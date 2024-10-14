@@ -11,7 +11,8 @@ of certain classes of undefined behaviour for parts of the C-code in mlkem-nativ
 Proofs are organized by functions, with the harnesses and proofs for each function
 in a separate directory.
 
-TODO: Provide more information about CBMC and the properties it proves
+See the [Proof Guide](proof_guide.md) for a walkthrough of how to use CBMC and
+develop new proofs.
 
 # Usage
 
@@ -26,6 +27,10 @@ If `GITHUB_STEP_SUMMARY` is set, the proof summary will be appended to it.
 
 # Covered functions
 
-The following functions are currently covered:
+Each proved function has an eponymous sub-directory of its own. The shell command
 
-- `poly.c`: `poly_compress`
+```
+find . -name cbmc-proof.txt
+```
+
+yields a list of the subdirectories, and thus function names, that have a proof.
