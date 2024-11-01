@@ -76,6 +76,10 @@ endif
 AUTO ?= 1
 CYCLES ?=
 OPT ?= 1
+ifeq ($(OPT),1)
+        CPPFLAGS += -DMLKEM_USE_NATIVE
+endif
+
 RETAINED_VARS := CYCLES OPT AUTO
 
 ifeq ($(AUTO),1)

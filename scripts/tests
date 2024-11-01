@@ -39,6 +39,30 @@ def sha256sum(result: bytes) -> str:
     return m.hexdigest()
 
 
+class SCHEME(IntEnum):
+    MLKEM512 = 1
+    MLKEM768 = 2
+    MLKEM1024 = 3
+
+    def __str__(self):
+        match self:
+            case SCHEME.MLKEM512:
+                return "ML-KEM-512"
+            case SCHEME.MLKEM768:
+                return "ML-KEM-768"
+            case SCHEME.MLKEM1024:
+                return "ML-KEM-1024"
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return self + 1
+
+    def suffix(self):
+        return self.name.removeprefix("MLKEM")
+
+
 class TEST_TYPES(IntEnum):
     MLKEM = 1
     BENCH = 2
@@ -75,32 +99,8 @@ class TEST_TYPES(IntEnum):
             case TEST_TYPES.KAT:
                 return "gen_KAT"
 
-    def bin_path(self, scheme):
-        return f"test/build/{scheme.name.lower()}/bin/{self.bin()}{scheme.suffix()}"
-
-
-class SCHEME(IntEnum):
-    MLKEM512 = 1
-    MLKEM768 = 2
-    MLKEM1024 = 3
-
-    def __str__(self):
-        match self:
-            case SCHEME.MLKEM512:
-                return "ML-KEM-512"
-            case SCHEME.MLKEM768:
-                return "ML-KEM-768"
-            case SCHEME.MLKEM1024:
-                return "ML-KEM-1024"
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        return self + 1
-
-    def suffix(self):
-        return self.name.removeprefix("MLKEM")
+    def bin_path(self, scheme: SCHEME, opt: bool):
+        return f'test/build/{scheme.name.lower()}/bin/{self.bin()}{scheme.suffix()}_{"opt" if opt else "ref"}'
 
 
 def parse_meta(scheme: SCHEME, field: str) -> str:
@@ -287,7 +287,7 @@ class State(object):
         results = {}
         for scheme in SCHEME:
             result = self.run_scheme(
-                test_type.bin_path(scheme),
+                test_type.bin_path(scheme, self.opt),
                 run_as_root,
                 exec_wrapper,
             )
