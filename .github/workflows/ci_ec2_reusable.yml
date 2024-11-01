@@ -36,7 +36,7 @@ on:
         default: all
       opt:
         type: string
-        description: either all, opt or non-opt
+        description: either all, opt or no_opt
         default: all
       functest:
         type: boolean

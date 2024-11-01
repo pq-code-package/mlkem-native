@@ -246,7 +246,7 @@ jobs:
       ec2_ami: ubuntu-latest (custom AMI)
       ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
       compile_mode: native
-      opt: non-opt
+      opt: no_opt
       lint: false
       verbose: true
       functest: true
@@ -268,7 +268,7 @@ jobs:
       ec2_ami: ubuntu-latest (custom AMI)
       ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
       compile_mode: native
-      opt: non-opt
+      opt: no_opt
       lint: false
       verbose: true
       functest: true
@@ -290,7 +290,7 @@ jobs:
       ec2_ami: ubuntu-latest (custom AMI)
       ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
       compile_mode: native
-      opt: non-opt
+      opt: no_opt
       lint: false
       verbose: true
       functest: true
