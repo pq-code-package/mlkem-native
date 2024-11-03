@@ -8,133 +8,188 @@
 #include "poly.h"
 
 #include "debug/debug.h"
+
+
+#if (MLKEM_POLYVECCOMPRESSEDBYTES == (MLKEM_K * 320))
+static void poly_compress10(uint8_t r[320], const poly * restrict a)
+{
+  unsigned int i;
+  __m256i f0, f1, f2;
+  __m128i t0, t1;
+  const __m256i v = _mm256_load_si256(&qdata.vec[_16XV/16]);
+  const __m256i v8 = _mm256_slli_epi16(v,3);
+  const __m256i off = _mm256_set1_epi16(15);
+  const __m256i shift1 = _mm256_set1_epi16(1 << 12);
+  const __m256i mask = _mm256_set1_epi16(1023);
+  const __m256i shift2 = _mm256_set1_epi64x((1024LL << 48) + (1LL << 32) + (1024 << 16) + 1);
+  const __m256i sllvdidx = _mm256_set1_epi64x(12);
+  const __m256i shufbidx = _mm256_set_epi8( 8, 4, 3, 2, 1, 0,-1,-1,-1,-1,-1,-1,12,11,10, 9,
+                                           -1,-1,-1,-1,-1,-1,12,11,10, 9, 8, 4, 3, 2, 1, 0);
+
+  for(i=0;i<MLKEM_N/16;i++) {
+    f0 = _mm256_load_si256(&a->vec[i]);
+    f1 = _mm256_mullo_epi16(f0,v8);
+    f2 = _mm256_add_epi16(f0,off);
+    f0 = _mm256_slli_epi16(f0,3);
+    f0 = _mm256_mulhi_epi16(f0,v);
+    f2 = _mm256_sub_epi16(f1,f2);
+    f1 = _mm256_andnot_si256(f1,f2);
+    f1 = _mm256_srli_epi16(f1,15);
+    f0 = _mm256_sub_epi16(f0,f1);
+    f0 = _mm256_mulhrs_epi16(f0,shift1);
+    f0 = _mm256_and_si256(f0,mask);
+    f0 = _mm256_madd_epi16(f0,shift2);
+    f0 = _mm256_sllv_epi32(f0,sllvdidx);
+    f0 = _mm256_srli_epi64(f0,12);
+    f0 = _mm256_shuffle_epi8(f0,shufbidx);
+    t0 = _mm256_castsi256_si128(f0);
+    t1 = _mm256_extracti128_si256(f0,1);
+    t0 = _mm_blend_epi16(t0,t1,0xE0);
+    _mm_storeu_si128((__m128i *)&r[20*i+ 0],t0);
+    memcpy(&r[20*i+16],&t1,4);
+  }
+}
+
+static void poly_decompress10(poly * restrict r, const uint8_t a[320+12])
+{
+  unsigned int i;
+  __m256i f;
+  const __m256i q = _mm256_set1_epi32((MLKEM_Q << 16) + 4*MLKEM_Q);
+  const __m256i shufbidx = _mm256_set_epi8(11,10,10, 9, 9, 8, 8, 7,
+                                            6, 5, 5, 4, 4, 3, 3, 2,
+                                            9, 8, 8, 7, 7, 6, 6, 5,
+                                            4, 3, 3, 2, 2, 1, 1, 0);
+  const __m256i sllvdidx = _mm256_set1_epi64x(4);
+  const __m256i mask = _mm256_set1_epi32((32736 << 16) + 8184);
+
+  for(i=0;i<MLKEM_N/16;i++) {
+    f = _mm256_loadu_si256((__m256i *)&a[20*i]);
+    f = _mm256_permute4x64_epi64(f,0x94);
+    f = _mm256_shuffle_epi8(f,shufbidx);
+    f = _mm256_sllv_epi32(f,sllvdidx);
+    f = _mm256_srli_epi16(f,1);
+    f = _mm256_and_si256(f,mask);
+    f = _mm256_mulhrs_epi16(f,q);
+    _mm256_store_si256(&r->vec[i],f);
+  }
+}
+
+#elif (MLKEM_POLYVECCOMPRESSEDBYTES == (MLKEM_K * 352))
+static void poly_compress11(uint8_t r[352+2], const poly * restrict a)
+{
+  unsigned int i;
+  __m256i f0, f1, f2;
+  __m128i t0, t1;
+  const __m256i v = _mm256_load_si256(&qdata.vec[_16XV/16]);
+  const __m256i v8 = _mm256_slli_epi16(v,3);
+  const __m256i off = _mm256_set1_epi16(36);
+  const __m256i shift1 = _mm256_set1_epi16(1 << 13);
+  const __m256i mask = _mm256_set1_epi16(2047);
+  const __m256i shift2 = _mm256_set1_epi64x((2048LL << 48) + (1LL << 32) + (2048 << 16) + 1);
+  const __m256i sllvdidx = _mm256_set1_epi64x(10);
+  const __m256i srlvqidx = _mm256_set_epi64x(30,10,30,10);
+  const __m256i shufbidx = _mm256_set_epi8( 4, 3, 2, 1, 0, 0,-1,-1,-1,-1,10, 9, 8, 7, 6, 5,
+                                           -1,-1,-1,-1,-1,10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0);
+
+  for(i=0;i<MLKEM_N/16;i++) {
+    f0 = _mm256_load_si256(&a->vec[i]);
+    f1 = _mm256_mullo_epi16(f0,v8);
+    f2 = _mm256_add_epi16(f0,off);
+    f0 = _mm256_slli_epi16(f0,3);
+    f0 = _mm256_mulhi_epi16(f0,v);
+    f2 = _mm256_sub_epi16(f1,f2);
+    f1 = _mm256_andnot_si256(f1,f2);
+    f1 = _mm256_srli_epi16(f1,15);
+    f0 = _mm256_sub_epi16(f0,f1);
+    f0 = _mm256_mulhrs_epi16(f0,shift1);
+    f0 = _mm256_and_si256(f0,mask);
+    f0 = _mm256_madd_epi16(f0,shift2);
+    f0 = _mm256_sllv_epi32(f0,sllvdidx);
+    f1 = _mm256_bsrli_epi128(f0,8);
+    f0 = _mm256_srlv_epi64(f0,srlvqidx);
+    f1 = _mm256_slli_epi64(f1,34);
+    f0 = _mm256_add_epi64(f0,f1);
+    f0 = _mm256_shuffle_epi8(f0,shufbidx);
+    t0 = _mm256_castsi256_si128(f0);
+    t1 = _mm256_extracti128_si256(f0,1);
+    t0 = _mm_blendv_epi8(t0,t1,_mm256_castsi256_si128(shufbidx));
+    _mm_storeu_si128((__m128i *)&r[22*i+ 0],t0);
+    _mm_storel_epi64((__m128i *)&r[22*i+16],t1);
+  }
+}
+
+static void poly_decompress11(poly * restrict r, const uint8_t a[352+10])
+{
+  unsigned int i;
+  __m256i f;
+  const __m256i q = _mm256_load_si256(&qdata.vec[_16XQ/16]);
+  const __m256i shufbidx = _mm256_set_epi8(13,12,12,11,10, 9, 9, 8,
+                                            8, 7, 6, 5, 5, 4, 4, 3,
+                                           10, 9, 9, 8, 7, 6, 6, 5,
+                                            5, 4, 3, 2, 2, 1, 1, 0);
+  const __m256i srlvdidx = _mm256_set_epi32(0,0,1,0,0,0,1,0);
+  const __m256i srlvqidx = _mm256_set_epi64x(2,0,2,0);
+  const __m256i shift = _mm256_set_epi16(4,32,1,8,32,1,4,32,4,32,1,8,32,1,4,32);
+  const __m256i mask = _mm256_set1_epi16(32752);
+
+  for(i=0;i<MLKEM_N/16;i++) {
+    f = _mm256_loadu_si256((__m256i *)&a[22*i]);
+    f = _mm256_permute4x64_epi64(f,0x94);
+    f = _mm256_shuffle_epi8(f,shufbidx);
+    f = _mm256_srlv_epi32(f,srlvdidx);
+    f = _mm256_srlv_epi64(f,srlvqidx);
+    f = _mm256_mullo_epi16(f,shift);
+    f = _mm256_srli_epi16(f,1);
+    f = _mm256_and_si256(f,mask);
+    f = _mm256_mulhrs_epi16(f,q);
+    _mm256_store_si256(&r->vec[i],f);
+  }
+}
+
+#endif
+
 /*************************************************
- * Name:        polyvec_compress
- *
- * Description: Compress and serialize vector of polynomials
- *
- * Arguments:   - uint8_t *r: pointer to output byte array
- *                            (needs space for MLKEM_POLYVECCOMPRESSEDBYTES)
- *              - const polyvec *a: pointer to input vector of polynomials
- **************************************************/
-void polyvec_compress(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES],
-                      const polyvec *a) {
-  unsigned int i, j, k;
-  uint64_t d0;
+* Name:        polyvec_compress
+*
+* Description: Compress and serialize vector of polynomials
+*
+* Arguments:   - uint8_t *r: pointer to output byte array
+*                            (needs space for MLKEM_POLYVECCOMPRESSEDBYTES)
+*              - polyvec *a: pointer to input vector of polynomials
+**************************************************/
+void polyvec_compress(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES+2], const polyvec *a)
+{
+  unsigned int i;
 
-#if (MLKEM_POLYVECCOMPRESSEDBYTES == (MLKEM_K * 352))
-  uint16_t t[8];
-  for (i = 0; i < MLKEM_K; i++) {
-    for (j = 0; j < MLKEM_N / 8; j++) {
-      for (k = 0; k < 8; k++) {
-        t[k] = a->vec[i].coeffs[8 * j + k];
-        t[k] += ((int16_t)t[k] >> 15) & MLKEM_Q;
-        /*      t[k]  = ((((uint32_t)t[k] << 11) + MLKEM_Q/2)/MLKEM_Q) & 0x7ff;
-         */
-        d0 = t[k];
-        d0 <<= 11;
-        d0 += 1664;
-        d0 *= 645084;
-        d0 >>= 31;
-        t[k] = d0 & 0x7ff;
-      }
-
-      r[0] = (t[0] >> 0);
-      r[1] = (t[0] >> 8) | (t[1] << 3);
-      r[2] = (t[1] >> 5) | (t[2] << 6);
-      r[3] = (t[2] >> 2);
-      r[4] = (t[2] >> 10) | (t[3] << 1);
-      r[5] = (t[3] >> 7) | (t[4] << 4);
-      r[6] = (t[4] >> 4) | (t[5] << 7);
-      r[7] = (t[5] >> 1);
-      r[8] = (t[5] >> 9) | (t[6] << 2);
-      r[9] = (t[6] >> 6) | (t[7] << 5);
-      r[10] = (t[7] >> 3);
-      r += 11;
-    }
-  }
-#elif (MLKEM_POLYVECCOMPRESSEDBYTES == (MLKEM_K * 320))
-  uint16_t t[4];
-  for (i = 0; i < MLKEM_K; i++) {
-    for (j = 0; j < MLKEM_N / 4; j++) {
-      for (k = 0; k < 4; k++) {
-        t[k] = a->vec[i].coeffs[4 * j + k];
-        t[k] += ((int16_t)t[k] >> 15) & MLKEM_Q;
-        /*      t[k]  = ((((uint32_t)t[k] << 10) + MLKEM_Q/2)/ MLKEM_Q) & 0x3ff;
-         */
-        d0 = t[k];
-        d0 <<= 10;
-        d0 += 1665;
-        d0 *= 1290167;
-        d0 >>= 32;
-        t[k] = d0 & 0x3ff;
-      }
-
-      r[0] = (t[0] >> 0);
-      r[1] = (t[0] >> 8) | (t[1] << 2);
-      r[2] = (t[1] >> 6) | (t[2] << 4);
-      r[3] = (t[2] >> 4) | (t[3] << 6);
-      r[4] = (t[3] >> 2);
-      r += 5;
-    }
-  }
-#else
-#error "MLKEM_POLYVECCOMPRESSEDBYTES needs to be in {320*MLKEM_K, 352*MLKEM_K}"
+#if (MLKEM_POLYVECCOMPRESSEDBYTES == (MLKEM_K * 320))
+  for(i=0;i<MLKEM_K;i++)
+    poly_compress10(&r[320*i],&a->vec[i]);
+#elif (MLKEM_POLYVECCOMPRESSEDBYTES == (MLKEM_K * 352))
+  for(i=0;i<MLKEM_K;i++)
+    poly_compress11(&r[352*i],&a->vec[i]);
 #endif
 }
 
 /*************************************************
- * Name:        polyvec_decompress
- *
- * Description: De-serialize and decompress vector of polynomials;
- *              approximate inverse of polyvec_compress
- *
- * Arguments:   - polyvec *r:       pointer to output vector of polynomials
- *              - const uint8_t *a: pointer to input byte array
- *                                  (of length MLKEM_POLYVECCOMPRESSEDBYTES)
- **************************************************/
-void polyvec_decompress(polyvec *r,
-                        const uint8_t a[MLKEM_POLYVECCOMPRESSEDBYTES]) {
-  unsigned int i, j, k;
+* Name:        polyvec_decompress
+*
+* Description: De-serialize and decompress vector of polynomials;
+*              approximate inverse of polyvec_compress
+*
+* Arguments:   - polyvec *r: pointer to output vector of polynomials
+*              - const uint8_t *a: pointer to input byte array
+*                                  (of length MLKEM_POLYVECCOMPRESSEDBYTES)
+**************************************************/
+void polyvec_decompress(polyvec *r, const uint8_t a[MLKEM_POLYVECCOMPRESSEDBYTES+12])
+{
+  unsigned int i;
 
-#if (MLKEM_POLYVECCOMPRESSEDBYTES == (MLKEM_K * 352))
-  uint16_t t[8];
-  for (i = 0; i < MLKEM_K; i++) {
-    for (j = 0; j < MLKEM_N / 8; j++) {
-      t[0] = (a[0] >> 0) | ((uint16_t)a[1] << 8);
-      t[1] = (a[1] >> 3) | ((uint16_t)a[2] << 5);
-      t[2] = (a[2] >> 6) | ((uint16_t)a[3] << 2) | ((uint16_t)a[4] << 10);
-      t[3] = (a[4] >> 1) | ((uint16_t)a[5] << 7);
-      t[4] = (a[5] >> 4) | ((uint16_t)a[6] << 4);
-      t[5] = (a[6] >> 7) | ((uint16_t)a[7] << 1) | ((uint16_t)a[8] << 9);
-      t[6] = (a[8] >> 2) | ((uint16_t)a[9] << 6);
-      t[7] = (a[9] >> 5) | ((uint16_t)a[10] << 3);
-      a += 11;
-
-      for (k = 0; k < 8; k++) {
-        r->vec[i].coeffs[8 * j + k] =
-            ((uint32_t)(t[k] & 0x7FF) * MLKEM_Q + 1024) >> 11;
-      }
-    }
-  }
-#elif (MLKEM_POLYVECCOMPRESSEDBYTES == (MLKEM_K * 320))
-  uint16_t t[4];
-  for (i = 0; i < MLKEM_K; i++) {
-    for (j = 0; j < MLKEM_N / 4; j++) {
-      t[0] = (a[0] >> 0) | ((uint16_t)a[1] << 8);
-      t[1] = (a[1] >> 2) | ((uint16_t)a[2] << 6);
-      t[2] = (a[2] >> 4) | ((uint16_t)a[3] << 4);
-      t[3] = (a[3] >> 6) | ((uint16_t)a[4] << 2);
-      a += 5;
-
-      for (k = 0; k < 4; k++) {
-        r->vec[i].coeffs[4 * j + k] =
-            ((uint32_t)(t[k] & 0x3FF) * MLKEM_Q + 512) >> 10;
-      }
-    }
-  }
-#else
-#error "MLKEM_POLYVECCOMPRESSEDBYTES needs to be in {320*MLKEM_K, 352*MLKEM_K}"
+#if (MLKEM_POLYVECCOMPRESSEDBYTES == (MLKEM_K * 320))
+  for(i=0;i<MLKEM_K;i++)
+    poly_decompress10(&r->vec[i],&a[320*i]);
+#elif (MLKEM_POLYVECCOMPRESSEDBYTES == (MLKEM_K * 352))
+  for(i=0;i<MLKEM_K;i++)
+    poly_decompress11(&r->vec[i],&a[352*i]);
 #endif
 }
 

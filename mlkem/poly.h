@@ -8,13 +8,15 @@
 #include "params.h"
 #include "reduce.h"
 #include "verify.h"
+#include <immintrin.h>
 
 /*
  * Elements of R_q = Z_q[X]/(X^n + 1). Represents polynomial
  * coeffs[0] + X*coeffs[1] + X^2*coeffs[2] + ... + X^{n-1}*coeffs[n-1]
  */
-typedef struct {
+typedef union {
   int16_t coeffs[MLKEM_N];
+  __m256i vec[(MLKEM_N+15)/16]; \
 } ALIGN poly;
 
 /*

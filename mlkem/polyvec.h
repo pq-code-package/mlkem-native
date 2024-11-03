@@ -16,11 +16,11 @@ typedef struct {
 } polyvec_mulcache;
 
 #define polyvec_compress MLKEM_NAMESPACE(polyvec_compress)
-void polyvec_compress(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES],
+void polyvec_compress(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES+2],
                       const polyvec *a);
 #define polyvec_decompress MLKEM_NAMESPACE(polyvec_decompress)
 void polyvec_decompress(polyvec *r,
-                        const uint8_t a[MLKEM_POLYVECCOMPRESSEDBYTES]);
+                        const uint8_t a[MLKEM_POLYVECCOMPRESSEDBYTES+12]);
 
 #define polyvec_tobytes MLKEM_NAMESPACE(polyvec_tobytes)
 void polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const polyvec *a);
