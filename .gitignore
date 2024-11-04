@@ -5,3 +5,4 @@
 .vscode
 .idea
 test/build
+__pycache__/
