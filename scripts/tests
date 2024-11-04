@@ -2,424 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import platform
-import sys
-import io
 import os
-import subprocess
-import logging
+import sys
 import click
-import hashlib
-import yaml
 from functools import reduce
-from enum import IntEnum
-from typing import Optional, Callable, TypedDict
-from contextlib import redirect_stdout, redirect_stderr
-import copy
 
-
-def config_logger(verbose):
-    if verbose:
-        logging.basicConfig(
-            stream=sys.stdout,
-            format="%(levelname)-5s > %(message)s",
-            level=logging.DEBUG,
-        )
-    else:
-        logging.basicConfig(
-            stream=sys.stdout,
-            format="%(levelname)-5s > %(message)s",
-            level=logging.INFO,
-        )
-
-
-def sha256sum(result: bytes) -> str:
-    m = hashlib.sha256()
-    m.update(result)
-    return m.hexdigest()
-
-
-class TEST_TYPES(IntEnum):
-    MLKEM = 1
-    BENCH = 2
-    NISTKAT = 3
-    KAT = 4
-    BENCH_COMPONENTS = 5
-
-    def __str__(self):
-        return self.name.lower()
-
-    def desc(self):
-        match self:
-            case TEST_TYPES.MLKEM:
-                return "Functional Test"
-            case TEST_TYPES.BENCH:
-                return "Benchmark"
-            case TEST_TYPES.BENCH_COMPONENTS:
-                return "Benchmark Components"
-            case TEST_TYPES.NISTKAT:
-                return "Nistkat Test"
-            case TEST_TYPES.KAT:
-                return "Kat Test"
-
-    def bin(self):
-        match self:
-            case TEST_TYPES.MLKEM:
-                return "test_mlkem"
-            case TEST_TYPES.BENCH:
-                return "bench_mlkem"
-            case TEST_TYPES.BENCH_COMPONENTS:
-                return "bench_components_mlkem"
-            case TEST_TYPES.NISTKAT:
-                return "gen_NISTKAT"
-            case TEST_TYPES.KAT:
-                return "gen_KAT"
-
-    def bin_path(self, scheme):
-        return f"test/build/{scheme.name.lower()}/bin/{self.bin()}{scheme.suffix()}"
-
-
-class SCHEME(IntEnum):
-    MLKEM512 = 1
-    MLKEM768 = 2
-    MLKEM1024 = 3
-
-    def __str__(self):
-        match self:
-            case SCHEME.MLKEM512:
-                return "ML-KEM-512"
-            case SCHEME.MLKEM768:
-                return "ML-KEM-768"
-            case SCHEME.MLKEM1024:
-                return "ML-KEM-1024"
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        return self + 1
-
-    def suffix(self):
-        return self.name.removeprefix("MLKEM")
-
-
-def parse_meta(scheme: SCHEME, field: str) -> str:
-    with open("META.yml", "r") as f:
-        meta = yaml.safe_load(f)
-    return meta["implementations"][int(scheme) - 1][field]
-
-
-def github_summary(title: str, test: TEST_TYPES, results: TypedDict):
-    summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
-
-    res = list(results.values())
-
-    if isinstance(results[SCHEME.MLKEM512], str):
-        summaries = list(
-            map(
-                lambda s: f" {s} |",
-                reduce(
-                    lambda acc, s: [
-                        line1 + " | " + line2 for line1, line2 in zip(acc, s)
-                    ],
-                    [s.splitlines() for s in res],
-                ),
-            )
-        )
-        summaries = [f"| {test.desc()} |" + summaries[0]] + [
-            "| |" + x for x in summaries[1:]
-        ]
-    else:
-        summaries = [
-            reduce(
-                lambda acc, b: f"{acc} " + (":x: |" if b else ":white_check_mark: |"),
-                res,
-                f"| {test.desc()} |",
-            )
-        ]
-
-    def find_last_consecutive_match(l, s):
-        for i, v in enumerate(l[s + 1 :]):
-            if not v.startswith("|") or not v.endswith("|"):
-                return i + 1
-        return len(l)
-
-    def add_summaries(fn, title, summaries):
-        summary_title = "| Tests |"
-        summary_table_format = "| ----- |"
-        for s in SCHEME:
-            summary_title += f" {s} |"
-            summary_table_format += " ----- |"
-
-        with open(fn, "r") as f:
-            pre_summaries = [x for x in f.read().splitlines() if x]
-            if title in pre_summaries:
-                if summary_title not in pre_summaries:
-                    summaries = [summary_title, summary_table_format] + summaries
-                    pre_summaries = (
-                        pre_summaries[: pre_summaries.index(title) + 1]
-                        + summaries
-                        + pre_summaries[pre_summaries.index(title) + 1 :]
-                    )
-                else:
-                    i = find_last_consecutive_match(
-                        pre_summaries, pre_summaries.index(title)
-                    )
-                    pre_summaries = pre_summaries[:i] + summaries + pre_summaries[i:]
-                return ("w", pre_summaries)
-            else:
-                pre_summaries = [
-                    title,
-                    summary_title,
-                    summary_table_format,
-                ] + summaries
-                return ("a", pre_summaries)
-
-    if summary_file is not None:
-        (access_mode, summaries) = add_summaries(summary_file, title, summaries)
-        with open(summary_file, access_mode) as f:
-            print("\n".join(summaries), file=f)
-
-
-class State(object):
-
-    def __init__(self):
-        self.verbose = False
-        self.cross_prefix = ""
-        self.cflags = ""
-        self.arch_flags = ""
-        self.auto = True
-        self.compile = True
-        self.run = True
-
-    def compile_schemes(
-        self,
-        test_type: TEST_TYPES,
-        extra_make_envs={},
-        extra_make_args=[],
-    ):
-        """compile or cross compile with some extra environment variables and makefile arguments"""
-
-        def dict2str(dict):
-            s = ""
-            for k, v in dict.items():
-                s += f"{k}={v} "
-            return s
-
-        logging.debug(f"Compiling {test_type}...")
-        args = [
-            "make",
-            f"CROSS_PREFIX={self.cross_prefix}",
-            f"{test_type}",
-        ] + extra_make_args
-
-        logging.info(dict2str(extra_make_envs) + " ".join(args))
-
-        p = subprocess.run(
-            args,
-            stdout=subprocess.DEVNULL if not self.verbose else None,
-            env=os.environ.copy() | extra_make_envs,
-        )
-
-        if p.returncode != 0:
-            logging.error(f"make failed: {p.returncode}")
-            sys.exit(1)
-
-    def run_scheme(
-        self,
-        bin: str,
-        run_as_root=False,
-        exec_wrapper=None,
-    ) -> bytes:
-        """Run the binary in all different ways"""
-        if not os.path.isfile(bin):
-            logging.error(f"{bin} does not exists")
-            sys.exit(1)
-
-        cmd = [f"./{bin}"]
-        if self.cross_prefix and platform.system() != "Darwin":
-            logging.info(f"Emulating {bin} with QEMU")
-            if "x86_64" in self.cross_prefix:
-                cmd = ["qemu-x86_64"] + cmd
-            elif "aarch64" in self.cross_prefix:
-                cmd = ["qemu-aarch64"] + cmd
-            else:
-                logging.info(
-                    f"Emulation for {self.cross_prefix} on {platform.system()} not supported"
-                )
-
-        if run_as_root:
-            logging.info(
-                f"Running {bin} as root -- you may need to enter your root password."
-            )
-            cmd = ["sudo"] + cmd
-
-        if exec_wrapper:
-            logging.info(f"Running {bin} with customized wrapper.")
-            exec_wrapper = exec_wrapper.split(" ")
-            cmd = exec_wrapper + cmd
-
-        logging.debug(" ".join(cmd))
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            universal_newlines=False,
-        )
-
-        if result.returncode != 0:
-            logging.error(
-                f"Running '{cmd}' failed: {result.returncode} {result.stderr.decode()}"
-            )
-            sys.exit(1)
-
-        return result.stdout
-
-    def run_schemes(
-        self,
-        test_type: TEST_TYPES,
-        opt: bool,
-        run_as_root=False,
-        exec_wrapper=None,
-        actual_proc: Callable[[bytes], str] = None,
-        expect_proc: Callable[[SCHEME], str] = None,
-    ) -> TypedDict:
-        fail = False
-        results = {}
-        for scheme in SCHEME:
-            result = self.run_scheme(
-                test_type.bin_path(scheme),
-                run_as_root,
-                exec_wrapper,
-            )
-
-            if actual_proc is not None and expect_proc is not None:
-                actual = actual_proc(result)
-                expect = expect_proc(scheme)
-                f = actual != expect
-                fail = fail or f
-                if f:
-                    logging.error(
-                        f"{scheme} failed, expecting {expect}, but getting {actual}"
-                    )
-                else:
-                    logging.info(f"{scheme} passed")
-                results[scheme] = f
-            else:
-                logging.info(f"{scheme}")
-                logging.info(f"\n{result.decode()}")
-                results[scheme] = result.decode()
-
-        if fail:
-            sys.exit(1)
-
-        return results
-
-    def test(
-        self,
-        test_type: TEST_TYPES,
-        opt: bool,
-        extra_make_envs={},
-        extra_make_args=[],
-        actual_proc: Callable[[bytes], str] = None,
-        expect_proc: Callable[[SCHEME], str] = None,
-        run_as_root: bool = False,
-        exec_wrapper: str = None,
-    ):
-        config_logger(self.verbose)
-
-        logging.info(
-            f'{test_type.desc()} ({"cross" if self.cross_prefix else "native"}, {"opt" if opt else "no_opt"})'
-        )
-
-        make_envs = (
-            {"CFLAGS": f"{self.cflags}"} if self.cflags is not None else {}
-        ) | (
-            {"ARCH_FLAGS": f"{self.arch_flags}"} if self.arch_flags is not None else {}
-        )
-        make_envs.update(extra_make_envs)
-
-        if self.compile:
-            self.compile_schemes(
-                test_type,
-                make_envs,
-                extra_make_args
-                + list(
-                    set([f"OPT={int(opt)}", f"AUTO={int(self.auto)}"])
-                    - set(extra_make_args)
-                ),
-            )
-
-        results = None
-        if self.run:
-            results = self.run_schemes(
-                test_type,
-                opt,
-                run_as_root,
-                exec_wrapper,
-                actual_proc,
-                expect_proc,
-            )
-
-            title = (
-                "## "
-                + ("Cross" if self.cross_prefix else "Native")
-                + " "
-                + ("Opt" if opt else "Non-opt")
-                + " Tests"
-            )
-            github_summary(title, test_type, results)
-
-        return results
-
-
-"""
-Underlying functional tests
-
-"""
-
-
-def _func(state: State, opt: bool):
-    """Underlying function for functional test"""
-
-    def expect(scheme: SCHEME) -> str:
-        sk_bytes = parse_meta(scheme, "length-secret-key")
-        pk_bytes = parse_meta(scheme, "length-public-key")
-        ct_bytes = parse_meta(scheme, "length-ciphertext")
-
-        return (
-            f"CRYPTO_SECRETKEYBYTES:  {sk_bytes}\n"
-            + f"CRYPTO_PUBLICKEYBYTES:  {pk_bytes}\n"
-            + f"CRYPTO_CIPHERTEXTBYTES: {ct_bytes}\n"
-        )
-
-    state.test(
-        TEST_TYPES.MLKEM,
-        opt,
-        actual_proc=lambda result: str(result, encoding="utf-8"),
-        expect_proc=expect,
-    )
-
-
-def _nistkat(state: State, opt: bool):
-    """Underlying function for nistkat test"""
-
-    state.test(
-        TEST_TYPES.NISTKAT,
-        opt,
-        actual_proc=sha256sum,
-        expect_proc=lambda scheme: parse_meta(scheme, "nistkat-sha256"),
-    )
-
-
-def _kat(state: State, opt: bool):
-    """Underlying function for kat test"""
-
-    state.test(
-        TEST_TYPES.KAT,
-        opt,
-        actual_proc=sha256sum,
-        expect_proc=lambda scheme: parse_meta(scheme, "kat-sha256"),
-    )
-
+sys.path.append(f"{os.path.join(os.path.dirname(__file__), 'lib')}")
+from mlkem_test import *
 
 """
 Click interface configuration
@@ -433,6 +22,11 @@ def __callback(n):
         return value
 
     return callback
+
+
+def add_options(options):
+    """Shortcurt for adding multiple options for Click command"""
+    return lambda func: reduce(lambda f, o: o(f), reversed(options), func)
 
 
 _shared_options = [
@@ -551,10 +145,6 @@ _bench_options = [
 ]
 
 
-def add_options(options):
-    return lambda func: reduce(lambda f, o: o(f), reversed(options), func)
-
-
 @click.group(invoke_without_command=True)
 def cli():
     pass
@@ -568,7 +158,7 @@ def cli():
 @click.make_pass_decorator(State, ensure=True)
 @_opt_option
 def func(state: State, opt: bool):
-    _func(state, opt)
+    Tests().func(state, opt)
 
 
 @cli.command(
@@ -579,7 +169,7 @@ def func(state: State, opt: bool):
 @click.make_pass_decorator(State, ensure=True)
 @_opt_option
 def nistkat(state: State, opt: bool):
-    _nistkat(state, opt)
+    Tests().nistkat(state, opt)
 
 
 @cli.command(
@@ -590,7 +180,7 @@ def nistkat(state: State, opt: bool):
 @click.make_pass_decorator(State, ensure=True)
 @_opt_option
 def kat(state: State, opt: bool):
-    _kat(state, opt)
+    Tests().kat(state, opt)
 
 
 @cli.command(
@@ -611,55 +201,16 @@ def bench(
     mac_taskpolicy,
     components,
 ):
-    config_logger(state.verbose)
-
-    if components is False:
-        bench_type = TEST_TYPES.BENCH
-    else:
-        bench_type = TEST_TYPES.BENCH_COMPONENTS
-        output = False
-
-    if mac_taskpolicy:
-        if exec_wrapper:
-            logging.error(f"cannot set both --mac-taskpolicy and --exec-wrapper")
-            sys.exit(1)
-        else:
-            exec_wrapper = f"taskpolicy -c {mac_taskpolicy}"
-
-    results = state.test(
-        bench_type,
+    Tests().bench(
+        state,
         opt,
-        extra_make_args=[f"CYCLES={cycles}"],
-        run_as_root=run_as_root,
-        exec_wrapper=exec_wrapper,
+        cycles,
+        output,
+        run_as_root,
+        exec_wrapper,
+        mac_taskpolicy,
+        components,
     )
-
-    if results is not None and output is not None and components is False:
-        import json
-
-        with open(output, "w") as f:
-            v = []
-            for scheme in results:
-                schemeStr = str(scheme)
-                r = results[scheme]
-
-                # The first 3 lines of the output are expected to be
-                # keypair cycles=X
-                # encaps cycles=X
-                # decaps cycles=X
-
-                lines = [line for line in r.splitlines() if "=" in line]
-
-                d = {k.strip(): int(v) for k, v in (l.split("=") for l in lines)}
-                for primitive in ["keypair", "encaps", "decaps"]:
-                    v.append(
-                        {
-                            "name": f"{schemeStr} {primitive}",
-                            "unit": "cycles",
-                            "value": d[f"{primitive} cycles"],
-                        }
-                    )
-            f.write(json.dumps(v))
 
 
 @cli.command(
@@ -708,88 +259,7 @@ def all(
     kat: bool,
     nistkat: bool,
 ):
-    compile_mode = "cross" if state.cross_prefix else "native"
-
-    gh_env = os.environ.get("GITHUB_ENV")
-
-    tests = [
-        *([_func] if func else []),
-        *([_nistkat] if nistkat else []),
-        *([_kat] if kat else []),
-    ]
-
-    def compile_all(_state: State, opt: str):
-        code = 0
-
-        def _compile(opt: bool):
-            opt_label = "opt" if opt else "no-opt"
-            for f in tests:
-                if gh_env is not None:
-                    print(
-                        f"::group::compile {compile_mode} {opt_label} {f.__name__.removeprefix('_')} test"
-                    )
-
-                try:
-                    f(_state, opt)
-                    print("")
-                except SystemExit as e:
-                    code = code or e
-
-                if gh_env is not None:
-                    print(f"::endgroup::")
-                sys.stdout.flush()
-
-        if opt.lower() == "all" or opt.lower() == "no_opt":
-            _compile(False)
-
-        if opt.lower() == "all" or opt.lower() == "opt":
-            _compile(True)
-
-        return code
-
-    def run(f, _state: State, opt: bool):
-        code = 0
-        opt_label = "opt" if opt else "no-opt"
-        if gh_env is not None:
-            print(
-                f"::group::run {compile_mode} {opt_label} {f.__name__.removeprefix('_')} test"
-            )
-
-        try:
-            f(_state, opt)
-        except SystemExit as e:
-            code = e
-
-        if gh_env is not None:
-            print(f"::endgroup::")
-        sys.stdout.flush()
-
-        return code
-
-    def run_all(_state: State, opt: str):
-        code = 0
-        for f in tests:
-            if opt.lower() == "all" or opt.lower() == "no_opt":
-                code = code or run(f, _state, False)
-            if opt.lower() == "all" or opt.lower() == "opt":
-                code = code or run(f, _state, True)
-        return code
-
-    exit_code = 0
-
-    if state.compile:
-        _state = copy.deepcopy(state)
-        _state.run = False
-
-        exit_code = compile_all(_state, opt)
-
-    if state.run:
-        _state = state
-        _state.compile = False
-
-        exit_code = exit_code or run_all(_state, opt)
-
-    exit(exit_code)
+    Tests().all(state, opt, func, kat, nistkat)
 
 
 if __name__ == "__main__":
