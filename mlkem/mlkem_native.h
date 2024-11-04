@@ -25,6 +25,10 @@
 
 #include <stdint.h>
 
+// TODO: need to eliminate this
+#include "indcpa.h"
+#include "kem.h"
+
 /*************************** Build information ********************************/
 
 /*
@@ -114,107 +118,113 @@
 
 /****************************** Function API **********************************/
 
-/*************************************************
- * Name:        crypto_kem_keypair_derand
- *
- * Description: Generates public and private key
- *              for CCA-secure ML-KEM key encapsulation mechanism
- *
- * Arguments:   - uint8_t pk[]: pointer to output public key, an array of
- *                 length MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
- *              - uint8_t sk[]: pointer to output private key, an array of
- *                  of MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
- *              - uint8_t *coins: pointer to input randomness, an array of
- *                  2*MLKEM_SYMBYTES uniformly random bytes.
- *
- * Returns 0 (success)
- **************************************************/
-int BUILD_INFO_NAMESPACE(keypair_derand)(
-    uint8_t pk[MLKEM_PUBLICKEYBYTES(BUILD_INFO_LVL)],
-    uint8_t sk[MLKEM_SECRETKEYBYTES(BUILD_INFO_LVL)], const uint8_t *coins);
+// /*************************************************
+//  * Name:        crypto_kem_keypair_derand
+//  *
+//  * Description: Generates public and private key
+//  *              for CCA-secure ML-KEM key encapsulation mechanism
+//  *
+//  * Arguments:   - uint8_t pk[]: pointer to output public key, an array of
+//  *                 length MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
+//  *              - uint8_t sk[]: pointer to output private key, an array of
+//  *                  of MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
+//  *              - uint8_t *coins: pointer to input randomness, an array of
+//  *                  2*MLKEM_SYMBYTES uniformly random bytes.
+//  *
+//  * Returns 0 (success)
+//  **************************************************/
+// int BUILD_INFO_NAMESPACE(keypair_derand)(
+//     uint8_t pk[MLKEM_PUBLICKEYBYTES(BUILD_INFO_LVL)],
+//     uint8_t sk[MLKEM_SECRETKEYBYTES(BUILD_INFO_LVL)], const uint8_t *coins);
 
-/*************************************************
- * Name:        crypto_kem_keypair
- *
- * Description: Generates public and private key
- *              for CCA-secure ML-KEM key encapsulation mechanism
- *
- * Arguments:   - uint8_t *pk: pointer to output public key, an array of
- *                 MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
- *              - uint8_t *sk: pointer to output private key, an array of
- *                 MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
- *
- * Returns 0 (success)
- **************************************************/
-int BUILD_INFO_NAMESPACE(keypair)(
-    uint8_t pk[MLKEM_PUBLICKEYBYTES(BUILD_INFO_LVL)],
-    uint8_t sk[MLKEM_SECRETKEYBYTES(BUILD_INFO_LVL)]);
+// /*************************************************
+//  * Name:        crypto_kem_keypair
+//  *
+//  * Description: Generates public and private key
+//  *              for CCA-secure ML-KEM key encapsulation mechanism
+//  *
+//  * Arguments:   - uint8_t *pk: pointer to output public key, an array of
+//  *                 MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
+//  *              - uint8_t *sk: pointer to output private key, an array of
+//  *                 MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
+//  *
+//  * Returns 0 (success)
+//  **************************************************/
+// int BUILD_INFO_NAMESPACE(keypair)(
+//     uint8_t pk[MLKEM_PUBLICKEYBYTES(BUILD_INFO_LVL)],
+//     uint8_t sk[MLKEM_SECRETKEYBYTES(BUILD_INFO_LVL)]);
 
-/*************************************************
- * Name:        crypto_kem_enc_derand
- *
- * Description: Generates cipher text and shared
- *              secret for given public key
- *
- * Arguments:   - uint8_t *ct: pointer to output cipher text, an array of
- *                 MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
- *              - uint8_t *ss: pointer to output shared secret, an array of
- *                 MLKEM_BYTES bytes.
- *              - const uint8_t *pk: pointer to input public key, an array of
- *                 MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
- *              - const uint8_t *coins: pointer to input randomness, an array of
- *                 MLKEM_SYMBYTES bytes.
- *
- * Returns 0 on success, and -1 if the public key modulus check (see Section 7.2
- * of FIPS203) fails.
- **************************************************/
-int BUILD_INFO_NAMESPACE(enc_derand)(
-    uint8_t ct[MLKEM_CIPHERTEXTBYTES(BUILD_INFO_LVL)], uint8_t ss[MLKEM_BYTES],
-    const uint8_t pk[MLKEM_PUBLICKEYBYTES(BUILD_INFO_LVL)],
-    const uint8_t coins[MLKEM_SYMBYTES]);
+// /*************************************************
+//  * Name:        crypto_kem_enc_derand
+//  *
+//  * Description: Generates cipher text and shared
+//  *              secret for given public key
+//  *
+//  * Arguments:   - uint8_t *ct: pointer to output cipher text, an array of
+//  *                 MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
+//  *              - uint8_t *ss: pointer to output shared secret, an array of
+//  *                 MLKEM_BYTES bytes.
+//  *              - const uint8_t *pk: pointer to input public key, an array of
+//  *                 MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
+//  *              - const uint8_t *coins: pointer to input randomness, an array
+//  of
+//  *                 MLKEM_SYMBYTES bytes.
+//  *
+//  * Returns 0 on success, and -1 if the public key modulus check (see
+//  Section 7.2
+//  * of FIPS203) fails.
+//  **************************************************/
+// int BUILD_INFO_NAMESPACE(enc_derand)(
+//     uint8_t ct[MLKEM_CIPHERTEXTBYTES(BUILD_INFO_LVL)], uint8_t
+//     ss[MLKEM_BYTES], const uint8_t pk[MLKEM_PUBLICKEYBYTES(BUILD_INFO_LVL)],
+//     const uint8_t coins[MLKEM_SYMBYTES]);
 
-/*************************************************
- * Name:        crypto_kem_enc
- *
- * Description: Generates cipher text and shared
- *              secret for given public key
- *
- * Arguments:   - uint8_t *ct: pointer to output cipher text, an array of
- *                 MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
- *              - uint8_t *ss: pointer to output shared secret, an array of
- *                 MLKEM_BYTES bytes.
- *              - const uint8_t *pk: pointer to input public key, an array of
- *                 MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
- *
- * Returns 0 on success, and -1 if the public key modulus check (see Section 7.2
- * of FIPS203) fails.
- **************************************************/
-int BUILD_INFO_NAMESPACE(enc)(
-    uint8_t ct[MLKEM_CIPHERTEXTBYTES(BUILD_INFO_LVL)], uint8_t ss[MLKEM_BYTES],
-    const uint8_t pk[MLKEM_PUBLICKEYBYTES(BUILD_INFO_LVL)]);
+// /*************************************************
+//  * Name:        crypto_kem_enc
+//  *
+//  * Description: Generates cipher text and shared
+//  *              secret for given public key
+//  *
+//  * Arguments:   - uint8_t *ct: pointer to output cipher text, an array of
+//  *                 MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
+//  *              - uint8_t *ss: pointer to output shared secret, an array of
+//  *                 MLKEM_BYTES bytes.
+//  *              - const uint8_t *pk: pointer to input public key, an array of
+//  *                 MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
+//  *
+//  * Returns 0 on success, and -1 if the public key modulus check (see
+//  Section 7.2
+//  * of FIPS203) fails.
+//  **************************************************/
+// int BUILD_INFO_NAMESPACE(enc)(
+//     uint8_t ct[MLKEM_CIPHERTEXTBYTES(BUILD_INFO_LVL)], uint8_t
+//     ss[MLKEM_BYTES], const uint8_t pk[MLKEM_PUBLICKEYBYTES(BUILD_INFO_LVL)]);
 
-/*************************************************
- * Name:        crypto_kem_dec
- *
- * Description: Generates shared secret for given
- *              cipher text and private key
- *
- * Arguments:   - uint8_t *ss: pointer to output shared secret, an array of
- *                 MLKEM_BYTES bytes.
- *              - const uint8_t *ct: pointer to input cipher text, an array of
- *                 MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
- *              - const uint8_t *sk: pointer to input private key, an array of
- *                 MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
- *
- * Returns 0 on success, and -1 if the secret key hash check (see Section 7.3 of
- * FIPS203) fails.
- *
- * On failure, ss will contain a pseudo-random value.
- **************************************************/
-int BUILD_INFO_NAMESPACE(dec)(
-    uint8_t ss[MLKEM_BYTES],
-    const uint8_t ct[MLKEM_CIPHERTEXTBYTES(BUILD_INFO_LVL)],
-    const uint8_t sk[MLKEM_SECRETKEYBYTES(BUILD_INFO_LVL)]);
+// /*************************************************
+//  * Name:        crypto_kem_dec
+//  *
+//  * Description: Generates shared secret for given
+//  *              cipher text and private key
+//  *
+//  * Arguments:   - uint8_t *ss: pointer to output shared secret, an array of
+//  *                 MLKEM_BYTES bytes.
+//  *              - const uint8_t *ct: pointer to input cipher text, an array
+//  of
+//  *                 MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
+//  *              - const uint8_t *sk: pointer to input private key, an array
+//  of
+//  *                 MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
+//  *
+//  * Returns 0 on success, and -1 if the secret key hash check (see Section 7.3
+//  of
+//  * FIPS203) fails.
+//  *
+//  * On failure, ss will contain a pseudo-random value.
+//  **************************************************/
+// int BUILD_INFO_NAMESPACE(dec)(
+//     uint8_t ss[MLKEM_BYTES],
+//     const uint8_t ct[MLKEM_CIPHERTEXTBYTES(BUILD_INFO_LVL)],
+//     const uint8_t sk[MLKEM_SECRETKEYBYTES(BUILD_INFO_LVL)]);
 
 /****************************** Standard API *********************************/
 
@@ -232,11 +242,11 @@ int BUILD_INFO_NAMESPACE(dec)(
 #define CRYPTO_SYMBYTES MLKEM_SYMBYTES
 #define CRYPTO_BYTES MLKEM_BYTES
 
-#define crypto_kem_keypair_derand BUILD_INFO_NAMESPACE(keypair_derand)
-#define crypto_kem_keypair BUILD_INFO_NAMESPACE(keypair)
-#define crypto_kem_enc_derand BUILD_INFO_NAMESPACE(enc_derand)
-#define crypto_kem_enc BUILD_INFO_NAMESPACE(enc)
-#define crypto_kem_dec BUILD_INFO_NAMESPACE(dec)
+// #define crypto_kem_keypair_derand BUILD_INFO_NAMESPACE(keypair_derand)
+// #define crypto_kem_keypair BUILD_INFO_NAMESPACE(keypair)
+// #define crypto_kem_enc_derand BUILD_INFO_NAMESPACE(enc_derand)
+// #define crypto_kem_enc BUILD_INFO_NAMESPACE(enc)
+// #define crypto_kem_dec BUILD_INFO_NAMESPACE(dec)
 #endif /* BUILD_INFO_NO_STANDARD_API */
 
 /********************************* Cleanup ************************************/

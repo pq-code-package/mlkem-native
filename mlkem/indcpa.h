@@ -10,6 +10,76 @@
 #include "common.h"
 #include "poly_k.h"
 
+typedef struct
+{
+  polyvec skpv;
+} mlkem_indcpa_secret_key;
+
+typedef struct
+{
+  polyvec at[MLKEM_K]; /* transposed matrix */
+  polyvec pkpv;
+  uint8_t seed[MLKEM_SYMBYTES];
+} mlkem_indcpa_public_key;
+
+
+#define indcpa_serialize_pk MLKEM_NAMESPACE_K(indcpa_serialize_pk)
+/*************************************************
+ * Name:        indcpa_serialize_pk
+ *
+ * Description: Serialize the public key as concatenation of the
+ *              serialized vector of polynomials pk
+ *              and the public seed used to generate the matrix A.
+ *
+ * Arguments:   uint8_t *pks: pointer to the output serialized public key
+ *              polyvec *pk: pointer to the input public-key.
+ **************************************************/
+MLKEM_NATIVE_INTERNAL_API
+void indcpa_serialize_pk(uint8_t pks[MLKEM_INDCPA_PUBLICKEYBYTES],
+                         const mlkem_indcpa_public_key *pk);
+
+#define indcpa_deserialize_pk MLKEM_NAMESPACE_K(indcpa_deserialize_pk)
+/*************************************************
+ * Name:        indcpa_deserialize_pk
+ *
+ * Description: De-serialize public key from a byte array;
+ *              approximate inverse of indcpa_serialize_pk
+ *
+ * Arguments:   - mlkem_indcpa_public_key *pk: pointer to output public-key
+ *              - uint8_t *seed: pointer to output seed to generate matrix A
+ *              - const uint8_t *pks: pointer to input serialized public
+ *                  key.
+ **************************************************/
+MLKEM_NATIVE_INTERNAL_API
+void indcpa_deserialize_pk(mlkem_indcpa_public_key *pk,
+                           const uint8_t pks[MLKEM_INDCPA_PUBLICKEYBYTES]);
+
+#define indcpa_serialize_sk MLKEM_NAMESPACE_K(indcpa_serialize_sk)
+/*************************************************
+ * Name:        indcpa_serialize_sk
+ *
+ * Description: Serialize the secret key
+ *
+ * Arguments:   - uint8_t *sks: pointer to output serialized secret key
+ *              - polyvec *sk: pointer to input secret key
+ **************************************************/
+MLKEM_NATIVE_INTERNAL_API
+void indcpa_serialize_sk(uint8_t sks[MLKEM_INDCPA_SECRETKEYBYTES],
+                         const mlkem_indcpa_secret_key *sk);
+
+#define indcpa_deserialize_sk MLKEM_NAMESPACE_K(indcpa_deserialize_sk)
+/*************************************************
+ * Name:        indcpa_deserialize_sk
+ *
+ * Description: De-serialize the secret key; inverse of indcpa_serialize_sk
+ *
+ * Arguments:   - mlkem_indcpa_secret_key *sk: pointer to output secret key
+ *              - const uint8_t *sks: pointer to input serialized secret key
+ **************************************************/
+MLKEM_NATIVE_INTERNAL_API
+void indcpa_deserialize_sk(mlkem_indcpa_secret_key *sk,
+                           const uint8_t sks[MLKEM_INDCPA_SECRETKEYBYTES]);
+
 #define gen_matrix MLKEM_NAMESPACE_K(gen_matrix)
 /*************************************************
  * Name:        gen_matrix
@@ -41,20 +111,18 @@ __contract__(
  * Description: Generates public and private key for the CPA-secure
  *              public-key encryption scheme underlying ML-KEM
  *
- * Arguments:   - uint8_t *pk: pointer to output public key
- *                             (of length MLKEM_INDCPA_PUBLICKEYBYTES bytes)
- *              - uint8_t *sk: pointer to output private key
- *                             (of length MLKEM_INDCPA_SECRETKEYBYTES bytes)
+ * Arguments:   - mlkem_indcpa_public_key *pk: pointer to output public key
+ *              - mlkem_indcpa_secret_key *sk: pointer to output private key
  *              - const uint8_t *coins: pointer to input randomness
  *                             (of length MLKEM_SYMBYTES bytes)
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                           uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
+void indcpa_keypair_derand(mlkem_indcpa_public_key *pk,
+                           mlkem_indcpa_secret_key *sk,
                            const uint8_t coins[MLKEM_SYMBYTES])
 __contract__(
-  requires(memory_no_alias(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
-  requires(memory_no_alias(sk, MLKEM_INDCPA_SECRETKEYBYTES))
+  requires(memory_no_alias(pk, sizeof(mlkem_indcpa_public_key)))
+  requires(memory_no_alias(sk, sizeof(mlkem_indcpa_secret_key)))
   requires(memory_no_alias(coins, MLKEM_SYMBYTES))
   assigns(object_whole(pk))
   assigns(object_whole(sk))
@@ -71,20 +139,19 @@ __contract__(
  *                            (of length MLKEM_INDCPA_BYTES bytes)
  *              - const uint8_t *m: pointer to input message
  *                                  (of length MLKEM_INDCPA_MSGBYTES bytes)
- *              - const uint8_t *pk: pointer to input public key
- *                                   (of length MLKEM_INDCPA_PUBLICKEYBYTES)
+ *              - const mlkem_indcpa_public_key *pk: pointer to input public key
  *              - const uint8_t *coins: pointer to input random coins used as
  *seed (of length MLKEM_SYMBYTES) to deterministically generate all randomness
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
 void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
                 const uint8_t m[MLKEM_INDCPA_MSGBYTES],
-                const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
+                const mlkem_indcpa_public_key *pk,
                 const uint8_t coins[MLKEM_SYMBYTES])
 __contract__(
   requires(memory_no_alias(c, MLKEM_INDCPA_BYTES))
   requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES))
-  requires(memory_no_alias(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
+  requires(memory_no_alias(pk, sizeof(mlkem_indcpa_public_key)))
   requires(memory_no_alias(coins, MLKEM_SYMBYTES))
   assigns(object_whole(c))
 );
@@ -100,17 +167,17 @@ __contract__(
  *                            (of length MLKEM_INDCPA_MSGBYTES)
  *              - const uint8_t *c: pointer to input ciphertext
  *                                  (of length MLKEM_INDCPA_BYTES)
- *              - const uint8_t *sk: pointer to input secret key
- *                                   (of length MLKEM_INDCPA_SECRETKEYBYTES)
+ *              - const mlkem_indcpa_secret_key *sk: pointer to input secret key
+ *
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
 void indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
                 const uint8_t c[MLKEM_INDCPA_BYTES],
-                const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
+                const mlkem_indcpa_secret_key *sk)
 __contract__(
   requires(memory_no_alias(c, MLKEM_INDCPA_BYTES))
   requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES))
-  requires(memory_no_alias(sk, MLKEM_INDCPA_SECRETKEYBYTES))
+  requires(memory_no_alias(sk, sizeof(mlkem_indcpa_secret_key)))
   assigns(object_whole(m))
 );
 
