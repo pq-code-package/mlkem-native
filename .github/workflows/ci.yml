@@ -39,13 +39,12 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: make quickcheck
         run: |
-          OPT=0 make quickcheck >/dev/null
-          make clean            >/dev/null
-          OPT=1 make quickcheck >/dev/null
+          make OPT=0 quickcheck >/dev/null
+          make OPT=1 quickcheck >/dev/null
       - uses: ./.github/actions/setup-ubuntu
       - name: tests func
         run: |
-          ./scripts/tests func
+          ./scripts/tests func --no-compile
       - name: check namespacing
         run: |
           ./scripts/ci/check-namespace
