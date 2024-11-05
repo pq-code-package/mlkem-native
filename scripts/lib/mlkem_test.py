@@ -15,6 +15,7 @@ from util import (
     parse_meta,
     config_logger,
     github_summary,
+    logger,
 )
 import copy
 
@@ -33,10 +34,13 @@ class State(object):
     def compile_schemes(
         self,
         test_type: TEST_TYPES,
+        opt: bool,
         extra_make_envs={},
         extra_make_args=[],
     ):
         """compile or cross compile with some extra environment variables and makefile arguments"""
+
+        log = logger(test_type, "Compiling", self.cross_prefix, opt)
 
         def dict2str(dict):
             s = ""
@@ -44,14 +48,24 @@ class State(object):
                 s += f"{k}={v} "
             return s
 
-        logging.debug(f"Compiling {test_type}...")
+        make_envs = (
+            {"CFLAGS": f"{self.cflags}"} if self.cflags is not None else {}
+        ) | (
+            {"ARCH_FLAGS": f"{self.arch_flags}"} if self.arch_flags is not None else {}
+        )
+        extra_make_envs.update(make_envs)
+
+        extra_make_args = extra_make_args + list(
+            set([f"OPT={int(opt)}", f"AUTO={int(self.auto)}"]) - set(extra_make_args)
+        )
+
         args = [
             "make",
             f"CROSS_PREFIX={self.cross_prefix}",
             f"{test_type}",
         ] + extra_make_args
 
-        logging.info(dict2str(extra_make_envs) + " ".join(args))
+        log.info(dict2str(extra_make_envs) + " ".join(args))
 
         p = subprocess.run(
             args,
@@ -60,44 +74,48 @@ class State(object):
         )
 
         if p.returncode != 0:
-            logging.error(f"make failed: {p.returncode}")
+            log.error(f"make failed: {p.returncode}")
             sys.exit(1)
 
     def run_scheme(
         self,
-        bin: str,
+        test_type: TEST_TYPES,
+        scheme: SCHEME,
+        opt: bool,
         run_as_root=False,
         exec_wrapper=None,
     ) -> bytes:
         """Run the binary in all different ways"""
+        log = logger(test_type, scheme, self.cross_prefix, opt)
+        bin = test_type.bin_path(scheme)
         if not os.path.isfile(bin):
-            logging.error(f"{bin} does not exists")
+            log.error(f"{bin} does not exists")
             sys.exit(1)
 
         cmd = [f"./{bin}"]
         if self.cross_prefix and platform.system() != "Darwin":
-            logging.info(f"Emulating {bin} with QEMU")
+            log.info(f"Emulating {bin} with QEMU")
             if "x86_64" in self.cross_prefix:
                 cmd = ["qemu-x86_64"] + cmd
             elif "aarch64" in self.cross_prefix:
                 cmd = ["qemu-aarch64"] + cmd
             else:
-                logging.info(
+                log.info(
                     f"Emulation for {self.cross_prefix} on {platform.system()} not supported"
                 )
 
         if run_as_root:
-            logging.info(
+            log.info(
                 f"Running {bin} as root -- you may need to enter your root password."
             )
             cmd = ["sudo"] + cmd
 
         if exec_wrapper:
-            logging.info(f"Running {bin} with customized wrapper.")
+            log.info(f"Running {bin} with customized wrapper.")
             exec_wrapper = exec_wrapper.split(" ")
             cmd = exec_wrapper + cmd
 
-        logging.info(" ".join(cmd))
+        log.info(" ".join(cmd))
         result = subprocess.run(
             cmd,
             capture_output=True,
@@ -105,7 +123,7 @@ class State(object):
         )
 
         if result.returncode != 0:
-            logging.error(
+            log.error(
                 f"Running '{cmd}' failed: {result.returncode} {result.stderr.decode()}"
             )
             sys.exit(1)
@@ -124,8 +142,11 @@ class State(object):
         fail = False
         results = {}
         for scheme in SCHEME:
+            log = logger(test_type, scheme, self.cross_prefix, opt)
             result = self.run_scheme(
-                test_type.bin_path(scheme),
+                test_type,
+                scheme,
+                opt,
                 run_as_root,
                 exec_wrapper,
             )
@@ -136,21 +157,33 @@ class State(object):
                 f = actual != expect
                 fail = fail or f
                 if f:
-                    logging.error(
+                    log.error(
                         f"{scheme} failed, expecting {expect}, but getting {actual}"
                     )
                 else:
-                    logging.info(f"{scheme} passed")
+                    log.info(f"{scheme} passed")
                 results[scheme] = f
             else:
-                logging.info(f"{scheme}")
-                logging.info(f"\n{result.decode()}")
+                log.info(f"{scheme}")
+                log.info(f"\n{result.decode()}")
                 results[scheme] = result.decode()
+
+        title = (
+            "## "
+            + ("Cross" if self.cross_prefix else "Native")
+            + " "
+            + ("Opt" if opt else "Non-opt")
+            + " Tests"
+        )
+        github_summary(title, test_type, results)
 
         if fail:
             sys.exit(1)
 
-        return results
+        if actual_proc is not None and expect_proc is not None:
+            return fail
+        else:
+            return results
 
     def test(
         self,
@@ -165,26 +198,12 @@ class State(object):
     ):
         config_logger(self.verbose)
 
-        logging.info(
-            f'{test_type.desc()} ({"cross" if self.cross_prefix else "native"}, {"opt" if opt else "no_opt"})'
-        )
-
-        make_envs = (
-            {"CFLAGS": f"{self.cflags}"} if self.cflags is not None else {}
-        ) | (
-            {"ARCH_FLAGS": f"{self.arch_flags}"} if self.arch_flags is not None else {}
-        )
-        make_envs.update(extra_make_envs)
-
         if self.compile:
             self.compile_schemes(
                 test_type,
-                make_envs,
-                extra_make_args
-                + list(
-                    set([f"OPT={int(opt)}", f"AUTO={int(self.auto)}"])
-                    - set(extra_make_args)
-                ),
+                opt,
+                extra_make_envs,
+                extra_make_args,
             )
 
         results = None
@@ -197,15 +216,6 @@ class State(object):
                 actual_proc,
                 expect_proc,
             )
-
-            title = (
-                "## "
-                + ("Cross" if self.cross_prefix else "Native")
-                + " "
-                + ("Opt" if opt else "Non-opt")
-                + " Tests"
-            )
-            github_summary(title, test_type, results)
 
         return results
 
