@@ -16,30 +16,57 @@ from util import (
     github_summary,
     logger,
 )
-import copy
+
+gh_env = os.environ.get("GITHUB_ENV")
 
 
-class State(object):
+class CompileOptions(object):
 
+    def __init__(
+        self, cross_prefix: str, cflags: str, arch_flags: str, auto: bool, verbose: bool
+    ):
+        self.cross_prefix = cross_prefix
+        self.cflags = cflags
+        self.arch_flags = arch_flags
+        self.auto = auto
+        self.verbose = verbose
+
+
+class Options(object):
     def __init__(self):
-        self.verbose = False
         self.cross_prefix = ""
         self.cflags = ""
         self.arch_flags = ""
         self.auto = True
+        self.verbose = False
+        self.opt = "ALL"
         self.compile = True
         self.run = True
 
+
+class Base:
+
+    def __init__(self, test_type: TEST_TYPES, copts: CompileOptions, opt: bool):
+        self.test_type = test_type
+        self.cross_prefix = copts.cross_prefix
+        self.cflags = copts.cflags
+        self.arch_flags = copts.arch_flags
+        self.auto = copts.auto
+        self.verbose = copts.verbose
+        self.opt = opt
+
     def compile_schemes(
         self,
-        test_type: TEST_TYPES,
-        opt: bool,
         extra_make_envs={},
         extra_make_args=[],
     ):
         """compile or cross compile with some extra environment variables and makefile arguments"""
 
-        log = logger(test_type, "Compiling", self.cross_prefix, opt)
+        if gh_env is not None:
+            compile_mode = "Cross" if self.cross_prefix else "Native"
+            print(f"::group::compile {compile_mode} {self.opt} {self.test_type.desc()}")
+
+        log = logger(self.test_type, "Compile", self.cross_prefix, self.opt)
 
         def dict2str(dict):
             s = ""
@@ -47,22 +74,23 @@ class State(object):
                 s += f"{k}={v} "
             return s
 
+        extra_make_args = extra_make_args + list(
+            set([f"OPT={int(self.opt)}", f"AUTO={int(self.auto)}"])
+            - set(extra_make_args)
+        )
+
+        args = [
+            "make",
+            f"CROSS_PREFIX={self.cross_prefix}",
+            f"{self.test_type}",
+        ] + extra_make_args
+
         make_envs = (
             {"CFLAGS": f"{self.cflags}"} if self.cflags is not None else {}
         ) | (
             {"ARCH_FLAGS": f"{self.arch_flags}"} if self.arch_flags is not None else {}
         )
         extra_make_envs.update(make_envs)
-
-        extra_make_args = extra_make_args + list(
-            set([f"OPT={int(opt)}", f"AUTO={int(self.auto)}"]) - set(extra_make_args)
-        )
-
-        args = [
-            "make",
-            f"CROSS_PREFIX={self.cross_prefix}",
-            f"{test_type}",
-        ] + extra_make_args
 
         log.info(dict2str(extra_make_envs) + " ".join(args))
 
@@ -74,19 +102,25 @@ class State(object):
 
         if p.returncode != 0:
             log.error(f"make failed: {p.returncode}")
+
+        if gh_env is not None:
+            print(f"::endgroup::")
+
+        if p.returncode != 0:
             sys.exit(1)
 
     def run_scheme(
         self,
-        test_type: TEST_TYPES,
         scheme: SCHEME,
-        opt: bool,
+        actual_proc: Callable[[bytes], str] = None,
+        expect_proc: Callable[[SCHEME], str] = None,
         run_as_root=False,
         exec_wrapper=None,
-    ) -> bytes:
+    ):
         """Run the binary in all different ways"""
-        log = logger(test_type, scheme, self.cross_prefix, opt)
-        bin = test_type.bin_path(scheme, opt)
+        log = logger(self.test_type, scheme, self.cross_prefix, self.opt)
+
+        bin = self.test_type.bin_path(scheme, self.opt)
         if not os.path.isfile(bin):
             log.error(f"{bin} does not exists")
             sys.exit(1)
@@ -100,12 +134,12 @@ class State(object):
                 cmd = ["qemu-aarch64"] + cmd
             else:
                 log.info(
-                    f"Emulation for {self.cross_prefix} on {platform.system()} not supported"
+                    f"Emulation for {self.cross_prefix} on {platform.system()} not supported",
                 )
 
         if run_as_root:
             log.info(
-                f"Running {bin} as root -- you may need to enter your root password."
+                f"Running {bin} as root -- you may need to enter your root password.",
             )
             cmd = ["sudo"] + cmd
 
@@ -114,109 +148,107 @@ class State(object):
             exec_wrapper = exec_wrapper.split(" ")
             cmd = exec_wrapper + cmd
 
-        log.info(" ".join(cmd))
-        result = subprocess.run(
+        log.debug(" ".join(cmd))
+
+        p = subprocess.run(
             cmd,
             capture_output=True,
             universal_newlines=False,
         )
 
-        if result.returncode != 0:
+        result = None
+
+        if p.returncode != 0:
             log.error(
-                f"Running '{cmd}' failed: {result.returncode} {result.stderr.decode()}"
+                f"Running '{cmd}' failed: {p.returncode} {p.stderr.decode()}",
             )
-            sys.exit(1)
-
-        return result.stdout
-
-    def run_schemes(
-        self,
-        test_type: TEST_TYPES,
-        opt: bool,
-        run_as_root=False,
-        exec_wrapper=None,
-        actual_proc: Callable[[bytes], str] = None,
-        expect_proc: Callable[[SCHEME], str] = None,
-    ) -> TypedDict:
-        fail = False
-        results = {}
-        for scheme in SCHEME:
-            log = logger(test_type, scheme, self.cross_prefix, opt)
-            result = self.run_scheme(
-                test_type,
-                scheme,
-                opt,
-                run_as_root,
-                exec_wrapper,
-            )
-
-            if actual_proc is not None and expect_proc is not None:
-                actual = actual_proc(result)
-                expect = expect_proc(scheme)
-                f = actual != expect
-                fail = fail or f
-                if f:
-                    log.error(
-                        f"{scheme} failed, expecting {expect}, but getting {actual}"
-                    )
-                else:
-                    log.info(f"{scheme} passed")
-                results[scheme] = f
+        elif actual_proc is not None and expect_proc is not None:
+            actual = actual_proc(p.stdout)
+            expect = expect_proc(scheme)
+            result = actual != expect
+            if result:
+                log.error(f"failed, expecting {expect}, but getting {actual}")
             else:
-                log.info(f"{scheme}")
-                log.info(f"\n{result.decode()}")
-                results[scheme] = result.decode()
-
-        title = (
-            "## "
-            + ("Cross" if self.cross_prefix else "Native")
-            + " "
-            + ("Opt" if opt else "Non-opt")
-            + " Tests"
-        )
-        github_summary(title, test_type, results)
-
-        if fail:
-            sys.exit(1)
-
-        if actual_proc is not None and expect_proc is not None:
-            return fail
+                log.info(f"passed")
         else:
-            return results
+            log.info(f"{p.stdout.decode()}")
+            result = p.stdout.decode()
 
-    def test(
+        if p.returncode != 0:
+            exit(p.returncode)
+        else:
+            return result
+
+
+class Test_Implementations:
+    def __init__(
         self,
         test_type: TEST_TYPES,
-        opt: bool,
+        copts: CompileOptions,
+    ):
+        self.compile_mode = "Cross" if copts.cross_prefix else "Native"
+        self.test_type = test_type
+        self.ts = {}
+        self.ts["no_opt"] = Base(test_type, copts, False)
+        self.ts["opt"] = Base(test_type, copts, True)
+
+    def compile(
+        self,
+        opt: str,
         extra_make_envs={},
         extra_make_args=[],
-        actual_proc: Callable[[bytes], str] = None,
-        expect_proc: Callable[[SCHEME], str] = None,
-        run_as_root: bool = False,
-        exec_wrapper: str = None,
     ):
-        config_logger(self.verbose)
-
-        if self.compile:
-            self.compile_schemes(
-                test_type,
-                opt,
+        if opt.lower() == "all" or opt.lower() == "no_opt":
+            self.ts["no_opt"].compile_schemes(
+                extra_make_envs,
+                extra_make_args,
+            )
+        if opt.lower() == "all" or opt.lower() == "opt":
+            self.ts["opt"].compile_schemes(
                 extra_make_envs,
                 extra_make_args,
             )
 
-        results = None
-        if self.run:
-            results = self.run_schemes(
-                test_type,
-                opt,
-                run_as_root,
-                exec_wrapper,
-                actual_proc,
-                expect_proc,
-            )
+    def run_schemes(
+        self,
+        opt: str,
+        actual_proc: Callable[[bytes], str] = None,
+        expect_proc: Callable[[SCHEME], str] = None,
+        run_as_root=False,
+        exec_wrapper=None,
+    ) -> TypedDict:
+        results = {}
 
-        return results
+        def run(opt: bool):
+            k = "opt" if opt else "no_opt"
+            results[k] = {}
+            for scheme in SCHEME:
+                result = self.ts[k].run_scheme(
+                    scheme,
+                    actual_proc,
+                    expect_proc,
+                    run_as_root,
+                    exec_wrapper,
+                )
+
+                results[k][scheme] = result
+
+            title = "## " + (self.compile_mode) + " " + (k.capitalize()) + " Tests"
+            github_summary(title, self.test_type, results[k])
+
+        if opt.lower() == "all" or opt.lower() == "no_opt":
+            run(False)
+        if opt.lower() == "all" or opt.lower() == "opt":
+            run(True)
+
+        if actual_proc is not None and expect_proc is not None:
+            return reduce(
+                lambda acc, c: acc or c,
+                [r for rs in results.values() for r in rs.values()],
+                False,
+            )
+        else:
+            return results
 
 
 """
@@ -226,7 +258,25 @@ Underlying functional tests
 
 
 class Tests:
-    def func(self, state: State, opt: bool):
+    def __init__(self, opts: Options):
+        copts = CompileOptions(
+            opts.cross_prefix, opts.cflags, opts.arch_flags, opts.auto, opts.verbose
+        )
+        self.opt = opts.opt
+
+        self.verbose = opts.verbose
+        self._func = Test_Implementations(TEST_TYPES.MLKEM, copts)
+        self._nistkat = Test_Implementations(TEST_TYPES.NISTKAT, copts)
+        self._kat = Test_Implementations(TEST_TYPES.KAT, copts)
+        self._bench = Test_Implementations(TEST_TYPES.BENCH, copts)
+        self._bench_components = Test_Implementations(
+            TEST_TYPES.BENCH_COMPONENTS, copts
+        )
+
+        self.compile = opts.compile
+        self.run = opts.run
+
+    def _run_func(self):
         """Underlying function for functional test"""
 
         def expect(scheme: SCHEME) -> str:
@@ -240,37 +290,58 @@ class Tests:
                 + f"CRYPTO_CIPHERTEXTBYTES: {ct_bytes}\n"
             )
 
-        state.test(
-            TEST_TYPES.MLKEM,
-            opt,
+        return self._func.run_schemes(
+            self.opt,
             actual_proc=lambda result: str(result, encoding="utf-8"),
             expect_proc=expect,
         )
 
-    def nistkat(self, state: State, opt: bool):
-        """Underlying function for nistkat test"""
+    def func(self):
+        config_logger(self.verbose)
 
-        state.test(
-            TEST_TYPES.NISTKAT,
-            opt,
+        if self.compile:
+            self._func.compile(self.opt)
+        if self.run:
+            fail = self._run_func()
+            if fail:
+                exit(1)
+
+    def _run_nistkat(self):
+        return self._nistkat.run_schemes(
+            self.opt,
             actual_proc=sha256sum,
             expect_proc=lambda scheme: parse_meta(scheme, "nistkat-sha256"),
         )
 
-    def kat(self, state: State, opt: bool):
-        """Underlying function for kat test"""
+    def nistkat(self):
+        config_logger(self.verbose)
 
-        state.test(
-            TEST_TYPES.KAT,
-            opt,
+        if self.compile:
+            self._nistkat.compile(self.opt)
+        if self.run:
+            fail = self._run_nistkat()
+            if fail:
+                exit(1)
+
+    def _run_kat(self):
+        return self._kat.run_schemes(
+            self.opt,
             actual_proc=sha256sum,
             expect_proc=lambda scheme: parse_meta(scheme, "kat-sha256"),
         )
 
+    def kat(self):
+        config_logger(self.verbose)
+
+        if self.compile:
+            self._kat.compile(self.opt)
+        if self.run:
+            fail = self._run_kat()
+            if fail:
+                exit(1)
+
     def bench(
         self,
-        state: State,
-        opt: bool,
         cycles: str,
         output,
         run_as_root: bool,
@@ -278,12 +349,12 @@ class Tests:
         mac_taskpolicy,
         components,
     ):
-        config_logger(state.verbose)
+        config_logger(self.verbose)
 
         if components is False:
-            bench_type = TEST_TYPES.BENCH
+            t = self._bench
         else:
-            bench_type = TEST_TYPES.BENCH_COMPONENTS
+            t = self._bench_components
             output = False
 
         if mac_taskpolicy:
@@ -293,106 +364,102 @@ class Tests:
             else:
                 exec_wrapper = f"taskpolicy -c {mac_taskpolicy}"
 
-        results = state.test(
-            bench_type,
-            opt,
-            extra_make_args=[f"CYCLES={cycles}"],
-            run_as_root=run_as_root,
-            exec_wrapper=exec_wrapper,
-        )
+        if self.compile:
+            t.compile(self.opt, extra_make_args=[f"CYCLES={cycles}"])
 
-        if results is not None and output is not None and components is False:
-            import json
+        if self.run:
+            resultss = t.run_schemes(
+                self.opt,
+                run_as_root,
+                exec_wrapper,
+            )
 
-            with open(output, "w") as f:
-                v = []
-                for scheme in results:
-                    schemeStr = str(scheme)
-                    r = results[scheme]
+        if resultss is None:
+            exit(0)
 
-                    # The first 3 lines of the output are expected to be
-                    # keypair cycles=X
-                    # encaps cycles=X
-                    # decaps cycles=X
+        for k, results in resultss.items():
+            if results is not None and output is not None and components is False:
+                import json
 
-                    lines = [line for line in r.splitlines() if "=" in line]
+                with open(output, "w") as f:
+                    v = []
+                    for scheme in results:
+                        schemeStr = str(scheme)
+                        r = results[scheme]
 
-                    d = {k.strip(): int(v) for k, v in (l.split("=") for l in lines)}
-                    for primitive in ["keypair", "encaps", "decaps"]:
-                        v.append(
-                            {
-                                "name": f"{schemeStr} {primitive}",
-                                "unit": "cycles",
-                                "value": d[f"{primitive} cycles"],
-                            }
-                        )
-                f.write(json.dumps(v))
+                        # The first 3 lines of the output are expected to be
+                        # keypair cycles=X
+                        # encaps cycles=X
+                        # decaps cycles=X
 
-    def all(self, state: State, opt: str, func: bool, kat: bool, nistkat: bool):
-        compile_mode = "cross" if state.cross_prefix else "native"
+                        lines = [line for line in r.splitlines() if "=" in line]
 
-        gh_env = os.environ.get("GITHUB_ENV")
+                        d = {
+                            k.strip(): int(v) for k, v in (l.split("=") for l in lines)
+                        }
+                        for primitive in ["keypair", "encaps", "decaps"]:
+                            v.append(
+                                {
+                                    "name": f"{schemeStr} {primitive}",
+                                    "unit": "cycles",
+                                    "value": d[f"{primitive} cycles"],
+                                }
+                            )
+                    f.write(json.dumps(v))
 
-        tests = [
-            *([self.func] if func else []),
-            *([self.nistkat] if nistkat else []),
-            *([self.kat] if kat else []),
-        ]
+    def all(self, func: bool, kat: bool, nistkat: bool):
+        config_logger(self.verbose)
 
         exit_code = 0
 
-        if state.compile:
-            _state = copy.deepcopy(state)
-            _state.run = False
+        if self.compile:
+            compiles = [
+                *([self._func.compile] if func else []),
+                *([self._nistkat.compile] if nistkat else []),
+                *([self._kat.compile] if kat else []),
+            ]
 
-            def _compile(opt: bool):
-                opt_label = "opt" if opt else "no-opt"
-                for f in tests:
+            def _compile(opt: str):
+                for f in compiles:
                     if gh_env is not None:
                         print(
                             f"::group::compile {compile_mode} {opt_label} {f.__name__.removeprefix('_')} test"
                         )
-
                     try:
-                        f(_state, opt)
-                        print("")
+                        f(opt)
                     except SystemExit as e:
                         exit_code = exit_code or e
 
                     if gh_env is not None:
-                        print(f"::endgroup::")
+                        print("::endgroup::")
                     sys.stdout.flush()
 
-            if opt.lower() == "all" or opt.lower() == "no_opt":
-                _compile(False)
+            if self.opt.lower() == "all":
+                _compile("no_opt")
+                _compile("opt")
+            else:
+                _compile(self.opt)
 
-            if opt.lower() == "all" or opt.lower() == "opt":
-                _compile(True)
+        if self.run:
+            runs = [
+                *([self._run_func] if func else []),
+                *([self._run_nistkat] if nistkat else []),
+                *([self._run_kat] if kat else []),
+            ]
 
-        if state.run:
-            _state = state
-            _state.compile = False
-
-            def _run(f, _state: State, opt: bool):
-                opt_label = "opt" if opt else "no-opt"
+            for f in runs:
                 if gh_env is not None:
                     print(
-                        f"::group::run {compile_mode} {opt_label} {f.__name__.removeprefix('_')} test"
+                        f"::group::run {compile_mode} {self.opt} {f.__name__.removeprefix('_')} test"
                     )
 
                 try:
-                    f(_state, opt)
+                    f()
                 except SystemExit as e:
                     exit_code = exit_code or e
 
                 if gh_env is not None:
                     print(f"::endgroup::")
                 sys.stdout.flush()
-
-            for f in tests:
-                if opt.lower() == "all" or opt.lower() == "no_opt":
-                    _run(f, _state, False)
-                if opt.lower() == "all" or opt.lower() == "opt":
-                    _run(f, _state, True)
 
         exit(exit_code)
