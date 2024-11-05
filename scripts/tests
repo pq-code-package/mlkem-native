@@ -17,7 +17,7 @@ Click interface configuration
 
 def __callback(n):
     def callback(ctx, param, value):
-        state = ctx.ensure_object(State)
+        state = ctx.ensure_object(Options)
         state.__dict__[n] = value
         return value
 
@@ -73,6 +73,16 @@ _shared_options = [
         default=True,
         help="Allow makefile to auto configure system specific preprocessor",
         callback=__callback("auto"),
+    ),
+    click.option(
+        "--opt",
+        expose_value=False,
+        nargs=1,
+        type=click.Choice(["ALL", "OPT", "NO_OPT"], case_sensitive=False),
+        show_default=True,
+        default="ALL",
+        help="Determine whether to compile/run the opt/no_opt binary or both",
+        callback=__callback("opt"),
     ),
     click.option(
         "--compile/--no-compile",
@@ -155,10 +165,9 @@ def cli():
     context_settings={"show_default": True},
 )
 @add_options(_shared_options)
-@click.make_pass_decorator(State, ensure=True)
-@_opt_option
-def func(state: State, opt: bool):
-    Tests().func(state, opt)
+@click.make_pass_decorator(Options, ensure=True)
+def func(opts: Options):
+    Tests(opts).func()
 
 
 @cli.command(
@@ -166,10 +175,9 @@ def func(state: State, opt: bool):
     context_settings={"show_default": True},
 )
 @add_options(_shared_options)
-@click.make_pass_decorator(State, ensure=True)
-@_opt_option
-def nistkat(state: State, opt: bool):
-    Tests().nistkat(state, opt)
+@click.make_pass_decorator(Options, ensure=True)
+def nistkat(opts: Options):
+    Tests(opts).nistkat()
 
 
 @cli.command(
@@ -177,10 +185,9 @@ def nistkat(state: State, opt: bool):
     context_settings={"show_default": True},
 )
 @add_options(_shared_options)
-@click.make_pass_decorator(State, ensure=True)
-@_opt_option
-def kat(state: State, opt: bool):
-    Tests().kat(state, opt)
+@click.make_pass_decorator(Options, ensure=True)
+def kat(opts: Options):
+    Tests(opts).kat()
 
 
 @cli.command(
@@ -189,11 +196,9 @@ def kat(state: State, opt: bool):
 )
 @add_options(_shared_options)
 @add_options(_bench_options)
-@click.make_pass_decorator(State, ensure=True)
-@_opt_option
+@click.make_pass_decorator(Options, ensure=True)
 def bench(
-    state: State,
-    opt: bool,
+    opts: Options,
     cycles: str,
     output,
     run_as_root: bool,
@@ -201,9 +206,7 @@ def bench(
     mac_taskpolicy,
     components,
 ):
-    Tests().bench(
-        state,
-        opt,
+    Tests(opts).bench(
         cycles,
         output,
         run_as_root,
@@ -220,14 +223,6 @@ def bench(
 @add_options(_shared_options)
 @add_options(
     [
-        click.option(
-            "--opt",
-            nargs=1,
-            type=click.Choice(["ALL", "OPT", "NO_OPT"], case_sensitive=False),
-            show_default=True,
-            default="ALL",
-            help="Determine whether to compile/run the opt/no_opt binary or both",
-        ),
         click.option(
             "--func/--no-func",
             is_flag=True,
@@ -251,15 +246,14 @@ def bench(
         ),
     ]
 )
-@click.make_pass_decorator(State, ensure=True)
+@click.make_pass_decorator(Options, ensure=True)
 def all(
-    state: State,
-    opt: str,
+    opts: Options,
     func: bool,
     kat: bool,
     nistkat: bool,
 ):
-    Tests().all(state, opt, func, kat, nistkat)
+    Tests(opts).all(func, kat, nistkat)
 
 
 if __name__ == "__main__":
