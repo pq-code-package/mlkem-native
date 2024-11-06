@@ -39,6 +39,16 @@ class SCHEME(IntEnum):
     def suffix(self):
         return self.name.removeprefix("MLKEM")
 
+    @classmethod
+    def from_str(cls, s: str):
+        # Iterate through all enum members to find a match for the given string
+        for m in cls:
+            if str(m) == s:
+                return m
+        raise ValueError(
+            f"'{s}' is not a valid string representation for {cls.__name__}"
+        )
+
 
 class TEST_TYPES(IntEnum):
     MLKEM = 1
@@ -46,6 +56,7 @@ class TEST_TYPES(IntEnum):
     NISTKAT = 3
     KAT = 4
     BENCH_COMPONENTS = 5
+    ACVP = 6
 
     def __str__(self):
         return self.name.lower()
@@ -62,6 +73,8 @@ class TEST_TYPES(IntEnum):
                 return "Nistkat Test"
             case TEST_TYPES.KAT:
                 return "Kat Test"
+            case TEST_TYPES.ACVP:
+                return "ACVP Test"
 
     def bin(self):
         match self:
@@ -75,6 +88,8 @@ class TEST_TYPES(IntEnum):
                 return "gen_NISTKAT"
             case TEST_TYPES.KAT:
                 return "gen_KAT"
+            case TEST_TYPES.ACVP:
+                return "acvp_mlkem"
 
     def bin_path(self, scheme: SCHEME, opt: bool):
         return f'test/build/{scheme.name.lower()}/bin/{self.bin()}{scheme.suffix()}_{"opt" if opt else "ref"}'
@@ -86,7 +101,7 @@ def parse_meta(scheme: SCHEME, field: str) -> str:
     return meta["implementations"][int(scheme) - 1][field]
 
 
-def github_summary(title: str, test: TEST_TYPES, results: TypedDict):
+def github_summary(title: str, test_label: str, results: TypedDict):
     summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
 
     res = list(results.values())
@@ -103,7 +118,7 @@ def github_summary(title: str, test: TEST_TYPES, results: TypedDict):
                 ),
             )
         )
-        summaries = [f"| {test.desc()} |" + summaries[0]] + [
+        summaries = [f"| {test_label} |" + summaries[0]] + [
             "| |" + x for x in summaries[1:]
         ]
     else:
@@ -111,7 +126,7 @@ def github_summary(title: str, test: TEST_TYPES, results: TypedDict):
             reduce(
                 lambda acc, b: f"{acc} " + (":x: |" if b else ":white_check_mark: |"),
                 res,
-                f"| {test.desc()} |",
+                f"| {test_label} |",
             )
         ]
 
@@ -159,7 +174,7 @@ def github_summary(title: str, test: TEST_TYPES, results: TypedDict):
 
 
 def config_logger(verbose):
-    logging.basicConfig(format="%(levelname)-5s > %(name)-40s %(message)s")
+    logging.basicConfig(format="%(levelname)-5s > %(name)-41s %(message)s")
 
     logger = logging.getLogger()
 
@@ -169,10 +184,21 @@ def config_logger(verbose):
         logger.setLevel(logging.INFO)
 
 
-def logger(test_type: TEST_TYPES, scheme: SCHEME, cross_prefix: str, opt: bool):
+def logger(
+    test_type: TEST_TYPES, scheme: SCHEME, cross_prefix: str, opt: bool, i: int = None
+):
     compile_mode = "cross" if cross_prefix else "native"
     implementation = "opt" if opt else "no_opt"
 
     return logging.getLogger(
-        f"{test_type.desc():<15} {str(scheme):<11} ({compile_mode:<6}, {implementation:>6})"
+        "{:<18} {:<11} ({:<6}, {:>6})".format(
+            (
+                test_type.desc()
+                if (i is None or test_type is not TEST_TYPES.ACVP)
+                else f"{test_type.desc():<15} {i}"
+            ),
+            str(scheme),
+            compile_mode,
+            implementation,
+        )
     )

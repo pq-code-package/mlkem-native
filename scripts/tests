@@ -224,6 +224,28 @@ def bench(
 
 
 @cli.command(
+    short_help="Run ACVP client",
+    context_settings={"show_default": True},
+)
+@add_options(_shared_options)
+@add_options(
+    [
+        click.option(
+            "-d",
+            "--acvp_dir",
+            nargs=1,
+            show_default=True,
+            default="test/acvp_data",
+            help="Path to acvp directory",
+        ),
+    ]
+)
+@click.make_pass_decorator(Options, ensure=True)
+def acvp(opts: Options, acvp_dir: str):
+    Tests(opts).acvp(acvp_dir)
+
+
+@cli.command(
     short_help="Run all tests (except benchmark for now)",
     context_settings={"show_default": True},
 )
@@ -251,6 +273,13 @@ def bench(
             default=True,
             help="Determine whether to run nistkat test or not",
         ),
+        click.option(
+            "--acvp/--no-acvp",
+            is_flag=True,
+            show_default=True,
+            default=True,
+            help="Determine whether to run nistkat test or not",
+        ),
     ]
 )
 @click.make_pass_decorator(Options, ensure=True)
@@ -259,8 +288,9 @@ def all(
     func: bool,
     kat: bool,
     nistkat: bool,
+    acvp: bool,
 ):
-    Tests(opts).all(func, kat, nistkat)
+    Tests(opts).all(func, kat, nistkat, acvp)
 
 
 if __name__ == "__main__":

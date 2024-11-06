@@ -18,8 +18,7 @@ quickcheck: buildall
 	$(MLKEM512_BUILD_DIR)/bin/test_mlkem512_$(OPT_SUFFIX)
 	$(MLKEM768_BUILD_DIR)/bin/test_mlkem768_$(OPT_SUFFIX)
 	$(MLKEM1024_BUILD_DIR)/bin/test_mlkem1024_$(OPT_SUFFIX)
-	wait
-	python3 ./test/acvp_client.py $(OPT_SUFFIX)
+	./scripts/tests acvp --opt=$(OPT_SUFFIX)
 	$(Q)echo "  Functionality and ACVP tests passed!"
 
 mlkem: \
