@@ -114,8 +114,8 @@ class Base:
         scheme: SCHEME,
         actual_proc: Callable[[bytes], str] = None,
         expect_proc: Callable[[SCHEME], str] = None,
-        run_as_root=False,
-        exec_wrapper=None,
+        prefix: [str] = [],
+        extra_args: [str] = [],
     ):
         """Run the binary in all different ways"""
         log = logger(self.test_type, scheme, self.cross_prefix, self.opt)
@@ -137,16 +137,7 @@ class Base:
                     f"Emulation for {self.cross_prefix} on {platform.system()} not supported",
                 )
 
-        if run_as_root:
-            log.info(
-                f"Running {bin} as root -- you may need to enter your root password.",
-            )
-            cmd = ["sudo"] + cmd
-
-        if exec_wrapper:
-            log.info(f"Running {bin} with customized wrapper.")
-            exec_wrapper = exec_wrapper.split(" ")
-            cmd = exec_wrapper + cmd
+        cmd = prefix + cmd + extra_args
 
         log.debug(" ".join(cmd))
 
@@ -214,8 +205,8 @@ class Test_Implementations:
         opt: str,
         actual_proc: Callable[[bytes], str] = None,
         expect_proc: Callable[[SCHEME], str] = None,
-        run_as_root=False,
-        exec_wrapper=None,
+        prefix: [str] = [],
+        extra_args: [str] = [],
     ) -> TypedDict:
         results = {}
 
@@ -224,11 +215,7 @@ class Test_Implementations:
             results[k] = {}
             for scheme in SCHEME:
                 result = self.ts[k].run_scheme(
-                    scheme,
-                    actual_proc,
-                    expect_proc,
-                    run_as_root,
-                    exec_wrapper,
+                    scheme, actual_proc, expect_proc, prefix, extra_args
                 )
 
                 results[k][scheme] = result
@@ -367,11 +354,22 @@ class Tests:
         if self.compile:
             t.compile(self.opt, extra_make_args=[f"CYCLES={cycles}"])
 
+        prefix = []
+        if run_as_root:
+            logging.info(
+                f"Running {bin} as root -- you may need to enter your root password.",
+            )
+            prefix.append("sudo")
+
+        if exec_wrapper:
+            logging.info(f"Running with customized wrapper.")
+            exec_wrapper = exec_wrapper.split(" ")
+            prefix = prefix + exec_wrapper
+
         if self.run:
             resultss = t.run_schemes(
                 self.opt,
-                run_as_root,
-                exec_wrapper,
+                prefix=prefix,
             )
 
         if resultss is None:
