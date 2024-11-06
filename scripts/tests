@@ -10,7 +10,6 @@ import logging
 import click
 import hashlib
 import yaml
-import asyncio
 from functools import reduce
 from enum import IntEnum
 from typing import Optional, Callable, TypedDict
@@ -259,7 +258,7 @@ class State(object):
             exec_wrapper = exec_wrapper.split(" ")
             cmd = exec_wrapper + cmd
 
-        logging.info(" ".join(cmd))
+        logging.debug(" ".join(cmd))
         result = subprocess.run(
             cmd,
             capture_output=True,
@@ -748,7 +747,7 @@ def all(
 
         return code
 
-    async def run(f, _state: State, opt: bool):
+    def run(f, _state: State, opt: bool):
         code = 0
         opt_label = "opt" if opt else "no-opt"
         if gh_env is not None:
@@ -756,14 +755,10 @@ def all(
                 f"::group::run {compile_mode} {opt_label} {f.__name__.removeprefix('_')} test"
             )
 
-        with redirect_stdout(io.StringIO()) as out:
-            try:
-                f(_state, opt)
-            except SystemExit as e:
-                code = e
-
-        if out:
-            print(out.getvalue())
+        try:
+            f(_state, opt)
+        except SystemExit as e:
+            code = e
 
         if gh_env is not None:
             print(f"::endgroup::")
@@ -771,31 +766,28 @@ def all(
 
         return code
 
-    async def run_all(_state: State, opt: str):
-        ts = []
-        async with asyncio.TaskGroup() as g:
-            for f in tests:
-                if opt.lower() == "all" or opt.lower() == "no_opt":
-                    ts.append(g.create_task(run(f, _state, False)))
-                if opt.lower() == "all" or opt.lower() == "opt":
-                    ts.append(g.create_task(run(f, _state, True)))
-        return reduce(lambda acc, c: acc or c, map(lambda t: t.result(), ts), exit_code)
+    def run_all(_state: State, opt: str):
+        code = 0
+        for f in tests:
+            if opt.lower() == "all" or opt.lower() == "no_opt":
+                code = code or run(f, _state, False)
+            if opt.lower() == "all" or opt.lower() == "opt":
+                code = code or run(f, _state, True)
+        return code
 
     exit_code = 0
 
-    # sequentially compile
     if state.compile:
         _state = copy.deepcopy(state)
         _state.run = False
 
         exit_code = compile_all(_state, opt)
 
-    # parallelly run
     if state.run:
         _state = state
         _state.compile = False
 
-        exit_code = asyncio.run(run_all(_state, opt))
+        exit_code = exit_code or run_all(_state, opt)
 
     exit(exit_code)
 
