@@ -26,8 +26,8 @@ inputs:
     description: For auto-determining the default cross-prefix (e.g. native | cross )
     default: "native"
   opt:
-    description: opt flag to pass to test script
-    default: "true"
+    description: Whether to build opt/non-opt binaries or all (all | opt | no_opt)
+    default: "all"
   func:
     description: Determine whether to run functional test or not
     default: "true"
@@ -52,7 +52,6 @@ runs:
           fi
 
           echo _CROSS_PREFIX="$_cross_prefix" >> $GITHUB_ENV
-          echo OPT="${{ inputs.opt == 'true' && 'opt' || 'no-opt' }}" >> $GITHUB_ENV
           echo FUNC="${{ inputs.func == 'true' && 'func' || 'no-func' }}" >> $GITHUB_ENV
           echo KAT="${{ inputs.kat == 'true' && 'kat' || 'no-kat' }}" >> $GITHUB_ENV
           echo NISTKAT="${{ inputs.nistkat == 'true' && 'nistkat' || 'no-nistkat' }}" >> $GITHUB_ENV
@@ -84,15 +83,11 @@ runs:
             - $(bash --version | grep -m1 "")
             - $(${_CROSS_PREFIX}${CC} --version | grep -m1 "")
           EOF
-      - name: Compile ${{ inputs.mode }} ${{ env.OPT }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }})
+      - name: ${{ inputs.mode }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }})
         shell: ${{ env.SHELL }}
         run: |
-          tests all  --cross-prefix="${{ env._CROSS_PREFIX }}" --cflags="${{ inputs.cflags }}" --${{ env.OPT }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.NISTKAT }} --compile --no-run -v
-      - name: Run ${{ inputs.mode }} ${{ env.OPT }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }})
-        shell: ${{ env.SHELL }}
-        run: |
-          tests all  --cross-prefix="${{ env._CROSS_PREFIX }}" --cflags="${{ inputs.cflags }}" --${{ env.OPT }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.NISTKAT }} --no-compile --run -v
-      - name: Check namespacing ${{ inputs.mode }} ${{ env.OPT }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }})
+          tests all  --cross-prefix="${{ env._CROSS_PREFIX }}" --cflags="${{ inputs.cflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.NISTKAT }} -v
+      - name: Check namespacing ${{ inputs.mode }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }})
         shell: ${{ env.SHELL }}
         run: |
           check-namespace

@@ -188,7 +188,6 @@ class State(object):
         self.cross_prefix = ""
         self.cflags = ""
         self.arch_flags = ""
-        self.opt = True
         self.auto = True
         self.compile = True
         self.run = True
@@ -278,6 +277,7 @@ class State(object):
     def run_schemes(
         self,
         test_type: TEST_TYPES,
+        opt: bool,
         run_as_root=False,
         exec_wrapper=None,
         actual_proc: Callable[[bytes], str] = None,
@@ -317,6 +317,7 @@ class State(object):
     def test(
         self,
         test_type: TEST_TYPES,
+        opt: bool,
         extra_make_envs={},
         extra_make_args=[],
         actual_proc: Callable[[bytes], str] = None,
@@ -326,7 +327,9 @@ class State(object):
     ):
         config_logger(self.verbose)
 
-        logging.info(f"{test_type.desc()}")
+        logging.info(
+            f'{test_type.desc()} ({"cross" if self.cross_prefix else "native"}, {"opt" if opt else "no_opt"})'
+        )
 
         make_envs = (
             {"CFLAGS": f"{self.cflags}"} if self.cflags is not None else {}
@@ -341,7 +344,7 @@ class State(object):
                 make_envs,
                 extra_make_args
                 + list(
-                    set([f"OPT={int(self.opt)}", f"AUTO={int(self.auto)}"])
+                    set([f"OPT={int(opt)}", f"AUTO={int(self.auto)}"])
                     - set(extra_make_args)
                 ),
             )
@@ -350,6 +353,7 @@ class State(object):
         if self.run:
             results = self.run_schemes(
                 test_type,
+                opt,
                 run_as_root,
                 exec_wrapper,
                 actual_proc,
@@ -360,7 +364,7 @@ class State(object):
                 "## "
                 + ("Cross" if self.cross_prefix else "Native")
                 + " "
-                + ("Opt" if self.opt else "Non-opt")
+                + ("Opt" if opt else "Non-opt")
                 + " Tests"
             )
             github_summary(title, test_type, results)
@@ -374,7 +378,7 @@ Underlying functional tests
 """
 
 
-def _func(state: State):
+def _func(state: State, opt: bool):
     """Underlying function for functional test"""
 
     def expect(scheme: SCHEME) -> str:
@@ -390,26 +394,29 @@ def _func(state: State):
 
     state.test(
         TEST_TYPES.MLKEM,
+        opt,
         actual_proc=lambda result: str(result, encoding="utf-8"),
         expect_proc=expect,
     )
 
 
-def _nistkat(state: State):
+def _nistkat(state: State, opt: bool):
     """Underlying function for nistkat test"""
 
     state.test(
         TEST_TYPES.NISTKAT,
+        opt,
         actual_proc=sha256sum,
         expect_proc=lambda scheme: parse_meta(scheme, "nistkat-sha256"),
     )
 
 
-def _kat(state: State):
+def _kat(state: State, opt: bool):
     """Underlying function for kat test"""
 
     state.test(
         TEST_TYPES.KAT,
+        opt,
         actual_proc=sha256sum,
         expect_proc=lambda scheme: parse_meta(scheme, "kat-sha256"),
     )
@@ -464,15 +471,6 @@ _shared_options = [
         nargs=1,
         help="Extra arch flags to passed in (e.g. '-march=armv8')",
         callback=__callback("arch_flags"),
-    ),
-    click.option(
-        "--opt/--no-opt",
-        expose_value=False,
-        is_flag=True,
-        show_default=True,
-        default=True,
-        help="Choose whether to enable assembly optimizations (if present)",
-        callback=__callback("opt"),
     ),
     click.option(
         "--auto/--no-auto",
@@ -569,8 +567,9 @@ def cli():
 )
 @add_options(_shared_options)
 @click.make_pass_decorator(State, ensure=True)
-def func(state: State):
-    _func(state)
+@_opt_option
+def func(state: State, opt: bool):
+    _func(state, opt)
 
 
 @cli.command(
@@ -579,8 +578,9 @@ def func(state: State):
 )
 @add_options(_shared_options)
 @click.make_pass_decorator(State, ensure=True)
-def nistkat(state: State):
-    _nistkat(state)
+@_opt_option
+def nistkat(state: State, opt: bool):
+    _nistkat(state, opt)
 
 
 @cli.command(
@@ -589,8 +589,9 @@ def nistkat(state: State):
 )
 @add_options(_shared_options)
 @click.make_pass_decorator(State, ensure=True)
-def kat(state: State):
-    _kat(state)
+@_opt_option
+def kat(state: State, opt: bool):
+    _kat(state, opt)
 
 
 @cli.command(
@@ -600,8 +601,10 @@ def kat(state: State):
 @add_options(_shared_options)
 @add_options(_bench_options)
 @click.make_pass_decorator(State, ensure=True)
+@_opt_option
 def bench(
     state: State,
+    opt: bool,
     cycles: str,
     output,
     run_as_root: bool,
@@ -626,6 +629,7 @@ def bench(
 
     results = state.test(
         bench_type,
+        opt,
         extra_make_args=[f"CYCLES={cycles}"],
         run_as_root=run_as_root,
         exec_wrapper=exec_wrapper,
@@ -667,6 +671,14 @@ def bench(
 @add_options(
     [
         click.option(
+            "--opt",
+            nargs=1,
+            type=click.Choice(["ALL", "OPT", "NO_OPT"], case_sensitive=False),
+            show_default=True,
+            default="ALL",
+            help="Determine whether to compile/run the opt/no_opt binary or both",
+        ),
+        click.option(
             "--func/--no-func",
             is_flag=True,
             show_default=True,
@@ -692,11 +704,11 @@ def bench(
 @click.make_pass_decorator(State, ensure=True)
 def all(
     state: State,
+    opt: str,
     func: bool,
     kat: bool,
     nistkat: bool,
 ):
-    opt_label = "opt" if state.opt else "no-opt"
     compile_mode = "cross" if state.cross_prefix else "native"
 
     gh_env = os.environ.get("GITHUB_ENV")
@@ -706,29 +718,39 @@ def all(
         *([_nistkat] if nistkat else []),
         *([_kat] if kat else []),
     ]
-    exit_code = 0
 
-    # sequentially compile
-    _state = copy.deepcopy(state)
-    _state.run = False
-
-    if state.compile:
-        for f in tests:
-            if gh_env is not None:
-                print(f"::group::compile {compile_mode} {opt_label} {opt_label} test")
-
-            try:
-                f(_state)
-                print("")
-            except SystemExit as e:
-                exit_code = exit_code or e
-
-            if gh_env is not None:
-                print(f"::endgroup::")
-
-    # parallelly run
-    async def run(f, _state: State):
+    def compile_all(_state: State, opt: str):
         code = 0
+
+        def _compile(opt: bool):
+            opt_label = "opt" if opt else "no-opt"
+            for f in tests:
+                if gh_env is not None:
+                    print(
+                        f"::group::compile {compile_mode} {opt_label} {f.__name__.removeprefix('_')} test"
+                    )
+
+                try:
+                    f(_state, opt)
+                    print("")
+                except SystemExit as e:
+                    code = code or e
+
+                if gh_env is not None:
+                    print(f"::endgroup::")
+                sys.stdout.flush()
+
+        if opt.lower() == "all" or opt.lower() == "no_opt":
+            _compile(False)
+
+        if opt.lower() == "all" or opt.lower() == "opt":
+            _compile(True)
+
+        return code
+
+    async def run(f, _state: State, opt: bool):
+        code = 0
+        opt_label = "opt" if opt else "no-opt"
         if gh_env is not None:
             print(
                 f"::group::run {compile_mode} {opt_label} {f.__name__.removeprefix('_')} test"
@@ -736,7 +758,7 @@ def all(
 
         with redirect_stdout(io.StringIO()) as out:
             try:
-                f(_state)
+                f(_state, opt)
             except SystemExit as e:
                 code = e
 
@@ -745,21 +767,35 @@ def all(
 
         if gh_env is not None:
             print(f"::endgroup::")
+        sys.stdout.flush()
 
         return code
 
-    async def run_all(_state: State):
+    async def run_all(_state: State, opt: str):
         ts = []
         async with asyncio.TaskGroup() as g:
             for f in tests:
-                ts.append(g.create_task(run(f, _state)))
+                if opt.lower() == "all" or opt.lower() == "no_opt":
+                    ts.append(g.create_task(run(f, _state, False)))
+                if opt.lower() == "all" or opt.lower() == "opt":
+                    ts.append(g.create_task(run(f, _state, True)))
         return reduce(lambda acc, c: acc or c, map(lambda t: t.result(), ts), exit_code)
 
+    exit_code = 0
+
+    # sequentially compile
+    if state.compile:
+        _state = copy.deepcopy(state)
+        _state.run = False
+
+        exit_code = compile_all(_state, opt)
+
+    # parallelly run
     if state.run:
         _state = state
         _state.compile = False
 
-        exit_code = asyncio.run(run_all(_state))
+        exit_code = asyncio.run(run_all(_state, opt))
 
     exit(exit_code)
 

@@ -64,7 +64,7 @@ jobs:
         opt:
           - name: opt
             value: true
-          - name: non-opt
+          - name: no_opt
             value: false
         target:
           - name: Graviton2
