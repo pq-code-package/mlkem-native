@@ -17,96 +17,31 @@
 #include "arith_native.h"
 #include "debug/debug.h"
 
-#include "cbmc.h"
 
-/*************************************************
- * Name:        pack_pk
- *
- * Description: Serialize the public key as concatenation of the
- *              serialized vector of polynomials pk
- *              and the public seed used to generate the matrix A.
- *
- * Arguments:   uint8_t *r: pointer to the output serialized public key
- *              polyvec *pk: pointer to the input public-key polyvec.
- *                Must have coefficients within [0,..,q-1].
- *              const uint8_t *seed: pointer to the input public seed
- **************************************************/
-STATIC_TESTABLE
-void pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], polyvec *pk,
-             const uint8_t seed[MLKEM_SYMBYTES])  // clang-format off
-REQUIRES(IS_FRESH(r, MLKEM_INDCPA_PUBLICKEYBYTES))
-REQUIRES(IS_FRESH(pk, sizeof(polyvec)))
-REQUIRES(IS_FRESH(seed, MLKEM_SYMBYTES))
-REQUIRES(FORALL(int, k0, 0, MLKEM_K - 1,
-  ARRAY_IN_BOUNDS(int, k1, 0, MLKEM_N - 1, pk->vec[k0].coeffs, 0, MLKEM_Q - 1)))
-ASSIGNS(OBJECT_WHOLE(r))  // clang-format on
-{
-  POLYVEC_BOUND(pk, MLKEM_Q);
-  polyvec_tobytes(r, pk);
-  memcpy(r + MLKEM_POLYVECBYTES, seed, MLKEM_SYMBYTES);
+void indcpa_serialize_pk(uint8_t pks[MLKEM_INDCPA_PUBLICKEYBYTES],
+                         const mlkem_indcpa_public_key *pk) {
+  POLYVEC_BOUND(pk->pkpv, MLKEM_Q);
+  polyvec_tobytes(pks, &pk->pkpv);
+  memcpy(pks + MLKEM_POLYVECBYTES, pk->seed, MLKEM_SYMBYTES);
 }
 
-/*************************************************
- * Name:        unpack_pk
- *
- * Description: De-serialize public key from a byte array;
- *              approximate inverse of pack_pk
- *
- * Arguments:   - polyvec *pk: pointer to output public-key polynomial vector
- *                  Coefficients will be normalized to [0,..,q-1].
- *              - uint8_t *seed: pointer to output seed to generate matrix A
- *              - const uint8_t *packedpk: pointer to input serialized public
- *                  key.
- **************************************************/
-STATIC_TESTABLE
-void unpack_pk(
-    polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
-    const uint8_t packedpk[MLKEM_INDCPA_PUBLICKEYBYTES])  // clang-format off
-REQUIRES(IS_FRESH(packedpk, MLKEM_INDCPA_PUBLICKEYBYTES))
-REQUIRES(IS_FRESH(pk, sizeof(polyvec)))
-REQUIRES(IS_FRESH(seed, MLKEM_SYMBYTES))
-ENSURES(FORALL(int, k0, 0, MLKEM_K - 1,
-  ARRAY_IN_BOUNDS(int, k1, 0, MLKEM_N - 1, pk->vec[k0].coeffs, 0, MLKEM_Q - 1)))
-ASSIGNS(OBJECT_WHOLE(pk))
-ASSIGNS(OBJECT_WHOLE(seed))  // clang-format on
-{
-  polyvec_frombytes(pk, packedpk);
-  memcpy(seed, packedpk + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
-
-  // TODO! pk must be subject to a "modulus check" at the top-level
-  // crypto_kem_enc_derand(). Once that's done, the reduction is no
-  // longer necessary here.
-  polyvec_reduce(pk);
+void indcpa_deserialize_pk(mlkem_indcpa_public_key *pk,
+                           const uint8_t pks[MLKEM_INDCPA_PUBLICKEYBYTES]) {
+  polyvec_frombytes(&pk->pkpv, pks);
+  memcpy(pk->seed, pks + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
+  gen_matrix(pk->at, pk->seed, 1);
 }
 
-/*************************************************
- * Name:        pack_sk
- *
- * Description: Serialize the secret key
- *
- * Arguments:   - uint8_t *r: pointer to output serialized secret key
- *              - polyvec *sk: pointer to input vector of polynomials (secret
- *key)
- **************************************************/
-static void pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], polyvec *sk) {
-  POLYVEC_BOUND(sk, MLKEM_Q);
-  polyvec_tobytes(r, sk);
+void indcpa_serialize_sk(uint8_t sks[MLKEM_INDCPA_SECRETKEYBYTES],
+                         const mlkem_indcpa_secret_key *sk) {
+  polyvec_tobytes(sks, &sk->skpv);
 }
 
-/*************************************************
- * Name:        unpack_sk
- *
- * Description: De-serialize the secret key; inverse of pack_sk
- *
- * Arguments:   - polyvec *sk: pointer to output vector of polynomials (secret
- *key)
- *              - const uint8_t *packedsk: pointer to input serialized secret
- *key
- **************************************************/
-static void unpack_sk(polyvec *sk,
-                      const uint8_t packedsk[MLKEM_INDCPA_SECRETKEYBYTES]) {
-  polyvec_frombytes(sk, packedsk);
-  polyvec_reduce(sk);
+void indcpa_deserialize_sk(mlkem_indcpa_secret_key *sk,
+                           const uint8_t sks[MLKEM_INDCPA_SECRETKEYBYTES]) {
+  polyvec_frombytes(&sk->skpv, sks);
+  // TODO: do we really need a reduce here?
+  polyvec_reduce(&sk->skpv);
 }
 
 /*************************************************
@@ -293,6 +228,21 @@ void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES],
 #endif /* MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER */
 }
 
+
+static void transpose_matrix(polyvec a[MLKEM_K]) {
+  unsigned int i, j, k;
+  int16_t t;
+  for (i = 0; i < MLKEM_K; i++) {
+    for (j = i + 1; j < MLKEM_K; j++) {
+      for (k = 0; k < MLKEM_N; k++) {
+        t = a[i].vec[j].coeffs[k];
+        a[i].vec[j].coeffs[k] = a[j].vec[i].coeffs[k];
+        a[j].vec[i].coeffs[k] = t;
+      }
+    }
+  }
+}
+
 /*************************************************
  * Name:        indcpa_keypair_derand
  *
@@ -309,14 +259,14 @@ void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES],
 
 STATIC_ASSERT(NTT_BOUND + MLKEM_Q < INT16_MAX, indcpa_enc_bound_0)
 
-void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                           uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
+void indcpa_keypair_derand(mlkem_indcpa_public_key *pk,
+                           mlkem_indcpa_secret_key *sk,
                            const uint8_t coins[MLKEM_SYMBYTES]) {
   unsigned int i;
   uint8_t buf[2 * MLKEM_SYMBYTES] ALIGN;
   const uint8_t *publicseed = buf;
   const uint8_t *noiseseed = buf + MLKEM_SYMBYTES;
-  polyvec a[MLKEM_K], e, pkpv, skpv;
+  polyvec e;
   polyvec_mulcache skpv_cache;
 
   // Add MLKEM_K for domain separation of security levels
@@ -324,42 +274,43 @@ void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
   buf[MLKEM_SYMBYTES] = MLKEM_K;
   hash_g(buf, buf, MLKEM_SYMBYTES + 1);
 
-  gen_matrix(a, publicseed, 0 /* no transpose */);
+  gen_matrix(pk->at, publicseed, 0 /* no transpose */);
 
 #if MLKEM_K == 2
-  poly_getnoise_eta1_4x(skpv.vec + 0, skpv.vec + 1, e.vec + 0, e.vec + 1,
-                        noiseseed, 0, 1, 2, 3);
+  poly_getnoise_eta1_4x(sk->skpv.vec + 0, sk->skpv.vec + 1, e.vec + 0,
+                        e.vec + 1, noiseseed, 0, 1, 2, 3);
 #elif MLKEM_K == 3
-  poly_getnoise_eta1_4x(skpv.vec + 0, skpv.vec + 1, skpv.vec + 2, e.vec + 0,
-                        noiseseed, 0, 1, 2, 3);
-  poly_getnoise_eta1_4x(e.vec + 1, e.vec + 2, pkpv.vec + 0, pkpv.vec + 1,
-                        noiseseed, 4, 5, 6, 7);
+  poly_getnoise_eta1_4x(sk->skpv.vec + 0, sk->skpv.vec + 1, sk->skpv.vec + 2,
+                        e.vec + 0, noiseseed, 0, 1, 2, 3);
+  poly_getnoise_eta1_4x(e.vec + 1, e.vec + 2, pk->pkpv.vec + 0,
+                        pk->pkpv.vec + 1, noiseseed, 4, 5, 6, 7);
 #elif MLKEM_K == 4
-  poly_getnoise_eta1_4x(skpv.vec + 0, skpv.vec + 1, skpv.vec + 2, skpv.vec + 3,
-                        noiseseed, 0, 1, 2, 3);
+  poly_getnoise_eta1_4x(sk->skpv.vec + 0, sk->skpv.vec + 1, sk->skpv.vec + 2,
+                        sk->skpv.vec + 3, noiseseed, 0, 1, 2, 3);
   poly_getnoise_eta1_4x(e.vec + 0, e.vec + 1, e.vec + 2, e.vec + 3, noiseseed,
                         4, 5, 6, 7);
 #endif
 
-  polyvec_ntt(&skpv);
+  polyvec_ntt(&sk->skpv);
   polyvec_ntt(&e);
 
-  polyvec_mulcache_compute(&skpv_cache, &skpv);
+  polyvec_mulcache_compute(&skpv_cache, &sk->skpv);
 
   // matrix-vector multiplication
   for (i = 0; i < MLKEM_K; i++) {
-    polyvec_basemul_acc_montgomery_cached(&pkpv.vec[i], &a[i], &skpv,
-                                          &skpv_cache);
-    poly_tomont(&pkpv.vec[i]);
+    polyvec_basemul_acc_montgomery_cached(&pk->pkpv.vec[i], &pk->at[i],
+                                          &sk->skpv, &skpv_cache);
+    poly_tomont(&pk->pkpv.vec[i]);
   }
 
   // Arithmetic cannot overflow, see static assertion at the top
-  polyvec_add(&pkpv, &e);
-  polyvec_reduce(&pkpv);
-  polyvec_reduce(&skpv);
+  polyvec_add(&pk->pkpv, &e);
+  polyvec_reduce(&pk->pkpv);
+  polyvec_reduce(&sk->skpv);
 
-  pack_sk(sk, &skpv);
-  pack_pk(pk, &pkpv, publicseed);
+  memcpy(pk->seed, publicseed, MLKEM_SYMBYTES);
+  // tranpose matrix as encapsulation requires the transpose
+  transpose_matrix(pk->at);
 }
 
 /*************************************************
@@ -385,17 +336,14 @@ STATIC_ASSERT(INVNTT_BOUND + MLKEM_ETA2 + MLKEM_Q < INT16_MAX,
 
 void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
                 const uint8_t m[MLKEM_INDCPA_MSGBYTES],
-                const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
+                const mlkem_indcpa_public_key *pk,
                 const uint8_t coins[MLKEM_SYMBYTES]) {
   unsigned int i;
-  uint8_t seed[MLKEM_SYMBYTES] ALIGN;
-  polyvec sp, pkpv, ep, at[MLKEM_K], b;
+  polyvec sp, ep, b;
   polyvec_mulcache sp_cache;
   poly v, k, epp;
 
-  unpack_pk(&pkpv, seed, pk);
   poly_frommsg(&k, m);
-  gen_matrix(at, seed, 1 /* transpose */);
 
 #if MLKEM_K == 2
   poly_getnoise_eta1122_4x(sp.vec + 0, sp.vec + 1, ep.vec + 0, ep.vec + 1,
@@ -419,10 +367,11 @@ void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
 
   // matrix-vector multiplication
   for (i = 0; i < MLKEM_K; i++) {
-    polyvec_basemul_acc_montgomery_cached(&b.vec[i], &at[i], &sp, &sp_cache);
+    polyvec_basemul_acc_montgomery_cached(&b.vec[i], &pk->at[i], &sp,
+                                          &sp_cache);
   }
 
-  polyvec_basemul_acc_montgomery_cached(&v, &pkpv, &sp, &sp_cache);
+  polyvec_basemul_acc_montgomery_cached(&v, &pk->pkpv, &sp, &sp_cache);
 
   polyvec_invntt_tomont(&b);
   poly_invntt_tomont(&v);
@@ -457,15 +406,14 @@ STATIC_ASSERT(INVNTT_BOUND + MLKEM_Q < INT16_MAX, indcpa_dec_bound_0)
 
 void indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
                 const uint8_t c[MLKEM_INDCPA_BYTES],
-                const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES]) {
-  polyvec b, skpv;
+                const mlkem_indcpa_secret_key *sk) {
+  polyvec b;
   poly v, sb;
 
   unpack_ciphertext(&b, &v, c);
-  unpack_sk(&skpv, sk);
 
   polyvec_ntt(&b);
-  polyvec_basemul_acc_montgomery(&sb, &skpv, &b);
+  polyvec_basemul_acc_montgomery(&sb, &sk->skpv, &b);
   poly_invntt_tomont(&sb);
 
   // Arithmetic cannot overflow, see static assertion at the top

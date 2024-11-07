@@ -3,7 +3,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include "indcpa.h"
 #include "params.h"
 #include "randombytes.h"
 #include "symmetric.h"
@@ -60,6 +59,54 @@ static int check_sk(const uint8_t sk[MLKEM_SECRETKEYBYTES]) {
   return 0;
 }
 
+
+int crypto_kem_serialize_sk(uint8_t sks[MLKEM_SECRETKEYBYTES],
+                            const mlkem_secret_key *sk) {
+  indcpa_serialize_sk(sks, &sk->indcpa_sk);
+  indcpa_serialize_pk(sks + MLKEM_INDCPA_SECRETKEYBYTES, &sk->indcpa_pk);
+  memcpy(sks + MLKEM_INDCPA_SECRETKEYBYTES + MLKEM_INDCPA_PUBLICKEYBYTES,
+         sk->hpk, MLKEM_SYMBYTES);
+  memcpy(sks + MLKEM_INDCPA_SECRETKEYBYTES + MLKEM_INDCPA_PUBLICKEYBYTES +
+             MLKEM_SYMBYTES,
+         sk->z, MLKEM_SYMBYTES);
+  return 0;
+}
+
+int crypto_kem_deserialize_sk(mlkem_secret_key *sk,
+                              const uint8_t sks[MLKEM_SECRETKEYBYTES]) {
+  if (check_sk(sks)) {
+    return -1;
+  }
+  indcpa_deserialize_sk(&sk->indcpa_sk, sks);
+  indcpa_deserialize_pk(&sk->indcpa_pk, sks + MLKEM_INDCPA_SECRETKEYBYTES);
+  memcpy(sk->hpk,
+         sks + MLKEM_INDCPA_SECRETKEYBYTES + MLKEM_INDCPA_PUBLICKEYBYTES,
+         MLKEM_SYMBYTES);
+  memcpy(sk->z,
+         sks + MLKEM_INDCPA_SECRETKEYBYTES + MLKEM_INDCPA_PUBLICKEYBYTES +
+             MLKEM_SYMBYTES,
+         MLKEM_SYMBYTES);
+
+  return 0;
+}
+
+int crypto_kem_serialize_pk(uint8_t pks[MLKEM_PUBLICKEYBYTES],
+                            const mlkem_public_key *pk) {
+  indcpa_serialize_pk(pks, &pk->indcpa_pk);
+  return 0;
+}
+
+int crypto_kem_deserialize_pk(mlkem_public_key *pk,
+                              const uint8_t pks[MLKEM_PUBLICKEYBYTES]) {
+  if (check_pk(pks)) {
+    return -1;
+  }
+  indcpa_deserialize_pk(&pk->indcpa_pk, pks);
+  hash_h(pk->hpk, pks, MLKEM_PUBLICKEYBYTES);
+  return 0;
+}
+
+
 /*************************************************
  * Name:        crypto_kem_keypair_derand
  *
@@ -76,14 +123,28 @@ static int check_sk(const uint8_t sk[MLKEM_SECRETKEYBYTES]) {
  **
  * Returns 0 (success)
  **************************************************/
-int crypto_kem_keypair_derand(uint8_t *pk, uint8_t *sk, const uint8_t *coins) {
-  indcpa_keypair_derand(pk, sk, coins);
-  memcpy(sk + MLKEM_INDCPA_SECRETKEYBYTES, pk, MLKEM_PUBLICKEYBYTES);
-  hash_h(sk + MLKEM_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, pk,
-         MLKEM_PUBLICKEYBYTES);
-  /* Value z for pseudo-random output on reject */
-  memcpy(sk + MLKEM_SECRETKEYBYTES - MLKEM_SYMBYTES, coins + MLKEM_SYMBYTES,
-         MLKEM_SYMBYTES);
+int crypto_kem_keypair_derand(mlkem_public_key *pk, mlkem_secret_key *sk,
+                              const uint8_t *coins) {
+  indcpa_keypair_derand(&sk->indcpa_pk, &sk->indcpa_sk, coins);
+
+  // pre-compute H(pk)
+  uint8_t pks[MLKEM_PUBLICKEYBYTES];
+  indcpa_serialize_pk(pks, &sk->indcpa_pk);
+  hash_h(sk->hpk, pks, MLKEM_PUBLICKEYBYTES);
+
+
+  // copy over indcpa pk and H(pk) to public key
+  // pk is NULL during deseralization before decaps as the pk is not needed
+  if (pk != NULL) {
+    memcpy(&pk->indcpa_pk, &sk->indcpa_pk, sizeof(mlkem_indcpa_public_key));
+    memcpy(pk->hpk, sk->hpk, MLKEM_SYMBYTES);
+  }
+
+  // Value z for pseudo-random output on reject
+  memcpy(sk->z, coins + MLKEM_SYMBYTES, MLKEM_SYMBYTES);
+
+  // seed to regenerate whole secret key
+  memcpy(sk->seed, coins, MLKEM_SYMBYTES);
   return 0;
 }
 
@@ -100,7 +161,7 @@ int crypto_kem_keypair_derand(uint8_t *pk, uint8_t *sk, const uint8_t *coins) {
  *
  * Returns 0 (success)
  **************************************************/
-int crypto_kem_keypair(uint8_t *pk, uint8_t *sk) {
+int crypto_kem_keypair(mlkem_public_key *pk, mlkem_secret_key *sk) {
   uint8_t coins[2 * MLKEM_SYMBYTES] ALIGN;
   randombytes(coins, 2 * MLKEM_SYMBYTES);
   crypto_kem_keypair_derand(pk, sk, coins);
@@ -123,27 +184,23 @@ int crypto_kem_keypair(uint8_t *pk, uint8_t *sk) {
  *                (an already allocated array filled with MLKEM_SYMBYTES random
  *bytes)
  **
- * Returns 0 on success, and -1 if the public key modulus check (see Section 7.2
- * of FIPS203) fails.
+ * Returns 0 (success)
  **************************************************/
-int crypto_kem_enc_derand(uint8_t *ct, uint8_t *ss, const uint8_t *pk,
+int crypto_kem_enc_derand(uint8_t ct[MLKEM_CIPHERTEXTBYTES],
+                          uint8_t ss[MLKEM_SSBYTES], const mlkem_public_key *pk,
                           const uint8_t *coins) {
   uint8_t buf[2 * MLKEM_SYMBYTES] ALIGN;
   /* Will contain key, coins */
   uint8_t kr[2 * MLKEM_SYMBYTES] ALIGN;
 
-  if (check_pk(pk)) {
-    return -1;
-  }
-
   memcpy(buf, coins, MLKEM_SYMBYTES);
 
   /* Multitarget countermeasure for coins + contributory KEM */
-  hash_h(buf + MLKEM_SYMBYTES, pk, MLKEM_PUBLICKEYBYTES);
+  memcpy(buf + MLKEM_SYMBYTES, pk->hpk, MLKEM_SYMBYTES);
   hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
 
   /* coins are in kr+MLKEM_SYMBYTES */
-  indcpa_enc(ct, buf, pk, kr + MLKEM_SYMBYTES);
+  indcpa_enc(ct, buf, &pk->indcpa_pk, kr + MLKEM_SYMBYTES);
 
   memcpy(ss, kr, MLKEM_SYMBYTES);
   return 0;
@@ -162,10 +219,10 @@ int crypto_kem_enc_derand(uint8_t *ct, uint8_t *ss, const uint8_t *pk,
  *              - const uint8_t *pk: pointer to input public key
  *                (an already allocated array of MLKEM_PUBLICKEYBYTES bytes)
  *
- * Returns 0 on success, and -1 if the public key modulus check (see Section 7.2
- * of FIPS203) fails.
+ * Returns 0 (success)
  **************************************************/
-int crypto_kem_enc(uint8_t *ct, uint8_t *ss, const uint8_t *pk) {
+int crypto_kem_enc(uint8_t ct[MLKEM_CIPHERTEXTBYTES], uint8_t ss[MLKEM_SSBYTES],
+                   const mlkem_public_key *pk) {
   uint8_t coins[MLKEM_SYMBYTES] ALIGN;
   randombytes(coins, MLKEM_SYMBYTES);
   return crypto_kem_enc_derand(ct, ss, pk, coins);
@@ -184,37 +241,32 @@ int crypto_kem_enc(uint8_t *ct, uint8_t *ss, const uint8_t *pk) {
  *              - const uint8_t *sk: pointer to input private key
  *                (an already allocated array of MLKEM_SECRETKEYBYTES bytes)
  *
- * Returns 0 on success, and -1 if the secret key hash check (see Section 7.3 of
- * FIPS203) fails.
+ * Returns 0 (success)
  *
  * On failure, ss will contain a pseudo-random value.
  **************************************************/
-int crypto_kem_dec(uint8_t *ss, const uint8_t *ct, const uint8_t *sk) {
+int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
+                   const uint8_t ct[MLKEM_CIPHERTEXTBYTES],
+                   const mlkem_secret_key *sk) {
   int fail;
   uint8_t buf[2 * MLKEM_SYMBYTES] ALIGN;
   /* Will contain key, coins */
   uint8_t kr[2 * MLKEM_SYMBYTES] ALIGN;
   uint8_t cmp[MLKEM_CIPHERTEXTBYTES + MLKEM_SYMBYTES] ALIGN;
-  const uint8_t *pk = sk + MLKEM_INDCPA_SECRETKEYBYTES;
 
-  if (check_sk(sk)) {
-    return -1;
-  }
-
-  indcpa_dec(buf, ct, sk);
+  indcpa_dec(buf, ct, &sk->indcpa_sk);
 
   /* Multitarget countermeasure for coins + contributory KEM */
-  memcpy(buf + MLKEM_SYMBYTES, sk + MLKEM_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES,
-         MLKEM_SYMBYTES);
+  memcpy(buf + MLKEM_SYMBYTES, sk->hpk, MLKEM_SYMBYTES);
   hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
 
   /* coins are in kr+MLKEM_SYMBYTES */
-  indcpa_enc(cmp, buf, pk, kr + MLKEM_SYMBYTES);
+  indcpa_enc(cmp, buf, &sk->indcpa_pk, kr + MLKEM_SYMBYTES);
 
   fail = verify(ct, cmp, MLKEM_CIPHERTEXTBYTES);
 
   /* Compute rejection key */
-  rkprf(ss, sk + MLKEM_SECRETKEYBYTES - MLKEM_SYMBYTES, ct);
+  rkprf(ss, sk->z, ct);
 
   /* Copy true key to return buffer if fail is false */
   cmov(ss, kr, MLKEM_SYMBYTES, !fail);
