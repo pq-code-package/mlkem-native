@@ -72,12 +72,12 @@ runs:
       run: |
         ./scripts/tests bench -c ${{ inputs.perf }} --cross-prefix="${{ inputs.cross_prefix }}" \
               --cflags="${{ inputs.cflags }}" --arch-flags="${{ inputs.archflags }}" \
-              $([[ ${{ inputs.opt }} == "false" ]] && echo "--no-opt")  \
+              --opt=$([[ ${{ inputs.opt }} == "false" ]] && echo "no_opt" || echo "opt")  \
               -v --output=output.json ${{ inputs.bench_extra_args }}
 
         ./scripts/tests bench --components -c ${{ inputs.perf }} --cross-prefix="${{ inputs.cross_prefix }}" \
               --cflags="${{ inputs.cflags }}" --arch-flags="${{ inputs.archflags }}" \
-              $([[ ${{ inputs.opt }} == "false" ]] && echo "--no-opt")  \
+              --opt=$([[ ${{ inputs.opt }} == "false" ]] && echo "no_opt" || echo "opt")  \
               -v --output=output.json ${{ inputs.bench_extra_args }}
     - name: Check namespace
       shell: ${{ env.SHELL }}

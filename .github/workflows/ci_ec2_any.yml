@@ -40,12 +40,12 @@ on:
           - none
         default: all
       opt:
-        description: Indicates to compile and run the opt/non-opt binary or both.
+        description: Determine whether to compile and run the opt/no_opt binary or both.
         type: choice
         options:
           - all
           - opt
-          - non-opt
+          - no_opt
         default: all
       cbmc:
         description: Whether to run CBMC proofs
