@@ -32,8 +32,11 @@ ENVIRONMENT OR TO PROTECT ANY SENSITIVE DATA.** Once we have the first stable ve
 
 #### Verification
 
-Mostly TODO. We apply CBMC to verify the absence of UB in a few basic C routines, but the bulk of the C verification
+Mostly TODO. We apply [CBMC](https://github.com/diffblue/cbmc) to verify type-safety and the absence of
+UB in a few basic C routines, but the bulk of the C verification
 is outstanding. No formal verification has yet been applied to the backends.
+
+See the [Proof README](cbmc/proofs/README.md) and [Proof Guide](cbmc/proofs/proof_guide.md) for more details.
 
 ### Getting started
 
