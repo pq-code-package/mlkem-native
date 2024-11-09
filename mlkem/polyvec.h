@@ -130,7 +130,7 @@ REQUIRES(IS_FRESH(b_cache, sizeof(polyvec_mulcache)))
 REQUIRES(FORALL(int, k1, 0, MLKEM_K - 1,
  ARRAY_IN_BOUNDS(int, k2, 0, MLKEM_N - 1,
    a->vec[k1].coeffs, -(MLKEM_Q - 1), (MLKEM_Q - 1))))
-ASSIGNS(OBJECT_WHOLE(r));
+ASSIGNS(OBJECT_UPTO(r, sizeof(poly)));
 // clang-format on
 
 // REF-CHANGE: This function does not exist in the reference implementation

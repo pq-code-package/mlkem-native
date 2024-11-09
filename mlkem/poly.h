@@ -570,6 +570,7 @@ ASSIGNS(OBJECT_WHOLE(r))
 ENSURES(ARRAY_IN_BOUNDS(int, k, 0, MLKEM_N - 1, r->coeffs, -3 * HALF_Q + 1, 3 * HALF_Q - 1));
 // clang-format on
 
+// clang-format off
 #define poly_tomont MLKEM_NAMESPACE(poly_tomont)
 /*************************************************
  * Name:        poly_tomont
@@ -582,9 +583,8 @@ ENSURES(ARRAY_IN_BOUNDS(int, k, 0, MLKEM_N - 1, r->coeffs, -3 * HALF_Q + 1, 3 * 
  * Arguments:   - poly *r: pointer to input/output polynomial
  **************************************************/
 void poly_tomont(poly *r)
-    // clang-format off
 REQUIRES(IS_FRESH(r, sizeof(poly)))
-ASSIGNS(OBJECT_WHOLE(r))
+ASSIGNS(OBJECT_UPTO(r, sizeof(poly)))
 ENSURES(ARRAY_IN_BOUNDS(int, k, 0, MLKEM_N - 1, r->coeffs, -(MLKEM_Q - 1), (MLKEM_Q - 1)));
 // clang-format on
 
