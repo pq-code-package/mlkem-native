@@ -443,16 +443,38 @@ void poly_getnoise_eta1_4x(poly *r0, poly *r1, poly *r2, poly *r3,
                            const uint8_t seed[MLKEM_SYMBYTES], uint8_t nonce0,
                            uint8_t nonce1, uint8_t nonce2,
                            uint8_t nonce3)  // clang-format off
-REQUIRES(IS_FRESH(r0, sizeof(poly)))
-REQUIRES(IS_FRESH(r1, sizeof(poly)))
-REQUIRES(IS_FRESH(r2, sizeof(poly)))
-REQUIRES(IS_FRESH(r3, sizeof(poly)))
 REQUIRES(IS_FRESH(seed, MLKEM_SYMBYTES))
-ASSIGNS(OBJECT_WHOLE(r0), OBJECT_WHOLE(r1), OBJECT_WHOLE(r2), OBJECT_WHOLE(r3))
-ENSURES(                                                                          \
-    ARRAY_IN_BOUNDS(int, k0, 0, MLKEM_N - 1, r0->coeffs, -MLKEM_ETA1, MLKEM_ETA1) \
- && ARRAY_IN_BOUNDS(int, k1, 0, MLKEM_N - 1, r1->coeffs, -MLKEM_ETA1, MLKEM_ETA1) \
- && ARRAY_IN_BOUNDS(int, k2, 0, MLKEM_N - 1, r2->coeffs, -MLKEM_ETA1, MLKEM_ETA1) \
+/* Depending on MLKEM_K, the pointers passed to this function belong
+   to the same objects, so we cannot use IS_FRESH for r0-r3.
+
+   Instead, we specify the various cases that occur in a disjunction,
+   and take care to use OBJECT_UPTO rather than OBJECT_WHOLE when
+   specifying the function's assignments.
+
+   NOTE: Somehow it is important to use IS_FRESH() last in the
+     conjunctions defining each case.
+*/
+REQUIRES(
+    /* Case A: r0, r1 consecutive, r2, r3 consecutive */
+  (r1 == r0 + 1 && r3 == r2 + 1 && !SAME_OBJECT(r0, r2) &&
+   IS_FRESH(r0, 2 * sizeof(poly)) && IS_FRESH(r2, 2 * sizeof(poly)))
+ ||
+    /* Case B: r0, r1, r2, r3 consecutive */
+ (r1 == r0 + 1 && r2 == r0 + 2 && r3 == r0 + 3 &&
+  IS_FRESH(r0, 4 * sizeof(poly)))
+ ||
+    /* Case C: r0, r1, r2 consecutive */
+ (r1 == r0 + 1 && r2 == r0 + 2 && !SAME_OBJECT(r3, r0) &&
+  IS_FRESH(r0, 3 * sizeof(poly)) && IS_FRESH(r3, 1 * sizeof(poly)))
+)
+ASSIGNS(OBJECT_UPTO(r0, sizeof(poly)))
+ASSIGNS(OBJECT_UPTO(r1, sizeof(poly)))
+ASSIGNS(OBJECT_UPTO(r2, sizeof(poly)))
+ASSIGNS(OBJECT_UPTO(r3, sizeof(poly)))
+ENSURES(
+    ARRAY_IN_BOUNDS(int, k0, 0, MLKEM_N - 1, r0->coeffs, -MLKEM_ETA1, MLKEM_ETA1)
+ && ARRAY_IN_BOUNDS(int, k1, 0, MLKEM_N - 1, r1->coeffs, -MLKEM_ETA1, MLKEM_ETA1)
+ && ARRAY_IN_BOUNDS(int, k2, 0, MLKEM_N - 1, r2->coeffs, -MLKEM_ETA1, MLKEM_ETA1)
  && ARRAY_IN_BOUNDS(int, k3, 0, MLKEM_N - 1, r3->coeffs, -MLKEM_ETA1, MLKEM_ETA1));
 // clang-format on
 
@@ -494,12 +516,34 @@ void poly_getnoise_eta2_4x(poly *r0, poly *r1, poly *r2, poly *r3,
                            const uint8_t seed[MLKEM_SYMBYTES], uint8_t nonce0,
                            uint8_t nonce1, uint8_t nonce2,
                            uint8_t nonce3)  // clang-format off
-REQUIRES(IS_FRESH(r0, sizeof(poly)))
-REQUIRES(IS_FRESH(r1, sizeof(poly)))
-REQUIRES(IS_FRESH(r2, sizeof(poly)))
-REQUIRES(IS_FRESH(r3, sizeof(poly)))
 REQUIRES(IS_FRESH(seed, MLKEM_SYMBYTES))
-ASSIGNS(OBJECT_WHOLE(r0), OBJECT_WHOLE(r1), OBJECT_WHOLE(r2), OBJECT_WHOLE(r3))
+/* Depending on MLKEM_K, the pointers passed to this function belong
+   to the same objects, so we cannot use IS_FRESH for r0-r3.
+
+   Instead, we specify the various cases that occur in a disjunction,
+   and take care to use OBJECT_UPTO rather than OBJECT_WHOLE when
+   specifying the function's assignments.
+
+   NOTE: Somehow it is important to use IS_FRESH() last in the
+     conjunctions defining each case.
+*/
+REQUIRES(
+    /* Case A: r0, r1 consecutive, r2, r3 consecutive */
+  (r1 == r0 + 1 && r3 == r2 + 1 && !SAME_OBJECT(r0, r2) &&
+   IS_FRESH(r0, 2 * sizeof(poly)) && IS_FRESH(r2, 2 * sizeof(poly)))
+ ||
+    /* Case B: r0, r1, r2, r3 consecutive */
+ (r1 == r0 + 1 && r2 == r0 + 2 && r3 == r0 + 3 &&
+  IS_FRESH(r0, 4 * sizeof(poly)))
+ ||
+    /* Case C: r0, r1, r2 consecutive */
+ (r1 == r0 + 1 && r2 == r0 + 2 && !SAME_OBJECT(r3, r0) &&
+  IS_FRESH(r0, 3 * sizeof(poly)) && IS_FRESH(r3, 1 * sizeof(poly)))
+)
+ASSIGNS(OBJECT_UPTO(r0, sizeof(poly)))
+ASSIGNS(OBJECT_UPTO(r1, sizeof(poly)))
+ASSIGNS(OBJECT_UPTO(r2, sizeof(poly)))
+ASSIGNS(OBJECT_UPTO(r3, sizeof(poly)))
 ENSURES(                                                                          \
     ARRAY_IN_BOUNDS(int, k0, 0, MLKEM_N - 1, r0->coeffs, -MLKEM_ETA2, MLKEM_ETA2) \
  && ARRAY_IN_BOUNDS(int, k1, 0, MLKEM_N - 1, r1->coeffs, -MLKEM_ETA2, MLKEM_ETA2) \
@@ -524,12 +568,34 @@ void poly_getnoise_eta1122_4x(poly *r0, poly *r1, poly *r2, poly *r3,
                               const uint8_t seed[MLKEM_SYMBYTES],
                               uint8_t nonce0, uint8_t nonce1, uint8_t nonce2,
                               uint8_t nonce3)  // clang-format off
-REQUIRES(IS_FRESH(r0, sizeof(poly)))
-REQUIRES(IS_FRESH(r1, sizeof(poly)))
-REQUIRES(IS_FRESH(r2, sizeof(poly)))
-REQUIRES(IS_FRESH(r3, sizeof(poly)))
 REQUIRES(IS_FRESH(seed, MLKEM_SYMBYTES))
-ASSIGNS(OBJECT_WHOLE(r0), OBJECT_WHOLE(r1), OBJECT_WHOLE(r2), OBJECT_WHOLE(r3))
+/* Depending on MLKEM_K, the pointers passed to this function belong
+   to the same objects, so we cannot use IS_FRESH for r0-r3.
+
+   Instead, we specify the various cases that occur in a disjunction,
+   and take care to use OBJECT_UPTO rather than OBJECT_WHOLE when
+   specifying the function's assignments.
+
+   NOTE: Somehow it is important to use IS_FRESH() last in the
+     conjunctions defining each case.
+*/
+REQUIRES(
+    /* Case A: r0, r1 consecutive, r2, r3 consecutive */
+  (r1 == r0 + 1 && r3 == r2 + 1 && !SAME_OBJECT(r0, r2) &&
+   IS_FRESH(r0, 2 * sizeof(poly)) && IS_FRESH(r2, 2 * sizeof(poly)))
+ ||
+    /* Case B: r0, r1, r2, r3 consecutive */
+ (r1 == r0 + 1 && r2 == r0 + 2 && r3 == r0 + 3 &&
+  IS_FRESH(r0, 4 * sizeof(poly)))
+ ||
+    /* Case C: r0, r1, r2 consecutive */
+ (r1 == r0 + 1 && r2 == r0 + 2 && !SAME_OBJECT(r3, r0) &&
+  IS_FRESH(r0, 3 * sizeof(poly)) && IS_FRESH(r3, 1 * sizeof(poly)))
+)
+ASSIGNS(OBJECT_UPTO(r0, sizeof(poly)))
+ASSIGNS(OBJECT_UPTO(r1, sizeof(poly)))
+ASSIGNS(OBJECT_UPTO(r2, sizeof(poly)))
+ASSIGNS(OBJECT_UPTO(r3, sizeof(poly)))
 ENSURES(                                                                          \
     ARRAY_IN_BOUNDS(int, k0, 0, MLKEM_N - 1, r0->coeffs, -MLKEM_ETA1, MLKEM_ETA1) \
  && ARRAY_IN_BOUNDS(int, k1, 0, MLKEM_N - 1, r1->coeffs, -MLKEM_ETA1, MLKEM_ETA1) \
