@@ -216,4 +216,24 @@ ENSURES(FORALL(int, j, 0, MLKEM_K - 1,
 ASSIGNS(OBJECT_WHOLE(r));
 // clang-format on
 
+// clang-format off
+#define polyvec_tomont MLKEM_NAMESPACE(polyvec_tomont)
+/*************************************************
+ * Name:        polyvec_tomont
+ *
+ * Description: Inplace conversion of all coefficients of a polynomial
+ *              vector from normal domain to Montgomery domain
+ *
+ *              Bounds: Output < q in absolute value.
+ *
+ **************************************************/
+void polyvec_tomont(polyvec *r)
+  REQUIRES(IS_FRESH(r, sizeof(polyvec)))
+  ASSIGNS(OBJECT_UPTO(r, sizeof(polyvec)))
+  ENSURES(FORALL(int, j, 0, MLKEM_K - 1,
+    ARRAY_IN_BOUNDS(int, k, 0, MLKEM_N - 1,
+                    r->vec[j].coeffs, -(MLKEM_Q - 1), (MLKEM_Q - 1))))
+  ASSIGNS(OBJECT_WHOLE(r));
+// clang-format on
+
 #endif
