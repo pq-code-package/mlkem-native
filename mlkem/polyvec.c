@@ -355,3 +355,10 @@ void polyvec_add(polyvec *r, const polyvec *b) {
     poly_add(&r->vec[i], &b->vec[i]);
   }
 }
+
+void polyvec_tomont(polyvec *r) {
+  unsigned int i;
+  for (i = 0; i < MLKEM_K; i++) {
+    poly_tomont(&r->vec[i]);
+  }
+}

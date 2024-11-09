@@ -17,12 +17,6 @@ void poly_ntt(poly *r);
 #define poly_invntt_tomont MLKEM_NAMESPACE(poly_invntt_tomont)
 void poly_invntt_tomont(poly *r);
 
-// Absolute exclusive upper bound for the output of the inverse NTT
-#define INVNTT_BOUND 8 * MLKEM_Q
-
-// Absolute exclusive upper bound for the output of the forward NTT
-#define NTT_BOUND 8 * MLKEM_Q
-
 #define basemul_cached MLKEM_NAMESPACE(basemul_cached)
 /************************************************************
  * Name: basemul_cached

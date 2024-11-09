@@ -88,10 +88,25 @@ ASSIGNS(OBJECT_UPTO(output, outlen));
 
 /* One-stop SHA3-256 shop */
 #define sha3_256 FIPS202_NAMESPACE(sha3_256)
-void sha3_256(uint8_t *output, const uint8_t *input, size_t inlen);
+void sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
+    // clang-format off
+REQUIRES(IS_FRESH(input, inlen))
+REQUIRES(IS_FRESH(output, 32))
+ASSIGNS(OBJECT_WHOLE(output));
+// clang-format on
 
 /* One-stop SHA3-512 shop */
 #define sha3_512 FIPS202_NAMESPACE(sha3_512)
-void sha3_512(uint8_t *output, const uint8_t *input, size_t inlen);
+void sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
+    // clang-format off
+REQUIRES(
+    /* Case A: Aliasing between input and output */
+    (output == input && inlen <= 64 && IS_FRESH(output, 64))
+ ||
+    /* Case B: Disjoint input and output */
+    (IS_FRESH(input, inlen) && IS_FRESH(output, 64))
+)
+ASSIGNS(OBJECT_WHOLE(output));
+// clang-format on
 
 #endif

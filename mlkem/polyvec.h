@@ -6,6 +6,12 @@
 #include "params.h"
 #include "poly.h"
 
+// Absolute exclusive upper bound for the output of the inverse NTT
+#define INVNTT_BOUND (8 * MLKEM_Q)
+
+// Absolute exclusive upper bound for the output of the forward NTT
+#define NTT_BOUND (8 * MLKEM_Q)
+
 typedef struct {
   poly vec[MLKEM_K];
 } ALIGN polyvec;
@@ -88,8 +94,16 @@ ENSURES(FORALL(int, k0, 0, MLKEM_K - 1,
                         r->vec[k0].coeffs, 0, 4095)))
 ASSIGNS(OBJECT_WHOLE(r));  // clang-format on
 
+// clang-format off
 #define polyvec_ntt MLKEM_NAMESPACE(polyvec_ntt)
-void polyvec_ntt(polyvec *r);
+void polyvec_ntt(polyvec *r)
+  REQUIRES(IS_FRESH(r, sizeof(polyvec)))
+  ASSIGNS(OBJECT_WHOLE(r))
+  ENSURES(FORALL(int, j, 0, MLKEM_K - 1,
+    ARRAY_IN_BOUNDS(int, k, 0, MLKEM_N - 1,
+                    r->vec[j].coeffs, -NTT_BOUND + 1, NTT_BOUND - 1)));
+// clang-format on
+
 #define polyvec_invntt_tomont MLKEM_NAMESPACE(polyvec_invntt_tomont)
 void polyvec_invntt_tomont(polyvec *r);
 
@@ -130,7 +144,7 @@ REQUIRES(IS_FRESH(b_cache, sizeof(polyvec_mulcache)))
 REQUIRES(FORALL(int, k1, 0, MLKEM_K - 1,
  ARRAY_IN_BOUNDS(int, k2, 0, MLKEM_N - 1,
    a->vec[k1].coeffs, -(MLKEM_Q - 1), (MLKEM_Q - 1))))
-ASSIGNS(OBJECT_WHOLE(r));
+ASSIGNS(OBJECT_UPTO(r, sizeof(poly)));
 // clang-format on
 
 // REF-CHANGE: This function does not exist in the reference implementation
@@ -214,6 +228,26 @@ ENSURES(FORALL(int, j, 0, MLKEM_K - 1,
           FORALL(int, k, 0, MLKEM_N - 1,
             r->vec[j].coeffs[k] == OLD(*r).vec[j].coeffs[k] + b->vec[j].coeffs[k])))
 ASSIGNS(OBJECT_WHOLE(r));
+// clang-format on
+
+// clang-format off
+#define polyvec_tomont MLKEM_NAMESPACE(polyvec_tomont)
+/*************************************************
+ * Name:        polyvec_tomont
+ *
+ * Description: Inplace conversion of all coefficients of a polynomial
+ *              vector from normal domain to Montgomery domain
+ *
+ *              Bounds: Output < q in absolute value.
+ *
+ **************************************************/
+void polyvec_tomont(polyvec *r)
+  REQUIRES(IS_FRESH(r, sizeof(polyvec)))
+  ASSIGNS(OBJECT_UPTO(r, sizeof(polyvec)))
+  ENSURES(FORALL(int, j, 0, MLKEM_K - 1,
+    ARRAY_IN_BOUNDS(int, k, 0, MLKEM_N - 1,
+                    r->vec[j].coeffs, -(MLKEM_Q - 1), (MLKEM_Q - 1))))
+  ASSIGNS(OBJECT_WHOLE(r));
 // clang-format on
 
 #endif

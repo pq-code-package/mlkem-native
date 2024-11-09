@@ -61,6 +61,8 @@
 #define OBJECT_FROM(...) __CPROVER_object_from(__VA_ARGS__)
 #define OBJECT_UPTO(...) __CPROVER_object_upto(__VA_ARGS__)
 
+#define SAME_OBJECT(...) __CPROVER_same_object(__VA_ARGS__)
+
 // Pointer-related predicates
 // https://diffblue.github.io/cbmc/contracts-memory-predicates.html
 #define IS_FRESH(...) __CPROVER_is_fresh(__VA_ARGS__)
