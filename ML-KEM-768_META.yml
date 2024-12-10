@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: Apache-2.0
+
+name: ML-KEM-768
+type: kem
+claimed-nist-level: 3
+claimed-security: IND-CCA2
+length-public-key: 1184
+length-ciphertext: 1088
+length-secret-key: 2400
+length-shared-secret: 32
+nistkat-sha256: 5352539586b6c3df58be6158a6250aeff402bd73060b0a3de68850ac074c17c3
+testvectors-sha256: 667c8ca2ca93729c0df6ff24588460bad1bbdbfb64ece0fe8563852a7ff348c6
+principal-submitters:
+  - Peter Schwabe
+auxiliary-submitters:
+  - Roberto Avanzi
+  - Joppe Bos
+  - Léo Ducas
+  - Eike Kiltz
+  - Tancrède Lepoint
+  - Vadim Lyubashevsky
+  - John M. Schanck
+  - Gregor Seiler
+  - Damien Stehlé
+implementations:
+  - name: ref
+    version: FIPS203
+    folder_name: mlkem
+    compile_opts: -DMLKEM_K=3
+    signature_keypair: PQCP_MLKEM_NATIVE_MLKEM768_C_keypair
+    signature_enc: PQCP_MLKEM_NATIVE_MLKEM768_C_enc
+    signature_dec: PQCP_MLKEM_NATIVE_MLKEM768_C_dec
+    sources: LICENSE api.h cbd.c cbd.h cbmc.h common.h indcpa.c indcpa.h kem.c kem.h ntt.c ntt.h params.h poly.c poly.h polyvec.c polyvec.h reduce.c reduce.h rej_uniform.c rej_uniform.h symmetric-shake.c symmetric.h verify.c verify.h zetas.c sys/config.h sys/cpucap.h native/arith_native.h debug

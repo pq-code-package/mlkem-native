@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: Apache-2.0
+
+name: ML-KEM-512
+type: kem
+claimed-nist-level: 1
+claimed-security: IND-CCA2
+length-public-key: 800
+length-ciphertext: 768
+length-secret-key: 1632
+length-shared-secret: 32
+nistkat-sha256: c70041a761e01cd6426fa60e9fd6a4412c2be817386c8d0f3334898082512782
+testvectors-sha256: 6730bb552c22d9d2176ffb5568e48eb30952cf1f065073ec5f9724f6a3c6ea85
+principal-submitters:
+  - Peter Schwabe
+auxiliary-submitters:
+  - Roberto Avanzi
+  - Joppe Bos
+  - Léo Ducas
+  - Eike Kiltz
+  - Tancrède Lepoint
+  - Vadim Lyubashevsky
+  - John M. Schanck
+  - Gregor Seiler
+  - Damien Stehlé
+implementations:
+  - name: ref
+    version: FIPS203
+    folder_name: mlkem
+    compile_opts: -DMLKEM_K=2
+    signature_keypair: PQCP_MLKEM_NATIVE_MLKEM512_C_keypair
+    signature_enc: PQCP_MLKEM_NATIVE_MLKEM512_C_enc
+    signature_dec: PQCP_MLKEM_NATIVE_MLKEM512_C_dec
+    sources: LICENSE api.h cbd.c cbd.h cbmc.h common.h indcpa.c indcpa.h kem.c kem.h ntt.c ntt.h params.h poly.c poly.h polyvec.c polyvec.h reduce.c reduce.h rej_uniform.c rej_uniform.h symmetric-shake.c symmetric.h verify.c verify.h zetas.c sys/config.h sys/cpucap.h native/arith_native.h debug
