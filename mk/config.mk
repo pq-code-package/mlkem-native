@@ -81,7 +81,7 @@ ifeq ($(AUTO),1)
 include mk/auto.mk
 endif
 
-BUILD_DIR := test/build
+BUILD_DIR ?= test/build
 
 MAKE_OBJS = $(2:%=$(1)/%.o)
 OBJS = $(call MAKE_OBJS,$(BUILD_DIR),$(1))
