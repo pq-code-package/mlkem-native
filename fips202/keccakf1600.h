@@ -9,7 +9,6 @@
 #include "fips202_native.h"
 #include "namespace.h"
 
-#define KECCAK_WAY 4
 #define KECCAK_LANES 25
 
 /*
@@ -19,7 +18,8 @@
  * The struct is only exposed here to allow its construction on the stack.
  */
 
-typedef ALIGN uint64_t keccakx4_state[KECCAK_WAY * KECCAK_LANES];
+typedef ALIGN uint64_t shake128x4incctx[KECCAK_WAY * KECCAK_LANES];
+typedef ALIGN uint64_t shake256x4incctx[KECCAK_WAY * KECCAK_LANES];
 
 #define KeccakF1600_StateExtractBytes \
   FIPS202_NAMESPACE(KeccakF1600_StateExtractBytes)

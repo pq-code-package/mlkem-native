@@ -241,8 +241,10 @@ void shake256_inc_squeeze(uint8_t *output, size_t outlen, shake256incctx *state)
 
 void shake256_inc_ctx_release(shake256incctx *state) { (void)state; }
 
+void shake128_inc_init(shake128incctx *state) { keccak_inc_init(state->ctx); }
 
-void shake128_absorb(shake128ctx *state, const uint8_t *input, size_t inlen)
+void shake128_absorb_once(shake128incctx *state, const uint8_t *input,
+                          size_t inlen)
 {
   int i;
   for (i = 0; i < 25; i++)
@@ -253,13 +255,14 @@ void shake128_absorb(shake128ctx *state, const uint8_t *input, size_t inlen)
   keccak_absorb(state->ctx, SHAKE128_RATE, input, inlen, 0x1F);
 }
 
-void shake128_squeezeblocks(uint8_t *output, size_t nblocks, shake128ctx *state)
+void shake128_squeezeblocks(uint8_t *output, size_t nblocks,
+                            shake128incctx *state)
 {
   keccak_squeezeblocks(output, nblocks, state->ctx, SHAKE128_RATE);
 }
 
 
-void shake128_ctx_release(shake128ctx *state) { (void)state; }
+void shake128_inc_ctx_release(shake128incctx *state) { (void)state; }
 
 void shake256(uint8_t *output, size_t outlen, const uint8_t *input,
               size_t inlen)

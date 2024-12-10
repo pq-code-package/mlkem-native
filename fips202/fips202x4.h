@@ -13,12 +13,12 @@
 
 #include "cbmc.h"
 
-#define shake128x4_absorb FIPS202_NAMESPACE(shake128x4_absorb)
-void shake128x4_absorb(keccakx4_state *state, const uint8_t *in0,
-                       const uint8_t *in1, const uint8_t *in2,
-                       const uint8_t *in3, size_t inlen)
+#define shake128x4_absorb_once FIPS202_NAMESPACE(shake128x4_absorb_once)
+void shake128x4_absorb_once(shake128x4incctx *state, const uint8_t *in0,
+                            const uint8_t *in1, const uint8_t *in2,
+                            const uint8_t *in3, size_t inlen)
 __contract__(
-  requires(memory_no_alias(state, sizeof(keccakx4_state)))
+  requires(memory_no_alias(state, sizeof(shake128x4incctx)))
   requires(memory_no_alias(in0, inlen))
   requires(memory_no_alias(in1, inlen))
   requires(memory_no_alias(in2, inlen))
@@ -26,12 +26,12 @@ __contract__(
   assigns(object_whole(state))
 );
 
-#define shake256x4_absorb FIPS202_NAMESPACE(shake256x4_absorb)
-void shake256x4_absorb(keccakx4_state *state, const uint8_t *in0,
-                       const uint8_t *in1, const uint8_t *in2,
-                       const uint8_t *in3, size_t inlen)
+#define shake256x4_absorb_once FIPS202_NAMESPACE(shake256x4_absorb_once)
+void shake256x4_absorb_once(shake256x4incctx *state, const uint8_t *in0,
+                            const uint8_t *in1, const uint8_t *in2,
+                            const uint8_t *in3, size_t inlen)
 __contract__(
-  requires(memory_no_alias(state, sizeof(keccakx4_state)))
+  requires(memory_no_alias(state, sizeof(shake256x4incctx)))
   requires(memory_no_alias(in0, inlen))
   requires(memory_no_alias(in1, inlen))
   requires(memory_no_alias(in2, inlen))
@@ -42,9 +42,9 @@ __contract__(
 #define shake128x4_squeezeblocks FIPS202_NAMESPACE(shake128x4_squeezeblocks)
 void shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
                               uint8_t *out3, size_t nblocks,
-                              keccakx4_state *state)
+                              shake128x4incctx *state)
 __contract__(
-  requires(memory_no_alias(state, sizeof(keccakx4_state)))
+  requires(memory_no_alias(state, sizeof(shake128x4incctx)))
   requires(memory_no_alias(out0, nblocks * SHAKE128_RATE))
   requires(memory_no_alias(out1, nblocks * SHAKE128_RATE))
   requires(memory_no_alias(out2, nblocks * SHAKE128_RATE))
@@ -59,13 +59,19 @@ __contract__(
 #define shake256x4_squeezeblocks FIPS202_NAMESPACE(shake256x4_squeezeblocks)
 void shake256x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
                               uint8_t *out3, size_t nblocks,
-                              keccakx4_state *state);
+                              shake256x4incctx *state);
 
-#define shake128x4_ctx_release FIPS202_NAMESPACE(shake128x4_ctx_release)
-void shake128x4_ctx_release(keccakx4_state *state);
+#define shake128x4_inc_init FIPS202_NAMESPACE(shake128x4_inc_init)
+void shake128x4_inc_init(shake128x4incctx *state);
 
-#define shake256x4_ctx_release FIPS202_NAMESPACE(shake256x4_ctx_release)
-void shake256x4_ctx_release(keccakx4_state *state);
+#define shake256x4_inc_init FIPS202_NAMESPACE(shake256x4_inc_init)
+void shake256x4_inc_init(shake256x4incctx *state);
+
+#define shake128x4_inc_ctx_release FIPS202_NAMESPACE(shake128x4_inc_ctx_release)
+void shake128x4_inc_ctx_release(shake128x4incctx *state);
+
+#define shake256x4_inc_ctx_release FIPS202_NAMESPACE(shake256x4_inc_ctx_release)
+void shake256x4_inc_ctx_release(shake256x4incctx *state);
 
 #define shake256x4 FIPS202_NAMESPACE(shake256x4)
 void shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
