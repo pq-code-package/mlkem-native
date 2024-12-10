@@ -9,7 +9,6 @@
 #include "fips202_native.h"
 #include "namespace.h"
 
-#define KECCAK_WAY 4
 #define KECCAK_LANES 25
 
 /*
