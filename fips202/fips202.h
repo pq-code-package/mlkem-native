@@ -21,8 +21,8 @@
 /* Context for non-incremental API */
 typedef struct
 {
-  uint64_t ctx[25];
-} shake128ctx;
+  uint64_t ctx[26];
+} shake128incctx;
 
 /* Context for incremental API */
 typedef struct
@@ -35,9 +35,9 @@ typedef struct
  * This function does not support being called multiple times
  * with the same state.
  */
-#define shake128_absorb FIPS202_NAMESPACE(shake128_absorb)
+#define shake128_absorb_once FIPS202_NAMESPACE(shake128_absorb_once)
 /*************************************************
- * Name:        shake128_absorb
+ * Name:        shake128_absorb_once
  *
  * Description: Absorb step of the SHAKE128 XOF.
  *              non-incremental, starts by zeroeing the state.
@@ -48,11 +48,12 @@ typedef struct
  *state
  *              - size_t inlen:         length of input in bytes
  **************************************************/
-void shake128_absorb(shake128ctx *state, const uint8_t *input, size_t inlen)
+void shake128_absorb_once(shake128incctx *state, const uint8_t *input,
+                          size_t inlen)
 __contract__(
-  requires(memory_no_alias(state, sizeof(shake128ctx)))
+  requires(memory_no_alias(state, sizeof(shake128incctx)))
   requires(memory_no_alias(input, inlen))
-  assigns(memory_slice(state, sizeof(shake128ctx)))
+  assigns(memory_slice(state, sizeof(shake128incctx)))
 );
 
 /* Squeeze output out of the sponge.
@@ -70,18 +71,26 @@ __contract__(
  * Arguments:   - uint8_t *output:     pointer to output blocks
  *              - size_t nblocks:      number of blocks to be squeezed (written
  *to output)
- *              - shake128ctx *state:  pointer to in/output Keccak state
+ *              - shake128incctx *state:  pointer to in/output Keccak state
  **************************************************/
-void shake128_squeezeblocks(uint8_t *output, size_t nblocks, shake128ctx *state)
+void shake128_squeezeblocks(uint8_t *output, size_t nblocks,
+                            shake128incctx *state)
 __contract__(
-  requires(memory_no_alias(state, sizeof(shake128ctx)))
+  requires(memory_no_alias(state, sizeof(shake128incctx)))
   requires(memory_no_alias(output, nblocks * SHAKE128_RATE))
-  assigns(memory_slice(output, nblocks * SHAKE128_RATE), memory_slice(state, sizeof(shake128ctx)))
+  assigns(memory_slice(output, nblocks * SHAKE128_RATE), memory_slice(state, sizeof(shake128incctx)))
 );
 
 /* Free the state */
-#define shake128_ctx_release FIPS202_NAMESPACE(shake128_ctx_release)
-void shake128_ctx_release(shake128ctx *state);
+#define shake128_inc_ctx_release FIPS202_NAMESPACE(shake128_inc_ctx_release)
+void shake128_inc_ctx_release(shake128incctx *state);
+
+#define shake128_inc_init FIPS202_NAMESPACE(shake128_inc_init)
+void shake128_inc_init(shake128incctx *state)
+__contract__(
+  requires(memory_no_alias(state, sizeof(shake128incctx)))
+  assigns(memory_slice(state, sizeof(shake128incctx)))
+);
 
 /* Initialize incremental hashing API */
 #define shake256_inc_init FIPS202_NAMESPACE(shake256_inc_init)

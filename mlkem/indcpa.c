@@ -163,12 +163,14 @@ __contract__(
 
   /* Tracks the number of coefficients we have already sampled */
   unsigned int ctr[KECCAK_WAY];
-  keccakx4_state statex;
+  shake128x4incctx statex;
   unsigned int buflen;
 
+  shake128x4_inc_init(&statex);
+
   /* seed is MLKEM_SYMBYTES + 2 bytes long, but padded to MLKEM_SYMBYTES + 16 */
-  shake128x4_absorb(&statex, seed[0], seed[1], seed[2], seed[3],
-                    MLKEM_SYMBYTES + 2);
+  shake128x4_absorb_once(&statex, seed[0], seed[1], seed[2], seed[3],
+                         MLKEM_SYMBYTES + 2);
 
   /*
    * Initially, squeeze heuristic number of MLKEM_GEN_MATRIX_NBLOCKS.
@@ -206,7 +208,7 @@ __contract__(
     ctr[3] = rej_uniform(vec[3].coeffs, MLKEM_N, ctr[3], buf3, buflen);
   }
 
-  shake128x4_ctx_release(&statex);
+  shake128x4_inc_ctx_release(&statex);
 }
 
 /*
@@ -221,11 +223,13 @@ __contract__(
   assigns(memory_slice(entry, sizeof(poly)))
   ensures(array_bound(entry->coeffs, 0, MLKEM_N - 1, 0, (MLKEM_Q - 1))))
 {
-  shake128ctx state;
+  shake128incctx state;
   uint8_t buf[MLKEM_GEN_MATRIX_NBLOCKS * SHAKE128_RATE];
   unsigned int ctr, buflen;
 
-  shake128_absorb(&state, seed, MLKEM_SYMBYTES + 2);
+  shake128_inc_init(&state);
+
+  shake128_absorb_once(&state, seed, MLKEM_SYMBYTES + 2);
 
   /* Initially, squeeze + sample heuristic number of MLKEM_GEN_MATRIX_NBLOCKS.
    */
@@ -247,7 +251,7 @@ __contract__(
     ctr = rej_uniform(entry->coeffs, MLKEM_N, ctr, buf, SHAKE128_RATE);
   }
 
-  shake128_ctx_release(&state);
+  shake128_inc_ctx_release(&state);
 }
 
 
