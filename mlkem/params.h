@@ -6,25 +6,45 @@
 #define PARAMS_H
 
 #include "common.h"
+#include "config.h"
 #include "cpucap.h"
 
 #ifndef MLKEM_K
 #define MLKEM_K 3 /* Change this for different security strengths */
 #endif
 
+#if defined(MLKEM_USE_NATIVE_X86_64)
+#define MLKEM_NATIVE_BACKEND X86_64
+#elif defined(MLKEM_USE_NATIVE_AARCH64)
+#define MLKEM_NATIVE_BACKEND AARCH64
+#else
+#define MLKEM_NATIVE_BACKEND C
+#endif
+
 /* Don't change parameters below this line */
 #if (MLKEM_K == 2)
-#define MLKEM_NAMESPACE(s) PQCP_MLKEM_NATIVE_MLKEM512_##s
-#define _MLKEM_NAMESPACE(s) _PQCP_MLKEM_NATIVE_MLKEM512_##s
+#define MLKEM_PARAM_NAME MLKEM512
 #elif (MLKEM_K == 3)
-#define MLKEM_NAMESPACE(s) PQCP_MLKEM_NATIVE_MLKEM768_##s
-#define _MLKEM_NAMESPACE(s) _PQCP_MLKEM_NATIVE_MLKEM768_##s
+#define MLKEM_PARAM_NAME MLKEM768
 #elif (MLKEM_K == 4)
-#define MLKEM_NAMESPACE(s) PQCP_MLKEM_NATIVE_MLKEM1024_##s
-#define _MLKEM_NAMESPACE(s) _PQCP_MLKEM_NATIVE_MLKEM1024_##s
+#define MLKEM_PARAM_NAME MLKEM1024
 #else
 #error "MLKEM_K must be in {2,3,4}"
 #endif
+
+#define ___MLKEM_NAMESPACE(x1, x2, x3, x4) x1##_##x2##_##x3##_##x4
+#define __MLKEM_NAMESPACE(x1, x2, x3, x4) ___MLKEM_NAMESPACE(x1, x2, x3, x4)
+
+/*
+ * NAMESPACE is PQCP_MLKEM_NATIVE_<PARAM_NAME>_<BACKEND>_
+ * e.g., PQCP_MLKEM_NATIVE_MLKEM512_AARCH64_
+ */
+#define MLKEM_NAMESPACE(s)                                                     \
+  __MLKEM_NAMESPACE(PQCP_MLKEM_NATIVE, MLKEM_PARAM_NAME, MLKEM_NATIVE_BACKEND, \
+                    s)
+#define _MLKEM_NAMESPACE(s)                               \
+  __MLKEM_NAMESPACE(_PQCP_MLKEM_NATIVE, MLKEM_PARAM_NAME, \
+                    MLKEM_NATIVE_BACKEND, s)
 
 #define MLKEM_N 256
 #define MLKEM_Q 3329
