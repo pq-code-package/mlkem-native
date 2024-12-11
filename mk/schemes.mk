@@ -19,22 +19,29 @@ $(BUILD_DIR)/lib$(1).a: CFLAGS += -static
 $(BUILD_DIR)/lib$(1).a: $(call MAKE_OBJS,$(BUILD_DIR)/$(1),$(SOURCES))
 endef
 
-$(BUILD_DIR)/libmlkem512%.a: CPPFLAGS += -DMLKEM_K=2
-$(BUILD_DIR)/libmlkem768%.a: CPPFLAGS += -DMLKEM_K=3
-$(BUILD_DIR)/libmlkem1024%.a: CPPFLAGS += -DMLKEM_K=4
+$(BUILD_DIR)/libmlkem512.a: CPPFLAGS += -DMLKEM_K=2
+$(BUILD_DIR)/libmlkem768.a: CPPFLAGS += -DMLKEM_K=3
+$(BUILD_DIR)/libmlkem1024.a: CPPFLAGS += -DMLKEM_K=4
 
 # build libmlkem512.a libmlkem768.a libmlkem1024.a
 $(foreach scheme,mlkem512 mlkem768 mlkem1024, \
 	$(eval $(call BUILD_LIB,$(scheme))))
 
+# rules for compilation for all tests: mainly linking with mlkem static link library
+define ADD_SOURCE
+$(BUILD_DIR)/$(1)/bin/$(2)$(shell echo $(1) | tr -d -c 0-9): LDLIBS += -L$(BUILD_DIR) -l$(1)
+$(BUILD_DIR)/$(1)/bin/$(2)$(shell echo $(1) | tr -d -c 0-9): $(BUILD_DIR)/$(1)/test/$(2).c.o $(BUILD_DIR)/lib$(1).a
+endef
+
 $(MLKEM512_DIR)/bin/%: CPPFLAGS += -DMLKEM_K=2
-$(ALL_TESTS:%=$(MLKEM512_DIR)/bin/%512):$(MLKEM512_DIR)/bin/%512: $(MLKEM512_DIR)/test/%.c.o $(call MAKE_OBJS,$(MLKEM512_DIR), $(SOURCES))
-
 $(MLKEM768_DIR)/bin/%: CPPFLAGS += -DMLKEM_K=3
-$(ALL_TESTS:%=$(MLKEM768_DIR)/bin/%768):$(MLKEM768_DIR)/bin/%768: $(MLKEM768_DIR)/test/%.c.o $(call MAKE_OBJS,$(MLKEM768_DIR), $(SOURCES))
-
 $(MLKEM1024_DIR)/bin/%: CPPFLAGS += -DMLKEM_K=4
-$(ALL_TESTS:%=$(MLKEM1024_DIR)/bin/%1024):$(MLKEM1024_DIR)/bin/%1024: $(MLKEM1024_DIR)/test/%.c.o $(call MAKE_OBJS,$(MLKEM1024_DIR), $(SOURCES))
+
+$(foreach scheme,mlkem512 mlkem768 mlkem1024, \
+	$(foreach test,$(ALL_TESTS), \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test))) \
+	) \
+)
 
 # nistkat tests require special RNG
 $(MLKEM512_DIR)/bin/gen_NISTKAT512: CPPFLAGS += -Itest/nistrng
