@@ -12,10 +12,17 @@ CROSS_PREFIX ?=
 CC  ?= gcc
 CPP ?= cpp
 AR  ?= ar
+# NOTE: gcc-ar is a wrapper around ar that ensures proper integration with GCC plugins,
+# 		such as lto. Using gcc-ar is preferred when creating or linking static libraries
+# 		if the binary is compiled with -flto.
+# 		However, this doesn't apply to darwin as it is using clang instead, and there's no
+# 		gcc-ar wrapper as well.
+CC_AR ?= $(if $(findstring Darwin,$(shell uname -s)),ar,gcc-ar)
 
 CC  := $(CROSS_PREFIX)$(CC)
 CPP := $(CROSS_PREFIX)$(CPP)
 AR  := $(CROSS_PREFIX)$(AR)
+CC_AR  := $(CROSS_PREFIX)$(CC_AR)
 LD  := $(CC)
 OBJCOPY := $(CROSS_PREFIX)objcopy
 SIZE := $(CROSS_PREFIX)size
@@ -75,13 +82,13 @@ endif
 AUTO ?= 1
 CYCLES ?=
 OPT ?= 1
-RETAINED_VARS := CYCLES OPT AUTO
+RETAINED_VARS := CROSS_PREFIX CYCLES OPT AUTO
 
 ifeq ($(AUTO),1)
 include mk/auto.mk
 endif
 
-BUILD_DIR := test/build
+BUILD_DIR ?= test/build
 
 MAKE_OBJS = $(2:%=$(1)/%.o)
 OBJS = $(call MAKE_OBJS,$(BUILD_DIR),$(1))
