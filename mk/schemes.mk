@@ -13,6 +13,20 @@ MLKEM512_DIR = $(BUILD_DIR)/mlkem512
 MLKEM768_DIR = $(BUILD_DIR)/mlkem768
 MLKEM1024_DIR = $(BUILD_DIR)/mlkem1024
 
+# build lib<scheme>.a
+define BUILD_LIB
+$(BUILD_DIR)/lib$(1).a: CFLAGS += -static
+$(BUILD_DIR)/lib$(1).a: $(call MAKE_OBJS,$(BUILD_DIR)/$(1),$(SOURCES))
+endef
+
+$(BUILD_DIR)/libmlkem512%.a: CPPFLAGS += -DMLKEM_K=2
+$(BUILD_DIR)/libmlkem768%.a: CPPFLAGS += -DMLKEM_K=3
+$(BUILD_DIR)/libmlkem1024%.a: CPPFLAGS += -DMLKEM_K=4
+
+# build libmlkem512.a libmlkem768.a libmlkem1024.a
+$(foreach scheme,mlkem512 mlkem768 mlkem1024, \
+	$(eval $(call BUILD_LIB,$(scheme))))
+
 $(MLKEM512_DIR)/bin/%: CPPFLAGS += -DMLKEM_K=2
 $(ALL_TESTS:%=$(MLKEM512_DIR)/bin/%512):$(MLKEM512_DIR)/bin/%512: $(MLKEM512_DIR)/test/%.c.o $(call MAKE_OBJS,$(MLKEM512_DIR), $(SOURCES))
 

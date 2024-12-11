@@ -21,6 +21,11 @@ quickcheck: buildall
 	./scripts/acvp
 	$(Q)echo "  Functionality and ACVP tests passed!"
 
+lib: \
+  $(BUILD_DIR)/libmlkem512.a \
+  $(BUILD_DIR)/libmlkem768.a \
+  $(BUILD_DIR)/libmlkem1024.a
+
 mlkem: \
   $(MLKEM512_DIR)/bin/test_mlkem512 \
   $(MLKEM768_DIR)/bin/test_mlkem768 \
