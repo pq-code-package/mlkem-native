@@ -75,7 +75,7 @@ endif
 AUTO ?= 1
 CYCLES ?=
 OPT ?= 1
-RETAINED_VARS := CYCLES OPT AUTO
+RETAINED_VARS := CROSS_PREFIX CYCLES OPT AUTO
 
 ifeq ($(AUTO),1)
 include mk/auto.mk
