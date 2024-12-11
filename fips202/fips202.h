@@ -24,31 +24,30 @@ typedef struct
   uint64_t ctx[25];
 } shake128ctx;
 
-/* Context for incremental API */
-typedef struct
-{
-  uint64_t ctx[26];
-} shake256incctx;
+typedef shake128ctx shake256ctx;
 
 /* Initialize the state and absorb the provided input.
  *
  * This function does not support being called multiple times
  * with the same state.
  */
-#define shake128_absorb FIPS202_NAMESPACE(shake128_absorb)
+#define shake128_absorb_once FIPS202_NAMESPACE(shake128_absorb_once)
 /*************************************************
- * Name:        shake128_absorb
+ * Name:        shake128_absorb_once
  *
  * Description: Absorb step of the SHAKE128 XOF.
  *              non-incremental, starts by zeroeing the state.
  *
+ *              WARNING: Must only be called once.
+ *
  * Arguments:   - uint64_t *state:      pointer to (uninitialized) output Keccak
- *state
+ *                                      state
  *              - const uint8_t *input: pointer to input to be absorbed into
- *state
+ *                                      state
  *              - size_t inlen:         length of input in bytes
  **************************************************/
-void shake128_absorb(shake128ctx *state, const uint8_t *input, size_t inlen)
+void shake128_absorb_once(shake128ctx *state, const uint8_t *input,
+                          size_t inlen)
 __contract__(
   requires(memory_no_alias(state, sizeof(shake128ctx)))
   requires(memory_no_alias(input, inlen))
@@ -64,12 +63,12 @@ __contract__(
  * Name:        shake128_squeezeblocks
  *
  * Description: Squeeze step of SHAKE128 XOF. Squeezes full blocks of
- *SHAKE128_RATE bytes each. Modifies the state. Can be called multiple times to
- *keep squeezing, i.e., is incremental.
+ *              SHAKE128_RATE bytes each. Modifies the state. Can be called
+ *              multiple times to keep squeezing, i.e., is incremental.
  *
  * Arguments:   - uint8_t *output:     pointer to output blocks
  *              - size_t nblocks:      number of blocks to be squeezed (written
- *to output)
+ *                                     to output)
  *              - shake128ctx *state:  pointer to in/output Keccak state
  **************************************************/
 void shake128_squeezeblocks(uint8_t *output, size_t nblocks, shake128ctx *state)
@@ -82,50 +81,6 @@ __contract__(
 /* Free the state */
 #define shake128_ctx_release FIPS202_NAMESPACE(shake128_ctx_release)
 void shake128_ctx_release(shake128ctx *state);
-
-/* Initialize incremental hashing API */
-#define shake256_inc_init FIPS202_NAMESPACE(shake256_inc_init)
-void shake256_inc_init(shake256incctx *state)
-__contract__(
-  requires(memory_no_alias(state, sizeof(shake256incctx)))
-  assigns(memory_slice(state, sizeof(shake256incctx)))
-);
-
-
-#define shake256_inc_absorb FIPS202_NAMESPACE(shake256_inc_absorb)
-void shake256_inc_absorb(shake256incctx *state, const uint8_t *input,
-                         size_t inlen)
-__contract__(
-  requires(memory_no_alias(state, sizeof(shake256incctx)))
-  requires(memory_no_alias(input, inlen))
-  assigns(memory_slice(state, sizeof(shake256incctx)))
-);
-
-
-/* Prepares for squeeze phase */
-#define shake256_inc_finalize FIPS202_NAMESPACE(shake256_inc_finalize)
-void shake256_inc_finalize(shake256incctx *state)
-__contract__(
-  requires(memory_no_alias(state, sizeof(shake256incctx)))
-  assigns(memory_slice(state, sizeof(shake256incctx)))
-);
-
-/* Squeeze output out of the sponge.
- *
- * Supports being called multiple times
- */
-#define shake256_inc_squeeze FIPS202_NAMESPACE(shake256_inc_squeeze)
-void shake256_inc_squeeze(uint8_t *output, size_t outlen, shake256incctx *state)
-__contract__(
-  requires(memory_no_alias(state, sizeof(shake256incctx)))
-  requires(memory_no_alias(output, outlen))
-  assigns(memory_slice(output, outlen))
-  assigns(memory_slice(state, sizeof(shake256incctx)))
-);
-
-/* Free the state */
-#define shake256_inc_ctx_release FIPS202_NAMESPACE(shake256_inc_ctx_release)
-void shake256_inc_ctx_release(shake256incctx *state);
 
 /* One-stop SHAKE256 call. Aliasing between input and
  * output is not permitted */

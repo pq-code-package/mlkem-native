@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2024 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
@@ -21,22 +22,31 @@
 #define ROL(a, offset) (((a) << (offset)) ^ ((a) >> (64 - (offset))))
 
 /*************************************************
- * Name:        keccak_absorb
+ * Name:        keccak_absorb_once
  *
  * Description: Absorb step of Keccak;
  *              non-incremental, starts by zeroeing the state.
  *
+ *              WARNING: Must only be called once.
+ *
  * Arguments:   - uint64_t *s:       pointer to (uninitialized) output Keccak
- *state
+ *                                   state
  *              - uint32_t r:        rate in bytes (e.g., 168 for SHAKE128)
  *              - const uint8_t *m:  pointer to input to be absorbed into s
  *              - size_t mlen:       length of input in bytes
  *              - uint8_t p:         domain-separation byte for different
- *Keccak-derived functions
+ *                                   Keccak-derived functions
  **************************************************/
-static void keccak_absorb(uint64_t *s, uint32_t r, const uint8_t *m,
-                          size_t mlen, uint8_t p)
+static void keccak_absorb_once(uint64_t *s, uint32_t r, const uint8_t *m,
+                               size_t mlen, uint8_t p)
 {
+  /* Initialize state */
+  size_t i;
+  for (i = 0; i < 25; ++i)
+  {
+    s[i] = 0;
+  }
+
   while (mlen >= r)
   {
     KeccakF1600_StateXORBytes(s, m, 0, r);
@@ -64,20 +74,19 @@ static void keccak_absorb(uint64_t *s, uint32_t r, const uint8_t *m,
 }
 
 /*************************************************
- * Name:        keccak_squeezeblocks
+ * Name:        keccak_inc_squeeze
  *
- * Description: Squeeze step of Keccak. Squeezes full blocks of r bytes each.
- *              Modifies the state. Can be called multiple times to keep
- *squeezing, i.e., is incremental.
+ * Description: block-level Keccak squeeze
  *
- * Arguments:   - uint8_t *h:     pointer to output blocks
- *              - size_t nblocks: number of blocks to be squeezed (written to h)
- *              - uint64_t *s:    pointer to in/output Keccak state
- *              - uint32_t r:     rate in bytes (e.g., 168 for SHAKE128)
+ * Arguments:   - uint8_t *h: pointer to output bytes
+ *              - size_t outlen: number of blocks to be squeezed
+ *              - uint64_t *s_inc: pointer to input/output state
+ *              - uint32_t r: rate in bytes (e.g., 168 for SHAKE128)
  **************************************************/
 static void keccak_squeezeblocks(uint8_t *h, size_t nblocks, uint64_t *s,
                                  uint32_t r)
 {
+  /* Then squeeze the remaining necessary blocks */
   while (nblocks > 0)
   {
     KeccakF1600_StatePermute(s);
@@ -88,123 +97,24 @@ static void keccak_squeezeblocks(uint8_t *h, size_t nblocks, uint64_t *s,
 }
 
 /*************************************************
- * Name:        keccak_inc_init
+ * Name:        keccak_squeeze_once
  *
- * Description: Initializes the incremental Keccak state to zero.
+ * Description: Keccak squeeze; can be called on byte-level
  *
- * Arguments:   - uint64_t *s_inc: pointer to input/output incremental state
- *                First 25 values represent Keccak state.
- *                26th value represents either the number of absorbed bytes
- *                that have not been permuted, or not-yet-squeezed bytes.
- **************************************************/
-static void keccak_inc_init(uint64_t *s_inc)
-{
-  size_t i;
-
-  for (i = 0; i < 25; ++i)
-  {
-    s_inc[i] = 0;
-  }
-  s_inc[25] = 0;
-}
-/*************************************************
- * Name:        keccak_inc_absorb
- *
- * Description: Incremental keccak absorb
- *              Preceded by keccak_inc_init, succeeded by keccak_inc_finalize
- *
- * Arguments:   - uint64_t *s_inc: pointer to input/output incremental state
- *                First 25 values represent Keccak state.
- *                26th value represents either the number of absorbed bytes
- *                that have not been permuted, or not-yet-squeezed bytes.
- *              - uint32_t r: rate in bytes (e.g., 168 for SHAKE128)
- *              - const uint8_t *m: pointer to input to be absorbed into s_inc
- *              - size_t mlen: length of input in bytes
- **************************************************/
-static void keccak_inc_absorb(uint64_t *s_inc, uint32_t r, const uint8_t *m,
-                              size_t mlen)
-{
-  /* Recall that s_inc[25] is the non-absorbed bytes xored into the state */
-  while (mlen + s_inc[25] >= r)
-  {
-    KeccakF1600_StateXORBytes(s_inc, m, s_inc[25], r - s_inc[25]);
-    mlen -= (size_t)(r - s_inc[25]);
-    m += r - s_inc[25];
-    s_inc[25] = 0;
-
-    KeccakF1600_StatePermute(s_inc);
-  }
-
-  KeccakF1600_StateXORBytes(s_inc, m, s_inc[25], mlen);
-  s_inc[25] += mlen;
-}
-
-/*************************************************
- * Name:        keccak_inc_finalize
- *
- * Description: Finalizes Keccak absorb phase, prepares for squeezing
- *
- * Arguments:   - uint64_t *s_inc: pointer to input/output incremental state
- *                First 25 values represent Keccak state.
- *                26th value represents either the number of absorbed bytes
- *                that have not been permuted, or not-yet-squeezed bytes.
- *              - uint32_t r: rate in bytes (e.g., 168 for SHAKE128)
- *              - uint8_t p: domain-separation byte for different
- *                                 Keccak-derived functions
- **************************************************/
-static void keccak_inc_finalize(uint64_t *s_inc, uint32_t r, uint8_t p)
-{
-  /* After keccak_inc_absorb, we are guaranteed that s_inc[25] < r,
-     so we can always use one more byte for p in the current state. */
-  if (s_inc[25] == r - 1)
-  {
-    p |= 128;
-    KeccakF1600_StateXORBytes(s_inc, &p, s_inc[25], 1);
-  }
-  else
-  {
-    KeccakF1600_StateXORBytes(s_inc, &p, s_inc[25], 1);
-    p = 128;
-    KeccakF1600_StateXORBytes(s_inc, &p, r - 1, 1);
-  }
-  s_inc[25] = 0;
-}
-
-/*************************************************
- * Name:        keccak_inc_squeeze
- *
- * Description: Incremental Keccak squeeze; can be called on byte-level
+ *              WARNING: This must only be called once.
  *
  * Arguments:   - uint8_t *h: pointer to output bytes
  *              - size_t outlen: number of bytes to be squeezed
- *              - uint64_t *s_inc: pointer to input/output incremental state
- *                First 25 values represent Keccak state.
- *                26th value represents either the number of absorbed bytes
- *                that have not been permuted, or not-yet-squeezed bytes.
+ *              - uint64_t *s_inc: pointer to Keccak state
  *              - uint32_t r: rate in bytes (e.g., 168 for SHAKE128)
  **************************************************/
-static void keccak_inc_squeeze(uint8_t *h, size_t outlen, uint64_t *s_inc,
-                               uint32_t r)
+static void keccak_squeeze_once(uint8_t *h, size_t outlen, uint64_t *s,
+                                uint32_t r)
 {
   size_t len;
-  if (outlen < s_inc[25])
-  {
-    len = outlen;
-  }
-  else
-  {
-    len = s_inc[25];
-  }
-
-  KeccakF1600_StateExtractBytes(s_inc, h, r - s_inc[25], len);
-  h += len;
-  outlen -= len;
-  s_inc[25] -= len;
-
-  /* Then squeeze the remaining necessary blocks */
   while (outlen > 0)
   {
-    KeccakF1600_StatePermute(s_inc);
+    KeccakF1600_StatePermute(s);
 
     if (outlen < r)
     {
@@ -214,43 +124,21 @@ static void keccak_inc_squeeze(uint8_t *h, size_t outlen, uint64_t *s_inc,
     {
       len = r;
     }
-    KeccakF1600_StateExtractBytes(s_inc, h, 0, len);
+    KeccakF1600_StateExtractBytes(s, h, 0, len);
     h += len;
     outlen -= len;
-    s_inc[25] = r - len;
   }
 }
 
-void shake256_inc_init(shake256incctx *state) { keccak_inc_init(state->ctx); }
-
-void shake256_inc_absorb(shake256incctx *state, const uint8_t *input,
-                         size_t inlen)
-{
-  keccak_inc_absorb(state->ctx, SHAKE256_RATE, input, inlen);
-}
-
-void shake256_inc_finalize(shake256incctx *state)
-{
-  keccak_inc_finalize(state->ctx, SHAKE256_RATE, 0x1F);
-}
-
-void shake256_inc_squeeze(uint8_t *output, size_t outlen, shake256incctx *state)
-{
-  keccak_inc_squeeze(output, outlen, state->ctx, SHAKE256_RATE);
-}
-
-void shake256_inc_ctx_release(shake256incctx *state) { (void)state; }
-
-
-void shake128_absorb(shake128ctx *state, const uint8_t *input, size_t inlen)
+void shake128_absorb_once(shake128ctx *state, const uint8_t *input,
+                          size_t inlen)
 {
   int i;
   for (i = 0; i < 25; i++)
   {
     state->ctx[i] = 0;
   }
-
-  keccak_absorb(state->ctx, SHAKE128_RATE, input, inlen, 0x1F);
+  keccak_absorb_once(state->ctx, SHAKE128_RATE, input, inlen, 0x1F);
 }
 
 void shake128_squeezeblocks(uint8_t *output, size_t nblocks, shake128ctx *state)
@@ -258,46 +146,32 @@ void shake128_squeezeblocks(uint8_t *output, size_t nblocks, shake128ctx *state)
   keccak_squeezeblocks(output, nblocks, state->ctx, SHAKE128_RATE);
 }
 
-
 void shake128_ctx_release(shake128ctx *state) { (void)state; }
 
 void shake256(uint8_t *output, size_t outlen, const uint8_t *input,
               size_t inlen)
 {
-  shake256incctx state;
-
-  keccak_inc_init(state.ctx);
-
+  shake256ctx state;
   /* Absorb input */
-  keccak_inc_absorb(state.ctx, SHAKE256_RATE, input, inlen);
-  keccak_inc_finalize(state.ctx, SHAKE256_RATE, 0x1F);
-
+  keccak_absorb_once(state.ctx, SHAKE256_RATE, input, inlen, 0x1F);
   /* Squeeze output */
-  keccak_inc_squeeze(output, outlen, state.ctx, SHAKE256_RATE);
+  keccak_squeeze_once(output, outlen, state.ctx, SHAKE256_RATE);
 }
 
 void sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
 {
-  uint64_t ctx[26];
-  keccak_inc_init(ctx);
-
+  uint64_t ctx[25];
   /* Absorb input */
-  keccak_inc_absorb(ctx, SHA3_256_RATE, input, inlen);
-  keccak_inc_finalize(ctx, SHA3_256_RATE, 0x06);
-
+  keccak_absorb_once(ctx, SHA3_256_RATE, input, inlen, 0x06);
   /* Squeeze output */
-  keccak_inc_squeeze(output, 32, ctx, SHA3_256_RATE);
+  keccak_squeeze_once(output, 32, ctx, SHA3_256_RATE);
 }
 
 void sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
 {
-  uint64_t ctx[26];
-  keccak_inc_init(ctx);
-
+  uint64_t ctx[25];
   /* Absorb input */
-  keccak_inc_absorb(ctx, SHA3_512_RATE, input, inlen);
-  keccak_inc_finalize(ctx, SHA3_512_RATE, 0x06);
-
+  keccak_absorb_once(ctx, SHA3_512_RATE, input, inlen, 0x06);
   /* Squeeze output */
-  keccak_inc_squeeze(output, 64, ctx, SHA3_512_RATE);
+  keccak_squeeze_once(output, 64, ctx, SHA3_512_RATE);
 }

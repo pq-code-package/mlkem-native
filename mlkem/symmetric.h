@@ -13,70 +13,42 @@
 
 #include "cbmc.h"
 
-#define mlkem_shake256_prf MLKEM_NAMESPACE(mlkem_shake256_prf)
-/*************************************************
- * Name:        mlkem_shake256_prf
- *
- * Ref:         FIPS-203 Section 4.1. Function PRF (eq 4.3)
- *
- * Description: Usage of SHAKE256 as a PRF, concatenates secret and public input
- *              and then generates outlen bytes of SHAKE256 output
- *
- * Arguments:   - uint8_t *out: pointer to output
- *              - size_t outlen: number of requested output bytes
- *              - const uint8_t *key: pointer to the key (of length
- *                MLKEM_SYMBYTES)
- *              - uint8_t nonce: single-byte nonce (public PRF input)
- *
- *              out and key may NOT be aliased.
- **************************************************/
-void mlkem_shake256_prf(uint8_t *out, size_t outlen,
-                        const uint8_t key[MLKEM_SYMBYTES], uint8_t nonce)
-__contract__(
-  requires(memory_no_alias(out, outlen))
-  requires(memory_no_alias(key, MLKEM_SYMBYTES))
-  assigns(memory_slice(out, outlen))
-);
-
-#define mlkem_shake256_rkprf MLKEM_NAMESPACE(mlkem_shake256_rkprf)
-/*************************************************
- * Name:        mlkem_shake256_rkprf
- *
- * Ref:         FIPS-203 Section 4.1. Hash function J
- *
- * Description: Usage of SHAKE256 as a PRF, concatenates key with input
- *              and then generates MLKEM_SSBYTES bytes of SHAKE256 output
- *
- * Arguments:   - uint8_t *out: pointer to output
- *              - const uint8_t *key: pointer to the key (of length
- *                MLKEM_SYMBYTES)
- *              - const uint8_t *input: pointer to the input (of length
- *                MLKEM_CIPHERTEXTBYTES)
- *
- *              out, key, and input may NOT be aliased.
- **************************************************/
-void mlkem_shake256_rkprf(uint8_t out[MLKEM_SSBYTES],
-                          const uint8_t key[MLKEM_SYMBYTES],
-                          const uint8_t input[MLKEM_CIPHERTEXTBYTES])
-__contract__(
-  requires(memory_no_alias(out, MLKEM_SSBYTES))
-  requires(memory_no_alias(key, MLKEM_SYMBYTES))
-  requires(memory_no_alias(input, MLKEM_CIPHERTEXTBYTES))
-  assigns(memory_slice(out, MLKEM_SSBYTES))
-);
-
-
 /* Macros denoting FIPS-203 specific Hash functions */
 
-/* Hash function H, FIPS-201 4.1 (eq 4.4) */
+/* Hash function H, FIPS-203 4.1 (eq 4.4) */
 #define hash_h(OUT, IN, INBYTES) sha3_256(OUT, IN, INBYTES)
 
-/* Hash function G, FIPS-201 4.1 (eq 4.5) */
+/* Hash function G, FIPS-203 4.1 (eq 4.5) */
 #define hash_g(OUT, IN, INBYTES) sha3_512(OUT, IN, INBYTES)
 
-/* Macros denoting FIPS-203 specific PRFs */
-#define prf(OUT, OUTBYTES, KEY, NONCE) \
-  mlkem_shake256_prf(OUT, OUTBYTES, KEY, NONCE)
-#define rkprf(OUT, KEY, INPUT) mlkem_shake256_rkprf(OUT, KEY, INPUT)
+/* Hash function J, FIPS-203 4.1 (eq 4.4) */
+#define hash_j(OUT, IN, INBYTES) shake256(OUT, MLKEM_SYMBYTES, IN, INBYTES)
+
+/* PRF function, FIPS-203 4.1 (eq 4.3)
+ * Referring to (eq 4.3), `OUT` is assumed to contain `s || b`. */
+#define prf_eta(ETA, OUT, IN) \
+  shake256(OUT, (ETA) * MLKEM_N / 4, IN, MLKEM_SYMBYTES + 1)
+#define prf_eta1(OUT, IN) prf_eta(MLKEM_ETA1, OUT, IN)
+#define prf_eta2(OUT, IN) prf_eta(MLKEM_ETA2, OUT, IN)
+#define prf_eta1_x4(OUT0, OUT1, OUT2, OUT3, IN0, IN1, IN2, IN3)            \
+  shake256x4(OUT0, OUT1, OUT2, OUT3, (MLKEM_ETA1 * MLKEM_N / 4), IN0, IN1, \
+             IN2, IN3, MLKEM_SYMBYTES + 1)
+
+/* XOF function, FIPS-203 4.1 */
+#define xof_ctx shake128ctx
+#define xof_x4_ctx shake128x4_ctx
+#define xof_absorb(CTX, IN, INBYTES) \
+  shake128_absorb_once((CTX), (IN), (INBYTES))
+#define xof_squeezeblocks(BUF, NBLOCKS, CTX) \
+  shake128_squeezeblocks((BUF), (NBLOCKS), (CTX))
+#define xof_release(CTX) shake128_ctx_release((CTX))
+
+#define xof_x4_absorb(CTX, IN0, IN1, IN2, IN3, INBYTES) \
+  shake128x4_absorb_once((CTX), (IN0), (IN1), (IN2), (IN3), (INBYTES))
+#define xof_x4_squeezeblocks(BUF0, BUF1, BUF2, BUF3, NBLOCKS, CTX) \
+  shake128x4_squeezeblocks((BUF0), (BUF1), (BUF2), (BUF3), (NBLOCKS), (CTX))
+#define xof_x4_release(CTX) shake128x4_ctx_release((CTX))
+
+#define XOF_RATE SHAKE128_RATE
 
 #endif /* SYMMETRIC_H */

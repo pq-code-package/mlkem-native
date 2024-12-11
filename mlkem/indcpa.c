@@ -133,7 +133,7 @@ static void unpack_ciphertext(polyvec *b, poly *v,
 
 #ifndef MLKEM_GEN_MATRIX_NBLOCKS
 #define MLKEM_GEN_MATRIX_NBLOCKS \
-  ((12 * MLKEM_N / 8 * (1 << 12) / MLKEM_Q + SHAKE128_RATE) / SHAKE128_RATE)
+  ((12 * MLKEM_N / 8 * (1 << 12) / MLKEM_Q + XOF_RATE) / XOF_RATE)
 #endif
 
 /*
@@ -156,27 +156,27 @@ __contract__(
   ensures(array_bound(vec[3].coeffs, 0, MLKEM_N - 1, 0, (MLKEM_Q - 1))))
 {
   /* Temporary buffers for XOF output before rejection sampling */
-  uint8_t buf0[MLKEM_GEN_MATRIX_NBLOCKS * SHAKE128_RATE];
-  uint8_t buf1[MLKEM_GEN_MATRIX_NBLOCKS * SHAKE128_RATE];
-  uint8_t buf2[MLKEM_GEN_MATRIX_NBLOCKS * SHAKE128_RATE];
-  uint8_t buf3[MLKEM_GEN_MATRIX_NBLOCKS * SHAKE128_RATE];
+  uint8_t buf0[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
+  uint8_t buf1[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
+  uint8_t buf2[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
+  uint8_t buf3[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
 
   /* Tracks the number of coefficients we have already sampled */
   unsigned int ctr[KECCAK_WAY];
-  keccakx4_state statex;
+  xof_x4_ctx statex;
   unsigned int buflen;
 
   /* seed is MLKEM_SYMBYTES + 2 bytes long, but padded to MLKEM_SYMBYTES + 16 */
-  shake128x4_absorb(&statex, seed[0], seed[1], seed[2], seed[3],
-                    MLKEM_SYMBYTES + 2);
+  xof_x4_absorb(&statex, seed[0], seed[1], seed[2], seed[3],
+                MLKEM_SYMBYTES + 2);
 
   /*
    * Initially, squeeze heuristic number of MLKEM_GEN_MATRIX_NBLOCKS.
    * This should generate the matrix entries with high probability.
    */
-  shake128x4_squeezeblocks(buf0, buf1, buf2, buf3, MLKEM_GEN_MATRIX_NBLOCKS,
-                           &statex);
-  buflen = MLKEM_GEN_MATRIX_NBLOCKS * SHAKE128_RATE;
+  xof_x4_squeezeblocks(buf0, buf1, buf2, buf3, MLKEM_GEN_MATRIX_NBLOCKS,
+                       &statex);
+  buflen = MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE;
   ctr[0] = rej_uniform(vec[0].coeffs, MLKEM_N, 0, buf0, buflen);
   ctr[1] = rej_uniform(vec[1].coeffs, MLKEM_N, 0, buf1, buflen);
   ctr[2] = rej_uniform(vec[2].coeffs, MLKEM_N, 0, buf2, buflen);
@@ -186,7 +186,7 @@ __contract__(
    * So long as not all matrix entries have been generated, squeeze
    * one more block a time until we're done.
    */
-  buflen = SHAKE128_RATE;
+  buflen = XOF_RATE;
   while (ctr[0] < MLKEM_N || ctr[1] < MLKEM_N || ctr[2] < MLKEM_N ||
          ctr[3] < MLKEM_N)
   __loop__(
@@ -199,14 +199,14 @@ __contract__(
     invariant(ctr[2] > 0 ==> array_bound(vec[2].coeffs, 0, ctr[2] - 1, 0, (MLKEM_Q - 1)))
     invariant(ctr[3] > 0 ==> array_bound(vec[3].coeffs, 0, ctr[3] - 1, 0, (MLKEM_Q - 1))))
   {
-    shake128x4_squeezeblocks(buf0, buf1, buf2, buf3, 1, &statex);
+    xof_x4_squeezeblocks(buf0, buf1, buf2, buf3, 1, &statex);
     ctr[0] = rej_uniform(vec[0].coeffs, MLKEM_N, ctr[0], buf0, buflen);
     ctr[1] = rej_uniform(vec[1].coeffs, MLKEM_N, ctr[1], buf1, buflen);
     ctr[2] = rej_uniform(vec[2].coeffs, MLKEM_N, ctr[2], buf2, buflen);
     ctr[3] = rej_uniform(vec[3].coeffs, MLKEM_N, ctr[3], buf3, buflen);
   }
 
-  shake128x4_ctx_release(&statex);
+  xof_x4_release(&statex);
 }
 
 /*
@@ -221,21 +221,21 @@ __contract__(
   assigns(memory_slice(entry, sizeof(poly)))
   ensures(array_bound(entry->coeffs, 0, MLKEM_N - 1, 0, (MLKEM_Q - 1))))
 {
-  shake128ctx state;
-  uint8_t buf[MLKEM_GEN_MATRIX_NBLOCKS * SHAKE128_RATE];
+  xof_ctx state;
+  uint8_t buf[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
   unsigned int ctr, buflen;
 
-  shake128_absorb(&state, seed, MLKEM_SYMBYTES + 2);
+  xof_absorb(&state, seed, MLKEM_SYMBYTES + 2);
 
   /* Initially, squeeze + sample heuristic number of MLKEM_GEN_MATRIX_NBLOCKS.
    */
   /* This should generate the matrix entry with high probability. */
-  shake128_squeezeblocks(buf, MLKEM_GEN_MATRIX_NBLOCKS, &state);
-  buflen = MLKEM_GEN_MATRIX_NBLOCKS * SHAKE128_RATE;
+  xof_squeezeblocks(buf, MLKEM_GEN_MATRIX_NBLOCKS, &state);
+  buflen = MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE;
   ctr = rej_uniform(entry->coeffs, MLKEM_N, 0, buf, buflen);
 
   /* Squeeze + sample one more block a time until we're done */
-  buflen = SHAKE128_RATE;
+  buflen = XOF_RATE;
   while (ctr < MLKEM_N)
   __loop__(
     assigns(ctr, state, memory_slice(entry, sizeof(poly)), object_whole(buf))
@@ -243,11 +243,11 @@ __contract__(
     invariant(ctr > 0 ==> array_bound(entry->coeffs, 0, ctr - 1,
                                           0, (MLKEM_Q - 1))))
   {
-    shake128_squeezeblocks(buf, 1, &state);
-    ctr = rej_uniform(entry->coeffs, MLKEM_N, ctr, buf, SHAKE128_RATE);
+    xof_squeezeblocks(buf, 1, &state);
+    ctr = rej_uniform(entry->coeffs, MLKEM_N, ctr, buf, XOF_RATE);
   }
 
-  shake128_ctx_release(&state);
+  xof_release(&state);
 }
 
 

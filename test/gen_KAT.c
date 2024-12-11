@@ -22,14 +22,6 @@ static void print_hex(const char *label, const uint8_t *data, size_t size)
   printf("\n");
 }
 
-static void shake256_absorb(shake256incctx *state, const uint8_t *input,
-                            size_t inlen)
-{
-  shake256_inc_init(state);
-  shake256_inc_absorb(state, input, inlen);
-  shake256_inc_finalize(state);
-}
-
 int main(void)
 {
   unsigned int i;
@@ -46,13 +38,11 @@ int main(void)
       64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
       80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
   };
-
-  shake256incctx state;
-  shake256_absorb(&state, seed, sizeof(seed));
+  shake256(coins, sizeof(coins), seed, sizeof(seed));
 
   for (i = 0; i < NTESTS; i++)
   {
-    shake256_inc_squeeze(coins, sizeof(coins), &state);
+    shake256(coins, sizeof(coins), coins, sizeof(coins));
 
     crypto_kem_keypair_derand(pk, sk, coins);
     print_hex("pk", pk, sizeof(pk));
@@ -71,8 +61,6 @@ int main(void)
 
     print_hex("ss", ss1, sizeof(ss1));
   }
-
-  shake256_inc_ctx_release(&state);
 
   return 0;
 }
