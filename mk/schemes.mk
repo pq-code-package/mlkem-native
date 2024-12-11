@@ -17,6 +17,9 @@ MLKEM1024_DIR = $(BUILD_DIR)/mlkem1024
 define BUILD_LIB
 $(BUILD_DIR)/lib$(1).a: CFLAGS += -static
 $(BUILD_DIR)/lib$(1).a: $(call MAKE_OBJS,$(BUILD_DIR)/$(1),$(SOURCES))
+
+# NOTE: the order matters, or else the `MLKEM_K` preprocessor won't be properly set
+$(BUILD_DIR)/libmlkem.a: $(BUILD_DIR)/lib$(1).a $(call MAKE_OBJS,$(BUILD_DIR)/$(1),$(SOURCES))
 endef
 
 $(BUILD_DIR)/libmlkem512.a: CPPFLAGS += -DMLKEM_K=2
