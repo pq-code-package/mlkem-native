@@ -19,7 +19,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/ntt.c
 
 CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_invntt_tomont
-USE_FUNCTION_CONTRACTS= invntt_layer fqmul
+USE_FUNCTION_CONTRACTS= invntt_layer7_invert invntt_layer6 invntt_layer54 invntt_layer321
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
