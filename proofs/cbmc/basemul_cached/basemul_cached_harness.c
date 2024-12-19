@@ -6,6 +6,10 @@
 #include "ntt.h"
 #include "reduce.h"
 
+#define basemul_cached MLKEM_NAMESPACE(basemul_cached)
+void basemul_cached(int16_t r[2], const int16_t a[2], const int16_t b[2],
+                    const int16_t b_cached);
+
 void harness(void)
 {
   int16_t *a, *b, *r, b_cached;

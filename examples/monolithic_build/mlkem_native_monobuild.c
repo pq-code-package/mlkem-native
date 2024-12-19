@@ -25,7 +25,6 @@
 #include "mlkem/polyvec.c"
 #include "mlkem/rej_uniform.c"
 #include "mlkem/verify.c"
-#include "mlkem/zetas.c"
 
 
 /*
@@ -1145,23 +1144,128 @@
 #endif
 
 /* mlkem/ntt.c */
+#if defined(MONT_F)
+#undef MONT_F
+#endif
+
+/* mlkem/ntt.c */
+#if defined(NTT_BOUND1)
+#undef NTT_BOUND1
+#endif
+
+/* mlkem/ntt.c */
+#if defined(NTT_BOUND2)
+#undef NTT_BOUND2
+#endif
+
+/* mlkem/ntt.c */
+#if defined(NTT_BOUND4)
+#undef NTT_BOUND4
+#endif
+
+/* mlkem/ntt.c */
+#if defined(NTT_BOUND6)
+#undef NTT_BOUND6
+#endif
+
+/* mlkem/ntt.c */
+#if defined(NTT_BOUND7)
+#undef NTT_BOUND7
+#endif
+
+/* mlkem/ntt.c */
+#if defined(NTT_BOUND8)
+#undef NTT_BOUND8
+#endif
+
+/* mlkem/ntt.c */
+#if defined(ct_butterfly)
+#undef ct_butterfly
+#endif
+
+/* mlkem/ntt.c */
 #if defined(empty_cu_ntt)
 #undef empty_cu_ntt
 #endif
 
 /* mlkem/ntt.c */
-#if defined(invntt_layer)
-#undef invntt_layer
+#if defined(gs_butterfly_defer)
+#undef gs_butterfly_defer
 #endif
 
 /* mlkem/ntt.c */
-#if defined(ntt_butterfly_block)
-#undef ntt_butterfly_block
+#if defined(gs_butterfly_reduce)
+#undef gs_butterfly_reduce
 #endif
 
 /* mlkem/ntt.c */
-#if defined(ntt_layer)
-#undef ntt_layer
+#if defined(invntt_layer321)
+#undef invntt_layer321
+#endif
+
+/* mlkem/ntt.c */
+#if defined(invntt_layer54)
+#undef invntt_layer54
+#endif
+
+/* mlkem/ntt.c */
+#if defined(invntt_layer54_butterfly)
+#undef invntt_layer54_butterfly
+#endif
+
+/* mlkem/ntt.c */
+#if defined(invntt_layer6)
+#undef invntt_layer6
+#endif
+
+/* mlkem/ntt.c */
+#if defined(invntt_layer6_butterfly)
+#undef invntt_layer6_butterfly
+#endif
+
+/* mlkem/ntt.c */
+#if defined(invntt_layer7_invert)
+#undef invntt_layer7_invert
+#endif
+
+/* mlkem/ntt.c */
+#if defined(invntt_layer7_invert_butterfly)
+#undef invntt_layer7_invert_butterfly
+#endif
+
+/* mlkem/ntt.c */
+#if defined(ntt_layer123)
+#undef ntt_layer123
+#endif
+
+/* mlkem/ntt.c */
+#if defined(ntt_layer45)
+#undef ntt_layer45
+#endif
+
+/* mlkem/ntt.c */
+#if defined(ntt_layer45_butterfly)
+#undef ntt_layer45_butterfly
+#endif
+
+/* mlkem/ntt.c */
+#if defined(ntt_layer6)
+#undef ntt_layer6
+#endif
+
+/* mlkem/ntt.c */
+#if defined(ntt_layer6_butterfly)
+#undef ntt_layer6_butterfly
+#endif
+
+/* mlkem/ntt.c */
+#if defined(ntt_layer7)
+#undef ntt_layer7
+#endif
+
+/* mlkem/ntt.c */
+#if defined(ntt_layer7_butterfly)
+#undef ntt_layer7_butterfly
 #endif
 
 /* mlkem/ntt.h */
@@ -1170,8 +1274,8 @@
 #endif
 
 /* mlkem/ntt.h */
-#if defined(basemul_cached)
-#undef basemul_cached
+#if defined(layer7_zetas)
+#undef layer7_zetas
 #endif
 
 /* mlkem/ntt.h */
@@ -1184,9 +1288,9 @@
 #undef poly_ntt
 #endif
 
-/* mlkem/ntt.h */
-#if defined(zetas)
-#undef zetas
+/* mlkem/poly.c */
+#if defined(basemul_cached)
+#undef basemul_cached
 #endif
 
 /* mlkem/poly.c */
@@ -1545,6 +1649,11 @@
 #endif
 
 /* mlkem/sys.h */
+#if defined(NO_INLINE)
+#undef NO_INLINE
+#endif
+
+/* mlkem/sys.h */
 #if defined(RESTRICT)
 #undef RESTRICT
 #endif
@@ -1652,11 +1761,6 @@
 /* mlkem/verify.h */
 #if defined(value_barrier_u8)
 #undef value_barrier_u8
-#endif
-
-/* mlkem/zetas.c */
-#if defined(empty_cu_zetas)
-#undef empty_cu_zetas
 #endif
 
 #endif /* MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS */

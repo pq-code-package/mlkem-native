@@ -64,20 +64,24 @@
 /* Do not use inline for C90 builds*/
 #if !defined(INLINE)
 #if !defined(inline)
-#if defined(_MSC_VER)
-#define INLINE __inline
-#define ALWAYS_INLINE __forceinline
-#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 #define INLINE inline
 #define ALWAYS_INLINE __attribute__((always_inline))
+#define NO_INLINE __attribute__((noinline))
+#elif defined(_MSC_VER)
+#define INLINE __inline
+#define ALWAYS_INLINE __forceinline
+#define NO_INLINE
 #else
 #define INLINE __attribute__((unused))
 #define ALWAYS_INLINE
+#define NO_INLINE
 #endif
 
 #else
 #define INLINE inline
 #define ALWAYS_INLINE __attribute__((always_inline))
+#define NO_INLINE __attribute__((noinline))
 #endif
 #endif
 

@@ -953,6 +953,7 @@ result:
 	$(MAKE) -B _result
 	@ echo Running 'litani build'
 	$(LITANI) run-build
+	tail -4 $(LOGDIR)/result.txt
 
 _property: $(LOGDIR)/property.xml
 property:

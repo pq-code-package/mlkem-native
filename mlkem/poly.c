@@ -18,6 +18,13 @@
 #include "symmetric.h"
 #include "verify.h"
 
+/* Static namespacing
+ * This is to facilitate building multiple instances
+ * of mlkem-native (e.g. with varying security levels)
+ * within a single compilation unit. */
+#define basemul_cached MLKEM_NAMESPACE_K(basemul_cached)
+/* End of static namespacing */
+
 #if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
 MLKEM_NATIVE_INTERNAL_API
 void poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const poly *a)
@@ -392,6 +399,52 @@ void poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const poly *a)
   }
 }
 
+/************************************************************
+ * Name: basemul_cached
+ *
+ * Description: Computes a representative modulo q of
+ *              (a0*b0 + a1*b_cached, a0*b1 + a1*b0)/65536
+ *
+ *              If b_cached is b1*zeta, this represents the
+ *              product of (a0 + a1*X) and (b0 + b1*X) in
+ *              Fq[X]/(X^2 - zeta).
+ *
+ * Arguments: - r: Pointer to output polynomial
+ *                   Upon return, coefficients are bound by
+ *                   2*MLKEM_Q in absolute value.
+ *            - a: Pointer to first input polynomial
+ *                   Every coefficient must be in [0..4095]
+ *            - b: Pointer to second input polynomial
+ *                   Can have arbitrary int16_t coefficients
+ *            - b_cached: Some precomputed value, typically derived from
+ *                   b1 and a twiddle factor. Can be an arbitary int16_t.
+ ************************************************************/
+static void basemul_cached(int16_t r[2], const int16_t a[2], const int16_t b[2],
+                           int16_t b_cached)
+__contract__(
+  requires(memory_no_alias(r, 2 * sizeof(int16_t)))
+  requires(memory_no_alias(a, 2 * sizeof(int16_t)))
+  requires(memory_no_alias(b, 2 * sizeof(int16_t)))
+  requires(array_bound(a, 0, 2, 0, UINT12_LIMIT))
+  assigns(memory_slice(r, 2 * sizeof(int16_t)))
+  ensures(array_abs_bound(r, 0, 2, 2 * MLKEM_Q))
+)
+{
+  int32_t t0, t1;
+  debug_assert_bound(a, 2, 0, UINT12_LIMIT);
+
+  t0 = (int32_t)a[1] * b_cached;
+  t0 += (int32_t)a[0] * b[0];
+  t1 = (int32_t)a[0] * b[1];
+  t1 += (int32_t)a[1] * b[0];
+
+  /* |ti| < 2 * q * 2^15 */
+  r[0] = montgomery_reduce(t0);
+  r[1] = montgomery_reduce(t1);
+
+  debug_assert_abs_bound(r, 2, 2 * MLKEM_Q);
+}
+
 MLKEM_NATIVE_INTERNAL_API
 void poly_basemul_montgomery_cached(poly *r, const poly *a, const poly *b,
                                     const poly_mulcache *b_cache)
@@ -504,8 +557,8 @@ void poly_mulcache_compute(poly_mulcache *x, const poly *a)
     invariant(i <= MLKEM_N / 4)
     invariant(array_abs_bound(x->coeffs, 0, 2 * i, MLKEM_Q)))
   {
-    x->coeffs[2 * i + 0] = fqmul(a->coeffs[4 * i + 1], zetas[64 + i]);
-    x->coeffs[2 * i + 1] = fqmul(a->coeffs[4 * i + 3], -zetas[64 + i]);
+    x->coeffs[2 * i + 0] = fqmul(a->coeffs[4 * i + 1], layer7_zetas[i]);
+    x->coeffs[2 * i + 1] = fqmul(a->coeffs[4 * i + 3], -layer7_zetas[i]);
   }
 
   /*

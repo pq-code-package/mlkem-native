@@ -3,11 +3,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = poly_invntt_tomont_harness
+HARNESS_FILE = ntt_layer45_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = poly_invntt_tomont
+PROOF_UID = ntt_layer45
 
 DEFINES +=
 INCLUDES +=
@@ -18,16 +18,16 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/ntt.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_invntt_tomont
-USE_FUNCTION_CONTRACTS= $(MLKEM_NAMESPACE)invntt_layer7_invert $(MLKEM_NAMESPACE)invntt_layer6 $(MLKEM_NAMESPACE)invntt_layer54 $(MLKEM_NAMESPACE)invntt_layer321
+CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)ntt_layer45
+USE_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)ntt_layer45_butterfly
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2
+CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = poly_invntt_tomont
+FUNCTION_NAME = $(MLKEM_NAMESPACE)ntt_layer45
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
@@ -36,7 +36,7 @@ FUNCTION_NAME = poly_invntt_tomont
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 12
+CBMC_OBJECT_BITS = 10
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
