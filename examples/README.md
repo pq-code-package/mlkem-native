@@ -17,3 +17,8 @@ implementation.
 
 See [custom_backend](custom_backend) for an example of how to use mlkem-native with a custom configuration file and a
 custom FIPS-202 backend.
+
+## Building mlkem-native with a single compilation unit
+
+See [monolithic_build](monolithic_build) for an example of how to build mlkem-native (with C backend) from a single
+auto-generated compilation unit.

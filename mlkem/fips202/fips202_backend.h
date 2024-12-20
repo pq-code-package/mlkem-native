@@ -3,9 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifdef MLKEM_NATIVE_FIPS202_IMPL_H
-#error Only one FIPS202 assembly profile can be defined -- did you include multiple profiles?
-#else
+#if !defined(MLKEM_NATIVE_FIPS202_IMPL_H)
 #define MLKEM_NATIVE_FIPS202_IMPL_H
 
 #if defined(MLKEM_NATIVE_FIPS202_BACKEND_IMPL)
@@ -18,6 +16,5 @@
  * the sanity checks won't have an effect. */
 #include "fips202/native/api.h"
 #endif
-
 
 #endif /* MLKEM_NATIVE_FIPS202_IMPL_H */
