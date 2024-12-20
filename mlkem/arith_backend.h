@@ -3,9 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifdef MLKEM_NATIVE_ARITH_IMPL_H
-#error Only one ARITH assembly profile can be defined -- did you include multiple profiles?
-#else
+#if !defined(MLKEM_NATIVE_ARITH_IMPL_H)
 #define MLKEM_NATIVE_ARITH_IMPL_H
 
 #include "common.h"

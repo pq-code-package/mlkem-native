@@ -140,6 +140,9 @@ jobs:
       - name: custom_backend
         run: |
           make run -C examples/custom_backend
+      - name: monolithic_build
+        run: |
+          make run -C examples/monolithic_build
   build_kat:
     needs: [quickcheck, quickcheck-windows, quickcheck-c90, quickcheck-lib, examples, lint, lint-markdown-link]
     strategy:

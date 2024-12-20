@@ -4,6 +4,7 @@
 
 import subprocess
 import argparse
+import glob
 import os
 
 modulus = 3329
@@ -15,6 +16,7 @@ montgomery_factor = pow(2, 16, modulus)
 # It currently covers:
 # - zeta values for the reference NTT and invNTT
 # - lookup tables used for fast rejection sampling
+# - monolithic C file for single-CU build
 
 
 def gen_header():
@@ -530,6 +532,36 @@ def gen_avx2_fwd_ntt_zeta_file(dry_run=False):
     )
 
 
+def get_source_files():
+    c_src = []
+    for i in range(5):
+        c_src += glob.glob("mlkem/" + "**/" * i + "*.c")
+    return c_src
+
+
+def gen_monolithic_source_file_core():
+    for c in get_source_files():
+        yield f'#include "{c}"'
+    yield ""
+
+
+def gen_monolithic_source_file(dry_run=False):
+    def gen():
+        yield from gen_header()
+        yield "/*"
+        yield " * Monolithic compilation unit bundling all compilation units within mlkem-native"
+        yield " */"
+        yield ""
+        yield from gen_monolithic_source_file_core()
+        yield ""
+
+    update_file(
+        "examples/monolithic_build/mlkem_native_all.c",
+        "\n".join(gen()),
+        dry_run=dry_run,
+    )
+
+
 def _main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -542,6 +574,8 @@ def _main():
     gen_aarch64_rej_uniform_table(args.dry_run)
     gen_avx2_fwd_ntt_zeta_file(args.dry_run)
     gen_avx2_rej_uniform_table(args.dry_run)
+
+    gen_monolithic_source_file(args.dry_run)
 
 
 if __name__ == "__main__":
