@@ -41,7 +41,6 @@ CFLAGS += \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
-	-O3 \
 	-fomit-frame-pointer \
 	-std=c99 \
 	-pedantic \
