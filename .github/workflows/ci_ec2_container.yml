@@ -59,6 +59,9 @@ on:
       cbmc_mlkem_k:
         type: string
         default: 2
+      container:
+        type: string
+        default: ''
 env:
   AWS_ROLE: arn:aws:iam::559050233797:role/mlkem-c-aarch64-gh-action
   AWS_REGION: us-east-1
@@ -115,27 +118,42 @@ jobs:
   tests:
     name: Run tests
     needs: start-ec2-runner
+    if: ${{ inputs.container != '' }}
     runs-on: ${{ needs.start-ec2-runner.outputs.label }}
+    container:
+      localhost:5000/${{ inputs.container }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Linting
-        if: ${{ inputs.lint }}
-        uses: ./.github/actions/lint
-        with:
-          nix-shell: ci-linter
-          gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
-          nix-verbose: ${{ inputs.verbose }}
-      - name: Preprocess
-        id: preprocess
+      # We're not using the checkout action here because on it's not supported
+      # on all containers we want to test. Resort to a manual checkout.
+      #
+      # We can't hoist this into an action since calling an action can only
+      # be done after checkout.
+      - name: Manual checkout
         shell: bash
         run: |
-          echo "nix-shell=${{ inputs.cbmc && 'ci-cbmc' || 'ci' }}${{ (inputs.compile_mode == 'cross' || inputs.compile_mode == 'all') && '-cross' || '' }}" >> $GITHUB_OUTPUT
+          if /usr/bin/which yum; then
+             yum install git -y
+          elif /usr/bin/which apt; then
+             apt update
+             apt install git -y
+          fi
+
+          git init
+          git remote add origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
+          git fetch origin --depth 1 $GITHUB_SHA
+          git checkout FETCH_HEAD
+      - uses: ./.github/actions/setup-os
+        with:
+          sudo: ""
+      - name: make quickcheck
+        run: |
+          OPT=0 make quickcheck >/dev/null
+          make clean            >/dev/null
+          OPT=1 make quickcheck >/dev/null
       - name: Functional Tests
         uses: ./.github/actions/multi-functest
         with:
-          nix-shell: ${{ steps.preprocess.outputs.nix-shell }}
-          nix-cache: ${{ inputs.cbmc || inputs.compile_mode == 'cross' || inputs.compile_mode == 'all' }}
-          nix-verbose: ${{ inputs.verbose }}
+          nix-shell: ""
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
           cflags: ${{ inputs.cflags }}
           compile_mode: ${{ inputs.compile_mode }}
@@ -144,14 +162,6 @@ jobs:
           kat: ${{ inputs.kattest }}
           nistkat: ${{ inputs.nistkattest }}
           acvp: ${{ inputs.acvptest }}
-      - name: CBMC
-        if: ${{ inputs.cbmc && (success() || failure()) }}
-        uses: ./.github/actions/cbmc
-        with:
-          nix-shell: ${{ steps.preprocess.outputs.nix-shell }}
-          nix-verbose: ${{ inputs.verbose }}
-          mlkem_k: ${{ inputs.cbmc_mlkem_k }}
-          gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
   stop-ec2-runner:
     name: Stop instance (${{ inputs.ec2_instance_type }})
     permissions:

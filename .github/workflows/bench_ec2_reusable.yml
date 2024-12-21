@@ -165,7 +165,7 @@ jobs:
     if: ${{ inputs.compiler != '' }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: ./.github/actions/setup-ubuntu
+      - uses: ./.github/actions/setup-apt
         with:
           packages: ${{ inputs.additional_packages }}
       - name: Set compiler
