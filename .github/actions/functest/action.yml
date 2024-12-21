@@ -68,26 +68,28 @@ runs:
             ## Setup
             Architecture: $ARCH
             - $(uname -a)
-            - $(nix --version)
+            - $(nix --version || echo 'nix not present')
             - $(bash --version | grep -m1 "")
+            - $(python3 --version)
             - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
           EOF
           cat >> $GITHUB_STEP_SUMMARY <<-EOF
             ## Setup
             Architecture: $ARCH
             - $(uname -a)
-            - $(nix --version)
+            - $(nix --version || echo 'nix not present')
             - $(bash --version | grep -m1 "")
+            - $(python3 --version)
             - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
           EOF
       - name: ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }})
         shell: ${{ env.SHELL }}
         run: |
-          tests all  --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.NISTKAT }} --${{ env.ACVP }} -v
+          ./scripts/tests all  --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.NISTKAT }} --${{ env.ACVP }} -v
       - name: Check namespacing ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }})
         shell: ${{ env.SHELL }}
         run: |
-          check-namespace
+          ./scripts/ci/check-namespace
       - name: Post ${{ env.MODE }} Tests
         shell: ${{ env.SHELL }}
         if: success() || failure()

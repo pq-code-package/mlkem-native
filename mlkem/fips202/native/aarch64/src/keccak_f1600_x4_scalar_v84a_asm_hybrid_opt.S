@@ -145,7 +145,7 @@
 
     /* Mapping of Kecck-f1600 state to scalar registers
      * at the beginning and end of each round. */
-    sAba     .req x1
+    tAba     .req x1   /* Some compilers don't like sAba */
     sAbe     .req x6
     sAbi     .req x11
     sAbo     .req x16
@@ -279,7 +279,7 @@
 
 .macro store_input_scalar idx
     add input_addr, input_addr, #((2 + \idx)*25*8)
-    stp sAba, sAbe, [input_addr, #(1*8*0)]
+    stp tAba, sAbe, [input_addr, #(1*8*0)]
     stp sAbi, sAbo, [input_addr, #(1*8*2)]
     stp sAbu, sAga, [input_addr, #(1*8*4)]
     stp sAge, sAgi, [input_addr, #(1*8*6)]
@@ -297,7 +297,7 @@
 
 .macro load_input_scalar idx
     add input_addr, input_addr, #((2 + \idx)*25*8)
-    ldp sAba, sAbe, [input_addr, #(1*8*0)]
+    ldp tAba, sAbe, [input_addr, #(1*8*0)]
     ldp sAbi, sAbo, [input_addr, #(1*8*2)]
     ldp sAbu, sAga, [input_addr, #(1*8*4)]
     ldp sAge, sAgi, [input_addr, #(1*8*6)]
@@ -495,7 +495,7 @@
         eor x14, x26, x6, ror #46                 // .....................................................*
         eor x6, x27, x29, ror #41                 // .....................................................*
 
-    // eor5 X<sC0>, sAma, sAsa, sAba, sAga, sAka
+    // eor5 X<sC0>, sAma, sAsa, tAba, sAga, sAka
     // eor5 X<sC1>, sAme, sAse, sAbe, sAge, sAke
     // eor5 X<sC2>, sAmi, sAsi, sAbi, sAgi, sAki
     // eor5 X<sC3>, sAmo, sAso, sAbo, sAgo, sAko
@@ -507,7 +507,7 @@
     // eor X<sE2>, X<sC1>, X<sC3>, ror #63
     // eor X<sE4>, X<sC3>, X<sC0>, ror #63
 
-    // eor X<sBba>, sAba, X<sE0>
+    // eor X<sBba>, tAba, X<sE0>
     // eor X<sBsa>, sAbi, X<sE2>
     // eor X<sBbi>, sAki, X<sE2>
     // eor X<sBki>, sAko, X<sE3>
@@ -558,13 +558,13 @@
     // chi_step_ror sAsi, X<sBsi>, X<sBsu>, X<sBso>, 25, 27
     // chi_step_ror sAso, X<sBso>, X<sBsa>, X<sBsu>, 60, 21
     // chi_step_ror sAsu, X<sBsu>, X<sBse>, X<sBsa>, 57, 53
-    // chi_step_ror2 sAba, X<sBba>, X<sBbi>, X<sBbe>, 63, 21
+    // chi_step_ror2 tAba, X<sBba>, X<sBbi>, X<sBbe>, 63, 21
     // chi_step_ror sAbe, X<sBbe>, X<sBbo>, X<sBbi>, 42, 41
     // chi_step_ror sAbi, X<sBbi>, X<sBbu>, X<sBbo>, 57, 35
     // chi_step_ror sAbo, X<sBbo>, X<sBba>, X<sBbu>, 50, 43
     // chi_step_ror sAbu, X<sBbu>, X<sBbe>, X<sBba>, 44, 30
 
-    // eor sAba, sAba, X<cur_const>
+    // eor tAba, tAba, X<cur_const>
 .endm
 
 .macro vector_round
@@ -753,7 +753,7 @@
         eor x23, x3, x26, ror #52                 // ........................................................*
         eor x3, x29, x30, ror #24                 // ........................................................*
 
-    // eor X<sC0>, sAba,   sAga, ror #61
+    // eor X<sC0>, tAba,   sAga, ror #61
     // eor X<sC0>, X<sC0>, sAma, ror #54
     // eor X<sC0>, X<sC0>, sAka, ror #39
     // eor X<sC0>, X<sC0>, sAsa, ror #25
@@ -787,7 +787,7 @@
     // eor X<sE2>, X<sC1>, X<sC3>, ror #63
     // eor X<sE4>, X<sC3>, X<sC0>, ror #63
 
-    // eor X<sBba>, X<sE0>, sAba
+    // eor X<sBba>, X<sE0>, tAba
     // eor X<sBsa>, X<sE2>, sAbi, ror #50
     // eor X<sBbi>, X<sE2>, sAki, ror #46
     // eor X<sBki>, X<sE3>, sAko, ror #63
@@ -840,13 +840,13 @@
     // chi_step_ror sAsi, X<sBsi>, X<sBsu>, X<sBso>, 25, 27
     // chi_step_ror sAso, X<sBso>, X<sBsa>, X<sBsu>, 60, 21
     // chi_step_ror sAsu, X<sBsu>, X<sBse>, X<sBsa>, 57, 53
-    // chi_step_ror2 sAba, X<sBba>, X<sBbi>, X<sBbe>, 63, 21
+    // chi_step_ror2 tAba, X<sBba>, X<sBbi>, X<sBbe>, 63, 21
     // chi_step_ror sAbe, X<sBbe>, X<sBbo>, X<sBbi>, 42, 41
     // chi_step_ror sAbi, X<sBbi>, X<sBbu>, X<sBbo>, 57, 35
     // chi_step_ror sAbo, X<sBbo>, X<sBba>, X<sBbu>, 50, 43
     // chi_step_ror sAbu, X<sBbu>, X<sBbe>, X<sBba>, 44, 30
 
-    // eor sAba, sAba, X<cur_const>
+    // eor tAba, tAba, X<cur_const>
 .endm
 
 .macro final_scalar_rotate

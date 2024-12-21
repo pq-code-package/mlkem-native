@@ -6,19 +6,18 @@ import sys
 import hashlib
 import logging
 from enum import IntEnum
-from typing import TypedDict
 from functools import reduce
-import yaml
+import json
 
 CWD = os.getcwd()
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 
-def path(p: str):
+def path(p):
     return os.path.relpath(os.path.join(ROOT, p), CWD)
 
 
-def sha256sum(result: bytes) -> str:
+def sha256sum(result):
     m = hashlib.sha256()
     m.update(result)
     return m.hexdigest()
@@ -30,13 +29,12 @@ class SCHEME(IntEnum):
     MLKEM1024 = 3
 
     def __str__(self):
-        match self:
-            case SCHEME.MLKEM512:
-                return "ML-KEM-512"
-            case SCHEME.MLKEM768:
-                return "ML-KEM-768"
-            case SCHEME.MLKEM1024:
-                return "ML-KEM-1024"
+        if self == SCHEME.MLKEM512:
+            return "ML-KEM-512"
+        if self == SCHEME.MLKEM768:
+            return "ML-KEM-768"
+        if self == SCHEME.MLKEM1024:
+            return "ML-KEM-1024"
 
     def __iter__(self):
         return self
@@ -45,10 +43,15 @@ class SCHEME(IntEnum):
         return self + 1
 
     def suffix(self):
-        return self.name.removeprefix("MLKEM")
+        if self == SCHEME.MLKEM512:
+            return "512"
+        if self == SCHEME.MLKEM768:
+            return "768"
+        if self == SCHEME.MLKEM1024:
+            return "1024"
 
     @classmethod
-    def from_str(cls, s: str):
+    def from_str(cls, s):
         # Iterate through all enum members to find a match for the given string
         for m in cls:
             if str(m) == s:
@@ -70,48 +73,61 @@ class TEST_TYPES(IntEnum):
         return self.name.lower()
 
     def desc(self):
-        match self:
-            case TEST_TYPES.MLKEM:
-                return "Functional Test"
-            case TEST_TYPES.BENCH:
-                return "Benchmark"
-            case TEST_TYPES.BENCH_COMPONENTS:
-                return "Benchmark Components"
-            case TEST_TYPES.NISTKAT:
-                return "Nistkat Test"
-            case TEST_TYPES.KAT:
-                return "Kat Test"
-            case TEST_TYPES.ACVP:
-                return "ACVP Test"
+        if self == TEST_TYPES.MLKEM:
+            return "Functional Test"
+        if self == TEST_TYPES.BENCH:
+            return "Benchmark"
+        if self == TEST_TYPES.BENCH_COMPONENTS:
+            return "Benchmark Components"
+        if self == TEST_TYPES.NISTKAT:
+            return "Nistkat Test"
+        if self == TEST_TYPES.KAT:
+            return "Kat Test"
+        if self == TEST_TYPES.ACVP:
+            return "ACVP Test"
 
     def bin(self):
-        match self:
-            case TEST_TYPES.MLKEM:
-                return "test_mlkem"
-            case TEST_TYPES.BENCH:
-                return "bench_mlkem"
-            case TEST_TYPES.BENCH_COMPONENTS:
-                return "bench_components_mlkem"
-            case TEST_TYPES.NISTKAT:
-                return "gen_NISTKAT"
-            case TEST_TYPES.KAT:
-                return "gen_KAT"
-            case TEST_TYPES.ACVP:
-                return "acvp_mlkem"
+        if self == TEST_TYPES.MLKEM:
+            return "test_mlkem"
+        if self == TEST_TYPES.BENCH:
+            return "bench_mlkem"
+        if self == TEST_TYPES.BENCH_COMPONENTS:
+            return "bench_components_mlkem"
+        if self == TEST_TYPES.NISTKAT:
+            return "gen_NISTKAT"
+        if self == TEST_TYPES.KAT:
+            return "gen_KAT"
+        if self == TEST_TYPES.ACVP:
+            return "acvp_mlkem"
 
-    def bin_path(self, scheme: SCHEME):
+    def make_target(self):
+        if self == TEST_TYPES.MLKEM:
+            return "mlkem"
+        if self == TEST_TYPES.BENCH:
+            return "bench"
+        if self == TEST_TYPES.BENCH_COMPONENTS:
+            return "bench_components"
+        if self == TEST_TYPES.NISTKAT:
+            return "nistkat"
+        if self == TEST_TYPES.KAT:
+            return "kat"
+        if self == TEST_TYPES.ACVP:
+            return "acvp"
+
+    def bin_path(self, scheme):
         return path(
             f"test/build/{scheme.name.lower()}/bin/{self.bin()}{scheme.suffix()}"
         )
 
 
-def parse_meta(scheme: SCHEME, field: str) -> str:
-    with open("META.yml", "r") as f:
-        meta = yaml.safe_load(f)
+def parse_meta(scheme, field):
+    with open("META.json", "r") as f:
+        meta = json.load(f)
     return meta["implementations"][int(scheme) - 1][field]
 
 
-def github_summary(title: str, test_label: str, results: TypedDict):
+def github_summary(title, test_label, results):
+    """Generate summary for GitHub CI"""
     summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
 
     res = list(results.values())
@@ -197,9 +213,8 @@ def config_logger(verbose):
         logger.setLevel(logging.INFO)
 
 
-def logger(
-    test_type: TEST_TYPES, scheme: SCHEME, cross_prefix: str, opt: bool, i: int = None
-):
+def logger(test_type, scheme, cross_prefix, opt, i=None):
+    """Emit line indicating the processing of the given test"""
     compile_mode = "cross" if cross_prefix else "native"
     implementation = "opt" if opt else "no_opt"
 

@@ -13,11 +13,10 @@ CC  ?= gcc
 CPP ?= cpp
 AR  ?= ar
 # NOTE: gcc-ar is a wrapper around ar that ensures proper integration with GCC plugins,
-# 		such as lto. Using gcc-ar is preferred when creating or linking static libraries
-# 		if the binary is compiled with -flto.
-# 		However, this doesn't apply to darwin as it is using clang instead, and there's no
-# 		gcc-ar wrapper as well.
-CC_AR ?= $(if $(findstring Darwin,$(shell uname -s)),ar,gcc-ar)
+# 	such as lto. Using gcc-ar is preferred when creating or linking static libraries
+# 	if the binary is compiled with -flto. However, it is not universally present, so
+#       only use it if available.
+CC_AR ?= $(if $(shell which gcc-ar),gcc-ar,ar)
 
 CC  := $(CROSS_PREFIX)$(CC)
 CPP := $(CROSS_PREFIX)$(CPP)
@@ -42,7 +41,6 @@ CFLAGS += \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
-	-O3 \
 	-fomit-frame-pointer \
 	-std=c99 \
 	-pedantic \

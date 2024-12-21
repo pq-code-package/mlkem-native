@@ -8,7 +8,6 @@ import io
 import logging
 import subprocess
 from functools import reduce, partial
-from typing import Optional, Callable, TypedDict
 from util import (
     TEST_TYPES,
     SCHEME,
@@ -25,16 +24,14 @@ gh_env = os.environ.get("GITHUB_ENV")
 
 class CompileOptions(object):
 
-    def __init__(
-        self, cross_prefix: str, cflags: str, arch_flags: str, auto: bool, verbose: bool
-    ):
+    def __init__(self, cross_prefix, cflags, arch_flags, auto, verbose):
         self.cross_prefix = cross_prefix
         self.cflags = cflags
         self.arch_flags = arch_flags
         self.auto = auto
         self.verbose = verbose
 
-    def compile_mode(self) -> str:
+    def compile_mode(self):
         return "Cross" if self.cross_prefix else "Native"
 
 
@@ -69,10 +66,14 @@ class Base:
 
     def compile_schemes(
         self,
-        extra_make_envs={},
-        extra_make_args=[],
+        extra_make_envs=None,
+        extra_make_args=None,
     ):
         """compile or cross compile with some extra environment variables and makefile arguments"""
+        if extra_make_envs is None:
+            extra_make_envs = {}
+        if extra_make_args is None:
+            extra_make_args = []
 
         if gh_env is not None:
             print(
@@ -95,20 +96,23 @@ class Base:
         args = [
             "make",
             f"CROSS_PREFIX={self.cross_prefix}",
-            f"{self.test_type}",
+            f"{self.test_type.make_target()}",
         ] + extra_make_args
 
-        make_envs = ({"CFLAGS": self.cflags} if self.cflags is not None else {}) | (
-            {"ARCH_FLAGS": f"{self.arch_flags}"} if self.arch_flags is not None else {}
-        )
-        extra_make_envs.update(make_envs)
+        env = os.environ.copy()
+        if self.cflags is not None:
+            env["CFLAGS"] = self.cflags
+        if self.arch_flags is not None:
+            env["ARCH_FLAGS"] = self.arch_flags
+
+        env.update(extra_make_envs)
 
         log.info(dict2str(extra_make_envs) + " ".join(args))
 
         p = subprocess.run(
             args,
             stdout=subprocess.DEVNULL if not self.verbose else None,
-            env=os.environ.copy() | extra_make_envs,
+            env=env,
         )
 
         if p.returncode != 0:
@@ -122,13 +126,30 @@ class Base:
 
     def run_scheme(
         self,
-        scheme: SCHEME,
-        actual_proc: Callable[[bytes], str] = None,
-        expect_proc: Callable[[SCHEME, str], tuple[bool, str]] = None,
-        cmd_prefix: [str] = [],
-        extra_args: [str] = [],
+        scheme,
+        actual_proc=None,
+        expect_proc=None,
+        cmd_prefix=None,
+        extra_args=None,
     ):
-        """Run the binary in all different ways"""
+        """Run the binary in all different ways
+
+        Arguments:
+
+        - scheme: Scheme to test
+        - actual_proc: Callable to process the raw byte-output
+            of the test run with.
+        - expected_proc: Checker function. Callable receiving test type and
+            processed output, and returns success/failure and potentially
+            error string
+        - cmd_prefix: Command prefix; array of strings, or None
+        - extra_args: Extra arguments; array of strings, or None
+        """
+        if cmd_prefix is None:
+            cmd_prefix = []
+        if extra_args is None:
+            extra_args = []
+
         log = logger(self.test_type, scheme, self.cross_prefix, self.opt, self.i)
         self.i += 1
 
@@ -180,9 +201,9 @@ class Test_Implementations:
 
     def compile(
         self,
-        opt: bool,
-        extra_make_envs={},
-        extra_make_args=[],
+        opt,
+        extra_make_envs=None,
+        extra_make_args=None,
     ):
         self.ts["opt" if opt else "no_opt"].compile_schemes(
             extra_make_envs,
@@ -191,13 +212,31 @@ class Test_Implementations:
 
     def run_scheme(
         self,
-        opt: bool,
-        scheme: SCHEME,
-        actual_proc: Callable[[bytes], str] = None,
-        expect_proc: Callable[[SCHEME, str], tuple[bool, str]] = None,
-        cmd_prefix: [str] = [],
-        extra_args: [str] = [],
-    ) -> TypedDict:
+        opt,
+        scheme,
+        actual_proc=None,
+        expect_proc=None,
+        cmd_prefix=None,
+        extra_args=None,
+    ):
+        """Arguments:
+
+        - opt: Whether build should include native backends or not
+        - scheme: Scheme to run
+        - actual_proc: Callable to process the raw byte-output
+            of the test run with.
+        - expected_proc: Checker function. Callable receiving test type and
+            processed output, and returns success/failure and potentially
+            error string
+        - cmd_prefix: Command prefix; array of strings, or None
+        - extra_args: Extra arguments; array of strings, or None
+        """
+        if cmd_prefix is None:
+            cmd_prefix = []
+        if extra_args is None:
+            extra_args = []
+
+        # Returns TypedDict
         k = "opt" if opt else "no_opt"
 
         results = {}
@@ -209,13 +248,25 @@ class Test_Implementations:
         return results
 
     def run_schemes(
-        self,
-        opt: bool,
-        actual_proc: Callable[[bytes], str] = None,
-        expect_proc: Callable[[SCHEME, str], tuple[bool, str]] = None,
-        cmd_prefix: [str] = [],
-        extra_args: [str] = [],
-    ) -> TypedDict:
+        self, opt, actual_proc=None, expect_proc=None, cmd_prefix=None, extra_args=None
+    ):
+        """Arguments:
+
+        - opt: Whether native backends should be enabled
+        - actual_proc: Functionto process the raw byte-output
+                       of the test run with.
+        - expected_proc: Checker function. Receives test type and
+                         processed output, and returns success/failure
+                         and potentially error string
+        - cmd_prefix: Command prefix; array of strings
+        - extra_args: Extra arguments; array of strings
+        """
+        if cmd_prefix is None:
+            cmd_prefix = []
+        if extra_args is None:
+            extra_args = []
+
+        # Returns
         results = {}
 
         k = "opt" if opt else "no_opt"
@@ -312,7 +363,9 @@ class Tests:
     def _run_func(self, opt: bool):
         """Underlying function for functional test"""
 
-        def expect(scheme: SCHEME, actual: str) -> tuple[bool, str]:
+        def expect(scheme: SCHEME, actual: str):
+            """Checks whether the hashed output of the scheme matches the META.yml"""
+
             sk_bytes = parse_meta(scheme, "length-secret-key")
             pk_bytes = parse_meta(scheme, "length-public-key")
             ct_bytes = parse_meta(scheme, "length-ciphertext")
@@ -355,7 +408,8 @@ class Tests:
             exit(1)
 
     def _run_nistkat(self, opt: bool):
-        def expect_proc(scheme: SCHEME, actual: str) -> tuple[bool, str]:
+        def expect_proc(scheme: SCHEME, actual: str):
+            """Checks whether the hashed output of the scheme matches the META.yml"""
             expect = parse_meta(scheme, "nistkat-sha256")
             fail = expect != actual
 
@@ -390,7 +444,8 @@ class Tests:
             exit(1)
 
     def _run_kat(self, opt: bool):
-        def expect_proc(scheme: SCHEME, actual: str) -> tuple[bool, str]:
+        def expect_proc(scheme: SCHEME, actual: str):
+            """Checks whether the hashed output of the scheme matches the META.yml"""
             expect = parse_meta(scheme, "kat-sha256")
             fail = expect != actual
 
@@ -435,12 +490,11 @@ class Tests:
         with open(acvp_encapDecap_json, "r") as f:
             acvp_encapDecap_data = json.load(f)
 
-        def actual_proc(bs: bytes) -> str:
+        def actual_proc(bs: bytes):
             return bs.decode("utf-8")
 
-        def _expect_proc(
-            tc: TypedDict, scheme: SCHEME, actual: str
-        ) -> tuple[bool, str]:
+        def _expect_proc(tc, scheme, actual):
+            """Checks whether the ACVP result is as expected"""
             fail = False
             err = ""
             for l in actual.splitlines():
@@ -455,7 +509,7 @@ class Tests:
 
         opt_label = "opt" if opt else "no_opt"
 
-        def init_results() -> TypedDict:
+        def init_results():
             results = {}
             results[opt_label] = {}
             for s in SCHEME:
@@ -583,7 +637,7 @@ class Tests:
         self,
         t: Test_Implementations,
         opt: bool,
-    ) -> TypedDict:
+    ):
         return t.run_schemes(opt, cmd_prefix=self.cmd_prefix)
 
     def bench(

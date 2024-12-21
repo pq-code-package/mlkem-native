@@ -1,35 +1,34 @@
 # SPDX-License-Identifier: Apache-2.0
 
-name: Setup ubuntu
-description: Setup ubuntu
+name: Dependencies (yum)
+description: Install dependencies via yum
 
 inputs:
   packages:
     description: Space-separated list of additional packages to install
     required: false
     default: ''
+  sudo:
+    required: false
+    default: 'sudo'
 
 runs:
   using: composite
   steps:
-    - name: Update package repository
-      shell: bash
-      run: |
-        sudo apt-get update
     - name: Install base packages
       shell: bash
       run: |
-        sudo apt-get install python3-venv python3-pip make -y
+        ${{ inputs.sudo }} yum install make git python3-pip -y
+        ${{ inputs.sudo }} pip3 install virtualenv
     - name: Install additional packages
       if: ${{ inputs.packages != ''}}
       shell: bash
       run: |
-        sudo apt-get install ${{ inputs.packages }} -y
+        ${{ inputs.sudo }} yum install ${{ inputs.packages }} -y
     - name: Setup Python venv
       shell: bash
       run: |
-        python3 -m venv venv
+        virtualenv venv
         source venv/bin/activate
         python3 -m pip install -r requirements.txt
-        deactivate
         echo "$(pwd)/venv/bin/" >> "$GITHUB_PATH"
