@@ -85,10 +85,57 @@ runs:
             - $(python3 --version)
             - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
           EOF
-      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }})
+
+      - name: Cleanup
         shell: ${{ env.SHELL }}
         run: |
-          ./scripts/tests all --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.NISTKAT }} --${{ env.ACVP }} -v
+          make clean
+      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (no_opt, func)
+        if: ${{ inputs.func == 'true' && (inputs.opt == 'no_opt' || inputs.opt == 'all') }}
+        shell: ${{ env.SHELL }}
+        run: |
+          CFLAGS="${{ inputs.cflags }}" make EXEC_PREFIX="${{ inputs.exec_wrapper }}" CROSS_PREFIX="${{ inputs.cross_prefix }}" AUTO=1 OPT=0 check_func
+      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (no_opt, nistkat)
+        if: ${{ inputs.nistkat == 'true' && (inputs.opt == 'no_opt' || inputs.opt == 'all') }}
+        shell: ${{ env.SHELL }}
+        run: |
+          CFLAGS="${{ inputs.cflags }}" make EXEC_PREFIX="${{ inputs.exec_wrapper }}" CROSS_PREFIX="${{ inputs.cross_prefix }}" AUTO=1 OPT=0 check_nistkat
+      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (no_opt, kat)
+        if: ${{ inputs.kat == 'true' && (inputs.opt == 'no_opt' || inputs.opt == 'all') }}
+        shell: ${{ env.SHELL }}
+        run: |
+          CFLAGS="${{ inputs.cflags }}" make EXEC_PREFIX="${{ inputs.exec_wrapper }}" CROSS_PREFIX="${{ inputs.cross_prefix }}" AUTO=1 OPT=0 check_kat
+      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (no_opt, acvp)
+        if: ${{ inputs.acvp == 'true' && (inputs.opt == 'no_opt' || inputs.opt == 'all') }}
+        shell: ${{ env.SHELL }}
+        run: |
+          CFLAGS="${{ inputs.cflags }}" make EXEC_PREFIX="${{ inputs.exec_wrapper }}" CROSS_PREFIX="${{ inputs.cross_prefix }}" AUTO=1 OPT=0 check_acvp
+
+      - name: Cleanup
+        shell: ${{ env.SHELL }}
+        run: |
+          make clean
+      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (opt, func)
+        if: ${{ inputs.func == 'true' && (inputs.opt == 'opt' || inputs.opt == 'all') }}
+        shell: ${{ env.SHELL }}
+        run: |
+          CFLAGS="${{ inputs.cflags }}" make EXEC_PREFIX="${{ inputs.exec_wrapper }}" CROSS_PREFIX="${{ inputs.cross_prefix }}" AUTO=1 OPT=1 check_func
+      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (opt, nistkat)
+        if: ${{ inputs.nistkat == 'true' && (inputs.opt == 'opt' || inputs.opt == 'all') }}
+        shell: ${{ env.SHELL }}
+        run: |
+          CFLAGS="${{ inputs.cflags }}" make EXEC_PREFIX="${{ inputs.exec_wrapper }}" CROSS_PREFIX="${{ inputs.cross_prefix }}" AUTO=1 OPT=1 check_nistkat
+      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (opt, kat)
+        if: ${{ inputs.kat == 'true' && (inputs.opt == 'opt' || inputs.opt == 'all') }}
+        shell: ${{ env.SHELL }}
+        run: |
+          CFLAGS="${{ inputs.cflags }}" make EXEC_PREFIX="${{ inputs.exec_wrapper }}" CROSS_PREFIX="${{ inputs.cross_prefix }}" AUTO=1 OPT=1 check_kat
+      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (opt, acvp)
+        if: ${{ inputs.acvp == 'true' && (inputs.opt == 'opt' || inputs.opt == 'all') }}
+        shell: ${{ env.SHELL }}
+        run: |
+          CFLAGS="${{ inputs.cflags }}" make EXEC_PREFIX="${{ inputs.exec_wrapper }}" CROSS_PREFIX="${{ inputs.cross_prefix }}" AUTO=1 OPT=1 check_acvp
+
       - name: Check namespacing ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }})
         shell: ${{ env.SHELL }}
         run: |
