@@ -330,25 +330,6 @@ class Tests:
             if opts.exec_wrapper:
                 logging.info(f"Running with customized wrapper {opts.exec_wrapper}")
                 self.cmd_prefix = self.cmd_prefix + opts.exec_wrapper.split(" ")
-            elif opts.cross_prefix and platform.system() != "Darwin":
-                logging.info(f"Emulating with QEMU")
-                if "x86_64" in opts.cross_prefix:
-                    self.cmd_prefix.append("qemu-x86_64")
-                elif "aarch64_be" in opts.cross_prefix:
-                    self.cmd_prefix.append("qemu-aarch64_be")
-                elif "aarch64" in opts.cross_prefix:
-                    self.cmd_prefix.append("qemu-aarch64")
-                elif "riscv64" in opts.cross_prefix:
-                    self.cmd_prefix.append("qemu-riscv64")
-                else:
-                    logging.info(
-                        f"Emulation for {opts.cross_prefix} on {platform.system()} not supported",
-                    )
-            elif opts.cross_prefix:
-                logging.error(
-                    f"Emulation for {opts.cross_prefix} on {platform.system()} not supported",
-                )
-                sys.exit(1)
 
     def _run_func(self, opt):
         """Underlying function for functional test"""
