@@ -10,6 +10,10 @@ include mk/crypto.mk
 include mk/schemes.mk
 include mk/rules.mk
 
+# Binary wrapper, e.g. qemu-aarch64/qemu-x86_64 for emulation.
+# Usually chosen consistently with CROSS_PREFIX for compilation.
+WRAP?=
+
 quickcheck: checkall
 
 buildall: mlkem nistkat kat acvp
@@ -19,19 +23,19 @@ checkall: buildall check_kat check_nistkat check_func check_acvp
 	$(Q)echo "  Everything checks fine!"
 
 check_kat: buildall
-	$(MLKEM512_DIR)/bin/gen_KAT512   | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-512  kat-sha256
-	$(MLKEM768_DIR)/bin/gen_KAT768   | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-768  kat-sha256
-	$(MLKEM1024_DIR)/bin/gen_KAT1024 | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-1024 kat-sha256
+	$(WRAP) $(MLKEM512_DIR)/bin/gen_KAT512   | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-512  kat-sha256
+	$(WRAP) $(MLKEM768_DIR)/bin/gen_KAT768   | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-768  kat-sha256
+	$(WRAP) $(MLKEM1024_DIR)/bin/gen_KAT1024 | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-1024 kat-sha256
 
 check_nistkat: buildall
-	$(MLKEM512_DIR)/bin/gen_NISTKAT512   | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-512  nistkat-sha256
-	$(MLKEM768_DIR)/bin/gen_NISTKAT768   | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-768  nistkat-sha256
-	$(MLKEM1024_DIR)/bin/gen_NISTKAT1024 | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-1024 nistkat-sha256
+	$(WRAP) $(MLKEM512_DIR)/bin/gen_NISTKAT512   | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-512  nistkat-sha256
+	$(WRAP) $(MLKEM768_DIR)/bin/gen_NISTKAT768   | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-768  nistkat-sha256
+	$(WRAP) $(MLKEM1024_DIR)/bin/gen_NISTKAT1024 | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-1024 nistkat-sha256
 
 check_func: buildall
-	$(MLKEM512_DIR)/bin/test_mlkem512
-	$(MLKEM768_DIR)/bin/test_mlkem768
-	$(MLKEM1024_DIR)/bin/test_mlkem1024
+	$(WRAP) $(MLKEM512_DIR)/bin/test_mlkem512
+	$(WRAP) $(MLKEM768_DIR)/bin/test_mlkem768
+	$(WRAP) $(MLKEM1024_DIR)/bin/test_mlkem1024
 
 check_acvp: buildall
 	python3 ./test/acvp_client.py

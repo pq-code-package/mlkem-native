@@ -85,6 +85,12 @@ runs:
             - $(python3 --version)
             - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
           EOF
+      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (no-opt, func)
+        if: ${{ inputs.func == 'true' && (inputs.opt == 'no-opt' || inputs.opt == 'all') }}
+        shell: ${{ env.SHELL }}
+        run: |
+          make clean
+          make EXEC_WRAPPER="${{ inputs.exec_wrapper }}" CROSS_PREFIX="${{ inputs.cross_prefix }}" CFLAGS="${{ inputs.cflags }}" AUTO=1 OPT=0 check_func
       - name: ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }})
         shell: ${{ env.SHELL }}
         run: |
