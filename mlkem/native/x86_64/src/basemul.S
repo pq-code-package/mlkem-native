@@ -33,7 +33,6 @@ vmovdqa		(64*\off+16)*2(%rdx),%ymm6		# d0
 vpmulhw		%ymm5,%ymm1,%ymm13			# a0c0.hi
 vpmulhw		%ymm6,%ymm1,%ymm1			# a0d0.hi
 vpmulhw		%ymm5,%ymm2,%ymm14			# b0c0.hi
-vpmulhw		%ymm6,%ymm2,%ymm2			# b0d0.hi
 
 vmovdqa		(64*\off+32)*2(%rdx),%ymm7		# c1
 vmovdqa		(64*\off+48)*2(%rdx),%ymm8		# d1
@@ -43,7 +42,6 @@ vmovdqa		(64*\off+48)*2(%rdx),%ymm8		# d1
 vpmulhw		%ymm7,%ymm3,%ymm15			# a1c1.hi
 vpmulhw		%ymm8,%ymm3,%ymm3			# a1d1.hi
 vpmulhw		%ymm7,%ymm4,%ymm0			# b1c1.hi
-vpmulhw		%ymm8,%ymm4,%ymm4			# b1d1.hi
 
 vmovdqa		%ymm13,(%rsp)
 
@@ -52,14 +50,20 @@ vmovdqa		%ymm13,(%rsp)
 vpmullw		%ymm5,%ymm9,%ymm13			# a0c0.lo
 vpmullw		%ymm6,%ymm9,%ymm9			# a0d0.lo
 vpmullw		%ymm5,%ymm10,%ymm5			# b0c0.lo
-vpmullw		%ymm6,%ymm10,%ymm10			# b0d0.lo
 
 /* Compute low-parts of monomials in (a1+b1*X)*(c1+d1*X), */
 /* using Montgomery twists calculated before */
 vpmullw		%ymm7,%ymm11,%ymm6			# a1c1.lo
 vpmullw		%ymm8,%ymm11,%ymm11			# a1d1.lo
 vpmullw		%ymm7,%ymm12,%ymm7			# b1c1.lo
-vpmullw		%ymm8,%ymm12,%ymm12			# b1d1.lo
+
+/* Use cached (d * zeta) to compute the high part of (b*d) terms */
+vmovdqa		(32*\off+ 0)*2(%r8),%ymm8	# d0z
+vpmulhw		%ymm8,%ymm2,%ymm2			# b0d0z.hi
+vpmullw		%ymm8,%ymm10,%ymm10			# b0d0z.lo
+vmovdqa		(32*\off+16)*2(%r8),%ymm8	# d1z
+vpmulhw		%ymm8,%ymm4,%ymm4			# b1d1z.hi
+vpmullw		%ymm8,%ymm12,%ymm12			# b1d1z.lo
 
 /* Compute 2nd high multiplication in Montgomery multiplication */
 vmovdqa		_16XQ*2(%rcx),%ymm8
@@ -83,21 +87,6 @@ vpsubw		%ymm11,%ymm3,%ymm11			# a1d1
 vpsubw		%ymm7,%ymm0,%ymm7			# b1c1
 vpsubw		%ymm12,%ymm4,%ymm12			# b1d1
 
-/* b0*d0 and b1*d1 need twisting by a twiddle, accounting
- * for X^2=zeta in F_q[X]/(X^2-zeta).
- *
- * TODO: This could be precomputed in the mulcache */
-vmovdqa		(%r9),%ymm0
-vmovdqa		32(%r9),%ymm1
-vpmullw		%ymm0,%ymm10,%ymm2
-vpmullw		%ymm0,%ymm12,%ymm3
-vpmulhw		%ymm1,%ymm10,%ymm10
-vpmulhw		%ymm1,%ymm12,%ymm12
-vpmulhw		%ymm8,%ymm2,%ymm2
-vpmulhw		%ymm8,%ymm3,%ymm3
-vpsubw		%ymm2,%ymm10,%ymm10			# rb0d0
-vpsubw		%ymm3,%ymm12,%ymm12			# rb1d1
-
 vpaddw		%ymm5,%ymm9,%ymm9
 vpaddw		%ymm7,%ymm11,%ymm11
 vpsubw		%ymm13,%ymm10,%ymm13
@@ -115,23 +104,19 @@ vmovdqa		%ymm11,(64*\off+48)*2(%rdi)
 .text
 .global MLKEM_ASM_NAMESPACE(basemul_avx2)
 MLKEM_ASM_NAMESPACE(basemul_avx2):
-mov		%rsp,%r8
+mov		%rsp,%r11
 and		$-32,%rsp
 sub		$32,%rsp
 
-lea		(_ZETAS_EXP+176)*2(%rcx),%r9
 schoolbook	0
 
-add		$32*2,%r9
 schoolbook	1
 
-add		$192*2,%r9
 schoolbook	2
 
-add		$32*2,%r9
 schoolbook	3
 
-mov		%r8,%rsp
+mov		%r11,%rsp
 ret
 
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT */

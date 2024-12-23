@@ -36,7 +36,7 @@ typedef struct
 typedef struct
 {
   int16_t coeffs[MLKEM_N >> 1];
-} poly_mulcache;
+} ALIGN poly_mulcache;
 
 /* Static namespacing
  * This is to facilitate building multiple instances

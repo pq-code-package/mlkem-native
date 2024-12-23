@@ -19,7 +19,7 @@ typedef struct
 typedef struct
 {
   poly_mulcache vec[MLKEM_K];
-} polyvec_mulcache;
+} ALIGN polyvec_mulcache;
 
 #define polyvec_compress_du MLKEM_NAMESPACE(polyvec_compress_du)
 /*************************************************
