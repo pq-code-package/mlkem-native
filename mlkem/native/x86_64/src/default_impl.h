@@ -67,9 +67,8 @@ static INLINE void poly_tomont_native(int16_t data[MLKEM_N])
 static INLINE void poly_mulcache_compute_native(int16_t x[MLKEM_N / 2],
                                                 const int16_t y[MLKEM_N])
 {
-  /* AVX2 backend does not use mulcache */
-  ((void)y);
-  ((void)x);
+  mulcache_compute_avx2((__m256i *)x, (const __m256i *)y,
+                        (const __m256i *)zetas_mulcache_avx2, qdata.vec);
 }
 
 static INLINE void polyvec_basemul_acc_montgomery_cached_native(
