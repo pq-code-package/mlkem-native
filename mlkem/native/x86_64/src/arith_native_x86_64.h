@@ -15,6 +15,9 @@
 #define REJ_UNIFORM_AVX_BUFLEN \
   (3 * 168) /* REJ_UNIFORM_AVX_BUFLEN * SHAKE128_RATE */
 
+#define zetas_mulcache_avx2 MLKEM_NAMESPACE(zetas_mulcache_avx2)
+extern ALIGN const int16_t zetas_mulcache_avx2[128];
+
 #define rej_uniform_avx2 MLKEM_NAMESPACE(rej_uniform_avx2)
 unsigned rej_uniform_avx2(int16_t *r, const uint8_t *buf);
 
@@ -38,7 +41,10 @@ void reduce_avx2(__m256i *r, const __m256i *qdata);
 
 #define basemul_avx2 MLKEM_NAMESPACE(basemul_avx2)
 void basemul_avx2(__m256i *r, const __m256i *a, const __m256i *b,
-                  const __m256i *qdata);
+                  const __m256i *qdata, const __m256i *bcache);
+#define mulcache_compute_avx2 MLKEM_NAMESPACE(mulcache_compute_avx2)
+void mulcache_compute_avx2(__m256i *out, const __m256i *in,
+                           const __m256i *zetas, const __m256i *qdata);
 
 #define polyvec_basemul_acc_montgomery_cached_avx2 \
   MLKEM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_avx2)
