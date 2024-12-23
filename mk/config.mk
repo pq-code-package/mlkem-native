@@ -29,7 +29,7 @@ CC_AR  := $(CROSS_PREFIX)$(CC_AR)
 #################
 # Common config #
 #################
-CFLAGS := \
+CFLAGS += \
 	$(ARCH_FLAGS) \
 	-Wall \
 	-Wextra \
@@ -45,8 +45,7 @@ CFLAGS := \
 	-fomit-frame-pointer \
 	-std=c99 \
 	-pedantic \
-	-MMD \
-	$(CFLAGS)
+	-MMD
 
 ##################
 # Some Variables #
