@@ -16,7 +16,7 @@ acvp_dir = "test/acvp_data"
 acvp_keygen_json = f"{acvp_dir}/acvp_keygen_internalProjection.json"
 acvp_encapDecap_json = f"{acvp_dir}/acvp_encapDecap_internalProjection.json"
 
-if os.environ.get("EXEC_PREFIX","").strip() != "":
+if os.environ.get("EXEC_PREFIX", "").strip() != "":
     exec_wrapper = [os.environ["EXEC_PREFIX"].strip()]
 else:
     exec_wrapper = []

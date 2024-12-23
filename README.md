@@ -26,20 +26,12 @@ bounds accesses, nor integer overflows during optimized modular arithmetic.
 git clone https://github.com/pq-code-package/mlkem-native.git
 cd mlkem-native
 
-# Install base packages
+# Make sure to have `make`
 sudo apt-get update
-sudo apt-get install python3-venv python3-pip make
+sudo apt-get install make
 
-# Setup Python environment
-python3 -m venv venv
-source venv/bin/activate
-python3 -m pip install -r requirements.txt
-
-# Build and run base tests
-make quickcheck
-
-# Build and run all tests
-./scripts/tests all
+# Build & run tests
+make checkall
 ```
 
 See [BUILDING.md](BUILDING.md) for more information.
