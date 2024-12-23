@@ -34,7 +34,7 @@ typedef struct
 typedef struct
 {
   int16_t coeffs[MLKEM_N >> 1];
-} poly_mulcache;
+} ALIGN poly_mulcache;
 
 /************************************************************
  * Name: scalar_compress_d1

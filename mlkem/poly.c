@@ -555,3 +555,4 @@ void poly_mulcache_compute(poly_mulcache *x, const poly *a)
    * of poly_basemul_montgomery_cached() does still include the check. */
 }
 #endif /* MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE */
+

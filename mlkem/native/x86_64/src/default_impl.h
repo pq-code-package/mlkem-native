@@ -70,9 +70,7 @@ static INLINE void poly_tomont_native(poly *data)
 
 static INLINE void poly_mulcache_compute_native(poly_mulcache *x, const poly *y)
 {
-  /* AVX2 backend does not use mulcache */
-  ((void)y);
-  ((void)x);
+  poly_mulcache_compute_avx2(x, y);
 }
 
 static INLINE void polyvec_basemul_acc_montgomery_cached_native(
