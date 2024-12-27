@@ -153,7 +153,6 @@ jobs:
       - name: Functional Tests
         uses: ./.github/actions/multi-functest
         with:
-          nix-shell: ""
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
           cflags: ${{ inputs.cflags }}
           compile_mode: ${{ inputs.compile_mode }}
