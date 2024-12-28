@@ -41,7 +41,7 @@ jobs:
           sudo apt update
           sudo apt install nix
           nix --version
-          nix develop --experimental-features 'nix-command flakes'
+          sudo nix develop --experimental-features 'nix-command flakes'
           lint
   lint-markdown-link:
     runs-on: ubuntu-latest
