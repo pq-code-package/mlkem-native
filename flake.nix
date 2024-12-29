@@ -17,7 +17,7 @@
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [ ];
       systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
-      perSystem = { config, pkgs, system, inputs', ... }:
+      perSystem = { config, pkgs, system, ... }:
         let
           glibc-join = p: p.buildPackages.symlinkJoin {
             name = "glibc-join";
@@ -53,9 +53,9 @@
               # - equip all toolchains if cross is explicitly set to true
               # - On some machines, `native-gcc` needed to be evaluated lastly (placed as the last element of the toolchain list), or else would result in environment variables (CC, AR, ...) overriding issue.
             pkgs.lib.optionals (cross && !pkgs.stdenv.isDarwin) [
-              (pkgs.lib.optional (! pkgs.stdenv.hostPlatform.isx86_64) x86_64-gcc)
-              (pkgs.lib.optional (! pkgs.stdenv.hostPlatform.isAarch64) aarch64-gcc)
-              (pkgs.lib.optional (! pkgs.stdenv.hostPlatform.isRiscV64) riscv64-gcc)
+              (pkgs.lib.optional (! pkgs.stdenv.isx86_64) x86_64-gcc)
+              (pkgs.lib.optional (! pkgs.stdenv.isAarch64) aarch64-gcc)
+              (pkgs.lib.optional (pkgs.stdenv.isx86_64 || pkgs.stdenv.isAarch64) riscv64-gcc)
               (pkgs.lib.optional (pkgs.stdenv.hostPlatform.isx86_64) aarch64_be-gcc)
               native-gcc
             ]
@@ -87,14 +87,6 @@
           mkShell = mkShellWithCC native-gcc;
         in
         {
-          # NOTE: hack for replacing bitwuzla in nixos-24.05 (0.4.0) to the one in nixos-unstable (0.6.0) by nix overlays
-          _module.args.pkgs = import inputs.nixpkgs {
-            inherit system;
-            overlays = [
-              (_: _: { bitwuzla = inputs'.nixpkgs-unstable.legacyPackages.bitwuzla; })
-            ];
-          };
-
           packages.linters = pkgs.buildEnv
             {
               name = "pqcp-linters";
@@ -112,7 +104,9 @@
               };
             };
 
-          packages.cbmc = pkgs.callPackage ./nix/cbmc { }; # 6.4.1
+          packages.cbmc = pkgs.callPackage ./nix/cbmc {
+            bitwuzla = inputs.nixpkgs-unstable.legacyPackages.${system}.bitwuzla;
+          }; # 6.4.1
 
           devShells.default = wrapShell mkShell {
             packages =
