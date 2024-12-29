@@ -60,8 +60,8 @@
               native-gcc
             ]
             ++ builtins.attrValues {
-              inherit (config.packages) base;
               inherit (pkgs)
+                python3
                 qemu; # 8.2.4
             };
 
@@ -114,16 +114,6 @@
 
           packages.cbmc = pkgs.callPackage ./nix/cbmc { }; # 6.4.1
 
-          packages.base = pkgs.buildEnv {
-            name = "pqcp-base";
-            paths = builtins.attrValues {
-              inherit (pkgs.python3Packages)
-                pyyaml
-                python
-                click;
-            };
-          };
-
           devShells.default = wrapShell mkShell {
             packages =
               core { } ++
@@ -142,12 +132,12 @@
           devShells.ci-cbmc-cross = wrapShell mkShell { packages = core { } ++ [ config.packages.cbmc ]; };
           devShells.ci-linter = wrapShell pkgs.mkShellNoCC { packages = [ config.packages.linters ]; };
 
-          devShells.ci_clang18 = wrapShell (mkShellWithCC pkgs.clang_18) { packages = [ config.packages.base ]; };
-          devShells.ci_gcc48 = wrapShell (mkShellWithCC pkgs.gcc48) { packages = [ config.packages.base ]; };
-          devShells.ci_gcc49 = wrapShell (mkShellWithCC pkgs.gcc49) { packages = [ config.packages.base ]; };
-          devShells.ci_gcc7 = wrapShell (mkShellWithCC pkgs.gcc7) { packages = [ config.packages.base ]; };
-          devShells.ci_gcc11 = wrapShell (mkShellWithCC pkgs.gcc11) { packages = [ config.packages.base ]; };
-          devShells.ci_gcc14 = wrapShell (mkShellWithCC pkgs.gcc14) { packages = [ config.packages.base ]; };
+          devShells.ci_clang18 = wrapShell (mkShellWithCC pkgs.clang_18) { packages = [ pkgs.python3 ]; };
+          devShells.ci_gcc48 = wrapShell (mkShellWithCC pkgs.gcc48) { packages = [ pkgs.python3 ]; };
+          devShells.ci_gcc49 = wrapShell (mkShellWithCC pkgs.gcc49) { packages = [ pkgs.python3 ]; };
+          devShells.ci_gcc7 = wrapShell (mkShellWithCC pkgs.gcc7) { packages = [ pkgs.python3 ]; };
+          devShells.ci_gcc11 = wrapShell (mkShellWithCC pkgs.gcc11) { packages = [ pkgs.python3 ]; };
+          devShells.ci_gcc14 = wrapShell (mkShellWithCC pkgs.gcc14) { packages = [ pkgs.python3 ]; };
         };
       flake = {
         # The usual flake attributes can be defined here, including system-
