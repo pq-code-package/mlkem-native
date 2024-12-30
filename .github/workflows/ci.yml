@@ -440,6 +440,34 @@ jobs:
       lint: false
       verbose: true
     secrets: inherit
+  develop_environment:
+    strategy:
+      max-parallel: 4
+      fail-fast: false
+      matrix:
+        container:
+          - id: nixos/nix:2.6.1
+    name: Compatibility tests (${{ matrix.container.id }})
+    runs-on: ubuntu-latest
+    needs: [quickcheck, quickcheck-windows, quickcheck-c90, quickcheck-lib, examples, lint, lint-markdown-link]
+    container:
+      ${{ matrix.container.id }}
+    steps:
+      # We're not using the checkout action here because on it's not supported
+      # on all containers we want to test. Resort to a manual checkout.
+
+      # We can't hoist this into an action since calling an action can only
+      # be done after checkout.
+      - name: Manual checkout
+        shell: bash
+        run: |
+          git init
+          git remote add origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
+          git fetch origin --depth 1 $GITHUB_SHA
+          git checkout FETCH_HEAD
+      - name: nix develop
+        run: |
+          nix develop --experimental-features "nix-command flakes"
   compatibility_tests:
     strategy:
       max-parallel: 4
