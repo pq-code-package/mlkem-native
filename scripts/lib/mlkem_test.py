@@ -467,7 +467,7 @@ class Tests:
                 s += f"{k}={v} "
             return s
 
-        args = ["make", "check_acvp"]
+        args = ["make", "run_acvp"]
         log.info(dict2str(env_update) + " ".join(args))
 
         p = subprocess.run(
