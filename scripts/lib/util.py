@@ -102,17 +102,17 @@ class TEST_TYPES(IntEnum):
 
     def make_target(self):
         if self == TEST_TYPES.MLKEM:
-            return "mlkem"
+            return "build_func"
         if self == TEST_TYPES.BENCH:
             return "bench"
         if self == TEST_TYPES.BENCH_COMPONENTS:
             return "bench_components"
         if self == TEST_TYPES.NISTKAT:
-            return "nistkat"
+            return "build_nistkat"
         if self == TEST_TYPES.KAT:
-            return "kat"
+            return "build_kat"
         if self == TEST_TYPES.ACVP:
-            return "acvp"
+            return "build_acvp"
 
     def bin_path(self, scheme):
         return path(
