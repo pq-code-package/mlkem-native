@@ -34,20 +34,6 @@ class CompileOptions(object):
         return "Cross" if self.cross_prefix else "Native"
 
 
-class Options(object):
-    def __init__(self):
-        self.cross_prefix = ""
-        self.cflags = ""
-        self.auto = True
-        self.verbose = False
-        self.opt = "ALL"
-        self.compile = True
-        self.run = True
-        self.exec_wrapper = ""
-        self.run_as_root = ""
-        self.k = "ALL"
-
-
 class Base:
 
     def __init__(self, test_type: TEST_TYPES, copts: CompileOptions, opt):
