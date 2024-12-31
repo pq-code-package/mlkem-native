@@ -210,19 +210,17 @@ def cli():
     )
 
     args = main_parser.parse_args()
+    if not hasattr(args, "mac_taskpolicy"):
+        args.mac_taskpolicy = None
 
     if args.cmd == "all":
-        Tests(args).all(args.func, args.kat, args.nistkat, args.acvp)
+        Tests(args).all()
     elif args.cmd == "acvp":
-        Tests(args).acvp(args.acvp_dir)
+        Tests(args).acvp()
     elif args.cmd == "bench":
-        if not hasattr(args, "mac_taskpolicy"):
-            args.mac_taskpolicy = None
-        Tests(args).bench(
-            args.cycles, args.output, args.mac_taskpolicy, args.components
-        )
+        Tests(args).bench()
     elif args.cmd == "cbmc":
-        Tests(args).cbmc(args.k)
+        Tests(args).cbmc()
     elif args.cmd == "func":
         Tests(args).func()
     elif args.cmd == "kat":
