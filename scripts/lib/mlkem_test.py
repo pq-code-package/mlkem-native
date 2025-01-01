@@ -61,48 +61,6 @@ class Base:
         self.args = args
         self.test_type = test_type
         self.opt = opt
-        self.opt_label = "opt" if self.opt else "no_opt"
-
-    def compile_schemes(self):
-        """compile or cross compile with some extra environment variables and makefile arguments"""
-
-        github_log(
-            f"::group::compile {Args.compile_mode(self.args)} {self.opt_label} {self.test_type.desc()}"
-        )
-
-        log = logger(self.test_type, "Compile", self.args.cross_prefix, self.opt)
-
-        extra_make_args = [f"OPT={int(self.opt)}", f"AUTO={int(self.args.auto)}"]
-        if self.test_type.is_benchmark() is True:
-            extra_make_args += [f"CYCLES={self.args.cycles}"]
-        extra_make_args += Args.make_j(self.args)
-
-        args = ["make", self.test_type.make_target()] + extra_make_args
-
-        env_update = {}
-        if self.args.cflags is not None and self.args.cflags != "":
-            env_update["CFLAGS"] = self.args.cflags
-        if self.args.cross_prefix is not None and self.args.cross_prefix != "":
-            env_update["CROSS_PREFIX"] = self.args.cross_prefix
-
-        env = os.environ.copy()
-        env.update(env_update)
-
-        log.info(dict2str(env_update) + " ".join(args))
-
-        p = subprocess.run(
-            args,
-            stdout=subprocess.DEVNULL if not self.args.verbose else None,
-            env=env,
-        )
-
-        if p.returncode != 0:
-            log.error(f"make failed: {p.returncode}")
-
-        github_log("::endgroup::")
-
-        if p.returncode != 0:
-            sys.exit(1)
 
     def run_scheme(
         self,
@@ -164,12 +122,6 @@ class Test_Implementations:
         self.ts = {}
         self.ts["opt"] = Base(test_type, args, True)
         self.ts["no_opt"] = Base(test_type, args, False)
-
-    def compile(
-        self,
-        opt,
-    ):
-        self.ts["opt" if opt else "no_opt"].compile_schemes()
 
     def run_scheme(
         self,
@@ -252,9 +204,52 @@ class Tests:
         self._bench = Test_Implementations(TEST_TYPES.BENCH, args)
         self._bench_components = Test_Implementations(TEST_TYPES.BENCH_COMPONENTS, args)
 
+    def _compile_schemes(self, test_type, opt):
+        """compile or cross compile with some extra environment variables and makefile arguments"""
+
+        opt_label = "opt" if opt else "no_opt"
+
+        github_log(
+            f"::group::compile {Args.compile_mode(self.args)} {opt_label} {test_type.desc()}"
+        )
+
+        log = logger(test_type, "Compile", self.args.cross_prefix, opt)
+
+        extra_make_args = [f"OPT={int(opt)}", f"AUTO={int(self.args.auto)}"]
+        if test_type.is_benchmark() is True:
+            extra_make_args += [f"CYCLES={self.args.cycles}"]
+        extra_make_args += Args.make_j(self.args)
+
+        args = ["make", test_type.make_target()] + extra_make_args
+
+        env_update = {}
+        if self.args.cflags is not None and self.args.cflags != "":
+            env_update["CFLAGS"] = self.args.cflags
+        if self.args.cross_prefix is not None and self.args.cross_prefix != "":
+            env_update["CROSS_PREFIX"] = self.args.cross_prefix
+
+        env = os.environ.copy()
+        env.update(env_update)
+
+        log.info(dict2str(env_update) + " ".join(args))
+
+        p = subprocess.run(
+            args,
+            stdout=subprocess.DEVNULL if not self.args.verbose else None,
+            env=env,
+        )
+
+        if p.returncode != 0:
+            log.error(f"make failed: {p.returncode}")
+
+        github_log("::endgroup::")
+
+        if p.returncode != 0:
+            sys.exit(1)
+
     def func(self):
         def _func(opt):
-            self._func.compile(opt)
+            self._compile_schemes(TEST_TYPES.MLKEM, opt)
             if self.args.run:
                 return self._func.run_schemes(opt)
 
@@ -269,7 +264,7 @@ class Tests:
 
     def nistkat(self):
         def _nistkat(opt):
-            self._nistkat.compile(opt)
+            self._compile_schemes(TEST_TYPES.NISTKAT, opt)
             if self.args.run:
                 return self._nistkat.run_schemes(opt)
 
@@ -284,7 +279,7 @@ class Tests:
 
     def kat(self):
         def _kat(opt):
-            self._kat.compile(opt)
+            self._compile_schemes(TEST_TYPES.KAT, opt)
             if self.args.run:
                 return self._kat.run_schemes(opt)
 
@@ -300,7 +295,7 @@ class Tests:
 
     def acvp(self):
         def _acvp(opt):
-            self._acvp.compile(opt)
+            self._compile_schemes(TEST_TYPES.ACVP, opt)
             if self.args.run:
                 return self._acvp.run_scheme(opt, None)
 
@@ -320,23 +315,23 @@ class Tests:
         components = self.args.components
 
         if components is False:
+            test_type = TEST_TYPES.BENCH
             t = self._bench
         else:
+            test_type = TEST_TYPES.BENCH_COMPONENTS
             t = self._bench_components
             output = False
 
         # NOTE: We haven't yet decided how to output both opt/no-opt benchmark results
         if Args.do_opt_all(self.args):
-            t.compile(False)
+            self._compile_schemes(test_type, False)
             if self.args.run:
                 t.run_schemes(False, suppress_output=False)
-            t.compile(True)
+            self._compile_schemes(test_type, True)
             if self.args.run:
                 resultss = t.run_schemes(True, suppress_output=False)
         else:
-            t.compile(
-                Args.do_opt(self.args),
-            )
+            self._compile_schemes(test_type, Args.do_opt(self.args))
             if self.args.run:
                 resultss = t.run_schemes(Args.do_opt(self.args), suppress_output=False)
 
@@ -384,10 +379,10 @@ class Tests:
             code = 0
 
             compiles = [
-                *([self._func.compile] if func else []),
-                *([self._nistkat.compile] if nistkat else []),
-                *([self._kat.compile] if kat else []),
-                *([self._acvp.compile] if acvp else []),
+                *([lambda o: self._compile_schemes(TEST_TYPES.MLKEM, o)] if func else []),
+                *([lambda o: self._compile_schemes(TEST_TYPES.NISTKAT, o)] if nistkat else []),
+                *([lambda o: self._compile_schemes(TEST_TYPES.KAT, o)] if kat else []),
+                *([lambda o: self._compile_schemes(TEST_TYPES.ACVP, o)] if acvp else []),
             ]
 
             for f in compiles:
