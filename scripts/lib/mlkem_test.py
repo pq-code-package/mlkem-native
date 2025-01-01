@@ -112,7 +112,7 @@ class Base:
     def run_scheme(
         self,
         scheme,
-        suppress_output=False,
+        suppress_output=True,
     ):
         """Run the binary in all different ways
 
@@ -183,7 +183,7 @@ class Test_Implementations:
         self,
         opt,
         scheme,
-        suppress_output=False,
+        suppress_output=True,
     ):
         """Arguments:
 
@@ -200,7 +200,7 @@ class Test_Implementations:
 
         return results
 
-    def run_schemes(self, opt, suppress_output=False):
+    def run_schemes(self, opt, suppress_output=True):
         """Arguments:
 
         - opt: Whether native backends should be enabled
@@ -268,7 +268,7 @@ class Tests:
             if self.args.compile:
                 self._func.compile(opt)
             if self.args.run:
-                return self._func.run_schemes(opt, suppress_output=True)
+                return self._func.run_schemes(opt)
 
         fail = False
         if Args.do_no_opt(self.args):
@@ -286,7 +286,7 @@ class Tests:
             if self.args.compile:
                 self._nistkat.compile(opt)
             if self.args.run:
-                return self._nistkat.run_schemes(opt, suppress_output=True)
+                return self._nistkat.run_schemes(opt)
 
         fail = False
         if Args.do_no_opt(self.args):
@@ -304,7 +304,7 @@ class Tests:
             if self.args.compile:
                 self._kat.compile(opt)
             if self.args.run:
-                return self._kat.run_schemes(opt, suppress_output=True)
+                return self._kat.run_schemes(opt)
 
         fail = False
 
@@ -323,7 +323,7 @@ class Tests:
             if self.args.compile:
                 self._acvp.compile(opt)
             if self.args.run:
-                return self._acvp.run_scheme(opt, None, suppress_output=True)
+                return self._acvp.run_scheme(opt, None)
 
         fail = False
 
@@ -340,7 +340,7 @@ class Tests:
         t,  # Testmplementations
         opt,
     ):
-        return t.run_schemes(opt)
+        return t.run_schemes(opt, suppress_output=False)
 
     def bench(self):
         cycles = self.args.cycles
@@ -439,26 +439,10 @@ class Tests:
 
             if self.args.run:
                 runs = [
-                    *(
-                        [lambda o: self._func.run_schemes(o, suppress_output=True)]
-                        if func
-                        else []
-                    ),
-                    *(
-                        [lambda o: self._nistkat.run_schemes(o, suppress_output=True)]
-                        if nistkat
-                        else []
-                    ),
-                    *(
-                        [lambda o: self._kat.run_schemes(o, suppress_output=True)]
-                        if kat
-                        else []
-                    ),
-                    *(
-                        [lambda o: self._acvp.run_schemes(o, suppress_output=True)]
-                        if acvp
-                        else []
-                    ),
+                    *([self._func.run_schemes] if func else []),
+                    *([self._nistkat.run_schemes] if nistkat else []),
+                    *([self._kat.run_schemes] if kat else []),
+                    *([self._acvp.run_schemes] if acvp else []),
                 ]
 
                 for f in runs:
