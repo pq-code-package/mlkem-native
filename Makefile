@@ -21,8 +21,7 @@ all: quickcheck
 W := $(EXEC_WRAPPER)
 
 include mk/config.mk
-include mk/crypto.mk
-include mk/schemes.mk
+include mk/components.mk
 include mk/rules.mk
 
 quickcheck: checkall
