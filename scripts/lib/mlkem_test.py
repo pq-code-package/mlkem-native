@@ -242,6 +242,7 @@ Underlying functional tests
 
 class Tests:
     def __init__(self, args):
+        config_logger(args.verbose)
         self.args = args
 
         self._func = Test_Implementations(TEST_TYPES.MLKEM, args)
@@ -252,8 +253,6 @@ class Tests:
         self._bench_components = Test_Implementations(TEST_TYPES.BENCH_COMPONENTS, args)
 
     def func(self):
-        config_logger(self.args.verbose)
-
         def _func(opt):
             self._func.compile(opt)
             if self.args.run:
@@ -269,8 +268,6 @@ class Tests:
             exit(1)
 
     def nistkat(self):
-        config_logger(self.args.verbose)
-
         def _nistkat(opt):
             self._nistkat.compile(opt)
             if self.args.run:
@@ -286,8 +283,6 @@ class Tests:
             exit(1)
 
     def kat(self):
-        config_logger(self.args.verbose)
-
         def _kat(opt):
             self._kat.compile(opt)
             if self.args.run:
@@ -304,8 +299,6 @@ class Tests:
             exit(1)
 
     def acvp(self):
-        config_logger(self.args.verbose)
-
         def _acvp(opt):
             self._acvp.compile(opt)
             if self.args.run:
@@ -332,8 +325,6 @@ class Tests:
         cycles = self.args.cycles
         output = self.args.output
         components = self.args.components
-
-        config_logger(self.args.verbose)
 
         if components is False:
             t = self._bench
@@ -399,10 +390,9 @@ class Tests:
         nistkat = self.args.nistkat
         acvp = self.args.acvp
 
-        config_logger(self.args.verbose)
-
         def all(opt):
             code = 0
+
             compiles = [
                 *([self._func.compile] if func else []),
                 *([self._nistkat.compile] if nistkat else []),
@@ -445,8 +435,6 @@ class Tests:
         exit(exit_code)
 
     def cbmc(self):
-        config_logger(self.args.verbose)
-
         def run_cbmc(mlkem_k):
             envvars = {"MLKEM_K": mlkem_k}
             p = subprocess.Popen(
