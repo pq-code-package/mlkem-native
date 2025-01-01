@@ -12,11 +12,11 @@
 	run_bench_512 run_bench_768 run_bench_1024 run_bench \
 	bench_components_512 bench_components_768 bench_components_1024 bench_components \
 	run_bench_components_512 run_bench_components_768 run_bench_components_1024 run_bench_components \
-	buildall checkall all \
+	build test all \
 	clean quickcheck check-defined-CYCLES
 
-.DEFAULT_GOAL := buildall
-all: quickcheck
+.DEFAULT_GOAL := build
+all: build
 
 W := $(EXEC_WRAPPER)
 
@@ -24,12 +24,12 @@ include mk/config.mk
 include mk/components.mk
 include mk/rules.mk
 
-quickcheck: checkall
+quickcheck: test
 
-buildall: func nistkat kat acvp
+build: func nistkat kat acvp
 	$(Q)echo "  Everything builds fine!"
 
-checkall: run_kat run_nistkat run_func run_acvp
+test: run_kat run_nistkat run_func run_acvp
 	$(Q)echo "  Everything checks fine!"
 
 run_kat_512: kat_512
