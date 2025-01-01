@@ -17,48 +17,38 @@ from .util import (
 import json
 
 
-class Args:
-    """Helper functions for working with command line parameters"""
-
-    @staticmethod
-    def cmd_prefix(args):
-        res = []
-        if args.run_as_root is True:
-            res += ["sudo"]
-        if args.exec_wrapper is not None and args.exec_wrapper != "":
-            res += args.exec_wrapper.split(" ")
-        if args.mac_taskpolicy is not None:
-            res += ["taskpolicy", "-c", f"{mac_taskpolicy}"]
-
-        return res
-
-    @staticmethod
-    def make_j(args):
-        if args.j is None:
-            return []
-        return [f"-j{args.j}"]
-
-    @staticmethod
-    def do_opt_all(args):
-        return args.opt.lower() == ["all"]
-
-    @staticmethod
-    def do_opt(args):
-        return args.opt.lower() in ["all", "opt"]
-
-    @staticmethod
-    def do_no_opt(args):
-        return args.opt.lower() in ["all", "no_opt"]
-
-    @staticmethod
-    def compile_mode(args):
-        return "Cross" if args.cross_prefix is not None else "Native"
-
-
 class Tests:
     def __init__(self, args):
         config_logger(args.verbose)
         self.args = args
+
+    def cmd_prefix(self):
+        res = []
+        if self.args.run_as_root is True:
+            res += ["sudo"]
+        if self.args.exec_wrapper is not None and self.args.exec_wrapper != "":
+            res += self.args.exec_wrapper.split(" ")
+        if self.args.mac_taskpolicy is not None:
+            res += ["taskpolicy", "-c", f"{mac_taskpolicy}"]
+
+        return res
+
+    def make_j(self):
+        if self.args.j is None:
+            return []
+        return [f"-j{self.args.j}"]
+
+    def do_opt_all(self):
+        return self.args.opt.lower() == ["all"]
+
+    def do_opt(self):
+        return self.args.opt.lower() in ["all", "opt"]
+
+    def do_no_opt(self):
+        return self.args.opt.lower() in ["all", "no_opt"]
+
+    def compile_mode(self):
+        return "Cross" if self.args.cross_prefix is not None else "Native"
 
     def _compile_schemes(self, test_type, opt):
         """compile or cross compile with some extra environment variables and makefile arguments"""
@@ -66,7 +56,7 @@ class Tests:
         opt_label = "opt" if opt else "no_opt"
 
         github_log(
-            f"::group::compile {Args.compile_mode(self.args)} {opt_label} {test_type.desc()}"
+            f"::group::compile {self.compile_mode()} {opt_label} {test_type.desc()}"
         )
 
         log = logger(test_type, "Compile", self.args.cross_prefix, opt)
@@ -74,7 +64,7 @@ class Tests:
         extra_make_args = [f"OPT={int(opt)}", f"AUTO={int(self.args.auto)}"]
         if test_type.is_benchmark() is True:
             extra_make_args += [f"CYCLES={self.args.cycles}"]
-        extra_make_args += Args.make_j(self.args)
+        extra_make_args += self.make_j()
 
         args = ["make", test_type.make_target()] + extra_make_args
 
@@ -125,11 +115,11 @@ class Tests:
 
         log = logger(test_type, scheme_str, self.args.cross_prefix, opt)
 
-        args = ["make", test_type.make_run_target(scheme)] + Args.make_j(self.args)
+        args = ["make", test_type.make_run_target(scheme)] + self.make_j()
 
         env_update = {}
-        if len(Args.cmd_prefix(self.args)) > 0:
-            env_update["EXEC_WRAPPER"] = " ".join(Args.cmd_prefix(self.args))
+        if len(self.cmd_prefix()) > 0:
+            env_update["EXEC_WRAPPER"] = " ".join(self.cmd_prefix())
 
         env = os.environ.copy()
         env.update(env_update)
@@ -168,9 +158,7 @@ class Tests:
 
         k = "opt" if opt else "no_opt"
 
-        github_log(
-            f"::group::run {Args.compile_mode(self.args)} {k} {test_type.desc()}"
-        )
+        github_log(f"::group::run {self.compile_mode()} {k} {test_type.desc()}")
 
         results[k] = {}
         for scheme in SCHEME:
@@ -183,9 +171,7 @@ class Tests:
 
             results[k][scheme] = result
 
-        title = (
-            "## " + (Args.compile_mode(self.args)) + " " + (k.capitalize()) + " Tests"
-        )
+        title = "## " + (self.compile_mode()) + " " + (k.capitalize()) + " Tests"
         github_summary(title, test_type.desc(), results[k])
 
         github_log("::endgroup::")
@@ -207,9 +193,9 @@ class Tests:
                 return self._run_schemes(TEST_TYPES.MLKEM, opt)
 
         fail = False
-        if Args.do_no_opt(self.args):
+        if self.do_no_opt():
             fail = fail or _func(False)
-        if Args.do_opt(self.args):
+        if self.do_opt():
             fail = fail or _func(True)
 
         if fail:
@@ -222,9 +208,9 @@ class Tests:
                 return self._run_schemes(TEST_TYPES.NISTKAT, opt)
 
         fail = False
-        if Args.do_no_opt(self.args):
+        if self.do_no_opt():
             fail = fail or _nistkat(False)
-        if Args.do_opt(self.args):
+        if self.do_opt():
             fail = fail or _nistkat(True)
 
         if fail:
@@ -238,9 +224,9 @@ class Tests:
 
         fail = False
 
-        if Args.do_no_opt(self.args):
+        if self.do_no_opt():
             fail = fail or _kat(False)
-        if Args.do_opt(self.args):
+        if self.do_opt():
             fail = fail or _kat(True)
 
         if fail:
@@ -254,9 +240,9 @@ class Tests:
 
         fail = False
 
-        if Args.do_no_opt(self.args):
+        if self.do_no_opt():
             fail = fail or _acvp(False)
-        if Args.do_opt(self.args):
+        if self.do_opt():
             fail = fail or _acvp(True)
 
         if fail:
@@ -274,7 +260,7 @@ class Tests:
             output = False
 
         # NOTE: We haven't yet decided how to output both opt/no-opt benchmark results
-        if Args.do_opt_all(self.args):
+        if self.do_opt_all():
             self._compile_schemes(test_type, False)
             if self.args.run:
                 self._run_schemes(test_type, False, suppress_output=False)
@@ -282,10 +268,10 @@ class Tests:
             if self.args.run:
                 resultss = self._run_schemes(test_type, True, suppress_output=False)
         else:
-            self._compile_schemes(test_type, Args.do_opt(self.args))
+            self._compile_schemes(test_type, self.do_opt())
             if self.args.run:
                 resultss = self._run_schemes(
-                    test_type, Args.do_opt(self.args), suppress_output=False
+                    test_type, self.do_opt(), suppress_output=False
                 )
 
         if resultss is None:
@@ -389,9 +375,9 @@ class Tests:
 
         exit_code = 0
 
-        if Args.do_no_opt(self.args):
+        if self.do_no_opt():
             exit_code = exit_code or all(False)
-        if Args.do_opt(self.args):
+        if self.do_opt():
             exit_code = exit_code or all(True)
 
         exit(exit_code)
@@ -406,7 +392,7 @@ class Tests:
                     "--summarize",
                     "--no-coverage",
                 ]
-                + Args.make_j(self.args),
+                + self.make_j(),
                 cwd="cbmc",
                 env=os.environ.copy() | envvars,
             )
