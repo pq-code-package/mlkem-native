@@ -134,14 +134,6 @@ def cli():
         "acvp", help="Run ACVP client", parents=[common_parser]
     )
 
-    acvp_parser.add_argument(
-        "-d",
-        "--acvp_dir",
-        dest="acvp_dir",
-        default=path("test/acvp_data"),
-        help="Path to acvp directory",
-    )
-
     # bench arguments
     bench_parser = cmd_subparsers.add_parser(
         "bench",
