@@ -65,12 +65,9 @@ class Base:
 
     def compile_schemes(
         self,
-        extra_make_envs=None,
         extra_make_args=None,
     ):
         """compile or cross compile with some extra environment variables and makefile arguments"""
-        if extra_make_envs is None:
-            extra_make_envs = {}
         if extra_make_args is None:
             extra_make_args = []
 
@@ -102,9 +99,7 @@ class Base:
         if self.args.cflags is not None:
             env["CFLAGS"] = self.args.cflags
 
-        env.update(extra_make_envs)
-
-        log.info(dict2str(extra_make_envs) + " ".join(args))
+        log.info(" ".join(args))
 
         p = subprocess.run(
             args,
@@ -186,11 +181,9 @@ class Test_Implementations:
     def compile(
         self,
         opt,
-        extra_make_envs=None,
         extra_make_args=None,
     ):
         self.ts["opt" if opt else "no_opt"].compile_schemes(
-            extra_make_envs,
             extra_make_args,
         )
 
