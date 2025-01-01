@@ -78,7 +78,13 @@ def cli():
     common_parser.add_argument(
         "-w", "--exec-wrapper", help="Run the binary with the user-customized wrapper"
     )
-    common_parser.add_argument("-r", "--run-as-root", help="Run the binary as root")
+    common_parser.add_argument(
+        "-r",
+        "--run-as-root",
+        default=False,
+        action="store_true",
+        help="Run the binary as root",
+    )
 
     main_parser = argparse.ArgumentParser()
 
