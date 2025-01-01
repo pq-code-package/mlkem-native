@@ -192,20 +192,15 @@ def config_logger(verbose):
         logger.setLevel(logging.INFO)
 
 
-def logger(test_type, scheme, cross_prefix, opt, i=None):
+def logger(test_type, scheme, cross_prefix, opt):
     """Emit line indicating the processing of the given test"""
     compile_mode = "cross" if cross_prefix else "native"
     implementation = "opt" if opt else "no_opt"
 
     return logging.getLogger(
-        "{:<18} {:<11} ({:<6}, {:>6})".format(
-            (
-                test_type.desc()
-                if (i is None or test_type is not TEST_TYPES.ACVP)
-                else f"{test_type.desc():<15} {i}"
-            ),
+        "{:<18} {:<11} {:<17}".format(
+            (test_type.desc()),
             str(scheme),
-            compile_mode,
-            implementation,
+            "({}, {}):".format(compile_mode, implementation),
         )
     )

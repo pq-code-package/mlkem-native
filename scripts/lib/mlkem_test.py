@@ -60,7 +60,6 @@ class Base:
         self.test_type = test_type
         self.opt = opt
         self.opt_label = "opt" if self.opt else "no_opt"
-        self.i = 0
 
     def compile_schemes(
         self,
@@ -123,8 +122,7 @@ class Base:
         - suppress_output: Indicate whether to suppress or print-and-return the output
         """
 
-        log = logger(self.test_type, scheme, self.args.cross_prefix, self.opt, self.i)
-        self.i += 1
+        log = logger(self.test_type, scheme, self.args.cross_prefix, self.opt)
 
         args = ["make", self.test_type.make_run_target(scheme)]
 
