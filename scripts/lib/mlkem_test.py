@@ -34,7 +34,7 @@ class Tests:
         return res
 
     def make_j(self):
-        if self.args.j is None:
+        if self.args.j is None or int(self.args.j) == 1:
             return []
         return [f"-j{self.args.j}"]
 
@@ -115,7 +115,9 @@ class Tests:
 
         log = logger(test_type, scheme_str, self.args.cross_prefix, opt)
 
-        args = ["make", test_type.make_run_target(scheme)] + self.make_j()
+        args = ["make", test_type.make_run_target(scheme)]
+        if test_type.is_benchmark() is False:
+            args += self.make_j()
 
         env_update = {}
         if len(self.cmd_prefix()) > 0:
