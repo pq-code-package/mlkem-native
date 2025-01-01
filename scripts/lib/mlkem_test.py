@@ -262,8 +262,7 @@ class Tests:
         config_logger(self.args.verbose)
 
         def _func(opt):
-            if self.args.compile:
-                self._func.compile(opt)
+            self._func.compile(opt)
             if self.args.run:
                 return self._func.run_schemes(opt)
 
@@ -280,8 +279,7 @@ class Tests:
         config_logger(self.args.verbose)
 
         def _nistkat(opt):
-            if self.args.compile:
-                self._nistkat.compile(opt)
+            self._nistkat.compile(opt)
             if self.args.run:
                 return self._nistkat.run_schemes(opt)
 
@@ -298,8 +296,7 @@ class Tests:
         config_logger(self.args.verbose)
 
         def _kat(opt):
-            if self.args.compile:
-                self._kat.compile(opt)
+            self._kat.compile(opt)
             if self.args.run:
                 return self._kat.run_schemes(opt)
 
@@ -317,8 +314,7 @@ class Tests:
         config_logger(self.args.verbose)
 
         def _acvp(opt):
-            if self.args.compile:
-                self._acvp.compile(opt)
+            self._acvp.compile(opt)
             if self.args.run:
                 return self._acvp.run_scheme(opt, None)
 
@@ -354,20 +350,17 @@ class Tests:
 
         # NOTE: We haven't yet decided how to output both opt/no-opt benchmark results
         if Args.do_opt_all(self.args):
-            if self.args.compile:
-                t.compile(False, extra_make_args=[f"CYCLES={cycles}"])
+            t.compile(False, extra_make_args=[f"CYCLES={cycles}"])
             if self.args.run:
                 self._run_bench(t, False)
-            if self.args.compile:
-                t.compile(True, extra_make_args=[f"CYCLES={cycles}"])
+            t.compile(True, extra_make_args=[f"CYCLES={cycles}"])
             if self.args.run:
                 resultss = self._run_bench(t, True)
         else:
-            if self.args.compile:
-                t.compile(
-                    Args.do_opt(self.args),
-                    extra_make_args=[f"CYCLES={cycles}"],
-                )
+            t.compile(
+                Args.do_opt(self.args),
+                extra_make_args=[f"CYCLES={cycles}"],
+            )
             if self.args.run:
                 resultss = self._run_bench(
                     t,
@@ -418,21 +411,20 @@ class Tests:
 
         def all(opt):
             code = 0
-            if self.args.compile:
-                compiles = [
-                    *([self._func.compile] if func else []),
-                    *([self._nistkat.compile] if nistkat else []),
-                    *([self._kat.compile] if kat else []),
-                    *([self._acvp.compile] if acvp else []),
-                ]
+            compiles = [
+                *([self._func.compile] if func else []),
+                *([self._nistkat.compile] if nistkat else []),
+                *([self._kat.compile] if kat else []),
+                *([self._acvp.compile] if acvp else []),
+            ]
 
-                for f in compiles:
-                    try:
-                        f(opt)
-                    except SystemExit as e:
-                        code = code or e
+            for f in compiles:
+                try:
+                    f(opt)
+                except SystemExit as e:
+                    code = code or e
 
-                    sys.stdout.flush()
+                sys.stdout.flush()
 
             if self.args.run:
                 runs = [

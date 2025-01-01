@@ -46,22 +46,6 @@ def cli():
         default="ALL",
     )
 
-    # --compile / --no-compile
-    compile_group = common_parser.add_mutually_exclusive_group()
-    compile_group.add_argument(
-        "--compile",
-        action="store_true",
-        dest="compile",
-        help="Compile the binaries",
-        default=True,
-    )
-    compile_group.add_argument(
-        "--no-compile",
-        action="store_false",
-        dest="compile",
-        help="Do not compile the binaries",
-    )
-
     # --run / --no-run
     run_group = common_parser.add_mutually_exclusive_group()
     run_group.add_argument(
