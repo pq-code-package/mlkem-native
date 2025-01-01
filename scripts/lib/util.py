@@ -9,6 +9,7 @@ from enum import IntEnum
 from functools import reduce
 import json
 
+
 class SCHEME(IntEnum):
     MLKEM512 = 1
     MLKEM768 = 2
@@ -35,6 +36,7 @@ class SCHEME(IntEnum):
             return "768"
         if self == SCHEME.MLKEM1024:
             return "1024"
+
 
 class TEST_TYPES(IntEnum):
     MLKEM = 1
@@ -76,7 +78,10 @@ class TEST_TYPES(IntEnum):
             return "acvp"
 
     def make_run_target(self, scheme):
-        return f"run_{self.make_target()}_{scheme.suffix()}"
+        if scheme is not None:
+            return f"run_{self.make_target()}_{scheme.suffix()}"
+        else:
+            return f"run_{self.make_target()}"
 
 
 def dict2str(dict):

@@ -10,7 +10,6 @@ from functools import reduce
 
 sys.path.append(f"{os.path.join(os.path.dirname(__file__), 'lib')}")
 from mlkem_test import *
-from util import path
 
 
 def cli():

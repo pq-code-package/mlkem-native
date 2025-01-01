@@ -122,7 +122,12 @@ class Base:
         - suppress_output: Indicate whether to suppress or print-and-return the output
         """
 
-        log = logger(self.test_type, scheme, self.args.cross_prefix, self.opt)
+        if scheme is None:
+            scheme_str = "All"
+        else:
+            scheme_str = str(scheme)
+
+        log = logger(self.test_type, scheme_str, self.args.cross_prefix, self.opt)
 
         args = ["make", self.test_type.make_run_target(scheme)]
 
@@ -144,6 +149,8 @@ class Base:
             log.error(f"'{cmd_str}' failed with with {p.returncode}")
             log.error(p.stderr.decode())
         elif suppress_output is True:
+            if self.args.verbose is True:
+                log.info(p.stdout.decode())
             result = False
         else:
             result = p.stdout.decode()
@@ -185,7 +192,6 @@ class Test_Implementations:
         - suppress_output: Indicate whether to suppress or print-and-return the output
         """
 
-        # Returns TypedDict
         k = "opt" if opt else "no_opt"
 
         results = {}
@@ -201,7 +207,6 @@ class Test_Implementations:
         - suppress_output: Indicate whether to suppress or print-and-return the output
         """
 
-        # Returns
         results = {}
 
         k = "opt" if opt else "no_opt"
@@ -256,23 +261,14 @@ class Tests:
         self._bench = Test_Implementations(TEST_TYPES.BENCH, args)
         self._bench_components = Test_Implementations(TEST_TYPES.BENCH_COMPONENTS, args)
 
-    def _run_func(self, opt):
-        """Underlying function for functional test"""
-
-        return self._func.run_schemes(
-            opt,
-            suppress_output=True,
-        )
-
     def func(self):
         config_logger(self.args.verbose)
 
         def _func(opt):
-
             if self.args.compile:
                 self._func.compile(opt)
             if self.args.run:
-                return self._run_func(opt)
+                return self._func.run_schemes(opt, suppress_output=True)
 
         fail = False
         if Args.do_no_opt(self.args):
@@ -283,12 +279,6 @@ class Tests:
         if fail:
             exit(1)
 
-    def _run_nistkat(self, opt):
-        return self._nistkat.run_schemes(
-            opt,
-            suppress_output=True,
-        )
-
     def nistkat(self):
         config_logger(self.args.verbose)
 
@@ -296,7 +286,7 @@ class Tests:
             if self.args.compile:
                 self._nistkat.compile(opt)
             if self.args.run:
-                return self._run_nistkat(opt)
+                return self._nistkat.run_schemes(opt, suppress_output=True)
 
         fail = False
         if Args.do_no_opt(self.args):
@@ -307,12 +297,6 @@ class Tests:
         if fail:
             exit(1)
 
-    def _run_kat(self, opt):
-        return self._kat.run_schemes(
-            opt,
-            suppress_output=True,
-        )
-
     def kat(self):
         config_logger(self.args.verbose)
 
@@ -320,7 +304,7 @@ class Tests:
             if self.args.compile:
                 self._kat.compile(opt)
             if self.args.run:
-                return self._run_kat(opt)
+                return self._kat.run_schemes(opt, suppress_output=True)
 
         fail = False
 
@@ -332,69 +316,14 @@ class Tests:
         if fail:
             exit(1)
 
-    def _run_acvp(self, opt):
-
-        opt_label = "opt" if opt else "no_opt"
-        log = logger(
-            TEST_TYPES.ACVP, "Run", self._acvp.ts[opt_label].args.cross_prefix, opt
-        )
-
-        if gh_env is not None:
-            print(
-                f"::group::run {Args.compile_mode(self.args)} {opt_label} {TEST_TYPES.ACVP.desc()}"
-            )
-
-        env_update = {}
-        cmd_prefix = Args.cmd_prefix(self.args)
-        if len(cmd_prefix) > 0:
-            env_update["EXEC_WRAPPER"] = " ".cmd_prefix
-
-        env = os.environ.copy()
-        env.update(env_update)
-
-        args = ["make", "run_acvp"]
-        log.info(dict2str(env_update) + " ".join(args))
-
-        p = subprocess.run(
-            args,
-            capture_output=True,
-            universal_newlines=False,
-            env=env,
-        )
-        fail = p.returncode != 0
-        if fail is True:
-            log.error(p.stderr.decode())
-            log.error(f"ACVP test failed: {p.returncode}")
-
-        results = {}
-        results[opt_label] = {}
-        for s in SCHEME:
-            results[opt_label][s] = fail
-
-        if gh_env is not None:
-            print(f"::endgroup::")
-
-        for k, result in results.items():
-            title = (
-                "## "
-                + (Args.compile_mode(self.args))
-                + " "
-                + (k.capitalize())
-                + " Tests"
-            )
-            github_summary(title, f"{TEST_TYPES.ACVP.desc()}", result)
-
-        return fail
-
     def acvp(self):
-        acvp_dir = self.args.acvp_dir
         config_logger(self.args.verbose)
 
         def _acvp(opt):
             if self.args.compile:
                 self._acvp.compile(opt)
             if self.args.run:
-                return self._run_acvp(opt)
+                return self._acvp.run_scheme(opt, None, suppress_output=True)
 
         fail = False
 
@@ -510,10 +439,26 @@ class Tests:
 
             if self.args.run:
                 runs = [
-                    *([self._run_func] if func else []),
-                    *([self._run_nistkat] if nistkat else []),
-                    *([self._run_kat] if kat else []),
-                    *([self._run_acvp] if acvp else []),
+                    *(
+                        [lambda o: self._func.run_schemes(o, suppress_output=True)]
+                        if func
+                        else []
+                    ),
+                    *(
+                        [lambda o: self._nistkat.run_schemes(o, suppress_output=True)]
+                        if nistkat
+                        else []
+                    ),
+                    *(
+                        [lambda o: self._kat.run_schemes(o, suppress_output=True)]
+                        if kat
+                        else []
+                    ),
+                    *(
+                        [lambda o: self._acvp.run_schemes(o, suppress_output=True)]
+                        if acvp
+                        else []
+                    ),
                 ]
 
                 for f in runs:
