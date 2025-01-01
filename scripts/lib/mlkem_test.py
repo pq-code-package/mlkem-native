@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
-import sys
 import subprocess
 from functools import reduce
 from .util import (
@@ -21,6 +20,20 @@ class Tests:
     def __init__(self, args):
         config_logger(args.verbose)
         self.args = args
+        self.failed = []
+
+    def fail(self, info):
+        self.failed.append(info)
+
+    def check_fail(self):
+        num_failed = len(self.failed)
+        if num_failed > 0:
+            print(f"{num_failed} tests FAILED")
+            for info in self.failed:
+                print(f"* {info}")
+            exit(1)
+        print("All good!")
+        exit(0)
 
     def cmd_prefix(self):
         res = []
@@ -87,11 +100,9 @@ class Tests:
 
         if p.returncode != 0:
             log.error(f"make failed: {p.returncode}")
+            self.fail(f"Compilation for ({test_type},{opt_label})")
 
         github_log("::endgroup::")
-
-        if p.returncode != 0:
-            sys.exit(1)
 
     def _run_scheme(
         self,
@@ -107,6 +118,8 @@ class Tests:
         - scheme: Scheme to test
         - suppress_output: Indicate whether to suppress or print-and-return the output
         """
+
+        opt_label = "opt" if opt else "no_opt"
 
         if scheme is None:
             scheme_str = "All"
@@ -131,22 +144,16 @@ class Tests:
 
         p = subprocess.run(args, capture_output=True, universal_newlines=False, env=env)
 
-        result = None
-
         if p.returncode != 0:
             log.error(f"'{cmd_str}' failed with with {p.returncode}")
             log.error(p.stderr.decode())
+            self.fail(f"{test_type.desc()} ({opt_label}, {scheme_str})")
         elif suppress_output is True:
             if self.args.verbose is True:
                 log.info(p.stdout.decode())
-            result = False
         else:
             result = p.stdout.decode()
             log.info(result)
-
-        if p.returncode != 0:
-            exit(p.returncode)
-        else:
             return result
 
     def _run_schemes(self, test_type, opt, suppress_output=True):
@@ -194,14 +201,12 @@ class Tests:
             if self.args.run:
                 return self._run_schemes(TEST_TYPES.MLKEM, opt)
 
-        fail = False
         if self.do_no_opt():
-            fail = fail or _func(False)
+            _func(False)
         if self.do_opt():
-            fail = fail or _func(True)
+            _func(True)
 
-        if fail:
-            exit(1)
+        self.check_fail()
 
     def nistkat(self):
         def _nistkat(opt):
@@ -209,14 +214,12 @@ class Tests:
             if self.args.run:
                 return self._run_schemes(TEST_TYPES.NISTKAT, opt)
 
-        fail = False
         if self.do_no_opt():
-            fail = fail or _nistkat(False)
+            _nistkat(False)
         if self.do_opt():
-            fail = fail or _nistkat(True)
+            _nistkat(True)
 
-        if fail:
-            exit(1)
+        self.check_fail()
 
     def kat(self):
         def _kat(opt):
@@ -224,15 +227,12 @@ class Tests:
             if self.args.run:
                 return self._run_schemes(TEST_TYPES.KAT, opt)
 
-        fail = False
-
         if self.do_no_opt():
-            fail = fail or _kat(False)
+            _kat(False)
         if self.do_opt():
-            fail = fail or _kat(True)
+            _kat(True)
 
-        if fail:
-            exit(1)
+        self.check_fail()
 
     def acvp(self):
         def _acvp(opt):
@@ -240,18 +240,14 @@ class Tests:
             if self.args.run:
                 return self._run_scheme(TEST_TYPES.ACVP, opt, None)
 
-        fail = False
-
         if self.do_no_opt():
-            fail = fail or _acvp(False)
+            _acvp(False)
         if self.do_opt():
-            fail = fail or _acvp(True)
+            _acvp(True)
 
-        if fail:
-            exit(1)
+        self.check_fail()
 
     def bench(self):
-        cycles = self.args.cycles
         output = self.args.output
         components = self.args.components
 
@@ -316,73 +312,34 @@ class Tests:
         nistkat = self.args.nistkat
         acvp = self.args.acvp
 
-        def all(opt):
-            code = 0
+        def _all(opt):
+            if func is True:
+                self._compile_schemes(TEST_TYPES.MLKEM, opt)
+            if kat is True:
+                self._compile_schemes(TEST_TYPES.KAT, opt)
+            if nistkat is True:
+                self._compile_schemes(TEST_TYPES.NISTKAT, opt)
+            if acvp is True:
+                self._compile_schemes(TEST_TYPES.ACVP, opt)
 
-            compiles = [
-                *(
-                    [lambda o: self._compile_schemes(TEST_TYPES.MLKEM, o)]
-                    if func
-                    else []
-                ),
-                *(
-                    [lambda o: self._compile_schemes(TEST_TYPES.NISTKAT, o)]
-                    if nistkat
-                    else []
-                ),
-                *([lambda o: self._compile_schemes(TEST_TYPES.KAT, o)] if kat else []),
-                *(
-                    [lambda o: self._compile_schemes(TEST_TYPES.ACVP, o)]
-                    if acvp
-                    else []
-                ),
-            ]
+            if self.args.run is False:
+                return
 
-            for f in compiles:
-                try:
-                    f(opt)
-                except SystemExit as e:
-                    code = code or e
-
-                sys.stdout.flush()
-
-            if self.args.run:
-                runs = [
-                    *(
-                        [lambda o: self._run_schemes(TEST_TYPES.MLKEM, o)]
-                        if func
-                        else []
-                    ),
-                    *(
-                        [lambda o: self._run_schemes(TEST_TYPES.NISTKAT, o)]
-                        if nistkat
-                        else []
-                    ),
-                    *([lambda o: self._run_schemes(TEST_TYPES.KAT, o)] if kat else []),
-                    *(
-                        [lambda o: self._run_schemes(TEST_TYPES.ACVP, o)]
-                        if acvp
-                        else []
-                    ),
-                ]
-
-                for f in runs:
-                    try:
-                        code = code or int(f(opt))
-                    except SystemExit as e:
-                        code = code or e
-
-                    sys.stdout.flush()
-            return code
-
-        exit_code = 0
+            if func is True:
+                self._run_schemes(TEST_TYPES.MLKEM, opt)
+            if kat is True:
+                self._run_schemes(TEST_TYPES.KAT, opt)
+            if nistkat is True:
+                self._run_schemes(TEST_TYPES.NISTKAT, opt)
+            if acvp is True:
+                self._run_schemes(TEST_TYPES.ACVP, opt)
 
         if self.do_no_opt():
-            exit_code = exit_code or all(False)
+            _all(False)
         if self.do_opt():
-            exit_code = exit_code or all(True)
+            _all(True)
 
-        exit(exit_code)
+        self.check_fail()
 
     def cbmc(self):
         def run_cbmc(mlkem_k):
@@ -399,7 +356,9 @@ class Tests:
                 env=os.environ.copy() | envvars,
             )
             p.communicate()
-            assert p.returncode == 0
+
+            if p.returncode != 0:
+                self.fail(f"CBMC proofs for k={mlkem_k}")
 
         k = self.args.k
         if k == "ALL":
@@ -408,3 +367,5 @@ class Tests:
             run_cbmc("4")
         else:
             run_cbmc(k)
+
+        self.check_fail()
