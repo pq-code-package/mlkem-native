@@ -3,13 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import platform
-import os
-import sys
 import argparse
-from functools import reduce
 
-sys.path.append(f"{os.path.join(os.path.dirname(__file__), 'lib')}")
-from mlkem_test import *
+from lib.mlkem_test import *
 
 
 def cli():

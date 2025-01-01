@@ -3,14 +3,12 @@
 
 import os
 import sys
-import hashlib
 import logging
-from enum import IntEnum
+from enum import Enum
 from functools import reduce
-import json
 
 
-class SCHEME(IntEnum):
+class SCHEME(Enum):
     MLKEM512 = 1
     MLKEM768 = 2
     MLKEM1024 = 3
@@ -23,12 +21,6 @@ class SCHEME(IntEnum):
         if self == SCHEME.MLKEM1024:
             return "ML-KEM-1024"
 
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        return self + 1
-
     def suffix(self):
         if self == SCHEME.MLKEM512:
             return "512"
@@ -38,16 +30,13 @@ class SCHEME(IntEnum):
             return "1024"
 
 
-class TEST_TYPES(IntEnum):
+class TEST_TYPES(Enum):
     MLKEM = 1
     BENCH = 2
     NISTKAT = 3
     KAT = 4
     BENCH_COMPONENTS = 5
     ACVP = 6
-
-    def __str__(self):
-        return self.name.lower()
 
     def desc(self):
         if self == TEST_TYPES.MLKEM:

@@ -1,14 +1,11 @@
 # Copyright (c) 2024 The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0
 
-import platform
 import os
 import sys
-import io
-import logging
 import subprocess
-from functools import reduce, partial
-from util import (
+from functools import reduce
+from .util import (
     TEST_TYPES,
     SCHEME,
     config_logger,
