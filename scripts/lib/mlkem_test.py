@@ -11,11 +11,10 @@ from functools import reduce, partial
 from util import (
     TEST_TYPES,
     SCHEME,
-    sha256sum,
-    parse_meta,
     config_logger,
     github_summary,
     logger,
+    dict2str,
 )
 import json
 
@@ -30,7 +29,7 @@ class Args:
         res = []
         if args.run_as_root is True:
             res += ["sudo"]
-        if args.exec_wrapper is not None:
+        if args.exec_wrapper is not None and args.exec_wrapper != "":
             res += args.exec_wrapper.split(" ")
         if args.mac_taskpolicy is not None:
             res += ["taskpolicy", "-c", f"{mac_taskpolicy}"]
@@ -78,28 +77,23 @@ class Base:
 
         log = logger(self.test_type, "Compile", self.args.cross_prefix, self.opt)
 
-        def dict2str(dict):
-            s = ""
-            for k, v in dict.items():
-                s += f"{k}={v} "
-            return s
-
         extra_make_args = extra_make_args + list(
             set([f"OPT={int(self.opt)}", f"AUTO={int(self.args.auto)}"])
             - set(extra_make_args)
         )
 
-        args = [
-            "make",
-            f"CROSS_PREFIX={self.args.cross_prefix}",
-            f"{self.test_type.make_target()}",
-        ] + extra_make_args
+        args = ["make", self.test_type.make_target()] + extra_make_args
+
+        env_update = {}
+        if self.args.cflags is not None and self.args.cflags != "":
+            env_update["CFLAGS"] = self.args.cflags
+        if self.args.cross_prefix is not None and self.args.cross_prefix != "":
+            env_update["CROSS_PREFIX"] = self.args.cross_prefix
 
         env = os.environ.copy()
-        if self.args.cflags is not None:
-            env["CFLAGS"] = self.args.cflags
+        env.update(env_update)
 
-        log.info(" ".join(args))
+        log.info(dict2str(env_update) + " ".join(args))
 
         p = subprocess.run(
             args,
@@ -119,50 +113,43 @@ class Base:
     def run_scheme(
         self,
         scheme,
-        check_proc=None,
+        suppress_output=False,
     ):
         """Run the binary in all different ways
 
         Arguments:
 
         - scheme: Scheme to test
-        - check_proc: Callable to process and check the raw byte-output
-            of the test run with.
+        - suppress_output: Indicate whether to suppress or print-and-return the output
         """
 
         log = logger(self.test_type, scheme, self.args.cross_prefix, self.opt, self.i)
         self.i += 1
 
-        bin = self.test_type.bin_path(scheme)
-        if not os.path.isfile(bin):
-            log.error(f"{bin} does not exists")
-            sys.exit(1)
+        args = ["make", self.test_type.make_run_target(scheme)]
 
-        cmd = Args.cmd_prefix(self.args) + [f"{bin}"]
+        env_update = {}
+        if len(Args.cmd_prefix(self.args)) > 0:
+            env_update["EXEC_WRAPPER"] = " ".join(Args.cmd_prefix(self.args))
 
-        log.debug(" ".join(cmd))
+        env = os.environ.copy()
+        env.update(env_update)
 
-        p = subprocess.run(
-            cmd,
-            capture_output=True,
-            universal_newlines=False,
-        )
+        cmd_str = dict2str(env_update) + " ".join(args)
+        log.info(cmd_str)
+
+        p = subprocess.run(args, capture_output=True, universal_newlines=False, env=env)
 
         result = None
 
         if p.returncode != 0:
-            log.error(
-                f"Running '{cmd}' failed: {p.returncode} {p.stderr.decode()}",
-            )
-        elif check_proc is not None:
-            result, err = check_proc(scheme, p.stdout)
-            if result:
-                log.error(f"{err}")
-            else:
-                log.info(f"passed")
+            log.error(f"'{cmd_str}' failed with with {p.returncode}")
+            log.error(p.stderr.decode())
+        elif suppress_output is True:
+            result = False
         else:
-            log.info(f"\n{p.stdout.decode()}")
             result = p.stdout.decode()
+            log.info(result)
 
         if p.returncode != 0:
             exit(p.returncode)
@@ -191,14 +178,13 @@ class Test_Implementations:
         self,
         opt,
         scheme,
-        check_proc=None,
+        suppress_output=False,
     ):
         """Arguments:
 
         - opt: Whether build should include native backends or not
         - scheme: Scheme to run
-        - check_proc: Callable to process and check the
-            raw byte-output of the test run with.
+        - suppress_output: Indicate whether to suppress or print-and-return the output
         """
 
         # Returns TypedDict
@@ -206,16 +192,15 @@ class Test_Implementations:
 
         results = {}
         results[k] = {}
-        results[k][scheme] = self.ts[k].run_scheme(scheme, check_proc)
+        results[k][scheme] = self.ts[k].run_scheme(scheme, suppress_output)
 
         return results
 
-    def run_schemes(self, opt, check_proc=None):
+    def run_schemes(self, opt, suppress_output=False):
         """Arguments:
 
         - opt: Whether native backends should be enabled
-        - check_proc: Functionto process and check the raw byte-output
-                      of the test run with.
+        - suppress_output: Indicate whether to suppress or print-and-return the output
         """
 
         # Returns
@@ -232,7 +217,7 @@ class Test_Implementations:
         for scheme in SCHEME:
             result = self.ts[k].run_scheme(
                 scheme,
-                check_proc,
+                suppress_output,
             )
 
             results[k][scheme] = result
@@ -246,7 +231,7 @@ class Test_Implementations:
             print(f"::endgroup::")
 
         ## TODO What is happening here?
-        if check_proc is not None:
+        if suppress_output is True:
             return reduce(
                 lambda acc, c: acc or c,
                 [r for rs in results.values() for r in rs.values()],
@@ -276,29 +261,9 @@ class Tests:
     def _run_func(self, opt):
         """Underlying function for functional test"""
 
-        def expect(scheme, raw):
-            """Checks whether the hashed output of the scheme matches the META.yml"""
-
-            actual = str(raw, encoding="utf-8")
-
-            sk_bytes = parse_meta(scheme, "length-secret-key")
-            pk_bytes = parse_meta(scheme, "length-public-key")
-            ct_bytes = parse_meta(scheme, "length-ciphertext")
-
-            expect = (
-                f"CRYPTO_SECRETKEYBYTES:  {sk_bytes}\n"
-                + f"CRYPTO_PUBLICKEYBYTES:  {pk_bytes}\n"
-                + f"CRYPTO_CIPHERTEXTBYTES: {ct_bytes}\n"
-            )
-            fail = expect != actual
-            return (
-                fail,
-                f"Failed, expecting {expect}, but getting {actual}" if fail else "",
-            )
-
         return self._func.run_schemes(
             opt,
-            check_proc=expect,
+            suppress_output=True,
         )
 
     def func(self):
@@ -321,21 +286,9 @@ class Tests:
             exit(1)
 
     def _run_nistkat(self, opt):
-        def check_proc(scheme, raw):
-            """Checks whether the hashed output of the scheme matches the META.yml"""
-
-            actual = sha256sum(raw)
-            expect = parse_meta(scheme, "nistkat-sha256")
-            fail = expect != actual
-
-            return (
-                fail,
-                f"Failed, expecting {expect}, but getting {actual}" if fail else "",
-            )
-
         return self._nistkat.run_schemes(
             opt,
-            check_proc=check_proc,
+            suppress_output=True,
         )
 
     def nistkat(self):
@@ -357,20 +310,9 @@ class Tests:
             exit(1)
 
     def _run_kat(self, opt):
-        def check_proc(scheme, raw):
-            """Checks whether the hashed output of the scheme matches the META.yml"""
-            actual = sha256sum(raw)
-            expect = parse_meta(scheme, "kat-sha256")
-            fail = expect != actual
-
-            return (
-                fail,
-                f"Failed, expecting {expect}, but getting {actual}" if fail else "",
-            )
-
         return self._kat.run_schemes(
             opt,
-            check_proc=check_proc,
+            suppress_output=True,
         )
 
     def kat(self):
@@ -404,15 +346,13 @@ class Tests:
                 f"::group::run {Args.compile_mode(self.args)} {opt_label} {TEST_TYPES.ACVP.desc()}"
             )
 
-        env_update = {"EXEC_WRAPPER": " ".join(Args.cmd_prefix(self.args))}
+        env_update = {}
+        cmd_prefix = Args.cmd_prefix(self.args)
+        if len(cmd_prefix) > 0:
+            env_update["EXEC_WRAPPER"] = " ".cmd_prefix
+
         env = os.environ.copy()
         env.update(env_update)
-
-        def dict2str(dict):
-            s = ""
-            for k, v in dict.items():
-                s += f"{k}={v} "
-            return s
 
         args = ["make", "run_acvp"]
         log.info(dict2str(env_update) + " ".join(args))

@@ -17,12 +17,6 @@ def path(p):
     return os.path.relpath(os.path.join(ROOT, p), CWD)
 
 
-def sha256sum(result):
-    m = hashlib.sha256()
-    m.update(result)
-    return m.hexdigest()
-
-
 class SCHEME(IntEnum):
     MLKEM512 = 1
     MLKEM768 = 2
@@ -86,20 +80,6 @@ class TEST_TYPES(IntEnum):
         if self == TEST_TYPES.ACVP:
             return "ACVP Test"
 
-    def bin(self):
-        if self == TEST_TYPES.MLKEM:
-            return "test_mlkem"
-        if self == TEST_TYPES.BENCH:
-            return "bench_mlkem"
-        if self == TEST_TYPES.BENCH_COMPONENTS:
-            return "bench_components_mlkem"
-        if self == TEST_TYPES.NISTKAT:
-            return "gen_NISTKAT"
-        if self == TEST_TYPES.KAT:
-            return "gen_KAT"
-        if self == TEST_TYPES.ACVP:
-            return "acvp_mlkem"
-
     def make_target(self):
         if self == TEST_TYPES.MLKEM:
             return "func"
@@ -114,16 +94,15 @@ class TEST_TYPES(IntEnum):
         if self == TEST_TYPES.ACVP:
             return "acvp"
 
-    def bin_path(self, scheme):
-        return path(
-            f"test/build/{scheme.name.lower()}/bin/{self.bin()}{scheme.suffix()}"
-        )
+    def make_run_target(self, scheme):
+        return f"run_{self.make_target()}_{scheme.suffix()}"
 
 
-def parse_meta(scheme, field):
-    with open("META.json", "r") as f:
-        meta = json.load(f)
-    return meta["implementations"][int(scheme) - 1][field]
+def dict2str(dict):
+    s = ""
+    for k, v in dict.items():
+        s += f"{k}={v} "
+    return s
 
 
 def github_summary(title, test_label, results):
