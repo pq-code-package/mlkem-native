@@ -9,14 +9,6 @@ from enum import IntEnum
 from functools import reduce
 import json
 
-CWD = os.getcwd()
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-
-
-def path(p):
-    return os.path.relpath(os.path.join(ROOT, p), CWD)
-
-
 class SCHEME(IntEnum):
     MLKEM512 = 1
     MLKEM768 = 2
@@ -43,17 +35,6 @@ class SCHEME(IntEnum):
             return "768"
         if self == SCHEME.MLKEM1024:
             return "1024"
-
-    @classmethod
-    def from_str(cls, s):
-        # Iterate through all enum members to find a match for the given string
-        for m in cls:
-            if str(m) == s:
-                return m
-        raise ValueError(
-            f"'{s}' is not a valid string representation for {cls.__name__}"
-        )
-
 
 class TEST_TYPES(IntEnum):
     MLKEM = 1
