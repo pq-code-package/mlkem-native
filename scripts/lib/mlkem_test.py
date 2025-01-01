@@ -55,154 +55,10 @@ class Args:
         return "Cross" if args.cross_prefix is not None else "Native"
 
 
-class Base:
-
-    def __init__(self, test_type: TEST_TYPES, args, opt):
-        self.args = args
-        self.test_type = test_type
-        self.opt = opt
-
-    def run_scheme(
-        self,
-        scheme,
-        suppress_output=True,
-    ):
-        """Run the binary in all different ways
-
-        Arguments:
-
-        - scheme: Scheme to test
-        - suppress_output: Indicate whether to suppress or print-and-return the output
-        """
-
-        if scheme is None:
-            scheme_str = "All"
-        else:
-            scheme_str = str(scheme)
-
-        log = logger(self.test_type, scheme_str, self.args.cross_prefix, self.opt)
-
-        args = ["make", self.test_type.make_run_target(scheme)] + Args.make_j(self.args)
-
-        env_update = {}
-        if len(Args.cmd_prefix(self.args)) > 0:
-            env_update["EXEC_WRAPPER"] = " ".join(Args.cmd_prefix(self.args))
-
-        env = os.environ.copy()
-        env.update(env_update)
-
-        cmd_str = dict2str(env_update) + " ".join(args)
-        log.info(cmd_str)
-
-        p = subprocess.run(args, capture_output=True, universal_newlines=False, env=env)
-
-        result = None
-
-        if p.returncode != 0:
-            log.error(f"'{cmd_str}' failed with with {p.returncode}")
-            log.error(p.stderr.decode())
-        elif suppress_output is True:
-            if self.args.verbose is True:
-                log.info(p.stdout.decode())
-            result = False
-        else:
-            result = p.stdout.decode()
-            log.info(result)
-
-        if p.returncode != 0:
-            exit(p.returncode)
-        else:
-            return result
-
-
-class Test_Implementations:
-    def __init__(self, test_type: TEST_TYPES, args):
-        self.args = args
-        self.test_type = test_type
-        self.ts = {}
-        self.ts["opt"] = Base(test_type, args, True)
-        self.ts["no_opt"] = Base(test_type, args, False)
-
-    def run_scheme(
-        self,
-        opt,
-        scheme,
-        suppress_output=True,
-    ):
-        """Arguments:
-
-        - opt: Whether build should include native backends or not
-        - scheme: Scheme to run
-        - suppress_output: Indicate whether to suppress or print-and-return the output
-        """
-
-        k = "opt" if opt else "no_opt"
-
-        results = {}
-        results[k] = {}
-        results[k][scheme] = self.ts[k].run_scheme(scheme, suppress_output)
-
-        return results
-
-    def run_schemes(self, opt, suppress_output=True):
-        """Arguments:
-
-        - opt: Whether native backends should be enabled
-        - suppress_output: Indicate whether to suppress or print-and-return the output
-        """
-
-        results = {}
-
-        k = "opt" if opt else "no_opt"
-
-        github_log(
-            f"::group::run {Args.compile_mode(self.args)} {k} {self.test_type.desc()}"
-        )
-
-        results[k] = {}
-        for scheme in SCHEME:
-            result = self.ts[k].run_scheme(
-                scheme,
-                suppress_output,
-            )
-
-            results[k][scheme] = result
-
-        title = (
-            "## " + (Args.compile_mode(self.args)) + " " + (k.capitalize()) + " Tests"
-        )
-        github_summary(title, self.test_type.desc(), results[k])
-
-        github_log("::endgroup::")
-
-        ## TODO What is happening here?
-        if suppress_output is True:
-            return reduce(
-                lambda acc, c: acc or c,
-                [r for rs in results.values() for r in rs.values()],
-                False,
-            )
-        else:
-            return results
-
-
-"""
-Underlying functional tests
-
-"""
-
-
 class Tests:
     def __init__(self, args):
         config_logger(args.verbose)
         self.args = args
-
-        self._func = Test_Implementations(TEST_TYPES.MLKEM, args)
-        self._nistkat = Test_Implementations(TEST_TYPES.NISTKAT, args)
-        self._kat = Test_Implementations(TEST_TYPES.KAT, args)
-        self._acvp = Test_Implementations(TEST_TYPES.ACVP, args)
-        self._bench = Test_Implementations(TEST_TYPES.BENCH, args)
-        self._bench_components = Test_Implementations(TEST_TYPES.BENCH_COMPONENTS, args)
 
     def _compile_schemes(self, test_type, opt):
         """compile or cross compile with some extra environment variables and makefile arguments"""
@@ -247,11 +103,108 @@ class Tests:
         if p.returncode != 0:
             sys.exit(1)
 
+    def _run_scheme(
+        self,
+        test_type,
+        opt,
+        scheme,
+        suppress_output=True,
+    ):
+        """Run the binary in all different ways
+
+        Arguments:
+
+        - scheme: Scheme to test
+        - suppress_output: Indicate whether to suppress or print-and-return the output
+        """
+
+        if scheme is None:
+            scheme_str = "All"
+        else:
+            scheme_str = str(scheme)
+
+        log = logger(test_type, scheme_str, self.args.cross_prefix, opt)
+
+        args = ["make", test_type.make_run_target(scheme)] + Args.make_j(self.args)
+
+        env_update = {}
+        if len(Args.cmd_prefix(self.args)) > 0:
+            env_update["EXEC_WRAPPER"] = " ".join(Args.cmd_prefix(self.args))
+
+        env = os.environ.copy()
+        env.update(env_update)
+
+        cmd_str = dict2str(env_update) + " ".join(args)
+        log.info(cmd_str)
+
+        p = subprocess.run(args, capture_output=True, universal_newlines=False, env=env)
+
+        result = None
+
+        if p.returncode != 0:
+            log.error(f"'{cmd_str}' failed with with {p.returncode}")
+            log.error(p.stderr.decode())
+        elif suppress_output is True:
+            if self.args.verbose is True:
+                log.info(p.stdout.decode())
+            result = False
+        else:
+            result = p.stdout.decode()
+            log.info(result)
+
+        if p.returncode != 0:
+            exit(p.returncode)
+        else:
+            return result
+
+    def _run_schemes(self, test_type, opt, suppress_output=True):
+        """Arguments:
+
+        - opt: Whether native backends should be enabled
+        - suppress_output: Indicate whether to suppress or print-and-return the output
+        """
+
+        results = {}
+
+        k = "opt" if opt else "no_opt"
+
+        github_log(
+            f"::group::run {Args.compile_mode(self.args)} {k} {test_type.desc()}"
+        )
+
+        results[k] = {}
+        for scheme in SCHEME:
+            result = self._run_scheme(
+                test_type,
+                opt,
+                scheme,
+                suppress_output,
+            )
+
+            results[k][scheme] = result
+
+        title = (
+            "## " + (Args.compile_mode(self.args)) + " " + (k.capitalize()) + " Tests"
+        )
+        github_summary(title, test_type.desc(), results[k])
+
+        github_log("::endgroup::")
+
+        ## TODO What is happening here?
+        if suppress_output is True:
+            return reduce(
+                lambda acc, c: acc or c,
+                [r for rs in results.values() for r in rs.values()],
+                False,
+            )
+        else:
+            return results
+
     def func(self):
         def _func(opt):
             self._compile_schemes(TEST_TYPES.MLKEM, opt)
             if self.args.run:
-                return self._func.run_schemes(opt)
+                return self._run_schemes(TEST_TYPES.MLKEM, opt)
 
         fail = False
         if Args.do_no_opt(self.args):
@@ -266,7 +219,7 @@ class Tests:
         def _nistkat(opt):
             self._compile_schemes(TEST_TYPES.NISTKAT, opt)
             if self.args.run:
-                return self._nistkat.run_schemes(opt)
+                return self._run_schemes(TEST_TYPES.NISTKAT, opt)
 
         fail = False
         if Args.do_no_opt(self.args):
@@ -281,7 +234,7 @@ class Tests:
         def _kat(opt):
             self._compile_schemes(TEST_TYPES.KAT, opt)
             if self.args.run:
-                return self._kat.run_schemes(opt)
+                return self._run_schemes(TEST_TYPES.KAT, opt)
 
         fail = False
 
@@ -297,7 +250,7 @@ class Tests:
         def _acvp(opt):
             self._compile_schemes(TEST_TYPES.ACVP, opt)
             if self.args.run:
-                return self._acvp.run_scheme(opt, None)
+                return self._run_scheme(TEST_TYPES.ACVP, opt, None)
 
         fail = False
 
@@ -316,24 +269,24 @@ class Tests:
 
         if components is False:
             test_type = TEST_TYPES.BENCH
-            t = self._bench
         else:
             test_type = TEST_TYPES.BENCH_COMPONENTS
-            t = self._bench_components
             output = False
 
         # NOTE: We haven't yet decided how to output both opt/no-opt benchmark results
         if Args.do_opt_all(self.args):
             self._compile_schemes(test_type, False)
             if self.args.run:
-                t.run_schemes(False, suppress_output=False)
+                self._run_schemes(test_type, False, suppress_output=False)
             self._compile_schemes(test_type, True)
             if self.args.run:
-                resultss = t.run_schemes(True, suppress_output=False)
+                resultss = self._run_schemes(test_type, True, suppress_output=False)
         else:
             self._compile_schemes(test_type, Args.do_opt(self.args))
             if self.args.run:
-                resultss = t.run_schemes(Args.do_opt(self.args), suppress_output=False)
+                resultss = self._run_schemes(
+                    test_type, Args.do_opt(self.args), suppress_output=False
+                )
 
         if resultss is None:
             exit(0)
@@ -379,10 +332,22 @@ class Tests:
             code = 0
 
             compiles = [
-                *([lambda o: self._compile_schemes(TEST_TYPES.MLKEM, o)] if func else []),
-                *([lambda o: self._compile_schemes(TEST_TYPES.NISTKAT, o)] if nistkat else []),
+                *(
+                    [lambda o: self._compile_schemes(TEST_TYPES.MLKEM, o)]
+                    if func
+                    else []
+                ),
+                *(
+                    [lambda o: self._compile_schemes(TEST_TYPES.NISTKAT, o)]
+                    if nistkat
+                    else []
+                ),
                 *([lambda o: self._compile_schemes(TEST_TYPES.KAT, o)] if kat else []),
-                *([lambda o: self._compile_schemes(TEST_TYPES.ACVP, o)] if acvp else []),
+                *(
+                    [lambda o: self._compile_schemes(TEST_TYPES.ACVP, o)]
+                    if acvp
+                    else []
+                ),
             ]
 
             for f in compiles:
@@ -395,10 +360,22 @@ class Tests:
 
             if self.args.run:
                 runs = [
-                    *([self._func.run_schemes] if func else []),
-                    *([self._nistkat.run_schemes] if nistkat else []),
-                    *([self._kat.run_schemes] if kat else []),
-                    *([self._acvp.run_schemes] if acvp else []),
+                    *(
+                        [lambda o: self._run_schemes(TEST_TYPES.MLKEM, o)]
+                        if func
+                        else []
+                    ),
+                    *(
+                        [lambda o: self._run_schemes(TEST_TYPES.NISTKAT, o)]
+                        if nistkat
+                        else []
+                    ),
+                    *([lambda o: self._run_schemes(TEST_TYPES.KAT, o)] if kat else []),
+                    *(
+                        [lambda o: self._run_schemes(TEST_TYPES.ACVP, o)]
+                        if acvp
+                        else []
+                    ),
                 ]
 
                 for f in runs:
