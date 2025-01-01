@@ -314,13 +314,6 @@ class Tests:
         if fail:
             exit(1)
 
-    def _run_bench(
-        self,
-        t,  # Testmplementations
-        opt,
-    ):
-        return t.run_schemes(opt, suppress_output=False)
-
     def bench(self):
         cycles = self.args.cycles
         output = self.args.output
@@ -336,19 +329,16 @@ class Tests:
         if Args.do_opt_all(self.args):
             t.compile(False)
             if self.args.run:
-                self._run_bench(t, False)
+                t.run_schemes(False, suppress_output=False)
             t.compile(True)
             if self.args.run:
-                resultss = self._run_bench(t, True)
+                resultss = t.run_schemes(True, suppress_output=False)
         else:
             t.compile(
                 Args.do_opt(self.args),
             )
             if self.args.run:
-                resultss = self._run_bench(
-                    t,
-                    Args.do_opt(self.args),
-                )
+                resultss = t.run_schemes(Args.do_opt(self.args), suppress_output=False)
 
         if resultss is None:
             exit(0)
