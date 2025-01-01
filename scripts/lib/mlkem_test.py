@@ -10,12 +10,11 @@ from .util import (
     SCHEME,
     config_logger,
     github_summary,
+    github_log,
     logger,
     dict2str,
 )
 import json
-
-gh_env = os.environ.get("GITHUB_ENV")
 
 
 class Args:
@@ -67,10 +66,9 @@ class Base:
     def compile_schemes(self):
         """compile or cross compile with some extra environment variables and makefile arguments"""
 
-        if gh_env is not None:
-            print(
-                f"::group::compile {Args.compile_mode(self.args)} {self.opt_label} {self.test_type.desc()}"
-            )
+        github_log(
+            f"::group::compile {Args.compile_mode(self.args)} {self.opt_label} {self.test_type.desc()}"
+        )
 
         log = logger(self.test_type, "Compile", self.args.cross_prefix, self.opt)
 
@@ -101,8 +99,7 @@ class Base:
         if p.returncode != 0:
             log.error(f"make failed: {p.returncode}")
 
-        if gh_env is not None:
-            print(f"::endgroup::")
+        github_log("::endgroup::")
 
         if p.returncode != 0:
             sys.exit(1)
@@ -206,10 +203,9 @@ class Test_Implementations:
 
         k = "opt" if opt else "no_opt"
 
-        if gh_env is not None:
-            print(
-                f"::group::run {Args.compile_mode(self.args)} {k} {self.test_type.desc()}"
-            )
+        github_log(
+            f"::group::run {Args.compile_mode(self.args)} {k} {self.test_type.desc()}"
+        )
 
         results[k] = {}
         for scheme in SCHEME:
@@ -225,8 +221,7 @@ class Test_Implementations:
         )
         github_summary(title, self.test_type.desc(), results[k])
 
-        if gh_env is not None:
-            print(f"::endgroup::")
+        github_log("::endgroup::")
 
         ## TODO What is happening here?
         if suppress_output is True:

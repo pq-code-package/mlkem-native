@@ -83,6 +83,12 @@ def dict2str(dict):
     return s
 
 
+def github_log(msg):
+    if os.environ.get("GITHUB_ENV") is None:
+        return
+    print(msg)
+
+
 def github_summary(title, test_label, results):
     """Generate summary for GitHub CI"""
     summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
