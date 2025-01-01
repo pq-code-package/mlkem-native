@@ -34,6 +34,12 @@ class Args:
         return res
 
     @staticmethod
+    def make_j(args):
+        if args.j is None:
+            return []
+        return [f"-j{args.j}"]
+
+    @staticmethod
     def do_opt_all(args):
         return args.opt.lower() == ["all"]
 
@@ -78,7 +84,11 @@ class Base:
             - set(extra_make_args)
         )
 
-        args = ["make", self.test_type.make_target()] + extra_make_args
+        args = (
+            ["make", self.test_type.make_target()]
+            + Args.make_j(self.args)
+            + extra_make_args
+        )
 
         env_update = {}
         if self.args.cflags is not None and self.args.cflags != "":
@@ -126,7 +136,7 @@ class Base:
 
         log = logger(self.test_type, scheme_str, self.args.cross_prefix, self.opt)
 
-        args = ["make", self.test_type.make_run_target(scheme)]
+        args = ["make", self.test_type.make_run_target(scheme)] + Args.make_j(self.args)
 
         env_update = {}
         if len(Args.cmd_prefix(self.args)) > 0:
@@ -457,15 +467,14 @@ class Tests:
 
         def run_cbmc(mlkem_k):
             envvars = {"MLKEM_K": mlkem_k}
-            cpucount = os.cpu_count()
             p = subprocess.Popen(
                 [
                     "python3",
                     "run-cbmc-proofs.py",
                     "--summarize",
                     "--no-coverage",
-                    f"-j{cpucount}",
-                ],
+                ]
+                + Args.make_j(self.args),
                 cwd="cbmc",
                 env=os.environ.copy() | envvars,
             )

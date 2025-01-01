@@ -4,6 +4,7 @@
 
 import platform
 import argparse
+import os
 
 from lib.mlkem_test import *
 
@@ -20,6 +21,11 @@ def cli():
     )
     common_parser.add_argument(
         "--cflags", help="Extra cflags to passed in (e.g. '-mcpu=cortex-a72')"
+    )
+    common_parser.add_argument(
+        "-j",
+        help="Number of jobs to be used for `make` invocations",
+        default=os.cpu_count(),
     )
 
     # --auto / --no-auto
