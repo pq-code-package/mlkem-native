@@ -64,13 +64,8 @@ class Base:
         self.opt = opt
         self.opt_label = "opt" if self.opt else "no_opt"
 
-    def compile_schemes(
-        self,
-        extra_make_args=None,
-    ):
+    def compile_schemes(self):
         """compile or cross compile with some extra environment variables and makefile arguments"""
-        if extra_make_args is None:
-            extra_make_args = []
 
         if gh_env is not None:
             print(
@@ -79,16 +74,12 @@ class Base:
 
         log = logger(self.test_type, "Compile", self.args.cross_prefix, self.opt)
 
-        extra_make_args = extra_make_args + list(
-            set([f"OPT={int(self.opt)}", f"AUTO={int(self.args.auto)}"])
-            - set(extra_make_args)
-        )
+        extra_make_args = [f"OPT={int(self.opt)}", f"AUTO={int(self.args.auto)}"]
+        if self.test_type.is_benchmark() is True:
+            extra_make_args += [f"CYCLES={self.args.cycles}"]
+        extra_make_args += Args.make_j(self.args)
 
-        args = (
-            ["make", self.test_type.make_target()]
-            + Args.make_j(self.args)
-            + extra_make_args
-        )
+        args = ["make", self.test_type.make_target()] + extra_make_args
 
         env_update = {}
         if self.args.cflags is not None and self.args.cflags != "":
@@ -180,11 +171,8 @@ class Test_Implementations:
     def compile(
         self,
         opt,
-        extra_make_args=None,
     ):
-        self.ts["opt" if opt else "no_opt"].compile_schemes(
-            extra_make_args,
-        )
+        self.ts["opt" if opt else "no_opt"].compile_schemes()
 
     def run_scheme(
         self,
@@ -360,16 +348,15 @@ class Tests:
 
         # NOTE: We haven't yet decided how to output both opt/no-opt benchmark results
         if Args.do_opt_all(self.args):
-            t.compile(False, extra_make_args=[f"CYCLES={cycles}"])
+            t.compile(False)
             if self.args.run:
                 self._run_bench(t, False)
-            t.compile(True, extra_make_args=[f"CYCLES={cycles}"])
+            t.compile(True)
             if self.args.run:
                 resultss = self._run_bench(t, True)
         else:
             t.compile(
                 Args.do_opt(self.args),
-                extra_make_args=[f"CYCLES={cycles}"],
             )
             if self.args.run:
                 resultss = self._run_bench(

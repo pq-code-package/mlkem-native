@@ -38,6 +38,9 @@ class TEST_TYPES(Enum):
     BENCH_COMPONENTS = 5
     ACVP = 6
 
+    def is_benchmark(self):
+        return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
+
     def desc(self):
         if self == TEST_TYPES.MLKEM:
             return "Functional Test"
