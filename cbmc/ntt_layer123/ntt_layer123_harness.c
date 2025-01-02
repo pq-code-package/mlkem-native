@@ -2,20 +2,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
-/*
- * Insert copyright notice
- */
-
-/**
- * @file ntt_layer123_harness.c
- * @brief Implements the proof harness for ntt_layer123 function.
- */
-
-/*
- * Insert project header files that
- *   - include the declaration of the function
- *   - include the types needed to declare function arguments
- */
 #include <ntt.h>
 void ntt_layer123(int16_t *r);
 

@@ -2,20 +2,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
-/*
- * Insert copyright notice
- */
-
-/**
- * @file invntt_layer54_harness.c
- * @brief Implements the proof harness for invntt_layer54 function.
- */
-
-/*
- * Insert project header files that
- *   - include the declaration of the function
- *   - include the types needed to declare function arguments
- */
 #include <ntt.h>
 void invntt_layer54(int16_t *r);
 
