@@ -3,27 +3,12 @@
 
 import os
 import sys
-import hashlib
 import logging
-from enum import IntEnum
+from enum import Enum
 from functools import reduce
-import json
-
-CWD = os.getcwd()
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 
-def path(p):
-    return os.path.relpath(os.path.join(ROOT, p), CWD)
-
-
-def sha256sum(result):
-    m = hashlib.sha256()
-    m.update(result)
-    return m.hexdigest()
-
-
-class SCHEME(IntEnum):
+class SCHEME(Enum):
     MLKEM512 = 1
     MLKEM768 = 2
     MLKEM1024 = 3
@@ -36,12 +21,6 @@ class SCHEME(IntEnum):
         if self == SCHEME.MLKEM1024:
             return "ML-KEM-1024"
 
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        return self + 1
-
     def suffix(self):
         if self == SCHEME.MLKEM512:
             return "512"
@@ -50,30 +29,20 @@ class SCHEME(IntEnum):
         if self == SCHEME.MLKEM1024:
             return "1024"
 
-    @classmethod
-    def from_str(cls, s):
-        # Iterate through all enum members to find a match for the given string
-        for m in cls:
-            if str(m) == s:
-                return m
-        raise ValueError(
-            f"'{s}' is not a valid string representation for {cls.__name__}"
-        )
 
-
-class TEST_TYPES(IntEnum):
-    MLKEM = 1
+class TEST_TYPES(Enum):
+    FUNC = 1
     BENCH = 2
     NISTKAT = 3
     KAT = 4
     BENCH_COMPONENTS = 5
     ACVP = 6
 
-    def __str__(self):
-        return self.name.lower()
+    def is_benchmark(self):
+        return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
 
     def desc(self):
-        if self == TEST_TYPES.MLKEM:
+        if self == TEST_TYPES.FUNC:
             return "Functional Test"
         if self == TEST_TYPES.BENCH:
             return "Benchmark"
@@ -86,22 +55,8 @@ class TEST_TYPES(IntEnum):
         if self == TEST_TYPES.ACVP:
             return "ACVP Test"
 
-    def bin(self):
-        if self == TEST_TYPES.MLKEM:
-            return "test_mlkem"
-        if self == TEST_TYPES.BENCH:
-            return "bench_mlkem"
-        if self == TEST_TYPES.BENCH_COMPONENTS:
-            return "bench_components_mlkem"
-        if self == TEST_TYPES.NISTKAT:
-            return "gen_NISTKAT"
-        if self == TEST_TYPES.KAT:
-            return "gen_KAT"
-        if self == TEST_TYPES.ACVP:
-            return "acvp_mlkem"
-
     def make_target(self):
-        if self == TEST_TYPES.MLKEM:
+        if self == TEST_TYPES.FUNC:
             return "func"
         if self == TEST_TYPES.BENCH:
             return "bench"
@@ -114,16 +69,24 @@ class TEST_TYPES(IntEnum):
         if self == TEST_TYPES.ACVP:
             return "acvp"
 
-    def bin_path(self, scheme):
-        return path(
-            f"test/build/{scheme.name.lower()}/bin/{self.bin()}{scheme.suffix()}"
-        )
+    def make_run_target(self, scheme):
+        if scheme is not None:
+            return f"run_{self.make_target()}_{scheme.suffix()}"
+        else:
+            return f"run_{self.make_target()}"
 
 
-def parse_meta(scheme, field):
-    with open("META.json", "r") as f:
-        meta = json.load(f)
-    return meta["implementations"][int(scheme) - 1][field]
+def dict2str(dict):
+    s = ""
+    for k, v in dict.items():
+        s += f"{k}={v} "
+    return s
+
+
+def github_log(msg):
+    if os.environ.get("GITHUB_ENV") is None:
+        return
+    print(msg)
 
 
 def github_summary(title, test_label, results):
@@ -213,20 +176,15 @@ def config_logger(verbose):
         logger.setLevel(logging.INFO)
 
 
-def logger(test_type, scheme, cross_prefix, opt, i=None):
+def logger(test_type, scheme, cross_prefix, opt):
     """Emit line indicating the processing of the given test"""
     compile_mode = "cross" if cross_prefix else "native"
     implementation = "opt" if opt else "no_opt"
 
     return logging.getLogger(
-        "{:<18} {:<11} ({:<6}, {:>6})".format(
-            (
-                test_type.desc()
-                if (i is None or test_type is not TEST_TYPES.ACVP)
-                else f"{test_type.desc():<15} {i}"
-            ),
+        "{:<18} {:<11} {:<17}".format(
+            (test_type.desc()),
             str(scheme),
-            compile_mode,
-            implementation,
+            "({}, {}):".format(compile_mode, implementation),
         )
     )

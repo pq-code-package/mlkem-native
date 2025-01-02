@@ -1,251 +1,194 @@
 # Copyright (c) 2024 The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0
 
-import platform
 import os
-import sys
-import io
-import logging
 import subprocess
-from functools import reduce, partial
-from util import (
+from functools import reduce
+from .util import (
     TEST_TYPES,
     SCHEME,
-    sha256sum,
-    parse_meta,
     config_logger,
     github_summary,
+    github_log,
     logger,
+    dict2str,
 )
 import json
 
-gh_env = os.environ.get("GITHUB_ENV")
 
+class Tests:
+    def __init__(self, args):
+        config_logger(args.verbose)
+        self.args = args
+        self.failed = []
 
-class CompileOptions(object):
+    def fail(self, info):
+        self.failed.append(info)
 
-    def __init__(self, cross_prefix, cflags, auto, verbose):
-        self.cross_prefix = cross_prefix
-        self.cflags = cflags
-        self.auto = auto
-        self.verbose = verbose
+    def check_fail(self):
+        num_failed = len(self.failed)
+        if num_failed > 0:
+            print(f"{num_failed} tests FAILED")
+            for info in self.failed:
+                print(f"* {info}")
+            exit(1)
+        print("All good!")
+        exit(0)
+
+    def cmd_prefix(self):
+        res = []
+        if self.args.run_as_root is True:
+            res += ["sudo"]
+        if self.args.exec_wrapper is not None and self.args.exec_wrapper != "":
+            res += self.args.exec_wrapper.split(" ")
+        if self.args.mac_taskpolicy is not None:
+            res += ["taskpolicy", "-c", f"{mac_taskpolicy}"]
+
+        return res
+
+    def make_j(self):
+        if self.args.j is None or int(self.args.j) == 1:
+            return []
+        return [f"-j{self.args.j}"]
+
+    def do_opt_all(self):
+        return self.args.opt.lower() == ["all"]
+
+    def do_opt(self):
+        return self.args.opt.lower() in ["all", "opt"]
+
+    def do_no_opt(self):
+        return self.args.opt.lower() in ["all", "no_opt"]
 
     def compile_mode(self):
-        return "Cross" if self.cross_prefix else "Native"
+        return "Cross" if self.args.cross_prefix is not None else "Native"
 
-
-class Base:
-
-    def __init__(self, test_type: TEST_TYPES, copts: CompileOptions, opt):
-        self.test_type = test_type
-        self.cross_prefix = copts.cross_prefix
-        self.cflags = copts.cflags
-        self.auto = copts.auto
-        self.verbose = copts.verbose
-        self.opt = opt
-        self.compile_mode = copts.compile_mode()
-        self.opt_label = "opt" if self.opt else "no_opt"
-        self.i = 0
-
-    def compile_schemes(
-        self,
-        extra_make_envs=None,
-        extra_make_args=None,
-    ):
+    def _compile_schemes(self, test_type, opt):
         """compile or cross compile with some extra environment variables and makefile arguments"""
-        if extra_make_envs is None:
-            extra_make_envs = {}
-        if extra_make_args is None:
-            extra_make_args = []
 
-        if gh_env is not None:
-            print(
-                f"::group::compile {self.compile_mode} {self.opt_label} {self.test_type.desc()}"
-            )
+        opt_label = "opt" if opt else "no_opt"
 
-        log = logger(self.test_type, "Compile", self.cross_prefix, self.opt)
-
-        def dict2str(dict):
-            s = ""
-            for k, v in dict.items():
-                s += f"{k}={v} "
-            return s
-
-        extra_make_args = extra_make_args + list(
-            set([f"OPT={int(self.opt)}", f"AUTO={int(self.auto)}"])
-            - set(extra_make_args)
+        github_log(
+            f"::group::compile {self.compile_mode()} {opt_label} {test_type.desc()}"
         )
 
-        args = [
-            "make",
-            f"CROSS_PREFIX={self.cross_prefix}",
-            f"{self.test_type.make_target()}",
-        ] + extra_make_args
+        log = logger(test_type, "Compile", self.args.cross_prefix, opt)
+
+        extra_make_args = [f"OPT={int(opt)}", f"AUTO={int(self.args.auto)}"]
+        if test_type.is_benchmark() is True:
+            extra_make_args += [f"CYCLES={self.args.cycles}"]
+        extra_make_args += self.make_j()
+
+        args = ["make", test_type.make_target()] + extra_make_args
+
+        env_update = {}
+        if self.args.cflags is not None and self.args.cflags != "":
+            env_update["CFLAGS"] = self.args.cflags
+        if self.args.cross_prefix is not None and self.args.cross_prefix != "":
+            env_update["CROSS_PREFIX"] = self.args.cross_prefix
 
         env = os.environ.copy()
-        if self.cflags is not None:
-            env["CFLAGS"] = self.cflags
+        env.update(env_update)
 
-        env.update(extra_make_envs)
-
-        log.info(dict2str(extra_make_envs) + " ".join(args))
+        log.info(dict2str(env_update) + " ".join(args))
 
         p = subprocess.run(
             args,
-            stdout=subprocess.DEVNULL if not self.verbose else None,
+            stdout=subprocess.DEVNULL if not self.args.verbose else None,
             env=env,
         )
 
         if p.returncode != 0:
             log.error(f"make failed: {p.returncode}")
+            self.fail(f"Compilation for ({test_type},{opt_label})")
 
-        if gh_env is not None:
-            print(f"::endgroup::")
+        github_log("::endgroup::")
 
-        if p.returncode != 0:
-            sys.exit(1)
-
-    def run_scheme(
+    def _run_scheme(
         self,
+        test_type,
+        opt,
         scheme,
-        check_proc=None,
-        cmd_prefix=None,
+        suppress_output=True,
     ):
         """Run the binary in all different ways
 
         Arguments:
 
         - scheme: Scheme to test
-        - check_proc: Callable to process and check the raw byte-output
-            of the test run with.
-        - cmd_prefix: Command prefix; array of strings, or None
+        - suppress_output: Indicate whether to suppress or print-and-return the output
         """
-        if cmd_prefix is None:
-            cmd_prefix = []
 
-        log = logger(self.test_type, scheme, self.cross_prefix, self.opt, self.i)
-        self.i += 1
+        opt_label = "opt" if opt else "no_opt"
 
-        bin = self.test_type.bin_path(scheme)
-        if not os.path.isfile(bin):
-            log.error(f"{bin} does not exists")
-            sys.exit(1)
+        if scheme is None:
+            scheme_str = "All"
+        else:
+            scheme_str = str(scheme)
 
-        cmd = cmd_prefix + [f"{bin}"]
+        log = logger(test_type, scheme_str, self.args.cross_prefix, opt)
 
-        log.debug(" ".join(cmd))
+        args = ["make", test_type.make_run_target(scheme)]
+        if test_type.is_benchmark() is False:
+            args += self.make_j()
 
-        p = subprocess.run(
-            cmd,
-            capture_output=True,
-            universal_newlines=False,
-        )
+        env_update = {}
+        if len(self.cmd_prefix()) > 0:
+            env_update["EXEC_WRAPPER"] = " ".join(self.cmd_prefix())
 
-        result = None
+        env = os.environ.copy()
+        env.update(env_update)
+
+        cmd_str = dict2str(env_update) + " ".join(args)
+        log.info(cmd_str)
+
+        p = subprocess.run(args, capture_output=True, universal_newlines=False, env=env)
 
         if p.returncode != 0:
-            log.error(
-                f"Running '{cmd}' failed: {p.returncode} {p.stderr.decode()}",
-            )
-        elif check_proc is not None:
-            result, err = check_proc(scheme, p.stdout)
-            if result:
-                log.error(f"{err}")
-            else:
-                log.info(f"passed")
+            log.error(f"'{cmd_str}' failed with with {p.returncode}")
+            log.error(p.stderr.decode())
+            self.fail(f"{test_type.desc()} ({opt_label}, {scheme_str})")
+            return True  # Failure
+        elif suppress_output is True:
+            if self.args.verbose is True:
+                log.info(p.stdout.decode())
+            return False  # No failure
         else:
-            log.info(f"\n{p.stdout.decode()}")
             result = p.stdout.decode()
-
-        if p.returncode != 0:
-            exit(p.returncode)
-        else:
+            log.info(result)
             return result
 
-
-class Test_Implementations:
-    def __init__(self, test_type: TEST_TYPES, copts: CompileOptions):
-        self.test_type = test_type
-        self.compile_mode = copts.compile_mode()
-        self.ts = {}
-        self.ts["opt"] = Base(test_type, copts, True)
-        self.ts["no_opt"] = Base(test_type, copts, False)
-
-    def compile(
-        self,
-        opt,
-        extra_make_envs=None,
-        extra_make_args=None,
-    ):
-        self.ts["opt" if opt else "no_opt"].compile_schemes(
-            extra_make_envs,
-            extra_make_args,
-        )
-
-    def run_scheme(
-        self,
-        opt,
-        scheme,
-        check_proc=None,
-        cmd_prefix=None,
-    ):
-        """Arguments:
-
-        - opt: Whether build should include native backends or not
-        - scheme: Scheme to run
-        - check_proc: Callable to process and check the
-            raw byte-output of the test run with.
-        - cmd_prefix: Command prefix; array of strings, or None
-        """
-        if cmd_prefix is None:
-            cmd_prefix = []
-
-        # Returns TypedDict
-        k = "opt" if opt else "no_opt"
-
-        results = {}
-        results[k] = {}
-        results[k][scheme] = self.ts[k].run_scheme(scheme, check_proc, cmd_prefix)
-
-        return results
-
-    def run_schemes(self, opt, check_proc=None, cmd_prefix=None):
+    def _run_schemes(self, test_type, opt, suppress_output=True):
         """Arguments:
 
         - opt: Whether native backends should be enabled
-        - check_proc: Functionto process and check the raw byte-output
-                      of the test run with.
-        - cmd_prefix: Command prefix; array of strings
+        - suppress_output: Indicate whether to suppress or print-and-return the output
         """
-        if cmd_prefix is None:
-            cmd_prefix = []
 
-        # Returns
         results = {}
 
         k = "opt" if opt else "no_opt"
 
-        if gh_env is not None:
-            print(f"::group::run {self.compile_mode} {k} {self.test_type.desc()}")
+        github_log(f"::group::run {self.compile_mode()} {k} {test_type.desc()}")
 
         results[k] = {}
         for scheme in SCHEME:
-            result = self.ts[k].run_scheme(
+            result = self._run_scheme(
+                test_type,
+                opt,
                 scheme,
-                check_proc,
-                cmd_prefix,
+                suppress_output,
             )
 
             results[k][scheme] = result
 
-        title = "## " + (self.compile_mode) + " " + (k.capitalize()) + " Tests"
-        github_summary(title, self.test_type.desc(), results[k])
+        title = "## " + (self.compile_mode()) + " " + (k.capitalize()) + " Tests"
+        github_summary(title, test_type.desc(), results[k])
 
-        if gh_env is not None:
-            print(f"::endgroup::")
+        github_log("::endgroup::")
 
-        ## TODO What is happening here?
-        if check_proc is not None:
+        if suppress_output is True:
+            # In this case, we only gather success/failure booleans
             return reduce(
                 lambda acc, c: acc or c,
                 [r for rs in results.values() for r in rs.values()],
@@ -254,285 +197,81 @@ class Test_Implementations:
         else:
             return results
 
-
-"""
-Underlying functional tests
-
-"""
-
-
-class Tests:
-    def __init__(self, opts):
-        copts = CompileOptions(
-            opts.cross_prefix,
-            opts.cflags,
-            opts.auto,
-            opts.verbose,
-        )
-        self.opt = opts.opt
-
-        self.verbose = opts.verbose
-        self._func = Test_Implementations(TEST_TYPES.MLKEM, copts)
-        self._nistkat = Test_Implementations(TEST_TYPES.NISTKAT, copts)
-        self._kat = Test_Implementations(TEST_TYPES.KAT, copts)
-        self._acvp = Test_Implementations(TEST_TYPES.ACVP, copts)
-        self._bench = Test_Implementations(TEST_TYPES.BENCH, copts)
-        self._bench_components = Test_Implementations(
-            TEST_TYPES.BENCH_COMPONENTS, copts
-        )
-
-        self.compile_mode = copts.compile_mode()
-        self.compile = opts.compile
-        self.run = opts.run
-        self.cmd_prefix = []
-
-        if self.run:
-            if opts.run_as_root:
-                logging.info(
-                    f"Running {bin} as root -- you may need to enter your root password.",
-                )
-                self.cmd_prefix.append("sudo")
-
-            if opts.exec_wrapper:
-                logging.info(f"Running with customized wrapper {opts.exec_wrapper}")
-                self.cmd_prefix = self.cmd_prefix + opts.exec_wrapper.split(" ")
-
-    def _run_func(self, opt):
-        """Underlying function for functional test"""
-
-        def expect(scheme, raw):
-            """Checks whether the hashed output of the scheme matches the META.yml"""
-
-            actual = str(raw, encoding="utf-8")
-
-            sk_bytes = parse_meta(scheme, "length-secret-key")
-            pk_bytes = parse_meta(scheme, "length-public-key")
-            ct_bytes = parse_meta(scheme, "length-ciphertext")
-
-            expect = (
-                f"CRYPTO_SECRETKEYBYTES:  {sk_bytes}\n"
-                + f"CRYPTO_PUBLICKEYBYTES:  {pk_bytes}\n"
-                + f"CRYPTO_CIPHERTEXTBYTES: {ct_bytes}\n"
-            )
-            fail = expect != actual
-            return (
-                fail,
-                f"Failed, expecting {expect}, but getting {actual}" if fail else "",
-            )
-
-        return self._func.run_schemes(
-            opt,
-            check_proc=expect,
-            cmd_prefix=self.cmd_prefix,
-        )
-
     def func(self):
-        config_logger(self.verbose)
-
         def _func(opt):
+            self._compile_schemes(TEST_TYPES.FUNC, opt)
+            if self.args.run:
+                self._run_schemes(TEST_TYPES.FUNC, opt)
 
-            if self.compile:
-                self._func.compile(opt)
-            if self.run:
-                return self._run_func(opt)
+        if self.do_no_opt():
+            _func(False)
+        if self.do_opt():
+            _func(True)
 
-        fail = False
-        if self.opt.lower() == "all" or self.opt.lower() == "no_opt":
-            fail = fail or _func(False)
-        if self.opt.lower() == "all" or self.opt.lower() == "opt":
-            fail = fail or _func(True)
-
-        if fail:
-            exit(1)
-
-    def _run_nistkat(self, opt):
-        def check_proc(scheme, raw):
-            """Checks whether the hashed output of the scheme matches the META.yml"""
-
-            actual = sha256sum(raw)
-            expect = parse_meta(scheme, "nistkat-sha256")
-            fail = expect != actual
-
-            return (
-                fail,
-                f"Failed, expecting {expect}, but getting {actual}" if fail else "",
-            )
-
-        return self._nistkat.run_schemes(
-            opt,
-            check_proc=check_proc,
-            cmd_prefix=self.cmd_prefix,
-        )
+        self.check_fail()
 
     def nistkat(self):
-        config_logger(self.verbose)
-
         def _nistkat(opt):
-            if self.compile:
-                self._nistkat.compile(opt)
-            if self.run:
-                return self._run_nistkat(opt)
+            self._compile_schemes(TEST_TYPES.NISTKAT, opt)
+            if self.args.run:
+                self._run_schemes(TEST_TYPES.NISTKAT, opt)
 
-        fail = False
-        if self.opt.lower() == "all" or self.opt.lower() == "no_opt":
-            fail = fail or _nistkat(False)
-        if self.opt.lower() == "all" or self.opt.lower() == "opt":
-            fail = fail or _nistkat(True)
+        if self.do_no_opt():
+            _nistkat(False)
+        if self.do_opt():
+            _nistkat(True)
 
-        if fail:
-            exit(1)
-
-    def _run_kat(self, opt):
-        def check_proc(scheme, raw):
-            """Checks whether the hashed output of the scheme matches the META.yml"""
-            actual = sha256sum(raw)
-            expect = parse_meta(scheme, "kat-sha256")
-            fail = expect != actual
-
-            return (
-                fail,
-                f"Failed, expecting {expect}, but getting {actual}" if fail else "",
-            )
-
-        return self._kat.run_schemes(
-            opt,
-            check_proc=check_proc,
-            cmd_prefix=self.cmd_prefix,
-        )
+        self.check_fail()
 
     def kat(self):
-        config_logger(self.verbose)
-
         def _kat(opt):
-            if self.compile:
-                self._kat.compile(opt)
-            if self.run:
-                return self._run_kat(opt)
+            self._compile_schemes(TEST_TYPES.KAT, opt)
+            if self.args.run:
+                self._run_schemes(TEST_TYPES.KAT, opt)
 
-        fail = False
+        if self.do_no_opt():
+            _kat(False)
+        if self.do_opt():
+            _kat(True)
 
-        if self.opt.lower() == "all" or self.opt.lower() == "no_opt":
-            fail = fail or _kat(False)
-        if self.opt.lower() == "all" or self.opt.lower() == "opt":
-            fail = fail or _kat(True)
+        self.check_fail()
 
-        if fail:
-            exit(1)
-
-    def _run_acvp(self, opt):
-
-        opt_label = "opt" if opt else "no_opt"
-        log = logger(TEST_TYPES.ACVP, "Run", self._acvp.ts[opt_label].cross_prefix, opt)
-
-        if gh_env is not None:
-            print(
-                f"::group::run {self.compile_mode} {opt_label} {TEST_TYPES.ACVP.desc()}"
-            )
-
-        env_update = {"EXEC_WRAPPER": " ".join(self.cmd_prefix)}
-        env = os.environ.copy()
-        env.update(env_update)
-
-        def dict2str(dict):
-            s = ""
-            for k, v in dict.items():
-                s += f"{k}={v} "
-            return s
-
-        args = ["make", "run_acvp"]
-        log.info(dict2str(env_update) + " ".join(args))
-
-        p = subprocess.run(
-            args,
-            capture_output=True,
-            universal_newlines=False,
-            env=env,
-        )
-        fail = p.returncode != 0
-        if fail is True:
-            log.error(p.stderr.decode())
-            log.error(f"ACVP test failed: {p.returncode}")
-
-        results = {}
-        results[opt_label] = {}
-        for s in SCHEME:
-            results[opt_label][s] = fail
-
-        if gh_env is not None:
-            print(f"::endgroup::")
-
-        for k, result in results.items():
-            title = (
-                "## " + (self._acvp.compile_mode) + " " + (k.capitalize()) + " Tests"
-            )
-            github_summary(title, f"{TEST_TYPES.ACVP.desc()}", result)
-
-        return fail
-
-    def acvp(self, acvp_dir):
-        config_logger(self.verbose)
-
+    def acvp(self):
         def _acvp(opt):
-            if self.compile:
-                self._acvp.compile(opt)
-            if self.run:
-                return self._run_acvp(opt)
+            self._compile_schemes(TEST_TYPES.ACVP, opt)
+            if self.args.run:
+                self._run_scheme(TEST_TYPES.ACVP, opt, None)
 
-        fail = False
+        if self.do_no_opt():
+            _acvp(False)
+        if self.do_opt():
+            _acvp(True)
 
-        if self.opt.lower() == "all" or self.opt.lower() == "no_opt":
-            fail = fail or _acvp(False)
-        if self.opt.lower() == "all" or self.opt.lower() == "opt":
-            fail = fail or _acvp(True)
+        self.check_fail()
 
-        if fail:
-            exit(1)
-
-    def _run_bench(
-        self,
-        t,  # Testmplementations
-        opt,
-    ):
-        return t.run_schemes(opt, cmd_prefix=self.cmd_prefix)
-
-    def bench(
-        self,
-        cycles,
-        output,
-        mac_taskpolicy,
-        components,
-    ):
-        config_logger(self.verbose)
+    def bench(self):
+        output = self.args.output
+        components = self.args.components
 
         if components is False:
-            t = self._bench
+            test_type = TEST_TYPES.BENCH
         else:
-            t = self._bench_components
+            test_type = TEST_TYPES.BENCH_COMPONENTS
             output = False
 
-        if mac_taskpolicy:
-            self.cmd_prefix.extend(["taskpolicy", "-c", f"{mac_taskpolicy}"])
-
         # NOTE: We haven't yet decided how to output both opt/no-opt benchmark results
-        if self.opt.lower() == "all":
-            if self.compile:
-                t.compile(False, extra_make_args=[f"CYCLES={cycles}"])
-            if self.run:
-                self._run_bench(t, False)
-            if self.compile:
-                t.compile(True, extra_make_args=[f"CYCLES={cycles}"])
-            if self.run:
-                resultss = self._run_bench(t, True)
+        if self.do_opt_all():
+            self._compile_schemes(test_type, False)
+            if self.args.run:
+                self._run_schemes(test_type, False, suppress_output=False)
+            self._compile_schemes(test_type, True)
+            if self.args.run:
+                resultss = self._run_schemes(test_type, True, suppress_output=False)
         else:
-            if self.compile:
-                t.compile(
-                    True if self.opt.lower() == "opt" else False,
-                    extra_make_args=[f"CYCLES={cycles}"],
-                )
-            if self.run:
-                resultss = self._run_bench(
-                    t,
-                    True if self.opt.lower() == "opt" else False,
+            self._compile_schemes(test_type, self.do_opt())
+            if self.args.run:
+                resultss = self._run_schemes(
+                    test_type, self.do_opt(), suppress_output=False
                 )
 
         if resultss is None:
@@ -540,105 +279,94 @@ class Tests:
 
         # NOTE: There will only be one items in resultss, as we haven't yet decided how to write both opt/no-opt benchmark results
         for k, results in resultss.items():
-            if results is not None and output is not None and components is False:
-                import json
+            if not (results is not None and output is not None and components is False):
+                continue
 
-                with open(output, "w") as f:
-                    v = []
-                    for scheme in results:
-                        schemeStr = str(scheme)
-                        r = results[scheme]
+            v = []
+            for scheme in results:
+                schemeStr = str(scheme)
+                r = results[scheme]
 
-                        # The first 3 lines of the output are expected to be
-                        # keypair cycles=X
-                        # encaps cycles=X
-                        # decaps cycles=X
+                # The first 3 lines of the output are expected to be
+                # keypair cycles=X
+                # encaps cycles=X
+                # decaps cycles=X
 
-                        lines = [line for line in r.splitlines() if "=" in line]
+                lines = [line for line in r.splitlines() if "=" in line]
 
-                        d = {
-                            k.strip(): int(v) for k, v in (l.split("=") for l in lines)
+                d = {k.strip(): int(v) for k, v in (l.split("=") for l in lines)}
+                for primitive in ["keypair", "encaps", "decaps"]:
+                    v.append(
+                        {
+                            "name": f"{schemeStr} {primitive}",
+                            "unit": "cycles",
+                            "value": d[f"{primitive} cycles"],
                         }
-                        for primitive in ["keypair", "encaps", "decaps"]:
-                            v.append(
-                                {
-                                    "name": f"{schemeStr} {primitive}",
-                                    "unit": "cycles",
-                                    "value": d[f"{primitive} cycles"],
-                                }
-                            )
-                    f.write(json.dumps(v))
+                    )
 
-    def all(self, func, kat, nistkat, acvp):
-        config_logger(self.verbose)
+            with open(output, "w") as f:
+                f.write(json.dumps(v))
 
-        def all(opt):
-            code = 0
-            if self.compile:
-                compiles = [
-                    *([self._func.compile] if func else []),
-                    *([self._nistkat.compile] if nistkat else []),
-                    *([self._kat.compile] if kat else []),
-                    *([self._acvp.compile] if acvp else []),
-                ]
+    def all(self):
+        func = self.args.func
+        kat = self.args.kat
+        nistkat = self.args.nistkat
+        acvp = self.args.acvp
 
-                for f in compiles:
-                    try:
-                        f(opt)
-                    except SystemExit as e:
-                        code = code or e
+        def _all(opt):
+            if func is True:
+                self._compile_schemes(TEST_TYPES.FUNC, opt)
+            if kat is True:
+                self._compile_schemes(TEST_TYPES.KAT, opt)
+            if nistkat is True:
+                self._compile_schemes(TEST_TYPES.NISTKAT, opt)
+            if acvp is True:
+                self._compile_schemes(TEST_TYPES.ACVP, opt)
 
-                    sys.stdout.flush()
+            if self.args.run is False:
+                return
 
-            if self.run:
-                runs = [
-                    *([self._run_func] if func else []),
-                    *([self._run_nistkat] if nistkat else []),
-                    *([self._run_kat] if kat else []),
-                    *([self._run_acvp] if acvp else []),
-                ]
+            if func is True:
+                self._run_schemes(TEST_TYPES.FUNC, opt)
+            if kat is True:
+                self._run_schemes(TEST_TYPES.KAT, opt)
+            if nistkat is True:
+                self._run_schemes(TEST_TYPES.NISTKAT, opt)
+            if acvp is True:
+                self._run_schemes(TEST_TYPES.ACVP, opt)
 
-                for f in runs:
-                    try:
-                        code = code or int(f(opt))
-                    except SystemExit as e:
-                        code = code or e
+        if self.do_no_opt():
+            _all(False)
+        if self.do_opt():
+            _all(True)
 
-                    sys.stdout.flush()
-            return code
+        self.check_fail()
 
-        exit_code = 0
-
-        if self.opt.lower() == "all" or self.opt.lower() == "no_opt":
-            exit_code = exit_code or all(False)
-        if self.opt.lower() == "all" or self.opt.lower() == "opt":
-            exit_code = exit_code or all(True)
-
-        exit(exit_code)
-
-    def cbmc(self, k):
-        config_logger(self.verbose)
-
+    def cbmc(self):
         def run_cbmc(mlkem_k):
             envvars = {"MLKEM_K": mlkem_k}
-            cpucount = os.cpu_count()
             p = subprocess.Popen(
                 [
                     "python3",
                     "run-cbmc-proofs.py",
                     "--summarize",
                     "--no-coverage",
-                    f"-j{cpucount}",
-                ],
+                ]
+                + self.make_j(),
                 cwd="cbmc",
                 env=os.environ.copy() | envvars,
             )
             p.communicate()
-            assert p.returncode == 0
 
+            if p.returncode != 0:
+                self.fail(f"CBMC proofs for k={mlkem_k}")
+
+        k = self.args.k
         if k == "ALL":
             run_cbmc("2")
             run_cbmc("3")
             run_cbmc("4")
         else:
             run_cbmc(k)
+
+        self.check_fail()
