@@ -31,7 +31,7 @@ class SCHEME(Enum):
 
 
 class TEST_TYPES(Enum):
-    MLKEM = 1
+    FUNC = 1
     BENCH = 2
     NISTKAT = 3
     KAT = 4
@@ -42,7 +42,7 @@ class TEST_TYPES(Enum):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
 
     def desc(self):
-        if self == TEST_TYPES.MLKEM:
+        if self == TEST_TYPES.FUNC:
             return "Functional Test"
         if self == TEST_TYPES.BENCH:
             return "Benchmark"
@@ -56,7 +56,7 @@ class TEST_TYPES(Enum):
             return "ACVP Test"
 
     def make_target(self):
-        if self == TEST_TYPES.MLKEM:
+        if self == TEST_TYPES.FUNC:
             return "func"
         if self == TEST_TYPES.BENCH:
             return "bench"

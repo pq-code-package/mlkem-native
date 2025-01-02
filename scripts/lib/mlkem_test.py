@@ -197,9 +197,9 @@ class Tests:
 
     def func(self):
         def _func(opt):
-            self._compile_schemes(TEST_TYPES.MLKEM, opt)
+            self._compile_schemes(TEST_TYPES.FUNC, opt)
             if self.args.run:
-                return self._run_schemes(TEST_TYPES.MLKEM, opt)
+                return self._run_schemes(TEST_TYPES.FUNC, opt)
 
         if self.do_no_opt():
             _func(False)
@@ -313,7 +313,7 @@ class Tests:
 
         def _all(opt):
             if func is True:
-                self._compile_schemes(TEST_TYPES.MLKEM, opt)
+                self._compile_schemes(TEST_TYPES.FUNC, opt)
             if kat is True:
                 self._compile_schemes(TEST_TYPES.KAT, opt)
             if nistkat is True:
@@ -325,7 +325,7 @@ class Tests:
                 return
 
             if func is True:
-                self._run_schemes(TEST_TYPES.MLKEM, opt)
+                self._run_schemes(TEST_TYPES.FUNC, opt)
             if kat is True:
                 self._run_schemes(TEST_TYPES.KAT, opt)
             if nistkat is True:
