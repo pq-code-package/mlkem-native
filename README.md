@@ -30,11 +30,14 @@ sudo apt-get install make gcc python3 git
 git clone https://github.com/pq-code-package/mlkem-native.git
 cd mlkem-native
 
-# Build and run base tests
-make quickcheck
+# Build and run tests
+make build
+make test
 
-# Build and run all tests
+# The same using `tests`, a convenience wrapper around `make`
 ./scripts/tests all
+# Show all options
+./scripts/tests --help
 ```
 
 See [BUILDING.md](BUILDING.md) for more information.
