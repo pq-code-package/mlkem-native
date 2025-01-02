@@ -1,0 +1,87 @@
+# SPDX-License-Identifier: Apache-2.0
+
+name: Nix
+permissions:
+  contents: read
+on:
+  push:
+    branches: ["main"]
+    # Only run upon changes to nix files
+    paths:
+      - 'flake.lock'
+      - 'flake.nix'
+      - 'nix/**'
+  pull_request:
+    branches: ["main"]
+    # Only run upon changes to nix files
+    paths:
+      - 'flake.lock'
+      - 'flake.nix'
+      - 'nix/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  develop_environment:
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - runner: ubuntu-latest
+            container: nixos/nix:2.6.1
+            install: 'native'
+          - runner: ubuntu-22.04
+            container:
+            install: 'apt'
+          - runner: ubuntu-24.04
+            container:
+            install: 'apt'
+          - runner: macos-latest
+            container:
+            install: 'installer'
+          - runner: ubuntu-20.04
+            container:
+            install: 'installer'
+          - runner: ubuntu-22.04
+            container:
+            install: 'installer'
+          - runner: ubuntu-24.04
+            container:
+            install: 'installer'
+    name: nix setup test (${{ matrix.target.container != '' && matrix.target.container || matrix.target.runner }}, nix via ${{ matrix.target.install }})
+    runs-on: ${{ matrix.target.runner }}
+    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    container:
+      ${{ matrix.target.container }}
+    steps:
+      - name: Install git
+        shell: bash
+        run: |
+          if ! which git 2>&1 >/dev/null; then
+            ${{ matrix.target.container == '' && 'sudo' || '' }} apt update
+            ${{ matrix.target.container == '' && 'sudo' || '' }} apt install git -y
+          fi
+      - name: Manual checkout
+        shell: bash
+        run: |
+          git init
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          git remote add origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
+          git fetch origin --depth 1 $GITHUB_SHA
+          git checkout FETCH_HEAD
+      - name: Install nix via apt
+        if: ${{ matrix.target.install == 'apt' }}
+        run: |
+          ${{ matrix.target.container == '' && 'sudo' || '' }} apt install nix -y
+      - name: Install nix via installer script
+        if: ${{ matrix.target.install == 'installer' }}
+        shell: bash
+        run: |
+          sh <(curl -L https://nixos.org/nix/install) --daemon
+          . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+          echo "$(dirname $(which nix))" >> $GITHUB_PATH
+      - name: nix develop
+        run: |
+          ${{ matrix.target.install == 'apt' && 'sudo' || '' }} nix develop --experimental-features "nix-command flakes"
