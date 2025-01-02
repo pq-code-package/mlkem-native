@@ -148,9 +148,11 @@ class Tests:
             log.error(f"'{cmd_str}' failed with with {p.returncode}")
             log.error(p.stderr.decode())
             self.fail(f"{test_type.desc()} ({opt_label}, {scheme_str})")
+            return True  # Failure
         elif suppress_output is True:
             if self.args.verbose is True:
                 log.info(p.stdout.decode())
+            return False  # No failure
         else:
             result = p.stdout.decode()
             log.info(result)
@@ -185,8 +187,8 @@ class Tests:
 
         github_log("::endgroup::")
 
-        ## TODO What is happening here?
         if suppress_output is True:
+            # In this case, we only gather success/failure booleans
             return reduce(
                 lambda acc, c: acc or c,
                 [r for rs in results.values() for r in rs.values()],
@@ -199,7 +201,7 @@ class Tests:
         def _func(opt):
             self._compile_schemes(TEST_TYPES.FUNC, opt)
             if self.args.run:
-                return self._run_schemes(TEST_TYPES.FUNC, opt)
+                self._run_schemes(TEST_TYPES.FUNC, opt)
 
         if self.do_no_opt():
             _func(False)
@@ -212,7 +214,7 @@ class Tests:
         def _nistkat(opt):
             self._compile_schemes(TEST_TYPES.NISTKAT, opt)
             if self.args.run:
-                return self._run_schemes(TEST_TYPES.NISTKAT, opt)
+                self._run_schemes(TEST_TYPES.NISTKAT, opt)
 
         if self.do_no_opt():
             _nistkat(False)
@@ -225,7 +227,7 @@ class Tests:
         def _kat(opt):
             self._compile_schemes(TEST_TYPES.KAT, opt)
             if self.args.run:
-                return self._run_schemes(TEST_TYPES.KAT, opt)
+                self._run_schemes(TEST_TYPES.KAT, opt)
 
         if self.do_no_opt():
             _kat(False)
@@ -238,7 +240,7 @@ class Tests:
         def _acvp(opt):
             self._compile_schemes(TEST_TYPES.ACVP, opt)
             if self.args.run:
-                return self._run_scheme(TEST_TYPES.ACVP, opt, None)
+                self._run_scheme(TEST_TYPES.ACVP, opt, None)
 
         if self.do_no_opt():
             _acvp(False)
