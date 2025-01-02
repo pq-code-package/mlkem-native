@@ -102,7 +102,7 @@ class TEST_TYPES(IntEnum):
 
     def make_target(self):
         if self == TEST_TYPES.MLKEM:
-            return "mlkem"
+            return "func"
         if self == TEST_TYPES.BENCH:
             return "bench"
         if self == TEST_TYPES.BENCH_COMPONENTS:

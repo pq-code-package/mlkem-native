@@ -34,20 +34,6 @@ class CompileOptions(object):
         return "Cross" if self.cross_prefix else "Native"
 
 
-class Options(object):
-    def __init__(self):
-        self.cross_prefix = ""
-        self.cflags = ""
-        self.auto = True
-        self.verbose = False
-        self.opt = "ALL"
-        self.compile = True
-        self.run = True
-        self.exec_wrapper = ""
-        self.run_as_root = ""
-        self.k = "ALL"
-
-
 class Base:
 
     def __init__(self, test_type: TEST_TYPES, copts: CompileOptions, opt):
@@ -124,7 +110,6 @@ class Base:
         scheme,
         check_proc=None,
         cmd_prefix=None,
-        extra_args=None,
     ):
         """Run the binary in all different ways
 
@@ -134,12 +119,9 @@ class Base:
         - check_proc: Callable to process and check the raw byte-output
             of the test run with.
         - cmd_prefix: Command prefix; array of strings, or None
-        - extra_args: Extra arguments; array of strings, or None
         """
         if cmd_prefix is None:
             cmd_prefix = []
-        if extra_args is None:
-            extra_args = []
 
         log = logger(self.test_type, scheme, self.cross_prefix, self.opt, self.i)
         self.i += 1
@@ -149,7 +131,7 @@ class Base:
             log.error(f"{bin} does not exists")
             sys.exit(1)
 
-        cmd = cmd_prefix + [f"{bin}"] + extra_args
+        cmd = cmd_prefix + [f"{bin}"]
 
         log.debug(" ".join(cmd))
 
@@ -206,7 +188,6 @@ class Test_Implementations:
         scheme,
         check_proc=None,
         cmd_prefix=None,
-        extra_args=None,
     ):
         """Arguments:
 
@@ -215,37 +196,29 @@ class Test_Implementations:
         - check_proc: Callable to process and check the
             raw byte-output of the test run with.
         - cmd_prefix: Command prefix; array of strings, or None
-        - extra_args: Extra arguments; array of strings, or None
         """
         if cmd_prefix is None:
             cmd_prefix = []
-        if extra_args is None:
-            extra_args = []
 
         # Returns TypedDict
         k = "opt" if opt else "no_opt"
 
         results = {}
         results[k] = {}
-        results[k][scheme] = self.ts[k].run_scheme(
-            scheme, check_proc, cmd_prefix, extra_args
-        )
+        results[k][scheme] = self.ts[k].run_scheme(scheme, check_proc, cmd_prefix)
 
         return results
 
-    def run_schemes(self, opt, check_proc=None, cmd_prefix=None, extra_args=None):
+    def run_schemes(self, opt, check_proc=None, cmd_prefix=None):
         """Arguments:
 
         - opt: Whether native backends should be enabled
         - check_proc: Functionto process and check the raw byte-output
                       of the test run with.
         - cmd_prefix: Command prefix; array of strings
-        - extra_args: Extra arguments; array of strings
         """
         if cmd_prefix is None:
             cmd_prefix = []
-        if extra_args is None:
-            extra_args = []
 
         # Returns
         results = {}
@@ -261,7 +234,6 @@ class Test_Implementations:
                 scheme,
                 check_proc,
                 cmd_prefix,
-                extra_args,
             )
 
             results[k][scheme] = result
@@ -467,7 +439,7 @@ class Tests:
                 s += f"{k}={v} "
             return s
 
-        args = ["make", "check_acvp"]
+        args = ["make", "run_acvp"]
         log.info(dict2str(env_update) + " ".join(args))
 
         p = subprocess.run(
