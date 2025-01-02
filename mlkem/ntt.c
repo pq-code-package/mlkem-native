@@ -476,7 +476,7 @@ void poly_ntt(poly *p)
  */
 
 /* Check that bound for reference invNTT implies contractual bound */
-#define INVNTT_BOUND_REF (3 * MLKEM_Q / 4)
+#define INVNTT_BOUND_REF NTT_BOUND8
 STATIC_ASSERT(INVNTT_BOUND_REF <= INVNTT_BOUND, invntt_bound)
 
 
