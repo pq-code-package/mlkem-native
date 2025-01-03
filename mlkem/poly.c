@@ -441,6 +441,55 @@ void poly_getnoise_eta1122_4x(poly *r0, poly *r1, poly *r2, poly *r3,
   POLY_BOUND_MSG(r3, MLKEM_ETA2 + 1, "poly_getnoise_eta1122_4x output 3");
 }
 
+/************************************************************
+ * Name: basemul_cached
+ *
+ * Description: Computes a representative modulo q of
+ *              (a0*b0 + a1*b_cached, a0*b1 + a1*b0)/65536
+ *
+ *              If b_cached is b1*zeta, this represents the
+ *              product of (a0 + a1*X) and (b0 + b1*X) in
+ *              Fq[X]/(X^2 - zeta).
+ *
+ * Arguments: - r: Pointer to output polynomial
+ *                   Upon return, coefficients are bound by
+ *                   2*MLKEM_Q in absolute value.
+ *            - a: Pointer to first input polynomial
+ *                   Must be coefficient-wise < 4096 in absolute value.
+ *            - b: Pointer to second input polynomial
+ *                   Can have arbitrary int16_t coefficients
+ *            - b_cached: Some precomputed value, typically derived from
+ *                   b1 and a twiddle factor. Can be an arbitary int16_t.
+ ************************************************************/
+STATIC_INLINE_TESTABLE void basemul_cached(int16_t r[2], const int16_t a[2],
+                                           const int16_t b[2],
+                                           const int16_t b_cached)
+__contract__(
+  requires(memory_no_alias(r, 2 * sizeof(int16_t)))
+  requires(memory_no_alias(a, 2 * sizeof(int16_t)))
+  requires(memory_no_alias(b, 2 * sizeof(int16_t)))
+  requires(array_abs_bound(a, 0, 1, UINT12_MAX))
+  assigns(memory_slice(r, 2 * sizeof(int16_t)))
+  ensures(array_abs_bound(r, 0, 1, 2 * MLKEM_Q - 1))
+)
+{
+  int32_t t0, t1;
+
+  BOUND(a, 2, 4096, "basemul input bound");
+
+  t0 = (int32_t)a[1] * b_cached;
+  t0 += (int32_t)a[0] * b[0];
+  t1 = (int32_t)a[0] * b[1];
+  t1 += (int32_t)a[1] * b[0];
+
+  /* |ti| < 2 * q * 2^15 */
+  r[0] = montgomery_reduce(t0);
+  r[1] = montgomery_reduce(t1);
+
+  BOUND(r, 2, 2 * MLKEM_Q, "basemul output bound");
+}
+
+
 void poly_basemul_montgomery_cached(poly *r, const poly *a, const poly *b,
                                     const poly_mulcache *b_cache)
 {
@@ -541,8 +590,8 @@ void poly_mulcache_compute(poly_mulcache *x, const poly *a)
   for (i = 0; i < MLKEM_N / 4; i++)
   __loop__(invariant(i >= 0 && i <= MLKEM_N / 4))
   {
-    x->coeffs[2 * i + 0] = fqmul(a->coeffs[4 * i + 1], zetas[64 + i]);
-    x->coeffs[2 * i + 1] = fqmul(a->coeffs[4 * i + 3], -zetas[64 + i]);
+    x->coeffs[2 * i + 0] = fqmul(a->coeffs[4 * i + 1], mlkem_layer7_zetas[i]);
+    x->coeffs[2 * i + 1] = fqmul(a->coeffs[4 * i + 3], -mlkem_layer7_zetas[i]);
   }
   POLY_BOUND(x, MLKEM_Q);
 }
