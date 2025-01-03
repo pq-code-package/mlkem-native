@@ -282,6 +282,23 @@ def gen_aarch64_inv_ntt_zetas_layer56():
             )
 
 
+def gen_avx2_mulcache_twiddles():
+    for i in range(2):
+        for idx in range(16):
+            root = signed_reduce(
+                pow(root_of_unity, bitreverse(64 + 32 * i + 2 * idx, 7), modulus)
+                * montgomery_factor
+            )
+            yield prepare_root_for_barrett(root)[0]
+
+        for idx in range(16):
+            root = signed_reduce(
+                pow(root_of_unity, bitreverse(64 + 32 * i + 2 * idx + 1, 7), modulus)
+                * montgomery_factor
+            )
+            yield prepare_root_for_barrett(root)[0]
+
+
 def gen_aarch64_mulcache_twiddles():
     for idx in range(64):
         root = pow(root_of_unity, bitreverse(64 + idx, 7), modulus)
@@ -530,6 +547,24 @@ def gen_avx2_fwd_ntt_zeta_file(dry_run=False):
     )
 
 
+def gen_avx2_mulcache_zeta_file(dry_run=False):
+    def gen():
+        yield from gen_header()
+        yield "/*"
+        yield " * Table of zeta values used in the AVX2 mulcache_compute"
+        yield " * See autogenerate_files.py for details."
+        yield " */"
+        yield ""
+        yield from map(lambda t: str(t) + ",", gen_avx2_mulcache_twiddles())
+        yield ""
+
+    update_file(
+        "mlkem/native/x86_64/src/x86_64_zetas_mulcache.i",
+        "\n".join(gen()),
+        dry_run=dry_run,
+    )
+
+
 def _main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -542,6 +577,7 @@ def _main():
     gen_aarch64_rej_uniform_table(args.dry_run)
     gen_avx2_fwd_ntt_zeta_file(args.dry_run)
     gen_avx2_rej_uniform_table(args.dry_run)
+    gen_avx2_mulcache_zeta_file(args.dry_run)
 
 
 if __name__ == "__main__":
