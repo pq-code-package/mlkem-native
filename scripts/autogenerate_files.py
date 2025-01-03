@@ -88,24 +88,77 @@ def gen_c_zetas():
         zeta.append(signed_reduce(pow(root_of_unity, i, modulus) * montgomery_factor))
 
     # The source code stores the zeta table in bit reversed form
-    yield from (zeta[bitreverse(i, 7)] for i in range(128))
+    zeta_reversed = []
+    for i in range(128):
+        zeta_reversed.append(zeta[bitreverse(i, 7)])
+    # return a finite sequence here, not a generator
+    return zeta_reversed
 
 
 def gen_c_zeta_file(dry_run=False):
     def gen():
+        zetas = gen_c_zetas()
         yield from gen_header()
-        yield '#include "ntt.h"'
-        yield ""
         yield "/*"
-        yield " * Table of zeta values used in the reference NTT and inverse NTT."
+        yield " * Tables of zeta values used in the reference NTT and inverse NTT."
         yield " * See autogenerate_files.py for details."
         yield " */"
-        yield "ALIGN const int16_t zetas[128] = {"
-        yield from map(lambda t: str(t) + ",", gen_c_zetas())
+        yield ""
+        yield "/* Constant zeta values for NTT layers 1, 2, and 3 */"
+        yield "static const int16_t mlkem_l1zeta1 = " + str(zetas[1]) + ";"
+        yield "static const int16_t mlkem_l2zeta2 = " + str(zetas[2]) + ";"
+        yield "static const int16_t mlkem_l2zeta3 = " + str(zetas[3]) + ";"
+        yield "static const int16_t mlkem_l3zeta4 = " + str(zetas[4]) + ";"
+        yield "static const int16_t mlkem_l3zeta5 = " + str(zetas[5]) + ";"
+        yield "static const int16_t mlkem_l3zeta6 = " + str(zetas[6]) + ";"
+        yield "static const int16_t mlkem_l3zeta7 = " + str(zetas[7]) + ";"
+        yield ""
+
+        yield "/* Zeta values for layer 4, originally occupying */"
+        yield "/* positions 8 .. 15 in the full Zeta table.     */"
+        yield "ALIGN static const int16_t mlkem_layer4_zetas[8] = {"
+        for i in range(8, 16, 1):
+            yield str(zetas[i]) + ","
         yield "};"
         yield ""
 
-    update_file("mlkem/zetas.c", "\n".join(gen()), dry_run=dry_run)
+        yield "/* Zeta values for layer 5, originally occupying 'even'      */"
+        yield "/* positions 16,18,20,22,24,26,28,30 in the full Zeta table. */"
+        yield "ALIGN static const int16_t mlkem_layer5_even_zetas[8] = {"
+        for i in range(16, 32, 2):
+            yield str(zetas[i]) + ","
+        yield "};"
+        yield ""
+
+        yield "/* Zeta values for layer 5, originally occupying 'odd'       */"
+        yield "/* positions 17,19,21,23,25,27,29,31 in the full Zeta table. */"
+        yield "ALIGN static const int16_t mlkem_layer5_odd_zetas[8] = {"
+        for i in range(17, 33, 2):
+            yield str(zetas[i]) + ","
+        yield "};"
+        yield ""
+
+        yield "/* Zeta values for layer 6, originally occupying  */"
+        yield "/* positions 32 .. 63 in the full Zeta table.     */"
+        yield "ALIGN static const int16_t mlkem_layer6_zetas[32] = {"
+        for i in range(32, 64, 1):
+            yield str(zetas[i]) + ","
+        yield "};"
+        yield ""
+
+        # Layer 7 Zeta values are needed in poly.c as well as in ntt.c
+        # so this table is NOT declared "static". If this declaration
+        # changes, then the corresponding "extern" declaration in ntt.h
+        # must also be updated to match.
+        yield "/* Zeta values for layer 7, originally occupying  */"
+        yield "/* positions 64 .. 127 in the full Zeta table.     */"
+        yield "ALIGN const int16_t mlkem_layer7_zetas[64] = {"
+        for i in range(64, 128, 1):
+            yield str(zetas[i]) + ","
+        yield "};"
+        yield ""
+
+    update_file("mlkem/zetas.i", "\n".join(gen()), dry_run=dry_run)
 
 
 def prepare_root_for_barrett(root):

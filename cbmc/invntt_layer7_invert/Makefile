@@ -3,11 +3,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = poly_basemul_montgomery_cached_harness
+HARNESS_FILE = invntt_layer7_invert_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = poly_basemul_montgomery_cached
+PROOF_UID = invntt_layer7_invert
 
 DEFINES +=
 INCLUDES +=
@@ -16,18 +16,18 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c
+PROJECT_SOURCES += $(SRCDIR)/mlkem/ntt.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_basemul_montgomery_cached
-USE_FUNCTION_CONTRACTS=basemul_cached
+CHECK_FUNCTION_CONTRACTS=invntt_layer7_invert
+USE_FUNCTION_CONTRACTS=invntt_layer7_invert_butterfly
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--bitwuzla
+CBMCFLAGS=--smt2
 
-FUNCTION_NAME = poly_basemul_montgomery_cached
+FUNCTION_NAME = invntt_layer7_invert
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
@@ -36,7 +36,7 @@ FUNCTION_NAME = poly_basemul_montgomery_cached
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 8
+CBMC_OBJECT_BITS = 10
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
