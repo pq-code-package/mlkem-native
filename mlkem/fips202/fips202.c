@@ -18,9 +18,6 @@
 #include "fips202.h"
 #include "keccakf1600.h"
 
-#define NROUNDS 24
-#define ROL(a, offset) (((a) << (offset)) ^ ((a) >> (64 - (offset))))
-
 /*************************************************
  * Name:        keccak_absorb_once
  *
