@@ -20,16 +20,19 @@ static const int16_t zetas_avx2[64] = {
 
 #define QINV (-3327) /* q^-1 mod 2^16 */
 
-void poly_mulcache_compute_avx2(poly_mulcache *x, const poly *y) {
+void poly_mulcache_compute_avx2(poly_mulcache *x, const poly *y)
+{
+  int j;
   __m256i q, qinv, a0, a1, z, t0, t1, s0, s1, r0, r1;
 
-  q    = _mm256_set1_epi16(MLKEM_Q);
+  q = _mm256_set1_epi16(MLKEM_Q);
   qinv = _mm256_set1_epi16(QINV);
 
-  for (int j = 0; j < 4; j++) {
-    a0 = _mm256_load_si256((const __m256i*)&y->coeffs[64*j+16]);
-    a1 = _mm256_load_si256((const __m256i*)&y->coeffs[64*j+48]);
-    z  = _mm256_load_si256((const __m256i*)&zetas_avx2[16*j]);
+  for (j = 0; j < 4; j++)
+  {
+    a0 = _mm256_load_si256((const __m256i *)&y->coeffs[64 * j + 16]);
+    a1 = _mm256_load_si256((const __m256i *)&y->coeffs[64 * j + 48]);
+    z = _mm256_load_si256((const __m256i *)&zetas_avx2[16 * j]);
 
     t0 = _mm256_mullo_epi16(a0, qinv);
     t1 = _mm256_mullo_epi16(a1, qinv);
@@ -44,18 +47,17 @@ void poly_mulcache_compute_avx2(poly_mulcache *x, const poly *y) {
     r0 = _mm256_sub_epi16(s0, r0);
     r1 = _mm256_sub_epi16(s1, r1);
 
-    _mm256_store_si256((__m256i*)&x->coeffs[32*j], r0);
-    _mm256_store_si256((__m256i*)&x->coeffs[32*j+16], r1);
+    _mm256_store_si256((__m256i *)&x->coeffs[32 * j], r0);
+    _mm256_store_si256((__m256i *)&x->coeffs[32 * j + 16], r1);
   }
 }
 
-static void poly_basemul_montgomery_avx2(poly *r,
-                                         const poly *a, const poly *b,
+static void poly_basemul_montgomery_avx2(poly *r, const poly *a, const poly *b,
                                          const poly_mulcache *b_cache)
 {
-  basemul_avx2((__m256i *)r->coeffs,
-               (const __m256i *)a->coeffs, (const __m256i *)b->coeffs,
-               qdata.vec, (const __m256i *)b_cache->coeffs);
+  basemul_avx2((__m256i *)r->coeffs, (const __m256i *)a->coeffs,
+               (const __m256i *)b->coeffs, qdata.vec,
+               (const __m256i *)b_cache->coeffs);
 }
 
 /*

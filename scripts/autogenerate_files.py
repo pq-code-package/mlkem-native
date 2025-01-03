@@ -294,12 +294,19 @@ def gen_aarch64_inv_ntt_zetas_layer56():
 def gen_avx2_mulcache_twiddles():
     for i in range(2):
         for idx in range(16):
-            root = signed_reduce(pow(root_of_unity, bitreverse(64 + 32*i + 2*idx, 7), modulus) * montgomery_factor)
+            root = signed_reduce(
+                pow(root_of_unity, bitreverse(64 + 32 * i + 2 * idx, 7), modulus)
+                * montgomery_factor
+            )
             yield prepare_root_for_barrett(root)[0]
 
         for idx in range(16):
-            root = signed_reduce(pow(root_of_unity, bitreverse(64 + 32*i + 2*idx + 1, 7), modulus) * montgomery_factor)
+            root = signed_reduce(
+                pow(root_of_unity, bitreverse(64 + 32 * i + 2 * idx + 1, 7), modulus)
+                * montgomery_factor
+            )
             yield prepare_root_for_barrett(root)[0]
+
 
 def gen_aarch64_mulcache_twiddles():
     for idx in range(64):
@@ -548,6 +555,7 @@ def gen_avx2_fwd_ntt_zeta_file(dry_run=False):
         "mlkem/native/x86_64/src/x86_64_zetas.i", "\n".join(gen()), dry_run=dry_run
     )
 
+
 def gen_avx2_mulcache_zeta_file(dry_run=False):
     def gen():
         yield from gen_header()
@@ -560,7 +568,9 @@ def gen_avx2_mulcache_zeta_file(dry_run=False):
         yield ""
 
     update_file(
-        "mlkem/native/x86_64/src/x86_64_zetas_mulcache.i", "\n".join(gen()), dry_run=dry_run
+        "mlkem/native/x86_64/src/x86_64_zetas_mulcache.i",
+        "\n".join(gen()),
+        dry_run=dry_run,
     )
 
 
@@ -660,6 +670,7 @@ def _main():
     gen_avx2_rej_uniform_table(args.dry_run)
     gen_monolithic_source_file(args.dry_run)
     gen_avx2_mulcache_zeta_file(args.dry_run)
+
 
 if __name__ == "__main__":
     _main()
