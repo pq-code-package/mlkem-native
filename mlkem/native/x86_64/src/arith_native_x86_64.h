@@ -42,8 +42,7 @@ void reduce_avx2(__m256i *r, const __m256i *qdata);
 void basemul_avx2(__m256i *r, const __m256i *a, const __m256i *b,
                   const __m256i *qdata, const __m256i *bcache);
 
-#define poly_mulcache_compute_avx2 \
-  MLKEM_NAMESPACE(poly_mulcache_compute_avx2)
+#define poly_mulcache_compute_avx2 MLKEM_NAMESPACE(poly_mulcache_compute_avx2)
 void poly_mulcache_compute_avx2(poly_mulcache *x, const poly *y);
 
 #define polyvec_basemul_acc_montgomery_cached_avx2 \
