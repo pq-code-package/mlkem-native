@@ -96,7 +96,7 @@ static INLINE void ct_butterfly(int16_t *base, unsigned stride, unsigned i,
   base[stride * j] = t1 - t2;
 }
 
-STATIC_NO_INLINE_TESTABLE void ntt_layer123(pc r)
+STATIC_TESTABLE void ntt_layer123(pc r)
 __contract__(
   requires(memory_no_alias(r, sizeof(pc)))
   requires(array_abs_bound(r, 0, MLKEM_N - 1, NTT_BOUND1))
@@ -188,7 +188,7 @@ __contract__(
 }
 
 
-STATIC_NO_INLINE_TESTABLE void ntt_layer45(pc r)
+STATIC_TESTABLE void ntt_layer45(pc r)
 __contract__(
   requires(memory_no_alias(r, sizeof(pc)))
   requires(array_abs_bound(r, 0, MLKEM_N - 1, NTT_BOUND4))
@@ -208,7 +208,7 @@ __contract__(
   ntt_layer45_butterfly(r, 7, 224);
 }
 
-STATIC_NO_INLINE_TESTABLE void ntt_layer6(pc r)
+STATIC_TESTABLE void ntt_layer6(pc r)
 __contract__(
   requires(memory_no_alias(r, sizeof(pc)))
   requires(array_abs_bound(r, 0, MLKEM_N - 1, NTT_BOUND6))
@@ -230,7 +230,7 @@ __contract__(
   }
 }
 
-STATIC_NO_INLINE_TESTABLE void ntt_layer7(pc r)
+STATIC_TESTABLE void ntt_layer7(pc r)
 __contract__(
   requires(memory_no_alias(r, sizeof(pc)))
   requires(array_abs_bound(r, 0, MLKEM_N - 1, NTT_BOUND7))
@@ -388,7 +388,7 @@ __contract__(
   r[ci3] = fqmul((c3 - c1), zeta);
 }
 
-STATIC_NO_INLINE_TESTABLE void invntt_layer7_invert(pc r)
+STATIC_TESTABLE void invntt_layer7_invert(pc r)
 __contract__(
   requires(memory_no_alias(r, sizeof(pc)))
   assigns(memory_slice(r, sizeof(pc)))
@@ -453,7 +453,7 @@ __contract__(
   r[ci7] = fqmul((c7 - c3), zeta);
 }
 
-STATIC_NO_INLINE_TESTABLE void invntt_layer6(pc r)
+STATIC_TESTABLE void invntt_layer6(pc r)
 __contract__(
   requires(memory_no_alias(r, sizeof(pc)))
   requires(array_abs_bound(r, 0, (MLKEM_N - 1), NTT_BOUND1))
@@ -544,7 +544,7 @@ __contract__(
   }
 }
 
-STATIC_NO_INLINE_TESTABLE void invntt_layer54(pc r)
+STATIC_TESTABLE void invntt_layer54(pc r)
 __contract__(
   requires(memory_no_alias(r, sizeof(pc)))
   requires(array_abs_bound(r, 0, (MLKEM_N - 1), NTT_BOUND2))
@@ -565,7 +565,7 @@ __contract__(
   invntt_layer54_butterfly(r, 0, 224);
 }
 
-STATIC_NO_INLINE_TESTABLE void invntt_layer321(pc r)
+STATIC_TESTABLE void invntt_layer321(pc r)
 __contract__(
   requires(memory_no_alias(r, sizeof(pc)))
   requires(array_abs_bound(r, 0, MLKEM_N - 1, NTT_BOUND1))
