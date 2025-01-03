@@ -86,6 +86,16 @@ typedef int16_t pc[MLKEM_N];
 /* of auto-vectorization and optimization of the code   */
 #include "zetas.i"
 
+ALWAYS_INLINE
+static INLINE void ct_butterfly(int16_t *base, unsigned stride, unsigned i,
+                                unsigned j, int16_t root)
+{
+  int16_t t1 = base[stride * i];
+  int16_t t2 = fqmul(base[stride * j], root);
+  base[stride * i] = t1 + t2;
+  base[stride * j] = t1 - t2;
+}
+
 STATIC_NO_INLINE_TESTABLE void ntt_layer123(pc r)
 __contract__(
   requires(memory_no_alias(r, sizeof(pc)))
@@ -120,78 +130,21 @@ __contract__(
     invariant(array_abs_bound(r,     224, j + 223, NTT_BOUND4))
     invariant(array_abs_bound(r, j + 224, (MLKEM_N - 1), NTT_BOUND1)))
   {
-    const int ci1 = j + 0;
-    const int ci2 = j + 32;
-    const int ci3 = j + 64;
-    const int ci4 = j + 96;
-    const int ci5 = j + 128;
-    const int ci6 = j + 160;
-    const int ci7 = j + 192;
-    const int ci8 = j + 224;
-    int16_t t1, t2;
-
     /* Layer 1 */
-    t1 = fqmul(r[ci5], mlkem_l1zeta1);
-    t2 = r[ci1];
-    r[ci5] = t2 - t1;
-    r[ci1] = t2 + t1;
-
-    t1 = fqmul(r[ci7], mlkem_l1zeta1);
-    t2 = r[ci3];
-    r[ci7] = t2 - t1;
-    r[ci3] = t2 + t1;
-
-    t1 = fqmul(r[ci6], mlkem_l1zeta1);
-    t2 = r[ci2];
-    r[ci6] = t2 - t1;
-    r[ci2] = t2 + t1;
-
-    t1 = fqmul(r[ci8], mlkem_l1zeta1);
-    t2 = r[ci4];
-    r[ci8] = t2 - t1;
-    r[ci4] = t2 + t1;
-
+    ct_butterfly(r + j, 32, 0, 4, mlkem_l1zeta1);
+    ct_butterfly(r + j, 32, 1, 5, mlkem_l1zeta1);
+    ct_butterfly(r + j, 32, 2, 6, mlkem_l1zeta1);
+    ct_butterfly(r + j, 32, 3, 7, mlkem_l1zeta1);
     /* Layer 2 */
-    t1 = fqmul(r[ci3], mlkem_l2zeta2);
-    t2 = r[ci1];
-    r[ci3] = t2 - t1;
-    r[ci1] = t2 + t1;
-
-    t1 = fqmul(r[ci7], mlkem_l2zeta3);
-    t2 = r[ci5];
-    r[ci7] = t2 - t1;
-    r[ci5] = t2 + t1;
-
-    t1 = fqmul(r[ci4], mlkem_l2zeta2);
-    t2 = r[ci2];
-    r[ci4] = t2 - t1;
-    r[ci2] = t2 + t1;
-
-    t1 = fqmul(r[ci8], mlkem_l2zeta3);
-    t2 = r[ci6];
-    r[ci8] = t2 - t1;
-    r[ci6] = t2 + t1;
-
+    ct_butterfly(r + j, 32, 0, 2, mlkem_l2zeta2);
+    ct_butterfly(r + j, 32, 1, 3, mlkem_l2zeta2);
+    ct_butterfly(r + j, 32, 4, 6, mlkem_l2zeta3);
+    ct_butterfly(r + j, 32, 5, 7, mlkem_l2zeta3);
     /* Layer 3 */
-    t1 = fqmul(r[ci2], mlkem_l3zeta4);
-    t2 = r[ci1];
-    r[ci2] = t2 - t1;
-    r[ci1] = t2 + t1;
-
-    t1 = fqmul(r[ci4], mlkem_l3zeta5);
-    t2 = r[ci3];
-    r[ci4] = t2 - t1;
-    r[ci3] = t2 + t1;
-
-    t1 = fqmul(r[ci6], mlkem_l3zeta6);
-    t2 = r[ci5];
-    r[ci6] = t2 - t1;
-    r[ci5] = t2 + t1;
-
-    t1 = fqmul(r[ci8], mlkem_l3zeta7);
-    t2 = r[ci7];
-    r[ci8] = t2 - t1;
-    r[ci7] = t2 + t1;
+    ct_butterfly(r + j, 32, 0, 1, mlkem_l3zeta4);
+    ct_butterfly(r + j, 32, 2, 3, mlkem_l3zeta5);
+    ct_butterfly(r + j, 32, 4, 5, mlkem_l3zeta6);
+    ct_butterfly(r + j, 32, 6, 7, mlkem_l3zeta7);
   }
 }
 
@@ -225,33 +178,12 @@ __contract__(
     invariant(array_abs_bound(r,     start + 24, start + j + 23, NTT_BOUND6))
     invariant(array_abs_bound(r, start + j + 24,  (MLKEM_N - 1), NTT_BOUND4)))
   {
-    const int ci1 = j + start;
-    const int ci2 = ci1 + 8;
-    const int ci3 = ci1 + 16;
-    const int ci4 = ci1 + 24;
-    int16_t t1, t2;
-
     /* Layer 4 */
-    t1 = fqmul(r[ci3], z1);
-    t2 = r[ci1];
-    r[ci3] = t2 - t1;
-    r[ci1] = t2 + t1;
-
-    t1 = fqmul(r[ci4], z1);
-    t2 = r[ci2];
-    r[ci4] = t2 - t1;
-    r[ci2] = t2 + t1;
-
+    ct_butterfly(r + start + j, 8, 0, 2, z1);
+    ct_butterfly(r + start + j, 8, 1, 3, z1);
     /* Layer 5 */
-    t1 = fqmul(r[ci2], z2);
-    t2 = r[ci1];
-    r[ci2] = t2 - t1;
-    r[ci1] = t2 + t1;
-
-    t1 = fqmul(r[ci4], z3);
-    t2 = r[ci3];
-    r[ci4] = t2 - t1;
-    r[ci3] = t2 + t1;
+    ct_butterfly(r + start + j, 8, 0, 1, z2);
+    ct_butterfly(r + start + j, 8, 2, 3, z3);
   }
 }
 
@@ -276,39 +208,6 @@ __contract__(
   ntt_layer45_butterfly(r, 7, 224);
 }
 
-STATIC_INLINE_TESTABLE void ntt_layer6_butterfly(pc r, const int zeta_index,
-                                                 const int start)
-__contract__(
-  requires(memory_no_alias(r, sizeof(pc)))
-  requires(zeta_index >= 0 && zeta_index <= 31)
-  requires(start >= 0 && start <= 248)
-  requires(array_abs_bound(r,          0,    start -  1, NTT_BOUND7))
-  requires(array_abs_bound(r,      start, (MLKEM_N - 1), NTT_BOUND6))
-  assigns(memory_slice(r, sizeof(pc)))
-  ensures (array_abs_bound(r,         0,     start + 7, NTT_BOUND7))
-  ensures (array_abs_bound(r, start + 8, (MLKEM_N - 1), NTT_BOUND6)))
-{
-  const int16_t zeta = mlkem_layer6_zetas[zeta_index];
-
-  int j;
-  for (j = 0; j < 4; j++)
-  __loop__(
-    invariant(j >= 0 && j <= 4)
-    invariant(array_abs_bound(r,             0,     start -  1, NTT_BOUND7))
-    invariant(array_abs_bound(r,     start + 0,  start + j - 1, NTT_BOUND7))
-    invariant(array_abs_bound(r,     start + j,      start + 3, NTT_BOUND6))
-    invariant(array_abs_bound(r,     start + 4,  start + j + 3, NTT_BOUND7))
-    invariant(array_abs_bound(r, start + j + 4,  (MLKEM_N - 1), NTT_BOUND6)))
-  {
-    const int ci1 = j + start;
-    const int ci2 = ci1 + 4;
-    const int16_t t = fqmul(r[ci2], zeta);
-    const int16_t t2 = r[ci1];
-    r[ci2] = t2 - t;
-    r[ci1] = t2 + t;
-  }
-}
-
 STATIC_NO_INLINE_TESTABLE void ntt_layer6(pc r)
 __contract__(
   requires(memory_no_alias(r, sizeof(pc)))
@@ -323,44 +222,12 @@ __contract__(
     invariant(array_abs_bound(r,     0,     j * 8 - 1, NTT_BOUND7))
     invariant(array_abs_bound(r, j * 8, (MLKEM_N - 1), NTT_BOUND6)))
   {
-    ntt_layer6_butterfly(r, j, j * 8);
+    const int16_t zeta = mlkem_layer6_zetas[j];
+    ct_butterfly(r + j * 8 + 0, 4, 0, 1, zeta);
+    ct_butterfly(r + j * 8 + 1, 4, 0, 1, zeta);
+    ct_butterfly(r + j * 8 + 2, 4, 0, 1, zeta);
+    ct_butterfly(r + j * 8 + 3, 4, 0, 1, zeta);
   }
-}
-
-STATIC_INLINE_TESTABLE void ntt_layer7_butterfly(pc r, int zeta_index,
-                                                 int start)
-__contract__(
-  requires(memory_no_alias(r, sizeof(pc)))
-  requires(zeta_index >= 0 && zeta_index <= 63)
-  requires(start >= 0 && start <= 252)
-  requires(array_abs_bound(r,          0,    start -  1, NTT_BOUND8))
-  requires(array_abs_bound(r,      start, (MLKEM_N - 1), NTT_BOUND7))
-  assigns(memory_slice(r, sizeof(pc)))
-  ensures (array_abs_bound(r,         0,     start + 3, NTT_BOUND8))
-  ensures (array_abs_bound(r, start + 4, (MLKEM_N - 1), NTT_BOUND7)))
-{
-  const int32_t zeta = (int32_t)mlkem_layer7_zetas[zeta_index];
-  /* Coefficient indexes 0 through 3 */
-  const unsigned int ci0 = start;
-  const unsigned int ci1 = ci0 + 1;
-  const unsigned int ci2 = ci0 + 2;
-  const unsigned int ci3 = ci0 + 3;
-
-  /* Read and write coefficients in natural order of
-   * increasing memory location
-   */
-  const int16_t c0 = r[ci0];
-  const int16_t c1 = r[ci1];
-  const int16_t c2 = r[ci2];
-  const int16_t c3 = r[ci3];
-
-  const int16_t zc2 = fqmul(c2, zeta);
-  const int16_t zc3 = fqmul(c3, zeta);
-
-  r[ci0] = c0 + zc2;
-  r[ci1] = c1 + zc3;
-  r[ci2] = c0 - zc2;
-  r[ci3] = c1 - zc3;
 }
 
 STATIC_NO_INLINE_TESTABLE void ntt_layer7(pc r)
@@ -377,7 +244,9 @@ __contract__(
     invariant(array_abs_bound(r,     0,     j * 4 - 1, NTT_BOUND8))
     invariant(array_abs_bound(r, j * 4, (MLKEM_N - 1), NTT_BOUND7)))
   {
-    ntt_layer7_butterfly(r, j, j * 4);
+    const int16_t zeta = mlkem_layer7_zetas[j];
+    ct_butterfly(r + j * 4 + 0, 2, 0, 1, zeta);
+    ct_butterfly(r + j * 4 + 1, 2, 0, 1, zeta);
   }
 }
 
