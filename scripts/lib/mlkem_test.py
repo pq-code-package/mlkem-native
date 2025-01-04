@@ -61,7 +61,7 @@ class Tests:
         return self.args.opt.lower() in ["all", "no_opt"]
 
     def compile_mode(self):
-        return "Cross" if self.args.cross_prefix is not None else "Native"
+        return "Cross" if self.args.cross_prefix != "" else "Native"
 
     def _compile_schemes(self, test_type, opt):
         """compile or cross compile with some extra environment variables and makefile arguments"""
@@ -84,7 +84,7 @@ class Tests:
         env_update = {}
         if self.args.cflags is not None and self.args.cflags != "":
             env_update["CFLAGS"] = self.args.cflags
-        if self.args.cross_prefix is not None and self.args.cross_prefix != "":
+        if self.args.cross_prefix != "":
             env_update["CROSS_PREFIX"] = self.args.cross_prefix
 
         env = os.environ.copy()
