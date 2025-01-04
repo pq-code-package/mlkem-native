@@ -7,6 +7,10 @@
 #include "mlkem_native_all.c"
 #undef MLKEM_NATIVE_CONFIG_FILE
 
+#define MLKEM_NATIVE_CONFIG_FILE "config_b.h"
+#include "mlkem_native_all.c"
+#undef MLKEM_NATIVE_CONFIG_FILE
+
 int main(void)
 {
   /* Nothing to do here -- only test that it builds */
