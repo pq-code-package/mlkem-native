@@ -5,6 +5,7 @@
 
 #define MLKEM_NATIVE_CONFIG_FILE "config_a.h"
 #include "mlkem_native_all.c"
+#undef MLKEM_NATIVE_CONFIG_FILE
 
 int main(void)
 {

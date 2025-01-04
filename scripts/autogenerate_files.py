@@ -17,7 +17,7 @@ montgomery_factor = pow(2, 16, modulus)
 # It currently covers:
 # - zeta values for the reference NTT and invNTT
 # - lookup tables used for fast rejection sampling
-# - monolithic C file for single-CU build
+# - source files for monolithic single-CU build
 
 
 def gen_header():
@@ -554,10 +554,48 @@ def get_files(pattern):
     return list(files)
 
 
+def get_defines():
+    for c in get_source_files() + get_header_files():
+        with open(c, "r") as f:
+            for i, l in enumerate(f.read().split("\n")):
+                if l.lstrip().startswith("#define "):
+                    yield (
+                        c,
+                        i,
+                        l.lstrip()
+                        .removeprefix("#define ")
+                        .split(" ")[0]
+                        .split("(")[0]
+                        .replace("'", ""),
+                    )
+
+
+def gen_monolithic_undef_all_core():
+    yield ""
+    yield "/*"
+    yield " * Undo all #define directives from *.c or *.h files"
+    yield " */"
+    yield ""
+
+    def undo_define(filename, line_no, d):
+        yield f"/* {filename}:{line_no} */"
+        yield f"#if defined({d})"
+        yield f"#undef {d}"
+        yield "#endif"
+        yield ""
+
+    defines = list(get_defines())
+    defines.sort()
+
+    for filename, line_no, d in defines:
+        yield from undo_define(filename, line_no, d)
+
+
 def gen_monolithic_source_file_core():
     for c in get_source_files():
         yield f'#include "{c}"'
-    yield ""
+
+    yield from gen_monolithic_undef_all_core()
 
 
 def gen_monolithic_source_file(dry_run=False):
