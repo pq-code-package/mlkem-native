@@ -444,6 +444,11 @@
 #undef STATIC_ASSERT
 #endif
 
+/* mlkem/fips202/fips202.c:177 */
+#if defined(shake256ctx)
+#undef shake256ctx
+#endif
+
 /* mlkem/fips202/fips202.h:5 */
 #if defined(FIPS202_H)
 #undef FIPS202_H
@@ -474,42 +479,47 @@
 #undef SHA3_512_RATE
 #endif
 
-/* mlkem/fips202/fips202.h:30 */
+/* mlkem/fips202/fips202.h:20 */
+#if defined(shake128ctx)
+#undef shake128ctx
+#endif
+
+/* mlkem/fips202/fips202.h:31 */
 #if defined(shake128_absorb_once)
 #undef shake128_absorb_once
 #endif
 
-/* mlkem/fips202/fips202.h:57 */
+/* mlkem/fips202/fips202.h:58 */
 #if defined(shake128_squeezeblocks)
 #undef shake128_squeezeblocks
 #endif
 
-/* mlkem/fips202/fips202.h:79 */
+/* mlkem/fips202/fips202.h:80 */
 #if defined(shake128_release)
 #undef shake128_release
 #endif
 
-/* mlkem/fips202/fips202.h:84 */
+/* mlkem/fips202/fips202.h:85 */
 #if defined(shake256)
 #undef shake256
 #endif
 
-/* mlkem/fips202/fips202.h:105 */
+/* mlkem/fips202/fips202.h:106 */
 #if defined(SHA3_256_HASHBYTES)
 #undef SHA3_256_HASHBYTES
 #endif
 
-/* mlkem/fips202/fips202.h:106 */
+/* mlkem/fips202/fips202.h:107 */
 #if defined(sha3_256)
 #undef sha3_256
 #endif
 
-/* mlkem/fips202/fips202.h:125 */
+/* mlkem/fips202/fips202.h:126 */
 #if defined(SHA3_512_HASHBYTES)
 #undef SHA3_512_HASHBYTES
 #endif
 
-/* mlkem/fips202/fips202.h:126 */
+/* mlkem/fips202/fips202.h:127 */
 #if defined(sha3_512)
 #undef sha3_512
 #endif
@@ -519,27 +529,37 @@
 #undef MLKEM_NATIVE_FIPS202_IMPL_H
 #endif
 
+/* mlkem/fips202/fips202x4.c:9 */
+#if defined(shake256x4_ctx)
+#undef shake256x4_ctx
+#endif
+
 /* mlkem/fips202/fips202x4.h:5 */
 #if defined(FIPS_202X4_H)
 #undef FIPS_202X4_H
 #endif
 
-/* mlkem/fips202/fips202x4.h:21 */
+/* mlkem/fips202/fips202x4.h:16 */
+#if defined(shake128x4ctx)
+#undef shake128x4ctx
+#endif
+
+/* mlkem/fips202/fips202x4.h:22 */
 #if defined(shake128x4_absorb_once)
 #undef shake128x4_absorb_once
 #endif
 
-/* mlkem/fips202/fips202x4.h:34 */
+/* mlkem/fips202/fips202x4.h:35 */
 #if defined(shake128x4_squeezeblocks)
 #undef shake128x4_squeezeblocks
 #endif
 
-/* mlkem/fips202/fips202x4.h:51 */
+/* mlkem/fips202/fips202x4.h:52 */
 #if defined(shake128x4_release)
 #undef shake128x4_release
 #endif
 
-/* mlkem/fips202/fips202x4.h:54 */
+/* mlkem/fips202/fips202x4.h:55 */
 #if defined(shake256x4)
 #undef shake256x4
 #endif
@@ -2079,92 +2099,102 @@
 #undef NTT_BOUND
 #endif
 
-/* mlkem/poly.h:305 */
+/* mlkem/poly.h:24 */
+#if defined(poly)
+#undef poly
+#endif
+
+/* mlkem/poly.h:34 */
+#if defined(poly_mulcache)
+#undef poly_mulcache
+#endif
+
+/* mlkem/poly.h:307 */
 #if defined(poly_compress_du)
 #undef poly_compress_du
 #endif
 
-/* mlkem/poly.h:326 */
+/* mlkem/poly.h:328 */
 #if defined(poly_decompress_du)
 #undef poly_decompress_du
 #endif
 
-/* mlkem/poly.h:349 */
+/* mlkem/poly.h:351 */
 #if defined(poly_compress_dv)
 #undef poly_compress_dv
 #endif
 
-/* mlkem/poly.h:370 */
+/* mlkem/poly.h:372 */
 #if defined(poly_decompress_dv)
 #undef poly_decompress_dv
 #endif
 
-/* mlkem/poly.h:394 */
+/* mlkem/poly.h:396 */
 #if defined(poly_tobytes)
 #undef poly_tobytes
 #endif
 
-/* mlkem/poly.h:418 */
+/* mlkem/poly.h:420 */
 #if defined(poly_frombytes)
 #undef poly_frombytes
 #endif
 
-/* mlkem/poly.h:441 */
+/* mlkem/poly.h:443 */
 #if defined(poly_frommsg)
 #undef poly_frommsg
 #endif
 
-/* mlkem/poly.h:458 */
+/* mlkem/poly.h:460 */
 #if defined(poly_tomsg)
 #undef poly_tomsg
 #endif
 
-/* mlkem/poly.h:476 */
+/* mlkem/poly.h:478 */
 #if defined(poly_getnoise_eta1_4x)
 #undef poly_getnoise_eta1_4x
 #endif
 
-/* mlkem/poly.h:553 */
+/* mlkem/poly.h:555 */
 #if defined(poly_getnoise_eta2_4x)
 #undef poly_getnoise_eta2_4x
 #endif
 
-/* mlkem/poly.h:556 */
+/* mlkem/poly.h:558 */
 #if defined(poly_getnoise_eta2)
 #undef poly_getnoise_eta2
 #endif
 
-/* mlkem/poly.h:578 */
+/* mlkem/poly.h:580 */
 #if defined(poly_getnoise_eta1122_4x)
 #undef poly_getnoise_eta1122_4x
 #endif
 
-/* mlkem/poly.h:607 */
+/* mlkem/poly.h:609 */
 #if defined(poly_basemul_montgomery_cached)
 #undef poly_basemul_montgomery_cached
 #endif
 
-/* mlkem/poly.h:640 */
+/* mlkem/poly.h:642 */
 #if defined(poly_tomont)
 #undef poly_tomont
 #endif
 
-/* mlkem/poly.h:658 */
+/* mlkem/poly.h:660 */
 #if defined(poly_mulcache_compute)
 #undef poly_mulcache_compute
 #endif
 
-/* mlkem/poly.h:688 */
+/* mlkem/poly.h:690 */
 #if defined(poly_reduce)
 #undef poly_reduce
 #endif
 
-/* mlkem/poly.h:713 */
+/* mlkem/poly.h:715 */
 #if defined(poly_add)
 #undef poly_add
 #endif
 
-/* mlkem/poly.h:741 */
+/* mlkem/poly.h:743 */
 #if defined(poly_sub)
 #undef poly_sub
 #endif
@@ -2174,62 +2204,72 @@
 #undef POLYVEC_H
 #endif
 
-/* mlkem/polyvec.h:21 */
+/* mlkem/polyvec.h:11 */
+#if defined(polyvec)
+#undef polyvec
+#endif
+
+/* mlkem/polyvec.h:17 */
+#if defined(polyvec_mulcache)
+#undef polyvec_mulcache
+#endif
+
+/* mlkem/polyvec.h:23 */
 #if defined(polyvec_compress_du)
 #undef polyvec_compress_du
 #endif
 
-/* mlkem/polyvec.h:43 */
+/* mlkem/polyvec.h:45 */
 #if defined(polyvec_decompress_du)
 #undef polyvec_decompress_du
 #endif
 
-/* mlkem/polyvec.h:65 */
+/* mlkem/polyvec.h:67 */
 #if defined(polyvec_tobytes)
 #undef polyvec_tobytes
 #endif
 
-/* mlkem/polyvec.h:85 */
+/* mlkem/polyvec.h:87 */
 #if defined(polyvec_frombytes)
 #undef polyvec_frombytes
 #endif
 
-/* mlkem/polyvec.h:106 */
+/* mlkem/polyvec.h:108 */
 #if defined(polyvec_ntt)
 #undef polyvec_ntt
 #endif
 
-/* mlkem/polyvec.h:131 */
+/* mlkem/polyvec.h:133 */
 #if defined(polyvec_invntt_tomont)
 #undef polyvec_invntt_tomont
 #endif
 
-/* mlkem/polyvec.h:155 */
+/* mlkem/polyvec.h:157 */
 #if defined(polyvec_basemul_acc_montgomery)
 #undef polyvec_basemul_acc_montgomery
 #endif
 
-/* mlkem/polyvec.h:178 */
+/* mlkem/polyvec.h:180 */
 #if defined(polyvec_basemul_acc_montgomery_cached)
 #undef polyvec_basemul_acc_montgomery_cached
 #endif
 
-/* mlkem/polyvec.h:210 */
+/* mlkem/polyvec.h:212 */
 #if defined(polyvec_mulcache_compute)
 #undef polyvec_mulcache_compute
 #endif
 
-/* mlkem/polyvec.h:243 */
+/* mlkem/polyvec.h:245 */
 #if defined(polyvec_reduce)
 #undef polyvec_reduce
 #endif
 
-/* mlkem/polyvec.h:268 */
+/* mlkem/polyvec.h:270 */
 #if defined(polyvec_add)
 #undef polyvec_add
 #endif
 
-/* mlkem/polyvec.h:298 */
+/* mlkem/polyvec.h:300 */
 #if defined(polyvec_tomont)
 #undef polyvec_tomont
 #endif

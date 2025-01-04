@@ -7,6 +7,7 @@
 #include "fips202.h"
 #include "keccakf1600.h"
 
+#define shake256x4_ctx FIPS202_NAMESPACE(shake256x4_ctx)
 typedef shake128x4ctx shake256x4_ctx;
 
 static void keccak_absorb_once_x4(uint64_t *s, uint32_t r, const uint8_t *in0,

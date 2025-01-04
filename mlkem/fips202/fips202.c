@@ -175,6 +175,7 @@ void shake128_squeezeblocks(uint8_t *output, size_t nblocks, shake128ctx *state)
 
 void shake128_release(shake128ctx *state) { (void)state; }
 
+#define shake256ctx FIPS202_NAMESPACE(shake256ctx)
 typedef shake128ctx shake256ctx;
 void shake256(uint8_t *output, size_t outlen, const uint8_t *input,
               size_t inlen)

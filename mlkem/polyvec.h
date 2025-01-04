@@ -9,11 +9,13 @@
 #include "common.h"
 #include "poly.h"
 
+#define polyvec MLKEM_NAMESPACE(polyvec)
 typedef struct
 {
   poly vec[MLKEM_K];
 } ALIGN polyvec;
 
+#define polyvec_mulcache MLKEM_NAMESPACE(polyvec_mulcache)
 typedef struct
 {
   poly_mulcache vec[MLKEM_K];
