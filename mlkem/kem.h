@@ -14,14 +14,6 @@
 #define CRYPTO_CIPHERTEXTBYTES MLKEM_CIPHERTEXTBYTES
 #define CRYPTO_BYTES MLKEM_SSBYTES
 
-#if (MLKEM_K == 2)
-#define CRYPTO_ALGNAME "Kyber512"
-#elif (MLKEM_K == 3)
-#define CRYPTO_ALGNAME "Kyber768"
-#elif (MLKEM_K == 4)
-#define CRYPTO_ALGNAME "Kyber1024"
-#endif
-
 #define crypto_kem_keypair_derand MLKEM_NAMESPACE(keypair_derand)
 /*************************************************
  * Name:        crypto_kem_keypair_derand

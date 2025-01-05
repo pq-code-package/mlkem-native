@@ -10,6 +10,14 @@
 #include "nistrng.h"
 #include "randombytes.h"
 
+#if (MLKEM_K == 2)
+#define CRYPTO_ALGNAME "Kyber512"
+#elif (MLKEM_K == 3)
+#define CRYPTO_ALGNAME "Kyber768"
+#elif (MLKEM_K == 4)
+#define CRYPTO_ALGNAME "Kyber1024"
+#endif
+
 static void fprintBstr(FILE *fp, const char *S, const uint8_t *A, size_t L)
 {
   size_t i;
