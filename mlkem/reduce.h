@@ -10,6 +10,17 @@
 #include "common.h"
 #include "debug/debug.h"
 
+/* Static namespacing
+ * This is to facilitate building multiple instances
+ * of mlkem-native (e.g. with varying security levels)
+ * within a single compilation unit. */
+#define cast_uint16_to_int16 MLKEM_NAMESPACE(cast_uint16_to_int16)
+#define montgomery_reduce_generic MLKEM_NAMESPACE(montgomery_reduce_generic)
+#define montgomery_reduce MLKEM_NAMESPACE(montgomery_reduce)
+#define fqmul MLKEM_NAMESPACE(fqmul)
+#define barrett_reduce MLKEM_NAMESPACE(barrett_reduce)
+/* End of static namespacing */
+
 #define HALF_Q ((MLKEM_Q + 1) / 2) /* 1665 */
 
 /*************************************************

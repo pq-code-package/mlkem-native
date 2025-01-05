@@ -9,6 +9,15 @@
 #include "ntt.h"
 #include "reduce.h"
 
+/* Static namespacing
+ * This is to facilitate building multiple instances
+ * of mlkem-native (e.g. with varying security levels)
+ * within a single compilation unit. */
+#define ntt_butterfly_block MLKEM_NAMESPACE(ntt_butterfly_block)
+#define ntt_layer MLKEM_NAMESPACE(ntt_layer)
+#define invntt_layer MLKEM_NAMESPACE(invntt_layer)
+/* End of static namespacing */
+
 #if !defined(MLKEM_USE_NATIVE_NTT)
 /*
  * Computes a block CT butterflies with a fixed twiddle factor,

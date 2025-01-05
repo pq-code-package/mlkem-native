@@ -18,6 +18,15 @@
 #include "fips202.h"
 #include "keccakf1600.h"
 
+/* Static namespacing
+ * This is to facilitate building multiple instances
+ * of mlkem-native (e.g. with varying security levels)
+ * within a single compilation unit. */
+#define keccak_absorb_once FIPS202_NAMESPACE(keccak_absorb_once)
+#define keccak_squeeze_once FIPS202_NAMESPACE(keccak_squeeze_once)
+#define keccak_squeezeblocks FIPS202_NAMESPACE(keccak_squeezeblocks)
+/* End of static namespacing */
+
 /*************************************************
  * Name:        keccak_absorb_once
  *

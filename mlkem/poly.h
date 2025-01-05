@@ -38,6 +38,22 @@ typedef struct
   int16_t coeffs[MLKEM_N >> 1];
 } poly_mulcache;
 
+/* Static namespacing
+ * This is to facilitate building multiple instances
+ * of mlkem-native (e.g. with varying security levels)
+ * within a single compilation unit. */
+#define scalar_compress_d1 MLKEM_NAMESPACE(scalar_compress_d1)
+#define scalar_compress_d4 MLKEM_NAMESPACE(scalar_compress_d4)
+#define scalar_compress_d5 MLKEM_NAMESPACE(scalar_compress_d5)
+#define scalar_compress_d10 MLKEM_NAMESPACE(scalar_compress_d10)
+#define scalar_compress_d11 MLKEM_NAMESPACE(scalar_compress_d11)
+#define scalar_decompress_d4 MLKEM_NAMESPACE(scalar_decompress_d4)
+#define scalar_decompress_d5 MLKEM_NAMESPACE(scalar_decompress_d5)
+#define scalar_decompress_d10 MLKEM_NAMESPACE(scalar_decompress_d10)
+#define scalar_decompress_d11 MLKEM_NAMESPACE(scalar_decompress_d11)
+#define scalar_signed_to_unsigned_q MLKEM_NAMESPACE(scalar_signed_to_unsigned_q)
+/* End of static namespacing */
+
 /************************************************************
  * Name: scalar_compress_d1
  *

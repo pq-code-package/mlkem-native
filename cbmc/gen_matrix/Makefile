@@ -19,7 +19,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/indcpa.c
 
 CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)gen_matrix
-USE_FUNCTION_CONTRACTS=gen_matrix_entry gen_matrix_entry_x4 poly_permute_bitrev_to_custom
+USE_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)gen_matrix_entry $(MLKEM_NAMESPACE)gen_matrix_entry_x4 $(MLKEM_NAMESPACE)poly_permute_bitrev_to_custom
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

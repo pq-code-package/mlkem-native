@@ -44,6 +44,26 @@
 #undef MLKEM_NATIVE_ARITH_IMPL_H
 #endif
 
+/* mlkem/cbd.c:11 */
+#if defined(load32_littleendian)
+#undef load32_littleendian
+#endif
+
+/* mlkem/cbd.c:12 */
+#if defined(load24_littleendian)
+#undef load24_littleendian
+#endif
+
+/* mlkem/cbd.c:13 */
+#if defined(cbd2)
+#undef cbd2
+#endif
+
+/* mlkem/cbd.c:14 */
+#if defined(cbd3)
+#undef cbd3
+#endif
+
 /* mlkem/cbd.h:5 */
 #if defined(CBD_H)
 #undef CBD_H
@@ -444,7 +464,22 @@
 #undef STATIC_ASSERT
 #endif
 
-/* mlkem/fips202/fips202.c:177 */
+/* mlkem/fips202/fips202.c:24 */
+#if defined(keccak_absorb_once)
+#undef keccak_absorb_once
+#endif
+
+/* mlkem/fips202/fips202.c:25 */
+#if defined(keccak_squeeze_once)
+#undef keccak_squeeze_once
+#endif
+
+/* mlkem/fips202/fips202.c:26 */
+#if defined(keccak_squeezeblocks)
+#undef keccak_squeezeblocks
+#endif
+
+/* mlkem/fips202/fips202.c:186 */
 #if defined(shake256ctx)
 #undef shake256ctx
 #endif
@@ -534,6 +569,26 @@
 #undef shake256x4_ctx
 #endif
 
+/* mlkem/fips202/fips202x4.c:16 */
+#if defined(keccak_absorb_once_x4)
+#undef keccak_absorb_once_x4
+#endif
+
+/* mlkem/fips202/fips202x4.c:17 */
+#if defined(keccak_squeezeblocks_x4)
+#undef keccak_squeezeblocks_x4
+#endif
+
+/* mlkem/fips202/fips202x4.c:18 */
+#if defined(shake256x4_absorb_once)
+#undef shake256x4_absorb_once
+#endif
+
+/* mlkem/fips202/fips202x4.c:19 */
+#if defined(shake256x4_squeezeblocks)
+#undef shake256x4_squeezeblocks
+#endif
+
 /* mlkem/fips202/fips202x4.h:5 */
 #if defined(FIPS_202X4_H)
 #undef FIPS_202X4_H
@@ -572,6 +627,11 @@
 /* mlkem/fips202/keccakf1600.c:22 */
 #if defined(ROL)
 #undef ROL
+#endif
+
+/* mlkem/fips202/keccakf1600.c:28 */
+#if defined(KeccakF_RoundConstants)
+#undef KeccakF_RoundConstants
 #endif
 
 /* mlkem/fips202/keccakf1600.h:5 */
@@ -1074,9 +1134,59 @@
 #undef MLKEM_NATIVE_FIPS202_BACKEND_IMPL
 #endif
 
-/* mlkem/indcpa.c:133 */
+/* mlkem/indcpa.c:27 */
+#if defined(pack_pk)
+#undef pack_pk
+#endif
+
+/* mlkem/indcpa.c:28 */
+#if defined(unpack_pk)
+#undef unpack_pk
+#endif
+
+/* mlkem/indcpa.c:29 */
+#if defined(pack_sk)
+#undef pack_sk
+#endif
+
+/* mlkem/indcpa.c:30 */
+#if defined(unpack_sk)
+#undef unpack_sk
+#endif
+
+/* mlkem/indcpa.c:31 */
+#if defined(pack_ciphertext)
+#undef pack_ciphertext
+#endif
+
+/* mlkem/indcpa.c:32 */
+#if defined(unpack_ciphertext)
+#undef unpack_ciphertext
+#endif
+
+/* mlkem/indcpa.c:33 */
+#if defined(gen_matrix_entry_x4)
+#undef gen_matrix_entry_x4
+#endif
+
+/* mlkem/indcpa.c:34 */
+#if defined(gen_matrix_entry)
+#undef gen_matrix_entry
+#endif
+
+/* mlkem/indcpa.c:35 */
+#if defined(matvec_mul)
+#undef matvec_mul
+#endif
+
+/* mlkem/indcpa.c:148 */
 #if defined(MLKEM_GEN_MATRIX_NBLOCKS)
 #undef MLKEM_GEN_MATRIX_NBLOCKS
+#endif
+
+/* mlkem/indcpa.c:269 */
+#if defined(poly_permute_bitrev_to_custom)
+#undef poly_permute_bitrev_to_custom
 #endif
 
 /* mlkem/indcpa.h:5 */
@@ -1102,6 +1212,16 @@
 /* mlkem/indcpa.h:88 */
 #if defined(indcpa_dec)
 #undef indcpa_dec
+#endif
+
+/* mlkem/kem.c:17 */
+#if defined(check_pk)
+#undef check_pk
+#endif
+
+/* mlkem/kem.c:18 */
+#if defined(check_sk)
+#undef check_sk
 #endif
 
 /* mlkem/kem.h:5 */
@@ -1909,7 +2029,22 @@
 #undef empty_cu_avx2_rej_uniform_table
 #endif
 
-/* mlkem/ntt.c:156 */
+/* mlkem/ntt.c:15 */
+#if defined(ntt_butterfly_block)
+#undef ntt_butterfly_block
+#endif
+
+/* mlkem/ntt.c:16 */
+#if defined(ntt_layer)
+#undef ntt_layer
+#endif
+
+/* mlkem/ntt.c:17 */
+#if defined(invntt_layer)
+#undef invntt_layer
+#endif
+
+/* mlkem/ntt.c:165 */
 #if defined(INVNTT_BOUND_REF)
 #undef INVNTT_BOUND_REF
 #endif
@@ -2109,92 +2244,142 @@
 #undef poly_mulcache
 #endif
 
-/* mlkem/poly.h:307 */
+/* mlkem/poly.h:44 */
+#if defined(scalar_compress_d1)
+#undef scalar_compress_d1
+#endif
+
+/* mlkem/poly.h:45 */
+#if defined(scalar_compress_d4)
+#undef scalar_compress_d4
+#endif
+
+/* mlkem/poly.h:46 */
+#if defined(scalar_compress_d5)
+#undef scalar_compress_d5
+#endif
+
+/* mlkem/poly.h:47 */
+#if defined(scalar_compress_d10)
+#undef scalar_compress_d10
+#endif
+
+/* mlkem/poly.h:48 */
+#if defined(scalar_compress_d11)
+#undef scalar_compress_d11
+#endif
+
+/* mlkem/poly.h:49 */
+#if defined(scalar_decompress_d4)
+#undef scalar_decompress_d4
+#endif
+
+/* mlkem/poly.h:50 */
+#if defined(scalar_decompress_d5)
+#undef scalar_decompress_d5
+#endif
+
+/* mlkem/poly.h:51 */
+#if defined(scalar_decompress_d10)
+#undef scalar_decompress_d10
+#endif
+
+/* mlkem/poly.h:52 */
+#if defined(scalar_decompress_d11)
+#undef scalar_decompress_d11
+#endif
+
+/* mlkem/poly.h:53 */
+#if defined(scalar_signed_to_unsigned_q)
+#undef scalar_signed_to_unsigned_q
+#endif
+
+/* mlkem/poly.h:323 */
 #if defined(poly_compress_du)
 #undef poly_compress_du
 #endif
 
-/* mlkem/poly.h:328 */
+/* mlkem/poly.h:344 */
 #if defined(poly_decompress_du)
 #undef poly_decompress_du
 #endif
 
-/* mlkem/poly.h:351 */
+/* mlkem/poly.h:367 */
 #if defined(poly_compress_dv)
 #undef poly_compress_dv
 #endif
 
-/* mlkem/poly.h:372 */
+/* mlkem/poly.h:388 */
 #if defined(poly_decompress_dv)
 #undef poly_decompress_dv
 #endif
 
-/* mlkem/poly.h:396 */
+/* mlkem/poly.h:412 */
 #if defined(poly_tobytes)
 #undef poly_tobytes
 #endif
 
-/* mlkem/poly.h:420 */
+/* mlkem/poly.h:436 */
 #if defined(poly_frombytes)
 #undef poly_frombytes
 #endif
 
-/* mlkem/poly.h:443 */
+/* mlkem/poly.h:459 */
 #if defined(poly_frommsg)
 #undef poly_frommsg
 #endif
 
-/* mlkem/poly.h:460 */
+/* mlkem/poly.h:476 */
 #if defined(poly_tomsg)
 #undef poly_tomsg
 #endif
 
-/* mlkem/poly.h:478 */
+/* mlkem/poly.h:494 */
 #if defined(poly_getnoise_eta1_4x)
 #undef poly_getnoise_eta1_4x
 #endif
 
-/* mlkem/poly.h:555 */
+/* mlkem/poly.h:571 */
 #if defined(poly_getnoise_eta2_4x)
 #undef poly_getnoise_eta2_4x
 #endif
 
-/* mlkem/poly.h:558 */
+/* mlkem/poly.h:574 */
 #if defined(poly_getnoise_eta2)
 #undef poly_getnoise_eta2
 #endif
 
-/* mlkem/poly.h:580 */
+/* mlkem/poly.h:596 */
 #if defined(poly_getnoise_eta1122_4x)
 #undef poly_getnoise_eta1122_4x
 #endif
 
-/* mlkem/poly.h:609 */
+/* mlkem/poly.h:625 */
 #if defined(poly_basemul_montgomery_cached)
 #undef poly_basemul_montgomery_cached
 #endif
 
-/* mlkem/poly.h:642 */
+/* mlkem/poly.h:658 */
 #if defined(poly_tomont)
 #undef poly_tomont
 #endif
 
-/* mlkem/poly.h:660 */
+/* mlkem/poly.h:676 */
 #if defined(poly_mulcache_compute)
 #undef poly_mulcache_compute
 #endif
 
-/* mlkem/poly.h:690 */
+/* mlkem/poly.h:706 */
 #if defined(poly_reduce)
 #undef poly_reduce
 #endif
 
-/* mlkem/poly.h:715 */
+/* mlkem/poly.h:731 */
 #if defined(poly_add)
 #undef poly_add
 #endif
 
-/* mlkem/poly.h:743 */
+/* mlkem/poly.h:759 */
 #if defined(poly_sub)
 #undef poly_sub
 #endif
@@ -2284,9 +2469,39 @@
 #undef REDUCE_H
 #endif
 
-/* mlkem/reduce.h:12 */
+/* mlkem/reduce.h:16 */
+#if defined(cast_uint16_to_int16)
+#undef cast_uint16_to_int16
+#endif
+
+/* mlkem/reduce.h:17 */
+#if defined(montgomery_reduce_generic)
+#undef montgomery_reduce_generic
+#endif
+
+/* mlkem/reduce.h:18 */
+#if defined(montgomery_reduce)
+#undef montgomery_reduce
+#endif
+
+/* mlkem/reduce.h:19 */
+#if defined(fqmul)
+#undef fqmul
+#endif
+
+/* mlkem/reduce.h:20 */
+#if defined(barrett_reduce)
+#undef barrett_reduce
+#endif
+
+/* mlkem/reduce.h:23 */
 #if defined(HALF_Q)
 #undef HALF_Q
+#endif
+
+/* mlkem/rej_uniform.c:12 */
+#if defined(rej_uniform_scalar)
+#undef rej_uniform_scalar
 #endif
 
 /* mlkem/rej_uniform.h:5 */
@@ -2509,12 +2724,62 @@
 #undef VERIFY_H
 #endif
 
-/* mlkem/verify.h:47 */
+/* mlkem/verify.h:17 */
+#if defined(value_barrier_u8)
+#undef value_barrier_u8
+#endif
+
+/* mlkem/verify.h:18 */
+#if defined(value_barrier_u32)
+#undef value_barrier_u32
+#endif
+
+/* mlkem/verify.h:19 */
+#if defined(value_barrier_i32)
+#undef value_barrier_i32
+#endif
+
+/* mlkem/verify.h:20 */
+#if defined(ct_cmask_neg_i16)
+#undef ct_cmask_neg_i16
+#endif
+
+/* mlkem/verify.h:21 */
+#if defined(ct_cmask_nonzero_u8)
+#undef ct_cmask_nonzero_u8
+#endif
+
+/* mlkem/verify.h:22 */
+#if defined(ct_cmask_nonzero_u16)
+#undef ct_cmask_nonzero_u16
+#endif
+
+/* mlkem/verify.h:23 */
+#if defined(ct_sel_uint8)
+#undef ct_sel_uint8
+#endif
+
+/* mlkem/verify.h:24 */
+#if defined(ct_sel_int16)
+#undef ct_sel_int16
+#endif
+
+/* mlkem/verify.h:25 */
+#if defined(ct_memcmp)
+#undef ct_memcmp
+#endif
+
+/* mlkem/verify.h:26 */
+#if defined(ct_cmov_zero)
+#undef ct_cmov_zero
+#endif
+
+/* mlkem/verify.h:63 */
 #if defined(MLKEM_USE_ASM_VALUE_BARRIER)
 #undef MLKEM_USE_ASM_VALUE_BARRIER
 #endif
 
-/* mlkem/verify.h:56 */
+/* mlkem/verify.h:72 */
 #if defined(ct_opt_blocker_u64)
 #undef ct_opt_blocker_u64
 #endif

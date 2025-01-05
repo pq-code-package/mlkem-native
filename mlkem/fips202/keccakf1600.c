@@ -22,6 +22,13 @@
 #define NROUNDS 24
 #define ROL(a, offset) ((a << offset) ^ (a >> (64 - offset)))
 
+/* Static namespacing
+ * This is to facilitate building multiple instances
+ * of mlkem-native (e.g. with varying security levels)
+ * within a single compilation unit. */
+#define KeccakF_RoundConstants FIPS202_NAMESPACE(KeccakF_RoundConstants)
+/* End of static namespacing */
+
 void KeccakF1600_StateExtractBytes(uint64_t *state, unsigned char *data,
                                    unsigned int offset, unsigned int length)
 {

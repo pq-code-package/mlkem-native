@@ -6,6 +6,13 @@
 #include "rej_uniform.h"
 #include "arith_backend.h"
 
+/* Static namespacing
+ * This is to facilitate building multiple instances
+ * of mlkem-native (e.g. with varying security levels)
+ * within a single compilation unit. */
+#define rej_uniform_scalar MLKEM_NAMESPACE(rej_uniform_scalar)
+/* End of static namespacing */
+
 /*************************************************
  * Name:        rej_uniform_scalar
  *
