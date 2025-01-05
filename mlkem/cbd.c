@@ -5,6 +5,16 @@
 #include "cbd.h"
 #include <stdint.h>
 
+/* Static namespacing
+ * This is to facilitate building multiple instances
+ * of mlkem-native (e.g. with varying security levels)
+ * within a single compilation unit. */
+#define load32_littleendian MLKEM_NAMESPACE(load32_littleendian)
+#define load24_littleendian MLKEM_NAMESPACE(load24_littleendian)
+#define cbd2 MLKEM_NAMESPACE(cbd2)
+#define cbd3 MLKEM_NAMESPACE(cbd3)
+/* End of static namespacing */
+
 /*************************************************
  * Name:        load32_littleendian
  *
@@ -25,6 +35,7 @@ static uint32_t load32_littleendian(const uint8_t x[4])
   return r;
 }
 
+#if MLKEM_ETA1 == 3
 /*************************************************
  * Name:        load24_littleendian
  *
@@ -36,7 +47,6 @@ static uint32_t load32_littleendian(const uint8_t x[4])
  *
  * Returns 32-bit unsigned integer loaded from x (most significant byte is zero)
  **************************************************/
-#if MLKEM_ETA1 == 3
 static uint32_t load24_littleendian(const uint8_t x[3])
 {
   uint32_t r;
@@ -45,7 +55,7 @@ static uint32_t load24_littleendian(const uint8_t x[3])
   r |= (uint32_t)x[2] << 16;
   return r;
 }
-#endif
+#endif /* MLKEM_ETA1 == 3 */
 
 /*************************************************
  * Name:        cbd2
@@ -82,6 +92,7 @@ static void cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
   }
 }
 
+#if MLKEM_ETA1 == 3
 /*************************************************
  * Name:        cbd3
  *
@@ -93,7 +104,6 @@ static void cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
  * Arguments:   - poly *r: pointer to output polynomial
  *              - const uint8_t *buf: pointer to input byte array
  **************************************************/
-#if MLKEM_ETA1 == 3
 static void cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4])
 {
   int i;
@@ -119,7 +129,7 @@ static void cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4])
     }
   }
 }
-#endif
+#endif /* MLKEM_ETA1 == 3 */
 
 void poly_cbd_eta1(poly *r, const uint8_t buf[MLKEM_ETA1 * MLKEM_N / 4])
 {

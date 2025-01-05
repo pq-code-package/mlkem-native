@@ -18,6 +18,7 @@
 
 
 /* Context for non-incremental API */
+#define shake128ctx FIPS202_NAMESPACE(shake128ctx)
 typedef struct
 {
   uint64_t ctx[25];

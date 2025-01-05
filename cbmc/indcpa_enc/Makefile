@@ -44,8 +44,9 @@ USED_FUNCTIONS += poly_reduce
 USED_FUNCTIONS += polyvec_compress_du
 USED_FUNCTIONS += poly_compress_dv
 USED_FUNCTIONS += polyvec_frombytes
+USED_FUNCTIONS += matvec_mul
 
-USE_FUNCTION_CONTRACTS=matvec_mul $(addprefix $(MLKEM_NAMESPACE),$(USED_FUNCTIONS))
+USE_FUNCTION_CONTRACTS=$(addprefix $(MLKEM_NAMESPACE),$(USED_FUNCTIONS))
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

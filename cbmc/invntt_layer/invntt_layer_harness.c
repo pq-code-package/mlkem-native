@@ -3,6 +3,9 @@
 // SPDX-License-Identifier: MIT-0
 
 #include <stdint.h>
+#include "common.h"
+
+#define invntt_layer MLKEM_NAMESPACE(invntt_layer)
 void invntt_layer(int16_t *p, int len, int layer);
 
 void harness(void)

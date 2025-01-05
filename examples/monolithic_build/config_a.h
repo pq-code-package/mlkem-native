@@ -25,16 +25,14 @@
  * Name:        MLKEM_NATIVE_CONFIG_FILE
  *
  * Description: If defined, this is a header that will be included instead
- *              of this default configuration file mlkem/config.h.
+ *              of mlkem/config.h.
+ *
+ *              This _must_ be set on the command line using
+ *              `-DMLKEM_NATIVE_CONFIG_FILE="..."`.
  *
  *              When you need to build mlkem-native in multiple configurations,
- *              using varying MLKEM_NATIVE_CONFIG_FILE can be more convenient
+ *              using varying MLKEM_NATIE_CONFIG_FILE can be more convenient
  *              then configuring everything through CFLAGS.
- *
- *              To use, MLKEM_NATIVE_CONFIG_FILE _must_ be defined prior
- *              to the inclusion of any mlkem-native headers. For example,
- *              it can be set by passing `-DMLKEM_NATIVE_CONFIG_FILE="..."`
- *              on the command line.
  *
  *****************************************************************************/
 /* #define MLKEM_NATIVE_CONFIG_FILE "config.h" */
@@ -45,7 +43,8 @@
  * Description: The macros to use to namespace global symbols
  *              from mlkem/.
  *****************************************************************************/
-#define MLKEM_NAMESPACE(sym) MLKEM_DEFAULT_NAMESPACE(sym)
+#define CONCAT(a, b) a##b
+#define MLKEM_NAMESPACE(sym) CONCAT(mlkem768_, sym)
 
 /******************************************************************************
  * Name:        FIPS202_NAMESPACE
@@ -53,7 +52,7 @@
  * Description: The macros to use to namespace global symbols
  *              from mlkem/fips202/.
  *****************************************************************************/
-#define FIPS202_NAMESPACE(sym) FIPS202_DEFAULT_NAMESPACE(sym)
+#define FIPS202_NAMESPACE(sym) CONCAT(mlkem768_, sym)
 
 /******************************************************************************
  * Name:        MLKEM_USE_NATIVE
@@ -64,9 +63,7 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#if !defined(MLKEM_USE_NATIVE)
 /* #define MLKEM_USE_NATIVE */
-#endif
 
 /******************************************************************************
  * Name:        MLKEM_NATIVE_ARITH_BACKEND

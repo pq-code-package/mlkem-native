@@ -5,6 +5,7 @@
 #include "indcpa.h"
 #include "polyvec.h"
 
+#define matvec_mul MLKEM_NAMESPACE(matvec_mul)
 void matvec_mul(polyvec *out, polyvec const *a, polyvec const *v,
                 polyvec_mulcache const *vc);
 

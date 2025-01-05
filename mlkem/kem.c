@@ -11,6 +11,14 @@
 #include "symmetric.h"
 #include "verify.h"
 
+/* Static namespacing
+ * This is to facilitate building multiple instances
+ * of mlkem-native (e.g. with varying security levels)
+ * within a single compilation unit. */
+#define check_pk MLKEM_NAMESPACE(check_pk)
+#define check_sk MLKEM_NAMESPACE(check_sk)
+/* End of static namespacing */
+
 #if defined(CBMC)
 /* Redeclaration with contract needed for CBMC only */
 int memcmp(const void *str1, const void *str2, size_t n)

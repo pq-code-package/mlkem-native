@@ -14,6 +14,7 @@
 #include "cbmc.h"
 
 /* Context for non-incremental API */
+#define shake128x4ctx FIPS202_NAMESPACE(shake128x4ctx)
 typedef struct
 {
   uint64_t ctx[KECCAK_LANES * KECCAK_WAY];

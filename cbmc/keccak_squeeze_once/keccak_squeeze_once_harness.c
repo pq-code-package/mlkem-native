@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#define keccak_squeeze_once FIPS202_NAMESPACE(keccak_squeeze_once)
 void keccak_squeeze_once(uint8_t *h, size_t outlen, uint64_t *s, uint32_t r);
 
 void harness(void)

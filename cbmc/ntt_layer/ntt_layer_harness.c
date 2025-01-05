@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: MIT-0
 
 #include "poly.h"
+
+#define ntt_layer MLKEM_NAMESPACE(ntt_layer)
 void ntt_layer(int16_t *p, int len, int layer);
 
 void harness(void)

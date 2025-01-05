@@ -5,6 +5,7 @@
 #include "cbmc.h"
 #include "rej_uniform.h"
 
+#define rej_uniform_scalar MLKEM_NAMESPACE(rej_uniform_scalar)
 unsigned int rej_uniform_scalar(int16_t *r, unsigned int target,
                                 unsigned int offset, const uint8_t *buf,
                                 unsigned int buflen);

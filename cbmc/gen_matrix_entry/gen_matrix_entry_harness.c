@@ -6,6 +6,7 @@
 #include "poly.h"
 
 // declare here since it's static in non-CBMC builds
+#define gen_matrix_entry MLKEM_NAMESPACE(gen_matrix_entry)
 void gen_matrix_entry(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 16]);
 
 void harness(void)

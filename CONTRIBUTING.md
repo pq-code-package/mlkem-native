@@ -1,19 +1,30 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
-# Contributing
+# Contributing to mlkem-native
 
-We welcome proposals to improve **mlkem-native**.
-In particular, we are interested to hear how you plan to use **mlkem-native** or what should be improved about **mlkem-native** allowing other projects to rely on it.
-If you have specific feature requests, please open an issue. 
+We welcome contributors who can help us build mlkem-native. If you are interested, please contact us, or volunteer for
+any of the open issues. Here are some things to get you started.
 
-You can contact the **mlkem-native** team through the [PQCA Discord](https://discord.com/invite/xyVnwzfg5R).
+### nix setup
 
-## Call for contributors
+We specify the development environment for mlkem-native using `nix`. If you want to help develop mlkem-native, please
+use `nix`. We recommend using the latest Nix version provided by the [nix installer
+script](https://nixos.org/download/), but we currently support all Nix versions >= 2.6.
 
-We are actively seeking contributors who can help us build **mlkem-native**. If you are interested, please contact us,
-or volunteer for any of the open issues.
+All the development and build dependencies are specified in [flake.nix](flake.nix). To execute a bash shell, run
+```bash
+nix develop --experimental-features 'nix-command flakes'
+```
 
-## Call for potential consumers
+To confirm that everything worked, try `lint` or `tests cbmc`.
 
-If you are a potential consumer of **mlkem-native**, please reach out: We're interested in hearing the way you want to
-use **mlkem-native**. If you have specific feature requests, please open an issue.
+### Coding style
+
+We use auto-formatting using `clang-format` as specified in [.clang-format](.clang-format). Use the `./scripts/format`
+script (in your `PATH` when using`nix`) to re-format the files accordingly.
+
+### Namespacing
+
+We namespace all entities of global scope, including statics and structures. This is to facilitate monolithic builds of
+mlkem-native in a single compilation unit, potentially including multiple copies for different security levels. See
+[examples/monolithic_build](examples/monolithic_build) for an example.

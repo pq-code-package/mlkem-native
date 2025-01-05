@@ -22,6 +22,7 @@
  * Elements of R_q = Z_q[X]/(X^n + 1). Represents polynomial
  * coeffs[0] + X*coeffs[1] + X^2*coeffs[2] + ... + X^{n-1}*coeffs[n-1]
  */
+#define poly MLKEM_NAMESPACE(poly)
 typedef struct
 {
   int16_t coeffs[MLKEM_N];
@@ -31,10 +32,27 @@ typedef struct
  * INTERNAL presentation of precomputed data speeding up
  * the base multiplication of two polynomials in NTT domain.
  */
+#define poly_mulcache MLKEM_NAMESPACE(poly_mulcache)
 typedef struct
 {
   int16_t coeffs[MLKEM_N >> 1];
 } poly_mulcache;
+
+/* Static namespacing
+ * This is to facilitate building multiple instances
+ * of mlkem-native (e.g. with varying security levels)
+ * within a single compilation unit. */
+#define scalar_compress_d1 MLKEM_NAMESPACE(scalar_compress_d1)
+#define scalar_compress_d4 MLKEM_NAMESPACE(scalar_compress_d4)
+#define scalar_compress_d5 MLKEM_NAMESPACE(scalar_compress_d5)
+#define scalar_compress_d10 MLKEM_NAMESPACE(scalar_compress_d10)
+#define scalar_compress_d11 MLKEM_NAMESPACE(scalar_compress_d11)
+#define scalar_decompress_d4 MLKEM_NAMESPACE(scalar_decompress_d4)
+#define scalar_decompress_d5 MLKEM_NAMESPACE(scalar_decompress_d5)
+#define scalar_decompress_d10 MLKEM_NAMESPACE(scalar_decompress_d10)
+#define scalar_decompress_d11 MLKEM_NAMESPACE(scalar_decompress_d11)
+#define scalar_signed_to_unsigned_q MLKEM_NAMESPACE(scalar_signed_to_unsigned_q)
+/* End of static namespacing */
 
 /************************************************************
  * Name: scalar_compress_d1
