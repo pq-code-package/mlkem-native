@@ -44,7 +44,7 @@
  *              from mlkem/.
  *****************************************************************************/
 #define CONCAT(a, b) a##b
-#define MLKEM_NAMESPACE(sym) CONCAT(namespace_b_, sym)
+#define MLKEM_NAMESPACE(sym) CONCAT(mlkem1024_, sym)
 
 /******************************************************************************
  * Name:        FIPS202_NAMESPACE
@@ -52,7 +52,7 @@
  * Description: The macros to use to namespace global symbols
  *              from mlkem/fips202/.
  *****************************************************************************/
-#define FIPS202_NAMESPACE(sym) CONCAT(namespace_b_, sym)
+#define FIPS202_NAMESPACE(sym) CONCAT(mlkem1024_, sym)
 
 /******************************************************************************
  * Name:        MLKEM_USE_NATIVE
