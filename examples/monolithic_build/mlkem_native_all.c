@@ -284,22 +284,22 @@
 #undef MLKEM_K
 #endif
 
-/* mlkem/config.h:45 */
+/* mlkem/config.h:47 */
 #if defined(MLKEM_NAMESPACE)
 #undef MLKEM_NAMESPACE
 #endif
 
-/* mlkem/config.h:53 */
+/* mlkem/config.h:55 */
 #if defined(FIPS202_NAMESPACE)
 #undef FIPS202_NAMESPACE
 #endif
 
-/* mlkem/config.h:80 */
+/* mlkem/config.h:82 */
 #if defined(MLKEM_NATIVE_ARITH_BACKEND)
 #undef MLKEM_NATIVE_ARITH_BACKEND
 #endif
 
-/* mlkem/config.h:94 */
+/* mlkem/config.h:96 */
 #if defined(MLKEM_NATIVE_FIPS202_BACKEND)
 #undef MLKEM_NATIVE_FIPS202_BACKEND
 #endif

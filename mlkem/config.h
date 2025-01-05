@@ -25,14 +25,16 @@
  * Name:        MLKEM_NATIVE_CONFIG_FILE
  *
  * Description: If defined, this is a header that will be included instead
- *              of mlkem/config.h.
- *
- *              This _must_ be set on the command line using
- *              `-DMLKEM_NATIVE_CONFIG_FILE="..."`.
+ *              of this default configuration file mlkem/config.h.
  *
  *              When you need to build mlkem-native in multiple configurations,
- *              using varying MLKEM_NATIE_CONFIG_FILE can be more convenient
+ *              using varying MLKEM_NATIVE_CONFIG_FILE can be more convenient
  *              then configuring everything through CFLAGS.
+ *
+ *              To use, MLKEM_NATIVE_CONFIG_FILE _must_ be defined prior
+ *              to the inclusion of any mlkem-native headers. For example,
+ *              it can be set by passing `-DMLKEM_NATIVE_CONFIG_FILE="..."`
+ *              on the command line.
  *
  *****************************************************************************/
 /* #define MLKEM_NATIVE_CONFIG_FILE "config.h" */
