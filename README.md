@@ -121,4 +121,4 @@ If you have any other question / non-security related issue / feature request, p
 ## Contributing
 
 If you want to help us build mlkem-native, please reach out. You can contact the mlkem-native team
-through the [PQCA Discord](https://discord.com/invite/xyVnwzfg5R).
+through the [PQCA Discord](https://discord.com/invite/xyVnwzfg5R). See also [CONTRIBUTING.md](CONTRIBUTING.md).
