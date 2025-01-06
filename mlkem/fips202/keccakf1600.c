@@ -10,14 +10,12 @@
  * from https://twitter.com/tweetfips202
  * by Gilles Van Assche, Daniel J. Bernstein, and Peter Schwabe */
 
-#include "keccakf1600.h"
 #include <assert.h>
 #include <stdint.h>
 
-#include "config.h"
-#include "fips202_backend.h"
-
 #include "cbmc.h"
+#include "fips202_backend.h"
+#include "keccakf1600.h"
 
 #define NROUNDS 24
 #define ROL(a, offset) ((a << offset) ^ (a >> (64 - offset)))

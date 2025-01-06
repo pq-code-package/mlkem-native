@@ -5,7 +5,6 @@
 #include "polyvec.h"
 #include <stdint.h>
 #include "arith_backend.h"
-#include "config.h"
 #include "ntt.h"
 #include "poly.h"
 

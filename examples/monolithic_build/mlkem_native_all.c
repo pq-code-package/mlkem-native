@@ -609,17 +609,17 @@
 #undef shake256x4
 #endif
 
-/* mlkem/fips202/keccakf1600.c:21 */
+/* mlkem/fips202/keccakf1600.c:19 */
 #if defined(NROUNDS)
 #undef NROUNDS
 #endif
 
-/* mlkem/fips202/keccakf1600.c:22 */
+/* mlkem/fips202/keccakf1600.c:20 */
 #if defined(ROL)
 #undef ROL
 #endif
 
-/* mlkem/fips202/keccakf1600.c:28 */
+/* mlkem/fips202/keccakf1600.c:26 */
 #if defined(KeccakF_RoundConstants)
 #undef KeccakF_RoundConstants
 #endif
