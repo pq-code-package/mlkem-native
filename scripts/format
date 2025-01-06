@@ -46,7 +46,7 @@ if ! command -v clang-format 2>&1 >/dev/null; then
   echo "clang-format not found. Are you running in a nix shell? See BUILDING.md."
   exit 1
 fi
-clang-format -i $(git ls-files ":/*.c" ":/*.h")
+clang-format -i $(git ls-files ":/*.c" ":/*.h" | xargs -I {} sh -c "[ ! -L {} ] && echo '{}'")
 
 info "Checking for eol"
 check-eol()
