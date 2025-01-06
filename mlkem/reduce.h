@@ -107,8 +107,7 @@ static INLINE int16_t montgomery_reduce_generic(int32_t a)
  * Returns:     integer congruent to a * R^-1 modulo q,
  *              smaller than 2 * q in absolute value.
  **************************************************/
-STATIC_INLINE_TESTABLE
-int16_t montgomery_reduce(int32_t a)
+static INLINE int16_t montgomery_reduce(int32_t a)
 __contract__(
   requires(a > -(2 * 4096 * 32768))
   requires(a <  (2 * 4096 * 32768))
@@ -143,8 +142,7 @@ __contract__(
  * smaller than q in absolute value.
  *
  **************************************************/
-STATIC_INLINE_TESTABLE
-int16_t fqmul(int16_t a, int16_t b)
+static INLINE int16_t fqmul(int16_t a, int16_t b)
 __contract__(
   requires(b > -HALF_Q)
   requires(b < HALF_Q)
@@ -177,8 +175,7 @@ __contract__(
  *
  * Returns:     integer in {-(q-1)/2,...,(q-1)/2} congruent to a modulo q.
  **************************************************/
-STATIC_INLINE_TESTABLE
-int16_t barrett_reduce(int16_t a)
+static INLINE int16_t barrett_reduce(int16_t a)
 __contract__(
   ensures(return_value > -HALF_Q && return_value < HALF_Q)
 )

@@ -74,41 +74,41 @@
 extern volatile uint64_t ct_opt_blocker_u64;
 
 /* Helper functions for obtaining masks of various sizes */
-STATIC_INLINE_TESTABLE uint8_t get_optblocker_u8(void)
+static INLINE uint8_t get_optblocker_u8(void)
 __contract__(ensures(return_value == 0)) { return (uint8_t)ct_opt_blocker_u64; }
 
-STATIC_INLINE_TESTABLE uint32_t get_optblocker_u32(void)
+static INLINE uint32_t get_optblocker_u32(void)
 __contract__(ensures(return_value == 0)) { return ct_opt_blocker_u64; }
 
-STATIC_INLINE_TESTABLE uint32_t get_optblocker_i32(void)
+static INLINE uint32_t get_optblocker_i32(void)
 __contract__(ensures(return_value == 0)) { return ct_opt_blocker_u64; }
 
-STATIC_INLINE_TESTABLE uint32_t value_barrier_u32(uint32_t b)
+static INLINE uint32_t value_barrier_u32(uint32_t b)
 __contract__(ensures(return_value == b)) { return (b ^ get_optblocker_u32()); }
 
-STATIC_INLINE_TESTABLE int32_t value_barrier_i32(int32_t b)
+static INLINE int32_t value_barrier_i32(int32_t b)
 __contract__(ensures(return_value == b)) { return (b ^ get_optblocker_i32()); }
 
-STATIC_INLINE_TESTABLE uint8_t value_barrier_u8(uint8_t b)
+static INLINE uint8_t value_barrier_u8(uint8_t b)
 __contract__(ensures(return_value == b)) { return (b ^ get_optblocker_u8()); }
 
 #else /* !MLKEM_USE_ASM_VALUE_BARRIER */
 
-STATIC_INLINE_TESTABLE uint32_t value_barrier_u32(uint32_t b)
+static INLINE uint32_t value_barrier_u32(uint32_t b)
 __contract__(ensures(return_value == b))
 {
   asm("" : "+r"(b));
   return b;
 }
 
-STATIC_INLINE_TESTABLE int32_t value_barrier_i32(int32_t b)
+static INLINE int32_t value_barrier_i32(int32_t b)
 __contract__(ensures(return_value == b))
 {
   asm("" : "+r"(b));
   return b;
 }
 
-STATIC_INLINE_TESTABLE uint8_t value_barrier_u8(uint8_t b)
+static INLINE uint8_t value_barrier_u8(uint8_t b)
 __contract__(ensures(return_value == b))
 {
   asm("" : "+r"(b));
@@ -134,7 +134,7 @@ __contract__(ensures(return_value == b))
  *
  * Arguments:   uint16_t x: Value to be converted into a mask
  **************************************************/
-STATIC_INLINE_TESTABLE uint16_t ct_cmask_nonzero_u16(uint16_t x)
+static INLINE uint16_t ct_cmask_nonzero_u16(uint16_t x)
 __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFFFF)))
 {
   uint32_t tmp = value_barrier_u32(-((uint32_t)x));
@@ -149,7 +149,7 @@ __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFFFF)))
  *
  * Arguments:   uint8_t x: Value to be converted into a mask
  **************************************************/
-STATIC_INLINE_TESTABLE uint8_t ct_cmask_nonzero_u8(uint8_t x)
+static INLINE uint8_t ct_cmask_nonzero_u8(uint8_t x)
 __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFF)))
 {
   uint32_t tmp = value_barrier_u32(-((uint32_t)x));
@@ -179,7 +179,7 @@ __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFF)))
  *
  * Arguments:   uint16_t x: Value to be converted into a mask
  **************************************************/
-STATIC_INLINE_TESTABLE uint16_t ct_cmask_neg_i16(int16_t x)
+static INLINE uint16_t ct_cmask_neg_i16(int16_t x)
 __contract__(ensures(return_value == ((x < 0) ? 0xFFFF : 0)))
 {
   int32_t tmp = value_barrier_i32((int32_t)x);
@@ -214,7 +214,7 @@ __contract__(ensures(return_value == ((x < 0) ? 0xFFFF : 0)))
  *              int16_t b:       Second alternative
  *              uint16_t cond:   Condition variable.
  **************************************************/
-STATIC_INLINE_TESTABLE int16_t ct_sel_int16(int16_t a, int16_t b, uint16_t cond)
+static INLINE int16_t ct_sel_int16(int16_t a, int16_t b, uint16_t cond)
 __contract__(ensures(return_value == (cond ? a : b)))
 {
   uint16_t au = a, bu = b;
@@ -238,7 +238,7 @@ __contract__(ensures(return_value == (cond ? a : b)))
  *              uint8_t b:       Second alternative
  *              uuint8_t cond:   Condition variable.
  **************************************************/
-STATIC_INLINE_TESTABLE uint8_t ct_sel_uint8(uint8_t a, uint8_t b, uint8_t cond)
+static INLINE uint8_t ct_sel_uint8(uint8_t a, uint8_t b, uint8_t cond)
 __contract__(ensures(return_value == (cond ? a : b)))
 {
   return b ^ (ct_cmask_nonzero_u8(cond) & (a ^ b));
@@ -255,8 +255,8 @@ __contract__(ensures(return_value == (cond ? a : b)))
  *
  * Returns 0 if the byte arrays are equal, a non-zero value otherwise
  **************************************************/
-STATIC_INLINE_TESTABLE uint8_t ct_memcmp(const uint8_t *a, const uint8_t *b,
-                                         const size_t len)
+static INLINE uint8_t ct_memcmp(const uint8_t *a, const uint8_t *b,
+                                const size_t len)
 __contract__(
   requires(memory_no_alias(a, len))
   requires(memory_no_alias(b, len))
@@ -306,8 +306,8 @@ __contract__(
  *              size_t len:       Amount of bytes to be copied
  *              uint8_t b:        Condition value.
  **************************************************/
-STATIC_INLINE_TESTABLE
-void ct_cmov_zero(uint8_t *r, const uint8_t *x, size_t len, uint8_t b)
+static INLINE void ct_cmov_zero(uint8_t *r, const uint8_t *x, size_t len,
+                                uint8_t b)
 __contract__(
   requires(memory_no_alias(r, len))
   requires(memory_no_alias(x, len))

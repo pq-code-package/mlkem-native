@@ -11,18 +11,11 @@
 
 #ifndef CBMC
 
-#define STATIC_INLINE_TESTABLE static INLINE
-#define STATIC_TESTABLE static
-
 #define __contract__(x)
 #define __loop__(x)
 #define cassert(x, y)
 
 #else /* CBMC _is_ defined, therefore we're doing proof */
-
-/* expose certain procedures to CBMC proofs that are static otherwise */
-#define STATIC_TESTABLE
-#define STATIC_INLINE_TESTABLE
 
 #define __contract__(x) x
 #define __loop__(x) x

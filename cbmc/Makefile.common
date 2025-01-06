@@ -535,6 +535,10 @@ ifndef MLKEM_K
 endif
 
 DEFINES += -DMLKEM_K=$(MLKEM_K)
+# Give visibility to all static functions
+DEFINES += -Dstatic=
+DEFINES += -DINLINE=
+DEFINES += -DALWAYS_INLINE=
 
 # CI currently assumes cbmc invocation has at most one --unwindset
 
