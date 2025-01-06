@@ -564,15 +564,16 @@ def gen_avx2_mulcache_zeta_file(dry_run=False):
         yield " * See autogenerate_files.py for details."
         yield " */"
         yield ""
+        yield "ALIGN const int16_t zetas_mulcache_avx2[128] = {"
         yield from map(lambda t: str(t) + ",", gen_avx2_mulcache_twiddles())
+        yield "};"
         yield ""
 
     update_file(
-        "mlkem/native/x86_64/src/x86_64_zetas_mulcache.i",
+        "mlkem/native/x86_64/src/x86_64_zetas_mulcache.h",
         "\n".join(gen()),
         dry_run=dry_run,
     )
-
 
 def get_source_files():
     return get_files("mlkem/*.c")
@@ -654,7 +655,6 @@ def gen_monolithic_source_file(dry_run=False):
         "\n".join(gen()),
         dry_run=dry_run,
     )
-
 
 def _main():
     parser = argparse.ArgumentParser(

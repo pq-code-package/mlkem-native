@@ -13,10 +13,7 @@
 #include "polyvec.h"
 
 #include "arith_native_x86_64.h"
-
-static const int16_t zetas_avx2[64] = {
-#include "x86_64_zetas_mulcache.i"
-};
+#include "x86_64_zetas_mulcache.h"
 
 #define QINV (-3327) /* q^-1 mod 2^16 */
 
@@ -32,7 +29,7 @@ void poly_mulcache_compute_avx2(poly_mulcache *x, const poly *y)
   {
     a0 = _mm256_load_si256((const __m256i *)&y->coeffs[64 * j + 16]);
     a1 = _mm256_load_si256((const __m256i *)&y->coeffs[64 * j + 48]);
-    z = _mm256_load_si256((const __m256i *)&zetas_avx2[16 * j]);
+    z = _mm256_load_si256((const __m256i *)&zetas_mulcache_avx2[16 * j]);
 
     t0 = _mm256_mullo_epi16(a0, qinv);
     t1 = _mm256_mullo_epi16(a1, qinv);
