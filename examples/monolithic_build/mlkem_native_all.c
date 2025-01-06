@@ -224,42 +224,42 @@
 #undef MLKEM_NATIVE_COMMON_H
 #endif
 
-/* mlkem/common.h:26 */
+/* mlkem/common.h:28 */
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_NAME)
 #undef MLKEM_NATIVE_ARITH_BACKEND_NAME
 #endif
 
-/* mlkem/common.h:30 */
+/* mlkem/common.h:32 */
 #if defined(MLKEM_NATIVE_FIPS202_BACKEND_NAME)
 #undef MLKEM_NATIVE_FIPS202_BACKEND_NAME
 #endif
 
-/* mlkem/common.h:37 */
+/* mlkem/common.h:39 */
 #if defined(MLKEM_ASM_NAMESPACE)
 #undef MLKEM_ASM_NAMESPACE
 #endif
 
-/* mlkem/common.h:38 */
+/* mlkem/common.h:40 */
 #if defined(FIPS202_ASM_NAMESPACE)
 #undef FIPS202_ASM_NAMESPACE
 #endif
 
-/* mlkem/common.h:40 */
+/* mlkem/common.h:42 */
 #if defined(_PREFIX_UNDERSCORE)
 #undef _PREFIX_UNDERSCORE
 #endif
 
-/* mlkem/common.h:41 */
+/* mlkem/common.h:43 */
 #if defined(PREFIX_UNDERSCORE)
 #undef PREFIX_UNDERSCORE
 #endif
 
-/* mlkem/common.h:42 */
+/* mlkem/common.h:44 */
 #if defined(MLKEM_ASM_NAMESPACE)
 #undef MLKEM_ASM_NAMESPACE
 #endif
 
-/* mlkem/common.h:43 */
+/* mlkem/common.h:45 */
 #if defined(FIPS202_ASM_NAMESPACE)
 #undef FIPS202_ASM_NAMESPACE
 #endif
@@ -2059,142 +2059,142 @@
 #undef PARAMS_H
 #endif
 
-/* mlkem/params.h:13 */
+/* mlkem/params.h:17 */
 #if defined(MLKEM_N)
 #undef MLKEM_N
 #endif
 
-/* mlkem/params.h:14 */
+/* mlkem/params.h:18 */
 #if defined(MLKEM_Q)
 #undef MLKEM_Q
 #endif
 
-/* mlkem/params.h:15 */
+/* mlkem/params.h:19 */
 #if defined(UINT12_MAX)
 #undef UINT12_MAX
 #endif
 
-/* mlkem/params.h:17 */
+/* mlkem/params.h:21 */
 #if defined(MLKEM_SYMBYTES)
 #undef MLKEM_SYMBYTES
 #endif
 
-/* mlkem/params.h:18 */
+/* mlkem/params.h:22 */
 #if defined(MLKEM_SSBYTES)
 #undef MLKEM_SSBYTES
 #endif
 
-/* mlkem/params.h:20 */
+/* mlkem/params.h:24 */
 #if defined(MLKEM_POLYBYTES)
 #undef MLKEM_POLYBYTES
 #endif
 
-/* mlkem/params.h:21 */
+/* mlkem/params.h:25 */
 #if defined(MLKEM_POLYVECBYTES)
 #undef MLKEM_POLYVECBYTES
 #endif
 
-/* mlkem/params.h:24 */
+/* mlkem/params.h:28 */
 #if defined(MLKEM_ETA1)
 #undef MLKEM_ETA1
-#endif
-
-/* mlkem/params.h:25 */
-#if defined(MLKEM_POLYCOMPRESSEDBYTES_DV)
-#undef MLKEM_POLYCOMPRESSEDBYTES_DV
-#endif
-
-/* mlkem/params.h:26 */
-#if defined(MLKEM_POLYCOMPRESSEDBYTES_DU)
-#undef MLKEM_POLYCOMPRESSEDBYTES_DU
-#endif
-
-/* mlkem/params.h:27 */
-#if defined(MLKEM_POLYVECCOMPRESSEDBYTES_DU)
-#undef MLKEM_POLYVECCOMPRESSEDBYTES_DU
 #endif
 
 /* mlkem/params.h:29 */
-#if defined(MLKEM_ETA1)
-#undef MLKEM_ETA1
+#if defined(MLKEM_POLYCOMPRESSEDBYTES_DV)
+#undef MLKEM_POLYCOMPRESSEDBYTES_DV
 #endif
 
 /* mlkem/params.h:30 */
-#if defined(MLKEM_POLYCOMPRESSEDBYTES_DV)
-#undef MLKEM_POLYCOMPRESSEDBYTES_DV
-#endif
-
-/* mlkem/params.h:31 */
 #if defined(MLKEM_POLYCOMPRESSEDBYTES_DU)
 #undef MLKEM_POLYCOMPRESSEDBYTES_DU
 #endif
 
-/* mlkem/params.h:32 */
+/* mlkem/params.h:31 */
 #if defined(MLKEM_POLYVECCOMPRESSEDBYTES_DU)
 #undef MLKEM_POLYVECCOMPRESSEDBYTES_DU
 #endif
 
-/* mlkem/params.h:34 */
+/* mlkem/params.h:33 */
 #if defined(MLKEM_ETA1)
 #undef MLKEM_ETA1
 #endif
 
-/* mlkem/params.h:35 */
+/* mlkem/params.h:34 */
 #if defined(MLKEM_POLYCOMPRESSEDBYTES_DV)
 #undef MLKEM_POLYCOMPRESSEDBYTES_DV
 #endif
 
-/* mlkem/params.h:36 */
+/* mlkem/params.h:35 */
 #if defined(MLKEM_POLYCOMPRESSEDBYTES_DU)
 #undef MLKEM_POLYCOMPRESSEDBYTES_DU
 #endif
 
-/* mlkem/params.h:37 */
+/* mlkem/params.h:36 */
 #if defined(MLKEM_POLYVECCOMPRESSEDBYTES_DU)
 #undef MLKEM_POLYVECCOMPRESSEDBYTES_DU
 #endif
 
+/* mlkem/params.h:38 */
+#if defined(MLKEM_ETA1)
+#undef MLKEM_ETA1
+#endif
+
+/* mlkem/params.h:39 */
+#if defined(MLKEM_POLYCOMPRESSEDBYTES_DV)
+#undef MLKEM_POLYCOMPRESSEDBYTES_DV
+#endif
+
 /* mlkem/params.h:40 */
+#if defined(MLKEM_POLYCOMPRESSEDBYTES_DU)
+#undef MLKEM_POLYCOMPRESSEDBYTES_DU
+#endif
+
+/* mlkem/params.h:41 */
+#if defined(MLKEM_POLYVECCOMPRESSEDBYTES_DU)
+#undef MLKEM_POLYVECCOMPRESSEDBYTES_DU
+#endif
+
+/* mlkem/params.h:44 */
 #if defined(MLKEM_ETA2)
 #undef MLKEM_ETA2
 #endif
 
-/* mlkem/params.h:42 */
+/* mlkem/params.h:46 */
 #if defined(MLKEM_INDCPA_MSGBYTES)
 #undef MLKEM_INDCPA_MSGBYTES
 #endif
 
-/* mlkem/params.h:43 */
+/* mlkem/params.h:47 */
 #if defined(MLKEM_INDCPA_PUBLICKEYBYTES)
 #undef MLKEM_INDCPA_PUBLICKEYBYTES
 #endif
 
-/* mlkem/params.h:44 */
+/* mlkem/params.h:48 */
 #if defined(MLKEM_INDCPA_SECRETKEYBYTES)
 #undef MLKEM_INDCPA_SECRETKEYBYTES
 #endif
 
-/* mlkem/params.h:45 */
+/* mlkem/params.h:49 */
 #if defined(MLKEM_INDCPA_BYTES)
 #undef MLKEM_INDCPA_BYTES
 #endif
 
-/* mlkem/params.h:48 */
+/* mlkem/params.h:52 */
 #if defined(MLKEM_PUBLICKEYBYTES)
 #undef MLKEM_PUBLICKEYBYTES
 #endif
 
-/* mlkem/params.h:50 */
+/* mlkem/params.h:54 */
 #if defined(MLKEM_SECRETKEYBYTES)
 #undef MLKEM_SECRETKEYBYTES
 #endif
 
-/* mlkem/params.h:53 */
+/* mlkem/params.h:57 */
 #if defined(MLKEM_CIPHERTEXTBYTES)
 #undef MLKEM_CIPHERTEXTBYTES
 #endif
 
-/* mlkem/params.h:55 */
+/* mlkem/params.h:59 */
 #if defined(KECCAK_WAY)
 #undef KECCAK_WAY
 #endif

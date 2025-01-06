@@ -7,11 +7,13 @@
 
 #if defined(MLKEM_NATIVE_CONFIG_FILE)
 #include MLKEM_NATIVE_CONFIG_FILE
+#else
+#include "config.h"
 #endif /* MLKEM_NATIVE_CONFIG_FILE */
 
+#include "namespace.h"
 #include "params.h"
 #include "sys.h"
-#include "namespace.h"
 
 /* Include backend metadata */
 #if defined(MLKEM_USE_NATIVE)
