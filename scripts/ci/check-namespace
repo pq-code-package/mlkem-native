@@ -67,17 +67,13 @@ def check_folder(folder, namespace):
 
 def list_mlkem_namespaces(lvl):
     return [
-        f"PQCP_MLKEM_NATIVE_MLKEM{lvl}_C",
-        f"PQCP_MLKEM_NATIVE_MLKEM{lvl}_AARCH64",
-        f"PQCP_MLKEM_NATIVE_MLKEM{lvl}_X86_64",
+        f"PQCP_MLKEM_NATIVE_MLKEM{lvl}",
     ]
 
 
 def list_fips202_namespaces():
     return [
-        f"PQCP_MLKEM_NATIVE_FIPS202_C",
-        f"PQCP_MLKEM_NATIVE_FIPS202_AARCH64",
-        f"PQCP_MLKEM_NATIVE_FIPS202_X86_64",
+        f"PQCP_MLKEM_NATIVE_FIPS202",
     ]
 
 

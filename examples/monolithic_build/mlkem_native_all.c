@@ -224,24 +224,14 @@
 #undef MLKEM_NATIVE_COMMON_H
 #endif
 
-/* mlkem/common.h:32 */
-#if defined(MLKEM_ASM_NAMESPACE)
-#undef MLKEM_ASM_NAMESPACE
+/* mlkem/common.h:26 */
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_NAME)
+#undef MLKEM_NATIVE_ARITH_BACKEND_NAME
 #endif
 
-/* mlkem/common.h:33 */
-#if defined(FIPS202_ASM_NAMESPACE)
-#undef FIPS202_ASM_NAMESPACE
-#endif
-
-/* mlkem/common.h:35 */
-#if defined(_PREFIX_UNDERSCORE)
-#undef _PREFIX_UNDERSCORE
-#endif
-
-/* mlkem/common.h:36 */
-#if defined(PREFIX_UNDERSCORE)
-#undef PREFIX_UNDERSCORE
+/* mlkem/common.h:30 */
+#if defined(MLKEM_NATIVE_FIPS202_BACKEND_NAME)
+#undef MLKEM_NATIVE_FIPS202_BACKEND_NAME
 #endif
 
 /* mlkem/common.h:37 */
@@ -250,6 +240,26 @@
 #endif
 
 /* mlkem/common.h:38 */
+#if defined(FIPS202_ASM_NAMESPACE)
+#undef FIPS202_ASM_NAMESPACE
+#endif
+
+/* mlkem/common.h:40 */
+#if defined(_PREFIX_UNDERSCORE)
+#undef _PREFIX_UNDERSCORE
+#endif
+
+/* mlkem/common.h:41 */
+#if defined(PREFIX_UNDERSCORE)
+#undef PREFIX_UNDERSCORE
+#endif
+
+/* mlkem/common.h:42 */
+#if defined(MLKEM_ASM_NAMESPACE)
+#undef MLKEM_ASM_NAMESPACE
+#endif
+
+/* mlkem/common.h:43 */
 #if defined(FIPS202_ASM_NAMESPACE)
 #undef FIPS202_ASM_NAMESPACE
 #endif
@@ -1274,9 +1284,14 @@
 #undef MLKEM_NATIVE_NAMESPACE_H
 #endif
 
-/* mlkem/namespace.h:8 */
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_NAME)
-#undef MLKEM_NATIVE_ARITH_BACKEND_NAME
+/* mlkem/namespace.h:9 */
+#if defined(MLKEM_PARAM_NAME)
+#undef MLKEM_PARAM_NAME
+#endif
+
+/* mlkem/namespace.h:11 */
+#if defined(MLKEM_PARAM_NAME)
+#undef MLKEM_PARAM_NAME
 #endif
 
 /* mlkem/namespace.h:13 */
@@ -1284,47 +1299,32 @@
 #undef MLKEM_PARAM_NAME
 #endif
 
-/* mlkem/namespace.h:15 */
-#if defined(MLKEM_PARAM_NAME)
-#undef MLKEM_PARAM_NAME
-#endif
-
-/* mlkem/namespace.h:17 */
-#if defined(MLKEM_PARAM_NAME)
-#undef MLKEM_PARAM_NAME
-#endif
-
-/* mlkem/namespace.h:22 */
+/* mlkem/namespace.h:18 */
 #if defined(___MLKEM_DEFAULT_NAMESPACE)
 #undef ___MLKEM_DEFAULT_NAMESPACE
 #endif
 
-/* mlkem/namespace.h:23 */
+/* mlkem/namespace.h:19 */
 #if defined(__MLKEM_DEFAULT_NAMESPACE)
 #undef __MLKEM_DEFAULT_NAMESPACE
 #endif
 
-/* mlkem/namespace.h:30 */
+/* mlkem/namespace.h:26 */
 #if defined(MLKEM_DEFAULT_NAMESPACE)
 #undef MLKEM_DEFAULT_NAMESPACE
 #endif
 
-/* mlkem/namespace.h:35 */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_NAME)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_NAME
-#endif
-
-/* mlkem/namespace.h:38 */
+/* mlkem/namespace.h:29 */
 #if defined(___FIPS202_DEFAULT_NAMESPACE)
 #undef ___FIPS202_DEFAULT_NAMESPACE
 #endif
 
-/* mlkem/namespace.h:39 */
+/* mlkem/namespace.h:30 */
 #if defined(__FIPS202_DEFAULT_NAMESPACE)
 #undef __FIPS202_DEFAULT_NAMESPACE
 #endif
 
-/* mlkem/namespace.h:46 */
+/* mlkem/namespace.h:36 */
 #if defined(FIPS202_DEFAULT_NAMESPACE)
 #undef FIPS202_DEFAULT_NAMESPACE
 #endif
