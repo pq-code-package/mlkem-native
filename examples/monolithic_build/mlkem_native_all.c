@@ -80,161 +80,141 @@
 #endif
 
 /* mlkem/cbmc.h:13 */
-#if defined(STATIC_INLINE_TESTABLE)
-#undef STATIC_INLINE_TESTABLE
-#endif
-
-/* mlkem/cbmc.h:14 */
-#if defined(STATIC_TESTABLE)
-#undef STATIC_TESTABLE
-#endif
-
-/* mlkem/cbmc.h:16 */
 #if defined(__contract__)
 #undef __contract__
 #endif
 
-/* mlkem/cbmc.h:17 */
+/* mlkem/cbmc.h:14 */
 #if defined(__loop__)
 #undef __loop__
 #endif
 
-/* mlkem/cbmc.h:18 */
+/* mlkem/cbmc.h:15 */
 #if defined(cassert)
 #undef cassert
 #endif
 
-/* mlkem/cbmc.h:23 */
-#if defined(STATIC_TESTABLE)
-#undef STATIC_TESTABLE
-#endif
-
-/* mlkem/cbmc.h:24 */
-#if defined(STATIC_INLINE_TESTABLE)
-#undef STATIC_INLINE_TESTABLE
-#endif
-
-/* mlkem/cbmc.h:26 */
+/* mlkem/cbmc.h:19 */
 #if defined(__contract__)
 #undef __contract__
 #endif
 
-/* mlkem/cbmc.h:27 */
+/* mlkem/cbmc.h:20 */
 #if defined(__loop__)
 #undef __loop__
 #endif
 
-/* mlkem/cbmc.h:30 */
+/* mlkem/cbmc.h:23 */
 #if defined(assigns)
 #undef assigns
 #endif
 
-/* mlkem/cbmc.h:33 */
+/* mlkem/cbmc.h:26 */
 #if defined(requires)
 #undef requires
 #endif
 
-/* mlkem/cbmc.h:34 */
+/* mlkem/cbmc.h:27 */
 #if defined(ensures)
 #undef ensures
 #endif
 
-/* mlkem/cbmc.h:36 */
+/* mlkem/cbmc.h:29 */
 #if defined(invariant)
 #undef invariant
 #endif
 
-/* mlkem/cbmc.h:37 */
+/* mlkem/cbmc.h:30 */
 #if defined(decreases)
 #undef decreases
 #endif
 
-/* mlkem/cbmc.h:39 */
+/* mlkem/cbmc.h:32 */
 #if defined(cassert)
 #undef cassert
 #endif
 
-/* mlkem/cbmc.h:40 */
+/* mlkem/cbmc.h:33 */
 #if defined(assume)
 #undef assume
 #endif
 
-/* mlkem/cbmc.h:51 */
+/* mlkem/cbmc.h:44 */
 #if defined(return_value)
 #undef return_value
 #endif
 
-/* mlkem/cbmc.h:57 */
+/* mlkem/cbmc.h:50 */
 #if defined(object_whole)
 #undef object_whole
 #endif
 
-/* mlkem/cbmc.h:58 */
+/* mlkem/cbmc.h:51 */
 #if defined(memory_slice)
 #undef memory_slice
 #endif
 
-/* mlkem/cbmc.h:59 */
+/* mlkem/cbmc.h:52 */
 #if defined(same_object)
 #undef same_object
 #endif
 
-/* mlkem/cbmc.h:65 */
+/* mlkem/cbmc.h:58 */
 #if defined(memory_no_alias)
 #undef memory_no_alias
 #endif
 
-/* mlkem/cbmc.h:66 */
+/* mlkem/cbmc.h:59 */
 #if defined(readable)
 #undef readable
 #endif
 
-/* mlkem/cbmc.h:67 */
+/* mlkem/cbmc.h:60 */
 #if defined(writeable)
 #undef writeable
 #endif
 
-/* mlkem/cbmc.h:73 */
+/* mlkem/cbmc.h:66 */
 #if defined(old)
 #undef old
 #endif
 
-/* mlkem/cbmc.h:74 */
+/* mlkem/cbmc.h:67 */
 #if defined(loop_entry)
 #undef loop_entry
 #endif
 
-/* mlkem/cbmc.h:86 */
+/* mlkem/cbmc.h:79 */
 #if defined(forall)
 #undef forall
 #endif
 
-/* mlkem/cbmc.h:93 */
+/* mlkem/cbmc.h:86 */
 #if defined(EXISTS)
 #undef EXISTS
 #endif
 
-/* mlkem/cbmc.h:119 */
+/* mlkem/cbmc.h:112 */
 #if defined(CBMC_CONCAT_)
 #undef CBMC_CONCAT_
 #endif
 
-/* mlkem/cbmc.h:120 */
+/* mlkem/cbmc.h:113 */
 #if defined(CBMC_CONCAT)
 #undef CBMC_CONCAT
 #endif
 
-/* mlkem/cbmc.h:122 */
+/* mlkem/cbmc.h:115 */
 #if defined(array_bound_core)
 #undef array_bound_core
 #endif
 
-/* mlkem/cbmc.h:132 */
+/* mlkem/cbmc.h:125 */
 #if defined(array_bound)
 #undef array_bound
 #endif
 
-/* mlkem/cbmc.h:138 */
+/* mlkem/cbmc.h:131 */
 #if defined(array_abs_bound)
 #undef array_abs_bound
 #endif
@@ -479,7 +459,7 @@
 #undef keccak_squeezeblocks
 #endif
 
-/* mlkem/fips202/fips202.c:186 */
+/* mlkem/fips202/fips202.c:185 */
 #if defined(shake256ctx)
 #undef shake256ctx
 #endif
@@ -1184,7 +1164,7 @@
 #undef MLKEM_GEN_MATRIX_NBLOCKS
 #endif
 
-/* mlkem/indcpa.c:269 */
+/* mlkem/indcpa.c:267 */
 #if defined(poly_permute_bitrev_to_custom)
 #undef poly_permute_bitrev_to_custom
 #endif
@@ -2044,7 +2024,7 @@
 #undef invntt_layer
 #endif
 
-/* mlkem/ntt.c:165 */
+/* mlkem/ntt.c:163 */
 #if defined(INVNTT_BOUND_REF)
 #undef INVNTT_BOUND_REF
 #endif
@@ -2634,49 +2614,44 @@
 #undef SYS_BIG_ENDIAN
 #endif
 
-/* mlkem/sys.h:65 */
+/* mlkem/sys.h:66 */
 #if defined(INLINE)
 #undef INLINE
 #endif
 
-/* mlkem/sys.h:66 */
+/* mlkem/sys.h:67 */
 #if defined(ALWAYS_INLINE)
 #undef ALWAYS_INLINE
-#endif
-
-/* mlkem/sys.h:68 */
-#if defined(INLINE)
-#undef INLINE
 #endif
 
 /* mlkem/sys.h:69 */
-#if defined(ALWAYS_INLINE)
-#undef ALWAYS_INLINE
-#endif
-
-/* mlkem/sys.h:71 */
 #if defined(INLINE)
 #undef INLINE
+#endif
+
+/* mlkem/sys.h:70 */
+#if defined(ALWAYS_INLINE)
+#undef ALWAYS_INLINE
 #endif
 
 /* mlkem/sys.h:72 */
-#if defined(ALWAYS_INLINE)
-#undef ALWAYS_INLINE
-#endif
-
-/* mlkem/sys.h:76 */
 #if defined(INLINE)
 #undef INLINE
 #endif
 
-/* mlkem/sys.h:77 */
+/* mlkem/sys.h:73 */
 #if defined(ALWAYS_INLINE)
 #undef ALWAYS_INLINE
 #endif
 
-/* mlkem/sys.h:86 */
-#if defined(RESTRICT)
-#undef RESTRICT
+/* mlkem/sys.h:77 */
+#if defined(INLINE)
+#undef INLINE
+#endif
+
+/* mlkem/sys.h:78 */
+#if defined(ALWAYS_INLINE)
+#undef ALWAYS_INLINE
 #endif
 
 /* mlkem/sys.h:88 */
@@ -2684,24 +2659,24 @@
 #undef RESTRICT
 #endif
 
-/* mlkem/sys.h:93 */
+/* mlkem/sys.h:90 */
 #if defined(RESTRICT)
 #undef RESTRICT
 #endif
 
-/* mlkem/sys.h:96 */
+/* mlkem/sys.h:95 */
+#if defined(RESTRICT)
+#undef RESTRICT
+#endif
+
+/* mlkem/sys.h:98 */
 #if defined(DEFAULT_ALIGN)
 #undef DEFAULT_ALIGN
 #endif
 
-/* mlkem/sys.h:98 */
+/* mlkem/sys.h:100 */
 #if defined(ALIGN)
 #undef ALIGN
-#endif
-
-/* mlkem/sys.h:99 */
-#if defined(asm)
-#undef asm
 #endif
 
 /* mlkem/sys.h:101 */
@@ -2709,7 +2684,12 @@
 #undef asm
 #endif
 
-/* mlkem/sys.h:102 */
+/* mlkem/sys.h:103 */
+#if defined(asm)
+#undef asm
+#endif
+
+/* mlkem/sys.h:104 */
 #if defined(ALIGN)
 #undef ALIGN
 #endif

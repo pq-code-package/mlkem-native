@@ -154,8 +154,7 @@ static void unpack_ciphertext(polyvec *b, poly *v,
  * Generate four A matrix entries from a seed, using rejection
  * sampling on the output of a XOF.
  */
-STATIC_TESTABLE
-void gen_matrix_entry_x4(poly *vec, uint8_t *seed[4])
+static void gen_matrix_entry_x4(poly *vec, uint8_t *seed[4])
 __contract__(
   requires(memory_no_alias(vec, sizeof(poly) * 4))
   requires(memory_no_alias(seed, sizeof(uint8_t*) * 4))
@@ -227,8 +226,7 @@ __contract__(
  * Generate a single A matrix entry from a seed, using rejection
  * sampling on the output of a XOF.
  */
-STATIC_TESTABLE
-void gen_matrix_entry(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
+static void gen_matrix_entry(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
 __contract__(
   requires(memory_no_alias(entry, sizeof(poly)))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES + 2))
@@ -270,8 +268,7 @@ __contract__(
 #define poly_permute_bitrev_to_custom \
   MLKEM_NAMESPACE(poly_permute_bitrev_to_custom)
 
-STATIC_INLINE_TESTABLE
-void poly_permute_bitrev_to_custom(poly *data)
+static INLINE void poly_permute_bitrev_to_custom(poly *data)
 __contract__(
   /* We don't specify that this should be a permutation, but only
    * that it does not change the bound established at the end of gen_matrix. */
@@ -386,9 +383,8 @@ void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES], int transposed)
  *              - polyvec *vc: Mulcache for v, computed via
  *                  polyvec_mulcache_compute().
  **************************************************/
-STATIC_TESTABLE
-void matvec_mul(polyvec *out, const polyvec a[MLKEM_K], const polyvec *v,
-                const polyvec_mulcache *vc)
+static void matvec_mul(polyvec *out, const polyvec a[MLKEM_K], const polyvec *v,
+                       const polyvec_mulcache *vc)
 __contract__(
   requires(memory_no_alias(out, sizeof(polyvec)))
   requires(memory_no_alias(a, sizeof(polyvec) * MLKEM_K))

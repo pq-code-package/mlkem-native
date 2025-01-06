@@ -43,9 +43,8 @@
  *              - uint8_t p:         domain-separation byte for different
  *                                   Keccak-derived functions
  **************************************************/
-STATIC_TESTABLE
-void keccak_absorb_once(uint64_t *s, uint32_t r, const uint8_t *m, size_t mlen,
-                        uint8_t p)
+static void keccak_absorb_once(uint64_t *s, uint32_t r, const uint8_t *m,
+                               size_t mlen, uint8_t p)
 __contract__(
     requires(r <= sizeof(uint64_t) * KECCAK_LANES)
     requires(memory_no_alias(s, sizeof(uint64_t) * KECCAK_LANES))
@@ -100,8 +99,8 @@ __contract__(
  *              - uint64_t *s_inc: pointer to input/output state
  *              - uint32_t r: rate in bytes (e.g., 168 for SHAKE128)
  **************************************************/
-STATIC_TESTABLE
-void keccak_squeezeblocks(uint8_t *h, size_t nblocks, uint64_t *s, uint32_t r)
+static void keccak_squeezeblocks(uint8_t *h, size_t nblocks, uint64_t *s,
+                                 uint32_t r)
 __contract__(
     requires(r <= sizeof(uint64_t) * KECCAK_LANES)
     requires(nblocks <= 8 /* somewhat arbitrary bound */)
@@ -137,8 +136,8 @@ __contract__(
  *              - uint64_t *s_inc: pointer to Keccak state
  *              - uint32_t r: rate in bytes (e.g., 168 for SHAKE128)
  **************************************************/
-STATIC_TESTABLE
-void keccak_squeeze_once(uint8_t *h, size_t outlen, uint64_t *s, uint32_t r)
+static void keccak_squeeze_once(uint8_t *h, size_t outlen, uint64_t *s,
+                                uint32_t r)
 __contract__(
     requires(r <= sizeof(uint64_t) * KECCAK_LANES)
     requires(memory_no_alias(s, sizeof(uint64_t) * KECCAK_LANES))

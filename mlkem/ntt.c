@@ -45,9 +45,8 @@
  *          4 -- 6
  *             5 -- 7
  */
-STATIC_TESTABLE
-void ntt_butterfly_block(int16_t r[MLKEM_N], int16_t zeta, int start, int len,
-                         int bound)
+static void ntt_butterfly_block(int16_t r[MLKEM_N], int16_t zeta, int start,
+                                int len, int bound)
 __contract__(
   requires(0 <= start && start < MLKEM_N)
   requires(1 <= len && len <= MLKEM_N / 2 && start + 2 * len <= MLKEM_N)
@@ -94,8 +93,7 @@ __contract__(
  *   official Kyber implementation here, merely adding `layer` as
  *   a ghost variable for the specifications.
  */
-STATIC_TESTABLE
-void ntt_layer(int16_t r[MLKEM_N], int len, int layer)
+static void ntt_layer(int16_t r[MLKEM_N], int len, int layer)
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
   requires(1 <= layer && layer <= 7 && len == (MLKEM_N >> layer))
@@ -167,8 +165,7 @@ void poly_ntt(poly *p)
 STATIC_ASSERT(INVNTT_BOUND_REF <= INVNTT_BOUND, invntt_bound)
 
 /* Compute one layer of inverse NTT */
-STATIC_TESTABLE
-void invntt_layer(int16_t *r, int len, int layer)
+static void invntt_layer(int16_t *r, int len, int layer)
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
   requires(2 <= len && len <= 128 && 1 <= layer && layer <= 7)

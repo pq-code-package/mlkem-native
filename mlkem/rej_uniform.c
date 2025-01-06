@@ -42,10 +42,9 @@
  * is guaranteed to have been consumed. If it is equal to len, no information
  * is provided on how many bytes of the input buffer have been consumed.
  **************************************************/
-STATIC_TESTABLE
-unsigned int rej_uniform_scalar(int16_t *r, unsigned int target,
-                                unsigned int offset, const uint8_t *buf,
-                                unsigned int buflen)
+static unsigned int rej_uniform_scalar(int16_t *r, unsigned int target,
+                                       unsigned int offset, const uint8_t *buf,
+                                       unsigned int buflen)
 __contract__(
   requires(offset <= target && target <= 4096 && buflen <= 4096 && buflen % 3 == 0)
   requires(memory_no_alias(r, sizeof(int16_t) * target))

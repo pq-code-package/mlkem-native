@@ -61,6 +61,7 @@
  */
 
 /* Do not use inline for C90 builds*/
+#if !defined(INLINE)
 #if !defined(inline)
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 #define INLINE inline
@@ -76,6 +77,7 @@
 #else
 #define INLINE inline
 #define ALWAYS_INLINE __attribute__((always_inline))
+#endif
 #endif
 
 /*
