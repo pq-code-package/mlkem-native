@@ -243,13 +243,11 @@ jobs:
           compile_mode: native
           cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
   compiler_tests:
-    name: Compiler tests (${{ matrix.target.name }})
+    name: Compiler tests  (${{ matrix.compiler.name }}, ${{ matrix.target.name }})
     needs: [quickcheck, quickcheck-windows, quickcheck-c90, quickcheck-lib, examples, lint, lint-markdown-link]
     strategy:
       fail-fast: false
       matrix:
-        external:
-         - ${{ github.repository_owner != 'pq-code-package' }}
         target:
          - runner: pqcp-arm64
            name: 'aarch64'
@@ -257,17 +255,36 @@ jobs:
            name: 'x86_64'
          - runner: macos-latest
            name: 'macos'
-        exclude:
-          - {external: true,
-             target: {
-               runner: pqcp-arm64,
-               name: 'aarch64'
-             }}
+        compiler:
+         - name: gcc-4.8
+           shell: ci_gcc48
+           darwin: False
+           c17: False
+         - name: gcc-4.9
+           shell: ci_gcc49
+           darwin: False
+           c17: False
+         - name: gcc-7
+           shell: ci_gcc7
+           darwin: False
+           c17: False
+         - name: gcc-11
+           shell: ci_gcc11
+           darwin: True
+         - name: gcc-13
+           shell: ci
+           darwin: True
+         - name: gcc-14
+           shell: ci_gcc14
+           darwin: True
+         - name: clang-18
+           shell: ci_clang18
+           darwin: True
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: native build+functest (gcc-4.8)
-        if: ${{ matrix.target.runner != 'macos-latest' }}
+      - name: native build+functest (default)
+        if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
         uses: ./.github/actions/multi-functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -276,10 +293,10 @@ jobs:
           nistkat: false
           kat: false
           acvp: false
-          nix-shell: "ci_gcc48"
+          nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-O1" # _FORTIFY_SOURCE requires compiling with optimization
-      - name: native build+functest (gcc-4.9)
-        if: ${{ matrix.target.runner != 'macos-latest' }}
+      - name: native build+functest (C90)
+        if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
         uses: ./.github/actions/multi-functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -288,10 +305,10 @@ jobs:
           nistkat: false
           kat: false
           acvp: false
-          nix-shell: "ci_gcc49"
-          cflags: "-O1" # _FORTIFY_SOURCE requires compiling with optimization
-      - name: native build+functest (gcc-7)
-        if: ${{ matrix.target.runner != 'macos-latest' }}
+          nix-shell: ${{ matrix.compiler.shell }}
+          cflags: "-O1 -std=c90" # _FORTIFY_SOURCE requires compiling with optimization
+      - name: native build+functest (C99)
+        if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
         uses: ./.github/actions/multi-functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -300,9 +317,10 @@ jobs:
           nistkat: false
           kat: false
           acvp: false
-          nix-shell: "ci_gcc7"
-          cflags: "-O1" # _FORTIFY_SOURCE requires compiling with optimization
-      - name: native build+functest (gcc-11)
+          nix-shell: ${{ matrix.compiler.shell }}
+          cflags: "-O1 -std=c99" # _FORTIFY_SOURCE requires compiling with optimization
+      - name: native build+functest (C11)
+        if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
         uses: ./.github/actions/multi-functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -311,9 +329,11 @@ jobs:
           nistkat: false
           kat: false
           acvp: false
-          nix-shell: "ci_gcc11"
-          cflags: "-O1" # _FORTIFY_SOURCE requires compiling with optimization
-      - name: native build+functest (gcc-14)
+          nix-shell: ${{ matrix.compiler.shell }}
+          cflags: "-O1 -std=c11" # _FORTIFY_SOURCE requires compiling with optimization
+      - name: native build+functest (C17)
+        if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
+                matrix.compiler.c17 }}
         uses: ./.github/actions/multi-functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -322,19 +342,8 @@ jobs:
           nistkat: false
           kat: false
           acvp: false
-          nix-shell: "ci_gcc14"
-          cflags: "-O1" # _FORTIFY_SOURCE requires compiling with optimization
-      - name: native build+functest (clang-18)
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          func: true
-          nistkat: false
-          kat: false
-          acvp: false
-          nix-shell: "ci_clang18"
-          cflags: "-O1" # _FORTIFY_SOURCE requires compiling with optimization
+          nix-shell: ${{ matrix.compiler.shell }}
+          cflags: "-O1 -std=c17" # _FORTIFY_SOURCE requires compiling with optimization
   # The purpose of this job is to test non-default yet valid configurations
   config_variations:
     name: Non-standard configurations
