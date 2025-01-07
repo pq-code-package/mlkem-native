@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <kem.h>
+#include <mlkem_native.h>
 
 int main(void)
 {

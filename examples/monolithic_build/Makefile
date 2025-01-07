@@ -31,14 +31,27 @@ RNG_SOURCE=$(wildcard test_only_rng/*.c)
 # Part C:
 #
 # Your application source code
-APP_SOURCE=main.c
+APP_SOURCE=main.c mlkem_native_all.c
 
 ALL_SOURCE=$(MLKEM_NATIVE_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
 
 BUILD_DIR=build
 BIN=test_binary
 
-CFLAGS=-std=c90
+CFLAGS := \
+	-Wall \
+	-Wextra \
+	-Wmissing-prototypes \
+	-Wshadow \
+	-Wpointer-arith \
+	-Wno-long-long \
+	-Wno-unknown-pragmas \
+	-Wno-unused-command-line-argument \
+	-O3 \
+	-fomit-frame-pointer \
+	-std=c90 \
+	-pedantic \
+	-MMD
 
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 

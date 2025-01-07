@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "hal.h"
-#include "kem.h"
+#include "mlkem_native.h"
 #include "randombytes.h"
 
 #define NWARMUP 50

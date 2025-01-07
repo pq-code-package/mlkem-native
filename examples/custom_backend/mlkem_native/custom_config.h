@@ -108,4 +108,14 @@
  *****************************************************************************/
 #define MLKEM_NATIVE_FIPS202_BACKEND "fips202/native/custom/custom.h"
 
+/******************************************************************************
+ * Name:        MLKEM_NATIVE_API_STANDARD
+ *
+ * Description: Define this to extend api.h to also export key sizes and public
+ *              API in the CRYPTO_xxx and crypto_kem_xxx format as used e.g. by
+ *              SUPERCOP.
+ *
+ *****************************************************************************/
+#define MLKEM_NATIVE_API_STANDARD
+
 #endif /* MLkEM_NATIVE_CONFIG_H */

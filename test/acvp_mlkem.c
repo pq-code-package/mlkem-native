@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include "kem.h"
+#include "mlkem_native.h"
 #include "randombytes.h"
 
 #define USAGE \
@@ -114,11 +114,11 @@ static void print_hex(const char *name, const unsigned char *raw, size_t len)
 }
 
 static void acvp_mlkem_encapDecp_AFT_encapsulation(
-    unsigned char const ek[MLKEM_INDCPA_PUBLICKEYBYTES],
-    unsigned char const m[MLKEM_SYMBYTES])
+    unsigned char const ek[CRYPTO_PUBLICKEYBYTES],
+    unsigned char const m[CRYPTO_SYMBYTES])
 {
-  unsigned char ct[MLKEM_CIPHERTEXTBYTES];
-  unsigned char ss[MLKEM_SSBYTES];
+  unsigned char ct[CRYPTO_CIPHERTEXTBYTES];
+  unsigned char ss[CRYPTO_BYTES];
 
   crypto_kem_enc_derand(ct, ss, ek, m);
 
@@ -127,25 +127,25 @@ static void acvp_mlkem_encapDecp_AFT_encapsulation(
 }
 
 static void acvp_mlkem_encapDecp_VAL_decapsulation(
-    unsigned char const dk[MLKEM_SECRETKEYBYTES],
-    unsigned char const c[MLKEM_CIPHERTEXTBYTES])
+    unsigned char const dk[CRYPTO_SECRETKEYBYTES],
+    unsigned char const c[CRYPTO_CIPHERTEXTBYTES])
 {
-  unsigned char ss[MLKEM_SSBYTES];
+  unsigned char ss[CRYPTO_BYTES];
 
   crypto_kem_dec(ss, c, dk);
 
   print_hex("k", ss, sizeof(ss));
 }
 
-static void acvp_mlkem_keyGen_AFT(unsigned char const z[MLKEM_SYMBYTES],
-                                  unsigned char const d[MLKEM_SYMBYTES])
+static void acvp_mlkem_keyGen_AFT(unsigned char const z[CRYPTO_SYMBYTES],
+                                  unsigned char const d[CRYPTO_SYMBYTES])
 {
-  unsigned char ek[MLKEM_INDCPA_PUBLICKEYBYTES];
-  unsigned char dk[MLKEM_SECRETKEYBYTES];
+  unsigned char ek[CRYPTO_PUBLICKEYBYTES];
+  unsigned char dk[CRYPTO_SECRETKEYBYTES];
 
-  unsigned char zd[2 * MLKEM_SYMBYTES];
-  memcpy(zd, d, MLKEM_SYMBYTES);
-  memcpy(zd + MLKEM_SYMBYTES, z, MLKEM_SYMBYTES);
+  unsigned char zd[2 * CRYPTO_SYMBYTES];
+  memcpy(zd, d, CRYPTO_SYMBYTES);
+  memcpy(zd + CRYPTO_SYMBYTES, z, CRYPTO_SYMBYTES);
 
   crypto_kem_keypair_derand(ek, dk, zd);
 
@@ -234,8 +234,8 @@ int main(int argc, char *argv[])
       {
         case encapsulation:
         {
-          unsigned char ek[MLKEM_INDCPA_PUBLICKEYBYTES];
-          unsigned char m[MLKEM_SYMBYTES];
+          unsigned char ek[CRYPTO_PUBLICKEYBYTES];
+          unsigned char m[CRYPTO_SYMBYTES];
           /* Encapsulation only for "AFT" */
           if (type != AFT)
           {
@@ -262,8 +262,8 @@ int main(int argc, char *argv[])
         }
         case decapsulation:
         {
-          unsigned char dk[MLKEM_SECRETKEYBYTES];
-          unsigned char c[MLKEM_CIPHERTEXTBYTES];
+          unsigned char dk[CRYPTO_SECRETKEYBYTES];
+          unsigned char c[CRYPTO_CIPHERTEXTBYTES];
           /* Decapsulation only for "VAL" */
           if (type != VAL)
           {
@@ -293,8 +293,8 @@ int main(int argc, char *argv[])
     }
     case keyGen:
     {
-      unsigned char z[MLKEM_SYMBYTES];
-      unsigned char d[MLKEM_SYMBYTES];
+      unsigned char z[CRYPTO_SYMBYTES];
+      unsigned char d[CRYPTO_SYMBYTES];
       /* keyGen only for "AFT" */
       if (type != AFT)
       {

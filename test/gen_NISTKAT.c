@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "kem.h"
+#include "mlkem_native.h"
 #include "nistrng.h"
 #include "randombytes.h"
 
