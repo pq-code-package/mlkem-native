@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 #include "cbmc.h"
-#include "params.h"
+#include "common.h"
 
 #define CRYPTO_SECRETKEYBYTES MLKEM_SECRETKEYBYTES
 #define CRYPTO_PUBLICKEYBYTES MLKEM_PUBLICKEYBYTES

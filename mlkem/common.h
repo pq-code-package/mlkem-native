@@ -7,8 +7,11 @@
 
 #if defined(MLKEM_NATIVE_CONFIG_FILE)
 #include MLKEM_NATIVE_CONFIG_FILE
+#else
+#include "config.h"
 #endif /* MLKEM_NATIVE_CONFIG_FILE */
 
+#include "namespace.h"
 #include "params.h"
 #include "sys.h"
 
@@ -22,9 +25,13 @@
 #endif
 #endif
 
-/* This must come after the inclusion of the backend metadata
- * since the backend choice may be part of the namespace. */
-#include "namespace.h"
+#if !defined(MLKEM_NATIVE_ARITH_BACKEND_NAME)
+#define MLKEM_NATIVE_ARITH_BACKEND_NAME C
+#endif
+
+#if !defined(MLKEM_NATIVE_FIPS202_BACKEND_NAME)
+#define MLKEM_NATIVE_FIPS202_BACKEND_NAME C
+#endif
 
 /* On Apple platforms, we need to emit leading underscore
  * in front of assembly symbols. We thus introducee a separate

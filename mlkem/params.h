@@ -5,7 +5,11 @@
 #ifndef PARAMS_H
 #define PARAMS_H
 
+#if defined(MLKEM_NATIVE_CONFIG_FILE)
+#include MLKEM_NATIVE_CONFIG_FILE
+#else
 #include "config.h"
+#endif /* MLKEM_NATIVE_CONFIG_FILE */
 
 #if !defined(MLKEM_K)
 #error MLKEM_K is not defined

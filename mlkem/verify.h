@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "cbmc.h"
-#include "params.h"
+#include "common.h"
 
 /* Static namespacing
  * This is to facilitate building multiple instances
