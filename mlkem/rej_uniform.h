@@ -47,6 +47,7 @@
  * buffer. This avoids shifting the buffer base in the caller, which appears
  * tricky to reason about.
  */
+MLKEM_NATIVE_INTERNAL_API
 unsigned int rej_uniform(int16_t *r, unsigned int target, unsigned int offset,
                          const uint8_t *buf, unsigned int buflen)
 __contract__(

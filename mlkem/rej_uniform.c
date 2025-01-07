@@ -90,6 +90,7 @@ unsigned int rej_uniform(int16_t *r, unsigned int target, unsigned int offset,
 }
 #else  /* MLKEM_USE_NATIVE_REJ_UNIFORM */
 
+MLKEM_NATIVE_INTERNAL_API
 unsigned int rej_uniform(int16_t *r, unsigned int target, unsigned int offset,
                          const uint8_t *buf, unsigned int buflen)
 {

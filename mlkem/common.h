@@ -32,6 +32,14 @@
 #define MLKEM_NATIVE_FIPS202_BACKEND_NAME C
 #endif
 
+/* For a monobuild (where all compilation units are merged into one), mark
+ * all non-public API as static since they don't need external linkage. */
+#if !defined(MLKEM_NATIVE_MONOBUILD)
+#define MLKEM_NATIVE_INTERNAL_API
+#else
+#define MLKEM_NATIVE_INTERNAL_API static
+#endif
+
 /* On Apple platforms, we need to emit leading underscore
  * in front of assembly symbols. We thus introducee a separate
  * namespace wrapper for ASM symbols. */

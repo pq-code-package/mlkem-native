@@ -127,6 +127,7 @@ __contract__(
  * the proof may need strengthening.
  */
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_ntt(poly *p)
 {
   int len, layer;
@@ -150,6 +151,7 @@ void poly_ntt(poly *p)
 /* Check that bound for native NTT implies contractual bound */
 STATIC_ASSERT(NTT_BOUND_NATIVE <= NTT_BOUND, invntt_bound)
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_ntt(poly *p)
 {
   POLY_BOUND_MSG(p, MLKEM_Q, "native ntt input");
@@ -201,6 +203,7 @@ __contract__(
   }
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_invntt_tomont(poly *p)
 {
   /*
@@ -236,6 +239,7 @@ void poly_invntt_tomont(poly *p)
 /* Check that bound for native invNTT implies contractual bound */
 STATIC_ASSERT(INVNTT_BOUND_NATIVE <= INVNTT_BOUND, invntt_bound)
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_invntt_tomont(poly *p)
 {
   intt_native(p);
@@ -243,6 +247,7 @@ void poly_invntt_tomont(poly *p)
 }
 #endif /* MLKEM_USE_NATIVE_INTT */
 
+MLKEM_NATIVE_INTERNAL_API
 void basemul_cached(int16_t r[2], const int16_t a[2], const int16_t b[2],
                     int16_t b_cached)
 {

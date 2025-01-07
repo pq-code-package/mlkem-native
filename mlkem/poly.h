@@ -334,6 +334,7 @@ __contract__(
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void poly_compress_du(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DU], const poly *a)
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_DU))
@@ -357,6 +358,7 @@ __contract__(
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void poly_decompress_du(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DU])
 __contract__(
   requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_DU))
@@ -378,6 +380,7 @@ __contract__(
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void poly_compress_dv(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DV], const poly *a)
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_DV))
@@ -402,6 +405,7 @@ __contract__(
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void poly_decompress_dv(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DV])
 __contract__(
   requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_DV))
@@ -425,6 +429,7 @@ __contract__(
  *              - r: pointer to output byte array
  *                   (of MLKEM_POLYBYTES bytes)
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYBYTES))
@@ -448,6 +453,7 @@ __contract__(
  *                   each coefficient unsigned and in the range
  *                   0 .. 4095
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
 __contract__(
   requires(memory_no_alias(a, MLKEM_POLYBYTES))
@@ -466,6 +472,7 @@ __contract__(
  * Arguments:   - poly *r: pointer to output polynomial
  *              - const uint8_t *msg: pointer to input message
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void poly_frommsg(poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
 __contract__(
   requires(memory_no_alias(msg, MLKEM_INDCPA_MSGBYTES))
@@ -484,6 +491,7 @@ __contract__(
  *              - const poly *r: pointer to input polynomial
  *                Coefficients must be unsigned canonical
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const poly *r)
 __contract__(
   requires(memory_no_alias(msg, MLKEM_INDCPA_MSGBYTES))
@@ -505,6 +513,7 @@ __contract__(
  *                                     (of length MLKEM_SYMBYTES bytes)
  *              - uint8_t nonce{0,1,2,3}: one-byte input nonce
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void poly_getnoise_eta1_4x(poly *r0, poly *r1, poly *r2, poly *r3,
                            const uint8_t seed[MLKEM_SYMBYTES], uint8_t nonce0,
                            uint8_t nonce1, uint8_t nonce2, uint8_t nonce3)
@@ -585,6 +594,7 @@ __contract__(
  *                                     (of length MLKEM_SYMBYTES bytes)
  *              - uint8_t nonce: one-byte input nonce
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void poly_getnoise_eta2(poly *r, const uint8_t seed[MLKEM_SYMBYTES],
                         uint8_t nonce)
 __contract__(
@@ -607,6 +617,7 @@ __contract__(
  *                                     (of length MLKEM_SYMBYTES bytes)
  *              - uint8_t nonce{0,1,2,3}: one-byte input nonce
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void poly_getnoise_eta1122_4x(poly *r0, poly *r1, poly *r2, poly *r3,
                               const uint8_t seed[MLKEM_SYMBYTES],
                               uint8_t nonce0, uint8_t nonce1, uint8_t nonce2,
@@ -644,6 +655,7 @@ __contract__(
  *                  for second input polynomial. Can be computed
  *                  via poly_mulcache_compute().
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void poly_basemul_montgomery_cached(poly *r, const poly *a, const poly *b,
                                     const poly_mulcache *b_cache)
 __contract__(
@@ -667,6 +679,7 @@ __contract__(
  *
  * Arguments:   - poly *r: pointer to input/output polynomial
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void poly_tomont(poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
@@ -697,6 +710,7 @@ __contract__(
  * the mulcache with values in (-q,q), but this is not needed for the
  * higher level safety proofs, and thus not part of the spec.
  */
+MLKEM_NATIVE_INTERNAL_API
 void poly_mulcache_compute(poly_mulcache *x, const poly *a)
 __contract__(
   requires(memory_no_alias(x, sizeof(poly_mulcache)))
@@ -722,6 +736,7 @@ __contract__(
  * outputs are better suited to the only remaining
  * use of poly_reduce() in the context of (de)serialization.
  */
+MLKEM_NATIVE_INTERNAL_API
 void poly_reduce(poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
@@ -747,6 +762,7 @@ __contract__(
  * NOTE: The reference implementation uses a 3-argument poly_add.
  * We specialize to the accumulator form to avoid reasoning about aliasing.
  */
+MLKEM_NATIVE_INTERNAL_API
 void poly_add(poly *r, const poly *b)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
@@ -771,6 +787,7 @@ __contract__(
  * NOTE: The reference implementation uses a 3-argument poly_sub.
  * We specialize to the accumulator form to avoid reasoning about aliasing.
  */
+MLKEM_NATIVE_INTERNAL_API
 void poly_sub(poly *r, const poly *b)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
