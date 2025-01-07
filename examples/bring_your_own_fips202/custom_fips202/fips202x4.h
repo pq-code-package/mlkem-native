@@ -17,8 +17,6 @@
 #include <stdint.h>
 
 #include "cbmc.h"
-#include "namespace.h"
-
 #include "fips202.h"
 
 typedef shake128ctx shake128x4ctx[4];

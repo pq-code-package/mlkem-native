@@ -6,8 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "fips202.h"
-#include "kem.h"
-#include "params.h"
+#include "mlkem_native.h"
 
 #define NTESTS 1000
 
@@ -25,7 +24,7 @@ static void print_hex(const char *label, const uint8_t *data, size_t size)
 int main(void)
 {
   unsigned int i;
-  ALIGN uint8_t coins[3 * MLKEM_SYMBYTES];
+  ALIGN uint8_t coins[3 * CRYPTO_SYMBYTES];
   ALIGN uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   ALIGN uint8_t sk[CRYPTO_SECRETKEYBYTES];
   ALIGN uint8_t ct[CRYPTO_CIPHERTEXTBYTES];

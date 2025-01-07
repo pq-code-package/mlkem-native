@@ -615,7 +615,7 @@ def gen_monolithic_source_file(dry_run=False):
         yield ""
 
     update_file(
-        "examples/monolithic_build/mlkem_native_all.c",
+        "examples/monolithic_build/mlkem_native_monobuild.c",
         "\n".join(gen()),
         dry_run=dry_run,
     )

@@ -11,7 +11,6 @@
 #include "config.h"
 #endif /* MLKEM_NATIVE_CONFIG_FILE */
 
-#include "namespace.h"
 #include "params.h"
 #include "sys.h"
 

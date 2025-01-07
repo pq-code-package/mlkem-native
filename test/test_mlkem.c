@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include "kem.h"
+#include "mlkem_native.h"
 #include "randombytes.h"
 
 #define NTESTS 1000
