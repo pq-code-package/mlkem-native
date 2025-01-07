@@ -583,8 +583,8 @@ def gen_monolithic_undef_all_core():
     yield " */"
     yield ""
 
-    def undo_define(filename, line_no, d):
-        yield f"/* {filename}:{line_no} */"
+    def undo_define(filename, d):
+        yield f"/* {filename} */"
         yield f"#if defined({d})"
         yield f"#undef {d}"
         yield "#endif"
@@ -594,7 +594,7 @@ def gen_monolithic_undef_all_core():
     defines.sort()
 
     for filename, line_no, d in defines:
-        yield from undo_define(filename, line_no, d)
+        yield from undo_define(filename, d)
 
 
 def gen_monolithic_source_file_core():
