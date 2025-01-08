@@ -1860,6 +1860,16 @@
 #endif
 
 /* mlkem/native/x86_64/src/arith_native_x86_64.h */
+#if defined(mulcache_compute_avx2)
+#undef mulcache_compute_avx2
+#endif
+
+/* mlkem/native/x86_64/src/arith_native_x86_64.h */
+#if defined(poly_mulcache_compute_avx2)
+#undef poly_mulcache_compute_avx2
+#endif
+
+/* mlkem/native/x86_64/src/arith_native_x86_64.h */
 #if defined(polyvec_basemul_acc_montgomery_cached_avx2)
 #undef polyvec_basemul_acc_montgomery_cached_avx2
 #endif

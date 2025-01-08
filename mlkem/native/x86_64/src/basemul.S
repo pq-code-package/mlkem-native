@@ -121,19 +121,19 @@ ret
 
 
 .macro mulcache_compute_iter i
-vmovdqa (64*\i+16)*2(%rsi), %ymm2 # a0
-vmovdqa (64*\i+48)*2(%rsi), %ymm3 # a1
-vmovdqa (16*\i)*2(%rdx), %ymm4 # z
+vmovdqa (64*\i+16)*2(%rsi), %ymm2
+vmovdqa (64*\i+48)*2(%rsi), %ymm3
+vmovdqa (16*\i)*2(%rdx), %ymm4
 
-vpmullw %ymm2, %ymm1, %ymm5 # t0
-vpmullw %ymm3, %ymm1, %ymm6 # t1
+vpmullw %ymm2, %ymm1, %ymm5
+vpmullw %ymm3, %ymm1, %ymm6
 vpmullw %ymm5, %ymm4, %ymm5
 vpmullw %ymm6, %ymm4, %ymm6
 
-vpmulhw %ymm2, %ymm4, %ymm7 # s0
-vpmulhw %ymm3, %ymm4, %ymm8 # s1
-vpmulhw %ymm5, %ymm0, %ymm9 # r0
-vpmulhw %ymm6, %ymm0, %ymm10 # r1
+vpmulhw %ymm2, %ymm4, %ymm7
+vpmulhw %ymm3, %ymm4, %ymm8
+vpmulhw %ymm5, %ymm0, %ymm9
+vpmulhw %ymm6, %ymm0, %ymm10
 
 vpsubw %ymm9, %ymm7, %ymm7
 vpsubw %ymm10, %ymm8, %ymm8
