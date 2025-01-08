@@ -2164,6 +2164,16 @@
 #undef empty_cu_avx2_rej_uniform_table
 #endif
 
+/* mlkem/native/x86_64/src/x86_64_zetas_mulcache.h */
+#if defined(X86_64_ZETAS_MULCACHE_H)
+#undef X86_64_ZETAS_MULCACHE_H
+#endif
+
+/* mlkem/native/x86_64/src/x86_64_zetas_mulcache.h */
+#if defined(zetas_mulcache_avx2)
+#undef zetas_mulcache_avx2
+#endif
+
 /* mlkem/ntt.c */
 #if defined(ntt_butterfly_block)
 #undef ntt_butterfly_block

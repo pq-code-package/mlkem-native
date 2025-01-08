@@ -8,11 +8,17 @@
  *          Do not modify it directly.
  */
 
+#include "common.h"
+
+#ifndef X86_64_ZETAS_MULCACHE_H
+#define X86_64_ZETAS_MULCACHE_H
+
 /*
  * Table of zeta values used in the AVX2 mulcache_compute
  * See autogenerate_files.py for details.
  */
 
+#define zetas_mulcache_avx2 MLKEM_NAMESPACE(zetas_mulcache_avx2)
 ALIGN const int16_t zetas_mulcache_avx2[128] = {
     -1103, 555,   -1251, 1550,  422,  177,  -291,  1574,  -246,  1159,  -777,
     -602,  -1590, -872,  418,   -156, 430,  843,   871,   105,   587,   -235,
@@ -21,3 +27,4 @@ ALIGN const int16_t zetas_mulcache_avx2[128] = {
     -108,  996,   958,   1522,  1097, 610,  -1285, 384,   -136,  -1335, 220,
     -1659, -1530, 794,   -854,  478,  -308, 991,   -1460, 1628,
 };
+#endif

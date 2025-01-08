@@ -559,14 +559,21 @@ def gen_avx2_fwd_ntt_zeta_file(dry_run=False):
 def gen_avx2_mulcache_zeta_file(dry_run=False):
     def gen():
         yield from gen_header()
+        yield '#include "common.h"'
+        yield ""
+        yield "#ifndef X86_64_ZETAS_MULCACHE_H"
+        yield "#define X86_64_ZETAS_MULCACHE_H"
+        yield ""
         yield "/*"
         yield " * Table of zeta values used in the AVX2 mulcache_compute"
         yield " * See autogenerate_files.py for details."
         yield " */"
         yield ""
+        yield "#define zetas_mulcache_avx2 MLKEM_NAMESPACE(zetas_mulcache_avx2)"
         yield "ALIGN const int16_t zetas_mulcache_avx2[128] = {"
         yield from map(lambda t: str(t) + ",", gen_avx2_mulcache_twiddles())
         yield "};"
+        yield "#endif"
         yield ""
 
     update_file(
