@@ -12,9 +12,6 @@
  *
  */
 
-#warning !!! WARNING !!!
-#warning THIS BUILD IS USING A TEST-ONLY RANDOM NUMBER GENERATOR WHICH MUST NOT BE USED IN PRODUCTION
-
 #include <stdint.h>
 #include "randombytes.h"
 
