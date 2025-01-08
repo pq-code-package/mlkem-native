@@ -41,6 +41,8 @@ void reduce_avx2(__m256i *r, const __m256i *qdata);
 #define basemul_avx2 MLKEM_NAMESPACE(basemul_avx2)
 void basemul_avx2(__m256i *r, const __m256i *a, const __m256i *b,
                   const __m256i *qdata, const __m256i *bcache);
+#define mulcache_compute_avx2 MLKEM_NAMESPACE(mulcache_compute_avx2)
+void mulcache_compute_avx2(__m256i *out, const __m256i *in, const __m256i *zetas, const __m256i *qdata);
 
 #define poly_mulcache_compute_avx2 MLKEM_NAMESPACE(poly_mulcache_compute_avx2)
 void poly_mulcache_compute_avx2(poly_mulcache *x, const poly *y);

@@ -119,4 +119,41 @@ schoolbook	3
 mov		%r11,%rsp
 ret
 
+
+.macro mulcache_compute_iter i
+vmovdqa (64*\i+16)*2(%rsi), %ymm2 # a0
+vmovdqa (64*\i+48)*2(%rsi), %ymm3 # a1
+vmovdqa (16*\i)*2(%rdx), %ymm4 # z
+
+vpmullw %ymm2, %ymm1, %ymm5 # t0
+vpmullw %ymm3, %ymm1, %ymm6 # t1
+vpmullw %ymm5, %ymm4, %ymm5
+vpmullw %ymm6, %ymm4, %ymm6
+
+vpmulhw %ymm2, %ymm4, %ymm7 # s0
+vpmulhw %ymm3, %ymm4, %ymm8 # s1
+vpmulhw %ymm5, %ymm0, %ymm9 # r0
+vpmulhw %ymm6, %ymm0, %ymm10 # r1
+
+vpsubw %ymm9, %ymm7, %ymm7
+vpsubw %ymm10, %ymm8, %ymm8
+
+vmovdqa %ymm7, (32*\i)*2(%rdi)
+vmovdqa %ymm8, (32*\i+16)*2(%rdi)
+.endm
+
+.text
+.global MLKEM_ASM_NAMESPACE(mulcache_compute_avx2)
+MLKEM_ASM_NAMESPACE(mulcache_compute_avx2):
+
+vmovdqa _16XQ*2(%rcx),%ymm0
+vmovdqa _16XQINV*2(%rcx),%ymm1
+
+mulcache_compute_iter 0
+mulcache_compute_iter 1
+mulcache_compute_iter 2
+mulcache_compute_iter 3
+
+ret
+
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT */
