@@ -77,7 +77,7 @@ static INLINE void shake128_squeezeblocks(uint8_t *output, size_t nblocks,
 
 /* Free the state */
 #define shake128_release FIPS202_NAMESPACE(shake128_release)
-static INLINE void shake128_release(shake128ctx *state) {}
+static INLINE void shake128_release(shake128ctx *state) { ((void)state); }
 
 /* One-stop SHAKE256 call. Aliasing between input and
  * output is not permitted */

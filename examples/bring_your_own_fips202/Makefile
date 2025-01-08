@@ -9,16 +9,15 @@
 # If you are not concerned about minimizing for a specific backend,
 # you can just include _all_ source files into your build.
 MLKEM_NATIVE_SOURCE=$(wildcard          \
-	mlkem_native/**/*.c	  	\
+	mlkem_native/*.c	  	\
+	mlkem_native/*.c		\
 	mlkem_native/**/*.c		\
-	mlkem_native/**/**/*.c		\
-	mlkem_native/**/**/**/*.c	\
-	mlkem_native/**/**/**/**/*.c)
+	mlkem_native/**/**/*.c	        \
+	mlkem_native/**/**/**/*.c)
 
 INC=
-INC+=-Imlkem_native/mlkem
-INC+=-Imlkem_native/mlkem
-INC+=-Imlkem_native/mlkem/native
+INC+=-Imlkem_native/
+INC+=-Imlkem_native/native
 
 # Part B:
 #
