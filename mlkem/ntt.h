@@ -32,6 +32,7 @@ extern const int16_t zetas[128];
  *
  * Arguments:   - poly *p: pointer to in/output polynomial
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void poly_ntt(poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
@@ -57,6 +58,7 @@ __contract__(
  *
  * Arguments:   - uint16_t *a: pointer to in/output polynomial
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void poly_invntt_tomont(poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
@@ -85,6 +87,7 @@ __contract__(
  *            - b_cached: Some precomputed value, typically derived from
  *                   b1 and a twiddle factor. Can be an arbitary int16_t.
  ************************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void basemul_cached(int16_t r[2], const int16_t a[2], const int16_t b[2],
                     int16_t b_cached)
 __contract__(

@@ -20,6 +20,7 @@
  * Arguments:   - poly *r: pointer to output polynomial
  *              - const uint8_t *buf: pointer to input byte array
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void poly_cbd_eta1(poly *r, const uint8_t buf[MLKEM_ETA1 * MLKEM_N / 4])
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
@@ -39,6 +40,7 @@ __contract__(
  * Arguments:   - poly *r: pointer to output polynomial
  *              - const uint8_t *buf: pointer to input byte array
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void poly_cbd_eta2(poly *r, const uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4])
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))

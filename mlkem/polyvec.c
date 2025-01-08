@@ -9,6 +9,8 @@
 #include "poly.h"
 
 #include "debug/debug.h"
+
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                          const polyvec *a)
 {
@@ -21,6 +23,7 @@ void polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
   }
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_decompress_du(polyvec *r,
                            const uint8_t a[MLKEM_POLYVECCOMPRESSEDBYTES_DU])
 {
@@ -33,6 +36,7 @@ void polyvec_decompress_du(polyvec *r,
   POLYVEC_UBOUND(r, MLKEM_Q);
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const polyvec *a)
 {
   unsigned int i;
@@ -42,6 +46,7 @@ void polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const polyvec *a)
   }
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_frombytes(polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
 {
   int i;
@@ -51,6 +56,7 @@ void polyvec_frombytes(polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
   }
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_ntt(polyvec *r)
 {
   unsigned int i;
@@ -60,6 +66,7 @@ void polyvec_ntt(polyvec *r)
   }
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_invntt_tomont(polyvec *r)
 {
   unsigned int i;
@@ -70,6 +77,7 @@ void polyvec_invntt_tomont(polyvec *r)
 }
 
 #if !defined(MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
                                            const polyvec *b,
                                            const polyvec_mulcache *b_cache)
@@ -102,6 +110,7 @@ void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
   POLY_BOUND(r, MLKEM_K * 2 * MLKEM_Q);
 }
 #else  /* !MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
                                            const polyvec *b,
                                            const polyvec_mulcache *b_cache)
@@ -115,6 +124,7 @@ void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
 }
 #endif /* MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyvec *b)
 {
   polyvec_mulcache b_cache;
@@ -122,6 +132,7 @@ void polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyvec *b)
   polyvec_basemul_acc_montgomery_cached(r, a, b, &b_cache);
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_mulcache_compute(polyvec_mulcache *x, const polyvec *a)
 {
   unsigned int i;
@@ -131,6 +142,7 @@ void polyvec_mulcache_compute(polyvec_mulcache *x, const polyvec *a)
   }
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_reduce(polyvec *r)
 {
   unsigned int i;
@@ -140,6 +152,7 @@ void polyvec_reduce(polyvec *r)
   }
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_add(polyvec *r, const polyvec *b)
 {
   int i;
@@ -149,6 +162,7 @@ void polyvec_add(polyvec *r, const polyvec *b)
   }
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_tomont(polyvec *r)
 {
   unsigned int i;

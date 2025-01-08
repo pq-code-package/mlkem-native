@@ -16,6 +16,7 @@
 #include "symmetric.h"
 #include "verify.h"
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_compress_du(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DU], const poly *a)
 {
   int j;
@@ -80,6 +81,7 @@ void poly_compress_du(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DU], const poly *a)
 }
 
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_decompress_du(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DU])
 {
   int j;
@@ -139,6 +141,7 @@ void poly_decompress_du(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DU])
 #endif
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_compress_dv(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DV], const poly *a)
 {
   int i;
@@ -193,6 +196,7 @@ void poly_compress_dv(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DV], const poly *a)
 #endif
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_decompress_dv(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DV])
 {
   int i;
@@ -250,6 +254,7 @@ void poly_decompress_dv(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DV])
 }
 
 #if !defined(MLKEM_USE_NATIVE_POLY_TOBYTES)
+MLKEM_NATIVE_INTERNAL_API
 void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
 {
   unsigned int i;
@@ -282,6 +287,7 @@ void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
   }
 }
 #else  /* MLKEM_USE_NATIVE_POLY_TOBYTES */
+MLKEM_NATIVE_INTERNAL_API
 void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
 {
   POLY_UBOUND(a, MLKEM_Q);
@@ -290,6 +296,7 @@ void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
 #endif /* MLKEM_USE_NATIVE_POLY_TOBYTES */
 
 #if !defined(MLKEM_USE_NATIVE_POLY_FROMBYTES)
+MLKEM_NATIVE_INTERNAL_API
 void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
 {
   int i;
@@ -309,12 +316,14 @@ void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
   POLY_UBOUND(r, 4096);
 }
 #else  /* MLKEM_USE_NATIVE_POLY_FROMBYTES */
+MLKEM_NATIVE_INTERNAL_API
 void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
 {
   poly_frombytes_native(r, a);
 }
 #endif /* MLKEM_USE_NATIVE_POLY_FROMBYTES */
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_frommsg(poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
 {
   int i;
@@ -341,6 +350,7 @@ void poly_frommsg(poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
   POLY_BOUND_MSG(r, MLKEM_Q, "poly_frommsg output");
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const poly *a)
 {
   int i;
@@ -361,6 +371,7 @@ void poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const poly *a)
   }
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_getnoise_eta1_4x(poly *r0, poly *r1, poly *r2, poly *r3,
                            const uint8_t seed[MLKEM_SYMBYTES], uint8_t nonce0,
                            uint8_t nonce1, uint8_t nonce2, uint8_t nonce3)
@@ -388,6 +399,7 @@ void poly_getnoise_eta1_4x(poly *r0, poly *r1, poly *r2, poly *r3,
   POLY_BOUND_MSG(r3, MLKEM_ETA1 + 1, "poly_getnoise_eta1_4x output 3");
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_getnoise_eta2(poly *r, const uint8_t seed[MLKEM_SYMBYTES],
                         uint8_t nonce)
 {
@@ -403,6 +415,7 @@ void poly_getnoise_eta2(poly *r, const uint8_t seed[MLKEM_SYMBYTES],
   POLY_BOUND_MSG(r, MLKEM_ETA1 + 1, "poly_getnoise_eta2 output");
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_getnoise_eta1122_4x(poly *r0, poly *r1, poly *r2, poly *r3,
                               const uint8_t seed[MLKEM_SYMBYTES],
                               uint8_t nonce0, uint8_t nonce1, uint8_t nonce2,
@@ -441,6 +454,7 @@ void poly_getnoise_eta1122_4x(poly *r0, poly *r1, poly *r2, poly *r3,
   POLY_BOUND_MSG(r3, MLKEM_ETA2 + 1, "poly_getnoise_eta1122_4x output 3");
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_basemul_montgomery_cached(poly *r, const poly *a, const poly *b,
                                     const poly_mulcache *b_cache)
 {
@@ -461,6 +475,7 @@ void poly_basemul_montgomery_cached(poly *r, const poly *a, const poly *b,
 }
 
 #if !defined(MLKEM_USE_NATIVE_POLY_TOMONT)
+MLKEM_NATIVE_INTERNAL_API
 void poly_tomont(poly *r)
 {
   int i;
@@ -476,6 +491,7 @@ void poly_tomont(poly *r)
   POLY_BOUND(r, MLKEM_Q);
 }
 #else  /* MLKEM_USE_NATIVE_POLY_TOMONT */
+MLKEM_NATIVE_INTERNAL_API
 void poly_tomont(poly *r)
 {
   poly_tomont_native(r);
@@ -484,6 +500,7 @@ void poly_tomont(poly *r)
 #endif /* MLKEM_USE_NATIVE_POLY_TOMONT */
 
 #if !defined(MLKEM_USE_NATIVE_POLY_REDUCE)
+MLKEM_NATIVE_INTERNAL_API
 void poly_reduce(poly *r)
 {
   int i;
@@ -501,6 +518,7 @@ void poly_reduce(poly *r)
   POLY_UBOUND(r, MLKEM_Q);
 }
 #else  /* MLKEM_USE_NATIVE_POLY_REDUCE */
+MLKEM_NATIVE_INTERNAL_API
 void poly_reduce(poly *r)
 {
   poly_reduce_native(r);
@@ -508,6 +526,7 @@ void poly_reduce(poly *r)
 }
 #endif /* MLKEM_USE_NATIVE_POLY_REDUCE */
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_add(poly *r, const poly *b)
 {
   int i;
@@ -521,6 +540,7 @@ void poly_add(poly *r, const poly *b)
   }
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_sub(poly *r, const poly *b)
 {
   int i;
@@ -535,6 +555,7 @@ void poly_sub(poly *r, const poly *b)
 }
 
 #if !defined(MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE)
+MLKEM_NATIVE_INTERNAL_API
 void poly_mulcache_compute(poly_mulcache *x, const poly *a)
 {
   int i;
@@ -547,6 +568,7 @@ void poly_mulcache_compute(poly_mulcache *x, const poly *a)
   POLY_BOUND(x, MLKEM_Q);
 }
 #else  /* MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE */
+MLKEM_NATIVE_INTERNAL_API
 void poly_mulcache_compute(poly_mulcache *x, const poly *a)
 {
   poly_mulcache_compute_native(x, a);

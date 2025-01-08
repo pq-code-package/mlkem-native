@@ -23,6 +23,7 @@
  *              - const uint8_t *seed: pointer to input seed
  *              - int transposed: boolean deciding whether A or A^T is generated
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES], int transposed)
 __contract__(
   requires(memory_no_alias(a, sizeof(polyvec) * MLKEM_K))
@@ -47,6 +48,7 @@ __contract__(
  *              - const uint8_t *coins: pointer to input randomness
  *                             (of length MLKEM_SYMBYTES bytes)
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
                            uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
                            const uint8_t coins[MLKEM_SYMBYTES])
@@ -74,6 +76,7 @@ __contract__(
  *              - const uint8_t *coins: pointer to input random coins used as
  *seed (of length MLKEM_SYMBYTES) to deterministically generate all randomness
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
                 const uint8_t m[MLKEM_INDCPA_MSGBYTES],
                 const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
@@ -100,6 +103,7 @@ __contract__(
  *              - const uint8_t *sk: pointer to input secret key
  *                                   (of length MLKEM_INDCPA_SECRETKEYBYTES)
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
                 const uint8_t c[MLKEM_INDCPA_BYTES],
                 const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])

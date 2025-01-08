@@ -131,6 +131,7 @@ static void cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4])
 }
 #endif /* MLKEM_ETA1 == 3 */
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_cbd_eta1(poly *r, const uint8_t buf[MLKEM_ETA1 * MLKEM_N / 4])
 {
 #if MLKEM_ETA1 == 2
@@ -142,6 +143,7 @@ void poly_cbd_eta1(poly *r, const uint8_t buf[MLKEM_ETA1 * MLKEM_N / 4])
 #endif
 }
 
+MLKEM_NATIVE_INTERNAL_API
 void poly_cbd_eta2(poly *r, const uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4])
 {
 #if MLKEM_ETA2 == 2

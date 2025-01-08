@@ -33,6 +33,7 @@ typedef struct
  *                                  Coefficients must be unsigned canonical,
  *                                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                          const polyvec *a)
 __contract__(
@@ -55,6 +56,7 @@ __contract__(
  *              - const uint8_t *a: pointer to input byte array
  *                                  (of length MLKEM_POLYVECCOMPRESSEDBYTES_DU)
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_decompress_du(polyvec *r,
                            const uint8_t a[MLKEM_POLYVECCOMPRESSEDBYTES_DU])
 __contract__(
@@ -76,6 +78,7 @@ __contract__(
  *              - const polyvec *a: pointer to input vector of polynomials
  *                  Each polynomial must have coefficients in [0,..,q-1].
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const polyvec *a)
 __contract__(
   requires(memory_no_alias(a, sizeof(polyvec)))
@@ -97,6 +100,7 @@ __contract__(
  *                 normalized in [0..4095].
  *              - uint8_t *r: pointer to input byte array
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_frombytes(polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
 __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
@@ -121,6 +125,7 @@ __contract__(
  * Arguments:   - polyvec *r: pointer to in/output vector of polynomials
  *
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_ntt(polyvec *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
@@ -147,6 +152,7 @@ __contract__(
  *
  * Arguments:   - polyvec *r: pointer to in/output vector of polynomials
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_invntt_tomont(polyvec *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
@@ -167,6 +173,7 @@ __contract__(
  *            - const polyvec *a: pointer to first input vector of polynomials
  *            - const polyvec *b: pointer to second input vector of polynomials
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyvec *b)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
@@ -197,6 +204,7 @@ __contract__(
  *                  for second input polynomial vector. Can be computed
  *                  via polyvec_mulcache_compute().
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
                                            const polyvec *b,
                                            const polyvec_mulcache *b_cache)
@@ -236,6 +244,7 @@ __contract__(
  * the mulcache with values in (-q,q), but this is not needed for the
  * higher level safety proofs, and thus not part of the spec.
  */
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_mulcache_compute(polyvec_mulcache *x, const polyvec *a)
 __contract__(
   requires(memory_no_alias(x, sizeof(polyvec_mulcache)))
@@ -260,6 +269,7 @@ __contract__(
  *       outputs are better suited to the only remaining
  *       use of poly_reduce() in the context of (de)serialization.
  */
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_reduce(polyvec *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
@@ -285,6 +295,7 @@ __contract__(
  * to prove type-safety of calling units. Therefore, no stronger
  * ensures clause is required on this function.
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_add(polyvec *r, const polyvec *b)
 __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
@@ -308,6 +319,7 @@ __contract__(
  *              Bounds: Output < q in absolute value.
  *
  **************************************************/
+MLKEM_NATIVE_INTERNAL_API
 void polyvec_tomont(polyvec *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))

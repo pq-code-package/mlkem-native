@@ -235,6 +235,16 @@
 #endif
 
 /* mlkem/common.h */
+#if defined(MLKEM_NATIVE_INTERNAL_API)
+#undef MLKEM_NATIVE_INTERNAL_API
+#endif
+
+/* mlkem/common.h */
+#if defined(MLKEM_NATIVE_INTERNAL_API)
+#undef MLKEM_NATIVE_INTERNAL_API
+#endif
+
+/* mlkem/common.h */
 #if defined(MLKEM_ASM_NAMESPACE)
 #undef MLKEM_ASM_NAMESPACE
 #endif

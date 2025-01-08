@@ -52,6 +52,8 @@ CFLAGS := \
 	-std=c90 \
 	-pedantic \
 	-MMD
+# Set this flag to give all non-global functions internal linkage
+CFLAGS += -DMLKEM_NATIVE_MONOBUILD
 
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 

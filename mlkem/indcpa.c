@@ -279,6 +279,7 @@ __contract__(
 #endif /* MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER */
 
 /* Not static for benchmarking */
+MLKEM_NATIVE_INTERNAL_API
 void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES], int transposed)
 {
   int i;
@@ -409,6 +410,7 @@ __contract__(
 
 STATIC_ASSERT(NTT_BOUND + MLKEM_Q < INT16_MAX, indcpa_enc_bound_0)
 
+MLKEM_NATIVE_INTERNAL_API
 void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
                            uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
                            const uint8_t coins[MLKEM_SYMBYTES])
@@ -472,6 +474,7 @@ STATIC_ASSERT(INVNTT_BOUND + MLKEM_ETA1 < INT16_MAX, indcpa_enc_bound_0)
 STATIC_ASSERT(INVNTT_BOUND + MLKEM_ETA2 + MLKEM_Q < INT16_MAX,
               indcpa_enc_bound_1)
 
+MLKEM_NATIVE_INTERNAL_API
 void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
                 const uint8_t m[MLKEM_INDCPA_MSGBYTES],
                 const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
@@ -531,6 +534,7 @@ void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
 /* Check that the arithmetic in indcpa_dec() does not overflow */
 STATIC_ASSERT(INVNTT_BOUND + MLKEM_Q < INT16_MAX, indcpa_dec_bound_0)
 
+MLKEM_NATIVE_INTERNAL_API
 void indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
                 const uint8_t c[MLKEM_INDCPA_BYTES],
                 const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
