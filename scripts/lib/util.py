@@ -37,9 +37,34 @@ class TEST_TYPES(Enum):
     KAT = 4
     BENCH_COMPONENTS = 5
     ACVP = 6
+    BRING_YOUR_OWN_FIPS202 = 7
+    CUSTOM_BACKEND = 8
+    MLKEM_NATIVE_AS_CODE_PACKAGE = 9
+    MONOLITHIC_BUILD = 10
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
+
+    def is_example(self):
+        return self in TEST_TYPES.examples()
+
+    @staticmethod
+    def examples():
+        return [
+            TEST_TYPES.BRING_YOUR_OWN_FIPS202,
+            TEST_TYPES.CUSTOM_BACKEND,
+            TEST_TYPES.MLKEM_NATIVE_AS_CODE_PACKAGE,
+            TEST_TYPES.MONOLITHIC_BUILD,
+        ]
+
+    @staticmethod
+    def from_string(s):
+        for e in TEST_TYPES.examples():
+            if str.lower(e.name) == str.lower(s):
+                return e
+        raise Exception(
+            f"Could not find example {s}. Examples: {list(map(lambda e: str.lower(e.name), TEST_TYPES.examples()))}"
+        )
 
     def desc(self):
         if self == TEST_TYPES.FUNC:
@@ -54,6 +79,25 @@ class TEST_TYPES(Enum):
             return "Kat Test"
         if self == TEST_TYPES.ACVP:
             return "ACVP Test"
+        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
+            return "Example (Bring-Your-Own-FIPS202)"
+        if self == TEST_TYPES.CUSTOM_BACKEND:
+            return "Example (Custom Backend)"
+        if self == TEST_TYPES.MLKEM_NATIVE_AS_CODE_PACKAGE:
+            return "Example (mlkem-native as code package)"
+        if self == TEST_TYPES.MONOLITHIC_BUILD:
+            return "Example (monolithic build)"
+
+    def make_dir(self):
+        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
+            return "examples/bring_your_own_fips202"
+        if self == TEST_TYPES.CUSTOM_BACKEND:
+            return "examples/custom_backend"
+        if self == TEST_TYPES.MLKEM_NATIVE_AS_CODE_PACKAGE:
+            return "examples/mlkem_native_as_code_package"
+        if self == TEST_TYPES.MONOLITHIC_BUILD:
+            return "examples/monolithic_build"
+        return ""
 
     def make_target(self):
         if self == TEST_TYPES.FUNC:
@@ -68,12 +112,25 @@ class TEST_TYPES(Enum):
             return "kat"
         if self == TEST_TYPES.ACVP:
             return "acvp"
+        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
+            return ""
+        if self == TEST_TYPES.CUSTOM_BACKEND:
+            return ""
+        if self == TEST_TYPES.MLKEM_NATIVE_AS_CODE_PACKAGE:
+            return ""
+        if self == TEST_TYPES.MONOLITHIC_BUILD:
+            return ""
 
     def make_run_target(self, scheme):
-        if scheme is not None:
-            return f"run_{self.make_target()}_{scheme.suffix()}"
+        t = self.make_target()
+        if t == "":
+            run_t = "run"
         else:
-            return f"run_{self.make_target()}"
+            run_t = f"run_{t}"
+        if scheme is not None:
+            return f"{run_t}_{scheme.suffix()}"
+        else:
+            return run_t
 
 
 def dict2str(dict):
@@ -179,12 +236,23 @@ def config_logger(verbose):
 def logger(test_type, scheme, cross_prefix, opt):
     """Emit line indicating the processing of the given test"""
     compile_mode = "cross" if cross_prefix else "native"
-    implementation = "opt" if opt else "no_opt"
+    if opt is None:
+        opt_label = ""
+    elif opt is True:
+        opt_label = " opt"
+    else:
+        opt_label = " no_opt"
+
+    if test_type.is_example():
+        sz = 40
+    else:
+        sz = 18
 
     return logging.getLogger(
-        "{:<18} {:<11} {:<17}".format(
+        "{0:<{1}} {2:<11} {3:<17}".format(
             (test_type.desc()),
+            sz,
             str(scheme),
-            "({}, {}):".format(compile_mode, implementation),
+            "({}{}):".format(compile_mode, opt_label),
         )
     )

@@ -107,15 +107,19 @@ static int bench(void)
                               (poly *)data3, (uint8_t *)data4, nonce0, nonce1,
                               nonce2, nonce3))
 
+#if MLKEM_K == 2 || MLKEM_K == 4
   /* poly_getnoise_eta2 */
   BENCH("poly_getnoise_eta2",
         poly_getnoise_eta2((poly *)data0, (uint8_t *)data1, nonce0))
+#endif
 
+#if MLKEM_K == 2
   /* poly_getnoise_eta1122_4x */
   BENCH("poly_getnoise_eta1122_4x",
         poly_getnoise_eta1122_4x((poly *)data0, (poly *)data1, (poly *)data2,
                                  (poly *)data3, (uint8_t *)data4, nonce0,
                                  nonce1, nonce2, nonce3))
+#endif
 
   /* poly_basemul_montgomery_cached */
   BENCH("poly_basemul_montgomery_cached",

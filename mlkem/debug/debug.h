@@ -25,6 +25,7 @@
  *              - description: Textual description of assertion
  *              - val: Value asserted to be non-zero
  **************************************************/
+#define mlkem_debug_assert MLKEM_NAMESPACE(mlkem_debug_assert)
 void mlkem_debug_assert(const char *file, int line, const char *description,
                         const int val);
 
@@ -45,12 +46,14 @@ void mlkem_debug_assert(const char *file, int line, const char *description,
  *              - lower_bound_exclusive: Exclusive lower bound
  *              - upper_bound_exclusive: Exclusive upper bound
  **************************************************/
+#define mlkem_debug_check_bounds MLKEM_NAMESPACE(mlkem_debug_check_bounds)
 void mlkem_debug_check_bounds(const char *file, int line,
                               const char *description, const int16_t *ptr,
                               unsigned len, int lower_bound_exclusive,
                               int upper_bound_exclusive);
 
 /* Print error message to stderr alongside file and line information */
+#define mlkem_debug_print_error MLKEM_NAMESPACE(mlkem_debug_print_error)
 void mlkem_debug_print_error(const char *file, int line, const char *msg);
 
 /* Check assertion, calling exit() upon failure
@@ -163,7 +166,8 @@ void mlkem_debug_print_error(const char *file, int line, const char *msg);
   typedef struct                                                         \
   {                                                                      \
     unsigned int MLKEM_CONCAT(static_assertion_, msg) : (cond) ? 1 : -1; \
-  } MLKEM_CONCAT(static_assertion_, msg) __attribute__((unused));
+  } MLKEM_CONCAT(MLKEM_NAMESPACE(static_assertion_), msg)                \
+      __attribute__((unused));
 
 #define MLKEM_STATIC_ASSERT_ADD_LINE0(cond, suffix) \
   MLKEM_STATIC_ASSERT_DEFINE(cond, MLKEM_CONCAT(at_line_, suffix))

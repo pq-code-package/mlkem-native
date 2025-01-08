@@ -120,9 +120,41 @@ def cli():
         "--no-acvp", action="store_false", dest="acvp", help="Do not run acvp test"
     )
 
+    examples_group = all_parser.add_mutually_exclusive_group()
+    examples_group.add_argument(
+        "--examples",
+        action="store_true",
+        dest="examples",
+        help="Run examples",
+        default=True,
+    )
+    examples_group.add_argument(
+        "--no-examples",
+        action="store_false",
+        dest="examples",
+        help="Do not run examples",
+    )
+
     # acvp arguments
     acvp_parser = cmd_subparsers.add_parser(
         "acvp", help="Run ACVP client", parents=[common_parser]
+    )
+
+    # examples arguments
+    examples_parser = cmd_subparsers.add_parser(
+        "examples", help="Run examples", parents=[common_parser]
+    )
+
+    examples_parser.add_argument(
+        "-l",
+        help="Explicitly list the examples to run; can be called multiple times",
+        choices=[
+            "bring_your_own_fips202",
+            "custom_backend",
+            "mlkem_native_as_code_package",
+            "monolithic_build",
+        ],
+        action="append",
     )
 
     # bench arguments
@@ -193,11 +225,16 @@ def cli():
     )
 
     args = main_parser.parse_args()
+
     if not hasattr(args, "mac_taskpolicy"):
         args.mac_taskpolicy = None
+    if not hasattr(args, "l"):
+        args.l = None
 
     if args.cmd == "all":
         Tests(args).all()
+    elif args.cmd == "examples":
+        Tests(args).examples()
     elif args.cmd == "acvp":
         Tests(args).acvp()
     elif args.cmd == "bench":

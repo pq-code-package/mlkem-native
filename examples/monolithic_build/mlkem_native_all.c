@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* Two instances of mlkem-native for two security levels */
+/* Three instances of mlkem-native for all security levels */
 
 #define MLKEM_NATIVE_CONFIG_FILE "config_512.h"
 #include "mlkem_native_monobuild.c"

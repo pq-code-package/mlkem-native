@@ -1,6 +1,15 @@
 # (SPDX-License-Identifier: CC-BY-4.0)
 
 .PHONY: build run clean
+.DEFAULT_GOAL := all
+
+# Append cross-prefix for cross compilation
+# Remove or ignore for native builds
+CC  ?= gcc
+# When called from the root Makefile, CROSS_PREFIX has already been added here
+ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
+CC  := $(CROSS_PREFIX)$(CC)
+endif
 
 # Part A:
 #
@@ -10,7 +19,6 @@
 # you can just include _all_ source files into your build.
 MLKEM_NATIVE_SOURCE=$(wildcard          \
 	mlkem_native/**/*.c	  	\
-	mlkem_native/**/*.c		\
 	mlkem_native/**/**/*.c		\
 	mlkem_native/**/**/**/*.c	\
 	mlkem_native/**/**/**/**/*.c)
@@ -44,7 +52,23 @@ ALL_SOURCE=$(MLKEM_NATIVE_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
 BUILD_DIR=build
 BIN=test_binary
 
-CFLAGS=-DMLKEM_NATIVE_CONFIG_FILE="\"custom_config.h\""
+CFLAGS := \
+	-Wall \
+	-Wextra \
+	-Wmissing-prototypes \
+	-Wshadow \
+	-Werror \
+	-Wpointer-arith \
+	-Wno-long-long \
+	-Wno-unknown-pragmas \
+	-Wno-unused-command-line-argument \
+	-fomit-frame-pointer \
+	-std=c99 \
+	-pedantic \
+	-MMD \
+	$(CFLAGS)
+
+CFLAGS+=-DMLKEM_NATIVE_CONFIG_FILE="\"custom_config.h\""
 
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 
@@ -53,12 +77,12 @@ $(BINARY_NAME_FULL): $(ALL_SOURCE)
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INC) $^ -o $@
 
-all: run
+all: build
 
 build: $(BINARY_NAME_FULL)
 
 run: $(BINARY_NAME_FULL)
-	./$(BINARY_NAME_FULL)
+	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
 
 clean:
 	rm -rf $(BUILD_DIR)

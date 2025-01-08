@@ -1,13 +1,24 @@
 # (SPDX-License-Identifier: CC-BY-4.0)
 
 .PHONY: build run clean
+.DEFAULT_GOAL := all
+
+# Append cross-prefix for cross compilation
+# Remove or ignore for native builds
+CC  ?= gcc
+# When called from the root Makefile, CROSS_PREFIX has already been added here
+ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
+CC  := $(CROSS_PREFIX)$(CC)
+endif
 
 # Part A:
 #
 # mlkem-native source and header files
 #
-# If you are not concerned about minimizing for a specific backend,
-# you can just include _all_ source files into your build.
+# Here, we use just a single monolithic compilation unit to include
+# multiple instances of mlkem-native.
+
+MLKEM_NATIVE_SOURCE=mlkem_native_all.c
 
 INC=
 INC+=-I./
@@ -31,9 +42,9 @@ RNG_SOURCE=$(wildcard test_only_rng/*.c)
 # Part C:
 #
 # Your application source code
-APP_SOURCE=main.c mlkem_native_all.c
+APP_SOURCE=main.c
 
-ALL_SOURCE=$(MLKEM_NATIVE_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
+ALL_SOURCE=$(RNG_SOURCE) $(APP_SOURCE) $(MLKEM_NATIVE_SOURCE)
 
 BUILD_DIR=build
 BIN=test_binary
@@ -47,11 +58,12 @@ CFLAGS := \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
-	-O3 \
 	-fomit-frame-pointer \
-	-std=c90 \
+	-std=c99 \
 	-pedantic \
-	-MMD
+	-MMD \
+	$(CFLAGS)
+
 # Set this flag to give all non-global functions internal linkage
 CFLAGS += -DMLKEM_NATIVE_MONOBUILD
 
@@ -62,12 +74,12 @@ $(BINARY_NAME_FULL): $(ALL_SOURCE)
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INC) $^ -o $@
 
-all: run
+all: build
 
 build: $(BINARY_NAME_FULL)
 
 run: $(BINARY_NAME_FULL)
-	./$(BINARY_NAME_FULL)
+	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
 
 clean:
 	rm -rf $(BUILD_DIR)

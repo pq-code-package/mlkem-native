@@ -18,14 +18,13 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_getnoise_eta1122_4x
-# Depending on MLKEM_K, the code uses shake256 or shake256x4.
-# Unfortunately, CBMC complains about unused function contracts,
-# so we have to distinguish along MLKEM_K here.
+# Only relevant for K=2
 ifeq ($(MLKEM_K),2)
+CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_getnoise_eta1122_4x
 USE_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_cbd_eta1 $(MLKEM_NAMESPACE)poly_cbd_eta2 $(FIPS202_NAMESPACE)shake256
 else
-USE_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_cbd_eta1 $(MLKEM_NAMESPACE)poly_cbd_eta2 $(FIPS202_NAMESPACE)shake256x4
+CHECK_FUNCTION_CONTRACTS=
+USE_FUNCTION_CONTRACTS=
 endif
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1

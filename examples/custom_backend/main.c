@@ -59,7 +59,7 @@ int main(void)
 
   printf("Shared secret: ");
   {
-    int i;
+    size_t i;
     for (i = 0; i < sizeof(key_a); i++)
       printf("%02x", key_a[i]);
   }

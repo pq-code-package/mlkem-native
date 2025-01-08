@@ -66,24 +66,44 @@ class Tests:
     def _compile_schemes(self, test_type, opt):
         """compile or cross compile with some extra environment variables and makefile arguments"""
 
-        opt_label = "opt" if opt else "no_opt"
+        if opt is None:
+            opt_label = ""
+        elif opt is True:
+            opt_label = " opt"
+        else:
+            opt_label = " no_opt"
 
         github_log(
-            f"::group::compile {self.compile_mode()} {opt_label} {test_type.desc()}"
+            f"::group::compile {self.compile_mode()}{opt_label} {test_type.desc()}"
         )
 
         log = logger(test_type, "Compile", self.args.cross_prefix, opt)
 
-        extra_make_args = [f"OPT={int(opt)}", f"AUTO={int(self.args.auto)}"]
+        extra_make_args = []
+        # Those options are not used in the examples
+        if test_type.is_example() is False:
+            extra_make_args += [f"OPT={int(opt)}", f"AUTO={int(self.args.auto)}"]
         if test_type.is_benchmark() is True:
             extra_make_args += [f"CYCLES={self.args.cycles}"]
+        if test_type.make_dir() != "":
+            extra_make_args += ["-C", test_type.make_dir()]
         extra_make_args += self.make_j()
 
-        args = ["make", test_type.make_target()] + extra_make_args
+        target = test_type.make_target()
+        target = [target] if target != "" else []
+        args = ["make"] + target + extra_make_args
+
+        # Force static compilation for cross builds
+        cflags = self.args.cflags
+        if cflags is None:
+            cflags = ""
+
+        if test_type.is_example() and self.args.cross_prefix != "":
+            cflags += " -static"
 
         env_update = {}
-        if self.args.cflags is not None and self.args.cflags != "":
-            env_update["CFLAGS"] = self.args.cflags
+        if cflags != "":
+            env_update["CFLAGS"] = cflags
         if self.args.cross_prefix != "":
             env_update["CROSS_PREFIX"] = self.args.cross_prefix
 
@@ -100,7 +120,7 @@ class Tests:
 
         if p.returncode != 0:
             log.error(f"make failed: {p.returncode}")
-            self.fail(f"Compilation for ({test_type},{opt_label})")
+            self.fail(f"Compilation for ({test_type}{opt_label})")
 
         github_log("::endgroup::")
 
@@ -119,7 +139,12 @@ class Tests:
         - suppress_output: Indicate whether to suppress or print-and-return the output
         """
 
-        opt_label = "opt" if opt else "no_opt"
+        if opt is None:
+            opt_label = ""
+        elif opt is True:
+            opt_label = " opt"
+        else:
+            opt_label = " no_opt"
 
         if scheme is None:
             scheme_str = "All"
@@ -129,8 +154,10 @@ class Tests:
         log = logger(test_type, scheme_str, self.args.cross_prefix, opt)
 
         args = ["make", test_type.make_run_target(scheme)]
-        if test_type.is_benchmark() is False:
+        if test_type.is_benchmark() is False and test_type.is_example() is False:
             args += self.make_j()
+        if test_type.make_dir() != "":
+            args += ["-C", test_type.make_dir()]
 
         env_update = {}
         if len(self.cmd_prefix()) > 0:
@@ -147,7 +174,7 @@ class Tests:
         if p.returncode != 0:
             log.error(f"'{cmd_str}' failed with with {p.returncode}")
             log.error(p.stderr.decode())
-            self.fail(f"{test_type.desc()} ({opt_label}, {scheme_str})")
+            self.fail(f"{test_type.desc()} ({scheme_str}{opt_label})")
             return True  # Failure
         elif suppress_output is True:
             if self.args.verbose is True:
@@ -249,6 +276,15 @@ class Tests:
 
         self.check_fail()
 
+    def examples(self):
+        if self.args.l is None:
+            l = TEST_TYPES.examples()
+        else:
+            l = list(map(TEST_TYPES.from_string, self.args.l))
+        for e in l:
+            self._compile_schemes(e, None)
+            self._run_scheme(e, None, None)
+
     def bench(self):
         output = self.args.output
         components = self.args.components
@@ -312,6 +348,7 @@ class Tests:
         kat = self.args.kat
         nistkat = self.args.nistkat
         acvp = self.args.acvp
+        examples = self.args.examples
 
         def _all(opt):
             if func is True:
@@ -339,6 +376,9 @@ class Tests:
             _all(False)
         if self.do_opt():
             _all(True)
+
+        if examples is True:
+            self.examples()
 
         self.check_fail()
 
