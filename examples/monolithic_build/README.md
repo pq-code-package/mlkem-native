@@ -1,20 +1,76 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
-# Using mlkem-native as a code package
+# Multi-level mlkem-native in a single compilation unit
 
-This directory contains a minimal example for how to use mlkem-native as a code package, without modifications.
+This directory contains a minimal example for how to build multiple instances of mlkem-native in a single compilation
+unit.
 
-## Components
+The auto-generated source file [mlkem_native_monobuild.c](mlkem_native_monobuild.c) includes all mlkem-native C source
+files. Moreover, it clears all `#define`s clauses set by mlkem-native at the end, and is hence amenable to multiple
+inclusion in another compilation unit.
 
-An application using mlkem-native as-is needs to include the following components:
+The manually written source file [mlkem_native_all.c](mlkem_native_all.c) includes
+[mlkem_native_monobuild.c](mlkem_native_monobuild.c) three times, once for each of the three configuration files
+[config_512.h](config_512.h), [config_768.h](config_768.h),
+[config_1024.h](config_1024.h) for the different levels. For each inclusion, it sets `MLKEM_NATIVE_CONFIG_FILE`
+appropriately first, and then includes the monobuild:
+```C
+/* Three instances of mlkem-native for all security levels */
 
-1. mlkem-native source tree, including [`mlkem/`](../../mlkem) and [`mlkem/fips202/`](../../mlkem/fips202).
-2. A secure pseudo random number generator, implementing [`randombytes.h`](../../mlkem/randombytes.h).
-3. The application source code
+#define MLKEM_NATIVE_CONFIG_FILE "config_512.h"
+#include "mlkem_native_monobuild.c"
+#undef MLKEM_NATIVE_CONFIG_FILE
 
-**WARNING:** The `randombytes()` implementation used here is for TESTING ONLY. You MUST NOT use this implementation
-outside of testing.
+#define MLKEM_NATIVE_CONFIG_FILE "config_768.h"
+#include "mlkem_native_monobuild.c"
+#undef MLKEM_NATIVE_CONFIG_FILE
+
+#define MLKEM_NATIVE_CONFIG_FILE "config_1024.h"
+#include "mlkem_native_monobuild.c"
+#undef MLKEM_NATIVE_CONFIG_FILE
+```
+
+To make the monolithic multi-level build accessible from the application sources, we provide
+[mlkem_native_all.h](mlkem_native_all.h), which includes [mlkem_native.h](../../mlkem/mlkem_native.h) once per
+configuration. Note that we don't refer to the configuration using `MLKEM_NATIVE_CONFIG_FILE`, but by setting
+`BUILD_INFO_XXX` explicitly. Otherwise, [mlkem_native.h](../../mlkem/mlkem_native.h) would include the confg, which
+would lead to name-clashes upon multiple use.
+
+```C
+/* API for MLKEM-512 */
+#define BUILD_INFO_LVL 512
+#define BUILD_INFO_NAMESPACE(sym) mlkem512_##sym
+#define BUILD_INFO_NO_STANDARD_API
+#include "mlkem_native.h"
+#undef BUILD_INFO_LVL
+#undef BUILD_INFO_NAMESPACE
+#undef BUILD_INFO_NO_STANDARD_API
+#undef MLKEM_NATIVE_H
+
+/* API for MLKEM-768 */
+#define BUILD_INFO_LVL 768
+#define BUILD_INFO_NAMESPACE(sym) mlkem768_##sym
+#define BUILD_INFO_NO_STANDARD_API
+#include "mlkem_native.h"
+#undef BUILD_INFO_LVL
+#undef BUILD_INFO_NAMESPACE
+#undef BUILD_INFO_NO_STANDARD_API
+#undef MLKEM_NATIVE_H
+
+/* API for MLKEM-1024 */
+#define BUILD_INFO_LVL 1024
+#define BUILD_INFO_NAMESPACE(sym) mlkem1024_##sym
+#define BUILD_INFO_NO_STANDARD_API
+#include "mlkem_native.h"
+#undef BUILD_INFO_LVL
+#undef BUILD_INFO_NAMESPACE
+#undef BUILD_INFO_NO_STANDARD_API
+#undef MLKEM_NATIVE_H
+```
 
 ## Usage
 
 Build this example with `make build`, run with `make run`.
+
+**WARNING:** The `randombytes()` implementation used here is for TESTING ONLY. You MUST NOT use this implementation
+outside of testing.

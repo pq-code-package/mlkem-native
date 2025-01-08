@@ -14,8 +14,10 @@ endif
 #
 # mlkem-native source and header files
 #
-# If you are not concerned about minimizing for a specific backend,
-# you can just include _all_ source files into your build.
+# Here, we use just a single monolithic compilation unit to include
+# multiple instances of mlkem-native.
+
+MLKEM_NATIVE_SOURCE=mlkem_native_all.c
 
 INC=
 INC+=-I./
@@ -39,9 +41,9 @@ RNG_SOURCE=$(wildcard test_only_rng/*.c)
 # Part C:
 #
 # Your application source code
-APP_SOURCE=main.c mlkem_native_all.c
+APP_SOURCE=main.c
 
-ALL_SOURCE=$(MLKEM_NATIVE_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
+ALL_SOURCE=$(RNG_SOURCE) $(APP_SOURCE) $(MLKEM_NATIVE_SOURCE)
 
 BUILD_DIR=build
 BIN=test_binary
