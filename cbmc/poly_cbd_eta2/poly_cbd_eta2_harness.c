@@ -6,8 +6,11 @@
 
 void harness(void)
 {
+  /* poly_cbd_eta2() is only defined for MLKEM_K == 2 or 4 */
+#if MLKEM_K == 2 || MLKEM_K == 4
   uint8_t *buf;
   poly *a;
 
   poly_cbd_eta2(a, buf);
+#endif /* MLKEM_K == 2 || MLKEM_K == 4 */
 }

@@ -29,6 +29,7 @@ __contract__(
   ensures(array_abs_bound(r->coeffs, 0, MLKEM_N - 1, MLKEM_ETA1))
 );
 
+#if MLKEM_K == 2 || MLKEM_K == 4
 #define poly_cbd_eta2 MLKEM_NAMESPACE(poly_cbd_eta2)
 /*************************************************
  * Name:        poly_cbd_eta1
@@ -48,5 +49,6 @@ __contract__(
   assigns(memory_slice(r, sizeof(poly)))
   ensures(array_abs_bound(r->coeffs, 0, MLKEM_N - 1, MLKEM_ETA2))
 );
+#endif /* MLKEM_K == 2 || MLKEM_K == 4 */
 
 #endif

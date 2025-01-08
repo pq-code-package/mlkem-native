@@ -143,6 +143,7 @@ void poly_cbd_eta1(poly *r, const uint8_t buf[MLKEM_ETA1 * MLKEM_N / 4])
 #endif
 }
 
+#if MLKEM_K == 2 || MLKEM_K == 4
 MLKEM_NATIVE_INTERNAL_API
 void poly_cbd_eta2(poly *r, const uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4])
 {
@@ -152,3 +153,4 @@ void poly_cbd_eta2(poly *r, const uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4])
 #error "This implementation requires eta2 = 2"
 #endif
 }
+#endif /* MLKEM_K == 2 || MLKEM_K == 4 */

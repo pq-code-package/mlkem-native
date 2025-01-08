@@ -581,6 +581,7 @@ __contract__(
 #define poly_getnoise_eta2_4x poly_getnoise_eta1_4x
 #endif /* MLKEM_ETA1 == MLKEM_ETA2 */
 
+#if MLKEM_K == 2 || MLKEM_K == 4
 #define poly_getnoise_eta2 MLKEM_NAMESPACE(poly_getnoise_eta2)
 /*************************************************
  * Name:        poly_getnoise_eta2
@@ -603,7 +604,9 @@ __contract__(
   assigns(object_whole(r))
   ensures(array_abs_bound(r->coeffs, 0, MLKEM_N - 1, MLKEM_ETA2))
 );
+#endif /* MLKEM_K == 2 || MLKEM_K == 4 */
 
+#if MLKEM_K == 2
 #define poly_getnoise_eta1122_4x MLKEM_NAMESPACE(poly_getnoise_eta1122_4x)
 /*************************************************
  * Name:        poly_getnoise_eta1122_4x
@@ -633,6 +636,7 @@ __contract__(
      && array_abs_bound(r2->coeffs,0, MLKEM_N - 1, MLKEM_ETA2)
      && array_abs_bound(r3->coeffs,0, MLKEM_N - 1, MLKEM_ETA2));
 );
+#endif /* MLKEM_K == 2 */
 
 #define poly_basemul_montgomery_cached \
   MLKEM_NAMESPACE(poly_basemul_montgomery_cached)
