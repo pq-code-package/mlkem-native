@@ -17,7 +17,8 @@
 
 void poly_mulcache_compute_avx2(poly_mulcache *x, const poly *y)
 {
-  mulcache_compute_avx2((__m256i *)x->coeffs, (const __m256i *)y->coeffs, (const __m256i*)zetas_mulcache_avx2, qdata.vec);
+  mulcache_compute_avx2((__m256i *)x->coeffs, (const __m256i *)y->coeffs,
+                        (const __m256i *)zetas_mulcache_avx2, qdata.vec);
 }
 
 static void poly_basemul_montgomery_avx2(poly *r, const poly *a, const poly *b,

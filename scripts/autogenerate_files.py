@@ -575,6 +575,7 @@ def gen_avx2_mulcache_zeta_file(dry_run=False):
         dry_run=dry_run,
     )
 
+
 def get_source_files():
     return get_files("mlkem/*.c")
 
@@ -655,6 +656,7 @@ def gen_monolithic_source_file(dry_run=False):
         "\n".join(gen()),
         dry_run=dry_run,
     )
+
 
 def _main():
     parser = argparse.ArgumentParser(
