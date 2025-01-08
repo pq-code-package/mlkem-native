@@ -27,6 +27,12 @@ An application using mlkem-native with a custom FIPS-202 backend and custom conf
    demonstration, we set a custom namespace. We set `MLKEM_NATIVE_FIPS202_BACKEND` to point to our custom FIPS-202
    backend, but leave `MLKEM_NATIVE_ARITH_BACKEND` undefined to indicate that we wish to use the C backend.
 
+## Note
+
+The tiny_sha3 code uses a byte-reversed presentation of the Keccakf1600 state for big-endian targets. Since
+mlkem-native's FIPS202 frontend assumes a standard presentation, the corresponding byte-reversal in
+[sha3.c](mlkem_native/fips202/native/custom/src/sha3.c) is removed.
+
 ## Usage
 
 Build this example with `make build`, run with `make run`.

@@ -31,19 +31,25 @@ void sha3_keccakf(uint64_t st[25])
   int i, j, r;
   uint64_t t, bc[5];
 
-#if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
-  uint8_t *v;
+  /* NOTE:
+   * This is present in the tiny_sha3 implementation because it uses
+   * a byte-reversed presentation of the Keccakf1600 state for big endian
+   * targets. mlkem-native uses the standard presentation, hence we don't
+   * the reversal here. */
+  /* #if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__ */
+  /*   uint8_t *v; */
 
-  /* endianess conversion. this is redundant on little-endian targets */
-  for (i = 0; i < 25; i++)
-  {
-    v = (uint8_t *)&st[i];
-    st[i] = ((uint64_t)v[0]) | (((uint64_t)v[1]) << 8) |
-            (((uint64_t)v[2]) << 16) | (((uint64_t)v[3]) << 24) |
-            (((uint64_t)v[4]) << 32) | (((uint64_t)v[5]) << 40) |
-            (((uint64_t)v[6]) << 48) | (((uint64_t)v[7]) << 56);
-  }
-#endif
+  /*   /\* endianess conversion. this is redundant on little-endian targets *\/
+   */
+  /*   for (i = 0; i < 25; i++) */
+  /*   { */
+  /*     v = (uint8_t *)&st[i]; */
+  /*     st[i] = ((uint64_t)v[0]) | (((uint64_t)v[1]) << 8) | */
+  /*             (((uint64_t)v[2]) << 16) | (((uint64_t)v[3]) << 24) | */
+  /*             (((uint64_t)v[4]) << 32) | (((uint64_t)v[5]) << 40) | */
+  /*             (((uint64_t)v[6]) << 48) | (((uint64_t)v[7]) << 56); */
+  /*   } */
+  /* #endif */
 
   /* actual iteration */
   for (r = 0; r < KECCAKF_ROUNDS; r++)
@@ -82,22 +88,28 @@ void sha3_keccakf(uint64_t st[25])
     st[0] ^= keccakf_rndc[r];
   }
 
-#if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
-  /* endianess conversion. this is redundant on little-endian targets */
-  for (i = 0; i < 25; i++)
-  {
-    v = (uint8_t *)&st[i];
-    t = st[i];
-    v[0] = t & 0xFF;
-    v[1] = (t >> 8) & 0xFF;
-    v[2] = (t >> 16) & 0xFF;
-    v[3] = (t >> 24) & 0xFF;
-    v[4] = (t >> 32) & 0xFF;
-    v[5] = (t >> 40) & 0xFF;
-    v[6] = (t >> 48) & 0xFF;
-    v[7] = (t >> 56) & 0xFF;
-  }
-#endif
+  /* NOTE:
+   * This is present in the tiny_sha3 implementation because it uses
+   * a byte-reversed presentation of the Keccakf1600 state for big endian
+   * targets. mlkem-native uses the standard presentation, hence we don't
+   * the reversal here. */
+  /* #if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__ */
+  /*   /\* endianess conversion. this is redundant on little-endian targets *\/
+   */
+  /*   for (i = 0; i < 25; i++) */
+  /*   { */
+  /*     v = (uint8_t *)&st[i]; */
+  /*     t = st[i]; */
+  /*     v[0] = t & 0xFF; */
+  /*     v[1] = (t >> 8) & 0xFF; */
+  /*     v[2] = (t >> 16) & 0xFF; */
+  /*     v[3] = (t >> 24) & 0xFF; */
+  /*     v[4] = (t >> 32) & 0xFF; */
+  /*     v[5] = (t >> 40) & 0xFF; */
+  /*     v[6] = (t >> 48) & 0xFF; */
+  /*     v[7] = (t >> 56) & 0xFF; */
+  /*   } */
+  /* #endif */
 }
 
 /* Initialize the context for SHA3 */
