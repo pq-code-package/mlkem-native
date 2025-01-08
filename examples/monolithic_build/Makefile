@@ -1,6 +1,7 @@
 # (SPDX-License-Identifier: CC-BY-4.0)
 
 .PHONY: build run clean
+.DEFAULT_GOAL := all
 
 # Append cross-prefix for cross compilation
 # Remove or ignore for native builds
@@ -73,7 +74,7 @@ $(BINARY_NAME_FULL): $(ALL_SOURCE)
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INC) $^ -o $@
 
-all: run
+all: build
 
 build: $(BINARY_NAME_FULL)
 
