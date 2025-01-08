@@ -360,6 +360,21 @@
 #endif
 
 /* mlkem/debug/debug.h */
+#if defined(mlkem_debug_assert)
+#undef mlkem_debug_assert
+#endif
+
+/* mlkem/debug/debug.h */
+#if defined(mlkem_debug_check_bounds)
+#undef mlkem_debug_check_bounds
+#endif
+
+/* mlkem/debug/debug.h */
+#if defined(mlkem_debug_print_error)
+#undef mlkem_debug_print_error
+#endif
+
+/* mlkem/debug/debug.h */
 #if defined(CASSERT)
 #undef CASSERT
 #endif
