@@ -2,6 +2,14 @@
 
 .PHONY: build run clean
 
+# Append cross-prefix for cross compilation
+# Remove or ignore for native builds
+CC  ?= gcc
+# When called from the root Makefile, CROSS_PREFIX has already been added here
+ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
+CC  := $(CROSS_PREFIX)$(CC)
+endif
+
 # Part A:
 #
 # mlkem-native source and header files
@@ -44,7 +52,21 @@ ALL_SOURCE=$(MLKEM_NATIVE_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
 BUILD_DIR=build
 BIN=test_binary
 
-CFLAGS=-std=c90
+CFLAGS := \
+	-Wall \
+	-Wextra \
+	-Wmissing-prototypes \
+	-Wshadow \
+	-Werror \
+	-Wpointer-arith \
+	-Wno-long-long \
+	-Wno-unknown-pragmas \
+	-Wno-unused-command-line-argument \
+	-fomit-frame-pointer \
+	-std=c99 \
+	-pedantic \
+	-MMD \
+	$(CFLAGS)
 
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 
@@ -58,7 +80,7 @@ all: run
 build: $(BINARY_NAME_FULL)
 
 run: $(BINARY_NAME_FULL)
-	./$(BINARY_NAME_FULL)
+	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
 
 clean:
 	rm -rf $(BUILD_DIR)
