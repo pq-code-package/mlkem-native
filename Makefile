@@ -144,3 +144,7 @@ run_bench_components: \
 clean:
 	-$(RM) -rf *.gcno *.gcda *.lcov *.o *.so
 	-$(RM) -rf $(BUILD_DIR)
+	-make clean -C examples/bring_your_own_fips202 >/dev/null
+	-make clean -C examples/custom_backend >/dev/null
+	-make clean -C examples/mlkem_native_as_code_package >/dev/null
+	-make clean -C examples/monolithic_build >/dev/null
