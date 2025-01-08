@@ -19,7 +19,6 @@ endif
 # you can just include _all_ source files into your build.
 MLKEM_NATIVE_SOURCE=$(wildcard          \
 	mlkem_native/**/*.c	  	\
-	mlkem_native/**/*.c		\
 	mlkem_native/**/**/*.c		\
 	mlkem_native/**/**/**/*.c	\
 	mlkem_native/**/**/**/**/*.c)
