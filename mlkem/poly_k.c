@@ -301,31 +301,40 @@ void poly_getnoise_eta1122_4x(poly *r0, poly *r1, poly *r2, poly *r3,
                               uint8_t nonce0, uint8_t nonce1, uint8_t nonce2,
                               uint8_t nonce3)
 {
-  ALIGN uint8_t buf1[KECCAK_WAY / 2][MLKEM_ETA1 * MLKEM_N / 4];
-  ALIGN uint8_t buf2[KECCAK_WAY / 2][MLKEM_ETA2 * MLKEM_N / 4];
-  ALIGN uint8_t extkey[KECCAK_WAY][MLKEM_SYMBYTES + 1];
-  memcpy(extkey[0], seed, MLKEM_SYMBYTES);
-  memcpy(extkey[1], seed, MLKEM_SYMBYTES);
-  memcpy(extkey[2], seed, MLKEM_SYMBYTES);
-  memcpy(extkey[3], seed, MLKEM_SYMBYTES);
-  extkey[0][MLKEM_SYMBYTES] = nonce0;
-  extkey[1][MLKEM_SYMBYTES] = nonce1;
-  extkey[2][MLKEM_SYMBYTES] = nonce2;
-  extkey[3][MLKEM_SYMBYTES] = nonce3;
+#if MLKEM_ETA2 >= MLKEM_ETA1
+#error poly_getnoise_eta1122_4x assumes MLKEM_ETA1 > MLKEM_ETA2
+#endif
+  ALIGN uint8_t buf0[MLKEM_ETA1 * MLKEM_N / 4];
+  ALIGN uint8_t buf1[MLKEM_ETA1 * MLKEM_N / 4];
+  /* pad to larger buffer*/
+  ALIGN uint8_t buf2[MLKEM_ETA1 * MLKEM_N / 4];
+  ALIGN uint8_t buf3[MLKEM_ETA1 * MLKEM_N / 4];
 
-  prf_eta1(buf1[0], extkey[0]);
-  prf_eta1(buf1[1], extkey[1]);
-  prf_eta2(buf2[0], extkey[2]);
-  prf_eta2(buf2[1], extkey[3]);
+  ALIGN uint8_t extkey0[MLKEM_SYMBYTES + 1];
+  ALIGN uint8_t extkey1[MLKEM_SYMBYTES + 1];
+  ALIGN uint8_t extkey2[MLKEM_SYMBYTES + 1];
+  ALIGN uint8_t extkey3[MLKEM_SYMBYTES + 1];
 
-  poly_cbd_eta1(r0, buf1[0]);
-  poly_cbd_eta1(r1, buf1[1]);
-  poly_cbd_eta2(r2, buf2[0]);
-  poly_cbd_eta2(r3, buf2[1]);
+  memcpy(extkey0, seed, MLKEM_SYMBYTES);
+  memcpy(extkey1, seed, MLKEM_SYMBYTES);
+  memcpy(extkey2, seed, MLKEM_SYMBYTES);
+  memcpy(extkey3, seed, MLKEM_SYMBYTES);
+  extkey0[MLKEM_SYMBYTES] = nonce0;
+  extkey1[MLKEM_SYMBYTES] = nonce1;
+  extkey2[MLKEM_SYMBYTES] = nonce2;
+  extkey3[MLKEM_SYMBYTES] = nonce3;
+
+  prf_eta1_x4(buf0, buf1, buf2, buf3, extkey0, extkey1, extkey2, extkey3);
+
+  poly_cbd_eta1(r0, buf0);
+  poly_cbd_eta1(r1, buf1);
+  poly_cbd_eta2(r2, buf2);
+  poly_cbd_eta2(r3, buf3);
 
   debug_assert_abs_bound(r0, MLKEM_N, MLKEM_ETA1 + 1);
   debug_assert_abs_bound(r1, MLKEM_N, MLKEM_ETA1 + 1);
   debug_assert_abs_bound(r2, MLKEM_N, MLKEM_ETA2 + 1);
   debug_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA2 + 1);
+
 }
 #endif /* MLKEM_K == 2 */
