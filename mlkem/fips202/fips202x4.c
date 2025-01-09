@@ -33,6 +33,13 @@ __contract__(
   assigns(memory_slice(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY)))
 {
   while (inlen >= r)
+  __loop__(
+    assigns(inlen, in0, in1, in2, in3, memory_slice(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+    invariant(inlen <= loop_entry(inlen))
+    invariant(in0 == loop_entry(in0) + (loop_entry(inlen) - inlen))
+    invariant(in1 == loop_entry(in1) + (loop_entry(inlen) - inlen))
+    invariant(in2 == loop_entry(in2) + (loop_entry(inlen) - inlen))
+    invariant(in3 == loop_entry(in3) + (loop_entry(inlen) - inlen)))
   {
     KeccakF1600x4_StateXORBytes(s, in0, in1, in2, in3, 0, r);
     KeccakF1600x4_StatePermute(s);

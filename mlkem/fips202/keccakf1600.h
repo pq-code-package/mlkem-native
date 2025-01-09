@@ -53,10 +53,30 @@ void KeccakF1600x4_StateXORBytes(uint64_t *state, const unsigned char *data0,
                                  const unsigned char *data1,
                                  const unsigned char *data2,
                                  const unsigned char *data3,
-                                 unsigned int offset, unsigned int length);
+                                 unsigned int offset, unsigned int length)
+__contract__(
+    requires(0 <= offset && offset <= KECCAK_LANES * sizeof(uint64_t) &&
+	     0 <= length && length <= KECCAK_LANES * sizeof(uint64_t) - offset)
+    requires(memory_no_alias(state, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+    requires(memory_no_alias(data0, length))
+    /* Case 1: all input buffers are distinct; Case 2: All input buffers are the same */
+    requires((memory_no_alias(data1, length) && 
+              memory_no_alias(data2, length) && 
+              memory_no_alias(data3, length)) ||
+             (same_object(data0, data1) &&
+              same_object(data0, data2) &&
+              same_object(data0, data3)))
+    assigns(memory_slice(state, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+);
+
 
 #define KeccakF1600x4_StatePermute FIPS202_NAMESPACE(KeccakF1600x4_StatePermute)
-void KeccakF1600x4_StatePermute(uint64_t *state);
+void KeccakF1600x4_StatePermute(uint64_t *state)
+__contract__(
+    requires(memory_no_alias(state, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+    assigns(memory_slice(state, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+);
+
 
 #if !defined(MLKEM_USE_FIPS202_X1_ASM)
 #define KeccakF1600_StatePermute FIPS202_NAMESPACE(KeccakF1600_StatePermute)
