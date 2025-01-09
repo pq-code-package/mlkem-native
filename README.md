@@ -15,7 +15,8 @@ implementation](https://github.com/pq-crystals/kyber/tree/main/ref).
 
 mlkem-native aims to be secure, fast, and easy to use: It provides native code backends in C, AArch64 and
 x86_64, offering state of the art performance on most Arm, Intel and AMD platforms (see
-[benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/)). The C code in [mlkem/*](mlkem) is verified
+[benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/)).
+The frontend and the C backend (i.e., all C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202)) are verified
 using [CBMC](https://github.com/diffblue/cbmc) to be free of undefined behaviour. In particular, there are no out of
 bounds accesses, nor integer overflows during optimized modular arithmetic.
 
@@ -54,9 +55,9 @@ through suitable barriers and constant-time patterns.
 ## Formal Verification
 
 We use the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) to prove absence of various classes of
-undefined behaviour in C, including out of bounds memory accesses and integer overflows. At present, the proofs cover
-all C code in [mlkem/*](mlkem) involved in running mlkem-native with its C backend. See [cbmc](cbmc) for
-details.
+undefined behaviour in C, including out of bounds memory accesses and integer overflows. The proofs cover
+all C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202) involved in running mlkem-native with its C backend.
+See [cbmc](cbmc) for details.
 
 Experiments are underway to verify assembly using the [HOL-Light](https://hol-light.github.io/) theorem prover
 and the [s2n-bignum](https://github.com/awslabs/s2n-bignum) infrastructure (e.g. see
