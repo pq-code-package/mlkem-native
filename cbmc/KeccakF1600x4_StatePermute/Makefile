@@ -3,11 +3,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = KeccakF1600x4_StateXORBytes_harness
+HARNESS_FILE = KeccakF1600x4_StatePermute_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = KeccakF1600x4_StateXORBytes
+PROOF_UID = KeccakF1600x4_StatePermute
 
 DEFINES +=
 INCLUDES +=
@@ -18,16 +18,27 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/fips202/keccakf1600.c
 
-CHECK_FUNCTION_CONTRACTS=$(FIPS202_NAMESPACE)KeccakF1600x4_StateXORBytes
-USE_FUNCTION_CONTRACTS=$(FIPS202_NAMESPACE)KeccakF1600_StateXORBytes
+CHECK_FUNCTION_CONTRACTS=$(FIPS202_NAMESPACE)KeccakF1600x4_StatePermute
+USE_FUNCTION_CONTRACTS=$(FIPS202_NAMESPACE)KeccakF1600_StatePermute
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--bitwuzla
+CBMCFLAGS=--smt2
 
-FUNCTION_NAME = $(FIPS202_NAMESPACE)KeccakF1600x4_StateXORBytes
+# For this proof we tell CBMC to
+#  1. not decompose arrays into their individual cells
+#  2. to model arrays directly as SMT-lib arrays
+#  3. to slice constraints that are not in the cone of influcence of the proof obligations
+# These options simplify them modelling of arrays and produce much more compact
+# SMT files, leaving all array-type reasoning to the SMT solver.
+#
+# For functions that use large and multi-dimensional arrays, this yields
+# a substantial improvement in proof performance.
+CBMCFLAGS += --no-array-field-sensitivity --arrays-uf-always --slice-formula
+
+FUNCTION_NAME = $(FIPS202_NAMESPACE)KeccakF1600x4_StatePermute
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

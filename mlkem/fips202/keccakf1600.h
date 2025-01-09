@@ -63,9 +63,9 @@ __contract__(
     requires((memory_no_alias(data1, length) && 
               memory_no_alias(data2, length) && 
               memory_no_alias(data3, length)) ||
-             (same_object(data0, data1) &&
-              same_object(data0, data2) &&
-              same_object(data0, data3)))
+             (data0 == data1 &&
+              data0 == data2 &&
+              data0 == data3))
     assigns(memory_slice(state, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
 );
 
