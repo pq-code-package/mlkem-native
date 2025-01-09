@@ -23,8 +23,23 @@ typedef shake128x4ctx shake256x4_ctx;
 static void keccak_absorb_once_x4(uint64_t *s, uint32_t r, const uint8_t *in0,
                                   const uint8_t *in1, const uint8_t *in2,
                                   const uint8_t *in3, size_t inlen, uint8_t p)
+__contract__(
+  requires(memory_no_alias(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+  requires(r <= sizeof(uint64_t) * KECCAK_LANES)
+  requires(memory_no_alias(in0, inlen))
+  requires(memory_no_alias(in1, inlen))
+  requires(memory_no_alias(in2, inlen))
+  requires(memory_no_alias(in3, inlen))
+  assigns(memory_slice(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY)))
 {
   while (inlen >= r)
+  __loop__(
+    assigns(inlen, in0, in1, in2, in3, memory_slice(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+    invariant(inlen <= loop_entry(inlen))
+    invariant(in0 == loop_entry(in0) + (loop_entry(inlen) - inlen))
+    invariant(in1 == loop_entry(in1) + (loop_entry(inlen) - inlen))
+    invariant(in2 == loop_entry(in2) + (loop_entry(inlen) - inlen))
+    invariant(in3 == loop_entry(in3) + (loop_entry(inlen) - inlen)))
   {
     KeccakF1600x4_StateXORBytes(s, in0, in1, in2, in3, 0, r);
     KeccakF1600x4_StatePermute(s);
@@ -57,8 +72,33 @@ static void keccak_absorb_once_x4(uint64_t *s, uint32_t r, const uint8_t *in0,
 static void keccak_squeezeblocks_x4(uint8_t *out0, uint8_t *out1, uint8_t *out2,
                                     uint8_t *out3, size_t nblocks, uint64_t *s,
                                     uint32_t r)
+__contract__(
+    requires(r <= sizeof(uint64_t) * KECCAK_LANES)
+    requires(nblocks <= 8 /* somewhat arbitrary bound */)
+    requires(memory_no_alias(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+    requires(memory_no_alias(out0, nblocks * r))
+    requires(memory_no_alias(out1, nblocks * r))
+    requires(memory_no_alias(out2, nblocks * r))
+    requires(memory_no_alias(out3, nblocks * r))
+    assigns(memory_slice(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+    assigns(memory_slice(out0, nblocks * r))
+    assigns(memory_slice(out1, nblocks * r))
+    assigns(memory_slice(out2, nblocks * r))
+    assigns(memory_slice(out3, nblocks * r)))
 {
   while (nblocks > 0)
+  __loop__(
+    assigns(out0, out1, out2, out3, nblocks,
+            memory_slice(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY),
+            memory_slice(out0, nblocks * r),
+            memory_slice(out1, nblocks * r),
+            memory_slice(out2, nblocks * r),
+            memory_slice(out3, nblocks * r))
+    invariant(nblocks <= loop_entry(nblocks) &&
+      out0 == loop_entry(out0) + r * (loop_entry(nblocks) - nblocks) &&
+      out1 == loop_entry(out1) + r * (loop_entry(nblocks) - nblocks) &&
+      out2 == loop_entry(out2) + r * (loop_entry(nblocks) - nblocks) &&
+      out3 == loop_entry(out3) + r * (loop_entry(nblocks) - nblocks)))
   {
     KeccakF1600x4_StatePermute(s);
     KeccakF1600x4_StateExtractBytes(s, out0, out1, out2, out3, 0, r);
@@ -113,7 +153,10 @@ void shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
 {
   shake256x4_ctx statex;
   size_t nblocks = outlen / SHAKE256_RATE;
-  uint8_t tmp[KECCAK_WAY][SHAKE256_RATE];
+  uint8_t tmp0[SHAKE256_RATE];
+  uint8_t tmp1[SHAKE256_RATE];
+  uint8_t tmp2[SHAKE256_RATE];
+  uint8_t tmp3[SHAKE256_RATE];
 
   shake256x4_absorb_once(&statex, in0, in1, in2, in3, inlen);
   shake256x4_squeezeblocks(out0, out1, out2, out3, nblocks, &statex);
@@ -127,10 +170,10 @@ void shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
 
   if (outlen)
   {
-    shake256x4_squeezeblocks(tmp[0], tmp[1], tmp[2], tmp[3], 1, &statex);
-    memcpy(out0, tmp[0], outlen);
-    memcpy(out1, tmp[1], outlen);
-    memcpy(out2, tmp[2], outlen);
-    memcpy(out3, tmp[3], outlen);
+    shake256x4_squeezeblocks(tmp0, tmp1, tmp2, tmp3, 1, &statex);
+    memcpy(out0, tmp0, outlen);
+    memcpy(out1, tmp1, outlen);
+    memcpy(out2, tmp2, outlen);
+    memcpy(out3, tmp3, outlen);
   }
 }
