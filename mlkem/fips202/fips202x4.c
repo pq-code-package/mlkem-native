@@ -23,6 +23,14 @@ typedef shake128x4ctx shake256x4_ctx;
 static void keccak_absorb_once_x4(uint64_t *s, uint32_t r, const uint8_t *in0,
                                   const uint8_t *in1, const uint8_t *in2,
                                   const uint8_t *in3, size_t inlen, uint8_t p)
+__contract__(
+  requires(memory_no_alias(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+  requires(r <= sizeof(uint64_t) * KECCAK_LANES)
+  requires(memory_no_alias(in0, inlen))
+  requires(memory_no_alias(in1, inlen))
+  requires(memory_no_alias(in2, inlen))
+  requires(memory_no_alias(in3, inlen))
+  assigns(memory_slice(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY)))
 {
   while (inlen >= r)
   {
