@@ -73,12 +73,12 @@ __contract__(
     requires(memory_no_alias(state, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
     requires(memory_no_alias(data0, length))
     /* Case 1: all input buffers are distinct; Case 2: All input buffers are the same */
-    requires((memory_no_alias(data1, length) && 
-              memory_no_alias(data2, length) && 
-              memory_no_alias(data3, length)) ||
-             (data0 == data1 &&
+    requires((data0 == data1 &&
               data0 == data2 &&
-              data0 == data3))
+              data0 == data3) ||
+	     (memory_no_alias(data1, length) &&
+              memory_no_alias(data2, length) &&
+              memory_no_alias(data3, length)))
     assigns(memory_slice(state, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
 );
 
