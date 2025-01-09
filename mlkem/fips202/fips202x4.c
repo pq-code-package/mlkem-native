@@ -87,6 +87,18 @@ __contract__(
     assigns(memory_slice(out3, nblocks * r)))
 {
   while (nblocks > 0)
+  __loop__(
+    assigns(out0, out1, out2, out3, nblocks,
+            memory_slice(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY),
+            memory_slice(out0, nblocks * r),
+            memory_slice(out1, nblocks * r),
+            memory_slice(out2, nblocks * r),
+            memory_slice(out3, nblocks * r))
+    invariant(nblocks <= loop_entry(nblocks) &&
+      out0 == loop_entry(out0) + r * (loop_entry(nblocks) - nblocks) &&
+      out1 == loop_entry(out1) + r * (loop_entry(nblocks) - nblocks) &&
+      out2 == loop_entry(out2) + r * (loop_entry(nblocks) - nblocks) &&
+      out3 == loop_entry(out3) + r * (loop_entry(nblocks) - nblocks)))
   {
     KeccakF1600x4_StatePermute(s);
     KeccakF1600x4_StateExtractBytes(s, out0, out1, out2, out3, 0, r);

@@ -45,7 +45,20 @@ __contract__(
 void KeccakF1600x4_StateExtractBytes(uint64_t *state, unsigned char *data0,
                                      unsigned char *data1, unsigned char *data2,
                                      unsigned char *data3, unsigned int offset,
-                                     unsigned int length);
+                                     unsigned int length)
+__contract__(
+    requires(0 <= offset && offset <= KECCAK_LANES * sizeof(uint64_t) &&
+	     0 <= length && length <= KECCAK_LANES * sizeof(uint64_t) - offset)
+    requires(memory_no_alias(state, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+    requires(memory_no_alias(data0, length))
+    requires(memory_no_alias(data1, length))
+    requires(memory_no_alias(data2, length))
+    requires(memory_no_alias(data3, length))
+    assigns(memory_slice(data0, length))
+    assigns(memory_slice(data1, length))
+    assigns(memory_slice(data2, length))
+    assigns(memory_slice(data3, length))
+);
 
 #define KeccakF1600x4_StateXORBytes \
   FIPS202_NAMESPACE(KeccakF1600x4_StateXORBytes)
