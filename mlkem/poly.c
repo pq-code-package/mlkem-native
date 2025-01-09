@@ -376,22 +376,27 @@ void poly_getnoise_eta1_4x(poly *r0, poly *r1, poly *r2, poly *r3,
                            const uint8_t seed[MLKEM_SYMBYTES], uint8_t nonce0,
                            uint8_t nonce1, uint8_t nonce2, uint8_t nonce3)
 {
-  ALIGN uint8_t buf[KECCAK_WAY][MLKEM_ETA1 * MLKEM_N / 4];
-  ALIGN uint8_t extkey[KECCAK_WAY][MLKEM_SYMBYTES + 1];
-  memcpy(extkey[0], seed, MLKEM_SYMBYTES);
-  memcpy(extkey[1], seed, MLKEM_SYMBYTES);
-  memcpy(extkey[2], seed, MLKEM_SYMBYTES);
-  memcpy(extkey[3], seed, MLKEM_SYMBYTES);
-  extkey[0][MLKEM_SYMBYTES] = nonce0;
-  extkey[1][MLKEM_SYMBYTES] = nonce1;
-  extkey[2][MLKEM_SYMBYTES] = nonce2;
-  extkey[3][MLKEM_SYMBYTES] = nonce3;
-  prf_eta1_x4(buf[0], buf[1], buf[2], buf[3], extkey[0], extkey[1], extkey[2],
-              extkey[3]);
-  poly_cbd_eta1(r0, buf[0]);
-  poly_cbd_eta1(r1, buf[1]);
-  poly_cbd_eta1(r2, buf[2]);
-  poly_cbd_eta1(r3, buf[3]);
+  ALIGN uint8_t buf0[MLKEM_ETA1 * MLKEM_N / 4];
+  ALIGN uint8_t buf1[MLKEM_ETA1 * MLKEM_N / 4];
+  ALIGN uint8_t buf2[MLKEM_ETA1 * MLKEM_N / 4];
+  ALIGN uint8_t buf3[MLKEM_ETA1 * MLKEM_N / 4];
+  ALIGN uint8_t extkey0[MLKEM_SYMBYTES + 1];
+  ALIGN uint8_t extkey1[MLKEM_SYMBYTES + 1];
+  ALIGN uint8_t extkey2[MLKEM_SYMBYTES + 1];
+  ALIGN uint8_t extkey3[MLKEM_SYMBYTES + 1];
+  memcpy(extkey0, seed, MLKEM_SYMBYTES);
+  memcpy(extkey1, seed, MLKEM_SYMBYTES);
+  memcpy(extkey2, seed, MLKEM_SYMBYTES);
+  memcpy(extkey3, seed, MLKEM_SYMBYTES);
+  extkey0[MLKEM_SYMBYTES] = nonce0;
+  extkey1[MLKEM_SYMBYTES] = nonce1;
+  extkey2[MLKEM_SYMBYTES] = nonce2;
+  extkey3[MLKEM_SYMBYTES] = nonce3;
+  prf_eta1_x4(buf0, buf1, buf2, buf3, extkey0, extkey1, extkey2, extkey3);
+  poly_cbd_eta1(r0, buf0);
+  poly_cbd_eta1(r1, buf1);
+  poly_cbd_eta1(r2, buf2);
+  poly_cbd_eta1(r3, buf3);
 
   POLY_BOUND_MSG(r0, MLKEM_ETA1 + 1, "poly_getnoise_eta1_4x output 0");
   POLY_BOUND_MSG(r1, MLKEM_ETA1 + 1, "poly_getnoise_eta1_4x output 1");
