@@ -153,7 +153,10 @@ void shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
 {
   shake256x4_ctx statex;
   size_t nblocks = outlen / SHAKE256_RATE;
-  uint8_t tmp[KECCAK_WAY][SHAKE256_RATE];
+  uint8_t tmp0[SHAKE256_RATE];
+  uint8_t tmp1[SHAKE256_RATE];
+  uint8_t tmp2[SHAKE256_RATE];
+  uint8_t tmp3[SHAKE256_RATE];
 
   shake256x4_absorb_once(&statex, in0, in1, in2, in3, inlen);
   shake256x4_squeezeblocks(out0, out1, out2, out3, nblocks, &statex);
@@ -167,10 +170,10 @@ void shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
 
   if (outlen)
   {
-    shake256x4_squeezeblocks(tmp[0], tmp[1], tmp[2], tmp[3], 1, &statex);
-    memcpy(out0, tmp[0], outlen);
-    memcpy(out1, tmp[1], outlen);
-    memcpy(out2, tmp[2], outlen);
-    memcpy(out3, tmp[3], outlen);
+    shake256x4_squeezeblocks(tmp0, tmp1, tmp2, tmp3, 1, &statex);
+    memcpy(out0, tmp0, outlen);
+    memcpy(out1, tmp1, outlen);
+    memcpy(out2, tmp2, outlen);
+    memcpy(out3, tmp3, outlen);
   }
 }
