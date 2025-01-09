@@ -7,7 +7,7 @@
 void harness(void)
 {
   uint64_t *state;
-  const unsigned char *data0, data1, data2, data3;
+  const unsigned char *data0, *data1, *data2, *data3;
   unsigned int offset;
   unsigned int length;
   KeccakF1600x4_StateXORBytes(state, data0, data1, data2, data3, offset,
