@@ -72,6 +72,19 @@ __contract__(
 static void keccak_squeezeblocks_x4(uint8_t *out0, uint8_t *out1, uint8_t *out2,
                                     uint8_t *out3, size_t nblocks, uint64_t *s,
                                     uint32_t r)
+__contract__(
+    requires(r <= sizeof(uint64_t) * KECCAK_LANES)
+    requires(nblocks <= 8 /* somewhat arbitrary bound */)
+    requires(memory_no_alias(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+    requires(memory_no_alias(out0, nblocks * r))
+    requires(memory_no_alias(out1, nblocks * r))
+    requires(memory_no_alias(out2, nblocks * r))
+    requires(memory_no_alias(out3, nblocks * r))
+    assigns(memory_slice(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+    assigns(memory_slice(out0, nblocks * r))
+    assigns(memory_slice(out1, nblocks * r))
+    assigns(memory_slice(out2, nblocks * r))
+    assigns(memory_slice(out3, nblocks * r)))
 {
   while (nblocks > 0)
   {

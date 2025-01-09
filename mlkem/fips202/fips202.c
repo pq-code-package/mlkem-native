@@ -107,7 +107,7 @@ __contract__(
     requires(memory_no_alias(s, sizeof(uint64_t) * KECCAK_LANES))
     requires(memory_no_alias(h, nblocks * r))
     assigns(memory_slice(s, sizeof(uint64_t) * KECCAK_LANES))
-    assigns(memory_slice(h, nblocks *r)))
+    assigns(memory_slice(h, nblocks * r)))
 {
   while (nblocks > 0)
   __loop__(

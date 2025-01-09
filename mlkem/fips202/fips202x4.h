@@ -38,6 +38,7 @@ void shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
                               uint8_t *out3, size_t nblocks,
                               shake128x4ctx *state)
 __contract__(
+  requires(nblocks <= 8 /* somewhat arbitrary bound */)
   requires(memory_no_alias(state, sizeof(shake128x4ctx)))
   requires(memory_no_alias(out0, nblocks * SHAKE128_RATE))
   requires(memory_no_alias(out1, nblocks * SHAKE128_RATE))
