@@ -55,11 +55,13 @@
 #error MLKEM_K not set by config file
 #endif
 
-#ifndef MLKEM_NAMESPACE
-#error MLKEM_NAMESPACE not set by config file
+#ifndef MLKEM_NAMESPACE_PREFIX
+#error MLKEM_NAMESPACE_PREFIX not set by config file
 #endif
 
-#define BUILD_INFO_NAMESPACE(sym) MLKEM_NAMESPACE(sym)
+#define BUILD_INFO_CONCAT_(x, y) x##_##y
+#define BUILD_INFO_CONCAT(x, y) BUILD_INFO_CONCAT_(x, y)
+#define BUILD_INFO_NAMESPACE(sym) BUILD_INFO_CONCAT(MLKEM_NAMESPACE_PREFIX, sym)
 
 #endif /* BUILD_INFO_LVL */
 

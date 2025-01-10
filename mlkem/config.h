@@ -42,18 +42,28 @@
 /******************************************************************************
  * Name:        MLKEM_NAMESPACE
  *
- * Description: The macros to use to namespace global symbols
+ * Description: The prefix to use to namespace global symbols
  *              from mlkem/.
+ *
+ *              This can also be set using CFLAGS.
+ *
  *****************************************************************************/
-#define MLKEM_NAMESPACE(sym) MLKEM_DEFAULT_NAMESPACE(sym)
+#if !defined(MLKEM_NAMESPACE_PREFIX)
+#define MLKEM_NAMESPACE_PREFIX MLKEM_DEFAULT_NAMESPACE_PREFIX
+#endif
 
 /******************************************************************************
  * Name:        FIPS202_NAMESPACE
  *
- * Description: The macros to use to namespace global symbols
+ * Description: The prefix to use to namespace global symbols
  *              from mlkem/fips202/.
+ *
+ *              This can also be set using CFLAGS.
+ *
  *****************************************************************************/
-#define FIPS202_NAMESPACE(sym) FIPS202_DEFAULT_NAMESPACE(sym)
+#if !defined(FIPS202_NAMESPACE_PREFIX)
+#define FIPS202_NAMESPACE_PREFIX FIPS202_DEFAULT_NAMESPACE_PREFIX
+#endif
 
 /******************************************************************************
  * Name:        MLKEM_USE_NATIVE
@@ -113,11 +123,7 @@
  * e.g., PQCP_MLKEM_NATIVE_FIPS202_C_
  */
 
-#define FIPS202_DEFAULT_NAMESPACE___(x1, x2) x1##_##x2
-#define FIPS202_DEFAULT_NAMESPACE__(x1, x2) FIPS202_DEFAULT_NAMESPACE___(x1, x2)
-
-#define FIPS202_DEFAULT_NAMESPACE(s) \
-  FIPS202_DEFAULT_NAMESPACE__(PQCP_MLKEM_NATIVE_FIPS202, s)
+#define FIPS202_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_FIPS202
 
 /*
  * The default MLKEM namespace is
@@ -127,19 +133,12 @@
  * e.g., PQCP_MLKEM_NATIVE_MLKEM512_AARCH64_OPT_
  */
 
-#define MLKEM_DEFAULT_NAMESPACE___(x1, x2, x3) x1##_##x2##_##x3
-#define MLKEM_DEFAULT_NAMESPACE__(x1, x2, x3) \
-  MLKEM_DEFAULT_NAMESPACE___(x1, x2, x3)
-
 #if MLKEM_K == 2
-#define MLKEM_DEFAULT_NAMESPACE(s) \
-  MLKEM_DEFAULT_NAMESPACE__(PQCP_MLKEM_NATIVE, MLKEM512, s)
+#define MLKEM_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM512
 #elif MLKEM_K == 3
-#define MLKEM_DEFAULT_NAMESPACE(s) \
-  MLKEM_DEFAULT_NAMESPACE__(PQCP_MLKEM_NATIVE, MLKEM768, s)
+#define MLKEM_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM768
 #elif MLKEM_K == 4
-#define MLKEM_DEFAULT_NAMESPACE(s) \
-  MLKEM_DEFAULT_NAMESPACE__(PQCP_MLKEM_NATIVE, MLKEM1024, s)
+#define MLKEM_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM1024
 #endif
 
 #endif /* MLkEM_NATIVE_CONFIG_H */

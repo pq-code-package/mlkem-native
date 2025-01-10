@@ -38,21 +38,26 @@
 /* #define MLKEM_NATIVE_CONFIG_FILE "config.h" */
 
 /******************************************************************************
- * Name:        MLKEM_NAMESPACE
+ * Name:        MLKEM_NAMESPACE_PREFIX
  *
- * Description: The macros to use to namespace global symbols
+ * Description: The prefix to use to namespace global symbols
  *              from mlkem/.
+ *
+ *              This can also be set using CFLAGS.
+ *
  *****************************************************************************/
-#define CONCAT(a, b) a##b
-#define MLKEM_NAMESPACE(sym) CONCAT(mlkem1024_, sym)
+#define MLKEM_NAMESPACE_PREFIX mlkem1024
 
 /******************************************************************************
- * Name:        FIPS202_NAMESPACE
+ * Name:        FIPS202_NAMESPACE_PREFIX
  *
- * Description: The macros to use to namespace global symbols
+ * Description: The prefix to use to namespace global symbols
  *              from mlkem/fips202/.
+ *
+ *              This can also be set using CFLAGS.
+ *
  *****************************************************************************/
-#define FIPS202_NAMESPACE(sym) CONCAT(fips202_, sym)
+#define FIPS202_NAMESPACE_PREFIX fips202
 
 /******************************************************************************
  * Name:        MLKEM_USE_NATIVE

@@ -40,6 +40,15 @@
 #define MLKEM_NATIVE_INTERNAL_API static
 #endif
 
+#define MLKEM_NATIVE_MAKE_NAMESPACE_(x1, x2) x1##_##x2
+#define MLKEM_NATIVE_MAKE_NAMESPACE(x1, x2) MLKEM_NATIVE_MAKE_NAMESPACE_(x1, x2)
+
+#define FIPS202_NAMESPACE(s) \
+  MLKEM_NATIVE_MAKE_NAMESPACE(FIPS202_NAMESPACE_PREFIX, s)
+
+#define MLKEM_NAMESPACE(s) \
+  MLKEM_NATIVE_MAKE_NAMESPACE(MLKEM_NAMESPACE_PREFIX, s)
+
 /* On Apple platforms, we need to emit leading underscore
  * in front of assembly symbols. We thus introducee a separate
  * namespace wrapper for ASM symbols. */

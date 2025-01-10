@@ -249,6 +249,26 @@
 #endif
 
 /* mlkem/common.h */
+#if defined(MLKEM_NATIVE_MAKE_NAMESPACE_)
+#undef MLKEM_NATIVE_MAKE_NAMESPACE_
+#endif
+
+/* mlkem/common.h */
+#if defined(MLKEM_NATIVE_MAKE_NAMESPACE)
+#undef MLKEM_NATIVE_MAKE_NAMESPACE
+#endif
+
+/* mlkem/common.h */
+#if defined(FIPS202_NAMESPACE)
+#undef FIPS202_NAMESPACE
+#endif
+
+/* mlkem/common.h */
+#if defined(MLKEM_NAMESPACE)
+#undef MLKEM_NAMESPACE
+#endif
+
+/* mlkem/common.h */
 #if defined(MLKEM_ASM_NAMESPACE)
 #undef MLKEM_ASM_NAMESPACE
 #endif
@@ -289,13 +309,13 @@
 #endif
 
 /* mlkem/config.h */
-#if defined(MLKEM_NAMESPACE)
-#undef MLKEM_NAMESPACE
+#if defined(MLKEM_NAMESPACE_PREFIX)
+#undef MLKEM_NAMESPACE_PREFIX
 #endif
 
 /* mlkem/config.h */
-#if defined(FIPS202_NAMESPACE)
-#undef FIPS202_NAMESPACE
+#if defined(FIPS202_NAMESPACE_PREFIX)
+#undef FIPS202_NAMESPACE_PREFIX
 #endif
 
 /* mlkem/config.h */
@@ -309,43 +329,23 @@
 #endif
 
 /* mlkem/config.h */
-#if defined(FIPS202_DEFAULT_NAMESPACE___)
-#undef FIPS202_DEFAULT_NAMESPACE___
+#if defined(FIPS202_DEFAULT_NAMESPACE_PREFIX)
+#undef FIPS202_DEFAULT_NAMESPACE_PREFIX
 #endif
 
 /* mlkem/config.h */
-#if defined(FIPS202_DEFAULT_NAMESPACE__)
-#undef FIPS202_DEFAULT_NAMESPACE__
+#if defined(MLKEM_DEFAULT_NAMESPACE_PREFIX)
+#undef MLKEM_DEFAULT_NAMESPACE_PREFIX
 #endif
 
 /* mlkem/config.h */
-#if defined(FIPS202_DEFAULT_NAMESPACE)
-#undef FIPS202_DEFAULT_NAMESPACE
+#if defined(MLKEM_DEFAULT_NAMESPACE_PREFIX)
+#undef MLKEM_DEFAULT_NAMESPACE_PREFIX
 #endif
 
 /* mlkem/config.h */
-#if defined(MLKEM_DEFAULT_NAMESPACE___)
-#undef MLKEM_DEFAULT_NAMESPACE___
-#endif
-
-/* mlkem/config.h */
-#if defined(MLKEM_DEFAULT_NAMESPACE__)
-#undef MLKEM_DEFAULT_NAMESPACE__
-#endif
-
-/* mlkem/config.h */
-#if defined(MLKEM_DEFAULT_NAMESPACE)
-#undef MLKEM_DEFAULT_NAMESPACE
-#endif
-
-/* mlkem/config.h */
-#if defined(MLKEM_DEFAULT_NAMESPACE)
-#undef MLKEM_DEFAULT_NAMESPACE
-#endif
-
-/* mlkem/config.h */
-#if defined(MLKEM_DEFAULT_NAMESPACE)
-#undef MLKEM_DEFAULT_NAMESPACE
+#if defined(MLKEM_DEFAULT_NAMESPACE_PREFIX)
+#undef MLKEM_DEFAULT_NAMESPACE_PREFIX
 #endif
 
 /* mlkem/debug/debug.c */
@@ -636,6 +636,16 @@
 /* mlkem/mlkem_native.h */
 #if defined(BUILD_INFO_LVL)
 #undef BUILD_INFO_LVL
+#endif
+
+/* mlkem/mlkem_native.h */
+#if defined(BUILD_INFO_CONCAT_)
+#undef BUILD_INFO_CONCAT_
+#endif
+
+/* mlkem/mlkem_native.h */
+#if defined(BUILD_INFO_CONCAT)
+#undef BUILD_INFO_CONCAT
 #endif
 
 /* mlkem/mlkem_native.h */
