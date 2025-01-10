@@ -298,11 +298,12 @@ def get_litani_capabilities(litani_path):
 def check_uid_uniqueness(proof_dir, proof_uids):
     with (pathlib.Path(proof_dir) / "Makefile").open() as handle:
         for line in handle:
-            match = re.match(r"^PROOF_UID\s*=\s*(?P<uid>\w+)", line)
+            match = re.match(r"^PROOF_UID\s*=(?P<uid>[^#]+)", line)
             if not match:
                 continue
-            if match["uid"] not in proof_uids:
-                proof_uids[match["uid"]] = proof_dir
+            uid = match["uid"].strip()
+            if uid not in proof_uids:
+                proof_uids[uid] = proof_dir
                 return
 
             logging.critical(
