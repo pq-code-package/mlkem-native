@@ -576,7 +576,11 @@ def get_defines():
                     )
 
 
-def gen_monolithic_undef_all_core():
+def gen_monolithic_undef_all_core(filt=None):
+
+    if filt is None:
+        filt = lambda c: True
+
     yield ""
     yield "/*"
     yield " * Undo all #define directives from *.c or *.h files"
@@ -594,24 +598,38 @@ def gen_monolithic_undef_all_core():
     defines.sort()
 
     for filename, line_no, d in defines:
+        if filt(filename) is False:
+            continue
         yield from undo_define(filename, d)
 
 
-def gen_monolithic_source_file_core():
-    for c in get_source_files():
-        yield f'#include "{c}"'
-
-    yield from gen_monolithic_undef_all_core()
-
-
 def gen_monolithic_source_file(dry_run=False):
+
+    def fips202_only(c):
+        return "fips202/" in c
+
+    def no_fips202(c):
+        return not fips202_only(c)
+
     def gen():
         yield from gen_header()
         yield "/*"
         yield " * Monolithic compilation unit bundling all compilation units within mlkem-native"
         yield " */"
         yield ""
-        yield from gen_monolithic_source_file_core()
+        for c in filter(no_fips202, get_source_files()):
+            yield f'#include "{c}"'
+        yield ""
+        yield "#if !defined(MLKEM_NATIVE_MONOBUILD_NO_FIPS202_SOURCES)"
+        for c in filter(fips202_only, get_source_files()):
+            yield f'#include "{c}"'
+        yield "#endif /* MLKEM_NATIVE_MONOBUILD_NO_FIPS202_SOURCES */"
+        yield ""
+        yield from gen_monolithic_undef_all_core(filt=no_fips202)
+        yield ""
+        yield "#if !defined(MLKEM_NATIVE_MONOBUILD_KEEP_FIPS202_HEADERS)"
+        yield from gen_monolithic_undef_all_core(filt=fips202_only)
+        yield "#endif /* MLKEM_NATIVE_MONOBUILD_KEEP_FIPS202_HEADERS */"
         yield ""
 
     update_file(

@@ -5,9 +5,13 @@
 
 /* Three instances of mlkem-native for all security levels */
 
+#define MLKEM_NATIVE_MONOBUILD_KEEP_FIPS202_HEADERS
+
 #define MLKEM_NATIVE_CONFIG_FILE "config_512.h"
 #include "mlkem_native_monobuild.c"
 #undef MLKEM_NATIVE_CONFIG_FILE
+
+#define MLKEM_NATIVE_MONOBUILD_NO_FIPS202_SOURCES
 
 #define MLKEM_NATIVE_CONFIG_FILE "config_768.h"
 #include "mlkem_native_monobuild.c"
