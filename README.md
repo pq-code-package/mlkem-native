@@ -1,7 +1,5 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
-![mlkem_native_logo](docs/images/mlkem_native.png)
-
 # mlkem-native
 
 ![CI](https://github.com/pq-code-package/mlkem-native/actions/workflows/ci.yml/badge.svg)
