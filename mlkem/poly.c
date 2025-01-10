@@ -29,7 +29,7 @@ void poly_compress_du(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DU], const poly *a)
     for (k = 0; k < 8; k++)
     __loop__(
       invariant(k >= 0 && k <= 8)
-      invariant(forall(int, r, 0, k - 1, t[r] < (1u << 11))))
+      invariant(forall(int, r, 0, k, t[r] < (1u << 11))))
     {
       t[k] = scalar_compress_d11(a->coeffs[8 * j + k]);
     }
@@ -60,7 +60,7 @@ void poly_compress_du(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DU], const poly *a)
     for (k = 0; k < 4; k++)
     __loop__(
       invariant(k >= 0 && k <= 4)
-      invariant(forall(int, r, 0, k - 1, t[r] < (1u << 10))))
+      invariant(forall(int, r, 0, k, t[r] < (1u << 10))))
     {
       t[k] = scalar_compress_d10(a->coeffs[4 * j + k]);
     }
@@ -89,7 +89,7 @@ void poly_decompress_du(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DU])
   for (j = 0; j < MLKEM_N / 8; j++)
   __loop__(
     invariant(0 <= j && j <= MLKEM_N / 8)
-    invariant(array_bound(r->coeffs, 0, 8 * j - 1, 0, (MLKEM_Q - 1))))
+    invariant(array_bound(r->coeffs, 0, 8 * j, 0, (MLKEM_Q - 1))))
   {
     int k;
     uint16_t t[8];
@@ -108,7 +108,7 @@ void poly_decompress_du(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DU])
     for (k = 0; k < 8; k++)
     __loop__(
       invariant(0 <= k && k <= 8)
-      invariant(array_bound(r->coeffs, 0, 8 * j + k - 1, 0, (MLKEM_Q - 1))))
+      invariant(array_bound(r->coeffs, 0, 8 * j + k, 0, (MLKEM_Q - 1))))
     {
       r->coeffs[8 * j + k] = scalar_decompress_d11(t[k]);
     }
@@ -117,7 +117,7 @@ void poly_decompress_du(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DU])
   for (j = 0; j < MLKEM_N / 4; j++)
   __loop__(
     invariant(0 <= j && j <= MLKEM_N / 4)
-    invariant(array_bound(r->coeffs, 0, 4 * j - 1, 0, (MLKEM_Q - 1))))
+    invariant(array_bound(r->coeffs, 0, 4 * j, 0, (MLKEM_Q - 1))))
   {
     int k;
     uint16_t t[4];
@@ -131,7 +131,7 @@ void poly_decompress_du(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DU])
     for (k = 0; k < 4; k++)
     __loop__(
       invariant(0 <= k && k <= 4)
-      invariant(array_bound(r->coeffs, 0, 4 * j + k - 1, 0, (MLKEM_Q - 1))))
+      invariant(array_bound(r->coeffs, 0, 4 * j + k, 0, (MLKEM_Q - 1))))
     {
       r->coeffs[4 * j + k] = scalar_decompress_d10(t[k]);
     }
@@ -156,7 +156,7 @@ void poly_compress_dv(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DV], const poly *a)
     for (j = 0; j < 8; j++)
     __loop__(
       invariant(i >= 0 && i <= MLKEM_N / 8 && j >= 0 && j <= 8)
-      invariant(array_bound(t, 0, (j-1), 0, 15)))
+      invariant(array_bound(t, 0, j, 0, 15)))
     {
       t[j] = scalar_compress_d4(a->coeffs[8 * i + j]);
     }
@@ -175,7 +175,7 @@ void poly_compress_dv(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DV], const poly *a)
     for (j = 0; j < 8; j++)
     __loop__(
       invariant(i >= 0 && i <= MLKEM_N / 8 && j >= 0 && j <= 8)
-      invariant(array_bound(t, 0, (j-1), 0, 31)))
+      invariant(array_bound(t, 0, j, 0, 31)))
     {
       t[j] = scalar_compress_d5(a->coeffs[8 * i + j]);
     }
@@ -204,7 +204,7 @@ void poly_decompress_dv(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DV])
   for (i = 0; i < MLKEM_N / 2; i++)
   __loop__(
     invariant(i >= 0 && i <= MLKEM_N / 2)
-    invariant(array_bound(r->coeffs, 0, (2 * i - 1), 0, (MLKEM_Q - 1))))
+    invariant(array_bound(r->coeffs, 0, 2 * i, 0, (MLKEM_Q - 1))))
   {
     r->coeffs[2 * i + 0] = scalar_decompress_d4((a[i] >> 0) & 0xF);
     r->coeffs[2 * i + 1] = scalar_decompress_d4((a[i] >> 4) & 0xF);
@@ -213,7 +213,7 @@ void poly_decompress_dv(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DV])
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(
     invariant(i >= 0 && i <= MLKEM_N / 8)
-    invariant(array_bound(r->coeffs, 0, (8 * i - 1), 0, (MLKEM_Q - 1))))
+    invariant(array_bound(r->coeffs, 0, 8 * i, 0, (MLKEM_Q - 1))))
   {
     int j;
     uint8_t t[8];
@@ -241,7 +241,7 @@ void poly_decompress_dv(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DV])
     for (j = 0; j < 8; j++)
     __loop__(
       invariant(j >= 0 && j <= 8 && i >= 0 && i <= MLKEM_N / 8)
-      invariant(array_bound(r->coeffs, 0, (8 * i + j - 1), 0, (MLKEM_Q - 1))))
+      invariant(array_bound(r->coeffs, 0, 8 * i + j, 0, (MLKEM_Q - 1))))
     {
       r->coeffs[8 * i + j] = scalar_decompress_d5(t[j]);
     }
@@ -303,7 +303,7 @@ void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
   for (i = 0; i < MLKEM_N / 2; i++)
   __loop__(
     invariant(i >= 0 && i <= MLKEM_N / 2)
-    invariant(array_bound(r->coeffs, 0, (2 * i - 1), 0, UINT12_MAX)))
+    invariant(array_bound(r->coeffs, 0, 2 * i, 0, UINT12_MAX)))
   {
     const uint8_t t0 = a[3 * i + 0];
     const uint8_t t1 = a[3 * i + 1];
@@ -334,13 +334,13 @@ void poly_frommsg(poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(
     invariant(i >= 0 && i <= MLKEM_N / 8)
-    invariant(array_bound(r->coeffs, 0, (8 * i - 1), 0, (MLKEM_Q - 1))))
+    invariant(array_bound(r->coeffs, 0, 8 * i, 0, (MLKEM_Q - 1))))
   {
     int j;
     for (j = 0; j < 8; j++)
     __loop__(
       invariant(i >= 0 && i <  MLKEM_N / 8 && j >= 0 && j <= 8)
-      invariant(array_bound(r->coeffs, 0, (8 * i + j - 1), 0, (MLKEM_Q - 1))))
+      invariant(array_bound(r->coeffs, 0, 8 * i + j, 0, (MLKEM_Q - 1))))
     {
       /* Prevent the compiler from recognizing this as a bit selection */
       uint8_t mask = value_barrier_u8(1u << j);
@@ -469,7 +469,7 @@ void poly_basemul_montgomery_cached(poly *r, const poly *a, const poly *b,
   __loop__(
     assigns(i, object_whole(r))
     invariant(i >= 0 && i <= MLKEM_N / 4)
-    invariant(array_abs_bound(r->coeffs, 0, (4 * i - 1), 2 * MLKEM_Q - 1)))
+    invariant(array_abs_bound(r->coeffs, 0, 4 * i, 2 * MLKEM_Q - 1)))
   {
     basemul_cached(&r->coeffs[4 * i], &a->coeffs[4 * i], &b->coeffs[4 * i],
                    b_cache->coeffs[2 * i]);
@@ -487,7 +487,7 @@ void poly_tomont(poly *r)
   for (i = 0; i < MLKEM_N; i++)
   __loop__(
     invariant(i >= 0 && i <= MLKEM_N)
-    invariant(array_abs_bound(r->coeffs ,0, (i - 1), (MLKEM_Q - 1))))
+    invariant(array_abs_bound(r->coeffs ,0, i, (MLKEM_Q - 1))))
   {
     r->coeffs[i] = fqmul(r->coeffs[i], f);
   }
@@ -511,7 +511,7 @@ void poly_reduce(poly *r)
   for (i = 0; i < MLKEM_N; i++)
   __loop__(
     invariant(i >= 0 && i <= MLKEM_N)
-    invariant(array_bound(r->coeffs, 0, (i - 1), 0, (MLKEM_Q - 1))))
+    invariant(array_bound(r->coeffs, 0, i, 0, (MLKEM_Q - 1))))
   {
     /* Barrett reduction, giving signed canonical representative */
     int16_t t = barrett_reduce(r->coeffs[i]);
@@ -537,8 +537,8 @@ void poly_add(poly *r, const poly *b)
   for (i = 0; i < MLKEM_N; i++)
   __loop__(
     invariant(i >= 0 && i <= MLKEM_N)
-    invariant(forall(int, k0, i, MLKEM_N - 1, r->coeffs[k0] == loop_entry(*r).coeffs[k0]))
-    invariant(forall(int, k1, 0, i - 1, r->coeffs[k1] == loop_entry(*r).coeffs[k1] + b->coeffs[k1])))
+    invariant(forall(int, k0, i, MLKEM_N, r->coeffs[k0] == loop_entry(*r).coeffs[k0]))
+    invariant(forall(int, k1, 0, i, r->coeffs[k1] == loop_entry(*r).coeffs[k1] + b->coeffs[k1])))
   {
     r->coeffs[i] = r->coeffs[i] + b->coeffs[i];
   }
@@ -551,8 +551,8 @@ void poly_sub(poly *r, const poly *b)
   for (i = 0; i < MLKEM_N; i++)
   __loop__(
     invariant(i >= 0 && i <= MLKEM_N)
-    invariant(forall(int, k0, i, MLKEM_N - 1, r->coeffs[k0] == loop_entry(*r).coeffs[k0]))
-    invariant(forall(int, k1, 0, i - 1, r->coeffs[k1] == loop_entry(*r).coeffs[k1] - b->coeffs[k1])))
+    invariant(forall(int, k0, i, MLKEM_N, r->coeffs[k0] == loop_entry(*r).coeffs[k0]))
+    invariant(forall(int, k1, 0, i, r->coeffs[k1] == loop_entry(*r).coeffs[k1] - b->coeffs[k1])))
   {
     r->coeffs[i] = r->coeffs[i] - b->coeffs[i];
   }

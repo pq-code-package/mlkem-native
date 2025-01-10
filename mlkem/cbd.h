@@ -26,7 +26,7 @@ __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   requires(memory_no_alias(buf, MLKEM_ETA1 * MLKEM_N / 4))
   assigns(memory_slice(r, sizeof(poly)))
-  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N - 1, MLKEM_ETA1))
+  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_ETA1))
 );
 
 #if MLKEM_K == 2 || MLKEM_K == 4
@@ -47,7 +47,7 @@ __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   requires(memory_no_alias(buf, MLKEM_ETA2 * MLKEM_N / 4))
   assigns(memory_slice(r, sizeof(poly)))
-  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N - 1, MLKEM_ETA2))
+  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_ETA2))
 );
 #endif /* MLKEM_K == 2 || MLKEM_K == 4 */
 

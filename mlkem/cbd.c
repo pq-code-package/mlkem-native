@@ -73,7 +73,7 @@ static void cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(
     invariant(i >= 0 && i <= MLKEM_N / 8)
-    invariant(array_abs_bound(r->coeffs, 0, (8 * i - 1), 2)))
+    invariant(array_abs_bound(r->coeffs, 0, 8 * i, 2)))
   {
     int j;
     uint32_t t = load32_littleendian(buf + 4 * i);
@@ -83,7 +83,7 @@ static void cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
     for (j = 0; j < 8; j++)
     __loop__(
       invariant(i >= 0 && i <= MLKEM_N / 8 && j >= 0 && j <= 8)
-      invariant(array_abs_bound(r->coeffs, 0, 8 * i + j - 1, 2)))
+      invariant(array_abs_bound(r->coeffs, 0, 8 * i + j, 2)))
     {
       const int16_t a = (d >> (4 * j + 0)) & 0x3;
       const int16_t b = (d >> (4 * j + 2)) & 0x3;
@@ -110,7 +110,7 @@ static void cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4])
   for (i = 0; i < MLKEM_N / 4; i++)
   __loop__(
     invariant(i >= 0 && i <= MLKEM_N / 4)
-    invariant(array_abs_bound(r->coeffs, 0, (4 * i - 1), 3)))
+    invariant(array_abs_bound(r->coeffs, 0, 4 * i, 3)))
   {
     int j;
     const uint32_t t = load24_littleendian(buf + 3 * i);
@@ -121,7 +121,7 @@ static void cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4])
     for (j = 0; j < 4; j++)
     __loop__(
       invariant(i >= 0 && i <= MLKEM_N / 4 && j >= 0 && j <= 4)
-      invariant(array_abs_bound(r->coeffs, 0, 4 * i + j - 1, 3)))
+      invariant(array_abs_bound(r->coeffs, 0, 4 * i + j, 3)))
     {
       const int16_t a = (d >> (6 * j + 0)) & 0x7;
       const int16_t b = (d >> (6 * j + 3)) & 0x7;

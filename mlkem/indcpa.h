@@ -30,8 +30,8 @@ __contract__(
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
   requires(transposed == 0 || transposed == 1)
   assigns(object_whole(a))
-  ensures(forall(int, x, 0, MLKEM_K - 1, forall(int, y, 0, MLKEM_K - 1,
-  array_bound(a[x].vec[y].coeffs, 0, MLKEM_N - 1, 0, (MLKEM_Q - 1)))));
+  ensures(forall(int, x, 0, MLKEM_K, forall(int, y, 0, MLKEM_K,
+  array_bound(a[x].vec[y].coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1)))));
 );
 
 #define indcpa_keypair_derand MLKEM_NAMESPACE(indcpa_keypair_derand)

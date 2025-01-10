@@ -261,7 +261,7 @@ __contract__(
   requires(memory_no_alias(a, len))
   requires(memory_no_alias(b, len))
   requires(len <= INT_MAX)
-  ensures((return_value == 0) == forall(int, i, 0, ((int)len - 1), (a[i] == b[i]))))
+  ensures((return_value == 0) == forall(int, i, 0, (int)len, (a[i] == b[i]))))
 {
   uint8_t r = 0, s = 0;
 
@@ -276,7 +276,7 @@ __contract__(
   for (i = 0; i < ilen; i++)
   __loop__(
     invariant(i >= 0 && i <= ilen)
-    invariant((r == 0) == (forall(int, k, 0, (i - 1), (a[k] == b[k])))))
+    invariant((r == 0) == (forall(int, k, 0, i, (a[k] == b[k])))))
   {
     r |= a[i] ^ b[i];
     /* s is useless, but prevents the loop from being aborted once r=0xff. */

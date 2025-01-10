@@ -39,8 +39,8 @@ void polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(a, sizeof(polyvec)))
-  requires(forall(int, k0, 0, MLKEM_K - 1,
-         array_bound(a->vec[k0].coeffs, 0, (MLKEM_N - 1), 0, (MLKEM_Q - 1))))
+  requires(forall(int, k0, 0, MLKEM_K,
+         array_bound(a->vec[k0].coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1))))
   assigns(object_whole(r))
 );
 
@@ -63,8 +63,8 @@ __contract__(
   requires(memory_no_alias(a, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(r, sizeof(polyvec)))
   assigns(object_whole(r))
-  ensures(forall(int, k0, 0, MLKEM_K - 1,
-         array_bound(r->vec[k0].coeffs, 0, (MLKEM_N - 1), 0, (MLKEM_Q - 1))))
+  ensures(forall(int, k0, 0, MLKEM_K,
+         array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1))))
 );
 
 #define polyvec_tobytes MLKEM_NAMESPACE(polyvec_tobytes)
@@ -83,8 +83,8 @@ void polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const polyvec *a)
 __contract__(
   requires(memory_no_alias(a, sizeof(polyvec)))
   requires(memory_no_alias(r, MLKEM_POLYVECBYTES))
-  requires(forall(int, k0, 0, MLKEM_K - 1,
-         array_bound(a->vec[k0].coeffs, 0, (MLKEM_N - 1), 0, (MLKEM_Q - 1))))
+  requires(forall(int, k0, 0, MLKEM_K,
+         array_bound(a->vec[k0].coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1))))
   assigns(object_whole(r))
 );
 
@@ -106,8 +106,8 @@ __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
   requires(memory_no_alias(a, MLKEM_POLYVECBYTES))
   assigns(object_whole(r))
-  ensures(forall(int, k0, 0, MLKEM_K - 1,
-        array_bound(r->vec[k0].coeffs, 0, (MLKEM_N - 1), 0, UINT12_MAX)))
+  ensures(forall(int, k0, 0, MLKEM_K,
+        array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, UINT12_MAX)))
 );
 
 #define polyvec_ntt MLKEM_NAMESPACE(polyvec_ntt)
@@ -129,11 +129,11 @@ MLKEM_NATIVE_INTERNAL_API
 void polyvec_ntt(polyvec *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
-  requires(forall(int, j, 0, MLKEM_K - 1,
-  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N - 1, (MLKEM_Q - 1))))
+  requires(forall(int, j, 0, MLKEM_K,
+  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, (MLKEM_Q - 1))))
   assigns(object_whole(r))
-  ensures(forall(int, j, 0, MLKEM_K - 1,
-  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N - 1, (NTT_BOUND - 1))))
+  ensures(forall(int, j, 0, MLKEM_K,
+  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, (NTT_BOUND - 1))))
 );
 
 #define polyvec_invntt_tomont MLKEM_NAMESPACE(polyvec_invntt_tomont)
@@ -157,8 +157,8 @@ void polyvec_invntt_tomont(polyvec *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
   assigns(object_whole(r))
-  ensures(forall(int, j, 0, MLKEM_K - 1,
-  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N - 1, (INVNTT_BOUND - 1))))
+  ensures(forall(int, j, 0, MLKEM_K,
+  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, (INVNTT_BOUND - 1))))
 );
 
 #define polyvec_basemul_acc_montgomery \
@@ -179,8 +179,8 @@ __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   requires(memory_no_alias(a, sizeof(polyvec)))
   requires(memory_no_alias(b, sizeof(polyvec)))
-  requires(forall(int, k1, 0, MLKEM_K - 1,
-    array_abs_bound(a->vec[k1].coeffs, 0, MLKEM_N - 1, UINT12_MAX)))
+  requires(forall(int, k1, 0, MLKEM_K,
+    array_abs_bound(a->vec[k1].coeffs, 0, MLKEM_N, UINT12_MAX)))
   assigns(memory_slice(r, sizeof(poly)))
 );
 
@@ -213,8 +213,8 @@ __contract__(
   requires(memory_no_alias(a, sizeof(polyvec)))
   requires(memory_no_alias(b, sizeof(polyvec)))
   requires(memory_no_alias(b_cache, sizeof(polyvec_mulcache)))
-  requires(forall(int, k1, 0, MLKEM_K - 1,
-    array_abs_bound(a->vec[k1].coeffs, 0, MLKEM_N - 1, UINT12_MAX)))
+  requires(forall(int, k1, 0, MLKEM_K,
+    array_abs_bound(a->vec[k1].coeffs, 0, MLKEM_N, UINT12_MAX)))
   assigns(memory_slice(r, sizeof(poly)))
 );
 
@@ -274,8 +274,8 @@ void polyvec_reduce(polyvec *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
   assigns(object_whole(r))
-  ensures(forall(int, k0, 0, MLKEM_K - 1,
-    array_bound(r->vec[k0].coeffs, 0, MLKEM_N - 1, 0, (MLKEM_Q - 1))))
+  ensures(forall(int, k0, 0, MLKEM_K,
+    array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1))))
 );
 
 #define polyvec_add MLKEM_NAMESPACE(polyvec_add)
@@ -300,11 +300,11 @@ void polyvec_add(polyvec *r, const polyvec *b)
 __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
   requires(memory_no_alias(b, sizeof(polyvec)))
-  requires(forall(int, j0, 0, MLKEM_K - 1,
-          forall(int, k0, 0, MLKEM_N - 1,
+  requires(forall(int, j0, 0, MLKEM_K,
+          forall(int, k0, 0, MLKEM_N,
             (int32_t)r->vec[j0].coeffs[k0] + b->vec[j0].coeffs[k0] <= INT16_MAX)))
-  requires(forall(int, j1, 0, MLKEM_K - 1,
-          forall(int, k1, 0, MLKEM_N - 1,
+  requires(forall(int, j1, 0, MLKEM_K,
+          forall(int, k1, 0, MLKEM_N,
             (int32_t)r->vec[j1].coeffs[k1] + b->vec[j1].coeffs[k1] >= INT16_MIN)))
   assigns(object_whole(r))
 );
@@ -325,8 +325,8 @@ __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
   assigns(memory_slice(r, sizeof(polyvec)))
   assigns(object_whole(r))
-  ensures(forall(int, j, 0, MLKEM_K - 1,
-  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N - 1, (MLKEM_Q - 1))))
+  ensures(forall(int, j, 0, MLKEM_K,
+  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, (MLKEM_Q - 1))))
 );
 
 #endif

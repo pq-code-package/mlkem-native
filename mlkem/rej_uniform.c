@@ -49,10 +49,10 @@ __contract__(
   requires(offset <= target && target <= 4096 && buflen <= 4096 && buflen % 3 == 0)
   requires(memory_no_alias(r, sizeof(int16_t) * target))
   requires(memory_no_alias(buf, buflen))
-  requires(offset > 0 ==> array_bound(r, 0, offset - 1, 0, (MLKEM_Q - 1)))
+  requires(offset > 0 ==> array_bound(r, 0, offset, 0, (MLKEM_Q - 1)))
   assigns(memory_slice(r, sizeof(int16_t) * target))
   ensures(offset <= return_value && return_value <= target)
-  ensures(return_value > 0 ==> array_bound(r, 0, return_value - 1, 0, (MLKEM_Q - 1)))
+  ensures(return_value > 0 ==> array_bound(r, 0, return_value, 0, (MLKEM_Q - 1)))
 )
 {
   unsigned int ctr, pos;
@@ -64,7 +64,7 @@ __contract__(
   while (ctr < target && pos + 3 <= buflen)
   __loop__(
     invariant(offset <= ctr && ctr <= target && pos <= buflen)
-    invariant(ctr > 0 ==> array_bound(r, 0, ctr - 1, 0, (MLKEM_Q - 1))))
+    invariant(ctr > 0 ==> array_bound(r, 0, ctr, 0, (MLKEM_Q - 1))))
   {
     val0 = ((buf[pos + 0] >> 0) | ((uint16_t)buf[pos + 1] << 8)) & 0xFFF;
     val1 = ((buf[pos + 1] >> 4) | ((uint16_t)buf[pos + 2] << 4)) & 0xFFF;
