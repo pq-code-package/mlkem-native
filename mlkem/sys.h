@@ -23,9 +23,9 @@
 #endif
 #endif /* __x86_64__ */
 
-/* Check endianness */
+/* Try to find endianness, if not forced through CFLAGS already */
+#if !defined(SYS_LITTLE_ENDIAN) && !defined(SYS_BIG_ENDIAN)
 #if defined(__BYTE_ORDER__)
-
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define SYS_LITTLE_ENDIAN
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
@@ -34,6 +34,7 @@
 #error "__BYTE_ORDER__ defined, but don't recognize value."
 #endif /* __BYTE_ORER__ */
 #endif /* !defined(__BYTE_ORER__) */
+#endif /* defined(SYS_LITTLE_ENDIAN) || defined(SYS_BIG_ENDIAN) */
 
 /* If FORCE_AARCH64 is set, assert that we're indeed on an AArch64 system. */
 #if defined(FORCE_AARCH64) && !defined(SYS_AARCH64)

@@ -41,8 +41,9 @@ void KeccakF1600_StateExtractBytes(uint64_t *state, unsigned char *data,
 #else  /* SYS_LITTLE_ENDIAN */
   /* Portable version */
   for (i = 0; i < length; i++)
+  __loop__(invariant(0 <= i && i <= length))
   {
-    data[i] = state[(offset + i) >> 3] >> (8 * ((offset + i) & 0x07));
+    data[i] = (state[(offset + i) >> 3] >> (8 * ((offset + i) & 0x07))) & 0xFF;
   }
 #endif /* SYS_LITTLE_ENDIAN */
 }
@@ -61,6 +62,7 @@ void KeccakF1600_StateXORBytes(uint64_t *state, const unsigned char *data,
 #else  /* SYS_LITTLE_ENDIAN */
   /* Portable version */
   for (i = 0; i < length; i++)
+  __loop__(invariant(i <= length))
   {
     state[(offset + i) >> 3] ^= (uint64_t)data[i]
                                 << (8 * ((offset + i) & 0x07));
