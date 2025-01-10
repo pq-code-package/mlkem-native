@@ -36,9 +36,9 @@ MLKEM_NATIVE_INTERNAL_API
 void poly_ntt(poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
-  requires(array_abs_bound(r->coeffs, 0, MLKEM_N - 1, MLKEM_Q - 1))
+  requires(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_Q - 1))
   assigns(memory_slice(r, sizeof(poly)))
-  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N - 1, NTT_BOUND - 1))
+  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, NTT_BOUND - 1))
 );
 
 #define poly_invntt_tomont MLKEM_NAMESPACE(poly_invntt_tomont)
@@ -63,7 +63,7 @@ void poly_invntt_tomont(poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   assigns(memory_slice(r, sizeof(poly)))
-  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N - 1, INVNTT_BOUND - 1))
+  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, INVNTT_BOUND - 1))
 );
 
 #define basemul_cached MLKEM_NAMESPACE(basemul_cached)
@@ -94,9 +94,9 @@ __contract__(
   requires(memory_no_alias(r, 2 * sizeof(int16_t)))
   requires(memory_no_alias(a, 2 * sizeof(int16_t)))
   requires(memory_no_alias(b, 2 * sizeof(int16_t)))
-  requires(array_abs_bound(a, 0, 1, UINT12_MAX))
+  requires(array_abs_bound(a, 0, 2, UINT12_MAX))
   assigns(memory_slice(r, 2 * sizeof(int16_t)))
-  ensures(array_abs_bound(r, 0, 1, 2 * MLKEM_Q - 1))
+  ensures(array_abs_bound(r, 0, 2, 2 * MLKEM_Q - 1))
 );
 
 

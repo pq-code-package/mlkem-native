@@ -69,7 +69,7 @@
 
 /*
  * Quantifiers
- * Note that the range on qvar is _inclusive_ between qvar_lb .. qvar_ub
+ * Note that the range on qvar is _exclusive_ between qvar_lb .. qvar_ub
  * https://diffblue.github.io/cbmc/contracts-quantifiers.html
  */
 
@@ -81,14 +81,14 @@
   __CPROVER_forall                                                \
   {                                                               \
     type qvar;                                                    \
-    ((qvar_lb) <= (qvar) && (qvar) <= (qvar_ub)) ==> (predicate)  \
+    ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) ==> (predicate)   \
   }
 
 #define EXISTS(type, qvar, qvar_lb, qvar_ub, predicate)         \
   __CPROVER_exists                                              \
   {                                                             \
     type qvar;                                                  \
-    ((qvar_lb) <= (qvar) && (qvar) <= (qvar_ub)) && (predicate) \
+    ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) && (predicate)  \
   }
 /* clang-format on */
 
@@ -100,7 +100,7 @@
  * Boolean-value predidate that asserts that "all values of array_var are in
  * range value_lb .. value_ub (inclusive)"
  * Example:
- *  array_bound(a->coeffs, 0, MLKEM_N-1, -(MLKEM_Q - 1), MLKEM_Q - 1)
+ *  array_bound(a->coeffs, 0, MLKEM_N, -(MLKEM_Q - 1), MLKEM_Q - 1)
  * expands to
  *  __CPROVER_forall { int k; (0 <= k && k <= MLKEM_N-1) ==> ( (-(MLKEM_Q -
  *  1) <= a->coeffs[k]) && (a->coeffs[k] <= (MLKEM_Q - 1))) }
@@ -118,7 +118,7 @@
   __CPROVER_forall                                                     \
   {                                                                    \
     indextype qvar;                                                    \
-    ((qvar_lb) <= (qvar) && (qvar) <= (qvar_ub)) ==>                   \
+    ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) ==>                    \
         (((value_lb) <= (array_var[(qvar)])) &&                        \
         ((array_var[(qvar)]) <= (value_ub)))                           \
   }
