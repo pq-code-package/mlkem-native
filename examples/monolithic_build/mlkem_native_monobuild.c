@@ -15,11 +15,6 @@
 
 #include "mlkem/cbd.c"
 #include "mlkem/debug/debug.c"
-#include "mlkem/fips202/fips202.c"
-#include "mlkem/fips202/fips202x4.c"
-#include "mlkem/fips202/keccakf1600.c"
-#include "mlkem/fips202/native/aarch64/src/keccakf1600_round_constants.c"
-#include "mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c"
 #include "mlkem/indcpa.c"
 #include "mlkem/kem.c"
 #include "mlkem/native/aarch64/src/aarch64_zetas.c"
@@ -34,6 +29,15 @@
 #include "mlkem/rej_uniform.c"
 #include "mlkem/verify.c"
 #include "mlkem/zetas.c"
+
+#if !defined(MLKEM_NATIVE_MONOBUILD_NO_FIPS202_SOURCES)
+#include "mlkem/fips202/fips202.c"
+#include "mlkem/fips202/fips202x4.c"
+#include "mlkem/fips202/keccakf1600.c"
+#include "mlkem/fips202/native/aarch64/src/keccakf1600_round_constants.c"
+#include "mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c"
+#endif /* MLKEM_NATIVE_MONOBUILD_NO_FIPS202_SOURCES */
+
 
 /*
  * Undo all #define directives from *.c or *.h files
@@ -517,676 +521,6 @@
 /* mlkem/debug/debug.h */
 #if defined(STATIC_ASSERT)
 #undef STATIC_ASSERT
-#endif
-
-/* mlkem/fips202/fips202.c */
-#if defined(keccak_absorb_once)
-#undef keccak_absorb_once
-#endif
-
-/* mlkem/fips202/fips202.c */
-#if defined(keccak_squeeze_once)
-#undef keccak_squeeze_once
-#endif
-
-/* mlkem/fips202/fips202.c */
-#if defined(keccak_squeezeblocks)
-#undef keccak_squeezeblocks
-#endif
-
-/* mlkem/fips202/fips202.c */
-#if defined(shake256ctx)
-#undef shake256ctx
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(FIPS202_H)
-#undef FIPS202_H
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(SHAKE128_RATE)
-#undef SHAKE128_RATE
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(SHAKE256_RATE)
-#undef SHAKE256_RATE
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(SHA3_256_RATE)
-#undef SHA3_256_RATE
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(SHA3_384_RATE)
-#undef SHA3_384_RATE
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(SHA3_512_RATE)
-#undef SHA3_512_RATE
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(shake128ctx)
-#undef shake128ctx
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(shake128_absorb_once)
-#undef shake128_absorb_once
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(shake128_squeezeblocks)
-#undef shake128_squeezeblocks
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(shake128_release)
-#undef shake128_release
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(shake256)
-#undef shake256
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(SHA3_256_HASHBYTES)
-#undef SHA3_256_HASHBYTES
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(sha3_256)
-#undef sha3_256
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(SHA3_512_HASHBYTES)
-#undef SHA3_512_HASHBYTES
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(sha3_512)
-#undef sha3_512
-#endif
-
-/* mlkem/fips202/fips202_backend.h */
-#if defined(MLKEM_NATIVE_FIPS202_IMPL_H)
-#undef MLKEM_NATIVE_FIPS202_IMPL_H
-#endif
-
-/* mlkem/fips202/fips202x4.c */
-#if defined(shake256x4_ctx)
-#undef shake256x4_ctx
-#endif
-
-/* mlkem/fips202/fips202x4.c */
-#if defined(keccak_absorb_once_x4)
-#undef keccak_absorb_once_x4
-#endif
-
-/* mlkem/fips202/fips202x4.c */
-#if defined(keccak_squeezeblocks_x4)
-#undef keccak_squeezeblocks_x4
-#endif
-
-/* mlkem/fips202/fips202x4.c */
-#if defined(shake256x4_absorb_once)
-#undef shake256x4_absorb_once
-#endif
-
-/* mlkem/fips202/fips202x4.c */
-#if defined(shake256x4_squeezeblocks)
-#undef shake256x4_squeezeblocks
-#endif
-
-/* mlkem/fips202/fips202x4.h */
-#if defined(FIPS_202X4_H)
-#undef FIPS_202X4_H
-#endif
-
-/* mlkem/fips202/fips202x4.h */
-#if defined(shake128x4ctx)
-#undef shake128x4ctx
-#endif
-
-/* mlkem/fips202/fips202x4.h */
-#if defined(shake128x4_absorb_once)
-#undef shake128x4_absorb_once
-#endif
-
-/* mlkem/fips202/fips202x4.h */
-#if defined(shake128x4_squeezeblocks)
-#undef shake128x4_squeezeblocks
-#endif
-
-/* mlkem/fips202/fips202x4.h */
-#if defined(shake128x4_release)
-#undef shake128x4_release
-#endif
-
-/* mlkem/fips202/fips202x4.h */
-#if defined(shake256x4)
-#undef shake256x4
-#endif
-
-/* mlkem/fips202/keccakf1600.c */
-#if defined(NROUNDS)
-#undef NROUNDS
-#endif
-
-/* mlkem/fips202/keccakf1600.c */
-#if defined(ROL)
-#undef ROL
-#endif
-
-/* mlkem/fips202/keccakf1600.c */
-#if defined(KeccakF_RoundConstants)
-#undef KeccakF_RoundConstants
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
-#if defined(KECCAKF1600_H)
-#undef KECCAKF1600_H
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
-#if defined(KECCAK_LANES)
-#undef KECCAK_LANES
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
-#if defined(KeccakF1600_StateExtractBytes)
-#undef KeccakF1600_StateExtractBytes
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
-#if defined(KeccakF1600_StateXORBytes)
-#undef KeccakF1600_StateXORBytes
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
-#if defined(KeccakF1600x4_StateExtractBytes)
-#undef KeccakF1600x4_StateExtractBytes
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
-#if defined(KeccakF1600x4_StateXORBytes)
-#undef KeccakF1600x4_StateXORBytes
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
-#if defined(KeccakF1600x4_StatePermute)
-#undef KeccakF1600x4_StatePermute
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
-#if defined(KeccakF1600_StatePermute)
-#undef KeccakF1600_StatePermute
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
-#if defined(KeccakF1600_StatePermute)
-#undef KeccakF1600_StatePermute
-#endif
-
-/* mlkem/fips202/native/aarch64/cortex_a55.h */
-#if defined(FIPS202_NATIVE_PROFILE_H)
-#undef FIPS202_NATIVE_PROFILE_H
-#endif
-
-/* mlkem/fips202/native/aarch64/cortex_a55.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55
-#endif
-
-/* mlkem/fips202/native/aarch64/cortex_a55.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_NAME)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_NAME
-#endif
-
-/* mlkem/fips202/native/aarch64/cortex_a55.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_IMPL)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_IMPL
-#endif
-
-/* mlkem/fips202/native/aarch64/default.h */
-#if defined(FIPS202_NATIVE_PROFILE_H)
-#undef FIPS202_NATIVE_PROFILE_H
-#endif
-
-/* mlkem/fips202/native/aarch64/default.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT
-#endif
-
-/* mlkem/fips202/native/aarch64/default.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_NAME)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_NAME
-#endif
-
-/* mlkem/fips202/native/aarch64/default.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_IMPL)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_IMPL
-#endif
-
-/* mlkem/fips202/native/aarch64/src/cortex_a55_impl.h */
-#if defined(FIPS202_NATIVE_PROFILE_IMPL_H)
-#undef FIPS202_NATIVE_PROFILE_IMPL_H
-#endif
-
-/* mlkem/fips202/native/aarch64/src/cortex_a55_impl.h */
-#if defined(MLKEM_USE_FIPS202_X1_NATIVE)
-#undef MLKEM_USE_FIPS202_X1_NATIVE
-#endif
-
-/* mlkem/fips202/native/aarch64/src/default_impl.h */
-#if defined(FIPS202_NATIVE_PROFILE_IMPL_H)
-#undef FIPS202_NATIVE_PROFILE_IMPL_H
-#endif
-
-/* mlkem/fips202/native/aarch64/src/default_impl.h */
-#if defined(MLKEM_USE_FIPS202_X1_NATIVE)
-#undef MLKEM_USE_FIPS202_X1_NATIVE
-#endif
-
-/* mlkem/fips202/native/aarch64/src/default_impl.h */
-#if defined(MLKEM_USE_FIPS202_X1_NATIVE)
-#undef MLKEM_USE_FIPS202_X1_NATIVE
-#endif
-
-/* mlkem/fips202/native/aarch64/src/default_impl.h */
-#if defined(MLKEM_USE_FIPS202_X2_NATIVE)
-#undef MLKEM_USE_FIPS202_X2_NATIVE
-#endif
-
-/* mlkem/fips202/native/aarch64/src/default_impl.h */
-#if defined(MLKEM_USE_FIPS202_X4_NATIVE)
-#undef MLKEM_USE_FIPS202_X4_NATIVE
-#endif
-
-/* mlkem/fips202/native/aarch64/src/default_impl.h */
-#if defined(MLKEM_USE_FIPS202_X4_NATIVE)
-#undef MLKEM_USE_FIPS202_X4_NATIVE
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(FIPS202_AARCH64_NATIVE_H)
-#undef FIPS202_AARCH64_NATIVE_H
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(keccak_f1600_x1_scalar_asm_opt)
-#undef keccak_f1600_x1_scalar_asm_opt
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(keccak_f1600_x1_v84a_asm_clean)
-#undef keccak_f1600_x1_v84a_asm_clean
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(keccak_f1600_x2_v84a_asm_clean)
-#undef keccak_f1600_x2_v84a_asm_clean
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(keccak_f1600_x2_v8a_v84a_asm_hybrid)
-#undef keccak_f1600_x2_v8a_v84a_asm_hybrid
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(keccak_f1600_x4_scalar_v8a_asm_hybrid_opt)
-#undef keccak_f1600_x4_scalar_v8a_asm_hybrid_opt
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(keccak_f1600_x4_scalar_v84a_asm_hybrid_opt)
-#undef keccak_f1600_x4_scalar_v84a_asm_hybrid_opt
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt)
-#undef keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(keccakf1600_round_constants)
-#undef keccakf1600_round_constants
-#endif
-
-/* mlkem/fips202/native/aarch64/src/keccakf1600_round_constants.c */
-#if defined(empty_cu_keccakf1600_round_constants)
-#undef empty_cu_keccakf1600_round_constants
-#endif
-
-/* mlkem/fips202/native/api.h */
-#if defined(MLKEM_NATIVE_FIPS202_NATIVE_API_H)
-#undef MLKEM_NATIVE_FIPS202_NATIVE_API_H
-#endif
-
-/* mlkem/fips202/native/default.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_DEFAULT_H)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_DEFAULT_H
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(ANDnu256)
-#undef ANDnu256
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(CONST256)
-#undef CONST256
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(CONST256_64)
-#undef CONST256_64
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(ROL64in256)
-#undef ROL64in256
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(ROL64in256_8)
-#undef ROL64in256_8
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(ROL64in256_56)
-#undef ROL64in256_56
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(STORE256)
-#undef STORE256
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(XOR256)
-#undef XOR256
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(XOReq256)
-#undef XOReq256
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(SnP_laneLengthInBytes)
-#undef SnP_laneLengthInBytes
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(declareABCDE)
-#undef declareABCDE
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(prepareTheta)
-#undef prepareTheta
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(thetaRhoPiChiIotaPrepareTheta)
-#undef thetaRhoPiChiIotaPrepareTheta
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(thetaRhoPiChiIota)
-#undef thetaRhoPiChiIota
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(copyFromState)
-#undef copyFromState
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(SCATTER_STORE256)
-#undef SCATTER_STORE256
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(copyToState)
-#undef copyToState
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(copyStateVariables)
-#undef copyStateVariables
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(FullUnrolling)
-#undef FullUnrolling
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(Unrolling)
-#undef Unrolling
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(empty_cu_avx2_keccakx4)
-#undef empty_cu_avx2_keccakx4
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SnP.h */
-#if defined(_KeccakP_1600_times4_SnP_h_)
-#undef _KeccakP_1600_times4_SnP_h_
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SnP.h */
-#if defined(KeccakP1600times4_statesAlignment)
-#undef KeccakP1600times4_statesAlignment
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SnP.h */
-#if defined(KeccakP1600times4_PermuteAll_24rounds)
-#undef KeccakP1600times4_PermuteAll_24rounds
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-SIMD256-config.h */
-#if defined(KeccakP1600times4_implementation_config)
-#undef KeccakP1600times4_implementation_config
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-SIMD256-config.h */
-#if defined(KeccakP1600times4_fullUnrolling)
-#undef KeccakP1600times4_fullUnrolling
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-SIMD256-config.h */
-#if defined(KeccakP1600times4_useAVX2)
-#undef KeccakP1600times4_useAVX2
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-align.h */
-#if defined(_keccakp_align_h_)
-#undef _keccakp_align_h_
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-align.h */
-#if defined(ALIGN)
-#undef ALIGN
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-align.h */
-#if defined(ALIGN)
-#undef ALIGN
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-align.h */
-#if defined(ALIGN)
-#undef ALIGN
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-align.h */
-#if defined(ALIGN)
-#undef ALIGN
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(_KECCAKP_BRG_ENDIAN_H)
-#undef _KECCAKP_BRG_ENDIAN_H
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(IS_BIG_ENDIAN)
-#undef IS_BIG_ENDIAN
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(IS_LITTLE_ENDIAN)
-#undef IS_LITTLE_ENDIAN
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
-#if defined(PLATFORM_BYTE_ORDER)
-#undef PLATFORM_BYTE_ORDER
-#endif
-
-/* mlkem/fips202/native/x86_64/src/xkcp_impl.h */
-#if defined(MLKEM_NATIVE_FIPS202_PROFILE_IMPL_H)
-#undef MLKEM_NATIVE_FIPS202_PROFILE_IMPL_H
-#endif
-
-/* mlkem/fips202/native/x86_64/src/xkcp_impl.h */
-#if defined(MLKEM_USE_FIPS202_X4_NATIVE)
-#undef MLKEM_USE_FIPS202_X4_NATIVE
-#endif
-
-/* mlkem/fips202/native/x86_64/xkcp.h */
-#if defined(MLKEM_NATIVE_FIPS202_PROFILE_H)
-#undef MLKEM_NATIVE_FIPS202_PROFILE_H
-#endif
-
-/* mlkem/fips202/native/x86_64/xkcp.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP
-#endif
-
-/* mlkem/fips202/native/x86_64/xkcp.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_NAME)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_NAME
-#endif
-
-/* mlkem/fips202/native/x86_64/xkcp.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_IMPL)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_IMPL
 #endif
 
 /* mlkem/indcpa.c */
@@ -2923,3 +2257,682 @@
 #if defined(ct_opt_blocker_u64)
 #undef ct_opt_blocker_u64
 #endif
+
+
+#if !defined(MLKEM_NATIVE_MONOBUILD_KEEP_FIPS202_HEADERS)
+
+/*
+ * Undo all #define directives from *.c or *.h files
+ */
+
+/* mlkem/fips202/fips202.c */
+#if defined(keccak_absorb_once)
+#undef keccak_absorb_once
+#endif
+
+/* mlkem/fips202/fips202.c */
+#if defined(keccak_squeeze_once)
+#undef keccak_squeeze_once
+#endif
+
+/* mlkem/fips202/fips202.c */
+#if defined(keccak_squeezeblocks)
+#undef keccak_squeezeblocks
+#endif
+
+/* mlkem/fips202/fips202.c */
+#if defined(shake256ctx)
+#undef shake256ctx
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(FIPS202_H)
+#undef FIPS202_H
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(SHAKE128_RATE)
+#undef SHAKE128_RATE
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(SHAKE256_RATE)
+#undef SHAKE256_RATE
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(SHA3_256_RATE)
+#undef SHA3_256_RATE
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(SHA3_384_RATE)
+#undef SHA3_384_RATE
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(SHA3_512_RATE)
+#undef SHA3_512_RATE
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(shake128ctx)
+#undef shake128ctx
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(shake128_absorb_once)
+#undef shake128_absorb_once
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(shake128_squeezeblocks)
+#undef shake128_squeezeblocks
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(shake128_release)
+#undef shake128_release
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(shake256)
+#undef shake256
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(SHA3_256_HASHBYTES)
+#undef SHA3_256_HASHBYTES
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(sha3_256)
+#undef sha3_256
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(SHA3_512_HASHBYTES)
+#undef SHA3_512_HASHBYTES
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(sha3_512)
+#undef sha3_512
+#endif
+
+/* mlkem/fips202/fips202_backend.h */
+#if defined(MLKEM_NATIVE_FIPS202_IMPL_H)
+#undef MLKEM_NATIVE_FIPS202_IMPL_H
+#endif
+
+/* mlkem/fips202/fips202x4.c */
+#if defined(shake256x4_ctx)
+#undef shake256x4_ctx
+#endif
+
+/* mlkem/fips202/fips202x4.c */
+#if defined(keccak_absorb_once_x4)
+#undef keccak_absorb_once_x4
+#endif
+
+/* mlkem/fips202/fips202x4.c */
+#if defined(keccak_squeezeblocks_x4)
+#undef keccak_squeezeblocks_x4
+#endif
+
+/* mlkem/fips202/fips202x4.c */
+#if defined(shake256x4_absorb_once)
+#undef shake256x4_absorb_once
+#endif
+
+/* mlkem/fips202/fips202x4.c */
+#if defined(shake256x4_squeezeblocks)
+#undef shake256x4_squeezeblocks
+#endif
+
+/* mlkem/fips202/fips202x4.h */
+#if defined(FIPS_202X4_H)
+#undef FIPS_202X4_H
+#endif
+
+/* mlkem/fips202/fips202x4.h */
+#if defined(shake128x4ctx)
+#undef shake128x4ctx
+#endif
+
+/* mlkem/fips202/fips202x4.h */
+#if defined(shake128x4_absorb_once)
+#undef shake128x4_absorb_once
+#endif
+
+/* mlkem/fips202/fips202x4.h */
+#if defined(shake128x4_squeezeblocks)
+#undef shake128x4_squeezeblocks
+#endif
+
+/* mlkem/fips202/fips202x4.h */
+#if defined(shake128x4_release)
+#undef shake128x4_release
+#endif
+
+/* mlkem/fips202/fips202x4.h */
+#if defined(shake256x4)
+#undef shake256x4
+#endif
+
+/* mlkem/fips202/keccakf1600.c */
+#if defined(NROUNDS)
+#undef NROUNDS
+#endif
+
+/* mlkem/fips202/keccakf1600.c */
+#if defined(ROL)
+#undef ROL
+#endif
+
+/* mlkem/fips202/keccakf1600.c */
+#if defined(KeccakF_RoundConstants)
+#undef KeccakF_RoundConstants
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(KECCAKF1600_H)
+#undef KECCAKF1600_H
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(KECCAK_LANES)
+#undef KECCAK_LANES
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(KeccakF1600_StateExtractBytes)
+#undef KeccakF1600_StateExtractBytes
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(KeccakF1600_StateXORBytes)
+#undef KeccakF1600_StateXORBytes
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(KeccakF1600x4_StateExtractBytes)
+#undef KeccakF1600x4_StateExtractBytes
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(KeccakF1600x4_StateXORBytes)
+#undef KeccakF1600x4_StateXORBytes
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(KeccakF1600x4_StatePermute)
+#undef KeccakF1600x4_StatePermute
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(KeccakF1600_StatePermute)
+#undef KeccakF1600_StatePermute
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(KeccakF1600_StatePermute)
+#undef KeccakF1600_StatePermute
+#endif
+
+/* mlkem/fips202/native/aarch64/cortex_a55.h */
+#if defined(FIPS202_NATIVE_PROFILE_H)
+#undef FIPS202_NATIVE_PROFILE_H
+#endif
+
+/* mlkem/fips202/native/aarch64/cortex_a55.h */
+#if defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55)
+#undef MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55
+#endif
+
+/* mlkem/fips202/native/aarch64/cortex_a55.h */
+#if defined(MLKEM_NATIVE_FIPS202_BACKEND_NAME)
+#undef MLKEM_NATIVE_FIPS202_BACKEND_NAME
+#endif
+
+/* mlkem/fips202/native/aarch64/cortex_a55.h */
+#if defined(MLKEM_NATIVE_FIPS202_BACKEND_IMPL)
+#undef MLKEM_NATIVE_FIPS202_BACKEND_IMPL
+#endif
+
+/* mlkem/fips202/native/aarch64/default.h */
+#if defined(FIPS202_NATIVE_PROFILE_H)
+#undef FIPS202_NATIVE_PROFILE_H
+#endif
+
+/* mlkem/fips202/native/aarch64/default.h */
+#if defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT)
+#undef MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT
+#endif
+
+/* mlkem/fips202/native/aarch64/default.h */
+#if defined(MLKEM_NATIVE_FIPS202_BACKEND_NAME)
+#undef MLKEM_NATIVE_FIPS202_BACKEND_NAME
+#endif
+
+/* mlkem/fips202/native/aarch64/default.h */
+#if defined(MLKEM_NATIVE_FIPS202_BACKEND_IMPL)
+#undef MLKEM_NATIVE_FIPS202_BACKEND_IMPL
+#endif
+
+/* mlkem/fips202/native/aarch64/src/cortex_a55_impl.h */
+#if defined(FIPS202_NATIVE_PROFILE_IMPL_H)
+#undef FIPS202_NATIVE_PROFILE_IMPL_H
+#endif
+
+/* mlkem/fips202/native/aarch64/src/cortex_a55_impl.h */
+#if defined(MLKEM_USE_FIPS202_X1_NATIVE)
+#undef MLKEM_USE_FIPS202_X1_NATIVE
+#endif
+
+/* mlkem/fips202/native/aarch64/src/default_impl.h */
+#if defined(FIPS202_NATIVE_PROFILE_IMPL_H)
+#undef FIPS202_NATIVE_PROFILE_IMPL_H
+#endif
+
+/* mlkem/fips202/native/aarch64/src/default_impl.h */
+#if defined(MLKEM_USE_FIPS202_X1_NATIVE)
+#undef MLKEM_USE_FIPS202_X1_NATIVE
+#endif
+
+/* mlkem/fips202/native/aarch64/src/default_impl.h */
+#if defined(MLKEM_USE_FIPS202_X1_NATIVE)
+#undef MLKEM_USE_FIPS202_X1_NATIVE
+#endif
+
+/* mlkem/fips202/native/aarch64/src/default_impl.h */
+#if defined(MLKEM_USE_FIPS202_X2_NATIVE)
+#undef MLKEM_USE_FIPS202_X2_NATIVE
+#endif
+
+/* mlkem/fips202/native/aarch64/src/default_impl.h */
+#if defined(MLKEM_USE_FIPS202_X4_NATIVE)
+#undef MLKEM_USE_FIPS202_X4_NATIVE
+#endif
+
+/* mlkem/fips202/native/aarch64/src/default_impl.h */
+#if defined(MLKEM_USE_FIPS202_X4_NATIVE)
+#undef MLKEM_USE_FIPS202_X4_NATIVE
+#endif
+
+/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
+#if defined(FIPS202_AARCH64_NATIVE_H)
+#undef FIPS202_AARCH64_NATIVE_H
+#endif
+
+/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
+#if defined(keccak_f1600_x1_scalar_asm_opt)
+#undef keccak_f1600_x1_scalar_asm_opt
+#endif
+
+/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
+#if defined(keccak_f1600_x1_v84a_asm_clean)
+#undef keccak_f1600_x1_v84a_asm_clean
+#endif
+
+/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
+#if defined(keccak_f1600_x2_v84a_asm_clean)
+#undef keccak_f1600_x2_v84a_asm_clean
+#endif
+
+/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
+#if defined(keccak_f1600_x2_v8a_v84a_asm_hybrid)
+#undef keccak_f1600_x2_v8a_v84a_asm_hybrid
+#endif
+
+/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
+#if defined(keccak_f1600_x4_scalar_v8a_asm_hybrid_opt)
+#undef keccak_f1600_x4_scalar_v8a_asm_hybrid_opt
+#endif
+
+/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
+#if defined(keccak_f1600_x4_scalar_v84a_asm_hybrid_opt)
+#undef keccak_f1600_x4_scalar_v84a_asm_hybrid_opt
+#endif
+
+/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
+#if defined(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt)
+#undef keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt
+#endif
+
+/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
+#if defined(keccakf1600_round_constants)
+#undef keccakf1600_round_constants
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccakf1600_round_constants.c */
+#if defined(empty_cu_keccakf1600_round_constants)
+#undef empty_cu_keccakf1600_round_constants
+#endif
+
+/* mlkem/fips202/native/api.h */
+#if defined(MLKEM_NATIVE_FIPS202_NATIVE_API_H)
+#undef MLKEM_NATIVE_FIPS202_NATIVE_API_H
+#endif
+
+/* mlkem/fips202/native/default.h */
+#if defined(MLKEM_NATIVE_FIPS202_BACKEND_DEFAULT_H)
+#undef MLKEM_NATIVE_FIPS202_BACKEND_DEFAULT_H
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(ANDnu256)
+#undef ANDnu256
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(CONST256)
+#undef CONST256
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(CONST256_64)
+#undef CONST256_64
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(ROL64in256)
+#undef ROL64in256
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(ROL64in256_8)
+#undef ROL64in256_8
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(ROL64in256_56)
+#undef ROL64in256_56
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(STORE256)
+#undef STORE256
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(XOR256)
+#undef XOR256
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(XOReq256)
+#undef XOReq256
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(SnP_laneLengthInBytes)
+#undef SnP_laneLengthInBytes
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(declareABCDE)
+#undef declareABCDE
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(prepareTheta)
+#undef prepareTheta
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(thetaRhoPiChiIotaPrepareTheta)
+#undef thetaRhoPiChiIotaPrepareTheta
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(thetaRhoPiChiIota)
+#undef thetaRhoPiChiIota
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(copyFromState)
+#undef copyFromState
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(SCATTER_STORE256)
+#undef SCATTER_STORE256
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(copyToState)
+#undef copyToState
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(copyStateVariables)
+#undef copyStateVariables
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(FullUnrolling)
+#undef FullUnrolling
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(Unrolling)
+#undef Unrolling
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(empty_cu_avx2_keccakx4)
+#undef empty_cu_avx2_keccakx4
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SnP.h */
+#if defined(_KeccakP_1600_times4_SnP_h_)
+#undef _KeccakP_1600_times4_SnP_h_
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SnP.h */
+#if defined(KeccakP1600times4_statesAlignment)
+#undef KeccakP1600times4_statesAlignment
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SnP.h */
+#if defined(KeccakP1600times4_PermuteAll_24rounds)
+#undef KeccakP1600times4_PermuteAll_24rounds
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-SIMD256-config.h */
+#if defined(KeccakP1600times4_implementation_config)
+#undef KeccakP1600times4_implementation_config
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-SIMD256-config.h */
+#if defined(KeccakP1600times4_fullUnrolling)
+#undef KeccakP1600times4_fullUnrolling
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-SIMD256-config.h */
+#if defined(KeccakP1600times4_useAVX2)
+#undef KeccakP1600times4_useAVX2
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-align.h */
+#if defined(_keccakp_align_h_)
+#undef _keccakp_align_h_
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-align.h */
+#if defined(ALIGN)
+#undef ALIGN
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-align.h */
+#if defined(ALIGN)
+#undef ALIGN
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-align.h */
+#if defined(ALIGN)
+#undef ALIGN
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-align.h */
+#if defined(ALIGN)
+#undef ALIGN
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(_KECCAKP_BRG_ENDIAN_H)
+#undef _KECCAKP_BRG_ENDIAN_H
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(IS_BIG_ENDIAN)
+#undef IS_BIG_ENDIAN
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(IS_LITTLE_ENDIAN)
+#undef IS_LITTLE_ENDIAN
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-brg_endian.h */
+#if defined(PLATFORM_BYTE_ORDER)
+#undef PLATFORM_BYTE_ORDER
+#endif
+
+/* mlkem/fips202/native/x86_64/src/xkcp_impl.h */
+#if defined(MLKEM_NATIVE_FIPS202_PROFILE_IMPL_H)
+#undef MLKEM_NATIVE_FIPS202_PROFILE_IMPL_H
+#endif
+
+/* mlkem/fips202/native/x86_64/src/xkcp_impl.h */
+#if defined(MLKEM_USE_FIPS202_X4_NATIVE)
+#undef MLKEM_USE_FIPS202_X4_NATIVE
+#endif
+
+/* mlkem/fips202/native/x86_64/xkcp.h */
+#if defined(MLKEM_NATIVE_FIPS202_PROFILE_H)
+#undef MLKEM_NATIVE_FIPS202_PROFILE_H
+#endif
+
+/* mlkem/fips202/native/x86_64/xkcp.h */
+#if defined(MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP)
+#undef MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP
+#endif
+
+/* mlkem/fips202/native/x86_64/xkcp.h */
+#if defined(MLKEM_NATIVE_FIPS202_BACKEND_NAME)
+#undef MLKEM_NATIVE_FIPS202_BACKEND_NAME
+#endif
+
+/* mlkem/fips202/native/x86_64/xkcp.h */
+#if defined(MLKEM_NATIVE_FIPS202_BACKEND_IMPL)
+#undef MLKEM_NATIVE_FIPS202_BACKEND_IMPL
+#endif
+
+#endif /* MLKEM_NATIVE_MONOBUILD_KEEP_FIPS202_HEADERS */

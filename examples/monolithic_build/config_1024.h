@@ -52,7 +52,7 @@
  * Description: The macros to use to namespace global symbols
  *              from mlkem/fips202/.
  *****************************************************************************/
-#define FIPS202_NAMESPACE(sym) CONCAT(mlkem1024_, sym)
+#define FIPS202_NAMESPACE(sym) CONCAT(fips202_, sym)
 
 /******************************************************************************
  * Name:        MLKEM_USE_NATIVE
