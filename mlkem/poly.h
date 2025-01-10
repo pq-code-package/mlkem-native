@@ -771,9 +771,9 @@ void poly_add(poly *r, const poly *b)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   requires(memory_no_alias(b, sizeof(poly)))
-  requires(forall(int, k0, 0, MLKEM_N, (int32_t) r->coeffs[k0] + b->coeffs[k0] <= INT16_MAX))
-  requires(forall(int, k1, 0, MLKEM_N, (int32_t) r->coeffs[k1] + b->coeffs[k1] >= INT16_MIN))
-  ensures(forall(int, k, 0, MLKEM_N, r->coeffs[k] == old(*r).coeffs[k] + b->coeffs[k]))
+  requires(forall(k0, 0, MLKEM_N, (int32_t) r->coeffs[k0] + b->coeffs[k0] <= INT16_MAX))
+  requires(forall(k1, 0, MLKEM_N, (int32_t) r->coeffs[k1] + b->coeffs[k1] >= INT16_MIN))
+  ensures(forall(k, 0, MLKEM_N, r->coeffs[k] == old(*r).coeffs[k] + b->coeffs[k]))
   assigns(memory_slice(r, sizeof(poly)))
 );
 
@@ -796,9 +796,9 @@ void poly_sub(poly *r, const poly *b)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   requires(memory_no_alias(b, sizeof(poly)))
-  requires(forall(int, k0, 0, MLKEM_N, (int32_t) r->coeffs[k0] - b->coeffs[k0] <= INT16_MAX))
-  requires(forall(int, k1, 0, MLKEM_N, (int32_t) r->coeffs[k1] - b->coeffs[k1] >= INT16_MIN))
-  ensures(forall(int, k, 0, MLKEM_N, r->coeffs[k] == old(*r).coeffs[k] - b->coeffs[k]))
+  requires(forall(k0, 0, MLKEM_N, (int32_t) r->coeffs[k0] - b->coeffs[k0] <= INT16_MAX))
+  requires(forall(k1, 0, MLKEM_N, (int32_t) r->coeffs[k1] - b->coeffs[k1] >= INT16_MIN))
+  ensures(forall(k, 0, MLKEM_N, r->coeffs[k] == old(*r).coeffs[k] - b->coeffs[k]))
   assigns(object_whole(r))
 );
 

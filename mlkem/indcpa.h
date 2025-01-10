@@ -30,7 +30,7 @@ __contract__(
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
   requires(transposed == 0 || transposed == 1)
   assigns(object_whole(a))
-  ensures(forall(int, x, 0, MLKEM_K, forall(int, y, 0, MLKEM_K,
+  ensures(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
   array_bound(a[x].vec[y].coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1)))));
 );
 

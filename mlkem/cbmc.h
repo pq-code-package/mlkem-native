@@ -77,17 +77,17 @@
  * Prevent clang-format from corrupting CBMC's special ==> operator
  */
 /* clang-format off */
-#define forall(type, qvar, qvar_lb, qvar_ub, predicate)           \
+#define forall(qvar, qvar_lb, qvar_ub, predicate)                 \
   __CPROVER_forall                                                \
   {                                                               \
-    type qvar;                                                    \
+    unsigned qvar;                                                \
     ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) ==> (predicate)   \
   }
 
-#define EXISTS(type, qvar, qvar_lb, qvar_ub, predicate)         \
+#define EXISTS(qvar, qvar_lb, qvar_ub, predicate)         \
   __CPROVER_exists                                              \
   {                                                             \
-    type qvar;                                                  \
+    unsigned qvar;                                              \
     ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) && (predicate)  \
   }
 /* clang-format on */
@@ -113,18 +113,18 @@
 #define CBMC_CONCAT_(left, right) left##right
 #define CBMC_CONCAT(left, right) CBMC_CONCAT_(left, right)
 
-#define array_bound_core(indextype, qvar, qvar_lb, qvar_ub, array_var, \
+#define array_bound_core(qvar, qvar_lb, qvar_ub, array_var,            \
                          value_lb, value_ub)                           \
   __CPROVER_forall                                                     \
   {                                                                    \
-    indextype qvar;                                                    \
+    unsigned qvar;                                                     \
     ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) ==>                    \
         (((value_lb) <= (array_var[(qvar)])) &&                        \
         ((array_var[(qvar)]) <= (value_ub)))                           \
   }
 
 #define array_bound(array_var, qvar_lb, qvar_ub, value_lb, value_ub) \
-  array_bound_core(int, CBMC_CONCAT(_cbmc_idx, __LINE__), (qvar_lb), \
+  array_bound_core(CBMC_CONCAT(_cbmc_idx, __LINE__), (qvar_lb),      \
                    (qvar_ub), (array_var), (value_lb), (value_ub))
 
 

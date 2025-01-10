@@ -19,17 +19,17 @@
 MLKEM_NATIVE_INTERNAL_API
 void poly_compress_du(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DU], const poly *a)
 {
-  int j;
+  unsigned j;
 #if (MLKEM_POLYCOMPRESSEDBYTES_DU == 352)
   for (j = 0; j < MLKEM_N / 8; j++)
   __loop__(invariant(j >= 0 && j <= MLKEM_N / 8))
   {
-    int k;
+    unsigned k;
     uint16_t t[8];
     for (k = 0; k < 8; k++)
     __loop__(
       invariant(k >= 0 && k <= 8)
-      invariant(forall(int, r, 0, k, t[r] < (1u << 11))))
+      invariant(forall(r, 0, k, t[r] < (1u << 11))))
     {
       t[k] = scalar_compress_d11(a->coeffs[8 * j + k]);
     }
@@ -55,12 +55,12 @@ void poly_compress_du(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DU], const poly *a)
   for (j = 0; j < MLKEM_N / 4; j++)
   __loop__(invariant(j >= 0 && j <= MLKEM_N / 4))
   {
-    int k;
+    unsigned k;
     uint16_t t[4];
     for (k = 0; k < 4; k++)
     __loop__(
       invariant(k >= 0 && k <= 4)
-      invariant(forall(int, r, 0, k, t[r] < (1u << 10))))
+      invariant(forall(r, 0, k, t[r] < (1u << 10))))
     {
       t[k] = scalar_compress_d10(a->coeffs[4 * j + k]);
     }
@@ -84,7 +84,7 @@ void poly_compress_du(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DU], const poly *a)
 MLKEM_NATIVE_INTERNAL_API
 void poly_decompress_du(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DU])
 {
-  int j;
+  unsigned j;
 #if (MLKEM_POLYCOMPRESSEDBYTES_DU == 352)
   for (j = 0; j < MLKEM_N / 8; j++)
   __loop__(
@@ -144,14 +144,14 @@ void poly_decompress_du(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DU])
 MLKEM_NATIVE_INTERNAL_API
 void poly_compress_dv(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DV], const poly *a)
 {
-  int i;
+  unsigned i;
   POLY_UBOUND(a, MLKEM_Q);
 
 #if (MLKEM_POLYCOMPRESSEDBYTES_DV == 128)
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(invariant(i >= 0 && i <= MLKEM_N / 8))
   {
-    int j;
+    unsigned j;
     uint8_t t[8] = {0};
     for (j = 0; j < 8; j++)
     __loop__(
@@ -170,7 +170,7 @@ void poly_compress_dv(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DV], const poly *a)
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(invariant(i >= 0 && i <= MLKEM_N / 8))
   {
-    int j;
+    unsigned j;
     uint8_t t[8] = {0};
     for (j = 0; j < 8; j++)
     __loop__(
@@ -199,7 +199,7 @@ void poly_compress_dv(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DV], const poly *a)
 MLKEM_NATIVE_INTERNAL_API
 void poly_decompress_dv(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DV])
 {
-  int i;
+  unsigned i;
 #if (MLKEM_POLYCOMPRESSEDBYTES_DV == 128)
   for (i = 0; i < MLKEM_N / 2; i++)
   __loop__(
@@ -215,7 +215,7 @@ void poly_decompress_dv(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DV])
     invariant(i >= 0 && i <= MLKEM_N / 8)
     invariant(array_bound(r->coeffs, 0, 8 * i, 0, (MLKEM_Q - 1))))
   {
-    int j;
+    unsigned j;
     uint8_t t[8];
     const int offset = i * 5;
     /*
@@ -257,7 +257,7 @@ void poly_decompress_dv(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DV])
 MLKEM_NATIVE_INTERNAL_API
 void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
 {
-  unsigned int i;
+  unsigned i;
   POLY_UBOUND(a, MLKEM_Q);
 
 
@@ -299,7 +299,7 @@ void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
 MLKEM_NATIVE_INTERNAL_API
 void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
 {
-  int i;
+  unsigned i;
   for (i = 0; i < MLKEM_N / 2; i++)
   __loop__(
     invariant(i >= 0 && i <= MLKEM_N / 2)
@@ -326,7 +326,7 @@ void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
 MLKEM_NATIVE_INTERNAL_API
 void poly_frommsg(poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
 {
-  int i;
+  unsigned i;
 #if (MLKEM_INDCPA_MSGBYTES != MLKEM_N / 8)
 #error "MLKEM_INDCPA_MSGBYTES must be equal to MLKEM_N/8 bytes!"
 #endif
@@ -336,7 +336,7 @@ void poly_frommsg(poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
     invariant(i >= 0 && i <= MLKEM_N / 8)
     invariant(array_bound(r->coeffs, 0, 8 * i, 0, (MLKEM_Q - 1))))
   {
-    int j;
+    unsigned j;
     for (j = 0; j < 8; j++)
     __loop__(
       invariant(i >= 0 && i <  MLKEM_N / 8 && j >= 0 && j <= 8)
@@ -353,13 +353,13 @@ void poly_frommsg(poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
 MLKEM_NATIVE_INTERNAL_API
 void poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const poly *a)
 {
-  int i;
+  unsigned i;
   POLY_UBOUND(a, MLKEM_Q);
 
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(invariant(i >= 0 && i <= MLKEM_N / 8))
   {
-    int j;
+    unsigned j;
     msg[i] = 0;
     for (j = 0; j < 8; j++)
     __loop__(
@@ -462,7 +462,7 @@ MLKEM_NATIVE_INTERNAL_API
 void poly_basemul_montgomery_cached(poly *r, const poly *a, const poly *b,
                                     const poly_mulcache *b_cache)
 {
-  int i;
+  unsigned i;
   POLY_BOUND(b_cache, 4096);
 
   for (i = 0; i < MLKEM_N / 4; i++)
@@ -482,7 +482,7 @@ void poly_basemul_montgomery_cached(poly *r, const poly *a, const poly *b,
 MLKEM_NATIVE_INTERNAL_API
 void poly_tomont(poly *r)
 {
-  int i;
+  unsigned i;
   const int16_t f = (1ULL << 32) % MLKEM_Q; /* 1353 */
   for (i = 0; i < MLKEM_N; i++)
   __loop__(
@@ -507,7 +507,7 @@ void poly_tomont(poly *r)
 MLKEM_NATIVE_INTERNAL_API
 void poly_reduce(poly *r)
 {
-  int i;
+  unsigned i;
   for (i = 0; i < MLKEM_N; i++)
   __loop__(
     invariant(i >= 0 && i <= MLKEM_N)
@@ -533,12 +533,12 @@ void poly_reduce(poly *r)
 MLKEM_NATIVE_INTERNAL_API
 void poly_add(poly *r, const poly *b)
 {
-  int i;
+  unsigned i;
   for (i = 0; i < MLKEM_N; i++)
   __loop__(
     invariant(i >= 0 && i <= MLKEM_N)
-    invariant(forall(int, k0, i, MLKEM_N, r->coeffs[k0] == loop_entry(*r).coeffs[k0]))
-    invariant(forall(int, k1, 0, i, r->coeffs[k1] == loop_entry(*r).coeffs[k1] + b->coeffs[k1])))
+    invariant(forall(k0, i, MLKEM_N, r->coeffs[k0] == loop_entry(*r).coeffs[k0]))
+    invariant(forall(k1, 0, i, r->coeffs[k1] == loop_entry(*r).coeffs[k1] + b->coeffs[k1])))
   {
     r->coeffs[i] = r->coeffs[i] + b->coeffs[i];
   }
@@ -547,12 +547,12 @@ void poly_add(poly *r, const poly *b)
 MLKEM_NATIVE_INTERNAL_API
 void poly_sub(poly *r, const poly *b)
 {
-  int i;
+  unsigned i;
   for (i = 0; i < MLKEM_N; i++)
   __loop__(
     invariant(i >= 0 && i <= MLKEM_N)
-    invariant(forall(int, k0, i, MLKEM_N, r->coeffs[k0] == loop_entry(*r).coeffs[k0]))
-    invariant(forall(int, k1, 0, i, r->coeffs[k1] == loop_entry(*r).coeffs[k1] - b->coeffs[k1])))
+    invariant(forall(k0, i, MLKEM_N, r->coeffs[k0] == loop_entry(*r).coeffs[k0]))
+    invariant(forall(k1, 0, i, r->coeffs[k1] == loop_entry(*r).coeffs[k1] - b->coeffs[k1])))
   {
     r->coeffs[i] = r->coeffs[i] - b->coeffs[i];
   }
@@ -562,7 +562,7 @@ void poly_sub(poly *r, const poly *b)
 MLKEM_NATIVE_INTERNAL_API
 void poly_mulcache_compute(poly_mulcache *x, const poly *a)
 {
-  int i;
+  unsigned i;
   for (i = 0; i < MLKEM_N / 4; i++)
   __loop__(invariant(i >= 0 && i <= MLKEM_N / 4))
   {

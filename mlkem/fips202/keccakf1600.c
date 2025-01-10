@@ -30,7 +30,7 @@
 void KeccakF1600_StateExtractBytes(uint64_t *state, unsigned char *data,
                                    unsigned int offset, unsigned int length)
 {
-  unsigned int i;
+  unsigned i;
 #if defined(SYS_LITTLE_ENDIAN)
   uint8_t *state_ptr = (uint8_t *)state + offset;
   for (i = 0; i < length; i++)
@@ -50,7 +50,7 @@ void KeccakF1600_StateExtractBytes(uint64_t *state, unsigned char *data,
 void KeccakF1600_StateXORBytes(uint64_t *state, const unsigned char *data,
                                unsigned int offset, unsigned int length)
 {
-  unsigned int i;
+  unsigned i;
 #if defined(SYS_LITTLE_ENDIAN)
   uint8_t *state_ptr = (uint8_t *)state + offset;
   for (i = 0; i < length; i++)
