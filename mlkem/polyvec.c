@@ -14,7 +14,7 @@ MLKEM_NATIVE_INTERNAL_API
 void polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                          const polyvec *a)
 {
-  unsigned int i;
+  unsigned i;
   POLYVEC_UBOUND(a, MLKEM_Q);
 
   for (i = 0; i < MLKEM_K; i++)
@@ -27,7 +27,7 @@ MLKEM_NATIVE_INTERNAL_API
 void polyvec_decompress_du(polyvec *r,
                            const uint8_t a[MLKEM_POLYVECCOMPRESSEDBYTES_DU])
 {
-  unsigned int i;
+  unsigned i;
   for (i = 0; i < MLKEM_K; i++)
   {
     poly_decompress_du(&r->vec[i], a + i * MLKEM_POLYCOMPRESSEDBYTES_DU);
@@ -39,7 +39,7 @@ void polyvec_decompress_du(polyvec *r,
 MLKEM_NATIVE_INTERNAL_API
 void polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const polyvec *a)
 {
-  unsigned int i;
+  unsigned i;
   for (i = 0; i < MLKEM_K; i++)
   {
     poly_tobytes(r + i * MLKEM_POLYBYTES, &a->vec[i]);
@@ -49,7 +49,7 @@ void polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const polyvec *a)
 MLKEM_NATIVE_INTERNAL_API
 void polyvec_frombytes(polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
 {
-  int i;
+  unsigned i;
   for (i = 0; i < MLKEM_K; i++)
   {
     poly_frombytes(&r->vec[i], a + i * MLKEM_POLYBYTES);
@@ -59,7 +59,7 @@ void polyvec_frombytes(polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
 MLKEM_NATIVE_INTERNAL_API
 void polyvec_ntt(polyvec *r)
 {
-  unsigned int i;
+  unsigned i;
   for (i = 0; i < MLKEM_K; i++)
   {
     poly_ntt(&r->vec[i]);
@@ -69,7 +69,7 @@ void polyvec_ntt(polyvec *r)
 MLKEM_NATIVE_INTERNAL_API
 void polyvec_invntt_tomont(polyvec *r)
 {
-  unsigned int i;
+  unsigned i;
   for (i = 0; i < MLKEM_K; i++)
   {
     poly_invntt_tomont(&r->vec[i]);
@@ -82,7 +82,7 @@ void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
                                            const polyvec *b,
                                            const polyvec_mulcache *b_cache)
 {
-  int i;
+  unsigned i;
   poly t;
 
   POLYVEC_BOUND(a, 4096);
@@ -134,7 +134,7 @@ void polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyvec *b)
 MLKEM_NATIVE_INTERNAL_API
 void polyvec_mulcache_compute(polyvec_mulcache *x, const polyvec *a)
 {
-  unsigned int i;
+  unsigned i;
   for (i = 0; i < MLKEM_K; i++)
   {
     poly_mulcache_compute(&x->vec[i], &a->vec[i]);
@@ -144,7 +144,7 @@ void polyvec_mulcache_compute(polyvec_mulcache *x, const polyvec *a)
 MLKEM_NATIVE_INTERNAL_API
 void polyvec_reduce(polyvec *r)
 {
-  unsigned int i;
+  unsigned i;
   for (i = 0; i < MLKEM_K; i++)
   {
     poly_reduce(&r->vec[i]);
@@ -154,7 +154,7 @@ void polyvec_reduce(polyvec *r)
 MLKEM_NATIVE_INTERNAL_API
 void polyvec_add(polyvec *r, const polyvec *b)
 {
-  int i;
+  unsigned i;
   for (i = 0; i < MLKEM_K; i++)
   {
     poly_add(&r->vec[i], &b->vec[i]);
@@ -164,7 +164,7 @@ void polyvec_add(polyvec *r, const polyvec *b)
 MLKEM_NATIVE_INTERNAL_API
 void polyvec_tomont(polyvec *r)
 {
-  unsigned int i;
+  unsigned i;
   for (i = 0; i < MLKEM_K; i++)
   {
     poly_tomont(&r->vec[i]);

@@ -282,8 +282,7 @@ __contract__(
 MLKEM_NATIVE_INTERNAL_API
 void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES], int transposed)
 {
-  int i;
-  unsigned int j;
+  unsigned i, j;
   /*
    * We generate four separate seed arrays rather than a single one to work
    * around limitations in CBMC function contracts dealing with disjoint slices
@@ -391,12 +390,12 @@ __contract__(
   requires(memory_no_alias(a, sizeof(polyvec) * MLKEM_K))
   requires(memory_no_alias(v, sizeof(polyvec)))
   requires(memory_no_alias(vc, sizeof(polyvec_mulcache)))
-  requires(forall(int, k0, 0, MLKEM_K,
-    forall(int, k1, 0, MLKEM_K,
+  requires(forall(k0, 0, MLKEM_K,
+    forall(k1, 0, MLKEM_K,
       array_abs_bound(a[k0].vec[k1].coeffs, 0, MLKEM_N, UINT12_MAX))))
   assigns(object_whole(out)))
 {
-  int i;
+  unsigned i;
   for (i = 0; i < MLKEM_K; i++)
   __loop__(
     assigns(i, object_whole(out))

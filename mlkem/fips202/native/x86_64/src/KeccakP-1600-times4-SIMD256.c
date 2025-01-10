@@ -438,7 +438,7 @@ void KeccakP1600times4_PermuteAll_24rounds(void *states)
   V256 *statesAsLanes = (V256 *)states;
   declareABCDE
 #ifndef KeccakP1600times4_fullUnrolling
-      unsigned int i;
+      unsigned i;
 #endif
 
   copyFromState(A, statesAsLanes) rounds24 copyToState(statesAsLanes, A)

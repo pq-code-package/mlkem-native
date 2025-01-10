@@ -69,13 +69,13 @@ static uint32_t load24_littleendian(const uint8_t x[3])
  **************************************************/
 static void cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
 {
-  int i;
+  unsigned i;
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(
     invariant(i >= 0 && i <= MLKEM_N / 8)
     invariant(array_abs_bound(r->coeffs, 0, 8 * i, 2)))
   {
-    int j;
+    unsigned j;
     uint32_t t = load32_littleendian(buf + 4 * i);
     uint32_t d = t & 0x55555555;
     d += (t >> 1) & 0x55555555;
@@ -106,13 +106,13 @@ static void cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
  **************************************************/
 static void cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4])
 {
-  int i;
+  unsigned i;
   for (i = 0; i < MLKEM_N / 4; i++)
   __loop__(
     invariant(i >= 0 && i <= MLKEM_N / 4)
     invariant(array_abs_bound(r->coeffs, 0, 4 * i, 3)))
   {
-    int j;
+    unsigned j;
     const uint32_t t = load24_littleendian(buf + 3 * i);
     uint32_t d = t & 0x00249249;
     d += (t >> 1) & 0x00249249;

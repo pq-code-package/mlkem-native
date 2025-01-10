@@ -25,7 +25,7 @@ static void poly_basemul_montgomery_avx2(poly *r, const poly *a, const poly *b)
  */
 static void poly_add_avx2(poly *r, const poly *a, const poly *b)
 {
-  unsigned int i;
+  unsigned i;
   __m256i f0, f1;
 
   for (i = 0; i < MLKEM_N; i += 16)
@@ -41,7 +41,7 @@ void polyvec_basemul_acc_montgomery_cached_avx2(poly *r, const polyvec *a,
                                                 const polyvec *b,
                                                 const polyvec_mulcache *b_cache)
 {
-  unsigned int i;
+  unsigned i;
   poly t;
 
   /* TODO: Use mulcache for AVX2. So far, it is unused. */
