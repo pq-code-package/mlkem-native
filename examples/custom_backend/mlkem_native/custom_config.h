@@ -34,25 +34,20 @@
 /* #define MLKEM_NATIVE_CONFIG_FILE "config.h" */
 
 /******************************************************************************
- * Name:        MLKEM_NAMESPACE
- *              _MLKEM_NAMESPACE
+ * Name:        MLKEM_NAMESPACE_PREFIX
  *
- * Description: The macros to use to namespace global symbols
+ * Description: The prefix to use to namespace global symbols
  *              from mlkem/.
  *****************************************************************************/
-#define __CONC(a, b) a##b
-#define CONC(a, b) __CONC(a, b)
-
-#define MLKEM_NAMESPACE(sym) CONC(CUSTOM_TINY_SHA3_, sym)
+#define MLKEM_NAMESPACE_PREFIX CUSTOM_TINY_SHA3
 
 /******************************************************************************
- * Name:        FIPS202_NAMESPACE
- *              _FIPS202_NAMESPACE
+ * Name:        FIPS202_NAMESPACE_PREFIX
  *
- * Description: The macros to use to namespace global symbols
+ * Description: The prefix to use to namespace global symbols
  *              from mlkem/fips202/.
  *****************************************************************************/
-#define FIPS202_NAMESPACE(sym) CONC(CUSTOM_TINY_SHA3_, sym)
+#define FIPS202_NAMESPACE_PREFIX CUSTOM_TINY_SHA3
 
 /******************************************************************************
  * Name:        MLKEM_USE_NATIVE
