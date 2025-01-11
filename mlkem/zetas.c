@@ -4,7 +4,7 @@
  */
 
 /*
- * WARNING: This file is auto-generated from scripts/autogenerate_files.py
+ * WARNING: This file is auto-generated from scripts/autogen
  *          Do not modify it directly.
  */
 
@@ -12,7 +12,7 @@
 
 /*
  * Table of zeta values used in the reference NTT and inverse NTT.
- * See autogenerate_files.py for details.
+ * See autogen for details.
  */
 ALIGN const int16_t zetas[128] = {
     -1044, -758,  -359,  -1517, 1493,  1422,  287,   202,  -171,  622,   1577,

@@ -4,7 +4,7 @@
  */
 
 /*
- * WARNING: This file is auto-generated from scripts/autogenerate_files.py
+ * WARNING: This file is auto-generated from scripts/autogen
  *          Do not modify it directly.
  */
 

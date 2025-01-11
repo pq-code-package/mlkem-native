@@ -27,7 +27,7 @@ def gen_header():
     yield " */"
     yield ""
     yield "/*"
-    yield " * WARNING: This file is auto-generated from scripts/autogenerate_files.py"
+    yield " * WARNING: This file is auto-generated from scripts/autogen"
     yield " *          Do not modify it directly."
     yield " */"
     yield ""
@@ -107,7 +107,7 @@ def gen_c_zeta_file(dry_run=False):
         yield ""
         yield "/*"
         yield " * Table of zeta values used in the reference NTT and inverse NTT."
-        yield " * See autogenerate_files.py for details."
+        yield " * See autogen for details."
         yield " */"
         yield "ALIGN const int16_t zetas[128] = {"
         yield from map(lambda t: str(t) + ",", gen_c_zetas())
@@ -318,7 +318,7 @@ def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
         yield ""
         yield "/*"
         yield " * Table of zeta values used in the AArch64 forward NTT"
-        yield " * See autogenerate_files.py for details."
+        yield " * See autogen for details."
         yield " */"
         yield "ALIGN const int16_t aarch64_ntt_zetas_layer01234[] = {"
         yield from map(lambda t: str(t) + ",", gen_aarch64_fwd_ntt_zetas_layer01234())
@@ -389,7 +389,7 @@ def gen_aarch64_rej_uniform_table(dry_run=False):
         yield ""
         yield "/*"
         yield " * Lookup table used by rejection sampling of the public matrix."
-        yield " * See autogenerate_files.py for details."
+        yield " * See autogen for details."
         yield " */"
         yield "ALIGN const uint8_t rej_uniform_table[] = {"
         yield from map(lambda t: str(t) + ",", gen_aarch64_rej_uniform_table_rows())
@@ -440,7 +440,7 @@ def gen_avx2_rej_uniform_table(dry_run=False):
         yield ""
         yield "/*"
         yield " * Lookup table used by rejection sampling of the public matrix."
-        yield " * See autogenerate_files.py for details."
+        yield " * See autogen for details."
         yield " */"
         yield "ALIGN const uint8_t rej_uniform_table[256][8] = {"
         yield from map(lambda t: str(t) + ",", gen_avx2_rej_uniform_table_rows())
@@ -528,7 +528,7 @@ def gen_avx2_fwd_ntt_zeta_file(dry_run=False):
         yield from gen_header()
         yield "/*"
         yield " * Table of zeta values used in the AVX2 NTTs"
-        yield " * See autogenerate_files.py for details."
+        yield " * See autogen for details."
         yield " */"
         yield ""
         yield from map(lambda t: str(t) + ",", gen_avx2_fwd_ntt_zetas())

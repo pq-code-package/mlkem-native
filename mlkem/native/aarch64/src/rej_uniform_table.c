@@ -4,7 +4,7 @@
  */
 
 /*
- * WARNING: This file is auto-generated from scripts/autogenerate_files.py
+ * WARNING: This file is auto-generated from scripts/autogen
  *          Do not modify it directly.
  */
 
@@ -18,7 +18,7 @@
 
 /*
  * Lookup table used by rejection sampling of the public matrix.
- * See autogenerate_files.py for details.
+ * See autogen for details.
  */
 ALIGN const uint8_t rej_uniform_table[] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 /* 0 */,
