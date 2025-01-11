@@ -2,57 +2,151 @@
 
 # CBMC Proof Guide and Cookbook for mlkem-native
 
-This doc acts as a guide to developing proofs of C code using [CBMC](https://model-checking.github.io/cbmc-training/). It concentrates
-on the use of _contracts_ to achieve _unbounded_ and _modular_ proofs of type-safety
-and correctness properties.
+This document acts as a guide to how we develop proofs of mlkem-native's C code using
+[CBMC](https://model-checking.github.io/cbmc-training/). It concentrates on the use of _contracts_ to achieve
+_unbounded_ and _modular_ proofs of type-safety and correctness properties.
 
-This document uses the abbreviated forms of the [CBMC contracts](https://diffblue.github.io/cbmc/contracts-user.html) defined by macros in the
-[cbmc.h](../mlkem/cbmc.h) header file in the mlkem-native sources.
+## Scope
 
-## Common Proof Patterns
+Our CBMC proofs confirm the absence of certain classes of undefined behaviour, such as integer overflow or out of bounds
+memory accesses -- for the precise list of conditions checked, see the CBMC configuration in
+[Makefile.common](Makefile.common). For many arithmetic functions, we additionally specify how they affect coefficient
+bounds: For example, we show that the result of `poly_invntt_tomont()` has coefficients bound by
+`INVNTT_BOUND`. Finally, some simple functions have their full functional behaviour specified: For example, the
+specification of the constant-time `ct_memcmp()` shows that, functionally, it is just an ordinary `memcmp()`.
 
-### Loops (general advice)
+## CBMC annotations
 
-1. A function should contain at most one outermost loop statement. If the function you're trying to prove has more than one outermost loop, then re-factor it into two or more functions.
+CBMC proofs are largely automatic; there are no proof scripts as in interactive theorem proving. Instead, CBMC consumes
+_annotated_ C code and checks that it does not exhibit the configured classes of undefined behaviour within the
+context described by the annotations; if the annotations add further constraints, those are checked, too. For example, a
+function contract annotation provides contextual assumptions about a function as _preconditions_ to CBMC, and adds
+further _constraints_ for the program state at function return.
 
-2. The one outermost loop statement should be the _final_ statement before the function returns. Don't have complicated code _after_ the loop body.
+In mlkem-native, we use abbreviated forms of the CBMC annotations defined by macros in the [cbmc.h](../mlkem/cbmc.h). We
+now list the most prominent.
+
+### Function contracts
+
+A _function contract_ can be added where a function is declared. For `static` functions where the sites of
+declaration and definition coincide, it is part of the definition. mlkem-native's syntax for function contracts is
+
+```c
+int foo(args...)
+__contract(
+  requires(...)
+  ...
+  requires(...)
+  assigns(...)
+  ensures(...)
+  ...
+  ensures(...)
+);
+```
+
+Here, an arbitrary number of `requires` clauses can be used to specify assumptions made by the function, and an
+arbitrary number of `ensures(...)` clauses specifies the post-condition. One also needs an `assigns(...)` clause
+indicating the 'footprint' of the function, that is, the objects it changes.
+
+### Pointer validity
+
+When dealing with pointers, a very common precondition to encounter is `memory_no_alias(ptr, len)`. This asserts that
+`ptr` is a valid pointer to a block of memory of length `len` bytes, that does not overlap with other memory regions
+also described via `memory_no_alias(...)`. Hence, a function operating on `n` memory buffers will typically have `n`
+instances of `memory_no_alias(...)` in its precondition.
+
+Care has to be taken for functions where aliasing is needed. Aliasing constraints can be difficult to specify, and we
+reduce it as much as possible in mlkem-native. For example, rather than having `poly_add(dst, src0, src1)` where `dst`
+may overlap with `src0` or `src1`, we only have a destructive `poly_add(dst, src)` implementing `dst += src`, thereby
+avoiding the need to specify an aliasing constraint.
+
+Care also has to be taken when _invoking_ a function that has a contract with multiple `memory_no_alias(...)` clauses;
+Here, CBMC will assert that the pointer arguments point to different C objects, rather than conducting a fine-grained
+check of disjointness. This simplifies the constraints, but can be impeding for the user: For example, given `foo x[2]`
+for some struct `foo`, you cannot pass `&foo[0]`, `&foo[1]` as arguments to a function specified using
+`memory_no_alias(...)` for both, because `&foo[0]`, `&foo[1]` point to the same object. In mlkem-native, we sometimes
+work around this by manually splitting statically-sized arrays into multiple separate objects.
+
+### Memory footprint
+
+The most common way to specify memory footprint in `assigns(...)` clauses is via `memory_slice(ptr, len)`. This asserts
+that the code in question may change the first `len` bytes starting from `ptr`.
+
+There is also `object_whole(ptr)`, which more coarsely asserts that the entire object can change. This has to be used
+with care: If a function precondition specifies `requires(memory_no_alias(ptr, 42))` and `assigns(object_whole(ptr))`
+and is called in a context where `ptr` is, say, a slice of some larger structure, then the entire structure will be
+marked as tained by the function call. This is often not desired, hence the more fine-grained `memory_slice(...)` is
+desirable.
+
+### Quantifiers and bounds
+
+If you need to specify a quantified condition for use in `ensures(...)` or `requires(...)`, you can use the
+`forall(...)` wrapper. It has the shape `forall(k, low_bound, high_bound, condition)`, where `k` is a name for the
+quantified variable `[low_bound, ..., high_bound-1]` the quantification range, and `condition` is the quantified
+condition (usually depending on `k`).
+
+A prominent condition built from `forall` are `array_bound`:
+`array_bound(arr, idx_low, idx_high, value_low, value_high)` asserts that the values of the array `arr` within
+`[idx_low, ..., idx_high - 1]` are within the range `[value_low, ..., value_high]`. There is also `array_abs_bound(...)`
+for absolute value constraints.
+
+### Loop invariants
+
+Loop invariants are specified using `__loop__(...)` as follows:
+
+```c
+for (...)
+__loop__(
+  assigns(...)
+  invariant(...)
+  ...
+  invariant(...))
+{
+   ...
+}
+```
+
+Here, one or more `invariant(...)` clauses describe the invariant maintained by the loop body. As for function
+contracts, `assigns(...)` captures the footprint of the loop body.
+
+## Common Patterns
 
 ### `for` loops
 
 The most common, and easiest, patten is a "for" loop that has a counter starting at 0, and counting up to some upper bound, like this:
 
 ```
-int i;
+unsigned i;
 for (i = 0; i < C; i++) {
     S;
 }
 ```
-Notes:
-1. It is good practice to declare the counter variable locally, within the scope of the loop.
-2. The counter variable should be a constant within the loop body. In the example above, do _not_ modify (or take the address of) `i` in the body of the loop.
-3. `int` is the best type for the counter variable. `unsigned` integer types complicate matters with their modulo N semantics. Avoid `size_t` since its large range (possibly unsigned 64 bit) can slow proofs down.
 
-CBMC requires basic assigns, loop-invariant, and decreases contracts _in exactly that order_. In mlkem-native, we
-further enclose the entire loop annotations in a `__loop__` macro. Note that the contracts appear _before_ the opening.
+CBMC requires basic assigns, loop-invariant, and optionally a decreases contracts _in exactly that order_. The most
+common pattern is:
 
 ```
-int i;
+unsigned i;
 for (i = 0; i < C; i++)
 __loop__(
-  assigns(i) // plus whatever else S does
-  invariant(i >= 0)
-  invariant(i <= C)
+  assigns(i, ...)   /* plus whatever else S does */
+  invariant(i <= C) /* Counter invariant */
+  invariant(...)    /* Further invariants */
   decreases(C - i))
 {
     S;
 }
 ```
 
-The `i <= C` in the invariant is _not_ a typo. CBMC places the invariant just _after_ the loop counter has been incremented, but just _before_ the loop exit test, so it is possible for `i == C` at the invariant on the final iteration of the loop.
+Importantly, the `i <= C` in the invariant is _not_ a typo: CBMC places the invariant just _after_ the loop counter has
+been incremented, but just _before_ the loop exit test, so it is possible for `i == C` at the invariant on the final
+iteration of the loop.
 
 ### Iterating over an array for a `for` loop
 
-A common pattern - doing something to every element of an array. An example would be setting every element of a byte-array to 0x00 given a pointer to the first element and a length. Initially, we want to prove type safety of this function, so we won't even bother with a post-condition. The function specification might look like this:
+A common pattern is doing something to every element of an array. An example would be setting every element of a
+byte-array to 0x00 given a pointer to the first element and a length. Initially, we want to prove type safety of this
+function, so we won't even bother with a post-condition. The function specification might look like this:
 
 ```
 void zero_array_ts (uint8_t *dst, int len)
@@ -61,55 +155,56 @@ __contract__(
   assigns(object_whole(dst)));
 ```
 
-The `memory_no_alias(dst,len)` in the precondition means that the pointer value `dst` is not `NULL` and is pointing to at least `len` bytes of data. The `assigns` contract (in this case) means that when the function returns, it promises to have updated the whole object pointed to by dst - in this case `len` bytes of data.
+As mentioned before, the `memory_no_alias(dst,len)` in the precondition means that the pointer value `dst` is not `NULL`
+and is pointing to at least `len` bytes of data. The `assigns` contract (in this case) means that when the function
+returns, it promises to have updated the whole object pointed to by dst - in this case `len` bytes of data.
 
 The body:
 
 ```
 void zero_array_ts (uint8_t *dst, int len)
 {
-    int i;
+    unsigned i;
     for (i = 0; i < len; i++)
     __loop__(
       assigns(i, object_whole(dst))
-      invariant(i >= 0 && i <= len)
+      invariant(i <= len)
       decreases(len - i))
     {
         dst[i] = 0;
     }
 }
 ```
-The only real "type safety proofs" here are that
-1. dst is pointing at exactly "len" bytes - this is given by the memory_no_alias() part of the precondition.
-2. The assignment to `dst[i]` does not have a buffer overflow. This requires a proof that `i >= 0 && i < len` which is trivially discharged given the loop invariant AND the fact that the loop _hasn't_ terminated (so we know `i < len` too).
+
+For memory safety, the only interesting proof obligation for CBMC here is that the assignment `dst[i]` is valid. This
+requires a proof that `i < len` which is trivially discharged given the loop invariant `i <= len`, plus the fact that
+the loop has not terminated, and hence `i < len`.
 
 ### Correctness proof of zero_array
 
-We can go further, and prove the correctness of that function by adding a post-condition, and extending the loop invariant. This introduces more important patterns.
-
-The function specification is extended:
+We can go further, and prove the correctness of that function by adding a post-condition, and extending the loop
+invariant, as follows:
 
 ```
 void zero_array_correct (uint8_t *dst, int len)
 __contract__(
   requires(memory_no_alias(dst, len))
   assigns(object_whole(dst))
-  ensures(forall { int k; (0 <= k && k < len) ==> dst[k] == 0 }));
+  ensures(forall(k, 0, len, dst[k] == 0)));
 ```
 
-Note the required order of the contracts is always requires, assigns, ensures.
-
-The body is the same, but with a stronger loop invariant. The invariant says that "after j loop iterations, we've zeroed the first j elements of the array", so:
+The body is the same, but now with a stronger loop invariant. The invariant says that "after j loop iterations, we've
+zeroed the first j elements of the array", so:
 
 ```
 void zero_array_correct (uint8_t *dst, int len)
 {
-    int i;
+    unsigned i;
     for (i = 0; i < len; i++)
     __loop__(
       assigns(i, object_whole(dst))
       invariant(i >= 0 && i <= len)
-      invariant(forall { int j; (0 <= j && j <= i - 1) ==> dst[j] == 0 } )
+      invariant(forall(j, 0, i, dst[j] == 0))
       decreases(len - i))
     {
         dst[i] = 0;
@@ -117,73 +212,43 @@ void zero_array_correct (uint8_t *dst, int len)
 }
 ```
 
-Rules of thumb:
-1. Don't overload your program variables with quantified variables inside your forall contracts. It get confusing if you do.
-2. The type of the quanitified variable is _signed_ "int". This is important.
-3. The path in the program from the loop-invariant, through the final loop exit test, to the implicit `return` statement is "nothing" or a "null statement". The proof needs to establish that (on the final iteration), the loop invariant _and_ the loop exit condidtion imply the post-condition. Imagine having to do that if there's some really complex code _after_ the loop body.
+Things to note:
+1. The type of the quanitified variable is `unsigned`.
+2. Don't overload your program variables with quantified variables inside your forall contracts. It get confusing if you
+   do.
 
-This pattern also brings up another important trick - the use of "null ranges" in forall expressions. Consider the loop invariant above. We need to prove that it's true on the first entry to the loop (i.e. when i == 0).
-
-Substituting i == 0 into there, we need to prove
-
-```
-forall { int j; (0 <= j && j <= -1) ==> dst[j] == 0 }
-```
-
-but how can j be both larger-than-or-equal-to 0 AND less-than-or-equal-to -1 at the same time? Answer: it can't! So.. the left hand side of the quantified predicate is False, so it reduces to:
-
-```
-forall { int j; false ==> dst[j] == 0 }
-```
-
-The `==>` is a logical implication, and we know that `False ==> ANYTHING` is True, so all is well.
-
-This comes up a lot. You often end up reasoning about such "slices" of arrays, where one or more of the slices has "null range" at either the loop entry, or at the loop exit point, and therefore that particular quantifier "disappears". Several examples of this trick can be found on the MLKEM codebase.
-
-This also explains why we prefer to use _signed_ integers for loop counters and quantified variables - to allow "0 - 1" to evaluate to -1.  If you use an unsigned type, then "0 - 1" evaluated to something like UINT_MAX, and all hell breaks loose.
+Note that the invariant `invariant(forall(j, 0, i, dst[j] == 0))` is vacuous at loop entry, where `i == 0` and the
+premise `j < i` of the bounded quantification in `forall(...)` is therefore unsatisfiable (remember that `i,j` are
+`unsigned`). This pattern comes up frequently when one reasons about slices of arrays, and one or more of the slices has
+a "null range" at either the loop entry or exit, and therefore that particular quantified constraint is vacuously
+true.
 
 ## Invariant && loop-exit ==> post-condition
 
-Another important sanity check. If there are no statements following the loop body, then the loop invariant AND the loop exit condition should imply the post-condition. For the example above, we need to prove:
+When the loop completes, CBMC reasons about the following code (if any) based on the combination of (a) loop invariant,
+and (b) loop exit condition. In the simplest case where there is no code following the loop, this means that the loop
+invariant and exit condition together should imply the function's post-condition.
+
+For the example above, we need to prove:
 
 ```
 // Loop invariant
-(i >= 0 &&
- i <= len &&
- (forall { int j; (0 <= j && j <= i - 1) ==> dst[j] == 0 } )
+(i <= len && forall(j, 0, j < i, dst[j] == 0))
 &&
 // Loop exit condition must be TRUE, so
 i == len)
 
-  ==>
+===>
 
 // Post-condition
-forall { int k; (0 <= k && k < len) ==> dst[k] == 0 }
+forall(k, 0, len, dst[k] == 0)
 ```
 
-The loop exit condition means that we can just replace `i` with `len` in the hypotheses, to get:
-
-```
-len >= 0 &&
-len <= len &&
-(forall { int j; (0 <= j && j <= len - 1) ==> dst[j] == 0 } )
-  ==>
-forall { int k; (0 <= k && k < len) ==> dst[k] == 0 }
-```
-
-`j <= len - 1` can be simplified to `j < len` so that simplifies to:
-
-```
-forall { int j; (0 <= j && j < len) ==> dst[j] == 0 }
-  ==>
-forall { int k; (0 <= k && k < len) ==> dst[k] == 0 }
-```
-
-which is True.
+which holds by rewriting `i` by `len` in the loop invariant.
 
 ## Recipe to prove a new function
 
-Let's say we want to develop a proof of a function. Here are the basic steps.
+If you want to develop a proof of a function, here are the basic steps.
 1. Populate a proof directory
 2. Update Makefile
 3. Update harness function
@@ -191,13 +256,14 @@ Let's say we want to develop a proof of a function. Here are the basic steps.
 5. Supply loop-invariants (if required) and other interior contracts
 6. Prove it!
 
-These steps are expanded on in the following sub-sections
+These steps are expanded on in the following sub-sections.
 
 ### Populate a proof directory
 
-For mlkem-native, proof directories lie below `cbmc/proofs`
+For mlkem-native, proof directories lie below `cbmc`.
 
-Create a new sub-directory in there, where the name of the directory is the name of the function _without_ the `$(MLKEM_NAMESPACE)` prefix.
+Create a new sub-directory in there, where the name of the directory is the name of the function. You don't need a
+namespacing prefix.
 
 That directory needs to contain 3 files.
 
@@ -207,25 +273,31 @@ That directory needs to contain 3 files.
 
 where "XXX" is the name of the function being proved - same as the directory name.
 
-We suggest that you copy these files from an existing proof directory and modify the latter two. The `cbmc-proof.txt` file is just a marker that says "this directory contains a CBMC proof" to the tools, so no modification is required.
+We suggest that you copy these files from an existing proof directory and modify the latter two. The `cbmc-proof.txt`
+file is just a marker that says "this directory contains a CBMC proof" to the tools, so no modification is required.
 
 ### Update Makefile
 
-The `Makefile` sets options and targets for this proof. Let's imagine that the function we want to prove is called `XXX` (without the `$(MLKEM_NAMESPACE)` prefix).
+The `Makefile` sets options and targets for this proof. Let's imagine that the function we want to prove is called `XXX`
+(without namespacing prefix).
 
 Edit the Makefile and update the definition of the following variables:
 
 * HARNESS_FILE - should be `XXX_harness`
 * PROOF_UID - should be `XXX`
 * PROJECT_SOURCES - should the files containing the source code of XXX
-* CHECK_FUNCTION_CONTRACTS - set to the `XXX`, but _with_ the `$(MLKEM_NAMESPACE)` prefix if required
-* USE_FUNCTION_CONTRACTS - a list of functions that `XXX` calls where you want CBMC to use the contracts of the called function for proof, rather than 'inlining' the called function for proof. Include the `$(MLKEM_NAMESPACE)` prefix if required
+* CHECK_FUNCTION_CONTRACTS - set to the `XXX`, but including the `$(MLKEM_NAMESPACE)` prefix if required
+* USE_FUNCTION_CONTRACTS - a list of functions that `XXX` calls where you want CBMC to use the contracts of the called
+  function for proof, rather than 'inlining' the called function for proof. Include the `$(MLKEM_NAMESPACE)` prefix if
+  required
 * EXTERNAL_SAT_SOLVER - should _always_ be "nothing" to prevent CBMC selecting a SAT backend over the selected SMT backend.
-* CBMCFLAGS - additional flags to pass to the final run of CBMC. This is normally set to `--smt2` which tells cbmc to run Z3 as its underlying solver. Can also be set to `--bitwuzla` which is sometimes better at generaing counter-examples when Z3 fails.
+* CBMCFLAGS - additional flags to pass to the final run of CBMC. This is normally set to `--smt2` which tells cbmc to
+  run Z3 as its underlying solver. Can also be set to `--bitwuzla` which is sometimes better at generaing
+  counter-examples when Z3 fails.
 * FUNCTION_NAME - set to `XXX` with the `$(MLKEM_NAMESPACE)` prefix if required
 * CBMC_OBJECT_BITS. Normally set to 8, but might need to be increased if CBMC runs out of memory for this proof.
 
-For documentation of these (and the other) options, see the `cbmc/proofs/Makefile.common` file.
+For documentation of these (and the other) options, see the [cbmc/Makefile.common](Makefile.common) file.
 
 The `USE_FUNCTION_CONTRACTS` option should be used where possible, since contracts enable modular proof, which is far more efficient
  than inlining, which tends to explode in complexity for higher-level functions.
@@ -234,7 +306,9 @@ The `USE_FUNCTION_CONTRACTS` option should be used where possible, since contrac
 
 We have found that it's better to use Bitwuzla in the initial stages of developing and debugging a new proof.
 
-When Z3 finds that a proof is "sat" (i.e. not true), it tries to produce a counter-example to show you what's wrong. Unfortunately, recent versions of Z3 can produce quantified expressions as output that cannot be currently understood by CBMC. This leads CBMC to fail with an error such as
+When Z3 finds that a proof is "sat" (i.e. not true), it tries to produce a counter-example to show you what's
+wrong. Unfortunately, recent versions of Z3 can produce quantified expressions as output that cannot be currently
+understood by CBMC. This leads CBMC to fail with an error such as
 
 ```
 SMT2 solver returned non-constant value for variable Bxxx
@@ -242,12 +316,15 @@ SMT2 solver returned non-constant value for variable Bxxx
 
 This is not helpful when trying to understand a failed proof. Bitwuzla works better and produces reliable counter-examples.
 
-Once a proof is working OK, we revert to Z3 to check it _also_ works with Z3. If it does, then keep Z3 as the selected prover. If not, then stick with Bitwuzla.
-
+Once a proof is working OK, you may revert to Z3 to check if it _also_ passes with Z3, and perhaps faster. If it does,
+then keep Z3 as the selected prover. If not, then stick with Bitwuzla.
 
 ### Update harness function
 
-The file `XXX_harness.c` should declare a single function called `XXX_harness()` that calls `XXX` exactly once, with appropriately typed actual parameters. The actual parameters should be variables of the simplest type possible, and should be _uninitialized_. Where a pointer value is required, create an uninitialized variable of that pointer type. Do _not_ pass the address of a stack-allocated object.
+The file `XXX_harness.c` should declare a single function called `XXX_harness()` that calls `XXX` exactly once, with
+appropriately typed actual parameters. The actual parameters should be variables of the simplest type possible, and
+should be _uninitialized_. Where a pointer value is required, create an uninitialized variable of that pointer type. Do
+_not_ pass the address of a stack-allocated object.
 
 For example, if a function f() expects a single parameter which is a pointer to some struct s:
 ```
@@ -269,29 +346,36 @@ Using contracts, this harness function should not need to contain any CBMC `assu
 
 ### Supply top-level contracts
 
-Now for the tricky bit. Does `XXX` need any top-level pre- and post-condition contracts, other than those inferred from its type-signature?
+Add a `__contract(...)__` contract in the header defining the function-under-proof. If the function is `static`, add the
+`__contract__(...)` in the `.c` file at point of definition. As mentioned before, the pattern is as follows:
 
-A common case is where a function has an array parameter, where the numeric range of the array's elements are not just the range of the underlying predefined type.
-
-Similarly, a parameter of a predefined integer type might have to be constrained to a small range.
-
-Check for any BOUND macros in the body that give range constraints on the parameters, and make sure that your contracts are identical or consistent with those. Also read the comments for XXX to make sure they agree with your contracts.
-
-The order of the top-level contracts for a function is _always_:
-```
-t1 XXX(params...)
+```c
+return_type function_name(arg0, arg1, ...)
 __contract__(
   requires()
   assigns()
   ensures());
 ```
-with a final semi-colon on the end of the last one. That final semi-colon is needed to terminate the function declaration as per normal C syntax.
+
+or
+
+```c
+return_type function_name(arg0, arg1, ...)
+__contract__(
+  requires()
+  assigns()
+  ensures())
+{
+   ...
+}
+```
+
+Note that when added to a declaration, the contract has to come before the final semicolon concluding the declaration.
 
 ### Interior contracts and loop invariants
 
-If XXX contains no loop statements, then you might be able to just skip this step.
-
-As above, it's best if a function contains at most ONE top-level loop statement. Refer to the patterns above for common invariants. Don't be afraid to ask for help.
+If XXX contains no loop statements, then you might be able to just skip this step. Otherwise, add `__loop__(...)`
+annotations to every loop in the function under proof.
 
 ### Prove it!
 
@@ -299,11 +383,10 @@ Proof of a single function can be run from the proof directory for that function
 
 This produces `logs/result.txt` in plaintext format.
 
-Before pushing a new proof for a new function, make sure that _all_ proofs run OK from the `cbmc/proofs` directory with
+Before pushing a new proof for a new function, make sure that _all_ proofs run OK from the [cbmc](./) directory with
 
 ```
-export MLKEM_K=3 # or 2 or 4...
-./run-cbmc-proofs.py --summarize -j$(nproc)
+MLKEM_K=3 ./run-cbmc-proofs.py --summarize -j$(nproc)
 ```
 
 That will use `$(nproc)` processor cores to run the proofs.
@@ -324,7 +407,7 @@ This section follows the recipe above, and adds actual settings, contracts and c
 
 ### Populate a proof directory
 
-The proof directory is `cbmc/proofs/poly_tobytes`
+The proof directory is [cbmc/poly_tobytes](poly_tobytes).
 
 ### Update Makefile
 
@@ -365,57 +448,63 @@ The comments on `poly_tobytes()` give us a clear hint:
  *              - r: pointer to output byte array
  *                   (of MLKEM_POLYBYTES bytes)
 ```
-So we need to write a requires contract to constrain the ranges of the coefficients denoted by the parameter `a`. There is no constraint on the output byte array, other than it must be the right length, which is given by the function prototype.
+So we need to write a requires contract to constrain the ranges of the coefficients denoted by the parameter `a`. There
+is no constraint on the output byte array, other than it must be the right length, which is given by the function
+prototype.
 
-We can use the macros in `cbmc.h` to help, thus:
+We can use the macros in [mlkem/cbmc.h](../mlkem/cbmc.h) to help, thus:
 
 ```
 void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
 __contract__(
   requires(memory_no_alias(a, sizeof(poly)))
-  requires(array_bound(a->coeffs, 0, (MLKEM_N - 1), 0, (MLKEM_Q - 1)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1)))
   assigns(object_whole(r)));
 ```
 
-`array_bound` is a macro that expands to a quantified expression that expresses that the elemtns of `a->coeffs` between index values `0` and `(MLKEM_N - 1)` (inclusive) are in the range `0` through `(MLKEM_Q - 1)` (also inclusive). See the macro definition in `mlkem/cbmc.h` for details.
+`array_bound` is a macro that expands to a quantified expression that expresses that the elemtns of `a->coeffs` between
+index values `0` (inclusive) and `MLKEM_N` (exclusive) are in the range `0` through `(MLKEM_Q - 1)` (both
+inclusive). See the macro definition in [mlkem/cbmc.h](../mlkem/cbmc.h) for details.
 
 ### Interior contracts and loop invariants
 
 `poly_tobytes` has a single loop statement:
 
 ```
-  int i;
+  unsigned i;
   for (i = 0; i < MLKEM_N / 2; i++)
   { ... }
 ```
 
 A candidate loop contract needs to state that:
 1. The loop body assigns to variable `i` and the whole object pointed to by `r`.
-2. Loop counter variable `i` is in range 0 .. MLKEM_N / 2 at the point of the loop invariant (remember the pattern above).
+2. Loop counter variable `i` is in range `0 .. MLKEM_N / 2` at the point of the loop invariant (remember the pattern above).
 3. The loop terminates because the expression `MLKEM_N / 2 - i` decreases on every iteration.
 
 Therefore, we add:
 
 ```
-  int i;
+  unsigned i;
   for (i = 0; i < MLKEM_N / 2; i++)
   __loop__(
     assigns(i, object_whole(r))
-    invariant(i >= 0)
-    invariant(i <= MLKEM_N / 2)
+    invariant(i >= 0 && i <= MLKEM_N / 2)
     decreases(MLKEM_N / 2 - i))
   { ... }
 ```
 
 Note that the invariant `i >= 0` could be ommitted since `i` is of an `unsigned` integer type. It is given here for clarity only.
 
-Another small set of changes is required to make CBMC happy with the loop body. By default, CBMC is pedantic and warns about conversions that truncate values or lose information via an implicit type conversion.
+Another small set of changes is required to make CBMC happy with the loop body. By default, CBMC is pedantic and warns
+about conversions that truncate values or lose information via an implicit type conversion.
 
 In the original version of the function, we have 3 lines, the first of which is:
 ```
 r[3 * i + 0] = (t0 >> 0);
 ```
-which has an implicit conversion from `uint16_t` to `uint8_t`. This is well-defined in C, but CBMC issues a warning just in case. To make CBMC happy, we have to explicitly reduce the range of t0 with a bitwise mask, and use an explicit conversion, thus:
+which has an implicit conversion from `uint16_t` to `uint8_t`. This is well-defined in C, but CBMC issues a warning just
+in case. To make CBMC happy, we have to explicitly reduce the range of t0 with a bitwise mask, and use an explicit
+conversion, thus:
 ```
 r[3 * i + 0] = (uint8_t)(t0 & 0xFF);
 ```
@@ -426,7 +515,7 @@ and so on for the other two statements in the loop body.
 With those changes, CBMC completes the proof in about 10 seconds:
 
 ```
-cd cbmc/proofs/poly_tobytes
+cd cbmc/poly_tobytes
 make result
 cat logs/result.txt
 ```
@@ -439,7 +528,7 @@ VERIFICATION SUCCESSFUL
 We can also use the higher-level Python script to prove just that one function:
 
 ```
-cd cbmc/proofs
+cd cbmc
 MLKEM_K=3 ./run-cbmc-proofs.py --summarize -j$(nproc) -p poly_tobytes
 ```
 yields
