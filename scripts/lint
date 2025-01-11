@@ -8,7 +8,7 @@ set -o nounset
 set -o pipefail
 
 # consts
-ROOT="$(realpath "$(dirname "$0")"/../../)"
+ROOT="$(realpath "$(dirname "$0")"/../)"
 GITHUB_STEP_SUMMARY=${GITHUB_STEP_SUMMARY:-/dev/stdout}
 
 checkerr()

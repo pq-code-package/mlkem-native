@@ -66,7 +66,7 @@ jobs:
           ./scripts/tests func
       - name: check namespacing
         run: |
-          ./scripts/ci/check-namespace
+          ./scripts/check-namespace
   quickcheck-c90:
     strategy:
       fail-fast: false
@@ -99,7 +99,7 @@ jobs:
           ./scripts/tests func --cflags="-std=c90"
       - name: check namespacing
         run: |
-          ./scripts/ci/check-namespace
+          ./scripts/check-namespace
   quickcheck-windows:
     name: Quickcheck windows-latest
     runs-on: windows-latest

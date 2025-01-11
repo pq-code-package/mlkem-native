@@ -93,7 +93,7 @@ runs:
       - name: Check namespacing ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }})
         shell: ${{ env.SHELL }}
         run: |
-          ./scripts/ci/check-namespace
+          ./scripts/check-namespace
       - name: Post ${{ env.MODE }} Tests
         shell: ${{ env.SHELL }}
         if: success() || failure()
