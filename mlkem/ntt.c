@@ -97,9 +97,9 @@ static void ntt_layer(int16_t r[MLKEM_N], int len, int layer)
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
   requires(1 <= layer && layer <= 7 && len == (MLKEM_N >> layer))
-  requires(array_abs_bound(r, 0, MLKEM_N, layer * MLKEM_Q - 1))
+  requires(array_abs_bound(r, 0, MLKEM_N, layer * MLKEM_Q))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
-  ensures(array_abs_bound(r, 0, MLKEM_N, (layer + 1) * MLKEM_Q - 1)))
+  ensures(array_abs_bound(r, 0, MLKEM_N, (layer + 1) * MLKEM_Q)))
 {
   int start, k;
   /* `layer` is a ghost variable only needed in the CBMC specification */
@@ -110,11 +110,11 @@ __contract__(
   __loop__(
     invariant(0 <= start && start < MLKEM_N + 2 * len)
     invariant(0 <= k && k <= MLKEM_N / 2 && 2 * len * k == start + MLKEM_N)
-    invariant(array_abs_bound(r, 0, start, (layer * MLKEM_Q - 1) + MLKEM_Q))
-    invariant(array_abs_bound(r, start, MLKEM_N, layer * MLKEM_Q - 1)))
+    invariant(array_abs_bound(r, 0, start, layer * MLKEM_Q + MLKEM_Q))
+    invariant(array_abs_bound(r, start, MLKEM_N, layer * MLKEM_Q)))
   {
     int16_t zeta = zetas[k++];
-    ntt_butterfly_block(r, zeta, start, len, layer * MLKEM_Q - 1);
+    ntt_butterfly_block(r, zeta, start, len, layer * MLKEM_Q);
   }
 }
 
@@ -138,7 +138,7 @@ void poly_ntt(poly *p)
   for (len = 128, layer = 1; len >= 2; len >>= 1, layer++)
   __loop__(
     invariant(1 <= layer && layer <= 8 && len == (MLKEM_N >> layer))
-    invariant(array_abs_bound(r, 0, MLKEM_N, layer * MLKEM_Q - 1)))
+    invariant(array_abs_bound(r, 0, MLKEM_N, layer * MLKEM_Q)))
   {
     ntt_layer(r, len, layer);
   }

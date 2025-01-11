@@ -339,7 +339,7 @@ void poly_compress_du(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DU], const poly *a)
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(a, sizeof(poly)))
-  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
   assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_DU))
 );
 
@@ -364,7 +364,7 @@ __contract__(
   requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(r, sizeof(poly)))
   assigns(memory_slice(r, sizeof(poly)))
-  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
 );
 
 #define poly_compress_dv MLKEM_NAMESPACE(poly_compress_dv)
@@ -385,7 +385,7 @@ void poly_compress_dv(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DV], const poly *a)
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_DV))
   requires(memory_no_alias(a, sizeof(poly)))
-  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
   assigns(object_whole(r))
 );
 
@@ -411,7 +411,7 @@ __contract__(
   requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_DV))
   requires(memory_no_alias(r, sizeof(poly)))
   assigns(object_whole(r))
-  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
 );
 
 #define poly_tobytes MLKEM_NAMESPACE(poly_tobytes)
@@ -434,7 +434,7 @@ void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYBYTES))
   requires(memory_no_alias(a, sizeof(poly)))
-  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
   assigns(object_whole(r))
 );
 
@@ -459,7 +459,7 @@ __contract__(
   requires(memory_no_alias(a, MLKEM_POLYBYTES))
   requires(memory_no_alias(r, sizeof(poly)))
   assigns(memory_slice(r, sizeof(poly)))
-  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, UINT12_MAX))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, UINT12_LIMIT))
 );
 
 
@@ -478,7 +478,7 @@ __contract__(
   requires(memory_no_alias(msg, MLKEM_INDCPA_MSGBYTES))
   requires(memory_no_alias(r, sizeof(poly)))
   assigns(object_whole(r))
-  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
 );
 
 #define poly_tomsg MLKEM_NAMESPACE(poly_tomsg)
@@ -496,7 +496,7 @@ void poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const poly *r)
 __contract__(
   requires(memory_no_alias(msg, MLKEM_INDCPA_MSGBYTES))
   requires(memory_no_alias(r, sizeof(poly)))
-  requires(array_bound(r->coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1)))
+  requires(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
   assigns(object_whole(msg))
 );
 
@@ -534,10 +534,10 @@ __contract__(
   assigns(memory_slice(r2, sizeof(poly)))
   assigns(memory_slice(r3, sizeof(poly)))
   ensures(
-    array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1)
-    && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1)
-    && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA1)
-    && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA1));
+    array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1));
 );
 #elif MLKEM_K == 4
 __contract__(
@@ -549,10 +549,10 @@ __contract__(
   assigns(memory_slice(r2, sizeof(poly)))
   assigns(memory_slice(r3, sizeof(poly)))
   ensures(
-    array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1)
-    && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1)
-    && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA1)
-    && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA1));
+    array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1));
 );
 #elif MLKEM_K == 3
 __contract__(
@@ -565,10 +565,10 @@ __contract__(
   assigns(memory_slice(r2, sizeof(poly)))
   assigns(memory_slice(r3, sizeof(poly)))
   ensures(
-    array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1)
-    && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1)
-    && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA1)
-    && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA1));
+    array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1));
 );
 #endif /* MLKEM_K */
 
@@ -602,7 +602,7 @@ __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
   assigns(object_whole(r))
-  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_ETA2))
+  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_ETA2 + 1))
 );
 #endif /* MLKEM_K == 2 || MLKEM_K == 4 */
 
@@ -631,10 +631,10 @@ __contract__(
    r1 == r0 + 1 && r3 == r2 + 1 && !same_object(r0, r2)))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
   assigns(object_whole(r0), object_whole(r1), object_whole(r2), object_whole(r3))
-  ensures(array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1)
-     && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1)
-     && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA2)
-     && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA2));
+  ensures(array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+     && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+     && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA2 + 1)
+     && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA2 + 1));
 );
 #endif /* MLKEM_K == 2 */
 
@@ -667,9 +667,9 @@ __contract__(
   requires(memory_no_alias(a, sizeof(poly)))
   requires(memory_no_alias(b, sizeof(poly)))
   requires(memory_no_alias(b_cache, sizeof(poly_mulcache)))
-  requires(array_abs_bound(a->coeffs, 0, MLKEM_N, UINT12_MAX))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, UINT12_LIMIT))
   assigns(object_whole(r))
-  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, 2 * MLKEM_Q - 1))
+  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, 2 * MLKEM_Q))
 );
 
 #define poly_tomont MLKEM_NAMESPACE(poly_tomont)
@@ -688,7 +688,7 @@ void poly_tomont(poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   assigns(memory_slice(r, sizeof(poly)))
-  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, (MLKEM_Q - 1)))
+  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_Q))
 );
 
 #define poly_mulcache_compute MLKEM_NAMESPACE(poly_mulcache_compute)
@@ -745,7 +745,7 @@ void poly_reduce(poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   assigns(memory_slice(r, sizeof(poly)))
-  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
 );
 
 #define poly_add MLKEM_NAMESPACE(poly_add)

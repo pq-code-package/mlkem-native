@@ -31,7 +31,7 @@ __contract__(
   requires(transposed == 0 || transposed == 1)
   assigns(object_whole(a))
   ensures(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
-  array_bound(a[x].vec[y].coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1)))));
+  array_bound(a[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))));
 );
 
 #define indcpa_keypair_derand MLKEM_NAMESPACE(indcpa_keypair_derand)

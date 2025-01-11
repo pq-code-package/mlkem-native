@@ -54,9 +54,9 @@ __contract__(
   requires(offset <= target && target <= 4096 && buflen <= 4096 && buflen % 3 == 0)
   requires(memory_no_alias(r, sizeof(int16_t) * target))
   requires(memory_no_alias(buf, buflen))
-  requires(offset > 0 ==> array_bound(r, 0, offset, 0, (MLKEM_Q - 1)))
+  requires(offset > 0 ==> array_bound(r, 0, offset, 0, MLKEM_Q))
   assigns(memory_slice(r, sizeof(int16_t) * target))
   ensures(offset <= return_value && return_value <= target)
-  ensures(return_value > 0 ==> array_bound(r, 0, return_value, 0, (MLKEM_Q - 1)))
+  ensures(return_value > 0 ==> array_bound(r, 0, return_value, 0, MLKEM_Q))
 );
 #endif

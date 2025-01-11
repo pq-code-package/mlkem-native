@@ -98,12 +98,12 @@
 
 /*
  * Boolean-value predidate that asserts that "all values of array_var are in
- * range value_lb .. value_ub (inclusive)"
+ * range value_lb (inclusive) .. value_ub (exclusive)"
  * Example:
- *  array_bound(a->coeffs, 0, MLKEM_N, -(MLKEM_Q - 1), MLKEM_Q - 1)
+ *  array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q)
  * expands to
- *  __CPROVER_forall { int k; (0 <= k && k <= MLKEM_N-1) ==> ( (-(MLKEM_Q -
- *  1) <= a->coeffs[k]) && (a->coeffs[k] <= (MLKEM_Q - 1))) }
+ *  __CPROVER_forall { int k; (0 <= k && k <= MLKEM_N-1) ==> (
+ *  0 <= a->coeffs[k]) && a->coeffs[k] < MLKEM_Q)) }
  */
 
 /*
@@ -120,17 +120,20 @@
     unsigned qvar;                                                     \
     ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) ==>                    \
         (((value_lb) <= (array_var[(qvar)])) &&                        \
-        ((array_var[(qvar)]) <= (value_ub)))                           \
+        ((array_var[(qvar)]) < (value_ub)))                            \
   }
 
 #define array_bound(array_var, qvar_lb, qvar_ub, value_lb, value_ub) \
   array_bound_core(CBMC_CONCAT(_cbmc_idx, __LINE__), (qvar_lb),      \
                    (qvar_ub), (array_var), (value_lb), (value_ub))
-
-
-/* Wrapper around array_bound operating on absolute values */
-#define array_abs_bound(arr, lb, ub, k) \
-  array_bound((arr), (lb), (ub), (-(k)), (k))
 /* clang-format on */
+
+/* Wrapper around array_bound operating on absolute values.
+ *
+ * Note that since the absolute bound is inclusive, but the lower
+ * bound in array_bound is inclusive, we have to raise it by 1.
+ */
+#define array_abs_bound(arr, lb, ub, k) \
+  array_bound((arr), (lb), (ub), -(k) + 1, (k))
 
 #endif

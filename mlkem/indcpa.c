@@ -163,10 +163,10 @@ __contract__(
   requires(memory_no_alias(seed[2], MLKEM_SYMBYTES + 2))
   requires(memory_no_alias(seed[3], MLKEM_SYMBYTES + 2))
   assigns(memory_slice(vec, sizeof(poly) * 4))
-  ensures(array_bound(vec[0].coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1)))
-  ensures(array_bound(vec[1].coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1)))
-  ensures(array_bound(vec[2].coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1)))
-  ensures(array_bound(vec[3].coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1))))
+  ensures(array_bound(vec[0].coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  ensures(array_bound(vec[1].coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  ensures(array_bound(vec[2].coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  ensures(array_bound(vec[3].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 {
   /* Temporary buffers for XOF output before rejection sampling */
   uint8_t buf0[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
@@ -207,10 +207,10 @@ __contract__(
        object_whole(buf1), object_whole(buf2), object_whole(buf3))
     invariant(ctr[0] <= MLKEM_N && ctr[1] <= MLKEM_N)
     invariant(ctr[2] <= MLKEM_N && ctr[3] <= MLKEM_N)
-    invariant(ctr[0] > 0 ==> array_bound(vec[0].coeffs, 0, ctr[0], 0, (MLKEM_Q - 1)))
-    invariant(ctr[1] > 0 ==> array_bound(vec[1].coeffs, 0, ctr[1], 0, (MLKEM_Q - 1)))
-    invariant(ctr[2] > 0 ==> array_bound(vec[2].coeffs, 0, ctr[2], 0, (MLKEM_Q - 1)))
-    invariant(ctr[3] > 0 ==> array_bound(vec[3].coeffs, 0, ctr[3], 0, (MLKEM_Q - 1))))
+    invariant(ctr[0] > 0 ==> array_bound(vec[0].coeffs, 0, ctr[0], 0, MLKEM_Q))
+    invariant(ctr[1] > 0 ==> array_bound(vec[1].coeffs, 0, ctr[1], 0, MLKEM_Q))
+    invariant(ctr[2] > 0 ==> array_bound(vec[2].coeffs, 0, ctr[2], 0, MLKEM_Q))
+    invariant(ctr[3] > 0 ==> array_bound(vec[3].coeffs, 0, ctr[3], 0, MLKEM_Q)))
   {
     xof_x4_squeezeblocks(buf0, buf1, buf2, buf3, 1, &statex);
     ctr[0] = rej_uniform(vec[0].coeffs, MLKEM_N, ctr[0], buf0, buflen);
@@ -231,7 +231,7 @@ __contract__(
   requires(memory_no_alias(entry, sizeof(poly)))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES + 2))
   assigns(memory_slice(entry, sizeof(poly)))
-  ensures(array_bound(entry->coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1))))
+  ensures(array_bound(entry->coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 {
   xof_ctx state;
   uint8_t buf[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
@@ -253,7 +253,7 @@ __contract__(
     assigns(ctr, state, memory_slice(entry, sizeof(poly)), object_whole(buf))
     invariant(0 <= ctr && ctr <= MLKEM_N)
     invariant(ctr > 0 ==> array_bound(entry->coeffs, 0, ctr,
-                                          0, (MLKEM_Q - 1))))
+                                          0, MLKEM_Q)))
   {
     xof_squeezeblocks(buf, 1, &state);
     ctr = rej_uniform(entry->coeffs, MLKEM_N, ctr, buf, buflen);
@@ -273,9 +273,9 @@ __contract__(
   /* We don't specify that this should be a permutation, but only
    * that it does not change the bound established at the end of gen_matrix. */
   requires(memory_no_alias(data, sizeof(poly)))
-  requires(array_bound(data->coeffs, 0, MLKEM_N, 0, MLKEM_Q - 1))
+  requires(array_bound(data->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
   assigns(memory_slice(data, sizeof(poly)))
-  ensures(array_bound(data->coeffs, 0, MLKEM_N, 0, MLKEM_Q - 1))) { ((void)data); }
+  ensures(array_bound(data->coeffs, 0, MLKEM_N, 0, MLKEM_Q))) { ((void)data); }
 #endif /* MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER */
 
 /* Not static for benchmarking */
@@ -392,7 +392,7 @@ __contract__(
   requires(memory_no_alias(vc, sizeof(polyvec_mulcache)))
   requires(forall(k0, 0, MLKEM_K,
     forall(k1, 0, MLKEM_K,
-      array_abs_bound(a[k0].vec[k1].coeffs, 0, MLKEM_N, UINT12_MAX))))
+      array_bound(a[k0].vec[k1].coeffs, 0, MLKEM_N, 0, UINT12_LIMIT))))
   assigns(object_whole(out)))
 {
   unsigned i;
