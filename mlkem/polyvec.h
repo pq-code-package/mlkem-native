@@ -40,7 +40,7 @@ __contract__(
   requires(memory_no_alias(r, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(a, sizeof(polyvec)))
   requires(forall(k0, 0, MLKEM_K,
-         array_bound(a->vec[k0].coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1))))
+         array_bound(a->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
   assigns(object_whole(r))
 );
 
@@ -64,7 +64,7 @@ __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
   assigns(object_whole(r))
   ensures(forall(k0, 0, MLKEM_K,
-         array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1))))
+         array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 );
 
 #define polyvec_tobytes MLKEM_NAMESPACE(polyvec_tobytes)
@@ -84,7 +84,7 @@ __contract__(
   requires(memory_no_alias(a, sizeof(polyvec)))
   requires(memory_no_alias(r, MLKEM_POLYVECBYTES))
   requires(forall(k0, 0, MLKEM_K,
-         array_bound(a->vec[k0].coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1))))
+         array_bound(a->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
   assigns(object_whole(r))
 );
 
@@ -107,7 +107,7 @@ __contract__(
   requires(memory_no_alias(a, MLKEM_POLYVECBYTES))
   assigns(object_whole(r))
   ensures(forall(k0, 0, MLKEM_K,
-        array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, UINT12_MAX)))
+        array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, UINT12_LIMIT)))
 );
 
 #define polyvec_ntt MLKEM_NAMESPACE(polyvec_ntt)
@@ -130,10 +130,10 @@ void polyvec_ntt(polyvec *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
   requires(forall(j, 0, MLKEM_K,
-  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, (MLKEM_Q - 1))))
+  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
   assigns(object_whole(r))
   ensures(forall(j, 0, MLKEM_K,
-  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, (NTT_BOUND - 1))))
+  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, NTT_BOUND)))
 );
 
 #define polyvec_invntt_tomont MLKEM_NAMESPACE(polyvec_invntt_tomont)
@@ -158,7 +158,7 @@ __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
   assigns(object_whole(r))
   ensures(forall(j, 0, MLKEM_K,
-  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, (INVNTT_BOUND - 1))))
+  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, INVNTT_BOUND)))
 );
 
 #define polyvec_basemul_acc_montgomery \
@@ -180,7 +180,7 @@ __contract__(
   requires(memory_no_alias(a, sizeof(polyvec)))
   requires(memory_no_alias(b, sizeof(polyvec)))
   requires(forall(k1, 0, MLKEM_K,
-    array_abs_bound(a->vec[k1].coeffs, 0, MLKEM_N, UINT12_MAX)))
+    array_bound(a->vec[k1].coeffs, 0, MLKEM_N, 0, UINT12_LIMIT)))
   assigns(memory_slice(r, sizeof(poly)))
 );
 
@@ -214,7 +214,7 @@ __contract__(
   requires(memory_no_alias(b, sizeof(polyvec)))
   requires(memory_no_alias(b_cache, sizeof(polyvec_mulcache)))
   requires(forall(k1, 0, MLKEM_K,
-    array_abs_bound(a->vec[k1].coeffs, 0, MLKEM_N, UINT12_MAX)))
+     array_bound(a->vec[k1].coeffs, 0, MLKEM_N, 0, UINT12_LIMIT)))
   assigns(memory_slice(r, sizeof(poly)))
 );
 
@@ -275,7 +275,7 @@ __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
   assigns(object_whole(r))
   ensures(forall(k0, 0, MLKEM_K,
-    array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1))))
+    array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 );
 
 #define polyvec_add MLKEM_NAMESPACE(polyvec_add)
@@ -326,7 +326,7 @@ __contract__(
   assigns(memory_slice(r, sizeof(polyvec)))
   assigns(object_whole(r))
   ensures(forall(j, 0, MLKEM_K,
-    array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, (MLKEM_Q - 1))))
+    array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
 );
 
 #endif

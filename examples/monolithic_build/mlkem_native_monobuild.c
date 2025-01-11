@@ -1559,8 +1559,8 @@
 #endif
 
 /* mlkem/params.h */
-#if defined(UINT12_MAX)
-#undef UINT12_MAX
+#if defined(UINT12_LIMIT)
+#undef UINT12_LIMIT
 #endif
 
 /* mlkem/params.h */

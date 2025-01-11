@@ -115,13 +115,13 @@ __contract__(
 )
 {
   int16_t res;
-  SCALAR_BOUND(a, 2 * UINT12_MAX * 32768, "montgomery_reduce input");
+  SCALAR_BOUND(a, 2 * UINT12_LIMIT * 32768, "montgomery_reduce input");
 
   res = montgomery_reduce_generic(a);
   /* Bounds:
    * |res| <= ceil(|a| / 2^16) + (MLKEM_Q + 1) / 2
-   *       <= ceil(2 * UINT12_MAX * 32768 / 65536) + (MLKEM_Q + 1) / 2
-   *       <= UINT12_MAX + (MLKEM_Q + 1) / 2
+   *       <= ceil(2 * UINT12_LIMIT * 32768 / 65536) + (MLKEM_Q + 1) / 2
+   *       <= UINT12_LIMIT + (MLKEM_Q + 1) / 2
    *        < 2 * MLKEM_Q */
 
   SCALAR_BOUND(res, 2 * MLKEM_Q, "montgomery_reduce output");
