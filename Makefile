@@ -20,9 +20,9 @@ all: build
 
 W := $(EXEC_WRAPPER)
 
-include mk/config.mk
-include mk/components.mk
-include mk/rules.mk
+include test/mk/config.mk
+include test/mk/components.mk
+include test/mk/rules.mk
 
 quickcheck: test
 
