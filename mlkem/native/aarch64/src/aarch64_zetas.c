@@ -4,7 +4,7 @@
  */
 
 /*
- * WARNING: This file is auto-generated from scripts/autogenerate_files.py
+ * WARNING: This file is auto-generated from scripts/autogen
  *          Do not modify it directly.
  */
 
@@ -18,7 +18,7 @@
 
 /*
  * Table of zeta values used in the AArch64 forward NTT
- * See autogenerate_files.py for details.
+ * See autogen for details.
  */
 ALIGN const int16_t aarch64_ntt_zetas_layer01234[] = {
     -1600, -15749, -749,  -7373,  -40,   -394,   -687, -6762, 630,  6201,

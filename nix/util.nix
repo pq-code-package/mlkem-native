@@ -51,7 +51,7 @@ rec {
   wrapShell = mkShell: attrs:
     mkShell (attrs // {
       shellHook = ''
-        export PATH=$PWD/scripts:$PWD/scripts/ci:$PATH
+        export PATH=$PWD/scripts:$PATH
       '' +
       # NOTE: we don't support nix gcc toolchains for darwin system, therefore explicitly setting environment variables like CC, AR, AS, ... is required
       pkgs.lib.optionalString pkgs.stdenv.isDarwin ''

@@ -4,13 +4,13 @@
  */
 
 /*
- * WARNING: This file is auto-generated from scripts/autogenerate_files.py
+ * WARNING: This file is auto-generated from scripts/autogen
  *          Do not modify it directly.
  */
 
 /*
  * Table of zeta values used in the AVX2 NTTs
- * See autogenerate_files.py for details.
+ * See autogen for details.
  */
 
 31498, 31498, 31498, 31498, -758, -758, -758, -758, 0, 0, 0, 0, 0, 0, 0, 0,
