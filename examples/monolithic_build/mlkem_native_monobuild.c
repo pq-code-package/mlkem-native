@@ -1499,6 +1499,16 @@
 #endif
 
 /* mlkem/ntt.h */
+#if defined(INVNTT_BOUND)
+#undef INVNTT_BOUND
+#endif
+
+/* mlkem/ntt.h */
+#if defined(NTT_BOUND)
+#undef NTT_BOUND
+#endif
+
+/* mlkem/ntt.h */
 #if defined(poly_ntt)
 #undef poly_ntt
 #endif
@@ -1676,16 +1686,6 @@
 /* mlkem/poly.h */
 #if defined(POLY_H)
 #undef POLY_H
-#endif
-
-/* mlkem/poly.h */
-#if defined(INVNTT_BOUND)
-#undef INVNTT_BOUND
-#endif
-
-/* mlkem/poly.h */
-#if defined(NTT_BOUND)
-#undef NTT_BOUND
 #endif
 
 /* mlkem/poly.h */

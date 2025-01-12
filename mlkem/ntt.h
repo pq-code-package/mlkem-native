@@ -14,6 +14,12 @@
 #define zetas MLKEM_NAMESPACE(zetas)
 extern const int16_t zetas[128];
 
+/* Absolute exclusive upper bound for the output of the inverse NTT */
+#define INVNTT_BOUND (8 * MLKEM_Q)
+
+/* Absolute exclusive upper bound for the output of the forward NTT */
+#define NTT_BOUND (8 * MLKEM_Q)
+
 #define poly_ntt MLKEM_NAMESPACE(poly_ntt)
 /*************************************************
  * Name:        poly_ntt
