@@ -1023,11 +1023,6 @@
 #undef MLKEM_USE_NATIVE_REJ_UNIFORM
 #endif
 
-/* mlkem/native/aarch64/src/clean_impl.h */
-#if defined(INVNTT_BOUND_NATIVE)
-#undef INVNTT_BOUND_NATIVE
-#endif
-
 /* mlkem/native/aarch64/src/consts.h */
 #if defined(MLKEM_NATIVE_AARCH64_CONSTS)
 #undef MLKEM_NATIVE_AARCH64_CONSTS
@@ -1086,16 +1081,6 @@
 /* mlkem/native/aarch64/src/opt_impl.h */
 #if defined(MLKEM_USE_NATIVE_REJ_UNIFORM)
 #undef MLKEM_USE_NATIVE_REJ_UNIFORM
-#endif
-
-/* mlkem/native/aarch64/src/opt_impl.h */
-#if defined(NTT_BOUND_NATIVE)
-#undef NTT_BOUND_NATIVE
-#endif
-
-/* mlkem/native/aarch64/src/opt_impl.h */
-#if defined(INVNTT_BOUND_NATIVE)
-#undef INVNTT_BOUND_NATIVE
 #endif
 
 /* mlkem/native/aarch64/src/rej_uniform_table.c */
@@ -1468,16 +1453,6 @@
 #undef MLKEM_USE_NATIVE_POLY_FROMBYTES
 #endif
 
-/* mlkem/native/x86_64/src/default_impl.h */
-#if defined(INVNTT_BOUND_NATIVE)
-#undef INVNTT_BOUND_NATIVE
-#endif
-
-/* mlkem/native/x86_64/src/default_impl.h */
-#if defined(NTT_BOUND_NATIVE)
-#undef NTT_BOUND_NATIVE
-#endif
-
 /* mlkem/native/x86_64/src/rej_uniform_avx2.c */
 #if defined(_mm256_cmpge_epu16)
 #undef _mm256_cmpge_epu16
@@ -1511,11 +1486,6 @@
 /* mlkem/ntt.c */
 #if defined(invntt_layer)
 #undef invntt_layer
-#endif
-
-/* mlkem/ntt.c */
-#if defined(INVNTT_BOUND_REF)
-#undef INVNTT_BOUND_REF
 #endif
 
 /* mlkem/ntt.h */
