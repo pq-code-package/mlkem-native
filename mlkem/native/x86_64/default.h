@@ -19,6 +19,6 @@
 /* Filename of the C backend implementation.
  * This is not inlined here because this header is included in assembly
  * files as well. */
-#define MLKEM_NATIVE_ARITH_BACKEND_IMPL "x86_64/src/default_impl.h"
+#define MLKEM_NATIVE_ARITH_BACKEND_IMPL "native/x86_64/src/default_impl.h"
 
 #endif /* MLKEM_NATIVE_ARITH_PROFILE_H */

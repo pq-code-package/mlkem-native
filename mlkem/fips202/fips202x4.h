@@ -7,11 +7,12 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "common.h"
+
+#include "../cbmc.h"
+#include "../common.h"
+
 #include "fips202.h"
 #include "keccakf1600.h"
-
-#include "cbmc.h"
 
 /* Context for non-incremental API */
 #define shake128x4ctx FIPS202_NAMESPACE(shake128x4ctx)

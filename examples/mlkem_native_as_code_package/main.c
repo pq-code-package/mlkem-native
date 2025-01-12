@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <mlkem_native.h>
+#include "mlkem_native/mlkem/mlkem_native.h"
 
 int main(void)
 {

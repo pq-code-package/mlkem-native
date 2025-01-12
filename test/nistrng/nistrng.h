@@ -6,8 +6,8 @@
 #ifndef NISTRNG_H
 #define NISTRNG_H
 
+#include "../../mlkem/randombytes.h"
 #include "aes.h"
-#include "randombytes.h"
 
 void nist_kat_init(
     unsigned char entropy_input[AES256_KEYBYTES + AES_BLOCKBYTES],

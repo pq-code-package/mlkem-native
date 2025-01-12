@@ -5,8 +5,8 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include "mlkem_native.h"
-#include "randombytes.h"
+
+#include "../mlkem/mlkem_native.h"
 
 #define USAGE \
   "acvp_mlkem{lvl} [encapDecap|keyGen] [AFT|VAL] {test specific arguments}"

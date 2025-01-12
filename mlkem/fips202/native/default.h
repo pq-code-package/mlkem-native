@@ -9,7 +9,7 @@
 /*
  * Default FIPS202 backend
  */
-#include "sys.h"
+#include "../../sys.h"
 
 #if defined(SYS_AARCH64)
 #include "aarch64/default.h"

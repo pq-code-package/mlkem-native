@@ -3,15 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "common.h"
+#include "../../../common.h"
 
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT)
 
-#include "consts.h"
-#include "poly.h"
-#include "polyvec.h"
+#include "../../../poly.h"
+#include "../../../polyvec.h"
 
 #include "arith_native_x86_64.h"
+#include "consts.h"
 
 static void poly_basemul_montgomery_avx2(poly *r, const poly *a, const poly *b)
 {

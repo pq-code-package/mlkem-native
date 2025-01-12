@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
 
-CFLAGS += -Imlkem/fips202 -Imlkem/fips202/native
 FIPS202_SRCS = $(wildcard mlkem/fips202/*.c)
 ifeq ($(OPT),1)
 	FIPS202_SRCS += $(wildcard mlkem/fips202/native/aarch64/src/*.S) $(wildcard mlkem/fips202/native/aarch64/src/*.c) $(wildcard mlkem/fips202/native/x86_64/src/*.c)
@@ -17,7 +16,6 @@ ifeq ($(OPT),1)
 	CFLAGS += -DMLKEM_USE_NATIVE
 endif
 
-CFLAGS += -Imlkem -Imlkem/sys -Imlkem/native -Imlkem/native/aarch64 -Imlkem/native/x86_64
 ALL_TESTS = test_mlkem acvp_mlkem bench_mlkem bench_components_mlkem gen_NISTKAT gen_KAT
 NON_NIST_TESTS = $(filter-out gen_NISTKAT,$(ALL_TESTS))
 

@@ -2,7 +2,7 @@
  * Copyright (c) 2024 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#include "common.h"
+#include "../common.h"
 
 #if defined(MLKEM_DEBUG)
 

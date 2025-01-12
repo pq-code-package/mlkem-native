@@ -23,8 +23,8 @@
 #define MLKEM_NATIVE_ARITH_NATIVE_API_H
 
 #include <stdint.h>
-#include "poly.h"
-#include "polyvec.h"
+#include "../poly.h"
+#include "../polyvec.h"
 
 /*
  * This is the C<->native interface allowing for the drop-in of

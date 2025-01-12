@@ -6,11 +6,10 @@
 // Implementation from Kyber reference repository
 // https://github.com/pq-crystals/kyber/blob/main/avx2
 
-#include "common.h"
+#include "../../../common.h"
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT)
 
 #include "consts.h"
-#include "params.h"
 
 /* Polynomials to be multiplied are denoted a+bX (rsi arg) and c+dX (rdx arg) */
 .macro schoolbook off

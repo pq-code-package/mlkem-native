@@ -11,7 +11,7 @@
 #ifndef CONSTS_H
 #define CONSTS_H
 
-#include "common.h"
+#include "../../../common.h"
 
 #define _16XQ 0
 #define _16XQINV 16

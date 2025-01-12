@@ -27,7 +27,7 @@
 // Author: Hanno Becker <hanno.becker@arm.com>
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
 
-#include "common.h"
+#include "../../../../common.h"
 #if defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
     defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55)
 

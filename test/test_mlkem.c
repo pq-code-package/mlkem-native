@@ -5,8 +5,8 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include "mlkem_native.h"
-#include "randombytes.h"
+#include "../mlkem/mlkem_native.h"
+#include "../mlkem/randombytes.h"
 
 #define NTESTS 1000
 

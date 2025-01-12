@@ -6,9 +6,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "mlkem_native.h"
 #include "nistrng.h"
-#include "randombytes.h"
+
+#include "../mlkem/mlkem_native.h"
+#include "../mlkem/randombytes.h"
 
 #if (MLKEM_K == 2)
 #define CRYPTO_ALGNAME "Kyber512"

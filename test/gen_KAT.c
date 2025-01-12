@@ -5,8 +5,8 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include "fips202.h"
-#include "mlkem_native.h"
+#include "../mlkem/fips202/fips202.h"
+#include "../mlkem/mlkem_native.h"
 
 #define NTESTS 1000
 

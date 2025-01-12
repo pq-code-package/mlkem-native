@@ -6,8 +6,8 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include "fips202.h"
-#include "fips202x4.h"
+#include "fips202/fips202.h"
+#include "fips202/fips202x4.h"
 #include "indcpa.h"
 #include "ntt.h"
 #include "poly.h"

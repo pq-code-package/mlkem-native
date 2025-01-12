@@ -17,9 +17,9 @@ An application using mlkem-native with a custom FIPS-202 backend and custom conf
 3. FIPS-202 part of the mlkem-native source tree, [`fips202/`](../../mlkem/fips202). If you only want to use your backend,
    you can remove all existing backends; that's what this example does.
 4. A custom FIPS-202 backend. In this example, the metadata file is
-   [custom.h](mlkem_native/fips202/native/custom/custom.h), the implementation shim is
-   [custom_impl.h](mlkem_native/fips202/native/custom/src/custom_impl.h), wrapping the
-   [sha3.c](mlkem_native/fips202/native/custom/src/sha3.c) and setting `MLKEM_USE_FIPS101_X1_NATIVE` to indicate that we
+   [custom.h](mlkem_native/mlkem/fips202/native/custom/custom.h), the implementation shim is
+   [custom_impl.h](mlkem_native/mlkem/fips202/native/custom/src/custom_impl.h), wrapping the
+   [sha3.c](mlkem_native/mlkem/fips202/native/custom/src/sha3.c) and setting `MLKEM_USE_FIPS101_X1_NATIVE` to indicate that we
    replace 1-fold Keccak-F1600.
 5. Either modify the existing [config.h](mlkem_native/mlkem/config.h), or register a new config. In this example, we add
    a new config [custom_config.h](mlkem_native/custom_config.h) and register it from the command line for
@@ -31,7 +31,7 @@ An application using mlkem-native with a custom FIPS-202 backend and custom conf
 
 The tiny_sha3 code uses a byte-reversed presentation of the Keccakf1600 state for big-endian targets. Since
 mlkem-native's FIPS202 frontend assumes a standard presentation, the corresponding byte-reversal in
-[sha3.c](mlkem_native/fips202/native/custom/src/sha3.c) is removed.
+[sha3.c](mlkem_native/mlkem/fips202/native/custom/src/sha3.c) is removed.
 
 ## Usage
 

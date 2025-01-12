@@ -5,17 +5,16 @@
 #ifndef MLKEM_X86_64_NATIVE_H
 #define MLKEM_X86_64_NATIVE_H
 
-#include "common.h"
+#include "../../../common.h"
 
 #include <immintrin.h>
 #include <stdint.h>
+#include "../../../polyvec.h"
 #include "consts.h"
-#include "fips202.h"
-#include "polyvec.h"
 
-#define REJ_UNIFORM_AVX_NBLOCKS \
-  ((12 * MLKEM_N / 8 * (1 << 12) / MLKEM_Q + SHAKE128_RATE) / SHAKE128_RATE)
-#define REJ_UNIFORM_AVX_BUFLEN (REJ_UNIFORM_AVX_NBLOCKS * SHAKE128_RATE)
+#define REJ_UNIFORM_AVX_NBLOCKS 3 /* See MLKEM_GEN_MATRIX_NBLOCKS */
+#define REJ_UNIFORM_AVX_BUFLEN \
+  (3 * 168) /* REJ_UNIFORM_AVX_BUFLEN * SHAKE128_RATE */
 
 #define rej_uniform_avx2 MLKEM_NAMESPACE(rej_uniform_avx2)
 unsigned int rej_uniform_avx2(int16_t *r, const uint8_t *buf);

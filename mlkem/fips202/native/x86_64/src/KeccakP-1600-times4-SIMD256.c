@@ -24,7 +24,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
  *   Keccak states in memory.
  */
 
-#include "common.h"
+#include "../../../../common.h"
 #if defined(MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP)
 
 #include <emmintrin.h>
