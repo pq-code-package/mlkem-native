@@ -349,8 +349,8 @@
 #endif
 
 /* mlkem/debug/debug.c */
-#if defined(_ISOC99_SOURCE)
-#undef _ISOC99_SOURCE
+#if defined(MLKEM_NATIVE_DEBUG_ERROR_HEADER)
+#undef MLKEM_NATIVE_DEBUG_ERROR_HEADER
 #endif
 
 /* mlkem/debug/debug.c */
@@ -371,11 +371,6 @@
 /* mlkem/debug/debug.h */
 #if defined(mlkem_debug_check_bounds)
 #undef mlkem_debug_check_bounds
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(mlkem_debug_print_error)
-#undef mlkem_debug_print_error
 #endif
 
 /* mlkem/debug/debug.h */

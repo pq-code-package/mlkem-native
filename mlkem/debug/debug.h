@@ -52,10 +52,6 @@ void mlkem_debug_check_bounds(const char *file, int line,
                               unsigned len, int lower_bound_exclusive,
                               int upper_bound_exclusive);
 
-/* Print error message to stderr alongside file and line information */
-#define mlkem_debug_print_error MLKEM_NAMESPACE(mlkem_debug_print_error)
-void mlkem_debug_print_error(const char *file, int line, const char *msg);
-
 /* Check assertion, calling exit() upon failure
  *
  * val: Value that's asserted to be non-zero
