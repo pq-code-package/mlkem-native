@@ -429,46 +429,6 @@
 #endif
 
 /* mlkem/debug/debug.h */
-#if defined(MLKEM_CONCAT_)
-#undef MLKEM_CONCAT_
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(MLKEM_CONCAT)
-#undef MLKEM_CONCAT
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(MLKEM_STATIC_ASSERT_DEFINE)
-#undef MLKEM_STATIC_ASSERT_DEFINE
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(MLKEM_STATIC_ASSERT_ADD_LINE0)
-#undef MLKEM_STATIC_ASSERT_ADD_LINE0
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(MLKEM_STATIC_ASSERT_ADD_LINE1)
-#undef MLKEM_STATIC_ASSERT_ADD_LINE1
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(MLKEM_STATIC_ASSERT_ADD_LINE2)
-#undef MLKEM_STATIC_ASSERT_ADD_LINE2
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(MLKEM_STATIC_ASSERT_ADD_ERROR)
-#undef MLKEM_STATIC_ASSERT_ADD_ERROR
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(STATIC_ASSERT)
-#undef STATIC_ASSERT
-#endif
-
-/* mlkem/debug/debug.h */
 #if defined(CASSERT)
 #undef CASSERT
 #endif
