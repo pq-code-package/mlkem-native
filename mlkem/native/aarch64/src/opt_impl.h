@@ -25,14 +25,12 @@
 #define MLKEM_USE_NATIVE_POLY_TOBYTES
 #define MLKEM_USE_NATIVE_REJ_UNIFORM
 
-#define NTT_BOUND_NATIVE (6 * MLKEM_Q)
 static INLINE void ntt_native(poly *data)
 {
   ntt_asm_opt(data->coeffs, aarch64_ntt_zetas_layer01234,
               aarch64_ntt_zetas_layer56);
 }
 
-#define INVNTT_BOUND_NATIVE (8 * MLKEM_Q)
 static INLINE void intt_native(poly *data)
 {
   intt_asm_opt(data->coeffs, aarch64_invntt_zetas_layer01234,

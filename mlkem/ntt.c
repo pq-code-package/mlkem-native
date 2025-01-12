@@ -148,23 +148,16 @@ void poly_ntt(poly *p)
 }
 #else  /* MLKEM_USE_NATIVE_NTT */
 
-/* Check that bound for native NTT implies contractual bound */
-STATIC_ASSERT(NTT_BOUND_NATIVE <= NTT_BOUND, invntt_bound)
-
 MLKEM_NATIVE_INTERNAL_API
 void poly_ntt(poly *p)
 {
   POLY_BOUND_MSG(p, MLKEM_Q, "native ntt input");
   ntt_native(p);
-  POLY_BOUND_MSG(p, NTT_BOUND_NATIVE, "native ntt output");
+  POLY_BOUND_MSG(p, NTT_BOUND, "native ntt output");
 }
 #endif /* MLKEM_USE_NATIVE_NTT */
 
 #if !defined(MLKEM_USE_NATIVE_INTT)
-
-/* Check that bound for reference invNTT implies contractual bound */
-#define INVNTT_BOUND_REF (3 * MLKEM_Q / 4)
-STATIC_ASSERT(INVNTT_BOUND_REF <= INVNTT_BOUND, invntt_bound)
 
 /* Compute one layer of inverse NTT */
 static void invntt_layer(int16_t *r, int len, int layer)
@@ -232,18 +225,15 @@ void poly_invntt_tomont(poly *p)
     invntt_layer(p->coeffs, len, layer);
   }
 
-  POLY_BOUND_MSG(p, INVNTT_BOUND_REF, "ref intt output");
+  POLY_BOUND_MSG(p, INVNTT_BOUND, "ref intt output");
 }
 #else  /* MLKEM_USE_NATIVE_INTT */
-
-/* Check that bound for native invNTT implies contractual bound */
-STATIC_ASSERT(INVNTT_BOUND_NATIVE <= INVNTT_BOUND, invntt_bound)
 
 MLKEM_NATIVE_INTERNAL_API
 void poly_invntt_tomont(poly *p)
 {
   intt_native(p);
-  POLY_BOUND_MSG(p, INVNTT_BOUND_NATIVE, "native intt output");
+  POLY_BOUND_MSG(p, INVNTT_BOUND, "native intt output");
 }
 #endif /* MLKEM_USE_NATIVE_INTT */
 

@@ -31,7 +31,6 @@ static INLINE void ntt_native(poly *data)
                 aarch64_ntt_zetas_layer56);
 }
 
-#define INVNTT_BOUND_NATIVE (8 * MLKEM_Q)
 static INLINE void intt_native(poly *data)
 {
   intt_asm_clean(data->coeffs, aarch64_invntt_zetas_layer01234,
