@@ -19,6 +19,7 @@
 /* Filename of the C backend implementation.
  * This is not inlined here because this header is included in assembly
  * files as well. */
-#define MLKEM_NATIVE_FIPS202_BACKEND_IMPL "x86_64/src/xkcp_impl.h"
+#define MLKEM_NATIVE_FIPS202_BACKEND_IMPL \
+  "../fips202/native/x86_64/src/xkcp_impl.h"
 
 #endif /* MLKEM_NATIVE_FIPS202_PROFILE_H */

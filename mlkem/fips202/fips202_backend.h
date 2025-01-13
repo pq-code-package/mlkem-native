@@ -6,6 +6,8 @@
 #if !defined(MLKEM_NATIVE_FIPS202_IMPL_H)
 #define MLKEM_NATIVE_FIPS202_IMPL_H
 
+#include "../common.h"
+
 #if defined(MLKEM_NATIVE_FIPS202_BACKEND_IMPL)
 #include MLKEM_NATIVE_FIPS202_BACKEND_IMPL
 
