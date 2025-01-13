@@ -538,7 +538,6 @@ def gen_avx2_fwd_ntt_zeta_file(dry_run=False):
         "mlkem/native/x86_64/src/x86_64_zetas.i", "\n".join(gen()), dry_run=dry_run
     )
 
-
 def get_c_source_files():
     return get_files("mlkem/*.c")
 
@@ -563,23 +562,21 @@ def get_files(pattern):
     files = filter(lambda s: s != "", p.stdout.decode().split("\n"))
     return list(files)
 
+def get_define_for_file(c):
+    with open(c, "r") as f:
+        for i, l in enumerate(f.read().split("\n")):
+            if l.lstrip().startswith("#define "):
+                yield (
+                    c,
+                    i,
+                    l.lstrip()
+                    .removeprefix("#define ")
+                    .split(" ")[0]
+                    .split("(")[0]
+                    .replace("'", ""),
+                )
 
-def get_defines():
-    for c in get_c_source_files() + get_header_files():
-        with open(c, "r") as f:
-            for i, l in enumerate(f.read().split("\n")):
-                if l.lstrip().startswith("#define "):
-                    yield (
-                        c,
-                        i,
-                        l.lstrip()
-                        .removeprefix("#define ")
-                        .split(" ")[0]
-                        .split("(")[0]
-                        .replace("'", ""),
-                    )
-
-def get_checked_defines():
+def get_checked_define_for_file(filename):
     allow_list = [("__contract__", "cbmc.h"),
                   ("__loop__", "cbmc.h")]
 
@@ -589,21 +586,22 @@ def get_checked_defines():
                 return True
         return False
 
-    for (c,i,d) in get_defines():
+    for (c,i,d) in get_define_for_file(filename):
         if d.startswith("_") and is_allowed(d,c) is False:
             raise Exception(f"{d} from {c}:{i} starts with an underscore, which is not allowed for mlkem-native macros. "
                   f"If this is an mlkem-native specific macro, please pick a different name. "
                   f"If this is an external macro, it likely needs removing from `gen_monolithic_undef_all_core()` in `scripts/autogen` -- check this!")
         yield (c,i,d)
 
-def gen_monolithic_undef_all_core(filt=None):
+
+def gen_monolithic_undef_for_file(filename, filt=None):
 
     if filt is None:
         filt = lambda c: True
 
     yield ""
     yield "/*"
-    yield " * Undo all #define directives from *.c or *.h files"
+    yield f" * Undo all #define directives from {filename}"
     yield " */"
     yield ""
 
@@ -614,7 +612,7 @@ def gen_monolithic_undef_all_core(filt=None):
         yield "#endif"
         yield ""
 
-    defines = list(set(get_checked_defines()))
+    defines = list(set(get_checked_define_for_file(filename)))
     defines.sort(key=lambda t: (t[0], t[2]))
 
     for filename, line_no, d in defines:
@@ -623,7 +621,7 @@ def gen_monolithic_undef_all_core(filt=None):
         yield from undo_define(filename, d)
 
 
-def gen_monolithic_source_file(dry_run=False):
+def gen_monolithic_c_source_file(dry_run=False):
 
     def fips202(c):
         return "fips202/" in c
@@ -642,16 +640,20 @@ def gen_monolithic_source_file(dry_run=False):
         yield ""
         for c in filter(lambda c: not fips202(c), get_c_source_files()):
             yield f'#include "{c}"'
+            yield from gen_monolithic_undef_for_file(c)
         yield ""
         yield "#if !defined(MLKEM_NATIVE_MONOBUILD_NO_FIPS202_SOURCES)"
         for c in filter(fips202, get_c_source_files()):
             yield f'#include "{c}"'
+            yield from gen_monolithic_undef_for_file(c)
         yield "#endif /* MLKEM_NATIVE_MONOBUILD_NO_FIPS202_SOURCES */"
         yield ""
-        yield from gen_monolithic_undef_all_core(filt=lambda c: not shared(c))
+        for h in filter(lambda c: not shared(c), get_header_files()):
+            yield from gen_monolithic_undef_for_file(h)
         yield ""
         yield "#if !defined(MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS)"
-        yield from gen_monolithic_undef_all_core(filt=shared)
+        for h in filter(shared, get_header_files()):
+            yield from gen_monolithic_undef_for_file(h)
         yield "#endif /* MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS */"
         yield ""
 
@@ -709,6 +711,49 @@ def check_asm_register_aliases():
 
 
 
+def gen_monolithic_asm_source_file(dry_run=False):
+
+    def fips202(c):
+        return "fips202/" in c
+
+    def randombytes(c):
+        return "randombytes.h" in c
+
+    def shared(c):
+        return randombytes(c) or fips202(c)
+
+    def gen():
+        yield from gen_header()
+        yield "/*"
+        yield " * Monolithic assembly file bundling all assembly files within mlkem-native"
+        yield " */"
+        yield ""
+        for c in filter(lambda c: not fips202(c), get_asm_source_files()):
+            yield f'#include "{c}"'
+            yield from gen_monolithic_undef_for_file(c)
+        yield ""
+        yield "#if !defined(MLKEM_NATIVE_MONOBUILD_NO_FIPS202_SOURCES)"
+        for c in filter(fips202, get_asm_source_files()):
+            yield f'#include "{c}"'
+            yield from gen_monolithic_undef_for_file(c)
+        yield "#endif /* MLKEM_NATIVE_MONOBUILD_NO_FIPS202_SOURCES */"
+        yield ""
+        for h in filter(lambda c: not shared(c), get_header_files()):
+            yield from gen_monolithic_undef_for_file(h)
+        yield ""
+        yield "#if !defined(MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS)"
+        for h in filter(shared, get_header_files()):
+            yield from gen_monolithic_undef_for_file(h)
+        yield "#endif /* MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS */"
+        yield ""
+
+    update_file(
+        "examples/monolithic_build/mlkem_native_monobuild.S",
+        "\n".join(gen()),
+        dry_run=dry_run,
+    )
+
+
 def _main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -725,7 +770,8 @@ def _main():
     gen_avx2_fwd_ntt_zeta_file(args.dry_run)
     gen_avx2_rej_uniform_table(args.dry_run)
 
-    gen_monolithic_source_file(args.dry_run)
+    gen_monolithic_c_source_file(args.dry_run)
+    gen_monolithic_asm_source_file(args.dry_run)
 
 
 if __name__ == "__main__":
