@@ -18,8 +18,8 @@ and related or neighboring rights to the source code in this file.
 http://creativecommons.org/publicdomain/zero/1.0/
 */
 
-#ifndef _KeccakP_1600_times4_SnP_h_
-#define _KeccakP_1600_times4_SnP_h_
+#ifndef KECCAKP_1600_TIMES4_SNP_H
+#define KECCAKP_1600_TIMES4_SNP_H
 
 /** For the documentation, see PlSnP-documentation.h.
  */
@@ -34,4 +34,4 @@ http://creativecommons.org/publicdomain/zero/1.0/
   FIPS202_NAMESPACE(KeccakP1600times4_PermuteAll_24rounds)
 void KeccakP1600times4_PermuteAll_24rounds(void *states);
 
-#endif
+#endif /* KECCAKP_1600_TIMES4_SNP_H */

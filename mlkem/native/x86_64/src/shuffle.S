@@ -171,7 +171,7 @@ ret
 .global MLKEM_ASM_NAMESPACE(ntttobytes_avx2)
 MLKEM_ASM_NAMESPACE(ntttobytes_avx2):
 #consts
-vmovdqa		_16XQ*2(%rdx),%ymm0
+vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rdx),%ymm0
 call		ntttobytes128_avx
 add		$256,%rsi
 add		$192,%rdi
@@ -247,7 +247,7 @@ ret
 .global MLKEM_ASM_NAMESPACE(nttfrombytes_avx2)
 MLKEM_ASM_NAMESPACE(nttfrombytes_avx2):
 #consts
-vmovdqa		_16XMASK*2(%rdx),%ymm0
+vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XMASK*2(%rdx),%ymm0
 call		nttfrombytes128_avx
 add		$256,%rdi
 add		$192,%rsi

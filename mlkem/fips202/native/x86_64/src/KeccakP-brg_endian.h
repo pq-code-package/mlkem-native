@@ -31,8 +31,8 @@
  Changes for ARM 9/9/2010
 */
 
-#ifndef _KECCAKP_BRG_ENDIAN_H
-#define _KECCAKP_BRG_ENDIAN_H
+#ifndef KECCAKP_BRG_ENDIAN_H
+#define KECCAKP_BRG_ENDIAN_H
 
 #define IS_BIG_ENDIAN 4321    /* byte 0 is most significant (mc68k) */
 #define IS_LITTLE_ENDIAN 1234 /* byte 0 is least significant (i386) */
@@ -147,4 +147,4 @@
 
 #endif
 
-#endif
+#endif /* KECCAKP_BRG_ENDIAN_H */

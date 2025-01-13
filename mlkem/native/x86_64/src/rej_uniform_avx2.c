@@ -18,15 +18,13 @@
 #include "arith_native_x86_64.h"
 #include "consts.h"
 
-#define _mm256_cmpge_epu16(a, b) _mm256_cmpeq_epi16(_mm256_max_epu16(a, b), a)
-#define _mm_cmpge_epu16(a, b) _mm_cmpeq_epi16(_mm_max_epu16(a, b), a)
-
 unsigned int rej_uniform_avx2(int16_t *RESTRICT r, const uint8_t *buf)
 {
   unsigned int ctr, pos;
   uint16_t val0, val1;
   uint32_t good;
-  const __m256i bound = _mm256_load_si256(&qdata.vec[_16XQ / 16]);
+  const __m256i bound =
+      _mm256_load_si256(&qdata.vec[AVX2_BACKEND_DATA_OFFSET_16XQ / 16]);
   const __m256i ones = _mm256_set1_epi8(1);
   const __m256i mask = _mm256_set1_epi16(0xFFF);
   const __m256i idx8 =
