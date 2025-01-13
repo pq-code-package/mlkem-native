@@ -1,0 +1,131 @@
+# SPDX-License-Identifier: Apache-2.0
+
+name: AWS-LC
+permissions:
+  contents: read
+on:
+  workflow_call:
+    inputs:
+      commit:
+        type: string
+        description: Commit to test against
+        default: main
+      repository:
+        type: string
+        description: Repository to fetch
+        default: aws/aws-lc
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.commit }}
+  cancel-in-progress: true
+
+env:
+  DEPENDENCIES: 'cmake golang unifdef'
+
+jobs:
+  aws_lc_integration_fips:
+    strategy:
+      fail-fast: false
+      matrix:
+        system: [ubuntu-latest, pqcp-arm64]
+        fips: [0,1]
+    name: AWS-LC FIPS test (${{ matrix.system }}, FIPS=${{ matrix.fips }})
+    runs-on: ${{ matrix.system }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: ./.github/actions/setup-os
+        with:
+          packages: ${{ env.DEPENDENCIES }}
+      - uses: ./.github/actions/setup-aws-lc
+        with:
+          repository: ${{ inputs.repository }}
+          commit: ${{ inputs.commit }}
+      - name: Run importer
+        run: |
+          cd $AWSLC_DIR/crypto/fipsmodule/ml_kem
+          rm -rf mlkem
+          GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA ./importer.sh --force
+      - name: Build+Test AWS-LC (FIPS=${{ matrix.fips }})
+        run: |
+          cd $AWSLC_DIR
+          mkdir build
+          cd build
+          cmake -DFIPS=${{ matrix.fips }} ..
+          cd ..
+
+          cmake --build ./build --target all
+          cmake --build ./build --target run_tests
+  posix:
+    # This is a partial parallelization of the run_posix_tests.sh script
+    strategy:
+      max-parallel: 16
+      fail-fast: false
+      matrix:
+        system: [ubuntu-latest, pqcp-arm64]
+        test:
+          - name: Debug mode
+            flags: -DENABLE_DILITHIUM=ON
+          - name: Release mode
+            flags: -DCMAKE_BUILD_TYPE=Release -DENABLE_DILITHIUM=ON
+          - name: Small compilation
+            flags: -DOPENSSL_SMALL=1 -DCMAKE_BUILD_TYPE=Release -DENABLE_DILITHIUM=ON
+          - name: No-ASM
+            flags: -DOPENSSL_NO_ASM=1 -DCMAKE_BUILD_TYPE=Release -DENABLE_DILITHIUM=ON
+          - name: Shared
+            flags: -DBUILD_SHARED_LIBS=1 -DCMAKE_BUILD_TYPE=Release -DENABLE_DILITHIUM=ON
+          - name: Pre-Gen ASM
+            flags: -DDISABLE_PERL=ON -DENABLE_DILITHIUM=ON
+          - name: DIT
+            flags: -DENABLE_DATA_INDEPENDENT_TIMING=ON -DCMAKE_BUILD_TYPE=Release -DENABLE_DILITHIUM=ON
+    name: Posix test (${{ matrix.test.name }}, ${{ matrix.system }})
+    runs-on: ${{ matrix.system }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: ./.github/actions/setup-os
+        with:
+          packages: ${{ env.DEPENDENCIES }}
+      - uses: ./.github/actions/setup-aws-lc
+        with:
+          repository: ${{ inputs.repository }}
+          commit: ${{ inputs.commit }}
+      - name: Run importer
+        run: |
+          cd $AWSLC_DIR/crypto/fipsmodule/ml_kem
+          GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA ./importer.sh --force
+      - name: Run test
+        run: |
+          cd $AWSLC_DIR
+          source tests/ci/common_posix_setup.sh
+          build_and_test ${{ matrix.test.flags }}
+  prefix:
+    # This is a parallelization of the run_prefix_tests.sh script
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        system: [ubuntu-latest, pqcp-arm64, macos-latest, macos-13]
+        test:
+          - name: Prefix+Debug
+            flags:
+          - name: Prefix+Release
+            flags: -DCMAKE_BUILD_TYPE=Release
+    name: Prefix test (${{ matrix.test.name }}, ${{ matrix.system }})
+    runs-on: ${{ matrix.system }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: ./.github/actions/setup-os
+        with:
+          packages: ${{ env.DEPENDENCIES }}
+      - uses: ./.github/actions/setup-aws-lc
+        with:
+          repository: ${{ inputs.repository }}
+          commit: ${{ inputs.commit }}
+      - name: Run importer
+        run: |
+          cd $AWSLC_DIR/crypto/fipsmodule/ml_kem
+          GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA ./importer.sh --force
+      - name: Run test
+        run: |
+          cd $AWSLC_DIR
+          source tests/ci/common_posix_setup.sh
+          build_prefix_and_test ${{ matrix.flags }}
