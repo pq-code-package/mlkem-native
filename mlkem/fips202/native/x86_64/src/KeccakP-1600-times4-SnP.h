@@ -28,8 +28,6 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #include "../../../../common.h"
 #include "KeccakP-SIMD256-config.h"
 
-#define KeccakP1600times4_statesAlignment 32
-
 #define KeccakP1600times4_PermuteAll_24rounds \
   FIPS202_NAMESPACE(KeccakP1600times4_PermuteAll_24rounds)
 void KeccakP1600times4_PermuteAll_24rounds(void *states);

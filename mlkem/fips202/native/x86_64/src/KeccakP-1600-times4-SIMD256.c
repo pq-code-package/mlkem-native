@@ -36,7 +36,6 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #include <wmmintrin.h>
 #include "KeccakP-1600-times4-SnP.h"
 #include "KeccakP-SIMD256-config.h"
-#include "KeccakP-align.h"
 
 #ifndef SYS_LITTLE_ENDIAN
 #error Expecting a little-endian platform
@@ -312,7 +311,7 @@ static const UINT64 rho56[4] = {0x0007060504030201, 0x080F0E0D0C0B0A09,
   E##su = XOR256(Bsu, ANDnu256(Bsa, Bse));
 
 
-static ALIGN(KeccakP1600times4_statesAlignment) const UINT64
+static ALIGN const UINT64
     KeccakF1600RoundConstants[24] = {
         0x0000000000000001ULL, 0x0000000000008082ULL, 0x800000000000808aULL,
         0x8000000080008000ULL, 0x000000000000808bULL, 0x0000000080000001ULL,
