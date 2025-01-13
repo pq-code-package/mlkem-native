@@ -29,8 +29,8 @@ http://creativecommons.org/publicdomain/zero/1.0/
 
 #include <immintrin.h>
 #include <stdint.h>
-#include "KeccakP-1600-times4-SnP.h"
-#include "KeccakP-SIMD256-config.h"
+
+#include "xkcp_impl.h"
 
 #ifndef SYS_LITTLE_ENDIAN
 #error Expecting a little-endian platform
@@ -417,22 +417,40 @@ static ALIGN const uint64_t KeccakF1600RoundConstants[24] = {
   X##so = Y##so;                 \
   X##su = Y##su;
 
-#ifdef KeccakP1600times4_fullUnrolling
-#define FullUnrolling
-#else
-#define Unrolling KeccakP1600times4_unrolling
-#endif
-#include "KeccakP-1600-unrolling.macros"
+/* clang-format off */
+#define rounds24 \
+    prepareTheta \
+    thetaRhoPiChiIotaPrepareTheta( 0, A, E) \
+    thetaRhoPiChiIotaPrepareTheta( 1, E, A) \
+    thetaRhoPiChiIotaPrepareTheta( 2, A, E) \
+    thetaRhoPiChiIotaPrepareTheta( 3, E, A) \
+    thetaRhoPiChiIotaPrepareTheta( 4, A, E) \
+    thetaRhoPiChiIotaPrepareTheta( 5, E, A) \
+    thetaRhoPiChiIotaPrepareTheta( 6, A, E) \
+    thetaRhoPiChiIotaPrepareTheta( 7, E, A) \
+    thetaRhoPiChiIotaPrepareTheta( 8, A, E) \
+    thetaRhoPiChiIotaPrepareTheta( 9, E, A) \
+    thetaRhoPiChiIotaPrepareTheta(10, A, E) \
+    thetaRhoPiChiIotaPrepareTheta(11, E, A) \
+    thetaRhoPiChiIotaPrepareTheta(12, A, E) \
+    thetaRhoPiChiIotaPrepareTheta(13, E, A) \
+    thetaRhoPiChiIotaPrepareTheta(14, A, E) \
+    thetaRhoPiChiIotaPrepareTheta(15, E, A) \
+    thetaRhoPiChiIotaPrepareTheta(16, A, E) \
+    thetaRhoPiChiIotaPrepareTheta(17, E, A) \
+    thetaRhoPiChiIotaPrepareTheta(18, A, E) \
+    thetaRhoPiChiIotaPrepareTheta(19, E, A) \
+    thetaRhoPiChiIotaPrepareTheta(20, A, E) \
+    thetaRhoPiChiIotaPrepareTheta(21, E, A) \
+    thetaRhoPiChiIotaPrepareTheta(22, A, E) \
+    thetaRhoPiChiIota(23, E, A)
+/* clang-format on */
 
 void KeccakP1600times4_PermuteAll_24rounds(void *states)
 {
   __m256i *statesAsLanes = (__m256i *)states;
-  declareABCDE
-#ifndef KeccakP1600times4_fullUnrolling
-      unsigned i;
-#endif
-
-  copyFromState(A, statesAsLanes) rounds24 copyToState(statesAsLanes, A)
+  declareABCDE copyFromState(A, statesAsLanes)
+      rounds24 copyToState(statesAsLanes, A)
 }
 
 #else

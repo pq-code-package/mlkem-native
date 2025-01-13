@@ -2581,11 +2581,6 @@
 #endif
 
 /* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(FullUnrolling)
-#undef FullUnrolling
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
 #if defined(ROL64in256)
 #undef ROL64in256
 #endif
@@ -2613,11 +2608,6 @@
 /* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
 #if defined(SnP_laneLengthInBytes)
 #undef SnP_laneLengthInBytes
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(Unrolling)
-#undef Unrolling
 #endif
 
 /* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
@@ -2661,6 +2651,11 @@
 #endif
 
 /* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
+#if defined(rounds24)
+#undef rounds24
+#endif
+
+/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
 #if defined(thetaRhoPiChiIota)
 #undef thetaRhoPiChiIota
 #endif
@@ -2670,29 +2665,9 @@
 #undef thetaRhoPiChiIotaPrepareTheta
 #endif
 
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SnP.h */
-#if defined(KECCAKP_1600_TIMES4_SNP_H)
-#undef KECCAKP_1600_TIMES4_SNP_H
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SnP.h */
+/* mlkem/fips202/native/x86_64/src/xkcp_impl.h */
 #if defined(KeccakP1600times4_PermuteAll_24rounds)
 #undef KeccakP1600times4_PermuteAll_24rounds
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-SIMD256-config.h */
-#if defined(KeccakP1600times4_fullUnrolling)
-#undef KeccakP1600times4_fullUnrolling
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-SIMD256-config.h */
-#if defined(KeccakP1600times4_implementation_config)
-#undef KeccakP1600times4_implementation_config
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-SIMD256-config.h */
-#if defined(KeccakP1600times4_useAVX2)
-#undef KeccakP1600times4_useAVX2
 #endif
 
 /* mlkem/fips202/native/x86_64/src/xkcp_impl.h */
