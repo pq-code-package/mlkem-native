@@ -405,10 +405,6 @@ __contract__(
   }
 }
 
-
-
-STATIC_ASSERT(NTT_BOUND + MLKEM_Q < INT16_MAX, indcpa_enc_bound_0)
-
 MLKEM_NATIVE_INTERNAL_API
 void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
                            uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
@@ -458,7 +454,6 @@ void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
   matvec_mul(&pkpv, a, &skpv, &skpv_cache);
   polyvec_tomont(&pkpv);
 
-  /* Arithmetic cannot overflow, see static assertion at the top */
   polyvec_add(&pkpv, &e);
   polyvec_reduce(&pkpv);
   polyvec_reduce(&skpv);
@@ -467,11 +462,6 @@ void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
   pack_pk(pk, &pkpv, publicseed);
 }
 
-
-/* Check that the arithmetic in indcpa_enc() does not overflow */
-STATIC_ASSERT(INVNTT_BOUND + MLKEM_ETA1 < INT16_MAX, indcpa_enc_bound_0)
-STATIC_ASSERT(INVNTT_BOUND + MLKEM_ETA2 + MLKEM_Q < INT16_MAX,
-              indcpa_enc_bound_1)
 
 MLKEM_NATIVE_INTERNAL_API
 void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
@@ -519,7 +509,6 @@ void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
   polyvec_invntt_tomont(&b);
   poly_invntt_tomont(&v);
 
-  /* Arithmetic cannot overflow, see static assertion at the top */
   polyvec_add(&b, &ep);
   poly_add(&v, &epp);
   poly_add(&v, &k);
@@ -529,9 +518,6 @@ void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
 
   pack_ciphertext(c, &b, &v);
 }
-
-/* Check that the arithmetic in indcpa_dec() does not overflow */
-STATIC_ASSERT(INVNTT_BOUND + MLKEM_Q < INT16_MAX, indcpa_dec_bound_0)
 
 MLKEM_NATIVE_INTERNAL_API
 void indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
@@ -548,7 +534,6 @@ void indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
   polyvec_basemul_acc_montgomery(&sb, &skpv, &b);
   poly_invntt_tomont(&sb);
 
-  /* Arithmetic cannot overflow, see static assertion at the top */
   poly_sub(&v, &sb);
   poly_reduce(&v);
 

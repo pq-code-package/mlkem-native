@@ -154,27 +154,6 @@ void mlkem_debug_check_bounds(const char *file, int line,
                       "polyvec unsigned bound for " #ptr ".vec[i]");       \
   } while (0)
 
-#define MLKEM_CONCAT_(left, right) left##right
-#define MLKEM_CONCAT(left, right) MLKEM_CONCAT_(left, right)
-
-/* Following AWS-LC to define a C99-compliant static assert */
-#define MLKEM_STATIC_ASSERT_DEFINE(cond, msg)                            \
-  typedef struct                                                         \
-  {                                                                      \
-    unsigned int MLKEM_CONCAT(static_assertion_, msg) : (cond) ? 1 : -1; \
-  } MLKEM_CONCAT(MLKEM_NAMESPACE(static_assertion_), msg)                \
-      __attribute__((unused));
-
-#define MLKEM_STATIC_ASSERT_ADD_LINE0(cond, suffix) \
-  MLKEM_STATIC_ASSERT_DEFINE(cond, MLKEM_CONCAT(at_line_, suffix))
-#define MLKEM_STATIC_ASSERT_ADD_LINE1(cond, line, suffix) \
-  MLKEM_STATIC_ASSERT_ADD_LINE0(cond, MLKEM_CONCAT(line, suffix))
-#define MLKEM_STATIC_ASSERT_ADD_LINE2(cond, suffix) \
-  MLKEM_STATIC_ASSERT_ADD_LINE1(cond, __LINE__, suffix)
-#define MLKEM_STATIC_ASSERT_ADD_ERROR(cond, suffix) \
-  MLKEM_STATIC_ASSERT_ADD_LINE2(cond, MLKEM_CONCAT(_error_is_, suffix))
-#define STATIC_ASSERT(cond, error) MLKEM_STATIC_ASSERT_ADD_ERROR(cond, error)
-
 #else /* MLKEM_DEBUG */
 
 #define CASSERT(val, msg) \

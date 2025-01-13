@@ -28,9 +28,6 @@
 #define MLKEM_USE_NATIVE_POLY_TOBYTES
 #define MLKEM_USE_NATIVE_POLY_FROMBYTES
 
-#define INVNTT_BOUND_NATIVE (8 * MLKEM_Q)
-#define NTT_BOUND_NATIVE (8 * MLKEM_Q)
-
 static INLINE void poly_permute_bitrev_to_custom(poly *data)
 {
   nttunpack_avx2((__m256i *)(data->coeffs), qdata.vec);

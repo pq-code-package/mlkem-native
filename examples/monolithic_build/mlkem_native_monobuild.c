@@ -379,46 +379,11 @@
 #endif
 
 /* mlkem/debug/debug.h */
-#if defined(MLKEM_CONCAT)
-#undef MLKEM_CONCAT
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(MLKEM_CONCAT_)
-#undef MLKEM_CONCAT_
-#endif
-
-/* mlkem/debug/debug.h */
 #if defined(MLKEM_DEBUG_H)
 #undef MLKEM_DEBUG_H
 #endif
 
 /* mlkem/debug/debug.h */
-#if defined(MLKEM_STATIC_ASSERT_ADD_ERROR)
-#undef MLKEM_STATIC_ASSERT_ADD_ERROR
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(MLKEM_STATIC_ASSERT_ADD_LINE0)
-#undef MLKEM_STATIC_ASSERT_ADD_LINE0
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(MLKEM_STATIC_ASSERT_ADD_LINE1)
-#undef MLKEM_STATIC_ASSERT_ADD_LINE1
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(MLKEM_STATIC_ASSERT_ADD_LINE2)
-#undef MLKEM_STATIC_ASSERT_ADD_LINE2
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(MLKEM_STATIC_ASSERT_DEFINE)
-#undef MLKEM_STATIC_ASSERT_DEFINE
-#endif
-
-/* mlkem/debug/debug.h */
 #if defined(POLYVEC_BOUND)
 #undef POLYVEC_BOUND
 #endif
@@ -486,11 +451,6 @@
 /* mlkem/debug/debug.h */
 #if defined(SCALAR_BOUND)
 #undef SCALAR_BOUND
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(STATIC_ASSERT)
-#undef STATIC_ASSERT
 #endif
 
 /* mlkem/debug/debug.h */
@@ -974,11 +934,6 @@
 #endif
 
 /* mlkem/native/aarch64/src/clean_impl.h */
-#if defined(INVNTT_BOUND_NATIVE)
-#undef INVNTT_BOUND_NATIVE
-#endif
-
-/* mlkem/native/aarch64/src/clean_impl.h */
 #if defined(MLKEM_NATIVE_ARITH_PROFILE_IMPL_H)
 #undef MLKEM_NATIVE_ARITH_PROFILE_IMPL_H
 #endif
@@ -1039,11 +994,6 @@
 #endif
 
 /* mlkem/native/aarch64/src/opt_impl.h */
-#if defined(INVNTT_BOUND_NATIVE)
-#undef INVNTT_BOUND_NATIVE
-#endif
-
-/* mlkem/native/aarch64/src/opt_impl.h */
 #if defined(MLKEM_NATIVE_ARITH_PROFILE_IMPL_H)
 #undef MLKEM_NATIVE_ARITH_PROFILE_IMPL_H
 #endif
@@ -1086,11 +1036,6 @@
 /* mlkem/native/aarch64/src/opt_impl.h */
 #if defined(MLKEM_USE_NATIVE_REJ_UNIFORM)
 #undef MLKEM_USE_NATIVE_REJ_UNIFORM
-#endif
-
-/* mlkem/native/aarch64/src/opt_impl.h */
-#if defined(NTT_BOUND_NATIVE)
-#undef NTT_BOUND_NATIVE
 #endif
 
 /* mlkem/native/aarch64/src/rej_uniform_table.c */
@@ -1409,11 +1354,6 @@
 #endif
 
 /* mlkem/native/x86_64/src/default_impl.h */
-#if defined(INVNTT_BOUND_NATIVE)
-#undef INVNTT_BOUND_NATIVE
-#endif
-
-/* mlkem/native/x86_64/src/default_impl.h */
 #if defined(MLKEM_NATIVE_ARITH_PROFILE_IMPL_H)
 #undef MLKEM_NATIVE_ARITH_PROFILE_IMPL_H
 #endif
@@ -1468,11 +1408,6 @@
 #undef MLKEM_USE_NATIVE_REJ_UNIFORM
 #endif
 
-/* mlkem/native/x86_64/src/default_impl.h */
-#if defined(NTT_BOUND_NATIVE)
-#undef NTT_BOUND_NATIVE
-#endif
-
 /* mlkem/native/x86_64/src/rej_uniform_avx2.c */
 #if defined(empty_cu_rej_uniform_avx2)
 #undef empty_cu_rej_uniform_avx2
@@ -1481,11 +1416,6 @@
 /* mlkem/native/x86_64/src/rej_uniform_table.c */
 #if defined(empty_cu_avx2_rej_uniform_table)
 #undef empty_cu_avx2_rej_uniform_table
-#endif
-
-/* mlkem/ntt.c */
-#if defined(INVNTT_BOUND_REF)
-#undef INVNTT_BOUND_REF
 #endif
 
 /* mlkem/ntt.c */
