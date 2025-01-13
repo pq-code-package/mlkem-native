@@ -575,6 +575,22 @@ def get_defines():
                         .replace("'", ""),
                     )
 
+def get_checked_defines():
+    allow_list = [("__contract__", "cbmc.h"),
+                  ("__loop__", "cbmc.h")]
+
+    def is_allowed(d,c):
+        for (d0,c0) in allow_list:
+            if c.endswith(c0) is True and d0 == d:
+                return True
+        return False
+
+    for (c,i,d) in get_defines():
+        if d.startswith("_") and is_allowed(d,c) is False:
+            raise Exception(f"{d} from {c}:{i} starts with an underscore, which is not allowed for mlkem-native macros. "
+                  f"If this is an mlkem-native specific macro, please pick a different name. "
+                  f"If this is an external macro, it likely needs removing from `gen_monolithic_undef_all_core()` in `scripts/autogen` -- check this!")
+        yield (c,i,d)
 
 def gen_monolithic_undef_all_core(filt=None):
 
@@ -594,8 +610,7 @@ def gen_monolithic_undef_all_core(filt=None):
         yield "#endif"
         yield ""
 
-    defines = list(get_defines())
-    defines.sort()
+    defines = list(get_checked_defines())
 
     for filename, line_no, d in defines:
         if filt(filename) is False:
