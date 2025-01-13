@@ -18,9 +18,6 @@
 #include "arith_native_x86_64.h"
 #include "consts.h"
 
-#define _mm256_cmpge_epu16(a, b) _mm256_cmpeq_epi16(_mm256_max_epu16(a, b), a)
-#define _mm_cmpge_epu16(a, b) _mm_cmpeq_epi16(_mm_max_epu16(a, b), a)
-
 unsigned int rej_uniform_avx2(int16_t *RESTRICT r, const uint8_t *buf)
 {
   unsigned int ctr, pos;
