@@ -47,9 +47,11 @@ BIN=test_binary
 CFLAGS := \
 	-Wall \
 	-Wextra \
+	-Werror \
 	-Wmissing-prototypes \
 	-Wshadow \
 	-Wpointer-arith \
+	-Wredundant-decls \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
