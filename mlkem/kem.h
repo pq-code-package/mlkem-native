@@ -9,6 +9,7 @@
 #include "cbmc.h"
 #include "common.h"
 
+#if defined(MLKEM_NATIVE_CHECK_APIS)
 /* Include to ensure consistency between internal kem.h
  * and external mlkem_native.h. */
 #include "mlkem_native.h"
@@ -23,6 +24,14 @@
 
 #if MLKEM_INDCCA_CIPHERTEXTBYTES != MLKEM_CIPHERTEXTBYTES(MLKEM_LVL)
 #error Mismatch for CIPHERTEXTBYTES between kem.h and mlkem_native.h
+#endif
+
+#else
+#define crypto_kem_keypair_derand MLKEM_NAMESPACE(keypair_derand)
+#define crypto_kem_keypair MLKEM_NAMESPACE(keypair)
+#define crypto_kem_enc_derand MLKEM_NAMESPACE(enc_derand)
+#define crypto_kem_enc MLKEM_NAMESPACE(enc)
+#define crypto_kem_dec MLKEM_NAMESPACE(dec)
 #endif
 
 /*************************************************

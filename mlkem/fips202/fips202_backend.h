@@ -16,7 +16,10 @@
  *
  * Keep this _after_ the inclusion of the backend; otherwise,
  * the sanity checks won't have an effect. */
+
+#if defined(MLKEM_NATIVE_CHECK_APIS)
 #include "native/api.h"
+#endif
 #endif
 
 #endif /* MLKEM_NATIVE_FIPS202_IMPL_H */
