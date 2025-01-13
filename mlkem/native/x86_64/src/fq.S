@@ -63,8 +63,8 @@ ret
 .global MLKEM_ASM_NAMESPACE(reduce_avx2)
 MLKEM_ASM_NAMESPACE(reduce_avx2):
 #consts
-vmovdqa		_16XQ*2(%rsi),%ymm0
-vmovdqa		_16XV*2(%rsi),%ymm1
+vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
+vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XV*2(%rsi),%ymm1
 call		reduce128_avx2
 add		$256,%rdi
 call		reduce128_avx2
@@ -106,9 +106,9 @@ ret
 .global MLKEM_ASM_NAMESPACE(tomont_avx2)
 MLKEM_ASM_NAMESPACE(tomont_avx2):
 #consts
-vmovdqa		_16XQ*2(%rsi),%ymm0
-vmovdqa		_16XMONTSQLO*2(%rsi),%ymm1
-vmovdqa		_16XMONTSQHI*2(%rsi),%ymm2
+vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
+vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XMONTSQLO*2(%rsi),%ymm1
+vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XMONTSQHI*2(%rsi),%ymm2
 call		tomont128_avx2
 add		$256,%rdi
 call		tomont128_avx2

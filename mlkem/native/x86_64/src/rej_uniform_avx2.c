@@ -23,7 +23,8 @@ unsigned int rej_uniform_avx2(int16_t *RESTRICT r, const uint8_t *buf)
   unsigned int ctr, pos;
   uint16_t val0, val1;
   uint32_t good;
-  const __m256i bound = _mm256_load_si256(&qdata.vec[_16XQ / 16]);
+  const __m256i bound =
+      _mm256_load_si256(&qdata.vec[AVX2_BACKEND_DATA_OFFSET_16XQ / 16]);
   const __m256i ones = _mm256_set1_epi8(1);
   const __m256i mask = _mm256_set1_epi16(0xFFF);
   const __m256i idx8 =
