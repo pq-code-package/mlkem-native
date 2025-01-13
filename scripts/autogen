@@ -610,7 +610,8 @@ def gen_monolithic_undef_all_core(filt=None):
         yield "#endif"
         yield ""
 
-    defines = list(get_checked_defines())
+    defines = list(set(get_checked_defines()))
+    defines.sort(key=lambda t: (t[0], t[2]))
 
     for filename, line_no, d in defines:
         if filt(filename) is False:
