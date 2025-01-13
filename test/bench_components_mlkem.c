@@ -7,17 +7,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../mlkem/kem.h"
+#include "../mlkem/randombytes.h"
+#include "../mlkem/rej_uniform.h"
 #include "hal.h"
-#include "kem.h"
-#include "randombytes.h"
-#include "rej_uniform.h"
 
 #include "../mlkem/arith_backend.h"
-#include "fips202.h"
-#include "indcpa.h"
-#include "keccakf1600.h"
-#include "poly.h"
-#include "polyvec.h"
+#include "../mlkem/fips202/fips202.h"
+#include "../mlkem/fips202/keccakf1600.h"
+#include "../mlkem/indcpa.h"
+#include "../mlkem/poly.h"
+#include "../mlkem/polyvec.h"
 
 #define NWARMUP 50
 #define NITERERATIONS 300

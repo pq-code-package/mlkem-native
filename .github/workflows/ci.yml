@@ -64,6 +64,12 @@ jobs:
       - name: tests func
         run: |
           ./scripts/tests func
+      - name: tests bench
+        run: |
+          ./scripts/tests bench -c NO
+      - name: tests bench components
+        run: |
+          ./scripts/tests bench --components -c NO
       - name: check namespacing
         run: |
           ./scripts/check-namespace
@@ -97,6 +103,12 @@ jobs:
       - name: tests func
         run: |
           ./scripts/tests func --cflags="-std=c90"
+      - name: tests bench
+        run: |
+          ./scripts/tests bench -c NO --cflags="-std=c90"
+      - name: tests bench components
+        run: |
+          ./scripts/tests bench --components -c NO --cflags="-std=c90"
       - name: check namespacing
         run: |
           ./scripts/check-namespace
