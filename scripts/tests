@@ -323,7 +323,7 @@ class Tests:
         return [f"-j{self.args.j}"]
 
     def do_opt_all(self):
-        return self.args.opt.lower() == ["all"]
+        return self.args.opt.lower() == "all"
 
     def do_opt(self):
         return self.args.opt.lower() in ["all", "opt"]
