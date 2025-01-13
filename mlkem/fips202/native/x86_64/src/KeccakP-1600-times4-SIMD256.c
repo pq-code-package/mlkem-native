@@ -27,63 +27,51 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #include "../../../../common.h"
 #if defined(MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP)
 
-#include <emmintrin.h>
 #include <immintrin.h>
-#include <smmintrin.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <wmmintrin.h>
-#include "KeccakP-1600-times4-SnP.h"
-#include "KeccakP-SIMD256-config.h"
-#include "KeccakP-align.h"
+#include <stdint.h>
 
-#include "KeccakP-brg_endian.h"
-#if (PLATFORM_BYTE_ORDER != IS_LITTLE_ENDIAN)
+#include "xkcp_impl.h"
+
+#ifndef SYS_LITTLE_ENDIAN
 #error Expecting a little-endian platform
 #endif
 
-typedef unsigned long long int UINT64;
-typedef __m256i V256;
-
-#if defined(KeccakP1600times4_useAVX2)
 #define ANDnu256(a, b) _mm256_andnot_si256(a, b)
-#define CONST256(a) _mm256_load_si256((const V256 *)&(a))
-#define CONST256_64(a) (V256) _mm256_broadcast_sd((const double *)(&a))
+#define CONST256(a) _mm256_load_si256((const __m256i *)&(a))
+#define CONST256_64(a) (__m256i) _mm256_broadcast_sd((const double *)(&a))
 #define ROL64in256(d, a, o) \
   d = _mm256_or_si256(_mm256_slli_epi64(a, o), _mm256_srli_epi64(a, 64 - (o)))
 #define ROL64in256_8(d, a) d = _mm256_shuffle_epi8(a, CONST256(rho8))
 #define ROL64in256_56(d, a) d = _mm256_shuffle_epi8(a, CONST256(rho56))
-static const UINT64 rho8[4] = {0x0605040302010007, 0x0E0D0C0B0A09080F,
-                               0x1615141312111017, 0x1E1D1C1B1A19181F};
-static const UINT64 rho56[4] = {0x0007060504030201, 0x080F0E0D0C0B0A09,
-                                0x1017161514131211, 0x181F1E1D1C1B1A19};
-#define STORE256(a, b) _mm256_store_si256((V256 *)&(a), b)
+static const uint64_t rho8[4] = {0x0605040302010007, 0x0E0D0C0B0A09080F,
+                                 0x1615141312111017, 0x1E1D1C1B1A19181F};
+static const uint64_t rho56[4] = {0x0007060504030201, 0x080F0E0D0C0B0A09,
+                                  0x1017161514131211, 0x181F1E1D1C1B1A19};
+#define STORE256(a, b) _mm256_store_si256((__m256i *)&(a), b)
 #define XOR256(a, b) _mm256_xor_si256(a, b)
 #define XOReq256(a, b) a = _mm256_xor_si256(a, b)
-#endif
 
 #define SnP_laneLengthInBytes 8
 
-#define declareABCDE            \
-  V256 Aba, Abe, Abi, Abo, Abu; \
-  V256 Aga, Age, Agi, Ago, Agu; \
-  V256 Aka, Ake, Aki, Ako, Aku; \
-  V256 Ama, Ame, Ami, Amo, Amu; \
-  V256 Asa, Ase, Asi, Aso, Asu; \
-  V256 Bba, Bbe, Bbi, Bbo, Bbu; \
-  V256 Bga, Bge, Bgi, Bgo, Bgu; \
-  V256 Bka, Bke, Bki, Bko, Bku; \
-  V256 Bma, Bme, Bmi, Bmo, Bmu; \
-  V256 Bsa, Bse, Bsi, Bso, Bsu; \
-  V256 Ca, Ce, Ci, Co, Cu;      \
-  V256 Ca1, Ce1, Ci1, Co1, Cu1; \
-  V256 Da, De, Di, Do, Du;      \
-  V256 Eba, Ebe, Ebi, Ebo, Ebu; \
-  V256 Ega, Ege, Egi, Ego, Egu; \
-  V256 Eka, Eke, Eki, Eko, Eku; \
-  V256 Ema, Eme, Emi, Emo, Emu; \
-  V256 Esa, Ese, Esi, Eso, Esu;
+#define declareABCDE               \
+  __m256i Aba, Abe, Abi, Abo, Abu; \
+  __m256i Aga, Age, Agi, Ago, Agu; \
+  __m256i Aka, Ake, Aki, Ako, Aku; \
+  __m256i Ama, Ame, Ami, Amo, Amu; \
+  __m256i Asa, Ase, Asi, Aso, Asu; \
+  __m256i Bba, Bbe, Bbi, Bbo, Bbu; \
+  __m256i Bga, Bge, Bgi, Bgo, Bgu; \
+  __m256i Bka, Bke, Bki, Bko, Bku; \
+  __m256i Bma, Bme, Bmi, Bmo, Bmu; \
+  __m256i Bsa, Bse, Bsi, Bso, Bsu; \
+  __m256i Ca, Ce, Ci, Co, Cu;      \
+  __m256i Ca1, Ce1, Ci1, Co1, Cu1; \
+  __m256i Da, De, Di, Do, Du;      \
+  __m256i Eba, Ebe, Ebi, Ebo, Ebu; \
+  __m256i Ega, Ege, Egi, Ego, Egu; \
+  __m256i Eka, Eke, Eki, Eko, Eku; \
+  __m256i Ema, Eme, Emi, Emo, Emu; \
+  __m256i Esa, Ese, Esi, Eso, Esu;
 
 #define prepareTheta                                            \
   Ca = XOR256(Aba, XOR256(Aga, XOR256(Aka, XOR256(Ama, Asa)))); \
@@ -313,16 +301,19 @@ static const UINT64 rho56[4] = {0x0007060504030201, 0x080F0E0D0C0B0A09,
   E##su = XOR256(Bsu, ANDnu256(Bsa, Bse));
 
 
-static ALIGN(KeccakP1600times4_statesAlignment) const UINT64
-    KeccakF1600RoundConstants[24] = {
-        0x0000000000000001ULL, 0x0000000000008082ULL, 0x800000000000808aULL,
-        0x8000000080008000ULL, 0x000000000000808bULL, 0x0000000080000001ULL,
-        0x8000000080008081ULL, 0x8000000000008009ULL, 0x000000000000008aULL,
-        0x0000000000000088ULL, 0x0000000080008009ULL, 0x000000008000000aULL,
-        0x000000008000808bULL, 0x800000000000008bULL, 0x8000000000008089ULL,
-        0x8000000000008003ULL, 0x8000000000008002ULL, 0x8000000000000080ULL,
-        0x000000000000800aULL, 0x800000008000000aULL, 0x8000000080008081ULL,
-        0x8000000000008080ULL, 0x0000000080000001ULL, 0x8000000080008008ULL};
+static ALIGN const uint64_t KeccakF1600RoundConstants[24] = {
+    (uint64_t)0x0000000000000001ULL, (uint64_t)0x0000000000008082ULL,
+    (uint64_t)0x800000000000808aULL, (uint64_t)0x8000000080008000ULL,
+    (uint64_t)0x000000000000808bULL, (uint64_t)0x0000000080000001ULL,
+    (uint64_t)0x8000000080008081ULL, (uint64_t)0x8000000000008009ULL,
+    (uint64_t)0x000000000000008aULL, (uint64_t)0x0000000000000088ULL,
+    (uint64_t)0x0000000080008009ULL, (uint64_t)0x000000008000000aULL,
+    (uint64_t)0x000000008000808bULL, (uint64_t)0x800000000000008bULL,
+    (uint64_t)0x8000000000008089ULL, (uint64_t)0x8000000000008003ULL,
+    (uint64_t)0x8000000000008002ULL, (uint64_t)0x8000000000000080ULL,
+    (uint64_t)0x000000000000800aULL, (uint64_t)0x800000008000000aULL,
+    (uint64_t)0x8000000080008081ULL, (uint64_t)0x8000000000008080ULL,
+    (uint64_t)0x0000000080000001ULL, (uint64_t)0x8000000080008008ULL};
 
 #include <stdint.h>
 
@@ -426,22 +417,40 @@ static ALIGN(KeccakP1600times4_statesAlignment) const UINT64
   X##so = Y##so;                 \
   X##su = Y##su;
 
-#ifdef KeccakP1600times4_fullUnrolling
-#define FullUnrolling
-#else
-#define Unrolling KeccakP1600times4_unrolling
-#endif
-#include "KeccakP-1600-unrolling.macros"
+/* clang-format off */
+#define rounds24 \
+    prepareTheta \
+    thetaRhoPiChiIotaPrepareTheta( 0, A, E) \
+    thetaRhoPiChiIotaPrepareTheta( 1, E, A) \
+    thetaRhoPiChiIotaPrepareTheta( 2, A, E) \
+    thetaRhoPiChiIotaPrepareTheta( 3, E, A) \
+    thetaRhoPiChiIotaPrepareTheta( 4, A, E) \
+    thetaRhoPiChiIotaPrepareTheta( 5, E, A) \
+    thetaRhoPiChiIotaPrepareTheta( 6, A, E) \
+    thetaRhoPiChiIotaPrepareTheta( 7, E, A) \
+    thetaRhoPiChiIotaPrepareTheta( 8, A, E) \
+    thetaRhoPiChiIotaPrepareTheta( 9, E, A) \
+    thetaRhoPiChiIotaPrepareTheta(10, A, E) \
+    thetaRhoPiChiIotaPrepareTheta(11, E, A) \
+    thetaRhoPiChiIotaPrepareTheta(12, A, E) \
+    thetaRhoPiChiIotaPrepareTheta(13, E, A) \
+    thetaRhoPiChiIotaPrepareTheta(14, A, E) \
+    thetaRhoPiChiIotaPrepareTheta(15, E, A) \
+    thetaRhoPiChiIotaPrepareTheta(16, A, E) \
+    thetaRhoPiChiIotaPrepareTheta(17, E, A) \
+    thetaRhoPiChiIotaPrepareTheta(18, A, E) \
+    thetaRhoPiChiIotaPrepareTheta(19, E, A) \
+    thetaRhoPiChiIotaPrepareTheta(20, A, E) \
+    thetaRhoPiChiIotaPrepareTheta(21, E, A) \
+    thetaRhoPiChiIotaPrepareTheta(22, A, E) \
+    thetaRhoPiChiIota(23, E, A)
+/* clang-format on */
 
 void KeccakP1600times4_PermuteAll_24rounds(void *states)
 {
-  V256 *statesAsLanes = (V256 *)states;
-  declareABCDE
-#ifndef KeccakP1600times4_fullUnrolling
-      unsigned i;
-#endif
-
-  copyFromState(A, statesAsLanes) rounds24 copyToState(statesAsLanes, A)
+  __m256i *statesAsLanes = (__m256i *)states;
+  declareABCDE copyFromState(A, statesAsLanes)
+      rounds24 copyToState(statesAsLanes, A)
 }
 
 #else
