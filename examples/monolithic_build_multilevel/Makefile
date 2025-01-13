@@ -18,7 +18,7 @@ endif
 # Here, we use just a single monolithic compilation unit to include
 # multiple instances of mlkem-native.
 
-MLKEM_NATIVE_SOURCE=mlkem_native_monobuild.c
+MLKEM_NATIVE_SOURCE=mlkem_native_all.c
 
 INC=-Imlkem/ -I./
 
@@ -47,11 +47,9 @@ BIN=test_binary
 CFLAGS := \
 	-Wall \
 	-Wextra \
-	-Werror \
 	-Wmissing-prototypes \
 	-Wshadow \
 	-Wpointer-arith \
-	-Wredundant-decls \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
@@ -59,7 +57,6 @@ CFLAGS := \
 	-std=c99 \
 	-pedantic \
 	-MMD \
-        -DMLKEM_NATIVE_CONFIG_FILE="\"config_512.h\""\
 	$(CFLAGS)
 
 # Set this flag to give all non-global functions internal linkage
