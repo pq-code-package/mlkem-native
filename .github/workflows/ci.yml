@@ -164,6 +164,45 @@ jobs:
       - name: multilevel_build_native
         run: |
           make run -C examples/multilevel_build_native
+  aws_lc_integration:
+    strategy:
+      matrix:
+        system: [Ubuntu-latest]
+    name: AWS-LC integration test
+    runs-on: ${{ matrix.system }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: ./.github/actions/setup-os
+        with:
+          packages: 'cmake'
+      - uses: ./.github/actions/setup-aws-lc
+        with:
+          repository: 'hanno-becker/aws-lc'
+          commit: 'mlkem_native2'
+      - name: Run importer
+        run: |
+          cd $AWSLC_DIR/crypto/fipsmodule/ml_kem
+          GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA ./importer.sh
+      - name: Build AWS-LC (FIPS=1)
+        run: |
+          cd $AWSLC_DIR
+          mkdir build_fips
+          cd build_fips
+          cmake -DFIPS=1 ..
+          cd ..
+
+          cmake --build ./build_fips --target all
+          cmake --build ./build_fips --target run_tests
+      - name: Build AWS-LC (FIPS=0)
+        run: |
+          cd $AWSLC_DIR
+          mkdir build_no_fips
+          cd build_no_fips
+          cmake ..
+          cd ..
+
+          cmake --build ./build_no_fips --target all
+          cmake --build ./build_no_fips --target run_tests
   build_kat:
     needs: [quickcheck, quickcheck-windows, quickcheck-c90, quickcheck-lib, examples, lint, lint-markdown-link]
     strategy:
