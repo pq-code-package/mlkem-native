@@ -7,9 +7,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../mlkem/mlkem_native.h"
+#include "../mlkem/randombytes.h"
 #include "hal.h"
-#include "mlkem_native.h"
-#include "randombytes.h"
 
 #define NWARMUP 50
 #define NITERATIONS 300
