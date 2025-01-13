@@ -573,6 +573,31 @@
 #undef KEM_H
 #endif
 
+/* mlkem/kem.h */
+#if defined(crypto_kem_dec)
+#undef crypto_kem_dec
+#endif
+
+/* mlkem/kem.h */
+#if defined(crypto_kem_enc)
+#undef crypto_kem_enc
+#endif
+
+/* mlkem/kem.h */
+#if defined(crypto_kem_enc_derand)
+#undef crypto_kem_enc_derand
+#endif
+
+/* mlkem/kem.h */
+#if defined(crypto_kem_keypair)
+#undef crypto_kem_keypair
+#endif
+
+/* mlkem/kem.h */
+#if defined(crypto_kem_keypair_derand)
+#undef crypto_kem_keypair_derand
+#endif
+
 /* mlkem/mlkem_native.h */
 #if defined(BUILD_INFO_CONCAT)
 #undef BUILD_INFO_CONCAT
@@ -1858,11 +1883,6 @@
 #undef polyvec_tomont
 #endif
 
-/* mlkem/randombytes.h */
-#if defined(RANDOMBYTES_H)
-#undef RANDOMBYTES_H
-#endif
-
 /* mlkem/reduce.h */
 #if defined(HALF_Q)
 #undef HALF_Q
@@ -2184,7 +2204,7 @@
 #endif
 
 
-#if !defined(MLKEM_NATIVE_MONOBUILD_KEEP_FIPS202_HEADERS)
+#if !defined(MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS)
 
 /*
  * Undo all #define directives from *.c or *.h files
@@ -2860,4 +2880,9 @@
 #undef MLKEM_NATIVE_FIPS202_PROFILE_H
 #endif
 
-#endif /* MLKEM_NATIVE_MONOBUILD_KEEP_FIPS202_HEADERS */
+/* mlkem/randombytes.h */
+#if defined(RANDOMBYTES_H)
+#undef RANDOMBYTES_H
+#endif
+
+#endif /* MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS */
