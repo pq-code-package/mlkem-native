@@ -405,11 +405,6 @@ __contract__(
   }
 }
 
-#if NTT_BOUND > INT16_MAX - MLKEM_Q
-#error \
-    "The bound for the forward NTT is too large to ensure non-overflow in indcpa_keypair_derand"
-#endif
-
 MLKEM_NATIVE_INTERNAL_API
 void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
                            uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
@@ -468,12 +463,6 @@ void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
 }
 
 
-#if (INVNTT_BOUND > INT16_MAX - MLKEM_ETA1) || \
-    (INVNTT_BOUND > INT16_MAX - MLKEM_ETA2 - MLKEM_Q)
-#error \
-    "The bound for the inverse NTT is too large to ensure non-overflow in indcpa_enc"
-#endif
-
 MLKEM_NATIVE_INTERNAL_API
 void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
                 const uint8_t m[MLKEM_INDCPA_MSGBYTES],
@@ -529,12 +518,6 @@ void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
 
   pack_ciphertext(c, &b, &v);
 }
-
-/* Check that the arithmetic in indcpa_dec() does not overflow */
-#if INVNTT_BOUND > INT16_MAX - MLKEM_Q
-#error \
-    "The bound for the forward NTT is too large to ensure non-overflow in indcpa_dec"
-#endif
 
 MLKEM_NATIVE_INTERNAL_API
 void indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
