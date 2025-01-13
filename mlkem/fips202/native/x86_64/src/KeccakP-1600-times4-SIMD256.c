@@ -36,7 +36,6 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #error Expecting a little-endian platform
 #endif
 
-#if defined(KeccakP1600times4_useAVX2)
 #define ANDnu256(a, b) _mm256_andnot_si256(a, b)
 #define CONST256(a) _mm256_load_si256((const __m256i *)&(a))
 #define CONST256_64(a) (__m256i) _mm256_broadcast_sd((const double *)(&a))
@@ -51,7 +50,6 @@ static const uint64_t rho56[4] = {0x0007060504030201, 0x080F0E0D0C0B0A09,
 #define STORE256(a, b) _mm256_store_si256((__m256i *)&(a), b)
 #define XOR256(a, b) _mm256_xor_si256(a, b)
 #define XOReq256(a, b) a = _mm256_xor_si256(a, b)
-#endif
 
 #define SnP_laneLengthInBytes 8
 
