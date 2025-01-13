@@ -8,7 +8,7 @@
 /*
  * Default arithmetic backend
  */
-#include "sys.h"
+#include "../sys.h"
 
 #ifdef SYS_AARCH64
 /*

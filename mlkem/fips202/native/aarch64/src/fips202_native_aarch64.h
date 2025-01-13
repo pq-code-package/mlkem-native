@@ -6,7 +6,7 @@
 #define FIPS202_AARCH64_NATIVE_H
 
 #include <stdint.h>
-#include "common.h"
+#include "../../../../common.h"
 
 #define keccak_f1600_x1_scalar_asm_opt \
   FIPS202_NAMESPACE(keccak_f1600_x1_scalar_asm_opt)

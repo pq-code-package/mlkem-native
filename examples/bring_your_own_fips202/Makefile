@@ -14,25 +14,23 @@ endif
 # Part A:
 #
 # mlkem-native source and header files
-#
-# If you are not concerned about minimizing for a specific backend,
-# you can just include _all_ source files into your build.
 MLKEM_NATIVE_SOURCE=$(wildcard          \
 	mlkem_native/*.c		\
 	mlkem_native/**/*.c		\
 	mlkem_native/**/**/*.c	        \
 	mlkem_native/**/**/**/*.c)
 
-INC=
-INC+=-Imlkem_native/
-INC+=-Imlkem_native/native
+INC=-Imlkem_native/
 
 # Part B:
 #
 # Custom FIPS-202 implementation
-FIPS202_SOURCE=custom_fips202/tiny_sha3/sha3.c
+#
+# At present, this must be located in a directory named "fips202".
+# This limitation will be lifted in the future.
+FIPS202_SOURCE=fips202/tiny_sha3/sha3.c
 
-INC+=-Icustom_fips202
+INC+=-I./
 
 # Part C:
 #

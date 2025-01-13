@@ -11,7 +11,7 @@
 //   in [0,1,...,q-1] rather than [0,1,...,q], matching the
 //   semantics of poly_reduce().
 
-#include "common.h"
+#include "../../../common.h"
 
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT)
 #include "consts.h"

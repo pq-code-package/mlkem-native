@@ -9,7 +9,7 @@
 // https://eprint.iacr.org/2021/986
 // https://github.com/neon-ntt/neon-ntt
 
-#include "common.h"
+#include "../../../common.h"
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
 
 /* We use a single literal pool for all functions in this file.

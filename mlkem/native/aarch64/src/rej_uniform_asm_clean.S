@@ -18,7 +18,7 @@
  *
  * Returns number of sampled 16-bit integers (at most MLKEM_N).
  **************************************************/
-#include "common.h"
+#include "../../../common.h"
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \
     defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
 

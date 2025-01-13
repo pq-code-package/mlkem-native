@@ -6,8 +6,8 @@
 #define KECCAKF1600_H
 
 #include <stdint.h>
-#include "cbmc.h"
-#include "common.h"
+#include "../cbmc.h"
+#include "../common.h"
 #define KECCAK_LANES 25
 
 /*

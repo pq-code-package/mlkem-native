@@ -19,6 +19,6 @@
 /* Filename of the C backend implementation.
  * This is not inlined here because this header is included in assembly
  * files as well. */
-#define MLKEM_NATIVE_FIPS202_BACKEND_IMPL "aarch64/src/default_impl.h"
+#define MLKEM_NATIVE_FIPS202_BACKEND_IMPL "native/aarch64/src/default_impl.h"
 
 #endif /* FIPS202_NATIVE_PROFILE_H */

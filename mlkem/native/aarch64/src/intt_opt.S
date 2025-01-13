@@ -23,7 +23,7 @@
 /// SOFTWARE.
 ///
 
-#include "common.h"
+#include "../../../common.h"
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
 
 // Bounds:

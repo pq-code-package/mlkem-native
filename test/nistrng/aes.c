@@ -35,9 +35,8 @@
 #include <string.h>
 
 #include "aes.h"
-#include "common.h"
 
-static INLINE uint32_t br_dec32le(const unsigned char *src)
+static uint32_t br_dec32le(const unsigned char *src)
 {
   return (uint32_t)src[0] | ((uint32_t)src[1] << 8) | ((uint32_t)src[2] << 16) |
          ((uint32_t)src[3] << 24);
@@ -52,13 +51,13 @@ static void br_range_dec32le(uint32_t *v, size_t num, const unsigned char *src)
   }
 }
 
-static INLINE uint32_t br_swap32(uint32_t x)
+static uint32_t br_swap32(uint32_t x)
 {
   x = ((x & (uint32_t)0x00FF00FF) << 8) | ((x >> 8) & (uint32_t)0x00FF00FF);
   return (x << 16) | (x >> 16);
 }
 
-static INLINE void br_enc32le(unsigned char *dst, uint32_t x)
+static void br_enc32le(unsigned char *dst, uint32_t x)
 {
   dst[0] = (unsigned char)x;
   dst[1] = (unsigned char)(x >> 8);
@@ -428,7 +427,7 @@ static void br_aes_ct64_skey_expand(uint64_t *skey, const uint64_t *comp_skey,
   }
 }
 
-static INLINE void add_round_key(uint64_t *q, const uint64_t *sk)
+static void add_round_key(uint64_t *q, const uint64_t *sk)
 {
   q[0] ^= sk[0];
   q[1] ^= sk[1];
@@ -440,7 +439,7 @@ static INLINE void add_round_key(uint64_t *q, const uint64_t *sk)
   q[7] ^= sk[7];
 }
 
-static INLINE void shift_rows(uint64_t *q)
+static void shift_rows(uint64_t *q)
 {
   int i;
 
@@ -459,9 +458,9 @@ static INLINE void shift_rows(uint64_t *q)
   }
 }
 
-static INLINE uint64_t rotr32(uint64_t x) { return (x << 32) | (x >> 32); }
+static uint64_t rotr32(uint64_t x) { return (x << 32) | (x >> 32); }
 
-static INLINE void mix_columns(uint64_t *q)
+static void mix_columns(uint64_t *q)
 {
   uint64_t q0, q1, q2, q3, q4, q5, q6, q7;
   uint64_t r0, r1, r2, r3, r4, r5, r6, r7;

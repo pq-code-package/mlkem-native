@@ -23,13 +23,6 @@ MLKEM_NATIVE_SOURCE=$(wildcard          \
 	mlkem_native/**/**/**/*.c	\
 	mlkem_native/**/**/**/**/*.c)
 
-INC=
-INC+=-Imlkem_native/mlkem
-INC+=-Imlkem_native/mlkem
-INC+=-Imlkem_native/mlkem/native
-INC+=-Imlkem_native/mlkem/fips202
-INC+=-Imlkem_native/mlkem/fips202/native
-
 # Part B:
 #
 # Random number generator
@@ -73,7 +66,7 @@ BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 $(BINARY_NAME_FULL): $(ALL_SOURCE)
 	echo "$@"
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(INC) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@
 
 all: build
 

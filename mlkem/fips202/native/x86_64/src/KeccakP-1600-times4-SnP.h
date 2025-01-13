@@ -25,8 +25,8 @@ http://creativecommons.org/publicdomain/zero/1.0/
  */
 
 #include <stddef.h>
+#include "../../../../common.h"
 #include "KeccakP-SIMD256-config.h"
-#include "common.h"
 
 #define KeccakP1600times4_statesAlignment 32
 

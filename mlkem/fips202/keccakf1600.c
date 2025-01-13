@@ -13,7 +13,6 @@
 #include <assert.h>
 #include <stdint.h>
 
-#include "cbmc.h"
 #include "fips202_backend.h"
 #include "keccakf1600.h"
 

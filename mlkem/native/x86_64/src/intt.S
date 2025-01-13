@@ -9,12 +9,11 @@
  * Changes to placement of modular reductions have
  * been made to simplify reasoning of non-overflow */
 
-#include "common.h"
+#include "../../../common.h"
 
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT)
 
 #include "consts.h"
-#include "params.h"
 #include "shuffle.inc"
 #include "fq.inc"
 

@@ -20,12 +20,7 @@ endif
 
 MLKEM_NATIVE_SOURCE=mlkem_native_all.c
 
-INC=
-INC+=-I./
-INC+=-Imlkem/
-INC+=-Imlkem/native
-INC+=-Imlkem/fips202
-INC+=-Imlkem/fips202/native
+INC=-Imlkem/ -I./
 
 # Part B:
 #

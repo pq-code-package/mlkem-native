@@ -9,7 +9,7 @@
 #include "cbd.h"
 #include "cbmc.h"
 #include "debug/debug.h"
-#include "fips202x4.h"
+#include "fips202/fips202x4.h"
 #include "ntt.h"
 #include "poly.h"
 #include "reduce.h"

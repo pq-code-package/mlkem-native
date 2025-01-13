@@ -308,7 +308,7 @@ def gen_aarch64_mulcache_twiddles_twisted():
 def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
     def gen():
         yield from gen_header()
-        yield '#include "common.h"'
+        yield '#include "../../../common.h"'
         yield ""
         yield "#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \\"
         yield "    defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)"
@@ -379,7 +379,7 @@ def gen_aarch64_rej_uniform_table_rows():
 def gen_aarch64_rej_uniform_table(dry_run=False):
     def gen():
         yield from gen_header()
-        yield '#include "common.h"'
+        yield '#include "../../../common.h"'
         yield ""
         yield "#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \\"
         yield "    defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)"
@@ -431,7 +431,7 @@ def gen_avx2_rej_uniform_table_rows():
 def gen_avx2_rej_uniform_table(dry_run=False):
     def gen():
         yield from gen_header()
-        yield '#include "common.h"'
+        yield '#include "../../../common.h"'
         yield ""
         yield "#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT)"
         yield ""

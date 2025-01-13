@@ -6,7 +6,7 @@
 #define MLKEM_AARCH64_NATIVE_H
 
 #include <stdint.h>
-#include "common.h"
+#include "../../../common.h"
 
 #define aarch64_ntt_zetas_layer01234 \
   MLKEM_NAMESPACE(aarch64_ntt_zetas_layer01234)

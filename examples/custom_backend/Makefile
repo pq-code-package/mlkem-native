@@ -23,12 +23,7 @@ MLKEM_NATIVE_SOURCE=$(wildcard          \
 	mlkem_native/**/**/**/*.c	\
 	mlkem_native/**/**/**/**/*.c)
 
-INC=
-INC+=-Imlkem_native/
-INC+=-Imlkem_native/mlkem
-INC+=-Imlkem_native/mlkem/native
-INC+=-Imlkem_native/fips202
-INC+=-Imlkem_native/fips202/native
+INC=-Imlkem_native -Imlkem_native/mlkem
 
 # Part B:
 #
