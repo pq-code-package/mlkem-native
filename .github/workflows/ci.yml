@@ -414,6 +414,37 @@ jobs:
           nistkat: true
           kat: false
           acvp: false
+  # ensure that kem.h and mlkem_native.h; api.h and native backends are compatible
+  check-apis:
+    strategy:
+      fail-fast: false
+      matrix:
+        external:
+         - ${{ github.repository_owner != 'pq-code-package' }}
+        target:
+         - runner: pqcp-arm64
+           name: 'aarch64'
+         - runner: ubuntu-latest
+           name: 'x86_64'
+        exclude:
+          - {external: true,
+             target: {
+               runner: pqcp-arm64,
+               name: 'aarch64'
+             }}
+    name: Check API consistency
+    runs-on: ${{ matrix.target.runner }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: make quickcheck
+        run: |
+          OPT=0 CFLAGS="-DMLKEM_NATIVE_CHECK_APIS -Wno-redundant-decls" make quickcheck
+          make clean >/dev/null
+          OPT=1 CFLAGS="-DMLKEM_NATIVE_CHECK_APIS -Wno-redundant-decls" make quickcheck
+      - uses: ./.github/actions/setup-apt
+      - name: tests func
+        run: |
+          ./scripts/tests func --cflags="-DMLKEM_NATIVE_CHECK_APIS -Wno-redundant-decls"
   ec2_functests:
     strategy:
       fail-fast: false
