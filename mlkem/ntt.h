@@ -66,6 +66,7 @@ __contract__(
   ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, INVNTT_BOUND))
 );
 
+#if !defined(MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
 #define basemul_cached MLKEM_NAMESPACE(basemul_cached)
 /************************************************************
  * Name: basemul_cached
@@ -98,6 +99,6 @@ __contract__(
   assigns(memory_slice(r, 2 * sizeof(int16_t)))
   ensures(array_abs_bound(r, 0, 2, 2 * MLKEM_Q))
 );
-
+#endif /* MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
 #endif

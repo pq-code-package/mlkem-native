@@ -8,18 +8,9 @@
 #include <stdint.h>
 #include "common.h"
 #include "poly.h"
+#include "structs.h"
 
-#define polyvec MLKEM_NAMESPACE(polyvec)
-typedef struct
-{
-  poly vec[MLKEM_K];
-} ALIGN polyvec;
-
-#define polyvec_mulcache MLKEM_NAMESPACE(polyvec_mulcache)
-typedef struct
-{
-  poly_mulcache vec[MLKEM_K];
-} polyvec_mulcache;
+#include "arith_backend.h"
 
 #define polyvec_compress_du MLKEM_NAMESPACE(polyvec_compress_du)
 /*************************************************

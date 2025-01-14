@@ -458,6 +458,7 @@ void poly_getnoise_eta1122_4x(poly *r0, poly *r1, poly *r2, poly *r3,
 }
 #endif /* MLKEM_K == 2 */
 
+#if !defined(MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
 MLKEM_NATIVE_INTERNAL_API
 void poly_basemul_montgomery_cached(poly *r, const poly *a, const poly *b,
                                     const poly_mulcache *b_cache)
@@ -477,6 +478,7 @@ void poly_basemul_montgomery_cached(poly *r, const poly *a, const poly *b,
                    &b->coeffs[4 * i + 2], b_cache->coeffs[2 * i + 1]);
   }
 }
+#endif /* MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
 #if !defined(MLKEM_USE_NATIVE_POLY_TOMONT)
 MLKEM_NATIVE_INTERNAL_API

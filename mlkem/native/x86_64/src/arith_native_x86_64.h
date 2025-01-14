@@ -6,10 +6,10 @@
 #define MLKEM_X86_64_NATIVE_H
 
 #include "../../../common.h"
+#include "../../../structs.h"
 
 #include <immintrin.h>
 #include <stdint.h>
-#include "../../../polyvec.h"
 #include "consts.h"
 
 #define REJ_UNIFORM_AVX_NBLOCKS 3 /* See MLKEM_GEN_MATRIX_NBLOCKS */

@@ -10,33 +10,16 @@
 #include "cbmc.h"
 #include "common.h"
 #include "reduce.h"
+#include "structs.h"
 #include "verify.h"
+
+#include "arith_backend.h"
 
 /* Absolute exclusive upper bound for the output of the inverse NTT */
 #define INVNTT_BOUND (8 * MLKEM_Q)
 
 /* Absolute exclusive upper bound for the output of the forward NTT */
 #define NTT_BOUND (8 * MLKEM_Q)
-
-/*
- * Elements of R_q = Z_q[X]/(X^n + 1). Represents polynomial
- * coeffs[0] + X*coeffs[1] + X^2*coeffs[2] + ... + X^{n-1}*coeffs[n-1]
- */
-#define poly MLKEM_NAMESPACE(poly)
-typedef struct
-{
-  int16_t coeffs[MLKEM_N];
-} ALIGN poly;
-
-/*
- * INTERNAL presentation of precomputed data speeding up
- * the base multiplication of two polynomials in NTT domain.
- */
-#define poly_mulcache MLKEM_NAMESPACE(poly_mulcache)
-typedef struct
-{
-  int16_t coeffs[MLKEM_N >> 1];
-} poly_mulcache;
 
 /* Static namespacing
  * This is to facilitate building multiple instances
@@ -638,6 +621,7 @@ __contract__(
 );
 #endif /* MLKEM_K == 2 */
 
+#if !defined(MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
 #define poly_basemul_montgomery_cached \
   MLKEM_NAMESPACE(poly_basemul_montgomery_cached)
 /*************************************************
@@ -671,6 +655,7 @@ __contract__(
   assigns(object_whole(r))
   ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, 2 * MLKEM_Q))
 );
+#endif /* MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
 #define poly_tomont MLKEM_NAMESPACE(poly_tomont)
 /*************************************************

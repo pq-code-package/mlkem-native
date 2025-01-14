@@ -3480,11 +3480,6 @@
 #endif
 
 /* mlkem/poly.h */
-#if defined(poly)
-#undef poly
-#endif
-
-/* mlkem/poly.h */
 #if defined(poly_add)
 #undef poly_add
 #endif
@@ -3542,11 +3537,6 @@
 /* mlkem/poly.h */
 #if defined(poly_getnoise_eta2_4x)
 #undef poly_getnoise_eta2_4x
-#endif
-
-/* mlkem/poly.h */
-#if defined(poly_mulcache)
-#undef poly_mulcache
 #endif
 
 /* mlkem/poly.h */
@@ -3640,11 +3630,6 @@
 #endif
 
 /* mlkem/polyvec.h */
-#if defined(polyvec)
-#undef polyvec
-#endif
-
-/* mlkem/polyvec.h */
 #if defined(polyvec_add)
 #undef polyvec_add
 #endif
@@ -3677,11 +3662,6 @@
 /* mlkem/polyvec.h */
 #if defined(polyvec_invntt_tomont)
 #undef polyvec_invntt_tomont
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(polyvec_mulcache)
-#undef polyvec_mulcache
 #endif
 
 /* mlkem/polyvec.h */
@@ -3762,6 +3742,36 @@
 /* mlkem/rej_uniform.h */
 #if defined(rej_uniform)
 #undef rej_uniform
+#endif
+
+
+/*
+ * Undo all #define directives from mlkem/structs.h
+ */
+
+/* mlkem/structs.h */
+#if defined(STRUCTS_H)
+#undef STRUCTS_H
+#endif
+
+/* mlkem/structs.h */
+#if defined(poly)
+#undef poly
+#endif
+
+/* mlkem/structs.h */
+#if defined(poly_mulcache)
+#undef poly_mulcache
+#endif
+
+/* mlkem/structs.h */
+#if defined(polyvec)
+#undef polyvec
+#endif
+
+/* mlkem/structs.h */
+#if defined(polyvec_mulcache)
+#undef polyvec_mulcache
 #endif
 
 

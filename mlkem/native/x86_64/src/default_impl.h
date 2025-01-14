@@ -12,8 +12,7 @@
 
 #include <string.h>
 
-#include "../../../poly.h"
-#include "../../../polyvec.h"
+#include "../../../structs.h"
 #include "arith_native_x86_64.h"
 
 #define MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER

@@ -237,6 +237,7 @@ void poly_invntt_tomont(poly *p)
 }
 #endif /* MLKEM_USE_NATIVE_INTT */
 
+#if !defined(MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
 MLKEM_NATIVE_INTERNAL_API
 void basemul_cached(int16_t r[2], const int16_t a[2], const int16_t b[2],
                     int16_t b_cached)
@@ -256,3 +257,4 @@ void basemul_cached(int16_t r[2], const int16_t a[2], const int16_t b[2],
 
   BOUND(r, 2, 2 * MLKEM_Q, "basemul output bound");
 }
+#endif /* MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
