@@ -1,0 +1,72 @@
+# SPDX-License-Identifier: Apache-2.0
+diff --git a/tools/build-proof.sh b/tools/build-proof.sh
+index 39d72433..d10c3244 100755
+--- a/tools/build-proof.sh
++++ b/tools/build-proof.sh
+@@ -1,6 +1,7 @@
+ #!/bin/bash
++ROOT="$(realpath "$(dirname "$0")"/../)"
+ if [ "$#" -ne 3 ]; then
+-  echo "../tools/build-proof.sh <.ml file path> <hol.sh> <output .native path>"
++  echo "${ROOT}/tools/build-proof.sh <.ml file path> <hol.sh> <output .native path>"
+   echo "This script builds HOL Light proof using OCaml native compiler and puts the "
+   echo "output binary at <output .native path>."
+   exit 1
+@@ -9,14 +10,11 @@ fi
+ # Return the exit code if any statement fails
+ set -e
+
+-s2n_bignum_arch=$(basename "$(pwd)")
+-
+-cd ..
+-
+-ml_path_noarch=$1
+-ml_path=${s2n_bignum_arch}/${ml_path_noarch}
++ml_path="$1"
+ hol_sh_cmd=$2
+-output_path=${s2n_bignum_arch}/$3
++output_path=$3
++output_dir=$(dirname "$output_path")
++[ -d "$output_dir" ] || mkdir -p "$output_dir"
+
+ export HOLLIGHT_DIR="$(dirname ${hol_sh_cmd})"
+ if [ ! -f "${HOLLIGHT_DIR}/hol_lib.cmxa" ]; then
+@@ -34,7 +32,7 @@ echo "Generating a template .ml that loads the file...: ${template_ml}"
+  echo "check_axioms ();;") >> ${template_ml}
+
+ spec_found=0
+-for spec in $(./tools/collect-specs.sh ${s2n_bignum_arch} ${ml_path_noarch}) ; do
++for spec in $("${ROOT}"/tools/collect-specs.sh "$(dirname "${ml_path}")" "${ml_path}"); do
+   echo "Printf.printf \"val ${spec} : thm = %s\n\" (string_of_thm ${spec});;"
+   spec_found=1
+ done >> ${template_ml}
+@@ -51,7 +49,7 @@ fi
+ inlined_prefix="$(mktemp)"
+ inlined_ml="${inlined_prefix}.ml"
+ inlined_cmx="${inlined_prefix}.cmx"
+-ocaml ${HOLLIGHT_DIR}/inline_load.ml ${template_ml} ${inlined_ml}
++(cd "$ROOT" && ocaml "${HOLLIGHT_DIR}"/inline_load.ml "${template_ml}" "${inlined_ml}")
+
+ # Give a large stack size.
+ OCAMLRUNPARAM=l=2000000000 \
+diff --git a/tools/collect-specs.sh b/tools/collect-specs.sh
+index a29aa6c8..784e0af3 100755
+--- a/tools/collect-specs.sh
++++ b/tools/collect-specs.sh
+@@ -6,14 +6,12 @@ if [ "$#" -ne 1 ] && [ "$#" -ne 2 ]; then
+   exit 1
+ fi
+
+-s2n_bignum_arch=$1
+ if [ "$#" -eq 2 ]; then
+   filepat="$2"
+ else
+-  filepat="*.ml"
++  filepat="$1"
+ fi
+-cd $s2n_bignum_arch > /dev/null
+
+ # An env. var for sorting
+ export LC_ALL=C
+-grep 'let [A-Z_0-9]*_SUBROUTINE_CORRECT' ${filepat} | cut -f2 -d' ' | sort
++grep -r 'let [A-Z_0-9]*_SUBROUTINE_CORRECT' ${filepat} | cut -f2 -d' ' | sort
