@@ -15,8 +15,7 @@ endif
 #
 # mlkem-native source and header files
 #
-# Here, we use just a single monolithic compilation unit to include
-# multiple instances of mlkem-native.
+# Here, we use a single monolithic compilation unit to include mlkem-native.
 
 MLKEM_NATIVE_SOURCE=mlkem_native_monobuild.c
 
