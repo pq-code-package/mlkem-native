@@ -1,0 +1,82 @@
+# (SPDX-License-Identifier: CC-BY-4.0)
+
+.PHONY: build run clean
+.DEFAULT_GOAL := all
+
+# Append cross-prefix for cross compilation
+# Remove or ignore for native builds
+CC  ?= gcc
+# When called from the root Makefile, CROSS_PREFIX has already been added here
+ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
+CC  := $(CROSS_PREFIX)$(CC)
+endif
+
+# Part A:
+#
+# mlkem-native source and header files
+#
+# Here, we use just a one C and one ASM file to include mlkem-native.
+
+MLKEM_NATIVE_SOURCE=mlkem_native_monobuild.c mlkem_native_monobuild.S
+
+INC=-Imlkem/ -I./
+
+# Part B:
+#
+# Random number generator
+#
+# !!! WARNING !!!
+#
+# The randombytes() implementation used here is for TESTING ONLY.
+# You MUST NOT use this implementation outside of testing.
+#
+# !!! WARNING !!!
+RNG_SOURCE=$(wildcard test_only_rng/*.c)
+
+# Part C:
+#
+# Your application source code
+APP_SOURCE=main.c
+
+ALL_SOURCE=$(RNG_SOURCE) $(APP_SOURCE) $(MLKEM_NATIVE_SOURCE)
+
+BUILD_DIR=build
+BIN=test_binary
+
+CFLAGS := \
+	-Wall \
+	-Wextra \
+	-Werror \
+	-Wmissing-prototypes \
+	-Wshadow \
+	-Wpointer-arith \
+	-Wredundant-decls \
+	-Wno-long-long \
+	-Wno-unknown-pragmas \
+	-Wno-unused-command-line-argument \
+	-fomit-frame-pointer \
+	-std=c99 \
+	-pedantic \
+	-MMD \
+        -DMLKEM_NATIVE_CONFIG_FILE="\"config_512.h\""\
+	$(CFLAGS)
+
+# Set this flag to give all non-global functions internal linkage
+CFLAGS += -DMLKEM_NATIVE_MONOBUILD
+
+BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
+
+$(BINARY_NAME_FULL): $(ALL_SOURCE)
+	echo "$@"
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INC) $^ -o $@
+
+all: build
+
+build: $(BINARY_NAME_FULL)
+
+run: $(BINARY_NAME_FULL)
+	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
+
+clean:
+	rm -rf $(BUILD_DIR)

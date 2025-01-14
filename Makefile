@@ -148,4 +148,5 @@ clean:
 	-make clean -C examples/custom_backend >/dev/null
 	-make clean -C examples/mlkem_native_as_code_package >/dev/null
 	-make clean -C examples/monolithic_build >/dev/null
+	-make clean -C examples/monolithic_build_native >/dev/null
 	-make clean -C examples/monolithic_build_multilevel >/dev/null
