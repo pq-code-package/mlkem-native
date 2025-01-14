@@ -337,5 +337,63 @@ return:
     pop_stack
     ret
 
+
+/****************** REGISTER DEALLOCATIONS *******************/
+    .unreq output
+    .unreq buf
+    .unreq buflen
+    .unreq table_idx
+    .unreq len
+    .unreq output_tmp
+    .unreq output_tmp_base
+    .unreq count
+    .unreq buf_consumed
+    .unreq tmp
+    .unreq final_copy_count
+    .unreq rec_idx_0
+    .unreq rec_idx_1
+    .unreq rec_idx_2
+    .unreq rec_idx_3
+    .unreq ctr0
+    .unreq ctr1
+    .unreq ctr2
+    .unreq ctr3
+    .unreq ctr01
+    .unreq ctr23
+    .unreq buf0
+    .unreq buf1
+    .unreq buf2
+    .unreq tmp0
+    .unreq tmp1
+    .unreq tmp2
+    .unreq tmp3
+    .unreq sign0
+    .unreq sign1
+    .unreq sign2
+    .unreq sign3
+    .unreq val0
+    .unreq val0q
+    .unreq val1
+    .unreq val1q
+    .unreq val2
+    .unreq val2q
+    .unreq val3
+    .unreq val3q
+    .unreq t0
+    .unreq t1
+    .unreq t2
+    .unreq t3
+    .unreq table0
+    .unreq table0q
+    .unreq table1
+    .unreq table1q
+    .unreq table2
+    .unreq table2q
+    .unreq table3
+    .unreq table3q
+    .unreq mlkem_q
+    .unreq bits
+    .unreq bits_q
+
 #endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) ||
           defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) */

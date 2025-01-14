@@ -1581,4 +1581,40 @@ MLKEM_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_opt):
         ret
 #endif /* MLKEM_K == 4 */
 
+/****************** REGISTER DEALLOCATIONS *******************/
+    .unreq out
+    .unreq a0_ptr
+    .unreq b0_ptr
+    .unreq b0_cache_ptr
+    .unreq a1_ptr
+    .unreq b1_ptr
+    .unreq b1_cache_ptr
+    .unreq a2_ptr
+    .unreq b2_ptr
+    .unreq b2_cache_ptr
+    .unreq a3_ptr
+    .unreq b3_ptr
+    .unreq b3_cache_ptr
+    .unreq count
+    .unreq modulus
+    .unreq q_modulus
+    .unreq modulus_twisted
+    .unreq q_modulus_twisted
+    .unreq aa0
+    .unreq aa1
+    .unreq bb0
+    .unreq bb1
+    .unreq bb1t
+    .unreq res0l
+    .unreq res1l
+    .unreq res0h
+    .unreq res1h
+    .unreq tmp0
+    .unreq tmp1
+    .unreq q_tmp0
+    .unreq q_tmp1
+    .unreq out0
+    .unreq out1
+    .unreq t0
+
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT */
