@@ -25,6 +25,7 @@
         {
           packages.cbmc = util.cbmc;
           packages.hol_light = pkgs.callPackage ./nix/hol_light { };
+          packages.s2n_bignum = pkgs.callPackage ./nix/s2n_bignum { };
 
           devShells.default = util.wrapShell util.mkShell {
             packages =
@@ -32,14 +33,18 @@
               util.linters ++
               builtins.attrValues
                 {
-                  inherit (config.packages) cbmc hol_light;
+                  inherit (config.packages) cbmc hol_light s2n_bignum;
                   inherit (pkgs)
                     direnv
                     nix-direnv;
                 };
           };
 
-          devShells.hol_light = util.wrapShell util.mkShell { packages = [ config.packages.hol_light ]; };
+          devShells.hol_light = util.wrapShell util.mkShell {
+            packages = builtins.attrValues {
+              inherit (config.packages) hol_light s2n_bignum;
+            };
+          };
 
           devShells.ci = util.wrapShell util.mkShell { packages = util.core { cross = false; }; };
           devShells.ci-cross = util.wrapShell util.mkShell { packages = util.core { }; };
