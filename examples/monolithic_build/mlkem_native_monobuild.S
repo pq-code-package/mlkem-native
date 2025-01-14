@@ -24,6 +24,21 @@
 #endif
 
 /* mlkem/native/aarch64/src/intt_clean.S */
+#if defined(c_consts)
+#undef c_consts
+#endif
+
+/* mlkem/native/aarch64/src/intt_clean.S */
+#if defined(c_ninv)
+#undef c_ninv
+#endif
+
+/* mlkem/native/aarch64/src/intt_clean.S */
+#if defined(c_ninv_tw)
+#undef c_ninv_tw
+#endif
+
+/* mlkem/native/aarch64/src/intt_clean.S */
 #if defined(dup8h)
 #undef dup8h
 #endif
@@ -36,6 +51,16 @@
 /* mlkem/native/aarch64/src/intt_clean.S */
 #if defined(gs_butterfly_v)
 #undef gs_butterfly_v
+#endif
+
+/* mlkem/native/aarch64/src/intt_clean.S */
+#if defined(layer012_start)
+#undef layer012_start
+#endif
+
+/* mlkem/native/aarch64/src/intt_clean.S */
+#if defined(layer3456_start)
+#undef layer3456_start
 #endif
 
 /* mlkem/native/aarch64/src/intt_clean.S */
@@ -86,6 +111,11 @@
 /* mlkem/native/aarch64/src/intt_clean.S */
 #if defined(save_vregs)
 #undef save_vregs
+#endif
+
+/* mlkem/native/aarch64/src/intt_clean.S */
+#if defined(scale_start)
+#undef scale_start
 #endif
 
 /* mlkem/native/aarch64/src/intt_clean.S */
@@ -110,6 +140,21 @@
 #endif
 
 /* mlkem/native/aarch64/src/intt_opt.S */
+#if defined(c_consts)
+#undef c_consts
+#endif
+
+/* mlkem/native/aarch64/src/intt_opt.S */
+#if defined(c_ninv)
+#undef c_ninv
+#endif
+
+/* mlkem/native/aarch64/src/intt_opt.S */
+#if defined(c_ninv_tw)
+#undef c_ninv_tw
+#endif
+
+/* mlkem/native/aarch64/src/intt_opt.S */
 #if defined(dup8h)
 #undef dup8h
 #endif
@@ -122,6 +167,16 @@
 /* mlkem/native/aarch64/src/intt_opt.S */
 #if defined(gs_butterfly_v)
 #undef gs_butterfly_v
+#endif
+
+/* mlkem/native/aarch64/src/intt_opt.S */
+#if defined(layer012_start)
+#undef layer012_start
+#endif
+
+/* mlkem/native/aarch64/src/intt_opt.S */
+#if defined(layer3456_start)
+#undef layer3456_start
 #endif
 
 /* mlkem/native/aarch64/src/intt_opt.S */
@@ -175,6 +230,11 @@
 #endif
 
 /* mlkem/native/aarch64/src/intt_opt.S */
+#if defined(scale_start)
+#undef scale_start
+#endif
+
+/* mlkem/native/aarch64/src/intt_opt.S */
 #if defined(transpose4)
 #undef transpose4
 #endif
@@ -191,6 +251,11 @@
  */
 
 /* mlkem/native/aarch64/src/ntt_clean.S */
+#if defined(c_consts)
+#undef c_consts
+#endif
+
+/* mlkem/native/aarch64/src/ntt_clean.S */
 #if defined(ct_butterfly)
 #undef ct_butterfly
 #endif
@@ -198,6 +263,16 @@
 /* mlkem/native/aarch64/src/ntt_clean.S */
 #if defined(ct_butterfly_v)
 #undef ct_butterfly_v
+#endif
+
+/* mlkem/native/aarch64/src/ntt_clean.S */
+#if defined(layer012_start)
+#undef layer012_start
+#endif
+
+/* mlkem/native/aarch64/src/ntt_clean.S */
+#if defined(layer3456_start)
+#undef layer3456_start
 #endif
 
 /* mlkem/native/aarch64/src/ntt_clean.S */
@@ -257,6 +332,11 @@
  */
 
 /* mlkem/native/aarch64/src/ntt_opt.S */
+#if defined(c_consts)
+#undef c_consts
+#endif
+
+/* mlkem/native/aarch64/src/ntt_opt.S */
 #if defined(ct_butterfly)
 #undef ct_butterfly
 #endif
@@ -264,6 +344,16 @@
 /* mlkem/native/aarch64/src/ntt_opt.S */
 #if defined(ct_butterfly_v)
 #undef ct_butterfly_v
+#endif
+
+/* mlkem/native/aarch64/src/ntt_opt.S */
+#if defined(layer012_start)
+#undef layer012_start
+#endif
+
+/* mlkem/native/aarch64/src/ntt_opt.S */
+#if defined(layer3456_start)
+#undef layer3456_start
 #endif
 
 /* mlkem/native/aarch64/src/ntt_opt.S */
@@ -328,13 +418,53 @@
 #endif
 
 /* mlkem/native/aarch64/src/poly_clean.S */
+#if defined(c_barrett_twist)
+#undef c_barrett_twist
+#endif
+
+/* mlkem/native/aarch64/src/poly_clean.S */
+#if defined(c_modulus)
+#undef c_modulus
+#endif
+
+/* mlkem/native/aarch64/src/poly_clean.S */
+#if defined(c_modulus_twisted)
+#undef c_modulus_twisted
+#endif
+
+/* mlkem/native/aarch64/src/poly_clean.S */
+#if defined(c_mont_constant)
+#undef c_mont_constant
+#endif
+
+/* mlkem/native/aarch64/src/poly_clean.S */
 #if defined(dup8h)
 #undef dup8h
 #endif
 
 /* mlkem/native/aarch64/src/poly_clean.S */
+#if defined(mulcache_compute_loop_start)
+#undef mulcache_compute_loop_start
+#endif
+
+/* mlkem/native/aarch64/src/poly_clean.S */
 #if defined(mulmod)
 #undef mulmod
+#endif
+
+/* mlkem/native/aarch64/src/poly_clean.S */
+#if defined(poly_reduce_loop_start)
+#undef poly_reduce_loop_start
+#endif
+
+/* mlkem/native/aarch64/src/poly_clean.S */
+#if defined(poly_tobytes_asm_clean_asm_loop_start)
+#undef poly_tobytes_asm_clean_asm_loop_start
+#endif
+
+/* mlkem/native/aarch64/src/poly_clean.S */
+#if defined(poly_tomont_asm_loop)
+#undef poly_tomont_asm_loop
 #endif
 
 /* mlkem/native/aarch64/src/poly_clean.S */
@@ -354,13 +484,53 @@
 #endif
 
 /* mlkem/native/aarch64/src/poly_opt.S */
+#if defined(c_barrett_twist)
+#undef c_barrett_twist
+#endif
+
+/* mlkem/native/aarch64/src/poly_opt.S */
+#if defined(c_modulus)
+#undef c_modulus
+#endif
+
+/* mlkem/native/aarch64/src/poly_opt.S */
+#if defined(c_modulus_twisted)
+#undef c_modulus_twisted
+#endif
+
+/* mlkem/native/aarch64/src/poly_opt.S */
+#if defined(c_mont_constant)
+#undef c_mont_constant
+#endif
+
+/* mlkem/native/aarch64/src/poly_opt.S */
 #if defined(dup8h)
 #undef dup8h
 #endif
 
 /* mlkem/native/aarch64/src/poly_opt.S */
+#if defined(mulcache_compute_loop_start)
+#undef mulcache_compute_loop_start
+#endif
+
+/* mlkem/native/aarch64/src/poly_opt.S */
 #if defined(mulmod)
 #undef mulmod
+#endif
+
+/* mlkem/native/aarch64/src/poly_opt.S */
+#if defined(poly_reduce_loop_start)
+#undef poly_reduce_loop_start
+#endif
+
+/* mlkem/native/aarch64/src/poly_opt.S */
+#if defined(poly_tobytes_asm_opt_asm_loop_start)
+#undef poly_tobytes_asm_opt_asm_loop_start
+#endif
+
+/* mlkem/native/aarch64/src/poly_opt.S */
+#if defined(poly_tomont_asm_loop)
+#undef poly_tomont_asm_loop
 #endif
 
 /* mlkem/native/aarch64/src/poly_opt.S */
@@ -375,8 +545,33 @@
  */
 
 /* mlkem/native/aarch64/src/polyvec_clean.S */
+#if defined(c_modulus)
+#undef c_modulus
+#endif
+
+/* mlkem/native/aarch64/src/polyvec_clean.S */
+#if defined(c_modulus_twisted)
+#undef c_modulus_twisted
+#endif
+
+/* mlkem/native/aarch64/src/polyvec_clean.S */
 #if defined(dup8h)
 #undef dup8h
+#endif
+
+/* mlkem/native/aarch64/src/polyvec_clean.S */
+#if defined(k2_loop_start)
+#undef k2_loop_start
+#endif
+
+/* mlkem/native/aarch64/src/polyvec_clean.S */
+#if defined(k3_loop_start)
+#undef k3_loop_start
+#endif
+
+/* mlkem/native/aarch64/src/polyvec_clean.S */
+#if defined(k4_loop_start)
+#undef k4_loop_start
 #endif
 
 /* mlkem/native/aarch64/src/polyvec_clean.S */
@@ -436,8 +631,33 @@
  */
 
 /* mlkem/native/aarch64/src/polyvec_opt.S */
+#if defined(c_modulus)
+#undef c_modulus
+#endif
+
+/* mlkem/native/aarch64/src/polyvec_opt.S */
+#if defined(c_modulus_twisted)
+#undef c_modulus_twisted
+#endif
+
+/* mlkem/native/aarch64/src/polyvec_opt.S */
 #if defined(dup8h)
 #undef dup8h
+#endif
+
+/* mlkem/native/aarch64/src/polyvec_opt.S */
+#if defined(k2_loop_start)
+#undef k2_loop_start
+#endif
+
+/* mlkem/native/aarch64/src/polyvec_opt.S */
+#if defined(k3_loop_start)
+#undef k3_loop_start
+#endif
+
+/* mlkem/native/aarch64/src/polyvec_opt.S */
+#if defined(k4_loop_start)
+#undef k4_loop_start
 #endif
 
 /* mlkem/native/aarch64/src/polyvec_opt.S */
@@ -508,6 +728,31 @@
 #endif
 
 /* mlkem/native/aarch64/src/rej_uniform_asm_clean.S */
+#if defined(c_bit_table)
+#undef c_bit_table
+#endif
+
+/* mlkem/native/aarch64/src/rej_uniform_asm_clean.S */
+#if defined(final_copy)
+#undef final_copy
+#endif
+
+/* mlkem/native/aarch64/src/rej_uniform_asm_clean.S */
+#if defined(loop48)
+#undef loop48
+#endif
+
+/* mlkem/native/aarch64/src/rej_uniform_asm_clean.S */
+#if defined(loop48_end)
+#undef loop48_end
+#endif
+
+/* mlkem/native/aarch64/src/rej_uniform_asm_clean.S */
+#if defined(memory_copy)
+#undef memory_copy
+#endif
+
+/* mlkem/native/aarch64/src/rej_uniform_asm_clean.S */
 #if defined(pop_stack)
 #undef pop_stack
 #endif
@@ -533,6 +778,16 @@
 /*
  * Undo all #define directives from mlkem/native/x86_64/src/fq.S
  */
+
+/* mlkem/native/x86_64/src/fq.S */
+#if defined(reduce128_avx2)
+#undef reduce128_avx2
+#endif
+
+/* mlkem/native/x86_64/src/fq.S */
+#if defined(tomont128_avx2)
+#undef tomont128_avx2
+#endif
 
 #include "mlkem/native/x86_64/src/intt.S"
 
@@ -591,6 +846,21 @@
 /*
  * Undo all #define directives from mlkem/native/x86_64/src/shuffle.S
  */
+
+/* mlkem/native/x86_64/src/shuffle.S */
+#if defined(nttfrombytes128_avx)
+#undef nttfrombytes128_avx
+#endif
+
+/* mlkem/native/x86_64/src/shuffle.S */
+#if defined(ntttobytes128_avx)
+#undef ntttobytes128_avx
+#endif
+
+/* mlkem/native/x86_64/src/shuffle.S */
+#if defined(nttunpack128_avx2)
+#undef nttunpack128_avx2
+#endif
 
 
 #if !defined(MLKEM_NATIVE_MONOBUILD_NO_FIPS202_SOURCES)
@@ -657,8 +927,18 @@
 #endif
 
 /* mlkem/fips202/native/aarch64/src/keccak_f1600_x1_scalar_asm_opt.S */
+#if defined(initial)
+#undef initial
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccak_f1600_x1_scalar_asm_opt.S */
 #if defined(load_state)
 #undef load_state
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccak_f1600_x1_scalar_asm_opt.S */
+#if defined(loop)
+#undef loop
 #endif
 
 /* mlkem/fips202/native/aarch64/src/keccak_f1600_x1_scalar_asm_opt.S */
@@ -726,6 +1006,11 @@
 /* mlkem/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm_clean.S */
 #if defined(load_input)
 #undef load_input
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm_clean.S */
+#if defined(loop)
+#undef loop
 #endif
 
 /* mlkem/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm_clean.S */
@@ -803,6 +1088,11 @@
 /* mlkem/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm_clean.S */
 #if defined(load_input)
 #undef load_input
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm_clean.S */
+#if defined(loop)
+#undef loop
 #endif
 
 /* mlkem/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm_clean.S */
@@ -890,6 +1180,11 @@
 /* mlkem/fips202/native/aarch64/src/keccak_f1600_x2_v8a_v84a_asm_hybrid.S */
 #if defined(load_input)
 #undef load_input
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccak_f1600_x2_v8a_v84a_asm_hybrid.S */
+#if defined(loop)
+#undef loop
 #endif
 
 /* mlkem/fips202/native/aarch64/src/keccak_f1600_x2_v8a_v84a_asm_hybrid.S */
@@ -1054,6 +1349,12 @@
 
 /* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_scalar_v84a_asm_hybrid_opt.S
  */
+#if defined(done)
+#undef done
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_scalar_v84a_asm_hybrid_opt.S
+ */
 #if defined(eor3_m0)
 #undef eor3_m0
 #endif
@@ -1084,6 +1385,12 @@
 
 /* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_scalar_v84a_asm_hybrid_opt.S
  */
+#if defined(initial)
+#undef initial
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_scalar_v84a_asm_hybrid_opt.S
+ */
 #if defined(load_input_scalar)
 #undef load_input_scalar
 #endif
@@ -1092,6 +1399,18 @@
  */
 #if defined(load_input_vector)
 #undef load_input_vector
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_scalar_v84a_asm_hybrid_opt.S
+ */
+#if defined(loop)
+#undef loop
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_scalar_v84a_asm_hybrid_opt.S
+ */
+#if defined(loop_end)
+#undef loop_end
 #endif
 
 /* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_scalar_v84a_asm_hybrid_opt.S
@@ -1283,6 +1602,12 @@
 
 /* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_asm_opt.S
  */
+#if defined(done)
+#undef done
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_asm_opt.S
+ */
 #if defined(eor3_m1)
 #undef eor3_m1
 #endif
@@ -1307,6 +1632,12 @@
 
 /* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_asm_opt.S
  */
+#if defined(initial)
+#undef initial
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_asm_opt.S
+ */
 #if defined(load_input_scalar)
 #undef load_input_scalar
 #endif
@@ -1315,6 +1646,18 @@
  */
 #if defined(load_input_vector)
 #undef load_input_vector
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_asm_opt.S
+ */
+#if defined(loop)
+#undef loop
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_asm_opt.S
+ */
+#if defined(loop_end)
+#undef loop_end
 #endif
 
 /* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_asm_opt.S
@@ -1500,6 +1843,12 @@
 
 /* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm_opt.S
  */
+#if defined(done)
+#undef done
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm_opt.S
+ */
 #if defined(eor3_m0)
 #undef eor3_m0
 #endif
@@ -1530,6 +1879,12 @@
 
 /* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm_opt.S
  */
+#if defined(initial)
+#undef initial
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm_opt.S
+ */
 #if defined(load_input_scalar)
 #undef load_input_scalar
 #endif
@@ -1538,6 +1893,18 @@
  */
 #if defined(load_input_vector)
 #undef load_input_vector
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm_opt.S
+ */
+#if defined(loop)
+#undef loop
+#endif
+
+/* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm_opt.S
+ */
+#if defined(loop_end)
+#undef loop_end
 #endif
 
 /* mlkem/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm_opt.S

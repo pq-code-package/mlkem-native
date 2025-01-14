@@ -47,6 +47,9 @@
 #define restore_vregs MLKEM_NAMESPACE(ntt_clean_restore_vregs)
 #define push_stack MLKEM_NAMESPACE(ntt_clean_push_stack)
 #define pop_stack MLKEM_NAMESPACE(ntt_clean_pop_stack)
+#define c_consts MLKEM_NAMESPACE(ntt_clean_c_consts)
+#define layer012_start MLKEM_NAMESPACE(ntt_clean_layer012_start)
+#define layer3456_start MLKEM_NAMESPACE(ntt_clean_layer3456_start)
 /* End of static namespacing */
 
 // Bounds:

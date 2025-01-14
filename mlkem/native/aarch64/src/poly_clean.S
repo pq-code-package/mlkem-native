@@ -18,6 +18,14 @@
 #define barrett_reduce MLKEM_NAMESPACE(poly_clean_barrett_reduce)
 #define mulmod MLKEM_NAMESPACE(poly_clean_mulmod)
 #define scalar_signed_to_unsigned MLKEM_NAMESPACE(poly_clean_scalar_signed_to_unsigned)
+#define c_modulus MLKEM_NAMESPACE(poly_clean_c_modulus)
+#define c_modulus_twisted MLKEM_NAMESPACE(poly_clean_c_modulus_twisted)
+#define c_mont_constant MLKEM_NAMESPACE(poly_clean_c_mont_constant)
+#define c_barrett_twist MLKEM_NAMESPACE(poly_clean_c_barrett_twist)
+#define poly_reduce_loop_start MLKEM_NAMESPACE(poly_clean_poly_reduce_loop_start)
+#define mulcache_compute_loop_start MLKEM_NAMESPACE(poly_clean_mulcache_compute_loop_start)
+#define poly_tobytes_asm_clean_asm_loop_start MLKEM_NAMESPACE(poly_clean_poly_tobytes_asm_clean_asm_loop_start)
+#define poly_tomont_asm_loop MLKEM_NAMESPACE(poly_clean_poly_tomont_asm_loop)
 /* End of static namespacing */
 
 /* We use a single literal pool for all functions in this file.
@@ -101,7 +109,7 @@ MLKEM_ASM_NAMESPACE(poly_reduce_asm_clean):
         ldr q_modulus_twisted, c_modulus_twisted
 
         mov count, #8
-loop_start:
+poly_reduce_loop_start:
         ldr q_data, [ptr], #64
         barrett_reduce data
         scalar_signed_to_unsigned data
@@ -123,7 +131,7 @@ loop_start:
         str q_data, [ptr, #-16]
 
         subs count, count, #1
-        cbnz count, loop_start
+        cbnz count, poly_reduce_loop_start
 
         ret
 

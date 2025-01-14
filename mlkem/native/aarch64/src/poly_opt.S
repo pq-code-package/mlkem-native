@@ -18,6 +18,14 @@
 #define barrett_reduce MLKEM_NAMESPACE(poly_opt_barrett_reduce)
 #define mulmod MLKEM_NAMESPACE(poly_opt_mulmod)
 #define scalar_signed_to_unsigned MLKEM_NAMESPACE(poly_opt_scalar_signed_to_unsigned)
+#define c_modulus MLKEM_NAMESPACE(poly_opt_c_modulus)
+#define c_modulus_twisted MLKEM_NAMESPACE(poly_opt_c_modulus_twisted)
+#define c_mont_constant MLKEM_NAMESPACE(poly_opt_c_mont_constant)
+#define c_barrett_twist MLKEM_NAMESPACE(poly_opt_c_barrett_twist)
+#define poly_reduce_loop_start MLKEM_NAMESPACE(poly_opt_poly_reduce_loop_start)
+#define mulcache_compute_loop_start MLKEM_NAMESPACE(poly_opt_mulcache_compute_loop_start)
+#define poly_tobytes_asm_opt_asm_loop_start MLKEM_NAMESPACE(poly_opt_poly_tobytes_asm_opt_asm_loop_start)
+#define poly_tomont_asm_loop MLKEM_NAMESPACE(poly_opt_poly_tomont_asm_loop)
 /* End of static namespacing */
 
 /* We use a single literal pool for all functions in this file.
@@ -150,7 +158,7 @@ MLKEM_ASM_NAMESPACE(poly_reduce_asm_opt):
         // add v16.8H, v2.8H, v27.8H              // .....................*.........
 
         sub count, count, #1
-1:
+poly_reduce_loop_start:
                                                // Instructions:    32
                                                // Expected cycles: 36
                                                // Expected IPC:    0.89
@@ -234,7 +242,7 @@ MLKEM_ASM_NAMESPACE(poly_reduce_asm_opt):
         // str q0, [x0, #-16]                     // .....~............................'......*..........................
 
         sub count, count, 1
-        cbnz count, 1b
+        cbnz count, poly_reduce_loop_start
                                                // Instructions:    17
                                                // Expected cycles: 23
                                                // Expected IPC:    0.74
@@ -371,7 +379,7 @@ MLKEM_ASM_NAMESPACE(poly_mulcache_compute_asm_opt):
         // sqrdmulh v27.8H, v28.8H, v7.8H       // ...........*...................
 
         sub count, count, #1
-1:
+mulcache_compute_loop_start:
                                               // Instructions:    9
                                               // Expected cycles: 13
                                               // Expected IPC:    0.69
@@ -409,7 +417,7 @@ MLKEM_ASM_NAMESPACE(poly_mulcache_compute_asm_opt):
         // str q5, [x0], #16                       // ..........~..'.........*..'....
 
         sub count, count, 1
-        cbnz count, 1b
+        cbnz count, mulcache_compute_loop_start
                                           // Instructions:    2
                                           // Expected cycles: 5
                                           // Expected IPC:    0.40
@@ -570,7 +578,7 @@ MLKEM_ASM_NAMESPACE(poly_tomont_asm_opt):
         // ldr q27, [x0, #32]                // ......*........................
 
         sub count, count, #1
-1:
+poly_tomont_asm_loop:
                                               // Instructions:    20
                                               // Expected cycles: 24
                                               // Expected IPC:    0.83
@@ -630,7 +638,7 @@ MLKEM_ASM_NAMESPACE(poly_tomont_asm_opt):
         // str q1, [x0, #-16]                     // ..............'...*...................
 
         sub count, count, 1
-        cbnz count, 1b
+        cbnz count, poly_tomont_asm_loop
                                               // Instructions:    15
                                               // Expected cycles: 18
                                               // Expected IPC:    0.83

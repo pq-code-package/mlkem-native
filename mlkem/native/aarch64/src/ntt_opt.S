@@ -47,6 +47,9 @@
 #define restore_vregs MLKEM_NAMESPACE(ntt_opt_restore_vregs)
 #define push_stack MLKEM_NAMESPACE(ntt_opt_push_stack)
 #define pop_stack MLKEM_NAMESPACE(ntt_opt_pop_stack)
+#define c_consts MLKEM_NAMESPACE(ntt_opt_c_consts)
+#define layer012_start MLKEM_NAMESPACE(ntt_opt_layer012_start)
+#define layer3456_start MLKEM_NAMESPACE(ntt_opt_layer3456_start)
 /* End of static namespacing */
 
 // Bounds:
@@ -264,7 +267,7 @@ MLKEM_ASM_NAMESPACE(ntt_asm_opt):
         // mul v15.8H, v11.8H, v0.H[0]      // ...............*...............
 
         sub count, count, #1
-1:
+layer012_start:
                                                 // Instructions:    76
                                                 // Expected cycles: 84
                                                 // Expected IPC:    0.90
@@ -436,7 +439,7 @@ MLKEM_ASM_NAMESPACE(ntt_asm_opt):
         // str q15, [x0, #(-16 + 7*(512/8))]          // .....................~.....'.............................................................................*
 
         sub count, count, 1
-        cbnz count, 1b
+        cbnz count, layer012_start
                                                 // Instructions:    66
                                                 // Expected cycles: 67
                                                 // Expected IPC:    0.99
@@ -659,7 +662,7 @@ MLKEM_ASM_NAMESPACE(ntt_asm_opt):
         // ldr q13, [x2, #-16]                   // ..............................*
 
         sub count, count, #1
-1:
+layer3456_start:
                                                 // Instructions:    71
                                                 // Expected cycles: 82
                                                 // Expected IPC:    0.87
@@ -821,7 +824,7 @@ MLKEM_ASM_NAMESPACE(ntt_asm_opt):
         // str q11, [x0, #(-16*1)]                    // .................................................................................~'................................................................................*
 
         sub count, count, 1
-        cbnz count, 1b
+        cbnz count, layer3456_start
                                                // Instructions:    47
                                                // Expected cycles: 52
                                                // Expected IPC:    0.90

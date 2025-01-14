@@ -64,6 +64,10 @@
 #define vector_round MLKEM_NAMESPACE(keccak_f1600_x4_scalar_v84a_asm_hybrid_opt_vector_round)
 #define scalar_round_noninitial MLKEM_NAMESPACE(keccak_f1600_x4_scalar_v84a_asm_hybrid_opt_scalar_round_noninitial)
 #define final_scalar_rotate MLKEM_NAMESPACE(keccak_f1600_x4_scalar_v84a_asm_hybrid_opt_final_scalar_rotate)
+#define initial MLKEM_NAMESPACE(keccak_f1600_x4_scalar_v84a_asm_hybrid_opt_initial)
+#define loop MLKEM_NAMESPACE(keccak_f1600_x4_scalar_v84a_asm_hybrid_opt_loop)
+#define loop_end MLKEM_NAMESPACE(keccak_f1600_x4_scalar_v84a_asm_hybrid_opt_loop_end)
+#define done MLKEM_NAMESPACE(keccak_f1600_x4_scalar_v84a_asm_hybrid_opt_done)
 /* End of static namespacing */
 
 #if defined(__ARM_FEATURE_SHA3)

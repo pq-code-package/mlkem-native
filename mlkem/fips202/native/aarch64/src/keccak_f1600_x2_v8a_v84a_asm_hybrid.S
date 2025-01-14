@@ -66,6 +66,7 @@
 #define xar_m0 MLKEM_NAMESPACE(keccak_f1600_x2_v8a_v84a_asm_hybrid_xar_m0)
 #define bcax_m0 MLKEM_NAMESPACE(keccak_f1600_x2_v8a_v84a_asm_hybrid_bcax_m0)
 #define hybrid_round MLKEM_NAMESPACE(keccak_f1600_x2_v8a_v84a_asm_hybrid_hybrid_round)
+#define loop MLKEM_NAMESPACE(keccak_f1600_x2_v8a_v84a_asm_hybrid_loop)
 /* End of static namespacing */
 
 #if defined(__ARM_FEATURE_SHA3)

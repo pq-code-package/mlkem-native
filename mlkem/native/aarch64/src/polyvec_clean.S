@@ -31,6 +31,11 @@
 #define restore_vregs MLKEM_NAMESPACE(polyvec_clean_restore_vregs)
 #define push_stack MLKEM_NAMESPACE(polyvec_clean_push_stack)
 #define pop_stack MLKEM_NAMESPACE(polyvec_clean_pop_stack)
+#define c_modulus MLKEM_NAMESPACE(polyvec_clean_c_modulus)
+#define c_modulus_twisted MLKEM_NAMESPACE(polyvec_clean_c_modulus_twisted)
+#define k2_loop_start MLKEM_NAMESPACE(polyvec_clean_k2_loop_start)
+#define k3_loop_start MLKEM_NAMESPACE(polyvec_clean_k3_loop_start)
+#define k4_loop_start MLKEM_NAMESPACE(polyvec_clean_k4_loop_start)
 /* End of static namespacing */
 
 /* We use a single literal pool for all functions in this file.

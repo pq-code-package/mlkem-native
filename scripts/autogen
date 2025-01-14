@@ -664,6 +664,35 @@ def gen_monolithic_c_source_file(dry_run=False):
         dry_run=dry_run,
     )
 
+def get_asm_label(l):
+    if ":" not in l:
+        return None
+    s = next(map(str.strip,l.split(":")))
+    s = filter(lambda s: s != "", s.split(" "))
+    s = list(s)
+    if len(s) != 1 or s[0].isidentifier() is False:
+        return None
+    return s[0]
+
+def check_asm_labels_for_file(filename):
+    """Checks that `filename` has no numeric code labels"""
+
+    with open(filename, "r") as f:
+        content = f.read()
+
+    for i, l in enumerate(content.split('\n')):
+        lbl = get_asm_label(l)
+        if lbl is None:
+            continue
+
+        if lbl.isnumeric():
+            raise Exception(f"Unsupported assembly file {filename}: Please remove the numeric label '{lbl}' at line {i}")
+
+def check_asm_labels():
+    for asm_file in get_asm_source_files():
+        check_asm_labels_for_file(asm_file)
+
+
 def check_asm_register_aliases_for_file(filename):
     """Checks that `filename` has no mismatching or dangling register aliases"""
 
@@ -763,16 +792,30 @@ def gen_asm_macros_in_file(filename):
             continue
         yield list(filter(lambda s: s != "", l.split(" ")))[1]
 
-def get_asm_macro_namespace(filename, macro):
-   """Returns the namespaced version of `macro` in `filename`."""
+
+def gen_asm_labels_in_file(filename):
+    with open(filename, "r") as f:
+        content = f.read()
+    for l in content.split('\n'):
+        lbl = get_asm_label(l)
+        if lbl is None:
+            continue
+        yield lbl
+
+def get_asm_namespace(filename, s):
+   """Returns the namespaced version of `s` in `filename`."""
    stem = os.path.splitext(os.path.basename(filename))[0]
-   return f"MLKEM_NAMESPACE({stem}_{macro})"
+   return f"MLKEM_NAMESPACE({stem}_{s})"
 
 def gen_asm_namespacing_section(filename):
     """Generate namespacing code for the given assembly file"""
     section = []
     for m in gen_asm_macros_in_file(filename):
-        section.append(f"#define {m} {get_asm_macro_namespace(filename, m)}")
+        section.append(f"#define {m} {get_asm_namespace(filename, m)}")
+
+    for lbl in gen_asm_labels_in_file(filename):
+        if "NAMESPACE" not in lbl:
+            section.append(f"#define {lbl} {get_asm_namespace(filename, lbl)}")
 
     if len(section) == 0:
         return []
@@ -856,6 +899,7 @@ def _main():
     args = parser.parse_args()
 
     check_asm_register_aliases()
+    check_asm_labels()
 
     # Note: The ASM files need updating before autogenerating the monobuild.
     update_static_asm_namespacing(args.dry_run)

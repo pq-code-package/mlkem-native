@@ -46,6 +46,8 @@
 #define load_state MLKEM_NAMESPACE(keccak_f1600_x1_scalar_asm_opt_load_state)
 #define store_state MLKEM_NAMESPACE(keccak_f1600_x1_scalar_asm_opt_store_state)
 #define final_rotate MLKEM_NAMESPACE(keccak_f1600_x1_scalar_asm_opt_final_rotate)
+#define initial MLKEM_NAMESPACE(keccak_f1600_x1_scalar_asm_opt_initial)
+#define loop MLKEM_NAMESPACE(keccak_f1600_x1_scalar_asm_opt_loop)
 /* End of static namespacing */
 
 /****************** REGISTER ALLOCATIONS *******************/

@@ -50,6 +50,12 @@
 #define push_stack MLKEM_NAMESPACE(intt_clean_push_stack)
 #define pop_stack MLKEM_NAMESPACE(intt_clean_pop_stack)
 #define dup8h MLKEM_NAMESPACE(intt_clean_dup8h)
+#define c_consts MLKEM_NAMESPACE(intt_clean_c_consts)
+#define c_ninv MLKEM_NAMESPACE(intt_clean_c_ninv)
+#define c_ninv_tw MLKEM_NAMESPACE(intt_clean_c_ninv_tw)
+#define scale_start MLKEM_NAMESPACE(intt_clean_scale_start)
+#define layer3456_start MLKEM_NAMESPACE(intt_clean_layer3456_start)
+#define layer012_start MLKEM_NAMESPACE(intt_clean_layer012_start)
 /* End of static namespacing */
 
 // Bounds:
