@@ -423,5 +423,35 @@ initial:
     free_stack
     ret
 
+/****************** REGISTER DEALLOCATIONS *******************/
+    .unreq input_addr
+    .unreq input_rc
+    .unreq const_addr
+    .unreq Aba
+    .unreq Abe
+    .unreq Abi
+    .unreq Abo
+    .unreq Abu
+    .unreq Aga
+    .unreq Age
+    .unreq Agi
+    .unreq Ago
+    .unreq Agu
+    .unreq Aka
+    .unreq Ake
+    .unreq Aki
+    .unreq Ako
+    .unreq Aku
+    .unreq Ama
+    .unreq Ame
+    .unreq Ami
+    .unreq Amo
+    .unreq Amu
+    .unreq Asa
+    .unreq Ase
+    .unreq Asi
+    .unreq Aso
+    .unreq Asu
+
 #endif /* defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) ||
           defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55) */
