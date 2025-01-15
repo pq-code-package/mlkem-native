@@ -563,11 +563,10 @@ def get_files(pattern):
 def get_defines():
     for c in get_source_files() + get_header_files():
         with open(c, "r") as f:
-            for i, l in enumerate(f.read().split("\n")):
+            for l in f.read().split("\n"):
                 if l.lstrip().startswith("#define "):
                     yield (
                         c,
-                        i,
                         l.lstrip()
                         .removeprefix("#define ")
                         .split(" ")[0]
@@ -585,12 +584,12 @@ def get_checked_defines():
                 return True
         return False
 
-    for (c,i,d) in get_defines():
+    for (c,d) in get_defines():
         if d.startswith("_") and is_allowed(d,c) is False:
             raise Exception(f"{d} from {c}:{i} starts with an underscore, which is not allowed for mlkem-native macros. "
                   f"If this is an mlkem-native specific macro, please pick a different name. "
                   f"If this is an external macro, it likely needs removing from `gen_monolithic_undef_all_core()` in `scripts/autogen` -- check this!")
-        yield (c,i,d)
+        yield (c,d)
 
 def gen_monolithic_undef_all_core(filt=None):
 
@@ -611,9 +610,9 @@ def gen_monolithic_undef_all_core(filt=None):
         yield ""
 
     defines = list(set(get_checked_defines()))
-    defines.sort(key=lambda t: (t[0], t[2]))
+    defines.sort()
 
-    for filename, line_no, d in defines:
+    for filename, d in defines:
         if filt(filename) is False:
             continue
         yield from undo_define(filename, d)
