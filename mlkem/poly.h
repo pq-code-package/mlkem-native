@@ -307,17 +307,17 @@ __contract__(
  ************************************************************/
 static INLINE uint16_t scalar_signed_to_unsigned_q(int16_t c)
 __contract__(
-  requires(c >= -(MLKEM_Q - 1) && c <= (MLKEM_Q - 1))
-  ensures(return_value >= 0 && return_value <= (MLKEM_Q - 1))
+  requires(c > -MLKEM_Q && c < MLKEM_Q)
+  ensures(return_value >= 0 && return_value < MLKEM_Q)
   ensures(return_value == (int32_t)c + (((int32_t)c < 0) * MLKEM_Q)))
 {
+  debug_assert_abs_bound(&c, 1, MLKEM_Q);
+
   /* Add Q if c is negative, but in constant time */
   c = ct_sel_int16(c + MLKEM_Q, c, ct_cmask_neg_i16(c));
 
-  cassert(c >= 0);
-  cassert(c < MLKEM_Q);
-
   /* and therefore cast to uint16_t is safe. */
+  debug_assert_bound(&c, 1, 0, MLKEM_Q);
   return (uint16_t)c;
 }
 

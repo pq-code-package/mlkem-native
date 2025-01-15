@@ -119,13 +119,13 @@
   {                                                                    \
     unsigned qvar;                                                     \
     ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) ==>                    \
-        (((int)(value_lb) <= (array_var[(qvar)])) &&		       \
-         ((array_var[(qvar)]) < (int)(value_ub)))		       \
+        (((int)(value_lb) <= ((array_var)[(qvar)])) &&		       \
+         (((array_var)[(qvar)]) < (int)(value_ub)))		       \
   }
 
 #define array_bound(array_var, qvar_lb, qvar_ub, value_lb, value_ub) \
   array_bound_core(CBMC_CONCAT(_cbmc_idx, __LINE__), (qvar_lb),      \
-                   (qvar_ub), (array_var), (value_lb), (value_ub))
+      (qvar_ub), (array_var), (value_lb), (value_ub))
 /* clang-format on */
 
 /* Wrapper around array_bound operating on absolute values.

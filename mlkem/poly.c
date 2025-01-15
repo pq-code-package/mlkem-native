@@ -20,6 +20,8 @@ MLKEM_NATIVE_INTERNAL_API
 void poly_compress_du(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DU], const poly *a)
 {
   unsigned j;
+  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+
 #if (MLKEM_POLYCOMPRESSEDBYTES_DU == 352)
   for (j = 0; j < MLKEM_N / 8; j++)
   __loop__(invariant(j <= MLKEM_N / 8))
@@ -139,6 +141,8 @@ void poly_decompress_du(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DU])
 #else
 #error "MLKEM_POLYCOMPRESSEDBYTES_DU needs to be in {320,352}"
 #endif
+
+  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 
 MLKEM_NATIVE_INTERNAL_API
@@ -259,7 +263,6 @@ void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
 {
   unsigned i;
   debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
-
 
   for (i = 0; i < MLKEM_N / 2; i++)
   __loop__(invariant(i <= MLKEM_N / 2))
@@ -489,7 +492,7 @@ void poly_tomont(poly *r)
   for (i = 0; i < MLKEM_N; i++)
   __loop__(
     invariant(i <= MLKEM_N)
-    invariant(array_abs_bound(r->coeffs ,0, i, MLKEM_Q)))
+    invariant(array_abs_bound(r->coeffs, 0, i, MLKEM_Q)))
   {
     r->coeffs[i] = fqmul(r->coeffs[i], f);
   }
@@ -566,11 +569,20 @@ void poly_mulcache_compute(poly_mulcache *x, const poly *a)
 {
   unsigned i;
   for (i = 0; i < MLKEM_N / 4; i++)
-  __loop__(invariant(i <= MLKEM_N / 4))
+  __loop__(
+    invariant(i <= MLKEM_N / 4)
+    invariant(array_abs_bound(x->coeffs, 0, 2 * i, MLKEM_Q)))
   {
     x->coeffs[2 * i + 0] = fqmul(a->coeffs[4 * i + 1], zetas[64 + i]);
     x->coeffs[2 * i + 1] = fqmul(a->coeffs[4 * i + 3], -zetas[64 + i]);
   }
+
+  /*
+   * This bound is true for the C implementation, but not needed
+   * in the higher level bounds reasoning. It is thus omitted
+   * them from the spec to not unnecessarily constrain native
+   * implementations, but checked here nonetheless.
+   */
   debug_assert_abs_bound(x, MLKEM_N / 2, MLKEM_Q);
 }
 #else  /* MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE */

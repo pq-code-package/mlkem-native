@@ -13,7 +13,7 @@ DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET += $(MLKEM_NAMESPACE)polyvec_compress_du.1:4 # Largest value of MLKEM_K
+UNWINDSET += $(MLKEM_NAMESPACE)polyvec_compress_du.0:4 # Largest value of MLKEM_K
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/polyvec.c

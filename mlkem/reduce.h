@@ -115,8 +115,7 @@ __contract__(
 )
 {
   int16_t res;
-  debug_assert((a > -(2 * UINT12_LIMIT * 32768)) &&
-               (a < (2 * UINT12_LIMIT * 32768)));
+  debug_assert_abs_bound(&a, 1, 2 * UINT12_LIMIT * 32768);
 
   res = montgomery_reduce_generic(a);
   /* Bounds:
@@ -125,7 +124,7 @@ __contract__(
    *       <= UINT12_LIMIT + (MLKEM_Q + 1) / 2
    *        < 2 * MLKEM_Q */
 
-  debug_assert(res > -2 * MLKEM_Q && res < 2 * MLKEM_Q);
+  debug_assert_abs_bound(&res, 1, 2 * MLKEM_Q);
   return res;
 }
 
@@ -151,7 +150,7 @@ __contract__(
 )
 {
   int16_t res;
-  debug_assert(b > -HALF_Q && b < HALF_Q);
+  debug_assert_abs_bound(&b, 1, HALF_Q);
 
   res = montgomery_reduce((int32_t)a * (int32_t)b);
   /* Bounds:
@@ -161,7 +160,7 @@ __contract__(
    *        < MLKEM_Q
    */
 
-  debug_assert(res > -MLKEM_Q && res < MLKEM_Q);
+  debug_assert_abs_bound(&res, 1, MLKEM_Q);
   return res;
 }
 
@@ -201,7 +200,10 @@ __contract__(
    * t is in -10 .. +10, so we need 32-bit math to
    * evaluate t * MLKEM_Q and the subsequent subtraction
    */
-  return (int16_t)(a - t * MLKEM_Q);
+  int16_t res = (int16_t)(a - t * MLKEM_Q);
+
+  debug_assert_abs_bound(&res, 1, HALF_Q);
+  return res;
 }
 
 #endif
