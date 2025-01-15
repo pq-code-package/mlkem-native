@@ -72,7 +72,7 @@ static void cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
   unsigned i;
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(
-    invariant(i >= 0 && i <= MLKEM_N / 8)
+    invariant(i <= MLKEM_N / 8)
     invariant(array_abs_bound(r->coeffs, 0, 8 * i, 3)))
   {
     unsigned j;
@@ -82,7 +82,7 @@ static void cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
 
     for (j = 0; j < 8; j++)
     __loop__(
-      invariant(i >= 0 && i <= MLKEM_N / 8 && j >= 0 && j <= 8)
+      invariant(i <= MLKEM_N / 8 && j <= 8)
       invariant(array_abs_bound(r->coeffs, 0, 8 * i + j, 3)))
     {
       const int16_t a = (d >> (4 * j + 0)) & 0x3;
@@ -109,7 +109,7 @@ static void cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4])
   unsigned i;
   for (i = 0; i < MLKEM_N / 4; i++)
   __loop__(
-    invariant(i >= 0 && i <= MLKEM_N / 4)
+    invariant(i <= MLKEM_N / 4)
     invariant(array_abs_bound(r->coeffs, 0, 4 * i, 4)))
   {
     unsigned j;
@@ -120,7 +120,7 @@ static void cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4])
 
     for (j = 0; j < 4; j++)
     __loop__(
-      invariant(i >= 0 && i <= MLKEM_N / 4 && j >= 0 && j <= 4)
+      invariant(i <= MLKEM_N / 4 && j <= 4)
       invariant(array_abs_bound(r->coeffs, 0, 4 * i + j, 4)))
     {
       const int16_t a = (d >> (6 * j + 0)) & 0x7;

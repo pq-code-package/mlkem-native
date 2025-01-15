@@ -6,12 +6,13 @@
 #include "common.h"
 
 #define ntt_butterfly_block MLKEM_NAMESPACE(ntt_butterfly_block)
-void ntt_butterfly_block(int16_t *r, int16_t root, int start, int len,
+void ntt_butterfly_block(int16_t *r, int16_t root, unsigned start, unsigned len,
                          int bound);
 
 void harness(void)
 {
   int16_t *r, root;
-  int start, stride, bound;
+  unsigned start, stride;
+  int bound;
   ntt_butterfly_block(r, root, start, stride, bound);
 }

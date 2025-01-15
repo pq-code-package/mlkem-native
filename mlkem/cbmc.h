@@ -119,8 +119,8 @@
   {                                                                    \
     unsigned qvar;                                                     \
     ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) ==>                    \
-        (((value_lb) <= (array_var[(qvar)])) &&                        \
-        ((array_var[(qvar)]) < (value_ub)))                            \
+        (((int)(value_lb) <= (array_var[(qvar)])) &&		       \
+         ((array_var[(qvar)]) < (int)(value_ub)))		       \
   }
 
 #define array_bound(array_var, qvar_lb, qvar_ub, value_lb, value_ub) \
@@ -134,6 +134,6 @@
  * bound in array_bound is inclusive, we have to raise it by 1.
  */
 #define array_abs_bound(arr, lb, ub, k) \
-  array_bound((arr), (lb), (ub), -(k) + 1, (k))
+  array_bound((arr), (lb), (ub), -((int)(k)) + 1, (k))
 
 #endif

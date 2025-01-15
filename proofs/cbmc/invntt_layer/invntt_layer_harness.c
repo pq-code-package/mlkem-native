@@ -6,11 +6,11 @@
 #include "common.h"
 
 #define invntt_layer MLKEM_NAMESPACE(invntt_layer)
-void invntt_layer(int16_t *p, int len, int layer);
+void invntt_layer(int16_t *p, unsigned len, unsigned layer);
 
 void harness(void)
 {
   int16_t *a;
-  int len, layer;
+  unsigned len, layer;
   invntt_layer(a, len, layer);
 }

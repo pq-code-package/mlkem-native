@@ -203,7 +203,7 @@ void zero_array_correct (uint8_t *dst, int len)
     for (i = 0; i < len; i++)
     __loop__(
       assigns(i, object_whole(dst))
-      invariant(i >= 0 && i <= len)
+      invariant(i <= len)
       invariant(forall(j, 0, i, dst[j] == 0))
       decreases(len - i))
     {
@@ -488,12 +488,10 @@ Therefore, we add:
   for (i = 0; i < MLKEM_N / 2; i++)
   __loop__(
     assigns(i, object_whole(r))
-    invariant(i >= 0 && i <= MLKEM_N / 2)
+    invariant(i <= MLKEM_N / 2)
     decreases(MLKEM_N / 2 - i))
   { ... }
 ```
-
-Note that the invariant `i >= 0` could be ommitted since `i` is of an `unsigned` integer type. It is given here for clarity only.
 
 Another small set of changes is required to make CBMC happy with the loop body. By default, CBMC is pedantic and warns
 about conversions that truncate values or lose information via an implicit type conversion.

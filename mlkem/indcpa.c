@@ -251,9 +251,8 @@ __contract__(
   while (ctr < MLKEM_N)
   __loop__(
     assigns(ctr, state, memory_slice(entry, sizeof(poly)), object_whole(buf))
-    invariant(0 <= ctr && ctr <= MLKEM_N)
-    invariant(ctr > 0 ==> array_bound(entry->coeffs, 0, ctr,
-                                          0, MLKEM_Q)))
+    invariant(ctr <= MLKEM_N)
+    invariant(array_bound(entry->coeffs, 0, ctr, 0, MLKEM_Q)))
   {
     xof_squeezeblocks(buf, 1, &state);
     ctr = rej_uniform(entry->coeffs, MLKEM_N, ctr, buf, buflen);
@@ -398,7 +397,7 @@ __contract__(
   for (i = 0; i < MLKEM_K; i++)
   __loop__(
     assigns(i, object_whole(out))
-    invariant(i >= 0 && i <= MLKEM_K))
+    invariant(i <= MLKEM_K))
   {
     polyvec_basemul_acc_montgomery_cached(&out->vec[i], &a[i], v, vc);
   }
