@@ -23,7 +23,7 @@ context described by the annotations; if the annotations add further constraints
 function contract annotation provides contextual assumptions about a function as _preconditions_ to CBMC, and adds
 further _constraints_ for the program state at function return.
 
-In mlkem-native, we use abbreviated forms of the CBMC annotations defined by macros in the [cbmc.h](../mlkem/cbmc.h). We
+In mlkem-native, we use abbreviated forms of the CBMC annotations defined by macros in the [cbmc.h](../../mlkem/cbmc.h). We
 now list the most prominent.
 
 ### Function contracts
@@ -383,7 +383,7 @@ Proof of a single function can be run from the proof directory for that function
 
 This produces `logs/result.txt` in plaintext format.
 
-Before pushing a new proof for a new function, make sure that _all_ proofs run OK from the [cbmc](./) directory with
+Before pushing a new proof for a new function, make sure that _all_ proofs run OK from the [proofs/cbmc](./) directory with
 
 ```
 MLKEM_K=3 ./run-cbmc-proofs.py --summarize -j$(nproc)
@@ -407,7 +407,7 @@ This section follows the recipe above, and adds actual settings, contracts and c
 
 ### Populate a proof directory
 
-The proof directory is [cbmc/poly_tobytes](poly_tobytes).
+The proof directory is [proofs/cbmc/poly_tobytes](poly_tobytes).
 
 ### Update Makefile
 
@@ -452,7 +452,7 @@ So we need to write a requires contract to constrain the ranges of the coefficie
 is no constraint on the output byte array, other than it must be the right length, which is given by the function
 prototype.
 
-We can use the macros in [mlkem/cbmc.h](../mlkem/cbmc.h) to help, thus:
+We can use the macros in [mlkem/cbmc.h](../../mlkem/cbmc.h) to help, thus:
 
 ```
 void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
@@ -464,7 +464,7 @@ __contract__(
 
 `array_bound` is a macro that expands to a quantified expression that expresses that the elemtns of `a->coeffs` between
 index values `0` (inclusive) and `MLKEM_N` (exclusive) are in the range `0` through `(MLKEM_Q - 1)` (both
-inclusive). See the macro definition in [mlkem/cbmc.h](../mlkem/cbmc.h) for details.
+inclusive). See the macro definition in [mlkem/cbmc.h](../../mlkem/cbmc.h) for details.
 
 ### Interior contracts and loop invariants
 
@@ -515,7 +515,7 @@ and so on for the other two statements in the loop body.
 With those changes, CBMC completes the proof in about 10 seconds:
 
 ```
-cd cbmc/poly_tobytes
+cd proofs/cbmc/poly_tobytes
 make result
 cat logs/result.txt
 ```
@@ -528,7 +528,7 @@ VERIFICATION SUCCESSFUL
 We can also use the higher-level Python script to prove just that one function:
 
 ```
-cd cbmc
+cd proofs/cbmc
 MLKEM_K=3 ./run-cbmc-proofs.py --summarize -j$(nproc) -p poly_tobytes
 ```
 yields
