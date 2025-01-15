@@ -55,7 +55,7 @@ through suitable barriers and constant-time patterns.
 We use the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) to prove absence of various classes of
 undefined behaviour in C, including out of bounds memory accesses and integer overflows. The proofs cover
 all C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202) involved in running mlkem-native with its C backend.
-See [cbmc](cbmc) for details.
+See [proofs/cbmc](proofs/cbmc) for details.
 
 Experiments are underway to verify assembly using the [HOL-Light](https://hol-light.github.io/) theorem prover
 and the [s2n-bignum](https://github.com/awslabs/s2n-bignum) infrastructure (e.g. see

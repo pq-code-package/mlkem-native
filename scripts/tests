@@ -664,7 +664,7 @@ class Tests:
                     "--no-coverage",
                 ]
                 + self.make_j(),
-                cwd="cbmc",
+                cwd="proofs/cbmc",
                 env=os.environ.copy() | envvars,
             )
             p.communicate()

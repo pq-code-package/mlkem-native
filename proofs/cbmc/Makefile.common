@@ -153,7 +153,7 @@ PROOF_STUB = $(CBMC_ROOT)/stubs
 # selectively enable access to such symbols via each proof's Makefile.
 EXPORT_FILE_LOCAL_SYMBOLS =
 
-SRCDIR ?= $(abspath $(PROOF_ROOT)/..)
+SRCDIR ?= $(abspath $(PROOF_ROOT)/../../)
 LITANI ?= litani
 PROJECT_NAME = "mlkem-native"
 
