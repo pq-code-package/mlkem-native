@@ -132,7 +132,7 @@ void poly_ntt(poly *p)
 {
   int len, layer;
   int16_t *r;
-  POLY_BOUND_MSG(p, MLKEM_Q, "ref ntt input");
+  debug_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
   r = p->coeffs;
 
   for (len = 128, layer = 1; len >= 2; len >>= 1, layer++)
@@ -144,16 +144,16 @@ void poly_ntt(poly *p)
   }
 
   /* Check the stronger bound */
-  POLY_BOUND_MSG(p, NTT_BOUND, "ref ntt output");
+  debug_assert_abs_bound(p, MLKEM_N, NTT_BOUND);
 }
 #else  /* MLKEM_USE_NATIVE_NTT */
 
 MLKEM_NATIVE_INTERNAL_API
 void poly_ntt(poly *p)
 {
-  POLY_BOUND_MSG(p, MLKEM_Q, "native ntt input");
+  debug_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
   ntt_native(p);
-  POLY_BOUND_MSG(p, NTT_BOUND, "native ntt output");
+  debug_assert_abs_bound(p, MLKEM_N, NTT_BOUND);
 }
 #endif /* MLKEM_USE_NATIVE_NTT */
 
@@ -225,7 +225,7 @@ void poly_invntt_tomont(poly *p)
     invntt_layer(p->coeffs, len, layer);
   }
 
-  POLY_BOUND_MSG(p, INVNTT_BOUND, "ref intt output");
+  debug_assert_abs_bound(p, MLKEM_N, INVNTT_BOUND);
 }
 #else  /* MLKEM_USE_NATIVE_INTT */
 
@@ -233,7 +233,7 @@ MLKEM_NATIVE_INTERNAL_API
 void poly_invntt_tomont(poly *p)
 {
   intt_native(p);
-  POLY_BOUND_MSG(p, INVNTT_BOUND, "native intt output");
+  debug_assert_abs_bound(p, MLKEM_N, INVNTT_BOUND);
 }
 #endif /* MLKEM_USE_NATIVE_INTT */
 
@@ -242,8 +242,7 @@ void basemul_cached(int16_t r[2], const int16_t a[2], const int16_t b[2],
                     int16_t b_cached)
 {
   int32_t t0, t1;
-
-  BOUND(a, 2, 4096, "basemul input bound");
+  debug_assert_bound(a, 2, 0, UINT12_LIMIT);
 
   t0 = (int32_t)a[1] * b_cached;
   t0 += (int32_t)a[0] * b[0];
@@ -254,5 +253,5 @@ void basemul_cached(int16_t r[2], const int16_t a[2], const int16_t b[2],
   r[0] = montgomery_reduce(t0);
   r[1] = montgomery_reduce(t1);
 
-  BOUND(r, 2, 2 * MLKEM_Q, "basemul output bound");
+  debug_assert_abs_bound(r, 2, 2 * MLKEM_Q);
 }

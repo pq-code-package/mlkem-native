@@ -145,7 +145,7 @@ MLKEM_NATIVE_INTERNAL_API
 void poly_compress_dv(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DV], const poly *a)
 {
   unsigned i;
-  POLY_UBOUND(a, MLKEM_Q);
+  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
 #if (MLKEM_POLYCOMPRESSEDBYTES_DV == 128)
   for (i = 0; i < MLKEM_N / 8; i++)
@@ -250,7 +250,7 @@ void poly_decompress_dv(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DV])
 #error "MLKEM_POLYCOMPRESSEDBYTES_DV needs to be in {128, 160}"
 #endif
 
-  POLY_UBOUND(r, MLKEM_Q);
+  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 
 #if !defined(MLKEM_USE_NATIVE_POLY_TOBYTES)
@@ -258,7 +258,7 @@ MLKEM_NATIVE_INTERNAL_API
 void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
 {
   unsigned i;
-  POLY_UBOUND(a, MLKEM_Q);
+  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
 
   for (i = 0; i < MLKEM_N / 2; i++)
@@ -290,7 +290,7 @@ void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
 MLKEM_NATIVE_INTERNAL_API
 void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
 {
-  POLY_UBOUND(a, MLKEM_Q);
+  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
   poly_tobytes_native(r, a);
 }
 #endif /* MLKEM_USE_NATIVE_POLY_TOBYTES */
@@ -313,7 +313,7 @@ void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
   }
 
   /* Note that the coefficients are not canonical */
-  POLY_UBOUND(r, 4096);
+  debug_assert_bound(r, MLKEM_N, 0, UINT12_LIMIT);
 }
 #else  /* MLKEM_USE_NATIVE_POLY_FROMBYTES */
 MLKEM_NATIVE_INTERNAL_API
@@ -347,14 +347,14 @@ void poly_frommsg(poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
       r->coeffs[8 * i + j] = ct_sel_int16(HALF_Q, 0, msg[i] & mask);
     }
   }
-  POLY_BOUND_MSG(r, MLKEM_Q, "poly_frommsg output");
+  debug_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
 }
 
 MLKEM_NATIVE_INTERNAL_API
 void poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const poly *a)
 {
   unsigned i;
-  POLY_UBOUND(a, MLKEM_Q);
+  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(invariant(i >= 0 && i <= MLKEM_N / 8))
@@ -398,10 +398,10 @@ void poly_getnoise_eta1_4x(poly *r0, poly *r1, poly *r2, poly *r3,
   poly_cbd_eta1(r2, buf2);
   poly_cbd_eta1(r3, buf3);
 
-  POLY_BOUND_MSG(r0, MLKEM_ETA1 + 1, "poly_getnoise_eta1_4x output 0");
-  POLY_BOUND_MSG(r1, MLKEM_ETA1 + 1, "poly_getnoise_eta1_4x output 1");
-  POLY_BOUND_MSG(r2, MLKEM_ETA1 + 1, "poly_getnoise_eta1_4x output 2");
-  POLY_BOUND_MSG(r3, MLKEM_ETA1 + 1, "poly_getnoise_eta1_4x output 3");
+  debug_assert_abs_bound(r0, MLKEM_N, MLKEM_ETA1 + 1);
+  debug_assert_abs_bound(r1, MLKEM_N, MLKEM_ETA1 + 1);
+  debug_assert_abs_bound(r2, MLKEM_N, MLKEM_ETA1 + 1);
+  debug_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA1 + 1);
 }
 
 #if MLKEM_K == 2 || MLKEM_K == 4
@@ -418,7 +418,7 @@ void poly_getnoise_eta2(poly *r, const uint8_t seed[MLKEM_SYMBYTES],
 
   poly_cbd_eta2(r, buf);
 
-  POLY_BOUND_MSG(r, MLKEM_ETA1 + 1, "poly_getnoise_eta2 output");
+  debug_assert_abs_bound(r, MLKEM_N, MLKEM_ETA1 + 1);
 }
 #endif /* MLKEM_K == 2 || MLKEM_K == 4 */
 
@@ -451,10 +451,10 @@ void poly_getnoise_eta1122_4x(poly *r0, poly *r1, poly *r2, poly *r3,
   poly_cbd_eta2(r2, buf2[0]);
   poly_cbd_eta2(r3, buf2[1]);
 
-  POLY_BOUND_MSG(r0, MLKEM_ETA1 + 1, "poly_getnoise_eta1122_4x output 0");
-  POLY_BOUND_MSG(r1, MLKEM_ETA1 + 1, "poly_getnoise_eta1122_4x output 1");
-  POLY_BOUND_MSG(r2, MLKEM_ETA2 + 1, "poly_getnoise_eta1122_4x output 2");
-  POLY_BOUND_MSG(r3, MLKEM_ETA2 + 1, "poly_getnoise_eta1122_4x output 3");
+  debug_assert_abs_bound(r0, MLKEM_N, MLKEM_ETA1 + 1);
+  debug_assert_abs_bound(r1, MLKEM_N, MLKEM_ETA1 + 1);
+  debug_assert_abs_bound(r2, MLKEM_N, MLKEM_ETA2 + 1);
+  debug_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA2 + 1);
 }
 #endif /* MLKEM_K == 2 */
 
@@ -463,7 +463,7 @@ void poly_basemul_montgomery_cached(poly *r, const poly *a, const poly *b,
                                     const poly_mulcache *b_cache)
 {
   unsigned i;
-  POLY_BOUND(b_cache, 4096);
+  debug_assert_bound(a, MLKEM_N, 0, UINT12_LIMIT);
 
   for (i = 0; i < MLKEM_N / 4; i++)
   __loop__(
@@ -476,6 +476,8 @@ void poly_basemul_montgomery_cached(poly *r, const poly *a, const poly *b,
     basemul_cached(&r->coeffs[4 * i + 2], &a->coeffs[4 * i + 2],
                    &b->coeffs[4 * i + 2], b_cache->coeffs[2 * i + 1]);
   }
+
+  debug_assert_abs_bound(r, MLKEM_N, 2 * MLKEM_Q);
 }
 
 #if !defined(MLKEM_USE_NATIVE_POLY_TOMONT)
@@ -492,14 +494,14 @@ void poly_tomont(poly *r)
     r->coeffs[i] = fqmul(r->coeffs[i], f);
   }
 
-  POLY_BOUND(r, MLKEM_Q);
+  debug_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
 }
 #else  /* MLKEM_USE_NATIVE_POLY_TOMONT */
 MLKEM_NATIVE_INTERNAL_API
 void poly_tomont(poly *r)
 {
   poly_tomont_native(r);
-  POLY_BOUND(r, MLKEM_Q);
+  debug_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
 }
 #endif /* MLKEM_USE_NATIVE_POLY_TOMONT */
 
@@ -519,14 +521,14 @@ void poly_reduce(poly *r)
     r->coeffs[i] = scalar_signed_to_unsigned_q(t);
   }
 
-  POLY_UBOUND(r, MLKEM_Q);
+  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 #else  /* MLKEM_USE_NATIVE_POLY_REDUCE */
 MLKEM_NATIVE_INTERNAL_API
 void poly_reduce(poly *r)
 {
   poly_reduce_native(r);
-  POLY_UBOUND(r, MLKEM_Q);
+  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 #endif /* MLKEM_USE_NATIVE_POLY_REDUCE */
 
@@ -569,14 +571,14 @@ void poly_mulcache_compute(poly_mulcache *x, const poly *a)
     x->coeffs[2 * i + 0] = fqmul(a->coeffs[4 * i + 1], zetas[64 + i]);
     x->coeffs[2 * i + 1] = fqmul(a->coeffs[4 * i + 3], -zetas[64 + i]);
   }
-  POLY_BOUND(x, MLKEM_Q);
+  debug_assert_abs_bound(x, MLKEM_N / 2, MLKEM_Q);
 }
 #else  /* MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE */
 MLKEM_NATIVE_INTERNAL_API
 void poly_mulcache_compute(poly_mulcache *x, const poly *a)
 {
   poly_mulcache_compute_native(x, a);
-  /* Omitting POLY_BOUND(x, MLKEM_Q) since native implementations may
+  /* Omitting bounds assertion since native implementations may
    * decide not to use a mulcache. Note that the C backend implementation
    * of poly_basemul_montgomery_cached() does still include the check. */
 }
