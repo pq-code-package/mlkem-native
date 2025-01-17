@@ -539,8 +539,12 @@ def gen_avx2_fwd_ntt_zeta_file(dry_run=False):
     )
 
 
-def get_source_files():
+def get_c_source_files():
     return get_files("mlkem/*.c")
+
+
+def get_asm_source_files():
+    return get_files("mlkem/*.S")
 
 
 def get_header_files():
@@ -561,7 +565,7 @@ def get_files(pattern):
 
 
 def get_defines():
-    for c in get_source_files() + get_header_files():
+    for c in get_c_source_files() + get_header_files():
         with open(c, "r") as f:
             for l in f.read().split("\n"):
                 if l.lstrip().startswith("#define "):
@@ -635,11 +639,11 @@ def gen_monolithic_source_file(dry_run=False):
         yield " * Monolithic compilation unit bundling all compilation units within mlkem-native"
         yield " */"
         yield ""
-        for c in filter(lambda c: not fips202(c), get_source_files()):
+        for c in filter(lambda c: not fips202(c), get_c_source_files()):
             yield f'#include "{c}"'
         yield ""
         yield "#if !defined(MLKEM_NATIVE_MONOBUILD_NO_FIPS202_SOURCES)"
-        for c in filter(fips202, get_source_files()):
+        for c in filter(fips202, get_c_source_files()):
             yield f'#include "{c}"'
         yield "#endif /* MLKEM_NATIVE_MONOBUILD_NO_FIPS202_SOURCES */"
         yield ""
@@ -656,6 +660,53 @@ def gen_monolithic_source_file(dry_run=False):
         dry_run=dry_run,
     )
 
+def check_asm_register_aliases_for_file(filename):
+    """Checks that `filename` has no mismatching or dangling register aliases"""
+
+    def get_alias_def(l):
+        s = list(filter(lambda s: s != "", l.strip().split(" ")))
+        if len(s) < 3 or s[1] != ".req":
+            return None
+        return s[0]
+
+    def get_alias_undef(l):
+        if l.strip().startswith(".unreq") is False:
+            return None
+        return list(filter(lambda s: s != "", l.strip().split(" ")))[1]
+
+    with open(filename, "r") as f:
+        content = f.read()
+    aliases = {}
+    for i, l in enumerate(content.split('\n')):
+        alias_def = get_alias_def(l)
+        alias_undef = get_alias_undef(l)
+        if alias_def is not None:
+            if alias_def in aliases.keys():
+                raise Exception(f"Invalid assembly file {filename}: Duplicate .req directive for {alias_def} at line {i}")
+            aliases[alias_def] = i
+        elif alias_undef is not None:
+            if alias_undef not in aliases.keys():
+                raise Exception(f"Invalid assembly file {filename}: .unreq without prior .req for {alias_undef} at line {i}")
+            del aliases[alias_undef]
+
+    if len(aliases) > 0:
+        fixup_suggestion = ["/****************** REGISTER DEALLOCATIONS *******************/"]
+        dangling = list(aliases.items())
+        # Sort by line number of .req
+        dangling.sort(key=lambda s: s[1])
+
+        for a, _ in dangling:
+            fixup_suggestion.append(f"    .unreq {a}")
+        fixup_suggestion.append("")
+        fixup_suggestion = '\n'.join(fixup_suggestion)
+
+        raise Exception(f"Invalid assembly file {filename}: Dangling .req directives {aliases}.\n\nTry adding this?\n\n{fixup_suggestion}")
+
+def check_asm_register_aliases():
+    for asm_file in get_asm_source_files():
+        check_asm_register_aliases_for_file(asm_file)
+
+
 
 def _main():
     parser = argparse.ArgumentParser(
@@ -664,6 +715,9 @@ def _main():
     parser.add_argument("--dry-run", default=False, action="store_true")
 
     args = parser.parse_args()
+
+    check_asm_register_aliases()
+
     gen_c_zeta_file(args.dry_run)
     gen_aarch64_fwd_ntt_zeta_file(args.dry_run)
     gen_aarch64_rej_uniform_table(args.dry_run)

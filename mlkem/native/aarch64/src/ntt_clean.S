@@ -280,4 +280,47 @@ layer3456_start:
         pop_stack
         ret
 
+/****************** REGISTER DEALLOCATIONS *******************/
+    .unreq in
+    .unreq r01234_ptr
+    .unreq r56_ptr
+    .unreq inp
+    .unreq count
+    .unreq xtmp
+    .unreq data0
+    .unreq data1
+    .unreq data2
+    .unreq data3
+    .unreq data4
+    .unreq data5
+    .unreq data6
+    .unreq data7
+    .unreq q_data0
+    .unreq q_data1
+    .unreq q_data2
+    .unreq q_data3
+    .unreq q_data4
+    .unreq q_data5
+    .unreq q_data6
+    .unreq q_data7
+    .unreq root0
+    .unreq root1
+    .unreq root2
+    .unreq root0_tw
+    .unreq root1_tw
+    .unreq root2_tw
+    .unreq q_root0
+    .unreq q_root1
+    .unreq q_root2
+    .unreq q_root0_tw
+    .unreq q_root1_tw
+    .unreq q_root2_tw
+    .unreq consts
+    .unreq q_consts
+    .unreq tmp
+    .unreq t0
+    .unreq t1
+    .unreq t2
+    .unreq t3
+
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN */
