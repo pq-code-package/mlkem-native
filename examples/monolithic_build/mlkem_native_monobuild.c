@@ -104,16 +104,6 @@
 #endif
 
 /* mlkem/cbmc.h */
-#if defined(__contract__)
-#undef __contract__
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(__loop__)
-#undef __loop__
-#endif
-
-/* mlkem/cbmc.h */
 #if defined(__loop__)
 #undef __loop__
 #endif
@@ -141,11 +131,6 @@
 /* mlkem/cbmc.h */
 #if defined(assume)
 #undef assume
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(cassert)
-#undef cassert
 #endif
 
 /* mlkem/cbmc.h */
@@ -229,18 +214,8 @@
 #endif
 
 /* mlkem/common.h */
-#if defined(FIPS202_ASM_NAMESPACE)
-#undef FIPS202_ASM_NAMESPACE
-#endif
-
-/* mlkem/common.h */
 #if defined(FIPS202_NAMESPACE)
 #undef FIPS202_NAMESPACE
-#endif
-
-/* mlkem/common.h */
-#if defined(MLKEM_ASM_NAMESPACE)
-#undef MLKEM_ASM_NAMESPACE
 #endif
 
 /* mlkem/common.h */
@@ -266,11 +241,6 @@
 /* mlkem/common.h */
 #if defined(MLKEM_NATIVE_FIPS202_BACKEND_NAME)
 #undef MLKEM_NATIVE_FIPS202_BACKEND_NAME
-#endif
-
-/* mlkem/common.h */
-#if defined(MLKEM_NATIVE_INTERNAL_API)
-#undef MLKEM_NATIVE_INTERNAL_API
 #endif
 
 /* mlkem/common.h */
@@ -306,16 +276,6 @@
 /* mlkem/config.h */
 #if defined(FIPS202_NAMESPACE_PREFIX)
 #undef FIPS202_NAMESPACE_PREFIX
-#endif
-
-/* mlkem/config.h */
-#if defined(MLKEM_DEFAULT_NAMESPACE_PREFIX)
-#undef MLKEM_DEFAULT_NAMESPACE_PREFIX
-#endif
-
-/* mlkem/config.h */
-#if defined(MLKEM_DEFAULT_NAMESPACE_PREFIX)
-#undef MLKEM_DEFAULT_NAMESPACE_PREFIX
 #endif
 
 /* mlkem/config.h */
@@ -369,26 +329,6 @@
 #endif
 
 /* mlkem/debug/debug.h */
-#if defined(debug_assert)
-#undef debug_assert
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(debug_assert)
-#undef debug_assert
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(debug_assert_abs_bound)
-#undef debug_assert_abs_bound
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(debug_assert_abs_bound)
-#undef debug_assert_abs_bound
-#endif
-
-/* mlkem/debug/debug.h */
 #if defined(debug_assert_abs_bound)
 #undef debug_assert_abs_bound
 #endif
@@ -399,38 +339,8 @@
 #endif
 
 /* mlkem/debug/debug.h */
-#if defined(debug_assert_abs_bound_2d)
-#undef debug_assert_abs_bound_2d
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(debug_assert_abs_bound_2d)
-#undef debug_assert_abs_bound_2d
-#endif
-
-/* mlkem/debug/debug.h */
 #if defined(debug_assert_bound)
 #undef debug_assert_bound
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(debug_assert_bound)
-#undef debug_assert_bound
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(debug_assert_bound)
-#undef debug_assert_bound
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(debug_assert_bound_2d)
-#undef debug_assert_bound_2d
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(debug_assert_bound_2d)
-#undef debug_assert_bound_2d
 #endif
 
 /* mlkem/debug/debug.h */
@@ -576,16 +486,6 @@
 /* mlkem/mlkem_native.h */
 #if defined(BUILD_INFO_CONCAT_)
 #undef BUILD_INFO_CONCAT_
-#endif
-
-/* mlkem/mlkem_native.h */
-#if defined(BUILD_INFO_LVL)
-#undef BUILD_INFO_LVL
-#endif
-
-/* mlkem/mlkem_native.h */
-#if defined(BUILD_INFO_LVL)
-#undef BUILD_INFO_LVL
 #endif
 
 /* mlkem/mlkem_native.h */
@@ -1464,16 +1364,6 @@
 #endif
 
 /* mlkem/params.h */
-#if defined(MLKEM_ETA1)
-#undef MLKEM_ETA1
-#endif
-
-/* mlkem/params.h */
-#if defined(MLKEM_ETA1)
-#undef MLKEM_ETA1
-#endif
-
-/* mlkem/params.h */
 #if defined(MLKEM_ETA2)
 #undef MLKEM_ETA2
 #endif
@@ -1519,16 +1409,6 @@
 #endif
 
 /* mlkem/params.h */
-#if defined(MLKEM_LVL)
-#undef MLKEM_LVL
-#endif
-
-/* mlkem/params.h */
-#if defined(MLKEM_LVL)
-#undef MLKEM_LVL
-#endif
-
-/* mlkem/params.h */
 #if defined(MLKEM_N)
 #undef MLKEM_N
 #endif
@@ -1544,26 +1424,6 @@
 #endif
 
 /* mlkem/params.h */
-#if defined(MLKEM_POLYCOMPRESSEDBYTES_DU)
-#undef MLKEM_POLYCOMPRESSEDBYTES_DU
-#endif
-
-/* mlkem/params.h */
-#if defined(MLKEM_POLYCOMPRESSEDBYTES_DU)
-#undef MLKEM_POLYCOMPRESSEDBYTES_DU
-#endif
-
-/* mlkem/params.h */
-#if defined(MLKEM_POLYCOMPRESSEDBYTES_DV)
-#undef MLKEM_POLYCOMPRESSEDBYTES_DV
-#endif
-
-/* mlkem/params.h */
-#if defined(MLKEM_POLYCOMPRESSEDBYTES_DV)
-#undef MLKEM_POLYCOMPRESSEDBYTES_DV
-#endif
-
-/* mlkem/params.h */
 #if defined(MLKEM_POLYCOMPRESSEDBYTES_DV)
 #undef MLKEM_POLYCOMPRESSEDBYTES_DV
 #endif
@@ -1571,16 +1431,6 @@
 /* mlkem/params.h */
 #if defined(MLKEM_POLYVECBYTES)
 #undef MLKEM_POLYVECBYTES
-#endif
-
-/* mlkem/params.h */
-#if defined(MLKEM_POLYVECCOMPRESSEDBYTES_DU)
-#undef MLKEM_POLYVECCOMPRESSEDBYTES_DU
-#endif
-
-/* mlkem/params.h */
-#if defined(MLKEM_POLYVECCOMPRESSEDBYTES_DU)
-#undef MLKEM_POLYVECCOMPRESSEDBYTES_DU
 #endif
 
 /* mlkem/params.h */
@@ -1994,26 +1844,6 @@
 #endif
 
 /* mlkem/sys.h */
-#if defined(ALIGN)
-#undef ALIGN
-#endif
-
-/* mlkem/sys.h */
-#if defined(ALWAYS_INLINE)
-#undef ALWAYS_INLINE
-#endif
-
-/* mlkem/sys.h */
-#if defined(ALWAYS_INLINE)
-#undef ALWAYS_INLINE
-#endif
-
-/* mlkem/sys.h */
-#if defined(ALWAYS_INLINE)
-#undef ALWAYS_INLINE
-#endif
-
-/* mlkem/sys.h */
 #if defined(ALWAYS_INLINE)
 #undef ALWAYS_INLINE
 #endif
@@ -2029,33 +1859,8 @@
 #endif
 
 /* mlkem/sys.h */
-#if defined(INLINE)
-#undef INLINE
-#endif
-
-/* mlkem/sys.h */
-#if defined(INLINE)
-#undef INLINE
-#endif
-
-/* mlkem/sys.h */
-#if defined(INLINE)
-#undef INLINE
-#endif
-
-/* mlkem/sys.h */
 #if defined(MLKEM_NATIVE_SYS_H)
 #undef MLKEM_NATIVE_SYS_H
-#endif
-
-/* mlkem/sys.h */
-#if defined(RESTRICT)
-#undef RESTRICT
-#endif
-
-/* mlkem/sys.h */
-#if defined(RESTRICT)
-#undef RESTRICT
 #endif
 
 /* mlkem/sys.h */
@@ -2091,11 +1896,6 @@
 /* mlkem/sys.h */
 #if defined(SYS_X86_64_AVX2)
 #undef SYS_X86_64_AVX2
-#endif
-
-/* mlkem/sys.h */
-#if defined(asm)
-#undef asm
 #endif
 
 /* mlkem/sys.h */
@@ -2371,11 +2171,6 @@
 #endif
 
 /* mlkem/fips202/keccakf1600.h */
-#if defined(KeccakF1600_StatePermute)
-#undef KeccakF1600_StatePermute
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
 #if defined(KeccakF1600_StateXORBytes)
 #undef KeccakF1600_StateXORBytes
 #endif
@@ -2456,18 +2251,8 @@
 #endif
 
 /* mlkem/fips202/native/aarch64/src/default_impl.h */
-#if defined(MLKEM_USE_FIPS202_X1_NATIVE)
-#undef MLKEM_USE_FIPS202_X1_NATIVE
-#endif
-
-/* mlkem/fips202/native/aarch64/src/default_impl.h */
 #if defined(MLKEM_USE_FIPS202_X2_NATIVE)
 #undef MLKEM_USE_FIPS202_X2_NATIVE
-#endif
-
-/* mlkem/fips202/native/aarch64/src/default_impl.h */
-#if defined(MLKEM_USE_FIPS202_X4_NATIVE)
-#undef MLKEM_USE_FIPS202_X4_NATIVE
 #endif
 
 /* mlkem/fips202/native/aarch64/src/default_impl.h */
