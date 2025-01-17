@@ -16,13 +16,150 @@
 #include "symmetric.h"
 #include "verify.h"
 
+#if MLKEM_K == 2 || MLKEM_K == 3
 MLKEM_NATIVE_INTERNAL_API
-void poly_compress_du(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DU], const poly *a)
+void poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const poly *a)
+{
+  unsigned i;
+  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+
+  for (i = 0; i < MLKEM_N / 8; i++)
+  __loop__(invariant(i <= MLKEM_N / 8))
+  {
+    unsigned j;
+    uint8_t t[8] = {0};
+    for (j = 0; j < 8; j++)
+    __loop__(
+      invariant(i <= MLKEM_N / 8 && j <= 8)
+      invariant(array_bound(t, 0, j, 0, 16)))
+    {
+      t[j] = scalar_compress_d4(a->coeffs[8 * i + j]);
+    }
+
+    r[i * 4] = t[0] | (t[1] << 4);
+    r[i * 4 + 1] = t[2] | (t[3] << 4);
+    r[i * 4 + 2] = t[4] | (t[5] << 4);
+    r[i * 4 + 3] = t[6] | (t[7] << 4);
+  }
+}
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const poly *a)
+{
+  unsigned j;
+  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  for (j = 0; j < MLKEM_N / 4; j++)
+  __loop__(invariant(j <= MLKEM_N / 4))
+  {
+    unsigned k;
+    uint16_t t[4];
+    for (k = 0; k < 4; k++)
+    __loop__(
+      invariant(k <= 4)
+      invariant(forall(r, 0, k, t[r] < (1u << 10))))
+    {
+      t[k] = scalar_compress_d10(a->coeffs[4 * j + k]);
+    }
+
+    /*
+     * Make all implicit truncation explicit. No data is being
+     * truncated for the LHS's since each t[i] is 10-bit in size.
+     */
+    r[5 * j + 0] = (t[0] >> 0) & 0xFF;
+    r[5 * j + 1] = (t[0] >> 8) | ((t[1] << 2) & 0xFF);
+    r[5 * j + 2] = (t[1] >> 6) | ((t[2] << 4) & 0xFF);
+    r[5 * j + 3] = (t[2] >> 4) | ((t[3] << 6) & 0xFF);
+    r[5 * j + 4] = (t[3] >> 2);
+  }
+}
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_decompress_d4(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
+{
+  unsigned i;
+  for (i = 0; i < MLKEM_N / 2; i++)
+  __loop__(
+    invariant(i <= MLKEM_N / 2)
+    invariant(array_bound(r->coeffs, 0, 2 * i, 0, MLKEM_Q)))
+  {
+    r->coeffs[2 * i + 0] = scalar_decompress_d4((a[i] >> 0) & 0xF);
+    r->coeffs[2 * i + 1] = scalar_decompress_d4((a[i] >> 4) & 0xF);
+  }
+
+  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+}
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_decompress_d10(poly *r,
+                         const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
+{
+  unsigned j;
+  for (j = 0; j < MLKEM_N / 4; j++)
+  __loop__(
+    invariant(j <= MLKEM_N / 4)
+    invariant(array_bound(r->coeffs, 0, 4 * j, 0, MLKEM_Q)))
+  {
+    unsigned k;
+    uint16_t t[4];
+    uint8_t const *base = &a[5 * j];
+
+    t[0] = 0x3FF & ((base[0] >> 0) | ((uint16_t)base[1] << 8));
+    t[1] = 0x3FF & ((base[1] >> 2) | ((uint16_t)base[2] << 6));
+    t[2] = 0x3FF & ((base[2] >> 4) | ((uint16_t)base[3] << 4));
+    t[3] = 0x3FF & ((base[3] >> 6) | ((uint16_t)base[4] << 2));
+
+    for (k = 0; k < 4; k++)
+    __loop__(
+      invariant(k <= 4)
+      invariant(array_bound(r->coeffs, 0, 4 * j + k, 0, MLKEM_Q)))
+    {
+      r->coeffs[4 * j + k] = scalar_decompress_d10(t[k]);
+    }
+  }
+
+  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+}
+#endif /* MLKEM_K == 2 || MLKEM_K == 2 */
+
+#if MLKEM_K == 4
+MLKEM_NATIVE_INTERNAL_API
+void poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const poly *a)
+{
+  unsigned i;
+  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+
+  for (i = 0; i < MLKEM_N / 8; i++)
+  __loop__(invariant(i <= MLKEM_N / 8))
+  {
+    unsigned j;
+    uint8_t t[8] = {0};
+    for (j = 0; j < 8; j++)
+    __loop__(
+      invariant(i <= MLKEM_N / 8 && j <= 8)
+      invariant(array_bound(t, 0, j, 0, 32)))
+    {
+      t[j] = scalar_compress_d5(a->coeffs[8 * i + j]);
+    }
+
+    /*
+     * Explicitly truncate to avoid warning about
+     * implicit truncation in CBMC, and use array indexing into
+     * r rather than pointer-arithmetic to simplify verification
+     */
+    r[i * 5] = 0xFF & ((t[0] >> 0) | (t[1] << 5));
+    r[i * 5 + 1] = 0xFF & ((t[1] >> 3) | (t[2] << 2) | (t[3] << 7));
+    r[i * 5 + 2] = 0xFF & ((t[3] >> 1) | (t[4] << 4));
+    r[i * 5 + 3] = 0xFF & ((t[4] >> 4) | (t[5] << 1) | (t[6] << 6));
+    r[i * 5 + 4] = 0xFF & ((t[6] >> 2) | (t[7] << 3));
+  }
+}
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const poly *a)
 {
   unsigned j;
   debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
-#if (MLKEM_POLYCOMPRESSEDBYTES_DU == 352)
   for (j = 0; j < MLKEM_N / 8; j++)
   __loop__(invariant(j <= MLKEM_N / 8))
   {
@@ -52,168 +189,12 @@ void poly_compress_du(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DU], const poly *a)
     r[11 * j + 9] = (t[6] >> 6) | ((t[7] << 5) & 0xFF);
     r[11 * j + 10] = (t[7] >> 3);
   }
-
-#elif (MLKEM_POLYCOMPRESSEDBYTES_DU == 320)
-  for (j = 0; j < MLKEM_N / 4; j++)
-  __loop__(invariant(j <= MLKEM_N / 4))
-  {
-    unsigned k;
-    uint16_t t[4];
-    for (k = 0; k < 4; k++)
-    __loop__(
-      invariant(k <= 4)
-      invariant(forall(r, 0, k, t[r] < (1u << 10))))
-    {
-      t[k] = scalar_compress_d10(a->coeffs[4 * j + k]);
-    }
-
-    /*
-     * Make all implicit truncation explicit. No data is being
-     * truncated for the LHS's since each t[i] is 10-bit in size.
-     */
-    r[5 * j + 0] = (t[0] >> 0) & 0xFF;
-    r[5 * j + 1] = (t[0] >> 8) | ((t[1] << 2) & 0xFF);
-    r[5 * j + 2] = (t[1] >> 6) | ((t[2] << 4) & 0xFF);
-    r[5 * j + 3] = (t[2] >> 4) | ((t[3] << 6) & 0xFF);
-    r[5 * j + 4] = (t[3] >> 2);
-  }
-#else
-#error "MLKEM_POLYCOMPRESSEDBYTES_DU needs to be in {320,352}"
-#endif
-}
-
-
-MLKEM_NATIVE_INTERNAL_API
-void poly_decompress_du(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DU])
-{
-  unsigned j;
-#if (MLKEM_POLYCOMPRESSEDBYTES_DU == 352)
-  for (j = 0; j < MLKEM_N / 8; j++)
-  __loop__(
-    invariant(j <= MLKEM_N / 8)
-    invariant(array_bound(r->coeffs, 0, 8 * j, 0, MLKEM_Q)))
-  {
-    unsigned k;
-    uint16_t t[8];
-    uint8_t const *base = &a[11 * j];
-    t[0] = 0x7FF & ((base[0] >> 0) | ((uint16_t)base[1] << 8));
-    t[1] = 0x7FF & ((base[1] >> 3) | ((uint16_t)base[2] << 5));
-    t[2] = 0x7FF & ((base[2] >> 6) | ((uint16_t)base[3] << 2) |
-                    ((uint16_t)base[4] << 10));
-    t[3] = 0x7FF & ((base[4] >> 1) | ((uint16_t)base[5] << 7));
-    t[4] = 0x7FF & ((base[5] >> 4) | ((uint16_t)base[6] << 4));
-    t[5] = 0x7FF & ((base[6] >> 7) | ((uint16_t)base[7] << 1) |
-                    ((uint16_t)base[8] << 9));
-    t[6] = 0x7FF & ((base[8] >> 2) | ((uint16_t)base[9] << 6));
-    t[7] = 0x7FF & ((base[9] >> 5) | ((uint16_t)base[10] << 3));
-
-    for (k = 0; k < 8; k++)
-    __loop__(
-      invariant(k <= 8)
-      invariant(array_bound(r->coeffs, 0, 8 * j + k, 0, MLKEM_Q)))
-    {
-      r->coeffs[8 * j + k] = scalar_decompress_d11(t[k]);
-    }
-  }
-#elif (MLKEM_POLYCOMPRESSEDBYTES_DU == 320)
-  for (j = 0; j < MLKEM_N / 4; j++)
-  __loop__(
-    invariant(j <= MLKEM_N / 4)
-    invariant(array_bound(r->coeffs, 0, 4 * j, 0, MLKEM_Q)))
-  {
-    unsigned k;
-    uint16_t t[4];
-    uint8_t const *base = &a[5 * j];
-
-    t[0] = 0x3FF & ((base[0] >> 0) | ((uint16_t)base[1] << 8));
-    t[1] = 0x3FF & ((base[1] >> 2) | ((uint16_t)base[2] << 6));
-    t[2] = 0x3FF & ((base[2] >> 4) | ((uint16_t)base[3] << 4));
-    t[3] = 0x3FF & ((base[3] >> 6) | ((uint16_t)base[4] << 2));
-
-    for (k = 0; k < 4; k++)
-    __loop__(
-      invariant(k <= 4)
-      invariant(array_bound(r->coeffs, 0, 4 * j + k, 0, MLKEM_Q)))
-    {
-      r->coeffs[4 * j + k] = scalar_decompress_d10(t[k]);
-    }
-  }
-#else
-#error "MLKEM_POLYCOMPRESSEDBYTES_DU needs to be in {320,352}"
-#endif
-
-  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 
 MLKEM_NATIVE_INTERNAL_API
-void poly_compress_dv(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DV], const poly *a)
+void poly_decompress_d5(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
 {
   unsigned i;
-  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
-
-#if (MLKEM_POLYCOMPRESSEDBYTES_DV == 128)
-  for (i = 0; i < MLKEM_N / 8; i++)
-  __loop__(invariant(i <= MLKEM_N / 8))
-  {
-    unsigned j;
-    uint8_t t[8] = {0};
-    for (j = 0; j < 8; j++)
-    __loop__(
-      invariant(i <= MLKEM_N / 8 && j <= 8)
-      invariant(array_bound(t, 0, j, 0, 16)))
-    {
-      t[j] = scalar_compress_d4(a->coeffs[8 * i + j]);
-    }
-
-    r[i * 4] = t[0] | (t[1] << 4);
-    r[i * 4 + 1] = t[2] | (t[3] << 4);
-    r[i * 4 + 2] = t[4] | (t[5] << 4);
-    r[i * 4 + 3] = t[6] | (t[7] << 4);
-  }
-#elif (MLKEM_POLYCOMPRESSEDBYTES_DV == 160)
-  for (i = 0; i < MLKEM_N / 8; i++)
-  __loop__(invariant(i <= MLKEM_N / 8))
-  {
-    unsigned j;
-    uint8_t t[8] = {0};
-    for (j = 0; j < 8; j++)
-    __loop__(
-      invariant(i <= MLKEM_N / 8 && j <= 8)
-      invariant(array_bound(t, 0, j, 0, 32)))
-    {
-      t[j] = scalar_compress_d5(a->coeffs[8 * i + j]);
-    }
-
-    /*
-     * Explicitly truncate to avoid warning about
-     * implicit truncation in CBMC, and use array indexing into
-     * r rather than pointer-arithmetic to simplify verification
-     */
-    r[i * 5] = 0xFF & ((t[0] >> 0) | (t[1] << 5));
-    r[i * 5 + 1] = 0xFF & ((t[1] >> 3) | (t[2] << 2) | (t[3] << 7));
-    r[i * 5 + 2] = 0xFF & ((t[3] >> 1) | (t[4] << 4));
-    r[i * 5 + 3] = 0xFF & ((t[4] >> 4) | (t[5] << 1) | (t[6] << 6));
-    r[i * 5 + 4] = 0xFF & ((t[6] >> 2) | (t[7] << 3));
-  }
-#else
-#error "MLKEM_POLYCOMPRESSEDBYTES_DV needs to be in {128, 160}"
-#endif
-}
-
-MLKEM_NATIVE_INTERNAL_API
-void poly_decompress_dv(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DV])
-{
-  unsigned i;
-#if (MLKEM_POLYCOMPRESSEDBYTES_DV == 128)
-  for (i = 0; i < MLKEM_N / 2; i++)
-  __loop__(
-    invariant(i <= MLKEM_N / 2)
-    invariant(array_bound(r->coeffs, 0, 2 * i, 0, MLKEM_Q)))
-  {
-    r->coeffs[2 * i + 0] = scalar_decompress_d4((a[i] >> 0) & 0xF);
-    r->coeffs[2 * i + 1] = scalar_decompress_d4((a[i] >> 4) & 0xF);
-  }
-#elif (MLKEM_POLYCOMPRESSEDBYTES_DV == 160)
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(
     invariant(i <= MLKEM_N / 8)
@@ -250,12 +231,46 @@ void poly_decompress_dv(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DV])
       r->coeffs[8 * i + j] = scalar_decompress_d5(t[j]);
     }
   }
-#else
-#error "MLKEM_POLYCOMPRESSEDBYTES_DV needs to be in {128, 160}"
-#endif
 
   debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_decompress_d11(poly *r,
+                         const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
+{
+  unsigned j;
+  for (j = 0; j < MLKEM_N / 8; j++)
+  __loop__(
+    invariant(j <= MLKEM_N / 8)
+    invariant(array_bound(r->coeffs, 0, 8 * j, 0, MLKEM_Q)))
+  {
+    unsigned k;
+    uint16_t t[8];
+    uint8_t const *base = &a[11 * j];
+    t[0] = 0x7FF & ((base[0] >> 0) | ((uint16_t)base[1] << 8));
+    t[1] = 0x7FF & ((base[1] >> 3) | ((uint16_t)base[2] << 5));
+    t[2] = 0x7FF & ((base[2] >> 6) | ((uint16_t)base[3] << 2) |
+                    ((uint16_t)base[4] << 10));
+    t[3] = 0x7FF & ((base[4] >> 1) | ((uint16_t)base[5] << 7));
+    t[4] = 0x7FF & ((base[5] >> 4) | ((uint16_t)base[6] << 4));
+    t[5] = 0x7FF & ((base[6] >> 7) | ((uint16_t)base[7] << 1) |
+                    ((uint16_t)base[8] << 9));
+    t[6] = 0x7FF & ((base[8] >> 2) | ((uint16_t)base[9] << 6));
+    t[7] = 0x7FF & ((base[9] >> 5) | ((uint16_t)base[10] << 3));
+
+    for (k = 0; k < 8; k++)
+    __loop__(
+      invariant(k <= 8)
+      invariant(array_bound(r->coeffs, 0, 8 * j + k, 0, MLKEM_Q)))
+    {
+      r->coeffs[8 * j + k] = scalar_decompress_d11(t[k]);
+    }
+  }
+
+  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+}
+#endif /* MLKEM_K == 4 */
 
 #if !defined(MLKEM_USE_NATIVE_POLY_TOBYTES)
 MLKEM_NATIVE_INTERNAL_API

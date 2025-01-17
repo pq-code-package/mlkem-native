@@ -1359,6 +1359,16 @@
 #endif
 
 /* mlkem/params.h */
+#if defined(MLKEM_DU)
+#undef MLKEM_DU
+#endif
+
+/* mlkem/params.h */
+#if defined(MLKEM_DV)
+#undef MLKEM_DV
+#endif
+
+/* mlkem/params.h */
 #if defined(MLKEM_ETA1)
 #undef MLKEM_ETA1
 #endif
@@ -1416,6 +1426,26 @@
 /* mlkem/params.h */
 #if defined(MLKEM_POLYBYTES)
 #undef MLKEM_POLYBYTES
+#endif
+
+/* mlkem/params.h */
+#if defined(MLKEM_POLYCOMPRESSEDBYTES_D10)
+#undef MLKEM_POLYCOMPRESSEDBYTES_D10
+#endif
+
+/* mlkem/params.h */
+#if defined(MLKEM_POLYCOMPRESSEDBYTES_D11)
+#undef MLKEM_POLYCOMPRESSEDBYTES_D11
+#endif
+
+/* mlkem/params.h */
+#if defined(MLKEM_POLYCOMPRESSEDBYTES_D4)
+#undef MLKEM_POLYCOMPRESSEDBYTES_D4
+#endif
+
+/* mlkem/params.h */
+#if defined(MLKEM_POLYCOMPRESSEDBYTES_D5)
+#undef MLKEM_POLYCOMPRESSEDBYTES_D5
 #endif
 
 /* mlkem/params.h */
@@ -1494,6 +1524,26 @@
 #endif
 
 /* mlkem/poly.h */
+#if defined(poly_compress_d10)
+#undef poly_compress_d10
+#endif
+
+/* mlkem/poly.h */
+#if defined(poly_compress_d11)
+#undef poly_compress_d11
+#endif
+
+/* mlkem/poly.h */
+#if defined(poly_compress_d4)
+#undef poly_compress_d4
+#endif
+
+/* mlkem/poly.h */
+#if defined(poly_compress_d5)
+#undef poly_compress_d5
+#endif
+
+/* mlkem/poly.h */
 #if defined(poly_compress_du)
 #undef poly_compress_du
 #endif
@@ -1501,6 +1551,26 @@
 /* mlkem/poly.h */
 #if defined(poly_compress_dv)
 #undef poly_compress_dv
+#endif
+
+/* mlkem/poly.h */
+#if defined(poly_decompress_d10)
+#undef poly_decompress_d10
+#endif
+
+/* mlkem/poly.h */
+#if defined(poly_decompress_d11)
+#undef poly_decompress_d11
+#endif
+
+/* mlkem/poly.h */
+#if defined(poly_decompress_d4)
+#undef poly_decompress_d4
+#endif
+
+/* mlkem/poly.h */
+#if defined(poly_decompress_d5)
+#undef poly_decompress_d5
 #endif
 
 /* mlkem/poly.h */

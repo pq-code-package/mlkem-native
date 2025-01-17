@@ -321,98 +321,272 @@ __contract__(
   return (uint16_t)c;
 }
 
-#define poly_compress_du MLKEM_NAMESPACE(poly_compress_du)
+#if MLKEM_K == 2 || MLKEM_K == 3
+#define poly_compress_d4 MLKEM_NAMESPACE(poly_compress_d4)
 /*************************************************
- * Name:        poly_compress_du
+ * Name:        poly_compress_d4
  *
- * Description: Compression (du bits) and subsequent serialization of a
- *polynomial
+ * Description: Compression (4 bits) and subsequent serialization of a
+ *              polynomial
  *
  * Arguments:   - uint8_t *r: pointer to output byte array
- *                            (of length MLKEM_POLYCOMPRESSEDBYTES)
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_D4 bytes)
  *              - const poly *a: pointer to input polynomial
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_compress_du(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DU], const poly *a)
+void poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const poly *a);
+
+#define poly_compress_d10 MLKEM_NAMESPACE(poly_compress_d10)
+/*************************************************
+ * Name:        poly_compress_d10
+ *
+ * Description: Compression (10 bits) and subsequent serialization of a
+ *              polynomial
+ *
+ * Arguments:   - uint8_t *r: pointer to output byte array
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_D10 bytes)
+ *              - const poly *a: pointer to input polynomial
+ *                  Coefficients must be unsigned canonical,
+ *                  i.e. in [0,1,..,MLKEM_Q-1].
+ **************************************************/
+MLKEM_NATIVE_INTERNAL_API
+void poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const poly *a);
+
+#define poly_decompress_d4 MLKEM_NAMESPACE(poly_decompress_d4)
+/*************************************************
+ * Name:        poly_decompress_d4
+ *
+ * Description: De-serialization and subsequent decompression (dv bits) of a
+ *              polynomial; approximate inverse of poly_compress
+ *
+ * Arguments:   - poly *r: pointer to output polynomial
+ *              - const uint8_t *a: pointer to input byte array
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_D4 bytes)
+ *
+ * Upon return, the coefficients of the output polynomial are unsigned-canonical
+ * (non-negative and smaller than MLKEM_Q).
+ *
+ **************************************************/
+MLKEM_NATIVE_INTERNAL_API
+void poly_decompress_d4(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]);
+
+#define poly_decompress_d10 MLKEM_NAMESPACE(poly_decompress_d10)
+/*************************************************
+ * Name:        poly_decompress_d10
+ *
+ * Description: De-serialization and subsequent decompression (10 bits) of a
+ *              polynomial; approximate inverse of poly_compress_d10
+ *
+ * Arguments:   - poly *r: pointer to output polynomial
+ *              - const uint8_t *a: pointer to input byte array
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_D10 bytes)
+ *
+ * Upon return, the coefficients of the output polynomial are unsigned-canonical
+ * (non-negative and smaller than MLKEM_Q).
+ *
+ **************************************************/
+MLKEM_NATIVE_INTERNAL_API
+void poly_decompress_d10(poly *r,
+                         const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10]);
+#endif /* MLKEM_K == 2 || MLKEM_K == 3 */
+
+#if MLKEM_K == 4
+#define poly_compress_d5 MLKEM_NAMESPACE(poly_compress_d5)
+/*************************************************
+ * Name:        poly_compress_d5
+ *
+ * Description: Compression (5 bits) and subsequent serialization of a
+ *              polynomial
+ *
+ * Arguments:   - uint8_t *r: pointer to output byte array
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_D5 bytes)
+ *              - const poly *a: pointer to input polynomial
+ *                  Coefficients must be unsigned canonical,
+ *                  i.e. in [0,1,..,MLKEM_Q-1].
+ **************************************************/
+MLKEM_NATIVE_INTERNAL_API
+void poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const poly *a);
+
+#define poly_compress_d11 MLKEM_NAMESPACE(poly_compress_d11)
+/*************************************************
+ * Name:        poly_compress_d11
+ *
+ * Description: Compression (11 bits) and subsequent serialization of a
+ *              polynomial
+ *
+ * Arguments:   - uint8_t *r: pointer to output byte array
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_D11 bytes)
+ *              - const poly *a: pointer to input polynomial
+ *                  Coefficients must be unsigned canonical,
+ *                  i.e. in [0,1,..,MLKEM_Q-1].
+ **************************************************/
+MLKEM_NATIVE_INTERNAL_API
+void poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const poly *a);
+
+#define poly_decompress_d5 MLKEM_NAMESPACE(poly_decompress_d5)
+/*************************************************
+ * Name:        poly_decompress_d5
+ *
+ * Description: De-serialization and subsequent decompression (dv bits) of a
+ *              polynomial; approximate inverse of poly_compress
+ *
+ * Arguments:   - poly *r: pointer to output polynomial
+ *              - const uint8_t *a: pointer to input byte array
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_D5 bytes)
+ *
+ * Upon return, the coefficients of the output polynomial are unsigned-canonical
+ * (non-negative and smaller than MLKEM_Q).
+ *
+ **************************************************/
+MLKEM_NATIVE_INTERNAL_API
+void poly_decompress_d5(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5]);
+
+#define poly_decompress_d11 MLKEM_NAMESPACE(poly_decompress_d11)
+/*************************************************
+ * Name:        poly_decompress_d11
+ *
+ * Description: De-serialization and subsequent decompression (11 bits) of a
+ *              polynomial; approximate inverse of poly_compress_d11
+ *
+ * Arguments:   - poly *r: pointer to output polynomial
+ *              - const uint8_t *a: pointer to input byte array
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_D11 bytes)
+ *
+ * Upon return, the coefficients of the output polynomial are unsigned-canonical
+ * (non-negative and smaller than MLKEM_Q).
+ *
+ **************************************************/
+MLKEM_NATIVE_INTERNAL_API
+void poly_decompress_d11(poly *r,
+                         const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]);
+#endif /* MLKEM_K == 4 */
+
+#define poly_compress_du MLKEM_NAMESPACE(poly_compress_du)
+/*************************************************
+ * Name:        poly_compress_du
+ *
+ * Description: Compression (du bits) and subsequent serialization of a
+ *              polynomial
+ *
+ * Arguments:   - uint8_t *r: pointer to output byte array
+ *                  (of length MLKEM_POLYCOMPRESSEDBYTES_DU bytes)
+ *              - const poly *a: pointer to input polynomial
+ *                  Coefficients must be unsigned canonical,
+ *                  i.e. in [0,1,..,MLKEM_Q-1].
+ **************************************************/
+static INLINE void poly_compress_du(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DU],
+                                    const poly *a)
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(a, sizeof(poly)))
   requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
-  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_DU))
-);
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_DU)))
+{
+#if MLKEM_DU == 10
+  poly_compress_d10(r, a);
+#elif MLKEM_DU == 11
+  poly_compress_d11(r, a);
+#else
+#error "Invalid value of MLKEM_DU"
+#endif
+}
 
 #define poly_decompress_du MLKEM_NAMESPACE(poly_decompress_du)
 /*************************************************
  * Name:        poly_decompress_du
  *
  * Description: De-serialization and subsequent decompression (du bits) of a
- *polynomial; approximate inverse of poly_compress_du
+ *              polynomial; approximate inverse of poly_compress_du
  *
  * Arguments:   - poly *r: pointer to output polynomial
  *              - const uint8_t *a: pointer to input byte array
- *                                  (of length MLKEM_POLYCOMPRESSEDBYTES bytes)
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_DU bytes)
  *
  * Upon return, the coefficients of the output polynomial are unsigned-canonical
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
-void poly_decompress_du(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DU])
+static INLINE void poly_decompress_du(
+    poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DU])
 __contract__(
   requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(r, sizeof(poly)))
   assigns(memory_slice(r, sizeof(poly)))
-  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
-);
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+{
+#if MLKEM_DU == 10
+  poly_decompress_d10(r, a);
+#elif MLKEM_DU == 11
+  poly_decompress_d11(r, a);
+#else
+#error "Invalid value of MLKEM_DU"
+#endif
+}
 
 #define poly_compress_dv MLKEM_NAMESPACE(poly_compress_dv)
 /*************************************************
  * Name:        poly_compress_dv
  *
  * Description: Compression (dv bits) and subsequent serialization of a
- *polynomial
+ *              polynomial
  *
  * Arguments:   - uint8_t *r: pointer to output byte array
- *                            (of length MLKEM_POLYCOMPRESSEDBYTES_DV)
+ *                  (of length MLKEM_POLYCOMPRESSEDBYTES_DV bytes)
  *              - const poly *a: pointer to input polynomial
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
-void poly_compress_dv(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DV], const poly *a)
+static INLINE void poly_compress_dv(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DV],
+                                    const poly *a)
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_DV))
   requires(memory_no_alias(a, sizeof(poly)))
   requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
-  assigns(object_whole(r))
-);
+  assigns(object_whole(r)))
+{
+#if MLKEM_DV == 4
+  poly_compress_d4(r, a);
+#elif MLKEM_DV == 5
+  poly_compress_d5(r, a);
+#else
+#error "Invalid value of MLKEM_DV"
+#endif
+}
+
 
 #define poly_decompress_dv MLKEM_NAMESPACE(poly_decompress_dv)
 /*************************************************
  * Name:        poly_decompress_dv
  *
  * Description: De-serialization and subsequent decompression (dv bits) of a
- *polynomial; approximate inverse of poly_compress
+ *              polynomial; approximate inverse of poly_compress
  *
  * Arguments:   - poly *r: pointer to output polynomial
  *              - const uint8_t *a: pointer to input byte array
- *                                  (of length MLKEM_POLYCOMPRESSEDBYTES_DV
- *bytes)
+ *                  (of length MLKEM_POLYCOMPRESSEDBYTES_DV bytes)
  *
  * Upon return, the coefficients of the output polynomial are unsigned-canonical
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
-void poly_decompress_dv(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DV])
+static INLINE void poly_decompress_dv(
+    poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DV])
 __contract__(
   requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_DV))
   requires(memory_no_alias(r, sizeof(poly)))
   assigns(object_whole(r))
-  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
-);
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+{
+#if MLKEM_DV == 4
+  poly_decompress_d4(r, a);
+#elif MLKEM_DV == 5
+  poly_decompress_d5(r, a);
+#else
+#error "Invalid value of MLKEM_DV"
+#endif
+}
 
 #define poly_tobytes MLKEM_NAMESPACE(poly_tobytes)
 /*************************************************
