@@ -149,7 +149,7 @@
 
         inp     .req x3
         count   .req x4
-        xtmp    .req x5
+        wtmp    .req w5
 
         data0  .req v8
         data1  .req v9
@@ -193,40 +193,20 @@
         t3  .req v28
 
         ninv             .req v29
-        q_ninv           .req q29
         ninv_tw          .req v30
-        q_ninv_tw        .req q30
-
-/* Literal pool */
-.macro dup8h c
-        .short \c
-        .short \c
-        .short \c
-        .short \c
-        .short \c
-        .short \c
-        .short \c
-        .short \c
-.endm
-
-.p2align 4
-c_consts:         .short 3329
-                  .short 20159
-                  .short 0
-                  .short 0
-                  .short 0
-                  .short 0
-                  .short 0
-                  .short 0
-c_ninv:           dup8h 512
-c_ninv_tw:        dup8h 5040
 
 MLKEM_ASM_NAMESPACE(intt_asm_opt):
         push_stack
 
-        ldr q_consts,  c_consts
-        ldr q_ninv,    c_ninv
-        ldr q_ninv_tw, c_ninv_tw
+        // Setup constants
+        mov wtmp, #3329
+        mov consts.h[0], wtmp
+        mov wtmp, #20159
+        mov consts.h[1], wtmp
+        mov wtmp, #512
+        dup ninv.8h, wtmp
+        mov wtmp, #5040
+        dup ninv_tw.8h, wtmp
 
         mov inp, in
         mov count, #8
@@ -1023,7 +1003,7 @@ layer012_start:
     .unreq r56_ptr
     .unreq inp
     .unreq count
-    .unreq xtmp
+    .unreq wtmp
     .unreq data0
     .unreq data1
     .unreq data2
@@ -1060,8 +1040,6 @@ layer012_start:
     .unreq t2
     .unreq t3
     .unreq ninv
-    .unreq q_ninv
     .unreq ninv_tw
-    .unreq q_ninv_tw
 
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT */

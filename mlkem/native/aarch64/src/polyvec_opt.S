@@ -12,31 +12,6 @@
 #include "../../../common.h"
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
 
-/* We use a single literal pool for all functions in this file.
- * This is OK even when the file gets expanded through SLOTHY,
- * since PC-relative offets are up to 1MB in AArch64.
- *
- * The use of dup8h to build constant vectors in memory
- * is slightly wasteful and could be avoided with a GPR-load
- * followed by Neon `dup`, but we're ultimately only talking
- * about 64 bytes, so it seems OK.
- */
-
-.macro dup8h c
-        .short \c
-        .short \c
-        .short \c
-        .short \c
-        .short \c
-        .short \c
-        .short \c
-        .short \c
-.endm
-
-.p2align 4
-c_modulus:         dup8h 3329   // ML-KEM modulus
-c_modulus_twisted: dup8h 3327
-
 // Input:
 // - Vectors al, ah of 32-bit entries
 // Output:
@@ -136,11 +111,10 @@ c_modulus_twisted: dup8h 3327
         b3_ptr       .req x11
         b3_cache_ptr .req x12
         count        .req x13
+        wtmp         .req w14
 
         modulus           .req v0
-        q_modulus         .req q0
         modulus_twisted   .req v2
-        q_modulus_twisted .req q2
 
         aa0      .req v3
         aa1      .req v4
@@ -168,8 +142,12 @@ c_modulus_twisted: dup8h 3327
 
 MLKEM_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_opt):
         push_stack
-        ldr q_modulus, c_modulus
-        ldr q_modulus_twisted, c_modulus_twisted
+
+        mov wtmp, #3329
+        dup modulus.8h, wtmp
+
+        mov wtmp, #3327
+        dup modulus_twisted.8h, wtmp
 
         // Computed bases of vector entries
 
@@ -534,8 +512,11 @@ MLKEM_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_opt):
 
 MLKEM_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_opt):
         push_stack
-        ldr q_modulus, c_modulus
-        ldr q_modulus_twisted, c_modulus_twisted
+        mov wtmp, #3329
+        dup modulus.8h, wtmp
+
+        mov wtmp, #3327
+        dup modulus_twisted.8h, wtmp
 
         // Computed bases of vector entries
 
@@ -1005,8 +986,11 @@ MLKEM_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_opt):
 
 MLKEM_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_opt):
         push_stack
-        ldr q_modulus, c_modulus
-        ldr q_modulus_twisted, c_modulus_twisted
+        mov wtmp, #3329
+        dup modulus.8h, wtmp
+
+        mov wtmp, #3327
+        dup modulus_twisted.8h, wtmp
 
         // Computed bases of vector entries
 
@@ -1597,9 +1581,8 @@ MLKEM_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_opt):
     .unreq b3_cache_ptr
     .unreq count
     .unreq modulus
-    .unreq q_modulus
     .unreq modulus_twisted
-    .unreq q_modulus_twisted
+    .unreq wtmp
     .unreq aa0
     .unreq aa1
     .unreq bb0
