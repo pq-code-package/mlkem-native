@@ -33,14 +33,14 @@ void KeccakF1600_StateExtractBytes(uint64_t *state, unsigned char *data,
 #if defined(SYS_LITTLE_ENDIAN)
   uint8_t *state_ptr = (uint8_t *)state + offset;
   for (i = 0; i < length; i++)
-  __loop__(invariant(0 <= i && i <= length))
+  __loop__(invariant(i <= length))
   {
     data[i] = state_ptr[i];
   }
 #else  /* SYS_LITTLE_ENDIAN */
   /* Portable version */
   for (i = 0; i < length; i++)
-  __loop__(invariant(0 <= i && i <= length))
+  __loop__(invariant(i <= length))
   {
     data[i] = (state[(offset + i) >> 3] >> (8 * ((offset + i) & 0x07))) & 0xFF;
   }
@@ -128,7 +128,7 @@ static const uint64_t KeccakF_RoundConstants[NROUNDS] = {
 
 void KeccakF1600_StatePermute(uint64_t *state)
 {
-  int round;
+  unsigned round;
 
   uint64_t Aba, Abe, Abi, Abo, Abu;
   uint64_t Aga, Age, Agi, Ago, Agu;
@@ -171,7 +171,7 @@ void KeccakF1600_StatePermute(uint64_t *state)
   Asu = state[24];
 
   for (round = 0; round < NROUNDS; round += 2)
-  __loop__(invariant(0 <= round && round <= NROUNDS && round % 2 == 0))
+  __loop__(invariant(round <= NROUNDS && round % 2 == 0))
   {
     /*    prepareTheta */
     BCa = Aba ^ Aga ^ Aka ^ Ama ^ Asa;

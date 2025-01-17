@@ -5,11 +5,11 @@
 #include "poly.h"
 
 #define ntt_layer MLKEM_NAMESPACE(ntt_layer)
-void ntt_layer(int16_t *p, int len, int layer);
+void ntt_layer(int16_t *p, unsigned len, unsigned layer);
 
 void harness(void)
 {
   int16_t *a;
-  int len, layer;
+  unsigned len, layer;
   ntt_layer(a, len, layer);
 }
