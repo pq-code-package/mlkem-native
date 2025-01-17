@@ -359,113 +359,38 @@
 #endif
 
 /* mlkem/debug/debug.h */
-#if defined(BOUND)
-#undef BOUND
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(BOUND)
-#undef BOUND
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(CASSERT)
-#undef CASSERT
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(CASSERT)
-#undef CASSERT
-#endif
-
-/* mlkem/debug/debug.h */
 #if defined(MLKEM_DEBUG_H)
 #undef MLKEM_DEBUG_H
 #endif
 
 /* mlkem/debug/debug.h */
-#if defined(POLYVEC_BOUND)
-#undef POLYVEC_BOUND
+#if defined(debug_assert)
+#undef debug_assert
 #endif
 
 /* mlkem/debug/debug.h */
-#if defined(POLYVEC_BOUND)
-#undef POLYVEC_BOUND
+#if defined(debug_assert)
+#undef debug_assert
 #endif
 
 /* mlkem/debug/debug.h */
-#if defined(POLYVEC_UBOUND)
-#undef POLYVEC_UBOUND
+#if defined(debug_assert_abs_bound)
+#undef debug_assert_abs_bound
 #endif
 
 /* mlkem/debug/debug.h */
-#if defined(POLYVEC_UBOUND)
-#undef POLYVEC_UBOUND
+#if defined(debug_assert_abs_bound)
+#undef debug_assert_abs_bound
 #endif
 
 /* mlkem/debug/debug.h */
-#if defined(POLY_BOUND)
-#undef POLY_BOUND
+#if defined(debug_assert_bound)
+#undef debug_assert_bound
 #endif
 
 /* mlkem/debug/debug.h */
-#if defined(POLY_BOUND)
-#undef POLY_BOUND
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(POLY_BOUND_MSG)
-#undef POLY_BOUND_MSG
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(POLY_BOUND_MSG)
-#undef POLY_BOUND_MSG
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(POLY_UBOUND)
-#undef POLY_UBOUND
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(POLY_UBOUND)
-#undef POLY_UBOUND
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(POLY_UBOUND_MSG)
-#undef POLY_UBOUND_MSG
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(POLY_UBOUND_MSG)
-#undef POLY_UBOUND_MSG
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(SCALAR_BOUND)
-#undef SCALAR_BOUND
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(SCALAR_BOUND)
-#undef SCALAR_BOUND
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(STATIC_ASSERT)
-#undef STATIC_ASSERT
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(UBOUND)
-#undef UBOUND
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(UBOUND)
-#undef UBOUND
+#if defined(debug_assert_bound)
+#undef debug_assert_bound
 #endif
 
 /* mlkem/debug/debug.h */

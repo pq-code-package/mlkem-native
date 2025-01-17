@@ -81,7 +81,7 @@ __contract__(
  *                   Upon return, coefficients are bound by
  *                   2*MLKEM_Q in absolute value.
  *            - a: Pointer to first input polynomial
- *                   Must be coefficient-wise < 4096 in absolute value.
+ *                   Every coefficient must be in [0..4095]
  *            - b: Pointer to second input polynomial
  *                   Can have arbitrary int16_t coefficients
  *            - b_cached: Some precomputed value, typically derived from

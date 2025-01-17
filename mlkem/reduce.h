@@ -109,13 +109,14 @@ static INLINE int16_t montgomery_reduce_generic(int32_t a)
  **************************************************/
 static INLINE int16_t montgomery_reduce(int32_t a)
 __contract__(
-  requires(a > -(2 * 4096 * 32768))
-  requires(a <  (2 * 4096 * 32768))
+  requires(a > -(2 * UINT12_LIMIT * 32768))
+  requires(a <  (2 * UINT12_LIMIT * 32768))
   ensures(return_value > -2 * MLKEM_Q && return_value < 2 * MLKEM_Q)
 )
 {
   int16_t res;
-  SCALAR_BOUND(a, 2 * UINT12_LIMIT * 32768, "montgomery_reduce input");
+  debug_assert((a > -(2 * UINT12_LIMIT * 32768)) &&
+               (a < (2 * UINT12_LIMIT * 32768)));
 
   res = montgomery_reduce_generic(a);
   /* Bounds:
@@ -124,7 +125,7 @@ __contract__(
    *       <= UINT12_LIMIT + (MLKEM_Q + 1) / 2
    *        < 2 * MLKEM_Q */
 
-  SCALAR_BOUND(res, 2 * MLKEM_Q, "montgomery_reduce output");
+  debug_assert(res > -2 * MLKEM_Q && res < 2 * MLKEM_Q);
   return res;
 }
 
@@ -150,7 +151,7 @@ __contract__(
 )
 {
   int16_t res;
-  SCALAR_BOUND(b, HALF_Q, "fqmul input");
+  debug_assert(b > -HALF_Q && b < HALF_Q);
 
   res = montgomery_reduce((int32_t)a * (int32_t)b);
   /* Bounds:
@@ -160,7 +161,7 @@ __contract__(
    *        < MLKEM_Q
    */
 
-  SCALAR_BOUND(res, MLKEM_Q, "fqmul output");
+  debug_assert(res > -MLKEM_Q && res < MLKEM_Q);
   return res;
 }
 

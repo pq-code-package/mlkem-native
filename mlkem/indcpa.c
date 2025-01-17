@@ -51,7 +51,7 @@
 static void pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], polyvec *pk,
                     const uint8_t seed[MLKEM_SYMBYTES])
 {
-  POLYVEC_BOUND(pk, MLKEM_Q);
+  debug_assert_abs_bound(pk, MLKEM_K * MLKEM_N, MLKEM_Q);
   polyvec_tobytes(r, pk);
   memcpy(r + MLKEM_POLYVECBYTES, seed, MLKEM_SYMBYTES);
 }
@@ -77,7 +77,7 @@ static void unpack_pk(polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
   /* NOTE: If a modulus check was conducted on the PK, we know at this
    * point that the coefficients of `pk` are unsigned canonical. The
    * specifications and proofs, however, do _not_ assume this, and instead
-   * work with the easily provable bound by 4096. */
+   * work with the easily provable bound by UINT12_LIMIT. */
 }
 
 /*************************************************
@@ -91,7 +91,7 @@ static void unpack_pk(polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
  **************************************************/
 static void pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], polyvec *sk)
 {
-  POLYVEC_BOUND(sk, MLKEM_Q);
+  debug_assert_abs_bound(sk, MLKEM_K * MLKEM_N, MLKEM_Q);
   polyvec_tobytes(r, sk);
 }
 
@@ -354,8 +354,7 @@ void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES], int transposed)
     i++;
   }
 
-  cassert(i == MLKEM_K * MLKEM_K,
-          "gen_matrix: failed to generate whole matrix");
+  cassert(i == MLKEM_K * MLKEM_K);
 
   /*
    * The public matrix is generated in NTT domain. If the native backend

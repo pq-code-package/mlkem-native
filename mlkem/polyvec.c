@@ -15,7 +15,7 @@ void polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                          const polyvec *a)
 {
   unsigned i;
-  POLYVEC_UBOUND(a, MLKEM_Q);
+  debug_assert_bound(a, MLKEM_K * MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_K; i++)
   {
@@ -33,7 +33,7 @@ void polyvec_decompress_du(polyvec *r,
     poly_decompress_du(&r->vec[i], a + i * MLKEM_POLYCOMPRESSEDBYTES_DU);
   }
 
-  POLYVEC_UBOUND(r, MLKEM_Q);
+  debug_assert_bound(r, MLKEM_K * MLKEM_N, 0, MLKEM_Q);
 }
 
 MLKEM_NATIVE_INTERNAL_API
@@ -85,9 +85,9 @@ void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
   unsigned i;
   poly t;
 
-  POLYVEC_BOUND(a, 4096);
-  POLYVEC_BOUND(b, NTT_BOUND);
-  POLYVEC_BOUND(b_cache, MLKEM_Q);
+  debug_assert_bound(a, MLKEM_K * MLKEM_N, 0, UINT12_LIMIT);
+  debug_assert_abs_bound(b, MLKEM_K * MLKEM_N, NTT_BOUND);
+  debug_assert_abs_bound(b_cache, MLKEM_K * (MLKEM_N / 2), MLKEM_Q);
 
   poly_basemul_montgomery_cached(r, &a->vec[0], &b->vec[0], &b_cache->vec[0]);
   for (i = 1; i < MLKEM_K; i++)
@@ -103,10 +103,9 @@ void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
    * in the higher level bounds reasoning. It is thus best to omit
    * them from the spec to not unnecessarily constraint native implementations.
    */
-  cassert(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_K * 2 * MLKEM_Q),
-          "polyvec_basemul_acc_montgomery_cached output bounds");
-  /* TODO: Integrate CBMC assertion into POLY_BOUND if CBMC is set */
-  POLY_BOUND(r, MLKEM_K * 2 * MLKEM_Q);
+  cassert(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_K * 2 * MLKEM_Q));
+  /* TODO: Integrate CBMC assertion into debug_asserts if CBMC is set */
+  debug_assert_abs_bound(r, MLKEM_N, MLKEM_K * 2 * MLKEM_Q);
 }
 #else  /* !MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 MLKEM_NATIVE_INTERNAL_API
@@ -114,9 +113,9 @@ void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
                                            const polyvec *b,
                                            const polyvec_mulcache *b_cache)
 {
-  POLYVEC_BOUND(a, 4096);
-  POLYVEC_BOUND(b, NTT_BOUND);
-  /* Omitting POLYVEC_BOUND(b_cache, MLKEM_Q) since native implementations may
+  debug_assert_bound(a, MLKEM_K * MLKEM_N, 0, UINT12_LIMIT);
+  debug_assert_abs_bound(b, MLKEM_K * MLKEM_N, NTT_BOUND);
+  /* Omitting bounds assertion for cache since native implementations may
    * decide not to use a mulcache. Note that the C backend implementation
    * of poly_basemul_montgomery_cached() does still include the check. */
   polyvec_basemul_acc_montgomery_cached_native(r, a, b, b_cache);

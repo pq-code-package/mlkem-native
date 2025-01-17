@@ -194,7 +194,7 @@ __contract__(
  *              using mulcache for second operand.
  *
  *              Bounds:
- *              - a is assumed to be coefficient-wise < 4096 in absolute value.
+ *              - Every coefficient of a is assumed to be in [0..4095]
  *              - No bounds guarantees for the coefficients in the result.
  *
  * Arguments:   - poly *r: pointer to output polynomial

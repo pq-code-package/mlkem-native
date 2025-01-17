@@ -314,8 +314,8 @@ __contract__(
   /* Add Q if c is negative, but in constant time */
   c = ct_sel_int16(c + MLKEM_Q, c, ct_cmask_neg_i16(c));
 
-  cassert(c >= 0, "scalar_signed_to_unsigned_q result lower bound");
-  cassert(c < MLKEM_Q, "scalar_signed_to_unsigned_q result upper bound");
+  cassert(c >= 0);
+  cassert(c < MLKEM_Q);
 
   /* and therefore cast to uint16_t is safe. */
   return (uint16_t)c;
@@ -649,8 +649,7 @@ __contract__(
  *              Bounds:
  *              - a is assumed to be coefficient-wise < q in absolute value.
  *
- *              The result is coefficient-wise bound by 3/2 q in absolute
- *              value.
+ *              The result is coefficient-wise bound by 2*q in absolute value.
  *
  * Arguments:   - poly *r: pointer to output polynomial
  *              - const poly *a: pointer to first input polynomial

@@ -13,7 +13,7 @@
 
 #define __contract__(x)
 #define __loop__(x)
-#define cassert(x, y)
+#define cassert(x)
 
 #else /* CBMC _is_ defined, therefore we're doing proof */
 
@@ -30,7 +30,7 @@
 #define invariant(...) __CPROVER_loop_invariant(__VA_ARGS__)
 #define decreases(...) __CPROVER_decreases(__VA_ARGS__)
 /* cassert to avoid confusion with in-built assert */
-#define cassert(...) __CPROVER_assert(__VA_ARGS__)
+#define cassert(x) __CPROVER_assert(x, "cbmc assertion failed")
 #define assume(...) __CPROVER_assume(__VA_ARGS__)
 
 /***************************************************
