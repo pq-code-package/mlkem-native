@@ -38,6 +38,8 @@ FUNCTION_NAME = poly_basemul_montgomery_cached
 # This function is large enough to need...
 CBMC_OBJECT_BITS = 8
 
+CBMCFLAGS += --no-array-field-sensitivity --arrays-uf-always --slice-formula
+
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
 # ("mlkem/poly.c") in PROJECT_SOURCES).

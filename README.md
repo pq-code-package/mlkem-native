@@ -7,7 +7,7 @@
 [![C90](https://img.shields.io/badge/language-C90-blue.svg)](https://web.archive.org/web/20200909074736if_/https://www.pdf-archive.com/2014/10/02/ansi-iso-9899-1990-1/ansi-iso-9899-1990-1.pdf)
 [![Apache](https://img.shields.io/badge/license-Apache--2.0-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
-mlkem-native is a C90 implementation of [ML-KEM](https://doi.org/10.6028/NIST.FIPS.203.ipd) targeting
+mlkem-native is a C90 implementation of [ML-KEM](https://doi.org/10.6028/NIST.FIPS.203) targeting
 PC, mobile and server platforms. It is a fork of the ML-KEM [reference
 implementation](https://github.com/pq-crystals/kyber/tree/main/ref).
 

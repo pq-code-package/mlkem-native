@@ -5,6 +5,7 @@
 
 #include "rej_uniform.h"
 #include "arith_backend.h"
+#include "debug/debug.h"
 
 /* Static namespacing
  * This is to facilitate building multiple instances
@@ -58,6 +59,8 @@ __contract__(
   unsigned int ctr, pos;
   uint16_t val0, val1;
 
+  debug_assert_bound(r, offset, 0, MLKEM_Q);
+
   ctr = offset;
   pos = 0;
   /* pos + 3 cannot overflow due to the assumption buflen <= 4096 */
@@ -79,6 +82,8 @@ __contract__(
       r[ctr++] = val1;
     }
   }
+
+  debug_assert_bound(r, ctr, 0, MLKEM_Q);
   return ctr;
 }
 
@@ -99,7 +104,11 @@ unsigned int rej_uniform(int16_t *r, unsigned int target, unsigned int offset,
   /* Sample from large buffer with full lane as much as possible. */
   ret = rej_uniform_native(r + offset, target - offset, buf, buflen);
   if (ret != -1)
-    return offset + (unsigned)ret;
+  {
+    unsigned res = offset + (unsigned)ret;
+    debug_assert_bound(r, res, 0, MLKEM_Q);
+    return res;
+  }
 
   return rej_uniform_scalar(r, target, offset, buf, buflen);
 }

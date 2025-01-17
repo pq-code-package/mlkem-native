@@ -374,6 +374,16 @@
 #endif
 
 /* mlkem/debug/debug.h */
+#if defined(debug_assert)
+#undef debug_assert
+#endif
+
+/* mlkem/debug/debug.h */
+#if defined(debug_assert_abs_bound)
+#undef debug_assert_abs_bound
+#endif
+
+/* mlkem/debug/debug.h */
 #if defined(debug_assert_abs_bound)
 #undef debug_assert_abs_bound
 #endif
@@ -384,6 +394,21 @@
 #endif
 
 /* mlkem/debug/debug.h */
+#if defined(debug_assert_abs_bound_2d)
+#undef debug_assert_abs_bound_2d
+#endif
+
+/* mlkem/debug/debug.h */
+#if defined(debug_assert_abs_bound_2d)
+#undef debug_assert_abs_bound_2d
+#endif
+
+/* mlkem/debug/debug.h */
+#if defined(debug_assert_abs_bound_2d)
+#undef debug_assert_abs_bound_2d
+#endif
+
+/* mlkem/debug/debug.h */
 #if defined(debug_assert_bound)
 #undef debug_assert_bound
 #endif
@@ -391,6 +416,26 @@
 /* mlkem/debug/debug.h */
 #if defined(debug_assert_bound)
 #undef debug_assert_bound
+#endif
+
+/* mlkem/debug/debug.h */
+#if defined(debug_assert_bound)
+#undef debug_assert_bound
+#endif
+
+/* mlkem/debug/debug.h */
+#if defined(debug_assert_bound_2d)
+#undef debug_assert_bound_2d
+#endif
+
+/* mlkem/debug/debug.h */
+#if defined(debug_assert_bound_2d)
+#undef debug_assert_bound_2d
+#endif
+
+/* mlkem/debug/debug.h */
+#if defined(debug_assert_bound_2d)
+#undef debug_assert_bound_2d
 #endif
 
 /* mlkem/debug/debug.h */
