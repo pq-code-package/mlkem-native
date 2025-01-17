@@ -45,6 +45,7 @@
     len                         .req w4
 
     /* Temporary output on the stack */
+    xtmp                        .req x7
     output_tmp                  .req x7
     output_tmp_base             .req x8
 
@@ -110,20 +111,26 @@
 
     mlkem_q                     .req v30
     bits                        .req v31
-    bits_q                      .req q31
 
 .text
-/* Literal pool */
-.p2align 4
-c_bit_table:
-    .short 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80
-
 .align 4
 .global MLKEM_ASM_NAMESPACE(rej_uniform_asm_clean)
 MLKEM_ASM_NAMESPACE(rej_uniform_asm_clean):
     push_stack
 
-    ldr  bits_q, c_bit_table
+    // Load 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80
+    movz xtmp, 0x1
+    movk xtmp, 0x2, lsl 16
+    movk xtmp, 0x4, lsl 32
+    movk xtmp, 0x8, lsl 48
+    mov bits.d[0], xtmp
+
+    movz xtmp, 0x10
+    movk xtmp, 0x20, lsl 16
+    movk xtmp, 0x40, lsl 32
+    movk xtmp, 0x80, lsl 48
+    mov bits.d[1], xtmp
+
     movz tmp, #MLKEM_Q
     dup  mlkem_q.8h, tmp
 
@@ -349,6 +356,7 @@ return:
     .unreq count
     .unreq buf_consumed
     .unreq tmp
+    .unreq xtmp
     .unreq final_copy_count
     .unreq rec_idx_0
     .unreq rec_idx_1
@@ -393,7 +401,6 @@ return:
     .unreq table3q
     .unreq mlkem_q
     .unreq bits
-    .unreq bits_q
 
 #endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) ||
           defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) */

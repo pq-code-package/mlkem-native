@@ -6,33 +6,6 @@
 #include "../../../common.h"
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
 
-/* We use a single literal pool for all functions in this file.
- * This is OK even when the file gets expanded through SLOTHY,
- * since PC-relative offets are up to 1MB in AArch64.
- *
- * The use of dup8h to build constant vectors in memory
- * is slightly wasteful and could be avoided with a GPR-load
- * followed by Neon `dup`, but we're ultimately only talking
- * about 64 bytes, so it seems OK.
- */
-
-.macro dup8h c
-        .short \c
-        .short \c
-        .short \c
-        .short \c
-        .short \c
-        .short \c
-        .short \c
-        .short \c
-.endm
-
-.p2align 4
-c_modulus:         dup8h 3329   // ML-KEM modulus
-c_modulus_twisted: dup8h 20159  // Barrett twist of 1 wrt 2^27
-c_mont_constant:   dup8h -1044  // 2^16 % 3329
-c_barrett_twist:   dup8h -10276 // Barrett twist of -1044 (wrt 2^16)
-
 /*
  * Some modular arithmetic macros
  */
@@ -70,6 +43,7 @@ c_barrett_twist:   dup8h -10276 // Barrett twist of -1044 (wrt 2^16)
 
         ptr               .req x0
         count             .req x1
+        wtmp              .req w2
 
         data              .req v0
         q_data            .req q0
@@ -77,14 +51,15 @@ c_barrett_twist:   dup8h -10276 // Barrett twist of -1044 (wrt 2^16)
         tmp               .req v1
         mask              .req v2
         modulus           .req v3
-        q_modulus         .req q3
         modulus_twisted   .req v4
-        q_modulus_twisted .req q4
 
 MLKEM_ASM_NAMESPACE(poly_reduce_asm_opt):
 
-        ldr q_modulus, c_modulus
-        ldr q_modulus_twisted, c_modulus_twisted
+        mov wtmp, #3329 // ML-KEM modulus
+        dup modulus.8h, wtmp
+
+        mov wtmp, #20159 // Barrett twist of 1 wrt 2^27
+        dup modulus_twisted.8h, wtmp
 
         mov count, #8
                                                // Instructions:    15
@@ -278,6 +253,7 @@ MLKEM_ASM_NAMESPACE(poly_reduce_asm_opt):
 
         .unreq ptr
         .unreq count
+        .unreq wtmp
 
         .unreq data
         .unreq q_data
@@ -285,9 +261,7 @@ MLKEM_ASM_NAMESPACE(poly_reduce_asm_opt):
         .unreq tmp
         .unreq mask
         .unreq modulus
-        .unreq q_modulus
         .unreq modulus_twisted
-        .unreq q_modulus_twisted
 
 /********************************************
  *          poly_mulcache_compute()         *
@@ -300,6 +274,7 @@ MLKEM_ASM_NAMESPACE(poly_reduce_asm_opt):
         zeta_ptr          .req x2
         zeta_twisted_ptr  .req x3
         count             .req x4
+        wtmp              .req w5
 
         data_odd          .req v0
         zeta              .req v1
@@ -315,13 +290,14 @@ MLKEM_ASM_NAMESPACE(poly_reduce_asm_opt):
         q_dst             .req q5
 
         modulus           .req v6
-        q_modulus         .req q6
         modulus_twisted   .req v7
-        q_modulus_twisted .req q7
 
 MLKEM_ASM_NAMESPACE(poly_mulcache_compute_asm_opt):
-        ldr q_modulus, c_modulus
-        ldr q_modulus_twisted, c_modulus_twisted
+        mov wtmp, #3329
+        dup modulus.8h, wtmp
+
+        mov wtmp, #20159
+        dup modulus_twisted.8h, wtmp
 
         mov count, #16
                                               // Instructions:    7
@@ -426,6 +402,7 @@ MLKEM_ASM_NAMESPACE(poly_mulcache_compute_asm_opt):
         .unreq zeta_ptr
         .unreq zeta_twisted_ptr
         .unreq count
+        .unreq wtmp
 
         .unreq data_odd
         .unreq zeta
@@ -441,9 +418,7 @@ MLKEM_ASM_NAMESPACE(poly_mulcache_compute_asm_opt):
         .unreq q_dst
 
         .unreq modulus
-        .unreq q_modulus
         .unreq modulus_twisted
-        .unreq q_modulus_twisted
 
 /********************************************
  *             poly_tobytes()               *
@@ -502,6 +477,7 @@ poly_tobytes_asm_opt_asm_loop_start:
 
         src               .req x0
         count             .req x1
+        wtmp              .req w2
 
         data              .req v0
         q_data            .req q0
@@ -509,22 +485,25 @@ poly_tobytes_asm_opt_asm_loop_start:
         q_res             .req q1
 
         factor            .req v2
-        q_factor          .req q2
         factor_t          .req v3
-        q_factor_t        .req q3
         modulus           .req v4
-        q_modulus         .req q4
         modulus_twisted   .req v5
-        q_modulus_twisted .req q5
 
         tmp0              .req v6
 
 MLKEM_ASM_NAMESPACE(poly_tomont_asm_opt):
 
-        ldr q_modulus,         c_modulus
-        ldr q_modulus_twisted, c_modulus_twisted
-        ldr q_factor,          c_mont_constant
-        ldr q_factor_t,        c_barrett_twist
+        mov wtmp, #3329 // ML-KEM modulus
+        dup modulus.8h, wtmp
+
+        mov wtmp, #20159 // Barrett twist of 1 wrt 2^27
+        dup modulus_twisted.8h, wtmp
+
+        mov wtmp, #-1044 // 2^16 % 3329
+        dup factor.8h, wtmp
+
+        mov wtmp, #-10276 // Barrett twist of -1044 (wrt 2^16)
+        dup factor_t.8h, wtmp
 
         mov count, #8
                                              // Instructions:    5
@@ -670,6 +649,7 @@ MLKEM_ASM_NAMESPACE(poly_tomont_asm_opt):
 
         .unreq src
         .unreq count
+        .unreq wtmp
 
         .unreq data
         .unreq q_data
@@ -677,13 +657,9 @@ MLKEM_ASM_NAMESPACE(poly_tomont_asm_opt):
         .unreq q_res
 
         .unreq factor
-        .unreq q_factor
         .unreq factor_t
-        .unreq q_factor_t
         .unreq modulus
-        .unreq q_modulus
         .unreq modulus_twisted
-        .unreq q_modulus_twisted
 
         .unreq tmp0
 

@@ -121,7 +121,7 @@
 
         inp     .req x3
         count   .req x4
-        xtmp    .req x5
+        wtmp    .req w5
 
         data0  .req v8
         data1  .req v9
@@ -156,7 +156,6 @@
         q_root2_tw .req q6
 
         consts    .req v7
-        q_consts  .req q7
 
         tmp .req v24
         t0  .req v25
@@ -167,21 +166,13 @@
         .text
         .global MLKEM_ASM_NAMESPACE(ntt_asm_clean)
 
-/* Literal pool */
-.p2align 4
-c_consts:
-        .short 3329
-        .short 20159
-        .short 0
-        .short 0
-        .short 0
-        .short 0
-        .short 0
-        .short 0
-
 MLKEM_ASM_NAMESPACE(ntt_asm_clean):
         push_stack
-        ldr q_consts, c_consts
+
+        mov wtmp, #3329
+        mov consts.h[0], wtmp
+        mov wtmp, #20159
+        mov consts.h[1], wtmp
 
         mov inp, in
         mov count, #4
@@ -286,7 +277,7 @@ layer3456_start:
     .unreq r56_ptr
     .unreq inp
     .unreq count
-    .unreq xtmp
+    .unreq wtmp
     .unreq data0
     .unreq data1
     .unreq data2
@@ -316,7 +307,6 @@ layer3456_start:
     .unreq q_root1_tw
     .unreq q_root2_tw
     .unreq consts
-    .unreq q_consts
     .unreq tmp
     .unreq t0
     .unreq t1
