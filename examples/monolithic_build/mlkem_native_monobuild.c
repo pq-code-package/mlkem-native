@@ -49,16 +49,6 @@
 #endif
 
 /* mlkem/cbd.c */
-#if defined(cbd2)
-#undef cbd2
-#endif
-
-/* mlkem/cbd.c */
-#if defined(cbd3)
-#undef cbd3
-#endif
-
-/* mlkem/cbd.c */
 #if defined(load24_littleendian)
 #undef load24_littleendian
 #endif
@@ -71,6 +61,16 @@
 /* mlkem/cbd.h */
 #if defined(CBD_H)
 #undef CBD_H
+#endif
+
+/* mlkem/cbd.h */
+#if defined(poly_cbd2)
+#undef poly_cbd2
+#endif
+
+/* mlkem/cbd.h */
+#if defined(poly_cbd3)
+#undef poly_cbd3
 #endif
 
 /* mlkem/cbd.h */

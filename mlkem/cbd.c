@@ -11,8 +11,6 @@
  * within a single compilation unit. */
 #define load32_littleendian MLKEM_NAMESPACE(load32_littleendian)
 #define load24_littleendian MLKEM_NAMESPACE(load24_littleendian)
-#define cbd2 MLKEM_NAMESPACE(cbd2)
-#define cbd3 MLKEM_NAMESPACE(cbd3)
 /* End of static namespacing */
 
 /*************************************************
@@ -35,39 +33,8 @@ static uint32_t load32_littleendian(const uint8_t x[4])
   return r;
 }
 
-#if MLKEM_ETA1 == 3
-/*************************************************
- * Name:        load24_littleendian
- *
- * Description: load 3 bytes into a 32-bit integer
- *              in little-endian order.
- *              This function is only needed for ML-KEM-512
- *
- * Arguments:   - const uint8_t *x: pointer to input byte array
- *
- * Returns 32-bit unsigned integer loaded from x (most significant byte is zero)
- **************************************************/
-static uint32_t load24_littleendian(const uint8_t x[3])
-{
-  uint32_t r;
-  r = (uint32_t)x[0];
-  r |= (uint32_t)x[1] << 8;
-  r |= (uint32_t)x[2] << 16;
-  return r;
-}
-#endif /* MLKEM_ETA1 == 3 */
-
-/*************************************************
- * Name:        cbd2
- *
- * Description: Given an array of uniformly random bytes, compute
- *              polynomial with coefficients distributed according to
- *              a centered binomial distribution with parameter eta=2
- *
- * Arguments:   - poly *r: pointer to output polynomial
- *              - const uint8_t *buf: pointer to input byte array
- **************************************************/
-static void cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
+MLKEM_NATIVE_INTERNAL_API
+void poly_cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
 {
   unsigned i;
   for (i = 0; i < MLKEM_N / 8; i++)
@@ -94,17 +61,27 @@ static void cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
 
 #if MLKEM_ETA1 == 3
 /*************************************************
- * Name:        cbd3
+ * Name:        load24_littleendian
  *
- * Description: Given an array of uniformly random bytes, compute
- *              polynomial with coefficients distributed according to
- *              a centered binomial distribution with parameter eta=3.
+ * Description: load 3 bytes into a 32-bit integer
+ *              in little-endian order.
  *              This function is only needed for ML-KEM-512
  *
- * Arguments:   - poly *r: pointer to output polynomial
- *              - const uint8_t *buf: pointer to input byte array
+ * Arguments:   - const uint8_t *x: pointer to input byte array
+ *
+ * Returns 32-bit unsigned integer loaded from x (most significant byte is zero)
  **************************************************/
-static void cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4])
+static uint32_t load24_littleendian(const uint8_t x[3])
+{
+  uint32_t r;
+  r = (uint32_t)x[0];
+  r |= (uint32_t)x[1] << 8;
+  r |= (uint32_t)x[2] << 16;
+  return r;
+}
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4])
 {
   unsigned i;
   for (i = 0; i < MLKEM_N / 4; i++)
@@ -130,27 +107,3 @@ static void cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4])
   }
 }
 #endif /* MLKEM_ETA1 == 3 */
-
-MLKEM_NATIVE_INTERNAL_API
-void poly_cbd_eta1(poly *r, const uint8_t buf[MLKEM_ETA1 * MLKEM_N / 4])
-{
-#if MLKEM_ETA1 == 2
-  cbd2(r, buf);
-#elif MLKEM_ETA1 == 3
-  cbd3(r, buf);
-#else
-#error "This implementation requires eta1 in {2,3}"
-#endif
-}
-
-#if MLKEM_K == 2 || MLKEM_K == 4
-MLKEM_NATIVE_INTERNAL_API
-void poly_cbd_eta2(poly *r, const uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4])
-{
-#if MLKEM_ETA2 == 2
-  cbd2(r, buf);
-#else
-#error "This implementation requires eta2 = 2"
-#endif
-}
-#endif /* MLKEM_K == 2 || MLKEM_K == 4 */
