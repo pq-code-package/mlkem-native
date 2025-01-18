@@ -359,21 +359,6 @@
 #endif
 
 /* mlkem/indcpa.c */
-#if defined(MLKEM_GEN_MATRIX_NBLOCKS)
-#undef MLKEM_GEN_MATRIX_NBLOCKS
-#endif
-
-/* mlkem/indcpa.c */
-#if defined(gen_matrix_entry)
-#undef gen_matrix_entry
-#endif
-
-/* mlkem/indcpa.c */
-#if defined(gen_matrix_entry_x4)
-#undef gen_matrix_entry_x4
-#endif
-
-/* mlkem/indcpa.c */
 #if defined(matvec_mul)
 #undef matvec_mul
 #endif
@@ -1809,6 +1794,16 @@
 #endif
 
 /* mlkem/rej_uniform.c */
+#if defined(MLKEM_GEN_MATRIX_NBLOCKS)
+#undef MLKEM_GEN_MATRIX_NBLOCKS
+#endif
+
+/* mlkem/rej_uniform.c */
+#if defined(rej_uniform)
+#undef rej_uniform
+#endif
+
+/* mlkem/rej_uniform.c */
 #if defined(rej_uniform_scalar)
 #undef rej_uniform_scalar
 #endif
@@ -1819,8 +1814,13 @@
 #endif
 
 /* mlkem/rej_uniform.h */
-#if defined(rej_uniform)
-#undef rej_uniform
+#if defined(poly_rej_uniform)
+#undef poly_rej_uniform
+#endif
+
+/* mlkem/rej_uniform.h */
+#if defined(poly_rej_uniform_x4)
+#undef poly_rej_uniform_x4
 #endif
 
 /* mlkem/symmetric.h */
