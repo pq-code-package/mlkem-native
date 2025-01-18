@@ -45,8 +45,8 @@
  *          4 -- 6
  *             5 -- 7
  */
-static void ntt_butterfly_block(int16_t r[MLKEM_N], int16_t zeta,
-                                unsigned start, unsigned len, int bound)
+static void ntt_butterfly_block(int16_t r[MLKEM_N], int16_t zeta, int start,
+                                int len, int bound)
 __contract__(
   requires(start < MLKEM_N)
   requires(1 <= len && len <= MLKEM_N / 2 && start + 2 * len <= MLKEM_N)
@@ -60,7 +60,7 @@ __contract__(
   ensures(array_abs_bound(r, start + 2 * len, MLKEM_N, bound)))
 {
   /* `bound` is a ghost variable only needed in the CBMC specification */
-  unsigned j;
+  int j;
   ((void)bound);
   for (j = start; j < start + len; j++)
   __loop__(
@@ -93,7 +93,7 @@ __contract__(
  *   official Kyber implementation here, merely adding `layer` as
  *   a ghost variable for the specifications.
  */
-static void ntt_layer(int16_t r[MLKEM_N], unsigned len, unsigned layer)
+static void ntt_layer(int16_t r[MLKEM_N], int len, int layer)
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
   requires(1 <= layer && layer <= 7 && len == (MLKEM_N >> layer))
@@ -101,7 +101,7 @@ __contract__(
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
   ensures(array_abs_bound(r, 0, MLKEM_N, (layer + 1) * MLKEM_Q)))
 {
-  unsigned start, k;
+  int start, k;
   /* `layer` is a ghost variable only needed in the CBMC specification */
   ((void)layer);
   /* Twiddle factors for layer n start at index 2^(layer-1) */
@@ -130,7 +130,7 @@ __contract__(
 MLKEM_NATIVE_INTERNAL_API
 void poly_ntt(poly *p)
 {
-  unsigned len, layer;
+  int len, layer;
   int16_t *r;
   debug_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
   r = p->coeffs;
@@ -160,7 +160,7 @@ void poly_ntt(poly *p)
 #if !defined(MLKEM_USE_NATIVE_INTT)
 
 /* Compute one layer of inverse NTT */
-static void invntt_layer(int16_t *r, unsigned len, unsigned layer)
+static void invntt_layer(int16_t *r, int len, int layer)
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
   requires(2 <= len && len <= 128 && 1 <= layer && layer <= 7)
@@ -169,7 +169,7 @@ __contract__(
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
   ensures(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q)))
 {
-  unsigned start, k;
+  int start, k;
   /* `layer` is a ghost variable used only in the specification */
   ((void)layer);
   k = MLKEM_N / len - 1;
@@ -180,7 +180,7 @@ __contract__(
     /* Normalised form of k == MLKEM_N / len - 1 - start / (2 * len) */
     invariant(2 * len * k + start == 2 * MLKEM_N - 2 * len))
   {
-    unsigned j;
+    int j;
     int16_t zeta = zetas[k--];
     for (j = start; j < start + len; j++)
     __loop__(
@@ -204,7 +204,7 @@ void poly_invntt_tomont(poly *p)
    * and NTT twist. This also brings coefficients down to
    * absolute value < MLKEM_Q.
    */
-  unsigned j, len, layer;
+  int j, len, layer;
   const int16_t f = 1441;
   int16_t *r = p->coeffs;
 
