@@ -9,19 +9,19 @@
 #include "common.h"
 #include "poly.h"
 
-#define polyvec MLKEM_NAMESPACE(polyvec)
+#define polyvec MLKEM_NAMESPACE_K(polyvec)
 typedef struct
 {
   poly vec[MLKEM_K];
 } ALIGN polyvec;
 
-#define polyvec_mulcache MLKEM_NAMESPACE(polyvec_mulcache)
+#define polyvec_mulcache MLKEM_NAMESPACE_K(polyvec_mulcache)
 typedef struct
 {
   poly_mulcache vec[MLKEM_K];
 } polyvec_mulcache;
 
-#define poly_compress_du MLKEM_NAMESPACE(poly_compress_du)
+#define poly_compress_du MLKEM_NAMESPACE_K(poly_compress_du)
 /*************************************************
  * Name:        poly_compress_du
  *
@@ -51,7 +51,7 @@ __contract__(
 #endif
 }
 
-#define poly_decompress_du MLKEM_NAMESPACE(poly_decompress_du)
+#define poly_decompress_du MLKEM_NAMESPACE_K(poly_decompress_du)
 /*************************************************
  * Name:        poly_decompress_du
  *
@@ -83,7 +83,7 @@ __contract__(
 #endif
 }
 
-#define poly_compress_dv MLKEM_NAMESPACE(poly_compress_dv)
+#define poly_compress_dv MLKEM_NAMESPACE_K(poly_compress_dv)
 /*************************************************
  * Name:        poly_compress_dv
  *
@@ -114,7 +114,7 @@ __contract__(
 }
 
 
-#define poly_decompress_dv MLKEM_NAMESPACE(poly_decompress_dv)
+#define poly_decompress_dv MLKEM_NAMESPACE_K(poly_decompress_dv)
 /*************************************************
  * Name:        poly_decompress_dv
  *
@@ -146,7 +146,7 @@ __contract__(
 #endif
 }
 
-#define polyvec_compress_du MLKEM_NAMESPACE(polyvec_compress_du)
+#define polyvec_compress_du MLKEM_NAMESPACE_K(polyvec_compress_du)
 /*************************************************
  * Name:        polyvec_compress_du
  *
@@ -169,7 +169,7 @@ __contract__(
   assigns(object_whole(r))
 );
 
-#define polyvec_decompress_du MLKEM_NAMESPACE(polyvec_decompress_du)
+#define polyvec_decompress_du MLKEM_NAMESPACE_K(polyvec_decompress_du)
 /*************************************************
  * Name:        polyvec_decompress_du
  *
@@ -192,7 +192,7 @@ __contract__(
          array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 );
 
-#define polyvec_tobytes MLKEM_NAMESPACE(polyvec_tobytes)
+#define polyvec_tobytes MLKEM_NAMESPACE_K(polyvec_tobytes)
 /*************************************************
  * Name:        polyvec_tobytes
  *
@@ -213,7 +213,7 @@ __contract__(
   assigns(object_whole(r))
 );
 
-#define polyvec_frombytes MLKEM_NAMESPACE(polyvec_frombytes)
+#define polyvec_frombytes MLKEM_NAMESPACE_K(polyvec_frombytes)
 /*************************************************
  * Name:        polyvec_frombytes
  *
@@ -235,7 +235,7 @@ __contract__(
         array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, UINT12_LIMIT)))
 );
 
-#define polyvec_ntt MLKEM_NAMESPACE(polyvec_ntt)
+#define polyvec_ntt MLKEM_NAMESPACE_K(polyvec_ntt)
 /*************************************************
  * Name:        polyvec_ntt
  *
@@ -261,7 +261,7 @@ __contract__(
   array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, NTT_BOUND)))
 );
 
-#define polyvec_invntt_tomont MLKEM_NAMESPACE(polyvec_invntt_tomont)
+#define polyvec_invntt_tomont MLKEM_NAMESPACE_K(polyvec_invntt_tomont)
 /*************************************************
  * Name:        polyvec_invntt_tomont
  *
@@ -287,7 +287,7 @@ __contract__(
 );
 
 #define polyvec_basemul_acc_montgomery \
-  MLKEM_NAMESPACE(polyvec_basemul_acc_montgomery)
+  MLKEM_NAMESPACE_K(polyvec_basemul_acc_montgomery)
 /*************************************************
  * Name:        polyvec_basemul_acc_montgomery
  *
@@ -311,7 +311,7 @@ __contract__(
 
 
 #define polyvec_basemul_acc_montgomery_cached \
-  MLKEM_NAMESPACE(polyvec_basemul_acc_montgomery_cached)
+  MLKEM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached)
 /*************************************************
  * Name:        polyvec_basemul_acc_montgomery_cached
  *
@@ -343,7 +343,7 @@ __contract__(
   assigns(memory_slice(r, sizeof(poly)))
 );
 
-#define polyvec_mulcache_compute MLKEM_NAMESPACE(polyvec_mulcache_compute)
+#define polyvec_mulcache_compute MLKEM_NAMESPACE_K(polyvec_mulcache_compute)
 /************************************************************
  * Name: polyvec_mulcache_compute
  *
@@ -377,7 +377,7 @@ __contract__(
   assigns(object_whole(x))
 );
 
-#define polyvec_reduce MLKEM_NAMESPACE(polyvec_reduce)
+#define polyvec_reduce MLKEM_NAMESPACE_K(polyvec_reduce)
 /*************************************************
  * Name:        polyvec_reduce
  *
@@ -403,7 +403,7 @@ __contract__(
     array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 );
 
-#define polyvec_add MLKEM_NAMESPACE(polyvec_add)
+#define polyvec_add MLKEM_NAMESPACE_K(polyvec_add)
 /*************************************************
  * Name:        polyvec_add
  *
@@ -434,7 +434,7 @@ __contract__(
   assigns(object_whole(r))
 );
 
-#define polyvec_tomont MLKEM_NAMESPACE(polyvec_tomont)
+#define polyvec_tomont MLKEM_NAMESPACE_K(polyvec_tomont)
 /*************************************************
  * Name:        polyvec_tomont
  *
@@ -454,7 +454,7 @@ __contract__(
     array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
 );
 
-#define poly_getnoise_eta1_4x MLKEM_NAMESPACE(poly_getnoise_eta1_4x)
+#define poly_getnoise_eta1_4x MLKEM_NAMESPACE_K(poly_getnoise_eta1_4x)
 /*************************************************
  * Name:        poly_getnoise_eta1_4x
  *
@@ -536,7 +536,7 @@ __contract__(
 #endif /* MLKEM_ETA1 == MLKEM_ETA2 */
 
 #if MLKEM_K == 2 || MLKEM_K == 4
-#define poly_getnoise_eta2 MLKEM_NAMESPACE(poly_getnoise_eta2)
+#define poly_getnoise_eta2 MLKEM_NAMESPACE_K(poly_getnoise_eta2)
 /*************************************************
  * Name:        poly_getnoise_eta2
  *
@@ -561,7 +561,7 @@ __contract__(
 #endif /* MLKEM_K == 2 || MLKEM_K == 4 */
 
 #if MLKEM_K == 2
-#define poly_getnoise_eta1122_4x MLKEM_NAMESPACE(poly_getnoise_eta1122_4x)
+#define poly_getnoise_eta1122_4x MLKEM_NAMESPACE_K(poly_getnoise_eta1122_4x)
 /*************************************************
  * Name:        poly_getnoise_eta1122_4x
  *

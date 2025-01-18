@@ -25,13 +25,13 @@
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define pack_pk MLKEM_NAMESPACE(pack_pk)
-#define unpack_pk MLKEM_NAMESPACE(unpack_pk)
-#define pack_sk MLKEM_NAMESPACE(pack_sk)
-#define unpack_sk MLKEM_NAMESPACE(unpack_sk)
-#define pack_ciphertext MLKEM_NAMESPACE(pack_ciphertext)
-#define unpack_ciphertext MLKEM_NAMESPACE(unpack_ciphertext)
-#define matvec_mul MLKEM_NAMESPACE(matvec_mul)
+#define pack_pk MLKEM_NAMESPACE_K(pack_pk)
+#define unpack_pk MLKEM_NAMESPACE_K(unpack_pk)
+#define pack_sk MLKEM_NAMESPACE_K(pack_sk)
+#define unpack_sk MLKEM_NAMESPACE_K(unpack_sk)
+#define pack_ciphertext MLKEM_NAMESPACE_K(pack_ciphertext)
+#define unpack_ciphertext MLKEM_NAMESPACE_K(unpack_ciphertext)
+#define matvec_mul MLKEM_NAMESPACE_K(matvec_mul)
 /* End of static namespacing */
 
 /*************************************************
@@ -147,7 +147,7 @@ static void unpack_ciphertext(polyvec *b, poly *v,
 /* This namespacing is not done at the top to avoid a naming conflict
  * with native backends, which are currently not yet namespaced. */
 #define poly_permute_bitrev_to_custom \
-  MLKEM_NAMESPACE(poly_permute_bitrev_to_custom)
+  MLKEM_NAMESPACE_K(poly_permute_bitrev_to_custom)
 
 static INLINE void poly_permute_bitrev_to_custom(poly *data)
 __contract__(

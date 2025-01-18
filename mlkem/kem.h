@@ -27,11 +27,11 @@
 #endif
 
 #else
-#define crypto_kem_keypair_derand MLKEM_NAMESPACE(keypair_derand)
-#define crypto_kem_keypair MLKEM_NAMESPACE(keypair)
-#define crypto_kem_enc_derand MLKEM_NAMESPACE(enc_derand)
-#define crypto_kem_enc MLKEM_NAMESPACE(enc)
-#define crypto_kem_dec MLKEM_NAMESPACE(dec)
+#define crypto_kem_keypair_derand MLKEM_NAMESPACE_K(keypair_derand)
+#define crypto_kem_keypair MLKEM_NAMESPACE_K(keypair)
+#define crypto_kem_enc_derand MLKEM_NAMESPACE_K(enc_derand)
+#define crypto_kem_enc MLKEM_NAMESPACE_K(enc)
+#define crypto_kem_dec MLKEM_NAMESPACE_K(dec)
 #endif
 
 /*************************************************

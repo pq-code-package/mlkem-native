@@ -40,7 +40,7 @@
 /* #define MLKEM_NATIVE_CONFIG_FILE "config.h" */
 
 /******************************************************************************
- * Name:        MLKEM_NAMESPACE
+ * Name:        MLKEM_NAMESPACE_PREFIX
  *
  * Description: The prefix to use to namespace global symbols
  *              from mlkem/.
@@ -53,7 +53,23 @@
 #endif
 
 /******************************************************************************
- * Name:        FIPS202_NAMESPACE
+ * Name:        MLKEM_NAMESPACE_PREFIX_ADD_LEVEL
+ *
+ * Description: If set, the level (512, 768, 1024) is added to the namespace
+ *              prefix MLKEM_NAMESPACE_PREFIX for all functions which are
+ *              level-dependent. Level-independent functions will have there
+ *              symbol prefixed by MLKEM_NAMESPACE_PREFIX only.
+ *
+ *              This is intended to be used for multi-level builds where
+ *              level-independent code should be shared across levels.
+ *
+ *              This can also be set using CFLAGS.
+ *
+ *****************************************************************************/
+/* #define MLKEM_NAMESPACE_PREFIX_ADD_LEVEL */
+
+/******************************************************************************
+ * Name:        FIPS202_NAMESPACE_PREFIX
  *
  * Description: The prefix to use to namespace global symbols
  *              from mlkem/fips202/.

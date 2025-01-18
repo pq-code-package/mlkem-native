@@ -42,7 +42,7 @@ void basemul_avx2(__m256i *r, const __m256i *a, const __m256i *b,
                   const __m256i *qdata);
 
 #define polyvec_basemul_acc_montgomery_cached_avx2 \
-  MLKEM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_avx2)
+  MLKEM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_avx2)
 void polyvec_basemul_acc_montgomery_cached_avx2(
     poly *r, const polyvec *a, const polyvec *b,
     const polyvec_mulcache *b_cache);

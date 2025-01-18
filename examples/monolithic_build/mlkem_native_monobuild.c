@@ -214,8 +214,18 @@
 #endif
 
 /* mlkem/common.h */
+#if defined(MLKEM_ASM_NAMESPACE_K)
+#undef MLKEM_ASM_NAMESPACE_K
+#endif
+
+/* mlkem/common.h */
 #if defined(MLKEM_NAMESPACE)
 #undef MLKEM_NAMESPACE
+#endif
+
+/* mlkem/common.h */
+#if defined(MLKEM_NAMESPACE_K)
+#undef MLKEM_NAMESPACE_K
 #endif
 
 /* mlkem/common.h */
@@ -246,6 +256,16 @@
 /* mlkem/common.h */
 #if defined(MLKEM_NATIVE_MAKE_NAMESPACE_)
 #undef MLKEM_NATIVE_MAKE_NAMESPACE_
+#endif
+
+/* mlkem/common.h */
+#if defined(MLKEM_NATIVE_MAKE_NAMESPACE_K)
+#undef MLKEM_NATIVE_MAKE_NAMESPACE_K
+#endif
+
+/* mlkem/common.h */
+#if defined(MLKEM_NATIVE_MAKE_NAMESPACE_K_)
+#undef MLKEM_NATIVE_MAKE_NAMESPACE_K_
 #endif
 
 /* mlkem/common.h */
@@ -454,13 +474,23 @@
 #endif
 
 /* mlkem/mlkem_native.h */
-#if defined(BUILD_INFO_CONCAT)
-#undef BUILD_INFO_CONCAT
+#if defined(BUILD_INFO_CONCAT2)
+#undef BUILD_INFO_CONCAT2
 #endif
 
 /* mlkem/mlkem_native.h */
-#if defined(BUILD_INFO_CONCAT_)
-#undef BUILD_INFO_CONCAT_
+#if defined(BUILD_INFO_CONCAT2_)
+#undef BUILD_INFO_CONCAT2_
+#endif
+
+/* mlkem/mlkem_native.h */
+#if defined(BUILD_INFO_CONCAT3)
+#undef BUILD_INFO_CONCAT3
+#endif
+
+/* mlkem/mlkem_native.h */
+#if defined(BUILD_INFO_CONCAT3_)
+#undef BUILD_INFO_CONCAT3_
 #endif
 
 /* mlkem/mlkem_native.h */

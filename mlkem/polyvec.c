@@ -17,8 +17,8 @@
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define poly_cbd_eta1 MLKEM_NAMESPACE(poly_cbd_eta1)
-#define poly_cbd_eta2 MLKEM_NAMESPACE(poly_cbd_eta2)
+#define poly_cbd_eta1 MLKEM_NAMESPACE_K(poly_cbd_eta1)
+#define poly_cbd_eta2 MLKEM_NAMESPACE_K(poly_cbd_eta2)
 /* End of static namespacing */
 
 MLKEM_NATIVE_INTERNAL_API
