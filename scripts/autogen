@@ -319,8 +319,9 @@ def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
         yield from gen_header()
         yield '#include "../../../common.h"'
         yield ""
-        yield "#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \\"
-        yield "    defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)"
+        yield "#if (defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \\"
+        yield "     defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)) &&  \\"
+        yield "     !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)"
         yield ""
         yield "#include <stdint.h>"
         yield '#include "arith_native_aarch64.h"'
@@ -353,12 +354,17 @@ def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
         yield from map(lambda t: str(t) + ",", gen_aarch64_mulcache_twiddles_twisted())
         yield "};"
         yield ""
-        yield "#else"
+        yield "#else /* (defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \\"
+        yield "          defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT))     \\"
+        yield "          && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */"
         yield ""
         yield "/* Dummy declaration for compilers disliking empty compilation units */"
         yield "#define empty_cu_aarch64_zetas MLKEM_NAMESPACE(empty_cu_aarch64_zetas)"
         yield "int empty_cu_aarch64_zetas;"
-        yield "#endif"
+        yield ""
+        yield "#endif /* (defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \\"
+        yield "           defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT))     \\"
+        yield "           && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */"
         yield ""
 
     update_file(
@@ -390,8 +396,9 @@ def gen_aarch64_rej_uniform_table(dry_run=False):
         yield from gen_header()
         yield '#include "../../../common.h"'
         yield ""
-        yield "#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \\"
-        yield "    defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)"
+        yield "#if (defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \\"
+        yield "     defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)) &&  \\"
+        yield "     !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)"
         yield ""
         yield "#include <stdint.h>"
         yield '#include "arith_native_aarch64.h"'
@@ -404,12 +411,16 @@ def gen_aarch64_rej_uniform_table(dry_run=False):
         yield from map(lambda t: str(t) + ",", gen_aarch64_rej_uniform_table_rows())
         yield "};"
         yield ""
-        yield "#else"
+        yield "#else /* (defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \\"
+        yield "          defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT))     \\"
+        yield "          && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */"
         yield ""
         yield "/* Dummy declaration for compilers disliking empty compilation units */"
         yield "#define empty_cu_aarch64_rej_uniform_table MLKEM_NAMESPACE(empty_cu_aarch64_rej_uniform_table)"
         yield "int empty_cu_aarch64_rej_uniform_table;"
-        yield "#endif"
+        yield "#endif /* (defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \\"
+        yield "           defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT))     \\"
+        yield "           && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */"
         yield ""
 
     update_file(
@@ -442,7 +453,8 @@ def gen_avx2_rej_uniform_table(dry_run=False):
         yield from gen_header()
         yield '#include "../../../common.h"'
         yield ""
-        yield "#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT)"
+        yield "#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \\"
+        yield "    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)"
         yield ""
         yield "#include <stdint.h>"
         yield '#include "arith_native_x86_64.h"'
@@ -455,12 +467,15 @@ def gen_avx2_rej_uniform_table(dry_run=False):
         yield from map(lambda t: str(t) + ",", gen_avx2_rej_uniform_table_rows())
         yield "};"
         yield ""
-        yield "#else"
+        yield "#else /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \\"
+        yield "         !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */"
         yield ""
         yield "/* Dummy declaration for compilers disliking empty compilation units */"
         yield "#define empty_cu_avx2_rej_uniform_table MLKEM_NAMESPACE(empty_cu_avx2_rej_uniform_table)"
         yield "int empty_cu_avx2_rej_uniform_table;"
-        yield "#endif"
+        yield ""
+        yield "#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \\"
+        yield "          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */"
         yield ""
 
     update_file(

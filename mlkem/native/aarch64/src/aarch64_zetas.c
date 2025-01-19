@@ -10,8 +10,9 @@
 
 #include "../../../common.h"
 
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \
-    defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
+#if (defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \
+     defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)) &&  \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 #include <stdint.h>
 #include "arith_native_aarch64.h"
@@ -167,9 +168,14 @@ ALIGN const int16_t aarch64_zetas_mulcache_twisted_native[] = {
     -11566, 11566,
 };
 
-#else
+#else /* (defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \
+          defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT))     \
+          && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
 
 /* Dummy declaration for compilers disliking empty compilation units */
-#define empty_cu_aarch64_zetas MLKEM_NAMESPACE(empty_cu_aarch64_zetas)
+#define empty_cu_aarch64_zetas MLKEM_NAMESPACE_K(empty_cu_aarch64_zetas)
 int empty_cu_aarch64_zetas;
-#endif
+
+#endif /* (defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \
+           defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT))     \
+           && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */

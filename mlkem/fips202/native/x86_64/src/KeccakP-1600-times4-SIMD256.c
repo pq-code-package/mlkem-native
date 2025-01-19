@@ -25,7 +25,8 @@ http://creativecommons.org/publicdomain/zero/1.0/
  */
 
 #include "../../../../common.h"
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP)
+#if defined(MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 #include <immintrin.h>
 #include <stdint.h>
@@ -453,10 +454,12 @@ void KeccakP1600times4_PermuteAll_24rounds(void *states)
       rounds24 copyToState(statesAsLanes, A)
 }
 
-#else
+#else /* defined(MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP) && \
+         !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
 
 /* Dummy constant to keep compiler happy despite empty CU */
-#define empty_cu_avx2_keccakx4 FIPS202_NAMESPACE(empty_cu_avx2_keccakx4)
+#define empty_cu_avx2_keccakx4 FIPS202_NAMESPACE_K(empty_cu_avx2_keccakx4)
 int empty_cu_avx2_keccakx4;
 
-#endif /* MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP */
+#endif /* defined(MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP) && \
+          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */

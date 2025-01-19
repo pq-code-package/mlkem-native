@@ -4,7 +4,8 @@
  */
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 /* Barrett reduction */
 .macro barrett_reduce a
@@ -251,4 +252,5 @@ MLKEM_ASM_NAMESPACE(poly_reduce_asm_opt):
         .unreq modulus
         .unreq modulus_twisted
 
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT */
+#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT &&
+          !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

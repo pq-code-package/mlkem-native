@@ -4,7 +4,8 @@
  */
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 /********************************************
  *             poly_tobytes()               *
@@ -56,4 +57,5 @@ poly_tobytes_asm_clean_asm_loop_start:
         .unreq src
         .unreq count
 
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN */
+#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN &&
+          !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

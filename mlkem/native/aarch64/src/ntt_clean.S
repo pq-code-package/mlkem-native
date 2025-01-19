@@ -25,7 +25,8 @@
 ///
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 // Bounds:
 // If C is chosen so that |src| < q * C, then |dst| < q * (0.0508 * C + 1/2)
@@ -313,4 +314,5 @@ layer3456_start:
     .unreq t2
     .unreq t3
 
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN */
+#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN &&
+          !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

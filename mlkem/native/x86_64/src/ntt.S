@@ -7,7 +7,8 @@
 // https://github.com/pq-crystals/kyber/blob/main/avx2
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 #include "consts.h"
 #include "shuffle.inc"
@@ -216,4 +217,5 @@ levels1t6	1
 
 ret
 
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT */
+#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
+          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */

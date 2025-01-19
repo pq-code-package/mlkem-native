@@ -10,7 +10,9 @@
 // https://github.com/neon-ntt/neon-ntt
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) && MLKEM_K == 4
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) && \
+    (defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4)
 
 // Input:
 // - Vectors al, ah of 32-bit entries
@@ -222,4 +224,6 @@ k4_loop_start:
     .unreq out1
     .unreq t0
 
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN && MLKEM_K == 4 */
+#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) && \
+          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) && \
+          (defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 2) */

@@ -4,7 +4,8 @@
  */
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 /* Montgomery multiplication, with precomputed Montgomery twist
  * Expects modulus in consts.h[0]. */
@@ -93,4 +94,5 @@ mulcache_compute_loop_start:
         .unreq modulus
         .unreq modulus_twisted
 
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN */
+#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN &&
+          !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

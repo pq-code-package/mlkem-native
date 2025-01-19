@@ -189,6 +189,7 @@ class TEST_TYPES(Enum):
     MONOLITHIC_BUILD = 10
     MONOLITHIC_BUILD_MULTILEVEL = 11
     MULTILEVEL_BUILD = 12
+    MULTILEVEL_BUILD_NATIVE = 13
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -205,6 +206,7 @@ class TEST_TYPES(Enum):
             TEST_TYPES.MONOLITHIC_BUILD,
             TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL,
             TEST_TYPES.MULTILEVEL_BUILD,
+            TEST_TYPES.MULTILEVEL_BUILD_NATIVE,
         ]
 
     @staticmethod
@@ -241,6 +243,8 @@ class TEST_TYPES(Enum):
             return "Example (monolithic build, multilevel)"
         if self == TEST_TYPES.MULTILEVEL_BUILD:
             return "Example (multilevel build)"
+        if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
+            return "Example (multilevel build, native)"
 
     def make_dir(self):
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
@@ -255,6 +259,8 @@ class TEST_TYPES(Enum):
             return "examples/monolithic_build_multilevel"
         if self == TEST_TYPES.MULTILEVEL_BUILD:
             return "examples/multilevel_build"
+        if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
+            return "examples/multilevel_build_native"
         return ""
 
     def make_target(self):
@@ -281,6 +287,8 @@ class TEST_TYPES(Enum):
         if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
             return ""
         if self == TEST_TYPES.MULTILEVEL_BUILD:
+            return ""
+        if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
             return ""
 
     def make_run_target(self, scheme):

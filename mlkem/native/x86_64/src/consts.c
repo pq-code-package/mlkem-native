@@ -10,7 +10,8 @@
 
 #include "../../../common.h"
 
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 #include "align.h"
 #include "consts.h"
@@ -85,9 +86,12 @@ const qdata_t qdata = {{
     SHIFT,    SHIFT,    SHIFT,    SHIFT,    SHIFT,    SHIFT,
     SHIFT,    SHIFT,    SHIFT,    SHIFT}};
 
-#else /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT */
+#else /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
+         !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
 
 /* Dummy declaration for compilers disliking empty compilation units */
-#define empty_cu_consts MLKEM_NAMESPACE(empty_cu_consts)
+#define empty_cu_consts MLKEM_NAMESPACE_K(empty_cu_consts)
 int empty_cu_consts;
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT */
+
+#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
+          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */

@@ -28,8 +28,9 @@
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
 
 #include "../../../../common.h"
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-    defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55)
+#if (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
+     defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55)) &&    \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 /****************** REGISTER ALLOCATIONS *******************/
 
@@ -453,5 +454,6 @@ initial:
     .unreq Aso
     .unreq Asu
 
-#endif /* defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) ||
-          defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55) */
+#endif /* (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) ||
+          defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55) &&
+         !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)*/

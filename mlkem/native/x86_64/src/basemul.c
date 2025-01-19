@@ -5,7 +5,8 @@
 
 #include "../../../common.h"
 
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 #include "../../../poly.h"
 #include "../../../polyvec.h"
@@ -58,11 +59,13 @@ void polyvec_basemul_acc_montgomery_cached_avx2(poly *r, const polyvec *a,
   }
 }
 
-#else /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT */
+#else /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
+          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
 
 /* Dummy constant to keep compiler happy despite empty CU */
 
-#define empty_cu_avx2_basemul MLKEM_NAMESPACE(empty_cu_avx2_basemul)
+#define empty_cu_avx2_basemul MLKEM_NAMESPACE_K(empty_cu_avx2_basemul)
 int empty_cu_avx2_basemul;
 
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT */
+#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
+          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */

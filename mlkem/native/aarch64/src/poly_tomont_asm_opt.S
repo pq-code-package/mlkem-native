@@ -4,7 +4,8 @@
  */
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 /* Montgomery multiplication, with precomputed Montgomery twist
  * Expects modulus in consts.h[0]. */
@@ -207,4 +208,5 @@ MLKEM_ASM_NAMESPACE(poly_tomont_asm_opt):
 
         .unreq tmp0
 
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT */
+#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT &&
+          !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

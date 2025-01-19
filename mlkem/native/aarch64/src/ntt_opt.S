@@ -25,7 +25,8 @@
 ///
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 // Bounds:
 // If C is chosen so that |src| < q * C, then |dst| < q * (0.0508 * C + 1/2)
@@ -951,4 +952,5 @@ MLKEM_ASM_NAMESPACE(ntt_asm_opt):
     .unreq t2
     .unreq t3
 
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT */
+#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT &&
+          !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
