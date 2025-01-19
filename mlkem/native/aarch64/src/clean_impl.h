@@ -56,8 +56,18 @@ static INLINE void polyvec_basemul_acc_montgomery_cached_native(
     poly *r, const polyvec *a, const polyvec *b,
     const polyvec_mulcache *b_cache)
 {
-  polyvec_basemul_acc_montgomery_cached_asm_clean(
+#if MLKEM_K == 2
+  polyvec_basemul_acc_montgomery_cached_asm_k2_clean(
       r->coeffs, a->vec[0].coeffs, b->vec[0].coeffs, b_cache->vec[0].coeffs);
+#elif MLKEM_K == 3
+  polyvec_basemul_acc_montgomery_cached_asm_k3_clean(
+      r->coeffs, a->vec[0].coeffs, b->vec[0].coeffs, b_cache->vec[0].coeffs);
+#elif MLKEM_K == 4
+  polyvec_basemul_acc_montgomery_cached_asm_k4_clean(
+      r->coeffs, a->vec[0].coeffs, b->vec[0].coeffs, b_cache->vec[0].coeffs);
+#else
+#error Invalid value for MLKEM_K
+#endif
 }
 
 static INLINE void poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
