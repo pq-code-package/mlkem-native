@@ -5,8 +5,9 @@
 
 #include "../../../../common.h"
 
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-    defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55)
+#if (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
+     defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55)) &&    \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 #include <stdint.h>
 #include "fips202_native_aarch64.h"
@@ -22,8 +23,12 @@ ALIGN const uint64_t keccakf1600_round_constants[] = {
     0x8000000000008080, 0x0000000080000001, 0x8000000080008008,
 };
 
-#else
+#else /* (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
+          defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55) &&     \
+         !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)*/
 
 MLKEM_NATIVE_EMPTY_CU(fips202_aarch64_round_constants)
 
-#endif
+#endif /* (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
+          defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55) &&      \
+         !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)*/

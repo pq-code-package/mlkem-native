@@ -38,8 +38,9 @@
 //
 
 #include "../../../../common.h"
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-    defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55)
+#if (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
+     defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55)) &&    \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 #if defined(__ARM_FEATURE_SHA3)
 
@@ -449,6 +450,8 @@ loop:
     .unreq Aba_
     .unreq Abe_
 
-#endif
+#endif /* __ARM_FEATURE_SHA3 */
 
-#endif
+#endif /* (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) ||
+          defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55) &&
+         !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)*/

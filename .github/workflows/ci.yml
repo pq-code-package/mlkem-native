@@ -161,6 +161,9 @@ jobs:
       - name: multilevel_build
         run: |
           make run -C examples/multilevel_build
+      - name: multilevel_build_native
+        run: |
+          make run -C examples/multilevel_build_native
   build_kat:
     needs: [quickcheck, quickcheck-windows, quickcheck-c90, quickcheck-lib, examples, lint, lint-markdown-link]
     strategy:

@@ -25,7 +25,8 @@ http://creativecommons.org/publicdomain/zero/1.0/
  */
 
 #include "../../../../common.h"
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP)
+#if defined(MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 #include <immintrin.h>
 #include <stdint.h>
@@ -453,8 +454,10 @@ void KeccakP1600times4_PermuteAll_24rounds(void *states)
       rounds24 copyToState(statesAsLanes, A)
 }
 
-#else
+#else /* defined(MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP) && \
+         !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
 
 MLKEM_NATIVE_EMPTY_CU(fips202_avx2_keccakx4)
 
-#endif /* MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP */
+#endif /* defined(MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP) && \
+          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */

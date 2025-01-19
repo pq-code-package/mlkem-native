@@ -9,10 +9,15 @@ This directory contains minimal examples demonstrating how you can use mlkem-nat
 See [mlkem_native_as_code_package](mlkem_native_as_code_package) for a basic example of how to build a single instance
 of mlkem-native.
 
-## Multi-level build
+## Multi-level build (C only)
 
 See [multilevel_build](multilevel_build) for an example of how to build one instance of mlkem-native per security level,
 in such a way that level-independent code is shared.
+
+## Multi-level build (with native code)
+
+See [multilevel_build_native](multilevel_build_native) for an example of how to build one instance of mlkem-native per
+security level, in such a way that level-independent code is shared, and leveraging the native backends.
 
 ## Custom FIPS202 implementation
 

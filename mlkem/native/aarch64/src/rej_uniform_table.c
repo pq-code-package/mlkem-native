@@ -10,7 +10,8 @@
 
 #include "../../../common.h"
 
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 #include <stdint.h>
 #include "arith_native_aarch64.h"
@@ -278,8 +279,10 @@ ALIGN const uint8_t rej_uniform_table[] = {
     0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15 /* 255 */,
 };
 
-#else
+#else /* defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) \
+          && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
 
 MLKEM_NATIVE_EMPTY_CU(aarch64_rej_uniform_table)
 
-#endif
+#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) \
+          && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
