@@ -202,10 +202,22 @@ static int bench(void)
   BENCH("poly-mulcache-compute-clean",
         poly_mulcache_compute_asm_clean((int16_t *)data0, (int16_t *)data1,
                                         (int16_t *)data2, (int16_t *)data3));
-  BENCH("poly-basemul-acc-montgomery-clean",
-        polyvec_basemul_acc_montgomery_cached_asm_clean(
+#if MLKEM_K == 2
+  BENCH("polyvec-basemul-acc-montgomery-cached-asm-clean",
+        polyvec_basemul_acc_montgomery_cached_asm_k2_clean(
             (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
             (int16_t *)data3));
+#elif MLKEM_K == 3
+  BENCH("polyvec-basemul-acc-montgomery-cached-asm-clean",
+        polyvec_basemul_acc_montgomery_cached_asm_k3_clean(
+            (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
+            (int16_t *)data3));
+#elif MLKEM_K == 4
+  BENCH("polyvec-basemul-acc-montgomery-cached-asm-clean",
+        polyvec_basemul_acc_montgomery_cached_asm_k4_clean(
+            (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
+            (int16_t *)data3));
+#endif
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN */
 
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
@@ -218,10 +230,22 @@ static int bench(void)
   BENCH("poly-mulcache-compute-opt",
         poly_mulcache_compute_asm_opt((int16_t *)data0, (int16_t *)data1,
                                       (int16_t *)data2, (int16_t *)data3));
-  BENCH("poly-basemul-acc-montgomery-opt",
-        polyvec_basemul_acc_montgomery_cached_asm_opt(
+#if MLKEM_K == 2
+  BENCH("polyvec-basemul-acc-montgomery-cached-asm-opt",
+        polyvec_basemul_acc_montgomery_cached_asm_k2_opt(
             (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
             (int16_t *)data3));
+#elif MLKEM_K == 3
+  BENCH("polyvec-basemul-acc-montgomery-cached-asm-opt",
+        polyvec_basemul_acc_montgomery_cached_asm_k3_opt(
+            (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
+            (int16_t *)data3));
+#elif MLKEM_K == 4
+  BENCH("polyvec-basemul-acc-montgomery-cached-asm-opt",
+        polyvec_basemul_acc_montgomery_cached_asm_k4_opt(
+            (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
+            (int16_t *)data3));
+#endif
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT */
 
   return 0;

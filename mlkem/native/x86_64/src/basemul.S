@@ -113,6 +113,7 @@ vmovdqa		%ymm11,(64*\off+48)*2(%rdi)
 
 .text
 .global MLKEM_ASM_NAMESPACE(basemul_avx2)
+.balign 4
 MLKEM_ASM_NAMESPACE(basemul_avx2):
 mov		%rsp,%r8
 and		$-32,%rsp

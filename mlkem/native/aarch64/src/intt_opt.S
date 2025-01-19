@@ -139,9 +139,6 @@
 // are NOT canonically reduced. The ordering of the coefficients is canonical,
 // also matching PQClean.
 
-.text
-        .global MLKEM_ASM_NAMESPACE(intt_asm_opt)
-
         in         .req x0
         r01234_ptr .req x1
         r56_ptr    .req x2
@@ -194,7 +191,9 @@
         ninv             .req v29
         ninv_tw          .req v30
 
-.balign 4
+        .text
+        .global MLKEM_ASM_NAMESPACE(intt_asm_opt)
+        .balign 4
 MLKEM_ASM_NAMESPACE(intt_asm_opt):
         push_stack
 

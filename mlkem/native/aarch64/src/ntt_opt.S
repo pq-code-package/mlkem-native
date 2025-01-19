@@ -166,7 +166,6 @@
 
         .text
         .global MLKEM_ASM_NAMESPACE(ntt_asm_opt)
-
         .balign 4
 MLKEM_ASM_NAMESPACE(ntt_asm_opt):
         push_stack

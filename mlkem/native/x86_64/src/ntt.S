@@ -205,6 +205,7 @@ vmovdqa		%ymm11,(128*\off+112)*2(%rdi)
 
 .text
 .global MLKEM_ASM_NAMESPACE(ntt_avx2)
+.balign 4
 MLKEM_ASM_NAMESPACE(ntt_avx2):
 vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
 

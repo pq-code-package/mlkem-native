@@ -112,9 +112,9 @@
     mlkem_q                     .req v30
     bits                        .req v31
 
-.text
-.global MLKEM_ASM_NAMESPACE(rej_uniform_asm_clean)
-.balign 4
+    .text
+    .global MLKEM_ASM_NAMESPACE(rej_uniform_asm_clean)
+    .balign 4
 MLKEM_ASM_NAMESPACE(rej_uniform_asm_clean):
     push_stack
 
