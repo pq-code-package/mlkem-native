@@ -82,6 +82,57 @@
 #endif
 
 /******************************************************************************
+ * Name:        MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED
+ *
+ * Description: This is for multi-level builds of mlkem-native only. If you
+ *              need only a single security level build of mlkem-native,
+ *              keep this unset.
+ *
+ *              If this is set, all MLKEM_K-independent code will be included
+ *              in the build, including code needed only for other security
+ *              levels.
+ *
+ *              Example: poly_cbd3 is only needed for MLKEM_K == 2. Yet, if
+ *              this option is set for a build with MLKEM_K==3/4, it would
+ *              be included.
+ *
+ *              To build mlkem-native with support for all security levels,
+ *              build it three times -- once per level -- and set the option
+ *              MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED for exactly one of
+ *              them, and MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED for the
+ *              others.
+ *
+ *              See examples/multilevel_build for an example.
+ *
+ *              This can also be set using CFLAGS.
+ *
+ *****************************************************************************/
+/* #define MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED */
+
+/******************************************************************************
+ * Name:        MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED
+ *
+ * Description: This is for multi-level builds of mlkem-native only. If you
+ *              need only a single security level build of mlkem-native,
+ *              keep this unset.
+ *
+ *              If this is set, no MLKEM_K-independent code will be included
+ *              in the build.
+ *
+ *              To build mlkem-native with support for all security levels,
+ *              build it three times -- once per level -- and set the option
+ *              MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED for exactly one of
+ *              them, and MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED for the
+ *              others.
+ *
+ *              See examples/multilevel_build for an example.
+ *
+ *              This can also be set using CFLAGS.
+ *
+ *****************************************************************************/
+/* #define MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+
+/******************************************************************************
  * Name:        MLKEM_USE_NATIVE
  *
  * Description: Determines whether a native backend should
