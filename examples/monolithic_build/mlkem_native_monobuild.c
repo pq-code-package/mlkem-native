@@ -73,16 +73,6 @@
 #undef poly_cbd3
 #endif
 
-/* mlkem/cbd.h */
-#if defined(poly_cbd_eta1)
-#undef poly_cbd_eta1
-#endif
-
-/* mlkem/cbd.h */
-#if defined(poly_cbd_eta2)
-#undef poly_cbd_eta2
-#endif
-
 /* mlkem/cbmc.h */
 #if defined(CBMC_CONCAT)
 #undef CBMC_CONCAT
@@ -1529,16 +1519,6 @@
 #endif
 
 /* mlkem/poly.h */
-#if defined(poly_compress_du)
-#undef poly_compress_du
-#endif
-
-/* mlkem/poly.h */
-#if defined(poly_compress_dv)
-#undef poly_compress_dv
-#endif
-
-/* mlkem/poly.h */
 #if defined(poly_decompress_d10)
 #undef poly_decompress_d10
 #endif
@@ -1559,16 +1539,6 @@
 #endif
 
 /* mlkem/poly.h */
-#if defined(poly_decompress_du)
-#undef poly_decompress_du
-#endif
-
-/* mlkem/poly.h */
-#if defined(poly_decompress_dv)
-#undef poly_decompress_dv
-#endif
-
-/* mlkem/poly.h */
 #if defined(poly_frombytes)
 #undef poly_frombytes
 #endif
@@ -1576,26 +1546,6 @@
 /* mlkem/poly.h */
 #if defined(poly_frommsg)
 #undef poly_frommsg
-#endif
-
-/* mlkem/poly.h */
-#if defined(poly_getnoise_eta1122_4x)
-#undef poly_getnoise_eta1122_4x
-#endif
-
-/* mlkem/poly.h */
-#if defined(poly_getnoise_eta1_4x)
-#undef poly_getnoise_eta1_4x
-#endif
-
-/* mlkem/poly.h */
-#if defined(poly_getnoise_eta2)
-#undef poly_getnoise_eta2
-#endif
-
-/* mlkem/poly.h */
-#if defined(poly_getnoise_eta2_4x)
-#undef poly_getnoise_eta2_4x
 #endif
 
 /* mlkem/poly.h */
@@ -1683,9 +1633,59 @@
 #undef scalar_signed_to_unsigned_q
 #endif
 
+/* mlkem/polyvec.c */
+#if defined(poly_cbd_eta1)
+#undef poly_cbd_eta1
+#endif
+
+/* mlkem/polyvec.c */
+#if defined(poly_cbd_eta2)
+#undef poly_cbd_eta2
+#endif
+
 /* mlkem/polyvec.h */
 #if defined(POLYVEC_H)
 #undef POLYVEC_H
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(poly_compress_du)
+#undef poly_compress_du
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(poly_compress_dv)
+#undef poly_compress_dv
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(poly_decompress_du)
+#undef poly_decompress_du
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(poly_decompress_dv)
+#undef poly_decompress_dv
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(poly_getnoise_eta1122_4x)
+#undef poly_getnoise_eta1122_4x
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(poly_getnoise_eta1_4x)
+#undef poly_getnoise_eta1_4x
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(poly_getnoise_eta2)
+#undef poly_getnoise_eta2
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(poly_getnoise_eta2_4x)
+#undef poly_getnoise_eta2_4x
 #endif
 
 /* mlkem/polyvec.h */
