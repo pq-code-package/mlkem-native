@@ -149,3 +149,4 @@ clean:
 	-make clean -C examples/mlkem_native_as_code_package >/dev/null
 	-make clean -C examples/monolithic_build >/dev/null
 	-make clean -C examples/monolithic_build_multilevel >/dev/null
+	-make clean -C examples/multilevel_build >/dev/null
