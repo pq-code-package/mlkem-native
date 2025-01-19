@@ -23,7 +23,7 @@
 MLKEM_NATIVE_INTERNAL_API
 void poly_cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4]);
 
-#if MLKEM_ETA1 == 3
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_ETA1 == 3
 #define poly_cbd3 MLKEM_NAMESPACE(poly_cbd3)
 /*************************************************
  * Name:        poly_cbd3
@@ -38,6 +38,6 @@ void poly_cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4]);
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
 void poly_cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4]);
-#endif /* MLKEM_ETA1 == 3 */
+#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD || MLKEM_ETA1 == 3 */
 
-#endif
+#endif /* CBD_H */

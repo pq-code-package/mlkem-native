@@ -11,10 +11,12 @@
  * from https://twitter.com/tweetfips202
  * by Gilles Van Assche, Daniel J. Bernstein, and Peter Schwabe */
 
+#include "../common.h"
+#if !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-
 #include "fips202.h"
 #include "keccakf1600.h"
 
@@ -212,3 +214,10 @@ void sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
   /* Squeeze output */
   keccak_squeeze_once(output, 64, ctx, SHA3_512_RATE);
 }
+
+#else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+
+#define empty_cu_fips202 MLKEM_NAMESPACE_K(empty_cu_fips202)
+int empty_cu_fips202;
+
+#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

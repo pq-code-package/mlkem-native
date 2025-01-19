@@ -4,7 +4,6 @@
  */
 #ifndef KECCAKF1600_H
 #define KECCAKF1600_H
-
 #include <stdint.h>
 #include "../cbmc.h"
 #include "../common.h"
@@ -103,4 +102,4 @@ __contract__(
 #define KeccakF1600_StatePermute FIPS202_NAMESPACE(keccak_f1600_x1_asm)
 #endif
 
-#endif
+#endif /* KECCAKF1600_H */

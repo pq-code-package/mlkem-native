@@ -2,9 +2,11 @@
  * Copyright (c) 2024 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
+#include "common.h"
+#if !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+
 #include <stdint.h>
 #include <string.h>
-
 #include "arith_backend.h"
 #include "cbd.h"
 #include "cbmc.h"
@@ -16,7 +18,7 @@
 #include "symmetric.h"
 #include "verify.h"
 
-#if MLKEM_K == 2 || MLKEM_K == 3
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
 MLKEM_NATIVE_INTERNAL_API
 void poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const poly *a)
 {
@@ -119,9 +121,10 @@ void poly_decompress_d10(poly *r,
 
   debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
-#endif /* MLKEM_K == 2 || MLKEM_K == 2 */
+#endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
+          || MLKEM_K == 3) */
 
-#if MLKEM_K == 4
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
 MLKEM_NATIVE_INTERNAL_API
 void poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const poly *a)
 {
@@ -270,7 +273,7 @@ void poly_decompress_d11(poly *r,
 
   debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
-#endif /* MLKEM_K == 4 */
+#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD) || MLKEM_K == 4 */
 
 #if !defined(MLKEM_USE_NATIVE_POLY_TOBYTES)
 MLKEM_NATIVE_INTERNAL_API
@@ -523,3 +526,10 @@ void poly_mulcache_compute(poly_mulcache *x, const poly *a)
    * of poly_basemul_montgomery_cached() does still include the check. */
 }
 #endif /* MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE */
+
+#else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+
+#define empty_cu_poly MLKEM_NAMESPACE_K(empty_cu_poly)
+int empty_cu_poly;
+
+#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

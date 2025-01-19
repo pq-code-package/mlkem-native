@@ -3,7 +3,7 @@
 # Multi-level mlkem-native in a single compilation unit
 
 This directory contains a minimal example for how to build multiple instances of mlkem-native in a single compilation
-unit.
+unit. Only the C-backend is exercised.
 
 The auto-generated source file [mlkem_native_monobuild.c](mlkem_native_monobuild.c) includes all mlkem-native C source
 files. Moreover, it clears all `#define`s clauses set by mlkem-native at the end, and is hence amenable to multiple
@@ -17,18 +17,32 @@ appropriately first, and then includes the monobuild:
 ```C
 /* Three instances of mlkem-native for all security levels */
 
+/* Include level-independent code */
+#define MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED
+#define MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS
+
 #define MLKEM_NATIVE_CONFIG_FILE "config_512.h"
 #include "mlkem_native_monobuild.c"
 #undef MLKEM_NATIVE_CONFIG_FILE
 
-#define MLKEM_NATIVE_CONFIG_FILE "config_768.h"
-#include "mlkem_native_monobuild.c"
-#undef MLKEM_NATIVE_CONFIG_FILE
+/* Exclude level-independent code */
+#undef MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED
+#define MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED
 
 #define MLKEM_NATIVE_CONFIG_FILE "config_1024.h"
 #include "mlkem_native_monobuild.c"
 #undef MLKEM_NATIVE_CONFIG_FILE
+
+#define MLKEM_NATIVE_CONFIG_FILE "config_768.h"
+#undef MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS
+#include "mlkem_native_monobuild.c"
+#undef MLKEM_NATIVE_CONFIG_FILE
 ```
+
+Note the setting `MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED` which forces the inclusion of all level-independent
+code in the MLKEM-512 build, and the setting `MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED`, which drops all
+level-independent code in the subsequent builds. Finally, `MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS` entails that
+`mlkem_native_monobuild.c` does not `#undefine` the `#define` clauses from level-independent files.
 
 To make the monolithic multi-level build accessible from the application sources, we provide
 [mlkem_native_all.h](mlkem_native_all.h), which includes [mlkem_native.h](../../mlkem/mlkem_native.h) once per

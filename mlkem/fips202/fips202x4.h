@@ -75,4 +75,4 @@ __contract__(
   assigns(memory_slice(out3, outlen))
 );
 
-#endif
+#endif /* FIPS_202X4_H */

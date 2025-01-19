@@ -60,4 +60,4 @@ __contract__(
   assigns(memory_slice(entry, sizeof(poly)))
   ensures(array_bound(entry->coeffs, 0, MLKEM_N, 0, MLKEM_Q)));
 
-#endif
+#endif /* REJ_UNIFORM_H */

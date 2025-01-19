@@ -15,14 +15,11 @@
 
 #include "mlkem/cbd.c"
 #include "mlkem/debug/debug.c"
+#include "mlkem/fips202/fips202.c"
+#include "mlkem/fips202/fips202x4.c"
+#include "mlkem/fips202/keccakf1600.c"
 #include "mlkem/indcpa.c"
 #include "mlkem/kem.c"
-#include "mlkem/native/aarch64/src/aarch64_zetas.c"
-#include "mlkem/native/aarch64/src/rej_uniform_table.c"
-#include "mlkem/native/x86_64/src/basemul.c"
-#include "mlkem/native/x86_64/src/consts.c"
-#include "mlkem/native/x86_64/src/rej_uniform_avx2.c"
-#include "mlkem/native/x86_64/src/rej_uniform_table.c"
 #include "mlkem/ntt.c"
 #include "mlkem/poly.c"
 #include "mlkem/polyvec.c"
@@ -30,173 +27,10 @@
 #include "mlkem/verify.c"
 #include "mlkem/zetas.c"
 
-#if !defined(MLKEM_NATIVE_MONOBUILD_NO_FIPS202_SOURCES)
-#include "mlkem/fips202/fips202.c"
-#include "mlkem/fips202/fips202x4.c"
-#include "mlkem/fips202/keccakf1600.c"
-#include "mlkem/fips202/native/aarch64/src/keccakf1600_round_constants.c"
-#include "mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c"
-#endif /* MLKEM_NATIVE_MONOBUILD_NO_FIPS202_SOURCES */
-
 
 /*
  * Undo all #define directives from *.c or *.h files
  */
-
-/* mlkem/arith_backend.h */
-#if defined(MLKEM_NATIVE_ARITH_IMPL_H)
-#undef MLKEM_NATIVE_ARITH_IMPL_H
-#endif
-
-/* mlkem/cbd.c */
-#if defined(load24_littleendian)
-#undef load24_littleendian
-#endif
-
-/* mlkem/cbd.c */
-#if defined(load32_littleendian)
-#undef load32_littleendian
-#endif
-
-/* mlkem/cbd.h */
-#if defined(CBD_H)
-#undef CBD_H
-#endif
-
-/* mlkem/cbd.h */
-#if defined(poly_cbd2)
-#undef poly_cbd2
-#endif
-
-/* mlkem/cbd.h */
-#if defined(poly_cbd3)
-#undef poly_cbd3
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(CBMC_CONCAT)
-#undef CBMC_CONCAT
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(CBMC_CONCAT_)
-#undef CBMC_CONCAT_
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(EXISTS)
-#undef EXISTS
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(__contract__)
-#undef __contract__
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(__loop__)
-#undef __loop__
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(array_abs_bound)
-#undef array_abs_bound
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(array_bound)
-#undef array_bound
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(array_bound_core)
-#undef array_bound_core
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(assigns)
-#undef assigns
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(assume)
-#undef assume
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(cassert)
-#undef cassert
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(decreases)
-#undef decreases
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(ensures)
-#undef ensures
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(forall)
-#undef forall
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(invariant)
-#undef invariant
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(loop_entry)
-#undef loop_entry
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(memory_no_alias)
-#undef memory_no_alias
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(memory_slice)
-#undef memory_slice
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(object_whole)
-#undef object_whole
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(old)
-#undef old
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(readable)
-#undef readable
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(requires)
-#undef requires
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(return_value)
-#undef return_value
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(same_object)
-#undef same_object
-#endif
-
-/* mlkem/cbmc.h */
-#if defined(writeable)
-#undef writeable
-#endif
 
 /* mlkem/common.h */
 #if defined(FIPS202_ASM_NAMESPACE)
@@ -316,56 +150,6 @@
 /* mlkem/config.h */
 #if defined(MLKEM_NATIVE_FIPS202_BACKEND)
 #undef MLKEM_NATIVE_FIPS202_BACKEND
-#endif
-
-/* mlkem/debug/debug.c */
-#if defined(MLKEM_NATIVE_DEBUG_ERROR_HEADER)
-#undef MLKEM_NATIVE_DEBUG_ERROR_HEADER
-#endif
-
-/* mlkem/debug/debug.c */
-#if defined(empty_cu_debug)
-#undef empty_cu_debug
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(MLKEM_DEBUG_H)
-#undef MLKEM_DEBUG_H
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(debug_assert)
-#undef debug_assert
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(debug_assert_abs_bound)
-#undef debug_assert_abs_bound
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(debug_assert_abs_bound_2d)
-#undef debug_assert_abs_bound_2d
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(debug_assert_bound)
-#undef debug_assert_bound
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(debug_assert_bound_2d)
-#undef debug_assert_bound_2d
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(mlkem_debug_assert)
-#undef mlkem_debug_assert
-#endif
-
-/* mlkem/debug/debug.h */
-#if defined(mlkem_debug_check_bounds)
-#undef mlkem_debug_check_bounds
 #endif
 
 /* mlkem/indcpa.c */
@@ -673,691 +457,6 @@
 #undef crypto_kem_keypair_derand
 #endif
 
-/* mlkem/native/aarch64/clean.h */
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN)
-#undef MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN
-#endif
-
-/* mlkem/native/aarch64/clean.h */
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_IMPL)
-#undef MLKEM_NATIVE_ARITH_BACKEND_IMPL
-#endif
-
-/* mlkem/native/aarch64/clean.h */
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_NAME)
-#undef MLKEM_NATIVE_ARITH_BACKEND_NAME
-#endif
-
-/* mlkem/native/aarch64/clean.h */
-#if defined(MLKEM_NATIVE_ARITH_PROFILE_H)
-#undef MLKEM_NATIVE_ARITH_PROFILE_H
-#endif
-
-/* mlkem/native/aarch64/opt.h */
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
-#undef MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT
-#endif
-
-/* mlkem/native/aarch64/opt.h */
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_IMPL)
-#undef MLKEM_NATIVE_ARITH_BACKEND_IMPL
-#endif
-
-/* mlkem/native/aarch64/opt.h */
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_NAME)
-#undef MLKEM_NATIVE_ARITH_BACKEND_NAME
-#endif
-
-/* mlkem/native/aarch64/opt.h */
-#if defined(MLKEM_NATIVE_ARITH_PROFILE_H)
-#undef MLKEM_NATIVE_ARITH_PROFILE_H
-#endif
-
-/* mlkem/native/aarch64/src/aarch64_zetas.c */
-#if defined(empty_cu_aarch64_zetas)
-#undef empty_cu_aarch64_zetas
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(MLKEM_AARCH64_NATIVE_H)
-#undef MLKEM_AARCH64_NATIVE_H
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(aarch64_invntt_zetas_layer01234)
-#undef aarch64_invntt_zetas_layer01234
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(aarch64_invntt_zetas_layer56)
-#undef aarch64_invntt_zetas_layer56
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(aarch64_ntt_zetas_layer01234)
-#undef aarch64_ntt_zetas_layer01234
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(aarch64_ntt_zetas_layer56)
-#undef aarch64_ntt_zetas_layer56
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(aarch64_zetas_mulcache_native)
-#undef aarch64_zetas_mulcache_native
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(aarch64_zetas_mulcache_twisted_native)
-#undef aarch64_zetas_mulcache_twisted_native
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(intt_asm_clean)
-#undef intt_asm_clean
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(intt_asm_opt)
-#undef intt_asm_opt
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(ntt_asm_clean)
-#undef ntt_asm_clean
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(ntt_asm_opt)
-#undef ntt_asm_opt
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(poly_mulcache_compute_asm_clean)
-#undef poly_mulcache_compute_asm_clean
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(poly_mulcache_compute_asm_opt)
-#undef poly_mulcache_compute_asm_opt
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(poly_reduce_asm_clean)
-#undef poly_reduce_asm_clean
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(poly_reduce_asm_opt)
-#undef poly_reduce_asm_opt
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(poly_tobytes_asm_clean)
-#undef poly_tobytes_asm_clean
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(poly_tobytes_asm_opt)
-#undef poly_tobytes_asm_opt
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(poly_tomont_asm_clean)
-#undef poly_tomont_asm_clean
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(poly_tomont_asm_opt)
-#undef poly_tomont_asm_opt
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(polyvec_basemul_acc_montgomery_cached_asm_clean)
-#undef polyvec_basemul_acc_montgomery_cached_asm_clean
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(polyvec_basemul_acc_montgomery_cached_asm_opt)
-#undef polyvec_basemul_acc_montgomery_cached_asm_opt
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(rej_uniform_asm_clean)
-#undef rej_uniform_asm_clean
-#endif
-
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(rej_uniform_table)
-#undef rej_uniform_table
-#endif
-
-/* mlkem/native/aarch64/src/clean_impl.h */
-#if defined(MLKEM_NATIVE_ARITH_PROFILE_IMPL_H)
-#undef MLKEM_NATIVE_ARITH_PROFILE_IMPL_H
-#endif
-
-/* mlkem/native/aarch64/src/clean_impl.h */
-#if defined(MLKEM_USE_NATIVE_INTT)
-#undef MLKEM_USE_NATIVE_INTT
-#endif
-
-/* mlkem/native/aarch64/src/clean_impl.h */
-#if defined(MLKEM_USE_NATIVE_NTT)
-#undef MLKEM_USE_NATIVE_NTT
-#endif
-
-/* mlkem/native/aarch64/src/clean_impl.h */
-#if defined(MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
-#undef MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED
-#endif
-
-/* mlkem/native/aarch64/src/clean_impl.h */
-#if defined(MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE)
-#undef MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE
-#endif
-
-/* mlkem/native/aarch64/src/clean_impl.h */
-#if defined(MLKEM_USE_NATIVE_POLY_REDUCE)
-#undef MLKEM_USE_NATIVE_POLY_REDUCE
-#endif
-
-/* mlkem/native/aarch64/src/clean_impl.h */
-#if defined(MLKEM_USE_NATIVE_POLY_TOBYTES)
-#undef MLKEM_USE_NATIVE_POLY_TOBYTES
-#endif
-
-/* mlkem/native/aarch64/src/clean_impl.h */
-#if defined(MLKEM_USE_NATIVE_POLY_TOMONT)
-#undef MLKEM_USE_NATIVE_POLY_TOMONT
-#endif
-
-/* mlkem/native/aarch64/src/clean_impl.h */
-#if defined(MLKEM_USE_NATIVE_REJ_UNIFORM)
-#undef MLKEM_USE_NATIVE_REJ_UNIFORM
-#endif
-
-/* mlkem/native/aarch64/src/consts.h */
-#if defined(MLKEM_NATIVE_AARCH64_CONSTS)
-#undef MLKEM_NATIVE_AARCH64_CONSTS
-#endif
-
-/* mlkem/native/aarch64/src/consts.h */
-#if defined(zetas_mulcache_native)
-#undef zetas_mulcache_native
-#endif
-
-/* mlkem/native/aarch64/src/consts.h */
-#if defined(zetas_mulcache_twisted_native)
-#undef zetas_mulcache_twisted_native
-#endif
-
-/* mlkem/native/aarch64/src/opt_impl.h */
-#if defined(MLKEM_NATIVE_ARITH_PROFILE_IMPL_H)
-#undef MLKEM_NATIVE_ARITH_PROFILE_IMPL_H
-#endif
-
-/* mlkem/native/aarch64/src/opt_impl.h */
-#if defined(MLKEM_USE_NATIVE_INTT)
-#undef MLKEM_USE_NATIVE_INTT
-#endif
-
-/* mlkem/native/aarch64/src/opt_impl.h */
-#if defined(MLKEM_USE_NATIVE_NTT)
-#undef MLKEM_USE_NATIVE_NTT
-#endif
-
-/* mlkem/native/aarch64/src/opt_impl.h */
-#if defined(MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
-#undef MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED
-#endif
-
-/* mlkem/native/aarch64/src/opt_impl.h */
-#if defined(MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE)
-#undef MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE
-#endif
-
-/* mlkem/native/aarch64/src/opt_impl.h */
-#if defined(MLKEM_USE_NATIVE_POLY_REDUCE)
-#undef MLKEM_USE_NATIVE_POLY_REDUCE
-#endif
-
-/* mlkem/native/aarch64/src/opt_impl.h */
-#if defined(MLKEM_USE_NATIVE_POLY_TOBYTES)
-#undef MLKEM_USE_NATIVE_POLY_TOBYTES
-#endif
-
-/* mlkem/native/aarch64/src/opt_impl.h */
-#if defined(MLKEM_USE_NATIVE_POLY_TOMONT)
-#undef MLKEM_USE_NATIVE_POLY_TOMONT
-#endif
-
-/* mlkem/native/aarch64/src/opt_impl.h */
-#if defined(MLKEM_USE_NATIVE_REJ_UNIFORM)
-#undef MLKEM_USE_NATIVE_REJ_UNIFORM
-#endif
-
-/* mlkem/native/aarch64/src/rej_uniform_table.c */
-#if defined(empty_cu_aarch64_rej_uniform_table)
-#undef empty_cu_aarch64_rej_uniform_table
-#endif
-
-/* mlkem/native/api.h */
-#if defined(MLKEM_NATIVE_ARITH_NATIVE_API_H)
-#undef MLKEM_NATIVE_ARITH_NATIVE_API_H
-#endif
-
-/* mlkem/native/default.h */
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_DEFAULT_H)
-#undef MLKEM_NATIVE_ARITH_BACKEND_DEFAULT_H
-#endif
-
-/* mlkem/native/x86_64/default.h */
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_IMPL)
-#undef MLKEM_NATIVE_ARITH_BACKEND_IMPL
-#endif
-
-/* mlkem/native/x86_64/default.h */
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_NAME)
-#undef MLKEM_NATIVE_ARITH_BACKEND_NAME
-#endif
-
-/* mlkem/native/x86_64/default.h */
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT)
-#undef MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT
-#endif
-
-/* mlkem/native/x86_64/default.h */
-#if defined(MLKEM_NATIVE_ARITH_PROFILE_H)
-#undef MLKEM_NATIVE_ARITH_PROFILE_H
-#endif
-
-/* mlkem/native/x86_64/src/align.h */
-#if defined(ALIGNED_INT16)
-#undef ALIGNED_INT16
-#endif
-
-/* mlkem/native/x86_64/src/align.h */
-#if defined(ALIGNED_UINT8)
-#undef ALIGNED_UINT8
-#endif
-
-/* mlkem/native/x86_64/src/align.h */
-#if defined(ALIGN_H)
-#undef ALIGN_H
-#endif
-
-/* mlkem/native/x86_64/src/arith_native_x86_64.h */
-#if defined(MLKEM_X86_64_NATIVE_H)
-#undef MLKEM_X86_64_NATIVE_H
-#endif
-
-/* mlkem/native/x86_64/src/arith_native_x86_64.h */
-#if defined(REJ_UNIFORM_AVX_BUFLEN)
-#undef REJ_UNIFORM_AVX_BUFLEN
-#endif
-
-/* mlkem/native/x86_64/src/arith_native_x86_64.h */
-#if defined(REJ_UNIFORM_AVX_NBLOCKS)
-#undef REJ_UNIFORM_AVX_NBLOCKS
-#endif
-
-/* mlkem/native/x86_64/src/arith_native_x86_64.h */
-#if defined(basemul_avx2)
-#undef basemul_avx2
-#endif
-
-/* mlkem/native/x86_64/src/arith_native_x86_64.h */
-#if defined(invntt_avx2)
-#undef invntt_avx2
-#endif
-
-/* mlkem/native/x86_64/src/arith_native_x86_64.h */
-#if defined(ntt_avx2)
-#undef ntt_avx2
-#endif
-
-/* mlkem/native/x86_64/src/arith_native_x86_64.h */
-#if defined(nttfrombytes_avx2)
-#undef nttfrombytes_avx2
-#endif
-
-/* mlkem/native/x86_64/src/arith_native_x86_64.h */
-#if defined(nttpack_avx2)
-#undef nttpack_avx2
-#endif
-
-/* mlkem/native/x86_64/src/arith_native_x86_64.h */
-#if defined(ntttobytes_avx2)
-#undef ntttobytes_avx2
-#endif
-
-/* mlkem/native/x86_64/src/arith_native_x86_64.h */
-#if defined(nttunpack_avx2)
-#undef nttunpack_avx2
-#endif
-
-/* mlkem/native/x86_64/src/arith_native_x86_64.h */
-#if defined(polyvec_basemul_acc_montgomery_cached_avx2)
-#undef polyvec_basemul_acc_montgomery_cached_avx2
-#endif
-
-/* mlkem/native/x86_64/src/arith_native_x86_64.h */
-#if defined(reduce_avx2)
-#undef reduce_avx2
-#endif
-
-/* mlkem/native/x86_64/src/arith_native_x86_64.h */
-#if defined(rej_uniform_avx2)
-#undef rej_uniform_avx2
-#endif
-
-/* mlkem/native/x86_64/src/arith_native_x86_64.h */
-#if defined(rej_uniform_table)
-#undef rej_uniform_table
-#endif
-
-/* mlkem/native/x86_64/src/arith_native_x86_64.h */
-#if defined(tomont_avx2)
-#undef tomont_avx2
-#endif
-
-/* mlkem/native/x86_64/src/basemul.c */
-#if defined(empty_cu_avx2_basemul)
-#undef empty_cu_avx2_basemul
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XFHI)
-#undef AVX2_BACKEND_DATA_OFFSET_16XFHI
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XFLO)
-#undef AVX2_BACKEND_DATA_OFFSET_16XFLO
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XMASK)
-#undef AVX2_BACKEND_DATA_OFFSET_16XMASK
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XMONTSQHI)
-#undef AVX2_BACKEND_DATA_OFFSET_16XMONTSQHI
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XMONTSQLO)
-#undef AVX2_BACKEND_DATA_OFFSET_16XMONTSQLO
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XQ)
-#undef AVX2_BACKEND_DATA_OFFSET_16XQ
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XQINV)
-#undef AVX2_BACKEND_DATA_OFFSET_16XQINV
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XSHIFT)
-#undef AVX2_BACKEND_DATA_OFFSET_16XSHIFT
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XV)
-#undef AVX2_BACKEND_DATA_OFFSET_16XV
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(AVX2_BACKEND_DATA_OFFSET_REVIDXB)
-#undef AVX2_BACKEND_DATA_OFFSET_REVIDXB
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(AVX2_BACKEND_DATA_OFFSET_REVIDXD)
-#undef AVX2_BACKEND_DATA_OFFSET_REVIDXD
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP)
-#undef AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(FHI)
-#undef FHI
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(FLO)
-#undef FLO
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(MASK)
-#undef MASK
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(MONT)
-#undef MONT
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(MONTSQHI)
-#undef MONTSQHI
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(MONTSQLO)
-#undef MONTSQLO
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(Q)
-#undef Q
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(QINV)
-#undef QINV
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(SHIFT)
-#undef SHIFT
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(V)
-#undef V
-#endif
-
-/* mlkem/native/x86_64/src/consts.c */
-#if defined(empty_cu_consts)
-#undef empty_cu_consts
-#endif
-
-/* mlkem/native/x86_64/src/consts.h */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XFHI)
-#undef AVX2_BACKEND_DATA_OFFSET_16XFHI
-#endif
-
-/* mlkem/native/x86_64/src/consts.h */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XFLO)
-#undef AVX2_BACKEND_DATA_OFFSET_16XFLO
-#endif
-
-/* mlkem/native/x86_64/src/consts.h */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XMASK)
-#undef AVX2_BACKEND_DATA_OFFSET_16XMASK
-#endif
-
-/* mlkem/native/x86_64/src/consts.h */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XMONTSQHI)
-#undef AVX2_BACKEND_DATA_OFFSET_16XMONTSQHI
-#endif
-
-/* mlkem/native/x86_64/src/consts.h */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XMONTSQLO)
-#undef AVX2_BACKEND_DATA_OFFSET_16XMONTSQLO
-#endif
-
-/* mlkem/native/x86_64/src/consts.h */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XQ)
-#undef AVX2_BACKEND_DATA_OFFSET_16XQ
-#endif
-
-/* mlkem/native/x86_64/src/consts.h */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XQINV)
-#undef AVX2_BACKEND_DATA_OFFSET_16XQINV
-#endif
-
-/* mlkem/native/x86_64/src/consts.h */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XSHIFT)
-#undef AVX2_BACKEND_DATA_OFFSET_16XSHIFT
-#endif
-
-/* mlkem/native/x86_64/src/consts.h */
-#if defined(AVX2_BACKEND_DATA_OFFSET_16XV)
-#undef AVX2_BACKEND_DATA_OFFSET_16XV
-#endif
-
-/* mlkem/native/x86_64/src/consts.h */
-#if defined(AVX2_BACKEND_DATA_OFFSET_REVIDXB)
-#undef AVX2_BACKEND_DATA_OFFSET_REVIDXB
-#endif
-
-/* mlkem/native/x86_64/src/consts.h */
-#if defined(AVX2_BACKEND_DATA_OFFSET_REVIDXD)
-#undef AVX2_BACKEND_DATA_OFFSET_REVIDXD
-#endif
-
-/* mlkem/native/x86_64/src/consts.h */
-#if defined(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP)
-#undef AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP
-#endif
-
-/* mlkem/native/x86_64/src/consts.h */
-#if defined(CONSTS_H)
-#undef CONSTS_H
-#endif
-
-/* mlkem/native/x86_64/src/consts.h */
-#if defined(qdata)
-#undef qdata
-#endif
-
-/* mlkem/native/x86_64/src/default_impl.h */
-#if defined(MLKEM_NATIVE_ARITH_PROFILE_IMPL_H)
-#undef MLKEM_NATIVE_ARITH_PROFILE_IMPL_H
-#endif
-
-/* mlkem/native/x86_64/src/default_impl.h */
-#if defined(MLKEM_USE_NATIVE_INTT)
-#undef MLKEM_USE_NATIVE_INTT
-#endif
-
-/* mlkem/native/x86_64/src/default_impl.h */
-#if defined(MLKEM_USE_NATIVE_NTT)
-#undef MLKEM_USE_NATIVE_NTT
-#endif
-
-/* mlkem/native/x86_64/src/default_impl.h */
-#if defined(MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER)
-#undef MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER
-#endif
-
-/* mlkem/native/x86_64/src/default_impl.h */
-#if defined(MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
-#undef MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED
-#endif
-
-/* mlkem/native/x86_64/src/default_impl.h */
-#if defined(MLKEM_USE_NATIVE_POLY_FROMBYTES)
-#undef MLKEM_USE_NATIVE_POLY_FROMBYTES
-#endif
-
-/* mlkem/native/x86_64/src/default_impl.h */
-#if defined(MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE)
-#undef MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE
-#endif
-
-/* mlkem/native/x86_64/src/default_impl.h */
-#if defined(MLKEM_USE_NATIVE_POLY_REDUCE)
-#undef MLKEM_USE_NATIVE_POLY_REDUCE
-#endif
-
-/* mlkem/native/x86_64/src/default_impl.h */
-#if defined(MLKEM_USE_NATIVE_POLY_TOBYTES)
-#undef MLKEM_USE_NATIVE_POLY_TOBYTES
-#endif
-
-/* mlkem/native/x86_64/src/default_impl.h */
-#if defined(MLKEM_USE_NATIVE_POLY_TOMONT)
-#undef MLKEM_USE_NATIVE_POLY_TOMONT
-#endif
-
-/* mlkem/native/x86_64/src/default_impl.h */
-#if defined(MLKEM_USE_NATIVE_REJ_UNIFORM)
-#undef MLKEM_USE_NATIVE_REJ_UNIFORM
-#endif
-
-/* mlkem/native/x86_64/src/rej_uniform_avx2.c */
-#if defined(empty_cu_rej_uniform_avx2)
-#undef empty_cu_rej_uniform_avx2
-#endif
-
-/* mlkem/native/x86_64/src/rej_uniform_table.c */
-#if defined(empty_cu_avx2_rej_uniform_table)
-#undef empty_cu_avx2_rej_uniform_table
-#endif
-
-/* mlkem/ntt.c */
-#if defined(invntt_layer)
-#undef invntt_layer
-#endif
-
-/* mlkem/ntt.c */
-#if defined(ntt_butterfly_block)
-#undef ntt_butterfly_block
-#endif
-
-/* mlkem/ntt.c */
-#if defined(ntt_layer)
-#undef ntt_layer
-#endif
-
-/* mlkem/ntt.h */
-#if defined(NTT_H)
-#undef NTT_H
-#endif
-
-/* mlkem/ntt.h */
-#if defined(basemul_cached)
-#undef basemul_cached
-#endif
-
-/* mlkem/ntt.h */
-#if defined(poly_invntt_tomont)
-#undef poly_invntt_tomont
-#endif
-
-/* mlkem/ntt.h */
-#if defined(poly_ntt)
-#undef poly_ntt
-#endif
-
-/* mlkem/ntt.h */
-#if defined(zetas)
-#undef zetas
-#endif
-
 /* mlkem/params.h */
 #if defined(KECCAK_WAY)
 #undef KECCAK_WAY
@@ -1496,6 +595,623 @@
 /* mlkem/params.h */
 #if defined(UINT12_LIMIT)
 #undef UINT12_LIMIT
+#endif
+
+/* mlkem/polyvec.c */
+#if defined(poly_cbd_eta1)
+#undef poly_cbd_eta1
+#endif
+
+/* mlkem/polyvec.c */
+#if defined(poly_cbd_eta2)
+#undef poly_cbd_eta2
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(POLYVEC_H)
+#undef POLYVEC_H
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(poly_compress_du)
+#undef poly_compress_du
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(poly_compress_dv)
+#undef poly_compress_dv
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(poly_decompress_du)
+#undef poly_decompress_du
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(poly_decompress_dv)
+#undef poly_decompress_dv
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(poly_getnoise_eta1122_4x)
+#undef poly_getnoise_eta1122_4x
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(poly_getnoise_eta1_4x)
+#undef poly_getnoise_eta1_4x
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(poly_getnoise_eta2)
+#undef poly_getnoise_eta2
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(poly_getnoise_eta2_4x)
+#undef poly_getnoise_eta2_4x
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(polyvec)
+#undef polyvec
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(polyvec_add)
+#undef polyvec_add
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(polyvec_basemul_acc_montgomery)
+#undef polyvec_basemul_acc_montgomery
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(polyvec_basemul_acc_montgomery_cached)
+#undef polyvec_basemul_acc_montgomery_cached
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(polyvec_compress_du)
+#undef polyvec_compress_du
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(polyvec_decompress_du)
+#undef polyvec_decompress_du
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(polyvec_frombytes)
+#undef polyvec_frombytes
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(polyvec_invntt_tomont)
+#undef polyvec_invntt_tomont
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(polyvec_mulcache)
+#undef polyvec_mulcache
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(polyvec_mulcache_compute)
+#undef polyvec_mulcache_compute
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(polyvec_ntt)
+#undef polyvec_ntt
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(polyvec_reduce)
+#undef polyvec_reduce
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(polyvec_tobytes)
+#undef polyvec_tobytes
+#endif
+
+/* mlkem/polyvec.h */
+#if defined(polyvec_tomont)
+#undef polyvec_tomont
+#endif
+
+
+#if !defined(MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS)
+
+/*
+ * Undo all #define directives from *.c or *.h files
+ */
+
+/* mlkem/arith_backend.h */
+#if defined(MLKEM_NATIVE_ARITH_IMPL_H)
+#undef MLKEM_NATIVE_ARITH_IMPL_H
+#endif
+
+/* mlkem/cbd.c */
+#if defined(empty_cu_cbd)
+#undef empty_cu_cbd
+#endif
+
+/* mlkem/cbd.c */
+#if defined(load24_littleendian)
+#undef load24_littleendian
+#endif
+
+/* mlkem/cbd.c */
+#if defined(load32_littleendian)
+#undef load32_littleendian
+#endif
+
+/* mlkem/cbd.h */
+#if defined(CBD_H)
+#undef CBD_H
+#endif
+
+/* mlkem/cbd.h */
+#if defined(poly_cbd2)
+#undef poly_cbd2
+#endif
+
+/* mlkem/cbd.h */
+#if defined(poly_cbd3)
+#undef poly_cbd3
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(CBMC_CONCAT)
+#undef CBMC_CONCAT
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(CBMC_CONCAT_)
+#undef CBMC_CONCAT_
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(EXISTS)
+#undef EXISTS
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(__contract__)
+#undef __contract__
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(__loop__)
+#undef __loop__
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(array_abs_bound)
+#undef array_abs_bound
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(array_bound)
+#undef array_bound
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(array_bound_core)
+#undef array_bound_core
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(assigns)
+#undef assigns
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(assume)
+#undef assume
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(cassert)
+#undef cassert
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(decreases)
+#undef decreases
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(ensures)
+#undef ensures
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(forall)
+#undef forall
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(invariant)
+#undef invariant
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(loop_entry)
+#undef loop_entry
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(memory_no_alias)
+#undef memory_no_alias
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(memory_slice)
+#undef memory_slice
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(object_whole)
+#undef object_whole
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(old)
+#undef old
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(readable)
+#undef readable
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(requires)
+#undef requires
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(return_value)
+#undef return_value
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(same_object)
+#undef same_object
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(writeable)
+#undef writeable
+#endif
+
+/* mlkem/debug/debug.c */
+#if defined(MLKEM_NATIVE_DEBUG_ERROR_HEADER)
+#undef MLKEM_NATIVE_DEBUG_ERROR_HEADER
+#endif
+
+/* mlkem/debug/debug.c */
+#if defined(empty_cu_debug)
+#undef empty_cu_debug
+#endif
+
+/* mlkem/debug/debug.h */
+#if defined(MLKEM_DEBUG_H)
+#undef MLKEM_DEBUG_H
+#endif
+
+/* mlkem/debug/debug.h */
+#if defined(debug_assert)
+#undef debug_assert
+#endif
+
+/* mlkem/debug/debug.h */
+#if defined(debug_assert_abs_bound)
+#undef debug_assert_abs_bound
+#endif
+
+/* mlkem/debug/debug.h */
+#if defined(debug_assert_abs_bound_2d)
+#undef debug_assert_abs_bound_2d
+#endif
+
+/* mlkem/debug/debug.h */
+#if defined(debug_assert_bound)
+#undef debug_assert_bound
+#endif
+
+/* mlkem/debug/debug.h */
+#if defined(debug_assert_bound_2d)
+#undef debug_assert_bound_2d
+#endif
+
+/* mlkem/debug/debug.h */
+#if defined(mlkem_debug_assert)
+#undef mlkem_debug_assert
+#endif
+
+/* mlkem/debug/debug.h */
+#if defined(mlkem_debug_check_bounds)
+#undef mlkem_debug_check_bounds
+#endif
+
+/* mlkem/fips202/fips202.c */
+#if defined(empty_cu_fips202)
+#undef empty_cu_fips202
+#endif
+
+/* mlkem/fips202/fips202.c */
+#if defined(keccak_absorb_once)
+#undef keccak_absorb_once
+#endif
+
+/* mlkem/fips202/fips202.c */
+#if defined(keccak_squeeze_once)
+#undef keccak_squeeze_once
+#endif
+
+/* mlkem/fips202/fips202.c */
+#if defined(keccak_squeezeblocks)
+#undef keccak_squeezeblocks
+#endif
+
+/* mlkem/fips202/fips202.c */
+#if defined(shake256ctx)
+#undef shake256ctx
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(FIPS202_H)
+#undef FIPS202_H
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(SHA3_256_HASHBYTES)
+#undef SHA3_256_HASHBYTES
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(SHA3_256_RATE)
+#undef SHA3_256_RATE
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(SHA3_384_RATE)
+#undef SHA3_384_RATE
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(SHA3_512_HASHBYTES)
+#undef SHA3_512_HASHBYTES
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(SHA3_512_RATE)
+#undef SHA3_512_RATE
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(SHAKE128_RATE)
+#undef SHAKE128_RATE
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(SHAKE256_RATE)
+#undef SHAKE256_RATE
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(sha3_256)
+#undef sha3_256
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(sha3_512)
+#undef sha3_512
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(shake128_absorb_once)
+#undef shake128_absorb_once
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(shake128_release)
+#undef shake128_release
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(shake128_squeezeblocks)
+#undef shake128_squeezeblocks
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(shake128ctx)
+#undef shake128ctx
+#endif
+
+/* mlkem/fips202/fips202.h */
+#if defined(shake256)
+#undef shake256
+#endif
+
+/* mlkem/fips202/fips202_backend.h */
+#if defined(MLKEM_NATIVE_FIPS202_IMPL_H)
+#undef MLKEM_NATIVE_FIPS202_IMPL_H
+#endif
+
+/* mlkem/fips202/fips202x4.c */
+#if defined(empty_cu_fips202x4)
+#undef empty_cu_fips202x4
+#endif
+
+/* mlkem/fips202/fips202x4.c */
+#if defined(keccak_absorb_once_x4)
+#undef keccak_absorb_once_x4
+#endif
+
+/* mlkem/fips202/fips202x4.c */
+#if defined(keccak_squeezeblocks_x4)
+#undef keccak_squeezeblocks_x4
+#endif
+
+/* mlkem/fips202/fips202x4.c */
+#if defined(shake256x4_absorb_once)
+#undef shake256x4_absorb_once
+#endif
+
+/* mlkem/fips202/fips202x4.c */
+#if defined(shake256x4_ctx)
+#undef shake256x4_ctx
+#endif
+
+/* mlkem/fips202/fips202x4.c */
+#if defined(shake256x4_squeezeblocks)
+#undef shake256x4_squeezeblocks
+#endif
+
+/* mlkem/fips202/fips202x4.h */
+#if defined(FIPS_202X4_H)
+#undef FIPS_202X4_H
+#endif
+
+/* mlkem/fips202/fips202x4.h */
+#if defined(shake128x4_absorb_once)
+#undef shake128x4_absorb_once
+#endif
+
+/* mlkem/fips202/fips202x4.h */
+#if defined(shake128x4_release)
+#undef shake128x4_release
+#endif
+
+/* mlkem/fips202/fips202x4.h */
+#if defined(shake128x4_squeezeblocks)
+#undef shake128x4_squeezeblocks
+#endif
+
+/* mlkem/fips202/fips202x4.h */
+#if defined(shake128x4ctx)
+#undef shake128x4ctx
+#endif
+
+/* mlkem/fips202/fips202x4.h */
+#if defined(shake256x4)
+#undef shake256x4
+#endif
+
+/* mlkem/fips202/keccakf1600.c */
+#if defined(KeccakF_RoundConstants)
+#undef KeccakF_RoundConstants
+#endif
+
+/* mlkem/fips202/keccakf1600.c */
+#if defined(NROUNDS)
+#undef NROUNDS
+#endif
+
+/* mlkem/fips202/keccakf1600.c */
+#if defined(ROL)
+#undef ROL
+#endif
+
+/* mlkem/fips202/keccakf1600.c */
+#if defined(empty_cu_keccakf1600)
+#undef empty_cu_keccakf1600
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(KECCAKF1600_H)
+#undef KECCAKF1600_H
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(KECCAK_LANES)
+#undef KECCAK_LANES
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(KeccakF1600_StateExtractBytes)
+#undef KeccakF1600_StateExtractBytes
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(KeccakF1600_StatePermute)
+#undef KeccakF1600_StatePermute
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(KeccakF1600_StateXORBytes)
+#undef KeccakF1600_StateXORBytes
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(KeccakF1600x4_StateExtractBytes)
+#undef KeccakF1600x4_StateExtractBytes
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(KeccakF1600x4_StatePermute)
+#undef KeccakF1600x4_StatePermute
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(KeccakF1600x4_StateXORBytes)
+#undef KeccakF1600x4_StateXORBytes
+#endif
+
+/* mlkem/ntt.c */
+#if defined(empty_cu_ntt)
+#undef empty_cu_ntt
+#endif
+
+/* mlkem/ntt.c */
+#if defined(invntt_layer)
+#undef invntt_layer
+#endif
+
+/* mlkem/ntt.c */
+#if defined(ntt_butterfly_block)
+#undef ntt_butterfly_block
+#endif
+
+/* mlkem/ntt.c */
+#if defined(ntt_layer)
+#undef ntt_layer
+#endif
+
+/* mlkem/ntt.h */
+#if defined(NTT_H)
+#undef NTT_H
+#endif
+
+/* mlkem/ntt.h */
+#if defined(basemul_cached)
+#undef basemul_cached
+#endif
+
+/* mlkem/ntt.h */
+#if defined(poly_invntt_tomont)
+#undef poly_invntt_tomont
+#endif
+
+/* mlkem/ntt.h */
+#if defined(poly_ntt)
+#undef poly_ntt
+#endif
+
+/* mlkem/ntt.h */
+#if defined(zetas)
+#undef zetas
+#endif
+
+/* mlkem/poly.c */
+#if defined(empty_cu_poly)
+#undef empty_cu_poly
 #endif
 
 /* mlkem/poly.h */
@@ -1663,129 +1379,9 @@
 #undef scalar_signed_to_unsigned_q
 #endif
 
-/* mlkem/polyvec.c */
-#if defined(poly_cbd_eta1)
-#undef poly_cbd_eta1
-#endif
-
-/* mlkem/polyvec.c */
-#if defined(poly_cbd_eta2)
-#undef poly_cbd_eta2
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(POLYVEC_H)
-#undef POLYVEC_H
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(poly_compress_du)
-#undef poly_compress_du
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(poly_compress_dv)
-#undef poly_compress_dv
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(poly_decompress_du)
-#undef poly_decompress_du
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(poly_decompress_dv)
-#undef poly_decompress_dv
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(poly_getnoise_eta1122_4x)
-#undef poly_getnoise_eta1122_4x
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(poly_getnoise_eta1_4x)
-#undef poly_getnoise_eta1_4x
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(poly_getnoise_eta2)
-#undef poly_getnoise_eta2
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(poly_getnoise_eta2_4x)
-#undef poly_getnoise_eta2_4x
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(polyvec)
-#undef polyvec
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(polyvec_add)
-#undef polyvec_add
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(polyvec_basemul_acc_montgomery)
-#undef polyvec_basemul_acc_montgomery
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(polyvec_basemul_acc_montgomery_cached)
-#undef polyvec_basemul_acc_montgomery_cached
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(polyvec_compress_du)
-#undef polyvec_compress_du
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(polyvec_decompress_du)
-#undef polyvec_decompress_du
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(polyvec_frombytes)
-#undef polyvec_frombytes
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(polyvec_invntt_tomont)
-#undef polyvec_invntt_tomont
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(polyvec_mulcache)
-#undef polyvec_mulcache
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(polyvec_mulcache_compute)
-#undef polyvec_mulcache_compute
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(polyvec_ntt)
-#undef polyvec_ntt
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(polyvec_reduce)
-#undef polyvec_reduce
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(polyvec_tobytes)
-#undef polyvec_tobytes
-#endif
-
-/* mlkem/polyvec.h */
-#if defined(polyvec_tomont)
-#undef polyvec_tomont
+/* mlkem/randombytes.h */
+#if defined(RANDOMBYTES_H)
+#undef RANDOMBYTES_H
 #endif
 
 /* mlkem/reduce.h */
@@ -1826,6 +1422,11 @@
 /* mlkem/rej_uniform.c */
 #if defined(MLKEM_GEN_MATRIX_NBLOCKS)
 #undef MLKEM_GEN_MATRIX_NBLOCKS
+#endif
+
+/* mlkem/rej_uniform.c */
+#if defined(empty_cu_rej_uniform)
+#undef empty_cu_rej_uniform
 #endif
 
 /* mlkem/rej_uniform.c */
@@ -2073,491 +1674,9 @@
 #undef value_barrier_u8
 #endif
 
-
-#if !defined(MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS)
-
-/*
- * Undo all #define directives from *.c or *.h files
- */
-
-/* mlkem/fips202/fips202.c */
-#if defined(keccak_absorb_once)
-#undef keccak_absorb_once
-#endif
-
-/* mlkem/fips202/fips202.c */
-#if defined(keccak_squeeze_once)
-#undef keccak_squeeze_once
-#endif
-
-/* mlkem/fips202/fips202.c */
-#if defined(keccak_squeezeblocks)
-#undef keccak_squeezeblocks
-#endif
-
-/* mlkem/fips202/fips202.c */
-#if defined(shake256ctx)
-#undef shake256ctx
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(FIPS202_H)
-#undef FIPS202_H
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(SHA3_256_HASHBYTES)
-#undef SHA3_256_HASHBYTES
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(SHA3_256_RATE)
-#undef SHA3_256_RATE
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(SHA3_384_RATE)
-#undef SHA3_384_RATE
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(SHA3_512_HASHBYTES)
-#undef SHA3_512_HASHBYTES
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(SHA3_512_RATE)
-#undef SHA3_512_RATE
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(SHAKE128_RATE)
-#undef SHAKE128_RATE
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(SHAKE256_RATE)
-#undef SHAKE256_RATE
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(sha3_256)
-#undef sha3_256
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(sha3_512)
-#undef sha3_512
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(shake128_absorb_once)
-#undef shake128_absorb_once
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(shake128_release)
-#undef shake128_release
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(shake128_squeezeblocks)
-#undef shake128_squeezeblocks
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(shake128ctx)
-#undef shake128ctx
-#endif
-
-/* mlkem/fips202/fips202.h */
-#if defined(shake256)
-#undef shake256
-#endif
-
-/* mlkem/fips202/fips202_backend.h */
-#if defined(MLKEM_NATIVE_FIPS202_IMPL_H)
-#undef MLKEM_NATIVE_FIPS202_IMPL_H
-#endif
-
-/* mlkem/fips202/fips202x4.c */
-#if defined(keccak_absorb_once_x4)
-#undef keccak_absorb_once_x4
-#endif
-
-/* mlkem/fips202/fips202x4.c */
-#if defined(keccak_squeezeblocks_x4)
-#undef keccak_squeezeblocks_x4
-#endif
-
-/* mlkem/fips202/fips202x4.c */
-#if defined(shake256x4_absorb_once)
-#undef shake256x4_absorb_once
-#endif
-
-/* mlkem/fips202/fips202x4.c */
-#if defined(shake256x4_ctx)
-#undef shake256x4_ctx
-#endif
-
-/* mlkem/fips202/fips202x4.c */
-#if defined(shake256x4_squeezeblocks)
-#undef shake256x4_squeezeblocks
-#endif
-
-/* mlkem/fips202/fips202x4.h */
-#if defined(FIPS_202X4_H)
-#undef FIPS_202X4_H
-#endif
-
-/* mlkem/fips202/fips202x4.h */
-#if defined(shake128x4_absorb_once)
-#undef shake128x4_absorb_once
-#endif
-
-/* mlkem/fips202/fips202x4.h */
-#if defined(shake128x4_release)
-#undef shake128x4_release
-#endif
-
-/* mlkem/fips202/fips202x4.h */
-#if defined(shake128x4_squeezeblocks)
-#undef shake128x4_squeezeblocks
-#endif
-
-/* mlkem/fips202/fips202x4.h */
-#if defined(shake128x4ctx)
-#undef shake128x4ctx
-#endif
-
-/* mlkem/fips202/fips202x4.h */
-#if defined(shake256x4)
-#undef shake256x4
-#endif
-
-/* mlkem/fips202/keccakf1600.c */
-#if defined(KeccakF_RoundConstants)
-#undef KeccakF_RoundConstants
-#endif
-
-/* mlkem/fips202/keccakf1600.c */
-#if defined(NROUNDS)
-#undef NROUNDS
-#endif
-
-/* mlkem/fips202/keccakf1600.c */
-#if defined(ROL)
-#undef ROL
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
-#if defined(KECCAKF1600_H)
-#undef KECCAKF1600_H
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
-#if defined(KECCAK_LANES)
-#undef KECCAK_LANES
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
-#if defined(KeccakF1600_StateExtractBytes)
-#undef KeccakF1600_StateExtractBytes
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
-#if defined(KeccakF1600_StatePermute)
-#undef KeccakF1600_StatePermute
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
-#if defined(KeccakF1600_StateXORBytes)
-#undef KeccakF1600_StateXORBytes
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
-#if defined(KeccakF1600x4_StateExtractBytes)
-#undef KeccakF1600x4_StateExtractBytes
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
-#if defined(KeccakF1600x4_StatePermute)
-#undef KeccakF1600x4_StatePermute
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
-#if defined(KeccakF1600x4_StateXORBytes)
-#undef KeccakF1600x4_StateXORBytes
-#endif
-
-/* mlkem/fips202/native/aarch64/cortex_a55.h */
-#if defined(FIPS202_NATIVE_PROFILE_H)
-#undef FIPS202_NATIVE_PROFILE_H
-#endif
-
-/* mlkem/fips202/native/aarch64/cortex_a55.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55
-#endif
-
-/* mlkem/fips202/native/aarch64/cortex_a55.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_IMPL)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_IMPL
-#endif
-
-/* mlkem/fips202/native/aarch64/cortex_a55.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_NAME)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_NAME
-#endif
-
-/* mlkem/fips202/native/aarch64/default.h */
-#if defined(FIPS202_NATIVE_PROFILE_H)
-#undef FIPS202_NATIVE_PROFILE_H
-#endif
-
-/* mlkem/fips202/native/aarch64/default.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT
-#endif
-
-/* mlkem/fips202/native/aarch64/default.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_IMPL)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_IMPL
-#endif
-
-/* mlkem/fips202/native/aarch64/default.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_NAME)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_NAME
-#endif
-
-/* mlkem/fips202/native/aarch64/src/cortex_a55_impl.h */
-#if defined(FIPS202_NATIVE_PROFILE_IMPL_H)
-#undef FIPS202_NATIVE_PROFILE_IMPL_H
-#endif
-
-/* mlkem/fips202/native/aarch64/src/cortex_a55_impl.h */
-#if defined(MLKEM_USE_FIPS202_X1_NATIVE)
-#undef MLKEM_USE_FIPS202_X1_NATIVE
-#endif
-
-/* mlkem/fips202/native/aarch64/src/default_impl.h */
-#if defined(FIPS202_NATIVE_PROFILE_IMPL_H)
-#undef FIPS202_NATIVE_PROFILE_IMPL_H
-#endif
-
-/* mlkem/fips202/native/aarch64/src/default_impl.h */
-#if defined(MLKEM_USE_FIPS202_X1_NATIVE)
-#undef MLKEM_USE_FIPS202_X1_NATIVE
-#endif
-
-/* mlkem/fips202/native/aarch64/src/default_impl.h */
-#if defined(MLKEM_USE_FIPS202_X2_NATIVE)
-#undef MLKEM_USE_FIPS202_X2_NATIVE
-#endif
-
-/* mlkem/fips202/native/aarch64/src/default_impl.h */
-#if defined(MLKEM_USE_FIPS202_X4_NATIVE)
-#undef MLKEM_USE_FIPS202_X4_NATIVE
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(FIPS202_AARCH64_NATIVE_H)
-#undef FIPS202_AARCH64_NATIVE_H
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(keccak_f1600_x1_scalar_asm_opt)
-#undef keccak_f1600_x1_scalar_asm_opt
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(keccak_f1600_x1_v84a_asm_clean)
-#undef keccak_f1600_x1_v84a_asm_clean
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(keccak_f1600_x2_v84a_asm_clean)
-#undef keccak_f1600_x2_v84a_asm_clean
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(keccak_f1600_x2_v8a_v84a_asm_hybrid)
-#undef keccak_f1600_x2_v8a_v84a_asm_hybrid
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(keccak_f1600_x4_scalar_v84a_asm_hybrid_opt)
-#undef keccak_f1600_x4_scalar_v84a_asm_hybrid_opt
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(keccak_f1600_x4_scalar_v8a_asm_hybrid_opt)
-#undef keccak_f1600_x4_scalar_v8a_asm_hybrid_opt
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt)
-#undef keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt
-#endif
-
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(keccakf1600_round_constants)
-#undef keccakf1600_round_constants
-#endif
-
-/* mlkem/fips202/native/aarch64/src/keccakf1600_round_constants.c */
-#if defined(empty_cu_keccakf1600_round_constants)
-#undef empty_cu_keccakf1600_round_constants
-#endif
-
-/* mlkem/fips202/native/api.h */
-#if defined(MLKEM_NATIVE_FIPS202_NATIVE_API_H)
-#undef MLKEM_NATIVE_FIPS202_NATIVE_API_H
-#endif
-
-/* mlkem/fips202/native/default.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_DEFAULT_H)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_DEFAULT_H
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(ANDnu256)
-#undef ANDnu256
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(CONST256)
-#undef CONST256
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(CONST256_64)
-#undef CONST256_64
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(ROL64in256)
-#undef ROL64in256
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(ROL64in256_56)
-#undef ROL64in256_56
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(ROL64in256_8)
-#undef ROL64in256_8
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(SCATTER_STORE256)
-#undef SCATTER_STORE256
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(STORE256)
-#undef STORE256
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(SnP_laneLengthInBytes)
-#undef SnP_laneLengthInBytes
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(XOR256)
-#undef XOR256
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(XOReq256)
-#undef XOReq256
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(copyFromState)
-#undef copyFromState
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(copyStateVariables)
-#undef copyStateVariables
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(copyToState)
-#undef copyToState
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(declareABCDE)
-#undef declareABCDE
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(empty_cu_avx2_keccakx4)
-#undef empty_cu_avx2_keccakx4
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(prepareTheta)
-#undef prepareTheta
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(rounds24)
-#undef rounds24
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(thetaRhoPiChiIota)
-#undef thetaRhoPiChiIota
-#endif
-
-/* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
-#if defined(thetaRhoPiChiIotaPrepareTheta)
-#undef thetaRhoPiChiIotaPrepareTheta
-#endif
-
-/* mlkem/fips202/native/x86_64/src/xkcp_impl.h */
-#if defined(KeccakP1600times4_PermuteAll_24rounds)
-#undef KeccakP1600times4_PermuteAll_24rounds
-#endif
-
-/* mlkem/fips202/native/x86_64/src/xkcp_impl.h */
-#if defined(MLKEM_NATIVE_FIPS202_PROFILE_IMPL_H)
-#undef MLKEM_NATIVE_FIPS202_PROFILE_IMPL_H
-#endif
-
-/* mlkem/fips202/native/x86_64/src/xkcp_impl.h */
-#if defined(MLKEM_USE_FIPS202_X4_NATIVE)
-#undef MLKEM_USE_FIPS202_X4_NATIVE
-#endif
-
-/* mlkem/fips202/native/x86_64/xkcp.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_IMPL)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_IMPL
-#endif
-
-/* mlkem/fips202/native/x86_64/xkcp.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_NAME)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_NAME
-#endif
-
-/* mlkem/fips202/native/x86_64/xkcp.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP
-#endif
-
-/* mlkem/fips202/native/x86_64/xkcp.h */
-#if defined(MLKEM_NATIVE_FIPS202_PROFILE_H)
-#undef MLKEM_NATIVE_FIPS202_PROFILE_H
-#endif
-
-/* mlkem/randombytes.h */
-#if defined(RANDOMBYTES_H)
-#undef RANDOMBYTES_H
+/* mlkem/zetas.c */
+#if defined(empty_cu_zetas)
+#undef empty_cu_zetas
 #endif
 
 #endif /* MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS */

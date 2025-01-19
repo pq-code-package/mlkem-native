@@ -2,8 +2,11 @@
  * Copyright (c) 2024 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#include "cbd.h"
+#include "common.h"
+#ifndef MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED
+
 #include <stdint.h>
+#include "cbd.h"
 
 /* Static namespacing
  * This is to facilitate building multiple instances
@@ -59,7 +62,7 @@ void poly_cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
   }
 }
 
-#if MLKEM_ETA1 == 3
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_ETA1 == 3
 /*************************************************
  * Name:        load24_littleendian
  *
@@ -106,4 +109,12 @@ void poly_cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4])
     }
   }
 }
-#endif /* MLKEM_ETA1 == 3 */
+#endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_ETA1 == \
+          3 */
+
+#else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+
+#define empty_cu_cbd MLKEM_NAMESPACE_K(empty_cu_cbd)
+int empty_cu_cbd;
+
+#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

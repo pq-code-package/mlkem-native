@@ -2,8 +2,10 @@
  * Copyright (c) 2024 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#include <stdint.h>
+#include "common.h"
+#if !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
+#include <stdint.h>
 #include "arith_backend.h"
 #include "debug/debug.h"
 #include "ntt.h"
@@ -255,3 +257,10 @@ void basemul_cached(int16_t r[2], const int16_t a[2], const int16_t b[2],
 
   debug_assert_abs_bound(r, 2, 2 * MLKEM_Q);
 }
+
+#else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+
+#define empty_cu_ntt MLKEM_NAMESPACE_K(empty_cu_ntt)
+int empty_cu_ntt;
+
+#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

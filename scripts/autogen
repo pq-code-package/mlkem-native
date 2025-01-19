@@ -103,6 +103,8 @@ def gen_c_zetas():
 def gen_c_zeta_file(dry_run=False):
     def gen():
         yield from gen_header()
+        yield '#include "common.h"'
+        yield "#if !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)"
         yield '#include "ntt.h"'
         yield ""
         yield "/*"
@@ -112,6 +114,13 @@ def gen_c_zeta_file(dry_run=False):
         yield "ALIGN const int16_t zetas[128] = {"
         yield from map(lambda t: str(t) + ",", gen_c_zetas())
         yield "};"
+        yield ""
+        yield "#else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */"
+        yield ""
+        yield "#define empty_cu_zetas MLKEM_NAMESPACE_K(empty_cu_zetas)"
+        yield "int empty_cu_zetas;"
+        yield ""
+        yield "#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */"
         yield ""
 
     update_file("mlkem/zetas.c", "\n".join(gen()), dry_run=dry_run)
@@ -624,14 +633,32 @@ def gen_monolithic_undef_all_core(filt=None):
 
 def gen_monolithic_source_file(dry_run=False):
 
-    def fips202(c):
-        return "fips202/" in c
+    def not_native(c):
+        return "native/" not in c
 
-    def randombytes(c):
-        return "randombytes.h" in c
+    # List of level-specific source files
+    # All other files only need including and building once
+    # in multilevel build.
+    def k_specific(c):
+        # For now, we exclude native files from the monobuild
+        if not_native(c) is False:
+            return False
 
-    def shared(c):
-        return randombytes(c) or fips202(c)
+        k_specific_sources = ["mlkem_native.h", "params.h", "config.h", "common.h",
+                              "indcpa.c", "indcpa.h",
+                              "kem.c", "kem.h",
+                              "polyvec.c", "polyvec.h" ]
+        for f in k_specific_sources:
+            if c.endswith(f):
+                return True
+        return False
+
+    def k_generic(c):
+        # For now, we exclude native files from the monobuild
+        if not_native(c) is False:
+            return False
+
+        return not k_specific(c)
 
     def gen():
         yield from gen_header()
@@ -639,18 +666,13 @@ def gen_monolithic_source_file(dry_run=False):
         yield " * Monolithic compilation unit bundling all compilation units within mlkem-native"
         yield " */"
         yield ""
-        for c in filter(lambda c: not fips202(c), get_c_source_files()):
+        for c in filter(not_native, get_c_source_files()):
             yield f'#include "{c}"'
         yield ""
-        yield "#if !defined(MLKEM_NATIVE_MONOBUILD_NO_FIPS202_SOURCES)"
-        for c in filter(fips202, get_c_source_files()):
-            yield f'#include "{c}"'
-        yield "#endif /* MLKEM_NATIVE_MONOBUILD_NO_FIPS202_SOURCES */"
-        yield ""
-        yield from gen_monolithic_undef_all_core(filt=lambda c: not shared(c))
+        yield from gen_monolithic_undef_all_core(filt=k_specific)
         yield ""
         yield "#if !defined(MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS)"
-        yield from gen_monolithic_undef_all_core(filt=shared)
+        yield from gen_monolithic_undef_all_core(filt=k_generic)
         yield "#endif /* MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS */"
         yield ""
 

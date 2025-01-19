@@ -2,12 +2,14 @@
  * Copyright (c) 2024 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
+#include "common.h"
+#if !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
-#include "rej_uniform.h"
 #include "arith_backend.h"
 #include "debug/debug.h"
 #include "fips202/fips202.h"
 #include "fips202/fips202x4.h"
+#include "rej_uniform.h"
 #include "symmetric.h"
 
 /* Static namespacing
@@ -226,3 +228,10 @@ void poly_rej_uniform(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
 
   xof_release(&state);
 }
+
+#else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+
+#define empty_cu_rej_uniform MLKEM_NAMESPACE_K(empty_cu_rej_uniform)
+int empty_cu_rej_uniform;
+
+#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

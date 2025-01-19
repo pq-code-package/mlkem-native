@@ -321,7 +321,8 @@ __contract__(
   return (uint16_t)c;
 }
 
-#if MLKEM_K == 2 || MLKEM_K == 3
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || \
+    (MLKEM_K == 2 || MLKEM_K == 3)
 #define poly_compress_d4 MLKEM_NAMESPACE(poly_compress_d4)
 /*************************************************
  * Name:        poly_compress_d4
@@ -390,9 +391,10 @@ void poly_decompress_d4(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]);
 MLKEM_NATIVE_INTERNAL_API
 void poly_decompress_d10(poly *r,
                          const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10]);
-#endif /* MLKEM_K == 2 || MLKEM_K == 3 */
+#endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
+          || MLKEM_K == 3) */
 
-#if MLKEM_K == 4
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
 #define poly_compress_d5 MLKEM_NAMESPACE(poly_compress_d5)
 /*************************************************
  * Name:        poly_compress_d5
@@ -461,7 +463,8 @@ void poly_decompress_d5(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5]);
 MLKEM_NATIVE_INTERNAL_API
 void poly_decompress_d11(poly *r,
                          const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]);
-#endif /* MLKEM_K == 4 */
+#endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4 \
+        */
 
 #define poly_tobytes MLKEM_NAMESPACE(poly_tobytes)
 /*************************************************
@@ -712,4 +715,4 @@ __contract__(
   assigns(object_whole(r))
 );
 
-#endif
+#endif /* POLY_H */

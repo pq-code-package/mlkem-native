@@ -46,7 +46,8 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLKEM_NAMESPACE_PREFIX mlkem512
+#define MLKEM_NAMESPACE_PREFIX mlkem
+#define MLKEM_NAMESPACE_PREFIX_ADD_LEVEL
 
 /******************************************************************************
  * Name:        FIPS202_NAMESPACE_PREFIX
