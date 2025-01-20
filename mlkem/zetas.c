@@ -33,7 +33,6 @@ ALIGN const int16_t zetas[128] = {
 
 #else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
 
-#define empty_cu_zetas MLKEM_NAMESPACE_K(empty_cu_zetas)
-int empty_cu_zetas;
+MLKEM_NATIVE_EMPTY_CU(zetas)
 
 #endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

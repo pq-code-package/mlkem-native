@@ -404,7 +404,6 @@ void KeccakF1600_StatePermute(uint64_t *state)
 
 #else /* MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED */
 
-#define empty_cu_keccakf1600 MLKEM_NAMESPACE_K(empty_cu_keccakf1600)
-int empty_cu_keccakf1600;
+MLKEM_NATIVE_EMPTY_CU(keccakf1600)
 
 #endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED */

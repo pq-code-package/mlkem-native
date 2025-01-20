@@ -16,8 +16,7 @@ volatile uint64_t ct_opt_blocker_u64 = 0;
 #else /* MLKEM_USE_ASM_VALUE_BARRIER && \
          !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
 
-#define empty_cu_verify MLKEM_NAMESPACE_K(empty_cu_verify)
-int empty_cu_verify;
+MLKEM_NATIVE_EMPTY_CU(verify)
 
 #endif /* MLKEM_USE_ASM_VALUE_BARRIER && \
           !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

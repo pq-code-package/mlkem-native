@@ -389,7 +389,6 @@ void poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const poly *a)
 
 #else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
 
-#define empty_cu_compress MLKEM_NAMESPACE_K(empty_cu_compress)
-int empty_cu_compress;
+MLKEM_NATIVE_EMPTY_CU(compress)
 
 #endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
