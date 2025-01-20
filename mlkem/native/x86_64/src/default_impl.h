@@ -72,11 +72,29 @@ static INLINE void poly_mulcache_compute_native(poly_mulcache *x, const poly *y)
   ((void)x);
 }
 
-static INLINE void polyvec_basemul_acc_montgomery_cached_native(
-    poly *r, const polyvec *a, const polyvec *b,
-    const polyvec_mulcache *b_cache)
+
+static INLINE void polyvec_basemul_acc_montgomery_cached_k2_native(
+    poly *r, const poly a[2], const poly b[2],
+    const poly_mulcache b_cache[2])
 {
-  polyvec_basemul_acc_montgomery_cached_avx2(r, a, b, b_cache);
+  polyvec_basemul_acc_montgomery_cached_avx2(2,
+      r->coeffs, a[0].coeffs, b[0].coeffs, b_cache[0].coeffs);
+}
+
+static INLINE void polyvec_basemul_acc_montgomery_cached_k3_native(
+    poly *r, const poly a[3], const poly b[3],
+    const poly_mulcache b_cache[3])
+{
+  polyvec_basemul_acc_montgomery_cached_avx2(3,
+      r->coeffs, a[0].coeffs, b[0].coeffs, b_cache[0].coeffs);
+}
+
+static INLINE void polyvec_basemul_acc_montgomery_cached_k4_native(
+    poly *r, const poly a[4], const poly b[4],
+    const poly_mulcache b_cache[4])
+{
+  polyvec_basemul_acc_montgomery_cached_avx2(4,
+      r->coeffs, a[0].coeffs, b[0].coeffs, b_cache[0].coeffs);
 }
 
 static INLINE void poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],

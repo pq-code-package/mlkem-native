@@ -24,7 +24,6 @@
 
 #include <stdint.h>
 #include "../poly.h"
-#include "../polyvec.h"
 
 /*
  * This is the C<->native interface allowing for the drop-in of
@@ -171,13 +170,13 @@ static INLINE void poly_mulcache_compute_native(poly_mulcache *cache,
 
 #if defined(MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
 /*************************************************
- * Name:        poly_mulcache_compute_native
+ * Name:        polyvec_basemul_acc_montgomery_cached_k{2,3,4}_native
  *
- * Description: Compute multiplication of polynomials in NTT domain.
+ * Description: Compute scalar product of polynomial vectors in NTT domain
  *
  * Arguments:   INPUT:
- *              - a: First polynomial operand.
- *                 This must be in NTT domain and inin bitreversed order, or of
+ *              - a: First polynomial vector of length k=2,3,4
+ *                 This must be in NTT domain and in bitreversed order, or of
  *                 a custom order if MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER is set.
  *                 See the documentation of MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER
  *                 for more information.
@@ -185,12 +184,20 @@ static INLINE void poly_mulcache_compute_native(poly_mulcache *cache,
  *                 As for a.
  *              - b_cache: Multiplication-cache for b.
  *              OUTPUT
- *              - r: Result of the base multiplication. This is again
+ *              - r: Result of the scalar product. This is again
  *                   in NTT domain, and of the same order as a and b.
  **************************************************/
-static INLINE void polyvec_basemul_acc_montgomery_cached_native(
-    poly *r, const polyvec *a, const polyvec *b,
-    const polyvec_mulcache *b_cache);
+static INLINE void polyvec_basemul_acc_montgomery_cached_k2_native(
+    poly *r, const poly a[2], const poly b[2],
+    const poly_mulcache b_cache[2]);
+
+static INLINE void polyvec_basemul_acc_montgomery_cached_k3_native(
+    poly *r, const poly a[3], const poly b[3],
+    const poly_mulcache b_cache[3]);
+
+static INLINE void polyvec_basemul_acc_montgomery_cached_k4_native(
+    poly *r, const poly a[4], const poly b[4],
+    const poly_mulcache b_cache[4]);
 #endif
 
 #if defined(MLKEM_USE_NATIVE_POLY_TOBYTES)

@@ -38,9 +38,9 @@ static void poly_add_avx2(poly *r, const poly *a, const poly *b)
   }
 }
 
-void polyvec_basemul_acc_montgomery_cached_avx2(poly *r, const polyvec *a,
-                                                const polyvec *b,
-                                                const polyvec_mulcache *b_cache)
+void polyvec_basemul_acc_montgomery_cached_avx2(int k, poly *r, const poly *a,
+                                                const *b,
+                                                const poly_mulcache *b_cache)
 {
   unsigned i;
   poly t;
@@ -51,10 +51,10 @@ void polyvec_basemul_acc_montgomery_cached_avx2(poly *r, const polyvec *a,
   /* Coefficient-wise bound of each basemul is 2q.
    * Since we are accumulating at most 4 times, the
    * overall bound is 8q < INT16_MAX. */
-  poly_basemul_montgomery_avx2(r, &a->vec[0], &b->vec[0]);
-  for (i = 1; i < MLKEM_K; i++)
+  poly_basemul_montgomery_avx2(r, &a[0], &b[0]);
+  for (i = 1; i < k; i++)
   {
-    poly_basemul_montgomery_avx2(&t, &a->vec[i], &b->vec[i]);
+    poly_basemul_montgomery_avx2(&t, &a[i], &b[i]);
     poly_add_avx2(r, r, &t);
   }
 }

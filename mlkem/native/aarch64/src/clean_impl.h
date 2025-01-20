@@ -13,7 +13,6 @@
 #include "arith_native_aarch64.h"
 
 #include "../../../poly.h"
-#include "../../../polyvec.h"
 
 /* Set of primitives that this backend replaces */
 #define MLKEM_USE_NATIVE_NTT
@@ -52,22 +51,29 @@ static INLINE void poly_mulcache_compute_native(poly_mulcache *x, const poly *y)
                                   aarch64_zetas_mulcache_native,
                                   aarch64_zetas_mulcache_twisted_native);
 }
-static INLINE void polyvec_basemul_acc_montgomery_cached_native(
-    poly *r, const polyvec *a, const polyvec *b,
-    const polyvec_mulcache *b_cache)
+
+static INLINE void polyvec_basemul_acc_montgomery_cached_k2_native(
+    poly *r, const poly a[2], const poly b[2],
+    const poly_mulcache b_cache[2])
 {
-#if MLKEM_K == 2
   polyvec_basemul_acc_montgomery_cached_asm_k2_clean(
-      r->coeffs, a->vec[0].coeffs, b->vec[0].coeffs, b_cache->vec[0].coeffs);
-#elif MLKEM_K == 3
+      r->coeffs, a[0].coeffs, b[0].coeffs, b_cache[0].coeffs);
+}
+
+static INLINE void polyvec_basemul_acc_montgomery_cached_k3_native(
+    poly *r, const poly a[3], const poly b[3],
+    const poly_mulcache b_cache[3])
+{
   polyvec_basemul_acc_montgomery_cached_asm_k3_clean(
-      r->coeffs, a->vec[0].coeffs, b->vec[0].coeffs, b_cache->vec[0].coeffs);
-#elif MLKEM_K == 4
+      r->coeffs, a[0].coeffs, b[0].coeffs, b_cache[0].coeffs);
+}
+
+static INLINE void polyvec_basemul_acc_montgomery_cached_k4_native(
+    poly *r, const poly a[4], const poly b[4],
+    const poly_mulcache b_cache[4])
+{
   polyvec_basemul_acc_montgomery_cached_asm_k4_clean(
-      r->coeffs, a->vec[0].coeffs, b->vec[0].coeffs, b_cache->vec[0].coeffs);
-#else
-#error Invalid value for MLKEM_K
-#endif
+      r->coeffs, a[0].coeffs, b[0].coeffs, b_cache[0].coeffs);
 }
 
 static INLINE void poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],

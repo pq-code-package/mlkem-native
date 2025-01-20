@@ -131,7 +131,15 @@ void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
   /* Omitting bounds assertion for cache since native implementations may
    * decide not to use a mulcache. Note that the C backend implementation
    * of poly_basemul_montgomery_cached() does still include the check. */
-  polyvec_basemul_acc_montgomery_cached_native(r, a, b, b_cache);
+#if MLKEM_K == 2
+  polyvec_basemul_acc_montgomery_cached_k2_native(r, a->vec, b->vec, b_cache->vec);
+#elif MLKEM_K == 3
+  polyvec_basemul_acc_montgomery_cached_k3_native(r, a->vec, b->vec, b_cache->vec);
+#elif MLKEM_K == 4
+  polyvec_basemul_acc_montgomery_cached_k4_native(r, a->vec, b->vec, b_cache->vec);
+#else
+#error Invalid value for MLKEM_K
+#endif
 }
 #endif /* MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
