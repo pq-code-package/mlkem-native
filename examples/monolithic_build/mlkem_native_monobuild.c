@@ -43,13 +43,13 @@
 #endif
 
 /* mlkem/common.h */
-#if defined(MLKEM_ASM_NAMESPACE)
-#undef MLKEM_ASM_NAMESPACE
+#if defined(FIPS202_NAMESPACE_K)
+#undef FIPS202_NAMESPACE_K
 #endif
 
 /* mlkem/common.h */
-#if defined(MLKEM_ASM_NAMESPACE_K)
-#undef MLKEM_ASM_NAMESPACE_K
+#if defined(MLKEM_ASM_NAMESPACE)
+#undef MLKEM_ASM_NAMESPACE
 #endif
 
 /* mlkem/common.h */
@@ -70,6 +70,11 @@
 /* mlkem/common.h */
 #if defined(MLKEM_NATIVE_COMMON_H)
 #undef MLKEM_NATIVE_COMMON_H
+#endif
+
+/* mlkem/common.h */
+#if defined(MLKEM_NATIVE_EMPTY_CU)
+#undef MLKEM_NATIVE_EMPTY_CU
 #endif
 
 /* mlkem/common.h */
@@ -735,11 +740,6 @@
 #endif
 
 /* mlkem/cbd.c */
-#if defined(empty_cu_cbd)
-#undef empty_cu_cbd
-#endif
-
-/* mlkem/cbd.c */
 #if defined(load24_littleendian)
 #undef load24_littleendian
 #endif
@@ -894,11 +894,6 @@
 #undef MLKEM_NATIVE_DEBUG_ERROR_HEADER
 #endif
 
-/* mlkem/debug/debug.c */
-#if defined(empty_cu_debug)
-#undef empty_cu_debug
-#endif
-
 /* mlkem/debug/debug.h */
 #if defined(MLKEM_DEBUG_H)
 #undef MLKEM_DEBUG_H
@@ -937,11 +932,6 @@
 /* mlkem/debug/debug.h */
 #if defined(mlkem_debug_check_bounds)
 #undef mlkem_debug_check_bounds
-#endif
-
-/* mlkem/fips202/fips202.c */
-#if defined(empty_cu_fips202)
-#undef empty_cu_fips202
 #endif
 
 /* mlkem/fips202/fips202.c */
@@ -1045,11 +1035,6 @@
 #endif
 
 /* mlkem/fips202/fips202x4.c */
-#if defined(empty_cu_fips202x4)
-#undef empty_cu_fips202x4
-#endif
-
-/* mlkem/fips202/fips202x4.c */
 #if defined(keccak_absorb_once_x4)
 #undef keccak_absorb_once_x4
 #endif
@@ -1119,11 +1104,6 @@
 #undef ROL
 #endif
 
-/* mlkem/fips202/keccakf1600.c */
-#if defined(empty_cu_keccakf1600)
-#undef empty_cu_keccakf1600
-#endif
-
 /* mlkem/fips202/keccakf1600.h */
 #if defined(KECCAKF1600_H)
 #undef KECCAKF1600_H
@@ -1165,11 +1145,6 @@
 #endif
 
 /* mlkem/ntt.c */
-#if defined(empty_cu_ntt)
-#undef empty_cu_ntt
-#endif
-
-/* mlkem/ntt.c */
 #if defined(invntt_layer)
 #undef invntt_layer
 #endif
@@ -1207,11 +1182,6 @@
 /* mlkem/ntt.h */
 #if defined(zetas)
 #undef zetas
-#endif
-
-/* mlkem/poly.c */
-#if defined(empty_cu_poly)
-#undef empty_cu_poly
 #endif
 
 /* mlkem/poly.h */
@@ -1425,11 +1395,6 @@
 #endif
 
 /* mlkem/rej_uniform.c */
-#if defined(empty_cu_rej_uniform)
-#undef empty_cu_rej_uniform
-#endif
-
-/* mlkem/rej_uniform.c */
 #if defined(rej_uniform)
 #undef rej_uniform
 #endif
@@ -1604,11 +1569,6 @@
 #undef asm
 #endif
 
-/* mlkem/verify.c */
-#if defined(empty_cu_verify)
-#undef empty_cu_verify
-#endif
-
 /* mlkem/verify.h */
 #if defined(MLKEM_USE_ASM_VALUE_BARRIER)
 #undef MLKEM_USE_ASM_VALUE_BARRIER
@@ -1672,11 +1632,6 @@
 /* mlkem/verify.h */
 #if defined(value_barrier_u8)
 #undef value_barrier_u8
-#endif
-
-/* mlkem/zetas.c */
-#if defined(empty_cu_zetas)
-#undef empty_cu_zetas
 #endif
 
 #endif /* MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS */

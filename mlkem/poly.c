@@ -529,7 +529,6 @@ void poly_mulcache_compute(poly_mulcache *x, const poly *a)
 
 #else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
 
-#define empty_cu_poly MLKEM_NAMESPACE_K(empty_cu_poly)
-int empty_cu_poly;
+MLKEM_NATIVE_EMPTY_CU(poly)
 
 #endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

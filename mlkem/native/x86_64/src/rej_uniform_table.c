@@ -154,10 +154,7 @@ ALIGN const uint8_t rej_uniform_table[256][8] = {
 #else /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
 
-/* Dummy declaration for compilers disliking empty compilation units */
-#define empty_cu_avx2_rej_uniform_table \
-  MLKEM_NAMESPACE_K(empty_cu_avx2_rej_uniform_table)
-int empty_cu_avx2_rej_uniform_table;
+MLKEM_NATIVE_EMPTY_CU(avx2_rej_uniform_table)
 
 #endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
           !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */

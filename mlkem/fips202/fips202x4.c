@@ -183,7 +183,6 @@ void shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
 
 #else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
 
-#define empty_cu_fips202x4 MLKEM_NAMESPACE_K(empty_cu_fips202x4)
-int empty_cu_fips202x4;
+MLKEM_NATIVE_EMPTY_CU(fips202x4)
 
 #endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

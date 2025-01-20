@@ -114,7 +114,6 @@ void poly_cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4])
 
 #else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
 
-#define empty_cu_cbd MLKEM_NAMESPACE_K(empty_cu_cbd)
-int empty_cu_cbd;
+MLKEM_NATIVE_EMPTY_CU(cbd)
 
 #endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

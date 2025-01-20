@@ -50,7 +50,6 @@ void mlkem_debug_check_bounds(const char *file, int line, const int16_t *ptr,
 
 #else /* !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED && MLKEM_DEBUG */
 
-#define empty_cu_debug MLKEM_NAMESPACE_K(empty_cu_debug)
-int empty_cu_debug;
+MLKEM_NATIVE_EMPTY_CU(debug)
 
 #endif /* !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED && MLKEM_DEBUG */

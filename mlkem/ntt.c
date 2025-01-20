@@ -260,7 +260,6 @@ void basemul_cached(int16_t r[2], const int16_t a[2], const int16_t b[2],
 
 #else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
 
-#define empty_cu_ntt MLKEM_NAMESPACE_K(empty_cu_ntt)
-int empty_cu_ntt;
+MLKEM_NATIVE_EMPTY_CU(ntt)
 
 #endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

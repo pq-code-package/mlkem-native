@@ -284,10 +284,8 @@ ALIGN const uint8_t rej_uniform_table[] = {
           defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT))     \
           && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
 
-/* Dummy declaration for compilers disliking empty compilation units */
-#define empty_cu_aarch64_rej_uniform_table \
-  MLKEM_NAMESPACE_K(empty_cu_aarch64_rej_uniform_table)
-int empty_cu_aarch64_rej_uniform_table;
+MLKEM_NATIVE_EMPTY_CU(aarch64_rej_uniform_table)
+
 #endif /* (defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \
            defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT))     \
            && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */

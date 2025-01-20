@@ -231,7 +231,6 @@ void poly_rej_uniform(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
 
 #else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
 
-#define empty_cu_rej_uniform MLKEM_NAMESPACE_K(empty_cu_rej_uniform)
-int empty_cu_rej_uniform;
+MLKEM_NATIVE_EMPTY_CU(rej_uniform)
 
 #endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

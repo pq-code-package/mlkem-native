@@ -27,10 +27,7 @@ ALIGN const uint64_t keccakf1600_round_constants[] = {
           defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55) &&     \
          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)*/
 
-/* Dummy declaration for compilers disliking empty compilation units */
-#define empty_cu_keccakf1600_round_constants \
-  FIPS202_NAMESPACE_K(empty_cu_keccakf1600_round_constants)
-int empty_cu_keccakf1600_round_constants;
+MLKEM_NATIVE_EMPTY_CU(fips202_aarch64_round_constants)
 
 #endif /* (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
           defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55) &&      \

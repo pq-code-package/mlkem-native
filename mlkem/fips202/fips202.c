@@ -217,7 +217,6 @@ void sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
 
 #else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
 
-#define empty_cu_fips202 MLKEM_NAMESPACE_K(empty_cu_fips202)
-int empty_cu_fips202;
+MLKEM_NATIVE_EMPTY_CU(fips202)
 
 #endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

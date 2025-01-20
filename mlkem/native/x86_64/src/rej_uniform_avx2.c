@@ -127,9 +127,7 @@ unsigned int rej_uniform_avx2(int16_t *RESTRICT r, const uint8_t *buf)
 #else /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
           !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
 
-/* Dummy declaration for compilers disliking empty compilation units */
-#define empty_cu_rej_uniform_avx2 MLKEM_NAMESPACE_K(empty_cu_rej_uniform_avx2)
-int empty_cu_rej_uniform_avx2;
+MLKEM_NATIVE_EMPTY_CU(avx2_rej_uniform)
 
 #endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
           !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
