@@ -2,9 +2,13 @@
  * Copyright (c) 2024 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#include "../common.h"
+
+/* NOTE: You can remove this file unless you compile with MLKEM_DEBUG. */
+
+#include "common.h"
 
 #if !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) && defined(MLKEM_DEBUG)
+
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -14,7 +14,7 @@
  */
 
 #include "mlkem/cbd.c"
-#include "mlkem/debug/debug.c"
+#include "mlkem/debug.c"
 #include "mlkem/fips202/fips202.c"
 #include "mlkem/fips202/fips202x4.c"
 #include "mlkem/fips202/keccakf1600.c"
@@ -869,52 +869,52 @@
 #undef writeable
 #endif
 
-/* mlkem/debug/debug.c */
+/* mlkem/debug.c */
 #if defined(MLKEM_NATIVE_DEBUG_ERROR_HEADER)
 #undef MLKEM_NATIVE_DEBUG_ERROR_HEADER
 #endif
 
-/* mlkem/debug/debug.c */
+/* mlkem/debug.c */
 #if defined(empty_cu_debug)
 #undef empty_cu_debug
 #endif
 
-/* mlkem/debug/debug.h */
+/* mlkem/debug.h */
 #if defined(MLKEM_DEBUG_H)
 #undef MLKEM_DEBUG_H
 #endif
 
-/* mlkem/debug/debug.h */
+/* mlkem/debug.h */
 #if defined(debug_assert)
 #undef debug_assert
 #endif
 
-/* mlkem/debug/debug.h */
+/* mlkem/debug.h */
 #if defined(debug_assert_abs_bound)
 #undef debug_assert_abs_bound
 #endif
 
-/* mlkem/debug/debug.h */
+/* mlkem/debug.h */
 #if defined(debug_assert_abs_bound_2d)
 #undef debug_assert_abs_bound_2d
 #endif
 
-/* mlkem/debug/debug.h */
+/* mlkem/debug.h */
 #if defined(debug_assert_bound)
 #undef debug_assert_bound
 #endif
 
-/* mlkem/debug/debug.h */
+/* mlkem/debug.h */
 #if defined(debug_assert_bound_2d)
 #undef debug_assert_bound_2d
 #endif
 
-/* mlkem/debug/debug.h */
+/* mlkem/debug.h */
 #if defined(mlkem_debug_assert)
 #undef mlkem_debug_assert
 #endif
 
-/* mlkem/debug/debug.h */
+/* mlkem/debug.h */
 #if defined(mlkem_debug_check_bounds)
 #undef mlkem_debug_check_bounds
 #endif

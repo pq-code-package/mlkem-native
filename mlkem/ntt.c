@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 #include "arith_backend.h"
-#include "debug/debug.h"
+#include "debug.h"
 #include "ntt.h"
 #include "reduce.h"
 

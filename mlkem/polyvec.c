@@ -11,7 +11,7 @@
 #include "poly.h"
 #include "symmetric.h"
 
-#include "debug/debug.h"
+#include "debug.h"
 
 /* Static namespacing
  * This is to facilitate building multiple instances

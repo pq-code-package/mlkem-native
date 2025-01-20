@@ -6,7 +6,7 @@
 #if !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 #include "arith_backend.h"
-#include "debug/debug.h"
+#include "debug.h"
 #include "fips202/fips202.h"
 #include "fips202/fips202x4.h"
 #include "rej_uniform.h"

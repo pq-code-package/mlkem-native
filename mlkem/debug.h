@@ -4,7 +4,7 @@
  */
 #ifndef MLKEM_DEBUG_H
 #define MLKEM_DEBUG_H
-#include "../common.h"
+#include "common.h"
 
 #if defined(MLKEM_DEBUG)
 #include <stdint.h>

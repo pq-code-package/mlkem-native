@@ -10,7 +10,7 @@
 #include "arith_backend.h"
 #include "cbd.h"
 #include "cbmc.h"
-#include "debug/debug.h"
+#include "debug.h"
 #include "fips202/fips202x4.h"
 #include "ntt.h"
 #include "poly.h"

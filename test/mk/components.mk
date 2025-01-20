@@ -5,7 +5,7 @@ ifeq ($(OPT),1)
 	FIPS202_SRCS += $(wildcard mlkem/fips202/native/aarch64/src/*.S) $(wildcard mlkem/fips202/native/aarch64/src/*.c) $(wildcard mlkem/fips202/native/x86_64/src/*.c)
 endif
 
-SOURCES += $(wildcard mlkem/*.c) $(wildcard mlkem/debug/*.c)
+SOURCES += $(wildcard mlkem/*.c)
 ifeq ($(OPT),1)
 	SOURCES += $(wildcard mlkem/native/aarch64/src/*.[csS]) $(wildcard mlkem/native/x86_64/src/*.[csS])
 	CFLAGS += -DMLKEM_USE_NATIVE
