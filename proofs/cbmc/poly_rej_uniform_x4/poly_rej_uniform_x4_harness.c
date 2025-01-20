@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT-0
 
 #include <stdint.h>
-#include "rej_uniform.h"
+#include "sampling.h"
 
 void harness(void)
 {

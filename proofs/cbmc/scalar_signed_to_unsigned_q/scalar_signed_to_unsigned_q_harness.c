@@ -2,7 +2,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-#include <poly.h>
+#include <stdint.h>
+#include "common.h"
+
+#define scalar_signed_to_unsigned_q MLKEM_NAMESPACE(scalar_signed_to_unsigned_q)
+uint16_t scalar_signed_to_unsigned_q(int16_t c);
 
 void harness(void)
 {

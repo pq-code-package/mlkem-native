@@ -16,7 +16,7 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mlkem/rej_uniform.c $(SRCDIR)/mlkem/fips202/fips202.c
+PROJECT_SOURCES += $(SRCDIR)/mlkem/sampling.c $(SRCDIR)/mlkem/fips202/fips202.c
 
 CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_rej_uniform
 USE_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)shake128_absorb_once $(MLKEM_NAMESPACE)shake128_squeezeblocks $(MLKEM_NAMESPACE)rej_uniform

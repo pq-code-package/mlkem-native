@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include "common.h"
+#include "compress.h"
 #include "poly.h"
 
 #define polyvec MLKEM_NAMESPACE_K(polyvec)
