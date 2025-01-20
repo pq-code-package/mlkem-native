@@ -152,8 +152,6 @@ ALIGN const uint8_t rej_uniform_table[256][8] = {
 
 #else
 
-/* Dummy declaration for compilers disliking empty compilation units */
-#define empty_cu_avx2_rej_uniform_table \
-  MLKEM_NAMESPACE(empty_cu_avx2_rej_uniform_table)
-int empty_cu_avx2_rej_uniform_table;
+MLKEM_NATIVE_EMPTY_CU(avx2_rej_uniform_table)
+
 #endif

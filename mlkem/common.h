@@ -76,4 +76,10 @@
 #define MLKEM_ASM_NAMESPACE_K(sym) PREFIX_UNDERSCORE(MLKEM_NAMESPACE_K(sym))
 #endif
 
+/* We aim to simplify the user's life by supporting builds where
+ * all source files are included, even those that are not needed.
+ * Those files are appropriately guarded and will be empty when unneeded.
+ * The following is to avoid compilers complaining about this. */
+#define MLKEM_NATIVE_EMPTY_CU(s) int MLKEM_NAMESPACE_K(empty_cu_##s);
+
 #endif /* MLKEM_NATIVE_COMMON_H */

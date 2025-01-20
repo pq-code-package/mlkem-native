@@ -281,8 +281,6 @@ ALIGN const uint8_t rej_uniform_table[] = {
 
 #else
 
-/* Dummy declaration for compilers disliking empty compilation units */
-#define empty_cu_aarch64_rej_uniform_table \
-  MLKEM_NAMESPACE(empty_cu_aarch64_rej_uniform_table)
-int empty_cu_aarch64_rej_uniform_table;
+MLKEM_NATIVE_EMPTY_CU(aarch64_rej_uniform_table)
+
 #endif

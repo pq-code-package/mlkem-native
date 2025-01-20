@@ -24,8 +24,6 @@ ALIGN const uint64_t keccakf1600_round_constants[] = {
 
 #else
 
-/* Dummy declaration for compilers disliking empty compilation units */
-#define empty_cu_keccakf1600_round_constants \
-  MLKEM_NAMESPACE(empty_cu_keccakf1600_round_constants)
-int empty_cu_keccakf1600_round_constants;
+MLKEM_NATIVE_EMPTY_CU(fips202_aarch64_round_constants)
+
 #endif
