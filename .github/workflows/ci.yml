@@ -158,6 +158,9 @@ jobs:
       - name: monolithic_build_multilevel
         run: |
           make run -C examples/monolithic_build_multilevel
+      - name: multilevel_build
+        run: |
+          make run -C examples/multilevel_build
   build_kat:
     needs: [quickcheck, quickcheck-windows, quickcheck-c90, quickcheck-lib, examples, lint, lint-markdown-link]
     strategy:

@@ -16,8 +16,8 @@
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define check_pk MLKEM_NAMESPACE(check_pk)
-#define check_sk MLKEM_NAMESPACE(check_sk)
+#define check_pk MLKEM_NAMESPACE_K(check_pk)
+#define check_sk MLKEM_NAMESPACE_K(check_sk)
 /* End of static namespacing */
 
 #if defined(CBMC)

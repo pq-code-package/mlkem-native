@@ -59,9 +59,17 @@
 #error MLKEM_NAMESPACE_PREFIX not set by config file
 #endif
 
-#define BUILD_INFO_CONCAT_(x, y) x##_##y
-#define BUILD_INFO_CONCAT(x, y) BUILD_INFO_CONCAT_(x, y)
-#define BUILD_INFO_NAMESPACE(sym) BUILD_INFO_CONCAT(MLKEM_NAMESPACE_PREFIX, sym)
+#if defined(MLKEM_NATIVE_NAMESPACE_PREFIX_ADD_LEVEL)
+#define BUILD_INFO_CONCAT3_(x, y, z) x##y##_##z
+#define BUILD_INFO_CONCAT3(x, y, z) BUILD_INFO_CONCAT_(x, y, z)
+#define BUILD_INFO_NAMESPACE(sym) \
+  BUILD_INFO_CONCAT3(MLKEM_NAMESPACE_PREFIX, BUILD_INFO_LVL, sym)
+#else
+#define BUILD_INFO_CONCAT2_(x, y) x##_##y
+#define BUILD_INFO_CONCAT2(x, y) BUILD_INFO_CONCAT2_(x, y)
+#define BUILD_INFO_NAMESPACE(sym) \
+  BUILD_INFO_CONCAT2(MLKEM_NAMESPACE_PREFIX, sym)
+#endif
 
 #endif /* BUILD_INFO_LVL */
 

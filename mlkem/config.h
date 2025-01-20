@@ -40,7 +40,7 @@
 /* #define MLKEM_NATIVE_CONFIG_FILE "config.h" */
 
 /******************************************************************************
- * Name:        MLKEM_NAMESPACE
+ * Name:        MLKEM_NAMESPACE_PREFIX
  *
  * Description: The prefix to use to namespace global symbols
  *              from mlkem/.
@@ -53,7 +53,23 @@
 #endif
 
 /******************************************************************************
- * Name:        FIPS202_NAMESPACE
+ * Name:        MLKEM_NAMESPACE_PREFIX_ADD_LEVEL
+ *
+ * Description: If set, the level (512, 768, 1024) is added to the namespace
+ *              prefix MLKEM_NAMESPACE_PREFIX for all functions which are
+ *              level-dependent. Level-independent functions will have there
+ *              symbol prefixed by MLKEM_NAMESPACE_PREFIX only.
+ *
+ *              This is intended to be used for multi-level builds where
+ *              level-independent code should be shared across levels.
+ *
+ *              This can also be set using CFLAGS.
+ *
+ *****************************************************************************/
+/* #define MLKEM_NAMESPACE_PREFIX_ADD_LEVEL */
+
+/******************************************************************************
+ * Name:        FIPS202_NAMESPACE_PREFIX
  *
  * Description: The prefix to use to namespace global symbols
  *              from mlkem/fips202/.
@@ -64,6 +80,57 @@
 #if !defined(FIPS202_NAMESPACE_PREFIX)
 #define FIPS202_NAMESPACE_PREFIX FIPS202_DEFAULT_NAMESPACE_PREFIX
 #endif
+
+/******************************************************************************
+ * Name:        MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED
+ *
+ * Description: This is for multi-level builds of mlkem-native only. If you
+ *              need only a single security level build of mlkem-native,
+ *              keep this unset.
+ *
+ *              If this is set, all MLKEM_K-independent code will be included
+ *              in the build, including code needed only for other security
+ *              levels.
+ *
+ *              Example: poly_cbd3 is only needed for MLKEM_K == 2. Yet, if
+ *              this option is set for a build with MLKEM_K==3/4, it would
+ *              be included.
+ *
+ *              To build mlkem-native with support for all security levels,
+ *              build it three times -- once per level -- and set the option
+ *              MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED for exactly one of
+ *              them, and MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED for the
+ *              others.
+ *
+ *              See examples/multilevel_build for an example.
+ *
+ *              This can also be set using CFLAGS.
+ *
+ *****************************************************************************/
+/* #define MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED */
+
+/******************************************************************************
+ * Name:        MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED
+ *
+ * Description: This is for multi-level builds of mlkem-native only. If you
+ *              need only a single security level build of mlkem-native,
+ *              keep this unset.
+ *
+ *              If this is set, no MLKEM_K-independent code will be included
+ *              in the build.
+ *
+ *              To build mlkem-native with support for all security levels,
+ *              build it three times -- once per level -- and set the option
+ *              MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED for exactly one of
+ *              them, and MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED for the
+ *              others.
+ *
+ *              See examples/multilevel_build for an example.
+ *
+ *              This can also be set using CFLAGS.
+ *
+ *****************************************************************************/
+/* #define MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
 
 /******************************************************************************
  * Name:        MLKEM_USE_NATIVE

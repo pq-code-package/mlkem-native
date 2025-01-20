@@ -49,16 +49,28 @@
 #define MLKEM_NAMESPACE(s) \
   MLKEM_NATIVE_MAKE_NAMESPACE(MLKEM_NAMESPACE_PREFIX, s)
 
+#if defined(MLKEM_NAMESPACE_PREFIX_ADD_LEVEL)
+#define MLKEM_NATIVE_MAKE_NAMESPACE_K_(x1, x2, x3) x1##x2##_##x3
+#define MLKEM_NATIVE_MAKE_NAMESPACE_K(x1, x2, x3) \
+  MLKEM_NATIVE_MAKE_NAMESPACE_K_(x1, x2, x3)
+#define MLKEM_NAMESPACE_K(s) \
+  MLKEM_NATIVE_MAKE_NAMESPACE_K(MLKEM_NAMESPACE_PREFIX, MLKEM_LVL, s)
+#else
+#define MLKEM_NAMESPACE_K(s) MLKEM_NAMESPACE(s)
+#endif
+
 /* On Apple platforms, we need to emit leading underscore
  * in front of assembly symbols. We thus introducee a separate
  * namespace wrapper for ASM symbols. */
 #if !defined(__APPLE__)
 #define MLKEM_ASM_NAMESPACE(sym) MLKEM_NAMESPACE(sym)
+#define MLKEM_ASM_NAMESPACE_K(sym) MLKEM_NAMESPACE_K(sym)
 #define FIPS202_ASM_NAMESPACE(sym) FIPS202_NAMESPACE(sym)
 #else
 #define PREFIX_UNDERSCORE_(sym) _##sym
 #define PREFIX_UNDERSCORE(sym) PREFIX_UNDERSCORE_(sym)
 #define MLKEM_ASM_NAMESPACE(sym) PREFIX_UNDERSCORE(MLKEM_NAMESPACE(sym))
+#define MLKEM_ASM_NAMESPACE_K(sym) PREFIX_UNDERSCORE(MLKEM_NAMESPACE_K(sym))
 #define FIPS202_ASM_NAMESPACE(sym) PREFIX_UNDERSCORE(FIPS202_NAMESPACE(sym))
 #endif
 

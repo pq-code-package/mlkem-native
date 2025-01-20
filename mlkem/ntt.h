@@ -4,10 +4,10 @@
  */
 #ifndef NTT_H
 #define NTT_H
+#include "common.h"
 
 #include <stdint.h>
 #include "cbmc.h"
-#include "common.h"
 #include "poly.h"
 #include "reduce.h"
 
@@ -99,5 +99,4 @@ __contract__(
   ensures(array_abs_bound(r, 0, 2, 2 * MLKEM_Q))
 );
 
-
-#endif
+#endif /* NTT_H */

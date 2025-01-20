@@ -10,7 +10,7 @@
 #include "common.h"
 #include "polyvec.h"
 
-#define gen_matrix MLKEM_NAMESPACE(gen_matrix)
+#define gen_matrix MLKEM_NAMESPACE_K(gen_matrix)
 /*************************************************
  * Name:        gen_matrix
  *
@@ -34,7 +34,7 @@ __contract__(
   array_bound(a[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))));
 );
 
-#define indcpa_keypair_derand MLKEM_NAMESPACE(indcpa_keypair_derand)
+#define indcpa_keypair_derand MLKEM_NAMESPACE_K(indcpa_keypair_derand)
 /*************************************************
  * Name:        indcpa_keypair_derand
  *
@@ -60,7 +60,7 @@ __contract__(
   assigns(object_whole(sk))
 );
 
-#define indcpa_enc MLKEM_NAMESPACE(indcpa_enc)
+#define indcpa_enc MLKEM_NAMESPACE_K(indcpa_enc)
 /*************************************************
  * Name:        indcpa_enc
  *
@@ -89,7 +89,7 @@ __contract__(
   assigns(object_whole(c))
 );
 
-#define indcpa_dec MLKEM_NAMESPACE(indcpa_dec)
+#define indcpa_dec MLKEM_NAMESPACE_K(indcpa_dec)
 /*************************************************
  * Name:        indcpa_dec
  *

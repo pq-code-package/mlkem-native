@@ -4,7 +4,6 @@
  */
 #ifndef FIPS202_H
 #define FIPS202_H
-
 #include <stddef.h>
 #include <stdint.h>
 #include "../cbmc.h"
@@ -142,4 +141,4 @@ __contract__(
   assigns(memory_slice(output, SHA3_512_HASHBYTES))
 );
 
-#endif
+#endif /* FIPS202_H */

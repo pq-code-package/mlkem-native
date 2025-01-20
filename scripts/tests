@@ -188,6 +188,7 @@ class TEST_TYPES(Enum):
     MLKEM_NATIVE_AS_CODE_PACKAGE = 9
     MONOLITHIC_BUILD = 10
     MONOLITHIC_BUILD_MULTILEVEL = 11
+    MULTILEVEL_BUILD = 12
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -203,6 +204,7 @@ class TEST_TYPES(Enum):
             TEST_TYPES.MLKEM_NATIVE_AS_CODE_PACKAGE,
             TEST_TYPES.MONOLITHIC_BUILD,
             TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL,
+            TEST_TYPES.MULTILEVEL_BUILD,
         ]
 
     @staticmethod
@@ -237,6 +239,8 @@ class TEST_TYPES(Enum):
             return "Example (monolithic build)"
         if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
             return "Example (monolithic build, multilevel)"
+        if self == TEST_TYPES.MULTILEVEL_BUILD:
+            return "Example (multilevel build)"
 
     def make_dir(self):
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
@@ -249,6 +253,8 @@ class TEST_TYPES(Enum):
             return "examples/monolithic_build"
         if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
             return "examples/monolithic_build_multilevel"
+        if self == TEST_TYPES.MULTILEVEL_BUILD:
+            return "examples/multilevel_build"
         return ""
 
     def make_target(self):
@@ -273,6 +279,8 @@ class TEST_TYPES(Enum):
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return ""
         if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
+            return ""
+        if self == TEST_TYPES.MULTILEVEL_BUILD:
             return ""
 
     def make_run_target(self, scheme):

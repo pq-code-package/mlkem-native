@@ -16,7 +16,7 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mlkem/cbd.c
+PROJECT_SOURCES += $(SRCDIR)/mlkem/cbd.c $(SRCDIR)/mlkem/polyvec.c
 
 # Only relevant for K=2 or K=4
 ifeq ($(MLKEM_K),2)

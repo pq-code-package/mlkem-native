@@ -3,11 +3,7 @@
 // SPDX-License-Identifier: MIT-0
 
 #include <stdint.h>
-#include "poly.h"
-
-// declare here since it's static in non-CBMC builds
-#define poly_rej_uniform MLKEM_NAMESPACE(poly_rej_uniform)
-void poly_rej_uniform(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 16]);
+#include "rej_uniform.h"
 
 void harness(void)
 {

@@ -4,7 +4,7 @@
  */
 #include "../common.h"
 
-#if defined(MLKEM_DEBUG)
+#if !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) && defined(MLKEM_DEBUG)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,9 +48,9 @@ void mlkem_debug_check_bounds(const char *file, int line, const int16_t *ptr,
     exit(1);
 }
 
-#else /* MLKEM_DEBUG */
+#else /* !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED && MLKEM_DEBUG */
 
-#define empty_cu_debug MLKEM_NAMESPACE(empty_cu_debug)
+#define empty_cu_debug MLKEM_NAMESPACE_K(empty_cu_debug)
 int empty_cu_debug;
 
-#endif /* MLKEM_DEBUG */
+#endif /* !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED && MLKEM_DEBUG */

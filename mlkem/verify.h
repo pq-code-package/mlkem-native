@@ -314,4 +314,4 @@ __contract__(
   }
 }
 
-#endif
+#endif /* VERIFY_H */

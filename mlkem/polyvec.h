@@ -9,19 +9,144 @@
 #include "common.h"
 #include "poly.h"
 
-#define polyvec MLKEM_NAMESPACE(polyvec)
+#define polyvec MLKEM_NAMESPACE_K(polyvec)
 typedef struct
 {
   poly vec[MLKEM_K];
 } ALIGN polyvec;
 
-#define polyvec_mulcache MLKEM_NAMESPACE(polyvec_mulcache)
+#define polyvec_mulcache MLKEM_NAMESPACE_K(polyvec_mulcache)
 typedef struct
 {
   poly_mulcache vec[MLKEM_K];
 } polyvec_mulcache;
 
-#define polyvec_compress_du MLKEM_NAMESPACE(polyvec_compress_du)
+#define poly_compress_du MLKEM_NAMESPACE_K(poly_compress_du)
+/*************************************************
+ * Name:        poly_compress_du
+ *
+ * Description: Compression (du bits) and subsequent serialization of a
+ *              polynomial
+ *
+ * Arguments:   - uint8_t *r: pointer to output byte array
+ *                  (of length MLKEM_POLYCOMPRESSEDBYTES_DU bytes)
+ *              - const poly *a: pointer to input polynomial
+ *                  Coefficients must be unsigned canonical,
+ *                  i.e. in [0,1,..,MLKEM_Q-1].
+ **************************************************/
+static INLINE void poly_compress_du(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DU],
+                                    const poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_DU))
+  requires(memory_no_alias(a, sizeof(poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_DU)))
+{
+#if MLKEM_DU == 10
+  poly_compress_d10(r, a);
+#elif MLKEM_DU == 11
+  poly_compress_d11(r, a);
+#else
+#error "Invalid value of MLKEM_DU"
+#endif
+}
+
+#define poly_decompress_du MLKEM_NAMESPACE_K(poly_decompress_du)
+/*************************************************
+ * Name:        poly_decompress_du
+ *
+ * Description: De-serialization and subsequent decompression (du bits) of a
+ *              polynomial; approximate inverse of poly_compress_du
+ *
+ * Arguments:   - poly *r: pointer to output polynomial
+ *              - const uint8_t *a: pointer to input byte array
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_DU bytes)
+ *
+ * Upon return, the coefficients of the output polynomial are unsigned-canonical
+ * (non-negative and smaller than MLKEM_Q).
+ *
+ **************************************************/
+static INLINE void poly_decompress_du(
+    poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DU])
+__contract__(
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_DU))
+  requires(memory_no_alias(r, sizeof(poly)))
+  assigns(memory_slice(r, sizeof(poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+{
+#if MLKEM_DU == 10
+  poly_decompress_d10(r, a);
+#elif MLKEM_DU == 11
+  poly_decompress_d11(r, a);
+#else
+#error "Invalid value of MLKEM_DU"
+#endif
+}
+
+#define poly_compress_dv MLKEM_NAMESPACE_K(poly_compress_dv)
+/*************************************************
+ * Name:        poly_compress_dv
+ *
+ * Description: Compression (dv bits) and subsequent serialization of a
+ *              polynomial
+ *
+ * Arguments:   - uint8_t *r: pointer to output byte array
+ *                  (of length MLKEM_POLYCOMPRESSEDBYTES_DV bytes)
+ *              - const poly *a: pointer to input polynomial
+ *                  Coefficients must be unsigned canonical,
+ *                  i.e. in [0,1,..,MLKEM_Q-1].
+ **************************************************/
+static INLINE void poly_compress_dv(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DV],
+                                    const poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_DV))
+  requires(memory_no_alias(a, sizeof(poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(object_whole(r)))
+{
+#if MLKEM_DV == 4
+  poly_compress_d4(r, a);
+#elif MLKEM_DV == 5
+  poly_compress_d5(r, a);
+#else
+#error "Invalid value of MLKEM_DV"
+#endif
+}
+
+
+#define poly_decompress_dv MLKEM_NAMESPACE_K(poly_decompress_dv)
+/*************************************************
+ * Name:        poly_decompress_dv
+ *
+ * Description: De-serialization and subsequent decompression (dv bits) of a
+ *              polynomial; approximate inverse of poly_compress
+ *
+ * Arguments:   - poly *r: pointer to output polynomial
+ *              - const uint8_t *a: pointer to input byte array
+ *                  (of length MLKEM_POLYCOMPRESSEDBYTES_DV bytes)
+ *
+ * Upon return, the coefficients of the output polynomial are unsigned-canonical
+ * (non-negative and smaller than MLKEM_Q).
+ *
+ **************************************************/
+static INLINE void poly_decompress_dv(
+    poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DV])
+__contract__(
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_DV))
+  requires(memory_no_alias(r, sizeof(poly)))
+  assigns(object_whole(r))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+{
+#if MLKEM_DV == 4
+  poly_decompress_d4(r, a);
+#elif MLKEM_DV == 5
+  poly_decompress_d5(r, a);
+#else
+#error "Invalid value of MLKEM_DV"
+#endif
+}
+
+#define polyvec_compress_du MLKEM_NAMESPACE_K(polyvec_compress_du)
 /*************************************************
  * Name:        polyvec_compress_du
  *
@@ -44,7 +169,7 @@ __contract__(
   assigns(object_whole(r))
 );
 
-#define polyvec_decompress_du MLKEM_NAMESPACE(polyvec_decompress_du)
+#define polyvec_decompress_du MLKEM_NAMESPACE_K(polyvec_decompress_du)
 /*************************************************
  * Name:        polyvec_decompress_du
  *
@@ -67,7 +192,7 @@ __contract__(
          array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 );
 
-#define polyvec_tobytes MLKEM_NAMESPACE(polyvec_tobytes)
+#define polyvec_tobytes MLKEM_NAMESPACE_K(polyvec_tobytes)
 /*************************************************
  * Name:        polyvec_tobytes
  *
@@ -88,7 +213,7 @@ __contract__(
   assigns(object_whole(r))
 );
 
-#define polyvec_frombytes MLKEM_NAMESPACE(polyvec_frombytes)
+#define polyvec_frombytes MLKEM_NAMESPACE_K(polyvec_frombytes)
 /*************************************************
  * Name:        polyvec_frombytes
  *
@@ -110,7 +235,7 @@ __contract__(
         array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, UINT12_LIMIT)))
 );
 
-#define polyvec_ntt MLKEM_NAMESPACE(polyvec_ntt)
+#define polyvec_ntt MLKEM_NAMESPACE_K(polyvec_ntt)
 /*************************************************
  * Name:        polyvec_ntt
  *
@@ -136,7 +261,7 @@ __contract__(
   array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, NTT_BOUND)))
 );
 
-#define polyvec_invntt_tomont MLKEM_NAMESPACE(polyvec_invntt_tomont)
+#define polyvec_invntt_tomont MLKEM_NAMESPACE_K(polyvec_invntt_tomont)
 /*************************************************
  * Name:        polyvec_invntt_tomont
  *
@@ -162,7 +287,7 @@ __contract__(
 );
 
 #define polyvec_basemul_acc_montgomery \
-  MLKEM_NAMESPACE(polyvec_basemul_acc_montgomery)
+  MLKEM_NAMESPACE_K(polyvec_basemul_acc_montgomery)
 /*************************************************
  * Name:        polyvec_basemul_acc_montgomery
  *
@@ -186,7 +311,7 @@ __contract__(
 
 
 #define polyvec_basemul_acc_montgomery_cached \
-  MLKEM_NAMESPACE(polyvec_basemul_acc_montgomery_cached)
+  MLKEM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached)
 /*************************************************
  * Name:        polyvec_basemul_acc_montgomery_cached
  *
@@ -218,7 +343,7 @@ __contract__(
   assigns(memory_slice(r, sizeof(poly)))
 );
 
-#define polyvec_mulcache_compute MLKEM_NAMESPACE(polyvec_mulcache_compute)
+#define polyvec_mulcache_compute MLKEM_NAMESPACE_K(polyvec_mulcache_compute)
 /************************************************************
  * Name: polyvec_mulcache_compute
  *
@@ -252,7 +377,7 @@ __contract__(
   assigns(object_whole(x))
 );
 
-#define polyvec_reduce MLKEM_NAMESPACE(polyvec_reduce)
+#define polyvec_reduce MLKEM_NAMESPACE_K(polyvec_reduce)
 /*************************************************
  * Name:        polyvec_reduce
  *
@@ -278,7 +403,7 @@ __contract__(
     array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 );
 
-#define polyvec_add MLKEM_NAMESPACE(polyvec_add)
+#define polyvec_add MLKEM_NAMESPACE_K(polyvec_add)
 /*************************************************
  * Name:        polyvec_add
  *
@@ -309,7 +434,7 @@ __contract__(
   assigns(object_whole(r))
 );
 
-#define polyvec_tomont MLKEM_NAMESPACE(polyvec_tomont)
+#define polyvec_tomont MLKEM_NAMESPACE_K(polyvec_tomont)
 /*************************************************
  * Name:        polyvec_tomont
  *
@@ -328,5 +453,143 @@ __contract__(
   ensures(forall(j, 0, MLKEM_K,
     array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
 );
+
+#define poly_getnoise_eta1_4x MLKEM_NAMESPACE_K(poly_getnoise_eta1_4x)
+/*************************************************
+ * Name:        poly_getnoise_eta1_4x
+ *
+ * Description: Batch sample four polynomials deterministically from a seed
+ * and nonces, with output polynomials close to centered binomial distribution
+ * with parameter MLKEM_ETA1.
+ *
+ * Arguments:   - poly *r{0,1,2,3}: pointer to output polynomial
+ *              - const uint8_t *seed: pointer to input seed
+ *                                     (of length MLKEM_SYMBYTES bytes)
+ *              - uint8_t nonce{0,1,2,3}: one-byte input nonce
+ **************************************************/
+MLKEM_NATIVE_INTERNAL_API
+void poly_getnoise_eta1_4x(poly *r0, poly *r1, poly *r2, poly *r3,
+                           const uint8_t seed[MLKEM_SYMBYTES], uint8_t nonce0,
+                           uint8_t nonce1, uint8_t nonce2, uint8_t nonce3)
+/* Depending on MLKEM_K, the pointers passed to this function belong
+   to the same objects, so we cannot use memory_no_alias for r0-r3.
+
+   NOTE: Somehow it is important to use memory_no_alias() first in the
+         conjunctions defining each case.
+*/
+#if MLKEM_K == 2
+__contract__(
+  requires(memory_no_alias(seed, MLKEM_SYMBYTES))
+  requires( /* Case A: r0, r1 consecutive, r2, r3 consecutive */
+    (memory_no_alias(r0, 2 * sizeof(poly)) && memory_no_alias(r2, 2 * sizeof(poly)) &&
+     r1 == r0 + 1 && r3 == r2 + 1 && !same_object(r0, r2)))
+  assigns(memory_slice(r0, sizeof(poly)))
+  assigns(memory_slice(r1, sizeof(poly)))
+  assigns(memory_slice(r2, sizeof(poly)))
+  assigns(memory_slice(r3, sizeof(poly)))
+  ensures(
+    array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1));
+);
+#elif MLKEM_K == 4
+__contract__(
+  requires(memory_no_alias(seed, MLKEM_SYMBYTES))
+  requires( /* Case B: r0, r1, r2, r3 consecutive */
+    (memory_no_alias(r0, 4 * sizeof(poly)) && r1 == r0 + 1 && r2 == r0 + 2 && r3 == r0 + 3))
+  assigns(memory_slice(r0, sizeof(poly)))
+  assigns(memory_slice(r1, sizeof(poly)))
+  assigns(memory_slice(r2, sizeof(poly)))
+  assigns(memory_slice(r3, sizeof(poly)))
+  ensures(
+    array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1));
+);
+#elif MLKEM_K == 3
+__contract__(
+  requires(memory_no_alias(seed, MLKEM_SYMBYTES))
+  requires( /* Case C: r0, r1, r2 consecutive */
+ (memory_no_alias(r0, 3 * sizeof(poly)) && memory_no_alias(r3, 1 * sizeof(poly)) &&
+  r1 == r0 + 1 && r2 == r0 + 2 && !same_object(r3, r0)))
+  assigns(memory_slice(r0, sizeof(poly)))
+  assigns(memory_slice(r1, sizeof(poly)))
+  assigns(memory_slice(r2, sizeof(poly)))
+  assigns(memory_slice(r3, sizeof(poly)))
+  ensures(
+    array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+    && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1));
+);
+#endif /* MLKEM_K */
+
+#if MLKEM_ETA1 == MLKEM_ETA2
+/*
+ * We only require poly_getnoise_eta2_4x for ml-kem-768 and ml-kem-1024
+ * where MLKEM_ETA2 = MLKEM_ETA1 = 2.
+ * For ml-kem-512, poly_getnoise_eta1122_4x is used instead.
+ */
+#define poly_getnoise_eta2_4x poly_getnoise_eta1_4x
+#endif /* MLKEM_ETA1 == MLKEM_ETA2 */
+
+#if MLKEM_K == 2 || MLKEM_K == 4
+#define poly_getnoise_eta2 MLKEM_NAMESPACE_K(poly_getnoise_eta2)
+/*************************************************
+ * Name:        poly_getnoise_eta2
+ *
+ * Description: Sample a polynomial deterministically from a seed and a nonce,
+ *              with output polynomial close to centered binomial distribution
+ *              with parameter MLKEM_ETA2
+ *
+ * Arguments:   - poly *r: pointer to output polynomial
+ *              - const uint8_t *seed: pointer to input seed
+ *                                     (of length MLKEM_SYMBYTES bytes)
+ *              - uint8_t nonce: one-byte input nonce
+ **************************************************/
+MLKEM_NATIVE_INTERNAL_API
+void poly_getnoise_eta2(poly *r, const uint8_t seed[MLKEM_SYMBYTES],
+                        uint8_t nonce)
+__contract__(
+  requires(memory_no_alias(r, sizeof(poly)))
+  requires(memory_no_alias(seed, MLKEM_SYMBYTES))
+  assigns(object_whole(r))
+  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_ETA2 + 1))
+);
+#endif /* MLKEM_K == 2 || MLKEM_K == 4 */
+
+#if MLKEM_K == 2
+#define poly_getnoise_eta1122_4x MLKEM_NAMESPACE_K(poly_getnoise_eta1122_4x)
+/*************************************************
+ * Name:        poly_getnoise_eta1122_4x
+ *
+ * Description: Batch sample four polynomials deterministically from a seed
+ * and a nonces, with output polynomials close to centered binomial
+ * distribution with parameter MLKEM_ETA1 and MLKEM_ETA2
+ *
+ * Arguments:   - poly *r{0,1,2,3}: pointer to output polynomial
+ *              - const uint8_t *seed: pointer to input seed
+ *                                     (of length MLKEM_SYMBYTES bytes)
+ *              - uint8_t nonce{0,1,2,3}: one-byte input nonce
+ **************************************************/
+MLKEM_NATIVE_INTERNAL_API
+void poly_getnoise_eta1122_4x(poly *r0, poly *r1, poly *r2, poly *r3,
+                              const uint8_t seed[MLKEM_SYMBYTES],
+                              uint8_t nonce0, uint8_t nonce1, uint8_t nonce2,
+                              uint8_t nonce3)
+__contract__(
+  requires( /* r0, r1 consecutive, r2, r3 consecutive */
+ (memory_no_alias(r0, 2 * sizeof(poly)) && memory_no_alias(r2, 2 * sizeof(poly)) &&
+   r1 == r0 + 1 && r3 == r2 + 1 && !same_object(r0, r2)))
+  requires(memory_no_alias(seed, MLKEM_SYMBYTES))
+  assigns(object_whole(r0), object_whole(r1), object_whole(r2), object_whole(r3))
+  ensures(array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+     && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+     && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA2 + 1)
+     && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA2 + 1));
+);
+#endif /* MLKEM_K == 2 */
 
 #endif

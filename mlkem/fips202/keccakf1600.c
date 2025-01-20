@@ -13,8 +13,10 @@
 #include <assert.h>
 #include <stdint.h>
 
-#include "fips202_backend.h"
 #include "keccakf1600.h"
+#if !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+
+#include "fips202_backend.h"
 
 #define NROUNDS 24
 #define ROL(a, offset) ((a << offset) ^ (a >> (64 - offset)))
@@ -399,3 +401,10 @@ void KeccakF1600_StatePermute(uint64_t *state)
   keccak_f1600_x1_native(state);
 }
 #endif /* !MLKEM_USE_FIPS202_X1_NATIVE */
+
+#else /* MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED */
+
+#define empty_cu_keccakf1600 MLKEM_NAMESPACE_K(empty_cu_keccakf1600)
+int empty_cu_keccakf1600;
+
+#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED */

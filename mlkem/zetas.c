@@ -8,6 +8,8 @@
  *          Do not modify it directly.
  */
 
+#include "common.h"
+#if !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 #include "ntt.h"
 
 /*
@@ -28,3 +30,10 @@ ALIGN const int16_t zetas[128] = {
     -1187, -1659, -1185, -1530, -1278, 794,   -1510, -854, -870,  478,   -108,
     -308,  996,   991,   958,   -1460, 1522,  1628,
 };
+
+#else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+
+#define empty_cu_zetas MLKEM_NAMESPACE_K(empty_cu_zetas)
+int empty_cu_zetas;
+
+#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

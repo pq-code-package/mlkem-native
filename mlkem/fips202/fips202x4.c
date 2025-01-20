@@ -2,9 +2,12 @@
  * Copyright (c) 2024 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#include "fips202x4.h"
+#include "../common.h"
+#if !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+
 #include <string.h>
 #include "fips202.h"
+#include "fips202x4.h"
 #include "keccakf1600.h"
 
 #define shake256x4_ctx FIPS202_NAMESPACE(shake256x4_ctx)
@@ -177,3 +180,10 @@ void shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
     memcpy(out3, tmp3, outlen);
   }
 }
+
+#else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+
+#define empty_cu_fips202x4 MLKEM_NAMESPACE_K(empty_cu_fips202x4)
+int empty_cu_fips202x4;
+
+#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

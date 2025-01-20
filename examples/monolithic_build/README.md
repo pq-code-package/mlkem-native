@@ -3,7 +3,7 @@
 # Single-level mlkem-native in a single compilation unit
 
 This directory contains a minimal example for how to build a single instance of mlkem-native in a single compilation
-unit.
+unit. Only the C-backend is exercised.
 
 The auto-generated source file [mlkem_native_monobuild.c](mlkem_native_monobuild.c) includes all mlkem-native C source
 files. Moreover, it clears all `#define`s clauses set by mlkem-native at the end, and is hence amenable to multiple
