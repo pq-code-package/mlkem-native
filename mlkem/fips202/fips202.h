@@ -17,7 +17,7 @@
 
 
 /* Context for non-incremental API */
-#define shake128ctx FIPS202_NAMESPACE(shake128ctx)
+#define shake128ctx MLKEM_NAMESPACE(shake128ctx)
 typedef struct
 {
   uint64_t ctx[25];
@@ -28,7 +28,7 @@ typedef struct
  * This function does not support being called multiple times
  * with the same state.
  */
-#define shake128_absorb_once FIPS202_NAMESPACE(shake128_absorb_once)
+#define shake128_absorb_once MLKEM_NAMESPACE(shake128_absorb_once)
 /*************************************************
  * Name:        shake128_absorb_once
  *
@@ -55,7 +55,7 @@ __contract__(
  *
  * Supports being called multiple times
  */
-#define shake128_squeezeblocks FIPS202_NAMESPACE(shake128_squeezeblocks)
+#define shake128_squeezeblocks MLKEM_NAMESPACE(shake128_squeezeblocks)
 /*************************************************
  * Name:        shake128_squeezeblocks
  *
@@ -77,12 +77,12 @@ __contract__(
 );
 
 /* Free the state */
-#define shake128_release FIPS202_NAMESPACE(shake128_release)
+#define shake128_release MLKEM_NAMESPACE(shake128_release)
 void shake128_release(shake128ctx *state);
 
 /* One-stop SHAKE256 call. Aliasing between input and
  * output is not permitted */
-#define shake256 FIPS202_NAMESPACE(shake256)
+#define shake256 MLKEM_NAMESPACE(shake256)
 /*************************************************
  * Name:        shake256
  *
@@ -104,7 +104,7 @@ __contract__(
 /* One-stop SHA3_256 call. Aliasing between input and
  * output is not permitted */
 #define SHA3_256_HASHBYTES 32
-#define sha3_256 FIPS202_NAMESPACE(sha3_256)
+#define sha3_256 MLKEM_NAMESPACE(sha3_256)
 /*************************************************
  * Name:        sha3_256
  *
@@ -124,7 +124,7 @@ __contract__(
 /* One-stop SHA3_512 call. Aliasing between input and
  * output is not permitted */
 #define SHA3_512_HASHBYTES 64
-#define sha3_512 FIPS202_NAMESPACE(sha3_512)
+#define sha3_512 MLKEM_NAMESPACE(sha3_512)
 /*************************************************
  * Name:        sha3_512
  *

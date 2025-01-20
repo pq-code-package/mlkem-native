@@ -310,9 +310,9 @@
 
 .text
 .align 4
-.global FIPS202_ASM_NAMESPACE(keccak_f1600_x1_v84a_asm_clean)
+.global MLKEM_ASM_NAMESPACE(keccak_f1600_x1_v84a_asm_clean)
 
-FIPS202_ASM_NAMESPACE(keccak_f1600_x1_v84a_asm_clean):
+MLKEM_ASM_NAMESPACE(keccak_f1600_x1_v84a_asm_clean):
     alloc_stack
     save_vregs
     mov const_addr, input_rc

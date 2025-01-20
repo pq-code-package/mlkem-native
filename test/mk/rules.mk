@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
+
 $(BUILD_DIR)/mlkem512/bin/%: $(CONFIG)
 	$(Q)echo "  LD      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
@@ -19,10 +20,10 @@ $(BUILD_DIR)/%.a: $(CONFIG)
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)rm -f $@
 	$(Q)$(CC_AR) rcs $@ $(filter %.o,$^)
-
-# NOTE:
-# 	$AR doesn't care about duplicated symbols, one can only find it out via actually linking.
-# 	The easiest one to do this that one can think of is to create a dummy C file with empty main function on the fly, pipe it to $CC and link with the built library
+        # $AR doesn't care about duplicated symbols, one can only find it out
+        # via actually linking. The easiest one to do this that one can think
+        # of is to create a dummy C file with empty main function on the fly,
+        # pipe it to $CC and link with the built library
 	$(eval _LIB := $(subst $(BUILD_DIR)/lib,,$(@:%.a=%)))
 	$(eval _CFLAGS := $(subst -static,,$(CFLAGS)))
 
@@ -41,16 +42,6 @@ else                                           # if not on macOS
 	$(Q)rm -f $(@:%.a=%_tmp.a.out)
 endif
 	$(Q)echo "  AR         Checked for duplicated symbols"
-
-$(BUILD_DIR)/%.c.o: %.c $(CONFIG)
-	$(Q)echo "  CC      $@"
-	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
-
-$(BUILD_DIR)/%.S.o: %.S $(CONFIG)
-	$(Q)echo "  AS      $@"
-	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
 
 $(BUILD_DIR)/mlkem512/%.c.o: %.c $(CONFIG)
 	$(Q)echo "  CC      $@"

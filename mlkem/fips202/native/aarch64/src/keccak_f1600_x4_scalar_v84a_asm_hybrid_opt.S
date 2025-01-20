@@ -875,11 +875,11 @@
     ror sAsu, sAsu,#(64-55)
 .endm
 
-.global FIPS202_ASM_NAMESPACE(keccak_f1600_x4_scalar_v84a_asm_hybrid_opt)
+.global MLKEM_ASM_NAMESPACE(keccak_f1600_x4_scalar_v84a_asm_hybrid_opt)
 .text
 .align 4
 
-FIPS202_ASM_NAMESPACE(keccak_f1600_x4_scalar_v84a_asm_hybrid_opt):
+MLKEM_ASM_NAMESPACE(keccak_f1600_x4_scalar_v84a_asm_hybrid_opt):
     alloc_stack
     save_gprs
     save_vregs

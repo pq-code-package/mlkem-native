@@ -91,7 +91,7 @@ acvp_1024: $(MLKEM1024_DIR)/bin/acvp_mlkem1024
 	$(Q)echo "  ACVP       ML-MEM-1024:  $^"
 acvp: acvp_512 acvp_768 acvp_1024
 
-lib: $(BUILD_DIR)/libmlkem.a
+lib: $(BUILD_DIR)/libmlkem.a $(BUILD_DIR)/libmlkem512.a $(BUILD_DIR)/libmlkem768.a $(BUILD_DIR)/libmlkem1024.a
 
 # Enforce setting CYCLES make variable when
 # building benchmarking binaries

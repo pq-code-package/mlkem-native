@@ -13,7 +13,7 @@
 #include "../../../../common.h"
 
 #define KeccakP1600times4_PermuteAll_24rounds \
-  FIPS202_NAMESPACE(KeccakP1600times4_PermuteAll_24rounds)
+  MLKEM_NAMESPACE(KeccakP1600times4_PermuteAll_24rounds)
 void KeccakP1600times4_PermuteAll_24rounds(void *states);
 
 #define MLKEM_USE_FIPS202_X4_NATIVE

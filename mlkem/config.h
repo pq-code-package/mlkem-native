@@ -42,8 +42,10 @@
 /******************************************************************************
  * Name:        MLKEM_NAMESPACE_PREFIX
  *
- * Description: The prefix to use to namespace global symbols
- *              from mlkem/.
+ * Description: The prefix to use to namespace global symbols from mlkem/.
+ *
+ *              Level-dependent symbols will additionally be prefixed with the
+ *              security level if MLKEM_NAMESPACE_PREFIX_ADD_LEVEL is set.
  *
  *              This can also be set using CFLAGS.
  *
@@ -67,19 +69,6 @@
  *
  *****************************************************************************/
 /* #define MLKEM_NAMESPACE_PREFIX_ADD_LEVEL */
-
-/******************************************************************************
- * Name:        FIPS202_NAMESPACE_PREFIX
- *
- * Description: The prefix to use to namespace global symbols
- *              from mlkem/fips202/.
- *
- *              This can also be set using CFLAGS.
- *
- *****************************************************************************/
-#if !defined(FIPS202_NAMESPACE_PREFIX)
-#define FIPS202_NAMESPACE_PREFIX FIPS202_DEFAULT_NAMESPACE_PREFIX
-#endif
 
 /******************************************************************************
  * Name:        MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED
@@ -179,25 +168,13 @@
 /* Default namespace
  *
  * Don't change this. If you need a different namespace, re-define
- * MLKEM_NAMESPACE above instead, and remove the following.
- */
-
-/*
- * The default FIPS202 namespace is
+ * MLKEM_NAMESPACE_PREFIX above instead, and remove the following.
  *
- *   PQCP_MLKEM_NATIVE_FIPS202_<BACKEND>_
- *
- * e.g., PQCP_MLKEM_NATIVE_FIPS202_C_
- */
-
-#define FIPS202_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_FIPS202
-
-/*
  * The default MLKEM namespace is
  *
- *   PQCP_MLKEM_NATIVE_MLKEM<LEVEL>_<BACKEND>_
+ *   PQCP_MLKEM_NATIVE_MLKEM<LEVEL>_
  *
- * e.g., PQCP_MLKEM_NATIVE_MLKEM512_AARCH64_OPT_
+ * e.g., PQCP_MLKEM_NATIVE_MLKEM512_
  */
 
 #if MLKEM_K == 2

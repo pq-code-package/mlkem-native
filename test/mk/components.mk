@@ -5,11 +5,6 @@ ifeq ($(OPT),1)
 	FIPS202_SRCS += $(wildcard mlkem/fips202/native/aarch64/src/*.S) $(wildcard mlkem/fips202/native/aarch64/src/*.c) $(wildcard mlkem/fips202/native/x86_64/src/*.c)
 endif
 
-$(BUILD_DIR)/libmlkem.a: $(call OBJS, $(FIPS202_SRCS))
-$(BUILD_DIR)/libmlkem512.a: $(call OBJS, $(FIPS202_SRCS))
-$(BUILD_DIR)/libmlkem768.a: $(call OBJS, $(FIPS202_SRCS))
-$(BUILD_DIR)/libmlkem1024.a: $(call OBJS, $(FIPS202_SRCS))
-
 SOURCES += $(wildcard mlkem/*.c) $(wildcard mlkem/debug/*.c)
 ifeq ($(OPT),1)
 	SOURCES += $(wildcard mlkem/native/aarch64/src/*.[csS]) $(wildcard mlkem/native/x86_64/src/*.[csS])
@@ -23,31 +18,18 @@ MLKEM512_DIR = $(BUILD_DIR)/mlkem512
 MLKEM768_DIR = $(BUILD_DIR)/mlkem768
 MLKEM1024_DIR = $(BUILD_DIR)/mlkem1024
 
-# build lib<scheme>.a
-define BUILD_LIB
-$(BUILD_DIR)/lib$(1).a: CFLAGS += -static
-$(BUILD_DIR)/lib$(1).a: $(call MAKE_OBJS,$(BUILD_DIR)/$(1),$(SOURCES))
+MLKEM512_OBJS = $(call MAKE_OBJS,$(MLKEM512_DIR),$(SOURCES) $(FIPS202_SRCS))
+$(MLKEM512_OBJS): CFLAGS += -DMLKEM_K=2
+MLKEM768_OBJS = $(call MAKE_OBJS,$(MLKEM768_DIR),$(SOURCES) $(FIPS202_SRCS))
+$(MLKEM768_OBJS): CFLAGS += -DMLKEM_K=3
+MLKEM1024_OBJS = $(call MAKE_OBJS,$(MLKEM1024_DIR),$(SOURCES) $(FIPS202_SRCS))
+$(MLKEM1024_OBJS): CFLAGS += -DMLKEM_K=4
 
-# NOTE:
-# libmlkem.a does not link against libmlkem{512,768,1024}.a, but the underlying object files.
-# Still, we currently need a dependency on libmlkem{512,768,1024}.a here as otherwise there is
-# a hiccup with the setting of MLKEM_K (TODO: look at this more closely)
-$(BUILD_DIR)/libmlkem.a: $(BUILD_DIR)/lib$(1).a $(call MAKE_OBJS,$(BUILD_DIR)/$(1),$(SOURCES))
-endef
+$(BUILD_DIR)/libmlkem512.a: $(MLKEM512_OBJS)
+$(BUILD_DIR)/libmlkem768.a: $(MLKEM768_OBJS)
+$(BUILD_DIR)/libmlkem1024.a: $(MLKEM1024_OBJS)
 
-$(BUILD_DIR)/libmlkem512.a: CFLAGS += -DMLKEM_K=2
-$(BUILD_DIR)/libmlkem768.a: CFLAGS += -DMLKEM_K=3
-$(BUILD_DIR)/libmlkem1024.a: CFLAGS += -DMLKEM_K=4
-
-# build libmlkem512.a libmlkem768.a libmlkem1024.a
-$(foreach scheme,mlkem512 mlkem768 mlkem1024, \
-	$(eval $(call BUILD_LIB,$(scheme))))
-
-# rules for compilation for all tests: mainly linking with mlkem static link library
-define ADD_SOURCE
-$(BUILD_DIR)/$(1)/bin/$(2)$(shell echo $(1) | tr -d -c 0-9): LDLIBS += -L$(BUILD_DIR) -l$(1)
-$(BUILD_DIR)/$(1)/bin/$(2)$(shell echo $(1) | tr -d -c 0-9): $(BUILD_DIR)/$(1)/test/$(2).c.o $(BUILD_DIR)/lib$(1).a
-endef
+$(BUILD_DIR)/libmlkem.a: $(MLKEM512_OBJS) $(MLKEM768_OBJS) $(MLKEM1024_OBJS)
 
 $(MLKEM512_DIR)/bin/bench_mlkem512: CFLAGS += -Itest/hal
 $(MLKEM768_DIR)/bin/bench_mlkem768: CFLAGS += -Itest/hal
@@ -66,6 +48,12 @@ $(MLKEM1024_DIR)/bin/bench_components_mlkem1024: $(MLKEM1024_DIR)/test/hal/hal.c
 $(MLKEM512_DIR)/bin/%: CFLAGS += -DMLKEM_K=2
 $(MLKEM768_DIR)/bin/%: CFLAGS += -DMLKEM_K=3
 $(MLKEM1024_DIR)/bin/%: CFLAGS += -DMLKEM_K=4
+
+# Link tests with respective library
+define ADD_SOURCE
+$(BUILD_DIR)/$(1)/bin/$(2)$(shell echo $(1) | tr -d -c 0-9): LDLIBS += -L$(BUILD_DIR) -l$(1)
+$(BUILD_DIR)/$(1)/bin/$(2)$(shell echo $(1) | tr -d -c 0-9): $(BUILD_DIR)/$(1)/test/$(2).c.o $(BUILD_DIR)/lib$(1).a
+endef
 
 $(foreach scheme,mlkem512 mlkem768 mlkem1024, \
 	$(foreach test,$(ALL_TESTS), \
