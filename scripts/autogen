@@ -642,15 +642,15 @@ def gen_monolithic_undef_all_core(filt=None):
 
 def gen_monolithic_source_file(dry_run=False):
 
-    def not_native(c):
-        return "native/" not in c
+    def check_native(c):
+        return True
+        # return "native/" not in c
 
     # List of level-specific source files
     # All other files only need including and building once
     # in multilevel build.
     def k_specific(c):
-        # For now, we exclude native files from the monobuild
-        if not_native(c) is False:
+        if check_native(c) is False:
             return False
 
         k_specific_sources = ["mlkem_native.h", "params.h", "config.h", "common.h",
@@ -664,7 +664,7 @@ def gen_monolithic_source_file(dry_run=False):
 
     def k_generic(c):
         # For now, we exclude native files from the monobuild
-        if not_native(c) is False:
+        if check_native(c) is False:
             return False
 
         return not k_specific(c)
@@ -675,7 +675,7 @@ def gen_monolithic_source_file(dry_run=False):
         yield " * Monolithic compilation unit bundling all compilation units within mlkem-native"
         yield " */"
         yield ""
-        for c in filter(not_native, get_c_source_files()):
+        for c in filter(check_native, get_c_source_files()):
             yield f'#include "{c}"'
         yield ""
         yield from gen_monolithic_undef_all_core(filt=k_specific)
