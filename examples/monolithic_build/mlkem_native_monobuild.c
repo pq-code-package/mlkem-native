@@ -848,11 +848,6 @@
 #undef writeable
 #endif
 
-/* mlkem/compress.c */
-#if defined(empty_cu_compress)
-#undef empty_cu_compress
-#endif
-
 /* mlkem/compress.h */
 #if defined(COMPRESS_H)
 #undef COMPRESS_H
