@@ -9,7 +9,6 @@
 
 #include <immintrin.h>
 #include <stdint.h>
-#include "../../../poly_k.h"
 #include "consts.h"
 
 #define REJ_UNIFORM_AVX_NBLOCKS 3 /* See MLKEM_GEN_MATRIX_NBLOCKS */
@@ -44,8 +43,9 @@ void basemul_avx2(__m256i *r, const __m256i *a, const __m256i *b,
 #define polyvec_basemul_acc_montgomery_cached_avx2 \
   MLKEM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_avx2)
 void polyvec_basemul_acc_montgomery_cached_avx2(
-    poly *r, const polyvec *a, const polyvec *b,
-    const polyvec_mulcache *b_cache);
+    int16_t r[MLKEM_N], const int16_t a[MLKEM_K * MLKEM_N],
+    const int16_t b[MLKEM_K * MLKEM_N],
+    const int16_t b_cache[MLKEM_K * (MLKEM_N / 2)]);
 
 #define ntttobytes_avx2 MLKEM_NAMESPACE(ntttobytes_avx2)
 void ntttobytes_avx2(uint8_t *r, const __m256i *a, const __m256i *qdata);

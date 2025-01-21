@@ -130,7 +130,9 @@ void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
   /* Omitting bounds assertion for cache since native implementations may
    * decide not to use a mulcache. Note that the C backend implementation
    * of poly_basemul_montgomery_cached() does still include the check. */
-  polyvec_basemul_acc_montgomery_cached_native(r, a, b, b_cache);
+  polyvec_basemul_acc_montgomery_cached_native(r->coeffs, (const int16_t *)a,
+                                               (const int16_t *)b,
+                                               (const int16_t *)b_cache);
 }
 #endif /* MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
