@@ -2,8 +2,8 @@
  * Copyright (c) 2024 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef POLYVEC_H
-#define POLYVEC_H
+#ifndef POLY_K_H
+#define POLY_K_H
 
 #include <stdint.h>
 #include "common.h"

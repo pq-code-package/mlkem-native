@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT-0
 
 #include "indcpa.h"
-#include "polyvec.h"
+#include "poly_k.h"
 
 #define matvec_mul MLKEM_NAMESPACE(matvec_mul)
 void matvec_mul(polyvec *out, polyvec const *a, polyvec const *v,

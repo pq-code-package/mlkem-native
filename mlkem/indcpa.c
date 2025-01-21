@@ -10,7 +10,7 @@
 #include "fips202/fips202x4.h"
 #include "indcpa.h"
 #include "poly.h"
-#include "polyvec.h"
+#include "poly_k.h"
 #include "randombytes.h"
 #include "sampling.h"
 #include "symmetric.h"

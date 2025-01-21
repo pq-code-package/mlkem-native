@@ -647,7 +647,7 @@ def gen_monolithic_source_file(dry_run=False):
         k_specific_sources = ["mlkem_native.h", "params.h", "config.h", "common.h",
                               "indcpa.c", "indcpa.h",
                               "kem.c", "kem.h",
-                              "polyvec.c", "polyvec.h" ]
+                              "poly_k.c", "poly_k.h" ]
         for f in k_specific_sources:
             if c.endswith(f):
                 return True

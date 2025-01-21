@@ -16,7 +16,7 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET += $(MLKEM_NAMESPACE)polyvec_mulcache_compute.0:4 # Largest value of MLKEM_K
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c $(SRCDIR)/mlkem/polyvec.c
+PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c $(SRCDIR)/mlkem/poly_k.c
 
 CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)polyvec_mulcache_compute
 USE_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_mulcache_compute

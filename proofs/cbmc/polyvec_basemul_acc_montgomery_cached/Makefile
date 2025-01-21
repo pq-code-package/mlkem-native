@@ -16,7 +16,7 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET += $(MLKEM_NAMESPACE)polyvec_basemul_acc_montgomery_cached.0:4 # Largest value of MLKEM_K
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mlkem/polyvec.c
+PROJECT_SOURCES += $(SRCDIR)/mlkem/poly_k.c
 
 CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)polyvec_basemul_acc_montgomery_cached
 USE_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_basemul_montgomery_cached $(MLKEM_NAMESPACE)poly_add

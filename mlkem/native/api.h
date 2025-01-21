@@ -24,7 +24,7 @@
 
 #include <stdint.h>
 #include "../poly.h"
-#include "../polyvec.h"
+#include "../poly_k.h"
 
 /*
  * This is the C<->native interface allowing for the drop-in of

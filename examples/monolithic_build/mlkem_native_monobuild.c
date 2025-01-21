@@ -21,7 +21,7 @@
 #include "mlkem/indcpa.c"
 #include "mlkem/kem.c"
 #include "mlkem/poly.c"
-#include "mlkem/polyvec.c"
+#include "mlkem/poly_k.c"
 #include "mlkem/sampling.c"
 #include "mlkem/verify.c"
 #include "mlkem/zetas.c"
@@ -581,127 +581,127 @@
 #undef UINT12_LIMIT
 #endif
 
-/* mlkem/polyvec.c */
+/* mlkem/poly_k.c */
 #if defined(poly_cbd_eta1)
 #undef poly_cbd_eta1
 #endif
 
-/* mlkem/polyvec.c */
+/* mlkem/poly_k.c */
 #if defined(poly_cbd_eta2)
 #undef poly_cbd_eta2
 #endif
 
-/* mlkem/polyvec.h */
-#if defined(POLYVEC_H)
-#undef POLYVEC_H
+/* mlkem/poly_k.h */
+#if defined(POLY_K_H)
+#undef POLY_K_H
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(poly_compress_du)
 #undef poly_compress_du
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(poly_compress_dv)
 #undef poly_compress_dv
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(poly_decompress_du)
 #undef poly_decompress_du
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(poly_decompress_dv)
 #undef poly_decompress_dv
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(poly_getnoise_eta1122_4x)
 #undef poly_getnoise_eta1122_4x
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(poly_getnoise_eta1_4x)
 #undef poly_getnoise_eta1_4x
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(poly_getnoise_eta2)
 #undef poly_getnoise_eta2
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(poly_getnoise_eta2_4x)
 #undef poly_getnoise_eta2_4x
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec)
 #undef polyvec
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_add)
 #undef polyvec_add
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_basemul_acc_montgomery)
 #undef polyvec_basemul_acc_montgomery
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_basemul_acc_montgomery_cached)
 #undef polyvec_basemul_acc_montgomery_cached
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_compress_du)
 #undef polyvec_compress_du
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_decompress_du)
 #undef polyvec_decompress_du
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_frombytes)
 #undef polyvec_frombytes
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_invntt_tomont)
 #undef polyvec_invntt_tomont
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_mulcache)
 #undef polyvec_mulcache
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_mulcache_compute)
 #undef polyvec_mulcache_compute
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_ntt)
 #undef polyvec_ntt
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_reduce)
 #undef polyvec_reduce
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_tobytes)
 #undef polyvec_tobytes
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_tomont)
 #undef polyvec_tomont
 #endif

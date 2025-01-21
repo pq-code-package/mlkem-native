@@ -9,7 +9,7 @@
 
 #include <immintrin.h>
 #include <stdint.h>
-#include "../../../polyvec.h"
+#include "../../../poly_k.h"
 #include "consts.h"
 
 #define REJ_UNIFORM_AVX_NBLOCKS 3 /* See MLKEM_GEN_MATRIX_NBLOCKS */

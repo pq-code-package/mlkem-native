@@ -2,7 +2,7 @@
  * Copyright (c) 2024 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#include "polyvec.h"
+#include "poly_k.h"
 #include <stdint.h>
 #include <string.h>
 #include "arith_backend.h"
