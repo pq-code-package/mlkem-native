@@ -1219,18 +1219,8 @@
 #endif
 
 /* mlkem/ntt.c */
-#if defined(invntt_layer6_butterfly)
-#undef invntt_layer6_butterfly
-#endif
-
-/* mlkem/ntt.c */
 #if defined(invntt_layer7_invert)
 #undef invntt_layer7_invert
-#endif
-
-/* mlkem/ntt.c */
-#if defined(invntt_layer7_invert_butterfly)
-#undef invntt_layer7_invert_butterfly
 #endif
 
 /* mlkem/ntt.c */
@@ -1254,18 +1244,8 @@
 #endif
 
 /* mlkem/ntt.c */
-#if defined(ntt_layer6_butterfly)
-#undef ntt_layer6_butterfly
-#endif
-
-/* mlkem/ntt.c */
 #if defined(ntt_layer7)
 #undef ntt_layer7
-#endif
-
-/* mlkem/ntt.c */
-#if defined(ntt_layer7_butterfly)
-#undef ntt_layer7_butterfly
 #endif
 
 /* mlkem/ntt.h */
