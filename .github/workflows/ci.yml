@@ -128,7 +128,7 @@ jobs:
     name: Quickcheck lib
     strategy:
       matrix:
-        system: [macos-latest, ubuntu-latest]
+        system: [macos-latest, ubuntu-latest, ubuntu-24.04-arm]
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -139,7 +139,7 @@ jobs:
     name: Examples
     strategy:
       matrix:
-        system: [macos-latest, ubuntu-latest]
+        system: [macos-latest, ubuntu-latest, ubuntu-24.04-arm]
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -172,6 +172,10 @@ jobs:
          - runner: macos-latest
            name: 'MacOS'
            arch: mac
+           mode: native
+         - runner: ubuntu-24.04-arm
+           name: 'ubuntu-24.04-arm'
+           arch: aarch64
            mode: native
          - runner: pqcp-arm64
            name: 'ubuntu-latest (aarch64)'
@@ -269,6 +273,8 @@ jobs:
         target:
          - runner: pqcp-arm64
            name: 'aarch64'
+         - runner: ubuntu-24.04-arm
+           name: 'ubuntu-24.04-arm'
          - runner: ubuntu-latest
            name: 'x86_64'
          - runner: macos-latest
