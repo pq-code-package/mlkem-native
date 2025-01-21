@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/fips202/keccakf1600.c
 
-CHECK_FUNCTION_CONTRACTS=$(FIPS202_NAMESPACE)KeccakF1600x4_StatePermute
-USE_FUNCTION_CONTRACTS=$(FIPS202_NAMESPACE)KeccakF1600_StatePermute
+CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)KeccakF1600x4_StatePermute
+USE_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)KeccakF1600_StatePermute
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -38,7 +38,7 @@ CBMCFLAGS=--smt2
 # a substantial improvement in proof performance.
 CBMCFLAGS += --no-array-field-sensitivity --arrays-uf-always --slice-formula
 
-FUNCTION_NAME = $(FIPS202_NAMESPACE)KeccakF1600x4_StatePermute
+FUNCTION_NAME = $(MLKEM_NAMESPACE)KeccakF1600x4_StatePermute
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

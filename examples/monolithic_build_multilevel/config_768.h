@@ -50,17 +50,6 @@
 #define MLKEM_NAMESPACE_PREFIX_ADD_LEVEL
 
 /******************************************************************************
- * Name:        FIPS202_NAMESPACE_PREFIX
- *
- * Description: The prefix to use to namespace global symbols
- *              from mlkem/fips202/.
- *
- *              This can also be set using CFLAGS.
- *
- *****************************************************************************/
-#define FIPS202_NAMESPACE_PREFIX fips202
-
-/******************************************************************************
  * Name:        MLKEM_USE_NATIVE
  *
  * Description: Determines whether a native backend should

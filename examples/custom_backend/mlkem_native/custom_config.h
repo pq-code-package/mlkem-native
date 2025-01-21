@@ -42,14 +42,6 @@
 #define MLKEM_NAMESPACE_PREFIX CUSTOM_TINY_SHA3
 
 /******************************************************************************
- * Name:        FIPS202_NAMESPACE_PREFIX
- *
- * Description: The prefix to use to namespace global symbols
- *              from mlkem/fips202/.
- *****************************************************************************/
-#define FIPS202_NAMESPACE_PREFIX CUSTOM_TINY_SHA3
-
-/******************************************************************************
  * Name:        MLKEM_USE_NATIVE
  *
  * Description: Determines whether a native backend should

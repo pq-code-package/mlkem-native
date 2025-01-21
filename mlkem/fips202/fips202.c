@@ -24,9 +24,9 @@
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define keccak_absorb_once FIPS202_NAMESPACE(keccak_absorb_once)
-#define keccak_squeeze_once FIPS202_NAMESPACE(keccak_squeeze_once)
-#define keccak_squeezeblocks FIPS202_NAMESPACE(keccak_squeezeblocks)
+#define keccak_absorb_once MLKEM_NAMESPACE(keccak_absorb_once)
+#define keccak_squeeze_once MLKEM_NAMESPACE(keccak_squeeze_once)
+#define keccak_squeezeblocks MLKEM_NAMESPACE(keccak_squeezeblocks)
 /* End of static namespacing */
 
 /*************************************************
@@ -185,7 +185,7 @@ void shake128_squeezeblocks(uint8_t *output, size_t nblocks, shake128ctx *state)
 
 void shake128_release(shake128ctx *state) { (void)state; }
 
-#define shake256ctx FIPS202_NAMESPACE(shake256ctx)
+#define shake256ctx MLKEM_NAMESPACE(shake256ctx)
 typedef shake128ctx shake256ctx;
 void shake256(uint8_t *output, size_t outlen, const uint8_t *input,
               size_t inlen)

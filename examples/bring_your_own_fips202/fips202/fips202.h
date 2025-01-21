@@ -29,7 +29,7 @@ typedef sha3_ctx_t shake128ctx;
  * This function does not support being called multiple times
  * with the same state.
  */
-#define shake128_absorb_once FIPS202_NAMESPACE(shake128_absorb_once)
+#define shake128_absorb_once MLKEM_NAMESPACE(shake128_absorb_once)
 /*************************************************
  * Name:        shake128_absorb_once
  *
@@ -56,7 +56,7 @@ static INLINE void shake128_absorb_once(shake128ctx *state,
  *
  * Supports being called multiple times
  */
-#define shake128_squeezeblocks FIPS202_NAMESPACE(shake128_squeezeblocks)
+#define shake128_squeezeblocks MLKEM_NAMESPACE(shake128_squeezeblocks)
 /*************************************************
  * Name:        shake128_squeezeblocks
  *
@@ -76,12 +76,12 @@ static INLINE void shake128_squeezeblocks(uint8_t *output, size_t nblocks,
 }
 
 /* Free the state */
-#define shake128_release FIPS202_NAMESPACE(shake128_release)
+#define shake128_release MLKEM_NAMESPACE(shake128_release)
 static INLINE void shake128_release(shake128ctx *state) { ((void)state); }
 
 /* One-stop SHAKE256 call. Aliasing between input and
  * output is not permitted */
-#define shake256 FIPS202_NAMESPACE(shake256)
+#define shake256 MLKEM_NAMESPACE(shake256)
 /*************************************************
  * Name:        shake256
  *
@@ -105,7 +105,7 @@ static INLINE void shake256(uint8_t *output, size_t outlen,
 /* One-stop SHA3_256 call. Aliasing between input and
  * output is not permitted */
 #define SHA3_256_HASHBYTES 32
-#define sha3_256 FIPS202_NAMESPACE(sha3_256)
+#define sha3_256 MLKEM_NAMESPACE(sha3_256)
 /*************************************************
  * Name:        sha3_256
  *
@@ -123,7 +123,7 @@ static INLINE void sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
 /* One-stop SHA3_512 call. Aliasing between input and
  * output is not permitted */
 #define SHA3_512_HASHBYTES 64
-#define sha3_512 FIPS202_NAMESPACE(sha3_512)
+#define sha3_512 MLKEM_NAMESPACE(sha3_512)
 /*************************************************
  * Name:        sha3_512
  *

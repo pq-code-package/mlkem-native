@@ -10,17 +10,17 @@
 #include "fips202x4.h"
 #include "keccakf1600.h"
 
-#define shake256x4_ctx FIPS202_NAMESPACE(shake256x4_ctx)
+#define shake256x4_ctx MLKEM_NAMESPACE(shake256x4_ctx)
 typedef shake128x4ctx shake256x4_ctx;
 
 /* Static namespacing
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define keccak_absorb_once_x4 FIPS202_NAMESPACE(keccak_absorb_once_x4)
-#define keccak_squeezeblocks_x4 FIPS202_NAMESPACE(keccak_squeezeblocks_x4)
-#define shake256x4_absorb_once FIPS202_NAMESPACE(shake256x4_absorb_once)
-#define shake256x4_squeezeblocks FIPS202_NAMESPACE(shake256x4_squeezeblocks)
+#define keccak_absorb_once_x4 MLKEM_NAMESPACE(keccak_absorb_once_x4)
+#define keccak_squeezeblocks_x4 MLKEM_NAMESPACE(keccak_squeezeblocks_x4)
+#define shake256x4_absorb_once MLKEM_NAMESPACE(shake256x4_absorb_once)
+#define shake256x4_squeezeblocks MLKEM_NAMESPACE(shake256x4_squeezeblocks)
 /* End of static namespacing */
 
 static void keccak_absorb_once_x4(uint64_t *s, uint32_t r, const uint8_t *in0,

@@ -21,7 +21,7 @@
 
 typedef shake128ctx shake128x4ctx[4];
 
-#define shake128x4_absorb_once FIPS202_NAMESPACE(shake128x4_absorb_once)
+#define shake128x4_absorb_once MLKEM_NAMESPACE(shake128x4_absorb_once)
 static INLINE void shake128x4_absorb_once(shake128x4ctx *state,
                                           const uint8_t *in0,
                                           const uint8_t *in1,
@@ -42,7 +42,7 @@ __contract__(
   shake128_absorb_once(&(*state)[3], in3, inlen);
 }
 
-#define shake128x4_squeezeblocks FIPS202_NAMESPACE(shake128x4_squeezeblocks)
+#define shake128x4_squeezeblocks MLKEM_NAMESPACE(shake128x4_squeezeblocks)
 static INLINE void shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1,
                                             uint8_t *out2, uint8_t *out3,
                                             size_t nblocks,
@@ -66,7 +66,7 @@ __contract__(
   shake128_squeezeblocks(out3, nblocks, &(*state)[3]);
 }
 
-#define shake128x4_release FIPS202_NAMESPACE(shake128x4_release)
+#define shake128x4_release MLKEM_NAMESPACE(shake128x4_release)
 static INLINE void shake128x4_release(shake128x4ctx *state)
 {
   shake128_release(&(*state)[0]);
@@ -75,7 +75,7 @@ static INLINE void shake128x4_release(shake128x4ctx *state)
   shake128_release(&(*state)[3]);
 }
 
-#define shake256x4 FIPS202_NAMESPACE(shake256x4)
+#define shake256x4 MLKEM_NAMESPACE(shake256x4)
 static INLINE void shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2,
                               uint8_t *out3, size_t outlen, uint8_t *in0,
                               uint8_t *in1, uint8_t *in2, uint8_t *in3,

@@ -379,9 +379,9 @@
 
 .text
 .align 4
-.global FIPS202_ASM_NAMESPACE(keccak_f1600_x2_v8a_v84a_asm_hybrid)
+.global MLKEM_ASM_NAMESPACE(keccak_f1600_x2_v8a_v84a_asm_hybrid)
 
-FIPS202_ASM_NAMESPACE(keccak_f1600_x2_v8a_v84a_asm_hybrid):
+MLKEM_ASM_NAMESPACE(keccak_f1600_x2_v8a_v84a_asm_hybrid):
     alloc_stack
     save_gprs
     save_vregs

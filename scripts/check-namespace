@@ -65,24 +65,13 @@ def check_folder(folder, namespace):
     assert checked > 0
 
 
-def list_mlkem_namespaces(lvl):
-    return [
-        f"PQCP_MLKEM_NATIVE_MLKEM{lvl}",
-    ]
-
-
-def list_fips202_namespaces():
-    return [
-        f"PQCP_MLKEM_NATIVE_FIPS202",
-    ]
-
+def make_mlkem_namespace(lvl):
+    return [f"PQCP_MLKEM_NATIVE_MLKEM{lvl}"]
 
 def run():
-    check_folder("test/build/mlkem512/mlkem", list_mlkem_namespaces(512))
-    check_folder("test/build/mlkem768/mlkem", list_mlkem_namespaces(768))
-    check_folder("test/build/mlkem1024/mlkem", list_mlkem_namespaces(1024))
-    check_folder("test/build/mlkem/fips202", list_fips202_namespaces())
-
+    check_folder("test/build/mlkem512/mlkem", make_mlkem_namespace(512))
+    check_folder("test/build/mlkem768/mlkem", make_mlkem_namespace(768))
+    check_folder("test/build/mlkem1024/mlkem", make_mlkem_namespace(1024))
 
 if __name__ == "__main__":
     run()

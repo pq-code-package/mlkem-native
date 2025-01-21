@@ -456,7 +456,7 @@ void KeccakP1600times4_PermuteAll_24rounds(void *states)
 #else
 
 /* Dummy constant to keep compiler happy despite empty CU */
-#define empty_cu_avx2_keccakx4 FIPS202_NAMESPACE(empty_cu_avx2_keccakx4)
+#define empty_cu_avx2_keccakx4 MLKEM_NAMESPACE(empty_cu_avx2_keccakx4)
 int empty_cu_avx2_keccakx4;
 
 #endif /* MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP */

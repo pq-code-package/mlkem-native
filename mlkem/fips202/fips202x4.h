@@ -15,13 +15,13 @@
 #include "keccakf1600.h"
 
 /* Context for non-incremental API */
-#define shake128x4ctx FIPS202_NAMESPACE(shake128x4ctx)
+#define shake128x4ctx MLKEM_NAMESPACE(shake128x4ctx)
 typedef struct
 {
   uint64_t ctx[KECCAK_LANES * KECCAK_WAY];
 } shake128x4ctx;
 
-#define shake128x4_absorb_once FIPS202_NAMESPACE(shake128x4_absorb_once)
+#define shake128x4_absorb_once MLKEM_NAMESPACE(shake128x4_absorb_once)
 void shake128x4_absorb_once(shake128x4ctx *state, const uint8_t *in0,
                             const uint8_t *in1, const uint8_t *in2,
                             const uint8_t *in3, size_t inlen)
@@ -34,7 +34,7 @@ __contract__(
   assigns(object_whole(state))
 );
 
-#define shake128x4_squeezeblocks FIPS202_NAMESPACE(shake128x4_squeezeblocks)
+#define shake128x4_squeezeblocks MLKEM_NAMESPACE(shake128x4_squeezeblocks)
 void shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
                               uint8_t *out3, size_t nblocks,
                               shake128x4ctx *state)
@@ -52,10 +52,10 @@ __contract__(
     object_whole(state))
 );
 
-#define shake128x4_release FIPS202_NAMESPACE(shake128x4_release)
+#define shake128x4_release MLKEM_NAMESPACE(shake128x4_release)
 void shake128x4_release(shake128x4ctx *state);
 
-#define shake256x4 FIPS202_NAMESPACE(shake256x4)
+#define shake256x4 MLKEM_NAMESPACE(shake256x4)
 void shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
                 size_t outlen, uint8_t *in0, uint8_t *in1, uint8_t *in2,
                 uint8_t *in3, size_t inlen)

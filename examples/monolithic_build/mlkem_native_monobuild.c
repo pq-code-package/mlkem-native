@@ -33,16 +33,6 @@
  */
 
 /* mlkem/common.h */
-#if defined(FIPS202_ASM_NAMESPACE)
-#undef FIPS202_ASM_NAMESPACE
-#endif
-
-/* mlkem/common.h */
-#if defined(FIPS202_NAMESPACE)
-#undef FIPS202_NAMESPACE
-#endif
-
-/* mlkem/common.h */
 #if defined(MLKEM_ASM_NAMESPACE)
 #undef MLKEM_ASM_NAMESPACE
 #endif
@@ -110,16 +100,6 @@
 /* mlkem/common.h */
 #if defined(PREFIX_UNDERSCORE_)
 #undef PREFIX_UNDERSCORE_
-#endif
-
-/* mlkem/config.h */
-#if defined(FIPS202_DEFAULT_NAMESPACE_PREFIX)
-#undef FIPS202_DEFAULT_NAMESPACE_PREFIX
-#endif
-
-/* mlkem/config.h */
-#if defined(FIPS202_NAMESPACE_PREFIX)
-#undef FIPS202_NAMESPACE_PREFIX
 #endif
 
 /* mlkem/config.h */

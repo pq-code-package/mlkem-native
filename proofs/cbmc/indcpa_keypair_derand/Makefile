@@ -19,7 +19,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/indcpa.c
 
 CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)indcpa_keypair_derand
-USE_FUNCTION_CONTRACTS=$(FIPS202_NAMESPACE)sha3_512 $(MLKEM_NAMESPACE)gen_matrix $(MLKEM_NAMESPACE)poly_getnoise_eta1_4x $(MLKEM_NAMESPACE)polyvec_ntt $(MLKEM_NAMESPACE)polyvec_mulcache_compute $(MLKEM_NAMESPACE)matvec_mul $(MLKEM_NAMESPACE)polyvec_tomont $(MLKEM_NAMESPACE)polyvec_add $(MLKEM_NAMESPACE)polyvec_reduce $(MLKEM_NAMESPACE)polyvec_tobytes
+USE_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)sha3_512 $(MLKEM_NAMESPACE)gen_matrix $(MLKEM_NAMESPACE)poly_getnoise_eta1_4x $(MLKEM_NAMESPACE)polyvec_ntt $(MLKEM_NAMESPACE)polyvec_mulcache_compute $(MLKEM_NAMESPACE)matvec_mul $(MLKEM_NAMESPACE)polyvec_tomont $(MLKEM_NAMESPACE)polyvec_add $(MLKEM_NAMESPACE)polyvec_reduce $(MLKEM_NAMESPACE)polyvec_tobytes
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
