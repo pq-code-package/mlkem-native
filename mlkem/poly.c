@@ -336,19 +336,18 @@ __contract__(
  *   official Kyber implementation here, merely adding `layer` as
  *   a ghost variable for the specifications.
  */
-static void ntt_layer(int16_t r[MLKEM_N], unsigned len, unsigned layer)
+static void ntt_layer(int16_t r[MLKEM_N], unsigned layer)
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
-  requires(1 <= layer && layer <= 7 && len == (MLKEM_N >> layer))
+  requires(1 <= layer && layer <= 7)
   requires(array_abs_bound(r, 0, MLKEM_N, layer * MLKEM_Q))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
   ensures(array_abs_bound(r, 0, MLKEM_N, (layer + 1) * MLKEM_Q)))
 {
-  unsigned start, k;
-  /* `layer` is a ghost variable only needed in the CBMC specification */
-  ((void)layer);
-  /* Twiddle factors for layer n start at index 2^(layer-1) */
-  k = MLKEM_N / (2 * len);
+  unsigned start, k, len;
+  /* Twiddle factors for layer n are at indices 2^(n-1)..2^n-1. */
+  k = 1u << (layer - 1);
+  len = MLKEM_N >> layer;
   for (start = 0; start < MLKEM_N; start += 2 * len)
   __loop__(
     invariant(start < MLKEM_N + 2 * len)
@@ -373,17 +372,17 @@ __contract__(
 MLK_INTERNAL_API
 void poly_ntt(poly *p)
 {
-  unsigned len, layer;
+  unsigned layer;
   int16_t *r;
   debug_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
   r = p->coeffs;
 
-  for (len = 128, layer = 1; len >= 2; len >>= 1, layer++)
+  for (layer = 1; layer <= 7; layer++)
   __loop__(
-    invariant(1 <= layer && layer <= 8 && len == (MLKEM_N >> layer))
+    invariant(1 <= layer && layer <= 8)
     invariant(array_abs_bound(r, 0, MLKEM_N, layer * MLKEM_Q)))
   {
-    ntt_layer(r, len, layer);
+    ntt_layer(r, layer);
   }
 
   /* Check the stronger bound */
