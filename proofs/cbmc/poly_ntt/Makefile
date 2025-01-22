@@ -4,7 +4,7 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = poly_ntt_harness
+HARNESS_FILE = mlk_poly_ntt_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
@@ -19,7 +19,7 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c
 
- CHECK_FUNCTION_CONTRACTS=mlk_poly_ntt
+CHECK_FUNCTION_CONTRACTS=mlk_poly_ntt
 USE_FUNCTION_CONTRACTS=mlk_poly_ntt_c
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
