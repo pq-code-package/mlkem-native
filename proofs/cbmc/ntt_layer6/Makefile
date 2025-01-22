@@ -3,11 +3,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = invntt_layer_harness
+HARNESS_FILE = mlk_ntt_layer6_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = mlk_invntt_layer
+PROOF_UID = ntt_layer6
 
 DEFINES +=
 INCLUDES +=
@@ -18,16 +18,16 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_invntt_layer
-USE_FUNCTION_CONTRACTS=mlk_fqmul mlk_barrett_reduce
+CHECK_FUNCTION_CONTRACTS=mlk_ntt_layer6
+USE_FUNCTION_CONTRACTS=mlk_fqmul
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2
+CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = mlk_invntt_layer
+FUNCTION_NAME = mlk_ntt_layer6
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
