@@ -2,15 +2,16 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
-#include <stdint.h>
-#include "common.h"
+#include <poly.h>
 
+void mlk_ntt_layer7(int16_t *r);
 
-void mlk_invntt_layer(int16_t *p, unsigned layer);
-
+/**
+ * @brief Starting point for formal analysis
+ *
+ */
 void harness(void)
 {
   int16_t *a;
-  unsigned layer;
-  mlk_invntt_layer(a, layer);
+  mlk_ntt_layer7(a);
 }
