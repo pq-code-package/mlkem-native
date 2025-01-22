@@ -4,11 +4,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = mlk_poly_ntt_harness
+HARNESS_FILE = mlk_ntt_layer45_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = mlk_poly_ntt
+PROOF_UID = mlk_ntt_layer45
 
 DEFINES +=
 INCLUDES +=
@@ -19,8 +19,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_poly_ntt
-USE_FUNCTION_CONTRACTS=mlk_ntt_layer123 mlk_ntt_layer45 mlk_ntt_layer6 mlk_ntt_layer7
+CHECK_FUNCTION_CONTRACTS=mlk_ntt_layer45
+USE_FUNCTION_CONTRACTS=mlk_ntt_layer45_block
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -28,7 +28,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = mlk_poly_ntt
+FUNCTION_NAME = mlk_ntt_layer45
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
@@ -37,7 +37,7 @@ FUNCTION_NAME = mlk_poly_ntt
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 8
+CBMC_OBJECT_BITS = 10
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
