@@ -117,8 +117,8 @@
 #endif
 
 /* mlkem/config.h */
-#if defined(MLKEM_NATIVE_ARITH_BACKEND)
-#undef MLKEM_NATIVE_ARITH_BACKEND
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_FILE)
+#undef MLKEM_NATIVE_ARITH_BACKEND_FILE
 #endif
 
 /* mlkem/config.h */
@@ -127,8 +127,8 @@
 #endif
 
 /* mlkem/config.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND)
-#undef MLKEM_NATIVE_FIPS202_BACKEND
+#if defined(MLKEM_NATIVE_FIPS202_BACKEND_FILE)
+#undef MLKEM_NATIVE_FIPS202_BACKEND_FILE
 #endif
 
 /* mlkem/indcpa.c */

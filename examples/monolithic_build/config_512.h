@@ -49,43 +49,86 @@
 #define MLKEM_NAMESPACE_PREFIX mlkem512
 
 /******************************************************************************
- * Name:        MLKEM_USE_NATIVE
+ * Name:        MLKEM_USE_NATIVE_BACKEND_ARITH
  *
- * Description: Determines whether a native backend should
- *              be used, if available.
+ * Description: Determines whether an native arithmetic backend should be used.
+ *
+ *              The arithmetic backend covers performance critical functions
+ *              such as the number-theoretic transform (NTT).
+ *
+ *              If this option is unset, the C backend will be used.
+ *
+ *              If this option is set, the arithmetic backend to be use is
+ *              determined by MLKEM_NATIVE_ARITH_BACKEND: If the latter is
+ *              unset, the default backend for your the target architecture
+ *              will be used. If set, it must be the name of a backend metadata
+ *              file.
  *
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-/* #define MLKEM_USE_NATIVE */
+#if !defined(MLKEM_USE_NATIVE_BACKEND_ARITH)
+/* #define MLKEM_USE_NATIVE_BACKEND_ARITH */
+#endif
 
 /******************************************************************************
- * Name:        MLKEM_NATIVE_ARITH_BACKEND
+ * Name:        MLKEM_NATIVE_ARITH_BACKEND_FILE
  *
  * Description: The arithmetic backend to use.
  *
- *              This must be the filename of an arithmetic backend.
- *              See the existing backends for examples.
+ *              If MLKEM_USE_NATIVE_BACKEND_ARITH is unset, this option
+ *              is ignored.
+ *
+ *              If MLKEM_USE_NATIVE_BACKEND_ARITH is set, this option must
+ *              either be undefined or the filename of an arithmetic backend.
+ *              If unset, the default backend will be used.
  *
  *              This can be set using CFLAGS.
  *
  *****************************************************************************/
-#if defined(MLKEM_USE_NATIVE) && !defined(MLKEM_NATIVE_ARITH_BACKEND)
-#define MLKEM_NATIVE_ARITH_BACKEND "native/default.h"
-#endif /* MLKEM_NATIVE_ARITH_BACKEND */
+#if defined(MLKEM_USE_NATIVE_BACKEND_ARITH) && \
+    !defined(MLKEM_NATIVE_ARITH_BACKEND_FILE)
+#define MLKEM_NATIVE_ARITH_BACKEND_FILE "native/default.h"
+#endif
 
 /******************************************************************************
- * Name:        MLKEM_NATIVE_FIPS202_BACKEND
+ * Name:        MLKEM_USE_NATIVE_BACKEND_FIPS202
+ *
+ * Description: Determines whether an native FIPS202 backend should be used.
+ *
+ *              The FIPS202 backend covers 1x/2x/4x-fold Keccak-f1600, which is
+ *              the performance bottleneck of SHA3 and SHAKE.
+ *
+ *              If this option is unset, the C backend will be used.
+ *
+ *              If this option is set, the FIPS202 backend to be use is
+ *              determined by MLKEM_NATIVE_FIPS202_BACKEND: If the latter is
+ *              unset, the default backend for your the target architecture
+ *              will be used. If set, it must be the name of a backend metadata
+ *              file.
+ *
+ *              This can also be set using CFLAGS.
+ *
+ *****************************************************************************/
+#if !defined(MLKEM_USE_NATIVE_BACKEND_FIPS202)
+/* #define MLKEM_USE_NATIVE_BACKEND_FIPS202 */
+#endif
+
+/******************************************************************************
+ * Name:        MLKEM_NATIVE_FIPS202_BACKEND_FILE
  *
  * Description: The FIPS-202 backend to use.
  *
- *              This must be the filename of an FIPS-202 backend.
+ *              If MLKEM_USE_NATIVE_BACKEND_FIPS202 is set, this option must
+ *              either be undefined or the filename of a FIPS202 backend.
+ *              If unset, the default backend will be used.
  *
  *              This can be set using CFLAGS.
  *
  *****************************************************************************/
-#if defined(MLKEM_USE_NATIVE) && !defined(MLKEM_NATIVE_FIPS202_BACKEND)
-#define MLKEM_NATIVE_FIPS202_BACKEND "fips202/native/default.h"
-#endif /* MLKEM_NATIVE_FIPS202_BACKEND */
+#if defined(MLKEM_USE_NATIVE_BACKEND_FIPS202) && \
+    !defined(MLKEM_NATIVE_FIPS202_BACKEND_FILE)
+#define MLKEM_NATIVE_FIPS202_BACKEND_FILE "fips202/native/default.h"
+#endif
 
 #endif /* MLkEM_NATIVE_CONFIG_H */

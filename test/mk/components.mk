@@ -8,7 +8,7 @@ endif
 SOURCES += $(wildcard mlkem/*.c)
 ifeq ($(OPT),1)
 	SOURCES += $(wildcard mlkem/native/aarch64/src/*.[csS]) $(wildcard mlkem/native/x86_64/src/*.[csS])
-	CFLAGS += -DMLKEM_USE_NATIVE
+	CFLAGS += -DMLKEM_USE_NATIVE_BACKEND_ARITH -DMLKEM_USE_NATIVE_BACKEND_FIPS202
 endif
 
 ALL_TESTS = test_mlkem acvp_mlkem bench_mlkem bench_components_mlkem gen_NISTKAT gen_KAT
