@@ -23,8 +23,7 @@
 #define MLKEM_NATIVE_ARITH_NATIVE_API_H
 
 #include <stdint.h>
-#include "../poly.h"
-#include "../poly_k.h"
+#include "../common.h"
 
 /*
  * This is the C<->native interface allowing for the drop-in of
@@ -65,9 +64,9 @@
  *              See the documentation of MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER
  *              for more information.
  *
- * Arguments:   - poly *p: pointer to in/output polynomial
+ * Arguments:   - int16_t p[MLKEM_N]: pointer to in/output polynomial
  **************************************************/
-static INLINE void ntt_native(poly *);
+static INLINE void ntt_native(int16_t p[MLKEM_N]);
 #endif /* MLKEM_USE_NATIVE_NTT */
 
 #if defined(MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER)
@@ -96,10 +95,10 @@ and to/from bytes conversions."
  *
  *              This must only be defined if there is native code for
  *              all of (a) NTT, (b) invNTT, (c) basemul, (d) mulcache.
- * Arguments:   - poly *p: pointer to in/output polynomial
+ * Arguments:   - int16_t p[MLKEM_N]: pointer to in/output polynomial
  *
  **************************************************/
-static INLINE void poly_permute_bitrev_to_custom(poly *);
+static INLINE void poly_permute_bitrev_to_custom(int16_t p[MLKEM_N]);
 #endif /* MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER */
 
 #if defined(MLKEM_USE_NATIVE_INTT)
@@ -117,7 +116,7 @@ static INLINE void poly_permute_bitrev_to_custom(poly *);
  *
  * Arguments:   - uint16_t *a: pointer to in/output polynomial
  **************************************************/
-static INLINE void intt_native(poly *);
+static INLINE void intt_native(int16_t p[MLKEM_N]);
 #endif /* MLKEM_USE_NATIVE_INTT */
 
 #if defined(MLKEM_USE_NATIVE_POLY_REDUCE)
@@ -126,9 +125,9 @@ static INLINE void intt_native(poly *);
  *
  * Description: Applies modular reduction to all coefficients of a polynomial.
  *
- * Arguments:   - poly *r: pointer to input/output polynomial
+ * Arguments:   - int16_t r[MLKEM_N]: pointer to input/output polynomial
  **************************************************/
-static INLINE void poly_reduce_native(poly *);
+static INLINE void poly_reduce_native(int16_t p[MLKEM_N]);
 #endif /* MLKEM_USE_NATIVE_POLY_REDUCE */
 
 #if defined(MLKEM_USE_NATIVE_POLY_TOMONT)
@@ -138,9 +137,9 @@ static INLINE void poly_reduce_native(poly *);
  * Description: Inplace conversion of all coefficients of a polynomial
  *              from normal domain to Montgomery domain
  *
- * Arguments:   - poly *r: pointer to input/output polynomial
+ * Arguments:   - int16_t r[MLKEM_N]: pointer to input/output polynomial
  **************************************************/
-static INLINE void poly_tomont_native(poly *);
+static INLINE void poly_tomont_native(int16_t p[MLKEM_N]);
 #endif /* MLKEM_USE_NATIVE_POLY_TOMONT */
 
 #if defined(MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE)
@@ -165,8 +164,8 @@ static INLINE void poly_tomont_native(poly *);
  *              OUTPUT
  *              - cache: pointer to multiplication cache
  **************************************************/
-static INLINE void poly_mulcache_compute_native(poly_mulcache *cache,
-                                                const poly *poly);
+static INLINE void poly_mulcache_compute_native(int16_t cache[MLKEM_N / 2],
+                                                const int16_t poly[MLKEM_N]);
 #endif /* MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE */
 
 #if defined(MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
@@ -189,8 +188,9 @@ static INLINE void poly_mulcache_compute_native(poly_mulcache *cache,
  *                   in NTT domain, and of the same order as a and b.
  **************************************************/
 static INLINE void polyvec_basemul_acc_montgomery_cached_native(
-    poly *r, const polyvec *a, const polyvec *b,
-    const polyvec_mulcache *b_cache);
+    int16_t r[MLKEM_N], const int16_t a[MLKEM_K * MLKEM_N],
+    const int16_t b[MLKEM_K * MLKEM_N],
+    const int16_t b_cache[MLKEM_K * (MLKEM_N / 2)]);
 #endif
 
 #if defined(MLKEM_USE_NATIVE_POLY_TOBYTES)
@@ -209,7 +209,7 @@ static INLINE void polyvec_basemul_acc_montgomery_cached_native(
  *                   (of MLKEM_POLYBYTES bytes)
  **************************************************/
 static INLINE void poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
-                                       const poly *a);
+                                       const int16_t a[MLKEM_N]);
 #endif /* MLKEM_USE_NATIVE_POLY_TOBYTES */
 
 #if defined(MLKEM_USE_NATIVE_POLY_FROMBYTES)
@@ -226,7 +226,7 @@ static INLINE void poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
  *              - a: const pointer to input byte aray
  *                   (of MLKEM_POLYBYTES bytes)
  **************************************************/
-static INLINE void poly_frombytes_native(poly *a,
+static INLINE void poly_frombytes_native(int16_t a[MLKEM_N],
                                          const uint8_t r[MLKEM_POLYBYTES]);
 #endif /* MLKEM_USE_NATIVE_POLY_FROMBYTES */
 

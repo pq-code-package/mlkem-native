@@ -292,7 +292,7 @@ void poly_tomont(poly *r)
 MLKEM_NATIVE_INTERNAL_API
 void poly_tomont(poly *r)
 {
-  poly_tomont_native(r);
+  poly_tomont_native(r->coeffs);
   debug_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
 }
 #endif /* MLKEM_USE_NATIVE_POLY_TOMONT */
@@ -353,7 +353,7 @@ void poly_reduce(poly *r)
 MLKEM_NATIVE_INTERNAL_API
 void poly_reduce(poly *r)
 {
-  poly_reduce_native(r);
+  poly_reduce_native(r->coeffs);
   debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 #endif /* MLKEM_USE_NATIVE_POLY_REDUCE */
@@ -412,7 +412,7 @@ void poly_mulcache_compute(poly_mulcache *x, const poly *a)
 MLKEM_NATIVE_INTERNAL_API
 void poly_mulcache_compute(poly_mulcache *x, const poly *a)
 {
-  poly_mulcache_compute_native(x, a);
+  poly_mulcache_compute_native(x->coeffs, a->coeffs);
   /* Omitting bounds assertion since native implementations may
    * decide not to use a mulcache. Note that the C backend implementation
    * of poly_basemul_montgomery_cached() does still include the check. */
@@ -553,7 +553,7 @@ MLKEM_NATIVE_INTERNAL_API
 void poly_ntt(poly *p)
 {
   debug_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
-  ntt_native(p);
+  ntt_native(p->coeffs);
   debug_assert_abs_bound(p, MLKEM_N, NTT_BOUND);
 }
 #endif /* MLKEM_USE_NATIVE_NTT */
@@ -633,7 +633,7 @@ void poly_invntt_tomont(poly *p)
 MLKEM_NATIVE_INTERNAL_API
 void poly_invntt_tomont(poly *p)
 {
-  intt_native(p);
+  intt_native(p->coeffs);
   debug_assert_abs_bound(p, MLKEM_N, INVNTT_BOUND);
 }
 #endif /* MLKEM_USE_NATIVE_INTT */

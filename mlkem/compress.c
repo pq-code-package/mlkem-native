@@ -307,7 +307,7 @@ MLKEM_NATIVE_INTERNAL_API
 void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
 {
   debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
-  poly_tobytes_native(r, a);
+  poly_tobytes_native(r, a->coeffs);
 }
 #endif /* MLKEM_USE_NATIVE_POLY_TOBYTES */
 
@@ -335,7 +335,7 @@ void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
 MLKEM_NATIVE_INTERNAL_API
 void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
 {
-  poly_frombytes_native(r, a);
+  poly_frombytes_native(r->coeffs, a);
 }
 #endif /* MLKEM_USE_NATIVE_POLY_FROMBYTES */
 

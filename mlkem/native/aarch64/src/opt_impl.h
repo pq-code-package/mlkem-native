@@ -10,10 +10,8 @@
 #else
 #define MLKEM_NATIVE_ARITH_PROFILE_IMPL_H
 
+#include "../../../params.h"
 #include "arith_native_aarch64.h"
-
-#include "../../../poly.h"
-#include "../../../poly_k.h"
 
 /* Set of primitives that this backend replaces */
 #define MLKEM_USE_NATIVE_NTT
@@ -25,45 +23,46 @@
 #define MLKEM_USE_NATIVE_POLY_TOBYTES
 #define MLKEM_USE_NATIVE_REJ_UNIFORM
 
-static INLINE void ntt_native(poly *data)
+static INLINE void ntt_native(int16_t data[MLKEM_N])
 {
-  ntt_asm_opt(data->coeffs, aarch64_ntt_zetas_layer01234,
-              aarch64_ntt_zetas_layer56);
+  ntt_asm_opt(data, aarch64_ntt_zetas_layer01234, aarch64_ntt_zetas_layer56);
 }
 
-static INLINE void intt_native(poly *data)
+static INLINE void intt_native(int16_t data[MLKEM_N])
 {
-  intt_asm_opt(data->coeffs, aarch64_invntt_zetas_layer01234,
+  intt_asm_opt(data, aarch64_invntt_zetas_layer01234,
                aarch64_invntt_zetas_layer56);
 }
 
-static INLINE void poly_reduce_native(poly *data)
+static INLINE void poly_reduce_native(int16_t data[MLKEM_N])
 {
-  poly_reduce_asm_opt(data->coeffs);
-}
-static INLINE void poly_tomont_native(poly *data)
-{
-  poly_tomont_asm_opt(data->coeffs);
+  poly_reduce_asm_opt(data);
 }
 
-static INLINE void poly_mulcache_compute_native(poly_mulcache *x, const poly *y)
+static INLINE void poly_tomont_native(int16_t data[MLKEM_N])
 {
-  poly_mulcache_compute_asm_opt(x->coeffs, y->coeffs,
-                                aarch64_zetas_mulcache_native,
+  poly_tomont_asm_opt(data);
+}
+
+static INLINE void poly_mulcache_compute_native(int16_t x[MLKEM_N / 2],
+                                                const int16_t y[MLKEM_N])
+{
+  poly_mulcache_compute_asm_opt(x, y, aarch64_zetas_mulcache_native,
                                 aarch64_zetas_mulcache_twisted_native);
 }
+
 static INLINE void polyvec_basemul_acc_montgomery_cached_native(
-    poly *r, const polyvec *a, const polyvec *b,
-    const polyvec_mulcache *b_cache)
+    int16_t r[MLKEM_N], const int16_t a[MLKEM_K * MLKEM_N],
+    const int16_t b[MLKEM_K * MLKEM_N],
+    const int16_t b_cache[MLKEM_K * (MLKEM_N / 2)])
 {
-  polyvec_basemul_acc_montgomery_cached_asm_opt(
-      r->coeffs, a->vec[0].coeffs, b->vec[0].coeffs, b_cache->vec[0].coeffs);
+  polyvec_basemul_acc_montgomery_cached_asm_opt(r, a, b, b_cache);
 }
 
 static INLINE void poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
-                                       const poly *a)
+                                       const int16_t a[MLKEM_N])
 {
-  poly_tobytes_asm_opt(r, a->coeffs);
+  poly_tobytes_asm_opt(r, a);
 }
 
 static INLINE int rej_uniform_native(int16_t *r, unsigned int len,

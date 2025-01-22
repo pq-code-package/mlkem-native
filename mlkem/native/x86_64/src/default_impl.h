@@ -12,8 +12,7 @@
 
 #include <string.h>
 
-#include "../../../poly.h"
-#include "../../../poly_k.h"
+#include "../../../params.h"
 #include "arith_native_x86_64.h"
 
 #define MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER
@@ -28,9 +27,9 @@
 #define MLKEM_USE_NATIVE_POLY_TOBYTES
 #define MLKEM_USE_NATIVE_POLY_FROMBYTES
 
-static INLINE void poly_permute_bitrev_to_custom(poly *data)
+static INLINE void poly_permute_bitrev_to_custom(int16_t data[MLKEM_N])
 {
-  nttunpack_avx2((__m256i *)(data->coeffs), qdata.vec);
+  nttunpack_avx2((__m256i *)(data), qdata.vec);
 }
 
 static INLINE int rej_uniform_native(int16_t *r, unsigned int len,
@@ -45,27 +44,28 @@ static INLINE int rej_uniform_native(int16_t *r, unsigned int len,
   return (int)rej_uniform_avx2(r, buf);
 }
 
-static INLINE void ntt_native(poly *data)
+static INLINE void ntt_native(int16_t data[MLKEM_N])
 {
   ntt_avx2((__m256i *)data, qdata.vec);
 }
 
-static INLINE void intt_native(poly *data)
+static INLINE void intt_native(int16_t data[MLKEM_N])
 {
   invntt_avx2((__m256i *)data, qdata.vec);
 }
 
-static INLINE void poly_reduce_native(poly *data)
+static INLINE void poly_reduce_native(int16_t data[MLKEM_N])
 {
-  reduce_avx2((__m256i *)data->coeffs, qdata.vec);
+  reduce_avx2((__m256i *)data, qdata.vec);
 }
 
-static INLINE void poly_tomont_native(poly *data)
+static INLINE void poly_tomont_native(int16_t data[MLKEM_N])
 {
-  tomont_avx2((__m256i *)data->coeffs, qdata.vec);
+  tomont_avx2((__m256i *)data, qdata.vec);
 }
 
-static INLINE void poly_mulcache_compute_native(poly_mulcache *x, const poly *y)
+static INLINE void poly_mulcache_compute_native(int16_t x[MLKEM_N / 2],
+                                                const int16_t y[MLKEM_N])
 {
   /* AVX2 backend does not use mulcache */
   ((void)y);
@@ -73,22 +73,23 @@ static INLINE void poly_mulcache_compute_native(poly_mulcache *x, const poly *y)
 }
 
 static INLINE void polyvec_basemul_acc_montgomery_cached_native(
-    poly *r, const polyvec *a, const polyvec *b,
-    const polyvec_mulcache *b_cache)
+    int16_t r[MLKEM_N], const int16_t a[MLKEM_K * MLKEM_N],
+    const int16_t b[MLKEM_K * MLKEM_N],
+    const int16_t b_cache[MLKEM_K * (MLKEM_N / 2)])
 {
   polyvec_basemul_acc_montgomery_cached_avx2(r, a, b, b_cache);
 }
 
 static INLINE void poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
-                                       const poly *a)
+                                       const int16_t a[MLKEM_N])
 {
-  ntttobytes_avx2(r, (const __m256i *)a->coeffs, qdata.vec);
+  ntttobytes_avx2(r, (const __m256i *)a, qdata.vec);
 }
 
-static INLINE void poly_frombytes_native(poly *r,
+static INLINE void poly_frombytes_native(int16_t r[MLKEM_N],
                                          const uint8_t a[MLKEM_POLYBYTES])
 {
-  nttfrombytes_avx2((__m256i *)r->coeffs, a, qdata.vec);
+  nttfrombytes_avx2((__m256i *)r, a, qdata.vec);
 }
 
 #endif /* MLKEM_NATIVE_ARITH_PROFILE_IMPL_H */
