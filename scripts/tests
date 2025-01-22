@@ -321,7 +321,7 @@ class Tests:
         if self.args.exec_wrapper is not None and self.args.exec_wrapper != "":
             res += self.args.exec_wrapper.split(" ")
         if self.args.mac_taskpolicy is not None:
-            res += ["taskpolicy", "-c", f"{mac_taskpolicy}"]
+            res += ["taskpolicy", "-c", f"{self.args.mac_taskpolicy}"]
 
         return res
 
