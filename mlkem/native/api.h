@@ -23,7 +23,14 @@
 #define MLKEM_NATIVE_ARITH_NATIVE_API_H
 
 #include <stdint.h>
+#include "../cbmc.h"
 #include "../common.h"
+
+/* Absolute exclusive upper bound for the output of the inverse NTT */
+#define INVNTT_BOUND (8 * MLKEM_Q)
+
+/* Absolute exclusive upper bound for the output of the forward NTT */
+#define NTT_BOUND (8 * MLKEM_Q)
 
 /*
  * This is the C<->native interface allowing for the drop-in of
@@ -66,7 +73,13 @@
  *
  * Arguments:   - int16_t p[MLKEM_N]: pointer to in/output polynomial
  **************************************************/
-static INLINE void ntt_native(int16_t p[MLKEM_N]);
+static INLINE void ntt_native(int16_t p[MLKEM_N])
+__contract__(
+  requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
+  requires(array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
+  assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(p, 0, MLKEM_N, NTT_BOUND))
+);
 #endif /* MLKEM_USE_NATIVE_NTT */
 
 #if defined(MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER)
@@ -98,7 +111,14 @@ and to/from bytes conversions."
  * Arguments:   - int16_t p[MLKEM_N]: pointer to in/output polynomial
  *
  **************************************************/
-static INLINE void poly_permute_bitrev_to_custom(int16_t p[MLKEM_N]);
+static INLINE void poly_permute_bitrev_to_custom(int16_t p[MLKEM_N])
+__contract__(
+  /* We don't specify that this should be a permutation, but only
+   * that it does not change the bound established at the end of gen_matrix. */
+  requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
+  requires(array_bound(p, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
+  ensures(array_bound(p, 0, MLKEM_N, 0, MLKEM_Q)));
 #endif /* MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER */
 
 #if defined(MLKEM_USE_NATIVE_INTT)
@@ -116,7 +136,12 @@ static INLINE void poly_permute_bitrev_to_custom(int16_t p[MLKEM_N]);
  *
  * Arguments:   - uint16_t *a: pointer to in/output polynomial
  **************************************************/
-static INLINE void intt_native(int16_t p[MLKEM_N]);
+static INLINE void intt_native(int16_t p[MLKEM_N])
+__contract__(
+  requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
+  assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(p, 0, MLKEM_N, INVNTT_BOUND))
+);
 #endif /* MLKEM_USE_NATIVE_INTT */
 
 #if defined(MLKEM_USE_NATIVE_POLY_REDUCE)
@@ -127,7 +152,12 @@ static INLINE void intt_native(int16_t p[MLKEM_N]);
  *
  * Arguments:   - int16_t r[MLKEM_N]: pointer to input/output polynomial
  **************************************************/
-static INLINE void poly_reduce_native(int16_t p[MLKEM_N]);
+static INLINE void poly_reduce_native(int16_t p[MLKEM_N])
+__contract__(
+  requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
+  assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
+  ensures(array_bound(p, 0, MLKEM_N, 0, MLKEM_Q))
+);
 #endif /* MLKEM_USE_NATIVE_POLY_REDUCE */
 
 #if defined(MLKEM_USE_NATIVE_POLY_TOMONT)
@@ -139,7 +169,12 @@ static INLINE void poly_reduce_native(int16_t p[MLKEM_N]);
  *
  * Arguments:   - int16_t r[MLKEM_N]: pointer to input/output polynomial
  **************************************************/
-static INLINE void poly_tomont_native(int16_t p[MLKEM_N]);
+static INLINE void poly_tomont_native(int16_t p[MLKEM_N])
+__contract__(
+  requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
+  assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
+);
 #endif /* MLKEM_USE_NATIVE_POLY_TOMONT */
 
 #if defined(MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE)
@@ -165,7 +200,12 @@ static INLINE void poly_tomont_native(int16_t p[MLKEM_N]);
  *              - cache: pointer to multiplication cache
  **************************************************/
 static INLINE void poly_mulcache_compute_native(int16_t cache[MLKEM_N / 2],
-                                                const int16_t poly[MLKEM_N]);
+                                                const int16_t poly[MLKEM_N])
+__contract__(
+  requires(memory_no_alias(cache, sizeof(int16_t) * (MLKEM_N / 2)))
+  requires(memory_no_alias(poly, sizeof(int16_t) * MLKEM_N))
+  assigns(object_whole(cache))
+);
 #endif /* MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE */
 
 #if defined(MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
@@ -190,7 +230,25 @@ static INLINE void poly_mulcache_compute_native(int16_t cache[MLKEM_N / 2],
 static INLINE void polyvec_basemul_acc_montgomery_cached_native(
     int16_t r[MLKEM_N], const int16_t a[MLKEM_K * MLKEM_N],
     const int16_t b[MLKEM_K * MLKEM_N],
-    const int16_t b_cache[MLKEM_K * (MLKEM_N / 2)]);
+    const int16_t b_cache[MLKEM_K * (MLKEM_N / 2)])
+__contract__(
+  requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
+  requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_K * MLKEM_N))
+  requires(memory_no_alias(b, sizeof(int16_t) * MLKEM_K * MLKEM_N))
+  requires(memory_no_alias(b_cache, sizeof(int16_t) * MLKEM_K * (MLKEM_N / 2)))
+  /* Because of https://github.com/diffblue/cbmc/issues/8570, we can't
+   * just use a single flattened array_bound(...) here.
+   *
+   * Once fixed, change to:
+   * ```
+   * requires(array_bound(a, 0, MLKEM_K * MLKEM_N, 0, UINT12_LIMIT))
+   * ```
+   */
+  requires(forall(kN, 0, MLKEM_K,					  \
+              array_bound(&((int16_t(*)[MLKEM_N])(a))[kN][0], 0, MLKEM_N, \
+			  0, UINT12_LIMIT)))
+  assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+);
 #endif
 
 #if defined(MLKEM_USE_NATIVE_POLY_TOBYTES)
@@ -209,7 +267,13 @@ static INLINE void polyvec_basemul_acc_montgomery_cached_native(
  *                   (of MLKEM_POLYBYTES bytes)
  **************************************************/
 static INLINE void poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
-                                       const int16_t a[MLKEM_N]);
+                                       const int16_t a[MLKEM_N])
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYBYTES))
+  requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_N))
+  requires(array_bound(a, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(object_whole(r))
+);
 #endif /* MLKEM_USE_NATIVE_POLY_TOBYTES */
 
 #if defined(MLKEM_USE_NATIVE_POLY_FROMBYTES)
@@ -227,7 +291,13 @@ static INLINE void poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
  *                   (of MLKEM_POLYBYTES bytes)
  **************************************************/
 static INLINE void poly_frombytes_native(int16_t a[MLKEM_N],
-                                         const uint8_t r[MLKEM_POLYBYTES]);
+                                         const uint8_t r[MLKEM_POLYBYTES])
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYBYTES))
+  requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_N))
+  assigns(memory_slice(a, sizeof(int16_t) * MLKEM_N))
+  ensures(array_bound(a, 0, MLKEM_N, 0, UINT12_LIMIT))
+);
 #endif /* MLKEM_USE_NATIVE_POLY_FROMBYTES */
 
 #if defined(MLKEM_USE_NATIVE_REJ_UNIFORM)
