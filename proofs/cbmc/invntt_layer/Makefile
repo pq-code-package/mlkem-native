@@ -16,7 +16,7 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mlkem/ntt.c $(SRCDIR)/mlkem/zetas.c
+PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c $(SRCDIR)/mlkem/zetas.c
 
 CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)invntt_layer
 USE_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)fqmul $(MLKEM_NAMESPACE)barrett_reduce
@@ -36,7 +36,7 @@ FUNCTION_NAME = invntt_layer
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 9
+CBMC_OBJECT_BITS = 10
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

@@ -2,8 +2,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
-#include "cbmc.h"
-#include "rej_uniform.h"
+#include "sampling.h"
 
 #define rej_uniform_scalar MLKEM_NAMESPACE(rej_uniform_scalar)
 unsigned int rej_uniform_scalar(int16_t *r, unsigned int target,

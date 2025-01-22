@@ -2,7 +2,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0 AND Apache-2.0
 
-#include "reduce.h"
+#include <stdint.h>
+#include "common.h"
+
+#define barrett_reduce MLKEM_NAMESPACE(barrett_reduce)
+int16_t barrett_reduce(int16_t a);
 
 void harness(void)
 {

@@ -2,7 +2,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0 AND Apache-2.0
 
-#include "reduce.h"
+#include <stdint.h>
+#include "common.h"
+
+#define fqmul MLKEM_NAMESPACE(fqmul)
+int16_t fqmul(int16_t a, int16_t b);
 
 void harness(void)
 {

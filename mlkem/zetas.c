@@ -10,7 +10,7 @@
 
 #include "common.h"
 #if !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
-#include "ntt.h"
+#include "poly.h"
 
 /*
  * Table of zeta values used in the reference NTT and inverse NTT.

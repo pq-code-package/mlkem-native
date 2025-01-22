@@ -17,7 +17,7 @@
 #include "../mlkem/fips202/keccakf1600.h"
 #include "../mlkem/indcpa.h"
 #include "../mlkem/poly.h"
-#include "../mlkem/polyvec.h"
+#include "../mlkem/poly_k.h"
 
 #define NWARMUP 50
 #define NITERERATIONS 300

@@ -13,17 +13,16 @@
  * mlkem-native
  */
 
-#include "mlkem/cbd.c"
+#include "mlkem/compress.c"
 #include "mlkem/debug.c"
 #include "mlkem/fips202/fips202.c"
 #include "mlkem/fips202/fips202x4.c"
 #include "mlkem/fips202/keccakf1600.c"
 #include "mlkem/indcpa.c"
 #include "mlkem/kem.c"
-#include "mlkem/ntt.c"
 #include "mlkem/poly.c"
-#include "mlkem/polyvec.c"
-#include "mlkem/rej_uniform.c"
+#include "mlkem/poly_k.c"
+#include "mlkem/sampling.c"
 #include "mlkem/verify.c"
 #include "mlkem/zetas.c"
 
@@ -438,6 +437,11 @@
 #endif
 
 /* mlkem/params.h */
+#if defined(HALF_Q)
+#undef HALF_Q
+#endif
+
+/* mlkem/params.h */
 #if defined(KECCAK_WAY)
 #undef KECCAK_WAY
 #endif
@@ -577,127 +581,127 @@
 #undef UINT12_LIMIT
 #endif
 
-/* mlkem/polyvec.c */
+/* mlkem/poly_k.c */
 #if defined(poly_cbd_eta1)
 #undef poly_cbd_eta1
 #endif
 
-/* mlkem/polyvec.c */
+/* mlkem/poly_k.c */
 #if defined(poly_cbd_eta2)
 #undef poly_cbd_eta2
 #endif
 
-/* mlkem/polyvec.h */
-#if defined(POLYVEC_H)
-#undef POLYVEC_H
+/* mlkem/poly_k.h */
+#if defined(POLY_K_H)
+#undef POLY_K_H
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(poly_compress_du)
 #undef poly_compress_du
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(poly_compress_dv)
 #undef poly_compress_dv
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(poly_decompress_du)
 #undef poly_decompress_du
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(poly_decompress_dv)
 #undef poly_decompress_dv
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(poly_getnoise_eta1122_4x)
 #undef poly_getnoise_eta1122_4x
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(poly_getnoise_eta1_4x)
 #undef poly_getnoise_eta1_4x
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(poly_getnoise_eta2)
 #undef poly_getnoise_eta2
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(poly_getnoise_eta2_4x)
 #undef poly_getnoise_eta2_4x
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec)
 #undef polyvec
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_add)
 #undef polyvec_add
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_basemul_acc_montgomery)
 #undef polyvec_basemul_acc_montgomery
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_basemul_acc_montgomery_cached)
 #undef polyvec_basemul_acc_montgomery_cached
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_compress_du)
 #undef polyvec_compress_du
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_decompress_du)
 #undef polyvec_decompress_du
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_frombytes)
 #undef polyvec_frombytes
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_invntt_tomont)
 #undef polyvec_invntt_tomont
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_mulcache)
 #undef polyvec_mulcache
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_mulcache_compute)
 #undef polyvec_mulcache_compute
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_ntt)
 #undef polyvec_ntt
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_reduce)
 #undef polyvec_reduce
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_tobytes)
 #undef polyvec_tobytes
 #endif
 
-/* mlkem/polyvec.h */
+/* mlkem/poly_k.h */
 #if defined(polyvec_tomont)
 #undef polyvec_tomont
 #endif
@@ -712,36 +716,6 @@
 /* mlkem/arith_backend.h */
 #if defined(MLKEM_NATIVE_ARITH_IMPL_H)
 #undef MLKEM_NATIVE_ARITH_IMPL_H
-#endif
-
-/* mlkem/cbd.c */
-#if defined(empty_cu_cbd)
-#undef empty_cu_cbd
-#endif
-
-/* mlkem/cbd.c */
-#if defined(load24_littleendian)
-#undef load24_littleendian
-#endif
-
-/* mlkem/cbd.c */
-#if defined(load32_littleendian)
-#undef load32_littleendian
-#endif
-
-/* mlkem/cbd.h */
-#if defined(CBD_H)
-#undef CBD_H
-#endif
-
-/* mlkem/cbd.h */
-#if defined(poly_cbd2)
-#undef poly_cbd2
-#endif
-
-/* mlkem/cbd.h */
-#if defined(poly_cbd3)
-#undef poly_cbd3
 #endif
 
 /* mlkem/cbmc.h */
@@ -867,6 +841,121 @@
 /* mlkem/cbmc.h */
 #if defined(writeable)
 #undef writeable
+#endif
+
+/* mlkem/compress.c */
+#if defined(empty_cu_compress)
+#undef empty_cu_compress
+#endif
+
+/* mlkem/compress.h */
+#if defined(COMPRESS_H)
+#undef COMPRESS_H
+#endif
+
+/* mlkem/compress.h */
+#if defined(poly_compress_d10)
+#undef poly_compress_d10
+#endif
+
+/* mlkem/compress.h */
+#if defined(poly_compress_d11)
+#undef poly_compress_d11
+#endif
+
+/* mlkem/compress.h */
+#if defined(poly_compress_d4)
+#undef poly_compress_d4
+#endif
+
+/* mlkem/compress.h */
+#if defined(poly_compress_d5)
+#undef poly_compress_d5
+#endif
+
+/* mlkem/compress.h */
+#if defined(poly_decompress_d10)
+#undef poly_decompress_d10
+#endif
+
+/* mlkem/compress.h */
+#if defined(poly_decompress_d11)
+#undef poly_decompress_d11
+#endif
+
+/* mlkem/compress.h */
+#if defined(poly_decompress_d4)
+#undef poly_decompress_d4
+#endif
+
+/* mlkem/compress.h */
+#if defined(poly_decompress_d5)
+#undef poly_decompress_d5
+#endif
+
+/* mlkem/compress.h */
+#if defined(poly_frombytes)
+#undef poly_frombytes
+#endif
+
+/* mlkem/compress.h */
+#if defined(poly_frommsg)
+#undef poly_frommsg
+#endif
+
+/* mlkem/compress.h */
+#if defined(poly_tobytes)
+#undef poly_tobytes
+#endif
+
+/* mlkem/compress.h */
+#if defined(poly_tomsg)
+#undef poly_tomsg
+#endif
+
+/* mlkem/compress.h */
+#if defined(scalar_compress_d1)
+#undef scalar_compress_d1
+#endif
+
+/* mlkem/compress.h */
+#if defined(scalar_compress_d10)
+#undef scalar_compress_d10
+#endif
+
+/* mlkem/compress.h */
+#if defined(scalar_compress_d11)
+#undef scalar_compress_d11
+#endif
+
+/* mlkem/compress.h */
+#if defined(scalar_compress_d4)
+#undef scalar_compress_d4
+#endif
+
+/* mlkem/compress.h */
+#if defined(scalar_compress_d5)
+#undef scalar_compress_d5
+#endif
+
+/* mlkem/compress.h */
+#if defined(scalar_decompress_d10)
+#undef scalar_decompress_d10
+#endif
+
+/* mlkem/compress.h */
+#if defined(scalar_decompress_d11)
+#undef scalar_decompress_d11
+#endif
+
+/* mlkem/compress.h */
+#if defined(scalar_decompress_d4)
+#undef scalar_decompress_d4
+#endif
+
+/* mlkem/compress.h */
+#if defined(scalar_decompress_d5)
+#undef scalar_decompress_d5
 #endif
 
 /* mlkem/debug.c */
@@ -1144,54 +1233,59 @@
 #undef KeccakF1600x4_StateXORBytes
 #endif
 
-/* mlkem/ntt.c */
-#if defined(empty_cu_ntt)
-#undef empty_cu_ntt
+/* mlkem/poly.c */
+#if defined(barrett_reduce)
+#undef barrett_reduce
 #endif
 
-/* mlkem/ntt.c */
-#if defined(invntt_layer)
-#undef invntt_layer
-#endif
-
-/* mlkem/ntt.c */
-#if defined(ntt_butterfly_block)
-#undef ntt_butterfly_block
-#endif
-
-/* mlkem/ntt.c */
-#if defined(ntt_layer)
-#undef ntt_layer
-#endif
-
-/* mlkem/ntt.h */
-#if defined(NTT_H)
-#undef NTT_H
-#endif
-
-/* mlkem/ntt.h */
+/* mlkem/poly.c */
 #if defined(basemul_cached)
 #undef basemul_cached
 #endif
 
-/* mlkem/ntt.h */
-#if defined(poly_invntt_tomont)
-#undef poly_invntt_tomont
-#endif
-
-/* mlkem/ntt.h */
-#if defined(poly_ntt)
-#undef poly_ntt
-#endif
-
-/* mlkem/ntt.h */
-#if defined(zetas)
-#undef zetas
+/* mlkem/poly.c */
+#if defined(cast_uint16_to_int16)
+#undef cast_uint16_to_int16
 #endif
 
 /* mlkem/poly.c */
 #if defined(empty_cu_poly)
 #undef empty_cu_poly
+#endif
+
+/* mlkem/poly.c */
+#if defined(fqmul)
+#undef fqmul
+#endif
+
+/* mlkem/poly.c */
+#if defined(invntt_layer)
+#undef invntt_layer
+#endif
+
+/* mlkem/poly.c */
+#if defined(montgomery_reduce)
+#undef montgomery_reduce
+#endif
+
+/* mlkem/poly.c */
+#if defined(montgomery_reduce_generic)
+#undef montgomery_reduce_generic
+#endif
+
+/* mlkem/poly.c */
+#if defined(ntt_butterfly_block)
+#undef ntt_butterfly_block
+#endif
+
+/* mlkem/poly.c */
+#if defined(ntt_layer)
+#undef ntt_layer
+#endif
+
+/* mlkem/poly.c */
+#if defined(scalar_signed_to_unsigned_q)
+#undef scalar_signed_to_unsigned_q
 #endif
 
 /* mlkem/poly.h */
@@ -1225,53 +1319,8 @@
 #endif
 
 /* mlkem/poly.h */
-#if defined(poly_compress_d10)
-#undef poly_compress_d10
-#endif
-
-/* mlkem/poly.h */
-#if defined(poly_compress_d11)
-#undef poly_compress_d11
-#endif
-
-/* mlkem/poly.h */
-#if defined(poly_compress_d4)
-#undef poly_compress_d4
-#endif
-
-/* mlkem/poly.h */
-#if defined(poly_compress_d5)
-#undef poly_compress_d5
-#endif
-
-/* mlkem/poly.h */
-#if defined(poly_decompress_d10)
-#undef poly_decompress_d10
-#endif
-
-/* mlkem/poly.h */
-#if defined(poly_decompress_d11)
-#undef poly_decompress_d11
-#endif
-
-/* mlkem/poly.h */
-#if defined(poly_decompress_d4)
-#undef poly_decompress_d4
-#endif
-
-/* mlkem/poly.h */
-#if defined(poly_decompress_d5)
-#undef poly_decompress_d5
-#endif
-
-/* mlkem/poly.h */
-#if defined(poly_frombytes)
-#undef poly_frombytes
-#endif
-
-/* mlkem/poly.h */
-#if defined(poly_frommsg)
-#undef poly_frommsg
+#if defined(poly_invntt_tomont)
+#undef poly_invntt_tomont
 #endif
 
 /* mlkem/poly.h */
@@ -1285,6 +1334,11 @@
 #endif
 
 /* mlkem/poly.h */
+#if defined(poly_ntt)
+#undef poly_ntt
+#endif
+
+/* mlkem/poly.h */
 #if defined(poly_reduce)
 #undef poly_reduce
 #endif
@@ -1295,68 +1349,13 @@
 #endif
 
 /* mlkem/poly.h */
-#if defined(poly_tobytes)
-#undef poly_tobytes
-#endif
-
-/* mlkem/poly.h */
 #if defined(poly_tomont)
 #undef poly_tomont
 #endif
 
 /* mlkem/poly.h */
-#if defined(poly_tomsg)
-#undef poly_tomsg
-#endif
-
-/* mlkem/poly.h */
-#if defined(scalar_compress_d1)
-#undef scalar_compress_d1
-#endif
-
-/* mlkem/poly.h */
-#if defined(scalar_compress_d10)
-#undef scalar_compress_d10
-#endif
-
-/* mlkem/poly.h */
-#if defined(scalar_compress_d11)
-#undef scalar_compress_d11
-#endif
-
-/* mlkem/poly.h */
-#if defined(scalar_compress_d4)
-#undef scalar_compress_d4
-#endif
-
-/* mlkem/poly.h */
-#if defined(scalar_compress_d5)
-#undef scalar_compress_d5
-#endif
-
-/* mlkem/poly.h */
-#if defined(scalar_decompress_d10)
-#undef scalar_decompress_d10
-#endif
-
-/* mlkem/poly.h */
-#if defined(scalar_decompress_d11)
-#undef scalar_decompress_d11
-#endif
-
-/* mlkem/poly.h */
-#if defined(scalar_decompress_d4)
-#undef scalar_decompress_d4
-#endif
-
-/* mlkem/poly.h */
-#if defined(scalar_decompress_d5)
-#undef scalar_decompress_d5
-#endif
-
-/* mlkem/poly.h */
-#if defined(scalar_signed_to_unsigned_q)
-#undef scalar_signed_to_unsigned_q
+#if defined(zetas)
+#undef zetas
 #endif
 
 /* mlkem/randombytes.h */
@@ -1364,72 +1363,57 @@
 #undef RANDOMBYTES_H
 #endif
 
-/* mlkem/reduce.h */
-#if defined(HALF_Q)
-#undef HALF_Q
-#endif
-
-/* mlkem/reduce.h */
-#if defined(REDUCE_H)
-#undef REDUCE_H
-#endif
-
-/* mlkem/reduce.h */
-#if defined(barrett_reduce)
-#undef barrett_reduce
-#endif
-
-/* mlkem/reduce.h */
-#if defined(cast_uint16_to_int16)
-#undef cast_uint16_to_int16
-#endif
-
-/* mlkem/reduce.h */
-#if defined(fqmul)
-#undef fqmul
-#endif
-
-/* mlkem/reduce.h */
-#if defined(montgomery_reduce)
-#undef montgomery_reduce
-#endif
-
-/* mlkem/reduce.h */
-#if defined(montgomery_reduce_generic)
-#undef montgomery_reduce_generic
-#endif
-
-/* mlkem/rej_uniform.c */
+/* mlkem/sampling.c */
 #if defined(MLKEM_GEN_MATRIX_NBLOCKS)
 #undef MLKEM_GEN_MATRIX_NBLOCKS
 #endif
 
-/* mlkem/rej_uniform.c */
-#if defined(empty_cu_rej_uniform)
-#undef empty_cu_rej_uniform
+/* mlkem/sampling.c */
+#if defined(empty_cu_sampling)
+#undef empty_cu_sampling
 #endif
 
-/* mlkem/rej_uniform.c */
+/* mlkem/sampling.c */
+#if defined(load24_littleendian)
+#undef load24_littleendian
+#endif
+
+/* mlkem/sampling.c */
+#if defined(load32_littleendian)
+#undef load32_littleendian
+#endif
+
+/* mlkem/sampling.c */
 #if defined(rej_uniform)
 #undef rej_uniform
 #endif
 
-/* mlkem/rej_uniform.c */
+/* mlkem/sampling.c */
 #if defined(rej_uniform_scalar)
 #undef rej_uniform_scalar
 #endif
 
-/* mlkem/rej_uniform.h */
-#if defined(REJ_UNIFORM_H)
-#undef REJ_UNIFORM_H
+/* mlkem/sampling.h */
+#if defined(SAMPLING_H)
+#undef SAMPLING_H
 #endif
 
-/* mlkem/rej_uniform.h */
+/* mlkem/sampling.h */
+#if defined(poly_cbd2)
+#undef poly_cbd2
+#endif
+
+/* mlkem/sampling.h */
+#if defined(poly_cbd3)
+#undef poly_cbd3
+#endif
+
+/* mlkem/sampling.h */
 #if defined(poly_rej_uniform)
 #undef poly_rej_uniform
 #endif
 
-/* mlkem/rej_uniform.h */
+/* mlkem/sampling.h */
 #if defined(poly_rej_uniform_x4)
 #undef poly_rej_uniform_x4
 #endif

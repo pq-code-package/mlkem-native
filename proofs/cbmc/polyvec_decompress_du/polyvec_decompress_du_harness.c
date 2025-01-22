@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT-0 AND Apache-2.0
 
 #include "poly.h"
-#include "polyvec.h"
+#include "poly_k.h"
 
 void harness(void)
 {

@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include "cbmc.h"
 #include "common.h"
-#include "polyvec.h"
+#include "poly_k.h"
 
 #define gen_matrix MLKEM_NAMESPACE_K(gen_matrix)
 /*************************************************

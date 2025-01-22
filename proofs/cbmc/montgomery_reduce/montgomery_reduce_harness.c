@@ -2,7 +2,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0 AND Apache-2.0
 
-#include "reduce.h"
+#include <stdint.h>
+#include "common.h"
+
+#define montgomery_reduce MLKEM_NAMESPACE(montgomery_reduce)
+int16_t montgomery_reduce(int32_t a);
 
 void harness(void)
 {
