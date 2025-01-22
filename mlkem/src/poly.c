@@ -309,109 +309,264 @@ void mlk_poly_mulcache_compute(mlk_poly_mulcache *x, const mlk_poly *a)
   mlk_poly_mulcache_compute_c(x, a);
 }
 
-/*
- * Computes a block CT butterflies with a fixed twiddle factor,
- * using Montgomery multiplication.
- * Parameters:
- * - r: Pointer to base of polynomial (_not_ the base of butterfly block)
- * - root: Twiddle factor to use for the butterfly. This must be in
- *         Montgomery form and signed canonical.
- * - start: Offset to the beginning of the butterfly block
- * - len: Index difference between coefficients subject to a butterfly
- * - bound: Ghost variable describing coefficient bound: Prior to `start`,
- *          coefficients must be bound by `bound + MLKEM_Q`. Post `start`,
- *          they must be bound by `bound`.
- * When this function returns, output coefficients in the index range
- * [start, start+2*len) have bound bumped to `bound + MLKEM_Q`.
- * Example:
- * - start=8, len=4
- *   This would compute the following four butterflies
- *          8     --    12
- *             9    --     13
- *                10   --     14
- *                   11   --     15
- * - start=4, len=2
- *   This would compute the following two butterflies
- *          4 -- 6
- *             5 -- 7
- */
+#if !defined(MLK_USE_NATIVE_NTT)
 
-/* Reference: Embedded in `ntt()` in the reference implementation @[REF]. */
-static void mlk_ntt_butterfly_block(int16_t r[MLKEM_N], int16_t zeta,
-                                    unsigned start, unsigned len, int bound)
-__contract__(
-  requires(start < MLKEM_N)
-  requires(1 <= len && len <= MLKEM_N / 2 && start + 2 * len <= MLKEM_N)
-  requires(0 <= bound && bound < INT16_MAX - MLKEM_Q)
-  requires(-MLKEM_Q_HALF < zeta && zeta < MLKEM_Q_HALF)
-  requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
-  requires(array_abs_bound(r, 0, start, bound + MLKEM_Q))
-  requires(array_abs_bound(r, start, MLKEM_N, bound))
-  assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
-  ensures(array_abs_bound(r, 0, start + 2*len, bound + MLKEM_Q))
-  ensures(array_abs_bound(r, start + 2 * len, MLKEM_N, bound)))
+/* 1.1 Forward NTT - Optimized C implementation
+ * --------------------------------------------
+ *
+ * Overview: this implementation aims to strike a balance
+ * between readability, formal verifification of type-safety,
+ * and performance.
+ *
+ * Layer merging
+ * -------------
+ * In this implementation:
+ *  Layers 1,2,3 and merged in function ntt_layer123()
+ *  Layers 4 and 5 are merged in function ntt_layer45()
+ *  Layer 6 stands alone in function ntt_layer6()
+ *  Layer 7 stands alone in function ntt_layer7()
+ *
+ * This particular merging was determined by experimentation
+ * and measurement of performance.
+ *
+ * Coefficient Reduction
+ * ---------------------
+ * The code defers reduction of coefficients in the core
+ * "butterfly" functions in each layer, so that the coefficients
+ * grow in absolute magnitiude by MLKEM_Q after each layer.
+ * This growth is reflected and verification in the contracts
+ * and loop invariants of each layer and their inner functions.
+ *
+ * Auto-Vectorization
+ * ------------------
+ * The code is written in a style that is amenable to auto-vectorization
+ * on targets that can support it, and using comtemporary compilers - for
+ * example, Graviton/AArch64 or Intel/AVX2 using recent versions of GCC
+ * or CLANG.
+ *
+ * Merging 3 layers results in an inner loop that proceses 8
+ * coefficients at a time. Similarly, merging 2 layers results
+ * in an inner loop that processes 4 coefficients at a time.
+ * Compiler for particlar targets may choose to further unroll
+ * or transform these loops as they see fit.
+ *
+ * Inlining of the inner "butterfly" functions is selectively enabled
+ * to allow a compiler to inline, to perform partial application, and
+ * vectorization of the top-level layer functions.
+ */
+#define MLK_NTT_BOUND1 (MLKEM_Q)
+#define MLK_NTT_BOUND2 (2 * MLKEM_Q)
+#define MLK_NTT_BOUND4 (4 * MLKEM_Q)
+#define MLK_NTT_BOUND6 (6 * MLKEM_Q)
+#define MLK_NTT_BOUND7 (7 * MLKEM_Q)
+#define MLK_NTT_BOUND8 (8 * MLKEM_Q)
+
+/* mlk_ct_butterfly() performs a single CT Butterfly       */
+/* step in polynomial denoted by r, using the coefficients */
+/* indexed by coeff1_index and coeff2_index, and the       */
+/* given value of zeta.                                    */
+/*                                                         */
+/* NOTE that this function is marked MLK_INLINE for        */
+/* compilation (for efficiency) and does not have          */
+/* contracts, so it is "inlined for proof" by CBMC         */
+/* This allows CBMC to keep track of the ranges of the     */
+/* modified coefficients in the calling functions.         */
+static MLK_INLINE void mlk_ct_butterfly(int16_t r[MLKEM_N],
+                                        const unsigned coeff1_index,
+                                        const unsigned coeff2_index,
+                                        const int16_t zeta)
 {
-  /* `bound` is a ghost variable only needed in the CBMC specification */
+  int16_t t1 = r[coeff1_index];
+  int16_t t2 = mlk_fqmul(r[coeff2_index], zeta);
+  r[coeff1_index] = t1 + t2;
+  r[coeff2_index] = t1 - t2;
+}
+
+static void mlk_ntt_layer123(int16_t r[MLKEM_N])
+__contract__(
+  requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
+  requires(array_abs_bound(r, 0, MLKEM_N, MLK_NTT_BOUND1))
+  assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(r, 0, MLKEM_N, MLK_NTT_BOUND4)))
+{
   unsigned j;
-  ((void)bound);
-  for (j = start; j < start + len; j++)
+  for (j = 0; j < 32; j++)
   __loop__(
-    invariant(start <= j && j <= start + len)
-    /*
-     * Coefficients are updated in strided pairs, so the bounds for the
-     * intermediate states alternate twice between the old and new bound
-     */
-    invariant(array_abs_bound(r, 0,           j,           bound + MLKEM_Q))
-    invariant(array_abs_bound(r, j,           start + len, bound))
-    invariant(array_abs_bound(r, start + len, j + len,     bound + MLKEM_Q))
-    invariant(array_abs_bound(r, j + len,     MLKEM_N,     bound)))
+    /* A single iteration of this loop updates 8 coefficients 3 times each,
+     * meaning their bound jumps from MLK_NTT_BOUND1 to MLK_NTT_BOUND4. Other (as yet
+     * untouched) coefficients remain bounded by MLK_NTT_BOUND1. When this loop
+     * terminates with j == 32, ALL the coefficients have been updated
+     * exactly 3 times, so ALL are bounded by MLK_NTT_BOUND4, which establishes
+     * the post-condition */
+    invariant(j <= 32)
+    invariant(array_abs_bound(r,       0,       j, MLK_NTT_BOUND4))
+    invariant(array_abs_bound(r,       j,      32, MLK_NTT_BOUND1))
+    invariant(array_abs_bound(r,      32,  j + 32, MLK_NTT_BOUND4))
+    invariant(array_abs_bound(r,  j + 32,      64, MLK_NTT_BOUND1))
+    invariant(array_abs_bound(r,      64,  j + 64, MLK_NTT_BOUND4))
+    invariant(array_abs_bound(r,  j + 64,      96, MLK_NTT_BOUND1))
+    invariant(array_abs_bound(r,      96,  j + 96, MLK_NTT_BOUND4))
+    invariant(array_abs_bound(r,  j + 96,     128, MLK_NTT_BOUND1))
+    invariant(array_abs_bound(r,     128, j + 128, MLK_NTT_BOUND4))
+    invariant(array_abs_bound(r, j + 128,     160, MLK_NTT_BOUND1))
+    invariant(array_abs_bound(r,     160, j + 160, MLK_NTT_BOUND4))
+    invariant(array_abs_bound(r, j + 160,     192, MLK_NTT_BOUND1))
+    invariant(array_abs_bound(r,     192, j + 192, MLK_NTT_BOUND4))
+    invariant(array_abs_bound(r, j + 192,     224, MLK_NTT_BOUND1))
+    invariant(array_abs_bound(r,     224, j + 224, MLK_NTT_BOUND4))
+    invariant(array_abs_bound(r, j + 224, MLKEM_N, MLK_NTT_BOUND1)))
   {
-    int16_t t;
-    t = mlk_fqmul(r[j + len], zeta);
-    r[j + len] = r[j] - t;
-    r[j] = r[j] + t;
+    /* 8 coeffifient indexes, starting at element j */
+    /* and increasing in strides of 32              */
+    const unsigned ci0 = j;
+    const unsigned ci1 = ci0 + 32;
+    const unsigned ci2 = ci0 + 64;
+    const unsigned ci3 = ci0 + 96;
+    const unsigned ci4 = ci0 + 128;
+    const unsigned ci5 = ci0 + 160;
+    const unsigned ci6 = ci0 + 192;
+    const unsigned ci7 = ci0 + 224;
+
+    /* Layer 1 */
+    mlk_ct_butterfly(r, ci0, ci4, zetas[1]);
+    mlk_ct_butterfly(r, ci1, ci5, zetas[1]);
+    mlk_ct_butterfly(r, ci2, ci6, zetas[1]);
+    mlk_ct_butterfly(r, ci3, ci7, zetas[1]);
+    /* Layer 2 */
+    mlk_ct_butterfly(r, ci0, ci2, zetas[2]);
+    mlk_ct_butterfly(r, ci1, ci3, zetas[2]);
+    mlk_ct_butterfly(r, ci4, ci6, zetas[3]);
+    mlk_ct_butterfly(r, ci5, ci7, zetas[3]);
+    /* Layer 3 */
+    mlk_ct_butterfly(r, ci0, ci1, zetas[4]);
+    mlk_ct_butterfly(r, ci2, ci3, zetas[5]);
+    mlk_ct_butterfly(r, ci4, ci5, zetas[6]);
+    mlk_ct_butterfly(r, ci6, ci7, zetas[7]);
   }
 }
 
-/*
- * Compute one layer of forward NTT
- * Parameters:
- * - r: Pointer to base of polynomial
- * - layer: Variable indicating which layer is being applied.
- */
-
-/* Reference: Embedded in `ntt()` in the reference implementation @[REF]. */
-static void mlk_ntt_layer(int16_t r[MLKEM_N], unsigned layer)
+static MLK_INLINE void mlk_ntt_layer45_block(int16_t r[MLKEM_N],
+                                             const unsigned zeta_subtree_index,
+                                             const unsigned start)
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
-  requires(1 <= layer && layer <= 7)
-  requires(array_abs_bound(r, 0, MLKEM_N, layer * MLKEM_Q))
+  requires(zeta_subtree_index <= 7)
+  requires(start <= 224)
+  requires(array_abs_bound(r,          0,   start, MLK_NTT_BOUND6))
+  requires(array_abs_bound(r,      start, MLKEM_N, MLK_NTT_BOUND4))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
-  ensures(array_abs_bound(r, 0, MLKEM_N, (layer + 1) * MLKEM_Q)))
+  ensures (array_abs_bound(r,          0, start + 32, MLK_NTT_BOUND6))
+  ensures (array_abs_bound(r, start + 32,    MLKEM_N, MLK_NTT_BOUND4)))
 {
-  unsigned start, k, len;
-  /* Twiddle factors for layer n are at indices 2^(n-1)..2^n-1. */
-  k = 1u << (layer - 1);
-  len = MLKEM_N >> layer;
-  for (start = 0; start < MLKEM_N; start += 2 * len)
+  const unsigned l4zi = 8 + zeta_subtree_index;
+  const unsigned l5zi1 = l4zi * 2;
+  const unsigned l5zi2 = l5zi1 + 1;
+
+  const int16_t z1 = zetas[l4zi];
+  const int16_t z2 = zetas[l5zi1];
+  const int16_t z3 = zetas[l5zi2];
+
+  unsigned j;
+  for (j = 0; j < 8; j++)
   __loop__(
-    invariant(start < MLKEM_N + 2 * len)
-    invariant(k <= MLKEM_N / 2 && 2 * len * k == start + MLKEM_N)
-    invariant(array_abs_bound(r, 0, start, layer * MLKEM_Q + MLKEM_Q))
-    invariant(array_abs_bound(r, start, MLKEM_N, layer * MLKEM_Q)))
+    invariant(j <= 8)
+    invariant(array_abs_bound(r,              0,          start, MLK_NTT_BOUND6))
+    invariant(array_abs_bound(r,      start + 0,      start + j, MLK_NTT_BOUND6))
+    invariant(array_abs_bound(r,      start + j,      start + 8, MLK_NTT_BOUND4))
+    invariant(array_abs_bound(r,      start + 8,  start + j + 8, MLK_NTT_BOUND6))
+    invariant(array_abs_bound(r,  start + j + 8,     start + 16, MLK_NTT_BOUND4))
+    invariant(array_abs_bound(r,     start + 16, start + j + 16, MLK_NTT_BOUND6))
+    invariant(array_abs_bound(r, start + j + 16,     start + 24, MLK_NTT_BOUND4))
+    invariant(array_abs_bound(r,     start + 24, start + j + 24, MLK_NTT_BOUND6))
+    invariant(array_abs_bound(r, start + j + 24,        MLKEM_N, MLK_NTT_BOUND4)))
   {
-    int16_t zeta = mlk_zetas[k++];
-    mlk_ntt_butterfly_block(r, zeta, start, len, layer * MLKEM_Q);
+    /* 4 coeffifient indexes, starting at element j + start */
+    /* and increasing in strides of 8                       */
+    const unsigned ci1 = j + start;
+    const unsigned ci2 = ci1 + 8;
+    const unsigned ci3 = ci1 + 16;
+    const unsigned ci4 = ci1 + 24;
+
+    /* Layer 4 */
+    mlk_ct_butterfly(r, ci1, ci3, z1);
+    mlk_ct_butterfly(r, ci2, ci4, z1);
+    /* Layer 5 */
+    mlk_ct_butterfly(r, ci1, ci2, z2);
+    mlk_ct_butterfly(r, ci3, ci4, z3);
+  }
+}
+
+
+static void mlk_ntt_layer45(int16_t r[MLKEM_N])
+__contract__(
+  requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
+  requires(array_abs_bound(r, 0, MLKEM_N, MLK_NTT_BOUND4))
+  assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(r, 0, MLKEM_N, MLK_NTT_BOUND6)))
+{
+  /* Manual unroll here to maximize opportunity to inline and partially apply
+   * inner functions. Also avoids a complicated loop invariant
+   */
+  mlk_ntt_layer45_block(r, 0, 0);
+  mlk_ntt_layer45_block(r, 1, 32);
+  mlk_ntt_layer45_block(r, 2, 64);
+  mlk_ntt_layer45_block(r, 3, 96);
+  mlk_ntt_layer45_block(r, 4, 128);
+  mlk_ntt_layer45_block(r, 5, 160);
+  mlk_ntt_layer45_block(r, 6, 192);
+  mlk_ntt_layer45_block(r, 7, 224);
+}
+
+static void mlk_ntt_layer6(int16_t r[MLKEM_N])
+__contract__(
+  requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
+  requires(array_abs_bound(r, 0, MLKEM_N, MLK_NTT_BOUND6))
+  assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(r, 0, MLKEM_N, MLK_NTT_BOUND7)))
+{
+  unsigned j;
+  for (j = 0; j < 32; j++)
+  __loop__(
+    invariant(j <= 32)
+    invariant(array_abs_bound(r,     0,   j * 8, MLK_NTT_BOUND7))
+    invariant(array_abs_bound(r, j * 8, MLKEM_N, MLK_NTT_BOUND6)))
+  {
+    const int16_t zeta = zetas[j + 32];
+    const unsigned ci0 = j * 8;
+
+    /* Process 8 coefficients here, all of which need the same Zeta value */
+    mlk_ct_butterfly(r, ci0, ci0 + 4, zeta);
+    mlk_ct_butterfly(r, ci0 + 1, ci0 + 5, zeta);
+    mlk_ct_butterfly(r, ci0 + 2, ci0 + 6, zeta);
+    mlk_ct_butterfly(r, ci0 + 3, ci0 + 7, zeta);
+  }
+}
+
+static void mlk_ntt_layer7(int16_t r[MLKEM_N])
+__contract__(
+  requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
+  requires(array_abs_bound(r, 0, MLKEM_N, MLK_NTT_BOUND7))
+  assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(r, 0, MLKEM_N, MLK_NTT_BOUND8)))
+{
+  unsigned j;
+  for (j = 0; j < 64; j++)
+  __loop__(
+    invariant(j <= 64)
+    invariant(array_abs_bound(r,     0,   j * 4, MLK_NTT_BOUND8))
+    invariant(array_abs_bound(r, j * 4, MLKEM_N, MLK_NTT_BOUND7)))
+  {
+    const int16_t zeta = zetas[j + 64];
+    const unsigned ci0 = j * 4;
+
+    /* Process 4 coefficients here, all of which need the same Zeta value */
+    mlk_ct_butterfly(r, ci0, ci0 + 2, zeta);
+    mlk_ct_butterfly(r, ci0 + 1, ci0 + 3, zeta);
   }
 }
 
 /*
- * Compute full forward NTT
- * NOTE: This particular implementation satisfies a much tighter
- * bound on the output coefficients (5*q) than the contractual one (8*q),
- * but this is not needed in the calling code. Should we change the
- * base multiplication strategy to require smaller NTT output bounds,
- * the proof may need strengthening.
+ * Compute full Forward NTT
  */
 
 /* Reference: `ntt()` in the reference implementation @[REF].
@@ -425,20 +580,16 @@ __contract__(
   ensures(array_abs_bound(p->coeffs, 0, MLKEM_N, MLK_NTT_BOUND))
 )
 {
-  unsigned layer;
   int16_t *r;
 
   mlk_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
 
   r = p->coeffs;
 
-  for (layer = 1; layer <= 7; layer++)
-  __loop__(
-    invariant(1 <= layer && layer <= 8)
-    invariant(array_abs_bound(r, 0, MLKEM_N, layer * MLKEM_Q)))
-  {
-    mlk_ntt_layer(r, layer);
-  }
+  mlk_ntt_layer123(r);
+  mlk_ntt_layer45(r);
+  mlk_ntt_layer6(r);
+  mlk_ntt_layer7(r);
 
   /* Check the stronger bound */
   mlk_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
@@ -465,40 +616,274 @@ void mlk_poly_ntt(mlk_poly *p)
 }
 
 
-/* Compute one layer of inverse NTT */
 
-/* Reference: Embedded into `invntt()` in the reference implementation @[REF] */
-static void mlk_invntt_layer(int16_t *r, unsigned layer)
+/* 2.1 Inverse NTT - Optimized C implementation
+ * --------------------------------------------
+ *
+ * Layer merging
+ * -------------
+ * In this implementation:
+ *  Layer 7 stands alone in function mlk_invntt_layer7_invert()
+ *  Layer 6 stands alone in function mlk_invntt_layer6()
+ *  Layers 5 and 4 are merged in function mlk_invntt_layer45()
+ *  Layers 3,2,1 and merged in function mlk_invntt_layer123()
+ *
+ * Coefficient Reduction
+ * ---------------------
+ * In the Inverse NTT, using the GS-Butterfly, coefficients
+ * do not grow linearly with respect to the layer numbering.
+ * Instead, some coefficients _double_ in absolute magnitude
+ * after each layer, meaning that more reduction steps are
+ * required to keep coefficients at or below 8*MLKEM_Q, which
+ * is the upper limit that can be accomodated in an int16_t object.
+ *
+ * The basic approach in this implementation is as follows:
+ *
+ * Layer 7 can accept any int16_t value for all coefficients
+ * as inputs, but inverts and reduces all coefficients,
+ * meaning inputs to Layer 6 are bounded by MLK_NTT_BOUND1.
+ *
+ * Layer 6 defers reduction, meaning all coefficents
+ * are bounded by MLK_NTT_BOUND2.
+ *
+ * Layers 5 and 4 are merged. Layer 5 defers reduction, meaning
+ * inputs to layer 4 are bounded by MLK_NTT_BOUND4. Layer 4 reduces
+ * all coefficeints so that inputs to layer 3 are bounded by
+ * MLK_NTT_BOUND1.
+ *
+ * Layers 3, 2, and 1 are merged. These all defer reduction,
+ * resulting in outputs bounded by MLK_NTT_BOUND8.
+ *
+ * These bounds are all reflected and verified by the contracts
+ * and loop invariants below.
+ *
+ * This layer merging and reduction strategy is NOT optimal, but
+ * offers a reasonable balance between performance, readability
+ * and verifiability of the code.
+ *
+ * Auto-Vectorization
+ * ------------------
+ *
+ * As with the Forward NTT, code is wr itten to handle at most
+ * 8 coefficents at once, with selective inlining to maximize
+ * opportunity for auto-vectorization.
+ */
+
+/* mlk_gs_butterfly_reduce() performs a single GS Butterfly */
+/* step in polynomial denoted by r, using the               */
+/* coefficients indexes coeff1_index and coeff2_index       */
+/* and the given value of zeta.                             */
+/*                                                          */
+/* Like mlk_ct_butterfly(), this functions is inlined       */
+/* for both compilation and proof.                          */
+static MLK_INLINE void mlk_gs_butterfly_reduce(int16_t r[MLKEM_N],
+                                               const unsigned coeff1_index,
+                                               const unsigned coeff2_index,
+                                               const int16_t zeta)
+{
+  const int16_t t1 = r[coeff1_index];
+  const int16_t t2 = r[coeff2_index];
+  r[coeff1_index] = mlk_barrett_reduce(t1 + t2);
+  r[coeff2_index] = mlk_fqmul((t2 - t1), zeta);
+}
+
+/* As mlk_gs_butterfly_reduce(), but does not reduce the */
+/* coefficient denoted by coeff1_index                   */
+static MLK_INLINE void mlk_gs_butterfly_defer(int16_t r[MLKEM_N],
+                                              const unsigned coeff1_index,
+                                              const unsigned coeff2_index,
+                                              const int16_t zeta)
+{
+  const int16_t t1 = r[coeff1_index];
+  const int16_t t2 = r[coeff2_index];
+  r[coeff1_index] = t1 + t2;
+  r[coeff2_index] = mlk_fqmul((t2 - t1), zeta);
+}
+
+static void mlk_invntt_layer7_invert(int16_t r[MLKEM_N])
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
-  requires(1 <= layer && layer <= 7)
-  requires(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
-  ensures(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q)))
+  ensures(array_abs_bound(r, 0, MLKEM_N, MLK_NTT_BOUND1))
+)
 {
-  unsigned start, k, len;
-  len = (MLKEM_N >> layer);
-  k = (1u << layer) - 1;
-  for (start = 0; start < MLKEM_N; start += 2 * len)
+  const int16_t f = 1441; /* check-magic: 1441 == pow(2,32 - 7,MLKEM_Q) */
+  unsigned i;
+  for (i = 0; i < 64; i++)
   __loop__(
-    invariant(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q))
-    invariant(start <= MLKEM_N && k <= 127)
-    /* Normalised form of k == MLKEM_N / len - 1 - start / (2 * len) */
-    invariant(2 * len * k + start == 2 * MLKEM_N - 2 * len))
+    invariant(i <= 64)
+    invariant(array_abs_bound(r, 0, i * 4, MLK_NTT_BOUND1))
+  )
   {
-    unsigned j;
-    int16_t zeta = mlk_zetas[k--];
-    for (j = start; j < start + len; j++)
-    __loop__(
-      invariant(start <= j && j <= start + len)
-      invariant(start <= MLKEM_N && k <= 127)
-      invariant(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q)))
-    {
-      int16_t t = r[j];
-      r[j] = mlk_barrett_reduce(t + r[j + len]);
-      r[j + len] = r[j + len] - t;
-      r[j + len] = mlk_fqmul(r[j + len], zeta);
-    }
+    /* Process 4 coefficients here, all of which need the same Zeta value */
+    const int16_t zeta = zetas[127 - i];
+    const unsigned ci0 = i * 4;
+    const unsigned ci1 = ci0 + 1;
+    const unsigned ci2 = ci0 + 2;
+    const unsigned ci3 = ci0 + 3;
+
+    /* Invert and reduce all coefficients here the first time they */
+    /* are read. This is efficient, and also means we can accept   */
+    /* any int16_t value for all coefficients as input.            */
+    r[ci0] = mlk_fqmul(r[ci0], f);
+    r[ci1] = mlk_fqmul(r[ci1], f);
+    r[ci2] = mlk_fqmul(r[ci2], f);
+    r[ci3] = mlk_fqmul(r[ci3], f);
+
+    /* Reduce all coefficients here to meet the precondition of Layer 6 */
+    mlk_gs_butterfly_reduce(r, ci0, ci2, zeta);
+    mlk_gs_butterfly_reduce(r, ci1, ci3, zeta);
+  }
+}
+
+static void mlk_invntt_layer6(int16_t r[MLKEM_N])
+__contract__(
+  requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
+  requires(array_abs_bound(r, 0, MLKEM_N, MLK_NTT_BOUND1))
+  assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(r, 0, MLKEM_N, MLK_NTT_BOUND2))
+)
+{
+  unsigned i;
+  for (i = 0; i < 32; i++)
+  __loop__(
+    invariant(i <= 32)
+    invariant(array_abs_bound(r, 0,       i * 8, MLK_NTT_BOUND2))
+    invariant(array_abs_bound(r, i * 8, MLKEM_N, MLK_NTT_BOUND1))
+  )
+  {
+    const int16_t zeta = zetas[63 - i];
+    const unsigned ci0 = i * 8;
+
+    /* Process 8 coefficients here, all of which need the same Zeta value */
+    /* Defer reduction of coefficients 0, 1, 2, and 3 here so they        */
+    /* are bounded to MLK_NTT_BOUND2 after Layer6                         */
+    mlk_gs_butterfly_defer(r, ci0, ci0 + 4, zeta);
+    mlk_gs_butterfly_defer(r, ci0 + 1, ci0 + 5, zeta);
+    mlk_gs_butterfly_defer(r, ci0 + 2, ci0 + 6, zeta);
+    mlk_gs_butterfly_defer(r, ci0 + 3, ci0 + 7, zeta);
+  }
+}
+
+
+static MLK_INLINE void mlk_invntt_layer54_block(int16_t r[MLKEM_N],
+                                                const unsigned zeta_index,
+                                                const unsigned start)
+__contract__(
+  requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
+  requires(zeta_index <= 7)
+  requires(start <= 224)
+  requires(start % 32 == 0)
+  requires(array_abs_bound(r, 0,       start, MLK_NTT_BOUND1))
+  requires(array_abs_bound(r, start, MLKEM_N, MLK_NTT_BOUND2))
+  assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(r, 0,          start + 32, MLK_NTT_BOUND1))
+  ensures(array_abs_bound(r, start + 32,    MLKEM_N, MLK_NTT_BOUND2))
+)
+{
+  const unsigned l4zi = 8 + zeta_index;
+  const unsigned l5zi1 = l4zi * 2;
+  const unsigned l5zi2 = l5zi1 + 1;
+
+  const int16_t l4zeta = zetas[l4zi];
+  const int16_t l5zeta1 = zetas[l5zi1];
+  const int16_t l5zeta2 = zetas[l5zi2];
+
+  unsigned j;
+  for (j = 0; j < 8; j++)
+  __loop__(
+    invariant(j <= 8)
+    invariant(array_abs_bound(r,              0,          start, MLK_NTT_BOUND1))
+    invariant(array_abs_bound(r,      start + 0,      start + j, MLK_NTT_BOUND1))
+    invariant(array_abs_bound(r,      start + j,      start + 8, MLK_NTT_BOUND2))
+    invariant(array_abs_bound(r,      start + 8,  start + j + 8, MLK_NTT_BOUND1))
+    invariant(array_abs_bound(r,  start + j + 8,     start + 16, MLK_NTT_BOUND2))
+    invariant(array_abs_bound(r,     start + 16, start + j + 16, MLK_NTT_BOUND1))
+    invariant(array_abs_bound(r, start + j + 16,     start + 24, MLK_NTT_BOUND2))
+    invariant(array_abs_bound(r,     start + 24, start + j + 24, MLK_NTT_BOUND1))
+    invariant(array_abs_bound(r, start + j + 24,        MLKEM_N, MLK_NTT_BOUND2)))
+  {
+    const unsigned ci0 = j + start;
+    const unsigned ci8 = ci0 + 8;
+    const unsigned ci16 = ci0 + 16;
+    const unsigned ci24 = ci0 + 24;
+
+    /* Layer 5 - Defer reduction of coeffs 0 and 16 here */
+    mlk_gs_butterfly_defer(r, ci0, ci8, l5zeta2);
+    mlk_gs_butterfly_defer(r, ci16, ci24, l5zeta1);
+    /* Layer 4 - reduce all coefficients to be in MLK_NTT_BOUND1 */
+    /* to meet the pre-condition of Layer321                     */
+    mlk_gs_butterfly_reduce(r, ci0, ci16, l4zeta);
+    mlk_gs_butterfly_reduce(r, ci8, ci24, l4zeta);
+  }
+}
+
+static void mlk_invntt_layer54(int16_t r[MLKEM_N])
+__contract__(
+  requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
+  requires(array_abs_bound(r, 0, MLKEM_N, MLK_NTT_BOUND2))
+  assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(r, 0, MLKEM_N, MLK_NTT_BOUND1))
+)
+{
+  /* Manual unroll here to maximize opportunity to inline and partially apply
+   * inner functions. Also avoids a complicated loop invariant
+   */
+  mlk_invntt_layer54_block(r, 7, 0);
+  mlk_invntt_layer54_block(r, 6, 32);
+  mlk_invntt_layer54_block(r, 5, 64);
+  mlk_invntt_layer54_block(r, 4, 96);
+  mlk_invntt_layer54_block(r, 3, 128);
+  mlk_invntt_layer54_block(r, 2, 160);
+  mlk_invntt_layer54_block(r, 1, 192);
+  mlk_invntt_layer54_block(r, 0, 224);
+}
+
+static void mlk_invntt_layer321(int16_t r[MLKEM_N])
+__contract__(
+  requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
+  requires(array_abs_bound(r, 0, MLKEM_N, MLK_NTT_BOUND1))
+  assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(r, 0, MLKEM_N, MLK_NTT_BOUND8)))
+{
+  unsigned j;
+  for (j = 0; j < 32; j++)
+  __loop__(
+    invariant(j <= 32)
+    invariant(array_abs_bound(r,       0,       j, MLK_NTT_BOUND8))
+    invariant(array_abs_bound(r,       j,      32, MLK_NTT_BOUND1))
+    invariant(array_abs_bound(r,      32,  j + 32, MLK_NTT_BOUND4))
+    invariant(array_abs_bound(r,  j + 32,      64, MLK_NTT_BOUND1))
+    invariant(array_abs_bound(r,      64,  j + 64, MLK_NTT_BOUND2))
+    invariant(array_abs_bound(r,  j + 64,      96, MLK_NTT_BOUND1))
+    invariant(array_abs_bound(r,      96,  j + 96, MLK_NTT_BOUND2))
+    invariant(array_abs_bound(r,  j + 96,     128, MLK_NTT_BOUND1))
+    invariant(array_abs_bound(r,     128, MLKEM_N, MLK_NTT_BOUND1)))
+  {
+    const unsigned ci0 = j + 0;
+    const unsigned ci32 = j + 32;
+    const unsigned ci64 = j + 64;
+    const unsigned ci96 = j + 96;
+    const unsigned ci128 = j + 128;
+    const unsigned ci160 = j + 160;
+    const unsigned ci192 = j + 192;
+    const unsigned ci224 = j + 224;
+
+    /* Layer 3 */
+    mlk_gs_butterfly_defer(r, ci0, ci32, zetas[7]);
+    mlk_gs_butterfly_defer(r, ci64, ci96, zetas[6]);
+    mlk_gs_butterfly_defer(r, ci128, ci160, zetas[5]);
+    mlk_gs_butterfly_defer(r, ci192, ci224, zetas[4]);
+    /* Layer 2 */
+    mlk_gs_butterfly_defer(r, ci0, ci64, zetas[3]);
+    mlk_gs_butterfly_defer(r, ci32, ci96, zetas[3]);
+    mlk_gs_butterfly_defer(r, ci128, ci192, zetas[2]);
+    mlk_gs_butterfly_defer(r, ci160, ci224, zetas[2]);
+    /* Layer 1 */
+    mlk_gs_butterfly_defer(r, ci0, ci128, zetas[1]);
+    mlk_gs_butterfly_defer(r, ci32, ci160, zetas[1]);
+    mlk_gs_butterfly_defer(r, ci64, ci192, zetas[1]);
+    mlk_gs_butterfly_defer(r, ci96, ci224, zetas[1]);
   }
 }
 
@@ -514,31 +899,11 @@ __contract__(
   ensures(array_abs_bound(p->coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND))
 )
 {
-  unsigned j, layer;
-  const int16_t f = 1441; /* check-magic: 1441 == pow(2,32 - 7,MLKEM_Q) */
   int16_t *r = p->coeffs;
-
-  /*
-   * Scale input polynomial to account for Montgomery factor
-   * and NTT twist. This also brings coefficients down to
-   * absolute value < MLKEM_Q.
-   */
-  for (j = 0; j < MLKEM_N; j++)
-  __loop__(
-    invariant(j <= MLKEM_N)
-    invariant(array_abs_bound(r, 0, j, MLKEM_Q)))
-  {
-    r[j] = mlk_fqmul(r[j], f);
-  }
-
-  /* Run the invNTT layers */
-  for (layer = 7; layer > 0; layer--)
-  __loop__(
-    invariant(0 <= layer && layer < 8)
-    invariant(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q)))
-  {
-    mlk_invntt_layer(r, layer);
-  }
+  mlk_invntt_layer7_invert(r);
+  mlk_invntt_layer6(r);
+  mlk_invntt_layer54(r);
+  mlk_invntt_layer321(r);
 
   mlk_assert_abs_bound(p, MLKEM_N, MLK_INVNTT_BOUND);
 }
