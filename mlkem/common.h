@@ -15,12 +15,19 @@
 #include "sys.h"
 
 /* Include backend metadata */
-#if defined(MLKEM_USE_NATIVE)
-#if defined(MLKEM_NATIVE_ARITH_BACKEND)
-#include MLKEM_NATIVE_ARITH_BACKEND
+#if defined(MLKEM_USE_NATIVE_BACKEND_ARITH)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_FILE)
+#include MLKEM_NATIVE_ARITH_BACKEND_FILE
+#else
+#error Bad configuration: MLKEM_USE_NATIVE_BACKEND_ARITH is set, but MLKEM_NATIVE_ARITH_BACKEND_FILE is not.
 #endif
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND)
-#include MLKEM_NATIVE_FIPS202_BACKEND
+#endif
+
+#if defined(MLKEM_USE_NATIVE_BACKEND_FIPS202)
+#if defined(MLKEM_NATIVE_FIPS202_BACKEND_FILE)
+#include MLKEM_NATIVE_FIPS202_BACKEND_FILE
+#else
+#error Bad configuration: MLKEM_USE_NATIVE_BACKEND_FIPS202 is set, but MLKEM_NATIVE_FIPS202_BACKEND_FILE is not.
 #endif
 #endif
 
