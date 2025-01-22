@@ -4,7 +4,7 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = poly_invntt_tomont_harness
+HARNESS_FILE = mlk_poly_invntt_tomont_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
@@ -20,7 +20,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_poly_invntt_tomont
-USE_FUNCTION_CONTRACTS=mlk_invntt_layer mlk_fqmul
+USE_FUNCTION_CONTRACTS=mlk_invntt_layer321 mlk_invntt_layer54 mlk_invntt_layer6 mlk_invntt_layer7_invert
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
