@@ -52,6 +52,9 @@ __contract__(
     object_whole(state))
 );
 
+#define shake128x4_init MLKEM_NAMESPACE(shake128x4_init)
+void shake128x4_init(shake128x4ctx *state);
+
 #define shake128x4_release MLKEM_NAMESPACE(shake128x4_release)
 void shake128x4_release(shake128x4ctx *state);
 

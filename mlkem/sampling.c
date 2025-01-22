@@ -158,6 +158,7 @@ void poly_rej_uniform_x4(poly *vec, uint8_t *seed[4])
   unsigned int buflen;
 
   /* seed is MLKEM_SYMBYTES + 2 bytes long, but padded to MLKEM_SYMBYTES + 16 */
+  xof_x4_init(&statex);
   xof_x4_absorb(&statex, seed[0], seed[1], seed[2], seed[3],
                 MLKEM_SYMBYTES + 2);
 
@@ -207,6 +208,7 @@ void poly_rej_uniform(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
   uint8_t buf[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
   unsigned int ctr, buflen;
 
+  xof_init(&state);
   xof_absorb(&state, seed, MLKEM_SYMBYTES + 2);
 
   /* Initially, squeeze + sample heuristic number of MLKEM_GEN_MATRIX_NBLOCKS.

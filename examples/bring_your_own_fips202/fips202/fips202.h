@@ -24,21 +24,16 @@
  * mlkem-native */
 typedef sha3_ctx_t shake128ctx;
 
-/* Initialize the state and absorb the provided input.
- *
- * This function does not support being called multiple times
- * with the same state.
- */
+/* NOTE: shake128_init is already defined in sha3.h under that name;
+ * Otherwise, it would need to be defined here as well. */
+
 #define shake128_absorb_once MLKEM_NAMESPACE(shake128_absorb_once)
 /*************************************************
  * Name:        shake128_absorb_once
  *
  * Description: Absorb step of the SHAKE128 XOF.
- *              non-incremental, starts by zeroeing the state.
  *
- *              WARNING: Must only be called once.
- *
- * Arguments:   - uint64_t *state:      pointer to (uninitialized) output Keccak
+ * Arguments:   - shake128ctx *state:   pointer to zeroized output Keccak
  *                                      state
  *              - const uint8_t *input: pointer to input to be absorbed into
  *                                      state
@@ -47,7 +42,6 @@ typedef sha3_ctx_t shake128ctx;
 static INLINE void shake128_absorb_once(shake128ctx *state,
                                         const uint8_t *input, size_t inlen)
 {
-  shake128_init(state);
   shake_update(state, input, inlen);
   shake_xof(state);
 }

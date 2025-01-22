@@ -66,6 +66,15 @@ __contract__(
   shake128_squeezeblocks(out3, nblocks, &(*state)[3]);
 }
 
+#define shake128x4_init MLKEM_NAMESPACE(shake128x4_init)
+static INLINE void shake128x4_init(shake128x4ctx *state)
+{
+  shake128_init(&(*state)[0]);
+  shake128_init(&(*state)[1]);
+  shake128_init(&(*state)[2]);
+  shake128_init(&(*state)[3]);
+}
+
 #define shake128x4_release MLKEM_NAMESPACE(shake128x4_release)
 static INLINE void shake128x4_release(shake128x4ctx *state)
 {

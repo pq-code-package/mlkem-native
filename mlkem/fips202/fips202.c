@@ -183,6 +183,7 @@ void shake128_squeezeblocks(uint8_t *output, size_t nblocks, shake128ctx *state)
   keccak_squeezeblocks(output, nblocks, state->ctx, SHAKE128_RATE);
 }
 
+void shake128_init(shake128ctx *state) { (void)state; }
 void shake128_release(shake128ctx *state) { (void)state; }
 
 #define shake256ctx MLKEM_NAMESPACE(shake256ctx)
