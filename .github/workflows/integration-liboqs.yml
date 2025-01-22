@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: Apache-2.0
+
+name: Test liboqs integration
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  check-oqs-source-list:
+    name: Check META.yml source list
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Run file check
+        run: |
+          cd integration/liboqs
+          python3 liboqs-check-filelist.py

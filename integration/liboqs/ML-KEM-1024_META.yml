@@ -1,0 +1,65 @@
+# Copyright (c) 2024 The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0
+name: ML-KEM-1024
+type: kem
+claimed-nist-level: 5
+claimed-security: IND-CCA2
+length-public-key: 1568
+length-ciphertext: 1568
+length-secret-key: 3168
+length-shared-secret: 32
+nistkat-sha256: f580d851e5fb27e6876e5e203fa18be4cdbfd49e05d48fec3d3992c8f43a13e6
+testvectors-sha256: ff1a854b9b6761a70c65ccae85246fe0596a949e72eae0866a8a2a2d4ea54b10
+principal-submitters:
+  - Peter Schwabe
+auxiliary-submitters:
+  - Roberto Avanzi
+  - Joppe Bos
+  - Léo Ducas
+  - Eike Kiltz
+  - Tancrède Lepoint
+  - Vadim Lyubashevsky
+  - John M. Schanck
+  - Gregor Seiler
+  - Damien Stehlé
+implementations:
+  - name: ref
+    version: FIPS203
+    folder_name: mlkem
+    compile_opts: -DMLKEM_K=4 -DMLKEM_NAMESPACE_PREFIX=PQCP_MLKEM_NATIVE_MLKEM1024_C
+    signature_keypair: PQCP_MLKEM_NATIVE_MLKEM1024_C_keypair
+    signature_enc: PQCP_MLKEM_NATIVE_MLKEM1024_C_enc
+    signature_dec: PQCP_MLKEM_NATIVE_MLKEM1024_C_dec
+    sources: LICENSE arith_backend.h cbmc.h common.h compress.c compress.h config.h debug.c debug.h indcpa.c indcpa.h kem.c kem.h mlkem_native.h params.h poly.c poly.h poly_k.c poly_k.h sampling.c sampling.h symmetric.h sys.h verify.c verify.h zetas.c native/api.h native/default.h
+  - name: x86_64
+    version: FIPS203
+    folder_name: mlkem
+    compile_opts: -DMLKEM_K=4 -DFORCE_X86_64 -DMLKEM_NATIVE_ARITH_BACKEND_NAME=X86_64_DEFAULT -DMLKEM_USE_NATIVE -DMLKEM_NAMESPACE_PREFIX=PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_DEFAULT
+    signature_keypair: PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_DEFAULT_keypair
+    signature_enc: PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_DEFAULT_enc
+    signature_dec: PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_DEFAULT_dec
+    sources: LICENSE arith_backend.h cbmc.h common.h compress.c compress.h config.h debug.c debug.h indcpa.c indcpa.h kem.c kem.h mlkem_native.h params.h poly.c poly.h poly_k.c poly_k.h sampling.c sampling.h symmetric.h sys.h verify.c verify.h zetas.c native/api.h native/default.h native/x86_64
+    supported_platforms:
+      - architecture: x86_64
+        operating_systems:
+          - Linux
+          - Darwin
+        required_flags:
+          - avx2
+          - bmi2
+          - popcnt
+  - name: aarch64
+    version: FIPS203
+    folder_name: mlkem
+    compile_opts: -DMLKEM_K=4 -DFORCE_AARCH64 -DMLKEM_NATIVE_ARITH_BACKEND_NAME=AARCH64_OPT -DMLKEM_USE_NATIVE -DMLKEM_NAMESPACE_PREFIX=PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_OPT
+    signature_keypair: PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_OPT_keypair
+    signature_enc: PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_OPT_enc
+    signature_dec: PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_OPT_dec
+    sources: LICENSE arith_backend.h cbmc.h common.h compress.c compress.h config.h debug.c debug.h indcpa.c indcpa.h kem.c kem.h mlkem_native.h params.h poly.c poly.h poly_k.c poly_k.h sampling.c sampling.h symmetric.h sys.h verify.c verify.h zetas.c native/api.h native/default.h native/aarch64
+    supported_platforms:
+      - architecture: arm_8
+        operating_systems:
+            - Linux
+            - Darwin
+        required_flags:
+            - asimd
