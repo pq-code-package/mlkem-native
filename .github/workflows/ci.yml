@@ -298,6 +298,9 @@ jobs:
          - name: clang-18
            shell: ci_clang18
            darwin: True
+         - name: clang-19
+           shell: ci_clang19
+           darwin: True
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
