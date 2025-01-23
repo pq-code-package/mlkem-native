@@ -42,8 +42,8 @@ void intt_asm_clean(int16_t *, const int16_t *, const int16_t *);
 void intt_asm_opt(int16_t *, const int16_t *, const int16_t *);
 
 #define rej_uniform_asm_clean MLKEM_NAMESPACE(rej_uniform_asm_clean)
-unsigned int rej_uniform_asm_clean(int16_t *r, const uint8_t *buf,
-                                   unsigned int buflen, const uint8_t *table);
+unsigned rej_uniform_asm_clean(int16_t *r, const uint8_t *buf, unsigned buflen,
+                               const uint8_t *table);
 
 #define poly_reduce_asm_clean MLKEM_NAMESPACE(poly_reduce_asm_clean)
 void poly_reduce_asm_clean(int16_t *);

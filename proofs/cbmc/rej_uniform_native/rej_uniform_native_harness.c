@@ -6,12 +6,12 @@
 #include "cbmc.h"
 
 #define rej_uniform MLKEM_NAMESPACE(rej_uniform)
-unsigned int rej_uniform(int16_t *r, unsigned int target, unsigned int offset,
-                         const uint8_t *buf, unsigned int buflen);
+unsigned rej_uniform(int16_t *r, unsigned target, unsigned offset,
+                     const uint8_t *buf, unsigned buflen);
 
 void harness(void)
 {
-  unsigned int target, offset, inlen;
+  unsigned target, offset, inlen;
   int16_t *r;
   uint8_t *buf;
 

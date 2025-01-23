@@ -8,7 +8,7 @@ void harness(void)
 {
   uint64_t *state;
   unsigned char *data;
-  unsigned int offset;
-  unsigned int length;
+  unsigned offset;
+  unsigned length;
   KeccakF1600_StateExtractBytes(state, data, offset, length);
 }

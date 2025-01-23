@@ -55,7 +55,7 @@ static int bench(void)
   unsigned char kg_rand[2 * CRYPTO_BYTES], enc_rand[CRYPTO_BYTES];
   uint64_t cycles_kg[NTESTS], cycles_enc[NTESTS], cycles_dec[NTESTS];
 
-  unsigned int i, j;
+  unsigned i, j;
   uint64_t t0, t1;
 
 

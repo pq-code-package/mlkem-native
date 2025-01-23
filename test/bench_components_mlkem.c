@@ -62,7 +62,7 @@ static int bench(void)
   uint8_t nonce0 = 0, nonce1 = 1, nonce2 = 2, nonce3 = 3;
   uint64_t cyc[NTESTS];
 
-  unsigned int i, j;
+  unsigned i, j;
   uint64_t t0, t1;
 
   BENCH("keccak-f1600-x1", KeccakF1600_StatePermute(data0))

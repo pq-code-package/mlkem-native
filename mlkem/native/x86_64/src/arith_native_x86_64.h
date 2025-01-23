@@ -16,7 +16,7 @@
   (3 * 168) /* REJ_UNIFORM_AVX_BUFLEN * SHAKE128_RATE */
 
 #define rej_uniform_avx2 MLKEM_NAMESPACE(rej_uniform_avx2)
-unsigned int rej_uniform_avx2(int16_t *r, const uint8_t *buf);
+unsigned rej_uniform_avx2(int16_t *r, const uint8_t *buf);
 
 #define rej_uniform_table MLKEM_NAMESPACE(rej_uniform_table)
 extern const uint8_t rej_uniform_table[256][8];

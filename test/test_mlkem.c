@@ -236,7 +236,7 @@ static int test_invalid_ciphertext(void)
 
 int main(void)
 {
-  unsigned int i;
+  unsigned i;
   int r;
 
   for (i = 0; i < NTESTS; i++)

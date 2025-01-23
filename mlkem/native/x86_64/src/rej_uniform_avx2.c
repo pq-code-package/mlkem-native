@@ -18,9 +18,9 @@
 #include "arith_native_x86_64.h"
 #include "consts.h"
 
-unsigned int rej_uniform_avx2(int16_t *RESTRICT r, const uint8_t *buf)
+unsigned rej_uniform_avx2(int16_t *RESTRICT r, const uint8_t *buf)
 {
-  unsigned int ctr, pos;
+  unsigned ctr, pos;
   uint16_t val0, val1;
   uint32_t good;
   const __m256i bound =

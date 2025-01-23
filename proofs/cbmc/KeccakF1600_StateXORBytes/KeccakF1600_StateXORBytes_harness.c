@@ -8,7 +8,7 @@ void harness(void)
 {
   uint64_t *state;
   const unsigned char *data;
-  unsigned int offset;
-  unsigned int length;
+  unsigned offset;
+  unsigned length;
   KeccakF1600_StateXORBytes(state, data, offset, length);
 }

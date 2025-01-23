@@ -29,7 +29,7 @@
 /* End of static namespacing */
 
 void KeccakF1600_StateExtractBytes(uint64_t *state, unsigned char *data,
-                                   unsigned int offset, unsigned int length)
+                                   unsigned offset, unsigned length)
 {
   unsigned i;
 #if defined(SYS_LITTLE_ENDIAN)
@@ -50,7 +50,7 @@ void KeccakF1600_StateExtractBytes(uint64_t *state, unsigned char *data,
 }
 
 void KeccakF1600_StateXORBytes(uint64_t *state, const unsigned char *data,
-                               unsigned int offset, unsigned int length)
+                               unsigned offset, unsigned length)
 {
   unsigned i;
 #if defined(SYS_LITTLE_ENDIAN)
@@ -73,8 +73,8 @@ void KeccakF1600_StateXORBytes(uint64_t *state, const unsigned char *data,
 
 void KeccakF1600x4_StateExtractBytes(uint64_t *state, unsigned char *data0,
                                      unsigned char *data1, unsigned char *data2,
-                                     unsigned char *data3, unsigned int offset,
-                                     unsigned int length)
+                                     unsigned char *data3, unsigned offset,
+                                     unsigned length)
 {
   KeccakF1600_StateExtractBytes(state + KECCAK_LANES * 0, data0, offset,
                                 length);
@@ -89,8 +89,8 @@ void KeccakF1600x4_StateExtractBytes(uint64_t *state, unsigned char *data0,
 void KeccakF1600x4_StateXORBytes(uint64_t *state, const unsigned char *data0,
                                  const unsigned char *data1,
                                  const unsigned char *data2,
-                                 const unsigned char *data3,
-                                 unsigned int offset, unsigned int length)
+                                 const unsigned char *data3, unsigned offset,
+                                 unsigned length)
 {
   KeccakF1600_StateXORBytes(state + KECCAK_LANES * 0, data0, offset, length);
   KeccakF1600_StateXORBytes(state + KECCAK_LANES * 1, data1, offset, length);
