@@ -2,13 +2,13 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
-#include "compress.h"
+#include <stdint.h>
+#include "indcpa.h"
 
 void harness(void)
 {
-  poly *a;
-  uint8_t *msg;
-
-  /* Contracts for this function are in compress.h */
-  poly_tomsg(msg, a);
+  polyvec *a;
+  uint8_t *seed;
+  int transposed;
+  gen_matrix(a, seed, transposed);
 }

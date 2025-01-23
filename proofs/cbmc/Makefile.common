@@ -321,6 +321,7 @@ ADD_LIBRARY_FLAG := --add-library
 # Preprocessor include paths -I...
 INCLUDES ?=
 INCLUDES += -I$(PROOFDIR)
+INCLUDES += -I$(SRCDIR)/proofs/cbmc
 INCLUDES += -I$(SRCDIR)/mlkem
 INCLUDES += -I$(SRCDIR)/mlkem/fips202
 

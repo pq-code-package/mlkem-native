@@ -2,13 +2,10 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
-#include "compress.h"
+#include <keccakf1600.h>
 
 void harness(void)
 {
-  poly *a;
-  uint8_t *msg;
-
-  /* Contracts for this function are in compress.h */
-  poly_tomsg(msg, a);
+  uint64_t *s;
+  KeccakF1600x4_StatePermute(s);
 }

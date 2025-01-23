@@ -29,10 +29,10 @@ __contract__(
   requires(offset <= target && target <= 4096 && buflen <= 4096 && buflen % 3 == 0)
   requires(memory_no_alias(r, sizeof(int16_t) * target))
   requires(memory_no_alias(buf, buflen))
-  requires(offset > 0 ==> array_bound(r, 0, offset, 0, MLKEM_Q))
+  requires(array_bound(r, 0, offset, 0, MLKEM_Q))
   assigns(memory_slice(r, sizeof(int16_t) * target))
   ensures(offset <= return_value && return_value <= target)
-  ensures(return_value > 0 ==> array_bound(r, 0, return_value, 0, MLKEM_Q))
+  ensures(array_bound(r, 0, return_value, 0, MLKEM_Q))
 )
 {
   unsigned int ctr, pos;
@@ -66,7 +66,6 @@ __contract__(
   return ctr;
 }
 
-#if !defined(MLKEM_USE_NATIVE_REJ_UNIFORM)
 /*************************************************
  * Name:        rej_uniform
  *
@@ -87,7 +86,7 @@ __contract__(
  *                                     Must be a multiple of 3.
  *
  * Note: Strictly speaking, only a few values of buflen near UINT_MAX need
- * excluding. The limit of 4096 is somewhat arbitary but sufficient for all
+ * excluding. The limit of 128 is somewhat arbitary but sufficient for all
  * uses of this function. Similarly, the actual limit for target is UINT_MAX/2.
  *
  * Returns the new offset of sampled 16-bit integers, at most target,
@@ -110,33 +109,27 @@ __contract__(
   requires(offset <= target && target <= 4096 && buflen <= 4096 && buflen % 3 == 0)
   requires(memory_no_alias(r, sizeof(int16_t) * target))
   requires(memory_no_alias(buf, buflen))
-  requires(offset > 0 ==> array_bound(r, 0, offset, 0, MLKEM_Q))
+  requires(array_bound(r, 0, offset, 0, MLKEM_Q))
   assigns(memory_slice(r, sizeof(int16_t) * target))
   ensures(offset <= return_value && return_value <= target)
-  ensures(return_value > 0 ==> array_bound(r, 0, return_value, 0, MLKEM_Q))
+  ensures(array_bound(r, 0, return_value, 0, MLKEM_Q))
 )
 {
-  return rej_uniform_scalar(r, target, offset, buf, buflen);
-}
-#else  /* MLKEM_USE_NATIVE_REJ_UNIFORM */
-static unsigned int rej_uniform(int16_t *r, unsigned int target,
-                                unsigned int offset, const uint8_t *buf,
-                                unsigned int buflen)
-{
-  int ret;
-
-  /* Sample from large buffer with full lane as much as possible. */
-  ret = rej_uniform_native(r + offset, target - offset, buf, buflen);
-  if (ret != -1)
+#if defined(MLKEM_USE_NATIVE_REJ_UNIFORM)
+  if (offset == 0)
   {
-    unsigned res = offset + (unsigned)ret;
-    debug_assert_bound(r, res, 0, MLKEM_Q);
-    return res;
+    int ret = rej_uniform_native(r, target, buf, buflen);
+    if (ret != -1)
+    {
+      unsigned res = (unsigned)ret;
+      debug_assert_bound(r, res, 0, MLKEM_Q);
+      return res;
+    }
   }
+#endif /* MLKEM_USE_NATIVE_REJ_UNIFORM */
 
   return rej_uniform_scalar(r, target, offset, buf, buflen);
 }
-#endif /* MLKEM_USE_NATIVE_REJ_UNIFORM */
 
 #ifndef MLKEM_GEN_MATRIX_NBLOCKS
 #define MLKEM_GEN_MATRIX_NBLOCKS \

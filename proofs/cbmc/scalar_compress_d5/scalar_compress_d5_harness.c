@@ -8,6 +8,6 @@ void harness(void)
 {
   uint16_t u;
 
-  /* Contracts for this function are in poly.h */
+  /* Contracts for this function are in compress.h */
   uint32_t d = scalar_compress_d5(u);
 }
