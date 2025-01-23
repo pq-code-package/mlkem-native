@@ -12,6 +12,10 @@
 #include "symmetric.h"
 #include "verify.h"
 
+#ifdef ENABLE_CT_TESTING
+#include <valgrind/memcheck.h>
+#endif
+
 /* Static namespacing
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
@@ -79,6 +83,15 @@ static int check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
    * no public information is leaked through the runtime or the return value
    * of this function.
    */
+
+#ifdef ENABLE_CT_TESTING
+  /* Declassify the public part of the secret key */
+  VALGRIND_MAKE_MEM_DEFINED(sk + MLKEM_INDCPA_SECRETKEYBYTES,
+                            MLKEM_INDCCA_PUBLICKEYBYTES);
+  VALGRIND_MAKE_MEM_DEFINED(
+      sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, MLKEM_SYMBYTES);
+#endif
+
   hash_h(test, sk + MLKEM_INDCPA_SECRETKEYBYTES, MLKEM_INDCCA_PUBLICKEYBYTES);
   if (memcmp(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, test,
              MLKEM_SYMBYTES))
