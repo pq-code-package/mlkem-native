@@ -9,6 +9,6 @@ void harness(void)
   poly *a;
   uint8_t *r;
 
-  /* Contracts for this function are in poly.h */
+  /* Contracts for this function are in compress.h */
   poly_frombytes(a, r);
 }

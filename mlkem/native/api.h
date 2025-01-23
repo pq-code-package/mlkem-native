@@ -26,10 +26,16 @@
 #include "../cbmc.h"
 #include "../common.h"
 
-/* Absolute exclusive upper bound for the output of the inverse NTT */
+/* Absolute exclusive upper bound for the output of the inverse NTT
+ *
+ * NOTE: This is the same bound as in poly.h and has to be kept
+ * in sync. */
 #define INVNTT_BOUND (8 * MLKEM_Q)
 
-/* Absolute exclusive upper bound for the output of the forward NTT */
+/* Absolute exclusive upper bound for the output of the forward NTT
+ *
+ * NOTE: This is the same bound as in poly.h and has to be kept
+ * in sync. */
 #define NTT_BOUND (8 * MLKEM_Q)
 
 /*
