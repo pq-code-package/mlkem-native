@@ -319,7 +319,15 @@ __contract__(
  * len).
  **************************************************/
 static INLINE int rej_uniform_native(int16_t *r, unsigned int len,
-                                     const uint8_t *buf, unsigned int buflen);
+                                     const uint8_t *buf, unsigned int buflen)
+__contract__(
+  requires(len <= 4096 && buflen <= 4096 && buflen % 3 == 0)
+  requires(memory_no_alias(r, sizeof(int16_t) * len))
+  requires(memory_no_alias(buf, buflen))
+  assigns(memory_slice(r, sizeof(int16_t) * len))
+  ensures(return_value == -1 || (0 <= return_value && return_value <= len))
+  ensures(return_value != -1 ==> array_bound(r, 0, (unsigned) return_value, 0, MLKEM_Q))
+);
 #endif /* MLKEM_USE_NATIVE_REJ_UNIFORM */
 
 #endif /* MLKEM_NATIVE_ARITH_NATIVE_API_H */
