@@ -1089,6 +1089,11 @@
 #endif
 
 /* mlkem/fips202/fips202.h */
+#if defined(shake128_init)
+#undef shake128_init
+#endif
+
+/* mlkem/fips202/fips202.h */
 #if defined(shake128_release)
 #undef shake128_release
 #endif
@@ -1151,6 +1156,11 @@
 /* mlkem/fips202/fips202x4.h */
 #if defined(shake128x4_absorb_once)
 #undef shake128x4_absorb_once
+#endif
+
+/* mlkem/fips202/fips202x4.h */
+#if defined(shake128x4_init)
+#undef shake128x4_init
 #endif
 
 /* mlkem/fips202/fips202x4.h */
@@ -1474,6 +1484,11 @@
 #endif
 
 /* mlkem/symmetric.h */
+#if defined(xof_init)
+#undef xof_init
+#endif
+
+/* mlkem/symmetric.h */
 #if defined(xof_release)
 #undef xof_release
 #endif
@@ -1491,6 +1506,11 @@
 /* mlkem/symmetric.h */
 #if defined(xof_x4_ctx)
 #undef xof_x4_ctx
+#endif
+
+/* mlkem/symmetric.h */
+#if defined(xof_x4_init)
+#undef xof_x4_init
 #endif
 
 /* mlkem/symmetric.h */

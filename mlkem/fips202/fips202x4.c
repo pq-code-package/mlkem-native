@@ -131,6 +131,7 @@ void shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
                           SHAKE128_RATE);
 }
 
+void shake128x4_init(shake128x4ctx *state) { (void)state; }
 void shake128x4_release(shake128x4ctx *state) { (void)state; }
 
 static void shake256x4_absorb_once(shake256x4_ctx *state, const uint8_t *in0,

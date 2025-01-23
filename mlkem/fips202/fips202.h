@@ -23,24 +23,27 @@ typedef struct
   uint64_t ctx[25];
 } shake128ctx;
 
-/* Initialize the state and absorb the provided input.
- *
- * This function does not support being called multiple times
- * with the same state.
- */
 #define shake128_absorb_once MLKEM_NAMESPACE(shake128_absorb_once)
 /*************************************************
  * Name:        shake128_absorb_once
  *
- * Description: Absorb step of the SHAKE128 XOF.
- *              non-incremental, starts by zeroeing the state.
+ * Description: One-shot absorb step of the SHAKE128 XOF.
  *
- *              WARNING: Must only be called once.
+ *              For call-sites (in mlkem-native):
+ *              - This function MUST ONLY be called straight after
+ *                shake128_init().
+ *              - This function MUST ONLY be called once.
  *
- * Arguments:   - uint64_t *state:      pointer to (uninitialized) output Keccak
- *                                      state
+ *              Consequently, for providers of custom FIPS202 code
+ *              to be used with mlkem-native:
+ *              - You may assume that the input context is
+ *                freshly initialized via shake128_init().
+ *              - You may assume that this function is
+ *                called exactly once.
+ *
+ * Arguments:   - shake128ctx *state:   pointer to SHAKE128 context
  *              - const uint8_t *input: pointer to input to be absorbed into
- *                                      state
+ *                                      the state
  *              - size_t inlen:         length of input in bytes
  **************************************************/
 void shake128_absorb_once(shake128ctx *state, const uint8_t *input,
@@ -51,10 +54,6 @@ __contract__(
   assigns(memory_slice(state, sizeof(shake128ctx)))
 );
 
-/* Squeeze output out of the sponge.
- *
- * Supports being called multiple times
- */
 #define shake128_squeezeblocks MLKEM_NAMESPACE(shake128_squeezeblocks)
 /*************************************************
  * Name:        shake128_squeezeblocks
@@ -76,7 +75,9 @@ __contract__(
   assigns(memory_slice(output, nblocks * SHAKE128_RATE), memory_slice(state, sizeof(shake128ctx)))
 );
 
-/* Free the state */
+#define shake128_init MLKEM_NAMESPACE(shake128_init)
+void shake128_init(shake128ctx *state);
+
 #define shake128_release MLKEM_NAMESPACE(shake128_release)
 void shake128_release(shake128ctx *state);
 
