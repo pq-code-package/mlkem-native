@@ -12,7 +12,9 @@
 #include <valgrind/memcheck.h>
 #endif
 
+#ifndef NTESTS
 #define NTESTS 1000
+#endif
 
 static int test_keys(void)
 {
