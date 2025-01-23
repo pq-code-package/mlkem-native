@@ -11,6 +11,7 @@ import platform
 import argparse
 import os
 import sys
+import time
 import logging
 import subprocess
 import json
@@ -125,6 +126,9 @@ def config_logger(verbose):
 
 def logger(test_type, scheme, cross_prefix, opt):
     """Emit line indicating the processing of the given test"""
+
+    test_desc = str(test_type)
+
     compile_mode = "cross" if cross_prefix else "native"
     if opt is None:
         opt_label = ""
@@ -133,14 +137,14 @@ def logger(test_type, scheme, cross_prefix, opt):
     else:
         opt_label = " no_opt"
 
-    if test_type.is_example():
+    if isinstance(test_type, TEST_TYPES) and test_type.is_example():
         sz = 40
     else:
         sz = 18
 
     return logging.getLogger(
         "{0:<{1}} {2:<11} {3:<17}".format(
-            (test_type.desc()),
+            test_desc,
             sz,
             str(scheme),
             "({}{}):".format(compile_mode, opt_label),
@@ -174,6 +178,16 @@ class SCHEME(Enum):
             return "768"
         if self == SCHEME.MLKEM1024:
             return "1024"
+
+    def from_k(k):
+        if isinstance(k, str):
+            k = int(k)
+        if k == 2:
+            return SCHEME.MLKEM512
+        if k == 3:
+            return SCHEME.MLKEM768
+        if k == 4:
+            return SCHEME.MLKEM1024
 
 
 class TEST_TYPES(Enum):
@@ -215,6 +229,9 @@ class TEST_TYPES(Enum):
         raise Exception(
             f"Could not find example {s}. Examples: {list(map(lambda e: str.lower(e.name), TEST_TYPES.examples()))}"
         )
+
+    def __str__(self):
+        return self.desc()
 
     def desc(self):
         if self == TEST_TYPES.FUNC:
@@ -664,20 +681,93 @@ class Tests:
         self.check_fail()
 
     def cbmc(self):
-        def run_cbmc(mlkem_k):
+
+        def list_proofs():
+            cmd_str = ["./proofs/cbmc/list_proofs.sh"]
+            p = subprocess.run(cmd_str, capture_output=True, universal_newlines=False)
+            proofs = filter(lambda s: s.strip() != "", p.stdout.decode().split("\n"))
+            return list(proofs)
+
+        if self.args.list_functions:
+            for p in list_proofs():
+                print(p)
+            exit(0)
+
+        def run_cbmc_single_step(mlkem_k, proofs):
             envvars = {"MLKEM_K": mlkem_k}
-            p = subprocess.Popen(
-                [
-                    "python3",
-                    "run-cbmc-proofs.py",
-                    "--summarize",
-                    "--no-coverage",
-                ]
+            scheme = SCHEME.from_k(mlkem_k)
+            num_proofs = len(proofs)
+            for i, func in enumerate(proofs):
+                log = logger(f"CBMC ({i+1}/{num_proofs})", scheme, None, None)
+                log.info(f"Starting CBMC proof for {func}")
+                start = time.time()
+                if self.args.verbose is False:
+                    extra_args = {
+                        "stdout": subprocess.DEVNULL,
+                        "stderr": subprocess.DEVNULL,
+                    }
+                else:
+                    extra_args = {}
+                try:
+                    p = subprocess.run(
+                        [
+                            "python3",
+                            "run-cbmc-proofs.py",
+                            "--summarize",
+                            "--no-coverage",
+                            "-p",
+                            func,
+                        ]
+                        + self.make_j(),
+                        cwd="proofs/cbmc",
+                        env=os.environ.copy() | envvars,
+                        capture_output=True,
+                        timeout=self.args.timeout,
+                    )
+                except subprocess.TimeoutExpired:
+                    log.error(f"   TIMEOUT (after {self.args.timeout}s)")
+                    log.error(p.stderr)
+                    self.fail(f"CBMC proof for {func}")
+                    if self.args.fail_upon_error:
+                        log.error(
+                            "Aborting proofs, as requested by -f/--fail-upon-error"
+                        )
+                        exit(1)
+                    continue
+
+                end = time.time()
+                dur = int(end - start)
+                if p.returncode != 0:
+                    log.error(f"   FAILED (after {dur}s)")
+                    log.error(p.stderr.decode())
+                    self.fail(f"CBMC proof for {func}")
+                else:
+                    log.info(f"   SUCCESS (after {dur}s)")
+
+        def run_cbmc(mlkem_k):
+            proofs = list_proofs()
+            if self.args.start_with is not None:
+                try:
+                    idx = proofs.index(self.args.start_with)
+                    proofs = proofs[idx:]
+                except ValueError:
+                    log.error(
+                        "Could not find function {self.args.start_with}. Running all proofs"
+                    )
+            if self.args.proof is not None:
+                proofs = self.args.proof
+
+            if self.args.single_step:
+                run_cbmc_single_step(mlkem_k, proofs)
+                return
+            envvars = {"MLKEM_K": mlkem_k}
+            p = subprocess.run(
+                ["python3", "run-cbmc-proofs.py", "--summarize", "--no-coverage", "-p"]
+                + proofs
                 + self.make_j(),
                 cwd="proofs/cbmc",
                 env=os.environ.copy() | envvars,
             )
-            p.communicate()
 
             if p.returncode != 0:
                 self.fail(f"CBMC proofs for k={mlkem_k}")
@@ -893,6 +983,50 @@ def cli():
         choices=["2", "3", "4", "ALL"],
         type=str.upper,
         default="ALL",
+    )
+
+    cbmc_parser.add_argument(
+        "--single-step",
+        help="Run one proof a time. This is useful for debugging",
+        action="store_true",
+        default=False,
+    )
+
+    cbmc_parser.add_argument(
+        "--start-with",
+        help="When --single-step is set, start with given proof and proceed in alphabetical order",
+        default=None,
+    )
+
+    cbmc_parser.add_argument(
+        "-p",
+        "--proof",
+        nargs='+',
+        help="Space separated list of functions for which to run the CBMC proofs.",
+        default=None,
+    )
+
+    cbmc_parser.add_argument(
+        "--timeout",
+        help="Timeout for individual CBMC proofs, in seconds",
+        type=int,
+        default=3600,
+    )
+
+    cbmc_parser.add_argument(
+        "-f",
+        "--fail-upon-error",
+        help="Stop upon first CBMC proof failure",
+        action="store_true",
+        default=False,
+    )
+
+    cbmc_parser.add_argument(
+        "-l",
+        "--list-functions",
+        help="Don't run any proofs, but list all functions for which CBMC proofs are available",
+        action="store_true",
+        default=False,
     )
 
     # func arguments

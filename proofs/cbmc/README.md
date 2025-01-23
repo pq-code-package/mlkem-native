@@ -25,12 +25,12 @@ MLKEM_K={2,3,4} run-cbmc-proofs.py --summarize
 
 If `GITHUB_STEP_SUMMARY` is set, the proof summary will be appended to it.
 
+Alternatively, you can use the [tests](../../scripts/tests) script, see
+
+```
+tests cbmc --help
+```
+
 # Covered functions
 
-Each proved function has an eponymous sub-directory of its own. The shell command
-
-```
-find . -name cbmc-proof.txt
-```
-
-yields a list of the subdirectories, and thus function names, that have a proof.
+Each proved function has an eponymous sub-directory of its own. Use [list_proofs.sh](list_proofs.sh) to see the list of functions covered.
