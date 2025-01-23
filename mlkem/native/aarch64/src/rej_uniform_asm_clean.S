@@ -13,7 +13,7 @@
  *                                     16-bit coefficients.
  *              - const uint8_t *buf:  pointer to input buffer
  *                                     (assumed to be uniform random bytes)
- *              - unsigned buflen: length of input buffer in bytes.
+ *              - unsigned buflen:     length of input buffer in bytes.
  *                                     Must be a multiple of 24.
  *
  * Returns number of sampled 16-bit integers (at most MLKEM_N).

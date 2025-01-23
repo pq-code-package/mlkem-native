@@ -72,15 +72,15 @@ __contract__(
  *              uniform random integers mod q
  *
  * Arguments:   - int16_t *r:          pointer to output buffer
- *              - unsigned target: requested number of 16-bit integers
+ *              - unsigned target:     requested number of 16-bit integers
  *                                     (uniform mod q).
  *                                     Must be <= 4096.
- *              - unsigned offset: number of 16-bit integers that have
+ *              - unsigned offset:     number of 16-bit integers that have
  *                                     already been sampled.
  *                                     Must be <= target.
  *              - const uint8_t *buf:  pointer to input buffer
  *                                     (assumed to be uniform random bytes)
- *              - unsigned buflen: length of input buffer in bytes
+ *              - unsigned buflen:     length of input buffer in bytes
  *                                     Must be <= 4096.
  *                                     Must be a multiple of 3.
  *
@@ -240,7 +240,7 @@ void poly_rej_uniform(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
  *
  * Arguments:   - const uint8_t *x: pointer to input byte array
  *
- * Returns 32-bit unsignedeger loaded from x
+ * Returns 32-bit unsigned integer loaded from x
  **************************************************/
 static uint32_t load32_littleendian(const uint8_t x[4])
 {
@@ -288,7 +288,7 @@ void poly_cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
  *
  * Arguments:   - const uint8_t *x: pointer to input byte array
  *
- * Returns 32-bit unsignedeger loaded from x (most significant byte is zero)
+ * Returns 32-bit unsigned integer loaded from x (most significant byte is zero)
  **************************************************/
 static uint32_t load24_littleendian(const uint8_t x[3])
 {

@@ -164,7 +164,7 @@ __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFF)))
 
 /*
  * The ct_cmask_neg_i16 function below makes deliberate use of
- * signed to unsignedeger conversion, which is fully defined
+ * signed to unsigned integer conversion, which is fully defined
  * behaviour in C. It is thus safe to disable this warning.
  */
 #ifdef CBMC
