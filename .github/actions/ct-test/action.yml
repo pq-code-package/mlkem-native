@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+
+name: CT Test
+description: Builds the library with given flags and runs Valgrind-based constant-time tests
+
+inputs:
+  cflags:
+    description: CFLAGS to pass to compilation
+    default: ""
+
+runs:
+  using: composite
+  steps:
+      - shell: ${{ env.SHELL }}
+        run: |
+          make clean
+          tests func --exec-wrapper="valgrind --error-exitcode=1 --track-origins=yes" --cflags="-DENABLE_CT_TESTING -DNTESTS=50 ${{ inputs.cflags }}"

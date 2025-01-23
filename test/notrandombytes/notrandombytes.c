@@ -15,6 +15,10 @@
 #include <stdint.h>
 #include "../../mlkem/randombytes.h"
 
+#ifdef ENABLE_CT_TESTING
+#include <valgrind/memcheck.h>
+#endif
+
 static uint32_t seed[32] = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 8, 9, 7, 9, 3,
                             2, 3, 8, 4, 6, 2, 6, 4, 3, 3, 8, 3, 2, 7, 9, 5};
 static uint32_t in[12];
@@ -69,6 +73,11 @@ static void surf(void)
 
 void randombytes(uint8_t *buf, size_t n)
 {
+#ifdef ENABLE_CT_TESTING
+  uint8_t *buf_orig = buf;
+  size_t n_orig = n;
+#endif
+
   while (n > 0)
   {
     if (!outleft)
@@ -90,4 +99,12 @@ void randombytes(uint8_t *buf, size_t n)
     ++buf;
     --n;
   }
+
+#ifdef ENABLE_CT_TESTING
+  /*
+   * Mark all randombytes output as secret (undefined).
+   * Valgrind will propagate this to everything derived from it.
+   */
+  VALGRIND_MAKE_MEM_UNDEFINED(buf_orig, n_orig);
+#endif
 }

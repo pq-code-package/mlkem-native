@@ -8,7 +8,13 @@
 #include "../mlkem/mlkem_native.h"
 #include "../mlkem/randombytes.h"
 
+#ifdef ENABLE_CT_TESTING
+#include <valgrind/memcheck.h>
+#endif
+
+#ifndef NTESTS
 #define NTESTS 1000
+#endif
 
 static int test_keys(void)
 {
@@ -21,11 +27,22 @@ static int test_keys(void)
   /* Alice generates a public key */
   crypto_kem_keypair(pk, sk);
 
+#ifdef ENABLE_CT_TESTING
+  /* mark public key as public (=defined) */
+  VALGRIND_MAKE_MEM_DEFINED(pk, CRYPTO_PUBLICKEYBYTES);
+#endif
+
   /* Bob derives a secret key and creates a response */
   crypto_kem_enc(ct, key_b, pk);
 
   /* Alice uses Bobs response to get her shared key */
   crypto_kem_dec(key_a, ct, sk);
+
+#ifdef ENABLE_CT_TESTING
+  /* mark as defined, so we can compare */
+  VALGRIND_MAKE_MEM_DEFINED(key_a, CRYPTO_BYTES);
+  VALGRIND_MAKE_MEM_DEFINED(key_b, CRYPTO_BYTES);
+#endif
 
   if (memcmp(key_a, key_b, CRYPTO_BYTES))
   {
@@ -45,6 +62,11 @@ static int test_invalid_pk(void)
   int rc;
   /* Alice generates a public key */
   crypto_kem_keypair(pk, sk);
+
+#ifdef ENABLE_CT_TESTING
+  /* mark public key as public (=defined) */
+  VALGRIND_MAKE_MEM_DEFINED(pk, CRYPTO_PUBLICKEYBYTES);
+#endif
 
   /* Bob derives a secret key and creates a response */
   rc = crypto_kem_enc(ct, key_b, pk);
@@ -81,6 +103,11 @@ static int test_invalid_sk_a(void)
   /* Alice generates a public key */
   crypto_kem_keypair(pk, sk);
 
+#ifdef ENABLE_CT_TESTING
+  /* mark public key as public (=defined) */
+  VALGRIND_MAKE_MEM_DEFINED(pk, CRYPTO_PUBLICKEYBYTES);
+#endif
+
   /* Bob derives a secret key and creates a response */
   crypto_kem_enc(ct, key_b, pk);
 
@@ -97,6 +124,12 @@ static int test_invalid_sk_a(void)
     printf("ERROR test_invalid_sk_a\n");
     return 1;
   }
+
+#ifdef ENABLE_CT_TESTING
+  /* mark as defined, so we can compare */
+  VALGRIND_MAKE_MEM_DEFINED(key_a, CRYPTO_BYTES);
+  VALGRIND_MAKE_MEM_DEFINED(key_b, CRYPTO_BYTES);
+#endif
 
   if (!memcmp(key_a, key_b, CRYPTO_BYTES))
   {
@@ -118,6 +151,11 @@ static int test_invalid_sk_b(void)
 
   /* Alice generates a public key */
   crypto_kem_keypair(pk, sk);
+
+#ifdef ENABLE_CT_TESTING
+  /* mark public key as public (=defined) */
+  VALGRIND_MAKE_MEM_DEFINED(pk, CRYPTO_PUBLICKEYBYTES);
+#endif
 
   /* Bob derives a secret key and creates a response */
   crypto_kem_enc(ct, key_b, pk);
@@ -152,11 +190,25 @@ static int test_invalid_ciphertext(void)
   do
   {
     randombytes(&b, sizeof(uint8_t));
+
+#ifdef ENABLE_CT_TESTING
+    VALGRIND_MAKE_MEM_DEFINED(&b, sizeof(uint8_t));
+#endif
   } while (!b);
   randombytes((uint8_t *)&pos, sizeof(size_t));
 
+
+#ifdef ENABLE_CT_TESTING
+  VALGRIND_MAKE_MEM_DEFINED(&pos, sizeof(size_t));
+#endif
+
   /* Alice generates a public key */
   crypto_kem_keypair(pk, sk);
+
+#ifdef ENABLE_CT_TESTING
+  /* mark public key as public (=defined) */
+  VALGRIND_MAKE_MEM_DEFINED(pk, CRYPTO_PUBLICKEYBYTES);
+#endif
 
   /* Bob derives a secret key and creates a response */
   crypto_kem_enc(ct, key_b, pk);
@@ -166,6 +218,12 @@ static int test_invalid_ciphertext(void)
 
   /* Alice uses Bobs response to get her shared key */
   crypto_kem_dec(key_a, ct, sk);
+
+#ifdef ENABLE_CT_TESTING
+  /* mark as defined, so we can compare */
+  VALGRIND_MAKE_MEM_DEFINED(key_a, CRYPTO_BYTES);
+  VALGRIND_MAKE_MEM_DEFINED(key_b, CRYPTO_BYTES);
+#endif
 
   if (!memcmp(key_a, key_b, CRYPTO_BYTES))
   {

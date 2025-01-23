@@ -298,6 +298,9 @@ jobs:
          - name: clang-18
            shell: ci_clang18
            darwin: True
+         - name: clang-19
+           shell: ci_clang19
+           darwin: True
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -312,7 +315,6 @@ jobs:
           kat: false
           acvp: false
           nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-O1" # _FORTIFY_SOURCE requires compiling with optimization
       - name: native build+functest (C90)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
         uses: ./.github/actions/multi-functest
@@ -324,7 +326,7 @@ jobs:
           kat: false
           acvp: false
           nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-O1 -std=c90" # _FORTIFY_SOURCE requires compiling with optimization
+          cflags: "-std=c90"
       - name: native build+functest (C99)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
         uses: ./.github/actions/multi-functest
@@ -336,7 +338,7 @@ jobs:
           kat: false
           acvp: false
           nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-O1 -std=c99" # _FORTIFY_SOURCE requires compiling with optimization
+          cflags: "-std=c99"
       - name: native build+functest (C11)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
         uses: ./.github/actions/multi-functest
@@ -348,7 +350,7 @@ jobs:
           kat: false
           acvp: false
           nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-O1 -std=c11" # _FORTIFY_SOURCE requires compiling with optimization
+          cflags: "-std=c11"
       - name: native build+functest (C17)
         if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
                 matrix.compiler.c17 }}
@@ -361,7 +363,7 @@ jobs:
           kat: false
           acvp: false
           nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-O1 -std=c17" # _FORTIFY_SOURCE requires compiling with optimization
+          cflags: "-std=c17"
   # The purpose of this job is to test non-default yet valid configurations
   config_variations:
     name: Non-standard configurations
