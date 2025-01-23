@@ -19,7 +19,7 @@
 #define KeccakF1600_StateExtractBytes \
   MLKEM_NAMESPACE(KeccakF1600_StateExtractBytes)
 void KeccakF1600_StateExtractBytes(uint64_t *state, unsigned char *data,
-                                   unsigned int offset, unsigned int length)
+                                   unsigned offset, unsigned length)
 __contract__(
     requires(0 <= offset && offset <= KECCAK_LANES * sizeof(uint64_t) &&
 	     0 <= length && length <= KECCAK_LANES * sizeof(uint64_t) - offset)
@@ -30,7 +30,7 @@ __contract__(
 
 #define KeccakF1600_StateXORBytes MLKEM_NAMESPACE(KeccakF1600_StateXORBytes)
 void KeccakF1600_StateXORBytes(uint64_t *state, const unsigned char *data,
-                               unsigned int offset, unsigned int length)
+                               unsigned offset, unsigned length)
 __contract__(
     requires(0 <= offset && offset <= KECCAK_LANES * sizeof(uint64_t) &&
 	     0 <= length && length <= KECCAK_LANES * sizeof(uint64_t) - offset)
@@ -43,8 +43,8 @@ __contract__(
   MLKEM_NAMESPACE(KeccakF1600x4_StateExtractBytes)
 void KeccakF1600x4_StateExtractBytes(uint64_t *state, unsigned char *data0,
                                      unsigned char *data1, unsigned char *data2,
-                                     unsigned char *data3, unsigned int offset,
-                                     unsigned int length)
+                                     unsigned char *data3, unsigned offset,
+                                     unsigned length)
 __contract__(
     requires(0 <= offset && offset <= KECCAK_LANES * sizeof(uint64_t) &&
 	     0 <= length && length <= KECCAK_LANES * sizeof(uint64_t) - offset)
@@ -63,8 +63,8 @@ __contract__(
 void KeccakF1600x4_StateXORBytes(uint64_t *state, const unsigned char *data0,
                                  const unsigned char *data1,
                                  const unsigned char *data2,
-                                 const unsigned char *data3,
-                                 unsigned int offset, unsigned int length)
+                                 const unsigned char *data3, unsigned offset,
+                                 unsigned length)
 __contract__(
     requires(0 <= offset && offset <= KECCAK_LANES * sizeof(uint64_t) &&
 	     0 <= length && length <= KECCAK_LANES * sizeof(uint64_t) - offset)

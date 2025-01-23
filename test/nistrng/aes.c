@@ -348,9 +348,9 @@ static uint32_t sub_word(uint32_t x)
 }
 
 static void br_aes_ct64_keysched(uint64_t *comp_skey, const unsigned char *key,
-                                 unsigned int key_len)
+                                 unsigned key_len)
 {
-  unsigned int i, j, k, nk, nkf;
+  unsigned i, j, k, nk, nkf;
   uint32_t tmp;
   uint32_t skey[60];
   unsigned nrounds = 10 + ((key_len - 16) >> 2);
@@ -403,7 +403,7 @@ static void br_aes_ct64_keysched(uint64_t *comp_skey, const unsigned char *key,
 }
 
 static void br_aes_ct64_skey_expand(uint64_t *skey, const uint64_t *comp_skey,
-                                    unsigned int nrounds)
+                                    unsigned nrounds)
 {
   unsigned u, v, n;
 
@@ -499,11 +499,11 @@ static void inc4_be(uint32_t *x)
 }
 
 static void aes_ecb4x(unsigned char out[64], const uint32_t ivw[16],
-                      const uint64_t *sk_exp, unsigned int nrounds)
+                      const uint64_t *sk_exp, unsigned nrounds)
 {
   uint32_t w[16];
   uint64_t q[8];
-  unsigned int i;
+  unsigned i;
 
   memcpy(w, ivw, sizeof(w));
   for (i = 0; i < 4; i++)
@@ -533,7 +533,7 @@ static void aes_ecb4x(unsigned char out[64], const uint32_t ivw[16],
 }
 
 static void aes_ctr4x(unsigned char out[64], uint32_t ivw[16],
-                      const uint64_t *sk_exp, unsigned int nrounds)
+                      const uint64_t *sk_exp, unsigned nrounds)
 {
   aes_ecb4x(out, ivw, sk_exp, nrounds);
 
@@ -545,7 +545,7 @@ static void aes_ctr4x(unsigned char out[64], uint32_t ivw[16],
 }
 
 static void aes_ecb(unsigned char *out, const unsigned char *in, size_t nblocks,
-                    const uint64_t *rkeys, unsigned int nrounds)
+                    const uint64_t *rkeys, unsigned nrounds)
 {
   uint32_t blocks[16];
   unsigned char t[64];
@@ -568,7 +568,7 @@ static void aes_ecb(unsigned char *out, const unsigned char *in, size_t nblocks,
 }
 
 static void aes_ctr(unsigned char *out, size_t outlen, const unsigned char *iv,
-                    const uint64_t *rkeys, unsigned int nrounds)
+                    const uint64_t *rkeys, unsigned nrounds)
 {
   uint32_t ivw[16];
   size_t i;

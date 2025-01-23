@@ -32,8 +32,8 @@ static INLINE void poly_permute_bitrev_to_custom(int16_t data[MLKEM_N])
   nttunpack_avx2((__m256i *)(data), qdata.vec);
 }
 
-static INLINE int rej_uniform_native(int16_t *r, unsigned int len,
-                                     const uint8_t *buf, unsigned int buflen)
+static INLINE int rej_uniform_native(int16_t *r, unsigned len,
+                                     const uint8_t *buf, unsigned buflen)
 {
   /* AVX2 implementation assumes specific buffer lengths */
   if (len != MLKEM_N || buflen != REJ_UNIFORM_AVX_BUFLEN)

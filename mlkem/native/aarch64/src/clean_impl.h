@@ -64,8 +64,8 @@ static INLINE void poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
   poly_tobytes_asm_clean(r, a);
 }
 
-static INLINE int rej_uniform_native(int16_t *r, unsigned int len,
-                                     const uint8_t *buf, unsigned int buflen)
+static INLINE int rej_uniform_native(int16_t *r, unsigned len,
+                                     const uint8_t *buf, unsigned buflen)
 {
   if (len != MLKEM_N || buflen % 24 != 0)
   {

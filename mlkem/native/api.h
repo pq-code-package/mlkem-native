@@ -314,18 +314,18 @@ __contract__(
  *              uniform random integers mod q
  *
  * Arguments:   - int16_t *r:          pointer to output buffer
- *              - unsigned int len:    requested number of 16-bit integers
+ *              - unsigned len:        requested number of 16-bit integers
  *                                     (uniform mod q).
  *              - const uint8_t *buf:  pointer to input buffer
  *                                     (assumed to be uniform random bytes)
- *              - unsigned int buflen: length of input buffer in bytes.
+ *              - unsigned buflen:     length of input buffer in bytes.
  *
  * Return -1 if the native implementation does not support the input lengths.
  * Otherwise, returns non-negative number of sampled 16-bit integers (at most
  * len).
  **************************************************/
-static INLINE int rej_uniform_native(int16_t *r, unsigned int len,
-                                     const uint8_t *buf, unsigned int buflen)
+static INLINE int rej_uniform_native(int16_t *r, unsigned len,
+                                     const uint8_t *buf, unsigned buflen)
 __contract__(
   requires(len <= 4096 && buflen <= 4096 && buflen % 3 == 0)
   requires(memory_no_alias(r, sizeof(int16_t) * len))

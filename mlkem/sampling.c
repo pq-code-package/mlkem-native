@@ -22,9 +22,8 @@
 #define load24_littleendian MLKEM_NAMESPACE(load24_littleendian)
 /* End of static namespacing */
 
-static unsigned int rej_uniform_scalar(int16_t *r, unsigned int target,
-                                       unsigned int offset, const uint8_t *buf,
-                                       unsigned int buflen)
+static unsigned rej_uniform_scalar(int16_t *r, unsigned target, unsigned offset,
+                                   const uint8_t *buf, unsigned buflen)
 __contract__(
   requires(offset <= target && target <= 4096 && buflen <= 4096 && buflen % 3 == 0)
   requires(memory_no_alias(r, sizeof(int16_t) * target))
@@ -35,7 +34,7 @@ __contract__(
   ensures(array_bound(r, 0, return_value, 0, MLKEM_Q))
 )
 {
-  unsigned int ctr, pos;
+  unsigned ctr, pos;
   uint16_t val0, val1;
 
   debug_assert_bound(r, offset, 0, MLKEM_Q);
@@ -73,15 +72,15 @@ __contract__(
  *              uniform random integers mod q
  *
  * Arguments:   - int16_t *r:          pointer to output buffer
- *              - unsigned int target: requested number of 16-bit integers
+ *              - unsigned target:     requested number of 16-bit integers
  *                                     (uniform mod q).
  *                                     Must be <= 4096.
- *              - unsigned int offset: number of 16-bit integers that have
+ *              - unsigned offset:     number of 16-bit integers that have
  *                                     already been sampled.
  *                                     Must be <= target.
  *              - const uint8_t *buf:  pointer to input buffer
  *                                     (assumed to be uniform random bytes)
- *              - unsigned int buflen: length of input buffer in bytes
+ *              - unsigned buflen:     length of input buffer in bytes
  *                                     Must be <= 4096.
  *                                     Must be a multiple of 3.
  *
@@ -102,9 +101,8 @@ __contract__(
  * buffer. This avoids shifting the buffer base in the caller, which appears
  * tricky to reason about.
  */
-static unsigned int rej_uniform(int16_t *r, unsigned int target,
-                                unsigned int offset, const uint8_t *buf,
-                                unsigned int buflen)
+static unsigned rej_uniform(int16_t *r, unsigned target, unsigned offset,
+                            const uint8_t *buf, unsigned buflen)
 __contract__(
   requires(offset <= target && target <= 4096 && buflen <= 4096 && buflen % 3 == 0)
   requires(memory_no_alias(r, sizeof(int16_t) * target))
@@ -146,9 +144,9 @@ void poly_rej_uniform_x4(poly *vec, uint8_t *seed[4])
   uint8_t buf3[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
 
   /* Tracks the number of coefficients we have already sampled */
-  unsigned int ctr[KECCAK_WAY];
+  unsigned ctr[KECCAK_WAY];
   xof_x4_ctx statex;
-  unsigned int buflen;
+  unsigned buflen;
 
   /* seed is MLKEM_SYMBYTES + 2 bytes long, but padded to MLKEM_SYMBYTES + 16 */
   xof_x4_init(&statex);
@@ -199,7 +197,7 @@ void poly_rej_uniform(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
 {
   xof_ctx state;
   uint8_t buf[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
-  unsigned int ctr, buflen;
+  unsigned ctr, buflen;
 
   xof_init(&state);
   xof_absorb(&state, seed, MLKEM_SYMBYTES + 2);

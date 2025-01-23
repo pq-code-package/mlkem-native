@@ -167,7 +167,7 @@ uint64_t get_cyclecounter(void)
   F(uint32_t, kpc_get_counter_count, uint32_t) \
   F(uint32_t, kpc_get_config_count, uint32_t)  \
   F(int, kperf_sample_get, int *)              \
-  F(int, kpc_get_thread_counters, int, unsigned int, void *)
+  F(int, kpc_get_thread_counters, int, unsigned, void *)
 
 #define F(ret, name, ...)              \
   typedef ret name##proc(__VA_ARGS__); \

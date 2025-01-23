@@ -23,7 +23,7 @@ static void print_hex(const char *label, const uint8_t *data, size_t size)
 
 int main(void)
 {
-  unsigned int i;
+  unsigned i;
   ALIGN uint8_t coins[3 * CRYPTO_SYMBYTES];
   ALIGN uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   ALIGN uint8_t sk[CRYPTO_SECRETKEYBYTES];
