@@ -110,7 +110,7 @@ static INLINE uint16_t scalar_decompress_d4(uint32_t u)
 __contract__(
   requires(0 <= u && u < 16)
   ensures(return_value <= (MLKEM_Q - 1))
-) { return ((u * MLKEM_Q) + 8) / 16; }
+) { return ((u * MLKEM_Q) + 8) >> 4; }
 
 /************************************************************
  * Name: scalar_compress_d5
@@ -159,7 +159,7 @@ static INLINE uint16_t scalar_decompress_d5(uint32_t u)
 __contract__(
   requires(0 <= u && u < 32)
   ensures(return_value <= MLKEM_Q - 1)
-) { return ((u * MLKEM_Q) + 16) / 32; }
+) { return ((u * MLKEM_Q) + 16) >> 5; }
 
 /************************************************************
  * Name: scalar_compress_d10
@@ -209,7 +209,7 @@ static INLINE uint16_t scalar_decompress_d10(uint32_t u)
 __contract__(
   requires(0 <= u && u < 1024)
   ensures(return_value <= (MLKEM_Q - 1))
-) { return ((u * MLKEM_Q) + 512) / 1024; }
+) { return ((u * MLKEM_Q) + 512) >> 10; }
 
 /************************************************************
  * Name: scalar_compress_d11
@@ -259,7 +259,7 @@ static INLINE uint16_t scalar_decompress_d11(uint32_t u)
 __contract__(
   requires(0 <= u && u < 2048)
   ensures(return_value <= (MLKEM_Q - 1))
-) { return ((u * MLKEM_Q) + 1024) / 2048; }
+) { return ((u * MLKEM_Q) + 1024) >> 11; }
 
 #if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || \
     (MLKEM_K == 2 || MLKEM_K == 3)
