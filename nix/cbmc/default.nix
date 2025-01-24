@@ -16,10 +16,10 @@ buildEnv {
       cbmc = cbmc.overrideAttrs (old: rec {
         version = "d4757e2231b236ddd1d1933b4002a5aa4ca36db9"; # remember to adjust this in ../flake.nix too
         src = fetchFromGitHub {
-          owner = "diffblue";
+          owner = "remi-delmas-3000";
           repo = old.pname;
-          rev = "d4757e2231b236ddd1d1933b4002a5aa4ca36db9";
-          hash = "sha256-o0aiTm+HZXtzBQ94kfymkR5FHhARZvwWRjCk1p2U/P0";
+          rev = "contracts-predicates-units-no-fail";
+          hash = "sha256-63DdStiwIFAcjnN7MTqh+miCyrzBNnfCPZAt0ODQfk4";
         };
         patches = [
           ./0001-Do-not-download-sources-in-cmake.patch
