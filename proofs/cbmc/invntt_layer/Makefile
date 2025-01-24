@@ -27,6 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
+CBMCFLAGS += --no-array-field-sensitivity --arrays-uf-always --slice-formula
 FUNCTION_NAME = invntt_layer
 
 # If this proof is found to consume huge amounts of RAM, you can set the
