@@ -46,6 +46,7 @@ __contract__(
  *
  * Returns 0 on success, and -1 on failure
  **************************************************/
+__attribute__((unused))
 static int check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 {
   polyvec p;
@@ -75,6 +76,7 @@ static int check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
  *
  * Returns 0 on success, and -1 on failure
  **************************************************/
+__attribute__((unused))
 static int check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
   ALIGN uint8_t test[MLKEM_SYMBYTES];
@@ -133,10 +135,12 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   /* Will contain key, coins */
   ALIGN uint8_t kr[2 * MLKEM_SYMBYTES];
 
+#if defined(INPUT_VALIDATION)
   if (check_pk(pk))
   {
     return -1;
   }
+#endif
 
   memcpy(buf, coins, MLKEM_SYMBYTES);
 
@@ -170,10 +174,12 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   ALIGN uint8_t kr[2 * MLKEM_SYMBYTES];
   const uint8_t *pk = sk + MLKEM_INDCPA_SECRETKEYBYTES;
 
+#if defined(INPUT_VALIDATION)
   if (check_sk(sk))
   {
     return -1;
   }
+#endif
 
   indcpa_dec(buf, ct, sk);
 
