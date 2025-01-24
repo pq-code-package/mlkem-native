@@ -336,4 +336,39 @@ __contract__(
 );
 #endif /* MLKEM_USE_NATIVE_REJ_UNIFORM */
 
+#if defined(MLKEM_USE_NATIVE_POLYVEC_COMPRESS_DU)
+/*************************************************
+ * Name:        polyvec_compress_native
+ *
+ * Description: Compress and serialize vector of polynomials
+ *
+ * Arguments:   - uint8_t *r: pointer to output byte array
+ *                            (needs space for MLKEM_POLYVECCOMPRESSEDBYTES)
+ *              - const int16_t *a: pointer to input vector of polynomials.
+ *                                  Coefficients must be unsigned canonical,
+ *                                  i.e. in [0,1,..,MLKEM_Q-1].
+ **************************************************/
+static INLINE void polyvec_compress_du_native(
+    uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
+    const int16_t a[MLKEM_K * MLKEM_N]);
+#endif /* MLKEM_USE_NATIVE_POLYVEC_COMPRESS_DU */
+
+#if defined(MLKEM_USE_NATIVE_POLYVEC_DECOMPRESS_DU)
+/*************************************************
+ * Name:        polyvec_decompress_native
+ *
+ * Description: De-serialize and decompress vector of polynomials;
+ *              approximate inverse of polyvec_compress
+ *
+ * Arguments:   - int16_t *r:       pointer to output vector of polynomials.
+ *                Output will have coefficients normalized to [0,..,q-1].
+ *              - const uint8_t *a: pointer to input byte array
+ *                                  (of length MLKEM_POLYVECCOMPRESSEDBYTES)
+ **************************************************/
+static INLINE void polyvec_decompress_du_native(
+    int16_t r[MLKEM_K * MLKEM_N],
+    const uint8_t a[MLKEM_POLYVECCOMPRESSEDBYTES_DU]);
+
+#endif /* MLKEM_USE_NATIVE_POLYVEC_DECOMPRESS_DU */
+
 #endif /* MLKEM_NATIVE_ARITH_NATIVE_API_H */

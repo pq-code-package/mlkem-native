@@ -20,6 +20,7 @@
 #define poly_cbd_eta2 MLKEM_NAMESPACE_K(poly_cbd_eta2)
 /* End of static namespacing */
 
+#if !defined(MLKEM_USE_NATIVE_POLYVEC_COMPRESS_DU)
 MLKEM_NATIVE_INTERNAL_API
 void polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                          const polyvec *a)
@@ -32,7 +33,17 @@ void polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
     poly_compress_du(r + i * MLKEM_POLYCOMPRESSEDBYTES_DU, &a->vec[i]);
   }
 }
+#else  /* MLKEM_USE_NATIVE_POLYVEC_COMPRESS_DU */
+MLKEM_NATIVE_INTERNAL_API
+void polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
+                         const polyvec *a)
+{
+  debug_assert_bound_2d(a, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
+  polyvec_compress_du_native(r, (const int16_t *)a);
+}
+#endif /* MLKEM_USE_NATIVE_POLYVEC_COMPRESS_DU */
 
+#if !defined(MLKEM_USE_NATIVE_POLYVEC_DECOMPRESS_DU)
 MLKEM_NATIVE_INTERNAL_API
 void polyvec_decompress_du(polyvec *r,
                            const uint8_t a[MLKEM_POLYVECCOMPRESSEDBYTES_DU])
@@ -45,6 +56,15 @@ void polyvec_decompress_du(polyvec *r,
 
   debug_assert_bound_2d(r, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
 }
+#else  /* MLKEM_USE_NATIVE_POLYVEC_DECOMPRESS_DU */
+MLKEM_NATIVE_INTERNAL_API
+void polyvec_decompress_du(polyvec *r,
+                           const uint8_t a[MLKEM_POLYVECCOMPRESSEDBYTES_DU])
+{
+  polyvec_decompress_du_native((int16_t *)r, a);
+  debug_assert_bound_2d(r, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
+}
+#endif /* MLKEM_USE_NATIVE_POLYVEC_DECOMPRESS_DU */
 
 MLKEM_NATIVE_INTERNAL_API
 void polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const polyvec *a)

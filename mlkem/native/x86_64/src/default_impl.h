@@ -26,6 +26,8 @@
 #define MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE
 #define MLKEM_USE_NATIVE_POLY_TOBYTES
 #define MLKEM_USE_NATIVE_POLY_FROMBYTES
+#define MLKEM_USE_NATIVE_POLYVEC_COMPRESS_DU
+#define MLKEM_USE_NATIVE_POLYVEC_DECOMPRESS_DU
 
 static INLINE void poly_permute_bitrev_to_custom(int16_t data[MLKEM_N])
 {
@@ -90,6 +92,20 @@ static INLINE void poly_frombytes_native(int16_t r[MLKEM_N],
                                          const uint8_t a[MLKEM_POLYBYTES])
 {
   nttfrombytes_avx2((__m256i *)r, a, qdata.vec);
+}
+
+static INLINE void polyvec_compress_du_native(
+    uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
+    const int16_t a[MLKEM_K * MLKEM_N])
+{
+  polyvec_compress_du_avx2(r, a);
+}
+
+static INLINE void polyvec_decompress_du_native(
+    int16_t r[MLKEM_K * MLKEM_N],
+    const uint8_t a[MLKEM_POLYVECCOMPRESSEDBYTES_DU])
+{
+  polyvec_decompress_du_avx2(r, a);
 }
 
 #endif /* MLKEM_NATIVE_ARITH_PROFILE_IMPL_H */

@@ -56,4 +56,13 @@ void nttfrombytes_avx2(__m256i *r, const uint8_t *a, const __m256i *qdata);
 #define tomont_avx2 MLKEM_NAMESPACE(tomont_avx2)
 void tomont_avx2(__m256i *r, const __m256i *qdata);
 
+#define polyvec_compress_du_avx2 MLKEM_NAMESPACE(polyvec_compress_du_avx2)
+void polyvec_compress_du_avx2(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
+                              const int16_t a[MLKEM_K * MLKEM_N]);
+
+#define polyvec_decompress_du_avx2 MLKEM_NAMESPACE(polyvec_decompress_du_avx2)
+void polyvec_decompress_du_avx2(
+    int16_t r[MLKEM_N * MLKEM_K],
+    const uint8_t a[MLKEM_POLYVECCOMPRESSEDBYTES_DU]);
+
 #endif /* MLKEM_X86_64_NATIVE_H */
