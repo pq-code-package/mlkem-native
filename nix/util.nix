@@ -85,4 +85,5 @@ rec {
     };
 
   cbmc = pkgs.callPackage ./cbmc { inherit bitwuzla; };
+  valgrind-varlat = pkgs.callPackage ./valgrind { };
 }

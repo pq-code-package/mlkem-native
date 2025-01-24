@@ -7,6 +7,9 @@ inputs:
   cflags:
     description: CFLAGS to pass to compilation
     default: ""
+  valgrind_flags:
+    description: Extra flags to pass to valgrind
+    default: ""
 
 runs:
   using: composite
@@ -14,4 +17,4 @@ runs:
       - shell: ${{ env.SHELL }}
         run: |
           make clean
-          tests func --exec-wrapper="valgrind --error-exitcode=1 --track-origins=yes" --cflags="-DENABLE_CT_TESTING -DNTESTS=50 ${{ inputs.cflags }}"
+          tests func --exec-wrapper="valgrind --error-exitcode=1 --track-origins=yes ${{ inputs.valgrind_flags }}" --cflags="-DENABLE_CT_TESTING -DNTESTS=50 ${{ inputs.cflags }}"
