@@ -1001,7 +1001,7 @@ def cli():
     cbmc_parser.add_argument(
         "-p",
         "--proof",
-        nargs='+',
+        nargs="+",
         help="Space separated list of functions for which to run the CBMC proofs.",
         default=None,
     )
