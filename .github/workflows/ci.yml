@@ -370,21 +370,6 @@ jobs:
           acvp: false
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c17"
-  # The purpose of this job is to test non-default yet valid configurations
-  hol_light_proofs:
-    name: hol-light proofs
-    runs-on: pqcp-arm64
-    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
-    needs: [quickcheck, quickcheck-windows, quickcheck-c90, quickcheck-lib, examples, lint, lint-markdown-link]
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: ./.github/actions/setup-shell
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          nix-shell: 'hol_light'
-          script: |
-            make -C proofs/hol_light/arm p256/bignum_montmul_p256.correct
-
   config_variations:
     name: Non-standard configurations
     needs: [quickcheck, quickcheck-windows, quickcheck-c90, quickcheck-lib, examples, lint, lint-markdown-link]
