@@ -251,7 +251,8 @@ __contract__(
 }
 
 MLKEM_NATIVE_INTERNAL_API
-void poly_basemul_montgomery_cached(poly *r, const poly *a, const poly *b,
+void poly_basemul_montgomery_cached(poly *RESTRICT r, const poly *RESTRICT a,
+                                    const poly *RESTRICT b,
                                     const poly_mulcache *b_cache)
 {
   unsigned i;
@@ -359,7 +360,7 @@ void poly_reduce(poly *r)
 #endif /* MLKEM_USE_NATIVE_POLY_REDUCE */
 
 MLKEM_NATIVE_INTERNAL_API
-void poly_add(poly *r, const poly *b)
+void poly_add(poly *RESTRICT r, const poly *RESTRICT b)
 {
   unsigned i;
   for (i = 0; i < MLKEM_N; i++)
@@ -373,7 +374,7 @@ void poly_add(poly *r, const poly *b)
 }
 
 MLKEM_NATIVE_INTERNAL_API
-void poly_sub(poly *r, const poly *b)
+void poly_sub(poly *RESTRICT r, const poly *RESTRICT b)
 {
   unsigned i;
   for (i = 0; i < MLKEM_N; i++)
@@ -388,7 +389,7 @@ void poly_sub(poly *r, const poly *b)
 
 #if !defined(MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE)
 MLKEM_NATIVE_INTERNAL_API
-void poly_mulcache_compute(poly_mulcache *x, const poly *a)
+void poly_mulcache_compute(poly_mulcache *RESTRICT x, const poly *RESTRICT a)
 {
   unsigned i;
   for (i = 0; i < MLKEM_N / 4; i++)
@@ -410,7 +411,7 @@ void poly_mulcache_compute(poly_mulcache *x, const poly *a)
 }
 #else  /* MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE */
 MLKEM_NATIVE_INTERNAL_API
-void poly_mulcache_compute(poly_mulcache *x, const poly *a)
+void poly_mulcache_compute(poly_mulcache *RESTRICT x, const poly *RESTRICT a)
 {
   poly_mulcache_compute_native(x->coeffs, a->coeffs);
   /* Omitting bounds assertion since native implementations may

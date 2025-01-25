@@ -23,7 +23,7 @@
  *              - const uint8_t *buf: pointer to input byte array
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4]);
+void poly_cbd2(poly *RESTRICT r, const uint8_t buf[RESTRICT 2 * MLKEM_N / 4]);
 
 #if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_ETA1 == 3
 #define poly_cbd3 MLKEM_NAMESPACE(poly_cbd3)
@@ -39,7 +39,7 @@ void poly_cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4]);
  *              - const uint8_t *buf: pointer to input byte array
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4]);
+void poly_cbd3(poly *RESTRICT r, const uint8_t buf[RESTRICT 3 * MLKEM_N / 4]);
 #endif /* MLKEM_NATIVE_MULTILEVEL_BUILD || MLKEM_ETA1 == 3 */
 
 #define poly_rej_uniform_x4 MLKEM_NAMESPACE(poly_rej_uniform_x4)
@@ -57,7 +57,7 @@ void poly_cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4]);
  *
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_rej_uniform_x4(poly *vec, uint8_t *seed[4])
+void poly_rej_uniform_x4(poly *RESTRICT vec, uint8_t *seed[4])
 __contract__(
   requires(memory_no_alias(vec, sizeof(poly) * 4))
   requires(memory_no_alias(seed, sizeof(uint8_t*) * 4))
@@ -84,7 +84,8 @@ __contract__(
  *
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_rej_uniform(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
+void poly_rej_uniform(poly *RESTRICT entry,
+                      uint8_t seed[RESTRICT MLKEM_SYMBYTES + 2])
 __contract__(
   requires(memory_no_alias(entry, sizeof(poly)))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES + 2))

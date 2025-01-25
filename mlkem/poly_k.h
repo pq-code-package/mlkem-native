@@ -35,8 +35,8 @@ typedef struct
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
-static INLINE void poly_compress_du(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DU],
-                                    const poly *a)
+static INLINE void poly_compress_du(
+    uint8_t r[RESTRICT MLKEM_POLYCOMPRESSEDBYTES_DU], const poly *RESTRICT a)
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(a, sizeof(poly)))
@@ -68,7 +68,7 @@ __contract__(
  *
  **************************************************/
 static INLINE void poly_decompress_du(
-    poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DU])
+    poly *RESTRICT r, const uint8_t a[RESTRICT MLKEM_POLYCOMPRESSEDBYTES_DU])
 __contract__(
   requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(r, sizeof(poly)))
@@ -97,8 +97,8 @@ __contract__(
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
-static INLINE void poly_compress_dv(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DV],
-                                    const poly *a)
+static INLINE void poly_compress_dv(
+    uint8_t r[RESTRICT MLKEM_POLYCOMPRESSEDBYTES_DV], const poly *RESTRICT a)
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_DV))
   requires(memory_no_alias(a, sizeof(poly)))
@@ -131,7 +131,7 @@ __contract__(
  *
  **************************************************/
 static INLINE void poly_decompress_dv(
-    poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DV])
+    poly *RESTRICT r, const uint8_t a[RESTRICT MLKEM_POLYCOMPRESSEDBYTES_DV])
 __contract__(
   requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_DV))
   requires(memory_no_alias(r, sizeof(poly)))
@@ -160,8 +160,8 @@ __contract__(
  *                                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
-                         const polyvec *a)
+void polyvec_compress_du(uint8_t r[RESTRICT MLKEM_POLYVECCOMPRESSEDBYTES_DU],
+                         const polyvec *RESTRICT a)
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(a, sizeof(polyvec)))
@@ -183,8 +183,9 @@ __contract__(
  *                                  (of length MLKEM_POLYVECCOMPRESSEDBYTES_DU)
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void polyvec_decompress_du(polyvec *r,
-                           const uint8_t a[MLKEM_POLYVECCOMPRESSEDBYTES_DU])
+void polyvec_decompress_du(
+    polyvec *RESTRICT r,
+    const uint8_t a[RESTRICT MLKEM_POLYVECCOMPRESSEDBYTES_DU])
 __contract__(
   requires(memory_no_alias(a, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(r, sizeof(polyvec)))
@@ -205,7 +206,8 @@ __contract__(
  *                  Each polynomial must have coefficients in [0,..,q-1].
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const polyvec *a)
+void polyvec_tobytes(uint8_t r[RESTRICT MLKEM_POLYVECBYTES],
+                     const polyvec *RESTRICT a)
 __contract__(
   requires(memory_no_alias(a, sizeof(polyvec)))
   requires(memory_no_alias(r, MLKEM_POLYVECBYTES))
@@ -227,7 +229,8 @@ __contract__(
  *              - uint8_t *r: pointer to input byte array
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void polyvec_frombytes(polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+void polyvec_frombytes(polyvec *RESTRICT r,
+                       const uint8_t a[RESTRICT MLKEM_POLYVECBYTES])
 __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
   requires(memory_no_alias(a, MLKEM_POLYVECBYTES))
@@ -300,7 +303,8 @@ __contract__(
  *            - const polyvec *b: pointer to second input vector of polynomials
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyvec *b)
+void polyvec_basemul_acc_montgomery(poly *RESTRICT r, const polyvec *RESTRICT a,
+                                    const polyvec *RESTRICT b)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   requires(memory_no_alias(a, sizeof(polyvec)))
@@ -331,9 +335,9 @@ __contract__(
  *                  via polyvec_mulcache_compute().
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
-                                           const polyvec *b,
-                                           const polyvec_mulcache *b_cache)
+void polyvec_basemul_acc_montgomery_cached(
+    poly *RESTRICT r, const polyvec *RESTRICT a, const polyvec *RESTRICT b,
+    const polyvec_mulcache *RESTRICT b_cache)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   requires(memory_no_alias(a, sizeof(polyvec)))
@@ -371,7 +375,8 @@ __contract__(
  * higher level safety proofs, and thus not part of the spec.
  */
 MLKEM_NATIVE_INTERNAL_API
-void polyvec_mulcache_compute(polyvec_mulcache *x, const polyvec *a)
+void polyvec_mulcache_compute(polyvec_mulcache *RESTRICT x,
+                              const polyvec *RESTRICT a)
 __contract__(
   requires(memory_no_alias(x, sizeof(polyvec_mulcache)))
   requires(memory_no_alias(a, sizeof(polyvec)))
@@ -422,7 +427,7 @@ __contract__(
  * ensures clause is required on this function.
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void polyvec_add(polyvec *r, const polyvec *b)
+void polyvec_add(polyvec *RESTRICT r, const polyvec *RESTRICT b)
 __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
   requires(memory_no_alias(b, sizeof(polyvec)))
@@ -469,9 +474,11 @@ __contract__(
  *              - uint8_t nonce{0,1,2,3}: one-byte input nonce
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_getnoise_eta1_4x(poly *r0, poly *r1, poly *r2, poly *r3,
-                           const uint8_t seed[MLKEM_SYMBYTES], uint8_t nonce0,
-                           uint8_t nonce1, uint8_t nonce2, uint8_t nonce3)
+void poly_getnoise_eta1_4x(poly *RESTRICT r0, poly *RESTRICT r1,
+                           poly *RESTRICT r2, poly *RESTRICT r3,
+                           const uint8_t seed[RESTRICT MLKEM_SYMBYTES],
+                           uint8_t nonce0, uint8_t nonce1, uint8_t nonce2,
+                           uint8_t nonce3)
 /* Depending on MLKEM_K, the pointers passed to this function belong
    to the same objects, so we cannot use memory_no_alias for r0-r3.
 
@@ -551,7 +558,8 @@ __contract__(
  *              - uint8_t nonce: one-byte input nonce
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_getnoise_eta2(poly *r, const uint8_t seed[MLKEM_SYMBYTES],
+void poly_getnoise_eta2(poly *RESTRICT r,
+                        const uint8_t seed[RESTRICT MLKEM_SYMBYTES],
                         uint8_t nonce)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
@@ -576,8 +584,9 @@ __contract__(
  *              - uint8_t nonce{0,1,2,3}: one-byte input nonce
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_getnoise_eta1122_4x(poly *r0, poly *r1, poly *r2, poly *r3,
-                              const uint8_t seed[MLKEM_SYMBYTES],
+void poly_getnoise_eta1122_4x(poly *RESTRICT r0, poly *RESTRICT r1,
+                              poly *RESTRICT r2, poly *RESTRICT r3,
+                              const uint8_t seed[RESTRICT MLKEM_SYMBYTES],
                               uint8_t nonce0, uint8_t nonce1, uint8_t nonce2,
                               uint8_t nonce3)
 __contract__(

@@ -62,8 +62,9 @@ typedef struct
  *                  via poly_mulcache_compute().
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_basemul_montgomery_cached(poly *r, const poly *a, const poly *b,
-                                    const poly_mulcache *b_cache)
+void poly_basemul_montgomery_cached(poly *RESTRICT r, const poly *RESTRICT a,
+                                    const poly *RESTRICT b,
+                                    const poly_mulcache *RESTRICT b_cache)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   requires(memory_no_alias(a, sizeof(poly)))
@@ -117,7 +118,7 @@ __contract__(
  * higher level safety proofs, and thus not part of the spec.
  */
 MLKEM_NATIVE_INTERNAL_API
-void poly_mulcache_compute(poly_mulcache *x, const poly *a)
+void poly_mulcache_compute(poly_mulcache *RESTRICT x, const poly *RESTRICT a)
 __contract__(
   requires(memory_no_alias(x, sizeof(poly_mulcache)))
   requires(memory_no_alias(a, sizeof(poly)))
@@ -169,7 +170,7 @@ __contract__(
  * We specialize to the accumulator form to avoid reasoning about aliasing.
  */
 MLKEM_NATIVE_INTERNAL_API
-void poly_add(poly *r, const poly *b)
+void poly_add(poly *RESTRICT r, const poly *RESTRICT b)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   requires(memory_no_alias(b, sizeof(poly)))
@@ -194,7 +195,7 @@ __contract__(
  * We specialize to the accumulator form to avoid reasoning about aliasing.
  */
 MLKEM_NATIVE_INTERNAL_API
-void poly_sub(poly *r, const poly *b)
+void poly_sub(poly *RESTRICT r, const poly *RESTRICT b)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   requires(memory_no_alias(b, sizeof(poly)))

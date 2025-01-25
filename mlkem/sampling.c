@@ -22,8 +22,9 @@
 #define load24_littleendian MLKEM_NAMESPACE(load24_littleendian)
 /* End of static namespacing */
 
-static unsigned rej_uniform_scalar(int16_t *r, unsigned target, unsigned offset,
-                                   const uint8_t *buf, unsigned buflen)
+static unsigned rej_uniform_scalar(int16_t *RESTRICT r, unsigned target,
+                                   unsigned offset, const uint8_t *RESTRICT buf,
+                                   unsigned buflen)
 __contract__(
   requires(offset <= target && target <= 4096 && buflen <= 4096 && buflen % 3 == 0)
   requires(memory_no_alias(r, sizeof(int16_t) * target))
@@ -101,8 +102,9 @@ __contract__(
  * buffer. This avoids shifting the buffer base in the caller, which appears
  * tricky to reason about.
  */
-static unsigned rej_uniform(int16_t *r, unsigned target, unsigned offset,
-                            const uint8_t *buf, unsigned buflen)
+static unsigned rej_uniform(int16_t *RESTRICT r, unsigned target,
+                            unsigned offset, const uint8_t *RESTRICT buf,
+                            unsigned buflen)
 __contract__(
   requires(offset <= target && target <= 4096 && buflen <= 4096 && buflen % 3 == 0)
   requires(memory_no_alias(r, sizeof(int16_t) * target))
@@ -135,7 +137,7 @@ __contract__(
 #endif
 
 MLKEM_NATIVE_INTERNAL_API
-void poly_rej_uniform_x4(poly *vec, uint8_t *seed[4])
+void poly_rej_uniform_x4(poly *RESTRICT vec, uint8_t *seed[4])
 {
   /* Temporary buffers for XOF output before rejection sampling */
   uint8_t buf0[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
@@ -193,7 +195,8 @@ void poly_rej_uniform_x4(poly *vec, uint8_t *seed[4])
 }
 
 MLKEM_NATIVE_INTERNAL_API
-void poly_rej_uniform(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
+void poly_rej_uniform(poly *RESTRICT entry,
+                      uint8_t seed[RESTRICT MLKEM_SYMBYTES + 2])
 {
   xof_ctx state;
   uint8_t buf[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
@@ -253,7 +256,7 @@ static uint32_t load32_littleendian(const uint8_t x[4])
 }
 
 MLKEM_NATIVE_INTERNAL_API
-void poly_cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
+void poly_cbd2(poly *RESTRICT r, const uint8_t buf[RESTRICT(2 * MLKEM_N / 4)])
 {
   unsigned i;
   for (i = 0; i < MLKEM_N / 8; i++)
@@ -300,7 +303,7 @@ static uint32_t load24_littleendian(const uint8_t x[3])
 }
 
 MLKEM_NATIVE_INTERNAL_API
-void poly_cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4])
+void poly_cbd3(poly *RESTRICT r, const uint8_t buf[RESTRICT(3 * MLKEM_N / 4)])
 {
   unsigned i;
   for (i = 0; i < MLKEM_N / 4; i++)

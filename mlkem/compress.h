@@ -277,7 +277,8 @@ __contract__(
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const poly *a);
+void poly_compress_d4(uint8_t r[RESTRICT MLKEM_POLYCOMPRESSEDBYTES_D4],
+                      const poly *RESTRICT a);
 
 #define poly_compress_d10 MLKEM_NAMESPACE(poly_compress_d10)
 /*************************************************
@@ -293,7 +294,8 @@ void poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const poly *a);
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const poly *a);
+void poly_compress_d10(uint8_t r[RESTRICT MLKEM_POLYCOMPRESSEDBYTES_D10],
+                       const poly *RESTRICT a);
 
 #define poly_decompress_d4 MLKEM_NAMESPACE(poly_decompress_d4)
 /*************************************************
@@ -311,7 +313,8 @@ void poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const poly *a);
  *
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_decompress_d4(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]);
+void poly_decompress_d4(poly *RESTRICT r,
+                        const uint8_t a[RESTRICT MLKEM_POLYCOMPRESSEDBYTES_D4]);
 
 #define poly_decompress_d10 MLKEM_NAMESPACE(poly_decompress_d10)
 /*************************************************
@@ -329,8 +332,8 @@ void poly_decompress_d4(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]);
  *
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_decompress_d10(poly *r,
-                         const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10]);
+void poly_decompress_d10(
+    poly *RESTRICT r, const uint8_t a[RESTRICT MLKEM_POLYCOMPRESSEDBYTES_D10]);
 #endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
           || MLKEM_K == 3) */
 
@@ -349,7 +352,8 @@ void poly_decompress_d10(poly *r,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const poly *a);
+void poly_compress_d5(uint8_t r[RESTRICT MLKEM_POLYCOMPRESSEDBYTES_D5],
+                      const poly *RESTRICT a);
 
 #define poly_compress_d11 MLKEM_NAMESPACE(poly_compress_d11)
 /*************************************************
@@ -365,7 +369,8 @@ void poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const poly *a);
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const poly *a);
+void poly_compress_d11(uint8_t r[RESTRICT MLKEM_POLYCOMPRESSEDBYTES_D11],
+                       const poly *RESTRICT a);
 
 #define poly_decompress_d5 MLKEM_NAMESPACE(poly_decompress_d5)
 /*************************************************
@@ -383,7 +388,8 @@ void poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const poly *a);
  *
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_decompress_d5(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5]);
+void poly_decompress_d5(poly *RESTRICT r,
+                        const uint8_t a[RESTRICT MLKEM_POLYCOMPRESSEDBYTES_D5]);
 
 #define poly_decompress_d11 MLKEM_NAMESPACE(poly_decompress_d11)
 /*************************************************
@@ -401,8 +407,8 @@ void poly_decompress_d5(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5]);
  *
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_decompress_d11(poly *r,
-                         const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]);
+void poly_decompress_d11(
+    poly *RESTRICT r, const uint8_t a[RESTRICT MLKEM_POLYCOMPRESSEDBYTES_D11]);
 #endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4 \
         */
 
@@ -422,7 +428,7 @@ void poly_decompress_d11(poly *r,
  *                   (of MLKEM_POLYBYTES bytes)
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
+void poly_tobytes(uint8_t r[RESTRICT MLKEM_POLYBYTES], const poly *RESTRICT a)
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYBYTES))
   requires(memory_no_alias(a, sizeof(poly)))
@@ -446,7 +452,7 @@ __contract__(
  *                   0 .. 4095
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
+void poly_frombytes(poly *RESTRICT r, const uint8_t a[RESTRICT MLKEM_POLYBYTES])
 __contract__(
   requires(memory_no_alias(a, MLKEM_POLYBYTES))
   requires(memory_no_alias(r, sizeof(poly)))
@@ -465,7 +471,8 @@ __contract__(
  *              - const uint8_t *msg: pointer to input message
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_frommsg(poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
+void poly_frommsg(poly *RESTRICT r,
+                  const uint8_t msg[RESTRICT MLKEM_INDCPA_MSGBYTES])
 __contract__(
   requires(memory_no_alias(msg, MLKEM_INDCPA_MSGBYTES))
   requires(memory_no_alias(r, sizeof(poly)))
@@ -484,7 +491,8 @@ __contract__(
  *                Coefficients must be unsigned canonical
  **************************************************/
 MLKEM_NATIVE_INTERNAL_API
-void poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const poly *r)
+void poly_tomsg(uint8_t msg[RESTRICT MLKEM_INDCPA_MSGBYTES],
+                const poly *RESTRICT r)
 __contract__(
   requires(memory_no_alias(msg, MLKEM_INDCPA_MSGBYTES))
   requires(memory_no_alias(r, sizeof(poly)))

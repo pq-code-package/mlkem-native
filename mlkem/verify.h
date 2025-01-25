@@ -299,8 +299,8 @@ __contract__(
  *              size_t len:       Amount of bytes to be copied
  *              uint8_t b:        Condition value.
  **************************************************/
-static INLINE void ct_cmov_zero(uint8_t *r, const uint8_t *x, size_t len,
-                                uint8_t b)
+static INLINE void ct_cmov_zero(uint8_t *RESTRICT r, const uint8_t *RESTRICT x,
+                                size_t len, uint8_t b)
 __contract__(
   requires(memory_no_alias(r, len))
   requires(memory_no_alias(x, len))
