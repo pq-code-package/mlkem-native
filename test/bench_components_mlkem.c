@@ -9,7 +9,7 @@
 #include <string.h>
 #include "../mlkem/kem.h"
 #include "../mlkem/randombytes.h"
-#include "../mlkem/rej_uniform.h"
+#include "../mlkem/sampling.h"
 #include "hal.h"
 
 #include "../mlkem/arith_backend.h"
@@ -20,8 +20,8 @@
 #include "../mlkem/poly_k.h"
 
 #define NWARMUP 50
-#define NITERERATIONS 300
-#define NTESTS 200
+#define NITERATIONS 300
+#define NTESTS 20
 
 static int cmp_uint64_t(const void *a, const void *b)
 {
@@ -42,7 +42,7 @@ static int cmp_uint64_t(const void *a, const void *b)
     }                                                   \
                                                         \
     t0 = get_cyclecounter();                            \
-    for (j = 0; j < NITERERATIONS; j++)                 \
+    for (j = 0; j < NITERATIONS; j++)                   \
     {                                                   \
       code;                                             \
     }                                                   \
@@ -50,7 +50,7 @@ static int cmp_uint64_t(const void *a, const void *b)
     (cyc)[i] = t1 - t0;                                 \
   }                                                     \
   qsort((cyc), NTESTS, sizeof(uint64_t), cmp_uint64_t); \
-  printf(txt " cycles=%" PRIu64 "\n", (cyc)[NTESTS >> 1] / NITERERATIONS);
+  printf(txt " cycles=%" PRIu64 "\n", (cyc)[NTESTS >> 1] / NITERATIONS);
 
 static int bench(void)
 {
@@ -59,20 +59,22 @@ static int bench(void)
   ALIGN uint64_t data2[1024];
   ALIGN uint64_t data3[1024];
   ALIGN uint64_t data4[1024];
+  uint8_t *seed[4];
   uint8_t nonce0 = 0, nonce1 = 1, nonce2 = 2, nonce3 = 3;
   uint64_t cyc[NTESTS];
 
   unsigned i, j;
   uint64_t t0, t1;
 
+  seed[0] = (uint8_t *)data1;
+  seed[1] = (uint8_t *)data2;
+  seed[2] = (uint8_t *)data3;
+  seed[3] = (uint8_t *)data4;
+
   BENCH("keccak-f1600-x1", KeccakF1600_StatePermute(data0))
   BENCH("keccak-f1600-x4", KeccakF1600x4_StatePermute(data0))
-  BENCH("rej_uniform (bulk)",
-        rej_uniform((int16_t *)data0, MLKEM_N, 0, (const uint8_t *)data1,
-                    3 * SHAKE128_RATE))
-  BENCH("rej_uniform (residue)",
-        rej_uniform((int16_t *)data0, MLKEM_N / 2, 0, (const uint8_t *)data1,
-                    1 * SHAKE128_RATE))
+  BENCH("poly_rej_uniform", poly_rej_uniform((poly *)data0, (uint8_t *)data1))
+  BENCH("poly_rej_uniform_x4", poly_rej_uniform_x4((poly *)data0, seed))
 
   /* poly */
   /* poly_compress_du */

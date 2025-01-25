@@ -592,8 +592,6 @@ class Tests:
         if resultss is None:
             exit(0)
 
-        self.check_fail()
-
         # NOTE: There will only be one items in resultss, as we haven't yet decided how to write both opt/no-opt benchmark results
         for k, results in resultss.items():
             if not (results is not None and output is not None and components is False):
@@ -623,6 +621,8 @@ class Tests:
 
             with open(output, "w") as f:
                 f.write(json.dumps(v))
+
+        self.check_fail()
 
     def all(self):
         func = self.args.func
