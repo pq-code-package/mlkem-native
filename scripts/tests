@@ -622,6 +622,8 @@ class Tests:
             with open(output, "w") as f:
                 f.write(json.dumps(v))
 
+        self.check_fail()
+
     def all(self):
         func = self.args.func
         kat = self.args.kat
