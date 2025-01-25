@@ -81,7 +81,7 @@ runs:
         ./scripts/tests bench --components -c ${{ inputs.perf }} --cross-prefix="${{ inputs.cross_prefix }}" \
               --cflags="${{ inputs.cflags }} ${{ inputs.archflags }}" \
               --opt=$([[ ${{ inputs.opt }} == "false" ]] && echo "no_opt" || echo "opt")  \
-              -v --output=output.json ${{ inputs.bench_extra_args }}
+              -v
     - name: Check namespace
       shell: ${{ env.SHELL }}
       run: |
