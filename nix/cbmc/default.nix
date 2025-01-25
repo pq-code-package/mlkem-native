@@ -18,8 +18,8 @@ buildEnv {
         src = fetchFromGitHub {
           owner = "remi-delmas-3000";
           repo = old.pname;
-          rev = "contracts-predicates-units-no-fail";
-          hash = "sha256-63DdStiwIFAcjnN7MTqh+miCyrzBNnfCPZAt0ODQfk4";
+          rev = "contracts-obj-set--demonic";
+          hash = "sha256-FG6pTGlPpIwynsaMBgU1wdk7tZQllyImOKfHJjcjOJo";
         };
         patches = [
           ./0001-Do-not-download-sources-in-cmake.patch
