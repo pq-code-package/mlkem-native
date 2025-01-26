@@ -123,11 +123,10 @@ ret
 vmovdqa (64*\i+16)*2(%rsi), %ymm2
 vmovdqa (64*\i+48)*2(%rsi), %ymm3
 vmovdqa (16*\i)*2(%rdx), %ymm4
+vmovdqa (64 + 16*\i)*2(%rdx), %ymm1
 
 vpmullw %ymm2, %ymm1, %ymm5
 vpmullw %ymm3, %ymm1, %ymm6
-vpmullw %ymm5, %ymm4, %ymm5
-vpmullw %ymm6, %ymm4, %ymm6
 
 vpmulhw %ymm2, %ymm4, %ymm7
 vpmulhw %ymm3, %ymm4, %ymm8
@@ -146,7 +145,6 @@ vmovdqa %ymm8, (32*\i+16)*2(%rdi)
 MLKEM_ASM_NAMESPACE(mulcache_compute_avx2):
 
 vmovdqa AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rcx),%ymm0
-vmovdqa AVX2_BACKEND_DATA_OFFSET_16XQINV*2(%rcx),%ymm1
 
 mulcache_compute_iter 0
 mulcache_compute_iter 1

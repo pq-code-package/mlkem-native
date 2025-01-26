@@ -303,19 +303,25 @@ def gen_aarch64_inv_ntt_zetas_layer56():
 def gen_avx2_mulcache_twiddles():
     for i in range(2):
         for idx in range(16):
-            root = signed_reduce(
-                pow(root_of_unity, bitreverse(64 + 32 * i + 2 * idx, 7), modulus)
-                * montgomery_factor
-            )
-            yield prepare_root_for_barrett(root)[0]
+            root, root_twisted = prepare_root_for_montmul(
+                pow(root_of_unity, bitreverse(64 + 32 * i + 2 * idx, 7), modulus))
+            yield root
 
         for idx in range(16):
-            root = signed_reduce(
-                pow(root_of_unity, bitreverse(64 + 32 * i + 2 * idx + 1, 7), modulus)
-                * montgomery_factor
-            )
-            yield prepare_root_for_barrett(root)[0]
+            root, root_twisted = prepare_root_for_montmul(
+                pow(root_of_unity, bitreverse(64 + 32 * i + 2 * idx + 1, 7), modulus))
+            yield root
 
+    for i in range(2):
+        for idx in range(16):
+            root, root_twisted = prepare_root_for_montmul(
+                pow(root_of_unity, bitreverse(64 + 32 * i + 2 * idx, 7), modulus))
+            yield root_twisted
+
+        for idx in range(16):
+            root, root_twisted = prepare_root_for_montmul(
+                pow(root_of_unity, bitreverse(64 + 32 * i + 2 * idx + 1, 7), modulus))
+            yield root_twisted
 
 def gen_aarch64_mulcache_twiddles():
     for idx in range(64):
