@@ -877,8 +877,8 @@
 
 .global MLKEM_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt)
 .text
-.align 4
 
+.balign 4
 MLKEM_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt):
     alloc_stack
     save_gprs

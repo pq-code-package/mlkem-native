@@ -140,7 +140,6 @@
 // also matching PQClean.
 
 .text
-
         .global MLKEM_ASM_NAMESPACE(intt_asm_clean)
 
         in         .req x0
@@ -195,6 +194,7 @@
         ninv             .req v29
         ninv_tw          .req v30
 
+.balign 4
 MLKEM_ASM_NAMESPACE(intt_asm_clean):
         push_stack
 

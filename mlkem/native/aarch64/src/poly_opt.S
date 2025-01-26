@@ -53,6 +53,7 @@
         modulus           .req v3
         modulus_twisted   .req v4
 
+.balign 4
 MLKEM_ASM_NAMESPACE(poly_reduce_asm_opt):
 
         mov wtmp, #3329 // ML-KEM modulus
@@ -292,6 +293,7 @@ MLKEM_ASM_NAMESPACE(poly_reduce_asm_opt):
         modulus           .req v6
         modulus_twisted   .req v7
 
+.balign 4
 MLKEM_ASM_NAMESPACE(poly_mulcache_compute_asm_opt):
         mov wtmp, #3329
         dup modulus.8h, wtmp
@@ -436,6 +438,7 @@ MLKEM_ASM_NAMESPACE(poly_mulcache_compute_asm_opt):
         src   .req x1
         count .req x2
 
+.balign 4
 MLKEM_ASM_NAMESPACE(poly_tobytes_asm_opt):
 
         mov count, #16
@@ -491,6 +494,7 @@ poly_tobytes_asm_opt_asm_loop_start:
 
         tmp0              .req v6
 
+.balign 4
 MLKEM_ASM_NAMESPACE(poly_tomont_asm_opt):
 
         mov wtmp, #3329 // ML-KEM modulus

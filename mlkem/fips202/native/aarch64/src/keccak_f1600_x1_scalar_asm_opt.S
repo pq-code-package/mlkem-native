@@ -163,9 +163,9 @@
 #define KECCAK_F1600_ROUNDS 24
 
 .text
-.balign 16
 .global MLKEM_ASM_NAMESPACE(keccak_f1600_x1_scalar_asm_opt)
 
+.balign 4
 MLKEM_ASM_NAMESPACE(keccak_f1600_x1_scalar_asm_opt):
     alloc_stack
     save_gprs
