@@ -42,6 +42,7 @@ CFLAGS := \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
 	-O3 \
+	-march=native \
 	-fomit-frame-pointer \
 	-std=c99 \
 	-pedantic \
