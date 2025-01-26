@@ -60,9 +60,9 @@ vpmullw		%ymm7,%ymm12,%ymm7			# b1c1.lo
 vmovdqa		(32*\off+ 0)*2(%r8),%ymm8	# d0z
 vpmulhw		%ymm8,%ymm2,%ymm2			# b0d0z.hi
 vpmullw		%ymm8,%ymm10,%ymm10			# b0d0z.lo
-vmovdqa		(32*\off+16)*2(%r8),%ymm8	# d1z
-vpmulhw		%ymm8,%ymm4,%ymm4			# b1d1z.hi
-vpmullw		%ymm8,%ymm12,%ymm12			# b1d1z.lo
+vmovdqa		(32*\off+16)*2(%r8),%ymm8	# -d1z
+vpmulhw		%ymm8,%ymm4,%ymm4			# -b1d1z.hi
+vpmullw		%ymm8,%ymm12,%ymm12			# -b1d1z.lo
 
 /* Compute 2nd high multiplication in Montgomery multiplication */
 vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rcx),%ymm8
@@ -84,10 +84,11 @@ vpsubw		%ymm10,%ymm2,%ymm10			# b0d0
 vpsubw		%ymm6,%ymm15,%ymm6			# a1c1
 vpsubw		%ymm11,%ymm3,%ymm11			# a1d1
 vpsubw		%ymm7,%ymm0,%ymm7			# b1c1
-vpsubw		%ymm12,%ymm4,%ymm12			# b1d1
+vpsubw		%ymm12,%ymm4,%ymm12			# -b1d1z
 
 vpaddw		%ymm5,%ymm9,%ymm9
 vpaddw		%ymm7,%ymm11,%ymm11
+/* Note the different sign here, cancelling the sign in -b1d1z */
 vpsubw		%ymm13,%ymm10,%ymm13
 vpsubw		%ymm12,%ymm6,%ymm6
 
