@@ -146,22 +146,6 @@ static void unpack_ciphertext(polyvec *b, poly *v,
   poly_decompress_dv(v, c + MLKEM_POLYVECCOMPRESSEDBYTES_DU);
 }
 
-#if !defined(MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER)
-/* This namespacing is not done at the top to avoid a naming conflict
- * with native backends, which are currently not yet namespaced. */
-#define poly_permute_bitrev_to_custom \
-  MLKEM_NAMESPACE_K(poly_permute_bitrev_to_custom)
-
-static INLINE void poly_permute_bitrev_to_custom(int16_t data[MLKEM_N])
-__contract__(
-  /* We don't specify that this should be a permutation, but only
-   * that it does not change the bound established at the end of gen_matrix. */
-  requires(memory_no_alias(data, sizeof(int16_t) * MLKEM_N))
-  requires(array_bound(data, 0, MLKEM_N, 0, MLKEM_Q))
-  assigns(memory_slice(data, sizeof(poly)))
-  ensures(array_bound(data, 0, MLKEM_N, 0, MLKEM_Q))) { ((void)data); }
-#endif /* MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER */
-
 /* Not static for benchmarking */
 MLKEM_NATIVE_INTERNAL_API
 void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES], int transposed)
@@ -239,18 +223,6 @@ void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES], int transposed)
   }
 
   debug_assert(i == MLKEM_K * MLKEM_K);
-
-  /*
-   * The public matrix is generated in NTT domain. If the native backend
-   * uses a custom order in NTT domain, permute A accordingly.
-   */
-  for (i = 0; i < MLKEM_K; i++)
-  {
-    for (j = 0; j < MLKEM_K; j++)
-    {
-      poly_permute_bitrev_to_custom(a[i].vec[j].coeffs);
-    }
-  }
 }
 
 /*************************************************

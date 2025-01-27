@@ -134,6 +134,22 @@ __contract__(
   ((12 * MLKEM_N / 8 * (1 << 12) / MLKEM_Q + XOF_RATE) / XOF_RATE)
 #endif
 
+#if !defined(MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER)
+/* This namespacing is not done at the top to avoid a naming conflict
+ * with native backends, which are currently not yet namespaced. */
+#define poly_permute_bitrev_to_custom \
+  MLKEM_NAMESPACE_K(poly_permute_bitrev_to_custom)
+
+static INLINE void poly_permute_bitrev_to_custom(int16_t data[MLKEM_N])
+__contract__(
+  /* We don't specify that this should be a permutation, but only
+   * that it does not change the bound established at the end of gen_matrix. */
+  requires(memory_no_alias(data, sizeof(int16_t) * MLKEM_N))
+  requires(array_bound(data, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(data, sizeof(poly)))
+  ensures(array_bound(data, 0, MLKEM_N, 0, MLKEM_Q))) { ((void)data); }
+#endif /* MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER */
+
 MLKEM_NATIVE_INTERNAL_API
 void poly_rej_uniform_x4(poly *vec, uint8_t *seed[4])
 {
@@ -190,6 +206,15 @@ void poly_rej_uniform_x4(poly *vec, uint8_t *seed[4])
   }
 
   xof_x4_release(&statex);
+
+  /*
+   * The public matrix is generated in NTT domain. If the native backend
+   * uses a custom order in NTT domain, permute A accordingly.
+   */
+  poly_permute_bitrev_to_custom(vec[0].coeffs);
+  poly_permute_bitrev_to_custom(vec[1].coeffs);
+  poly_permute_bitrev_to_custom(vec[2].coeffs);
+  poly_permute_bitrev_to_custom(vec[3].coeffs);
 }
 
 MLKEM_NATIVE_INTERNAL_API
@@ -222,6 +247,12 @@ void poly_rej_uniform(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
   }
 
   xof_release(&state);
+
+  /*
+   * The public matrix is generated in NTT domain. If the native backend
+   * uses a custom order in NTT domain, permute A accordingly.
+   */
+  poly_permute_bitrev_to_custom(entry->coeffs);
 }
 
 /* Static namespacing
