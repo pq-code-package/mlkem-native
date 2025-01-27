@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT-0
 
 #include <stdint.h>
-#include "sampling.h"
+#include "poly.h"
 
 void harness(void)
 {

@@ -6,8 +6,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "arith_backend.h"
-#include "compress.h"
-#include "sampling.h"
+#include "poly.h"
 #include "symmetric.h"
 
 #include "debug.h"

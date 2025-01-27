@@ -8,8 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../mlkem/kem.h"
+#include "../mlkem/poly.h"
 #include "../mlkem/randombytes.h"
-#include "../mlkem/sampling.h"
 #include "hal.h"
 
 #include "../mlkem/arith_backend.h"

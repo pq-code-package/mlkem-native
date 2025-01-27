@@ -12,7 +12,6 @@
 #include "debug.h"
 #include "fips202/fips202x4.h"
 #include "poly.h"
-#include "sampling.h"
 #include "symmetric.h"
 #include "verify.h"
 
@@ -30,6 +29,10 @@
 #define ntt_butterfly_block MLKEM_NAMESPACE(ntt_butterfly_block)
 #define ntt_layer MLKEM_NAMESPACE(ntt_layer)
 #define invntt_layer MLKEM_NAMESPACE(invntt_layer)
+#define rej_uniform MLKEM_NAMESPACE(rej_uniform)
+#define rej_uniform_scalar MLKEM_NAMESPACE(rej_uniform_scalar)
+#define load32_littleendian MLKEM_NAMESPACE(load32_littleendian)
+#define load24_littleendian MLKEM_NAMESPACE(load24_littleendian)
 /* End of static namespacing */
 
 /*************************************************
@@ -637,6 +640,686 @@ void poly_invntt_tomont(poly *p)
   debug_assert_abs_bound(p, MLKEM_N, INVNTT_BOUND);
 }
 #endif /* MLKEM_USE_NATIVE_INTT */
+
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
+MLKEM_NATIVE_INTERNAL_API
+void poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const poly *a)
+{
+  unsigned i;
+  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+
+  for (i = 0; i < MLKEM_N / 8; i++)
+  __loop__(invariant(i <= MLKEM_N / 8))
+  {
+    unsigned j;
+    uint8_t t[8] = {0};
+    for (j = 0; j < 8; j++)
+    __loop__(
+      invariant(i <= MLKEM_N / 8 && j <= 8)
+      invariant(array_bound(t, 0, j, 0, 16)))
+    {
+      t[j] = scalar_compress_d4(a->coeffs[8 * i + j]);
+    }
+
+    r[i * 4] = t[0] | (t[1] << 4);
+    r[i * 4 + 1] = t[2] | (t[3] << 4);
+    r[i * 4 + 2] = t[4] | (t[5] << 4);
+    r[i * 4 + 3] = t[6] | (t[7] << 4);
+  }
+}
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const poly *a)
+{
+  unsigned j;
+  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  for (j = 0; j < MLKEM_N / 4; j++)
+  __loop__(invariant(j <= MLKEM_N / 4))
+  {
+    unsigned k;
+    uint16_t t[4];
+    for (k = 0; k < 4; k++)
+    __loop__(
+      invariant(k <= 4)
+      invariant(forall(r, 0, k, t[r] < (1u << 10))))
+    {
+      t[k] = scalar_compress_d10(a->coeffs[4 * j + k]);
+    }
+
+    /*
+     * Make all implicit truncation explicit. No data is being
+     * truncated for the LHS's since each t[i] is 10-bit in size.
+     */
+    r[5 * j + 0] = (t[0] >> 0) & 0xFF;
+    r[5 * j + 1] = (t[0] >> 8) | ((t[1] << 2) & 0xFF);
+    r[5 * j + 2] = (t[1] >> 6) | ((t[2] << 4) & 0xFF);
+    r[5 * j + 3] = (t[2] >> 4) | ((t[3] << 6) & 0xFF);
+    r[5 * j + 4] = (t[3] >> 2);
+  }
+}
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_decompress_d4(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
+{
+  unsigned i;
+  for (i = 0; i < MLKEM_N / 2; i++)
+  __loop__(
+    invariant(i <= MLKEM_N / 2)
+    invariant(array_bound(r->coeffs, 0, 2 * i, 0, MLKEM_Q)))
+  {
+    r->coeffs[2 * i + 0] = scalar_decompress_d4((a[i] >> 0) & 0xF);
+    r->coeffs[2 * i + 1] = scalar_decompress_d4((a[i] >> 4) & 0xF);
+  }
+
+  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+}
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_decompress_d10(poly *r,
+                         const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
+{
+  unsigned j;
+  for (j = 0; j < MLKEM_N / 4; j++)
+  __loop__(
+    invariant(j <= MLKEM_N / 4)
+    invariant(array_bound(r->coeffs, 0, 4 * j, 0, MLKEM_Q)))
+  {
+    unsigned k;
+    uint16_t t[4];
+    uint8_t const *base = &a[5 * j];
+
+    t[0] = 0x3FF & ((base[0] >> 0) | ((uint16_t)base[1] << 8));
+    t[1] = 0x3FF & ((base[1] >> 2) | ((uint16_t)base[2] << 6));
+    t[2] = 0x3FF & ((base[2] >> 4) | ((uint16_t)base[3] << 4));
+    t[3] = 0x3FF & ((base[3] >> 6) | ((uint16_t)base[4] << 2));
+
+    for (k = 0; k < 4; k++)
+    __loop__(
+      invariant(k <= 4)
+      invariant(array_bound(r->coeffs, 0, 4 * j + k, 0, MLKEM_Q)))
+    {
+      r->coeffs[4 * j + k] = scalar_decompress_d10(t[k]);
+    }
+  }
+
+  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+}
+#endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
+          || MLKEM_K == 3) */
+
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
+MLKEM_NATIVE_INTERNAL_API
+void poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const poly *a)
+{
+  unsigned i;
+  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+
+  for (i = 0; i < MLKEM_N / 8; i++)
+  __loop__(invariant(i <= MLKEM_N / 8))
+  {
+    unsigned j;
+    uint8_t t[8] = {0};
+    for (j = 0; j < 8; j++)
+    __loop__(
+      invariant(i <= MLKEM_N / 8 && j <= 8)
+      invariant(array_bound(t, 0, j, 0, 32)))
+    {
+      t[j] = scalar_compress_d5(a->coeffs[8 * i + j]);
+    }
+
+    /*
+     * Explicitly truncate to avoid warning about
+     * implicit truncation in CBMC, and use array indexing into
+     * r rather than pointer-arithmetic to simplify verification
+     */
+    r[i * 5] = 0xFF & ((t[0] >> 0) | (t[1] << 5));
+    r[i * 5 + 1] = 0xFF & ((t[1] >> 3) | (t[2] << 2) | (t[3] << 7));
+    r[i * 5 + 2] = 0xFF & ((t[3] >> 1) | (t[4] << 4));
+    r[i * 5 + 3] = 0xFF & ((t[4] >> 4) | (t[5] << 1) | (t[6] << 6));
+    r[i * 5 + 4] = 0xFF & ((t[6] >> 2) | (t[7] << 3));
+  }
+}
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const poly *a)
+{
+  unsigned j;
+  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+
+  for (j = 0; j < MLKEM_N / 8; j++)
+  __loop__(invariant(j <= MLKEM_N / 8))
+  {
+    unsigned k;
+    uint16_t t[8];
+    for (k = 0; k < 8; k++)
+    __loop__(
+      invariant(k <= 8)
+      invariant(forall(r, 0, k, t[r] < (1u << 11))))
+    {
+      t[k] = scalar_compress_d11(a->coeffs[8 * j + k]);
+    }
+
+    /*
+     * Make all implicit truncation explicit. No data is being
+     * truncated for the LHS's since each t[i] is 11-bit in size.
+     */
+    r[11 * j + 0] = (t[0] >> 0) & 0xFF;
+    r[11 * j + 1] = (t[0] >> 8) | ((t[1] << 3) & 0xFF);
+    r[11 * j + 2] = (t[1] >> 5) | ((t[2] << 6) & 0xFF);
+    r[11 * j + 3] = (t[2] >> 2) & 0xFF;
+    r[11 * j + 4] = (t[2] >> 10) | ((t[3] << 1) & 0xFF);
+    r[11 * j + 5] = (t[3] >> 7) | ((t[4] << 4) & 0xFF);
+    r[11 * j + 6] = (t[4] >> 4) | ((t[5] << 7) & 0xFF);
+    r[11 * j + 7] = (t[5] >> 1) & 0xFF;
+    r[11 * j + 8] = (t[5] >> 9) | ((t[6] << 2) & 0xFF);
+    r[11 * j + 9] = (t[6] >> 6) | ((t[7] << 5) & 0xFF);
+    r[11 * j + 10] = (t[7] >> 3);
+  }
+}
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_decompress_d5(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
+{
+  unsigned i;
+  for (i = 0; i < MLKEM_N / 8; i++)
+  __loop__(
+    invariant(i <= MLKEM_N / 8)
+    invariant(array_bound(r->coeffs, 0, 8 * i, 0, MLKEM_Q)))
+  {
+    unsigned j;
+    uint8_t t[8];
+    const unsigned offset = i * 5;
+    /*
+     * Explicitly truncate to avoid warning about
+     * implicit truncation in CBMC and unwind loop for ease
+     * of proof.
+     */
+
+    /*
+     * Decompress 5 8-bit bytes (so 40 bits) into
+     * 8 5-bit values stored in t[]
+     */
+    t[0] = 0x1F & (a[offset + 0] >> 0);
+    t[1] = 0x1F & ((a[offset + 0] >> 5) | (a[offset + 1] << 3));
+    t[2] = 0x1F & (a[offset + 1] >> 2);
+    t[3] = 0x1F & ((a[offset + 1] >> 7) | (a[offset + 2] << 1));
+    t[4] = 0x1F & ((a[offset + 2] >> 4) | (a[offset + 3] << 4));
+    t[5] = 0x1F & (a[offset + 3] >> 1);
+    t[6] = 0x1F & ((a[offset + 3] >> 6) | (a[offset + 4] << 2));
+    t[7] = 0x1F & (a[offset + 4] >> 3);
+
+    /* and copy to the correct slice in r[] */
+    for (j = 0; j < 8; j++)
+    __loop__(
+      invariant(j <= 8 && i <= MLKEM_N / 8)
+      invariant(array_bound(r->coeffs, 0, 8 * i + j, 0, MLKEM_Q)))
+    {
+      r->coeffs[8 * i + j] = scalar_decompress_d5(t[j]);
+    }
+  }
+
+  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+}
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_decompress_d11(poly *r,
+                         const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
+{
+  unsigned j;
+  for (j = 0; j < MLKEM_N / 8; j++)
+  __loop__(
+    invariant(j <= MLKEM_N / 8)
+    invariant(array_bound(r->coeffs, 0, 8 * j, 0, MLKEM_Q)))
+  {
+    unsigned k;
+    uint16_t t[8];
+    uint8_t const *base = &a[11 * j];
+    t[0] = 0x7FF & ((base[0] >> 0) | ((uint16_t)base[1] << 8));
+    t[1] = 0x7FF & ((base[1] >> 3) | ((uint16_t)base[2] << 5));
+    t[2] = 0x7FF & ((base[2] >> 6) | ((uint16_t)base[3] << 2) |
+                    ((uint16_t)base[4] << 10));
+    t[3] = 0x7FF & ((base[4] >> 1) | ((uint16_t)base[5] << 7));
+    t[4] = 0x7FF & ((base[5] >> 4) | ((uint16_t)base[6] << 4));
+    t[5] = 0x7FF & ((base[6] >> 7) | ((uint16_t)base[7] << 1) |
+                    ((uint16_t)base[8] << 9));
+    t[6] = 0x7FF & ((base[8] >> 2) | ((uint16_t)base[9] << 6));
+    t[7] = 0x7FF & ((base[9] >> 5) | ((uint16_t)base[10] << 3));
+
+    for (k = 0; k < 8; k++)
+    __loop__(
+      invariant(k <= 8)
+      invariant(array_bound(r->coeffs, 0, 8 * j + k, 0, MLKEM_Q)))
+    {
+      r->coeffs[8 * j + k] = scalar_decompress_d11(t[k]);
+    }
+  }
+
+  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+}
+#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD) || MLKEM_K == 4 */
+
+#if !defined(MLKEM_USE_NATIVE_POLY_TOBYTES)
+MLKEM_NATIVE_INTERNAL_API
+void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
+{
+  unsigned i;
+  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+
+  for (i = 0; i < MLKEM_N / 2; i++)
+  __loop__(invariant(i <= MLKEM_N / 2))
+  {
+    const uint16_t t0 = a->coeffs[2 * i];
+    const uint16_t t1 = a->coeffs[2 * i + 1];
+    /*
+     * t0 and t1 are both < MLKEM_Q, so contain at most 12 bits each of
+     * significant data, so these can be packed into 24 bits or exactly
+     * 3 bytes, as follows.
+     */
+
+    /* Least significant bits 0 - 7 of t0. */
+    r[3 * i + 0] = t0 & 0xFF;
+
+    /*
+     * Most significant bits 8 - 11 of t0 become the least significant
+     * nibble of the second byte. The least significant 4 bits
+     * of t1 become the upper nibble of the second byte.
+     */
+    r[3 * i + 1] = (t0 >> 8) | ((t1 << 4) & 0xF0);
+
+    /* Bits 4 - 11 of t1 become the third byte. */
+    r[3 * i + 2] = t1 >> 4;
+  }
+}
+#else  /* MLKEM_USE_NATIVE_POLY_TOBYTES */
+MLKEM_NATIVE_INTERNAL_API
+void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
+{
+  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  poly_tobytes_native(r, a->coeffs);
+}
+#endif /* MLKEM_USE_NATIVE_POLY_TOBYTES */
+
+#if !defined(MLKEM_USE_NATIVE_POLY_FROMBYTES)
+MLKEM_NATIVE_INTERNAL_API
+void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
+{
+  unsigned i;
+  for (i = 0; i < MLKEM_N / 2; i++)
+  __loop__(
+    invariant(i <= MLKEM_N / 2)
+    invariant(array_bound(r->coeffs, 0, 2 * i, 0, UINT12_LIMIT)))
+  {
+    const uint8_t t0 = a[3 * i + 0];
+    const uint8_t t1 = a[3 * i + 1];
+    const uint8_t t2 = a[3 * i + 2];
+    r->coeffs[2 * i + 0] = t0 | ((t1 << 8) & 0xFFF);
+    r->coeffs[2 * i + 1] = (t1 >> 4) | (t2 << 4);
+  }
+
+  /* Note that the coefficients are not canonical */
+  debug_assert_bound(r, MLKEM_N, 0, UINT12_LIMIT);
+}
+#else  /* MLKEM_USE_NATIVE_POLY_FROMBYTES */
+MLKEM_NATIVE_INTERNAL_API
+void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
+{
+  poly_frombytes_native(r->coeffs, a);
+}
+#endif /* MLKEM_USE_NATIVE_POLY_FROMBYTES */
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_frommsg(poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
+{
+  unsigned i;
+#if (MLKEM_INDCPA_MSGBYTES != MLKEM_N / 8)
+#error "MLKEM_INDCPA_MSGBYTES must be equal to MLKEM_N/8 bytes!"
+#endif
+
+  for (i = 0; i < MLKEM_N / 8; i++)
+  __loop__(
+    invariant(i <= MLKEM_N / 8)
+    invariant(array_bound(r->coeffs, 0, 8 * i, 0, MLKEM_Q)))
+  {
+    unsigned j;
+    for (j = 0; j < 8; j++)
+    __loop__(
+      invariant(i <  MLKEM_N / 8 && j <= 8)
+      invariant(array_bound(r->coeffs, 0, 8 * i + j, 0, MLKEM_Q)))
+    {
+      /* Prevent the compiler from recognizing this as a bit selection */
+      uint8_t mask = value_barrier_u8(1u << j);
+      r->coeffs[8 * i + j] = ct_sel_int16(HALF_Q, 0, msg[i] & mask);
+    }
+  }
+  debug_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
+}
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const poly *a)
+{
+  unsigned i;
+  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+
+  for (i = 0; i < MLKEM_N / 8; i++)
+  __loop__(invariant(i <= MLKEM_N / 8))
+  {
+    unsigned j;
+    msg[i] = 0;
+    for (j = 0; j < 8; j++)
+    __loop__(
+      invariant(i <= MLKEM_N / 8 && j <= 8))
+    {
+      uint32_t t = scalar_compress_d1(a->coeffs[8 * i + j]);
+      msg[i] |= t << j;
+    }
+  }
+}
+
+static unsigned rej_uniform_scalar(int16_t *r, unsigned target, unsigned offset,
+                                   const uint8_t *buf, unsigned buflen)
+__contract__(
+  requires(offset <= target && target <= 4096 && buflen <= 4096 && buflen % 3 == 0)
+  requires(memory_no_alias(r, sizeof(int16_t) * target))
+  requires(memory_no_alias(buf, buflen))
+  requires(array_bound(r, 0, offset, 0, MLKEM_Q))
+  assigns(memory_slice(r, sizeof(int16_t) * target))
+  ensures(offset <= return_value && return_value <= target)
+  ensures(array_bound(r, 0, return_value, 0, MLKEM_Q))
+)
+{
+  unsigned ctr, pos;
+  uint16_t val0, val1;
+
+  debug_assert_bound(r, offset, 0, MLKEM_Q);
+
+  ctr = offset;
+  pos = 0;
+  /* pos + 3 cannot overflow due to the assumption buflen <= 4096 */
+  while (ctr < target && pos + 3 <= buflen)
+  __loop__(
+    invariant(offset <= ctr && ctr <= target && pos <= buflen)
+    invariant(ctr > 0 ==> array_bound(r, 0, ctr, 0, MLKEM_Q)))
+  {
+    val0 = ((buf[pos + 0] >> 0) | ((uint16_t)buf[pos + 1] << 8)) & 0xFFF;
+    val1 = ((buf[pos + 1] >> 4) | ((uint16_t)buf[pos + 2] << 4)) & 0xFFF;
+    pos += 3;
+
+    if (val0 < MLKEM_Q)
+    {
+      r[ctr++] = val0;
+    }
+    if (ctr < target && val1 < MLKEM_Q)
+    {
+      r[ctr++] = val1;
+    }
+  }
+
+  debug_assert_bound(r, ctr, 0, MLKEM_Q);
+  return ctr;
+}
+
+/*************************************************
+ * Name:        rej_uniform
+ *
+ * Description: Run rejection sampling on uniform random bytes to generate
+ *              uniform random integers mod q
+ *
+ * Arguments:   - int16_t *r:          pointer to output buffer
+ *              - unsigned target:     requested number of 16-bit integers
+ *                                     (uniform mod q).
+ *                                     Must be <= 4096.
+ *              - unsigned offset:     number of 16-bit integers that have
+ *                                     already been sampled.
+ *                                     Must be <= target.
+ *              - const uint8_t *buf:  pointer to input buffer
+ *                                     (assumed to be uniform random bytes)
+ *              - unsigned buflen:     length of input buffer in bytes
+ *                                     Must be <= 4096.
+ *                                     Must be a multiple of 3.
+ *
+ * Note: Strictly speaking, only a few values of buflen near UINT_MAX need
+ * excluding. The limit of 128 is somewhat arbitary but sufficient for all
+ * uses of this function. Similarly, the actual limit for target is UINT_MAX/2.
+ *
+ * Returns the new offset of sampled 16-bit integers, at most target,
+ * and at least the initial offset.
+ * If the new offset is strictly less than len, all of the input buffers
+ * is guaranteed to have been consumed. If it is equal to len, no information
+ * is provided on how many bytes of the input buffer have been consumed.
+ **************************************************/
+
+/*
+ * NOTE: The signature differs from the Kyber reference implementation
+ * in that it adds the offset and always expects the base of the target
+ * buffer. This avoids shifting the buffer base in the caller, which appears
+ * tricky to reason about.
+ */
+static unsigned rej_uniform(int16_t *r, unsigned target, unsigned offset,
+                            const uint8_t *buf, unsigned buflen)
+__contract__(
+  requires(offset <= target && target <= 4096 && buflen <= 4096 && buflen % 3 == 0)
+  requires(memory_no_alias(r, sizeof(int16_t) * target))
+  requires(memory_no_alias(buf, buflen))
+  requires(array_bound(r, 0, offset, 0, MLKEM_Q))
+  assigns(memory_slice(r, sizeof(int16_t) * target))
+  ensures(offset <= return_value && return_value <= target)
+  ensures(array_bound(r, 0, return_value, 0, MLKEM_Q))
+)
+{
+#if defined(MLKEM_USE_NATIVE_REJ_UNIFORM)
+  if (offset == 0)
+  {
+    int ret = rej_uniform_native(r, target, buf, buflen);
+    if (ret != -1)
+    {
+      unsigned res = (unsigned)ret;
+      debug_assert_bound(r, res, 0, MLKEM_Q);
+      return res;
+    }
+  }
+#endif /* MLKEM_USE_NATIVE_REJ_UNIFORM */
+
+  return rej_uniform_scalar(r, target, offset, buf, buflen);
+}
+
+#ifndef MLKEM_GEN_MATRIX_NBLOCKS
+#define MLKEM_GEN_MATRIX_NBLOCKS \
+  ((12 * MLKEM_N / 8 * (1 << 12) / MLKEM_Q + XOF_RATE) / XOF_RATE)
+#endif
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_rej_uniform_x4(poly *vec, uint8_t *seed[4])
+{
+  /* Temporary buffers for XOF output before rejection sampling */
+  ALIGN uint8_t buf0[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
+  ALIGN uint8_t buf1[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
+  ALIGN uint8_t buf2[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
+  ALIGN uint8_t buf3[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
+
+  /* Tracks the number of coefficients we have already sampled */
+  unsigned ctr[KECCAK_WAY];
+  xof_x4_ctx statex;
+  unsigned buflen;
+
+  /* seed is MLKEM_SYMBYTES + 2 bytes long, but padded to MLKEM_SYMBYTES + 16 */
+  xof_x4_init(&statex);
+  xof_x4_absorb(&statex, seed[0], seed[1], seed[2], seed[3],
+                MLKEM_SYMBYTES + 2);
+
+  /*
+   * Initially, squeeze heuristic number of MLKEM_GEN_MATRIX_NBLOCKS.
+   * This should generate the matrix entries with high probability.
+   */
+  xof_x4_squeezeblocks(buf0, buf1, buf2, buf3, MLKEM_GEN_MATRIX_NBLOCKS,
+                       &statex);
+  buflen = MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE;
+  ctr[0] = rej_uniform(vec[0].coeffs, MLKEM_N, 0, buf0, buflen);
+  ctr[1] = rej_uniform(vec[1].coeffs, MLKEM_N, 0, buf1, buflen);
+  ctr[2] = rej_uniform(vec[2].coeffs, MLKEM_N, 0, buf2, buflen);
+  ctr[3] = rej_uniform(vec[3].coeffs, MLKEM_N, 0, buf3, buflen);
+
+  /*
+   * So long as not all matrix entries have been generated, squeeze
+   * one more block a time until we're done.
+   */
+  buflen = XOF_RATE;
+  while (ctr[0] < MLKEM_N || ctr[1] < MLKEM_N || ctr[2] < MLKEM_N ||
+         ctr[3] < MLKEM_N)
+  __loop__(
+    assigns(ctr, statex, memory_slice(vec, sizeof(poly) * 4), object_whole(buf0),
+       object_whole(buf1), object_whole(buf2), object_whole(buf3))
+    invariant(ctr[0] <= MLKEM_N && ctr[1] <= MLKEM_N)
+    invariant(ctr[2] <= MLKEM_N && ctr[3] <= MLKEM_N)
+    invariant(ctr[0] > 0 ==> array_bound(vec[0].coeffs, 0, ctr[0], 0, MLKEM_Q))
+    invariant(ctr[1] > 0 ==> array_bound(vec[1].coeffs, 0, ctr[1], 0, MLKEM_Q))
+    invariant(ctr[2] > 0 ==> array_bound(vec[2].coeffs, 0, ctr[2], 0, MLKEM_Q))
+    invariant(ctr[3] > 0 ==> array_bound(vec[3].coeffs, 0, ctr[3], 0, MLKEM_Q)))
+  {
+    xof_x4_squeezeblocks(buf0, buf1, buf2, buf3, 1, &statex);
+    ctr[0] = rej_uniform(vec[0].coeffs, MLKEM_N, ctr[0], buf0, buflen);
+    ctr[1] = rej_uniform(vec[1].coeffs, MLKEM_N, ctr[1], buf1, buflen);
+    ctr[2] = rej_uniform(vec[2].coeffs, MLKEM_N, ctr[2], buf2, buflen);
+    ctr[3] = rej_uniform(vec[3].coeffs, MLKEM_N, ctr[3], buf3, buflen);
+  }
+
+  xof_x4_release(&statex);
+}
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_rej_uniform(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
+{
+  xof_ctx state;
+  ALIGN uint8_t buf[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
+  unsigned ctr, buflen;
+
+  xof_init(&state);
+  xof_absorb(&state, seed, MLKEM_SYMBYTES + 2);
+
+  /* Initially, squeeze + sample heuristic number of MLKEM_GEN_MATRIX_NBLOCKS.
+   */
+  /* This should generate the matrix entry with high probability. */
+  xof_squeezeblocks(buf, MLKEM_GEN_MATRIX_NBLOCKS, &state);
+  buflen = MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE;
+  ctr = rej_uniform(entry->coeffs, MLKEM_N, 0, buf, buflen);
+
+  /* Squeeze + sample one more block a time until we're done */
+  buflen = XOF_RATE;
+  while (ctr < MLKEM_N)
+  __loop__(
+    assigns(ctr, state, memory_slice(entry, sizeof(poly)), object_whole(buf))
+    invariant(ctr <= MLKEM_N)
+    invariant(array_bound(entry->coeffs, 0, ctr, 0, MLKEM_Q)))
+  {
+    xof_squeezeblocks(buf, 1, &state);
+    ctr = rej_uniform(entry->coeffs, MLKEM_N, ctr, buf, buflen);
+  }
+
+  xof_release(&state);
+}
+
+/* Static namespacing
+ * This is to facilitate building multiple instances
+ * of mlkem-native (e.g. with varying security levels)
+ * within a single compilation unit. */
+#define load32_littleendian MLKEM_NAMESPACE(load32_littleendian)
+#define load24_littleendian MLKEM_NAMESPACE(load24_littleendian)
+/* End of static namespacing */
+
+/*************************************************
+ * Name:        load32_littleendian
+ *
+ * Description: load 4 bytes into a 32-bit integer
+ *              in little-endian order
+ *
+ * Arguments:   - const uint8_t *x: pointer to input byte array
+ *
+ * Returns 32-bit unsigned integer loaded from x
+ **************************************************/
+static uint32_t load32_littleendian(const uint8_t x[4])
+{
+  uint32_t r;
+  r = (uint32_t)x[0];
+  r |= (uint32_t)x[1] << 8;
+  r |= (uint32_t)x[2] << 16;
+  r |= (uint32_t)x[3] << 24;
+  return r;
+}
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
+{
+  unsigned i;
+  for (i = 0; i < MLKEM_N / 8; i++)
+  __loop__(
+    invariant(i <= MLKEM_N / 8)
+    invariant(array_abs_bound(r->coeffs, 0, 8 * i, 3)))
+  {
+    unsigned j;
+    uint32_t t = load32_littleendian(buf + 4 * i);
+    uint32_t d = t & 0x55555555;
+    d += (t >> 1) & 0x55555555;
+
+    for (j = 0; j < 8; j++)
+    __loop__(
+      invariant(i <= MLKEM_N / 8 && j <= 8)
+      invariant(array_abs_bound(r->coeffs, 0, 8 * i + j, 3)))
+    {
+      const int16_t a = (d >> (4 * j + 0)) & 0x3;
+      const int16_t b = (d >> (4 * j + 2)) & 0x3;
+      r->coeffs[8 * i + j] = a - b;
+    }
+  }
+}
+
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_ETA1 == 3
+/*************************************************
+ * Name:        load24_littleendian
+ *
+ * Description: load 3 bytes into a 32-bit integer
+ *              in little-endian order.
+ *              This function is only needed for ML-KEM-512
+ *
+ * Arguments:   - const uint8_t *x: pointer to input byte array
+ *
+ * Returns 32-bit unsigned integer loaded from x (most significant byte is zero)
+ **************************************************/
+static uint32_t load24_littleendian(const uint8_t x[3])
+{
+  uint32_t r;
+  r = (uint32_t)x[0];
+  r |= (uint32_t)x[1] << 8;
+  r |= (uint32_t)x[2] << 16;
+  return r;
+}
+
+MLKEM_NATIVE_INTERNAL_API
+void poly_cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4])
+{
+  unsigned i;
+  for (i = 0; i < MLKEM_N / 4; i++)
+  __loop__(
+    invariant(i <= MLKEM_N / 4)
+    invariant(array_abs_bound(r->coeffs, 0, 4 * i, 4)))
+  {
+    unsigned j;
+    const uint32_t t = load24_littleendian(buf + 3 * i);
+    uint32_t d = t & 0x00249249;
+    d += (t >> 1) & 0x00249249;
+    d += (t >> 2) & 0x00249249;
+
+    for (j = 0; j < 4; j++)
+    __loop__(
+      invariant(i <= MLKEM_N / 4 && j <= 4)
+      invariant(array_abs_bound(r->coeffs, 0, 4 * i + j, 4)))
+    {
+      const int16_t a = (d >> (6 * j + 0)) & 0x7;
+      const int16_t b = (d >> (6 * j + 3)) & 0x7;
+      r->coeffs[4 * i + j] = a - b;
+    }
+  }
+}
+#endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_ETA1 == \
+          3 */
 
 #else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
 

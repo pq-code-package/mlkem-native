@@ -12,7 +12,6 @@
 #include "poly.h"
 #include "poly_k.h"
 #include "randombytes.h"
-#include "sampling.h"
 #include "symmetric.h"
 
 #include "arith_backend.h"
@@ -132,7 +131,7 @@ static void pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES], polyvec *b, poly *v)
 /*************************************************
  * Name:        unpack_ciphertext
  *
- * Description: De-serialize and decompress ciphertext from a byte array;
+ * Description: De-serialize and depoly.ciphertext from a byte array;
  *              approximate inverse of pack_ciphertext
  *
  * Arguments:   - polyvec *b: pointer to the output vector of polynomials b
