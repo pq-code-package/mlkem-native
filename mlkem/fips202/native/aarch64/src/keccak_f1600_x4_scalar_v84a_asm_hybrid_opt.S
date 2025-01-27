@@ -874,11 +874,10 @@
     ror sAmu, sAmu,#(64-36)
     ror sAsu, sAsu,#(64-55)
 .endm
-
 .global MLKEM_ASM_NAMESPACE(keccak_f1600_x4_scalar_v84a_asm_hybrid_opt)
 .text
-.align 4
 
+.balign 4
 MLKEM_ASM_NAMESPACE(keccak_f1600_x4_scalar_v84a_asm_hybrid_opt):
     alloc_stack
     save_gprs

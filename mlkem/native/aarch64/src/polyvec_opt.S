@@ -140,6 +140,7 @@
 #if MLKEM_K == 2
 .global MLKEM_ASM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_asm_opt)
 
+.balign 4
 MLKEM_ASM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_asm_opt):
         push_stack
 
@@ -510,6 +511,7 @@ MLKEM_ASM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_asm_opt):
 #if MLKEM_K == 3
 .global MLKEM_ASM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_asm_opt)
 
+.balign 4
 MLKEM_ASM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_asm_opt):
         push_stack
         mov wtmp, #3329
@@ -984,6 +986,7 @@ MLKEM_ASM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_asm_opt):
 #if MLKEM_K == 4
 .global MLKEM_ASM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_asm_opt)
 
+.balign 4
 MLKEM_ASM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_asm_opt):
         push_stack
         mov wtmp, #3329
