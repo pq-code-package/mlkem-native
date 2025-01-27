@@ -77,7 +77,7 @@ static int check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
  **************************************************/
 static int check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
-  uint8_t test[MLKEM_SYMBYTES];
+  ALIGN uint8_t test[MLKEM_SYMBYTES];
   /*
    * The parts of `sk` being hashed and compared here are public, so
    * no public information is leaked through the runtime or the return value

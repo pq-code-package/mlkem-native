@@ -87,7 +87,6 @@ const qdata_t qdata = {{
 
 #else /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT */
 
-/* Dummy declaration for compilers disliking empty compilation units */
-#define empty_cu_consts MLKEM_NAMESPACE(empty_cu_consts)
-int empty_cu_consts;
+MLKEM_NATIVE_EMPTY_CU(avx2_consts)
+
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT */

@@ -62,6 +62,11 @@
 #endif
 
 /* mlkem/common.h */
+#if defined(MLKEM_NATIVE_EMPTY_CU)
+#undef MLKEM_NATIVE_EMPTY_CU
+#endif
+
+/* mlkem/common.h */
 #if defined(MLKEM_NATIVE_FIPS202_BACKEND_NAME)
 #undef MLKEM_NATIVE_FIPS202_BACKEND_NAME
 #endif
@@ -843,11 +848,6 @@
 #undef writeable
 #endif
 
-/* mlkem/compress.c */
-#if defined(empty_cu_compress)
-#undef empty_cu_compress
-#endif
-
 /* mlkem/compress.h */
 #if defined(COMPRESS_H)
 #undef COMPRESS_H
@@ -963,11 +963,6 @@
 #undef MLKEM_NATIVE_DEBUG_ERROR_HEADER
 #endif
 
-/* mlkem/debug.c */
-#if defined(empty_cu_debug)
-#undef empty_cu_debug
-#endif
-
 /* mlkem/debug.h */
 #if defined(MLKEM_DEBUG_H)
 #undef MLKEM_DEBUG_H
@@ -1006,11 +1001,6 @@
 /* mlkem/debug.h */
 #if defined(mlkem_debug_check_bounds)
 #undef mlkem_debug_check_bounds
-#endif
-
-/* mlkem/fips202/fips202.c */
-#if defined(empty_cu_fips202)
-#undef empty_cu_fips202
 #endif
 
 /* mlkem/fips202/fips202.c */
@@ -1119,11 +1109,6 @@
 #endif
 
 /* mlkem/fips202/fips202x4.c */
-#if defined(empty_cu_fips202x4)
-#undef empty_cu_fips202x4
-#endif
-
-/* mlkem/fips202/fips202x4.c */
 #if defined(keccak_absorb_once_x4)
 #undef keccak_absorb_once_x4
 #endif
@@ -1198,11 +1183,6 @@
 #undef ROL
 #endif
 
-/* mlkem/fips202/keccakf1600.c */
-#if defined(empty_cu_keccakf1600)
-#undef empty_cu_keccakf1600
-#endif
-
 /* mlkem/fips202/keccakf1600.h */
 #if defined(KECCAKF1600_H)
 #undef KECCAKF1600_H
@@ -1256,11 +1236,6 @@
 /* mlkem/poly.c */
 #if defined(cast_uint16_to_int16)
 #undef cast_uint16_to_int16
-#endif
-
-/* mlkem/poly.c */
-#if defined(empty_cu_poly)
-#undef empty_cu_poly
 #endif
 
 /* mlkem/poly.c */
@@ -1376,11 +1351,6 @@
 /* mlkem/sampling.c */
 #if defined(MLKEM_GEN_MATRIX_NBLOCKS)
 #undef MLKEM_GEN_MATRIX_NBLOCKS
-#endif
-
-/* mlkem/sampling.c */
-#if defined(empty_cu_sampling)
-#undef empty_cu_sampling
 #endif
 
 /* mlkem/sampling.c */
@@ -1588,11 +1558,6 @@
 #undef asm
 #endif
 
-/* mlkem/verify.c */
-#if defined(empty_cu_verify)
-#undef empty_cu_verify
-#endif
-
 /* mlkem/verify.h */
 #if defined(MLKEM_USE_ASM_VALUE_BARRIER)
 #undef MLKEM_USE_ASM_VALUE_BARRIER
@@ -1656,11 +1621,6 @@
 /* mlkem/verify.h */
 #if defined(value_barrier_u8)
 #undef value_barrier_u8
-#endif
-
-/* mlkem/zetas.c */
-#if defined(empty_cu_zetas)
-#undef empty_cu_zetas
 #endif
 
 #endif /* MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS */
