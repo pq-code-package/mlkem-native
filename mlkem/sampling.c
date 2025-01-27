@@ -138,10 +138,10 @@ MLKEM_NATIVE_INTERNAL_API
 void poly_rej_uniform_x4(poly *vec, uint8_t *seed[4])
 {
   /* Temporary buffers for XOF output before rejection sampling */
-  uint8_t buf0[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
-  uint8_t buf1[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
-  uint8_t buf2[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
-  uint8_t buf3[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
+  ALIGN uint8_t buf0[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
+  ALIGN uint8_t buf1[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
+  ALIGN uint8_t buf2[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
+  ALIGN uint8_t buf3[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
 
   /* Tracks the number of coefficients we have already sampled */
   unsigned ctr[KECCAK_WAY];
@@ -196,7 +196,7 @@ MLKEM_NATIVE_INTERNAL_API
 void poly_rej_uniform(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
 {
   xof_ctx state;
-  uint8_t buf[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
+  ALIGN uint8_t buf[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
   unsigned ctr, buflen;
 
   xof_init(&state);
