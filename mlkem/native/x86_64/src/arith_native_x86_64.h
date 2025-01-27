@@ -56,4 +56,29 @@ void nttfrombytes_avx2(__m256i *r, const uint8_t *a, const __m256i *qdata);
 #define tomont_avx2 MLKEM_NAMESPACE(tomont_avx2)
 void tomont_avx2(__m256i *r, const __m256i *qdata);
 
+#define poly_compress_d4_avx2 MLKEM_NAMESPACE(poly_compress_d4_avx2)
+void poly_compress_d4_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
+                           const __m256i *RESTRICT a);
+#define poly_decompress_d4_avx2 MLKEM_NAMESPACE(poly_decompress_d4_avx2)
+void poly_decompress_d4_avx2(__m256i *RESTRICT r,
+                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]);
+#define poly_compress_d10_avx2 MLKEM_NAMESPACE(poly_compress10_avx2)
+void poly_compress_d10_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
+                            const __m256i *RESTRICT a);
+#define poly_decompress_d10_avx2 MLKEM_NAMESPACE(poly_decompress10_avx2)
+void poly_decompress_d10_avx2(__m256i *RESTRICT r,
+                              const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10]);
+#define poly_compress_d5_avx2 MLKEM_NAMESPACE(poly_compress_d5_avx2)
+void poly_compress_d5_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
+                           const __m256i *RESTRICT a);
+#define poly_decompress_d5_avx2 MLKEM_NAMESPACE(poly_decompress_d5_avx2)
+void poly_decompress_d5_avx2(__m256i *RESTRICT r,
+                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5]);
+#define poly_compress_d11_avx2 MLKEM_NAMESPACE(poly_compress11_avx2)
+void poly_compress_d11_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
+                            const __m256i *RESTRICT a);
+#define poly_decompress_d11_avx2 MLKEM_NAMESPACE(poly_decompress11_avx2)
+void poly_decompress_d11_avx2(__m256i *RESTRICT r,
+                              const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]);
+
 #endif /* MLKEM_X86_64_NATIVE_H */

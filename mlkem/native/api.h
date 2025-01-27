@@ -336,4 +336,155 @@ __contract__(
 );
 #endif /* MLKEM_USE_NATIVE_REJ_UNIFORM */
 
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || \
+    (MLKEM_K == 2 || MLKEM_K == 3)
+#if defined(MLKEM_USE_NATIVE_POLY_COMPRESS_D4)
+/*************************************************
+ * Name:        poly_compress_d4_native
+ *
+ * Description: Compression (4 bits) and subsequent serialization of a
+ *              polynomial
+ *
+ * Arguments:   - uint8_t *r: pointer to output byte array
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_D4 bytes)
+ *              - const int16_t a[MLKEM_N]: pointer to input polynomial
+ *                  Coefficients must be unsigned canonical,
+ *                  i.e. in [0,1,..,MLKEM_Q-1].
+ **************************************************/
+static INLINE void poly_compress_d4_native(
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const int16_t a[MLKEM_N]);
+#endif /* MLKEM_USE_NATIVE_POLY_COMPRESS_D4 */
+
+#if defined(MLKEM_USE_NATIVE_POLY_COMPRESS_D10)
+/*************************************************
+ * Name:        poly_compress_d10_native
+ *
+ * Description: Compression (10 bits) and subsequent serialization of a
+ *              polynomial
+ *
+ * Arguments:   - uint8_t *r: pointer to output byte array
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_D10 bytes)
+ *              - const int16_t a[MLKEM_N]: pointer to input polynomial
+ *                  Coefficients must be unsigned canonical,
+ *                  i.e. in [0,1,..,MLKEM_Q-1].
+ **************************************************/
+static INLINE void poly_compress_d10_native(
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const int16_t a[MLKEM_N]);
+#endif /* MLKEM_USE_NATIVE_POLY_COMPRESS_D10 */
+
+#if defined(MLKEM_USE_NATIVE_POLY_DECOMPRESS_D4)
+/*************************************************
+ * Name:        poly_decompress_d4
+ *
+ * Description: De-serialization and subsequent decompression (dv bits) of a
+ *              polynomial; approximate inverse of poly_compress
+ *
+ * Arguments:   - int16_t r[MLKEM_N]: pointer to output polynomial
+ *              - const uint8_t *a: pointer to input byte array
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_D4 bytes)
+ *
+ * Upon return, the coefficients of the output polynomial are unsigned-canonical
+ * (non-negative and smaller than MLKEM_Q).
+ *
+ **************************************************/
+static INLINE void poly_decompress_d4_native(
+    int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]);
+#endif /* MLKEM_USE_NATIVE_POLY_DECOMPRESS_D4 */
+
+#if defined(MLKEM_USE_NATIVE_POLY_DECOMPRESS_D10)
+/*************************************************
+ * Name:        poly_decompress_d10_native
+ *
+ * Description: De-serialization and subsequent decompression (10 bits) of a
+ *              polynomial; approximate inverse of poly_compress_d10
+ *
+ * Arguments:   - int16_t r[MLKEM_N]: pointer to output polynomial
+ *              - const uint8_t *a: pointer to input byte array
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_D10 bytes)
+ *
+ * Upon return, the coefficients of the output polynomial are unsigned-canonical
+ * (non-negative and smaller than MLKEM_Q).
+ *
+ **************************************************/
+static INLINE void poly_decompress_d10_native(
+    int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10]);
+#endif /* MLKEM_USE_NATIVE_POLY_DECOMPRESS_D10 */
+#endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
+          || MLKEM_K == 3) */
+
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
+#if defined(MLKEM_USE_NATIVE_POLY_COMPRESS_D5)
+/*************************************************
+ * Name:        poly_compress_d5_native
+ *
+ * Description: Compression (5 bits) and subsequent serialization of a
+ *              polynomial
+ *
+ * Arguments:   - uint8_t *r: pointer to output byte array
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_D5 bytes)
+ *              - const int16_t a[MLKEM_N]: pointer to input polynomial
+ *                  Coefficients must be unsigned canonical,
+ *                  i.e. in [0,1,..,MLKEM_Q-1].
+ **************************************************/
+static INLINE void poly_compress_d5_native(
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const int16_t a[MLKEM_N]);
+#endif /* MLKEM_USE_NATIVE_POLY_COMPRESS_D5 */
+
+#if defined(MLKEM_USE_NATIVE_POLY_COMPRESS_D11)
+/*************************************************
+ * Name:        poly_compress_d11_native
+ *
+ * Description: Compression (11 bits) and subsequent serialization of a
+ *              polynomial
+ *
+ * Arguments:   - uint8_t *r: pointer to output byte array
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_D11 bytes)
+ *              - const int16_t a[MLKEM_N]: pointer to input polynomial
+ *                  Coefficients must be unsigned canonical,
+ *                  i.e. in [0,1,..,MLKEM_Q-1].
+ **************************************************/
+static INLINE void poly_compress_d11_native(
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const int16_t a[MLKEM_N]);
+#endif /* MLKEM_USE_NATIVE_POLY_COMPRESS_D11 */
+
+#if defined(MLKEM_USE_NATIVE_POLY_DECOMPRESS_D5)
+/*************************************************
+ * Name:        poly_decompress_d5_native
+ *
+ * Description: De-serialization and subsequent decompression (dv bits) of a
+ *              polynomial; approximate inverse of poly_compress
+ *
+ * Arguments:   - int16_t r[MLKEM_N]: pointer to output polynomial
+ *              - const uint8_t *a: pointer to input byte array
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_D5 bytes)
+ *
+ * Upon return, the coefficients of the output polynomial are unsigned-canonical
+ * (non-negative and smaller than MLKEM_Q).
+ *
+ **************************************************/
+static INLINE void poly_decompress_d5_native(
+    int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5]);
+#endif /* MLKEM_USE_NATIVE_POLY_DECOMPRESS_D5 */
+
+#if defined(MLKEM_USE_NATIVE_POLY_DECOMPRESS_D11)
+/*************************************************
+ * Name:        poly_decompress_d11_native
+ *
+ * Description: De-serialization and subsequent decompression (11 bits) of a
+ *              polynomial; approximate inverse of poly_compress_d11
+ *
+ * Arguments:   - int16_t r[MLKEM_N]: pointer to output polynomial
+ *              - const uint8_t *a: pointer to input byte array
+ *                   (of length MLKEM_POLYCOMPRESSEDBYTES_D11 bytes)
+ *
+ * Upon return, the coefficients of the output polynomial are unsigned-canonical
+ * (non-negative and smaller than MLKEM_Q).
+ *
+ **************************************************/
+static INLINE void poly_decompress_d11_native(
+    int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]);
+#endif /* MLKEM_USE_NATIVE_POLY_DECOMPRESS_D11 */
+#endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4 \
+        */
+
 #endif /* MLKEM_NATIVE_ARITH_NATIVE_API_H */
