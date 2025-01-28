@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-{ pkgs, bitwuzla }:
+{ pkgs, bitwuzla, z3 }:
 rec {
   glibc-join = p: p.buildPackages.symlinkJoin {
     name = "glibc-join";
@@ -87,6 +87,8 @@ rec {
         black;
     };
 
-  cbmc = pkgs.callPackage ./cbmc { inherit bitwuzla; };
+  cbmc = pkgs.callPackage ./cbmc {
+    inherit bitwuzla z3;
+  };
   valgrind-varlat = pkgs.callPackage ./valgrind { };
 }

@@ -20,7 +20,10 @@
       systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
       perSystem = { config, pkgs, system, ... }:
         let
-          util = pkgs.callPackage ./nix/util.nix { bitwuzla = inputs.nixpkgs-unstable.legacyPackages.${system}.bitwuzla; };
+          util = pkgs.callPackage ./nix/util.nix {
+            bitwuzla = inputs.nixpkgs-unstable.legacyPackages.${system}.bitwuzla;
+            z3 = inputs.nixpkgs-unstable.legacyPackages.${system}.z3;
+          };
         in
         {
           packages.cbmc = util.cbmc;
@@ -90,6 +93,7 @@
             util = pkgs.callPackage ./nix/util.nix {
               inherit pkgs;
               bitwuzla = pkgs-unstable.bitwuzla;
+              z3 = pkgs-unstable.z3;
             };
           in
           util.wrapShell util.mkShell {
