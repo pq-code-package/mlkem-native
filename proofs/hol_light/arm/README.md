@@ -7,6 +7,10 @@ ML-KEM AArch64 assembly routines. The proofs were developed by John Harrison
 and are written in the [HOL Light](https://hol-light.github.io/) theorem
 prover, utilizing the assembly verification infrastructure from [s2n-bignum](https://github.com/awslabs/s2n-bignum).
 
+The HOL-Light proofs in this dircetory are not yet synchronized with the assembly in
+[mlkem/native/aarch64/src](../../../mlkem/native/aarch64/src) -- we do not yet claim that the AArch64 NTT and invNTT
+that mlkem-native ships with are formally verified.
+
 Each function is proved in a separate `.ml` file in [proofs/](proofs). Each file
 contains the byte code being verified, as well as the specification that is being
 proved. Specifications are essentially Hoare triples, with the noteworthy difference

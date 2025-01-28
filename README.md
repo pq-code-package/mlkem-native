@@ -57,10 +57,11 @@ undefined behaviour in C, including out of bounds memory accesses and integer ov
 all C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202) involved in running mlkem-native with its C backend.
 See [proofs/cbmc](proofs/cbmc) for details.
 
-Experiments are underway to verify assembly using the [HOL-Light](https://hol-light.github.io/) theorem prover
-and the [s2n-bignum](https://github.com/awslabs/s2n-bignum) infrastructure (e.g. see
-[here](https://github.com/jargh/s2n-bignum-dev/tree/mlkem) for proofs of SLOTHY-optimized versions of the AArch64 NTT
-and invNTT by John Harrison).
+HOL-Light functional correctness proofs for SLOTHY-optimized versions of the AArch64 NTT and inverse NTT are available
+in [proofs/hol_light/arm](proofs/hol_light/arm). These proofs were contributed by John Harrison, and are
+utilizing the verification infrastructure provided by [s2n-bignum](https://github.com/awslabs/s2n-bignum) infrastructure.
+The HOL-Light proofs are currently not yet synchronized with the assembly in [mlkem/native/aarch64/src](mlkem/native/aarch64/src) --
+we therefore do not yet claim that the AArch64 NTT and invNTT that mlkem-native ships with are formally verified.
 
 ## State
 
