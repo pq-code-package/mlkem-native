@@ -16,7 +16,7 @@
 #define MLKEM_USE_FIPS202_X1_NATIVE
 static INLINE void keccak_f1600_x1_native(uint64_t *state)
 {
-  sha3_keccakf(state);
+  tiny_sha3_keccakf(state);
 }
 
 #endif /* FIPS202_NATIVE_PROFILE_H */
