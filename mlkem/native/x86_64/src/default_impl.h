@@ -26,6 +26,14 @@
 #define MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE
 #define MLKEM_USE_NATIVE_POLY_TOBYTES
 #define MLKEM_USE_NATIVE_POLY_FROMBYTES
+#define MLKEM_USE_NATIVE_POLY_COMPRESS_D4
+#define MLKEM_USE_NATIVE_POLY_COMPRESS_D5
+#define MLKEM_USE_NATIVE_POLY_COMPRESS_D10
+#define MLKEM_USE_NATIVE_POLY_COMPRESS_D11
+#define MLKEM_USE_NATIVE_POLY_DECOMPRESS_D4
+#define MLKEM_USE_NATIVE_POLY_DECOMPRESS_D5
+#define MLKEM_USE_NATIVE_POLY_DECOMPRESS_D10
+#define MLKEM_USE_NATIVE_POLY_DECOMPRESS_D11
 
 static INLINE void poly_permute_bitrev_to_custom(int16_t data[MLKEM_N])
 {
@@ -91,5 +99,59 @@ static INLINE void poly_frombytes_native(int16_t r[MLKEM_N],
 {
   nttfrombytes_avx2((__m256i *)r, a, qdata.vec);
 }
+
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || \
+    (MLKEM_K == 2 || MLKEM_K == 3)
+static INLINE void poly_compress_d4_native(
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const int16_t a[MLKEM_N])
+{
+  poly_compress_d4_avx2(r, (const __m256i *)a);
+}
+
+static INLINE void poly_compress_d10_native(
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const int16_t a[MLKEM_N])
+{
+  poly_compress_d10_avx2(r, (const __m256i *)a);
+}
+
+static INLINE void poly_decompress_d4_native(
+    int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
+{
+  poly_decompress_d4_avx2((__m256i *)r, a);
+}
+
+static INLINE void poly_decompress_d10_native(
+    int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
+{
+  poly_decompress_d10_avx2((__m256i *)r, a);
+}
+#endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
+          || MLKEM_K == 3) */
+
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
+static INLINE void poly_compress_d5_native(
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const int16_t a[MLKEM_N])
+{
+  poly_compress_d5_avx2(r, (const __m256i *)a);
+}
+
+static INLINE void poly_compress_d11_native(
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const int16_t a[MLKEM_N])
+{
+  poly_compress_d11_avx2(r, (const __m256i *)a);
+}
+
+static INLINE void poly_decompress_d5_native(
+    int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
+{
+  poly_decompress_d5_avx2((__m256i *)r, a);
+}
+
+static INLINE void poly_decompress_d11_native(
+    int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
+{
+  poly_decompress_d11_avx2((__m256i *)r, a);
+}
+#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 4 */
 
 #endif /* MLKEM_NATIVE_ARITH_PROFILE_IMPL_H */

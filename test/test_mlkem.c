@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+#include "../mlkem/compress.h"
 #include "../mlkem/mlkem_native.h"
 #include "../mlkem/randombytes.h"
 
@@ -234,6 +235,78 @@ static int test_invalid_ciphertext(void)
   return 0;
 }
 
+/* This test invokes the polynomial (de)compression routines
+ * with minimally sized buffers. When run with address sanitization,
+ * this ensures that no buffer overflow is happening. This is of interest
+ * because the compressed buffers sometimes have unaligned lengths and
+ * are therefore at risk of being overflowed by vectorized code. */
+static int test_poly_compress_no_overflow(void)
+{
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || \
+    (MLKEM_K == 2 || MLKEM_K == 3)
+  {
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4];
+    poly s;
+    memset((uint8_t *)&s, 0, sizeof(s));
+    poly_compress_d4(r, &s);
+  }
+
+  {
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4];
+    poly s;
+    memset(r, 0, sizeof(r));
+    poly_decompress_d4(&s, r);
+  }
+
+  {
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10];
+    poly s;
+    memset((uint8_t *)&s, 0, sizeof(s));
+    poly_compress_d10(r, &s);
+  }
+
+  {
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10];
+    poly s;
+    memset(r, 0, sizeof(r));
+    poly_decompress_d10(&s, r);
+  }
+#endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
+          || MLKEM_K == 3) */
+
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
+  {
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5];
+    poly s;
+    memset((uint8_t *)&s, 0, sizeof(s));
+    poly_compress_d5(r, &s);
+  }
+
+  {
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5];
+    poly s;
+    memset(r, 0, sizeof(r));
+    poly_decompress_d5(&s, r);
+  }
+
+  {
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11];
+    poly s;
+    memset((uint8_t *)&s, 0, sizeof(s));
+    poly_compress_d11(r, &s);
+  }
+
+  {
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11];
+    poly s;
+    memset(r, 0, sizeof(r));
+    poly_decompress_d11(&s, r);
+  }
+#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 4 */
+
+  return 0;
+}
+
 int main(void)
 {
   unsigned i;
@@ -246,6 +319,7 @@ int main(void)
     r |= test_invalid_sk_a();
     r |= test_invalid_sk_b();
     r |= test_invalid_ciphertext();
+    r |= test_poly_compress_no_overflow();
     if (r)
     {
       return 1;
