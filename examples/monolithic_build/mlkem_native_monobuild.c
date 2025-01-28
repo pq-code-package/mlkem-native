@@ -1029,6 +1029,11 @@
 #endif
 
 /* mlkem/fips202/fips202.h */
+#if defined(FIPS202_X4_DEFAULT_IMPLEMENTATION)
+#undef FIPS202_X4_DEFAULT_IMPLEMENTATION
+#endif
+
+/* mlkem/fips202/fips202.h */
 #if defined(SHA3_256_HASHBYTES)
 #undef SHA3_256_HASHBYTES
 #endif

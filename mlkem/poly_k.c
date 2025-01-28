@@ -306,7 +306,7 @@ void poly_getnoise_eta1122_4x(poly *r0, poly *r1, poly *r2, poly *r3,
 #endif
   ALIGN uint8_t buf0[MLKEM_ETA1 * MLKEM_N / 4];
   ALIGN uint8_t buf1[MLKEM_ETA1 * MLKEM_N / 4];
-  /* pad to larger buffer*/
+  /* Pad to larger buffer */
   ALIGN uint8_t buf2[MLKEM_ETA1 * MLKEM_N / 4];
   ALIGN uint8_t buf3[MLKEM_ETA1 * MLKEM_N / 4];
 
@@ -324,7 +324,17 @@ void poly_getnoise_eta1122_4x(poly *r0, poly *r1, poly *r2, poly *r3,
   extkey2[MLKEM_SYMBYTES] = nonce2;
   extkey3[MLKEM_SYMBYTES] = nonce3;
 
+  /* On systems with fast batched Keccak, we use 4-fold batched PRF,
+   * even though that means generating more random data in buf2 and buf3
+   * than necessary. */
+#if !defined(FIPS202_X4_DEFAULT_IMPLEMENTATION)
   prf_eta1_x4(buf0, buf1, buf2, buf3, extkey0, extkey1, extkey2, extkey3);
+#else  /* FIPS202_X4_DEFAULT_IMPLEMENTATION */
+  prf_eta1(buf0, extkey0);
+  prf_eta1(buf1, extkey1);
+  prf_eta2(buf2, extkey2);
+  prf_eta2(buf3, extkey3);
+#endif /* FIPS202_X4_DEFAULT_IMPLEMENTATION */
 
   poly_cbd_eta1(r0, buf0);
   poly_cbd_eta1(r1, buf1);
@@ -335,6 +345,5 @@ void poly_getnoise_eta1122_4x(poly *r0, poly *r1, poly *r2, poly *r3,
   debug_assert_abs_bound(r1, MLKEM_N, MLKEM_ETA1 + 1);
   debug_assert_abs_bound(r2, MLKEM_N, MLKEM_ETA2 + 1);
   debug_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA2 + 1);
-
 }
 #endif /* MLKEM_K == 2 */

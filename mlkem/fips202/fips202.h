@@ -15,7 +15,6 @@
 #define SHA3_384_RATE 104
 #define SHA3_512_RATE 72
 
-
 /* Context for non-incremental API */
 #define shake128ctx MLKEM_NAMESPACE(shake128ctx)
 typedef struct
@@ -141,5 +140,16 @@ __contract__(
   requires(memory_no_alias(output, SHA3_512_HASHBYTES))
   assigns(memory_slice(output, SHA3_512_HASHBYTES))
 );
+
+#include "fips202_backend.h"
+#if !defined(MLKEM_NATIVE_FIPS202_BACKEND_IMPL) || \
+    (!defined(MLKEM_USE_FIPS202_X2_NATIVE) &&      \
+     !defined(MLKEM_USE_FIPS202_X4_NATIVE))
+/* If you provide your own FIPS-202 implementation where the x4-
+ * Keccak-f1600-x4 implementation falls back to 4-fold Keccak-f1600,
+ * set this to gain a small speedup. */
+#define FIPS202_X4_DEFAULT_IMPLEMENTATION
+#endif
+
 
 #endif /* FIPS202_H */
