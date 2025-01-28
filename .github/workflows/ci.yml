@@ -370,7 +370,6 @@ jobs:
           acvp: false
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c17"
-  # The purpose of this job is to test non-default yet valid configurations
   config_variations:
     name: Non-standard configurations
     needs: [quickcheck, quickcheck-windows, quickcheck-c90, quickcheck-lib, examples, lint, lint-markdown-link]

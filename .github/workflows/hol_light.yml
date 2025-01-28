@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: Apache-2.0
+
+name: HOL-Light
+permissions:
+  contents: read
+on:
+  push:
+    branches: ["main"]
+    # Only run upon changes to AArch64 NTT or invNTT
+    paths:
+     - 'proofs/hol_light/arm/**/*.S'
+  pull_request:
+    branches: ["main"]
+    paths:
+      # Only run upon changes to AArch64 NTT or invNTT
+      - 'proofs/hol_light/arm/**/*.S'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hol_light_proofs:
+    strategy:
+      matrix:
+        proof: [mlkem_ntt,mlkem_intt]
+    name: HOL Light proof for ${{ matrix.proof }}.S
+    runs-on: pqcp-arm64
+    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: ./.github/actions/setup-shell
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          nix-shell: 'hol_light'
+          script: |
+            make -C proofs/hol_light/arm mlkem/${{ matrix.proof }}.correct
