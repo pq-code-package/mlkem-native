@@ -264,6 +264,24 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
           cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+  simpasm:
+    name: ASM simplifier
+    strategy:
+      matrix:
+        target:
+           - runner: ubuntu-24.04-arm
+             arch: 'aarch64'
+           - runner: ubuntu-latest
+             arch: 'x86_64'
+    runs-on: ${{ matrix.target.runner }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Simplify assembly
+        run: |
+          ./scripts/simpasm -d mlkem/native/${{ matrix.target.arch }}/src --cflags='-Imlkem/native/${{ matrix.target.arch }}/src/' -p
+      - name: Test simplified assembly
+        run: |
+          OPT=1 make quickcheck
   compiler_tests:
     name: Compiler tests  (${{ matrix.compiler.name }}, ${{ matrix.target.name }})
     needs: [quickcheck, quickcheck-windows, quickcheck-c90, quickcheck-lib, examples, lint, lint-markdown-link]
