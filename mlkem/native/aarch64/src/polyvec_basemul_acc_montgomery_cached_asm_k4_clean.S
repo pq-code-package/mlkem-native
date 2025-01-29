@@ -11,6 +11,7 @@
 
 #include "../../../common.h"
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) && MLKEM_K == 4
+/* simpasm: header-end */
 
 // Input:
 // - Vectors al, ah of 32-bit entries
@@ -223,4 +224,5 @@ k4_loop_start:
     .unreq out1
     .unreq t0
 
+/* simpasm: footer-start */
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN && MLKEM_K == 4 */

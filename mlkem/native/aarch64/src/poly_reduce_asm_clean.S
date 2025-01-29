@@ -5,6 +5,7 @@
 
 #include "../../../common.h"
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN)
+/* simpasm: header-end */
 
 /* Barrett reduction */
 .macro barrett_reduce a
@@ -89,4 +90,5 @@ loop_start:
         .unreq modulus
         .unreq modulus_twisted
 
+/* simpasm: footer-start */
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN */

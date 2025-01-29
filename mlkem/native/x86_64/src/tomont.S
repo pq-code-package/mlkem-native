@@ -14,8 +14,9 @@
 #include "../../../common.h"
 
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT)
-#include "consts.h"
+/* simpasm: header-end */
 
+#include "consts.h"
 #include "fq.inc"
 
 .text
@@ -63,4 +64,5 @@ vmovdqa		%ymm10,224(%rdi)
 
 ret
 
+/* simpasm: footer-start */
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT */

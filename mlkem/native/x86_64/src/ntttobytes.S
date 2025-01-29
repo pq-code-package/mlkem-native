@@ -9,6 +9,7 @@
 #include "../../../common.h"
 
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT)
+/* simpasm: header-end */
 
 #include "consts.h"
 #include "fq.inc"
@@ -86,4 +87,5 @@ vmovdqu		%ymm9,160(%rdi)
 
 ret
 
+/* simpasm: footer-start */
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT */

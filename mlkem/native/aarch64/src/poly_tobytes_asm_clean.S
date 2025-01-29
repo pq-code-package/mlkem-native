@@ -5,6 +5,7 @@
 
 #include "../../../common.h"
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN)
+/* simpasm: header-end */
 
 /********************************************
  *             poly_tobytes()               *
@@ -58,4 +59,5 @@ poly_tobytes_asm_clean_asm_loop_start:
         .unreq src
         .unreq count
 
+/* simpasm: footer-start */
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN */

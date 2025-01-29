@@ -8,6 +8,7 @@
 
 #include "../../../common.h"
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT)
+/* simpasm: header-end */
 
 #include "consts.h"
 
@@ -134,4 +135,5 @@ schoolbook	3
 mov		%r8,%rsp
 ret
 
+/* simpasm: footer-start */
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT */

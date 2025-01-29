@@ -12,6 +12,7 @@
 #include "../../../common.h"
 
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT)
+/* simpasm: header-end */
 
 #include "consts.h"
 #include "shuffle.inc"
@@ -253,4 +254,5 @@ intt_level6	0
 intt_level6	1
 ret
 
+/* simpasm: footer-start */
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT */

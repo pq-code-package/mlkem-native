@@ -5,6 +5,7 @@
 
 #include "../../../common.h"
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
+/* simpasm: header-end */
 
 /* Montgomery multiplication, with precomputed Montgomery twist
  * Expects modulus in consts.h[0]. */
@@ -173,4 +174,5 @@ poly_mulcache_compute_asm_opt_loop:
         .unreq modulus
         .unreq modulus_twisted
 
+/* simpasm: footer-start */
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT */
