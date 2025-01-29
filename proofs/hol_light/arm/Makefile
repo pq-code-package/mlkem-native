@@ -69,11 +69,25 @@ OBJ = mlkem/mlkem_ntt.o mlkem/mlkem_intt.o
 # According to
 # https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms,
 # x18 should not be used for Apple platforms. Check this using grep.
+ifneq ($(OSTYPE_RESULT),Darwin)
 $(OBJ): %.o : %.S
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	cat $< | $(PREPROCESS) | $(SPLIT) | grep -v -E '^\s+.quad\s+0x[0-9a-f]+$$' | $(ASSEMBLE) -o $@ -
 	$(OBJDUMP) $@ | ( ( ! grep --ignore-case -E 'w18|[^0]x18' ) || ( rm $@ ; exit 1 ) )
 	cat $< | $(PREPROCESS) | $(SPLIT) | $(ASSEMBLE) -o $@ -
+else
+$(OBJ): %.o : %.S
+	@if ! (which gobjcopy >/dev/null); then \
+	  echo "gobjcopy not found. Consider installing it via 'brew install binutils', and put its parent directory (typically `/opt/homebrew/opt/binutils/bin`) in your PATH.";\
+	  exit 1; \
+	fi
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	cat $< | $(PREPROCESS) | $(SPLIT) | grep -v -E '^\s+.quad\s+0x[0-9a-f]+$$' | $(ASSEMBLE) -o $@ -
+	$(OBJDUMP) $@ | ( ( ! grep --ignore-case -E 'w18|[^0]x18' ) || ( rm $@ ; exit 1 ) )
+	cat $< | $(PREPROCESS) | $(SPLIT) | $(ASSEMBLE) -o $@ -
+        # On Darwin, we need to explicitly convert Mach-O to ELF
+	gobjcopy -I mach-o-arm64 -O elf64-littleaarch64 $@ $@
+endif
 
 clean:; rm -f */*.o */*/*.o */*.correct */*.native
 
