@@ -413,7 +413,7 @@ MLKEM_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k4_opt):
         // zip1 v5.8H, v7.8H, v15.8H          // ........................................................................................*.........................
 
         sub count, count, #2
-1:
+polyvec_basemul_acc_montgomery_cached_asm_k4_opt_loop:
                                              // Instructions:    82
                                              // Expected cycles: 102
                                              // Expected IPC:    0.80
@@ -597,7 +597,8 @@ MLKEM_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k4_opt):
         // str q13, [x0, #-16]               // ...................................................~...........................'.....................................................~...........................'.....................................................l..........................
 
         sub count, count, #1
-        cbnz count, 1b
+        cbnz count, polyvec_basemul_acc_montgomery_cached_asm_k4_opt_loop
+
                                              // Instructions:    50
                                              // Expected cycles: 56
                                              // Expected IPC:    0.89

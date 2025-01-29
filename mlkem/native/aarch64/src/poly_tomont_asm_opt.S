@@ -82,7 +82,7 @@ MLKEM_ASM_NAMESPACE(poly_tomont_asm_opt):
         // ldr q27, [x0, #32]                // ......*........................
 
         sub count, count, #1
-1:
+poly_tomont_asm_opt_loop:
                                               // Instructions:    20
                                               // Expected cycles: 24
                                               // Expected IPC:    0.83
@@ -142,7 +142,7 @@ MLKEM_ASM_NAMESPACE(poly_tomont_asm_opt):
         // str q1, [x0, #-16]                     // ..............'...*...................
 
         sub count, count, 1
-        cbnz count, 1b
+        cbnz count, poly_tomont_asm_opt_loop
                                               // Instructions:    15
                                               // Expected cycles: 18
                                               // Expected IPC:    0.83

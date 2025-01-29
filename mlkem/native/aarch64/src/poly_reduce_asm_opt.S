@@ -100,7 +100,7 @@ MLKEM_ASM_NAMESPACE(poly_reduce_asm_opt):
         // add v16.8H, v2.8H, v27.8H              // .....................*.........
 
         sub count, count, #1
-1:
+poly_reduce_asm_opt_loop:
                                                // Instructions:    32
                                                // Expected cycles: 36
                                                // Expected IPC:    0.89
@@ -184,7 +184,7 @@ MLKEM_ASM_NAMESPACE(poly_reduce_asm_opt):
         // str q0, [x0, #-16]                     // .....~............................'......*..........................
 
         sub count, count, 1
-        cbnz count, 1b
+        cbnz count, poly_reduce_asm_opt_loop
                                                // Instructions:    17
                                                // Expected cycles: 23
                                                // Expected IPC:    0.74

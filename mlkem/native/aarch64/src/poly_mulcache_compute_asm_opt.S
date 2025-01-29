@@ -86,7 +86,7 @@ MLKEM_ASM_NAMESPACE(poly_mulcache_compute_asm_opt):
         // sqrdmulh v27.8H, v28.8H, v7.8H       // ...........*...................
 
         sub count, count, #1
-1:
+poly_mulcache_compute_asm_opt_loop:
                                               // Instructions:    9
                                               // Expected cycles: 13
                                               // Expected IPC:    0.69
@@ -124,7 +124,7 @@ MLKEM_ASM_NAMESPACE(poly_mulcache_compute_asm_opt):
         // str q5, [x0], #16                       // ..........~..'.........*..'....
 
         sub count, count, 1
-        cbnz count, 1b
+        cbnz count, poly_mulcache_compute_asm_opt_loop
                                           // Instructions:    2
                                           // Expected cycles: 5
                                           // Expected IPC:    0.40
