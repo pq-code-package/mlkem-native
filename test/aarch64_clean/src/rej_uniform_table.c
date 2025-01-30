@@ -10,7 +10,7 @@
 
 #include "../../../common.h"
 
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN)
 
 #include <stdint.h>
 #include "arith_native_aarch64.h"
