@@ -583,22 +583,25 @@ def get_defines():
                         .replace("'", ""),
                     )
 
-def get_checked_defines():
-    allow_list = [("__contract__", "cbmc.h"),
-                  ("__loop__", "cbmc.h")]
 
-    def is_allowed(d,c):
-        for (d0,c0) in allow_list:
+def get_checked_defines():
+    allow_list = [("__contract__", "cbmc.h"), ("__loop__", "cbmc.h")]
+
+    def is_allowed(d, c):
+        for d0, c0 in allow_list:
             if c.endswith(c0) is True and d0 == d:
                 return True
         return False
 
-    for (c,d) in get_defines():
-        if d.startswith("_") and is_allowed(d,c) is False:
-            raise Exception(f"{d} from {c}:{i} starts with an underscore, which is not allowed for mlkem-native macros. "
-                  f"If this is an mlkem-native specific macro, please pick a different name. "
-                  f"If this is an external macro, it likely needs removing from `gen_monolithic_undef_all_core()` in `scripts/autogen` -- check this!")
-        yield (c,d)
+    for c, d in get_defines():
+        if d.startswith("_") and is_allowed(d, c) is False:
+            raise Exception(
+                f"{d} from {c}:{i} starts with an underscore, which is not allowed for mlkem-native macros. "
+                f"If this is an mlkem-native specific macro, please pick a different name. "
+                f"If this is an external macro, it likely needs removing from `gen_monolithic_undef_all_core()` in `scripts/autogen` -- check this!"
+            )
+        yield (c, d)
+
 
 def gen_monolithic_undef_all_core(filt=None):
 
@@ -640,10 +643,18 @@ def gen_monolithic_source_file(dry_run=False):
         if not_native(c) is False:
             return False
 
-        k_specific_sources = ["mlkem_native.h", "params.h", "config.h", "common.h",
-                              "indcpa.c", "indcpa.h",
-                              "kem.c", "kem.h",
-                              "poly_k.c", "poly_k.h" ]
+        k_specific_sources = [
+            "mlkem_native.h",
+            "params.h",
+            "config.h",
+            "common.h",
+            "indcpa.c",
+            "indcpa.h",
+            "kem.c",
+            "kem.h",
+            "poly_k.c",
+            "poly_k.h",
+        ]
         for f in k_specific_sources:
             if c.endswith(f):
                 return True
@@ -678,6 +689,7 @@ def gen_monolithic_source_file(dry_run=False):
         dry_run=dry_run,
     )
 
+
 def check_asm_register_aliases_for_file(filename):
     """Checks that `filename` has no mismatching or dangling register aliases"""
 
@@ -695,20 +707,26 @@ def check_asm_register_aliases_for_file(filename):
     with open(filename, "r") as f:
         content = f.read()
     aliases = {}
-    for i, l in enumerate(content.split('\n')):
+    for i, l in enumerate(content.split("\n")):
         alias_def = get_alias_def(l)
         alias_undef = get_alias_undef(l)
         if alias_def is not None:
             if alias_def in aliases.keys():
-                raise Exception(f"Invalid assembly file {filename}: Duplicate .req directive for {alias_def} at line {i}")
+                raise Exception(
+                    f"Invalid assembly file {filename}: Duplicate .req directive for {alias_def} at line {i}"
+                )
             aliases[alias_def] = i
         elif alias_undef is not None:
             if alias_undef not in aliases.keys():
-                raise Exception(f"Invalid assembly file {filename}: .unreq without prior .req for {alias_undef} at line {i}")
+                raise Exception(
+                    f"Invalid assembly file {filename}: .unreq without prior .req for {alias_undef} at line {i}"
+                )
             del aliases[alias_undef]
 
     if len(aliases) > 0:
-        fixup_suggestion = ["/****************** REGISTER DEALLOCATIONS *******************/"]
+        fixup_suggestion = [
+            "/****************** REGISTER DEALLOCATIONS *******************/"
+        ]
         dangling = list(aliases.items())
         # Sort by line number of .req
         dangling.sort(key=lambda s: s[1])
@@ -716,14 +734,16 @@ def check_asm_register_aliases_for_file(filename):
         for a, _ in dangling:
             fixup_suggestion.append(f"    .unreq {a}")
         fixup_suggestion.append("")
-        fixup_suggestion = '\n'.join(fixup_suggestion)
+        fixup_suggestion = "\n".join(fixup_suggestion)
 
-        raise Exception(f"Invalid assembly file {filename}: Dangling .req directives {aliases}.\n\nTry adding this?\n\n{fixup_suggestion}")
+        raise Exception(
+            f"Invalid assembly file {filename}: Dangling .req directives {aliases}.\n\nTry adding this?\n\n{fixup_suggestion}"
+        )
+
 
 def check_asm_register_aliases():
     for asm_file in get_asm_source_files():
         check_asm_register_aliases_for_file(asm_file)
-
 
 
 def _main():

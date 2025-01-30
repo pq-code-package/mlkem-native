@@ -11,12 +11,13 @@ import sys
 import os
 import re
 
+
 def patchup_disasm(asm):
-    asm = asm.split('\n')
+    asm = asm.split("\n")
     indentation = 8
 
     def decode_label(asm_line):
-        r = re.search(r'^\s*[0-9a-fA-F]+\s*<([a-zA-Z0-9_]+)>:\s*$', asm_line)
+        r = re.search(r"^\s*[0-9a-fA-F]+\s*<([a-zA-Z0-9_]+)>:\s*$", asm_line)
         if r is None:
             return None
         return r.group(1)
@@ -29,7 +30,8 @@ def patchup_disasm(asm):
         if decode_label(l) is not None:
             break
 
-    asm = asm[i+1:]
+    asm = asm[i + 1 :]
+
     def gen(asm):
         for l in asm:
             if l.strip() == "":
@@ -41,17 +43,24 @@ def patchup_disasm(asm):
                 yield make_label(lbl)
                 continue
             # Drop comments
-            l = l.split(';')[0]
+            l = l.split(";")[0]
             # Re-format references to labels
             # Those are assumed to have the form `0xDEADBEEF <label>`
-            l = re.sub(r'(0x)?[0-9a-fA-F]+\s+<(?P<label>[a-zA-Z0-9_]+)>', r'\g<label>', l)
+            l = re.sub(
+                r"(0x)?[0-9a-fA-F]+\s+<(?P<label>[a-zA-Z0-9_]+)>", r"\g<label>", l
+            )
             # Drop address and byte code from line
-            d = re.search(r'^\s*[0-9a-fA-F]+:\s+([0-9a-fA-F][0-9a-fA-F][ ]*)+\s+(?P<inst>.*)$', l)
+            d = re.search(
+                r"^\s*[0-9a-fA-F]+:\s+([0-9a-fA-F][0-9a-fA-F][ ]*)+\s+(?P<inst>.*)$", l
+            )
             if d is None:
-                raise Exception(f"The following does not seem to be an assembly line of the expected format `ADDRESS: BYTECODE INSTRUCTION`:\n\"{l}\"")
-            yield ' ' * indentation + d.group("inst")
+                raise Exception(
+                    f'The following does not seem to be an assembly line of the expected format `ADDRESS: BYTECODE INSTRUCTION`:\n"{l}"'
+                )
+            yield " " * indentation + d.group("inst")
 
     return list(gen(asm))
+
 
 def find_header_footer(asm, filename):
     header_end_marker = "simpasm: header-end"
@@ -64,7 +73,9 @@ def find_header_footer(asm, filename):
             header_end = i
             break
     if header_end is None:
-        raise Exception(f"Could not find header-end marker {header_end_marker} in {filename}")
+        raise Exception(
+            f"Could not find header-end marker {header_end_marker} in {filename}"
+        )
     header = asm[:header_end]
 
     # Extract footer
@@ -74,21 +85,25 @@ def find_header_footer(asm, filename):
             footer_start = i
             break
     if footer_start is None:
-        raise Exception(f"Could not find footer-start marker {footer_start_marker} in {filename}")
-    footer = asm[footer_start+1:]
+        raise Exception(
+            f"Could not find footer-start marker {footer_start_marker} in {filename}"
+        )
+    footer = asm[footer_start + 1 :]
 
-    body = asm[header_end+1:footer_start]
+    body = asm[header_end + 1 : footer_start]
 
     return header, body, footer
+
 
 def find_globals(asm):
     global_symbols = []
     for l in asm:
-        r = re.search('^\s*\.global\s+(.*)$', l)
+        r = re.search("^\s*\.global\s+(.*)$", l)
         if r is None:
             continue
         global_symbols.append(r.group(1))
     return global_symbols
+
 
 # Converts `#if ...` statements into `#if 1` in header to avoid having
 # to specify various `-D...` in the CFLAGS. The original header will be
@@ -110,17 +125,15 @@ def drop_if_from_header(header):
 
     return header_new
 
+
 def simplify(logger, args, asm_input, asm_output=None):
 
     def run_cmd(cmd, input=None):
         logger.debug(f"Running command: {' '.join(cmd)}")
         try:
             r = subprocess.run(
-                cmd,
-                capture_output=True,
-                input=input,
-                text=True,
-                check=True)
+                cmd, capture_output=True, input=input, text=True, check=True
+            )
             return r
         except subprocess.CalledProcessError as e:
             logger.error(f"Command failed: {' '.join(cmd)}")
@@ -133,7 +146,7 @@ def simplify(logger, args, asm_input, asm_output=None):
 
     # Load input assembly
     with open(asm_input, "r") as f:
-        orig_asm = f.read().split('\n')
+        orig_asm = f.read().split("\n")
 
     if args.preserve_header_footer is True:
         header, body, footer = find_header_footer(orig_asm, asm_input)
@@ -143,25 +156,32 @@ def simplify(logger, args, asm_input, asm_output=None):
     # Extract unique global symbol from assembly
     syms = find_globals(orig_asm)
     if len(syms) != 1:
-        logger.error(f"Expected exactly one global symbol in {asm_input}, but found {syms}")
+        logger.error(
+            f"Expected exactly one global symbol in {asm_input}, but found {syms}"
+        )
         raise Exception("simpasm failed")
     sym = syms[0]
 
     if args.cflags is not None:
-        cflags = args.cflags.split(' ')
+        cflags = args.cflags.split(" ")
     else:
         cflags = []
 
     # Create temporary object files for byte code before/after simplification
-    with tempfile.NamedTemporaryFile(suffix=".o", delete=False) as tmp0, \
-         tempfile.NamedTemporaryFile(suffix=".o", delete=False) as tmp1:
+    with tempfile.NamedTemporaryFile(
+        suffix=".o", delete=False
+    ) as tmp0, tempfile.NamedTemporaryFile(suffix=".o", delete=False) as tmp1:
 
         tmp_objfile0 = tmp0.name
         tmp_objfile1 = tmp1.name
 
-        cmd = [args.cc, "-c", "-x", "assembler-with-cpp"] + cflags + ["-o", tmp_objfile0, "-"]
+        cmd = (
+            [args.cc, "-c", "-x", "assembler-with-cpp"]
+            + cflags
+            + ["-o", tmp_objfile0, "-"]
+        )
         logger.debug(f"Assembling {asm_input} ...")
-        asm_no_if = '\n'.join(drop_if_from_header(header) + body + footer)
+        asm_no_if = "\n".join(drop_if_from_header(header) + body + footer)
         run_cmd(cmd, input=asm_no_if)
 
         # Remember the binary contents of the object file for later
@@ -170,21 +190,29 @@ def simplify(logger, args, asm_input, asm_output=None):
 
         # Check that there is exactly one global symbol at location 0
         cmd = [args.nm, "--extern-only", tmp_objfile0]
-        logger.debug(f"Extracting symbols from temporary object file {tmp_objfile0} ...")
+        logger.debug(
+            f"Extracting symbols from temporary object file {tmp_objfile0} ..."
+        )
         r = run_cmd(cmd)
 
-        nm_output = r.stdout.split('\n')
+        nm_output = r.stdout.split("\n")
         nm_output = list(filter(lambda s: s.strip() != "", nm_output))
         if len(nm_output) == 0:
-            logger.error(f"Found one .global annotation in {asm_input}, but no external symbols in object file {tmp_objfile0} -- should not happen?")
+            logger.error(
+                f"Found one .global annotation in {asm_input}, but no external symbols in object file {tmp_objfile0} -- should not happen?"
+            )
             logger.error(asm_no_if)
             raise Exception("simpasm failed")
         elif len(nm_output) > 1:
-            logger.error(f"Found only one .global annotation in {asm_input}, but multiple external symbols {nm_output} in object file -- should not happen?")
+            logger.error(
+                f"Found only one .global annotation in {asm_input}, but multiple external symbols {nm_output} in object file -- should not happen?"
+            )
             raise Exception("simpasm failed")
-        sym_addr = int(nm_output[0].split(' ')[0])
+        sym_addr = int(nm_output[0].split(" ")[0])
         if sym_addr != 0:
-            logger.error(f"Global sym {sym} not at address 0 (instead at address {hex(sym_addr)}) -- please reorder the assembly to start with the global function symbol")
+            logger.error(
+                f"Global sym {sym} not at address 0 (instead at address {hex(sym_addr)}) -- please reorder the assembly to start with the global function symbol"
+            )
             raise Exception("simpasm failed")
 
         cmd = [args.objdump, "--disassemble", tmp_objfile0]
@@ -206,19 +234,25 @@ def simplify(logger, args, asm_input, asm_output=None):
             ".text",
             ".balign 4",
             f"{sym}:",
-            ""
+            "",
         ]
 
         # Write simplified assembly file
         full_simplified = header + autogen_header + simplified + footer
         logger.debug(f"Writing simplified assembly to {asm_output} ...")
         with open(asm_output, "w+") as f:
-            f.write('\n'.join(full_simplified))
+            f.write("\n".join(full_simplified))
 
-        cmd = [args.cc, "-c", "-x", "assembler-with-cpp"] + cflags + ["-o", tmp_objfile1, "-"]
+        cmd = (
+            [args.cc, "-c", "-x", "assembler-with-cpp"]
+            + cflags
+            + ["-o", tmp_objfile1, "-"]
+        )
         logger.debug(f"Assembling simplified assembly ...")
         logger.debug(f"Command: {' '.join(cmd)}")
-        new_asm = '\n'.join(drop_if_from_header(header) + autogen_header + simplified + footer)
+        new_asm = "\n".join(
+            drop_if_from_header(header) + autogen_header + simplified + footer
+        )
         run_cmd(cmd, input=new_asm)
 
         # Get binary contents of re-assembled object file
@@ -227,7 +261,9 @@ def simplify(logger, args, asm_input, asm_output=None):
 
         logger.debug("Checking that byte-code is unchanged ...")
         if orig_obj != simplified_obj:
-            logger.error(f"Object files {tmp_objfile0} and {tmp_objfile1} before/after simplification are not byte-wise equal -- aborting")
+            logger.error(
+                f"Object files {tmp_objfile0} and {tmp_objfile1} before/after simplification are not byte-wise equal -- aborting"
+            )
             logger.error("I'll keep them around for you to have a look")
             raise Exception("simpasm failed")
 
@@ -236,6 +272,7 @@ def simplify(logger, args, asm_input, asm_output=None):
 
     logger.info(f"Simplified {asm_input} -> {asm_output} (same byte code)")
 
+
 def _main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -243,7 +280,9 @@ def _main():
     parser.add_argument("-d", "--directory", type=str, help="Input assembly file")
     parser.add_argument("-i", "--input", type=str, help="Input assembly file")
     parser.add_argument("-o", "--output", type=str, help="Output assembly file")
-    parser.add_argument("-p", "--preserve-header-footer", default=False, action="store_true")
+    parser.add_argument(
+        "-p", "--preserve-header-footer", default=False, action="store_true"
+    )
     parser.add_argument("-v", "--verbose", default=False, action="store_true")
     parser.add_argument("--cross-prefix", type=str, default="")
     parser.add_argument("--cc", type=str, default="gcc")
@@ -257,9 +296,7 @@ def _main():
     args.nm = args.cross_prefix + args.nm
     args.objdump = args.cross_prefix + args.objdump
 
-    logging.basicConfig(
-        stream=sys.stdout, format="%(name)s: %(message)s"
-    )
+    logging.basicConfig(stream=sys.stdout, format="%(name)s: %(message)s")
 
     logger = logging.getLogger("simpasm")
     if args.verbose is True:
@@ -274,6 +311,7 @@ def _main():
         asm_files = pathlib.Path(args.directory).glob("*.S")
         for f in asm_files:
             simplify(logger, args, f)
+
 
 if __name__ == "__main__":
     _main()
