@@ -21,6 +21,7 @@
 #include "../../../common.h"
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \
     defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
+/* simpasm: header-end */
 
 // We save the output on the stack first, and copy to the actual
 // output buffer only in the end. This is because the main loop can overwrite
@@ -112,9 +113,9 @@
     mlkem_q                     .req v30
     bits                        .req v31
 
-.text
-.global MLKEM_ASM_NAMESPACE(rej_uniform_asm_clean)
-.balign 4
+    .text
+    .global MLKEM_ASM_NAMESPACE(rej_uniform_asm_clean)
+    .balign 4
 MLKEM_ASM_NAMESPACE(rej_uniform_asm_clean):
     push_stack
 
@@ -402,5 +403,6 @@ return:
     .unreq mlkem_q
     .unreq bits
 
+/* simpasm: footer-start */
 #endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) ||
           defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) */

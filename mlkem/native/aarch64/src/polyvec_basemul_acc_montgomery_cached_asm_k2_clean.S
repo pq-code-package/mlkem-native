@@ -10,7 +10,8 @@
 // https://github.com/neon-ntt/neon-ntt
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) && MLKEM_K == 2
+/* simpasm: header-end */
 
 // Input:
 // - Vectors al, ah of 32-bit entries
@@ -137,11 +138,10 @@
 
         t0   .req v28
 
-#if MLKEM_K == 2
-.global MLKEM_ASM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_asm_clean)
-
-.balign 4
-MLKEM_ASM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_asm_clean):
+        .text
+        .global MLKEM_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2_clean)
+        .balign 4
+MLKEM_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2_clean):
         push_stack
 
         mov wtmp, #3329
@@ -174,103 +174,6 @@ k2_loop_start:
 
         pop_stack
         ret
-#endif /* MLKEM_K == 2 */
-
-#if MLKEM_K == 3
-.global MLKEM_ASM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_asm_clean)
-
-.balign 4
-MLKEM_ASM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_asm_clean):
-        push_stack
-        mov wtmp, #3329
-        dup modulus.8h, wtmp
-
-        mov wtmp, #3327
-        dup modulus_twisted.8h, wtmp
-
-        // Computed bases of vector entries
-
-        add a1_ptr, a0_ptr, #(1 * 512)
-        add b1_ptr, b0_ptr, #(1 * 512)
-        add b1_cache_ptr, b0_cache_ptr, #(1 * 512/2)
-        add a2_ptr, a0_ptr, #(2 * 512)
-        add b2_ptr, b0_ptr, #(2 * 512)
-        add b2_cache_ptr, b0_cache_ptr, #(2 * 512/2)
-
-        mov count, #(MLKEM_N / 16)
-k3_loop_start:
-
-        load_polys aa, bb, a0_ptr, b0_ptr, b0_cache_ptr
-        pmull res, aa, bb
-        load_polys aa, bb, a1_ptr, b1_ptr, b1_cache_ptr
-        pmlal res, aa, bb
-        load_polys aa, bb, a2_ptr, b2_ptr, b2_cache_ptr
-        pmlal res, aa, bb
-
-        montgomery_reduce_long out0, res0
-        montgomery_reduce_long out1, res1
-
-        st2_wrap out, out
-
-        subs count, count, #1
-        cbnz count, k3_loop_start
-
-        pop_stack
-        ret
-#endif /* MLKEM_K == 3 */
-
-#if MLKEM_K == 4
-.global MLKEM_ASM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_asm_clean)
-
-.balign 4
-MLKEM_ASM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_asm_clean):
-        push_stack
-        mov wtmp, #3329
-        dup modulus.8h, wtmp
-
-        mov wtmp, #3327
-        dup modulus_twisted.8h, wtmp
-
-        // Computed bases of vector entries
-
-        add a1_ptr, a0_ptr, #(1 * 512)
-        add b1_ptr, b0_ptr, #(1 * 512)
-        add b1_cache_ptr, b0_cache_ptr, #(1 * 512/2)
-        add a2_ptr, a0_ptr, #(2 * 512)
-        add b2_ptr, b0_ptr, #(2 * 512)
-        add b2_cache_ptr, b0_cache_ptr, #(2 * 512/2)
-        add a3_ptr, a0_ptr, #(3 * 512)
-        add b3_ptr, b0_ptr, #(3 * 512)
-        add b3_cache_ptr, b0_cache_ptr, #(3 * 512/2)
-
-        // Bounds:
-        //
-        // Each pmull is bound by 2*4096*2^15=2^28, so the final value
-        // before Montgomery reduction is bound by 2^30.
-
-        mov count, #(MLKEM_N / 16)
-k4_loop_start:
-
-        load_polys aa, bb, a0_ptr, b0_ptr, b0_cache_ptr
-        pmull res, aa, bb
-        load_polys aa, bb, a1_ptr, b1_ptr, b1_cache_ptr
-        pmlal res, aa, bb
-        load_polys aa, bb, a2_ptr, b2_ptr, b2_cache_ptr
-        pmlal res, aa, bb
-        load_polys aa, bb, a3_ptr, b3_ptr, b3_cache_ptr
-        pmlal res, aa, bb
-
-        montgomery_reduce_long out0, res0
-        montgomery_reduce_long out1, res1
-
-        st2_wrap out, out
-
-        subs count, count, #1
-        cbnz count, k4_loop_start
-
-        pop_stack
-        ret
-#endif /* MLKEM_K == 4 */
 
 /****************** REGISTER DEALLOCATIONS *******************/
     .unreq out
@@ -307,4 +210,5 @@ k4_loop_start:
     .unreq out1
     .unreq t0
 
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN */
+/* simpasm: footer-start */
+#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN && MLKEM_K == 2 */
