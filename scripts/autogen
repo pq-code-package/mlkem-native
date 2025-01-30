@@ -316,12 +316,11 @@ def gen_aarch64_mulcache_twiddles_twisted():
 
 
 def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
-    def gen():
+    def gen(suffix):
         yield from gen_header()
         yield '#include "../../../common.h"'
         yield ""
-        yield "#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \\"
-        yield "    defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)"
+        yield f"#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_{suffix.upper()})"
         yield ""
         yield "#include <stdint.h>"
         yield '#include "arith_native_aarch64.h"'
@@ -362,7 +361,11 @@ def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
         yield ""
 
     update_file(
-        "mlkem/native/aarch64/src/aarch64_zetas.c", "\n".join(gen()), dry_run=dry_run
+        "mlkem/native/aarch64/src/aarch64_zetas.c", "\n".join(gen("opt")), dry_run=dry_run
+    )
+
+    update_file(
+        "mlkem/native/aarch64_clean/src/aarch64_zetas.c", "\n".join(gen("clean")), dry_run=dry_run
     )
 
 
@@ -386,12 +389,11 @@ def gen_aarch64_rej_uniform_table_rows():
 
 
 def gen_aarch64_rej_uniform_table(dry_run=False):
-    def gen():
+    def gen(suffix):
         yield from gen_header()
         yield '#include "../../../common.h"'
         yield ""
-        yield "#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \\"
-        yield "    defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)"
+        yield f"#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_{suffix.upper()})"
         yield ""
         yield "#include <stdint.h>"
         yield '#include "arith_native_aarch64.h"'
@@ -413,7 +415,13 @@ def gen_aarch64_rej_uniform_table(dry_run=False):
 
     update_file(
         "mlkem/native/aarch64/src/rej_uniform_table.c",
-        "\n".join(gen()),
+        "\n".join(gen("opt")),
+        dry_run=dry_run,
+    )
+
+    update_file(
+        "mlkem/native/aarch64_clean/src/rej_uniform_table.c",
+        "\n".join(gen("clean")),
         dry_run=dry_run,
     )
 

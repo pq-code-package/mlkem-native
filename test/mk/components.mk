@@ -7,7 +7,7 @@ endif
 
 SOURCES += $(wildcard mlkem/*.c)
 ifeq ($(OPT),1)
-	SOURCES += $(wildcard mlkem/native/aarch64/src/*.[csS]) $(wildcard mlkem/native/x86_64/src/*.[csS])
+	SOURCES += $(wildcard mlkem/native/aarch64/src/*.[csS]) $(wildcard mlkem/native/aarch64_clean/src/*.[csS]) $(wildcard mlkem/native/x86_64/src/*.[csS])
 	CFLAGS += -DMLKEM_USE_NATIVE_BACKEND_ARITH -DMLKEM_USE_NATIVE_BACKEND_FIPS202
 endif
 
