@@ -78,7 +78,7 @@ $(OBJ): %.o : %.S
 else
 $(OBJ): %.o : %.S
 	@if ! (which gobjcopy >/dev/null); then \
-	  echo "gobjcopy not found. Consider installing it via 'brew install binutils', and put its parent directory (typically `/opt/homebrew/opt/binutils/bin`) in your PATH.";\
+	  echo "gobjcopy not found. Consider installing it via 'brew install binutils', and put its parent directory (typically /opt/homebrew/opt/binutils/bin) in your PATH.";\
 	  exit 1; \
 	fi
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)

@@ -126,6 +126,22 @@ def drop_if_from_header(header):
     return header_new
 
 
+def drop_preprocessor_directives(header):
+    header_new = []
+    i = 0
+    while i < len(header):
+        l = header[i]
+        if not l.strip().startswith("#"):
+            header_new.append(l)
+            i += 1
+            continue
+        while i < len(header) and header[i].endswith("\\"):
+            i += 1
+        i += 1
+
+    return header_new
+
+
 def simplify(logger, args, asm_input, asm_output=None):
 
     def run_cmd(cmd, input=None):
@@ -148,10 +164,7 @@ def simplify(logger, args, asm_input, asm_output=None):
     with open(asm_input, "r") as f:
         orig_asm = f.read().split("\n")
 
-    if args.preserve_header_footer is True:
-        header, body, footer = find_header_footer(orig_asm, asm_input)
-    else:
-        header, body, footer = [], orig_asm, []
+    header, body, footer = find_header_footer(orig_asm, asm_input)
 
     # Extract unique global symbol from assembly
     syms = find_globals(orig_asm)
@@ -208,12 +221,21 @@ def simplify(logger, args, asm_input, asm_output=None):
                 f"Found only one .global annotation in {asm_input}, but multiple external symbols {nm_output} in object file -- should not happen?"
             )
             raise Exception("simpasm failed")
-        sym_addr = int(nm_output[0].split(" ")[0])
+        sym_info = nm_output[0].split(" ")
+        sym_addr = int(sym_info[0])
         if sym_addr != 0:
             logger.error(
                 f"Global sym {sym} not at address 0 (instead at address {hex(sym_addr)}) -- please reorder the assembly to start with the global function symbol"
             )
             raise Exception("simpasm failed")
+
+        # If we don't preserve preprocessor directives, use the raw global symbol name instead;
+        # otherwise, end up emitting a namespaced symbol without including the header needed to
+        # make sense of it.
+        if args.preserve_preprocessor_directives is False:
+            # Expecting format "ADDRESS T SYMBOL"
+            sym = sym_info[2]
+            logger.debug(f"Using raw global symbol {sym} going forward ...")
 
         cmd = [args.objdump, "--disassemble", tmp_objfile0]
         logger.debug(f"Disassembling temporary object file {tmp_objfile0} ...")
@@ -237,8 +259,17 @@ def simplify(logger, args, asm_input, asm_output=None):
             "",
         ]
 
+        if args.preserve_preprocessor_directives is False:
+            simplified_header = drop_preprocessor_directives(header)
+            simplified_footer = []
+        else:
+            simplified_header = header
+            simplified_footer = footer
+
         # Write simplified assembly file
-        full_simplified = header + autogen_header + simplified + footer
+        full_simplified = (
+            simplified_header + autogen_header + simplified + simplified_footer
+        )
         logger.debug(f"Writing simplified assembly to {asm_output} ...")
         with open(asm_output, "w+") as f:
             f.write("\n".join(full_simplified))
@@ -251,7 +282,10 @@ def simplify(logger, args, asm_input, asm_output=None):
         logger.debug(f"Assembling simplified assembly ...")
         logger.debug(f"Command: {' '.join(cmd)}")
         new_asm = "\n".join(
-            drop_if_from_header(header) + autogen_header + simplified + footer
+            drop_if_from_header(simplified_header)
+            + autogen_header
+            + simplified
+            + simplified_footer
         )
         run_cmd(cmd, input=new_asm)
 
@@ -281,7 +315,7 @@ def _main():
     parser.add_argument("-i", "--input", type=str, help="Input assembly file")
     parser.add_argument("-o", "--output", type=str, help="Output assembly file")
     parser.add_argument(
-        "-p", "--preserve-header-footer", default=False, action="store_true"
+        "-p", "--preserve-preprocessor-directives", default=False, action="store_true"
     )
     parser.add_argument("-v", "--verbose", default=False, action="store_true")
     parser.add_argument("--cross-prefix", type=str, default="")
