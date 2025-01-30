@@ -37,11 +37,6 @@
 #endif
 
 /* mlkem/common.h */
-#if defined(MLKEM_ASM_NAMESPACE_K)
-#undef MLKEM_ASM_NAMESPACE_K
-#endif
-
-/* mlkem/common.h */
 #if defined(MLKEM_NAMESPACE)
 #undef MLKEM_NAMESPACE
 #endif
