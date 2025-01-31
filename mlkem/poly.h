@@ -39,7 +39,7 @@ typedef struct
 typedef struct
 {
   int16_t coeffs[MLKEM_N >> 1];
-} poly_mulcache;
+} ALIGN poly_mulcache;
 
 #define poly_basemul_montgomery_cached \
   MLKEM_NAMESPACE(poly_basemul_montgomery_cached)
