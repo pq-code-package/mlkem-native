@@ -9,36 +9,36 @@
 
 #include "mlkem_native.h"
 
-static int test_keys_mlkem512(void)
+static int test_keys_mlkem(void)
 {
-  uint8_t pk[MLKEM512_PUBLICKEYBYTES];
-  uint8_t sk[MLKEM512_SECRETKEYBYTES];
-  uint8_t ct[MLKEM512_CIPHERTEXTBYTES];
-  uint8_t key_a[MLKEM512_BYTES];
-  uint8_t key_b[MLKEM512_BYTES];
+  uint8_t pk[MLKEM_PUBLICKEYBYTES(BUILD_INFO_LVL)];
+  uint8_t sk[MLKEM_SECRETKEYBYTES(BUILD_INFO_LVL)];
+  uint8_t ct[MLKEM_CIPHERTEXTBYTES(BUILD_INFO_LVL)];
+  uint8_t key_a[MLKEM_BYTES];
+  uint8_t key_b[MLKEM_BYTES];
 
   /* Alice generates a public key */
-  mlkem512_keypair(pk, sk);
+  mlkem_keypair(pk, sk);
 
   /* Bob derives a secret key and creates a response */
-  mlkem512_enc(ct, key_b, pk);
+  mlkem_enc(ct, key_b, pk);
 
   /* Alice uses Bobs response to get her shared key */
-  mlkem512_dec(key_a, ct, sk);
+  mlkem_dec(key_a, ct, sk);
 
-  if (memcmp(key_a, key_b, MLKEM512_BYTES))
+  if (memcmp(key_a, key_b, MLKEM_BYTES))
   {
-    printf("[MLKEM-512] ERROR keys\n");
+    printf("[MLKEM] ERROR keys\n");
     return 1;
   }
 
-  printf("[MLKEM-512] OK\n");
+  printf("[MLKEM-%d] OK\n", BUILD_INFO_LVL);
   return 0;
 }
 
 int main(void)
 {
-  if (test_keys_mlkem512() != 0)
+  if (test_keys_mlkem() != 0)
   {
     return 1;
   }

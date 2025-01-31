@@ -6,9 +6,14 @@
 # Append cross-prefix for cross compilation
 # Remove or ignore for native builds
 CC  ?= gcc
+AR  ?= ar
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
+endif
+
+ifeq (,$(findstring $(CROSS_PREFIX),$(AR)))
+AR  := $(CROSS_PREFIX)$(AR)
 endif
 
 # Part A:
@@ -37,12 +42,11 @@ RNG_SOURCE=$(wildcard test_only_rng/*.c)
 # Part C:
 #
 # Your application source code
-APP_SOURCE=main.c
-
-ALL_SOURCE=$(RNG_SOURCE) $(APP_SOURCE) $(MLKEM_NATIVE_SOURCE)
+APP_SOURCE=$(RNG_SOURCE) main.c
 
 BUILD_DIR=build
 BIN=test_binary
+LIB=libmlkem.a
 
 CFLAGS := \
 	-Wall \
@@ -63,8 +67,16 @@ CFLAGS := \
 CFLAGS += -DMLKEM_NATIVE_MONOBUILD
 
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
+LIB_NAME_FULL=$(BUILD_DIR)/$(LIB)
 
-$(BINARY_NAME_FULL): $(ALL_SOURCE)
+$(LIB_NAME_FULL): $(MLKEM_NATIVE_SOURCE)
+	echo "$@"
+	mkdir -p $(BUILD_DIR)
+	$(CC) -c $(CFLAGS) $(INC) $^ -o $(BUILD_DIR)/mlkem_native.o
+	$(AR) rcs $@ $(BUILD_DIR)/mlkem_native.o
+	strip -S $@
+
+$(BINARY_NAME_FULL): $(APP_SOURCE) $(LIB_NAME_FULL)
 	echo "$@"
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INC) $^ -o $@
