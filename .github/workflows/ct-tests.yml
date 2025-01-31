@@ -11,75 +11,11 @@ on:
     branches: ["main"]
 
 jobs:
-  check-ct:
-    name: CT test ${{ matrix.nix-shell }} ${{ matrix.system }}
-    strategy:
-      max-parallel: 4
-      fail-fast: false
-      matrix:
-        system: [ubuntu-latest, ubuntu-24.04-arm]
-        nix-shell:
-          - ci_clang14
-          - ci_clang15
-          - ci_clang16
-          - ci_clang17
-          - ci_clang18
-          - ci_clang19
-          - ci_gcc48
-          - ci_gcc49
-          - ci_gcc7
-          - ci_gcc11
-          - ci_gcc12
-          - ci_gcc13
-          - ci_gcc14
-    runs-on: ${{ matrix.system }}
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Setup nix
-        uses: ./.github/actions/setup-shell
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          nix-shell: ${{ matrix.nix-shell }}
-          nix-cache: true
-      - name:  Build and run test (-Oz)
-        # -Oz got introduced in gcc12
-        if: ${{ matrix.nix-shell !=  'ci_gcc48' && matrix.nix-shell !=  'ci_gcc49' && matrix.nix-shell !=  'ci_gcc7' && matrix.nix-shell !=  'ci_gcc11'}}
-        uses: ./.github/actions/ct-test
-        with:
-          cflags: -Oz
-      - name:  Build and run test (-Os)
-        uses: ./.github/actions/ct-test
-        with:
-          cflags: -Os
-      - name:  Build and run test (-O3)
-        uses: ./.github/actions/ct-test
-        with:
-          cflags: -O3
-      - name:  Build and run test (-Ofast)
-        # -Ofast got deprecated in clang19; -O3 -ffast-math should be used instead
-        if: ${{ matrix.nix-shell !=  'ci_clang19' }}
-        uses: ./.github/actions/ct-test
-        with:
-          cflags: -Ofast
-      - name:  Build and run test (-O3 -ffast-math)
-        uses: ./.github/actions/ct-test
-        with:
-          cflags: -O3 -ffast-math
-      - name:  Build and run test (-O2)
-        uses: ./.github/actions/ct-test
-        with:
-          cflags: -O2
-      - name:  Build and run test (-O1)
-        uses: ./.github/actions/ct-test
-        with:
-          cflags: -O1
-      - name:  Build and run test (-O0)
-        uses: ./.github/actions/ct-test
-        with:
-          cflags: -O0
   check-ct-varlat:
     # Using the patched Valgrind from the KyberSlash paper to detect divisions
-    name: CT test (Variable-latency instructions) ${{ matrix.nix-shell }} ${{ matrix.system }}
+    # In case the patch no longer applies after an update, we may want to switch back
+    # to stock valgrind added in https://github.com/pq-code-package/mlkem-native/pull/687
+    name: CT test ${{ matrix.nix-shell }} ${{ matrix.system }}
     strategy:
       fail-fast: false
       max-parallel: 4
