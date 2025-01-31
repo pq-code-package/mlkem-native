@@ -361,11 +361,15 @@ def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
         yield ""
 
     update_file(
-        "mlkem/native/aarch64/src/aarch64_zetas.c", "\n".join(gen("opt")), dry_run=dry_run
+        "mlkem/native/aarch64/src/aarch64_zetas.c",
+        "\n".join(gen("opt")),
+        dry_run=dry_run,
     )
 
     update_file(
-        "test/aarch64_clean/src/aarch64_zetas.c", "\n".join(gen("clean")), dry_run=dry_run
+        "test/aarch64_clean/src/aarch64_zetas.c",
+        "\n".join(gen("clean")),
+        dry_run=dry_run,
     )
 
 
@@ -761,6 +765,7 @@ def gen_hol_light_asm_file(infile, outfile, dry_run=False):
         try:
             cmd = [
                 "./scripts/simpasm",
+                "--objdump=llvm-objdump",
                 "-i",
                 f"mlkem/native/aarch64/src/{infile}",
                 "-o",

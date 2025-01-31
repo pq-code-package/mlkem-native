@@ -29,33 +29,38 @@
  *   mlkem/native/aarch64/src/intt_opt.S using scripts/simpasm. Do not modify it directly.
  */
 
-.global _PQCP_MLKEM_NATIVE_MLKEM768_intt_asm_opt
 
 .text
 .balign 4
+#ifdef __APPLE__
+.global _PQCP_MLKEM_NATIVE_MLKEM768_intt_asm_opt
 _PQCP_MLKEM_NATIVE_MLKEM768_intt_asm_opt:
+#else
+.global PQCP_MLKEM_NATIVE_MLKEM768_intt_asm_opt
+PQCP_MLKEM_NATIVE_MLKEM768_intt_asm_opt:
+#endif
 
         sub	sp, sp, #0x40
         stp	d8, d9, [sp]
-        stp	d10, d11, [sp, #16]
-        stp	d12, d13, [sp, #32]
-        stp	d14, d15, [sp, #48]
-        mov	w5, #0xd01                 	// #3329
+        stp	d10, d11, [sp, #0x10]
+        stp	d12, d13, [sp, #0x20]
+        stp	d14, d15, [sp, #0x30]
+        mov	w5, #0xd01              // =3329
         mov	v7.h[0], w5
-        mov	w5, #0x4ebf                	// #20159
+        mov	w5, #0x4ebf             // =20159
         mov	v7.h[1], w5
-        mov	w5, #0x200                 	// #512
+        mov	w5, #0x200              // =512
         dup	v29.8h, w5
-        mov	w5, #0x13b0                	// #5040
+        mov	w5, #0x13b0             // =5040
         dup	v30.8h, w5
         mov	x3, x0
-        mov	x4, #0x8                   	// #8
+        mov	x4, #0x8                // =8
 
 scale_start:
         ldr	q8, [x3]
-        ldr	q9, [x3, #16]
-        ldr	q10, [x3, #32]
-        ldr	q11, [x3, #48]
+        ldr	q9, [x3, #0x10]
+        ldr	q10, [x3, #0x20]
+        ldr	q11, [x3, #0x30]
         sqrdmulh	v27.8h, v8.8h, v30.8h
         mul	v8.8h, v8.8h, v29.8h
         mls	v8.8h, v27.8h, v7.h[0]
@@ -68,25 +73,25 @@ scale_start:
         sqrdmulh	v27.8h, v11.8h, v30.8h
         mul	v11.8h, v11.8h, v29.8h
         mls	v11.8h, v27.8h, v7.h[0]
-        str	q8, [x3], #64
-        stur	q9, [x3, #-48]
-        stur	q10, [x3, #-32]
-        stur	q11, [x3, #-16]
+        str	q8, [x3], #0x40
+        stur	q9, [x3, #-0x30]
+        stur	q10, [x3, #-0x20]
+        stur	q11, [x3, #-0x10]
         subs	x4, x4, #0x1
         cbnz	x4, scale_start
         mov	x3, x0
-        mov	x4, #0x8                   	// #8
+        mov	x4, #0x8                // =8
         ldr	q26, [x3]
-        ldr	q8, [x3, #16]
-        ldr	q24, [x3, #32]
-        ldr	q16, [x3, #48]
-        ldr	q9, [x2], #96
+        ldr	q8, [x3, #0x10]
+        ldr	q24, [x3, #0x20]
+        ldr	q16, [x3, #0x30]
+        ldr	q9, [x2], #0x60
         trn1	v0.4s, v24.4s, v16.4s
-        ldur	q6, [x2, #-80]
-        ldur	q3, [x2, #-64]
-        ldur	q15, [x2, #-48]
-        ldur	q4, [x2, #-32]
-        ldur	q28, [x2, #-16]
+        ldur	q6, [x2, #-0x50]
+        ldur	q3, [x2, #-0x40]
+        ldur	q15, [x2, #-0x30]
+        ldur	q4, [x2, #-0x20]
+        ldur	q28, [x2, #-0x10]
         sub	x4, x4, #0x1
 
 layer3456_start:
@@ -111,7 +116,7 @@ layer3456_start:
         mls	v8.8h, v26.8h, v7.h[0]
         sqrdmulh	v26.8h, v0.8h, v6.8h
         mul	v11.8h, v0.8h, v9.8h
-        ldr	q15, [x1], #16
+        ldr	q15, [x1], #0x10
         sub	v0.8h, v16.8h, v8.8h
         mls	v11.8h, v26.8h, v7.h[0]
         add	v26.8h, v16.8h, v8.8h
@@ -119,13 +124,13 @@ layer3456_start:
         mul	v16.8h, v0.8h, v9.8h
         trn1	v0.4s, v12.4s, v26.4s
         trn2	v12.4s, v12.4s, v26.4s
-        ldr	q26, [x3, #64]
+        ldr	q26, [x3, #0x40]
         mls	v16.8h, v8.8h, v7.h[0]
-        ldr	q8, [x3, #80]
-        ldr	q24, [x3, #96]
+        ldr	q8, [x3, #0x50]
+        ldr	q24, [x3, #0x60]
         trn1	v9.4s, v11.4s, v16.4s
         trn2	v11.4s, v11.4s, v16.4s
-        ldr	q16, [x3, #112]
+        ldr	q16, [x3, #0x70]
         trn2	v6.2d, v0.2d, v9.2d
         trn2	v3.2d, v12.2d, v11.2d
         trn1	v0.2d, v0.2d, v9.2d
@@ -142,13 +147,13 @@ layer3456_start:
         mls	v9.8h, v4.8h, v7.h[0]
         mls	v11.8h, v0.8h, v7.h[0]
         sqdmulh	v0.8h, v6.8h, v7.h[1]
-        srshr	v3.8h, v3.8h, #11
+        srshr	v3.8h, v3.8h, #0xb
         sqdmulh	v4.8h, v9.8h, v7.h[1]
         sqdmulh	v28.8h, v11.8h, v7.h[1]
         mls	v12.8h, v3.8h, v7.h[0]
-        srshr	v0.8h, v0.8h, #11
-        srshr	v3.8h, v4.8h, #11
-        srshr	v4.8h, v28.8h, #11
+        srshr	v0.8h, v0.8h, #0xb
+        srshr	v3.8h, v4.8h, #0xb
+        srshr	v4.8h, v28.8h, #0xb
         mls	v6.8h, v0.8h, v7.h[0]
         mls	v9.8h, v3.8h, v7.h[0]
         mls	v11.8h, v4.8h, v7.h[0]
@@ -162,17 +167,17 @@ layer3456_start:
         mul	v15.8h, v6.8h, v15.h[0]
         add	v11.8h, v9.8h, v11.8h
         mls	v3.8h, v4.8h, v7.h[0]
-        str	q12, [x3], #64
+        str	q12, [x3], #0x40
         mls	v15.8h, v28.8h, v7.h[0]
-        stur	q11, [x3, #-48]
-        ldr	q9, [x2], #96
-        stur	q3, [x3, #-32]
-        ldur	q6, [x2, #-80]
-        stur	q15, [x3, #-16]
-        ldur	q3, [x2, #-64]
-        ldur	q15, [x2, #-48]
-        ldur	q4, [x2, #-32]
-        ldur	q28, [x2, #-16]
+        stur	q11, [x3, #-0x30]
+        ldr	q9, [x2], #0x60
+        stur	q3, [x3, #-0x20]
+        ldur	q6, [x2, #-0x50]
+        stur	q15, [x3, #-0x10]
+        ldur	q3, [x2, #-0x40]
+        ldur	q15, [x2, #-0x30]
+        ldur	q4, [x2, #-0x20]
+        ldur	q28, [x2, #-0x10]
         sub	x4, x4, #0x1
         cbnz	x4, layer3456_start
         trn1	v11.4s, v26.4s, v8.4s
@@ -193,7 +198,7 @@ layer3456_start:
         mls	v3.8h, v17.8h, v7.h[0]
         mls	v16.8h, v26.8h, v7.h[0]
         sub	v26.8h, v24.8h, v10.8h
-        ldr	q4, [x1], #16
+        ldr	q4, [x1], #0x10
         sub	v12.8h, v3.8h, v16.8h
         sqrdmulh	v15.8h, v26.8h, v6.8h
         mul	v11.8h, v26.8h, v9.8h
@@ -224,12 +229,12 @@ layer3456_start:
         mls	v13.8h, v26.8h, v7.h[0]
         sqdmulh	v11.8h, v24.8h, v7.h[1]
         sqdmulh	v8.8h, v0.8h, v7.h[1]
-        srshr	v12.8h, v12.8h, #11
+        srshr	v12.8h, v12.8h, #0xb
         sqdmulh	v26.8h, v13.8h, v7.h[1]
-        srshr	v11.8h, v11.8h, #11
+        srshr	v11.8h, v11.8h, #0xb
         mls	v16.8h, v12.8h, v7.h[0]
-        srshr	v8.8h, v8.8h, #11
-        srshr	v26.8h, v26.8h, #11
+        srshr	v8.8h, v8.8h, #0xb
+        srshr	v26.8h, v26.8h, #0xb
         mls	v24.8h, v11.8h, v7.h[0]
         mls	v0.8h, v8.8h, v7.h[0]
         mls	v13.8h, v26.8h, v7.h[0]
@@ -242,26 +247,26 @@ layer3456_start:
         sqrdmulh	v8.8h, v12.8h, v4.h[1]
         add	v12.8h, v0.8h, v13.8h
         mls	v11.8h, v16.8h, v7.h[0]
-        str	q15, [x3], #64
+        str	q15, [x3], #0x40
         mls	v26.8h, v8.8h, v7.h[0]
-        stur	q12, [x3, #-48]
-        stur	q11, [x3, #-32]
-        stur	q26, [x3, #-16]
-        mov	x4, #0x4                   	// #4
-        ldr	q0, [x1], #32
-        ldur	q1, [x1, #-16]
-        ldr	q24, [x0, #128]
-        ldr	q16, [x0, #192]
-        ldr	q9, [x0, #256]
-        ldr	q6, [x0, #320]
-        ldr	q3, [x0, #384]
-        ldr	q4, [x0, #448]
+        stur	q12, [x3, #-0x30]
+        stur	q11, [x3, #-0x20]
+        stur	q26, [x3, #-0x10]
+        mov	x4, #0x4                // =4
+        ldr	q0, [x1], #0x20
+        ldur	q1, [x1, #-0x10]
+        ldr	q24, [x0, #0x80]
+        ldr	q16, [x0, #0xc0]
+        ldr	q9, [x0, #0x100]
+        ldr	q6, [x0, #0x140]
+        ldr	q3, [x0, #0x180]
+        ldr	q4, [x0, #0x1c0]
         add	v28.8h, v9.8h, v6.8h
         add	v19.8h, v24.8h, v16.8h
         add	v13.8h, v3.8h, v4.8h
         ldr	q11, [x0]
         add	v23.8h, v28.8h, v13.8h
-        ldr	q15, [x0, #64]
+        ldr	q15, [x0, #0x40]
         sub	x4, x4, #0x1
 
 layer012_start:
@@ -294,7 +299,7 @@ layer012_start:
         mul	v6.8h, v3.8h, v0.h[2]
         sqrdmulh	v3.8h, v9.8h, v0.h[1]
         mul	v9.8h, v9.8h, v0.h[0]
-        str	q26, [x0], #16
+        str	q26, [x0], #0x10
         mls	v15.8h, v8.8h, v7.h[0]
         mls	v6.8h, v24.8h, v7.h[0]
         sub	v26.8h, v28.8h, v13.8h
@@ -321,24 +326,24 @@ layer012_start:
         sqrdmulh	v6.8h, v16.8h, v0.h[1]
         mul	v16.8h, v16.8h, v0.h[0]
         mls	v24.8h, v11.8h, v7.h[0]
-        str	q9, [x0, #240]
+        str	q9, [x0, #0xf0]
         ldr	q11, [x0]
         mls	v16.8h, v6.8h, v7.h[0]
-        str	q15, [x0, #304]
-        ldr	q15, [x0, #64]
-        str	q24, [x0, #368]
-        ldr	q24, [x0, #128]
-        str	q16, [x0, #432]
-        ldr	q16, [x0, #192]
-        str	q12, [x0, #48]
-        ldr	q9, [x0, #256]
-        ldr	q6, [x0, #320]
-        ldr	q3, [x0, #384]
-        ldr	q4, [x0, #448]
-        str	q26, [x0, #112]
+        str	q15, [x0, #0x130]
+        ldr	q15, [x0, #0x40]
+        str	q24, [x0, #0x170]
+        ldr	q24, [x0, #0x80]
+        str	q16, [x0, #0x1b0]
+        ldr	q16, [x0, #0xc0]
+        str	q12, [x0, #0x30]
+        ldr	q9, [x0, #0x100]
+        ldr	q6, [x0, #0x140]
+        ldr	q3, [x0, #0x180]
+        ldr	q4, [x0, #0x1c0]
+        str	q26, [x0, #0x70]
         add	v28.8h, v9.8h, v6.8h
         add	v13.8h, v3.8h, v4.8h
-        str	q8, [x0, #176]
+        str	q8, [x0, #0xb0]
         add	v19.8h, v24.8h, v16.8h
         add	v23.8h, v28.8h, v13.8h
         sub	x4, x4, #0x1
@@ -377,7 +382,7 @@ layer012_start:
         mul	v28.8h, v28.8h, v1.h[2]
         mls	v24.8h, v8.8h, v7.h[0]
         sub	v11.8h, v19.8h, v23.8h
-        str	q12, [x0, #384]
+        str	q12, [x0, #0x180]
         mls	v28.8h, v6.8h, v7.h[0]
         sqrdmulh	v16.8h, v11.8h, v0.h[1]
         mul	v9.8h, v11.8h, v0.h[0]
@@ -388,9 +393,9 @@ layer012_start:
         add	v3.8h, v6.8h, v26.8h
         mul	v8.8h, v15.8h, v0.h[4]
         sqrdmulh	v15.8h, v15.8h, v0.h[5]
-        str	q9, [x0, #256]
+        str	q9, [x0, #0x100]
         sub	v2.8h, v6.8h, v26.8h
-        str	q3, [x0, #64]
+        str	q3, [x0, #0x40]
         mls	v8.8h, v15.8h, v7.h[0]
         sqrdmulh	v15.8h, v2.8h, v0.h[1]
         mul	v11.8h, v2.8h, v0.h[0]
@@ -400,16 +405,16 @@ layer012_start:
         mls	v11.8h, v15.8h, v7.h[0]
         sqrdmulh	v26.8h, v12.8h, v0.h[1]
         mul	v12.8h, v12.8h, v0.h[0]
-        str	q8, [x0, #192]
+        str	q8, [x0, #0xc0]
         add	v15.8h, v19.8h, v23.8h
-        str	q11, [x0, #320]
+        str	q11, [x0, #0x140]
         mls	v12.8h, v26.8h, v7.h[0]
-        str	q15, [x0], #16
-        str	q16, [x0, #112]
-        str	q12, [x0, #432]
+        str	q15, [x0], #0x10
+        str	q16, [x0, #0x70]
+        str	q12, [x0, #0x1b0]
         ldp	d8, d9, [sp]
-        ldp	d10, d11, [sp, #16]
-        ldp	d12, d13, [sp, #32]
-        ldp	d14, d15, [sp, #48]
+        ldp	d10, d11, [sp, #0x10]
+        ldp	d12, d13, [sp, #0x20]
+        ldp	d14, d15, [sp, #0x30]
         add	sp, sp, #0x40
         ret

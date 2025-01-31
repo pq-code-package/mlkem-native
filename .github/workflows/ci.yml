@@ -267,6 +267,7 @@ jobs:
   simpasm:
     name: ASM simplifier
     strategy:
+      fail-fast: false
       matrix:
         target:
            - runner: ubuntu-24.04-arm

@@ -7,6 +7,7 @@ import argparse
 import logging
 import pathlib
 import tempfile
+import platform
 import sys
 import os
 import re
@@ -238,6 +239,9 @@ def simplify(logger, args, asm_input, asm_output=None):
             logger.debug(f"Using raw global symbol {sym} going forward ...")
 
         cmd = [args.objdump, "--disassemble", tmp_objfile0]
+        if platform.system() == "Darwin":
+            cmd += ["--triple=aarch64"]
+
         logger.debug(f"Disassembling temporary object file {tmp_objfile0} ...")
         disasm = run_cmd(cmd).stdout
 
@@ -251,18 +255,32 @@ def simplify(logger, args, asm_input, asm_output=None):
             f" *   {asm_input} using scripts/simpasm. Do not modify it directly.",
             " */",
             "",
-            f".global {sym}",
             "",
             ".text",
-            ".balign 4",
-            f"{sym}:",
-            "",
-        ]
+            ".balign 4"
+            ]
 
         if args.preserve_preprocessor_directives is False:
+            if platform.system() == "Darwin" and sym[0] == "_":
+                sym = sym[1:]
+            autogen_header += [
+                "#ifdef __APPLE__",
+                f".global _{sym}",
+                f"_{sym}:",
+                "#else",
+                f".global {sym}",
+                f"{sym}:",
+                "#endif",
+                "",
+            ]
             simplified_header = drop_preprocessor_directives(header)
             simplified_footer = []
         else:
+            autogen_header += [
+                f".global {sym}",
+                f"{sym}:",
+                "",
+            ]
             simplified_header = header
             simplified_footer = footer
 
