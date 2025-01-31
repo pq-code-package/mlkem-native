@@ -39,7 +39,7 @@ if ! command -v black 2>&1 >/dev/null; then
   echo "black not found. Are you running in a nix shell? See BUILDING.md."
   exit 1
 fi
-black --include "(scripts/tests|scripts/simpasm|scripts/autogen|\.py$)" "$ROOT"
+black --include "(scripts/tests|scripts/simpasm|scripts/autogen|scripts/check-namespace|\.py$)" "$ROOT"
 
 info "Formatting c files"
 if ! command -v clang-format 2>&1 >/dev/null; then

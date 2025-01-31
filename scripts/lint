@@ -48,7 +48,7 @@ checkerr "Lint shell" "$(shfmt -s -l -i 2 -ci -fn $(shfmt -f $(git grep -l '' :/
 echo "::endgroup::"
 
 echo "::group::Linting python scripts with black"
-if ! diff=$(black --check --diff -q --include "(scripts/tests|\.py$)" "$ROOT"); then
+if ! diff=$(black --check --diff -q --include "(scripts/tests|scripts/simpasm|scripts/autogen|scripts/check-namespace|\.py$)" "$ROOT"); then
   echo "::error title=Format error::$diff"
   SUCCESS=false
   echo ":x: Lint python" >>"$GITHUB_STEP_SUMMARY"
