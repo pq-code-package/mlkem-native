@@ -26,9 +26,9 @@ SRC_ARM ?= $(SRC)/arm
 # by single-quote characters in comments, so we eliminate // comments first.
 
 ifeq ($(OSTYPE_RESULT),Darwin)
-PREPROCESS=sed -e 's/\/\/.*//' | $(CC) -E -I$(SRC)/include $(SYMBOL_HIDING) -xassembler-with-cpp -
+PREPROCESS=sed -e 's/\/\/.*//' | $(CC) -E -xassembler-with-cpp -
 else
-PREPROCESS=$(CC) -E -I$(SRC)/include $(SYMBOL_HIDING) -xassembler-with-cpp -
+PREPROCESS=$(CC) -E -xassembler-with-cpp -
 endif
 
 # Generally GNU-type assemblers are happy with multiple instructions on
