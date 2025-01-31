@@ -49,6 +49,9 @@ thwarting most timing side channels.
 The C code is hardened against compiler-introduced timing side channels (such as
 [KyberSlash](https://kyberslash.cr.yp.to/) or [clangover](https://github.com/antoonpurnal/clangover))
 through suitable barriers and constant-time patterns.
+Absence of secret-dependent branches, memory-access patterns
+and variable-latency instructions is also tested using `valgrind` with various combinations of compilers and
+compilation options.
 
 ## Formal Verification
 

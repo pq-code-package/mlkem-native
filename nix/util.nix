@@ -76,6 +76,9 @@ rec {
         unwrapped = pkgs.llvmPackages_17.clang-unwrapped;
       };
 
+      inherit (pkgs.llvmPackages_17)
+        bintools;
+
       inherit (pkgs)
         nixpkgs-fmt
         shfmt;
