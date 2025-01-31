@@ -8,7 +8,7 @@ rec {
   };
 
   wrap-gcc = p: p.buildPackages.wrapCCWith {
-    cc = p.buildPackages.gcc13.cc;
+    cc = p.buildPackages.gcc14.cc;
     bintools = p.buildPackages.wrapBintoolsWith {
       bintools = p.buildPackages.binutils-unwrapped;
       libc = glibc-join p;

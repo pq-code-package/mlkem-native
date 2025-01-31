@@ -315,7 +315,7 @@ jobs:
            shell: ci_gcc11
            darwin: True
          - name: gcc-13
-           shell: ci
+           shell: ci_gcc13
            darwin: True
          - name: gcc-14
            shell: ci_gcc14
