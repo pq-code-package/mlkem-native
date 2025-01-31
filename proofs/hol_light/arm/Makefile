@@ -71,22 +71,30 @@ OBJ = mlkem/mlkem_ntt.o mlkem/mlkem_intt.o
 # x18 should not be used for Apple platforms. Check this using grep.
 ifneq ($(OSTYPE_RESULT),Darwin)
 $(OBJ): %.o : %.S
+	@echo "Preparing $@ ..."
+	@echo "AS: `$(ASSEMBLE) --version`"
+	@echo "OBJDUMP: `$(OBJDUMP) --version`"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	cat $< | $(PREPROCESS) | $(SPLIT) | grep -v -E '^\s+.quad\s+0x[0-9a-f]+$$' | $(ASSEMBLE) -o $@ -
 	$(OBJDUMP) $@ | ( ( ! grep --ignore-case -E 'w18|[^0]x18' ) || ( rm $@ ; exit 1 ) )
 	cat $< | $(PREPROCESS) | $(SPLIT) | $(ASSEMBLE) -o $@ -
 else
+GOBJCOPY?=/opt/homebrew/opt/binutils/bin/gobjcopy
 $(OBJ): %.o : %.S
-	@if ! (which gobjcopy >/dev/null); then \
-	  echo "gobjcopy not found. Consider installing it via 'brew install binutils', and put its parent directory (typically /opt/homebrew/opt/binutils/bin) in your PATH.";\
+	@echo "Preparing $@ ..."
+	@echo "AS: `$(ASSEMBLE) --version`"
+	@echo "OBJDUMP: `$(OBJDUMP) --version`"
+	@if ! (which $(GOBJCOPY) >/dev/null); then \
+	  echo "gobjcopy not found. Consider installing it via 'brew install binutils'. If you have, and if it is in a different location than $(GOBJCOPY), please set the GOBJCOPY environment variable accordingly.";\
 	  exit 1; \
 	fi
+	@echo "GOBJCOPY: `$(GOBJCOPY) --version`"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	cat $< | $(PREPROCESS) | $(SPLIT) | grep -v -E '^\s+.quad\s+0x[0-9a-f]+$$' | $(ASSEMBLE) -o $@ -
 	$(OBJDUMP) $@ | ( ( ! grep --ignore-case -E 'w18|[^0]x18' ) || ( rm $@ ; exit 1 ) )
 	cat $< | $(PREPROCESS) | $(SPLIT) | $(ASSEMBLE) -o $@ -
         # On Darwin, we need to explicitly convert Mach-O to ELF
-	gobjcopy -I mach-o-arm64 -O elf64-littleaarch64 $@ $@
+	$(GOBJCOPY) -I mach-o-arm64 -O elf64-littleaarch64 $@ $@
 endif
 
 clean:; rm -f */*.o */*/*.o */*.correct */*.native
