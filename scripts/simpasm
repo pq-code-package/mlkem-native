@@ -257,8 +257,8 @@ def simplify(logger, args, asm_input, asm_output=None):
             "",
             "",
             ".text",
-            ".balign 4"
-            ]
+            ".balign 4",
+        ]
 
         if args.preserve_preprocessor_directives is False:
             if platform.system() == "Darwin" and sym[0] == "_":

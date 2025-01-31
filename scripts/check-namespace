@@ -68,10 +68,12 @@ def check_folder(folder, namespace):
 def make_mlkem_namespace(lvl):
     return [f"PQCP_MLKEM_NATIVE_MLKEM{lvl}"]
 
+
 def run():
     check_folder("test/build/mlkem512/mlkem", make_mlkem_namespace(512))
     check_folder("test/build/mlkem768/mlkem", make_mlkem_namespace(768))
     check_folder("test/build/mlkem1024/mlkem", make_mlkem_namespace(1024))
+
 
 if __name__ == "__main__":
     run()
