@@ -123,11 +123,6 @@ static int bench(void)
                                  nonce1, nonce2, nonce3))
 #endif
 
-  /* poly_basemul_montgomery_cached */
-  BENCH("poly_basemul_montgomery_cached",
-        poly_basemul_montgomery_cached((poly *)data0, (poly *)data1,
-                                       (poly *)data2, (poly_mulcache *)data3))
-
   /* poly_tomont */
   BENCH("poly_tomont", poly_tomont((poly *)data0))
 

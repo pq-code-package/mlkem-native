@@ -20,122 +20,13 @@
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define cast_uint16_to_int16 MLKEM_NAMESPACE(cast_uint16_to_int16)
-#define montgomery_reduce_generic MLKEM_NAMESPACE(montgomery_reduce_generic)
-#define montgomery_reduce MLKEM_NAMESPACE(montgomery_reduce)
 #define fqmul MLKEM_NAMESPACE(fqmul)
 #define barrett_reduce MLKEM_NAMESPACE(barrett_reduce)
-#define basemul_cached MLKEM_NAMESPACE(basemul_cached)
 #define scalar_signed_to_unsigned_q MLKEM_NAMESPACE(scalar_signed_to_unsigned_q)
 #define ntt_butterfly_block MLKEM_NAMESPACE(ntt_butterfly_block)
 #define ntt_layer MLKEM_NAMESPACE(ntt_layer)
 #define invntt_layer MLKEM_NAMESPACE(invntt_layer)
 /* End of static namespacing */
-
-/*************************************************
- * Name:        cast_uint16_to_int16
- *
- * Description: Cast uint16 value to int16
- *
- * Returns:
- *   input x in     0 .. 32767: returns value unchanged
- *   input x in 32768 .. 65535: returns (x - 65536)
- **************************************************/
-#ifdef CBMC
-#pragma CPROVER check push
-#pragma CPROVER check disable "conversion"
-#endif
-ALWAYS_INLINE
-static INLINE int16_t cast_uint16_to_int16(uint16_t x)
-{
-  /*
-   * PORTABILITY: This relies on uint16_t -> int16_t
-   * being implemented as the inverse of int16_t -> uint16_t,
-   * which is implementation-defined (C99 6.3.1.3 (3))
-   * CBMC (correctly) fails to prove this conversion is OK,
-   * so we have to suppress that check here
-   */
-  return (int16_t)x;
-}
-#ifdef CBMC
-#pragma CPROVER check pop
-#endif
-
-/*************************************************
- * Name:        montgomery_reduce_generic
- *
- * Description: Generic Montgomery reduction; given a 32-bit integer a, computes
- *              16-bit integer congruent to a * R^-1 mod q, where R=2^16
- *
- * Arguments:   - int32_t a: input integer to be reduced
- *
- * Returns:     integer congruent to a * R^-1 modulo q, with absolute value
- *                <= ceil(|a| / 2^16) + (MLKEM_Q + 1)/2
- *
- **************************************************/
-ALWAYS_INLINE
-static INLINE int16_t montgomery_reduce_generic(int32_t a)
-{
-  /* QINV == -3327 converted to uint16_t == -3327 + 65536 == 62209 */
-  const uint32_t QINV = 62209; /* q^-1 mod 2^16 */
-
-  /*  Compute a*q^{-1} mod 2^16 in unsigned representatives */
-  const uint16_t a_reduced = a & UINT16_MAX;
-  const uint16_t a_inverted = (a_reduced * QINV) & UINT16_MAX;
-
-  /* Lift to signed canonical representative mod 2^16. */
-  const int16_t t = cast_uint16_to_int16(a_inverted);
-
-  int32_t r = a - ((int32_t)t * MLKEM_Q);
-  /* Bounds: |r| <= |a| + 2^15 * MLKEM_Q */
-
-  /*
-   * PORTABILITY: Right-shift on a signed integer is, strictly-speaking,
-   * implementation-defined for negative left argument. Here,
-   * we assume it's sign-preserving "arithmetic" shift right. (C99 6.5.7 (5))
-   */
-  r = r >> 16;
-  /* Bounds: |r >> 16| <= ceil(|r| / 2^16)
-   *                   <= ceil(|a| / 2^16 + MLKEM_Q / 2)
-   *                   <= ceil(|a| / 2^16) + (MLKEM_Q + 1) / 2
-   *
-   * (Note that |a >> n| = ceil(|a| / 2^16) for negative a)
-   */
-
-  return (int16_t)r;
-}
-
-/*************************************************
- * Name:        montgomery_reduce
- *
- * Description: Montgomery reduction
- *
- * Arguments:   - int32_t a: input integer to be reduced
- *                  Must be smaller than 2 * 2^12 * 2^15 in absolute value.
- *
- * Returns:     integer congruent to a * R^-1 modulo q,
- *              smaller than 2 * q in absolute value.
- **************************************************/
-static INLINE int16_t montgomery_reduce(int32_t a)
-__contract__(
-  requires(a > -(2 * UINT12_LIMIT * 32768))
-  requires(a <  (2 * UINT12_LIMIT * 32768))
-  ensures(return_value > -2 * MLKEM_Q && return_value < 2 * MLKEM_Q)
-)
-{
-  int16_t res;
-  debug_assert_abs_bound(&a, 1, 2 * UINT12_LIMIT * 32768);
-
-  res = montgomery_reduce_generic(a);
-  /* Bounds:
-   * |res| <= ceil(|a| / 2^16) + (MLKEM_Q + 1) / 2
-   *       <= ceil(2 * UINT12_LIMIT * 32768 / 65536) + (MLKEM_Q + 1) / 2
-   *       <= UINT12_LIMIT + (MLKEM_Q + 1) / 2
-   *        < 2 * MLKEM_Q */
-
-  debug_assert_abs_bound(&res, 1, 2 * MLKEM_Q);
-  return res;
-}
 
 #if !defined(MLKEM_USE_NATIVE_POLY_TOMONT) ||           \
     !defined(MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE) || \
@@ -224,53 +115,6 @@ __contract__(
 }
 #endif /* !defined(MLKEM_USE_NATIVE_POLY_REDUCE) || \
           !defined(MLKEM_USE_NATIVE_INTT) */
-
-static void basemul_cached(int16_t r[2], const int16_t a[2], const int16_t b[2],
-                           int16_t b_cached)
-__contract__(
-  requires(memory_no_alias(r, 2 * sizeof(int16_t)))
-  requires(memory_no_alias(a, 2 * sizeof(int16_t)))
-  requires(memory_no_alias(b, 2 * sizeof(int16_t)))
-  requires(array_bound(a, 0, 2, 0, UINT12_LIMIT))
-  assigns(memory_slice(r, 2 * sizeof(int16_t)))
-  ensures(array_abs_bound(r, 0, 2, 2 * MLKEM_Q)))
-{
-  int32_t t0, t1;
-  debug_assert_bound(a, 2, 0, UINT12_LIMIT);
-
-  t0 = (int32_t)a[1] * b_cached;
-  t0 += (int32_t)a[0] * b[0];
-  t1 = (int32_t)a[0] * b[1];
-  t1 += (int32_t)a[1] * b[0];
-
-  /* |ti| < 2 * q * 2^15 */
-  r[0] = montgomery_reduce(t0);
-  r[1] = montgomery_reduce(t1);
-
-  debug_assert_abs_bound(r, 2, 2 * MLKEM_Q);
-}
-
-MLKEM_NATIVE_INTERNAL_API
-void poly_basemul_montgomery_cached(poly *r, const poly *a, const poly *b,
-                                    const poly_mulcache *b_cache)
-{
-  unsigned i;
-  debug_assert_bound(a, MLKEM_N, 0, UINT12_LIMIT);
-
-  for (i = 0; i < MLKEM_N / 4; i++)
-  __loop__(
-    assigns(i, object_whole(r))
-    invariant(i <= MLKEM_N / 4)
-    invariant(array_abs_bound(r->coeffs, 0, 4 * i, 2 * MLKEM_Q)))
-  {
-    basemul_cached(&r->coeffs[4 * i], &a->coeffs[4 * i], &b->coeffs[4 * i],
-                   b_cache->coeffs[2 * i]);
-    basemul_cached(&r->coeffs[4 * i + 2], &a->coeffs[4 * i + 2],
-                   &b->coeffs[4 * i + 2], b_cache->coeffs[2 * i + 1]);
-  }
-
-  debug_assert_abs_bound(r, MLKEM_N, 2 * MLKEM_Q);
-}
 
 #if !defined(MLKEM_USE_NATIVE_POLY_TOMONT)
 MLKEM_NATIVE_INTERNAL_API

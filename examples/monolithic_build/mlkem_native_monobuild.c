@@ -1229,16 +1229,6 @@
 #endif
 
 /* mlkem/poly.c */
-#if defined(basemul_cached)
-#undef basemul_cached
-#endif
-
-/* mlkem/poly.c */
-#if defined(cast_uint16_to_int16)
-#undef cast_uint16_to_int16
-#endif
-
-/* mlkem/poly.c */
 #if defined(fqmul)
 #undef fqmul
 #endif
@@ -1246,16 +1236,6 @@
 /* mlkem/poly.c */
 #if defined(invntt_layer)
 #undef invntt_layer
-#endif
-
-/* mlkem/poly.c */
-#if defined(montgomery_reduce)
-#undef montgomery_reduce
-#endif
-
-/* mlkem/poly.c */
-#if defined(montgomery_reduce_generic)
-#undef montgomery_reduce_generic
 #endif
 
 /* mlkem/poly.c */
@@ -1289,6 +1269,16 @@
 #endif
 
 /* mlkem/poly.h */
+#if defined(cast_uint16_to_int16)
+#undef cast_uint16_to_int16
+#endif
+
+/* mlkem/poly.h */
+#if defined(montgomery_reduce)
+#undef montgomery_reduce
+#endif
+
+/* mlkem/poly.h */
 #if defined(poly)
 #undef poly
 #endif
@@ -1296,11 +1286,6 @@
 /* mlkem/poly.h */
 #if defined(poly_add)
 #undef poly_add
-#endif
-
-/* mlkem/poly.h */
-#if defined(poly_basemul_montgomery_cached)
-#undef poly_basemul_montgomery_cached
 #endif
 
 /* mlkem/poly.h */
