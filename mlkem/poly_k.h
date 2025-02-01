@@ -341,7 +341,7 @@ __contract__(
   requires(memory_no_alias(b_cache, sizeof(polyvec_mulcache)))
   requires(forall(k1, 0, MLKEM_K,
      array_bound(a->vec[k1].coeffs, 0, MLKEM_N, 0, UINT12_LIMIT)))
-  assigns(memory_slice(r, sizeof(poly)))
+  assigns(object_whole(r))
 );
 
 #define polyvec_mulcache_compute MLKEM_NAMESPACE_K(polyvec_mulcache_compute)

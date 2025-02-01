@@ -101,25 +101,30 @@ void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
                                            const polyvec_mulcache *b_cache)
 {
   unsigned i;
-  poly t;
   debug_assert_bound_2d(a, MLKEM_K, MLKEM_N, 0, UINT12_LIMIT);
-
-  poly_basemul_montgomery_cached(r, &a->vec[0], &b->vec[0], &b_cache->vec[0]);
-  for (i = 1; i < MLKEM_K; i++)
+  for (i = 0; i < MLKEM_N / 2; i++)
+  __loop__(invariant(i <= MLKEM_N / 2))
   {
-    poly_basemul_montgomery_cached(&t, &a->vec[i], &b->vec[i],
-                                   &b_cache->vec[i]);
-    poly_add(r, &t);
+    unsigned k;
+    int32_t t[2] = {0};
+    for (k = 0; k < MLKEM_K; k++)
+    __loop__(
+      invariant(k <= MLKEM_K &&
+         t[0] <=    (int32_t) k * 2 * UINT12_LIMIT * 32768  &&
+         t[0] >= - ((int32_t) k * 2 * UINT12_LIMIT * 32768) &&
+         t[1] <=   ((int32_t) k * 2 * UINT12_LIMIT * 32768) &&
+         t[1] >= - ((int32_t) k * 2 * UINT12_LIMIT * 32768)))
+    {
+      t[0] += (int32_t)a->vec[k].coeffs[2 * i + 1] * b_cache->vec[k].coeffs[i];
+      t[0] += (int32_t)a->vec[k].coeffs[2 * i] * b->vec[k].coeffs[2 * i];
+      t[1] += (int32_t)a->vec[k].coeffs[2 * i] * b->vec[k].coeffs[2 * i + 1];
+      t[1] += (int32_t)a->vec[k].coeffs[2 * i + 1] * b->vec[k].coeffs[2 * i];
+    }
+    r->coeffs[2 * i + 0] = montgomery_reduce(t[0]);
+    r->coeffs[2 * i + 1] = montgomery_reduce(t[1]);
   }
-
-  /*
-   * This bound is true for the C implementation, but not needed
-   * in the higher level bounds reasoning. It is thus omitted
-   * them from the spec to not unnecessarily constrain native
-   * implementations, but checked here nonetheless.
-   */
-  debug_assert_abs_bound(r, MLKEM_K, MLKEM_N * 2 * MLKEM_Q);
 }
+
 #else  /* !MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 MLKEM_NATIVE_INTERNAL_API
 void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,

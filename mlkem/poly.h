@@ -41,38 +41,94 @@ typedef struct
   int16_t coeffs[MLKEM_N >> 1];
 } poly_mulcache;
 
-#define poly_basemul_montgomery_cached \
-  MLKEM_NAMESPACE(poly_basemul_montgomery_cached)
+#define cast_uint16_to_int16 MLKEM_NAMESPACE(cast_uint16_to_int16)
 /*************************************************
- * Name:        poly_basemul_montgomery_cached
+ * Name:        cast_uint16_to_int16
  *
- * Description: Multiplication of two polynomials in NTT domain,
- *              using mulcache for second operand.
+ * Description: Cast uint16 value to int16
  *
- *              Bounds:
- *              - a is assumed to be coefficient-wise < q in absolute value.
- *
- *              The result is coefficient-wise bound by 2*q in absolute value.
- *
- * Arguments:   - poly *r: pointer to output polynomial
- *              - const poly *a: pointer to first input polynomial
- *              - const poly *b: pointer to second input polynomial
- *              - const poly_mulcache *b_cache: pointer to mulcache
- *                  for second input polynomial. Can be computed
- *                  via poly_mulcache_compute().
+ * Returns:
+ *   input x in     0 .. 32767: returns value unchanged
+ *   input x in 32768 .. 65535: returns (x - 65536)
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
-void poly_basemul_montgomery_cached(poly *r, const poly *a, const poly *b,
-                                    const poly_mulcache *b_cache)
+#ifdef CBMC
+#pragma CPROVER check push
+#pragma CPROVER check disable "conversion"
+#endif
+ALWAYS_INLINE
+static INLINE int16_t cast_uint16_to_int16(uint16_t x)
+{
+  /*
+   * PORTABILITY: This relies on uint16_t -> int16_t
+   * being implemented as the inverse of int16_t -> uint16_t,
+   * which is implementation-defined (C99 6.3.1.3 (3))
+   * CBMC (correctly) fails to prove this conversion is OK,
+   * so we have to suppress that check here
+   */
+  return (int16_t)x;
+}
+#ifdef CBMC
+#pragma CPROVER check pop
+#endif
+
+#define montgomery_reduce MLKEM_NAMESPACE(montgomery_reduce)
+/*************************************************
+ * Name:        montgomery_reduce
+ *
+ * Description: Generic Montgomery reduction; given a 32-bit integer a, computes
+ *              16-bit integer congruent to a * R^-1 mod q, where R=2^16
+ *
+ * Arguments:   - int32_t a: input integer to be reduced, of absolute value
+ *                smaller or equal to INT32_MAX - 2^15 * MLKEM_Q.
+ *
+ * Returns:     integer congruent to a * R^-1 modulo q, with absolute value
+ *                <= ceil(|a| / 2^16) + (MLKEM_Q + 1)/2
+ *
+ **************************************************/
+ALWAYS_INLINE
+static INLINE int16_t montgomery_reduce(int32_t a)
 __contract__(
-  requires(memory_no_alias(r, sizeof(poly)))
-  requires(memory_no_alias(a, sizeof(poly)))
-  requires(memory_no_alias(b, sizeof(poly)))
-  requires(memory_no_alias(b_cache, sizeof(poly_mulcache)))
-  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, UINT12_LIMIT))
-  assigns(object_whole(r))
-  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, 2 * MLKEM_Q))
-);
+    requires(a < +(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)) &&
+	     a > -(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)))
+    /* We don't attempt to express an input-dependent output bound
+     * as the post-condition here. There are two call-sites for this
+     * function:
+     * - The base multiplication: Here, we need no output bound.
+     * - fqmul: Here, we inline this function and prove another spec
+     *          for fqmul which does have a post-condition bound. */
+)
+{
+  /* QINV == -3327 converted to uint16_t == -3327 + 65536 == 62209 */
+  const uint32_t QINV = 62209; /* q^-1 mod 2^16 */
+
+  /*  Compute a*q^{-1} mod 2^16 in unsigned representatives */
+  const uint16_t a_reduced = a & UINT16_MAX;
+  const uint16_t a_inverted = (a_reduced * QINV) & UINT16_MAX;
+
+  /* Lift to signed canonical representative mod 2^16. */
+  const int16_t t = cast_uint16_to_int16(a_inverted);
+
+  int32_t r;
+
+  debug_assert(a < +(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)) &&
+               a > -(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)));
+
+  r = a - ((int32_t)t * MLKEM_Q);
+
+  /*
+   * PORTABILITY: Right-shift on a signed integer is, strictly-speaking,
+   * implementation-defined for negative left argument. Here,
+   * we assume it's sign-preserving "arithmetic" shift right. (C99 6.5.7 (5))
+   */
+  r = r >> 16;
+  /* Bounds: |r >> 16| <= ceil(|r| / 2^16)
+   *                   <= ceil(|a| / 2^16 + MLKEM_Q / 2)
+   *                   <= ceil(|a| / 2^16) + (MLKEM_Q + 1) / 2
+   *
+   * (Note that |a >> n| = ceil(|a| / 2^16) for negative a)
+   */
+  return (int16_t)r;
+}
 
 #define poly_tomont MLKEM_NAMESPACE(poly_tomont)
 /*************************************************
