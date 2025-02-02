@@ -89,6 +89,7 @@ CFLAGS := \
 	-std=c99 \
 	-pedantic \
 	-MMD \
+	-O3 \
 	$(CFLAGS)
 
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)

@@ -30,6 +30,7 @@ CFLAGS := \
 	-std=c99 \
 	-pedantic \
 	-MMD \
+	-O3 \
 	$(CFLAGS)
 
 # Part A:
