@@ -99,7 +99,7 @@ def find_header_footer(asm, filename):
 def find_globals(asm):
     global_symbols = []
     for l in asm:
-        r = re.search("^\s*\.global\s+(.*)$", l)
+        r = re.search(r"^\s*\.global\s+(.*)$", l)
         if r is None:
             continue
         global_symbols.append(r.group(1))
