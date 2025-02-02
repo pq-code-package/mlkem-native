@@ -10,9 +10,9 @@ files. Moreover, it clears all `#define`s clauses set by mlkem-native at the end
 inclusion in another compilation unit.
 
 The manually written source file [mlkem_native_all.c](mlkem_native_all.c) includes
-[mlkem_native_monobuild.c](mlkem_native_monobuild.c) three times, once for each of the three configuration files
-[config_512.h](config_512.h), [config_768.h](config_768.h),
-[config_1024.h](config_1024.h) for the different levels. For each inclusion, it sets `MLKEM_NATIVE_CONFIG_FILE`
+[mlkem_native_monobuild.c](mlkem_native_monobuild.c) three times, each time using the fixed config
+[multilevel_config.h](multilevel_config.h), but changing the security level (specified
+by `MLKEM_K`) every time. For each inclusion, it sets `MLKEM_NATIVE_CONFIG_FILE`
 appropriately first, and then includes the monobuild:
 ```C
 /* Three instances of mlkem-native for all security levels */
@@ -21,7 +21,8 @@ appropriately first, and then includes the monobuild:
 #define MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED
 #define MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS
 
-#define MLKEM_NATIVE_CONFIG_FILE "config_512.h"
+#define MLKEM_K 2
+#define MLKEM_NATIVE_CONFIG_FILE "multilevel_config.h"
 #include "mlkem_native_monobuild.c"
 #undef MLKEM_NATIVE_CONFIG_FILE
 
@@ -29,11 +30,13 @@ appropriately first, and then includes the monobuild:
 #undef MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED
 #define MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED
 
-#define MLKEM_NATIVE_CONFIG_FILE "config_1024.h"
+#define MLKEM_K 3
+#define MLKEM_NATIVE_CONFIG_FILE "multilevel_config.h"
 #include "mlkem_native_monobuild.c"
 #undef MLKEM_NATIVE_CONFIG_FILE
 
-#define MLKEM_NATIVE_CONFIG_FILE "config_768.h"
+#define MLKEM_K 4
+#define MLKEM_NATIVE_CONFIG_FILE "multilevel_config.h"
 #undef MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS
 #include "mlkem_native_monobuild.c"
 #undef MLKEM_NATIVE_CONFIG_FILE
