@@ -1,0 +1,98 @@
+[//]: # (SPDX-License-Identifier: CC-BY-4.0)
+
+# Multi-level mlkem-native in a single compilation unit, with native code
+
+This directory contains a minimal example for how to build multiple instances of mlkem-native in a single compilation
+unit, while additionally linking assembly sources from native code.
+
+The auto-generated source file [mlkem_native_monobuild.c](mlkem_native_monobuild.c) includes all mlkem-native C source
+files. Moreover, it clears all `#define`s clauses set by mlkem-native at the end, and is hence amenable to multiple
+inclusion in another compilation unit.
+
+The manually written source file [mlkem_native_all.c](mlkem_native_all.c) includes
+[mlkem_native_monobuild.c](mlkem_native_monobuild.c) three times, each time using the fixed config
+[multilevel_config.h](multilevel_config.h), but changing the security level (specified
+by `MLKEM_K`) every time. For each inclusion, it sets `MLKEM_NATIVE_CONFIG_FILE`
+appropriately first, and then includes the monobuild:
+```C
+/* Three instances of mlkem-native for all security levels */
+
+/* Include level-independent code */
+#define MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED 1
+#define MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS
+/* Include C files accompanying native code */
+#define MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_ARITH
+#define MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_FIPS202
+/* Indicate that this is a monobuild */
+#define MLKEM_NATIVE_MONOBUILD
+
+#define MLKEM_K 2
+#define MLKEM_NATIVE_CONFIG_FILE "multilevel_config.h"
+#include "mlkem_native_monobuild.c"
+#undef MLKEM_NATIVE_CONFIG_FILE
+
+/* Exclude level-independent code */
+#undef MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED
+#define MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED
+
+#define MLKEM_K 3
+#define MLKEM_NATIVE_CONFIG_FILE "multilevel_config.h"
+#include "mlkem_native_monobuild.c"
+#undef MLKEM_NATIVE_CONFIG_FILE
+
+#define MLKEM_K 4
+#define MLKEM_NATIVE_CONFIG_FILE "multilevel_config.h"
+#undef MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS
+#include "mlkem_native_monobuild.c"
+#undef MLKEM_NATIVE_CONFIG_FILE
+```
+
+Note the setting `MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED` which forces the inclusion of all level-independent
+code in the MLKEM-512 build, and the setting `MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED`, which drops all
+level-independent code in the subsequent builds. Finally, `MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS` entails that
+`mlkem_native_monobuild.c` does not `#undefine` the `#define` clauses from level-independent files.
+
+To make the monolithic multi-level build accessible from the application sources, we provide
+[mlkem_native_all.h](mlkem_native_all.h), which includes [mlkem_native.h](../../mlkem/mlkem_native.h) once per
+configuration. Note that we don't refer to the configuration using `MLKEM_NATIVE_CONFIG_FILE`, but by setting
+`BUILD_INFO_XXX` explicitly. Otherwise, [mlkem_native.h](../../mlkem/mlkem_native.h) would include the confg, which
+would lead to name-clashes upon multiple use.
+
+```C
+/* API for MLKEM-512 */
+#define BUILD_INFO_LVL 512
+#define BUILD_INFO_NAMESPACE(sym) mlkem512_##sym
+#define BUILD_INFO_NO_STANDARD_API
+#include "mlkem_native.h"
+#undef BUILD_INFO_LVL
+#undef BUILD_INFO_NAMESPACE
+#undef BUILD_INFO_NO_STANDARD_API
+#undef MLKEM_NATIVE_H
+
+/* API for MLKEM-768 */
+#define BUILD_INFO_LVL 768
+#define BUILD_INFO_NAMESPACE(sym) mlkem768_##sym
+#define BUILD_INFO_NO_STANDARD_API
+#include "mlkem_native.h"
+#undef BUILD_INFO_LVL
+#undef BUILD_INFO_NAMESPACE
+#undef BUILD_INFO_NO_STANDARD_API
+#undef MLKEM_NATIVE_H
+
+/* API for MLKEM-1024 */
+#define BUILD_INFO_LVL 1024
+#define BUILD_INFO_NAMESPACE(sym) mlkem1024_##sym
+#define BUILD_INFO_NO_STANDARD_API
+#include "mlkem_native.h"
+#undef BUILD_INFO_LVL
+#undef BUILD_INFO_NAMESPACE
+#undef BUILD_INFO_NO_STANDARD_API
+#undef MLKEM_NATIVE_H
+```
+
+## Usage
+
+Build this example with `make build`, run with `make run`.
+
+**WARNING:** The `randombytes()` implementation used here is for TESTING ONLY. You MUST NOT use this implementation
+outside of testing.
