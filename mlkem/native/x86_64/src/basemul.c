@@ -5,7 +5,8 @@
 
 #include "../../../common.h"
 
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 #include "arith_native_x86_64.h"
 #include "consts.h"
@@ -58,8 +59,10 @@ void polyvec_basemul_acc_montgomery_cached_avx2(
   }
 }
 
-#else /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT */
+#else /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
+          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
 
 MLKEM_NATIVE_EMPTY_CU(avx2_basemul)
 
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT */
+#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
+          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */

@@ -10,7 +10,9 @@
 // https://github.com/neon-ntt/neon-ntt
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && MLKEM_K == 4
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) && \
+    (defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4)
 /* simpasm: header-end */
 
 // Input:
@@ -758,4 +760,6 @@ polyvec_basemul_acc_montgomery_cached_asm_k4_opt_loop:
     .unreq t0
 
 /* simpasm: footer-start */
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT && MLKEM_K == 4 */
+#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && \
+          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) && \
+          (defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4) */

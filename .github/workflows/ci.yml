@@ -145,22 +145,25 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: mlkem_native_as_code_package
         run: |
-          make run -C examples/mlkem_native_as_code_package
+          CFLAGS="-O0" make run -C examples/mlkem_native_as_code_package
       - name: bring_your_own_fips202
         run: |
-          make run -C examples/bring_your_own_fips202
+          CFLAGS="-O0" make run -C examples/bring_your_own_fips202
       - name: custom_backend
         run: |
-          make run -C examples/custom_backend
+          CFLAGS="-O0" make run -C examples/custom_backend
       - name: monolithic_build
         run: |
-          make run -C examples/monolithic_build
+          CFLAGS="-O0" make run -C examples/monolithic_build
       - name: monolithic_build_multilevel
         run: |
-          make run -C examples/monolithic_build_multilevel
+          CFLAGS="-O0" make run -C examples/monolithic_build_multilevel
       - name: multilevel_build
         run: |
-          make run -C examples/multilevel_build
+          CFLAGS="-O0" make run -C examples/multilevel_build
+      - name: multilevel_build_native
+        run: |
+          CFLAGS="-O0" make run -C examples/multilevel_build_native
   build_kat:
     needs: [quickcheck, quickcheck-windows, quickcheck-c90, quickcheck-lib, examples, lint, lint-markdown-link]
     strategy:

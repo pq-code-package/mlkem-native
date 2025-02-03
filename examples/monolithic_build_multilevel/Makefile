@@ -61,6 +61,7 @@ CFLAGS := \
 	-std=c99 \
 	-pedantic \
 	-MMD \
+	-O3 \
 	$(CFLAGS)
 
 # Set this flag to give all non-global functions internal linkage

@@ -64,6 +64,7 @@ CFLAGS := \
 	-std=c99 \
 	-pedantic \
 	-MMD \
+	-O3 \
 	$(CFLAGS)
 
 CFLAGS+=-DMLKEM_NATIVE_CONFIG_FILE="\"custom_config.h\""

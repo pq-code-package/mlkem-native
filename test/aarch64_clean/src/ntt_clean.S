@@ -25,7 +25,8 @@
 ///
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
 // Bounds:
@@ -315,4 +316,5 @@ layer3456_start:
     .unreq t3
 
 /* simpasm: footer-start */
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN */
+#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN &&
+          !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

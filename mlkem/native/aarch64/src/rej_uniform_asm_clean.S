@@ -19,7 +19,9 @@
  * Returns number of sampled 16-bit integers (at most MLKEM_N).
  **************************************************/
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
+#if (defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \
+        defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT))  \
+    && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
 // We save the output on the stack first, and copy to the actual
@@ -403,4 +405,6 @@ return:
     .unreq bits
 
 /* simpasm: footer-start */
-#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) */
+#endif /* (defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) ||
+           defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT))
+          && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */

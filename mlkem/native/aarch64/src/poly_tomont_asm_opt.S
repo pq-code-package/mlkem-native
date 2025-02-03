@@ -4,7 +4,8 @@
  */
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
 /* Montgomery multiplication, with precomputed Montgomery twist
@@ -212,4 +213,5 @@ poly_tomont_asm_opt_loop:
         .unreq tmp0
 
 /* simpasm: footer-start */
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT */
+#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT &&
+          !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
