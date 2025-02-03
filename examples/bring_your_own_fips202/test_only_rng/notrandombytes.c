@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 The mlkem-native project authors
+ * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: LicenseRef-PD-hp OR CC0-1.0 OR 0BSD OR MIT-0 OR MI
  * Based on https://cr.yp.to/papers.html#surf by Daniel. J. Bernstein
  */

@@ -1,4 +1,4 @@
-/// Copyright (c) 2024 The mlkem-native project authors
+/// Copyright (c) 2024-2025 The mlkem-native project authors
 /// Copyright (c) 2022 Arm Limited
 /// Copyright (c) 2022 Hanno Becker
 /// Copyright (c) 2023 Amin Abdulrahman, Matthias Kannwischer

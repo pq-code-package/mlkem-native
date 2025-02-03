@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024 The mlkem-native project authors
+# Copyright (c) 2024-2025 The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0
 
 import subprocess
@@ -23,7 +23,7 @@ montgomery_factor = pow(2, 16, modulus)
 
 def gen_header():
     yield "/*"
-    yield " * Copyright (c) 2024 The mlkem-native project authors"
+    yield " * Copyright (c) 2024-2025 The mlkem-native project authors"
     yield " * SPDX-License-Identifier: Apache-2.0"
     yield " */"
     yield ""
@@ -818,9 +818,7 @@ def gen_hol_light_asm(dry_run=False):
 
 def gen_header_guard(header_file, dry_run=False):
 
-    exceptions = {
-        "mlkem/mlkem_native.h": "MLKEM_NATIVE_H"
-        }
+    exceptions = {"mlkem/mlkem_native.h": "MLKEM_NATIVE_H"}
 
     # Checks that the first non-comment line in the header file
     # if of the form `#if defined(MLKEM_NATIVE_{full filename}_H)`.
@@ -838,7 +836,7 @@ def gen_header_guard(header_file, dry_run=False):
 
     def gen_copyright():
         yield "/*"
-        yield " * Copyright (c) 2024 The mlkem-native project authors"
+        yield " * Copyright (c) 2024-2025 The mlkem-native project authors"
         yield " * SPDX-License-Identifier: Apache-2.0"
         yield " */"
 
