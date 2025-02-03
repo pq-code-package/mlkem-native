@@ -949,6 +949,7 @@ def cli():
             "mlkem_native_as_code_package",
             "monolithic_build",
             "monolithic_build_multilevel",
+            "monolithic_build_multilevel_native",
             "multilevel_build",
             "multilevel_build_native",
         ],

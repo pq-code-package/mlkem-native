@@ -12,8 +12,9 @@
  *
  */
 
+#include "notrandombytes.h"
 #include <stdint.h>
-#include "../../mlkem/randombytes.h"
+#include <string.h>
 
 #ifdef ENABLE_CT_TESTING
 #include <valgrind/memcheck.h>
@@ -24,6 +25,13 @@ static uint32_t seed[32] = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 8, 9, 7, 9, 3,
 static uint32_t in[12];
 static uint32_t out[8];
 static int32_t outleft = 0;
+
+void randombytes_reset(void)
+{
+  memset(in, 0, sizeof(in));
+  memset(out, 0, sizeof(out));
+  outleft = 0;
+}
 
 #define ROTATE(x, b) (((x) << (b)) | ((x) >> (32 - (b))))
 #define MUSH(i, b) x = t[i] += (((x ^ seed[i]) + sum) ^ ROTATE(x, b));
