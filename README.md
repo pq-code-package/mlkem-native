@@ -7,16 +7,15 @@
 [![C90](https://img.shields.io/badge/language-C90-blue.svg)](https://web.archive.org/web/20200909074736if_/https://www.pdf-archive.com/2014/10/02/ansi-iso-9899-1990-1/ansi-iso-9899-1990-1.pdf)
 [![Apache](https://img.shields.io/badge/license-Apache--2.0-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
-mlkem-native is a C90 implementation of [ML-KEM](https://doi.org/10.6028/NIST.FIPS.203) targeting
-PC, mobile and server platforms. It is a fork of the ML-KEM [reference
-implementation](https://github.com/pq-crystals/kyber/tree/main/ref).
+mlkem-native is a secure, fast and portable C90 implementation of [ML-KEM](https://doi.org/10.6028/NIST.FIPS.203).
+It is a fork of the ML-KEM [reference implementation](https://github.com/pq-crystals/kyber/tree/main/ref).
 
-mlkem-native aims to be secure, fast, and easy to use: It provides native code backends in C, AArch64 and
-x86_64, offering state of the art performance on most Arm, Intel and AMD platforms (see
-[benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/)).
-The frontend and the C backend (i.e., all C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202)) are verified
+mlkem-native includes native backends for AArch64 and AVX2, offering competitive performance on most Arm, Intel and AMD platforms
+(see [benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/)). The frontend and the C backend (i.e., all C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202)) are verified
 using [CBMC](https://github.com/diffblue/cbmc) to be free of undefined behaviour. In particular, there are no out of
 bounds accesses, nor integer overflows during optimized modular arithmetic.
+
+mlkem-native is supported by the [Post-Quantum Cryptography Alliance](https://pqca.org/) as part of the [Linux Foundation](https://linuxfoundation.org/).
 
 ## Quickstart for Ubuntu
 
