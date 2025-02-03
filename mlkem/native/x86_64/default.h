@@ -1,8 +1,10 @@
 /*
- * Copyright (c) 2024 The mlkem-native project authors
+ * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#ifndef MLKEM_NATIVE_NATIVE_X86_64_DEFAULT_H
+#define MLKEM_NATIVE_NATIVE_X86_64_DEFAULT_H
 /* ML-KEM arithmetic native profile for clean assembly */
 
 #ifdef MLKEM_NATIVE_ARITH_PROFILE_H
@@ -22,3 +24,5 @@
 #define MLKEM_NATIVE_ARITH_BACKEND_IMPL "native/x86_64/src/default_impl.h"
 
 #endif /* MLKEM_NATIVE_ARITH_PROFILE_H */
+
+#endif /* MLKEM_NATIVE_NATIVE_X86_64_DEFAULT_H */

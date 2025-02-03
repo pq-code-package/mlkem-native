@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2024 The mlkem-native project authors
+ * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef KECCAKF1600_H
-#define KECCAKF1600_H
+#ifndef MLKEM_NATIVE_FIPS202_KECCAKF1600_H
+#define MLKEM_NATIVE_FIPS202_KECCAKF1600_H
 #include <stdint.h>
 #include "../cbmc.h"
 #include "../common.h"
@@ -101,4 +101,4 @@ __contract__(
 #define KeccakF1600_StatePermute MLKEM_NAMESPACE(keccak_f1600_x1_asm)
 #endif
 
-#endif /* KECCAKF1600_H */
+#endif /* MLKEM_NATIVE_FIPS202_KECCAKF1600_H */

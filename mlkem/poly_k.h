@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2024 The mlkem-native project authors
+ * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef POLY_K_H
-#define POLY_K_H
+#ifndef MLKEM_NATIVE_POLY_K_H
+#define MLKEM_NATIVE_POLY_K_H
 
 #include <stdint.h>
 #include "common.h"
@@ -593,4 +593,4 @@ __contract__(
 );
 #endif /* MLKEM_K == 2 */
 
-#endif
+#endif /* MLKEM_NATIVE_POLY_K_H */

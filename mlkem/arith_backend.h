@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2024 The mlkem-native project authors
+ * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#if !defined(MLKEM_NATIVE_ARITH_IMPL_H)
-#define MLKEM_NATIVE_ARITH_IMPL_H
+#ifndef MLKEM_NATIVE_ARITH_BACKEND_H
+#define MLKEM_NATIVE_ARITH_BACKEND_H
 
 #include "common.h"
 
@@ -21,4 +21,4 @@
 #endif
 #endif
 
-#endif /* MLKEM_NATIVE_ARITH_IMPL_H */
+#endif /* MLKEM_NATIVE_ARITH_BACKEND_H */

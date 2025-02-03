@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 The mlkem-native project authors
+ * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -185,8 +185,8 @@
 #endif
 
 /* mlkem/indcpa.h */
-#if defined(INDCPA_H)
-#undef INDCPA_H
+#if defined(MLKEM_NATIVE_INDCPA_H)
+#undef MLKEM_NATIVE_INDCPA_H
 #endif
 
 /* mlkem/indcpa.h */
@@ -220,8 +220,8 @@
 #endif
 
 /* mlkem/kem.h */
-#if defined(KEM_H)
-#undef KEM_H
+#if defined(MLKEM_NATIVE_KEM_H)
+#undef MLKEM_NATIVE_KEM_H
 #endif
 
 /* mlkem/kem.h */
@@ -525,6 +525,11 @@
 #endif
 
 /* mlkem/params.h */
+#if defined(MLKEM_NATIVE_PARAMS_H)
+#undef MLKEM_NATIVE_PARAMS_H
+#endif
+
+/* mlkem/params.h */
 #if defined(MLKEM_POLYBYTES)
 #undef MLKEM_POLYBYTES
 #endif
@@ -585,11 +590,6 @@
 #endif
 
 /* mlkem/params.h */
-#if defined(PARAMS_H)
-#undef PARAMS_H
-#endif
-
-/* mlkem/params.h */
 #if defined(UINT12_LIMIT)
 #undef UINT12_LIMIT
 #endif
@@ -605,8 +605,8 @@
 #endif
 
 /* mlkem/poly_k.h */
-#if defined(POLY_K_H)
-#undef POLY_K_H
+#if defined(MLKEM_NATIVE_POLY_K_H)
+#undef MLKEM_NATIVE_POLY_K_H
 #endif
 
 /* mlkem/poly_k.h */
@@ -727,8 +727,8 @@
  */
 
 /* mlkem/arith_backend.h */
-#if defined(MLKEM_NATIVE_ARITH_IMPL_H)
-#undef MLKEM_NATIVE_ARITH_IMPL_H
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_H)
+#undef MLKEM_NATIVE_ARITH_BACKEND_H
 #endif
 
 /* mlkem/cbmc.h */
@@ -744,6 +744,11 @@
 /* mlkem/cbmc.h */
 #if defined(EXISTS)
 #undef EXISTS
+#endif
+
+/* mlkem/cbmc.h */
+#if defined(MLKEM_NATIVE_CBMC_H)
+#undef MLKEM_NATIVE_CBMC_H
 #endif
 
 /* mlkem/cbmc.h */
@@ -857,8 +862,8 @@
 #endif
 
 /* mlkem/compress.h */
-#if defined(COMPRESS_H)
-#undef COMPRESS_H
+#if defined(MLKEM_NATIVE_COMPRESS_H)
+#undef MLKEM_NATIVE_COMPRESS_H
 #endif
 
 /* mlkem/compress.h */
@@ -972,8 +977,8 @@
 #endif
 
 /* mlkem/debug.h */
-#if defined(MLKEM_DEBUG_H)
-#undef MLKEM_DEBUG_H
+#if defined(MLKEM_NATIVE_DEBUG_H)
+#undef MLKEM_NATIVE_DEBUG_H
 #endif
 
 /* mlkem/debug.h */
@@ -1032,13 +1037,13 @@
 #endif
 
 /* mlkem/fips202/fips202.h */
-#if defined(FIPS202_H)
-#undef FIPS202_H
+#if defined(FIPS202_X4_DEFAULT_IMPLEMENTATION)
+#undef FIPS202_X4_DEFAULT_IMPLEMENTATION
 #endif
 
 /* mlkem/fips202/fips202.h */
-#if defined(FIPS202_X4_DEFAULT_IMPLEMENTATION)
-#undef FIPS202_X4_DEFAULT_IMPLEMENTATION
+#if defined(MLKEM_NATIVE_FIPS202_FIPS202_H)
+#undef MLKEM_NATIVE_FIPS202_FIPS202_H
 #endif
 
 /* mlkem/fips202/fips202.h */
@@ -1117,8 +1122,8 @@
 #endif
 
 /* mlkem/fips202/fips202_backend.h */
-#if defined(MLKEM_NATIVE_FIPS202_IMPL_H)
-#undef MLKEM_NATIVE_FIPS202_IMPL_H
+#if defined(MLKEM_NATIVE_FIPS202_FIPS202_BACKEND_H)
+#undef MLKEM_NATIVE_FIPS202_FIPS202_BACKEND_H
 #endif
 
 /* mlkem/fips202/fips202x4.c */
@@ -1147,8 +1152,8 @@
 #endif
 
 /* mlkem/fips202/fips202x4.h */
-#if defined(FIPS_202X4_H)
-#undef FIPS_202X4_H
+#if defined(MLKEM_NATIVE_FIPS202_FIPS202X4_H)
+#undef MLKEM_NATIVE_FIPS202_FIPS202X4_H
 #endif
 
 /* mlkem/fips202/fips202x4.h */
@@ -1197,11 +1202,6 @@
 #endif
 
 /* mlkem/fips202/keccakf1600.h */
-#if defined(KECCAKF1600_H)
-#undef KECCAKF1600_H
-#endif
-
-/* mlkem/fips202/keccakf1600.h */
 #if defined(KECCAK_LANES)
 #undef KECCAK_LANES
 #endif
@@ -1234,6 +1234,11 @@
 /* mlkem/fips202/keccakf1600.h */
 #if defined(KeccakF1600x4_StateXORBytes)
 #undef KeccakF1600x4_StateXORBytes
+#endif
+
+/* mlkem/fips202/keccakf1600.h */
+#if defined(MLKEM_NATIVE_FIPS202_KECCAKF1600_H)
+#undef MLKEM_NATIVE_FIPS202_KECCAKF1600_H
 #endif
 
 /* mlkem/poly.c */
@@ -1272,13 +1277,13 @@
 #endif
 
 /* mlkem/poly.h */
-#if defined(NTT_BOUND)
-#undef NTT_BOUND
+#if defined(MLKEM_NATIVE_POLY_H)
+#undef MLKEM_NATIVE_POLY_H
 #endif
 
 /* mlkem/poly.h */
-#if defined(POLY_H)
-#undef POLY_H
+#if defined(NTT_BOUND)
+#undef NTT_BOUND
 #endif
 
 /* mlkem/poly.h */
@@ -1342,8 +1347,8 @@
 #endif
 
 /* mlkem/randombytes.h */
-#if defined(RANDOMBYTES_H)
-#undef RANDOMBYTES_H
+#if defined(MLKEM_NATIVE_RANDOMBYTES_H)
+#undef MLKEM_NATIVE_RANDOMBYTES_H
 #endif
 
 /* mlkem/sampling.c */
@@ -1372,8 +1377,8 @@
 #endif
 
 /* mlkem/sampling.h */
-#if defined(SAMPLING_H)
-#undef SAMPLING_H
+#if defined(MLKEM_NATIVE_SAMPLING_H)
+#undef MLKEM_NATIVE_SAMPLING_H
 #endif
 
 /* mlkem/sampling.h */
@@ -1397,8 +1402,8 @@
 #endif
 
 /* mlkem/symmetric.h */
-#if defined(SYMMETRIC_H)
-#undef SYMMETRIC_H
+#if defined(MLKEM_NATIVE_SYMMETRIC_H)
+#undef MLKEM_NATIVE_SYMMETRIC_H
 #endif
 
 /* mlkem/symmetric.h */
@@ -1557,13 +1562,13 @@
 #endif
 
 /* mlkem/verify.h */
-#if defined(MLKEM_USE_ASM_VALUE_BARRIER)
-#undef MLKEM_USE_ASM_VALUE_BARRIER
+#if defined(MLKEM_NATIVE_VERIFY_H)
+#undef MLKEM_NATIVE_VERIFY_H
 #endif
 
 /* mlkem/verify.h */
-#if defined(VERIFY_H)
-#undef VERIFY_H
+#if defined(MLKEM_USE_ASM_VALUE_BARRIER)
+#undef MLKEM_USE_ASM_VALUE_BARRIER
 #endif
 
 /* mlkem/verify.h */
@@ -1647,6 +1652,11 @@
 #undef MLKEM_NATIVE_FIPS202_BACKEND_NAME
 #endif
 
+/* mlkem/fips202/native/aarch64/cortex_a55.h */
+#if defined(MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_CORTEX_A55_H)
+#undef MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_CORTEX_A55_H
+#endif
+
 /* mlkem/fips202/native/aarch64/default.h */
 #if defined(FIPS202_NATIVE_PROFILE_H)
 #undef FIPS202_NATIVE_PROFILE_H
@@ -1667,9 +1677,19 @@
 #undef MLKEM_NATIVE_FIPS202_BACKEND_NAME
 #endif
 
+/* mlkem/fips202/native/aarch64/default.h */
+#if defined(MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_DEFAULT_H)
+#undef MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_DEFAULT_H
+#endif
+
 /* mlkem/fips202/native/aarch64/src/cortex_a55_impl.h */
 #if defined(FIPS202_NATIVE_PROFILE_IMPL_H)
 #undef FIPS202_NATIVE_PROFILE_IMPL_H
+#endif
+
+/* mlkem/fips202/native/aarch64/src/cortex_a55_impl.h */
+#if defined(MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_SRC_CORTEX_A55_IMPL_H)
+#undef MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_SRC_CORTEX_A55_IMPL_H
 #endif
 
 /* mlkem/fips202/native/aarch64/src/cortex_a55_impl.h */
@@ -1680,6 +1700,11 @@
 /* mlkem/fips202/native/aarch64/src/default_impl.h */
 #if defined(FIPS202_NATIVE_PROFILE_IMPL_H)
 #undef FIPS202_NATIVE_PROFILE_IMPL_H
+#endif
+
+/* mlkem/fips202/native/aarch64/src/default_impl.h */
+#if defined(MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_SRC_DEFAULT_IMPL_H)
+#undef MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_SRC_DEFAULT_IMPL_H
 #endif
 
 /* mlkem/fips202/native/aarch64/src/default_impl.h */
@@ -1698,8 +1723,8 @@
 #endif
 
 /* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
-#if defined(FIPS202_AARCH64_NATIVE_H)
-#undef FIPS202_AARCH64_NATIVE_H
+#if defined(MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H)
+#undef MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H
 #endif
 
 /* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
@@ -1748,8 +1773,8 @@
 #endif
 
 /* mlkem/fips202/native/default.h */
-#if defined(MLKEM_NATIVE_FIPS202_BACKEND_DEFAULT_H)
-#undef MLKEM_NATIVE_FIPS202_BACKEND_DEFAULT_H
+#if defined(MLKEM_NATIVE_FIPS202_NATIVE_DEFAULT_H)
+#undef MLKEM_NATIVE_FIPS202_NATIVE_DEFAULT_H
 #endif
 
 /* mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c */
@@ -1853,6 +1878,11 @@
 #endif
 
 /* mlkem/fips202/native/x86_64/src/xkcp_impl.h */
+#if defined(MLKEM_NATIVE_FIPS202_NATIVE_X86_64_SRC_XKCP_IMPL_H)
+#undef MLKEM_NATIVE_FIPS202_NATIVE_X86_64_SRC_XKCP_IMPL_H
+#endif
+
+/* mlkem/fips202/native/x86_64/src/xkcp_impl.h */
 #if defined(MLKEM_NATIVE_FIPS202_PROFILE_IMPL_H)
 #undef MLKEM_NATIVE_FIPS202_PROFILE_IMPL_H
 #endif
@@ -1875,6 +1905,11 @@
 /* mlkem/fips202/native/x86_64/xkcp.h */
 #if defined(MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP)
 #undef MLKEM_NATIVE_FIPS202_BACKEND_X86_64_XKCP
+#endif
+
+/* mlkem/fips202/native/x86_64/xkcp.h */
+#if defined(MLKEM_NATIVE_FIPS202_NATIVE_X86_64_XKCP_H)
+#undef MLKEM_NATIVE_FIPS202_NATIVE_X86_64_XKCP_H
 #endif
 
 /* mlkem/fips202/native/x86_64/xkcp.h */
@@ -1902,9 +1937,14 @@
 #undef MLKEM_NATIVE_ARITH_PROFILE_H
 #endif
 
+/* mlkem/native/aarch64/opt.h */
+#if defined(MLKEM_NATIVE_NATIVE_AARCH64_OPT_H)
+#undef MLKEM_NATIVE_NATIVE_AARCH64_OPT_H
+#endif
+
 /* mlkem/native/aarch64/src/arith_native_aarch64.h */
-#if defined(MLKEM_AARCH64_NATIVE_H)
-#undef MLKEM_AARCH64_NATIVE_H
+#if defined(MLKEM_NATIVE_NATIVE_AARCH64_SRC_ARITH_NATIVE_AARCH64_H)
+#undef MLKEM_NATIVE_NATIVE_AARCH64_SRC_ARITH_NATIVE_AARCH64_H
 #endif
 
 /* mlkem/native/aarch64/src/arith_native_aarch64.h */
@@ -1993,8 +2033,8 @@
 #endif
 
 /* mlkem/native/aarch64/src/consts.h */
-#if defined(MLKEM_NATIVE_AARCH64_CONSTS)
-#undef MLKEM_NATIVE_AARCH64_CONSTS
+#if defined(MLKEM_NATIVE_NATIVE_AARCH64_SRC_CONSTS_H)
+#undef MLKEM_NATIVE_NATIVE_AARCH64_SRC_CONSTS_H
 #endif
 
 /* mlkem/native/aarch64/src/consts.h */
@@ -2010,6 +2050,11 @@
 /* mlkem/native/aarch64/src/opt_impl.h */
 #if defined(MLKEM_NATIVE_ARITH_PROFILE_IMPL_H)
 #undef MLKEM_NATIVE_ARITH_PROFILE_IMPL_H
+#endif
+
+/* mlkem/native/aarch64/src/opt_impl.h */
+#if defined(MLKEM_NATIVE_NATIVE_AARCH64_SRC_OPT_IMPL_H)
+#undef MLKEM_NATIVE_NATIVE_AARCH64_SRC_OPT_IMPL_H
 #endif
 
 /* mlkem/native/aarch64/src/opt_impl.h */
@@ -2058,8 +2103,8 @@
 #endif
 
 /* mlkem/native/api.h */
-#if defined(MLKEM_NATIVE_ARITH_NATIVE_API_H)
-#undef MLKEM_NATIVE_ARITH_NATIVE_API_H
+#if defined(MLKEM_NATIVE_NATIVE_API_H)
+#undef MLKEM_NATIVE_NATIVE_API_H
 #endif
 
 /* mlkem/native/api.h */
@@ -2068,8 +2113,8 @@
 #endif
 
 /* mlkem/native/default.h */
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_DEFAULT_H)
-#undef MLKEM_NATIVE_ARITH_BACKEND_DEFAULT_H
+#if defined(MLKEM_NATIVE_NATIVE_DEFAULT_H)
+#undef MLKEM_NATIVE_NATIVE_DEFAULT_H
 #endif
 
 /* mlkem/native/x86_64/default.h */
@@ -2092,6 +2137,11 @@
 #undef MLKEM_NATIVE_ARITH_PROFILE_H
 #endif
 
+/* mlkem/native/x86_64/default.h */
+#if defined(MLKEM_NATIVE_NATIVE_X86_64_DEFAULT_H)
+#undef MLKEM_NATIVE_NATIVE_X86_64_DEFAULT_H
+#endif
+
 /* mlkem/native/x86_64/src/align.h */
 #if defined(ALIGNED_INT16)
 #undef ALIGNED_INT16
@@ -2107,9 +2157,14 @@
 #undef ALIGN_H
 #endif
 
+/* mlkem/native/x86_64/src/align.h */
+#if defined(MLKEM_NATIVE_NATIVE_X86_64_SRC_ALIGN_H)
+#undef MLKEM_NATIVE_NATIVE_X86_64_SRC_ALIGN_H
+#endif
+
 /* mlkem/native/x86_64/src/arith_native_x86_64.h */
-#if defined(MLKEM_X86_64_NATIVE_H)
-#undef MLKEM_X86_64_NATIVE_H
+#if defined(MLKEM_NATIVE_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H)
+#undef MLKEM_NATIVE_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H
 #endif
 
 /* mlkem/native/x86_64/src/arith_native_x86_64.h */
@@ -2398,6 +2453,11 @@
 #endif
 
 /* mlkem/native/x86_64/src/consts.h */
+#if defined(MLKEM_NATIVE_NATIVE_X86_64_SRC_CONSTS_H)
+#undef MLKEM_NATIVE_NATIVE_X86_64_SRC_CONSTS_H
+#endif
+
+/* mlkem/native/x86_64/src/consts.h */
 #if defined(qdata)
 #undef qdata
 #endif
@@ -2405,6 +2465,11 @@
 /* mlkem/native/x86_64/src/default_impl.h */
 #if defined(MLKEM_NATIVE_ARITH_PROFILE_IMPL_H)
 #undef MLKEM_NATIVE_ARITH_PROFILE_IMPL_H
+#endif
+
+/* mlkem/native/x86_64/src/default_impl.h */
+#if defined(MLKEM_NATIVE_NATIVE_X86_64_SRC_DEFAULT_IMPL_H)
+#undef MLKEM_NATIVE_NATIVE_X86_64_SRC_DEFAULT_IMPL_H
 #endif
 
 /* mlkem/native/x86_64/src/default_impl.h */

@@ -1,8 +1,10 @@
 /*
- * Copyright (c) 2024 The mlkem-native project authors
+ * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#ifndef MLKEM_NATIVE_CBMC_H
+#define MLKEM_NATIVE_CBMC_H
 /***************************************************
  * Basic replacements for __CPROVER_XXX contracts
  ***************************************************/
@@ -137,3 +139,5 @@
   array_bound((arr), (lb), (ub), -((int)(k)) + 1, (k))
 
 #endif
+
+#endif /* MLKEM_NATIVE_CBMC_H */

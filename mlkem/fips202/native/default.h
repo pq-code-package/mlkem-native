@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2024 The mlkem-native project authors
+ * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef MLKEM_NATIVE_FIPS202_BACKEND_DEFAULT_H
-#define MLKEM_NATIVE_FIPS202_BACKEND_DEFAULT_H
+#ifndef MLKEM_NATIVE_FIPS202_NATIVE_DEFAULT_H
+#define MLKEM_NATIVE_FIPS202_NATIVE_DEFAULT_H
 
 /*
  * Default FIPS202 backend
@@ -19,4 +19,4 @@
 #include "x86_64/xkcp.h"
 #endif
 
-#endif /* MLKEM_NATIVE_FIPS202_BACKEND_DEFAULT_H */
+#endif /* MLKEM_NATIVE_FIPS202_NATIVE_DEFAULT_H */

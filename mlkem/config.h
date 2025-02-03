@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 The mlkem-native project authors
+ * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -226,4 +226,4 @@
 #define MLKEM_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM1024
 #endif
 
-#endif /* MLkEM_NATIVE_CONFIG_H */
+#endif /* MLKEM_NATIVE_CONFIG_H */

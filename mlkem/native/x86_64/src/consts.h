@@ -1,8 +1,10 @@
 /*
- * Copyright (c) 2024 The mlkem-native project authors
+ * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#ifndef MLKEM_NATIVE_NATIVE_X86_64_SRC_CONSTS_H
+#define MLKEM_NATIVE_NATIVE_X86_64_SRC_CONSTS_H
 /*
  * Implementation from Kyber reference repository
  * https://github.com/pq-crystals/kyber/blob/main/avx2/consts.h
@@ -42,3 +44,5 @@ extern const qdata_t qdata;
 #endif
 
 #endif
+
+#endif /* MLKEM_NATIVE_NATIVE_X86_64_SRC_CONSTS_H */

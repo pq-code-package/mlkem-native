@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2024 The mlkem-native project authors
+ * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef KEM_H
-#define KEM_H
+#ifndef MLKEM_NATIVE_KEM_H
+#define MLKEM_NATIVE_KEM_H
 
 #include <stdint.h>
 #include "cbmc.h"
@@ -180,4 +180,4 @@ __contract__(
   assigns(object_whole(ss))
 );
 
-#endif
+#endif /* MLKEM_NATIVE_KEM_H */

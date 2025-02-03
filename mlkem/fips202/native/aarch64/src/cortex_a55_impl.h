@@ -1,8 +1,10 @@
 /*
- * Copyright (c) 2024 The mlkem-native project authors
+ * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#ifndef MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_SRC_CORTEX_A55_IMPL_H
+#define MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_SRC_CORTEX_A55_IMPL_H
 /* FIPS202 assembly profile targeting Cortex-A55 */
 
 #ifdef FIPS202_NATIVE_PROFILE_IMPL_H
@@ -23,3 +25,5 @@ static INLINE void keccak_f1600_x1_native(uint64_t *state)
 }
 
 #endif /* FIPS202_NATIVE_PROFILE_IMPL_H */
+
+#endif /* MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_SRC_CORTEX_A55_IMPL_H */

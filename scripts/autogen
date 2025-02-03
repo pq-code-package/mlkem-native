@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024 The mlkem-native project authors
+# Copyright (c) 2024-2025 The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0
 
 import subprocess
@@ -23,7 +23,7 @@ montgomery_factor = pow(2, 16, modulus)
 
 def gen_header():
     yield "/*"
-    yield " * Copyright (c) 2024 The mlkem-native project authors"
+    yield " * Copyright (c) 2024-2025 The mlkem-native project authors"
     yield " * SPDX-License-Identifier: Apache-2.0"
     yield " */"
     yield ""
@@ -816,6 +816,80 @@ def gen_hol_light_asm(dry_run=False):
     gen_hol_light_asm_file("intt_opt.S", "mlkem_intt.S", dry_run=dry_run)
 
 
+def gen_header_guard(header_file, dry_run=False):
+
+    exceptions = {"mlkem/mlkem_native.h": "MLKEM_NATIVE_H"}
+
+    # Checks that the first non-comment line in the header file
+    # if of the form `#if defined(MLKEM_NATIVE_{full filename}_H)`.
+    with open(header_file, "r") as f:
+        content = f.read().split("\n")
+
+    # Use full filename as the header guard, with '/' and '.' replaced by '_'
+    guard_name = (
+        header_file.removeprefix("mlkem/").replace("/", "_").replace(".", "_").upper()
+    )
+    guard_name = "MLKEM_NATIVE_" + guard_name
+
+    if header_file in exceptions.keys():
+        guard_name = exceptions[header_file]
+
+    def gen_copyright():
+        yield "/*"
+        yield " * Copyright (c) 2024-2025 The mlkem-native project authors"
+        yield " * SPDX-License-Identifier: Apache-2.0"
+        yield " */"
+
+    def gen_guard():
+        yield f"#ifndef {guard_name}"
+        yield f"#define {guard_name}"
+
+    def gen_footer():
+        yield f"#endif /* {guard_name} */"
+        yield ""
+
+    cr = list(gen_copyright())
+    guard = list(gen_guard())
+    footer = list(gen_footer())
+
+    # Check if header file begins with copyright notice; otherwise, add it.
+    if content[: len(cr)] != cr:
+        assert False
+        content = cr + content
+    i = len(cr)
+    while content[i].strip() == "":
+        i += 1
+    # Check if header file has some guard -- if so, drop it
+    if content[i].strip().startswith("#if !defined") or content[i].strip().startswith(
+        "#ifndef"
+    ):
+        del content[i]
+        if content[i].strip().startswith("#define"):
+            del content[i]
+        has_guard = True
+    else:
+        has_guard = False
+    # Add standardized guard
+    content = content[:i] + guard + content[i:]
+    # Check if header has some footer
+    if (
+        has_guard is True
+        and content[-1] == ""
+        and content[-2].strip().startswith("#endif")
+    ):
+        del content[-2:]
+    # Add standardized footer
+    content = content + footer
+
+    new_content = "\n".join(content)
+    update_file(header_file, new_content, dry_run=dry_run)
+
+
+def gen_header_guards(dry_run=False):
+    for h in get_header_files():
+        gen_header_guard(h, dry_run=dry_run)
+
+
 def _main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -832,10 +906,11 @@ def _main():
     gen_avx2_fwd_ntt_zeta_file(args.dry_run)
     gen_avx2_rej_uniform_table(args.dry_run)
 
-    gen_monolithic_source_file(args.dry_run)
-
     if platform.machine().lower() in ["arm64", "aarch64"]:
         gen_hol_light_asm(args.dry_run)
+
+    gen_header_guards(args.dry_run)
+    gen_monolithic_source_file(args.dry_run)
 
 
 if __name__ == "__main__":

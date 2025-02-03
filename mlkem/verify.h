@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2024 The mlkem-native project authors
+ * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef VERIFY_H
-#define VERIFY_H
+#ifndef MLKEM_NATIVE_VERIFY_H
+#define MLKEM_NATIVE_VERIFY_H
 
 #include <limits.h>
 #include <stddef.h>
@@ -314,4 +314,4 @@ __contract__(
   }
 }
 
-#endif /* VERIFY_H */
+#endif /* MLKEM_NATIVE_VERIFY_H */

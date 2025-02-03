@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2024 The mlkem-native project authors
+ * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef MLKEM_DEBUG_H
-#define MLKEM_DEBUG_H
+#ifndef MLKEM_NATIVE_DEBUG_H
+#define MLKEM_NATIVE_DEBUG_H
 #include "common.h"
 
 #if defined(MLKEM_DEBUG)
@@ -127,4 +127,4 @@ void mlkem_debug_check_bounds(const char *file, int line, const int16_t *ptr,
 
 
 #endif /* MLKEM_DEBUG */
-#endif /* MLKEM_DEBUG_H */
+#endif /* MLKEM_NATIVE_DEBUG_H */
