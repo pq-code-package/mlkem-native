@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "mlkem_native_all.h"
+#include "test_only_rng/notrandombytes.h"
 
 static int test_keys_mlkem512(void)
 {
@@ -16,6 +17,10 @@ static int test_keys_mlkem512(void)
   uint8_t ct[MLKEM512_CIPHERTEXTBYTES];
   uint8_t key_a[MLKEM512_BYTES];
   uint8_t key_b[MLKEM512_BYTES];
+
+  /* WARNING: Test-only
+   * Normally, you would want to seed a PRNG with trustworthy entropy here. */
+  randombytes_reset();
 
   /* Alice generates a public key */
   mlkem512_keypair(pk, sk);
@@ -44,6 +49,10 @@ static int test_keys_mlkem768(void)
   uint8_t key_a[MLKEM768_BYTES];
   uint8_t key_b[MLKEM768_BYTES];
 
+  /* WARNING: Test-only
+   * Normally, you would want to seed a PRNG with trustworthy entropy here. */
+  randombytes_reset();
+
   /* Alice generates a public key */
   mlkem768_keypair(pk, sk);
 
@@ -70,6 +79,10 @@ static int test_keys_mlkem1024(void)
   uint8_t ct[MLKEM1024_CIPHERTEXTBYTES];
   uint8_t key_a[MLKEM1024_BYTES];
   uint8_t key_b[MLKEM1024_BYTES];
+
+  /* WARNING: Test-only
+   * Normally, you would want to seed a PRNG with trustworthy entropy here. */
+  randombytes_reset();
 
   /* Alice generates a public key */
   mlkem1024_keypair(pk, sk);
