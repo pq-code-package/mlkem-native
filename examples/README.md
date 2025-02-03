@@ -38,9 +38,3 @@ auto-generated compilation unit.
 
 See [monolithic_build_multilevel](monolithic_build_multilevel) for an example of how to build all security levels of
 mlkem-native (with C backend) inside a single compilation unit, sharing the level-independent code.
-
-## Multi-level monobuild (with native code)
-
-See [monolithic_build_multilevel_native](monolithic_build_multilevel_native) for an example of how to build all security
-levels of mlkem-native inside a single compilation unit, sharing the level-independent code, while also linking in assembly
-from the native backends.

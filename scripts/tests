@@ -204,7 +204,6 @@ class TEST_TYPES(Enum):
     MONOLITHIC_BUILD_MULTILEVEL = 11
     MULTILEVEL_BUILD = 12
     MULTILEVEL_BUILD_NATIVE = 13
-    MONOLITHIC_BUILD_MULTILEVEL_NATIVE = 14
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -220,7 +219,6 @@ class TEST_TYPES(Enum):
             TEST_TYPES.MLKEM_NATIVE_AS_CODE_PACKAGE,
             TEST_TYPES.MONOLITHIC_BUILD,
             TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL,
-            TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE,
             TEST_TYPES.MULTILEVEL_BUILD,
             TEST_TYPES.MULTILEVEL_BUILD_NATIVE,
         ]
@@ -260,8 +258,6 @@ class TEST_TYPES(Enum):
             return "Example (monobuild)"
         if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
             return "Example (monobuild, multilevel)"
-        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE:
-            return "Example (monobuild, multilevel, native)"
         if self == TEST_TYPES.MULTILEVEL_BUILD:
             return "Example (multilevel build)"
         if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
@@ -278,8 +274,6 @@ class TEST_TYPES(Enum):
             return "examples/monolithic_build"
         if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
             return "examples/monolithic_build_multilevel"
-        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE:
-            return "examples/monolithic_build_multilevel_native"
         if self == TEST_TYPES.MULTILEVEL_BUILD:
             return "examples/multilevel_build"
         if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
@@ -308,8 +302,6 @@ class TEST_TYPES(Enum):
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return ""
         if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
-            return ""
-        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE:
             return ""
         if self == TEST_TYPES.MULTILEVEL_BUILD:
             return ""
@@ -949,7 +941,6 @@ def cli():
             "mlkem_native_as_code_package",
             "monolithic_build",
             "monolithic_build_multilevel",
-            "monolithic_build_multilevel_native",
             "multilevel_build",
             "multilevel_build_native",
         ],
