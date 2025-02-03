@@ -51,20 +51,25 @@ static INLINE void poly_mulcache_compute_native(int16_t x[MLKEM_N / 2],
                                 aarch64_zetas_mulcache_twisted_native);
 }
 
-static INLINE void polyvec_basemul_acc_montgomery_cached_native(
-    int16_t r[MLKEM_N], const int16_t a[MLKEM_K * MLKEM_N],
-    const int16_t b[MLKEM_K * MLKEM_N],
-    const int16_t b_cache[MLKEM_K * (MLKEM_N / 2)])
+static INLINE void polyvec_basemul_acc_montgomery_cached_k2_native(
+    int16_t r[MLKEM_N], const int16_t a[2 * MLKEM_N],
+    const int16_t b[2 * MLKEM_N], const int16_t b_cache[2 * (MLKEM_N / 2)])
 {
-#if MLKEM_K == 2
   polyvec_basemul_acc_montgomery_cached_asm_k2_opt(r, a, b, b_cache);
-#elif MLKEM_K == 3
+}
+
+static INLINE void polyvec_basemul_acc_montgomery_cached_k3_native(
+    int16_t r[MLKEM_N], const int16_t a[3 * MLKEM_N],
+    const int16_t b[3 * MLKEM_N], const int16_t b_cache[3 * (MLKEM_N / 2)])
+{
   polyvec_basemul_acc_montgomery_cached_asm_k3_opt(r, a, b, b_cache);
-#elif MLKEM_K == 4
+}
+
+static INLINE void polyvec_basemul_acc_montgomery_cached_k4_native(
+    int16_t r[MLKEM_N], const int16_t a[4 * MLKEM_N],
+    const int16_t b[4 * MLKEM_N], const int16_t b_cache[4 * (MLKEM_N / 2)])
+{
   polyvec_basemul_acc_montgomery_cached_asm_k4_opt(r, a, b, b_cache);
-#else
-#error Invalid value for MLKEM_K
-#endif
 }
 
 static INLINE void poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],

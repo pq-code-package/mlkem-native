@@ -210,47 +210,135 @@ __contract__(
 #endif /* MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE */
 
 #if defined(MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 2
 /*************************************************
- * Name:        poly_mulcache_compute_native
+ * Name:        poly_mulcache_compute_k2_native
  *
- * Description: Compute multiplication of polynomials in NTT domain.
+ * Description: Compute scalar product of length-2 polynomial vectors in NTT
+ *              domain.
  *
  * Arguments:   INPUT:
- *              - a: First polynomial operand.
- *                 This must be in NTT domain and inin bitreversed order, or of
+ *              - a: First polynomial vector operand.
+ *                 This must be in NTT domain and in bitreversed order, or of
  *                 a custom order if MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER is set.
  *                 See the documentation of MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER
  *                 for more information.
- *              - b: Second polynomial operand.
+ *              - b: Second polynomial vector operand.
  *                 As for a.
  *              - b_cache: Multiplication-cache for b.
  *              OUTPUT
- *              - r: Result of the base multiplication. This is again
- *                   in NTT domain, and of the same order as a and b.
+ *              - r: The result of the scalar product. This is again
+ *                   in NTT domain, and of the same ordering as a and b.
  **************************************************/
-static INLINE void polyvec_basemul_acc_montgomery_cached_native(
-    int16_t r[MLKEM_N], const int16_t a[MLKEM_K * MLKEM_N],
-    const int16_t b[MLKEM_K * MLKEM_N],
-    const int16_t b_cache[MLKEM_K * (MLKEM_N / 2)])
+static INLINE void polyvec_basemul_acc_montgomery_cached_k2_native(
+    int16_t r[MLKEM_N], const int16_t a[2 * MLKEM_N],
+    const int16_t b[2 * MLKEM_N], const int16_t b_cache[2 * (MLKEM_N / 2)])
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
-  requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_K * MLKEM_N))
-  requires(memory_no_alias(b, sizeof(int16_t) * MLKEM_K * MLKEM_N))
-  requires(memory_no_alias(b_cache, sizeof(int16_t) * MLKEM_K * (MLKEM_N / 2)))
+  requires(memory_no_alias(a, sizeof(int16_t) * 2 * MLKEM_N))
+  requires(memory_no_alias(b, sizeof(int16_t) * 2 * MLKEM_N))
+  requires(memory_no_alias(b_cache, sizeof(int16_t) * 2 * (MLKEM_N / 2)))
   /* Because of https://github.com/diffblue/cbmc/issues/8570, we can't
    * just use a single flattened array_bound(...) here.
    *
    * Once fixed, change to:
    * ```
-   * requires(array_bound(a, 0, MLKEM_K * MLKEM_N, 0, UINT12_LIMIT))
+   * requires(array_bound(a, 0, 2 * MLKEM_N, 0, UINT12_LIMIT))
    * ```
    */
-  requires(forall(kN, 0, MLKEM_K,					  \
+  requires(forall(kN, 0, 2,					  \
               array_bound(&((int16_t(*)[MLKEM_N])(a))[kN][0], 0, MLKEM_N, \
 			  0, UINT12_LIMIT)))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
 );
-#endif
+#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 2 */
+
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 3
+/*************************************************
+ * Name:        poly_mulcache_compute_k3_native
+ *
+ * Description: Compute scalar product of length-3 polynomial vectors in NTT
+ *              domain.
+ *
+ * Arguments:   INPUT:
+ *              - a: First polynomial vector operand.
+ *                 This must be in NTT domain and in bitreversed order, or of
+ *                 a custom order if MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER is set.
+ *                 See the documentation of MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER
+ *                 for more information.
+ *              - b: Second polynomial vector operand.
+ *                 As for a.
+ *              - b_cache: Multiplication-cache for b.
+ *              OUTPUT
+ *              - r: The result of the scalar product. This is again
+ *                   in NTT domain, and of the same ordering as a and b.
+ **************************************************/
+static INLINE void polyvec_basemul_acc_montgomery_cached_k3_native(
+    int16_t r[MLKEM_N], const int16_t a[3 * MLKEM_N],
+    const int16_t b[3 * MLKEM_N], const int16_t b_cache[3 * (MLKEM_N / 2)])
+__contract__(
+  requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
+  requires(memory_no_alias(a, sizeof(int16_t) * 3 * MLKEM_N))
+  requires(memory_no_alias(b, sizeof(int16_t) * 3 * MLKEM_N))
+  requires(memory_no_alias(b_cache, sizeof(int16_t) * 3 * (MLKEM_N / 2)))
+  /* Because of https://github.com/diffblue/cbmc/issues/8570, we can't
+   * just use a single flattened array_bound(...) here.
+   *
+   * Once fixed, change to:
+   * ```
+   * requires(array_bound(a, 0, 3 * MLKEM_N, 0, UINT12_LIMIT))
+   * ```
+   */
+  requires(forall(kN, 0, 3,					  \
+              array_bound(&((int16_t(*)[MLKEM_N])(a))[kN][0], 0, MLKEM_N, \
+			  0, UINT12_LIMIT)))
+  assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+);
+#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 3 */
+
+#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
+/*************************************************
+ * Name:        poly_mulcache_compute_k4_native
+ *
+ * Description: Compute scalar product of length-4 polynomial vectors in NTT
+ *              domain.
+ *
+ * Arguments:   INPUT:
+ *              - a: First polynomial vector operand.
+ *                 This must be in NTT domain and in bitreversed order, or of
+ *                 a custom order if MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER is set.
+ *                 See the documentation of MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER
+ *                 for more information.
+ *              - b: Second polynomial vector operand.
+ *                 As for a.
+ *              - b_cache: Multiplication-cache for b.
+ *              OUTPUT
+ *              - r: The result of the scalar product. This is again
+ *                   in NTT domain, and of the same ordering as a and b.
+ **************************************************/
+static INLINE void polyvec_basemul_acc_montgomery_cached_k4_native(
+    int16_t r[MLKEM_N], const int16_t a[4 * MLKEM_N],
+    const int16_t b[4 * MLKEM_N], const int16_t b_cache[4 * (MLKEM_N / 2)])
+__contract__(
+  requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
+  requires(memory_no_alias(a, sizeof(int16_t) * 4 * MLKEM_N))
+  requires(memory_no_alias(b, sizeof(int16_t) * 4 * MLKEM_N))
+  requires(memory_no_alias(b_cache, sizeof(int16_t) * 4 * (MLKEM_N / 2)))
+  /* Because of https://github.com/diffblue/cbmc/issues/8570, we can't
+   * just use a single flattened array_bound(...) here.
+   *
+   * Once fixed, change to:
+   * ```
+   * requires(array_bound(a, 0, 4 * MLKEM_N, 0, UINT12_LIMIT))
+   * ```
+   */
+  requires(forall(kN, 0, 4,					  \
+              array_bound(&((int16_t(*)[MLKEM_N])(a))[kN][0], 0, MLKEM_N, \
+			  0, UINT12_LIMIT)))
+  assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+);
+#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 4 */
+#endif /* MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
 #if defined(MLKEM_USE_NATIVE_POLY_TOBYTES)
 /*************************************************

@@ -41,11 +41,11 @@ void basemul_avx2(__m256i *r, const __m256i *a, const __m256i *b,
                   const __m256i *qdata);
 
 #define polyvec_basemul_acc_montgomery_cached_avx2 \
-  MLKEM_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_avx2)
-void polyvec_basemul_acc_montgomery_cached_avx2(
-    int16_t r[MLKEM_N], const int16_t a[MLKEM_K * MLKEM_N],
-    const int16_t b[MLKEM_K * MLKEM_N],
-    const int16_t b_cache[MLKEM_K * (MLKEM_N / 2)]);
+  MLKEM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_avx2)
+void polyvec_basemul_acc_montgomery_cached_avx2(unsigned k, int16_t r[MLKEM_N],
+                                                const int16_t *a,
+                                                const int16_t *b,
+                                                const int16_t *kb_cache);
 
 #define ntttobytes_avx2 MLKEM_NAMESPACE(ntttobytes_avx2)
 void ntttobytes_avx2(uint8_t *r, const __m256i *a, const __m256i *qdata);
