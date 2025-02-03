@@ -627,14 +627,17 @@ def get_checked_defines():
         yield (c, d)
 
 
-def gen_monolithic_undef_all_core(filt=None):
+def gen_monolithic_undef_all_core(filt=None, desc=""):
 
     if filt is None:
         filt = lambda c: True
 
+    if desc != "":
+        desc = f" ({desc})"
+
     yield ""
     yield "/*"
-    yield " * Undo all #define directives from *.c or *.h files"
+    yield f" * Undo all #define directives from *.[ch] files{desc}"
     yield " */"
     yield ""
 
@@ -656,17 +659,19 @@ def gen_monolithic_undef_all_core(filt=None):
 
 def gen_monolithic_source_file(dry_run=False):
 
-    def not_native(c):
-        return "native/" not in c
+    def native(c):
+        return "native/" in c
+
+    def native_fips202(c):
+        return native(c) and "fips202" in c
+
+    def native_arith(c):
+        return native(c) and not native_fips202(c)
 
     # List of level-specific source files
     # All other files only need including and building once
     # in multilevel build.
     def k_specific(c):
-        # For now, we exclude native files from the monobuild
-        if not_native(c) is False:
-            return False
-
         k_specific_sources = [
             "mlkem_native.h",
             "params.h",
@@ -685,10 +690,6 @@ def gen_monolithic_source_file(dry_run=False):
         return False
 
     def k_generic(c):
-        # For now, we exclude native files from the monobuild
-        if not_native(c) is False:
-            return False
-
         return not k_specific(c)
 
     def gen():
@@ -697,13 +698,28 @@ def gen_monolithic_source_file(dry_run=False):
         yield " * Monolithic compilation unit bundling all compilation units within mlkem-native"
         yield " */"
         yield ""
-        for c in filter(not_native, get_c_source_files()):
+        for c in filter(lambda c: not native(c), get_c_source_files()):
             yield f'#include "{c}"'
+        yield "#if defined(MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_ARITH)"
+        for c in filter(native_arith, get_c_source_files()):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_FIPS202)"
+        for c in filter(native_fips202, get_c_source_files()):
+            yield f'#include "{c}"'
+        yield "#endif"
         yield ""
-        yield from gen_monolithic_undef_all_core(filt=k_specific)
+        yield from gen_monolithic_undef_all_core(
+            filt=k_specific, desc="MLKEM_K-specific files"
+        )
         yield ""
         yield "#if !defined(MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS)"
-        yield from gen_monolithic_undef_all_core(filt=k_generic)
+        yield from gen_monolithic_undef_all_core(
+            filt=lambda c: not native(c) and k_generic(c), desc="MLKEM_K-generic files"
+        )
+        yield "#if defined(MLKEM_NATIVE_MONOBUILD_WITH_NATIVE)"
+        yield from gen_monolithic_undef_all_core(filt=native, desc="native code")
+        yield "#endif"
         yield "#endif /* MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS */"
         yield ""
 
