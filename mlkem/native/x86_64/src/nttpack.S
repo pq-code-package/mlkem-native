@@ -8,7 +8,8 @@
 
 #include "../../../common.h"
 
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
 #include "consts.h"
@@ -62,4 +63,5 @@ vmovdqa		%ymm11,224(%rdi)
 ret
 
 /* simpasm: footer-start */
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT */
+#endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT &&
+         ! MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

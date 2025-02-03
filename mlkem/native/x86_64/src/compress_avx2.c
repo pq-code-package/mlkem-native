@@ -8,7 +8,8 @@
 
 #include "../../../common.h"
 
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT)
+#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 #include <immintrin.h>
 #include <stdint.h>
@@ -360,8 +361,10 @@ void poly_decompress_d11_avx2(__m256i *RESTRICT r,
 
 #endif /* MLKEM_NATIVE_MULTILEVEL_BUILD || MLKEM_K == 4 */
 
-#else /* MLKEM_USE_NATIVE_X86_64 && SYS_X86_64_AVX2 */
+#else /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT && \
+         ! MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
 
 MLKEM_NATIVE_EMPTY_CU(avx2_poly_compress)
 
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT */
+#endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT && \
+         ! MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
