@@ -9,7 +9,6 @@
 
 /* Include level-independent code */
 #define MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED 1
-#define MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS
 /* Include C files accompanying native code */
 #define MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_ARITH
 #define MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_FIPS202
@@ -32,6 +31,5 @@
 
 #define MLKEM_K 4
 #define MLKEM_NATIVE_CONFIG_FILE "multilevel_config.h"
-#undef MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS
 #include "mlkem_native_monobuild.c"
 #undef MLKEM_NATIVE_CONFIG_FILE

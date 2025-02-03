@@ -608,7 +608,6 @@ def get_defines_from_file(c):
 
 
 def get_defines():
-    # for c in get_c_source_files() + get_header_files():
     for c in get_header_files():
         yield from get_defines_from_file(c)
 
@@ -688,9 +687,6 @@ def gen_monolithic_source_file(dry_run=False):
                 return True
         return False
 
-    def k_generic(c):
-        return not k_specific(c)
-
     def gen():
         yield from gen_header()
         yield "/*"
@@ -711,17 +707,6 @@ def gen_monolithic_source_file(dry_run=False):
         yield from gen_monolithic_undef_all_core(
             filt=k_specific, desc="MLKEM_K-specific files"
         )
-        yield ""
-        yield "#if !defined(MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS)"
-        yield from gen_monolithic_undef_all_core(
-            filt=lambda c: not native(c) and k_generic(c), desc="MLKEM_K-generic files"
-        )
-        yield "#if defined(MLKEM_NATIVE_MONOBUILD_WITH_NATIVE)"
-        yield from gen_monolithic_undef_all_core(
-            filt=native, desc="native code headers"
-        )
-        yield "#endif /* MLKEM_NATIVE_MONOBUILD_WITH_NATIVE */"
-        yield "#endif /* MLKEM_NATIVE_MONOBUILD_KEEP_SHARED_HEADERS */"
         yield ""
 
     update_file(
