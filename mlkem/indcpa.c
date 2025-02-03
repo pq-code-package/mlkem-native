@@ -181,17 +181,17 @@ void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES], int transposed)
   seedxy[2] = seed2;
   seedxy[3] = seed3;
 
-  for (j = 0; j < KECCAK_WAY; j++)
+  for (j = 0; j < 4; j++)
   {
     memcpy(seedxy[j], seed, MLKEM_SYMBYTES);
   }
 
-  for (i = 0; i < (MLKEM_K * MLKEM_K / KECCAK_WAY) * KECCAK_WAY;
-       i += KECCAK_WAY)
+  /* Sample 4 matrix entries a time. */
+  for (i = 0; i < (MLKEM_K * MLKEM_K / 4) * 4; i += 4)
   {
     uint8_t x, y;
 
-    for (j = 0; j < KECCAK_WAY; j++)
+    for (j = 0; j < 4; j++)
     {
       x = (i + j) / MLKEM_K;
       y = (i + j) % MLKEM_K;
@@ -214,7 +214,7 @@ void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES], int transposed)
     poly_rej_uniform_x4(&a[0].vec[0] + i, seedxy);
   }
 
-  /* For left over polynomial, we use single keccak. */
+  /* For MLKEM_K == 3, sample the last entry individually. */
   if (i < MLKEM_K * MLKEM_K)
   {
     uint8_t x, y;

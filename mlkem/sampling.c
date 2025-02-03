@@ -144,7 +144,7 @@ void poly_rej_uniform_x4(poly *vec, uint8_t *seed[4])
   ALIGN uint8_t buf3[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
 
   /* Tracks the number of coefficients we have already sampled */
-  unsigned ctr[KECCAK_WAY];
+  unsigned ctr[4];
   xof_x4_ctx statex;
   unsigned buflen;
 

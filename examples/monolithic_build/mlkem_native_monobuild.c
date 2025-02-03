@@ -121,7 +121,6 @@
 #undef crypto_kem_keypair
 #undef crypto_kem_keypair_derand
 /* mlkem/params.h */
-#undef KECCAK_WAY
 #undef MLKEM_DU
 #undef MLKEM_DV
 #undef MLKEM_ETA1

@@ -7,7 +7,9 @@
 #include <stdint.h>
 #include "../cbmc.h"
 #include "../common.h"
+
 #define KECCAK_LANES 25
+#define KECCAK_WAY 4
 
 /*
  * WARNING:
