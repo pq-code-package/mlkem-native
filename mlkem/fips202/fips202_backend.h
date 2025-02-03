@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#if !defined(MLKEM_NATIVE_FIPS202_IMPL_H)
-#define MLKEM_NATIVE_FIPS202_IMPL_H
+#ifndef MLKEM_NATIVE_FIPS202_FIPS202_BACKEND_H
+#define MLKEM_NATIVE_FIPS202_FIPS202_BACKEND_H
 
 #include "../common.h"
 
@@ -22,4 +22,4 @@
 #endif
 #endif
 
-#endif /* MLKEM_NATIVE_FIPS202_IMPL_H */
+#endif /* MLKEM_NATIVE_FIPS202_FIPS202_BACKEND_H */

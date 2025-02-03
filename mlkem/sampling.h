@@ -2,8 +2,8 @@
  * Copyright (c) 2024 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef SAMPLING_H
-#define SAMPLING_H
+#ifndef MLKEM_NATIVE_SAMPLING_H
+#define MLKEM_NATIVE_SAMPLING_H
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -91,4 +91,4 @@ __contract__(
   assigns(memory_slice(entry, sizeof(poly)))
   ensures(array_bound(entry->coeffs, 0, MLKEM_N, 0, MLKEM_Q)));
 
-#endif /* SAMPLING_H */
+#endif /* MLKEM_NATIVE_SAMPLING_H */

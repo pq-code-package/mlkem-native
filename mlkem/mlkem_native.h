@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#ifndef MLKEM_NATIVE_H
+#define MLKEM_NATIVE_H
 /*
  * Public API for mlkem-native
  *
@@ -16,12 +18,9 @@
  *
  * This header specifies a build of mlkem-native for a fixed security level.
  * If you need multiple builds, e.g. to build a library offering multiple
- * security levels, you need multiple instances of this header.
+ * security levels, you need multiple instances of this header. In this case,
+ * make sure to rename or #undefine the header guard
  */
-
-/* NOTE: To use multiple instances of this header, use separate guards. */
-#ifndef MLKEM_NATIVE_H
-#define MLKEM_NATIVE_H
 
 #include <stdint.h>
 
@@ -246,4 +245,4 @@ int BUILD_INFO_NAMESPACE(dec)(
 /* #undef BUILD_INFO_LVL */
 /* #undef BUILD_INFO_NAMESPACE */
 
-#endif /* MLKEM_NATIVE_API_H */
+#endif /* MLKEM_NATIVE_H */

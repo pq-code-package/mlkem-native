@@ -3,19 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#ifndef MLKEM_NATIVE_FIPS202_NATIVE_API_H
+#define MLKEM_NATIVE_FIPS202_NATIVE_API_H
 /*
  * FIPS-202 native interface
  *
  * This header is primarily for documentation purposes.
  * It should not be included by backend implementations.
  */
-#ifdef MLKEM_NATIVE_FIPS202_NATIVE_API_H
-#error \
-    "The FIPS-202 backend API `mlkem/fips202/native/api.h` "		\
-    "should not be directly included. Please include the relevant "	\
-    "structure headers directly."
-#else /* MLKEM_NATIVE_FIPS202_NATIVE_API_H */
-#define MLKEM_NATIVE_FIPS202_NATIVE_API_H
 
 #include <stdint.h>
 

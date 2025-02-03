@@ -2,8 +2,8 @@
  * Copyright (c) 2024 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef PARAMS_H
-#define PARAMS_H
+#ifndef MLKEM_NATIVE_PARAMS_H
+#define MLKEM_NATIVE_PARAMS_H
 
 #if defined(MLKEM_NATIVE_CONFIG_FILE)
 #include MLKEM_NATIVE_CONFIG_FILE
@@ -73,4 +73,4 @@
 #define MLKEM_INDCCA_CIPHERTEXTBYTES (MLKEM_INDCPA_BYTES)
 
 #define KECCAK_WAY 4
-#endif
+#endif /* MLKEM_NATIVE_PARAMS_H */

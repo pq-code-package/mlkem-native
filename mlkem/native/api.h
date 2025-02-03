@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#ifndef MLKEM_NATIVE_NATIVE_API_H
+#define MLKEM_NATIVE_NATIVE_API_H
 /*
  * Native arithmetic interface
  *
@@ -14,13 +16,6 @@
  * backend, to ensure consistency of function signatures,
  * and run sanity checks.
  */
-#ifdef MLKEM_NATIVE_ARITH_NATIVE_API_H
-#error \
-    "The arithmetic backend API `mlkem/native/api.h` "		\
-    "should not be directly included. Please include the relevant "	\
-    "structure headers directly."
-#else /* MLKEM_NATIVE_ARITH_NATIVE_API_H */
-#define MLKEM_NATIVE_ARITH_NATIVE_API_H
 
 #include <stdint.h>
 #include "../cbmc.h"
@@ -487,4 +482,4 @@ static INLINE void poly_decompress_d11_native(
 #endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4 \
         */
 
-#endif /* MLKEM_NATIVE_ARITH_NATIVE_API_H */
+#endif /* MLKEM_NATIVE_NATIVE_API_H */

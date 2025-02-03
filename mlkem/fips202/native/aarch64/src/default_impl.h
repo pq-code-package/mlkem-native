@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#ifndef MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_SRC_DEFAULT_IMPL_H
+#define MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_SRC_DEFAULT_IMPL_H
 /* Default FIPS202 assembly profile for AArch64 systems */
 
 #ifdef FIPS202_NATIVE_PROFILE_IMPL_H
@@ -88,3 +90,5 @@ static INLINE void keccak_f1600_x4_native(uint64_t *state)
 #endif /* __ARM_FEATURE_SHA3 */
 
 #endif /* FIPS202_NATIVE_PROFILE_H */
+
+#endif /* MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_SRC_DEFAULT_IMPL_H */

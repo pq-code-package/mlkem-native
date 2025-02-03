@@ -2,8 +2,8 @@
  * Copyright (c) 2024 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef FIPS202_H
-#define FIPS202_H
+#ifndef MLKEM_NATIVE_FIPS202_FIPS202_H
+#define MLKEM_NATIVE_FIPS202_FIPS202_H
 #include <stddef.h>
 #include <stdint.h>
 #include "../cbmc.h"
@@ -152,4 +152,4 @@ __contract__(
 #endif
 
 
-#endif /* FIPS202_H */
+#endif /* MLKEM_NATIVE_FIPS202_FIPS202_H */

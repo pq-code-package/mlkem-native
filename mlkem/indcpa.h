@@ -2,8 +2,8 @@
  * Copyright (c) 2024 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef INDCPA_H
-#define INDCPA_H
+#ifndef MLKEM_NATIVE_INDCPA_H
+#define MLKEM_NATIVE_INDCPA_H
 
 #include <stdint.h>
 #include "cbmc.h"
@@ -114,4 +114,4 @@ __contract__(
   assigns(object_whole(m))
 );
 
-#endif
+#endif /* MLKEM_NATIVE_INDCPA_H */

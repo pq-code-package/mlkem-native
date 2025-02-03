@@ -2,8 +2,8 @@
  * Copyright (c) 2024 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef POLY_H
-#define POLY_H
+#ifndef MLKEM_NATIVE_POLY_H
+#define MLKEM_NATIVE_POLY_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -312,4 +312,4 @@ __contract__(
   ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, INVNTT_BOUND))
 );
 
-#endif /* POLY_H */
+#endif /* MLKEM_NATIVE_POLY_H */
