@@ -436,7 +436,7 @@ void poly_frommsg(poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
     {
       /* Prevent the compiler from recognizing this as a bit selection */
       uint8_t mask = value_barrier_u8(1u << j);
-      r->coeffs[8 * i + j] = ct_sel_int16(HALF_Q, 0, msg[i] & mask);
+      r->coeffs[8 * i + j] = ct_sel_int16(MLKEM_Q_HALF, 0, msg[i] & mask);
     }
   }
   debug_assert_abs_bound(r, MLKEM_N, MLKEM_Q);

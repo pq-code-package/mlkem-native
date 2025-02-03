@@ -121,7 +121,6 @@
 #undef crypto_kem_keypair
 #undef crypto_kem_keypair_derand
 /* mlkem/params.h */
-#undef HALF_Q
 #undef KECCAK_WAY
 #undef MLKEM_DU
 #undef MLKEM_DV
@@ -147,6 +146,7 @@
 #undef MLKEM_POLYVECBYTES
 #undef MLKEM_POLYVECCOMPRESSEDBYTES_DU
 #undef MLKEM_Q
+#undef MLKEM_Q_HALF
 #undef MLKEM_SSBYTES
 #undef MLKEM_SYMBYTES
 #undef UINT12_LIMIT

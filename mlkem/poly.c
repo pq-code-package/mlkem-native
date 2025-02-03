@@ -47,13 +47,12 @@
  **************************************************/
 static INLINE int16_t fqmul(int16_t a, int16_t b)
 __contract__(
-  requires(b > -HALF_Q)
-  requires(b < HALF_Q)
+  requires(b > -MLKEM_Q_HALF && b < MLKEM_Q_HALF)
   ensures(return_value > -MLKEM_Q && return_value < MLKEM_Q)
 )
 {
   int16_t res;
-  debug_assert_abs_bound(&b, 1, HALF_Q);
+  debug_assert_abs_bound(&b, 1, MLKEM_Q_HALF);
 
   res = montgomery_reduce((int32_t)a * (int32_t)b);
   /* Bounds:
@@ -85,7 +84,7 @@ __contract__(
  **************************************************/
 static INLINE int16_t barrett_reduce(int16_t a)
 __contract__(
-  ensures(return_value > -HALF_Q && return_value < HALF_Q)
+  ensures(return_value > -MLKEM_Q_HALF && return_value < MLKEM_Q_HALF)
 )
 {
   /*
@@ -110,7 +109,7 @@ __contract__(
    */
   int16_t res = (int16_t)(a - t * MLKEM_Q);
 
-  debug_assert_abs_bound(&res, 1, HALF_Q);
+  debug_assert_abs_bound(&res, 1, MLKEM_Q_HALF);
   return res;
 }
 #endif /* !defined(MLKEM_USE_NATIVE_POLY_REDUCE) || \
@@ -296,7 +295,7 @@ __contract__(
   requires(start < MLKEM_N)
   requires(1 <= len && len <= MLKEM_N / 2 && start + 2 * len <= MLKEM_N)
   requires(0 <= bound && bound < INT16_MAX - MLKEM_Q)
-  requires(-HALF_Q < zeta && zeta < HALF_Q)
+  requires(-MLKEM_Q_HALF < zeta && zeta < MLKEM_Q_HALF)
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
   requires(array_abs_bound(r, 0, start, bound + MLKEM_Q))
   requires(array_abs_bound(r, start, MLKEM_N, bound))

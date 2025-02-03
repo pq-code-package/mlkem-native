@@ -17,8 +17,8 @@
 
 #define MLKEM_N 256
 #define MLKEM_Q 3329
+#define MLKEM_Q_HALF ((MLKEM_Q + 1) / 2) /* 1665 */
 #define UINT12_LIMIT 4096
-#define HALF_Q ((MLKEM_Q + 1) / 2) /* 1665 */
 
 #define MLKEM_SYMBYTES 32 /* size in bytes of hashes, and seeds */
 #define MLKEM_SSBYTES 32  /* size in bytes of shared key */
