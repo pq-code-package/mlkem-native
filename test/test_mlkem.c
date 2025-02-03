@@ -7,7 +7,8 @@
 #include <string.h>
 #include "../mlkem/compress.h"
 #include "../mlkem/mlkem_native.h"
-#include "../mlkem/randombytes.h"
+
+#include "notrandombytes/notrandombytes.h"
 
 #ifdef ENABLE_CT_TESTING
 #include <valgrind/memcheck.h>
@@ -311,6 +312,10 @@ int main(void)
 {
   unsigned i;
   int r;
+
+  /* WARNING: Test-only
+   * Normally, you would want to seed a PRNG with trustworthy entropy here. */
+  randombytes_reset();
 
   for (i = 0; i < NTESTS; i++)
   {
