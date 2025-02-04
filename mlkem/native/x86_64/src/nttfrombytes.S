@@ -10,90 +10,99 @@
 
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
-/* simpasm: header-end */
 
-#include "consts.h"
-#include "fq.inc"
-#include "shuffle.inc"
+/*
+ * WARNING: This file is auto-derived from the mlkem-native source file 
+ *   dev/x86_64/src/nttfrombytes.S using scripts/simpasm. Do not modify it directly.
+ */
+
 
 .text
-.global MLKEM_ASM_NAMESPACE(nttfrombytes_avx2)
 .balign 4
+.global MLKEM_ASM_NAMESPACE(nttfrombytes_avx2)
 MLKEM_ASM_NAMESPACE(nttfrombytes_avx2):
-#consts
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XMASK*2(%rdx),%ymm0
-call		nttfrombytes128_avx
-add		$256,%rdi
-add		$192,%rsi
-call		nttfrombytes128_avx
-ret
+
+        vmovdqa	0xe0(%rdx), %ymm0
+        callq	nttfrombytes128_avx
+        addq	$0x100, %rdi            # imm = 0x100
+        addq	$0xc0, %rsi
+        callq	nttfrombytes128_avx
+        retq
 
 nttfrombytes128_avx:
-#load
-vmovdqu		(%rsi),%ymm4
-vmovdqu		32(%rsi),%ymm5
-vmovdqu		64(%rsi),%ymm6
-vmovdqu		96(%rsi),%ymm7
-vmovdqu		128(%rsi),%ymm8
-vmovdqu		160(%rsi),%ymm9
+        vmovdqu	(%rsi), %ymm4
+        vmovdqu	0x20(%rsi), %ymm5
+        vmovdqu	0x40(%rsi), %ymm6
+        vmovdqu	0x60(%rsi), %ymm7
+        vmovdqu	0x80(%rsi), %ymm8
+        vmovdqu	0xa0(%rsi), %ymm9
+        vperm2i128	$0x20, %ymm7, %ymm4, %ymm3 # ymm3 = ymm4[0,1],ymm7[0,1]
+        vperm2i128	$0x31, %ymm7, %ymm4, %ymm7 # ymm7 = ymm4[2,3],ymm7[2,3]
+        vperm2i128	$0x20, %ymm8, %ymm5, %ymm4 # ymm4 = ymm5[0,1],ymm8[0,1]
+        vperm2i128	$0x31, %ymm8, %ymm5, %ymm8 # ymm8 = ymm5[2,3],ymm8[2,3]
+        vperm2i128	$0x20, %ymm9, %ymm6, %ymm5 # ymm5 = ymm6[0,1],ymm9[0,1]
+        vperm2i128	$0x31, %ymm9, %ymm6, %ymm9 # ymm9 = ymm6[2,3],ymm9[2,3]
+        vpunpcklqdq	%ymm8, %ymm3, %ymm6 # ymm6 = ymm3[0],ymm8[0],ymm3[2],ymm8[2]
+        vpunpckhqdq	%ymm8, %ymm3, %ymm8 # ymm8 = ymm3[1],ymm8[1],ymm3[3],ymm8[3]
+        vpunpcklqdq	%ymm5, %ymm7, %ymm3 # ymm3 = ymm7[0],ymm5[0],ymm7[2],ymm5[2]
+        vpunpckhqdq	%ymm5, %ymm7, %ymm5 # ymm5 = ymm7[1],ymm5[1],ymm7[3],ymm5[3]
+        vpunpcklqdq	%ymm9, %ymm4, %ymm7 # ymm7 = ymm4[0],ymm9[0],ymm4[2],ymm9[2]
+        vpunpckhqdq	%ymm9, %ymm4, %ymm9 # ymm9 = ymm4[1],ymm9[1],ymm4[3],ymm9[3]
+        vmovsldup	%ymm5, %ymm4    # ymm4 = ymm5[0,0,2,2,4,4,6,6]
+        vpblendd	$0xaa, %ymm4, %ymm6, %ymm4 # ymm4 = ymm6[0],ymm4[1],ymm6[2],ymm4[3],ymm6[4],ymm4[5],ymm6[6],ymm4[7]
+        vpsrlq	$0x20, %ymm6, %ymm6
+        vpblendd	$0xaa, %ymm5, %ymm6, %ymm5 # ymm5 = ymm6[0],ymm5[1],ymm6[2],ymm5[3],ymm6[4],ymm5[5],ymm6[6],ymm5[7]
+        vmovsldup	%ymm7, %ymm6    # ymm6 = ymm7[0,0,2,2,4,4,6,6]
+        vpblendd	$0xaa, %ymm6, %ymm8, %ymm6 # ymm6 = ymm8[0],ymm6[1],ymm8[2],ymm6[3],ymm8[4],ymm6[5],ymm8[6],ymm6[7]
+        vpsrlq	$0x20, %ymm8, %ymm8
+        vpblendd	$0xaa, %ymm7, %ymm8, %ymm7 # ymm7 = ymm8[0],ymm7[1],ymm8[2],ymm7[3],ymm8[4],ymm7[5],ymm8[6],ymm7[7]
+        vmovsldup	%ymm9, %ymm8    # ymm8 = ymm9[0,0,2,2,4,4,6,6]
+        vpblendd	$0xaa, %ymm8, %ymm3, %ymm8 # ymm8 = ymm3[0],ymm8[1],ymm3[2],ymm8[3],ymm3[4],ymm8[5],ymm3[6],ymm8[7]
+        vpsrlq	$0x20, %ymm3, %ymm3
+        vpblendd	$0xaa, %ymm9, %ymm3, %ymm9 # ymm9 = ymm3[0],ymm9[1],ymm3[2],ymm9[3],ymm3[4],ymm9[5],ymm3[6],ymm9[7]
+        vpslld	$0x10, %ymm7, %ymm10
+        vpblendw	$0xaa, %ymm10, %ymm4, %ymm10 # ymm10 = ymm4[0],ymm10[1],ymm4[2],ymm10[3],ymm4[4],ymm10[5],ymm4[6],ymm10[7],ymm4[8],ymm10[9],ymm4[10],ymm10[11],ymm4[12],ymm10[13],ymm4[14],ymm10[15]
+        vpsrld	$0x10, %ymm4, %ymm4
+        vpblendw	$0xaa, %ymm7, %ymm4, %ymm7 # ymm7 = ymm4[0],ymm7[1],ymm4[2],ymm7[3],ymm4[4],ymm7[5],ymm4[6],ymm7[7],ymm4[8],ymm7[9],ymm4[10],ymm7[11],ymm4[12],ymm7[13],ymm4[14],ymm7[15]
+        vpslld	$0x10, %ymm8, %ymm4
+        vpblendw	$0xaa, %ymm4, %ymm5, %ymm4 # ymm4 = ymm5[0],ymm4[1],ymm5[2],ymm4[3],ymm5[4],ymm4[5],ymm5[6],ymm4[7],ymm5[8],ymm4[9],ymm5[10],ymm4[11],ymm5[12],ymm4[13],ymm5[14],ymm4[15]
+        vpsrld	$0x10, %ymm5, %ymm5
+        vpblendw	$0xaa, %ymm8, %ymm5, %ymm8 # ymm8 = ymm5[0],ymm8[1],ymm5[2],ymm8[3],ymm5[4],ymm8[5],ymm5[6],ymm8[7],ymm5[8],ymm8[9],ymm5[10],ymm8[11],ymm5[12],ymm8[13],ymm5[14],ymm8[15]
+        vpslld	$0x10, %ymm9, %ymm5
+        vpblendw	$0xaa, %ymm5, %ymm6, %ymm5 # ymm5 = ymm6[0],ymm5[1],ymm6[2],ymm5[3],ymm6[4],ymm5[5],ymm6[6],ymm5[7],ymm6[8],ymm5[9],ymm6[10],ymm5[11],ymm6[12],ymm5[13],ymm6[14],ymm5[15]
+        vpsrld	$0x10, %ymm6, %ymm6
+        vpblendw	$0xaa, %ymm9, %ymm6, %ymm9 # ymm9 = ymm6[0],ymm9[1],ymm6[2],ymm9[3],ymm6[4],ymm9[5],ymm6[6],ymm9[7],ymm6[8],ymm9[9],ymm6[10],ymm9[11],ymm6[12],ymm9[13],ymm6[14],ymm9[15]
+        vpsrlw	$0xc, %ymm10, %ymm11
+        vpsllw	$0x4, %ymm7, %ymm12
+        vpor	%ymm11, %ymm12, %ymm11
+        vpand	%ymm0, %ymm10, %ymm10
+        vpand	%ymm0, %ymm11, %ymm11
+        vpsrlw	$0x8, %ymm7, %ymm12
+        vpsllw	$0x8, %ymm4, %ymm13
+        vpor	%ymm12, %ymm13, %ymm12
+        vpand	%ymm0, %ymm12, %ymm12
+        vpsrlw	$0x4, %ymm4, %ymm13
+        vpand	%ymm0, %ymm13, %ymm13
+        vpsrlw	$0xc, %ymm8, %ymm14
+        vpsllw	$0x4, %ymm5, %ymm15
+        vpor	%ymm14, %ymm15, %ymm14
+        vpand	%ymm0, %ymm8, %ymm8
+        vpand	%ymm0, %ymm14, %ymm14
+        vpsrlw	$0x8, %ymm5, %ymm15
+        vpsllw	$0x8, %ymm9, %ymm1
+        vpor	%ymm15, %ymm1, %ymm15
+        vpand	%ymm0, %ymm15, %ymm15
+        vpsrlw	$0x4, %ymm9, %ymm1
+        vpand	%ymm0, %ymm1, %ymm1
+        vmovdqa	%ymm10, (%rdi)
+        vmovdqa	%ymm11, 0x20(%rdi)
+        vmovdqa	%ymm12, 0x40(%rdi)
+        vmovdqa	%ymm13, 0x60(%rdi)
+        vmovdqa	%ymm8, 0x80(%rdi)
+        vmovdqa	%ymm14, 0xa0(%rdi)
+        vmovdqa	%ymm15, 0xc0(%rdi)
+        vmovdqa	%ymm1, 0xe0(%rdi)
+        retq
 
-shuffle8	4,7,3,7
-shuffle8	5,8,4,8
-shuffle8	6,9,5,9
-
-shuffle4	3,8,6,8
-shuffle4	7,5,3,5
-shuffle4	4,9,7,9
-
-shuffle2	6,5,4,5
-shuffle2	8,7,6,7
-shuffle2	3,9,8,9
-
-shuffle1	4,7,10,7
-shuffle1	5,8,4,8
-shuffle1	6,9,5,9
-
-#bitunpack
-vpsrlw		$12,%ymm10,%ymm11
-vpsllw		$4,%ymm7,%ymm12
-vpor		%ymm11,%ymm12,%ymm11
-vpand		%ymm0,%ymm10,%ymm10
-vpand		%ymm0,%ymm11,%ymm11
-
-vpsrlw		$8,%ymm7,%ymm12
-vpsllw		$8,%ymm4,%ymm13
-vpor		%ymm12,%ymm13,%ymm12
-vpand		%ymm0,%ymm12,%ymm12
-
-vpsrlw		$4,%ymm4,%ymm13
-vpand		%ymm0,%ymm13,%ymm13
-
-vpsrlw		$12,%ymm8,%ymm14
-vpsllw		$4,%ymm5,%ymm15
-vpor		%ymm14,%ymm15,%ymm14
-vpand		%ymm0,%ymm8,%ymm8
-vpand		%ymm0,%ymm14,%ymm14
-
-vpsrlw		$8,%ymm5,%ymm15
-vpsllw		$8,%ymm9,%ymm1
-vpor		%ymm15,%ymm1,%ymm15
-vpand		%ymm0,%ymm15,%ymm15
-
-vpsrlw		$4,%ymm9,%ymm1
-vpand		%ymm0,%ymm1,%ymm1
-
-#store
-vmovdqa		%ymm10,(%rdi)
-vmovdqa		%ymm11,32(%rdi)
-vmovdqa		%ymm12,64(%rdi)
-vmovdqa		%ymm13,96(%rdi)
-vmovdqa		%ymm8,128(%rdi)
-vmovdqa		%ymm14,160(%rdi)
-vmovdqa		%ymm15,192(%rdi)
-vmovdqa		%ymm1,224(%rdi)
-
-ret
-
-/* simpasm: footer-start */
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT &&
          ! MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

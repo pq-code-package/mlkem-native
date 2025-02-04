@@ -9,216 +9,604 @@
 #include "../../../common.h"
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
-/* simpasm: header-end */
 
-#include "consts.h"
-#include "shuffle.inc"
+/*
+ * WARNING: This file is auto-derived from the mlkem-native source file 
+ *   dev/x86_64/src/ntt.S using scripts/simpasm. Do not modify it directly.
+ */
 
-/* Compute steps 1,2 / 3 of Montgomery multiplication */
-.macro mul rh0,rh1,rh2,rh3,zl0=15,zl1=15,zh0=2,zh1=2
-vpmullw		%ymm\zl0,%ymm\rh0,%ymm12
-vpmullw		%ymm\zl0,%ymm\rh1,%ymm13
-
-vpmullw		%ymm\zl1,%ymm\rh2,%ymm14
-vpmullw		%ymm\zl1,%ymm\rh3,%ymm15
-
-vpmulhw		%ymm\zh0,%ymm\rh0,%ymm\rh0
-vpmulhw		%ymm\zh0,%ymm\rh1,%ymm\rh1
-
-vpmulhw		%ymm\zh1,%ymm\rh2,%ymm\rh2
-vpmulhw		%ymm\zh1,%ymm\rh3,%ymm\rh3
-.endm
-
-/* Compute step 3 / 3 of Montgomery multiplication */
-/* Multiply-high is signed; outputs are bound by 2^15 * q in abs value */
-.macro reduce
-vpmulhw		%ymm0,%ymm12,%ymm12
-vpmulhw		%ymm0,%ymm13,%ymm13
-
-vpmulhw		%ymm0,%ymm14,%ymm14
-vpmulhw		%ymm0,%ymm15,%ymm15
-.endm
-
-/* Finish Montgomery multiplication and compute add/sub steps in NTT butterfly
- *
- * At this point, the two high-products of 4 ongoing Montgomery multiplications
- * are in %ymm{12,13,14,15} and %ymm{rh{0,1,2,3}}, respectively.
- * The NTT coefficients that the results of the Montgomery multiplications should
- * be add/sub-ed with, are in %ymm{rl{0,1,2,3}}.
- *
- * What's interesting, here, is that rather than completing the Montgomery
- * multiplications by computing `%ymm{12+i} + %ymm{rh{i}}`, and then add/sub'ing
- * the result into %ymm{rl{0,1,2,3}}, we add/sub both `%ymm{12+i}` and
- * %ymm{rh{i}} to %ymm{rl{0,1,2,3}}, and then add the results.
- *
- * Functionally, though, this is still a signed Montgomery multiplication
- * followed by an add/sub.
- *
- * Since the result of the Montgomery multiplication is bounded
- * by q in absolute value, the coefficients overall grow by not
- * more than q in absolute value per layer. */
-.macro update rln,rl0,rl1,rl2,rl3,rh0,rh1,rh2,rh3
-vpaddw		%ymm\rh0,%ymm\rl0,%ymm\rln /* rln = rl0 + rh0 */
-vpsubw		%ymm\rh0,%ymm\rl0,%ymm\rh0 /* rh0 = rl0 - rh0 */
-vpaddw		%ymm\rh1,%ymm\rl1,%ymm\rl0 /* rl0 = rl1 + rh1 */
-vpsubw		%ymm\rh1,%ymm\rl1,%ymm\rh1 /* rh1 = rl1 - rh1 */
-vpaddw		%ymm\rh2,%ymm\rl2,%ymm\rl1 /* rl1 = rl2 + rh2 */
-vpsubw		%ymm\rh2,%ymm\rl2,%ymm\rh2 /* rh2 = rl2 - rh2 */
-vpaddw		%ymm\rh3,%ymm\rl3,%ymm\rl2 /* rl2 = rl3 + rh3 */
-vpsubw		%ymm\rh3,%ymm\rl3,%ymm\rh3 /* rh3 = rl3 - rh3 */
-
-vpsubw		%ymm12,%ymm\rln,%ymm\rln /* rln = rh0 + rl0 - ymm12 = rl0 + (rh0 - ymm12) */
-vpaddw		%ymm12,%ymm\rh0,%ymm\rh0 /* rh0 = rl0 - rh0 + ymm12 = rl0 - (rh0 - ymm12) */
-vpsubw		%ymm13,%ymm\rl0,%ymm\rl0 /* rl0 = rl1 + rh1 - ymm13 = rl1 + (rh1 - ymm13) */
-vpaddw		%ymm13,%ymm\rh1,%ymm\rh1 /* rh1 = rl1 - rh1 + ymm13 = rl1 - (rh1 - ymm13) */
-vpsubw		%ymm14,%ymm\rl1,%ymm\rl1 /* rl1 = rh2 + rl2 - ymm14 = rl2 + (rh2 - ymm14) */
-vpaddw		%ymm14,%ymm\rh2,%ymm\rh2 /* rh2 = rl2 - rh2 + ymm14 = rl2 - (rh2 - ymm14) */
-vpsubw		%ymm15,%ymm\rl2,%ymm\rl2 /* rl2 = rh3 + rl3 - ymm15 = rl3 + (rh3 - ymm15) */
-vpaddw		%ymm15,%ymm\rh3,%ymm\rh3 /* rh3 = rl3 - rh3 + ymm15 = rl3 - (rh3 - ymm15) */
-.endm
-
-.macro level0 off
-vpbroadcastq	(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+0)*2(%rsi),%ymm15
-vmovdqa		(64*\off+128)*2(%rdi),%ymm8
-vmovdqa		(64*\off+144)*2(%rdi),%ymm9
-vmovdqa		(64*\off+160)*2(%rdi),%ymm10
-vmovdqa		(64*\off+176)*2(%rdi),%ymm11
-vpbroadcastq	(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+4)*2(%rsi),%ymm2
-
-mul		8,9,10,11
-
-vmovdqa		(64*\off+  0)*2(%rdi),%ymm4
-vmovdqa		(64*\off+ 16)*2(%rdi),%ymm5
-vmovdqa		(64*\off+ 32)*2(%rdi),%ymm6
-vmovdqa		(64*\off+ 48)*2(%rdi),%ymm7
-
-reduce
-update		3,4,5,6,7,8,9,10,11
-
-vmovdqa		%ymm3,(64*\off+  0)*2(%rdi)
-vmovdqa		%ymm4,(64*\off+ 16)*2(%rdi)
-vmovdqa		%ymm5,(64*\off+ 32)*2(%rdi)
-vmovdqa		%ymm6,(64*\off+ 48)*2(%rdi)
-vmovdqa		%ymm8,(64*\off+128)*2(%rdi)
-vmovdqa		%ymm9,(64*\off+144)*2(%rdi)
-vmovdqa		%ymm10,(64*\off+160)*2(%rdi)
-vmovdqa		%ymm11,(64*\off+176)*2(%rdi)
-.endm
-
-.macro levels1t6 off
-/* level 1 */
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+16)*2(%rsi),%ymm15
-vmovdqa		(128*\off+ 64)*2(%rdi),%ymm8
-vmovdqa		(128*\off+ 80)*2(%rdi),%ymm9
-vmovdqa		(128*\off+ 96)*2(%rdi),%ymm10
-vmovdqa		(128*\off+112)*2(%rdi),%ymm11
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+32)*2(%rsi),%ymm2
-
-mul		8,9,10,11
-
-vmovdqa		(128*\off+  0)*2(%rdi),%ymm4
-vmovdqa	 	(128*\off+ 16)*2(%rdi),%ymm5
-vmovdqa		(128*\off+ 32)*2(%rdi),%ymm6
-vmovdqa		(128*\off+ 48)*2(%rdi),%ymm7
-
-reduce
-update		3,4,5,6,7,8,9,10,11
-
-/* level 2 */
-shuffle8	5,10,7,10
-shuffle8	6,11,5,11
-
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+48)*2(%rsi),%ymm15
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+64)*2(%rsi),%ymm2
-
-mul		7,10,5,11
-
-shuffle8	3,8,6,8
-shuffle8	4,9,3,9
-
-reduce
-update		4,6,8,3,9,7,10,5,11
-
-/* level 3 */
-shuffle4	8,5,9,5
-shuffle4	3,11,8,11
-
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+80)*2(%rsi),%ymm15
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+96)*2(%rsi),%ymm2
-
-mul		9,5,8,11
-
-shuffle4	4,7,3,7
-shuffle4	6,10,4,10
-
-reduce
-update		6,3,7,4,10,9,5,8,11
-
-/* level 4 */
-shuffle2	7,8,10,8
-shuffle2	4,11,7,11
-
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+112)*2(%rsi),%ymm15
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+128)*2(%rsi),%ymm2
-
-mul		10,8,7,11
-
-shuffle2	6,9,4,9
-shuffle2	3,5,6,5
-
-reduce
-update		3,4,9,6,5,10,8,7,11
-
-/* level 5 */
-shuffle1	9,7,5,7
-shuffle1	6,11,9,11
-
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+144)*2(%rsi),%ymm15
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+160)*2(%rsi),%ymm2
-
-mul		5,7,9,11
-
-shuffle1	3,10,6,10
-shuffle1	4,8,3,8
-
-reduce
-update		4,6,10,3,8,5,7,9,11
-
-/* level 6 */
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+176)*2(%rsi),%ymm14
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+208)*2(%rsi),%ymm15
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+192)*2(%rsi),%ymm8
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+224)*2(%rsi),%ymm2
-
-mul		10,3,9,11,14,15,8,2
-
-reduce
-update		8,4,6,5,7,10,3,9,11
-
-vmovdqa		%ymm8,(128*\off+  0)*2(%rdi)
-vmovdqa		%ymm4,(128*\off+ 16)*2(%rdi)
-vmovdqa		%ymm10,(128*\off+ 32)*2(%rdi)
-vmovdqa		%ymm3,(128*\off+ 48)*2(%rdi)
-vmovdqa		%ymm6,(128*\off+ 64)*2(%rdi)
-vmovdqa		%ymm5,(128*\off+ 80)*2(%rdi)
-vmovdqa		%ymm9,(128*\off+ 96)*2(%rdi)
-vmovdqa		%ymm11,(128*\off+112)*2(%rdi)
-.endm
 
 .text
-.global MLKEM_ASM_NAMESPACE(ntt_avx2)
 .balign 4
+.global MLKEM_ASM_NAMESPACE(ntt_avx2)
 MLKEM_ASM_NAMESPACE(ntt_avx2):
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
 
-level0		0
-level0		1
+        vmovdqa	(%rsi), %ymm0
+        vpbroadcastq	0x140(%rsi), %ymm15
+        vmovdqa	0x100(%rdi), %ymm8
+        vmovdqa	0x120(%rdi), %ymm9
+        vmovdqa	0x140(%rdi), %ymm10
+        vmovdqa	0x160(%rdi), %ymm11
+        vpbroadcastq	0x148(%rsi), %ymm2
+        vpmullw	%ymm15, %ymm8, %ymm12
+        vpmullw	%ymm15, %ymm9, %ymm13
+        vpmullw	%ymm15, %ymm10, %ymm14
+        vpmullw	%ymm15, %ymm11, %ymm15
+        vpmulhw	%ymm2, %ymm8, %ymm8
+        vpmulhw	%ymm2, %ymm9, %ymm9
+        vpmulhw	%ymm2, %ymm10, %ymm10
+        vpmulhw	%ymm2, %ymm11, %ymm11
+        vmovdqa	(%rdi), %ymm4
+        vmovdqa	0x20(%rdi), %ymm5
+        vmovdqa	0x40(%rdi), %ymm6
+        vmovdqa	0x60(%rdi), %ymm7
+        vpmulhw	%ymm0, %ymm12, %ymm12
+        vpmulhw	%ymm0, %ymm13, %ymm13
+        vpmulhw	%ymm0, %ymm14, %ymm14
+        vpmulhw	%ymm0, %ymm15, %ymm15
+        vpaddw	%ymm8, %ymm4, %ymm3
+        vpsubw	%ymm8, %ymm4, %ymm8
+        vpaddw	%ymm9, %ymm5, %ymm4
+        vpsubw	%ymm9, %ymm5, %ymm9
+        vpaddw	%ymm10, %ymm6, %ymm5
+        vpsubw	%ymm10, %ymm6, %ymm10
+        vpaddw	%ymm11, %ymm7, %ymm6
+        vpsubw	%ymm11, %ymm7, %ymm11
+        vpsubw	%ymm12, %ymm3, %ymm3
+        vpaddw	%ymm12, %ymm8, %ymm8
+        vpsubw	%ymm13, %ymm4, %ymm4
+        vpaddw	%ymm13, %ymm9, %ymm9
+        vpsubw	%ymm14, %ymm5, %ymm5
+        vpaddw	%ymm14, %ymm10, %ymm10
+        vpsubw	%ymm15, %ymm6, %ymm6
+        vpaddw	%ymm15, %ymm11, %ymm11
+        vmovdqa	%ymm3, (%rdi)
+        vmovdqa	%ymm4, 0x20(%rdi)
+        vmovdqa	%ymm5, 0x40(%rdi)
+        vmovdqa	%ymm6, 0x60(%rdi)
+        vmovdqa	%ymm8, 0x100(%rdi)
+        vmovdqa	%ymm9, 0x120(%rdi)
+        vmovdqa	%ymm10, 0x140(%rdi)
+        vmovdqa	%ymm11, 0x160(%rdi)
+        vpbroadcastq	0x140(%rsi), %ymm15
+        vmovdqa	0x180(%rdi), %ymm8
+        vmovdqa	0x1a0(%rdi), %ymm9
+        vmovdqa	0x1c0(%rdi), %ymm10
+        vmovdqa	0x1e0(%rdi), %ymm11
+        vpbroadcastq	0x148(%rsi), %ymm2
+        vpmullw	%ymm15, %ymm8, %ymm12
+        vpmullw	%ymm15, %ymm9, %ymm13
+        vpmullw	%ymm15, %ymm10, %ymm14
+        vpmullw	%ymm15, %ymm11, %ymm15
+        vpmulhw	%ymm2, %ymm8, %ymm8
+        vpmulhw	%ymm2, %ymm9, %ymm9
+        vpmulhw	%ymm2, %ymm10, %ymm10
+        vpmulhw	%ymm2, %ymm11, %ymm11
+        vmovdqa	0x80(%rdi), %ymm4
+        vmovdqa	0xa0(%rdi), %ymm5
+        vmovdqa	0xc0(%rdi), %ymm6
+        vmovdqa	0xe0(%rdi), %ymm7
+        vpmulhw	%ymm0, %ymm12, %ymm12
+        vpmulhw	%ymm0, %ymm13, %ymm13
+        vpmulhw	%ymm0, %ymm14, %ymm14
+        vpmulhw	%ymm0, %ymm15, %ymm15
+        vpaddw	%ymm8, %ymm4, %ymm3
+        vpsubw	%ymm8, %ymm4, %ymm8
+        vpaddw	%ymm9, %ymm5, %ymm4
+        vpsubw	%ymm9, %ymm5, %ymm9
+        vpaddw	%ymm10, %ymm6, %ymm5
+        vpsubw	%ymm10, %ymm6, %ymm10
+        vpaddw	%ymm11, %ymm7, %ymm6
+        vpsubw	%ymm11, %ymm7, %ymm11
+        vpsubw	%ymm12, %ymm3, %ymm3
+        vpaddw	%ymm12, %ymm8, %ymm8
+        vpsubw	%ymm13, %ymm4, %ymm4
+        vpaddw	%ymm13, %ymm9, %ymm9
+        vpsubw	%ymm14, %ymm5, %ymm5
+        vpaddw	%ymm14, %ymm10, %ymm10
+        vpsubw	%ymm15, %ymm6, %ymm6
+        vpaddw	%ymm15, %ymm11, %ymm11
+        vmovdqa	%ymm3, 0x80(%rdi)
+        vmovdqa	%ymm4, 0xa0(%rdi)
+        vmovdqa	%ymm5, 0xc0(%rdi)
+        vmovdqa	%ymm6, 0xe0(%rdi)
+        vmovdqa	%ymm8, 0x180(%rdi)
+        vmovdqa	%ymm9, 0x1a0(%rdi)
+        vmovdqa	%ymm10, 0x1c0(%rdi)
+        vmovdqa	%ymm11, 0x1e0(%rdi)
+        vmovdqa	0x160(%rsi), %ymm15
+        vmovdqa	0x80(%rdi), %ymm8
+        vmovdqa	0xa0(%rdi), %ymm9
+        vmovdqa	0xc0(%rdi), %ymm10
+        vmovdqa	0xe0(%rdi), %ymm11
+        vmovdqa	0x180(%rsi), %ymm2
+        vpmullw	%ymm15, %ymm8, %ymm12
+        vpmullw	%ymm15, %ymm9, %ymm13
+        vpmullw	%ymm15, %ymm10, %ymm14
+        vpmullw	%ymm15, %ymm11, %ymm15
+        vpmulhw	%ymm2, %ymm8, %ymm8
+        vpmulhw	%ymm2, %ymm9, %ymm9
+        vpmulhw	%ymm2, %ymm10, %ymm10
+        vpmulhw	%ymm2, %ymm11, %ymm11
+        vmovdqa	(%rdi), %ymm4
+        vmovdqa	0x20(%rdi), %ymm5
+        vmovdqa	0x40(%rdi), %ymm6
+        vmovdqa	0x60(%rdi), %ymm7
+        vpmulhw	%ymm0, %ymm12, %ymm12
+        vpmulhw	%ymm0, %ymm13, %ymm13
+        vpmulhw	%ymm0, %ymm14, %ymm14
+        vpmulhw	%ymm0, %ymm15, %ymm15
+        vpaddw	%ymm8, %ymm4, %ymm3
+        vpsubw	%ymm8, %ymm4, %ymm8
+        vpaddw	%ymm9, %ymm5, %ymm4
+        vpsubw	%ymm9, %ymm5, %ymm9
+        vpaddw	%ymm10, %ymm6, %ymm5
+        vpsubw	%ymm10, %ymm6, %ymm10
+        vpaddw	%ymm11, %ymm7, %ymm6
+        vpsubw	%ymm11, %ymm7, %ymm11
+        vpsubw	%ymm12, %ymm3, %ymm3
+        vpaddw	%ymm12, %ymm8, %ymm8
+        vpsubw	%ymm13, %ymm4, %ymm4
+        vpaddw	%ymm13, %ymm9, %ymm9
+        vpsubw	%ymm14, %ymm5, %ymm5
+        vpaddw	%ymm14, %ymm10, %ymm10
+        vpsubw	%ymm15, %ymm6, %ymm6
+        vpaddw	%ymm15, %ymm11, %ymm11
+        vperm2i128	$0x20, %ymm10, %ymm5, %ymm7 # ymm7 = ymm5[0,1],ymm10[0,1]
+        vperm2i128	$0x31, %ymm10, %ymm5, %ymm10 # ymm10 = ymm5[2,3],ymm10[2,3]
+        vperm2i128	$0x20, %ymm11, %ymm6, %ymm5 # ymm5 = ymm6[0,1],ymm11[0,1]
+        vperm2i128	$0x31, %ymm11, %ymm6, %ymm11 # ymm11 = ymm6[2,3],ymm11[2,3]
+        vmovdqa	0x1a0(%rsi), %ymm15
+        vmovdqa	0x1c0(%rsi), %ymm2
+        vpmullw	%ymm15, %ymm7, %ymm12
+        vpmullw	%ymm15, %ymm10, %ymm13
+        vpmullw	%ymm15, %ymm5, %ymm14
+        vpmullw	%ymm15, %ymm11, %ymm15
+        vpmulhw	%ymm2, %ymm7, %ymm7
+        vpmulhw	%ymm2, %ymm10, %ymm10
+        vpmulhw	%ymm2, %ymm5, %ymm5
+        vpmulhw	%ymm2, %ymm11, %ymm11
+        vperm2i128	$0x20, %ymm8, %ymm3, %ymm6 # ymm6 = ymm3[0,1],ymm8[0,1]
+        vperm2i128	$0x31, %ymm8, %ymm3, %ymm8 # ymm8 = ymm3[2,3],ymm8[2,3]
+        vperm2i128	$0x20, %ymm9, %ymm4, %ymm3 # ymm3 = ymm4[0,1],ymm9[0,1]
+        vperm2i128	$0x31, %ymm9, %ymm4, %ymm9 # ymm9 = ymm4[2,3],ymm9[2,3]
+        vpmulhw	%ymm0, %ymm12, %ymm12
+        vpmulhw	%ymm0, %ymm13, %ymm13
+        vpmulhw	%ymm0, %ymm14, %ymm14
+        vpmulhw	%ymm0, %ymm15, %ymm15
+        vpaddw	%ymm7, %ymm6, %ymm4
+        vpsubw	%ymm7, %ymm6, %ymm7
+        vpaddw	%ymm10, %ymm8, %ymm6
+        vpsubw	%ymm10, %ymm8, %ymm10
+        vpaddw	%ymm5, %ymm3, %ymm8
+        vpsubw	%ymm5, %ymm3, %ymm5
+        vpaddw	%ymm11, %ymm9, %ymm3
+        vpsubw	%ymm11, %ymm9, %ymm11
+        vpsubw	%ymm12, %ymm4, %ymm4
+        vpaddw	%ymm12, %ymm7, %ymm7
+        vpsubw	%ymm13, %ymm6, %ymm6
+        vpaddw	%ymm13, %ymm10, %ymm10
+        vpsubw	%ymm14, %ymm8, %ymm8
+        vpaddw	%ymm14, %ymm5, %ymm5
+        vpsubw	%ymm15, %ymm3, %ymm3
+        vpaddw	%ymm15, %ymm11, %ymm11
+        vpunpcklqdq	%ymm5, %ymm8, %ymm9 # ymm9 = ymm8[0],ymm5[0],ymm8[2],ymm5[2]
+        vpunpckhqdq	%ymm5, %ymm8, %ymm5 # ymm5 = ymm8[1],ymm5[1],ymm8[3],ymm5[3]
+        vpunpcklqdq	%ymm11, %ymm3, %ymm8 # ymm8 = ymm3[0],ymm11[0],ymm3[2],ymm11[2]
+        vpunpckhqdq	%ymm11, %ymm3, %ymm11 # ymm11 = ymm3[1],ymm11[1],ymm3[3],ymm11[3]
+        vmovdqa	0x1e0(%rsi), %ymm15
+        vmovdqa	0x200(%rsi), %ymm2
+        vpmullw	%ymm15, %ymm9, %ymm12
+        vpmullw	%ymm15, %ymm5, %ymm13
+        vpmullw	%ymm15, %ymm8, %ymm14
+        vpmullw	%ymm15, %ymm11, %ymm15
+        vpmulhw	%ymm2, %ymm9, %ymm9
+        vpmulhw	%ymm2, %ymm5, %ymm5
+        vpmulhw	%ymm2, %ymm8, %ymm8
+        vpmulhw	%ymm2, %ymm11, %ymm11
+        vpunpcklqdq	%ymm7, %ymm4, %ymm3 # ymm3 = ymm4[0],ymm7[0],ymm4[2],ymm7[2]
+        vpunpckhqdq	%ymm7, %ymm4, %ymm7 # ymm7 = ymm4[1],ymm7[1],ymm4[3],ymm7[3]
+        vpunpcklqdq	%ymm10, %ymm6, %ymm4 # ymm4 = ymm6[0],ymm10[0],ymm6[2],ymm10[2]
+        vpunpckhqdq	%ymm10, %ymm6, %ymm10 # ymm10 = ymm6[1],ymm10[1],ymm6[3],ymm10[3]
+        vpmulhw	%ymm0, %ymm12, %ymm12
+        vpmulhw	%ymm0, %ymm13, %ymm13
+        vpmulhw	%ymm0, %ymm14, %ymm14
+        vpmulhw	%ymm0, %ymm15, %ymm15
+        vpaddw	%ymm9, %ymm3, %ymm6
+        vpsubw	%ymm9, %ymm3, %ymm9
+        vpaddw	%ymm5, %ymm7, %ymm3
+        vpsubw	%ymm5, %ymm7, %ymm5
+        vpaddw	%ymm8, %ymm4, %ymm7
+        vpsubw	%ymm8, %ymm4, %ymm8
+        vpaddw	%ymm11, %ymm10, %ymm4
+        vpsubw	%ymm11, %ymm10, %ymm11
+        vpsubw	%ymm12, %ymm6, %ymm6
+        vpaddw	%ymm12, %ymm9, %ymm9
+        vpsubw	%ymm13, %ymm3, %ymm3
+        vpaddw	%ymm13, %ymm5, %ymm5
+        vpsubw	%ymm14, %ymm7, %ymm7
+        vpaddw	%ymm14, %ymm8, %ymm8
+        vpsubw	%ymm15, %ymm4, %ymm4
+        vpaddw	%ymm15, %ymm11, %ymm11
+        vmovsldup	%ymm8, %ymm10   # ymm10 = ymm8[0,0,2,2,4,4,6,6]
+        vpblendd	$0xaa, %ymm10, %ymm7, %ymm10 # ymm10 = ymm7[0],ymm10[1],ymm7[2],ymm10[3],ymm7[4],ymm10[5],ymm7[6],ymm10[7]
+        vpsrlq	$0x20, %ymm7, %ymm7
+        vpblendd	$0xaa, %ymm8, %ymm7, %ymm8 # ymm8 = ymm7[0],ymm8[1],ymm7[2],ymm8[3],ymm7[4],ymm8[5],ymm7[6],ymm8[7]
+        vmovsldup	%ymm11, %ymm7   # ymm7 = ymm11[0,0,2,2,4,4,6,6]
+        vpblendd	$0xaa, %ymm7, %ymm4, %ymm7 # ymm7 = ymm4[0],ymm7[1],ymm4[2],ymm7[3],ymm4[4],ymm7[5],ymm4[6],ymm7[7]
+        vpsrlq	$0x20, %ymm4, %ymm4
+        vpblendd	$0xaa, %ymm11, %ymm4, %ymm11 # ymm11 = ymm4[0],ymm11[1],ymm4[2],ymm11[3],ymm4[4],ymm11[5],ymm4[6],ymm11[7]
+        vmovdqa	0x220(%rsi), %ymm15
+        vmovdqa	0x240(%rsi), %ymm2
+        vpmullw	%ymm15, %ymm10, %ymm12
+        vpmullw	%ymm15, %ymm8, %ymm13
+        vpmullw	%ymm15, %ymm7, %ymm14
+        vpmullw	%ymm15, %ymm11, %ymm15
+        vpmulhw	%ymm2, %ymm10, %ymm10
+        vpmulhw	%ymm2, %ymm8, %ymm8
+        vpmulhw	%ymm2, %ymm7, %ymm7
+        vpmulhw	%ymm2, %ymm11, %ymm11
+        vmovsldup	%ymm9, %ymm4    # ymm4 = ymm9[0,0,2,2,4,4,6,6]
+        vpblendd	$0xaa, %ymm4, %ymm6, %ymm4 # ymm4 = ymm6[0],ymm4[1],ymm6[2],ymm4[3],ymm6[4],ymm4[5],ymm6[6],ymm4[7]
+        vpsrlq	$0x20, %ymm6, %ymm6
+        vpblendd	$0xaa, %ymm9, %ymm6, %ymm9 # ymm9 = ymm6[0],ymm9[1],ymm6[2],ymm9[3],ymm6[4],ymm9[5],ymm6[6],ymm9[7]
+        vmovsldup	%ymm5, %ymm6    # ymm6 = ymm5[0,0,2,2,4,4,6,6]
+        vpblendd	$0xaa, %ymm6, %ymm3, %ymm6 # ymm6 = ymm3[0],ymm6[1],ymm3[2],ymm6[3],ymm3[4],ymm6[5],ymm3[6],ymm6[7]
+        vpsrlq	$0x20, %ymm3, %ymm3
+        vpblendd	$0xaa, %ymm5, %ymm3, %ymm5 # ymm5 = ymm3[0],ymm5[1],ymm3[2],ymm5[3],ymm3[4],ymm5[5],ymm3[6],ymm5[7]
+        vpmulhw	%ymm0, %ymm12, %ymm12
+        vpmulhw	%ymm0, %ymm13, %ymm13
+        vpmulhw	%ymm0, %ymm14, %ymm14
+        vpmulhw	%ymm0, %ymm15, %ymm15
+        vpaddw	%ymm10, %ymm4, %ymm3
+        vpsubw	%ymm10, %ymm4, %ymm10
+        vpaddw	%ymm8, %ymm9, %ymm4
+        vpsubw	%ymm8, %ymm9, %ymm8
+        vpaddw	%ymm7, %ymm6, %ymm9
+        vpsubw	%ymm7, %ymm6, %ymm7
+        vpaddw	%ymm11, %ymm5, %ymm6
+        vpsubw	%ymm11, %ymm5, %ymm11
+        vpsubw	%ymm12, %ymm3, %ymm3
+        vpaddw	%ymm12, %ymm10, %ymm10
+        vpsubw	%ymm13, %ymm4, %ymm4
+        vpaddw	%ymm13, %ymm8, %ymm8
+        vpsubw	%ymm14, %ymm9, %ymm9
+        vpaddw	%ymm14, %ymm7, %ymm7
+        vpsubw	%ymm15, %ymm6, %ymm6
+        vpaddw	%ymm15, %ymm11, %ymm11
+        vpslld	$0x10, %ymm7, %ymm5
+        vpblendw	$0xaa, %ymm5, %ymm9, %ymm5 # ymm5 = ymm9[0],ymm5[1],ymm9[2],ymm5[3],ymm9[4],ymm5[5],ymm9[6],ymm5[7],ymm9[8],ymm5[9],ymm9[10],ymm5[11],ymm9[12],ymm5[13],ymm9[14],ymm5[15]
+        vpsrld	$0x10, %ymm9, %ymm9
+        vpblendw	$0xaa, %ymm7, %ymm9, %ymm7 # ymm7 = ymm9[0],ymm7[1],ymm9[2],ymm7[3],ymm9[4],ymm7[5],ymm9[6],ymm7[7],ymm9[8],ymm7[9],ymm9[10],ymm7[11],ymm9[12],ymm7[13],ymm9[14],ymm7[15]
+        vpslld	$0x10, %ymm11, %ymm9
+        vpblendw	$0xaa, %ymm9, %ymm6, %ymm9 # ymm9 = ymm6[0],ymm9[1],ymm6[2],ymm9[3],ymm6[4],ymm9[5],ymm6[6],ymm9[7],ymm6[8],ymm9[9],ymm6[10],ymm9[11],ymm6[12],ymm9[13],ymm6[14],ymm9[15]
+        vpsrld	$0x10, %ymm6, %ymm6
+        vpblendw	$0xaa, %ymm11, %ymm6, %ymm11 # ymm11 = ymm6[0],ymm11[1],ymm6[2],ymm11[3],ymm6[4],ymm11[5],ymm6[6],ymm11[7],ymm6[8],ymm11[9],ymm6[10],ymm11[11],ymm6[12],ymm11[13],ymm6[14],ymm11[15]
+        vmovdqa	0x260(%rsi), %ymm15
+        vmovdqa	0x280(%rsi), %ymm2
+        vpmullw	%ymm15, %ymm5, %ymm12
+        vpmullw	%ymm15, %ymm7, %ymm13
+        vpmullw	%ymm15, %ymm9, %ymm14
+        vpmullw	%ymm15, %ymm11, %ymm15
+        vpmulhw	%ymm2, %ymm5, %ymm5
+        vpmulhw	%ymm2, %ymm7, %ymm7
+        vpmulhw	%ymm2, %ymm9, %ymm9
+        vpmulhw	%ymm2, %ymm11, %ymm11
+        vpslld	$0x10, %ymm10, %ymm6
+        vpblendw	$0xaa, %ymm6, %ymm3, %ymm6 # ymm6 = ymm3[0],ymm6[1],ymm3[2],ymm6[3],ymm3[4],ymm6[5],ymm3[6],ymm6[7],ymm3[8],ymm6[9],ymm3[10],ymm6[11],ymm3[12],ymm6[13],ymm3[14],ymm6[15]
+        vpsrld	$0x10, %ymm3, %ymm3
+        vpblendw	$0xaa, %ymm10, %ymm3, %ymm10 # ymm10 = ymm3[0],ymm10[1],ymm3[2],ymm10[3],ymm3[4],ymm10[5],ymm3[6],ymm10[7],ymm3[8],ymm10[9],ymm3[10],ymm10[11],ymm3[12],ymm10[13],ymm3[14],ymm10[15]
+        vpslld	$0x10, %ymm8, %ymm3
+        vpblendw	$0xaa, %ymm3, %ymm4, %ymm3 # ymm3 = ymm4[0],ymm3[1],ymm4[2],ymm3[3],ymm4[4],ymm3[5],ymm4[6],ymm3[7],ymm4[8],ymm3[9],ymm4[10],ymm3[11],ymm4[12],ymm3[13],ymm4[14],ymm3[15]
+        vpsrld	$0x10, %ymm4, %ymm4
+        vpblendw	$0xaa, %ymm8, %ymm4, %ymm8 # ymm8 = ymm4[0],ymm8[1],ymm4[2],ymm8[3],ymm4[4],ymm8[5],ymm4[6],ymm8[7],ymm4[8],ymm8[9],ymm4[10],ymm8[11],ymm4[12],ymm8[13],ymm4[14],ymm8[15]
+        vpmulhw	%ymm0, %ymm12, %ymm12
+        vpmulhw	%ymm0, %ymm13, %ymm13
+        vpmulhw	%ymm0, %ymm14, %ymm14
+        vpmulhw	%ymm0, %ymm15, %ymm15
+        vpaddw	%ymm5, %ymm6, %ymm4
+        vpsubw	%ymm5, %ymm6, %ymm5
+        vpaddw	%ymm7, %ymm10, %ymm6
+        vpsubw	%ymm7, %ymm10, %ymm7
+        vpaddw	%ymm9, %ymm3, %ymm10
+        vpsubw	%ymm9, %ymm3, %ymm9
+        vpaddw	%ymm11, %ymm8, %ymm3
+        vpsubw	%ymm11, %ymm8, %ymm11
+        vpsubw	%ymm12, %ymm4, %ymm4
+        vpaddw	%ymm12, %ymm5, %ymm5
+        vpsubw	%ymm13, %ymm6, %ymm6
+        vpaddw	%ymm13, %ymm7, %ymm7
+        vpsubw	%ymm14, %ymm10, %ymm10
+        vpaddw	%ymm14, %ymm9, %ymm9
+        vpsubw	%ymm15, %ymm3, %ymm3
+        vpaddw	%ymm15, %ymm11, %ymm11
+        vmovdqa	0x2a0(%rsi), %ymm14
+        vmovdqa	0x2e0(%rsi), %ymm15
+        vmovdqa	0x2c0(%rsi), %ymm8
+        vmovdqa	0x300(%rsi), %ymm2
+        vpmullw	%ymm14, %ymm10, %ymm12
+        vpmullw	%ymm14, %ymm3, %ymm13
+        vpmullw	%ymm15, %ymm9, %ymm14
+        vpmullw	%ymm15, %ymm11, %ymm15
+        vpmulhw	%ymm8, %ymm10, %ymm10
+        vpmulhw	%ymm8, %ymm3, %ymm3
+        vpmulhw	%ymm2, %ymm9, %ymm9
+        vpmulhw	%ymm2, %ymm11, %ymm11
+        vpmulhw	%ymm0, %ymm12, %ymm12
+        vpmulhw	%ymm0, %ymm13, %ymm13
+        vpmulhw	%ymm0, %ymm14, %ymm14
+        vpmulhw	%ymm0, %ymm15, %ymm15
+        vpaddw	%ymm10, %ymm4, %ymm8
+        vpsubw	%ymm10, %ymm4, %ymm10
+        vpaddw	%ymm3, %ymm6, %ymm4
+        vpsubw	%ymm3, %ymm6, %ymm3
+        vpaddw	%ymm9, %ymm5, %ymm6
+        vpsubw	%ymm9, %ymm5, %ymm9
+        vpaddw	%ymm11, %ymm7, %ymm5
+        vpsubw	%ymm11, %ymm7, %ymm11
+        vpsubw	%ymm12, %ymm8, %ymm8
+        vpaddw	%ymm12, %ymm10, %ymm10
+        vpsubw	%ymm13, %ymm4, %ymm4
+        vpaddw	%ymm13, %ymm3, %ymm3
+        vpsubw	%ymm14, %ymm6, %ymm6
+        vpaddw	%ymm14, %ymm9, %ymm9
+        vpsubw	%ymm15, %ymm5, %ymm5
+        vpaddw	%ymm15, %ymm11, %ymm11
+        vmovdqa	%ymm8, (%rdi)
+        vmovdqa	%ymm4, 0x20(%rdi)
+        vmovdqa	%ymm10, 0x40(%rdi)
+        vmovdqa	%ymm3, 0x60(%rdi)
+        vmovdqa	%ymm6, 0x80(%rdi)
+        vmovdqa	%ymm5, 0xa0(%rdi)
+        vmovdqa	%ymm9, 0xc0(%rdi)
+        vmovdqa	%ymm11, 0xe0(%rdi)
+        vmovdqa	0x320(%rsi), %ymm15
+        vmovdqa	0x180(%rdi), %ymm8
+        vmovdqa	0x1a0(%rdi), %ymm9
+        vmovdqa	0x1c0(%rdi), %ymm10
+        vmovdqa	0x1e0(%rdi), %ymm11
+        vmovdqa	0x340(%rsi), %ymm2
+        vpmullw	%ymm15, %ymm8, %ymm12
+        vpmullw	%ymm15, %ymm9, %ymm13
+        vpmullw	%ymm15, %ymm10, %ymm14
+        vpmullw	%ymm15, %ymm11, %ymm15
+        vpmulhw	%ymm2, %ymm8, %ymm8
+        vpmulhw	%ymm2, %ymm9, %ymm9
+        vpmulhw	%ymm2, %ymm10, %ymm10
+        vpmulhw	%ymm2, %ymm11, %ymm11
+        vmovdqa	0x100(%rdi), %ymm4
+        vmovdqa	0x120(%rdi), %ymm5
+        vmovdqa	0x140(%rdi), %ymm6
+        vmovdqa	0x160(%rdi), %ymm7
+        vpmulhw	%ymm0, %ymm12, %ymm12
+        vpmulhw	%ymm0, %ymm13, %ymm13
+        vpmulhw	%ymm0, %ymm14, %ymm14
+        vpmulhw	%ymm0, %ymm15, %ymm15
+        vpaddw	%ymm8, %ymm4, %ymm3
+        vpsubw	%ymm8, %ymm4, %ymm8
+        vpaddw	%ymm9, %ymm5, %ymm4
+        vpsubw	%ymm9, %ymm5, %ymm9
+        vpaddw	%ymm10, %ymm6, %ymm5
+        vpsubw	%ymm10, %ymm6, %ymm10
+        vpaddw	%ymm11, %ymm7, %ymm6
+        vpsubw	%ymm11, %ymm7, %ymm11
+        vpsubw	%ymm12, %ymm3, %ymm3
+        vpaddw	%ymm12, %ymm8, %ymm8
+        vpsubw	%ymm13, %ymm4, %ymm4
+        vpaddw	%ymm13, %ymm9, %ymm9
+        vpsubw	%ymm14, %ymm5, %ymm5
+        vpaddw	%ymm14, %ymm10, %ymm10
+        vpsubw	%ymm15, %ymm6, %ymm6
+        vpaddw	%ymm15, %ymm11, %ymm11
+        vperm2i128	$0x20, %ymm10, %ymm5, %ymm7 # ymm7 = ymm5[0,1],ymm10[0,1]
+        vperm2i128	$0x31, %ymm10, %ymm5, %ymm10 # ymm10 = ymm5[2,3],ymm10[2,3]
+        vperm2i128	$0x20, %ymm11, %ymm6, %ymm5 # ymm5 = ymm6[0,1],ymm11[0,1]
+        vperm2i128	$0x31, %ymm11, %ymm6, %ymm11 # ymm11 = ymm6[2,3],ymm11[2,3]
+        vmovdqa	0x360(%rsi), %ymm15
+        vmovdqa	0x380(%rsi), %ymm2
+        vpmullw	%ymm15, %ymm7, %ymm12
+        vpmullw	%ymm15, %ymm10, %ymm13
+        vpmullw	%ymm15, %ymm5, %ymm14
+        vpmullw	%ymm15, %ymm11, %ymm15
+        vpmulhw	%ymm2, %ymm7, %ymm7
+        vpmulhw	%ymm2, %ymm10, %ymm10
+        vpmulhw	%ymm2, %ymm5, %ymm5
+        vpmulhw	%ymm2, %ymm11, %ymm11
+        vperm2i128	$0x20, %ymm8, %ymm3, %ymm6 # ymm6 = ymm3[0,1],ymm8[0,1]
+        vperm2i128	$0x31, %ymm8, %ymm3, %ymm8 # ymm8 = ymm3[2,3],ymm8[2,3]
+        vperm2i128	$0x20, %ymm9, %ymm4, %ymm3 # ymm3 = ymm4[0,1],ymm9[0,1]
+        vperm2i128	$0x31, %ymm9, %ymm4, %ymm9 # ymm9 = ymm4[2,3],ymm9[2,3]
+        vpmulhw	%ymm0, %ymm12, %ymm12
+        vpmulhw	%ymm0, %ymm13, %ymm13
+        vpmulhw	%ymm0, %ymm14, %ymm14
+        vpmulhw	%ymm0, %ymm15, %ymm15
+        vpaddw	%ymm7, %ymm6, %ymm4
+        vpsubw	%ymm7, %ymm6, %ymm7
+        vpaddw	%ymm10, %ymm8, %ymm6
+        vpsubw	%ymm10, %ymm8, %ymm10
+        vpaddw	%ymm5, %ymm3, %ymm8
+        vpsubw	%ymm5, %ymm3, %ymm5
+        vpaddw	%ymm11, %ymm9, %ymm3
+        vpsubw	%ymm11, %ymm9, %ymm11
+        vpsubw	%ymm12, %ymm4, %ymm4
+        vpaddw	%ymm12, %ymm7, %ymm7
+        vpsubw	%ymm13, %ymm6, %ymm6
+        vpaddw	%ymm13, %ymm10, %ymm10
+        vpsubw	%ymm14, %ymm8, %ymm8
+        vpaddw	%ymm14, %ymm5, %ymm5
+        vpsubw	%ymm15, %ymm3, %ymm3
+        vpaddw	%ymm15, %ymm11, %ymm11
+        vpunpcklqdq	%ymm5, %ymm8, %ymm9 # ymm9 = ymm8[0],ymm5[0],ymm8[2],ymm5[2]
+        vpunpckhqdq	%ymm5, %ymm8, %ymm5 # ymm5 = ymm8[1],ymm5[1],ymm8[3],ymm5[3]
+        vpunpcklqdq	%ymm11, %ymm3, %ymm8 # ymm8 = ymm3[0],ymm11[0],ymm3[2],ymm11[2]
+        vpunpckhqdq	%ymm11, %ymm3, %ymm11 # ymm11 = ymm3[1],ymm11[1],ymm3[3],ymm11[3]
+        vmovdqa	0x3a0(%rsi), %ymm15
+        vmovdqa	0x3c0(%rsi), %ymm2
+        vpmullw	%ymm15, %ymm9, %ymm12
+        vpmullw	%ymm15, %ymm5, %ymm13
+        vpmullw	%ymm15, %ymm8, %ymm14
+        vpmullw	%ymm15, %ymm11, %ymm15
+        vpmulhw	%ymm2, %ymm9, %ymm9
+        vpmulhw	%ymm2, %ymm5, %ymm5
+        vpmulhw	%ymm2, %ymm8, %ymm8
+        vpmulhw	%ymm2, %ymm11, %ymm11
+        vpunpcklqdq	%ymm7, %ymm4, %ymm3 # ymm3 = ymm4[0],ymm7[0],ymm4[2],ymm7[2]
+        vpunpckhqdq	%ymm7, %ymm4, %ymm7 # ymm7 = ymm4[1],ymm7[1],ymm4[3],ymm7[3]
+        vpunpcklqdq	%ymm10, %ymm6, %ymm4 # ymm4 = ymm6[0],ymm10[0],ymm6[2],ymm10[2]
+        vpunpckhqdq	%ymm10, %ymm6, %ymm10 # ymm10 = ymm6[1],ymm10[1],ymm6[3],ymm10[3]
+        vpmulhw	%ymm0, %ymm12, %ymm12
+        vpmulhw	%ymm0, %ymm13, %ymm13
+        vpmulhw	%ymm0, %ymm14, %ymm14
+        vpmulhw	%ymm0, %ymm15, %ymm15
+        vpaddw	%ymm9, %ymm3, %ymm6
+        vpsubw	%ymm9, %ymm3, %ymm9
+        vpaddw	%ymm5, %ymm7, %ymm3
+        vpsubw	%ymm5, %ymm7, %ymm5
+        vpaddw	%ymm8, %ymm4, %ymm7
+        vpsubw	%ymm8, %ymm4, %ymm8
+        vpaddw	%ymm11, %ymm10, %ymm4
+        vpsubw	%ymm11, %ymm10, %ymm11
+        vpsubw	%ymm12, %ymm6, %ymm6
+        vpaddw	%ymm12, %ymm9, %ymm9
+        vpsubw	%ymm13, %ymm3, %ymm3
+        vpaddw	%ymm13, %ymm5, %ymm5
+        vpsubw	%ymm14, %ymm7, %ymm7
+        vpaddw	%ymm14, %ymm8, %ymm8
+        vpsubw	%ymm15, %ymm4, %ymm4
+        vpaddw	%ymm15, %ymm11, %ymm11
+        vmovsldup	%ymm8, %ymm10   # ymm10 = ymm8[0,0,2,2,4,4,6,6]
+        vpblendd	$0xaa, %ymm10, %ymm7, %ymm10 # ymm10 = ymm7[0],ymm10[1],ymm7[2],ymm10[3],ymm7[4],ymm10[5],ymm7[6],ymm10[7]
+        vpsrlq	$0x20, %ymm7, %ymm7
+        vpblendd	$0xaa, %ymm8, %ymm7, %ymm8 # ymm8 = ymm7[0],ymm8[1],ymm7[2],ymm8[3],ymm7[4],ymm8[5],ymm7[6],ymm8[7]
+        vmovsldup	%ymm11, %ymm7   # ymm7 = ymm11[0,0,2,2,4,4,6,6]
+        vpblendd	$0xaa, %ymm7, %ymm4, %ymm7 # ymm7 = ymm4[0],ymm7[1],ymm4[2],ymm7[3],ymm4[4],ymm7[5],ymm4[6],ymm7[7]
+        vpsrlq	$0x20, %ymm4, %ymm4
+        vpblendd	$0xaa, %ymm11, %ymm4, %ymm11 # ymm11 = ymm4[0],ymm11[1],ymm4[2],ymm11[3],ymm4[4],ymm11[5],ymm4[6],ymm11[7]
+        vmovdqa	0x3e0(%rsi), %ymm15
+        vmovdqa	0x400(%rsi), %ymm2
+        vpmullw	%ymm15, %ymm10, %ymm12
+        vpmullw	%ymm15, %ymm8, %ymm13
+        vpmullw	%ymm15, %ymm7, %ymm14
+        vpmullw	%ymm15, %ymm11, %ymm15
+        vpmulhw	%ymm2, %ymm10, %ymm10
+        vpmulhw	%ymm2, %ymm8, %ymm8
+        vpmulhw	%ymm2, %ymm7, %ymm7
+        vpmulhw	%ymm2, %ymm11, %ymm11
+        vmovsldup	%ymm9, %ymm4    # ymm4 = ymm9[0,0,2,2,4,4,6,6]
+        vpblendd	$0xaa, %ymm4, %ymm6, %ymm4 # ymm4 = ymm6[0],ymm4[1],ymm6[2],ymm4[3],ymm6[4],ymm4[5],ymm6[6],ymm4[7]
+        vpsrlq	$0x20, %ymm6, %ymm6
+        vpblendd	$0xaa, %ymm9, %ymm6, %ymm9 # ymm9 = ymm6[0],ymm9[1],ymm6[2],ymm9[3],ymm6[4],ymm9[5],ymm6[6],ymm9[7]
+        vmovsldup	%ymm5, %ymm6    # ymm6 = ymm5[0,0,2,2,4,4,6,6]
+        vpblendd	$0xaa, %ymm6, %ymm3, %ymm6 # ymm6 = ymm3[0],ymm6[1],ymm3[2],ymm6[3],ymm3[4],ymm6[5],ymm3[6],ymm6[7]
+        vpsrlq	$0x20, %ymm3, %ymm3
+        vpblendd	$0xaa, %ymm5, %ymm3, %ymm5 # ymm5 = ymm3[0],ymm5[1],ymm3[2],ymm5[3],ymm3[4],ymm5[5],ymm3[6],ymm5[7]
+        vpmulhw	%ymm0, %ymm12, %ymm12
+        vpmulhw	%ymm0, %ymm13, %ymm13
+        vpmulhw	%ymm0, %ymm14, %ymm14
+        vpmulhw	%ymm0, %ymm15, %ymm15
+        vpaddw	%ymm10, %ymm4, %ymm3
+        vpsubw	%ymm10, %ymm4, %ymm10
+        vpaddw	%ymm8, %ymm9, %ymm4
+        vpsubw	%ymm8, %ymm9, %ymm8
+        vpaddw	%ymm7, %ymm6, %ymm9
+        vpsubw	%ymm7, %ymm6, %ymm7
+        vpaddw	%ymm11, %ymm5, %ymm6
+        vpsubw	%ymm11, %ymm5, %ymm11
+        vpsubw	%ymm12, %ymm3, %ymm3
+        vpaddw	%ymm12, %ymm10, %ymm10
+        vpsubw	%ymm13, %ymm4, %ymm4
+        vpaddw	%ymm13, %ymm8, %ymm8
+        vpsubw	%ymm14, %ymm9, %ymm9
+        vpaddw	%ymm14, %ymm7, %ymm7
+        vpsubw	%ymm15, %ymm6, %ymm6
+        vpaddw	%ymm15, %ymm11, %ymm11
+        vpslld	$0x10, %ymm7, %ymm5
+        vpblendw	$0xaa, %ymm5, %ymm9, %ymm5 # ymm5 = ymm9[0],ymm5[1],ymm9[2],ymm5[3],ymm9[4],ymm5[5],ymm9[6],ymm5[7],ymm9[8],ymm5[9],ymm9[10],ymm5[11],ymm9[12],ymm5[13],ymm9[14],ymm5[15]
+        vpsrld	$0x10, %ymm9, %ymm9
+        vpblendw	$0xaa, %ymm7, %ymm9, %ymm7 # ymm7 = ymm9[0],ymm7[1],ymm9[2],ymm7[3],ymm9[4],ymm7[5],ymm9[6],ymm7[7],ymm9[8],ymm7[9],ymm9[10],ymm7[11],ymm9[12],ymm7[13],ymm9[14],ymm7[15]
+        vpslld	$0x10, %ymm11, %ymm9
+        vpblendw	$0xaa, %ymm9, %ymm6, %ymm9 # ymm9 = ymm6[0],ymm9[1],ymm6[2],ymm9[3],ymm6[4],ymm9[5],ymm6[6],ymm9[7],ymm6[8],ymm9[9],ymm6[10],ymm9[11],ymm6[12],ymm9[13],ymm6[14],ymm9[15]
+        vpsrld	$0x10, %ymm6, %ymm6
+        vpblendw	$0xaa, %ymm11, %ymm6, %ymm11 # ymm11 = ymm6[0],ymm11[1],ymm6[2],ymm11[3],ymm6[4],ymm11[5],ymm6[6],ymm11[7],ymm6[8],ymm11[9],ymm6[10],ymm11[11],ymm6[12],ymm11[13],ymm6[14],ymm11[15]
+        vmovdqa	0x420(%rsi), %ymm15
+        vmovdqa	0x440(%rsi), %ymm2
+        vpmullw	%ymm15, %ymm5, %ymm12
+        vpmullw	%ymm15, %ymm7, %ymm13
+        vpmullw	%ymm15, %ymm9, %ymm14
+        vpmullw	%ymm15, %ymm11, %ymm15
+        vpmulhw	%ymm2, %ymm5, %ymm5
+        vpmulhw	%ymm2, %ymm7, %ymm7
+        vpmulhw	%ymm2, %ymm9, %ymm9
+        vpmulhw	%ymm2, %ymm11, %ymm11
+        vpslld	$0x10, %ymm10, %ymm6
+        vpblendw	$0xaa, %ymm6, %ymm3, %ymm6 # ymm6 = ymm3[0],ymm6[1],ymm3[2],ymm6[3],ymm3[4],ymm6[5],ymm3[6],ymm6[7],ymm3[8],ymm6[9],ymm3[10],ymm6[11],ymm3[12],ymm6[13],ymm3[14],ymm6[15]
+        vpsrld	$0x10, %ymm3, %ymm3
+        vpblendw	$0xaa, %ymm10, %ymm3, %ymm10 # ymm10 = ymm3[0],ymm10[1],ymm3[2],ymm10[3],ymm3[4],ymm10[5],ymm3[6],ymm10[7],ymm3[8],ymm10[9],ymm3[10],ymm10[11],ymm3[12],ymm10[13],ymm3[14],ymm10[15]
+        vpslld	$0x10, %ymm8, %ymm3
+        vpblendw	$0xaa, %ymm3, %ymm4, %ymm3 # ymm3 = ymm4[0],ymm3[1],ymm4[2],ymm3[3],ymm4[4],ymm3[5],ymm4[6],ymm3[7],ymm4[8],ymm3[9],ymm4[10],ymm3[11],ymm4[12],ymm3[13],ymm4[14],ymm3[15]
+        vpsrld	$0x10, %ymm4, %ymm4
+        vpblendw	$0xaa, %ymm8, %ymm4, %ymm8 # ymm8 = ymm4[0],ymm8[1],ymm4[2],ymm8[3],ymm4[4],ymm8[5],ymm4[6],ymm8[7],ymm4[8],ymm8[9],ymm4[10],ymm8[11],ymm4[12],ymm8[13],ymm4[14],ymm8[15]
+        vpmulhw	%ymm0, %ymm12, %ymm12
+        vpmulhw	%ymm0, %ymm13, %ymm13
+        vpmulhw	%ymm0, %ymm14, %ymm14
+        vpmulhw	%ymm0, %ymm15, %ymm15
+        vpaddw	%ymm5, %ymm6, %ymm4
+        vpsubw	%ymm5, %ymm6, %ymm5
+        vpaddw	%ymm7, %ymm10, %ymm6
+        vpsubw	%ymm7, %ymm10, %ymm7
+        vpaddw	%ymm9, %ymm3, %ymm10
+        vpsubw	%ymm9, %ymm3, %ymm9
+        vpaddw	%ymm11, %ymm8, %ymm3
+        vpsubw	%ymm11, %ymm8, %ymm11
+        vpsubw	%ymm12, %ymm4, %ymm4
+        vpaddw	%ymm12, %ymm5, %ymm5
+        vpsubw	%ymm13, %ymm6, %ymm6
+        vpaddw	%ymm13, %ymm7, %ymm7
+        vpsubw	%ymm14, %ymm10, %ymm10
+        vpaddw	%ymm14, %ymm9, %ymm9
+        vpsubw	%ymm15, %ymm3, %ymm3
+        vpaddw	%ymm15, %ymm11, %ymm11
+        vmovdqa	0x460(%rsi), %ymm14
+        vmovdqa	0x4a0(%rsi), %ymm15
+        vmovdqa	0x480(%rsi), %ymm8
+        vmovdqa	0x4c0(%rsi), %ymm2
+        vpmullw	%ymm14, %ymm10, %ymm12
+        vpmullw	%ymm14, %ymm3, %ymm13
+        vpmullw	%ymm15, %ymm9, %ymm14
+        vpmullw	%ymm15, %ymm11, %ymm15
+        vpmulhw	%ymm8, %ymm10, %ymm10
+        vpmulhw	%ymm8, %ymm3, %ymm3
+        vpmulhw	%ymm2, %ymm9, %ymm9
+        vpmulhw	%ymm2, %ymm11, %ymm11
+        vpmulhw	%ymm0, %ymm12, %ymm12
+        vpmulhw	%ymm0, %ymm13, %ymm13
+        vpmulhw	%ymm0, %ymm14, %ymm14
+        vpmulhw	%ymm0, %ymm15, %ymm15
+        vpaddw	%ymm10, %ymm4, %ymm8
+        vpsubw	%ymm10, %ymm4, %ymm10
+        vpaddw	%ymm3, %ymm6, %ymm4
+        vpsubw	%ymm3, %ymm6, %ymm3
+        vpaddw	%ymm9, %ymm5, %ymm6
+        vpsubw	%ymm9, %ymm5, %ymm9
+        vpaddw	%ymm11, %ymm7, %ymm5
+        vpsubw	%ymm11, %ymm7, %ymm11
+        vpsubw	%ymm12, %ymm8, %ymm8
+        vpaddw	%ymm12, %ymm10, %ymm10
+        vpsubw	%ymm13, %ymm4, %ymm4
+        vpaddw	%ymm13, %ymm3, %ymm3
+        vpsubw	%ymm14, %ymm6, %ymm6
+        vpaddw	%ymm14, %ymm9, %ymm9
+        vpsubw	%ymm15, %ymm5, %ymm5
+        vpaddw	%ymm15, %ymm11, %ymm11
+        vmovdqa	%ymm8, 0x100(%rdi)
+        vmovdqa	%ymm4, 0x120(%rdi)
+        vmovdqa	%ymm10, 0x140(%rdi)
+        vmovdqa	%ymm3, 0x160(%rdi)
+        vmovdqa	%ymm6, 0x180(%rdi)
+        vmovdqa	%ymm5, 0x1a0(%rdi)
+        vmovdqa	%ymm9, 0x1c0(%rdi)
+        vmovdqa	%ymm11, 0x1e0(%rdi)
+        retq
 
-levels1t6	0
-levels1t6	1
-
-ret
-
-/* simpasm: footer-start */
 #endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
           !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
