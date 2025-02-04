@@ -89,7 +89,7 @@
  *****************************************************************************/
 #if defined(MLKEM_USE_NATIVE_BACKEND_ARITH) && \
     !defined(MLKEM_NATIVE_ARITH_BACKEND_FILE)
-#define MLKEM_NATIVE_ARITH_BACKEND_FILE "native/default.h"
+#define MLKEM_NATIVE_ARITH_BACKEND_FILE "native/meta.h"
 #endif
 
 /******************************************************************************
