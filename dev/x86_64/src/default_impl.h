@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef MLKEM_NATIVE_NATIVE_X86_64_SRC_DEFAULT_IMPL_H
-#define MLKEM_NATIVE_NATIVE_X86_64_SRC_DEFAULT_IMPL_H
+#ifndef MLKEM_NATIVE_DEV_X86_64_SRC_DEFAULT_IMPL_H
+#define MLKEM_NATIVE_DEV_X86_64_SRC_DEFAULT_IMPL_H
 /* ML-KEM arithmetic native profile for clean assembly */
 
 #ifdef MLKEM_NATIVE_ARITH_PROFILE_IMPL_H
@@ -177,4 +177,4 @@ static INLINE void poly_decompress_d11_native(
 
 #endif /* MLKEM_NATIVE_ARITH_PROFILE_IMPL_H */
 
-#endif /* MLKEM_NATIVE_NATIVE_X86_64_SRC_DEFAULT_IMPL_H */
+#endif /* MLKEM_NATIVE_DEV_X86_64_SRC_DEFAULT_IMPL_H */

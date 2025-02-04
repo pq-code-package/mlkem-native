@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#ifndef MLKEM_NATIVE_DEV_AARCH64_CLEAN_META_H
+#define MLKEM_NATIVE_DEV_AARCH64_CLEAN_META_H
 /* ML-KEM arithmetic native profile for clean assembly */
 
 #ifdef MLKEM_NATIVE_ARITH_PROFILE_H
@@ -22,3 +24,5 @@
 #define MLKEM_NATIVE_ARITH_BACKEND_IMPL "native/aarch64_clean/src/clean_impl.h"
 
 #endif /* MLKEM_NATIVE_ARITH_PROFILE_H */
+
+#endif /* MLKEM_NATIVE_DEV_AARCH64_CLEAN_META_H */

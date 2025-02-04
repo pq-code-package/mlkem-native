@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef MLKEM_NATIVE_NATIVE_X86_64_DEFAULT_H
-#define MLKEM_NATIVE_NATIVE_X86_64_DEFAULT_H
+#ifndef MLKEM_NATIVE_DEV_X86_64_META_H
+#define MLKEM_NATIVE_DEV_X86_64_META_H
 /* ML-KEM arithmetic native profile for clean assembly */
 
 #ifdef MLKEM_NATIVE_ARITH_PROFILE_H
@@ -25,4 +25,4 @@
 
 #endif /* MLKEM_NATIVE_ARITH_PROFILE_H */
 
-#endif /* MLKEM_NATIVE_NATIVE_X86_64_DEFAULT_H */
+#endif /* MLKEM_NATIVE_DEV_X86_64_META_H */

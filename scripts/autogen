@@ -580,7 +580,7 @@ def get_asm_source_files():
 
 
 def get_header_files():
-    return get_files("mlkem/*.h")
+    return get_files("mlkem/*.h") + get_files("dev/*.h")
 
 
 def get_files(pattern):

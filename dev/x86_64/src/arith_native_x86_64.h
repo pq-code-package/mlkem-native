@@ -2,8 +2,8 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef MLKEM_NATIVE_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H
-#define MLKEM_NATIVE_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H
+#ifndef MLKEM_NATIVE_DEV_X86_64_SRC_ARITH_NATIVE_X86_64_H
+#define MLKEM_NATIVE_DEV_X86_64_SRC_ARITH_NATIVE_X86_64_H
 
 #include "../../../common.h"
 
@@ -81,4 +81,4 @@ void poly_compress_d11_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
 void poly_decompress_d11_avx2(__m256i *RESTRICT r,
                               const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]);
 
-#endif /* MLKEM_NATIVE_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H */
+#endif /* MLKEM_NATIVE_DEV_X86_64_SRC_ARITH_NATIVE_X86_64_H */

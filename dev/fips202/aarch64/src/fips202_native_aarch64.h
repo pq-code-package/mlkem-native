@@ -2,8 +2,8 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H
-#define MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H
+#ifndef MLKEM_NATIVE_DEV_FIPS202_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H
+#define MLKEM_NATIVE_DEV_FIPS202_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H
 
 #include <stdint.h>
 #include "../../../../common.h"
@@ -42,4 +42,4 @@ void keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt(uint64_t *state,
 #define keccakf1600_round_constants MLKEM_NAMESPACE(keccakf1600_round_constants)
 extern const uint64_t keccakf1600_round_constants[];
 
-#endif /* MLKEM_NATIVE_FIPS202_NATIVE_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H */
+#endif /* MLKEM_NATIVE_DEV_FIPS202_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H */

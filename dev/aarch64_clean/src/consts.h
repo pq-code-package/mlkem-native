@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#if !defined(MLKEM_NATIVE_AARCH64_CONSTS)
-#define MLKEM_NATIVE_AARCH64_CONSTS
+#ifndef MLKEM_NATIVE_DEV_AARCH64_CLEAN_SRC_CONSTS_H
+#define MLKEM_NATIVE_DEV_AARCH64_CLEAN_SRC_CONSTS_H
 
 #include <stdint.h>
 #include "../../../common.h"
@@ -16,4 +16,4 @@ extern const int16_t zetas_mulcache_native[256];
   MLKEM_NAMESPACE(zetas_mulcache_twisted_native)
 extern const int16_t zetas_mulcache_twisted_native[256];
 
-#endif /* MLKEM_NATIVE_AARCH64_CONSTS */
+#endif /* MLKEM_NATIVE_DEV_AARCH64_CLEAN_SRC_CONSTS_H */
