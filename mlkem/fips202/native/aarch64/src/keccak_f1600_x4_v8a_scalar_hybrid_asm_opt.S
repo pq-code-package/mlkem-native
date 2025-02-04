@@ -31,6 +31,7 @@
 #if (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
      defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55)) &&    \
     !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+/* simpasm: header-end */
 
 #define KECCAK_F1600_ROUNDS 24
 
@@ -858,10 +859,9 @@
     ror sAsu, sAsu,#(64-55)
 .endm
 
-.global MLKEM_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_asm_hybrid_opt)
-.text
-
-.balign 4
+    .text
+    .global MLKEM_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_asm_hybrid_opt)
+    .balign 4
 MLKEM_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_asm_hybrid_opt):
     alloc_stack
     save_gprs
@@ -1816,6 +1816,7 @@ done:
     .unreq sAsu
     .unreq tmp
 
+/* simpasm: footer-start */
 #endif /* (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) ||
           defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55) &&
          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)*/

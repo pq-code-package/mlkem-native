@@ -43,6 +43,7 @@
     !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 #if defined(__ARM_FEATURE_SHA3)
+/* simpasm: header-end */
 
 /****************** REGISTER ALLOCATIONS *******************/
 
@@ -378,10 +379,9 @@
 
 #define KECCAK_F1600_ROUNDS 24
 
-.text
-.align 4
-.global MLKEM_ASM_NAMESPACE(keccak_f1600_x2_v8a_v84a_asm_hybrid)
-
+    .text
+    .global MLKEM_ASM_NAMESPACE(keccak_f1600_x2_v8a_v84a_asm_hybrid)
+    .balign 4
 MLKEM_ASM_NAMESPACE(keccak_f1600_x2_v8a_v84a_asm_hybrid):
     alloc_stack
     save_gprs
@@ -495,6 +495,7 @@ loop:
     .unreq Abe_
     .unreq vtmp
 
+/* simpasm: footer-start */
 #endif /* __ARM_FEATURE_SHA3 */
 
 #endif /* (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) ||
