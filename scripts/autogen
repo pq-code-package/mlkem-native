@@ -861,31 +861,41 @@ def gen_hol_light_asm(dry_run=False):
     gen_hol_light_asm_file("intt_opt.S", "mlkem_intt.S")
 
 
+def update_via_copy(infile_full, outdir, dry_run=False):
+    _, infile = os.path.split(infile_full)
+    outfile_full = os.path.join(outdir, infile)
+    with open(infile_full, "r") as f:
+        content = f.read()
+    update_file(outfile_full, content, dry_run=dry_run)
+
+
+def synchronize_backend(in_dir, out_dir, dry_run=False, **kwargs):
+    for f in get_files(os.path.join(in_dir, "*")):
+        if f.endswith(".S"):
+            update_via_simpasm(f, out_dir, dry_run=dry_run, **kwargs)
+        else:
+            update_via_copy(f, out_dir, dry_run=dry_run)
+
+
 def gen_simplified_asm(dry_run=False):
-    # Generate simplified AArch64 arithmetic assembly
-    for f in get_files("dev/aarch64_opt/src/*.S"):
-        update_via_simpasm(
-            f,
-            "mlkem/native/aarch64/src",
-            cflags="-Imlkem/native/aarch64/src",
-            dry_run=dry_run,
-        )
-    # Generate simplified AArch64 FIPS-202 assembly
-    for f in get_files("dev/fips202/aarch64/src/*.S"):
-        update_via_simpasm(
-            f,
-            "mlkem/fips202/native/aarch64/src",
-            cflags="-Imlkem/fips202/native/aarch64/src -march=armv8.4-a+sha3",
-            dry_run=dry_run,
-        )
-    # Generate simplified x86_64 arithmetic assembly
-    for f in get_files("dev/x86_64/src/*.S"):
-        update_via_simpasm(
-            f,
-            "mlkem/native/x86_64/src",
-            cflags="-Imlkem/native/x86_64/src/ -mavx2",
-            dry_run=dry_run,
-        )
+    synchronize_backend(
+        "dev/aarch64_opt/src",
+        "mlkem/native/aarch64/src",
+        dry_run=dry_run,
+        cflags="-Imlkem/native/aarch64/src",
+    )
+    synchronize_backend(
+        "dev/fips202/aarch64/src",
+        "mlkem/fips202/native/aarch64/src",
+        dry_run=dry_run,
+        cflags="-Imlkem/fips202/native/aarch64/src -march=armv8.4-a+sha3",
+    )
+    synchronize_backend(
+        "dev/x86_64/src",
+        "mlkem/native/x86_64/src",
+        dry_run=dry_run,
+        cflags="-Imlkem/native/x86_64/src/ -mavx2",
+    )
 
 
 def gen_header_guard(header_file, dry_run=False):
