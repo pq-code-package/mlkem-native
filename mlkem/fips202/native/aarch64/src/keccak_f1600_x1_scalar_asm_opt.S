@@ -293,7 +293,7 @@ initial:
     eor x14, x26, x6, ror #46                 // .....................................................*
     eor x6, x27, x29, ror #41                 // .....................................................*
 
-    loop:
+    keccak_f1600_x1_scalar_loop:
                                               // (Optimized for Cortex-A55)
                                               // Instructions:    112
                                               // Expected cycles: 57
@@ -414,7 +414,7 @@ initial:
     bic x3, x0, x30, ror #5                   // .......................................................*.
     eor x23, x3, x26, ror #52                 // ........................................................*
     eor x3, x29, x30, ror #24                 // ........................................................*
-    ble loop
+    ble keccak_f1600_x1_scalar_loop
 
     final_rotate
     ldr input_addr, [sp, #STACK_LOC_INPUT]
