@@ -877,8 +877,25 @@ def gen_header_guards(dry_run=False):
 
 
 def gen_source_undefs(source_file, dry_run=False):
-    # Get list of #define's clauses in this source file
-    undefs = list(f"#undef {d}" for (_, d) in get_defines_from_file(source_file))
+    # Get list of #define's clauses in this source file (ignore filename)
+    undef_list = list(map(lambda c: c[1], get_defines_from_file(source_file)))
+    # Get define clauses from header files, as dict
+    header_defs = {d: c for (c, d) in get_defines()}
+
+    undefs = []
+    ignored = []
+    for d in undef_list:
+        if d not in header_defs.keys():
+            undefs.append(f"#undef {d}")
+        else:
+            ignored.append((d, header_defs[d]))
+    info_line = "/* Some macros are kept because they are also defined in a header. */"
+    if len(ignored) != 0:
+        undefs.append(
+            "/* Some macros are kept because they are also defined in a header. */"
+        )
+        for d, c in ignored:
+            undefs.append(f"/* Keep: {d} ({c.split('/')[-1]}) */")
 
     # Remove list of #undef's at the end of the source file, and add
     # the up-to-date one.
@@ -886,7 +903,12 @@ def gen_source_undefs(source_file, dry_run=False):
         content = f.read().split("\n")
     while True:
         l = content[-1].strip()
-        if l.startswith("#undef") or l == "":
+        if (
+            l.startswith("#undef")
+            or l == info_line
+            or l.startswith("/* Keep:")
+            or l == ""
+        ):
             del content[-1]
             continue
         break

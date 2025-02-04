@@ -54,6 +54,40 @@ BUILD_DIR=build
 BIN=test_binary
 LIB=libmlkem.a
 
+# Automatically detect system architecture and set preprocessor etc accordingly
+HOST_PLATFORM := $(shell uname -s)-$(shell uname -m)
+# linux x86_64
+ifeq ($(HOST_PLATFORM),Linux-x86_64)
+	CFLAGS += -z noexecstack
+endif
+
+ifeq ($(HOST_PLATFORM),Linux-x86_64)
+ifeq ($(CROSS_PREFIX),)
+	CFLAGS += -mavx2 -mbmi2 -mpopcnt -maes
+	CFLAGS += -DFORCE_X86_64
+else ifneq ($(findstring aarch64_be, $(CROSS_PREFIX)),)
+	CFLAGS += -DFORCE_AARCH64_EB
+else ifneq ($(findstring aarch64, $(CROSS_PREFIX)),)
+	CFLAGS += -DFORCE_AARCH64
+else
+
+endif
+
+# linux aarch64
+else ifeq ($(HOST_PLATFORM),Linux-aarch64)
+ifeq ($(CROSS_PREFIX),)
+	CFLAGS += -DFORCE_AARCH64
+else ifneq ($(findstring x86_64, $(CROSS_PREFIX)),)
+	CFLAGS += -mavx2 -mbmi2 -mpopcnt -maes
+	CFLAGS += -DFORCE_X86_64
+else
+endif
+
+# darwin aarch64
+else ifeq ($(HOST_PLATFORM),Darwin-arm64)
+	CFLAGS += -DFORCE_AARCH64
+endif
+
 CFLAGS := \
 	-Wall \
 	-Wextra \

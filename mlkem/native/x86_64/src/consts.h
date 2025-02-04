@@ -9,10 +9,6 @@
  * Implementation from Kyber reference repository
  * https://github.com/pq-crystals/kyber/blob/main/avx2/consts.h
  */
-
-#ifndef CONSTS_H
-#define CONSTS_H
-
 #include "../../../common.h"
 
 #define AVX2_BACKEND_DATA_OFFSET_16XQ 0
@@ -41,8 +37,6 @@
 typedef ALIGNED_INT16(640) qdata_t;
 #define qdata MLKEM_NAMESPACE(qdata)
 extern const qdata_t qdata;
-#endif
-
 #endif
 
 #endif /* MLKEM_NATIVE_NATIVE_X86_64_SRC_CONSTS_H */
