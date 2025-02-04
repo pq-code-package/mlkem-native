@@ -33,11 +33,11 @@ Non-assembly files are synchronized by copy between this directory and [`mlkem`]
 
 #### Testing clean/optimized assembly
 
-The [aarch64_clean](aarch64_clean) and [aarch64_opt](aarch64_opt) directories are working arithmetic backends. To test --
-for example when exploring changes -- temporarily copy them into [mlkem/native/](../mlkem/native) and modify [mlkem/native/default.h]
-to include the backend headers [aarch64_clean/clean.h](aarch64_clean/clean.h) resp. [aarch64_opt/opt.h](aarch64_opt/opt.h) rather than
-[aarch64/opt.h](../mlkem/native/aarch64/opt.h). Alternatively, if you are only changing aspects of [aarch64_opt](aarch64_opt), you can run [`autogen`](../scripts/autogen)
-to autogenerate the final assembly from it.
+To test the clean assembly, run `autogen --aarch64-clean`. This will import the clean backend into `mlkem/native/aarch64/*`,
+replacing the optimized one. With `autogen --aarch64-clean --no-simplify` or `autogen --no-simplify` you can moreover reinstate
+the non-simplified assembly in the main source tree.
+
+Alternatively, you can also just manually copy the entire `aarch64_clean` and `aarch64_opt` trees into `mlkem/native/aarch64/`.
 
 ## AArch64 FIPS-202 assembly
 
