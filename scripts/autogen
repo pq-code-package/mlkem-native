@@ -371,7 +371,7 @@ def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
     )
 
     update_file(
-        "test/aarch64_clean/src/aarch64_zetas.c",
+        "dev/aarch64_clean/src/aarch64_zetas.c",
         "\n".join(gen("clean")),
         dry_run=dry_run,
     )
@@ -431,7 +431,7 @@ def gen_aarch64_rej_uniform_table(dry_run=False):
     )
 
     update_file(
-        "test/aarch64_clean/src/rej_uniform_table.c",
+        "dev/aarch64_clean/src/rej_uniform_table.c",
         "\n".join(gen("clean")),
         dry_run=dry_run,
     )
