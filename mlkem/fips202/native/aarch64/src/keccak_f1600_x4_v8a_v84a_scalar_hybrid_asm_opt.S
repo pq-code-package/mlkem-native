@@ -33,6 +33,7 @@
     !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 #if defined(__ARM_FEATURE_SHA3)
+/* simpasm: header-end */
 
 #define KECCAK_F1600_ROUNDS 24
 
@@ -876,10 +877,9 @@
     ror sAsu, sAsu,#(64-55)
 .endm
 
-.global MLKEM_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt)
-.text
-
-.balign 4
+    .text
+    .global MLKEM_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt)
+    .balign 4
 MLKEM_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt):
     alloc_stack
     save_gprs
@@ -896,11 +896,11 @@ MLKEM_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt):
     load_input_vector   // Vector input
     load_input_scalar 0 // First scalar input
 
- initial:
+keccak_f1600_x4_v8a_v84a_scalar_hybrid_initial:
     scalar_round_initial    // @slothy:interleaving_class=0
     scalar_round_noninitial // @slothy:interleaving_class=0
     vector_round            // @slothy:interleaving_class=1
-        loop:
+keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop:
                                                          // Instructions:    339
                                                          // Expected cycles: 169
                                                          // Expected IPC:    2.01
@@ -1591,15 +1591,13 @@ MLKEM_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt):
         // bcax v4.16b, v4.16b, v27.16b, v30.16b           // ..................................................................................................................................................................*.......
         // eor v0.16b, v0.16b, v28.16b                     // .........................................................................................................................................................................*
 
-        loop_end:
-
-    ble loop
+    ble keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop
     final_scalar_rotate
 
     // Read outer loop flag: We repeat the above twice
     ldr outer, [sp, #STACK_OFFSET_OUTER]      // @slothy:reads=STACK_OFFSET_OUTER
     cmp outer, #1
-    beq done
+    beq keccak_f1600_x4_v8a_v84a_scalar_hybrid_done
 
     // Update outer loop flag
     mov outer, #1
@@ -1609,8 +1607,8 @@ MLKEM_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt):
     store_input_scalar 0 // Store first scalar data
     load_input_scalar  1 // Load second scalar input
 
-    b initial
-done:
+    b keccak_f1600_x4_v8a_v84a_scalar_hybrid_initial
+keccak_f1600_x4_v8a_v84a_scalar_hybrid_done:
 
     ldr input_addr, [sp, #STACK_OFFSET_INPUT] // @slothy:reads=STACK_OFFSET_INPUT
     store_input_scalar 1
@@ -1740,6 +1738,7 @@ done:
     .unreq sAsu
     .unreq tmp
 
+/* simpasm: footer-start */
 #endif /* __ARM_FEATURE_SHA3 */
 
 #endif /* (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) ||
