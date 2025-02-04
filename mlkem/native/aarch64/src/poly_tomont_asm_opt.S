@@ -6,212 +6,73 @@
 #include "../../../common.h"
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && \
     !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
-/* simpasm: header-end */
 
-/* Montgomery multiplication, with precomputed Montgomery twist
- * Expects modulus in consts.h[0]. */
-.macro mulmod dst, src, const, const_twisted
-        sqrdmulh tmp0.8h,    \src\().8h, \const_twisted\().8h
-        mul      \dst\().8h, \src\().8h, \const\().8h
-        mls      \dst\().8h, tmp0.8h,    modulus.h[0]
-.endm
-
-/**********************************
- *          poly_tomont()         *
- **********************************/
-
-        src               .req x0
-        count             .req x1
-        wtmp              .req w2
-
-        data              .req v0
-        q_data            .req q0
-        res               .req v1
-        q_res             .req q1
-
-        factor            .req v2
-        factor_t          .req v3
-        modulus           .req v4
-        modulus_twisted   .req v5
-
-        tmp0              .req v6
+/*
+ * WARNING: This file is auto-derived from the mlkem-native source file 
+ *   dev/aarch64_opt/src/poly_tomont_asm_opt.S using scripts/simpasm. Do not modify it directly.
+ */
 
 
-        .text
-        .global MLKEM_ASM_NAMESPACE(poly_tomont_asm_opt)
-        .balign 4
+.text
+.balign 4
+.global MLKEM_ASM_NAMESPACE(poly_tomont_asm_opt)
 MLKEM_ASM_NAMESPACE(poly_tomont_asm_opt):
 
-        mov wtmp, #3329 // ML-KEM modulus
-        dup modulus.8h, wtmp
+        mov	w2, #0xd01              // =3329
+        dup	v4.8h, w2
+        mov	w2, #0x4ebf             // =20159
+        dup	v5.8h, w2
+        mov	w2, #-0x414             // =-1044
+        dup	v2.8h, w2
+        mov	w2, #-0x2824            // =-10276
+        dup	v3.8h, w2
+        mov	x1, #0x8                // =8
+        ldr	q26, [x0, #0x30]
+        ldr	q23, [x0, #0x10]
+        mul	v17.8h, v26.8h, v2.8h
+        sqrdmulh	v7.8h, v26.8h, v3.8h
+        ldr	q27, [x0, #0x20]
+        sub	x1, x1, #0x1
 
-        mov wtmp, #20159 // Barrett twist of 1 wrt 2^27
-        dup modulus_twisted.8h, wtmp
-
-        mov wtmp, #-1044 // 2^16 % 3329
-        dup factor.8h, wtmp
-
-        mov wtmp, #-10276 // Barrett twist of -1044 (wrt 2^16)
-        dup factor_t.8h, wtmp
-
-        mov count, #8
-                                             // Instructions:    5
-                                             // Expected cycles: 7
-                                             // Expected IPC:    0.71
-                                             //
-                                             // Cycle bound:     7.0
-                                             // IPC bound:       0.71
-                                             //
-                                             // Wall time:     0.01s
-                                             // User time:     0.01s
-                                             //
-                                             // ----- cycle (expected) ------>
-                                             // 0                        25
-                                             // |------------------------|----
-        ldr q26, [x0, #48]                   // *.............................
-        ldr q23, [x0, #16]                   // ..*...........................
-        mul v17.8H, v26.8H, v2.8H            // ....*.........................
-        sqrdmulh v7.8H, v26.8H, v3.8H        // .....*........................
-        ldr q27, [x0, #32]                   // ......*.......................
-
-                                             // ------ cycle (expected) ------>
-                                             // 0                        25
-                                             // |------------------------|-----
-        // ldr q7, [x0, #48]                 // *..............................
-        // ldr q23, [x0, #16]                // ..*............................
-        // mul v17.8H, v7.8H, v2.8H          // ....*..........................
-        // sqrdmulh v7.8H, v7.8H, v3.8H      // .....*.........................
-        // ldr q27, [x0, #32]                // ......*........................
-
-        sub count, count, #1
 poly_tomont_asm_opt_loop:
-                                              // Instructions:    20
-                                              // Expected cycles: 24
-                                              // Expected IPC:    0.83
-                                              //
-                                              // Cycle bound:     24.0
-                                              // IPC bound:       0.83
-                                              //
-                                              // Wall time:     0.73s
-                                              // User time:     0.73s
-                                              //
-                                              // ----- cycle (expected) ------>
-                                              // 0                        25
-                                              // |------------------------|----
-        mls v17.8H, v7.8H, v4.H[0]            // *.............................
-        sqrdmulh v5.8H, v23.8H, v3.8H         // .*............................
-        ldr q7, [x0], #64                     // ..*...........................
-        str q17, [x0, #-16]                   // ....*.........................
-        sqrdmulh v29.8H, v27.8H, v3.8H        // .....*........................
-        sqrdmulh v19.8H, v7.8H, v3.8H         // ......*.......................
-        mul v25.8H, v23.8H, v2.8H             // .......*......................
-        mul v0.8H, v7.8H, v2.8H               // ........*.....................
-        mul v26.8H, v27.8H, v2.8H             // .........*....................
-        ldr q7, [x0, #48]                     // ..........e...................
-        mls v25.8H, v5.8H, v4.H[0]            // ............*.................
-        ldr q23, [x0, #16]                    // .............e................
-        mls v26.8H, v29.8H, v4.H[0]           // ...............*..............
-        mls v0.8H, v19.8H, v4.H[0]            // ................*.............
-        str q25, [x0, #-48]                   // .................*............
-        mul v17.8H, v7.8H, v2.8H              // ..................e...........
-        sqrdmulh v7.8H, v7.8H, v3.8H          // ...................e..........
-        str q0, [x0, #-64]                    // ....................*.........
-        ldr q27, [x0, #32]                    // .....................e........
-        str q26, [x0, #-32]                   // .......................*......
-
-                                                  // --------- cycle (expected) ---------->
-                                                  // 0                        25
-                                                  // |------------------------|------------
-        // ldr q0, [x0], #64                      // ..............'.*.....................
-        // sqrdmulh v6.8h,    v0.8h, v3.8h        // ..............'.....*.................
-        // mul      v1.8h, v0.8h, v2.8h           // ..............'.......*...............
-        // mls      v1.8h, v6.8h,    v4.h[0]      // ......~.......'...............*.......
-        // str q1, [x0, #-64]                     // ..........~...'...................*...
-        // ldr q0, [x0, #-48]                     // ...e..........'............~..........
-        // sqrdmulh v6.8h,    v0.8h, v3.8h        // ..............'*......................
-        // mul      v1.8h, v0.8h, v2.8h           // ..............'......*................
-        // mls      v1.8h, v6.8h,    v4.h[0]      // ..~...........'...........*...........
-        // str q1, [x0, #-48]                     // .......~......'................*......
-        // ldr q0, [x0, #-32]                     // ...........e..'....................~..
-        // sqrdmulh v6.8h,    v0.8h, v3.8h        // ..............'....*..................
-        // mul      v1.8h, v0.8h, v2.8h           // ..............'........*..............
-        // mls      v1.8h, v6.8h,    v4.h[0]      // .....~........'..............*........
-        // str q1, [x0, #-32]                     // .............~'......................*
-        // ldr q0, [x0, #-16]                     // e.............'.........~.............
-        // sqrdmulh v6.8h,    v0.8h, v3.8h        // .........e....'..................~....
-        // mul      v1.8h, v0.8h, v2.8h           // ........e.....'.................~.....
-        // mls      v1.8h, v6.8h,    v4.h[0]      // ..............*.......................
-        // str q1, [x0, #-16]                     // ..............'...*...................
-
-        sub count, count, 1
-        cbnz count, poly_tomont_asm_opt_loop
-                                              // Instructions:    15
-                                              // Expected cycles: 18
-                                              // Expected IPC:    0.83
-                                              //
-                                              // Cycle bound:     18.0
-                                              // IPC bound:       0.83
-                                              //
-                                              // Wall time:     0.07s
-                                              // User time:     0.07s
-                                              //
-                                              // ----- cycle (expected) ------>
-                                              // 0                        25
-                                              // |------------------------|----
-        mls v17.8H, v7.8H, v4.H[0]            // *.............................
-        sqrdmulh v7.8H, v23.8H, v3.8H         // .*............................
-        mul v26.8H, v23.8H, v2.8H             // ..*...........................
-        sqrdmulh v25.8H, v27.8H, v3.8H        // ...*..........................
-        ldr q23, [x0], #64                    // ....*.........................
-        mul v27.8H, v27.8H, v2.8H             // ......*.......................
-        mls v26.8H, v7.8H, v4.H[0]            // .......*......................
-        sqrdmulh v7.8H, v23.8H, v3.8H         // ........*.....................
-        mul v23.8H, v23.8H, v2.8H             // .........*....................
-        str q17, [x0, #-16]                   // ..........*...................
-        mls v27.8H, v25.8H, v4.H[0]           // ...........*..................
-        str q26, [x0, #-48]                   // ............*.................
-        mls v23.8H, v7.8H, v4.H[0]            // .............*................
-        str q27, [x0, #-32]                   // ...............*..............
-        str q23, [x0, #-64]                   // .................*............
-
-                                               // ------ cycle (expected) ------>
-                                               // 0                        25
-                                               // |------------------------|-----
-        // mls v17.8H, v7.8H, v4.H[0]          // *..............................
-        // sqrdmulh v5.8H, v23.8H, v3.8H       // .*.............................
-        // ldr q7, [x0], #64                   // ....*..........................
-        // str q17, [x0, #-16]                 // ..........*....................
-        // sqrdmulh v29.8H, v27.8H, v3.8H      // ...*...........................
-        // sqrdmulh v19.8H, v7.8H, v3.8H       // ........*......................
-        // mul v25.8H, v23.8H, v2.8H           // ..*............................
-        // mul v0.8H, v7.8H, v2.8H             // .........*.....................
-        // mul v26.8H, v27.8H, v2.8H           // ......*........................
-        // mls v25.8H, v5.8H, v4.H[0]          // .......*.......................
-        // mls v26.8H, v29.8H, v4.H[0]         // ...........*...................
-        // mls v0.8H, v19.8H, v4.H[0]          // .............*.................
-        // str q25, [x0, #-48]                 // ............*..................
-        // str q0, [x0, #-64]                  // .................*.............
-        // str q26, [x0, #-32]                 // ...............*...............
-
-
+        mls	v17.8h, v7.8h, v4.h[0]
+        sqrdmulh	v5.8h, v23.8h, v3.8h
+        ldr	q7, [x0], #0x40
+        stur	q17, [x0, #-0x10]
+        sqrdmulh	v29.8h, v27.8h, v3.8h
+        sqrdmulh	v19.8h, v7.8h, v3.8h
+        mul	v25.8h, v23.8h, v2.8h
+        mul	v0.8h, v7.8h, v2.8h
+        mul	v26.8h, v27.8h, v2.8h
+        ldr	q7, [x0, #0x30]
+        mls	v25.8h, v5.8h, v4.h[0]
+        ldr	q23, [x0, #0x10]
+        mls	v26.8h, v29.8h, v4.h[0]
+        mls	v0.8h, v19.8h, v4.h[0]
+        stur	q25, [x0, #-0x30]
+        mul	v17.8h, v7.8h, v2.8h
+        sqrdmulh	v7.8h, v7.8h, v3.8h
+        stur	q0, [x0, #-0x40]
+        ldr	q27, [x0, #0x20]
+        stur	q26, [x0, #-0x20]
+        sub	x1, x1, #0x1
+        cbnz	x1, poly_tomont_asm_opt_loop
+        mls	v17.8h, v7.8h, v4.h[0]
+        sqrdmulh	v7.8h, v23.8h, v3.8h
+        mul	v26.8h, v23.8h, v2.8h
+        sqrdmulh	v25.8h, v27.8h, v3.8h
+        ldr	q23, [x0], #0x40
+        mul	v27.8h, v27.8h, v2.8h
+        mls	v26.8h, v7.8h, v4.h[0]
+        sqrdmulh	v7.8h, v23.8h, v3.8h
+        mul	v23.8h, v23.8h, v2.8h
+        stur	q17, [x0, #-0x10]
+        mls	v27.8h, v25.8h, v4.h[0]
+        stur	q26, [x0, #-0x30]
+        mls	v23.8h, v7.8h, v4.h[0]
+        stur	q27, [x0, #-0x20]
+        stur	q23, [x0, #-0x40]
         ret
 
-        .unreq src
-        .unreq count
-        .unreq wtmp
-
-        .unreq data
-        .unreq q_data
-        .unreq res
-        .unreq q_res
-
-        .unreq factor
-        .unreq factor_t
-        .unreq modulus
-        .unreq modulus_twisted
-
-        .unreq tmp0
-
-/* simpasm: footer-start */
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT &&
           !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
