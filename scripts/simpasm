@@ -336,7 +336,6 @@ def _main():
         "-p", "--preserve-preprocessor-directives", default=False, action="store_true"
     )
     parser.add_argument("-v", "--verbose", default=False, action="store_true")
-    parser.add_argument("--cross-prefix", type=str, default="")
     parser.add_argument("--cc", type=str, default="gcc")
     parser.add_argument("--nm", type=str, default="nm")
     parser.add_argument("--objdump", type=str, default="objdump")
@@ -344,9 +343,12 @@ def _main():
 
     args = parser.parse_args()
 
-    args.cc = args.cross_prefix + args.cc
-    args.nm = args.cross_prefix + args.nm
-    args.objdump = args.cross_prefix + args.objdump
+    if (
+        args.cflags is not None
+        and args.cflags.startswith('"')
+        and args.cflags.endswith('"')
+    ):
+        args.cflags = args.cflags[1:-1]
 
     logging.basicConfig(stream=sys.stdout, format="%(name)s: %(message)s")
 

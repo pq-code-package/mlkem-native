@@ -19,6 +19,9 @@ montgomery_factor = pow(2, 16, modulus)
 # - zeta values for the reference NTT and invNTT
 # - lookup tables used for fast rejection sampling
 # - source files for monolithic single-CU build
+# - simplified assembly sources
+# - header guards
+# - #undef's for CU-local macros
 
 
 def gen_header():
@@ -36,8 +39,8 @@ def gen_header():
 
 def update_file(filename, content, dry_run=False):
 
-    # Format content
-    if filename.endswith(".S") is False:
+    # Format contents of .[chi] files
+    if filename.endswith(".c") or filename.endswith(".h") or filename.endswith(".i"):
         p = subprocess.run(
             ["clang-format"], capture_output=True, input=content, text=True, shell=True
         )
@@ -365,7 +368,7 @@ def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
         yield ""
 
     update_file(
-        "mlkem/native/aarch64/src/aarch64_zetas.c",
+        "dev/aarch64_opt/src/aarch64_zetas.c",
         "\n".join(gen("opt")),
         dry_run=dry_run,
     )
@@ -425,7 +428,7 @@ def gen_aarch64_rej_uniform_table(dry_run=False):
         yield ""
 
     update_file(
-        "mlkem/native/aarch64/src/rej_uniform_table.c",
+        "dev/aarch64_opt/src/rej_uniform_table.c",
         "\n".join(gen("opt")),
         dry_run=dry_run,
     )
@@ -772,20 +775,66 @@ def check_asm_register_aliases():
         check_asm_register_aliases_for_file(asm_file)
 
 
-def gen_hol_light_asm_file(infile, outfile, dry_run=False):
+def update_via_simpasm(
+    infile_full, outdir, outfile=None, cflags=None, preserve_header=True, dry_run=False
+):
+
+    _, infile = os.path.split(infile_full)
+    if outfile is None:
+        outfile = infile
+    outfile_full = os.path.join(outdir, outfile)
+
+    # Check if we need to use a cross-compiler
+    if "aarch64" in infile_full:
+        source_arch = "aarch64"
+    elif "x86_64" in infile_full:
+        source_arch = "x86_64"
+    else:
+        raise Exception(f"Could not detect architecture of source file {infile_full}.")
+    # Check native architecture
+    if platform.machine().lower() in ["arm64", "aarch64"]:
+        native_arch = "aarch64"
+    else:
+        native_arch = "x86_64"
+
+    if native_arch != source_arch:
+        if platform.system() == "Darwin":
+            print(
+                f"WARNING: Skipping simplification of file {infile} -- "
+                "no cross-compilation on Darwin. "
+                "If you need to re-generate the simplified x86_64 assembly, "
+                "please run this script on a Linux-x86_64 or a Linux-aarch64 platform."
+            )
+            return
+        cross_prefix = f"{source_arch}-unknown-linux-gnu-"
+    else:
+        cross_prefix = None
+
     with tempfile.NamedTemporaryFile(suffix=".S") as tmp:
         try:
             cmd = [
                 "./scripts/simpasm",
                 "--objdump=llvm-objdump",
                 "-i",
-                f"mlkem/native/aarch64/src/{infile}",
+                infile_full,
                 "-o",
                 tmp.name,
-                "--cflags",
-                "-Imlkem/native/aarch64/src -DMLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT",
             ]
-            r = subprocess.run(cmd)
+            if cross_prefix is not None:
+                # Stick with llvm-objdump for disassembly
+                cmd += ["--cc", cross_prefix + "gcc"]
+                cmd += ["--nm", cross_prefix + "nm"]
+            if cflags is not None:
+                cmd += [f'--cflags="{cflags}"']
+            if preserve_header is True:
+                cmd += ["-p"]
+            r = subprocess.run(
+                cmd,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+                check=True,
+                text=True,
+            )
         except subprocess.CalledProcessError as e:
             print(f"Command failed: {' '.join(cmd)}")
             print(f"Exit code: {e.returncode}")
@@ -794,12 +843,49 @@ def gen_hol_light_asm_file(infile, outfile, dry_run=False):
         tmp.seek(0)
         new_contents = tmp.read().decode()
 
-    update_file(f"proofs/hol_light/arm/mlkem/{outfile}", new_contents, dry_run=dry_run)
+    update_file(outfile_full, new_contents, dry_run=dry_run)
 
 
 def gen_hol_light_asm(dry_run=False):
-    gen_hol_light_asm_file("ntt_opt.S", "mlkem_ntt.S", dry_run=dry_run)
-    gen_hol_light_asm_file("intt_opt.S", "mlkem_intt.S", dry_run=dry_run)
+    def gen_hol_light_asm_file(infile, outfile):
+        update_via_simpasm(
+            f"dev/aarch64_opt/src/{infile}",
+            "proofs/hol_light/arm/mlkem",
+            outfile=outfile,
+            cflags="-Imlkem/native/aarch64/src -DMLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT",
+            preserve_header=False,
+            dry_run=dry_run,
+        )
+
+    gen_hol_light_asm_file("ntt_opt.S", "mlkem_ntt.S")
+    gen_hol_light_asm_file("intt_opt.S", "mlkem_intt.S")
+
+
+def gen_simplified_asm(dry_run=False):
+    # Generate simplified AArch64 arithmetic assembly
+    for f in get_files("dev/aarch64_opt/src/*.S"):
+        update_via_simpasm(
+            f,
+            "mlkem/native/aarch64/src",
+            cflags="-Imlkem/native/aarch64/src",
+            dry_run=dry_run,
+        )
+    # Generate simplified AArch64 FIPS-202 assembly
+    for f in get_files("dev/fips202/aarch64/src/*.S"):
+        update_via_simpasm(
+            f,
+            "mlkem/fips202/native/aarch64/src",
+            cflags="-Imlkem/fips202/native/aarch64/src -march=armv8.4-a+sha3",
+            dry_run=dry_run,
+        )
+    # Generate simplified x86_64 arithmetic assembly
+    for f in get_files("dev/x86_64/src/*.S"):
+        update_via_simpasm(
+            f,
+            "mlkem/native/x86_64/src",
+            cflags="-Imlkem/native/x86_64/src/ -mavx2",
+            dry_run=dry_run,
+        )
 
 
 def gen_header_guard(header_file, dry_run=False):
@@ -955,10 +1041,10 @@ def _main():
     if platform.machine().lower() in ["arm64", "aarch64"]:
         gen_hol_light_asm(args.dry_run)
 
+    gen_simplified_asm(args.dry_run)
     gen_header_guards(args.dry_run)
     gen_monolithic_source_file(args.dry_run)
     gen_undefs(args.dry_run)
-
 
 if __name__ == "__main__":
     _main()
