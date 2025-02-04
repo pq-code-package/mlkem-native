@@ -19,16 +19,15 @@ jobs:
   lint:
     strategy:
       matrix:
-        system: [ubuntu-latest]
+        system: [ubuntu-latest, ubuntu-24.04-arm]
     name: Linting
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: ./.github/actions/lint
         with:
-          nix-shell: ci-linter
+          nix-shell: ci
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          cross-prefix: "aarch64-unknown-linux-gnu-"
   lint-markdown-link:
     runs-on: ubuntu-latest
     steps:
@@ -254,7 +253,7 @@ jobs:
       - name: build + test
         uses: ./.github/actions/multi-functest
         with:
-          nix-shell: ${{ matrix.target.mode == 'native' && 'ci' || 'ci-cross' }}
+          nix-shell: 'ci'
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: ${{ matrix.target.mode }}
@@ -267,29 +266,6 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
           cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
-  simpasm:
-    name: ASM simplifier
-    strategy:
-      fail-fast: false
-      matrix:
-        target:
-           - runner: ubuntu-24.04-arm
-             arch: 'aarch64'
-           - runner: ubuntu-latest
-             arch: 'x86_64'
-    runs-on: ${{ matrix.target.runner }}
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Simplify arithmetic assembly
-        run: |
-          ./scripts/simpasm -d mlkem/native/${{ matrix.target.arch }}/src --cflags='-Imlkem/native/${{ matrix.target.arch }}/src/' -p
-      - name: Simplify FIPS202 assembly (AArch64 only)
-        if: ${{ matrix.target.arch == 'aarch64' }}
-        run: |
-          ./scripts/simpasm -d mlkem/fips202/native/aarch64/src --cflags='-Imlkem/fips202/native/aarch64/src/ -march=armv8.4-a+sha3' -p
-      - name: Test simplified assembly
-        run: |
-          OPT=1 make quickcheck
   compiler_tests:
     name: Compiler tests  (${{ matrix.compiler.name }}, ${{ matrix.target.name }})
     needs: [quickcheck, quickcheck-windows, quickcheck-c90, quickcheck-lib, examples, lint, lint-markdown-link]

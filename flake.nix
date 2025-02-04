@@ -49,11 +49,8 @@
             };
           };
 
-          devShells.ci = util.wrapShell util.mkShell { packages = util.core { cross = false; }; };
-          devShells.ci-cross = util.wrapShell util.mkShell { packages = util.core { }; };
+          devShells.ci = util.wrapShell util.mkShell { packages = util.core { } ++ util.linters; };
           devShells.ci-cbmc = util.wrapShell util.mkShell { packages = util.core { cross = false; } ++ [ config.packages.cbmc ]; };
-          devShells.ci-cbmc-cross = util.wrapShell util.mkShell { packages = util.core { } ++ [ config.packages.cbmc ]; };
-          devShells.ci-linter = util.wrapShell pkgs.mkShellNoCC { packages = util.linters; };
 
           devShells.ci_clang14 = util.wrapShell (util.mkShellWithCC pkgs.clang_14) { packages = [ pkgs.python3 ] ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ pkgs.valgrind ]; hardeningDisable = [ "fortify" ]; };
           devShells.ci_clang15 = util.wrapShell (util.mkShellWithCC pkgs.clang_15) { packages = [ pkgs.python3 ] ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ pkgs.valgrind ]; hardeningDisable = [ "fortify" ]; };

@@ -16,9 +16,6 @@ inputs:
   custom_shell:
     description: The shell to use. Only relevant if no nix-shell specified
     default: "bash"
-  cross-prefix:
-    description: Binary prefix for cross compilation
-    default: ""
   gh_token:
     description: Github access token to use
     required: true
@@ -39,7 +36,6 @@ runs:
               - $(uname -a)
               - $(nix --version)
               - $(clang-format --version)
-              - $(${{ matrix.target.cross-prefix }}gcc --version | grep -m1 "")
               - $(bash --version | grep -m1 "")
             EOF
       - name: Run linter
