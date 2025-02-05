@@ -98,10 +98,12 @@
 #endif
 
 #define DEFAULT_ALIGN 32
-#if defined(_WIN32)
+#if defined(__GNUC__)
+#define ALIGN __attribute__((aligned(DEFAULT_ALIGN)))
+#elif defined(_MSC_VER)
 #define ALIGN __declspec(align(DEFAULT_ALIGN))
 #else
-#define ALIGN __attribute__((aligned(DEFAULT_ALIGN)))
+#define ALIGN /* No known support for alignment constraints */
 #endif
 
 #endif /* MLKEM_NATIVE_SYS_H */
