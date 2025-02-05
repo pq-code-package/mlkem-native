@@ -50,6 +50,7 @@
           };
 
           devShells.ci = util.wrapShell util.mkShell { packages = util.linters ++ util.core { cross = false; }; };
+          devShells.ci-bench = util.wrapShell util.mkShell { packages = util.core { cross = false; }; };
           devShells.ci-cross = util.wrapShell util.mkShell { packages = util.linters ++ util.core { }; };
           devShells.ci-cbmc = util.wrapShell util.mkShell { packages = util.core { cross = false; } ++ [ config.packages.cbmc ]; };
           devShells.ci-cbmc-cross = util.wrapShell util.mkShell { packages = util.core { } ++ [ config.packages.cbmc ]; };

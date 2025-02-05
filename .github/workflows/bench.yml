@@ -65,7 +65,7 @@ jobs:
           store_results: ${{ github.repository_owner == 'pq-code-package' && github.ref == 'refs/heads/main' }}
           bench_extra_args: ${{ matrix.target.bench_extra_args }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
-          nix-shell: ${{ matrix.target.cross_prefix != '' && 'ci-cross' || 'ci_gcc14' }}
+          nix-shell: ${{ matrix.target.cross_prefix != '' && 'ci-cross' || 'ci-bench' }}
           cross_prefix: ${{ matrix.target.cross_prefix }}
 
   ec2_all:
