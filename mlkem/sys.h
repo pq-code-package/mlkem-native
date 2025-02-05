@@ -100,9 +100,7 @@
 #define DEFAULT_ALIGN 32
 #if defined(_WIN32)
 #define ALIGN __declspec(align(DEFAULT_ALIGN))
-#define asm __asm
 #else
-#define asm __asm__
 #define ALIGN __attribute__((aligned(DEFAULT_ALIGN)))
 #endif
 

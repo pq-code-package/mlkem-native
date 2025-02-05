@@ -97,21 +97,21 @@ __contract__(ensures(return_value == b)) { return (b ^ get_optblocker_u8()); }
 static INLINE uint32_t value_barrier_u32(uint32_t b)
 __contract__(ensures(return_value == b))
 {
-  asm("" : "+r"(b));
+  __asm__("" : "+r"(b));
   return b;
 }
 
 static INLINE int32_t value_barrier_i32(int32_t b)
 __contract__(ensures(return_value == b))
 {
-  asm("" : "+r"(b));
+  __asm__("" : "+r"(b));
   return b;
 }
 
 static INLINE uint8_t value_barrier_u8(uint8_t b)
 __contract__(ensures(return_value == b))
 {
-  asm("" : "+r"(b));
+  __asm__("" : "+r"(b));
   return b;
 }
 
