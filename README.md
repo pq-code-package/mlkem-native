@@ -80,8 +80,8 @@ offers three backends for C, AArch64 and x86_64 - if you'd like contribute new b
 PR.
 
 Our AArch64 assembly is developed using [SLOTHY](https://github.com/slothy-optimizer/slothy): We write
-'clean' assembly by hand and automate micro-optimizations (e.g. see the [clean](test/aarch64_clean/src/ntt_clean.S)
-vs [optimized](mlkem/native/aarch64/src/ntt_opt.S) AArch64 NTT).
+'clean' assembly by hand and automate micro-optimizations (e.g. see the [clean](dev/aarch64_clean/src/ntt_clean.S)
+vs [optimized](mlkem/native/aarch64/src/ntt_opt.S) AArch64 NTT). See [dev/README.md](dev/README.md) for more details.
 
 ## How should I use mlkem-native?
 

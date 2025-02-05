@@ -78,7 +78,7 @@
  *              This can be set using CFLAGS.
  *
  *****************************************************************************/
-/* #define MLKEM_NATIVE_ARITH_BACKEND_FILE "native/default.h" */
+/* #define MLKEM_NATIVE_ARITH_BACKEND_FILE "native/meta.h" */
 
 /******************************************************************************
  * Name:        MLKEM_USE_NATIVE_BACKEND_FIPS202

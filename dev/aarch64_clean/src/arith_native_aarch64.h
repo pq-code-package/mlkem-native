@@ -2,8 +2,8 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef MLKEM_AARCH64_NATIVE_H
-#define MLKEM_AARCH64_NATIVE_H
+#ifndef MLKEM_NATIVE_DEV_AARCH64_CLEAN_SRC_ARITH_NATIVE_AARCH64_H
+#define MLKEM_NATIVE_DEV_AARCH64_CLEAN_SRC_ARITH_NATIVE_AARCH64_H
 
 #include <stdint.h>
 #include "../../../common.h"
@@ -75,4 +75,4 @@ void polyvec_basemul_acc_montgomery_cached_asm_k4_clean(int16_t *r,
                                                         const int16_t *b,
                                                         const int16_t *b_cache);
 
-#endif /* MLKEM_AARCH64_NATIVE_H */
+#endif /* MLKEM_NATIVE_DEV_AARCH64_CLEAN_SRC_ARITH_NATIVE_AARCH64_H */

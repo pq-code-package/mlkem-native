@@ -10,9 +10,9 @@ works:
 - _Fast and Clean: Auditable high-performance assembly via constraint solving_, Amin Abdulrahman, Hanno Becker, Matthias
   J. Kannwischer, Fabien Klein, [https://eprint.iacr.org/2022/1303](https://eprint.iacr.org/2022/1303)
 
+The code in this directory is auto-generated from the 'clean' assembly in [dev/aarch64_clean](../../../dev/aarch64_clean)
+in a two-step fashion: First, it is superoptimized using the [SLOTHY](https://github.com/slothy-optimizer/slothy) superoptimizer,
+giving the assembly in [dev/aarch64_opt](../../../dev/aarch64_opt). Then, it is stripped of remaining register aliases, macros
+and most preprocessor directives by [`scripts/simpasm`](../../../scripts/simpasm).
 
-## Variants
-
-This backend comes in two versions: "clean" and optimized. The "clean" backend is handwritten and meant to be easy to read and modify; for example, is heavily leverages register aliases and assembly macros. This directory contains the optimized version, which is automatically generated from the clean one via [SLOTHY](https://github.com/slothy-optimizer/slothy). Currently, the
-target architecture is Cortex-A55, but you can easily re-optimize the code for a different microarchitecture supported
-by SLOTHY, by adjusting the parameters in [optimize.sh](../../../test/aarch64_clean/src/optimize.sh).
+If you want to understand how the assembly works, and/or make changes to it, consult [dev/](../../../dev).

@@ -15,64 +15,107 @@
 
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
-/* simpasm: header-end */
 
-#include "consts.h"
-#include "fq.inc"
+/*
+ * WARNING: This file is auto-derived from the mlkem-native source file 
+ *   dev/x86_64/src/reduce.S using scripts/simpasm. Do not modify it directly.
+ */
+
 
 .text
-.global MLKEM_ASM_NAMESPACE(reduce_avx2)
 .balign 4
+.global MLKEM_ASM_NAMESPACE(reduce_avx2)
 MLKEM_ASM_NAMESPACE(reduce_avx2):
-#consts
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XV*2(%rsi),%ymm1
-call		reduce128_avx2
-add		$256,%rdi
-call		reduce128_avx2
-ret
+
+        vmovdqa	(%rsi), %ymm0
+        vmovdqa	0x40(%rsi), %ymm1
+        callq	reduce128_avx2
+        addq	$0x100, %rdi            # imm = 0x100
+        callq	reduce128_avx2
+        retq
 
 reduce128_avx2:
-#load
-vmovdqa		(%rdi),%ymm2
-vmovdqa		32(%rdi),%ymm3
-vmovdqa		64(%rdi),%ymm4
-vmovdqa		96(%rdi),%ymm5
-vmovdqa		128(%rdi),%ymm6
-vmovdqa		160(%rdi),%ymm7
-vmovdqa		192(%rdi),%ymm8
-vmovdqa		224(%rdi),%ymm9
+        vmovdqa	(%rdi), %ymm2
+        vmovdqa	0x20(%rdi), %ymm3
+        vmovdqa	0x40(%rdi), %ymm4
+        vmovdqa	0x60(%rdi), %ymm5
+        vmovdqa	0x80(%rdi), %ymm6
+        vmovdqa	0xa0(%rdi), %ymm7
+        vmovdqa	0xc0(%rdi), %ymm8
+        vmovdqa	0xe0(%rdi), %ymm9
+        vpmulhw	%ymm1, %ymm2, %ymm12
+        vpsraw	$0xa, %ymm12, %ymm12
+        vpmullw	%ymm0, %ymm12, %ymm12
+        vpsubw	%ymm12, %ymm2, %ymm2
+        vpmulhw	%ymm1, %ymm3, %ymm12
+        vpsraw	$0xa, %ymm12, %ymm12
+        vpmullw	%ymm0, %ymm12, %ymm12
+        vpsubw	%ymm12, %ymm3, %ymm3
+        vpmulhw	%ymm1, %ymm4, %ymm12
+        vpsraw	$0xa, %ymm12, %ymm12
+        vpmullw	%ymm0, %ymm12, %ymm12
+        vpsubw	%ymm12, %ymm4, %ymm4
+        vpmulhw	%ymm1, %ymm5, %ymm12
+        vpsraw	$0xa, %ymm12, %ymm12
+        vpmullw	%ymm0, %ymm12, %ymm12
+        vpsubw	%ymm12, %ymm5, %ymm5
+        vpmulhw	%ymm1, %ymm6, %ymm12
+        vpsraw	$0xa, %ymm12, %ymm12
+        vpmullw	%ymm0, %ymm12, %ymm12
+        vpsubw	%ymm12, %ymm6, %ymm6
+        vpmulhw	%ymm1, %ymm7, %ymm12
+        vpsraw	$0xa, %ymm12, %ymm12
+        vpmullw	%ymm0, %ymm12, %ymm12
+        vpsubw	%ymm12, %ymm7, %ymm7
+        vpmulhw	%ymm1, %ymm8, %ymm12
+        vpsraw	$0xa, %ymm12, %ymm12
+        vpmullw	%ymm0, %ymm12, %ymm12
+        vpsubw	%ymm12, %ymm8, %ymm8
+        vpmulhw	%ymm1, %ymm9, %ymm12
+        vpsraw	$0xa, %ymm12, %ymm12
+        vpmullw	%ymm0, %ymm12, %ymm12
+        vpsubw	%ymm12, %ymm9, %ymm9
+        vpsubw	%ymm0, %ymm2, %ymm2
+        vpsraw	$0xf, %ymm2, %ymm12
+        vpand	%ymm0, %ymm12, %ymm12
+        vpaddw	%ymm12, %ymm2, %ymm2
+        vpsubw	%ymm0, %ymm3, %ymm3
+        vpsraw	$0xf, %ymm3, %ymm12
+        vpand	%ymm0, %ymm12, %ymm12
+        vpaddw	%ymm12, %ymm3, %ymm3
+        vpsubw	%ymm0, %ymm4, %ymm4
+        vpsraw	$0xf, %ymm4, %ymm12
+        vpand	%ymm0, %ymm12, %ymm12
+        vpaddw	%ymm12, %ymm4, %ymm4
+        vpsubw	%ymm0, %ymm5, %ymm5
+        vpsraw	$0xf, %ymm5, %ymm12
+        vpand	%ymm0, %ymm12, %ymm12
+        vpaddw	%ymm12, %ymm5, %ymm5
+        vpsubw	%ymm0, %ymm6, %ymm6
+        vpsraw	$0xf, %ymm6, %ymm12
+        vpand	%ymm0, %ymm12, %ymm12
+        vpaddw	%ymm12, %ymm6, %ymm6
+        vpsubw	%ymm0, %ymm7, %ymm7
+        vpsraw	$0xf, %ymm7, %ymm12
+        vpand	%ymm0, %ymm12, %ymm12
+        vpaddw	%ymm12, %ymm7, %ymm7
+        vpsubw	%ymm0, %ymm8, %ymm8
+        vpsraw	$0xf, %ymm8, %ymm12
+        vpand	%ymm0, %ymm12, %ymm12
+        vpaddw	%ymm12, %ymm8, %ymm8
+        vpsubw	%ymm0, %ymm9, %ymm9
+        vpsraw	$0xf, %ymm9, %ymm12
+        vpand	%ymm0, %ymm12, %ymm12
+        vpaddw	%ymm12, %ymm9, %ymm9
+        vmovdqa	%ymm2, (%rdi)
+        vmovdqa	%ymm3, 0x20(%rdi)
+        vmovdqa	%ymm4, 0x40(%rdi)
+        vmovdqa	%ymm5, 0x60(%rdi)
+        vmovdqa	%ymm6, 0x80(%rdi)
+        vmovdqa	%ymm7, 0xa0(%rdi)
+        vmovdqa	%ymm8, 0xc0(%rdi)
+        vmovdqa	%ymm9, 0xe0(%rdi)
+        retq
 
-red16		2
-red16		3
-red16		4
-red16		5
-red16		6
-red16		7
-red16		8
-red16		9
-
-csubq		2
-csubq		3
-csubq		4
-csubq		5
-csubq		6
-csubq		7
-csubq		8
-csubq		9
-
-#store
-vmovdqa		%ymm2,(%rdi)
-vmovdqa		%ymm3,32(%rdi)
-vmovdqa		%ymm4,64(%rdi)
-vmovdqa		%ymm5,96(%rdi)
-vmovdqa		%ymm6,128(%rdi)
-vmovdqa		%ymm7,160(%rdi)
-vmovdqa		%ymm8,192(%rdi)
-vmovdqa		%ymm9,224(%rdi)
-
-ret
-
-/* simpasm: footer-start */
 #endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT &&
          ! MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */

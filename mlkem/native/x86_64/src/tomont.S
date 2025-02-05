@@ -14,56 +14,76 @@
 #include "../../../common.h"
 #if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
-/* simpasm: header-end */
 
-#include "consts.h"
-#include "fq.inc"
+/*
+ * WARNING: This file is auto-derived from the mlkem-native source file 
+ *   dev/x86_64/src/tomont.S using scripts/simpasm. Do not modify it directly.
+ */
+
 
 .text
-.global MLKEM_ASM_NAMESPACE(tomont_avx2)
 .balign 4
+.global MLKEM_ASM_NAMESPACE(tomont_avx2)
 MLKEM_ASM_NAMESPACE(tomont_avx2):
-#consts
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XMONTSQLO*2(%rsi),%ymm1
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XMONTSQHI*2(%rsi),%ymm2
-call		tomont128_avx2
-add		$256,%rdi
-call		tomont128_avx2
-ret
+
+        vmovdqa	(%rsi), %ymm0
+        vmovdqa	0xa0(%rsi), %ymm1
+        vmovdqa	0xc0(%rsi), %ymm2
+        callq	tomont128_avx2
+        addq	$0x100, %rdi            # imm = 0x100
+        callq	tomont128_avx2
+        retq
 
 tomont128_avx2:
-#load
-vmovdqa		(%rdi),%ymm3
-vmovdqa		32(%rdi),%ymm4
-vmovdqa		64(%rdi),%ymm5
-vmovdqa		96(%rdi),%ymm6
-vmovdqa		128(%rdi),%ymm7
-vmovdqa		160(%rdi),%ymm8
-vmovdqa		192(%rdi),%ymm9
-vmovdqa		224(%rdi),%ymm10
+        vmovdqa	(%rdi), %ymm3
+        vmovdqa	0x20(%rdi), %ymm4
+        vmovdqa	0x40(%rdi), %ymm5
+        vmovdqa	0x60(%rdi), %ymm6
+        vmovdqa	0x80(%rdi), %ymm7
+        vmovdqa	0xa0(%rdi), %ymm8
+        vmovdqa	0xc0(%rdi), %ymm9
+        vmovdqa	0xe0(%rdi), %ymm10
+        vpmullw	%ymm1, %ymm3, %ymm11
+        vpmulhw	%ymm2, %ymm3, %ymm3
+        vpmulhw	%ymm0, %ymm11, %ymm11
+        vpsubw	%ymm11, %ymm3, %ymm3
+        vpmullw	%ymm1, %ymm4, %ymm12
+        vpmulhw	%ymm2, %ymm4, %ymm4
+        vpmulhw	%ymm0, %ymm12, %ymm12
+        vpsubw	%ymm12, %ymm4, %ymm4
+        vpmullw	%ymm1, %ymm5, %ymm13
+        vpmulhw	%ymm2, %ymm5, %ymm5
+        vpmulhw	%ymm0, %ymm13, %ymm13
+        vpsubw	%ymm13, %ymm5, %ymm5
+        vpmullw	%ymm1, %ymm6, %ymm14
+        vpmulhw	%ymm2, %ymm6, %ymm6
+        vpmulhw	%ymm0, %ymm14, %ymm14
+        vpsubw	%ymm14, %ymm6, %ymm6
+        vpmullw	%ymm1, %ymm7, %ymm15
+        vpmulhw	%ymm2, %ymm7, %ymm7
+        vpmulhw	%ymm0, %ymm15, %ymm15
+        vpsubw	%ymm15, %ymm7, %ymm7
+        vpmullw	%ymm1, %ymm8, %ymm11
+        vpmulhw	%ymm2, %ymm8, %ymm8
+        vpmulhw	%ymm0, %ymm11, %ymm11
+        vpsubw	%ymm11, %ymm8, %ymm8
+        vpmullw	%ymm1, %ymm9, %ymm12
+        vpmulhw	%ymm2, %ymm9, %ymm9
+        vpmulhw	%ymm0, %ymm12, %ymm12
+        vpsubw	%ymm12, %ymm9, %ymm9
+        vpmullw	%ymm1, %ymm10, %ymm13
+        vpmulhw	%ymm2, %ymm10, %ymm10
+        vpmulhw	%ymm0, %ymm13, %ymm13
+        vpsubw	%ymm13, %ymm10, %ymm10
+        vmovdqa	%ymm3, (%rdi)
+        vmovdqa	%ymm4, 0x20(%rdi)
+        vmovdqa	%ymm5, 0x40(%rdi)
+        vmovdqa	%ymm6, 0x60(%rdi)
+        vmovdqa	%ymm7, 0x80(%rdi)
+        vmovdqa	%ymm8, 0xa0(%rdi)
+        vmovdqa	%ymm9, 0xc0(%rdi)
+        vmovdqa	%ymm10, 0xe0(%rdi)
+        retq
 
-fqmulprecomp	1,2,3,11
-fqmulprecomp	1,2,4,12
-fqmulprecomp	1,2,5,13
-fqmulprecomp	1,2,6,14
-fqmulprecomp	1,2,7,15
-fqmulprecomp	1,2,8,11
-fqmulprecomp	1,2,9,12
-fqmulprecomp	1,2,10,13
-
-#store
-vmovdqa		%ymm3,(%rdi)
-vmovdqa		%ymm4,32(%rdi)
-vmovdqa		%ymm5,64(%rdi)
-vmovdqa		%ymm6,96(%rdi)
-vmovdqa		%ymm7,128(%rdi)
-vmovdqa		%ymm8,160(%rdi)
-vmovdqa		%ymm9,192(%rdi)
-vmovdqa		%ymm10,224(%rdi)
-
-ret
-
-/* simpasm: footer-start */
 #endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
           !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */

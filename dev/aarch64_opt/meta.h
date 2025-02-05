@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef MLKEM_NATIVE_NATIVE_AARCH64_OPT_H
-#define MLKEM_NATIVE_NATIVE_AARCH64_OPT_H
+#ifndef MLKEM_NATIVE_DEV_AARCH64_OPT_META_H
+#define MLKEM_NATIVE_DEV_AARCH64_OPT_META_H
 #ifdef MLKEM_NATIVE_ARITH_PROFILE_H
 #error Only one MLKEM_ARITH assembly profile can be defined -- did you include multiple profiles?
 #else
@@ -23,4 +23,4 @@
 
 #endif /* MLKEM_NATIVE_ARITH_PROFILE_H */
 
-#endif /* MLKEM_NATIVE_NATIVE_AARCH64_OPT_H */
+#endif /* MLKEM_NATIVE_DEV_AARCH64_OPT_META_H */

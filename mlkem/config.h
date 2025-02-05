@@ -161,7 +161,7 @@
  *****************************************************************************/
 #if defined(MLKEM_USE_NATIVE_BACKEND_ARITH) && \
     !defined(MLKEM_NATIVE_ARITH_BACKEND_FILE)
-#define MLKEM_NATIVE_ARITH_BACKEND_FILE "native/default.h"
+#define MLKEM_NATIVE_ARITH_BACKEND_FILE "native/meta.h"
 #endif
 
 /******************************************************************************
@@ -201,7 +201,7 @@
  *****************************************************************************/
 #if defined(MLKEM_USE_NATIVE_BACKEND_FIPS202) && \
     !defined(MLKEM_NATIVE_FIPS202_BACKEND_FILE)
-#define MLKEM_NATIVE_FIPS202_BACKEND_FILE "fips202/native/default.h"
+#define MLKEM_NATIVE_FIPS202_BACKEND_FILE "fips202/native/meta.h"
 #endif
 
 /*************************  Config internals  ********************************/

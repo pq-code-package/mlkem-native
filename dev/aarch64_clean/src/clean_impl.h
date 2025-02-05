@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#ifndef MLKEM_NATIVE_DEV_AARCH64_CLEAN_SRC_CLEAN_IMPL_H
+#define MLKEM_NATIVE_DEV_AARCH64_CLEAN_SRC_CLEAN_IMPL_H
 /* ML-KEM arithmetic native profile for clean assembly */
 
 #ifdef MLKEM_NATIVE_ARITH_PROFILE_IMPL_H
@@ -88,3 +90,5 @@ static INLINE int rej_uniform_native(int16_t *r, unsigned len,
 }
 
 #endif /* MLKEM_NATIVE_ARITH_PROFILE_IMPL_H */
+
+#endif /* MLKEM_NATIVE_DEV_AARCH64_CLEAN_SRC_CLEAN_IMPL_H */
