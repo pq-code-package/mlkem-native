@@ -10,6 +10,9 @@ inputs:
   nix-cache:
     description: Determine whether to enable nix cache
     default: 'false'
+  nix-cache-prefix:
+    description: Fixed prefix of ID of Github cache entries that should be removed.
+    required: false
   nix-verbose:
     description: Determine wether to suppress nix log or not
     default: 'false'
@@ -35,6 +38,7 @@ runs:
         verbose: ${{ inputs.nix-verbose }}
         cache: ${{ inputs.nix-cache }}
         script: ${{ inputs.script }}
+        cache_prefix: ${{ inputs.nix-cache-prefix }}
     - name: Set custom shell
       shell: bash
       if: ${{ inputs.nix-shell == '' }}
