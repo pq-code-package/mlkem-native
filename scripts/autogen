@@ -659,11 +659,17 @@ def gen_monolithic_source_file(dry_run=False):
     def native(c):
         return "native/" in c
 
-    def native_fips202(c):
-        return native(c) and "fips202" in c
+    def native_fips202_aarch64(c):
+        return native(c) and "fips202" in c and "aarch64" in c
 
-    def native_arith(c):
-        return native(c) and not native_fips202(c)
+    def native_fips202_x86_64(c):
+        return native(c) and "fips202" in c and "x86_64" in c
+
+    def native_arith_aarch64(c):
+        return native(c) and not "fips202" in c and "aarch64" in c
+
+    def native_arith_x86_64(c):
+        return native(c) and not "fips202" in c and "x86_64" in c
 
     # List of level-specific source files
     # All other files only need including and building once
@@ -693,15 +699,29 @@ def gen_monolithic_source_file(dry_run=False):
         yield " * Monolithic compilation unit bundling all compilation units within mlkem-native"
         yield " */"
         yield ""
+        yield '#include "mlkem/sys.h"'
+        yield ""
         for c in filter(lambda c: not native(c), c_sources):
             yield f'#include "{c}"'
         yield "#if defined(MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_ARITH)"
-        for c in filter(native_arith, c_sources):
+        yield "#if defined(SYS_AARCH64)"
+        for c in filter(native_arith_aarch64, c_sources):
             yield f'#include "{c}"'
+        yield "#endif /* SYS_AARCH64 */"
+        yield "#if defined(SYS_X86_64)"
+        for c in filter(native_arith_x86_64, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif /* SYS_X86_64 */"
         yield "#endif /* MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_ARITH */"
         yield "#if defined(MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_FIPS202)"
-        for c in filter(native_fips202, c_sources):
+        yield "#if defined(SYS_AARCH64)"
+        for c in filter(native_fips202_aarch64, c_sources):
             yield f'#include "{c}"'
+        yield "#endif /* SYS_AARCH64 */"
+        yield "#if defined(SYS_X86_64)"
+        for c in filter(native_fips202_x86_64, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif /* SYS_X86_64 */"
         yield "#endif /* MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_FIPS202 */"
         yield ""
         yield from gen_monolithic_undef_all_core(

@@ -13,6 +13,8 @@
  * mlkem-native
  */
 
+#include "mlkem/sys.h"
+
 #include "mlkem/compress.c"
 #include "mlkem/debug.c"
 #include "mlkem/fips202/fips202.c"
@@ -26,17 +28,25 @@
 #include "mlkem/verify.c"
 #include "mlkem/zetas.c"
 #if defined(MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_ARITH)
+#if defined(SYS_AARCH64)
 #include "mlkem/native/aarch64/src/aarch64_zetas.c"
 #include "mlkem/native/aarch64/src/rej_uniform_table.c"
+#endif /* SYS_AARCH64 */
+#if defined(SYS_X86_64)
 #include "mlkem/native/x86_64/src/basemul.c"
 #include "mlkem/native/x86_64/src/compress_avx2.c"
 #include "mlkem/native/x86_64/src/consts.c"
 #include "mlkem/native/x86_64/src/rej_uniform_avx2.c"
 #include "mlkem/native/x86_64/src/rej_uniform_table.c"
+#endif /* SYS_X86_64 */
 #endif /* MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_ARITH */
 #if defined(MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_FIPS202)
+#if defined(SYS_AARCH64)
 #include "mlkem/fips202/native/aarch64/src/keccakf1600_round_constants.c"
+#endif /* SYS_AARCH64 */
+#if defined(SYS_X86_64)
 #include "mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c"
+#endif /* SYS_X86_64 */
 #endif /* MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_FIPS202 */
 
 
