@@ -8,7 +8,7 @@
     !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 /*
- * WARNING: This file is auto-derived from the mlkem-native source file 
+ * WARNING: This file is auto-derived from the mlkem-native source file
  *   dev/aarch64_opt/src/poly_tobytes_asm_opt.S using scripts/simpasm. Do not modify it directly.
  */
 

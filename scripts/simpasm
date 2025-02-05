@@ -251,7 +251,7 @@ def simplify(logger, args, asm_input, asm_output=None):
         autogen_header = [
             "",
             "/*",
-            f" * WARNING: This file is auto-derived from the mlkem-native source file ",
+            f" * WARNING: This file is auto-derived from the mlkem-native source file",
             f" *   {asm_input} using scripts/simpasm. Do not modify it directly.",
             " */",
             "",

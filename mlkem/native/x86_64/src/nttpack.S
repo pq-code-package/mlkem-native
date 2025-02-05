@@ -12,7 +12,7 @@
     !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
 
 /*
- * WARNING: This file is auto-derived from the mlkem-native source file 
+ * WARNING: This file is auto-derived from the mlkem-native source file
  *   dev/x86_64/src/nttpack.S using scripts/simpasm. Do not modify it directly.
  */
 

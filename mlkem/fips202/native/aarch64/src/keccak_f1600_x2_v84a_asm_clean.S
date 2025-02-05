@@ -45,7 +45,7 @@
 #if defined(__ARM_FEATURE_SHA3)
 
 /*
- * WARNING: This file is auto-derived from the mlkem-native source file 
+ * WARNING: This file is auto-derived from the mlkem-native source file
  *   dev/fips202/aarch64/src/keccak_f1600_x2_v84a_asm_clean.S using scripts/simpasm. Do not modify it directly.
  */
 

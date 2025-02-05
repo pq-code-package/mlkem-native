@@ -15,7 +15,7 @@
     (defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 3)
 
 /*
- * WARNING: This file is auto-derived from the mlkem-native source file 
+ * WARNING: This file is auto-derived from the mlkem-native source file
  *   dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k3_opt.S using scripts/simpasm. Do not modify it directly.
  */
 
