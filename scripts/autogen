@@ -866,11 +866,13 @@ def gen_hol_light_asm(dry_run=False):
     gen_hol_light_asm_file("intt_opt.S", "mlkem_intt.S")
 
 
-def update_via_copy(infile_full, outdir, dry_run=False):
-    _, infile = os.path.split(infile_full)
-    outfile_full = os.path.join(outdir, infile)
+def update_via_copy(infile_full, outfile_full, dry_run=False, transform=None):
     with open(infile_full, "r") as f:
         content = f.read()
+
+    if transform is not None:
+        content = transform(content)
+
     update_file(outfile_full, content, dry_run=dry_run)
 
 
@@ -897,7 +899,17 @@ def synchronize_backend(
         if no_simplify is False and f.endswith(".S"):
             update_via_simpasm(f, out_dir, dry_run=dry_run, **kwargs)
         else:
-            update_via_copy(f, out_dir, dry_run=dry_run)
+            # Update via copy
+            _, infile = os.path.split(f)
+            outfile_full = os.path.join(out_dir, infile)
+            # The header guards will also be checked later, but if we
+            # don't do it here, the dry-run would fail because of a
+            # mismatching intermediate file
+            if f.endswith(".h"):
+                transform = lambda c: adjust_header_guard_for_filename(c, outfile_full)
+            else:
+                transform = None
+            update_via_copy(f, outfile_full, dry_run=dry_run, transform=transform)
 
     if delete is False:
         return
@@ -920,7 +932,13 @@ def synchronize_backends(
 
     if delete is False:
         # We may switch the AArch64 arithmetic backend, so adjust the metadata file
-        update_via_copy(f"dev/aarch64_{ty}/meta.h", "mlkem/native/aarch64")
+        update_via_copy(
+            f"dev/aarch64_{ty}/meta.h",
+            "mlkem/native/aarch64/meta.h",
+            transform=lambda c: adjust_header_guard_for_filename(
+                c, "mlkem/native/aarch64/meta.h"
+            ),
+        )
 
     synchronize_backend(
         f"dev/aarch64_{ty}/src",
@@ -951,14 +969,9 @@ def synchronize_backends(
     )
 
 
-def gen_header_guard(header_file, dry_run=False):
-
+def adjust_header_guard_for_filename(content, header_file):
+    content = content.split("\n")
     exceptions = {"mlkem/mlkem_native.h": "MLKEM_NATIVE_H"}
-
-    # Checks that the first non-comment line in the header file
-    # if of the form `#if defined(MLKEM_NATIVE_{full filename}_H)`.
-    with open(header_file, "r") as f:
-        content = f.read().split("\n")
 
     # Use full filename as the header guard, with '/' and '.' replaced by '_'
     guard_name = (
@@ -1016,7 +1029,13 @@ def gen_header_guard(header_file, dry_run=False):
     # Add standardized footer
     content = content + footer
 
-    new_content = "\n".join(content)
+    return "\n".join(content)
+
+
+def gen_header_guard(header_file, dry_run=False):
+    with open(header_file, "r") as f:
+        content = f.read()
+    new_content = adjust_header_guard_for_filename(content, header_file)
     update_file(header_file, new_content, dry_run=dry_run)
 
 
