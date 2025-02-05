@@ -46,9 +46,9 @@ jobs:
           cflags: "-flto -static -DFORCE_AARCH64 -DMLKEM_NATIVE_FIPS202_BACKEND_FILE=\\\\\\\"fips202/native/aarch64/cortex_a55.h\\\\\\\""
           bench_extra_args: -w exec-on-a55
         - system: bpi
-          name: Bananapi bpi-f3 benchmarks
+          name: SpacemiT K1 8 (Banana Pi F3) benchmarks
           bench_pmu: PERF
-          archflags: "-march=rv64imafdc_zicsr_zifencei"
+          archflags: "-march=rv64imafdcv_zicsr_zifencei"
           cflags: "-static"
           bench_extra_args: -w exec-on-bpi
           cross_prefix: riscv64-unknown-linux-gnu-
