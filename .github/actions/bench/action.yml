@@ -31,7 +31,7 @@ inputs:
     required: true
   nix-shell:
     description: Run in the specified Nix environment if exists
-    default: "ci"
+    default: "ci_gcc14"
   nix-cache:
     description: Determine whether to enable nix cache
     default: 'false'
