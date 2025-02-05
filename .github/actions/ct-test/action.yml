@@ -14,6 +14,28 @@ inputs:
 runs:
   using: composite
   steps:
+      - name: System info
+        shell: ${{ env.SHELL }}
+        run: |
+          ARCH=$(uname -m)
+          echo <<-EOF
+            ## Setup
+            Architecture: $ARCH
+            - $(uname -a)
+            - $(nix --version || echo 'nix not present')
+            - $(bash --version | grep -m1 "")
+            - $(python3 --version)
+            - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
+          EOF
+          cat >> $GITHUB_STEP_SUMMARY <<-EOF
+            ## Setup
+            Architecture: $ARCH
+            - $(uname -a)
+            - $(nix --version || echo 'nix not present')
+            - $(bash --version | grep -m1 "")
+            - $(python3 --version)
+            - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
+          EOF
       - shell: ${{ env.SHELL }}
         run: |
           make clean

@@ -44,6 +44,7 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: ${{ matrix.nix-shell }}
           nix-cache: true
+          nix-cache-prefix: valgrind-${{ runner.os }}-${{ runner.arch }}
       - name:  Build and run test (-Oz)
         # -Oz got introduced in gcc12
         if: ${{ matrix.nix-shell !=  'ci_valgrind-varlat_gcc48' && matrix.nix-shell !=  'ci_valgrind-varlat_gcc49' && matrix.nix-shell !=  'ci_valgrind-varlat_gcc7' && matrix.nix-shell !=  'ci_valgrind-varlat_gcc11'}}
