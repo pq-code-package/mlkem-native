@@ -25,13 +25,13 @@
  *
  * NOTE: This is the same bound as in poly.h and has to be kept
  * in sync. */
-#define INVNTT_BOUND (8 * MLKEM_Q)
+#define MLK_INVNTT_BOUND (8 * MLKEM_Q)
 
 /* Absolute exclusive upper bound for the output of the forward NTT
  *
  * NOTE: This is the same bound as in poly.h and has to be kept
  * in sync. */
-#define NTT_BOUND (8 * MLKEM_Q)
+#define MLK_NTT_BOUND (8 * MLKEM_Q)
 
 /*
  * This is the C<->native interface allowing for the drop-in of
@@ -79,7 +79,7 @@ __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   requires(array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
-  ensures(array_abs_bound(p, 0, MLKEM_N, NTT_BOUND))
+  ensures(array_abs_bound(p, 0, MLKEM_N, MLK_NTT_BOUND))
 );
 #endif /* MLK_USE_NATIVE_NTT */
 
@@ -141,7 +141,7 @@ static MLK_INLINE void intt_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
-  ensures(array_abs_bound(p, 0, MLKEM_N, INVNTT_BOUND))
+  ensures(array_abs_bound(p, 0, MLKEM_N, MLK_INVNTT_BOUND))
 );
 #endif /* MLK_USE_NATIVE_INTT */
 

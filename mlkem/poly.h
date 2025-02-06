@@ -13,10 +13,10 @@
 #include "verify.h"
 
 /* Absolute exclusive upper bound for the output of the inverse NTT */
-#define INVNTT_BOUND (8 * MLKEM_Q)
+#define MLK_INVNTT_BOUND (8 * MLKEM_Q)
 
 /* Absolute exclusive upper bound for the output of the forward NTT */
-#define NTT_BOUND (8 * MLKEM_Q)
+#define MLK_NTT_BOUND (8 * MLKEM_Q)
 
 #define zetas MLK_NAMESPACE(zetas)
 extern const int16_t zetas[128];
@@ -271,7 +271,7 @@ __contract__(
  *              coefficient-wise bound by MLKEM_Q in absolute value.
  *
  *              The output polynomial is in bitreversed order, and
- *              coefficient-wise bound by NTT_BOUND in absolute value.
+ *              coefficient-wise bound by MLK_NTT_BOUND in absolute value.
  *
  *              (NOTE: Sometimes the input to the NTT is actually smaller,
  *               which gives better bounds.)
@@ -284,7 +284,7 @@ __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   requires(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_Q))
   assigns(memory_slice(r, sizeof(poly)))
-  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, NTT_BOUND))
+  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLK_NTT_BOUND))
 );
 
 #define poly_invntt_tomont MLK_NAMESPACE(poly_invntt_tomont)
@@ -300,7 +300,7 @@ __contract__(
  *              have arbitrary coefficients in int16_t.
  *
  *              The output polynomial is in normal order, and
- *              coefficient-wise bound by INVNTT_BOUND in absolute value.
+ *              coefficient-wise bound by MLK_INVNTT_BOUND in absolute value.
  *
  * Arguments:   - uint16_t *a: pointer to in/output polynomial
  **************************************************/
@@ -309,7 +309,7 @@ void poly_invntt_tomont(poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   assigns(memory_slice(r, sizeof(poly)))
-  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, INVNTT_BOUND))
+  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND))
 );
 
 #endif /* MLK_POLY_H */

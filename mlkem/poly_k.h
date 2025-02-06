@@ -246,7 +246,7 @@ __contract__(
  *              coefficient-wise bound by MLKEM_Q in absolute value.
  *
  *              The output polynomial is in bitreversed order, and
- *              coefficient-wise bound by NTT_BOUND in absolute value.
+ *              coefficient-wise bound by MLK_NTT_BOUND in absolute value.
  *
  * Arguments:   - polyvec *r: pointer to in/output vector of polynomials
  *
@@ -259,7 +259,7 @@ __contract__(
   array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
   assigns(object_whole(r))
   ensures(forall(j, 0, MLKEM_K,
-  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, NTT_BOUND)))
+  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLK_NTT_BOUND)))
 );
 
 #define polyvec_invntt_tomont MLK_NAMESPACE_K(polyvec_invntt_tomont)
@@ -273,7 +273,7 @@ __contract__(
  *              have arbitrary coefficients in int16_t.
  *
  *              The output polynomial is in normal order, and
- *              coefficient-wise bound by INVNTT_BOUND in absolute value.
+ *              coefficient-wise bound by MLK_INVNTT_BOUND in absolute value.
  *
  *
  * Arguments:   - polyvec *r: pointer to in/output vector of polynomials
@@ -284,7 +284,7 @@ __contract__(
   requires(memory_no_alias(r, sizeof(polyvec)))
   assigns(object_whole(r))
   ensures(forall(j, 0, MLKEM_K,
-  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, INVNTT_BOUND)))
+  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND)))
 );
 
 #define polyvec_basemul_acc_montgomery \
