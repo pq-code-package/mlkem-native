@@ -20,6 +20,8 @@ runs:
       run: |
         if (which yum > /dev/null); then
            echo PKG="yum" >> $GITHUB_ENV
+        elif (which brew > /dev/null); then
+           echo PKG="brew" >> $GITHUB_ENV
         elif (which apt > /dev/null); then
            echo PKG="apt" >> $GITHUB_ENV
         fi
@@ -32,6 +34,12 @@ runs:
     - name: Setup via apt
       if: ${{ env.PKG == 'apt' }}
       uses: ./.github/actions/setup-apt
+      with:
+        packages: ${{ inputs.packages }}
+        sudo: ${{ inputs.sudo }}
+    - name: Setup via brew
+      if: ${{ env.PKG == 'brew' }}
+      uses: ./.github/actions/setup-brew
       with:
         packages: ${{ inputs.packages }}
         sudo: ${{ inputs.sudo }}
