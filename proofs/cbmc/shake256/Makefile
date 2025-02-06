@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/fips202/fips202.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)shake256
-USE_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)keccak_absorb_once $(MLKEM_NAMESPACE)keccak_squeeze_once
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)shake256
+USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)keccak_absorb_once $(MLK_NAMESPACE)keccak_squeeze_once
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = $(MLKEM_NAMESPACE)shake256
+FUNCTION_NAME = $(MLK_NAMESPACE)shake256
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

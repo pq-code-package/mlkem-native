@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef MLKEM_NATIVE_CONFIG_H
-#define MLKEM_NATIVE_CONFIG_H
+#ifndef MLK_CONFIG_H
+#define MLK_CONFIG_H
 
 /******************************************************************************
  * Name:        MLKEM_K
@@ -22,23 +22,23 @@
 #endif
 
 /******************************************************************************
- * Name:        MLKEM_NATIVE_CONFIG_FILE
+ * Name:        MLK_CONFIG_FILE
  *
  * Description: If defined, this is a header that will be included instead
  *              of mlkem/config.h.
  *
  *              This _must_ be set on the command line using
- *              `-DMLKEM_NATIVE_CONFIG_FILE="..."`.
+ *              `-DMLK_CONFIG_FILE="..."`.
  *
  *              When you need to build mlkem-native in multiple configurations,
- *              using varying MLKEM_NATIE_CONFIG_FILE can be more convenient
+ *              using varying MLK_CONFIG_FILE can be more convenient
  *              then configuring everything through CFLAGS.
  *
  *****************************************************************************/
-/* #define MLKEM_NATIVE_CONFIG_FILE "config.h" */
+/* #define MLK_CONFIG_FILE "config.h" */
 
 /******************************************************************************
- * Name:        MLKEM_NAMESPACE_PREFIX
+ * Name:        MLK_NAMESPACE_PREFIX
  *
  * Description: The prefix to use to namespace global symbols
  *              from mlkem/.
@@ -46,11 +46,11 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLKEM_NAMESPACE_PREFIX mlkem
-#define MLKEM_NAMESPACE_PREFIX_ADD_LEVEL
+#define MLK_NAMESPACE_PREFIX mlkem
+#define MLK_NAMESPACE_PREFIX_ADD_LEVEL
 
 /******************************************************************************
- * Name:        MLKEM_USE_NATIVE_BACKEND_ARITH
+ * Name:        MLK_USE_NATIVE_BACKEND_ARITH
  *
  * Description: Determines whether an native arithmetic backend should be used.
  *
@@ -60,7 +60,7 @@
  *              If this option is unset, the C backend will be used.
  *
  *              If this option is set, the arithmetic backend to be use is
- *              determined by MLKEM_NATIVE_ARITH_BACKEND: If the latter is
+ *              determined by MLK_ARITH_BACKEND: If the latter is
  *              unset, the default backend for your the target architecture
  *              will be used. If set, it must be the name of a backend metadata
  *              file.
@@ -68,32 +68,31 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#if !defined(MLKEM_USE_NATIVE_BACKEND_ARITH)
-/* #define MLKEM_USE_NATIVE_BACKEND_ARITH */
+#if !defined(MLK_USE_NATIVE_BACKEND_ARITH)
+/* #define MLK_USE_NATIVE_BACKEND_ARITH */
 #endif
 
 /******************************************************************************
- * Name:        MLKEM_NATIVE_ARITH_BACKEND_FILE
+ * Name:        MLK_ARITH_BACKEND_FILE
  *
  * Description: The arithmetic backend to use.
  *
- *              If MLKEM_USE_NATIVE_BACKEND_ARITH is unset, this option
+ *              If MLK_USE_NATIVE_BACKEND_ARITH is unset, this option
  *              is ignored.
  *
- *              If MLKEM_USE_NATIVE_BACKEND_ARITH is set, this option must
+ *              If MLK_USE_NATIVE_BACKEND_ARITH is set, this option must
  *              either be undefined or the filename of an arithmetic backend.
  *              If unset, the default backend will be used.
  *
  *              This can be set using CFLAGS.
  *
  *****************************************************************************/
-#if defined(MLKEM_USE_NATIVE_BACKEND_ARITH) && \
-    !defined(MLKEM_NATIVE_ARITH_BACKEND_FILE)
-#define MLKEM_NATIVE_ARITH_BACKEND_FILE "native/meta.h"
+#if defined(MLK_USE_NATIVE_BACKEND_ARITH) && !defined(MLK_ARITH_BACKEND_FILE)
+#define MLK_ARITH_BACKEND_FILE "native/meta.h"
 #endif
 
 /******************************************************************************
- * Name:        MLKEM_USE_NATIVE_BACKEND_FIPS202
+ * Name:        MLK_USE_NATIVE_BACKEND_FIPS202
  *
  * Description: Determines whether an native FIPS202 backend should be used.
  *
@@ -103,7 +102,7 @@
  *              If this option is unset, the C backend will be used.
  *
  *              If this option is set, the FIPS202 backend to be use is
- *              determined by MLKEM_NATIVE_FIPS202_BACKEND: If the latter is
+ *              determined by MLK_FIPS202_BACKEND: If the latter is
  *              unset, the default backend for your the target architecture
  *              will be used. If set, it must be the name of a backend metadata
  *              file.
@@ -111,8 +110,8 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#if !defined(MLKEM_USE_NATIVE_BACKEND_FIPS202)
-/* #define MLKEM_USE_NATIVE_BACKEND_FIPS202 */
+#if !defined(MLK_USE_NATIVE_BACKEND_FIPS202)
+/* #define MLK_USE_NATIVE_BACKEND_FIPS202 */
 #endif
 
 #endif /* MLkEM_NATIVE_CONFIG_H */

@@ -28,20 +28,20 @@
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
 
 #include "../../../../common.h"
-#if (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-     defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55)) &&    \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) || \
+     defined(MLK_FIPS202_BACKEND_AARCH64_A55)) &&    \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 /*
- * WARNING: This file is auto-derived from the mlkem-native source file 
+ * WARNING: This file is auto-derived from the mlkem-native source file
  *   dev/fips202/aarch64/src/keccak_f1600_x1_scalar_asm_opt.S using scripts/simpasm. Do not modify it directly.
  */
 
 
 .text
 .balign 4
-.global MLKEM_ASM_NAMESPACE(keccak_f1600_x1_scalar_asm_opt)
-MLKEM_ASM_NAMESPACE(keccak_f1600_x1_scalar_asm_opt):
+.global MLK_ASM_NAMESPACE(keccak_f1600_x1_scalar_asm_opt)
+MLK_ASM_NAMESPACE(keccak_f1600_x1_scalar_asm_opt):
 
         sub	sp, sp, #0x80
         stp	x19, x20, [sp, #0x20]
@@ -336,6 +336,6 @@ keccak_f1600_x1_scalar_loop:
         add	sp, sp, #0x80
         ret
 
-#endif /* (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) ||
-          defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55) &&
-         !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)*/
+#endif /* (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) ||
+          defined(MLK_FIPS202_BACKEND_AARCH64_A55) &&
+         !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)*/

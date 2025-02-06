@@ -20,8 +20,8 @@ PROJECT_SOURCES += $(SRCDIR)/mlkem/poly_k.c
 
 # Only relevant for K=2
 ifeq ($(MLKEM_K),2)
-CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_getnoise_eta1122_4x
-USE_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_cbd_eta1 $(MLKEM_NAMESPACE)poly_cbd_eta2 $(MLKEM_NAMESPACE)shake256
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_getnoise_eta1122_4x
+USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_cbd_eta1 $(MLK_NAMESPACE)poly_cbd_eta2 $(MLK_NAMESPACE)shake256
 else
 CHECK_FUNCTION_CONTRACTS=
 USE_FUNCTION_CONTRACTS=
@@ -33,7 +33,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = $(MLKEM_NAMESPACE)poly_getnoise_eta1122_4x
+FUNCTION_NAME = $(MLK_NAMESPACE)poly_getnoise_eta1122_4x
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

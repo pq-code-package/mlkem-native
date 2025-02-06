@@ -17,7 +17,7 @@ endif
 #
 # If you are not concerned about minimizing for a specific backend,
 # you can just include _all_ source files into your build.
-MLKEM_NATIVE_SOURCE=$(wildcard          \
+MLK_SOURCE=$(wildcard          \
     mlkem_native/**/*.c                 \
     mlkem_native/**/**/*.c              \
     mlkem_native/**/**/**/*.c           \
@@ -43,7 +43,7 @@ RNG_SOURCE=$(wildcard test_only_rng/*.c)
 # Your application source code
 APP_SOURCE=$(wildcard *.c)
 
-ALL_SOURCE=$(MLKEM_NATIVE_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
+ALL_SOURCE=$(MLK_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
 
 BUILD_DIR=build
 BIN=test_binary
@@ -67,7 +67,7 @@ CFLAGS := \
 	-O3 \
 	$(CFLAGS)
 
-CFLAGS+=-DMLKEM_NATIVE_CONFIG_FILE="\"custom_config.h\""
+CFLAGS+=-DMLK_CONFIG_FILE="\"custom_config.h\""
 
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 

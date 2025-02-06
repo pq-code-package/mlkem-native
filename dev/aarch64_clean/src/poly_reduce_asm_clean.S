@@ -4,8 +4,8 @@
  */
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_AARCH64_CLEAN) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
 /* Barrett reduction */
@@ -42,9 +42,9 @@
         modulus_twisted   .req v4
 
         .text
-        .global MLKEM_ASM_NAMESPACE(poly_reduce_asm_clean)
+        .global MLK_ASM_NAMESPACE(poly_reduce_asm_clean)
         .balign 4
-MLKEM_ASM_NAMESPACE(poly_reduce_asm_clean):
+MLK_ASM_NAMESPACE(poly_reduce_asm_clean):
 
         mov wtmp, #3329 // ML-KEM modulus
         dup modulus.8h, wtmp
@@ -92,5 +92,5 @@ loop_start:
         .unreq modulus_twisted
 
 /* simpasm: footer-start */
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN &&
-          !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64_CLEAN &&
+          !MLK_MULTILEVEL_BUILD_NO_SHARED */

@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef MLKEM_NATIVE_DEV_FIPS202_AARCH64_SRC_DEFAULT_IMPL_H
-#define MLKEM_NATIVE_DEV_FIPS202_AARCH64_SRC_DEFAULT_IMPL_H
+#ifndef MLK_DEV_FIPS202_AARCH64_SRC_DEFAULT_IMPL_H
+#define MLK_DEV_FIPS202_AARCH64_SRC_DEFAULT_IMPL_H
 /* Default FIPS202 assembly profile for AArch64 systems */
 
-#ifdef FIPS202_NATIVE_PROFILE_IMPL_H
+#ifdef MLK_FIPS202_NATIVE_PROFILE_IMPL_H
 #error Only one FIPS202 assembly profile can be defined -- did you include multiple profiles?
 #else
-#define FIPS202_NATIVE_PROFILE_IMPL_H
+#define MLK_FIPS202_NATIVE_PROFILE_IMPL_H
 
 #include "fips202_native_aarch64.h"
 
@@ -26,24 +26,24 @@
  * Keccak-f1600
  *
  * - On Arm-based Apple CPUs, we pick a pure Neon implementation.
- * - Otherwise, unless SYS_AARCH64_SLOW_BARREL_SHIFTER is set,
+ * - Otherwise, unless MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER is set,
  *   we use lazy-rotation scalar assembly from [1].
- * - Otherwise, if SYS_AARCH64_SLOW_BARREL_SHIFTER is set, we
+ * - Otherwise, if MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER is set, we
  *   fall back to the standard C implementation.
  */
 #if defined(__ARM_FEATURE_SHA3) && defined(__APPLE__)
-#define MLKEM_USE_FIPS202_X1_NATIVE
-static INLINE void keccak_f1600_x1_native(uint64_t *state)
+#define MLK_USE_FIPS202_X1_NATIVE
+static MLK_INLINE void keccak_f1600_x1_native(uint64_t *state)
 {
   keccak_f1600_x1_v84a_asm_clean(state, keccakf1600_round_constants);
 }
-#elif !defined(SYS_AARCH64_SLOW_BARREL_SHIFTER)
-#define MLKEM_USE_FIPS202_X1_NATIVE
-static INLINE void keccak_f1600_x1_native(uint64_t *state)
+#elif !defined(MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER)
+#define MLK_USE_FIPS202_X1_NATIVE
+static MLK_INLINE void keccak_f1600_x1_native(uint64_t *state)
 {
   keccak_f1600_x1_scalar_asm_opt(state, keccakf1600_round_constants);
 }
-#endif /* !SYS_AARCH64_SLOW_BARREL_SHIFTER */
+#endif /* !MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER */
 
 /*
  * Keccak-f1600x2/x4
@@ -65,14 +65,14 @@ static INLINE void keccak_f1600_x1_native(uint64_t *state)
  * instructions only.
  */
 #if defined(__APPLE__)
-#define MLKEM_USE_FIPS202_X2_NATIVE
-static INLINE void keccak_f1600_x2_native(uint64_t *state)
+#define MLK_USE_FIPS202_X2_NATIVE
+static MLK_INLINE void keccak_f1600_x2_native(uint64_t *state)
 {
   keccak_f1600_x2_v84a_asm_clean(state, keccakf1600_round_constants);
 }
 #else /* __APPLE__ */
-#define MLKEM_USE_FIPS202_X4_NATIVE
-static INLINE void keccak_f1600_x4_native(uint64_t *state)
+#define MLK_USE_FIPS202_X4_NATIVE
+static MLK_INLINE void keccak_f1600_x4_native(uint64_t *state)
 {
   keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt(state,
                                                  keccakf1600_round_constants);
@@ -81,14 +81,14 @@ static INLINE void keccak_f1600_x4_native(uint64_t *state)
 
 #else /* __ARM_FEATURE_SHA3 */
 
-#define MLKEM_USE_FIPS202_X4_NATIVE
-static INLINE void keccak_f1600_x4_native(uint64_t *state)
+#define MLK_USE_FIPS202_X4_NATIVE
+static MLK_INLINE void keccak_f1600_x4_native(uint64_t *state)
 {
   keccak_f1600_x4_scalar_v8a_asm_hybrid_opt(state, keccakf1600_round_constants);
 }
 
 #endif /* __ARM_FEATURE_SHA3 */
 
-#endif /* FIPS202_NATIVE_PROFILE_H */
+#endif /* MLK_FIPS202_NATIVE_PROFILE_H */
 
-#endif /* MLKEM_NATIVE_DEV_FIPS202_AARCH64_SRC_DEFAULT_IMPL_H */
+#endif /* MLK_DEV_FIPS202_AARCH64_SRC_DEFAULT_IMPL_H */

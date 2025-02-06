@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#define keccak_squeezeblocks_x4 MLKEM_NAMESPACE(keccak_squeezeblocks_x4)
+#define keccak_squeezeblocks_x4 MLK_NAMESPACE(keccak_squeezeblocks_x4)
 void keccak_squeezeblocks_x4(uint8_t *out0, uint8_t *out1, uint8_t *out2,
                              uint8_t *out3, size_t nblocks, uint64_t *s,
                              uint32_t r);

@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef MLKEM_NATIVE_NATIVE_API_H
-#define MLKEM_NATIVE_NATIVE_API_H
+#ifndef MLK_NATIVE_API_H
+#define MLK_NATIVE_API_H
 /*
  * Native arithmetic interface
  *
@@ -39,10 +39,10 @@
  *
  * A _backend_ is a specific implementation of (part of) this interface.
  *
- * To add a function to a backend, define MLKEM_USE_NATIVE_XXX and
+ * To add a function to a backend, define MLK_USE_NATIVE_XXX and
  * implement `static inline xxx(...)` in the profile header.
  *
- * The only exception is MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER. This option can
+ * The only exception is MLK_USE_NATIVE_NTT_CUSTOM_ORDER. This option can
  * be set if there are native implementations for all of NTT, invNTT, and
  * base multiplication, and allows the native implementation to use a
  * custom order of polynomial coefficients in NTT domain -- the use of such
@@ -59,7 +59,7 @@
  * implementation is present.
  */
 
-#if defined(MLKEM_USE_NATIVE_NTT)
+#if defined(MLK_USE_NATIVE_NTT)
 /*************************************************
  * Name:        ntt_native
  *
@@ -68,34 +68,34 @@
  *
  *              The input polynomial is assumed to be in normal order.
  *              The output polynomial is in bitreversed order, or of a
- *              custom order if MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER is set.
- *              See the documentation of MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER
+ *              custom order if MLK_USE_NATIVE_NTT_CUSTOM_ORDER is set.
+ *              See the documentation of MLK_USE_NATIVE_NTT_CUSTOM_ORDER
  *              for more information.
  *
  * Arguments:   - int16_t p[MLKEM_N]: pointer to in/output polynomial
  **************************************************/
-static INLINE void ntt_native(int16_t p[MLKEM_N])
+static MLK_INLINE void ntt_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   requires(array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
   ensures(array_abs_bound(p, 0, MLKEM_N, NTT_BOUND))
 );
-#endif /* MLKEM_USE_NATIVE_NTT */
+#endif /* MLK_USE_NATIVE_NTT */
 
-#if defined(MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER)
+#if defined(MLK_USE_NATIVE_NTT_CUSTOM_ORDER)
 /*
  * This must only be set if NTT, invNTT, basemul, mulcache, and
  * to/from byte stream conversions all have native implementations
  * that are adapted to the custom order.
  */
-#if !defined(MLKEM_USE_NATIVE_NTT) || !defined(MLKEM_USE_NATIVE_INTT) || \
-    !defined(MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE) ||                  \
-    !defined(MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED) ||  \
-    !defined(MLKEM_USE_NATIVE_POLY_TOBYTES) ||                           \
-    !defined(MLKEM_USE_NATIVE_POLY_FROMBYTES)
+#if !defined(MLK_USE_NATIVE_NTT) || !defined(MLK_USE_NATIVE_INTT) ||  \
+    !defined(MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE) ||                 \
+    !defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED) || \
+    !defined(MLK_USE_NATIVE_POLY_TOBYTES) ||                          \
+    !defined(MLK_USE_NATIVE_POLY_FROMBYTES)
 #error \
-    "Invalid native profile: MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER can only be \
+    "Invalid native profile: MLK_USE_NATIVE_NTT_CUSTOM_ORDER can only be \
 set if there are native implementations for NTT, invNTT, mulcache, basemul, \
 and to/from bytes conversions."
 #endif
@@ -103,7 +103,7 @@ and to/from bytes conversions."
 /*************************************************
  * Name:        poly_permute_bitrev_to_custom
  *
- * Description: When MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER is defined,
+ * Description: When MLK_USE_NATIVE_NTT_CUSTOM_ORDER is defined,
  *              convert a polynomial in NTT domain from bitreversed
  *              order to the custom order output by the native NTT.
  *
@@ -112,7 +112,7 @@ and to/from bytes conversions."
  * Arguments:   - int16_t p[MLKEM_N]: pointer to in/output polynomial
  *
  **************************************************/
-static INLINE void poly_permute_bitrev_to_custom(int16_t p[MLKEM_N])
+static MLK_INLINE void poly_permute_bitrev_to_custom(int16_t p[MLKEM_N])
 __contract__(
   /* We don't specify that this should be a permutation, but only
    * that it does not change the bound established at the end of gen_matrix. */
@@ -120,9 +120,9 @@ __contract__(
   requires(array_bound(p, 0, MLKEM_N, 0, MLKEM_Q))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
   ensures(array_bound(p, 0, MLKEM_N, 0, MLKEM_Q)));
-#endif /* MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER */
+#endif /* MLK_USE_NATIVE_NTT_CUSTOM_ORDER */
 
-#if defined(MLKEM_USE_NATIVE_INTT)
+#if defined(MLK_USE_NATIVE_INTT)
 /*************************************************
  * Name:        intt_native
  *
@@ -130,22 +130,22 @@ __contract__(
  *              of a polynomial in place.
  *
  *              The input polynomial is in bitreversed order, or of a
- *              custom order if MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER is set.
- *              See the documentation of MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER
+ *              custom order if MLK_USE_NATIVE_NTT_CUSTOM_ORDER is set.
+ *              See the documentation of MLK_USE_NATIVE_NTT_CUSTOM_ORDER
  *              for more information.
  *              The output polynomial is assumed to be in normal order.
  *
  * Arguments:   - uint16_t *a: pointer to in/output polynomial
  **************************************************/
-static INLINE void intt_native(int16_t p[MLKEM_N])
+static MLK_INLINE void intt_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
   ensures(array_abs_bound(p, 0, MLKEM_N, INVNTT_BOUND))
 );
-#endif /* MLKEM_USE_NATIVE_INTT */
+#endif /* MLK_USE_NATIVE_INTT */
 
-#if defined(MLKEM_USE_NATIVE_POLY_REDUCE)
+#if defined(MLK_USE_NATIVE_POLY_REDUCE)
 /*************************************************
  * Name:        poly_reduce_native
  *
@@ -153,15 +153,15 @@ __contract__(
  *
  * Arguments:   - int16_t r[MLKEM_N]: pointer to input/output polynomial
  **************************************************/
-static INLINE void poly_reduce_native(int16_t p[MLKEM_N])
+static MLK_INLINE void poly_reduce_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
   ensures(array_bound(p, 0, MLKEM_N, 0, MLKEM_Q))
 );
-#endif /* MLKEM_USE_NATIVE_POLY_REDUCE */
+#endif /* MLK_USE_NATIVE_POLY_REDUCE */
 
-#if defined(MLKEM_USE_NATIVE_POLY_TOMONT)
+#if defined(MLK_USE_NATIVE_POLY_TOMONT)
 /*************************************************
  * Name:        poly_tomont_native
  *
@@ -170,15 +170,15 @@ __contract__(
  *
  * Arguments:   - int16_t r[MLKEM_N]: pointer to input/output polynomial
  **************************************************/
-static INLINE void poly_tomont_native(int16_t p[MLKEM_N])
+static MLK_INLINE void poly_tomont_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
   ensures(array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
 );
-#endif /* MLKEM_USE_NATIVE_POLY_TOMONT */
+#endif /* MLK_USE_NATIVE_POLY_TOMONT */
 
-#if defined(MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE)
+#if defined(MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE)
 /*************************************************
  * Name:        poly_mulcache_compute_native
  *
@@ -194,23 +194,23 @@ __contract__(
  * Arguments:   INPUT:
  *              - poly: const pointer to input polynomial.
  *                  This must be in NTT domain and inin bitreversed order, or of
- *                  a custom order if MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER is set.
- *                  See the documentation of MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER
+ *                  a custom order if MLK_USE_NATIVE_NTT_CUSTOM_ORDER is set.
+ *                  See the documentation of MLK_USE_NATIVE_NTT_CUSTOM_ORDER
  *                  for more information.
  *              OUTPUT
  *              - cache: pointer to multiplication cache
  **************************************************/
-static INLINE void poly_mulcache_compute_native(int16_t cache[MLKEM_N / 2],
-                                                const int16_t poly[MLKEM_N])
+static MLK_INLINE void poly_mulcache_compute_native(int16_t cache[MLKEM_N / 2],
+                                                    const int16_t poly[MLKEM_N])
 __contract__(
   requires(memory_no_alias(cache, sizeof(int16_t) * (MLKEM_N / 2)))
   requires(memory_no_alias(poly, sizeof(int16_t) * MLKEM_N))
   assigns(object_whole(cache))
 );
-#endif /* MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE */
+#endif /* MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE */
 
-#if defined(MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
-#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 2
+#if defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
+#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 2
 /*************************************************
  * Name:        poly_mulcache_compute_k2_native
  *
@@ -220,8 +220,8 @@ __contract__(
  * Arguments:   INPUT:
  *              - a: First polynomial vector operand.
  *                 This must be in NTT domain and in bitreversed order, or of
- *                 a custom order if MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER is set.
- *                 See the documentation of MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER
+ *                 a custom order if MLK_USE_NATIVE_NTT_CUSTOM_ORDER is set.
+ *                 See the documentation of MLK_USE_NATIVE_NTT_CUSTOM_ORDER
  *                 for more information.
  *              - b: Second polynomial vector operand.
  *                 As for a.
@@ -230,7 +230,7 @@ __contract__(
  *              - r: The result of the scalar product. This is again
  *                   in NTT domain, and of the same ordering as a and b.
  **************************************************/
-static INLINE void polyvec_basemul_acc_montgomery_cached_k2_native(
+static MLK_INLINE void polyvec_basemul_acc_montgomery_cached_k2_native(
     int16_t r[MLKEM_N], const int16_t a[2 * MLKEM_N],
     const int16_t b[2 * MLKEM_N], const int16_t b_cache[2 * (MLKEM_N / 2)])
 __contract__(
@@ -243,17 +243,17 @@ __contract__(
    *
    * Once fixed, change to:
    * ```
-   * requires(array_bound(a, 0, 2 * MLKEM_N, 0, UINT12_LIMIT))
+   * requires(array_bound(a, 0, 2 * MLKEM_N, 0, MLKEM_UINT12_LIMIT))
    * ```
    */
   requires(forall(kN, 0, 2,					  \
               array_bound(&((int16_t(*)[MLKEM_N])(a))[kN][0], 0, MLKEM_N, \
-			  0, UINT12_LIMIT)))
+			  0, MLKEM_UINT12_LIMIT)))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
 );
-#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 2 */
+#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 2 */
 
-#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 3
+#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 3
 /*************************************************
  * Name:        poly_mulcache_compute_k3_native
  *
@@ -263,8 +263,8 @@ __contract__(
  * Arguments:   INPUT:
  *              - a: First polynomial vector operand.
  *                 This must be in NTT domain and in bitreversed order, or of
- *                 a custom order if MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER is set.
- *                 See the documentation of MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER
+ *                 a custom order if MLK_USE_NATIVE_NTT_CUSTOM_ORDER is set.
+ *                 See the documentation of MLK_USE_NATIVE_NTT_CUSTOM_ORDER
  *                 for more information.
  *              - b: Second polynomial vector operand.
  *                 As for a.
@@ -273,7 +273,7 @@ __contract__(
  *              - r: The result of the scalar product. This is again
  *                   in NTT domain, and of the same ordering as a and b.
  **************************************************/
-static INLINE void polyvec_basemul_acc_montgomery_cached_k3_native(
+static MLK_INLINE void polyvec_basemul_acc_montgomery_cached_k3_native(
     int16_t r[MLKEM_N], const int16_t a[3 * MLKEM_N],
     const int16_t b[3 * MLKEM_N], const int16_t b_cache[3 * (MLKEM_N / 2)])
 __contract__(
@@ -286,17 +286,17 @@ __contract__(
    *
    * Once fixed, change to:
    * ```
-   * requires(array_bound(a, 0, 3 * MLKEM_N, 0, UINT12_LIMIT))
+   * requires(array_bound(a, 0, 3 * MLKEM_N, 0, MLKEM_UINT12_LIMIT))
    * ```
    */
   requires(forall(kN, 0, 3,					  \
               array_bound(&((int16_t(*)[MLKEM_N])(a))[kN][0], 0, MLKEM_N, \
-			  0, UINT12_LIMIT)))
+			  0, MLKEM_UINT12_LIMIT)))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
 );
-#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 3 */
+#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 3 */
 
-#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
+#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
 /*************************************************
  * Name:        poly_mulcache_compute_k4_native
  *
@@ -306,8 +306,8 @@ __contract__(
  * Arguments:   INPUT:
  *              - a: First polynomial vector operand.
  *                 This must be in NTT domain and in bitreversed order, or of
- *                 a custom order if MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER is set.
- *                 See the documentation of MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER
+ *                 a custom order if MLK_USE_NATIVE_NTT_CUSTOM_ORDER is set.
+ *                 See the documentation of MLK_USE_NATIVE_NTT_CUSTOM_ORDER
  *                 for more information.
  *              - b: Second polynomial vector operand.
  *                 As for a.
@@ -316,7 +316,7 @@ __contract__(
  *              - r: The result of the scalar product. This is again
  *                   in NTT domain, and of the same ordering as a and b.
  **************************************************/
-static INLINE void polyvec_basemul_acc_montgomery_cached_k4_native(
+static MLK_INLINE void polyvec_basemul_acc_montgomery_cached_k4_native(
     int16_t r[MLKEM_N], const int16_t a[4 * MLKEM_N],
     const int16_t b[4 * MLKEM_N], const int16_t b_cache[4 * (MLKEM_N / 2)])
 __contract__(
@@ -329,18 +329,18 @@ __contract__(
    *
    * Once fixed, change to:
    * ```
-   * requires(array_bound(a, 0, 4 * MLKEM_N, 0, UINT12_LIMIT))
+   * requires(array_bound(a, 0, 4 * MLKEM_N, 0, MLKEM_UINT12_LIMIT))
    * ```
    */
   requires(forall(kN, 0, 4,					  \
               array_bound(&((int16_t(*)[MLKEM_N])(a))[kN][0], 0, MLKEM_N, \
-			  0, UINT12_LIMIT)))
+			  0, MLKEM_UINT12_LIMIT)))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
 );
-#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 4 */
-#endif /* MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
+#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 4 */
+#endif /* MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
-#if defined(MLKEM_USE_NATIVE_POLY_TOBYTES)
+#if defined(MLK_USE_NATIVE_POLY_TOBYTES)
 /*************************************************
  * Name:        poly_tobytes_native
  *
@@ -355,17 +355,17 @@ __contract__(
  *              - r: pointer to output byte array
  *                   (of MLKEM_POLYBYTES bytes)
  **************************************************/
-static INLINE void poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
-                                       const int16_t a[MLKEM_N])
+static MLK_INLINE void poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
+                                           const int16_t a[MLKEM_N])
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYBYTES))
   requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_N))
   requires(array_bound(a, 0, MLKEM_N, 0, MLKEM_Q))
   assigns(object_whole(r))
 );
-#endif /* MLKEM_USE_NATIVE_POLY_TOBYTES */
+#endif /* MLK_USE_NATIVE_POLY_TOBYTES */
 
-#if defined(MLKEM_USE_NATIVE_POLY_FROMBYTES)
+#if defined(MLK_USE_NATIVE_POLY_FROMBYTES)
 /*************************************************
  * Name:        poly_frombytes_native
  *
@@ -379,17 +379,17 @@ __contract__(
  *              - a: const pointer to input byte aray
  *                   (of MLKEM_POLYBYTES bytes)
  **************************************************/
-static INLINE void poly_frombytes_native(int16_t a[MLKEM_N],
-                                         const uint8_t r[MLKEM_POLYBYTES])
+static MLK_INLINE void poly_frombytes_native(int16_t a[MLKEM_N],
+                                             const uint8_t r[MLKEM_POLYBYTES])
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYBYTES))
   requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(a, sizeof(int16_t) * MLKEM_N))
-  ensures(array_bound(a, 0, MLKEM_N, 0, UINT12_LIMIT))
+  ensures(array_bound(a, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT))
 );
-#endif /* MLKEM_USE_NATIVE_POLY_FROMBYTES */
+#endif /* MLK_USE_NATIVE_POLY_FROMBYTES */
 
-#if defined(MLKEM_USE_NATIVE_REJ_UNIFORM)
+#if defined(MLK_USE_NATIVE_REJ_UNIFORM)
 /*************************************************
  * Name:        rej_uniform_native
  *
@@ -407,8 +407,8 @@ __contract__(
  * Otherwise, returns non-negative number of sampled 16-bit integers (at most
  * len).
  **************************************************/
-static INLINE int rej_uniform_native(int16_t *r, unsigned len,
-                                     const uint8_t *buf, unsigned buflen)
+static MLK_INLINE int rej_uniform_native(int16_t *r, unsigned len,
+                                         const uint8_t *buf, unsigned buflen)
 __contract__(
   requires(len <= 4096 && buflen <= 4096 && buflen % 3 == 0)
   requires(memory_no_alias(r, sizeof(int16_t) * len))
@@ -417,11 +417,10 @@ __contract__(
   ensures(return_value == -1 || (0 <= return_value && return_value <= len))
   ensures(return_value != -1 ==> array_bound(r, 0, (unsigned) return_value, 0, MLKEM_Q))
 );
-#endif /* MLKEM_USE_NATIVE_REJ_UNIFORM */
+#endif /* MLK_USE_NATIVE_REJ_UNIFORM */
 
-#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || \
-    (MLKEM_K == 2 || MLKEM_K == 3)
-#if defined(MLKEM_USE_NATIVE_POLY_COMPRESS_D4)
+#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
+#if defined(MLK_USE_NATIVE_POLY_COMPRESS_D4)
 /*************************************************
  * Name:        poly_compress_d4_native
  *
@@ -434,11 +433,11 @@ __contract__(
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
-static INLINE void poly_compress_d4_native(
+static MLK_INLINE void poly_compress_d4_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const int16_t a[MLKEM_N]);
-#endif /* MLKEM_USE_NATIVE_POLY_COMPRESS_D4 */
+#endif /* MLK_USE_NATIVE_POLY_COMPRESS_D4 */
 
-#if defined(MLKEM_USE_NATIVE_POLY_COMPRESS_D10)
+#if defined(MLK_USE_NATIVE_POLY_COMPRESS_D10)
 /*************************************************
  * Name:        poly_compress_d10_native
  *
@@ -451,11 +450,11 @@ static INLINE void poly_compress_d4_native(
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
-static INLINE void poly_compress_d10_native(
+static MLK_INLINE void poly_compress_d10_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const int16_t a[MLKEM_N]);
-#endif /* MLKEM_USE_NATIVE_POLY_COMPRESS_D10 */
+#endif /* MLK_USE_NATIVE_POLY_COMPRESS_D10 */
 
-#if defined(MLKEM_USE_NATIVE_POLY_DECOMPRESS_D4)
+#if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D4)
 /*************************************************
  * Name:        poly_decompress_d4
  *
@@ -470,11 +469,11 @@ static INLINE void poly_compress_d10_native(
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
-static INLINE void poly_decompress_d4_native(
+static MLK_INLINE void poly_decompress_d4_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]);
-#endif /* MLKEM_USE_NATIVE_POLY_DECOMPRESS_D4 */
+#endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D4 */
 
-#if defined(MLKEM_USE_NATIVE_POLY_DECOMPRESS_D10)
+#if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D10)
 /*************************************************
  * Name:        poly_decompress_d10_native
  *
@@ -489,14 +488,14 @@ static INLINE void poly_decompress_d4_native(
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
-static INLINE void poly_decompress_d10_native(
+static MLK_INLINE void poly_decompress_d10_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10]);
-#endif /* MLKEM_USE_NATIVE_POLY_DECOMPRESS_D10 */
-#endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
+#endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D10 */
+#endif /* defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
           || MLKEM_K == 3) */
 
-#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
-#if defined(MLKEM_USE_NATIVE_POLY_COMPRESS_D5)
+#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
+#if defined(MLK_USE_NATIVE_POLY_COMPRESS_D5)
 /*************************************************
  * Name:        poly_compress_d5_native
  *
@@ -509,11 +508,11 @@ static INLINE void poly_decompress_d10_native(
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
-static INLINE void poly_compress_d5_native(
+static MLK_INLINE void poly_compress_d5_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const int16_t a[MLKEM_N]);
-#endif /* MLKEM_USE_NATIVE_POLY_COMPRESS_D5 */
+#endif /* MLK_USE_NATIVE_POLY_COMPRESS_D5 */
 
-#if defined(MLKEM_USE_NATIVE_POLY_COMPRESS_D11)
+#if defined(MLK_USE_NATIVE_POLY_COMPRESS_D11)
 /*************************************************
  * Name:        poly_compress_d11_native
  *
@@ -526,11 +525,11 @@ static INLINE void poly_compress_d5_native(
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
-static INLINE void poly_compress_d11_native(
+static MLK_INLINE void poly_compress_d11_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const int16_t a[MLKEM_N]);
-#endif /* MLKEM_USE_NATIVE_POLY_COMPRESS_D11 */
+#endif /* MLK_USE_NATIVE_POLY_COMPRESS_D11 */
 
-#if defined(MLKEM_USE_NATIVE_POLY_DECOMPRESS_D5)
+#if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D5)
 /*************************************************
  * Name:        poly_decompress_d5_native
  *
@@ -545,11 +544,11 @@ static INLINE void poly_compress_d11_native(
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
-static INLINE void poly_decompress_d5_native(
+static MLK_INLINE void poly_decompress_d5_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5]);
-#endif /* MLKEM_USE_NATIVE_POLY_DECOMPRESS_D5 */
+#endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D5 */
 
-#if defined(MLKEM_USE_NATIVE_POLY_DECOMPRESS_D11)
+#if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D11)
 /*************************************************
  * Name:        poly_decompress_d11_native
  *
@@ -564,10 +563,10 @@ static INLINE void poly_decompress_d5_native(
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
-static INLINE void poly_decompress_d11_native(
+static MLK_INLINE void poly_decompress_d11_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]);
-#endif /* MLKEM_USE_NATIVE_POLY_DECOMPRESS_D11 */
-#endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4 \
+#endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D11 */
+#endif /* defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4 \
         */
 
-#endif /* MLKEM_NATIVE_NATIVE_API_H */
+#endif /* MLK_NATIVE_API_H */

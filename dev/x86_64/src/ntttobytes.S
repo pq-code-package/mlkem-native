@@ -8,8 +8,8 @@
 
 #include "../../../common.h"
 
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
 #include "consts.h"
@@ -17,9 +17,9 @@
 #include "shuffle.inc"
 
 .text
-.global MLKEM_ASM_NAMESPACE(ntttobytes_avx2)
+.global MLK_ASM_NAMESPACE(ntttobytes_avx2)
 .balign 4
-MLKEM_ASM_NAMESPACE(ntttobytes_avx2):
+MLK_ASM_NAMESPACE(ntttobytes_avx2):
 #consts
 vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rdx),%ymm0
 call		ntttobytes128_avx
@@ -89,5 +89,5 @@ vmovdqu		%ymm9,160(%rdi)
 ret
 
 /* simpasm: footer-start */
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT &&
-         ! MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT &&
+         ! MLK_MULTILEVEL_BUILD_NO_SHARED */

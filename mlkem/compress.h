@@ -2,8 +2,8 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef MLKEM_NATIVE_COMPRESS_H
-#define MLKEM_NATIVE_COMPRESS_H
+#ifndef MLK_COMPRESS_H
+#define MLK_COMPRESS_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -17,15 +17,15 @@
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define scalar_compress_d1 MLKEM_NAMESPACE(scalar_compress_d1)
-#define scalar_compress_d4 MLKEM_NAMESPACE(scalar_compress_d4)
-#define scalar_compress_d5 MLKEM_NAMESPACE(scalar_compress_d5)
-#define scalar_compress_d10 MLKEM_NAMESPACE(scalar_compress_d10)
-#define scalar_compress_d11 MLKEM_NAMESPACE(scalar_compress_d11)
-#define scalar_decompress_d4 MLKEM_NAMESPACE(scalar_decompress_d4)
-#define scalar_decompress_d5 MLKEM_NAMESPACE(scalar_decompress_d5)
-#define scalar_decompress_d10 MLKEM_NAMESPACE(scalar_decompress_d10)
-#define scalar_decompress_d11 MLKEM_NAMESPACE(scalar_decompress_d11)
+#define scalar_compress_d1 MLK_NAMESPACE(scalar_compress_d1)
+#define scalar_compress_d4 MLK_NAMESPACE(scalar_compress_d4)
+#define scalar_compress_d5 MLK_NAMESPACE(scalar_compress_d5)
+#define scalar_compress_d10 MLK_NAMESPACE(scalar_compress_d10)
+#define scalar_compress_d11 MLK_NAMESPACE(scalar_compress_d11)
+#define scalar_decompress_d4 MLK_NAMESPACE(scalar_decompress_d4)
+#define scalar_decompress_d5 MLK_NAMESPACE(scalar_decompress_d5)
+#define scalar_decompress_d10 MLK_NAMESPACE(scalar_decompress_d10)
+#define scalar_decompress_d11 MLK_NAMESPACE(scalar_decompress_d11)
 /* End of static namespacing */
 
 /************************************************************
@@ -47,7 +47,7 @@
 #pragma CPROVER check push
 #pragma CPROVER check disable "unsigned-overflow"
 #endif
-static INLINE uint32_t scalar_compress_d1(uint16_t u)
+static MLK_INLINE uint32_t scalar_compress_d1(uint16_t u)
 __contract__(
   requires(u <= MLKEM_Q - 1)
   ensures(return_value < 2)
@@ -82,7 +82,7 @@ __contract__(
 #pragma CPROVER check push
 #pragma CPROVER check disable "unsigned-overflow"
 #endif
-static INLINE uint32_t scalar_compress_d4(uint16_t u)
+static MLK_INLINE uint32_t scalar_compress_d4(uint16_t u)
 __contract__(
   requires(u <= MLKEM_Q - 1)
   ensures(return_value < 16)
@@ -106,7 +106,7 @@ __contract__(
  * Arguments: - u: Unsigned canonical modulus modulo 16
  *                 to be decompressed.
  ************************************************************/
-static INLINE uint16_t scalar_decompress_d4(uint32_t u)
+static MLK_INLINE uint16_t scalar_decompress_d4(uint32_t u)
 __contract__(
   requires(0 <= u && u < 16)
   ensures(return_value <= (MLKEM_Q - 1))
@@ -131,7 +131,7 @@ __contract__(
 #pragma CPROVER check push
 #pragma CPROVER check disable "unsigned-overflow"
 #endif
-static INLINE uint32_t scalar_compress_d5(uint16_t u)
+static MLK_INLINE uint32_t scalar_compress_d5(uint16_t u)
 __contract__(
   requires(u <= MLKEM_Q - 1)
   ensures(return_value < 32)
@@ -155,7 +155,7 @@ __contract__(
  * Arguments: - u: Unsigned canonical modulus modulo 32
  *                 to be decompressed.
  ************************************************************/
-static INLINE uint16_t scalar_decompress_d5(uint32_t u)
+static MLK_INLINE uint16_t scalar_decompress_d5(uint32_t u)
 __contract__(
   requires(0 <= u && u < 32)
   ensures(return_value <= MLKEM_Q - 1)
@@ -180,7 +180,7 @@ __contract__(
 #pragma CPROVER check push
 #pragma CPROVER check disable "unsigned-overflow"
 #endif
-static INLINE uint32_t scalar_compress_d10(uint16_t u)
+static MLK_INLINE uint32_t scalar_compress_d10(uint16_t u)
 __contract__(
   requires(u <= MLKEM_Q - 1)
   ensures(return_value < (1u << 10))
@@ -205,7 +205,7 @@ __contract__(
  * Arguments: - u: Unsigned canonical modulus modulo 16
  *                 to be decompressed.
  ************************************************************/
-static INLINE uint16_t scalar_decompress_d10(uint32_t u)
+static MLK_INLINE uint16_t scalar_decompress_d10(uint32_t u)
 __contract__(
   requires(0 <= u && u < 1024)
   ensures(return_value <= (MLKEM_Q - 1))
@@ -230,7 +230,7 @@ __contract__(
 #pragma CPROVER check push
 #pragma CPROVER check disable "unsigned-overflow"
 #endif
-static INLINE uint32_t scalar_compress_d11(uint16_t u)
+static MLK_INLINE uint32_t scalar_compress_d11(uint16_t u)
 __contract__(
   requires(u <= MLKEM_Q - 1)
   ensures(return_value < (1u << 11))
@@ -255,15 +255,14 @@ __contract__(
  * Arguments: - u: Unsigned canonical modulus modulo 16
  *                 to be decompressed.
  ************************************************************/
-static INLINE uint16_t scalar_decompress_d11(uint32_t u)
+static MLK_INLINE uint16_t scalar_decompress_d11(uint32_t u)
 __contract__(
   requires(0 <= u && u < 2048)
   ensures(return_value <= (MLKEM_Q - 1))
 ) { return ((u * MLKEM_Q) + 1024) >> 11; }
 
-#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || \
-    (MLKEM_K == 2 || MLKEM_K == 3)
-#define poly_compress_d4 MLKEM_NAMESPACE(poly_compress_d4)
+#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
+#define poly_compress_d4 MLK_NAMESPACE(poly_compress_d4)
 /*************************************************
  * Name:        poly_compress_d4
  *
@@ -276,10 +275,10 @@ __contract__(
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const poly *a);
 
-#define poly_compress_d10 MLKEM_NAMESPACE(poly_compress_d10)
+#define poly_compress_d10 MLK_NAMESPACE(poly_compress_d10)
 /*************************************************
  * Name:        poly_compress_d10
  *
@@ -292,10 +291,10 @@ void poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const poly *a);
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const poly *a);
 
-#define poly_decompress_d4 MLKEM_NAMESPACE(poly_decompress_d4)
+#define poly_decompress_d4 MLK_NAMESPACE(poly_decompress_d4)
 /*************************************************
  * Name:        poly_decompress_d4
  *
@@ -310,10 +309,10 @@ void poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const poly *a);
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_decompress_d4(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]);
 
-#define poly_decompress_d10 MLKEM_NAMESPACE(poly_decompress_d10)
+#define poly_decompress_d10 MLK_NAMESPACE(poly_decompress_d10)
 /*************************************************
  * Name:        poly_decompress_d10
  *
@@ -328,14 +327,14 @@ void poly_decompress_d4(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]);
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_decompress_d10(poly *r,
                          const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10]);
-#endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
+#endif /* defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
           || MLKEM_K == 3) */
 
-#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
-#define poly_compress_d5 MLKEM_NAMESPACE(poly_compress_d5)
+#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
+#define poly_compress_d5 MLK_NAMESPACE(poly_compress_d5)
 /*************************************************
  * Name:        poly_compress_d5
  *
@@ -348,10 +347,10 @@ void poly_decompress_d10(poly *r,
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const poly *a);
 
-#define poly_compress_d11 MLKEM_NAMESPACE(poly_compress_d11)
+#define poly_compress_d11 MLK_NAMESPACE(poly_compress_d11)
 /*************************************************
  * Name:        poly_compress_d11
  *
@@ -364,10 +363,10 @@ void poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const poly *a);
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const poly *a);
 
-#define poly_decompress_d5 MLKEM_NAMESPACE(poly_decompress_d5)
+#define poly_decompress_d5 MLK_NAMESPACE(poly_decompress_d5)
 /*************************************************
  * Name:        poly_decompress_d5
  *
@@ -382,10 +381,10 @@ void poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const poly *a);
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_decompress_d5(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5]);
 
-#define poly_decompress_d11 MLKEM_NAMESPACE(poly_decompress_d11)
+#define poly_decompress_d11 MLK_NAMESPACE(poly_decompress_d11)
 /*************************************************
  * Name:        poly_decompress_d11
  *
@@ -400,13 +399,13 @@ void poly_decompress_d5(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5]);
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_decompress_d11(poly *r,
                          const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]);
-#endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4 \
+#endif /* defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4 \
         */
 
-#define poly_tobytes MLKEM_NAMESPACE(poly_tobytes)
+#define poly_tobytes MLK_NAMESPACE(poly_tobytes)
 /*************************************************
  * Name:        poly_tobytes
  *
@@ -421,7 +420,7 @@ void poly_decompress_d11(poly *r,
  *              - r: pointer to output byte array
  *                   (of MLKEM_POLYBYTES bytes)
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYBYTES))
@@ -431,7 +430,7 @@ __contract__(
 );
 
 
-#define poly_frombytes MLKEM_NAMESPACE(poly_frombytes)
+#define poly_frombytes MLK_NAMESPACE(poly_frombytes)
 /*************************************************
  * Name:        poly_frombytes
  *
@@ -445,17 +444,17 @@ __contract__(
  *                   each coefficient unsigned and in the range
  *                   0 .. 4095
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
 __contract__(
   requires(memory_no_alias(a, MLKEM_POLYBYTES))
   requires(memory_no_alias(r, sizeof(poly)))
   assigns(memory_slice(r, sizeof(poly)))
-  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, UINT12_LIMIT))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT))
 );
 
 
-#define poly_frommsg MLKEM_NAMESPACE(poly_frommsg)
+#define poly_frommsg MLK_NAMESPACE(poly_frommsg)
 /*************************************************
  * Name:        poly_frommsg
  *
@@ -464,7 +463,7 @@ __contract__(
  * Arguments:   - poly *r: pointer to output polynomial
  *              - const uint8_t *msg: pointer to input message
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_frommsg(poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
 __contract__(
   requires(memory_no_alias(msg, MLKEM_INDCPA_MSGBYTES))
@@ -473,7 +472,7 @@ __contract__(
   ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
 );
 
-#define poly_tomsg MLKEM_NAMESPACE(poly_tomsg)
+#define poly_tomsg MLK_NAMESPACE(poly_tomsg)
 /*************************************************
  * Name:        poly_tomsg
  *
@@ -483,7 +482,7 @@ __contract__(
  *              - const poly *r: pointer to input polynomial
  *                Coefficients must be unsigned canonical
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const poly *r)
 __contract__(
   requires(memory_no_alias(msg, MLKEM_INDCPA_MSGBYTES))
@@ -492,4 +491,4 @@ __contract__(
   assigns(object_whole(msg))
 );
 
-#endif /* MLKEM_NATIVE_COMPRESS_H */
+#endif /* MLK_COMPRESS_H */

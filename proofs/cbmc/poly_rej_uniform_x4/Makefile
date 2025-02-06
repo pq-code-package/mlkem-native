@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/sampling.c $(SRCDIR)/mlkem/fips202/fips202x4.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_rej_uniform_x4
-USE_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)shake128x4_absorb_once $(MLKEM_NAMESPACE)shake128x4_squeezeblocks $(MLKEM_NAMESPACE)rej_uniform
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_rej_uniform_x4
+USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)shake128x4_absorb_once $(MLK_NAMESPACE)shake128x4_squeezeblocks $(MLK_NAMESPACE)rej_uniform
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = $(MLKEM_NAMESPACE)poly_rej_uniform_x4
+FUNCTION_NAME = $(MLK_NAMESPACE)poly_rej_uniform_x4
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

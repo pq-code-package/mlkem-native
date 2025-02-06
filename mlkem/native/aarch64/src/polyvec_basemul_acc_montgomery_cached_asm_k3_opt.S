@@ -10,20 +10,20 @@
 // https://github.com/neon-ntt/neon-ntt
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) && \
-    (defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 3)
+#if defined(MLK_ARITH_BACKEND_AARCH64_OPT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) && \
+    (defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 3)
 
 /*
- * WARNING: This file is auto-derived from the mlkem-native source file 
+ * WARNING: This file is auto-derived from the mlkem-native source file
  *   dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k3_opt.S using scripts/simpasm. Do not modify it directly.
  */
 
 
 .text
 .balign 4
-.global MLKEM_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k3_opt)
-MLKEM_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k3_opt):
+.global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k3_opt)
+MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k3_opt):
 
         sub	sp, sp, #0x40
         stp	d8, d9, [sp]
@@ -248,6 +248,6 @@ polyvec_basemul_acc_montgomery_cached_asm_k3_opt_loop:
         add	sp, sp, #0x40
         ret
 
-#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && \
-          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) && \
-          (defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 3) */
+#endif /* defined(MLK_ARITH_BACKEND_AARCH64_OPT) && \
+          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) && \
+          (defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 3) */

@@ -7,8 +7,8 @@
 // https://github.com/pq-crystals/kyber/blob/main/avx2
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
 #include "consts.h"
@@ -114,9 +114,9 @@ vmovdqa		%ymm11,(64*\off+48)*2(%rdi)
 .endm
 
 .text
-.global MLKEM_ASM_NAMESPACE(basemul_avx2)
+.global MLK_ASM_NAMESPACE(basemul_avx2)
 .balign 4
-MLKEM_ASM_NAMESPACE(basemul_avx2):
+MLK_ASM_NAMESPACE(basemul_avx2):
 mov		%rsp,%r8
 and		$-32,%rsp
 sub		$32,%rsp
@@ -137,5 +137,5 @@ mov		%r8,%rsp
 ret
 
 /* simpasm: footer-start */
-#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
+#endif /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */

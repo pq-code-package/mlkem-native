@@ -51,13 +51,13 @@ static void randombytes_nth(uint8_t *seed, size_t nth, size_t len)
 
 int main(void)
 {
-  uint8_t seed[48] ALIGN;
+  uint8_t seed[48] MLK_ALIGN;
   FILE *fh = stdout;
-  uint8_t public_key[CRYPTO_PUBLICKEYBYTES] ALIGN;
-  uint8_t secret_key[CRYPTO_SECRETKEYBYTES] ALIGN;
-  uint8_t ciphertext[CRYPTO_CIPHERTEXTBYTES] ALIGN;
-  uint8_t shared_secret_e[CRYPTO_BYTES] ALIGN;
-  uint8_t shared_secret_d[CRYPTO_BYTES] ALIGN;
+  uint8_t public_key[CRYPTO_PUBLICKEYBYTES] MLK_ALIGN;
+  uint8_t secret_key[CRYPTO_SECRETKEYBYTES] MLK_ALIGN;
+  uint8_t ciphertext[CRYPTO_CIPHERTEXTBYTES] MLK_ALIGN;
+  uint8_t shared_secret_e[CRYPTO_BYTES] MLK_ALIGN;
+  uint8_t shared_secret_d[CRYPTO_BYTES] MLK_ALIGN;
   int rc;
 
   int count = 0;

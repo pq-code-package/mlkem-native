@@ -10,9 +10,9 @@
 // https://github.com/neon-ntt/neon-ntt
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) && \
-    (defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 2)
+#if defined(MLK_ARITH_BACKEND_AARCH64_OPT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) && \
+    (defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 2)
 /* simpasm: header-end */
 
 // Input:
@@ -141,9 +141,9 @@
         t0   .req v28
 
         .text
-        .global MLKEM_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2_opt)
+        .global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2_opt)
         .balign 4
-MLKEM_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2_opt):
+MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2_opt):
         push_stack
 
         mov wtmp, #3329
@@ -545,6 +545,6 @@ polyvec_basemul_acc_montgomery_cached_asm_k2_opt_loop:
     .unreq t0
 
 /* simpasm: footer-start */
-#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && \
-          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) && \
-          (defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 2) */
+#endif /* defined(MLK_ARITH_BACKEND_AARCH64_OPT) && \
+          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) && \
+          (defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 2) */

@@ -8,8 +8,8 @@
 
 #include "../../../common.h"
 
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 #include <immintrin.h>
 #include <stdint.h>
@@ -17,10 +17,9 @@
 #include "arith_native_x86_64.h"
 #include "consts.h"
 
-#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || \
-    (MLKEM_K == 2 || MLKEM_K == 3)
+#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
 void poly_compress_d4_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
-                           const __m256i *RESTRICT a)
+                           const __m256i *MLK_RESTRICT a)
 {
   unsigned int i;
   __m256i f0, f1, f2, f3;
@@ -59,7 +58,7 @@ void poly_compress_d4_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
   }
 }
 
-void poly_decompress_d4_avx2(__m256i *RESTRICT r,
+void poly_decompress_d4_avx2(__m256i *MLK_RESTRICT r,
                              const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
 {
   unsigned int i;
@@ -86,7 +85,7 @@ void poly_decompress_d4_avx2(__m256i *RESTRICT r,
 }
 
 void poly_compress_d10_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
-                            const __m256i *RESTRICT a)
+                            const __m256i *MLK_RESTRICT a)
 {
   unsigned int i;
   __m256i f0, f1, f2;
@@ -129,7 +128,7 @@ void poly_compress_d10_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
   }
 }
 
-void poly_decompress_d10_avx2(__m256i *RESTRICT r,
+void poly_decompress_d10_avx2(__m256i *MLK_RESTRICT r,
                               const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
 {
   unsigned int i;
@@ -165,12 +164,12 @@ void poly_decompress_d10_avx2(__m256i *RESTRICT r,
   _mm256_store_si256(&r[i], f);
 }
 
-#endif /* defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
+#endif /* defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
           || MLKEM_K == 3) */
 
-#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
+#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
 void poly_compress_d5_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
-                           const __m256i *RESTRICT a)
+                           const __m256i *MLK_RESTRICT a)
 {
   unsigned int i;
   __m256i f0, f1;
@@ -211,7 +210,7 @@ void poly_compress_d5_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
   }
 }
 
-void poly_decompress_d5_avx2(__m256i *RESTRICT r,
+void poly_decompress_d5_avx2(__m256i *MLK_RESTRICT r,
                              const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
 {
   unsigned int i;
@@ -243,7 +242,7 @@ void poly_decompress_d5_avx2(__m256i *RESTRICT r,
 }
 
 void poly_compress_d11_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
-                            const __m256i *RESTRICT a)
+                            const __m256i *MLK_RESTRICT a)
 {
   unsigned int i;
   __m256i f0, f1, f2;
@@ -315,7 +314,7 @@ void poly_compress_d11_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
   memcpy(&r[22 * i + 16], &t1, 6);
 }
 
-void poly_decompress_d11_avx2(__m256i *RESTRICT r,
+void poly_decompress_d11_avx2(__m256i *MLK_RESTRICT r,
                               const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
 {
   unsigned int i;
@@ -359,12 +358,12 @@ void poly_decompress_d11_avx2(__m256i *RESTRICT r,
   _mm256_store_si256(&r[i], f);
 }
 
-#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD || MLKEM_K == 4 */
+#endif /* MLK_MULTILEVEL_BUILD || MLKEM_K == 4 */
 
-#else /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT && \
-         ! MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+#else /* MLK_ARITH_BACKEND_X86_64_DEFAULT && \
+         ! MLK_MULTILEVEL_BUILD_NO_SHARED */
 
-MLKEM_NATIVE_EMPTY_CU(avx2_poly_compress)
+MLK_EMPTY_CU(avx2_poly_compress)
 
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT && \
-         ! MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && \
+         ! MLK_MULTILEVEL_BUILD_NO_SHARED */

@@ -4,8 +4,8 @@
  */
 #include "verify.h"
 
-#if !defined(MLKEM_USE_ASM_VALUE_BARRIER) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if !defined(MLK_USE_ASM_VALUE_BARRIER) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 /*
  * Masking value used in constant-time functions from
  * verify.h to block the compiler's range analysis and
@@ -13,10 +13,10 @@
  */
 volatile uint64_t ct_opt_blocker_u64 = 0;
 
-#else /* MLKEM_USE_ASM_VALUE_BARRIER && \
-         !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+#else /* MLK_USE_ASM_VALUE_BARRIER && \
+         !MLK_MULTILEVEL_BUILD_NO_SHARED */
 
-MLKEM_NATIVE_EMPTY_CU(verify)
+MLK_EMPTY_CU(verify)
 
-#endif /* MLKEM_USE_ASM_VALUE_BARRIER && \
-          !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_USE_ASM_VALUE_BARRIER && \
+          !MLK_MULTILEVEL_BUILD_NO_SHARED */

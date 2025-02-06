@@ -2,8 +2,8 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef MLKEM_NATIVE_SYMMETRIC_H
-#define MLKEM_NATIVE_SYMMETRIC_H
+#ifndef MLK_SYMMETRIC_H
+#define MLK_SYMMETRIC_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -52,4 +52,4 @@
 
 #define XOF_RATE SHAKE128_RATE
 
-#endif /* MLKEM_NATIVE_SYMMETRIC_H */
+#endif /* MLK_SYMMETRIC_H */

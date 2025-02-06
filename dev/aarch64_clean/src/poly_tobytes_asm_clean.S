@@ -4,8 +4,8 @@
  */
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_AARCH64_CLEAN) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
 /********************************************
@@ -24,9 +24,9 @@
         count .req x2
 
         .text
-        .global MLKEM_ASM_NAMESPACE(poly_tobytes_asm_clean)
+        .global MLK_ASM_NAMESPACE(poly_tobytes_asm_clean)
         .balign 4
-MLKEM_ASM_NAMESPACE(poly_tobytes_asm_clean):
+MLK_ASM_NAMESPACE(poly_tobytes_asm_clean):
 
         mov count, #16
 poly_tobytes_asm_clean_asm_loop_start:
@@ -61,5 +61,5 @@ poly_tobytes_asm_clean_asm_loop_start:
         .unreq count
 
 /* simpasm: footer-start */
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN &&
-          !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64_CLEAN &&
+          !MLK_MULTILEVEL_BUILD_NO_SHARED */

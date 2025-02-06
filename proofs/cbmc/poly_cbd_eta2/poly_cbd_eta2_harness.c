@@ -4,7 +4,7 @@
 
 #include "poly.h"
 
-#define poly_cbd_eta2 MLKEM_NAMESPACE(poly_cbd_eta2)
+#define poly_cbd_eta2 MLK_NAMESPACE(poly_cbd_eta2)
 void poly_cbd_eta2(poly *r, const uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4]);
 
 void harness(void)

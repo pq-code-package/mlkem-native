@@ -286,15 +286,15 @@ Edit the Makefile and update the definition of the following variables:
 * HARNESS_FILE - should be `XXX_harness`
 * PROOF_UID - should be `XXX`
 * PROJECT_SOURCES - should the files containing the source code of XXX
-* CHECK_FUNCTION_CONTRACTS - set to the `XXX`, but including the `$(MLKEM_NAMESPACE)` prefix if required
+* CHECK_FUNCTION_CONTRACTS - set to the `XXX`, but including the `$(MLK_NAMESPACE)` prefix if required
 * USE_FUNCTION_CONTRACTS - a list of functions that `XXX` calls where you want CBMC to use the contracts of the called
-  function for proof, rather than 'inlining' the called function for proof. Include the `$(MLKEM_NAMESPACE)` prefix if
+  function for proof, rather than 'inlining' the called function for proof. Include the `$(MLK_NAMESPACE)` prefix if
   required
 * EXTERNAL_SAT_SOLVER - should _always_ be "nothing" to prevent CBMC selecting a SAT backend over the selected SMT backend.
 * CBMCFLAGS - additional flags to pass to the final run of CBMC. This is normally set to `--smt2` which tells cbmc to
   run Z3 as its underlying solver. Can also be set to `--bitwuzla` which is sometimes better at generaing
   counter-examples when Z3 fails.
-* FUNCTION_NAME - set to `XXX` with the `$(MLKEM_NAMESPACE)` prefix if required
+* FUNCTION_NAME - set to `XXX` with the `$(MLK_NAMESPACE)` prefix if required
 * CBMC_OBJECT_BITS. Normally set to 8, but might need to be increased if CBMC runs out of memory for this proof.
 
 For documentation of these (and the other) options, see the [cbmc/Makefile.common](Makefile.common) file.
@@ -416,9 +416,9 @@ The significant changes are:
 HARNESS_FILE = poly_tobytes_harness
 PROOF_UID = poly_tobytes
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c
-CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_tobytes
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_tobytes
 USE_FUNCTION_CONTRACTS=
-FUNCTION_NAME = $(MLKEM_NAMESPACE)poly_tobytes
+FUNCTION_NAME = $(MLK_NAMESPACE)poly_tobytes
 ```
 Note that `USE_FUNCTION_CONTRACTS` is left empty since `poly_tobytes()` is a leaf function that does not call any other functions at all.
 

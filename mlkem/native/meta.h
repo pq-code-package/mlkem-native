@@ -2,20 +2,20 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef MLKEM_NATIVE_NATIVE_META_H
-#define MLKEM_NATIVE_NATIVE_META_H
+#ifndef MLK_NATIVE_META_H
+#define MLK_NATIVE_META_H
 
 /*
  * Default arithmetic backend
  */
 #include "../sys.h"
 
-#ifdef SYS_AARCH64
+#ifdef MLK_SYS_AARCH64
 #include "aarch64/meta.h"
-#endif /* SYS_AARCH64 */
+#endif /* MLK_SYS_AARCH64 */
 
-#ifdef SYS_X86_64_AVX2
+#ifdef MLK_SYS_X86_64_AVX2
 #include "x86_64/meta.h"
-#endif /* SYS_X86_64 */
+#endif /* MLK_SYS_X86_64 */
 
-#endif /* MLKEM_NATIVE_NATIVE_META_H */
+#endif /* MLK_NATIVE_META_H */

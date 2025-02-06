@@ -8,19 +8,19 @@
 
 #include "../../../common.h"
 
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 /*
- * WARNING: This file is auto-derived from the mlkem-native source file 
+ * WARNING: This file is auto-derived from the mlkem-native source file
  *   dev/x86_64/src/ntttobytes.S using scripts/simpasm. Do not modify it directly.
  */
 
 
 .text
 .balign 4
-.global MLKEM_ASM_NAMESPACE(ntttobytes_avx2)
-MLKEM_ASM_NAMESPACE(ntttobytes_avx2):
+.global MLK_ASM_NAMESPACE(ntttobytes_avx2)
+MLK_ASM_NAMESPACE(ntttobytes_avx2):
 
         vmovdqa	(%rdx), %ymm0
         callq	ntttobytes128_avx
@@ -98,5 +98,5 @@ ntttobytes128_avx:
         vmovdqu	%ymm9, 0xa0(%rdi)
         retq
 
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT &&
-         ! MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT &&
+         ! MLK_MULTILEVEL_BUILD_NO_SHARED */

@@ -19,9 +19,9 @@
  * Returns number of sampled 16-bit integers (at most MLKEM_N).
  **************************************************/
 #include "../../../common.h"
-#if (defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \
-        defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT))  \
-    && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if (defined(MLK_ARITH_BACKEND_AARCH64_CLEAN) || \
+        defined(MLK_ARITH_BACKEND_AARCH64_OPT))  \
+    && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
 // We save the output on the stack first, and copy to the actual
@@ -115,9 +115,9 @@
     bits                        .req v31
 
     .text
-    .global MLKEM_ASM_NAMESPACE(rej_uniform_asm_clean)
+    .global MLK_ASM_NAMESPACE(rej_uniform_asm_clean)
     .balign 4
-MLKEM_ASM_NAMESPACE(rej_uniform_asm_clean):
+MLK_ASM_NAMESPACE(rej_uniform_asm_clean):
     push_stack
 
     // Load 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80
@@ -405,6 +405,6 @@ return:
     .unreq bits
 
 /* simpasm: footer-start */
-#endif /* (defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) ||
-           defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT))
-          && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
+#endif /* (defined(MLK_ARITH_BACKEND_AARCH64_CLEAN) ||
+           defined(MLK_ARITH_BACKEND_AARCH64_OPT))
+          && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */

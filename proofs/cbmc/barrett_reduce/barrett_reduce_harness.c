@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include "common.h"
 
-#define barrett_reduce MLKEM_NAMESPACE(barrett_reduce)
+#define barrett_reduce MLK_NAMESPACE(barrett_reduce)
 int16_t barrett_reduce(int16_t a);
 
 void harness(void)

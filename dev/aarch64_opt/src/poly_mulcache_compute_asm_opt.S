@@ -4,8 +4,8 @@
  */
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_AARCH64_OPT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
 /* Montgomery multiplication, with precomputed Montgomery twist
@@ -45,9 +45,9 @@
         modulus_twisted   .req v7
 
         .text
-        .global MLKEM_ASM_NAMESPACE(poly_mulcache_compute_asm_opt)
+        .global MLK_ASM_NAMESPACE(poly_mulcache_compute_asm_opt)
         .balign 4
-MLKEM_ASM_NAMESPACE(poly_mulcache_compute_asm_opt):
+MLK_ASM_NAMESPACE(poly_mulcache_compute_asm_opt):
         mov wtmp, #3329
         dup modulus.8h, wtmp
 
@@ -176,5 +176,5 @@ poly_mulcache_compute_asm_opt_loop:
         .unreq modulus_twisted
 
 /* simpasm: footer-start */
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT &&
-          !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64_OPT &&
+          !MLK_MULTILEVEL_BUILD_NO_SHARED */

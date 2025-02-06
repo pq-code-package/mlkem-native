@@ -4,19 +4,19 @@
  */
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_AARCH64_OPT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 /*
- * WARNING: This file is auto-derived from the mlkem-native source file 
+ * WARNING: This file is auto-derived from the mlkem-native source file
  *   dev/aarch64_opt/src/poly_tobytes_asm_opt.S using scripts/simpasm. Do not modify it directly.
  */
 
 
 .text
 .balign 4
-.global MLKEM_ASM_NAMESPACE(poly_tobytes_asm_opt)
-MLKEM_ASM_NAMESPACE(poly_tobytes_asm_opt):
+.global MLK_ASM_NAMESPACE(poly_tobytes_asm_opt)
+MLK_ASM_NAMESPACE(poly_tobytes_asm_opt):
 
         mov	x2, #0x10               // =16
 
@@ -32,5 +32,5 @@ poly_tobytes_asm_opt_asm_loop_start:
         cbnz	x2, poly_tobytes_asm_opt_asm_loop_start
         ret
 
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT &&
-          !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64_OPT &&
+          !MLK_MULTILEVEL_BUILD_NO_SHARED */

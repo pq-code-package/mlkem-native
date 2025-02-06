@@ -24,12 +24,12 @@ static void print_hex(const char *label, const uint8_t *data, size_t size)
 int main(void)
 {
   unsigned i;
-  ALIGN uint8_t coins[3 * CRYPTO_SYMBYTES];
-  ALIGN uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  ALIGN uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  ALIGN uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
-  ALIGN uint8_t ss1[CRYPTO_BYTES];
-  ALIGN uint8_t ss2[CRYPTO_BYTES];
+  MLK_ALIGN uint8_t coins[3 * CRYPTO_SYMBYTES];
+  MLK_ALIGN uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+  MLK_ALIGN uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  MLK_ALIGN uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
+  MLK_ALIGN uint8_t ss1[CRYPTO_BYTES];
+  MLK_ALIGN uint8_t ss2[CRYPTO_BYTES];
 
   const uint8_t seed[64] = {
       32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,

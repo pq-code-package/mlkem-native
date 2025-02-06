@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include "common.h"
 
-#define scalar_signed_to_unsigned_q MLKEM_NAMESPACE(scalar_signed_to_unsigned_q)
+#define scalar_signed_to_unsigned_q MLK_NAMESPACE(scalar_signed_to_unsigned_q)
 uint16_t scalar_signed_to_unsigned_q(int16_t c);
 
 void harness(void)

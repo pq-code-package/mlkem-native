@@ -5,14 +5,14 @@
 
 #include "../../../../common.h"
 
-#if (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-     defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55)) &&    \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) || \
+     defined(MLK_FIPS202_BACKEND_AARCH64_A55)) &&    \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 #include <stdint.h>
 #include "fips202_native_aarch64.h"
 
-ALIGN const uint64_t keccakf1600_round_constants[] = {
+MLK_ALIGN const uint64_t keccakf1600_round_constants[] = {
     0x0000000000000001, 0x0000000000008082, 0x800000000000808a,
     0x8000000080008000, 0x000000000000808b, 0x0000000080000001,
     0x8000000080008081, 0x8000000000008009, 0x000000000000008a,
@@ -23,12 +23,12 @@ ALIGN const uint64_t keccakf1600_round_constants[] = {
     0x8000000000008080, 0x0000000080000001, 0x8000000080008008,
 };
 
-#else /* (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-          defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55) &&     \
-         !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)*/
+#else /* (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) || \
+          defined(MLK_FIPS202_BACKEND_AARCH64_A55) &&     \
+         !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)*/
 
-MLKEM_NATIVE_EMPTY_CU(fips202_aarch64_round_constants)
+MLK_EMPTY_CU(fips202_aarch64_round_constants)
 
-#endif /* (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-          defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55) &&      \
-         !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)*/
+#endif /* (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) || \
+          defined(MLK_FIPS202_BACKEND_AARCH64_A55) &&      \
+         !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)*/

@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef MLKEM_NATIVE_NATIVE_X86_64_SRC_CONSTS_H
-#define MLKEM_NATIVE_NATIVE_X86_64_SRC_CONSTS_H
+#ifndef MLK_NATIVE_X86_64_SRC_CONSTS_H
+#define MLK_NATIVE_X86_64_SRC_CONSTS_H
 /*
  * Implementation from Kyber reference repository
  * https://github.com/pq-crystals/kyber/blob/main/avx2/consts.h
@@ -35,8 +35,8 @@
 #ifndef __ASSEMBLER__
 #include "align.h"
 typedef ALIGNED_INT16(640) qdata_t;
-#define qdata MLKEM_NAMESPACE(qdata)
+#define qdata MLK_NAMESPACE(qdata)
 extern const qdata_t qdata;
 #endif
 
-#endif /* MLKEM_NATIVE_NATIVE_X86_64_SRC_CONSTS_H */
+#endif /* MLK_NATIVE_X86_64_SRC_CONSTS_H */

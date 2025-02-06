@@ -2,8 +2,8 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef MLKEM_NATIVE_FIPS202_FIPS202_H
-#define MLKEM_NATIVE_FIPS202_FIPS202_H
+#ifndef MLK_FIPS202_FIPS202_H
+#define MLK_FIPS202_FIPS202_H
 #include <stddef.h>
 #include <stdint.h>
 #include "../cbmc.h"
@@ -16,13 +16,13 @@
 #define SHA3_512_RATE 72
 
 /* Context for non-incremental API */
-#define shake128ctx MLKEM_NAMESPACE(shake128ctx)
+#define shake128ctx MLK_NAMESPACE(shake128ctx)
 typedef struct
 {
   uint64_t ctx[25];
 } shake128ctx;
 
-#define shake128_absorb_once MLKEM_NAMESPACE(shake128_absorb_once)
+#define shake128_absorb_once MLK_NAMESPACE(shake128_absorb_once)
 /*************************************************
  * Name:        shake128_absorb_once
  *
@@ -53,7 +53,7 @@ __contract__(
   assigns(memory_slice(state, sizeof(shake128ctx)))
 );
 
-#define shake128_squeezeblocks MLKEM_NAMESPACE(shake128_squeezeblocks)
+#define shake128_squeezeblocks MLK_NAMESPACE(shake128_squeezeblocks)
 /*************************************************
  * Name:        shake128_squeezeblocks
  *
@@ -74,15 +74,15 @@ __contract__(
   assigns(memory_slice(output, nblocks * SHAKE128_RATE), memory_slice(state, sizeof(shake128ctx)))
 );
 
-#define shake128_init MLKEM_NAMESPACE(shake128_init)
+#define shake128_init MLK_NAMESPACE(shake128_init)
 void shake128_init(shake128ctx *state);
 
-#define shake128_release MLKEM_NAMESPACE(shake128_release)
+#define shake128_release MLK_NAMESPACE(shake128_release)
 void shake128_release(shake128ctx *state);
 
 /* One-stop SHAKE256 call. Aliasing between input and
  * output is not permitted */
-#define shake256 MLKEM_NAMESPACE(shake256)
+#define shake256 MLK_NAMESPACE(shake256)
 /*************************************************
  * Name:        shake256
  *
@@ -104,7 +104,7 @@ __contract__(
 /* One-stop SHA3_256 call. Aliasing between input and
  * output is not permitted */
 #define SHA3_256_HASHBYTES 32
-#define sha3_256 MLKEM_NAMESPACE(sha3_256)
+#define sha3_256 MLK_NAMESPACE(sha3_256)
 /*************************************************
  * Name:        sha3_256
  *
@@ -124,7 +124,7 @@ __contract__(
 /* One-stop SHA3_512 call. Aliasing between input and
  * output is not permitted */
 #define SHA3_512_HASHBYTES 64
-#define sha3_512 MLKEM_NAMESPACE(sha3_512)
+#define sha3_512 MLK_NAMESPACE(sha3_512)
 /*************************************************
  * Name:        sha3_512
  *
@@ -142,9 +142,9 @@ __contract__(
 );
 
 #include "fips202_backend.h"
-#if !defined(MLKEM_NATIVE_FIPS202_BACKEND_IMPL) || \
-    (!defined(MLKEM_USE_FIPS202_X2_NATIVE) &&      \
-     !defined(MLKEM_USE_FIPS202_X4_NATIVE))
+#if !defined(MLK_FIPS202_BACKEND_IMPL) ||   \
+    (!defined(MLK_USE_FIPS202_X2_NATIVE) && \
+     !defined(MLK_USE_FIPS202_X4_NATIVE))
 /* If you provide your own FIPS-202 implementation where the x4-
  * Keccak-f1600-x4 implementation falls back to 4-fold Keccak-f1600,
  * set this to gain a small speedup. */
@@ -152,4 +152,4 @@ __contract__(
 #endif
 
 
-#endif /* MLKEM_NATIVE_FIPS202_FIPS202_H */
+#endif /* MLK_FIPS202_FIPS202_H */

@@ -25,7 +25,7 @@
 
 
 /*
- * WARNING: This file is auto-derived from the mlkem-native source file 
+ * WARNING: This file is auto-derived from the mlkem-native source file
  *   dev/aarch64_opt/src/intt_opt.S using scripts/simpasm. Do not modify it directly.
  */
 

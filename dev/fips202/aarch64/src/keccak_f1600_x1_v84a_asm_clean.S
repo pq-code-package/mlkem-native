@@ -38,9 +38,9 @@
 //
 
 #include "../../../../common.h"
-#if (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-     defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55)) &&    \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) || \
+     defined(MLK_FIPS202_BACKEND_AARCH64_A55)) &&    \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 #if defined(__ARM_FEATURE_SHA3)
 /* simpasm: header-end */
@@ -311,9 +311,9 @@
 #define KECCAK_F1600_ROUNDS 24
 
     .text
-    .global MLKEM_ASM_NAMESPACE(keccak_f1600_x1_v84a_asm_clean)
+    .global MLK_ASM_NAMESPACE(keccak_f1600_x1_v84a_asm_clean)
     .balign 4
-MLKEM_ASM_NAMESPACE(keccak_f1600_x1_v84a_asm_clean):
+MLK_ASM_NAMESPACE(keccak_f1600_x1_v84a_asm_clean):
     alloc_stack
     save_vregs
     mov const_addr, input_rc
@@ -425,6 +425,6 @@ keccak_f1600_x1_v84a_loop:
 /* simpasm: footer-start */
 #endif /* __ARM_FEATURE_SHA3 */
 
-#endif /* (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) ||
-          defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55) &&
-         !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)*/
+#endif /* (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) ||
+          defined(MLK_FIPS202_BACKEND_AARCH64_A55) &&
+         !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)*/

@@ -10,8 +10,8 @@
 
 #include "../../../common.h"
 
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_AARCH64_OPT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 #include <stdint.h>
 #include "arith_native_aarch64.h"
@@ -20,7 +20,7 @@
  * Lookup table used by rejection sampling of the public matrix.
  * See autogen for details.
  */
-ALIGN const uint8_t rej_uniform_table[] = {
+MLK_ALIGN const uint8_t rej_uniform_table[] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 /* 0 */,
     0,  1,  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 /* 1 */,
     2,  3,  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 /* 2 */,
@@ -279,10 +279,10 @@ ALIGN const uint8_t rej_uniform_table[] = {
     0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15 /* 255 */,
 };
 
-#else /* defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) \
-          && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
+#else /* defined(MLK_ARITH_BACKEND_AARCH64_OPT) \
+          && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */
 
-MLKEM_NATIVE_EMPTY_CU(aarch64_rej_uniform_table)
+MLK_EMPTY_CU(aarch64_rej_uniform_table)
 
-#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) \
-          && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
+#endif /* defined(MLK_ARITH_BACKEND_AARCH64_OPT) \
+          && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */

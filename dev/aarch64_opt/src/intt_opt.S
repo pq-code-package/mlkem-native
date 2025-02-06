@@ -24,8 +24,8 @@
 ///
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_AARCH64_OPT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
 // Bounds:
@@ -194,9 +194,9 @@
         ninv_tw          .req v30
 
         .text
-        .global MLKEM_ASM_NAMESPACE(intt_asm_opt)
+        .global MLK_ASM_NAMESPACE(intt_asm_opt)
         .balign 4
-MLKEM_ASM_NAMESPACE(intt_asm_opt):
+MLK_ASM_NAMESPACE(intt_asm_opt):
         push_stack
 
         // Setup constants
@@ -1044,5 +1044,5 @@ layer012_start:
     .unreq ninv_tw
 
 /* simpasm: footer-start */
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT &&
-          !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64_OPT &&
+          !MLK_MULTILEVEL_BUILD_NO_SHARED */

@@ -111,22 +111,22 @@ def gen_c_zeta_file(dry_run=False):
     def gen():
         yield from gen_header()
         yield '#include "common.h"'
-        yield "#if !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)"
+        yield "#if !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)"
         yield '#include "poly.h"'
         yield ""
         yield "/*"
         yield " * Table of zeta values used in the reference NTT and inverse NTT."
         yield " * See autogen for details."
         yield " */"
-        yield "ALIGN const int16_t zetas[128] = {"
+        yield "MLK_ALIGN const int16_t zetas[128] = {"
         yield from map(lambda t: str(t) + ",", gen_c_zetas())
         yield "};"
         yield ""
-        yield "#else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */"
+        yield "#else /* MLK_MULTILEVEL_BUILD_NO_SHARED */"
         yield ""
-        yield "MLKEM_NATIVE_EMPTY_CU(zetas)"
+        yield "MLK_EMPTY_CU(zetas)"
         yield ""
-        yield "#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */"
+        yield "#endif /* MLK_MULTILEVEL_BUILD_NO_SHARED */"
         yield ""
 
     update_file("mlkem/zetas.c", "\n".join(gen()), dry_run=dry_run)
@@ -325,8 +325,8 @@ def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
         yield from gen_header()
         yield '#include "../../../common.h"'
         yield ""
-        yield f"#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_{suffix.upper()}) && \\"
-        yield "     !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)"
+        yield f"#if defined(MLK_ARITH_BACKEND_AARCH64_{suffix.upper()}) && \\"
+        yield "     !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)"
         yield ""
         yield "#include <stdint.h>"
         yield '#include "arith_native_aarch64.h"'
@@ -335,38 +335,38 @@ def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
         yield " * Table of zeta values used in the AArch64 forward NTT"
         yield " * See autogen for details."
         yield " */"
-        yield "ALIGN const int16_t aarch64_ntt_zetas_layer01234[] = {"
+        yield "MLK_ALIGN const int16_t aarch64_ntt_zetas_layer01234[] = {"
         yield from map(lambda t: str(t) + ",", gen_aarch64_fwd_ntt_zetas_layer01234())
         yield "};"
         yield ""
-        yield "ALIGN const int16_t aarch64_ntt_zetas_layer56[] = {"
+        yield "MLK_ALIGN const int16_t aarch64_ntt_zetas_layer56[] = {"
         yield from map(lambda t: str(t) + ",", gen_aarch64_fwd_ntt_zetas_layer56())
         yield "};"
         yield ""
-        yield "ALIGN const int16_t aarch64_invntt_zetas_layer01234[] = {"
+        yield "MLK_ALIGN const int16_t aarch64_invntt_zetas_layer01234[] = {"
         yield from map(lambda t: str(t) + ",", gen_aarch64_inv_ntt_zetas_layer01234())
         yield "};"
         yield ""
-        yield "ALIGN const int16_t aarch64_invntt_zetas_layer56[] = {"
+        yield "MLK_ALIGN const int16_t aarch64_invntt_zetas_layer56[] = {"
         yield from map(lambda t: str(t) + ",", gen_aarch64_inv_ntt_zetas_layer56())
         yield "};"
         yield ""
-        yield "ALIGN const int16_t aarch64_zetas_mulcache_native[] = {"
+        yield "MLK_ALIGN const int16_t aarch64_zetas_mulcache_native[] = {"
         yield from map(lambda t: str(t) + ",", gen_aarch64_mulcache_twiddles())
         yield "};"
         yield ""
-        yield "ALIGN const int16_t aarch64_zetas_mulcache_twisted_native[] = {"
+        yield "MLK_ALIGN const int16_t aarch64_zetas_mulcache_twisted_native[] = {"
         yield from map(lambda t: str(t) + ",", gen_aarch64_mulcache_twiddles_twisted())
         yield "};"
         yield ""
-        yield f"#else /* defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_{suffix.upper()})"
-        yield "          && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */"
+        yield f"#else /* defined(MLK_ARITH_BACKEND_AARCH64_{suffix.upper()})"
+        yield "          && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
         yield ""
-        yield "MLKEM_NATIVE_EMPTY_CU(aarch64_zetas)"
+        yield "MLK_EMPTY_CU(aarch64_zetas)"
         yield ""
         yield ""
-        yield f"#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_{suffix.upper()})"
-        yield "          && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */"
+        yield f"#endif /* defined(MLK_ARITH_BACKEND_AARCH64_{suffix.upper()})"
+        yield "          && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
         yield ""
 
     update_file(
@@ -406,8 +406,8 @@ def gen_aarch64_rej_uniform_table(dry_run=False):
         yield from gen_header()
         yield '#include "../../../common.h"'
         yield ""
-        yield f"#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_{suffix.upper()}) && \\"
-        yield "     !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)"
+        yield f"#if defined(MLK_ARITH_BACKEND_AARCH64_{suffix.upper()}) && \\"
+        yield "     !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)"
         yield ""
         yield "#include <stdint.h>"
         yield '#include "arith_native_aarch64.h"'
@@ -416,17 +416,17 @@ def gen_aarch64_rej_uniform_table(dry_run=False):
         yield " * Lookup table used by rejection sampling of the public matrix."
         yield " * See autogen for details."
         yield " */"
-        yield "ALIGN const uint8_t rej_uniform_table[] = {"
+        yield "MLK_ALIGN const uint8_t rej_uniform_table[] = {"
         yield from map(lambda t: str(t) + ",", gen_aarch64_rej_uniform_table_rows())
         yield "};"
         yield ""
-        yield f"#else /* defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_{suffix.upper()})"
-        yield "          && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */"
+        yield f"#else /* defined(MLK_ARITH_BACKEND_AARCH64_{suffix.upper()})"
+        yield "          && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
         yield ""
-        yield "MLKEM_NATIVE_EMPTY_CU(aarch64_rej_uniform_table)"
+        yield "MLK_EMPTY_CU(aarch64_rej_uniform_table)"
         yield ""
-        yield f"#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_{suffix.upper()})"
-        yield "          && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */"
+        yield f"#endif /* defined(MLK_ARITH_BACKEND_AARCH64_{suffix.upper()})"
+        yield "          && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
         yield ""
 
     update_file(
@@ -465,8 +465,8 @@ def gen_avx2_rej_uniform_table(dry_run=False):
         yield from gen_header()
         yield '#include "../../../common.h"'
         yield ""
-        yield "#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \\"
-        yield "    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)"
+        yield "#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \\"
+        yield "    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)"
         yield ""
         yield "#include <stdint.h>"
         yield '#include "arith_native_x86_64.h"'
@@ -475,17 +475,17 @@ def gen_avx2_rej_uniform_table(dry_run=False):
         yield " * Lookup table used by rejection sampling of the public matrix."
         yield " * See autogen for details."
         yield " */"
-        yield "ALIGN const uint8_t rej_uniform_table[256][8] = {"
+        yield "MLK_ALIGN const uint8_t rej_uniform_table[256][8] = {"
         yield from map(lambda t: str(t) + ",", gen_avx2_rej_uniform_table_rows())
         yield "};"
         yield ""
-        yield "#else /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \\"
-        yield "         !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */"
+        yield "#else /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \\"
+        yield "         !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
         yield ""
-        yield "MLKEM_NATIVE_EMPTY_CU(avx2_rej_uniform_table)"
+        yield "MLK_EMPTY_CU(avx2_rej_uniform_table)"
         yield ""
-        yield "#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \\"
-        yield "          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */"
+        yield "#endif /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \\"
+        yield "          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
         yield ""
 
     update_file(
@@ -659,11 +659,17 @@ def gen_monolithic_source_file(dry_run=False):
     def native(c):
         return "native/" in c
 
-    def native_fips202(c):
-        return native(c) and "fips202" in c
+    def native_fips202_aarch64(c):
+        return native(c) and "fips202" in c and "aarch64" in c
 
-    def native_arith(c):
-        return native(c) and not native_fips202(c)
+    def native_fips202_x86_64(c):
+        return native(c) and "fips202" in c and "x86_64" in c
+
+    def native_arith_aarch64(c):
+        return native(c) and not "fips202" in c and "aarch64" in c
+
+    def native_arith_x86_64(c):
+        return native(c) and not "fips202" in c and "x86_64" in c
 
     # List of level-specific source files
     # All other files only need including and building once
@@ -693,16 +699,30 @@ def gen_monolithic_source_file(dry_run=False):
         yield " * Monolithic compilation unit bundling all compilation units within mlkem-native"
         yield " */"
         yield ""
+        yield '#include "mlkem/sys.h"'
+        yield ""
         for c in filter(lambda c: not native(c), c_sources):
             yield f'#include "{c}"'
-        yield "#if defined(MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_ARITH)"
-        for c in filter(native_arith, c_sources):
+        yield "#if defined(MLK_MONOBUILD_WITH_NATIVE_ARITH)"
+        yield "#if defined(MLK_SYS_AARCH64)"
+        for c in filter(native_arith_aarch64, c_sources):
             yield f'#include "{c}"'
-        yield "#endif /* MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_ARITH */"
-        yield "#if defined(MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_FIPS202)"
-        for c in filter(native_fips202, c_sources):
+        yield "#endif /* MLK_SYS_AARCH64 */"
+        yield "#if defined(MLK_SYS_X86_64)"
+        for c in filter(native_arith_x86_64, c_sources):
             yield f'#include "{c}"'
-        yield "#endif /* MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_FIPS202 */"
+        yield "#endif /* MLK_SYS_X86_64 */"
+        yield "#endif /* MLK_MONOBUILD_WITH_NATIVE_ARITH */"
+        yield "#if defined(MLK_MONOBUILD_WITH_NATIVE_FIPS202)"
+        yield "#if defined(MLK_SYS_AARCH64)"
+        for c in filter(native_fips202_aarch64, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif /* MLK_SYS_AARCH64 */"
+        yield "#if defined(MLK_SYS_X86_64)"
+        for c in filter(native_fips202_x86_64, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif /* MLK_SYS_X86_64 */"
+        yield "#endif /* MLK_MONOBUILD_WITH_NATIVE_FIPS202 */"
         yield ""
         yield from gen_monolithic_undef_all_core(
             filt=k_specific, desc="MLKEM_K-specific files"
@@ -857,7 +877,7 @@ def gen_hol_light_asm(dry_run=False):
             f"dev/aarch64_opt/src/{infile}",
             "proofs/hol_light/arm/mlkem",
             outfile=outfile,
-            cflags="-Imlkem/native/aarch64/src -DMLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT",
+            cflags="-Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
             preserve_header=False,
             dry_run=dry_run,
         )
@@ -971,13 +991,13 @@ def synchronize_backends(
 
 def adjust_header_guard_for_filename(content, header_file):
     content = content.split("\n")
-    exceptions = {"mlkem/mlkem_native.h": "MLKEM_NATIVE_H"}
+    exceptions = {"mlkem/mlkem_native.h": "MLK_H"}
 
     # Use full filename as the header guard, with '/' and '.' replaced by '_'
     guard_name = (
         header_file.removeprefix("mlkem/").replace("/", "_").replace(".", "_").upper()
     )
-    guard_name = "MLKEM_NATIVE_" + guard_name
+    guard_name = "MLK_" + guard_name
 
     if header_file in exceptions.keys():
         guard_name = exceptions[header_file]

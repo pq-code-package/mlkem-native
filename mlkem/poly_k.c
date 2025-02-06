@@ -16,11 +16,11 @@
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define poly_cbd_eta1 MLKEM_NAMESPACE_K(poly_cbd_eta1)
-#define poly_cbd_eta2 MLKEM_NAMESPACE_K(poly_cbd_eta2)
+#define poly_cbd_eta1 MLK_NAMESPACE_K(poly_cbd_eta1)
+#define poly_cbd_eta2 MLK_NAMESPACE_K(poly_cbd_eta2)
 /* End of static namespacing */
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                          const polyvec *a)
 {
@@ -33,7 +33,7 @@ void polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
   }
 }
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void polyvec_decompress_du(polyvec *r,
                            const uint8_t a[MLKEM_POLYVECCOMPRESSEDBYTES_DU])
 {
@@ -46,7 +46,7 @@ void polyvec_decompress_du(polyvec *r,
   debug_assert_bound_2d(r, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
 }
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const polyvec *a)
 {
   unsigned i;
@@ -58,7 +58,7 @@ void polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const polyvec *a)
   }
 }
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void polyvec_frombytes(polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
 {
   unsigned i;
@@ -67,10 +67,10 @@ void polyvec_frombytes(polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
     poly_frombytes(&r->vec[i], a + i * MLKEM_POLYBYTES);
   }
 
-  debug_assert_bound_2d(r, MLKEM_K, MLKEM_N, 0, UINT12_LIMIT);
+  debug_assert_bound_2d(r, MLKEM_K, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
 }
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void polyvec_ntt(polyvec *r)
 {
   unsigned i;
@@ -82,7 +82,7 @@ void polyvec_ntt(polyvec *r)
   debug_assert_abs_bound_2d(r, MLKEM_K, MLKEM_N, NTT_BOUND);
 }
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void polyvec_invntt_tomont(polyvec *r)
 {
   unsigned i;
@@ -94,14 +94,14 @@ void polyvec_invntt_tomont(polyvec *r)
   debug_assert_abs_bound_2d(r, MLKEM_K, MLKEM_N, INVNTT_BOUND);
 }
 
-#if !defined(MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
-MLKEM_NATIVE_INTERNAL_API
+#if !defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
+MLK_INTERNAL_API
 void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
                                            const polyvec *b,
                                            const polyvec_mulcache *b_cache)
 {
   unsigned i;
-  debug_assert_bound_2d(a, MLKEM_K, MLKEM_N, 0, UINT12_LIMIT);
+  debug_assert_bound_2d(a, MLKEM_K, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
   for (i = 0; i < MLKEM_N / 2; i++)
   __loop__(invariant(i <= MLKEM_N / 2))
   {
@@ -110,10 +110,10 @@ void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
     for (k = 0; k < MLKEM_K; k++)
     __loop__(
       invariant(k <= MLKEM_K &&
-         t[0] <=    (int32_t) k * 2 * UINT12_LIMIT * 32768  &&
-         t[0] >= - ((int32_t) k * 2 * UINT12_LIMIT * 32768) &&
-         t[1] <=   ((int32_t) k * 2 * UINT12_LIMIT * 32768) &&
-         t[1] >= - ((int32_t) k * 2 * UINT12_LIMIT * 32768)))
+         t[0] <=    (int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768  &&
+         t[0] >= - ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768) &&
+         t[1] <=   ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768) &&
+         t[1] >= - ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768)))
     {
       t[0] += (int32_t)a->vec[k].coeffs[2 * i + 1] * b_cache->vec[k].coeffs[i];
       t[0] += (int32_t)a->vec[k].coeffs[2 * i] * b->vec[k].coeffs[2 * i];
@@ -125,13 +125,13 @@ void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
   }
 }
 
-#else /* !MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
-MLKEM_NATIVE_INTERNAL_API
+#else /* !MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
+MLK_INTERNAL_API
 void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
                                            const polyvec *b,
                                            const polyvec_mulcache *b_cache)
 {
-  debug_assert_bound_2d(a, MLKEM_K, MLKEM_N, 0, UINT12_LIMIT);
+  debug_assert_bound_2d(a, MLKEM_K, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
   /* Omitting bounds assertion for cache since native implementations may
    * decide not to use a mulcache. Note that the C backend implementation
    * of poly_basemul_montgomery_cached() does still include the check. */
@@ -149,9 +149,9 @@ void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
                                                   (const int16_t *)b_cache);
 #endif
 }
-#endif /* MLKEM_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
+#endif /* MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyvec *b)
 {
   polyvec_mulcache b_cache;
@@ -159,7 +159,7 @@ void polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyvec *b)
   polyvec_basemul_acc_montgomery_cached(r, a, b, &b_cache);
 }
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void polyvec_mulcache_compute(polyvec_mulcache *x, const polyvec *a)
 {
   unsigned i;
@@ -169,7 +169,7 @@ void polyvec_mulcache_compute(polyvec_mulcache *x, const polyvec *a)
   }
 }
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void polyvec_reduce(polyvec *r)
 {
   unsigned i;
@@ -181,7 +181,7 @@ void polyvec_reduce(polyvec *r)
   debug_assert_bound_2d(r, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
 }
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void polyvec_add(polyvec *r, const polyvec *b)
 {
   unsigned i;
@@ -191,7 +191,7 @@ void polyvec_add(polyvec *r, const polyvec *b)
   }
 }
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void polyvec_tomont(polyvec *r)
 {
   unsigned i;
@@ -214,8 +214,8 @@ void polyvec_tomont(polyvec *r)
  * Arguments:   - poly *r: pointer to output polynomial
  *              - const uint8_t *buf: pointer to input byte array
  **************************************************/
-static INLINE void poly_cbd_eta1(poly *r,
-                                 const uint8_t buf[MLKEM_ETA1 * MLKEM_N / 4])
+static MLK_INLINE void poly_cbd_eta1(
+    poly *r, const uint8_t buf[MLKEM_ETA1 * MLKEM_N / 4])
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   requires(memory_no_alias(buf, MLKEM_ETA1 * MLKEM_N / 4))
@@ -232,19 +232,19 @@ __contract__(
 #endif
 }
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_getnoise_eta1_4x(poly *r0, poly *r1, poly *r2, poly *r3,
                            const uint8_t seed[MLKEM_SYMBYTES], uint8_t nonce0,
                            uint8_t nonce1, uint8_t nonce2, uint8_t nonce3)
 {
-  ALIGN uint8_t buf0[MLKEM_ETA1 * MLKEM_N / 4];
-  ALIGN uint8_t buf1[MLKEM_ETA1 * MLKEM_N / 4];
-  ALIGN uint8_t buf2[MLKEM_ETA1 * MLKEM_N / 4];
-  ALIGN uint8_t buf3[MLKEM_ETA1 * MLKEM_N / 4];
-  ALIGN uint8_t extkey0[MLKEM_SYMBYTES + 1];
-  ALIGN uint8_t extkey1[MLKEM_SYMBYTES + 1];
-  ALIGN uint8_t extkey2[MLKEM_SYMBYTES + 1];
-  ALIGN uint8_t extkey3[MLKEM_SYMBYTES + 1];
+  MLK_ALIGN uint8_t buf0[MLKEM_ETA1 * MLKEM_N / 4];
+  MLK_ALIGN uint8_t buf1[MLKEM_ETA1 * MLKEM_N / 4];
+  MLK_ALIGN uint8_t buf2[MLKEM_ETA1 * MLKEM_N / 4];
+  MLK_ALIGN uint8_t buf3[MLKEM_ETA1 * MLKEM_N / 4];
+  MLK_ALIGN uint8_t extkey0[MLKEM_SYMBYTES + 1];
+  MLK_ALIGN uint8_t extkey1[MLKEM_SYMBYTES + 1];
+  MLK_ALIGN uint8_t extkey2[MLKEM_SYMBYTES + 1];
+  MLK_ALIGN uint8_t extkey3[MLKEM_SYMBYTES + 1];
   memcpy(extkey0, seed, MLKEM_SYMBYTES);
   memcpy(extkey1, seed, MLKEM_SYMBYTES);
   memcpy(extkey2, seed, MLKEM_SYMBYTES);
@@ -276,8 +276,8 @@ void poly_getnoise_eta1_4x(poly *r0, poly *r1, poly *r2, poly *r3,
  * Arguments:   - poly *r: pointer to output polynomial
  *              - const uint8_t *buf: pointer to input byte array
  **************************************************/
-static INLINE void poly_cbd_eta2(poly *r,
-                                 const uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4])
+static MLK_INLINE void poly_cbd_eta2(
+    poly *r, const uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4])
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
   requires(memory_no_alias(buf, MLKEM_ETA2 * MLKEM_N / 4))
@@ -291,12 +291,12 @@ __contract__(
 #endif
 }
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_getnoise_eta2(poly *r, const uint8_t seed[MLKEM_SYMBYTES],
                         uint8_t nonce)
 {
-  ALIGN uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4];
-  ALIGN uint8_t extkey[MLKEM_SYMBYTES + 1];
+  MLK_ALIGN uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4];
+  MLK_ALIGN uint8_t extkey[MLKEM_SYMBYTES + 1];
 
   memcpy(extkey, seed, MLKEM_SYMBYTES);
   extkey[MLKEM_SYMBYTES] = nonce;
@@ -310,7 +310,7 @@ void poly_getnoise_eta2(poly *r, const uint8_t seed[MLKEM_SYMBYTES],
 
 
 #if MLKEM_K == 2
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_getnoise_eta1122_4x(poly *r0, poly *r1, poly *r2, poly *r3,
                               const uint8_t seed[MLKEM_SYMBYTES],
                               uint8_t nonce0, uint8_t nonce1, uint8_t nonce2,
@@ -319,16 +319,16 @@ void poly_getnoise_eta1122_4x(poly *r0, poly *r1, poly *r2, poly *r3,
 #if MLKEM_ETA2 >= MLKEM_ETA1
 #error poly_getnoise_eta1122_4x assumes MLKEM_ETA1 > MLKEM_ETA2
 #endif
-  ALIGN uint8_t buf0[MLKEM_ETA1 * MLKEM_N / 4];
-  ALIGN uint8_t buf1[MLKEM_ETA1 * MLKEM_N / 4];
+  MLK_ALIGN uint8_t buf0[MLKEM_ETA1 * MLKEM_N / 4];
+  MLK_ALIGN uint8_t buf1[MLKEM_ETA1 * MLKEM_N / 4];
   /* Pad to larger buffer */
-  ALIGN uint8_t buf2[MLKEM_ETA1 * MLKEM_N / 4];
-  ALIGN uint8_t buf3[MLKEM_ETA1 * MLKEM_N / 4];
+  MLK_ALIGN uint8_t buf2[MLKEM_ETA1 * MLKEM_N / 4];
+  MLK_ALIGN uint8_t buf3[MLKEM_ETA1 * MLKEM_N / 4];
 
-  ALIGN uint8_t extkey0[MLKEM_SYMBYTES + 1];
-  ALIGN uint8_t extkey1[MLKEM_SYMBYTES + 1];
-  ALIGN uint8_t extkey2[MLKEM_SYMBYTES + 1];
-  ALIGN uint8_t extkey3[MLKEM_SYMBYTES + 1];
+  MLK_ALIGN uint8_t extkey0[MLKEM_SYMBYTES + 1];
+  MLK_ALIGN uint8_t extkey1[MLKEM_SYMBYTES + 1];
+  MLK_ALIGN uint8_t extkey2[MLKEM_SYMBYTES + 1];
+  MLK_ALIGN uint8_t extkey3[MLKEM_SYMBYTES + 1];
 
   memcpy(extkey0, seed, MLKEM_SYMBYTES);
   memcpy(extkey1, seed, MLKEM_SYMBYTES);

@@ -22,4 +22,4 @@ Macros:
  - __contract__(x)={ void a; void b; void c; void d; void e; void f; } void abcdefghijklmnopqrstuvw()
  - __loop__(x)={}
  # Make this artifically long to force line break
- - MLKEM_NATIVE_INTERNAL_API=void abcdefghijklmnopqrstuvwabcdefghijklmnopqrstuvwabcdefg();
+ - MLK_INTERNAL_API=void abcdefghijklmnopqrstuvwabcdefghijklmnopqrstuvwabcdefg();

@@ -19,20 +19,20 @@
  * Returns number of sampled 16-bit integers (at most MLKEM_N).
  **************************************************/
 #include "../../../common.h"
-#if (defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) || \
-        defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT))  \
-    && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if (defined(MLK_ARITH_BACKEND_AARCH64_CLEAN) || \
+        defined(MLK_ARITH_BACKEND_AARCH64_OPT))  \
+    && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 /*
- * WARNING: This file is auto-derived from the mlkem-native source file 
+ * WARNING: This file is auto-derived from the mlkem-native source file
  *   dev/aarch64_opt/src/rej_uniform_asm_clean.S using scripts/simpasm. Do not modify it directly.
  */
 
 
 .text
 .balign 4
-.global MLKEM_ASM_NAMESPACE(rej_uniform_asm_clean)
-MLKEM_ASM_NAMESPACE(rej_uniform_asm_clean):
+.global MLK_ASM_NAMESPACE(rej_uniform_asm_clean)
+MLK_ASM_NAMESPACE(rej_uniform_asm_clean):
 
         sub	sp, sp, #0x240
         mov	x7, #0x1                // =1
@@ -185,6 +185,6 @@ return:
         add	sp, sp, #0x240
         ret
 
-#endif /* (defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN) ||
-           defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT))
-          && !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
+#endif /* (defined(MLK_ARITH_BACKEND_AARCH64_CLEAN) ||
+           defined(MLK_ARITH_BACKEND_AARCH64_OPT))
+          && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */

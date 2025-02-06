@@ -2,8 +2,8 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef MLKEM_NATIVE_RANDOMBYTES_H
-#define MLKEM_NATIVE_RANDOMBYTES_H
+#ifndef MLK_RANDOMBYTES_H
+#define MLK_RANDOMBYTES_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -16,4 +16,4 @@ __contract__(
   assigns(memory_slice(out, outlen))
 );
 
-#endif /* MLKEM_NATIVE_RANDOMBYTES_H */
+#endif /* MLK_RANDOMBYTES_H */

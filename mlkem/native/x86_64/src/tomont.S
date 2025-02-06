@@ -12,19 +12,19 @@
 //   semantics of poly_reduce().
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 /*
- * WARNING: This file is auto-derived from the mlkem-native source file 
+ * WARNING: This file is auto-derived from the mlkem-native source file
  *   dev/x86_64/src/tomont.S using scripts/simpasm. Do not modify it directly.
  */
 
 
 .text
 .balign 4
-.global MLKEM_ASM_NAMESPACE(tomont_avx2)
-MLKEM_ASM_NAMESPACE(tomont_avx2):
+.global MLK_ASM_NAMESPACE(tomont_avx2)
+MLK_ASM_NAMESPACE(tomont_avx2):
 
         vmovdqa	(%rsi), %ymm0
         vmovdqa	0xa0(%rsi), %ymm1
@@ -85,5 +85,5 @@ tomont128_avx2:
         vmovdqa	%ymm10, 0xe0(%rdi)
         retq
 
-#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
+#endif /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */
