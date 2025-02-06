@@ -24,7 +24,7 @@ void poly_compress_d4_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
   unsigned int i;
   __m256i f0, f1, f2, f3;
   const __m256i v =
-      _mm256_load_si256(&qdata.vec[AVX2_BACKEND_DATA_OFFSET_16XV / 16]);
+      _mm256_load_si256(&qdata.vec[MLK_AVX2_BACKEND_DATA_OFFSET_16XV / 16]);
   const __m256i shift1 = _mm256_set1_epi16(1 << 9);
   const __m256i mask = _mm256_set1_epi16(15);
   const __m256i shift2 = _mm256_set1_epi16((16 << 8) + 1);
@@ -65,7 +65,7 @@ void poly_decompress_d4_avx2(__m256i *MLK_RESTRICT r,
   __m128i t;
   __m256i f;
   const __m256i q =
-      _mm256_load_si256(&qdata.vec[AVX2_BACKEND_DATA_OFFSET_16XQ / 16]);
+      _mm256_load_si256(&qdata.vec[MLK_AVX2_BACKEND_DATA_OFFSET_16XQ / 16]);
   const __m256i shufbidx =
       _mm256_set_epi8(7, 7, 7, 7, 6, 6, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3,
                       3, 2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0);
@@ -91,7 +91,7 @@ void poly_compress_d10_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
   __m256i f0, f1, f2;
   __m128i t0, t1;
   const __m256i v =
-      _mm256_load_si256(&qdata.vec[AVX2_BACKEND_DATA_OFFSET_16XV / 16]);
+      _mm256_load_si256(&qdata.vec[MLK_AVX2_BACKEND_DATA_OFFSET_16XV / 16]);
   const __m256i v8 = _mm256_slli_epi16(v, 3);
   const __m256i off = _mm256_set1_epi16(15);
   const __m256i shift1 = _mm256_set1_epi16(1 << 12);
@@ -175,7 +175,7 @@ void poly_compress_d5_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
   __m256i f0, f1;
   __m128i t0, t1;
   const __m256i v =
-      _mm256_load_si256(&qdata.vec[AVX2_BACKEND_DATA_OFFSET_16XV / 16]);
+      _mm256_load_si256(&qdata.vec[MLK_AVX2_BACKEND_DATA_OFFSET_16XV / 16]);
   const __m256i shift1 = _mm256_set1_epi16(1 << 10);
   const __m256i mask = _mm256_set1_epi16(31);
   const __m256i shift2 = _mm256_set1_epi16((32 << 8) + 1);
@@ -218,7 +218,7 @@ void poly_decompress_d5_avx2(__m256i *MLK_RESTRICT r,
   __m256i f;
   int16_t ti;
   const __m256i q =
-      _mm256_load_si256(&qdata.vec[AVX2_BACKEND_DATA_OFFSET_16XQ / 16]);
+      _mm256_load_si256(&qdata.vec[MLK_AVX2_BACKEND_DATA_OFFSET_16XQ / 16]);
   const __m256i shufbidx =
       _mm256_set_epi8(9, 9, 9, 8, 8, 8, 8, 7, 7, 6, 6, 6, 6, 5, 5, 5, 4, 4, 4,
                       3, 3, 3, 3, 2, 2, 1, 1, 1, 1, 0, 0, 0);
@@ -248,7 +248,7 @@ void poly_compress_d11_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
   __m256i f0, f1, f2;
   __m128i t0, t1;
   const __m256i v =
-      _mm256_load_si256(&qdata.vec[AVX2_BACKEND_DATA_OFFSET_16XV / 16]);
+      _mm256_load_si256(&qdata.vec[MLK_AVX2_BACKEND_DATA_OFFSET_16XV / 16]);
   const __m256i v8 = _mm256_slli_epi16(v, 3);
   const __m256i off = _mm256_set1_epi16(36);
   const __m256i shift1 = _mm256_set1_epi16(1 << 13);
@@ -320,7 +320,7 @@ void poly_decompress_d11_avx2(__m256i *MLK_RESTRICT r,
   unsigned int i;
   __m256i f;
   const __m256i q =
-      _mm256_load_si256(&qdata.vec[AVX2_BACKEND_DATA_OFFSET_16XQ / 16]);
+      _mm256_load_si256(&qdata.vec[MLK_AVX2_BACKEND_DATA_OFFSET_16XQ / 16]);
   const __m256i shufbidx =
       _mm256_set_epi8(13, 12, 12, 11, 10, 9, 9, 8, 8, 7, 6, 5, 5, 4, 4, 3, 10,
                       9, 9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1, 1, 0);

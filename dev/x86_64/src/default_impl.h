@@ -46,7 +46,7 @@ static MLK_INLINE int rej_uniform_native(int16_t *r, unsigned len,
                                          const uint8_t *buf, unsigned buflen)
 {
   /* AVX2 implementation assumes specific buffer lengths */
-  if (len != MLKEM_N || buflen != REJ_UNIFORM_AVX_BUFLEN)
+  if (len != MLKEM_N || buflen != MLK_AVX2_REJ_UNIFORM_BUFLEN)
   {
     return -1;
   }
