@@ -21,7 +21,7 @@
 .balign 4
 MLK_ASM_NAMESPACE(nttfrombytes_avx2):
 #consts
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XMASK*2(%rdx),%ymm0
+vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XMASK*2(%rdx),%ymm0
 call		nttfrombytes128_avx
 add		$256,%rdi
 add		$192,%rsi

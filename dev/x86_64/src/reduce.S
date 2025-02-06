@@ -25,8 +25,8 @@
 .balign 4
 MLK_ASM_NAMESPACE(reduce_avx2):
 #consts
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XV*2(%rsi),%ymm1
+vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
+vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XV*2(%rsi),%ymm1
 call		reduce128_avx2
 add		$256,%rdi
 call		reduce128_avx2

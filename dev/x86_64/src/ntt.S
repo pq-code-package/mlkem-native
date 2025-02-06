@@ -78,12 +78,12 @@ vpaddw		%ymm15,%ymm\rh3,%ymm\rh3 /* rh3 = rl3 - rh3 + ymm15 = rl3 - (rh3 - ymm15
 .endm
 
 .macro level0 off
-vpbroadcastq	(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+0)*2(%rsi),%ymm15
+vpbroadcastq	(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+0)*2(%rsi),%ymm15
 vmovdqa		(64*\off+128)*2(%rdi),%ymm8
 vmovdqa		(64*\off+144)*2(%rdi),%ymm9
 vmovdqa		(64*\off+160)*2(%rdi),%ymm10
 vmovdqa		(64*\off+176)*2(%rdi),%ymm11
-vpbroadcastq	(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+4)*2(%rsi),%ymm2
+vpbroadcastq	(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+4)*2(%rsi),%ymm2
 
 mul		8,9,10,11
 
@@ -107,12 +107,12 @@ vmovdqa		%ymm11,(64*\off+176)*2(%rdi)
 
 .macro levels1t6 off
 /* level 1 */
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+16)*2(%rsi),%ymm15
+vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+16)*2(%rsi),%ymm15
 vmovdqa		(128*\off+ 64)*2(%rdi),%ymm8
 vmovdqa		(128*\off+ 80)*2(%rdi),%ymm9
 vmovdqa		(128*\off+ 96)*2(%rdi),%ymm10
 vmovdqa		(128*\off+112)*2(%rdi),%ymm11
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+32)*2(%rsi),%ymm2
+vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+32)*2(%rsi),%ymm2
 
 mul		8,9,10,11
 
@@ -128,8 +128,8 @@ update		3,4,5,6,7,8,9,10,11
 shuffle8	5,10,7,10
 shuffle8	6,11,5,11
 
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+48)*2(%rsi),%ymm15
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+64)*2(%rsi),%ymm2
+vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+48)*2(%rsi),%ymm15
+vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+64)*2(%rsi),%ymm2
 
 mul		7,10,5,11
 
@@ -143,8 +143,8 @@ update		4,6,8,3,9,7,10,5,11
 shuffle4	8,5,9,5
 shuffle4	3,11,8,11
 
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+80)*2(%rsi),%ymm15
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+96)*2(%rsi),%ymm2
+vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+80)*2(%rsi),%ymm15
+vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+96)*2(%rsi),%ymm2
 
 mul		9,5,8,11
 
@@ -158,8 +158,8 @@ update		6,3,7,4,10,9,5,8,11
 shuffle2	7,8,10,8
 shuffle2	4,11,7,11
 
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+112)*2(%rsi),%ymm15
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+128)*2(%rsi),%ymm2
+vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+112)*2(%rsi),%ymm15
+vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+128)*2(%rsi),%ymm2
 
 mul		10,8,7,11
 
@@ -173,8 +173,8 @@ update		3,4,9,6,5,10,8,7,11
 shuffle1	9,7,5,7
 shuffle1	6,11,9,11
 
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+144)*2(%rsi),%ymm15
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+160)*2(%rsi),%ymm2
+vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+144)*2(%rsi),%ymm15
+vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+160)*2(%rsi),%ymm2
 
 mul		5,7,9,11
 
@@ -185,10 +185,10 @@ reduce
 update		4,6,10,3,8,5,7,9,11
 
 /* level 6 */
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+176)*2(%rsi),%ymm14
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+208)*2(%rsi),%ymm15
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+192)*2(%rsi),%ymm8
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+224)*2(%rsi),%ymm2
+vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+176)*2(%rsi),%ymm14
+vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+208)*2(%rsi),%ymm15
+vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+192)*2(%rsi),%ymm8
+vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+224*\off+224)*2(%rsi),%ymm2
 
 mul		10,3,9,11,14,15,8,2
 
@@ -209,7 +209,7 @@ vmovdqa		%ymm11,(128*\off+112)*2(%rdi)
 .global MLK_ASM_NAMESPACE(ntt_avx2)
 .balign 4
 MLK_ASM_NAMESPACE(ntt_avx2):
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
+vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
 
 level0		0
 level0		1

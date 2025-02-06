@@ -13,7 +13,7 @@
 #include <immintrin.h>
 #include <stdint.h>
 
-#define ALIGNED_INT16(N)        \
+#define MLK_ALIGNED_INT16(N)    \
   union                         \
   {                             \
     int16_t coeffs[N];          \

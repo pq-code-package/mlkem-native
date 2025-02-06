@@ -15,7 +15,7 @@
 
 /* Polynomials to be multiplied are denoted a+bX (rsi arg) and c+dX (rdx arg) */
 .macro schoolbook off
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XQINV*2(%rcx),%ymm0
+vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XQINV*2(%rcx),%ymm0
 vmovdqa		(64*\off+ 0)*2(%rsi),%ymm1		# a0
 vmovdqa		(64*\off+16)*2(%rsi),%ymm2		# b0
 vmovdqa		(64*\off+32)*2(%rsi),%ymm3		# a1
@@ -63,7 +63,7 @@ vpmullw		%ymm7,%ymm12,%ymm7			# b1c1.lo
 vpmullw		%ymm8,%ymm12,%ymm12			# b1d1.lo
 
 /* Compute 2nd high multiplication in Montgomery multiplication */
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rcx),%ymm8
+vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rcx),%ymm8
 vpmulhw		%ymm8,%ymm13,%ymm13
 vpmulhw		%ymm8,%ymm9,%ymm9
 vpmulhw		%ymm8,%ymm5,%ymm5
@@ -121,7 +121,7 @@ mov		%rsp,%r8
 and		$-32,%rsp
 sub		$32,%rsp
 
-lea		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+176)*2(%rcx),%r9
+lea		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+176)*2(%rcx),%r9
 schoolbook	0
 
 add		$32*2,%r9
