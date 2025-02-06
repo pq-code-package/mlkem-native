@@ -2,8 +2,8 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef MLKEM_NATIVE_FIPS202_KECCAKF1600_H
-#define MLKEM_NATIVE_FIPS202_KECCAKF1600_H
+#ifndef MLK_FIPS202_KECCAKF1600_H
+#define MLK_FIPS202_KECCAKF1600_H
 #include <stdint.h>
 #include "../cbmc.h"
 #include "../common.h"
@@ -19,7 +19,7 @@
  */
 
 #define KeccakF1600_StateExtractBytes \
-  MLKEM_NAMESPACE(KeccakF1600_StateExtractBytes)
+  MLK_NAMESPACE(KeccakF1600_StateExtractBytes)
 void KeccakF1600_StateExtractBytes(uint64_t *state, unsigned char *data,
                                    unsigned offset, unsigned length)
 __contract__(
@@ -30,7 +30,7 @@ __contract__(
     assigns(memory_slice(data, length))
 );
 
-#define KeccakF1600_StateXORBytes MLKEM_NAMESPACE(KeccakF1600_StateXORBytes)
+#define KeccakF1600_StateXORBytes MLK_NAMESPACE(KeccakF1600_StateXORBytes)
 void KeccakF1600_StateXORBytes(uint64_t *state, const unsigned char *data,
                                unsigned offset, unsigned length)
 __contract__(
@@ -42,7 +42,7 @@ __contract__(
 );
 
 #define KeccakF1600x4_StateExtractBytes \
-  MLKEM_NAMESPACE(KeccakF1600x4_StateExtractBytes)
+  MLK_NAMESPACE(KeccakF1600x4_StateExtractBytes)
 void KeccakF1600x4_StateExtractBytes(uint64_t *state, unsigned char *data0,
                                      unsigned char *data1, unsigned char *data2,
                                      unsigned char *data3, unsigned offset,
@@ -61,7 +61,7 @@ __contract__(
     assigns(memory_slice(data3, length))
 );
 
-#define KeccakF1600x4_StateXORBytes MLKEM_NAMESPACE(KeccakF1600x4_StateXORBytes)
+#define KeccakF1600x4_StateXORBytes MLK_NAMESPACE(KeccakF1600x4_StateXORBytes)
 void KeccakF1600x4_StateXORBytes(uint64_t *state, const unsigned char *data0,
                                  const unsigned char *data1,
                                  const unsigned char *data2,
@@ -83,7 +83,7 @@ __contract__(
 );
 
 
-#define KeccakF1600x4_StatePermute MLKEM_NAMESPACE(KeccakF1600x4_StatePermute)
+#define KeccakF1600x4_StatePermute MLK_NAMESPACE(KeccakF1600x4_StatePermute)
 void KeccakF1600x4_StatePermute(uint64_t *state)
 __contract__(
     requires(memory_no_alias(state, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
@@ -91,8 +91,8 @@ __contract__(
 );
 
 
-#if !defined(MLKEM_USE_FIPS202_X1_ASM)
-#define KeccakF1600_StatePermute MLKEM_NAMESPACE(KeccakF1600_StatePermute)
+#if !defined(MLK_USE_FIPS202_X1_ASM)
+#define KeccakF1600_StatePermute MLK_NAMESPACE(KeccakF1600_StatePermute)
 void KeccakF1600_StatePermute(uint64_t *state)
 __contract__(
     requires(memory_no_alias(state, sizeof(uint64_t) * KECCAK_LANES))
@@ -100,7 +100,7 @@ __contract__(
 );
 
 #else
-#define KeccakF1600_StatePermute MLKEM_NAMESPACE(keccak_f1600_x1_asm)
+#define KeccakF1600_StatePermute MLK_NAMESPACE(keccak_f1600_x1_asm)
 #endif
 
-#endif /* MLKEM_NATIVE_FIPS202_KECCAKF1600_H */
+#endif /* MLK_FIPS202_KECCAKF1600_H */

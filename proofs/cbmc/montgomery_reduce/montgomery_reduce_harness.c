@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include "common.h"
 
-#define montgomery_reduce MLKEM_NAMESPACE(montgomery_reduce)
+#define montgomery_reduce MLK_NAMESPACE(montgomery_reduce)
 int16_t montgomery_reduce(int32_t a);
 
 void harness(void)

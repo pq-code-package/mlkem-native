@@ -4,7 +4,7 @@
 
 #include "sampling.h"
 
-#define rej_uniform_scalar MLKEM_NAMESPACE(rej_uniform_scalar)
+#define rej_uniform_scalar MLK_NAMESPACE(rej_uniform_scalar)
 unsigned rej_uniform_scalar(int16_t *r, unsigned target, unsigned offset,
                             const uint8_t *buf, unsigned buflen);
 

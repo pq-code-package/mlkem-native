@@ -28,9 +28,9 @@
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
 
 #include "../../../../common.h"
-#if (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-     defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55)) &&    \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) || \
+     defined(MLK_FIPS202_BACKEND_AARCH64_A55)) &&    \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
 #define KECCAK_F1600_ROUNDS 24
@@ -860,9 +860,9 @@
 .endm
 
     .text
-    .global MLKEM_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_asm_hybrid_opt)
+    .global MLK_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_asm_hybrid_opt)
     .balign 4
-MLKEM_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_asm_hybrid_opt):
+MLK_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_asm_hybrid_opt):
     alloc_stack
     save_gprs
     save_vregs
@@ -1815,6 +1815,6 @@ keccak_f1600_x4_v8a_scalar_hybrid_done:
     .unreq tmp
 
 /* simpasm: footer-start */
-#endif /* (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) ||
-          defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55) &&
-         !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)*/
+#endif /* (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) ||
+          defined(MLK_FIPS202_BACKEND_AARCH64_A55) &&
+         !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)*/

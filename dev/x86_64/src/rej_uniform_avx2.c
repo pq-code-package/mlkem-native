@@ -10,8 +10,8 @@
 
 #include "../../../common.h"
 
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 #include <immintrin.h>
 #include <stdint.h>
@@ -19,7 +19,7 @@
 #include "arith_native_x86_64.h"
 #include "consts.h"
 
-unsigned rej_uniform_avx2(int16_t *RESTRICT r, const uint8_t *buf)
+unsigned rej_uniform_avx2(int16_t *MLK_RESTRICT r, const uint8_t *buf)
 {
   unsigned ctr, pos;
   uint16_t val0, val1;
@@ -124,10 +124,10 @@ unsigned rej_uniform_avx2(int16_t *RESTRICT r, const uint8_t *buf)
   return ctr;
 }
 
-#else /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
+#else /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */
 
-MLKEM_NATIVE_EMPTY_CU(avx2_rej_uniform)
+MLK_EMPTY_CU(avx2_rej_uniform)
 
-#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
+#endif /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */

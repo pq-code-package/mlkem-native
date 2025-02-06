@@ -13,13 +13,13 @@ DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET += $(MLKEM_NAMESPACE)polyvec_mulcache_compute.0:4 # Largest value of MLKEM_K
+UNWINDSET += $(MLK_NAMESPACE)polyvec_mulcache_compute.0:4 # Largest value of MLKEM_K
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c $(SRCDIR)/mlkem/poly_k.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)polyvec_mulcache_compute
-USE_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_mulcache_compute
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)polyvec_mulcache_compute
+USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_mulcache_compute
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

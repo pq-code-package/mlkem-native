@@ -2,8 +2,8 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef MLKEM_NATIVE_SAMPLING_H
-#define MLKEM_NATIVE_SAMPLING_H
+#ifndef MLK_SAMPLING_H
+#define MLK_SAMPLING_H
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -11,7 +11,7 @@
 #include "common.h"
 #include "poly.h"
 
-#define poly_cbd2 MLKEM_NAMESPACE(poly_cbd2)
+#define poly_cbd2 MLK_NAMESPACE(poly_cbd2)
 /*************************************************
  * Name:        poly_cbd2
  *
@@ -22,11 +22,11 @@
  * Arguments:   - poly *r: pointer to output polynomial
  *              - const uint8_t *buf: pointer to input byte array
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4]);
 
-#if defined(MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_ETA1 == 3
-#define poly_cbd3 MLKEM_NAMESPACE(poly_cbd3)
+#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_ETA1 == 3
+#define poly_cbd3 MLK_NAMESPACE(poly_cbd3)
 /*************************************************
  * Name:        poly_cbd3
  *
@@ -38,11 +38,11 @@ void poly_cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4]);
  * Arguments:   - poly *r: pointer to output polynomial
  *              - const uint8_t *buf: pointer to input byte array
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4]);
-#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD || MLKEM_ETA1 == 3 */
+#endif /* MLK_MULTILEVEL_BUILD || MLKEM_ETA1 == 3 */
 
-#define poly_rej_uniform_x4 MLKEM_NAMESPACE(poly_rej_uniform_x4)
+#define poly_rej_uniform_x4 MLK_NAMESPACE(poly_rej_uniform_x4)
 /*************************************************
  * Name:        poly_rej_uniform_x4
  *
@@ -56,7 +56,7 @@ void poly_cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4]);
  *                                     MLKEM_SYMBYTES + 2 each.
  *
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_rej_uniform_x4(poly *vec, uint8_t *seed[4])
 __contract__(
   requires(memory_no_alias(vec, sizeof(poly) * 4))
@@ -71,7 +71,7 @@ __contract__(
   ensures(array_bound(vec[2].coeffs, 0, MLKEM_N, 0, MLKEM_Q))
   ensures(array_bound(vec[3].coeffs, 0, MLKEM_N, 0, MLKEM_Q)));
 
-#define poly_rej_uniform MLKEM_NAMESPACE(poly_rej_uniform)
+#define poly_rej_uniform MLK_NAMESPACE(poly_rej_uniform)
 /*************************************************
  * Name:        poly_rej_uniform
  *
@@ -83,7 +83,7 @@ __contract__(
  *                                     MLKEM_SYMBYTES + 2 each.
  *
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_rej_uniform(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
 __contract__(
   requires(memory_no_alias(entry, sizeof(poly)))
@@ -91,4 +91,4 @@ __contract__(
   assigns(memory_slice(entry, sizeof(poly)))
   ensures(array_bound(entry->coeffs, 0, MLKEM_N, 0, MLKEM_Q)));
 
-#endif /* MLKEM_NATIVE_SAMPLING_H */
+#endif /* MLK_SAMPLING_H */

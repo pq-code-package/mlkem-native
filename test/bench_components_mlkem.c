@@ -54,11 +54,11 @@ static int cmp_uint64_t(const void *a, const void *b)
 
 static int bench(void)
 {
-  ALIGN uint64_t data0[1024];
-  ALIGN uint64_t data1[1024];
-  ALIGN uint64_t data2[1024];
-  ALIGN uint64_t data3[1024];
-  ALIGN uint64_t data4[1024];
+  MLK_ALIGN uint64_t data0[1024];
+  MLK_ALIGN uint64_t data1[1024];
+  MLK_ALIGN uint64_t data2[1024];
+  MLK_ALIGN uint64_t data3[1024];
+  MLK_ALIGN uint64_t data4[1024];
   uint8_t *seed[4];
   uint8_t nonce0 = 0, nonce1 = 1, nonce2 = 2, nonce3 = 3;
   uint64_t cyc[NTESTS];
@@ -185,7 +185,7 @@ static int bench(void)
   BENCH("gen_matrix", gen_matrix((polyvec *)data0, (uint8_t *)data1, 0))
 
 
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN)
+#if defined(MLK_ARITH_BACKEND_AARCH64_CLEAN)
   BENCH("ntt-clean",
         ntt_asm_clean((int16_t *)data0, (int16_t *)data1, (int16_t *)data2));
   BENCH("intt-clean",
@@ -213,9 +213,9 @@ static int bench(void)
             (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
             (int16_t *)data3));
 #endif
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_CLEAN */
+#endif /* MLK_ARITH_BACKEND_AARCH64_CLEAN */
 
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT)
+#if defined(MLK_ARITH_BACKEND_AARCH64_OPT)
   BENCH("ntt-opt",
         ntt_asm_opt((int16_t *)data0, (int16_t *)data1, (int16_t *)data2));
   BENCH("intt-opt",
@@ -241,7 +241,7 @@ static int bench(void)
             (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
             (int16_t *)data3));
 #endif
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT */
+#endif /* MLK_ARITH_BACKEND_AARCH64_OPT */
 
   return 0;
 }

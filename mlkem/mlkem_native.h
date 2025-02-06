@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef MLKEM_NATIVE_H
-#define MLKEM_NATIVE_H
+#ifndef MLK_H
+#define MLK_H
 /*
  * Public API for mlkem-native
  *
@@ -13,8 +13,8 @@
  * To use this header, make sure one of the following holds:
  *
  * - The config.h used for the build is available in the include paths.
- * - The values of BUILD_INFO_LVL and BUILD_INFO_NAMESPACE are set, reflecting
- *   the security level (512/768/1024) and namespace of the build.
+ * - The values of MLK_BUILD_INFO_LVL and MLK_BUILD_INFO_NAMESPACE are set,
+ * reflecting the security level (512/768/1024) and namespace of the build.
  *
  * This header specifies a build of mlkem-native for a fixed security level.
  * If you need multiple builds, e.g. to build a library offering multiple
@@ -27,55 +27,55 @@
 /*************************** Build information ********************************/
 
 /*
- * Provide security level (BUILD_INFO_LVL) and namespacing
- * (BUILD_INFO_NAMESPACE)
+ * Provide security level (MLK_BUILD_INFO_LVL) and namespacing
+ * (MLK_BUILD_INFO_NAMESPACE)
  *
  * By default, this is extracted from the configuration used for the build,
  * but you can also set it manually to avoid a dependency on the build config.
  */
 
-/* Skip this if BUILD_INFO_LVL has already been set */
-#if !defined(BUILD_INFO_LVL)
+/* Skip this if MLK_BUILD_INFO_LVL has already been set */
+#if !defined(MLK_BUILD_INFO_LVL)
 
 /* Option 1: Extract from config */
-#if defined(MLKEM_NATIVE_CONFIG_FILE)
-#include MLKEM_NATIVE_CONFIG_FILE
+#if defined(MLK_CONFIG_FILE)
+#include MLK_CONFIG_FILE
 #else
 #include "config.h"
 #endif
 
 #if MLKEM_K == 2
-#define BUILD_INFO_LVL 512
+#define MLK_BUILD_INFO_LVL 512
 #elif MLKEM_K == 3
-#define BUILD_INFO_LVL 768
+#define MLK_BUILD_INFO_LVL 768
 #elif MLKEM_K == 4
-#define BUILD_INFO_LVL 1024
+#define MLK_BUILD_INFO_LVL 1024
 #else
 #error MLKEM_K not set by config file
 #endif
 
-#ifndef MLKEM_NAMESPACE_PREFIX
-#error MLKEM_NAMESPACE_PREFIX not set by config file
+#ifndef MLK_NAMESPACE_PREFIX
+#error MLK_NAMESPACE_PREFIX not set by config file
 #endif
 
-#if defined(MLKEM_NATIVE_NAMESPACE_PREFIX_ADD_LEVEL)
-#define BUILD_INFO_CONCAT3_(x, y, z) x##y##_##z
-#define BUILD_INFO_CONCAT3(x, y, z) BUILD_INFO_CONCAT_(x, y, z)
-#define BUILD_INFO_NAMESPACE(sym) \
-  BUILD_INFO_CONCAT3(MLKEM_NAMESPACE_PREFIX, BUILD_INFO_LVL, sym)
+#if defined(MLK_NAMESPACE_PREFIX_ADD_LEVEL)
+#define MLK_BUILD_INFO_CONCAT3_(x, y, z) x##y##_##z
+#define MLK_BUILD_INFO_CONCAT3(x, y, z) MLK_BUILD_INFO_CONCAT_(x, y, z)
+#define MLK_BUILD_INFO_NAMESPACE(sym) \
+  MLK_BUILD_INFO_CONCAT3(MLK_NAMESPACE_PREFIX, MLK_BUILD_INFO_LVL, sym)
 #else
-#define BUILD_INFO_CONCAT2_(x, y) x##_##y
-#define BUILD_INFO_CONCAT2(x, y) BUILD_INFO_CONCAT2_(x, y)
-#define BUILD_INFO_NAMESPACE(sym) \
-  BUILD_INFO_CONCAT2(MLKEM_NAMESPACE_PREFIX, sym)
+#define MLK_BUILD_INFO_CONCAT2_(x, y) x##_##y
+#define MLK_BUILD_INFO_CONCAT2(x, y) MLK_BUILD_INFO_CONCAT2_(x, y)
+#define MLK_BUILD_INFO_NAMESPACE(sym) \
+  MLK_BUILD_INFO_CONCAT2(MLK_NAMESPACE_PREFIX, sym)
 #endif
 
-#endif /* BUILD_INFO_LVL */
+#endif /* MLK_BUILD_INFO_LVL */
 
-/* Option 2: Provide BUILD_INFO_LVL and BUILD_INFO_NAMESPACE manually */
+/* Option 2: Provide MLK_BUILD_INFO_LVL and MLK_BUILD_INFO_NAMESPACE manually */
 
-/* #define BUILD_INFO_LVL            ADJUSTME */
-/* #define BUILD_INFO_NAMESPACE(sym) ADJUSTME */
+/* #define MLK_BUILD_INFO_LVL            ADJUSTME */
+/* #define MLK_BUILD_INFO_NAMESPACE(sym) ADJUSTME */
 
 /******************************* Key sizes ************************************/
 
@@ -128,9 +128,9 @@
  *
  * Returns 0 (success)
  **************************************************/
-int BUILD_INFO_NAMESPACE(keypair_derand)(
-    uint8_t pk[MLKEM_PUBLICKEYBYTES(BUILD_INFO_LVL)],
-    uint8_t sk[MLKEM_SECRETKEYBYTES(BUILD_INFO_LVL)], const uint8_t *coins);
+int MLK_BUILD_INFO_NAMESPACE(keypair_derand)(
+    uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_BUILD_INFO_LVL)],
+    uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_BUILD_INFO_LVL)], const uint8_t *coins);
 
 /*************************************************
  * Name:        crypto_kem_keypair
@@ -145,9 +145,9 @@ int BUILD_INFO_NAMESPACE(keypair_derand)(
  *
  * Returns 0 (success)
  **************************************************/
-int BUILD_INFO_NAMESPACE(keypair)(
-    uint8_t pk[MLKEM_PUBLICKEYBYTES(BUILD_INFO_LVL)],
-    uint8_t sk[MLKEM_SECRETKEYBYTES(BUILD_INFO_LVL)]);
+int MLK_BUILD_INFO_NAMESPACE(keypair)(
+    uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_BUILD_INFO_LVL)],
+    uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_BUILD_INFO_LVL)]);
 
 /*************************************************
  * Name:        crypto_kem_enc_derand
@@ -167,9 +167,10 @@ int BUILD_INFO_NAMESPACE(keypair)(
  * Returns 0 on success, and -1 if the public key modulus check (see Section 7.2
  * of FIPS203) fails.
  **************************************************/
-int BUILD_INFO_NAMESPACE(enc_derand)(
-    uint8_t ct[MLKEM_CIPHERTEXTBYTES(BUILD_INFO_LVL)], uint8_t ss[MLKEM_BYTES],
-    const uint8_t pk[MLKEM_PUBLICKEYBYTES(BUILD_INFO_LVL)],
+int MLK_BUILD_INFO_NAMESPACE(enc_derand)(
+    uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_BUILD_INFO_LVL)],
+    uint8_t ss[MLKEM_BYTES],
+    const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_BUILD_INFO_LVL)],
     const uint8_t coins[MLKEM_SYMBYTES]);
 
 /*************************************************
@@ -188,9 +189,10 @@ int BUILD_INFO_NAMESPACE(enc_derand)(
  * Returns 0 on success, and -1 if the public key modulus check (see Section 7.2
  * of FIPS203) fails.
  **************************************************/
-int BUILD_INFO_NAMESPACE(enc)(
-    uint8_t ct[MLKEM_CIPHERTEXTBYTES(BUILD_INFO_LVL)], uint8_t ss[MLKEM_BYTES],
-    const uint8_t pk[MLKEM_PUBLICKEYBYTES(BUILD_INFO_LVL)]);
+int MLK_BUILD_INFO_NAMESPACE(enc)(
+    uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_BUILD_INFO_LVL)],
+    uint8_t ss[MLKEM_BYTES],
+    const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_BUILD_INFO_LVL)]);
 
 /*************************************************
  * Name:        crypto_kem_dec
@@ -210,10 +212,10 @@ int BUILD_INFO_NAMESPACE(enc)(
  *
  * On failure, ss will contain a pseudo-random value.
  **************************************************/
-int BUILD_INFO_NAMESPACE(dec)(
+int MLK_BUILD_INFO_NAMESPACE(dec)(
     uint8_t ss[MLKEM_BYTES],
-    const uint8_t ct[MLKEM_CIPHERTEXTBYTES(BUILD_INFO_LVL)],
-    const uint8_t sk[MLKEM_SECRETKEYBYTES(BUILD_INFO_LVL)]);
+    const uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_BUILD_INFO_LVL)],
+    const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_BUILD_INFO_LVL)]);
 
 /****************************** Standard API *********************************/
 
@@ -223,26 +225,26 @@ int BUILD_INFO_NAMESPACE(dec)(
  * Remove this if you don't need it, or if you need multiple instances
  * of this header. */
 
-#if !defined(BUILD_INFO_NO_STANDARD_API)
-#define CRYPTO_SECRETKEYBYTES MLKEM_SECRETKEYBYTES(BUILD_INFO_LVL)
-#define CRYPTO_PUBLICKEYBYTES MLKEM_PUBLICKEYBYTES(BUILD_INFO_LVL)
-#define CRYPTO_CIPHERTEXTBYTES MLKEM_CIPHERTEXTBYTES(BUILD_INFO_LVL)
+#if !defined(MLK_BUILD_INFO_NO_STANDARD_API)
+#define CRYPTO_SECRETKEYBYTES MLKEM_SECRETKEYBYTES(MLK_BUILD_INFO_LVL)
+#define CRYPTO_PUBLICKEYBYTES MLKEM_PUBLICKEYBYTES(MLK_BUILD_INFO_LVL)
+#define CRYPTO_CIPHERTEXTBYTES MLKEM_CIPHERTEXTBYTES(MLK_BUILD_INFO_LVL)
 
 #define CRYPTO_SYMBYTES MLKEM_SYMBYTES
 #define CRYPTO_BYTES MLKEM_BYTES
 
-#define crypto_kem_keypair_derand BUILD_INFO_NAMESPACE(keypair_derand)
-#define crypto_kem_keypair BUILD_INFO_NAMESPACE(keypair)
-#define crypto_kem_enc_derand BUILD_INFO_NAMESPACE(enc_derand)
-#define crypto_kem_enc BUILD_INFO_NAMESPACE(enc)
-#define crypto_kem_dec BUILD_INFO_NAMESPACE(dec)
-#endif /* BUILD_INFO_NO_STANDARD_API */
+#define crypto_kem_keypair_derand MLK_BUILD_INFO_NAMESPACE(keypair_derand)
+#define crypto_kem_keypair MLK_BUILD_INFO_NAMESPACE(keypair)
+#define crypto_kem_enc_derand MLK_BUILD_INFO_NAMESPACE(enc_derand)
+#define crypto_kem_enc MLK_BUILD_INFO_NAMESPACE(enc)
+#define crypto_kem_dec MLK_BUILD_INFO_NAMESPACE(dec)
+#endif /* MLK_BUILD_INFO_NO_STANDARD_API */
 
 /********************************* Cleanup ************************************/
 
 /* Unset build information to allow multiple instances of this header.
  * Keep this commented out when using the standard API. */
-/* #undef BUILD_INFO_LVL */
-/* #undef BUILD_INFO_NAMESPACE */
+/* #undef MLK_BUILD_INFO_LVL */
+/* #undef MLK_BUILD_INFO_NAMESPACE */
 
-#endif /* MLKEM_NATIVE_H */
+#endif /* MLK_H */

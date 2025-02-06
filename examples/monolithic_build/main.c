@@ -28,9 +28,9 @@ static int test_keys_mlkem(void)
       0x0a, 0x56, 0xe3, 0xf0, 0xd3, 0xfd, 0x9b, 0x58, 0xbd, 0xa2, 0x8b,
       0x69, 0x0f, 0x91, 0xb5, 0x7b, 0x88, 0xa5, 0xa8, 0x0b, 0x90};
 #endif
-  uint8_t pk[MLKEM_PUBLICKEYBYTES(BUILD_INFO_LVL)];
-  uint8_t sk[MLKEM_SECRETKEYBYTES(BUILD_INFO_LVL)];
-  uint8_t ct[MLKEM_CIPHERTEXTBYTES(BUILD_INFO_LVL)];
+  uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_BUILD_INFO_LVL)];
+  uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_BUILD_INFO_LVL)];
+  uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_BUILD_INFO_LVL)];
   uint8_t key_a[MLKEM_BYTES];
   uint8_t key_b[MLKEM_BYTES];
 
@@ -67,7 +67,7 @@ static int test_keys_mlkem(void)
     return 1;
   }
 
-  printf("[MLKEM-%d] OK\n", BUILD_INFO_LVL);
+  printf("[MLKEM-%d] OK\n", MLK_BUILD_INFO_LVL);
   return 0;
 }
 

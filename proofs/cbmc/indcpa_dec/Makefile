@@ -18,7 +18,7 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/indcpa.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)indcpa_dec
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)indcpa_dec
 
 USED_FUNCTIONS = polyvec_ntt
 USED_FUNCTIONS += polyvec_basemul_acc_montgomery
@@ -30,7 +30,7 @@ USED_FUNCTIONS += polyvec_decompress_du
 USED_FUNCTIONS += poly_decompress_dv
 USED_FUNCTIONS += polyvec_frombytes
 USED_FUNCTIONS += polyvec_reduce
-USE_FUNCTION_CONTRACTS=$(addprefix $(MLKEM_NAMESPACE),$(USED_FUNCTIONS))
+USE_FUNCTION_CONTRACTS=$(addprefix $(MLK_NAMESPACE),$(USED_FUNCTIONS))
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -38,7 +38,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = $(MLKEM_NAMESPACE)indcpa_dec
+FUNCTION_NAME = $(MLK_NAMESPACE)indcpa_dec
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

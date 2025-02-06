@@ -38,9 +38,9 @@
 //
 
 #include "../../../../common.h"
-#if (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-     defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55)) &&    \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) || \
+     defined(MLK_FIPS202_BACKEND_AARCH64_A55)) &&    \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 #if defined(__ARM_FEATURE_SHA3)
 
@@ -52,8 +52,8 @@
 
 .text
 .balign 4
-.global MLKEM_ASM_NAMESPACE(keccak_f1600_x2_v8a_v84a_asm_hybrid)
-MLKEM_ASM_NAMESPACE(keccak_f1600_x2_v8a_v84a_asm_hybrid):
+.global MLK_ASM_NAMESPACE(keccak_f1600_x2_v8a_v84a_asm_hybrid)
+MLK_ASM_NAMESPACE(keccak_f1600_x2_v8a_v84a_asm_hybrid):
 
         sub	sp, sp, #0xa0
         stp	x19, x20, [sp, #0x40]
@@ -254,6 +254,6 @@ keccak_f1600_x2_v8a_v84a_loop:
 
 #endif /* __ARM_FEATURE_SHA3 */
 
-#endif /* (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) ||
-          defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55) &&
-         !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)*/
+#endif /* (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) ||
+          defined(MLK_FIPS202_BACKEND_AARCH64_A55) &&
+         !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)*/

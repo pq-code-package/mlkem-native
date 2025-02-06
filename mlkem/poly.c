@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "common.h"
-#if !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 #include <stdint.h>
 #include <string.h>
@@ -20,17 +20,17 @@
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define fqmul MLKEM_NAMESPACE(fqmul)
-#define barrett_reduce MLKEM_NAMESPACE(barrett_reduce)
-#define scalar_signed_to_unsigned_q MLKEM_NAMESPACE(scalar_signed_to_unsigned_q)
-#define ntt_butterfly_block MLKEM_NAMESPACE(ntt_butterfly_block)
-#define ntt_layer MLKEM_NAMESPACE(ntt_layer)
-#define invntt_layer MLKEM_NAMESPACE(invntt_layer)
+#define fqmul MLK_NAMESPACE(fqmul)
+#define barrett_reduce MLK_NAMESPACE(barrett_reduce)
+#define scalar_signed_to_unsigned_q MLK_NAMESPACE(scalar_signed_to_unsigned_q)
+#define ntt_butterfly_block MLK_NAMESPACE(ntt_butterfly_block)
+#define ntt_layer MLK_NAMESPACE(ntt_layer)
+#define invntt_layer MLK_NAMESPACE(invntt_layer)
 /* End of static namespacing */
 
-#if !defined(MLKEM_USE_NATIVE_POLY_TOMONT) ||           \
-    !defined(MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE) || \
-    !defined(MLKEM_USE_NATIVE_NTT) || !defined(MLKEM_USE_NATIVE_INTT)
+#if !defined(MLK_USE_NATIVE_POLY_TOMONT) ||           \
+    !defined(MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE) || \
+    !defined(MLK_USE_NATIVE_NTT) || !defined(MLK_USE_NATIVE_INTT)
 /*************************************************
  * Name:        fqmul
  *
@@ -45,7 +45,7 @@
  * smaller than q in absolute value.
  *
  **************************************************/
-static INLINE int16_t fqmul(int16_t a, int16_t b)
+static MLK_INLINE int16_t fqmul(int16_t a, int16_t b)
 __contract__(
   requires(b > -MLKEM_Q_HALF && b < MLKEM_Q_HALF)
   ensures(return_value > -MLKEM_Q && return_value < MLKEM_Q)
@@ -65,12 +65,12 @@ __contract__(
   debug_assert_abs_bound(&res, 1, MLKEM_Q);
   return res;
 }
-#endif /* !defined(MLKEM_USE_NATIVE_POLY_TOMONT) ||           \
-          !defined(MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE) || \
-          !defined(MLKEM_USE_NATIVE_NTT) ||                   \
-          !defined(MLKEM_USE_NATIVE_INTT) */
+#endif /* !defined(MLK_USE_NATIVE_POLY_TOMONT) ||           \
+          !defined(MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE) || \
+          !defined(MLK_USE_NATIVE_NTT) ||                   \
+          !defined(MLK_USE_NATIVE_INTT) */
 
-#if !defined(MLKEM_USE_NATIVE_POLY_REDUCE) || !defined(MLKEM_USE_NATIVE_INTT)
+#if !defined(MLK_USE_NATIVE_POLY_REDUCE) || !defined(MLK_USE_NATIVE_INTT)
 /*************************************************
  * Name:        barrett_reduce
  *
@@ -82,7 +82,7 @@ __contract__(
  *
  * Returns:     integer in {-(q-1)/2,...,(q-1)/2} congruent to a modulo q.
  **************************************************/
-static INLINE int16_t barrett_reduce(int16_t a)
+static MLK_INLINE int16_t barrett_reduce(int16_t a)
 __contract__(
   ensures(return_value > -MLKEM_Q_HALF && return_value < MLKEM_Q_HALF)
 )
@@ -112,11 +112,11 @@ __contract__(
   debug_assert_abs_bound(&res, 1, MLKEM_Q_HALF);
   return res;
 }
-#endif /* !defined(MLKEM_USE_NATIVE_POLY_REDUCE) || \
-          !defined(MLKEM_USE_NATIVE_INTT) */
+#endif /* !defined(MLK_USE_NATIVE_POLY_REDUCE) || \
+          !defined(MLK_USE_NATIVE_INTT) */
 
-#if !defined(MLKEM_USE_NATIVE_POLY_TOMONT)
-MLKEM_NATIVE_INTERNAL_API
+#if !defined(MLK_USE_NATIVE_POLY_TOMONT)
+MLK_INTERNAL_API
 void poly_tomont(poly *r)
 {
   unsigned i;
@@ -131,16 +131,16 @@ void poly_tomont(poly *r)
 
   debug_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
 }
-#else  /* MLKEM_USE_NATIVE_POLY_TOMONT */
-MLKEM_NATIVE_INTERNAL_API
+#else  /* MLK_USE_NATIVE_POLY_TOMONT */
+MLK_INTERNAL_API
 void poly_tomont(poly *r)
 {
   poly_tomont_native(r->coeffs);
   debug_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
 }
-#endif /* MLKEM_USE_NATIVE_POLY_TOMONT */
+#endif /* MLK_USE_NATIVE_POLY_TOMONT */
 
-#if !defined(MLKEM_USE_NATIVE_POLY_REDUCE)
+#if !defined(MLK_USE_NATIVE_POLY_REDUCE)
 /************************************************************
  * Name: scalar_signed_to_unsigned_q
  *
@@ -159,7 +159,7 @@ void poly_tomont(poly *r)
  *
  * Arguments: c: signed coefficient to be converted
  ************************************************************/
-static INLINE uint16_t scalar_signed_to_unsigned_q(int16_t c)
+static MLK_INLINE uint16_t scalar_signed_to_unsigned_q(int16_t c)
 __contract__(
   requires(c > -MLKEM_Q && c < MLKEM_Q)
   ensures(return_value >= 0 && return_value < MLKEM_Q)
@@ -175,7 +175,7 @@ __contract__(
   return (uint16_t)c;
 }
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_reduce(poly *r)
 {
   unsigned i;
@@ -192,16 +192,16 @@ void poly_reduce(poly *r)
 
   debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
-#else  /* MLKEM_USE_NATIVE_POLY_REDUCE */
-MLKEM_NATIVE_INTERNAL_API
+#else  /* MLK_USE_NATIVE_POLY_REDUCE */
+MLK_INTERNAL_API
 void poly_reduce(poly *r)
 {
   poly_reduce_native(r->coeffs);
   debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
-#endif /* MLKEM_USE_NATIVE_POLY_REDUCE */
+#endif /* MLK_USE_NATIVE_POLY_REDUCE */
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_add(poly *r, const poly *b)
 {
   unsigned i;
@@ -215,7 +215,7 @@ void poly_add(poly *r, const poly *b)
   }
 }
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_sub(poly *r, const poly *b)
 {
   unsigned i;
@@ -229,8 +229,8 @@ void poly_sub(poly *r, const poly *b)
   }
 }
 
-#if !defined(MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE)
-MLKEM_NATIVE_INTERNAL_API
+#if !defined(MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE)
+MLK_INTERNAL_API
 void poly_mulcache_compute(poly_mulcache *x, const poly *a)
 {
   unsigned i;
@@ -251,8 +251,8 @@ void poly_mulcache_compute(poly_mulcache *x, const poly *a)
    */
   debug_assert_abs_bound(x, MLKEM_N / 2, MLKEM_Q);
 }
-#else  /* MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE */
-MLKEM_NATIVE_INTERNAL_API
+#else  /* MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE */
+MLK_INTERNAL_API
 void poly_mulcache_compute(poly_mulcache *x, const poly *a)
 {
   poly_mulcache_compute_native(x->coeffs, a->coeffs);
@@ -260,9 +260,9 @@ void poly_mulcache_compute(poly_mulcache *x, const poly *a)
    * decide not to use a mulcache. Note that the C backend implementation
    * of poly_basemul_montgomery_cached() does still include the check. */
 }
-#endif /* MLKEM_USE_NATIVE_POLY_MULCACHE_COMPUTE */
+#endif /* MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE */
 
-#if !defined(MLKEM_USE_NATIVE_NTT)
+#if !defined(MLK_USE_NATIVE_NTT)
 /*
  * Computes a block CT butterflies with a fixed twiddle factor,
  * using Montgomery multiplication.
@@ -371,7 +371,7 @@ __contract__(
  * the proof may need strengthening.
  */
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_ntt(poly *p)
 {
   unsigned len, layer;
@@ -390,18 +390,18 @@ void poly_ntt(poly *p)
   /* Check the stronger bound */
   debug_assert_abs_bound(p, MLKEM_N, NTT_BOUND);
 }
-#else  /* MLKEM_USE_NATIVE_NTT */
+#else  /* MLK_USE_NATIVE_NTT */
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_ntt(poly *p)
 {
   debug_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
   ntt_native(p->coeffs);
   debug_assert_abs_bound(p, MLKEM_N, NTT_BOUND);
 }
-#endif /* MLKEM_USE_NATIVE_NTT */
+#endif /* MLK_USE_NATIVE_NTT */
 
-#if !defined(MLKEM_USE_NATIVE_INTT)
+#if !defined(MLK_USE_NATIVE_INTT)
 
 /* Compute one layer of inverse NTT */
 static void invntt_layer(int16_t *r, unsigned len, unsigned layer)
@@ -440,7 +440,7 @@ __contract__(
   }
 }
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_invntt_tomont(poly *p)
 {
   /*
@@ -471,21 +471,21 @@ void poly_invntt_tomont(poly *p)
 
   debug_assert_abs_bound(p, MLKEM_N, INVNTT_BOUND);
 }
-#else  /* MLKEM_USE_NATIVE_INTT */
+#else  /* MLK_USE_NATIVE_INTT */
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_invntt_tomont(poly *p)
 {
   intt_native(p->coeffs);
   debug_assert_abs_bound(p, MLKEM_N, INVNTT_BOUND);
 }
-#endif /* MLKEM_USE_NATIVE_INTT */
+#endif /* MLK_USE_NATIVE_INTT */
 
-#else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+#else /* MLK_MULTILEVEL_BUILD_NO_SHARED */
 
-MLKEM_NATIVE_EMPTY_CU(poly)
+MLK_EMPTY_CU(poly)
 
-#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_MULTILEVEL_BUILD_NO_SHARED */
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */

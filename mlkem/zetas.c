@@ -9,14 +9,14 @@
  */
 
 #include "common.h"
-#if !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 #include "poly.h"
 
 /*
  * Table of zeta values used in the reference NTT and inverse NTT.
  * See autogen for details.
  */
-ALIGN const int16_t zetas[128] = {
+MLK_ALIGN const int16_t zetas[128] = {
     -1044, -758,  -359,  -1517, 1493,  1422,  287,   202,  -171,  622,   1577,
     182,   962,   -1202, -1474, 1468,  573,   -1325, 264,  383,   -829,  1458,
     -1602, -130,  -681,  1017,  732,   608,   -1542, 411,  -205,  -1571, 1223,
@@ -31,8 +31,8 @@ ALIGN const int16_t zetas[128] = {
     -308,  996,   991,   958,   -1460, 1522,  1628,
 };
 
-#else /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+#else /* MLK_MULTILEVEL_BUILD_NO_SHARED */
 
-MLKEM_NATIVE_EMPTY_CU(zetas)
+MLK_EMPTY_CU(zetas)
 
-#endif /* MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_MULTILEVEL_BUILD_NO_SHARED */

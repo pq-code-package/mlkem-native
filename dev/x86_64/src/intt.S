@@ -10,8 +10,8 @@
  * been made to simplify reasoning of non-overflow */
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
 #include "consts.h"
@@ -242,9 +242,9 @@ vmovdqa		%ymm11,(64*\off+176)*2(%rdi)
 .endm
 
 .text
-.global MLKEM_ASM_NAMESPACE(invntt_avx2)
+.global MLK_ASM_NAMESPACE(invntt_avx2)
 .balign 4
-MLKEM_ASM_NAMESPACE(invntt_avx2):
+MLK_ASM_NAMESPACE(invntt_avx2):
 vmovdqa         AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
 
 intt_levels0t5	0
@@ -255,5 +255,5 @@ intt_level6	1
 ret
 
 /* simpasm: footer-start */
-#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
+#endif /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */

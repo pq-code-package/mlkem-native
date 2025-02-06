@@ -18,12 +18,12 @@ endif
 #
 # If you are not concerned about minimizing for a specific backend,
 # you can just include _all_ source files into your build.
-MLKEM_NATIVE_SOURCE_ALL := $(wildcard \
+MLK_SOURCE_ALL := $(wildcard \
 	mlkem_native/**/*.c	  	\
 	mlkem_native/**/**/*.c		\
 	mlkem_native/**/**/**/*.c	\
 	mlkem_native/**/**/**/**/*.c)
-MLKEM_NATIVE_SOURCE:=$(foreach S,$(MLKEM_NATIVE_SOURCE_ALL),\
+MLK_SOURCE:=$(foreach S,$(MLK_SOURCE_ALL),\
   $(if $(findstring /native/,$S),,$S))
 
 BUILD_DIR=build
@@ -31,21 +31,21 @@ MLKEM512_DIR = $(BUILD_DIR)/mlkem512
 MLKEM768_DIR = $(BUILD_DIR)/mlkem768
 MLKEM1024_DIR = $(BUILD_DIR)/mlkem1024
 
-MLKEM512_OBJS=$(patsubst %,$(MLKEM512_DIR)/%.o,$(MLKEM_NATIVE_SOURCE))
-MLKEM768_OBJS=$(patsubst %,$(MLKEM768_DIR)/%.o,$(MLKEM_NATIVE_SOURCE))
-MLKEM1024_OBJS=$(patsubst %,$(MLKEM1024_DIR)/%.o,$(MLKEM_NATIVE_SOURCE))
+MLKEM512_OBJS=$(patsubst %,$(MLKEM512_DIR)/%.o,$(MLK_SOURCE))
+MLKEM768_OBJS=$(patsubst %,$(MLKEM768_DIR)/%.o,$(MLK_SOURCE))
+MLKEM1024_OBJS=$(patsubst %,$(MLKEM1024_DIR)/%.o,$(MLK_SOURCE))
 
 $(MLKEM512_OBJS): $(MLKEM512_DIR)/%.c.o: %.c
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC)  -DMLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED -DMLKEM_K=2 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC)  -DMLK_MULTILEVEL_BUILD_WITH_SHARED -DMLKEM_K=2 $(CFLAGS) -c $^ -o $@
 
 $(MLKEM768_OBJS): $(MLKEM768_DIR)/%.c.o: %.c
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -DMLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED -DMLKEM_K=3 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC) -DMLK_MULTILEVEL_BUILD_NO_SHARED -DMLKEM_K=3 $(CFLAGS) -c $^ -o $@
 
 $(MLKEM1024_OBJS): $(MLKEM1024_DIR)/%.c.o: %.c
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -DMLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED -DMLKEM_K=4 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC) -DMLK_MULTILEVEL_BUILD_NO_SHARED -DMLKEM_K=4 $(CFLAGS) -c $^ -o $@
 
 mlkem512_objs: $(MLKEM512_OBJS)
 mlkem768_objs: $(MLKEM768_OBJS)
@@ -84,8 +84,8 @@ CFLAGS := \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
 	-fomit-frame-pointer \
-        -DMLKEM_NAMESPACE_PREFIX=mlkem \
-	-DMLKEM_NAMESPACE_PREFIX_ADD_LEVEL\
+        -DMLK_NAMESPACE_PREFIX=mlkem \
+	-DMLK_NAMESPACE_PREFIX_ADD_LEVEL\
 	-std=c99 \
 	-pedantic \
 	-MMD \

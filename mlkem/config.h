@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef MLKEM_NATIVE_CONFIG_H
-#define MLKEM_NATIVE_CONFIG_H
+#ifndef MLK_CONFIG_H
+#define MLK_CONFIG_H
 
 /******************************************************************************
  * Name:        MLKEM_K
@@ -22,45 +22,45 @@
 #endif
 
 /******************************************************************************
- * Name:        MLKEM_NATIVE_CONFIG_FILE
+ * Name:        MLK_CONFIG_FILE
  *
  * Description: If defined, this is a header that will be included instead
  *              of this default configuration file mlkem/config.h.
  *
  *              When you need to build mlkem-native in multiple configurations,
- *              using varying MLKEM_NATIVE_CONFIG_FILE can be more convenient
+ *              using varying MLK_CONFIG_FILE can be more convenient
  *              then configuring everything through CFLAGS.
  *
- *              To use, MLKEM_NATIVE_CONFIG_FILE _must_ be defined prior
+ *              To use, MLK_CONFIG_FILE _must_ be defined prior
  *              to the inclusion of any mlkem-native headers. For example,
- *              it can be set by passing `-DMLKEM_NATIVE_CONFIG_FILE="..."`
+ *              it can be set by passing `-DMLK_CONFIG_FILE="..."`
  *              on the command line.
  *
  *****************************************************************************/
-/* #define MLKEM_NATIVE_CONFIG_FILE "config.h" */
+/* #define MLK_CONFIG_FILE "config.h" */
 
 /******************************************************************************
- * Name:        MLKEM_NAMESPACE_PREFIX
+ * Name:        MLK_NAMESPACE_PREFIX
  *
  * Description: The prefix to use to namespace global symbols from mlkem/.
  *
  *              Level-dependent symbols will additionally be prefixed with the
- *              security level if MLKEM_NAMESPACE_PREFIX_ADD_LEVEL is set.
+ *              security level if MLK_NAMESPACE_PREFIX_ADD_LEVEL is set.
  *
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#if !defined(MLKEM_NAMESPACE_PREFIX)
-#define MLKEM_NAMESPACE_PREFIX MLKEM_DEFAULT_NAMESPACE_PREFIX
+#if !defined(MLK_NAMESPACE_PREFIX)
+#define MLK_NAMESPACE_PREFIX MLK_DEFAULT_NAMESPACE_PREFIX
 #endif
 
 /******************************************************************************
- * Name:        MLKEM_NAMESPACE_PREFIX_ADD_LEVEL
+ * Name:        MLK_NAMESPACE_PREFIX_ADD_LEVEL
  *
  * Description: If set, the level (512, 768, 1024) is added to the namespace
- *              prefix MLKEM_NAMESPACE_PREFIX for all functions which are
+ *              prefix MLK_NAMESPACE_PREFIX for all functions which are
  *              level-dependent. Level-independent functions will have there
- *              symbol prefixed by MLKEM_NAMESPACE_PREFIX only.
+ *              symbol prefixed by MLK_NAMESPACE_PREFIX only.
  *
  *              This is intended to be used for multi-level builds where
  *              level-independent code should be shared across levels.
@@ -68,10 +68,10 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-/* #define MLKEM_NAMESPACE_PREFIX_ADD_LEVEL */
+/* #define MLK_NAMESPACE_PREFIX_ADD_LEVEL */
 
 /******************************************************************************
- * Name:        MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED
+ * Name:        MLK_MULTILEVEL_BUILD_WITH_SHARED
  *
  * Description: This is for multi-level builds of mlkem-native only. If you
  *              need only a single security level build of mlkem-native,
@@ -87,8 +87,8 @@
  *
  *              To build mlkem-native with support for all security levels,
  *              build it three times -- once per level -- and set the option
- *              MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED for exactly one of
- *              them, and MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED for the
+ *              MLK_MULTILEVEL_BUILD_WITH_SHARED for exactly one of
+ *              them, and MLK_MULTILEVEL_BUILD_NO_SHARED for the
  *              others.
  *
  *              See examples/multilevel_build for an example.
@@ -96,10 +96,10 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-/* #define MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED */
+/* #define MLK_MULTILEVEL_BUILD_WITH_SHARED */
 
 /******************************************************************************
- * Name:        MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED
+ * Name:        MLK_MULTILEVEL_BUILD_NO_SHARED
  *
  * Description: This is for multi-level builds of mlkem-native only. If you
  *              need only a single security level build of mlkem-native,
@@ -110,8 +110,8 @@
  *
  *              To build mlkem-native with support for all security levels,
  *              build it three times -- once per level -- and set the option
- *              MLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED for exactly one of
- *              them, and MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED for the
+ *              MLK_MULTILEVEL_BUILD_WITH_SHARED for exactly one of
+ *              them, and MLK_MULTILEVEL_BUILD_NO_SHARED for the
  *              others.
  *
  *              See examples/multilevel_build for an example.
@@ -119,10 +119,10 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-/* #define MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+/* #define MLK_MULTILEVEL_BUILD_NO_SHARED */
 
 /******************************************************************************
- * Name:        MLKEM_USE_NATIVE_BACKEND_ARITH
+ * Name:        MLK_USE_NATIVE_BACKEND_ARITH
  *
  * Description: Determines whether an native arithmetic backend should be used.
  *
@@ -132,7 +132,7 @@
  *              If this option is unset, the C backend will be used.
  *
  *              If this option is set, the arithmetic backend to be use is
- *              determined by MLKEM_NATIVE_ARITH_BACKEND: If the latter is
+ *              determined by MLK_ARITH_BACKEND: If the latter is
  *              unset, the default backend for your the target architecture
  *              will be used. If set, it must be the name of a backend metadata
  *              file.
@@ -140,32 +140,31 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#if !defined(MLKEM_USE_NATIVE_BACKEND_ARITH)
-/* #define MLKEM_USE_NATIVE_BACKEND_ARITH */
+#if !defined(MLK_USE_NATIVE_BACKEND_ARITH)
+/* #define MLK_USE_NATIVE_BACKEND_ARITH */
 #endif
 
 /******************************************************************************
- * Name:        MLKEM_NATIVE_ARITH_BACKEND_FILE
+ * Name:        MLK_ARITH_BACKEND_FILE
  *
  * Description: The arithmetic backend to use.
  *
- *              If MLKEM_USE_NATIVE_BACKEND_ARITH is unset, this option
+ *              If MLK_USE_NATIVE_BACKEND_ARITH is unset, this option
  *              is ignored.
  *
- *              If MLKEM_USE_NATIVE_BACKEND_ARITH is set, this option must
+ *              If MLK_USE_NATIVE_BACKEND_ARITH is set, this option must
  *              either be undefined or the filename of an arithmetic backend.
  *              If unset, the default backend will be used.
  *
  *              This can be set using CFLAGS.
  *
  *****************************************************************************/
-#if defined(MLKEM_USE_NATIVE_BACKEND_ARITH) && \
-    !defined(MLKEM_NATIVE_ARITH_BACKEND_FILE)
-#define MLKEM_NATIVE_ARITH_BACKEND_FILE "native/meta.h"
+#if defined(MLK_USE_NATIVE_BACKEND_ARITH) && !defined(MLK_ARITH_BACKEND_FILE)
+#define MLK_ARITH_BACKEND_FILE "native/meta.h"
 #endif
 
 /******************************************************************************
- * Name:        MLKEM_USE_NATIVE_BACKEND_FIPS202
+ * Name:        MLK_USE_NATIVE_BACKEND_FIPS202
  *
  * Description: Determines whether an native FIPS202 backend should be used.
  *
@@ -175,7 +174,7 @@
  *              If this option is unset, the C backend will be used.
  *
  *              If this option is set, the FIPS202 backend to be use is
- *              determined by MLKEM_NATIVE_FIPS202_BACKEND: If the latter is
+ *              determined by MLK_FIPS202_BACKEND: If the latter is
  *              unset, the default backend for your the target architecture
  *              will be used. If set, it must be the name of a backend metadata
  *              file.
@@ -183,25 +182,25 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#if !defined(MLKEM_USE_NATIVE_BACKEND_FIPS202)
-/* #define MLKEM_USE_NATIVE_BACKEND_FIPS202 */
+#if !defined(MLK_USE_NATIVE_BACKEND_FIPS202)
+/* #define MLK_USE_NATIVE_BACKEND_FIPS202 */
 #endif
 
 /******************************************************************************
- * Name:        MLKEM_NATIVE_FIPS202_BACKEND_FILE
+ * Name:        MLK_FIPS202_BACKEND_FILE
  *
  * Description: The FIPS-202 backend to use.
  *
- *              If MLKEM_USE_NATIVE_BACKEND_FIPS202 is set, this option must
+ *              If MLK_USE_NATIVE_BACKEND_FIPS202 is set, this option must
  *              either be undefined or the filename of a FIPS202 backend.
  *              If unset, the default backend will be used.
  *
  *              This can be set using CFLAGS.
  *
  *****************************************************************************/
-#if defined(MLKEM_USE_NATIVE_BACKEND_FIPS202) && \
-    !defined(MLKEM_NATIVE_FIPS202_BACKEND_FILE)
-#define MLKEM_NATIVE_FIPS202_BACKEND_FILE "fips202/native/meta.h"
+#if defined(MLK_USE_NATIVE_BACKEND_FIPS202) && \
+    !defined(MLK_FIPS202_BACKEND_FILE)
+#define MLK_FIPS202_BACKEND_FILE "fips202/native/meta.h"
 #endif
 
 /*************************  Config internals  ********************************/
@@ -209,7 +208,7 @@
 /* Default namespace
  *
  * Don't change this. If you need a different namespace, re-define
- * MLKEM_NAMESPACE_PREFIX above instead, and remove the following.
+ * MLK_NAMESPACE_PREFIX above instead, and remove the following.
  *
  * The default MLKEM namespace is
  *
@@ -219,11 +218,11 @@
  */
 
 #if MLKEM_K == 2
-#define MLKEM_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM512
+#define MLK_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM512
 #elif MLKEM_K == 3
-#define MLKEM_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM768
+#define MLK_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM768
 #elif MLKEM_K == 4
-#define MLKEM_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM1024
+#define MLK_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM1024
 #endif
 
-#endif /* MLKEM_NATIVE_CONFIG_H */
+#endif /* MLK_CONFIG_H */

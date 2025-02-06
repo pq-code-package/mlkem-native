@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef MLKEM_NATIVE_NATIVE_X86_64_SRC_ALIGN_H
-#define MLKEM_NATIVE_NATIVE_X86_64_SRC_ALIGN_H
+#ifndef MLK_NATIVE_X86_64_SRC_ALIGN_H
+#define MLK_NATIVE_X86_64_SRC_ALIGN_H
 /*
  * Implementation from Kyber reference repository
  * https://github.com/pq-crystals/kyber/blob/main/avx2/align.h
@@ -32,4 +32,4 @@
 
 #endif
 
-#endif /* MLKEM_NATIVE_NATIVE_X86_64_SRC_ALIGN_H */
+#endif /* MLK_NATIVE_X86_64_SRC_ALIGN_H */

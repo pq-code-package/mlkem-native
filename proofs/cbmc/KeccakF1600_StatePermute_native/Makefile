@@ -9,7 +9,7 @@ HARNESS_FILE = KeccakF1600_StatePermute_native_harness
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
 PROOF_UID = KeccakF1600_StatePermute_native
 
-DEFINES += -DMLKEM_USE_NATIVE_BACKEND_FIPS202 -DMLKEM_NATIVE_FIPS202_BACKEND_FILE="\"dummy_backend_fips202_x1.h\""
+DEFINES += -DMLK_USE_NATIVE_BACKEND_FIPS202 -DMLK_FIPS202_BACKEND_FILE="\"dummy_backend_fips202_x1.h\""
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
@@ -18,7 +18,7 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/fips202/keccakf1600.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)KeccakF1600_StatePermute
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)KeccakF1600_StatePermute
 USE_FUNCTION_CONTRACTS=keccak_f1600_x1_native
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = $(MLKEM_NAMESPACE)KeccakF1600_StatePermute_native
+FUNCTION_NAME = $(MLK_NAMESPACE)KeccakF1600_StatePermute_native
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

@@ -5,8 +5,8 @@
 
 #include "../../../common.h"
 
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 #include "arith_native_x86_64.h"
 #include "consts.h"
@@ -43,7 +43,7 @@ void polyvec_basemul_acc_montgomery_cached_avx2(unsigned k, int16_t r[MLKEM_N],
                                                 const int16_t *b_cache)
 {
   unsigned i;
-  int16_t t[MLKEM_N] ALIGN;
+  int16_t t[MLKEM_N] MLK_ALIGN;
 
   /* TODO: Use mulcache for AVX2. So far, it is unused. */
   ((void)b_cache);
@@ -59,10 +59,10 @@ void polyvec_basemul_acc_montgomery_cached_avx2(unsigned k, int16_t r[MLKEM_N],
   }
 }
 
-#else /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
+#else /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */
 
-MLKEM_NATIVE_EMPTY_CU(avx2_basemul)
+MLK_EMPTY_CU(avx2_basemul)
 
-#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
+#endif /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */

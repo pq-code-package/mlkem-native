@@ -25,7 +25,7 @@ Q ?= @
 # Here, we use just a single monolithic compilation unit to include
 # multiple instances of mlkem-native.
 
-MLKEM_NATIVE_SOURCE=mlkem_native_monobuild.c
+MLK_SOURCE=mlkem_native_monobuild.c
 
 INC=-Imlkem/ -I./
 
@@ -73,7 +73,7 @@ CFLAGS := \
         $(CFLAGS)
 
 # Set this flag to give all non-global functions internal linkage
-CFLAGS += -DMLKEM_NATIVE_MONOBUILD
+CFLAGS += -DMLK_MONOBUILD
 
 BIN512_FULL=$(BUILD_DIR)/$(BIN512)
 BIN768_FULL=$(BUILD_DIR)/$(BIN768)
@@ -83,41 +83,41 @@ LIB512_FULL=$(BUILD_DIR)/$(LIB512)
 LIB768_FULL=$(BUILD_DIR)/$(LIB768)
 LIB1024_FULL=$(BUILD_DIR)/$(LIB1024)
 
-$(LIB512_FULL): $(MLKEM_NATIVE_SOURCE)
+$(LIB512_FULL): $(MLK_SOURCE)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) -c $(CFLAGS) -DMLKEM_NATIVE_CONFIG_FILE="\"config_512.h\"" $(INC) $^ -o $(BUILD_DIR)/mlkem_native512.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLK_CONFIG_FILE="\"config_512.h\"" $(INC) $^ -o $(BUILD_DIR)/mlkem_native512.o
 	$(Q)$(AR) rcs $@ $(BUILD_DIR)/mlkem_native512.o
 	$(Q)strip -S $@
 
-$(LIB768_FULL): $(MLKEM_NATIVE_SOURCE)
+$(LIB768_FULL): $(MLK_SOURCE)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) -c $(CFLAGS) -DMLKEM_NATIVE_CONFIG_FILE="\"config_768.h\"" $(INC) $^ -o $(BUILD_DIR)/mlkem_native768.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLK_CONFIG_FILE="\"config_768.h\"" $(INC) $^ -o $(BUILD_DIR)/mlkem_native768.o
 	$(Q)$(AR) rcs $@ $(BUILD_DIR)/mlkem_native768.o
 	$(Q)strip -S $@
 
-$(LIB1024_FULL): $(MLKEM_NATIVE_SOURCE)
+$(LIB1024_FULL): $(MLK_SOURCE)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) -c $(CFLAGS) -DMLKEM_NATIVE_CONFIG_FILE="\"config_1024.h\"" $(INC) $^ -o $(BUILD_DIR)/mlkem_native1024.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLK_CONFIG_FILE="\"config_1024.h\"" $(INC) $^ -o $(BUILD_DIR)/mlkem_native1024.o
 	$(Q)$(AR) rcs $@ $(BUILD_DIR)/mlkem_native1024.o
 	$(Q)strip -S $@
 
 $(BIN512_FULL): $(APP_SOURCE) $(LIB512_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) -DMLKEM_NATIVE_CONFIG_FILE="\"config_512.h\"" $(INC) $^ -o $@
+	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_FILE="\"config_512.h\"" $(INC) $^ -o $@
 
 $(BIN768_FULL): $(APP_SOURCE) $(LIB768_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) -DMLKEM_NATIVE_CONFIG_FILE="\"config_768.h\"" $(INC) $^ -o $@
+	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_FILE="\"config_768.h\"" $(INC) $^ -o $@
 
 $(BIN1024_FULL): $(APP_SOURCE) $(LIB1024_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) -DMLKEM_NATIVE_CONFIG_FILE="\"config_1024.h\"" $(INC) $^ -o $@
+	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_FILE="\"config_1024.h\"" $(INC) $^ -o $@
 
 all: build
 

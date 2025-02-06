@@ -2,8 +2,8 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef MLKEM_NATIVE_DEBUG_H
-#define MLKEM_NATIVE_DEBUG_H
+#ifndef MLK_DEBUG_H
+#define MLK_DEBUG_H
 #include "common.h"
 
 #if defined(MLKEM_DEBUG)
@@ -21,7 +21,7 @@
  *              - line: line number
  *              - val: Value asserted to be non-zero
  **************************************************/
-#define mlkem_debug_assert MLKEM_NAMESPACE(mlkem_debug_assert)
+#define mlkem_debug_assert MLK_NAMESPACE(mlkem_debug_assert)
 void mlkem_debug_assert(const char *file, int line, const int val);
 
 /*************************************************
@@ -40,7 +40,7 @@ void mlkem_debug_assert(const char *file, int line, const int val);
  *              - lower_bound_exclusive: Exclusive lower bound
  *              - upper_bound_exclusive: Exclusive upper bound
  **************************************************/
-#define mlkem_debug_check_bounds MLKEM_NAMESPACE(mlkem_debug_check_bounds)
+#define mlkem_debug_check_bounds MLK_NAMESPACE(mlkem_debug_check_bounds)
 void mlkem_debug_check_bounds(const char *file, int line, const int16_t *ptr,
                               unsigned len, int lower_bound_exclusive,
                               int upper_bound_exclusive);
@@ -127,4 +127,4 @@ void mlkem_debug_check_bounds(const char *file, int line, const int16_t *ptr,
 
 
 #endif /* MLKEM_DEBUG */
-#endif /* MLKEM_NATIVE_DEBUG_H */
+#endif /* MLK_DEBUG_H */

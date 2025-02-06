@@ -4,11 +4,11 @@
 ifeq ($(HOST_PLATFORM),Linux-x86_64)
 ifeq ($(CROSS_PREFIX),)
 	CFLAGS += -mavx2 -mbmi2 -mpopcnt -maes
-	CFLAGS += -DFORCE_X86_64
+	CFLAGS += -DMLK_FORCE_X86_64
 else ifneq ($(findstring aarch64_be, $(CROSS_PREFIX)),)
-	CFLAGS += -DFORCE_AARCH64_EB
+	CFLAGS += -DMLK_FORCE_AARCH64_EB
 else ifneq ($(findstring aarch64, $(CROSS_PREFIX)),)
-	CFLAGS += -DFORCE_AARCH64
+	CFLAGS += -DMLK_FORCE_AARCH64
 else
 
 endif
@@ -16,14 +16,14 @@ endif
 # linux aarch64
 else ifeq ($(HOST_PLATFORM),Linux-aarch64)
 ifeq ($(CROSS_PREFIX),)
-	CFLAGS += -DFORCE_AARCH64
+	CFLAGS += -DMLK_FORCE_AARCH64
 else ifneq ($(findstring x86_64, $(CROSS_PREFIX)),)
 	CFLAGS += -mavx2 -mbmi2 -mpopcnt -maes
-	CFLAGS += -DFORCE_X86_64
+	CFLAGS += -DMLK_FORCE_X86_64
 else
 endif
 
 # darwin aarch64
 else ifeq ($(HOST_PLATFORM),Darwin-arm64)
-	CFLAGS += -DFORCE_AARCH64
+	CFLAGS += -DMLK_FORCE_AARCH64
 endif

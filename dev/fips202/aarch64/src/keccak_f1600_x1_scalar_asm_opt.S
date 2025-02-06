@@ -28,9 +28,9 @@
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
 
 #include "../../../../common.h"
-#if (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-     defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55)) &&    \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) || \
+     defined(MLK_FIPS202_BACKEND_AARCH64_A55)) &&    \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
 /****************** REGISTER ALLOCATIONS *******************/
@@ -165,9 +165,9 @@
 #define KECCAK_F1600_ROUNDS 24
 
     .text
-    .global MLKEM_ASM_NAMESPACE(keccak_f1600_x1_scalar_asm_opt)
+    .global MLK_ASM_NAMESPACE(keccak_f1600_x1_scalar_asm_opt)
     .balign 4
-MLKEM_ASM_NAMESPACE(keccak_f1600_x1_scalar_asm_opt):
+MLK_ASM_NAMESPACE(keccak_f1600_x1_scalar_asm_opt):
     alloc_stack
     save_gprs
 
@@ -455,6 +455,6 @@ initial:
     .unreq Asu
 
 /* simpasm: footer-start */
-#endif /* (defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_DEFAULT) ||
-          defined(MLKEM_NATIVE_FIPS202_BACKEND_AARCH64_A55) &&
-         !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)*/
+#endif /* (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) ||
+          defined(MLK_FIPS202_BACKEND_AARCH64_A55) &&
+         !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)*/

@@ -25,8 +25,8 @@
 ///
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_AARCH64_OPT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
 // Bounds:
@@ -167,9 +167,9 @@
         t3  .req v28
 
         .text
-        .global MLKEM_ASM_NAMESPACE(ntt_asm_opt)
+        .global MLK_ASM_NAMESPACE(ntt_asm_opt)
         .balign 4
-MLKEM_ASM_NAMESPACE(ntt_asm_opt):
+MLK_ASM_NAMESPACE(ntt_asm_opt):
         push_stack
 
         mov wtmp, #3329
@@ -954,5 +954,5 @@ ntt_opt_loop1:
     .unreq t3
 
 /* simpasm: footer-start */
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_AARCH64_OPT &&
-          !MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64_OPT &&
+          !MLK_MULTILEVEL_BUILD_NO_SHARED */

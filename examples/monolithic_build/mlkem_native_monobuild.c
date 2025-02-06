@@ -27,27 +27,27 @@
 #include "mlkem/sampling.c"
 #include "mlkem/verify.c"
 #include "mlkem/zetas.c"
-#if defined(MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_ARITH)
-#if defined(SYS_AARCH64)
+#if defined(MLK_MONOBUILD_WITH_NATIVE_ARITH)
+#if defined(MLK_SYS_AARCH64)
 #include "mlkem/native/aarch64/src/aarch64_zetas.c"
 #include "mlkem/native/aarch64/src/rej_uniform_table.c"
-#endif /* SYS_AARCH64 */
-#if defined(SYS_X86_64)
+#endif /* MLK_SYS_AARCH64 */
+#if defined(MLK_SYS_X86_64)
 #include "mlkem/native/x86_64/src/basemul.c"
 #include "mlkem/native/x86_64/src/compress_avx2.c"
 #include "mlkem/native/x86_64/src/consts.c"
 #include "mlkem/native/x86_64/src/rej_uniform_avx2.c"
 #include "mlkem/native/x86_64/src/rej_uniform_table.c"
-#endif /* SYS_X86_64 */
-#endif /* MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_ARITH */
-#if defined(MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_FIPS202)
-#if defined(SYS_AARCH64)
+#endif /* MLK_SYS_X86_64 */
+#endif /* MLK_MONOBUILD_WITH_NATIVE_ARITH */
+#if defined(MLK_MONOBUILD_WITH_NATIVE_FIPS202)
+#if defined(MLK_SYS_AARCH64)
 #include "mlkem/fips202/native/aarch64/src/keccakf1600_round_constants.c"
-#endif /* SYS_AARCH64 */
-#if defined(SYS_X86_64)
+#endif /* MLK_SYS_AARCH64 */
+#if defined(MLK_SYS_X86_64)
 #include "mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c"
-#endif /* SYS_X86_64 */
-#endif /* MLKEM_NATIVE_MONOBUILD_WITH_NATIVE_FIPS202 */
+#endif /* MLK_SYS_X86_64 */
+#endif /* MLK_MONOBUILD_WITH_NATIVE_FIPS202 */
 
 
 /*
@@ -55,47 +55,41 @@
  */
 
 /* mlkem/common.h */
-#undef MLKEM_ASM_NAMESPACE
-#undef MLKEM_NAMESPACE
-#undef MLKEM_NAMESPACE_K
-#undef MLKEM_NATIVE_ARITH_BACKEND_NAME
-#undef MLKEM_NATIVE_COMMON_H
-#undef MLKEM_NATIVE_EMPTY_CU
-#undef MLKEM_NATIVE_FIPS202_BACKEND_NAME
-#undef MLKEM_NATIVE_INTERNAL_API
-#undef MLKEM_NATIVE_MAKE_NAMESPACE
-#undef MLKEM_NATIVE_MAKE_NAMESPACE_
-#undef MLKEM_NATIVE_MAKE_NAMESPACE_K
-#undef MLKEM_NATIVE_MAKE_NAMESPACE_K_
-#undef PREFIX_UNDERSCORE
-#undef PREFIX_UNDERSCORE_
+#undef MLK_ARITH_BACKEND_NAME
+#undef MLK_ASM_NAMESPACE
+#undef MLK_COMMON_H
+#undef MLK_EMPTY_CU
+#undef MLK_FIPS202_BACKEND_NAME
+#undef MLK_INTERNAL_API
+#undef MLK_MAKE_NAMESPACE
+#undef MLK_MAKE_NAMESPACE_
+#undef MLK_MAKE_NAMESPACE_K
+#undef MLK_MAKE_NAMESPACE_K_
+#undef MLK_NAMESPACE
+#undef MLK_NAMESPACE_K
+#undef MLK_PREFIX_UNDERSCORE
+#undef MLK_PREFIX_UNDERSCORE_
 /* mlkem/config.h */
-#undef MLKEM_DEFAULT_NAMESPACE_PREFIX
 #undef MLKEM_K
-#undef MLKEM_NAMESPACE_PREFIX
-#undef MLKEM_NATIVE_ARITH_BACKEND_FILE
-#undef MLKEM_NATIVE_CONFIG_H
-#undef MLKEM_NATIVE_FIPS202_BACKEND_FILE
+#undef MLK_ARITH_BACKEND_FILE
+#undef MLK_CONFIG_H
+#undef MLK_DEFAULT_NAMESPACE_PREFIX
+#undef MLK_FIPS202_BACKEND_FILE
+#undef MLK_NAMESPACE_PREFIX
 /* mlkem/indcpa.h */
-#undef MLKEM_NATIVE_INDCPA_H
+#undef MLK_INDCPA_H
 #undef gen_matrix
 #undef indcpa_dec
 #undef indcpa_enc
 #undef indcpa_keypair_derand
 /* mlkem/kem.h */
-#undef MLKEM_NATIVE_KEM_H
+#undef MLK_KEM_H
 #undef crypto_kem_dec
 #undef crypto_kem_enc
 #undef crypto_kem_enc_derand
 #undef crypto_kem_keypair
 #undef crypto_kem_keypair_derand
 /* mlkem/mlkem_native.h */
-#undef BUILD_INFO_CONCAT2
-#undef BUILD_INFO_CONCAT2_
-#undef BUILD_INFO_CONCAT3
-#undef BUILD_INFO_CONCAT3_
-#undef BUILD_INFO_LVL
-#undef BUILD_INFO_NAMESPACE
 #undef CRYPTO_BYTES
 #undef CRYPTO_CIPHERTEXTBYTES
 #undef CRYPTO_PUBLICKEYBYTES
@@ -119,12 +113,18 @@
 #undef MLKEM_BYTES
 #undef MLKEM_CIPHERTEXTBYTES
 #undef MLKEM_CIPHERTEXTBYTES_
-#undef MLKEM_NATIVE_H
 #undef MLKEM_PUBLICKEYBYTES
 #undef MLKEM_PUBLICKEYBYTES_
 #undef MLKEM_SECRETKEYBYTES
 #undef MLKEM_SECRETKEYBYTES_
 #undef MLKEM_SYMBYTES
+#undef MLK_BUILD_INFO_CONCAT2
+#undef MLK_BUILD_INFO_CONCAT2_
+#undef MLK_BUILD_INFO_CONCAT3
+#undef MLK_BUILD_INFO_CONCAT3_
+#undef MLK_BUILD_INFO_LVL
+#undef MLK_BUILD_INFO_NAMESPACE
+#undef MLK_H
 #undef crypto_kem_dec
 #undef crypto_kem_enc
 #undef crypto_kem_enc_derand
@@ -144,7 +144,6 @@
 #undef MLKEM_INDCPA_SECRETKEYBYTES
 #undef MLKEM_LVL
 #undef MLKEM_N
-#undef MLKEM_NATIVE_PARAMS_H
 #undef MLKEM_POLYBYTES
 #undef MLKEM_POLYCOMPRESSEDBYTES_D10
 #undef MLKEM_POLYCOMPRESSEDBYTES_D11
@@ -158,9 +157,10 @@
 #undef MLKEM_Q_HALF
 #undef MLKEM_SSBYTES
 #undef MLKEM_SYMBYTES
-#undef UINT12_LIMIT
+#undef MLKEM_UINT12_LIMIT
+#undef MLK_PARAMS_H
 /* mlkem/poly_k.h */
-#undef MLKEM_NATIVE_POLY_K_H
+#undef MLK_POLY_K_H
 #undef poly_compress_du
 #undef poly_compress_dv
 #undef poly_decompress_du

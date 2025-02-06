@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef MLKEM_NATIVE_CBMC_H
-#define MLKEM_NATIVE_CBMC_H
+#ifndef MLK_CBMC_H
+#define MLK_CBMC_H
 /***************************************************
  * Basic replacements for __CPROVER_XXX contracts
  ***************************************************/
@@ -140,4 +140,4 @@
 
 #endif
 
-#endif /* MLKEM_NATIVE_CBMC_H */
+#endif /* MLK_CBMC_H */

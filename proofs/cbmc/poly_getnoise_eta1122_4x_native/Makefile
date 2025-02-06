@@ -9,7 +9,7 @@ HARNESS_FILE = poly_getnoise_eta1122_4x_native_harness
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
 PROOF_UID = poly_getnoise_eta1122_4x_native
 
-DEFINES += -DMLKEM_USE_NATIVE_BACKEND_FIPS202 -DMLKEM_NATIVE_FIPS202_BACKEND_FILE="\"dummy_backend_fips202_x2.h\""
+DEFINES += -DMLK_USE_NATIVE_BACKEND_FIPS202 -DMLK_FIPS202_BACKEND_FILE="\"dummy_backend_fips202_x2.h\""
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
@@ -20,8 +20,8 @@ PROJECT_SOURCES += $(SRCDIR)/mlkem/poly_k.c
 
 # Only relevant for K=2
 ifeq ($(MLKEM_K),2)
-CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_getnoise_eta1122_4x
-USE_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_cbd_eta1 $(MLKEM_NAMESPACE)poly_cbd_eta2 $(MLKEM_NAMESPACE)shake256x4
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_getnoise_eta1122_4x
+USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_cbd_eta1 $(MLK_NAMESPACE)poly_cbd_eta2 $(MLK_NAMESPACE)shake256x4
 else
 CHECK_FUNCTION_CONTRACTS=
 USE_FUNCTION_CONTRACTS=
@@ -33,7 +33,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = $(MLKEM_NAMESPACE)poly_getnoise_eta1122_4x
+FUNCTION_NAME = $(MLK_NAMESPACE)poly_getnoise_eta1122_4x
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

@@ -499,13 +499,13 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: make quickcheck
         run: |
-          OPT=0 CFLAGS="-DMLKEM_NATIVE_CHECK_APIS -Wno-redundant-decls" make quickcheck
+          OPT=0 CFLAGS="-DMLK_CHECK_APIS -Wno-redundant-decls" make quickcheck
           make clean >/dev/null
-          OPT=1 CFLAGS="-DMLKEM_NATIVE_CHECK_APIS -Wno-redundant-decls" make quickcheck
+          OPT=1 CFLAGS="-DMLK_CHECK_APIS -Wno-redundant-decls" make quickcheck
       - uses: ./.github/actions/setup-apt
       - name: tests func
         run: |
-          ./scripts/tests func --cflags="-DMLKEM_NATIVE_CHECK_APIS -Wno-redundant-decls"
+          ./scripts/tests func --cflags="-DMLK_CHECK_APIS -Wno-redundant-decls"
   ec2_functests:
     strategy:
       fail-fast: false

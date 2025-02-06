@@ -23,7 +23,7 @@ endif
 # Here, we use just a single monolithic compilation unit to include
 # multiple instances of mlkem-native.
 
-MLKEM_NATIVE_SOURCE=mlkem_native_all.c
+MLK_SOURCE=mlkem_native_all.c
 
 INC=-Imlkem/ -I./
 
@@ -65,12 +65,12 @@ CFLAGS := \
 	$(CFLAGS)
 
 # Set this flag to give all non-global functions internal linkage
-CFLAGS += -DMLKEM_NATIVE_MONOBUILD
+CFLAGS += -DMLK_MONOBUILD
 
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 LIB_NAME_FULL=$(BUILD_DIR)/$(LIB)
 
-$(LIB_NAME_FULL): $(MLKEM_NATIVE_SOURCE)
+$(LIB_NAME_FULL): $(MLK_SOURCE)
 	echo "$@"
 	mkdir -p $(BUILD_DIR)
 	$(CC) -c $(CFLAGS) $(INC) $^ -o $(BUILD_DIR)/mlkem_native.o

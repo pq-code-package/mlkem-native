@@ -21,12 +21,12 @@
 
 typedef shake128ctx shake128x4ctx[4];
 
-#define shake128x4_absorb_once MLKEM_NAMESPACE(shake128x4_absorb_once)
-static INLINE void shake128x4_absorb_once(shake128x4ctx *state,
-                                          const uint8_t *in0,
-                                          const uint8_t *in1,
-                                          const uint8_t *in2,
-                                          const uint8_t *in3, size_t inlen)
+#define shake128x4_absorb_once MLK_NAMESPACE(shake128x4_absorb_once)
+static MLK_INLINE void shake128x4_absorb_once(shake128x4ctx *state,
+                                              const uint8_t *in0,
+                                              const uint8_t *in1,
+                                              const uint8_t *in2,
+                                              const uint8_t *in3, size_t inlen)
 __contract__(
   requires(memory_no_alias(state, sizeof(shake128x4ctx)))
   requires(memory_no_alias(in0, inlen))
@@ -42,11 +42,11 @@ __contract__(
   shake128_absorb_once(&(*state)[3], in3, inlen);
 }
 
-#define shake128x4_squeezeblocks MLKEM_NAMESPACE(shake128x4_squeezeblocks)
-static INLINE void shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1,
-                                            uint8_t *out2, uint8_t *out3,
-                                            size_t nblocks,
-                                            shake128x4ctx *state)
+#define shake128x4_squeezeblocks MLK_NAMESPACE(shake128x4_squeezeblocks)
+static MLK_INLINE void shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1,
+                                                uint8_t *out2, uint8_t *out3,
+                                                size_t nblocks,
+                                                shake128x4ctx *state)
 __contract__(
   requires(memory_no_alias(state, sizeof(shake128x4ctx)))
   requires(memory_no_alias(out0, nblocks * SHAKE128_RATE))
@@ -66,8 +66,8 @@ __contract__(
   shake128_squeezeblocks(out3, nblocks, &(*state)[3]);
 }
 
-#define shake128x4_init MLKEM_NAMESPACE(shake128x4_init)
-static INLINE void shake128x4_init(shake128x4ctx *state)
+#define shake128x4_init MLK_NAMESPACE(shake128x4_init)
+static MLK_INLINE void shake128x4_init(shake128x4ctx *state)
 {
   shake128_init(&(*state)[0]);
   shake128_init(&(*state)[1]);
@@ -75,8 +75,8 @@ static INLINE void shake128x4_init(shake128x4ctx *state)
   shake128_init(&(*state)[3]);
 }
 
-#define shake128x4_release MLKEM_NAMESPACE(shake128x4_release)
-static INLINE void shake128x4_release(shake128x4ctx *state)
+#define shake128x4_release MLK_NAMESPACE(shake128x4_release)
+static MLK_INLINE void shake128x4_release(shake128x4ctx *state)
 {
   shake128_release(&(*state)[0]);
   shake128_release(&(*state)[1]);
@@ -84,11 +84,11 @@ static INLINE void shake128x4_release(shake128x4ctx *state)
   shake128_release(&(*state)[3]);
 }
 
-#define shake256x4 MLKEM_NAMESPACE(shake256x4)
-static INLINE void shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2,
-                              uint8_t *out3, size_t outlen, uint8_t *in0,
-                              uint8_t *in1, uint8_t *in2, uint8_t *in3,
-                              size_t inlen)
+#define shake256x4 MLK_NAMESPACE(shake256x4)
+static MLK_INLINE void shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2,
+                                  uint8_t *out3, size_t outlen, uint8_t *in0,
+                                  uint8_t *in1, uint8_t *in2, uint8_t *in3,
+                                  size_t inlen)
 __contract__(
 /* Refine +prove this spec, e.g. add disjointness constraints? */
   requires(readable(in0, inlen))

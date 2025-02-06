@@ -2,15 +2,15 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef MLKEM_NATIVE_INDCPA_H
-#define MLKEM_NATIVE_INDCPA_H
+#ifndef MLK_INDCPA_H
+#define MLK_INDCPA_H
 
 #include <stdint.h>
 #include "cbmc.h"
 #include "common.h"
 #include "poly_k.h"
 
-#define gen_matrix MLKEM_NAMESPACE_K(gen_matrix)
+#define gen_matrix MLK_NAMESPACE_K(gen_matrix)
 /*************************************************
  * Name:        gen_matrix
  *
@@ -23,7 +23,7 @@
  *              - const uint8_t *seed: pointer to input seed
  *              - int transposed: boolean deciding whether A or A^T is generated
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES], int transposed)
 __contract__(
   requires(memory_no_alias(a, sizeof(polyvec) * MLKEM_K))
@@ -34,7 +34,7 @@ __contract__(
   array_bound(a[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))));
 );
 
-#define indcpa_keypair_derand MLKEM_NAMESPACE_K(indcpa_keypair_derand)
+#define indcpa_keypair_derand MLK_NAMESPACE_K(indcpa_keypair_derand)
 /*************************************************
  * Name:        indcpa_keypair_derand
  *
@@ -48,7 +48,7 @@ __contract__(
  *              - const uint8_t *coins: pointer to input randomness
  *                             (of length MLKEM_SYMBYTES bytes)
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
                            uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
                            const uint8_t coins[MLKEM_SYMBYTES])
@@ -60,7 +60,7 @@ __contract__(
   assigns(object_whole(sk))
 );
 
-#define indcpa_enc MLKEM_NAMESPACE_K(indcpa_enc)
+#define indcpa_enc MLK_NAMESPACE_K(indcpa_enc)
 /*************************************************
  * Name:        indcpa_enc
  *
@@ -76,7 +76,7 @@ __contract__(
  *              - const uint8_t *coins: pointer to input random coins used as
  *seed (of length MLKEM_SYMBYTES) to deterministically generate all randomness
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
                 const uint8_t m[MLKEM_INDCPA_MSGBYTES],
                 const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
@@ -89,7 +89,7 @@ __contract__(
   assigns(object_whole(c))
 );
 
-#define indcpa_dec MLKEM_NAMESPACE_K(indcpa_dec)
+#define indcpa_dec MLK_NAMESPACE_K(indcpa_dec)
 /*************************************************
  * Name:        indcpa_dec
  *
@@ -103,7 +103,7 @@ __contract__(
  *              - const uint8_t *sk: pointer to input secret key
  *                                   (of length MLKEM_INDCPA_SECRETKEYBYTES)
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
                 const uint8_t c[MLKEM_INDCPA_BYTES],
                 const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
@@ -114,4 +114,4 @@ __contract__(
   assigns(object_whole(m))
 );
 
-#endif /* MLKEM_NATIVE_INDCPA_H */
+#endif /* MLK_INDCPA_H */

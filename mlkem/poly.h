@@ -2,8 +2,8 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef MLKEM_NATIVE_POLY_H
-#define MLKEM_NATIVE_POLY_H
+#ifndef MLK_POLY_H
+#define MLK_POLY_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -18,30 +18,30 @@
 /* Absolute exclusive upper bound for the output of the forward NTT */
 #define NTT_BOUND (8 * MLKEM_Q)
 
-#define zetas MLKEM_NAMESPACE(zetas)
+#define zetas MLK_NAMESPACE(zetas)
 extern const int16_t zetas[128];
 
 /*
  * Elements of R_q = Z_q[X]/(X^n + 1). Represents polynomial
  * coeffs[0] + X*coeffs[1] + X^2*coeffs[2] + ... + X^{n-1}*coeffs[n-1]
  */
-#define poly MLKEM_NAMESPACE(poly)
+#define poly MLK_NAMESPACE(poly)
 typedef struct
 {
   int16_t coeffs[MLKEM_N];
-} ALIGN poly;
+} MLK_ALIGN poly;
 
 /*
  * INTERNAL presentation of precomputed data speeding up
  * the base multiplication of two polynomials in NTT domain.
  */
-#define poly_mulcache MLKEM_NAMESPACE(poly_mulcache)
+#define poly_mulcache MLK_NAMESPACE(poly_mulcache)
 typedef struct
 {
   int16_t coeffs[MLKEM_N >> 1];
 } poly_mulcache;
 
-#define cast_uint16_to_int16 MLKEM_NAMESPACE(cast_uint16_to_int16)
+#define cast_uint16_to_int16 MLK_NAMESPACE(cast_uint16_to_int16)
 /*************************************************
  * Name:        cast_uint16_to_int16
  *
@@ -55,8 +55,8 @@ typedef struct
 #pragma CPROVER check push
 #pragma CPROVER check disable "conversion"
 #endif
-ALWAYS_INLINE
-static INLINE int16_t cast_uint16_to_int16(uint16_t x)
+MLK_ALWAYS_INLINE
+static MLK_INLINE int16_t cast_uint16_to_int16(uint16_t x)
 {
   /*
    * PORTABILITY: This relies on uint16_t -> int16_t
@@ -71,7 +71,7 @@ static INLINE int16_t cast_uint16_to_int16(uint16_t x)
 #pragma CPROVER check pop
 #endif
 
-#define montgomery_reduce MLKEM_NAMESPACE(montgomery_reduce)
+#define montgomery_reduce MLK_NAMESPACE(montgomery_reduce)
 /*************************************************
  * Name:        montgomery_reduce
  *
@@ -85,8 +85,8 @@ static INLINE int16_t cast_uint16_to_int16(uint16_t x)
  *                <= ceil(|a| / 2^16) + (MLKEM_Q + 1)/2
  *
  **************************************************/
-ALWAYS_INLINE
-static INLINE int16_t montgomery_reduce(int32_t a)
+MLK_ALWAYS_INLINE
+static MLK_INLINE int16_t montgomery_reduce(int32_t a)
 __contract__(
     requires(a < +(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)) &&
 	     a > -(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)))
@@ -130,7 +130,7 @@ __contract__(
   return (int16_t)r;
 }
 
-#define poly_tomont MLKEM_NAMESPACE(poly_tomont)
+#define poly_tomont MLK_NAMESPACE(poly_tomont)
 /*************************************************
  * Name:        poly_tomont
  *
@@ -141,7 +141,7 @@ __contract__(
  *
  * Arguments:   - poly *r: pointer to input/output polynomial
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_tomont(poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
@@ -149,7 +149,7 @@ __contract__(
   ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_Q))
 );
 
-#define poly_mulcache_compute MLKEM_NAMESPACE(poly_mulcache_compute)
+#define poly_mulcache_compute MLK_NAMESPACE(poly_mulcache_compute)
 /************************************************************
  * Name: poly_mulcache_compute
  *
@@ -172,7 +172,7 @@ __contract__(
  * the mulcache with values in (-q,q), but this is not needed for the
  * higher level safety proofs, and thus not part of the spec.
  */
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_mulcache_compute(poly_mulcache *x, const poly *a)
 __contract__(
   requires(memory_no_alias(x, sizeof(poly_mulcache)))
@@ -180,7 +180,7 @@ __contract__(
   assigns(object_whole(x))
 );
 
-#define poly_reduce MLKEM_NAMESPACE(poly_reduce)
+#define poly_reduce MLK_NAMESPACE(poly_reduce)
 /*************************************************
  * Name:        poly_reduce
  *
@@ -198,7 +198,7 @@ __contract__(
  * outputs are better suited to the only remaining
  * use of poly_reduce() in the context of (de)serialization.
  */
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_reduce(poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
@@ -206,7 +206,7 @@ __contract__(
   ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
 );
 
-#define poly_add MLKEM_NAMESPACE(poly_add)
+#define poly_add MLK_NAMESPACE(poly_add)
 /************************************************************
  * Name: poly_add
  *
@@ -224,7 +224,7 @@ __contract__(
  * NOTE: The reference implementation uses a 3-argument poly_add.
  * We specialize to the accumulator form to avoid reasoning about aliasing.
  */
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_add(poly *r, const poly *b)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
@@ -235,7 +235,7 @@ __contract__(
   assigns(memory_slice(r, sizeof(poly)))
 );
 
-#define poly_sub MLKEM_NAMESPACE(poly_sub)
+#define poly_sub MLK_NAMESPACE(poly_sub)
 /*************************************************
  * Name:        poly_sub
  *
@@ -249,7 +249,7 @@ __contract__(
  * NOTE: The reference implementation uses a 3-argument poly_sub.
  * We specialize to the accumulator form to avoid reasoning about aliasing.
  */
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_sub(poly *r, const poly *b)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
@@ -260,7 +260,7 @@ __contract__(
   assigns(object_whole(r))
 );
 
-#define poly_ntt MLKEM_NAMESPACE(poly_ntt)
+#define poly_ntt MLK_NAMESPACE(poly_ntt)
 /*************************************************
  * Name:        poly_ntt
  *
@@ -278,7 +278,7 @@ __contract__(
  *
  * Arguments:   - poly *p: pointer to in/output polynomial
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_ntt(poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
@@ -287,7 +287,7 @@ __contract__(
   ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, NTT_BOUND))
 );
 
-#define poly_invntt_tomont MLKEM_NAMESPACE(poly_invntt_tomont)
+#define poly_invntt_tomont MLK_NAMESPACE(poly_invntt_tomont)
 /*************************************************
  * Name:        poly_invntt_tomont
  *
@@ -304,7 +304,7 @@ __contract__(
  *
  * Arguments:   - uint16_t *a: pointer to in/output polynomial
  **************************************************/
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void poly_invntt_tomont(poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(poly)))
@@ -312,4 +312,4 @@ __contract__(
   ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, INVNTT_BOUND))
 );
 
-#endif /* MLKEM_NATIVE_POLY_H */
+#endif /* MLK_POLY_H */

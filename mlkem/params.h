@@ -2,14 +2,14 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef MLKEM_NATIVE_PARAMS_H
-#define MLKEM_NATIVE_PARAMS_H
+#ifndef MLK_PARAMS_H
+#define MLK_PARAMS_H
 
-#if defined(MLKEM_NATIVE_CONFIG_FILE)
-#include MLKEM_NATIVE_CONFIG_FILE
+#if defined(MLK_CONFIG_FILE)
+#include MLK_CONFIG_FILE
 #else
 #include "config.h"
-#endif /* MLKEM_NATIVE_CONFIG_FILE */
+#endif /* MLK_CONFIG_FILE */
 
 #if !defined(MLKEM_K)
 #error MLKEM_K is not defined
@@ -18,7 +18,7 @@
 #define MLKEM_N 256
 #define MLKEM_Q 3329
 #define MLKEM_Q_HALF ((MLKEM_Q + 1) / 2) /* 1665 */
-#define UINT12_LIMIT 4096
+#define MLKEM_UINT12_LIMIT 4096
 
 #define MLKEM_SYMBYTES 32 /* size in bytes of hashes, and seeds */
 #define MLKEM_SSBYTES 32  /* size in bytes of shared key */
@@ -72,4 +72,4 @@
    2 * MLKEM_SYMBYTES)
 #define MLKEM_INDCCA_CIPHERTEXTBYTES (MLKEM_INDCPA_BYTES)
 
-#endif /* MLKEM_NATIVE_PARAMS_H */
+#endif /* MLK_PARAMS_H */

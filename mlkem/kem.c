@@ -20,8 +20,8 @@
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define check_pk MLKEM_NAMESPACE_K(check_pk)
-#define check_sk MLKEM_NAMESPACE_K(check_sk)
+#define check_pk MLK_NAMESPACE_K(check_pk)
+#define check_sk MLK_NAMESPACE_K(check_sk)
 /* End of static namespacing */
 
 #if defined(CBMC)
@@ -77,7 +77,7 @@ static int check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
  **************************************************/
 static int check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
-  ALIGN uint8_t test[MLKEM_SYMBYTES];
+  MLK_ALIGN uint8_t test[MLKEM_SYMBYTES];
   /*
    * The parts of `sk` being hashed and compared here are public, so
    * no public information is leaked through the runtime or the return value
@@ -118,7 +118,7 @@ int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                        uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
-  ALIGN uint8_t coins[2 * MLKEM_SYMBYTES];
+  MLK_ALIGN uint8_t coins[2 * MLKEM_SYMBYTES];
   randombytes(coins, 2 * MLKEM_SYMBYTES);
   crypto_kem_keypair_derand(pk, sk, coins);
   return 0;
@@ -129,9 +129,9 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                           const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                           const uint8_t coins[MLKEM_SYMBYTES])
 {
-  ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
+  MLK_ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
   /* Will contain key, coins */
-  ALIGN uint8_t kr[2 * MLKEM_SYMBYTES];
+  MLK_ALIGN uint8_t kr[2 * MLKEM_SYMBYTES];
 
   if (check_pk(pk))
   {
@@ -155,7 +155,7 @@ int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                    uint8_t ss[MLKEM_SSBYTES],
                    const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 {
-  ALIGN uint8_t coins[MLKEM_SYMBYTES];
+  MLK_ALIGN uint8_t coins[MLKEM_SYMBYTES];
   randombytes(coins, MLKEM_SYMBYTES);
   return crypto_kem_enc_derand(ct, ss, pk, coins);
 }
@@ -165,9 +165,9 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
                    const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
   uint8_t fail;
-  ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
+  MLK_ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
   /* Will contain key, coins */
-  ALIGN uint8_t kr[2 * MLKEM_SYMBYTES];
+  MLK_ALIGN uint8_t kr[2 * MLKEM_SYMBYTES];
   const uint8_t *pk = sk + MLKEM_INDCPA_SECRETKEYBYTES;
 
   if (check_sk(sk))
@@ -185,7 +185,7 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   /* Recompute and compare ciphertext */
   {
     /* Temporary buffer */
-    ALIGN uint8_t cmp[MLKEM_INDCCA_CIPHERTEXTBYTES];
+    MLK_ALIGN uint8_t cmp[MLKEM_INDCCA_CIPHERTEXTBYTES];
     /* coins are in kr+MLKEM_SYMBYTES */
     indcpa_enc(cmp, buf, pk, kr + MLKEM_SYMBYTES);
     fail = ct_memcmp(ct, cmp, MLKEM_INDCCA_CIPHERTEXTBYTES);
@@ -194,7 +194,7 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   /* Compute rejection key */
   {
     /* Temporary buffer */
-    ALIGN uint8_t tmp[MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES];
+    MLK_ALIGN uint8_t tmp[MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES];
     memcpy(tmp, sk + MLKEM_INDCCA_SECRETKEYBYTES - MLKEM_SYMBYTES,
            MLKEM_SYMBYTES);
     memcpy(tmp + MLKEM_SYMBYTES, ct, MLKEM_INDCCA_CIPHERTEXTBYTES);

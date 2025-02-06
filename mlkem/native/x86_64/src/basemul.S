@@ -7,8 +7,8 @@
 // https://github.com/pq-crystals/kyber/blob/main/avx2
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
@@ -18,8 +18,8 @@
 
 .text
 .balign 4
-.global MLKEM_ASM_NAMESPACE(basemul_avx2)
-MLKEM_ASM_NAMESPACE(basemul_avx2):
+.global MLK_ASM_NAMESPACE(basemul_avx2)
+MLK_ASM_NAMESPACE(basemul_avx2):
 
         movq	%rsp, %r8
         andq	$-0x20, %rsp
@@ -291,5 +291,5 @@ MLKEM_ASM_NAMESPACE(basemul_avx2):
         movq	%r8, %rsp
         retq
 
-#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
+#endif /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */

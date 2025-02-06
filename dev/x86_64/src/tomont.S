@@ -12,17 +12,17 @@
 //   semantics of poly_reduce().
 
 #include "../../../common.h"
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
 #include "consts.h"
 #include "fq.inc"
 
 .text
-.global MLKEM_ASM_NAMESPACE(tomont_avx2)
+.global MLK_ASM_NAMESPACE(tomont_avx2)
 .balign 4
-MLKEM_ASM_NAMESPACE(tomont_avx2):
+MLK_ASM_NAMESPACE(tomont_avx2):
 #consts
 vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
 vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XMONTSQLO*2(%rsi),%ymm1
@@ -65,5 +65,5 @@ vmovdqa		%ymm10,224(%rdi)
 ret
 
 /* simpasm: footer-start */
-#endif /* defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-          !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED) */
+#endif /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */

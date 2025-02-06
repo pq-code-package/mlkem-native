@@ -22,11 +22,11 @@ endif
 ifeq ($(HOST_PLATFORM),Linux-x86_64)
 ifeq ($(CROSS_PREFIX),)
 	CFLAGS += -mavx2 -mbmi2 -mpopcnt -maes
-	CFLAGS += -DFORCE_X86_64
+	CFLAGS += -DMLK_FORCE_X86_64
 else ifneq ($(findstring aarch64_be, $(CROSS_PREFIX)),)
-	CFLAGS += -DFORCE_AARCH64_EB
+	CFLAGS += -DMLK_FORCE_AARCH64_EB
 else ifneq ($(findstring aarch64, $(CROSS_PREFIX)),)
-	CFLAGS += -DFORCE_AARCH64
+	CFLAGS += -DMLK_FORCE_AARCH64
 else
 
 endif
@@ -34,16 +34,16 @@ endif
 # linux aarch64
 else ifeq ($(HOST_PLATFORM),Linux-aarch64)
 ifeq ($(CROSS_PREFIX),)
-	CFLAGS += -DFORCE_AARCH64
+	CFLAGS += -DMLK_FORCE_AARCH64
 else ifneq ($(findstring x86_64, $(CROSS_PREFIX)),)
 	CFLAGS += -mavx2 -mbmi2 -mpopcnt -maes
-	CFLAGS += -DFORCE_X86_64
+	CFLAGS += -DMLK_FORCE_X86_64
 else
 endif
 
 # darwin aarch64
 else ifeq ($(HOST_PLATFORM),Darwin-arm64)
-	CFLAGS += -DFORCE_AARCH64
+	CFLAGS += -DMLK_FORCE_AARCH64
 endif
 
 CFLAGS := \
@@ -59,8 +59,8 @@ CFLAGS := \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
 	-fomit-frame-pointer \
-	-DMLKEM_NAMESPACE_PREFIX=mlkem \
-	-DMLKEM_NAMESPACE_PREFIX_ADD_LEVEL \
+	-DMLK_NAMESPACE_PREFIX=mlkem \
+	-DMLK_NAMESPACE_PREFIX_ADD_LEVEL \
 	-std=c99 \
 	-pedantic \
 	-MMD \
@@ -74,7 +74,7 @@ CFLAGS := \
 #
 # If you are not concerned about minimizing for a specific backend,
 # you can just include _all_ source files into your build.
-MLKEM_NATIVE_SOURCE := $(wildcard \
+MLK_SOURCE := $(wildcard \
 	mlkem_native/**/*.c	  	\
 	mlkem_native/**/**/*.c		\
 	mlkem_native/**/**/**/*.c	\
@@ -91,24 +91,24 @@ MLKEM512_DIR = $(BUILD_DIR)/mlkem512
 MLKEM768_DIR = $(BUILD_DIR)/mlkem768
 MLKEM1024_DIR = $(BUILD_DIR)/mlkem1024
 
-MLKEM512_OBJS=$(patsubst %,$(MLKEM512_DIR)/%.o,$(MLKEM_NATIVE_SOURCE))
-MLKEM768_OBJS=$(patsubst %,$(MLKEM768_DIR)/%.o,$(MLKEM_NATIVE_SOURCE))
-MLKEM1024_OBJS=$(patsubst %,$(MLKEM1024_DIR)/%.o,$(MLKEM_NATIVE_SOURCE))
+MLKEM512_OBJS=$(patsubst %,$(MLKEM512_DIR)/%.o,$(MLK_SOURCE))
+MLKEM768_OBJS=$(patsubst %,$(MLKEM768_DIR)/%.o,$(MLK_SOURCE))
+MLKEM1024_OBJS=$(patsubst %,$(MLKEM1024_DIR)/%.o,$(MLK_SOURCE))
 
 $(MLKEM512_OBJS): $(MLKEM512_DIR)/%.o: %
 	$(Q)echo "  CC      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -DMLKEM_USE_NATIVE_BACKEND_ARITH -DMLKEM_USE_NATIVE_BACKEND_FIPS202 -DMLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED -DMLKEM_K=2 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC) -DMLK_USE_NATIVE_BACKEND_ARITH -DMLK_USE_NATIVE_BACKEND_FIPS202 -DMLK_MULTILEVEL_BUILD_WITH_SHARED -DMLKEM_K=2 $(CFLAGS) -c $^ -o $@
 
 $(MLKEM768_OBJS): $(MLKEM768_DIR)/%.o: %
 	$(Q)echo "  CC      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -DMLKEM_USE_NATIVE_BACKEND_ARITH -DMLKEM_USE_NATIVE_BACKEND_FIPS202 -DMLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED -DMLKEM_K=3 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC) -DMLK_USE_NATIVE_BACKEND_ARITH -DMLK_USE_NATIVE_BACKEND_FIPS202 -DMLK_MULTILEVEL_BUILD_NO_SHARED -DMLKEM_K=3 $(CFLAGS) -c $^ -o $@
 
 $(MLKEM1024_OBJS): $(MLKEM1024_DIR)/%.o: %
 	$(Q)echo "  CC      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -DMLKEM_USE_NATIVE_BACKEND_ARITH -DMLKEM_USE_NATIVE_BACKEND_FIPS202 -DMLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED -DMLKEM_K=4 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC) -DMLK_USE_NATIVE_BACKEND_ARITH -DMLK_USE_NATIVE_BACKEND_FIPS202 -DMLK_MULTILEVEL_BUILD_NO_SHARED -DMLKEM_K=4 $(CFLAGS) -c $^ -o $@
 
 mlkem512_objs: $(MLKEM512_OBJS)
 mlkem768_objs: $(MLKEM768_OBJS)

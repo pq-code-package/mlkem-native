@@ -9,7 +9,7 @@ HARNESS_FILE = poly_mulcache_compute_native_harness
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
 PROOF_UID = poly_mulcache_compute_native
 
-DEFINES += -DMLKEM_USE_NATIVE_BACKEND_ARITH -DMLKEM_NATIVE_ARITH_BACKEND_FILE="\"dummy_backend.h\""
+DEFINES += -DMLK_USE_NATIVE_BACKEND_ARITH -DMLK_ARITH_BACKEND_FILE="\"dummy_backend.h\""
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
@@ -18,7 +18,7 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c $(SRCDIR)/mlkem/zetas.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_mulcache_compute
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_mulcache_compute
 USE_FUNCTION_CONTRACTS=poly_mulcache_compute_native
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1

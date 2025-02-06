@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)poly_reduce
-USE_FUNCTION_CONTRACTS=$(MLKEM_NAMESPACE)scalar_signed_to_unsigned_q $(MLKEM_NAMESPACE)barrett_reduce
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_reduce
+USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)scalar_signed_to_unsigned_q $(MLK_NAMESPACE)barrett_reduce
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = $(MLKEM_NAMESPACE)poly_reduce
+FUNCTION_NAME = $(MLK_NAMESPACE)poly_reduce
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

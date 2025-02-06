@@ -2,14 +2,14 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef MLKEM_NATIVE_KEM_H
-#define MLKEM_NATIVE_KEM_H
+#ifndef MLK_KEM_H
+#define MLK_KEM_H
 
 #include <stdint.h>
 #include "cbmc.h"
 #include "common.h"
 
-#if defined(MLKEM_NATIVE_CHECK_APIS)
+#if defined(MLK_CHECK_APIS)
 /* Include to ensure consistency between internal kem.h
  * and external mlkem_native.h. */
 #include "mlkem_native.h"
@@ -27,11 +27,11 @@
 #endif
 
 #else
-#define crypto_kem_keypair_derand MLKEM_NAMESPACE_K(keypair_derand)
-#define crypto_kem_keypair MLKEM_NAMESPACE_K(keypair)
-#define crypto_kem_enc_derand MLKEM_NAMESPACE_K(enc_derand)
-#define crypto_kem_enc MLKEM_NAMESPACE_K(enc)
-#define crypto_kem_dec MLKEM_NAMESPACE_K(dec)
+#define crypto_kem_keypair_derand MLK_NAMESPACE_K(keypair_derand)
+#define crypto_kem_keypair MLK_NAMESPACE_K(keypair)
+#define crypto_kem_enc_derand MLK_NAMESPACE_K(enc_derand)
+#define crypto_kem_enc MLK_NAMESPACE_K(enc)
+#define crypto_kem_dec MLK_NAMESPACE_K(dec)
 #endif
 
 /*************************************************
@@ -180,4 +180,4 @@ __contract__(
   assigns(object_whole(ss))
 );
 
-#endif /* MLKEM_NATIVE_KEM_H */
+#endif /* MLK_KEM_H */

@@ -26,13 +26,13 @@
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define pack_pk MLKEM_NAMESPACE_K(pack_pk)
-#define unpack_pk MLKEM_NAMESPACE_K(unpack_pk)
-#define pack_sk MLKEM_NAMESPACE_K(pack_sk)
-#define unpack_sk MLKEM_NAMESPACE_K(unpack_sk)
-#define pack_ciphertext MLKEM_NAMESPACE_K(pack_ciphertext)
-#define unpack_ciphertext MLKEM_NAMESPACE_K(unpack_ciphertext)
-#define matvec_mul MLKEM_NAMESPACE_K(matvec_mul)
+#define pack_pk MLK_NAMESPACE_K(pack_pk)
+#define unpack_pk MLK_NAMESPACE_K(unpack_pk)
+#define pack_sk MLK_NAMESPACE_K(pack_sk)
+#define unpack_sk MLK_NAMESPACE_K(unpack_sk)
+#define pack_ciphertext MLK_NAMESPACE_K(pack_ciphertext)
+#define unpack_ciphertext MLK_NAMESPACE_K(unpack_ciphertext)
+#define matvec_mul MLK_NAMESPACE_K(matvec_mul)
 /* End of static namespacing */
 
 /*************************************************
@@ -76,7 +76,7 @@ static void unpack_pk(polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
   /* NOTE: If a modulus check was conducted on the PK, we know at this
    * point that the coefficients of `pk` are unsigned canonical. The
    * specifications and proofs, however, do _not_ assume this, and instead
-   * work with the easily provable bound by UINT12_LIMIT. */
+   * work with the easily provable bound by MLKEM_UINT12_LIMIT. */
 }
 
 /*************************************************
@@ -144,13 +144,13 @@ static void unpack_ciphertext(polyvec *b, poly *v,
   poly_decompress_dv(v, c + MLKEM_POLYVECCOMPRESSEDBYTES_DU);
 }
 
-#if !defined(MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER)
+#if !defined(MLK_USE_NATIVE_NTT_CUSTOM_ORDER)
 /* This namespacing is not done at the top to avoid a naming conflict
  * with native backends, which are currently not yet namespaced. */
 #define poly_permute_bitrev_to_custom \
-  MLKEM_NAMESPACE_K(poly_permute_bitrev_to_custom)
+  MLK_NAMESPACE_K(poly_permute_bitrev_to_custom)
 
-static INLINE void poly_permute_bitrev_to_custom(int16_t data[MLKEM_N])
+static MLK_INLINE void poly_permute_bitrev_to_custom(int16_t data[MLKEM_N])
 __contract__(
   /* We don't specify that this should be a permutation, but only
    * that it does not change the bound established at the end of gen_matrix. */
@@ -158,10 +158,10 @@ __contract__(
   requires(array_bound(data, 0, MLKEM_N, 0, MLKEM_Q))
   assigns(memory_slice(data, sizeof(poly)))
   ensures(array_bound(data, 0, MLKEM_N, 0, MLKEM_Q))) { ((void)data); }
-#endif /* MLKEM_USE_NATIVE_NTT_CUSTOM_ORDER */
+#endif /* MLK_USE_NATIVE_NTT_CUSTOM_ORDER */
 
 /* Not static for benchmarking */
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES], int transposed)
 {
   unsigned i, j;
@@ -171,10 +171,10 @@ void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES], int transposed)
    * of the same parent object.
    */
 
-  ALIGN uint8_t seed0[MLKEM_SYMBYTES + 2];
-  ALIGN uint8_t seed1[MLKEM_SYMBYTES + 2];
-  ALIGN uint8_t seed2[MLKEM_SYMBYTES + 2];
-  ALIGN uint8_t seed3[MLKEM_SYMBYTES + 2];
+  MLK_ALIGN uint8_t seed0[MLKEM_SYMBYTES + 2];
+  MLK_ALIGN uint8_t seed1[MLKEM_SYMBYTES + 2];
+  MLK_ALIGN uint8_t seed2[MLKEM_SYMBYTES + 2];
+  MLK_ALIGN uint8_t seed3[MLKEM_SYMBYTES + 2];
   uint8_t *seedxy[4];
   seedxy[0] = seed0;
   seedxy[1] = seed1;
@@ -273,7 +273,7 @@ __contract__(
   requires(memory_no_alias(vc, sizeof(polyvec_mulcache)))
   requires(forall(k0, 0, MLKEM_K,
     forall(k1, 0, MLKEM_K,
-      array_bound(a[k0].vec[k1].coeffs, 0, MLKEM_N, 0, UINT12_LIMIT))))
+      array_bound(a[k0].vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT))))
   assigns(object_whole(out)))
 {
   unsigned i;
@@ -286,18 +286,18 @@ __contract__(
   }
 }
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
                            uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
                            const uint8_t coins[MLKEM_SYMBYTES])
 {
-  ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
+  MLK_ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
   const uint8_t *publicseed = buf;
   const uint8_t *noiseseed = buf + MLKEM_SYMBYTES;
   polyvec a[MLKEM_K], e, pkpv, skpv;
   polyvec_mulcache skpv_cache;
 
-  ALIGN uint8_t coins_with_domain_separator[MLKEM_SYMBYTES + 1];
+  MLK_ALIGN uint8_t coins_with_domain_separator[MLKEM_SYMBYTES + 1];
   /* Concatenate coins with MLKEM_K for domain separation of security levels */
   memcpy(coins_with_domain_separator, coins, MLKEM_SYMBYTES);
   coins_with_domain_separator[MLKEM_SYMBYTES] = MLKEM_K;
@@ -355,13 +355,13 @@ void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
 }
 
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
                 const uint8_t m[MLKEM_INDCPA_MSGBYTES],
                 const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
                 const uint8_t coins[MLKEM_SYMBYTES])
 {
-  ALIGN uint8_t seed[MLKEM_SYMBYTES];
+  MLK_ALIGN uint8_t seed[MLKEM_SYMBYTES];
   polyvec sp, pkpv, ep, at[MLKEM_K], b;
   poly v, k, epp;
   polyvec_mulcache sp_cache;
@@ -423,7 +423,7 @@ void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
   pack_ciphertext(c, &b, &v);
 }
 
-MLKEM_NATIVE_INTERNAL_API
+MLK_INTERNAL_API
 void indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
                 const uint8_t c[MLKEM_INDCPA_BYTES],
                 const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])

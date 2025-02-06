@@ -23,8 +23,8 @@ endif
 # Here, we use just a single monolithic compilation unit to include
 # multiple instances of mlkem-native, plus all assembly.
 
-MLKEM_NATIVE_SOURCE_C=mlkem_native_all.c
-MLKEM_NATIVE_SOURCE_ASM = $(wildcard \
+MLK_SOURCE_C=mlkem_native_all.c
+MLK_SOURCE_ASM = $(wildcard \
 	mlkem/**/*.S                 \
 	mlkem/**/**/*.S              \
 	mlkem/**/**/**/*.S           \
@@ -64,11 +64,11 @@ endif
 ifeq ($(HOST_PLATFORM),Linux-x86_64)
 ifeq ($(CROSS_PREFIX),)
 	CFLAGS += -mavx2 -mbmi2 -mpopcnt -maes
-	CFLAGS += -DFORCE_X86_64
+	CFLAGS += -DMLK_FORCE_X86_64
 else ifneq ($(findstring aarch64_be, $(CROSS_PREFIX)),)
-	CFLAGS += -DFORCE_AARCH64_EB
+	CFLAGS += -DMLK_FORCE_AARCH64_EB
 else ifneq ($(findstring aarch64, $(CROSS_PREFIX)),)
-	CFLAGS += -DFORCE_AARCH64
+	CFLAGS += -DMLK_FORCE_AARCH64
 else
 
 endif
@@ -76,16 +76,16 @@ endif
 # linux aarch64
 else ifeq ($(HOST_PLATFORM),Linux-aarch64)
 ifeq ($(CROSS_PREFIX),)
-	CFLAGS += -DFORCE_AARCH64
+	CFLAGS += -DMLK_FORCE_AARCH64
 else ifneq ($(findstring x86_64, $(CROSS_PREFIX)),)
 	CFLAGS += -mavx2 -mbmi2 -mpopcnt -maes
-	CFLAGS += -DFORCE_X86_64
+	CFLAGS += -DMLK_FORCE_X86_64
 else
 endif
 
 # darwin aarch64
 else ifeq ($(HOST_PLATFORM),Darwin-arm64)
-	CFLAGS += -DFORCE_AARCH64
+	CFLAGS += -DMLK_FORCE_AARCH64
 endif
 
 CFLAGS := \
@@ -104,14 +104,14 @@ CFLAGS := \
 	-O3 \
 	$(CFLAGS)
 
-ASMFLAGS = -DMLKEM_NATIVE_CONFIG_FILE=\"multilevel_config.h\"
-ASMFLAGS += -DMLKEM_NATIVE_MULTILEVEL_BUILD_WITH_SHARED
+ASMFLAGS = -DMLK_CONFIG_FILE=\"multilevel_config.h\"
+ASMFLAGS += -DMLK_MULTILEVEL_BUILD_WITH_SHARED
 
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 LIB_NAME_FULL=$(BUILD_DIR)/$(LIB)
 
-MLKEM_NATIVE_OBJ_C=$(patsubst %,$(BUILD_DIR)/%.o,$(MLKEM_NATIVE_SOURCE_C))
-MLKEM_NATIVE_OBJ_ASM=$(patsubst %,$(BUILD_DIR)/%.o,$(MLKEM_NATIVE_SOURCE_ASM))
+MLK_OBJ_C=$(patsubst %,$(BUILD_DIR)/%.o,$(MLK_SOURCE_C))
+MLK_OBJ_ASM=$(patsubst %,$(BUILD_DIR)/%.o,$(MLK_SOURCE_ASM))
 
 Q ?= @
 
@@ -125,7 +125,7 @@ $(BUILD_DIR)/%.S.o: %.S
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(CC) -c $(CFLAGS) $(ASMFLAGS) $(INC) $^ -o $@
 
-$(LIB_NAME_FULL): $(MLKEM_NATIVE_OBJ_C) $(MLKEM_NATIVE_OBJ_ASM)
+$(LIB_NAME_FULL): $(MLK_OBJ_C) $(MLK_OBJ_ASM)
 	$(Q)echo "AR  $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(AR) rcs $@ $^

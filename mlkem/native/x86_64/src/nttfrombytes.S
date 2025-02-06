@@ -8,8 +8,8 @@
 
 #include "../../../common.h"
 
-#if defined(MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
@@ -19,8 +19,8 @@
 
 .text
 .balign 4
-.global MLKEM_ASM_NAMESPACE(nttfrombytes_avx2)
-MLKEM_ASM_NAMESPACE(nttfrombytes_avx2):
+.global MLK_ASM_NAMESPACE(nttfrombytes_avx2)
+MLK_ASM_NAMESPACE(nttfrombytes_avx2):
 
         vmovdqa	0xe0(%rdx), %ymm0
         callq	nttfrombytes128_avx
@@ -104,5 +104,5 @@ nttfrombytes128_avx:
         vmovdqa	%ymm1, 0xe0(%rdi)
         retq
 
-#endif /* MLKEM_NATIVE_ARITH_BACKEND_X86_64_DEFAULT &&
-         ! MLKEM_NATIVE_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT &&
+         ! MLK_MULTILEVEL_BUILD_NO_SHARED */
