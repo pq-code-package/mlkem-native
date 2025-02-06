@@ -12,6 +12,7 @@
 /* Include C files accompanying native code */
 #define MLK_MONOBUILD_WITH_NATIVE_ARITH
 #define MLK_MONOBUILD_WITH_NATIVE_FIPS202
+#define MLK_MONOBUILD_KEEP_SHARED_HEADERS
 /* Indicate that this is a monobuild */
 #define MLK_MONOBUILD
 
@@ -28,6 +29,8 @@
 #define MLK_CONFIG_FILE "multilevel_config.h"
 #include "mlkem_native_monobuild.c"
 #undef MLK_CONFIG_FILE
+
+#undef MLK_MONOBUILD_KEEP_SHARED_HEADERS
 
 #define MLKEM_K 4
 #define MLK_CONFIG_FILE "multilevel_config.h"

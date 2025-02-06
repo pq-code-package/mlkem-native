@@ -9,6 +9,7 @@
 
 /* Include level-independent code */
 #define MLK_MULTILEVEL_BUILD_WITH_SHARED
+#define MLK_MONOBUILD_KEEP_SHARED_HEADERS
 
 #define MLKEM_K 2
 #define MLK_CONFIG_FILE "multilevel_config.h"
@@ -23,6 +24,8 @@
 #define MLK_CONFIG_FILE "multilevel_config.h"
 #include "mlkem_native_monobuild.c"
 #undef MLK_CONFIG_FILE
+
+#undef MLK_MONOBUILD_KEEP_SHARED_HEADERS
 
 #define MLKEM_K 4
 #define MLK_CONFIG_FILE "multilevel_config.h"
