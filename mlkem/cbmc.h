@@ -15,7 +15,6 @@
 
 #define __contract__(x)
 #define __loop__(x)
-#define cassert(x)
 
 #else /* CBMC _is_ defined, therefore we're doing proof */
 
