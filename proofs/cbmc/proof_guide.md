@@ -12,7 +12,7 @@ Our CBMC proofs confirm the absence of certain classes of undefined behaviour, s
 memory accesses -- for the precise list of conditions checked, see the CBMC configuration in
 [Makefile.common](Makefile.common). For many arithmetic functions, we additionally specify how they affect coefficient
 bounds: For example, we show that the result of `poly_invntt_tomont()` has coefficients bound by
-`INVNTT_BOUND`. Finally, some simple functions have their full functional behaviour specified: For example, the
+`MLK_INVNTT_BOUND`. Finally, some simple functions have their full functional behaviour specified: For example, the
 specification of the constant-time `ct_memcmp()` shows that, functionally, it is just an ordinary `memcmp()`.
 
 ## CBMC annotations

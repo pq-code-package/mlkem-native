@@ -388,7 +388,7 @@ void poly_ntt(poly *p)
   }
 
   /* Check the stronger bound */
-  debug_assert_abs_bound(p, MLKEM_N, NTT_BOUND);
+  debug_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
 }
 #else  /* MLK_USE_NATIVE_NTT */
 
@@ -397,7 +397,7 @@ void poly_ntt(poly *p)
 {
   debug_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
   ntt_native(p->coeffs);
-  debug_assert_abs_bound(p, MLKEM_N, NTT_BOUND);
+  debug_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
 }
 #endif /* MLK_USE_NATIVE_NTT */
 
@@ -469,7 +469,7 @@ void poly_invntt_tomont(poly *p)
     invntt_layer(p->coeffs, len, layer);
   }
 
-  debug_assert_abs_bound(p, MLKEM_N, INVNTT_BOUND);
+  debug_assert_abs_bound(p, MLKEM_N, MLK_INVNTT_BOUND);
 }
 #else  /* MLK_USE_NATIVE_INTT */
 
@@ -477,7 +477,7 @@ MLK_INTERNAL_API
 void poly_invntt_tomont(poly *p)
 {
   intt_native(p->coeffs);
-  debug_assert_abs_bound(p, MLKEM_N, INVNTT_BOUND);
+  debug_assert_abs_bound(p, MLKEM_N, MLK_INVNTT_BOUND);
 }
 #endif /* MLK_USE_NATIVE_INTT */
 

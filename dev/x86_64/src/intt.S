@@ -59,8 +59,8 @@ vpsubw		%ymm\rh3,%ymm15,%ymm\rh3    /* rh3 = montmul(rh3-rl3, root0) */
 .macro intt_levels0t5 off
 /* level 0 */
 /* no bounds assumptions */
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XFLO*2(%rsi),%ymm2
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XFHI*2(%rsi),%ymm3
+vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XFLO*2(%rsi),%ymm2
+vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XFHI*2(%rsi),%ymm3
 
 vmovdqa         (128*\off+  0)*2(%rdi),%ymm4
 vmovdqa         (128*\off+ 32)*2(%rdi),%ymm6
@@ -84,11 +84,11 @@ fqmulprecomp	2,3,11
 
 /* bounds: coefficients < q */
 
-vpermq		$0x4E,(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+208)*2(%rsi),%ymm15
-vpermq		$0x4E,(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+176)*2(%rsi),%ymm1
-vpermq		$0x4E,(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+224)*2(%rsi),%ymm2
-vpermq		$0x4E,(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+192)*2(%rsi),%ymm3
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_REVIDXB*2(%rsi),%ymm12
+vpermq		$0x4E,(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+208)*2(%rsi),%ymm15
+vpermq		$0x4E,(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+176)*2(%rsi),%ymm1
+vpermq		$0x4E,(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+224)*2(%rsi),%ymm2
+vpermq		$0x4E,(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+192)*2(%rsi),%ymm3
+vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXB*2(%rsi),%ymm12
 vpshufb		%ymm12,%ymm15,%ymm15
 vpshufb		%ymm12,%ymm1,%ymm1
 vpshufb		%ymm12,%ymm2,%ymm2
@@ -104,9 +104,9 @@ butterfly	4,5,8,9,6,7,10,11,15,1,2,3
  * 4,5,8,9 abs bound < 2q; 6,7,10,11 abs bound < q */
 
 /* level 1 */
-vpermq		$0x4E,(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+144)*2(%rsi),%ymm2
-vpermq		$0x4E,(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+160)*2(%rsi),%ymm3
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_REVIDXB*2(%rsi),%ymm1
+vpermq		$0x4E,(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+144)*2(%rsi),%ymm2
+vpermq		$0x4E,(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+160)*2(%rsi),%ymm3
+vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXB*2(%rsi),%ymm1
 vpshufb		%ymm1,%ymm2,%ymm2
 vpshufb		%ymm1,%ymm3,%ymm3
 
@@ -123,14 +123,14 @@ shuffle1	8,9,6,9      // 6,9  abs bound < q
 shuffle1	10,11,8,11   // 8,11 abs bound < q
 
 /* level 2 */
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_REVIDXD*2(%rsi),%ymm12
-vpermd		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+112)*2(%rsi),%ymm12,%ymm2
-vpermd		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+128)*2(%rsi),%ymm12,%ymm10
+vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXD*2(%rsi),%ymm12
+vpermd		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+112)*2(%rsi),%ymm12,%ymm2
+vpermd		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+128)*2(%rsi),%ymm12,%ymm10
 
 butterfly	3,4,6,8,5,7,9,11,2,2,10,10
 /* 3 abs bound < 8q, 4 abs bound < 4q, 6,8 abs bound < 2q, 5,7,9,11 abs bound < q */
 
-vmovdqa		AVX2_BACKEND_DATA_OFFSET_16XV*2(%rsi),%ymm1
+vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XV*2(%rsi),%ymm1
 red16		3
 /*  4 abs bound < 4q, 6,8 abs bound < 2q, 3,5,7,9,11 abs bound < q */
 
@@ -140,8 +140,8 @@ shuffle2	5,7,6,7    // 6,7 abs bound < q
 shuffle2	9,11,5,11  // 5,11 abs bound < q
 
 /* level 3 */
-vpermq		$0x1B,(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+80)*2(%rsi),%ymm2
-vpermq		$0x1B,(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+96)*2(%rsi),%ymm9
+vpermq		$0x1B,(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+80)*2(%rsi),%ymm2
+vpermq		$0x1B,(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+96)*2(%rsi),%ymm9
 
 butterfly	10,3,6,5,4,8,7,11,2,2,9,9
 /* 10 abs bound < 8q
@@ -166,8 +166,8 @@ shuffle4	4,8,6,8    /* 6,8  abs bound < q */
 shuffle4	7,11,4,11  /* 4,11 abs bound < q */
 
 /* level 4 */
-vpermq		$0x4E,(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+48)*2(%rsi),%ymm2
-vpermq		$0x4E,(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+64)*2(%rsi),%ymm7
+vpermq		$0x4E,(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+48)*2(%rsi),%ymm2
+vpermq		$0x4E,(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+64)*2(%rsi),%ymm7
 
 butterfly	9,10,6,4,3,5,8,11,2,2,7,7
 /* 9 abs bound < 8q
@@ -185,8 +185,8 @@ shuffle8	3,5,6,5    /* 5,6  abs bound < q */
 shuffle8	8,11,3,11  /* 3,11 abs bound < q */
 
 /* level 5 */
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+16)*2(%rsi),%ymm2
-vmovdqa		(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+32)*2(%rsi),%ymm8
+vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+16)*2(%rsi),%ymm2
+vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+32)*2(%rsi),%ymm8
 
 butterfly	7,9,6,3,10,4,5,11,2,2,8,8
 /* 7         abs bound <8q
@@ -217,13 +217,13 @@ vmovdqa         (64*\off+  0)*2(%rdi),%ymm4
 vmovdqa         (64*\off+128)*2(%rdi),%ymm8
 vmovdqa         (64*\off+ 16)*2(%rdi),%ymm5
 vmovdqa         (64*\off+144)*2(%rdi),%ymm9
-vpbroadcastq	(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+0)*2(%rsi),%ymm2
+vpbroadcastq	(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+0)*2(%rsi),%ymm2
 
 vmovdqa         (64*\off+ 32)*2(%rdi),%ymm6
 vmovdqa         (64*\off+160)*2(%rdi),%ymm10
 vmovdqa         (64*\off+ 48)*2(%rdi),%ymm7
 vmovdqa         (64*\off+176)*2(%rdi),%ymm11
-vpbroadcastq	(AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+4)*2(%rsi),%ymm3
+vpbroadcastq	(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+4)*2(%rsi),%ymm3
 
 butterfly	4,5,6,7,8,9,10,11
 /* global abs bound < 8q */
@@ -245,7 +245,7 @@ vmovdqa		%ymm11,(64*\off+176)*2(%rdi)
 .global MLK_ASM_NAMESPACE(invntt_avx2)
 .balign 4
 MLK_ASM_NAMESPACE(invntt_avx2):
-vmovdqa         AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
+vmovdqa         MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
 
 intt_levels0t5	0
 intt_levels0t5	1

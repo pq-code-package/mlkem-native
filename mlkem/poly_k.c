@@ -79,7 +79,7 @@ void polyvec_ntt(polyvec *r)
     poly_ntt(&r->vec[i]);
   }
 
-  debug_assert_abs_bound_2d(r, MLKEM_K, MLKEM_N, NTT_BOUND);
+  debug_assert_abs_bound_2d(r, MLKEM_K, MLKEM_N, MLK_NTT_BOUND);
 }
 
 MLK_INTERNAL_API
@@ -91,7 +91,7 @@ void polyvec_invntt_tomont(polyvec *r)
     poly_invntt_tomont(&r->vec[i]);
   }
 
-  debug_assert_abs_bound_2d(r, MLKEM_K, MLKEM_N, INVNTT_BOUND);
+  debug_assert_abs_bound_2d(r, MLKEM_K, MLKEM_N, MLK_INVNTT_BOUND);
 }
 
 #if !defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)

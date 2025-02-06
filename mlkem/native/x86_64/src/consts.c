@@ -16,75 +16,218 @@
 #include "align.h"
 #include "consts.h"
 
-#define Q MLKEM_Q
-#define MONT -1044     /* 2^16 mod q */
-#define QINV -3327     /* q^-1 mod 2^16 */
-#define V 20159        /* floor(2^26/q + 0.5) */
-#define FHI 1441       /* mont^2/128 */
-#define FLO -10079     /* qinv*FHI */
-#define MONTSQHI 1353  /* mont^2 */
-#define MONTSQLO 20553 /* qinv*MONTSQHI */
-#define MASK 4095
-#define SHIFT 32
+#define MLK_AVX2_Q MLKEM_Q
+#define MLK_AVX2_MONT -1044     /* 2^16 mod q */
+#define MLK_AVX2_QINV -3327     /* q^-1 mod 2^16 */
+#define MLK_AVX2_V 20159        /* floor(2^26/q + 0.5) */
+#define MLK_AVX2_FHI 1441       /* mont^2/128 */
+#define MLK_AVX2_FLO -10079     /* qinv*FHI */
+#define MLK_AVX2_MONTSQHI 1353  /* mont^2 */
+#define MLK_AVX2_MONTSQLO 20553 /* qinv*MONTSQHI */
+#define MLK_AVX2_MASK 4095
+#define MLK_AVX2_SHIFT 32
 
 const qdata_t qdata = {{
-#define AVX2_BACKEND_DATA_OFFSET_16XQ 0
-    Q,        Q,        Q,        Q,        Q,        Q,
-    Q,        Q,        Q,        Q,        Q,        Q,
-    Q,        Q,        Q,        Q,
+#define MLK_AVX2_BACKEND_DATA_OFFSET_16XQ 0
+    MLK_AVX2_Q,
+    MLK_AVX2_Q,
+    MLK_AVX2_Q,
+    MLK_AVX2_Q,
+    MLK_AVX2_Q,
+    MLK_AVX2_Q,
+    MLK_AVX2_Q,
+    MLK_AVX2_Q,
+    MLK_AVX2_Q,
+    MLK_AVX2_Q,
+    MLK_AVX2_Q,
+    MLK_AVX2_Q,
+    MLK_AVX2_Q,
+    MLK_AVX2_Q,
+    MLK_AVX2_Q,
+    MLK_AVX2_Q,
 
-#define AVX2_BACKEND_DATA_OFFSET_16XQINV 16
-    QINV,     QINV,     QINV,     QINV,     QINV,     QINV,
-    QINV,     QINV,     QINV,     QINV,     QINV,     QINV,
-    QINV,     QINV,     QINV,     QINV,
+#define MLK_AVX2_BACKEND_DATA_OFFSET_16XQINV 16
+    MLK_AVX2_QINV,
+    MLK_AVX2_QINV,
+    MLK_AVX2_QINV,
+    MLK_AVX2_QINV,
+    MLK_AVX2_QINV,
+    MLK_AVX2_QINV,
+    MLK_AVX2_QINV,
+    MLK_AVX2_QINV,
+    MLK_AVX2_QINV,
+    MLK_AVX2_QINV,
+    MLK_AVX2_QINV,
+    MLK_AVX2_QINV,
+    MLK_AVX2_QINV,
+    MLK_AVX2_QINV,
+    MLK_AVX2_QINV,
+    MLK_AVX2_QINV,
 
-#define AVX2_BACKEND_DATA_OFFSET_16XV 32
-    V,        V,        V,        V,        V,        V,
-    V,        V,        V,        V,        V,        V,
-    V,        V,        V,        V,
+#define MLK_AVX2_BACKEND_DATA_OFFSET_16XV 32
+    MLK_AVX2_V,
+    MLK_AVX2_V,
+    MLK_AVX2_V,
+    MLK_AVX2_V,
+    MLK_AVX2_V,
+    MLK_AVX2_V,
+    MLK_AVX2_V,
+    MLK_AVX2_V,
+    MLK_AVX2_V,
+    MLK_AVX2_V,
+    MLK_AVX2_V,
+    MLK_AVX2_V,
+    MLK_AVX2_V,
+    MLK_AVX2_V,
+    MLK_AVX2_V,
+    MLK_AVX2_V,
 
-#define AVX2_BACKEND_DATA_OFFSET_16XFLO 48
-    FLO,      FLO,      FLO,      FLO,      FLO,      FLO,
-    FLO,      FLO,      FLO,      FLO,      FLO,      FLO,
-    FLO,      FLO,      FLO,      FLO,
+#define MLK_AVX2_BACKEND_DATA_OFFSET_16XFLO 48
+    MLK_AVX2_FLO,
+    MLK_AVX2_FLO,
+    MLK_AVX2_FLO,
+    MLK_AVX2_FLO,
+    MLK_AVX2_FLO,
+    MLK_AVX2_FLO,
+    MLK_AVX2_FLO,
+    MLK_AVX2_FLO,
+    MLK_AVX2_FLO,
+    MLK_AVX2_FLO,
+    MLK_AVX2_FLO,
+    MLK_AVX2_FLO,
+    MLK_AVX2_FLO,
+    MLK_AVX2_FLO,
+    MLK_AVX2_FLO,
+    MLK_AVX2_FLO,
 
-#define AVX2_BACKEND_DATA_OFFSET_16XFHI 64
-    FHI,      FHI,      FHI,      FHI,      FHI,      FHI,
-    FHI,      FHI,      FHI,      FHI,      FHI,      FHI,
-    FHI,      FHI,      FHI,      FHI,
+#define MLK_AVX2_BACKEND_DATA_OFFSET_16XFHI 64
+    MLK_AVX2_FHI,
+    MLK_AVX2_FHI,
+    MLK_AVX2_FHI,
+    MLK_AVX2_FHI,
+    MLK_AVX2_FHI,
+    MLK_AVX2_FHI,
+    MLK_AVX2_FHI,
+    MLK_AVX2_FHI,
+    MLK_AVX2_FHI,
+    MLK_AVX2_FHI,
+    MLK_AVX2_FHI,
+    MLK_AVX2_FHI,
+    MLK_AVX2_FHI,
+    MLK_AVX2_FHI,
+    MLK_AVX2_FHI,
+    MLK_AVX2_FHI,
 
-#define AVX2_BACKEND_DATA_OFFSET_16XMONTSQLO 80
-    MONTSQLO, MONTSQLO, MONTSQLO, MONTSQLO, MONTSQLO, MONTSQLO,
-    MONTSQLO, MONTSQLO, MONTSQLO, MONTSQLO, MONTSQLO, MONTSQLO,
-    MONTSQLO, MONTSQLO, MONTSQLO, MONTSQLO,
+#define MLK_AVX2_BACKEND_DATA_OFFSET_16XMONTSQLO 80
+    MLK_AVX2_MONTSQLO,
+    MLK_AVX2_MONTSQLO,
+    MLK_AVX2_MONTSQLO,
+    MLK_AVX2_MONTSQLO,
+    MLK_AVX2_MONTSQLO,
+    MLK_AVX2_MONTSQLO,
+    MLK_AVX2_MONTSQLO,
+    MLK_AVX2_MONTSQLO,
+    MLK_AVX2_MONTSQLO,
+    MLK_AVX2_MONTSQLO,
+    MLK_AVX2_MONTSQLO,
+    MLK_AVX2_MONTSQLO,
+    MLK_AVX2_MONTSQLO,
+    MLK_AVX2_MONTSQLO,
+    MLK_AVX2_MONTSQLO,
+    MLK_AVX2_MONTSQLO,
 
-#define AVX2_BACKEND_DATA_OFFSET_16XMONTSQHI 96
-    MONTSQHI, MONTSQHI, MONTSQHI, MONTSQHI, MONTSQHI, MONTSQHI,
-    MONTSQHI, MONTSQHI, MONTSQHI, MONTSQHI, MONTSQHI, MONTSQHI,
-    MONTSQHI, MONTSQHI, MONTSQHI, MONTSQHI,
+#define MLK_AVX2_BACKEND_DATA_OFFSET_16XMONTSQHI 96
+    MLK_AVX2_MONTSQHI,
+    MLK_AVX2_MONTSQHI,
+    MLK_AVX2_MONTSQHI,
+    MLK_AVX2_MONTSQHI,
+    MLK_AVX2_MONTSQHI,
+    MLK_AVX2_MONTSQHI,
+    MLK_AVX2_MONTSQHI,
+    MLK_AVX2_MONTSQHI,
+    MLK_AVX2_MONTSQHI,
+    MLK_AVX2_MONTSQHI,
+    MLK_AVX2_MONTSQHI,
+    MLK_AVX2_MONTSQHI,
+    MLK_AVX2_MONTSQHI,
+    MLK_AVX2_MONTSQHI,
+    MLK_AVX2_MONTSQHI,
+    MLK_AVX2_MONTSQHI,
 
-#define AVX2_BACKEND_DATA_OFFSET_16XMASK 112
-    MASK,     MASK,     MASK,     MASK,     MASK,     MASK,
-    MASK,     MASK,     MASK,     MASK,     MASK,     MASK,
-    MASK,     MASK,     MASK,     MASK,
+#define MLK_AVX2_BACKEND_DATA_OFFSET_16XMASK 112
+    MLK_AVX2_MASK,
+    MLK_AVX2_MASK,
+    MLK_AVX2_MASK,
+    MLK_AVX2_MASK,
+    MLK_AVX2_MASK,
+    MLK_AVX2_MASK,
+    MLK_AVX2_MASK,
+    MLK_AVX2_MASK,
+    MLK_AVX2_MASK,
+    MLK_AVX2_MASK,
+    MLK_AVX2_MASK,
+    MLK_AVX2_MASK,
+    MLK_AVX2_MASK,
+    MLK_AVX2_MASK,
+    MLK_AVX2_MASK,
+    MLK_AVX2_MASK,
 
-#define AVX2_BACKEND_DATA_OFFSET_REVIDXB 128
-    3854,     3340,     2826,     2312,     1798,     1284,
-    770,      256,      3854,     3340,     2826,     2312,
-    1798,     1284,     770,      256,
+#define MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXB 128
+    3854,
+    3340,
+    2826,
+    2312,
+    1798,
+    1284,
+    770,
+    256,
+    3854,
+    3340,
+    2826,
+    2312,
+    1798,
+    1284,
+    770,
+    256,
 
-#define AVX2_BACKEND_DATA_OFFSET_REVIDXD 144
-    7,        0,        6,        0,        5,        0,
-    4,        0,        3,        0,        2,        0,
-    1,        0,        0,        0,
+#define MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXD 144
+    7,
+    0,
+    6,
+    0,
+    5,
+    0,
+    4,
+    0,
+    3,
+    0,
+    2,
+    0,
+    1,
+    0,
+    0,
+    0,
 
-#define AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP 160
+#define MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP 160
 #include "x86_64_zetas.i"
 
-#define AVX2_BACKEND_DATA_OFFSET_16XSHIFT 624
-    SHIFT,    SHIFT,    SHIFT,    SHIFT,    SHIFT,    SHIFT,
-    SHIFT,    SHIFT,    SHIFT,    SHIFT,    SHIFT,    SHIFT,
-    SHIFT,    SHIFT,    SHIFT,    SHIFT}};
+#define MLK_AVX2_BACKEND_DATA_OFFSET_16XSHIFT 624
+    MLK_AVX2_SHIFT,
+    MLK_AVX2_SHIFT,
+    MLK_AVX2_SHIFT,
+    MLK_AVX2_SHIFT,
+    MLK_AVX2_SHIFT,
+    MLK_AVX2_SHIFT,
+    MLK_AVX2_SHIFT,
+    MLK_AVX2_SHIFT,
+    MLK_AVX2_SHIFT,
+    MLK_AVX2_SHIFT,
+    MLK_AVX2_SHIFT,
+    MLK_AVX2_SHIFT,
+    MLK_AVX2_SHIFT,
+    MLK_AVX2_SHIFT,
+    MLK_AVX2_SHIFT,
+    MLK_AVX2_SHIFT}};
 
 #else /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */
@@ -96,26 +239,26 @@ MLK_EMPTY_CU(avx2_consts)
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
-#undef Q
-#undef MONT
-#undef QINV
-#undef V
-#undef FHI
-#undef FLO
-#undef MONTSQHI
-#undef MONTSQLO
-#undef MASK
-#undef SHIFT
+#undef MLK_AVX2_Q
+#undef MLK_AVX2_MONT
+#undef MLK_AVX2_QINV
+#undef MLK_AVX2_V
+#undef MLK_AVX2_FHI
+#undef MLK_AVX2_FLO
+#undef MLK_AVX2_MONTSQHI
+#undef MLK_AVX2_MONTSQLO
+#undef MLK_AVX2_MASK
+#undef MLK_AVX2_SHIFT
 /* Some macros are kept because they are also defined in a header. */
-/* Keep: AVX2_BACKEND_DATA_OFFSET_16XQ (consts.h) */
-/* Keep: AVX2_BACKEND_DATA_OFFSET_16XQINV (consts.h) */
-/* Keep: AVX2_BACKEND_DATA_OFFSET_16XV (consts.h) */
-/* Keep: AVX2_BACKEND_DATA_OFFSET_16XFLO (consts.h) */
-/* Keep: AVX2_BACKEND_DATA_OFFSET_16XFHI (consts.h) */
-/* Keep: AVX2_BACKEND_DATA_OFFSET_16XMONTSQLO (consts.h) */
-/* Keep: AVX2_BACKEND_DATA_OFFSET_16XMONTSQHI (consts.h) */
-/* Keep: AVX2_BACKEND_DATA_OFFSET_16XMASK (consts.h) */
-/* Keep: AVX2_BACKEND_DATA_OFFSET_REVIDXB (consts.h) */
-/* Keep: AVX2_BACKEND_DATA_OFFSET_REVIDXD (consts.h) */
-/* Keep: AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP (consts.h) */
-/* Keep: AVX2_BACKEND_DATA_OFFSET_16XSHIFT (consts.h) */
+/* Keep: MLK_AVX2_BACKEND_DATA_OFFSET_16XQ (consts.h) */
+/* Keep: MLK_AVX2_BACKEND_DATA_OFFSET_16XQINV (consts.h) */
+/* Keep: MLK_AVX2_BACKEND_DATA_OFFSET_16XV (consts.h) */
+/* Keep: MLK_AVX2_BACKEND_DATA_OFFSET_16XFLO (consts.h) */
+/* Keep: MLK_AVX2_BACKEND_DATA_OFFSET_16XFHI (consts.h) */
+/* Keep: MLK_AVX2_BACKEND_DATA_OFFSET_16XMONTSQLO (consts.h) */
+/* Keep: MLK_AVX2_BACKEND_DATA_OFFSET_16XMONTSQHI (consts.h) */
+/* Keep: MLK_AVX2_BACKEND_DATA_OFFSET_16XMASK (consts.h) */
+/* Keep: MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXB (consts.h) */
+/* Keep: MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXD (consts.h) */
+/* Keep: MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP (consts.h) */
+/* Keep: MLK_AVX2_BACKEND_DATA_OFFSET_16XSHIFT (consts.h) */

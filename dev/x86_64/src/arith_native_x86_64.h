@@ -11,9 +11,8 @@
 #include <stdint.h>
 #include "consts.h"
 
-#define REJ_UNIFORM_AVX_NBLOCKS 3 /* See MLKEM_GEN_MATRIX_NBLOCKS */
-#define REJ_UNIFORM_AVX_BUFLEN \
-  (3 * 168) /* REJ_UNIFORM_AVX_BUFLEN * SHAKE128_RATE */
+#define MLK_AVX2_REJ_UNIFORM_BUFLEN \
+  (3 * 168) /* REJ_UNIFORM_NBLOCKS * SHAKE128_RATE */
 
 #define rej_uniform_avx2 MLK_NAMESPACE(rej_uniform_avx2)
 unsigned rej_uniform_avx2(int16_t *r, const uint8_t *buf);
