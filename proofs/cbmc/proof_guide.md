@@ -407,7 +407,7 @@ This section follows the recipe above, and adds actual settings, contracts and c
 
 ### Populate a proof directory
 
-The proof directory is [proofs/cbmc/mlk_poly_tobytes](mlk_poly_tobytes).
+The proof directory is [proofs/cbmc/poly_tobytes](poly_tobytes).
 
 ### Update Makefile
 
