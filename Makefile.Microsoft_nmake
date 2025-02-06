@@ -3,16 +3,19 @@
 CFLAGS = /nologo /O2 /Imlkem /Imlkem/fips202 /Imlkem/fips202/native /Imlkem/sys /Imlkem/native
 
 OBJ_FILES = .\mlkem\*.obj \
-            .\mlkem\fips202\*.obj \
+            .\mlkem\fips202\*.obj
 
 BUILD_DIR = test\build
 MLKEM512_BUILD_DIR = $(BUILD_DIR)\mlkem512
 MLKEM768_BUILD_DIR = $(BUILD_DIR)\mlkem768
 MLKEM1024_BUILD_DIR = $(BUILD_DIR)\mlkem1024
 
-OBJ_FILES_512 = $(subst .\,$(MLKEM512_BUILD_DIR)\,$(OBJ_FILES))
-OBJ_FILES_768 = $(subst .\,$(MLKEM768_BUILD_DIR)\,$(OBJ_FILES))
-OBJ_FILES_1024 = $(subst .\,$(MLKEM1024_BUILD_DIR)\,$(OBJ_FILES))
+OBJ_FILES_512 = $(MLKEM512_BUILD_DIR)\mlkem\*.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\fips202\*.obj
+OBJ_FILES_768 = $(MLKEM768_BUILD_DIR)\mlkem\*.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\fips202\*.obj
+OBJ_FILES_1024 = $(MLKEM1024_BUILD_DIR)\mlkem\*.obj \
+                 $(MLKEM1024_BUILD_DIR)\mlkem\fips202\*.obj
 
 # NOTE: We currently only build code for non-opt code, as we haven't yet made the assembly compatible on Windows
 !IFNDEF OPT
