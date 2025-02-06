@@ -15,5 +15,3 @@ else ifeq ($(MLKEM_K),4)
 else
      $(error Invalid value of MLKEM_K)
 endif
-
-FIPS202_NAMESPACE=PQCP_MLKEM_NATIVE_FIPS202_
