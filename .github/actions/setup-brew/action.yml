@@ -22,7 +22,7 @@ runs:
     - name: Install base packages
       shell: bash
       run: |
-        brew install make python3
+        brew install make
     - name: Install additional packages
       if: ${{ inputs.packages != ''}}
       shell: bash
