@@ -368,33 +368,6 @@
 #undef MLK_USE_NATIVE_REJ_UNIFORM
 /* mlkem/arith_backend.h */
 #undef MLK_ARITH_BACKEND_H
-/* mlkem/cbmc.h */
-#undef CBMC_CONCAT
-#undef CBMC_CONCAT_
-#undef EXISTS
-#undef MLK_CBMC_H
-#undef __contract__
-#undef __loop__
-#undef array_abs_bound
-#undef array_bound
-#undef array_bound_core
-#undef assigns
-#undef assume
-#undef cassert
-#undef decreases
-#undef ensures
-#undef forall
-#undef invariant
-#undef loop_entry
-#undef memory_no_alias
-#undef memory_slice
-#undef object_whole
-#undef old
-#undef readable
-#undef requires
-#undef return_value
-#undef same_object
-#undef writeable
 /* mlkem/compress.h */
 #undef MLK_COMPRESS_H
 #undef poly_compress_d10
@@ -536,6 +509,10 @@
 #undef value_barrier_i32
 #undef value_barrier_u32
 #undef value_barrier_u8
+/* mlkem/cbmc.h */
+#undef MLK_CBMC_H
+#undef __contract__
+#undef __loop__
 #if defined(MLK_MONOBUILD_WITH_NATIVE_FIPS202)
 /*
  * Undefine macros from native code
