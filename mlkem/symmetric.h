@@ -9,8 +9,8 @@
 #include <stdint.h>
 #include "cbmc.h"
 #include "common.h"
-#include "fips202/fips202.h"
-#include "fips202/fips202x4.h"
+#include MLK_FIPS202_HEADER_FILE
+#include MLK_FIPS202X4_HEADER_FILE
 
 /* Macros denoting FIPS-203 specific Hash functions */
 
