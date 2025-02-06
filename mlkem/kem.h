@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "cbmc.h"
 #include "common.h"
+#include "indcpa.h"
 
 #if defined(MLKEM_NATIVE_CHECK_APIS)
 /* Include to ensure consistency between internal kem.h
@@ -34,6 +35,37 @@
 #define crypto_kem_dec MLKEM_NAMESPACE_K(dec)
 #endif
 
+typedef struct
+{
+  mlkem_indcpa_secret_key indcpa_sk;
+  mlkem_indcpa_public_key indcpa_pk;
+  uint8_t seed[MLKEM_SYMBYTES];
+  uint8_t z[MLKEM_SYMBYTES];
+  uint8_t hpk[MLKEM_SYMBYTES];
+} mlkem_secret_key;
+
+typedef struct
+{
+  mlkem_indcpa_public_key indcpa_pk;
+  uint8_t hpk[MLKEM_SYMBYTES];
+} mlkem_public_key;
+
+#define crypto_kem_serialize_sk MLKEM_NAMESPACE(serialize_sk)
+int crypto_kem_serialize_sk(uint8_t sks[MLKEM_INDCCA_SECRETKEYBYTES],
+                            const mlkem_secret_key *sk);
+
+#define crypto_kem_deserialize_sk MLKEM_NAMESPACE(deserialize_sk)
+int crypto_kem_deserialize_sk(mlkem_secret_key *sk,
+                              const uint8_t sks[MLKEM_INDCCA_SECRETKEYBYTES]);
+
+#define crypto_kem_serialize_pk MLKEM_NAMESPACE(serialize_pk)
+int crypto_kem_serialize_pk(uint8_t pks[MLKEM_INDCCA_PUBLICKEYBYTES],
+                            const mlkem_public_key *pk);
+
+#define crypto_kem_deserialize_pk MLKEM_NAMESPACE(deserialize_pk)
+int crypto_kem_deserialize_pk(mlkem_public_key *pk,
+                              const uint8_t pks[MLKEM_INDCCA_PUBLICKEYBYTES]);
+
 /*************************************************
  * Name:        crypto_kem_keypair_derand
  *
@@ -52,8 +84,7 @@
  **
  * Returns 0 (success)
  **************************************************/
-int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                              uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
+int crypto_kem_keypair_derand(mlkem_public_key *pk, mlkem_secret_key *sk,
                               const uint8_t *coins)
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
@@ -78,8 +109,7 @@ __contract__(
  *
  * Returns 0 (success)
  **************************************************/
-int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                       uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+int crypto_kem_keypair(mlkem_public_key *pk, mlkem_secret_key *sk)
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
@@ -109,8 +139,7 @@ __contract__(
  * of FIPS203) fails.
  **************************************************/
 int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                          uint8_t ss[MLKEM_SSBYTES],
-                          const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+                          uint8_t ss[MLKEM_SSBYTES], const mlkem_public_key *pk,
                           const uint8_t coins[MLKEM_SYMBYTES])
 __contract__(
   requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
@@ -140,8 +169,7 @@ __contract__(
  * of FIPS203) fails.
  **************************************************/
 int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                   uint8_t ss[MLKEM_SSBYTES],
-                   const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+                   uint8_t ss[MLKEM_SSBYTES], const mlkem_public_key *pk)
 __contract__(
   requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
   requires(memory_no_alias(ss, MLKEM_SSBYTES))
@@ -172,7 +200,7 @@ __contract__(
  **************************************************/
 int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
                    const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                   const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+                   const mlkem_secret_key *sk)
 __contract__(
   requires(memory_no_alias(ss, MLKEM_SSBYTES))
   requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
