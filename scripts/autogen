@@ -580,12 +580,18 @@ def get_c_source_files(main_only=False):
         return get_files("mlkem/**/*.c") + get_files("dev/**/*.c")
 
 
-def get_asm_source_files():
-    return get_files("mlkem/**/*.S") + get_files("dev/**/*.S")
+def get_asm_source_files(main_only=False):
+    if main_only is True:
+        return get_files("mlkem/**/*.S")
+    else:
+        return get_files("mlkem/**/*.S") + get_files("dev/**/*.S")
 
 
-def get_header_files():
-    return get_files("mlkem/**/*.h") + get_files("dev/**/*.h")
+def get_header_files(main_only=False):
+    if main_only is True:
+        return get_files("mlkem/**/*.h")
+    else:
+        return get_files("mlkem/**/*.h") + get_files("dev/**/*.h")
 
 
 def get_files(pattern):
@@ -607,7 +613,7 @@ def get_defines_from_file(c):
 
 
 def get_defines():
-    for c in get_header_files():
+    for c in get_header_files(main_only=True):
         yield from get_defines_from_file(c)
 
 
