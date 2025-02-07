@@ -25,5 +25,12 @@ endif
 
 # darwin aarch64
 else ifeq ($(HOST_PLATFORM),Darwin-arm64)
+ifeq ($(CROSS_PREFIX),)
 	CFLAGS += -DMLK_FORCE_AARCH64
+else ifneq ($(findstring x86_64, $(CROSS_PREFIX)),)
+	CFLAGS += -DMLK_FORCE_X86_64
+else ifneq ($(findstring aarch64, $(CROSS_PREFIX)),)
+	CFLAGS += -DMLK_FORCE_AARCH64
+else
+endif
 endif
