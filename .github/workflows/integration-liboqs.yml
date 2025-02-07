@@ -20,3 +20,54 @@ jobs:
         run: |
           cd integration/liboqs
           python3 liboqs-check-filelist.py
+  oqs_basic_build:
+    strategy:
+      fail-fast: false
+      matrix:
+        system: [ubuntu-latest, pqcp-arm64]
+        cmake:
+          - name: Auto
+            flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=auto -DCMAKE_BUILD_TYPE=Release
+          - name: C
+            flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=generic -DCMAKE_BUILD_TYPE=Release
+    name: Build (${{ matrix.cmake.name }}, ${{ matrix.system }})
+    runs-on: ${{ matrix.system }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: ./.github/actions/setup-os
+        with:
+          packages: 'cmake python3-jinja2 python3-tabulate python3-git python3-pytest valgrind'
+      - uses: ./.github/actions/setup-oqs
+        with:
+          commit: 'a554b36dd321e94c276e85c025f350c70740f328'
+      - name: Apply patch
+        run: |
+          cd $LIBOQS_DIR
+          # Adjust commit in importer script
+          sed -i "/name: mlkem-native/,/preserve_folder_structure/s%git_url: .*%git_url: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY%" scripts/copy_from_upstream/copy_from_upstream.yml
+          sed -i "/name: mlkem-native/,/preserve_folder_structure/s/git_branch: .*/git_branch: $GITHUB_SHA/" scripts/copy_from_upstream/copy_from_upstream.yml
+          sed -i "/name: mlkem-native/,/preserve_folder_structure/s/git_commit: .*/git_commit: $GITHUB_SHA/" scripts/copy_from_upstream/copy_from_upstream.yml
+          # Remove patch
+          sed -i "/name: mlkem-native/,/preserve_folder_structure/{/patches:/d}" scripts/copy_from_upstream/copy_from_upstream.yml
+          git diff >> $GITHUB_STEP_SUMMARY
+      - name: Configure
+        run: |
+          cd $LIBOQS_DIR
+          git config --global user.name "pqcp_ci"
+          git config --global user.email "ci@pqcp.org"
+          git config --global --add safe.directory "$LIBOQS_DIR"
+      - name: Import mlkem-native
+        run: |
+          cd $LIBOQS_DIR/scripts/copy_from_upstream
+          ./copy_from_upstream.py copy
+      - name: Build libOQS
+        run: |
+          cd $LIBOQS_DIR
+          mkdir build
+          cd build
+          cmake ${{ matrix.cmake.flags }} ..
+          make -j$(nproc)
+      - name: Run KEM-test
+        run: |
+          cd $LIBOQS_DIR
+          python3 -m pytest -k ML-KEM
