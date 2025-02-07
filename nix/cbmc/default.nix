@@ -6,7 +6,6 @@
 , bitwuzla
 , ninja
 , cadical
-, libgcc
 , z3
 }:
 
@@ -19,13 +18,9 @@ buildEnv {
         src = fetchFromGitHub {
           owner = "diffblue";
           repo = old.pname;
-          rev = "${old.pname}-${version}";
+          tag = "${old.pname}-${version}";
           hash = "sha256-O8aZTW+Eylshl9bmm9GzbljWB0+cj2liZHs2uScERkM=";
         };
-        patches = [
-          ./0001-Do-not-download-sources-in-cmake.patch
-        ];
-        nativeBuildInputs = old.nativeBuildInputs ++ [ libgcc ];
       });
       litani = callPackage ./litani.nix { }; # 1.29.0
       cbmc-viewer = callPackage ./cbmc-viewer.nix { }; # 3.10

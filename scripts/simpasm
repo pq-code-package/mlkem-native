@@ -336,7 +336,9 @@ def _main():
         "-p", "--preserve-preprocessor-directives", default=False, action="store_true"
     )
     parser.add_argument("-v", "--verbose", default=False, action="store_true")
-    parser.add_argument("--cc", type=str, default="gcc")
+    parser.add_argument(
+        "--cc", type=str, default="gcc" if platform.system() != "Darwin" else "clang"
+    )
     parser.add_argument("--nm", type=str, default="nm")
     parser.add_argument("--objdump", type=str, default="objdump")
     parser.add_argument("--cflags", type=str)

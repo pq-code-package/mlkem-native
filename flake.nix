@@ -4,8 +4,8 @@
   description = "mlkem-native";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
-    nixpkgs2411.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs-2405.url = "github:NixOS/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     flake-parts = {
@@ -20,23 +20,36 @@
       systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
       perSystem = { config, pkgs, system, ... }:
         let
+          pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
+          pkgs-2405 = inputs.nixpkgs-2405.legacyPackages.${system};
           util = pkgs.callPackage ./nix/util.nix {
-            bitwuzla = inputs.nixpkgs-unstable.legacyPackages.${system}.bitwuzla;
-            z3 = inputs.nixpkgs-unstable.legacyPackages.${system}.z3;
+            cbmc = pkgs-unstable.cbmc;
+            bitwuzla = pkgs-unstable.bitwuzla;
+            z3 = pkgs-unstable.z3;
           };
         in
         {
-          packages.cbmc = util.cbmc;
+          _module.args.pkgs = import inputs.nixpkgs {
+            inherit system;
+            overlays = [
+              (_:_: {
+                gcc48 = pkgs-2405.gcc48;
+                gcc49 = pkgs-2405.gcc49;
+                qemu = pkgs-unstable.qemu; # 9.2.0
+              })
+            ];
+          };
+          packages.cbmc = util.cbmc-pkgs;
           packages.hol_light = pkgs.callPackage ./nix/hol_light { };
           packages.s2n_bignum = pkgs.callPackage ./nix/s2n_bignum { };
+          packages.toolchain = util.core-pkgs;
 
           devShells.default = util.wrapShell util.mkShell {
             packages =
-              util.core { } ++
               util.linters ++
               builtins.attrValues
                 {
-                  inherit (config.packages) cbmc hol_light s2n_bignum;
+                  inherit (config.packages) toolchain cbmc s2n_bignum;
                   inherit (pkgs)
                     direnv
                     nix-direnv;
@@ -93,6 +106,7 @@
             pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
             util = pkgs.callPackage ./nix/util.nix {
               inherit pkgs;
+              cbmc = pkgs-unstable.cbmc;
               bitwuzla = pkgs-unstable.bitwuzla;
               z3 = pkgs-unstable.z3;
             };
