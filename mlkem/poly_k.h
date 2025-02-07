@@ -287,30 +287,6 @@ __contract__(
   array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND)))
 );
 
-#define polyvec_basemul_acc_montgomery \
-  MLK_NAMESPACE_K(polyvec_basemul_acc_montgomery)
-/*************************************************
- * Name:        polyvec_basemul_acc_montgomery
- *
- * Description: Multiply elements of a and b in NTT domain, accumulate into r,
- *              and multiply by 2^-16.
- *
- * Arguments: - poly *r: pointer to output polynomial
- *            - const polyvec *a: pointer to first input vector of polynomials
- *            - const polyvec *b: pointer to second input vector of polynomials
- **************************************************/
-MLK_INTERNAL_API
-void polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyvec *b)
-__contract__(
-  requires(memory_no_alias(r, sizeof(poly)))
-  requires(memory_no_alias(a, sizeof(polyvec)))
-  requires(memory_no_alias(b, sizeof(polyvec)))
-  requires(forall(k1, 0, MLKEM_K,
-    array_bound(a->vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
-  assigns(memory_slice(r, sizeof(poly)))
-);
-
-
 #define polyvec_basemul_acc_montgomery_cached \
   MLK_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached)
 /*************************************************

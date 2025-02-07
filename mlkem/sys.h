@@ -68,18 +68,19 @@
 #if !defined(inline)
 #if defined(_MSC_VER)
 #define MLK_INLINE __inline
+/* Don't combine __inline and __forceinline */
 #define MLK_ALWAYS_INLINE __forceinline
 #elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 #define MLK_INLINE inline
-#define MLK_ALWAYS_INLINE __attribute__((always_inline))
+#define MLK_ALWAYS_INLINE MLK_INLINE __attribute__((always_inline))
 #else
 #define MLK_INLINE __attribute__((unused))
-#define MLK_ALWAYS_INLINE
+#define MLK_ALWAYS_INLINE MLK_INLINE
 #endif
 
 #else
 #define MLK_INLINE inline
-#define MLK_ALWAYS_INLINE __attribute__((always_inline))
+#define MLK_ALWAYS_INLINE MLK_INLINE __attribute__((always_inline))
 #endif
 #endif
 

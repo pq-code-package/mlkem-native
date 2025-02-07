@@ -55,8 +55,7 @@ typedef struct
 #pragma CPROVER check push
 #pragma CPROVER check disable "conversion"
 #endif
-MLK_ALWAYS_INLINE
-static MLK_INLINE int16_t cast_uint16_to_int16(uint16_t x)
+static MLK_ALWAYS_INLINE int16_t cast_uint16_to_int16(uint16_t x)
 {
   /*
    * PORTABILITY: This relies on uint16_t -> int16_t
@@ -85,8 +84,7 @@ static MLK_INLINE int16_t cast_uint16_to_int16(uint16_t x)
  *                <= ceil(|a| / 2^16) + (MLKEM_Q + 1)/2
  *
  **************************************************/
-MLK_ALWAYS_INLINE
-static MLK_INLINE int16_t montgomery_reduce(int32_t a)
+static MLK_ALWAYS_INLINE int16_t montgomery_reduce(int32_t a)
 __contract__(
     requires(a < +(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)) &&
 	     a > -(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)))

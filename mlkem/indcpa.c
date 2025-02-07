@@ -428,12 +428,14 @@ void indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
 {
   polyvec b, skpv;
   poly v, sb;
+  polyvec_mulcache b_cache;
 
   unpack_ciphertext(&b, &v, c);
   unpack_sk(&skpv, sk);
 
   polyvec_ntt(&b);
-  polyvec_basemul_acc_montgomery(&sb, &skpv, &b);
+  polyvec_mulcache_compute(&b_cache, &b);
+  polyvec_basemul_acc_montgomery_cached(&sb, &skpv, &b, &b_cache);
   poly_invntt_tomont(&sb);
 
   poly_sub(&v, &sb);

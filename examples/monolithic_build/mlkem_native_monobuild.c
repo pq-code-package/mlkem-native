@@ -185,7 +185,6 @@
 #undef poly_getnoise_eta2_4x
 #undef polyvec
 #undef polyvec_add
-#undef polyvec_basemul_acc_montgomery
 #undef polyvec_basemul_acc_montgomery_cached
 #undef polyvec_compress_du
 #undef polyvec_decompress_du
