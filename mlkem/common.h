@@ -78,4 +78,16 @@
  * The following is to avoid compilers complaining about this. */
 #define MLK_EMPTY_CU(s) extern int MLK_NAMESPACE_K(empty_cu_##s);
 
+#if !defined(MLK_FIPS202_CUSTOM_HEADER)
+#define MLK_FIPS202_HEADER_FILE "fips202/fips202.h"
+#else
+#define MLK_FIPS202_HEADER_FILE MLK_FIPS202_CUSTOM_HEADER
+#endif
+
+#if !defined(MLK_FIPS202X4_CUSTOM_HEADER)
+#define MLK_FIPS202X4_HEADER_FILE "fips202/fips202x4.h"
+#else
+#define MLK_FIPS202X4_HEADER_FILE MLK_FIPS202X4_CUSTOM_HEADER
+#endif
+
 #endif /* MLK_COMMON_H */

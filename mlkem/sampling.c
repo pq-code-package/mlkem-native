@@ -7,8 +7,6 @@
 
 #include "arith_backend.h"
 #include "debug.h"
-#include "fips202/fips202.h"
-#include "fips202/fips202x4.h"
 #include "sampling.h"
 #include "symmetric.h"
 

@@ -10,7 +10,6 @@
 #include "arith_backend.h"
 #include "cbmc.h"
 #include "debug.h"
-#include "fips202/fips202x4.h"
 #include "poly.h"
 #include "sampling.h"
 #include "symmetric.h"

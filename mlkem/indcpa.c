@@ -9,8 +9,6 @@
 #include "arith_backend.h"
 #include "cbmc.h"
 #include "debug.h"
-#include "fips202/fips202.h"
-#include "fips202/fips202x4.h"
 #include "indcpa.h"
 #include "poly.h"
 #include "poly_k.h"

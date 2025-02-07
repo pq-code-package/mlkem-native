@@ -28,9 +28,7 @@ INC=-Imlkem_native/
 #
 # At present, this must be located in a directory named "fips202".
 # This limitation will be lifted in the future.
-FIPS202_SOURCE=fips202/tiny_sha3/sha3.c
-
-INC+=-I./
+FIPS202_SOURCE=custom_fips202/tiny_sha3/sha3.c
 
 # Part C:
 #
@@ -71,6 +69,8 @@ CFLAGS := \
 	-MMD \
 	-O3 \
 	$(CFLAGS)
+CFLAGS += -DMLK_FIPS202_CUSTOM_HEADER="\"../custom_fips202/fips202.h\""
+CFLAGS += -DMLK_FIPS202X4_CUSTOM_HEADER="\"../custom_fips202/fips202x4.h\""
 
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 
