@@ -13,13 +13,19 @@
  * mlkem-native
  */
 
+/* If parts of the mlkem-native source tree are not used,
+ * consider reducing this header via `unifdef`.
+ *
+ * Example:
+ * ```bash
+ * unifdef -UMLK_MONOBUILD_WITH_NATIVE_ARITH mlkem_native_monobuild.c
+ * ```
+ */
+
 #include "mlkem/sys.h"
 
 #include "mlkem/compress.c"
 #include "mlkem/debug.c"
-#include "mlkem/fips202/fips202.c"
-#include "mlkem/fips202/fips202x4.c"
-#include "mlkem/fips202/keccakf1600.c"
 #include "mlkem/indcpa.c"
 #include "mlkem/kem.c"
 #include "mlkem/poly.c"
@@ -27,6 +33,13 @@
 #include "mlkem/sampling.c"
 #include "mlkem/verify.c"
 #include "mlkem/zetas.c"
+
+#if !defined(MLK_MONOBUILD_CUSTOM_FIPS202)
+#include "mlkem/fips202/fips202.c"
+#include "mlkem/fips202/fips202x4.c"
+#include "mlkem/fips202/keccakf1600.c"
+#endif /* !MLK_MONOBUILD_CUSTOM_FIPS202 */
+
 #if defined(MLK_MONOBUILD_WITH_NATIVE_ARITH)
 #if defined(MLK_SYS_AARCH64)
 #include "mlkem/native/aarch64/src/aarch64_zetas.c"
@@ -40,6 +53,7 @@
 #include "mlkem/native/x86_64/src/rej_uniform_table.c"
 #endif /* MLK_SYS_X86_64 */
 #endif /* MLK_MONOBUILD_WITH_NATIVE_ARITH */
+
 #if defined(MLK_MONOBUILD_WITH_NATIVE_FIPS202)
 #if defined(MLK_SYS_AARCH64)
 #include "mlkem/fips202/native/aarch64/src/keccakf1600_round_constants.c"
@@ -220,44 +234,6 @@
 #undef debug_assert_bound_2d
 #undef mlkem_debug_assert
 #undef mlkem_debug_check_bounds
-/* mlkem/fips202/fips202.h */
-#undef FIPS202_X4_DEFAULT_IMPLEMENTATION
-#undef MLK_FIPS202_FIPS202_H
-#undef SHA3_256_HASHBYTES
-#undef SHA3_256_RATE
-#undef SHA3_384_RATE
-#undef SHA3_512_HASHBYTES
-#undef SHA3_512_RATE
-#undef SHAKE128_RATE
-#undef SHAKE256_RATE
-#undef sha3_256
-#undef sha3_512
-#undef shake128_absorb_once
-#undef shake128_init
-#undef shake128_release
-#undef shake128_squeezeblocks
-#undef shake128ctx
-#undef shake256
-/* mlkem/fips202/fips202_backend.h */
-#undef MLK_FIPS202_FIPS202_BACKEND_H
-/* mlkem/fips202/fips202x4.h */
-#undef MLK_FIPS202_FIPS202X4_H
-#undef shake128x4_absorb_once
-#undef shake128x4_init
-#undef shake128x4_release
-#undef shake128x4_squeezeblocks
-#undef shake128x4ctx
-#undef shake256x4
-/* mlkem/fips202/keccakf1600.h */
-#undef KECCAK_LANES
-#undef KECCAK_WAY
-#undef KeccakF1600_StateExtractBytes
-#undef KeccakF1600_StatePermute
-#undef KeccakF1600_StateXORBytes
-#undef KeccakF1600x4_StateExtractBytes
-#undef KeccakF1600x4_StatePermute
-#undef KeccakF1600x4_StateXORBytes
-#undef MLK_FIPS202_KECCAKF1600_H
 /* mlkem/poly.h */
 #undef MLK_INVNTT_BOUND
 #undef MLK_NTT_BOUND
@@ -333,6 +309,51 @@
 #undef MLK_CBMC_H
 #undef __contract__
 #undef __loop__
+
+#if !defined(MLK_MONOBUILD_CUSTOM_FIPS202)
+/*
+ * Undefine macros from FIPS-202 files
+ */
+/* mlkem/fips202/fips202.h */
+#undef FIPS202_X4_DEFAULT_IMPLEMENTATION
+#undef MLK_FIPS202_FIPS202_H
+#undef SHA3_256_HASHBYTES
+#undef SHA3_256_RATE
+#undef SHA3_384_RATE
+#undef SHA3_512_HASHBYTES
+#undef SHA3_512_RATE
+#undef SHAKE128_RATE
+#undef SHAKE256_RATE
+#undef sha3_256
+#undef sha3_512
+#undef shake128_absorb_once
+#undef shake128_init
+#undef shake128_release
+#undef shake128_squeezeblocks
+#undef shake128ctx
+#undef shake256
+/* mlkem/fips202/fips202_backend.h */
+#undef MLK_FIPS202_FIPS202_BACKEND_H
+/* mlkem/fips202/fips202x4.h */
+#undef MLK_FIPS202_FIPS202X4_H
+#undef shake128x4_absorb_once
+#undef shake128x4_init
+#undef shake128x4_release
+#undef shake128x4_squeezeblocks
+#undef shake128x4ctx
+#undef shake256x4
+/* mlkem/fips202/keccakf1600.h */
+#undef KECCAK_LANES
+#undef KECCAK_WAY
+#undef KeccakF1600_StateExtractBytes
+#undef KeccakF1600_StatePermute
+#undef KeccakF1600_StateXORBytes
+#undef KeccakF1600x4_StateExtractBytes
+#undef KeccakF1600x4_StatePermute
+#undef KeccakF1600x4_StateXORBytes
+#undef MLK_FIPS202_KECCAKF1600_H
+#endif /* !MLK_MONOBUILD_CUSTOM_FIPS202 */
+
 #if defined(MLK_MONOBUILD_WITH_NATIVE_FIPS202)
 /*
  * Undefine macros from native code
