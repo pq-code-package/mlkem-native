@@ -663,23 +663,32 @@ def gen_monolithic_source_file(dry_run=False):
     def native(c):
         return "native/" in c
 
+    def fips202(c):
+        return "fips202" in c
+
+    def aarch64(c):
+        return "aarch64" in c
+
+    def x86_64(c):
+        return "x86_64" in c
+
     def native_fips202(c):
-        return native(c) and "fips202" in c
+        return native(c) and fips202(c)
 
     def native_arith(c):
-        return native(c) and not native_fips202(c)
+        return native(c) and not fips202(c)
 
     def native_fips202_aarch64(c):
-        return native_fips202(c) and "aarch64" in c
+        return native_fips202(c) and aarch64(c)
 
     def native_fips202_x86_64(c):
-        return native_fips202(c) and "x86_64" in c
+        return native_fips202(c) and x86_64(c)
 
     def native_arith_aarch64(c):
-        return native_arith(c) and "aarch64" in c
+        return native_arith(c) and aarch64(c)
 
     def native_arith_x86_64(c):
-        return native_arith(c) and "x86_64" in c
+        return native_arith(c) and x86_64(c)
 
     # List of level-specific source files
     # All other files only need including and building once
@@ -712,10 +721,25 @@ def gen_monolithic_source_file(dry_run=False):
         yield " * Monolithic compilation unit bundling all compilation units within mlkem-native"
         yield " */"
         yield ""
+        yield "/* If parts of the mlkem-native source tree are not used,"
+        yield " * consider reducing this header via `unifdef`."
+        yield " *"
+        yield " * Example:"
+        yield " * ```bash"
+        yield " * unifdef -UMLK_MONOBUILD_WITH_NATIVE_ARITH mlkem_native_monobuild.c"
+        yield " * ```"
+        yield " */"
+        yield ""
         yield '#include "mlkem/sys.h"'
         yield ""
-        for c in filter(lambda c: not native(c), c_sources):
+        for c in filter(lambda c: not native(c) and not fips202(c), c_sources):
             yield f'#include "{c}"'
+        yield ""
+        yield "#if !defined(MLK_MONOBUILD_CUSTOM_FIPS202)"
+        for c in filter(lambda c: not native(c) and fips202(c), c_sources):
+            yield f'#include "{c}"'
+        yield "#endif /* !MLK_MONOBUILD_CUSTOM_FIPS202 */"
+        yield ""
         yield "#if defined(MLK_MONOBUILD_WITH_NATIVE_ARITH)"
         yield "#if defined(MLK_SYS_AARCH64)"
         for c in filter(native_arith_aarch64, c_sources):
@@ -726,6 +750,7 @@ def gen_monolithic_source_file(dry_run=False):
             yield f'#include "{c}"'
         yield "#endif /* MLK_SYS_X86_64 */"
         yield "#endif /* MLK_MONOBUILD_WITH_NATIVE_ARITH */"
+        yield ""
         yield "#if defined(MLK_MONOBUILD_WITH_NATIVE_FIPS202)"
         yield "#if defined(MLK_SYS_AARCH64)"
         for c in filter(native_fips202_aarch64, c_sources):
@@ -743,7 +768,10 @@ def gen_monolithic_source_file(dry_run=False):
         yield ""
         yield "#if !defined(MLK_MONOBUILD_KEEP_SHARED_HEADERS)"
         yield from gen_monolithic_undef_all_core(
-            filt=lambda c: not native(c) and k_generic(c) and "cbmc.h" not in c,
+            filt=lambda c: not native(c)
+            and k_generic(c)
+            and not fips202(c)
+            and "cbmc.h" not in c,
             desc="MLKEM_K-generic files",
         )
         # Handle cbmc.h manually -- most #define's therein are only defined when CBMC is set
@@ -753,6 +781,14 @@ def gen_monolithic_source_file(dry_run=False):
         yield "#undef MLK_CBMC_H"
         yield "#undef __contract__"
         yield "#undef __loop__"
+        yield ""
+        yield "#if !defined(MLK_MONOBUILD_CUSTOM_FIPS202)"
+        yield from gen_monolithic_undef_all_core(
+            filt=lambda c: not native(c) and k_generic(c) and fips202(c),
+            desc="FIPS-202 files",
+        )
+        yield "#endif /* !MLK_MONOBUILD_CUSTOM_FIPS202 */"
+        yield ""
         yield "#if defined(MLK_MONOBUILD_WITH_NATIVE_FIPS202)"
         yield from gen_monolithic_undef_all_core(
             filt=native_fips202, desc="native code"
