@@ -152,14 +152,6 @@ void polyvec_basemul_acc_montgomery_cached(poly *r, const polyvec *a,
 #endif /* MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
 MLK_INTERNAL_API
-void polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyvec *b)
-{
-  polyvec_mulcache b_cache;
-  polyvec_mulcache_compute(&b_cache, b);
-  polyvec_basemul_acc_montgomery_cached(r, a, b, &b_cache);
-}
-
-MLK_INTERNAL_API
 void polyvec_mulcache_compute(polyvec_mulcache *x, const polyvec *a)
 {
   unsigned i;
