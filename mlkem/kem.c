@@ -44,17 +44,21 @@ __contract__(
  **************************************************/
 static int check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 {
+  int res;
   polyvec p;
   uint8_t p_reencoded[MLKEM_POLYVECBYTES];
+
   polyvec_frombytes(&p, pk);
   polyvec_reduce(&p);
   polyvec_tobytes(p_reencoded, &p);
+
   /* Data is public, so a variable-time memcmp() is OK */
-  if (memcmp(pk, p_reencoded, MLKEM_POLYVECBYTES))
-  {
-    return -1;
-  }
-  return 0;
+  res = memcmp(pk, p_reencoded, MLKEM_POLYVECBYTES) ? -1 : 0;
+
+  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  ct_zeroize(p_reencoded, sizeof(p_reencoded));
+  ct_zeroize(&p, sizeof(p));
+  return res;
 }
 
 /*************************************************
@@ -73,6 +77,7 @@ static int check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
  **************************************************/
 static int check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
+  int res;
   MLK_ALIGN uint8_t test[MLKEM_SYMBYTES];
   /*
    * The parts of `sk` being hashed and compared here are public, so
@@ -87,12 +92,14 @@ static int check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
       sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, MLKEM_SYMBYTES);
 
   hash_h(test, sk + MLKEM_INDCPA_SECRETKEYBYTES, MLKEM_INDCCA_PUBLICKEYBYTES);
-  if (memcmp(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, test,
-             MLKEM_SYMBYTES))
-  {
-    return -1;
-  }
-  return 0;
+  res = memcmp(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, test,
+               MLKEM_SYMBYTES)
+            ? -1
+            : 0;
+
+  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  ct_zeroize(test, sizeof(test));
+  return res;
 }
 
 int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
@@ -115,6 +122,10 @@ int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   MLK_ALIGN uint8_t coins[2 * MLKEM_SYMBYTES];
   randombytes(coins, 2 * MLKEM_SYMBYTES);
   crypto_kem_keypair_derand(pk, sk, coins);
+
+  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  ct_zeroize(coins, sizeof(coins));
+
   return 0;
 }
 
@@ -142,6 +153,11 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   indcpa_enc(ct, buf, pk, kr + MLKEM_SYMBYTES);
 
   memcpy(ss, kr, MLKEM_SYMBYTES);
+
+  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  ct_zeroize(buf, sizeof(buf));
+  ct_zeroize(kr, sizeof(kr));
+
   return 0;
 }
 
@@ -149,9 +165,14 @@ int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                    uint8_t ss[MLKEM_SSBYTES],
                    const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 {
+  int res;
   MLK_ALIGN uint8_t coins[MLKEM_SYMBYTES];
   randombytes(coins, MLKEM_SYMBYTES);
-  return crypto_kem_enc_derand(ct, ss, pk, coins);
+  res = crypto_kem_enc_derand(ct, ss, pk, coins);
+
+  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  ct_zeroize(coins, sizeof(coins));
+  return res;
 }
 
 int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
@@ -162,6 +183,8 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   MLK_ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
   /* Will contain key, coins */
   MLK_ALIGN uint8_t kr[2 * MLKEM_SYMBYTES];
+  MLK_ALIGN uint8_t tmp[MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES];
+
   const uint8_t *pk = sk + MLKEM_INDCPA_SECRETKEYBYTES;
 
   if (check_sk(sk))
@@ -177,26 +200,23 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
 
   /* Recompute and compare ciphertext */
-  {
-    /* Temporary buffer */
-    MLK_ALIGN uint8_t cmp[MLKEM_INDCCA_CIPHERTEXTBYTES];
-    /* coins are in kr+MLKEM_SYMBYTES */
-    indcpa_enc(cmp, buf, pk, kr + MLKEM_SYMBYTES);
-    fail = ct_memcmp(ct, cmp, MLKEM_INDCCA_CIPHERTEXTBYTES);
-  }
+  /* coins are in kr+MLKEM_SYMBYTES */
+  indcpa_enc(tmp, buf, pk, kr + MLKEM_SYMBYTES);
+  fail = ct_memcmp(ct, tmp, MLKEM_INDCCA_CIPHERTEXTBYTES);
 
   /* Compute rejection key */
-  {
-    /* Temporary buffer */
-    MLK_ALIGN uint8_t tmp[MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES];
-    memcpy(tmp, sk + MLKEM_INDCCA_SECRETKEYBYTES - MLKEM_SYMBYTES,
-           MLKEM_SYMBYTES);
-    memcpy(tmp + MLKEM_SYMBYTES, ct, MLKEM_INDCCA_CIPHERTEXTBYTES);
-    hash_j(ss, tmp, sizeof(tmp));
-  }
+  memcpy(tmp, sk + MLKEM_INDCCA_SECRETKEYBYTES - MLKEM_SYMBYTES,
+         MLKEM_SYMBYTES);
+  memcpy(tmp + MLKEM_SYMBYTES, ct, MLKEM_INDCCA_CIPHERTEXTBYTES);
+  hash_j(ss, tmp, sizeof(tmp));
 
   /* Copy true key to return buffer if fail is 0 */
   ct_cmov_zero(ss, kr, MLKEM_SYMBYTES, fail);
+
+  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  ct_zeroize(buf, sizeof(buf));
+  ct_zeroize(kr, sizeof(kr));
+  ct_zeroize(tmp, sizeof(tmp));
 
   return 0;
 }
