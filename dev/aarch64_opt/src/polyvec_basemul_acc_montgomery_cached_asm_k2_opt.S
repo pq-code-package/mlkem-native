@@ -143,7 +143,7 @@
         .text
         .global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2_opt)
         .balign 4
-MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2_opt):
+MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k2_opt)
         push_stack
 
         mov wtmp, #3329

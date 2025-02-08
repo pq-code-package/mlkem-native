@@ -629,7 +629,7 @@ def get_checked_defines():
     for c, d in get_defines():
         if d.startswith("_") and is_allowed(d, c) is False:
             raise Exception(
-                f"{d} from {c}:{i} starts with an underscore, which is not allowed for mlkem-native macros. "
+                f"{d} from {c}: starts with an underscore, which is not allowed for mlkem-native macros. "
                 f"If this is an mlkem-native specific macro, please pick a different name. "
                 f"If this is an external macro, it likely needs removing from `gen_monolithic_undef_all_core()` in `scripts/autogen` -- check this!"
             )
@@ -1056,7 +1056,14 @@ def synchronize_backends(
         delete=delete,
         force_cross=force_cross,
         no_simplify=no_simplify,
-        cflags="-Imlkem/native/x86_64/src/ -mavx2",
+        # Turn off control-flow protection (CET) explicitly. Newer versions of
+        # clang turn it on by default and insert endbr64 instructions at every
+        # global symbol.
+        # We insert endbr64 instruction manually via the MLK_ASM_FN_SYMBOL
+        # macro.
+        # This leads to duplicate endbr64 instructions causing a failure when
+        # comparing the object code before and after simplification.
+        cflags="-Imlkem/native/x86_64/src/ -mavx2 -fcf-protection=none",
     )
 
 

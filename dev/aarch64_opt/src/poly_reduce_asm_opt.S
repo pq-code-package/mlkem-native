@@ -44,7 +44,7 @@
         .text
         .global MLK_ASM_NAMESPACE(poly_reduce_asm_opt)
         .balign 4
-MLK_ASM_NAMESPACE(poly_reduce_asm_opt):
+MLK_ASM_FN_SYMBOL(poly_reduce_asm_opt)
 
         mov wtmp, #3329 // ML-KEM modulus
         dup modulus.8h, wtmp

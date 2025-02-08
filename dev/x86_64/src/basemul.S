@@ -116,7 +116,7 @@ vmovdqa		%ymm11,(64*\off+48)*2(%rdi)
 .text
 .global MLK_ASM_NAMESPACE(basemul_avx2)
 .balign 4
-MLK_ASM_NAMESPACE(basemul_avx2):
+MLK_ASM_FN_SYMBOL(basemul_avx2)
 mov		%rsp,%r8
 and		$-32,%rsp
 sub		$32,%rsp

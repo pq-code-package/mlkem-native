@@ -19,7 +19,7 @@
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(basemul_avx2)
-MLK_ASM_NAMESPACE(basemul_avx2):
+MLK_ASM_FN_SYMBOL(basemul_avx2)
 
         movq	%rsp, %r8
         andq	$-0x20, %rsp

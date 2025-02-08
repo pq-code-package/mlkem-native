@@ -19,7 +19,7 @@
 .text
 .global MLK_ASM_NAMESPACE(nttfrombytes_avx2)
 .balign 4
-MLK_ASM_NAMESPACE(nttfrombytes_avx2):
+MLK_ASM_FN_SYMBOL(nttfrombytes_avx2)
 #consts
 vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XMASK*2(%rdx),%ymm0
 call		nttfrombytes128_avx

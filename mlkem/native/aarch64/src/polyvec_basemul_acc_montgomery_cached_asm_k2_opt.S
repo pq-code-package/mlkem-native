@@ -23,7 +23,7 @@
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2_opt)
-MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2_opt):
+MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k2_opt)
 
         sub	sp, sp, #0x40
         stp	d8, d9, [sp]

@@ -19,7 +19,7 @@
 .text
 .global MLK_ASM_NAMESPACE(nttunpack_avx2)
 .balign 4
-MLK_ASM_NAMESPACE(nttunpack_avx2):
+MLK_ASM_FN_SYMBOL(nttunpack_avx2)
 call		nttunpack128_avx2
 add		$256,%rdi
 call		nttunpack128_avx2

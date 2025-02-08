@@ -196,7 +196,7 @@
         .text
         .global MLK_ASM_NAMESPACE(intt_asm_opt)
         .balign 4
-MLK_ASM_NAMESPACE(intt_asm_opt):
+MLK_ASM_FN_SYMBOL(intt_asm_opt)
         push_stack
 
         // Setup constants

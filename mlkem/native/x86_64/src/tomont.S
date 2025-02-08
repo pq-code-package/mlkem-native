@@ -24,7 +24,7 @@
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(tomont_avx2)
-MLK_ASM_NAMESPACE(tomont_avx2):
+MLK_ASM_FN_SYMBOL(tomont_avx2)
 
         vmovdqa	(%rsi), %ymm0
         vmovdqa	0xa0(%rsi), %ymm1

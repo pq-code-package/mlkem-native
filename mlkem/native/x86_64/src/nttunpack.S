@@ -20,7 +20,7 @@
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(nttunpack_avx2)
-MLK_ASM_NAMESPACE(nttunpack_avx2):
+MLK_ASM_FN_SYMBOL(nttunpack_avx2)
 
         callq	nttunpack128_avx2
         addq	$0x100, %rdi            # imm = 0x100

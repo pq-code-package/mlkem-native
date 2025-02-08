@@ -16,7 +16,7 @@
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(poly_reduce_asm_opt)
-MLK_ASM_NAMESPACE(poly_reduce_asm_opt):
+MLK_ASM_FN_SYMBOL(poly_reduce_asm_opt)
 
         mov	w2, #0xd01              // =3329
         dup	v3.8h, w2

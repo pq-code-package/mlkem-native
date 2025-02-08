@@ -72,6 +72,17 @@
 #define MLK_ASM_NAMESPACE(sym) MLK_PREFIX_UNDERSCORE(MLK_NAMESPACE(sym))
 #endif
 
+/*
+ * On X86_64 if control-flow protections (CET) are enabled (through
+ * -fcf-protection=), we add an endbr64 instruction at every global function
+ * label.  See sys.h for more details
+ */
+#if defined(MLK_SYS_X86_64)
+#define MLK_ASM_FN_SYMBOL(sym) MLK_ASM_NAMESPACE(sym) : MLK_CET_ENDBR
+#else
+#define MLK_ASM_FN_SYMBOL(sym) MLK_ASM_NAMESPACE(sym) :
+#endif
+
 /* We aim to simplify the user's life by supporting builds where
  * all source files are included, even those that are not needed.
  * Those files are appropriately guarded and will be empty when unneeded.

@@ -22,7 +22,7 @@
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(invntt_avx2)
-MLK_ASM_NAMESPACE(invntt_avx2):
+MLK_ASM_FN_SYMBOL(invntt_avx2)
 
         vmovdqa	(%rsi), %ymm0
         vmovdqa	0x60(%rsi), %ymm2

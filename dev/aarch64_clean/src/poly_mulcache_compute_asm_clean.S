@@ -46,7 +46,7 @@
         .global MLK_ASM_NAMESPACE(poly_mulcache_compute_asm_clean)
         .text
         .balign 4
-MLK_ASM_NAMESPACE(poly_mulcache_compute_asm_clean):
+MLK_ASM_FN_SYMBOL(poly_mulcache_compute_asm_clean)
         mov wtmp, #3329
         dup modulus.8h, wtmp
 

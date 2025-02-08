@@ -53,7 +53,7 @@
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(keccak_f1600_x2_v84a_asm_clean)
-MLK_ASM_NAMESPACE(keccak_f1600_x2_v84a_asm_clean):
+MLK_ASM_FN_SYMBOL(keccak_f1600_x2_v84a_asm_clean)
 
         sub	sp, sp, #0xa0
         stp	d8, d9, [sp]

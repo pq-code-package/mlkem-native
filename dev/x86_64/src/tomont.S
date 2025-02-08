@@ -22,7 +22,7 @@
 .text
 .global MLK_ASM_NAMESPACE(tomont_avx2)
 .balign 4
-MLK_ASM_NAMESPACE(tomont_avx2):
+MLK_ASM_FN_SYMBOL(tomont_avx2)
 #consts
 vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
 vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XMONTSQLO*2(%rsi),%ymm1

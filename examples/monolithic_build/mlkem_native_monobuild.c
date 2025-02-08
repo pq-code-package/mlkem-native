@@ -68,6 +68,7 @@
  */
 /* mlkem/common.h */
 #undef MLK_ARITH_BACKEND_NAME
+#undef MLK_ASM_FN_SYMBOL
 #undef MLK_ASM_NAMESPACE
 #undef MLK_COMMON_H
 #undef MLK_EMPTY_CU
@@ -282,6 +283,7 @@
 /* mlkem/sys.h */
 #undef MLK_ALIGN
 #undef MLK_ALWAYS_INLINE
+#undef MLK_CET_ENDBR
 #undef MLK_DEFAULT_ALIGN
 #undef MLK_INLINE
 #undef MLK_RESTRICT
