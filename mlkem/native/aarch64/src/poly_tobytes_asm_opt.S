@@ -16,7 +16,7 @@
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(poly_tobytes_asm_opt)
-MLK_ASM_NAMESPACE(poly_tobytes_asm_opt):
+MLK_ASM_FN_SYMBOL(poly_tobytes_asm_opt)
 
         mov	x2, #0x10               // =16
 

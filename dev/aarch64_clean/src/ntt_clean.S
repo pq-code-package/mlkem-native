@@ -168,7 +168,7 @@
         .text
         .global MLK_ASM_NAMESPACE(ntt_asm_clean)
         .balign 4
-MLK_ASM_NAMESPACE(ntt_asm_clean):
+MLK_ASM_FN_SYMBOL(ntt_asm_clean)
         push_stack
 
         mov wtmp, #3329

@@ -19,7 +19,7 @@
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(ntt_avx2)
-MLK_ASM_NAMESPACE(ntt_avx2):
+MLK_ASM_FN_SYMBOL(ntt_avx2)
 
         vmovdqa	(%rsi), %ymm0
         vpbroadcastq	0x140(%rsi), %ymm15

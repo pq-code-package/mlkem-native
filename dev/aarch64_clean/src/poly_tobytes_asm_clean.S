@@ -26,7 +26,7 @@
         .text
         .global MLK_ASM_NAMESPACE(poly_tobytes_asm_clean)
         .balign 4
-MLK_ASM_NAMESPACE(poly_tobytes_asm_clean):
+MLK_ASM_FN_SYMBOL(poly_tobytes_asm_clean)
 
         mov count, #16
 poly_tobytes_asm_clean_asm_loop_start:

@@ -109,4 +109,30 @@
 #define MLK_ALIGN /* No known support for alignment constraints */
 #endif
 
+
+/* New X86_64 CPUs support Conflow-flow protection using the CET instructions.
+ * When enabled (through -fcf-protection=), all compilation units (including
+ * empty ones) need to support CET for this to work.
+ * For assembly, this means that source files need to signal support for
+ * CET by setting the appropriate note.gnu.property section.
+ * This can be achieved by including the <cet.h> header in all assembly file.
+ * This file also provides the _CET_ENDBR macro which needs to be placed at
+ * every potential target of an indirect branch.
+ * If CET is enabled _CET_ENDBR maps to the endbr64 instruction, otherwise
+ * it is empty.
+ * In case the compiler does not support CET (e.g., <gcc8, <clang11),
+ * the __CET__ macro is not set and we default to nothing.
+ * Note that we only issue _CET_ENDBR instructions through the MLK_ASM_FN_SYMBOL
+ * macro as the global symbols are the only possible targets of indirect
+ * branches in our code.
+ */
+#if defined(MLK_SYS_X86_64)
+#if defined(__CET__)
+#include <cet.h>
+#define MLK_CET_ENDBR _CET_ENDBR
+#else
+#define MLK_CET_ENDBR
+#endif
+#endif
+
 #endif /* MLK_SYS_H */

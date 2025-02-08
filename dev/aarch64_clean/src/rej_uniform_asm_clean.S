@@ -116,7 +116,7 @@
     .text
     .global MLK_ASM_NAMESPACE(rej_uniform_asm_clean)
     .balign 4
-MLK_ASM_NAMESPACE(rej_uniform_asm_clean):
+MLK_ASM_FN_SYMBOL(rej_uniform_asm_clean)
     push_stack
 
     // Load 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80

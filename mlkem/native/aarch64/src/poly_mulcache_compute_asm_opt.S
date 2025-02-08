@@ -16,7 +16,7 @@
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(poly_mulcache_compute_asm_opt)
-MLK_ASM_NAMESPACE(poly_mulcache_compute_asm_opt):
+MLK_ASM_FN_SYMBOL(poly_mulcache_compute_asm_opt)
 
         mov	w5, #0xd01              // =3329
         dup	v6.8h, w5

@@ -1056,7 +1056,14 @@ def synchronize_backends(
         delete=delete,
         force_cross=force_cross,
         no_simplify=no_simplify,
-        cflags="-Imlkem/native/x86_64/src/ -mavx2",
+        # Turn off control-flow protection (CET) explicitly. Newer versions of
+        # clang turn it on by default and insert endbr64 instructions at every
+        # global symbol.
+        # We insert endbr64 instruction manually via the MLK_ASM_FN_SYMBOL
+        # macro.
+        # This leads to duplicate endbr64 instructions causing a failure when
+        # comparing the object code before and after simplification.
+        cflags="-Imlkem/native/x86_64/src/ -mavx2 -fcf-protection=none",
     )
 
 

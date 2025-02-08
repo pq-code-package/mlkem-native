@@ -32,7 +32,7 @@
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(rej_uniform_asm_clean)
-MLK_ASM_NAMESPACE(rej_uniform_asm_clean):
+MLK_ASM_FN_SYMBOL(rej_uniform_asm_clean)
 
         sub	sp, sp, #0x240
         mov	x7, #0x1                // =1

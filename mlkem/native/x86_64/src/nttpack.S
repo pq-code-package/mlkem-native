@@ -20,7 +20,7 @@
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(nttpack_avx2)
-MLK_ASM_NAMESPACE(nttpack_avx2):
+MLK_ASM_FN_SYMBOL(nttpack_avx2)
 
         vmovdqa	(%rdi), %ymm4
         vmovdqa	0x20(%rdi), %ymm5

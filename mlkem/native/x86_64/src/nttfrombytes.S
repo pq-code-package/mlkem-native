@@ -20,7 +20,7 @@
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(nttfrombytes_avx2)
-MLK_ASM_NAMESPACE(nttfrombytes_avx2):
+MLK_ASM_FN_SYMBOL(nttfrombytes_avx2)
 
         vmovdqa	0xe0(%rdx), %ymm0
         callq	nttfrombytes128_avx

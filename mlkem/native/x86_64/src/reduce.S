@@ -25,7 +25,7 @@
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(reduce_avx2)
-MLK_ASM_NAMESPACE(reduce_avx2):
+MLK_ASM_FN_SYMBOL(reduce_avx2)
 
         vmovdqa	(%rsi), %ymm0
         vmovdqa	0x40(%rsi), %ymm1

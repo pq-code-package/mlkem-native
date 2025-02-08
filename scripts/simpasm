@@ -278,7 +278,7 @@ def simplify(logger, args, asm_input, asm_output=None):
         else:
             autogen_header += [
                 f".global {sym}",
-                f"{sym}:",
+                f"{sym.replace('MLK_ASM_NAMESPACE', 'MLK_ASM_FN_SYMBOL')}",
                 "",
             ]
             simplified_header = header

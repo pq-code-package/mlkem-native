@@ -37,7 +37,7 @@
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(ntt_asm_opt)
-MLK_ASM_NAMESPACE(ntt_asm_opt):
+MLK_ASM_FN_SYMBOL(ntt_asm_opt)
 
         sub	sp, sp, #0x40
         stp	d8, d9, [sp]

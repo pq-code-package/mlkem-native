@@ -244,7 +244,7 @@ vmovdqa		%ymm11,(64*\off+176)*2(%rdi)
 .text
 .global MLK_ASM_NAMESPACE(invntt_avx2)
 .balign 4
-MLK_ASM_NAMESPACE(invntt_avx2):
+MLK_ASM_FN_SYMBOL(invntt_avx2)
 vmovdqa         MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
 
 intt_levels0t5	0
