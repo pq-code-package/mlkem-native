@@ -629,7 +629,7 @@ def get_checked_defines():
     for c, d in get_defines():
         if d.startswith("_") and is_allowed(d, c) is False:
             raise Exception(
-                f"{d} from {c}:{i} starts with an underscore, which is not allowed for mlkem-native macros. "
+                f"{d} from {c}: starts with an underscore, which is not allowed for mlkem-native macros. "
                 f"If this is an mlkem-native specific macro, please pick a different name. "
                 f"If this is an external macro, it likely needs removing from `gen_monolithic_undef_all_core()` in `scripts/autogen` -- check this!"
             )
