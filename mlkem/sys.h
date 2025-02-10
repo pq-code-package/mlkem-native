@@ -135,4 +135,21 @@
 #endif
 #endif
 
+#if defined(MLK_CT_TESTING_ENABLED) && !defined(__ASSEMBLER__)
+#include <valgrind/memcheck.h>
+#define MLK_CT_TESTING_SECRET(ptr, len) \
+  VALGRIND_MAKE_MEM_UNDEFINED((ptr), (len))
+#define MLK_CT_TESTING_DECLASSIFY(ptr, len) \
+  VALGRIND_MAKE_MEM_DEFINED((ptr), (len))
+#else
+#define MLK_CT_TESTING_SECRET(ptr, len) \
+  do                                    \
+  {                                     \
+  } while (0)
+#define MLK_CT_TESTING_DECLASSIFY(ptr, len) \
+  do                                        \
+  {                                         \
+  } while (0)
+#endif /* MLK_CT_TESTING_ENABLED */
+
 #endif /* MLK_SYS_H */
