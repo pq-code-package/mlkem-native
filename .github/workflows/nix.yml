@@ -103,4 +103,4 @@ jobs:
           echo "$(dirname $(which nix))" >> $GITHUB_PATH
       - name: nix develop
         run: |
-          ${{ matrix.target.install == 'apt' && 'sudo' || '' }} nix develop --experimental-features "nix-command flakes"
+          ${{ matrix.target.install == 'apt' && 'sudo' || '' }} nix develop --experimental-features "nix-command flakes" --access-tokens "github.com=${{ secrets.GITHUB_TOKEN }}"
