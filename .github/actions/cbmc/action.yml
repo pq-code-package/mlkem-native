@@ -34,6 +34,11 @@ runs:
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
           script: |
+
+            if [[ ${{ inputs.nix-shell }} != '' ]]; then
+              nix-collect-garbage
+            fi
+
             cat >> $GITHUB_STEP_SUMMARY << EOF
               ## Setup
               Architecture: $(uname -m)

@@ -24,6 +24,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build_nix_cache:
+    permissions:
+      actions: 'write'
+      contents: 'read'
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ ubuntu-24.04, ubuntu-24.04-arm, macos-latest ]
+    name: build nix cache (${{ matrix.runner }})
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: ./.github/actions/setup-nix
+        with:
+          cache: true
+          verbose: true
+          save_cache: true
+          devShell: ci
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            nix develop --profile tmp
+            nix-collect-garbage
   develop_environment:
     strategy:
       fail-fast: false

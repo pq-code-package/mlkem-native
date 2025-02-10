@@ -126,7 +126,7 @@
                 util.cbmc_pkgs
                 util.hol_light'
                 util.s2n_bignum
-                util.toolchains
+                util.toolchains_native
               ]
               ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ util.valgrind_varlat ];
           };
