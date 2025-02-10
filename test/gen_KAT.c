@@ -8,6 +8,11 @@
 #include "../mlkem/fips202/fips202.h"
 #include "../mlkem/mlkem_native.h"
 
+#if defined(_WIN64) || defined(_WIN32)
+#include <fcntl.h>
+#include <io.h>
+#endif
+
 #define NTESTS 1000
 
 static void print_hex(const char *label, const uint8_t *data, size_t size)
@@ -37,6 +42,13 @@ int main(void)
       64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
       80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
   };
+
+#if defined(_WIN64) || defined(_WIN32)
+  /* Disable automatic CRLF conversion on Windows to match testvector hashes */
+  _setmode(_fileno(stdout), _O_BINARY);
+#endif
+
+
   shake256(coins, sizeof(coins), seed, sizeof(seed));
 
   for (i = 0; i < NTESTS; i++)
