@@ -120,6 +120,7 @@ static int check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   int res;
   uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES];
   uint8_t ss_enc[MLKEM_SSBYTES], ss_dec[MLKEM_SSBYTES];
+  /* Use static coins to not alter the state of the PRNG. */
   uint8_t pct_coins[MLKEM_SYMBYTES] = {
       0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
       17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
@@ -176,7 +177,7 @@ int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   }
 
   /* Declassify public key */
-  MLK_CT_TESTING_DECLASSIFY(pk, MLKEM_INCDDA_PUBLICKEYBYTES);
+  MLK_CT_TESTING_DECLASSIFY(pk, MLKEM_INDCCA_PUBLICKEYBYTES);
   return 0;
 }
 

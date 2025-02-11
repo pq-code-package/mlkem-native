@@ -695,6 +695,11 @@ def gen_monolithic_source_file(dry_run=False):
     # in multilevel build.
     def k_specific(c):
         k_specific_sources = [
+            # sys.h is not k-specific, but has some macro-overlap with
+            # mlkem_native.h. Since the macros from mlkem_native.h are
+            # undef'ed after each level-include in a multi-level build
+            # we thus have to re-include sys.h as well.
+            "sys.h",
             "mlkem_native.h",
             "params.h",
             "config.h",

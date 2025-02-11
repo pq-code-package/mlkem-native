@@ -15,6 +15,18 @@
 #define NITERATIONS 300
 #define NTESTS 500
 
+#define CHECK(x)                                              \
+  do                                                          \
+  {                                                           \
+    int rc;                                                   \
+    rc = (x);                                                 \
+    if (!rc)                                                  \
+    {                                                         \
+      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
+      return 1;                                               \
+    }                                                         \
+  } while (0)
+
 static int cmp_uint64_t(const void *a, const void *b)
 {
   return (int)((*((const uint64_t *)a)) - (*((const uint64_t *)b)));
@@ -61,19 +73,20 @@ static int bench(void)
 
   for (i = 0; i < NTESTS; i++)
   {
+    int ret = 0;
     randombytes(kg_rand, 2 * CRYPTO_BYTES);
     randombytes(enc_rand, CRYPTO_BYTES);
 
     /* Key-pair generation */
     for (j = 0; j < NWARMUP; j++)
     {
-      crypto_kem_keypair_derand(pk, sk, kg_rand);
+      ret |= crypto_kem_keypair_derand(pk, sk, kg_rand);
     }
 
     t0 = get_cyclecounter();
     for (j = 0; j < NITERATIONS; j++)
     {
-      crypto_kem_keypair_derand(pk, sk, kg_rand);
+      ret |= crypto_kem_keypair_derand(pk, sk, kg_rand);
     }
     t1 = get_cyclecounter();
     cycles_kg[i] = t1 - t0;
@@ -82,12 +95,12 @@ static int bench(void)
     /* Encapsulation */
     for (j = 0; j < NWARMUP; j++)
     {
-      crypto_kem_enc_derand(ct, key_a, pk, enc_rand);
+      ret |= crypto_kem_enc_derand(ct, key_a, pk, enc_rand);
     }
     t0 = get_cyclecounter();
     for (j = 0; j < NITERATIONS; j++)
     {
-      crypto_kem_enc_derand(ct, key_a, pk, enc_rand);
+      ret |= crypto_kem_enc_derand(ct, key_a, pk, enc_rand);
     }
     t1 = get_cyclecounter();
     cycles_enc[i] = t1 - t0;
@@ -95,22 +108,18 @@ static int bench(void)
     /* Decapsulation */
     for (j = 0; j < NWARMUP; j++)
     {
-      crypto_kem_dec(key_b, ct, sk);
+      ret |= crypto_kem_dec(key_b, ct, sk);
     }
     t0 = get_cyclecounter();
     for (j = 0; j < NITERATIONS; j++)
     {
-      crypto_kem_dec(key_b, ct, sk);
+      ret |= crypto_kem_dec(key_b, ct, sk);
     }
     t1 = get_cyclecounter();
     cycles_dec[i] = t1 - t0;
 
-
-    if (memcmp(key_a, key_b, CRYPTO_BYTES))
-    {
-      printf("ERROR keys\n");
-      return 1;
-    }
+    CHECK(ret == 0);
+    CHECK(memcmp(key_a, key_b, CRYPTO_BYTES) == 0);
   }
 
   qsort(cycles_kg, NTESTS, sizeof(uint64_t), cmp_uint64_t);

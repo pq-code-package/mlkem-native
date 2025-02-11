@@ -24,12 +24,6 @@
 
 #include <stdint.h>
 
-#if defined(__GNUC__) || defined(clang)
-#define MLK_MUST_CHECK_RETURN_VALUE __attribute__((warn_unused_result))
-#else
-#define MLK_MUST_CHECK_RETURN_VALUE
-#endif
-
 /*************************** Build information ********************************/
 
 /*
@@ -118,6 +112,12 @@
 #define MLKEM_CIPHERTEXTBYTES(LVL) MLKEM_CIPHERTEXTBYTES_(LVL)
 
 /****************************** Function API **********************************/
+
+#if defined(__GNUC__) || defined(clang)
+#define MLK_MUST_CHECK_RETURN_VALUE __attribute__((warn_unused_result))
+#else
+#define MLK_MUST_CHECK_RETURN_VALUE
+#endif
 
 /*************************************************
  * Name:        crypto_kem_keypair_derand
