@@ -287,6 +287,7 @@
 #undef MLK_CT_TESTING_DECLASSIFY
 #undef MLK_CT_TESTING_SECRET
 #undef MLK_DEFAULT_ALIGN
+#undef MLK_HAVE_INLINE_ASM
 #undef MLK_INLINE
 #undef MLK_RESTRICT
 #undef MLK_SYS_AARCH64
@@ -294,6 +295,7 @@
 #undef MLK_SYS_BIG_ENDIAN
 #undef MLK_SYS_H
 #undef MLK_SYS_LITTLE_ENDIAN
+#undef MLK_SYS_WINDOWS
 #undef MLK_SYS_X86_64
 #undef MLK_SYS_X86_64_AVX2
 /* mlkem/verify.h */
@@ -307,6 +309,7 @@
 #undef ct_opt_blocker_u64
 #undef ct_sel_int16
 #undef ct_sel_uint8
+#undef ct_zeroize
 #undef value_barrier_i32
 #undef value_barrier_u32
 #undef value_barrier_u8

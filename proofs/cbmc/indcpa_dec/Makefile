@@ -21,6 +21,7 @@ PROJECT_SOURCES += $(SRCDIR)/mlkem/indcpa.c
 CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)indcpa_dec
 
 USED_FUNCTIONS = polyvec_ntt
+USED_FUNCTIONS += ct_zeroize
 USED_FUNCTIONS += polyvec_mulcache_compute
 USED_FUNCTIONS += polyvec_basemul_acc_montgomery_cached
 USED_FUNCTIONS += poly_invntt_tomont

@@ -235,6 +235,46 @@
  *****************************************************************************/
 /* #define MLK_FIPS202X4_CUSTOM_HEADER "SOME_FILE.h" */
 
+/******************************************************************************
+ * Name:        MLK_USE_CT_ZEROIZE_NATIVE
+ *
+ * Description: In compliance with FIPS-203 Section 3.3, mlkem-native zeroizes
+ *              intermediate stack buffers before returning from function calls.
+ *
+ *              Set this option and define `ct_zeroize_native` if you want to
+ *              use a custom method to zeroize intermediate stack buffers.
+ *              The default implementation uses SecureZeroMemory on Windows
+ *              and a memset + compiler barrier otherwise. If neither of those
+ *              is available on the target platform, compilation will fail,
+ *              and you will need to use MLK_USE_CT_ZEROIZE_NATIVE to provide
+ *              a custom implementation of `ct_zeroize_native()`.
+ *
+ *              WARNING:
+ *              The explicit stack zeroization conducted by mlkem-native
+ *              reduces the likelihood of data leaking on the stack, but
+ *              does not eliminate it! The C standard makes no guarantee about
+ *              where a compiler allocates structures and whether/where it makes
+ *              copies of them. Also, in addition to entire structures, there
+ *              may also be potentially exploitable leakage of individual values
+ *              on the stack.
+ *
+ *              If you need bullet-proof zeroization of the stack, you need to
+ *              consider additional measures instead of of what this feature
+ *              provides. In this case, you can set ct_zeroize_native to a
+ *              no-op.
+ *
+ *****************************************************************************/
+/* #define MLK_USE_CT_ZEROIZE_NATIVE
+   #if !defined(__ASSEMBLER__)
+   #include <stdint.h>
+   #include "sys.h"
+   static MLK_INLINE void ct_zeroize_native(void *ptr, size_t len)
+   {
+       ... your implementation ...
+   }
+   #endif
+*/
+
 /*************************  Config internals  ********************************/
 
 /* Default namespace

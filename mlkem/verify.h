@@ -25,6 +25,7 @@
 #define ct_sel_int16 MLK_NAMESPACE(ct_sel_int16)
 #define ct_memcmp MLK_NAMESPACE(ct_memcmp)
 #define ct_cmov_zero MLK_NAMESPACE(ct_cmov_zero)
+#define ct_zeroize MLK_NAMESPACE(ct_zeroize)
 /* End of static namespacing */
 
 /* Constant-time comparisons and conditional operations
@@ -59,8 +60,7 @@
 
 */
 
-#if (defined(__GNUC__) || defined(__clang__)) && !defined(CBMC) && \
-    !defined(MLKEM_NO_ASM_VALUE_BARRIER)
+#if defined(MLK_HAVE_INLINE_ASM) && !defined(MLKEM_NO_ASM_VALUE_BARRIER)
 #define MLK_USE_ASM_VALUE_BARRIER
 #endif
 
@@ -313,5 +313,46 @@ __contract__(
     r[i] = ct_sel_uint8(r[i], x[i], b);
   }
 }
+
+/*************************************************
+ * Name:        ct_zeroize
+ *
+ * Description: Force-zeroize a buffer.
+ *
+ * Arguments:   uint8_t *r:       pointer to byte array to be zeroed
+ *              size_t len:       Amount of bytes to be zeroed
+ **************************************************/
+static MLK_INLINE void ct_zeroize(void *r, size_t len)
+__contract__(
+  requires(memory_no_alias(r, len))
+  assigns(memory_slice(r, len))
+);
+
+#if defined(MLK_USE_CT_ZEROIZE_NATIVE)
+static MLK_INLINE void ct_zeroize(void *ptr, size_t len)
+{
+  ct_zeroize_native(ptr, len);
+}
+#elif defined(MLK_SYS_WINDOWS)
+#include <windows.h>
+static MLK_INLINE void ct_zeroize(void *ptr, size_t len)
+{
+  SecureZeroMemory(ptr, len);
+}
+#elif defined(MLK_HAVE_INLINE_ASM)
+#include <string.h>
+static MLK_INLINE void ct_zeroize(void *ptr, size_t len)
+{
+  memset(ptr, 0, len);
+  /* This follows OpenSSL and seems sufficient to prevent the compiler
+   * from optimizing away the memset.
+   *
+   * If there was a reliable way to detect availablility of memset_s(),
+   * that would be preferred. */
+  __asm__ __volatile__("" : : "r"(ptr) : "memory");
+}
+#else
+#error No plausibly-secure implementation of ct_zeroize availble. Please provide your own using MLK_USE_CT_ZEROIZE_NATIVE.
+#endif
 
 #endif /* MLK_VERIFY_H */

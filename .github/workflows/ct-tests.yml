@@ -18,7 +18,7 @@ jobs:
     name: CT test ${{ matrix.nix-shell }} ${{ matrix.system }}
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 10
       matrix:
         system: [ubuntu-latest, pqcp-arm64]
         nix-shell:

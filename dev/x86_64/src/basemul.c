@@ -8,6 +8,7 @@
 #if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
+#include "../../../verify.h"
 #include "arith_native_x86_64.h"
 #include "consts.h"
 
@@ -57,6 +58,9 @@ void polyvec_basemul_acc_montgomery_cached_avx2(unsigned k, int16_t r[MLKEM_N],
     poly_basemul_montgomery_avx2(t, &a[i * MLKEM_N], &b[i * MLKEM_N]);
     poly_add_avx2(r, r, t);
   }
+
+  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  ct_zeroize(t, sizeof(t));
 }
 
 #else /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \

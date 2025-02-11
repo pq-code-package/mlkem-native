@@ -23,6 +23,14 @@
 #endif
 #endif /* __x86_64__ */
 
+#if defined(_WIN32)
+#define MLK_SYS_WINDOWS
+#endif /* _WIN32 */
+
+#if !defined(MLK_NO_ASM) && (defined(__GNUC__) || defined(__clang__))
+#define MLK_HAVE_INLINE_ASM
+#endif
+
 /* Try to find endianness, if not forced through CFLAGS already */
 #if !defined(MLK_SYS_LITTLE_ENDIAN) && !defined(MLK_SYS_BIG_ENDIAN)
 #if defined(__BYTE_ORDER__)

@@ -19,7 +19,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly_k.c
 
 CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_getnoise_eta1_4x
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_cbd_eta1 $(MLK_NAMESPACE)shake256x4
+USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_cbd_eta1 $(MLK_NAMESPACE)shake256x4 $(MLK_NAMESPACE)ct_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -36,7 +36,7 @@ FUNCTION_NAME = $(MLK_NAMESPACE)poly_getnoise_eta1_4x
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 8
+CBMC_OBJECT_BITS = 9
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

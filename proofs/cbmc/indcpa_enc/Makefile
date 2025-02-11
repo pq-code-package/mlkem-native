@@ -21,6 +21,7 @@ PROJECT_SOURCES += $(SRCDIR)/mlkem/indcpa.c
 CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)indcpa_enc
 
 USED_FUNCTIONS = poly_frommsg
+USED_FUNCTIONS += ct_zeroize
 USED_FUNCTIONS += gen_matrix
 ifeq ($(MLKEM_K),2)
 USED_FUNCTIONS += poly_getnoise_eta1122_4x

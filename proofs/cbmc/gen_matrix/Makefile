@@ -19,7 +19,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/indcpa.c
 
 CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)gen_matrix
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_rej_uniform $(MLK_NAMESPACE)poly_rej_uniform_x4 $(MLK_NAMESPACE)poly_permute_bitrev_to_custom
+USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_rej_uniform $(MLK_NAMESPACE)poly_rej_uniform_x4 $(MLK_NAMESPACE)poly_permute_bitrev_to_custom $(MLK_NAMESPACE)ct_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

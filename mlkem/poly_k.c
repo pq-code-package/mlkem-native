@@ -255,6 +255,16 @@ void poly_getnoise_eta1_4x(poly *r0, poly *r1, poly *r2, poly *r3,
   debug_assert_abs_bound(r1, MLKEM_N, MLKEM_ETA1 + 1);
   debug_assert_abs_bound(r2, MLKEM_N, MLKEM_ETA1 + 1);
   debug_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA1 + 1);
+
+  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  ct_zeroize(buf0, sizeof(buf0));
+  ct_zeroize(buf1, sizeof(buf1));
+  ct_zeroize(buf2, sizeof(buf2));
+  ct_zeroize(buf3, sizeof(buf3));
+  ct_zeroize(extkey0, sizeof(extkey0));
+  ct_zeroize(extkey1, sizeof(extkey1));
+  ct_zeroize(extkey2, sizeof(extkey2));
+  ct_zeroize(extkey3, sizeof(extkey3));
 }
 
 #if MLKEM_K == 2 || MLKEM_K == 4
@@ -297,6 +307,10 @@ void poly_getnoise_eta2(poly *r, const uint8_t seed[MLKEM_SYMBYTES],
   poly_cbd_eta2(r, buf);
 
   debug_assert_abs_bound(r, MLKEM_N, MLKEM_ETA1 + 1);
+
+  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  ct_zeroize(buf, sizeof(buf));
+  ct_zeroize(extkey, sizeof(extkey));
 }
 #endif /* MLKEM_K == 2 || MLKEM_K == 4 */
 
@@ -352,6 +366,16 @@ void poly_getnoise_eta1122_4x(poly *r0, poly *r1, poly *r2, poly *r3,
   debug_assert_abs_bound(r1, MLKEM_N, MLKEM_ETA1 + 1);
   debug_assert_abs_bound(r2, MLKEM_N, MLKEM_ETA2 + 1);
   debug_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA2 + 1);
+
+  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  ct_zeroize(buf0, sizeof(buf0));
+  ct_zeroize(buf1, sizeof(buf1));
+  ct_zeroize(buf2, sizeof(buf2));
+  ct_zeroize(buf3, sizeof(buf3));
+  ct_zeroize(extkey0, sizeof(extkey0));
+  ct_zeroize(extkey1, sizeof(extkey1));
+  ct_zeroize(extkey2, sizeof(extkey2));
+  ct_zeroize(extkey3, sizeof(extkey3));
 }
 #endif /* MLKEM_K == 2 */
 
