@@ -60,35 +60,35 @@ run_acvp: acvp
 	python3 ./test/acvp_client.py
 
 func_512:  $(MLKEM512_DIR)/bin/test_mlkem512
-	$(Q)echo "  FUNC       ML-MEM-512:   $^"
+	$(Q)echo "  FUNC       ML-KEM-512:   $^"
 func_768:  $(MLKEM768_DIR)/bin/test_mlkem768
-	$(Q)echo "  FUNC       ML-MEM-768:   $^"
+	$(Q)echo "  FUNC       ML-KEM-768:   $^"
 func_1024: $(MLKEM1024_DIR)/bin/test_mlkem1024
-	$(Q)echo "  FUNC       ML-MEM-1024:  $^"
+	$(Q)echo "  FUNC       ML-KEM-1024:  $^"
 func: func_512 func_768 func_1024
 
 nistkat_512: $(MLKEM512_DIR)/bin/gen_NISTKAT512
-	$(Q)echo "  NISTKAT    ML-MEM-512:   $^"
+	$(Q)echo "  NISTKAT    ML-KEM-512:   $^"
 nistkat_768: $(MLKEM768_DIR)/bin/gen_NISTKAT768
-	$(Q)echo "  NISTKAT    ML-MEM-768:   $^"
+	$(Q)echo "  NISTKAT    ML-KEM-768:   $^"
 nistkat_1024: $(MLKEM1024_DIR)/bin/gen_NISTKAT1024
-	$(Q)echo "  NISTKAT    ML-MEM-1024:  $^"
+	$(Q)echo "  NISTKAT    ML-KEM-1024:  $^"
 nistkat: nistkat_512 nistkat_768 nistkat_1024
 
 kat_512: $(MLKEM512_DIR)/bin/gen_KAT512
-	$(Q)echo "  KAT        ML-MEM-512:   $^"
+	$(Q)echo "  KAT        ML-KEM-512:   $^"
 kat_768: $(MLKEM768_DIR)/bin/gen_KAT768
-	$(Q)echo "  KAT        ML-MEM-768:   $^"
+	$(Q)echo "  KAT        ML-KEM-768:   $^"
 kat_1024: $(MLKEM1024_DIR)/bin/gen_KAT1024
-	$(Q)echo "  KAT        ML-MEM-1024:  $^"
+	$(Q)echo "  KAT        ML-KEM-1024:  $^"
 kat: kat_512 kat_768 kat_1024
 
 acvp_512:  $(MLKEM512_DIR)/bin/acvp_mlkem512
-	$(Q)echo "  ACVP       ML-MEM-512:   $^"
+	$(Q)echo "  ACVP       ML-KEM-512:   $^"
 acvp_768:  $(MLKEM768_DIR)/bin/acvp_mlkem768
-	$(Q)echo "  ACVP       ML-MEM-768:   $^"
+	$(Q)echo "  ACVP       ML-KEM-768:   $^"
 acvp_1024: $(MLKEM1024_DIR)/bin/acvp_mlkem1024
-	$(Q)echo "  ACVP       ML-MEM-1024:  $^"
+	$(Q)echo "  ACVP       ML-KEM-1024:  $^"
 acvp: acvp_512 acvp_768 acvp_1024
 
 lib: $(BUILD_DIR)/libmlkem.a $(BUILD_DIR)/libmlkem512.a $(BUILD_DIR)/libmlkem768.a $(BUILD_DIR)/libmlkem1024.a
