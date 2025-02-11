@@ -16,10 +16,6 @@
 #include "sampling.h"
 #include "symmetric.h"
 
-#ifdef ENABLE_CT_TESTING
-#include <valgrind/memcheck.h>
-#endif
-
 /* Static namespacing
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
@@ -302,16 +298,13 @@ void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
 
   hash_g(buf, coins_with_domain_separator, MLKEM_SYMBYTES + 1);
 
-
-#ifdef ENABLE_CT_TESTING
   /*
    * Declassify the public seed.
    * Required to use it in conditional-branches in rejection sampling.
    * This is needed because all output of randombytes is marked as secret
    * (=undefined)
    */
-  VALGRIND_MAKE_MEM_DEFINED(publicseed, MLKEM_SYMBYTES);
-#endif
+  MLK_CT_TESTING_DECLASSIFY(publicseed, MLKEM_SYMBYTES);
 
   gen_matrix(a, publicseed, 0 /* no transpose */);
 
@@ -367,16 +360,13 @@ void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
   unpack_pk(&pkpv, seed, pk);
   poly_frommsg(&k, m);
 
-
-#ifdef ENABLE_CT_TESTING
   /*
    * Declassify the public seed.
    * Required to use it in conditional-branches in rejection sampling.
    * This is needed because in re-encryption the publicseed originated from sk
    * which is marked undefined.
    */
-  VALGRIND_MAKE_MEM_DEFINED(seed, MLKEM_SYMBYTES);
-#endif
+  MLK_CT_TESTING_DECLASSIFY(seed, MLKEM_SYMBYTES);
 
   gen_matrix(at, seed, 1 /* transpose */);
 
