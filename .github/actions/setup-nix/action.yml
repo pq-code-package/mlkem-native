@@ -22,10 +22,14 @@ inputs:
   save_cache:
     description: Determine whether to save cache with primary key or not
     required: false
-    default: 'true'
+    default: 'false'
   gh_token:
     description: Github access token to use
     required: true
+  install:
+    required: false
+    description: Determine how to install nix ('installer' | 'apt')
+    default: 'installer'
 
 runs:
   using: composite
@@ -51,6 +55,23 @@ runs:
         fi
 
         nix --version
+    - name: Install nix via apt
+      if: ${{ steps.nix-pre-check.outputs.installed == 'false' && inputs.install == 'apt' }}
+      shell: bash
+      run: |
+        if [[ -f /.dockerenv ]]; then
+          apt install nix -y
+        else
+          sudo apt install nix -y
+        fi
+        mkdir -p ~/.config/nix
+        cat >> ~/.config/nix/nix.conf << EOF
+          experimental-features = nix-command flakes
+        EOF
+
+        if [[ ! -z $GH_TOKEN ]]; then
+          echo "access-tokens = github.com=$GH_TOKEN" >> ~/.config/nix/nix.conf
+        fi
     - uses: cachix/install-nix-action@08dcb3a5e62fa31e2da3d490afc4176ef55ecd72 # v30
       if: ${{ steps.nix-pre-check.outputs.installed == 'false' }}
       with:
@@ -100,7 +121,11 @@ runs:
 
         echo NIX_SHELL="${{ inputs.devShell }}" >> $GITHUB_ENV
         nix_extra_flags="${{ inputs.verbose == 'false' && '--quiet' || '' }}"
-        echo SHELL="$(which nix) develop $nix_extra_flags .#${{ inputs.devShell }} -c bash -e {0}" >> $GITHUB_ENV
+        if [[ ${{ inputs.install }} == 'apt' && ! -f /.dockerenv ]]; then
+          echo SHELL="sudo $(which nix) develop $nix_extra_flags .#${{ inputs.devShell }} -c bash -e {0}" >> $GITHUB_ENV
+        else
+          echo SHELL="$(which nix) develop $nix_extra_flags .#${{ inputs.devShell }} -c bash -e {0}" >> $GITHUB_ENV
+        fi
         echo "::endgroup::"
     - name: Prepare nix dev shell
       shell: ${{ env.SHELL }}
