@@ -11,6 +11,11 @@
 #include "../mlkem/mlkem_native.h"
 #include "../mlkem/randombytes.h"
 
+#if defined(_WIN64) || defined(_WIN32)
+#include <fcntl.h>
+#include <io.h>
+#endif
+
 #if (MLKEM_K == 2)
 #define CRYPTO_ALGNAME "Kyber512"
 #elif (MLKEM_K == 3)
@@ -61,6 +66,12 @@ int main(void)
   int rc;
 
   int count = 0;
+
+#if defined(_WIN64) || defined(_WIN32)
+  /* Disable automatic CRLF conversion on Windows to match testvector hashes */
+  _setmode(_fileno(stdout), _O_BINARY);
+#endif
+
 
   fprintf(fh, "# %s\n\n", CRYPTO_ALGNAME);
 
