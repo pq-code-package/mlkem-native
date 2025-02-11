@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "cbmc.h"
 #include "common.h"
+#include "sys.h"
 
 #if defined(MLK_CHECK_APIS)
 /* Include to ensure consistency between internal kem.h
@@ -49,9 +50,11 @@
  *              - uint8_t *coins: pointer to input randomness
  *                (an already allocated array filled with 2*MLKEM_SYMBYTES
  *                 random bytes)
- **
- * Returns 0 (success)
+ *
+ * Returns:     - 0: On success
+ *              - 1: On PCT failure (if MLK_KEYGEN_PCT) is enabled.
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                               uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
                               const uint8_t *coins)
@@ -76,8 +79,10 @@ __contract__(
  *                (an already allocated array of MLKEM_INDCCA_SECRETKEYBYTES
  *                 bytes)
  *
- * Returns 0 (success)
+ * Returns:     - 0: On success
+ *              - 1: On PCT failure (if MLK_KEYGEN_PCT) is enabled.
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                        uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 __contract__(
@@ -108,6 +113,7 @@ __contract__(
  * Returns 0 on success, and -1 if the public key modulus check (see Section 7.2
  * of FIPS203) fails.
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                           uint8_t ss[MLKEM_SSBYTES],
                           const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
@@ -139,6 +145,7 @@ __contract__(
  * Returns 0 on success, and -1 if the public key modulus check (see Section 7.2
  * of FIPS203) fails.
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                    uint8_t ss[MLKEM_SSBYTES],
                    const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
@@ -170,6 +177,7 @@ __contract__(
  *
  * On failure, ss will contain a pseudo-random value.
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
                    const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                    const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])

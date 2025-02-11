@@ -24,6 +24,12 @@
 
 #include <stdint.h>
 
+#if defined(__GNUC__) || defined(clang)
+#define MLK_MUST_CHECK_RETURN_VALUE __attribute__((warn_unused_result))
+#else
+#define MLK_MUST_CHECK_RETURN_VALUE
+#endif
+
 /*************************** Build information ********************************/
 
 /*
@@ -128,6 +134,7 @@
  *
  * Returns 0 (success)
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 int MLK_BUILD_INFO_NAMESPACE(keypair_derand)(
     uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_BUILD_INFO_LVL)],
     uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_BUILD_INFO_LVL)], const uint8_t *coins);
@@ -145,6 +152,7 @@ int MLK_BUILD_INFO_NAMESPACE(keypair_derand)(
  *
  * Returns 0 (success)
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 int MLK_BUILD_INFO_NAMESPACE(keypair)(
     uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_BUILD_INFO_LVL)],
     uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_BUILD_INFO_LVL)]);
@@ -167,6 +175,7 @@ int MLK_BUILD_INFO_NAMESPACE(keypair)(
  * Returns 0 on success, and -1 if the public key modulus check (see Section 7.2
  * of FIPS203) fails.
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 int MLK_BUILD_INFO_NAMESPACE(enc_derand)(
     uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_BUILD_INFO_LVL)],
     uint8_t ss[MLKEM_BYTES],
@@ -189,6 +198,7 @@ int MLK_BUILD_INFO_NAMESPACE(enc_derand)(
  * Returns 0 on success, and -1 if the public key modulus check (see Section 7.2
  * of FIPS203) fails.
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 int MLK_BUILD_INFO_NAMESPACE(enc)(
     uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_BUILD_INFO_LVL)],
     uint8_t ss[MLKEM_BYTES],
@@ -212,6 +222,7 @@ int MLK_BUILD_INFO_NAMESPACE(enc)(
  *
  * On failure, ss will contain a pseudo-random value.
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 int MLK_BUILD_INFO_NAMESPACE(dec)(
     uint8_t ss[MLKEM_BYTES],
     const uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_BUILD_INFO_LVL)],

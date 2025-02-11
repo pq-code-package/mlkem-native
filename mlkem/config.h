@@ -275,6 +275,24 @@
    #endif
 */
 
+/******************************************************************************
+ * Name:        MLK_KEYGEN_PCT
+ *
+ * Description: Compliance with [FIPS 140-3
+ *IG](https://csrc.nist.gov/csrc/media/Projects/cryptographic-module-validation-program/documents/fips%20140-3/FIPS%20140-3%20IG.pdf)
+ *              requires a Pairwise Consistency Test (PCT) to be carried out
+ *              on a freshly generated keypair before it can be exported.
+ *
+ *              Set this option if such a check should be implemented.
+ *              In this case, crypto_kem_keypair_derand and crypto_kem_keypair
+ *              will return a non-zero error code if the PCT failed.
+ *
+ *              NOTE: This feature will drastically lower the performance of
+ *              key generation.
+ *
+ *****************************************************************************/
+/* #define MLK_KEYGEN_PCT */
+
 /*************************  Config internals  ********************************/
 
 /* Default namespace

@@ -140,6 +140,7 @@
 #undef MLK_BUILD_INFO_LVL
 #undef MLK_BUILD_INFO_NAMESPACE
 #undef MLK_H
+#undef MLK_MUST_CHECK_RETURN_VALUE
 #undef crypto_kem_dec
 #undef crypto_kem_enc
 #undef crypto_kem_enc_derand
@@ -289,6 +290,7 @@
 #undef MLK_DEFAULT_ALIGN
 #undef MLK_HAVE_INLINE_ASM
 #undef MLK_INLINE
+#undef MLK_MUST_CHECK_RETURN_VALUE
 #undef MLK_RESTRICT
 #undef MLK_SYS_AARCH64
 #undef MLK_SYS_AARCH64_EB

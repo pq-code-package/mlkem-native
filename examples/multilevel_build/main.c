@@ -10,6 +10,18 @@
 #include "mlkem_native_all.h"
 #include "test_only_rng/notrandombytes.h"
 
+#define CHECK(x)                                              \
+  do                                                          \
+  {                                                           \
+    int rc;                                                   \
+    rc = (x);                                                 \
+    if (!rc)                                                  \
+    {                                                         \
+      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
+      return 1;                                               \
+    }                                                         \
+  } while (0)
+
 static int test_keys_mlkem512(void)
 {
   const uint8_t expected_key[] = {
@@ -28,19 +40,15 @@ static int test_keys_mlkem512(void)
   randombytes_reset();
 
   /* Alice generates a public key */
-  mlkem512_keypair(pk, sk);
+  CHECK(mlkem512_keypair(pk, sk) == 0);
 
   /* Bob derives a secret key and creates a response */
-  mlkem512_enc(ct, key_b, pk);
+  CHECK(mlkem512_enc(ct, key_b, pk) == 0);
 
   /* Alice uses Bobs response to get her shared key */
-  mlkem512_dec(key_a, ct, sk);
+  CHECK(mlkem512_dec(key_a, ct, sk) == 0);
 
-  if (memcmp(key_a, key_b, MLKEM512_BYTES))
-  {
-    printf("[MLKEM-512] ERROR keys\n");
-    return 1;
-  }
+  CHECK(memcmp(key_a, key_b, MLKEM512_BYTES) == 0);
 
   printf("Shared secret: ");
   {
@@ -50,11 +58,7 @@ static int test_keys_mlkem512(void)
   }
   printf("\n");
 
-  if (memcmp(key_a, expected_key, sizeof(key_a)) != 0)
-  {
-    printf("ERROR: Unexpected result\n");
-    return 1;
-  }
+  CHECK(memcmp(key_a, expected_key, sizeof(key_a)) == 0);
 
   printf("[MLKEM-512] OK\n");
   return 0;
@@ -78,19 +82,15 @@ static int test_keys_mlkem768(void)
   randombytes_reset();
 
   /* Alice generates a public key */
-  mlkem768_keypair(pk, sk);
+  CHECK(mlkem768_keypair(pk, sk) == 0);
 
   /* Bob derives a secret key and creates a response */
-  mlkem768_enc(ct, key_b, pk);
+  CHECK(mlkem768_enc(ct, key_b, pk) == 0);
 
   /* Alice uses Bobs response to get her shared key */
-  mlkem768_dec(key_a, ct, sk);
+  CHECK(mlkem768_dec(key_a, ct, sk) == 0);
 
-  if (memcmp(key_a, key_b, MLKEM768_BYTES))
-  {
-    printf("[MLKEM-768] ERROR keys\n");
-    return 1;
-  }
+  CHECK(memcmp(key_a, key_b, MLKEM768_BYTES) == 0);
 
   printf("Shared secret: ");
   {
@@ -100,29 +100,12 @@ static int test_keys_mlkem768(void)
   }
   printf("\n");
 
-  if (memcmp(key_a, expected_key, sizeof(key_a)) != 0)
-  {
-    printf("ERROR: Unexpected result\n");
-    return 1;
-  }
-
-  printf("Shared secret: ");
-  {
-    size_t i;
-    for (i = 0; i < sizeof(key_a); i++)
-      printf("%02x", key_a[i]);
-  }
-  printf("\n");
-
-  if (memcmp(key_a, expected_key, sizeof(key_a)) != 0)
-  {
-    printf("ERROR: Unexpected result\n");
-    return 1;
-  }
+  CHECK(memcmp(key_a, expected_key, sizeof(key_a)) == 0);
 
   printf("[MLKEM-768] OK\n");
   return 0;
 }
+
 
 static int test_keys_mlkem1024(void)
 {
@@ -141,19 +124,15 @@ static int test_keys_mlkem1024(void)
   randombytes_reset();
 
   /* Alice generates a public key */
-  mlkem1024_keypair(pk, sk);
+  CHECK(mlkem1024_keypair(pk, sk) == 0);
 
   /* Bob derives a secret key and creates a response */
-  mlkem1024_enc(ct, key_b, pk);
+  CHECK(mlkem1024_enc(ct, key_b, pk) == 0);
 
   /* Alice uses Bobs response to get her shared key */
-  mlkem1024_dec(key_a, ct, sk);
+  CHECK(mlkem1024_dec(key_a, ct, sk) == 0);
 
-  if (memcmp(key_a, key_b, MLKEM1024_BYTES))
-  {
-    printf("[MLKEM-1024] ERROR keys\n");
-    return 1;
-  }
+  CHECK(memcmp(key_a, key_b, MLKEM1024_BYTES) == 0);
 
   printf("Shared secret: ");
   {
@@ -163,11 +142,7 @@ static int test_keys_mlkem1024(void)
   }
   printf("\n");
 
-  if (memcmp(key_a, expected_key, sizeof(key_a)) != 0)
-  {
-    printf("ERROR: Unexpected result\n");
-    return 1;
-  }
+  CHECK(memcmp(key_a, expected_key, sizeof(key_a)) == 0);
 
   printf("[MLKEM-1024] OK\n");
   return 0;
