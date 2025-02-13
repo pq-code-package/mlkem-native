@@ -267,21 +267,25 @@ layer4567_start:
         // Layer 5
         gs_butterfly data0, data1, root0, 2, 3
         gs_butterfly data2, data3, root0, 4, 5
-        // Max bound: 8q
+        // data0, data2: < 8q
+        // data1, data3: < q
 
-        // Not all of those reductions are needed, but the bounds tracking
-        // is easier if we uniformly reduce at this point.
+        // data0 and data2 have reached a bound of 8q now, so
+        // reduction of them is required.
         barrett_reduce data0
         barrett_reduce data2
-        barrett_reduce data1
-        barrett_reduce data3
+        // data0, data2: < q/2
+        // data1, data3: < q
 
-        // Bounds: q/2
-
-        // Layer 4
         gs_butterfly data0, data2, root0, 0, 1
         gs_butterfly data1, data3, root0, 0, 1
-        // Bounds: < q
+        // data0, data2, data3: < q
+        // data1: < 2q
+
+        barrett_reduce data1
+        // data1: < q/2 < q
+        // data0, data2, data3: < q
+        // Therefore, all < q
 
         str q_data0, [inp], #(64)
         str q_data1, [inp, #(-64 + 16*1)]
