@@ -9,6 +9,18 @@
 #include "mlkem_native/mlkem/mlkem_native.h"
 #include "test_only_rng/notrandombytes.h"
 
+#define CHECK(x)                                              \
+  do                                                          \
+  {                                                           \
+    int rc;                                                   \
+    rc = (x);                                                 \
+    if (!rc)                                                  \
+    {                                                         \
+      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
+      return 1;                                               \
+    }                                                         \
+  } while (0)
+
 int main(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -41,28 +53,24 @@ int main(void)
   printf("Generating keypair ... ");
 
   /* Alice generates a public key */
-  crypto_kem_keypair(pk, sk);
+  CHECK(crypto_kem_keypair(pk, sk) == 0);
 
   printf("DONE\n");
   printf("Encaps... ");
 
   /* Bob derives a secret key and creates a response */
-  crypto_kem_enc(ct, key_b, pk);
+  CHECK(crypto_kem_enc(ct, key_b, pk) == 0);
 
   printf("DONE\n");
   printf("Decaps... ");
 
   /* Alice uses Bobs response to get her shared key */
-  crypto_kem_dec(key_a, ct, sk);
+  CHECK(crypto_kem_dec(key_a, ct, sk) == 0);
 
   printf("DONE\n");
   printf("Compare... ");
 
-  if (memcmp(key_a, key_b, CRYPTO_BYTES))
-  {
-    printf("ERROR\n");
-    return 1;
-  }
+  CHECK(memcmp(key_a, key_b, CRYPTO_BYTES) == 0);
 
   printf("Shared secret: ");
   {
@@ -72,12 +80,7 @@ int main(void)
   }
   printf("\n");
 
-  if (memcmp(key_a, expected_key, sizeof(key_a)) != 0)
-  {
-    printf("ERROR: Unexpected result\n");
-    return 1;
-  }
-
+  CHECK(memcmp(key_a, expected_key, sizeof(key_a)) == 0);
   printf("OK\n");
   return 0;
 }

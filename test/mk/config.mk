@@ -32,6 +32,7 @@ CC_AR  := $(CROSS_PREFIX)$(CC_AR)
 CFLAGS := \
 	-Wall \
 	-Wextra \
+	-Werror=unused-result \
 	-Wpedantic \
 	-Werror \
 	-Wmissing-prototypes \

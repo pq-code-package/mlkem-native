@@ -160,4 +160,10 @@
   } while (0)
 #endif /* MLK_CT_TESTING_ENABLED */
 
+#if defined(__GNUC__) || defined(clang)
+#define MLK_MUST_CHECK_RETURN_VALUE __attribute__((warn_unused_result))
+#else
+#define MLK_MUST_CHECK_RETURN_VALUE
+#endif
+
 #endif /* MLK_SYS_H */

@@ -4,6 +4,7 @@
  */
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "../mlkem/mlkem_native.h"
@@ -13,6 +14,18 @@
 #define ENCAPS_USAGE "acvp_mlkem{lvl} encapDecap AFT encaps ek=HEX m=HEX"
 #define DECAPS_USAGE "acvp_mlkem{lvl} encapDecap VAL decaps dk=HEX c=HEX"
 #define KEYGEN_USAGE "acvp_mlkem{lvl} keyGen AFT z=HEX d=HEX"
+
+#define CHECK(x)                                              \
+  do                                                          \
+  {                                                           \
+    int rc;                                                   \
+    rc = (x);                                                 \
+    if (!rc)                                                  \
+    {                                                         \
+      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
+      exit(1);                                                \
+    }                                                         \
+  } while (0)
 
 typedef enum
 {
@@ -120,7 +133,7 @@ static void acvp_mlkem_encapDecp_AFT_encapsulation(
   unsigned char ct[CRYPTO_CIPHERTEXTBYTES];
   unsigned char ss[CRYPTO_BYTES];
 
-  crypto_kem_enc_derand(ct, ss, ek, m);
+  CHECK(crypto_kem_enc_derand(ct, ss, ek, m) == 0);
 
   print_hex("c", ct, sizeof(ct));
   print_hex("k", ss, sizeof(ss));
@@ -132,7 +145,7 @@ static void acvp_mlkem_encapDecp_VAL_decapsulation(
 {
   unsigned char ss[CRYPTO_BYTES];
 
-  crypto_kem_dec(ss, c, dk);
+  CHECK(crypto_kem_dec(ss, c, dk) == 0);
 
   print_hex("k", ss, sizeof(ss));
 }
@@ -147,7 +160,7 @@ static void acvp_mlkem_keyGen_AFT(unsigned char const z[CRYPTO_SYMBYTES],
   memcpy(zd, d, CRYPTO_SYMBYTES);
   memcpy(zd + CRYPTO_SYMBYTES, z, CRYPTO_SYMBYTES);
 
-  crypto_kem_keypair_derand(ek, dk, zd);
+  CHECK(crypto_kem_keypair_derand(ek, dk, zd) == 0);
 
   print_hex("ek", ek, sizeof(ek));
   print_hex("dk", dk, sizeof(dk));
