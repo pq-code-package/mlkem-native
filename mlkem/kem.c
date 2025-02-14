@@ -188,7 +188,11 @@ int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 {
   int res;
   MLK_ALIGN uint8_t coins[2 * MLKEM_SYMBYTES];
+
+  /* Acquire necessary randomness, and mark it as secret. */
   randombytes(coins, 2 * MLKEM_SYMBYTES);
+  MLK_CT_TESTING_SECRET(coins, sizeof(coins));
+
   res = crypto_kem_keypair_derand(pk, sk, coins);
 
   /* FIPS 203. Section 3.3 Destruction of intermediate values. */
@@ -236,7 +240,10 @@ int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
 {
   int res;
   MLK_ALIGN uint8_t coins[MLKEM_SYMBYTES];
+
   randombytes(coins, MLKEM_SYMBYTES);
+  MLK_CT_TESTING_SECRET(coins, sizeof(coins));
+
   res = crypto_kem_enc_derand(ct, ss, pk, coins);
 
   /* FIPS 203. Section 3.3 Destruction of intermediate values. */
