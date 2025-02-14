@@ -158,6 +158,7 @@ static int check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 }
 #endif /* MLKEM_KEYGEN_PCT */
 
+MLK_EXTERNAL_API
 int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                               uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
                               const uint8_t *coins)
@@ -181,6 +182,7 @@ int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   return 0;
 }
 
+MLK_EXTERNAL_API
 int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                        uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
@@ -194,6 +196,7 @@ int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   return res;
 }
 
+MLK_EXTERNAL_API
 int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                           uint8_t ss[MLKEM_SSBYTES],
                           const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
@@ -226,6 +229,7 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   return 0;
 }
 
+MLK_EXTERNAL_API
 int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                    uint8_t ss[MLKEM_SSBYTES],
                    const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
@@ -240,6 +244,7 @@ int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   return res;
 }
 
+MLK_EXTERNAL_API
 int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
                    const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                    const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])

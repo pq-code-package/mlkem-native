@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "mlkem_native_all.c"
 #include "mlkem_native_all.h"
 #include "test_only_rng/notrandombytes.h"
 

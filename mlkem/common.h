@@ -47,6 +47,13 @@
 #define MLK_INTERNAL_API static
 #endif
 
+/* Public API may have internal or external linkage, depending on how
+ * mlkem-native is used in the monobuild. Keep it external by default,
+ * but allow the user to overwrite this in the config. */
+#if !defined(MLK_EXTERNAL_API)
+#define MLK_EXTERNAL_API
+#endif /* MLK_EXTERNAL_API */
+
 #define MLK_MAKE_NAMESPACE_(x1, x2) x1##_##x2
 #define MLK_MAKE_NAMESPACE(x1, x2) MLK_MAKE_NAMESPACE_(x1, x2)
 

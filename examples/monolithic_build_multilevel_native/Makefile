@@ -20,10 +20,7 @@ endif
 #
 # mlkem-native source and header files
 #
-# Here, we use just a single monolithic compilation unit to include
-# multiple instances of mlkem-native, plus all assembly.
-
-MLK_SOURCE_C=mlkem_native_all.c
+# Here, the mlkem-native C source is directly included in main.c.
 MLK_SOURCE_ASM = $(wildcard \
 	mlkem/**/*.S                 \
 	mlkem/**/**/*.S              \
@@ -52,7 +49,6 @@ APP_SOURCE=$(RNG_SOURCE) main.c
 
 BUILD_DIR=build
 BIN=test_binary
-LIB=libmlkem.a
 
 # Automatically detect system architecture and set preprocessor etc accordingly
 HOST_PLATFORM := $(shell uname -s)-$(shell uname -m)
@@ -108,7 +104,6 @@ ASMFLAGS = -DMLK_CONFIG_FILE=\"multilevel_config.h\"
 ASMFLAGS += -DMLK_MULTILEVEL_BUILD_WITH_SHARED
 
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
-LIB_NAME_FULL=$(BUILD_DIR)/$(LIB)
 
 MLK_OBJ_C=$(patsubst %,$(BUILD_DIR)/%.o,$(MLK_SOURCE_C))
 MLK_OBJ_ASM=$(patsubst %,$(BUILD_DIR)/%.o,$(MLK_SOURCE_ASM))
@@ -125,16 +120,11 @@ $(BUILD_DIR)/%.S.o: %.S
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(CC) -c $(CFLAGS) $(ASMFLAGS) $(INC) $^ -o $@
 
-$(LIB_NAME_FULL): $(MLK_OBJ_C) $(MLK_OBJ_ASM)
-	$(Q)echo "AR  $@"
-	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(AR) rcs $@ $^
-	$(Q)strip -S $@
-
-$(BINARY_NAME_FULL): $(APP_SOURCE) $(LIB_NAME_FULL)
+$(BINARY_NAME_FULL): $(APP_SOURCE) $(MLK_OBJ_ASM)
 	$(Q)echo "CC  $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(CC) $(CFLAGS) $(INC) $^ -o $@
+	$(Q)strip -S $@
 
 all: build
 
