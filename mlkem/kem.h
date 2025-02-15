@@ -54,6 +54,7 @@
  * Returns:     - 0: On success
  *              - 1: On PCT failure (if MLK_KEYGEN_PCT) is enabled.
  **************************************************/
+MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                               uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
@@ -82,6 +83,7 @@ __contract__(
  * Returns:     - 0: On success
  *              - 1: On PCT failure (if MLK_KEYGEN_PCT) is enabled.
  **************************************************/
+MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                        uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
@@ -109,10 +111,11 @@ __contract__(
  *              - const uint8_t *coins: pointer to input randomness
  *                (an already allocated array filled with MLKEM_SYMBYTES random
  *                 bytes)
- **
+ *
  * Returns 0 on success, and -1 if the public key modulus check (see Section 7.2
  * of FIPS203) fails.
  **************************************************/
+MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                           uint8_t ss[MLKEM_SSBYTES],
@@ -135,16 +138,17 @@ __contract__(
  *
  * Arguments:   - uint8_t *ct: pointer to output cipher text
  *                (an already allocated array of MLKEM_INDCCA_CIPHERTEXTBYTES
- *bytes)
+ *                 bytes)
  *              - uint8_t *ss: pointer to output shared secret
  *                (an already allocated array of MLKEM_SSBYTES bytes)
  *              - const uint8_t *pk: pointer to input public key
  *                (an already allocated array of MLKEM_INDCCA_PUBLICKEYBYTES
- *bytes)
+ *                 bytes)
  *
  * Returns 0 on success, and -1 if the public key modulus check (see Section 7.2
  * of FIPS203) fails.
  **************************************************/
+MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                    uint8_t ss[MLKEM_SSBYTES],
@@ -167,16 +171,17 @@ __contract__(
  *                (an already allocated array of MLKEM_SSBYTES bytes)
  *              - const uint8_t *ct: pointer to input cipher text
  *                (an already allocated array of MLKEM_INDCCA_CIPHERTEXTBYTES
- *bytes)
+ *                 bytes)
  *              - const uint8_t *sk: pointer to input private key
  *                (an already allocated array of MLKEM_INDCCA_SECRETKEYBYTES
- *bytes)
+ *                 bytes)
  *
  * Returns 0 on success, and -1 if the secret key hash check (see Section 7.3 of
  * FIPS203) fails.
  *
  * On failure, ss will contain a pseudo-random value.
  **************************************************/
+MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
                    const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],

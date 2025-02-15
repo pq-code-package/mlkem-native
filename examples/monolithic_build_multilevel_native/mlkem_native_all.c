@@ -4,6 +4,7 @@
  */
 
 #define MLK_MULTILEVEL_BUILD
+#define MLK_EXTERNAL_API static
 
 /* Three instances of mlkem-native for all security levels */
 
