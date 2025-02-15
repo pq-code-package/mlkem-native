@@ -124,11 +124,8 @@ static int test_invalid_ciphertext(void)
   do
   {
     randombytes(&b, sizeof(uint8_t));
-    MLK_CT_TESTING_DECLASSIFY(&b, sizeof(uint8_t));
   } while (!b);
   randombytes((uint8_t *)&pos, sizeof(size_t));
-
-  MLK_CT_TESTING_DECLASSIFY(&pos, sizeof(size_t));
 
   /* Alice generates a public key */
   CHECK(crypto_kem_keypair(pk, sk) == 0);
