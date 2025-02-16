@@ -33,11 +33,11 @@
  *
  * Description: Computes round(u * 2 / q)
  *
- *              Implements Compress_d from FIPS203, Eq (4.7),
- *              for d = 1.
- *
  * Arguments: - u: Unsigned canonical modulus modulo q
  *                 to be compressed.
+ *
+ * Specification: Compress_1 from [FIPS 203, Eq (4.7)].
+ *
  ************************************************************/
 /*
  * The multiplication in this routine will exceed UINT32_MAX
@@ -68,11 +68,11 @@ __contract__(
  *
  * Description: Computes round(u * 16 / q) % 16
  *
- *              Implements Compress_d from FIPS203, Eq (4.7),
- *              for d = 4.
- *
  * Arguments: - u: Unsigned canonical modulus modulo q
  *                 to be compressed.
+ *
+ * Specification: Compress_4 from [FIPS 203, Eq (4.7)].
+ *
  ************************************************************/
 /*
  * The multiplication in this routine will exceed UINT32_MAX
@@ -100,11 +100,11 @@ __contract__(
  *
  * Description: Computes round(u * q / 16)
  *
- *              Implements Decompress_d from FIPS203, Eq (4.8),
- *              for d = 4.
- *
  * Arguments: - u: Unsigned canonical modulus modulo 16
  *                 to be decompressed.
+ *
+ * Specification: Decompress_4 from [FIPS 203, Eq (4.8)].
+ *
  ************************************************************/
 static MLK_INLINE uint16_t scalar_decompress_d4(uint32_t u)
 __contract__(
@@ -117,11 +117,11 @@ __contract__(
  *
  * Description: Computes round(u * 32 / q) % 32
  *
- *              Implements Compress_d from FIPS203, Eq (4.7),
- *              for d = 5.
- *
  * Arguments: - u: Unsigned canonical modulus modulo q
  *                 to be compressed.
+ *
+ * Specification: Compress_5 from [FIPS 203, Eq (4.7)].
+ *
  ************************************************************/
 /*
  * The multiplication in this routine will exceed UINT32_MAX
@@ -149,11 +149,11 @@ __contract__(
  *
  * Description: Computes round(u * q / 32)
  *
- *              Implements Decompress_d from FIPS203, Eq (4.8),
- *              for d = 5.
- *
  * Arguments: - u: Unsigned canonical modulus modulo 32
  *                 to be decompressed.
+ *
+ * Specification: Decompress_5 from [FIPS 203, Eq (4.8)].
+ *
  ************************************************************/
 static MLK_INLINE uint16_t scalar_decompress_d5(uint32_t u)
 __contract__(
@@ -166,11 +166,11 @@ __contract__(
  *
  * Description: Computes round(u * 2**10 / q) % 2**10
  *
- *              Implements Compress_d from FIPS203, Eq (4.7),
- *              for d = 10.
- *
  * Arguments: - u: Unsigned canonical modulus modulo q
  *                 to be compressed.
+ *
+ * Specification: Compress_10 from [FIPS 203, Eq (4.7)].
+ *
  ************************************************************/
 /*
  * The multiplication in this routine will exceed UINT32_MAX
@@ -199,11 +199,11 @@ __contract__(
  *
  * Description: Computes round(u * q / 1024)
  *
- *              Implements Decompress_d from FIPS203, Eq (4.8),
- *              for d = 10.
- *
- * Arguments: - u: Unsigned canonical modulus modulo 16
+ * Arguments: - u: Unsigned canonical modulus modulo 1024
  *                 to be decompressed.
+ *
+ * Specification: Decompress_10 from [FIPS 203, Eq (4.8)].
+ *
  ************************************************************/
 static MLK_INLINE uint16_t scalar_decompress_d10(uint32_t u)
 __contract__(
@@ -216,11 +216,11 @@ __contract__(
  *
  * Description: Computes round(u * 2**11 / q) % 2**11
  *
- *              Implements Compress_d from FIPS203, Eq (4.7),
- *              for d = 11.
- *
  * Arguments: - u: Unsigned canonical modulus modulo q
  *                 to be compressed.
+ *
+ * Specification: Compress_11 from [FIPS 203, Eq (4.7)].
+ *
  ************************************************************/
 /*
  * The multiplication in this routine will exceed UINT32_MAX
@@ -247,13 +247,13 @@ __contract__(
 /************************************************************
  * Name: scalar_decompress_d11
  *
- * Description: Computes round(u * q / 1024)
+ * Description: Computes round(u * q / 2048)
  *
- *              Implements Decompress_d from FIPS203, Eq (4.8),
- *              for d = 10.
- *
- * Arguments: - u: Unsigned canonical modulus modulo 16
+ * Arguments: - u: Unsigned canonical modulus modulo 2048
  *                 to be decompressed.
+ *
+ * Specification: Decompress_11 from [FIPS 203, Eq (4.8)].
+ *
  ************************************************************/
 static MLK_INLINE uint16_t scalar_decompress_d11(uint32_t u)
 __contract__(
@@ -274,6 +274,16 @@ __contract__(
  *              - const poly *a: pointer to input polynomial
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
+ *
+ * Specification: Implements `ByteEncode_4 (Compress_4 (a))`:
+ *                - ByteEncode_d: [FIPS 203, Algorithm 5],
+ *                - Compress_d: [FIPS 203, Eq (4.7)]
+ *                  Extended to vectors as per
+ *                  [FIPS 203, 2.4.8 Applying Algorithms to Arrays]
+ *                - `ByteEncode_{d_v} (Compress_{d_v} (v))` appears in
+ *                  [FIPS 203, Algorithm 14 (K-PKE.Encrypt), L23],
+ *                  where `d_v=4` for ML-KEM-{512,768} [FIPS 203, Table 2].
+ *
  **************************************************/
 MLK_INTERNAL_API
 void poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const poly *a);
@@ -290,6 +300,16 @@ void poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const poly *a);
  *              - const poly *a: pointer to input polynomial
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
+ *
+ * Specification: Implements `ByteEncode_10 (Compress_10 (a))`:
+ *                - ByteEncode_d: [FIPS 203, Algorithm 5],
+ *                - Compress_d: [FIPS 203, Eq (4.7)]
+ *                  Extended to vectors as per
+ *                  [FIPS 203, 2.4.8 Applying Algorithms to Arrays]
+ *                - `ByteEncode_{d_u} (Compress_{d_u} (u))` appears in
+ *                  [FIPS 203, Algorithm 14 (K-PKE.Encrypt), L22],
+ *                  where `d_u=10` for ML-KEM-{512,768} [FIPS 203, Table 2].
+ *
  **************************************************/
 MLK_INTERNAL_API
 void poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const poly *a);
@@ -308,6 +328,15 @@ void poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const poly *a);
  * Upon return, the coefficients of the output polynomial are unsigned-canonical
  * (non-negative and smaller than MLKEM_Q).
  *
+ * Specification: Implements `Decompress_4 (ByteDecode_4 (a))`:
+ *                - ByteDecode_d: [FIPS 203, Algorithm 6],
+ *                - Decompress_d: [FIPS 203, Eq (4.8)]
+ *                  Extended to vectors as per
+ *                  [FIPS 203, 2.4.8 Applying Algorithms to Arrays]
+ *                - `Decompress_{d_v} (ByteDecode_{d_v} (v))` appears in
+ *                  [FIPS 203, Algorithm 15 (K-PKE.Decrypt), L4],
+ *                  where `d_v=4` for ML-KEM-{512,768} [FIPS 203, Table 2].
+ *
  **************************************************/
 MLK_INTERNAL_API
 void poly_decompress_d4(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]);
@@ -325,6 +354,15 @@ void poly_decompress_d4(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]);
  *
  * Upon return, the coefficients of the output polynomial are unsigned-canonical
  * (non-negative and smaller than MLKEM_Q).
+ *
+ * Specification: Implements `Decompress_10 (ByteDecode_10 (a))`:
+ *                - ByteDecode_d: [FIPS 203, Algorithm 6],
+ *                - Decompress_d: [FIPS 203, Eq (4.8)]
+ *                  Extended to vectors as per
+ *                  [FIPS 203, 2.4.8 Applying Algorithms to Arrays]
+ *                - `Decompress_{d_u} (ByteDecode_{d_u} (u))` appears in
+ *                  [FIPS 203, Algorithm 15 (K-PKE.Decrypt), L3],
+ *                  where `d_u=10` for ML-KEM-{512,768} [FIPS 203, Table 2].
  *
  **************************************************/
 MLK_INTERNAL_API
@@ -346,6 +384,16 @@ void poly_decompress_d10(poly *r,
  *              - const poly *a: pointer to input polynomial
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
+ *
+ * Specification: Implements `ByteEncode_5 (Compress_5 (a))`:
+ *                - ByteEncode_d: [FIPS 203, Algorithm 5],
+ *                - Compress_d: [FIPS 203, Eq (4.7)]
+ *                  Extended to vectors as per
+ *                  [FIPS 203, 2.4.8 Applying Algorithms to Arrays]
+ *                - `ByteEncode_{d_v} (Compress_{d_v} (v))` appears in
+ *                  [FIPS 203, Algorithm 14 (K-PKE.Encrypt), L23],
+ *                  where `d_v=5` for ML-KEM-1024 [FIPS 203, Table 2].
+ *
  **************************************************/
 MLK_INTERNAL_API
 void poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const poly *a);
@@ -362,6 +410,16 @@ void poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const poly *a);
  *              - const poly *a: pointer to input polynomial
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
+ *
+ * Specification: `ByteEncode_11 (Compress_11 (a))`:
+ *                - ByteEncode_d: [FIPS 203, Algorithm 5],
+ *                - Compress_d: [FIPS 203, Eq (4.7)]
+ *                  Extended to vectors as per
+ *                  [FIPS 203, 2.4.8 Applying Algorithms to Arrays]
+ *                - `ByteEncode_{d_u} (Compress_{d_u} (u))` appears in
+ *                  [FIPS 203, Algorithm 14 (K-PKE.Encrypt), L22],
+ *                  where `d_u=11` for ML-KEM-1024 [FIPS 203, Table 2].
+ *
  **************************************************/
 MLK_INTERNAL_API
 void poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const poly *a);
@@ -380,6 +438,15 @@ void poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const poly *a);
  * Upon return, the coefficients of the output polynomial are unsigned-canonical
  * (non-negative and smaller than MLKEM_Q).
  *
+ * Specification: Implements `Decompress_5 (ByteDecode_5 (a))`:
+ *                - ByteDecode_d: [FIPS 203, Algorithm 6],
+ *                - Decompress_d: [FIPS 203, Eq (4.8)]
+ *                  Extended to vectors as per
+ *                  [FIPS 203, 2.4.8 Applying Algorithms to Arrays]
+ *                - `Decompress_{d_v} (ByteDecode_{d_v} (v))` appears in
+ *                  [FIPS 203, Algorithm 15 (K-PKE.Decrypt), L4],
+ *                  where `d_v=5` for ML-KEM-1024 [FIPS 203, Table 2].
+ *
  **************************************************/
 MLK_INTERNAL_API
 void poly_decompress_d5(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5]);
@@ -397,6 +464,15 @@ void poly_decompress_d5(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5]);
  *
  * Upon return, the coefficients of the output polynomial are unsigned-canonical
  * (non-negative and smaller than MLKEM_Q).
+ *
+ * Specification: Implements `Decompress_11 (ByteDecode_11 (a))`:
+ *                - ByteDecode_d: [FIPS 203, Algorithm 6],
+ *                - Decompress_d: [FIPS 203, Eq (4.8)]
+ *                  Extended to vectors as per
+ *                  [FIPS 203, 2.4.8 Applying Algorithms to Arrays]
+ *                - `Decompress_{d_u} (ByteDecode_{d_u} (u))` appears in
+ *                  [FIPS 203, Algorithm 15 (K-PKE.Decrypt), L3],
+ *                  where `d_u=11` for ML-KEM-1024 [FIPS 203, Table 2].
  *
  **************************************************/
 MLK_INTERNAL_API
@@ -419,6 +495,11 @@ void poly_decompress_d11(poly *r,
  *              OUTPUT
  *              - r: pointer to output byte array
  *                   (of MLKEM_POLYBYTES bytes)
+ *
+ * Specification: Implements ByteEncode_12 [FIPS 203, Algorithm 5].
+ *                Extended to vectors as per
+ *                [FIPS 203, 2.4.8 Applying Algorithms to Arrays]
+ *
  **************************************************/
 MLK_INTERNAL_API
 void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
@@ -443,6 +524,11 @@ __contract__(
  *              - r: pointer to output polynomial, with
  *                   each coefficient unsigned and in the range
  *                   0 .. 4095
+ *
+ * Specification: Implements ByteDecode_12 [FIPS 203, Algorithm 6].
+ *                Extended to vectors as per
+ *                [FIPS 203, 2.4.8 Applying Algorithms to Arrays]
+ *
  **************************************************/
 MLK_INTERNAL_API
 void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
@@ -462,6 +548,15 @@ __contract__(
  *
  * Arguments:   - poly *r: pointer to output polynomial
  *              - const uint8_t *msg: pointer to input message
+ *
+ * Specification: Implements `Decompress_1 (ByteDecode_1 (a))`:
+ *                - ByteDecode_d: [FIPS 203, Algorithm 6],
+ *                - Decompress_d: [FIPS 203, Eq (4.8)]
+ *                  Extended to vectors as per
+ *                  [FIPS 203, 2.4.8 Applying Algorithms to Arrays]
+ *                - `Decompress_1 (ByteDecode_1 (w))` appears in
+ *                  [FIPS 203, Algorithm 15 (K-PKE.Encrypt), L20].
+ *
  **************************************************/
 MLK_INTERNAL_API
 void poly_frommsg(poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
@@ -481,6 +576,15 @@ __contract__(
  * Arguments:   - uint8_t *msg: pointer to output message
  *              - const poly *r: pointer to input polynomial
  *                Coefficients must be unsigned canonical
+ *
+ * Specification: Implements `ByteEncode_1 (Compress_1 (a))`:
+ *                - ByteEncode_d: [FIPS 203, Algorithm 5],
+ *                - Compress_d: [FIPS 203, Eq (4.7)]
+ *                  Extended to vectors as per
+ *                  [FIPS 203, 2.4.8 Applying Algorithms to Arrays]
+ *                - `ByteEncode_1 (Compress_1 (w))` appears in
+ *                  [FIPS 203, Algorithm 14 (K-PKE.Decrypt), L7].
+ *
  **************************************************/
 MLK_INTERNAL_API
 void poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const poly *r)

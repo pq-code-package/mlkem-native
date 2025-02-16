@@ -34,6 +34,12 @@ typedef struct
  *              - const poly *a: pointer to input polynomial
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
+ *
+ * Specification: Implements `ByteEncode_{d_u} (Compress_{d_u} (u))`
+ *                in [FIPS 203, Algorithm 14 (K-PKE.Encrypt), L22],
+ *                with level-specific d_u defined in [FIPS 203, Table 2],
+ *                and given by MLKEM_DU here.
+ *
  **************************************************/
 static MLK_INLINE void poly_compress_du(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DU],
                                         const poly *a)
@@ -66,6 +72,11 @@ __contract__(
  * Upon return, the coefficients of the output polynomial are unsigned-canonical
  * (non-negative and smaller than MLKEM_Q).
  *
+ * Specification: Implements `Decompress_{d_u} (ByteDecode_{d_u} (u))`
+ *                in [FIPS 203, Algorithm 15 (K-PKE.Decrypt), L3].
+ *                with level-specific d_u defined in [FIPS 203, Table 2],
+ *                and given by MLKEM_DU here.
+ *
  **************************************************/
 static MLK_INLINE void poly_decompress_du(
     poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DU])
@@ -96,6 +107,12 @@ __contract__(
  *              - const poly *a: pointer to input polynomial
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
+ *
+ * Specification: Implements `ByteEncode_{d_v} (Compress_{d_v} (v))`
+ *                in [FIPS 203, Algorithm 14 (K-PKE.Encrypt), L23].
+ *                with level-specific d_v defined in [FIPS 203, Table 2],
+ *                and given by MLKEM_DV here.
+ *
  **************************************************/
 static MLK_INLINE void poly_compress_dv(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_DV],
                                         const poly *a)
@@ -129,6 +146,11 @@ __contract__(
  * Upon return, the coefficients of the output polynomial are unsigned-canonical
  * (non-negative and smaller than MLKEM_Q).
  *
+ * Specification: Implements `Decompress_{d_v} (ByteDecode_{d_v} (v))`
+ *                in [FIPS 203, Algorithm 15 (K-PKE.Decrypt), L4].
+ *                with level-specific d_v defined in [FIPS 203, Table 2],
+ *                and given by MLKEM_DV here.
+ *
  **************************************************/
 static MLK_INLINE void poly_decompress_dv(
     poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_DV])
@@ -158,6 +180,12 @@ __contract__(
  *              - const polyvec *a: pointer to input vector of polynomials.
  *                                  Coefficients must be unsigned canonical,
  *                                  i.e. in [0,1,..,MLKEM_Q-1].
+ *
+ * Specification: Implements `ByteEncode_{d_u} (Compress_{d_u} (u))`
+ *                in [FIPS 203, Algorithm 14 (K-PKE.Encrypt), L22].
+ *                with level-specific d_u defined in [FIPS 203, Table 2],
+ *                and given by MLKEM_DU here.
+ *
  **************************************************/
 MLK_INTERNAL_API
 void polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
@@ -181,6 +209,12 @@ __contract__(
  *                Output will have coefficients normalized to [0,..,q-1].
  *              - const uint8_t *a: pointer to input byte array
  *                                  (of length MLKEM_POLYVECCOMPRESSEDBYTES_DU)
+ *
+ * Specification: Implements `Decompress_{d_u} (ByteDecode_{d_u} (u))`
+ *                in [FIPS 203, Algorithm 15 (K-PKE.Decrypt), L3].
+ *                with level-specific d_u defined in [FIPS 203, Table 2],
+ *                and given by MLKEM_DU here.
+ *
  **************************************************/
 MLK_INTERNAL_API
 void polyvec_decompress_du(polyvec *r,

@@ -238,7 +238,7 @@
 /******************************************************************************
  * Name:        MLK_USE_CT_ZEROIZE_NATIVE
  *
- * Description: In compliance with FIPS-203 Section 3.3, mlkem-native zeroizes
+ * Description: In compliance with FIPS 203 Section 3.3, mlkem-native zeroizes
  *              intermediate stack buffers before returning from function calls.
  *
  *              Set this option and define `ct_zeroize_native` if you want to
