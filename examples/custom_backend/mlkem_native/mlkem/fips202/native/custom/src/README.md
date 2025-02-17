@@ -54,7 +54,7 @@ Like your Linux box. The main.c module contains self-tests for all
 officially supported hash sizes.
 
 If you're looking for production code, the official multi-megabyte package
-covers everyting you could possibly need and too much much more:
+covers everything you could possibly need and too much much more:
 http://keccak.noekeon.org/
 
 Cheers,

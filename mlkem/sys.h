@@ -38,10 +38,10 @@
 #define MLK_SYS_LITTLE_ENDIAN
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #define MLK_SYS_BIG_ENDIAN
-#else /* __BYTE_ORER__ */
+#else /* __BYTE_ORDER__ */
 #error "__BYTE_ORDER__ defined, but don't recognize value."
-#endif /* __BYTE_ORER__ */
-#endif /* !defined(__BYTE_ORER__) */
+#endif /* __BYTE_ORDER__ */
+#endif /* !defined(__BYTE_ORDER__) */
 #endif /* defined(MLK_SYS_LITTLE_ENDIAN) || defined(MLK_SYS_BIG_ENDIAN) */
 
 /* If MLK_FORCE_AARCH64 is set, assert that we're indeed on an AArch64 system.
