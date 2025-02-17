@@ -39,7 +39,7 @@ void tiny_sha3_keccakf(uint64_t st[25])
   /* #if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__ */
   /*   uint8_t *v; */
 
-  /*   /\* endianess conversion. this is redundant on little-endian targets *\/
+  /*   /\* endianness conversion. this is redundant on little-endian targets *\/
    */
   /*   for (i = 0; i < 25; i++) */
   /*   { */
@@ -94,7 +94,7 @@ void tiny_sha3_keccakf(uint64_t st[25])
    * targets. mlkem-native uses the standard presentation, hence we don't
    * the reversal here. */
   /* #if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__ */
-  /*   /\* endianess conversion. this is redundant on little-endian targets *\/
+  /*   /\* endianness conversion. this is redundant on little-endian targets *\/
    */
   /*   for (i = 0; i < 25; i++) */
   /*   { */
