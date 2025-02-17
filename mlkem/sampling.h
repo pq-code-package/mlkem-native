@@ -21,6 +21,9 @@
  *
  * Arguments:   - poly *r: pointer to output polynomial
  *              - const uint8_t *buf: pointer to input byte array
+ *
+ * Specification: Implements [FIPS 203, Algorithm 8, SamplePolyCBD_2]
+ *
  **************************************************/
 MLK_INTERNAL_API
 void poly_cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4]);
@@ -37,6 +40,9 @@ void poly_cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4]);
  *
  * Arguments:   - poly *r: pointer to output polynomial
  *              - const uint8_t *buf: pointer to input byte array
+ *
+ * Specification: Implements [FIPS 203, Algorithm 8, SamplePolyCBD_3]
+ *
  **************************************************/
 MLK_INTERNAL_API
 void poly_cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4]);
@@ -54,6 +60,8 @@ void poly_cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4]);
  *              - uint8_t *seed[4]:    Pointer to array of four pointers
  *                                     pointing to the seed buffers of size
  *                                     MLKEM_SYMBYTES + 2 each.
+ *
+ * Specification: Implements [FIPS 203, Algorithm 7, SampleNTT]
  *
  **************************************************/
 MLK_INTERNAL_API
@@ -81,6 +89,8 @@ __contract__(
  * Arguments:   - poly *vec:           Pointer to polynomial to be sampled.
  *              - uint8_t *seed:       Pointer to seed buffer of size
  *                                     MLKEM_SYMBYTES + 2 each.
+ *
+ * Specification: Implements [FIPS 203, Algorithm 7, SampleNTT]
  *
  **************************************************/
 MLK_INTERNAL_API
