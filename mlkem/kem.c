@@ -33,15 +33,18 @@ __contract__(
 /*************************************************
  * Name:        check_pk
  *
- * Description: Implements modulus check mandated by FIPS203,
+ * Description: Implements modulus check mandated by FIPS 203,
  *              i.e., ensures that coefficients are in [0,q-1].
- *              Described in Section 7.2 of FIPS203.
  *
  * Arguments:   - const uint8_t *pk: pointer to input public key
  *                (an already allocated array of MLKEM_INDCCA_PUBLICKEYBYTES
  *                 bytes)
  *
- * Returns 0 on success, and -1 on failure
+ * Returns: - 0 on success
+ *          - -1 on failure
+ *
+ * Specification: Implements [FIPS 203, Section 7.2, 'modulus check']
+ *
  **************************************************/
 MLK_MUST_CHECK_RETURN_VALUE
 static int check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
@@ -68,16 +71,19 @@ static int check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 /*************************************************
  * Name:        check_sk
  *
- * Description: Implements public key hash check mandated by FIPS203,
+ * Description: Implements public key hash check mandated by FIPS 203,
  *              i.e., ensures that
  *              sk[768𝑘+32 ∶ 768𝑘+64] = H(pk)= H(sk[384𝑘 : 768𝑘+32])
- *              Described in Section 7.3 of FIPS203.
  *
  * Arguments:   - const uint8_t *sk: pointer to input private key
  *                (an already allocated array of MLKEM_INDCCA_SECRETKEYBYTES
  *                 bytes)
  *
- * Returns 0 on success, and -1 on failure
+ * Returns: - 0 on success
+ *          - -1 on failure
+ *
+ * Specification: Implements [FIPS 203, Section 7.3, 'hash check']
+ *
  **************************************************/
 MLK_MUST_CHECK_RETURN_VALUE
 static int check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
@@ -116,6 +122,10 @@ __contract__(
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES)));
 
 #if defined(MLK_KEYGEN_PCT)
+/* Specification:
+ * Partially implements 'Pairwise Consistency Test' [FIPS 140-3 IG] and
+ * [FIPS 203, Section 7.1, Pairwise Consistency].
+ * Deviations: Currently uses static rather than random coins for the PCT. */
 static int check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                      uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
@@ -214,6 +224,7 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   /* Will contain key, coins */
   MLK_ALIGN uint8_t kr[2 * MLKEM_SYMBYTES];
 
+  /* Specification: Implements [FIPS 203, Section 7.2, Modulus check] */
   if (check_pk(pk))
   {
     return -1;
@@ -270,6 +281,7 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
 
   const uint8_t *pk = sk + MLKEM_INDCPA_SECRETKEYBYTES;
 
+  /* Specification: Implements [FIPS 203, Section 7.3, Hash check] */
   if (check_sk(sk))
   {
     return -1;

@@ -52,7 +52,10 @@
  *                 random bytes)
  *
  * Returns:     - 0: On success
- *              - 1: On PCT failure (if MLK_KEYGEN_PCT) is enabled.
+ *              - -1: On PCT failure (if MLK_KEYGEN_PCT) is enabled.
+ *
+ * Specification: Implements [FIPS 203, Algorithm 16, ML-KEM.KeyGen_Internal]
+ *
  **************************************************/
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
@@ -81,7 +84,10 @@ __contract__(
  *                 bytes)
  *
  * Returns:     - 0: On success
- *              - 1: On PCT failure (if MLK_KEYGEN_PCT) is enabled.
+ *              - -1: On PCT failure (if MLK_KEYGEN_PCT) is enabled.
+ *
+ * Specification: Implements [FIPS 203, Algorithm 19, ML-KEM.KeyGen]
+ *
  **************************************************/
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
@@ -112,8 +118,12 @@ __contract__(
  *                (an already allocated array filled with MLKEM_SYMBYTES random
  *                 bytes)
  *
- * Returns 0 on success, and -1 if the public key modulus check (see Section 7.2
- * of FIPS203) fails.
+ * Returns: - 0 on success
+ *          - -1 if the 'modulus check' [FIPS 203, Section 7.2]
+ *            for the public key fails.
+ *
+ * Specification: Implements [FIPS 203, Algorithm 17, ML-KEM.Encaps_Internal]
+ *
  **************************************************/
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
@@ -145,8 +155,12 @@ __contract__(
  *                (an already allocated array of MLKEM_INDCCA_PUBLICKEYBYTES
  *                 bytes)
  *
- * Returns 0 on success, and -1 if the public key modulus check (see Section 7.2
- * of FIPS203) fails.
+ * Returns: - 0 on success
+ *          - -1 if the 'modulus check' [FIPS 203, Section 7.2]
+ *            for the public key fails.
+ *
+ * Specification: Implements [FIPS 203, Algorithm 20, ML-KEM.Encaps]
+ *
  **************************************************/
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
@@ -176,10 +190,12 @@ __contract__(
  *                (an already allocated array of MLKEM_INDCCA_SECRETKEYBYTES
  *                 bytes)
  *
- * Returns 0 on success, and -1 if the secret key hash check (see Section 7.3 of
- * FIPS203) fails.
+ * Returns: - 0 on success
+ *          - -1 if the 'hash check' [FIPS 203, Section 7.3]
+ *            for the secret key fails.
  *
- * On failure, ss will contain a pseudo-random value.
+ * Specification: Implements [FIPS 203, Algorithm 21, ML-KEM.Decaps]
+ *
  **************************************************/
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
