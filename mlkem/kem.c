@@ -58,7 +58,8 @@ static int check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
    * declassify the PK before the PCT has succeeded. */
   res = ct_memcmp(pk, p_reencoded, MLKEM_POLYVECBYTES) ? -1 : 0;
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(p_reencoded, sizeof(p_reencoded));
   ct_zeroize(&p, sizeof(p));
   return res;
@@ -101,7 +102,8 @@ static int check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
             ? -1
             : 0;
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(test, sizeof(test));
   return res;
 }
@@ -141,7 +143,8 @@ static int check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   res = ct_memcmp(ss_enc, ss_dec, sizeof(ss_dec));
 
 cleanup:
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(ct, sizeof(ct));
   ct_zeroize(ss_enc, sizeof(ss_enc));
   ct_zeroize(ss_dec, sizeof(ss_dec));
@@ -195,7 +198,8 @@ int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 
   res = crypto_kem_keypair_derand(pk, sk, coins);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(coins, sizeof(coins));
   return res;
 }
@@ -226,7 +230,8 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
 
   memcpy(ss, kr, MLKEM_SYMBYTES);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(buf, sizeof(buf));
   ct_zeroize(kr, sizeof(kr));
 
@@ -246,7 +251,8 @@ int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
 
   res = crypto_kem_enc_derand(ct, ss, pk, coins);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(coins, sizeof(coins));
   return res;
 }
@@ -290,7 +296,8 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   /* Copy true key to return buffer if fail is 0 */
   ct_cmov_zero(ss, kr, MLKEM_SYMBYTES, fail);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(buf, sizeof(buf));
   ct_zeroize(kr, sizeof(kr));
   ct_zeroize(tmp, sizeof(tmp));

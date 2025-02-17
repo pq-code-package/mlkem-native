@@ -59,7 +59,8 @@ void polyvec_basemul_acc_montgomery_cached_avx2(unsigned k, int16_t r[MLKEM_N],
     poly_add_avx2(r, r, t);
   }
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(t, sizeof(t));
 }
 

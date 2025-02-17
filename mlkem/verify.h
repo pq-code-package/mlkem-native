@@ -321,6 +321,10 @@ __contract__(
  *
  * Arguments:   uint8_t *r:       pointer to byte array to be zeroed
  *              size_t len:       Amount of bytes to be zeroed
+ *
+ * Specification: Used to implement
+ * [FIPS 203, Section 3.3, Destruction of intermediate values]
+ *
  **************************************************/
 static MLK_INLINE void ct_zeroize(void *r, size_t len)
 __contract__(

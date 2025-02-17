@@ -189,7 +189,8 @@ void poly_rej_uniform_x4(poly *vec, uint8_t *seed[4])
 
   xof_x4_release(&statex);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(buf0, sizeof(buf0));
   ct_zeroize(buf1, sizeof(buf1));
   ct_zeroize(buf2, sizeof(buf2));
@@ -227,7 +228,8 @@ void poly_rej_uniform(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
 
   xof_release(&state);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(buf, sizeof(buf));
 }
 

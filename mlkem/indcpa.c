@@ -244,7 +244,8 @@ void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES], int transposed)
     }
   }
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(seed0, sizeof(seed0));
   ct_zeroize(seed1, sizeof(seed1));
   ct_zeroize(seed2, sizeof(seed2));
@@ -350,7 +351,8 @@ void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
   pack_sk(sk, &skpv);
   pack_pk(pk, &pkpv, publicseed);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(buf, sizeof(buf));
   ct_zeroize(coins_with_domain_separator, sizeof(coins_with_domain_separator));
   ct_zeroize(a, sizeof(a));
@@ -424,7 +426,8 @@ void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
 
   pack_ciphertext(c, &b, &v);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(seed, sizeof(seed));
   ct_zeroize(&sp, sizeof(sp));
   ct_zeroize(&sp_cache, sizeof(sp_cache));
@@ -458,7 +461,8 @@ void indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
 
   poly_tomsg(m, &v);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(&skpv, sizeof(skpv));
   ct_zeroize(&b, sizeof(b));
   ct_zeroize(&b_cache, sizeof(b_cache));
