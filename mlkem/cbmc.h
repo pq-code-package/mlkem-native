@@ -81,14 +81,14 @@
 #define forall(qvar, qvar_lb, qvar_ub, predicate)                 \
   __CPROVER_forall                                                \
   {                                                               \
-    unsigned qvar;                                                \
+    __CPROVER_size_t qvar;                                        \
     ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) ==> (predicate)   \
   }
 
-#define EXISTS(qvar, qvar_lb, qvar_ub, predicate)         \
+#define EXISTS(qvar, qvar_lb, qvar_ub, predicate)               \
   __CPROVER_exists                                              \
   {                                                             \
-    unsigned qvar;                                              \
+    __CPROVER_size_t qvar;                                      \
     ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) && (predicate)  \
   }
 /* clang-format on */
@@ -118,7 +118,7 @@
                          value_lb, value_ub)                           \
   __CPROVER_forall                                                     \
   {                                                                    \
-    unsigned qvar;                                                     \
+    __CPROVER_size_t qvar;                                             \
     ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) ==>                    \
         (((int)(value_lb) <= ((array_var)[(qvar)])) &&		       \
          (((array_var)[(qvar)]) < (int)(value_ub)))		       \
