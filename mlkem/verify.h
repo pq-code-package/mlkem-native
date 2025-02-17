@@ -213,6 +213,11 @@ __contract__(ensures(return_value == ((x < 0) ? 0xFFFF : 0)))
  * Arguments:   int16_t a:       First alternative
  *              int16_t b:       Second alternative
  *              uint16_t cond:   Condition variable.
+ *
+ * Specification:
+ * - With `a = MLKEM_Q_HALF` and `b=0`, this essentially
+ *   implements `Decompress_1` [FIPS 203, Eq (4.8)] in `poly_frommsg()`.
+ *
  **************************************************/
 static MLK_INLINE int16_t ct_sel_int16(int16_t a, int16_t b, uint16_t cond)
 __contract__(ensures(return_value == (cond ? a : b)))
@@ -254,6 +259,10 @@ __contract__(ensures(return_value == (cond ? a : b)))
  *              size_t len:       length of the byte arrays
  *
  * Returns 0 if the byte arrays are equal, a non-zero value otherwise
+ *
+ * Specification:
+ * - Used to securely compute conditional move in
+ *   [FIPS 203, Algorithm 18 (ML-KEM.Decaps_Internal, L9-11]
  **************************************************/
 static MLK_INLINE uint8_t ct_memcmp(const uint8_t *a, const uint8_t *b,
                                     const size_t len)
@@ -298,6 +307,10 @@ __contract__(
  *              const uint8_t *x: pointer to input byte array
  *              size_t len:       Amount of bytes to be copied
  *              uint8_t b:        Condition value.
+ *
+ * Specification:
+ * - Used to securely compute conditional move in
+ *   [FIPS 203, Algorithm 18 (ML-KEM.Decaps_Internal, L9-11]
  **************************************************/
 static MLK_INLINE void ct_cmov_zero(uint8_t *r, const uint8_t *x, size_t len,
                                     uint8_t b)
