@@ -32,7 +32,7 @@ def barrett_twiddle(b):
 
 
 def sqrdmulh_i16(a, b):
-    """Doubling multiply high with rouding"""
+    """Doubling multiply high with rounding"""
     # We cannot use round() here because of its behaviour
     # on multiples of 0.5: round(-.5) = round(0.5) = 0
     return (2 * a * b + 2**15) // 2**16
@@ -126,7 +126,7 @@ def bar_test_random():
 #
 # |barmul(a,b)| < Q*(0.0508*C + 1/2) if |a| < C*q
 #
-# where 0.0508 appears as a close upper boun for Q/2**16.
+# where 0.0508 appears as a close upper bound for Q/2**16.
 #
 
 

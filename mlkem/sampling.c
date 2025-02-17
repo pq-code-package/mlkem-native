@@ -83,7 +83,7 @@ __contract__(
  *                                     Must be a multiple of 3.
  *
  * Note: Strictly speaking, only a few values of buflen near UINT_MAX need
- * excluding. The limit of 128 is somewhat arbitary but sufficient for all
+ * excluding. The limit of 128 is somewhat arbitrary but sufficient for all
  * uses of this function. Similarly, the actual limit for target is UINT_MAX/2.
  *
  * Returns the new offset of sampled 16-bit integers, at most target,

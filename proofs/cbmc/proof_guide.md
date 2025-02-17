@@ -75,7 +75,7 @@ that the code in question may change the first `len` bytes starting from `ptr`.
 There is also `object_whole(ptr)`, which more coarsely asserts that the entire object can change. This has to be used
 with care: If a function precondition specifies `requires(memory_no_alias(ptr, 42))` and `assigns(object_whole(ptr))`
 and is called in a context where `ptr` is, say, a slice of some larger structure, then the entire structure will be
-marked as tained by the function call. This is often not desired, hence the more fine-grained `memory_slice(...)` is
+marked as tainted by the function call. This is often not desired, hence the more fine-grained `memory_slice(...)` is
 desirable.
 
 ### Quantifiers and bounds
@@ -113,7 +113,7 @@ contracts, `assigns(...)` captures the footprint of the loop body.
 
 ### `for` loops
 
-The most common, and easiest, patten is a "for" loop that has a counter starting at 0, and counting up to some upper bound, like this:
+The most common, and easiest, pattern is a "for" loop that has a counter starting at 0, and counting up to some upper bound, like this:
 
 ```
 unsigned i;
@@ -213,7 +213,7 @@ void zero_array_correct (uint8_t *dst, int len)
 ```
 
 Things to note:
-1. The type of the quanitified variable is `unsigned`.
+1. The type of the quantified variable is `unsigned`.
 2. Don't overload your program variables with quantified variables inside your forall contracts. It get confusing if you
    do.
 
@@ -292,7 +292,7 @@ Edit the Makefile and update the definition of the following variables:
   required
 * EXTERNAL_SAT_SOLVER - should _always_ be "nothing" to prevent CBMC selecting a SAT backend over the selected SMT backend.
 * CBMCFLAGS - additional flags to pass to the final run of CBMC. This is normally set to `--smt2` which tells cbmc to
-  run Z3 as its underlying solver. Can also be set to `--bitwuzla` which is sometimes better at generaing
+  run Z3 as its underlying solver. Can also be set to `--bitwuzla` which is sometimes better at generating
   counter-examples when Z3 fails.
 * FUNCTION_NAME - set to `XXX` with the `$(MLK_NAMESPACE)` prefix if required
 * CBMC_OBJECT_BITS. Normally set to 8, but might need to be increased if CBMC runs out of memory for this proof.

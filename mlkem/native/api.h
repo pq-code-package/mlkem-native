@@ -376,7 +376,7 @@ __contract__(
  * Arguments:   INPUT:
  *              - r: pointer to output polynomial in NTT domain
  *              OUTPUT
- *              - a: const pointer to input byte aray
+ *              - a: const pointer to input byte array
  *                   (of MLKEM_POLYBYTES bytes)
  **************************************************/
 static MLK_INLINE void poly_frombytes_native(int16_t a[MLKEM_N],

@@ -347,12 +347,12 @@ static MLK_INLINE void ct_zeroize(void *ptr, size_t len)
   /* This follows OpenSSL and seems sufficient to prevent the compiler
    * from optimizing away the memset.
    *
-   * If there was a reliable way to detect availablility of memset_s(),
+   * If there was a reliable way to detect availability of memset_s(),
    * that would be preferred. */
   __asm__ __volatile__("" : : "r"(ptr) : "memory");
 }
 #else
-#error No plausibly-secure implementation of ct_zeroize availble. Please provide your own using MLK_USE_CT_ZEROIZE_NATIVE.
+#error No plausibly-secure implementation of ct_zeroize available. Please provide your own using MLK_USE_CT_ZEROIZE_NATIVE.
 #endif
 
 #endif /* MLK_VERIFY_H */
