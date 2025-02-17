@@ -329,7 +329,6 @@ jobs:
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: ${{ matrix.target.mode }}
-          cflags: "-DMLK_KEYGEN_PCT"
           # There is no native code on R-V or AArch64_be yet, so no point running opt tests
           opt: ${{ (matrix.target.arch != 'riscv64' && matrix.target.arch != 'aarch64_be') && 'all' || 'no_opt' }}
       - name: build + test (+debug+memsan+ubsan)
@@ -338,7 +337,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
-          cflags: "-DMLK_KEYGEN_PCT -DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
   compiler_tests:
     name: Compiler tests  (${{ matrix.compiler.name }}, ${{ matrix.target.name }})
     needs: [quickcheck, quickcheck-windows, quickcheck-c90, quickcheck-lib, examples, lint, lint-markdown-link]
@@ -394,7 +393,6 @@ jobs:
           kat: false
           acvp: false
           nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-DMLK_KEYGEN_PCT"
       - name: native build+functest (C90)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
         uses: ./.github/actions/multi-functest
@@ -406,7 +404,7 @@ jobs:
           kat: false
           acvp: false
           nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-std=c90 -DMLK_KEYGEN_PCT"
+          cflags: "-std=c90"
       - name: native build+functest (C99)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
         uses: ./.github/actions/multi-functest
@@ -430,7 +428,7 @@ jobs:
           kat: false
           acvp: false
           nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-std=c11 -DMLK_KEYGEN_PCT"
+          cflags: "-std=c11"
       - name: native build+functest (C17)
         if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
                 matrix.compiler.c17 }}
@@ -443,7 +441,7 @@ jobs:
           kat: false
           acvp: false
           nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-std=c17 -DMLK_KEYGEN_PCT"
+          cflags: "-std=c17"
   config_variations:
     name: Non-standard configurations
     needs: [quickcheck, quickcheck-windows, quickcheck-c90, quickcheck-lib, examples, lint, lint-markdown-link]
@@ -471,6 +469,16 @@ jobs:
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: "MLK_KEYGEN_PCT"
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          cflags: "-DMLK_KEYGEN_PCT -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          func: true
+          nistkat: false
+          kat: true
+          acvp: true
       - name: "MLKEM_GEN_MATRIX_NBLOCKS=1"
         uses: ./.github/actions/multi-functest
         with:
@@ -607,7 +615,6 @@ jobs:
       acvptest: true
       lint: false
       verbose: true
-      cflags: " -DMLK_KEYGEN_PCT"
     secrets: inherit
   compatibility_tests:
     strategy:
@@ -656,7 +663,6 @@ jobs:
         with:
           nix-shell: ""
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
-          cflags: " -DMLK_KEYGEN_PCT"
   ec2_compatibilitytests:
     strategy:
       max-parallel: 8
@@ -703,7 +709,7 @@ jobs:
       acvptest: true
       lint: false
       verbose: true
-      cflags: "-O0 -DMLK_KEYGEN_PCT"
+      cflags: "-O0"
     secrets: inherit
   cbmc_k2:
     name: CBMC (ML-KEM-512)
