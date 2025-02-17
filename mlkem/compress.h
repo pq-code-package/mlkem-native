@@ -53,11 +53,15 @@ __contract__(
   ensures(return_value < 2)
   ensures(return_value == (((uint32_t)u * 2 + MLKEM_Q / 2) / MLKEM_Q) % 2)  )
 {
-  uint32_t d0 = u << 1;
-  d0 *= 645083;
-  d0 += 1u << 30;
-  d0 >>= 31;
-  return d0;
+  /* Compute as follows:
+   * ```
+   * round(u * 2 / MLKEM_Q)
+   *   = round(u * 2 * (2^31 / MLKEM_Q) / 2^31)
+   *  ~= round(u * 2 * round(2^31 / MLKEM_Q) / 2^31)
+   * ```
+   */
+  uint32_t d0 = (uint32_t)u * 1290168; /* 2 * round(2^31 / MLKEM_Q) */
+  return (d0 + (1u << 30)) >> 31;
 }
 #ifdef CBMC
 #pragma CPROVER check pop
@@ -88,6 +92,13 @@ __contract__(
   ensures(return_value < 16)
   ensures(return_value == (((uint32_t)u * 16 + MLKEM_Q / 2) / MLKEM_Q) % 16))
 {
+  /* Compute as follows:
+   * ```
+   * round(u * 16 / MLKEM_Q)
+   *   = round(u * 16 * (2^28 / MLKEM_Q) / 2^28)
+   *  ~= round(u * 16 * round(2^28 / MLKEM_Q) / 2^28)
+   * ```
+   */
   uint32_t d0 = (uint32_t)u * 1290160; /* 16 * round(2^28 / MLKEM_Q) */
   return (d0 + (1u << 27)) >> 28;      /* round(d0/2^28) */
 }
@@ -137,6 +148,13 @@ __contract__(
   ensures(return_value < 32)
   ensures(return_value == (((uint32_t)u * 32 + MLKEM_Q / 2) / MLKEM_Q) % 32)  )
 {
+  /* Compute as follows:
+   * ```
+   * round(u * 32 / MLKEM_Q)
+   *   = round(u * 32 * (2^27 / MLKEM_Q) / 2^27)
+   *  ~= round(u * 32 * round(2^27 / MLKEM_Q) / 2^27)
+   * ```
+   */
   uint32_t d0 = (uint32_t)u * 1290176; /* 2^5 * round(2^27 / MLKEM_Q) */
   return (d0 + (1u << 26)) >> 27;      /* round(d0/2^27) */
 }
@@ -186,8 +204,15 @@ __contract__(
   ensures(return_value < (1u << 10))
   ensures(return_value == (((uint32_t)u * (1u << 10) + MLKEM_Q / 2) / MLKEM_Q) % (1 << 10)))
 {
-  uint64_t d0 = (uint64_t)u * 2642263040; /* 2^10 * round(2^32 / MLKEM_Q) */
-  d0 = (d0 + ((uint64_t)1u << 32)) >> 33;
+  /* Compute as follows:
+   * ```
+   * round(u * 1024 / MLKEM_Q)
+   *   = round(u * 1024 * (2^33 / MLKEM_Q) / 2^33)
+   *  ~= round(u * 1024 * round(2^33 / MLKEM_Q) / 2^33)
+   * ```
+   */
+  uint64_t d0 = (uint64_t)u * 2642263040; /* 2^10 * round(2^33 / MLKEM_Q) */
+  d0 = (d0 + ((uint64_t)1u << 32)) >> 33; /* round(d0/2^33) */
   return (d0 & 0x3FF);
 }
 #ifdef CBMC
@@ -236,8 +261,15 @@ __contract__(
   ensures(return_value < (1u << 11))
   ensures(return_value == (((uint32_t)u * (1u << 11) + MLKEM_Q / 2) / MLKEM_Q) % (1 << 11)))
 {
+  /* Compute as follows:
+   * ```
+   * round(u * 2048 / MLKEM_Q)
+   *   = round(u * 2048 * (2^33 / MLKEM_Q) / 2^33)
+   *  ~= round(u * 2048 * round(2^33 / MLKEM_Q) / 2^33)
+   * ```
+   */
   uint64_t d0 = (uint64_t)u * 5284526080; /* 2^11 * round(2^33 / MLKEM_Q) */
-  d0 = (d0 + ((uint64_t)1u << 32)) >> 33;
+  d0 = (d0 + ((uint64_t)1u << 32)) >> 33; /* round(d0/2^33) */
   return (d0 & 0x7FF);
 }
 #ifdef CBMC
