@@ -433,6 +433,9 @@ void poly_frommsg(poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
       invariant(i <  MLKEM_N / 8 && j <= 8)
       invariant(array_bound(r->coeffs, 0, 8 * i + j, 0, MLKEM_Q)))
     {
+      /* ct_sel_int16(MLKEM_Q_HALF, 0, b) is `Decompress_1(b != 0)`
+       * as per [FIPS 203, Eq (4.8)]. */
+
       /* Prevent the compiler from recognizing this as a bit selection */
       uint8_t mask = value_barrier_u8(1u << j);
       r->coeffs[8 * i + j] = ct_sel_int16(MLKEM_Q_HALF, 0, msg[i] & mask);

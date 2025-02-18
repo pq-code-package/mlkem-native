@@ -40,6 +40,10 @@
  *              polyvec *pk: pointer to the input public-key polyvec.
  *                Must have coefficients within [0,..,q-1].
  *              const uint8_t *seed: pointer to the input public seed
+ *
+ * Specification:
+ * Implements [FIPS 203, Algorithm 13 (K-PKE.KeyGen), L19]
+ *
  **************************************************/
 static void pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], polyvec *pk,
                     const uint8_t seed[MLKEM_SYMBYTES])
@@ -60,6 +64,10 @@ static void pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], polyvec *pk,
  *              - uint8_t *seed: pointer to output seed to generate matrix A
  *              - const uint8_t *packedpk: pointer to input serialized public
  *                  key.
+ *
+ * Specification:
+ * Implements [FIPS 203, Algorithm 14 (K-PKE.Encrypt), L2-3]
+ *
  **************************************************/
 static void unpack_pk(polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
                       const uint8_t packedpk[MLKEM_INDCPA_PUBLICKEYBYTES])
@@ -80,7 +88,11 @@ static void unpack_pk(polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
  *
  * Arguments:   - uint8_t *r: pointer to output serialized secret key
  *              - polyvec *sk: pointer to input vector of polynomials (secret
- *key)
+ *                key)
+ *
+ * Specification:
+ * Implements [FIPS 203, Algorithm 13 (K-PKE.KeyGen), L20]
+ *
  **************************************************/
 static void pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], polyvec *sk)
 {
@@ -97,6 +109,10 @@ static void pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], polyvec *sk)
  *                key)
  *              - const uint8_t *packedsk: pointer to input serialized secret
  *                key
+ *
+ * Specification:
+ * Implements [FIPS 203, Algorithm 15 (K-PKE.Decrypt), L5]
+ *
  **************************************************/
 static void unpack_sk(polyvec *sk,
                       const uint8_t packedsk[MLKEM_INDCPA_SECRETKEYBYTES])
@@ -114,6 +130,10 @@ static void unpack_sk(polyvec *sk,
  * Arguments:   uint8_t *r: pointer to the output serialized ciphertext
  *              poly *pk: pointer to the input vector of polynomials b
  *              poly *v: pointer to the input polynomial v
+ *
+ * Specification:
+ * Implements [FIPS 203, Algorithm 14 (K-PKE.Encrypt), L22-23]
+ *
  **************************************************/
 static void pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES], polyvec *b, poly *v)
 {
@@ -130,6 +150,10 @@ static void pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES], polyvec *b, poly *v)
  * Arguments:   - polyvec *b: pointer to the output vector of polynomials b
  *              - poly *v: pointer to the output polynomial v
  *              - const uint8_t *c: pointer to the input serialized ciphertext
+ *
+ * Specification:
+ * Implements [FIPS 203, Algorithm 15 (K-PKE.Decrypt), L1-4]
+ *
  **************************************************/
 static void unpack_ciphertext(polyvec *b, poly *v,
                               const uint8_t c[MLKEM_INDCPA_BYTES])
@@ -244,7 +268,8 @@ void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES], int transposed)
     }
   }
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(seed0, sizeof(seed0));
   ct_zeroize(seed1, sizeof(seed1));
   ct_zeroize(seed2, sizeof(seed2));
@@ -263,6 +288,9 @@ void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES], int transposed)
  *              - polyvec *v: Input polynomial vector. Must be in NTT domain.
  *              - polyvec *vc: Mulcache for v, computed via
  *                  polyvec_mulcache_compute().
+ *
+ * Specification: Implements [FIPS 203, Section 2.4.7, Eq (2.12), (2.13)]
+ *
  **************************************************/
 static void matvec_mul(polyvec *out, const polyvec a[MLKEM_K], const polyvec *v,
                        const polyvec_mulcache *vc)
@@ -350,7 +378,8 @@ void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
   pack_sk(sk, &skpv);
   pack_pk(pk, &pkpv, publicseed);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(buf, sizeof(buf));
   ct_zeroize(coins_with_domain_separator, sizeof(coins_with_domain_separator));
   ct_zeroize(a, sizeof(a));
@@ -424,7 +453,8 @@ void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
 
   pack_ciphertext(c, &b, &v);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(seed, sizeof(seed));
   ct_zeroize(&sp, sizeof(sp));
   ct_zeroize(&sp_cache, sizeof(sp_cache));
@@ -458,7 +488,8 @@ void indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
 
   poly_tomsg(m, &v);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(&skpv, sizeof(skpv));
   ct_zeroize(&b, sizeof(b));
   ct_zeroize(&b_cache, sizeof(b_cache));

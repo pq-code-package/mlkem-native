@@ -187,7 +187,8 @@ void shake128_squeezeblocks(uint8_t *output, size_t nblocks, shake128ctx *state)
 void shake128_init(shake128ctx *state) { (void)state; }
 void shake128_release(shake128ctx *state)
 {
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(state, sizeof(shake128ctx));
 }
 
@@ -201,7 +202,8 @@ void shake256(uint8_t *output, size_t outlen, const uint8_t *input,
   keccak_absorb_once(state.ctx, SHAKE256_RATE, input, inlen, 0x1F);
   /* Squeeze output */
   keccak_squeeze_once(output, outlen, state.ctx, SHAKE256_RATE);
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(&state, sizeof(state));
 }
 
@@ -212,7 +214,8 @@ void sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
   keccak_absorb_once(ctx, SHA3_256_RATE, input, inlen, 0x06);
   /* Squeeze output */
   keccak_squeeze_once(output, 32, ctx, SHA3_256_RATE);
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(ctx, sizeof(ctx));
 }
 
@@ -223,7 +226,8 @@ void sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
   keccak_absorb_once(ctx, SHA3_512_RATE, input, inlen, 0x06);
   /* Squeeze output */
   keccak_squeeze_once(output, 64, ctx, SHA3_512_RATE);
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(ctx, sizeof(ctx));
 }
 

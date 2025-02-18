@@ -205,6 +205,11 @@ void polyvec_tomont(polyvec *r)
  *
  * Arguments:   - poly *r: pointer to output polynomial
  *              - const uint8_t *buf: pointer to input byte array
+ *
+ * Specification: Implements [FIPS 203, Algorithm 8, SamplePolyCBD_eta1], where
+ *                eta1 is specified per level in [FIPS 203, Table 2]
+ *                and represented as MLKEM_ETA1 here.
+ *
  **************************************************/
 static MLK_INLINE void poly_cbd_eta1(
     poly *r, const uint8_t buf[MLKEM_ETA1 * MLKEM_N / 4])
@@ -256,7 +261,8 @@ void poly_getnoise_eta1_4x(poly *r0, poly *r1, poly *r2, poly *r3,
   debug_assert_abs_bound(r2, MLKEM_N, MLKEM_ETA1 + 1);
   debug_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA1 + 1);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(buf0, sizeof(buf0));
   ct_zeroize(buf1, sizeof(buf1));
   ct_zeroize(buf2, sizeof(buf2));
@@ -277,6 +283,11 @@ void poly_getnoise_eta1_4x(poly *r0, poly *r1, poly *r2, poly *r3,
  *
  * Arguments:   - poly *r: pointer to output polynomial
  *              - const uint8_t *buf: pointer to input byte array
+ *
+ * Specification: Implements [FIPS 203, Algorithm 8, SamplePolyCBD_eta2], where
+ *                eta2 is specified per level in [FIPS 203, Table 2]
+ *                and represented as MLKEM_ETA2 here.
+ *
  **************************************************/
 static MLK_INLINE void poly_cbd_eta2(
     poly *r, const uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4])
@@ -308,7 +319,8 @@ void poly_getnoise_eta2(poly *r, const uint8_t seed[MLKEM_SYMBYTES],
 
   debug_assert_abs_bound(r, MLKEM_N, MLKEM_ETA1 + 1);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(buf, sizeof(buf));
   ct_zeroize(extkey, sizeof(extkey));
 }
@@ -367,7 +379,8 @@ void poly_getnoise_eta1122_4x(poly *r0, poly *r1, poly *r2, poly *r3,
   debug_assert_abs_bound(r2, MLKEM_N, MLKEM_ETA2 + 1);
   debug_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA2 + 1);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(buf0, sizeof(buf0));
   ct_zeroize(buf1, sizeof(buf1));
   ct_zeroize(buf2, sizeof(buf2));

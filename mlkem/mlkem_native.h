@@ -132,7 +132,11 @@
  *              - uint8_t *coins: pointer to input randomness, an array of
  *                  2*MLKEM_SYMBYTES uniformly random bytes.
  *
- * Returns 0 (success)
+ * Returns:     - 0: On success
+ *              - -1: On PCT failure (if MLK_KEYGEN_PCT) is enabled.
+ *
+ * Specification: Implements [FIPS 203, Algorithm 16, ML-KEM.KeyGen_Internal]
+ *
  **************************************************/
 MLK_MUST_CHECK_RETURN_VALUE
 int MLK_BUILD_INFO_NAMESPACE(keypair_derand)(
@@ -150,7 +154,11 @@ int MLK_BUILD_INFO_NAMESPACE(keypair_derand)(
  *              - uint8_t *sk: pointer to output private key, an array of
  *                 MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
  *
- * Returns 0 (success)
+ * Returns:     - 0: On success
+ *              - -1: On PCT failure (if MLK_KEYGEN_PCT) is enabled.
+ *
+ * Specification: Implements [FIPS 203, Algorithm 19, ML-KEM.KeyGen]
+ *
  **************************************************/
 MLK_MUST_CHECK_RETURN_VALUE
 int MLK_BUILD_INFO_NAMESPACE(keypair)(
@@ -172,8 +180,12 @@ int MLK_BUILD_INFO_NAMESPACE(keypair)(
  *              - const uint8_t *coins: pointer to input randomness, an array of
  *                 MLKEM_SYMBYTES bytes.
  *
- * Returns 0 on success, and -1 if the public key modulus check (see Section 7.2
- * of FIPS203) fails.
+ * Returns: - 0 on success
+ *          - -1 if the 'modulus check' [FIPS 203, Section 7.2]
+ *            for the public key fails.
+ *
+ * Specification: Implements [FIPS 203, Algorithm 17, ML-KEM.Encaps_Internal]
+ *
  **************************************************/
 MLK_MUST_CHECK_RETURN_VALUE
 int MLK_BUILD_INFO_NAMESPACE(enc_derand)(
@@ -195,8 +207,12 @@ int MLK_BUILD_INFO_NAMESPACE(enc_derand)(
  *              - const uint8_t *pk: pointer to input public key, an array of
  *                 MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
  *
- * Returns 0 on success, and -1 if the public key modulus check (see Section 7.2
- * of FIPS203) fails.
+ * Returns: - 0 on success
+ *          - -1 if the 'modulus check' [FIPS 203, Section 7.2]
+ *            for the public key fails.
+ *
+ * Specification: Implements [FIPS 203, Algorithm 20, ML-KEM.Encaps]
+ *
  **************************************************/
 MLK_MUST_CHECK_RETURN_VALUE
 int MLK_BUILD_INFO_NAMESPACE(enc)(
@@ -217,10 +233,12 @@ int MLK_BUILD_INFO_NAMESPACE(enc)(
  *              - const uint8_t *sk: pointer to input private key, an array of
  *                 MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
  *
- * Returns 0 on success, and -1 if the secret key hash check (see Section 7.3 of
- * FIPS203) fails.
+ * Returns: - 0 on success
+ *          - -1 if the 'hash check' [FIPS 203, Section 7.3]
+ *            for the secret key fails.
  *
- * On failure, ss will contain a pseudo-random value.
+ * Specification: Implements [FIPS 203, Algorithm 21, ML-KEM.Decaps]
+ *
  **************************************************/
 MLK_MUST_CHECK_RETURN_VALUE
 int MLK_BUILD_INFO_NAMESPACE(dec)(

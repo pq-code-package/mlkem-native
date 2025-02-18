@@ -135,7 +135,8 @@ void shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
 void shake128x4_init(shake128x4ctx *state) { (void)state; }
 void shake128x4_release(shake128x4ctx *state)
 {
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(state, sizeof(shake128x4ctx));
 }
 
@@ -186,7 +187,8 @@ void shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
     memcpy(out3, tmp3, outlen);
   }
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(&statex, sizeof(statex));
   ct_zeroize(tmp0, sizeof(tmp0));
   ct_zeroize(tmp1, sizeof(tmp1));

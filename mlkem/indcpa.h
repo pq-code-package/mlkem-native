@@ -22,6 +22,11 @@
  * Arguments:   - polyvec *a: pointer to output matrix A
  *              - const uint8_t *seed: pointer to input seed
  *              - int transposed: boolean deciding whether A or A^T is generated
+ *
+ * Specification: Implements [FIPS 203, Algorithm 13 (K-PKE.KeyGen), L3-7]
+ *                and [FIPS 203, Algorithm 14 (K-PKE.Encrypt), L4-8].
+ *                The `transposed` parameter only affects internal presentation.
+ *
  **************************************************/
 MLK_INTERNAL_API
 void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES], int transposed)
@@ -47,6 +52,9 @@ __contract__(
  *                             (of length MLKEM_INDCPA_SECRETKEYBYTES bytes)
  *              - const uint8_t *coins: pointer to input randomness
  *                             (of length MLKEM_SYMBYTES bytes)
+ *
+ * Specification: Implements [FIPS 203, Algorithm 13 (K-PKE.KeyGen)].
+ *
  **************************************************/
 MLK_INTERNAL_API
 void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
@@ -74,7 +82,11 @@ __contract__(
  *              - const uint8_t *pk: pointer to input public key
  *                                   (of length MLKEM_INDCPA_PUBLICKEYBYTES)
  *              - const uint8_t *coins: pointer to input random coins used as
- *seed (of length MLKEM_SYMBYTES) to deterministically generate all randomness
+ *                 seed (of length MLKEM_SYMBYTES) to deterministically generate
+ *                 all randomness
+ *
+ * Specification: Implements [FIPS 203, Algorithm 14 (K-PKE.Encrypt)].
+ *
  **************************************************/
 MLK_INTERNAL_API
 void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
@@ -102,6 +114,9 @@ __contract__(
  *                                  (of length MLKEM_INDCPA_BYTES)
  *              - const uint8_t *sk: pointer to input secret key
  *                                   (of length MLKEM_INDCPA_SECRETKEYBYTES)
+ *
+ * Specification: Implements [FIPS 203, Algorithm 15 (K-PKE.Decrypt)].
+ *
  **************************************************/
 MLK_INTERNAL_API
 void indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],

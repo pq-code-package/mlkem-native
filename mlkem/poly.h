@@ -138,6 +138,11 @@ __contract__(
  *              Bounds: Output < q in absolute value.
  *
  * Arguments:   - poly *r: pointer to input/output polynomial
+ *
+ * Specification: Internal normalization required in `indcpa_keypair_derand`
+ *                as part of matrix-vector multiplication
+ *                [FIPS 203, Algorithm 13, K-PKE.KeyGen, L18].
+ *
  **************************************************/
 MLK_INTERNAL_API
 void poly_tomont(poly *r)
@@ -164,6 +169,10 @@ __contract__(
  *
  * Arguments: - x: Pointer to mulcache to be populated
  *            - a: Pointer to input polynomial
+ *
+ * Specification:
+ * - Caches `b_1 * \gamma` in [FIPS 203, Algorithm 12, BaseCaseMultiply, L1]
+ *
  ************************************************************/
 /*
  * NOTE: The default C implementation of this function populates
@@ -188,6 +197,11 @@ __contract__(
  *              The output coefficients are in [0,1,...,MLKEM_Q-1].
  *
  * Arguments:   - poly *r: pointer to input/output polynomial
+ *
+ * Specification: Normalizes on unsigned canoncial representatives
+ *                ahead of calling [FIPS 203, Compress_d, Eq (4.7)].
+ *                This is not made explicit in FIPS 203.
+ *
  **************************************************/
 /*
  * NOTE: The semantics of poly_reduce() is different in
@@ -217,6 +231,10 @@ __contract__(
  * The coefficients of r and b must be so that the addition does
  * not overflow. Otherwise, the behaviour of this function is undefined.
  *
+ * Specification:
+ * - [FIPS 203, 2.4.5, Arithmetic With Polynomials and NTT Representations]
+ * - Used in [FIPS 203, Algorithm 14 (K-PKE.Encrypt), L21]
+ *
  ************************************************************/
 /*
  * NOTE: The reference implementation uses a 3-argument poly_add.
@@ -239,9 +257,13 @@ __contract__(
  *
  * Description: Subtract two polynomials; no modular reduction is performed
  *
- * Arguments: - poly *r:       Pointer to input-output polynomial to be added
- *to.
+ * Arguments: - poly *r: Pointer to input-output polynomial to be added to.
  *            - const poly *b: Pointer to second input polynomial
+ *
+ * Specification:
+ * - [FIPS 203, 2.4.5, Arithmetic With Polynomials and NTT Representations]
+ * - Used in [FIPS 203, Algorithm 15, K-PKE.Decrypt, L6]
+ *
  **************************************************/
 /*
  * NOTE: The reference implementation uses a 3-argument poly_sub.
@@ -275,6 +297,9 @@ __contract__(
  *               which gives better bounds.)
  *
  * Arguments:   - poly *p: pointer to in/output polynomial
+ *
+ * Specification: Implements [FIPS 203, Algorithm 9, NTT]
+ *
  **************************************************/
 MLK_INTERNAL_API
 void poly_ntt(poly *r)
@@ -301,6 +326,11 @@ __contract__(
  *              coefficient-wise bound by MLK_INVNTT_BOUND in absolute value.
  *
  * Arguments:   - uint16_t *a: pointer to in/output polynomial
+ *
+ * Specification: Implements composition of [FIPS 203, Algorithm 10, NTT^{-1}]
+ *                and elementwise modular multiplication with a suitable
+ *                Montgomery factor introduced during the base multiplication.
+ *
  **************************************************/
 MLK_INTERNAL_API
 void poly_invntt_tomont(poly *r)

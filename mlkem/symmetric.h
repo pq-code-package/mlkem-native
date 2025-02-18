@@ -12,18 +12,18 @@
 #include MLK_FIPS202_HEADER_FILE
 #include MLK_FIPS202X4_HEADER_FILE
 
-/* Macros denoting FIPS-203 specific Hash functions */
+/* Macros denoting FIPS 203 specific Hash functions */
 
-/* Hash function H, FIPS-203 4.1 (eq 4.4) */
+/* Hash function H, [FIPS 203, Section 4.1, Eq (4.4)] */
 #define hash_h(OUT, IN, INBYTES) sha3_256(OUT, IN, INBYTES)
 
-/* Hash function G, FIPS-203 4.1 (eq 4.5) */
+/* Hash function G, [FIPS 203, Section 4.1, Eq (4.5)] */
 #define hash_g(OUT, IN, INBYTES) sha3_512(OUT, IN, INBYTES)
 
-/* Hash function J, FIPS-203 4.1 (eq 4.4) */
+/* Hash function J, [FIPS 203, Section 4.1, Eq (4.4)] */
 #define hash_j(OUT, IN, INBYTES) shake256(OUT, MLKEM_SYMBYTES, IN, INBYTES)
 
-/* PRF function, FIPS-203 4.1 (eq 4.3)
+/* PRF function, [FIPS 203, Section 4.1, Eq (4.3)]
  * Referring to (eq 4.3), `OUT` is assumed to contain `s || b`. */
 #define prf_eta(ETA, OUT, IN) \
   shake256(OUT, (ETA) * MLKEM_N / 4, IN, MLKEM_SYMBYTES + 1)
@@ -33,7 +33,7 @@
   shake256x4(OUT0, OUT1, OUT2, OUT3, (MLKEM_ETA1 * MLKEM_N / 4), IN0, IN1, \
              IN2, IN3, MLKEM_SYMBYTES + 1)
 
-/* XOF function, FIPS-203 4.1 */
+/* XOF function, FIPS 203 4.1 */
 #define xof_ctx shake128ctx
 #define xof_x4_ctx shake128x4ctx
 #define xof_init(CTX) shake128_init((CTX))

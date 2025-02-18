@@ -33,15 +33,18 @@ __contract__(
 /*************************************************
  * Name:        check_pk
  *
- * Description: Implements modulus check mandated by FIPS203,
+ * Description: Implements modulus check mandated by FIPS 203,
  *              i.e., ensures that coefficients are in [0,q-1].
- *              Described in Section 7.2 of FIPS203.
  *
  * Arguments:   - const uint8_t *pk: pointer to input public key
  *                (an already allocated array of MLKEM_INDCCA_PUBLICKEYBYTES
  *                 bytes)
  *
- * Returns 0 on success, and -1 on failure
+ * Returns: - 0 on success
+ *          - -1 on failure
+ *
+ * Specification: Implements [FIPS 203, Section 7.2, 'modulus check']
+ *
  **************************************************/
 MLK_MUST_CHECK_RETURN_VALUE
 static int check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
@@ -58,7 +61,8 @@ static int check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
    * declassify the PK before the PCT has succeeded. */
   res = ct_memcmp(pk, p_reencoded, MLKEM_POLYVECBYTES) ? -1 : 0;
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(p_reencoded, sizeof(p_reencoded));
   ct_zeroize(&p, sizeof(p));
   return res;
@@ -67,16 +71,19 @@ static int check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 /*************************************************
  * Name:        check_sk
  *
- * Description: Implements public key hash check mandated by FIPS203,
+ * Description: Implements public key hash check mandated by FIPS 203,
  *              i.e., ensures that
  *              sk[768𝑘+32 ∶ 768𝑘+64] = H(pk)= H(sk[384𝑘 : 768𝑘+32])
- *              Described in Section 7.3 of FIPS203.
  *
  * Arguments:   - const uint8_t *sk: pointer to input private key
  *                (an already allocated array of MLKEM_INDCCA_SECRETKEYBYTES
  *                 bytes)
  *
- * Returns 0 on success, and -1 on failure
+ * Returns: - 0 on success
+ *          - -1 on failure
+ *
+ * Specification: Implements [FIPS 203, Section 7.3, 'hash check']
+ *
  **************************************************/
 MLK_MUST_CHECK_RETURN_VALUE
 static int check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
@@ -101,7 +108,8 @@ static int check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
             ? -1
             : 0;
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(test, sizeof(test));
   return res;
 }
@@ -114,6 +122,10 @@ __contract__(
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES)));
 
 #if defined(MLK_KEYGEN_PCT)
+/* Specification:
+ * Partially implements 'Pairwise Consistency Test' [FIPS 140-3 IG] and
+ * [FIPS 203, Section 7.1, Pairwise Consistency].
+ * Deviations: Currently uses static rather than random coins for the PCT. */
 static int check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                      uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
@@ -141,7 +153,8 @@ static int check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   res = ct_memcmp(ss_enc, ss_dec, sizeof(ss_dec));
 
 cleanup:
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(ct, sizeof(ct));
   ct_zeroize(ss_enc, sizeof(ss_enc));
   ct_zeroize(ss_dec, sizeof(ss_dec));
@@ -195,7 +208,8 @@ int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 
   res = crypto_kem_keypair_derand(pk, sk, coins);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(coins, sizeof(coins));
   return res;
 }
@@ -210,6 +224,7 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   /* Will contain key, coins */
   MLK_ALIGN uint8_t kr[2 * MLKEM_SYMBYTES];
 
+  /* Specification: Implements [FIPS 203, Section 7.2, Modulus check] */
   if (check_pk(pk))
   {
     return -1;
@@ -226,7 +241,8 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
 
   memcpy(ss, kr, MLKEM_SYMBYTES);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(buf, sizeof(buf));
   ct_zeroize(kr, sizeof(kr));
 
@@ -246,7 +262,8 @@ int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
 
   res = crypto_kem_enc_derand(ct, ss, pk, coins);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(coins, sizeof(coins));
   return res;
 }
@@ -264,6 +281,7 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
 
   const uint8_t *pk = sk + MLKEM_INDCPA_SECRETKEYBYTES;
 
+  /* Specification: Implements [FIPS 203, Section 7.3, Hash check] */
   if (check_sk(sk))
   {
     return -1;
@@ -290,7 +308,8 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   /* Copy true key to return buffer if fail is 0 */
   ct_cmov_zero(ss, kr, MLKEM_SYMBYTES, fail);
 
-  /* FIPS 203. Section 3.3 Destruction of intermediate values. */
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(buf, sizeof(buf));
   ct_zeroize(kr, sizeof(kr));
   ct_zeroize(tmp, sizeof(tmp));
