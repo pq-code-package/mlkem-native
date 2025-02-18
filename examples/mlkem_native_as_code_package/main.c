@@ -29,6 +29,9 @@ int main(void)
   uint8_t key_a[CRYPTO_BYTES];
   uint8_t key_b[CRYPTO_BYTES];
 
+  /* The PCT modifies the PRNG state, so the KAT tests don't work.
+   * We run KAT tests only for disabled PCT. */
+#if !defined(MLK_KEYGEN_PCT)
 #if MLKEM_K == 2
   const uint8_t expected_key[] = {
       0x77, 0x6c, 0x74, 0xdf, 0x30, 0x1f, 0x8d, 0x82, 0x52, 0x5e, 0x8e,
@@ -45,6 +48,7 @@ int main(void)
       0x0a, 0x56, 0xe3, 0xf0, 0xd3, 0xfd, 0x9b, 0x58, 0xbd, 0xa2, 0x8b,
       0x69, 0x0f, 0x91, 0xb5, 0x7b, 0x88, 0xa5, 0xa8, 0x0b, 0x90};
 #endif
+#endif /* MLK_KEYGEN_PCT */
 
   /* WARNING: Test-only
    * Normally, you would want to seed a PRNG with trustworthy entropy here. */
@@ -80,7 +84,15 @@ int main(void)
   }
   printf("\n");
 
-  CHECK(memcmp(key_a, expected_key, sizeof(key_a)) == 0);
+#if !defined(MLK_KEYGEN_PCT)
+  /* Check against hardcoded result to make sure that
+   * we integrated custom FIPS202 correctly */
+  CHECK(memcmp(key_a, expected_key, CRYPTO_BYTES) == 0);
+#else
+  printf(
+      "[WARNING] Skipping KAT test since PCT is enabled and modifies PRNG\n");
+#endif
+
   printf("OK\n");
   return 0;
 }

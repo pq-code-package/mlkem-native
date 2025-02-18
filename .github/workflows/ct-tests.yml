@@ -50,42 +50,42 @@ jobs:
         if: ${{ matrix.nix-shell !=  'ci_valgrind-varlat_gcc48' && matrix.nix-shell !=  'ci_valgrind-varlat_gcc49' && matrix.nix-shell !=  'ci_valgrind-varlat_gcc7' && matrix.nix-shell !=  'ci_valgrind-varlat_gcc11'}}
         uses: ./.github/actions/ct-test
         with:
-          cflags: -Oz
+          cflags: -Oz -DMLK_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
       - name:  Build and run test (-Os)
         uses: ./.github/actions/ct-test
         with:
-          cflags: -Os
+          cflags: -Os -DMLK_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
       - name:  Build and run test (-O3)
         uses: ./.github/actions/ct-test
         with:
-          cflags: -O3
+          cflags: -O3 -DMLK_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
       - name:  Build and run test (-Ofast)
         # -Ofast got deprecated in clang19; -O3 -ffast-math should be used instead
         if: ${{ matrix.nix-shell !=  'ci_valgrind-varlat_clang19' }}
         uses: ./.github/actions/ct-test
         with:
-          cflags: -Ofast
+          cflags: -Ofast -DMLK_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
       - name:  Build and run test (-O3 -ffast-math)
         uses: ./.github/actions/ct-test
         with:
-          cflags: -O3 -ffast-math
+          cflags: -O3 -ffast-math -DMLK_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
       - name:  Build and run test (-O2)
         uses: ./.github/actions/ct-test
         with:
-          cflags: -O2
+          cflags: -O2 -DMLK_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
       - name:  Build and run test (-O1)
         uses: ./.github/actions/ct-test
         with:
-          cflags: -O1
+          cflags: -O1 -DMLK_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
       - name:  Build and run test (-O0)
         uses: ./.github/actions/ct-test
         with:
-          cflags: -O0
+          cflags: -O0 -DMLK_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes

@@ -125,20 +125,15 @@ __contract__(
 /* Specification:
  * Partially implements 'Pairwise Consistency Test' [FIPS 140-3 IG] and
  * [FIPS 203, Section 7.1, Pairwise Consistency].
- * Deviations: Currently uses static rather than random coins for the PCT. */
+ */
 static int check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                      uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
   int res;
   uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES];
   uint8_t ss_enc[MLKEM_SSBYTES], ss_dec[MLKEM_SSBYTES];
-  /* Use static coins to not alter the state of the PRNG. */
-  uint8_t pct_coins[MLKEM_SYMBYTES] = {
-      0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
-      17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
-  };
 
-  res = crypto_kem_enc_derand(ct, ss_enc, pk, pct_coins);
+  res = crypto_kem_enc(ct, ss_enc, pk);
   if (res != 0)
   {
     goto cleanup;
@@ -153,6 +148,9 @@ static int check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   res = ct_memcmp(ss_enc, ss_dec, sizeof(ss_dec));
 
 cleanup:
+  /* The result of the PCT is public. */
+  MLK_CT_TESTING_DECLASSIFY(&res, sizeof(res));
+
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   ct_zeroize(ct, sizeof(ct));
@@ -184,14 +182,15 @@ int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   memcpy(sk + MLKEM_INDCCA_SECRETKEYBYTES - MLKEM_SYMBYTES,
          coins + MLKEM_SYMBYTES, MLKEM_SYMBYTES);
 
+  /* Declassify public key */
+  MLK_CT_TESTING_DECLASSIFY(pk, MLKEM_INDCCA_PUBLICKEYBYTES);
+
   /* Pairwise Consistency Test (PCT) (FIPS 140-3 IPG) */
   if (check_pct(pk, sk))
   {
     return -1;
   }
 
-  /* Declassify public key */
-  MLK_CT_TESTING_DECLASSIFY(pk, MLKEM_INDCCA_PUBLICKEYBYTES);
   return 0;
 }
 
