@@ -43,7 +43,7 @@ rec {
       native-gcc
     ]
     ++ builtins.attrValues {
-      inherit (pkgs.python3Packages) pyyaml;
+      inherit (pkgs.python3Packages) sympy pyyaml;
       inherit (pkgs)
         python3
         qemu; # 8.2.4
@@ -84,7 +84,7 @@ rec {
         shfmt;
 
       inherit (pkgs.python3Packages)
-        black;
+        sympy black;
     };
 
   cbmc = pkgs.callPackage ./cbmc {

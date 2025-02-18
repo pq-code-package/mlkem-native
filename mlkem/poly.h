@@ -93,8 +93,8 @@ __contract__(
      *          for fqmul which does have a post-condition bound. */
 )
 {
-  /* QINV == -3327 converted to uint16_t == -3327 + 65536 == 62209 */
-  const uint32_t QINV = 62209; /* q^-1 mod 2^16 */
+  /* check-magic: 62209 == unsigned_mod(pow(MLKEM_Q, -1, 2^16), 2^16) */
+  const uint32_t QINV = 62209;
 
   /*  Compute a*q^{-1} mod 2^16 in unsigned representatives */
   const uint16_t a_reduced = a & UINT16_MAX;

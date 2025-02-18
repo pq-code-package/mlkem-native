@@ -33,15 +33,15 @@
 /*************************************************
  * Name:        fqmul
  *
- * Description: Montgomery multiplication modulo q=3329
+ * Description: Montgomery multiplication modulo MLKEM_Q
  *
  * Arguments:   - int16_t a: first factor
  *                  Can be any int16_t.
  *              - int16_t b: second factor.
- *                  Must be signed canonical (abs value <(q+1)/2)
+ *                  Must be signed canonical (abs value <(MLKEM_Q+1)/2)
  *
- * Returns 16-bit integer congruent to a*b*R^{-1} mod q, and
- * smaller than q in absolute value.
+ * Returns 16-bit integer congruent to a*b*R^{-1} mod MLKEM_Q, and
+ * smaller than MLKEM_Q in absolute value.
  *
  **************************************************/
 static MLK_INLINE int16_t fqmul(int16_t a, int16_t b)
@@ -119,7 +119,7 @@ MLK_INTERNAL_API
 void poly_tomont(poly *r)
 {
   unsigned i;
-  const int16_t f = (1ULL << 32) % MLKEM_Q; /* 1353 */
+  const int16_t f = 1353; /* check-magic: 1353 == signed_mod(2^32, MLKEM_Q) */
   for (i = 0; i < MLKEM_N; i++)
   __loop__(
     invariant(i <= MLKEM_N)
@@ -143,18 +143,9 @@ void poly_tomont(poly *r)
 /************************************************************
  * Name: scalar_signed_to_unsigned_q
  *
- * Description: converts signed polynomial coefficient
- *              from signed (-3328 .. 3328) form to
- *              unsigned form (0 .. 3328).
- *
- * Note: Cryptographic constant time implementation
- *
- * Examples:       0 -> 0
- *                 1 -> 1
- *              3328 -> 3328
- *                -1 -> 3328
- *                -2 -> 3327
- *             -3328 -> 1
+ * Description: Constant-time conversion of signed representatives
+ *              modulo MLKEM_Q within range (-(MLKEM_Q-1) .. (MLKEM_Q-1))
+ *              into unsigned representatives within range (0..(MLKEM_Q-1)).
  *
  * Arguments: c: signed coefficient to be converted
  ************************************************************/
@@ -456,7 +447,7 @@ void poly_invntt_tomont(poly *p)
    * absolute value < MLKEM_Q.
    */
   unsigned j, len, layer;
-  const int16_t f = 1441;
+  const int16_t f = 1441; /* check-magic: 1441 == pow(2,32 - 7,MLKEM_Q) */
   int16_t *r = p->coeffs;
 
   for (j = 0; j < MLKEM_N; j++)

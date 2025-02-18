@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+# Copyright (c) 2024-2025 The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0
+
+#
+# Looks for magic numbers without explanation
+#
+
+import re
+import pathlib
+
+from sympy import simplify, sympify, Function
+
+def get_c_source_files():
+    return get_files("mlkem/**/*.c")
+
+def get_header_files():
+    return get_files("mlkem/**/*.h")
+
+def get_files(pattern):
+    return list(map(str, pathlib.Path().glob(pattern)))
+
+def check_magic_numbers():
+    mlkem_q = 3329
+    exceptions = [mlkem_q, 1023, 1024, 1665, 2047, 2048, 4095, 4096, 8192, 32767, 32768, 65535, 65536]
+    enable_marker = "check-magic: on"
+    disable_marker = "check-magic: off"
+    autogen_marker = "This file is auto-generated from scripts/autogen"
+
+    files = get_c_source_files() + get_header_files()
+
+    def is_exception(filename, l, magic):
+        return magic in exceptions
+
+    def get_magic(l):
+        regexp = r'/\* check-magic:\s+([-]?\d{4,})\s*==\s*(.*?) \*/'
+        m = re.search(regexp, l)
+        if m is not None:
+            # Remove magic annotation to avoid it being treated
+            # as magic value itself
+            l = re.sub(regexp,'',l)
+            return l, (int(m.group(1)), m.group(2))
+        return l, None
+
+    def get_define(l):
+        m = re.search(r'#define\s+(\w+)', l)
+        if m is not None:
+            return m.group(1)
+        return None
+
+    def evaluate_magic(m, known_magics):
+        def unsigned_mod(x,y):
+            return x % y
+        def signed_mod(x,y):
+            r = unsigned_mod(x,y)
+            if r >= y // 2:
+                r -= y
+            return r
+        def pow_mod(x,y,m):
+            x = int(x)
+            y = int(y)
+            m = int(m)
+            return signed_mod(pow(x,y,m),m)
+        locals_dict = {'signed_mod': signed_mod,
+                       'unsigned_mod': unsigned_mod,
+                       'pow': pow_mod }
+        locals_dict.update(known_magics)
+        return sympify(m, locals=locals_dict)
+
+    for filename in files:
+        with open(filename, "r") as f:
+            content = f.read()
+        if autogen_marker in content:
+            continue
+        content = content.split("\n")
+        # Use negative lookbefore and lookahead to exclude numbers
+        # that occur as part of identifiers (e.g. layer01234 or 199901L)
+        pattern = r'(?<![0-9a-zA-Z/_-])([-]?\d{4,})(?![0-9a-zA-Z_-])'
+        enabled = True
+        magic_dict = {'MLKEM_Q': mlkem_q}
+        magic_expr = None
+        for i, l in enumerate(content):
+            if enabled is True and disable_marker in l:
+                enabled = False
+                continue
+            if enabled is False and enable_marker in l:
+                enabled = True
+                continue
+            if enabled is False:
+                continue
+            l, g = get_magic(l)
+            if g is not None:
+                magic_val, magic_expr = g
+
+            found = next(re.finditer(pattern, l), None)
+            if found is None:
+                continue
+
+            magic = int(found.group())
+            if is_exception(filename, l, magic):
+                continue
+
+            if magic_expr is not None:
+                val = evaluate_magic(magic_expr, magic_dict)
+                if magic_val != val:
+                    raise Exception(f"{filename}:{i}: Mismatching magic annotation: {magic_val} != {val}")
+                if val == magic:
+                    print(f"[OK] {filename}:{i}: Verified magic constant {magic} == {magic_expr}")
+                else:
+                    raise Exception(f"{filename}:{i}: Magic constant mismatch {magic} != {magic_expr}")
+            else:
+                raise Exception(f"{filename}:{i}: No explanation for magic value {magic}")
+
+            # If this is a #define's clause, remember it
+            define = get_define(l)
+            if define is not None:
+                magic_dict[define] = magic
+
+def _main():
+    check_magic_numbers()
+
+if __name__ == "__main__":
+    _main()
