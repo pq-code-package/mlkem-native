@@ -370,6 +370,7 @@ __contract__(
  */
 
 MLK_INTERNAL_API
+MLK_UNROLL_LOOPS
 void poly_ntt(poly *p)
 {
   unsigned layer;

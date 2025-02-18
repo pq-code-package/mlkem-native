@@ -166,4 +166,10 @@
 #define MLK_MUST_CHECK_RETURN_VALUE
 #endif
 
+#if !defined(__OPTIMIZE_SIZE__) && (defined(__GNUC__) || defined(__clang__))
+#define MLK_UNROLL_LOOPS __attribute__((optimize("unroll-loops")))
+#else
+#define MLK_UNROLL_LOOPS
+#endif /* !__OPTIMIZE_SIZE__ && (__GNUC__ || __clang__) */
+
 #endif /* MLK_SYS_H */
