@@ -16,7 +16,7 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c $(SRCDIR)/mlkem/zetas.c
+PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c
 
 CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_mulcache_compute
 USE_FUNCTION_CONTRACTS=poly_mulcache_compute_native

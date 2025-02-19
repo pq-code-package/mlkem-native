@@ -228,6 +228,14 @@ void poly_sub(poly *r, const poly *b)
   }
 }
 
+/* Include zeta table unless NTT, invNTT and mulcache computation
+ * have been replaced by native implementations. */
+#if !defined(MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE) || \
+    !defined(MLK_USE_NATIVE_NTT) || !defined(MLK_USE_NATIVE_INTT)
+#include "zetas.inc"
+#endif /* !MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE && \
+    !MLK_USE_NATIVE_NTT && !MLK_USE_NATIVE_INTT */
+
 #if !defined(MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE)
 MLK_INTERNAL_API
 void poly_mulcache_compute(poly_mulcache *x, const poly *a)

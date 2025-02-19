@@ -30,7 +30,7 @@ implementations:
     signature_keypair: PQCP_MLKEM_NATIVE_MLKEM768_C_keypair
     signature_enc: PQCP_MLKEM_NATIVE_MLKEM768_C_enc
     signature_dec: PQCP_MLKEM_NATIVE_MLKEM768_C_dec
-    sources: LICENSE arith_backend.h cbmc.h common.h compress.c compress.h config.h debug.c debug.h indcpa.c indcpa.h kem.c kem.h mlkem_native.h params.h poly.c poly.h poly_k.c poly_k.h sampling.c sampling.h symmetric.h sys.h verify.c verify.h zetas.c native/api.h native/meta.h
+    sources: LICENSE arith_backend.h cbmc.h common.h compress.c compress.h config.h debug.c debug.h indcpa.c indcpa.h kem.c kem.h mlkem_native.h params.h poly.c poly.h poly_k.c poly_k.h sampling.c sampling.h symmetric.h sys.h verify.c verify.h zetas.inc native/api.h native/meta.h
   - name: x86_64
     version: FIPS203
     folder_name: mlkem
@@ -38,7 +38,7 @@ implementations:
     signature_keypair: PQCP_MLKEM_NATIVE_MLKEM768_X86_64_DEFAULT_keypair
     signature_enc: PQCP_MLKEM_NATIVE_MLKEM768_X86_64_DEFAULT_enc
     signature_dec: PQCP_MLKEM_NATIVE_MLKEM768_X86_64_DEFAULT_dec
-    sources: LICENSE arith_backend.h cbmc.h common.h compress.c compress.h config.h debug.c debug.h indcpa.c indcpa.h kem.c kem.h mlkem_native.h params.h poly.c poly.h poly_k.c poly_k.h sampling.c sampling.h symmetric.h sys.h verify.c verify.h zetas.c native/api.h native/meta.h native/x86_64
+    sources: LICENSE arith_backend.h cbmc.h common.h compress.c compress.h config.h debug.c debug.h indcpa.c indcpa.h kem.c kem.h mlkem_native.h params.h poly.c poly.h poly_k.c poly_k.h sampling.c sampling.h symmetric.h sys.h verify.c verify.h zetas.inc native/api.h native/meta.h native/x86_64
     supported_platforms:
       - architecture: x86_64
         operating_systems:
@@ -55,7 +55,7 @@ implementations:
     signature_keypair: PQCP_MLKEM_NATIVE_MLKEM768_AARCH64_OPT_keypair
     signature_enc: PQCP_MLKEM_NATIVE_MLKEM768_AARCH64_OPT_enc
     signature_dec: PQCP_MLKEM_NATIVE_MLKEM768_AARCH64_OPT_dec
-    sources: LICENSE arith_backend.h cbmc.h common.h compress.c compress.h config.h debug.c debug.h indcpa.c indcpa.h kem.c kem.h mlkem_native.h params.h poly.c poly.h poly_k.c poly_k.h sampling.c sampling.h symmetric.h sys.h verify.c verify.h zetas.c native/api.h native/meta.h native/aarch64
+    sources: LICENSE arith_backend.h cbmc.h common.h compress.c compress.h config.h debug.c debug.h indcpa.c indcpa.h kem.c kem.h mlkem_native.h params.h poly.c poly.h poly_k.c poly_k.h sampling.c sampling.h symmetric.h sys.h verify.c verify.h zetas.inc native/api.h native/meta.h native/aarch64
     supported_platforms:
       - architecture: arm_8
         operating_systems:

@@ -32,7 +32,6 @@
 #include "mlkem/poly_k.c"
 #include "mlkem/sampling.c"
 #include "mlkem/verify.c"
-#include "mlkem/zetas.c"
 
 #if !defined(MLK_MONOBUILD_CUSTOM_FIPS202)
 #include "mlkem/fips202/fips202.c"
@@ -272,7 +271,6 @@
 #undef poly_reduce
 #undef poly_sub
 #undef poly_tomont
-#undef zetas
 /* mlkem/randombytes.h */
 #undef MLK_RANDOMBYTES_H
 /* mlkem/sampling.h */

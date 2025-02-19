@@ -39,10 +39,9 @@ def gen_header():
     yield ""
 
 
-def update_file(filename, content, dry_run=False):
+def update_file(filename, content, dry_run=False, force_format=False):
 
-    # Format contents of .[chi] files
-    if filename.endswith(".c") or filename.endswith(".h") or filename.endswith(".i"):
+    if force_format is True or filename.endswith((".c", ".h", ".i")):
         p = subprocess.run(
             ["clang-format"], capture_output=True, input=content, text=True, shell=True
         )
@@ -110,27 +109,18 @@ def gen_c_zetas():
 def gen_c_zeta_file(dry_run=False):
     def gen():
         yield from gen_header()
-        yield '#include "common.h"'
-        yield "#if !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)"
-        yield '#include "poly.h"'
+        yield '#include <stdint.h>'
         yield ""
         yield "/*"
         yield " * Table of zeta values used in the reference NTT and inverse NTT."
         yield " * See autogen for details."
         yield " */"
-        yield "MLK_ALIGN const int16_t zetas[128] = {"
+        yield "static MLK_ALIGN const int16_t zetas[128] = {"
         yield from map(lambda t: str(t) + ",", gen_c_zetas())
         yield "};"
         yield ""
-        yield "#else /* MLK_MULTILEVEL_BUILD_NO_SHARED */"
-        yield ""
-        yield "MLK_EMPTY_CU(zetas)"
-        yield ""
-        yield "#endif /* MLK_MULTILEVEL_BUILD_NO_SHARED */"
-        yield ""
 
-    update_file("mlkem/zetas.c", "\n".join(gen()), dry_run=dry_run)
-
+    update_file("mlkem/zetas.inc", "\n".join(gen()), dry_run=dry_run, force_format=True)
 
 def prepare_root_for_barrett(root):
     """Takes a constant that the code needs to Barrett-multiply with,
