@@ -138,7 +138,10 @@ void poly_decompress_d10_avx2(__m256i *MLK_RESTRICT r,
       _mm256_set_epi8(11, 10, 10, 9, 9, 8, 8, 7, 6, 5, 5, 4, 4, 3, 3, 2, 9, 8,
                       8, 7, 7, 6, 6, 5, 4, 3, 3, 2, 2, 1, 1, 0);
   const __m256i sllvdidx = _mm256_set1_epi64x(4);
+  /* TODO: Explain magic values */
+  /* check-magic: off */
   const __m256i mask = _mm256_set1_epi32((32736 << 16) + 8184);
+  /* check-magic: on */
 
   for (i = 0; i < (MLKEM_N / 16) - 1; i++)
   {
@@ -222,11 +225,13 @@ void poly_decompress_d5_avx2(__m256i *MLK_RESTRICT r,
   const __m256i shufbidx =
       _mm256_set_epi8(9, 9, 9, 8, 8, 8, 8, 7, 7, 6, 6, 6, 6, 5, 5, 5, 4, 4, 4,
                       3, 3, 3, 3, 2, 2, 1, 1, 1, 1, 0, 0, 0);
+  /* TODO: Document those magic values */
+  /* check-magic: off */
   const __m256i mask = _mm256_set_epi16(248, 1984, 62, 496, 3968, 124, 992, 31,
                                         248, 1984, 62, 496, 3968, 124, 992, 31);
   const __m256i shift = _mm256_set_epi16(128, 16, 512, 64, 8, 256, 32, 1024,
                                          128, 16, 512, 64, 8, 256, 32, 1024);
-
+  /* check-magic: on */
   for (i = 0; i < MLKEM_N / 16; i++)
   {
     t = _mm_loadl_epi64((__m128i *)&a[10 * i + 0]);
@@ -328,7 +333,10 @@ void poly_decompress_d11_avx2(__m256i *MLK_RESTRICT r,
   const __m256i srlvqidx = _mm256_set_epi64x(2, 0, 2, 0);
   const __m256i shift =
       _mm256_set_epi16(4, 32, 1, 8, 32, 1, 4, 32, 4, 32, 1, 8, 32, 1, 4, 32);
+  /* TODO: Explain magic constant */
+  /* check-magic: off */
   const __m256i mask = _mm256_set1_epi16(32752);
+  /* check-magic: on */
 
   for (i = 0; i < (MLKEM_N / 16) - 1; i++)
   {

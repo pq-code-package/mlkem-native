@@ -80,6 +80,8 @@
 /******************************* Key sizes ************************************/
 
 /* Sizes of cryptographic material, per level */
+/* See mlke/common.h for the arithmetic expressions giving rise to these */
+/* check-magic: off */
 #define MLKEM512_SECRETKEYBYTES 1632
 #define MLKEM512_PUBLICKEYBYTES 800
 #define MLKEM512_CIPHERTEXTBYTES 768
@@ -91,6 +93,7 @@
 #define MLKEM1024_SECRETKEYBYTES 3168
 #define MLKEM1024_PUBLICKEYBYTES 1568
 #define MLKEM1024_CIPHERTEXTBYTES 1568
+/* check-magic: on */
 
 /* Size of randomness coins in bytes (level-independent) */
 #define MLKEM_SYMBYTES 32
