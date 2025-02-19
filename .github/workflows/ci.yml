@@ -469,7 +469,7 @@ jobs:
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: "MLK_KEYGEN_PCT"
+      - name: "PCT enabled"
         uses: ./.github/actions/multi-functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -479,6 +479,19 @@ jobs:
           nistkat: false
           kat: true
           acvp: true
+      - name: "PCT enabled + broken"
+        run: |
+          make clean
+          CFLAGS='-DMLK_CONFIG_FILE=\"../test/break_pct_config.h\"' make func -j4
+          # PCT breakage is done at runtime via MLK_BREAK_PCT
+          make run_func                 # Should be OK
+          MLK_BREAK_PCT=0 make run_func # Should be OK
+          if (MLK_BREAK_PCT=1 make run_func 2>&1 >/dev/null); then
+             echo "PCT failure expected"
+             exit 1
+          else
+             echo "PCT failed as expected"
+          fi
       - name: "MLKEM_GEN_MATRIX_NBLOCKS=1"
         uses: ./.github/actions/multi-functest
         with:

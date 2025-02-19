@@ -145,6 +145,14 @@ static int check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
     goto cleanup;
   }
 
+#if defined(MLK_KEYGEN_PCT_BREAKAGE_TEST)
+  /* Deliberately break PCT for testing purposes */
+  if (mlk_break_pct())
+  {
+    ss_enc[0] = ~ss_enc[0];
+  }
+#endif /* MLK_KEYGEN_PCT_BREAKAGE_TEST */
+
   res = ct_memcmp(ss_enc, ss_dec, sizeof(ss_dec));
 
 cleanup:
