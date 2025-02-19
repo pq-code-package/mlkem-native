@@ -291,7 +291,7 @@
  *              key generation.
  *
  *****************************************************************************/
-/* #define MLK_KEYGEN_PCT */
+#define MLK_KEYGEN_PCT
 
 /******************************************************************************
  * Name:        MLK_KEYGEN_PCT_BREAKAGE_TEST
@@ -303,15 +303,18 @@
  *              This option only has an effect if MLK_KEYGEN_PCT is set.
  *
  *****************************************************************************/
-/* #define MLK_KEYGEN_PCT_BREAKAGE_TEST
-   #if !defined(__ASSEMBLER__)
-   #include "sys.h"
-   static MLK_INLINE int mlk_break_pct(void)
-   {
-       ... return 0/1 depending on whether PCT should be broken ...
-   }
-   #endif
-*/
+#define MLK_KEYGEN_PCT_BREAKAGE_TEST
+#if !defined(__ASSEMBLER__)
+#include <stdlib.h>
+#include <string.h>
+#include "../mlkem/sys.h"
+static MLK_INLINE int mlk_break_pct(void)
+{
+  /* Break PCT if and only if MLK_BREAK_PCT is set to 1 */
+  const char *val = getenv("MLK_BREAK_PCT");
+  return val != NULL && strcmp(val, "1") == 0;
+}
+#endif
 
 /*************************  Config internals  ********************************/
 
