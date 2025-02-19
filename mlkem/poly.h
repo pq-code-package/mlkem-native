@@ -18,9 +18,6 @@
 /* Absolute exclusive upper bound for the output of the forward NTT */
 #define MLK_NTT_BOUND (8 * MLKEM_Q)
 
-#define zetas MLK_NAMESPACE(zetas)
-extern const int16_t zetas[128];
-
 /*
  * Elements of R_q = Z_q[X]/(X^n + 1). Represents polynomial
  * coeffs[0] + X*coeffs[1] + X^2*coeffs[2] + ... + X^{n-1}*coeffs[n-1]

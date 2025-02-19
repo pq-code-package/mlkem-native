@@ -175,10 +175,10 @@ void poly_rej_uniform_x4(poly *vec, uint8_t *seed[4])
        object_whole(buf1), object_whole(buf2), object_whole(buf3))
     invariant(ctr[0] <= MLKEM_N && ctr[1] <= MLKEM_N)
     invariant(ctr[2] <= MLKEM_N && ctr[3] <= MLKEM_N)
-    invariant(ctr[0] > 0 ==> array_bound(vec[0].coeffs, 0, ctr[0], 0, MLKEM_Q))
-    invariant(ctr[1] > 0 ==> array_bound(vec[1].coeffs, 0, ctr[1], 0, MLKEM_Q))
-    invariant(ctr[2] > 0 ==> array_bound(vec[2].coeffs, 0, ctr[2], 0, MLKEM_Q))
-    invariant(ctr[3] > 0 ==> array_bound(vec[3].coeffs, 0, ctr[3], 0, MLKEM_Q)))
+    invariant(array_bound(vec[0].coeffs, 0, ctr[0], 0, MLKEM_Q))
+    invariant(array_bound(vec[1].coeffs, 0, ctr[1], 0, MLKEM_Q))
+    invariant(array_bound(vec[2].coeffs, 0, ctr[2], 0, MLKEM_Q))
+    invariant(array_bound(vec[3].coeffs, 0, ctr[3], 0, MLKEM_Q)))
   {
     xof_x4_squeezeblocks(buf0, buf1, buf2, buf3, 1, &statex);
     ctr[0] = rej_uniform(vec[0].coeffs, MLKEM_N, ctr[0], buf0, buflen);
