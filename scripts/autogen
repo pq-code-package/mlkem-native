@@ -109,7 +109,7 @@ def gen_c_zetas():
 def gen_c_zeta_file(dry_run=False):
     def gen():
         yield from gen_header()
-        yield '#include <stdint.h>'
+        yield "#include <stdint.h>"
         yield ""
         yield "/*"
         yield " * Table of zeta values used in the reference NTT and inverse NTT."
@@ -121,6 +121,7 @@ def gen_c_zeta_file(dry_run=False):
         yield ""
 
     update_file("mlkem/zetas.inc", "\n".join(gen()), dry_run=dry_run, force_format=True)
+
 
 def prepare_root_for_barrett(root):
     """Takes a constant that the code needs to Barrett-multiply with,
