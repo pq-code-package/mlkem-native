@@ -77,8 +77,7 @@ void mlkem_debug_check_bounds(const char *file, int line, const int16_t *ptr,
 
 /* When running CBMC, convert debug assertions into proof obligations */
 #elif defined(CBMC)
-
-#include "../cbmc.h"
+#include "cbmc.h"
 
 #define debug_assert(val) cassert(val)
 
