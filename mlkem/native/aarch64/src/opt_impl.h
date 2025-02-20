@@ -25,13 +25,13 @@
 
 static MLK_INLINE void ntt_native(int16_t data[MLKEM_N])
 {
-  ntt_asm_opt(data, aarch64_ntt_zetas_layer01234, aarch64_ntt_zetas_layer56);
+  ntt_asm_opt(data, aarch64_ntt_zetas_layer12345, aarch64_ntt_zetas_layer67);
 }
 
 static MLK_INLINE void intt_native(int16_t data[MLKEM_N])
 {
-  intt_asm_opt(data, aarch64_invntt_zetas_layer01234,
-               aarch64_invntt_zetas_layer56);
+  intt_asm_opt(data, aarch64_invntt_zetas_layer12345,
+               aarch64_invntt_zetas_layer67);
 }
 
 static MLK_INLINE void poly_reduce_native(int16_t data[MLKEM_N])

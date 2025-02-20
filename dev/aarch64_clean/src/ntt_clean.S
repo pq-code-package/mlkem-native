@@ -62,22 +62,22 @@
         add \a\().8h, \a\().8h, tmp.8h
 .endm
 
-.macro load_roots_012
-        ldr q_root0, [r01234_ptr], #32
-        ldr q_root1, [r01234_ptr, #-16]
+.macro load_roots_123
+        ldr q_root0, [r12345_ptr], #32
+        ldr q_root1, [r12345_ptr, #-16]
 .endm
 
-.macro load_next_roots_34
-        ldr q_root0, [r01234_ptr], #16
+.macro load_next_roots_45
+        ldr q_root0, [r12345_ptr], #16
 .endm
 
-.macro load_next_roots_56
-        ldr q_root0,    [r56_ptr], #(6*16)
-        ldr q_root0_tw, [r56_ptr, #(-6*16 + 1*16)]
-        ldr q_root1,    [r56_ptr, #(-6*16 + 2*16)]
-        ldr q_root1_tw, [r56_ptr, #(-6*16 + 3*16)]
-        ldr q_root2,    [r56_ptr, #(-6*16 + 4*16)]
-        ldr q_root2_tw, [r56_ptr, #(-6*16 + 5*16)]
+.macro load_next_roots_67
+        ldr q_root0,    [r67_ptr], #(6*16)
+        ldr q_root0_tw, [r67_ptr, #(-6*16 + 1*16)]
+        ldr q_root1,    [r67_ptr, #(-6*16 + 2*16)]
+        ldr q_root1_tw, [r67_ptr, #(-6*16 + 3*16)]
+        ldr q_root2,    [r67_ptr, #(-6*16 + 4*16)]
+        ldr q_root2_tw, [r67_ptr, #(-6*16 + 5*16)]
 .endm
 
 .macro transpose4 data
@@ -118,8 +118,8 @@
 
         // Arguments
         in         .req x0 // Input/output buffer
-        r01234_ptr .req x1 // twiddles for layer 0,1,2,3,4
-        r56_ptr    .req x2 // twiddles for layer 5,6
+        r12345_ptr .req x1 // twiddles for layer 0,1,2,3,4
+        r67_ptr    .req x2 // twiddles for layer 5,6
 
         inp     .req x3
         count   .req x4
@@ -179,7 +179,7 @@ MLK_ASM_FN_SYMBOL(ntt_asm_clean)
         mov inp, in
         mov count, #4
 
-        load_roots_012
+        load_roots_123
 
         .p2align 2
 
@@ -196,7 +196,7 @@ MLK_ASM_FN_SYMBOL(ntt_asm_clean)
         //
         // See test/test_bounds.py for more details.
 
-layer012_start:
+layer123_start:
 
         ldr q_data0, [in, #0]
         ldr q_data1, [in, #(1*(512/8))]
@@ -232,20 +232,20 @@ layer012_start:
         str q_data7, [in, #(-16 + 7*(512/8))]
 
         subs count, count, #1
-        cbnz count, layer012_start
+        cbnz count, layer123_start
 
         mov in, inp
         mov count, #8
 
         .p2align 2
-layer3456_start:
+layer4567_start:
 
         ldr q_data0, [in, #(16*0)]
         ldr q_data1, [in, #(16*1)]
         ldr q_data2, [in, #(16*2)]
         ldr q_data3, [in, #(16*3)]
 
-        load_next_roots_34
+        load_next_roots_45
 
         ct_butterfly data0, data2, root0, 0, 1
         ct_butterfly data1, data3, root0, 0, 1
@@ -253,7 +253,7 @@ layer3456_start:
         ct_butterfly data2, data3, root0, 4, 5
 
         transpose4 data
-        load_next_roots_56
+        load_next_roots_67
 
         ct_butterfly_v data0, data2, root0, root0_tw
         ct_butterfly_v data1, data3, root0, root0_tw
@@ -268,15 +268,15 @@ layer3456_start:
         str q_data3, [in, #(-16*1)]
 
         subs count, count, #1
-        cbnz count, layer3456_start
+        cbnz count, layer4567_start
 
         pop_stack
         ret
 
 /****************** REGISTER DEALLOCATIONS *******************/
     .unreq in
-    .unreq r01234_ptr
-    .unreq r56_ptr
+    .unreq r12345_ptr
+    .unreq r67_ptr
     .unreq inp
     .unreq count
     .unreq wtmp

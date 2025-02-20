@@ -74,22 +74,22 @@
         mls     \a\().8h, t0.8h,    consts.h[0]
 .endm
 
-.macro load_roots_012
-        ldr q_root0, [r01234_ptr], #32
-        ldr q_root1, [r01234_ptr, #-16]
+.macro load_roots_123
+        ldr q_root0, [r12345_ptr], #32
+        ldr q_root1, [r12345_ptr, #-16]
 .endm
 
-.macro load_next_roots_34
-        ldr q_root0, [r01234_ptr], #16
+.macro load_next_roots_45
+        ldr q_root0, [r12345_ptr], #16
 .endm
 
-.macro load_next_roots_56
-        ldr q_root0,    [r56_ptr], #(6*16)
-        ldr q_root0_tw, [r56_ptr, #(-6*16 + 1*16)]
-        ldr q_root1,    [r56_ptr, #(-6*16 + 2*16)]
-        ldr q_root1_tw, [r56_ptr, #(-6*16 + 3*16)]
-        ldr q_root2,    [r56_ptr, #(-6*16 + 4*16)]
-        ldr q_root2_tw, [r56_ptr, #(-6*16 + 5*16)]
+.macro load_next_roots_67
+        ldr q_root0,    [r67_ptr], #(6*16)
+        ldr q_root0_tw, [r67_ptr, #(-6*16 + 1*16)]
+        ldr q_root1,    [r67_ptr, #(-6*16 + 2*16)]
+        ldr q_root1_tw, [r67_ptr, #(-6*16 + 3*16)]
+        ldr q_root2,    [r67_ptr, #(-6*16 + 4*16)]
+        ldr q_root2_tw, [r67_ptr, #(-6*16 + 5*16)]
 .endm
 
 .macro transpose4 data
@@ -142,8 +142,8 @@
 // also matching PQClean.
 
         in         .req x0
-        r01234_ptr .req x1
-        r56_ptr    .req x2
+        r12345_ptr .req x1
+        r67_ptr    .req x2
 
         inp     .req x3
         count   .req x4
@@ -275,7 +275,7 @@ scale_start:
         // ldr q28, [x2, #-16]             // ...................*...........
 
         sub count, count, #1
-layer3456_start:
+layer4567_start:
                                                 // Instructions:    83
                                                 // Expected cycles: 94
                                                 // Expected IPC:    0.88
@@ -461,7 +461,7 @@ layer3456_start:
         // str q11, [x3, #(-64 + 16*3)]               // .......................................................~........'....................................................................................*
 
         sub count, count, #1
-        cbnz count, layer3456_start
+        cbnz count, layer4567_start
                                                 // Instructions:    72
                                                 // Expected cycles: 79
                                                 // Expected IPC:    0.91
@@ -628,7 +628,7 @@ layer3456_start:
         // ---------------------------------------------------------------------
 
         mov count, #4
-        load_roots_012
+        load_roots_123
 
         .p2align 2
 
@@ -675,7 +675,7 @@ layer3456_start:
         // add v23.8H, v28.8H, v13.8H      // .................*.............
 
         sub count, count, #1
-layer012_start:
+layer123_start:
                                                 // Instructions:    76
                                                 // Expected cycles: 84
                                                 // Expected IPC:    0.90
@@ -847,7 +847,7 @@ layer012_start:
         // str q11, [x0, #(-16 + 3*(512/8))]          // ........................~..'................................................................................*
 
         sub count, count, #1
-        cbnz count, layer012_start
+        cbnz count, layer123_start
                                                 // Instructions:    64
                                                 // Expected cycles: 66
                                                 // Expected IPC:    0.97
@@ -1000,8 +1000,8 @@ layer012_start:
 
 /****************** REGISTER DEALLOCATIONS *******************/
     .unreq in
-    .unreq r01234_ptr
-    .unreq r56_ptr
+    .unreq r12345_ptr
+    .unreq r67_ptr
     .unreq inp
     .unreq count
     .unreq wtmp

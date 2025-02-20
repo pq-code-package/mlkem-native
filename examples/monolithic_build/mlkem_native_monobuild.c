@@ -427,10 +427,10 @@
 #undef MLK_NATIVE_AARCH64_META_H
 /* mlkem/native/aarch64/src/arith_native_aarch64.h */
 #undef MLK_NATIVE_AARCH64_SRC_ARITH_NATIVE_AARCH64_H
-#undef aarch64_invntt_zetas_layer01234
-#undef aarch64_invntt_zetas_layer56
-#undef aarch64_ntt_zetas_layer01234
-#undef aarch64_ntt_zetas_layer56
+#undef aarch64_invntt_zetas_layer12345
+#undef aarch64_invntt_zetas_layer67
+#undef aarch64_ntt_zetas_layer12345
+#undef aarch64_ntt_zetas_layer67
 #undef aarch64_zetas_mulcache_native
 #undef aarch64_zetas_mulcache_twisted_native
 #undef intt_asm_opt

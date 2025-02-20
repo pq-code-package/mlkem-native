@@ -92,7 +92,7 @@ scale_start:
         ldur	q28, [x2, #-0x10]
         sub	x4, x4, #0x1
 
-layer3456_start:
+layer4567_start:
         trn1	v12.4s, v26.4s, v8.4s
         trn2	v26.4s, v26.4s, v8.4s
         trn2	v8.4s, v24.4s, v16.4s
@@ -177,7 +177,7 @@ layer3456_start:
         ldur	q4, [x2, #-0x20]
         ldur	q28, [x2, #-0x10]
         sub	x4, x4, #0x1
-        cbnz	x4, layer3456_start
+        cbnz	x4, layer4567_start
         trn1	v11.4s, v26.4s, v8.4s
         trn2	v24.4s, v24.4s, v16.4s
         trn2	v26.4s, v26.4s, v8.4s
@@ -267,7 +267,7 @@ layer3456_start:
         ldr	q15, [x0, #0x40]
         sub	x4, x4, #0x1
 
-layer012_start:
+layer123_start:
         sub	v12.8h, v11.8h, v15.8h
         add	v26.8h, v11.8h, v15.8h
         sub	v8.8h, v24.8h, v16.8h
@@ -345,7 +345,7 @@ layer012_start:
         add	v19.8h, v24.8h, v16.8h
         add	v23.8h, v28.8h, v13.8h
         sub	x4, x4, #0x1
-        cbnz	x4, layer012_start
+        cbnz	x4, layer123_start
         add	v10.8h, v11.8h, v15.8h
         sub	v12.8h, v28.8h, v13.8h
         sub	v11.8h, v11.8h, v15.8h

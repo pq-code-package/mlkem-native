@@ -74,22 +74,22 @@
         mls     \a\().8h, t0.8h,    consts.h[0]
 .endm
 
-.macro load_roots_012
-        ldr q_root0, [r01234_ptr], #32
-        ldr q_root1, [r01234_ptr, #-16]
+.macro load_roots_123
+        ldr q_root0, [r12345_ptr], #32
+        ldr q_root1, [r12345_ptr, #-16]
 .endm
 
-.macro load_next_roots_34
-        ldr q_root0, [r01234_ptr], #16
+.macro load_next_roots_45
+        ldr q_root0, [r12345_ptr], #16
 .endm
 
-.macro load_next_roots_56
-        ldr q_root0,    [r56_ptr], #(6*16)
-        ldr q_root0_tw, [r56_ptr, #(-6*16 + 1*16)]
-        ldr q_root1,    [r56_ptr, #(-6*16 + 2*16)]
-        ldr q_root1_tw, [r56_ptr, #(-6*16 + 3*16)]
-        ldr q_root2,    [r56_ptr, #(-6*16 + 4*16)]
-        ldr q_root2_tw, [r56_ptr, #(-6*16 + 5*16)]
+.macro load_next_roots_67
+        ldr q_root0,    [r67_ptr], #(6*16)
+        ldr q_root0_tw, [r67_ptr, #(-6*16 + 1*16)]
+        ldr q_root1,    [r67_ptr, #(-6*16 + 2*16)]
+        ldr q_root1_tw, [r67_ptr, #(-6*16 + 3*16)]
+        ldr q_root2,    [r67_ptr, #(-6*16 + 4*16)]
+        ldr q_root2_tw, [r67_ptr, #(-6*16 + 5*16)]
 .endm
 
 .macro transpose4 data
@@ -142,8 +142,8 @@
 // also matching PQClean.
 
         in         .req x0
-        r01234_ptr .req x1
-        r56_ptr    .req x2
+        r12345_ptr .req x1
+        r67_ptr    .req x2
 
         inp     .req x3
         count   .req x4
@@ -234,7 +234,7 @@ scale_start:
         mov count, #8
 
         .p2align 2
-layer3456_start:
+layer4567_start:
 
         ldr q_data0, [inp, #(16*0)]
         ldr q_data1, [inp, #(16*1)]
@@ -243,7 +243,7 @@ layer3456_start:
 
         transpose4 data // manual ld4
 
-        load_next_roots_56
+        load_next_roots_67
 
         // Layer 7
         gs_butterfly_v data0, data1, root1, root1_tw
@@ -262,7 +262,7 @@ layer3456_start:
 
         transpose4 data
 
-        load_next_roots_34
+        load_next_roots_45
 
         // Layer 5
         gs_butterfly data0, data1, root0, 2, 3
@@ -289,16 +289,16 @@ layer3456_start:
         str q_data3, [inp, #(-64 + 16*3)]
 
         subs count, count, #1
-        cbnz count, layer3456_start
+        cbnz count, layer4567_start
 
         // ---------------------------------------------------------------------
 
         mov count, #4
-        load_roots_012
+        load_roots_123
 
         .p2align 2
 
-layer012_start:
+layer123_start:
 
         ldr q_data0, [in, #0]
         ldr q_data1, [in, #(1*(512/8))]
@@ -337,15 +337,15 @@ layer012_start:
         str q_data3, [in, #(-16 + 3*(512/8))]
 
         subs count, count, #1
-        cbnz count, layer012_start
+        cbnz count, layer123_start
 
         pop_stack
         ret
 
 /****************** REGISTER DEALLOCATIONS *******************/
     .unreq in
-    .unreq r01234_ptr
-    .unreq r56_ptr
+    .unreq r12345_ptr
+    .unreq r67_ptr
     .unreq inp
     .unreq count
     .unreq wtmp

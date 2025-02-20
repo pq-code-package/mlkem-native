@@ -74,7 +74,7 @@ def check_magic_numbers():
             continue
         content = content.split("\n")
         # Use negative lookbefore and lookahead to exclude numbers
-        # that occur as part of identifiers (e.g. layer01234 or 199901L)
+        # that occur as part of identifiers (e.g. layer12345 or 199901L)
         pattern = r'(?<![0-9a-zA-Z/_-])([-]?\d{4,})(?![0-9a-zA-Z_-])'
         enabled = True
         magic_dict = {'MLKEM_Q': mlkem_q}

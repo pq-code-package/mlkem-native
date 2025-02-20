@@ -148,6 +148,8 @@ def prepare_root_for_barrett(root):
 def gen_aarch64_root_of_unity_for_block(layer, block, inv=False):
     # We are computing a negacyclic NTT; the twiddles needed here is
     # the second half of the twiddles for a cyclic NTT of twice the size.
+    # For ease of calculating the roots, layers are numbers 0 through 6
+    # in this function.
     log = bitreverse(pow(2, layer) + block, 7)
     if inv is True:
         log = -log
@@ -155,8 +157,8 @@ def gen_aarch64_root_of_unity_for_block(layer, block, inv=False):
     return root, root_twisted
 
 
-def gen_aarch64_fwd_ntt_zetas_layer01234():
-    # Layers 0,1,2 are merged
+def gen_aarch64_fwd_ntt_zetas_layer12345():
+    # Layers 1,2,3 are merged
     yield from gen_aarch64_root_of_unity_for_block(0, 0)
     yield from gen_aarch64_root_of_unity_for_block(1, 0)
     yield from gen_aarch64_root_of_unity_for_block(1, 1)
@@ -166,8 +168,8 @@ def gen_aarch64_fwd_ntt_zetas_layer01234():
     yield from gen_aarch64_root_of_unity_for_block(2, 3)
     yield from (0, 0)  # Padding
 
-    # Layers 3,4,5,6 are merged, but we emit roots for 3,4
-    # in separate arrays than those for 5,6
+    # Layers 4,5,6,7 are merged, but we emit roots for 4,5
+    # in separate arrays than those for 6,7
     for block in range(8):  # There are 8 blocks in Layer 4
         yield from gen_aarch64_root_of_unity_for_block(3, block)
         yield from gen_aarch64_root_of_unity_for_block(4, 2 * block + 0)
@@ -175,9 +177,9 @@ def gen_aarch64_fwd_ntt_zetas_layer01234():
         yield from (0, 0)  # Padding
 
 
-def gen_aarch64_fwd_ntt_zetas_layer56():
-    # Layers 3,4,5,6 are merged, but we emit roots for 3,4
-    # in separate arrays than those for 5,6
+def gen_aarch64_fwd_ntt_zetas_layer67():
+    # Layers 4,5,6,7 are merged, but we emit roots for 4,5
+    # in separate arrays than those for 6,7
     for block in range(8):
 
         def double_ith(t, i):
@@ -226,16 +228,16 @@ def gen_aarch64_fwd_ntt_zetas_layer56():
             )
 
 
-def gen_aarch64_inv_ntt_zetas_layer01234():
-    # Layers 3,4,5,6 are merged, but we emit roots for 3,4
-    # in separate arrays than those for 5,6
+def gen_aarch64_inv_ntt_zetas_layer12345():
+    # Layers 4,5,6,7 are merged, but we emit roots for 4,5
+    # in separate arrays than those for 6,7
     for block in range(8):  # There are 8 blocks in Layer 4
         yield from gen_aarch64_root_of_unity_for_block(3, block, inv=True)
         yield from gen_aarch64_root_of_unity_for_block(4, 2 * block + 0, inv=True)
         yield from gen_aarch64_root_of_unity_for_block(4, 2 * block + 1, inv=True)
         yield from (0, 0)  # Padding
 
-    # Layers 0,1,2 are merged
+    # Layers 1,2,3 are merged
     yield from gen_aarch64_root_of_unity_for_block(0, 0, inv=True)
     yield from gen_aarch64_root_of_unity_for_block(1, 0, inv=True)
     yield from gen_aarch64_root_of_unity_for_block(1, 1, inv=True)
@@ -246,9 +248,9 @@ def gen_aarch64_inv_ntt_zetas_layer01234():
     yield from (0, 0)  # Padding
 
 
-def gen_aarch64_inv_ntt_zetas_layer56():
-    # Layers 3,4,5,6 are merged, but we emit roots for 3,4
-    # in separate arrays than those for 5,6
+def gen_aarch64_inv_ntt_zetas_layer67():
+    # Layers 4,5,6,7 are merged, but we emit roots for 4,5
+    # in separate arrays than those for 6,7
     for block in range(8):
 
         def double_ith(t, i):
@@ -326,20 +328,20 @@ def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
         yield " * Table of zeta values used in the AArch64 forward NTT"
         yield " * See autogen for details."
         yield " */"
-        yield "MLK_ALIGN const int16_t aarch64_ntt_zetas_layer01234[] = {"
-        yield from map(lambda t: str(t) + ",", gen_aarch64_fwd_ntt_zetas_layer01234())
+        yield "MLK_ALIGN const int16_t aarch64_ntt_zetas_layer12345[] = {"
+        yield from map(lambda t: str(t) + ",", gen_aarch64_fwd_ntt_zetas_layer12345())
         yield "};"
         yield ""
-        yield "MLK_ALIGN const int16_t aarch64_ntt_zetas_layer56[] = {"
-        yield from map(lambda t: str(t) + ",", gen_aarch64_fwd_ntt_zetas_layer56())
+        yield "MLK_ALIGN const int16_t aarch64_ntt_zetas_layer67[] = {"
+        yield from map(lambda t: str(t) + ",", gen_aarch64_fwd_ntt_zetas_layer67())
         yield "};"
         yield ""
-        yield "MLK_ALIGN const int16_t aarch64_invntt_zetas_layer01234[] = {"
-        yield from map(lambda t: str(t) + ",", gen_aarch64_inv_ntt_zetas_layer01234())
+        yield "MLK_ALIGN const int16_t aarch64_invntt_zetas_layer12345[] = {"
+        yield from map(lambda t: str(t) + ",", gen_aarch64_inv_ntt_zetas_layer12345())
         yield "};"
         yield ""
-        yield "MLK_ALIGN const int16_t aarch64_invntt_zetas_layer56[] = {"
-        yield from map(lambda t: str(t) + ",", gen_aarch64_inv_ntt_zetas_layer56())
+        yield "MLK_ALIGN const int16_t aarch64_invntt_zetas_layer67[] = {"
+        yield from map(lambda t: str(t) + ",", gen_aarch64_inv_ntt_zetas_layer67())
         yield "};"
         yield ""
         yield "MLK_ALIGN const int16_t aarch64_zetas_mulcache_native[] = {"
@@ -532,12 +534,12 @@ def gen_avx2_fwd_ntt_zetas():
         yield from (r for l in root_pairs for r in l[1])
         yield from (r for l in root_pairs for r in l[0])
 
-    # Layers 0 twiddle
+    # Layers 1 twiddle
     yield from gen_twiddles_many(0, 0, range(1), 4)
     # Padding so that the subsequent twiddles are 16-byte aligned
     yield from [0] * 8
 
-    # Layer 1-6 twiddles, separated by whether they belong to the upper or lower half
+    # Layer 2-7 twiddles, separated by whether they belong to the upper or lower half
     for i in range(2):
         yield from gen_twiddles_many(1, i * (2**0), range(1), 16)
         yield from gen_twiddles_many(2, i * (2**1), range(2), 8)
