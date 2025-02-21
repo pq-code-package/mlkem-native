@@ -265,16 +265,14 @@ For mlkem-native, proof directories lie below `cbmc`.
 Create a new sub-directory in there, where the name of the directory is the name of the function. You don't need a
 namespacing prefix.
 
-That directory needs to contain 3 files.
+That directory needs to contain 2 files.
 
-* cbmc-proof.txt
 * Makefile
 * XXX_harness.c
 
 where "XXX" is the name of the function being proved - same as the directory name.
 
-We suggest that you copy these files from an existing proof directory and modify the latter two. The `cbmc-proof.txt`
-file is just a marker that says "this directory contains a CBMC proof" to the tools, so no modification is required.
+We suggest that you copy these files from an existing proof directory and modify the it according to your needs.
 
 ### Update Makefile
 
