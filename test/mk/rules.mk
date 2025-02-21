@@ -27,13 +27,13 @@ $(BUILD_DIR)/%.a: $(CONFIG)
 	$(eval _LIB := $(subst $(BUILD_DIR)/lib,,$(@:%.a=%)))
 	$(eval _CFLAGS := $(subst -static,,$(CFLAGS)))
 
-ifneq ($(findstring Darwin,$(HOST_PLATFORM)),) # if is on macOS
+ifeq ($(findstring Darwin,$(HOST_PLATFORM))$(CROSS_PREFIX),Darwin) # if is on native macOS
 	$(Q)echo "int main(void) {return 0;}" \
 		| $(CC) -x c - -L$(BUILD_DIR) $(_CFLAGS) \
 		 -all_load -Wl,-undefined,dynamic_lookup -l$(_LIB) \
 		 -Imlkem $(wildcard test/notrandombytes/*.c) -o $(@:%.a=%_tmp.a.out)
 	$(Q)rm -f $(@:%.a=%_tmp.a.out)
-else                                           # if not on macOS
+else                                           # if not on macOS or cross compiling on macOS
 	$(Q)echo "int main(void) {return 0;}" \
 		| $(CC) -x c - -L$(BUILD_DIR) $(_CFLAGS) \
 		-Wl,--whole-archive,--unresolved-symbols=ignore-in-object-files -l$(_LIB) \

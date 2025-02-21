@@ -19,23 +19,21 @@ inputs:
   cache_prefix:
     description: Fixed prefix of ID of Github cache entries that should be removed.
     required: false
-  purge_cache:
-    description: Determine whether to purge cache with primary key or not
+  save_cache:
+    description: Determine whether to save cache with primary key or not
     required: false
-    default: 'true'
+    default: 'false'
   gh_token:
     description: Github access token to use
     required: true
+  install:
+    required: false
+    description: Determine how to install nix ('installer' | 'apt')
+    default: 'installer'
 
 runs:
   using: composite
   steps:
-    - name: Nix install mode
-      shell: bash
-      run: |
-        if [[ ${{ runner.os }} != 'Linux' || $USER == 'root' ]]; then
-          echo "NIX_INSTALL_MODE=multi" >> $GITHUB_ENV
-        fi
     - name: Pre-check nix
       id: nix-pre-check
       if: ${{ env.NIX_SHELL == '' }}
@@ -51,64 +49,33 @@ runs:
 
         trap 'suppress $LINENO' ERR
 
-        nix --version
-        nix config show | grep -E "^trusted-users = .*$USER"
-        nix config show | grep -E "^experimental-features = .*flakes"
-        nix config show | grep -E "^experimental-features = .*nix-command"
-    - name: Install Nix
-      shell: bash
-      if: ${{ steps.nix-pre-check.outputs.installed == 'false' }}
-      env:
-        GH_TOKEN: ${{ inputs.gh_token }}
-      run: |
-        echo "::group::Nix installation"
-        mkdir -p ~/.config/nix
-
-        if [[ $NIX_INSTALL_MODE == 'multi' ]]; then
-          curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install \
-          --no-confirm \
-          --extra-conf "trusted-users = ${USER:-}" \
-          --extra-conf "experimental-features = nix-command flakes"
-        else
-          sh <(curl -L https://nixos.org/nix/install) --no-daemon
-
-        cat >> ~/.config/nix/nix.conf << EOF
-          trusted-users = ${USER:-}
-          experimental-features = nix-command flakes
-          substituters = https://cache.nixos.org/
-          trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
-          max-jobs = auto
-        EOF
+        if [[ $USER == 'root' ]]; then
+          mkdir -p /root
+          echo "HOME=/root" >> $GITHUB_ENV
         fi
+
+        nix --version
+    - name: Install nix via apt
+      if: ${{ steps.nix-pre-check.outputs.installed == 'false' && inputs.install == 'apt' }}
+      shell: bash
+      run: |
+        if [[ -f /.dockerenv ]]; then
+          apt install nix -y
+        else
+          sudo apt install nix -y
+        fi
+        mkdir -p ~/.config/nix
+        cat >> ~/.config/nix/nix.conf << EOF
+          experimental-features = nix-command flakes
+        EOF
 
         if [[ ! -z $GH_TOKEN ]]; then
-           mkdir -p ~/.config/nix
-           echo "access-tokens = github.com=$GH_TOKEN" >> ~/.config/nix/nix.conf
+          echo "access-tokens = github.com=$GH_TOKEN" >> ~/.config/nix/nix.conf
         fi
-
-        if command -v gh >/dev/null 2>&1; then
-          limit=$(gh api rate_limit --jq '.rate.remaining')
-          reset=$(gh api rate_limit --jq '.rate.reset')
-          now=$(date +%s)
-          if [[ $limit < 10 ]]; then
-            wait=$(( reset - now ))
-            echo "Rate limit remaining is $limit less then 10, waiting for $wait secs to retry"
-            sleep $wait
-          else
-            echo "Rate limit remaining is $limit greater than 10, no need to wait"
-          fi
-        else
-            echo "GitHub CLI is not installed."
-        fi
-
-        if [[ $NIX_INSTALL_MODE == 'multi' ]]; then
-          . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-        else
-          . ~/.nix-profile/etc/profile.d/nix.sh
-        fi
-        echo "$(dirname $(which nix))" >> $GITHUB_PATH
-        nix profile install nixpkgs/nixos-24.05#sqlite
-        echo "::endgroup::"
+    - uses: cachix/install-nix-action@08dcb3a5e62fa31e2da3d490afc4176ef55ecd72 # v30
+      if: ${{ steps.nix-pre-check.outputs.installed == 'false' }}
+      with:
+        github_access_token: ${{ inputs.gh_token }}
     - name: Post-check nix
       id: nix-post-check
       continue-on-error: true
@@ -116,20 +83,21 @@ runs:
       run: |
         echo "::group::nix config"
         if [[ -z "${{ inputs.cache_prefix }}" ]]; then
-          cache_prefix="${{ runner.os }}-${{ runner.arch }}-${{ inputs.devShell }}"
+          cache_prefix="${{ runner.os }}-${{ runner.arch }}"
         else
           cache_prefix="${{ inputs.cache_prefix }}"
-        fi
-        if [[ ! -z $NIX_INSTALL_MODE ]]; then
-          cache_prefix="$cache_prefix-$NIX_INSTALL_MODE"
         fi
 
         echo "cache_prefix=$cache_prefix" >> $GITHUB_OUTPUT
 
-        nix config check
+        if [[ ${{ steps.nix-pre-check.outputs.installed }} == 'false' ]]; then
+          sudo chown -R $USER:nixbld /nix
+        fi
+
+        nix profile install nixpkgs/nixos-24.11#sqlite
         nix config show
         echo "::endgroup::"
-    - uses: nix-community/cache-nix-action@8351fb9f51c580c96c509987ebb99e38aed956ce # v5.2.1
+    - uses: nix-community/cache-nix-action@dab0514428ae3988852b7787a6d86a6fc571cc9d #v6.0.0
       id: cache
       if: ${{ env.NIX_CACHE_ENABLED != 1 && inputs.cache == 'true' }}
       continue-on-error: true
@@ -137,10 +105,11 @@ runs:
         primary-key: ${{ steps.nix-post-check.outputs.cache_prefix }}-${{ hashFiles('**/*.nix') }}
         restore-prefixes-first-match: ${{ steps.nix-post-check.outputs.cache_prefix }}
         gc-max-store-size-linux: 536870912
-        purge: ${{ inputs.purge_cache == 'true' }}
+        purge: ${{ inputs.save_cache == 'true' }}
+        save: ${{ inputs.save_cache == 'true' }}
         purge-prefixes: cache-${{ steps.nix-post-check.outputs.cache_prefix }}
         purge-created: 0
-        purge-primary-key: ${{ inputs.purge_cache == 'true' && 'always' || 'never' }}
+        purge-primary-key: ${{ inputs.save_cache == 'true' && 'always' || 'never' }}
         token: ${{ inputs.gh_token }}
     - name: Set Shell
       shell: bash -lo pipefail {0}
@@ -152,7 +121,11 @@ runs:
 
         echo NIX_SHELL="${{ inputs.devShell }}" >> $GITHUB_ENV
         nix_extra_flags="${{ inputs.verbose == 'false' && '--quiet' || '' }}"
-        echo SHELL="$(which nix) develop $nix_extra_flags .#${{ inputs.devShell }} -c bash -e {0}" >> $GITHUB_ENV
+        if [[ ${{ inputs.install }} == 'apt' && ! -f /.dockerenv ]]; then
+          echo SHELL="sudo $(which nix) develop $nix_extra_flags .#${{ inputs.devShell }} -c bash -e {0}" >> $GITHUB_ENV
+        else
+          echo SHELL="$(which nix) develop $nix_extra_flags .#${{ inputs.devShell }} -c bash -e {0}" >> $GITHUB_ENV
+        fi
         echo "::endgroup::"
     - name: Prepare nix dev shell
       shell: ${{ env.SHELL }}

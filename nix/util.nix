@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-{ pkgs, bitwuzla, z3 }:
+{ pkgs, cbmc, bitwuzla, z3 }:
 rec {
   glibc-join = p: p.buildPackages.symlinkJoin {
     name = "glibc-join";
@@ -17,11 +17,11 @@ rec {
 
   native-gcc =
     if pkgs.stdenv.isDarwin
-    then null
+    then pkgs.clang_15
     else wrap-gcc pkgs;
 
-  # cross is for determining whether to install the cross toolchain or not
-  core = { cross ? true }:
+  # cross is for determining whether to install the cross toolchain dependencies or not
+  _toolchains = { cross ? true }:
     let
       x86_64-gcc = wrap-gcc pkgs.pkgsCross.gnu64;
       aarch64-gcc = wrap-gcc pkgs.pkgsCross.aarch64-multiplatform;
@@ -35,43 +35,44 @@ rec {
       #   and won't just work for now
       # - equip all toolchains if cross is explicitly set to true
       # - On some machines, `native-gcc` needed to be evaluated lastly (placed as the last element of the toolchain list), or else would result in environment variables (CC, AR, ...) overriding issue.
-    pkgs.lib.optionals (cross && !pkgs.stdenv.isDarwin) [
-      (pkgs.lib.optional (! pkgs.stdenv.isx86_64) x86_64-gcc)
-      (pkgs.lib.optional (! pkgs.stdenv.isAarch64) aarch64-gcc)
-      (pkgs.lib.optional (pkgs.stdenv.isx86_64 || pkgs.stdenv.isAarch64) riscv64-gcc)
-      (pkgs.lib.optional (pkgs.stdenv.isx86_64) aarch64_be-gcc)
-      native-gcc
-    ]
+    pkgs.lib.optionals cross [ pkgs.qemu x86_64-gcc aarch64-gcc riscv64-gcc ]
+    ++ pkgs.lib.optionals (cross && pkgs.stdenv.isLinux && pkgs.stdenv.isx86_64) [ aarch64_be-gcc ]
+    ++ pkgs.lib.optionals cross [ native-gcc ]
+    # NOTE: Tools in /Library/Developer/CommandLineTools/usr/bin on macOS are inaccessible in the Nix shell. This issue is addressed in https://github.com/NixOS/nixpkgs/pull/353893 but hasn’t been merged into the 24.11 channel yet. As a workaround, we include this dependency for macOS temporary. 
+    ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [ pkgs.git ]
     ++ builtins.attrValues {
       inherit (pkgs.python3Packages) sympy pyyaml;
       inherit (pkgs)
-        python3
-        qemu; # 8.2.4
+        gnumake
+        python3;
     };
 
-  wrapShell = mkShell: attrs:
-    mkShell (attrs // {
+  # NOTE: idiomatic nix way of properly setting the $CC in a nix shell
+  mkShellWithCC = cc: attrs: (pkgs.mkShellNoCC.override { stdenv = pkgs.overrideCC pkgs.stdenv cc; }) (
+    attrs // {
       shellHook = ''
         export PATH=$PWD/scripts:$PATH
-      '' +
-      # NOTE: we don't support nix gcc toolchains for darwin system, therefore explicitly setting environment variables like CC, AR, AS, ... is required
-      pkgs.lib.optionalString pkgs.stdenv.isDarwin ''
-        export CC=gcc
-        export CXX=g++
-        for cmd in \
-            ar as ld nm objcopy objdump readelf ranlib strip strings size windres
-        do
-            export ''${cmd^^}=$cmd
-        done
       '';
-    });
-
-  # NOTE: idiomatic nix way of properly setting the $CC in a nix shell
-  mkShellWithCC = cc: pkgs.mkShellNoCC.override { stdenv = pkgs.overrideCC pkgs.stdenv cc; };
+    }
+  );
+  mkShellNoCC = mkShellWithCC null;
   mkShell = mkShellWithCC native-gcc;
 
-  linters =
-    builtins.attrValues {
+  mkShellWithCC' = cc:
+    mkShellWithCC cc {
+      packages = [ pkgs.python3 ];
+      hardeningDisable = [ "fortify" ];
+    };
+  mkShellWithCC_valgrind' = cc:
+    mkShellWithCC cc {
+      packages = [ pkgs.python3 ] ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ valgrind_varlat ];
+      hardeningDisable = [ "fortify" ];
+    };
+
+  # some customized packages
+  linters = pkgs.symlinkJoin {
+    name = "pqcp-linters";
+    paths = builtins.attrValues {
       clang-tools = pkgs.clang-tools.overrideAttrs {
         unwrapped = pkgs.llvmPackages_17.clang-unwrapped;
       };
@@ -84,11 +85,25 @@ rec {
         shfmt;
 
       inherit (pkgs.python3Packages)
-        sympy black;
+        mpmath sympy black;
     };
-
-  cbmc = pkgs.callPackage ./cbmc {
-    inherit bitwuzla z3;
   };
-  valgrind-varlat = pkgs.callPackage ./valgrind { };
+
+  cbmc_pkgs = pkgs.callPackage ./cbmc {
+    inherit cbmc bitwuzla z3;
+  };
+
+  valgrind_varlat = pkgs.callPackage ./valgrind { };
+  hol_light' = pkgs.callPackage ./hol_light { };
+  s2n_bignum = pkgs.callPackage ./s2n_bignum { };
+
+  toolchains = pkgs.symlinkJoin {
+    name = "toolchains";
+    paths = _toolchains { };
+  };
+
+  toolchains_native = pkgs.symlinkJoin {
+    name = "toolchains-native";
+    paths = _toolchains { cross = false; };
+  };
 }

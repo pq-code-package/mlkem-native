@@ -119,15 +119,10 @@ jobs:
           nix-shell: ci-linter
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
           nix-verbose: ${{ inputs.verbose }}
-      - name: Preprocess
-        id: preprocess
-        shell: bash
-        run: |
-          echo "nix-shell=${{ inputs.cbmc && 'ci-cbmc' || 'ci' }}${{ (inputs.compile_mode == 'cross' || inputs.compile_mode == 'all') && '-cross' || '' }}" >> $GITHUB_OUTPUT
       - name: Functional Tests
         uses: ./.github/actions/multi-functest
         with:
-          nix-shell: ${{ steps.preprocess.outputs.nix-shell }}
+          nix-shell: ${{ (inputs.compile_mode == 'cross' || inputs.compile_mode == 'all') && 'ci-cross' || 'ci' }}
           nix-cache: ${{ inputs.cbmc || inputs.compile_mode == 'cross' || inputs.compile_mode == 'all' }}
           nix-verbose: ${{ inputs.verbose }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
@@ -142,7 +137,7 @@ jobs:
         if: ${{ inputs.cbmc && (success() || failure()) }}
         uses: ./.github/actions/cbmc
         with:
-          nix-shell: ${{ steps.preprocess.outputs.nix-shell }}
+          nix-shell: ci-cbmc
           nix-verbose: ${{ inputs.verbose }}
           mlkem_k: ${{ inputs.cbmc_mlkem_k }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
