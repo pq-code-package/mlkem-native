@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include "common.h"
 
-#define mlk_ntt_butterfly_block MLK_NAMESPACE(ntt_butterfly_block)
+
 void mlk_ntt_butterfly_block(int16_t *r, int16_t root, unsigned start,
                              unsigned len, int bound);
 

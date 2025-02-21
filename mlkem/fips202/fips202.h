@@ -16,7 +16,6 @@
 #define SHA3_512_RATE 72
 
 /* Context for non-incremental API */
-#define mlk_shake128ctx MLK_NAMESPACE(shake128ctx)
 typedef struct
 {
   uint64_t ctx[25];

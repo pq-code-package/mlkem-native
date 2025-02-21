@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include "common.h"
 
-#define mlk_fqmul MLK_NAMESPACE(fqmul)
+
 int16_t mlk_fqmul(int16_t a, int16_t b);
 
 void harness(void)

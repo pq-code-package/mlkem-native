@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#define mlk_keccak_absorb_once MLK_NAMESPACE(keccak_absorb_once)
+
 void mlk_keccak_absorb_once(uint64_t *s, uint32_t r, const uint8_t *m,
                             size_t mlen, uint8_t p);
 

@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include "common.h"
 
-#define mlk_invntt_layer MLK_NAMESPACE(invntt_layer)
+
 void mlk_invntt_layer(int16_t *p, unsigned len, unsigned layer);
 
 void harness(void)

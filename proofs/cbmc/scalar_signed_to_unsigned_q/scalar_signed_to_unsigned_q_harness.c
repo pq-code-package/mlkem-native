@@ -5,8 +5,6 @@
 #include <stdint.h>
 #include "common.h"
 
-#define mlk_scalar_signed_to_unsigned_q \
-  MLK_NAMESPACE(scalar_signed_to_unsigned_q)
 uint16_t mlk_scalar_signed_to_unsigned_q(int16_t c);
 
 void harness(void)

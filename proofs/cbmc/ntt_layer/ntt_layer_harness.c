@@ -4,7 +4,7 @@
 
 #include "poly.h"
 
-#define mlk_ntt_layer MLK_NAMESPACE(ntt_layer)
+
 void mlk_ntt_layer(int16_t *p, unsigned len, unsigned layer);
 
 void harness(void)

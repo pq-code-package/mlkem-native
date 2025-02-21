@@ -20,19 +20,20 @@ PROJECT_SOURCES += $(SRCDIR)/mlkem/indcpa.c
 
 CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)indcpa_dec
 
-USED_FUNCTIONS = mlk_polyvec_ntt
-USED_FUNCTIONS += mlk_ct_zeroize
-USED_FUNCTIONS += mlk_polyvec_mulcache_compute
-USED_FUNCTIONS += mlk_polyvec_basemul_acc_montgomery_cached
-USED_FUNCTIONS += mlk_poly_invntt_tomont
-USED_FUNCTIONS += mlk_poly_sub
-USED_FUNCTIONS += mlk_poly_reduce
-USED_FUNCTIONS += mlk_poly_tomsg
-USED_FUNCTIONS += mlk_polyvec_decompress_du
-USED_FUNCTIONS += mlk_poly_decompress_dv
-USED_FUNCTIONS += mlk_polyvec_frombytes
-USED_FUNCTIONS += mlk_polyvec_reduce
+USED_FUNCTIONS  = polyvec_ntt
+USED_FUNCTIONS += polyvec_mulcache_compute
+USED_FUNCTIONS += polyvec_basemul_acc_montgomery_cached
+USED_FUNCTIONS += poly_invntt_tomont
+USED_FUNCTIONS += polyvec_decompress_du
+USED_FUNCTIONS += poly_decompress_dv
+USED_FUNCTIONS += polyvec_frombytes
+USED_FUNCTIONS += polyvec_reduce
+USED_FUNCTIONS += poly_sub
+USED_FUNCTIONS += poly_reduce
+USED_FUNCTIONS += poly_tomsg
+
 USE_FUNCTION_CONTRACTS=$(addprefix $(MLK_NAMESPACE),$(USED_FUNCTIONS))
+USE_FUNCTION_CONTRACTS += mlk_ct_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

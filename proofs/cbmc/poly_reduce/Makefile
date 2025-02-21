@@ -19,7 +19,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c
 
 CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_reduce
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)scalar_signed_to_unsigned_q $(MLK_NAMESPACE)barrett_reduce
+USE_FUNCTION_CONTRACTS=mlk_scalar_signed_to_unsigned_q mlk_barrett_reduce
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

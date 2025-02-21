@@ -15,7 +15,6 @@
 #include "keccakf1600.h"
 
 /* Context for non-incremental API */
-#define mlk_shake128x4ctx MLK_NAMESPACE(shake128x4ctx)
 typedef struct
 {
   uint64_t ctx[KECCAK_LANES * KECCAK_WAY];

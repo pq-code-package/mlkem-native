@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include "cbmc.h"
 
-#define mlk_rej_uniform MLK_NAMESPACE(rej_uniform)
+
 unsigned mlk_rej_uniform(int16_t *r, unsigned target, unsigned offset,
                          const uint8_t *buf, unsigned buflen);
 

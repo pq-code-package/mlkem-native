@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#define mlk_keccak_squeeze_once MLK_NAMESPACE(keccak_squeeze_once)
+
 void mlk_keccak_squeeze_once(uint8_t *h, size_t outlen, uint64_t *s,
                              uint32_t r);
 

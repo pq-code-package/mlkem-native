@@ -22,7 +22,6 @@
  * Elements of R_q = Z_q[X]/(X^n + 1). Represents polynomial
  * coeffs[0] + X*coeffs[1] + X^2*coeffs[2] + ... + X^{n-1}*coeffs[n-1]
  */
-#define mlk_poly MLK_NAMESPACE(poly)
 typedef struct
 {
   int16_t coeffs[MLKEM_N];
@@ -32,13 +31,11 @@ typedef struct
  * INTERNAL presentation of precomputed data speeding up
  * the base multiplication of two polynomials in NTT domain.
  */
-#define mlk_poly_mulcache MLK_NAMESPACE(poly_mulcache)
 typedef struct
 {
   int16_t coeffs[MLKEM_N >> 1];
 } mlk_poly_mulcache;
 
-#define mlk_cast_uint16_to_int16 MLK_NAMESPACE(cast_uint16_to_int16)
 /*************************************************
  * Name:        mlk_cast_uint16_to_int16
  *
@@ -67,7 +64,6 @@ static MLK_ALWAYS_INLINE int16_t mlk_cast_uint16_to_int16(uint16_t x)
 #pragma CPROVER check pop
 #endif
 
-#define mlk_montgomery_reduce MLK_NAMESPACE(montgomery_reduce)
 /*************************************************
  * Name:        mlk_montgomery_reduce
  *

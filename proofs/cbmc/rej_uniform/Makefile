@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/sampling.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)rej_uniform
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)rej_uniform_scalar
+CHECK_FUNCTION_CONTRACTS=mlk_rej_uniform
+USE_FUNCTION_CONTRACTS=mlk_rej_uniform_scalar
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = $(MLK_NAMESPACE)rej_uniform
+FUNCTION_NAME = mlk_rej_uniform
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
