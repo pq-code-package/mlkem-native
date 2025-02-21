@@ -167,9 +167,9 @@
         t3  .req v28
 
         .text
-        .global MLK_ASM_NAMESPACE(ntt_asm_opt)
+        .global MLK_ASM_NAMESPACE(ntt_asm)
         .balign 4
-MLK_ASM_FN_SYMBOL(ntt_asm_opt)
+MLK_ASM_FN_SYMBOL(ntt_asm)
         push_stack
 
         mov wtmp, #3329
@@ -236,7 +236,7 @@ MLK_ASM_FN_SYMBOL(ntt_asm_opt)
         // mul v15.8H, v11.8H, v0.H[0]      // ...............*...............
 
         sub count, count, #1
-ntt_opt_loop0:
+ntt_loop0:
                                                 // Instructions:    76
                                                 // Expected cycles: 84
                                                 // Expected IPC:    0.90
@@ -408,7 +408,7 @@ ntt_opt_loop0:
         // str q15, [x0, #(-16 + 7*(512/8))]          // .....................~.....'.............................................................................*
 
         sub count, count, 1
-        cbnz count, ntt_opt_loop0
+        cbnz count, ntt_loop0
                                                 // Instructions:    66
                                                 // Expected cycles: 67
                                                 // Expected IPC:    0.99
@@ -631,7 +631,7 @@ ntt_opt_loop0:
         // ldr q13, [x2, #-16]                   // ..............................*
 
         sub count, count, #1
-ntt_opt_loop1:
+ntt_loop1:
                                                 // Instructions:    71
                                                 // Expected cycles: 82
                                                 // Expected IPC:    0.87
@@ -793,7 +793,7 @@ ntt_opt_loop1:
         // str q11, [x0, #(-16*1)]                    // .................................................................................~'................................................................................*
 
         sub count, count, 1
-        cbnz count, ntt_opt_loop1
+        cbnz count, ntt_loop1
                                                // Instructions:    47
                                                // Expected cycles: 52
                                                // Expected IPC:    0.90

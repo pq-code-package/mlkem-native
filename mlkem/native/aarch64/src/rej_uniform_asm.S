@@ -4,7 +4,7 @@
  */
 
 /*************************************************
- * Name:        mlk_rej_uniform_asm_clean
+ * Name:        mlk_rej_uniform_asm
  *
  * Description: Run rejection sampling on uniform random bytes to generate
  *              uniform random integers mod q
@@ -25,14 +25,14 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/aarch64_opt/src/rej_uniform_asm_clean.S using scripts/simpasm. Do not modify it directly.
+ *   dev/aarch64_opt/src/rej_uniform_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(rej_uniform_asm_clean)
-MLK_ASM_FN_SYMBOL(rej_uniform_asm_clean)
+.global MLK_ASM_NAMESPACE(rej_uniform_asm)
+MLK_ASM_FN_SYMBOL(rej_uniform_asm)
 
         sub	sp, sp, #0x240
         mov	x7, #0x1                // =1

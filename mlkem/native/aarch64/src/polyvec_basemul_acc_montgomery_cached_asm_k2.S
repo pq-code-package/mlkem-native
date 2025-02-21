@@ -16,14 +16,14 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k2_opt.S using scripts/simpasm. Do not modify it directly.
+ *   dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S using scripts/simpasm. Do not modify it directly.
  */
 
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2_opt)
-MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k2_opt)
+.global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2)
+MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k2)
 
         sub	sp, sp, #0x40
         stp	d8, d9, [sp]
@@ -115,7 +115,7 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k2_opt)
         ld1	{ v4.8h }, [x3], #16
         sub	x13, x13, #0x2
 
-polyvec_basemul_acc_montgomery_cached_asm_k2_opt_loop:
+polyvec_basemul_acc_montgomery_cached_asm_k2_loop:
         smull2	v20.4s, v3.8h, v17.8h
         ldr	q18, [x4], #0x20
         ldr	q30, [x5], #0x20
@@ -165,7 +165,7 @@ polyvec_basemul_acc_montgomery_cached_asm_k2_opt_loop:
         ld1	{ v4.8h }, [x3], #16
         smlal2	v11.4s, v14.8h, v0.8h
         sub	x13, x13, #0x1
-        cbnz	x13, polyvec_basemul_acc_montgomery_cached_asm_k2_opt_loop
+        cbnz	x13, polyvec_basemul_acc_montgomery_cached_asm_k2_loop
         smull2	v5.4s, v3.8h, v17.8h
         smlal	v12.4s, v14.4h, v0.4h
         smlal	v23.4s, v10.4h, v4.4h

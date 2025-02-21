@@ -59,7 +59,7 @@ undefined behaviour in C, including out of bounds memory accesses and integer ov
 all C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202) involved in running mlkem-native with its C backend.
 See [proofs/cbmc](proofs/cbmc) for details.
 
-HOL-Light functional correctness proofs for the optimized AArch64 NTT [ntt_opt.S](mlkem/native/aarch64/src/ntt_opt.S) and inverse NTT [intt_opt.S](mlkem/native/aarch64/src/intt_opt.S)
+HOL-Light functional correctness proofs for the optimized AArch64 NTT [ntt.S](dev/aarch64_opt/src/ntt.S) and inverse NTT [intt.S](dev/aarch64_opt/src/intt.S)
 can be found in [proofs/hol_light/arm](proofs/hol_light/arm). These proofs were contributed by John Harrison, and are
 utilizing the verification infrastructure provided by [s2n-bignum](https://github.com/awslabs/s2n-bignum) infrastructure.
 
@@ -80,8 +80,8 @@ offers three backends for C, AArch64 and x86_64 - if you'd like contribute new b
 PR.
 
 Our AArch64 assembly is developed using [SLOTHY](https://github.com/slothy-optimizer/slothy): We write
-'clean' assembly by hand and automate micro-optimizations (e.g. see the [clean](dev/aarch64_clean/src/ntt_clean.S)
-vs [optimized](mlkem/native/aarch64/src/ntt_opt.S) AArch64 NTT). See [dev/README.md](dev/README.md) for more details.
+'clean' assembly by hand and automate micro-optimizations (e.g. see the [clean](dev/aarch64_clean/src/ntt.S)
+vs [optimized](dev/aarch64_opt/src/ntt.S) AArch64 NTT). See [dev/README.md](dev/README.md) for more details.
 
 ## How should I use mlkem-native?
 

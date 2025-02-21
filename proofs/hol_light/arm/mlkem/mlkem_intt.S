@@ -26,18 +26,18 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/aarch64_opt/src/intt_opt.S using scripts/simpasm. Do not modify it directly.
+ *   dev/aarch64_opt/src/intt.S using scripts/simpasm. Do not modify it directly.
  */
 
 
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_intt_asm_opt
-_PQCP_MLKEM_NATIVE_MLKEM768_intt_asm_opt:
+.global _PQCP_MLKEM_NATIVE_MLKEM768_intt_asm
+_PQCP_MLKEM_NATIVE_MLKEM768_intt_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_intt_asm_opt
-PQCP_MLKEM_NATIVE_MLKEM768_intt_asm_opt:
+.global PQCP_MLKEM_NATIVE_MLKEM768_intt_asm
+PQCP_MLKEM_NATIVE_MLKEM768_intt_asm:
 #endif
 
         sub	sp, sp, #0x40

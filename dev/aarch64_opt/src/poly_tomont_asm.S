@@ -38,9 +38,9 @@
 
 
         .text
-        .global MLK_ASM_NAMESPACE(poly_tomont_asm_opt)
+        .global MLK_ASM_NAMESPACE(poly_tomont_asm)
         .balign 4
-MLK_ASM_FN_SYMBOL(poly_tomont_asm_opt)
+MLK_ASM_FN_SYMBOL(poly_tomont_asm)
 
         mov wtmp, #3329 // ML-KEM modulus
         dup modulus.8h, wtmp
@@ -84,7 +84,7 @@ MLK_ASM_FN_SYMBOL(poly_tomont_asm_opt)
         // ldr q27, [x0, #32]                // ......*........................
 
         sub count, count, #1
-poly_tomont_asm_opt_loop:
+poly_tomont_asm_loop:
                                               // Instructions:    20
                                               // Expected cycles: 24
                                               // Expected IPC:    0.83
@@ -144,7 +144,7 @@ poly_tomont_asm_opt_loop:
         // str q1, [x0, #-16]                     // ..............'...*...................
 
         sub count, count, 1
-        cbnz count, poly_tomont_asm_opt_loop
+        cbnz count, poly_tomont_asm_loop
                                               // Instructions:    15
                                               // Expected cycles: 18
                                               // Expected IPC:    0.83

@@ -12,7 +12,7 @@
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64_CLEAN) && \
     !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) && \
-    (defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 3)
+    (defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 2)
 /* simpasm: header-end */
 
 // Input:
@@ -141,10 +141,11 @@
         t0   .req v28
 
         .text
-        .global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k3_clean)
+        .global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2)
         .balign 4
-MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k3_clean)
+MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k2)
         push_stack
+
         mov wtmp, #3329
         dup modulus.8h, wtmp
 
@@ -156,18 +157,13 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k3_clean)
         add a1_ptr, a0_ptr, #(1 * 512)
         add b1_ptr, b0_ptr, #(1 * 512)
         add b1_cache_ptr, b0_cache_ptr, #(1 * 512/2)
-        add a2_ptr, a0_ptr, #(2 * 512)
-        add b2_ptr, b0_ptr, #(2 * 512)
-        add b2_cache_ptr, b0_cache_ptr, #(2 * 512/2)
 
         mov count, #(MLKEM_N / 16)
-k3_loop_start:
+k2_loop_start:
 
         load_polys aa, bb, a0_ptr, b0_ptr, b0_cache_ptr
         pmull res, aa, bb
         load_polys aa, bb, a1_ptr, b1_ptr, b1_cache_ptr
-        pmlal res, aa, bb
-        load_polys aa, bb, a2_ptr, b2_ptr, b2_cache_ptr
         pmlal res, aa, bb
 
         montgomery_reduce_long out0, res0
@@ -176,7 +172,7 @@ k3_loop_start:
         st2_wrap out, out
 
         subs count, count, #1
-        cbnz count, k3_loop_start
+        cbnz count, k2_loop_start
 
         pop_stack
         ret
@@ -217,6 +213,7 @@ k3_loop_start:
     .unreq t0
 
 /* simpasm: footer-start */
+
 #endif /* defined(MLK_ARITH_BACKEND_AARCH64_CLEAN) && \
           !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) && \
-          (defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 3) */
+          (defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 2) */

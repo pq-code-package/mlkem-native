@@ -405,16 +405,16 @@
 #undef mlk_aarch64_ntt_zetas_layer67
 #undef mlk_aarch64_zetas_mulcache_native
 #undef mlk_aarch64_zetas_mulcache_twisted_native
-#undef mlk_intt_asm_opt
-#undef mlk_ntt_asm_opt
-#undef mlk_poly_mulcache_compute_asm_opt
-#undef mlk_poly_reduce_asm_opt
-#undef mlk_poly_tobytes_asm_opt
-#undef mlk_poly_tomont_asm_opt
-#undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k2_opt
-#undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k3_opt
-#undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k4_opt
-#undef mlk_rej_uniform_asm_clean
+#undef mlk_intt_asm
+#undef mlk_ntt_asm
+#undef mlk_poly_mulcache_compute_asm
+#undef mlk_poly_reduce_asm
+#undef mlk_poly_tobytes_asm
+#undef mlk_poly_tomont_asm
+#undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k2
+#undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k3
+#undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k4
+#undef mlk_rej_uniform_asm
 #undef mlk_rej_uniform_table
 /* mlkem/native/aarch64/src/consts.h */
 #undef MLK_NATIVE_AARCH64_SRC_CONSTS_H

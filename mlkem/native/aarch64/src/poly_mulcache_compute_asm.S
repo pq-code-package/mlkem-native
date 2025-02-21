@@ -9,14 +9,14 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/aarch64_opt/src/poly_mulcache_compute_asm_opt.S using scripts/simpasm. Do not modify it directly.
+ *   dev/aarch64_opt/src/poly_mulcache_compute_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(poly_mulcache_compute_asm_opt)
-MLK_ASM_FN_SYMBOL(poly_mulcache_compute_asm_opt)
+.global MLK_ASM_NAMESPACE(poly_mulcache_compute_asm)
+MLK_ASM_FN_SYMBOL(poly_mulcache_compute_asm)
 
         mov	w5, #0xd01              // =3329
         dup	v6.8h, w5
@@ -32,7 +32,7 @@ MLK_ASM_FN_SYMBOL(poly_mulcache_compute_asm_opt)
         sqrdmulh	v27.8h, v27.8h, v1.8h
         sub	x4, x4, #0x1
 
-poly_mulcache_compute_asm_opt_loop:
+poly_mulcache_compute_asm_loop:
         ldr	q29, [x1, #0x10]
         ldr	q21, [x2], #0x10
         mls	v2.8h, v27.8h, v6.h[0]
@@ -43,7 +43,7 @@ poly_mulcache_compute_asm_opt_loop:
         mul	v2.8h, v28.8h, v21.8h
         sqrdmulh	v27.8h, v28.8h, v7.8h
         sub	x4, x4, #0x1
-        cbnz	x4, poly_mulcache_compute_asm_opt_loop
+        cbnz	x4, poly_mulcache_compute_asm_loop
         mls	v2.8h, v27.8h, v6.h[0]
         str	q2, [x0], #0x10
         ret

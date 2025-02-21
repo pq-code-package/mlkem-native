@@ -30,14 +30,14 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/aarch64_opt/src/ntt_opt.S using scripts/simpasm. Do not modify it directly.
+ *   dev/aarch64_opt/src/ntt.S using scripts/simpasm. Do not modify it directly.
  */
 
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(ntt_asm_opt)
-MLK_ASM_FN_SYMBOL(ntt_asm_opt)
+.global MLK_ASM_NAMESPACE(ntt_asm)
+MLK_ASM_FN_SYMBOL(ntt_asm)
 
         sub	sp, sp, #0x40
         stp	d8, d9, [sp]
@@ -64,7 +64,7 @@ MLK_ASM_FN_SYMBOL(ntt_asm_opt)
         ldr	q13, [x0, #0x180]
         sub	x4, x4, #0x1
 
-ntt_opt_loop0:
+ntt_loop0:
         sqrdmulh	v14.8h, v23.8h, v0.h[1]
         sqrdmulh	v23.8h, v17.8h, v0.h[1]
         mul	v17.8h, v17.8h, v0.h[0]
@@ -142,7 +142,7 @@ ntt_opt_loop0:
         ldr	q13, [x0, #0x180]
         mul	v15.8h, v11.8h, v0.h[0]
         sub	x4, x4, #0x1
-        cbnz	x4, ntt_opt_loop0
+        cbnz	x4, ntt_loop0
         sqrdmulh	v27.8h, v11.8h, v0.h[1]
         mul	v8.8h, v13.8h, v0.h[0]
         sqrdmulh	v22.8h, v13.8h, v0.h[1]
@@ -237,7 +237,7 @@ ntt_opt_loop0:
         ldur	q13, [x2, #-0x10]
         sub	x4, x4, #0x1
 
-ntt_opt_loop1:
+ntt_loop1:
         ldr	q19, [x0, #0x70]
         ldr	q1, [x1], #0x10
         mls	v23.8h, v21.8h, v7.h[0]
@@ -310,7 +310,7 @@ ntt_opt_loop1:
         ldur	q13, [x2, #-0x10]
         stur	q9, [x0, #-0x10]
         sub	x4, x4, #0x1
-        cbnz	x4, ntt_opt_loop1
+        cbnz	x4, ntt_loop1
         mls	v23.8h, v21.8h, v7.h[0]
         add	v14.8h, v27.8h, v8.8h
         ldur	q1, [x2, #-0x20]

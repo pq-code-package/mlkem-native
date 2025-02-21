@@ -9,14 +9,14 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/aarch64_opt/src/poly_tomont_asm_opt.S using scripts/simpasm. Do not modify it directly.
+ *   dev/aarch64_opt/src/poly_tomont_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(poly_tomont_asm_opt)
-MLK_ASM_FN_SYMBOL(poly_tomont_asm_opt)
+.global MLK_ASM_NAMESPACE(poly_tomont_asm)
+MLK_ASM_FN_SYMBOL(poly_tomont_asm)
 
         mov	w2, #0xd01              // =3329
         dup	v4.8h, w2
@@ -34,7 +34,7 @@ MLK_ASM_FN_SYMBOL(poly_tomont_asm_opt)
         ldr	q27, [x0, #0x20]
         sub	x1, x1, #0x1
 
-poly_tomont_asm_opt_loop:
+poly_tomont_asm_loop:
         mls	v17.8h, v7.8h, v4.h[0]
         sqrdmulh	v5.8h, v23.8h, v3.8h
         ldr	q7, [x0], #0x40
@@ -56,7 +56,7 @@ poly_tomont_asm_opt_loop:
         ldr	q27, [x0, #0x20]
         stur	q26, [x0, #-0x20]
         sub	x1, x1, #0x1
-        cbnz	x1, poly_tomont_asm_opt_loop
+        cbnz	x1, poly_tomont_asm_loop
         mls	v17.8h, v7.8h, v4.h[0]
         sqrdmulh	v7.8h, v23.8h, v3.8h
         mul	v26.8h, v23.8h, v2.8h
