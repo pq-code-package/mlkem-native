@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name: CBMC
-description: Run CBMC proofs for MLKEM-C_AArch64
+description: Run CBMC proofs for mlkem-native
 
 inputs:
   nix-shell:
