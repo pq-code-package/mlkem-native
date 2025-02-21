@@ -254,6 +254,7 @@
 #undef mlk_debug_assert_abs_bound_2d
 #undef mlk_debug_assert_bound
 #undef mlk_debug_assert_bound_2d
+#undef mlk_debug_check_assert
 #undef mlk_debug_check_bounds
 /* mlkem/poly.h */
 #undef MLK_INVNTT_BOUND

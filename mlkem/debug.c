@@ -16,7 +16,7 @@
 
 #define MLK_DEBUG_ERROR_HEADER "[ERROR:%s:%04d] "
 
-void mlk_debug_assert(const char *file, int line, const int val)
+void mlk_debug_check_assert(const char *file, int line, const int val)
 {
   if (val == 0)
   {

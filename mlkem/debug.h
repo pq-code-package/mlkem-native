@@ -21,8 +21,8 @@
  *              - line: line number
  *              - val: Value asserted to be non-zero
  **************************************************/
-#define mlk_debug_assert MLK_NAMESPACE(mlkem_debug_assert)
-void mlk_debug_assert(const char *file, int line, const int val);
+#define mlk_debug_check_assert MLK_NAMESPACE(mlkem_debug_assert)
+void mlk_debug_check_assert(const char *file, int line, const int val);
 
 /*************************************************
  * Name:        mlk_debug_check_bounds
@@ -49,7 +49,7 @@ void mlk_debug_check_bounds(const char *file, int line, const int16_t *ptr,
  *
  * val: Value that's asserted to be non-zero
  */
-#define mlk_debug_assert(val) mlk_debug_assert(__FILE__, __LINE__, (val))
+#define mlk_debug_assert(val) mlk_debug_check_assert(__FILE__, __LINE__, (val))
 
 /* Check bounds in array of int16_t's
  * ptr: Base of int16_t array; will be explicitly cast to int16_t*,
