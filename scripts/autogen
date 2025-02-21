@@ -584,7 +584,11 @@ def get_header_files(main_only=False):
     if main_only is True:
         return get_files("mlkem/**/*.h")
     else:
-        return get_files("mlkem/**/*.h") + get_files("dev/**/*.h")
+        return (
+            get_files("mlkem/**/*.h")
+            + get_files("dev/**/*.h")
+            + get_files("integration/**/*.h")
+        )
 
 
 def get_files(pattern):
