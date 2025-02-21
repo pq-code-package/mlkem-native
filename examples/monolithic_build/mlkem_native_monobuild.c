@@ -238,15 +238,6 @@
 #undef mlk_poly_frommsg
 #undef mlk_poly_tobytes
 #undef mlk_poly_tomsg
-#undef mlk_scalar_compress_d1
-#undef mlk_scalar_compress_d10
-#undef mlk_scalar_compress_d11
-#undef mlk_scalar_compress_d4
-#undef mlk_scalar_compress_d5
-#undef mlk_scalar_decompress_d10
-#undef mlk_scalar_decompress_d11
-#undef mlk_scalar_decompress_d4
-#undef mlk_scalar_decompress_d5
 /* mlkem/debug.h */
 #undef MLK_DEBUG_H
 #undef mlk_debug_assert
@@ -301,18 +292,7 @@
 /* mlkem/verify.h */
 #undef MLK_USE_ASM_VALUE_BARRIER
 #undef MLK_VERIFY_H
-#undef mlk_ct_cmask_neg_i16
-#undef mlk_ct_cmask_nonzero_u16
-#undef mlk_ct_cmask_nonzero_u8
-#undef mlk_ct_cmov_zero
-#undef mlk_ct_memcmp
 #undef mlk_ct_opt_blocker_u64
-#undef mlk_ct_sel_int16
-#undef mlk_ct_sel_uint8
-#undef mlk_ct_zeroize
-#undef mlk_value_barrier_i32
-#undef mlk_value_barrier_u32
-#undef mlk_value_barrier_u8
 /* mlkem/cbmc.h */
 #undef MLK_CBMC_H
 #undef __contract__

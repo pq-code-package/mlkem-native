@@ -13,21 +13,6 @@
 #include "poly.h"
 #include "verify.h"
 
-/* Static namespacing
- * This is to facilitate building multiple instances
- * of mlkem-native (e.g. with varying security levels)
- * within a single compilation unit. */
-#define mlk_scalar_compress_d1 MLK_NAMESPACE(scalar_compress_d1)
-#define mlk_scalar_compress_d4 MLK_NAMESPACE(scalar_compress_d4)
-#define mlk_scalar_compress_d5 MLK_NAMESPACE(scalar_compress_d5)
-#define mlk_scalar_compress_d10 MLK_NAMESPACE(scalar_compress_d10)
-#define mlk_scalar_compress_d11 MLK_NAMESPACE(scalar_compress_d11)
-#define mlk_scalar_decompress_d4 MLK_NAMESPACE(scalar_decompress_d4)
-#define mlk_scalar_decompress_d5 MLK_NAMESPACE(scalar_decompress_d5)
-#define mlk_scalar_decompress_d10 MLK_NAMESPACE(scalar_decompress_d10)
-#define mlk_scalar_decompress_d11 MLK_NAMESPACE(scalar_decompress_d11)
-/* End of static namespacing */
-
 /************************************************************
  * Name: mlk_scalar_compress_d1
  *

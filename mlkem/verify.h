@@ -11,23 +11,6 @@
 #include "cbmc.h"
 #include "common.h"
 
-/* Static namespacing
- * This is to facilitate building multiple instances
- * of mlkem-native (e.g. with varying security levels)
- * within a single compilation unit. */
-#define mlk_value_barrier_u8 MLK_NAMESPACE(value_barrier_u8)
-#define mlk_value_barrier_u32 MLK_NAMESPACE(value_barrier_u32)
-#define mlk_value_barrier_i32 MLK_NAMESPACE(value_barrier_i32)
-#define mlk_ct_cmask_neg_i16 MLK_NAMESPACE(ct_cmask_neg_i16)
-#define mlk_ct_cmask_nonzero_u8 MLK_NAMESPACE(ct_cmask_nonzero_u8)
-#define mlk_ct_cmask_nonzero_u16 MLK_NAMESPACE(ct_cmask_nonzero_u16)
-#define mlk_ct_sel_uint8 MLK_NAMESPACE(ct_sel_uint8)
-#define mlk_ct_sel_int16 MLK_NAMESPACE(ct_sel_int16)
-#define mlk_ct_memcmp MLK_NAMESPACE(ct_memcmp)
-#define mlk_ct_cmov_zero MLK_NAMESPACE(ct_cmov_zero)
-#define mlk_ct_zeroize MLK_NAMESPACE(ct_zeroize)
-/* End of static namespacing */
-
 /* Constant-time comparisons and conditional operations
 
    We reduce the risk for compilation into variable-time code
