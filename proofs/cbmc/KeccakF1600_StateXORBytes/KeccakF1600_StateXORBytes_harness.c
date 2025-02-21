@@ -10,5 +10,5 @@ void harness(void)
   const unsigned char *data;
   unsigned offset;
   unsigned length;
-  KeccakF1600_StateXORBytes(state, data, offset, length);
+  mlk_KeccakF1600_StateXORBytes(state, data, offset, length);
 }

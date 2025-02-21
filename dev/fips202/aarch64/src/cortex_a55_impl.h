@@ -21,7 +21,7 @@
 #define MLK_USE_FIPS202_X1_NATIVE
 static MLK_INLINE void keccak_f1600_x1_native(uint64_t *state)
 {
-  keccak_f1600_x1_scalar_asm_opt(state, keccakf1600_round_constants);
+  keccak_f1600_x1_scalar_asm_opt(state, mlk_keccakf1600_round_constants);
 }
 
 #endif /* MLK_FIPS202_NATIVE_PROFILE_IMPL_H */

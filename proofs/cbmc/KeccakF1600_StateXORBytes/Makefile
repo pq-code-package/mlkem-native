@@ -7,7 +7,7 @@ HARNESS_FILE = KeccakF1600_StateXORBytes_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = KeccakF1600_StateXORBytes
+PROOF_UID = mlk_KeccakF1600_StateXORBytes
 
 DEFINES +=
 INCLUDES +=
@@ -18,7 +18,7 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/fips202/keccakf1600.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)KeccakF1600_StateXORBytes
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_KeccakF1600_StateXORBytes
 USE_FUNCTION_CONTRACTS=
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = $(MLK_NAMESPACE)KeccakF1600_StateXORBytes
+FUNCTION_NAME = $(MLK_NAMESPACE)mlk_KeccakF1600_StateXORBytes
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

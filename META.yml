@@ -12,7 +12,7 @@ implementations:
     length-shared-secret: 32
     kat-sha256: cc398096eee868ea6164b5f51e9a751da65d8ed44e636b09573ed57bc50ac4ed
     nistkat-sha256: a30184edee53b3b009356e1e31d7f9e93ce82550e3c622d7192e387b0cc84f2e
-    nistkat-shake256-256: 8517b4bed03f8f97f464ccbebbb395e887530d3426f171d77dd3b3a0e5add7ce
+    nistkat-mlk_shake256-256: 8517b4bed03f8f97f464ccbebbb395e887530d3426f171d77dd3b3a0e5add7ce
   - name: ML-KEM-768
     claimed-nist-level: 3
     claimed-security: IND-CCA2
@@ -22,7 +22,7 @@ implementations:
     length-shared-secret: 32
     kat-sha256: b328a57e85808d78766d994f17c9d85a2e554b80a6a16fb8c099534353350551
     nistkat-sha256: 729367b590637f4a93c68d5e4a4d2e2b4454842a52c9eec503e3a0d24cb66471
-    nistkat-shake256-256: 1383531be7867e0eab6c914472abfaed2f3846e518e401195880f8d25239c93e
+    nistkat-mlk_shake256-256: 1383531be7867e0eab6c914472abfaed2f3846e518e401195880f8d25239c93e
   - name: ML-KEM-1024
     claimed-nist-level: 5
     claimed-security: IND-CCA2
@@ -32,4 +32,4 @@ implementations:
     length-shared-secret: 32
     kat-sha256: 8854d2ee93e01d07dd91807fb033194f08decde49fffc5a56e38fc41f984330f
     nistkat-sha256: 3fba7327d0320cb6134badf2a1bcb963a5b3c0026c7dece8f00d6a6155e47b33
-    nistkat-shake256-256: 2c567fe56c8a1f60b7757d7c5367ec57d9b41e7cae3f157fd24616f3ce952f17
+    nistkat-mlk_shake256-256: 2c567fe56c8a1f60b7757d7c5367ec57d9b41e7cae3f157fd24616f3ce952f17

@@ -12,5 +12,5 @@ void harness(void)
   uint8_t *output;
   const uint8_t *input;
   size_t inlen;
-  sha3_512(output, input, inlen);
+  mlk_sha3_512(output, input, inlen);
 }

@@ -7,7 +7,7 @@ HARNESS_FILE = shake256_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = shake256
+PROOF_UID = mlk_shake256
 
 DEFINES +=
 INCLUDES +=
@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/fips202/fips202.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)shake256
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_keccak_absorb_once $(MLK_NAMESPACE)mlk_keccak_squeeze_once
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_shake256
+USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_mlk_keccak_absorb_once $(MLK_NAMESPACE)mlk_mlk_keccak_squeeze_once
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = $(MLK_NAMESPACE)shake256
+FUNCTION_NAME = $(MLK_NAMESPACE)mlk_shake256
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

@@ -332,34 +332,34 @@
 #undef SHA3_512_RATE
 #undef SHAKE128_RATE
 #undef SHAKE256_RATE
-#undef sha3_256
-#undef sha3_512
-#undef shake128_absorb_once
-#undef shake128_init
-#undef shake128_release
-#undef shake128_squeezeblocks
-#undef shake128ctx
-#undef shake256
+#undef mlk_sha3_256
+#undef mlk_sha3_512
+#undef mlk_shake128_absorb_once
+#undef mlk_shake128_init
+#undef mlk_shake128_release
+#undef mlk_shake128_squeezeblocks
+#undef mlk_shake128ctx
+#undef mlk_shake256
 /* mlkem/fips202/fips202_backend.h */
 #undef MLK_FIPS202_FIPS202_BACKEND_H
 /* mlkem/fips202/fips202x4.h */
 #undef MLK_FIPS202_FIPS202X4_H
-#undef shake128x4_absorb_once
-#undef shake128x4_init
-#undef shake128x4_release
-#undef shake128x4_squeezeblocks
-#undef shake128x4ctx
-#undef shake256x4
+#undef mlk_shake128x4_absorb_once
+#undef mlk_shake128x4_init
+#undef mlk_shake128x4_release
+#undef mlk_shake128x4_squeezeblocks
+#undef mlk_shake128x4ctx
+#undef mlk_shake256x4
 /* mlkem/fips202/keccakf1600.h */
 #undef KECCAK_LANES
 #undef KECCAK_WAY
 #undef KeccakF1600_StateExtractBytes
-#undef KeccakF1600_StatePermute
-#undef KeccakF1600_StateXORBytes
 #undef KeccakF1600x4_StateExtractBytes
-#undef KeccakF1600x4_StatePermute
-#undef KeccakF1600x4_StateXORBytes
 #undef MLK_FIPS202_KECCAKF1600_H
+#undef mlk_KeccakF1600_StatePermute
+#undef mlk_KeccakF1600_StateXORBytes
+#undef mlk_KeccakF1600x4_StatePermute
+#undef mlk_KeccakF1600x4_StateXORBytes
 #endif /* !MLK_MONOBUILD_CUSTOM_FIPS202 */
 
 #if defined(MLK_MONOBUILD_WITH_NATIVE_FIPS202)
@@ -397,7 +397,7 @@
 #undef keccak_f1600_x4_scalar_v84a_asm_hybrid_opt
 #undef keccak_f1600_x4_scalar_v8a_asm_hybrid_opt
 #undef keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt
-#undef keccakf1600_round_constants
+#undef mlk_keccakf1600_round_constants
 /* mlkem/fips202/native/api.h */
 #undef MLK_FIPS202_NATIVE_API_H
 /* mlkem/fips202/native/meta.h */

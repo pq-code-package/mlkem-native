@@ -10,6 +10,6 @@ void harness(void)
   const unsigned char *data0, *data1, *data2, *data3;
   unsigned offset;
   unsigned length;
-  KeccakF1600x4_StateXORBytes(state, data0, data1, data2, data3, offset,
-                              length);
+  mlk_KeccakF1600x4_StateXORBytes(state, data0, data1, data2, data3, offset,
+                                  length);
 }

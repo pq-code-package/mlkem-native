@@ -40,7 +40,7 @@ int sha3_final(void *md, sha3_ctx_t *c); /* digest goes to md */
 void *sha3(const void *in, size_t inlen, void *md, int mdlen);
 
 /* SHAKE128 and SHAKE256 extensible-output functions */
-#define shake128_init(c) sha3_init(c, 16)
+#define mlk_shake128_init(c) sha3_init(c, 16)
 #define shake256_init(c) sha3_init(c, 32)
 #define shake_update sha3_update
 

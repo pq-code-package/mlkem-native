@@ -7,9 +7,9 @@
 #include <stdint.h>
 #include <string.h>
 
-#define mlk_keccak_squeezeblocks MLK_NAMESPACE(keccak_squeezeblocks)
-void mlk_keccak_squeezeblocks(uint8_t *h, size_t nblocks, uint64_t *s,
-                              uint32_t r);
+#define mlk_mlk_keccak_squeezeblocks MLK_NAMESPACE(keccak_squeezeblocks)
+void mlk_mlk_keccak_squeezeblocks(uint8_t *h, size_t nblocks, uint64_t *s,
+                                  uint32_t r);
 
 void harness(void)
 {
@@ -17,5 +17,5 @@ void harness(void)
   size_t nblocks;
   uint64_t *s;
   uint32_t r;
-  mlk_keccak_squeezeblocks(h, nblocks, s, r);
+  mlk_mlk_keccak_squeezeblocks(h, nblocks, s, r);
 }

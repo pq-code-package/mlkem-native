@@ -9,8 +9,8 @@
 
 void harness(void)
 {
-  shake128ctx *state;
+  mlk_shake128ctx *state;
   const uint8_t *input;
   size_t inlen;
-  shake128_absorb_once(state, input, inlen);
+  mlk_shake128_absorb_once(state, input, inlen);
 }
