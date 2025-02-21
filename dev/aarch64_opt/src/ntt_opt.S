@@ -62,22 +62,22 @@
         add \a\().8h, \a\().8h, tmp.8h
 .endm
 
-.macro load_roots_012
-        ldr q_root0, [r01234_ptr], #32
-        ldr q_root1, [r01234_ptr, #-16]
+.macro load_roots_123
+        ldr q_root0, [r12345_ptr], #32
+        ldr q_root1, [r12345_ptr, #-16]
 .endm
 
-.macro load_next_roots_34
-        ldr q_root0, [r01234_ptr], #16
+.macro load_next_roots_45
+        ldr q_root0, [r12345_ptr], #16
 .endm
 
-.macro load_next_roots_56
-        ldr q_root0,    [r56_ptr], #(6*16)
-        ldr q_root0_tw, [r56_ptr, #(-6*16 + 1*16)]
-        ldr q_root1,    [r56_ptr, #(-6*16 + 2*16)]
-        ldr q_root1_tw, [r56_ptr, #(-6*16 + 3*16)]
-        ldr q_root2,    [r56_ptr, #(-6*16 + 4*16)]
-        ldr q_root2_tw, [r56_ptr, #(-6*16 + 5*16)]
+.macro load_next_roots_67
+        ldr q_root0,    [r67_ptr], #(6*16)
+        ldr q_root0_tw, [r67_ptr, #(-6*16 + 1*16)]
+        ldr q_root1,    [r67_ptr, #(-6*16 + 2*16)]
+        ldr q_root1_tw, [r67_ptr, #(-6*16 + 3*16)]
+        ldr q_root2,    [r67_ptr, #(-6*16 + 4*16)]
+        ldr q_root2_tw, [r67_ptr, #(-6*16 + 5*16)]
 .endm
 
 .macro transpose4 data
@@ -118,8 +118,8 @@
 
         // Arguments
         in         .req x0 // Input/output buffer
-        r01234_ptr .req x1 // twiddles for layer 0,1,2,3,4
-        r56_ptr    .req x2 // twiddles for layer 5,6
+        r12345_ptr .req x1 // twiddles for layer 1,2,3,4,5
+        r67_ptr    .req x2 // twiddles for layer 6,7
 
         inp     .req x3
         count   .req x4
@@ -180,7 +180,7 @@ MLK_ASM_FN_SYMBOL(ntt_asm_opt)
         mov inp, in
         mov count, #4
 
-        load_roots_012
+        load_roots_123
 
         .p2align 2
 
@@ -912,8 +912,8 @@ ntt_opt_loop1:
 
 /****************** REGISTER DEALLOCATIONS *******************/
     .unreq in
-    .unreq r01234_ptr
-    .unreq r56_ptr
+    .unreq r12345_ptr
+    .unreq r67_ptr
     .unreq inp
     .unreq count
     .unreq wtmp

@@ -8,21 +8,21 @@
 #include <stdint.h>
 #include "../../../common.h"
 
-#define aarch64_ntt_zetas_layer01234 MLK_NAMESPACE(aarch64_ntt_zetas_layer01234)
-#define aarch64_ntt_zetas_layer56 MLK_NAMESPACE(aarch64_ntt_zetas_layer56)
-#define aarch64_invntt_zetas_layer01234 \
-  MLK_NAMESPACE(aarch64_invntt_zetas_layer01234)
-#define aarch64_invntt_zetas_layer56 MLK_NAMESPACE(aarch64_invntt_zetas_layer56)
+#define aarch64_ntt_zetas_layer12345 MLK_NAMESPACE(aarch64_ntt_zetas_layer12345)
+#define aarch64_ntt_zetas_layer67 MLK_NAMESPACE(aarch64_ntt_zetas_layer67)
+#define aarch64_invntt_zetas_layer12345 \
+  MLK_NAMESPACE(aarch64_invntt_zetas_layer12345)
+#define aarch64_invntt_zetas_layer67 MLK_NAMESPACE(aarch64_invntt_zetas_layer67)
 #define aarch64_zetas_mulcache_native \
   MLK_NAMESPACE(aarch64_zetas_mulcache_native)
 #define aarch64_zetas_mulcache_twisted_native \
   MLK_NAMESPACE(aarch64_zetas_mulcache_twisted_native)
 #define rej_uniform_table MLK_NAMESPACE(rej_uniform_table)
 
-extern const int16_t aarch64_ntt_zetas_layer01234[];
-extern const int16_t aarch64_ntt_zetas_layer56[];
-extern const int16_t aarch64_invntt_zetas_layer01234[];
-extern const int16_t aarch64_invntt_zetas_layer56[];
+extern const int16_t aarch64_ntt_zetas_layer12345[];
+extern const int16_t aarch64_ntt_zetas_layer67[];
+extern const int16_t aarch64_invntt_zetas_layer12345[];
+extern const int16_t aarch64_invntt_zetas_layer67[];
 extern const int16_t aarch64_zetas_mulcache_native[];
 extern const int16_t aarch64_zetas_mulcache_twisted_native[];
 extern const uint8_t rej_uniform_table[];
