@@ -7,7 +7,7 @@ HARNESS_FILE = ct_cmask_neg_i16_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = ct_cmask_neg_i16
+PROOF_UID = mlk_ct_cmask_neg_i16
 
 DEFINES +=
 INCLUDES +=
@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c # Dummy because the Makefile wants _some_ project source
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)ct_cmask_neg_i16
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)value_barrier_i32
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_ct_cmask_neg_i16
+USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_value_barrier_i32
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = ct_cmask_neg_i16
+FUNCTION_NAME = mlk_ct_cmask_neg_i16
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

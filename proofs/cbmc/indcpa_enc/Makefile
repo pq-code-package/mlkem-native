@@ -7,7 +7,7 @@ HARNESS_FILE = indcpa_enc_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = indcpa_enc
+PROOF_UID = mlk_indcpa_enc
 
 DEFINES +=
 INCLUDES +=
@@ -18,34 +18,34 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/indcpa.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)indcpa_enc
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_indcpa_enc
 
-USED_FUNCTIONS = poly_frommsg
-USED_FUNCTIONS += ct_zeroize
-USED_FUNCTIONS += gen_matrix
+USED_FUNCTIONS = mlk_poly_frommsg
+USED_FUNCTIONS += mlk_ct_zeroize
+USED_FUNCTIONS += mlk_gen_matrix
 ifeq ($(MLKEM_K),2)
-USED_FUNCTIONS += poly_getnoise_eta1122_4x
-USED_FUNCTIONS += poly_getnoise_eta2
+USED_FUNCTIONS += mlk_poly_getnoise_eta1122_4x
+USED_FUNCTIONS += mlk_poly_getnoise_eta2
 else ifeq ($(MLKEM_K),3)
-USED_FUNCTIONS += poly_getnoise_eta1_4x
+USED_FUNCTIONS += mlk_poly_getnoise_eta1_4x
 else ifeq ($(MLKEM_K),4)
-USED_FUNCTIONS += poly_getnoise_eta1_4x
-USED_FUNCTIONS += poly_getnoise_eta2
+USED_FUNCTIONS += mlk_poly_getnoise_eta1_4x
+USED_FUNCTIONS += mlk_poly_getnoise_eta2
 endif
 
-USED_FUNCTIONS += polyvec_ntt
-USED_FUNCTIONS += polyvec_mulcache_compute
-USED_FUNCTIONS += polyvec_basemul_acc_montgomery_cached
-USED_FUNCTIONS += polyvec_invntt_tomont
-USED_FUNCTIONS += poly_invntt_tomont
-USED_FUNCTIONS += polyvec_add
-USED_FUNCTIONS += poly_add
-USED_FUNCTIONS += polyvec_reduce
-USED_FUNCTIONS += poly_reduce
-USED_FUNCTIONS += polyvec_compress_du
-USED_FUNCTIONS += poly_compress_dv
-USED_FUNCTIONS += polyvec_frombytes
-USED_FUNCTIONS += matvec_mul
+USED_FUNCTIONS += mlk_polyvec_ntt
+USED_FUNCTIONS += mlk_polyvec_mulcache_compute
+USED_FUNCTIONS += mlk_polyvec_basemul_acc_montgomery_cached
+USED_FUNCTIONS += mlk_polyvec_invntt_tomont
+USED_FUNCTIONS += mlk_poly_invntt_tomont
+USED_FUNCTIONS += mlk_polyvec_add
+USED_FUNCTIONS += mlk_poly_add
+USED_FUNCTIONS += mlk_polyvec_reduce
+USED_FUNCTIONS += mlk_poly_reduce
+USED_FUNCTIONS += mlk_polyvec_compress_du
+USED_FUNCTIONS += mlk_poly_compress_dv
+USED_FUNCTIONS += mlk_polyvec_frombytes
+USED_FUNCTIONS += mlk_matvec_mul
 
 USE_FUNCTION_CONTRACTS=$(addprefix $(MLK_NAMESPACE),$(USED_FUNCTIONS))
 APPLY_LOOP_CONTRACTS=on
@@ -55,7 +55,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = $(MLK_NAMESPACE)indcpa_enc
+FUNCTION_NAME = $(MLK_NAMESPACE)mlk_indcpa_enc
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

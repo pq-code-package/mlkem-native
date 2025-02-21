@@ -7,7 +7,7 @@ HARNESS_FILE = indcpa_dec_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = indcpa_dec
+PROOF_UID = mlk_indcpa_dec
 
 DEFINES +=
 INCLUDES +=
@@ -18,20 +18,20 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/indcpa.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)indcpa_dec
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_indcpa_dec
 
-USED_FUNCTIONS = polyvec_ntt
-USED_FUNCTIONS += ct_zeroize
-USED_FUNCTIONS += polyvec_mulcache_compute
-USED_FUNCTIONS += polyvec_basemul_acc_montgomery_cached
-USED_FUNCTIONS += poly_invntt_tomont
-USED_FUNCTIONS += poly_sub
-USED_FUNCTIONS += poly_reduce
-USED_FUNCTIONS += poly_tomsg
-USED_FUNCTIONS += polyvec_decompress_du
-USED_FUNCTIONS += poly_decompress_dv
-USED_FUNCTIONS += polyvec_frombytes
-USED_FUNCTIONS += polyvec_reduce
+USED_FUNCTIONS = mlk_polyvec_ntt
+USED_FUNCTIONS += mlk_ct_zeroize
+USED_FUNCTIONS += mlk_polyvec_mulcache_compute
+USED_FUNCTIONS += mlk_polyvec_basemul_acc_montgomery_cached
+USED_FUNCTIONS += mlk_poly_invntt_tomont
+USED_FUNCTIONS += mlk_poly_sub
+USED_FUNCTIONS += mlk_poly_reduce
+USED_FUNCTIONS += mlk_poly_tomsg
+USED_FUNCTIONS += mlk_polyvec_decompress_du
+USED_FUNCTIONS += mlk_poly_decompress_dv
+USED_FUNCTIONS += mlk_polyvec_frombytes
+USED_FUNCTIONS += mlk_polyvec_reduce
 USE_FUNCTION_CONTRACTS=$(addprefix $(MLK_NAMESPACE),$(USED_FUNCTIONS))
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
@@ -40,7 +40,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = $(MLK_NAMESPACE)indcpa_dec
+FUNCTION_NAME = $(MLK_NAMESPACE)mlk_indcpa_dec
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

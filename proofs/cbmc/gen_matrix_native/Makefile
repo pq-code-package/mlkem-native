@@ -13,13 +13,13 @@ DEFINES += -DMLK_USE_NATIVE_BACKEND_ARITH -DMLK_ARITH_BACKEND_FILE="\"dummy_back
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET += $(MLK_NAMESPACE)gen_matrix.0:4 $(MLK_NAMESPACE)gen_matrix.1:4 $(MLK_NAMESPACE)gen_matrix.2:4 $(MLK_NAMESPACE)gen_matrix.3:4 $(MLK_NAMESPACE)gen_matrix.4:4
+UNWINDSET += $(MLK_NAMESPACE)mlk_gen_matrix.0:4 $(MLK_NAMESPACE)mlk_gen_matrix.1:4 $(MLK_NAMESPACE)mlk_gen_matrix.2:4 $(MLK_NAMESPACE)mlk_gen_matrix.3:4 $(MLK_NAMESPACE)mlk_gen_matrix.4:4
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/indcpa.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)gen_matrix
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_rej_uniform $(MLK_NAMESPACE)poly_rej_uniform_x4 poly_permute_bitrev_to_custom
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_gen_matrix
+USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_poly_rej_uniform $(MLK_NAMESPACE)mlk_poly_rej_uniform_x4 poly_permute_bitrev_to_custom
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

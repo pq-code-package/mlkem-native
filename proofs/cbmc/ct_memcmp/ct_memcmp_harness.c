@@ -10,5 +10,5 @@ void harness(void)
   uint8_t *b;
   size_t len;
   int r;
-  r = ct_memcmp(a, b, len);
+  r = mlk_ct_memcmp(a, b, len);
 }

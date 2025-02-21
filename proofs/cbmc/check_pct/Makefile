@@ -7,7 +7,7 @@ HARNESS_FILE = check_pct_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = check_pct
+PROOF_UID = mlk_check_pct
 
 DEFINES += -DMLK_KEYGEN_PCT
 INCLUDES +=
@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/kem.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)check_pct
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)enc $(MLK_NAMESPACE)dec $(MLK_NAMESPACE)ct_memcmp $(MLK_NAMESPACE)ct_zeroize
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_check_pct
+USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)enc $(MLK_NAMESPACE)dec $(MLK_NAMESPACE)mlk_ct_memcmp $(MLK_NAMESPACE)mlk_ct_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = $(MLK_NAMESPACE)check_pct
+FUNCTION_NAME = $(MLK_NAMESPACE)mlk_check_pct
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

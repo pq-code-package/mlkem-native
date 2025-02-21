@@ -19,13 +19,13 @@
 #include "arith_native_x86_64.h"
 #include "consts.h"
 
-unsigned rej_uniform_avx2(int16_t *MLK_RESTRICT r, const uint8_t *buf)
+unsigned mlk_rej_uniform_avx2(int16_t *MLK_RESTRICT r, const uint8_t *buf)
 {
   unsigned ctr, pos;
   uint16_t val0, val1;
   uint32_t good;
   const __m256i bound =
-      _mm256_load_si256(&qdata.vec[MLK_AVX2_BACKEND_DATA_OFFSET_16XQ / 16]);
+      _mm256_load_si256(&mlk_qdata.vec[MLK_AVX2_BACKEND_DATA_OFFSET_16XQ / 16]);
   const __m256i ones = _mm256_set1_epi8(1);
   const __m256i mask = _mm256_set1_epi16(0xFFF);
   const __m256i idx8 =
@@ -59,14 +59,16 @@ unsigned rej_uniform_avx2(int16_t *MLK_RESTRICT r, const uint8_t *buf)
     good = _mm256_movemask_epi8(g0);
 
     g0 = _mm256_castsi128_si256(
-        _mm_loadl_epi64((__m128i *)&rej_uniform_table[(good >> 0) & 0xFF]));
+        _mm_loadl_epi64((__m128i *)&mlk_rej_uniform_table[(good >> 0) & 0xFF]));
     g1 = _mm256_castsi128_si256(
-        _mm_loadl_epi64((__m128i *)&rej_uniform_table[(good >> 8) & 0xFF]));
+        _mm_loadl_epi64((__m128i *)&mlk_rej_uniform_table[(good >> 8) & 0xFF]));
     g0 = _mm256_inserti128_si256(
-        g0, _mm_loadl_epi64((__m128i *)&rej_uniform_table[(good >> 16) & 0xFF]),
+        g0,
+        _mm_loadl_epi64((__m128i *)&mlk_rej_uniform_table[(good >> 16) & 0xFF]),
         1);
     g1 = _mm256_inserti128_si256(
-        g1, _mm_loadl_epi64((__m128i *)&rej_uniform_table[(good >> 24) & 0xFF]),
+        g1,
+        _mm_loadl_epi64((__m128i *)&mlk_rej_uniform_table[(good >> 24) & 0xFF]),
         1);
 
     g2 = _mm256_add_epi8(g0, ones);
@@ -100,7 +102,7 @@ unsigned rej_uniform_avx2(int16_t *MLK_RESTRICT r, const uint8_t *buf)
     good = _mm_movemask_epi8(t);
 
     good = _pext_u32(good, 0x5555);
-    pilo = _mm_loadl_epi64((__m128i *)&rej_uniform_table[good]);
+    pilo = _mm_loadl_epi64((__m128i *)&mlk_rej_uniform_table[good]);
 
     pihi = _mm_add_epi8(pilo, _mm256_castsi256_si128(ones));
     pilo = _mm_unpacklo_epi8(pilo, pihi);

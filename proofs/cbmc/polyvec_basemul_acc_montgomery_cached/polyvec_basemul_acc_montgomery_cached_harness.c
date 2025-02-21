@@ -6,9 +6,9 @@
 
 void harness(void)
 {
-  poly *r;
-  polyvec *a, *b;
-  polyvec_mulcache *b_cached;
+  mlk_poly *r;
+  mlk_polyvec *a, *b;
+  mlk_polyvec_mulcache *b_cached;
 
-  polyvec_basemul_acc_montgomery_cached(r, a, b, b_cached);
+  mlk_polyvec_basemul_acc_montgomery_cached(r, a, b, b_cached);
 }

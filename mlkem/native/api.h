@@ -115,7 +115,7 @@ and to/from bytes conversions."
 static MLK_INLINE void poly_permute_bitrev_to_custom(int16_t p[MLKEM_N])
 __contract__(
   /* We don't specify that this should be a permutation, but only
-   * that it does not change the bound established at the end of gen_matrix. */
+   * that it does not change the bound established at the end of mlk_gen_matrix. */
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   requires(array_bound(p, 0, MLKEM_N, 0, MLKEM_Q))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
@@ -192,7 +192,7 @@ __contract__(
  *              implementation defined.
  *
  * Arguments:   INPUT:
- *              - poly: const pointer to input polynomial.
+ *              - mlk_poly: const pointer to input polynomial.
  *                  This must be in NTT domain and inin bitreversed order, or of
  *                  a custom order if MLK_USE_NATIVE_NTT_CUSTOM_ORDER is set.
  *                  See the documentation of MLK_USE_NATIVE_NTT_CUSTOM_ORDER
@@ -200,11 +200,11 @@ __contract__(
  *              OUTPUT
  *              - cache: pointer to multiplication cache
  **************************************************/
-static MLK_INLINE void poly_mulcache_compute_native(int16_t cache[MLKEM_N / 2],
-                                                    const int16_t poly[MLKEM_N])
+static MLK_INLINE void poly_mulcache_compute_native(
+    int16_t cache[MLKEM_N / 2], const int16_t mlk_poly[MLKEM_N])
 __contract__(
   requires(memory_no_alias(cache, sizeof(int16_t) * (MLKEM_N / 2)))
-  requires(memory_no_alias(poly, sizeof(int16_t) * MLKEM_N))
+  requires(memory_no_alias(mlk_poly, sizeof(int16_t) * MLKEM_N))
   assigns(object_whole(cache))
 );
 #endif /* MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE */
@@ -456,7 +456,7 @@ static MLK_INLINE void poly_compress_d10_native(
 
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D4)
 /*************************************************
- * Name:        poly_decompress_d4
+ * Name:        mlk_poly_decompress_d4
  *
  * Description: De-serialization and subsequent decompression (dv bits) of a
  *              polynomial; approximate inverse of poly_compress
@@ -478,7 +478,7 @@ static MLK_INLINE void poly_decompress_d4_native(
  * Name:        poly_decompress_d10_native
  *
  * Description: De-serialization and subsequent decompression (10 bits) of a
- *              polynomial; approximate inverse of poly_compress_d10
+ *              polynomial; approximate inverse of mlk_poly_compress_d10
  *
  * Arguments:   - int16_t r[MLKEM_N]: pointer to output polynomial
  *              - const uint8_t *a: pointer to input byte array
@@ -553,7 +553,7 @@ static MLK_INLINE void poly_decompress_d5_native(
  * Name:        poly_decompress_d11_native
  *
  * Description: De-serialization and subsequent decompression (11 bits) of a
- *              polynomial; approximate inverse of poly_compress_d11
+ *              polynomial; approximate inverse of mlk_poly_compress_d11
  *
  * Arguments:   - int16_t r[MLKEM_N]: pointer to output polynomial
  *              - const uint8_t *a: pointer to input byte array

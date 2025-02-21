@@ -7,7 +7,7 @@ HARNESS_FILE = poly_decompress_dv_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = poly_decompress_dv
+PROOF_UID = mlk_poly_decompress_dv
 
 DEFINES +=
 INCLUDES +=
@@ -18,16 +18,16 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/compress.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_decompress_dv
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_poly_decompress_dv
 
 USE_FUNCTION_CONTRACTS =
 # TODO: We should be calling scalar_decompress_xxx by contract here,
 # but it does not seem to work yet because they are marked as static inline.
-# For K = 2 or 3, the code calls scalar_decompress_d4, so
+# For K = 2 or 3, the code calls mlk_scalar_decompress_d4, so
 # ifeq ($(MLKEM_K),4)
-# USE_FUNCTION_CONTRACTS = scalar_decompress_d5
+# USE_FUNCTION_CONTRACTS = mlk_scalar_decompress_d5
 # else
-# USE_FUNCTION_CONTRACTS = scalar_decompress_d4
+# USE_FUNCTION_CONTRACTS = mlk_scalar_decompress_d4
 # endif
 
 APPLY_LOOP_CONTRACTS=on
@@ -37,7 +37,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = $(MLK_NAMESPACE)poly_decompress_dv
+FUNCTION_NAME = $(MLK_NAMESPACE)mlk_poly_decompress_dv
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

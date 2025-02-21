@@ -25,23 +25,24 @@
 
 static MLK_INLINE void ntt_native(int16_t data[MLKEM_N])
 {
-  ntt_asm_opt(data, aarch64_ntt_zetas_layer12345, aarch64_ntt_zetas_layer67);
+  mlk_ntt_asm_opt(data, mlk_aarch64_ntt_zetas_layer12345,
+                  mlk_aarch64_ntt_zetas_layer67);
 }
 
 static MLK_INLINE void intt_native(int16_t data[MLKEM_N])
 {
-  intt_asm_opt(data, aarch64_invntt_zetas_layer12345,
-               aarch64_invntt_zetas_layer67);
+  mlk_intt_asm_opt(data, aarch64_invntt_zetas_layer12345,
+                   mlk_aarch64_invntt_zetas_layer67);
 }
 
 static MLK_INLINE void poly_reduce_native(int16_t data[MLKEM_N])
 {
-  poly_reduce_asm_opt(data);
+  mlk_poly_reduce_asm_opt(data);
 }
 
 static MLK_INLINE void poly_tomont_native(int16_t data[MLKEM_N])
 {
-  poly_tomont_asm_opt(data);
+  mlk_poly_tomont_asm_opt(data);
 }
 
 static MLK_INLINE void poly_mulcache_compute_native(int16_t x[MLKEM_N / 2],
@@ -75,7 +76,7 @@ static MLK_INLINE void polyvec_basemul_acc_montgomery_cached_k4_native(
 static MLK_INLINE void poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
                                            const int16_t a[MLKEM_N])
 {
-  poly_tobytes_asm_opt(r, a);
+  mlk_poly_tobytes_asm_opt(r, a);
 }
 
 static MLK_INLINE int rej_uniform_native(int16_t *r, unsigned len,
@@ -85,7 +86,7 @@ static MLK_INLINE int rej_uniform_native(int16_t *r, unsigned len,
   {
     return -1;
   }
-  return (int)rej_uniform_asm_clean(r, buf, buflen, rej_uniform_table);
+  return (int)mlk_rej_uniform_asm_clean(r, buf, buflen, mlk_rej_uniform_table);
 }
 
 #endif /* MLK_ARITH_PROFILE_IMPL_H */

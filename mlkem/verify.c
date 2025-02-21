@@ -11,7 +11,7 @@
  * verify.h to block the compiler's range analysis and
  * thereby reduce the risk of compiler-introduced branches.
  */
-volatile uint64_t ct_opt_blocker_u64 = 0;
+volatile uint64_t mlk_ct_opt_blocker_u64 = 0;
 
 #else /* MLK_USE_ASM_VALUE_BARRIER && \
          !MLK_MULTILEVEL_BUILD_NO_SHARED */

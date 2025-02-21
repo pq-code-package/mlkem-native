@@ -7,5 +7,5 @@
 void harness(void)
 {
   uint8_t *a, *b, *c;
-  indcpa_keypair_derand(a, b, c);
+  mlk_indcpa_keypair_derand(a, b, c);
 }

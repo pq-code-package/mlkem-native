@@ -18,15 +18,16 @@ typedef shake128x4ctx shake256x4_ctx;
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define keccak_absorb_once_x4 MLK_NAMESPACE(keccak_absorb_once_x4)
-#define keccak_squeezeblocks_x4 MLK_NAMESPACE(keccak_squeezeblocks_x4)
+#define mlk_keccak_absorb_once_x4 MLK_NAMESPACE(keccak_absorb_once_x4)
+#define mlk_keccak_squeezeblocks_x4 MLK_NAMESPACE(keccak_squeezeblocks_x4)
 #define shake256x4_absorb_once MLK_NAMESPACE(shake256x4_absorb_once)
 #define shake256x4_squeezeblocks MLK_NAMESPACE(shake256x4_squeezeblocks)
 /* End of static namespacing */
 
-static void keccak_absorb_once_x4(uint64_t *s, uint32_t r, const uint8_t *in0,
-                                  const uint8_t *in1, const uint8_t *in2,
-                                  const uint8_t *in3, size_t inlen, uint8_t p)
+static void mlk_keccak_absorb_once_x4(uint64_t *s, uint32_t r,
+                                      const uint8_t *in0, const uint8_t *in1,
+                                      const uint8_t *in2, const uint8_t *in3,
+                                      size_t inlen, uint8_t p)
 __contract__(
   requires(memory_no_alias(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
   requires(r <= sizeof(uint64_t) * KECCAK_LANES)
@@ -73,9 +74,9 @@ __contract__(
   }
 }
 
-static void keccak_squeezeblocks_x4(uint8_t *out0, uint8_t *out1, uint8_t *out2,
-                                    uint8_t *out3, size_t nblocks, uint64_t *s,
-                                    uint32_t r)
+static void mlk_keccak_squeezeblocks_x4(uint8_t *out0, uint8_t *out1,
+                                        uint8_t *out2, uint8_t *out3,
+                                        size_t nblocks, uint64_t *s, uint32_t r)
 __contract__(
     requires(r <= sizeof(uint64_t) * KECCAK_LANES)
     requires(nblocks <= 8 /* somewhat arbitrary bound */)
@@ -120,16 +121,16 @@ void shake128x4_absorb_once(shake128x4ctx *state, const uint8_t *in0,
                             const uint8_t *in3, size_t inlen)
 {
   memset(state, 0, sizeof(shake128x4ctx));
-  keccak_absorb_once_x4(state->ctx, SHAKE128_RATE, in0, in1, in2, in3, inlen,
-                        0x1F);
+  mlk_keccak_absorb_once_x4(state->ctx, SHAKE128_RATE, in0, in1, in2, in3,
+                            inlen, 0x1F);
 }
 
 void shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
                               uint8_t *out3, size_t nblocks,
                               shake128x4ctx *state)
 {
-  keccak_squeezeblocks_x4(out0, out1, out2, out3, nblocks, state->ctx,
-                          SHAKE128_RATE);
+  mlk_keccak_squeezeblocks_x4(out0, out1, out2, out3, nblocks, state->ctx,
+                              SHAKE128_RATE);
 }
 
 void shake128x4_init(shake128x4ctx *state) { (void)state; }
@@ -137,7 +138,7 @@ void shake128x4_release(shake128x4ctx *state)
 {
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  ct_zeroize(state, sizeof(shake128x4ctx));
+  mlk_ct_zeroize(state, sizeof(shake128x4ctx));
 }
 
 static void shake256x4_absorb_once(shake256x4_ctx *state, const uint8_t *in0,
@@ -145,16 +146,16 @@ static void shake256x4_absorb_once(shake256x4_ctx *state, const uint8_t *in0,
                                    const uint8_t *in3, size_t inlen)
 {
   memset(state, 0, sizeof(shake128x4ctx));
-  keccak_absorb_once_x4(state->ctx, SHAKE256_RATE, in0, in1, in2, in3, inlen,
-                        0x1F);
+  mlk_keccak_absorb_once_x4(state->ctx, SHAKE256_RATE, in0, in1, in2, in3,
+                            inlen, 0x1F);
 }
 
 static void shake256x4_squeezeblocks(uint8_t *out0, uint8_t *out1,
                                      uint8_t *out2, uint8_t *out3,
                                      size_t nblocks, shake256x4_ctx *state)
 {
-  keccak_squeezeblocks_x4(out0, out1, out2, out3, nblocks, state->ctx,
-                          SHAKE256_RATE);
+  mlk_keccak_squeezeblocks_x4(out0, out1, out2, out3, nblocks, state->ctx,
+                              SHAKE256_RATE);
 }
 
 void shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
@@ -189,11 +190,11 @@ void shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  ct_zeroize(&statex, sizeof(statex));
-  ct_zeroize(tmp0, sizeof(tmp0));
-  ct_zeroize(tmp1, sizeof(tmp1));
-  ct_zeroize(tmp2, sizeof(tmp2));
-  ct_zeroize(tmp3, sizeof(tmp3));
+  mlk_ct_zeroize(&statex, sizeof(statex));
+  mlk_ct_zeroize(tmp0, sizeof(tmp0));
+  mlk_ct_zeroize(tmp1, sizeof(tmp1));
+  mlk_ct_zeroize(tmp2, sizeof(tmp2));
+  mlk_ct_zeroize(tmp3, sizeof(tmp3));
 }
 
 #else /* MLK_MULTILEVEL_BUILD_NO_SHARED */
@@ -205,7 +206,7 @@ MLK_EMPTY_CU(fips202x4)
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
 #undef shake256x4_ctx
-#undef keccak_absorb_once_x4
-#undef keccak_squeezeblocks_x4
+#undef mlk_keccak_absorb_once_x4
+#undef mlk_keccak_squeezeblocks_x4
 #undef shake256x4_absorb_once
 #undef shake256x4_squeezeblocks

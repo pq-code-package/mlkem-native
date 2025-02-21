@@ -328,11 +328,11 @@ def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
         yield " * Table of zeta values used in the AArch64 forward NTT"
         yield " * See autogen for details."
         yield " */"
-        yield "MLK_ALIGN const int16_t aarch64_ntt_zetas_layer12345[] = {"
+        yield "MLK_ALIGN const int16_t mlk_aarch64_ntt_zetas_layer12345[] = {"
         yield from map(lambda t: str(t) + ",", gen_aarch64_fwd_ntt_zetas_layer12345())
         yield "};"
         yield ""
-        yield "MLK_ALIGN const int16_t aarch64_ntt_zetas_layer67[] = {"
+        yield "MLK_ALIGN const int16_t mlk_aarch64_ntt_zetas_layer67[] = {"
         yield from map(lambda t: str(t) + ",", gen_aarch64_fwd_ntt_zetas_layer67())
         yield "};"
         yield ""
@@ -340,7 +340,7 @@ def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
         yield from map(lambda t: str(t) + ",", gen_aarch64_inv_ntt_zetas_layer12345())
         yield "};"
         yield ""
-        yield "MLK_ALIGN const int16_t aarch64_invntt_zetas_layer67[] = {"
+        yield "MLK_ALIGN const int16_t mlk_aarch64_invntt_zetas_layer67[] = {"
         yield from map(lambda t: str(t) + ",", gen_aarch64_inv_ntt_zetas_layer67())
         yield "};"
         yield ""
@@ -409,7 +409,7 @@ def gen_aarch64_rej_uniform_table(dry_run=False):
         yield " * Lookup table used by rejection sampling of the public matrix."
         yield " * See autogen for details."
         yield " */"
-        yield "MLK_ALIGN const uint8_t rej_uniform_table[] = {"
+        yield "MLK_ALIGN const uint8_t mlk_rej_uniform_table[] = {"
         yield from map(lambda t: str(t) + ",", gen_aarch64_rej_uniform_table_rows())
         yield "};"
         yield ""
@@ -468,7 +468,7 @@ def gen_avx2_rej_uniform_table(dry_run=False):
         yield " * Lookup table used by rejection sampling of the public matrix."
         yield " * See autogen for details."
         yield " */"
-        yield "MLK_ALIGN const uint8_t rej_uniform_table[256][8] = {"
+        yield "MLK_ALIGN const uint8_t mlk_rej_uniform_table[256][8] = {"
         yield from map(lambda t: str(t) + ",", gen_avx2_rej_uniform_table_rows())
         yield "};"
         yield ""

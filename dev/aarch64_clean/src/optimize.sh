@@ -7,7 +7,7 @@ set -e
 TARGET_NAME="Cortex-A55"
 TARGET=Arm_Cortex_A55
 
-echo "* polyvec_basemul_acc_montgomery_cached, K=2, ${TARGET_NAME}"
+echo "* mlk_polyvec_basemul_acc_montgomery_cached, K=2, ${TARGET_NAME}"
 
 cp polyvec_clean.S polyvec_opt.S
 
@@ -23,7 +23,7 @@ slothy-cli Arm_AArch64 $TARGET \
   -c variable_size \
   -c constraints.stalls_first_attempt=64
 
-echo "* polyvec_basemul_acc_montgomery_cached, K=3, ${TARGET_NAME}"
+echo "* mlk_polyvec_basemul_acc_montgomery_cached, K=3, ${TARGET_NAME}"
 
 slothy-cli Arm_AArch64 $TARGET \
   polyvec_opt.S -o polyvec_opt.S \
@@ -37,7 +37,7 @@ slothy-cli Arm_AArch64 $TARGET \
   -c variable_size \
   -c constraints.stalls_first_attempt=64
 
-echo "* polyvec_basemul_acc_montgomery_cached, K=4, ${TARGET_NAME}"
+echo "* mlk_polyvec_basemul_acc_montgomery_cached, K=4, ${TARGET_NAME}"
 
 slothy-cli Arm_AArch64 $TARGET \
   polyvec_opt.S -o polyvec_opt.S \
@@ -53,11 +53,11 @@ slothy-cli Arm_AArch64 $TARGET \
 
 cp poly_clean.S poly_opt.S
 
-echo "* poly_reduce, ${TARGET_NAME}"
+echo "* mlk_poly_reduce, ${TARGET_NAME}"
 
 slothy-cli Arm_AArch64 $TARGET \
   poly_opt.S -o poly_opt.S \
-  -r poly_reduce_asm_clean,poly_reduce_asm_opt \
+  -r mlk_poly_reduce_asm_clean,mlk_poly_reduce_asm_opt \
   -l loop_start \
   -c sw_pipelining.enabled=true \
   -c inputs_are_outputs \
@@ -66,7 +66,7 @@ slothy-cli Arm_AArch64 $TARGET \
   -c variable_size \
   -c constraints.stalls_first_attempt=64
 
-echo "* poly_mulcache_compute, ${TARGET_NAME}"
+echo "* mlk_poly_mulcache_compute, ${TARGET_NAME}"
 
 slothy-cli Arm_AArch64 $TARGET \
   poly_opt.S -o poly_opt.S \
@@ -79,11 +79,11 @@ slothy-cli Arm_AArch64 $TARGET \
   -c variable_size \
   -c constraints.stalls_first_attempt=64
 
-echo "* poly_tomont, ${TARGET_NAME}"
+echo "* mlk_poly_tomont, ${TARGET_NAME}"
 
 slothy-cli Arm_AArch64 $TARGET \
   poly_opt.S -o poly_opt.S \
-  -r poly_tomont_asm_clean,poly_tomont_asm_opt \
+  -r mlk_poly_tomont_asm_clean,mlk_poly_tomont_asm_opt \
   -l poly_tomont_asm_loop \
   -c sw_pipelining.enabled=true \
   -c inputs_are_outputs \
@@ -96,7 +96,7 @@ echo " * ntt, ${TARGET_NAME}"
 
 slothy-cli Arm_AArch64 $TARGET \
   ntt_clean.S -o ntt_opt.S \
-  -r ntt_asm_clean,ntt_asm_opt \
+  -r mlk_ntt_asm_clean,mlk_ntt_asm_opt \
   -l layer123_start \
   -l layer4567_start \
   -c sw_pipelining.enabled=true \
@@ -110,7 +110,7 @@ echo " * intt, ${TARGET_NAME}"
 
 slothy-cli Arm_AArch64 $TARGET \
   intt_clean.S -o intt_opt.S \
-  -r intt_asm_clean,intt_asm_opt \
+  -r mlk_intt_asm_clean,mlk_intt_asm_opt \
   -l layer123_start \
   -l layer4567_start \
   -c sw_pipelining.enabled=true \

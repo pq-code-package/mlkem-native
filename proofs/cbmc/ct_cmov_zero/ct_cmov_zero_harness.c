@@ -9,5 +9,5 @@ void harness(void)
   uint8_t *x, *y;
   size_t len;
   uint8_t b;
-  ct_cmov_zero(x, y, len, b);
+  mlk_ct_cmov_zero(x, y, len, b);
 }

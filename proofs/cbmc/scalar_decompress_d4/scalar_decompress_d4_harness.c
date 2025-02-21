@@ -8,5 +8,5 @@ void harness(void)
 {
   uint32_t u;
   uint16_t d;
-  d = scalar_decompress_d4(u);
+  d = mlk_scalar_decompress_d4(u);
 }

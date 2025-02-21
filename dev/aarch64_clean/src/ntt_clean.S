@@ -189,7 +189,7 @@ MLK_ASM_FN_SYMBOL(ntt_asm_clean)
         // is modified through the addition/subtraction of a Montgomery
         // product of a twiddle of absolute value < q/2 and a layer-N value.
         // - Recalling that for C such that |a| < C * q and |t|<q/2, we have
-        // |fqmul(a,t)| < q * (0.0254*C + 1/2), we see that the coefficients
+        // |mlk_fqmul(a,t)| < q * (0.0254*C + 1/2), we see that the coefficients
         // of layer N (starting with layer 0 = input data) are bound by q * f^N(1),
         // where f(C) = 1/2 + 1.0508*C.
         // For N=7, we get the bound of f^7(1) * q < 18295.

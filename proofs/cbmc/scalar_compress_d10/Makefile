@@ -7,7 +7,7 @@ HARNESS_FILE = scalar_compress_d10_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = scalar_compress_d10
+PROOF_UID = mlk_scalar_compress_d10
 
 DEFINES +=
 INCLUDES +=
@@ -18,7 +18,7 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)scalar_compress_d10
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_scalar_compress_d10
 USE_FUNCTION_CONTRACTS=
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1

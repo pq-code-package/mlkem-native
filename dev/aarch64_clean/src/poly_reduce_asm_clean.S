@@ -9,7 +9,7 @@
 /* simpasm: header-end */
 
 /* Barrett reduction */
-.macro barrett_reduce a
+.macro mlk_barrett_reduce a
         sqdmulh tmp.8h,   \a\().8h, modulus_twisted.h[0]
         srshr   tmp.8h,   tmp.8h,   #11
         mls     \a\().8h, tmp.8h,   modulus.h[0]
@@ -26,7 +26,7 @@
 .endm
 
 /**********************************
- *          poly_reduce()         *
+ *          mlk_poly_reduce()         *
  **********************************/
 
         ptr               .req x0
@@ -55,22 +55,22 @@ MLK_ASM_FN_SYMBOL(poly_reduce_asm_clean)
         mov count, #8
 loop_start:
         ldr q_data, [ptr], #64
-        barrett_reduce data
+        mlk_barrett_reduce data
         scalar_signed_to_unsigned data
         str q_data, [ptr, #-64]
 
         ldr q_data, [ptr, #-48]
-        barrett_reduce data
+        mlk_barrett_reduce data
         scalar_signed_to_unsigned data
         str q_data, [ptr, #-48]
 
         ldr q_data, [ptr, #-32]
-        barrett_reduce data
+        mlk_barrett_reduce data
         scalar_signed_to_unsigned data
         str q_data, [ptr, #-32]
 
         ldr q_data, [ptr, #-16]
-        barrett_reduce data
+        mlk_barrett_reduce data
         scalar_signed_to_unsigned data
         str q_data, [ptr, #-16]
 

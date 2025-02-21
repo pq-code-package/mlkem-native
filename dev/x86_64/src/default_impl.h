@@ -39,7 +39,7 @@
 
 static MLK_INLINE void poly_permute_bitrev_to_custom(int16_t data[MLKEM_N])
 {
-  nttunpack_avx2((__m256i *)(data), qdata.vec);
+  mlk_nttunpack_avx2((__m256i *)(data), mlk_qdata.vec);
 }
 
 static MLK_INLINE int rej_uniform_native(int16_t *r, unsigned len,
@@ -51,27 +51,27 @@ static MLK_INLINE int rej_uniform_native(int16_t *r, unsigned len,
     return -1;
   }
 
-  return (int)rej_uniform_avx2(r, buf);
+  return (int)mlk_rej_uniform_avx2(r, buf);
 }
 
 static MLK_INLINE void ntt_native(int16_t data[MLKEM_N])
 {
-  ntt_avx2((__m256i *)data, qdata.vec);
+  mlk_ntt_avx2((__m256i *)data, mlk_qdata.vec);
 }
 
 static MLK_INLINE void intt_native(int16_t data[MLKEM_N])
 {
-  invntt_avx2((__m256i *)data, qdata.vec);
+  mlk_invntt_avx2((__m256i *)data, mlk_qdata.vec);
 }
 
 static MLK_INLINE void poly_reduce_native(int16_t data[MLKEM_N])
 {
-  reduce_avx2((__m256i *)data, qdata.vec);
+  mlk_reduce_avx2((__m256i *)data, mlk_qdata.vec);
 }
 
 static MLK_INLINE void poly_tomont_native(int16_t data[MLKEM_N])
 {
-  tomont_avx2((__m256i *)data, qdata.vec);
+  mlk_tomont_avx2((__m256i *)data, mlk_qdata.vec);
 }
 
 static MLK_INLINE void poly_mulcache_compute_native(int16_t x[MLKEM_N / 2],
@@ -112,38 +112,38 @@ static MLK_INLINE void polyvec_basemul_acc_montgomery_cached_k4_native(
 static MLK_INLINE void poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
                                            const int16_t a[MLKEM_N])
 {
-  ntttobytes_avx2(r, (const __m256i *)a, qdata.vec);
+  mlk_ntttobytes_avx2(r, (const __m256i *)a, mlk_qdata.vec);
 }
 
 static MLK_INLINE void poly_frombytes_native(int16_t r[MLKEM_N],
                                              const uint8_t a[MLKEM_POLYBYTES])
 {
-  nttfrombytes_avx2((__m256i *)r, a, qdata.vec);
+  mlk_nttfrombytes_avx2((__m256i *)r, a, mlk_qdata.vec);
 }
 
 #if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
 static MLK_INLINE void poly_compress_d4_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const int16_t a[MLKEM_N])
 {
-  poly_compress_d4_avx2(r, (const __m256i *)a);
+  mlk_poly_compress_d4_avx2(r, (const __m256i *)a);
 }
 
 static MLK_INLINE void poly_compress_d10_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const int16_t a[MLKEM_N])
 {
-  poly_compress_d10_avx2(r, (const __m256i *)a);
+  mlk_poly_compress_d10_avx2(r, (const __m256i *)a);
 }
 
 static MLK_INLINE void poly_decompress_d4_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
 {
-  poly_decompress_d4_avx2((__m256i *)r, a);
+  mlk_poly_decompress_d4_avx2((__m256i *)r, a);
 }
 
 static MLK_INLINE void poly_decompress_d10_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
 {
-  poly_decompress_d10_avx2((__m256i *)r, a);
+  mlk_poly_decompress_d10_avx2((__m256i *)r, a);
 }
 #endif /* defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
           || MLKEM_K == 3) */
@@ -152,25 +152,25 @@ static MLK_INLINE void poly_decompress_d10_native(
 static MLK_INLINE void poly_compress_d5_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const int16_t a[MLKEM_N])
 {
-  poly_compress_d5_avx2(r, (const __m256i *)a);
+  mlk_poly_compress_d5_avx2(r, (const __m256i *)a);
 }
 
 static MLK_INLINE void poly_compress_d11_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const int16_t a[MLKEM_N])
 {
-  poly_compress_d11_avx2(r, (const __m256i *)a);
+  mlk_poly_compress_d11_avx2(r, (const __m256i *)a);
 }
 
 static MLK_INLINE void poly_decompress_d5_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
 {
-  poly_decompress_d5_avx2((__m256i *)r, a);
+  mlk_poly_decompress_d5_avx2((__m256i *)r, a);
 }
 
 static MLK_INLINE void poly_decompress_d11_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
 {
-  poly_decompress_d11_avx2((__m256i *)r, a);
+  mlk_poly_decompress_d11_avx2((__m256i *)r, a);
 }
 #endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 4 */
 

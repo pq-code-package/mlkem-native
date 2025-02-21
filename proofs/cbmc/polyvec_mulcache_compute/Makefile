@@ -7,19 +7,19 @@ HARNESS_FILE = polyvec_mulcache_compute_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = polyvec_mulcache_compute
+PROOF_UID = mlk_polyvec_mulcache_compute
 
 DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET += $(MLK_NAMESPACE)polyvec_mulcache_compute.0:4 # Largest value of MLKEM_K
+UNWINDSET += $(MLK_NAMESPACE)mlk_polyvec_mulcache_compute.0:4 # Largest value of MLKEM_K
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c $(SRCDIR)/mlkem/poly_k.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)polyvec_mulcache_compute
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_mulcache_compute
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_polyvec_mulcache_compute
+USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_poly_mulcache_compute
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = polyvec_mulcache_compute
+FUNCTION_NAME = mlk_polyvec_mulcache_compute
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

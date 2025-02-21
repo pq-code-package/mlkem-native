@@ -68,7 +68,7 @@
         mulmod \dst3, \src3, ninv, ninv_tw
 .endm
 
-.macro barrett_reduce a
+.macro mlk_barrett_reduce a
         sqdmulh t0.8h,    \a\().8h, consts.h[1]
         srshr   t0.8h,    t0.8h,    #11
         mls     \a\().8h, t0.8h,    consts.h[0]
@@ -271,10 +271,10 @@ layer4567_start:
 
         // Not all of those reductions are needed, but the bounds tracking
         // is easier if we uniformly reduce at this point.
-        barrett_reduce data0
-        barrett_reduce data2
-        barrett_reduce data1
-        barrett_reduce data3
+        mlk_barrett_reduce data0
+        mlk_barrett_reduce data2
+        mlk_barrett_reduce data1
+        mlk_barrett_reduce data3
 
         // Bounds: q/2
 

@@ -35,8 +35,8 @@
 #ifndef __ASSEMBLER__
 #include "align.h"
 typedef MLK_ALIGNED_INT16(640) qdata_t;
-#define qdata MLK_NAMESPACE(qdata)
-extern const qdata_t qdata;
+#define mlk_qdata MLK_NAMESPACE(qdata)
+extern const qdata_t mlk_qdata;
 #endif
 
 #endif /* MLK_DEV_X86_64_SRC_CONSTS_H */

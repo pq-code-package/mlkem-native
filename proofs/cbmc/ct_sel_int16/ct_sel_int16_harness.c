@@ -9,5 +9,5 @@ void harness(void)
   int16_t a, b, c;
   uint16_t cond;
 
-  c = ct_sel_int16(a, b, cond);
+  c = mlk_ct_sel_int16(a, b, cond);
 }

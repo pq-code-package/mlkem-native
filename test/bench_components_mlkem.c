@@ -73,142 +73,157 @@ static int bench(void)
 
   BENCH("keccak-f1600-x1", KeccakF1600_StatePermute(data0))
   BENCH("keccak-f1600-x4", KeccakF1600x4_StatePermute(data0))
-  BENCH("poly_rej_uniform", poly_rej_uniform((poly *)data0, (uint8_t *)data1))
-  BENCH("poly_rej_uniform_x4", poly_rej_uniform_x4((poly *)data0, seed))
+  BENCH("mlk_poly_rej_uniform",
+        mlk_poly_rej_uniform((mlk_poly *)data0, (uint8_t *)data1))
+  BENCH("mlk_poly_rej_uniform_x4",
+        mlk_poly_rej_uniform_x4((mlk_poly *)data0, seed))
 
-  /* poly */
-  /* poly_compress_du */
-  BENCH("poly_compress_du", poly_compress_du((uint8_t *)data0, (poly *)data1))
+  /* mlk_poly */
+  /* mlk_poly_compress_du */
+  BENCH("mlk_poly_compress_du",
+        mlk_poly_compress_du((uint8_t *)data0, (mlk_poly *)data1))
 
-  /* poly_decompress_du */
-  BENCH("poly_decompress_du",
-        poly_decompress_du((poly *)data0, (uint8_t *)data1))
+  /* mlk_poly_decompress_du */
+  BENCH("mlk_poly_decompress_du",
+        mlk_poly_decompress_du((mlk_poly *)data0, (uint8_t *)data1))
 
-  /* poly_compress_dv */
-  BENCH("poly_compress_dv", poly_compress_dv((uint8_t *)data0, (poly *)data1))
+  /* mlk_poly_compress_dv */
+  BENCH("mlk_poly_compress_dv",
+        mlk_poly_compress_dv((uint8_t *)data0, (mlk_poly *)data1))
 
-  /* poly_decompress_dv */
-  BENCH("poly_decompress_dv",
-        poly_decompress_dv((poly *)data0, (uint8_t *)data1))
+  /* mlk_poly_decompress_dv */
+  BENCH("mlk_poly_decompress_dv",
+        mlk_poly_decompress_dv((mlk_poly *)data0, (uint8_t *)data1))
 
-  /* poly_tobytes */
-  BENCH("poly_tobytes", poly_tobytes((uint8_t *)data0, (poly *)data1))
+  /* mlk_poly_tobytes */
+  BENCH("mlk_poly_tobytes",
+        mlk_poly_tobytes((uint8_t *)data0, (mlk_poly *)data1))
 
-  /* poly_frombytes */
-  BENCH("poly_frombytes", poly_frombytes((poly *)data0, (uint8_t *)data1))
+  /* mlk_poly_frombytes */
+  BENCH("mlk_poly_frombytes",
+        mlk_poly_frombytes((mlk_poly *)data0, (uint8_t *)data1))
 
-  /* poly_frommsg */
-  BENCH("poly_frommsg", poly_frommsg((poly *)data0, (uint8_t *)data1))
+  /* mlk_poly_frommsg */
+  BENCH("mlk_poly_frommsg",
+        mlk_poly_frommsg((mlk_poly *)data0, (uint8_t *)data1))
 
-  /* poly_tomsg */
-  BENCH("poly_tomsg", poly_tomsg((uint8_t *)data0, (poly *)data1))
+  /* mlk_poly_tomsg */
+  BENCH("mlk_poly_tomsg", mlk_poly_tomsg((uint8_t *)data0, (mlk_poly *)data1))
 
-  /* poly_getnoise_eta1_4x */
-  BENCH("poly_getnoise_eta1_4x",
-        poly_getnoise_eta1_4x((poly *)data0, (poly *)data1, (poly *)data2,
-                              (poly *)data3, (uint8_t *)data4, nonce0, nonce1,
-                              nonce2, nonce3))
+  /* mlk_poly_getnoise_eta1_4x */
+  BENCH("mlk_poly_getnoise_eta1_4x",
+        mlk_poly_getnoise_eta1_4x((mlk_poly *)data0, (mlk_poly *)data1,
+                                  (mlk_poly *)data2, (mlk_poly *)data3,
+                                  (uint8_t *)data4, nonce0, nonce1, nonce2,
+                                  nonce3))
 
 #if MLKEM_K == 2 || MLKEM_K == 4
-  /* poly_getnoise_eta2 */
-  BENCH("poly_getnoise_eta2",
-        poly_getnoise_eta2((poly *)data0, (uint8_t *)data1, nonce0))
+  /* mlk_poly_getnoise_eta2 */
+  BENCH("mlk_poly_getnoise_eta2",
+        mlk_poly_getnoise_eta2((mlk_poly *)data0, (uint8_t *)data1, nonce0))
 #endif
 
 #if MLKEM_K == 2
-  /* poly_getnoise_eta1122_4x */
-  BENCH("poly_getnoise_eta1122_4x",
-        poly_getnoise_eta1122_4x((poly *)data0, (poly *)data1, (poly *)data2,
-                                 (poly *)data3, (uint8_t *)data4, nonce0,
-                                 nonce1, nonce2, nonce3))
+  /* mlk_poly_getnoise_eta1122_4x */
+  BENCH("mlk_poly_getnoise_eta1122_4x",
+        mlk_poly_getnoise_eta1122_4x((mlk_poly *)data0, (mlk_poly *)data1,
+                                     (mlk_poly *)data2, (mlk_poly *)data3,
+                                     (uint8_t *)data4, nonce0, nonce1, nonce2,
+                                     nonce3))
 #endif
 
-  /* poly_tomont */
-  BENCH("poly_tomont", poly_tomont((poly *)data0))
+  /* mlk_poly_tomont */
+  BENCH("mlk_poly_tomont", mlk_poly_tomont((mlk_poly *)data0))
 
-  /* poly_mulcache_compute */
-  BENCH("poly_mulcache_compute",
-        poly_mulcache_compute((poly_mulcache *)data0, (poly *)data1))
+  /* mlk_poly_mulcache_compute */
+  BENCH(
+      "mlk_poly_mulcache_compute",
+      mlk_poly_mulcache_compute((mlk_poly_mulcache *)data0, (mlk_poly *)data1))
 
-  /* poly_reduce */
-  BENCH("poly_reduce", poly_reduce((poly *)data0))
+  /* mlk_poly_reduce */
+  BENCH("mlk_poly_reduce", mlk_poly_reduce((mlk_poly *)data0))
 
-  /* poly_add */
-  BENCH("poly_add", poly_add((poly *)data0, (poly *)data1))
+  /* mlk_poly_add */
+  BENCH("mlk_poly_add", mlk_poly_add((mlk_poly *)data0, (mlk_poly *)data1))
 
-  /* poly_sub */
-  BENCH("poly_sub", poly_sub((poly *)data0, (poly *)data1))
+  /* mlk_poly_sub */
+  BENCH("mlk_poly_sub", mlk_poly_sub((mlk_poly *)data0, (mlk_poly *)data1))
 
-  /* polyvec */
-  /* polyvec_compress_du */
-  BENCH("polyvec_compress_du",
-        polyvec_compress_du((uint8_t *)data0, (polyvec *)data1))
+  /* mlk_polyvec */
+  /* mlk_polyvec_compress_du */
+  BENCH("mlk_polyvec_compress_du",
+        mlk_polyvec_compress_du((uint8_t *)data0, (mlk_polyvec *)data1))
 
-  /* polyvec_decompress_du */
-  BENCH("polyvec_decompress_du",
-        polyvec_decompress_du((polyvec *)data0, (uint8_t *)data1))
+  /* mlk_polyvec_decompress_du */
+  BENCH("mlk_polyvec_decompress_du",
+        mlk_polyvec_decompress_du((mlk_polyvec *)data0, (uint8_t *)data1))
 
-  /* polyvec_tobytes */
-  BENCH("polyvec_tobytes", polyvec_tobytes((uint8_t *)data0, (polyvec *)data1))
+  /* mlk_polyvec_tobytes */
+  BENCH("mlk_polyvec_tobytes",
+        mlk_polyvec_tobytes((uint8_t *)data0, (mlk_polyvec *)data1))
 
-  /* polyvec_frombytes */
-  BENCH("polyvec_frombytes",
-        polyvec_frombytes((polyvec *)data0, (uint8_t *)data1))
+  /* mlk_polyvec_frombytes */
+  BENCH("mlk_polyvec_frombytes",
+        mlk_polyvec_frombytes((mlk_polyvec *)data0, (uint8_t *)data1))
 
-  /* polyvec_ntt */
-  BENCH("polyvec_ntt", polyvec_ntt((polyvec *)data0))
+  /* mlk_polyvec_ntt */
+  BENCH("mlk_polyvec_ntt", mlk_polyvec_ntt((mlk_polyvec *)data0))
 
-  /* polyvec_invntt_tomont */
-  BENCH("polyvec_invntt_tomont", polyvec_invntt_tomont((polyvec *)data0))
+  /* mlk_polyvec_invntt_tomont */
+  BENCH("mlk_polyvec_invntt_tomont",
+        mlk_polyvec_invntt_tomont((mlk_polyvec *)data0))
 
-  /* polyvec_basemul_acc_montgomery_cached */
-  BENCH("polyvec_basemul_acc_montgomery_cached",
-        polyvec_basemul_acc_montgomery_cached((poly *)data0, (polyvec *)data1,
-                                              (polyvec *)data2,
-                                              (polyvec_mulcache *)data3))
+  /* mlk_polyvec_basemul_acc_montgomery_cached */
+  BENCH("mlk_polyvec_basemul_acc_montgomery_cached",
+        mlk_polyvec_basemul_acc_montgomery_cached(
+            (mlk_poly *)data0, (mlk_polyvec *)data1, (mlk_polyvec *)data2,
+            (mlk_polyvec_mulcache *)data3))
 
-  /* polyvec_mulcache_compute */
-  BENCH("polyvec_mulcache_compute",
-        polyvec_mulcache_compute((polyvec_mulcache *)data0, (polyvec *)data1))
+  /* mlk_polyvec_mulcache_compute */
+  BENCH("mlk_polyvec_mulcache_compute",
+        mlk_polyvec_mulcache_compute((mlk_polyvec_mulcache *)data0,
+                                     (mlk_polyvec *)data1))
 
-  /* polyvec_reduce */
-  BENCH("polyvec_reduce", polyvec_reduce((polyvec *)data0))
+  /* mlk_polyvec_reduce */
+  BENCH("mlk_polyvec_reduce", mlk_polyvec_reduce((mlk_polyvec *)data0))
 
-  /* polyvec_add */
-  BENCH("polyvec_add", polyvec_add((polyvec *)data0, (polyvec *)data1))
+  /* mlk_polyvec_add */
+  BENCH("mlk_polyvec_add",
+        mlk_polyvec_add((mlk_polyvec *)data0, (mlk_polyvec *)data1))
 
-  /* polyvec_tomont */
-  BENCH("polyvec_tomont", polyvec_tomont((polyvec *)data0))
+  /* mlk_polyvec_tomont */
+  BENCH("mlk_polyvec_tomont", mlk_polyvec_tomont((mlk_polyvec *)data0))
 
   /* indcpa */
-  /* gen_matrix */
-  BENCH("gen_matrix", gen_matrix((polyvec *)data0, (uint8_t *)data1, 0))
+  /* mlk_gen_matrix */
+  BENCH("mlk_gen_matrix",
+        mlk_gen_matrix((mlk_polyvec *)data0, (uint8_t *)data1, 0))
 
 
 #if defined(MLK_ARITH_BACKEND_AARCH64_CLEAN)
-  BENCH("ntt-clean",
-        ntt_asm_clean((int16_t *)data0, (int16_t *)data1, (int16_t *)data2));
-  BENCH("intt-clean",
-        intt_asm_clean((int16_t *)data0, (int16_t *)data1, (int16_t *)data2));
-  BENCH("poly-reduce-clean", poly_reduce_asm_clean((int16_t *)data0));
-  BENCH("poly-tomont-clean", poly_tomont_asm_clean((int16_t *)data0));
-  BENCH("poly-tobytes-clean",
-        poly_tobytes_asm_clean((uint8_t *)data0, (int16_t *)data1));
-  BENCH("poly-mulcache-compute-clean",
+  BENCH("ntt-clean", mlk_ntt_asm_clean((int16_t *)data0, (int16_t *)data1,
+                                       (int16_t *)data2));
+  BENCH("intt-clean", mlk_intt_asm_clean((int16_t *)data0, (int16_t *)data1,
+                                         (int16_t *)data2));
+  BENCH("mlk_poly-reduce-clean", mlk_poly_reduce_asm_clean((int16_t *)data0));
+  BENCH("mlk_poly-tomont-clean", mlk_poly_tomont_asm_clean((int16_t *)data0));
+  BENCH("mlk_poly-tobytes-clean",
+        mlk_poly_tobytes_asm_clean((uint8_t *)data0, (int16_t *)data1));
+  BENCH("mlk_poly-mulcache-compute-clean",
         poly_mulcache_compute_asm_clean((int16_t *)data0, (int16_t *)data1,
                                         (int16_t *)data2, (int16_t *)data3));
 #if MLKEM_K == 2
-  BENCH("polyvec-basemul-acc-montgomery-cached-asm-clean",
+  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-clean",
         polyvec_basemul_acc_montgomery_cached_asm_k2_clean(
             (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
             (int16_t *)data3));
 #elif MLKEM_K == 3
-  BENCH("polyvec-basemul-acc-montgomery-cached-asm-clean",
+  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-clean",
         polyvec_basemul_acc_montgomery_cached_asm_k3_clean(
             (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
             (int16_t *)data3));
 #elif MLKEM_K == 4
-  BENCH("polyvec-basemul-acc-montgomery-cached-asm-clean",
+  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-clean",
         polyvec_basemul_acc_montgomery_cached_asm_k4_clean(
             (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
             (int16_t *)data3));
@@ -217,26 +232,26 @@ static int bench(void)
 
 #if defined(MLK_ARITH_BACKEND_AARCH64_OPT)
   BENCH("ntt-opt",
-        ntt_asm_opt((int16_t *)data0, (int16_t *)data1, (int16_t *)data2));
+        mlk_ntt_asm_opt((int16_t *)data0, (int16_t *)data1, (int16_t *)data2));
   BENCH("intt-opt",
-        intt_asm_opt((int16_t *)data0, (int16_t *)data1, (int16_t *)data2));
-  BENCH("poly-reduce-opt", poly_reduce_asm_opt((int16_t *)data0));
-  BENCH("poly-tomont-opt", poly_tomont_asm_opt((int16_t *)data0));
-  BENCH("poly-mulcache-compute-opt",
+        mlk_intt_asm_opt((int16_t *)data0, (int16_t *)data1, (int16_t *)data2));
+  BENCH("mlk_poly-reduce-opt", mlk_poly_reduce_asm_opt((int16_t *)data0));
+  BENCH("mlk_poly-tomont-opt", mlk_poly_tomont_asm_opt((int16_t *)data0));
+  BENCH("mlk_poly-mulcache-compute-opt",
         poly_mulcache_compute_asm_opt((int16_t *)data0, (int16_t *)data1,
                                       (int16_t *)data2, (int16_t *)data3));
 #if MLKEM_K == 2
-  BENCH("polyvec-basemul-acc-montgomery-cached-asm-opt",
+  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-opt",
         polyvec_basemul_acc_montgomery_cached_asm_k2_opt(
             (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
             (int16_t *)data3));
 #elif MLKEM_K == 3
-  BENCH("polyvec-basemul-acc-montgomery-cached-asm-opt",
+  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-opt",
         polyvec_basemul_acc_montgomery_cached_asm_k3_opt(
             (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
             (int16_t *)data3));
 #elif MLKEM_K == 4
-  BENCH("polyvec-basemul-acc-montgomery-cached-asm-opt",
+  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-opt",
         polyvec_basemul_acc_montgomery_cached_asm_k4_opt(
             (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
             (int16_t *)data3));

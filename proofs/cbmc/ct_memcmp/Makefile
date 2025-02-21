@@ -7,7 +7,7 @@ HARNESS_FILE = ct_memcmp_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = ct_memcmp
+PROOF_UID = mlk_ct_memcmp
 
 DEFINES +=
 INCLUDES +=
@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)ct_memcmp
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)value_barrier_u8 $(MLK_NAMESPACE)ct_cmask_nonzero_u8
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_ct_memcmp
+USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_value_barrier_u8 $(MLK_NAMESPACE)mlk_ct_cmask_nonzero_u8
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = ct_memcmp
+FUNCTION_NAME = mlk_ct_memcmp
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

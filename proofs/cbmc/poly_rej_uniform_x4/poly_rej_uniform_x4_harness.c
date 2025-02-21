@@ -7,7 +7,7 @@
 
 void harness(void)
 {
-  poly out[4];
+  mlk_poly out[4];
   uint8_t *seed[4];
-  poly_rej_uniform_x4(out, seed);
+  mlk_poly_rej_uniform_x4(out, seed);
 }

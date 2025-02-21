@@ -81,7 +81,7 @@
  *              in the build, including code needed only for other security
  *              levels.
  *
- *              Example: poly_cbd3 is only needed for MLKEM_K == 2. Yet, if
+ *              Example: mlk_poly_cbd3 is only needed for MLKEM_K == 2. Yet, if
  *              this option is set for a build with MLKEM_K==3/4, it would
  *              be included.
  *

@@ -25,13 +25,13 @@
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define keccak_absorb_once MLK_NAMESPACE(keccak_absorb_once)
-#define keccak_squeeze_once MLK_NAMESPACE(keccak_squeeze_once)
-#define keccak_squeezeblocks MLK_NAMESPACE(keccak_squeezeblocks)
+#define mlk_keccak_absorb_once MLK_NAMESPACE(keccak_absorb_once)
+#define mlk_keccak_squeeze_once MLK_NAMESPACE(keccak_squeeze_once)
+#define mlk_keccak_squeezeblocks MLK_NAMESPACE(keccak_squeezeblocks)
 /* End of static namespacing */
 
 /*************************************************
- * Name:        keccak_absorb_once
+ * Name:        mlk_keccak_absorb_once
  *
  * Description: Absorb step of Keccak;
  *              non-incremental, starts by zeroeing the state.
@@ -46,8 +46,8 @@
  *              - uint8_t p:         domain-separation byte for different
  *                                   Keccak-derived functions
  **************************************************/
-static void keccak_absorb_once(uint64_t *s, uint32_t r, const uint8_t *m,
-                               size_t mlen, uint8_t p)
+static void mlk_keccak_absorb_once(uint64_t *s, uint32_t r, const uint8_t *m,
+                                   size_t mlen, uint8_t p)
 __contract__(
     requires(r <= sizeof(uint64_t) * KECCAK_LANES)
     requires(memory_no_alias(s, sizeof(uint64_t) * KECCAK_LANES))
@@ -93,7 +93,7 @@ __contract__(
 }
 
 /*************************************************
- * Name:        keccak_squeezeblocks
+ * Name:        mlk_keccak_squeezeblocks
  *
  * Description: block-level Keccak squeeze
  *
@@ -102,8 +102,8 @@ __contract__(
  *              - uint64_t *s_inc: pointer to input/output state
  *              - uint32_t r: rate in bytes (e.g., 168 for SHAKE128)
  **************************************************/
-static void keccak_squeezeblocks(uint8_t *h, size_t nblocks, uint64_t *s,
-                                 uint32_t r)
+static void mlk_keccak_squeezeblocks(uint8_t *h, size_t nblocks, uint64_t *s,
+                                     uint32_t r)
 __contract__(
     requires(r <= sizeof(uint64_t) * KECCAK_LANES)
     requires(nblocks <= 8 /* somewhat arbitrary bound */)
@@ -128,7 +128,7 @@ __contract__(
 }
 
 /*************************************************
- * Name:        keccak_squeeze_once
+ * Name:        mlk_keccak_squeeze_once
  *
  * Description: Keccak squeeze; can be called on byte-level
  *
@@ -139,8 +139,8 @@ __contract__(
  *              - uint64_t *s_inc: pointer to Keccak state
  *              - uint32_t r: rate in bytes (e.g., 168 for SHAKE128)
  **************************************************/
-static void keccak_squeeze_once(uint8_t *h, size_t outlen, uint64_t *s,
-                                uint32_t r)
+static void mlk_keccak_squeeze_once(uint8_t *h, size_t outlen, uint64_t *s,
+                                    uint32_t r)
 __contract__(
     requires(r <= sizeof(uint64_t) * KECCAK_LANES)
     requires(memory_no_alias(s, sizeof(uint64_t) * KECCAK_LANES))
@@ -176,12 +176,12 @@ __contract__(
 void shake128_absorb_once(shake128ctx *state, const uint8_t *input,
                           size_t inlen)
 {
-  keccak_absorb_once(state->ctx, SHAKE128_RATE, input, inlen, 0x1F);
+  mlk_keccak_absorb_once(state->ctx, SHAKE128_RATE, input, inlen, 0x1F);
 }
 
 void shake128_squeezeblocks(uint8_t *output, size_t nblocks, shake128ctx *state)
 {
-  keccak_squeezeblocks(output, nblocks, state->ctx, SHAKE128_RATE);
+  mlk_keccak_squeezeblocks(output, nblocks, state->ctx, SHAKE128_RATE);
 }
 
 void shake128_init(shake128ctx *state) { (void)state; }
@@ -189,7 +189,7 @@ void shake128_release(shake128ctx *state)
 {
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  ct_zeroize(state, sizeof(shake128ctx));
+  mlk_ct_zeroize(state, sizeof(shake128ctx));
 }
 
 #define shake256ctx MLK_NAMESPACE(shake256ctx)
@@ -199,36 +199,36 @@ void shake256(uint8_t *output, size_t outlen, const uint8_t *input,
 {
   shake256ctx state;
   /* Absorb input */
-  keccak_absorb_once(state.ctx, SHAKE256_RATE, input, inlen, 0x1F);
+  mlk_keccak_absorb_once(state.ctx, SHAKE256_RATE, input, inlen, 0x1F);
   /* Squeeze output */
-  keccak_squeeze_once(output, outlen, state.ctx, SHAKE256_RATE);
+  mlk_keccak_squeeze_once(output, outlen, state.ctx, SHAKE256_RATE);
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  ct_zeroize(&state, sizeof(state));
+  mlk_ct_zeroize(&state, sizeof(state));
 }
 
 void sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
 {
   uint64_t ctx[25];
   /* Absorb input */
-  keccak_absorb_once(ctx, SHA3_256_RATE, input, inlen, 0x06);
+  mlk_keccak_absorb_once(ctx, SHA3_256_RATE, input, inlen, 0x06);
   /* Squeeze output */
-  keccak_squeeze_once(output, 32, ctx, SHA3_256_RATE);
+  mlk_keccak_squeeze_once(output, 32, ctx, SHA3_256_RATE);
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  ct_zeroize(ctx, sizeof(ctx));
+  mlk_ct_zeroize(ctx, sizeof(ctx));
 }
 
 void sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
 {
   uint64_t ctx[25];
   /* Absorb input */
-  keccak_absorb_once(ctx, SHA3_512_RATE, input, inlen, 0x06);
+  mlk_keccak_absorb_once(ctx, SHA3_512_RATE, input, inlen, 0x06);
   /* Squeeze output */
-  keccak_squeeze_once(output, 64, ctx, SHA3_512_RATE);
+  mlk_keccak_squeeze_once(output, 64, ctx, SHA3_512_RATE);
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  ct_zeroize(ctx, sizeof(ctx));
+  mlk_ct_zeroize(ctx, sizeof(ctx));
 }
 
 #else /* MLK_MULTILEVEL_BUILD_NO_SHARED */
@@ -239,7 +239,7 @@ MLK_EMPTY_CU(fips202)
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
-#undef keccak_absorb_once
-#undef keccak_squeeze_once
-#undef keccak_squeezeblocks
+#undef mlk_keccak_absorb_once
+#undef mlk_keccak_squeeze_once
+#undef mlk_keccak_squeezeblocks
 #undef shake256ctx

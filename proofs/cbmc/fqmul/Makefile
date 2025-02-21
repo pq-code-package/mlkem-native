@@ -7,7 +7,7 @@ HARNESS_FILE = fqmul_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = fqmul
+PROOF_UID = mlk_fqmul
 
 DEFINES +=
 INCLUDES +=
@@ -18,7 +18,7 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c # Some unit including reduce.h
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)fqmul
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_fqmul
 USE_FUNCTION_CONTRACTS=
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = fqmul
+FUNCTION_NAME = mlk_fqmul
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

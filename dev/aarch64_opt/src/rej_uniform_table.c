@@ -20,7 +20,7 @@
  * Lookup table used by rejection sampling of the public matrix.
  * See autogen for details.
  */
-MLK_ALIGN const uint8_t rej_uniform_table[] = {
+MLK_ALIGN const uint8_t mlk_rej_uniform_table[] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 /* 0 */,
     0,  1,  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 /* 1 */,
     2,  3,  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 /* 2 */,

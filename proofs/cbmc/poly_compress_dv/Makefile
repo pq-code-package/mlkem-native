@@ -7,7 +7,7 @@ HARNESS_FILE = poly_compress_dv_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = poly_compress_dv
+PROOF_UID = mlk_poly_compress_dv
 
 DEFINES +=
 INCLUDES +=
@@ -18,15 +18,15 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/compress.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_compress_dv
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_poly_compress_dv
 
 USE_FUNCTION_CONTRACTS =
 # TODO: We should be calling scalar_decompress_xxx by contract here,
 # but it does not seem to work yet because they are marked as static inline.
 # ifeq ($(MLKEM_K),4)
-# USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)scalar_compress_d5
+# USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_scalar_compress_d5
 # else
-# USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)scalar_compress_d4
+# USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_scalar_compress_d4
 # endif
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
@@ -35,7 +35,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = $(MLK_NAMESPACE)poly_compress_dv
+FUNCTION_NAME = $(MLK_NAMESPACE)mlk_poly_compress_dv
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

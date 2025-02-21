@@ -16,7 +16,8 @@ static void poly_basemul_montgomery_avx2(int16_t r[MLKEM_N],
                                          const int16_t a[MLKEM_N],
                                          const int16_t b[MLKEM_N])
 {
-  basemul_avx2((__m256i *)r, (const __m256i *)a, (const __m256i *)b, qdata.vec);
+  mlk_basemul_avx2((__m256i *)r, (const __m256i *)a, (const __m256i *)b,
+                   mlk_qdata.vec);
 }
 
 /*
@@ -61,7 +62,7 @@ void polyvec_basemul_acc_montgomery_cached_avx2(unsigned k, int16_t r[MLKEM_N],
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  ct_zeroize(t, sizeof(t));
+  mlk_ct_zeroize(t, sizeof(t));
 }
 
 #else /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \

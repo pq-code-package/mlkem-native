@@ -7,19 +7,19 @@ HARNESS_FILE = polyvec_frombytes_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = polyvec_frombytes
+PROOF_UID = mlk_polyvec_frombytes
 
 DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET += $(MLK_NAMESPACE)polyvec_frombytes.0:4 # Largest value of MLKEM_K
+UNWINDSET += $(MLK_NAMESPACE)mlk_polyvec_frombytes.0:4 # Largest value of MLKEM_K
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly_k.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)polyvec_frombytes
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_frombytes
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_polyvec_frombytes
+USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)mlk_poly_frombytes
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = $(MLK_NAMESPACE)polyvec_frombytes
+FUNCTION_NAME = $(MLK_NAMESPACE)mlk_polyvec_frombytes
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

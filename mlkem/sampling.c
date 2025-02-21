@@ -14,14 +14,15 @@
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define rej_uniform MLK_NAMESPACE(rej_uniform)
-#define rej_uniform_scalar MLK_NAMESPACE(rej_uniform_scalar)
-#define load32_littleendian MLK_NAMESPACE(load32_littleendian)
-#define load24_littleendian MLK_NAMESPACE(load24_littleendian)
+#define mlk_rej_uniform MLK_NAMESPACE(rej_uniform)
+#define mlk_rej_uniform_scalar MLK_NAMESPACE(rej_uniform_scalar)
+#define mlk_load32_littleendian MLK_NAMESPACE(load32_littleendian)
+#define mlk_load24_littleendian MLK_NAMESPACE(load24_littleendian)
 /* End of static namespacing */
 
-static unsigned rej_uniform_scalar(int16_t *r, unsigned target, unsigned offset,
-                                   const uint8_t *buf, unsigned buflen)
+static unsigned mlk_rej_uniform_scalar(int16_t *r, unsigned target,
+                                       unsigned offset, const uint8_t *buf,
+                                       unsigned buflen)
 __contract__(
   requires(offset <= target && target <= 4096 && buflen <= 4096 && buflen % 3 == 0)
   requires(memory_no_alias(r, sizeof(int16_t) * target))
@@ -35,7 +36,7 @@ __contract__(
   unsigned ctr, pos;
   uint16_t val0, val1;
 
-  debug_assert_bound(r, offset, 0, MLKEM_Q);
+  mlk_debug_assert_bound(r, offset, 0, MLKEM_Q);
 
   ctr = offset;
   pos = 0;
@@ -59,12 +60,12 @@ __contract__(
     }
   }
 
-  debug_assert_bound(r, ctr, 0, MLKEM_Q);
+  mlk_debug_assert_bound(r, ctr, 0, MLKEM_Q);
   return ctr;
 }
 
 /*************************************************
- * Name:        rej_uniform
+ * Name:        mlk_rej_uniform
  *
  * Description: Run rejection sampling on uniform random bytes to generate
  *              uniform random integers mod q
@@ -99,8 +100,8 @@ __contract__(
  * buffer. This avoids shifting the buffer base in the caller, which appears
  * tricky to reason about.
  */
-static unsigned rej_uniform(int16_t *r, unsigned target, unsigned offset,
-                            const uint8_t *buf, unsigned buflen)
+static unsigned mlk_rej_uniform(int16_t *r, unsigned target, unsigned offset,
+                                const uint8_t *buf, unsigned buflen)
 __contract__(
   requires(offset <= target && target <= 4096 && buflen <= 4096 && buflen % 3 == 0)
   requires(memory_no_alias(r, sizeof(int16_t) * target))
@@ -118,13 +119,13 @@ __contract__(
     if (ret != -1)
     {
       unsigned res = (unsigned)ret;
-      debug_assert_bound(r, res, 0, MLKEM_Q);
+      mlk_debug_assert_bound(r, res, 0, MLKEM_Q);
       return res;
     }
   }
 #endif /* MLK_USE_NATIVE_REJ_UNIFORM */
 
-  return rej_uniform_scalar(r, target, offset, buf, buflen);
+  return mlk_rej_uniform_scalar(r, target, offset, buf, buflen);
 }
 
 #ifndef MLKEM_GEN_MATRIX_NBLOCKS
@@ -133,7 +134,7 @@ __contract__(
 #endif
 
 MLK_INTERNAL_API
-void poly_rej_uniform_x4(poly *vec, uint8_t *seed[4])
+void mlk_poly_rej_uniform_x4(mlk_poly *vec, uint8_t *seed[4])
 {
   /* Temporary buffers for XOF output before rejection sampling */
   MLK_ALIGN uint8_t buf0[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
@@ -158,10 +159,10 @@ void poly_rej_uniform_x4(poly *vec, uint8_t *seed[4])
   xof_x4_squeezeblocks(buf0, buf1, buf2, buf3, MLKEM_GEN_MATRIX_NBLOCKS,
                        &statex);
   buflen = MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE;
-  ctr[0] = rej_uniform(vec[0].coeffs, MLKEM_N, 0, buf0, buflen);
-  ctr[1] = rej_uniform(vec[1].coeffs, MLKEM_N, 0, buf1, buflen);
-  ctr[2] = rej_uniform(vec[2].coeffs, MLKEM_N, 0, buf2, buflen);
-  ctr[3] = rej_uniform(vec[3].coeffs, MLKEM_N, 0, buf3, buflen);
+  ctr[0] = mlk_rej_uniform(vec[0].coeffs, MLKEM_N, 0, buf0, buflen);
+  ctr[1] = mlk_rej_uniform(vec[1].coeffs, MLKEM_N, 0, buf1, buflen);
+  ctr[2] = mlk_rej_uniform(vec[2].coeffs, MLKEM_N, 0, buf2, buflen);
+  ctr[3] = mlk_rej_uniform(vec[3].coeffs, MLKEM_N, 0, buf3, buflen);
 
   /*
    * So long as not all matrix entries have been generated, squeeze
@@ -171,7 +172,7 @@ void poly_rej_uniform_x4(poly *vec, uint8_t *seed[4])
   while (ctr[0] < MLKEM_N || ctr[1] < MLKEM_N || ctr[2] < MLKEM_N ||
          ctr[3] < MLKEM_N)
   __loop__(
-    assigns(ctr, statex, memory_slice(vec, sizeof(poly) * 4), object_whole(buf0),
+    assigns(ctr, statex, memory_slice(vec, sizeof(mlk_poly) * 4), object_whole(buf0),
        object_whole(buf1), object_whole(buf2), object_whole(buf3))
     invariant(ctr[0] <= MLKEM_N && ctr[1] <= MLKEM_N)
     invariant(ctr[2] <= MLKEM_N && ctr[3] <= MLKEM_N)
@@ -181,24 +182,24 @@ void poly_rej_uniform_x4(poly *vec, uint8_t *seed[4])
     invariant(array_bound(vec[3].coeffs, 0, ctr[3], 0, MLKEM_Q)))
   {
     xof_x4_squeezeblocks(buf0, buf1, buf2, buf3, 1, &statex);
-    ctr[0] = rej_uniform(vec[0].coeffs, MLKEM_N, ctr[0], buf0, buflen);
-    ctr[1] = rej_uniform(vec[1].coeffs, MLKEM_N, ctr[1], buf1, buflen);
-    ctr[2] = rej_uniform(vec[2].coeffs, MLKEM_N, ctr[2], buf2, buflen);
-    ctr[3] = rej_uniform(vec[3].coeffs, MLKEM_N, ctr[3], buf3, buflen);
+    ctr[0] = mlk_rej_uniform(vec[0].coeffs, MLKEM_N, ctr[0], buf0, buflen);
+    ctr[1] = mlk_rej_uniform(vec[1].coeffs, MLKEM_N, ctr[1], buf1, buflen);
+    ctr[2] = mlk_rej_uniform(vec[2].coeffs, MLKEM_N, ctr[2], buf2, buflen);
+    ctr[3] = mlk_rej_uniform(vec[3].coeffs, MLKEM_N, ctr[3], buf3, buflen);
   }
 
   xof_x4_release(&statex);
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  ct_zeroize(buf0, sizeof(buf0));
-  ct_zeroize(buf1, sizeof(buf1));
-  ct_zeroize(buf2, sizeof(buf2));
-  ct_zeroize(buf3, sizeof(buf3));
+  mlk_ct_zeroize(buf0, sizeof(buf0));
+  mlk_ct_zeroize(buf1, sizeof(buf1));
+  mlk_ct_zeroize(buf2, sizeof(buf2));
+  mlk_ct_zeroize(buf3, sizeof(buf3));
 }
 
 MLK_INTERNAL_API
-void poly_rej_uniform(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
+void mlk_poly_rej_uniform(mlk_poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
 {
   xof_ctx state;
   MLK_ALIGN uint8_t buf[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
@@ -212,37 +213,37 @@ void poly_rej_uniform(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
   /* This should generate the matrix entry with high probability. */
   xof_squeezeblocks(buf, MLKEM_GEN_MATRIX_NBLOCKS, &state);
   buflen = MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE;
-  ctr = rej_uniform(entry->coeffs, MLKEM_N, 0, buf, buflen);
+  ctr = mlk_rej_uniform(entry->coeffs, MLKEM_N, 0, buf, buflen);
 
   /* Squeeze + sample one more block a time until we're done */
   buflen = XOF_RATE;
   while (ctr < MLKEM_N)
   __loop__(
-    assigns(ctr, state, memory_slice(entry, sizeof(poly)), object_whole(buf))
+    assigns(ctr, state, memory_slice(entry, sizeof(mlk_poly)), object_whole(buf))
     invariant(ctr <= MLKEM_N)
     invariant(array_bound(entry->coeffs, 0, ctr, 0, MLKEM_Q)))
   {
     xof_squeezeblocks(buf, 1, &state);
-    ctr = rej_uniform(entry->coeffs, MLKEM_N, ctr, buf, buflen);
+    ctr = mlk_rej_uniform(entry->coeffs, MLKEM_N, ctr, buf, buflen);
   }
 
   xof_release(&state);
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  ct_zeroize(buf, sizeof(buf));
+  mlk_ct_zeroize(buf, sizeof(buf));
 }
 
 /* Static namespacing
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define load32_littleendian MLK_NAMESPACE(load32_littleendian)
-#define load24_littleendian MLK_NAMESPACE(load24_littleendian)
+#define mlk_load32_littleendian MLK_NAMESPACE(load32_littleendian)
+#define mlk_load24_littleendian MLK_NAMESPACE(load24_littleendian)
 /* End of static namespacing */
 
 /*************************************************
- * Name:        load32_littleendian
+ * Name:        mlk_load32_littleendian
  *
  * Description: load 4 bytes into a 32-bit integer
  *              in little-endian order
@@ -251,7 +252,7 @@ void poly_rej_uniform(poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
  *
  * Returns 32-bit unsigned integer loaded from x
  **************************************************/
-static uint32_t load32_littleendian(const uint8_t x[4])
+static uint32_t mlk_load32_littleendian(const uint8_t x[4])
 {
   uint32_t r;
   r = (uint32_t)x[0];
@@ -262,7 +263,7 @@ static uint32_t load32_littleendian(const uint8_t x[4])
 }
 
 MLK_INTERNAL_API
-void poly_cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
+void mlk_poly_cbd2(mlk_poly *r, const uint8_t buf[2 * MLKEM_N / 4])
 {
   unsigned i;
   for (i = 0; i < MLKEM_N / 8; i++)
@@ -271,7 +272,7 @@ void poly_cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
     invariant(array_abs_bound(r->coeffs, 0, 8 * i, 3)))
   {
     unsigned j;
-    uint32_t t = load32_littleendian(buf + 4 * i);
+    uint32_t t = mlk_load32_littleendian(buf + 4 * i);
     uint32_t d = t & 0x55555555;
     d += (t >> 1) & 0x55555555;
 
@@ -289,7 +290,7 @@ void poly_cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
 
 #if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_ETA1 == 3
 /*************************************************
- * Name:        load24_littleendian
+ * Name:        mlk_load24_littleendian
  *
  * Description: load 3 bytes into a 32-bit integer
  *              in little-endian order.
@@ -299,7 +300,7 @@ void poly_cbd2(poly *r, const uint8_t buf[2 * MLKEM_N / 4])
  *
  * Returns 32-bit unsigned integer loaded from x (most significant byte is zero)
  **************************************************/
-static uint32_t load24_littleendian(const uint8_t x[3])
+static uint32_t mlk_load24_littleendian(const uint8_t x[3])
 {
   uint32_t r;
   r = (uint32_t)x[0];
@@ -309,7 +310,7 @@ static uint32_t load24_littleendian(const uint8_t x[3])
 }
 
 MLK_INTERNAL_API
-void poly_cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4])
+void mlk_poly_cbd3(mlk_poly *r, const uint8_t buf[3 * MLKEM_N / 4])
 {
   unsigned i;
   for (i = 0; i < MLKEM_N / 4; i++)
@@ -318,7 +319,7 @@ void poly_cbd3(poly *r, const uint8_t buf[3 * MLKEM_N / 4])
     invariant(array_abs_bound(r->coeffs, 0, 4 * i, 4)))
   {
     unsigned j;
-    const uint32_t t = load24_littleendian(buf + 3 * i);
+    const uint32_t t = mlk_load24_littleendian(buf + 3 * i);
     uint32_t d = t & 0x00249249;
     d += (t >> 1) & 0x00249249;
     d += (t >> 2) & 0x00249249;
@@ -345,10 +346,10 @@ MLK_EMPTY_CU(sampling)
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
-#undef rej_uniform
-#undef rej_uniform_scalar
-#undef load32_littleendian
-#undef load24_littleendian
+#undef mlk_rej_uniform
+#undef mlk_rej_uniform_scalar
+#undef mlk_load32_littleendian
+#undef mlk_load24_littleendian
 #undef MLKEM_GEN_MATRIX_NBLOCKS
-#undef load32_littleendian
-#undef load24_littleendian
+#undef mlk_load32_littleendian
+#undef mlk_load24_littleendian
