@@ -12,13 +12,13 @@
 #include "sampling.h"
 #include "symmetric.h"
 
-/* Static namespacing
+/* Level namespacing
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define mlk_poly_cbd_eta1 MLK_NAMESPACE_K(poly_cbd_eta1)
-#define mlk_poly_cbd_eta2 MLK_NAMESPACE_K(poly_cbd_eta2)
-/* End of static namespacing */
+#define mlk_poly_cbd_eta1 MLK_ADD_LEVEL(mlk_poly_cbd_eta1)
+#define mlk_poly_cbd_eta2 MLK_ADD_LEVEL(mlk_poly_cbd_eta2)
+/* End of level namespacing */
 
 MLK_INTERNAL_API
 void mlk_polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],

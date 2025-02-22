@@ -10,13 +10,13 @@
 #include "compress.h"
 #include "poly.h"
 
-#define mlk_polyvec MLK_NAMESPACE_K(polyvec)
+#define mlk_polyvec MLK_ADD_LEVEL(mlk_polyvec)
 typedef struct
 {
   mlk_poly vec[MLKEM_K];
 } MLK_ALIGN mlk_polyvec;
 
-#define mlk_polyvec_mulcache MLK_NAMESPACE_K(polyvec_mulcache)
+#define mlk_polyvec_mulcache MLK_ADD_LEVEL(mlk_polyvec_mulcache)
 typedef struct
 {
   mlk_poly_mulcache vec[MLKEM_K];
