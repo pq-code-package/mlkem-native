@@ -18,7 +18,7 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/compress.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_decompress_dv
+CHECK_FUNCTION_CONTRACTS=mlk_poly_decompress_dv
 
 USE_FUNCTION_CONTRACTS =
 # TODO: We should be calling scalar_decompress_xxx by contract here,
@@ -37,7 +37,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = $(MLK_NAMESPACE)poly_decompress_dv
+FUNCTION_NAME = mlk_poly_decompress_dv
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

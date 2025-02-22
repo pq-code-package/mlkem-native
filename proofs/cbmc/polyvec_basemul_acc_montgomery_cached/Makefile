@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly_k.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)polyvec_basemul_acc_montgomery_cached
-USE_FUNCTION_CONTRACTS= $(MLK_NAMESPACE)montgomery_reduce
+CHECK_FUNCTION_CONTRACTS=mlk_polyvec_basemul_acc_montgomery_cached
+USE_FUNCTION_CONTRACTS= mlk_montgomery_reduce
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/indcpa.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)indcpa_keypair_derand
-USE_FUNCTION_CONTRACTS=mlk_ct_zeroize $(MLK_NAMESPACE)sha3_512 $(MLK_NAMESPACE)gen_matrix $(MLK_NAMESPACE)poly_getnoise_eta1_4x $(MLK_NAMESPACE)polyvec_ntt $(MLK_NAMESPACE)polyvec_mulcache_compute $(MLK_NAMESPACE)matvec_mul $(MLK_NAMESPACE)polyvec_tomont $(MLK_NAMESPACE)polyvec_add $(MLK_NAMESPACE)polyvec_reduce $(MLK_NAMESPACE)polyvec_tobytes
+CHECK_FUNCTION_CONTRACTS=mlk_indcpa_keypair_derand
+USE_FUNCTION_CONTRACTS=mlk_ct_zeroize mlk_sha3_512 mlk_gen_matrix mlk_poly_getnoise_eta1_4x mlk_polyvec_ntt mlk_polyvec_mulcache_compute mlk_matvec_mul mlk_polyvec_tomont mlk_polyvec_add mlk_polyvec_reduce mlk_polyvec_tobytes
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = $(MLK_NAMESPACE)indcpa_keypair_derand
+FUNCTION_NAME = mlk_indcpa_keypair_derand
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

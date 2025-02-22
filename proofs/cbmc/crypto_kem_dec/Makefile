@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/kem.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)dec
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)sha3_512 $(MLK_NAMESPACE)sha3_256 $(MLK_NAMESPACE)indcpa_enc $(MLK_NAMESPACE)indcpa_dec $(MLK_NAMESPACE)shake256 mlk_ct_memcmp mlk_ct_cmov_zero memcmp mlk_ct_zeroize
+CHECK_FUNCTION_CONTRACTS=mlk_dec
+USE_FUNCTION_CONTRACTS=mlk_sha3_512 mlk_sha3_256 mlk_indcpa_enc mlk_indcpa_dec mlk_shake256 mlk_ct_memcmp mlk_ct_cmov_zero memcmp mlk_ct_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = $(MLK_NAMESPACE)dec
+FUNCTION_NAME = mlk_dec
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

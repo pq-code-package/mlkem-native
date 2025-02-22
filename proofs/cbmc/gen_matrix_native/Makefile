@@ -13,13 +13,13 @@ DEFINES += -DMLK_USE_NATIVE_BACKEND_ARITH -DMLK_ARITH_BACKEND_FILE="\"dummy_back
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET += $(MLK_NAMESPACE)gen_matrix.0:4 $(MLK_NAMESPACE)gen_matrix.1:4 $(MLK_NAMESPACE)gen_matrix.2:4 $(MLK_NAMESPACE)gen_matrix.3:4 $(MLK_NAMESPACE)gen_matrix.4:4
+UNWINDSET += mlk_gen_matrix.0:4 mlk_gen_matrix.1:4 mlk_gen_matrix.2:4 mlk_gen_matrix.3:4 mlk_gen_matrix.4:4
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/indcpa.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)gen_matrix
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_rej_uniform $(MLK_NAMESPACE)poly_rej_uniform_x4 mlk_poly_permute_bitrev_to_custom
+CHECK_FUNCTION_CONTRACTS=mlk_gen_matrix
+USE_FUNCTION_CONTRACTS=mlk_poly_rej_uniform mlk_poly_rej_uniform_x4 mlk_poly_permute_bitrev_to_custom
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = $(MLK_NAMESPACE)gen_matrix_native
+FUNCTION_NAME = mlk_gen_matrix_native
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/fips202/keccakf1600.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)keccakf1600x4_extract_bytes
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)keccakf1600_extract_bytes
+CHECK_FUNCTION_CONTRACTS=mlk_keccakf1600x4_extract_bytes
+USE_FUNCTION_CONTRACTS=mlk_keccakf1600_extract_bytes
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -29,7 +29,7 @@ CBMCFLAGS=--bitwuzla
 
 # CBMCFLAGS += --no-array-field-sensitivity --arrays-uf-always --slice-formula
 
-FUNCTION_NAME = $(MLK_NAMESPACE)keccakf1600x4_extract_bytes
+FUNCTION_NAME = mlk_keccakf1600x4_extract_bytes
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

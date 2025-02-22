@@ -19,7 +19,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/fips202/fips202.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_keccak_squeezeblocks
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)keccakf1600_extract_bytes $(MLK_NAMESPACE)keccakf1600_permute
+USE_FUNCTION_CONTRACTS=mlk_keccakf1600_extract_bytes mlk_keccakf1600_permute
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
