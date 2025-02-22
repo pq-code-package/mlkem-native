@@ -54,19 +54,23 @@
 #define MLK_EXTERNAL_API
 #endif /* MLK_EXTERNAL_API */
 
-#define MLK_MAKE_NAMESPACE_(x1, x2) x1##_##x2
-#define MLK_MAKE_NAMESPACE(x1, x2) MLK_MAKE_NAMESPACE_(x1, x2)
-
-#define MLK_NAMESPACE(s) MLK_MAKE_NAMESPACE(MLK_NAMESPACE_PREFIX, s)
-
-#if defined(MLK_NAMESPACE_PREFIX_ADD_LEVEL)
-#define MLK_MAKE_NAMESPACE_K_(x1, x2, x3) x1##x2##_##x3
-#define MLK_MAKE_NAMESPACE_K(x1, x2, x3) MLK_MAKE_NAMESPACE_K_(x1, x2, x3)
-#define MLK_NAMESPACE_K(s) \
-  MLK_MAKE_NAMESPACE_K(MLK_NAMESPACE_PREFIX, MLKEM_LVL, s)
-#else
-#define MLK_NAMESPACE_K(s) MLK_NAMESPACE(s)
+#if defined(MLK_MULTILEVEL_BUILD_NO_SHARED) || \
+    defined(MLK_MULTILEVEL_BUILD_WITH_SHARED)
+#define MLK_MULTILEVEL_BUILD
 #endif
+
+#define MLK_CONCAT_(x1, x2) x1##x2
+#define MLK_CONCAT(x1, x2) MLK_CONCAT_(x1, x2)
+
+#if defined(MLK_MULTILEVEL_BUILD)
+#define MLK_ADD_LEVEL(s) MLK_CONCAT(s, MLKEM_LVL)
+#else /* MLK_MULTILEVEL_BUILD */
+#define MLK_ADD_LEVEL(s) s
+#endif /* MLK_MULTILEVEL_BUILD */
+
+#define MLK_NAMESPACE(s) MLK_CONCAT(MLK_CONCAT(MLK_NAMESPACE_PREFIX, _), s)
+#define MLK_NAMESPACE_K(s) \
+  MLK_CONCAT(MLK_CONCAT(MLK_ADD_LEVEL(MLK_NAMESPACE_PREFIX), _), s)
 
 /* On Apple platforms, we need to emit leading underscore
  * in front of assembly symbols. We thus introducee a separate
@@ -74,9 +78,7 @@
 #if !defined(__APPLE__)
 #define MLK_ASM_NAMESPACE(sym) MLK_NAMESPACE(sym)
 #else
-#define MLK_PREFIX_UNDERSCORE_(sym) _##sym
-#define MLK_PREFIX_UNDERSCORE(sym) MLK_PREFIX_UNDERSCORE_(sym)
-#define MLK_ASM_NAMESPACE(sym) MLK_PREFIX_UNDERSCORE(MLK_NAMESPACE(sym))
+#define MLK_ASM_NAMESPACE(sym) MLK_CONCAT(_, MLK_NAMESPACE(sym))
 #endif
 
 /*
