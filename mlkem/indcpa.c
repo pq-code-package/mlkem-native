@@ -333,7 +333,7 @@ void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
   memcpy(coins_with_domain_separator, coins, MLKEM_SYMBYTES);
   coins_with_domain_separator[MLKEM_SYMBYTES] = MLKEM_K;
 
-  hash_g(buf, coins_with_domain_separator, MLKEM_SYMBYTES + 1);
+  mlk_hash_g(buf, coins_with_domain_separator, MLKEM_SYMBYTES + 1);
 
   /*
    * Declassify the public seed.

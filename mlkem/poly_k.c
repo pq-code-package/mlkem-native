@@ -251,7 +251,7 @@ void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
   extkey1[MLKEM_SYMBYTES] = nonce1;
   extkey2[MLKEM_SYMBYTES] = nonce2;
   extkey3[MLKEM_SYMBYTES] = nonce3;
-  prf_eta1_x4(buf0, buf1, buf2, buf3, extkey0, extkey1, extkey2, extkey3);
+  mlk_prf_eta1_x4(buf0, buf1, buf2, buf3, extkey0, extkey1, extkey2, extkey3);
   mlk_poly_cbd_eta1(r0, buf0);
   mlk_poly_cbd_eta1(r1, buf1);
   mlk_poly_cbd_eta1(r2, buf2);
@@ -314,7 +314,7 @@ void mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
 
   memcpy(extkey, seed, MLKEM_SYMBYTES);
   extkey[MLKEM_SYMBYTES] = nonce;
-  prf_eta2(buf, extkey);
+  mlk_prf_eta2(buf, extkey);
 
   mlk_poly_cbd_eta2(r, buf);
 
@@ -363,12 +363,12 @@ void mlk_poly_getnoise_eta1122_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
    * even though that means generating more random data in buf2 and buf3
    * than necessary. */
 #if !defined(FIPS202_X4_DEFAULT_IMPLEMENTATION)
-  prf_eta1_x4(buf0, buf1, buf2, buf3, extkey0, extkey1, extkey2, extkey3);
+  mlk_prf_eta1_x4(buf0, buf1, buf2, buf3, extkey0, extkey1, extkey2, extkey3);
 #else  /* FIPS202_X4_DEFAULT_IMPLEMENTATION */
-  prf_eta1(buf0, extkey0);
-  prf_eta1(buf1, extkey1);
-  prf_eta2(buf2, extkey2);
-  prf_eta2(buf3, extkey3);
+  mlk_prf_eta1(buf0, extkey0);
+  mlk_prf_eta1(buf1, extkey1);
+  mlk_prf_eta2(buf2, extkey2);
+  mlk_prf_eta2(buf3, extkey3);
 #endif /* FIPS202_X4_DEFAULT_IMPLEMENTATION */
 
   mlk_poly_cbd_eta1(r0, buf0);

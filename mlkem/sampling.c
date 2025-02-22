@@ -120,35 +120,35 @@ __contract__(
 
 #ifndef MLKEM_GEN_MATRIX_NBLOCKS
 #define MLKEM_GEN_MATRIX_NBLOCKS \
-  ((12 * MLKEM_N / 8 * (1 << 12) / MLKEM_Q + XOF_RATE) / XOF_RATE)
+  ((12 * MLKEM_N / 8 * (1 << 12) / MLKEM_Q + MLK_XOF_RATE) / MLK_XOF_RATE)
 #endif
 
 MLK_INTERNAL_API
 void mlk_poly_rej_uniform_x4(mlk_poly *vec, uint8_t *seed[4])
 {
   /* Temporary buffers for XOF output before rejection sampling */
-  MLK_ALIGN uint8_t buf0[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
-  MLK_ALIGN uint8_t buf1[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
-  MLK_ALIGN uint8_t buf2[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
-  MLK_ALIGN uint8_t buf3[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
+  MLK_ALIGN uint8_t buf0[MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE];
+  MLK_ALIGN uint8_t buf1[MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE];
+  MLK_ALIGN uint8_t buf2[MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE];
+  MLK_ALIGN uint8_t buf3[MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE];
 
   /* Tracks the number of coefficients we have already sampled */
   unsigned ctr[4];
-  xof_x4_ctx statex;
+  mlk_xof_x4_ctx statex;
   unsigned buflen;
 
   /* seed is MLKEM_SYMBYTES + 2 bytes long, but padded to MLKEM_SYMBYTES + 16 */
-  xof_x4_init(&statex);
-  xof_x4_absorb(&statex, seed[0], seed[1], seed[2], seed[3],
-                MLKEM_SYMBYTES + 2);
+  mlk_xof_x4_init(&statex);
+  mlk_xof_x4_absorb(&statex, seed[0], seed[1], seed[2], seed[3],
+                    MLKEM_SYMBYTES + 2);
 
   /*
    * Initially, squeeze heuristic number of MLKEM_GEN_MATRIX_NBLOCKS.
    * This should generate the matrix entries with high probability.
    */
-  xof_x4_squeezeblocks(buf0, buf1, buf2, buf3, MLKEM_GEN_MATRIX_NBLOCKS,
-                       &statex);
-  buflen = MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE;
+  mlk_xof_x4_squeezeblocks(buf0, buf1, buf2, buf3, MLKEM_GEN_MATRIX_NBLOCKS,
+                           &statex);
+  buflen = MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE;
   ctr[0] = mlk_rej_uniform(vec[0].coeffs, MLKEM_N, 0, buf0, buflen);
   ctr[1] = mlk_rej_uniform(vec[1].coeffs, MLKEM_N, 0, buf1, buflen);
   ctr[2] = mlk_rej_uniform(vec[2].coeffs, MLKEM_N, 0, buf2, buflen);
@@ -158,7 +158,7 @@ void mlk_poly_rej_uniform_x4(mlk_poly *vec, uint8_t *seed[4])
    * So long as not all matrix entries have been generated, squeeze
    * one more block a time until we're done.
    */
-  buflen = XOF_RATE;
+  buflen = MLK_XOF_RATE;
   while (ctr[0] < MLKEM_N || ctr[1] < MLKEM_N || ctr[2] < MLKEM_N ||
          ctr[3] < MLKEM_N)
   __loop__(
@@ -171,14 +171,14 @@ void mlk_poly_rej_uniform_x4(mlk_poly *vec, uint8_t *seed[4])
     invariant(array_bound(vec[2].coeffs, 0, ctr[2], 0, MLKEM_Q))
     invariant(array_bound(vec[3].coeffs, 0, ctr[3], 0, MLKEM_Q)))
   {
-    xof_x4_squeezeblocks(buf0, buf1, buf2, buf3, 1, &statex);
+    mlk_xof_x4_squeezeblocks(buf0, buf1, buf2, buf3, 1, &statex);
     ctr[0] = mlk_rej_uniform(vec[0].coeffs, MLKEM_N, ctr[0], buf0, buflen);
     ctr[1] = mlk_rej_uniform(vec[1].coeffs, MLKEM_N, ctr[1], buf1, buflen);
     ctr[2] = mlk_rej_uniform(vec[2].coeffs, MLKEM_N, ctr[2], buf2, buflen);
     ctr[3] = mlk_rej_uniform(vec[3].coeffs, MLKEM_N, ctr[3], buf3, buflen);
   }
 
-  xof_x4_release(&statex);
+  mlk_xof_x4_release(&statex);
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
@@ -191,33 +191,33 @@ void mlk_poly_rej_uniform_x4(mlk_poly *vec, uint8_t *seed[4])
 MLK_INTERNAL_API
 void mlk_poly_rej_uniform(mlk_poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
 {
-  xof_ctx state;
-  MLK_ALIGN uint8_t buf[MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE];
+  mlk_xof_ctx state;
+  MLK_ALIGN uint8_t buf[MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE];
   unsigned ctr, buflen;
 
-  xof_init(&state);
-  xof_absorb(&state, seed, MLKEM_SYMBYTES + 2);
+  mlk_xof_init(&state);
+  mlk_xof_absorb(&state, seed, MLKEM_SYMBYTES + 2);
 
   /* Initially, squeeze + sample heuristic number of MLKEM_GEN_MATRIX_NBLOCKS.
    */
   /* This should generate the matrix entry with high probability. */
-  xof_squeezeblocks(buf, MLKEM_GEN_MATRIX_NBLOCKS, &state);
-  buflen = MLKEM_GEN_MATRIX_NBLOCKS * XOF_RATE;
+  mlk_xof_squeezeblocks(buf, MLKEM_GEN_MATRIX_NBLOCKS, &state);
+  buflen = MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE;
   ctr = mlk_rej_uniform(entry->coeffs, MLKEM_N, 0, buf, buflen);
 
   /* Squeeze + sample one more block a time until we're done */
-  buflen = XOF_RATE;
+  buflen = MLK_XOF_RATE;
   while (ctr < MLKEM_N)
   __loop__(
     assigns(ctr, state, memory_slice(entry, sizeof(mlk_poly)), object_whole(buf))
     invariant(ctr <= MLKEM_N)
     invariant(array_bound(entry->coeffs, 0, ctr, 0, MLKEM_Q)))
   {
-    xof_squeezeblocks(buf, 1, &state);
+    mlk_xof_squeezeblocks(buf, 1, &state);
     ctr = mlk_rej_uniform(entry->coeffs, MLKEM_N, ctr, buf, buflen);
   }
 
-  xof_release(&state);
+  mlk_xof_release(&state);
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */

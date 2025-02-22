@@ -102,7 +102,8 @@ static int mlk_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
   MLK_CT_TESTING_DECLASSIFY(
       sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, MLKEM_SYMBYTES);
 
-  hash_h(test, sk + MLKEM_INDCPA_SECRETKEYBYTES, MLKEM_INDCCA_PUBLICKEYBYTES);
+  mlk_hash_h(test, sk + MLKEM_INDCPA_SECRETKEYBYTES,
+             MLKEM_INDCCA_PUBLICKEYBYTES);
   res = memcmp(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, test,
                MLKEM_SYMBYTES)
             ? -1
@@ -184,8 +185,8 @@ int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 {
   mlk_indcpa_keypair_derand(pk, sk, coins);
   memcpy(sk + MLKEM_INDCPA_SECRETKEYBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
-  hash_h(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, pk,
-         MLKEM_INDCCA_PUBLICKEYBYTES);
+  mlk_hash_h(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, pk,
+             MLKEM_INDCCA_PUBLICKEYBYTES);
   /* Value z for pseudo-random output on reject */
   memcpy(sk + MLKEM_INDCCA_SECRETKEYBYTES - MLKEM_SYMBYTES,
          coins + MLKEM_SYMBYTES, MLKEM_SYMBYTES);
@@ -240,8 +241,8 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   memcpy(buf, coins, MLKEM_SYMBYTES);
 
   /* Multitarget countermeasure for coins + contributory KEM */
-  hash_h(buf + MLKEM_SYMBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
-  hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
+  mlk_hash_h(buf + MLKEM_SYMBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
+  mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
 
   /* coins are in kr+MLKEM_SYMBYTES */
   mlk_indcpa_enc(ct, buf, pk, kr + MLKEM_SYMBYTES);
@@ -299,7 +300,7 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   /* Multitarget countermeasure for coins + contributory KEM */
   memcpy(buf + MLKEM_SYMBYTES,
          sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, MLKEM_SYMBYTES);
-  hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
+  mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
 
   /* Recompute and compare ciphertext */
   /* coins are in kr+MLKEM_SYMBYTES */
@@ -310,7 +311,7 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   memcpy(tmp, sk + MLKEM_INDCCA_SECRETKEYBYTES - MLKEM_SYMBYTES,
          MLKEM_SYMBYTES);
   memcpy(tmp + MLKEM_SYMBYTES, ct, MLKEM_INDCCA_CIPHERTEXTBYTES);
-  hash_j(ss, tmp, sizeof(tmp));
+  mlk_hash_j(ss, tmp, sizeof(tmp));
 
   /* Copy true key to return buffer if fail is 0 */
   mlk_ct_cmov_zero(ss, kr, MLKEM_SYMBYTES, fail);
