@@ -9,7 +9,7 @@
 /* simpasm: header-end */
 
 /* Barrett reduction */
-.macro mlk_barrett_reduce a
+.macro barrett_reduce a
         sqdmulh tmp.8h,   \a\().8h, modulus_twisted.h[0]
         srshr   tmp.8h,   tmp.8h,   #11
         mls     \a\().8h, tmp.8h,   modulus.h[0]
