@@ -25,7 +25,7 @@ void mlk_polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                              const mlk_polyvec *a)
 {
   unsigned i;
-  mlk_debug_assert_bound_2d(a, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
+  mlk_assert_bound_2d(a, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_K; i++)
   {
@@ -43,14 +43,14 @@ void mlk_polyvec_decompress_du(mlk_polyvec *r,
     mlk_poly_decompress_du(&r->vec[i], a + i * MLKEM_POLYCOMPRESSEDBYTES_DU);
   }
 
-  mlk_debug_assert_bound_2d(r, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
+  mlk_assert_bound_2d(r, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
 }
 
 MLK_INTERNAL_API
 void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
 {
   unsigned i;
-  mlk_debug_assert_bound_2d(a, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
+  mlk_assert_bound_2d(a, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_K; i++)
   {
@@ -67,7 +67,7 @@ void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
     mlk_poly_frombytes(&r->vec[i], a + i * MLKEM_POLYBYTES);
   }
 
-  mlk_debug_assert_bound_2d(r, MLKEM_K, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
+  mlk_assert_bound_2d(r, MLKEM_K, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
 }
 
 MLK_INTERNAL_API
@@ -79,7 +79,7 @@ void mlk_polyvec_ntt(mlk_polyvec *r)
     mlk_poly_ntt(&r->vec[i]);
   }
 
-  mlk_debug_assert_abs_bound_2d(r, MLKEM_K, MLKEM_N, MLK_NTT_BOUND);
+  mlk_assert_abs_bound_2d(r, MLKEM_K, MLKEM_N, MLK_NTT_BOUND);
 }
 
 MLK_INTERNAL_API
@@ -91,7 +91,7 @@ void mlk_polyvec_invntt_tomont(mlk_polyvec *r)
     mlk_poly_invntt_tomont(&r->vec[i]);
   }
 
-  mlk_debug_assert_abs_bound_2d(r, MLKEM_K, MLKEM_N, MLK_INVNTT_BOUND);
+  mlk_assert_abs_bound_2d(r, MLKEM_K, MLKEM_N, MLK_INVNTT_BOUND);
 }
 
 #if !defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
@@ -101,7 +101,7 @@ void mlk_polyvec_basemul_acc_montgomery_cached(
     const mlk_polyvec_mulcache *b_cache)
 {
   unsigned i;
-  mlk_debug_assert_bound_2d(a, MLKEM_K, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
+  mlk_assert_bound_2d(a, MLKEM_K, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
   for (i = 0; i < MLKEM_N / 2; i++)
   __loop__(invariant(i <= MLKEM_N / 2))
   {
@@ -131,7 +131,7 @@ void mlk_polyvec_basemul_acc_montgomery_cached(
     mlk_poly *r, const mlk_polyvec *a, const mlk_polyvec *b,
     const mlk_polyvec_mulcache *b_cache)
 {
-  mlk_debug_assert_bound_2d(a, MLKEM_K, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
+  mlk_assert_bound_2d(a, MLKEM_K, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
   /* Omitting bounds assertion for cache since native implementations may
    * decide not to use a mulcache. Note that the C backend implementation
    * of poly_basemul_montgomery_cached() does still include the check. */
@@ -170,7 +170,7 @@ void mlk_polyvec_reduce(mlk_polyvec *r)
     mlk_poly_reduce(&r->vec[i]);
   }
 
-  mlk_debug_assert_bound_2d(r, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
+  mlk_assert_bound_2d(r, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
 }
 
 MLK_INTERNAL_API
@@ -192,7 +192,7 @@ void mlk_polyvec_tomont(mlk_polyvec *r)
     mlk_poly_tomont(&r->vec[i]);
   }
 
-  mlk_debug_assert_abs_bound_2d(r, MLKEM_K, MLKEM_N, MLKEM_Q);
+  mlk_assert_abs_bound_2d(r, MLKEM_K, MLKEM_N, MLKEM_Q);
 }
 
 
@@ -257,10 +257,10 @@ void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
   mlk_poly_cbd_eta1(r2, buf2);
   mlk_poly_cbd_eta1(r3, buf3);
 
-  mlk_debug_assert_abs_bound(r0, MLKEM_N, MLKEM_ETA1 + 1);
-  mlk_debug_assert_abs_bound(r1, MLKEM_N, MLKEM_ETA1 + 1);
-  mlk_debug_assert_abs_bound(r2, MLKEM_N, MLKEM_ETA1 + 1);
-  mlk_debug_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA1 + 1);
+  mlk_assert_abs_bound(r0, MLKEM_N, MLKEM_ETA1 + 1);
+  mlk_assert_abs_bound(r1, MLKEM_N, MLKEM_ETA1 + 1);
+  mlk_assert_abs_bound(r2, MLKEM_N, MLKEM_ETA1 + 1);
+  mlk_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA1 + 1);
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
@@ -318,7 +318,7 @@ void mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
 
   mlk_poly_cbd_eta2(r, buf);
 
-  mlk_debug_assert_abs_bound(r, MLKEM_N, MLKEM_ETA1 + 1);
+  mlk_assert_abs_bound(r, MLKEM_N, MLKEM_ETA1 + 1);
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
@@ -376,10 +376,10 @@ void mlk_poly_getnoise_eta1122_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
   mlk_poly_cbd_eta2(r2, buf2);
   mlk_poly_cbd_eta2(r3, buf3);
 
-  mlk_debug_assert_abs_bound(r0, MLKEM_N, MLKEM_ETA1 + 1);
-  mlk_debug_assert_abs_bound(r1, MLKEM_N, MLKEM_ETA1 + 1);
-  mlk_debug_assert_abs_bound(r2, MLKEM_N, MLKEM_ETA2 + 1);
-  mlk_debug_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA2 + 1);
+  mlk_assert_abs_bound(r0, MLKEM_N, MLKEM_ETA1 + 1);
+  mlk_assert_abs_bound(r1, MLKEM_N, MLKEM_ETA1 + 1);
+  mlk_assert_abs_bound(r2, MLKEM_N, MLKEM_ETA2 + 1);
+  mlk_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA2 + 1);
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */

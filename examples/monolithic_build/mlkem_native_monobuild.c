@@ -238,11 +238,11 @@
 #undef mlk_poly_tomsg
 /* mlkem/debug.h */
 #undef MLK_DEBUG_H
-#undef mlk_debug_assert
-#undef mlk_debug_assert_abs_bound
-#undef mlk_debug_assert_abs_bound_2d
-#undef mlk_debug_assert_bound
-#undef mlk_debug_assert_bound_2d
+#undef mlk_assert
+#undef mlk_assert_abs_bound
+#undef mlk_assert_abs_bound_2d
+#undef mlk_assert_bound
+#undef mlk_assert_bound_2d
 #undef mlk_debug_check_assert
 #undef mlk_debug_check_bounds
 /* mlkem/poly.h */

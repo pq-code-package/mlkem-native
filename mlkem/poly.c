@@ -39,7 +39,7 @@ __contract__(
 )
 {
   int16_t res;
-  mlk_debug_assert_abs_bound(&b, 1, MLKEM_Q_HALF);
+  mlk_assert_abs_bound(&b, 1, MLKEM_Q_HALF);
 
   res = mlk_montgomery_reduce((int32_t)a * (int32_t)b);
   /* Bounds:
@@ -49,7 +49,7 @@ __contract__(
    *        < MLKEM_Q
    */
 
-  mlk_debug_assert_abs_bound(&res, 1, MLKEM_Q);
+  mlk_assert_abs_bound(&res, 1, MLKEM_Q);
   return res;
 }
 #endif /* !defined(MLK_USE_NATIVE_POLY_TOMONT) ||           \
@@ -96,7 +96,7 @@ __contract__(
    */
   int16_t res = (int16_t)(a - t * MLKEM_Q);
 
-  mlk_debug_assert_abs_bound(&res, 1, MLKEM_Q_HALF);
+  mlk_assert_abs_bound(&res, 1, MLKEM_Q_HALF);
   return res;
 }
 #endif /* !defined(MLK_USE_NATIVE_POLY_REDUCE) || \
@@ -116,14 +116,14 @@ void mlk_poly_tomont(mlk_poly *r)
     r->coeffs[i] = mlk_fqmul(r->coeffs[i], f);
   }
 
-  mlk_debug_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
+  mlk_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
 }
 #else  /* MLK_USE_NATIVE_POLY_TOMONT */
 MLK_INTERNAL_API
 void mlk_poly_tomont(mlk_poly *r)
 {
   poly_tomont_native(r->coeffs);
-  mlk_debug_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
+  mlk_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
 }
 #endif /* MLK_USE_NATIVE_POLY_TOMONT */
 
@@ -143,13 +143,13 @@ __contract__(
   ensures(return_value >= 0 && return_value < MLKEM_Q)
   ensures(return_value == (int32_t)c + (((int32_t)c < 0) * MLKEM_Q)))
 {
-  mlk_debug_assert_abs_bound(&c, 1, MLKEM_Q);
+  mlk_assert_abs_bound(&c, 1, MLKEM_Q);
 
   /* Add Q if c is negative, but in constant time */
   c = mlk_ct_sel_int16(c + MLKEM_Q, c, mlk_ct_cmask_neg_i16(c));
 
   /* and therefore cast to uint16_t is safe. */
-  mlk_debug_assert_bound(&c, 1, 0, MLKEM_Q);
+  mlk_assert_bound(&c, 1, 0, MLKEM_Q);
   return (uint16_t)c;
 }
 
@@ -168,14 +168,14 @@ void mlk_poly_reduce(mlk_poly *r)
     r->coeffs[i] = mlk_scalar_signed_to_unsigned_q(t);
   }
 
-  mlk_debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+  mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 #else  /* MLK_USE_NATIVE_POLY_REDUCE */
 MLK_INTERNAL_API
 void mlk_poly_reduce(mlk_poly *r)
 {
   poly_reduce_native(r->coeffs);
-  mlk_debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+  mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 #endif /* MLK_USE_NATIVE_POLY_REDUCE */
 
@@ -235,7 +235,7 @@ void mlk_poly_mulcache_compute(mlk_poly_mulcache *x, const mlk_poly *a)
    * them from the spec to not unnecessarily constrain native
    * implementations, but checked here nonetheless.
    */
-  mlk_debug_assert_abs_bound(x, MLKEM_N / 2, MLKEM_Q);
+  mlk_assert_abs_bound(x, MLKEM_N / 2, MLKEM_Q);
 }
 #else  /* MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE */
 MLK_INTERNAL_API
@@ -362,7 +362,7 @@ void mlk_poly_ntt(mlk_poly *p)
 {
   unsigned len, layer;
   int16_t *r;
-  mlk_debug_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
+  mlk_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
   r = p->coeffs;
 
   for (len = 128, layer = 1; len >= 2; len >>= 1, layer++)
@@ -374,16 +374,16 @@ void mlk_poly_ntt(mlk_poly *p)
   }
 
   /* Check the stronger bound */
-  mlk_debug_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
+  mlk_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
 }
 #else  /* MLK_USE_NATIVE_NTT */
 
 MLK_INTERNAL_API
 void mlk_poly_ntt(mlk_poly *p)
 {
-  mlk_debug_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
+  mlk_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
   ntt_native(p->coeffs);
-  mlk_debug_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
+  mlk_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
 }
 #endif /* MLK_USE_NATIVE_NTT */
 
@@ -455,7 +455,7 @@ void mlk_poly_invntt_tomont(mlk_poly *p)
     mlk_invntt_layer(p->coeffs, len, layer);
   }
 
-  mlk_debug_assert_abs_bound(p, MLKEM_N, MLK_INVNTT_BOUND);
+  mlk_assert_abs_bound(p, MLKEM_N, MLK_INVNTT_BOUND);
 }
 #else  /* MLK_USE_NATIVE_INTT */
 
@@ -463,7 +463,7 @@ MLK_INTERNAL_API
 void mlk_poly_invntt_tomont(mlk_poly *p)
 {
   intt_native(p->coeffs);
-  mlk_debug_assert_abs_bound(p, MLKEM_N, MLK_INVNTT_BOUND);
+  mlk_assert_abs_bound(p, MLKEM_N, MLK_INVNTT_BOUND);
 }
 #endif /* MLK_USE_NATIVE_INTT */
 

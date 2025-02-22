@@ -101,8 +101,8 @@ __contract__(
 
   int32_t r;
 
-  mlk_debug_assert(a < +(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)) &&
-                   a > -(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)));
+  mlk_assert(a < +(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)) &&
+             a > -(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)));
 
   r = a - ((int32_t)t * MLKEM_Q);
 

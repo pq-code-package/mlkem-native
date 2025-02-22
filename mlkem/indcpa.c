@@ -48,7 +48,7 @@
 static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], mlk_polyvec *pk,
                         const uint8_t seed[MLKEM_SYMBYTES])
 {
-  mlk_debug_assert_bound_2d(pk, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
+  mlk_assert_bound_2d(pk, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
   mlk_polyvec_tobytes(r, pk);
   memcpy(r + MLKEM_POLYVECBYTES, seed, MLKEM_SYMBYTES);
 }
@@ -96,7 +96,7 @@ static void mlk_unpack_pk(mlk_polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
  **************************************************/
 static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], mlk_polyvec *sk)
 {
-  mlk_debug_assert_bound_2d(sk, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
+  mlk_assert_bound_2d(sk, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
   mlk_polyvec_tobytes(r, sk);
 }
 
@@ -256,7 +256,7 @@ void mlk_gen_matrix(mlk_polyvec *a, const uint8_t seed[MLKEM_SYMBYTES],
     i++;
   }
 
-  mlk_debug_assert(i == MLKEM_K * MLKEM_K);
+  mlk_assert(i == MLKEM_K * MLKEM_K);
 
   /*
    * The public matrix is generated in NTT domain. If the native backend

@@ -26,7 +26,7 @@ __contract__(
   unsigned ctr, pos;
   uint16_t val0, val1;
 
-  mlk_debug_assert_bound(r, offset, 0, MLKEM_Q);
+  mlk_assert_bound(r, offset, 0, MLKEM_Q);
 
   ctr = offset;
   pos = 0;
@@ -50,7 +50,7 @@ __contract__(
     }
   }
 
-  mlk_debug_assert_bound(r, ctr, 0, MLKEM_Q);
+  mlk_assert_bound(r, ctr, 0, MLKEM_Q);
   return ctr;
 }
 
@@ -109,7 +109,7 @@ __contract__(
     if (ret != -1)
     {
       unsigned res = (unsigned)ret;
-      mlk_debug_assert_bound(r, res, 0, MLKEM_Q);
+      mlk_assert_bound(r, res, 0, MLKEM_Q);
       return res;
     }
   }
