@@ -40,10 +40,10 @@
 static void mlk_keccak_absorb_once(uint64_t *s, uint32_t r, const uint8_t *m,
                                    size_t mlen, uint8_t p)
 __contract__(
-    requires(r <= sizeof(uint64_t) * KECCAK_LANES)
-    requires(memory_no_alias(s, sizeof(uint64_t) * KECCAK_LANES))
+    requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)
+    requires(memory_no_alias(s, sizeof(uint64_t) * MLK_KECCAK_LANES))
     requires(memory_no_alias(m, mlen))
-    assigns(memory_slice(s, sizeof(uint64_t) * KECCAK_LANES)))
+    assigns(memory_slice(s, sizeof(uint64_t) * MLK_KECCAK_LANES)))
 {
   /* Initialize state */
   size_t i;
@@ -55,7 +55,7 @@ __contract__(
 
   while (mlen >= r)
   __loop__(
-    assigns(mlen, m, memory_slice(s, sizeof(uint64_t) * KECCAK_LANES))
+    assigns(mlen, m, memory_slice(s, sizeof(uint64_t) * MLK_KECCAK_LANES))
     invariant(mlen <= loop_entry(mlen))
     invariant(m == loop_entry(m) + (loop_entry(mlen) - mlen)))
   {
@@ -96,17 +96,17 @@ __contract__(
 static void mlk_keccak_squeezeblocks(uint8_t *h, size_t nblocks, uint64_t *s,
                                      uint32_t r)
 __contract__(
-    requires(r <= sizeof(uint64_t) * KECCAK_LANES)
+    requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)
     requires(nblocks <= 8 /* somewhat arbitrary bound */)
-    requires(memory_no_alias(s, sizeof(uint64_t) * KECCAK_LANES))
+    requires(memory_no_alias(s, sizeof(uint64_t) * MLK_KECCAK_LANES))
     requires(memory_no_alias(h, nblocks * r))
-    assigns(memory_slice(s, sizeof(uint64_t) * KECCAK_LANES))
+    assigns(memory_slice(s, sizeof(uint64_t) * MLK_KECCAK_LANES))
     assigns(memory_slice(h, nblocks * r)))
 {
   while (nblocks > 0)
   __loop__(
     assigns(h, nblocks,
-      memory_slice(s, sizeof(uint64_t) * KECCAK_LANES),
+      memory_slice(s, sizeof(uint64_t) * MLK_KECCAK_LANES),
       memory_slice(h, nblocks * r))
     invariant(nblocks <= loop_entry(nblocks) &&
       h == loop_entry(h) + r * (loop_entry(nblocks) - nblocks)))
@@ -133,17 +133,17 @@ __contract__(
 static void mlk_keccak_squeeze_once(uint8_t *h, size_t outlen, uint64_t *s,
                                     uint32_t r)
 __contract__(
-    requires(r <= sizeof(uint64_t) * KECCAK_LANES)
-    requires(memory_no_alias(s, sizeof(uint64_t) * KECCAK_LANES))
+    requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)
+    requires(memory_no_alias(s, sizeof(uint64_t) * MLK_KECCAK_LANES))
     requires(memory_no_alias(h, outlen))
-    assigns(memory_slice(s, sizeof(uint64_t) * KECCAK_LANES))
+    assigns(memory_slice(s, sizeof(uint64_t) * MLK_KECCAK_LANES))
     assigns(memory_slice(h, outlen)))
 {
   size_t len;
   while (outlen > 0)
   __loop__(
     assigns(len, h, outlen,
-      memory_slice(s, sizeof(uint64_t) * KECCAK_LANES),
+      memory_slice(s, sizeof(uint64_t) * MLK_KECCAK_LANES),
       memory_slice(h, outlen))
     invariant(outlen <= loop_entry(outlen) &&
       h == loop_entry(h) + (loop_entry(outlen) - outlen)))

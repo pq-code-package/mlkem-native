@@ -8,8 +8,8 @@
 #include "../cbmc.h"
 #include "../common.h"
 
-#define KECCAK_LANES 25
-#define KECCAK_WAY 4
+#define MLK_KECCAK_LANES 25
+#define MLK_KECCAK_WAY 4
 
 /*
  * WARNING:
@@ -22,9 +22,9 @@
 void mlk_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
                                    unsigned offset, unsigned length)
 __contract__(
-    requires(0 <= offset && offset <= KECCAK_LANES * sizeof(uint64_t) &&
-	     0 <= length && length <= KECCAK_LANES * sizeof(uint64_t) - offset)
-    requires(memory_no_alias(state, sizeof(uint64_t) * KECCAK_LANES))
+    requires(0 <= offset && offset <= MLK_KECCAK_LANES * sizeof(uint64_t) &&
+	     0 <= length && length <= MLK_KECCAK_LANES * sizeof(uint64_t) - offset)
+    requires(memory_no_alias(state, sizeof(uint64_t) * MLK_KECCAK_LANES))
     requires(memory_no_alias(data, length))
     assigns(memory_slice(data, length))
 );
@@ -33,11 +33,11 @@ __contract__(
 void mlk_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
                                unsigned offset, unsigned length)
 __contract__(
-    requires(0 <= offset && offset <= KECCAK_LANES * sizeof(uint64_t) &&
-	     0 <= length && length <= KECCAK_LANES * sizeof(uint64_t) - offset)
-    requires(memory_no_alias(state, sizeof(uint64_t) * KECCAK_LANES))
+    requires(0 <= offset && offset <= MLK_KECCAK_LANES * sizeof(uint64_t) &&
+	     0 <= length && length <= MLK_KECCAK_LANES * sizeof(uint64_t) - offset)
+    requires(memory_no_alias(state, sizeof(uint64_t) * MLK_KECCAK_LANES))
     requires(memory_no_alias(data, length))
-    assigns(memory_slice(state, sizeof(uint64_t) * KECCAK_LANES))
+    assigns(memory_slice(state, sizeof(uint64_t) * MLK_KECCAK_LANES))
 );
 
 #define mlk_keccakf1600x4_extract_bytes \
@@ -47,9 +47,9 @@ void mlk_keccakf1600x4_extract_bytes(uint64_t *state, unsigned char *data0,
                                      unsigned char *data3, unsigned offset,
                                      unsigned length)
 __contract__(
-    requires(0 <= offset && offset <= KECCAK_LANES * sizeof(uint64_t) &&
-	     0 <= length && length <= KECCAK_LANES * sizeof(uint64_t) - offset)
-    requires(memory_no_alias(state, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+    requires(0 <= offset && offset <= MLK_KECCAK_LANES * sizeof(uint64_t) &&
+	     0 <= length && length <= MLK_KECCAK_LANES * sizeof(uint64_t) - offset)
+    requires(memory_no_alias(state, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY))
     requires(memory_no_alias(data0, length))
     requires(memory_no_alias(data1, length))
     requires(memory_no_alias(data2, length))
@@ -67,9 +67,9 @@ void mlk_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
                                  const unsigned char *data3, unsigned offset,
                                  unsigned length)
 __contract__(
-    requires(0 <= offset && offset <= KECCAK_LANES * sizeof(uint64_t) &&
-	     0 <= length && length <= KECCAK_LANES * sizeof(uint64_t) - offset)
-    requires(memory_no_alias(state, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+    requires(0 <= offset && offset <= MLK_KECCAK_LANES * sizeof(uint64_t) &&
+	     0 <= length && length <= MLK_KECCAK_LANES * sizeof(uint64_t) - offset)
+    requires(memory_no_alias(state, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY))
     requires(memory_no_alias(data0, length))
     /* Case 1: all input buffers are distinct; Case 2: All input buffers are the same */
     requires((data0 == data1 &&
@@ -78,15 +78,15 @@ __contract__(
 	     (memory_no_alias(data1, length) &&
               memory_no_alias(data2, length) &&
               memory_no_alias(data3, length)))
-    assigns(memory_slice(state, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+    assigns(memory_slice(state, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY))
 );
 
 
 #define mlk_keccakf1600x4_permute MLK_NAMESPACE(keccakf1600x4_permute)
 void mlk_keccakf1600x4_permute(uint64_t *state)
 __contract__(
-    requires(memory_no_alias(state, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
-    assigns(memory_slice(state, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+    requires(memory_no_alias(state, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY))
+    assigns(memory_slice(state, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY))
 );
 
 
@@ -94,8 +94,8 @@ __contract__(
 #define mlk_keccakf1600_permute MLK_NAMESPACE(keccakf1600_permute)
 void mlk_keccakf1600_permute(uint64_t *state)
 __contract__(
-    requires(memory_no_alias(state, sizeof(uint64_t) * KECCAK_LANES))
-    assigns(memory_slice(state, sizeof(uint64_t) * KECCAK_LANES))
+    requires(memory_no_alias(state, sizeof(uint64_t) * MLK_KECCAK_LANES))
+    assigns(memory_slice(state, sizeof(uint64_t) * MLK_KECCAK_LANES))
 );
 
 #else

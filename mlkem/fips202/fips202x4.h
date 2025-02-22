@@ -17,7 +17,7 @@
 /* Context for non-incremental API */
 typedef struct
 {
-  uint64_t ctx[KECCAK_LANES * KECCAK_WAY];
+  uint64_t ctx[MLK_KECCAK_LANES * MLK_KECCAK_WAY];
 } mlk_shake128x4ctx;
 
 #define mlk_shake128x4_absorb_once MLK_NAMESPACE(shake128x4_absorb_once)

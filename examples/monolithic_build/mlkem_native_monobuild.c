@@ -324,9 +324,9 @@
 #undef mlk_shake128x4_squeezeblocks
 #undef mlk_shake256x4
 /* mlkem/fips202/keccakf1600.h */
-#undef KECCAK_LANES
-#undef KECCAK_WAY
 #undef MLK_FIPS202_KECCAKF1600_H
+#undef MLK_KECCAK_LANES
+#undef MLK_KECCAK_WAY
 #undef mlk_keccakf1600_extract_bytes
 #undef mlk_keccakf1600_permute
 #undef mlk_keccakf1600_xor_bytes

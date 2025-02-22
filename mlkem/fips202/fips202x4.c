@@ -18,17 +18,17 @@ static void mlk_keccak_absorb_once_x4(uint64_t *s, uint32_t r,
                                       const uint8_t *in2, const uint8_t *in3,
                                       size_t inlen, uint8_t p)
 __contract__(
-  requires(memory_no_alias(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
-  requires(r <= sizeof(uint64_t) * KECCAK_LANES)
+  requires(memory_no_alias(s, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY))
+  requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)
   requires(memory_no_alias(in0, inlen))
   requires(memory_no_alias(in1, inlen))
   requires(memory_no_alias(in2, inlen))
   requires(memory_no_alias(in3, inlen))
-  assigns(memory_slice(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY)))
+  assigns(memory_slice(s, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY)))
 {
   while (inlen >= r)
   __loop__(
-    assigns(inlen, in0, in1, in2, in3, memory_slice(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+    assigns(inlen, in0, in1, in2, in3, memory_slice(s, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY))
     invariant(inlen <= loop_entry(inlen))
     invariant(in0 == loop_entry(in0) + (loop_entry(inlen) - inlen))
     invariant(in1 == loop_entry(in1) + (loop_entry(inlen) - inlen))
@@ -67,14 +67,14 @@ static void mlk_keccak_squeezeblocks_x4(uint8_t *out0, uint8_t *out1,
                                         uint8_t *out2, uint8_t *out3,
                                         size_t nblocks, uint64_t *s, uint32_t r)
 __contract__(
-    requires(r <= sizeof(uint64_t) * KECCAK_LANES)
+    requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)
     requires(nblocks <= 8 /* somewhat arbitrary bound */)
-    requires(memory_no_alias(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+    requires(memory_no_alias(s, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY))
     requires(memory_no_alias(out0, nblocks * r))
     requires(memory_no_alias(out1, nblocks * r))
     requires(memory_no_alias(out2, nblocks * r))
     requires(memory_no_alias(out3, nblocks * r))
-    assigns(memory_slice(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
+    assigns(memory_slice(s, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY))
     assigns(memory_slice(out0, nblocks * r))
     assigns(memory_slice(out1, nblocks * r))
     assigns(memory_slice(out2, nblocks * r))
@@ -83,7 +83,7 @@ __contract__(
   while (nblocks > 0)
   __loop__(
     assigns(out0, out1, out2, out3, nblocks,
-            memory_slice(s, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY),
+            memory_slice(s, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY),
             memory_slice(out0, nblocks * r),
             memory_slice(out1, nblocks * r),
             memory_slice(out2, nblocks * r),
