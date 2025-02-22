@@ -5,12 +5,12 @@
 #include <stdint.h>
 #include "common.h"
 
-#define fqmul MLK_NAMESPACE(fqmul)
-int16_t fqmul(int16_t a, int16_t b);
+#define mlk_fqmul MLK_NAMESPACE(fqmul)
+int16_t mlk_fqmul(int16_t a, int16_t b);
 
 void harness(void)
 {
   int16_t a, b, r;
 
-  r = fqmul(a, b);
+  r = mlk_fqmul(a, b);
 }

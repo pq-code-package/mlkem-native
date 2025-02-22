@@ -7,7 +7,7 @@ HARNESS_FILE = sha3_256_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = sha3_256
+PROOF_UID = mlk_sha3_256
 
 DEFINES +=
 INCLUDES +=

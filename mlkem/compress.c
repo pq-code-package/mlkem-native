@@ -16,10 +16,11 @@
 #if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
 #if !defined(MLK_USE_NATIVE_POLY_COMPRESS_D4)
 MLK_INTERNAL_API
-void poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const poly *a)
+void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
+                          const mlk_poly *a)
 {
   unsigned i;
-  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(invariant(i <= MLKEM_N / 8))
@@ -31,7 +32,7 @@ void poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const poly *a)
       invariant(i <= MLKEM_N / 8 && j <= 8)
       invariant(array_bound(t, 0, j, 0, 16)))
     {
-      t[j] = scalar_compress_d4(a->coeffs[8 * i + j]);
+      t[j] = mlk_scalar_compress_d4(a->coeffs[8 * i + j]);
     }
 
     r[i * 4] = t[0] | (t[1] << 4);
@@ -42,19 +43,21 @@ void poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const poly *a)
 }
 #else  /* MLK_USE_NATIVE_POLY_COMPRESS_D4 */
 MLK_INTERNAL_API
-void poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const poly *a)
+void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
+                          const mlk_poly *a)
 {
-  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
   poly_compress_d4_native(r, a->coeffs);
 }
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D4 */
 
 #if !defined(MLK_USE_NATIVE_POLY_COMPRESS_D10)
 MLK_INTERNAL_API
-void poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const poly *a)
+void mlk_poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
+                           const mlk_poly *a)
 {
   unsigned j;
-  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
   for (j = 0; j < MLKEM_N / 4; j++)
   __loop__(invariant(j <= MLKEM_N / 4))
   {
@@ -65,7 +68,7 @@ void poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const poly *a)
       invariant(k <= 4)
       invariant(forall(r, 0, k, t[r] < (1u << 10))))
     {
-      t[k] = scalar_compress_d10(a->coeffs[4 * j + k]);
+      t[k] = mlk_scalar_compress_d10(a->coeffs[4 * j + k]);
     }
 
     /*
@@ -81,16 +84,18 @@ void poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const poly *a)
 }
 #else  /* MLK_USE_NATIVE_POLY_COMPRESS_D10 */
 MLK_INTERNAL_API
-void poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const poly *a)
+void mlk_poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
+                           const mlk_poly *a)
 {
-  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
   poly_compress_d10_native(r, a->coeffs);
 }
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D10 */
 
 #if !defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D4)
 MLK_INTERNAL_API
-void poly_decompress_d4(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
+void mlk_poly_decompress_d4(mlk_poly *r,
+                            const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
 {
   unsigned i;
   for (i = 0; i < MLKEM_N / 2; i++)
@@ -98,25 +103,26 @@ void poly_decompress_d4(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
     invariant(i <= MLKEM_N / 2)
     invariant(array_bound(r->coeffs, 0, 2 * i, 0, MLKEM_Q)))
   {
-    r->coeffs[2 * i + 0] = scalar_decompress_d4((a[i] >> 0) & 0xF);
-    r->coeffs[2 * i + 1] = scalar_decompress_d4((a[i] >> 4) & 0xF);
+    r->coeffs[2 * i + 0] = mlk_scalar_decompress_d4((a[i] >> 0) & 0xF);
+    r->coeffs[2 * i + 1] = mlk_scalar_decompress_d4((a[i] >> 4) & 0xF);
   }
 
-  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 #else  /* MLK_USE_NATIVE_POLY_DECOMPRESS_D4 */
 MLK_INTERNAL_API
-void poly_decompress_d4(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
+void mlk_poly_decompress_d4(mlk_poly *r,
+                            const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
 {
   poly_decompress_d4_native(r->coeffs, a);
-  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D4 */
 
 #if !defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D10)
 MLK_INTERNAL_API
-void poly_decompress_d10(poly *r,
-                         const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
+void mlk_poly_decompress_d10(mlk_poly *r,
+                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
 {
   unsigned j;
   for (j = 0; j < MLKEM_N / 4; j++)
@@ -138,19 +144,19 @@ void poly_decompress_d10(poly *r,
       invariant(k <= 4)
       invariant(array_bound(r->coeffs, 0, 4 * j + k, 0, MLKEM_Q)))
     {
-      r->coeffs[4 * j + k] = scalar_decompress_d10(t[k]);
+      r->coeffs[4 * j + k] = mlk_scalar_decompress_d10(t[k]);
     }
   }
 
-  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 #else  /* MLK_USE_NATIVE_POLY_DECOMPRESS_D10 */
 MLK_INTERNAL_API
-void poly_decompress_d10(poly *r,
-                         const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
+void mlk_poly_decompress_d10(mlk_poly *r,
+                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
 {
   poly_decompress_d10_native(r->coeffs, a);
-  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D10 */
 #endif /* defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
@@ -159,10 +165,11 @@ void poly_decompress_d10(poly *r,
 #if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
 #if !defined(MLK_USE_NATIVE_POLY_COMPRESS_D5)
 MLK_INTERNAL_API
-void poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const poly *a)
+void mlk_poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
+                          const mlk_poly *a)
 {
   unsigned i;
-  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(invariant(i <= MLKEM_N / 8))
@@ -174,7 +181,7 @@ void poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const poly *a)
       invariant(i <= MLKEM_N / 8 && j <= 8)
       invariant(array_bound(t, 0, j, 0, 32)))
     {
-      t[j] = scalar_compress_d5(a->coeffs[8 * i + j]);
+      t[j] = mlk_scalar_compress_d5(a->coeffs[8 * i + j]);
     }
 
     /*
@@ -191,19 +198,21 @@ void poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const poly *a)
 }
 #else  /* MLK_USE_NATIVE_POLY_COMPRESS_D5 */
 MLK_INTERNAL_API
-void poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const poly *a)
+void mlk_poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
+                          const mlk_poly *a)
 {
-  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
   poly_compress_d5_native(r, a->coeffs);
 }
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D5 */
 
 #if !defined(MLK_USE_NATIVE_POLY_COMPRESS_D11)
 MLK_INTERNAL_API
-void poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const poly *a)
+void mlk_poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
+                           const mlk_poly *a)
 {
   unsigned j;
-  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
   for (j = 0; j < MLKEM_N / 8; j++)
   __loop__(invariant(j <= MLKEM_N / 8))
@@ -215,7 +224,7 @@ void poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const poly *a)
       invariant(k <= 8)
       invariant(forall(r, 0, k, t[r] < (1u << 11))))
     {
-      t[k] = scalar_compress_d11(a->coeffs[8 * j + k]);
+      t[k] = mlk_scalar_compress_d11(a->coeffs[8 * j + k]);
     }
 
     /*
@@ -237,16 +246,18 @@ void poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const poly *a)
 }
 #else  /* MLK_USE_NATIVE_POLY_COMPRESS_D11 */
 MLK_INTERNAL_API
-void poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const poly *a)
+void mlk_poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
+                           const mlk_poly *a)
 {
-  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
   poly_compress_d11_native(r, a->coeffs);
 }
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D11 */
 
 #if !defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D5)
 MLK_INTERNAL_API
-void poly_decompress_d5(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
+void mlk_poly_decompress_d5(mlk_poly *r,
+                            const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
 {
   unsigned i;
   for (i = 0; i < MLKEM_N / 8; i++)
@@ -282,25 +293,26 @@ void poly_decompress_d5(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
       invariant(j <= 8 && i <= MLKEM_N / 8)
       invariant(array_bound(r->coeffs, 0, 8 * i + j, 0, MLKEM_Q)))
     {
-      r->coeffs[8 * i + j] = scalar_decompress_d5(t[j]);
+      r->coeffs[8 * i + j] = mlk_scalar_decompress_d5(t[j]);
     }
   }
 
-  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 #else  /* MLK_USE_NATIVE_POLY_DECOMPRESS_D5 */
 MLK_INTERNAL_API
-void poly_decompress_d5(poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
+void mlk_poly_decompress_d5(mlk_poly *r,
+                            const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
 {
   poly_decompress_d5_native(r->coeffs, a);
-  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D5 */
 
 #if !defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D11)
 MLK_INTERNAL_API
-void poly_decompress_d11(poly *r,
-                         const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
+void mlk_poly_decompress_d11(mlk_poly *r,
+                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
 {
   unsigned j;
   for (j = 0; j < MLKEM_N / 8; j++)
@@ -327,19 +339,19 @@ void poly_decompress_d11(poly *r,
       invariant(k <= 8)
       invariant(array_bound(r->coeffs, 0, 8 * j + k, 0, MLKEM_Q)))
     {
-      r->coeffs[8 * j + k] = scalar_decompress_d11(t[k]);
+      r->coeffs[8 * j + k] = mlk_scalar_decompress_d11(t[k]);
     }
   }
 
-  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 #else  /* MLK_USE_NATIVE_POLY_DECOMPRESS_D11 */
 MLK_INTERNAL_API
-void poly_decompress_d11(poly *r,
-                         const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
+void mlk_poly_decompress_d11(mlk_poly *r,
+                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
 {
   poly_decompress_d11_native(r->coeffs, a);
-  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D11 */
 
@@ -347,10 +359,10 @@ void poly_decompress_d11(poly *r,
 
 #if !defined(MLK_USE_NATIVE_POLY_TOBYTES)
 MLK_INTERNAL_API
-void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
+void mlk_poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
 {
   unsigned i;
-  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_N / 2; i++)
   __loop__(invariant(i <= MLKEM_N / 2))
@@ -379,16 +391,16 @@ void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
 }
 #else  /* MLK_USE_NATIVE_POLY_TOBYTES */
 MLK_INTERNAL_API
-void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
+void mlk_poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
 {
-  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
   poly_tobytes_native(r, a->coeffs);
 }
 #endif /* MLK_USE_NATIVE_POLY_TOBYTES */
 
 #if !defined(MLK_USE_NATIVE_POLY_FROMBYTES)
 MLK_INTERNAL_API
-void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
+void mlk_poly_frombytes(mlk_poly *r, const uint8_t a[MLKEM_POLYBYTES])
 {
   unsigned i;
   for (i = 0; i < MLKEM_N / 2; i++)
@@ -404,18 +416,18 @@ void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
   }
 
   /* Note that the coefficients are not canonical */
-  debug_assert_bound(r, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
+  mlk_debug_assert_bound(r, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
 }
 #else  /* MLK_USE_NATIVE_POLY_FROMBYTES */
 MLK_INTERNAL_API
-void poly_frombytes(poly *r, const uint8_t a[MLKEM_POLYBYTES])
+void mlk_poly_frombytes(mlk_poly *r, const uint8_t a[MLKEM_POLYBYTES])
 {
   poly_frombytes_native(r->coeffs, a);
 }
 #endif /* MLK_USE_NATIVE_POLY_FROMBYTES */
 
 MLK_INTERNAL_API
-void poly_frommsg(poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
+void mlk_poly_frommsg(mlk_poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
 {
   unsigned i;
 #if (MLKEM_INDCPA_MSGBYTES != MLKEM_N / 8)
@@ -433,22 +445,22 @@ void poly_frommsg(poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
       invariant(i <  MLKEM_N / 8 && j <= 8)
       invariant(array_bound(r->coeffs, 0, 8 * i + j, 0, MLKEM_Q)))
     {
-      /* ct_sel_int16(MLKEM_Q_HALF, 0, b) is `Decompress_1(b != 0)`
+      /* mlk_ct_sel_int16(MLKEM_Q_HALF, 0, b) is `Decompress_1(b != 0)`
        * as per [FIPS 203, Eq (4.8)]. */
 
       /* Prevent the compiler from recognizing this as a bit selection */
-      uint8_t mask = value_barrier_u8(1u << j);
-      r->coeffs[8 * i + j] = ct_sel_int16(MLKEM_Q_HALF, 0, msg[i] & mask);
+      uint8_t mask = mlk_value_barrier_u8(1u << j);
+      r->coeffs[8 * i + j] = mlk_ct_sel_int16(MLKEM_Q_HALF, 0, msg[i] & mask);
     }
   }
-  debug_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
+  mlk_debug_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
 }
 
 MLK_INTERNAL_API
-void poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const poly *a)
+void mlk_poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const mlk_poly *a)
 {
   unsigned i;
-  debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  mlk_debug_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(invariant(i <= MLKEM_N / 8))
@@ -459,7 +471,7 @@ void poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const poly *a)
     __loop__(
       invariant(i <= MLKEM_N / 8 && j <= 8))
     {
-      uint32_t t = scalar_compress_d1(a->coeffs[8 * i + j]);
+      uint32_t t = mlk_scalar_compress_d1(a->coeffs[8 * i + j]);
       msg[i] |= t << j;
     }
   }

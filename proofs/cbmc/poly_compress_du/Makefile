@@ -7,7 +7,7 @@ HARNESS_FILE = poly_compress_du_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = poly_compress_du
+PROOF_UID = mlk_poly_compress_du
 
 DEFINES +=
 INCLUDES +=
@@ -23,11 +23,11 @@ USE_FUNCTION_CONTRACTS =
 
 # TODO: We should be calling scalar_decompress_xxx by contract here,
 # but it does not seem to work yet because they are marked as static inline.
-# For K = 2 or 3, the code calls scalar_compress_d10, so
+# For K = 2 or 3, the code calls mlk_scalar_compress_d10, so
 # ifeq ($(MLKEM_K),4)
-# USE_FUNCTION_CONTRACTS = scalar_compress_d11
+# USE_FUNCTION_CONTRACTS = mlk_scalar_compress_d11
 # else
-# USE_FUNCTION_CONTRACTS = scalar_compress_d10
+# USE_FUNCTION_CONTRACTS = mlk_scalar_compress_d10
 # endif
 
 APPLY_LOOP_CONTRACTS=on

@@ -7,7 +7,7 @@ HARNESS_FILE = poly_frombytes_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = poly_frombytes
+PROOF_UID = mlk_poly_frombytes
 
 DEFINES +=
 INCLUDES +=

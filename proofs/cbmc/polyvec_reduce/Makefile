@@ -7,7 +7,7 @@ HARNESS_FILE = polyvec_reduce_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = polyvec_reduce
+PROOF_UID = mlk_polyvec_reduce
 
 DEFINES +=
 INCLUDES +=

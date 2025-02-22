@@ -7,7 +7,7 @@ HARNESS_FILE = poly_cbd_eta1_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = poly_cbd_eta1
+PROOF_UID = mlk_poly_cbd_eta1
 
 DEFINES +=
 INCLUDES +=

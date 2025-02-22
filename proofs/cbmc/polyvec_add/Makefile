@@ -7,7 +7,7 @@ HARNESS_FILE = polyvec_add_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = polyvec_add
+PROOF_UID = mlk_polyvec_add
 
 DEFINES +=
 INCLUDES +=
@@ -38,7 +38,7 @@ CBMCFLAGS=--smt2
 # a substantial improvement in proof performance.
 CBMCFLAGS += --no-array-field-sensitivity --arrays-uf-always --slice-formula
 
-FUNCTION_NAME = polyvec_add
+FUNCTION_NAME = mlk_polyvec_add
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

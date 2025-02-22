@@ -8,5 +8,5 @@
 void harness(void)
 {
   uint8_t *a, *b, *c, *d;
-  indcpa_enc(a, b, c, d);
+  mlk_indcpa_enc(a, b, c, d);
 }

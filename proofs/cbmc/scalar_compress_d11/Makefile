@@ -7,7 +7,7 @@ HARNESS_FILE = scalar_compress_d11_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = scalar_compress_d11
+PROOF_UID = mlk_scalar_compress_d11
 
 DEFINES +=
 INCLUDES +=

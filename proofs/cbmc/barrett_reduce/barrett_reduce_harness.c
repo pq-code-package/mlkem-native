@@ -5,13 +5,13 @@
 #include <stdint.h>
 #include "common.h"
 
-#define barrett_reduce MLK_NAMESPACE(barrett_reduce)
-int16_t barrett_reduce(int16_t a);
+#define mlk_barrett_reduce MLK_NAMESPACE(barrett_reduce)
+int16_t mlk_barrett_reduce(int16_t a);
 
 void harness(void)
 {
   int16_t a;
   int16_t r;
 
-  r = barrett_reduce(a);
+  r = mlk_barrett_reduce(a);
 }

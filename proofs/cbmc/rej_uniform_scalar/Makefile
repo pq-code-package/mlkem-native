@@ -7,7 +7,7 @@ HARNESS_FILE = rej_uniform_scalar_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = rej_uniform_scalar
+PROOF_UID = mlk_rej_uniform_scalar
 
 DEFINES +=
 INCLUDES +=
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = rej_uniform_scalar
+FUNCTION_NAME = mlk_rej_uniform_scalar
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

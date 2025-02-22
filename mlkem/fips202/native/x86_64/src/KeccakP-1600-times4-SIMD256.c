@@ -447,7 +447,7 @@ static MLK_ALIGN const uint64_t KeccakF1600RoundConstants[24] = {
     thetaRhoPiChiIota(23, E, A)
 /* clang-format on */
 
-void KeccakP1600times4_PermuteAll_24rounds(void *states)
+void mlk_KeccakP1600times4_PermuteAll_24rounds(void *states)
 {
   __m256i *statesAsLanes = (__m256i *)states;
   declareABCDE copyFromState(A, statesAsLanes)

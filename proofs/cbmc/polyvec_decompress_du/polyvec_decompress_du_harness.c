@@ -7,8 +7,8 @@
 
 void harness(void)
 {
-  polyvec *a;
+  mlk_polyvec *a;
   uint8_t *r;
 
-  polyvec_decompress_du(a, r);
+  mlk_polyvec_decompress_du(a, r);
 }

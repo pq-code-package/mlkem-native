@@ -7,7 +7,7 @@ HARNESS_FILE = polyvec_decompress_du_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = polyvec_decompress_du
+PROOF_UID = mlk_polyvec_decompress_du
 
 DEFINES +=
 INCLUDES +=

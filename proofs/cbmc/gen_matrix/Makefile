@@ -7,7 +7,7 @@ HARNESS_FILE = gen_matrix_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = gen_matrix
+PROOF_UID = mlk_gen_matrix
 
 DEFINES +=
 INCLUDES +=

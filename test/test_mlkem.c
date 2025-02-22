@@ -152,30 +152,30 @@ static int test_poly_compress_no_overflow(void)
 #if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
   {
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4];
-    poly s;
+    mlk_poly s;
     memset((uint8_t *)&s, 0, sizeof(s));
-    poly_compress_d4(r, &s);
+    mlk_poly_compress_d4(r, &s);
   }
 
   {
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4];
-    poly s;
+    mlk_poly s;
     memset(r, 0, sizeof(r));
-    poly_decompress_d4(&s, r);
+    mlk_poly_decompress_d4(&s, r);
   }
 
   {
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10];
-    poly s;
+    mlk_poly s;
     memset((uint8_t *)&s, 0, sizeof(s));
-    poly_compress_d10(r, &s);
+    mlk_poly_compress_d10(r, &s);
   }
 
   {
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10];
-    poly s;
+    mlk_poly s;
     memset(r, 0, sizeof(r));
-    poly_decompress_d10(&s, r);
+    mlk_poly_decompress_d10(&s, r);
   }
 #endif /* defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
           || MLKEM_K == 3) */
@@ -183,30 +183,30 @@ static int test_poly_compress_no_overflow(void)
 #if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
   {
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5];
-    poly s;
+    mlk_poly s;
     memset((uint8_t *)&s, 0, sizeof(s));
-    poly_compress_d5(r, &s);
+    mlk_poly_compress_d5(r, &s);
   }
 
   {
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5];
-    poly s;
+    mlk_poly s;
     memset(r, 0, sizeof(r));
-    poly_decompress_d5(&s, r);
+    mlk_poly_decompress_d5(&s, r);
   }
 
   {
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11];
-    poly s;
+    mlk_poly s;
     memset((uint8_t *)&s, 0, sizeof(s));
-    poly_compress_d11(r, &s);
+    mlk_poly_compress_d11(r, &s);
   }
 
   {
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11];
-    poly s;
+    mlk_poly s;
     memset(r, 0, sizeof(r));
-    poly_decompress_d11(&s, r);
+    mlk_poly_decompress_d11(&s, r);
   }
 #endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 4 */
 

@@ -7,5 +7,5 @@
 void harness(void)
 {
   uint64_t *s;
-  KeccakF1600_StatePermute(s);
+  mlk_KeccakF1600_StatePermute(s);
 }

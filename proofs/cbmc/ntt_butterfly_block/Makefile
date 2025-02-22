@@ -7,7 +7,7 @@ HARNESS_FILE = ntt_butterfly_block_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = ntt_butterfly_block
+PROOF_UID = mlk_ntt_butterfly_block
 
 DEFINES +=
 INCLUDES +=
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = ntt_butterfly_block
+FUNCTION_NAME = mlk_ntt_butterfly_block
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

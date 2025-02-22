@@ -6,7 +6,7 @@
 
 void harness(void)
 {
-  polyvec *a;
+  mlk_polyvec *a;
   uint8_t *r;
-  polyvec_tobytes(r, a);
+  mlk_polyvec_tobytes(r, a);
 }

@@ -10,16 +10,16 @@
 #include "common.h"
 #include "poly_k.h"
 
-#define gen_matrix MLK_NAMESPACE_K(gen_matrix)
+#define mlk_gen_matrix MLK_NAMESPACE_K(gen_matrix)
 /*************************************************
- * Name:        gen_matrix
+ * Name:        mlk_gen_matrix
  *
  * Description: Deterministically generate matrix A (or the transpose of A)
  *              from a seed. Entries of the matrix are polynomials that look
  *              uniformly random. Performs rejection sampling on output of
  *              a XOF
  *
- * Arguments:   - polyvec *a: pointer to output matrix A
+ * Arguments:   - mlk_polyvec *a: pointer to output matrix A
  *              - const uint8_t *seed: pointer to input seed
  *              - int transposed: boolean deciding whether A or A^T is generated
  *
@@ -29,9 +29,10 @@
  *
  **************************************************/
 MLK_INTERNAL_API
-void gen_matrix(polyvec *a, const uint8_t seed[MLKEM_SYMBYTES], int transposed)
+void mlk_gen_matrix(mlk_polyvec *a, const uint8_t seed[MLKEM_SYMBYTES],
+                    int transposed)
 __contract__(
-  requires(memory_no_alias(a, sizeof(polyvec) * MLKEM_K))
+  requires(memory_no_alias(a, sizeof(mlk_polyvec) * MLKEM_K))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
   requires(transposed == 0 || transposed == 1)
   assigns(object_whole(a))
@@ -39,9 +40,9 @@ __contract__(
   array_bound(a[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))));
 );
 
-#define indcpa_keypair_derand MLK_NAMESPACE_K(indcpa_keypair_derand)
+#define mlk_indcpa_keypair_derand MLK_NAMESPACE_K(indcpa_keypair_derand)
 /*************************************************
- * Name:        indcpa_keypair_derand
+ * Name:        mlk_indcpa_keypair_derand
  *
  * Description: Generates public and private key for the CPA-secure
  *              public-key encryption scheme underlying ML-KEM
@@ -57,9 +58,9 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                           uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
-                           const uint8_t coins[MLKEM_SYMBYTES])
+void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
+                               uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
+                               const uint8_t coins[MLKEM_SYMBYTES])
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCPA_SECRETKEYBYTES))
@@ -68,9 +69,9 @@ __contract__(
   assigns(object_whole(sk))
 );
 
-#define indcpa_enc MLK_NAMESPACE_K(indcpa_enc)
+#define mlk_indcpa_enc MLK_NAMESPACE_K(indcpa_enc)
 /*************************************************
- * Name:        indcpa_enc
+ * Name:        mlk_indcpa_enc
  *
  * Description: Encryption function of the CPA-secure
  *              public-key encryption scheme underlying Kyber.
@@ -89,10 +90,10 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
-                const uint8_t m[MLKEM_INDCPA_MSGBYTES],
-                const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                const uint8_t coins[MLKEM_SYMBYTES])
+void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
+                    const uint8_t m[MLKEM_INDCPA_MSGBYTES],
+                    const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
+                    const uint8_t coins[MLKEM_SYMBYTES])
 __contract__(
   requires(memory_no_alias(c, MLKEM_INDCPA_BYTES))
   requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES))
@@ -101,9 +102,9 @@ __contract__(
   assigns(object_whole(c))
 );
 
-#define indcpa_dec MLK_NAMESPACE_K(indcpa_dec)
+#define mlk_indcpa_dec MLK_NAMESPACE_K(indcpa_dec)
 /*************************************************
- * Name:        indcpa_dec
+ * Name:        mlk_indcpa_dec
  *
  * Description: Decryption function of the CPA-secure
  *              public-key encryption scheme underlying Kyber.
@@ -119,9 +120,9 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
-                const uint8_t c[MLKEM_INDCPA_BYTES],
-                const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
+void mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
+                    const uint8_t c[MLKEM_INDCPA_BYTES],
+                    const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
 __contract__(
   requires(memory_no_alias(c, MLKEM_INDCPA_BYTES))
   requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES))

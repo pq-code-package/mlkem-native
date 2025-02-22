@@ -17,7 +17,7 @@
 .endm
 
 /********************************************
- *          poly_mulcache_compute()         *
+ *          mlk_poly_mulcache_compute()         *
  ********************************************/
 
         cache_ptr         .req x0

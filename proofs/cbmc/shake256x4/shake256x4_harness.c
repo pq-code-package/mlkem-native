@@ -13,6 +13,6 @@ void harness(void)
   size_t outlen;
   const uint8_t *input0, input1, input2, input3;
   size_t inlen;
-  shake256x4(output0, output1, output2, output3, outlen, input0, input1, input2,
-             input3, inlen);
+  mlk_shake256x4(output0, output1, output2, output3, outlen, input0, input1,
+                 input2, input3, inlen);
 }

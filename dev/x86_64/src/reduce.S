@@ -9,7 +9,7 @@
 // Changes:
 // - Add call to csub in reduce128_avx to produce outputs
 //   in [0,1,...,q-1] rather than [0,1,...,q], matching the
-//   semantics of poly_reduce().
+//   semantics of mlk_poly_reduce().
 
 #include "../../../common.h"
 

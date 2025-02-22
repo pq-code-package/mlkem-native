@@ -7,7 +7,7 @@ HARNESS_FILE = keccak_squeezeblocks_x4_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = keccak_squeezeblocks_x4
+PROOF_UID = mlk_keccak_squeezeblocks_x4
 
 DEFINES +=
 INCLUDES +=
@@ -29,7 +29,7 @@ CBMCFLAGS=--bitwuzla
 
 CBMCFLAGS += --no-array-field-sensitivity --arrays-uf-always --slice-formula
 
-FUNCTION_NAME = keccak_squeezeblocks_x4
+FUNCTION_NAME = mlk_keccak_squeezeblocks_x4
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

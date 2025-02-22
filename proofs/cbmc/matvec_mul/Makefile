@@ -7,7 +7,7 @@ HARNESS_FILE = matvec_mul_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = matvec_mul
+PROOF_UID = mlk_matvec_mul
 
 DEFINES +=
 INCLUDES +=

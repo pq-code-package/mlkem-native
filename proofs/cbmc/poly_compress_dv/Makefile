@@ -7,7 +7,7 @@ HARNESS_FILE = poly_compress_dv_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = poly_compress_dv
+PROOF_UID = mlk_poly_compress_dv
 
 DEFINES +=
 INCLUDES +=

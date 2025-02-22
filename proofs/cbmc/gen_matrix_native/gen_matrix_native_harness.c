@@ -7,8 +7,8 @@
 
 void harness(void)
 {
-  polyvec *a;
+  mlk_polyvec *a;
   uint8_t *seed;
   int transposed;
-  gen_matrix(a, seed, transposed);
+  mlk_gen_matrix(a, seed, transposed);
 }

@@ -7,7 +7,7 @@ HARNESS_FILE = keccak_absorb_once_x4_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = keccak_absorb_once_x4
+PROOF_UID = mlk_keccak_absorb_once_x4
 
 DEFINES +=
 INCLUDES +=
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = keccak_absorb_once_x4
+FUNCTION_NAME = mlk_keccak_absorb_once_x4
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

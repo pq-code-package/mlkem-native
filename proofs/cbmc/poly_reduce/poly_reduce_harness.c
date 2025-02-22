@@ -6,8 +6,8 @@
 
 void harness(void)
 {
-  poly *a;
+  mlk_poly *a;
 
   /* Contracts for this function are in poly.h */
-  poly_reduce(a);
+  mlk_poly_reduce(a);
 }

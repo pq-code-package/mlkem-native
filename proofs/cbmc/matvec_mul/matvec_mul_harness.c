@@ -5,13 +5,13 @@
 #include "indcpa.h"
 #include "poly_k.h"
 
-#define matvec_mul MLK_NAMESPACE(matvec_mul)
-void matvec_mul(polyvec *out, polyvec const *a, polyvec const *v,
-                polyvec_mulcache const *vc);
+#define mlk_matvec_mul MLK_NAMESPACE(matvec_mul)
+void mlk_matvec_mul(mlk_polyvec *out, mlk_polyvec const *a,
+                    mlk_polyvec const *v, mlk_polyvec_mulcache const *vc);
 
 void harness(void)
 {
-  polyvec *out, *a, *v;
-  polyvec_mulcache *vc;
-  matvec_mul(out, a, v, vc);
+  mlk_polyvec *out, *a, *v;
+  mlk_polyvec_mulcache *vc;
+  mlk_matvec_mul(out, a, v, vc);
 }

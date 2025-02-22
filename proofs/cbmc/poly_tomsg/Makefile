@@ -7,7 +7,7 @@ HARNESS_FILE = poly_tomsg_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = poly_tomsg
+PROOF_UID = mlk_poly_tomsg
 
 DEFINES +=
 INCLUDES +=

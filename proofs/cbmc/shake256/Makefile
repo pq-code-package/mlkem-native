@@ -7,7 +7,7 @@ HARNESS_FILE = shake256_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = shake256
+PROOF_UID = mlk_shake256
 
 DEFINES +=
 INCLUDES +=

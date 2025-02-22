@@ -20,7 +20,7 @@
  * Table of zeta values used in the AArch64 forward NTT
  * See autogen for details.
  */
-MLK_ALIGN const int16_t aarch64_ntt_zetas_layer12345[] = {
+MLK_ALIGN const int16_t mlk_aarch64_ntt_zetas_layer12345[] = {
     -1600, -15749, -749,  -7373,  -40,   -394,   -687, -6762, 630,  6201,
     -1432, -14095, 848,   8347,   0,     0,      1062, 10453, 296,  2914,
     -882,  -8682,  0,     0,      -1410, -13879, 1339, 13180, 1476, 14529,
@@ -31,7 +31,7 @@ MLK_ALIGN const int16_t aarch64_ntt_zetas_layer12345[] = {
     0,     0,      -1583, -15582, -1355, -13338, 821,  8081,  0,    0,
 };
 
-MLK_ALIGN const int16_t aarch64_ntt_zetas_layer67[] = {
+MLK_ALIGN const int16_t mlk_aarch64_ntt_zetas_layer67[] = {
     289,    289,    331,    331,    -76,    -76,    -1573,  -1573,  2845,
     2845,   3258,   3258,   -748,   -748,   -15483, -15483, 17,     17,
     583,    583,    1637,   1637,   -1041,  -1041,  167,    167,    5739,
@@ -77,7 +77,7 @@ MLK_ALIGN const int16_t aarch64_ntt_zetas_layer67[] = {
     10129,  10129,  -3878,  -3878,  -11566, -11566,
 };
 
-MLK_ALIGN const int16_t aarch64_invntt_zetas_layer12345[] = {
+MLK_ALIGN const int16_t mlk_aarch64_invntt_zetas_layer12345[] = {
     1583,  15582,  -821,  -8081,  1355,  13338,  0,     0,      -569,  -5601,
     450,   4429,   936,   9213,   0,     0,      69,    679,    447,   4400,
     -535,  -5266,  0,     0,      543,   5345,   1235,  12156,  -1426, -14036,
@@ -88,7 +88,7 @@ MLK_ALIGN const int16_t aarch64_invntt_zetas_layer12345[] = {
     -848,  -8347,  1432,  14095,  -630,  -6201,  687,   6762,   0,     0,
 };
 
-MLK_ALIGN const int16_t aarch64_invntt_zetas_layer67[] = {
+MLK_ALIGN const int16_t mlk_aarch64_invntt_zetas_layer67[] = {
     -910,   -910,   -1227,  -1227,  219,    219,    855,    855,    -8957,
     -8957,  -12078, -12078, 2156,   2156,   8416,   8416,   1175,   1175,
     394,    394,    -1029,  -1029,  -1212,  -1212,  11566,  11566,  3878,
@@ -134,7 +134,7 @@ MLK_ALIGN const int16_t aarch64_invntt_zetas_layer67[] = {
     -16113, -16113, -5739,  -5739,  -167,   -167,
 };
 
-MLK_ALIGN const int16_t aarch64_zetas_mulcache_native[] = {
+MLK_ALIGN const int16_t mlk_aarch64_zetas_mulcache_native[] = {
     17,    -17,   -568,  568,  583,   -583,  -680,  680,   1637, -1637, 723,
     -723,  -1041, 1041,  1100, -1100, 1409,  -1409, -667,  667,  -48,   48,
     233,   -233,  756,   -756, -1173, 1173,  -314,  314,   -279, 279,   -1626,
@@ -149,7 +149,7 @@ MLK_ALIGN const int16_t aarch64_zetas_mulcache_native[] = {
     1219,  -394,  394,   885,  -885,  -1175, 1175,
 };
 
-MLK_ALIGN const int16_t aarch64_zetas_mulcache_twisted_native[] = {
+MLK_ALIGN const int16_t mlk_aarch64_zetas_mulcache_twisted_native[] = {
     167,    -167,  -5591,  5591,   5739,   -5739,  -6693,  6693,   16113,
     -16113, 7117,  -7117,  -10247, 10247,  10828,  -10828, 13869,  -13869,
     -6565,  6565,  -472,   472,    2293,   -2293,  7441,   -7441,  -11546,

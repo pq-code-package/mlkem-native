@@ -7,7 +7,7 @@ HARNESS_FILE = shake128_squeezeblocks_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = shake128_squeezeblocks
+PROOF_UID = mlk_shake128_squeezeblocks
 
 DEFINES +=
 INCLUDES +=

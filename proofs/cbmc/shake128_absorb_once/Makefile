@@ -7,7 +7,7 @@ HARNESS_FILE = shake128_absorb_once_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = shake128_absorb_once
+PROOF_UID = mlk_shake128_absorb_once
 
 DEFINES +=
 INCLUDES +=

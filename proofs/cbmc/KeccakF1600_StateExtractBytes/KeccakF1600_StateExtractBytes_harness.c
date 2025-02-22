@@ -10,5 +10,5 @@ void harness(void)
   unsigned char *data;
   unsigned offset;
   unsigned length;
-  KeccakF1600_StateExtractBytes(state, data, offset, length);
+  mlk_KeccakF1600_StateExtractBytes(state, data, offset, length);
 }

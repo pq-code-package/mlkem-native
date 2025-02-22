@@ -6,8 +6,8 @@
 
 void harness(void)
 {
-  poly *r;
+  mlk_poly *r;
   uint8_t *a;
 
-  poly_decompress_du(r, a);
+  mlk_poly_decompress_du(r, a);
 }

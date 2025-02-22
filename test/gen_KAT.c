@@ -61,11 +61,11 @@ int main(void)
 #endif
 
 
-  shake256(coins, sizeof(coins), seed, sizeof(seed));
+  mlk_shake256(coins, sizeof(coins), seed, sizeof(seed));
 
   for (i = 0; i < NTESTS; i++)
   {
-    shake256(coins, sizeof(coins), coins, sizeof(coins));
+    mlk_shake256(coins, sizeof(coins), coins, sizeof(coins));
 
     CHECK(crypto_kem_keypair_derand(pk, sk, coins) == 0);
     print_hex("pk", pk, sizeof(pk));

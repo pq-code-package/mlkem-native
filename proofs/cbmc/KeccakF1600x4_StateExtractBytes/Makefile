@@ -7,7 +7,7 @@ HARNESS_FILE = KeccakF1600x4_StateExtractBytes_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = KeccakF1600x4_StateExtractBytes
+PROOF_UID = mlk_KeccakF1600x4_StateExtractBytes
 
 DEFINES +=
 INCLUDES +=

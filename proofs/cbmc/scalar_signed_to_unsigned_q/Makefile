@@ -7,7 +7,7 @@ HARNESS_FILE = scalar_signed_to_unsigned_q_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = scalar_signed_to_unsigned_q
+PROOF_UID = mlk_scalar_signed_to_unsigned_q
 
 DEFINES +=
 INCLUDES +=

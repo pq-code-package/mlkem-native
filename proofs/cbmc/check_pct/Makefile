@@ -7,7 +7,7 @@ HARNESS_FILE = check_pct_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = check_pct
+PROOF_UID = mlk_check_pct
 
 DEFINES += -DMLK_KEYGEN_PCT
 INCLUDES +=

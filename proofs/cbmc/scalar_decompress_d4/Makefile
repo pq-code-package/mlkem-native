@@ -7,7 +7,7 @@ HARNESS_FILE = scalar_decompress_d4_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = scalar_decompress_d4
+PROOF_UID = mlk_scalar_decompress_d4
 
 DEFINES +=
 INCLUDES +=

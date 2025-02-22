@@ -68,7 +68,7 @@
         mulmod \dst3, \src3, ninv, ninv_tw
 .endm
 
-.macro barrett_reduce a
+.macro mlk_barrett_reduce a
         sqdmulh t0.8h,    \a\().8h, consts.h[1]
         srshr   t0.8h,    t0.8h,    #11
         mls     \a\().8h, t0.8h,    consts.h[0]

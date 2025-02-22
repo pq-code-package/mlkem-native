@@ -7,7 +7,7 @@ HARNESS_FILE = indcpa_keypair_derand_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = indcpa_keypair_derand
+PROOF_UID = mlk_indcpa_keypair_derand
 
 DEFINES +=
 INCLUDES +=
