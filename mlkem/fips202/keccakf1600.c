@@ -94,10 +94,10 @@ void mlk_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
 void mlk_keccakf1600x4_permute(uint64_t *state)
 {
 #if defined(MLK_USE_FIPS202_X4_NATIVE)
-  keccak_f1600_x4_native(state);
+  mlk_keccak_f1600_x4_native(state);
 #elif defined(MLK_USE_FIPS202_X2_NATIVE)
-  keccak_f1600_x2_native(state + 0 * KECCAK_LANES);
-  keccak_f1600_x2_native(state + 2 * KECCAK_LANES);
+  mlk_keccak_f1600_x2_native(state + 0 * KECCAK_LANES);
+  mlk_keccak_f1600_x2_native(state + 2 * KECCAK_LANES);
 #else
   mlk_keccakf1600_permute(state + KECCAK_LANES * 0);
   mlk_keccakf1600_permute(state + KECCAK_LANES * 1);
@@ -389,7 +389,10 @@ void mlk_keccakf1600_permute(uint64_t *state)
 #undef round
 }
 #else  /* !MLK_USE_FIPS202_X1_NATIVE */
-void mlk_keccakf1600_permute(uint64_t *state) { keccak_f1600_x1_native(state); }
+void mlk_keccakf1600_permute(uint64_t *state)
+{
+  mlk_keccak_f1600_x1_native(state);
+}
 #endif /* !MLK_USE_FIPS202_X1_NATIVE */
 
 #else /* MLK_MULTILEVEL_BUILD_WITH_SHARED */

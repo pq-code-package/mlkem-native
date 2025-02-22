@@ -19,7 +19,7 @@
 void mlk_keccakf1600x4_permute24(void *states);
 
 #define MLK_USE_FIPS202_X4_NATIVE
-static MLK_INLINE void keccak_f1600_x4_native(uint64_t *state)
+static MLK_INLINE void mlk_keccak_f1600_x4_native(uint64_t *state)
 {
   mlk_keccakf1600x4_permute24(state);
 }

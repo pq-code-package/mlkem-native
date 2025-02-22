@@ -136,17 +136,17 @@ void mlk_polyvec_basemul_acc_montgomery_cached(
    * decide not to use a mulcache. Note that the C backend implementation
    * of poly_basemul_montgomery_cached() does still include the check. */
 #if MLKEM_K == 2
-  polyvec_basemul_acc_montgomery_cached_k2_native(r->coeffs, (const int16_t *)a,
-                                                  (const int16_t *)b,
-                                                  (const int16_t *)b_cache);
+  mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
+      r->coeffs, (const int16_t *)a, (const int16_t *)b,
+      (const int16_t *)b_cache);
 #elif MLKEM_K == 3
-  polyvec_basemul_acc_montgomery_cached_k3_native(r->coeffs, (const int16_t *)a,
-                                                  (const int16_t *)b,
-                                                  (const int16_t *)b_cache);
+  mlk_polyvec_basemul_acc_montgomery_cached_k3_native(
+      r->coeffs, (const int16_t *)a, (const int16_t *)b,
+      (const int16_t *)b_cache);
 #elif MLKEM_K == 4
-  polyvec_basemul_acc_montgomery_cached_k4_native(r->coeffs, (const int16_t *)a,
-                                                  (const int16_t *)b,
-                                                  (const int16_t *)b_cache);
+  mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
+      r->coeffs, (const int16_t *)a, (const int16_t *)b,
+      (const int16_t *)b_cache);
 #endif
 }
 #endif /* MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */

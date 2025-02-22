@@ -23,58 +23,58 @@
 #define MLK_USE_NATIVE_POLY_TOBYTES
 #define MLK_USE_NATIVE_REJ_UNIFORM
 
-static MLK_INLINE void ntt_native(int16_t data[MLKEM_N])
+static MLK_INLINE void mlk_ntt_native(int16_t data[MLKEM_N])
 {
   mlk_ntt_asm_opt(data, mlk_aarch64_ntt_zetas_layer12345,
                   mlk_aarch64_ntt_zetas_layer67);
 }
 
-static MLK_INLINE void intt_native(int16_t data[MLKEM_N])
+static MLK_INLINE void mlk_intt_native(int16_t data[MLKEM_N])
 {
   mlk_intt_asm_opt(data, mlk_aarch64_invntt_zetas_layer12345,
                    mlk_aarch64_invntt_zetas_layer67);
 }
 
-static MLK_INLINE void poly_reduce_native(int16_t data[MLKEM_N])
+static MLK_INLINE void mlk_poly_reduce_native(int16_t data[MLKEM_N])
 {
   mlk_poly_reduce_asm_opt(data);
 }
 
-static MLK_INLINE void poly_tomont_native(int16_t data[MLKEM_N])
+static MLK_INLINE void mlk_poly_tomont_native(int16_t data[MLKEM_N])
 {
   mlk_poly_tomont_asm_opt(data);
 }
 
-static MLK_INLINE void poly_mulcache_compute_native(int16_t x[MLKEM_N / 2],
-                                                    const int16_t y[MLKEM_N])
+static MLK_INLINE void mlk_poly_mulcache_compute_native(
+    int16_t x[MLKEM_N / 2], const int16_t y[MLKEM_N])
 {
   mlk_poly_mulcache_compute_asm_opt(x, y, mlk_aarch64_zetas_mulcache_native,
                                     mlk_aarch64_zetas_mulcache_twisted_native);
 }
 
-static MLK_INLINE void polyvec_basemul_acc_montgomery_cached_k2_native(
+static MLK_INLINE void mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
     int16_t r[MLKEM_N], const int16_t a[2 * MLKEM_N],
     const int16_t b[2 * MLKEM_N], const int16_t b_cache[2 * (MLKEM_N / 2)])
 {
   mlk_polyvec_basemul_acc_montgomery_cached_asm_k2_opt(r, a, b, b_cache);
 }
 
-static MLK_INLINE void polyvec_basemul_acc_montgomery_cached_k3_native(
+static MLK_INLINE void mlk_polyvec_basemul_acc_montgomery_cached_k3_native(
     int16_t r[MLKEM_N], const int16_t a[3 * MLKEM_N],
     const int16_t b[3 * MLKEM_N], const int16_t b_cache[3 * (MLKEM_N / 2)])
 {
   mlk_polyvec_basemul_acc_montgomery_cached_asm_k3_opt(r, a, b, b_cache);
 }
 
-static MLK_INLINE void polyvec_basemul_acc_montgomery_cached_k4_native(
+static MLK_INLINE void mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
     int16_t r[MLKEM_N], const int16_t a[4 * MLKEM_N],
     const int16_t b[4 * MLKEM_N], const int16_t b_cache[4 * (MLKEM_N / 2)])
 {
   mlk_polyvec_basemul_acc_montgomery_cached_asm_k4_opt(r, a, b, b_cache);
 }
 
-static MLK_INLINE void poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
-                                           const int16_t a[MLKEM_N])
+static MLK_INLINE void mlk_poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
+                                               const int16_t a[MLKEM_N])
 {
   mlk_poly_tobytes_asm_opt(r, a);
 }

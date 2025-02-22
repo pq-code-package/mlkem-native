@@ -19,7 +19,7 @@
  * but no batched assembly implementation.
  */
 #define MLK_USE_FIPS202_X1_NATIVE
-static MLK_INLINE void keccak_f1600_x1_native(uint64_t *state)
+static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
 {
   mlk_keccak_f1600_x1_scalar_asm_opt(state, mlk_keccakf1600_round_constants);
 }
