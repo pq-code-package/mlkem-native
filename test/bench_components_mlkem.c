@@ -71,8 +71,8 @@ static int bench(void)
   seed[2] = (uint8_t *)data3;
   seed[3] = (uint8_t *)data4;
 
-  BENCH("keccak-f1600-x1", mlk_KeccakF1600_StatePermute(data0))
-  BENCH("keccak-f1600-x4", mlk_KeccakF1600x4_StatePermute(data0))
+  BENCH("keccak-f1600-x1", mlk_keccakf1600_permute(data0))
+  BENCH("keccak-f1600-x4", mlk_keccakf1600x4_permute(data0))
   BENCH("mlk_poly_rej_uniform",
         mlk_poly_rej_uniform((mlk_poly *)data0, (uint8_t *)data1))
   BENCH("mlk_poly_rej_uniform_x4",

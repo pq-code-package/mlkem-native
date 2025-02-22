@@ -59,27 +59,27 @@ __contract__(
     invariant(mlen <= loop_entry(mlen))
     invariant(m == loop_entry(m) + (loop_entry(mlen) - mlen)))
   {
-    mlk_KeccakF1600_StateXORBytes(s, m, 0, r);
-    mlk_KeccakF1600_StatePermute(s);
+    mlk_keccakf1600_xor_bytes(s, m, 0, r);
+    mlk_keccakf1600_permute(s);
     mlen -= r;
     m += r;
   }
 
   if (mlen > 0)
   {
-    mlk_KeccakF1600_StateXORBytes(s, m, 0, mlen);
+    mlk_keccakf1600_xor_bytes(s, m, 0, mlen);
   }
 
   if (mlen == r - 1)
   {
     p |= 128;
-    mlk_KeccakF1600_StateXORBytes(s, &p, mlen, 1);
+    mlk_keccakf1600_xor_bytes(s, &p, mlen, 1);
   }
   else
   {
-    mlk_KeccakF1600_StateXORBytes(s, &p, mlen, 1);
+    mlk_keccakf1600_xor_bytes(s, &p, mlen, 1);
     p = 128;
-    mlk_KeccakF1600_StateXORBytes(s, &p, r - 1, 1);
+    mlk_keccakf1600_xor_bytes(s, &p, r - 1, 1);
   }
 }
 
@@ -111,8 +111,8 @@ __contract__(
     invariant(nblocks <= loop_entry(nblocks) &&
       h == loop_entry(h) + r * (loop_entry(nblocks) - nblocks)))
   {
-    mlk_KeccakF1600_StatePermute(s);
-    mlk_KeccakF1600_StateExtractBytes(s, h, 0, r);
+    mlk_keccakf1600_permute(s);
+    mlk_keccakf1600_extract_bytes(s, h, 0, r);
     h += r;
     nblocks--;
   }
@@ -148,7 +148,7 @@ __contract__(
     invariant(outlen <= loop_entry(outlen) &&
       h == loop_entry(h) + (loop_entry(outlen) - outlen)))
   {
-    mlk_KeccakF1600_StatePermute(s);
+    mlk_keccakf1600_permute(s);
 
     if (outlen < r)
     {
@@ -158,7 +158,7 @@ __contract__(
     {
       len = r;
     }
-    mlk_KeccakF1600_StateExtractBytes(s, h, 0, len);
+    mlk_keccakf1600_extract_bytes(s, h, 0, len);
     h += len;
     outlen -= len;
   }

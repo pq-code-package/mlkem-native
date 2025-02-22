@@ -35,8 +35,8 @@ __contract__(
     invariant(in2 == loop_entry(in2) + (loop_entry(inlen) - inlen))
     invariant(in3 == loop_entry(in3) + (loop_entry(inlen) - inlen)))
   {
-    mlk_KeccakF1600x4_StateXORBytes(s, in0, in1, in2, in3, 0, r);
-    mlk_KeccakF1600x4_StatePermute(s);
+    mlk_keccakf1600x4_xor_bytes(s, in0, in1, in2, in3, 0, r);
+    mlk_keccakf1600x4_permute(s);
 
     in0 += r;
     in1 += r;
@@ -47,19 +47,19 @@ __contract__(
 
   if (inlen > 0)
   {
-    mlk_KeccakF1600x4_StateXORBytes(s, in0, in1, in2, in3, 0, inlen);
+    mlk_keccakf1600x4_xor_bytes(s, in0, in1, in2, in3, 0, inlen);
   }
 
   if (inlen == r - 1)
   {
     p |= 128;
-    mlk_KeccakF1600x4_StateXORBytes(s, &p, &p, &p, &p, inlen, 1);
+    mlk_keccakf1600x4_xor_bytes(s, &p, &p, &p, &p, inlen, 1);
   }
   else
   {
-    mlk_KeccakF1600x4_StateXORBytes(s, &p, &p, &p, &p, inlen, 1);
+    mlk_keccakf1600x4_xor_bytes(s, &p, &p, &p, &p, inlen, 1);
     p = 128;
-    mlk_KeccakF1600x4_StateXORBytes(s, &p, &p, &p, &p, r - 1, 1);
+    mlk_keccakf1600x4_xor_bytes(s, &p, &p, &p, &p, r - 1, 1);
   }
 }
 
@@ -94,8 +94,8 @@ __contract__(
       out2 == loop_entry(out2) + r * (loop_entry(nblocks) - nblocks) &&
       out3 == loop_entry(out3) + r * (loop_entry(nblocks) - nblocks)))
   {
-    mlk_KeccakF1600x4_StatePermute(s);
-    mlk_KeccakF1600x4_StateExtractBytes(s, out0, out1, out2, out3, 0, r);
+    mlk_keccakf1600x4_permute(s);
+    mlk_keccakf1600x4_extract_bytes(s, out0, out1, out2, out3, 0, r);
 
     out0 += r;
     out1 += r;

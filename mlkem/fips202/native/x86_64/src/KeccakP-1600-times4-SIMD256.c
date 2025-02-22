@@ -104,7 +104,7 @@ static const uint64_t rho56[4] = {0x0007060504030201, 0x080F0E0D0C0B0A09,
   XOReq256(A##ki, Di);                                        \
   ROL64in256(Bbi, A##ki, 43);                                 \
   E##ba = XOR256(Bba, ANDnu256(Bbe, Bbi));                    \
-  XOReq256(E##ba, CONST256_64(KeccakF1600RoundConstants[i])); \
+  XOReq256(E##ba, CONST256_64(keccakf1600RoundConstants[i])); \
   Ca = E##ba;                                                 \
   XOReq256(A##mo, Do);                                        \
   ROL64in256(Bbo, A##mo, 21);                                 \
@@ -227,7 +227,7 @@ static const uint64_t rho56[4] = {0x0007060504030201, 0x080F0E0D0C0B0A09,
   XOReq256(A##ki, Di);                                        \
   ROL64in256(Bbi, A##ki, 43);                                 \
   E##ba = XOR256(Bba, ANDnu256(Bbe, Bbi));                    \
-  XOReq256(E##ba, CONST256_64(KeccakF1600RoundConstants[i])); \
+  XOReq256(E##ba, CONST256_64(keccakf1600RoundConstants[i])); \
   XOReq256(A##mo, Do);                                        \
   ROL64in256(Bbo, A##mo, 21);                                 \
   E##be = XOR256(Bbe, ANDnu256(Bbi, Bbo));                    \
@@ -302,7 +302,7 @@ static const uint64_t rho56[4] = {0x0007060504030201, 0x080F0E0D0C0B0A09,
   E##su = XOR256(Bsu, ANDnu256(Bsa, Bse));
 
 
-static MLK_ALIGN const uint64_t KeccakF1600RoundConstants[24] = {
+static MLK_ALIGN const uint64_t keccakf1600RoundConstants[24] = {
     (uint64_t)0x0000000000000001ULL, (uint64_t)0x0000000000008082ULL,
     (uint64_t)0x800000000000808aULL, (uint64_t)0x8000000080008000ULL,
     (uint64_t)0x000000000000808bULL, (uint64_t)0x0000000080000001ULL,
@@ -447,7 +447,7 @@ static MLK_ALIGN const uint64_t KeccakF1600RoundConstants[24] = {
     thetaRhoPiChiIota(23, E, A)
 /* clang-format on */
 
-void mlk_KeccakP1600times4_PermuteAll_24rounds(void *states)
+void mlk_keccakf1600x4_permute24(void *states)
 {
   __m256i *statesAsLanes = (__m256i *)states;
   declareABCDE copyFromState(A, statesAsLanes)

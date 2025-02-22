@@ -3,11 +3,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = keccak_absorb_once_x4_harness
+HARNESS_FILE = keccakf1600_xor_bytes_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = mlk_keccak_absorb_once_x4
+PROOF_UID = mlk_keccakf1600_xor_bytes
 
 DEFINES +=
 INCLUDES +=
@@ -16,10 +16,10 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mlkem/fips202/fips202x4.c
+PROJECT_SOURCES += $(SRCDIR)/mlkem/fips202/keccakf1600.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_keccak_absorb_once_x4
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)keccakf1600x4_permute $(MLK_NAMESPACE)keccakf1600x4_xor_bytes
+CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)keccakf1600_xor_bytes
+USE_FUNCTION_CONTRACTS=
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = mlk_keccak_absorb_once_x4
+FUNCTION_NAME = $(MLK_NAMESPACE)keccakf1600_xor_bytes
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
@@ -36,7 +36,7 @@ FUNCTION_NAME = mlk_keccak_absorb_once_x4
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 9
+CBMC_OBJECT_BITS = 8
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

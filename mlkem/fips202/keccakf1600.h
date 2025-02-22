@@ -18,10 +18,9 @@
  * The struct is only exposed here to allow its construction on the stack.
  */
 
-#define mlk_KeccakF1600_StateExtractBytes \
-  MLK_NAMESPACE(KeccakF1600_StateExtractBytes)
-void mlk_KeccakF1600_StateExtractBytes(uint64_t *state, unsigned char *data,
-                                       unsigned offset, unsigned length)
+#define mlk_keccakf1600_extract_bytes MLK_NAMESPACE(keccakf1600_extract_bytes)
+void mlk_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
+                                   unsigned offset, unsigned length)
 __contract__(
     requires(0 <= offset && offset <= KECCAK_LANES * sizeof(uint64_t) &&
 	     0 <= length && length <= KECCAK_LANES * sizeof(uint64_t) - offset)
@@ -30,9 +29,9 @@ __contract__(
     assigns(memory_slice(data, length))
 );
 
-#define mlk_KeccakF1600_StateXORBytes MLK_NAMESPACE(KeccakF1600_StateXORBytes)
-void mlk_KeccakF1600_StateXORBytes(uint64_t *state, const unsigned char *data,
-                                   unsigned offset, unsigned length)
+#define mlk_keccakf1600_xor_bytes MLK_NAMESPACE(keccakf1600_xor_bytes)
+void mlk_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
+                               unsigned offset, unsigned length)
 __contract__(
     requires(0 <= offset && offset <= KECCAK_LANES * sizeof(uint64_t) &&
 	     0 <= length && length <= KECCAK_LANES * sizeof(uint64_t) - offset)
@@ -41,13 +40,12 @@ __contract__(
     assigns(memory_slice(state, sizeof(uint64_t) * KECCAK_LANES))
 );
 
-#define mlk_KeccakF1600x4_StateExtractBytes \
-  MLK_NAMESPACE(KeccakF1600x4_StateExtractBytes)
-void mlk_KeccakF1600x4_StateExtractBytes(uint64_t *state, unsigned char *data0,
-                                         unsigned char *data1,
-                                         unsigned char *data2,
-                                         unsigned char *data3, unsigned offset,
-                                         unsigned length)
+#define mlk_keccakf1600x4_extract_bytes \
+  MLK_NAMESPACE(keccakf1600x4_extract_bytes)
+void mlk_keccakf1600x4_extract_bytes(uint64_t *state, unsigned char *data0,
+                                     unsigned char *data1, unsigned char *data2,
+                                     unsigned char *data3, unsigned offset,
+                                     unsigned length)
 __contract__(
     requires(0 <= offset && offset <= KECCAK_LANES * sizeof(uint64_t) &&
 	     0 <= length && length <= KECCAK_LANES * sizeof(uint64_t) - offset)
@@ -62,14 +60,12 @@ __contract__(
     assigns(memory_slice(data3, length))
 );
 
-#define mlk_KeccakF1600x4_StateXORBytes \
-  MLK_NAMESPACE(KeccakF1600x4_StateXORBytes)
-void mlk_KeccakF1600x4_StateXORBytes(uint64_t *state,
-                                     const unsigned char *data0,
-                                     const unsigned char *data1,
-                                     const unsigned char *data2,
-                                     const unsigned char *data3,
-                                     unsigned offset, unsigned length)
+#define mlk_keccakf1600x4_xor_bytes MLK_NAMESPACE(keccakf1600x4_xor_bytes)
+void mlk_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
+                                 const unsigned char *data1,
+                                 const unsigned char *data2,
+                                 const unsigned char *data3, unsigned offset,
+                                 unsigned length)
 __contract__(
     requires(0 <= offset && offset <= KECCAK_LANES * sizeof(uint64_t) &&
 	     0 <= length && length <= KECCAK_LANES * sizeof(uint64_t) - offset)
@@ -86,8 +82,8 @@ __contract__(
 );
 
 
-#define mlk_KeccakF1600x4_StatePermute MLK_NAMESPACE(KeccakF1600x4_StatePermute)
-void mlk_KeccakF1600x4_StatePermute(uint64_t *state)
+#define mlk_keccakf1600x4_permute MLK_NAMESPACE(keccakf1600x4_permute)
+void mlk_keccakf1600x4_permute(uint64_t *state)
 __contract__(
     requires(memory_no_alias(state, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
     assigns(memory_slice(state, sizeof(uint64_t) * KECCAK_LANES * KECCAK_WAY))
@@ -95,15 +91,15 @@ __contract__(
 
 
 #if !defined(MLK_USE_FIPS202_X1_ASM)
-#define mlk_KeccakF1600_StatePermute MLK_NAMESPACE(KeccakF1600_StatePermute)
-void mlk_KeccakF1600_StatePermute(uint64_t *state)
+#define mlk_keccakf1600_permute MLK_NAMESPACE(keccakf1600_permute)
+void mlk_keccakf1600_permute(uint64_t *state)
 __contract__(
     requires(memory_no_alias(state, sizeof(uint64_t) * KECCAK_LANES))
     assigns(memory_slice(state, sizeof(uint64_t) * KECCAK_LANES))
 );
 
 #else
-#define mlk_KeccakF1600_StatePermute MLK_NAMESPACE(keccak_f1600_x1_asm)
+#define mlk_keccakf1600_permute MLK_NAMESPACE(keccak_f1600_x1_asm)
 #endif
 
 #endif /* MLK_FIPS202_KECCAKF1600_H */

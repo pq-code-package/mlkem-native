@@ -329,12 +329,12 @@
 #undef KECCAK_LANES
 #undef KECCAK_WAY
 #undef MLK_FIPS202_KECCAKF1600_H
-#undef mlk_KeccakF1600_StateExtractBytes
-#undef mlk_KeccakF1600_StatePermute
-#undef mlk_KeccakF1600_StateXORBytes
-#undef mlk_KeccakF1600x4_StateExtractBytes
-#undef mlk_KeccakF1600x4_StatePermute
-#undef mlk_KeccakF1600x4_StateXORBytes
+#undef mlk_keccakf1600_extract_bytes
+#undef mlk_keccakf1600_permute
+#undef mlk_keccakf1600_xor_bytes
+#undef mlk_keccakf1600x4_extract_bytes
+#undef mlk_keccakf1600x4_permute
+#undef mlk_keccakf1600x4_xor_bytes
 #endif /* !MLK_MONOBUILD_CUSTOM_FIPS202 */
 
 #if defined(MLK_MONOBUILD_WITH_NATIVE_FIPS202)
@@ -387,7 +387,7 @@
 #undef MLK_FIPS202_NATIVE_X86_64_SRC_XKCP_IMPL_H
 #undef MLK_FIPS202_PROFILE_IMPL_H
 #undef MLK_USE_FIPS202_X4_NATIVE
-#undef mlk_KeccakP1600times4_PermuteAll_24rounds
+#undef mlk_keccakf1600x4_permute24
 #endif /* MLK_MONOBUILD_WITH_NATIVE_FIPS202 */
 #if defined(MLK_MONOBUILD_WITH_NATIVE_ARITH)
 /*

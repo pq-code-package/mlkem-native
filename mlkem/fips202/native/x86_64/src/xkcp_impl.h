@@ -14,14 +14,14 @@
 
 #include "../../../../common.h"
 
-#define mlk_KeccakP1600times4_PermuteAll_24rounds \
+#define mlk_keccakf1600x4_permute24 \
   MLK_NAMESPACE(KeccakP1600times4_PermuteAll_24rounds)
-void mlk_KeccakP1600times4_PermuteAll_24rounds(void *states);
+void mlk_keccakf1600x4_permute24(void *states);
 
 #define MLK_USE_FIPS202_X4_NATIVE
 static MLK_INLINE void keccak_f1600_x4_native(uint64_t *state)
 {
-  mlk_KeccakP1600times4_PermuteAll_24rounds(state);
+  mlk_keccakf1600x4_permute24(state);
 }
 
 #endif /* MLK_FIPS202_PROFILE_IMPL_H */
