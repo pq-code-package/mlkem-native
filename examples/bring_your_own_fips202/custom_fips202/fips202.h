@@ -24,8 +24,10 @@
  * mlkem-native */
 typedef sha3_ctx_t mlk_shake128ctx;
 
-/* NOTE: mlk_shake128_init is already defined in sha3.h under that name;
- * Otherwise, it would need to be defined here as well. */
+static MLK_INLINE void mlk_shake128_init(mlk_shake128ctx *state)
+{
+  shake128_init(state);
+}
 
 #define mlk_shake128_absorb_once MLK_NAMESPACE(shake128_absorb_once)
 /*************************************************
