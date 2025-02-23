@@ -24,6 +24,7 @@
  * Specification: Compress_1 from [FIPS 203, Eq (4.7)].
  *
  ************************************************************/
+
 /*
  * The multiplication in this routine will exceed UINT32_MAX
  * and wrap around for large values of u. This is expected and required.
@@ -32,6 +33,8 @@
 #pragma CPROVER check push
 #pragma CPROVER check disable "unsigned-overflow"
 #endif
+
+/* Reference: Embedded in poly_tomsg() in the reference implementation. */
 static MLK_INLINE uint32_t mlk_scalar_compress_d1(uint16_t u)
 __contract__(
   requires(u <= MLKEM_Q - 1)
@@ -72,6 +75,9 @@ __contract__(
 #pragma CPROVER check push
 #pragma CPROVER check disable "unsigned-overflow"
 #endif
+
+/* Reference: Embedded into `poly_compress()` in the
+ *            reference implementation. */
 static MLK_INLINE uint32_t mlk_scalar_compress_d4(uint16_t u)
 __contract__(
   requires(u <= MLKEM_Q - 1)
@@ -104,6 +110,9 @@ __contract__(
  * Specification: Decompress_4 from [FIPS 203, Eq (4.8)].
  *
  ************************************************************/
+
+/* Reference: Embedded into `poly_decompress()` in the
+ *            reference implementation. */
 static MLK_INLINE uint16_t mlk_scalar_decompress_d4(uint32_t u)
 __contract__(
   requires(0 <= u && u < 16)
@@ -129,6 +138,9 @@ __contract__(
 #pragma CPROVER check push
 #pragma CPROVER check disable "unsigned-overflow"
 #endif
+
+/* Reference: Embedded into `poly_compress()` in the
+ *            reference implementation. */
 static MLK_INLINE uint32_t mlk_scalar_compress_d5(uint16_t u)
 __contract__(
   requires(u <= MLKEM_Q - 1)
@@ -161,6 +173,9 @@ __contract__(
  * Specification: Decompress_5 from [FIPS 203, Eq (4.8)].
  *
  ************************************************************/
+
+/* Reference: Embedded into `poly_decompress()` in the
+ *            reference implementation. */
 static MLK_INLINE uint16_t mlk_scalar_decompress_d5(uint32_t u)
 __contract__(
   requires(0 <= u && u < 32)
@@ -186,6 +201,9 @@ __contract__(
 #pragma CPROVER check push
 #pragma CPROVER check disable "unsigned-overflow"
 #endif
+
+/* Reference: Embedded into `polyvec_compress()` in the
+ *            reference implementation. */
 static MLK_INLINE uint32_t mlk_scalar_compress_d10(uint16_t u)
 __contract__(
   requires(u <= MLKEM_Q - 1)
@@ -219,6 +237,9 @@ __contract__(
  * Specification: Decompress_10 from [FIPS 203, Eq (4.8)].
  *
  ************************************************************/
+
+/* Reference: Embedded into `polyvec_decompress()` in the
+ *            reference implementation. */
 static MLK_INLINE uint16_t mlk_scalar_decompress_d10(uint32_t u)
 __contract__(
   requires(0 <= u && u < 1024)
@@ -244,6 +265,9 @@ __contract__(
 #pragma CPROVER check push
 #pragma CPROVER check disable "unsigned-overflow"
 #endif
+
+/* Reference: Embedded into `polyvec_compress()` in the
+ *            reference implementation. */
 static MLK_INLINE uint32_t mlk_scalar_compress_d11(uint16_t u)
 __contract__(
   requires(u <= MLKEM_Q - 1)
@@ -277,6 +301,9 @@ __contract__(
  * Specification: Decompress_11 from [FIPS 203, Eq (4.8)].
  *
  ************************************************************/
+
+/* Reference: Embedded into `polyvec_decompress()` in the
+ *            reference implementation. */
 static MLK_INLINE uint16_t mlk_scalar_decompress_d11(uint32_t u)
 __contract__(
   requires(0 <= u && u < 2048)
