@@ -391,7 +391,7 @@ __contract__(
 
 #if defined(MLK_USE_NATIVE_REJ_UNIFORM)
 /*************************************************
- * Name:        rej_uniform_native
+ * Name:        mlk_rej_uniform_native
  *
  * Description: Run rejection sampling on uniform random bytes to generate
  *              uniform random integers mod q
@@ -407,8 +407,9 @@ __contract__(
  * Otherwise, returns non-negative number of sampled 16-bit integers (at most
  * len).
  **************************************************/
-static MLK_INLINE int rej_uniform_native(int16_t *r, unsigned len,
-                                         const uint8_t *buf, unsigned buflen)
+static MLK_INLINE int mlk_rej_uniform_native(int16_t *r, unsigned len,
+                                             const uint8_t *buf,
+                                             unsigned buflen)
 __contract__(
   requires(len <= 4096 && buflen <= 4096 && buflen % 3 == 0)
   requires(memory_no_alias(r, sizeof(int16_t) * len))

@@ -81,8 +81,9 @@ static MLK_INLINE void mlk_poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
   mlk_poly_tobytes_asm_clean(r, a);
 }
 
-static MLK_INLINE int rej_uniform_native(int16_t *r, unsigned len,
-                                         const uint8_t *buf, unsigned buflen)
+static MLK_INLINE int mlk_rej_uniform_native(int16_t *r, unsigned len,
+                                             const uint8_t *buf,
+                                             unsigned buflen)
 {
   if (len != MLKEM_N || buflen % 24 != 0)
   {
