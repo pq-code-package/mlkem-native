@@ -105,7 +105,7 @@ __contract__(
 #if defined(MLK_USE_NATIVE_REJ_UNIFORM)
   if (offset == 0)
   {
-    int ret = rej_uniform_native(r, target, buf, buflen);
+    int ret = mlk_rej_uniform_native(r, target, buf, buflen);
     if (ret != -1)
     {
       unsigned res = (unsigned)ret;
@@ -182,10 +182,10 @@ void mlk_poly_rej_uniform_x4(mlk_poly *vec, uint8_t *seed[4])
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(buf0, sizeof(buf0));
-  mlk_ct_zeroize(buf1, sizeof(buf1));
-  mlk_ct_zeroize(buf2, sizeof(buf2));
-  mlk_ct_zeroize(buf3, sizeof(buf3));
+  mlk_zeroize(buf0, sizeof(buf0));
+  mlk_zeroize(buf1, sizeof(buf1));
+  mlk_zeroize(buf2, sizeof(buf2));
+  mlk_zeroize(buf3, sizeof(buf3));
 }
 
 MLK_INTERNAL_API
@@ -221,7 +221,7 @@ void mlk_poly_rej_uniform(mlk_poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(buf, sizeof(buf));
+  mlk_zeroize(buf, sizeof(buf));
 }
 
 /*************************************************

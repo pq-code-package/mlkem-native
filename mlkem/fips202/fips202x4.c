@@ -127,7 +127,7 @@ void mlk_shake128x4_release(mlk_shake128x4ctx *state)
 {
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(state, sizeof(mlk_shake128x4ctx));
+  mlk_zeroize(state, sizeof(mlk_shake128x4ctx));
 }
 
 static void mlk_shake256x4_absorb_once(mlk_shake256x4_ctx *state,
@@ -181,11 +181,11 @@ void mlk_shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(&statex, sizeof(statex));
-  mlk_ct_zeroize(tmp0, sizeof(tmp0));
-  mlk_ct_zeroize(tmp1, sizeof(tmp1));
-  mlk_ct_zeroize(tmp2, sizeof(tmp2));
-  mlk_ct_zeroize(tmp3, sizeof(tmp3));
+  mlk_zeroize(&statex, sizeof(statex));
+  mlk_zeroize(tmp0, sizeof(tmp0));
+  mlk_zeroize(tmp1, sizeof(tmp1));
+  mlk_zeroize(tmp2, sizeof(tmp2));
+  mlk_zeroize(tmp3, sizeof(tmp3));
 }
 
 #else /* MLK_MULTILEVEL_BUILD_NO_SHARED */

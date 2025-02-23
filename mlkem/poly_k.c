@@ -264,14 +264,14 @@ void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(buf0, sizeof(buf0));
-  mlk_ct_zeroize(buf1, sizeof(buf1));
-  mlk_ct_zeroize(buf2, sizeof(buf2));
-  mlk_ct_zeroize(buf3, sizeof(buf3));
-  mlk_ct_zeroize(extkey0, sizeof(extkey0));
-  mlk_ct_zeroize(extkey1, sizeof(extkey1));
-  mlk_ct_zeroize(extkey2, sizeof(extkey2));
-  mlk_ct_zeroize(extkey3, sizeof(extkey3));
+  mlk_zeroize(buf0, sizeof(buf0));
+  mlk_zeroize(buf1, sizeof(buf1));
+  mlk_zeroize(buf2, sizeof(buf2));
+  mlk_zeroize(buf3, sizeof(buf3));
+  mlk_zeroize(extkey0, sizeof(extkey0));
+  mlk_zeroize(extkey1, sizeof(extkey1));
+  mlk_zeroize(extkey2, sizeof(extkey2));
+  mlk_zeroize(extkey3, sizeof(extkey3));
 }
 
 #if MLKEM_K == 2 || MLKEM_K == 4
@@ -322,8 +322,8 @@ void mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(buf, sizeof(buf));
-  mlk_ct_zeroize(extkey, sizeof(extkey));
+  mlk_zeroize(buf, sizeof(buf));
+  mlk_zeroize(extkey, sizeof(extkey));
 }
 #endif /* MLKEM_K == 2 || MLKEM_K == 4 */
 
@@ -383,14 +383,14 @@ void mlk_poly_getnoise_eta1122_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(buf0, sizeof(buf0));
-  mlk_ct_zeroize(buf1, sizeof(buf1));
-  mlk_ct_zeroize(buf2, sizeof(buf2));
-  mlk_ct_zeroize(buf3, sizeof(buf3));
-  mlk_ct_zeroize(extkey0, sizeof(extkey0));
-  mlk_ct_zeroize(extkey1, sizeof(extkey1));
-  mlk_ct_zeroize(extkey2, sizeof(extkey2));
-  mlk_ct_zeroize(extkey3, sizeof(extkey3));
+  mlk_zeroize(buf0, sizeof(buf0));
+  mlk_zeroize(buf1, sizeof(buf1));
+  mlk_zeroize(buf2, sizeof(buf2));
+  mlk_zeroize(buf3, sizeof(buf3));
+  mlk_zeroize(extkey0, sizeof(extkey0));
+  mlk_zeroize(extkey1, sizeof(extkey1));
+  mlk_zeroize(extkey2, sizeof(extkey2));
+  mlk_zeroize(extkey3, sizeof(extkey3));
 }
 #endif /* MLKEM_K == 2 */
 

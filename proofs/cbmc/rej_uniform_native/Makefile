@@ -19,7 +19,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/sampling.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_rej_uniform
-USE_FUNCTION_CONTRACTS=rej_uniform_native mlk_rej_uniform_scalar
+USE_FUNCTION_CONTRACTS=mlk_rej_uniform_native mlk_rej_uniform_scalar
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

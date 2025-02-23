@@ -63,8 +63,8 @@ static int mlk_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(p_reencoded, sizeof(p_reencoded));
-  mlk_ct_zeroize(&p, sizeof(p));
+  mlk_zeroize(p_reencoded, sizeof(p_reencoded));
+  mlk_zeroize(&p, sizeof(p));
   return res;
 }
 
@@ -111,7 +111,7 @@ static int mlk_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(test, sizeof(test));
+  mlk_zeroize(test, sizeof(test));
   return res;
 }
 
@@ -162,9 +162,9 @@ cleanup:
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(ct, sizeof(ct));
-  mlk_ct_zeroize(ss_enc, sizeof(ss_enc));
-  mlk_ct_zeroize(ss_dec, sizeof(ss_dec));
+  mlk_zeroize(ct, sizeof(ct));
+  mlk_zeroize(ss_enc, sizeof(ss_enc));
+  mlk_zeroize(ss_dec, sizeof(ss_dec));
   return res;
 }
 #else  /* !MLKEM_KEYGEN_PCT */
@@ -218,7 +218,7 @@ int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(coins, sizeof(coins));
+  mlk_zeroize(coins, sizeof(coins));
   return res;
 }
 
@@ -251,8 +251,8 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(buf, sizeof(buf));
-  mlk_ct_zeroize(kr, sizeof(kr));
+  mlk_zeroize(buf, sizeof(buf));
+  mlk_zeroize(kr, sizeof(kr));
 
   return 0;
 }
@@ -272,7 +272,7 @@ int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(coins, sizeof(coins));
+  mlk_zeroize(coins, sizeof(coins));
   return res;
 }
 
@@ -318,9 +318,9 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(buf, sizeof(buf));
-  mlk_ct_zeroize(kr, sizeof(kr));
-  mlk_ct_zeroize(tmp, sizeof(tmp));
+  mlk_zeroize(buf, sizeof(buf));
+  mlk_zeroize(kr, sizeof(kr));
+  mlk_zeroize(tmp, sizeof(tmp));
 
   return 0;
 }

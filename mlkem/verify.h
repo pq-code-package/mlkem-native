@@ -57,23 +57,23 @@
 extern volatile uint64_t mlk_ct_opt_blocker_u64;
 
 /* Helper functions for obtaining masks of various sizes */
-static MLK_INLINE uint8_t get_optblocker_u8(void)
+static MLK_INLINE uint8_t mlk_ct_get_optblocker_u8(void)
 __contract__(ensures(return_value == 0)) { return (uint8_t)mlk_ct_opt_blocker_u64; }
 
-static MLK_INLINE uint32_t get_optblocker_u32(void)
+static MLK_INLINE uint32_t mlk_ct_get_optblocker_u32(void)
 __contract__(ensures(return_value == 0)) { return mlk_ct_opt_blocker_u64; }
 
-static MLK_INLINE uint32_t get_optblocker_i32(void)
+static MLK_INLINE uint32_t mlk_ct_get_optblocker_i32(void)
 __contract__(ensures(return_value == 0)) { return mlk_ct_opt_blocker_u64; }
 
 static MLK_INLINE uint32_t mlk_value_barrier_u32(uint32_t b)
-__contract__(ensures(return_value == b)) { return (b ^ get_optblocker_u32()); }
+__contract__(ensures(return_value == b)) { return (b ^ mlk_ct_get_optblocker_u32()); }
 
 static MLK_INLINE int32_t mlk_value_barrier_i32(int32_t b)
-__contract__(ensures(return_value == b)) { return (b ^ get_optblocker_i32()); }
+__contract__(ensures(return_value == b)) { return (b ^ mlk_ct_get_optblocker_i32()); }
 
 static MLK_INLINE uint8_t mlk_value_barrier_u8(uint8_t b)
-__contract__(ensures(return_value == b)) { return (b ^ get_optblocker_u8()); }
+__contract__(ensures(return_value == b)) { return (b ^ mlk_ct_get_optblocker_u8()); }
 
 #else /* !MLK_USE_ASM_VALUE_BARRIER */
 
@@ -311,7 +311,7 @@ __contract__(
 }
 
 /*************************************************
- * Name:        mlk_ct_zeroize
+ * Name:        mlk_zeroize
  *
  * Description: Force-zeroize a buffer.
  *
@@ -322,26 +322,26 @@ __contract__(
  * [FIPS 203, Section 3.3, Destruction of intermediate values]
  *
  **************************************************/
-static MLK_INLINE void mlk_ct_zeroize(void *r, size_t len)
+static MLK_INLINE void mlk_zeroize(void *r, size_t len)
 __contract__(
   requires(memory_no_alias(r, len))
   assigns(memory_slice(r, len))
 );
 
-#if defined(MLK_USE_CT_ZEROIZE_NATIVE)
-static MLK_INLINE void mlk_ct_zeroize(void *ptr, size_t len)
+#if defined(MLK_USE_ZEROIZE_NATIVE)
+static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
 {
-  ct_zeroize_native(ptr, len);
+  mlk_zeroize_native(ptr, len);
 }
 #elif defined(MLK_SYS_WINDOWS)
 #include <windows.h>
-static MLK_INLINE void mlk_ct_zeroize(void *ptr, size_t len)
+static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
 {
   SecureZeroMemory(ptr, len);
 }
 #elif defined(MLK_HAVE_INLINE_ASM)
 #include <string.h>
-static MLK_INLINE void mlk_ct_zeroize(void *ptr, size_t len)
+static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
 {
   memset(ptr, 0, len);
   /* This follows OpenSSL and seems sufficient to prevent the compiler
@@ -352,7 +352,7 @@ static MLK_INLINE void mlk_ct_zeroize(void *ptr, size_t len)
   __asm__ __volatile__("" : : "r"(ptr) : "memory");
 }
 #else
-#error No plausibly-secure implementation of mlk_ct_zeroize available. Please provide your own using MLK_USE_CT_ZEROIZE_NATIVE.
+#error No plausibly-secure implementation of mlk_zeroize available. Please provide your own using MLK_USE_ZEROIZE_NATIVE.
 #endif
 
 #endif /* MLK_VERIFY_H */

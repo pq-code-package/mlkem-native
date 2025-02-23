@@ -19,7 +19,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/sampling.c $(SRCDIR)/mlkem/fips202/fips202x4.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_poly_rej_uniform_x4
-USE_FUNCTION_CONTRACTS=mlk_shake128x4_absorb_once mlk_shake128x4_squeezeblocks mlk_rej_uniform mlk_ct_zeroize
+USE_FUNCTION_CONTRACTS=mlk_shake128x4_absorb_once mlk_shake128x4_squeezeblocks mlk_rej_uniform mlk_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
