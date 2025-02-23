@@ -7,7 +7,7 @@ HARNESS_FILE = keccak_absorb_once_x4_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = keccak_absorb_once_x4
+PROOF_UID = mlk_keccak_absorb_once_x4
 
 DEFINES +=
 INCLUDES +=
@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/fips202/fips202x4.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)keccak_absorb_once_x4
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)KeccakF1600x4_StatePermute $(MLK_NAMESPACE)KeccakF1600x4_StateXORBytes
+CHECK_FUNCTION_CONTRACTS=mlk_keccak_absorb_once_x4
+USE_FUNCTION_CONTRACTS=mlk_keccakf1600x4_permute mlk_keccakf1600x4_xor_bytes
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = keccak_absorb_once_x4
+FUNCTION_NAME = mlk_keccak_absorb_once_x4
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

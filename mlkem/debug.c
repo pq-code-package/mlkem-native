@@ -16,7 +16,7 @@
 
 #define MLK_DEBUG_ERROR_HEADER "[ERROR:%s:%04d] "
 
-void mlkem_debug_assert(const char *file, int line, const int val)
+void mlk_debug_check_assert(const char *file, int line, const int val)
 {
   if (val == 0)
   {
@@ -26,9 +26,9 @@ void mlkem_debug_assert(const char *file, int line, const int val)
   }
 }
 
-void mlkem_debug_check_bounds(const char *file, int line, const int16_t *ptr,
-                              unsigned len, int lower_bound_exclusive,
-                              int upper_bound_exclusive)
+void mlk_debug_check_bounds(const char *file, int line, const int16_t *ptr,
+                            unsigned len, int lower_bound_exclusive,
+                            int upper_bound_exclusive)
 {
   int err = 0;
   unsigned i;

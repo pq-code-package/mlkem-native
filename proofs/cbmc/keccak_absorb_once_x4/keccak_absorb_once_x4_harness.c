@@ -7,10 +7,10 @@
 #include <stdint.h>
 #include <string.h>
 
-#define keccak_absorb_once_x4 MLK_NAMESPACE(keccak_absorb_once_x4)
-void keccak_absorb_once_x4(uint64_t *s, uint32_t r, const uint8_t *in0,
-                           const uint8_t *in1, const uint8_t *in2,
-                           const uint8_t *in3, size_t inlen, uint8_t p);
+
+void mlk_keccak_absorb_once_x4(uint64_t *s, uint32_t r, const uint8_t *in0,
+                               const uint8_t *in1, const uint8_t *in2,
+                               const uint8_t *in3, size_t inlen, uint8_t p);
 
 void harness(void)
 {
@@ -19,5 +19,5 @@ void harness(void)
   const uint8_t *in0, *in1, *in2, *in3;
   size_t inlen;
   uint8_t p;
-  keccak_absorb_once_x4(s, r, in0, in1, in2, in3, inlen, p);
+  mlk_keccak_absorb_once_x4(s, r, in0, in1, in2, in3, inlen, p);
 }

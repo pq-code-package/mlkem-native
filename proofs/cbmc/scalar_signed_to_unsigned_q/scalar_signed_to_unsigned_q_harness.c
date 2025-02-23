@@ -5,13 +5,12 @@
 #include <stdint.h>
 #include "common.h"
 
-#define scalar_signed_to_unsigned_q MLK_NAMESPACE(scalar_signed_to_unsigned_q)
-uint16_t scalar_signed_to_unsigned_q(int16_t c);
+uint16_t mlk_scalar_signed_to_unsigned_q(int16_t c);
 
 void harness(void)
 {
   int16_t u;
 
   /* Contracts for this function are in poly.h */
-  uint16_t d = scalar_signed_to_unsigned_q(u);
+  uint16_t d = mlk_scalar_signed_to_unsigned_q(u);
 }

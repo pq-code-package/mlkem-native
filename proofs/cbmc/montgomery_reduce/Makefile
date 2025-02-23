@@ -7,7 +7,7 @@ HARNESS_FILE = montgomery_reduce_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = montgomery_reduce
+PROOF_UID = mlk_montgomery_reduce
 
 DEFINES +=
 INCLUDES +=
@@ -18,7 +18,7 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c # Some unit including reduce.h
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)montgomery_reduce
+CHECK_FUNCTION_CONTRACTS=mlk_montgomery_reduce
 USE_FUNCTION_CONTRACTS=
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = montgomery_reduce
+FUNCTION_NAME = mlk_montgomery_reduce
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

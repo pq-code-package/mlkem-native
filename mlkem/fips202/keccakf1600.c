@@ -21,14 +21,7 @@
 #define NROUNDS 24
 #define ROL(a, offset) ((a << offset) ^ (a >> (64 - offset)))
 
-/* Static namespacing
- * This is to facilitate building multiple instances
- * of mlkem-native (e.g. with varying security levels)
- * within a single compilation unit. */
-#define KeccakF_RoundConstants MLK_NAMESPACE(KeccakF_RoundConstants)
-/* End of static namespacing */
-
-void KeccakF1600_StateExtractBytes(uint64_t *state, unsigned char *data,
+void mlk_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
                                    unsigned offset, unsigned length)
 {
   unsigned i;
@@ -49,7 +42,7 @@ void KeccakF1600_StateExtractBytes(uint64_t *state, unsigned char *data,
 #endif /* MLK_SYS_LITTLE_ENDIAN */
 }
 
-void KeccakF1600_StateXORBytes(uint64_t *state, const unsigned char *data,
+void mlk_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
                                unsigned offset, unsigned length)
 {
   unsigned i;
@@ -71,50 +64,54 @@ void KeccakF1600_StateXORBytes(uint64_t *state, const unsigned char *data,
 #endif /* MLK_SYS_LITTLE_ENDIAN */
 }
 
-void KeccakF1600x4_StateExtractBytes(uint64_t *state, unsigned char *data0,
+void mlk_keccakf1600x4_extract_bytes(uint64_t *state, unsigned char *data0,
                                      unsigned char *data1, unsigned char *data2,
                                      unsigned char *data3, unsigned offset,
                                      unsigned length)
 {
-  KeccakF1600_StateExtractBytes(state + KECCAK_LANES * 0, data0, offset,
+  mlk_keccakf1600_extract_bytes(state + MLK_KECCAK_LANES * 0, data0, offset,
                                 length);
-  KeccakF1600_StateExtractBytes(state + KECCAK_LANES * 1, data1, offset,
+  mlk_keccakf1600_extract_bytes(state + MLK_KECCAK_LANES * 1, data1, offset,
                                 length);
-  KeccakF1600_StateExtractBytes(state + KECCAK_LANES * 2, data2, offset,
+  mlk_keccakf1600_extract_bytes(state + MLK_KECCAK_LANES * 2, data2, offset,
                                 length);
-  KeccakF1600_StateExtractBytes(state + KECCAK_LANES * 3, data3, offset,
+  mlk_keccakf1600_extract_bytes(state + MLK_KECCAK_LANES * 3, data3, offset,
                                 length);
 }
 
-void KeccakF1600x4_StateXORBytes(uint64_t *state, const unsigned char *data0,
+void mlk_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
                                  const unsigned char *data1,
                                  const unsigned char *data2,
                                  const unsigned char *data3, unsigned offset,
                                  unsigned length)
 {
-  KeccakF1600_StateXORBytes(state + KECCAK_LANES * 0, data0, offset, length);
-  KeccakF1600_StateXORBytes(state + KECCAK_LANES * 1, data1, offset, length);
-  KeccakF1600_StateXORBytes(state + KECCAK_LANES * 2, data2, offset, length);
-  KeccakF1600_StateXORBytes(state + KECCAK_LANES * 3, data3, offset, length);
+  mlk_keccakf1600_xor_bytes(state + MLK_KECCAK_LANES * 0, data0, offset,
+                            length);
+  mlk_keccakf1600_xor_bytes(state + MLK_KECCAK_LANES * 1, data1, offset,
+                            length);
+  mlk_keccakf1600_xor_bytes(state + MLK_KECCAK_LANES * 2, data2, offset,
+                            length);
+  mlk_keccakf1600_xor_bytes(state + MLK_KECCAK_LANES * 3, data3, offset,
+                            length);
 }
 
-void KeccakF1600x4_StatePermute(uint64_t *state)
+void mlk_keccakf1600x4_permute(uint64_t *state)
 {
 #if defined(MLK_USE_FIPS202_X4_NATIVE)
-  keccak_f1600_x4_native(state);
+  mlk_keccak_f1600_x4_native(state);
 #elif defined(MLK_USE_FIPS202_X2_NATIVE)
-  keccak_f1600_x2_native(state + 0 * KECCAK_LANES);
-  keccak_f1600_x2_native(state + 2 * KECCAK_LANES);
+  mlk_keccak_f1600_x2_native(state + 0 * MLK_KECCAK_LANES);
+  mlk_keccak_f1600_x2_native(state + 2 * MLK_KECCAK_LANES);
 #else
-  KeccakF1600_StatePermute(state + KECCAK_LANES * 0);
-  KeccakF1600_StatePermute(state + KECCAK_LANES * 1);
-  KeccakF1600_StatePermute(state + KECCAK_LANES * 2);
-  KeccakF1600_StatePermute(state + KECCAK_LANES * 3);
+  mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 0);
+  mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 1);
+  mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 2);
+  mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 3);
 #endif /* !MLK_USE_FIPS202_X2_NATIVE && !MLK_USE_FIPS202_X4_NATIVE */
 }
 
 #if !defined(MLK_USE_FIPS202_X1_NATIVE)
-static const uint64_t KeccakF_RoundConstants[NROUNDS] = {
+static const uint64_t mlk_KeccakF_RoundConstants[NROUNDS] = {
     (uint64_t)0x0000000000000001ULL, (uint64_t)0x0000000000008082ULL,
     (uint64_t)0x800000000000808aULL, (uint64_t)0x8000000080008000ULL,
     (uint64_t)0x000000000000808bULL, (uint64_t)0x0000000080000001ULL,
@@ -128,7 +125,7 @@ static const uint64_t KeccakF_RoundConstants[NROUNDS] = {
     (uint64_t)0x8000000080008081ULL, (uint64_t)0x8000000000008080ULL,
     (uint64_t)0x0000000080000001ULL, (uint64_t)0x8000000080008008ULL};
 
-void KeccakF1600_StatePermute(uint64_t *state)
+void mlk_keccakf1600_permute(uint64_t *state)
 {
   unsigned round;
 
@@ -200,7 +197,7 @@ void KeccakF1600_StatePermute(uint64_t *state)
     Asu ^= Du;
     BCu = ROL(Asu, 14);
     Eba = BCa ^ ((~BCe) & BCi);
-    Eba ^= (uint64_t)KeccakF_RoundConstants[round];
+    Eba ^= (uint64_t)mlk_KeccakF_RoundConstants[round];
     Ebe = BCe ^ ((~BCi) & BCo);
     Ebi = BCi ^ ((~BCo) & BCu);
     Ebo = BCo ^ ((~BCu) & BCa);
@@ -295,7 +292,7 @@ void KeccakF1600_StatePermute(uint64_t *state)
     Esu ^= Du;
     BCu = ROL(Esu, 14);
     Aba = BCa ^ ((~BCe) & BCi);
-    Aba ^= (uint64_t)KeccakF_RoundConstants[round + 1];
+    Aba ^= (uint64_t)mlk_KeccakF_RoundConstants[round + 1];
     Abe = BCe ^ ((~BCi) & BCo);
     Abi = BCi ^ ((~BCo) & BCu);
     Abo = BCo ^ ((~BCu) & BCa);
@@ -396,9 +393,9 @@ void KeccakF1600_StatePermute(uint64_t *state)
 #undef round
 }
 #else  /* !MLK_USE_FIPS202_X1_NATIVE */
-void KeccakF1600_StatePermute(uint64_t *state)
+void mlk_keccakf1600_permute(uint64_t *state)
 {
-  keccak_f1600_x1_native(state);
+  mlk_keccak_f1600_x1_native(state);
 }
 #endif /* !MLK_USE_FIPS202_X1_NATIVE */
 
@@ -412,4 +409,3 @@ MLK_EMPTY_CU(keccakf1600)
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
 #undef NROUNDS
 #undef ROL
-#undef KeccakF_RoundConstants

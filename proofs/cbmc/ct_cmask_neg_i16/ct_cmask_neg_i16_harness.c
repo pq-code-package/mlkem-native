@@ -9,5 +9,5 @@ void harness(void)
   int16_t a;
   uint16_t b;
 
-  b = ct_cmask_neg_i16(a);
+  b = mlk_ct_cmask_neg_i16(a);
 }

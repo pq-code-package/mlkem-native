@@ -7,7 +7,7 @@ HARNESS_FILE = shake128_absorb_once_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = shake128_absorb_once
+PROOF_UID = mlk_shake128_absorb_once
 
 DEFINES +=
 INCLUDES +=
@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/fips202/fips202.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)shake128_absorb_once
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)keccak_absorb_once
+CHECK_FUNCTION_CONTRACTS=mlk_shake128_absorb_once
+USE_FUNCTION_CONTRACTS=mlk_keccak_absorb_once
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = $(MLK_NAMESPACE)shake128_absorb_once
+FUNCTION_NAME = mlk_shake128_absorb_once
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

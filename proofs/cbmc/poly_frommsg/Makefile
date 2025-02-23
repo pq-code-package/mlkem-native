@@ -7,7 +7,7 @@ HARNESS_FILE = poly_frommsg_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = poly_frommsg
+PROOF_UID = mlk_poly_frommsg
 
 DEFINES +=
 INCLUDES +=
@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/compress.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_frommsg
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)ct_sel_int16 $(MLK_NAMESPACE)value_barrier_u8
+CHECK_FUNCTION_CONTRACTS=mlk_poly_frommsg
+USE_FUNCTION_CONTRACTS=mlk_ct_sel_int16 mlk_value_barrier_u8
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = $(MLK_NAMESPACE)poly_frommsg
+FUNCTION_NAME = mlk_poly_frommsg
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

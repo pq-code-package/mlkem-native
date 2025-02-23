@@ -19,20 +19,29 @@ def load(fname):
 
 def get_shared_sources():
     # add files mlkem/*
-    sources = [f for f in os.listdir(MLKEM_DIR) if os.path.isfile(f"{MLKEM_DIR}/{f}")]
+    sources = [
+        f"mlkem/{f}"
+        for f in os.listdir(MLKEM_DIR)
+        if os.path.isfile(f"{MLKEM_DIR}/{f}")
+    ]
     # add files mlkem/native/* (API definitions)
     sources += [
-        f"native/{f}"
+        f"mlkem/native/{f}"
         for f in os.listdir(f"{MLKEM_DIR}/native")
         if os.path.isfile(f"{MLKEM_DIR}/native/{f}")
     ]
     # randombytes.h is provided by liboqs
-    sources.remove("randombytes.h")
+    sources.remove("mlkem/randombytes.h")
+    # Add FIPS202 glue code
+    sources += [
+        "integration/liboqs/fips202_glue.h",
+        "integration/liboqs/fips202x4_glue.h",
+    ]
     return sources
 
 
 def get_native_sources(backend):
-    return [f"native/{backend}"]
+    return [f"mlkem/native/{backend}"]
 
 
 def check_implementation(impl):

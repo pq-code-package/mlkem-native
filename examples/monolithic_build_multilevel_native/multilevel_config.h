@@ -47,7 +47,6 @@
  *
  *****************************************************************************/
 #define MLK_NAMESPACE_PREFIX mlkem
-#define MLK_NAMESPACE_PREFIX_ADD_LEVEL
 
 /******************************************************************************
  * Name:        MLK_USE_NATIVE_BACKEND_ARITH

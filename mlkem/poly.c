@@ -15,23 +15,11 @@
 #include "symmetric.h"
 #include "verify.h"
 
-/* Static namespacing
- * This is to facilitate building multiple instances
- * of mlkem-native (e.g. with varying security levels)
- * within a single compilation unit. */
-#define fqmul MLK_NAMESPACE(fqmul)
-#define barrett_reduce MLK_NAMESPACE(barrett_reduce)
-#define scalar_signed_to_unsigned_q MLK_NAMESPACE(scalar_signed_to_unsigned_q)
-#define ntt_butterfly_block MLK_NAMESPACE(ntt_butterfly_block)
-#define ntt_layer MLK_NAMESPACE(ntt_layer)
-#define invntt_layer MLK_NAMESPACE(invntt_layer)
-/* End of static namespacing */
-
 #if !defined(MLK_USE_NATIVE_POLY_TOMONT) ||           \
     !defined(MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE) || \
     !defined(MLK_USE_NATIVE_NTT) || !defined(MLK_USE_NATIVE_INTT)
 /*************************************************
- * Name:        fqmul
+ * Name:        mlk_fqmul
  *
  * Description: Montgomery multiplication modulo MLKEM_Q
  *
@@ -44,16 +32,16 @@
  * smaller than MLKEM_Q in absolute value.
  *
  **************************************************/
-static MLK_INLINE int16_t fqmul(int16_t a, int16_t b)
+static MLK_INLINE int16_t mlk_fqmul(int16_t a, int16_t b)
 __contract__(
   requires(b > -MLKEM_Q_HALF && b < MLKEM_Q_HALF)
   ensures(return_value > -MLKEM_Q && return_value < MLKEM_Q)
 )
 {
   int16_t res;
-  debug_assert_abs_bound(&b, 1, MLKEM_Q_HALF);
+  mlk_assert_abs_bound(&b, 1, MLKEM_Q_HALF);
 
-  res = montgomery_reduce((int32_t)a * (int32_t)b);
+  res = mlk_montgomery_reduce((int32_t)a * (int32_t)b);
   /* Bounds:
    * |res| <= ceil(|a| * |b| / 2^16) + (MLKEM_Q + 1) / 2
    *       <= ceil(2^15 * ((MLKEM_Q - 1)/2) / 2^16) + (MLKEM_Q + 1) / 2
@@ -61,7 +49,7 @@ __contract__(
    *        < MLKEM_Q
    */
 
-  debug_assert_abs_bound(&res, 1, MLKEM_Q);
+  mlk_assert_abs_bound(&res, 1, MLKEM_Q);
   return res;
 }
 #endif /* !defined(MLK_USE_NATIVE_POLY_TOMONT) ||           \
@@ -71,7 +59,7 @@ __contract__(
 
 #if !defined(MLK_USE_NATIVE_POLY_REDUCE) || !defined(MLK_USE_NATIVE_INTT)
 /*************************************************
- * Name:        barrett_reduce
+ * Name:        mlk_barrett_reduce
  *
  * Description: Barrett reduction; given a 16-bit integer a, computes
  *              centered representative congruent to a mod q in
@@ -81,7 +69,7 @@ __contract__(
  *
  * Returns:     integer in {-(q-1)/2,...,(q-1)/2} congruent to a modulo q.
  **************************************************/
-static MLK_INLINE int16_t barrett_reduce(int16_t a)
+static MLK_INLINE int16_t mlk_barrett_reduce(int16_t a)
 __contract__(
   ensures(return_value > -MLKEM_Q_HALF && return_value < MLKEM_Q_HALF)
 )
@@ -108,7 +96,7 @@ __contract__(
    */
   int16_t res = (int16_t)(a - t * MLKEM_Q);
 
-  debug_assert_abs_bound(&res, 1, MLKEM_Q_HALF);
+  mlk_assert_abs_bound(&res, 1, MLKEM_Q_HALF);
   return res;
 }
 #endif /* !defined(MLK_USE_NATIVE_POLY_REDUCE) || \
@@ -116,7 +104,7 @@ __contract__(
 
 #if !defined(MLK_USE_NATIVE_POLY_TOMONT)
 MLK_INTERNAL_API
-void poly_tomont(poly *r)
+void mlk_poly_tomont(mlk_poly *r)
 {
   unsigned i;
   const int16_t f = 1353; /* check-magic: 1353 == signed_mod(2^32, MLKEM_Q) */
@@ -125,23 +113,23 @@ void poly_tomont(poly *r)
     invariant(i <= MLKEM_N)
     invariant(array_abs_bound(r->coeffs, 0, i, MLKEM_Q)))
   {
-    r->coeffs[i] = fqmul(r->coeffs[i], f);
+    r->coeffs[i] = mlk_fqmul(r->coeffs[i], f);
   }
 
-  debug_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
+  mlk_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
 }
 #else  /* MLK_USE_NATIVE_POLY_TOMONT */
 MLK_INTERNAL_API
-void poly_tomont(poly *r)
+void mlk_poly_tomont(mlk_poly *r)
 {
-  poly_tomont_native(r->coeffs);
-  debug_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
+  mlk_poly_tomont_native(r->coeffs);
+  mlk_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
 }
 #endif /* MLK_USE_NATIVE_POLY_TOMONT */
 
 #if !defined(MLK_USE_NATIVE_POLY_REDUCE)
 /************************************************************
- * Name: scalar_signed_to_unsigned_q
+ * Name: mlk_scalar_signed_to_unsigned_q
  *
  * Description: Constant-time conversion of signed representatives
  *              modulo MLKEM_Q within range (-(MLKEM_Q-1) .. (MLKEM_Q-1))
@@ -149,24 +137,24 @@ void poly_tomont(poly *r)
  *
  * Arguments: c: signed coefficient to be converted
  ************************************************************/
-static MLK_INLINE uint16_t scalar_signed_to_unsigned_q(int16_t c)
+static MLK_INLINE uint16_t mlk_scalar_signed_to_unsigned_q(int16_t c)
 __contract__(
   requires(c > -MLKEM_Q && c < MLKEM_Q)
   ensures(return_value >= 0 && return_value < MLKEM_Q)
   ensures(return_value == (int32_t)c + (((int32_t)c < 0) * MLKEM_Q)))
 {
-  debug_assert_abs_bound(&c, 1, MLKEM_Q);
+  mlk_assert_abs_bound(&c, 1, MLKEM_Q);
 
   /* Add Q if c is negative, but in constant time */
-  c = ct_sel_int16(c + MLKEM_Q, c, ct_cmask_neg_i16(c));
+  c = mlk_ct_sel_int16(c + MLKEM_Q, c, mlk_ct_cmask_neg_i16(c));
 
   /* and therefore cast to uint16_t is safe. */
-  debug_assert_bound(&c, 1, 0, MLKEM_Q);
+  mlk_assert_bound(&c, 1, 0, MLKEM_Q);
   return (uint16_t)c;
 }
 
 MLK_INTERNAL_API
-void poly_reduce(poly *r)
+void mlk_poly_reduce(mlk_poly *r)
 {
   unsigned i;
   for (i = 0; i < MLKEM_N; i++)
@@ -175,24 +163,24 @@ void poly_reduce(poly *r)
     invariant(array_bound(r->coeffs, 0, i, 0, MLKEM_Q)))
   {
     /* Barrett reduction, giving signed canonical representative */
-    int16_t t = barrett_reduce(r->coeffs[i]);
+    int16_t t = mlk_barrett_reduce(r->coeffs[i]);
     /* Conditional addition to get unsigned canonical representative */
-    r->coeffs[i] = scalar_signed_to_unsigned_q(t);
+    r->coeffs[i] = mlk_scalar_signed_to_unsigned_q(t);
   }
 
-  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+  mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 #else  /* MLK_USE_NATIVE_POLY_REDUCE */
 MLK_INTERNAL_API
-void poly_reduce(poly *r)
+void mlk_poly_reduce(mlk_poly *r)
 {
-  poly_reduce_native(r->coeffs);
-  debug_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+  mlk_poly_reduce_native(r->coeffs);
+  mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 #endif /* MLK_USE_NATIVE_POLY_REDUCE */
 
 MLK_INTERNAL_API
-void poly_add(poly *r, const poly *b)
+void mlk_poly_add(mlk_poly *r, const mlk_poly *b)
 {
   unsigned i;
   for (i = 0; i < MLKEM_N; i++)
@@ -206,7 +194,7 @@ void poly_add(poly *r, const poly *b)
 }
 
 MLK_INTERNAL_API
-void poly_sub(poly *r, const poly *b)
+void mlk_poly_sub(mlk_poly *r, const mlk_poly *b)
 {
   unsigned i;
   for (i = 0; i < MLKEM_N; i++)
@@ -229,7 +217,7 @@ void poly_sub(poly *r, const poly *b)
 
 #if !defined(MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE)
 MLK_INTERNAL_API
-void poly_mulcache_compute(poly_mulcache *x, const poly *a)
+void mlk_poly_mulcache_compute(mlk_poly_mulcache *x, const mlk_poly *a)
 {
   unsigned i;
   for (i = 0; i < MLKEM_N / 4; i++)
@@ -237,8 +225,8 @@ void poly_mulcache_compute(poly_mulcache *x, const poly *a)
     invariant(i <= MLKEM_N / 4)
     invariant(array_abs_bound(x->coeffs, 0, 2 * i, MLKEM_Q)))
   {
-    x->coeffs[2 * i + 0] = fqmul(a->coeffs[4 * i + 1], zetas[64 + i]);
-    x->coeffs[2 * i + 1] = fqmul(a->coeffs[4 * i + 3], -zetas[64 + i]);
+    x->coeffs[2 * i + 0] = mlk_fqmul(a->coeffs[4 * i + 1], zetas[64 + i]);
+    x->coeffs[2 * i + 1] = mlk_fqmul(a->coeffs[4 * i + 3], -zetas[64 + i]);
   }
 
   /*
@@ -247,13 +235,13 @@ void poly_mulcache_compute(poly_mulcache *x, const poly *a)
    * them from the spec to not unnecessarily constrain native
    * implementations, but checked here nonetheless.
    */
-  debug_assert_abs_bound(x, MLKEM_N / 2, MLKEM_Q);
+  mlk_assert_abs_bound(x, MLKEM_N / 2, MLKEM_Q);
 }
 #else  /* MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE */
 MLK_INTERNAL_API
-void poly_mulcache_compute(poly_mulcache *x, const poly *a)
+void mlk_poly_mulcache_compute(mlk_poly_mulcache *x, const mlk_poly *a)
 {
-  poly_mulcache_compute_native(x->coeffs, a->coeffs);
+  mlk_poly_mulcache_compute_native(x->coeffs, a->coeffs);
   /* Omitting bounds assertion since native implementations may
    * decide not to use a mulcache. Note that the C backend implementation
    * of poly_basemul_montgomery_cached() does still include the check. */
@@ -287,8 +275,8 @@ void poly_mulcache_compute(poly_mulcache *x, const poly *a)
  *          4 -- 6
  *             5 -- 7
  */
-static void ntt_butterfly_block(int16_t r[MLKEM_N], int16_t zeta,
-                                unsigned start, unsigned len, int bound)
+static void mlk_ntt_butterfly_block(int16_t r[MLKEM_N], int16_t zeta,
+                                    unsigned start, unsigned len, int bound)
 __contract__(
   requires(start < MLKEM_N)
   requires(1 <= len && len <= MLKEM_N / 2 && start + 2 * len <= MLKEM_N)
@@ -317,7 +305,7 @@ __contract__(
     invariant(array_abs_bound(r, j + len,     MLKEM_N,     bound)))
   {
     int16_t t;
-    t = fqmul(r[j + len], zeta);
+    t = mlk_fqmul(r[j + len], zeta);
     r[j + len] = r[j] - t;
     r[j] = r[j] + t;
   }
@@ -335,7 +323,7 @@ __contract__(
  *   official Kyber implementation here, merely adding `layer` as
  *   a ghost variable for the specifications.
  */
-static void ntt_layer(int16_t r[MLKEM_N], unsigned len, unsigned layer)
+static void mlk_ntt_layer(int16_t r[MLKEM_N], unsigned len, unsigned layer)
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
   requires(1 <= layer && layer <= 7 && len == (MLKEM_N >> layer))
@@ -356,7 +344,7 @@ __contract__(
     invariant(array_abs_bound(r, start, MLKEM_N, layer * MLKEM_Q)))
   {
     int16_t zeta = zetas[k++];
-    ntt_butterfly_block(r, zeta, start, len, layer * MLKEM_Q);
+    mlk_ntt_butterfly_block(r, zeta, start, len, layer * MLKEM_Q);
   }
 }
 
@@ -370,11 +358,11 @@ __contract__(
  */
 
 MLK_INTERNAL_API
-void poly_ntt(poly *p)
+void mlk_poly_ntt(mlk_poly *p)
 {
   unsigned len, layer;
   int16_t *r;
-  debug_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
+  mlk_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
   r = p->coeffs;
 
   for (len = 128, layer = 1; len >= 2; len >>= 1, layer++)
@@ -382,27 +370,27 @@ void poly_ntt(poly *p)
     invariant(1 <= layer && layer <= 8 && len == (MLKEM_N >> layer))
     invariant(array_abs_bound(r, 0, MLKEM_N, layer * MLKEM_Q)))
   {
-    ntt_layer(r, len, layer);
+    mlk_ntt_layer(r, len, layer);
   }
 
   /* Check the stronger bound */
-  debug_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
+  mlk_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
 }
 #else  /* MLK_USE_NATIVE_NTT */
 
 MLK_INTERNAL_API
-void poly_ntt(poly *p)
+void mlk_poly_ntt(mlk_poly *p)
 {
-  debug_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
-  ntt_native(p->coeffs);
-  debug_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
+  mlk_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
+  mlk_ntt_native(p->coeffs);
+  mlk_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
 }
 #endif /* MLK_USE_NATIVE_NTT */
 
 #if !defined(MLK_USE_NATIVE_INTT)
 
 /* Compute one layer of inverse NTT */
-static void invntt_layer(int16_t *r, unsigned len, unsigned layer)
+static void mlk_invntt_layer(int16_t *r, unsigned len, unsigned layer)
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
   requires(2 <= len && len <= 128 && 1 <= layer && layer <= 7)
@@ -431,15 +419,15 @@ __contract__(
       invariant(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q)))
     {
       int16_t t = r[j];
-      r[j] = barrett_reduce(t + r[j + len]);
+      r[j] = mlk_barrett_reduce(t + r[j + len]);
       r[j + len] = r[j + len] - t;
-      r[j + len] = fqmul(r[j + len], zeta);
+      r[j + len] = mlk_fqmul(r[j + len], zeta);
     }
   }
 }
 
 MLK_INTERNAL_API
-void poly_invntt_tomont(poly *p)
+void mlk_poly_invntt_tomont(mlk_poly *p)
 {
   /*
    * Scale input polynomial to account for Montgomery factor
@@ -455,7 +443,7 @@ void poly_invntt_tomont(poly *p)
     invariant(j <= MLKEM_N)
     invariant(array_abs_bound(r, 0, j, MLKEM_Q)))
   {
-    r[j] = fqmul(r[j], f);
+    r[j] = mlk_fqmul(r[j], f);
   }
 
   /* Run the invNTT layers */
@@ -464,32 +452,23 @@ void poly_invntt_tomont(poly *p)
     invariant(2 <= len && len <= 256 && layer <= 7 && len == (1 << (8 - layer)))
     invariant(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q)))
   {
-    invntt_layer(p->coeffs, len, layer);
+    mlk_invntt_layer(p->coeffs, len, layer);
   }
 
-  debug_assert_abs_bound(p, MLKEM_N, MLK_INVNTT_BOUND);
+  mlk_assert_abs_bound(p, MLKEM_N, MLK_INVNTT_BOUND);
 }
 #else  /* MLK_USE_NATIVE_INTT */
 
 MLK_INTERNAL_API
-void poly_invntt_tomont(poly *p)
+void mlk_poly_invntt_tomont(mlk_poly *p)
 {
-  intt_native(p->coeffs);
-  debug_assert_abs_bound(p, MLKEM_N, MLK_INVNTT_BOUND);
+  mlk_intt_native(p->coeffs);
+  mlk_assert_abs_bound(p, MLKEM_N, MLK_INVNTT_BOUND);
 }
 #endif /* MLK_USE_NATIVE_INTT */
 
 #else /* MLK_MULTILEVEL_BUILD_NO_SHARED */
 
-MLK_EMPTY_CU(poly)
+MLK_EMPTY_CU(mlk_poly)
 
 #endif /* MLK_MULTILEVEL_BUILD_NO_SHARED */
-
-/* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
- * Don't modify by hand -- this is auto-generated by scripts/autogen. */
-#undef fqmul
-#undef barrett_reduce
-#undef scalar_signed_to_unsigned_q
-#undef ntt_butterfly_block
-#undef ntt_layer
-#undef invntt_layer

@@ -6,8 +6,8 @@
 
 void harness(void)
 {
-  polyvec_mulcache *x;
-  polyvec *a;
+  mlk_polyvec_mulcache *x;
+  mlk_polyvec *a;
 
-  polyvec_mulcache_compute(x, a);
+  mlk_polyvec_mulcache_compute(x, a);
 }

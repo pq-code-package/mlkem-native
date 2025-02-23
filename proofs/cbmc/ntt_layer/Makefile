@@ -7,7 +7,7 @@ HARNESS_FILE = ntt_layer_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = ntt_layer
+PROOF_UID = mlk_ntt_layer
 
 DEFINES +=
 INCLUDES +=
@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)ntt_layer
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)ntt_butterfly_block
+CHECK_FUNCTION_CONTRACTS=mlk_ntt_layer
+USE_FUNCTION_CONTRACTS=mlk_ntt_butterfly_block
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = ntt_layer
+FUNCTION_NAME = mlk_ntt_layer
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

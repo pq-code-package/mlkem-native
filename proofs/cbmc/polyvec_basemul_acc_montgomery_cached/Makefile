@@ -7,7 +7,7 @@ HARNESS_FILE = polyvec_basemul_acc_montgomery_cached_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = polyvec_basemul_acc_montgomery_cached
+PROOF_UID = mlk_polyvec_basemul_acc_montgomery_cached
 
 DEFINES +=
 INCLUDES +=
@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly_k.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)polyvec_basemul_acc_montgomery_cached
-USE_FUNCTION_CONTRACTS= $(MLK_NAMESPACE)montgomery_reduce
+CHECK_FUNCTION_CONTRACTS=mlk_polyvec_basemul_acc_montgomery_cached
+USE_FUNCTION_CONTRACTS= mlk_montgomery_reduce
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -28,7 +28,7 @@ EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 CBMCFLAGS += --no-array-field-sensitivity --arrays-uf-always --slice-formula
 
-FUNCTION_NAME = polyvec_basemul_acc_montgomery_cached
+FUNCTION_NAME = mlk_polyvec_basemul_acc_montgomery_cached
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

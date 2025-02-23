@@ -11,9 +11,9 @@ _unbounded_ and _modular_ proofs of type-safety and correctness properties.
 Our CBMC proofs confirm the absence of certain classes of undefined behaviour, such as integer overflow or out of bounds
 memory accesses -- for the precise list of conditions checked, see the CBMC configuration in
 [Makefile.common](Makefile.common). For many arithmetic functions, we additionally specify how they affect coefficient
-bounds: For example, we show that the result of `poly_invntt_tomont()` has coefficients bound by
+bounds: For example, we show that the result of `mlk_poly_invntt_tomont()` has coefficients bound by
 `MLK_INVNTT_BOUND`. Finally, some simple functions have their full functional behaviour specified: For example, the
-specification of the constant-time `ct_memcmp()` shows that, functionally, it is just an ordinary `memcmp()`.
+specification of the constant-time `mlk_ct_memcmp()` shows that, functionally, it is just an ordinary `memcmp()`.
 
 ## CBMC annotations
 
@@ -56,8 +56,8 @@ also described via `memory_no_alias(...)`. Hence, a function operating on `n` me
 instances of `memory_no_alias(...)` in its precondition.
 
 Care has to be taken for functions where aliasing is needed. Aliasing constraints can be difficult to specify, and we
-reduce it as much as possible in mlkem-native. For example, rather than having `poly_add(dst, src0, src1)` where `dst`
-may overlap with `src0` or `src1`, we only have a destructive `poly_add(dst, src)` implementing `dst += src`, thereby
+reduce it as much as possible in mlkem-native. For example, rather than having `mlk_poly_add(dst, src0, src1)` where `dst`
+may overlap with `src0` or `src1`, we only have a destructive `mlk_poly_add(dst, src)` implementing `dst += src`, thereby
 avoiding the need to specify an aliasing constraint.
 
 Care also has to be taken when _invoking_ a function that has a contract with multiple `memory_no_alias(...)` clauses;
@@ -284,15 +284,15 @@ Edit the Makefile and update the definition of the following variables:
 * HARNESS_FILE - should be `XXX_harness`
 * PROOF_UID - should be `XXX`
 * PROJECT_SOURCES - should the files containing the source code of XXX
-* CHECK_FUNCTION_CONTRACTS - set to the `XXX`, but including the `$(MLK_NAMESPACE)` prefix if required
+* CHECK_FUNCTION_CONTRACTS - set to the `XXX`, but including the `mlk_` prefix if required
 * USE_FUNCTION_CONTRACTS - a list of functions that `XXX` calls where you want CBMC to use the contracts of the called
-  function for proof, rather than 'inlining' the called function for proof. Include the `$(MLK_NAMESPACE)` prefix if
+  function for proof, rather than 'inlining' the called function for proof. Include the `mlk_` prefix if
   required
 * EXTERNAL_SAT_SOLVER - should _always_ be "nothing" to prevent CBMC selecting a SAT backend over the selected SMT backend.
 * CBMCFLAGS - additional flags to pass to the final run of CBMC. This is normally set to `--smt2` which tells cbmc to
   run Z3 as its underlying solver. Can also be set to `--bitwuzla` which is sometimes better at generating
   counter-examples when Z3 fails.
-* FUNCTION_NAME - set to `XXX` with the `$(MLK_NAMESPACE)` prefix if required
+* FUNCTION_NAME - set to `XXX` with the `mlk_` prefix if required
 * CBMC_OBJECT_BITS. Normally set to 8, but might need to be increased if CBMC runs out of memory for this proof.
 
 For documentation of these (and the other) options, see the [cbmc/Makefile.common](Makefile.common) file.
@@ -399,9 +399,9 @@ make result VERBOSE=1 >log.txt
 
 and then inspect `log.txt` to see the exact sequence of commands that has been run. With that, you should be able to reproduce a failure on the command-line directly.
 
-## Worked Example - proving poly_tobytes()
+## Worked Example - proving mlk_poly_tobytes()
 
-This section follows the recipe above, and adds actual settings, contracts and command to prove the `poly_tobytes()` function.
+This section follows the recipe above, and adds actual settings, contracts and command to prove the `mlk_poly_tobytes()` function.
 
 ### Populate a proof directory
 
@@ -412,31 +412,31 @@ The proof directory is [proofs/cbmc/poly_tobytes](poly_tobytes).
 The significant changes are:
 ```
 HARNESS_FILE = poly_tobytes_harness
-PROOF_UID = poly_tobytes
+PROOF_UID = mlk_poly_tobytes
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_tobytes
+CHECK_FUNCTION_CONTRACTS=mlk_poly_tobytes
 USE_FUNCTION_CONTRACTS=
-FUNCTION_NAME = $(MLK_NAMESPACE)poly_tobytes
+FUNCTION_NAME = mlk_poly_tobytes
 ```
-Note that `USE_FUNCTION_CONTRACTS` is left empty since `poly_tobytes()` is a leaf function that does not call any other functions at all.
+Note that `USE_FUNCTION_CONTRACTS` is left empty since `mlk_poly_tobytes()` is a leaf function that does not call any other functions at all.
 
 ### Update harness function
 
-`poly_tobytes()` has a simple API, requiring two parameters, so the harness function is:
+`mlk_poly_tobytes()` has a simple API, requiring two parameters, so the harness function is:
 
 ```
 void harness(void) {
-  poly *a;
+  mlk_poly *a;
   uint8_t *r;
 
   /* Contracts for this function are in poly.h */
-  poly_tobytes(r, a);
+  mlk_poly_tobytes(r, a);
 }
 ```
 
 ### Top-level contracts
 
-The comments on `poly_tobytes()` give us a clear hint:
+The comments on `mlk_poly_tobytes()` give us a clear hint:
 
 ```
  * Arguments:   INPUT:
@@ -453,9 +453,9 @@ prototype.
 We can use the macros in [mlkem/cbmc.h](../../mlkem/cbmc.h) to help, thus:
 
 ```
-void poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const poly *a)
+void mlk_poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
 __contract__(
-  requires(memory_no_alias(a, sizeof(poly)))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
   requires(array_bound(a->coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1)))
   assigns(object_whole(r)));
 ```
@@ -466,7 +466,7 @@ inclusive). See the macro definition in [mlkem/cbmc.h](../../mlkem/cbmc.h) for d
 
 ### Interior contracts and loop invariants
 
-`poly_tobytes` has a single loop statement:
+`mlk_poly_tobytes` has a single loop statement:
 
 ```
   unsigned i;
@@ -511,7 +511,7 @@ and so on for the other two statements in the loop body.
 With those changes, CBMC completes the proof in about 10 seconds:
 
 ```
-cd proofs/cbmc/poly_tobytes
+cd proofs/cbmc/mlk_poly_tobytes
 make result
 cat logs/result.txt
 ```
@@ -525,12 +525,12 @@ We can also use the higher-level Python script to prove just that one function:
 
 ```
 cd proofs/cbmc
-MLKEM_K=3 ./run-cbmc-proofs.py --summarize -j$(nproc) -p poly_tobytes
+MLKEM_K=3 ./run-cbmc-proofs.py --summarize -j$(nproc) -p mlk_poly_tobytes
 ```
 yields
 ```
 | Proof        | Status  |
 |--------------|---------|
-| poly_tobytes | Success |
+| mlk_poly_tobytes | Success |
 
 ```

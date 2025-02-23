@@ -22,25 +22,28 @@
 
 /* NOTE: This is an incremental context, different from the one used by
  * mlkem-native */
-typedef sha3_ctx_t shake128ctx;
+typedef sha3_ctx_t mlk_shake128ctx;
 
-/* NOTE: shake128_init is already defined in sha3.h under that name;
- * Otherwise, it would need to be defined here as well. */
+static MLK_INLINE void mlk_shake128_init(mlk_shake128ctx *state)
+{
+  shake128_init(state);
+}
 
-#define shake128_absorb_once MLK_NAMESPACE(shake128_absorb_once)
+#define mlk_shake128_absorb_once MLK_NAMESPACE(shake128_absorb_once)
 /*************************************************
- * Name:        shake128_absorb_once
+ * Name:        mlk_shake128_absorb_once
  *
  * Description: Absorb step of the SHAKE128 XOF.
  *
- * Arguments:   - shake128ctx *state:   pointer to zeroized output Keccak
+ * Arguments:   - mlk_shake128ctx *state:   pointer to zeroized output Keccak
  *                                      state
  *              - const uint8_t *input: pointer to input to be absorbed into
  *                                      state
  *              - size_t inlen:         length of input in bytes
  **************************************************/
-static MLK_INLINE void shake128_absorb_once(shake128ctx *state,
-                                            const uint8_t *input, size_t inlen)
+static MLK_INLINE void mlk_shake128_absorb_once(mlk_shake128ctx *state,
+                                                const uint8_t *input,
+                                                size_t inlen)
 {
   shake_update(state, input, inlen);
   shake_xof(state);
@@ -50,9 +53,9 @@ static MLK_INLINE void shake128_absorb_once(shake128ctx *state,
  *
  * Supports being called multiple times
  */
-#define shake128_squeezeblocks MLK_NAMESPACE(shake128_squeezeblocks)
+#define mlk_shake128_squeezeblocks MLK_NAMESPACE(shake128_squeezeblocks)
 /*************************************************
- * Name:        shake128_squeezeblocks
+ * Name:        mlk_shake128_squeezeblocks
  *
  * Description: Squeeze step of SHAKE128 XOF. Squeezes full blocks of
  *              SHAKE128_RATE bytes each. Modifies the state. Can be called
@@ -61,23 +64,27 @@ static MLK_INLINE void shake128_absorb_once(shake128ctx *state,
  * Arguments:   - uint8_t *output:     pointer to output blocks
  *              - size_t nblocks:      number of blocks to be squeezed (written
  *                                     to output)
- *              - shake128ctx *state:  pointer to in/output Keccak state
+ *              - mlk_shake128ctx *state:  pointer to in/output Keccak state
  **************************************************/
-static MLK_INLINE void shake128_squeezeblocks(uint8_t *output, size_t nblocks,
-                                              shake128ctx *state)
+static MLK_INLINE void mlk_shake128_squeezeblocks(uint8_t *output,
+                                                  size_t nblocks,
+                                                  mlk_shake128ctx *state)
 {
   shake_out(state, output, nblocks * SHAKE128_RATE);
 }
 
 /* Free the state */
-#define shake128_release MLK_NAMESPACE(shake128_release)
-static MLK_INLINE void shake128_release(shake128ctx *state) { ((void)state); }
+#define mlk_shake128_release MLK_NAMESPACE(shake128_release)
+static MLK_INLINE void mlk_shake128_release(mlk_shake128ctx *state)
+{
+  ((void)state);
+}
 
 /* One-stop SHAKE256 call. Aliasing between input and
  * output is not permitted */
-#define shake256 MLK_NAMESPACE(shake256)
+#define mlk_shake256 MLK_NAMESPACE(shake256)
 /*************************************************
- * Name:        shake256
+ * Name:        mlk_shake256
  *
  * Description: SHAKE256 XOF with non-incremental API
  *
@@ -86,8 +93,8 @@ static MLK_INLINE void shake128_release(shake128ctx *state) { ((void)state); }
  *              - const uint8_t *input: pointer to input
  *              - size_t inlen:         length of input in bytes
  **************************************************/
-static MLK_INLINE void shake256(uint8_t *output, size_t outlen,
-                                const uint8_t *input, size_t inlen)
+static MLK_INLINE void mlk_shake256(uint8_t *output, size_t outlen,
+                                    const uint8_t *input, size_t inlen)
 {
   sha3_ctx_t c;
   shake256_init(&c);
@@ -99,9 +106,9 @@ static MLK_INLINE void shake256(uint8_t *output, size_t outlen,
 /* One-stop SHA3_256 call. Aliasing between input and
  * output is not permitted */
 #define SHA3_256_HASHBYTES 32
-#define sha3_256 MLK_NAMESPACE(sha3_256)
+#define mlk_sha3_256 MLK_NAMESPACE(sha3_256)
 /*************************************************
- * Name:        sha3_256
+ * Name:        mlk_sha3_256
  *
  * Description: SHA3-256 with non-incremental API
  *
@@ -109,8 +116,8 @@ static MLK_INLINE void shake256(uint8_t *output, size_t outlen,
  *              - const uint8_t *input: pointer to input
  *              - size_t inlen:         length of input in bytes
  **************************************************/
-static MLK_INLINE void sha3_256(uint8_t *output, const uint8_t *input,
-                                size_t inlen)
+static MLK_INLINE void mlk_sha3_256(uint8_t *output, const uint8_t *input,
+                                    size_t inlen)
 {
   (void)sha3(input, inlen, output, SHA3_256_HASHBYTES);
 }
@@ -118,9 +125,9 @@ static MLK_INLINE void sha3_256(uint8_t *output, const uint8_t *input,
 /* One-stop SHA3_512 call. Aliasing between input and
  * output is not permitted */
 #define SHA3_512_HASHBYTES 64
-#define sha3_512 MLK_NAMESPACE(sha3_512)
+#define mlk_sha3_512 MLK_NAMESPACE(sha3_512)
 /*************************************************
- * Name:        sha3_512
+ * Name:        mlk_sha3_512
  *
  * Description: SHA3-512 with non-incremental API
  *
@@ -128,8 +135,8 @@ static MLK_INLINE void sha3_256(uint8_t *output, const uint8_t *input,
  *              - const uint8_t *input: pointer to input
  *              - size_t inlen:         length of input in bytes
  **************************************************/
-static MLK_INLINE void sha3_512(uint8_t *output, const uint8_t *input,
-                                size_t inlen)
+static MLK_INLINE void mlk_sha3_512(uint8_t *output, const uint8_t *input,
+                                    size_t inlen)
 {
   (void)sha3(input, inlen, output, SHA3_512_HASHBYTES);
 }

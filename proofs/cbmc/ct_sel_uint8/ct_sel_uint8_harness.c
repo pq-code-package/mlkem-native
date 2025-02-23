@@ -8,5 +8,5 @@ void harness(void)
 {
   uint8_t a, b, c, cond;
 
-  c = ct_sel_uint8(a, b, cond);
+  c = mlk_ct_sel_uint8(a, b, cond);
 }

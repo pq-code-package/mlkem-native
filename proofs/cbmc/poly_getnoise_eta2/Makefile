@@ -7,7 +7,7 @@ HARNESS_FILE = poly_getnoise_eta2_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = poly_getnoise_eta2
+PROOF_UID = mlk_poly_getnoise_eta2
 
 DEFINES +=
 INCLUDES +=
@@ -20,11 +20,11 @@ PROJECT_SOURCES += $(SRCDIR)/mlkem/poly_k.c
 
 # Only relevant for K=2 or K=4
 ifeq ($(MLKEM_K),2)
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_getnoise_eta2
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_cbd_eta2 $(MLK_NAMESPACE)shake256 $(MLK_NAMESPACE)ct_zeroize
+CHECK_FUNCTION_CONTRACTS=mlk_poly_getnoise_eta2
+USE_FUNCTION_CONTRACTS=mlk_poly_cbd_eta2 mlk_shake256 mlk_ct_zeroize
 else ifeq ($(MLKEM_K),4)
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_getnoise_eta2
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_cbd_eta2 $(MLK_NAMESPACE)shake256 $(MLK_NAMESPACE)ct_zeroize
+CHECK_FUNCTION_CONTRACTS=mlk_poly_getnoise_eta2
+USE_FUNCTION_CONTRACTS=mlk_poly_cbd_eta2 mlk_shake256 mlk_ct_zeroize
 else
 CHECK_FUNCTION_CONTRACTS=
 USE_FUNCTION_CONTRACTS=
@@ -37,7 +37,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = $(MLK_NAMESPACE)poly_getnoise_eta2
+FUNCTION_NAME = mlk_poly_getnoise_eta2
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

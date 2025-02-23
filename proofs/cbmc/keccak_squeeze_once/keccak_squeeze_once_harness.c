@@ -7,8 +7,9 @@
 #include <stdint.h>
 #include <string.h>
 
-#define keccak_squeeze_once MLK_NAMESPACE(keccak_squeeze_once)
-void keccak_squeeze_once(uint8_t *h, size_t outlen, uint64_t *s, uint32_t r);
+
+void mlk_keccak_squeeze_once(uint8_t *h, size_t outlen, uint64_t *s,
+                             uint32_t r);
 
 void harness(void)
 {
@@ -16,5 +17,5 @@ void harness(void)
   size_t outlen;
   uint64_t *s;
   uint32_t r;
-  keccak_squeeze_once(h, outlen, s, r);
+  mlk_keccak_squeeze_once(h, outlen, s, r);
 }

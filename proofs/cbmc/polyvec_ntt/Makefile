@@ -7,19 +7,19 @@ HARNESS_FILE = polyvec_ntt_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = polyvec_ntt
+PROOF_UID = mlk_polyvec_ntt
 
 DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET += $(MLK_NAMESPACE)polyvec_ntt.0:4 # Largest value of MLKEM_K
+UNWINDSET += mlk_polyvec_ntt.0:4 # Largest value of MLKEM_K
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly_k.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)polyvec_ntt
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_ntt
+CHECK_FUNCTION_CONTRACTS=mlk_polyvec_ntt
+USE_FUNCTION_CONTRACTS=mlk_poly_ntt
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = polyvec_ntt
+FUNCTION_NAME = mlk_polyvec_ntt
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

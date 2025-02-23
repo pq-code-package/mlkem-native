@@ -4,16 +4,17 @@
 
 #include "poly.h"
 
-#define poly_cbd_eta2 MLK_NAMESPACE(poly_cbd_eta2)
-void poly_cbd_eta2(poly *r, const uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4]);
+#define mlk_poly_cbd_eta2 MLK_NAMESPACE(poly_cbd_eta2)
+void mlk_poly_cbd_eta2(mlk_poly *r,
+                       const uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4]);
 
 void harness(void)
 {
-  /* poly_cbd_eta2() is only defined for MLKEM_K == 2 or 4 */
+  /* mlk_poly_cbd_eta2() is only defined for MLKEM_K == 2 or 4 */
 #if MLKEM_K == 2 || MLKEM_K == 4
   uint8_t *buf;
-  poly *a;
+  mlk_poly *a;
 
-  poly_cbd_eta2(a, buf);
+  mlk_poly_cbd_eta2(a, buf);
 #endif /* MLKEM_K == 2 || MLKEM_K == 4 */
 }

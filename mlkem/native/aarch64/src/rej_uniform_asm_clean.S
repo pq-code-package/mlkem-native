@@ -4,7 +4,7 @@
  */
 
 /*************************************************
- * Name:        rej_uniform_asm_clean
+ * Name:        mlk_rej_uniform_asm_clean
  *
  * Description: Run rejection sampling on uniform random bytes to generate
  *              uniform random integers mod q

@@ -8,5 +8,5 @@ void harness(void)
 {
   uint16_t a, b;
 
-  b = ct_cmask_nonzero_u16(a);
+  b = mlk_ct_cmask_nonzero_u16(a);
 }

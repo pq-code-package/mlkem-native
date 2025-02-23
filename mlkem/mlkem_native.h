@@ -58,7 +58,8 @@
 #error MLK_NAMESPACE_PREFIX not set by config file
 #endif
 
-#if defined(MLK_NAMESPACE_PREFIX_ADD_LEVEL)
+#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || \
+    defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 #define MLK_BUILD_INFO_CONCAT3_(x, y, z) x##y##_##z
 #define MLK_BUILD_INFO_CONCAT3(x, y, z) MLK_BUILD_INFO_CONCAT_(x, y, z)
 #define MLK_BUILD_INFO_NAMESPACE(sym) \

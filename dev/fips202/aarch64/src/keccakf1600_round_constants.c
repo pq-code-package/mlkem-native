@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include "fips202_native_aarch64.h"
 
-MLK_ALIGN const uint64_t keccakf1600_round_constants[] = {
+MLK_ALIGN const uint64_t mlk_keccakf1600_round_constants[] = {
     0x0000000000000001, 0x0000000000008082, 0x800000000000808a,
     0x8000000080008000, 0x000000000000808b, 0x0000000080000001,
     0x8000000080008081, 0x8000000000008009, 0x000000000000008a,

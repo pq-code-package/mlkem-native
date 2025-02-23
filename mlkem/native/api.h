@@ -48,7 +48,7 @@
  * custom order of polynomial coefficients in NTT domain -- the use of such
  * custom order is not an implementation-detail since the public matrix
  * is generated in NTT domain. In this case, a permutation function
- * poly_permute_bitrev_to_custom() needs to be provided that permutes
+ * mlk_poly_permute_bitrev_to_custom() needs to be provided that permutes
  * polynomials in NTT domain from bitreversed to the custom order.
  */
 
@@ -61,7 +61,7 @@
 
 #if defined(MLK_USE_NATIVE_NTT)
 /*************************************************
- * Name:        ntt_native
+ * Name:        mlk_ntt_native
  *
  * Description: Computes negacyclic number-theoretic transform (NTT) of
  *              a polynomial in place.
@@ -74,7 +74,7 @@
  *
  * Arguments:   - int16_t p[MLKEM_N]: pointer to in/output polynomial
  **************************************************/
-static MLK_INLINE void ntt_native(int16_t p[MLKEM_N])
+static MLK_INLINE void mlk_ntt_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   requires(array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
@@ -101,7 +101,7 @@ and to/from bytes conversions."
 #endif
 
 /*************************************************
- * Name:        poly_permute_bitrev_to_custom
+ * Name:        mlk_poly_permute_bitrev_to_custom
  *
  * Description: When MLK_USE_NATIVE_NTT_CUSTOM_ORDER is defined,
  *              convert a polynomial in NTT domain from bitreversed
@@ -112,10 +112,10 @@ and to/from bytes conversions."
  * Arguments:   - int16_t p[MLKEM_N]: pointer to in/output polynomial
  *
  **************************************************/
-static MLK_INLINE void poly_permute_bitrev_to_custom(int16_t p[MLKEM_N])
+static MLK_INLINE void mlk_poly_permute_bitrev_to_custom(int16_t p[MLKEM_N])
 __contract__(
   /* We don't specify that this should be a permutation, but only
-   * that it does not change the bound established at the end of gen_matrix. */
+   * that it does not change the bound established at the end of mlk_gen_matrix. */
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   requires(array_bound(p, 0, MLKEM_N, 0, MLKEM_Q))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
@@ -124,7 +124,7 @@ __contract__(
 
 #if defined(MLK_USE_NATIVE_INTT)
 /*************************************************
- * Name:        intt_native
+ * Name:        mlk_intt_native
  *
  * Description: Computes inverse of negacyclic number-theoretic transform (NTT)
  *              of a polynomial in place.
@@ -137,7 +137,7 @@ __contract__(
  *
  * Arguments:   - uint16_t *a: pointer to in/output polynomial
  **************************************************/
-static MLK_INLINE void intt_native(int16_t p[MLKEM_N])
+static MLK_INLINE void mlk_intt_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
@@ -147,13 +147,13 @@ __contract__(
 
 #if defined(MLK_USE_NATIVE_POLY_REDUCE)
 /*************************************************
- * Name:        poly_reduce_native
+ * Name:        mlk_poly_reduce_native
  *
  * Description: Applies modular reduction to all coefficients of a polynomial.
  *
  * Arguments:   - int16_t r[MLKEM_N]: pointer to input/output polynomial
  **************************************************/
-static MLK_INLINE void poly_reduce_native(int16_t p[MLKEM_N])
+static MLK_INLINE void mlk_poly_reduce_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
@@ -163,14 +163,14 @@ __contract__(
 
 #if defined(MLK_USE_NATIVE_POLY_TOMONT)
 /*************************************************
- * Name:        poly_tomont_native
+ * Name:        mlk_poly_tomont_native
  *
  * Description: Inplace conversion of all coefficients of a polynomial
  *              from normal domain to Montgomery domain
  *
  * Arguments:   - int16_t r[MLKEM_N]: pointer to input/output polynomial
  **************************************************/
-static MLK_INLINE void poly_tomont_native(int16_t p[MLKEM_N])
+static MLK_INLINE void mlk_poly_tomont_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
@@ -180,7 +180,7 @@ __contract__(
 
 #if defined(MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE)
 /*************************************************
- * Name:        poly_mulcache_compute_native
+ * Name:        mlk_poly_mulcache_compute_native
  *
  * Description: Compute multiplication cache for a polynomial
  *              in NTT domain.
@@ -192,7 +192,7 @@ __contract__(
  *              implementation defined.
  *
  * Arguments:   INPUT:
- *              - poly: const pointer to input polynomial.
+ *              - mlk_poly: const pointer to input polynomial.
  *                  This must be in NTT domain and inin bitreversed order, or of
  *                  a custom order if MLK_USE_NATIVE_NTT_CUSTOM_ORDER is set.
  *                  See the documentation of MLK_USE_NATIVE_NTT_CUSTOM_ORDER
@@ -200,11 +200,11 @@ __contract__(
  *              OUTPUT
  *              - cache: pointer to multiplication cache
  **************************************************/
-static MLK_INLINE void poly_mulcache_compute_native(int16_t cache[MLKEM_N / 2],
-                                                    const int16_t poly[MLKEM_N])
+static MLK_INLINE void mlk_poly_mulcache_compute_native(
+    int16_t cache[MLKEM_N / 2], const int16_t mlk_poly[MLKEM_N])
 __contract__(
   requires(memory_no_alias(cache, sizeof(int16_t) * (MLKEM_N / 2)))
-  requires(memory_no_alias(poly, sizeof(int16_t) * MLKEM_N))
+  requires(memory_no_alias(mlk_poly, sizeof(int16_t) * MLKEM_N))
   assigns(object_whole(cache))
 );
 #endif /* MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE */
@@ -230,7 +230,7 @@ __contract__(
  *              - r: The result of the scalar product. This is again
  *                   in NTT domain, and of the same ordering as a and b.
  **************************************************/
-static MLK_INLINE void polyvec_basemul_acc_montgomery_cached_k2_native(
+static MLK_INLINE void mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
     int16_t r[MLKEM_N], const int16_t a[2 * MLKEM_N],
     const int16_t b[2 * MLKEM_N], const int16_t b_cache[2 * (MLKEM_N / 2)])
 __contract__(
@@ -273,7 +273,7 @@ __contract__(
  *              - r: The result of the scalar product. This is again
  *                   in NTT domain, and of the same ordering as a and b.
  **************************************************/
-static MLK_INLINE void polyvec_basemul_acc_montgomery_cached_k3_native(
+static MLK_INLINE void mlk_polyvec_basemul_acc_montgomery_cached_k3_native(
     int16_t r[MLKEM_N], const int16_t a[3 * MLKEM_N],
     const int16_t b[3 * MLKEM_N], const int16_t b_cache[3 * (MLKEM_N / 2)])
 __contract__(
@@ -316,7 +316,7 @@ __contract__(
  *              - r: The result of the scalar product. This is again
  *                   in NTT domain, and of the same ordering as a and b.
  **************************************************/
-static MLK_INLINE void polyvec_basemul_acc_montgomery_cached_k4_native(
+static MLK_INLINE void mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
     int16_t r[MLKEM_N], const int16_t a[4 * MLKEM_N],
     const int16_t b[4 * MLKEM_N], const int16_t b_cache[4 * (MLKEM_N / 2)])
 __contract__(
@@ -342,7 +342,7 @@ __contract__(
 
 #if defined(MLK_USE_NATIVE_POLY_TOBYTES)
 /*************************************************
- * Name:        poly_tobytes_native
+ * Name:        mlk_poly_tobytes_native
  *
  * Description: Serialization of a polynomial.
  *              Signed coefficients are converted to
@@ -355,8 +355,8 @@ __contract__(
  *              - r: pointer to output byte array
  *                   (of MLKEM_POLYBYTES bytes)
  **************************************************/
-static MLK_INLINE void poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
-                                           const int16_t a[MLKEM_N])
+static MLK_INLINE void mlk_poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
+                                               const int16_t a[MLKEM_N])
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYBYTES))
   requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_N))
@@ -367,7 +367,7 @@ __contract__(
 
 #if defined(MLK_USE_NATIVE_POLY_FROMBYTES)
 /*************************************************
- * Name:        poly_frombytes_native
+ * Name:        mlk_poly_frombytes_native
  *
  * Description: Serialization of a polynomial.
  *              Signed coefficients are converted to
@@ -379,8 +379,8 @@ __contract__(
  *              - a: const pointer to input byte array
  *                   (of MLKEM_POLYBYTES bytes)
  **************************************************/
-static MLK_INLINE void poly_frombytes_native(int16_t a[MLKEM_N],
-                                             const uint8_t r[MLKEM_POLYBYTES])
+static MLK_INLINE void mlk_poly_frombytes_native(
+    int16_t a[MLKEM_N], const uint8_t r[MLKEM_POLYBYTES])
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYBYTES))
   requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_N))
@@ -422,7 +422,7 @@ __contract__(
 #if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D4)
 /*************************************************
- * Name:        poly_compress_d4_native
+ * Name:        mlk_poly_compress_d4_native
  *
  * Description: Compression (4 bits) and subsequent serialization of a
  *              polynomial
@@ -433,13 +433,13 @@ __contract__(
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
-static MLK_INLINE void poly_compress_d4_native(
+static MLK_INLINE void mlk_poly_compress_d4_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const int16_t a[MLKEM_N]);
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D4 */
 
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D10)
 /*************************************************
- * Name:        poly_compress_d10_native
+ * Name:        mlk_poly_compress_d10_native
  *
  * Description: Compression (10 bits) and subsequent serialization of a
  *              polynomial
@@ -450,13 +450,13 @@ static MLK_INLINE void poly_compress_d4_native(
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
-static MLK_INLINE void poly_compress_d10_native(
+static MLK_INLINE void mlk_poly_compress_d10_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const int16_t a[MLKEM_N]);
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D10 */
 
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D4)
 /*************************************************
- * Name:        poly_decompress_d4
+ * Name:        mlk_poly_decompress_d4
  *
  * Description: De-serialization and subsequent decompression (dv bits) of a
  *              polynomial; approximate inverse of poly_compress
@@ -469,16 +469,16 @@ static MLK_INLINE void poly_compress_d10_native(
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
-static MLK_INLINE void poly_decompress_d4_native(
+static MLK_INLINE void mlk_poly_decompress_d4_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]);
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D4 */
 
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D10)
 /*************************************************
- * Name:        poly_decompress_d10_native
+ * Name:        mlk_poly_decompress_d10_native
  *
  * Description: De-serialization and subsequent decompression (10 bits) of a
- *              polynomial; approximate inverse of poly_compress_d10
+ *              polynomial; approximate inverse of mlk_poly_compress_d10
  *
  * Arguments:   - int16_t r[MLKEM_N]: pointer to output polynomial
  *              - const uint8_t *a: pointer to input byte array
@@ -488,7 +488,7 @@ static MLK_INLINE void poly_decompress_d4_native(
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
-static MLK_INLINE void poly_decompress_d10_native(
+static MLK_INLINE void mlk_poly_decompress_d10_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10]);
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D10 */
 #endif /* defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
@@ -497,7 +497,7 @@ static MLK_INLINE void poly_decompress_d10_native(
 #if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D5)
 /*************************************************
- * Name:        poly_compress_d5_native
+ * Name:        mlk_poly_compress_d5_native
  *
  * Description: Compression (5 bits) and subsequent serialization of a
  *              polynomial
@@ -508,13 +508,13 @@ static MLK_INLINE void poly_decompress_d10_native(
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
-static MLK_INLINE void poly_compress_d5_native(
+static MLK_INLINE void mlk_poly_compress_d5_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const int16_t a[MLKEM_N]);
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D5 */
 
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D11)
 /*************************************************
- * Name:        poly_compress_d11_native
+ * Name:        mlk_poly_compress_d11_native
  *
  * Description: Compression (11 bits) and subsequent serialization of a
  *              polynomial
@@ -525,13 +525,13 @@ static MLK_INLINE void poly_compress_d5_native(
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
-static MLK_INLINE void poly_compress_d11_native(
+static MLK_INLINE void mlk_poly_compress_d11_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const int16_t a[MLKEM_N]);
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D11 */
 
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D5)
 /*************************************************
- * Name:        poly_decompress_d5_native
+ * Name:        mlk_poly_decompress_d5_native
  *
  * Description: De-serialization and subsequent decompression (dv bits) of a
  *              polynomial; approximate inverse of poly_compress
@@ -544,16 +544,16 @@ static MLK_INLINE void poly_compress_d11_native(
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
-static MLK_INLINE void poly_decompress_d5_native(
+static MLK_INLINE void mlk_poly_decompress_d5_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5]);
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D5 */
 
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D11)
 /*************************************************
- * Name:        poly_decompress_d11_native
+ * Name:        mlk_poly_decompress_d11_native
  *
  * Description: De-serialization and subsequent decompression (11 bits) of a
- *              polynomial; approximate inverse of poly_compress_d11
+ *              polynomial; approximate inverse of mlk_poly_compress_d11
  *
  * Arguments:   - int16_t r[MLKEM_N]: pointer to output polynomial
  *              - const uint8_t *a: pointer to input byte array
@@ -563,7 +563,7 @@ static MLK_INLINE void poly_decompress_d5_native(
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
-static MLK_INLINE void poly_decompress_d11_native(
+static MLK_INLINE void mlk_poly_decompress_d11_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]);
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D11 */
 #endif /* defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4 \

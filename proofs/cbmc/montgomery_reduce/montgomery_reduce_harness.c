@@ -5,13 +5,13 @@
 #include <stdint.h>
 #include "common.h"
 
-#define montgomery_reduce MLK_NAMESPACE(montgomery_reduce)
-int16_t montgomery_reduce(int32_t a);
+#define mlk_montgomery_reduce MLK_NAMESPACE(montgomery_reduce)
+int16_t mlk_montgomery_reduce(int32_t a);
 
 void harness(void)
 {
   int32_t a;
   int16_t r;
 
-  r = montgomery_reduce(a);
+  r = mlk_montgomery_reduce(a);
 }

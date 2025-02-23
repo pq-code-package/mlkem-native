@@ -34,7 +34,7 @@
 #define MLK_AVX2_MASK 4095
 #define MLK_AVX2_SHIFT 32
 
-const qdata_t qdata = {{
+const qdata_t mlk_qdata = {{
 #define MLK_AVX2_BACKEND_DATA_OFFSET_16XQ 0
     MLK_AVX2_Q, MLK_AVX2_Q, MLK_AVX2_Q, MLK_AVX2_Q, MLK_AVX2_Q, MLK_AVX2_Q,
     MLK_AVX2_Q, MLK_AVX2_Q, MLK_AVX2_Q, MLK_AVX2_Q, MLK_AVX2_Q, MLK_AVX2_Q,

@@ -7,7 +7,7 @@ HARNESS_FILE = scalar_signed_to_unsigned_q_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = scalar_signed_to_unsigned_q
+PROOF_UID = mlk_scalar_signed_to_unsigned_q
 
 DEFINES +=
 INCLUDES +=
@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)scalar_signed_to_unsigned_q
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)ct_sel_int16 $(MLK_NAMESPACE)ct_cmask_neg_i16
+CHECK_FUNCTION_CONTRACTS=mlk_scalar_signed_to_unsigned_q
+USE_FUNCTION_CONTRACTS=mlk_ct_sel_int16 mlk_ct_cmask_neg_i16
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

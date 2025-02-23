@@ -11,23 +11,6 @@
 #include "cbmc.h"
 #include "common.h"
 
-/* Static namespacing
- * This is to facilitate building multiple instances
- * of mlkem-native (e.g. with varying security levels)
- * within a single compilation unit. */
-#define value_barrier_u8 MLK_NAMESPACE(value_barrier_u8)
-#define value_barrier_u32 MLK_NAMESPACE(value_barrier_u32)
-#define value_barrier_i32 MLK_NAMESPACE(value_barrier_i32)
-#define ct_cmask_neg_i16 MLK_NAMESPACE(ct_cmask_neg_i16)
-#define ct_cmask_nonzero_u8 MLK_NAMESPACE(ct_cmask_nonzero_u8)
-#define ct_cmask_nonzero_u16 MLK_NAMESPACE(ct_cmask_nonzero_u16)
-#define ct_sel_uint8 MLK_NAMESPACE(ct_sel_uint8)
-#define ct_sel_int16 MLK_NAMESPACE(ct_sel_int16)
-#define ct_memcmp MLK_NAMESPACE(ct_memcmp)
-#define ct_cmov_zero MLK_NAMESPACE(ct_cmov_zero)
-#define ct_zeroize MLK_NAMESPACE(ct_zeroize)
-/* End of static namespacing */
-
 /* Constant-time comparisons and conditional operations
 
    We reduce the risk for compilation into variable-time code
@@ -70,45 +53,45 @@
  * Declaration of global volatile that the global value barrier
  * is loading from and masking with.
  */
-#define ct_opt_blocker_u64 MLK_NAMESPACE(ct_opt_blocker_u64)
-extern volatile uint64_t ct_opt_blocker_u64;
+#define mlk_ct_opt_blocker_u64 MLK_NAMESPACE(ct_opt_blocker_u64)
+extern volatile uint64_t mlk_ct_opt_blocker_u64;
 
 /* Helper functions for obtaining masks of various sizes */
 static MLK_INLINE uint8_t get_optblocker_u8(void)
-__contract__(ensures(return_value == 0)) { return (uint8_t)ct_opt_blocker_u64; }
+__contract__(ensures(return_value == 0)) { return (uint8_t)mlk_ct_opt_blocker_u64; }
 
 static MLK_INLINE uint32_t get_optblocker_u32(void)
-__contract__(ensures(return_value == 0)) { return ct_opt_blocker_u64; }
+__contract__(ensures(return_value == 0)) { return mlk_ct_opt_blocker_u64; }
 
 static MLK_INLINE uint32_t get_optblocker_i32(void)
-__contract__(ensures(return_value == 0)) { return ct_opt_blocker_u64; }
+__contract__(ensures(return_value == 0)) { return mlk_ct_opt_blocker_u64; }
 
-static MLK_INLINE uint32_t value_barrier_u32(uint32_t b)
+static MLK_INLINE uint32_t mlk_value_barrier_u32(uint32_t b)
 __contract__(ensures(return_value == b)) { return (b ^ get_optblocker_u32()); }
 
-static MLK_INLINE int32_t value_barrier_i32(int32_t b)
+static MLK_INLINE int32_t mlk_value_barrier_i32(int32_t b)
 __contract__(ensures(return_value == b)) { return (b ^ get_optblocker_i32()); }
 
-static MLK_INLINE uint8_t value_barrier_u8(uint8_t b)
+static MLK_INLINE uint8_t mlk_value_barrier_u8(uint8_t b)
 __contract__(ensures(return_value == b)) { return (b ^ get_optblocker_u8()); }
 
 #else /* !MLK_USE_ASM_VALUE_BARRIER */
 
-static MLK_INLINE uint32_t value_barrier_u32(uint32_t b)
+static MLK_INLINE uint32_t mlk_value_barrier_u32(uint32_t b)
 __contract__(ensures(return_value == b))
 {
   __asm__("" : "+r"(b));
   return b;
 }
 
-static MLK_INLINE int32_t value_barrier_i32(int32_t b)
+static MLK_INLINE int32_t mlk_value_barrier_i32(int32_t b)
 __contract__(ensures(return_value == b))
 {
   __asm__("" : "+r"(b));
   return b;
 }
 
-static MLK_INLINE uint8_t value_barrier_u8(uint8_t b)
+static MLK_INLINE uint8_t mlk_value_barrier_u8(uint8_t b)
 __contract__(ensures(return_value == b))
 {
   __asm__("" : "+r"(b));
@@ -128,31 +111,31 @@ __contract__(ensures(return_value == b))
 #endif
 
 /*************************************************
- * Name:        ct_cmask_nonzero_u16
+ * Name:        mlk_ct_cmask_nonzero_u16
  *
  * Description: Return 0 if input is zero, and -1 otherwise.
  *
  * Arguments:   uint16_t x: Value to be converted into a mask
  **************************************************/
-static MLK_INLINE uint16_t ct_cmask_nonzero_u16(uint16_t x)
+static MLK_INLINE uint16_t mlk_ct_cmask_nonzero_u16(uint16_t x)
 __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFFFF)))
 {
-  uint32_t tmp = value_barrier_u32(-((uint32_t)x));
+  uint32_t tmp = mlk_value_barrier_u32(-((uint32_t)x));
   tmp >>= 16;
   return tmp;
 }
 
 /*************************************************
- * Name:        ct_cmask_nonzero_u8
+ * Name:        mlk_ct_cmask_nonzero_u8
  *
  * Description: Return 0 if input is zero, and -1 otherwise.
  *
  * Arguments:   uint8_t x: Value to be converted into a mask
  **************************************************/
-static MLK_INLINE uint8_t ct_cmask_nonzero_u8(uint8_t x)
+static MLK_INLINE uint8_t mlk_ct_cmask_nonzero_u8(uint8_t x)
 __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFF)))
 {
-  uint32_t tmp = value_barrier_u32(-((uint32_t)x));
+  uint32_t tmp = mlk_value_barrier_u32(-((uint32_t)x));
   tmp >>= 24;
   return tmp;
 }
@@ -163,7 +146,7 @@ __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFF)))
 #endif
 
 /*
- * The ct_cmask_neg_i16 function below makes deliberate use of
+ * The mlk_ct_cmask_neg_i16 function below makes deliberate use of
  * signed to unsigned integer conversion, which is fully defined
  * behaviour in C. It is thus safe to disable this warning.
  */
@@ -173,16 +156,16 @@ __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFF)))
 #endif
 
 /*************************************************
- * Name:        ct_cmask_neg_i16
+ * Name:        mlk_ct_cmask_neg_i16
  *
  * Description: Return 0 if input is non-negative, and -1 otherwise.
  *
  * Arguments:   uint16_t x: Value to be converted into a mask
  **************************************************/
-static MLK_INLINE uint16_t ct_cmask_neg_i16(int16_t x)
+static MLK_INLINE uint16_t mlk_ct_cmask_neg_i16(int16_t x)
 __contract__(ensures(return_value == ((x < 0) ? 0xFFFF : 0)))
 {
-  int32_t tmp = value_barrier_i32((int32_t)x);
+  int32_t tmp = mlk_value_barrier_i32((int32_t)x);
   tmp >>= 16;
   return (int16_t)tmp;
 }
@@ -204,7 +187,7 @@ __contract__(ensures(return_value == ((x < 0) ? 0xFFFF : 0)))
 #endif
 
 /*************************************************
- * Name:        ct_sel_int16
+ * Name:        mlk_ct_sel_int16
  *
  * Description: Functionally equivalent to cond ? a : b,
  *              but implemented with guards against
@@ -216,14 +199,14 @@ __contract__(ensures(return_value == ((x < 0) ? 0xFFFF : 0)))
  *
  * Specification:
  * - With `a = MLKEM_Q_HALF` and `b=0`, this essentially
- *   implements `Decompress_1` [FIPS 203, Eq (4.8)] in `poly_frommsg()`.
+ *   implements `Decompress_1` [FIPS 203, Eq (4.8)] in `mlk_poly_frommsg()`.
  *
  **************************************************/
-static MLK_INLINE int16_t ct_sel_int16(int16_t a, int16_t b, uint16_t cond)
+static MLK_INLINE int16_t mlk_ct_sel_int16(int16_t a, int16_t b, uint16_t cond)
 __contract__(ensures(return_value == (cond ? a : b)))
 {
   uint16_t au = a, bu = b;
-  uint16_t res = bu ^ (ct_cmask_nonzero_u16(cond) & (au ^ bu));
+  uint16_t res = bu ^ (mlk_ct_cmask_nonzero_u16(cond) & (au ^ bu));
   return (int16_t)res;
 }
 
@@ -233,7 +216,7 @@ __contract__(ensures(return_value == (cond ? a : b)))
 #endif
 
 /*************************************************
- * Name:        ct_sel_uint8
+ * Name:        mlk_ct_sel_uint8
  *
  * Description: Functionally equivalent to cond ? a : b,
  *              but implemented with guards against
@@ -243,14 +226,14 @@ __contract__(ensures(return_value == (cond ? a : b)))
  *              uint8_t b:       Second alternative
  *              uuint8_t cond:   Condition variable.
  **************************************************/
-static MLK_INLINE uint8_t ct_sel_uint8(uint8_t a, uint8_t b, uint8_t cond)
+static MLK_INLINE uint8_t mlk_ct_sel_uint8(uint8_t a, uint8_t b, uint8_t cond)
 __contract__(ensures(return_value == (cond ? a : b)))
 {
-  return b ^ (ct_cmask_nonzero_u8(cond) & (a ^ b));
+  return b ^ (mlk_ct_cmask_nonzero_u8(cond) & (a ^ b));
 }
 
 /*************************************************
- * Name:        ct_memcmp
+ * Name:        mlk_ct_memcmp
  *
  * Description: Compare two arrays for equality in constant time.
  *
@@ -264,8 +247,8 @@ __contract__(ensures(return_value == (cond ? a : b)))
  * - Used to securely compute conditional move in
  *   [FIPS 203, Algorithm 18 (ML-KEM.Decaps_Internal, L9-11]
  **************************************************/
-static MLK_INLINE uint8_t ct_memcmp(const uint8_t *a, const uint8_t *b,
-                                    const size_t len)
+static MLK_INLINE uint8_t mlk_ct_memcmp(const uint8_t *a, const uint8_t *b,
+                                        const size_t len)
 __contract__(
   requires(memory_no_alias(a, len))
   requires(memory_no_alias(b, len))
@@ -292,11 +275,11 @@ __contract__(
    * - XOR twice with s, separated by a value barrier, to prevent the compile
    *   from dropping the s computation in the loop.
    */
-  return (value_barrier_u8(ct_cmask_nonzero_u8(r) ^ s) ^ s);
+  return (mlk_value_barrier_u8(mlk_ct_cmask_nonzero_u8(r) ^ s) ^ s);
 }
 
 /*************************************************
- * Name:        ct_cmov_zero
+ * Name:        mlk_ct_cmov_zero
  *
  * Description: Copy len bytes from x to r if b is zero;
  *              don't modify x if b is non-zero.
@@ -312,8 +295,8 @@ __contract__(
  * - Used to securely compute conditional move in
  *   [FIPS 203, Algorithm 18 (ML-KEM.Decaps_Internal, L9-11]
  **************************************************/
-static MLK_INLINE void ct_cmov_zero(uint8_t *r, const uint8_t *x, size_t len,
-                                    uint8_t b)
+static MLK_INLINE void mlk_ct_cmov_zero(uint8_t *r, const uint8_t *x,
+                                        size_t len, uint8_t b)
 __contract__(
   requires(memory_no_alias(r, len))
   requires(memory_no_alias(x, len))
@@ -323,12 +306,12 @@ __contract__(
   for (i = 0; i < len; i++)
   __loop__(invariant(i <= len))
   {
-    r[i] = ct_sel_uint8(r[i], x[i], b);
+    r[i] = mlk_ct_sel_uint8(r[i], x[i], b);
   }
 }
 
 /*************************************************
- * Name:        ct_zeroize
+ * Name:        mlk_ct_zeroize
  *
  * Description: Force-zeroize a buffer.
  *
@@ -339,26 +322,26 @@ __contract__(
  * [FIPS 203, Section 3.3, Destruction of intermediate values]
  *
  **************************************************/
-static MLK_INLINE void ct_zeroize(void *r, size_t len)
+static MLK_INLINE void mlk_ct_zeroize(void *r, size_t len)
 __contract__(
   requires(memory_no_alias(r, len))
   assigns(memory_slice(r, len))
 );
 
 #if defined(MLK_USE_CT_ZEROIZE_NATIVE)
-static MLK_INLINE void ct_zeroize(void *ptr, size_t len)
+static MLK_INLINE void mlk_ct_zeroize(void *ptr, size_t len)
 {
   ct_zeroize_native(ptr, len);
 }
 #elif defined(MLK_SYS_WINDOWS)
 #include <windows.h>
-static MLK_INLINE void ct_zeroize(void *ptr, size_t len)
+static MLK_INLINE void mlk_ct_zeroize(void *ptr, size_t len)
 {
   SecureZeroMemory(ptr, len);
 }
 #elif defined(MLK_HAVE_INLINE_ASM)
 #include <string.h>
-static MLK_INLINE void ct_zeroize(void *ptr, size_t len)
+static MLK_INLINE void mlk_ct_zeroize(void *ptr, size_t len)
 {
   memset(ptr, 0, len);
   /* This follows OpenSSL and seems sufficient to prevent the compiler
@@ -369,7 +352,7 @@ static MLK_INLINE void ct_zeroize(void *ptr, size_t len)
   __asm__ __volatile__("" : : "r"(ptr) : "memory");
 }
 #else
-#error No plausibly-secure implementation of ct_zeroize available. Please provide your own using MLK_USE_CT_ZEROIZE_NATIVE.
+#error No plausibly-secure implementation of mlk_ct_zeroize available. Please provide your own using MLK_USE_CT_ZEROIZE_NATIVE.
 #endif
 
 #endif /* MLK_VERIFY_H */

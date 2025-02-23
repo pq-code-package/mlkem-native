@@ -66,24 +66,22 @@
  * Undefine macros from MLKEM_K-specific files
  */
 /* mlkem/common.h */
+#undef MLK_ADD_LEVEL
 #undef MLK_ARITH_BACKEND_NAME
 #undef MLK_ASM_FN_SYMBOL
 #undef MLK_ASM_NAMESPACE
 #undef MLK_COMMON_H
+#undef MLK_CONCAT
+#undef MLK_CONCAT_
 #undef MLK_EMPTY_CU
 #undef MLK_EXTERNAL_API
 #undef MLK_FIPS202X4_HEADER_FILE
 #undef MLK_FIPS202_BACKEND_NAME
 #undef MLK_FIPS202_HEADER_FILE
 #undef MLK_INTERNAL_API
-#undef MLK_MAKE_NAMESPACE
-#undef MLK_MAKE_NAMESPACE_
-#undef MLK_MAKE_NAMESPACE_K
-#undef MLK_MAKE_NAMESPACE_K_
+#undef MLK_MULTILEVEL_BUILD
 #undef MLK_NAMESPACE
 #undef MLK_NAMESPACE_K
-#undef MLK_PREFIX_UNDERSCORE
-#undef MLK_PREFIX_UNDERSCORE_
 /* mlkem/config.h */
 #undef MLKEM_K
 #undef MLK_ARITH_BACKEND_FILE
@@ -93,10 +91,10 @@
 #undef MLK_NAMESPACE_PREFIX
 /* mlkem/indcpa.h */
 #undef MLK_INDCPA_H
-#undef gen_matrix
-#undef indcpa_dec
-#undef indcpa_enc
-#undef indcpa_keypair_derand
+#undef mlk_gen_matrix
+#undef mlk_indcpa_dec
+#undef mlk_indcpa_enc
+#undef mlk_indcpa_keypair_derand
 /* mlkem/kem.h */
 #undef MLK_KEM_H
 #undef crypto_kem_dec
@@ -177,27 +175,27 @@
 #undef MLK_PARAMS_H
 /* mlkem/poly_k.h */
 #undef MLK_POLY_K_H
-#undef poly_compress_du
-#undef poly_compress_dv
-#undef poly_decompress_du
-#undef poly_decompress_dv
-#undef poly_getnoise_eta1122_4x
-#undef poly_getnoise_eta1_4x
-#undef poly_getnoise_eta2
-#undef poly_getnoise_eta2_4x
-#undef polyvec
-#undef polyvec_add
-#undef polyvec_basemul_acc_montgomery_cached
-#undef polyvec_compress_du
-#undef polyvec_decompress_du
-#undef polyvec_frombytes
-#undef polyvec_invntt_tomont
-#undef polyvec_mulcache
-#undef polyvec_mulcache_compute
-#undef polyvec_ntt
-#undef polyvec_reduce
-#undef polyvec_tobytes
-#undef polyvec_tomont
+#undef mlk_poly_compress_du
+#undef mlk_poly_compress_dv
+#undef mlk_poly_decompress_du
+#undef mlk_poly_decompress_dv
+#undef mlk_poly_getnoise_eta1122_4x
+#undef mlk_poly_getnoise_eta1_4x
+#undef mlk_poly_getnoise_eta2
+#undef mlk_poly_getnoise_eta2_4x
+#undef mlk_polyvec
+#undef mlk_polyvec_add
+#undef mlk_polyvec_basemul_acc_montgomery_cached
+#undef mlk_polyvec_compress_du
+#undef mlk_polyvec_decompress_du
+#undef mlk_polyvec_frombytes
+#undef mlk_polyvec_invntt_tomont
+#undef mlk_polyvec_mulcache
+#undef mlk_polyvec_mulcache_compute
+#undef mlk_polyvec_ntt
+#undef mlk_polyvec_reduce
+#undef mlk_polyvec_tobytes
+#undef mlk_polyvec_tomont
 /* mlkem/sys.h */
 #undef MLK_ALIGN
 #undef MLK_ALWAYS_INLINE
@@ -226,94 +224,70 @@
 #undef MLK_ARITH_BACKEND_H
 /* mlkem/compress.h */
 #undef MLK_COMPRESS_H
-#undef poly_compress_d10
-#undef poly_compress_d11
-#undef poly_compress_d4
-#undef poly_compress_d5
-#undef poly_decompress_d10
-#undef poly_decompress_d11
-#undef poly_decompress_d4
-#undef poly_decompress_d5
-#undef poly_frombytes
-#undef poly_frommsg
-#undef poly_tobytes
-#undef poly_tomsg
-#undef scalar_compress_d1
-#undef scalar_compress_d10
-#undef scalar_compress_d11
-#undef scalar_compress_d4
-#undef scalar_compress_d5
-#undef scalar_decompress_d10
-#undef scalar_decompress_d11
-#undef scalar_decompress_d4
-#undef scalar_decompress_d5
+#undef mlk_poly_compress_d10
+#undef mlk_poly_compress_d11
+#undef mlk_poly_compress_d4
+#undef mlk_poly_compress_d5
+#undef mlk_poly_decompress_d10
+#undef mlk_poly_decompress_d11
+#undef mlk_poly_decompress_d4
+#undef mlk_poly_decompress_d5
+#undef mlk_poly_frombytes
+#undef mlk_poly_frommsg
+#undef mlk_poly_tobytes
+#undef mlk_poly_tomsg
 /* mlkem/debug.h */
 #undef MLK_DEBUG_H
-#undef debug_assert
-#undef debug_assert_abs_bound
-#undef debug_assert_abs_bound_2d
-#undef debug_assert_bound
-#undef debug_assert_bound_2d
-#undef mlkem_debug_assert
-#undef mlkem_debug_check_bounds
+#undef mlk_assert
+#undef mlk_assert_abs_bound
+#undef mlk_assert_abs_bound_2d
+#undef mlk_assert_bound
+#undef mlk_assert_bound_2d
+#undef mlk_debug_check_assert
+#undef mlk_debug_check_bounds
 /* mlkem/poly.h */
 #undef MLK_INVNTT_BOUND
 #undef MLK_NTT_BOUND
 #undef MLK_POLY_H
-#undef cast_uint16_to_int16
-#undef montgomery_reduce
-#undef poly
-#undef poly_add
-#undef poly_invntt_tomont
-#undef poly_mulcache
-#undef poly_mulcache_compute
-#undef poly_ntt
-#undef poly_reduce
-#undef poly_sub
-#undef poly_tomont
+#undef mlk_poly_add
+#undef mlk_poly_invntt_tomont
+#undef mlk_poly_mulcache_compute
+#undef mlk_poly_ntt
+#undef mlk_poly_reduce
+#undef mlk_poly_sub
+#undef mlk_poly_tomont
 /* mlkem/randombytes.h */
 #undef MLK_RANDOMBYTES_H
 /* mlkem/sampling.h */
 #undef MLK_SAMPLING_H
-#undef poly_cbd2
-#undef poly_cbd3
-#undef poly_rej_uniform
-#undef poly_rej_uniform_x4
+#undef mlk_poly_cbd2
+#undef mlk_poly_cbd3
+#undef mlk_poly_rej_uniform
+#undef mlk_poly_rej_uniform_x4
 /* mlkem/symmetric.h */
 #undef MLK_SYMMETRIC_H
-#undef XOF_RATE
-#undef hash_g
-#undef hash_h
-#undef hash_j
-#undef prf_eta
-#undef prf_eta1
-#undef prf_eta1_x4
-#undef prf_eta2
-#undef xof_absorb
-#undef xof_ctx
-#undef xof_init
-#undef xof_release
-#undef xof_squeezeblocks
-#undef xof_x4_absorb
-#undef xof_x4_ctx
-#undef xof_x4_init
-#undef xof_x4_release
-#undef xof_x4_squeezeblocks
+#undef MLK_XOF_RATE
+#undef mlk_hash_g
+#undef mlk_hash_h
+#undef mlk_hash_j
+#undef mlk_prf_eta
+#undef mlk_prf_eta1
+#undef mlk_prf_eta1_x4
+#undef mlk_prf_eta2
+#undef mlk_xof_absorb
+#undef mlk_xof_ctx
+#undef mlk_xof_init
+#undef mlk_xof_release
+#undef mlk_xof_squeezeblocks
+#undef mlk_xof_x4_absorb
+#undef mlk_xof_x4_ctx
+#undef mlk_xof_x4_init
+#undef mlk_xof_x4_release
+#undef mlk_xof_x4_squeezeblocks
 /* mlkem/verify.h */
 #undef MLK_USE_ASM_VALUE_BARRIER
 #undef MLK_VERIFY_H
-#undef ct_cmask_neg_i16
-#undef ct_cmask_nonzero_u16
-#undef ct_cmask_nonzero_u8
-#undef ct_cmov_zero
-#undef ct_memcmp
-#undef ct_opt_blocker_u64
-#undef ct_sel_int16
-#undef ct_sel_uint8
-#undef ct_zeroize
-#undef value_barrier_i32
-#undef value_barrier_u32
-#undef value_barrier_u8
+#undef mlk_ct_opt_blocker_u64
 /* mlkem/cbmc.h */
 #undef MLK_CBMC_H
 #undef __contract__
@@ -333,34 +307,32 @@
 #undef SHA3_512_RATE
 #undef SHAKE128_RATE
 #undef SHAKE256_RATE
-#undef sha3_256
-#undef sha3_512
-#undef shake128_absorb_once
-#undef shake128_init
-#undef shake128_release
-#undef shake128_squeezeblocks
-#undef shake128ctx
-#undef shake256
+#undef mlk_sha3_256
+#undef mlk_sha3_512
+#undef mlk_shake128_absorb_once
+#undef mlk_shake128_init
+#undef mlk_shake128_release
+#undef mlk_shake128_squeezeblocks
+#undef mlk_shake256
 /* mlkem/fips202/fips202_backend.h */
 #undef MLK_FIPS202_FIPS202_BACKEND_H
 /* mlkem/fips202/fips202x4.h */
 #undef MLK_FIPS202_FIPS202X4_H
-#undef shake128x4_absorb_once
-#undef shake128x4_init
-#undef shake128x4_release
-#undef shake128x4_squeezeblocks
-#undef shake128x4ctx
-#undef shake256x4
+#undef mlk_shake128x4_absorb_once
+#undef mlk_shake128x4_init
+#undef mlk_shake128x4_release
+#undef mlk_shake128x4_squeezeblocks
+#undef mlk_shake256x4
 /* mlkem/fips202/keccakf1600.h */
-#undef KECCAK_LANES
-#undef KECCAK_WAY
-#undef KeccakF1600_StateExtractBytes
-#undef KeccakF1600_StatePermute
-#undef KeccakF1600_StateXORBytes
-#undef KeccakF1600x4_StateExtractBytes
-#undef KeccakF1600x4_StatePermute
-#undef KeccakF1600x4_StateXORBytes
 #undef MLK_FIPS202_KECCAKF1600_H
+#undef MLK_KECCAK_LANES
+#undef MLK_KECCAK_WAY
+#undef mlk_keccakf1600_extract_bytes
+#undef mlk_keccakf1600_permute
+#undef mlk_keccakf1600_xor_bytes
+#undef mlk_keccakf1600x4_extract_bytes
+#undef mlk_keccakf1600x4_permute
+#undef mlk_keccakf1600x4_xor_bytes
 #endif /* !MLK_MONOBUILD_CUSTOM_FIPS202 */
 
 #if defined(MLK_MONOBUILD_WITH_NATIVE_FIPS202)
@@ -391,14 +363,14 @@
 #undef MLK_USE_FIPS202_X4_NATIVE
 /* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
 #undef MLK_FIPS202_NATIVE_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H
-#undef keccak_f1600_x1_scalar_asm_opt
-#undef keccak_f1600_x1_v84a_asm_clean
-#undef keccak_f1600_x2_v84a_asm_clean
-#undef keccak_f1600_x2_v8a_v84a_asm_hybrid
-#undef keccak_f1600_x4_scalar_v84a_asm_hybrid_opt
-#undef keccak_f1600_x4_scalar_v8a_asm_hybrid_opt
-#undef keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt
-#undef keccakf1600_round_constants
+#undef mlk_keccak_f1600_x1_scalar_asm_opt
+#undef mlk_keccak_f1600_x1_v84a_asm_clean
+#undef mlk_keccak_f1600_x2_v84a_asm_clean
+#undef mlk_keccak_f1600_x2_v8a_v84a_asm_hybrid
+#undef mlk_keccak_f1600_x4_scalar_v84a_asm_hybrid_opt
+#undef mlk_keccak_f1600_x4_scalar_v8a_asm_hybrid_opt
+#undef mlk_keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt
+#undef mlk_keccakf1600_round_constants
 /* mlkem/fips202/native/api.h */
 #undef MLK_FIPS202_NATIVE_API_H
 /* mlkem/fips202/native/meta.h */
@@ -410,10 +382,10 @@
 #undef MLK_FIPS202_NATIVE_X86_64_META_H
 #undef MLK_FIPS202_PROFILE_H
 /* mlkem/fips202/native/x86_64/src/xkcp_impl.h */
-#undef KeccakP1600times4_PermuteAll_24rounds
 #undef MLK_FIPS202_NATIVE_X86_64_SRC_XKCP_IMPL_H
 #undef MLK_FIPS202_PROFILE_IMPL_H
 #undef MLK_USE_FIPS202_X4_NATIVE
+#undef mlk_keccakf1600x4_permute24
 #endif /* MLK_MONOBUILD_WITH_NATIVE_FIPS202 */
 #if defined(MLK_MONOBUILD_WITH_NATIVE_ARITH)
 /*
@@ -427,27 +399,27 @@
 #undef MLK_NATIVE_AARCH64_META_H
 /* mlkem/native/aarch64/src/arith_native_aarch64.h */
 #undef MLK_NATIVE_AARCH64_SRC_ARITH_NATIVE_AARCH64_H
-#undef aarch64_invntt_zetas_layer12345
-#undef aarch64_invntt_zetas_layer67
-#undef aarch64_ntt_zetas_layer12345
-#undef aarch64_ntt_zetas_layer67
-#undef aarch64_zetas_mulcache_native
-#undef aarch64_zetas_mulcache_twisted_native
-#undef intt_asm_opt
-#undef ntt_asm_opt
-#undef poly_mulcache_compute_asm_opt
-#undef poly_reduce_asm_opt
-#undef poly_tobytes_asm_opt
-#undef poly_tomont_asm_opt
-#undef polyvec_basemul_acc_montgomery_cached_asm_k2_opt
-#undef polyvec_basemul_acc_montgomery_cached_asm_k3_opt
-#undef polyvec_basemul_acc_montgomery_cached_asm_k4_opt
-#undef rej_uniform_asm_clean
-#undef rej_uniform_table
+#undef mlk_aarch64_invntt_zetas_layer12345
+#undef mlk_aarch64_invntt_zetas_layer67
+#undef mlk_aarch64_ntt_zetas_layer12345
+#undef mlk_aarch64_ntt_zetas_layer67
+#undef mlk_aarch64_zetas_mulcache_native
+#undef mlk_aarch64_zetas_mulcache_twisted_native
+#undef mlk_intt_asm_opt
+#undef mlk_ntt_asm_opt
+#undef mlk_poly_mulcache_compute_asm_opt
+#undef mlk_poly_reduce_asm_opt
+#undef mlk_poly_tobytes_asm_opt
+#undef mlk_poly_tomont_asm_opt
+#undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k2_opt
+#undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k3_opt
+#undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k4_opt
+#undef mlk_rej_uniform_asm_clean
+#undef mlk_rej_uniform_table
 /* mlkem/native/aarch64/src/consts.h */
 #undef MLK_NATIVE_AARCH64_SRC_CONSTS_H
-#undef zetas_mulcache_native
-#undef zetas_mulcache_twisted_native
+#undef mlk_zetas_mulcache_native
+#undef mlk_zetas_mulcache_twisted_native
 /* mlkem/native/aarch64/src/opt_impl.h */
 #undef MLK_ARITH_PROFILE_IMPL_H
 #undef MLK_NATIVE_AARCH64_SRC_OPT_IMPL_H
@@ -477,26 +449,26 @@
 /* mlkem/native/x86_64/src/arith_native_x86_64.h */
 #undef MLK_AVX2_REJ_UNIFORM_BUFLEN
 #undef MLK_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H
-#undef basemul_avx2
-#undef invntt_avx2
-#undef ntt_avx2
-#undef nttfrombytes_avx2
-#undef nttpack_avx2
-#undef ntttobytes_avx2
-#undef nttunpack_avx2
-#undef poly_compress_d10_avx2
-#undef poly_compress_d11_avx2
-#undef poly_compress_d4_avx2
-#undef poly_compress_d5_avx2
-#undef poly_decompress_d10_avx2
-#undef poly_decompress_d11_avx2
-#undef poly_decompress_d4_avx2
-#undef poly_decompress_d5_avx2
-#undef polyvec_basemul_acc_montgomery_cached_avx2
-#undef reduce_avx2
-#undef rej_uniform_avx2
-#undef rej_uniform_table
-#undef tomont_avx2
+#undef mlk_basemul_avx2
+#undef mlk_invntt_avx2
+#undef mlk_ntt_avx2
+#undef mlk_nttfrombytes_avx2
+#undef mlk_nttpack_avx2
+#undef mlk_ntttobytes_avx2
+#undef mlk_nttunpack_avx2
+#undef mlk_poly_compress_d10_avx2
+#undef mlk_poly_compress_d11_avx2
+#undef mlk_poly_compress_d4_avx2
+#undef mlk_poly_compress_d5_avx2
+#undef mlk_poly_decompress_d10_avx2
+#undef mlk_poly_decompress_d11_avx2
+#undef mlk_poly_decompress_d4_avx2
+#undef mlk_poly_decompress_d5_avx2
+#undef mlk_polyvec_basemul_acc_montgomery_cached_avx2
+#undef mlk_reduce_avx2
+#undef mlk_rej_uniform_avx2
+#undef mlk_rej_uniform_table
+#undef mlk_tomont_avx2
 /* mlkem/native/x86_64/src/consts.h */
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_16XFHI
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_16XFLO
@@ -511,7 +483,7 @@
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXD
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP
 #undef MLK_NATIVE_X86_64_SRC_CONSTS_H
-#undef qdata
+#undef mlk_qdata
 /* mlkem/native/x86_64/src/default_impl.h */
 #undef MLK_ARITH_PROFILE_IMPL_H
 #undef MLK_NATIVE_X86_64_SRC_DEFAULT_IMPL_H

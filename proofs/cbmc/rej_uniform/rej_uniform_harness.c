@@ -5,9 +5,9 @@
 #include <stdint.h>
 #include "cbmc.h"
 
-#define rej_uniform MLK_NAMESPACE(rej_uniform)
-unsigned rej_uniform(int16_t *r, unsigned target, unsigned offset,
-                     const uint8_t *buf, unsigned buflen);
+
+unsigned mlk_rej_uniform(int16_t *r, unsigned target, unsigned offset,
+                         const uint8_t *buf, unsigned buflen);
 
 void harness(void)
 {
@@ -15,5 +15,5 @@ void harness(void)
   int16_t *r;
   uint8_t *buf;
 
-  rej_uniform(r, target, offset, buf, inlen);
+  mlk_rej_uniform(r, target, offset, buf, inlen);
 }

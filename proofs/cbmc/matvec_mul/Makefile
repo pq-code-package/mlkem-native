@@ -7,7 +7,7 @@ HARNESS_FILE = matvec_mul_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = matvec_mul
+PROOF_UID = mlk_matvec_mul
 
 DEFINES +=
 INCLUDES +=
@@ -17,8 +17,8 @@ REMOVE_FUNCTION_BODY +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/indcpa.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)matvec_mul
-USE_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)polyvec_basemul_acc_montgomery_cached
+CHECK_FUNCTION_CONTRACTS=mlk_matvec_mul
+USE_FUNCTION_CONTRACTS=mlk_polyvec_basemul_acc_montgomery_cached
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -37,7 +37,7 @@ CBMCFLAGS=--smt2
 # a substantial improvement in proof performance.
 CBMCFLAGS += --no-array-field-sensitivity --arrays-uf-always --slice-formula
 
-FUNCTION_NAME = $(MLK_NAMESPACE)matvec_mul
+FUNCTION_NAME = mlk_matvec_mul
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

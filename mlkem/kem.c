@@ -12,14 +12,14 @@
 #include "symmetric.h"
 #include "verify.h"
 
-/* Static namespacing
+/* Level namespacing
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define check_pk MLK_NAMESPACE_K(check_pk)
-#define check_sk MLK_NAMESPACE_K(check_sk)
-#define check_pct MLK_NAMESPACE_K(check_pct)
-/* End of static namespacing */
+#define mlk_check_pk MLK_ADD_LEVEL(mlk_check_pk)
+#define mlk_check_sk MLK_ADD_LEVEL(mlk_check_sk)
+#define mlk_check_pct MLK_ADD_LEVEL(mlk_check_pct)
+/* End of level namespacing */
 
 #if defined(CBMC)
 /* Redeclaration with contract needed for CBMC only */
@@ -31,7 +31,7 @@ __contract__(
 #endif
 
 /*************************************************
- * Name:        check_pk
+ * Name:        mlk_check_pk
  *
  * Description: Implements modulus check mandated by FIPS 203,
  *              i.e., ensures that coefficients are in [0,q-1].
@@ -47,29 +47,29 @@ __contract__(
  *
  **************************************************/
 MLK_MUST_CHECK_RETURN_VALUE
-static int check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+static int mlk_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 {
   int res;
-  polyvec p;
+  mlk_polyvec p;
   uint8_t p_reencoded[MLKEM_POLYVECBYTES];
 
-  polyvec_frombytes(&p, pk);
-  polyvec_reduce(&p);
-  polyvec_tobytes(p_reencoded, &p);
+  mlk_polyvec_frombytes(&p, pk);
+  mlk_polyvec_reduce(&p);
+  mlk_polyvec_tobytes(p_reencoded, &p);
 
   /* We use a constant-time memcmp here to avoid having to
    * declassify the PK before the PCT has succeeded. */
-  res = ct_memcmp(pk, p_reencoded, MLKEM_POLYVECBYTES) ? -1 : 0;
+  res = mlk_ct_memcmp(pk, p_reencoded, MLKEM_POLYVECBYTES) ? -1 : 0;
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  ct_zeroize(p_reencoded, sizeof(p_reencoded));
-  ct_zeroize(&p, sizeof(p));
+  mlk_ct_zeroize(p_reencoded, sizeof(p_reencoded));
+  mlk_ct_zeroize(&p, sizeof(p));
   return res;
 }
 
 /*************************************************
- * Name:        check_sk
+ * Name:        mlk_check_sk
  *
  * Description: Implements public key hash check mandated by FIPS 203,
  *              i.e., ensures that
@@ -86,7 +86,7 @@ static int check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
  *
  **************************************************/
 MLK_MUST_CHECK_RETURN_VALUE
-static int check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+static int mlk_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
   int res;
   MLK_ALIGN uint8_t test[MLKEM_SYMBYTES];
@@ -102,7 +102,8 @@ static int check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
   MLK_CT_TESTING_DECLASSIFY(
       sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, MLKEM_SYMBYTES);
 
-  hash_h(test, sk + MLKEM_INDCPA_SECRETKEYBYTES, MLKEM_INDCCA_PUBLICKEYBYTES);
+  mlk_hash_h(test, sk + MLKEM_INDCPA_SECRETKEYBYTES,
+             MLKEM_INDCCA_PUBLICKEYBYTES);
   res = memcmp(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, test,
                MLKEM_SYMBYTES)
             ? -1
@@ -110,13 +111,13 @@ static int check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  ct_zeroize(test, sizeof(test));
+  mlk_ct_zeroize(test, sizeof(test));
   return res;
 }
 
 MLK_MUST_CHECK_RETURN_VALUE
-static int check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                     uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES])
+static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+                         uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES])
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES)));
@@ -126,8 +127,8 @@ __contract__(
  * Partially implements 'Pairwise Consistency Test' [FIPS 140-3 IG] and
  * [FIPS 203, Section 7.1, Pairwise Consistency].
  */
-static int check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                     uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES])
+static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+                         uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
   int res;
   uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES];
@@ -153,7 +154,7 @@ static int check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   }
 #endif /* MLK_KEYGEN_PCT_BREAKAGE_TEST */
 
-  res = ct_memcmp(ss_enc, ss_dec, sizeof(ss_dec));
+  res = mlk_ct_memcmp(ss_enc, ss_dec, sizeof(ss_dec));
 
 cleanup:
   /* The result of the PCT is public. */
@@ -161,14 +162,14 @@ cleanup:
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  ct_zeroize(ct, sizeof(ct));
-  ct_zeroize(ss_enc, sizeof(ss_enc));
-  ct_zeroize(ss_dec, sizeof(ss_dec));
+  mlk_ct_zeroize(ct, sizeof(ct));
+  mlk_ct_zeroize(ss_enc, sizeof(ss_enc));
+  mlk_ct_zeroize(ss_dec, sizeof(ss_dec));
   return res;
 }
 #else  /* !MLKEM_KEYGEN_PCT */
-static int check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                     uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES])
+static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+                         uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
   /* Skip PCT */
   ((void)pk);
@@ -182,10 +183,10 @@ int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                               uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
                               const uint8_t *coins)
 {
-  indcpa_keypair_derand(pk, sk, coins);
+  mlk_indcpa_keypair_derand(pk, sk, coins);
   memcpy(sk + MLKEM_INDCPA_SECRETKEYBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
-  hash_h(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, pk,
-         MLKEM_INDCCA_PUBLICKEYBYTES);
+  mlk_hash_h(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, pk,
+             MLKEM_INDCCA_PUBLICKEYBYTES);
   /* Value z for pseudo-random output on reject */
   memcpy(sk + MLKEM_INDCCA_SECRETKEYBYTES - MLKEM_SYMBYTES,
          coins + MLKEM_SYMBYTES, MLKEM_SYMBYTES);
@@ -194,7 +195,7 @@ int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   MLK_CT_TESTING_DECLASSIFY(pk, MLKEM_INDCCA_PUBLICKEYBYTES);
 
   /* Pairwise Consistency Test (PCT) (FIPS 140-3 IPG) */
-  if (check_pct(pk, sk))
+  if (mlk_check_pct(pk, sk))
   {
     return -1;
   }
@@ -217,7 +218,7 @@ int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  ct_zeroize(coins, sizeof(coins));
+  mlk_ct_zeroize(coins, sizeof(coins));
   return res;
 }
 
@@ -232,7 +233,7 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   MLK_ALIGN uint8_t kr[2 * MLKEM_SYMBYTES];
 
   /* Specification: Implements [FIPS 203, Section 7.2, Modulus check] */
-  if (check_pk(pk))
+  if (mlk_check_pk(pk))
   {
     return -1;
   }
@@ -240,18 +241,18 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   memcpy(buf, coins, MLKEM_SYMBYTES);
 
   /* Multitarget countermeasure for coins + contributory KEM */
-  hash_h(buf + MLKEM_SYMBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
-  hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
+  mlk_hash_h(buf + MLKEM_SYMBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
+  mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
 
   /* coins are in kr+MLKEM_SYMBYTES */
-  indcpa_enc(ct, buf, pk, kr + MLKEM_SYMBYTES);
+  mlk_indcpa_enc(ct, buf, pk, kr + MLKEM_SYMBYTES);
 
   memcpy(ss, kr, MLKEM_SYMBYTES);
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  ct_zeroize(buf, sizeof(buf));
-  ct_zeroize(kr, sizeof(kr));
+  mlk_ct_zeroize(buf, sizeof(buf));
+  mlk_ct_zeroize(kr, sizeof(kr));
 
   return 0;
 }
@@ -271,7 +272,7 @@ int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  ct_zeroize(coins, sizeof(coins));
+  mlk_ct_zeroize(coins, sizeof(coins));
   return res;
 }
 
@@ -289,43 +290,43 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   const uint8_t *pk = sk + MLKEM_INDCPA_SECRETKEYBYTES;
 
   /* Specification: Implements [FIPS 203, Section 7.3, Hash check] */
-  if (check_sk(sk))
+  if (mlk_check_sk(sk))
   {
     return -1;
   }
 
-  indcpa_dec(buf, ct, sk);
+  mlk_indcpa_dec(buf, ct, sk);
 
   /* Multitarget countermeasure for coins + contributory KEM */
   memcpy(buf + MLKEM_SYMBYTES,
          sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, MLKEM_SYMBYTES);
-  hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
+  mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
 
   /* Recompute and compare ciphertext */
   /* coins are in kr+MLKEM_SYMBYTES */
-  indcpa_enc(tmp, buf, pk, kr + MLKEM_SYMBYTES);
-  fail = ct_memcmp(ct, tmp, MLKEM_INDCCA_CIPHERTEXTBYTES);
+  mlk_indcpa_enc(tmp, buf, pk, kr + MLKEM_SYMBYTES);
+  fail = mlk_ct_memcmp(ct, tmp, MLKEM_INDCCA_CIPHERTEXTBYTES);
 
   /* Compute rejection key */
   memcpy(tmp, sk + MLKEM_INDCCA_SECRETKEYBYTES - MLKEM_SYMBYTES,
          MLKEM_SYMBYTES);
   memcpy(tmp + MLKEM_SYMBYTES, ct, MLKEM_INDCCA_CIPHERTEXTBYTES);
-  hash_j(ss, tmp, sizeof(tmp));
+  mlk_hash_j(ss, tmp, sizeof(tmp));
 
   /* Copy true key to return buffer if fail is 0 */
-  ct_cmov_zero(ss, kr, MLKEM_SYMBYTES, fail);
+  mlk_ct_cmov_zero(ss, kr, MLKEM_SYMBYTES, fail);
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  ct_zeroize(buf, sizeof(buf));
-  ct_zeroize(kr, sizeof(kr));
-  ct_zeroize(tmp, sizeof(tmp));
+  mlk_ct_zeroize(buf, sizeof(buf));
+  mlk_ct_zeroize(kr, sizeof(kr));
+  mlk_ct_zeroize(tmp, sizeof(tmp));
 
   return 0;
 }
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
-#undef check_pk
-#undef check_sk
-#undef check_pct
+#undef mlk_check_pk
+#undef mlk_check_sk
+#undef mlk_check_pct

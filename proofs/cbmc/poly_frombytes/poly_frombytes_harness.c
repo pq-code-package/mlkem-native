@@ -6,9 +6,9 @@
 
 void harness(void)
 {
-  poly *a;
+  mlk_poly *a;
   uint8_t *r;
 
   /* Contracts for this function are in compress.h */
-  poly_frombytes(a, r);
+  mlk_poly_frombytes(a, r);
 }

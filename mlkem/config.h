@@ -44,8 +44,11 @@
  *
  * Description: The prefix to use to namespace global symbols from mlkem/.
  *
- *              Level-dependent symbols will additionally be prefixed with the
- *              security level if MLK_NAMESPACE_PREFIX_ADD_LEVEL is set.
+ *              In a multi-level build (that is, if either
+ *              - MLK_MULTILEVEL_BUILD_WITH_SHARED, or
+ *              - MLK_MULTILEVEL_BUILD_NO_SHARED,
+ *              are set, level-dependent symbols will additionally be prefixed
+ *              with the security level.
  *
  *              This can also be set using CFLAGS.
  *
@@ -53,22 +56,6 @@
 #if !defined(MLK_NAMESPACE_PREFIX)
 #define MLK_NAMESPACE_PREFIX MLK_DEFAULT_NAMESPACE_PREFIX
 #endif
-
-/******************************************************************************
- * Name:        MLK_NAMESPACE_PREFIX_ADD_LEVEL
- *
- * Description: If set, the level (512, 768, 1024) is added to the namespace
- *              prefix MLK_NAMESPACE_PREFIX for all functions which are
- *              level-dependent. Level-independent functions will have there
- *              symbol prefixed by MLK_NAMESPACE_PREFIX only.
- *
- *              This is intended to be used for multi-level builds where
- *              level-independent code should be shared across levels.
- *
- *              This can also be set using CFLAGS.
- *
- *****************************************************************************/
-/* #define MLK_NAMESPACE_PREFIX_ADD_LEVEL */
 
 /******************************************************************************
  * Name:        MLK_MULTILEVEL_BUILD_WITH_SHARED
@@ -81,7 +68,7 @@
  *              in the build, including code needed only for other security
  *              levels.
  *
- *              Example: poly_cbd3 is only needed for MLKEM_K == 2. Yet, if
+ *              Example: mlk_poly_cbd3 is only needed for MLKEM_K == 2. Yet, if
  *              this option is set for a build with MLKEM_K==3/4, it would
  *              be included.
  *

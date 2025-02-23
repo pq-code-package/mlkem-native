@@ -7,7 +7,7 @@ HARNESS_FILE = poly_reduce_native_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = poly_reduce_native
+PROOF_UID = mlk_poly_reduce_native
 
 DEFINES += -DMLK_USE_NATIVE_BACKEND_ARITH -DMLK_ARITH_BACKEND_FILE="\"dummy_backend.h\""
 INCLUDES +=
@@ -18,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLK_NAMESPACE)poly_reduce
-USE_FUNCTION_CONTRACTS=poly_reduce_native
+CHECK_FUNCTION_CONTRACTS=mlk_poly_reduce
+USE_FUNCTION_CONTRACTS=mlk_poly_reduce_native
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = poly_reduce_native
+FUNCTION_NAME = mlk_poly_reduce_native
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
