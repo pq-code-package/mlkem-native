@@ -19,7 +19,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/poly_k.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_poly_getnoise_eta1_4x
-USE_FUNCTION_CONTRACTS=mlk_poly_cbd_eta1 mlk_shake256x4 mlk_ct_zeroize
+USE_FUNCTION_CONTRACTS=mlk_poly_cbd_eta1 mlk_shake256x4 mlk_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

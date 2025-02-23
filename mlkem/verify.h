@@ -311,7 +311,7 @@ __contract__(
 }
 
 /*************************************************
- * Name:        mlk_ct_zeroize
+ * Name:        mlk_zeroize
  *
  * Description: Force-zeroize a buffer.
  *
@@ -322,26 +322,26 @@ __contract__(
  * [FIPS 203, Section 3.3, Destruction of intermediate values]
  *
  **************************************************/
-static MLK_INLINE void mlk_ct_zeroize(void *r, size_t len)
+static MLK_INLINE void mlk_zeroize(void *r, size_t len)
 __contract__(
   requires(memory_no_alias(r, len))
   assigns(memory_slice(r, len))
 );
 
-#if defined(MLK_USE_CT_ZEROIZE_NATIVE)
-static MLK_INLINE void mlk_ct_zeroize(void *ptr, size_t len)
+#if defined(MLK_USE_ZEROIZE_NATIVE)
+static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
 {
-  ct_zeroize_native(ptr, len);
+  mlk_zeroize_native(ptr, len);
 }
 #elif defined(MLK_SYS_WINDOWS)
 #include <windows.h>
-static MLK_INLINE void mlk_ct_zeroize(void *ptr, size_t len)
+static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
 {
   SecureZeroMemory(ptr, len);
 }
 #elif defined(MLK_HAVE_INLINE_ASM)
 #include <string.h>
-static MLK_INLINE void mlk_ct_zeroize(void *ptr, size_t len)
+static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
 {
   memset(ptr, 0, len);
   /* This follows OpenSSL and seems sufficient to prevent the compiler
@@ -352,7 +352,7 @@ static MLK_INLINE void mlk_ct_zeroize(void *ptr, size_t len)
   __asm__ __volatile__("" : : "r"(ptr) : "memory");
 }
 #else
-#error No plausibly-secure implementation of mlk_ct_zeroize available. Please provide your own using MLK_USE_CT_ZEROIZE_NATIVE.
+#error No plausibly-secure implementation of mlk_zeroize available. Please provide your own using MLK_USE_ZEROIZE_NATIVE.
 #endif
 
 #endif /* MLK_VERIFY_H */

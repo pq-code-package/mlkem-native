@@ -181,7 +181,7 @@ void mlk_shake128_release(mlk_shake128ctx *state)
 {
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(state, sizeof(mlk_shake128ctx));
+  mlk_zeroize(state, sizeof(mlk_shake128ctx));
 }
 
 typedef mlk_shake128ctx mlk_shake256ctx;
@@ -195,7 +195,7 @@ void mlk_shake256(uint8_t *output, size_t outlen, const uint8_t *input,
   mlk_keccak_squeeze_once(output, outlen, state.ctx, SHAKE256_RATE);
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(&state, sizeof(state));
+  mlk_zeroize(&state, sizeof(state));
 }
 
 void mlk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
@@ -207,7 +207,7 @@ void mlk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
   mlk_keccak_squeeze_once(output, 32, ctx, SHA3_256_RATE);
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(ctx, sizeof(ctx));
+  mlk_zeroize(ctx, sizeof(ctx));
 }
 
 void mlk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
@@ -219,7 +219,7 @@ void mlk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
   mlk_keccak_squeeze_once(output, 64, ctx, SHA3_512_RATE);
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(ctx, sizeof(ctx));
+  mlk_zeroize(ctx, sizeof(ctx));
 }
 
 #else /* MLK_MULTILEVEL_BUILD_NO_SHARED */

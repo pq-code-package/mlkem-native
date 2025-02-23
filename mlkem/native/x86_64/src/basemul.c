@@ -63,7 +63,7 @@ void mlk_polyvec_basemul_acc_montgomery_cached_avx2(unsigned k,
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_ct_zeroize(t, sizeof(t));
+  mlk_zeroize(t, sizeof(t));
 }
 
 #else /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \

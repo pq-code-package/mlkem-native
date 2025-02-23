@@ -19,7 +19,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/kem.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_keypair
-USE_FUNCTION_CONTRACTS=mlk_keypair_derand randombytes mlk_ct_zeroize
+USE_FUNCTION_CONTRACTS=mlk_keypair_derand randombytes mlk_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
