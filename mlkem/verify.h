@@ -57,23 +57,23 @@
 extern volatile uint64_t mlk_ct_opt_blocker_u64;
 
 /* Helper functions for obtaining masks of various sizes */
-static MLK_INLINE uint8_t get_optblocker_u8(void)
+static MLK_INLINE uint8_t mlk_ct_get_optblocker_u8(void)
 __contract__(ensures(return_value == 0)) { return (uint8_t)mlk_ct_opt_blocker_u64; }
 
-static MLK_INLINE uint32_t get_optblocker_u32(void)
+static MLK_INLINE uint32_t mlk_ct_get_optblocker_u32(void)
 __contract__(ensures(return_value == 0)) { return mlk_ct_opt_blocker_u64; }
 
-static MLK_INLINE uint32_t get_optblocker_i32(void)
+static MLK_INLINE uint32_t mlk_ct_get_optblocker_i32(void)
 __contract__(ensures(return_value == 0)) { return mlk_ct_opt_blocker_u64; }
 
 static MLK_INLINE uint32_t mlk_value_barrier_u32(uint32_t b)
-__contract__(ensures(return_value == b)) { return (b ^ get_optblocker_u32()); }
+__contract__(ensures(return_value == b)) { return (b ^ mlk_ct_get_optblocker_u32()); }
 
 static MLK_INLINE int32_t mlk_value_barrier_i32(int32_t b)
-__contract__(ensures(return_value == b)) { return (b ^ get_optblocker_i32()); }
+__contract__(ensures(return_value == b)) { return (b ^ mlk_ct_get_optblocker_i32()); }
 
 static MLK_INLINE uint8_t mlk_value_barrier_u8(uint8_t b)
-__contract__(ensures(return_value == b)) { return (b ^ get_optblocker_u8()); }
+__contract__(ensures(return_value == b)) { return (b ^ mlk_ct_get_optblocker_u8()); }
 
 #else /* !MLK_USE_ASM_VALUE_BARRIER */
 
