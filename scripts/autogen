@@ -1012,7 +1012,11 @@ def synchronize_backend(
     in_dir, out_dir, dry_run=False, delete=False, no_simplify=False, **kwargs
 ):
     copied = []
+    # Only synchronize sources, but not README.md, Makefile and so on
+    extensions = (".c", ".h", ".i", ".inc", ".S")
     for f in get_files(os.path.join(in_dir, "*")):
+        if not f.endswith(extensions):
+            continue
         copied.append(os.path.basename(f))
         if delete is True:
             continue
