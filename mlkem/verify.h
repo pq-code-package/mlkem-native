@@ -56,16 +56,26 @@
 #define mlk_ct_opt_blocker_u64 MLK_NAMESPACE(ct_opt_blocker_u64)
 extern volatile uint64_t mlk_ct_opt_blocker_u64;
 
-/* Helper functions for obtaining masks of various sizes */
+/* Helper functions for obtaining global masks of various sizes */
+
+/* This contract is not proved but treated as an axiom.
+ *
+ * Its validity relies on the assumption that the global opt-blocker
+ * constant mlk_ct_opt_blocker_u64 is not modified.
+ */
+static MLK_INLINE uint64_t mlk_ct_get_optblocker_u64(void)
+__contract__(ensures(return_value == 0)) { return mlk_ct_opt_blocker_u64; }
+
 static MLK_INLINE uint8_t mlk_ct_get_optblocker_u8(void)
-__contract__(ensures(return_value == 0)) { return (uint8_t)mlk_ct_opt_blocker_u64; }
+__contract__(ensures(return_value == 0)) { return (uint8_t)mlk_ct_get_optblocker_u64(); }
 
 static MLK_INLINE uint32_t mlk_ct_get_optblocker_u32(void)
-__contract__(ensures(return_value == 0)) { return mlk_ct_opt_blocker_u64; }
+__contract__(ensures(return_value == 0)) { return (uint32_t)mlk_ct_get_optblocker_u64(); }
 
-static MLK_INLINE uint32_t mlk_ct_get_optblocker_i32(void)
-__contract__(ensures(return_value == 0)) { return mlk_ct_opt_blocker_u64; }
+static MLK_INLINE int32_t mlk_ct_get_optblocker_i32(void)
+__contract__(ensures(return_value == 0)) { return (int32_t)mlk_ct_get_optblocker_u64(); }
 
+/* Opt-blocker based implementation of value barriers */
 static MLK_INLINE uint32_t mlk_value_barrier_u32(uint32_t b)
 __contract__(ensures(return_value == b)) { return (b ^ mlk_ct_get_optblocker_u32()); }
 

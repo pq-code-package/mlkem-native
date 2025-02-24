@@ -135,3 +135,21 @@ echo "::endgroup::"
 if ! $SUCCESS; then
   exit 1
 fi
+
+check-contracts()
+{
+  if python3 $ROOT/scripts/check-contracts >/dev/null; then
+    echo ":white_check_mark: Check contracts" >>"$GITHUB_STEP_SUMMARY"
+  else
+    echo ":x: Check contracts" >>"$GITHUB_STEP_SUMMARY"
+    SUCCESS=false
+  fi
+}
+
+echo "::group::Check contracts"
+check-contracts
+echo "::endgroup::"
+
+if ! $SUCCESS; then
+  exit 1
+fi
