@@ -1,19 +1,19 @@
+# SPDX-License-Identifier: Apache-2.0
+
 ######
 # To run
 #
 # NOT IN THE NIX ENV
 # cd $SLOTHY_ROOT
 # pyenv local 3.11
+# source venv/bin/activate
+#
 # PATH=$SLOTHY_ROOT:$PATH
 # PATH=/opt/homebrew/opt/llvm/bin:$PATH
 # export PATH
 #
 # cd $MLKEM_NATIVE_ROOT
 # cd dev/aarch64_opt/src
-
-#
-
-
 
 # ISA to optimize for
 TARGET_ISA=Arm_AArch64

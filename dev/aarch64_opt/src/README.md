@@ -1,3 +1,5 @@
+[//]: # (SPDX-License-Identifier: CC-BY-4.0)
+
 # mlkem-native AArch64 back-end SLOTHY-optimized code
 
 This directory contains the AArch64 back-end _after_ it has
