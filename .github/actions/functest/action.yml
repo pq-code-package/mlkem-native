@@ -43,6 +43,9 @@ inputs:
   acvp:
     description: Determine whether to run acvp test or not
     default: "true"
+  examples:
+    description: Determine whether to run examples or not
+    default: "true"
 runs:
   using: composite
   steps:
@@ -55,6 +58,7 @@ runs:
           echo KAT="${{ inputs.kat == 'true' && 'kat' || 'no-kat' }}" >> $GITHUB_ENV
           echo NISTKAT="${{ inputs.nistkat == 'true' && 'nistkat' || 'no-nistkat' }}" >> $GITHUB_ENV
           echo ACVP="${{ inputs.acvp == 'true' && 'acvp' || 'no-acvp' }}" >> $GITHUB_ENV
+          echo EXAMPLES="${{ inputs.examples == 'true' && 'examples' || 'no-examples' }}" >> $GITHUB_ENV
       - name: Setup nix
         uses: ./.github/actions/setup-shell
         with:
@@ -85,12 +89,12 @@ runs:
             - $(python3 --version)
             - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
           EOF
-      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }})
+      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }}, ${{ env.EXAMPLES }})
         shell: ${{ env.SHELL }}
         run: |
           make clean
-          ./scripts/tests all --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.NISTKAT }} --${{ env.ACVP }} -v
-      - name: Check namespacing ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }})
+          ./scripts/tests all --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.NISTKAT }} --${{ env.ACVP }} --${{ env.EXAMPLES }} -v
+      - name: Check namespacing ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }}, ${{ env.EXAMPLES }})
         shell: ${{ env.SHELL }}
         run: |
           ./scripts/check-namespace
