@@ -4,4 +4,4 @@
 
 #include "verify.h"
 
-void harness(void) { uint8_t x = mlk_ct_get_optblocker_u8(); }
+void harness(void) { int32_t x = mlk_ct_get_optblocker_i32(); }
