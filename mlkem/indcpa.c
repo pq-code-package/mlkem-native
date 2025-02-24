@@ -60,7 +60,7 @@ static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], mlk_polyvec *pk,
  *              approximate inverse of mlk_pack_pk
  *
  * Arguments:   - mlk_polyvec *pk: pointer to output public-key polynomial
- *vector Coefficients will be normalized to [0,..,q-1].
+ *                vector Coefficients will be normalized to [0,..,q-1].
  *              - uint8_t *seed: pointer to output seed to generate matrix A
  *              - const uint8_t *packedpk: pointer to input serialized public
  *                  key.
@@ -88,7 +88,7 @@ static void mlk_unpack_pk(mlk_polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
  *
  * Arguments:   - uint8_t *r: pointer to output serialized secret key
  *              - mlk_polyvec *sk: pointer to input vector of polynomials
- *(secret key)
+ *                (secret key)
  *
  * Specification:
  * Implements [FIPS 203, Algorithm 13 (K-PKE.KeyGen), L20]
@@ -106,7 +106,7 @@ static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], mlk_polyvec *sk)
  * Description: De-serialize the secret key; inverse of mlk_pack_sk
  *
  * Arguments:   - mlk_polyvec *sk: pointer to output vector of polynomials
- *(secret key)
+ *                (secret key)
  *              - const uint8_t *packedsk: pointer to input serialized secret
  *                key
  *
@@ -179,7 +179,13 @@ __contract__(
   ensures(array_bound(data, 0, MLKEM_N, 0, MLKEM_Q))) { ((void)data); }
 #endif /* MLK_USE_NATIVE_NTT_CUSTOM_ORDER */
 
-/* Not static for benchmarking */
+/* Reference: `gen_matrix()` in the reference implementation.
+ *            - We use a special subroutine to generate 4 polynomials
+ *              at a time, to be able to leverage batched Keccak-f1600
+ *              implementations. The reference implementation generates
+ *              one matrix entry a time.
+ *
+ * Not static for benchmarking */
 MLK_INTERNAL_API
 void mlk_gen_matrix(mlk_polyvec *a, const uint8_t seed[MLKEM_SYMBYTES],
                     int transposed)
@@ -288,7 +294,7 @@ void mlk_gen_matrix(mlk_polyvec *a, const uint8_t seed[MLKEM_SYMBYTES],
  *              - mlk_polyvec a[MLKEM_K]: Input matrix. Must be in NTT domain
  *                  and have coefficients of absolute value < 4096.
  *              - mlk_polyvec *v: Input polynomial vector. Must be in NTT
- *domain.
+ *                  domain.
  *              - mlk_polyvec *vc: Mulcache for v, computed via
  *                  mlk_polyvec_mulcache_compute().
  *
@@ -317,6 +323,14 @@ __contract__(
   }
 }
 
+/* Reference: `indcpa_keypair_derand()` in the reference implementation.
+ *            - We use x4-batched versions of `poly_getnoise` to leverage
+ *              batched x4-batched Keccak-f1600.
+ *            - We use a different implementation of `gen_matrix()` which
+ *              uses x4-batched Keccak-f1600 (see `mlk_gen_matrix()` above).
+ *            - We use a mulcache to speed up matrix-vector multiplication.
+ *            - We include buffer zeroization.
+ */
 MLK_INTERNAL_API
 void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
                                uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
@@ -391,7 +405,14 @@ void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
   mlk_zeroize(&skpv_cache, sizeof(skpv_cache));
 }
 
-
+/* Reference: `indcpa_enc()` in the reference implementation.
+ *            - We use x4-batched versions of `poly_getnoise` to leverage
+ *              batched x4-batched Keccak-f1600.
+ *            - We use a different implementation of `gen_matrix()` which
+ *              uses x4-batched Keccak-f1600 (see `mlk_gen_matrix()` above).
+ *            - We use a mulcache to speed up matrix-vector multiplication.
+ *            - We include buffer zeroization.
+ */
 MLK_INTERNAL_API
 void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
                     const uint8_t m[MLKEM_INDCPA_MSGBYTES],
@@ -469,6 +490,9 @@ void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
   mlk_zeroize(&epp, sizeof(epp));
 }
 
+/* Reference: `indcpa_dec()` in the reference implementation.
+ *            - We use a mulcache for the scalar product.
+ *            - We include buffer zeroization. */
 MLK_INTERNAL_API
 void mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
                     const uint8_t c[MLKEM_INDCPA_BYTES],

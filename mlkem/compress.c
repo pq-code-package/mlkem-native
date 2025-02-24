@@ -15,6 +15,12 @@
 
 #if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
 #if !defined(MLK_USE_NATIVE_POLY_COMPRESS_D4)
+/* Reference: `poly_compress()` in the reference implementation,
+ *            for ML-KEM-{512,768}.
+ *            - In contrast to the reference implementation, we assume
+ *              unsigned canonical coefficients here.
+ *              The reference implementation works with coefficients
+ *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
 MLK_INTERNAL_API
 void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
                           const mlk_poly *a)
@@ -52,6 +58,12 @@ void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D4 */
 
 #if !defined(MLK_USE_NATIVE_POLY_COMPRESS_D10)
+/* Reference: Embedded into `polyvec_compress()` in the
+ *            reference implementation, for ML-KEM-{512,768}.
+ *            - In contrast to the reference implementation, we assume
+ *              unsigned canonical coefficients here.
+ *              The reference implementation works with coefficients
+ *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
 MLK_INTERNAL_API
 void mlk_poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
                            const mlk_poly *a)
@@ -93,6 +105,8 @@ void mlk_poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D10 */
 
 #if !defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D4)
+/* Reference: `poly_decompress()` in the reference implementation,
+ *            for ML-KEM-{512,768}. */
 MLK_INTERNAL_API
 void mlk_poly_decompress_d4(mlk_poly *r,
                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
@@ -120,6 +134,8 @@ void mlk_poly_decompress_d4(mlk_poly *r,
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D4 */
 
 #if !defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D10)
+/* Reference: Embedded into `polyvec_decompress()` in the
+ *            reference implementation, for ML-KEM-{512,768}. */
 MLK_INTERNAL_API
 void mlk_poly_decompress_d10(mlk_poly *r,
                              const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
@@ -164,6 +180,12 @@ void mlk_poly_decompress_d10(mlk_poly *r,
 
 #if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
 #if !defined(MLK_USE_NATIVE_POLY_COMPRESS_D5)
+/* Reference: `poly_compress()` in the reference implementation,
+ *            for ML-KEM-1024.
+ *            - In contrast to the reference implementation, we assume
+ *              unsigned canonical coefficients here.
+ *              The reference implementation works with coefficients
+ *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
 MLK_INTERNAL_API
 void mlk_poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
                           const mlk_poly *a)
@@ -207,6 +229,12 @@ void mlk_poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D5 */
 
 #if !defined(MLK_USE_NATIVE_POLY_COMPRESS_D11)
+/* Reference: Embedded into `polyvec_compress()` in the
+ *            reference implementation, for ML-KEM-1024.
+ *            - In contrast to the reference implementation, we assume
+ *              unsigned canonical coefficients here.
+ *              The reference implementation works with coefficients
+ *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
 MLK_INTERNAL_API
 void mlk_poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
                            const mlk_poly *a)
@@ -255,6 +283,8 @@ void mlk_poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D11 */
 
 #if !defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D5)
+/* Reference: `poly_decompress()` in the reference implementation,
+ *            for ML-KEM-1024. */
 MLK_INTERNAL_API
 void mlk_poly_decompress_d5(mlk_poly *r,
                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
@@ -310,6 +340,8 @@ void mlk_poly_decompress_d5(mlk_poly *r,
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D5 */
 
 #if !defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D11)
+/* Reference: Embedded into `polyvec_decompress()` in the
+ *            reference implementation, for ML-KEM-1024. */
 MLK_INTERNAL_API
 void mlk_poly_decompress_d11(mlk_poly *r,
                              const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
@@ -358,6 +390,11 @@ void mlk_poly_decompress_d11(mlk_poly *r,
 #endif /* MLK_MULTILEVEL_BUILD) || MLKEM_K == 4 */
 
 #if !defined(MLK_USE_NATIVE_POLY_TOBYTES)
+/* Reference: `poly_tobytes()` in the reference implementation.
+ *            - In contrast to the reference implementation, we assume
+ *              unsigned canonical coefficients here.
+ *              The reference implementation works with coefficients
+ *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
 MLK_INTERNAL_API
 void mlk_poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
 {
@@ -399,6 +436,7 @@ void mlk_poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
 #endif /* MLK_USE_NATIVE_POLY_TOBYTES */
 
 #if !defined(MLK_USE_NATIVE_POLY_FROMBYTES)
+/* Reference: `poly_frombytes()` in the reference implementation. */
 MLK_INTERNAL_API
 void mlk_poly_frombytes(mlk_poly *r, const uint8_t a[MLKEM_POLYBYTES])
 {
@@ -426,6 +464,12 @@ void mlk_poly_frombytes(mlk_poly *r, const uint8_t a[MLKEM_POLYBYTES])
 }
 #endif /* MLK_USE_NATIVE_POLY_FROMBYTES */
 
+/* Reference: `poly_frommsg()` in the reference implementation.
+ *            - We use a value barrier around the bit-selection mask to
+ *              reduce the risk of compiler-introduced branches.
+ *              The reference implementation contains the expression
+ *              `(msg[i] >> j) & 1` which the compiler can reason must
+ *              be either 0 or 1. */
 MLK_INTERNAL_API
 void mlk_poly_frommsg(mlk_poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
 {
@@ -456,6 +500,12 @@ void mlk_poly_frommsg(mlk_poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
   mlk_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
 }
 
+/* Reference: `poly_tomsg()` in the reference implementation.
+ *            - In contrast to the reference implementation, we assume
+ *              unsigned canonical coefficients here.
+ *              The reference implementation works with coefficients
+ *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1).
+ */
 MLK_INTERNAL_API
 void mlk_poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const mlk_poly *a)
 {

@@ -46,6 +46,8 @@ __contract__(
  * Specification: Implements [FIPS 203, Section 7.2, 'modulus check']
  *
  **************************************************/
+
+/* Reference: Not implemented in the reference implementation. */
 MLK_MUST_CHECK_RETURN_VALUE
 static int mlk_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 {
@@ -85,6 +87,8 @@ static int mlk_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
  * Specification: Implements [FIPS 203, Section 7.3, 'hash check']
  *
  **************************************************/
+
+/* Reference: Not implemented in the reference implementation. */
 MLK_MUST_CHECK_RETURN_VALUE
 static int mlk_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
@@ -125,8 +129,9 @@ __contract__(
 #if defined(MLK_KEYGEN_PCT)
 /* Specification:
  * Partially implements 'Pairwise Consistency Test' [FIPS 140-3 IG] and
- * [FIPS 203, Section 7.1, Pairwise Consistency].
- */
+ * [FIPS 203, Section 7.1, Pairwise Consistency]. */
+
+/* Reference: Not implemented in the reference implementation. */
 static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                          uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
@@ -178,6 +183,9 @@ static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 }
 #endif /* MLKEM_KEYGEN_PCT */
 
+/* Reference: `crypto_kem_keypair_derand()` in the reference implementation
+ *            - We optionally include PCT which is not present in
+ *              the reference code. */
 MLK_EXTERNAL_API
 int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                               uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
@@ -203,6 +211,8 @@ int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   return 0;
 }
 
+/* Reference: `crypto_kem_keypair()` in the reference implementation
+ *            - We zeroize the stack buffer */
 MLK_EXTERNAL_API
 int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                        uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
@@ -222,6 +232,9 @@ int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   return res;
 }
 
+/* Reference: `crypto_kem_enc_derand()` in the reference implementation
+ *            - We include public key check
+ *            - We include stack buffer zeroization */
 MLK_EXTERNAL_API
 int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                           uint8_t ss[MLKEM_SSBYTES],
@@ -257,6 +270,8 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   return 0;
 }
 
+/* Reference: `crypto_kem_enc()` in the reference implementation
+ *            - We include stack buffer zeroization */
 MLK_EXTERNAL_API
 int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                    uint8_t ss[MLKEM_SSBYTES],
@@ -276,6 +291,9 @@ int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   return res;
 }
 
+/* Reference: `crypto_kem_dec()` in the reference implementation
+ *            - We include secret key check
+ *            - We include stack buffer zeroization */
 MLK_EXTERNAL_API
 int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
                    const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
