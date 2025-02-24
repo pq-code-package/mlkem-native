@@ -194,9 +194,9 @@
         ninv_tw          .req v30
 
         .text
-        .global MLK_ASM_NAMESPACE(intt_asm_clean)
+        .global MLK_ASM_NAMESPACE(intt_asm)
         .balign 4
-MLK_ASM_FN_SYMBOL(intt_asm_clean)
+MLK_ASM_FN_SYMBOL(intt_asm)
         push_stack
 
         // Setup constants

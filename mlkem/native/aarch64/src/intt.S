@@ -29,14 +29,14 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/aarch64_opt/src/intt_opt.S using scripts/simpasm. Do not modify it directly.
+ *   dev/aarch64_opt/src/intt.S using scripts/simpasm. Do not modify it directly.
  */
 
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(intt_asm_opt)
-MLK_ASM_FN_SYMBOL(intt_asm_opt)
+.global MLK_ASM_NAMESPACE(intt_asm)
+MLK_ASM_FN_SYMBOL(intt_asm)
 
         sub	sp, sp, #0x40
         stp	d8, d9, [sp]

@@ -955,8 +955,8 @@ def gen_hol_light_asm(dry_run=False):
             dry_run=dry_run,
         )
 
-    gen_hol_light_asm_file("ntt_opt.S", "mlkem_ntt.S")
-    gen_hol_light_asm_file("intt_opt.S", "mlkem_intt.S")
+    gen_hol_light_asm_file("ntt.S", "mlkem_ntt.S")
+    gen_hol_light_asm_file("intt.S", "mlkem_intt.S")
 
 
 def update_via_copy(infile_full, outfile_full, dry_run=False, transform=None):

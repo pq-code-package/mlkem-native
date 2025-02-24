@@ -45,9 +45,9 @@
         modulus_twisted   .req v7
 
         .text
-        .global MLK_ASM_NAMESPACE(poly_mulcache_compute_asm_opt)
+        .global MLK_ASM_NAMESPACE(poly_mulcache_compute_asm)
         .balign 4
-MLK_ASM_FN_SYMBOL(poly_mulcache_compute_asm_opt)
+MLK_ASM_FN_SYMBOL(poly_mulcache_compute_asm)
         mov wtmp, #3329
         dup modulus.8h, wtmp
 
@@ -88,7 +88,7 @@ MLK_ASM_FN_SYMBOL(poly_mulcache_compute_asm_opt)
         // sqrdmulh v27.8H, v28.8H, v7.8H       // ...........*...................
 
         sub count, count, #1
-poly_mulcache_compute_asm_opt_loop:
+poly_mulcache_compute_asm_loop:
                                               // Instructions:    9
                                               // Expected cycles: 13
                                               // Expected IPC:    0.69
@@ -126,7 +126,7 @@ poly_mulcache_compute_asm_opt_loop:
         // str q5, [x0], #16                       // ..........~..'.........*..'....
 
         sub count, count, 1
-        cbnz count, poly_mulcache_compute_asm_opt_loop
+        cbnz count, poly_mulcache_compute_asm_loop
                                           // Instructions:    2
                                           // Expected cycles: 5
                                           // Expected IPC:    0.40

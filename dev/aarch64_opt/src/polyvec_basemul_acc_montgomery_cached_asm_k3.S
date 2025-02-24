@@ -141,9 +141,9 @@
         t0   .req v28
 
         .text
-        .global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k3_opt)
+        .global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k3)
         .balign 4
-MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k3_opt)
+MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k3)
         push_stack
         mov wtmp, #3329
         dup modulus.8h, wtmp
@@ -330,7 +330,7 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k3_opt)
         // ld1 {v25.8H}, [x9], #16             // ..........................................................................*
 
         sub count, count, #2
-polyvec_basemul_acc_montgomery_cached_asm_k3_opt_loop:
+polyvec_basemul_acc_montgomery_cached_asm_k3_loop:
                                              // Instructions:    65
                                              // Expected cycles: 80
                                              // Expected IPC:    0.81
@@ -480,7 +480,7 @@ polyvec_basemul_acc_montgomery_cached_asm_k3_opt_loop:
         // str q13, [x0, #-16]                // .............~..............'.................................................~..............'.................................................l
 
         sub count, count, #1
-        cbnz count, polyvec_basemul_acc_montgomery_cached_asm_k3_opt_loop
+        cbnz count, polyvec_basemul_acc_montgomery_cached_asm_k3_loop
                                              // Instructions:    55
                                              // Expected cycles: 61
                                              // Expected IPC:    0.90

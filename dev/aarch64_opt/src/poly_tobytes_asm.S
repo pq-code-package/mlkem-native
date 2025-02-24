@@ -24,12 +24,12 @@
         count .req x2
 
         .text
-        .global MLK_ASM_NAMESPACE(poly_tobytes_asm_opt)
+        .global MLK_ASM_NAMESPACE(poly_tobytes_asm)
         .balign 4
-MLK_ASM_FN_SYMBOL(poly_tobytes_asm_opt)
+MLK_ASM_FN_SYMBOL(poly_tobytes_asm)
 
         mov count, #16
-poly_tobytes_asm_opt_asm_loop_start:
+poly_tobytes_asm_asm_loop_start:
         ld2 {data0.8h, data1.8h}, [src], #32
 
         // r[3 * i + 0] = (t0 >> 0);
@@ -47,7 +47,7 @@ poly_tobytes_asm_opt_asm_loop_start:
         st3 {out0.8b, out1.8b, out2.8b}, [dst], #24
 
         subs count, count, #1
-        cbnz count, poly_tobytes_asm_opt_asm_loop_start
+        cbnz count, poly_tobytes_asm_asm_loop_start
         ret
 
         .unreq data0

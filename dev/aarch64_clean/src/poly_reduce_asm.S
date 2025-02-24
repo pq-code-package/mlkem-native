@@ -42,9 +42,9 @@
         modulus_twisted   .req v4
 
         .text
-        .global MLK_ASM_NAMESPACE(poly_reduce_asm_clean)
+        .global MLK_ASM_NAMESPACE(poly_reduce_asm)
         .balign 4
-MLK_ASM_FN_SYMBOL(poly_reduce_asm_clean)
+MLK_ASM_FN_SYMBOL(poly_reduce_asm)
 
         mov wtmp, #3329 // ML-KEM modulus
         dup modulus.8h, wtmp
