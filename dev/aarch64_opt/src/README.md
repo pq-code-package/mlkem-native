@@ -6,7 +6,7 @@ been optimized by SLOTHY.
 ## Running SLOTHY from the Makefile
 
 If the "clean" back-end sources in `../../aarch64_clean/src/*.S` change,
-then the `Makefile` in this directory can be used to re-generates the
+then the `Makefile` in this directory can be used to re-generate the
 optimized sources using SLOTHY.
 
 The Makefile requires a _particular_ set up. In short:
@@ -14,7 +14,8 @@ The Makefile requires a _particular_ set up. In short:
 1. Do NOT run from within the NIX environment.
 2. You must have Python 3.11 on PATH (3.12 does not work at present)
 3. You must have the LLVM tool `llvm-mc` on PATH.
-4. You must start the SLOTHY Python virtual-environment.
+4. You must have the slothy-cli on PATH.
+5. You must start the SLOTHY Python virtual-environment.
 
 ## Example set up on macOS
 
@@ -26,6 +27,8 @@ then
 cd $SLOTHY_ROOT
 # Force Python 3.11
 pyenv local 3.11
+# Start the python venv
+source venv/bin/activate
 
 # Add slothy-cli and llvm-mc to PATH
 PATH=$SLOTHY_ROOT:/opt/homebrew/opt/llvm/bin:$PATH
