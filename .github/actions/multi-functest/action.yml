@@ -40,6 +40,9 @@ inputs:
   acvp:
     description: Determine whether to run acvp test or not
     default: "true"
+  examples:
+    description: Determine whether to run examples or not
+    default: "true"
 runs:
   using: composite
   steps:
@@ -58,6 +61,7 @@ runs:
           kat: ${{ inputs.kat }}
           nistkat: ${{ inputs.nistkat }}
           acvp: ${{ inputs.acvp }}
+          examples: ${{ inputs.examples }}
       - name: Cross x86_64 Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-x86_64') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -75,6 +79,7 @@ runs:
           kat: ${{ inputs.kat }}
           nistkat: ${{ inputs.nistkat }}
           acvp: ${{ inputs.acvp }}
+          examples: ${{ inputs.examples }}
       - name: Cross aarch64 Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-aarch64') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -92,6 +97,7 @@ runs:
           kat: ${{ inputs.kat }}
           nistkat: ${{ inputs.nistkat }}
           acvp: ${{ inputs.acvp }}
+          examples: ${{ inputs.examples }}
       - name: Cross aarch64_be Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-aarch64_be') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -109,6 +115,7 @@ runs:
           kat: ${{ inputs.kat }}
           nistkat: ${{ inputs.nistkat }}
           acvp: ${{ inputs.acvp }}
+          examples: ${{ inputs.examples }}
       - name: Cross riscv64 Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-riscv64') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -126,3 +133,4 @@ runs:
           kat: ${{ inputs.kat }}
           nistkat: ${{ inputs.nistkat }}
           acvp: ${{ inputs.acvp }}
+          examples: ${{ inputs.examples }}

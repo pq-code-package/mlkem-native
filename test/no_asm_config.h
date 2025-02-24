@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
@@ -251,16 +252,16 @@
  *              no-op.
  *
  *****************************************************************************/
-/* #define MLK_USE_ZEROIZE_NATIVE
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "sys.h"
-   static MLK_INLINE void mlk_zeroize_native(void *ptr, size_t len)
-   {
-       ... your implementation ...
-   }
-   #endif
-*/
+#define MLK_USE_ZEROIZE_NATIVE
+#if !defined(__ASSEMBLER__)
+#include <stdint.h>
+#include <string.h>
+#include "../mlkem/sys.h"
+static MLK_INLINE void mlk_zeroize_native(void *ptr, size_t len)
+{
+  explicit_bzero(ptr, len);
+}
+#endif
 
 /******************************************************************************
  * Name:        MLK_NO_ASM
@@ -283,7 +284,7 @@
  *              backends will be used.
  *
  *****************************************************************************/
-/* #define MLK_NO_ASM */
+#define MLK_NO_ASM
 
 /******************************************************************************
  * Name:        MLK_KEYGEN_PCT

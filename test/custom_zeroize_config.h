@@ -251,16 +251,16 @@
  *              no-op.
  *
  *****************************************************************************/
-/* #define MLK_USE_ZEROIZE_NATIVE
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "sys.h"
-   static MLK_INLINE void mlk_zeroize_native(void *ptr, size_t len)
-   {
-       ... your implementation ...
-   }
-   #endif
-*/
+#define MLK_USE_ZEROIZE_NATIVE
+#if !defined(__ASSEMBLER__)
+#include <stdint.h>
+#include <string.h>
+#include "../mlkem/sys.h"
+static MLK_INLINE void mlk_zeroize_native(void *ptr, size_t len)
+{
+  explicit_bzero(ptr, len);
+}
+#endif
 
 /******************************************************************************
  * Name:        MLK_NO_ASM
