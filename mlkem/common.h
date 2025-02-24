@@ -15,7 +15,7 @@
 #include "sys.h"
 
 /* Include backend metadata */
-#if defined(MLK_USE_NATIVE_BACKEND_ARITH)
+#if !defined(MLK_NO_ASM) && defined(MLK_USE_NATIVE_BACKEND_ARITH)
 #if defined(MLK_ARITH_BACKEND_FILE)
 #include MLK_ARITH_BACKEND_FILE
 #else
@@ -23,7 +23,7 @@
 #endif
 #endif
 
-#if defined(MLK_USE_NATIVE_BACKEND_FIPS202)
+#if !defined(MLK_NO_ASM) && defined(MLK_USE_NATIVE_BACKEND_FIPS202)
 #if defined(MLK_FIPS202_BACKEND_FILE)
 #include MLK_FIPS202_BACKEND_FILE
 #else

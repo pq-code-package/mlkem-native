@@ -263,6 +263,29 @@
 */
 
 /******************************************************************************
+ * Name:        MLK_NO_ASM
+ *
+ * Description: If this option is set, mlkem-native will be built without
+ *              use of native code or inline assembly.
+ *
+ *              By default, inline assembly is used to implement value barriers.
+ *              Without inline assembly, mlkem-native will use a global volatile
+ *              'opt blocker' instead; see verify.h.
+ *
+ *              Inline assembly is also used to implement a secure zeroization
+ *              function on non-Windows platforms. If this option is set and
+ *              the target platform is not Windows, you MUST set
+ *              MLK_USE_ZEROIZE_NATIVE and provide a custom zeroization
+ *              function.
+ *
+ *              If this option is set, MLK_USE_NATIVE_BACKEND_FIPS202 and
+ *              and MLK_USE_NATIVE_BACKEND_ARITH will be ignored, and no native
+ *              backends will be used.
+ *
+ *****************************************************************************/
+/* #define MLK_NO_ASM */
+
+/******************************************************************************
  * Name:        MLK_KEYGEN_PCT
  *
  * Description: Compliance with [FIPS 140-3

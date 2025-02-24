@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
@@ -283,7 +284,7 @@ static MLK_INLINE void mlk_zeroize_native(void *ptr, size_t len)
  *              backends will be used.
  *
  *****************************************************************************/
-/* #define MLK_NO_ASM */
+#define MLK_NO_ASM
 
 /******************************************************************************
  * Name:        MLK_KEYGEN_PCT

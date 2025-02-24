@@ -39,11 +39,11 @@
    We use the empty-ASM value barrier for GCC and clang, and fall
    back to the global volatile barrier otherwise.
 
-   The global value barrier can be forced by setting MLKEM_NO_ASM_VALUE_BARRIER.
+   The global value barrier can be forced by setting MLK_NO_ASM_VALUE_BARRIER.
 
 */
 
-#if defined(MLK_HAVE_INLINE_ASM) && !defined(MLKEM_NO_ASM_VALUE_BARRIER)
+#if defined(MLK_HAVE_INLINE_ASM) && !defined(MLK_NO_ASM_VALUE_BARRIER)
 #define MLK_USE_ASM_VALUE_BARRIER
 #endif
 
