@@ -55,6 +55,64 @@ static int test_keys(void)
   return 0;
 }
 
+static int test_keys_struct_no_marshal(void)
+{
+  mlk_public_key pk;
+  mlk_secret_key sk;
+  uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
+  uint8_t key_a[CRYPTO_BYTES];
+  uint8_t key_b[CRYPTO_BYTES];
+
+
+  /* Alice generates a public key */
+  CHECK(crypto_kem_keypair_struct(&pk, &sk) == 0);
+  /* Bob derives a secret key and creates a response */
+  CHECK(crypto_kem_enc_struct(ct, key_b, &pk) == 0);
+  /* Alice uses Bobs response to get her shared key */
+  CHECK(crypto_kem_dec_struct(key_a, ct, &sk) == 0);
+
+  /* mark as defined, so we can compare */
+  MLK_CT_TESTING_DECLASSIFY(key_a, CRYPTO_BYTES);
+  MLK_CT_TESTING_DECLASSIFY(key_b, CRYPTO_BYTES);
+
+  CHECK(memcmp(key_a, key_b, CRYPTO_BYTES) == 0);
+  return 0;
+}
+
+static int test_keys_struct_marshal(void)
+{
+  mlk_public_key pk;
+  mlk_secret_key sk;
+  uint8_t pkb[CRYPTO_PUBLICKEYBYTES];
+  uint8_t skb[CRYPTO_SECRETKEYBYTES];
+  uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
+  uint8_t key_a[CRYPTO_BYTES];
+  uint8_t key_b[CRYPTO_BYTES];
+
+  /* Alice generates a public key */
+  CHECK(crypto_kem_keypair_struct(&pk, &sk) == 0);
+
+  crypto_kem_marshal_pk(pkb, &pk);
+  crypto_kem_marshal_sk(skb, &sk);
+  memset(&pk, 0, sizeof(mlk_public_key));
+  memset(&sk, 0, sizeof(mlk_secret_key));
+
+  /* Bob derives a secret key and creates a response */
+  CHECK(crypto_kem_parse_pk(&pk, pkb) == 0);
+  CHECK(crypto_kem_enc_struct(ct, key_b, &pk) == 0);
+
+  /* Alice uses Bobs response to get her shared key */
+  CHECK(crypto_kem_parse_sk(&sk, skb) == 0);
+  CHECK(crypto_kem_dec_struct(key_a, ct, &sk) == 0);
+
+  /* mark as defined, so we can compare */
+  MLK_CT_TESTING_DECLASSIFY(key_a, CRYPTO_BYTES);
+  MLK_CT_TESTING_DECLASSIFY(key_b, CRYPTO_BYTES);
+
+  CHECK(memcmp(key_a, key_b, CRYPTO_BYTES) == 0);
+  return 0;
+}
+
 static int test_invalid_pk(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -228,6 +286,8 @@ int main(void)
   for (i = 0; i < NTESTS; i++)
   {
     CHECK(test_keys() == 0);
+    CHECK(test_keys_struct_no_marshal() == 0);
+    CHECK(test_keys_struct_marshal() == 0);
     CHECK(test_invalid_pk() == 0);
     CHECK(test_invalid_sk_a() == 0);
     CHECK(test_invalid_sk_b() == 0);
