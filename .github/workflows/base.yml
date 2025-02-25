@@ -61,15 +61,58 @@ jobs:
       - name: tests func
         run: |
           ./scripts/tests func
-      - name: tests bench
-        run: |
-          ./scripts/tests bench -c NO
-      - name: tests bench components
-        run: |
-          ./scripts/tests bench --components -c NO
       - name: check namespacing
         run: |
           ./scripts/check-namespace
+  quickcheck_bench:
+    strategy:
+      fail-fast: false
+      matrix:
+        external:
+         - ${{ github.repository_owner != 'pq-code-package' }}
+        target:
+         - runner: pqcp-arm64
+           name: 'aarch64'
+         - runner: pqcp-arm64
+           name: 'aarch64'
+         - runner: ubuntu-latest
+           name: 'x86_64'
+         - runner: macos-latest
+           name: 'macos (aarch64)'
+         - runner: macos-13
+           name: 'macos (x86_64)'
+        exclude:
+          - {external: true,
+             target: {
+               runner: pqcp-arm64,
+               name: 'aarch64'
+             }}
+    name: Quickcheck bench (${{ matrix.target.name }})
+    runs-on: ${{ matrix.target.runner }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: "tests bench (cycles: NO)"
+        run: |
+          ./scripts/tests bench -c NO
+      - name: "tests bench (build only, cycles: PMU)"
+        if: ${{ matrix.target.name != 'macos (aarch64)' && matrix.target.name != 'macos (x86_64)' }}
+        run: |
+          make clean
+          ./scripts/tests bench -c PMU --no-run
+      - name: "tests bench (build only, cycles: PERF)"
+        if: ${{ matrix.target.name != 'macos (aarch64)' && matrix.target.name != 'macos (x86_64)' }}
+        run: |
+          make clean
+          ./scripts/tests bench -c PERF --no-run
+      - name: "tests bench (build only, cycles: M1)"
+        if: ${{ matrix.target.name == 'macos (aarch64)' || matrix.target.name == 'macos (x86_64)' }}
+        run: |
+          make clean
+          ./scripts/tests bench -c M1 --no-run
+      - name: tests bench components
+        run: |
+          make clean
+          ./scripts/tests bench --components -c NO
   quickcheck-c90:
     strategy:
       fail-fast: false

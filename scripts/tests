@@ -608,6 +608,7 @@ class Tests:
             output = False
 
         # NOTE: We haven't yet decided how to output both opt/no-opt benchmark results
+        resultss = None
         if self.do_opt_all():
             self._compile_schemes(test_type, False)
             if self.args.run:
@@ -623,7 +624,7 @@ class Tests:
                 )
 
         if resultss is None:
-            exit(0)
+            self.check_fail()
 
         # NOTE: There will only be one items in resultss, as we haven't yet decided how to write both opt/no-opt benchmark results
         for k, results in resultss.items():
