@@ -220,6 +220,9 @@ jobs:
       - name: monolithic_build_multilevel
         run: |
           CFLAGS="-O0" make run -C examples/monolithic_build_multilevel
+      - name: monolithic_build_multilevel_native
+        run: |
+          CFLAGS="-O0" make run -C examples/monolithic_build_multilevel_native
       - name: multilevel_build
         run: |
           CFLAGS="-O0" make run -C examples/multilevel_build
