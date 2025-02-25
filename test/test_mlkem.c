@@ -6,7 +6,12 @@
 #include <stdio.h>
 #include <string.h>
 #include "../mlkem/compress.h"
-#include "../mlkem/mlkem_native.h"
+#include "../mlkem/kem.h"
+
+#define CRYPTO_PUBLICKEYBYTES MLKEM_INDCCA_PUBLICKEYBYTES
+#define CRYPTO_SECRETKEYBYTES MLKEM_INDCCA_SECRETKEYBYTES
+#define CRYPTO_CIPHERTEXTBYTES MLKEM_INDCCA_CIPHERTEXTBYTES
+#define CRYPTO_BYTES MLKEM_SYMBYTES
 
 #include "notrandombytes/notrandombytes.h"
 

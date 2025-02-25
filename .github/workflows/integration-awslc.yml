@@ -44,6 +44,8 @@ jobs:
         run: |
           cd $AWSLC_DIR/crypto/fipsmodule/ml_kem
           rm -rf mlkem
+          # patch mlkem_native_config.h to allow unused external API functions
+          sed -i.bak 's/^#define MLK_CONFIG_EXTERNAL_API_QUALIFIER static$/#define MLK_CONFIG_EXTERNAL_API_QUALIFIER static __attribute__((unused))/' mlkem_native_config.h
           GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA ./importer.sh --force
       - name: Build+Test AWS-LC (FIPS=${{ matrix.fips }})
         run: |
@@ -91,6 +93,8 @@ jobs:
       - name: Run importer
         run: |
           cd $AWSLC_DIR/crypto/fipsmodule/ml_kem
+          # patch mlkem_native_config.h to allow unused external API functions
+          sed -i.bak 's/^#define MLK_CONFIG_EXTERNAL_API_QUALIFIER static$/#define MLK_CONFIG_EXTERNAL_API_QUALIFIER static __attribute__((unused))/' mlkem_native_config.h
           GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA ./importer.sh --force
       - name: Run test
         run: |
@@ -123,6 +127,8 @@ jobs:
       - name: Run importer
         run: |
           cd $AWSLC_DIR/crypto/fipsmodule/ml_kem
+          # patch mlkem_native_config.h to allow unused external API functions
+          sed -i.bak 's/^#define MLK_CONFIG_EXTERNAL_API_QUALIFIER static$/#define MLK_CONFIG_EXTERNAL_API_QUALIFIER static __attribute__((unused))/' mlkem_native_config.h
           GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA ./importer.sh --force
       - name: Run test
         run: |
