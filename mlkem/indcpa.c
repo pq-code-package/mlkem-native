@@ -90,7 +90,7 @@ void mlk_indcpa_parse_pk(mlk_indcpa_public_key *pks,
 {
   mlk_polyvec_frombytes(pks->pkpv, pk);
   memcpy(pks->seed, pk + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
-  mlk_gen_matrix(pks->at, pks->seed, 1);
+  mlk_gen_matrix(pks->at, pk + MLKEM_POLYVECBYTES, 1);
 
   /* NOTE: If a modulus check was conducted on the PK, we know at this
    * point that the coefficients of `pk` are unsigned canonical. The
@@ -200,6 +200,14 @@ __contract__(
 #endif /* !MLK_USE_NATIVE_NTT_CUSTOM_ORDER */
 
 static void mlk_transpose_matrix(mlk_polymat a)
+__contract__(
+  requires(memory_no_alias(a, MLKEM_K*MLKEM_K*sizeof(mlk_poly)))
+  requires(forall(k0, 0, MLKEM_K * MLKEM_K,
+      array_bound(a[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+  assigns(memory_slice(a, MLKEM_K*MLKEM_K*sizeof(mlk_poly)))
+  ensures(forall(k0, 0, MLKEM_K * MLKEM_K,
+      array_bound(a[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+)
 {
   unsigned int i, j, k;
   int16_t t;
@@ -334,7 +342,7 @@ __contract__(
   requires(memory_no_alias(vc, sizeof(mlk_polyvec_mulcache)))
   requires(forall(k0, 0, MLKEM_K * MLKEM_K,
     array_bound(a[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
-  assigns(object_whole(out)))
+    assigns(memory_slice(out, sizeof(mlk_polyvec))))
 {
   unsigned i;
   for (i = 0; i < MLKEM_K; i++)

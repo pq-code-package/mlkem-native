@@ -290,7 +290,6 @@ int crypto_kem_keypair_derand_struct(mlk_public_key *pk, mlk_secret_key *sk,
   /* Declassify public key */
   MLK_CT_TESTING_DECLASSIFY(&pk->indcpa_pk, sizeof(mlk_indcpa_public_key));
 
-
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(pks, sizeof(pks));
@@ -521,6 +520,8 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   }
 
   res = crypto_kem_dec_struct(ss, ct, &sks);
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(&sks, sizeof(mlk_secret_key));
   return res;
 }
@@ -530,7 +531,13 @@ MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_sk_from_seed(mlk_secret_key *sk,
                             const uint8_t coins[2 * MLKEM_SYMBYTES])
 {
-  return crypto_kem_keypair_derand_struct(NULL, sk, coins);
+  mlk_public_key pk;
+  int ret;
+  ret = crypto_kem_keypair_derand_struct(&pk, sk, coins);
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
+  mlk_zeroize(&pk, sizeof(mlk_public_key));
+  return ret;
 }
 
 MLK_EXTERNAL_API

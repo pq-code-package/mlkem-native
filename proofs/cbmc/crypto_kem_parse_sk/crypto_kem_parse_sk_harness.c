@@ -2,12 +2,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
-#include <indcpa.h>
-#include <poly.h>
+#include <kem.h>
 
 void harness(void)
 {
-  uint8_t *m, *c;
-  mlk_indcpa_secret_key *sk;
-  mlk_indcpa_dec(m, c, sk);
+  uint8_t *sk;
+  mlk_secret_key *sks;
+  crypto_kem_parse_sk(sks, sk);
 }

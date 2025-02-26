@@ -6,6 +6,8 @@
 
 void harness(void)
 {
-  uint8_t *a, *b, *c;
+  uint8_t *c;
+  mlk_indcpa_public_key *a;
+  mlk_indcpa_secret_key *b;
   mlk_indcpa_keypair_derand(a, b, c);
 }
