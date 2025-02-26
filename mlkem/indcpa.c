@@ -48,7 +48,7 @@ MLK_INTERNAL_API
 void mlk_indcpa_marshal_pk(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
                            const mlk_indcpa_public_key *pks)
 {
-  mlk_assert_bound_2d(pks->pkpv, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
+  mlk_assert_bound_2d(pks->pkpv.vec, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
   mlk_polyvec_tobytes(pk, &pks->pkpv);
   memcpy(pk + MLKEM_POLYVECBYTES, pks->seed, MLKEM_SYMBYTES);
 }
@@ -76,7 +76,7 @@ void mlk_indcpa_parse_pk(mlk_indcpa_public_key *pks,
 {
   mlk_polyvec_frombytes(&pks->pkpv, pk);
   memcpy(pks->seed, pk + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
-  mlk_gen_matrix(pks->at, pks->seed, 1);
+  mlk_gen_matrix(pks->at, pk + MLKEM_POLYVECBYTES, 1);
 
   /* NOTE: If a modulus check was conducted on the PK, we know at this
    * point that the coefficients of `pk` are unsigned canonical. The
@@ -185,7 +185,17 @@ __contract__(
   ensures(array_bound(data, 0, MLKEM_N, 0, MLKEM_Q))) { ((void)data); }
 #endif /* MLK_USE_NATIVE_NTT_CUSTOM_ORDER */
 
-static void transpose_matrix(mlk_polyvec a[MLKEM_K])
+static void mlk_transpose_matrix(mlk_polyvec a[MLKEM_K])
+__contract__(
+  requires(memory_no_alias(a, MLKEM_K*sizeof(mlk_polyvec)))
+  requires(forall(k0, 0, MLKEM_K,
+    forall(k1, 0, MLKEM_K,
+      array_bound(a[k0].vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
+  assigns(memory_slice(a, sizeof(mlk_polyvec) * MLKEM_K))
+  ensures(forall(k0, 0, MLKEM_K,
+    forall(k1, 0, MLKEM_K,
+      array_bound(a[k0].vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
+)
 {
   unsigned int i, j, k;
   int16_t t;
@@ -335,7 +345,7 @@ __contract__(
   requires(forall(k0, 0, MLKEM_K,
     forall(k1, 0, MLKEM_K,
       array_bound(a[k0].vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT))))
-  assigns(object_whole(out)))
+  assigns(memory_slice(out, sizeof(mlk_polyvec))))
 {
   unsigned i;
   for (i = 0; i < MLKEM_K; i++)
@@ -363,7 +373,7 @@ void mlk_indcpa_keypair_derand(mlk_indcpa_public_key *pk,
   MLK_ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
   const uint8_t *publicseed = buf;
   const uint8_t *noiseseed = buf + MLKEM_SYMBYTES;
-  mlk_polyvec e;
+  mlk_polyvec e, t;
   mlk_polyvec_mulcache skpv_cache;
 
   MLK_ALIGN uint8_t coins_with_domain_separator[MLKEM_SYMBYTES + 1];
@@ -410,7 +420,12 @@ void mlk_indcpa_keypair_derand(mlk_indcpa_public_key *pk,
   mlk_polyvec_ntt(&e);
 
   mlk_polyvec_mulcache_compute(&skpv_cache, &sk->skpv);
-  mlk_matvec_mul(&pk->pkpv, pk->at, &sk->skpv, &skpv_cache);
+  /* TODO: Eliminate the temporary polyvec t -  this is currently needed because
+    CBMC proofs break with mlk_matvec_mul(&pk->pkpv, pk->at, &sk->skpv,
+    &skpv_cache); because two arguments are part of the same object */
+
+  mlk_matvec_mul(&t, pk->at, &sk->skpv, &skpv_cache);
+  memcpy(&pk->pkpv, &t, sizeof(mlk_polyvec));
   mlk_polyvec_tomont(&pk->pkpv);
 
   mlk_polyvec_add(&pk->pkpv, &e);
@@ -421,7 +436,7 @@ void mlk_indcpa_keypair_derand(mlk_indcpa_public_key *pk,
    * TODO: We can eliminate this by moving the transpose into the matvec_mul
    * Then we can also eliminate the flag from the from the gen_matrix function
    */
-  transpose_matrix(pk->at);
+  mlk_transpose_matrix(pk->at);
 
 
   /* Specification: Partially implements

@@ -27,22 +27,46 @@ typedef struct
 #define mlk_indcpa_marshal_pk MLK_NAMESPACE_K(indcpa_marshal_pk)
 MLK_INTERNAL_API
 void mlk_indcpa_marshal_pk(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                           const mlk_indcpa_public_key *pks);
+                           const mlk_indcpa_public_key *pks)
+__contract__(
+  requires(memory_no_alias(pk,  MLKEM_INDCPA_PUBLICKEYBYTES))
+  requires(memory_no_alias(pks, sizeof(mlk_indcpa_public_key)))
+  requires(forall(k0, 0, MLKEM_K,
+    array_bound(pks->pkpv.vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+  assigns(object_whole(pk))
+);
 
 #define mlk_indcpa_parse_pk MLK_NAMESPACE_K(indcpa_parse_pk)
 MLK_INTERNAL_API
 void mlk_indcpa_parse_pk(mlk_indcpa_public_key *pks,
-                         const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES]);
+                         const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES])
+__contract__(
+  requires(memory_no_alias(pks, sizeof(mlk_indcpa_public_key)))
+  requires(memory_no_alias(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
+  assigns(object_whole(pks))
+);
 
 #define mlk_indcpa_marshal_sk MLK_NAMESPACE_K(indcpa_marshal_sk)
 MLK_INTERNAL_API
 void mlk_indcpa_marshal_sk(uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
-                           const mlk_indcpa_secret_key *sks);
+                           const mlk_indcpa_secret_key *sks)
+__contract__(
+  requires(memory_no_alias(sk,  MLKEM_INDCPA_SECRETKEYBYTES))
+  requires(memory_no_alias(sks, sizeof(mlk_indcpa_secret_key)))
+  requires(forall(k0, 0, MLKEM_K,
+    array_bound(sks->skpv.vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+  assigns(object_whole(sk))
+);
 
 #define mlk_indcpa_parse_sk MLK_NAMESPACE_K(indcpa_parse_sk)
 MLK_INTERNAL_API
 void mlk_indcpa_parse_sk(mlk_indcpa_secret_key *sks,
-                         const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES]);
+                         const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
+__contract__(
+  requires(memory_no_alias(sks, sizeof(mlk_indcpa_secret_key)))
+  requires(memory_no_alias(sk, MLKEM_INDCPA_SECRETKEYBYTES))
+  assigns(object_whole(sks))
+);
 
 #define mlk_gen_matrix MLK_NAMESPACE_K(gen_matrix)
 /*************************************************
@@ -69,7 +93,7 @@ __contract__(
   requires(memory_no_alias(a, sizeof(mlk_polyvec) * MLKEM_K))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
   requires(transposed == 0 || transposed == 1)
-  assigns(object_whole(a))
+  assigns(memory_slice(a, sizeof(mlk_polyvec) * MLKEM_K))
   ensures(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
   array_bound(a[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))));
 );
@@ -99,8 +123,12 @@ __contract__(
   requires(memory_no_alias(pk, sizeof(mlk_indcpa_public_key)))
   requires(memory_no_alias(sk, sizeof(mlk_indcpa_secret_key)))
   requires(memory_no_alias(coins, MLKEM_SYMBYTES))
-  assigns(object_whole(pk))
-  assigns(object_whole(sk))
+  assigns(memory_slice(pk, sizeof(mlk_indcpa_public_key)))
+  assigns(memory_slice(sk, sizeof(mlk_indcpa_secret_key)))
+  ensures(forall(k0, 0, MLKEM_K,
+    array_bound(pk->pkpv.vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+  ensures(forall(k1, 0, MLKEM_K,
+    array_bound(sk->skpv.vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 );
 
 #define mlk_indcpa_enc MLK_NAMESPACE_K(indcpa_enc)
@@ -132,6 +160,10 @@ __contract__(
   requires(memory_no_alias(c, MLKEM_INDCPA_BYTES))
   requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES))
   requires(memory_no_alias(pk, sizeof(mlk_indcpa_public_key)))
+  requires(forall(k0, 0, MLKEM_K,
+    array_bound(pk->pkpv.vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+  requires(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
+      array_bound(pk->at[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
   requires(memory_no_alias(coins, MLKEM_SYMBYTES))
   assigns(object_whole(c))
 );
@@ -161,6 +193,8 @@ __contract__(
   requires(memory_no_alias(c, MLKEM_INDCPA_BYTES))
   requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES))
   requires(memory_no_alias(sk, sizeof(mlk_indcpa_secret_key)))
+  requires(forall(k0, 0, MLKEM_K,
+    array_bound(sk->skpv.vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
   assigns(object_whole(m))
 );
 
