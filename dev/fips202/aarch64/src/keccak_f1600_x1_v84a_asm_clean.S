@@ -81,6 +81,33 @@
     Aso     .req v23
     Asu     .req v24
 
+    /* d-form of the above mapping */
+    Abad     .req d0
+    Abed     .req d1
+    Abid     .req d2
+    Abod     .req d3
+    Abud     .req d4
+    Agad     .req d5
+    Aged     .req d6
+    Agid     .req d7
+    Agod     .req d8
+    Agud     .req d9
+    Akad     .req d10
+    Aked     .req d11
+    Akid     .req d12
+    Akod     .req d13
+    Akud     .req d14
+    Amad     .req d15
+    Amed     .req d16
+    Amid     .req d17
+    Amod     .req d18
+    Amud     .req d19
+    Asad     .req d20
+    Ased     .req d21
+    Asid     .req d22
+    Asod     .req d23
+    Asud     .req d24
+
     /* q-form of the above mapping */
     Abaq    .req q0
     Abeq    .req q1
@@ -152,37 +179,35 @@
 /************************ MACROS ****************************/
 
 .macro load_input
-    ld2 {Aba.d, Abe.d}[0], [input_addr], #16
-    ld2 {Abi.d, Abo.d}[0], [input_addr], #16
-    ld2 {Abu.d, Aga.d}[0], [input_addr], #16
-    ld2 {Age.d, Agi.d}[0], [input_addr], #16
-    ld2 {Ago.d, Agu.d}[0], [input_addr], #16
-    ld2 {Aka.d, Ake.d}[0], [input_addr], #16
-    ld2 {Aki.d, Ako.d}[0], [input_addr], #16
-    ld2 {Aku.d, Ama.d}[0], [input_addr], #16
-    ld2 {Ame.d, Ami.d}[0], [input_addr], #16
-    ld2 {Amo.d, Amu.d}[0], [input_addr], #16
-    ld2 {Asa.d, Ase.d}[0], [input_addr], #16
-    ld2 {Asi.d, Aso.d}[0], [input_addr], #16
-    ld1 {Asu.d}[0], [input_addr], #8
-
-    sub input_addr, input_addr, #(25*8)
+    ldp Abad, Abed, [input_addr, #0x00]
+    ldp Abid, Abod, [input_addr, #0x10]
+    ldp Abud, Agad, [input_addr, #0x20]
+    ldp Aged, Agid, [input_addr, #0x30]
+    ldp Agod, Agud, [input_addr, #0x40]
+    ldp Akad, Aked, [input_addr, #0x50]
+    ldp Akid, Akod, [input_addr, #0x60]
+    ldp Akud, Amad, [input_addr, #0x70]
+    ldp Amed, Amid, [input_addr, #0x80]
+    ldp Amod, Amud, [input_addr, #0x90]
+    ldp Asad, Ased, [input_addr, #0xA0]
+    ldp Asid, Asod, [input_addr, #0xB0]
+    ldr Asud, [input_addr, #0xC0]
 .endm
 
 .macro store_input
-    st2 {Aba.d, Abe.d}[0], [input_addr], #16
-    st2 {Abi.d, Abo.d}[0], [input_addr], #16
-    st2 {Abu.d, Aga.d}[0], [input_addr], #16
-    st2 {Age.d, Agi.d}[0], [input_addr], #16
-    st2 {Ago.d, Agu.d}[0], [input_addr], #16
-    st2 {Aka.d, Ake.d}[0], [input_addr], #16
-    st2 {Aki.d, Ako.d}[0], [input_addr], #16
-    st2 {Aku.d, Ama.d}[0], [input_addr], #16
-    st2 {Ame.d, Ami.d}[0], [input_addr], #16
-    st2 {Amo.d, Amu.d}[0], [input_addr], #16
-    st2 {Asa.d, Ase.d}[0], [input_addr], #16
-    st2 {Asi.d, Aso.d}[0], [input_addr], #16
-    st1 {Asu.d}[0], [input_addr], #8
+    stp Abad, Abed, [input_addr, #0x00]
+    stp Abid, Abod, [input_addr, #0x10]
+    stp Abud, Agad, [input_addr, #0x20]
+    stp Aged, Agid, [input_addr, #0x30]
+    stp Agod, Agud, [input_addr, #0x40]
+    stp Akad, Aked, [input_addr, #0x50]
+    stp Akid, Akod, [input_addr, #0x60]
+    stp Akud, Amad, [input_addr, #0x70]
+    stp Amed, Amid, [input_addr, #0x80]
+    stp Amod, Amud, [input_addr, #0x90]
+    stp Asad, Ased, [input_addr, #0xA0]
+    stp Asid, Asod, [input_addr, #0xB0]
+    str Asud, [input_addr, #0xC0]
 .endm
 
 #define STACK_SIZE (16*4 + 16*6) /* VREGS (16*4) + GPRS (TODO: Remove) */
@@ -386,6 +411,31 @@ keccak_f1600_x1_v84a_loop:
     .unreq Asiq
     .unreq Asoq
     .unreq Asuq
+    .unreq Abad
+    .unreq Abed
+    .unreq Abid
+    .unreq Abod
+    .unreq Abud
+    .unreq Agad
+    .unreq Aged
+    .unreq Agid
+    .unreq Agod
+    .unreq Agud
+    .unreq Akad
+    .unreq Aked
+    .unreq Akid
+    .unreq Akod
+    .unreq Akud
+    .unreq Amad
+    .unreq Amed
+    .unreq Amid
+    .unreq Amod
+    .unreq Amud
+    .unreq Asad
+    .unreq Ased
+    .unreq Asid
+    .unreq Asod
+    .unreq Asud
     .unreq C0
     .unreq C1
     .unreq C2
