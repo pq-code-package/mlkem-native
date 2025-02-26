@@ -1,0 +1,87 @@
+# SPDX-License-Identifier: Apache-2.0
+
+name: CBMC
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+    types: [ "opened", "synchronize" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cbmc_k2:
+    name: CBMC (ML-KEM-512)
+    if: ${{ github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    uses: ./.github/workflows/ci_ec2_reusable.yml
+    with:
+      name: CBMC (MLKEM-512)
+      ec2_instance_type: c7g.2xlarge
+      ec2_ami: ubuntu-latest (custom AMI)
+      ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
+      compile_mode: native
+      opt: no_opt
+      lint: false
+      verbose: true
+      functest: true
+      kattest: false
+      nistkattest: false
+      acvptest: false
+      cbmc: true
+      cbmc_mlkem_k: 2
+    secrets: inherit
+  cbmc_k3:
+    name: CBMC (ML-KEM-768)
+    if: ${{ github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    uses: ./.github/workflows/ci_ec2_reusable.yml
+    with:
+      name: CBMC (MLKEM-768)
+      ec2_instance_type: c7g.2xlarge
+      ec2_ami: ubuntu-latest (custom AMI)
+      ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
+      compile_mode: native
+      opt: no_opt
+      lint: false
+      verbose: true
+      functest: true
+      kattest: false
+      nistkattest: false
+      acvptest: false
+      cbmc: true
+      cbmc_mlkem_k: 3
+    secrets: inherit
+  cbmc_k4:
+    name: CBMC (ML-KEM-1024)
+    if: ${{ github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    uses: ./.github/workflows/ci_ec2_reusable.yml
+    with:
+      name: CBMC (MLKEM-1024)
+      ec2_instance_type: c7g.2xlarge
+      ec2_ami: ubuntu-latest (custom AMI)
+      ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
+      compile_mode: native
+      opt: no_opt
+      lint: false
+      verbose: true
+      functest: true
+      kattest: false
+      nistkattest: false
+      acvptest: false
+      cbmc: true
+      cbmc_mlkem_k: 4
+    secrets: inherit
