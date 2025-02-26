@@ -78,60 +78,176 @@ typedef struct
 
 MLK_EXTERNAL_API
 void crypto_kem_marshal_pk(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                           const mlk_public_key *pks);
+                           const mlk_public_key *pks)
+__contract__(
+  requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
+  requires(memory_no_alias(pks, sizeof(mlk_public_key)))
+  requires(forall(k0, 0, MLKEM_K,
+    array_bound(((mlk_public_key_internal *)pks)->indcpa_pk.pkpv.vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+  assigns(object_whole(pk))
+);
 
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_parse_pk(mlk_public_key *pks,
-                        const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES]);
+                        const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+__contract__(
+  requires(memory_no_alias(pks, sizeof(mlk_public_key)))
+  requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
+  assigns(object_whole(pks))
+  ensures(forall(k0, 0, MLKEM_K,
+    array_bound(((mlk_public_key_internal *)pks)->indcpa_pk.pkpv.vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+  ensures(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
+      array_bound(((mlk_public_key_internal *)pks)->indcpa_pk.at[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
+);
 
 
 MLK_EXTERNAL_API
 void crypto_kem_marshal_sk(uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
-                           const mlk_secret_key *sks);
+                           const mlk_secret_key *sks)
+__contract__(
+  requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
+  requires(memory_no_alias(sks, sizeof(mlk_secret_key)))
+  requires(forall(k0, 0, MLKEM_K,
+    array_bound(((mlk_secret_key_internal *)sks)->indcpa_pk.pkpv.vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+  requires(forall(k1, 0, MLKEM_K,
+    array_bound(((mlk_secret_key_internal *)sks)->indcpa_sk.skpv.vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+  assigns(object_whole(sk))
+);
 
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_parse_sk(mlk_secret_key *sks,
-                        const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES]);
+                        const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+__contract__(
+  requires(memory_no_alias(sks, sizeof(mlk_secret_key)))
+  requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
+  assigns(object_whole(sks))
+  ensures(forall(k0, 0, MLKEM_K,
+    array_bound(((mlk_secret_key_internal *)sks)->indcpa_sk.skpv.vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+  ensures(forall(k1, 0, MLKEM_K,
+    array_bound(((mlk_secret_key_internal *)sks)->indcpa_pk.pkpv.vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+  ensures(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
+    array_bound(((mlk_secret_key_internal *)sks)->indcpa_pk.at[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
+);
 
 
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_keypair_derand_struct(mlk_public_key *pk, mlk_secret_key *sk,
-                                     const uint8_t coins[2 * MLKEM_SYMBYTES]);
+                                     const uint8_t coins[2 * MLKEM_SYMBYTES])
+__contract__(
+  requires(memory_no_alias(pk, sizeof(mlk_public_key)))
+  requires(memory_no_alias(sk, sizeof(mlk_secret_key)))
+  requires(memory_no_alias(coins, 2 * MLKEM_SYMBYTES))
+  assigns(object_whole(pk))
+  assigns(object_whole(sk))
+  ensures(forall(k0, 0, MLKEM_K,
+    array_bound(((mlk_public_key_internal *)pk)->indcpa_pk.pkpv.vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+  ensures(forall(k1, 0, MLKEM_K,
+    array_bound(((mlk_secret_key_internal *)sk)->indcpa_pk.pkpv.vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+  ensures(forall(k2, 0, MLKEM_K,
+    array_bound(((mlk_secret_key_internal *)sk)->indcpa_sk.skpv.vec[k2].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+);
 
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_keypair_struct(mlk_public_key *pk, mlk_secret_key *sk);
+int crypto_kem_keypair_struct(mlk_public_key *pk, mlk_secret_key *sk)
+__contract__(
+  requires(memory_no_alias(pk, sizeof(mlk_public_key)))
+  requires(memory_no_alias(sk, sizeof(mlk_secret_key)))
+  assigns(object_whole(pk))
+  assigns(object_whole(sk))
+  ensures(forall(k0, 0, MLKEM_K,
+    array_bound(((mlk_public_key_internal *)pk)->indcpa_pk.pkpv.vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+  ensures(forall(k1, 0, MLKEM_K,
+    array_bound(((mlk_secret_key_internal *)sk)->indcpa_pk.pkpv.vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+  ensures(forall(k2, 0, MLKEM_K,
+    array_bound(((mlk_secret_key_internal *)sk)->indcpa_sk.skpv.vec[k2].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+);
+
 
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_enc_derand_struct(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                                  uint8_t ss[MLKEM_SSBYTES],
                                  const mlk_public_key *pk,
-                                 const uint8_t coins[MLKEM_SYMBYTES]);
+                                 const uint8_t coins[MLKEM_SYMBYTES])
+__contract__(
+  requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
+  requires(memory_no_alias(ss, MLKEM_SSBYTES))
+  requires(memory_no_alias(pk, sizeof(mlk_public_key)))
+  requires(memory_no_alias(coins, MLKEM_SYMBYTES))
+  requires(forall(k0, 0, MLKEM_K,
+    array_bound(((mlk_public_key_internal *)pk)->indcpa_pk.pkpv.vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+  requires(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
+      array_bound(((mlk_public_key_internal *)pk)->indcpa_pk.at[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
+  assigns(object_whole(ct))
+  assigns(object_whole(ss))
+);
 
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_enc_struct(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                          uint8_t ss[MLKEM_SSBYTES], const mlk_public_key *pk);
+                          uint8_t ss[MLKEM_SSBYTES], const mlk_public_key *pk)
+__contract__(
+  requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
+  requires(memory_no_alias(ss, MLKEM_SSBYTES))
+  requires(memory_no_alias(pk, sizeof(mlk_public_key)))
+  requires(forall(k0, 0, MLKEM_K,
+    array_bound(((mlk_public_key_internal *)pk)->indcpa_pk.pkpv.vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+  requires(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
+      array_bound(((mlk_public_key_internal *)pk)->indcpa_pk.at[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
+  assigns(object_whole(ct))
+  assigns(object_whole(ss))
+);
 
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_dec_struct(uint8_t ss[MLKEM_SSBYTES],
                           const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                          const mlk_secret_key *sk);
-
+                          const mlk_secret_key *sk)
+__contract__(
+  requires(memory_no_alias(ss, MLKEM_SSBYTES))
+  requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
+  requires(memory_no_alias(sk, sizeof(mlk_secret_key)))
+  requires(forall(k0, 0, MLKEM_K,
+    array_bound(((mlk_secret_key_internal *)sk)->indcpa_sk.skpv.vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+  requires(forall(k1, 0, MLKEM_K,
+    array_bound(((mlk_secret_key_internal *)sk)->indcpa_pk.pkpv.vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+  requires(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
+    array_bound(((mlk_secret_key_internal *)sk)->indcpa_pk.at[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
+  assigns(object_whole(ss))
+);
 
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_sk_from_seed(mlk_secret_key *sk,
-                            const uint8_t coins[2 * MLKEM_SYMBYTES]);
+                            const uint8_t coins[2 * MLKEM_SYMBYTES])
+__contract__(
+  requires(memory_no_alias(sk, sizeof(mlk_secret_key)))
+  requires(memory_no_alias(coins, 2 * MLKEM_SYMBYTES))
+  assigns(object_whole(sk))
+  assigns(object_whole(coins))
+  ensures(forall(k0, 0, MLKEM_K,
+    array_bound(((mlk_secret_key_internal *)sk)->indcpa_sk.skpv.vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+  ensures(forall(k1, 0, MLKEM_K,
+    array_bound(((mlk_secret_key_internal *)sk)->indcpa_pk.pkpv.vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+  ensures(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
+    array_bound(((mlk_secret_key_internal *)sk)->indcpa_pk.at[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
+);
 
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_pk_from_sk(mlk_public_key *pk, mlk_secret_key *sk);
+int crypto_kem_pk_from_sk(mlk_public_key *pk, mlk_secret_key *sk)
+__contract__(
+  requires(memory_no_alias(pk, sizeof(mlk_public_key)))
+  requires(memory_no_alias(sk, sizeof(mlk_secret_key)))
+  assigns(object_whole(pk))
+  assigns(object_whole(sk))
+  ensures(forall(k0, 0, MLKEM_K,
+    array_bound(((mlk_public_key_internal *)pk)->indcpa_pk.pkpv.vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+);
 
 /*************************************************
  * Name:        crypto_kem_keypair_derand

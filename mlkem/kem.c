@@ -250,28 +250,21 @@ int crypto_kem_keypair_derand_struct(mlk_public_key *pk, mlk_secret_key *sk,
   mlk_secret_key_internal *ski = (mlk_secret_key_internal *)sk;
   MLK_ALIGN uint8_t pks[MLKEM_INDCCA_PUBLICKEYBYTES];
 
-  mlk_indcpa_keypair_derand(&ski->indcpa_pk, &ski->indcpa_sk, coins);
+  mlk_indcpa_keypair_derand(&pki->indcpa_pk, &ski->indcpa_sk, coins);
 
   /* pre-compute H(pk) */
-  mlk_indcpa_marshal_pk(pks, &ski->indcpa_pk);
-  mlk_hash_h(ski->hpk, pks, MLKEM_INDCCA_PUBLICKEYBYTES);
+  mlk_indcpa_marshal_pk(pks, &pki->indcpa_pk);
+  mlk_hash_h(pki->hpk, pks, MLKEM_INDCCA_PUBLICKEYBYTES);
 
-  /*
-   * copy over indcpa pk and H(pk) to public key
-   * pk is NULL during parsing before decaps as the pk is not needed
-   **/
-  if (pk != NULL)
-  {
-    memcpy(&pki->indcpa_pk, &ski->indcpa_pk, sizeof(mlk_indcpa_public_key));
-    memcpy(pki->hpk, ski->hpk, MLKEM_SYMBYTES);
-  }
+  /* copy over indcpa pk and H(pk) */
+  memcpy(&ski->indcpa_pk, &pki->indcpa_pk, sizeof(mlk_indcpa_public_key));
+  memcpy(ski->hpk, pki->hpk, MLKEM_SYMBYTES);
 
   /* Value z for pseudo-random output on reject */
   memcpy(ski->z, coins + MLKEM_SYMBYTES, MLKEM_SYMBYTES);
 
   /* Declassify public key */
   MLK_CT_TESTING_DECLASSIFY(&pki->indcpa_pk, sizeof(mlk_indcpa_public_key));
-
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
@@ -506,6 +499,8 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   }
 
   res = crypto_kem_dec_struct(ss, ct, &sks);
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(&sks, sizeof(mlk_secret_key));
   return res;
 }
@@ -515,7 +510,13 @@ MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_sk_from_seed(mlk_secret_key *sk,
                             const uint8_t coins[2 * MLKEM_SYMBYTES])
 {
-  return crypto_kem_keypair_derand_struct(NULL, sk, coins);
+  mlk_public_key pk;
+  int ret;
+  ret = crypto_kem_keypair_derand_struct(&pk, sk, coins);
+  /* Specification: Partially implements
+   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
+  mlk_zeroize(&pk, sizeof(mlk_public_key));
+  return ret;
 }
 
 MLK_EXTERNAL_API
