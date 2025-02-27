@@ -4,13 +4,16 @@ name: CBMC
 permissions:
   contents: read
 on:
+  workflow_call:
   workflow_dispatch:
-  workflow_run:
-    workflows: [ "Base tests" ]
-    types: [ completed ]
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+    types: [ "opened", "synchronize" ]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_branch }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
