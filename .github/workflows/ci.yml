@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-name: Extended tests
+name: Extended
 permissions:
   contents: read
 on:
