@@ -4,11 +4,8 @@ name: Test liboqs integration
 permissions:
   contents: read
 on:
+  workflow_call:
   workflow_dispatch:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
 
 jobs:
   check-oqs-source-list:

@@ -1,20 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
-name: Extended tests
+name: Extended
 permissions:
   contents: read
 on:
   workflow_call:
   workflow_dispatch:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
-    types: [ "opened", "synchronize" ]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   build_kat:
