@@ -19,6 +19,9 @@ inputs:
   gh_token:
     description: Github access token to use
     required: true
+  cc:
+    description: Compiler to use for compilation
+    default: ""
   cflags:
     description: CFLAGS to pass to compilation
     default: ""
@@ -56,6 +59,7 @@ runs:
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
           cflags: ${{ inputs.cflags }}
+          cc: ${{ inputs.cc }}
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
@@ -72,6 +76,7 @@ runs:
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
           cflags: ${{ inputs.cflags }}
+          cc: ${{ inputs.cc }}
           cross_prefix: x86_64-unknown-linux-gnu-
           exec_wrapper: qemu-x86_64
           opt: ${{ inputs.opt }}
@@ -90,6 +95,7 @@ runs:
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
           cflags: ${{ inputs.cflags }}
+          cc: ${{ inputs.cc }}
           cross_prefix: aarch64-unknown-linux-gnu-
           exec_wrapper: qemu-aarch64
           opt: ${{ inputs.opt }}
@@ -108,6 +114,7 @@ runs:
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
           cflags: "${{ inputs.cflags }} -static"
+          cc: ${{ inputs.cc }}
           cross_prefix: aarch64_be-none-linux-gnu-
           exec_wrapper: qemu-aarch64_be
           opt: ${{ inputs.opt }}
@@ -126,6 +133,7 @@ runs:
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
           cflags: ${{ inputs.cflags }}
+          cc: ${{ inputs.cc }}
           cross_prefix: riscv64-unknown-linux-gnu-
           exec_wrapper: qemu-riscv64
           opt: ${{ inputs.opt }}
