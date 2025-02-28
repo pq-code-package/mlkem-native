@@ -122,9 +122,9 @@ $(BUILD_DIR)/%.S.o: %.S
 
 $(BINARY_NAME_FULL): $(APP_SOURCE) $(MLK_OBJ_ASM)
 	$(Q)echo "CC  $@"
-	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) $(INC) $^ -o $@
-	$(Q)strip -S $@
+	[ -d $(@D) ] || mkdir -p $(@D)
+	$(CC) $(CFLAGS) $(INC) $^ -o $@
+	strip -S $@
 
 all: build
 

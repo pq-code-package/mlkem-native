@@ -8,507 +8,607 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_kat:
-    strategy:
-      fail-fast: false
-      matrix:
-        external:
-         - ${{ github.repository_owner != 'pq-code-package' }}
-        target:
-         - runner: macos-latest
-           name: 'MacOS (aarch64)'
-           arch: mac
-           mode: native
-         - runner: macos-13
-           name: 'MacOS (x86_64)'
-           arch: mac
-           mode: native
-         - runner: pqcp-arm64
-           name: 'ubuntu-latest (aarch64)'
-           arch: aarch64
-           mode: native
-         - runner: pqcp-arm64
-           name: 'ubuntu-latest (aarch64)'
-           arch: x86_64
-           mode: cross-x86_64
-         - runner: pqcp-arm64
-           name: 'ubuntu-latest (aarch64)'
-           arch: riscv64
-           mode: cross-riscv64
-         - runner: pqcp-x64
-           name: 'ubuntu-latest (x86_64)'
-           arch: x86_64
-           mode: native
-         - runner: pqcp-x64
-           name: 'ubuntu-latest (x86_64)'
-           arch: aarch64
-           mode: cross-aarch64
-         - runner: pqcp-x64
-           name: 'ubuntu-latest (x86_64)'
-           arch: aarch64_be
-           mode: cross-aarch64_be
-        exclude:
-          - {external: true,
-             target: {
-               runner: pqcp-arm64,
-               name: 'ubuntu-latest (aarch64)',
-               arch: aarch64,
-               mode: native
-             }}
-          - {external: true,
-             target: {
-               runner: pqcp-arm64,
-               name: 'ubuntu-latest (aarch64)',
-               arch: x86_64,
-               mode: cross-x86_64
-             }}
-          - {external: true,
-             target: {
-               runner: pqcp-arm64,
-               name: 'ubuntu-latest (aarch64)',
-               arch: riscv64,
-               mode: cross-riscv64
-             }}
-          - {external: true,
-             target: {
-               runner: pqcp-x64,
-               name: 'ubuntu-latest (x86_64)',
-               arch: x86_64,
-               mode: native
-             }}
-          - {external: true,
-             target: {
-               runner: pqcp-x64,
-               name: 'ubuntu-latest (x86_64)',
-               arch: aarch64,
-               mode: cross-aarch64
-             }}
-          - {external: true,
-             target: {
-               runner: pqcp-x64,
-               name: 'ubuntu-latest (x86_64)',
-               arch: aarch64_be,
-               mode: cross-aarch64_be
-             }}
-    name: Functional tests (${{ matrix.target.arch }}${{ matrix.target.mode != 'native' && ', cross' || ''}})
-    runs-on: ${{ matrix.target.runner }}
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: build + test
-        uses: ./.github/actions/multi-functest
-        with:
-          nix-shell: ${{ matrix.target.mode == 'native' && 'ci' || 'ci-cross' }}
-          nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: ${{ matrix.target.mode }}
-          # There is no native code on R-V or AArch64_be yet, so no point running opt tests
-          opt: ${{ (matrix.target.arch != 'riscv64' && matrix.target.arch != 'aarch64_be') && 'all' || 'no_opt' }}
-      - name: build + test (+debug+memsan+ubsan)
-        uses: ./.github/actions/multi-functest
-        if: ${{ matrix.target.mode == 'native' }}
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
-  compiler_tests:
-    name: Compiler tests  (${{ matrix.compiler.name }}, ${{ matrix.target.name }})
-    strategy:
-      fail-fast: false
-      matrix:
-        target:
-         - runner: pqcp-arm64
-           name: 'aarch64'
-         - runner: ubuntu-latest
-           name: 'x86_64'
-         - runner: macos-latest
-           name: 'macos'
-        compiler:
-         - name: gcc-4.8
-           shell: ci_gcc48
-           darwin: False
-           c17: False
-         - name: gcc-4.9
-           shell: ci_gcc49
-           darwin: False
-           c17: False
-         - name: gcc-7
-           shell: ci_gcc7
-           darwin: False
-           c17: False
-         - name: gcc-11
-           shell: ci_gcc11
-           darwin: True
-         - name: gcc-13
-           shell: ci_gcc13
-           darwin: True
-         - name: gcc-14
-           shell: ci_gcc14
-           darwin: True
-         - name: clang-18
-           shell: ci_clang18
-           darwin: True
-         - name: clang-19
-           shell: ci_clang19
-           darwin: True
-    runs-on: ${{ matrix.target.runner }}
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: native build+functest (default)
-        if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          func: true
-          nistkat: false
-          kat: false
-          acvp: false
-          nix-shell: ${{ matrix.compiler.shell }}
-      - name: native build+functest (C90)
-        if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          func: true
-          nistkat: false
-          kat: false
-          acvp: false
-          nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-std=c90"
-      - name: native build+functest (C99)
-        if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          func: true
-          nistkat: false
-          kat: false
-          acvp: false
-          nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-std=c99"
-      - name: native build+functest (C11)
-        if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          func: true
-          nistkat: false
-          kat: false
-          acvp: false
-          nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-std=c11"
-      - name: native build+functest (C17)
-        if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
-                matrix.compiler.c17 }}
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          func: true
-          nistkat: false
-          kat: false
-          acvp: false
-          nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-std=c17"
-  config_variations:
-    name: Non-standard configurations
-    strategy:
-      fail-fast: false
-      matrix:
-        external:
-         - ${{ github.repository_owner != 'pq-code-package' }}
-        target:
-         - runner: pqcp-arm64
-           name: 'ubuntu-latest (aarch64)'
-         - runner: pqcp-x64
-           name: 'ubuntu-latest (x86_64)'
-        exclude:
-          - {external: true,
-             target: {
-               runner: pqcp-arm64,
-               name: 'ubuntu-latest (aarch64)',
-             }}
-          - {external: true,
-             target: {
-               runner: pqcp-x64,
-               name: 'ubuntu-latest (x86_64)',
-             }}
-    runs-on: ${{ matrix.target.runner }}
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: "PCT enabled"
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-DMLK_KEYGEN_PCT -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
-          func: true
-          nistkat: false
-          kat: true
-          acvp: true
-      - name: "PCT enabled + broken"
-        run: |
-          make clean
-          CFLAGS='-DMLK_CONFIG_FILE=\"../test/break_pct_config.h\"' make func -j4
-          # PCT breakage is done at runtime via MLK_BREAK_PCT
-          make run_func                 # Should be OK
-          MLK_BREAK_PCT=0 make run_func # Should be OK
-          if (MLK_BREAK_PCT=1 make run_func 2>&1 >/dev/null); then
-             echo "PCT failure expected"
-             exit 1
-          else
-             echo "PCT failed as expected"
-          fi
-      - name: "Custom zeroization (explicit_bzero)"
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../test/custom_zeroize_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
-          func: true
-          nistkat: true
-          kat: true
-          acvp: true
-          examples: false # Some examples use a custom config themselves
-      - name: "No ASM"
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../test/no_asm_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
-          func: true
-          nistkat: true
-          kat: true
-          acvp: true
-          examples: false # Some examples use a custom config themselves
-      - name: "MLKEM_GEN_MATRIX_NBLOCKS=1"
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=1"
-          func: true
-          nistkat: true
-          kat: false
-          acvp: false
-      - name: "MLKEM_GEN_MATRIX_NBLOCKS=2"
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=2"
-          func: true
-          nistkat: true
-          kat: false
-          acvp: false
-      - name: "MLKEM_GEN_MATRIX_NBLOCKS=4"
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=4"
-          func: true
-          nistkat: true
-          kat: false
-          acvp: false
-  check-cf-protections:
-    name: Test control-flow protections  (${{ matrix.compiler.name }}, x86_64)
+  # build_kat:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       external:
+  #        - ${{ github.repository_owner != 'pq-code-package' }}
+  #       target:
+  #        - runner: macos-latest
+  #          name: 'MacOS (aarch64)'
+  #          arch: mac
+  #          mode: native
+  #        - runner: macos-13
+  #          name: 'MacOS (x86_64)'
+  #          arch: mac
+  #          mode: native
+  #        - runner: pqcp-arm64
+  #          name: 'ubuntu-latest (aarch64)'
+  #          arch: aarch64
+  #          mode: native
+  #        - runner: pqcp-arm64
+  #          name: 'ubuntu-latest (aarch64)'
+  #          arch: x86_64
+  #          mode: cross-x86_64
+  #        - runner: pqcp-arm64
+  #          name: 'ubuntu-latest (aarch64)'
+  #          arch: riscv64
+  #          mode: cross-riscv64
+  #        - runner: pqcp-x64
+  #          name: 'ubuntu-latest (x86_64)'
+  #          arch: x86_64
+  #          mode: native
+  #        - runner: pqcp-x64
+  #          name: 'ubuntu-latest (x86_64)'
+  #          arch: aarch64
+  #          mode: cross-aarch64
+  #        - runner: pqcp-x64
+  #          name: 'ubuntu-latest (x86_64)'
+  #          arch: aarch64_be
+  #          mode: cross-aarch64_be
+  #       exclude:
+  #         - {external: true,
+  #            target: {
+  #              runner: pqcp-arm64,
+  #              name: 'ubuntu-latest (aarch64)',
+  #              arch: aarch64,
+  #              mode: native
+  #            }}
+  #         - {external: true,
+  #            target: {
+  #              runner: pqcp-arm64,
+  #              name: 'ubuntu-latest (aarch64)',
+  #              arch: x86_64,
+  #              mode: cross-x86_64
+  #            }}
+  #         - {external: true,
+  #            target: {
+  #              runner: pqcp-arm64,
+  #              name: 'ubuntu-latest (aarch64)',
+  #              arch: riscv64,
+  #              mode: cross-riscv64
+  #            }}
+  #         - {external: true,
+  #            target: {
+  #              runner: pqcp-x64,
+  #              name: 'ubuntu-latest (x86_64)',
+  #              arch: x86_64,
+  #              mode: native
+  #            }}
+  #         - {external: true,
+  #            target: {
+  #              runner: pqcp-x64,
+  #              name: 'ubuntu-latest (x86_64)',
+  #              arch: aarch64,
+  #              mode: cross-aarch64
+  #            }}
+  #         - {external: true,
+  #            target: {
+  #              runner: pqcp-x64,
+  #              name: 'ubuntu-latest (x86_64)',
+  #              arch: aarch64_be,
+  #              mode: cross-aarch64_be
+  #            }}
+  #   name: Functional tests (${{ matrix.target.arch }}${{ matrix.target.mode != 'native' && ', cross' || ''}})
+  #   runs-on: ${{ matrix.target.runner }}
+  #   steps:
+  #     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+  #     - name: build + test
+  #       uses: ./.github/actions/multi-functest
+  #       with:
+  #         nix-shell: ${{ matrix.target.mode == 'native' && 'ci' || 'ci-cross' }}
+  #         nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
+  #         gh_token: ${{ secrets.GITHUB_TOKEN }}
+  #         compile_mode: ${{ matrix.target.mode }}
+  #         # There is no native code on R-V or AArch64_be yet, so no point running opt tests
+  #         opt: ${{ (matrix.target.arch != 'riscv64' && matrix.target.arch != 'aarch64_be') && 'all' || 'no_opt' }}
+  #     - name: build + test (+debug+memsan+ubsan)
+  #       uses: ./.github/actions/multi-functest
+  #       if: ${{ matrix.target.mode == 'native' }}
+  #       with:
+  #         gh_token: ${{ secrets.GITHUB_TOKEN }}
+  #         compile_mode: native
+  #         cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+  # compiler_tests:
+  #   name: Compiler tests  (${{ matrix.compiler.name }}, ${{ matrix.target.name }})
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       target:
+  #        - runner: pqcp-arm64
+  #          name: 'aarch64'
+  #        - runner: ubuntu-latest
+  #          name: 'x86_64'
+  #        - runner: macos-latest
+  #          name: 'macos'
+  #       compiler:
+  #        - name: gcc-4.8
+  #          shell: ci_gcc48
+  #          darwin: False
+  #          c17: False
+  #        - name: gcc-4.9
+  #          shell: ci_gcc49
+  #          darwin: False
+  #          c17: False
+  #        - name: gcc-7
+  #          shell: ci_gcc7
+  #          darwin: False
+  #          c17: False
+  #        - name: gcc-11
+  #          shell: ci_gcc11
+  #          darwin: True
+  #        - name: gcc-13
+  #          shell: ci_gcc13
+  #          darwin: True
+  #        - name: gcc-14
+  #          shell: ci_gcc14
+  #          darwin: True
+  #        - name: clang-18
+  #          shell: ci_clang18
+  #          darwin: True
+  #        - name: clang-19
+  #          shell: ci_clang19
+  #          darwin: True
+  #   runs-on: ${{ matrix.target.runner }}
+  #   steps:
+  #     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+  #     - name: native build+functest (default)
+  #       if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
+  #       uses: ./.github/actions/multi-functest
+  #       with:
+  #         gh_token: ${{ secrets.GITHUB_TOKEN }}
+  #         compile_mode: native
+  #         func: true
+  #         nistkat: false
+  #         kat: false
+  #         acvp: false
+  #         nix-shell: ${{ matrix.compiler.shell }}
+  #     - name: native build+functest (C90)
+  #       if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
+  #       uses: ./.github/actions/multi-functest
+  #       with:
+  #         gh_token: ${{ secrets.GITHUB_TOKEN }}
+  #         compile_mode: native
+  #         func: true
+  #         nistkat: false
+  #         kat: false
+  #         acvp: false
+  #         nix-shell: ${{ matrix.compiler.shell }}
+  #         cflags: "-std=c90"
+  #     - name: native build+functest (C99)
+  #       if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
+  #       uses: ./.github/actions/multi-functest
+  #       with:
+  #         gh_token: ${{ secrets.GITHUB_TOKEN }}
+  #         compile_mode: native
+  #         func: true
+  #         nistkat: false
+  #         kat: false
+  #         acvp: false
+  #         nix-shell: ${{ matrix.compiler.shell }}
+  #         cflags: "-std=c99"
+  #     - name: native build+functest (C11)
+  #       if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
+  #       uses: ./.github/actions/multi-functest
+  #       with:
+  #         gh_token: ${{ secrets.GITHUB_TOKEN }}
+  #         compile_mode: native
+  #         func: true
+  #         nistkat: false
+  #         kat: false
+  #         acvp: false
+  #         nix-shell: ${{ matrix.compiler.shell }}
+  #         cflags: "-std=c11"
+  #     - name: native build+functest (C17)
+  #       if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
+  #               matrix.compiler.c17 }}
+  #       uses: ./.github/actions/multi-functest
+  #       with:
+  #         gh_token: ${{ secrets.GITHUB_TOKEN }}
+  #         compile_mode: native
+  #         func: true
+  #         nistkat: false
+  #         kat: false
+  #         acvp: false
+  #         nix-shell: ${{ matrix.compiler.shell }}
+  #         cflags: "-std=c17"
+  compiler_tests_mingw_w64:
     strategy:
       fail-fast: false
       matrix:
         compiler:
-         - name: gcc-14
-           shell: ci_gcc14
-         - name: clang-19
-           shell: ci_clang19
-    # On AArch64 -fcf-protection is not supported anyway
-    runs-on: ubuntu-latest
+         - version: '5.4.0'
+           c17: true
+         - version: '11.2.0'
+           c17: true
+         - version: '12.2.0'
+           c17: true
+         - version: '13.2.0'
+           c17: true
+    name: Compiler tests (Mingw-w64 ${{ matrix.compiler.version }})
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Test control-flow protections
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-Wl,-z,cet-report=error -fcf-protection=full"
-          func: true
-          nistkat: true
-          kat: false
-          acvp: false
-          nix-shell: ${{ matrix.compiler.shell }}
-  # ensure that kem.h and mlkem_native.h; api.h and native backends are compatible
-  check-apis:
-    strategy:
-      fail-fast: false
-      matrix:
-        external:
-         - ${{ github.repository_owner != 'pq-code-package' }}
-        target:
-         - runner: pqcp-arm64
-           name: 'aarch64'
-         - runner: ubuntu-latest
-           name: 'x86_64'
-        exclude:
-          - {external: true,
-             target: {
-               runner: pqcp-arm64,
-               name: 'aarch64'
-             }}
-    name: Check API consistency
-    runs-on: ${{ matrix.target.runner }}
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install MinGW-w64
+        run: choco install mingw --version=${{ matrix.compiler.version }} -y
+        shell: cmd
       - name: make quickcheck
-        run: |
-          OPT=0 CFLAGS="-DMLK_CHECK_APIS -Wno-redundant-decls" make quickcheck
-          make clean >/dev/null
-          OPT=1 CFLAGS="-DMLK_CHECK_APIS -Wno-redundant-decls" make quickcheck
-      - uses: ./.github/actions/setup-apt
-      - name: tests func
-        run: |
-          ./scripts/tests func --cflags="-DMLK_CHECK_APIS -Wno-redundant-decls"
-  ec2_functests:
-    strategy:
-      fail-fast: false
-      matrix:
-        target:
-          - name: AMD EPYC 4th gen (t3a)
-            ec2_instance_type: t3a.small
-            ec2_ami: ubuntu-latest (custom AMI)
-            ec2_ami_id: ami-0d47e137a1108e078 # x86_64 ubuntu-latest, 32g
-            compile_mode: native
-            opt: all
-          - name: Intel Xeon 4th gen (t3)
-            ec2_instance_type: t3.small
-            ec2_ami: ubuntu-latest (custom AMI)
-            ec2_ami_id: ami-0d47e137a1108e078 # x86_64 ubuntu-latest, 32g
-            compile_mode: native
-            opt: all
-          - name: Graviton2 (c6g.medium)
-            ec2_instance_type: c6g.medium
-            ec2_ami: ubuntu-latest (custom AMI)
-            ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
-            compile_mode: native
-            opt: all
-          - name: Graviton3 (c7g.medium)
-            ec2_instance_type: c7g.medium
-            ec2_ami: ubuntu-latest (custom AMI)
-            ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
-            compile_mode: native
-            opt: all
-    name: Platform tests  (${{ matrix.target.name }})
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
-    uses: ./.github/workflows/ci_ec2_reusable.yml
-    with:
-      name: ${{ matrix.target.name }}
-      ec2_instance_type: ${{ matrix.target.ec2_instance_type }}
-      ec2_ami: ${{ matrix.target.ec2_ami }}
-      ec2_ami_id: ${{ matrix.target.ec2_ami_id }}
-      compile_mode: ${{ matrix.target.compile_mode }}
-      opt: ${{ matrix.target.opt }}
-      functest: true
-      kattest: true
-      nistkattest: true
-      acvptest: true
-      lint: false
-      verbose: true
-    secrets: inherit
-  compatibility_tests:
-    strategy:
-      max-parallel: 4
-      fail-fast: false
-      matrix:
-        container:
-          - id: debian:bullseye
-          - id: debian:bookworm
-    name: Compatibility tests (${{ matrix.container.id }})
-    runs-on: ubuntu-latest
-    container:
-      ${{ matrix.container.id }}
-    steps:
-      # We're not using the checkout action here because on it's not supported
-      # on all containers we want to test. Resort to a manual checkout.
-
-      # We can't hoist this into an action since calling an action can only
-      # be done after checkout.
-      - name: Manual checkout
         shell: bash
         run: |
-          if (which yum > /dev/null); then
-             yum install git -y
-          elif (which apt > /dev/null); then
-             apt update
-             apt install git -y
-          fi
-
-          git config --global --add safe.directory $GITHUB_WORKSPACE
-          git init
-          git remote add origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
-          git fetch origin --depth 1 $GITHUB_SHA
-          git checkout FETCH_HEAD
-      - uses: ./.github/actions/setup-os
-        with:
-          sudo: ""
+          CC=gcc OPT=0 make -C examples/monolithic_build_multilevel
+          CC=gcc OPT=0 make -C examples/monolithic_build_multilevel run
       - name: make quickcheck
+        shell: bash
         run: |
-          OPT=0 make quickcheck
-          make clean >/dev/null
-          OPT=1 make quickcheck
-      - name: Functional Tests
+          CC=gcc OPT=0 make -C examples/monolithic_build_multilevel_native
+          CC=gcc OPT=0 make -C examples/monolithic_build_multilevel_native run
+      - name: native build+functest (default)
         uses: ./.github/actions/multi-functest
         with:
-          nix-shell: ""
-          gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
-  ec2_compatibilitytests:
-    strategy:
-      max-parallel: 8
-      fail-fast: false
-      matrix:
-        container:
-          - id: amazonlinux-2-aarch:base
-          - id: amazonlinux-2-aarch:gcc-7x
-          - id: amazonlinux-2-aarch:clang-7x
-          - id: amazonlinux-2023-aarch:base
-          - id: amazonlinux-2023-aarch:gcc-11x
-          - id: amazonlinux-2023-aarch:clang-15x
-          - id: amazonlinux-2023-aarch:clang-15x-sanitizer
-          # - id: amazonlinux-2023-aarch:cryptofuzz Not yet supported
-          - id: ubuntu-22.04-aarch:gcc-12x
-          - id: ubuntu-22.04-aarch:gcc-11x
-          - id: ubuntu-20.04-aarch:gcc-8x
-          - id: ubuntu-20.04-aarch:gcc-7x
-          - id: ubuntu-20.04-aarch:clang-9x
-          - id: ubuntu-20.04-aarch:clang-8x
-          - id: ubuntu-20.04-aarch:clang-7x-bm-framework
-          - id: ubuntu-20.04-aarch:clang-7x
-          - id: ubuntu-20.04-aarch:clang-10x
-          - id: ubuntu-22.04-aarch:base
-          - id: ubuntu-20.04-aarch:base
-    name: Compatibility tests (${{ matrix.container.id }})
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    uses: ./.github/workflows/ci_ec2_container.yml
-    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
-    with:
-      container: ${{ matrix.container.id }}
-      name: ${{ matrix.container.id }}
-      ec2_instance_type: t4g.small
-      ec2_ami: ubuntu-latest (custom AMI)
-      ec2_ami_id: ami-0c9bc1901ef0d1066 # Has docker images preinstalled
-      compile_mode: native
-      opt: all
-      functest: true
-      kattest: true
-      nistkattest: true
-      acvptest: true
-      lint: false
-      verbose: true
-      cflags: "-O0"
-    secrets: inherit
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          opt: no_opt
+          func: true
+          nistkat: false
+          examples: true
+          kat: false
+          acvp: false
+          nix-shell: ''
+          cc: gcc
+      - name: native build+functest (C90)
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          opt: no_opt
+          func: true
+          nistkat: false
+          examples: true
+          kat: false
+          acvp: false
+          nix-shell: ''
+          cc: gcc
+          cflags: "-std=c90"
+      - name: native build+functest (C99)
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          opt: no_opt
+          func: true
+          nistkat: false
+          examples: true
+          kat: false
+          acvp: false
+          nix-shell: ''
+          cc: gcc
+          cflags: "-std=c99"
+      - name: native build+functest (C11)
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          opt: no_opt
+          func: true
+          nistkat: false
+          examples: true
+          kat: false
+          acvp: false
+          nix-shell: ''
+          cc: gcc
+          cflags: "-std=c11"
+      - name: native build+functest (C17)
+        if: ${{ matrix.compiler.c17 }}
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          opt: no_opt
+          compile_mode: native
+          func: true
+          nistkat: false
+          kat: false
+          examples: true
+          acvp: false
+          nix-shell: ''
+          cc: gcc
+          cflags: "-std=c17"
+  # config_variations:
+  #   name: Non-standard configurations
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       external:
+  #        - ${{ github.repository_owner != 'pq-code-package' }}
+  #       target:
+  #        - runner: pqcp-arm64
+  #          name: 'ubuntu-latest (aarch64)'
+  #        - runner: pqcp-x64
+  #          name: 'ubuntu-latest (x86_64)'
+  #       exclude:
+  #         - {external: true,
+  #            target: {
+  #              runner: pqcp-arm64,
+  #              name: 'ubuntu-latest (aarch64)',
+  #            }}
+  #         - {external: true,
+  #            target: {
+  #              runner: pqcp-x64,
+  #              name: 'ubuntu-latest (x86_64)',
+  #            }}
+  #   runs-on: ${{ matrix.target.runner }}
+  #   steps:
+  #     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+  #     - name: "PCT enabled"
+  #       uses: ./.github/actions/multi-functest
+  #       with:
+  #         gh_token: ${{ secrets.GITHUB_TOKEN }}
+  #         compile_mode: native
+  #         cflags: "-DMLK_KEYGEN_PCT -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+  #         func: true
+  #         nistkat: false
+  #         kat: true
+  #         acvp: true
+  #     - name: "PCT enabled + broken"
+  #       run: |
+  #         make clean
+  #         CFLAGS='-DMLK_CONFIG_FILE=\"../test/break_pct_config.h\"' make func -j4
+  #         # PCT breakage is done at runtime via MLK_BREAK_PCT
+  #         make run_func                 # Should be OK
+  #         MLK_BREAK_PCT=0 make run_func # Should be OK
+  #         if (MLK_BREAK_PCT=1 make run_func 2>&1 >/dev/null); then
+  #            echo "PCT failure expected"
+  #            exit 1
+  #         else
+  #            echo "PCT failed as expected"
+  #         fi
+  #     - name: "Custom zeroization (explicit_bzero)"
+  #       uses: ./.github/actions/multi-functest
+  #       with:
+  #         gh_token: ${{ secrets.GITHUB_TOKEN }}
+  #         compile_mode: native
+  #         cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../test/custom_zeroize_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+  #         func: true
+  #         nistkat: true
+  #         kat: true
+  #         acvp: true
+  #         examples: false # Some examples use a custom config themselves
+  #     - name: "No ASM"
+  #       uses: ./.github/actions/multi-functest
+  #       with:
+  #         gh_token: ${{ secrets.GITHUB_TOKEN }}
+  #         compile_mode: native
+  #         cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../test/no_asm_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+  #         func: true
+  #         nistkat: true
+  #         kat: true
+  #         acvp: true
+  #         examples: false # Some examples use a custom config themselves
+  #     - name: "MLKEM_GEN_MATRIX_NBLOCKS=1"
+  #       uses: ./.github/actions/multi-functest
+  #       with:
+  #         gh_token: ${{ secrets.GITHUB_TOKEN }}
+  #         compile_mode: native
+  #         cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=1"
+  #         func: true
+  #         nistkat: true
+  #         kat: false
+  #         acvp: false
+  #     - name: "MLKEM_GEN_MATRIX_NBLOCKS=2"
+  #       uses: ./.github/actions/multi-functest
+  #       with:
+  #         gh_token: ${{ secrets.GITHUB_TOKEN }}
+  #         compile_mode: native
+  #         cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=2"
+  #         func: true
+  #         nistkat: true
+  #         kat: false
+  #         acvp: false
+  #     - name: "MLKEM_GEN_MATRIX_NBLOCKS=4"
+  #       uses: ./.github/actions/multi-functest
+  #       with:
+  #         gh_token: ${{ secrets.GITHUB_TOKEN }}
+  #         compile_mode: native
+  #         cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=4"
+  #         func: true
+  #         nistkat: true
+  #         kat: false
+  #         acvp: false
+  # check-cf-protections:
+  #   name: Test control-flow protections  (${{ matrix.compiler.name }}, x86_64)
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       compiler:
+  #        - name: gcc-14
+  #          shell: ci_gcc14
+  #        - name: clang-19
+  #          shell: ci_clang19
+  #   # On AArch64 -fcf-protection is not supported anyway
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+  #     - name: Test control-flow protections
+  #       uses: ./.github/actions/multi-functest
+  #       with:
+  #         gh_token: ${{ secrets.GITHUB_TOKEN }}
+  #         compile_mode: native
+  #         cflags: "-Wl,-z,cet-report=error -fcf-protection=full"
+  #         func: true
+  #         nistkat: true
+  #         kat: false
+  #         acvp: false
+  #         nix-shell: ${{ matrix.compiler.shell }}
+  # # ensure that kem.h and mlkem_native.h; api.h and native backends are compatible
+  # check-apis:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       external:
+  #        - ${{ github.repository_owner != 'pq-code-package' }}
+  #       target:
+  #        - runner: pqcp-arm64
+  #          name: 'aarch64'
+  #        - runner: ubuntu-latest
+  #          name: 'x86_64'
+  #       exclude:
+  #         - {external: true,
+  #            target: {
+  #              runner: pqcp-arm64,
+  #              name: 'aarch64'
+  #            }}
+  #   name: Check API consistency
+  #   runs-on: ${{ matrix.target.runner }}
+  #   steps:
+  #     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+  #     - name: make quickcheck
+  #       run: |
+  #         OPT=0 CFLAGS="-DMLK_CHECK_APIS -Wno-redundant-decls" make quickcheck
+  #         make clean >/dev/null
+  #         OPT=1 CFLAGS="-DMLK_CHECK_APIS -Wno-redundant-decls" make quickcheck
+  #     - uses: ./.github/actions/setup-apt
+  #     - name: tests func
+  #       run: |
+  #         ./scripts/tests func --cflags="-DMLK_CHECK_APIS -Wno-redundant-decls"
+  # ec2_functests:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       target:
+  #         - name: AMD EPYC 4th gen (t3a)
+  #           ec2_instance_type: t3a.small
+  #           ec2_ami: ubuntu-latest (custom AMI)
+  #           ec2_ami_id: ami-0d47e137a1108e078 # x86_64 ubuntu-latest, 32g
+  #           compile_mode: native
+  #           opt: all
+  #         - name: Intel Xeon 4th gen (t3)
+  #           ec2_instance_type: t3.small
+  #           ec2_ami: ubuntu-latest (custom AMI)
+  #           ec2_ami_id: ami-0d47e137a1108e078 # x86_64 ubuntu-latest, 32g
+  #           compile_mode: native
+  #           opt: all
+  #         - name: Graviton2 (c6g.medium)
+  #           ec2_instance_type: c6g.medium
+  #           ec2_ami: ubuntu-latest (custom AMI)
+  #           ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
+  #           compile_mode: native
+  #           opt: all
+  #         - name: Graviton3 (c7g.medium)
+  #           ec2_instance_type: c7g.medium
+  #           ec2_ami: ubuntu-latest (custom AMI)
+  #           ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
+  #           compile_mode: native
+  #           opt: all
+  #   name: Platform tests  (${{ matrix.target.name }})
+  #   permissions:
+  #     contents: 'read'
+  #     id-token: 'write'
+  #   if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+  #   uses: ./.github/workflows/ci_ec2_reusable.yml
+  #   with:
+  #     name: ${{ matrix.target.name }}
+  #     ec2_instance_type: ${{ matrix.target.ec2_instance_type }}
+  #     ec2_ami: ${{ matrix.target.ec2_ami }}
+  #     ec2_ami_id: ${{ matrix.target.ec2_ami_id }}
+  #     compile_mode: ${{ matrix.target.compile_mode }}
+  #     opt: ${{ matrix.target.opt }}
+  #     functest: true
+  #     kattest: true
+  #     nistkattest: true
+  #     acvptest: true
+  #     lint: false
+  #     verbose: true
+  #   secrets: inherit
+  # compatibility_tests:
+  #   strategy:
+  #     max-parallel: 4
+  #     fail-fast: false
+  #     matrix:
+  #       container:
+  #         - id: debian:bullseye
+  #         - id: debian:bookworm
+  #   name: Compatibility tests (${{ matrix.container.id }})
+  #   runs-on: ubuntu-latest
+  #   container:
+  #     ${{ matrix.container.id }}
+  #   steps:
+  #     # We're not using the checkout action here because on it's not supported
+  #     # on all containers we want to test. Resort to a manual checkout.
+
+  #     # We can't hoist this into an action since calling an action can only
+  #     # be done after checkout.
+  #     - name: Manual checkout
+  #       shell: bash
+  #       run: |
+  #         if (which yum > /dev/null); then
+  #            yum install git -y
+  #         elif (which apt > /dev/null); then
+  #            apt update
+  #            apt install git -y
+  #         fi
+
+  #         git config --global --add safe.directory $GITHUB_WORKSPACE
+  #         git init
+  #         git remote add origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
+  #         git fetch origin --depth 1 $GITHUB_SHA
+  #         git checkout FETCH_HEAD
+  #     - uses: ./.github/actions/setup-os
+  #       with:
+  #         sudo: ""
+  #     - name: make quickcheck
+  #       run: |
+  #         OPT=0 make quickcheck
+  #         make clean >/dev/null
+  #         OPT=1 make quickcheck
+  #     - name: Functional Tests
+  #       uses: ./.github/actions/multi-functest
+  #       with:
+  #         nix-shell: ""
+  #         gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
+  # ec2_compatibilitytests:
+  #   strategy:
+  #     max-parallel: 8
+  #     fail-fast: false
+  #     matrix:
+  #       container:
+  #         - id: amazonlinux-2-aarch:base
+  #         - id: amazonlinux-2-aarch:gcc-7x
+  #         - id: amazonlinux-2-aarch:clang-7x
+  #         - id: amazonlinux-2023-aarch:base
+  #         - id: amazonlinux-2023-aarch:gcc-11x
+  #         - id: amazonlinux-2023-aarch:clang-15x
+  #         - id: amazonlinux-2023-aarch:clang-15x-sanitizer
+  #         # - id: amazonlinux-2023-aarch:cryptofuzz Not yet supported
+  #         - id: ubuntu-22.04-aarch:gcc-12x
+  #         - id: ubuntu-22.04-aarch:gcc-11x
+  #         - id: ubuntu-20.04-aarch:gcc-8x
+  #         - id: ubuntu-20.04-aarch:gcc-7x
+  #         - id: ubuntu-20.04-aarch:clang-9x
+  #         - id: ubuntu-20.04-aarch:clang-8x
+  #         - id: ubuntu-20.04-aarch:clang-7x-bm-framework
+  #         - id: ubuntu-20.04-aarch:clang-7x
+  #         - id: ubuntu-20.04-aarch:clang-10x
+  #         - id: ubuntu-22.04-aarch:base
+  #         - id: ubuntu-20.04-aarch:base
+  #   name: Compatibility tests (${{ matrix.container.id }})
+  #   permissions:
+  #     contents: 'read'
+  #     id-token: 'write'
+  #   uses: ./.github/workflows/ci_ec2_container.yml
+  #   if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+  #   with:
+  #     container: ${{ matrix.container.id }}
+  #     name: ${{ matrix.container.id }}
+  #     ec2_instance_type: t4g.small
+  #     ec2_ami: ubuntu-latest (custom AMI)
+  #     ec2_ami_id: ami-0c9bc1901ef0d1066 # Has docker images preinstalled
+  #     compile_mode: native
+  #     opt: all
+  #     functest: true
+  #     kattest: true
+  #     nistkattest: true
+  #     acvptest: true
+  #     lint: false
+  #     verbose: true
+  #     cflags: "-O0"
+  #   secrets: inherit

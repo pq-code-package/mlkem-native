@@ -19,6 +19,9 @@ inputs:
   gh_token:
     description: Github access token to use
     required: true
+  cc:
+    description: Compiler to use for compilation
+    default: ""
   cflags:
     description: CFLAGS to pass to compilation
     default: ""
@@ -59,6 +62,12 @@ runs:
           echo NISTKAT="${{ inputs.nistkat == 'true' && 'nistkat' || 'no-nistkat' }}" >> $GITHUB_ENV
           echo ACVP="${{ inputs.acvp == 'true' && 'acvp' || 'no-acvp' }}" >> $GITHUB_ENV
           echo EXAMPLES="${{ inputs.examples == 'true' && 'examples' || 'no-examples' }}" >> $GITHUB_ENV
+          if [[ "${{ inputs.cc }}" != "" ]]; then
+            echo CC=${{ inputs.cc }} >> $GITHUB_ENV
+            echo CC_FLAG="--cc=${{ inputs.cc }}" >> $GITHUB_ENV
+          else
+            echo CC_FLAG="" >> $GITHUB_ENV
+          fi
       - name: Setup nix
         uses: ./.github/actions/setup-shell
         with:
@@ -78,7 +87,7 @@ runs:
             - $(nix --version || echo 'nix not present')
             - $(bash --version | grep -m1 "")
             - $(python3 --version)
-            - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
+            - $(${{ inputs.cross_prefix }}${{ env.CC }} --version | grep -m1 "")
           EOF
           cat >> $GITHUB_STEP_SUMMARY <<-EOF
             ## Setup
@@ -87,13 +96,13 @@ runs:
             - $(nix --version || echo 'nix not present')
             - $(bash --version | grep -m1 "")
             - $(python3 --version)
-            - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
+            - $(${{ inputs.cross_prefix }}${{ env.CC }} --version | grep -m1 "")
           EOF
       - name: ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }}, ${{ env.EXAMPLES }})
         shell: ${{ env.SHELL }}
         run: |
           make clean
-          ./scripts/tests all --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.NISTKAT }} --${{ env.ACVP }} --${{ env.EXAMPLES }} -v
+          ./scripts/tests all --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" ${{ env.CC_FLAG }} --cflags="${{ inputs.cflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.NISTKAT }} --${{ env.ACVP }} --${{ env.EXAMPLES }} -v
       - name: Check namespacing ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }}, ${{ env.EXAMPLES }})
         shell: ${{ env.SHELL }}
         run: |

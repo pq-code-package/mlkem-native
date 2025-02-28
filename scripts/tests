@@ -416,6 +416,8 @@ class Tests:
         env_update = {}
         if cflags != "":
             env_update["CFLAGS"] = cflags
+        if self.args.cc is not None:
+            env_update["CC"] = self.args.cc
         if self.args.cross_prefix != "":
             env_update["CROSS_PREFIX"] = self.args.cross_prefix
 
@@ -818,6 +820,7 @@ def cli():
     common_parser.add_argument(
         "--cflags", help="Extra cflags to passed in (e.g. '-mcpu=cortex-a72')"
     )
+    common_parser.add_argument("--cc", help="Compiler to use")
     common_parser.add_argument(
         "-j",
         help="Number of jobs to be used for `make` invocations",
