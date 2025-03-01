@@ -26,19 +26,19 @@ implementations:
   - name: ref
     version: FIPS203
     folder_name: .
-    compile_opts: -DMLKEM_K=4 -DMLK_NAMESPACE_PREFIX=PQCP_MLKEM_NATIVE_MLKEM1024_C -DMLK_FIPS202_CUSTOM_HEADER="../integration/liboqs/fips202_glue.h"  -DMLK_FIPS202X4_CUSTOM_HEADER="../integration/liboqs/fips202x4_glue.h"
+    compile_opts: -DMLKEM_K=4 -DMLK_CONFIG_FILE="../integration/liboqs/config_c.h"
     signature_keypair: PQCP_MLKEM_NATIVE_MLKEM1024_C_keypair
     signature_enc: PQCP_MLKEM_NATIVE_MLKEM1024_C_enc
     signature_dec: PQCP_MLKEM_NATIVE_MLKEM1024_C_dec
-    sources: mlkem/LICENSE mlkem/arith_backend.h mlkem/cbmc.h mlkem/common.h mlkem/compress.c mlkem/compress.h mlkem/config.h mlkem/debug.c mlkem/debug.h mlkem/indcpa.c mlkem/indcpa.h mlkem/kem.c mlkem/kem.h mlkem/mlkem_native.h mlkem/params.h mlkem/poly.c mlkem/poly.h mlkem/poly_k.c mlkem/poly_k.h mlkem/sampling.c mlkem/sampling.h mlkem/symmetric.h mlkem/sys.h mlkem/verify.c mlkem/verify.h mlkem/zetas.inc mlkem/native/api.h mlkem/native/meta.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h
+    sources: mlkem/LICENSE mlkem/arith_backend.h mlkem/cbmc.h mlkem/common.h mlkem/compress.c mlkem/compress.h mlkem/debug.c mlkem/debug.h mlkem/indcpa.c mlkem/indcpa.h mlkem/kem.c mlkem/kem.h mlkem/mlkem_native.h mlkem/params.h mlkem/poly.c mlkem/poly.h mlkem/poly_k.c mlkem/poly_k.h mlkem/sampling.c mlkem/sampling.h mlkem/symmetric.h mlkem/sys.h mlkem/verify.c mlkem/verify.h mlkem/zetas.inc mlkem/native/api.h mlkem/native/meta.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h integration/liboqs/config_c.h
   - name: x86_64
     version: FIPS203
     folder_name: .
-    compile_opts: -DMLKEM_K=4 -DMLK_FORCE_X86_64 -DMLK_ARITH_BACKEND_NAME=X86_64_DEFAULT -DMLK_USE_NATIVE_BACKEND_ARITH -DMLK_NAMESPACE_PREFIX=PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_DEFAULT -DMLK_FIPS202_CUSTOM_HEADER="../integration/liboqs/fips202_glue.h"  -DMLK_FIPS202X4_CUSTOM_HEADER="../integration/liboqs/fips202x4_glue.h"
-    signature_keypair: PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_DEFAULT_keypair
-    signature_enc: PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_DEFAULT_enc
-    signature_dec: PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_DEFAULT_dec
-    sources: mlkem/LICENSE mlkem/arith_backend.h mlkem/cbmc.h mlkem/common.h mlkem/compress.c mlkem/compress.h mlkem/config.h mlkem/debug.c mlkem/debug.h mlkem/indcpa.c mlkem/indcpa.h mlkem/kem.c mlkem/kem.h mlkem/mlkem_native.h mlkem/params.h mlkem/poly.c mlkem/poly.h mlkem/poly_k.c mlkem/poly_k.h mlkem/sampling.c mlkem/sampling.h mlkem/symmetric.h mlkem/sys.h mlkem/verify.c mlkem/verify.h mlkem/zetas.inc mlkem/native/api.h mlkem/native/meta.h mlkem/native/x86_64 integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h
+    compile_opts: -DMLKEM_K=4 -DMLK_CONFIG_FILE="../integration/liboqs/config_x86_64.h"
+    signature_keypair: PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_keypair
+    signature_enc: PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_enc
+    signature_dec: PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_dec
+    sources: integration/liboqs/config_x86_64.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h mlkem/LICENSE mlkem/arith_backend.h mlkem/cbmc.h mlkem/common.h mlkem/compress.c mlkem/compress.h mlkem/debug.c mlkem/debug.h mlkem/indcpa.c mlkem/indcpa.h mlkem/kem.c mlkem/kem.h mlkem/mlkem_native.h mlkem/native/api.h mlkem/native/meta.h mlkem/native/x86_64 mlkem/params.h mlkem/poly.c mlkem/poly.h mlkem/poly_k.c mlkem/poly_k.h mlkem/sampling.c mlkem/sampling.h mlkem/symmetric.h mlkem/sys.h mlkem/verify.c mlkem/verify.h mlkem/zetas.inc
     supported_platforms:
       - architecture: x86_64
         operating_systems:
@@ -51,11 +51,11 @@ implementations:
   - name: aarch64
     version: FIPS203
     folder_name: .
-    compile_opts: -DMLKEM_K=4 -DMLK_FORCE_AARCH64 -DMLK_ARITH_BACKEND_NAME=AARCH64_OPT -DMLK_USE_NATIVE_BACKEND_ARITH -DMLK_NAMESPACE_PREFIX=PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_OPT -DMLK_FIPS202_CUSTOM_HEADER="../integration/liboqs/fips202_glue.h"  -DMLK_FIPS202X4_CUSTOM_HEADER="../integration/liboqs/fips202x4_glue.h"
-    signature_keypair: PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_OPT_keypair
-    signature_enc: PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_OPT_enc
-    signature_dec: PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_OPT_dec
-    sources: mlkem/LICENSE mlkem/arith_backend.h mlkem/cbmc.h mlkem/common.h mlkem/compress.c mlkem/compress.h mlkem/config.h mlkem/debug.c mlkem/debug.h mlkem/indcpa.c mlkem/indcpa.h mlkem/kem.c mlkem/kem.h mlkem/mlkem_native.h mlkem/params.h mlkem/poly.c mlkem/poly.h mlkem/poly_k.c mlkem/poly_k.h mlkem/sampling.c mlkem/sampling.h mlkem/symmetric.h mlkem/sys.h mlkem/verify.c mlkem/verify.h mlkem/zetas.inc mlkem/native/api.h mlkem/native/meta.h mlkem/native/aarch64 integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h
+    compile_opts: -DMLKEM_K=4 -DMLK_CONFIG_FILE="../integration/liboqs/config_aarch64.h"
+    signature_keypair: PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_keypair
+    signature_enc: PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_enc
+    signature_dec: PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_dec
+    sources: integration/liboqs/config_aarch64.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h mlkem/LICENSE mlkem/arith_backend.h mlkem/cbmc.h mlkem/common.h mlkem/compress.c mlkem/compress.h mlkem/debug.c mlkem/debug.h mlkem/indcpa.c mlkem/indcpa.h mlkem/kem.c mlkem/kem.h mlkem/mlkem_native.h mlkem/native/api.h mlkem/native/meta.h mlkem/native/aarch64 mlkem/params.h mlkem/poly.c mlkem/poly.h mlkem/poly_k.c mlkem/poly_k.h mlkem/sampling.c mlkem/sampling.h mlkem/symmetric.h mlkem/sys.h mlkem/verify.c mlkem/verify.h mlkem/zetas.inc
     supported_platforms:
       - architecture: arm_8
         operating_systems:

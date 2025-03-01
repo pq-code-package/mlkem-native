@@ -17,7 +17,7 @@ def load(fname):
         return yaml.safe_load(f)
 
 
-def get_shared_sources():
+def get_shared_sources(backend):
     # add files mlkem/*
     sources = [
         f"mlkem/{f}"
@@ -32,11 +32,18 @@ def get_shared_sources():
     ]
     # randombytes.h is provided by liboqs
     sources.remove("mlkem/randombytes.h")
+    # We use a custom config
+    sources.remove("mlkem/config.h")
     # Add FIPS202 glue code
     sources += [
         "integration/liboqs/fips202_glue.h",
         "integration/liboqs/fips202x4_glue.h",
     ]
+    # Add custom config
+    if backend == "ref":
+        backend = "C"
+    sources.append(f"integration/liboqs/config_{backend.lower()}.h")
+
     return sources
 
 
@@ -49,7 +56,7 @@ def check_implementation(impl):
     print(f"checking {name}")
     ymlsources = impl["sources"]
     ymlsources = ymlsources.split(" ")
-    sources = get_shared_sources()
+    sources = get_shared_sources(name)
 
     if name != "ref":
         sources += get_native_sources(name)
@@ -58,8 +65,10 @@ def check_implementation(impl):
     ymlsources.sort()
 
     if sources != ymlsources:
-        print(sources)
-        print(ymlsources)
+        print("Expected source list:")
+        print(" ".join(sources))
+        print("Current source list:")
+        print(" ".join(ymlsources))
         raise Exception("mismatch of liboqs file list")
 
 
