@@ -260,7 +260,7 @@ keccak_f1600_x1_scalar_loop:
         eor	x20, x20, x4, ror #21
         bic	x4, x28, x1, ror #48
         bic	x1, x1, x11, ror #57
-        ldr	x28, [x9, w25, uxtw #3]
+        ldr	x28, [x9, x25, lsl #3]
         ldr	x9, [sp, #0x18]
         add	x25, x25, #0x1
         str	x25, [sp, #0x10]
