@@ -945,7 +945,7 @@ def update_via_simpasm(
 
 
 def gen_hol_light_asm(dry_run=False):
-    def gen_hol_light_asm_file(infile, outfile):
+    def gen_hol_light_arith_asm_file(infile, outfile):
         update_via_simpasm(
             f"dev/aarch64_opt/src/{infile}",
             "proofs/hol_light/arm/mlkem",
@@ -955,8 +955,22 @@ def gen_hol_light_asm(dry_run=False):
             dry_run=dry_run,
         )
 
-    gen_hol_light_asm_file("ntt.S", "mlkem_ntt.S")
-    gen_hol_light_asm_file("intt.S", "mlkem_intt.S")
+    gen_hol_light_arith_asm_file("ntt.S", "mlkem_ntt.S")
+    gen_hol_light_arith_asm_file("intt.S", "mlkem_intt.S")
+
+    def gen_hol_light_fips202_asm_file(infile, outfile):
+        update_via_simpasm(
+            f"dev/fips202/aarch64/src/{infile}",
+            "proofs/hol_light/arm/mlkem",
+            outfile=outfile,
+            cflags="-Imlkem/fips202/native/aarch64/src/ -DMLK_FIPS202_BACKEND_AARCH64_DEFAULT",
+            preserve_header=False,
+            dry_run=dry_run,
+        )
+
+    gen_hol_light_fips202_asm_file(
+        "keccak_f1600_x1_scalar_asm_opt.S", "mlkem_keccak_f1600.S"
+    )
 
 
 def update_via_copy(infile_full, outfile_full, dry_run=False, transform=None):
