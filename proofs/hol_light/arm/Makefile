@@ -64,7 +64,7 @@ endif
 endif
 endif
 
-OBJ = mlkem/mlkem_ntt.o mlkem/mlkem_intt.o
+OBJ = mlkem/mlkem_ntt.o mlkem/mlkem_intt.o mlkem/mlkem_keccak_f1600.o
 
 # According to
 # https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms,
