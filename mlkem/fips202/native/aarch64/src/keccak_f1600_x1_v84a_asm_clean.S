@@ -55,12 +55,11 @@
 .global MLK_ASM_NAMESPACE(keccak_f1600_x1_v84a_asm_clean)
 MLK_ASM_FN_SYMBOL(keccak_f1600_x1_v84a_asm_clean)
 
-        sub	sp, sp, #0xa0
+        sub	sp, sp, #0x40
         stp	d8, d9, [sp]
         stp	d10, d11, [sp, #0x10]
         stp	d12, d13, [sp, #0x20]
         stp	d14, d15, [sp, #0x30]
-        mov	x1, x1
         ldp	d0, d1, [x0]
         ldp	d2, d3, [x0, #0x10]
         ldp	d4, d5, [x0, #0x20]
@@ -163,7 +162,7 @@ keccak_f1600_x1_v84a_loop:
         ldp	d10, d11, [sp, #0x10]
         ldp	d12, d13, [sp, #0x20]
         ldp	d14, d15, [sp, #0x30]
-        add	sp, sp, #0xa0
+        add	sp, sp, #0x40
         ret
 
 #endif /* __ARM_FEATURE_SHA3 */
