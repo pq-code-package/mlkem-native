@@ -349,29 +349,22 @@ __contract__(
  * Compute one layer of forward NTT
  * Parameters:
  * - r: Pointer to base of polynomial
- * - len: Stride of butterflies in this layer.
- * - layer: Ghost variable indicating which layer is being applied.
- *          Must match `len` via `len == MLKEM_N >> layer`.
- * Note: `len` could be dropped and computed in the function, but
- *   we are following the structure of the reference NTT from the
- *   official Kyber implementation here, merely adding `layer` as
- *   a ghost variable for the specifications.
+ * - layer: Variable indicating which layer is being applied.
  */
 
 /* Reference: Embedded in `ntt()` in the reference implementation. */
-static void mlk_ntt_layer(int16_t r[MLKEM_N], unsigned len, unsigned layer)
+static void mlk_ntt_layer(int16_t r[MLKEM_N], unsigned layer)
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
-  requires(1 <= layer && layer <= 7 && len == (MLKEM_N >> layer))
+  requires(1 <= layer && layer <= 7)
   requires(array_abs_bound(r, 0, MLKEM_N, layer * MLKEM_Q))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
   ensures(array_abs_bound(r, 0, MLKEM_N, (layer + 1) * MLKEM_Q)))
 {
-  unsigned start, k;
-  /* `layer` is a ghost variable only needed in the CBMC specification */
-  ((void)layer);
-  /* Twiddle factors for layer n start at index 2^(layer-1) */
-  k = MLKEM_N / (2 * len);
+  unsigned start, k, len;
+  /* Twiddle factors for layer n are at indices 2^(n-1)..2^n-1. */
+  k = 1u << (layer - 1);
+  len = MLKEM_N >> layer;
   for (start = 0; start < MLKEM_N; start += 2 * len)
   __loop__(
     invariant(start < MLKEM_N + 2 * len)
@@ -393,21 +386,23 @@ __contract__(
  * the proof may need strengthening.
  */
 
-/* Reference: `ntt()` in the reference implementation. */
+/* Reference: `ntt()` in the reference implementation.
+ * - Iterate over `layer` instead of `len` in the outer loop
+ *   to simplify computation of zeta index. */
 MLK_INTERNAL_API
 void mlk_poly_ntt(mlk_poly *p)
 {
-  unsigned len, layer;
+  unsigned layer;
   int16_t *r;
   mlk_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
   r = p->coeffs;
 
-  for (len = 128, layer = 1; len >= 2; len >>= 1, layer++)
+  for (layer = 1; layer <= 7; layer++)
   __loop__(
-    invariant(1 <= layer && layer <= 8 && len == (MLKEM_N >> layer))
+    invariant(1 <= layer && layer <= 8)
     invariant(array_abs_bound(r, 0, MLKEM_N, layer * MLKEM_Q)))
   {
-    mlk_ntt_layer(r, len, layer);
+    mlk_ntt_layer(r, layer);
   }
 
   /* Check the stronger bound */
@@ -429,19 +424,17 @@ void mlk_poly_ntt(mlk_poly *p)
 /* Compute one layer of inverse NTT */
 
 /* Reference: Embedded into `invntt()` in the reference implementation */
-static void mlk_invntt_layer(int16_t *r, unsigned len, unsigned layer)
+static void mlk_invntt_layer(int16_t *r, unsigned layer)
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
-  requires(2 <= len && len <= 128 && 1 <= layer && layer <= 7)
-  requires(len == (1 << (8 - layer)))
+  requires(1 <= layer && layer <= 7)
   requires(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
   ensures(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q)))
 {
-  unsigned start, k;
-  /* `layer` is a ghost variable used only in the specification */
-  ((void)layer);
-  k = MLKEM_N / len - 1;
+  unsigned start, k, len;
+  len = (MLKEM_N >> layer);
+  k = (1u << layer) - 1;
   for (start = 0; start < MLKEM_N; start += 2 * len)
   __loop__(
     invariant(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q))
@@ -478,7 +471,7 @@ void mlk_poly_invntt_tomont(mlk_poly *p)
    * and NTT twist. This also brings coefficients down to
    * absolute value < MLKEM_Q.
    */
-  unsigned j, len, layer;
+  unsigned j, layer;
   const int16_t f = 1441; /* check-magic: 1441 == pow(2,32 - 7,MLKEM_Q) */
   int16_t *r = p->coeffs;
 
@@ -491,12 +484,12 @@ void mlk_poly_invntt_tomont(mlk_poly *p)
   }
 
   /* Run the invNTT layers */
-  for (len = 2, layer = 7; len <= 128; len <<= 1, layer--)
+  for (layer = 7; layer > 0; layer--)
   __loop__(
-    invariant(2 <= len && len <= 256 && layer <= 7 && len == (1 << (8 - layer)))
+    invariant(0 <= layer && layer < 8)
     invariant(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q)))
   {
-    mlk_invntt_layer(p->coeffs, len, layer);
+    mlk_invntt_layer(r, layer);
   }
 
   mlk_assert_abs_bound(p, MLKEM_N, MLK_INVNTT_BOUND);
