@@ -20,6 +20,8 @@ $(BUILD_DIR)/%.a: $(CONFIG)
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)rm -f $@
 	$(Q)$(CC_AR) rcs $@ $(filter %.o,$^)
+# skip test when run in scan-build as it does not work
+ifneq ($(findstring ccc-analyzer,$(CC)),ccc-analyzer)
         # $AR doesn't care about duplicated symbols, one can only find it out
         # via actually linking. The easiest one to do this that one can think
         # of is to create a dummy C file with empty main function on the fly,
@@ -42,6 +44,7 @@ else                                           # if not on macOS or cross compil
 	$(Q)rm -f $(@:%.a=%_tmp.a.out)
 endif
 	$(Q)echo "  AR         Checked for duplicated symbols"
+endif
 
 $(BUILD_DIR)/mlkem512/%.c.o: %.c $(CONFIG)
 	$(Q)echo "  CC      $@"
