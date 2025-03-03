@@ -14,12 +14,12 @@ buildEnv {
   paths =
     builtins.attrValues {
       cbmc = cbmc.overrideAttrs (old: rec {
-        version = "6.4.1"; # remember to adjust this in ../flake.nix too
+        version = "weaken-is-fresh-assert"; # remember to adjust this in ../flake.nix too
         src = fetchFromGitHub {
-          owner = "diffblue";
-          repo = old.pname;
-          tag = "${old.pname}-${version}";
-          hash = "sha256-O8aZTW+Eylshl9bmm9GzbljWB0+cj2liZHs2uScERkM=";
+          owner = "remi-delmas-3000";
+          repo = "cbmc";
+          rev = "d4a1c6d33ab41b3ef416bb5fd812d2050ecc9fd7";
+          hash = "sha256-PXCcvArTXhRWRCzlgDXFsrD+XAGL1zt+iooGM9lFF2Q=";
         };
       });
       litani = callPackage ./litani.nix { }; # 1.29.0
