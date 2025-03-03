@@ -14,6 +14,7 @@ mlkem-native includes native backends for AArch64 and AVX2, offering competitive
 (see [benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/)). The frontend and the C backend (i.e., all C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202)) are verified
 using [CBMC](https://github.com/diffblue/cbmc) to be free of undefined behaviour. In particular, there are no out of
 bounds accesses, nor integer overflows during optimized modular arithmetic.
+HOL-Light is used to verify functional correctness of selected AArch64 assembly routines.
 
 mlkem-native is supported by the [Post-Quantum Cryptography Alliance](https://pqca.org/) as part of the [Linux Foundation](https://linuxfoundation.org/).
 
@@ -59,8 +60,15 @@ undefined behaviour in C, including out of bounds memory accesses and integer ov
 all C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202) involved in running mlkem-native with its C backend.
 See [proofs/cbmc](proofs/cbmc) for details.
 
-HOL-Light functional correctness proofs for the optimized AArch64 NTT [ntt.S](dev/aarch64_opt/src/ntt.S) and inverse NTT [intt.S](dev/aarch64_opt/src/intt.S)
-can be found in [proofs/hol_light/arm](proofs/hol_light/arm). These proofs were contributed by John Harrison, and are
+HOL-Light functional correctness proofs
+can be found in [proofs/hol_light/arm](proofs/hol_light/arm).
+So far, the following functions have been proven correct:
+ - AArch64 NTT [ntt.S](mlkem/native/aarch64/src/ntt.S)
+ - AArch64 inverse NTT [intt.S](mlkem/native/aarch64/src/ntt.S)
+ - AArch64 Keccak x1 [keccak_f1600_x1_scalar_asm_opt.S](mlkem/fips202/native/aarch64/src/keccak_f1600_x1_scalar_asm_opt.S)
+ - AArch64+SHA3 Keccak x1 [keccak_f1600_x1_v84a_asm_clean.S](mlkem/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm_clean.S)
+
+These proofs were contributed by John Harrison, and are
 utilizing the verification infrastructure provided by [s2n-bignum](https://github.com/awslabs/s2n-bignum) infrastructure.
 
 ## State
