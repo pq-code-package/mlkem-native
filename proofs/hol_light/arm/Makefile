@@ -25,10 +25,11 @@ SRC_ARM ?= $(SRC)/arm
 # Some clang-based preprocessors seem to behave differently, and get confused
 # by single-quote characters in comments, so we eliminate // comments first.
 
+ARCHFLAGS=-march=armv8.4-a+sha3
 ifeq ($(OSTYPE_RESULT),Darwin)
 PREPROCESS=sed -e 's/\/\/.*//' | $(CC) -E -xassembler-with-cpp -
 else
-PREPROCESS=$(CC) -E -xassembler-with-cpp -
+PREPROCESS=$(CC) $(ARCHFLAGS) -E -xassembler-with-cpp -
 endif
 
 # Generally GNU-type assemblers are happy with multiple instructions on
@@ -47,24 +48,27 @@ SPLIT=tr ';' '\n'
 #  sudo apt-get install binutils-aarch64-linux-gnu
 
 ifeq ($(ARCHTYPE_RESULT),aarch64)
-ASSEMBLE=as
+ASSEMBLE=as $(ARCHFLAGS)
 OBJDUMP=objdump -d
 else
 ifeq ($(ARCHTYPE_RESULT),arm64)
-ASSEMBLE=as
+ASSEMBLE=as $(ARCHFLAGS)
 OBJDUMP=objdump -d
 else
 ifeq ($(OSTYPE_RESULT),Darwin)
 ASSEMBLE=as -arch arm64
 OBJDUMP=otool -tvV
 else
-ASSEMBLE=aarch64-linux-gnu-as
+ASSEMBLE=aarch64-linux-gnu-as $(ARCHFLAGS)
 OBJDUMP=aarch64-linux-gnu-objdump -d
 endif
 endif
 endif
 
-OBJ = mlkem/mlkem_ntt.o mlkem/mlkem_intt.o mlkem/mlkem_keccak_f1600.o
+OBJ = mlkem/mlkem_ntt.o                 \
+      mlkem/mlkem_intt.o                \
+      mlkem/mlkem_keccak_f1600.o        \
+      mlkem/mlkem_keccak_f1600_alt.o
 
 # According to
 # https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms,

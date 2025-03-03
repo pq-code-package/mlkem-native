@@ -950,7 +950,7 @@ def gen_hol_light_asm(dry_run=False):
             f"dev/aarch64_opt/src/{infile}",
             "proofs/hol_light/arm/mlkem",
             outfile=outfile,
-            cflags="-Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+            cflags="-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
             preserve_header=False,
             dry_run=dry_run,
         )
@@ -963,13 +963,16 @@ def gen_hol_light_asm(dry_run=False):
             f"dev/fips202/aarch64/src/{infile}",
             "proofs/hol_light/arm/mlkem",
             outfile=outfile,
-            cflags="-Imlkem/fips202/native/aarch64/src/ -DMLK_FIPS202_BACKEND_AARCH64_DEFAULT",
+            cflags="-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/ -DMLK_FIPS202_BACKEND_AARCH64_DEFAULT",
             preserve_header=False,
             dry_run=dry_run,
         )
 
     gen_hol_light_fips202_asm_file(
         "keccak_f1600_x1_scalar_asm_opt.S", "mlkem_keccak_f1600.S"
+    )
+    gen_hol_light_fips202_asm_file(
+        "keccak_f1600_x1_v84a_asm_clean.S", "mlkem_keccak_f1600_alt.S"
     )
 
 

@@ -49,7 +49,6 @@
 
     input_addr    .req x0
     input_rc      .req x1
-    const_addr    .req x1
     count         .req x2
     cur_const     .req x3
 
@@ -210,7 +209,7 @@
     str Asud, [input_addr, #0xC0]
 .endm
 
-#define STACK_SIZE (16*4 + 16*6) /* VREGS (16*4) + GPRS (TODO: Remove) */
+#define STACK_SIZE (16*4) /* VREGS (16*4) */
 
 #define STACK_BASE_GPRS (16*4)
 .macro alloc_stack
@@ -219,7 +218,7 @@
 
 .macro free_stack
     add sp, sp, #(STACK_SIZE)
-	.endm
+.endm
 
 .macro save_vregs
     stp  d8,  d9, [sp, #(16*0)]
@@ -300,7 +299,7 @@
     xar_m0 Ame_, Aga, E0, 28
     xar_m0 Abe_, Age, E1, 20
 
-    ld1r {v31.2d}, [const_addr], #8
+    ld1r {v31.2d}, [input_rc], #8
 
     bcax_m0 Aga, Aga_, Agi_, Age_
     bcax_m0 Age, Age_, Ago_, Agi_
@@ -341,7 +340,6 @@
 MLK_ASM_FN_SYMBOL(keccak_f1600_x1_v84a_asm_clean)
     alloc_stack
     save_vregs
-    mov const_addr, input_rc
     load_input
 
     mov count, #(KECCAK_F1600_ROUNDS)
@@ -358,7 +356,6 @@ keccak_f1600_x1_v84a_loop:
 /****************** REGISTER DEALLOCATIONS *******************/
     .unreq input_addr
     .unreq input_rc
-    .unreq const_addr
     .unreq count
     .unreq cur_const
     .unreq Aba
