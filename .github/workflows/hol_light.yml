@@ -9,6 +9,7 @@ on:
     # Only run upon changes to AArch64 NTT or invNTT
     paths:
      - 'proofs/hol_light/arm/**/*.S'
+     - 'proofs/hol_light/arm/**/*.ml'
   pull_request:
     branches: ["main"]
     paths:
