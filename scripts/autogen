@@ -1006,24 +1006,28 @@ def synchronize_backend(
 ):
     copied = []
     # Only synchronize sources, but not README.md, Makefile and so on
-    for f in get_files(os.path.join(in_dir, "*.{c,h,i,inc,S}")):
-        copied.append(os.path.basename(f))
-        if delete is True:
-            continue
-        if no_simplify is False and f.endswith(".S"):
-            update_via_simpasm(f, out_dir, dry_run=dry_run, **kwargs)
-        else:
-            # Update via copy
-            _, infile = os.path.split(f)
-            outfile_full = os.path.join(out_dir, infile)
-            # The header guards will also be checked later, but if we
-            # don't do it here, the dry-run would fail because of a
-            # mismatching intermediate file
-            if f.endswith(".h"):
-                transform = lambda c: adjust_header_guard_for_filename(c, outfile_full)
+    extensions = (".c", ".h", ".i", ".inc", ".S")
+    for f in get_files(os.path.join(in_dir, "*")):
+        if f.endswith(extensions):
+            copied.append(os.path.basename(f))
+            if delete is True:
+                continue
+            if no_simplify is False and f.endswith(".S"):
+                update_via_simpasm(f, out_dir, dry_run=dry_run, **kwargs)
             else:
-                transform = None
-            update_via_copy(f, outfile_full, dry_run=dry_run, transform=transform)
+                # Update via copy
+                _, infile = os.path.split(f)
+                outfile_full = os.path.join(out_dir, infile)
+                # The header guards will also be checked later, but if we
+                # don't do it here, the dry-run would fail because of a
+                # mismatching intermediate file
+                if f.endswith(".h"):
+                    transform = lambda c: adjust_header_guard_for_filename(
+                        c, outfile_full
+                    )
+                else:
+                    transform = None
+                update_via_copy(f, outfile_full, dry_run=dry_run, transform=transform)
 
     if delete is False:
         return
