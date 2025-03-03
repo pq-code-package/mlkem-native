@@ -46,36 +46,51 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/fips202/aarch64/src/keccak_f1600_x1_v84a_asm_clean.S using scripts/simpasm. Do not modify it directly.
+ *   dev/fips202/aarch64/src/keccak_f1600_x2_v84a_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(keccak_f1600_x1_v84a_asm_clean)
-MLK_ASM_FN_SYMBOL(keccak_f1600_x1_v84a_asm_clean)
+.global MLK_ASM_NAMESPACE(keccak_f1600_x2_v84a_asm)
+MLK_ASM_FN_SYMBOL(keccak_f1600_x2_v84a_asm)
 
-        sub	sp, sp, #0x40
+        sub	sp, sp, #0xa0
         stp	d8, d9, [sp]
         stp	d10, d11, [sp, #0x10]
         stp	d12, d13, [sp, #0x20]
         stp	d14, d15, [sp, #0x30]
-        ldp	d0, d1, [x0]
-        ldp	d2, d3, [x0, #0x10]
-        ldp	d4, d5, [x0, #0x20]
-        ldp	d6, d7, [x0, #0x30]
-        ldp	d8, d9, [x0, #0x40]
-        ldp	d10, d11, [x0, #0x50]
-        ldp	d12, d13, [x0, #0x60]
-        ldp	d14, d15, [x0, #0x70]
-        ldp	d16, d17, [x0, #0x80]
-        ldp	d18, d19, [x0, #0x90]
-        ldp	d20, d21, [x0, #0xa0]
-        ldp	d22, d23, [x0, #0xb0]
-        ldr	d24, [x0, #0xc0]
+        mov	x1, x1
+        ld2	{ v0.d, v1.d }[0], [x0], #16
+        ld2	{ v2.d, v3.d }[0], [x0], #16
+        ld2	{ v4.d, v5.d }[0], [x0], #16
+        ld2	{ v6.d, v7.d }[0], [x0], #16
+        ld2	{ v8.d, v9.d }[0], [x0], #16
+        ld2	{ v10.d, v11.d }[0], [x0], #16
+        ld2	{ v12.d, v13.d }[0], [x0], #16
+        ld2	{ v14.d, v15.d }[0], [x0], #16
+        ld2	{ v16.d, v17.d }[0], [x0], #16
+        ld2	{ v18.d, v19.d }[0], [x0], #16
+        ld2	{ v20.d, v21.d }[0], [x0], #16
+        ld2	{ v22.d, v23.d }[0], [x0], #16
+        ld1	{ v24.d }[0], [x0], #8
+        ld2	{ v0.d, v1.d }[1], [x0], #16
+        ld2	{ v2.d, v3.d }[1], [x0], #16
+        ld2	{ v4.d, v5.d }[1], [x0], #16
+        ld2	{ v6.d, v7.d }[1], [x0], #16
+        ld2	{ v8.d, v9.d }[1], [x0], #16
+        ld2	{ v10.d, v11.d }[1], [x0], #16
+        ld2	{ v12.d, v13.d }[1], [x0], #16
+        ld2	{ v14.d, v15.d }[1], [x0], #16
+        ld2	{ v16.d, v17.d }[1], [x0], #16
+        ld2	{ v18.d, v19.d }[1], [x0], #16
+        ld2	{ v20.d, v21.d }[1], [x0], #16
+        ld2	{ v22.d, v23.d }[1], [x0], #16
+        ld1	{ v24.d }[1], [x0], #8
+        sub	x0, x0, #0x190
         mov	x2, #0x18               // =24
 
-keccak_f1600_x1_v84a_loop:
+keccak_f1600_x2_v84a_loop:
         eor3	v30.16b, v0.16b, v5.16b, v10.16b
         eor3	v29.16b, v1.16b, v6.16b, v11.16b
         eor3	v28.16b, v2.16b, v7.16b, v12.16b
@@ -144,25 +159,38 @@ keccak_f1600_x1_v84a_loop:
         bcax	v4.16b, v4.16b, v27.16b, v30.16b
         eor	v0.16b, v0.16b, v31.16b
         sub	x2, x2, #0x1
-        cbnz	x2, keccak_f1600_x1_v84a_loop
-        stp	d0, d1, [x0]
-        stp	d2, d3, [x0, #0x10]
-        stp	d4, d5, [x0, #0x20]
-        stp	d6, d7, [x0, #0x30]
-        stp	d8, d9, [x0, #0x40]
-        stp	d10, d11, [x0, #0x50]
-        stp	d12, d13, [x0, #0x60]
-        stp	d14, d15, [x0, #0x70]
-        stp	d16, d17, [x0, #0x80]
-        stp	d18, d19, [x0, #0x90]
-        stp	d20, d21, [x0, #0xa0]
-        stp	d22, d23, [x0, #0xb0]
-        str	d24, [x0, #0xc0]
+        cbnz	x2, keccak_f1600_x2_v84a_loop
+        st2	{ v0.d, v1.d }[0], [x0], #16
+        st2	{ v2.d, v3.d }[0], [x0], #16
+        st2	{ v4.d, v5.d }[0], [x0], #16
+        st2	{ v6.d, v7.d }[0], [x0], #16
+        st2	{ v8.d, v9.d }[0], [x0], #16
+        st2	{ v10.d, v11.d }[0], [x0], #16
+        st2	{ v12.d, v13.d }[0], [x0], #16
+        st2	{ v14.d, v15.d }[0], [x0], #16
+        st2	{ v16.d, v17.d }[0], [x0], #16
+        st2	{ v18.d, v19.d }[0], [x0], #16
+        st2	{ v20.d, v21.d }[0], [x0], #16
+        st2	{ v22.d, v23.d }[0], [x0], #16
+        st1	{ v24.d }[0], [x0], #8
+        st2	{ v0.d, v1.d }[1], [x0], #16
+        st2	{ v2.d, v3.d }[1], [x0], #16
+        st2	{ v4.d, v5.d }[1], [x0], #16
+        st2	{ v6.d, v7.d }[1], [x0], #16
+        st2	{ v8.d, v9.d }[1], [x0], #16
+        st2	{ v10.d, v11.d }[1], [x0], #16
+        st2	{ v12.d, v13.d }[1], [x0], #16
+        st2	{ v14.d, v15.d }[1], [x0], #16
+        st2	{ v16.d, v17.d }[1], [x0], #16
+        st2	{ v18.d, v19.d }[1], [x0], #16
+        st2	{ v20.d, v21.d }[1], [x0], #16
+        st2	{ v22.d, v23.d }[1], [x0], #16
+        st1	{ v24.d }[1], [x0], #8
         ldp	d8, d9, [sp]
         ldp	d10, d11, [sp, #0x10]
         ldp	d12, d13, [sp, #0x20]
         ldp	d14, d15, [sp, #0x30]
-        add	sp, sp, #0x40
+        add	sp, sp, #0xa0
         ret
 
 #endif /* __ARM_FEATURE_SHA3 */

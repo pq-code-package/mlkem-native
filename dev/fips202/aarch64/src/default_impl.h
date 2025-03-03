@@ -35,13 +35,13 @@
 #define MLK_USE_FIPS202_X1_NATIVE
 static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
 {
-  mlk_keccak_f1600_x1_v84a_asm_clean(state, mlk_keccakf1600_round_constants);
+  mlk_keccak_f1600_x1_v84a_asm(state, mlk_keccakf1600_round_constants);
 }
 #elif !defined(MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER)
 #define MLK_USE_FIPS202_X1_NATIVE
 static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
 {
-  mlk_keccak_f1600_x1_scalar_asm_opt(state, mlk_keccakf1600_round_constants);
+  mlk_keccak_f1600_x1_scalar_asm(state, mlk_keccakf1600_round_constants);
 }
 #endif /* !MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER */
 
@@ -68,13 +68,13 @@ static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
 #define MLK_USE_FIPS202_X2_NATIVE
 static MLK_INLINE void mlk_keccak_f1600_x2_native(uint64_t *state)
 {
-  mlk_keccak_f1600_x2_v84a_asm_clean(state, mlk_keccakf1600_round_constants);
+  mlk_keccak_f1600_x2_v84a_asm(state, mlk_keccakf1600_round_constants);
 }
 #else /* __APPLE__ */
 #define MLK_USE_FIPS202_X4_NATIVE
 static MLK_INLINE void mlk_keccak_f1600_x4_native(uint64_t *state)
 {
-  mlk_keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt(
+  mlk_keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm(
       state, mlk_keccakf1600_round_constants);
 }
 #endif /* __APPLE__ */
@@ -84,8 +84,8 @@ static MLK_INLINE void mlk_keccak_f1600_x4_native(uint64_t *state)
 #define MLK_USE_FIPS202_X4_NATIVE
 static MLK_INLINE void mlk_keccak_f1600_x4_native(uint64_t *state)
 {
-  mlk_keccak_f1600_x4_scalar_v8a_asm_hybrid_opt(
-      state, mlk_keccakf1600_round_constants);
+  mlk_keccak_f1600_x4_scalar_v8a_asm_hybrid(state,
+                                            mlk_keccakf1600_round_constants);
 }
 
 #endif /* __ARM_FEATURE_SHA3 */

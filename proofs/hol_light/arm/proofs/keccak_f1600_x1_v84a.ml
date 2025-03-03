@@ -10,11 +10,11 @@
 needs "arm/proofs/base.ml";;
 needs "arm/proofs/utils/keccak_spec.ml";;
 
-(**** print_literal_from_elf "arm/mlkem/mlkem_keccak_f1600_alt.o";;
+(**** print_literal_from_elf "arm/mlkem/keccak_f1600_x1_v84a.o";;
  ****)
 
-let mlkem_keccak_f1600_alt_mc = define_assert_from_elf
-  "mlkem_keccak_f1600_alt_mc" "mlkem/mlkem_keccak_f1600_alt.o"
+let keccak_f1600_x1_v84a_mc = define_assert_from_elf
+  "keccak_f1600_x1_v84a_mc" "mlkem/keccak_f1600_x1_v84a.o"
 [
   0xd10103ff;       (* arm_SUB SP SP (rvalue (word 64)) *)
   0x6d0027e8;       (* arm_STP D8 D9 SP (Immediate_Offset (iword (&0))) *)
@@ -125,7 +125,7 @@ let mlkem_keccak_f1600_alt_mc = define_assert_from_elf
   0xd65f03c0        (* arm_RET X30 *)
 ];;
 
-let MLKEM_KECCAK_F1600_ALT_EXEC = ARM_MK_EXEC_RULE mlkem_keccak_f1600_alt_mc;;
+let KECCAK_F1600_X1_V84A_EXEC = ARM_MK_EXEC_RULE keccak_f1600_x1_v84a_mc;;
 
 (* ------------------------------------------------------------------------- *)
 (* Convenient constructs to state and prove correctness. Should possibly     *)
@@ -176,11 +176,11 @@ let GHOST_SUBREGLIST_TAC =
 (* Correctness proof                                                         *)
 (* ------------------------------------------------------------------------- *)
 
-let MLKEM_KECCAK_F1600_ALT_CORRECT = prove
+let KECCAK_F1600_X1_V84A_CORRECT = prove
  (`!a rc A pc.
       ALL (nonoverlapping (a,200)) [(word pc,0x1ac); (rc,192)]
       ==> ensures arm
-           (\s. aligned_bytes_loaded s (word pc) mlkem_keccak_f1600_alt_mc /\
+           (\s. aligned_bytes_loaded s (word pc) keccak_f1600_x1_v84a_mc /\
                 read PC s = word (pc + 0x14) /\
                 C_ARGUMENTS [a; rc] s /\
                 wordlist_from_memory(a,25) s = A /\
@@ -192,7 +192,7 @@ let MLKEM_KECCAK_F1600_ALT_CORRECT = prove
             MAYCHANGE [memory :> bytes(a,200)])`,
   MAP_EVERY X_GEN_TAC
    [`a:int64`; `rc:int64`; `A:int64 list`; `pc:num`] THEN
-  REWRITE_TAC[fst MLKEM_KECCAK_F1600_ALT_EXEC] THEN
+  REWRITE_TAC[fst KECCAK_F1600_X1_V84A_EXEC] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
               ALL; ALLPAIRS; NONOVERLAPPING_CLAUSES] THEN
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
@@ -222,7 +222,7 @@ let MLKEM_KECCAK_F1600_ALT_CORRECT = prove
     BIGNUM_DIGITIZE_TAC "A_" `read (memory :> bytes (a,8 * 25)) s0` THEN
     FIRST_ASSUM(MP_TAC o CONV_RULE(LAND_CONV WORDLIST_FROM_MEMORY_CONV)) THEN
     ASM_REWRITE_TAC[] THEN DISCH_TAC THEN
-    ARM_STEPS_TAC MLKEM_KECCAK_F1600_ALT_EXEC (1--14) THEN
+    ARM_STEPS_TAC KECCAK_F1600_X1_V84A_EXEC (1--14) THEN
     ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
     REPEAT(CONJ_TAC THENL [CONV_TAC WORD_RULE; ALL_TAC]) THEN
     ASM_REWRITE_TAC[DREG_EXPAND_CLAUSES; READ_ZEROTOP_64] THEN
@@ -247,7 +247,7 @@ let MLKEM_KECCAK_F1600_ALT_CORRECT = prove
       ASM_REWRITE_TAC[round_constants; WORD_ADD_0] THEN
       CONV_TAC(ONCE_DEPTH_CONV EL_CONV) THEN REWRITE_TAC[];
       ALL_TAC] THEN
-    ARM_STEPS_TAC MLKEM_KECCAK_F1600_ALT_EXEC (1--68) THEN
+    ARM_STEPS_TAC KECCAK_F1600_X1_V84A_EXEC (1--68) THEN
     ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
     REPEAT(CONJ_TAC THENL [CONV_TAC WORD_RULE; ALL_TAC]) THEN
     REWRITE_TAC[keccak] THEN FIRST_X_ASSUM(fun th ->
@@ -261,7 +261,7 @@ let MLKEM_KECCAK_F1600_ALT_CORRECT = prove
     X_GEN_TAC `i:num` THEN STRIP_TAC THEN
     REWRITE_TAC[round_constants; CONS_11; GSYM CONJ_ASSOC;
     WORDLIST_FROM_MEMORY_CONV `wordlist_from_memory(rc,24) s`] THEN
-    ARM_SIM_TAC MLKEM_KECCAK_F1600_ALT_EXEC [1] THEN
+    ARM_SIM_TAC KECCAK_F1600_X1_V84A_EXEC [1] THEN
     VAL_INT64_TAC `i:num` THEN
     ASM_REWRITE_TAC[] THEN CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV) THEN
     ASM_SIMP_TAC[LT_IMP_NE];
@@ -270,11 +270,11 @@ let MLKEM_KECCAK_F1600_ALT_CORRECT = prove
 
     REWRITE_TAC[DREG_EXPAND_CLAUSES; READ_ZEROTOP_64] THEN
     GHOST_SUBREGLIST_TAC THEN
-    ARM_SIM_TAC MLKEM_KECCAK_F1600_ALT_EXEC (1--14) THEN
+    ARM_SIM_TAC KECCAK_F1600_X1_V84A_EXEC (1--14) THEN
     CONV_TAC(LAND_CONV WORDLIST_FROM_MEMORY_CONV) THEN
     ASM_REWRITE_TAC[]]);;
 
-let MLKEM_KECCAK_F1600_ALT_SUBROUTINE_CORRECT = prove
+let KECCAK_F1600_X1_V84A_SUBROUTINE_CORRECT = prove
 (`!a rc A pc stackpointer returnaddress.
         aligned 16 stackpointer /\
         nonoverlapping (a,200) (word_sub stackpointer (word 64),64) /\
@@ -282,7 +282,7 @@ let MLKEM_KECCAK_F1600_ALT_SUBROUTINE_CORRECT = prove
           [(a,200); (word_sub stackpointer (word 64),64)]
           [(word pc,0x1ac); (rc,192)]
         ==> ensures arm
-             (\s. aligned_bytes_loaded s (word pc) mlkem_keccak_f1600_alt_mc /\
+             (\s. aligned_bytes_loaded s (word pc) keccak_f1600_x1_v84a_mc /\
                   read PC s = word pc /\
                   read SP s = stackpointer /\
                   read X30 s = returnaddress /\
@@ -296,6 +296,6 @@ let MLKEM_KECCAK_F1600_ALT_SUBROUTINE_CORRECT = prove
                   memory :> bytes(word_sub stackpointer (word 64),64)])`,
   let TWEAK_CONV = ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV in
   CONV_TAC TWEAK_CONV THEN
-  ARM_ADD_RETURN_STACK_TAC ~pre_post_nsteps:(5,5) MLKEM_KECCAK_F1600_ALT_EXEC
-   (CONV_RULE TWEAK_CONV MLKEM_KECCAK_F1600_ALT_CORRECT)
+  ARM_ADD_RETURN_STACK_TAC ~pre_post_nsteps:(5,5) KECCAK_F1600_X1_V84A_EXEC
+   (CONV_RULE TWEAK_CONV KECCAK_F1600_X1_V84A_CORRECT)
   `[D8; D9; D10; D11; D12; D13; D14; D15]` 64);;
