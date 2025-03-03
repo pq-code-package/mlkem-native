@@ -363,13 +363,13 @@
 #undef MLK_USE_FIPS202_X4_NATIVE
 /* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
 #undef MLK_FIPS202_NATIVE_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H
-#undef mlk_keccak_f1600_x1_scalar_asm_opt
-#undef mlk_keccak_f1600_x1_v84a_asm_clean
-#undef mlk_keccak_f1600_x2_v84a_asm_clean
+#undef mlk_keccak_f1600_x1_scalar_asm
+#undef mlk_keccak_f1600_x1_v84a_asm
+#undef mlk_keccak_f1600_x2_v84a_asm
 #undef mlk_keccak_f1600_x2_v8a_v84a_asm_hybrid
-#undef mlk_keccak_f1600_x4_scalar_v84a_asm_hybrid_opt
-#undef mlk_keccak_f1600_x4_scalar_v8a_asm_hybrid_opt
-#undef mlk_keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm_opt
+#undef mlk_keccak_f1600_x4_scalar_v84a_asm_hybrid
+#undef mlk_keccak_f1600_x4_scalar_v8a_asm_hybrid
+#undef mlk_keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm
 #undef mlk_keccakf1600_round_constants
 /* mlkem/fips202/native/api.h */
 #undef MLK_FIPS202_NATIVE_API_H

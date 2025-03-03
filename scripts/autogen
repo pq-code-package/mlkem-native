@@ -969,10 +969,10 @@ def gen_hol_light_asm(dry_run=False):
         )
 
     gen_hol_light_fips202_asm_file(
-        "keccak_f1600_x1_scalar_asm_opt.S", "mlkem_keccak_f1600.S"
+        "keccak_f1600_x1_scalar_asm.S", "mlkem_keccak_f1600.S"
     )
     gen_hol_light_fips202_asm_file(
-        "keccak_f1600_x1_v84a_asm_clean.S", "mlkem_keccak_f1600_alt.S"
+        "keccak_f1600_x1_v84a_asm.S", "mlkem_keccak_f1600_alt.S"
     )
 
 

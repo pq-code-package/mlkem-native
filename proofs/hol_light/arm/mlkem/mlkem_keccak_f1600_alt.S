@@ -41,18 +41,18 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/fips202/aarch64/src/keccak_f1600_x1_v84a_asm_clean.S using scripts/simpasm. Do not modify it directly.
+ *   dev/fips202/aarch64/src/keccak_f1600_x1_v84a_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_v84a_asm_clean
-_PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_v84a_asm_clean:
+.global _PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_v84a_asm
+_PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_v84a_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_v84a_asm_clean
-PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_v84a_asm_clean:
+.global PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_v84a_asm
+PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_v84a_asm:
 #endif
 
         sub	sp, sp, #0x40

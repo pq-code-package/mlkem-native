@@ -46,14 +46,14 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/fips202/aarch64/src/keccak_f1600_x1_v84a_asm_clean.S using scripts/simpasm. Do not modify it directly.
+ *   dev/fips202/aarch64/src/keccak_f1600_x1_v84a_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(keccak_f1600_x1_v84a_asm_clean)
-MLK_ASM_FN_SYMBOL(keccak_f1600_x1_v84a_asm_clean)
+.global MLK_ASM_NAMESPACE(keccak_f1600_x1_v84a_asm)
+MLK_ASM_FN_SYMBOL(keccak_f1600_x1_v84a_asm)
 
         sub	sp, sp, #0x40
         stp	d8, d9, [sp]

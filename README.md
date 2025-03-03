@@ -65,8 +65,8 @@ can be found in [proofs/hol_light/arm](proofs/hol_light/arm).
 So far, the following functions have been proven correct:
  - AArch64 NTT [ntt.S](mlkem/native/aarch64/src/ntt.S)
  - AArch64 inverse NTT [intt.S](mlkem/native/aarch64/src/ntt.S)
- - AArch64 Keccak x1 [keccak_f1600_x1_scalar_asm_opt.S](mlkem/fips202/native/aarch64/src/keccak_f1600_x1_scalar_asm_opt.S)
- - AArch64+SHA3 Keccak x1 [keccak_f1600_x1_v84a_asm_clean.S](mlkem/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm_clean.S)
+ - AArch64 Keccak x1 [keccak_f1600_x1_scalar_asm.S](mlkem/fips202/native/aarch64/src/keccak_f1600_x1_scalar_asm.S)
+ - AArch64+SHA3 Keccak x1 [keccak_f1600_x1_v84a_asm.S](mlkem/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S)
 
 These proofs were contributed by John Harrison, and are
 utilizing the verification infrastructure provided by [s2n-bignum](https://github.com/awslabs/s2n-bignum) infrastructure.
