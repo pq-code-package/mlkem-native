@@ -2,7 +2,7 @@
 
 # mlkem-native
 
-![CI](https://github.com/pq-code-package/mlkem-native/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/pq-code-package/mlkem-native/actions/workflows/all.yml/badge.svg)
 ![Benchmarks](https://github.com/pq-code-package/mlkem-native/actions/workflows/bench.yml/badge.svg)
 ![C90](https://img.shields.io/badge/language-C90-blue.svg)
 [![Apache](https://img.shields.io/badge/license-Apache--2.0-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)
