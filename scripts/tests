@@ -967,8 +967,8 @@ def cli():
     bench_parser.add_argument(
         "-c",
         "--cycles",
-        help="Method for counting clock cycles. PMU requires (user-space) access to the Arm Performance Monitor Unit (PMU). PERF requires a kernel with perf support. M1 only works on Apple silicon.",
-        choices=["NO", "PMU", "PERF", "M1"],
+        help="Method for counting clock cycles. PMU requires (user-space) access to the Arm Performance Monitor Unit (PMU). PERF requires a kernel with perf support. MAC works on some Apple platforms, at least Apple M1.",
+        choices=["NO", "PMU", "PERF", "MAC"],
         type=str.upper,
         required=True,
     )
