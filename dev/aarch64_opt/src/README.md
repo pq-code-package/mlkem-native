@@ -58,7 +58,11 @@ are
 
 ```
 rej_uniform_asm.S
-ddd
+poly_tobytes_asm.S
 ```
 
 The Makefile simply copies these files from the "clean" directory unmodified.
+
+Additional targets are contained in the Makefile called `poly_tobytes_asm_with_slothy.S` and
+`rej_uniform_asm_with_slothy.S` that can be use to force SLOTHY to run on these units. These
+can be used to test SLOTHY as and when the missing instructions are added.
