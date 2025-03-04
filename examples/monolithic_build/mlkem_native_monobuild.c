@@ -196,6 +196,7 @@
 #undef mlk_polyvec_tomont
 /* mlkem/sys.h */
 #undef MLK_ALIGN
+#undef MLK_ALIGN_UP
 #undef MLK_ALWAYS_INLINE
 #undef MLK_CET_ENDBR
 #undef MLK_CT_TESTING_DECLASSIFY

@@ -285,27 +285,21 @@ void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
                                uint8_t nonce0, uint8_t nonce1, uint8_t nonce2,
                                uint8_t nonce3)
 {
-  MLK_ALIGN uint8_t buf0[MLKEM_ETA1 * MLKEM_N / 4];
-  MLK_ALIGN uint8_t buf1[MLKEM_ETA1 * MLKEM_N / 4];
-  MLK_ALIGN uint8_t buf2[MLKEM_ETA1 * MLKEM_N / 4];
-  MLK_ALIGN uint8_t buf3[MLKEM_ETA1 * MLKEM_N / 4];
-  MLK_ALIGN uint8_t extkey0[MLKEM_SYMBYTES + 1];
-  MLK_ALIGN uint8_t extkey1[MLKEM_SYMBYTES + 1];
-  MLK_ALIGN uint8_t extkey2[MLKEM_SYMBYTES + 1];
-  MLK_ALIGN uint8_t extkey3[MLKEM_SYMBYTES + 1];
-  memcpy(extkey0, seed, MLKEM_SYMBYTES);
-  memcpy(extkey1, seed, MLKEM_SYMBYTES);
-  memcpy(extkey2, seed, MLKEM_SYMBYTES);
-  memcpy(extkey3, seed, MLKEM_SYMBYTES);
-  extkey0[MLKEM_SYMBYTES] = nonce0;
-  extkey1[MLKEM_SYMBYTES] = nonce1;
-  extkey2[MLKEM_SYMBYTES] = nonce2;
-  extkey3[MLKEM_SYMBYTES] = nonce3;
-  mlk_prf_eta1_x4(buf0, buf1, buf2, buf3, extkey0, extkey1, extkey2, extkey3);
-  mlk_poly_cbd_eta1(r0, buf0);
-  mlk_poly_cbd_eta1(r1, buf1);
-  mlk_poly_cbd_eta1(r2, buf2);
-  mlk_poly_cbd_eta1(r3, buf3);
+  MLK_ALIGN uint8_t buf[4][MLK_ALIGN_UP(MLKEM_ETA1 * MLKEM_N / 4)];
+  MLK_ALIGN uint8_t extkey[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 1)];
+  memcpy(extkey[0], seed, MLKEM_SYMBYTES);
+  memcpy(extkey[1], seed, MLKEM_SYMBYTES);
+  memcpy(extkey[2], seed, MLKEM_SYMBYTES);
+  memcpy(extkey[3], seed, MLKEM_SYMBYTES);
+  extkey[0][MLKEM_SYMBYTES] = nonce0;
+  extkey[1][MLKEM_SYMBYTES] = nonce1;
+  extkey[2][MLKEM_SYMBYTES] = nonce2;
+  extkey[3][MLKEM_SYMBYTES] = nonce3;
+  mlk_prf_eta1_x4(buf, extkey);
+  mlk_poly_cbd_eta1(r0, buf[0]);
+  mlk_poly_cbd_eta1(r1, buf[1]);
+  mlk_poly_cbd_eta1(r2, buf[2]);
+  mlk_poly_cbd_eta1(r3, buf[3]);
 
   mlk_assert_abs_bound(r0, MLKEM_N, MLKEM_ETA1 + 1);
   mlk_assert_abs_bound(r1, MLKEM_N, MLKEM_ETA1 + 1);
@@ -314,14 +308,8 @@ void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_zeroize(buf0, sizeof(buf0));
-  mlk_zeroize(buf1, sizeof(buf1));
-  mlk_zeroize(buf2, sizeof(buf2));
-  mlk_zeroize(buf3, sizeof(buf3));
-  mlk_zeroize(extkey0, sizeof(extkey0));
-  mlk_zeroize(extkey1, sizeof(extkey1));
-  mlk_zeroize(extkey2, sizeof(extkey2));
-  mlk_zeroize(extkey3, sizeof(extkey3));
+  mlk_zeroize(buf, sizeof(buf));
+  mlk_zeroize(extkey, sizeof(extkey));
 }
 
 #if MLKEM_K == 2 || MLKEM_K == 4
@@ -399,42 +387,34 @@ void mlk_poly_getnoise_eta1122_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
 #if MLKEM_ETA2 >= MLKEM_ETA1
 #error mlk_poly_getnoise_eta1122_4x assumes MLKEM_ETA1 > MLKEM_ETA2
 #endif
-  MLK_ALIGN uint8_t buf0[MLKEM_ETA1 * MLKEM_N / 4];
-  MLK_ALIGN uint8_t buf1[MLKEM_ETA1 * MLKEM_N / 4];
-  /* Pad to larger buffer */
-  MLK_ALIGN uint8_t buf2[MLKEM_ETA1 * MLKEM_N / 4];
-  MLK_ALIGN uint8_t buf3[MLKEM_ETA1 * MLKEM_N / 4];
+  MLK_ALIGN uint8_t buf[4][MLK_ALIGN_UP(MLKEM_ETA1 * MLKEM_N / 4)];
+  MLK_ALIGN uint8_t extkey[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 1)];
 
-  MLK_ALIGN uint8_t extkey0[MLKEM_SYMBYTES + 1];
-  MLK_ALIGN uint8_t extkey1[MLKEM_SYMBYTES + 1];
-  MLK_ALIGN uint8_t extkey2[MLKEM_SYMBYTES + 1];
-  MLK_ALIGN uint8_t extkey3[MLKEM_SYMBYTES + 1];
-
-  memcpy(extkey0, seed, MLKEM_SYMBYTES);
-  memcpy(extkey1, seed, MLKEM_SYMBYTES);
-  memcpy(extkey2, seed, MLKEM_SYMBYTES);
-  memcpy(extkey3, seed, MLKEM_SYMBYTES);
-  extkey0[MLKEM_SYMBYTES] = nonce0;
-  extkey1[MLKEM_SYMBYTES] = nonce1;
-  extkey2[MLKEM_SYMBYTES] = nonce2;
-  extkey3[MLKEM_SYMBYTES] = nonce3;
+  memcpy(extkey[0], seed, MLKEM_SYMBYTES);
+  memcpy(extkey[1], seed, MLKEM_SYMBYTES);
+  memcpy(extkey[2], seed, MLKEM_SYMBYTES);
+  memcpy(extkey[3], seed, MLKEM_SYMBYTES);
+  extkey[0][MLKEM_SYMBYTES] = nonce0;
+  extkey[1][MLKEM_SYMBYTES] = nonce1;
+  extkey[2][MLKEM_SYMBYTES] = nonce2;
+  extkey[3][MLKEM_SYMBYTES] = nonce3;
 
   /* On systems with fast batched Keccak, we use 4-fold batched PRF,
-   * even though that means generating more random data in buf2 and buf3
+   * even though that means generating more random data in buf[2] and buf[3]
    * than necessary. */
 #if !defined(FIPS202_X4_DEFAULT_IMPLEMENTATION)
-  mlk_prf_eta1_x4(buf0, buf1, buf2, buf3, extkey0, extkey1, extkey2, extkey3);
+  mlk_prf_eta1_x4(buf, extkey);
 #else  /* FIPS202_X4_DEFAULT_IMPLEMENTATION */
-  mlk_prf_eta1(buf0, extkey0);
-  mlk_prf_eta1(buf1, extkey1);
-  mlk_prf_eta2(buf2, extkey2);
-  mlk_prf_eta2(buf3, extkey3);
+  mlk_prf_eta1(buf[0], extkey[0]);
+  mlk_prf_eta1(buf[1], extkey[1]);
+  mlk_prf_eta2(buf[2], extkey[2]);
+  mlk_prf_eta2(buf[3], extkey[3]);
 #endif /* FIPS202_X4_DEFAULT_IMPLEMENTATION */
 
-  mlk_poly_cbd_eta1(r0, buf0);
-  mlk_poly_cbd_eta1(r1, buf1);
-  mlk_poly_cbd_eta2(r2, buf2);
-  mlk_poly_cbd_eta2(r3, buf3);
+  mlk_poly_cbd_eta1(r0, buf[0]);
+  mlk_poly_cbd_eta1(r1, buf[1]);
+  mlk_poly_cbd_eta2(r2, buf[2]);
+  mlk_poly_cbd_eta2(r3, buf[3]);
 
   mlk_assert_abs_bound(r0, MLKEM_N, MLKEM_ETA1 + 1);
   mlk_assert_abs_bound(r1, MLKEM_N, MLKEM_ETA1 + 1);
@@ -443,14 +423,8 @@ void mlk_poly_getnoise_eta1122_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_zeroize(buf0, sizeof(buf0));
-  mlk_zeroize(buf1, sizeof(buf1));
-  mlk_zeroize(buf2, sizeof(buf2));
-  mlk_zeroize(buf3, sizeof(buf3));
-  mlk_zeroize(extkey0, sizeof(extkey0));
-  mlk_zeroize(extkey1, sizeof(extkey1));
-  mlk_zeroize(extkey2, sizeof(extkey2));
-  mlk_zeroize(extkey3, sizeof(extkey3));
+  mlk_zeroize(buf, sizeof(buf));
+  mlk_zeroize(extkey, sizeof(extkey));
 }
 #endif /* MLKEM_K == 2 */
 
