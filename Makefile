@@ -97,7 +97,7 @@ lib: $(BUILD_DIR)/libmlkem.a $(BUILD_DIR)/libmlkem512.a $(BUILD_DIR)/libmlkem768
 # building benchmarking binaries
 check_defined = $(if $(value $1),, $(error $2))
 check-defined-CYCLES:
-	@:$(call check_defined,CYCLES,CYCLES undefined. Benchmarking requires setting one of NO PMU PERF M1)
+	@:$(call check_defined,CYCLES,CYCLES undefined. Benchmarking requires setting one of NO PMU PERF MAC)
 
 bench_512: check-defined-CYCLES \
 	$(MLKEM512_DIR)/bin/bench_mlkem512

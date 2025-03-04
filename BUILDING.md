@@ -35,13 +35,16 @@ make run_acvp
 
 The resulting binaries can be found in `test/build` (their full path is printed by `make`).
 
-For benchmarking, specify the cycle counting method. Currently, **mlkem-native** is supporting PERF, PMU (AArch64 and
-x86 only), M1 (Apple Silicon only):
+For benchmarking, specify the cycle counting method. Currently, **mlkem-native** is supporting NO, PERF, PMU, and MAC:
+* `NO` means that no cycle counting will be used; this can be used to confirm that benchmarks compile fine.
+* `PERF` uses the `perf` kernel module for cycle counting. Does not work on Apple platforms.
+* `PMU` uses direct PMU access if available. On AArch64, this may require you to load a kernel module first, see [here](https://github.com/mupq/pqax?tab=readme-ov-file#enable-access-to-performance-counters). Does not work on Apple platforms.
+* `MAC` is `perf`-based and works on some Apple platforms, at least Apple M1.
 
 ```
-# CYCLES has to be on of PERF, PMU, M1, NO
-make run_bench CYCLES=PERF
-make run_bench_components CYCLES=PERF
+# CYCLES has to be one of PERF, PMU, MAC, NO
+sudo make run_bench CYCLES=PERF
+sudo make run_bench_components CYCLES=PERF
 ```
 
 ### Using `tests` script
@@ -53,7 +56,15 @@ example,
 ./scripts/tests func
 ```
 
-will compile and run functionality tests. For detailed information on how to use the script, please refer to
+will compile and run functionality tests. Similarly,
+
+```bash
+./scripts/tests bench -c PERF -r
+```
+
+will compile and run benchmarks, using PERF for cycle counting (`-c PERF`) and running as root (`-r`).
+
+For detailed information on how to use the script, please refer to
 `./scripts/tests --help`.
 
 ### Windows

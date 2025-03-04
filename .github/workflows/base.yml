@@ -104,11 +104,11 @@ jobs:
         run: |
           make clean
           ./scripts/tests bench -c PERF --no-run
-      - name: "tests bench (build only, cycles: M1)"
+      - name: "tests bench (build only, cycles: MAC)"
         if: ${{ matrix.target.name == 'macos (aarch64)' || matrix.target.name == 'macos (x86_64)' }}
         run: |
           make clean
-          ./scripts/tests bench -c M1 --no-run
+          ./scripts/tests bench -c MAC --no-run
       - name: tests bench components
         run: |
           make clean
