@@ -37,12 +37,7 @@
 // during load and store, so that the caller need not do this.
 //
 
-#include "../../../../common.h"
-#if (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-     defined(MLK_FIPS202_BACKEND_AARCH64_A55)) &&    \
-    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
-#if defined(__ARM_FEATURE_SHA3)
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
@@ -52,8 +47,13 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(keccak_f1600_x2_v84a_asm)
-MLK_ASM_FN_SYMBOL(keccak_f1600_x2_v84a_asm)
+#ifdef __APPLE__
+.global _PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x2_v84a_asm
+_PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x2_v84a_asm:
+#else
+.global PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x2_v84a_asm
+PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x2_v84a_asm:
+#endif
 
         sub	sp, sp, #0x40
         stp	d8, d9, [sp]
@@ -218,9 +218,3 @@ keccak_f1600_x2_v84a_loop:
         ldp	d14, d15, [sp, #0x30]
         add	sp, sp, #0x40
         ret
-
-#endif /* __ARM_FEATURE_SHA3 */
-
-#endif /* (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) ||
-          defined(MLK_FIPS202_BACKEND_AARCH64_A55) &&
-         !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)*/

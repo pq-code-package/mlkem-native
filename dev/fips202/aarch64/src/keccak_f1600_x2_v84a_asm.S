@@ -48,8 +48,8 @@
 /****************** REGISTER ALLOCATIONS *******************/
 
     input_addr    .req x0
+    input_addr_hi .req x2
     input_rc      .req x1
-    const_addr    .req x1
     count         .req x2
     cur_const     .req x3
 
@@ -81,32 +81,20 @@
     Aso     .req v23
     Asu     .req v24
 
-    /* q-form of the above mapping */
-    Abaq    .req q0
-    Abeq    .req q1
-    Abiq    .req q2
-    Aboq    .req q3
-    Abuq    .req q4
-    Agaq    .req q5
-    Ageq    .req q6
-    Agiq    .req q7
-    Agoq    .req q8
-    Aguq    .req q9
-    Akaq    .req q10
-    Akeq    .req q11
-    Akiq    .req q12
-    Akoq    .req q13
-    Akuq    .req q14
-    Amaq    .req q15
-    Ameq    .req q16
-    Amiq    .req q17
-    Amoq    .req q18
-    Amuq    .req q19
-    Asaq    .req q20
-    Aseq    .req q21
-    Asiq    .req q22
-    Asoq    .req q23
-    Asuq    .req q24
+    Asud    .req d24
+
+    tmp0 .req v25
+    tmp1 .req v26
+    tmp2 .req v27
+    tmp3 .req v28
+
+    tmp0q .req q25
+    tmp1q .req q26
+    tmp2q .req q27
+    tmp3q .req q28
+
+    tmp0d .req d25
+    tmp2d .req d27
 
     /* C[x] = A[x,0] xor A[x,1] xor A[x,2] xor A[x,3] xor A[x,4],   for x in 0..4 */
     C0 .req v30
@@ -151,69 +139,59 @@
 
 /************************ MACROS ****************************/
 
+.macro load_lane out0, out1, out2, out3, idx
+    ldp tmp0q, tmp1q, [input_addr,    #(16*(\idx))]
+    ldp tmp2q, tmp3q, [input_addr_hi, #(16*(\idx))]
+    trn1 \out0\().2d, tmp0.2d, tmp2.2d
+    trn2 \out1\().2d, tmp0.2d, tmp2.2d
+    trn1 \out2\().2d, tmp1.2d, tmp3.2d
+    trn2 \out3\().2d, tmp1.2d, tmp3.2d
+.endm
+
+.macro load_lane_single out, idx
+    ldr tmp0d, [input_addr,    #(16*(\idx))]
+    ldr tmp2d, [input_addr_hi, #(16*(\idx))]
+    trn1 \out\().2d, tmp0.2d, tmp2.2d
+.endm
+
+.macro store_lane out0, out1, out2, out3, idx
+    trn1 tmp0\().2d, \out0\().2d, \out1\().2d
+    trn1 tmp1\().2d, \out2\().2d, \out3\().2d
+    stp tmp0q, tmp1q, [input_addr,    #(16*(\idx))]
+    trn2 tmp2\().2d, \out0\().2d, \out1\().2d
+    trn2 tmp3\().2d, \out2\().2d, \out3\().2d
+    stp tmp2q, tmp3q, [input_addr_hi, #(16*(\idx))]
+.endm
+
+.macro store_lane_single out, idx
+    str  \out\()d, [input_addr, #(16*(\idx))]
+    trn2 tmp0.2d, \out\().2d, \out\().2d
+    str  tmp0d, [input_addr_hi, #(16*(\idx))]
+.endm
+
 .macro load_input
-    ld2 {Aba.d, Abe.d}[0], [input_addr], #16
-    ld2 {Abi.d, Abo.d}[0], [input_addr], #16
-    ld2 {Abu.d, Aga.d}[0], [input_addr], #16
-    ld2 {Age.d, Agi.d}[0], [input_addr], #16
-    ld2 {Ago.d, Agu.d}[0], [input_addr], #16
-    ld2 {Aka.d, Ake.d}[0], [input_addr], #16
-    ld2 {Aki.d, Ako.d}[0], [input_addr], #16
-    ld2 {Aku.d, Ama.d}[0], [input_addr], #16
-    ld2 {Ame.d, Ami.d}[0], [input_addr], #16
-    ld2 {Amo.d, Amu.d}[0], [input_addr], #16
-    ld2 {Asa.d, Ase.d}[0], [input_addr], #16
-    ld2 {Asi.d, Aso.d}[0], [input_addr], #16
-    ld1 {Asu.d}[0], [input_addr], #8
-
-    ld2 {Aba.d, Abe.d}[1], [input_addr], #16
-    ld2 {Abi.d, Abo.d}[1], [input_addr], #16
-    ld2 {Abu.d, Aga.d}[1], [input_addr], #16
-    ld2 {Age.d, Agi.d}[1], [input_addr], #16
-    ld2 {Ago.d, Agu.d}[1], [input_addr], #16
-    ld2 {Aka.d, Ake.d}[1], [input_addr], #16
-    ld2 {Aki.d, Ako.d}[1], [input_addr], #16
-    ld2 {Aku.d, Ama.d}[1], [input_addr], #16
-    ld2 {Ame.d, Ami.d}[1], [input_addr], #16
-    ld2 {Amo.d, Amu.d}[1], [input_addr], #16
-    ld2 {Asa.d, Ase.d}[1], [input_addr], #16
-    ld2 {Asi.d, Aso.d}[1], [input_addr], #16
-    ld1 {Asu.d}[1], [input_addr], #8
-
-    sub input_addr, input_addr, #(25*8*2)
+    add input_addr_hi, input_addr, #0xc8
+    load_lane Aba, Abe, Abi, Abo, 0
+    load_lane Abu, Aga, Age, Agi, 2
+    load_lane Ago, Agu, Aka, Ake, 4
+    load_lane Aki, Ako, Aku, Ama, 6
+    load_lane Ame, Ami, Amo, Amu, 8
+    load_lane Asa, Ase, Asi, Aso, 10
+    load_lane_single Asu, 12
 .endm
 
 .macro store_input
-    st2 {Aba.d, Abe.d}[0], [input_addr], #16
-    st2 {Abi.d, Abo.d}[0], [input_addr], #16
-    st2 {Abu.d, Aga.d}[0], [input_addr], #16
-    st2 {Age.d, Agi.d}[0], [input_addr], #16
-    st2 {Ago.d, Agu.d}[0], [input_addr], #16
-    st2 {Aka.d, Ake.d}[0], [input_addr], #16
-    st2 {Aki.d, Ako.d}[0], [input_addr], #16
-    st2 {Aku.d, Ama.d}[0], [input_addr], #16
-    st2 {Ame.d, Ami.d}[0], [input_addr], #16
-    st2 {Amo.d, Amu.d}[0], [input_addr], #16
-    st2 {Asa.d, Ase.d}[0], [input_addr], #16
-    st2 {Asi.d, Aso.d}[0], [input_addr], #16
-    st1 {Asu.d}[0], [input_addr], #8
-
-    st2 {Aba.d, Abe.d}[1], [input_addr], #16
-    st2 {Abi.d, Abo.d}[1], [input_addr], #16
-    st2 {Abu.d, Aga.d}[1], [input_addr], #16
-    st2 {Age.d, Agi.d}[1], [input_addr], #16
-    st2 {Ago.d, Agu.d}[1], [input_addr], #16
-    st2 {Aka.d, Ake.d}[1], [input_addr], #16
-    st2 {Aki.d, Ako.d}[1], [input_addr], #16
-    st2 {Aku.d, Ama.d}[1], [input_addr], #16
-    st2 {Ame.d, Ami.d}[1], [input_addr], #16
-    st2 {Amo.d, Amu.d}[1], [input_addr], #16
-    st2 {Asa.d, Ase.d}[1], [input_addr], #16
-    st2 {Asi.d, Aso.d}[1], [input_addr], #16
-    st1 {Asu.d}[1], [input_addr], #8
+    add input_addr_hi, input_addr, #0xc8
+    store_lane Aba, Abe, Abi, Abo, 0
+    store_lane Abu, Aga, Age, Agi, 2
+    store_lane Ago, Agu, Aka, Ake, 4
+    store_lane Aki, Ako, Aku, Ama, 6
+    store_lane Ame, Ami, Amo, Amu, 8
+    store_lane Asa, Ase, Asi, Aso, 10
+    store_lane_single Asu, 12
 .endm
 
-#define STACK_SIZE (16*4 + 16*6) /* VREGS (16*4) + GPRS (TODO: Remove) */
+#define STACK_SIZE (16*4) /* VREGS (16*4) */
 
 #define STACK_BASE_GPRS (16*4)
 .macro alloc_stack
@@ -222,7 +200,7 @@
 
 .macro free_stack
     add sp, sp, #(STACK_SIZE)
-	.endm
+.endm
 
 .macro save_vregs
     stp  d8,  d9, [sp, #(16*0)]
@@ -303,7 +281,7 @@
     xar_m0 Ame_, Aga, E0, 28
     xar_m0 Abe_, Age, E1, 20
 
-    ld1r {v31.2d}, [const_addr], #8
+    ld1r {v31.2d}, [input_rc], #8
 
     bcax_m0 Aga, Aga_, Agi_, Age_
     bcax_m0 Age, Age_, Ago_, Agi_
@@ -345,7 +323,6 @@
 MLK_ASM_FN_SYMBOL(keccak_f1600_x2_v84a_asm)
     alloc_stack
     save_vregs
-    mov const_addr, input_rc
     load_input
 
     mov count, #(KECCAK_F1600_ROUNDS)
@@ -362,7 +339,6 @@ keccak_f1600_x2_v84a_loop:
 /****************** REGISTER DEALLOCATIONS *******************/
     .unreq input_addr
     .unreq input_rc
-    .unreq const_addr
     .unreq count
     .unreq cur_const
     .unreq Aba
@@ -390,31 +366,6 @@ keccak_f1600_x2_v84a_loop:
     .unreq Asi
     .unreq Aso
     .unreq Asu
-    .unreq Abaq
-    .unreq Abeq
-    .unreq Abiq
-    .unreq Aboq
-    .unreq Abuq
-    .unreq Agaq
-    .unreq Ageq
-    .unreq Agiq
-    .unreq Agoq
-    .unreq Aguq
-    .unreq Akaq
-    .unreq Akeq
-    .unreq Akiq
-    .unreq Akoq
-    .unreq Akuq
-    .unreq Amaq
-    .unreq Ameq
-    .unreq Amiq
-    .unreq Amoq
-    .unreq Amuq
-    .unreq Asaq
-    .unreq Aseq
-    .unreq Asiq
-    .unreq Asoq
-    .unreq Asuq
     .unreq C0
     .unreq C1
     .unreq C2
@@ -450,7 +401,18 @@ keccak_f1600_x2_v84a_loop:
     .unreq Asu_
     .unreq Aba_
     .unreq Abe_
-
+    .unreq input_addr_hi
+    .unreq Asud
+    .unreq tmp0
+    .unreq tmp1
+    .unreq tmp2
+    .unreq tmp3
+    .unreq tmp0q
+    .unreq tmp1q
+    .unreq tmp2q
+    .unreq tmp3q
+    .unreq tmp0d
+    .unreq tmp2d
 /* simpasm: footer-start */
 #endif /* __ARM_FEATURE_SHA3 */
 
