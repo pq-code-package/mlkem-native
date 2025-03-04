@@ -197,19 +197,11 @@ void mlk_gen_matrix(mlk_polyvec *a, const uint8_t seed[MLKEM_SYMBYTES],
    * of the same parent object.
    */
 
-  MLK_ALIGN uint8_t seed0[MLKEM_SYMBYTES + 2];
-  MLK_ALIGN uint8_t seed1[MLKEM_SYMBYTES + 2];
-  MLK_ALIGN uint8_t seed2[MLKEM_SYMBYTES + 2];
-  MLK_ALIGN uint8_t seed3[MLKEM_SYMBYTES + 2];
-  uint8_t *seedxy[4];
-  seedxy[0] = seed0;
-  seedxy[1] = seed1;
-  seedxy[2] = seed2;
-  seedxy[3] = seed3;
+  MLK_ALIGN uint8_t seed_ext[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)];
 
   for (j = 0; j < 4; j++)
   {
-    memcpy(seedxy[j], seed, MLKEM_SYMBYTES);
+    memcpy(seed_ext[j], seed, MLKEM_SYMBYTES);
   }
 
   /* Sample 4 matrix entries a time. */
@@ -223,13 +215,13 @@ void mlk_gen_matrix(mlk_polyvec *a, const uint8_t seed[MLKEM_SYMBYTES],
       y = (i + j) % MLKEM_K;
       if (transposed)
       {
-        seedxy[j][MLKEM_SYMBYTES + 0] = x;
-        seedxy[j][MLKEM_SYMBYTES + 1] = y;
+        seed_ext[j][MLKEM_SYMBYTES + 0] = x;
+        seed_ext[j][MLKEM_SYMBYTES + 1] = y;
       }
       else
       {
-        seedxy[j][MLKEM_SYMBYTES + 0] = y;
-        seedxy[j][MLKEM_SYMBYTES + 1] = x;
+        seed_ext[j][MLKEM_SYMBYTES + 0] = y;
+        seed_ext[j][MLKEM_SYMBYTES + 1] = x;
       }
     }
 
@@ -237,7 +229,7 @@ void mlk_gen_matrix(mlk_polyvec *a, const uint8_t seed[MLKEM_SYMBYTES],
      * This call writes across mlk_polyvec boundaries for K=2 and K=3.
      * This is intentional and safe.
      */
-    mlk_poly_rej_uniform_x4(&a[0].vec[0] + i, seedxy);
+    mlk_poly_rej_uniform_x4(&a[0].vec[0] + i, seed_ext);
   }
 
   /* For MLKEM_K == 3, sample the last entry individually. */
@@ -249,16 +241,16 @@ void mlk_gen_matrix(mlk_polyvec *a, const uint8_t seed[MLKEM_SYMBYTES],
 
     if (transposed)
     {
-      seed0[MLKEM_SYMBYTES + 0] = x;
-      seed0[MLKEM_SYMBYTES + 1] = y;
+      seed_ext[0][MLKEM_SYMBYTES + 0] = x;
+      seed_ext[0][MLKEM_SYMBYTES + 1] = y;
     }
     else
     {
-      seed0[MLKEM_SYMBYTES + 0] = y;
-      seed0[MLKEM_SYMBYTES + 1] = x;
+      seed_ext[0][MLKEM_SYMBYTES + 0] = y;
+      seed_ext[0][MLKEM_SYMBYTES + 1] = x;
     }
 
-    mlk_poly_rej_uniform(&a[0].vec[0] + i, seed0);
+    mlk_poly_rej_uniform(&a[0].vec[0] + i, seed_ext[0]);
     i++;
   }
 
@@ -278,10 +270,7 @@ void mlk_gen_matrix(mlk_polyvec *a, const uint8_t seed[MLKEM_SYMBYTES],
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_zeroize(seed0, sizeof(seed0));
-  mlk_zeroize(seed1, sizeof(seed1));
-  mlk_zeroize(seed2, sizeof(seed2));
-  mlk_zeroize(seed3, sizeof(seed3));
+  mlk_zeroize(seed_ext, sizeof(seed_ext));
 }
 
 /*************************************************

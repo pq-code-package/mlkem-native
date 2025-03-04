@@ -109,6 +109,8 @@
 #endif
 
 #define MLK_DEFAULT_ALIGN 32
+#define MLK_ALIGN_UP(N) \
+  ((((N) + (MLK_DEFAULT_ALIGN - 1)) / MLK_DEFAULT_ALIGN) * MLK_DEFAULT_ALIGN)
 #if defined(__GNUC__)
 #define MLK_ALIGN __attribute__((aligned(MLK_DEFAULT_ALIGN)))
 #elif defined(_MSC_VER)

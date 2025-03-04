@@ -23,7 +23,7 @@
           pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
           pkgs-2405 = inputs.nixpkgs-2405.legacyPackages.${system};
           util = pkgs.callPackage ./nix/util.nix {
-            cbmc = pkgs-unstable.cbmc;
+            cbmc = pkgs.cbmc;
             bitwuzla = pkgs-unstable.bitwuzla;
             z3 = pkgs-unstable.z3;
           };
@@ -114,7 +114,7 @@
             pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
             util = pkgs.callPackage ./nix/util.nix {
               inherit pkgs;
-              cbmc = pkgs-unstable.cbmc;
+              cbmc = pkgs.cbmc;
               bitwuzla = pkgs-unstable.bitwuzla;
               z3 = pkgs-unstable.z3;
             };
