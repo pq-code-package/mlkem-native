@@ -17,4 +17,4 @@ This backend comes in two versions: "clean" and optimized. This directory contai
 meant to be easy to read and modify; for example, is heavily leverages register aliases and assembly macros. The optimized version
 is automatically generated from the clean one via [SLOTHY](https://github.com/slothy-optimizer/slothy). Currently, the
 target architecture is Cortex-A55, but you can easily re-optimize the code for a different microarchitecture supported
-by SLOTHY, by adjusting the parameters in [optimize.sh](src/optimize.sh).
+by SLOTHY, by adjusting the parameters in the [Makefile](../aarch64_opt/src/Makefile).
