@@ -62,33 +62,46 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm)
         str	x29, [sp, #0x8]
         str	x29, [sp, #0x10]
         str	x0, [sp]
-        ld2	{ v0.d, v1.d }[0], [x0], #16
-        ld2	{ v2.d, v3.d }[0], [x0], #16
-        ld2	{ v4.d, v5.d }[0], [x0], #16
-        ld2	{ v6.d, v7.d }[0], [x0], #16
-        ld2	{ v8.d, v9.d }[0], [x0], #16
-        ld2	{ v10.d, v11.d }[0], [x0], #16
-        ld2	{ v12.d, v13.d }[0], [x0], #16
-        ld2	{ v14.d, v15.d }[0], [x0], #16
-        ld2	{ v16.d, v17.d }[0], [x0], #16
-        ld2	{ v18.d, v19.d }[0], [x0], #16
-        ld2	{ v20.d, v21.d }[0], [x0], #16
-        ld2	{ v22.d, v23.d }[0], [x0], #16
-        ld1	{ v24.d }[0], [x0], #8
-        ld2	{ v0.d, v1.d }[1], [x0], #16
-        ld2	{ v2.d, v3.d }[1], [x0], #16
-        ld2	{ v4.d, v5.d }[1], [x0], #16
-        ld2	{ v6.d, v7.d }[1], [x0], #16
-        ld2	{ v8.d, v9.d }[1], [x0], #16
-        ld2	{ v10.d, v11.d }[1], [x0], #16
-        ld2	{ v12.d, v13.d }[1], [x0], #16
-        ld2	{ v14.d, v15.d }[1], [x0], #16
-        ld2	{ v16.d, v17.d }[1], [x0], #16
-        ld2	{ v18.d, v19.d }[1], [x0], #16
-        ld2	{ v20.d, v21.d }[1], [x0], #16
-        ld2	{ v22.d, v23.d }[1], [x0], #16
-        ld1	{ v24.d }[1], [x0], #8
-        sub	x0, x0, #0x190
+        add	x4, x0, #0xc8
+        ldp	q25, q26, [x0]
+        ldp	q27, q28, [x4]
+        trn1	v0.2d, v25.2d, v27.2d
+        trn2	v1.2d, v25.2d, v27.2d
+        trn1	v2.2d, v26.2d, v28.2d
+        trn2	v3.2d, v26.2d, v28.2d
+        ldp	q25, q26, [x0, #0x20]
+        ldp	q27, q28, [x4, #0x20]
+        trn1	v4.2d, v25.2d, v27.2d
+        trn2	v5.2d, v25.2d, v27.2d
+        trn1	v6.2d, v26.2d, v28.2d
+        trn2	v7.2d, v26.2d, v28.2d
+        ldp	q25, q26, [x0, #0x40]
+        ldp	q27, q28, [x4, #0x40]
+        trn1	v8.2d, v25.2d, v27.2d
+        trn2	v9.2d, v25.2d, v27.2d
+        trn1	v10.2d, v26.2d, v28.2d
+        trn2	v11.2d, v26.2d, v28.2d
+        ldp	q25, q26, [x0, #0x60]
+        ldp	q27, q28, [x4, #0x60]
+        trn1	v12.2d, v25.2d, v27.2d
+        trn2	v13.2d, v25.2d, v27.2d
+        trn1	v14.2d, v26.2d, v28.2d
+        trn2	v15.2d, v26.2d, v28.2d
+        ldp	q25, q26, [x0, #0x80]
+        ldp	q27, q28, [x4, #0x80]
+        trn1	v16.2d, v25.2d, v27.2d
+        trn2	v17.2d, v25.2d, v27.2d
+        trn1	v18.2d, v26.2d, v28.2d
+        trn2	v19.2d, v26.2d, v28.2d
+        ldp	q25, q26, [x0, #0xa0]
+        ldp	q27, q28, [x4, #0xa0]
+        trn1	v20.2d, v25.2d, v27.2d
+        trn2	v21.2d, v25.2d, v27.2d
+        trn1	v22.2d, v26.2d, v28.2d
+        trn2	v23.2d, v26.2d, v28.2d
+        ldr	d25, [x0, #0xc0]
+        ldr	d27, [x4, #0xc0]
+        trn1	v24.2d, v25.2d, v27.2d
         add	x0, x0, #0x190
         ldp	x1, x6, [x0]
         ldp	x11, x16, [x0, #0x10]
@@ -396,7 +409,7 @@ keccak_f1600_x4_v8a_v84a_scalar_hybrid_initial:
         bic	x4, x28, x1, ror #48
         bic	v31.16b, v24.16b, v23.16b
         bic	x1, x1, x11, ror #57
-        ldr	x28, [x9, w25, uxtw #3]
+        ldr	x28, [x9, x25, lsl #3]
         eor	v22.16b, v31.16b, v22.16b
         ldr	x9, [sp, #0xd0]
         add	x25, x25, #0x1
@@ -568,7 +581,7 @@ keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop:
         bic	x4, x28, x1, ror #48
         shl	v8.2d, v31.2d, #0x2d
         bic	x1, x1, x11, ror #57
-        ldr	x28, [x9, w25, uxtw #3]
+        ldr	x28, [x9, x25, lsl #3]
         sri	v8.2d, v31.2d, #0x13
         ldr	x9, [sp, #0xd0]
         add	x25, x25, #0x1
@@ -738,7 +751,7 @@ keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop:
         bic	x4, x28, x1, ror #48
         bic	x1, x1, x11, ror #57
         eor	v22.16b, v31.16b, v22.16b
-        ldr	x28, [x9, w25, uxtw #3]
+        ldr	x28, [x9, x25, lsl #3]
         ldr	x9, [sp, #0xd0]
         bcax	v23.16b, v23.16b, v0.16b, v24.16b
         add	x25, x25, #0x1
@@ -860,33 +873,46 @@ keccak_f1600_x4_v8a_v84a_scalar_hybrid_done:
         stp	x15, x20, [x0, #0xb0]
         str	x25, [x0, #0xc0]
         sub	x0, x0, #0x258
-        st2	{ v0.d, v1.d }[0], [x0], #16
-        st2	{ v2.d, v3.d }[0], [x0], #16
-        st2	{ v4.d, v5.d }[0], [x0], #16
-        st2	{ v6.d, v7.d }[0], [x0], #16
-        st2	{ v8.d, v9.d }[0], [x0], #16
-        st2	{ v10.d, v11.d }[0], [x0], #16
-        st2	{ v12.d, v13.d }[0], [x0], #16
-        st2	{ v14.d, v15.d }[0], [x0], #16
-        st2	{ v16.d, v17.d }[0], [x0], #16
-        st2	{ v18.d, v19.d }[0], [x0], #16
-        st2	{ v20.d, v21.d }[0], [x0], #16
-        st2	{ v22.d, v23.d }[0], [x0], #16
-        st1	{ v24.d }[0], [x0], #8
-        st2	{ v0.d, v1.d }[1], [x0], #16
-        st2	{ v2.d, v3.d }[1], [x0], #16
-        st2	{ v4.d, v5.d }[1], [x0], #16
-        st2	{ v6.d, v7.d }[1], [x0], #16
-        st2	{ v8.d, v9.d }[1], [x0], #16
-        st2	{ v10.d, v11.d }[1], [x0], #16
-        st2	{ v12.d, v13.d }[1], [x0], #16
-        st2	{ v14.d, v15.d }[1], [x0], #16
-        st2	{ v16.d, v17.d }[1], [x0], #16
-        st2	{ v18.d, v19.d }[1], [x0], #16
-        st2	{ v20.d, v21.d }[1], [x0], #16
-        st2	{ v22.d, v23.d }[1], [x0], #16
-        st1	{ v24.d }[1], [x0], #8
-        sub	x0, x0, #0x190
+        add	x4, x0, #0xc8
+        trn1	v25.2d, v0.2d, v1.2d
+        trn1	v26.2d, v2.2d, v3.2d
+        stp	q25, q26, [x0]
+        trn2	v27.2d, v0.2d, v1.2d
+        trn2	v28.2d, v2.2d, v3.2d
+        stp	q27, q28, [x4]
+        trn1	v25.2d, v4.2d, v5.2d
+        trn1	v26.2d, v6.2d, v7.2d
+        stp	q25, q26, [x0, #0x20]
+        trn2	v27.2d, v4.2d, v5.2d
+        trn2	v28.2d, v6.2d, v7.2d
+        stp	q27, q28, [x4, #0x20]
+        trn1	v25.2d, v8.2d, v9.2d
+        trn1	v26.2d, v10.2d, v11.2d
+        stp	q25, q26, [x0, #0x40]
+        trn2	v27.2d, v8.2d, v9.2d
+        trn2	v28.2d, v10.2d, v11.2d
+        stp	q27, q28, [x4, #0x40]
+        trn1	v25.2d, v12.2d, v13.2d
+        trn1	v26.2d, v14.2d, v15.2d
+        stp	q25, q26, [x0, #0x60]
+        trn2	v27.2d, v12.2d, v13.2d
+        trn2	v28.2d, v14.2d, v15.2d
+        stp	q27, q28, [x4, #0x60]
+        trn1	v25.2d, v16.2d, v17.2d
+        trn1	v26.2d, v18.2d, v19.2d
+        stp	q25, q26, [x0, #0x80]
+        trn2	v27.2d, v16.2d, v17.2d
+        trn2	v28.2d, v18.2d, v19.2d
+        stp	q27, q28, [x4, #0x80]
+        trn1	v25.2d, v20.2d, v21.2d
+        trn1	v26.2d, v22.2d, v23.2d
+        stp	q25, q26, [x0, #0xa0]
+        trn2	v27.2d, v20.2d, v21.2d
+        trn2	v28.2d, v22.2d, v23.2d
+        stp	q27, q28, [x4, #0xa0]
+        str	d24, [x0, #0xc0]
+        trn2	v25.2d, v24.2d, v24.2d
+        str	d25, [x4, #0xc0]
         ldp	d14, d15, [sp, #0xc0]
         ldp	d12, d13, [sp, #0xb0]
         ldp	d10, d11, [sp, #0xa0]
