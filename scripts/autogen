@@ -981,6 +981,9 @@ def gen_hol_light_asm(dry_run=False):
         "keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S",
         "keccak_f1600_x4_v8a_v84a_scalar.S",
     )
+    gen_hol_light_fips202_asm_file(
+        "keccak_f1600_x4_v8a_scalar_hybrid_asm.S", "keccak_f1600_x4_v8a_scalar.S"
+    )
 
 
 def update_via_copy(infile_full, outfile_full, dry_run=False, transform=None):

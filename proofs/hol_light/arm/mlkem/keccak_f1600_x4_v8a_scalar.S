@@ -27,10 +27,6 @@
 // Author: Hanno Becker <hannobecker@posteo.de>
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
 
-#include "../../../../common.h"
-#if (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-     defined(MLK_FIPS202_BACKEND_AARCH64_A55)) &&    \
-    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
@@ -40,8 +36,13 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_asm_hybrid)
-MLK_ASM_FN_SYMBOL(keccak_f1600_x4_scalar_v8a_asm_hybrid)
+#ifdef __APPLE__
+.global _PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_scalar_v8a_asm_hybrid
+_PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_scalar_v8a_asm_hybrid:
+#else
+.global PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_scalar_v8a_asm_hybrid
+PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_scalar_v8a_asm_hybrid:
+#endif
 
         sub	sp, sp, #0xe0
         stp	x19, x20, [sp, #0x30]
@@ -1017,7 +1018,3 @@ keccak_f1600_x4_v8a_scalar_hybrid_done:
         ldp	x29, x30, [sp, #0x80]
         add	sp, sp, #0xe0
         ret
-
-#endif /* (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) ||
-          defined(MLK_FIPS202_BACKEND_AARCH64_A55) &&
-         !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)*/
