@@ -69,7 +69,8 @@ OBJ = mlkem/mlkem_ntt.o                 \
       mlkem/mlkem_intt.o                \
       mlkem/keccak_f1600_x1_scalar.o    \
       mlkem/keccak_f1600_x1_v84a.o      \
-      mlkem/keccak_f1600_x2_v84a.o
+      mlkem/keccak_f1600_x2_v84a.o      \
+      mlkem/keccak_f1600_x4_v8a_v84a_scalar.o
 
 # According to
 # https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms,

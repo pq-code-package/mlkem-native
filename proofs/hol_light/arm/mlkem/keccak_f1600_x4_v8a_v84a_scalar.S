@@ -27,12 +27,7 @@
 // Author: Hanno Becker <hanno.becker@arm.com>
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
 
-#include "../../../../common.h"
-#if (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-     defined(MLK_FIPS202_BACKEND_AARCH64_A55)) &&    \
-    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
-#if defined(__ARM_FEATURE_SHA3)
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
@@ -42,8 +37,13 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm)
-MLK_ASM_FN_SYMBOL(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm)
+#ifdef __APPLE__
+.global _PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm
+_PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm:
+#else
+.global PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm
+PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm:
+#endif
 
         sub	sp, sp, #0xe0
         stp	x19, x20, [sp, #0x30]
@@ -925,9 +925,3 @@ keccak_f1600_x4_v8a_v84a_scalar_hybrid_done:
         ldp	x29, x30, [sp, #0x80]
         add	sp, sp, #0xe0
         ret
-
-#endif /* __ARM_FEATURE_SHA3 */
-
-#endif /* (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) ||
-          defined(MLK_FIPS202_BACKEND_AARCH64_A55) &&
-         !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)*/
