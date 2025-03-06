@@ -2,8 +2,8 @@
 
 # HOL Light functional correctness proofs
 
-This directory contains functional correctness proofs for the optimized
-AArch64 NTT and invNTT used in mlkem-native. The proofs were developed by John Harrison
+This directory contains functional correctness proofs for fast AArch64 assembly routines
+used in mlkem-native. The proofs were developed by John Harrison
 and are written in the [HOL Light](https://hol-light.github.io/) theorem
 prover, utilizing the assembly verification infrastructure from [s2n-bignum](https://github.com/awslabs/s2n-bignum).
 
@@ -12,6 +12,22 @@ contains the byte code being verified, as well as the specification that is bein
 proved. Specifications are essentially Hoare triples, with the noteworthy difference
 that the program is implicit as the content of memory at the PC; which is asserted to
 be the code under verification as part of the precondition.
+
+## What is covered?
+
+At present, this directory contains functional correctness proofs for the following functions:
+
+- ML-KEM Arithmetic:
+  * Optimized AArch64 forward NTT: [mlkem_ntt.S](mlkem/mlkem_ntt.S)
+  * Optimized AArch64 inverse NTT: [mlkem_intt.S](mlkem/mlkem_intt.S)
+- FIPS202:
+  * Keccak-F1600 using lazy rotations (see [this paper](https://eprint.iacr.org/2022/1243)): [keccak_f1600_x1_scalar.S](mlkem/keccak_f1600_x1_scalar.S)
+  * Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x1_v84a.S](mlkem/keccak_f1600_x1_v84a.S)
+  * 2-fold Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x2_v84a.S](mlkem/keccak_f1600_x2_v84a.S)
+  * 'Hybrid' 4-fold Keccak-F1600 using scalar and v8-A Neon instructions: [keccak_f1600_x4_v8a_scalar.S](mlkem/keccak_f1600_x4_v8a_scalar.S)
+  * 'Triple hybrid' 4-fold Keccak-F1600 using scalar, v8-A Neon and v8.4-A+SHA3 Neon instructions:[keccak_f1600_x4_v8a_v84a_scalar.S](mlkem/keccak_f1600_x4_v8a_v84a_scalar.S)
+
+The NTT and invNTT functions are super-optimized using [SLOTHY](https://github.com/slothy-optimizer/slothy/).
 
 ## Running the proofs
 
@@ -40,12 +56,3 @@ brew install binutils
 and put its parent directory (typically `/opt/homebrew/opt/binutils/bin`) into your `PATH`.
 This is needed to convert Mach-O object files to ELF (if you know a way to install a suitable version
 of `objcopy` through `nix`, please let us know!).
-
-## What is covered?
-
-At present, this directory contains functional correctness proofs for the following functions:
-
-- Optimized AArch64 forward NTT: [mlkem_ntt.S](mlkem/mlkem_ntt.S)
-- Optimized AArch64 inverse NTT: [mlkem_intt.S](mlkem/mlkem_intt.S)
-
-Both functions are super-optimized using [SLOTHY](https://github.com/slothy-optimizer/slothy/).
