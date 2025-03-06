@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef MLK_DEV_FIPS202_AARCH64_CORTEX_A55_H
-#define MLK_DEV_FIPS202_AARCH64_CORTEX_A55_H
+#ifndef MLK_DEV_FIPS202_AARCH64_META_CORTEX_A55_H
+#define MLK_DEV_FIPS202_AARCH64_META_CORTEX_A55_H
 /* FIPS202 assembly profile targeting Cortex-A55 */
 
 #ifdef MLK_FIPS202_NATIVE_PROFILE_H
@@ -21,8 +21,8 @@
 /* Filename of the C backend implementation.
  * This is not inlined here because this header is included in assembly
  * files as well. */
-#define MLK_FIPS202_BACKEND_IMPL "native/aarch64/src/cortex_a55_impl.h"
+#define MLK_FIPS202_BACKEND_IMPL "native/aarch64/src/x1_scalar_impl.h"
 
 #endif /* MLK_FIPS202_NATIVE_PROFILE_H */
 
-#endif /* MLK_DEV_FIPS202_AARCH64_CORTEX_A55_H */
+#endif /* MLK_DEV_FIPS202_AARCH64_META_CORTEX_A55_H */

@@ -32,17 +32,9 @@
  *   fall back to the standard C implementation.
  */
 #if defined(__ARM_FEATURE_SHA3) && defined(__APPLE__)
-#define MLK_USE_FIPS202_X1_NATIVE
-static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
-{
-  mlk_keccak_f1600_x1_v84a_asm(state, mlk_keccakf1600_round_constants);
-}
+#include "x1_v84a_impl.h"
 #elif !defined(MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER)
-#define MLK_USE_FIPS202_X1_NATIVE
-static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
-{
-  mlk_keccak_f1600_x1_scalar_asm(state, mlk_keccakf1600_round_constants);
-}
+#include "x1_scalar_impl.h"
 #endif /* !MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER */
 
 /*
@@ -65,28 +57,14 @@ static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
  * instructions only.
  */
 #if defined(__APPLE__)
-#define MLK_USE_FIPS202_X2_NATIVE
-static MLK_INLINE void mlk_keccak_f1600_x2_native(uint64_t *state)
-{
-  mlk_keccak_f1600_x2_v84a_asm(state, mlk_keccakf1600_round_constants);
-}
+#include "x2_v84a_impl.h"
 #else /* __APPLE__ */
-#define MLK_USE_FIPS202_X4_NATIVE
-static MLK_INLINE void mlk_keccak_f1600_x4_native(uint64_t *state)
-{
-  mlk_keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm(
-      state, mlk_keccakf1600_round_constants);
-}
+#include "x4_v8a_v84a_scalar_impl.h"
 #endif /* __APPLE__ */
 
 #else /* __ARM_FEATURE_SHA3 */
 
-#define MLK_USE_FIPS202_X4_NATIVE
-static MLK_INLINE void mlk_keccak_f1600_x4_native(uint64_t *state)
-{
-  mlk_keccak_f1600_x4_scalar_v8a_asm_hybrid(state,
-                                            mlk_keccakf1600_round_constants);
-}
+#include "x4_v8a_scalar_impl.h"
 
 #endif /* __ARM_FEATURE_SHA3 */
 

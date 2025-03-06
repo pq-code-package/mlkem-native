@@ -351,16 +351,9 @@
 #undef MLK_FIPS202_BACKEND_NAME
 #undef MLK_FIPS202_NATIVE_AARCH64_META_CORTEX_A55_H
 #undef MLK_FIPS202_NATIVE_PROFILE_H
-/* mlkem/fips202/native/aarch64/src/cortex_a55_impl.h */
-#undef MLK_FIPS202_NATIVE_AARCH64_SRC_CORTEX_A55_IMPL_H
-#undef MLK_FIPS202_NATIVE_PROFILE_IMPL_H
-#undef MLK_USE_FIPS202_X1_NATIVE
 /* mlkem/fips202/native/aarch64/src/default_impl.h */
 #undef MLK_FIPS202_NATIVE_AARCH64_SRC_DEFAULT_IMPL_H
 #undef MLK_FIPS202_NATIVE_PROFILE_IMPL_H
-#undef MLK_USE_FIPS202_X1_NATIVE
-#undef MLK_USE_FIPS202_X2_NATIVE
-#undef MLK_USE_FIPS202_X4_NATIVE
 /* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
 #undef MLK_FIPS202_NATIVE_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H
 #undef mlk_keccak_f1600_x1_scalar_asm
@@ -371,6 +364,26 @@
 #undef mlk_keccak_f1600_x4_scalar_v8a_asm_hybrid
 #undef mlk_keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm
 #undef mlk_keccakf1600_round_constants
+/* mlkem/fips202/native/aarch64/src/x1_scalar_impl.h */
+#undef MLK_FIPS202_NATIVE_AARCH64_SRC_X1_SCALAR_IMPL_H
+#undef MLK_FIPS202_NATIVE_PROFILE_IMPL_H
+#undef MLK_USE_FIPS202_X1_NATIVE
+/* mlkem/fips202/native/aarch64/src/x1_v84a_impl.h */
+#undef MLK_FIPS202_NATIVE_AARCH64_SRC_X1_V84A_IMPL_H
+#undef MLK_FIPS202_NATIVE_PROFILE_IMPL_H
+#undef MLK_USE_FIPS202_X1_NATIVE
+/* mlkem/fips202/native/aarch64/src/x2_v84a_impl.h */
+#undef MLK_FIPS202_NATIVE_AARCH64_SRC_X2_V84A_IMPL_H
+#undef MLK_FIPS202_NATIVE_PROFILE_IMPL_H
+#undef MLK_USE_FIPS202_X2_NATIVE
+/* mlkem/fips202/native/aarch64/src/x4_v8a_scalar_impl.h */
+#undef MLK_FIPS202_NATIVE_AARCH64_SRC_X4_V8A_SCALAR_IMPL_H
+#undef MLK_FIPS202_NATIVE_PROFILE_IMPL_H
+#undef MLK_USE_FIPS202_X4_NATIVE
+/* mlkem/fips202/native/aarch64/src/x4_v8a_v84a_scalar_impl.h */
+#undef MLK_FIPS202_NATIVE_AARCH64_SRC_X4_V8A_V84A_SCALAR_IMPL_H
+#undef MLK_FIPS202_NATIVE_PROFILE_IMPL_H
+#undef MLK_USE_FIPS202_X4_NATIVE
 /* mlkem/fips202/native/api.h */
 #undef MLK_FIPS202_NATIVE_API_H
 /* mlkem/fips202/native/meta.h */

@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef MLK_FIPS202_NATIVE_AARCH64_SRC_CORTEX_A55_IMPL_H
-#define MLK_FIPS202_NATIVE_AARCH64_SRC_CORTEX_A55_IMPL_H
-/* FIPS202 assembly profile targeting Cortex-A55 */
+#ifndef MLK_FIPS202_NATIVE_AARCH64_SRC_X1_SCALAR_IMPL_H
+#define MLK_FIPS202_NATIVE_AARCH64_SRC_X1_SCALAR_IMPL_H
 
 #ifdef MLK_FIPS202_NATIVE_PROFILE_IMPL_H
 #error Only one FIPS202 assembly profile can be defined -- did you include multiple profiles?
@@ -26,4 +25,4 @@ static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
 
 #endif /* MLK_FIPS202_NATIVE_PROFILE_IMPL_H */
 
-#endif /* MLK_FIPS202_NATIVE_AARCH64_SRC_CORTEX_A55_IMPL_H */
+#endif /* MLK_FIPS202_NATIVE_AARCH64_SRC_X1_SCALAR_IMPL_H */
