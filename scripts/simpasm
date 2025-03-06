@@ -345,6 +345,8 @@ def _main():
 
     args = parser.parse_args()
 
+    os.chdir(os.path.join(os.path.dirname(__file__), ".."))
+
     if (
         args.cflags is not None
         and args.cflags.startswith('"')
