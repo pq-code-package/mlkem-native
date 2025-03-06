@@ -1075,6 +1075,8 @@ def cli():
     if not hasattr(args, "l"):
         args.l = None
 
+    os.chdir(os.path.join(os.path.dirname(__file__), ".."))
+
     if args.cmd == "all":
         Tests(args).all()
     elif args.cmd == "examples":
