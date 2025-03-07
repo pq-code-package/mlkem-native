@@ -94,7 +94,7 @@
  *
  * Keep this _after_ the inclusion of the backend; otherwise,
  * the sanity checks won't have an effect. */
-#if defined(MLK_CHECK_APIS)
+#if defined(MLK_CHECK_APIS) && !defined(__ASSEMBLER__)
 #include "native/api.h"
 #endif
 #include MLK_ARITH_BACKEND_FILE
@@ -106,7 +106,7 @@
  *
  * Keep this _after_ the inclusion of the backend; otherwise,
  * the sanity checks won't have an effect. */
-#if defined(MLK_CHECK_APIS)
+#if defined(MLK_CHECK_APIS) && !defined(__ASSEMBLER__)
 #include "fips202/native/api.h"
 #endif
 #include MLK_FIPS202_BACKEND_FILE
