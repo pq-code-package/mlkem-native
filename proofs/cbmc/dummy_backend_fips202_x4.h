@@ -8,8 +8,6 @@
 #else
 #define MLK_FIPS202_PROFILE_H
 
-#define MLK_FIPS202_BACKEND_NAME DUMMY_BACKEND_FIPS202_X2
-
 /* Filename of the C backend implementation.
  * This is not inlined here because this header is included in assembly
  * files as well. */

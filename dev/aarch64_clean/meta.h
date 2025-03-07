@@ -16,8 +16,6 @@
  * in the build can be appropriately guarded. */
 #define MLK_ARITH_BACKEND_AARCH64_CLEAN
 
-#define MLK_ARITH_BACKEND_NAME AARCH64_CLEAN
-
 /* Filename of the C backend implementation.
  * This is not inlined here because this header is included in assembly
  * files as well. */

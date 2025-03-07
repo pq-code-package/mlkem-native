@@ -8,8 +8,6 @@
 #else
 #define MLK_ARITH_PROFILE_H
 
-#define MLK_ARITH_BACKEND_NAME DUMMY_BACKEND
-
 /* Filename of the C backend implementation.
  * This is not inlined here because this header is included in assembly
  * files as well. */

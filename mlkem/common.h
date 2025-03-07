@@ -31,14 +31,6 @@
 #endif
 #endif
 
-#if !defined(MLK_ARITH_BACKEND_NAME)
-#define MLK_ARITH_BACKEND_NAME C
-#endif
-
-#if !defined(MLK_FIPS202_BACKEND_NAME)
-#define MLK_FIPS202_BACKEND_NAME C
-#endif
-
 /* For a monobuild (where all compilation units are merged into one), mark
  * all non-public API as static since they don't need external linkage. */
 #if !defined(MLK_MONOBUILD)

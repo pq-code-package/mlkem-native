@@ -16,8 +16,6 @@
  * in the build can be appropriately guarded. */
 #define MLK_ARITH_BACKEND_X86_64_DEFAULT
 
-#define MLK_ARITH_BACKEND_NAME X86_64_DEFAULT
-
 /* Filename of the C backend implementation.
  * This is not inlined here because this header is included in assembly
  * files as well. */

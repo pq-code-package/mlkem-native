@@ -14,8 +14,6 @@
  * in the build can be appropriately guarded. */
 #define MLK_FIPS202_BACKEND_CUSTOM_TINY_SHA3
 
-#define MLK_FIPS202_BACKEND_NAME TINY_SHA3
-
 /* Filename of the C backend implementation.
  * This is not inlined here because this header is included in assembly
  * files as well. */
