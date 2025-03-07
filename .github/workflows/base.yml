@@ -278,4 +278,4 @@ jobs:
         run: |
           scan-build --status-bugs make quickcheck OPT=0
           make clean >/dev/null
-          scan-build --status-bugs make quickcheck OPT=1 
+          scan-build --status-bugs make quickcheck OPT=1
