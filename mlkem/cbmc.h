@@ -9,8 +9,6 @@
  * Basic replacements for __CPROVER_XXX contracts
  ***************************************************/
 
-#include "common.h"
-
 #ifndef CBMC
 
 #define __contract__(x)

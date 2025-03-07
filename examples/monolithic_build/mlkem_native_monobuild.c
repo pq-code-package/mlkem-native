@@ -58,7 +58,7 @@
 #include "mlkem/fips202/native/aarch64/src/keccakf1600_round_constants.c"
 #endif /* MLK_SYS_AARCH64 */
 #if defined(MLK_SYS_X86_64)
-#include "mlkem/fips202/native/x86_64/src/KeccakP-1600-times4-SIMD256.c"
+#include "mlkem/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.c"
 #endif /* MLK_SYS_X86_64 */
 #endif /* MLK_MONOBUILD_WITH_NATIVE_FIPS202 */
 
@@ -312,8 +312,6 @@
 #undef mlk_shake128_release
 #undef mlk_shake128_squeezeblocks
 #undef mlk_shake256
-/* mlkem/fips202/fips202_backend.h */
-#undef MLK_FIPS202_FIPS202_BACKEND_H
 /* mlkem/fips202/fips202x4.h */
 #undef MLK_FIPS202_FIPS202X4_H
 #undef mlk_shake128x4_absorb_once
@@ -337,19 +335,8 @@
 /*
  * Undefine macros from native code
  */
-/* mlkem/fips202/native/aarch64/meta.h */
-#undef MLK_FIPS202_BACKEND_AARCH64_DEFAULT
-#undef MLK_FIPS202_BACKEND_IMPL
-#undef MLK_FIPS202_NATIVE_AARCH64_META_H
-#undef MLK_FIPS202_NATIVE_PROFILE_H
-/* mlkem/fips202/native/aarch64/meta_cortex_a55.h */
-#undef MLK_FIPS202_BACKEND_AARCH64_A55
-#undef MLK_FIPS202_BACKEND_IMPL
-#undef MLK_FIPS202_NATIVE_AARCH64_META_CORTEX_A55_H
-#undef MLK_FIPS202_NATIVE_PROFILE_H
-/* mlkem/fips202/native/aarch64/src/default_impl.h */
-#undef MLK_FIPS202_NATIVE_AARCH64_SRC_DEFAULT_IMPL_H
-#undef MLK_FIPS202_NATIVE_PROFILE_IMPL_H
+/* mlkem/fips202/native/aarch64/auto.h */
+#undef MLK_FIPS202_NATIVE_AARCH64_AUTO_H
 /* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
 #undef MLK_FIPS202_NATIVE_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H
 #undef mlk_keccak_f1600_x1_scalar_asm
@@ -360,40 +347,37 @@
 #undef mlk_keccak_f1600_x4_scalar_v8a_asm_hybrid
 #undef mlk_keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm
 #undef mlk_keccakf1600_round_constants
-/* mlkem/fips202/native/aarch64/src/x1_scalar_impl.h */
-#undef MLK_FIPS202_NATIVE_AARCH64_SRC_X1_SCALAR_IMPL_H
-#undef MLK_FIPS202_NATIVE_PROFILE_IMPL_H
+/* mlkem/fips202/native/aarch64/x1_scalar.h */
+#undef MLK_FIPS202_AARCH64_NEED_X1_SCALAR
+#undef MLK_FIPS202_NATIVE_AARCH64_X1_SCALAR_H
 #undef MLK_USE_FIPS202_X1_NATIVE
-/* mlkem/fips202/native/aarch64/src/x1_v84a_impl.h */
-#undef MLK_FIPS202_NATIVE_AARCH64_SRC_X1_V84A_IMPL_H
-#undef MLK_FIPS202_NATIVE_PROFILE_IMPL_H
+/* mlkem/fips202/native/aarch64/x1_v84a.h */
+#undef MLK_FIPS202_AARCH64_NEED_X1_V84A
+#undef MLK_FIPS202_NATIVE_AARCH64_X1_V84A_H
 #undef MLK_USE_FIPS202_X1_NATIVE
-/* mlkem/fips202/native/aarch64/src/x2_v84a_impl.h */
-#undef MLK_FIPS202_NATIVE_AARCH64_SRC_X2_V84A_IMPL_H
-#undef MLK_FIPS202_NATIVE_PROFILE_IMPL_H
+/* mlkem/fips202/native/aarch64/x2_v84a.h */
+#undef MLK_FIPS202_AARCH64_NEED_X2_V84A
+#undef MLK_FIPS202_NATIVE_AARCH64_X2_V84A_H
 #undef MLK_USE_FIPS202_X2_NATIVE
-/* mlkem/fips202/native/aarch64/src/x4_v8a_scalar_impl.h */
-#undef MLK_FIPS202_NATIVE_AARCH64_SRC_X4_V8A_SCALAR_IMPL_H
-#undef MLK_FIPS202_NATIVE_PROFILE_IMPL_H
+/* mlkem/fips202/native/aarch64/x4_v8a_scalar.h */
+#undef MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID
+#undef MLK_FIPS202_NATIVE_AARCH64_X4_V8A_SCALAR_H
 #undef MLK_USE_FIPS202_X4_NATIVE
-/* mlkem/fips202/native/aarch64/src/x4_v8a_v84a_scalar_impl.h */
-#undef MLK_FIPS202_NATIVE_AARCH64_SRC_X4_V8A_V84A_SCALAR_IMPL_H
-#undef MLK_FIPS202_NATIVE_PROFILE_IMPL_H
+/* mlkem/fips202/native/aarch64/x4_v8a_v84a_scalar.h */
+#undef MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID
+#undef MLK_FIPS202_NATIVE_AARCH64_X4_V8A_V84A_SCALAR_H
 #undef MLK_USE_FIPS202_X4_NATIVE
 /* mlkem/fips202/native/api.h */
 #undef MLK_FIPS202_NATIVE_API_H
-/* mlkem/fips202/native/meta.h */
-#undef MLK_FIPS202_NATIVE_META_H
-/* mlkem/fips202/native/x86_64/meta.h */
-#undef MLK_FIPS202_BACKEND_IMPL
-#undef MLK_FIPS202_BACKEND_X86_64_XKCP
-#undef MLK_FIPS202_NATIVE_X86_64_META_H
-#undef MLK_FIPS202_PROFILE_H
-/* mlkem/fips202/native/x86_64/src/xkcp_impl.h */
-#undef MLK_FIPS202_NATIVE_X86_64_SRC_XKCP_IMPL_H
-#undef MLK_FIPS202_PROFILE_IMPL_H
-#undef MLK_USE_FIPS202_X4_NATIVE
+/* mlkem/fips202/native/auto.h */
+#undef MLK_FIPS202_NATIVE_AUTO_H
+/* mlkem/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.h */
+#undef MLK_FIPS202_NATIVE_X86_64_SRC_KECCAKP_1600_TIMES4_SIMD256_H
 #undef mlk_keccakf1600x4_permute24
+/* mlkem/fips202/native/x86_64/xkcp.h */
+#undef MLK_FIPS202_NATIVE_X86_64_XKCP_H
+#undef MLK_FIPS202_X86_64_XKCP
+#undef MLK_USE_FIPS202_X4_NATIVE
 #endif /* MLK_MONOBUILD_WITH_NATIVE_FIPS202 */
 #if defined(MLK_MONOBUILD_WITH_NATIVE_ARITH)
 /*

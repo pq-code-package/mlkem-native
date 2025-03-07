@@ -3,20 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* Default FIPS202 assembly profile for AArch64 systems */
+#if !defined(MLK_FIPS202_CUSTOM_TINY_SHA3_H)
+#define MLK_FIPS202_CUSTOM_TINY_SHA3_H
 
-#ifdef MLK_FIPS202_NATIVE_PROFILE_H
-#error Only one FIPS202 assembly profile can be defined -- did you include multiple profiles?
-#else
-#define MLK_FIPS202_NATIVE_PROFILE_H
+#if !defined(__ASSEMBLER__)
+#include "src/sha3.h"
+/* Replace (single) Keccak-F1600 by tiny-SHA3's */
+#define MLK_USE_FIPS202_X1_NATIVE
+static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
+{
+  tiny_sha3_keccakf(state);
+}
+#endif /* !__ASSEMBLER__ */
 
-/* Identifier for this backend so that source and assembly files
- * in the build can be appropriately guarded. */
-#define MLK_FIPS202_BACKEND_CUSTOM_TINY_SHA3
-
-/* Filename of the C backend implementation.
- * This is not inlined here because this header is included in assembly
- * files as well. */
-#define MLK_FIPS202_BACKEND_IMPL "fips202/native/custom/src/custom_impl.h"
-
-#endif /* MLK_FIPS202_NATIVE_PROFILE_H */
+#endif /* MLK_FIPS202_CUSTOM_TINY_SHA3_H */

@@ -3,16 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef MLK_DEV_FIPS202_AARCH64_SRC_DEFAULT_IMPL_H
-#define MLK_DEV_FIPS202_AARCH64_SRC_DEFAULT_IMPL_H
+#ifndef MLK_DEV_FIPS202_AARCH64_AUTO_H
+#define MLK_DEV_FIPS202_AARCH64_AUTO_H
 /* Default FIPS202 assembly profile for AArch64 systems */
-
-#ifdef MLK_FIPS202_NATIVE_PROFILE_IMPL_H
-#error Only one FIPS202 assembly profile can be defined -- did you include multiple profiles?
-#else
-#define MLK_FIPS202_NATIVE_PROFILE_IMPL_H
-
-#include "fips202_native_aarch64.h"
 
 /*
  * Default logic to decide which implementation to use.
@@ -32,9 +25,9 @@
  *   fall back to the standard C implementation.
  */
 #if defined(__ARM_FEATURE_SHA3) && defined(__APPLE__)
-#include "x1_v84a_impl.h"
+#include "x1_v84a.h"
 #elif !defined(MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER)
-#include "x1_scalar_impl.h"
+#include "x1_scalar.h"
 #endif /* !MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER */
 
 /*
@@ -57,17 +50,15 @@
  * instructions only.
  */
 #if defined(__APPLE__)
-#include "x2_v84a_impl.h"
+#include "x2_v84a.h"
 #else /* __APPLE__ */
-#include "x4_v8a_v84a_scalar_impl.h"
+#include "x4_v8a_v84a_scalar.h"
 #endif /* __APPLE__ */
 
 #else /* __ARM_FEATURE_SHA3 */
 
-#include "x4_v8a_scalar_impl.h"
+#include "x4_v8a_scalar.h"
 
 #endif /* __ARM_FEATURE_SHA3 */
 
-#endif /* MLK_FIPS202_NATIVE_PROFILE_H */
-
-#endif /* MLK_DEV_FIPS202_AARCH64_SRC_DEFAULT_IMPL_H */
+#endif /* MLK_DEV_FIPS202_AARCH64_AUTO_H */

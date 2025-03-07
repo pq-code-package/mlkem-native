@@ -25,13 +25,12 @@ http://creativecommons.org/publicdomain/zero/1.0/
  */
 
 #include "../../../../common.h"
-#if defined(MLK_FIPS202_BACKEND_X86_64_XKCP) && \
-    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_FIPS202_X86_64_XKCP) && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 #include <immintrin.h>
 #include <stdint.h>
 
-#include "xkcp_impl.h"
+#include "KeccakP_1600_times4_SIMD256.h"
 
 #ifndef MLK_SYS_LITTLE_ENDIAN
 #error Expecting a little-endian platform
@@ -454,12 +453,12 @@ void mlk_keccakf1600x4_permute24(void *states)
       rounds24 copyToState(statesAsLanes, A)
 }
 
-#else /* defined(MLK_FIPS202_BACKEND_X86_64_XKCP) && \
+#else /* defined(MLK_FIPS202_X86_64_XKCP) && \
          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */
 
 MLK_EMPTY_CU(fips202_avx2_keccakx4)
 
-#endif /* defined(MLK_FIPS202_BACKEND_X86_64_XKCP) && \
+#endif /* defined(MLK_FIPS202_X86_64_XKCP) && \
           !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.

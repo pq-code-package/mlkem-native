@@ -5,8 +5,11 @@
 
 #include "../../../../common.h"
 
-#if (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-     defined(MLK_FIPS202_BACKEND_AARCH64_A55)) &&    \
+#if (defined(MLK_FIPS202_AARCH64_NEED_X1_SCALAR) ||                  \
+     defined(MLK_FIPS202_AARCH64_NEED_X1_V84A) ||                    \
+     defined(MLK_FIPS202_AARCH64_NEED_X2_V84A) ||                    \
+     defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID) ||       \
+     defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID)) && \
     !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 #include <stdint.h>
@@ -23,12 +26,18 @@ MLK_ALIGN const uint64_t mlk_keccakf1600_round_constants[] = {
     0x8000000000008080, 0x0000000080000001, 0x8000000080008008,
 };
 
-#else /* (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-          defined(MLK_FIPS202_BACKEND_AARCH64_A55) &&     \
-         !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)*/
+#else /* (defined(MLK_FIPS202_AARCH64_NEED_X1_SCALAR)           ||       \
+         defined(MLK_FIPS202_AARCH64_NEED_X1_V84A)              ||       \
+         defined(MLK_FIPS202_AARCH64_NEED_X2_V84A)              ||       \
+         defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID) ||       \
+         defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID)) && \
+         !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */
 
 MLK_EMPTY_CU(fips202_aarch64_round_constants)
 
-#endif /* (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-          defined(MLK_FIPS202_BACKEND_AARCH64_A55) &&      \
-         !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)*/
+#endif /* (defined(MLK_FIPS202_AARCH64_NEED_X1_SCALAR)           ||       \
+          defined(MLK_FIPS202_AARCH64_NEED_X1_V84A)              ||       \
+          defined(MLK_FIPS202_AARCH64_NEED_X2_V84A)              ||       \
+          defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID) ||       \
+          defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID)) && \
+          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */

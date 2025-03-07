@@ -28,8 +28,7 @@
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
 
 #include "../../../../common.h"
-#if (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-     defined(MLK_FIPS202_BACKEND_AARCH64_A55)) &&    \
+#if defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID) && \
     !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 #if defined(__ARM_FEATURE_SHA3)
@@ -2383,6 +2382,5 @@ keccak_f1600_x4_v8a_v84a_scalar_hybrid_done:
 /* simpasm: footer-start */
 #endif /* __ARM_FEATURE_SHA3 */
 
-#endif /* (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) ||
-          defined(MLK_FIPS202_BACKEND_AARCH64_A55) &&
-         !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)*/
+#endif /* MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID &&
+          !MLK_MULTILEVEL_BUILD_NO_SHARED */

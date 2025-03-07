@@ -8,9 +8,7 @@
 #else
 #define MLK_FIPS202_PROFILE_H
 
-/* Filename of the C backend implementation.
- * This is not inlined here because this header is included in assembly
- * files as well. */
-#define MLK_FIPS202_BACKEND_IMPL "dummy_backend_fips202_x4_impl.h"
+#define MLK_USE_FIPS202_X4_NATIVE
+#include "../../mlkem/fips202/native/api.h"
 
 #endif /* MLK_FIPS202_PROFILE_H */
