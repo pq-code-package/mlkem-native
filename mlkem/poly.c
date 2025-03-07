@@ -7,7 +7,6 @@
 
 #include <stdint.h>
 #include <string.h>
-#include "arith_backend.h"
 #include "cbmc.h"
 #include "debug.h"
 #include "poly.h"

@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "arith_backend.h"
 #include "compress.h"
 #include "debug.h"
 #include "poly_k.h"

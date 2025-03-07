@@ -5,7 +5,6 @@
 #include "common.h"
 #if !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
-#include "arith_backend.h"
 #include "debug.h"
 #include "sampling.h"
 #include "symmetric.h"

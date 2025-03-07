@@ -12,7 +12,6 @@
 #include "../mlkem/sampling.h"
 #include "hal.h"
 
-#include "../mlkem/arith_backend.h"
 #include "../mlkem/fips202/fips202.h"
 #include "../mlkem/fips202/keccakf1600.h"
 #include "../mlkem/indcpa.h"
