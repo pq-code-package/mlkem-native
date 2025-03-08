@@ -77,7 +77,7 @@ utilizing the verification infrastructure provided by [s2n-bignum](https://githu
 
 ## State
 
-mlkem-native is in alpha-release stage. We believe it is ready for use, and hope to spark experiments on
+mlkem-native is in beta-release stage. We believe it is ready for use, and hope to spark experiments on
 integration into other software before issuing a stable release. If you have any feedback, please reach out! See
 [RELEASE.md](RELEASE.md) for details.
 
