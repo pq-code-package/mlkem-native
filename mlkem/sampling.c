@@ -131,35 +131,31 @@ __contract__(
  *            - x4-batched version of `rej_uniform()` from the
  *              reference implementation, leveraging x4-batched Keccak-f1600. */
 MLK_INTERNAL_API
-void mlk_poly_rej_uniform_x4(mlk_poly *vec, uint8_t *seed[4])
+void mlk_poly_rej_uniform_x4(mlk_poly *vec,
+                             uint8_t seed[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)])
 {
   /* Temporary buffers for XOF output before rejection sampling */
-  MLK_ALIGN uint8_t buf0[MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE];
-  MLK_ALIGN uint8_t buf1[MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE];
-  MLK_ALIGN uint8_t buf2[MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE];
-  MLK_ALIGN uint8_t buf3[MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE];
+  MLK_ALIGN uint8_t
+      buf[4][MLK_ALIGN_UP(MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE)];
 
   /* Tracks the number of coefficients we have already sampled */
   unsigned ctr[4];
   mlk_xof_x4_ctx statex;
   unsigned buflen;
 
-  /* seed is MLKEM_SYMBYTES + 2 bytes long, but padded to MLKEM_SYMBYTES + 16 */
   mlk_xof_x4_init(&statex);
-  mlk_xof_x4_absorb(&statex, seed[0], seed[1], seed[2], seed[3],
-                    MLKEM_SYMBYTES + 2);
+  mlk_xof_x4_absorb(&statex, seed, MLKEM_SYMBYTES + 2);
 
   /*
    * Initially, squeeze heuristic number of MLKEM_GEN_MATRIX_NBLOCKS.
    * This should generate the matrix entries with high probability.
    */
-  mlk_xof_x4_squeezeblocks(buf0, buf1, buf2, buf3, MLKEM_GEN_MATRIX_NBLOCKS,
-                           &statex);
+  mlk_xof_x4_squeezeblocks(buf, MLKEM_GEN_MATRIX_NBLOCKS, &statex);
   buflen = MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE;
-  ctr[0] = mlk_rej_uniform(vec[0].coeffs, MLKEM_N, 0, buf0, buflen);
-  ctr[1] = mlk_rej_uniform(vec[1].coeffs, MLKEM_N, 0, buf1, buflen);
-  ctr[2] = mlk_rej_uniform(vec[2].coeffs, MLKEM_N, 0, buf2, buflen);
-  ctr[3] = mlk_rej_uniform(vec[3].coeffs, MLKEM_N, 0, buf3, buflen);
+  ctr[0] = mlk_rej_uniform(vec[0].coeffs, MLKEM_N, 0, buf[0], buflen);
+  ctr[1] = mlk_rej_uniform(vec[1].coeffs, MLKEM_N, 0, buf[1], buflen);
+  ctr[2] = mlk_rej_uniform(vec[2].coeffs, MLKEM_N, 0, buf[2], buflen);
+  ctr[3] = mlk_rej_uniform(vec[3].coeffs, MLKEM_N, 0, buf[3], buflen);
 
   /*
    * So long as not all matrix entries have been generated, squeeze
@@ -169,8 +165,8 @@ void mlk_poly_rej_uniform_x4(mlk_poly *vec, uint8_t *seed[4])
   while (ctr[0] < MLKEM_N || ctr[1] < MLKEM_N || ctr[2] < MLKEM_N ||
          ctr[3] < MLKEM_N)
   __loop__(
-    assigns(ctr, statex, memory_slice(vec, sizeof(mlk_poly) * 4), object_whole(buf0),
-       object_whole(buf1), object_whole(buf2), object_whole(buf3))
+    assigns(ctr, statex, memory_slice(vec, sizeof(mlk_poly) * 4), object_whole(buf[0]),
+       object_whole(buf[1]), object_whole(buf[2]), object_whole(buf[3]))
     invariant(ctr[0] <= MLKEM_N && ctr[1] <= MLKEM_N)
     invariant(ctr[2] <= MLKEM_N && ctr[3] <= MLKEM_N)
     invariant(array_bound(vec[0].coeffs, 0, ctr[0], 0, MLKEM_Q))
@@ -178,21 +174,18 @@ void mlk_poly_rej_uniform_x4(mlk_poly *vec, uint8_t *seed[4])
     invariant(array_bound(vec[2].coeffs, 0, ctr[2], 0, MLKEM_Q))
     invariant(array_bound(vec[3].coeffs, 0, ctr[3], 0, MLKEM_Q)))
   {
-    mlk_xof_x4_squeezeblocks(buf0, buf1, buf2, buf3, 1, &statex);
-    ctr[0] = mlk_rej_uniform(vec[0].coeffs, MLKEM_N, ctr[0], buf0, buflen);
-    ctr[1] = mlk_rej_uniform(vec[1].coeffs, MLKEM_N, ctr[1], buf1, buflen);
-    ctr[2] = mlk_rej_uniform(vec[2].coeffs, MLKEM_N, ctr[2], buf2, buflen);
-    ctr[3] = mlk_rej_uniform(vec[3].coeffs, MLKEM_N, ctr[3], buf3, buflen);
+    mlk_xof_x4_squeezeblocks(buf, 1, &statex);
+    ctr[0] = mlk_rej_uniform(vec[0].coeffs, MLKEM_N, ctr[0], buf[0], buflen);
+    ctr[1] = mlk_rej_uniform(vec[1].coeffs, MLKEM_N, ctr[1], buf[1], buflen);
+    ctr[2] = mlk_rej_uniform(vec[2].coeffs, MLKEM_N, ctr[2], buf[2], buflen);
+    ctr[3] = mlk_rej_uniform(vec[3].coeffs, MLKEM_N, ctr[3], buf[3], buflen);
   }
 
   mlk_xof_x4_release(&statex);
 
   /* Specification: Partially implements
    * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_zeroize(buf0, sizeof(buf0));
-  mlk_zeroize(buf1, sizeof(buf1));
-  mlk_zeroize(buf2, sizeof(buf2));
-  mlk_zeroize(buf3, sizeof(buf3));
+  mlk_zeroize(buf, sizeof(buf));
 }
 
 MLK_INTERNAL_API
