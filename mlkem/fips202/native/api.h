@@ -13,6 +13,7 @@
  */
 
 #include <stdint.h>
+#include "../../cbmc.h"
 
 /*
  * This is the C<->native interface allowing for the drop-in

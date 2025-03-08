@@ -28,8 +28,7 @@
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
 
 #include "../../../../common.h"
-#if (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) || \
-     defined(MLK_FIPS202_BACKEND_AARCH64_A55)) &&    \
+#if defined(MLK_FIPS202_AARCH64_NEED_X1_SCALAR) && \
     !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
@@ -455,6 +454,5 @@ initial:
     .unreq Asu
 
 /* simpasm: footer-start */
-#endif /* (defined(MLK_FIPS202_BACKEND_AARCH64_DEFAULT) ||
-          defined(MLK_FIPS202_BACKEND_AARCH64_A55) &&
-         !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)*/
+#endif /* MLK_FIPS202_AARCH64_NEED_X1_SCALAR &&
+          !MLK_MULTILEVEL_BUILD_NO_SHARED */

@@ -592,7 +592,7 @@ def get_header_files(main_only=False):
 
 
 def get_files(pattern):
-    return list(map(str, pathlib.Path().glob(pattern)))
+    return [str(p) for p in pathlib.Path().glob(pattern) if p.is_file()]
 
 
 def get_defines_from_file(c):
@@ -1081,6 +1081,15 @@ def synchronize_backends(
         force_cross=force_cross,
         no_simplify=no_simplify,
         cflags="-Imlkem/fips202/native/aarch64/src -march=armv8.4-a+sha3",
+    )
+    synchronize_backend(
+        "dev/fips202/aarch64",
+        "mlkem/fips202/native/aarch64",
+        dry_run=dry_run,
+        delete=delete,
+        force_cross=force_cross,
+        no_simplify=no_simplify,
+        cflags="-Imlkem/fips202/native/aarch64 -march=armv8.4-a+sha3",
     )
     synchronize_backend(
         "dev/x86_64/src",

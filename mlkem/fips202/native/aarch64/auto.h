@@ -3,16 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef MLK_FIPS202_NATIVE_AARCH64_SRC_DEFAULT_IMPL_H
-#define MLK_FIPS202_NATIVE_AARCH64_SRC_DEFAULT_IMPL_H
+#ifndef MLK_FIPS202_NATIVE_AARCH64_AUTO_H
+#define MLK_FIPS202_NATIVE_AARCH64_AUTO_H
 /* Default FIPS202 assembly profile for AArch64 systems */
-
-#ifdef MLK_FIPS202_NATIVE_PROFILE_IMPL_H
-#error Only one FIPS202 assembly profile can be defined -- did you include multiple profiles?
-#else
-#define MLK_FIPS202_NATIVE_PROFILE_IMPL_H
-
-#include "fips202_native_aarch64.h"
 
 /*
  * Default logic to decide which implementation to use.
@@ -32,17 +25,9 @@
  *   fall back to the standard C implementation.
  */
 #if defined(__ARM_FEATURE_SHA3) && defined(__APPLE__)
-#define MLK_USE_FIPS202_X1_NATIVE
-static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
-{
-  mlk_keccak_f1600_x1_v84a_asm(state, mlk_keccakf1600_round_constants);
-}
+#include "x1_v84a.h"
 #elif !defined(MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER)
-#define MLK_USE_FIPS202_X1_NATIVE
-static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
-{
-  mlk_keccak_f1600_x1_scalar_asm(state, mlk_keccakf1600_round_constants);
-}
+#include "x1_scalar.h"
 #endif /* !MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER */
 
 /*
@@ -65,31 +50,15 @@ static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
  * instructions only.
  */
 #if defined(__APPLE__)
-#define MLK_USE_FIPS202_X2_NATIVE
-static MLK_INLINE void mlk_keccak_f1600_x2_native(uint64_t *state)
-{
-  mlk_keccak_f1600_x2_v84a_asm(state, mlk_keccakf1600_round_constants);
-}
+#include "x2_v84a.h"
 #else /* __APPLE__ */
-#define MLK_USE_FIPS202_X4_NATIVE
-static MLK_INLINE void mlk_keccak_f1600_x4_native(uint64_t *state)
-{
-  mlk_keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm(
-      state, mlk_keccakf1600_round_constants);
-}
+#include "x4_v8a_v84a_scalar.h"
 #endif /* __APPLE__ */
 
 #else /* __ARM_FEATURE_SHA3 */
 
-#define MLK_USE_FIPS202_X4_NATIVE
-static MLK_INLINE void mlk_keccak_f1600_x4_native(uint64_t *state)
-{
-  mlk_keccak_f1600_x4_scalar_v8a_asm_hybrid(state,
-                                            mlk_keccakf1600_round_constants);
-}
+#include "x4_v8a_scalar.h"
 
 #endif /* __ARM_FEATURE_SHA3 */
 
-#endif /* MLK_FIPS202_NATIVE_PROFILE_H */
-
-#endif /* MLK_FIPS202_NATIVE_AARCH64_SRC_DEFAULT_IMPL_H */
+#endif /* MLK_FIPS202_NATIVE_AARCH64_AUTO_H */

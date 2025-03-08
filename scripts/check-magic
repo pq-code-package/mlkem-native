@@ -22,7 +22,10 @@ def get_files(pattern):
 
 def check_magic_numbers():
     mlkem_q = 3329
-    exceptions = [mlkem_q, 1023, 1024, 1665, 2047, 2048, 4095, 4096, 8192, 32767, 32768, 65535, 65536]
+    exceptions = [mlkem_q,
+                  1665, # q/2
+                  1600, # For Keccak-F1600
+                  1023, 1024, 2047, 2048, 4095, 4096, 8192, 32767, 32768, 65535, 65536]
     enable_marker = "check-magic: on"
     disable_marker = "check-magic: off"
     autogen_marker = "This file is auto-generated from scripts/autogen"

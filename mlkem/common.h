@@ -14,31 +14,6 @@
 #include "params.h"
 #include "sys.h"
 
-/* Include backend metadata */
-#if !defined(MLK_NO_ASM) && defined(MLK_USE_NATIVE_BACKEND_ARITH)
-#if defined(MLK_ARITH_BACKEND_FILE)
-#include MLK_ARITH_BACKEND_FILE
-#else
-#error Bad configuration: MLK_USE_NATIVE_BACKEND_ARITH is set, but MLK_ARITH_BACKEND_FILE is not.
-#endif
-#endif
-
-#if !defined(MLK_NO_ASM) && defined(MLK_USE_NATIVE_BACKEND_FIPS202)
-#if defined(MLK_FIPS202_BACKEND_FILE)
-#include MLK_FIPS202_BACKEND_FILE
-#else
-#error Bad configuration: MLK_USE_NATIVE_BACKEND_FIPS202 is set, but MLK_FIPS202_BACKEND_FILE is not.
-#endif
-#endif
-
-#if !defined(MLK_ARITH_BACKEND_NAME)
-#define MLK_ARITH_BACKEND_NAME C
-#endif
-
-#if !defined(MLK_FIPS202_BACKEND_NAME)
-#define MLK_FIPS202_BACKEND_NAME C
-#endif
-
 /* For a monobuild (where all compilation units are merged into one), mark
  * all non-public API as static since they don't need external linkage. */
 #if !defined(MLK_MONOBUILD)
@@ -97,6 +72,45 @@
  * Those files are appropriately guarded and will be empty when unneeded.
  * The following is to avoid compilers complaining about this. */
 #define MLK_EMPTY_CU(s) extern int MLK_NAMESPACE_K(empty_cu_##s);
+
+/* MLK_NO_ASM takes precedence over MLK_USE_NATIVE_XXX */
+#if defined(MLK_NO_ASM)
+#undef MLK_USE_NATIVE_BACKEND_ARITH
+#undef MLK_USE_NATIVE_BACKEND_FIPS202
+#endif /* MLK_NO_ASM */
+
+#if defined(MLK_USE_NATIVE_BACKEND_ARITH) && !defined(MLK_ARITH_BACKEND_FILE)
+#error Bad configuration: MLK_USE_NATIVE_BACKEND_ARITH is set, but MLK_ARITH_BACKEND_FILE is not.
+#endif
+
+#if defined(MLK_USE_NATIVE_BACKEND_FIPS202) && \
+    !defined(MLK_FIPS202_BACKEND_FILE)
+#error Bad configuration: MLK_USE_NATIVE_BACKEND_FIPS202 is set, but MLK_FIPS202_BACKEND_FILE is not.
+#endif
+
+#if defined(MLK_USE_NATIVE_BACKEND_ARITH)
+/* Include to enforce consistency of API and implementation,
+ * and conduct sanity checks on the backend.
+ *
+ * Keep this _after_ the inclusion of the backend; otherwise,
+ * the sanity checks won't have an effect. */
+#if defined(MLK_CHECK_APIS) && !defined(__ASSEMBLER__)
+#include "native/api.h"
+#endif
+#include MLK_ARITH_BACKEND_FILE
+#endif
+
+#if defined(MLK_USE_NATIVE_BACKEND_FIPS202)
+/* Include to enforce consistency of API and implementation,
+ * and conduct sanity checks on the backend.
+ *
+ * Keep this _after_ the inclusion of the backend; otherwise,
+ * the sanity checks won't have an effect. */
+#if defined(MLK_CHECK_APIS) && !defined(__ASSEMBLER__)
+#include "fips202/native/api.h"
+#endif
+#include MLK_FIPS202_BACKEND_FILE
+#endif
 
 #if !defined(MLK_FIPS202_CUSTOM_HEADER)
 #define MLK_FIPS202_HEADER_FILE "fips202/fips202.h"

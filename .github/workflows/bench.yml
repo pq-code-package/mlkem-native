@@ -43,7 +43,7 @@ jobs:
           name: Arm Cortex-A55 (Snapdragon 888) benchmarks
           bench_pmu: PERF
           archflags: "-mcpu=cortex-a55 -march=armv8.2-a"
-          cflags: "-flto -static -DMLK_FORCE_AARCH64 -DMLK_FIPS202_BACKEND_FILE=\\\\\\\"fips202/native/aarch64/meta_cortex_a55.h\\\\\\\""
+          cflags: "-flto -static -DMLK_FORCE_AARCH64 -DMLK_FIPS202_BACKEND_FILE=\\\\\\\"fips202/native/aarch64/x1_scalar.h\\\\\\\""
           bench_extra_args: -w exec-on-a55
         - system: bpi
           name: SpacemiT K1 8 (Banana Pi F3) benchmarks

@@ -141,9 +141,8 @@ __contract__(
   assigns(memory_slice(output, SHA3_512_HASHBYTES))
 );
 
-#include "fips202_backend.h"
-#if !defined(MLK_FIPS202_BACKEND_IMPL) ||   \
-    (!defined(MLK_USE_FIPS202_X2_NATIVE) && \
+#if !defined(MLK_USE_NATIVE_BACKEND_FIPS202) || \
+    (!defined(MLK_USE_FIPS202_X2_NATIVE) &&     \
      !defined(MLK_USE_FIPS202_X4_NATIVE))
 /* If you provide your own FIPS-202 implementation where the x4-
  * Keccak-f1600-x4 implementation falls back to 4-fold Keccak-f1600,

@@ -16,8 +16,6 @@
 #include "keccakf1600.h"
 #if !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
-#include "fips202_backend.h"
-
 #define NROUNDS 24
 #define ROL(a, offset) ((a << offset) ^ (a >> (64 - offset)))
 

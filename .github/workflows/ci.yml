@@ -110,6 +110,25 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
           cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+  backend_tests:
+    name: AArch64 FIPS202 backends (${{ matrix.backend }})
+    strategy:
+      fail-fast: false
+      matrix:
+        backend: [x1_scalar, x1_v84a, x2_v84a, x4_v8a_scalar, x4_v8a_v84a_scalar]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: build + test
+        uses: ./.github/actions/multi-functest
+        with:
+          nix-shell: 'ci'
+          nix-cache: 'false'
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: 'native'
+          opt: 'opt'
+          examples: 'false'
+          cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLK_FORCE_AARCH64 -DMLK_FIPS202_BACKEND_FILE=\\\\\\\"fips202/native/aarch64/${{ matrix.backend }}.h\\\\\\\""
   compiler_tests:
     name: Compiler tests  (${{ matrix.compiler.name }}, ${{ matrix.target.name }})
     strategy:

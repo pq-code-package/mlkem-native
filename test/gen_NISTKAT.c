@@ -10,6 +10,7 @@
 
 #include "../mlkem/mlkem_native.h"
 #include "../mlkem/randombytes.h"
+#include "../mlkem/sys.h"
 
 #if defined(_WIN64) || defined(_WIN32)
 #include <fcntl.h>

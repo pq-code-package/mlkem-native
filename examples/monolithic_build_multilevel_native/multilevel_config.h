@@ -123,7 +123,7 @@
  *****************************************************************************/
 #if defined(MLK_USE_NATIVE_BACKEND_FIPS202) && \
     !defined(MLK_FIPS202_BACKEND_FILE)
-#define MLK_FIPS202_BACKEND_FILE "fips202/native/meta.h"
+#define MLK_FIPS202_BACKEND_FILE "fips202/native/auto.h"
 #endif
 
 #endif /* MLkEM_NATIVE_CONFIG_H */

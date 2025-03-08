@@ -8,11 +8,17 @@
 #else
 #define MLK_ARITH_PROFILE_H
 
-#define MLK_ARITH_BACKEND_NAME DUMMY_BACKEND
+#define MLK_USE_NATIVE_REJ_UNIFORM
+#define MLK_USE_NATIVE_NTT
+#define MLK_USE_NATIVE_INTT
+#define MLK_USE_NATIVE_POLY_REDUCE
+#define MLK_USE_NATIVE_POLY_TOMONT
+#define MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED
+#define MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE
+#define MLK_USE_NATIVE_POLY_TOBYTES
+#define MLK_USE_NATIVE_POLY_FROMBYTES
+#define MLK_USE_NATIVE_NTT_CUSTOM_ORDER
 
-/* Filename of the C backend implementation.
- * This is not inlined here because this header is included in assembly
- * files as well. */
-#define MLK_ARITH_BACKEND_IMPL "dummy_backend_impl.h"
+#include "../mlkem/native/api.h"
 
 #endif /* MLK_ARITH_PROFILE_H */
