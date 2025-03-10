@@ -18,14 +18,25 @@ exec_prefix = os.environ.get("EXEC_WRAPPER", "")
 exec_prefix = [exec_prefix] if exec_prefix != "" else []
 
 acvp_dir = "test/acvp_data"
-acvp_keygen_json = f"{acvp_dir}/acvp_keygen_internalProjection.json"
-acvp_encapDecap_json = f"{acvp_dir}/acvp_encapDecap_internalProjection.json"
+acvp_keygen_jsons = [
+    f"{acvp_dir}/acvp_v1.1.0.36_keygen_internalProjection.json",
+    f"{acvp_dir}/acvp_v1.1.0.38_keygen_internalProjection.json",
+]
+acvp_encapDecap_jsons = [
+    f"{acvp_dir}/acvp_v1.1.0.36_encapDecap_internalProjection.json",
+    f"{acvp_dir}/acvp_v1.1.0.38_encapDecap_internalProjection.json",
+]
 
-with open(acvp_keygen_json, "r") as f:
-    acvp_keygen_data = json.load(f)
+acvp_keygen_data = []
+for acvp_keygen_json in acvp_keygen_jsons:
+    with open(acvp_keygen_json, "r") as f:
+        acvp_keygen_data.append(json.load(f))
 
-with open(acvp_encapDecap_json, "r") as f:
-    acvp_encapDecap_data = json.load(f)
+
+acvp_encapDecap_data = []
+for acvp_encapDecap_json in acvp_encapDecap_jsons:
+    with open(acvp_encapDecap_json, "r") as f:
+        acvp_encapDecap_data.append(json.load(f))
 
 
 def err(msg, **kwargs):
@@ -127,10 +138,14 @@ def run_keyGen_test(tg, tc):
     info("OK")
 
 
-for tg in acvp_encapDecap_data["testGroups"]:
-    for tc in tg["tests"]:
-        run_encapDecap_test(tg, tc)
+for acvp_encapDecap, json_name in zip(acvp_encapDecap_data, acvp_encapDecap_jsons):
+    info(f"Running ACVP tests for {json_name}")
+    for tg in acvp_encapDecap["testGroups"]:
+        for tc in tg["tests"]:
+            run_encapDecap_test(tg, tc)
 
-for tg in acvp_keygen_data["testGroups"]:
-    for tc in tg["tests"]:
-        run_keyGen_test(tg, tc)
+for acvp_keygen, json_name in zip(acvp_keygen_data, acvp_keygen_jsons):
+    info(f"Running ACVP tests for {json_name}")
+    for tg in acvp_keygen["testGroups"]:
+        for tc in tg["tests"]:
+            run_keyGen_test(tg, tc)
