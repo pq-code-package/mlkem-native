@@ -24,7 +24,7 @@
 ///
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64_OPT) && \
+#if defined(MLK_ARITH_BACKEND_AARCH64) && \
     !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 /*
@@ -417,5 +417,5 @@ layer123_start:
         add	sp, sp, #0x40
         ret
 
-#endif /* MLK_ARITH_BACKEND_AARCH64_OPT &&
+#endif /* MLK_ARITH_BACKEND_AARCH64 &&
           !MLK_MULTILEVEL_BUILD_NO_SHARED */

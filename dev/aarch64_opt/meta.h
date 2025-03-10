@@ -18,7 +18,7 @@
 
 /* Identifier for this backend so that source and assembly files
  * in the build can be appropriately guarded. */
-#define MLK_ARITH_BACKEND_AARCH64_OPT
+#define MLK_ARITH_BACKEND_AARCH64
 
 
 #if !defined(__ASSEMBLER__)

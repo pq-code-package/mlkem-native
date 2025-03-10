@@ -24,7 +24,7 @@
 ///
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64_CLEAN) && \
+#if defined(MLK_ARITH_BACKEND_AARCH64) && \
     !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
@@ -388,5 +388,5 @@ layer123_start:
     .unreq ninv_tw
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_AARCH64_CLEAN &&
+#endif /* MLK_ARITH_BACKEND_AARCH64 &&
           !MLK_MULTILEVEL_BUILD_NO_SHARED */

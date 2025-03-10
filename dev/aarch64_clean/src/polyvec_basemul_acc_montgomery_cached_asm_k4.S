@@ -10,7 +10,7 @@
 // https://github.com/neon-ntt/neon-ntt
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64_CLEAN) && \
+#if defined(MLK_ARITH_BACKEND_AARCH64) && \
     !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) && \
     (defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4)
 /* simpasm: header-end */
@@ -227,6 +227,6 @@ k4_loop_start:
     .unreq t0
 
 /* simpasm: footer-start */
-#endif /* defined(MLK_ARITH_BACKEND_AARCH64_CLEAN) && \
+#endif /* defined(MLK_ARITH_BACKEND_AARCH64) && \
           !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) && \
           (defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 2) */

@@ -382,7 +382,7 @@
  * Undefine macros from native code
  */
 /* mlkem/native/aarch64/meta.h */
-#undef MLK_ARITH_BACKEND_AARCH64_OPT
+#undef MLK_ARITH_BACKEND_AARCH64
 #undef MLK_NATIVE_AARCH64_META_H
 #undef MLK_USE_NATIVE_INTT
 #undef MLK_USE_NATIVE_NTT

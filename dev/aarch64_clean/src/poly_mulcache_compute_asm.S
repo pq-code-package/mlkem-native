@@ -4,7 +4,7 @@
  */
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64_CLEAN) && \
+#if defined(MLK_ARITH_BACKEND_AARCH64) && \
     !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
@@ -97,5 +97,5 @@ mulcache_compute_loop_start:
         .unreq modulus_twisted
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_AARCH64_CLEAN &&
+#endif /* MLK_ARITH_BACKEND_AARCH64 &&
           !MLK_MULTILEVEL_BUILD_NO_SHARED */
