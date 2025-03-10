@@ -19,8 +19,7 @@
  * Returns number of sampled 16-bit integers (at most MLKEM_N).
  **************************************************/
 #include "../../../common.h"
-#if (defined(MLK_ARITH_BACKEND_AARCH64_CLEAN) || \
-        defined(MLK_ARITH_BACKEND_AARCH64_OPT))  \
+#if defined(MLK_ARITH_BACKEND_AARCH64)  \
     && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 /*
@@ -185,6 +184,5 @@ return:
         add	sp, sp, #0x240
         ret
 
-#endif /* (defined(MLK_ARITH_BACKEND_AARCH64_CLEAN) ||
-           defined(MLK_ARITH_BACKEND_AARCH64_OPT))
+#endif /* defined(MLK_ARITH_BACKEND_AARCH64)
           && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */

@@ -4,7 +4,7 @@
  */
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64_CLEAN) && \
+#if defined(MLK_ARITH_BACKEND_AARCH64) && \
     !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 /* simpasm: header-end */
 
@@ -94,5 +94,5 @@ poly_tomont_asm_loop:
         .unreq tmp0
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_AARCH64_CLEAN &&
+#endif /* MLK_ARITH_BACKEND_AARCH64 &&
           !MLK_MULTILEVEL_BUILD_NO_SHARED */

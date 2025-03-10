@@ -10,7 +10,7 @@
 // https://github.com/neon-ntt/neon-ntt
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64_OPT) && \
+#if defined(MLK_ARITH_BACKEND_AARCH64) && \
     !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) && \
     (defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 3)
 
@@ -248,6 +248,6 @@ polyvec_basemul_acc_montgomery_cached_asm_k3_loop:
         add	sp, sp, #0x40
         ret
 
-#endif /* defined(MLK_ARITH_BACKEND_AARCH64_OPT) && \
+#endif /* defined(MLK_ARITH_BACKEND_AARCH64) && \
           !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) && \
           (defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 3) */

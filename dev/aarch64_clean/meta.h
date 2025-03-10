@@ -17,7 +17,7 @@
 #define MLK_USE_NATIVE_REJ_UNIFORM
 
 /* Guard for AArch64 assembly files */
-#define MLK_ARITH_BACKEND_AARCH64_CLEAN
+#define MLK_ARITH_BACKEND_AARCH64
 
 #if !defined(__ASSEMBLER__)
 #include "src/arith_native_aarch64.h"

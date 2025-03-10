@@ -199,63 +199,39 @@ static int bench(void)
         mlk_gen_matrix((mlk_polyvec *)data0, (uint8_t *)data1, 0))
 
 
-#if defined(MLK_ARITH_BACKEND_AARCH64_CLEAN)
-  BENCH("ntt-clean",
-        mlk_ntt_asm((int16_t *)data0, (int16_t *)data1, (int16_t *)data2));
-  BENCH("intt-clean",
-        mlk_intt_asm((int16_t *)data0, (int16_t *)data1, (int16_t *)data2));
-  BENCH("mlk_poly-reduce-clean", mlk_poly_reduce_asm((int16_t *)data0));
-  BENCH("mlk_poly-tomont-clean", mlk_poly_tomont_asm((int16_t *)data0));
-  BENCH("mlk_poly-tobytes-clean",
-        mlk_poly_tobytes_asm((uint8_t *)data0, (int16_t *)data1));
-  BENCH("mlk_poly-mulcache-compute-clean",
-        mlk_poly_mulcache_compute_asm((int16_t *)data0, (int16_t *)data1,
-                                      (int16_t *)data2, (int16_t *)data3));
-#if MLKEM_K == 2
-  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-clean",
-        mlk_polyvec_basemul_acc_montgomery_cached_asm_k2(
-            (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
-            (int16_t *)data3));
-#elif MLKEM_K == 3
-  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-clean",
-        mlk_polyvec_basemul_acc_montgomery_cached_asm_k3(
-            (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
-            (int16_t *)data3));
-#elif MLKEM_K == 4
-  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-clean",
-        mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(
-            (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
-            (int16_t *)data3));
-#endif
-#endif /* MLK_ARITH_BACKEND_AARCH64_CLEAN */
+#if defined(MLK_ARITH_BACKEND_AARCH64)
 
-#if defined(MLK_ARITH_BACKEND_AARCH64_OPT)
-  BENCH("ntt-opt",
+  printf("---AArch64 native backend components---\n");
+
+  BENCH("ntt-native",
         mlk_ntt_asm((int16_t *)data0, (int16_t *)data1, (int16_t *)data2));
-  BENCH("intt-opt",
+  BENCH("intt-native",
         mlk_intt_asm((int16_t *)data0, (int16_t *)data1, (int16_t *)data2));
-  BENCH("mlk_poly-reduce-opt", mlk_poly_reduce_asm((int16_t *)data0));
-  BENCH("mlk_poly-tomont-opt", mlk_poly_tomont_asm((int16_t *)data0));
-  BENCH("mlk_poly-mulcache-compute-opt",
+  BENCH("mlk_poly-reduce-native", mlk_poly_reduce_asm((int16_t *)data0));
+  BENCH("mlk_poly-tomont-native", mlk_poly_tomont_asm((int16_t *)data0));
+  BENCH("mlk_poly-tobytes-native",
+        mlk_poly_tobytes_asm((uint8_t *)data0, (int16_t *)data1));
+  BENCH("mlk_poly-mulcache-compute-native",
         mlk_poly_mulcache_compute_asm((int16_t *)data0, (int16_t *)data1,
                                       (int16_t *)data2, (int16_t *)data3));
 #if MLKEM_K == 2
-  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-opt",
+  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-k2-native",
         mlk_polyvec_basemul_acc_montgomery_cached_asm_k2(
             (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
             (int16_t *)data3));
 #elif MLKEM_K == 3
-  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-opt",
+  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-k3-native",
         mlk_polyvec_basemul_acc_montgomery_cached_asm_k3(
             (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
             (int16_t *)data3));
 #elif MLKEM_K == 4
-  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-opt",
+  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-k4-native",
         mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(
             (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
             (int16_t *)data3));
 #endif
-#endif /* MLK_ARITH_BACKEND_AARCH64_OPT */
+
+#endif /* MLK_ARITH_BACKEND_AARCH64 */
 
   return 0;
 }

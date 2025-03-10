@@ -314,12 +314,12 @@ def gen_aarch64_mulcache_twiddles_twisted():
 
 
 def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
-    def gen(suffix):
+    def gen():
         yield from gen_header()
         yield '#include "../../../common.h"'
         yield ""
-        yield f"#if defined(MLK_ARITH_BACKEND_AARCH64_{suffix.upper()}) && \\"
-        yield "     !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)"
+        yield "#if defined(MLK_ARITH_BACKEND_AARCH64) && \\"
+        yield "    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)"
         yield ""
         yield "#include <stdint.h>"
         yield '#include "arith_native_aarch64.h"'
@@ -352,25 +352,25 @@ def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
         yield from map(lambda t: str(t) + ",", gen_aarch64_mulcache_twiddles_twisted())
         yield "};"
         yield ""
-        yield f"#else /* defined(MLK_ARITH_BACKEND_AARCH64_{suffix.upper()})"
-        yield "          && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
+        yield "#else /* defined(MLK_ARITH_BACKEND_AARCH64)"
+        yield "         && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
         yield ""
         yield "MLK_EMPTY_CU(aarch64_zetas)"
         yield ""
         yield ""
-        yield f"#endif /* defined(MLK_ARITH_BACKEND_AARCH64_{suffix.upper()})"
+        yield "#endif /* defined(MLK_ARITH_BACKEND_AARCH64)"
         yield "          && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
         yield ""
 
     update_file(
         "dev/aarch64_opt/src/aarch64_zetas.c",
-        "\n".join(gen("opt")),
+        "\n".join(gen()),
         dry_run=dry_run,
     )
 
     update_file(
         "dev/aarch64_clean/src/aarch64_zetas.c",
-        "\n".join(gen("clean")),
+        "\n".join(gen()),
         dry_run=dry_run,
     )
 
@@ -395,12 +395,12 @@ def gen_aarch64_rej_uniform_table_rows():
 
 
 def gen_aarch64_rej_uniform_table(dry_run=False):
-    def gen(suffix):
+    def gen():
         yield from gen_header()
         yield '#include "../../../common.h"'
         yield ""
-        yield f"#if defined(MLK_ARITH_BACKEND_AARCH64_{suffix.upper()}) && \\"
-        yield "     !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)"
+        yield "#if defined(MLK_ARITH_BACKEND_AARCH64) && \\"
+        yield "    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)"
         yield ""
         yield "#include <stdint.h>"
         yield '#include "arith_native_aarch64.h"'
@@ -413,24 +413,24 @@ def gen_aarch64_rej_uniform_table(dry_run=False):
         yield from map(lambda t: str(t) + ",", gen_aarch64_rej_uniform_table_rows())
         yield "};"
         yield ""
-        yield f"#else /* defined(MLK_ARITH_BACKEND_AARCH64_{suffix.upper()})"
-        yield "          && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
+        yield "#else /* defined(MLK_ARITH_BACKEND_AARCH64)"
+        yield "         && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
         yield ""
         yield "MLK_EMPTY_CU(aarch64_rej_uniform_table)"
         yield ""
-        yield f"#endif /* defined(MLK_ARITH_BACKEND_AARCH64_{suffix.upper()})"
+        yield "#endif /* defined(MLK_ARITH_BACKEND_AARCH64)"
         yield "          && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
         yield ""
 
     update_file(
         "dev/aarch64_opt/src/rej_uniform_table.c",
-        "\n".join(gen("opt")),
+        "\n".join(gen()),
         dry_run=dry_run,
     )
 
     update_file(
         "dev/aarch64_clean/src/rej_uniform_table.c",
-        "\n".join(gen("clean")),
+        "\n".join(gen()),
         dry_run=dry_run,
     )
 

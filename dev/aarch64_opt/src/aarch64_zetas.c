@@ -10,7 +10,7 @@
 
 #include "../../../common.h"
 
-#if defined(MLK_ARITH_BACKEND_AARCH64_OPT) && \
+#if defined(MLK_ARITH_BACKEND_AARCH64) && \
     !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
 
 #include <stdint.h>
@@ -167,11 +167,11 @@ MLK_ALIGN const int16_t mlk_aarch64_zetas_mulcache_twisted_native[] = {
     -11566, 11566,
 };
 
-#else /* defined(MLK_ARITH_BACKEND_AARCH64_OPT) \
-          && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */
+#else /* defined(MLK_ARITH_BACKEND_AARCH64) \
+         && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */
 
 MLK_EMPTY_CU(aarch64_zetas)
 
 
-#endif /* defined(MLK_ARITH_BACKEND_AARCH64_OPT) \
+#endif /* defined(MLK_ARITH_BACKEND_AARCH64) \
           && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */
