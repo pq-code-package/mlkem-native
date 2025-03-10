@@ -957,6 +957,7 @@ def gen_hol_light_asm(dry_run=False):
 
     gen_hol_light_arith_asm_file("ntt.S", "mlkem_ntt.S")
     gen_hol_light_arith_asm_file("intt.S", "mlkem_intt.S")
+    gen_hol_light_arith_asm_file("poly_tomont_asm.S", "mlkem_poly_tomont.S")
 
     def gen_hol_light_fips202_asm_file(infile, outfile):
         update_via_simpasm(

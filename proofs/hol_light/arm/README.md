@@ -3,7 +3,7 @@
 # HOL Light functional correctness proofs
 
 This directory contains functional correctness proofs for fast AArch64 assembly routines
-used in mlkem-native. The proofs were developed by John Harrison
+used in mlkem-native. The proofs were largely developed by John Harrison
 and are written in the [HOL Light](https://hol-light.github.io/) theorem
 prover, utilizing the assembly verification infrastructure from [s2n-bignum](https://github.com/awslabs/s2n-bignum).
 
@@ -18,8 +18,9 @@ be the code under verification as part of the precondition.
 At present, this directory contains functional correctness proofs for the following functions:
 
 - ML-KEM Arithmetic:
-  * Optimized AArch64 forward NTT: [mlkem_ntt.S](mlkem/mlkem_ntt.S)
-  * Optimized AArch64 inverse NTT: [mlkem_intt.S](mlkem/mlkem_intt.S)
+  * AArch64 forward NTT: [mlkem_ntt.S](mlkem/mlkem_ntt.S)
+  * AArch64 inverse NTT: [mlkem_intt.S](mlkem/mlkem_intt.S)
+  * AArch64 conversion to Montgomery form: [mlkem_poly_tomont.S](mlkem/mlkem_poly_tomont.S)
 - FIPS202:
   * Keccak-F1600 using lazy rotations (see [this paper](https://eprint.iacr.org/2022/1243)): [keccak_f1600_x1_scalar.S](mlkem/keccak_f1600_x1_scalar.S)
   * Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x1_v84a.S](mlkem/keccak_f1600_x1_v84a.S)

@@ -24,7 +24,15 @@ jobs:
   hol_light_proofs:
     strategy:
       matrix:
-        proof: [mlkem_ntt,mlkem_intt,keccak_f1600_x1_scalar,keccak_f1600_x1_v84a,keccak_f1600_x2_v84a,keccak_f1600_x4_v8a_v84a_scalar,keccak_f1600_x4_v8a_scalar]
+        proof:
+          - mlkem_ntt
+          - mlkem_intt
+          - mlkem_poly_tomont
+          - keccak_f1600_x1_scalar
+          - keccak_f1600_x1_v84a
+          - keccak_f1600_x2_v84a
+          - keccak_f1600_x4_v8a_v84a_scalar
+          - keccak_f1600_x4_v8a_scalar
     name: HOL Light proof for ${{ matrix.proof }}.S
     runs-on: pqcp-arm64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
