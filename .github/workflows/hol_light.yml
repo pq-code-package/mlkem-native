@@ -6,15 +6,14 @@ permissions:
 on:
   push:
     branches: ["main"]
-    # Only run upon changes to AArch64 NTT or invNTT
     paths:
      - 'proofs/hol_light/arm/**/*.S'
      - 'proofs/hol_light/arm/**/*.ml'
   pull_request:
     branches: ["main"]
     paths:
-      # Only run upon changes to AArch64 NTT or invNTT
       - 'proofs/hol_light/arm/**/*.S'
+      - 'proofs/hol_light/arm/**/*.ml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -23,6 +22,7 @@ concurrency:
 jobs:
   hol_light_proofs:
     strategy:
+      fail-fast: false
       matrix:
         proof:
           - mlkem_ntt
@@ -45,8 +45,10 @@ jobs:
         uses: tj-actions/changed-files@dcc7a0cba800f454d79fff4b993e8c3555bcc0a8 # v45.0.7
       - uses: ./.github/actions/setup-shell
         if: |
-          contains(steps.changed-files.outputs.all_changed_files,format('{0}.S',matrix.proof)) ||
-          contains(steps.changed-files.outputs.all_changed_files,format('{0}.ml',matrix.proof))
+          contains(steps.changed-files.outputs.all_changed_files,format('{0}.S',matrix.proof))  ||
+          contains(steps.changed-files.outputs.all_changed_files,format('{0}.ml',matrix.proof)) ||
+          contains(steps.changed-files.outputs.all_changed_files,'mlkem_specs.ml')              ||
+          contains(steps.changed-files.outputs.all_changed_files,'mlkem_utils.ml')
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: 'hol_light'

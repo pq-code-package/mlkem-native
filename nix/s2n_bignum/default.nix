@@ -12,7 +12,7 @@ stdenv.mkDerivation rec {
   setupHook = writeText "setup-hook.sh" ''
     export S2N_BIGNUM_DIR="$1"
   '';
-  patches = [ ./0001-fix-script-path.patch ];
+  patches = [ ];
   dontBuild = true;
   installPhase = ''
     mkdir -p $out

@@ -129,12 +129,8 @@ PROOF_LOGS = $(OBJ:.o=.correct)
 
 # Build precompiled native binaries of HOL Light proofs
 
-proofs/simulator.native: $(SRC_ARM)/proofs/simulator.ml
-	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(SRC)/tools/build-proof.sh $(SRC_ARM)/proofs/simulator.ml "$(HOLLIGHT)" "$@"
-
 .SECONDEXPANSION:
-%.native: proofs/$$(*F).ml %.o ; $(SRC)/tools/build-proof.sh $(BASE)/$< "$(HOLLIGHT)" "$@"
+%.native: proofs/$$(*F).ml %.o ; ./proofs/build-proof.sh $(BASE)/$< "$(HOLLIGHT)" "$@"
 
 # Run them and print the standard output+error at *.correct
 %.correct: %.native
