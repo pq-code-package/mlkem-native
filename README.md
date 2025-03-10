@@ -66,8 +66,9 @@ See [proofs/cbmc](proofs/cbmc) for details.
 HOL-Light functional correctness proofs
 can be found in [proofs/hol_light/arm](proofs/hol_light/arm). So far, the following functions have been proven correct:
 - ML-KEM Arithmetic:
-  * Optimized AArch64 forward NTT: [mlkem_ntt.S](proofs/hol_light/arm/mlkem/mlkem_ntt.S)
-  * Optimized AArch64 inverse NTT: [mlkem_intt.S](proofs/hol_light/arm/mlkem/mlkem_intt.S)
+  * AArch64 forward NTT: [mlkem_ntt.S](proofs/hol_light/arm/mlkem/mlkem_ntt.S)
+  * AArch64 inverse NTT: [mlkem_intt.S](proofs/hol_light/arm/mlkem/mlkem_intt.S)
+  * AArch64 conversion to Montgomery form: [mlkem_poly_tomont.S](proofs/hol_light/arm/mlkem/mlkem_poly_tomont.S)
 - FIPS202:
   * Keccak-F1600 using lazy rotations (see [this paper](https://eprint.iacr.org/2022/1243)): [keccak_f1600_x1_scalar.S](proofs/hol_light/arm/mlkem/keccak_f1600_x1_scalar.S)
   * Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x1_v84a.S](proofs/hol_light/arm/mlkem/keccak_f1600_x1_v84a.S)
@@ -75,7 +76,7 @@ can be found in [proofs/hol_light/arm](proofs/hol_light/arm). So far, the follow
   * 'Hybrid' 4-fold Keccak-F1600 using scalar and v8-A Neon instructions: [keccak_f1600_x4_v8a_scalar.S](proofs/hol_light/arm/mlkem/keccak_f1600_x4_v8a_scalar.S)
   * 'Triple hybrid' 4-fold Keccak-F1600 using scalar, v8-A Neon and v8.4-A+SHA3 Neon instructions:[keccak_f1600_x4_v8a_v84a_scalar.S](proofs/hol_light/arm/mlkem/keccak_f1600_x4_v8a_v84a_scalar.S)
 
-These proofs were contributed by John Harrison, and are
+These proofs were largely contributed by John Harrison, and are
 utilizing the verification infrastructure provided by [s2n-bignum](https://github.com/awslabs/s2n-bignum) infrastructure.
 
 ## State
