@@ -21,6 +21,7 @@ At present, this directory contains functional correctness proofs for the follow
   * AArch64 forward NTT: [mlkem_ntt.S](mlkem/mlkem_ntt.S)
   * AArch64 inverse NTT: [mlkem_intt.S](mlkem/mlkem_intt.S)
   * AArch64 conversion to Montgomery form: [mlkem_poly_tomont.S](mlkem/mlkem_poly_tomont.S)
+  * AArch64 'multiplication cache' computation: [mlkem_poly_mulcache_compute.S](mlkem/mlkem_poly_mulcache_compute.S)
 - FIPS202:
   * Keccak-F1600 using lazy rotations (see [this paper](https://eprint.iacr.org/2022/1243)): [keccak_f1600_x1_scalar.S](mlkem/keccak_f1600_x1_scalar.S)
   * Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x1_v84a.S](mlkem/keccak_f1600_x1_v84a.S)

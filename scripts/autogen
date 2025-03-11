@@ -300,17 +300,15 @@ def gen_aarch64_inv_ntt_zetas_layer67():
 
 
 def gen_aarch64_mulcache_twiddles():
-    for idx in range(64):
-        root = pow(root_of_unity, bitreverse(64 + idx, 7), modulus)
+    for idx in range(0, 128):
+        root = pow(root_of_unity, 2 * bitreverse(idx, 7) + 1, modulus)
         yield prepare_root_for_barrett(root)[0]
-        yield prepare_root_for_barrett(-root)[0]
 
 
 def gen_aarch64_mulcache_twiddles_twisted():
-    for idx in range(64):
-        root = pow(root_of_unity, bitreverse(64 + idx, 7), modulus)
+    for idx in range(0, 128):
+        root = pow(root_of_unity, 2 * bitreverse(idx, 7) + 1, modulus)
         yield prepare_root_for_barrett(root)[1]
-        yield prepare_root_for_barrett(-root)[1]
 
 
 def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
@@ -958,6 +956,9 @@ def gen_hol_light_asm(dry_run=False):
     gen_hol_light_arith_asm_file("ntt.S", "mlkem_ntt.S")
     gen_hol_light_arith_asm_file("intt.S", "mlkem_intt.S")
     gen_hol_light_arith_asm_file("poly_tomont_asm.S", "mlkem_poly_tomont.S")
+    gen_hol_light_arith_asm_file(
+        "poly_mulcache_compute_asm.S", "mlkem_poly_mulcache_compute.S"
+    )
 
     def gen_hol_light_fips202_asm_file(infile, outfile):
         update_via_simpasm(
