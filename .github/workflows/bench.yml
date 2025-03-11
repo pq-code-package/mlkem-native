@@ -52,6 +52,12 @@ jobs:
           cflags: "-static"
           bench_extra_args: -w exec-on-bpi
           cross_prefix: riscv64-unknown-linux-gnu-
+        - system: m1-mac-mini
+          name: Mac Mini (M1, 2020) benchmarks
+          bench_pmu: MAC
+          archflags: "-mcpu=apple-m1 -march=armv8.4-a+sha3"
+          cflags: "-flto"
+          bench_extra_args: "-r"
     if: github.repository_owner == 'pq-code-package' && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
     runs-on: self-hosted-${{ matrix.target.system }}
     steps:
