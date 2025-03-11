@@ -32,6 +32,8 @@ jobs:
             needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
           - name: mlkem_poly_tomont
             needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
+          - name: mlkem_poly_mulcache_compute
+            needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
           - name: keccak_f1600_x1_scalar
             needs: ["keccak_specs.ml"]
           - name: keccak_f1600_x1_v84a

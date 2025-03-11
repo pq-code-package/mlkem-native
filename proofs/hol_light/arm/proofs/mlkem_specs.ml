@@ -4,7 +4,8 @@
  *)
 
 (* ========================================================================= *)
-(* Common specifications and tactics for ML-KEM, mainly related to the NTT.  *)
+(* Common specifications and tactics for ML-KEM, mainly related to the NTT
+ * and the base multiplication.  *)
 (* ========================================================================= *)
 
 needs "Library/words.ml";;
@@ -45,6 +46,13 @@ let reorder = define
 
 let tomont_3329 = define
  `tomont_3329 (a:num->int) = \i. (&2 pow 16 * a i) rem &3329`;;
+
+(* ------------------------------------------------------------------------- *)
+(* The multiplication cache for fast base multiplication                     *)
+(* ------------------------------------------------------------------------- *)
+let mulcache = define
+ `mulcache f k =
+   (f (2 * k + 1) * (&17 pow (2 * (bitreverse7 k) + 1))) rem &3329`;;
 
 (* ------------------------------------------------------------------------- *)
 (* The precise specs of the actual ARM code.                                 *)
