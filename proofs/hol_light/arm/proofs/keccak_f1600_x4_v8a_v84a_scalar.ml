@@ -8,7 +8,7 @@
 (* ========================================================================= *)
 
 needs "arm/proofs/base.ml";;
-needs "arm/proofs/utils/keccak_spec.ml";;
+needs "proofs/keccak_spec.ml";;
 
 (**** print_literal_from_elf "mlkem/keccak_f1600_x4_v8a_v84a_scalar.o";;
  ****)
