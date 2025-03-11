@@ -25,15 +25,24 @@ jobs:
       fail-fast: false
       matrix:
         proof:
-          - mlkem_ntt
-          - mlkem_intt
-          - mlkem_poly_tomont
-          - keccak_f1600_x1_scalar
-          - keccak_f1600_x1_v84a
-          - keccak_f1600_x2_v84a
-          - keccak_f1600_x4_v8a_v84a_scalar
-          - keccak_f1600_x4_v8a_scalar
-    name: HOL Light proof for ${{ matrix.proof }}.S
+          # Dependencies on {name}.{S,ml} are implicit
+          - name: mlkem_ntt
+            needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
+          - name: mlkem_intt
+            needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
+          - name: mlkem_poly_tomont
+            needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
+          - name: keccak_f1600_x1_scalar
+            needs: ["keccak_specs.ml"]
+          - name: keccak_f1600_x1_v84a
+            needs: ["keccak_specs.ml"]
+          - name: keccak_f1600_x2_v84a
+            needs: ["keccak_specs.ml"]
+          - name: keccak_f1600_x4_v8a_v84a_scalar
+            needs: ["keccak_specs.ml"]
+          - name: keccak_f1600_x4_v8a_scalar
+            needs: ["keccak_specs.ml"]
+    name: HOL Light proof for ${{ matrix.proof.name }}.S
     runs-on: pqcp-arm64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
@@ -43,14 +52,26 @@ jobs:
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@dcc7a0cba800f454d79fff4b993e8c3555bcc0a8 # v45.0.7
+      - name: Check if dependencies changed
+        id: check_run
+        shell: bash
+        run: |
+          run_needed=0
+          changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
+          dependencies="${{ join(matrix.proof.needs, ' ') }} ${{ format('{0}.S {0}.ml', matrix.proof.name) }}"
+          for changed in $changed_files; do
+            for needs in $dependencies; do
+               if [[ "$changed" == *"$needs" ]]; then
+                 run_needed=1
+               fi
+            done
+          done
+          echo "run_needed=${run_needed}" >> $GITHUB_OUTPUT
       - uses: ./.github/actions/setup-shell
         if: |
-          contains(steps.changed-files.outputs.all_changed_files,format('{0}.S',matrix.proof))  ||
-          contains(steps.changed-files.outputs.all_changed_files,format('{0}.ml',matrix.proof)) ||
-          contains(steps.changed-files.outputs.all_changed_files,'mlkem_specs.ml')              ||
-          contains(steps.changed-files.outputs.all_changed_files,'mlkem_utils.ml')
+          steps.check_run.outputs.run_needed == '1'
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: 'hol_light'
           script: |
-            make -C proofs/hol_light/arm mlkem/${{ matrix.proof }}.correct
+            make -C proofs/hol_light/arm mlkem/${{ matrix.proof.name }}.correct
