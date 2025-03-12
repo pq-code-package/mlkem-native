@@ -69,6 +69,7 @@ OBJ = mlkem/mlkem_ntt.o                       \
       mlkem/mlkem_intt.o                      \
       mlkem/mlkem_poly_tomont.o               \
       mlkem/mlkem_poly_mulcache_compute.o     \
+      mlkem/mlkem_poly_reduce.o               \
       mlkem/keccak_f1600_x1_scalar.o          \
       mlkem/keccak_f1600_x1_v84a.o            \
       mlkem/keccak_f1600_x2_v84a.o            \
