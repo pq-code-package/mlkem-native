@@ -146,29 +146,42 @@ jobs:
            shell: ci_gcc48
            darwin: False
            c17: False
+           c23: False
          - name: gcc-4.9
            shell: ci_gcc49
            darwin: False
            c17: False
+           c23: False
          - name: gcc-7
            shell: ci_gcc7
            darwin: False
            c17: False
+           c23: False
          - name: gcc-11
            shell: ci_gcc11
            darwin: True
+           c17: True
+           c23: False
          - name: gcc-13
            shell: ci_gcc13
            darwin: True
+           c17: True
+           c23: False
          - name: gcc-14
            shell: ci_gcc14
            darwin: True
+           c17: True
+           c23: True
          - name: clang-18
            shell: ci_clang18
            darwin: True
+           c17: True
+           c23: True
          - name: clang-19
            shell: ci_clang19
            darwin: True
+           c17: True
+           c23: True
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -232,6 +245,19 @@ jobs:
           acvp: false
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c17"
+      - name: native build+functest (C23)
+        if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
+                matrix.compiler.c23 }}
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          nistkat: false
+          kat: false
+          acvp: false
+          nix-shell: ${{ matrix.compiler.shell }}
+          cflags: "-std=c23"
   config_variations:
     name: Non-standard configurations
     strategy:
