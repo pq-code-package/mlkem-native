@@ -67,6 +67,7 @@ The functional correctness of various AArch64 assembly routines is established u
 - ML-KEM Arithmetic:
   * AArch64 forward NTT: [mlkem_ntt.S](proofs/hol_light/arm/mlkem/mlkem_ntt.S)
   * AArch64 inverse NTT: [mlkem_intt.S](proofs/hol_light/arm/mlkem/mlkem_intt.S)
+  * AArch64 modular reduction: [mlkem_poly_reduce.S](proofs/hol_light/arm/mlkem/mlkem_poly_reduce.S)
   * AArch64 conversion to Montgomery form: [mlkem_poly_tomont.S](proofs/hol_light/arm/mlkem/mlkem_poly_tomont.S)
   * AArch64 'multiplication cache' computation: [mlkem_poly_mulcache_compute.S](proofs/hol_light/arm/mlkem/mlkem_poly_mulcache_compute.S)
 - FIPS202:
