@@ -154,6 +154,33 @@
 */
 
 /******************************************************************************
+ * Name:        MLK_CUSTOM_RANDOMBYTES
+ *
+ * Description: mlkem-native does not provide a secure randombytes
+ *              implementation. Such an implementation has to provided by the
+ *              consumer.
+ *
+ *              If this option is not set, mlkem-native expects a function
+ *              void randombytes(uint8_t *out, size_t outlen).
+ *
+ *              Set this option and define `mlk_randombytes` if you want to
+ *              use a custom method to sample randombytes with a different name
+ *              or signature.
+ *
+ *****************************************************************************/
+#define MLK_CUSTOM_RANDOMBYTES
+#if !defined(__ASSEMBLER__)
+#include <oqs/rand.h>
+#include <stdint.h>
+#include "../../mlkem/sys.h"
+static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
+{
+  OQS_randombytes(ptr, len);
+}
+#endif
+
+
+/******************************************************************************
  * Name:        MLK_NO_ASM
  *
  * Description: If this option is set, mlkem-native will be built without

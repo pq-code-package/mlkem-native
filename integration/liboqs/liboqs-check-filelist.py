@@ -30,8 +30,6 @@ def get_shared_sources(backend):
         for f in os.listdir(f"{MLKEM_DIR}/native")
         if os.path.isfile(f"{MLKEM_DIR}/native/{f}")
     ]
-    # randombytes.h is provided by liboqs
-    sources.remove("mlkem/randombytes.h")
     # We use a custom config
     sources.remove("mlkem/config.h")
     # Add FIPS202 glue code

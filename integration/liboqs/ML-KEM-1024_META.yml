@@ -30,7 +30,7 @@ implementations:
     signature_keypair: PQCP_MLKEM_NATIVE_MLKEM1024_C_keypair
     signature_enc: PQCP_MLKEM_NATIVE_MLKEM1024_C_enc
     signature_dec: PQCP_MLKEM_NATIVE_MLKEM1024_C_dec
-    sources: mlkem/cbmc.h mlkem/common.h mlkem/compress.c mlkem/compress.h mlkem/debug.c mlkem/debug.h mlkem/indcpa.c mlkem/indcpa.h mlkem/kem.c mlkem/kem.h mlkem/mlkem_native.h mlkem/params.h mlkem/poly.c mlkem/poly.h mlkem/poly_k.c mlkem/poly_k.h mlkem/sampling.c mlkem/sampling.h mlkem/symmetric.h mlkem/sys.h mlkem/verify.c mlkem/verify.h mlkem/zetas.inc mlkem/native/api.h mlkem/native/meta.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h integration/liboqs/config_c.h
+    sources: mlkem/cbmc.h mlkem/common.h mlkem/compress.c mlkem/compress.h mlkem/debug.c mlkem/debug.h mlkem/indcpa.c mlkem/indcpa.h mlkem/kem.c mlkem/kem.h mlkem/mlkem_native.h mlkem/params.h mlkem/poly.c mlkem/poly.h mlkem/randombytes.h mlkem/poly_k.c mlkem/poly_k.h mlkem/sampling.c mlkem/sampling.h mlkem/symmetric.h mlkem/sys.h mlkem/verify.c mlkem/verify.h mlkem/zetas.inc mlkem/native/api.h mlkem/native/meta.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h integration/liboqs/config_c.h
   - name: x86_64
     version: FIPS203
     folder_name: .
@@ -38,7 +38,7 @@ implementations:
     signature_keypair: PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_keypair
     signature_enc: PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_enc
     signature_dec: PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_dec
-    sources: integration/liboqs/config_x86_64.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h mlkem/cbmc.h mlkem/common.h mlkem/compress.c mlkem/compress.h mlkem/debug.c mlkem/debug.h mlkem/indcpa.c mlkem/indcpa.h mlkem/kem.c mlkem/kem.h mlkem/mlkem_native.h mlkem/native/api.h mlkem/native/meta.h mlkem/native/x86_64 mlkem/params.h mlkem/poly.c mlkem/poly.h mlkem/poly_k.c mlkem/poly_k.h mlkem/sampling.c mlkem/sampling.h mlkem/symmetric.h mlkem/sys.h mlkem/verify.c mlkem/verify.h mlkem/zetas.inc
+    sources: integration/liboqs/config_x86_64.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h mlkem/cbmc.h mlkem/common.h mlkem/compress.c mlkem/compress.h mlkem/debug.c mlkem/debug.h mlkem/indcpa.c mlkem/indcpa.h mlkem/kem.c mlkem/kem.h mlkem/mlkem_native.h mlkem/native/api.h mlkem/native/meta.h mlkem/native/x86_64 mlkem/params.h mlkem/poly.c mlkem/poly.h mlkem/randombytes.h mlkem/poly_k.c mlkem/poly_k.h mlkem/sampling.c mlkem/sampling.h mlkem/symmetric.h mlkem/sys.h mlkem/verify.c mlkem/verify.h mlkem/zetas.inc
     supported_platforms:
       - architecture: x86_64
         operating_systems:
@@ -55,7 +55,7 @@ implementations:
     signature_keypair: PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_keypair
     signature_enc: PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_enc
     signature_dec: PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_dec
-    sources: integration/liboqs/config_aarch64.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h mlkem/cbmc.h mlkem/common.h mlkem/compress.c mlkem/compress.h mlkem/debug.c mlkem/debug.h mlkem/indcpa.c mlkem/indcpa.h mlkem/kem.c mlkem/kem.h mlkem/mlkem_native.h mlkem/native/api.h mlkem/native/meta.h mlkem/native/aarch64 mlkem/params.h mlkem/poly.c mlkem/poly.h mlkem/poly_k.c mlkem/poly_k.h mlkem/sampling.c mlkem/sampling.h mlkem/symmetric.h mlkem/sys.h mlkem/verify.c mlkem/verify.h mlkem/zetas.inc
+    sources: integration/liboqs/config_aarch64.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h mlkem/cbmc.h mlkem/common.h mlkem/compress.c mlkem/compress.h mlkem/debug.c mlkem/debug.h mlkem/indcpa.c mlkem/indcpa.h mlkem/kem.c mlkem/kem.h mlkem/mlkem_native.h mlkem/native/api.h mlkem/native/meta.h mlkem/native/aarch64 mlkem/params.h mlkem/poly.c mlkem/poly.h mlkem/randombytes.h mlkem/poly_k.c mlkem/poly_k.h mlkem/sampling.c mlkem/sampling.h mlkem/symmetric.h mlkem/sys.h mlkem/verify.c mlkem/verify.h mlkem/zetas.inc
     supported_platforms:
       - architecture: arm_8
         operating_systems:
