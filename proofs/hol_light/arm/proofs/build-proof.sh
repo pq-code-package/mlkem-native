@@ -41,14 +41,6 @@ if [ ! -f "${HOLLIGHT_DIR}/hol_lib.cmxa" ]; then
   exit 1
 fi
 
-# Modify inline_load.ml to extend load_path; otherwise,
-# only the s2n-bignum and hol-light directories are searched,
-# which is not enough here.
-inline_ml_copy="$(mktemp).ml"
-cp ${HOLLIGHT_DIR}/inline_load.ml ${inline_ml_copy}
-load_path_extension="load_path := \"${ROOT}\" :: !load_path;;"
-perl -i -pe 's|#use "hol_loader.ml";;|#use "'"${HOLLIGHT_DIR}"'/hol_loader.ml";;\n'"${load_path_extension}"'|' ${inline_ml_copy}
-
 template_ml="$(mktemp).ml"
 echo "Generating a template .ml that loads the file...: ${template_ml}"
 
@@ -63,7 +55,7 @@ echo "Generating a template .ml that loads the file...: ${template_ml}"
 inlined_prefix="$(mktemp)"
 inlined_ml="${inlined_prefix}.ml"
 inlined_cmx="${inlined_prefix}.cmx"
-(cd "${S2N_BIGNUM_DIR}" && ocaml ${inline_ml_copy} "${template_ml}" "${inlined_ml}")
+(cd "${S2N_BIGNUM_DIR}" && HOLLIGHT_LOAD_PATH=${ROOT} ocaml ${HOLLIGHT_DIR}/inline_load.ml "${template_ml}" "${inlined_ml}")
 
 # Give a large stack size.
 OCAMLRUNPARAM=l=2000000000 \
@@ -74,4 +66,4 @@ ocamlfind ocamlopt -package zarith,unix -linkpkg hol_lib.cmxa \
   -o "${output_path}"
 
 # Remove the intermediate files to save disk space
-rm -f ${inlined_cmx} ${template_ml} ${inlined_ml} ${inline_ml_copy}
+rm -f ${inlined_cmx} ${template_ml} ${inlined_ml}
