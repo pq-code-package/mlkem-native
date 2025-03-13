@@ -10,8 +10,8 @@ hol_light.overrideAttrs (old: {
   src = fetchFromGitHub {
     owner = "jrh13";
     repo = "hol-light";
-    rev = "c5e165f85dfb340a786dabd1073a24aa421dd61b";
-    hash = "sha256-umKHUsVKBVZ9EZzu3Ry9harbslP9uWlo11YDxNLaYZY";
+    rev = "0e4b1bd8c7d400214d6fa6027f15a4221b54f8d4";
+    hash = "sha256-M6ddzqoAFyMBmaznuz31+o035xdEz4VXZMHhH4Dm4c8=";
   };
   patches = [ ./0005-Fix-hollight-path.patch ];
   propagatedBuildInputs = old.propagatedBuildInputs ++ old.nativeBuildInputs;

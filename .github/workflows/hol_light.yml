@@ -9,11 +9,15 @@ on:
     paths:
      - 'proofs/hol_light/arm/**/*.S'
      - 'proofs/hol_light/arm/**/*.ml'
+     - 'nix/hol_light/*'
+     - 'nix/s2n_bignum/*'
   pull_request:
     branches: ["main"]
     paths:
       - 'proofs/hol_light/arm/**/*.S'
       - 'proofs/hol_light/arm/**/*.ml'
+      - 'nix/hol_light/*'
+      - 'nix/s2n_bignum/*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -70,6 +74,12 @@ jobs:
                fi
             done
           done
+
+          # Always re-run upon change to nix files for HOL-Light
+          if [[ "$changed_files" == *"nix/"* ]]; then
+            run_needed=1
+          fi
+
           echo "run_needed=${run_needed}" >> $GITHUB_OUTPUT
       - uses: ./.github/actions/setup-shell
         if: |
