@@ -539,18 +539,12 @@ void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
                                mlk_poly *r3, const uint8_t seed[MLKEM_SYMBYTES],
                                uint8_t nonce0, uint8_t nonce1, uint8_t nonce2,
                                uint8_t nonce3)
-/* Depending on MLKEM_K, the pointers passed to this function belong
-   to the same objects, so we cannot use memory_no_alias for r0-r3.
-
-   NOTE: Somehow it is important to use memory_no_alias() first in the
-         conjunctions defining each case.
-*/
-#if MLKEM_K == 2
 __contract__(
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
-  requires( /* Case A: r0, r1 consecutive, r2, r3 consecutive */
-    (memory_no_alias(r0, 2 * sizeof(mlk_poly)) && memory_no_alias(r2, 2 * sizeof(mlk_poly)) &&
-     r1 == r0 + 1 && r3 == r2 + 1 && !same_object(r0, r2)))
+  requires(memory_no_alias(r0, sizeof(mlk_poly)))
+  requires(memory_no_alias(r1, sizeof(mlk_poly)))
+  requires(memory_no_alias(r2, sizeof(mlk_poly)))
+  requires(memory_no_alias(r3, sizeof(mlk_poly)))
   assigns(memory_slice(r0, sizeof(mlk_poly)))
   assigns(memory_slice(r1, sizeof(mlk_poly)))
   assigns(memory_slice(r2, sizeof(mlk_poly)))
@@ -561,38 +555,6 @@ __contract__(
     && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
     && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1));
 );
-#elif MLKEM_K == 4
-__contract__(
-  requires(memory_no_alias(seed, MLKEM_SYMBYTES))
-  requires( /* Case B: r0, r1, r2, r3 consecutive */
-    (memory_no_alias(r0, 4 * sizeof(mlk_poly)) && r1 == r0 + 1 && r2 == r0 + 2 && r3 == r0 + 3))
-  assigns(memory_slice(r0, sizeof(mlk_poly)))
-  assigns(memory_slice(r1, sizeof(mlk_poly)))
-  assigns(memory_slice(r2, sizeof(mlk_poly)))
-  assigns(memory_slice(r3, sizeof(mlk_poly)))
-  ensures(
-    array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
-    && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
-    && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
-    && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1));
-);
-#elif MLKEM_K == 3
-__contract__(
-  requires(memory_no_alias(seed, MLKEM_SYMBYTES))
-  requires( /* Case C: r0, r1, r2 consecutive */
- (memory_no_alias(r0, 3 * sizeof(mlk_poly)) && memory_no_alias(r3, 1 * sizeof(mlk_poly)) &&
-  r1 == r0 + 1 && r2 == r0 + 2 && !same_object(r3, r0)))
-  assigns(memory_slice(r0, sizeof(mlk_poly)))
-  assigns(memory_slice(r1, sizeof(mlk_poly)))
-  assigns(memory_slice(r2, sizeof(mlk_poly)))
-  assigns(memory_slice(r3, sizeof(mlk_poly)))
-  ensures(
-    array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
-    && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
-    && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
-    && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1));
-);
-#endif /* MLKEM_K */
 
 #if MLKEM_ETA1 == MLKEM_ETA2
 /*

@@ -58,24 +58,18 @@ static int bench(void)
   MLK_ALIGN uint64_t data2[1024];
   MLK_ALIGN uint64_t data3[1024];
   MLK_ALIGN uint64_t data4[1024];
-  uint8_t *seed[4];
   uint8_t nonce0 = 0, nonce1 = 1, nonce2 = 2, nonce3 = 3;
   uint64_t cyc[NTESTS];
 
   unsigned i, j;
   uint64_t t0, t1;
 
-  seed[0] = (uint8_t *)data1;
-  seed[1] = (uint8_t *)data2;
-  seed[2] = (uint8_t *)data3;
-  seed[3] = (uint8_t *)data4;
-
   BENCH("keccak-f1600-x1", mlk_keccakf1600_permute(data0))
   BENCH("keccak-f1600-x4", mlk_keccakf1600x4_permute(data0))
   BENCH("mlk_poly_rej_uniform",
         mlk_poly_rej_uniform((mlk_poly *)data0, (uint8_t *)data1))
   BENCH("mlk_poly_rej_uniform_x4",
-        mlk_poly_rej_uniform_x4((mlk_poly *)data0, seed))
+        mlk_poly_rej_uniform_x4((mlk_poly *)data0, (uint8_t(*)[64])data1))
 
   /* mlk_poly */
   /* mlk_poly_compress_du */

@@ -55,24 +55,21 @@ void mlk_poly_cbd3(mlk_poly *r, const uint8_t buf[3 * MLKEM_N / 4]);
  * Description: Generate four polynomials using rejection sampling
  *              on (pseudo-)uniformly random bytes sampled from a seed.
  *
- * Arguments:   - mlk_poly *vec:           Pointer to an array of 4 polynomials
- *                                     to be sampled.
- *              - uint8_t *seed[4]:    Pointer to array of four pointers
- *                                     pointing to the seed buffers of size
- *                                     MLKEM_SYMBYTES + 2 each.
+ * Arguments:   - mlk_poly *vec:
+ *                Pointer to an array of 4 polynomials to be sampled.
+ *              - uint8_t seed[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)]:
+ *                Pointer consecutive array of seed buffers of size
+ *                MLKEM_SYMBYTES + 2 each, plus padding for alignment.
  *
  * Specification: Implements [FIPS 203, Algorithm 7, SampleNTT]
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_poly_rej_uniform_x4(mlk_poly *vec, uint8_t *seed[4])
+void mlk_poly_rej_uniform_x4(mlk_poly *vec,
+                             uint8_t seed[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)])
 __contract__(
   requires(memory_no_alias(vec, sizeof(mlk_poly) * 4))
-  requires(memory_no_alias(seed, sizeof(uint8_t*) * 4))
-  requires(memory_no_alias(seed[0], MLKEM_SYMBYTES + 2))
-  requires(memory_no_alias(seed[1], MLKEM_SYMBYTES + 2))
-  requires(memory_no_alias(seed[2], MLKEM_SYMBYTES + 2))
-  requires(memory_no_alias(seed[3], MLKEM_SYMBYTES + 2))
+  requires(memory_no_alias(seed, 4 * MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)))
   assigns(memory_slice(vec, sizeof(mlk_poly) * 4))
   ensures(array_bound(vec[0].coeffs, 0, MLKEM_N, 0, MLKEM_Q))
   ensures(array_bound(vec[1].coeffs, 0, MLKEM_N, 0, MLKEM_Q))
