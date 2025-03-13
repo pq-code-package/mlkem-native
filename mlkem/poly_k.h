@@ -10,13 +10,19 @@
 #include "compress.h"
 #include "poly.h"
 
+/* Level namespacing
+ * This is to facilitate building multiple instances
+ * of mlkem-native (e.g. with varying security levels)
+ * within a single compilation unit. */
 #define mlk_polyvec MLK_ADD_LEVEL(mlk_polyvec)
+#define mlk_polyvec_mulcache MLK_ADD_LEVEL(mlk_polyvec_mulcache)
+/* End of level namespacing */
+
 typedef struct
 {
   mlk_poly vec[MLKEM_K];
 } MLK_ALIGN mlk_polyvec;
 
-#define mlk_polyvec_mulcache MLK_ADD_LEVEL(mlk_polyvec_mulcache)
 typedef struct
 {
   mlk_poly_mulcache vec[MLKEM_K];
@@ -356,7 +362,7 @@ __contract__(
  * Arguments:   - mlk_poly *r: pointer to output polynomial
  *              - const mlk_polyvec *a: pointer to first input polynomial vector
  *              - const mlk_polyvec *b: pointer to second input polynomial
- *vector
+ *                vector
  *              - const mlk_polyvec_mulcache *b_cache: pointer to mulcache
  *                  for second input polynomial vector. Can be computed
  *                  via mlk_polyvec_mulcache_compute().
@@ -457,9 +463,9 @@ __contract__(
  * Description: Add vectors of polynomials
  *
  * Arguments: - mlk_polyvec *r: pointer to input-output vector of polynomials to
- *be added to
+ *              be added to
  *            - const mlk_polyvec *b: pointer to second input vector of
- *polynomials
+ *              polynomials
  *
  * The coefficients of r and b must be so that the addition does
  * not overflow. Otherwise, the behaviour of this function is undefined.
