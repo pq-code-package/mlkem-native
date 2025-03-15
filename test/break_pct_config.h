@@ -221,20 +221,19 @@
  *
  *****************************************************************************/
 /* #define MLK_FIPS202X4_CUSTOM_HEADER "SOME_FILE.h" */
-
 /******************************************************************************
- * Name:        MLK_USE_ZEROIZE_NATIVE
+ * Name:        MLK_CUSTOM_ZEROIZE
  *
  * Description: In compliance with FIPS 203 Section 3.3, mlkem-native zeroizes
  *              intermediate stack buffers before returning from function calls.
  *
- *              Set this option and define `mlk_zeroize_native` if you want to
+ *              Set this option and define `mlk_zeroize` if you want to
  *              use a custom method to zeroize intermediate stack buffers.
  *              The default implementation uses SecureZeroMemory on Windows
  *              and a memset + compiler barrier otherwise. If neither of those
  *              is available on the target platform, compilation will fail,
- *              and you will need to use MLK_USE_ZEROIZE_NATIVE to provide
- *              a custom implementation of `mlk_zeroize_native()`.
+ *              and you will need to use MLK_CUSTOM_ZEROIZE to provide
+ *              a custom implementation of `mlk_zeroize()`.
  *
  *              WARNING:
  *              The explicit stack zeroization conducted by mlkem-native
@@ -247,20 +246,20 @@
  *
  *              If you need bullet-proof zeroization of the stack, you need to
  *              consider additional measures instead of of what this feature
- *              provides. In this case, you can set mlk_zeroize_native to a
- *              no-op.
+ *              provides. In this case, you can set mlk_zeroize to a no-op.
  *
  *****************************************************************************/
-/* #define MLK_USE_ZEROIZE_NATIVE
+/* #define MLK_CUSTOM_ZEROIZE
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
    #include "sys.h"
-   static MLK_INLINE void mlk_zeroize_native(void *ptr, size_t len)
+   static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
    {
        ... your implementation ...
    }
    #endif
 */
+
 
 /******************************************************************************
  * Name:        MLK_KEYGEN_PCT

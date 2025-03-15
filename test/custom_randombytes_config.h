@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef MLK_INTEGRATION_LIBOQS_CONFIG_X86_64_H
-#define MLK_INTEGRATION_LIBOQS_CONFIG_X86_64_H
+#ifndef MLK_CONFIG_H
+#define MLK_CONFIG_H
 
 /******************************************************************************
  * Name:        MLKEM_K
@@ -22,6 +22,24 @@
 #endif
 
 /******************************************************************************
+ * Name:        MLK_CONFIG_FILE
+ *
+ * Description: If defined, this is a header that will be included instead
+ *              of this default configuration file mlkem/config.h.
+ *
+ *              When you need to build mlkem-native in multiple configurations,
+ *              using varying MLK_CONFIG_FILE can be more convenient
+ *              then configuring everything through CFLAGS.
+ *
+ *              To use, MLK_CONFIG_FILE _must_ be defined prior
+ *              to the inclusion of any mlkem-native headers. For example,
+ *              it can be set by passing `-DMLK_CONFIG_FILE="..."`
+ *              on the command line.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_FILE "config.h" */
+
+/******************************************************************************
  * Name:        MLK_NAMESPACE_PREFIX
  *
  * Description: The prefix to use to namespace global symbols from mlkem/.
@@ -35,13 +53,60 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#if MLKEM_K == 2
-#define MLK_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM512_X86_64
-#elif MLKEM_K == 3
-#define MLK_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM768_X86_64
-#elif MLKEM_K == 4
-#define MLK_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM1024_X86_64
+#if !defined(MLK_NAMESPACE_PREFIX)
+#define MLK_NAMESPACE_PREFIX MLK_DEFAULT_NAMESPACE_PREFIX
 #endif
+
+/******************************************************************************
+ * Name:        MLK_MULTILEVEL_BUILD_WITH_SHARED
+ *
+ * Description: This is for multi-level builds of mlkem-native only. If you
+ *              need only a single security level build of mlkem-native,
+ *              keep this unset.
+ *
+ *              If this is set, all MLKEM_K-independent code will be included
+ *              in the build, including code needed only for other security
+ *              levels.
+ *
+ *              Example: mlk_poly_cbd3 is only needed for MLKEM_K == 2. Yet, if
+ *              this option is set for a build with MLKEM_K==3/4, it would
+ *              be included.
+ *
+ *              To build mlkem-native with support for all security levels,
+ *              build it three times -- once per level -- and set the option
+ *              MLK_MULTILEVEL_BUILD_WITH_SHARED for exactly one of
+ *              them, and MLK_MULTILEVEL_BUILD_NO_SHARED for the
+ *              others.
+ *
+ *              See examples/multilevel_build for an example.
+ *
+ *              This can also be set using CFLAGS.
+ *
+ *****************************************************************************/
+/* #define MLK_MULTILEVEL_BUILD_WITH_SHARED */
+
+/******************************************************************************
+ * Name:        MLK_MULTILEVEL_BUILD_NO_SHARED
+ *
+ * Description: This is for multi-level builds of mlkem-native only. If you
+ *              need only a single security level build of mlkem-native,
+ *              keep this unset.
+ *
+ *              If this is set, no MLKEM_K-independent code will be included
+ *              in the build.
+ *
+ *              To build mlkem-native with support for all security levels,
+ *              build it three times -- once per level -- and set the option
+ *              MLK_MULTILEVEL_BUILD_WITH_SHARED for exactly one of
+ *              them, and MLK_MULTILEVEL_BUILD_NO_SHARED for the
+ *              others.
+ *
+ *              See examples/multilevel_build for an example.
+ *
+ *              This can also be set using CFLAGS.
+ *
+ *****************************************************************************/
+/* #define MLK_MULTILEVEL_BUILD_NO_SHARED */
 
 /******************************************************************************
  * Name:        MLK_USE_NATIVE_BACKEND_ARITH
@@ -62,7 +127,9 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLK_USE_NATIVE_BACKEND_ARITH
+#if !defined(MLK_USE_NATIVE_BACKEND_ARITH)
+/* #define MLK_USE_NATIVE_BACKEND_ARITH */
+#endif
 
 /******************************************************************************
  * Name:        MLK_ARITH_BACKEND_FILE
@@ -79,7 +146,49 @@
  *              This can be set using CFLAGS.
  *
  *****************************************************************************/
+#if defined(MLK_USE_NATIVE_BACKEND_ARITH) && !defined(MLK_ARITH_BACKEND_FILE)
 #define MLK_ARITH_BACKEND_FILE "native/meta.h"
+#endif
+
+/******************************************************************************
+ * Name:        MLK_USE_NATIVE_BACKEND_FIPS202
+ *
+ * Description: Determines whether an native FIPS202 backend should be used.
+ *
+ *              The FIPS202 backend covers 1x/2x/4x-fold Keccak-f1600, which is
+ *              the performance bottleneck of SHA3 and SHAKE.
+ *
+ *              If this option is unset, the C backend will be used.
+ *
+ *              If this option is set, the FIPS202 backend to be use is
+ *              determined by MLK_FIPS202_BACKEND: If the latter is
+ *              unset, the default backend for your the target architecture
+ *              will be used. If set, it must be the name of a backend metadata
+ *              file.
+ *
+ *              This can also be set using CFLAGS.
+ *
+ *****************************************************************************/
+#if !defined(MLK_USE_NATIVE_BACKEND_FIPS202)
+/* #define MLK_USE_NATIVE_BACKEND_FIPS202 */
+#endif
+
+/******************************************************************************
+ * Name:        MLK_FIPS202_BACKEND_FILE
+ *
+ * Description: The FIPS-202 backend to use.
+ *
+ *              If MLK_USE_NATIVE_BACKEND_FIPS202 is set, this option must
+ *              either be undefined or the filename of a FIPS202 backend.
+ *              If unset, the default backend will be used.
+ *
+ *              This can be set using CFLAGS.
+ *
+ *****************************************************************************/
+#if defined(MLK_USE_NATIVE_BACKEND_FIPS202) && \
+    !defined(MLK_FIPS202_BACKEND_FILE)
+#define MLK_FIPS202_BACKEND_FILE "fips202/native/auto.h"
+#endif
 
 /******************************************************************************
  * Name:        MLK_FIPS202_CUSTOM_HEADER
@@ -95,7 +204,7 @@
  *              the same API (see FIPS202.md).
  *
  *****************************************************************************/
-#define MLK_FIPS202_CUSTOM_HEADER "../integration/liboqs/fips202_glue.h"
+/* #define MLK_FIPS202_CUSTOM_HEADER "SOME_FILE.h" */
 
 /******************************************************************************
  * Name:        MLK_FIPS202X4_CUSTOM_HEADER
@@ -111,7 +220,7 @@
  *              the same API (see FIPS202.md).
  *
  *****************************************************************************/
-#define MLK_FIPS202X4_CUSTOM_HEADER "../integration/liboqs/fips202x4_glue.h"
+/* #define MLK_FIPS202X4_CUSTOM_HEADER "SOME_FILE.h" */
 
 /******************************************************************************
  * Name:        MLK_CUSTOM_ZEROIZE
@@ -141,15 +250,17 @@
  *              provides. In this case, you can set mlk_zeroize to a no-op.
  *
  *****************************************************************************/
-/* #define MLK_CUSTOM_ZEROIZE
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "sys.h"
-   static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
-   {
-       ... your implementation ...
-   }
-   #endif
+/*
+#define MLK_CUSTOM_ZEROIZE
+#if !defined(__ASSEMBLER__)
+#include <stdint.h>
+#include <string.h>
+#include "../mlkem/sys.h"
+static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+{
+  explicit_bzero(ptr, len);
+}
+#endif
 */
 
 /******************************************************************************
@@ -169,14 +280,15 @@
  *****************************************************************************/
 #define MLK_CUSTOM_RANDOMBYTES
 #if !defined(__ASSEMBLER__)
-#include <oqs/rand.h>
 #include <stdint.h>
-#include "../../mlkem/sys.h"
+#include "../mlkem/sys.h"
+#include "notrandombytes/notrandombytes.h"
 static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
 {
-  OQS_randombytes(ptr, len);
+  randombytes(ptr, len);
 }
 #endif
+
 
 
 /******************************************************************************
@@ -240,13 +352,26 @@ static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
    #endif
 */
 
-/* Enable valgrind-based assertions in mlkem-native through macro
- * from libOQS. */
-#if !defined(__ASSEMBLER__)
-#include <oqs/common.h>
-#if defined(OQS_ENABLE_TEST_CONSTANT_TIME)
-#define MLK_CT_TESTING_ENABLED
-#endif
-#endif /* !__ASSEMBLER__ */
+/*************************  Config internals  ********************************/
 
-#endif /* MLK_INTEGRATION_LIBOQS_CONFIG_X86_64_H */
+/* Default namespace
+ *
+ * Don't change this. If you need a different namespace, re-define
+ * MLK_NAMESPACE_PREFIX above instead, and remove the following.
+ *
+ * The default MLKEM namespace is
+ *
+ *   PQCP_MLKEM_NATIVE_MLKEM<LEVEL>_
+ *
+ * e.g., PQCP_MLKEM_NATIVE_MLKEM512_
+ */
+
+#if MLKEM_K == 2
+#define MLK_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM512
+#elif MLKEM_K == 3
+#define MLK_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM768
+#elif MLKEM_K == 4
+#define MLK_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM1024
+#endif
+
+#endif /* MLK_CONFIG_H */

@@ -392,26 +392,19 @@ __contract__(
  **************************************************/
 
 /* Reference: Not present in the reference implementation. */
-static MLK_INLINE void mlk_zeroize(void *r, size_t len)
-__contract__(
-  requires(memory_no_alias(r, len))
-  assigns(memory_slice(r, len))
-);
-
-#if defined(MLK_USE_ZEROIZE_NATIVE)
-static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
-{
-  mlk_zeroize_native(ptr, len);
-}
-#elif defined(MLK_SYS_WINDOWS)
+#if !defined(MLK_CUSTOM_ZEROIZE)
+#if defined(MLK_SYS_WINDOWS)
 #include <windows.h>
 static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
-{
-  SecureZeroMemory(ptr, len);
-}
+__contract__(
+  requires(memory_no_alias(ptr, len))
+  assigns(memory_slice(ptr, len))) { SecureZeroMemory(ptr, len); }
 #elif defined(MLK_HAVE_INLINE_ASM)
 #include <string.h>
 static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+__contract__(
+  requires(memory_no_alias(ptr, len))
+  assigns(memory_slice(ptr, len)))
 {
   memset(ptr, 0, len);
   /* This follows OpenSSL and seems sufficient to prevent the compiler
@@ -422,7 +415,8 @@ static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
   __asm__ __volatile__("" : : "r"(ptr) : "memory");
 }
 #else
-#error No plausibly-secure implementation of mlk_zeroize available. Please provide your own using MLK_USE_ZEROIZE_NATIVE.
+#error No plausibly-secure implementation of mlk_zeroize available. Please provide your own using MLK_CUSTOM_ZEROIZE.
 #endif
+#endif /* !defined(MLK_CUSTOM_ZEROIZE) */
 
 #endif /* MLK_VERIFY_H */

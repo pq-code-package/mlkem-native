@@ -76,18 +76,18 @@
 #define MLK_FIPS202X4_CUSTOM_HEADER "../integration/liboqs/fips202x4_glue.h"
 
 /******************************************************************************
- * Name:        MLK_USE_ZEROIZE_NATIVE
+ * Name:        MLK_CUSTOM_ZEROIZE
  *
  * Description: In compliance with FIPS 203 Section 3.3, mlkem-native zeroizes
  *              intermediate stack buffers before returning from function calls.
  *
- *              Set this option and define `mlk_zeroize_native` if you want to
+ *              Set this option and define `mlk_zeroize` if you want to
  *              use a custom method to zeroize intermediate stack buffers.
  *              The default implementation uses SecureZeroMemory on Windows
  *              and a memset + compiler barrier otherwise. If neither of those
  *              is available on the target platform, compilation will fail,
- *              and you will need to use MLK_USE_ZEROIZE_NATIVE to provide
- *              a custom implementation of `mlk_zeroize_native()`.
+ *              and you will need to use MLK_CUSTOM_ZEROIZE to provide
+ *              a custom implementation of `mlk_zeroize()`.
  *
  *              WARNING:
  *              The explicit stack zeroization conducted by mlkem-native
@@ -100,20 +100,45 @@
  *
  *              If you need bullet-proof zeroization of the stack, you need to
  *              consider additional measures instead of of what this feature
- *              provides. In this case, you can set mlk_zeroize_native to a
- *              no-op.
+ *              provides. In this case, you can set mlk_zeroize to a no-op.
  *
  *****************************************************************************/
-/* #define MLK_USE_ZEROIZE_NATIVE
+/* #define MLK_CUSTOM_ZEROIZE
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
    #include "sys.h"
-   static MLK_INLINE void mlk_zeroize_native(void *ptr, size_t len)
+   static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
    {
        ... your implementation ...
    }
    #endif
 */
+
+/******************************************************************************
+ * Name:        MLK_CUSTOM_RANDOMBYTES
+ *
+ * Description: mlkem-native does not provide a secure randombytes
+ *              implementation. Such an implementation has to provided by the
+ *              consumer.
+ *
+ *              If this option is not set, mlkem-native expects a function
+ *              void randombytes(uint8_t *out, size_t outlen).
+ *
+ *              Set this option and define `mlk_randombytes` if you want to
+ *              use a custom method to sample randombytes with a different name
+ *              or signature.
+ *
+ *****************************************************************************/
+#define MLK_CUSTOM_RANDOMBYTES
+#if !defined(__ASSEMBLER__)
+#include <oqs/rand.h>
+#include <stdint.h>
+#include "../../mlkem/sys.h"
+static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
+{
+  OQS_randombytes(ptr, len);
+}
+#endif
 
 /******************************************************************************
  * Name:        MLK_NO_ASM
@@ -128,7 +153,7 @@
  *              Inline assembly is also used to implement a secure zeroization
  *              function on non-Windows platforms. If this option is set and
  *              the target platform is not Windows, you MUST set
- *              MLK_USE_ZEROIZE_NATIVE and provide a custom zeroization
+ *              MLK_CUSTOM_ZEROIZE and provide a custom zeroization
  *              function.
  *
  *              If this option is set, MLK_USE_NATIVE_BACKEND_FIPS202 and
