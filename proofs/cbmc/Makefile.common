@@ -311,7 +311,7 @@ CHECKFLAGS += $(CBMC_FLAG_UNSIGNED_OVERFLOW_CHECK)
 NONDET_STATIC ?=
 
 # Flags to pass to goto-cc for compilation and linking
-COMPILE_FLAGS ?= -Wall -Werror
+COMPILE_FLAGS ?= -Wall -Werror --native-compiler $(CC)
 LINK_FLAGS ?= -Wall -Werror
 EXPORT_FILE_LOCAL_SYMBOLS ?= --export-file-local-symbols
 
