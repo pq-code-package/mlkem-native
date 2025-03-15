@@ -23,6 +23,7 @@
  */
 
 #include <stdint.h>
+#include "sys.h"
 
 /*************************** Build information ********************************/
 
@@ -145,7 +146,8 @@
 MLK_MUST_CHECK_RETURN_VALUE
 int MLK_BUILD_INFO_NAMESPACE(keypair_derand)(
     uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_BUILD_INFO_LVL)],
-    uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_BUILD_INFO_LVL)], const uint8_t *coins);
+    uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_BUILD_INFO_LVL)],
+    const uint8_t coins[2 * MLKEM_SYMBYTES]);
 
 /*************************************************
  * Name:        crypto_kem_keypair
@@ -250,6 +252,77 @@ int MLK_BUILD_INFO_NAMESPACE(dec)(
     const uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_BUILD_INFO_LVL)],
     const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_BUILD_INFO_LVL)]);
 
+
+/* TODO: figure this out */
+#define MLK_CONCAT_(x1, x2) x1##x2
+#define MLK_CONCAT(x1, x2) MLK_CONCAT_(x1, x2)
+#define MLK_BUILD_INFO_ADD_LEVEL(s) MLK_CONCAT(s, MLK_BUILD_INFO_LVL)
+#define mlk_public_key MLK_BUILD_INFO_ADD_LEVEL(mlk_public_key)
+#define mlk_secret_key MLK_BUILD_INFO_ADD_LEVEL(mlk_secret_key)
+typedef struct
+{
+  uint8_t bytes[32768];
+} MLK_ALIGN mlk_public_key;
+
+typedef struct
+{
+  uint8_t bytes[32768];
+} MLK_ALIGN mlk_secret_key;
+
+void MLK_BUILD_INFO_NAMESPACE(marshal_pk)(
+    uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_BUILD_INFO_LVL)],
+    const mlk_public_key *pks);
+
+MLK_MUST_CHECK_RETURN_VALUE
+int MLK_BUILD_INFO_NAMESPACE(parse_pk)(
+    mlk_public_key *pks,
+    const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_BUILD_INFO_LVL)]);
+
+void MLK_BUILD_INFO_NAMESPACE(marshal_sk)(
+    uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_BUILD_INFO_LVL)],
+    const mlk_secret_key *sks);
+
+MLK_MUST_CHECK_RETURN_VALUE
+int MLK_BUILD_INFO_NAMESPACE(parse_sk)(
+    mlk_secret_key *sks,
+    const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_BUILD_INFO_LVL)]);
+
+
+MLK_MUST_CHECK_RETURN_VALUE
+int MLK_BUILD_INFO_NAMESPACE(keypair_derand_struct)(
+    mlk_public_key *pk, mlk_secret_key *sk,
+    const uint8_t coins[2 * MLKEM_SYMBYTES]);
+
+MLK_MUST_CHECK_RETURN_VALUE
+int MLK_BUILD_INFO_NAMESPACE(keypair_struct)(mlk_public_key *pk,
+                                             mlk_secret_key *sk);
+
+MLK_MUST_CHECK_RETURN_VALUE
+int MLK_BUILD_INFO_NAMESPACE(enc_derand_struct)(
+    uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_BUILD_INFO_LVL)],
+    uint8_t ss[MLKEM_BYTES], const mlk_public_key *pk,
+    const uint8_t coins[MLKEM_SYMBYTES]);
+
+MLK_MUST_CHECK_RETURN_VALUE
+int MLK_BUILD_INFO_NAMESPACE(enc_struct)(
+    uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_BUILD_INFO_LVL)],
+    uint8_t ss[MLKEM_BYTES], const mlk_public_key *pk);
+
+MLK_MUST_CHECK_RETURN_VALUE
+int MLK_BUILD_INFO_NAMESPACE(dec_struct)(
+    uint8_t ss[MLKEM_BYTES],
+    const uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_BUILD_INFO_LVL)],
+    const mlk_secret_key *sk);
+
+MLK_MUST_CHECK_RETURN_VALUE
+int MLK_BUILD_INFO_NAMESPACE(sk_from_seed)(
+    mlk_secret_key *sk, const uint8_t coins[2 * MLKEM_SYMBYTES]);
+
+MLK_MUST_CHECK_RETURN_VALUE
+int MLK_BUILD_INFO_NAMESPACE(pk_from_sk)(mlk_public_key *pk,
+                                         mlk_secret_key *sk);
+
+
 /****************************** Standard API *********************************/
 
 /* If desired, export API in CRYPTO_xxx and crypto_kem_xxx format as used
@@ -271,6 +344,19 @@ int MLK_BUILD_INFO_NAMESPACE(dec)(
 #define crypto_kem_enc_derand MLK_BUILD_INFO_NAMESPACE(enc_derand)
 #define crypto_kem_enc MLK_BUILD_INFO_NAMESPACE(enc)
 #define crypto_kem_dec MLK_BUILD_INFO_NAMESPACE(dec)
+
+#define crypto_kem_marshal_pk MLK_BUILD_INFO_NAMESPACE(marshal_pk)
+#define crypto_kem_parse_pk MLK_BUILD_INFO_NAMESPACE(parse_pk)
+#define crypto_kem_marshal_sk MLK_BUILD_INFO_NAMESPACE(marshal_sk)
+#define crypto_kem_parse_sk MLK_BUILD_INFO_NAMESPACE(parse_sk)
+#define crypto_kem_keypair_derand_struct \
+  MLK_BUILD_INFO_NAMESPACE(keypair_derand_struct)
+#define crypto_kem_keypair_struct MLK_BUILD_INFO_NAMESPACE(keypair_struct)
+#define crypto_kem_enc_derand_struct MLK_BUILD_INFO_NAMESPACE(enc_derand_struct)
+#define crypto_kem_enc_struct MLK_BUILD_INFO_NAMESPACE(enc_struct)
+#define crypto_kem_dec_struct MLK_BUILD_INFO_NAMESPACE(dec_struct)
+#define crypto_kem_sk_from_seed MLK_BUILD_INFO_NAMESPACE(sk_from_seed)
+#define crypto_kem_pk_from_sk MLK_BUILD_INFO_NAMESPACE(pk_from_sk)
 #endif /* MLK_BUILD_INFO_NO_STANDARD_API */
 
 /********************************* Cleanup ************************************/
