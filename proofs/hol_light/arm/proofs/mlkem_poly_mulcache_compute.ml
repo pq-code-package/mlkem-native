@@ -156,7 +156,8 @@ let poly_mulcache_compute_SPEC = prove(poly_mulcache_compute_GOAL,
        Note that we simplify eagerly after every step.
        This reduces the proof time *)
     REPEAT STRIP_TAC THEN
-    MAP_EVERY (fun n -> ARM_STEPS_TAC poly_mulcache_compute_EXEC [n] THEN SIMD_SIMPLIFY_TAC)
+    MAP_EVERY (fun n -> ARM_STEPS_TAC poly_mulcache_compute_EXEC [n] THEN
+               (SIMD_SIMPLIFY_TAC [barmul]))
               (1--181) THEN
     ENSURES_FINAL_STATE_TAC THEN
     REPEAT CONJ_TAC THEN
@@ -164,7 +165,7 @@ let poly_mulcache_compute_SPEC = prove(poly_mulcache_compute_GOAL,
 
     (* Reverse restructuring *)
     REPEAT(FIRST_X_ASSUM(STRIP_ASSUME_TAC o
-      CONV_RULE SIMD_SIMPLIFY_CONV o
+      CONV_RULE (SIMD_SIMPLIFY_CONV []) o
       CONV_RULE(READ_MEMORY_SPLIT_CONV 3) o
       check (can (term_match [] `read qqq s:int128 = xxx`) o concl))) THEN
 
