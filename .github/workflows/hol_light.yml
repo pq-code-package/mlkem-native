@@ -40,6 +40,12 @@ jobs:
             needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
           - name: mlkem_poly_reduce
             needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
+          - name: mlkem_poly_basemul_acc_montgomery_cached_k2
+            needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
+          - name: mlkem_poly_basemul_acc_montgomery_cached_k3
+            needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
+          - name: mlkem_poly_basemul_acc_montgomery_cached_k4
+            needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
           - name: keccak_f1600_x1_scalar
             needs: ["keccak_specs.ml"]
           - name: keccak_f1600_x1_v84a

@@ -960,6 +960,18 @@ def gen_hol_light_asm(dry_run=False):
     gen_hol_light_arith_asm_file(
         "poly_mulcache_compute_asm.S", "mlkem_poly_mulcache_compute.S"
     )
+    gen_hol_light_arith_asm_file(
+        "polyvec_basemul_acc_montgomery_cached_asm_k2.S",
+        "mlkem_poly_basemul_acc_montgomery_cached_k2.S",
+    )
+    gen_hol_light_arith_asm_file(
+        "polyvec_basemul_acc_montgomery_cached_asm_k3.S",
+        "mlkem_poly_basemul_acc_montgomery_cached_k3.S",
+    )
+    gen_hol_light_arith_asm_file(
+        "polyvec_basemul_acc_montgomery_cached_asm_k4.S",
+        "mlkem_poly_basemul_acc_montgomery_cached_k4.S",
+    )
 
     def gen_hol_light_fips202_asm_file(infile, outfile):
         update_via_simpasm(

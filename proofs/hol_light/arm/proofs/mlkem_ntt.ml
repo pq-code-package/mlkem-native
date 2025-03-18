@@ -478,14 +478,15 @@ let MLKEM_NTT_CORRECT = prove
 
   (*** Simulate all the way to the end, in effect unrolling loops ***)
 
-  MAP_EVERY (fun n -> ARM_STEPS_TAC MLKEM_NTT_EXEC [n] THEN SIMD_SIMPLIFY_TAC)
+  MAP_EVERY (fun n -> ARM_STEPS_TAC MLKEM_NTT_EXEC [n] THEN
+             (SIMD_SIMPLIFY_TAC [barmul]))
             (1--904) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
   (*** Reverse the restructuring by splitting the 128-bit words up ***)
 
   REPEAT(FIRST_X_ASSUM(STRIP_ASSUME_TAC o
-    CONV_RULE SIMD_SIMPLIFY_CONV o
+    CONV_RULE (SIMD_SIMPLIFY_CONV []) o
     CONV_RULE(READ_MEMORY_SPLIT_CONV 3) o
     check (can (term_match [] `read qqq s:int128 = xxx`) o concl))) THEN
 
