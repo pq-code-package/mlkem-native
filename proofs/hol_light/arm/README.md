@@ -48,14 +48,5 @@ make -C proofs/hol_light/arm
 
 will build and run the proofs. Note that this make take hours even on powerful machines.
 
-### macOS (AArch64)
+For convenience, you can also use `tests hol_light` which wraps the `make` invocation above; see `tests hol_light --help`.
 
-If you want run the proofs from an AArch64 Apple machine, you need to manually install `gobjcopy` via
-
-```
-brew install binutils
-```
-
-and put its parent directory (typically `/opt/homebrew/opt/binutils/bin`) into your `PATH`.
-This is needed to convert Mach-O object files to ELF (if you know a way to install a suitable version
-of `objcopy` through `nix`, please let us know!).

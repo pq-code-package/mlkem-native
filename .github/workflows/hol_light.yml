@@ -7,6 +7,8 @@ on:
   push:
     branches: ["main"]
     paths:
+     - '.github/workflows/hol_light.yml'
+     - 'proofs/hol_light/arm/Makefile'
      - 'proofs/hol_light/arm/**/*.S'
      - 'proofs/hol_light/arm/**/*.ml'
      - 'nix/hol_light/*'
@@ -14,6 +16,8 @@ on:
   pull_request:
     branches: ["main"]
     paths:
+      - '.github/workflows/hol_light.yml'
+      - 'proofs/hol_light/arm/Makefile'
       - 'proofs/hol_light/arm/**/*.S'
       - 'proofs/hol_light/arm/**/*.ml'
       - 'nix/hol_light/*'
@@ -82,7 +86,7 @@ jobs:
           done
 
           # Always re-run upon change to nix files for HOL-Light
-          if [[ "$changed_files" == *"nix/"* ]]; then
+          if [[ "$changed_files" == *"nix/"* ]] || [[ "$changed_files" == *"hol_light.yml"* ]] || [[ "$changed_files" == *"proofs/hol_light/arm/Makefile"* ]]; then
             run_needed=1
           fi
 
@@ -94,4 +98,4 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: 'hol_light'
           script: |
-            make -C proofs/hol_light/arm mlkem/${{ matrix.proof.name }}.correct
+            tests hol_light -p ${{ matrix.proof.name }}
