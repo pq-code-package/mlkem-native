@@ -330,8 +330,17 @@ __contract__(
     const int16_t zeta = zetas[k++];
     unsigned j;
     for (j = 0; j < len; j++)
+    __loop__(
+      invariant(j <= len)
+      invariant(array_abs_bound(r,               0, start,           layer * MLKEM_Q + MLKEM_Q))
+      invariant(array_abs_bound(r,           start, start + j,       layer * MLKEM_Q + MLKEM_Q))
+      invariant(array_abs_bound(r,       start + j, start + len,     layer * MLKEM_Q))
+      invariant(array_abs_bound(r,     start + len, start + len + j, layer * MLKEM_Q + MLKEM_Q))
+      invariant(array_abs_bound(r, start + len + j, start + 2 * len, layer * MLKEM_Q))
+      invariant(array_abs_bound(r, start + 2 * len, MLKEM_N,         layer * MLKEM_Q))
+    )
     {
-      mlk_ct_butterfly(r, j + start, j + start + len, zeta);
+      mlk_ct_butterfly(r, start + j, start + len + j, zeta);
     }
   }
 }
