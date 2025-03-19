@@ -15,7 +15,7 @@ It is a fork of the ML-KEM [reference implementation](https://github.com/pq-crys
 
 mlkem-native includes native backends for AArch64 and AVX2, offering competitive performance on most Arm, Intel, and AMD platforms
 (see [benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/)). The frontend and the C backend (i.e., all C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202)) are verified
-using [CBMC](https://github.com/diffblue/cbmc) to be free of undefined behaviour. In particular, there are no out of
+using [CBMC](https://github.com/diffblue/cbmc) to be free of various classes of undefined behaviour. In particular, there are no out of
 bounds accesses, nor integer overflows during optimized modular arithmetic.
 [HOL-Light](https://github.com/jrh13/hol-light) is used to verify the functional correctness of core AArch64 assembly routines.
 
