@@ -718,13 +718,6 @@ class Tests:
                 log = logger(f"CBMC ({i+1}/{num_proofs})", scheme, None, None)
                 log.info(f"Starting CBMC proof for {func}")
                 start = time.time()
-                if self.args.verbose is False:
-                    extra_args = {
-                        "stdout": subprocess.DEVNULL,
-                        "stderr": subprocess.DEVNULL,
-                    }
-                else:
-                    extra_args = {}
                 try:
                     p = subprocess.run(
                         [
@@ -738,12 +731,12 @@ class Tests:
                         + self.make_j(),
                         cwd="proofs/cbmc",
                         env=os.environ.copy() | envvars,
-                        capture_output=True,
                         timeout=self.args.timeout,
+                        capture_output=(self.args.verbose is False),
                     )
-                except subprocess.TimeoutExpired:
+                except subprocess.TimeoutExpired as e:
                     log.error(f"   TIMEOUT (after {self.args.timeout}s)")
-                    log.error(p.stderr)
+                    log.error(e.stderr.decode())
                     self.fail(f"CBMC proof for {func}")
                     if self.args.fail_upon_error:
                         log.error(
@@ -756,7 +749,8 @@ class Tests:
                 dur = int(end - start)
                 if p.returncode != 0:
                     log.error(f"   FAILED (after {dur}s)")
-                    log.error(p.stderr.decode())
+                    if p.stderr is not None:
+                        log.error(p.stderr.decode())
                     self.fail(f"CBMC proof for {func}")
                 else:
                     log.info(f"   SUCCESS (after {dur}s)")
