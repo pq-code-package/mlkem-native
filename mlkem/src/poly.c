@@ -325,7 +325,8 @@ __contract__(
     invariant(start < MLKEM_N + 2 * len)
     invariant(k <= MLKEM_N / 2 && 2 * len * k == start + MLKEM_N)
     invariant(array_abs_bound(r, 0, start, layer * MLKEM_Q + MLKEM_Q))
-    invariant(array_abs_bound(r, start, MLKEM_N, layer * MLKEM_Q)))
+    invariant(array_abs_bound(r, start, MLKEM_N, layer * MLKEM_Q))
+  )
   {
     const int16_t zeta = zetas[k++];
     unsigned j;
@@ -358,6 +359,14 @@ __contract__(
   /* Twiddle factors for layer n start at index 2 ** (layer-1) */
   k = 1 << (layer - 1);
   for (start = 0; start < MLKEM_N; start += 2 * len)
+  __loop__(
+    invariant(start < MLKEM_N + 2 * len)
+    invariant(len % 2 == 0)
+    invariant(len == 4 || len == 8 || len == 16 || len == 32 || len == 64 || len == 128)
+    invariant(k <= MLKEM_N / 2 && 2 * len * k == start + MLKEM_N)
+    invariant(array_abs_bound(r, 0, start, (layer + 2) * MLKEM_Q))
+    invariant(array_abs_bound(r, start, MLKEM_N, layer * MLKEM_Q))
+  )
   {
     unsigned j;
     const int16_t this_layer_zeta = zetas[k];
@@ -366,6 +375,27 @@ __contract__(
     k++;
 
     for (j = 0; j < len / 2; j++)
+    __loop__(
+      invariant(j <= len / 2)
+      invariant(len % 2 == 0)
+      invariant(len == 4 || len == 8 || len == 16 || len == 32 || len == 64 || len == 128)
+
+      invariant(array_abs_bound(r, 0,                         start,                     layer * MLKEM_Q + MLKEM_Q))
+
+      invariant(array_abs_bound(r, start,                     start + j,                 (layer + 2) * MLKEM_Q))
+      invariant(array_abs_bound(r, start + j,                 start + len / 2,           layer * MLKEM_Q))
+
+      invariant(array_abs_bound(r, start + len / 2,           start + len / 2 + j,       (layer + 2) * MLKEM_Q))
+      invariant(array_abs_bound(r, start + len / 2 + j,       start + len,               layer * MLKEM_Q))
+
+      invariant(array_abs_bound(r, start + len,               start + len + j,           (layer + 2) * MLKEM_Q))
+      invariant(array_abs_bound(r, start + len + j,           start + len + len / 2,     layer * MLKEM_Q))
+
+      invariant(array_abs_bound(r, start + len + len / 2,     start + len + len / 2 + j, (layer + 2) * MLKEM_Q))
+      invariant(array_abs_bound(r, start + len + len / 2 + j, start + 2 * len,           layer * MLKEM_Q))
+
+      invariant(array_abs_bound(r, start + 2 * len,           MLKEM_N,                   layer * MLKEM_Q))
+    )
     {
       const unsigned ci0 = j + start;
       const unsigned ci1 = ci0 + len / 2;
