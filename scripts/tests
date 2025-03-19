@@ -793,6 +793,62 @@ class Tests:
 
         self.check_fail()
 
+    def hol_light(self):
+
+        def list_proofs():
+            cmd_str = ["./proofs/hol_light/arm/list_proofs.sh"]
+            p = subprocess.run(cmd_str, capture_output=True, universal_newlines=False)
+            proofs = filter(lambda s: s.strip() != "", p.stdout.decode().split("\n"))
+            return list(proofs)
+
+        if self.args.list_functions:
+            for p in list_proofs():
+                print(p)
+            exit(0)
+
+        def run_hol_light_single_step(proofs):
+            num_proofs = len(proofs)
+            for i, func in enumerate(proofs):
+                log = logger(f"HOL_LIGHT ({i+1}/{num_proofs})", None, None, None)
+                log.info(f"Starting HOL-Light proof for {func}")
+                start = time.time()
+                proof_bin = f"mlkem/{func}.native"
+                proof_target = f"mlkem/{func}.correct"
+                proof_dir = "proofs/hol_light/arm"
+                # Remove intermediate proof files to force-rerun
+                try:
+                    os.remove(os.path.join(proof_dir, proof_bin))
+                    os.remove(os.path.join(proof_dir, proof_target))
+                except FileNotFoundError:
+                    pass
+                p = subprocess.run(
+                    [
+                        "make",
+                        f"mlkem/{func}.correct",
+                    ]
+                    + self.make_j(),
+                    cwd="proofs/hol_light/arm",
+                    env=os.environ.copy(),
+                    capture_output=(self.args.verbose is False),
+                )
+
+                end = time.time()
+                dur = int(end - start)
+                if p.returncode != 0:
+                    log.error(f"   FAILED (after {dur}s)")
+                    if p.stderr is not None:
+                        log.error(p.stderr.decode())
+                    self.fail(f"HOL-Light proof for {func}")
+                else:
+                    log.info(f"   SUCCESS (after {dur}s)")
+
+        proofs = list_proofs()
+        if self.args.proof is not None:
+            proofs = self.args.proof
+
+        run_hol_light_single_step(proofs)
+        self.check_fail()
+
 
 #
 # Command line interface
@@ -1043,6 +1099,29 @@ def cli():
         default=False,
     )
 
+    # hol_light arguments
+    hol_light_parser = cmd_subparsers.add_parser(
+        "hol_light",
+        help="Run the HOL_LIGHT proofs for all parameter sets",
+        parents=[common_parser],
+    )
+
+    hol_light_parser.add_argument(
+        "-p",
+        "--proof",
+        nargs="+",
+        help="Space separated list of functions for which to run the HOL_LIGHT proofs.",
+        default=None,
+    )
+
+    hol_light_parser.add_argument(
+        "-l",
+        "--list-functions",
+        help="Don't run any proofs, but list all functions for which HOL_LIGHT proofs are available",
+        action="store_true",
+        default=False,
+    )
+
     # func arguments
     func_parser = cmd_subparsers.add_parser(
         "func",
@@ -1081,6 +1160,8 @@ def cli():
         Tests(args).bench()
     elif args.cmd == "cbmc":
         Tests(args).cbmc()
+    elif args.cmd == "hol_light":
+        Tests(args).hol_light()
     elif args.cmd == "func":
         Tests(args).func()
     elif args.cmd == "kat":

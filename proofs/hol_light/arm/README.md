@@ -48,6 +48,8 @@ make -C proofs/hol_light/arm
 
 will build and run the proofs. Note that this make take hours even on powerful machines.
 
+For convenience, you can also use `tests hol_light` which wraps the `make` invocation above; see `tests hol_light --help`.
+
 ### macOS (AArch64)
 
 If you want run the proofs from an AArch64 Apple machine, you need to manually install `gobjcopy` via
