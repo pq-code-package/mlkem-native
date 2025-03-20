@@ -181,6 +181,7 @@
 #undef mlk_poly_getnoise_eta1_4x
 #undef mlk_poly_getnoise_eta2
 #undef mlk_poly_getnoise_eta2_4x
+#undef mlk_polymat
 #undef mlk_polyvec
 #undef mlk_polyvec_add
 #undef mlk_polyvec_basemul_acc_montgomery_cached

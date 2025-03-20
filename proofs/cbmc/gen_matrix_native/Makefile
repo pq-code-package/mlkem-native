@@ -13,7 +13,7 @@ DEFINES += -DMLK_USE_NATIVE_BACKEND_ARITH -DMLK_ARITH_BACKEND_FILE="\"dummy_back
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET += mlk_gen_matrix.0:4 mlk_gen_matrix.1:4 mlk_gen_matrix.2:4 mlk_gen_matrix.3:4 mlk_gen_matrix.4:4
+UNWINDSET += mlk_gen_matrix.0:4 mlk_gen_matrix.1:4 mlk_gen_matrix.2:4 mlk_gen_matrix.3:16
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/indcpa.c

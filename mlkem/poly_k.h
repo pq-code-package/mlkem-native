@@ -15,18 +15,13 @@
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
 #define mlk_polyvec MLK_ADD_LEVEL(mlk_polyvec)
+#define mlk_polymat MLK_ADD_LEVEL(mlk_polymat)
 #define mlk_polyvec_mulcache MLK_ADD_LEVEL(mlk_polyvec_mulcache)
 /* End of level namespacing */
 
-typedef struct
-{
-  mlk_poly vec[MLKEM_K];
-} MLK_ALIGN mlk_polyvec;
-
-typedef struct
-{
-  mlk_poly_mulcache vec[MLKEM_K];
-} mlk_polyvec_mulcache;
+typedef mlk_poly mlk_polyvec[MLKEM_K];
+typedef mlk_poly mlk_polymat[MLKEM_K * MLKEM_K];
+typedef mlk_poly_mulcache mlk_polyvec_mulcache[MLKEM_K];
 
 #define mlk_poly_compress_du MLK_NAMESPACE_K(poly_compress_du)
 /*************************************************
@@ -183,7 +178,7 @@ __contract__(
  *
  * Arguments:   - uint8_t *r: pointer to output byte array
  *                            (needs space for MLKEM_POLYVECCOMPRESSEDBYTES_DU)
- *              - const mlk_polyvec *a: pointer to input vector of polynomials.
+ *              - const mlk_polyvec a: pointer to input vector of polynomials.
  *                                  Coefficients must be unsigned canonical,
  *                                  i.e. in [0,1,..,MLKEM_Q-1].
  *
@@ -195,12 +190,12 @@ __contract__(
  **************************************************/
 MLK_INTERNAL_API
 void mlk_polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
-                             const mlk_polyvec *a)
+                             const mlk_polyvec a)
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(a, sizeof(mlk_polyvec)))
   requires(forall(k0, 0, MLKEM_K,
-         array_bound(a->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+         array_bound(a[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
   assigns(object_whole(r))
 );
 
@@ -211,7 +206,7 @@ __contract__(
  * Description: De-serialize and decompress vector of polynomials;
  *              approximate inverse of mlk_polyvec_compress_du
  *
- * Arguments:   - mlk_polyvec *r:       pointer to output vector of polynomials.
+ * Arguments:   - mlk_polyvec r:       pointer to output vector of polynomials.
  *                Output will have coefficients normalized to [0,..,q-1].
  *              - const uint8_t *a: pointer to input byte array
  *                                  (of length MLKEM_POLYVECCOMPRESSEDBYTES_DU)
@@ -223,14 +218,14 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_polyvec_decompress_du(mlk_polyvec *r,
+void mlk_polyvec_decompress_du(mlk_polyvec r,
                                const uint8_t a[MLKEM_POLYVECCOMPRESSEDBYTES_DU])
 __contract__(
   requires(memory_no_alias(a, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   assigns(object_whole(r))
   ensures(forall(k0, 0, MLKEM_K,
-         array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+         array_bound(r[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 );
 
 #define mlk_polyvec_tobytes MLK_NAMESPACE_K(polyvec_tobytes)
@@ -241,7 +236,7 @@ __contract__(
  *
  * Arguments:   - uint8_t *r: pointer to output byte array
  *                            (needs space for MLKEM_POLYVECBYTES)
- *              - const mlk_polyvec *a: pointer to input vector of polynomials
+ *              - const mlk_polyvec a: pointer to input vector of polynomials
  *                  Each polynomial must have coefficients in [0,..,q-1].
  *
  * Specification: Implements ByteEncode_12 [FIPS 203, Algorithm 5].
@@ -251,12 +246,12 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec a)
 __contract__(
   requires(memory_no_alias(a, sizeof(mlk_polyvec)))
   requires(memory_no_alias(r, MLKEM_POLYVECBYTES))
   requires(forall(k0, 0, MLKEM_K,
-         array_bound(a->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+         array_bound(a[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
   assigns(object_whole(r))
 );
 
@@ -267,7 +262,7 @@ __contract__(
  * Description: De-serialize vector of polynomials;
  *              inverse of mlk_polyvec_tobytes
  *
- * Arguments:   - const mlk_polyvec *a: pointer to output vector of polynomials
+ * Arguments:   - const mlk_polyvec a: pointer to output vector of polynomials
  *                 (of length MLKEM_POLYVECBYTES). Output will have coefficients
  *                 normalized in [0..4095].
  *              - uint8_t *r: pointer to input byte array
@@ -279,13 +274,13 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+void mlk_polyvec_frombytes(mlk_polyvec r, const uint8_t a[MLKEM_POLYVECBYTES])
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   requires(memory_no_alias(a, MLKEM_POLYVECBYTES))
   assigns(object_whole(r))
   ensures(forall(k0, 0, MLKEM_K,
-        array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+        array_bound(r[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
 );
 
 #define mlk_polyvec_ntt MLK_NAMESPACE_K(polyvec_ntt)
@@ -300,7 +295,7 @@ __contract__(
  *              The output polynomial is in bitreversed order, and
  *              coefficient-wise bound by MLK_NTT_BOUND in absolute value.
  *
- * Arguments:   - mlk_polyvec *r: pointer to in/output vector of polynomials
+ * Arguments:   - mlk_polyvec r: pointer to in/output vector of polynomials
  *
  * Specification:
  * - Implements [FIPS 203, Algorithm 9, NTT]
@@ -308,14 +303,14 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_polyvec_ntt(mlk_polyvec *r)
+void mlk_polyvec_ntt(mlk_polyvec r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   requires(forall(j, 0, MLKEM_K,
-  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
+  array_abs_bound(r[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
   assigns(object_whole(r))
   ensures(forall(j, 0, MLKEM_K,
-  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLK_NTT_BOUND)))
+  array_abs_bound(r[j].coeffs, 0, MLKEM_N, MLK_NTT_BOUND)))
 );
 
 #define mlk_polyvec_invntt_tomont MLK_NAMESPACE_K(polyvec_invntt_tomont)
@@ -331,7 +326,7 @@ __contract__(
  *              The output polynomial is in normal order, and
  *              coefficient-wise bound by MLK_INVNTT_BOUND in absolute value.
  *
- * Arguments:   - mlk_polyvec *r: pointer to in/output vector of polynomials
+ * Arguments:   - mlk_polyvec r: pointer to in/output vector of polynomials
  *
  * Specification:
  * - Implements [FIPS 203, Algorithm 10, NTT^{-1}]
@@ -339,12 +334,12 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_polyvec_invntt_tomont(mlk_polyvec *r)
+void mlk_polyvec_invntt_tomont(mlk_polyvec r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   assigns(object_whole(r))
   ensures(forall(j, 0, MLKEM_K,
-  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND)))
+  array_abs_bound(r[j].coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND)))
 );
 
 #define mlk_polyvec_basemul_acc_montgomery_cached \
@@ -360,10 +355,10 @@ __contract__(
  *              - No bounds guarantees for the coefficients in the result.
  *
  * Arguments:   - mlk_poly *r: pointer to output polynomial
- *              - const mlk_polyvec *a: pointer to first input polynomial vector
- *              - const mlk_polyvec *b: pointer to second input polynomial
+ *              - const mlk_polyvec a: pointer to first input polynomial vector
+ *              - const mlk_polyvec b: pointer to second input polynomial
  *                vector
- *              - const mlk_polyvec_mulcache *b_cache: pointer to mulcache
+ *              - const mlk_polyvec_mulcache b_cache: pointer to mulcache
  *                  for second input polynomial vector. Can be computed
  *                  via mlk_polyvec_mulcache_compute().
  *
@@ -375,15 +370,15 @@ __contract__(
  **************************************************/
 MLK_INTERNAL_API
 void mlk_polyvec_basemul_acc_montgomery_cached(
-    mlk_poly *r, const mlk_polyvec *a, const mlk_polyvec *b,
-    const mlk_polyvec_mulcache *b_cache)
+    mlk_poly *r, const mlk_polyvec a, const mlk_polyvec b,
+    const mlk_polyvec_mulcache b_cache)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_poly)))
   requires(memory_no_alias(a, sizeof(mlk_polyvec)))
   requires(memory_no_alias(b, sizeof(mlk_polyvec)))
   requires(memory_no_alias(b_cache, sizeof(mlk_polyvec_mulcache)))
   requires(forall(k1, 0, MLKEM_K,
-     array_bound(a->vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+     array_bound(a[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
   assigns(object_whole(r))
 );
 
@@ -418,7 +413,7 @@ __contract__(
  * higher level safety proofs, and thus not part of the spec.
  */
 MLK_INTERNAL_API
-void mlk_polyvec_mulcache_compute(mlk_polyvec_mulcache *x, const mlk_polyvec *a)
+void mlk_polyvec_mulcache_compute(mlk_polyvec_mulcache x, const mlk_polyvec a)
 __contract__(
   requires(memory_no_alias(x, sizeof(mlk_polyvec_mulcache)))
   requires(memory_no_alias(a, sizeof(mlk_polyvec)))
@@ -433,7 +428,7 @@ __contract__(
  *              of each element of a vector of polynomials;
  *              for details of the Barrett reduction see comments in reduce.c
  *
- * Arguments:   - mlk_polyvec *r: pointer to input/output polynomial
+ * Arguments:   - mlk_polyvec r: pointer to input/output polynomial
  *
  * Specification: Normalizes on unsigned canoncial representatives
  *                ahead of calling [FIPS 203, Compress_d, Eq (4.7)].
@@ -448,12 +443,12 @@ __contract__(
  *       use of mlk_poly_reduce() in the context of (de)serialization.
  */
 MLK_INTERNAL_API
-void mlk_polyvec_reduce(mlk_polyvec *r)
+void mlk_polyvec_reduce(mlk_polyvec r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   assigns(object_whole(r))
   ensures(forall(k0, 0, MLKEM_K,
-    array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+    array_bound(r[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 );
 
 #define mlk_polyvec_add MLK_NAMESPACE_K(polyvec_add)
@@ -462,9 +457,9 @@ __contract__(
  *
  * Description: Add vectors of polynomials
  *
- * Arguments: - mlk_polyvec *r: pointer to input-output vector of polynomials to
+ * Arguments: - mlk_polyvec r: pointer to input-output vector of polynomials to
  *              be added to
- *            - const mlk_polyvec *b: pointer to second input vector of
+ *            - const mlk_polyvec b: pointer to second input vector of
  *              polynomials
  *
  * The coefficients of r and b must be so that the addition does
@@ -480,16 +475,16 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_polyvec_add(mlk_polyvec *r, const mlk_polyvec *b)
+void mlk_polyvec_add(mlk_polyvec r, const mlk_polyvec b)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   requires(memory_no_alias(b, sizeof(mlk_polyvec)))
   requires(forall(j0, 0, MLKEM_K,
           forall(k0, 0, MLKEM_N,
-            (int32_t)r->vec[j0].coeffs[k0] + b->vec[j0].coeffs[k0] <= INT16_MAX)))
+            (int32_t)r[j0].coeffs[k0] + b[j0].coeffs[k0] <= INT16_MAX)))
   requires(forall(j1, 0, MLKEM_K,
           forall(k1, 0, MLKEM_N,
-            (int32_t)r->vec[j1].coeffs[k1] + b->vec[j1].coeffs[k1] >= INT16_MIN)))
+            (int32_t)r[j1].coeffs[k1] + b[j1].coeffs[k1] >= INT16_MIN)))
   assigns(object_whole(r))
 );
 
@@ -509,13 +504,13 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_polyvec_tomont(mlk_polyvec *r)
+void mlk_polyvec_tomont(mlk_polyvec r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   assigns(memory_slice(r, sizeof(mlk_polyvec)))
   assigns(object_whole(r))
   ensures(forall(j, 0, MLKEM_K,
-    array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
+    array_abs_bound(r[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
 );
 
 #define mlk_poly_getnoise_eta1_4x MLK_NAMESPACE_K(poly_getnoise_eta1_4x)

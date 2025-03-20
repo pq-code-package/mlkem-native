@@ -145,52 +145,52 @@ static int bench(void)
   /* mlk_polyvec */
   /* mlk_polyvec_compress_du */
   BENCH("mlk_polyvec_compress_du",
-        mlk_polyvec_compress_du((uint8_t *)data0, (mlk_polyvec *)data1))
+        mlk_polyvec_compress_du((uint8_t *)data0, (const mlk_poly *)data1))
 
   /* mlk_polyvec_decompress_du */
   BENCH("mlk_polyvec_decompress_du",
-        mlk_polyvec_decompress_du((mlk_polyvec *)data0, (uint8_t *)data1))
+        mlk_polyvec_decompress_du((mlk_poly *)data0, (uint8_t *)data1))
 
   /* mlk_polyvec_tobytes */
   BENCH("mlk_polyvec_tobytes",
-        mlk_polyvec_tobytes((uint8_t *)data0, (mlk_polyvec *)data1))
+        mlk_polyvec_tobytes((uint8_t *)data0, (const mlk_poly *)data1))
 
   /* mlk_polyvec_frombytes */
   BENCH("mlk_polyvec_frombytes",
-        mlk_polyvec_frombytes((mlk_polyvec *)data0, (uint8_t *)data1))
+        mlk_polyvec_frombytes((mlk_poly *)data0, (uint8_t *)data1))
 
   /* mlk_polyvec_ntt */
-  BENCH("mlk_polyvec_ntt", mlk_polyvec_ntt((mlk_polyvec *)data0))
+  BENCH("mlk_polyvec_ntt", mlk_polyvec_ntt((mlk_poly *)data0))
 
   /* mlk_polyvec_invntt_tomont */
   BENCH("mlk_polyvec_invntt_tomont",
-        mlk_polyvec_invntt_tomont((mlk_polyvec *)data0))
+        mlk_polyvec_invntt_tomont((mlk_poly *)data0))
 
   /* mlk_polyvec_basemul_acc_montgomery_cached */
   BENCH("mlk_polyvec_basemul_acc_montgomery_cached",
         mlk_polyvec_basemul_acc_montgomery_cached(
-            (mlk_poly *)data0, (mlk_polyvec *)data1, (mlk_polyvec *)data2,
-            (mlk_polyvec_mulcache *)data3))
+            (mlk_poly *)data0, (const mlk_poly *)data1, (const mlk_poly *)data2,
+            (const mlk_poly_mulcache *)data3))
 
   /* mlk_polyvec_mulcache_compute */
   BENCH("mlk_polyvec_mulcache_compute",
-        mlk_polyvec_mulcache_compute((mlk_polyvec_mulcache *)data0,
-                                     (mlk_polyvec *)data1))
+        mlk_polyvec_mulcache_compute((mlk_poly_mulcache *)data0,
+                                     (const mlk_poly *)data1))
 
   /* mlk_polyvec_reduce */
-  BENCH("mlk_polyvec_reduce", mlk_polyvec_reduce((mlk_polyvec *)data0))
+  BENCH("mlk_polyvec_reduce", mlk_polyvec_reduce((mlk_poly *)data0))
 
   /* mlk_polyvec_add */
   BENCH("mlk_polyvec_add",
-        mlk_polyvec_add((mlk_polyvec *)data0, (mlk_polyvec *)data1))
+        mlk_polyvec_add((mlk_poly *)data0, (const mlk_poly *)data1))
 
   /* mlk_polyvec_tomont */
-  BENCH("mlk_polyvec_tomont", mlk_polyvec_tomont((mlk_polyvec *)data0))
+  BENCH("mlk_polyvec_tomont", mlk_polyvec_tomont((mlk_poly *)data0))
 
   /* indcpa */
   /* mlk_gen_matrix */
   BENCH("mlk_gen_matrix",
-        mlk_gen_matrix((mlk_polyvec *)data0, (uint8_t *)data1, 0))
+        mlk_gen_matrix((mlk_poly *)data0, (uint8_t *)data1, 0))
 
 
 #if defined(MLK_ARITH_BACKEND_AARCH64)
