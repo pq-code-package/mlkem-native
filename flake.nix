@@ -45,13 +45,14 @@
           packages.hol_light = util.hol_light';
           packages.s2n_bignum = util.s2n_bignum;
           packages.valgrind_varlat = util.valgrind_varlat;
+          packages.slothy = util.slothy;
           packages.toolchains = util.toolchains;
           packages.toolchains_native = util.toolchains_native;
 
           devShells.default = util.mkShell {
             packages = builtins.attrValues
               {
-                inherit (config.packages) linters cbmc hol_light s2n_bignum toolchains_native;
+                inherit (config.packages) linters cbmc hol_light s2n_bignum slothy toolchains_native;
                 inherit (pkgs)
                   direnv
                   nix-direnv;
@@ -71,6 +72,9 @@
           };
           devShells.ci-cbmc = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) cbmc toolchains_native; };
+          };
+          devShells.ci-slothy = util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) slothy linters toolchains_native; };
           };
           devShells.ci-cross = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains; };
