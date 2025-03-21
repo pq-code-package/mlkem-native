@@ -25,7 +25,7 @@
           util = pkgs.callPackage ./nix/util.nix {
             cbmc = pkgs.cbmc;
             bitwuzla = pkgs-unstable.bitwuzla;
-            z3 = pkgs-unstable.z3;
+            z3 = pkgs-unstable.z3_4_14;
           };
         in
         {
@@ -35,7 +35,7 @@
               (_:_: {
                 gcc48 = pkgs-2405.gcc48;
                 gcc49 = pkgs-2405.gcc49;
-                qemu = pkgs-unstable.qemu; # 9.2.0
+                qemu = pkgs-unstable.qemu; # 9.2.2
               })
             ];
           };
@@ -120,7 +120,7 @@
               inherit pkgs;
               cbmc = pkgs.cbmc;
               bitwuzla = pkgs-unstable.bitwuzla;
-              z3 = pkgs-unstable.z3;
+              z3 = pkgs-unstable.z3_4_14;
             };
           in
           util.mkShell {
