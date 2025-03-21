@@ -55,3 +55,11 @@ jobs:
     needs: [ base ]
     uses: ./.github/workflows/ct-tests.yml
     secrets: inherit
+  slothy:
+    name: SLOTHY
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/slothy.yml
+    secrets: inherit

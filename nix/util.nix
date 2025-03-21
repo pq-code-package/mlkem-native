@@ -96,6 +96,7 @@ rec {
   valgrind_varlat = pkgs.callPackage ./valgrind { };
   hol_light' = pkgs.callPackage ./hol_light { };
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
+  slothy = pkgs.callPackage ./slothy { };
 
   toolchains = pkgs.symlinkJoin {
     name = "toolchains";
