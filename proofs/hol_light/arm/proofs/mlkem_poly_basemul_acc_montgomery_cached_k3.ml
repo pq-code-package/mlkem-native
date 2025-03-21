@@ -249,7 +249,7 @@ let poly_basemul_acc_montgomery_cached_k3_mc = define_assert_from_elf
    word_add (word_add (pmull x20 x21 y20 y21) (pmull x10 x11 y10 y11)) (pmull x00 x01 y00 y01)`;;
 
  let montred = define
-    `montred (x : 32 word) =
+    `(montred:int32->int16) x =
        word_subword (
           word_add (
             word_mul (
