@@ -28,7 +28,7 @@ buildEnv {
       inherit
         cadical#1.9.5
         bitwuzla# 0.7.0
-        z3# 4.13.4
+        z3# 4.14.1
         ninja; # 1.11.1
     };
 }
