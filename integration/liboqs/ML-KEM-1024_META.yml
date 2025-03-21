@@ -8,6 +8,7 @@ length-public-key: 1568
 length-ciphertext: 1568
 length-secret-key: 3168
 length-shared-secret: 32
+length-keypair-seed: 64
 nistkat-sha256: f580d851e5fb27e6876e5e203fa18be4cdbfd49e05d48fec3d3992c8f43a13e6
 testvectors-sha256: ff1a854b9b6761a70c65ccae85246fe0596a949e72eae0866a8a2a2d4ea54b10
 principal-submitters:
@@ -28,6 +29,7 @@ implementations:
     folder_name: .
     compile_opts: -DMLKEM_K=4 -DMLK_CONFIG_FILE="../integration/liboqs/config_c.h"
     signature_keypair: PQCP_MLKEM_NATIVE_MLKEM1024_C_keypair
+    signature_keypair_derand: PQCP_MLKEM_NATIVE_MLKEM1024_C_keypair_derand
     signature_enc: PQCP_MLKEM_NATIVE_MLKEM1024_C_enc
     signature_dec: PQCP_MLKEM_NATIVE_MLKEM1024_C_dec
     sources: mlkem/cbmc.h mlkem/common.h mlkem/compress.c mlkem/compress.h mlkem/debug.c mlkem/debug.h mlkem/indcpa.c mlkem/indcpa.h mlkem/kem.c mlkem/kem.h mlkem/mlkem_native.h mlkem/params.h mlkem/poly.c mlkem/poly.h mlkem/randombytes.h mlkem/poly_k.c mlkem/poly_k.h mlkem/sampling.c mlkem/sampling.h mlkem/symmetric.h mlkem/sys.h mlkem/verify.c mlkem/verify.h mlkem/zetas.inc mlkem/native/api.h mlkem/native/meta.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h integration/liboqs/config_c.h
@@ -36,6 +38,7 @@ implementations:
     folder_name: .
     compile_opts: -DMLKEM_K=4 -DMLK_CONFIG_FILE="../integration/liboqs/config_x86_64.h"
     signature_keypair: PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_keypair
+    signature_keypair_derand: PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_keypair_derand
     signature_enc: PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_enc
     signature_dec: PQCP_MLKEM_NATIVE_MLKEM1024_X86_64_dec
     sources: integration/liboqs/config_x86_64.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h mlkem/cbmc.h mlkem/common.h mlkem/compress.c mlkem/compress.h mlkem/debug.c mlkem/debug.h mlkem/indcpa.c mlkem/indcpa.h mlkem/kem.c mlkem/kem.h mlkem/mlkem_native.h mlkem/native/api.h mlkem/native/meta.h mlkem/native/x86_64 mlkem/params.h mlkem/poly.c mlkem/poly.h mlkem/randombytes.h mlkem/poly_k.c mlkem/poly_k.h mlkem/sampling.c mlkem/sampling.h mlkem/symmetric.h mlkem/sys.h mlkem/verify.c mlkem/verify.h mlkem/zetas.inc
@@ -53,6 +56,7 @@ implementations:
     folder_name: .
     compile_opts: -DMLKEM_K=4 -DMLK_CONFIG_FILE="../integration/liboqs/config_aarch64.h"
     signature_keypair: PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_keypair
+    signature_keypair_derand: PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_keypair_derand
     signature_enc: PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_enc
     signature_dec: PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64_dec
     sources: integration/liboqs/config_aarch64.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h mlkem/cbmc.h mlkem/common.h mlkem/compress.c mlkem/compress.h mlkem/debug.c mlkem/debug.h mlkem/indcpa.c mlkem/indcpa.h mlkem/kem.c mlkem/kem.h mlkem/mlkem_native.h mlkem/native/api.h mlkem/native/meta.h mlkem/native/aarch64 mlkem/params.h mlkem/poly.c mlkem/poly.h mlkem/randombytes.h mlkem/poly_k.c mlkem/poly_k.h mlkem/sampling.c mlkem/sampling.h mlkem/symmetric.h mlkem/sys.h mlkem/verify.c mlkem/verify.h mlkem/zetas.inc
