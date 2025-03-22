@@ -61,13 +61,6 @@
         mulmod  \b, tmp, \root, \root_twisted
 .endm
 
-.macro mul_ninv dst0, dst1, dst2, dst3, src0, src1, src2, src3
-        mulmod \dst0, \src0, ninv, ninv_tw
-        mulmod \dst1, \src1, ninv, ninv_tw
-        mulmod \dst2, \src2, ninv, ninv_tw
-        mulmod \dst3, \src3, ninv, ninv_tw
-.endm
-
 .macro barrett_reduce a
         sqdmulh t0.8h,    \a\().8h, consts.h[1]
         srshr   t0.8h,    t0.8h,    #11
@@ -190,9 +183,6 @@
         t2  .req v27
         t3  .req v28
 
-        ninv             .req v29
-        ninv_tw          .req v30
-
         .text
         .global MLK_ASM_NAMESPACE(intt_asm)
         .balign 4
@@ -205,30 +195,9 @@ MLK_ASM_FN_SYMBOL(intt_asm)
         mov wtmp, #20159
         mov consts.h[1], wtmp
         mov wtmp, #512
-        dup ninv.8h, wtmp
+        mov consts.h[2], wtmp
         mov wtmp, #5040
-        dup ninv_tw.8h, wtmp
-
-        mov inp, in
-        mov count, #8
-
-scale_start:
-
-        ldr q_data0, [inp, #(16*0)]
-        ldr q_data1, [inp, #(16*1)]
-        ldr q_data2, [inp, #(16*2)]
-        ldr q_data3, [inp, #(16*3)]
-
-        mul_ninv data0, data1, data2, data3, data0, data1, data2, data3
-        // Bounds: Absolute value < q
-
-        str q_data0, [inp], #64
-        str q_data1, [inp, #(-64 + 16*1)]
-        str q_data2, [inp, #(-64 + 16*2)]
-        str q_data3, [inp, #(-64 + 16*3)]
-
-        subs count, count, #1
-        cbnz count, scale_start
+        mov consts.h[3], wtmp
 
         mov inp, in
         mov count, #8
@@ -323,12 +292,18 @@ layer123_start:
         gs_butterfly data4, data6, root0, 4, 5
         gs_butterfly data5, data7, root0, 4, 5
 
-        gs_butterfly data0, data4, root0, 0, 1
-        gs_butterfly data1, data5, root0, 0, 1
+        gs_butterfly data0, data4, root1, 6, 7
+        gs_butterfly data1, data5, root1, 6, 7
         gs_butterfly data2, data6, root0, 0, 1
         gs_butterfly data3, data7, root0, 0, 1
 
         // Bounds: < 8q
+
+        // 3/4 of the scalings by 1/128 have been incorporated
+        // in the twiddle factors, but the lowest quarter still
+        // requires a manual scaling.
+        mulmodq data0, data0, consts, 2, 3
+        mulmodq data1, data1, consts, 2, 3
 
         str q_data4, [in, #(4*(512/8))]
         str q_data5, [in, #(5*(512/8))]
@@ -388,8 +363,6 @@ layer123_start:
     .unreq t1
     .unreq t2
     .unreq t3
-    .unreq ninv
-    .unreq ninv_tw
 
 /* simpasm: footer-start */
 #endif /* MLK_ARITH_BACKEND_AARCH64 &&
