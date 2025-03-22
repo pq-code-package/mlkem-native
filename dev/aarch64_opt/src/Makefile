@@ -21,7 +21,7 @@ SLOTHY_FLAGS=-c sw_pipelining.enabled=true \
              -c constraints.stalls_first_attempt=64 \
              $(SLOTHY_EXTRA_FLAGS)
 
-# For kernels which stash callee-saved v8-v15 but don't stash callee-saved GPRs x19-x30. 
+# For kernels which stash callee-saved v8-v15 but don't stash callee-saved GPRs x19-x30.
 # Allow SLOTHY to use all V-registers, but only caller-saved GPRs.
 RESERVE_X_ONLY_FLAG=-c reserved_regs="[x18--x30,sp]"
 
@@ -49,7 +49,11 @@ ntt.S: ../../aarch64_clean/src/ntt.S $(COMMON_H)
 	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l layer123_start -l layer4567_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
 
 intt.S: ../../aarch64_clean/src/intt.S $(COMMON_H)
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l layer123_start -l layer4567_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
+        # Somehow, valgrind is prone to run into an assertion failure for internal
+        # VREG spills when too many registers are used. Avoiding v29 and v30 seems
+        # to help avoiding this issue.
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l layer123_start -l layer4567_start $(SLOTHY_FLAGS) -c reserved_regs="[x18--x30,sp,v29,v30]"
+
 polyvec_basemul_acc_montgomery_cached_asm_k2.S: ../../aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S $(COMMON_H)
 	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l k2_loop_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
 
