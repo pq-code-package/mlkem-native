@@ -35,9 +35,9 @@ jobs:
         proof:
           # Dependencies on {name}.{S,ml} are implicit
           - name: mlkem_ntt
-            needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
+            needs: ["mlkem_specs.ml", "mlkem_utils.ml", "mlkem_zetas.ml"]
           - name: mlkem_intt
-            needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
+            needs: ["mlkem_specs.ml", "mlkem_utils.ml", "mlkem_zetas.ml"]
           - name: mlkem_poly_tomont
             needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
           - name: mlkem_poly_mulcache_compute
