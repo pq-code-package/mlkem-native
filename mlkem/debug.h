@@ -59,7 +59,7 @@ void mlk_debug_check_bounds(const char *file, int line, const int16_t *ptr,
  * value_ub: Exclusive upper value bound */
 #define mlk_assert_bound(ptr, len, value_lb, value_ub)                      \
   mlk_debug_check_bounds(__FILE__, __LINE__, (const int16_t *)(ptr), (len), \
-                         (value_lb)-1, (value_ub))
+                         (value_lb) - 1, (value_ub))
 
 /* Check absolute bounds in array of int16_t's
  * ptr: Base of array, expression of type int16_t*
