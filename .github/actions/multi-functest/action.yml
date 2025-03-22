@@ -43,6 +43,9 @@ inputs:
   examples:
     description: Determine whether to run examples or not
     default: "true"
+  check_namespace:
+    description: Determine whether to check namespacing or not
+    default: "true"
 runs:
   using: composite
   steps:
@@ -62,6 +65,7 @@ runs:
           nistkat: ${{ inputs.nistkat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
       - name: Cross x86_64 Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-x86_64') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -80,6 +84,7 @@ runs:
           nistkat: ${{ inputs.nistkat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
       - name: Cross aarch64 Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-aarch64') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -98,6 +103,7 @@ runs:
           nistkat: ${{ inputs.nistkat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
       - name: Cross aarch64_be Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-aarch64_be') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -116,6 +122,7 @@ runs:
           nistkat: ${{ inputs.nistkat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
       - name: Cross riscv64 Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-riscv64') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -134,3 +141,4 @@ runs:
           nistkat: ${{ inputs.nistkat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}

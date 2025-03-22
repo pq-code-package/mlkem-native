@@ -46,6 +46,9 @@ inputs:
   examples:
     description: Determine whether to run examples or not
     default: "true"
+  check_namespace:
+    description: Determine whether to check namespacing or not
+    default: "true"
 runs:
   using: composite
   steps:
@@ -95,6 +98,7 @@ runs:
           make clean
           ./scripts/tests all --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.NISTKAT }} --${{ env.ACVP }} --${{ env.EXAMPLES }} -v
       - name: Check namespacing ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }}, ${{ env.EXAMPLES }})
+        if: ${{ inputs.check_namespace == 'true' }}
         shell: ${{ env.SHELL }}
         run: |
           ./scripts/check-namespace

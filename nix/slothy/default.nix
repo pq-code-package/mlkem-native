@@ -2,10 +2,9 @@
 
 { stdenvNoCC
 , fetchFromGitHub
-, python311
+, python312
 , pkgs
-, callPackage
-, python311Packages
+, python312Packages
 , fetchPypi
 , stdenv
 , cmake
@@ -16,54 +15,87 @@
 
 
 let
-  ortools97 = python311Packages.buildPythonPackage rec {
+  # TODO: switch to protobuf from nixpkgs
+  # ortools 9.12 requires protobuf >= 5.29.3 - currently nixpkgs 24.11 has
+  # protobuf 5.28.3
+  protobuf_6_30_1 = python312Packages.buildPythonPackage rec {
+    pname = "protobuf";
+    version = "6.30.1";
+
+    propagatedBuildInputs = [
+      python312Packages.setuptools
+    ];
+
+    build-system = with python312Packages; [
+      setuptools
+    ];
+
+    dontConfigure = true;
+    nativeBuildInputs =
+      [
+        cmake
+        pkg-config
+      ];
+
+    src = fetchPypi {
+      inherit pname version;
+      hash = "sha256-U1+05E0CNok9XPEmOg9wbxFgtomnq5YunaipzkBQt4A=";
+    };
+  };
+
+
+  ortools912 = python312Packages.buildPythonPackage rec {
     pname = "ortools";
-    version = "9.7.2996";
+    version = "9.12.4544";
 
     format = "wheel";
 
     src = fetchPypi {
       inherit pname version;
       format = "wheel";
-      dist = "cp311";
-      python = "cp311";
-      abi = "cp311";
+      dist = "cp312";
+      python = "cp312";
+      abi = "cp312";
       platform =
         if stdenv.isDarwin then
           if stdenv.isAarch64 then "macosx_11_0_arm64"
           else "macosx_10_15_x86_64"
         else if stdenv.isLinux then
-          if stdenv.isAarch64 then "manylinux_2_17_aarch64.manylinux2014_aarch64"
-          else "manylinux_2_17_x86_64.manylinux2014_x86_64"
+          if stdenv.isAarch64 then "manylinux_2_27_aarch64.manylinux_2_28_aarch64"
+          else "manylinux_2_27_x86_64.manylinux_2_28_x86_64"
         else throw "Unsupported platform";
 
       hash =
         if stdenv.isDarwin then
-          if stdenv.isAarch64 then "sha256-Oc8xz9iRuOiDyZBc85qlS57u0efP/f4cDpi2k9ZlCQI="
-          else "sha256-0ax/I7604BumV+VRV7Y5fNDs0XrxkK+ocr9yU1oFMDQ="
+          if stdenv.isAarch64 then "sha256-Z/4bhlMndFZ4okBm2CbbJaEBmqIH6pAXygGvLPIUVlI="
+          else "sha256-FnaLGfyzBT9EvYTEYMuXjyop1046XZugYSNYn+sQrxI="
         else if stdenv.isLinux then
-          if stdenv.isAarch64 then "sha256-B8QfDoYT2OxrpoUzSQTNduRbxG2j1S8XPpMBZo/yI90="
-          else "sha256-pUerlb2cykE9cYraz68MnuBKDM4V1Du0Ta3yve16K/o="
+          if stdenv.isAarch64 then "sha256-VVD+nuVSt7jtAcrZHVimjsDkjNQN0necELGZFCmncFg="
+          else "sha256-kiEh1vSPjuseuIqMZF/wC2H2CFYxkxTOK48iD6uJYIM="
         else throw "Unsupported platform";
     };
 
-    propagatedBuildInputs = with python311Packages; [
+    propagatedBuildInputs = with python312Packages; [
       numpy
       pandas
-      protobuf
+      protobuf_6_30_1
     ];
 
   };
 
-  unicorn_2_1_3 = python311Packages.buildPythonPackage rec {
+  # TODO: switch to unicorn from nixpkgs
+  # nixpkgs 24.11 currently has 2.1.1 - we are experiencing some issues with 
+  # that version on MacOS. 2.1.2/2.1.3 (and also some older versions) don't 
+  # have that problem
+  unicorn_2_1_3 = python312Packages.buildPythonPackage rec {
     pname = "unicorn";
     version = "2.1.3";
 
     propagatedBuildInputs = [
-      python311Packages.setuptools
+      python312Packages.setuptools
     ];
 
-    build-system = with python311Packages; [
+    build-system = with python312Packages; [
       setuptools
     ];
 
@@ -80,8 +112,8 @@ let
     };
   };
 
-  pythonEnv = python311.withPackages (ps: with ps; [
-    ortools97
+  pythonEnv = python312.withPackages (ps: with ps; [
+    ortools912
     sympy
     unicorn_2_1_3
   ]);
