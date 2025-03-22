@@ -39,6 +39,19 @@ def gen_header():
     yield ""
 
 
+def gen_hol_light_header():
+    yield "(*"
+    yield " * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved."
+    yield " * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT-0"
+    yield " *)"
+    yield ""
+    yield "(*"
+    yield " * WARNING: This file is auto-generated from scripts/autogen"
+    yield " *          Do not modify it directly."
+    yield " *)"
+    yield ""
+
+
 def update_file(filename, content, dry_run=False, force_format=False):
 
     if force_format is True or filename.endswith((".c", ".h", ".i")):
@@ -311,7 +324,60 @@ def gen_aarch64_mulcache_twiddles_twisted():
         yield prepare_root_for_barrett(root)[1]
 
 
-def gen_aarch64_fwd_ntt_zeta_file(dry_run=False):
+def print_hol_light_int_array(g):
+
+    # Format of integer list entries, including `;` separator:
+    # - Positive numbers: &42;
+    # - Negative numbers: -- &42;
+    def format_hol_light_int(n):
+        prefix = ""
+        if n < 0:
+            prefix = "-- "
+            n = -n
+        return f"{prefix}&{n};"
+
+    l = list(map(format_hol_light_int, g))
+    # Remove `;` from end of last entry
+    l[-1] = l[-1][:-1]
+
+    entries_per_line = 8
+    for i in range(0, len(l), entries_per_line):
+        yield "  " + " ".join(l[i : i + entries_per_line])
+
+
+def gen_aarch64_hol_light_zeta_file(dry_run=False):
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * Table of zeta values used in the AArch64 NTTs"
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        yield "let ntt_zetas_layer12345 = define `ntt_zetas_layer12345:int list = ["
+        yield from print_hol_light_int_array(gen_aarch64_fwd_ntt_zetas_layer12345())
+        yield "]`;;"
+        yield ""
+        yield "let ntt_zetas_layer67 = define `ntt_zetas_layer67:int list = ["
+        yield from print_hol_light_int_array(gen_aarch64_fwd_ntt_zetas_layer67())
+        yield "]`;;"
+        yield ""
+        yield "let intt_zetas_layer12345 = define `intt_zetas_layer12345:int list = ["
+        yield from print_hol_light_int_array(gen_aarch64_inv_ntt_zetas_layer12345())
+        yield "]`;;"
+        yield ""
+        yield "let intt_zetas_layer67 = define `intt_zetas_layer67:int list = ["
+        yield from print_hol_light_int_array(gen_aarch64_inv_ntt_zetas_layer67())
+        yield "]`;;"
+        yield ""
+
+    update_file(
+        "proofs/hol_light/arm/proofs/mlkem_zetas.ml",
+        "\n".join(gen()),
+        dry_run=dry_run,
+    )
+
+
+def gen_aarch64_zeta_file(dry_run=False):
     def gen():
         yield from gen_header()
         yield '#include "../../../common.h"'
@@ -548,7 +614,7 @@ def gen_avx2_fwd_ntt_zetas():
         yield from gen_twiddles_many(6, i * (2**5), range(1, 32, 2), 1)
 
 
-def gen_avx2_fwd_ntt_zeta_file(dry_run=False):
+def gen_avx2_zeta_file(dry_run=False):
     def gen():
         yield from gen_header()
         yield "/*"
@@ -1275,9 +1341,10 @@ def _main():
     check_asm_register_aliases()
 
     gen_c_zeta_file(args.dry_run)
-    gen_aarch64_fwd_ntt_zeta_file(args.dry_run)
+    gen_aarch64_hol_light_zeta_file(args.dry_run)
+    gen_aarch64_zeta_file(args.dry_run)
     gen_aarch64_rej_uniform_table(args.dry_run)
-    gen_avx2_fwd_ntt_zeta_file(args.dry_run)
+    gen_avx2_zeta_file(args.dry_run)
     gen_avx2_rej_uniform_table(args.dry_run)
 
     if platform.machine().lower() in ["arm64", "aarch64"]:
