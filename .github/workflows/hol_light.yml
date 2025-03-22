@@ -98,4 +98,4 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: 'hol_light'
           script: |
-            tests hol_light -p ${{ matrix.proof.name }}
+            tests hol_light -p ${{ matrix.proof.name }} --verbose

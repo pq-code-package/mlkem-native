@@ -20,6 +20,7 @@ At present, this directory contains functional correctness proofs for the follow
 - ML-KEM Arithmetic:
   * AArch64 forward NTT: [mlkem_ntt.S](mlkem/mlkem_ntt.S)
   * AArch64 inverse NTT: [mlkem_intt.S](mlkem/mlkem_intt.S)
+  * AArch64 base multiplications: [mlkem_poly_basemul_acc_montgomery_cached_k2.S](mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.S) [mlkem_poly_basemul_acc_montgomery_cached_k3.S](mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.S) [mlkem_poly_basemul_acc_montgomery_cached_k4.S](mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.S)
   * AArch64 conversion to Montgomery form: [mlkem_poly_tomont.S](mlkem/mlkem_poly_tomont.S)
   * AArch64 modular reduction: [mlkem_poly_reduce.S](mlkem/mlkem_poly_reduce.S)
   * AArch64 'multiplication cache' computation: [mlkem_poly_mulcache_compute.S](mlkem/mlkem_poly_mulcache_compute.S)
@@ -49,4 +50,3 @@ make -C proofs/hol_light/arm
 will build and run the proofs. Note that this make take hours even on powerful machines.
 
 For convenience, you can also use `tests hol_light` which wraps the `make` invocation above; see `tests hol_light --help`.
-

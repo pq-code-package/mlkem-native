@@ -184,45 +184,29 @@ let poly_basemul_acc_montgomery_cached_k2_mc = define_assert_from_elf
     ];;
 
 let pmull = define
-  `pmull (x0: 16 word) (x1 : 16 word) (y0 : 16 word) (y1 : 16 word) =
-      word_add (word_mul ((word_sx x1) : 32 word) (word_sx y1))
-               (word_mul ((word_sx x0) : 32 word) (word_sx y0))`;;
+  `pmull (x0: int) (x1 : int) (y0 : int) (y1 : int) = x1 * y1 + x0 * y0`;;
 
 let pmull_acc2 = define
-    `pmull_acc2 (x00: 16 word) (x01 : 16 word) (y00 : 16 word) (y01 : 16 word)
-          (x10: 16 word) (x11 : 16 word) (y10 : 16 word) (y11 : 16 word) =
-      word_add (pmull x10 x11 y10 y11) (pmull x00 x01 y00 y01)`;;
-
-let montred = define
-   `montred (x : 32 word) =
-      word_subword (
-         word_add (
-           word_mul (
-             (word_sx : 16 word -> 32 word) (
-               word_mul (
-                 word_subword x (0,16)
-               ) (word 3327)
-             )
-           )
-           (word 3329)
-         ) x
-      ) (16, 16)`;;
+    `pmull_acc2 (x00: int) (x01 : int) (y00 : int) (y01 : int)
+          (x10: int) (x11 : int) (y10 : int) (y11 : int) =
+      pmull x10 x11 y10 y11 + pmull x00 x01 y00 y01`;;
 
 let pmul_acc2 = define
-    `pmul_acc2 (x00: 16 word) (x01 : 16 word) (y00 : 16 word) (y01 : 16 word)
-          (x10: 16 word) (x11 : 16 word) (y10 : 16 word) (y11 : 16 word) =
-      montred (pmull_acc2 x00 x01 y00 y01 x10 x11 y10 y11)`;;
+    `pmul_acc2 (x00: int) (x01 : int) (y00 : int) (y01 : int)
+          (x10: int) (x11 : int) (y10 : int) (y11 : int) =
+     (&(inverse_mod 3329 65536) *
+      pmull_acc2 x00 x01 y00 y01 x10 x11 y10 y11) rem &3329`;;
 
-let basemul2_even_raw = define
-   `basemul2_even_raw x0 y0 y0t x1 y1 y1t = \i.
+let basemul2_even = define
+   `basemul2_even x0 y0 y0t x1 y1 y1t = \i.
       pmul_acc2 (x0 (2 * i)) (x0 (2 * i + 1))
                 (y0 (2 * i)) (y0t i)
                 (x1 (2 * i)) (x1 (2 * i + 1))
                 (y1 (2 * i)) (y1t i)
    `;;
 
-let basemul2_odd_raw = define
- `basemul2_odd_raw x0 y0 x1 y1 = \i.
+let basemul2_odd = define
+ `basemul2_odd x0 y0 x1 y1 = \i.
     pmul_acc2 (x0 (2 * i)) (x0 (2 * i + 1))
               (y0 (2 * i + 1)) (y0 (2 * i))
               (x1 (2 * i)) (x1 (2 * i + 1))
@@ -230,6 +214,70 @@ let basemul2_odd_raw = define
  `;;
 
 let poly_basemul_acc_montgomery_cached_k2_EXEC = ARM_MK_EXEC_RULE poly_basemul_acc_montgomery_cached_k2_mc;;
+
+(* ------------------------------------------------------------------------- *)
+(* Hacky tweaking conversion to write away non-free state component reads.   *)
+(* ------------------------------------------------------------------------- *)
+
+let lemma = prove
+ (`!base size s n.
+        n + 2 <= size
+        ==> read(memory :> bytes16(word_add base (word n))) s =
+            word((read (memory :> bytes(base,size)) s DIV 2 EXP (8 * n)))`,
+  REPEAT STRIP_TAC THEN REWRITE_TAC[READ_COMPONENT_COMPOSE] THEN
+  SPEC_TAC(`read memory s`,`m:int64->byte`) THEN GEN_TAC THEN
+  REWRITE_TAC[READ_BYTES_DIV] THEN
+  REWRITE_TAC[bytes16; READ_COMPONENT_COMPOSE; asword; through; read] THEN
+  ONCE_REWRITE_TAC[GSYM WORD_MOD_SIZE] THEN REWRITE_TAC[DIMINDEX_16] THEN
+  REWRITE_TAC[ARITH_RULE `16 = 8 * 2`; READ_BYTES_MOD] THEN
+  ASM_SIMP_TAC[ARITH_RULE `n + 2 <= size ==> MIN (size - n) 2 = MIN 2 2`]);;
+
+let BOUNDED_QUANT_READ_MEM = prove
+ (`(!x base s.
+     (!i. i < n
+          ==> read(memory :> bytes16(word_add base (word(2 * i)))) s =
+              x i) <=>
+     (!i. i < n
+          ==> word((read(memory :> bytes(base,2 * n)) s DIV 2 EXP (16 * i))) =
+              x i)) /\
+   (!x p base s.
+     (!i. i < n
+          ==> (ival(read(memory :> bytes16(word_add base (word(2 * i)))) s) ==
+               x i) (mod p)) <=>
+     (!i. i < n
+          ==> (ival(word((read(memory :> bytes(base,2 * n)) s DIV 2 EXP (16 * i))):int16) ==
+               x i) (mod p))) /\
+   (!x p c base s.
+     (!i. i < n /\ c i
+          ==> (ival(read(memory :> bytes16(word_add base (word(2 * i)))) s) ==
+               x i) (mod p)) <=>
+     (!i. i < n /\ c i
+          ==> (ival(word((read(memory :> bytes(base,2 * n)) s DIV 2 EXP (16 * i))):int16) ==
+               x i) (mod p)))`,
+  REPEAT STRIP_TAC THEN
+  MP_TAC(ISPECL [`base:int64`; `2 * n`] lemma) THEN
+  SIMP_TAC[ARITH_RULE `2 * i + 2 <= 2 * n <=> i < n`] THEN
+  REWRITE_TAC[ARITH_RULE `8 * 2 * i = 16 * i`]);;
+
+let even_odd_split_lemma = prove
+ (`(!i. i < 128 ==> P (4 * i) i /\ Q(4 * i + 2) i) <=>
+   (!i. i < 256 /\ EVEN i ==> P(2 * i) (i DIV 2)) /\
+   (!i. i < 256 /\ ODD i ==> Q(2 * i) (i DIV 2))`,
+  REWRITE_TAC[IMP_CONJ] THEN
+  CONV_TAC(ONCE_DEPTH_CONV EXPAND_CASES_CONV) THEN
+  CONV_TAC NUM_REDUCE_CONV THEN
+  CONV_TAC CONJ_ACI_RULE);;
+
+let TWEAK_CONV =
+  REWRITE_CONV[even_odd_split_lemma] THENC
+  GEN_REWRITE_CONV TOP_DEPTH_CONV [WORD_RULE
+    `word_add x (word(a + b)) = word_add (word_add x (word a)) (word b)`] THENC
+  REWRITE_CONV[BOUNDED_QUANT_READ_MEM] THENC
+  NUM_REDUCE_CONV;;
+
+(* ------------------------------------------------------------------------- *)
+(* Main proof.                                                               *)
+(* ------------------------------------------------------------------------- *)
 
 let poly_basemul_acc_montgomery_cached_k2_GOAL = `forall srcA srcB srcBt dst x0 y0 y0t x1 y1 y1t pc.
      ALL (nonoverlapping (dst, 512))
@@ -246,10 +294,13 @@ let poly_basemul_acc_montgomery_cached_k2_GOAL = `forall srcA srcB srcBt dst x0 
             (!i. i < 256 ==> read(memory :> bytes16(word_add srcB  (word (512 + 2 * i)))) s = y1 i) /\
             (!i. i < 128 ==> read(memory :> bytes16(word_add srcBt (word (256 + 2 * i)))) s = y1t i))
        (\s. read PC s = word (pc + 640) /\
-            (!i. i < 128 ==> read(memory :> bytes16(word_add dst (word (4 * i)))) s =
-                                  basemul2_even_raw x0 y0 y0t x1 y1 y1t i /\
-                             read(memory :> bytes16(word_add dst (word (4 * i + 2)))) s =
-                                  basemul2_odd_raw x0 y0 x1 y1 i))
+            ((!i. i < 256 ==> abs(ival(x0 i)) <= &2 pow 12 /\  abs(ival(x1 i)) <= &2 pow 12)
+             ==> (!i. i < 128
+                      ==> (ival(read(memory :> bytes16(word_add dst (word (4 * i)))) s) ==
+                           basemul2_even (ival o x0) (ival o y0) (ival o y0t)
+                                         (ival o x1) (ival o y1) (ival o y1t) i) (mod &3329) /\
+                          (ival(read(memory :> bytes16(word_add dst (word (4 * i + 2)))) s) ==
+                           basemul2_odd (ival o x0) (ival o y0) (ival o x1) (ival o y1) i) (mod &3329))))
        // Register and memory footprint
        (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
         MAYCHANGE [Q8; Q9; Q10; Q11; Q12; Q13; Q14; Q15] ,,
@@ -289,9 +340,10 @@ let poly_basemul_acc_montgomery_cached_k2_SPEC = prove(poly_basemul_acc_montgome
         This reduces the proof time *)
      REPEAT STRIP_TAC THEN
      MAP_EVERY (fun n -> ARM_STEPS_TAC poly_basemul_acc_montgomery_cached_k2_EXEC [n] THEN
-                (SIMD_SIMPLIFY_TAC [pmull; GSYM WORD_ADD_ASSOC; pmull_acc2; montred; pmul_acc2])) (1--805) THEN
+                (SIMD_SIMPLIFY_TAC [montred])) (1--805) THEN
 
-     ENSURES_FINAL_STATE_TAC THEN
+     ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
+     CONV_TAC(LAND_CONV(ONCE_DEPTH_CONV EXPAND_CASES_CONV)) THEN STRIP_TAC THEN
      REPEAT CONJ_TAC THEN
      ASM_REWRITE_TAC [] THEN
 
@@ -307,24 +359,24 @@ let poly_basemul_acc_montgomery_cached_k2_SPEC = prove(poly_basemul_acc_montgome
      CONV_TAC(ONCE_DEPTH_CONV let_CONV) THEN
      ASM_REWRITE_TAC [WORD_ADD_0] THEN
 
-     (* Forget all assumptions *)
-     POP_ASSUM_LIST (K ALL_TAC) THEN
+     (* Forget all state-related assumptions, but keep bounds at least *)
+     DISCARD_STATE_TAC "s805" THEN
 
      (* Split into one congruence goals per index. *)
      REPEAT CONJ_TAC THEN
-
-     REWRITE_TAC[basemul2_even_raw; basemul2_odd_raw] THEN
+     REWRITE_TAC[basemul2_even; basemul2_odd;
+                 pmul_acc2; pmull_acc2; pmull; o_THM] THEN
      CONV_TAC(ONCE_DEPTH_CONV EL_CONV) THEN
-     CONV_TAC(REPEATC (CHANGED_CONV (ONCE_DEPTH_CONV (NUM_MULT_CONV ORELSEC NUM_ADD_CONV)))) THEN
-     REFL_TAC
- );;
+     CONV_TAC NUM_REDUCE_CONV THEN
 
- let TWEAK_CONV =
-  ONCE_DEPTH_CONV let_CONV THENC
-  ONCE_DEPTH_CONV EXPAND_CASES_CONV THENC
-  ONCE_DEPTH_CONV NUM_MULT_CONV THENC
-  ONCE_DEPTH_CONV NUM_ADD_CONV THENC
-  PURE_REWRITE_CONV [WORD_ADD_0];;
+     (* Solve the congruence goals *)
+
+    ASSUM_LIST((fun ths -> W(MP_TAC o CONJUNCT1 o GEN_CONGBOUND_RULE ths o
+      rand o lhand o rator o snd))) THEN
+    REWRITE_TAC[GSYM INT_REM_EQ] THEN CONV_TAC INT_REM_DOWN_CONV THEN
+    MATCH_MP_TAC EQ_IMP THEN AP_TERM_TAC THEN AP_THM_TAC THEN AP_TERM_TAC THEN
+    CONV_TAC INT_RING
+);;
 
 let poly_basemul_acc_montgomery_cached_k2_SPEC' = prove(
    `forall srcA srcB srcBt dst x0 y0 y0t x1 y1 y1t pc returnaddress stackpointer.
@@ -351,10 +403,13 @@ let poly_basemul_acc_montgomery_cached_k2_SPEC' = prove(
         (!i. i < 128 ==> read(memory :> bytes16(word_add srcBt (word (256 + 2 * i)))) s = y1t i)
       )
       (\s. read PC s = returnaddress /\
-       (!i. i < 128 ==> read(memory :> bytes16(word_add dst (word (4 * i)))) s =
-                             basemul2_even_raw x0 y0 y0t x1 y1 y1t i /\
-                        read(memory :> bytes16(word_add dst (word (4 * i + 2)))) s =
-                             basemul2_odd_raw x0 y0 x1 y1 i)
+           ((!i. i < 256 ==> abs(ival(x0 i)) <= &2 pow 12 /\  abs(ival(x1 i)) <= &2 pow 12)
+            ==>  (!i. i < 128
+                      ==> (ival(read(memory :> bytes16(word_add dst (word (4 * i)))) s) ==
+                           basemul2_even (ival o x0) (ival o y0) (ival o y0t)
+                                         (ival o x1) (ival o y1) (ival o y1t) i) (mod &3329) /\
+                          (ival(read(memory :> bytes16(word_add dst (word (4 * i + 2)))) s) ==
+                           basemul2_odd (ival o x0) (ival o y0) (ival o x1) (ival o y1) i) (mod &3329)))
       )
       // Register and memory footprint
       (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
