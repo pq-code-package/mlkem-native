@@ -17,7 +17,6 @@ jobs:
       fail-fast: false
       max-parallel: 10
       matrix:
-        system: [ubuntu-latest, pqcp-arm64]
         nix-shell:
           - ci_valgrind-varlat_clang14
           - ci_valgrind-varlat_clang15
@@ -32,6 +31,7 @@ jobs:
           - ci_valgrind-varlat_gcc12
           - ci_valgrind-varlat_gcc13
           - ci_valgrind-varlat_gcc14
+        system: [ubuntu-latest, pqcp-arm64]
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
