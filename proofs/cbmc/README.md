@@ -62,3 +62,5 @@ tests cbmc --help
 ## What is covered?
 
 Each proved function has an eponymous sub-directory of its own. Use [list_proofs.sh](list_proofs.sh) to see the list of functions covered.
+
+The classes of undefined behavior covered by CBMC are documented [here](https://github.com/diffblue/cbmc/blob/develop/doc/C/c11-undefined-behavior.html).
