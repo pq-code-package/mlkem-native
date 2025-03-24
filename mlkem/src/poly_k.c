@@ -154,18 +154,19 @@ void mlk_polyvec_basemul_acc_montgomery_cached(
 {
   unsigned i;
   mlk_assert_bound_2d(a, MLKEM_K, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
+  mlk_assert_abs_bound_2d(b, MLKEM_K, MLKEM_N, MLK_NTT_BOUND);
+  mlk_assert_abs_bound_2d(b_cache, MLKEM_K, MLKEM_N / 2, MLKEM_Q);
   for (i = 0; i < MLKEM_N / 2; i++)
-  __loop__(invariant(i <= MLKEM_N / 2))
+  __loop__(
+    invariant(i <= MLKEM_N / 2)
+    invariant(array_abs_bound(r->coeffs, 0, 2 * i, INT16_MAX/2)))
   {
     unsigned k;
     int32_t t[2] = {0};
     for (k = 0; k < MLKEM_K; k++)
     __loop__(
-      invariant(k <= MLKEM_K &&
-         t[0] <=    (int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768  &&
-         t[0] >= - ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768) &&
-         t[1] <=   ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768) &&
-         t[1] >= - ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768)))
+      invariant(k <= MLKEM_K && i <= MLKEM_N / 2)
+      invariant(array_abs_bound(t, 0, 2, k * 2 * MLKEM_UINT12_LIMIT * MLK_NTT_BOUND + 1)))
     {
       t[0] += (int32_t)a->vec[k].coeffs[2 * i + 1] * b_cache->vec[k].coeffs[i];
       t[0] += (int32_t)a->vec[k].coeffs[2 * i] * b->vec[k].coeffs[2 * i];
