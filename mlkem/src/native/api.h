@@ -143,6 +143,7 @@ __contract__(
 static MLK_INLINE void mlk_intt_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
+  requires(array_abs_bound(p, 0, MLKEM_N, INT16_MAX/2))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
   ensures(array_abs_bound(p, 0, MLKEM_N, MLK_INVNTT_BOUND))
 );
@@ -244,6 +245,7 @@ __contract__(
   requires(memory_no_alias(b_cache, sizeof(int16_t) * 2 * (MLKEM_N / 2)))
   requires(array_bound(a, 0, 2 * MLKEM_N, 0, MLKEM_UINT12_LIMIT))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(r, 0, MLKEM_N, INT16_MAX/2))
 );
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 */
 
@@ -277,6 +279,7 @@ __contract__(
   requires(memory_no_alias(b_cache, sizeof(int16_t) * 3 * (MLKEM_N / 2)))
   requires(array_bound(a, 0, 3 * MLKEM_N, 0, MLKEM_UINT12_LIMIT))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(r, 0, MLKEM_N, INT16_MAX/2))
 );
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 3 */
 
@@ -310,6 +313,7 @@ __contract__(
   requires(memory_no_alias(b_cache, sizeof(int16_t) * 4 * (MLKEM_N / 2)))
   requires(array_bound(a, 0, 4 * MLKEM_N, 0, MLKEM_UINT12_LIMIT))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(r, 0, MLKEM_N, INT16_MAX/2))
 );
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
 #endif /* MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */

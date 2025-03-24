@@ -89,14 +89,16 @@ static MLK_ALWAYS_INLINE int16_t mlk_cast_uint16_to_int16(uint16_t x)
  **************************************************/
 static MLK_ALWAYS_INLINE int16_t mlk_montgomery_reduce(int32_t a)
 __contract__(
-    requires(a < +(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)) &&
-	     a > -(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)))
-    /* We don't attempt to express an input-dependent output bound
-     * as the post-condition here. There are two call-sites for this
-     * function:
-     * - The base multiplication: Here, we need no output bound.
-     * - mlk_fqmul: Here, we inline this function and prove another spec
-     *          for mlk_fqmul which does have a post-condition bound. */
+    /* This specification is only relevant for Montgomery reduction
+     * during base multiplication, and the input bound is tailored to that.
+     * The output bound, albeit weak, allows one addition/subtraction prior
+     * to risk of overflow; this can be useful for the inverse NTT, for example.
+     *
+     * For the use of montgomery_reduce in fqmul, we inline this
+     * function instead of calling it by contract. */
+    requires(a <= +(4 * 2 * MLKEM_UINT12_LIMIT * MLK_NTT_BOUND) &&
+             a >= -(4 * 2 * MLKEM_UINT12_LIMIT * MLK_NTT_BOUND))
+    ensures(return_value < (INT16_MAX / 2) && return_value > -(INT16_MAX / 2))
 )
 {
   /* check-magic: 62209 == unsigned_mod(pow(MLKEM_Q, -1, 2^16), 2^16) */
@@ -177,17 +179,13 @@ __contract__(
  * - Caches `b_1 * \gamma` in @[FIPS203, Algorithm 12, BaseCaseMultiply, L1]
  *
  ************************************************************/
-/*
- * NOTE: The default C implementation of this function populates
- * the mulcache with values in (-q,q), but this is not needed for the
- * higher level safety proofs, and thus not part of the spec.
- */
 MLK_INTERNAL_API
 void mlk_poly_mulcache_compute(mlk_poly_mulcache *x, const mlk_poly *a)
 __contract__(
   requires(memory_no_alias(x, sizeof(mlk_poly_mulcache)))
   requires(memory_no_alias(a, sizeof(mlk_poly)))
-  assigns(object_whole(x))
+  assigns(memory_slice(x, sizeof(mlk_poly_mulcache)))
+  ensures(array_abs_bound(x->coeffs, 0, MLKEM_N/2, MLKEM_Q))
 );
 
 #define mlk_poly_reduce MLK_NAMESPACE(poly_reduce)
@@ -339,6 +337,7 @@ MLK_INTERNAL_API
 void mlk_poly_invntt_tomont(mlk_poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(array_abs_bound(r->coeffs, 0, MLKEM_N, INT16_MAX/2))
   assigns(memory_slice(r, sizeof(mlk_poly)))
   ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND))
 );
