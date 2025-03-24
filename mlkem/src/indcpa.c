@@ -289,9 +289,11 @@ void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
  *              - mlk_polymat a: Input matrix. Must be in NTT domain
  *                  and have coefficients of absolute value < 4096.
  *              - mlk_polyvec v: Input polynomial vector. Must be in NTT
- *                  domain.
+ *                  domain and have coefficients of absolute value
+ *                  < MLK_NTT_BOUND.
  *              - mlk_polyvec vc: Mulcache for v, computed via
- *                  mlk_polyvec_mulcache_compute().
+ *                  mlk_polyvec_mulcache_compute(). Must have coefficients
+ *                  of absolute value < MLKEM_Q.
  *
  * Specification: Implements @[FIPS203, Section 2.4.7, Eq (2.12), (2.13)]
  *
@@ -304,14 +306,22 @@ __contract__(
   requires(memory_no_alias(v, sizeof(mlk_polyvec)))
   requires(memory_no_alias(vc, sizeof(mlk_polyvec_mulcache)))
   requires(forall(k0, 0, MLKEM_K * MLKEM_K,
-    array_bound(a[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
-  assigns(object_whole(out)))
+      array_bound(a[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+  requires(forall(k1, 0, MLKEM_K,
+     array_abs_bound(v[k1].coeffs, 0, MLKEM_N, MLK_NTT_BOUND)))
+  requires(forall(k2, 0, MLKEM_K,
+     array_abs_bound(vc[k2].coeffs, 0, MLKEM_N/2, MLKEM_Q)))
+  assigns(memory_slice(out, sizeof(mlk_polyvec)))
+  ensures(forall(k3, 0, MLKEM_K,
+    array_abs_bound(out[k3].coeffs, 0, MLKEM_N, INT16_MAX/2))))
 {
   unsigned i;
   for (i = 0; i < MLKEM_K; i++)
   __loop__(
-    assigns(i, object_whole(out))
-    invariant(i <= MLKEM_K))
+    assigns(i, memory_slice(out, sizeof(mlk_polyvec)))
+    invariant(i <= MLKEM_K)
+    invariant(forall(k, 0, i,
+      array_abs_bound(out[k].coeffs, 0, MLKEM_N, INT16_MAX/2))))
   {
     mlk_polyvec_basemul_acc_montgomery_cached(&out[i], &a[MLKEM_K * i], v, vc);
   }
