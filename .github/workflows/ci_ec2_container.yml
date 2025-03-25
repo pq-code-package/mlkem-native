@@ -78,8 +78,8 @@ jobs:
                         # avoiding race conditions where an instance is started,
                         # but isn't yet done registering as a runner and reporting back.
     outputs:
-      label: ${{ steps.start-ec2-runner.outputs.label }}
-      ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
+      label: ${{ steps.remember-runner.outputs.label }}
+      ec2-instance-id: ${{ steps.remember-runner.outputs.ec2-instance-id }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Determine AMI ID
@@ -100,7 +100,8 @@ jobs:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
       - name: Start EC2 runner
-        id: start-ec2-runner
+        id: start-ec2-runner-first
+        continue-on-error: true
         uses: mkannwischer/ec2-github-runner@d15c8804522523d2bac7119a01ffff83b7795d87
         with:
           mode: start
@@ -109,6 +110,35 @@ jobs:
           ec2-instance-type: ${{ inputs.ec2_instance_type }}
           subnet-id: subnet-07b2729e5e065962f
           security-group-id: sg-0ab2e297196c8c381
+      - name: Start EC2 runner (wait before retry)
+        if: steps.start-ec2-runner-first.outcome == 'failure'
+        shell: bash
+        run: |
+          sleep 30 # Wait 30s before retrying
+          sleep $((1 + RANDOM % 30))
+      - name: Start EC2 runner (retry)
+        id: start-ec2-runner-second
+        if: steps.start-ec2-runner-first.outcome == 'failure'
+        uses: mkannwischer/ec2-github-runner@d15c8804522523d2bac7119a01ffff83b7795d87
+        with:
+          mode: start
+          github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
+          ec2-image-id: ${{ steps.det_ami_id.outputs.AMI_ID }}
+          ec2-instance-type: ${{ inputs.ec2_instance_type }}
+          subnet-id: subnet-07b2729e5e065962f
+          security-group-id: sg-0ab2e297196c8c381
+      - name: Remember runner
+        id: remember-runner
+        shell: bash
+        run: |
+          if [[ "${{ steps.start-ec2-runner-first.outcome }}" == "failure" ]]; then
+            echo "label=${{ steps.start-ec2-runner-second.outputs.label }}" >> "$GITHUB_OUTPUT"
+            echo "ec2-instance-id=${{ steps.start-ec2-runner-second.outputs.ec2-instance-id }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "label=${{ steps.start-ec2-runner-first.outputs.label }}" >> "$GITHUB_OUTPUT"
+            echo "ec2-instance-id=${{ steps.start-ec2-runner-first.outputs.ec2-instance-id }}" >> "$GITHUB_OUTPUT"
+          fi
+
   tests:
     name: Run tests
     needs: start-ec2-runner
