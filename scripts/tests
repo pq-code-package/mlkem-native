@@ -10,6 +10,7 @@ See the command line interface for more information."""
 import platform
 import argparse
 import os
+import re
 import sys
 import time
 import logging
@@ -756,7 +757,8 @@ class Tests:
                     log.info(f"   SUCCESS (after {dur}s)")
 
         def run_cbmc(mlkem_k):
-            proofs = list_proofs()
+            all_proofs = list_proofs()
+            proofs = all_proofs
             if self.args.start_with is not None:
                 try:
                     idx = proofs.index(self.args.start_with)
@@ -766,7 +768,12 @@ class Tests:
                         "Could not find function {self.args.start_with}. Running all proofs"
                     )
             if self.args.proof is not None:
-                proofs = self.args.proof
+                proofs = []
+                for pat in self.args.proof:
+                    # Replace wildcards by regexp wildcards
+                    pat = pat.replace("*", ".*")
+                    proofs += list(filter(lambda x: re.match(pat, x), all_proofs))
+                proofs = sorted(set(proofs))
 
             if self.args.single_step:
                 run_cbmc_single_step(mlkem_k, proofs)
@@ -1072,7 +1079,7 @@ def cli():
         "-p",
         "--proof",
         nargs="+",
-        help="Space separated list of functions for which to run the CBMC proofs.",
+        help='Space separated list of functions for which to run the CBMC proofs. Wildcard patterns "*" are allowed.',
         default=None,
     )
 
