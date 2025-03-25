@@ -381,7 +381,7 @@ __contract__(
       invariant(len % 2 == 0)
       invariant(len == 4 || len == 8 || len == 16 || len == 32 || len == 64 || len == 128)
 
-      invariant(array_abs_bound(r, 0,                         start,                     layer * MLKEM_Q + MLKEM_Q))
+      invariant(array_abs_bound(r, 0,                         start,                     (layer + 2) * MLKEM_Q))
 
       invariant(array_abs_bound(r, start,                     start + j,                 (layer + 2) * MLKEM_Q))
       invariant(array_abs_bound(r, start + j,                 start + len / 2,           layer * MLKEM_Q))
