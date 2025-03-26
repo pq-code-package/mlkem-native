@@ -28,6 +28,8 @@ MLK_SOURCE_ASM = $(wildcard \
 	mlkem/**/**/**/**/*.S        \
 	mlkem/**/**/**/**/**/*.S)
 
+MLK_SOURCE_C=mlkem_native_all.c
+
 INC=-Imlkem/ -I./
 
 # Part B:
@@ -120,7 +122,7 @@ $(BUILD_DIR)/%.S.o: %.S
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(CC) -c $(CFLAGS) $(ASMFLAGS) $(INC) $^ -o $@
 
-$(BINARY_NAME_FULL): $(APP_SOURCE) $(MLK_OBJ_ASM)
+$(BINARY_NAME_FULL): $(APP_SOURCE) $(MLK_OBJ_ASM) $(MLK_OBJ_C)
 	$(Q)echo "CC  $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(CC) $(CFLAGS) $(INC) $^ -o $@
