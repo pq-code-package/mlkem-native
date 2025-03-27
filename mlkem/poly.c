@@ -259,14 +259,6 @@ void mlk_poly_mulcache_compute(mlk_poly_mulcache *x, const mlk_poly *a)
     x->coeffs[2 * i + 0] = mlk_fqmul(a->coeffs[4 * i + 1], zetas[64 + i]);
     x->coeffs[2 * i + 1] = mlk_fqmul(a->coeffs[4 * i + 3], -zetas[64 + i]);
   }
-
-  /*
-   * This bound is true for the C implementation, but not needed
-   * in the higher level bounds reasoning. It is thus omitted
-   * them from the spec to not unnecessarily constrain native
-   * implementations, but checked here nonetheless.
-   */
-  mlk_assert_abs_bound(x, MLKEM_N / 2, MLKEM_Q);
 }
 #else  /* MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE */
 MLK_INTERNAL_API

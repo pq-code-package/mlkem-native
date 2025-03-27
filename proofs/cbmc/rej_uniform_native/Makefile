@@ -27,8 +27,6 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-#CBMCFLAGS += --no-array-field-sensitivity --arrays-uf-always --slice-formula
-
 FUNCTION_NAME = rej_uniform_native
 
 # If this proof is found to consume huge amounts of RAM, you can set the
