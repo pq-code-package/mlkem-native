@@ -87,17 +87,11 @@ void mlk_debug_check_bounds(const char *file, int line, const int16_t *ptr,
 #define mlk_assert_abs_bound(ptr, len, value_abs_bd) \
   cassert(array_abs_bound(((int16_t *)(ptr)), 0, (len), (value_abs_bd)))
 
-/* Because of https://github.com/diffblue/cbmc/issues/8570, we can't
- * just use a single flattened array_bound(...) here. */
-#define mlk_assert_bound_2d(ptr, M, N, value_lb, value_ub)             \
-  cassert(forall(kN, 0, (M),                                           \
-                 array_bound(&((int16_t(*)[(N)])(ptr))[kN][0], 0, (N), \
-                             (value_lb), (value_ub))))
+#define mlk_assert_bound_2d(ptr, M, N, value_lb, value_ub) \
+  mlk_assert_bound((ptr), (N) * (M), (value_lb), (value_ub))
 
-#define mlk_assert_abs_bound_2d(ptr, M, N, value_abs_bd)                   \
-  cassert(forall(kN, 0, (M),                                               \
-                 array_abs_bound(&((int16_t(*)[(N)])(ptr))[kN][0], 0, (N), \
-                                 (value_abs_bd))))
+#define mlk_assert_abs_bound_2d(ptr, M, N, value_abs_bd) \
+  mlk_assert_abs_bound((ptr), (N) * (M), (value_abs_bd))
 
 #else /* MLKEM_DEBUG */
 
