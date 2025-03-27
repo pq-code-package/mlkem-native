@@ -28,15 +28,15 @@ EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
 # For this proof we tell CBMC to
-#  1. not decompose arrays into their individual cells
-#  2. to model arrays directly as SMT-lib arrays
-#  3. to slice constraints that are not in the cone of influence of the proof obligations
+#  - not decompose arrays into their individual cells
+#  - to slice constraints that are not in the cone of influence of the proof obligations
 # These options simplify them modelling of arrays and produce much more compact
 # SMT files, leaving all array-type reasoning to the SMT solver.
 #
 # For functions that use large and multi-dimensional arrays, this yields
 # a substantial improvement in proof performance.
-CBMCFLAGS += --no-array-field-sensitivity --arrays-uf-always --slice-formula
+CBMCFLAGS += --no-array-field-sensitivity
+CBMCFLAGS += --slice-formula
 
 FUNCTION_NAME = mlk_keccakf1600_permute
 
