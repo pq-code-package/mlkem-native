@@ -13,10 +13,10 @@
  */
 volatile uint64_t mlk_ct_opt_blocker_u64 = 0;
 
-#else /* MLK_USE_ASM_VALUE_BARRIER && \
+#else /* !MLK_USE_ASM_VALUE_BARRIER && \
          !MLK_MULTILEVEL_BUILD_NO_SHARED */
 
 MLK_EMPTY_CU(verify)
 
-#endif /* MLK_USE_ASM_VALUE_BARRIER && \
+#endif /* !MLK_USE_ASM_VALUE_BARRIER && \
           !MLK_MULTILEVEL_BUILD_NO_SHARED */
