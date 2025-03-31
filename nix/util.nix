@@ -65,7 +65,7 @@ rec {
     };
   mkShellWithCC_valgrind' = cc:
     mkShellWithCC cc {
-      packages = [ pkgs.python3 ] ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ valgrind_varlat ];
+      packages = [ pkgs.python3 pkgs.llvmPackages.libllvm ] ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ valgrind_varlat ];
       hardeningDisable = [ "fortify" ];
     };
 

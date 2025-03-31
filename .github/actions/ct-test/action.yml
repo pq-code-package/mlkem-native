@@ -10,6 +10,9 @@ inputs:
   valgrind_flags:
     description: Extra flags to pass to valgrind
     default: ""
+  ctllvm:
+    description: whether to run CT-LLVM or not (requires LLVM)
+    default: "false"
 
 runs:
   using: composite
@@ -40,3 +43,12 @@ runs:
         run: |
           make clean
           tests func --exec-wrapper="valgrind --error-exitcode=1 --track-origins=yes ${{ inputs.valgrind_flags }}" --cflags="-DMLK_CT_TESTING_ENABLED -DNTESTS=50 ${{ inputs.cflags }}"
+      - shell: ${{ env.SHELL }}
+        if: ${{ inputs.ctllvm == 'true' }}
+        run: |
+          make -C test/ctllvm
+      - shell: ${{ env.SHELL }}
+        if: ${{ inputs.ctllvm == 'true' }}
+        run: | 
+          make clean
+          tests func --cflags="-fpass-plugin=test/ctllvm/ctllvm.so"-g ${{ inputs.cflags }}"
