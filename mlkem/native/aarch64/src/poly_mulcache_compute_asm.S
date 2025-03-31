@@ -48,5 +48,4 @@ poly_mulcache_compute_asm_loop:
         str	q2, [x0], #0x10
         ret
 
-#endif /* MLK_ARITH_BACKEND_AARCH64 &&
-          !MLK_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_MULTILEVEL_BUILD_NO_SHARED */

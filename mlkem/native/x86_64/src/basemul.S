@@ -291,5 +291,5 @@ MLK_ASM_FN_SYMBOL(basemul_avx2)
         movq	%r8, %rsp
         retq
 
-#endif /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
-          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */
+#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_MULTILEVEL_BUILD_NO_SHARED \
+        */

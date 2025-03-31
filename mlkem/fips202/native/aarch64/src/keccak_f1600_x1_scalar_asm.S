@@ -335,5 +335,5 @@ keccak_f1600_x1_scalar_loop:
         add	sp, sp, #0x80
         ret
 
-#endif /* MLK_FIPS202_AARCH64_NEED_X1_SCALAR &&
+#endif /* MLK_FIPS202_AARCH64_NEED_X1_SCALAR && \
           !MLK_MULTILEVEL_BUILD_NO_SHARED */

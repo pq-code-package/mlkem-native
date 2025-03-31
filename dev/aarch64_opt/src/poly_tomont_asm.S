@@ -213,5 +213,4 @@ poly_tomont_asm_loop:
         .unreq tmp0
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_AARCH64 &&
-          !MLK_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_MULTILEVEL_BUILD_NO_SHARED */
