@@ -98,5 +98,5 @@ ntttobytes128_avx:
         vmovdqu	%ymm9, 0xa0(%rdi)
         retq
 
-#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT &&
-         ! MLK_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_MULTILEVEL_BUILD_NO_SHARED \
+        */

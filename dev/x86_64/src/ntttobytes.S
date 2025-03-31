@@ -89,5 +89,5 @@ vmovdqu		%ymm9,160(%rdi)
 ret
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT &&
-         ! MLK_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_MULTILEVEL_BUILD_NO_SHARED \
+        */

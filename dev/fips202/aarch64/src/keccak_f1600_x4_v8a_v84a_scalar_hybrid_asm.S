@@ -2382,5 +2382,5 @@ keccak_f1600_x4_v8a_v84a_scalar_hybrid_done:
 /* simpasm: footer-start */
 #endif /* __ARM_FEATURE_SHA3 */
 
-#endif /* MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID &&
+#endif /* MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID && \
           !MLK_MULTILEVEL_BUILD_NO_SHARED */
