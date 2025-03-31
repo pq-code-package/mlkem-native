@@ -67,8 +67,28 @@ rec {
       hardeningDisable = [ "fortify" ];
     };
   mkShellWithCC_valgrind' = cc:
+    let
+      # Select the appropriate CT-LLVM package for clang compilers
+      # TODO: clang15 and clang20 not supported due to LLVM API compatibility issues
+      ctllvm =
+        if cc == pkgs.clang_14 then (pkgs.callPackage ./ctllvm { }).override { llvmPackages = pkgs.llvmPackages_14; }
+        else if cc == pkgs.clang_16 then (pkgs.callPackage ./ctllvm { }).override { llvmPackages = pkgs.llvmPackages_16; }
+        else if cc == pkgs.clang_17 then (pkgs.callPackage ./ctllvm { }).override { llvmPackages = pkgs.llvmPackages_17; }
+        else if cc == pkgs.clang_18 then (pkgs.callPackage ./ctllvm { }).override { llvmPackages = pkgs.llvmPackages_18; }
+        else if cc == pkgs.clang_19 then (pkgs.callPackage ./ctllvm { }).override { llvmPackages = pkgs.llvmPackages_19; }
+        else null; # no CT-LLVM for non-clang compilers or unsupported clang versions
+
+      # Base packages
+      basePackages = [ pkgs.python3 ] ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ valgrind_varlat ];
+
+      # Add CT-LLVM only for clang compilers
+      packages =
+        if ctllvm != null
+        then basePackages ++ [ ctllvm ]
+        else basePackages;
+    in
     mkShellWithCC cc {
-      packages = [ pkgs.python3 ] ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ valgrind_varlat ];
+      inherit packages;
       hardeningDisable = [ "fortify" ];
     };
 

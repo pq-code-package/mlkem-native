@@ -12,27 +12,41 @@ jobs:
     # Using the patched Valgrind from the KyberSlash paper to detect divisions
     # In case the patch no longer applies after an update, we may want to switch back
     # to stock valgrind added in https://github.com/pq-code-package/mlkem-native/pull/687
-    name: CT test ${{ matrix.nix-shell }} ${{ matrix.system }}
+    name: CT test ${{ matrix.nix-shell.shell }} ${{ matrix.system }}
     strategy:
       fail-fast: false
       max-parallel: 10
       matrix:
         system: [ubuntu-latest, pqcp-arm64]
         nix-shell:
-          - ci_valgrind-varlat_clang14
-          - ci_valgrind-varlat_clang15
-          - ci_valgrind-varlat_clang16
-          - ci_valgrind-varlat_clang17
-          - ci_valgrind-varlat_clang18
-          - ci_valgrind-varlat_clang19
-          - ci_valgrind-varlat_clang20
-          - ci_valgrind-varlat_gcc48
-          - ci_valgrind-varlat_gcc49
-          - ci_valgrind-varlat_gcc7
-          - ci_valgrind-varlat_gcc11
-          - ci_valgrind-varlat_gcc12
-          - ci_valgrind-varlat_gcc13
-          - ci_valgrind-varlat_gcc14
+          - shell: ci_valgrind-varlat_clang14
+            ctllvm: true
+          - shell: ci_valgrind-varlat_clang15
+            ctllvm: false
+          - shell: ci_valgrind-varlat_clang16
+            ctllvm: true
+          - shell: ci_valgrind-varlat_clang17
+            ctllvm: true
+          - shell: ci_valgrind-varlat_clang18
+            ctllvm: true
+          - shell: ci_valgrind-varlat_clang19
+            ctllvm: true
+          - shell: ci_valgrind-varlat_clang20
+            ctllvm: false  # TODO: Fix CT-LLVM compatibility with LLVM 20 - API changes in callback signatures
+          - shell: ci_valgrind-varlat_gcc48
+            ctllvm: false
+          - shell: ci_valgrind-varlat_gcc49
+            ctllvm: false
+          - shell: ci_valgrind-varlat_gcc7
+            ctllvm: false
+          - shell: ci_valgrind-varlat_gcc11
+            ctllvm: false
+          - shell: ci_valgrind-varlat_gcc12
+            ctllvm: false
+          - shell: ci_valgrind-varlat_gcc13
+            ctllvm: false
+          - shell: ci_valgrind-varlat_gcc14
+            ctllvm: false
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -40,49 +54,57 @@ jobs:
         uses: ./.github/actions/setup-shell
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          nix-shell: ${{ matrix.nix-shell }}
+          nix-shell: ${{ matrix.nix-shell.shell }}
           nix-cache: true
       - name:  Build and run test (-Oz)
         # -Oz got introduced in gcc12
-        if: ${{ matrix.nix-shell !=  'ci_valgrind-varlat_gcc48' && matrix.nix-shell !=  'ci_valgrind-varlat_gcc49' && matrix.nix-shell !=  'ci_valgrind-varlat_gcc7' && matrix.nix-shell !=  'ci_valgrind-varlat_gcc11'}}
+        if: ${{ matrix.nix-shell.shell !=  'ci_valgrind-varlat_gcc48' && matrix.nix-shell.shell !=  'ci_valgrind-varlat_gcc49' && matrix.nix-shell.shell !=  'ci_valgrind-varlat_gcc7' && matrix.nix-shell.shell !=  'ci_valgrind-varlat_gcc11'}}
         uses: ./.github/actions/ct-test
         with:
           cflags: -Oz -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
+          ctllvm: ${{ matrix.nix-shell.ctllvm }}
       - name:  Build and run test (-Os)
         uses: ./.github/actions/ct-test
         with:
           cflags: -Os -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
+          ctllvm: ${{ matrix.nix-shell.ctllvm }}
       - name:  Build and run test (-O3)
         uses: ./.github/actions/ct-test
         with:
           cflags: -O3 -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
+          ctllvm: ${{ matrix.nix-shell.ctllvm }}
       - name:  Build and run test (-Ofast)
         # -Ofast got deprecated in clang19; -O3 -ffast-math should be used instead
-        if: ${{ matrix.nix-shell != 'ci_valgrind-varlat_clang19' &&  matrix.nix-shell !=  'ci_valgrind-varlat_clang20' }}
+        if: ${{ matrix.nix-shell.shell != 'ci_valgrind-varlat_clang19' &&  matrix.nix-shell.shell !=  'ci_valgrind-varlat_clang20' }}
         uses: ./.github/actions/ct-test
         with:
           cflags: -Ofast -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
+          ctllvm: ${{ matrix.nix-shell.ctllvm }}
       - name:  Build and run test (-O3 -ffast-math)
         uses: ./.github/actions/ct-test
         with:
           cflags: -O3 -ffast-math -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
+          ctllvm: ${{ matrix.nix-shell.ctllvm }}
       - name:  Build and run test (-O2)
         uses: ./.github/actions/ct-test
         with:
           cflags: -O2 -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
+          ctllvm: ${{ matrix.nix-shell.ctllvm }}
       - name:  Build and run test (-O1)
         uses: ./.github/actions/ct-test
         with:
           cflags: -O1 -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
+          ctllvm: ${{ matrix.nix-shell.ctllvm }}
       - name:  Build and run test (-O0)
         uses: ./.github/actions/ct-test
         with:
           cflags: -O0 -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
+          ctllvm: ${{ matrix.nix-shell.ctllvm }}
