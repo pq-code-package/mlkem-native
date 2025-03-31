@@ -17,4 +17,4 @@
 #define mlk_shake128x4_release shake128x4_release
 #define mlk_shake256x4 shake256x4
 
-#endif /* MLK_INTEGRATION_LIBOQS_FIPS202X4_GLUE_H */
+#endif /* !MLK_INTEGRATION_LIBOQS_FIPS202X4_GLUE_H */

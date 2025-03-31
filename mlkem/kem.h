@@ -27,13 +27,13 @@
 #error Mismatch for CIPHERTEXTBYTES between kem.h and mlkem_native.h
 #endif
 
-#else
+#else /* MLK_CHECK_APIS */
 #define crypto_kem_keypair_derand MLK_NAMESPACE_K(keypair_derand)
 #define crypto_kem_keypair MLK_NAMESPACE_K(keypair)
 #define crypto_kem_enc_derand MLK_NAMESPACE_K(enc_derand)
 #define crypto_kem_enc MLK_NAMESPACE_K(enc)
 #define crypto_kem_dec MLK_NAMESPACE_K(dec)
-#endif
+#endif /* !MLK_CHECK_APIS */
 
 /*************************************************
  * Name:        crypto_kem_keypair_derand
@@ -209,4 +209,4 @@ __contract__(
   assigns(object_whole(ss))
 );
 
-#endif /* MLK_KEM_H */
+#endif /* !MLK_KEM_H */

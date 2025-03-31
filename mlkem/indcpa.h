@@ -130,4 +130,4 @@ __contract__(
   assigns(object_whole(m))
 );
 
-#endif /* MLK_INDCPA_H */
+#endif /* !MLK_INDCPA_H */

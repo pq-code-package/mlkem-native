@@ -143,8 +143,7 @@ static MLK_INLINE void mlk_poly_decompress_d10_native(
 {
   mlk_poly_decompress_d10_avx2((__m256i *)r, a);
 }
-#endif /* defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
-          || MLKEM_K == 3) */
+#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
 
 #if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
 static MLK_INLINE void mlk_poly_compress_d5_native(
@@ -174,4 +173,4 @@ static MLK_INLINE void mlk_poly_decompress_d11_native(
 
 #endif /* !__ASSEMBLER__ */
 
-#endif /* MLK_NATIVE_X86_64_META_H */
+#endif /* !MLK_NATIVE_X86_64_META_H */

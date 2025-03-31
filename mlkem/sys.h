@@ -25,7 +25,7 @@
 
 #if defined(_WIN32)
 #define MLK_SYS_WINDOWS
-#endif /* _WIN32 */
+#endif
 
 #if !defined(MLK_NO_ASM) && (defined(__GNUC__) || defined(__clang__))
 #define MLK_HAVE_INLINE_ASM
@@ -38,11 +38,11 @@
 #define MLK_SYS_LITTLE_ENDIAN
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #define MLK_SYS_BIG_ENDIAN
-#else /* __BYTE_ORDER__ */
+#else
 #error "__BYTE_ORDER__ defined, but don't recognize value."
+#endif
 #endif /* __BYTE_ORDER__ */
-#endif /* !defined(__BYTE_ORDER__) */
-#endif /* defined(MLK_SYS_LITTLE_ENDIAN) || defined(MLK_SYS_BIG_ENDIAN) */
+#endif /* !MLK_SYS_LITTLE_ENDIAN && !MLK_SYS_BIG_ENDIAN */
 
 /* If MLK_FORCE_AARCH64 is set, assert that we're indeed on an AArch64 system.
  */
@@ -86,11 +86,11 @@
 #define MLK_ALWAYS_INLINE MLK_INLINE
 #endif
 
-#else
+#else /* !inline */
 #define MLK_INLINE inline
 #define MLK_ALWAYS_INLINE MLK_INLINE __attribute__((always_inline))
-#endif
-#endif
+#endif /* inline */
+#endif /* !MLK_INLINE */
 
 /*
  * C90 does not have the restrict compiler directive yet.
@@ -103,10 +103,10 @@
 #define MLK_RESTRICT
 #endif
 
-#else
+#else /* !restrict */
 
 #define MLK_RESTRICT restrict
-#endif
+#endif /* restrict */
 
 #define MLK_DEFAULT_ALIGN 32
 #define MLK_ALIGN_UP(N) \
@@ -143,7 +143,7 @@
 #else
 #define MLK_CET_ENDBR
 #endif
-#endif
+#endif /* MLK_SYS_X86_64 */
 
 #if defined(MLK_CT_TESTING_ENABLED) && !defined(__ASSEMBLER__)
 #include <valgrind/memcheck.h>
@@ -151,7 +151,7 @@
   VALGRIND_MAKE_MEM_UNDEFINED((ptr), (len))
 #define MLK_CT_TESTING_DECLASSIFY(ptr, len) \
   VALGRIND_MAKE_MEM_DEFINED((ptr), (len))
-#else
+#else /* MLK_CT_TESTING_ENABLED && !__ASSEMBLER__ */
 #define MLK_CT_TESTING_SECRET(ptr, len) \
   do                                    \
   {                                     \
@@ -160,7 +160,7 @@
   do                                        \
   {                                         \
   } while (0)
-#endif /* MLK_CT_TESTING_ENABLED */
+#endif /* !(MLK_CT_TESTING_ENABLED && !__ASSEMBLER__) */
 
 #if defined(__GNUC__) || defined(clang)
 #define MLK_MUST_CHECK_RETURN_VALUE __attribute__((warn_unused_result))
@@ -168,4 +168,4 @@
 #define MLK_MUST_CHECK_RETURN_VALUE
 #endif
 
-#endif /* MLK_SYS_H */
+#endif /* !MLK_SYS_H */

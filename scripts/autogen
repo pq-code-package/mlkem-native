@@ -8,7 +8,9 @@ import platform
 import argparse
 import shutil
 import pathlib
+import re
 import sys
+import pyparsing as pp
 import os
 
 modulus = 3329
@@ -24,6 +26,11 @@ montgomery_factor = pow(2, 16, modulus)
 # - simplified assembly sources
 # - header guards
 # - #undef's for CU-local macros
+
+
+def status_update(task, msg):
+    print(f"\r{'':<140}", end="", flush=True)
+    print(f"\r[{task}]: {msg} ...", end="", flush=True)
 
 
 def gen_header():
@@ -52,9 +59,325 @@ def gen_hol_light_header():
     yield ""
 
 
+class CondParser:
+    """Rudimentary parser for expressions if `#if .. #else ..` directives"""
+
+    def __init__(self):
+        c_identifier = pp.common.identifier()
+        c_integer_suffix = pp.one_of("U L LU UL LL ULL LLU", caseless=True)
+        c_dec_integer = pp.Combine(
+            pp.Optional(pp.one_of("+ -"))
+            + pp.Word(pp.nums)
+            + pp.Optional(c_integer_suffix)
+        )
+        c_hex_integer = pp.Combine(
+            pp.Literal("0x") + pp.Word(pp.hexnums) + pp.Optional(c_integer_suffix)
+        )
+
+        self.parser = pp.infix_notation(
+            c_identifier | c_hex_integer | c_dec_integer,
+            [
+                (pp.one_of("!"), 1, pp.opAssoc.RIGHT),
+                (pp.one_of("!= == <= >= > <"), 2, pp.opAssoc.LEFT),
+                (pp.one_of("&&"), 2, pp.opAssoc.LEFT),
+                (pp.one_of("||"), 2, pp.opAssoc.LEFT),
+            ],
+        )
+
+    @staticmethod
+    def connective(res):
+        """Extract the top-level connective for the expression"""
+        if not isinstance(res, list):
+            return None
+        elif len(res) == 2:
+            # Unary operator (will be "!" in our case)
+            return res[0]
+        else:
+            # Binary operator
+            return res[1]
+
+    @staticmethod
+    def map_top(f, res):
+        """Apply function to arguments of top-level connective"""
+        if not isinstance(res, list):
+            return res
+        else:
+            # We expect `f` to do nothing on strings, so it is safe
+            # to apply it everywhere, including the connectives.
+            return list(map(f, res))
+
+    @staticmethod
+    def args(res):
+        """Assuming the argument is a binary operation, return all arguments"""
+        return res[::2]
+
+    @staticmethod
+    def simplify_double_negation(res):
+        """Cancel double negations"""
+        if CondParser.connective(res) == "!" and CondParser.connective(res[1]) == "!":
+            res = res[1][1]
+        res = CondParser.map_top(CondParser.simplify_double_negation, res)
+        return res
+
+    @staticmethod
+    def simplify_not_eq(res):
+        """Replace !(x == y) by x != y, and !(x != y) by x == y"""
+        if CondParser.connective(res) == "!" and CondParser.connective(res[1]) == "==":
+            res = res[1]
+            res[1] = "!="
+        if CondParser.connective(res) == "!" and CondParser.connective(res[1]) == "!=":
+            res = res[1]
+            res[1] = "=="
+        res = CondParser.map_top(CondParser.simplify_not_eq, res)
+        return res
+
+    @staticmethod
+    def simplify_neq_chain(res):
+        """Check for &&-chains of inequalities followed by an equality
+        which implies the inequality. This catches patterns like
+        ```
+         #if MLKEM_K == 2
+         ...
+         #elif MLKEM_K == 3
+         ...
+         #elif MLKEM_K == 4
+         ...
+         #endif
+        ```
+        """
+        if (
+            CondParser.connective(res) == "&&"
+            and CondParser.connective(res[-1]) == "=="
+        ):
+            lhs = res[-1][0]
+            rhs = res[-1][2]
+            args = []
+            for a in CondParser.args(res[:-1]):
+                if CondParser.connective(a) == "!=" and a[0] == lhs:
+                    args.append(a[2])
+                else:
+                    args = None
+                    break
+            if args is None:
+                return
+            # Check if all args are numerical and different
+            if rhs.isdigit() and all(
+                map(lambda a: a.isdigit() and int(a) != int(rhs), args)
+            ):
+                # Success -- just drop all but the final condition
+                return res[-1]
+        res = CondParser.map_top(CondParser.simplify_neq_chain, res)
+        return res
+
+    @staticmethod
+    def print_exp(exp, inner=False):
+        conn = CondParser.connective(exp)
+        if conn is None:
+            return exp
+        elif conn == "!":
+            res = f"!{CondParser.print_exp(exp[1], inner=True)}"
+        else:
+            padded_conn = f" {conn} "
+            res = padded_conn.join(
+                map(lambda e: CondParser.print_exp(e, inner=True), CondParser.args(exp))
+            )
+        if inner is True and conn in ["&&", "||"]:
+            res = f"({res})"
+        return res
+
+    def simplify_assoc(exp):
+        """Check for unnecesary bracketing and remove it"""
+        conn = CondParser.connective(exp)
+        if conn in ["&&", "||"]:
+            args = CondParser.args(exp)
+            new_args = []
+            for a in args:
+                if CondParser.connective(a) == conn:
+                    new_args += CondParser.args(a)
+                else:
+                    new_args.append(a)
+            exp = [x for y in map(lambda x: [x, conn], new_args) for x in y][:-1]
+        exp = CondParser.map_top(CondParser.simplify_assoc, exp)
+        return exp
+
+    def simplify_all(exp):
+        exp = CondParser.simplify_double_negation(exp)
+        exp = CondParser.simplify_not_eq(exp)
+        exp = CondParser.simplify_neq_chain(exp)
+        exp = CondParser.simplify_assoc(exp)
+        return exp
+
+    def parse_condition(self, exp, simplify=True):
+        try:
+            exp = self.parser.parseString(exp, parseAll=True).as_list()[0]
+        except pp.ParseException:
+            print(f"WARNING: Ignoring condition '{exp}' I cannot parse")
+            return exp
+        if simplify is True:
+            exp = CondParser.simplify_all(exp)
+        return exp
+
+    def normalize_condition(self, exp):
+        return CondParser.print_exp(self.parse_condition(exp))
+
+
+def adjust_preprocessor_comments_for_filename(content, source_file):
+    """Automatically add comments to large `#if ... #else ... #endif`
+    blocks indicating the guarding conditions.
+
+    For example, a block
+
+    ```c
+      #if FOO
+      ...
+      #else
+      ...
+      #endif
+    ```
+
+    will be transformed into
+
+
+    ```c
+      #if FOO
+      ...
+      #else /* FOO */
+      ...
+      #endif /* !FOO */
+    ```
+
+    except when the distance between the preprocessor directives is
+    very short, and the annotations would be more harmful than useful.
+
+    ```
+    """
+    status_update("if-else", source_file)
+
+    content = content.split("\n")
+    new_content = []
+
+    # Stack of `#if` statements. Every entry is a tuple
+    # `(conds, line_no, if_or_else, has_children)`, where
+    # - `conds` is the list of conditions being tested.
+    #   In a normal `#if ... #else ...` braach, this is a singleton list
+    #   containing the condition being tested. In a chain of
+    #   `#if .. #elif ..` it contains all conditions encountered to this point.
+    # - `line_no` is the line where it started
+    # - `if_or_else` indicates whether we are in the `#if`
+    #   or the `#else` branch (if present)
+    # - `force_print` indicates if a comment should be omitted
+    if_stack = []
+
+    def merge_escaped_lines(l, i):
+        while l.endswith("\\"):
+            l = l.removesuffix("\\").rstrip() + content[i + 1].lstrip()
+            i = i + 1
+        return (l, i)
+
+    def merge_commented_lines(l, i):
+        # Not very robust, but good enough
+        if not "/*" in l or "*/" in l:
+            return (l, i)
+        i += 1
+        while "*/" not in content[i]:
+            l += content[i]
+            i += 1
+
+        l += content[i]
+        return (l, i)
+
+    def should_print(cur_line_no, conds, line_no, force_print):
+        line_threshold = 5
+        if force_print is True:
+            return True
+
+        if cur_line_no - line_no >= line_threshold:
+            return True
+        return False
+
+    parser = CondParser()
+
+    def format_condition(cond):
+        cond = re.sub(r"defined\(([^)]+)\)", r"\1", cond)
+        return parser.normalize_condition(cond)
+
+    def format_conditions(conds, branch):
+        prev_conds = list(map(lambda s: f"!({s})", conds[:-1]))
+        final_cond = conds[-1]
+        if branch is False:
+            final_cond = f"!({final_cond})"
+        full_cond = "&&".join(prev_conds + [final_cond])
+        return format_condition(full_cond)
+
+    i = 0
+    while i < len(content):
+        l = content[i].strip()
+        # Replace #ifdef by #if defined(...)
+        if l.startswith("#ifdef "):
+            l = "#if defined(" + l.removeprefix("#ifdef").strip() + ")"
+        if l.startswith("#ifndef "):
+            l = "#if !defined(" + l.removeprefix("#ifndef").strip() + ")"
+        if l.startswith("#if"):
+            l, _ = merge_escaped_lines(l, i)
+            cond = l.removeprefix("#if")
+            if_stack.append(([cond], i, True, False))
+            new_content.append(content[i])
+        elif l.startswith("#elif"):
+            conds, _, _, force_print = if_stack.pop()
+            l, _ = merge_escaped_lines(l, i)
+            conds.append(l.removeprefix("#elif"))
+            if_stack.append((conds, i, True, force_print))
+            new_content.append(content[i])
+        elif l.startswith("#else"):
+            l, i = merge_escaped_lines(l, i)
+            _, i = merge_commented_lines(l, i)
+            conds, j, branch, force_print = if_stack.pop()
+            assert branch is True
+            print_else = should_print(i, cond, j, force_print)
+            if_stack.append((conds, i, False, print_else))
+            if print_else is True:
+                cond = format_conditions(conds, True)
+                new_content.append("#else /* " + cond + " */")
+            else:
+                new_content.append("#else")
+        elif l.startswith("#endif"):
+            l, i = merge_escaped_lines(l, i)
+            _, i = merge_commented_lines(l, i)
+            conds, j, branch, force_print = if_stack.pop()
+            print_endif = should_print(i, conds, j, force_print)
+            if print_endif is False:
+                new_content.append("#endif")
+            else:
+                cond = format_conditions(conds, branch)
+                new_content.append("#endif /* " + cond + " */")
+        else:
+            # Skip over multiline comments -- we don't want to
+            # handle `#if ...` inside documentation as this would
+            # lead to nested `/* ... */`.
+            i_old = i
+            _, i = merge_commented_lines(l, i_old)
+            new_content += content[i_old : i + 1]
+        i += 1
+
+    return "\n".join(new_content)
+
+
+def gen_preprocessor_comments_for(source_file, dry_run=False):
+    with open(source_file, "r") as f:
+        content = f.read()
+    new_content = adjust_preprocessor_comments_for_filename(content, source_file)
+    update_file(source_file, new_content, dry_run=dry_run)
+
+
+def gen_preprocessor_comments(dry_run=False):
+    for h in get_c_source_files() + get_header_files():
+        gen_preprocessor_comments_for(h, dry_run=dry_run)
+
+
 def update_file(filename, content, dry_run=False, force_format=False):
 
     if force_format is True or filename.endswith((".c", ".h", ".i")):
+        content = adjust_preprocessor_comments_for_filename(content, filename)
         p = subprocess.run(
             ["clang-format"], capture_output=True, input=content, text=True, shell=True
         )
@@ -416,14 +739,11 @@ def gen_aarch64_zeta_file(dry_run=False):
         yield from map(lambda t: str(t) + ",", gen_aarch64_mulcache_twiddles_twisted())
         yield "};"
         yield ""
-        yield "#else /* defined(MLK_ARITH_BACKEND_AARCH64)"
-        yield "         && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
+        yield "#else"
         yield ""
         yield "MLK_EMPTY_CU(aarch64_zetas)"
         yield ""
-        yield ""
-        yield "#endif /* defined(MLK_ARITH_BACKEND_AARCH64)"
-        yield "          && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
+        yield "#endif"
         yield ""
 
     update_file(
@@ -477,13 +797,11 @@ def gen_aarch64_rej_uniform_table(dry_run=False):
         yield from map(lambda t: str(t) + ",", gen_aarch64_rej_uniform_table_rows())
         yield "};"
         yield ""
-        yield "#else /* defined(MLK_ARITH_BACKEND_AARCH64)"
-        yield "         && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
+        yield "#else"
         yield ""
         yield "MLK_EMPTY_CU(aarch64_rej_uniform_table)"
         yield ""
-        yield "#endif /* defined(MLK_ARITH_BACKEND_AARCH64)"
-        yield "          && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
+        yield "#endif"
         yield ""
 
     update_file(
@@ -536,13 +854,11 @@ def gen_avx2_rej_uniform_table(dry_run=False):
         yield from map(lambda t: str(t) + ",", gen_avx2_rej_uniform_table_rows())
         yield "};"
         yield ""
-        yield "#else /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \\"
-        yield "         !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
+        yield "#else"
         yield ""
         yield "MLK_EMPTY_CU(avx2_rej_uniform_table)"
         yield ""
-        yield "#endif /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \\"
-        yield "          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */"
+        yield "#endif"
         yield ""
 
     update_file(
@@ -804,29 +1120,29 @@ def gen_monolithic_source_file(dry_run=False):
         yield "#if !defined(MLK_MONOBUILD_CUSTOM_FIPS202)"
         for c in filter(lambda c: not native(c) and fips202(c), c_sources):
             yield f'#include "{c}"'
-        yield "#endif /* !MLK_MONOBUILD_CUSTOM_FIPS202 */"
+        yield "#endif"
         yield ""
         yield "#if defined(MLK_MONOBUILD_WITH_NATIVE_ARITH)"
         yield "#if defined(MLK_SYS_AARCH64)"
         for c in filter(native_arith_aarch64, c_sources):
             yield f'#include "{c}"'
-        yield "#endif /* MLK_SYS_AARCH64 */"
+        yield "#endif"
         yield "#if defined(MLK_SYS_X86_64)"
         for c in filter(native_arith_x86_64, c_sources):
             yield f'#include "{c}"'
-        yield "#endif /* MLK_SYS_X86_64 */"
-        yield "#endif /* MLK_MONOBUILD_WITH_NATIVE_ARITH */"
+        yield "#endif"
+        yield "#endif"
         yield ""
         yield "#if defined(MLK_MONOBUILD_WITH_NATIVE_FIPS202)"
         yield "#if defined(MLK_SYS_AARCH64)"
         for c in filter(native_fips202_aarch64, c_sources):
             yield f'#include "{c}"'
-        yield "#endif /* MLK_SYS_AARCH64 */"
+        yield "#endif"
         yield "#if defined(MLK_SYS_X86_64)"
         for c in filter(native_fips202_x86_64, c_sources):
             yield f'#include "{c}"'
-        yield "#endif /* MLK_SYS_X86_64 */"
-        yield "#endif /* MLK_MONOBUILD_WITH_NATIVE_FIPS202 */"
+        yield "#endif"
+        yield "#endif"
         yield ""
         yield from gen_monolithic_undef_all_core(
             filt=k_specific, desc="MLKEM_K-specific files"
@@ -853,17 +1169,17 @@ def gen_monolithic_source_file(dry_run=False):
             filt=lambda c: not native(c) and k_generic(c) and fips202(c),
             desc="FIPS-202 files",
         )
-        yield "#endif /* !MLK_MONOBUILD_CUSTOM_FIPS202 */"
+        yield "#endif"
         yield ""
         yield "#if defined(MLK_MONOBUILD_WITH_NATIVE_FIPS202)"
         yield from gen_monolithic_undef_all_core(
             filt=native_fips202, desc="native code"
         )
-        yield "#endif /* MLK_MONOBUILD_WITH_NATIVE_FIPS202 */"
+        yield "#endif"
         yield "#if defined(MLK_MONOBUILD_WITH_NATIVE_ARITH)"
         yield from gen_monolithic_undef_all_core(filt=native_arith, desc="native code")
-        yield "#endif /* MLK_MONOBUILD_WITH_NATIVE_ARITH */"
-        yield "#endif /* MLK_MONOBUILD_KEEP_SHARED_HEADERS */"
+        yield "#endif"
+        yield "#endif"
         yield ""
 
     update_file(
@@ -875,6 +1191,7 @@ def gen_monolithic_source_file(dry_run=False):
 
 def check_asm_register_aliases_for_file(filename):
     """Checks that `filename` has no mismatching or dangling register aliases"""
+    status_update("reg alises", filename)
 
     def get_alias_def(l):
         s = list(filter(lambda s: s != "", l.strip().split(" ")))
@@ -938,6 +1255,7 @@ def update_via_simpasm(
     dry_run=False,
     force_cross=False,
 ):
+    status_update("simpasm", infile_full)
 
     _, infile = os.path.split(infile_full)
     if outfile is None:
@@ -963,10 +1281,6 @@ def update_via_simpasm(
         # Check if cross-compiler is present
         if shutil.which(cross_gcc) is None:
             if force_cross is False:
-                print(
-                    f"WARNING: Skipping simplification of file {infile} -- "
-                    f"no cross-compilation toolchain for {cross_prefix} found."
-                )
                 return
             raise Exception(f"Could not find cross toolchain {cross_prefix}")
     else:
@@ -1068,6 +1382,8 @@ def gen_hol_light_asm(dry_run=False):
 
 
 def update_via_copy(infile_full, outfile_full, dry_run=False, transform=None):
+    status_update("copy", f"{infile_full} -> {outfile_full}")
+
     with open(infile_full, "r") as f:
         content = f.read()
 
@@ -1191,6 +1507,9 @@ def synchronize_backends(
 
 
 def adjust_header_guard_for_filename(content, header_file):
+
+    status_update("header guards", header_file)
+
     content = content.split("\n")
     exceptions = {"mlkem/mlkem_native.h": "MLK_H"}
 
@@ -1214,7 +1533,7 @@ def adjust_header_guard_for_filename(content, header_file):
         yield f"#define {guard_name}"
 
     def gen_footer():
-        yield f"#endif /* {guard_name} */"
+        yield f"#endif"
         yield ""
 
     cr = list(gen_copyright())
@@ -1266,6 +1585,8 @@ def gen_header_guards(dry_run=False):
 
 
 def gen_source_undefs(source_file, dry_run=False):
+    status_update("undefs", source_file)
+
     # Get list of #define's clauses in this source file (ignore filename)
     undef_list = list(map(lambda c: c[1], get_defines_from_file(source_file)))
     # Get define clauses from header files, as dict
@@ -1357,6 +1678,7 @@ def _main():
         force_cross=args.force_cross,
     )
     gen_header_guards(args.dry_run)
+    gen_preprocessor_comments(args.dry_run)
     gen_monolithic_source_file(args.dry_run)
     gen_undefs(args.dry_run)
 
@@ -1367,6 +1689,8 @@ def _main():
         force_cross=args.force_cross,
         no_simplify=args.no_simplify,
     )
+
+    print()
 
 
 if __name__ == "__main__":

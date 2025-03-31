@@ -148,7 +148,8 @@ __contract__(
  * Keccak-f1600-x4 implementation falls back to 4-fold Keccak-f1600,
  * set this to gain a small speedup. */
 #define FIPS202_X4_DEFAULT_IMPLEMENTATION
-#endif
+#endif /* !MLK_USE_NATIVE_BACKEND_FIPS202 || (!MLK_USE_FIPS202_X2_NATIVE && \
+          !MLK_USE_FIPS202_X4_NATIVE) */
 
 
-#endif /* MLK_FIPS202_FIPS202_H */
+#endif /* !MLK_FIPS202_FIPS202_H */

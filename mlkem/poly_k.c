@@ -404,7 +404,7 @@ void mlk_poly_getnoise_eta1122_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
    * than necessary. */
 #if !defined(FIPS202_X4_DEFAULT_IMPLEMENTATION)
   mlk_prf_eta1_x4(buf, extkey);
-#else  /* FIPS202_X4_DEFAULT_IMPLEMENTATION */
+#else
   mlk_prf_eta1(buf[0], extkey[0]);
   mlk_prf_eta1(buf[1], extkey[1]);
   mlk_prf_eta2(buf[2], extkey[2]);

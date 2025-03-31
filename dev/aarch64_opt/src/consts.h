@@ -16,4 +16,4 @@ extern const int16_t mlk_zetas_mulcache_native[256];
   MLK_NAMESPACE(zetas_mulcache_twisted_native)
 extern const int16_t mlk_zetas_mulcache_twisted_native[256];
 
-#endif /* MLK_DEV_AARCH64_OPT_SRC_CONSTS_H */
+#endif /* !MLK_DEV_AARCH64_OPT_SRC_CONSTS_H */

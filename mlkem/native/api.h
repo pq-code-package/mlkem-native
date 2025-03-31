@@ -98,7 +98,10 @@ __contract__(
     "Invalid native profile: MLK_USE_NATIVE_NTT_CUSTOM_ORDER can only be \
 set if there are native implementations for NTT, invNTT, mulcache, basemul, \
 and to/from bytes conversions."
-#endif
+#endif /* !MLK_USE_NATIVE_NTT || !MLK_USE_NATIVE_INTT ||           \
+          !MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE ||                 \
+          !MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED || \
+          !MLK_USE_NATIVE_POLY_TOBYTES || !MLK_USE_NATIVE_POLY_FROMBYTES */
 
 /*************************************************
  * Name:        mlk_poly_permute_bitrev_to_custom
@@ -492,8 +495,7 @@ static MLK_INLINE void mlk_poly_decompress_d4_native(
 static MLK_INLINE void mlk_poly_decompress_d10_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10]);
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D10 */
-#endif /* defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
-          || MLKEM_K == 3) */
+#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
 
 #if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D5)
@@ -567,7 +569,6 @@ static MLK_INLINE void mlk_poly_decompress_d5_native(
 static MLK_INLINE void mlk_poly_decompress_d11_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]);
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D11 */
-#endif /* defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4 \
-        */
+#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 4 */
 
-#endif /* MLK_NATIVE_API_H */
+#endif /* !MLK_NATIVE_API_H */

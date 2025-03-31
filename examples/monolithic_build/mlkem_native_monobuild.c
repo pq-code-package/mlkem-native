@@ -37,13 +37,13 @@
 #include "mlkem/fips202/fips202.c"
 #include "mlkem/fips202/fips202x4.c"
 #include "mlkem/fips202/keccakf1600.c"
-#endif /* !MLK_MONOBUILD_CUSTOM_FIPS202 */
+#endif
 
 #if defined(MLK_MONOBUILD_WITH_NATIVE_ARITH)
 #if defined(MLK_SYS_AARCH64)
 #include "mlkem/native/aarch64/src/aarch64_zetas.c"
 #include "mlkem/native/aarch64/src/rej_uniform_table.c"
-#endif /* MLK_SYS_AARCH64 */
+#endif
 #if defined(MLK_SYS_X86_64)
 #include "mlkem/native/x86_64/src/basemul.c"
 #include "mlkem/native/x86_64/src/compress_avx2.c"
@@ -56,10 +56,10 @@
 #if defined(MLK_MONOBUILD_WITH_NATIVE_FIPS202)
 #if defined(MLK_SYS_AARCH64)
 #include "mlkem/fips202/native/aarch64/src/keccakf1600_round_constants.c"
-#endif /* MLK_SYS_AARCH64 */
+#endif
 #if defined(MLK_SYS_X86_64)
 #include "mlkem/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.c"
-#endif /* MLK_SYS_X86_64 */
+#endif
 #endif /* MLK_MONOBUILD_WITH_NATIVE_FIPS202 */
 
 /*
@@ -486,4 +486,4 @@
 #undef MLK_NATIVE_X86_64_SRC_CONSTS_H
 #undef mlk_qdata
 #endif /* MLK_MONOBUILD_WITH_NATIVE_ARITH */
-#endif /* MLK_MONOBUILD_KEEP_SHARED_HEADERS */
+#endif /* !MLK_MONOBUILD_KEEP_SHARED_HEADERS */

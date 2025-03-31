@@ -12,4 +12,4 @@
   MLK_NAMESPACE(KeccakP1600times4_PermuteAll_24rounds)
 void mlk_keccakf1600x4_permute24(void *states);
 
-#endif /* MLK_FIPS202_NATIVE_X86_64_SRC_KECCAKP_1600_TIMES4_SIMD256_H */
+#endif /* !MLK_FIPS202_NATIVE_X86_64_SRC_KECCAKP_1600_TIMES4_SIMD256_H */

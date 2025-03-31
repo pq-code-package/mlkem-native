@@ -325,10 +325,9 @@ void mlk_poly_cbd3(mlk_poly *r, const uint8_t buf[3 * MLKEM_N / 4])
     }
   }
 }
-#endif /* defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_ETA1 == \
-          3 */
+#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_ETA1 == 3 */
 
-#else /* MLK_MULTILEVEL_BUILD_NO_SHARED */
+#else /* !MLK_MULTILEVEL_BUILD_NO_SHARED */
 
 MLK_EMPTY_CU(sampling)
 

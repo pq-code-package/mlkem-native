@@ -19,4 +19,4 @@ static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
 }
 #endif /* !__ASSEMBLER__ */
 
-#endif /* MLK_DEV_FIPS202_AARCH64_X1_SCALAR_H */
+#endif /* !MLK_DEV_FIPS202_AARCH64_X1_SCALAR_H */

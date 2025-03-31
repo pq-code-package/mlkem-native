@@ -85,7 +85,7 @@ rec {
         shfmt;
 
       inherit (pkgs.python3Packages)
-        mpmath sympy black;
+        mpmath sympy black pyparsing;
     };
   };
 

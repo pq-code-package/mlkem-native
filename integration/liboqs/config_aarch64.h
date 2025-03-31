@@ -176,7 +176,7 @@ static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
 {
   OQS_randombytes(ptr, len);
 }
-#endif
+#endif /* !__ASSEMBLER__ */
 
 /******************************************************************************
  * Name:        MLK_NO_ASM
@@ -248,4 +248,4 @@ static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
 #endif
 #endif /* !__ASSEMBLER__ */
 
-#endif /* MLK_INTEGRATION_LIBOQS_CONFIG_AARCH64_H */
+#endif /* !MLK_INTEGRATION_LIBOQS_CONFIG_AARCH64_H */

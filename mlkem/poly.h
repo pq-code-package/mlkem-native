@@ -333,4 +333,4 @@ __contract__(
   ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND))
 );
 
-#endif /* MLK_POLY_H */
+#endif /* !MLK_POLY_H */

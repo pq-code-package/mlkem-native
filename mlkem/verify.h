@@ -414,9 +414,9 @@ __contract__(
    * that would be preferred. */
   __asm__ __volatile__("" : : "r"(ptr) : "memory");
 }
-#else
+#else /* !MLK_SYS_WINDOWS && MLK_HAVE_INLINE_ASM */
 #error No plausibly-secure implementation of mlk_zeroize available. Please provide your own using MLK_CUSTOM_ZEROIZE.
-#endif
-#endif /* !defined(MLK_CUSTOM_ZEROIZE) */
+#endif /* !MLK_SYS_WINDOWS && !MLK_HAVE_INLINE_ASM */
+#endif /* !MLK_CUSTOM_ZEROIZE */
 
-#endif /* MLK_VERIFY_H */
+#endif /* !MLK_VERIFY_H */

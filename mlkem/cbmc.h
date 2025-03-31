@@ -14,7 +14,7 @@
 #define __contract__(x)
 #define __loop__(x)
 
-#else /* CBMC _is_ defined, therefore we're doing proof */
+#else /* !CBMC */
 
 #define __contract__(x) x
 #define __loop__(x) x
@@ -135,6 +135,6 @@
 #define array_abs_bound(arr, lb, ub, k) \
   array_bound((arr), (lb), (ub), -((int)(k)) + 1, (k))
 
-#endif
+#endif /* CBMC */
 
-#endif /* MLK_CBMC_H */
+#endif /* !MLK_CBMC_H */

@@ -32,18 +32,18 @@ static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
 __contract__(
   requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 1))
   assigns(memory_slice(state, sizeof(uint64_t) * 25 * 1)));
-#endif
+#endif /* MLK_USE_FIPS202_X1_NATIVE */
 #if defined(MLK_USE_FIPS202_X2_NATIVE)
 static MLK_INLINE void mlk_keccak_f1600_x2_native(uint64_t *state)
 __contract__(
   requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 2))
   assigns(memory_slice(state, sizeof(uint64_t) * 25 * 2)));
-#endif
+#endif /* MLK_USE_FIPS202_X2_NATIVE */
 #if defined(MLK_USE_FIPS202_X4_NATIVE)
 static MLK_INLINE void mlk_keccak_f1600_x4_native(uint64_t *state)
 __contract__(
   requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 4))
   assigns(memory_slice(state, sizeof(uint64_t) * 25 * 4)));
-#endif
+#endif /* MLK_USE_FIPS202_X4_NATIVE */
 
-#endif /* MLK_FIPS202_NATIVE_API_H */
+#endif /* !MLK_FIPS202_NATIVE_API_H */

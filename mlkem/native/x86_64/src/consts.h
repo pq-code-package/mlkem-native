@@ -37,6 +37,6 @@
 typedef MLK_ALIGNED_INT16(640) qdata_t;
 #define mlk_qdata MLK_NAMESPACE(qdata)
 extern const qdata_t mlk_qdata;
-#endif
+#endif /* !__ASSEMBLER__ */
 
-#endif /* MLK_NATIVE_X86_64_SRC_CONSTS_H */
+#endif /* !MLK_NATIVE_X86_64_SRC_CONSTS_H */

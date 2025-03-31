@@ -66,10 +66,10 @@ void mlk_polyvec_basemul_acc_montgomery_cached_avx2(unsigned k,
   mlk_zeroize(t, sizeof(t));
 }
 
-#else /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
-          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */
+#else /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_MULTILEVEL_BUILD_NO_SHARED \
+       */
 
 MLK_EMPTY_CU(avx2_basemul)
 
-#endif /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
-          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */
+#endif /* !(MLK_ARITH_BACKEND_X86_64_DEFAULT && \
+          !MLK_MULTILEVEL_BUILD_NO_SHARED) */

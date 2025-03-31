@@ -642,4 +642,4 @@ __contract__(
 );
 #endif /* MLKEM_K == 2 */
 
-#endif /* MLK_POLY_K_H */
+#endif /* !MLK_POLY_K_H */

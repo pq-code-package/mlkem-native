@@ -12,10 +12,10 @@
 
 #ifdef MLK_SYS_AARCH64
 #include "aarch64/meta.h"
-#endif /* MLK_SYS_AARCH64 */
+#endif
 
 #ifdef MLK_SYS_X86_64_AVX2
 #include "x86_64/meta.h"
-#endif /* MLK_SYS_X86_64 */
+#endif
 
-#endif /* MLK_NATIVE_META_H */
+#endif /* !MLK_NATIVE_META_H */
