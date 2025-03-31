@@ -46,7 +46,7 @@ void mlk_poly_cbd2(mlk_poly *r, const uint8_t buf[2 * MLKEM_N / 4]);
  **************************************************/
 MLK_INTERNAL_API
 void mlk_poly_cbd3(mlk_poly *r, const uint8_t buf[3 * MLKEM_N / 4]);
-#endif /* MLK_MULTILEVEL_BUILD || MLKEM_ETA1 == 3 */
+#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_ETA1 == 3 */
 
 #define mlk_poly_rej_uniform_x4 MLK_NAMESPACE(poly_rej_uniform_x4)
 /*************************************************
@@ -98,4 +98,4 @@ __contract__(
   assigns(memory_slice(entry, sizeof(mlk_poly)))
   ensures(array_bound(entry->coeffs, 0, MLKEM_N, 0, MLKEM_Q)));
 
-#endif /* MLK_SAMPLING_H */
+#endif /* !MLK_SAMPLING_H */

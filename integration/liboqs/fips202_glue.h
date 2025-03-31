@@ -19,4 +19,4 @@
 #define mlk_sha3_256 sha3_256
 #define mlk_sha3_512 sha3_512
 
-#endif /* MLK_INTEGRATION_LIBOQS_FIPS202_GLUE_H */
+#endif /* !MLK_INTEGRATION_LIBOQS_FIPS202_GLUE_H */

@@ -99,7 +99,7 @@ void mlk_debug_check_bounds(const char *file, int line, const int16_t *ptr,
                  array_abs_bound(&((int16_t(*)[(N)])(ptr))[kN][0], 0, (N), \
                                  (value_abs_bd))))
 
-#else /* MLKEM_DEBUG */
+#else /* !MLKEM_DEBUG && CBMC */
 
 #define mlk_assert(val) \
   do                    \
@@ -125,5 +125,5 @@ void mlk_debug_check_bounds(const char *file, int line, const int16_t *ptr,
   } while (0)
 
 
-#endif /* MLKEM_DEBUG */
-#endif /* MLK_DEBUG_H */
+#endif /* !MLKEM_DEBUG && !CBMC */
+#endif /* !MLK_DEBUG_H */

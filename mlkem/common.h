@@ -9,7 +9,7 @@
 #include MLK_CONFIG_FILE
 #else
 #include "config.h"
-#endif /* MLK_CONFIG_FILE */
+#endif
 
 #include "params.h"
 #include "sys.h"
@@ -27,7 +27,7 @@
  * but allow the user to overwrite this in the config. */
 #if !defined(MLK_EXTERNAL_API)
 #define MLK_EXTERNAL_API
-#endif /* MLK_EXTERNAL_API */
+#endif
 
 #if defined(MLK_MULTILEVEL_BUILD_NO_SHARED) || \
     defined(MLK_MULTILEVEL_BUILD_WITH_SHARED)
@@ -39,9 +39,9 @@
 
 #if defined(MLK_MULTILEVEL_BUILD)
 #define MLK_ADD_LEVEL(s) MLK_CONCAT(s, MLKEM_LVL)
-#else /* MLK_MULTILEVEL_BUILD */
+#else
 #define MLK_ADD_LEVEL(s) s
-#endif /* MLK_MULTILEVEL_BUILD */
+#endif
 
 #define MLK_NAMESPACE(s) MLK_CONCAT(MLK_CONCAT(MLK_NAMESPACE_PREFIX, _), s)
 #define MLK_NAMESPACE_K(s) \
@@ -77,7 +77,7 @@
 #if defined(MLK_NO_ASM)
 #undef MLK_USE_NATIVE_BACKEND_ARITH
 #undef MLK_USE_NATIVE_BACKEND_FIPS202
-#endif /* MLK_NO_ASM */
+#endif
 
 #if defined(MLK_USE_NATIVE_BACKEND_ARITH) && !defined(MLK_ARITH_BACKEND_FILE)
 #error Bad configuration: MLK_USE_NATIVE_BACKEND_ARITH is set, but MLK_ARITH_BACKEND_FILE is not.
@@ -98,7 +98,7 @@
 #include "native/api.h"
 #endif
 #include MLK_ARITH_BACKEND_FILE
-#endif
+#endif /* MLK_USE_NATIVE_BACKEND_ARITH */
 
 #if defined(MLK_USE_NATIVE_BACKEND_FIPS202)
 /* Include to enforce consistency of API and implementation,
@@ -110,7 +110,7 @@
 #include "fips202/native/api.h"
 #endif
 #include MLK_FIPS202_BACKEND_FILE
-#endif
+#endif /* MLK_USE_NATIVE_BACKEND_FIPS202 */
 
 #if !defined(MLK_FIPS202_CUSTOM_HEADER)
 #define MLK_FIPS202_HEADER_FILE "fips202/fips202.h"
@@ -124,4 +124,4 @@
 #define MLK_FIPS202X4_HEADER_FILE MLK_FIPS202X4_CUSTOM_HEADER
 #endif
 
-#endif /* MLK_COMMON_H */
+#endif /* !MLK_COMMON_H */

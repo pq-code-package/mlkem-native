@@ -90,4 +90,4 @@ static MLK_INLINE int mlk_rej_uniform_native(int16_t *r, unsigned len,
 }
 #endif /* !__ASSEMBLER__ */
 
-#endif /* MLK_DEV_AARCH64_CLEAN_META_H */
+#endif /* !MLK_DEV_AARCH64_CLEAN_META_H */

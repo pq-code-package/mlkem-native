@@ -98,8 +98,8 @@ __contract__(
     assigns(memory_slice(state, sizeof(uint64_t) * MLK_KECCAK_LANES))
 );
 
-#else
+#else /* !MLK_USE_FIPS202_X1_ASM */
 #define mlk_keccakf1600_permute MLK_NAMESPACE(keccak_f1600_x1_asm)
-#endif
+#endif /* MLK_USE_FIPS202_X1_ASM */
 
-#endif /* MLK_FIPS202_KECCAKF1600_H */
+#endif /* !MLK_FIPS202_KECCAKF1600_H */

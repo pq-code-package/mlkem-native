@@ -222,7 +222,7 @@ void mlk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
   mlk_zeroize(ctx, sizeof(ctx));
 }
 
-#else /* MLK_MULTILEVEL_BUILD_NO_SHARED */
+#else /* !MLK_MULTILEVEL_BUILD_NO_SHARED */
 
 MLK_EMPTY_CU(fips202)
 

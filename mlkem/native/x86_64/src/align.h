@@ -20,4 +20,4 @@
     __m256i vec[(N + 15) / 16]; \
   }
 
-#endif /* MLK_NATIVE_X86_64_SRC_ALIGN_H */
+#endif /* !MLK_NATIVE_X86_64_SRC_ALIGN_H */

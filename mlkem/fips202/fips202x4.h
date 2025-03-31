@@ -77,4 +77,4 @@ __contract__(
   assigns(memory_slice(out3, outlen))
 );
 
-#endif /* MLK_FIPS202_FIPS202X4_H */
+#endif /* !MLK_FIPS202_FIPS202X4_H */

@@ -73,4 +73,4 @@ void mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(int16_t *r,
 unsigned mlk_rej_uniform_asm(int16_t *r, const uint8_t *buf, unsigned buflen,
                              const uint8_t *table);
 
-#endif /* MLK_NATIVE_AARCH64_SRC_ARITH_NATIVE_AARCH64_H */
+#endif /* !MLK_NATIVE_AARCH64_SRC_ARITH_NATIVE_AARCH64_H */

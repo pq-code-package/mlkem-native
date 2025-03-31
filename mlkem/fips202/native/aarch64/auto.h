@@ -28,7 +28,7 @@
 #include "x1_v84a.h"
 #elif !defined(MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER)
 #include "x1_scalar.h"
-#endif /* !MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER */
+#endif
 
 /*
  * Keccak-f1600x2/x4
@@ -51,14 +51,14 @@
  */
 #if defined(__APPLE__)
 #include "x2_v84a.h"
-#else /* __APPLE__ */
+#else
 #include "x4_v8a_v84a_scalar.h"
-#endif /* __APPLE__ */
+#endif
 
 #else /* __ARM_FEATURE_SHA3 */
 
 #include "x4_v8a_scalar.h"
 
-#endif /* __ARM_FEATURE_SHA3 */
+#endif /* !__ARM_FEATURE_SHA3 */
 
-#endif /* MLK_FIPS202_NATIVE_AARCH64_AUTO_H */
+#endif /* !MLK_FIPS202_NATIVE_AARCH64_AUTO_H */

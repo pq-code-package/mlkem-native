@@ -83,4 +83,4 @@ void mlk_poly_compress_d11_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
 void mlk_poly_decompress_d11_avx2(
     __m256i *MLK_RESTRICT r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]);
 
-#endif /* MLK_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H */
+#endif /* !MLK_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H */

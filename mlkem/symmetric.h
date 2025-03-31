@@ -56,4 +56,4 @@
 
 #define MLK_XOF_RATE SHAKE128_RATE
 
-#endif /* MLK_SYMMETRIC_H */
+#endif /* !MLK_SYMMETRIC_H */

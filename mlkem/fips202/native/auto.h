@@ -19,4 +19,4 @@
 #include "x86_64/xkcp.h"
 #endif
 
-#endif /* MLK_FIPS202_NATIVE_AUTO_H */
+#endif /* !MLK_FIPS202_NATIVE_AUTO_H */

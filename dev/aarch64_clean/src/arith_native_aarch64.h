@@ -74,4 +74,4 @@ void mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(int16_t *r,
                                                       const int16_t *b,
                                                       const int16_t *b_cache);
 
-#endif /* MLK_DEV_AARCH64_CLEAN_SRC_ARITH_NATIVE_AARCH64_H */
+#endif /* !MLK_DEV_AARCH64_CLEAN_SRC_ARITH_NATIVE_AARCH64_H */

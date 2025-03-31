@@ -53,10 +53,8 @@ __contract__(
   mlk_assert_abs_bound(&res, 1, MLKEM_Q);
   return res;
 }
-#endif /* !defined(MLK_USE_NATIVE_POLY_TOMONT) ||           \
-          !defined(MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE) || \
-          !defined(MLK_USE_NATIVE_NTT) ||                   \
-          !defined(MLK_USE_NATIVE_INTT) */
+#endif /* !MLK_USE_NATIVE_POLY_TOMONT || !MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE \
+          || !MLK_USE_NATIVE_NTT || !MLK_USE_NATIVE_INTT */
 
 #if !defined(MLK_USE_NATIVE_POLY_REDUCE) || !defined(MLK_USE_NATIVE_INTT)
 /*************************************************
@@ -105,8 +103,7 @@ __contract__(
   mlk_assert_abs_bound(&res, 1, MLKEM_Q_HALF);
   return res;
 }
-#endif /* !defined(MLK_USE_NATIVE_POLY_REDUCE) || \
-          !defined(MLK_USE_NATIVE_INTT) */
+#endif /* !MLK_USE_NATIVE_POLY_REDUCE || !MLK_USE_NATIVE_INTT */
 
 #if !defined(MLK_USE_NATIVE_POLY_TOMONT)
 /* Reference: `poly_tomont()` in reference implementation. */
@@ -125,7 +122,7 @@ void mlk_poly_tomont(mlk_poly *r)
 
   mlk_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
 }
-#else  /* MLK_USE_NATIVE_POLY_TOMONT */
+#else  /* !MLK_USE_NATIVE_POLY_TOMONT */
 MLK_INTERNAL_API
 void mlk_poly_tomont(mlk_poly *r)
 {
@@ -190,7 +187,7 @@ void mlk_poly_reduce(mlk_poly *r)
 
   mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
-#else  /* MLK_USE_NATIVE_POLY_REDUCE */
+#else  /* !MLK_USE_NATIVE_POLY_REDUCE */
 MLK_INTERNAL_API
 void mlk_poly_reduce(mlk_poly *r)
 {
@@ -238,8 +235,7 @@ void mlk_poly_sub(mlk_poly *r, const mlk_poly *b)
 #if !defined(MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE) || \
     !defined(MLK_USE_NATIVE_NTT) || !defined(MLK_USE_NATIVE_INTT)
 #include "zetas.inc"
-#endif /* !MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE && \
-    !MLK_USE_NATIVE_NTT && !MLK_USE_NATIVE_INTT */
+#endif
 
 #if !defined(MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE)
 /* Reference: Does not exist in the reference implementation.
@@ -268,7 +264,7 @@ void mlk_poly_mulcache_compute(mlk_poly_mulcache *x, const mlk_poly *a)
    */
   mlk_assert_abs_bound(x, MLKEM_N / 2, MLKEM_Q);
 }
-#else  /* MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE */
+#else  /* !MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE */
 MLK_INTERNAL_API
 void mlk_poly_mulcache_compute(mlk_poly_mulcache *x, const mlk_poly *a)
 {
@@ -407,7 +403,7 @@ void mlk_poly_ntt(mlk_poly *p)
   /* Check the stronger bound */
   mlk_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
 }
-#else  /* MLK_USE_NATIVE_NTT */
+#else  /* !MLK_USE_NATIVE_NTT */
 
 MLK_INTERNAL_API
 void mlk_poly_ntt(mlk_poly *p)
@@ -493,7 +489,7 @@ void mlk_poly_invntt_tomont(mlk_poly *p)
 
   mlk_assert_abs_bound(p, MLKEM_N, MLK_INVNTT_BOUND);
 }
-#else  /* MLK_USE_NATIVE_INTT */
+#else  /* !MLK_USE_NATIVE_INTT */
 
 MLK_INTERNAL_API
 void mlk_poly_invntt_tomont(mlk_poly *p)
@@ -503,7 +499,7 @@ void mlk_poly_invntt_tomont(mlk_poly *p)
 }
 #endif /* MLK_USE_NATIVE_INTT */
 
-#else /* MLK_MULTILEVEL_BUILD_NO_SHARED */
+#else /* !MLK_MULTILEVEL_BUILD_NO_SHARED */
 
 MLK_EMPTY_CU(mlk_poly)
 

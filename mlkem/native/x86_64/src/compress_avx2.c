@@ -167,8 +167,7 @@ void mlk_poly_decompress_d10_avx2(
   _mm256_store_si256(&r[i], f);
 }
 
-#endif /* defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 \
-          || MLKEM_K == 3) */
+#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
 
 #if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
 void mlk_poly_compress_d5_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
@@ -366,12 +365,12 @@ void mlk_poly_decompress_d11_avx2(
   _mm256_store_si256(&r[i], f);
 }
 
-#endif /* MLK_MULTILEVEL_BUILD || MLKEM_K == 4 */
+#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 4 */
 
-#else /* MLK_ARITH_BACKEND_X86_64_DEFAULT && \
-         ! MLK_MULTILEVEL_BUILD_NO_SHARED */
+#else /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_MULTILEVEL_BUILD_NO_SHARED \
+       */
 
 MLK_EMPTY_CU(avx2_poly_compress)
 
-#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && \
-         ! MLK_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* !(MLK_ARITH_BACKEND_X86_64_DEFAULT && \
+          !MLK_MULTILEVEL_BUILD_NO_SHARED) */

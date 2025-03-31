@@ -188,7 +188,7 @@ void mlk_shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
   mlk_zeroize(tmp3, sizeof(tmp3));
 }
 
-#else /* MLK_MULTILEVEL_BUILD_NO_SHARED */
+#else /* !MLK_MULTILEVEL_BUILD_NO_SHARED */
 
 MLK_EMPTY_CU(fips202x4)
 

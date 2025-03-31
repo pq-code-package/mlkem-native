@@ -28,7 +28,7 @@ __contract__(
   requires(memory_no_alias(str1, n))
   requires(memory_no_alias(str2, n))
 );
-#endif
+#endif /* CBMC */
 
 /*************************************************
  * Name:        mlk_check_pk
@@ -172,7 +172,7 @@ cleanup:
   mlk_zeroize(ss_dec, sizeof(ss_dec));
   return res;
 }
-#else  /* !MLKEM_KEYGEN_PCT */
+#else  /* MLK_KEYGEN_PCT */
 static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                          uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
@@ -181,7 +181,7 @@ static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   ((void)sk);
   return 0;
 }
-#endif /* MLKEM_KEYGEN_PCT */
+#endif /* !MLK_KEYGEN_PCT */
 
 /* Reference: `crypto_kem_keypair_derand()` in the reference implementation
  *            - We optionally include PCT which is not present in

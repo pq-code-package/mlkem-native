@@ -8,7 +8,7 @@
 
 #if !defined(__ARM_FEATURE_SHA3)
 #error This backend can only be used if SHA3 extensions are available.
-#endif /* __ARM_FEATURE_SHA3 */
+#endif
 
 /* Part of backend API */
 #define MLK_USE_FIPS202_X1_NATIVE
@@ -23,4 +23,4 @@ static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
 }
 #endif /* !__ASSEMBLER__ */
 
-#endif /* MLK_FIPS202_NATIVE_AARCH64_X1_V84A_H */
+#endif /* !MLK_FIPS202_NATIVE_AARCH64_X1_V84A_H */

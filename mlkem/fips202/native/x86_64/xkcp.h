@@ -19,6 +19,6 @@ static MLK_INLINE void mlk_keccak_f1600_x4_native(uint64_t *state)
 {
   mlk_keccakf1600x4_permute24(state);
 }
-#endif /* MLK_FIPS202_PROFILE_IMPL_H */
+#endif /* !__ASSEMBLER__ */
 
-#endif /* MLK_FIPS202_NATIVE_X86_64_XKCP_H */
+#endif /* !MLK_FIPS202_NATIVE_X86_64_XKCP_H */

@@ -279,10 +279,8 @@ MLK_ALIGN const uint8_t mlk_rej_uniform_table[] = {
     0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15 /* 255 */,
 };
 
-#else /* defined(MLK_ARITH_BACKEND_AARCH64) \
-         && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */
+#else /* MLK_ARITH_BACKEND_AARCH64 && !MLK_MULTILEVEL_BUILD_NO_SHARED */
 
 MLK_EMPTY_CU(aarch64_rej_uniform_table)
 
-#endif /* defined(MLK_ARITH_BACKEND_AARCH64) \
-          && !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */
+#endif /* !(MLK_ARITH_BACKEND_AARCH64 && !MLK_MULTILEVEL_BUILD_NO_SHARED) */

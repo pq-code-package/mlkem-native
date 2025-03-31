@@ -64,14 +64,15 @@
 #define MLK_BUILD_INFO_CONCAT3(x, y, z) MLK_BUILD_INFO_CONCAT3_(x, y, z)
 #define MLK_BUILD_INFO_NAMESPACE(sym) \
   MLK_BUILD_INFO_CONCAT3(MLK_NAMESPACE_PREFIX, MLK_BUILD_INFO_LVL, sym)
-#else
+#else /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLK_MULTILEVEL_BUILD_NO_SHARED */
 #define MLK_BUILD_INFO_CONCAT2_(x, y) x##_##y
 #define MLK_BUILD_INFO_CONCAT2(x, y) MLK_BUILD_INFO_CONCAT2_(x, y)
 #define MLK_BUILD_INFO_NAMESPACE(sym) \
   MLK_BUILD_INFO_CONCAT2(MLK_NAMESPACE_PREFIX, sym)
-#endif
+#endif /* !(MLK_MULTILEVEL_BUILD_WITH_SHARED || \
+          MLK_MULTILEVEL_BUILD_NO_SHARED) */
 
-#endif /* MLK_BUILD_INFO_LVL */
+#endif /* !MLK_BUILD_INFO_LVL */
 
 /* Option 2: Provide MLK_BUILD_INFO_LVL and MLK_BUILD_INFO_NAMESPACE manually */
 
@@ -271,7 +272,7 @@ int MLK_BUILD_INFO_NAMESPACE(dec)(
 #define crypto_kem_enc_derand MLK_BUILD_INFO_NAMESPACE(enc_derand)
 #define crypto_kem_enc MLK_BUILD_INFO_NAMESPACE(enc)
 #define crypto_kem_dec MLK_BUILD_INFO_NAMESPACE(dec)
-#endif /* MLK_BUILD_INFO_NO_STANDARD_API */
+#endif /* !MLK_BUILD_INFO_NO_STANDARD_API */
 
 /********************************* Cleanup ************************************/
 
@@ -280,4 +281,4 @@ int MLK_BUILD_INFO_NAMESPACE(dec)(
 /* #undef MLK_BUILD_INFO_LVL */
 /* #undef MLK_BUILD_INFO_NAMESPACE */
 
-#endif /* MLK_H */
+#endif /* !MLK_H */

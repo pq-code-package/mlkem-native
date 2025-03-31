@@ -176,7 +176,7 @@ __contract__(
   requires(array_bound(data, 0, MLKEM_N, 0, MLKEM_Q))
   assigns(memory_slice(data, sizeof(mlk_poly)))
   ensures(array_bound(data, 0, MLKEM_N, 0, MLKEM_Q))) { ((void)data); }
-#endif /* MLK_USE_NATIVE_NTT_CUSTOM_ORDER */
+#endif /* !MLK_USE_NATIVE_NTT_CUSTOM_ORDER */
 
 /* Reference: `gen_matrix()` in the reference implementation.
  *            - We use a special subroutine to generate 4 polynomials
