@@ -74,5 +74,4 @@ poly_tomont_asm_loop:
         stur	q23, [x0, #-0x40]
         ret
 
-#endif /* MLK_ARITH_BACKEND_AARCH64 &&
-          !MLK_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_MULTILEVEL_BUILD_NO_SHARED */

@@ -608,5 +608,5 @@ MLK_ASM_FN_SYMBOL(ntt_avx2)
         vmovdqa	%ymm11, 0x1e0(%rdi)
         retq
 
-#endif /* defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
-          !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) */
+#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_MULTILEVEL_BUILD_NO_SHARED \
+        */

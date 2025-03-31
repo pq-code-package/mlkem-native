@@ -454,5 +454,5 @@ initial:
     .unreq Asu
 
 /* simpasm: footer-start */
-#endif /* MLK_FIPS202_AARCH64_NEED_X1_SCALAR &&
+#endif /* MLK_FIPS202_AARCH64_NEED_X1_SCALAR && \
           !MLK_MULTILEVEL_BUILD_NO_SHARED */

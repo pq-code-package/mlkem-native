@@ -106,5 +106,4 @@ poly_tobytes_asm_asm_loop_start:
         st3	{ v22.8b, v23.8b, v24.8b }, [x0], #24
         ret
 
-#endif /* MLK_ARITH_BACKEND_AARCH64 &&
-          !MLK_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_MULTILEVEL_BUILD_NO_SHARED */

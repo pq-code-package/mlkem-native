@@ -117,5 +117,5 @@ reduce128_avx2:
         vmovdqa	%ymm9, 0xe0(%rdi)
         retq
 
-#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT &&
-         ! MLK_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_MULTILEVEL_BUILD_NO_SHARED \
+        */

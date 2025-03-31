@@ -954,5 +954,4 @@ ntt_loop1:
     .unreq t3
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_AARCH64 &&
-          !MLK_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_MULTILEVEL_BUILD_NO_SHARED */
