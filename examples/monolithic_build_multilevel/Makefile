@@ -64,9 +64,6 @@ CFLAGS := \
 	-O3 \
 	$(CFLAGS)
 
-# Set this flag to give all non-global functions internal linkage
-CFLAGS += -DMLK_MONOBUILD
-
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 LIB_NAME_FULL=$(BUILD_DIR)/$(LIB)
 
