@@ -10,7 +10,7 @@
      defined(MLK_FIPS202_AARCH64_NEED_X2_V84A) ||                    \
      defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID) ||       \
      defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID)) && \
-    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <stdint.h>
 #include "fips202_native_aarch64.h"
@@ -30,7 +30,7 @@ MLK_ALIGN const uint64_t mlk_keccakf1600_round_constants[] = {
          MLK_FIPS202_AARCH64_NEED_X1_V84A || MLK_FIPS202_AARCH64_NEED_X2_V84A \
          || MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID ||                  \
          MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID) &&               \
-         !MLK_MULTILEVEL_BUILD_NO_SHARED */
+         !MLK_CONFIG_MULTILEVEL_NO_SHARED */
 
 MLK_EMPTY_CU(fips202_aarch64_round_constants)
 
@@ -38,4 +38,4 @@ MLK_EMPTY_CU(fips202_aarch64_round_constants)
           MLK_FIPS202_AARCH64_NEED_X1_V84A || MLK_FIPS202_AARCH64_NEED_X2_V84A \
           || MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID ||                  \
           MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID) &&               \
-          !MLK_MULTILEVEL_BUILD_NO_SHARED) */
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED) */

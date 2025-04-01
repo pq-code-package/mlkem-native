@@ -27,7 +27,7 @@ implementations:
   - name: ref
     version: FIPS203
     folder_name: .
-    compile_opts: -DMLKEM_K=3 -DMLK_CONFIG_FILE="../integration/liboqs/config_c.h"
+    compile_opts: -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE="../integration/liboqs/config_c.h"
     signature_keypair: PQCP_MLKEM_NATIVE_MLKEM768_C_keypair
     signature_keypair_derand: PQCP_MLKEM_NATIVE_MLKEM768_C_keypair_derand
     signature_enc: PQCP_MLKEM_NATIVE_MLKEM768_C_enc
@@ -36,7 +36,7 @@ implementations:
   - name: x86_64
     version: FIPS203
     folder_name: .
-    compile_opts: -DMLKEM_K=3 -DMLK_CONFIG_FILE="../integration/liboqs/config_x86_64.h"
+    compile_opts: -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE="../integration/liboqs/config_x86_64.h"
     signature_keypair: PQCP_MLKEM_NATIVE_MLKEM768_X86_64_keypair
     signature_keypair_derand: PQCP_MLKEM_NATIVE_MLKEM768_X86_64_keypair_derand
     signature_enc: PQCP_MLKEM_NATIVE_MLKEM768_X86_64_enc
@@ -54,7 +54,7 @@ implementations:
   - name: aarch64
     version: FIPS203
     folder_name: .
-    compile_opts: -DMLKEM_K=3 -DMLK_CONFIG_FILE="../integration/liboqs/config_aarch64.h"
+    compile_opts: -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE="../integration/liboqs/config_aarch64.h"
     signature_keypair: PQCP_MLKEM_NATIVE_MLKEM768_AARCH64_keypair
     signature_keypair_derand: PQCP_MLKEM_NATIVE_MLKEM768_AARCH64_keypair_derand
     signature_enc: PQCP_MLKEM_NATIVE_MLKEM768_AARCH64_enc

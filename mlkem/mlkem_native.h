@@ -44,33 +44,30 @@
 #include "config.h"
 #endif
 
-#if MLKEM_K == 2
-#define MLK_BUILD_INFO_LVL 512
-#elif MLKEM_K == 3
-#define MLK_BUILD_INFO_LVL 768
-#elif MLKEM_K == 4
-#define MLK_BUILD_INFO_LVL 1024
+#if defined(MLK_CONFIG_PARAMETER_SET)
+#define MLK_BUILD_INFO_LVL MLK_CONFIG_PARAMETER_SET
 #else
-#error MLKEM_K not set by config file
+#error MLK_CONFIG_PARAMETER_SET not set by config file
 #endif
 
-#ifndef MLK_NAMESPACE_PREFIX
-#error MLK_NAMESPACE_PREFIX not set by config file
+#ifndef MLK_CONFIG_NAMESPACE_PREFIX
+#error MLK_CONFIG_NAMESPACE_PREFIX not set by config file
 #endif
 
-#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || \
-    defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 #define MLK_BUILD_INFO_CONCAT3_(x, y, z) x##y##_##z
 #define MLK_BUILD_INFO_CONCAT3(x, y, z) MLK_BUILD_INFO_CONCAT3_(x, y, z)
 #define MLK_BUILD_INFO_NAMESPACE(sym) \
-  MLK_BUILD_INFO_CONCAT3(MLK_NAMESPACE_PREFIX, MLK_BUILD_INFO_LVL, sym)
-#else /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLK_MULTILEVEL_BUILD_NO_SHARED */
+  MLK_BUILD_INFO_CONCAT3(MLK_CONFIG_NAMESPACE_PREFIX, MLK_BUILD_INFO_LVL, sym)
+#else /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLK_CONFIG_MULTILEVEL_NO_SHARED \
+       */
 #define MLK_BUILD_INFO_CONCAT2_(x, y) x##_##y
 #define MLK_BUILD_INFO_CONCAT2(x, y) MLK_BUILD_INFO_CONCAT2_(x, y)
 #define MLK_BUILD_INFO_NAMESPACE(sym) \
-  MLK_BUILD_INFO_CONCAT2(MLK_NAMESPACE_PREFIX, sym)
-#endif /* !(MLK_MULTILEVEL_BUILD_WITH_SHARED || \
-          MLK_MULTILEVEL_BUILD_NO_SHARED) */
+  MLK_BUILD_INFO_CONCAT2(MLK_CONFIG_NAMESPACE_PREFIX, sym)
+#endif /* !(MLK_CONFIG_MULTILEVEL_WITH_SHARED || \
+          MLK_CONFIG_MULTILEVEL_NO_SHARED) */
 
 #endif /* !MLK_BUILD_INFO_LVL */
 
@@ -138,7 +135,7 @@
  *                  2*MLKEM_SYMBYTES uniformly random bytes.
  *
  * Returns:     - 0: On success
- *              - -1: On PCT failure (if MLK_KEYGEN_PCT) is enabled.
+ *              - -1: On PCT failure (if MLK_CONFIG_KEYGEN_PCT) is enabled.
  *
  * Specification: Implements [FIPS 203, Algorithm 16, ML-KEM.KeyGen_Internal]
  *
@@ -160,7 +157,7 @@ int MLK_BUILD_INFO_NAMESPACE(keypair_derand)(
  *                 MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
  *
  * Returns:     - 0: On success
- *              - -1: On PCT failure (if MLK_KEYGEN_PCT) is enabled.
+ *              - -1: On PCT failure (if MLK_CONFIG_KEYGEN_PCT) is enabled.
  *
  * Specification: Implements [FIPS 203, Algorithm 19, ML-KEM.KeyGen]
  *

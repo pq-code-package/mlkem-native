@@ -7,18 +7,19 @@
 #define MLK_CONFIG_H
 
 /******************************************************************************
- * Name:        MLKEM_K
+ * Name:        MLK_CONFIG_PARAMETER_SET
  *
  * Description: Determines the security level for ML-KEM
- *              - MLKEM_K=2 corresponds to ML-KEM-512
- *              - MLKEM_K=3 corresponds to ML-KEM-768
- *              - MLKEM_K=4 corresponds to ML-KEM-1024
+ *              - MLK_CONFIG_PARAMETER_SET=512 corresponds to ML-KEM-512
+ *              - MLK_CONFIG_PARAMETER_SET=768 corresponds to ML-KEM-768
+ *              - MLK_CONFIG_PARAMETER_SET=1024 corresponds to ML-KEM-1024
  *
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#ifndef MLKEM_K
-#define MLKEM_K 3 /* Change this for different security strengths */
+#ifndef MLK_CONFIG_PARAMETER_SET
+#define MLK_CONFIG_PARAMETER_SET \
+  768 /* Change this for different security strengths */
 #endif
 
 /******************************************************************************
@@ -38,7 +39,7 @@
 /* #define MLK_CONFIG_FILE "config.h" */
 
 /******************************************************************************
- * Name:        MLK_NAMESPACE_PREFIX
+ * Name:        MLK_CONFIG_NAMESPACE_PREFIX
  *
  * Description: The prefix to use to namespace global symbols
  *              from mlkem/.
@@ -46,10 +47,10 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLK_NAMESPACE_PREFIX mlkem
+#define MLK_CONFIG_NAMESPACE_PREFIX mlkem
 
 /******************************************************************************
- * Name:        MLK_USE_NATIVE_BACKEND_ARITH
+ * Name:        MLK_CONFIG_USE_NATIVE_BACKEND_ARITH
  *
  * Description: Determines whether an native arithmetic backend should be used.
  *
@@ -67,31 +68,32 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#if !defined(MLK_USE_NATIVE_BACKEND_ARITH)
-/* #define MLK_USE_NATIVE_BACKEND_ARITH */
+#if !defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
+/* #define MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 #endif
 
 /******************************************************************************
- * Name:        MLK_ARITH_BACKEND_FILE
+ * Name:        MLK_CONFIG_ARITH_BACKEND_FILE
  *
  * Description: The arithmetic backend to use.
  *
- *              If MLK_USE_NATIVE_BACKEND_ARITH is unset, this option
+ *              If MLK_CONFIG_USE_NATIVE_BACKEND_ARITH is unset, this option
  *              is ignored.
  *
- *              If MLK_USE_NATIVE_BACKEND_ARITH is set, this option must
+ *              If MLK_CONFIG_USE_NATIVE_BACKEND_ARITH is set, this option must
  *              either be undefined or the filename of an arithmetic backend.
  *              If unset, the default backend will be used.
  *
  *              This can be set using CFLAGS.
  *
  *****************************************************************************/
-#if defined(MLK_USE_NATIVE_BACKEND_ARITH) && !defined(MLK_ARITH_BACKEND_FILE)
-#define MLK_ARITH_BACKEND_FILE "native/meta.h"
+#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH) && \
+    !defined(MLK_CONFIG_ARITH_BACKEND_FILE)
+#define MLK_CONFIG_ARITH_BACKEND_FILE "native/meta.h"
 #endif
 
 /******************************************************************************
- * Name:        MLK_USE_NATIVE_BACKEND_FIPS202
+ * Name:        MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
  *
  * Description: Determines whether an native FIPS202 backend should be used.
  *
@@ -109,8 +111,20 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#if !defined(MLK_USE_NATIVE_BACKEND_FIPS202)
-/* #define MLK_USE_NATIVE_BACKEND_FIPS202 */
+#if !defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
+/* #define MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 #endif
+
+/******************************************************************************
+ * Name:        MLK_CONFIG_INTERNAL_API_QUALIFIER
+ *
+ * Description: If set, this option provides an additional function
+ *              qualifier to be added to declarations of internal API.
+ *
+ *              The primary use case for this option are single-CU builds,
+ *              in which case this option can be set to `static`.
+ *
+ *****************************************************************************/
+#define MLK_CONFIG_INTERNAL_API_QUALIFIER static
 
 #endif /* MLkEM_NATIVE_CONFIG_H */

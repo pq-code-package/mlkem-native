@@ -7,17 +7,17 @@
 #define MLK_CONFIG_H
 
 /******************************************************************************
- * Name:        MLKEM_K
+ * Name:        MLK_CONFIG_PARAMETER_SET
  *
  * Description: Determines the security level for ML-KEM
- *              - MLKEM_K=2 corresponds to ML-KEM-512
- *              - MLKEM_K=3 corresponds to ML-KEM-768
- *              - MLKEM_K=4 corresponds to ML-KEM-1024
+ *              - MLK_CONFIG_PARAMETER_SET=512 corresponds to ML-KEM-512
+ *              - MLK_CONFIG_PARAMETER_SET=768 corresponds to ML-KEM-768
+ *              - MLK_CONFIG_PARAMETER_SET=1024 corresponds to ML-KEM-1024
  *
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLKEM_K 3 /* We want MLKEM-768 */
+#define MLK_CONFIG_PARAMETER_SET 768 /* We want MLKEM-768 */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_FILE
@@ -34,15 +34,15 @@
 /* #define MLK_CONFIG_FILE "config.h" */
 
 /******************************************************************************
- * Name:        MLK_NAMESPACE_PREFIX
+ * Name:        MLK_CONFIG_NAMESPACE_PREFIX
  *
  * Description: The prefix to use to namespace global symbols
  *              from mlkem/.
  *****************************************************************************/
-#define MLK_NAMESPACE_PREFIX CUSTOM_TINY_SHA3
+#define MLK_CONFIG_NAMESPACE_PREFIX CUSTOM_TINY_SHA3
 
 /******************************************************************************
- * Name:        MLK_USE_NATIVE_BACKEND_ARITH
+ * Name:        MLK_CONFIG_USE_NATIVE_BACKEND_ARITH
  *
  * Description: Determines whether an native arithmetic backend should be used.
  *
@@ -61,27 +61,27 @@
  *
  *****************************************************************************/
 /* No native arithmetic backend */
-/* #define MLK_USE_NATIVE_BACKEND_ARITH */
+/* #define MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
 /******************************************************************************
- * Name:        MLK_ARITH_BACKEND_FILE
+ * Name:        MLK_CONFIG_ARITH_BACKEND_FILE
  *
  * Description: The arithmetic backend to use.
  *
- *              If MLK_USE_NATIVE_BACKEND_ARITH is unset, this option
+ *              If MLK_CONFIG_USE_NATIVE_BACKEND_ARITH is unset, this option
  *              is ignored.
  *
- *              If MLK_USE_NATIVE_BACKEND_ARITH is set, this option must
+ *              If MLK_CONFIG_USE_NATIVE_BACKEND_ARITH is set, this option must
  *              either be undefined or the filename of an arithmetic backend.
  *              If unset, the default backend will be used.
  *
  *              This can be set using CFLAGS.
  *
  *****************************************************************************/
-/* #define MLK_ARITH_BACKEND_FILE "native/meta.h" */
+/* #define MLK_CONFIG_ARITH_BACKEND_FILE "native/meta.h" */
 
 /******************************************************************************
- * Name:        MLK_USE_NATIVE_BACKEND_FIPS202
+ * Name:        MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
  *
  * Description: Determines whether an native FIPS202 backend should be used.
  *
@@ -99,21 +99,21 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLK_USE_NATIVE_BACKEND_FIPS202
+#define MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
 
 /******************************************************************************
- * Name:        MLK_FIPS202_BACKEND_FILE
+ * Name:        MLK_CONFIG_FIPS202_BACKEND_FILE
  *
  * Description: The FIPS-202 backend to use.
  *
- *              If MLK_USE_NATIVE_BACKEND_FIPS202 is set, this option must
- *              either be undefined or the filename of a FIPS202 backend.
+ *              If MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 is set, this option
+ *              must either be undefined or the filename of a FIPS202 backend.
  *              If unset, the default backend will be used.
  *
  *              This can be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLK_FIPS202_BACKEND_FILE "fips202/native/custom/custom.h"
+#define MLK_CONFIG_FIPS202_BACKEND_FILE "fips202/native/custom/custom.h"
 
 /******************************************************************************
  * Name:        MLK_API_STANDARD

@@ -29,7 +29,7 @@
 
 #include "../../../../common.h"
 #if defined(MLK_FIPS202_AARCH64_NEED_X1_SCALAR) && \
-    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
@@ -336,4 +336,4 @@ keccak_f1600_x1_scalar_loop:
         ret
 
 #endif /* MLK_FIPS202_AARCH64_NEED_X1_SCALAR && \
-          !MLK_MULTILEVEL_BUILD_NO_SHARED */
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED */

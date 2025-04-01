@@ -11,7 +11,7 @@
 #include "../../../common.h"
 
 #if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <immintrin.h>
 #include <stdint.h>
@@ -126,10 +126,10 @@ unsigned mlk_rej_uniform_avx2(int16_t *MLK_RESTRICT r, const uint8_t *buf)
   return ctr;
 }
 
-#else /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_MULTILEVEL_BUILD_NO_SHARED \
+#else /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
        */
 
 MLK_EMPTY_CU(avx2_rej_uniform)
 
 #endif /* !(MLK_ARITH_BACKEND_X86_64_DEFAULT && \
-          !MLK_MULTILEVEL_BUILD_NO_SHARED) */
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED) */

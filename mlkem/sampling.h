@@ -28,7 +28,7 @@
 MLK_INTERNAL_API
 void mlk_poly_cbd2(mlk_poly *r, const uint8_t buf[2 * MLKEM_N / 4]);
 
-#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_ETA1 == 3
+#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_ETA1 == 3
 #define mlk_poly_cbd3 MLK_NAMESPACE(poly_cbd3)
 /*************************************************
  * Name:        mlk_poly_cbd3
@@ -46,7 +46,7 @@ void mlk_poly_cbd2(mlk_poly *r, const uint8_t buf[2 * MLKEM_N / 4]);
  **************************************************/
 MLK_INTERNAL_API
 void mlk_poly_cbd3(mlk_poly *r, const uint8_t buf[3 * MLKEM_N / 4]);
-#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_ETA1 == 3 */
+#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_ETA1 == 3 */
 
 #define mlk_poly_rej_uniform_x4 MLK_NAMESPACE(poly_rej_uniform_x4)
 /*************************************************

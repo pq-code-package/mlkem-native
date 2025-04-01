@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "common.h"
-#if !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
+#if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <stdint.h>
 #include <string.h>
@@ -499,8 +499,8 @@ void mlk_poly_invntt_tomont(mlk_poly *p)
 }
 #endif /* MLK_USE_NATIVE_INTT */
 
-#else /* !MLK_MULTILEVEL_BUILD_NO_SHARED */
+#else /* !MLK_CONFIG_MULTILEVEL_NO_SHARED */
 
 MLK_EMPTY_CU(mlk_poly)
 
-#endif /* MLK_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_CONFIG_MULTILEVEL_NO_SHARED */

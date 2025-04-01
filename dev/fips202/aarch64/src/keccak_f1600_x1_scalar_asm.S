@@ -29,7 +29,7 @@
 
 #include "../../../../common.h"
 #if defined(MLK_FIPS202_AARCH64_NEED_X1_SCALAR) && \
-    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
 /****************** REGISTER ALLOCATIONS *******************/
@@ -455,4 +455,4 @@ initial:
 
 /* simpasm: footer-start */
 #endif /* MLK_FIPS202_AARCH64_NEED_X1_SCALAR && \
-          !MLK_MULTILEVEL_BUILD_NO_SHARED */
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED */

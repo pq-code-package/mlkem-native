@@ -7,44 +7,45 @@
 #define MLK_INTEGRATION_LIBOQS_CONFIG_AARCH64_H
 
 /******************************************************************************
- * Name:        MLKEM_K
+ * Name:        MLK_CONFIG_PARAMETER_SET
  *
  * Description: Determines the security level for ML-KEM
- *              - MLKEM_K=2 corresponds to ML-KEM-512
- *              - MLKEM_K=3 corresponds to ML-KEM-768
- *              - MLKEM_K=4 corresponds to ML-KEM-1024
+ *              - MLK_CONFIG_PARAMETER_SET=512 corresponds to ML-KEM-512
+ *              - MLK_CONFIG_PARAMETER_SET=768 corresponds to ML-KEM-768
+ *              - MLK_CONFIG_PARAMETER_SET=1024 corresponds to ML-KEM-1024
  *
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#ifndef MLKEM_K
-#define MLKEM_K 3 /* Change this for different security strengths */
+#ifndef MLK_CONFIG_PARAMETER_SET
+#define MLK_CONFIG_PARAMETER_SET \
+  768 /* Change this for different security strengths */
 #endif
 
 /******************************************************************************
- * Name:        MLK_NAMESPACE_PREFIX
+ * Name:        MLK_CONFIG_NAMESPACE_PREFIX
  *
  * Description: The prefix to use to namespace global symbols from mlkem/.
  *
  *              In a multi-level build (that is, if either
- *              - MLK_MULTILEVEL_BUILD_WITH_SHARED, or
- *              - MLK_MULTILEVEL_BUILD_NO_SHARED,
+ *              - MLK_CONFIG_MULTILEVEL_WITH_SHARED, or
+ *              - MLK_CONFIG_MULTILEVEL_NO_SHARED,
  *              are set, level-dependent symbols will additionally be prefixed
  *              with the security level.
  *
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#if MLKEM_K == 2
-#define MLK_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM512_AARCH64
-#elif MLKEM_K == 3
-#define MLK_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM768_AARCH64
-#elif MLKEM_K == 4
-#define MLK_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64
+#if MLK_CONFIG_PARAMETER_SET == 512
+#define MLK_CONFIG_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM512_AARCH64
+#elif MLK_CONFIG_PARAMETER_SET == 768
+#define MLK_CONFIG_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM768_AARCH64
+#elif MLK_CONFIG_PARAMETER_SET == 1024
+#define MLK_CONFIG_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM1024_AARCH64
 #endif
 
 /******************************************************************************
- * Name:        MLK_USE_NATIVE_BACKEND_ARITH
+ * Name:        MLK_CONFIG_USE_NATIVE_BACKEND_ARITH
  *
  * Description: Determines whether an native arithmetic backend should be used.
  *
@@ -62,27 +63,27 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLK_USE_NATIVE_BACKEND_ARITH
+#define MLK_CONFIG_USE_NATIVE_BACKEND_ARITH
 
 /******************************************************************************
- * Name:        MLK_ARITH_BACKEND_FILE
+ * Name:        MLK_CONFIG_ARITH_BACKEND_FILE
  *
  * Description: The arithmetic backend to use.
  *
- *              If MLK_USE_NATIVE_BACKEND_ARITH is unset, this option
+ *              If MLK_CONFIG_USE_NATIVE_BACKEND_ARITH is unset, this option
  *              is ignored.
  *
- *              If MLK_USE_NATIVE_BACKEND_ARITH is set, this option must
+ *              If MLK_CONFIG_USE_NATIVE_BACKEND_ARITH is set, this option must
  *              either be undefined or the filename of an arithmetic backend.
  *              If unset, the default backend will be used.
  *
  *              This can be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLK_ARITH_BACKEND_FILE "native/meta.h"
+#define MLK_CONFIG_ARITH_BACKEND_FILE "native/meta.h"
 
 /******************************************************************************
- * Name:        MLK_FIPS202_CUSTOM_HEADER
+ * Name:        MLK_CONFIG_FIPS202_CUSTOM_HEADER
  *
  * Description: Custom header to use for FIPS-202
  *
@@ -95,10 +96,10 @@
  *              the same API (see FIPS202.md).
  *
  *****************************************************************************/
-#define MLK_FIPS202_CUSTOM_HEADER "../integration/liboqs/fips202_glue.h"
+#define MLK_CONFIG_FIPS202_CUSTOM_HEADER "../integration/liboqs/fips202_glue.h"
 
 /******************************************************************************
- * Name:        MLK_FIPS202X4_CUSTOM_HEADER
+ * Name:        MLK_CONFIG_FIPS202X4_CUSTOM_HEADER
  *
  * Description: Custom header to use for FIPS-202-X4
  *
@@ -111,10 +112,11 @@
  *              the same API (see FIPS202.md).
  *
  *****************************************************************************/
-#define MLK_FIPS202X4_CUSTOM_HEADER "../integration/liboqs/fips202x4_glue.h"
+#define MLK_CONFIG_FIPS202X4_CUSTOM_HEADER \
+  "../integration/liboqs/fips202x4_glue.h"
 
 /******************************************************************************
- * Name:        MLK_CUSTOM_ZEROIZE
+ * Name:        MLK_CONFIG_CUSTOM_ZEROIZE
  *
  * Description: In compliance with FIPS 203 Section 3.3, mlkem-native zeroizes
  *              intermediate stack buffers before returning from function calls.
@@ -124,7 +126,7 @@
  *              The default implementation uses SecureZeroMemory on Windows
  *              and a memset + compiler barrier otherwise. If neither of those
  *              is available on the target platform, compilation will fail,
- *              and you will need to use MLK_CUSTOM_ZEROIZE to provide
+ *              and you will need to use MLK_CONFIG_CUSTOM_ZEROIZE to provide
  *              a custom implementation of `mlk_zeroize()`.
  *
  *              WARNING:
@@ -141,7 +143,7 @@
  *              provides. In this case, you can set mlk_zeroize to a no-op.
  *
  *****************************************************************************/
-/* #define MLK_CUSTOM_ZEROIZE
+/* #define MLK_CONFIG_CUSTOM_ZEROIZE
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
    #include "sys.h"
@@ -153,7 +155,7 @@
 */
 
 /******************************************************************************
- * Name:        MLK_CUSTOM_RANDOMBYTES
+ * Name:        MLK_CONFIG_CUSTOM_RANDOMBYTES
  *
  * Description: mlkem-native does not provide a secure randombytes
  *              implementation. Such an implementation has to provided by the
@@ -167,7 +169,7 @@
  *              or signature.
  *
  *****************************************************************************/
-#define MLK_CUSTOM_RANDOMBYTES
+#define MLK_CONFIG_CUSTOM_RANDOMBYTES
 #if !defined(__ASSEMBLER__)
 #include <oqs/rand.h>
 #include <stdint.h>
@@ -179,7 +181,7 @@ static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
 #endif /* !__ASSEMBLER__ */
 
 /******************************************************************************
- * Name:        MLK_NO_ASM
+ * Name:        MLK_CONFIG_NO_ASM
  *
  * Description: If this option is set, mlkem-native will be built without
  *              use of native code or inline assembly.
@@ -191,18 +193,18 @@ static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
  *              Inline assembly is also used to implement a secure zeroization
  *              function on non-Windows platforms. If this option is set and
  *              the target platform is not Windows, you MUST set
- *              MLK_CUSTOM_ZEROIZE and provide a custom zeroization
+ *              MLK_CONFIG_CUSTOM_ZEROIZE and provide a custom zeroization
  *              function.
  *
- *              If this option is set, MLK_USE_NATIVE_BACKEND_FIPS202 and
- *              and MLK_USE_NATIVE_BACKEND_ARITH will be ignored, and no native
- *              backends will be used.
+ *              If this option is set, MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 and
+ *              and MLK_CONFIG_USE_NATIVE_BACKEND_ARITH will be ignored, and no
+ *native backends will be used.
  *
  *****************************************************************************/
-/* #define MLK_NO_ASM */
+/* #define MLK_CONFIG_NO_ASM */
 
 /******************************************************************************
- * Name:        MLK_KEYGEN_PCT
+ * Name:        MLK_CONFIG_KEYGEN_PCT
  *
  * Description: Compliance with [FIPS 140-3
  *IG](https://csrc.nist.gov/csrc/media/Projects/cryptographic-module-validation-program/documents/fips%20140-3/FIPS%20140-3%20IG.pdf)
@@ -217,19 +219,19 @@ static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
  *              key generation.
  *
  *****************************************************************************/
-/* #define MLK_KEYGEN_PCT */
+/* #define MLK_CONFIG_KEYGEN_PCT */
 
 /******************************************************************************
- * Name:        MLK_KEYGEN_PCT_BREAKAGE_TEST
+ * Name:        MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
  *
  * Description: If this option is set, the user must provide a runtime
  *              function `static inline int mlk_break_pct() { ... }` to
  *              indicate whether the PCT should be made fail.
  *
- *              This option only has an effect if MLK_KEYGEN_PCT is set.
+ *              This option only has an effect if MLK_CONFIG_KEYGEN_PCT is set.
  *
  *****************************************************************************/
-/* #define MLK_KEYGEN_PCT_BREAKAGE_TEST
+/* #define MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
    #if !defined(__ASSEMBLER__)
    #include "sys.h"
    static MLK_INLINE int mlk_break_pct(void)
@@ -244,7 +246,7 @@ static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
 #if !defined(__ASSEMBLER__)
 #include <oqs/common.h>
 #if defined(OQS_ENABLE_TEST_CONSTANT_TIME)
-#define MLK_CT_TESTING_ENABLED
+#define MLK_CONFIG_CT_TESTING_ENABLED
 #endif
 #endif /* !__ASSEMBLER__ */
 

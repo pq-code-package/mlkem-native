@@ -16,20 +16,20 @@
 
 /* Internal and public API have external linkage by default, but
  * this can be overwritten by the user, e.g. for single-CU builds. */
-#if !defined(MLK_INTERNAL_API_QUALIFIER)
+#if !defined(MLK_CONFIG_INTERNAL_API_QUALIFIER)
 #define MLK_INTERNAL_API
 #else
-#define MLK_INTERNAL_API MLK_INTERNAL_API_QUALIFIER
+#define MLK_INTERNAL_API MLK_CONFIG_INTERNAL_API_QUALIFIER
 #endif
 
-#if !defined(MLK_EXTERNAL_API_QUALIFIER)
+#if !defined(MLK_CONFIG_EXTERNAL_API_QUALIFIER)
 #define MLK_EXTERNAL_API
 #else
-#define MLK_EXTERNAL_API MLK_EXTERNAL_API_QUALIFIER
+#define MLK_EXTERNAL_API MLK_CONFIG_EXTERNAL_API_QUALIFIER
 #endif
 
-#if defined(MLK_MULTILEVEL_BUILD_NO_SHARED) || \
-    defined(MLK_MULTILEVEL_BUILD_WITH_SHARED)
+#if defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) || \
+    defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED)
 #define MLK_MULTILEVEL_BUILD
 #endif
 
@@ -42,9 +42,10 @@
 #define MLK_ADD_LEVEL(s) s
 #endif
 
-#define MLK_NAMESPACE(s) MLK_CONCAT(MLK_CONCAT(MLK_NAMESPACE_PREFIX, _), s)
+#define MLK_NAMESPACE(s) \
+  MLK_CONCAT(MLK_CONCAT(MLK_CONFIG_NAMESPACE_PREFIX, _), s)
 #define MLK_NAMESPACE_K(s) \
-  MLK_CONCAT(MLK_CONCAT(MLK_ADD_LEVEL(MLK_NAMESPACE_PREFIX), _), s)
+  MLK_CONCAT(MLK_CONCAT(MLK_ADD_LEVEL(MLK_CONFIG_NAMESPACE_PREFIX), _), s)
 
 /* On Apple platforms, we need to emit leading underscore
  * in front of assembly symbols. We thus introducee a separate
@@ -72,22 +73,23 @@
  * The following is to avoid compilers complaining about this. */
 #define MLK_EMPTY_CU(s) extern int MLK_NAMESPACE_K(empty_cu_##s);
 
-/* MLK_NO_ASM takes precedence over MLK_USE_NATIVE_XXX */
-#if defined(MLK_NO_ASM)
-#undef MLK_USE_NATIVE_BACKEND_ARITH
-#undef MLK_USE_NATIVE_BACKEND_FIPS202
+/* MLK_CONFIG_NO_ASM takes precedence over MLK_USE_NATIVE_XXX */
+#if defined(MLK_CONFIG_NO_ASM)
+#undef MLK_CONFIG_USE_NATIVE_BACKEND_ARITH
+#undef MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
 #endif
 
-#if defined(MLK_USE_NATIVE_BACKEND_ARITH) && !defined(MLK_ARITH_BACKEND_FILE)
-#error Bad configuration: MLK_USE_NATIVE_BACKEND_ARITH is set, but MLK_ARITH_BACKEND_FILE is not.
+#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH) && \
+    !defined(MLK_CONFIG_ARITH_BACKEND_FILE)
+#error Bad configuration: MLK_CONFIG_USE_NATIVE_BACKEND_ARITH is set, but MLK_CONFIG_ARITH_BACKEND_FILE is not.
 #endif
 
-#if defined(MLK_USE_NATIVE_BACKEND_FIPS202) && \
-    !defined(MLK_FIPS202_BACKEND_FILE)
-#error Bad configuration: MLK_USE_NATIVE_BACKEND_FIPS202 is set, but MLK_FIPS202_BACKEND_FILE is not.
+#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202) && \
+    !defined(MLK_CONFIG_FIPS202_BACKEND_FILE)
+#error Bad configuration: MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 is set, but MLK_CONFIG_FIPS202_BACKEND_FILE is not.
 #endif
 
-#if defined(MLK_USE_NATIVE_BACKEND_ARITH)
+#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
 /* Include to enforce consistency of API and implementation,
  * and conduct sanity checks on the backend.
  *
@@ -96,10 +98,10 @@
 #if defined(MLK_CHECK_APIS) && !defined(__ASSEMBLER__)
 #include "native/api.h"
 #endif
-#include MLK_ARITH_BACKEND_FILE
-#endif /* MLK_USE_NATIVE_BACKEND_ARITH */
+#include MLK_CONFIG_ARITH_BACKEND_FILE
+#endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
-#if defined(MLK_USE_NATIVE_BACKEND_FIPS202)
+#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
 /* Include to enforce consistency of API and implementation,
  * and conduct sanity checks on the backend.
  *
@@ -108,19 +110,19 @@
 #if defined(MLK_CHECK_APIS) && !defined(__ASSEMBLER__)
 #include "fips202/native/api.h"
 #endif
-#include MLK_FIPS202_BACKEND_FILE
-#endif /* MLK_USE_NATIVE_BACKEND_FIPS202 */
+#include MLK_CONFIG_FIPS202_BACKEND_FILE
+#endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 
-#if !defined(MLK_FIPS202_CUSTOM_HEADER)
+#if !defined(MLK_CONFIG_FIPS202_CUSTOM_HEADER)
 #define MLK_FIPS202_HEADER_FILE "fips202/fips202.h"
 #else
-#define MLK_FIPS202_HEADER_FILE MLK_FIPS202_CUSTOM_HEADER
+#define MLK_FIPS202_HEADER_FILE MLK_CONFIG_FIPS202_CUSTOM_HEADER
 #endif
 
-#if !defined(MLK_FIPS202X4_CUSTOM_HEADER)
+#if !defined(MLK_CONFIG_FIPS202X4_CUSTOM_HEADER)
 #define MLK_FIPS202X4_HEADER_FILE "fips202/fips202x4.h"
 #else
-#define MLK_FIPS202X4_HEADER_FILE MLK_FIPS202X4_CUSTOM_HEADER
+#define MLK_FIPS202X4_HEADER_FILE MLK_CONFIG_FIPS202X4_CUSTOM_HEADER
 #endif
 
 #endif /* !MLK_COMMON_H */

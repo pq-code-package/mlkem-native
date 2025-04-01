@@ -52,7 +52,7 @@
  *                 random bytes)
  *
  * Returns:     - 0: On success
- *              - -1: On PCT failure (if MLK_KEYGEN_PCT) is enabled.
+ *              - -1: On PCT failure (if MLK_CONFIG_KEYGEN_PCT) is enabled.
  *
  * Specification: Implements [FIPS 203, Algorithm 16, ML-KEM.KeyGen_Internal]
  *
@@ -84,7 +84,7 @@ __contract__(
  *                 bytes)
  *
  * Returns:     - 0: On success
- *              - -1: On PCT failure (if MLK_KEYGEN_PCT) is enabled.
+ *              - -1: On PCT failure (if MLK_CONFIG_KEYGEN_PCT) is enabled.
  *
  * Specification: Implements [FIPS 203, Algorithm 19, ML-KEM.KeyGen]
  *

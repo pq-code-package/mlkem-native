@@ -9,7 +9,7 @@ HARNESS_FILE = check_pct_harness
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
 PROOF_UID = mlk_check_pct
 
-DEFINES += -DMLK_KEYGEN_PCT
+DEFINES += -DMLK_CONFIG_KEYGEN_PCT
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=

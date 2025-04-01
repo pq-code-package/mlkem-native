@@ -11,8 +11,8 @@
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64) && \
-    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED) && \
-    (defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 3)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
+    (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 3)
 /* simpasm: header-end */
 
 // Input:
@@ -217,5 +217,5 @@ k3_loop_start:
     .unreq t0
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_MULTILEVEL_BUILD_NO_SHARED && \
-          (MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 3) */
+#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED && \
+          (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 3) */

@@ -37,15 +37,15 @@ MLKEM1024_OBJS=$(patsubst %,$(MLKEM1024_DIR)/%.o,$(MLK_SOURCE))
 
 $(MLKEM512_OBJS): $(MLKEM512_DIR)/%.c.o: %.c
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC)  -DMLK_MULTILEVEL_BUILD_WITH_SHARED -DMLKEM_K=2 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC)  -DMLK_CONFIG_MULTILEVEL_WITH_SHARED -DMLK_CONFIG_PARAMETER_SET=512 $(CFLAGS) -c $^ -o $@
 
 $(MLKEM768_OBJS): $(MLKEM768_DIR)/%.c.o: %.c
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -DMLK_MULTILEVEL_BUILD_NO_SHARED -DMLKEM_K=3 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC) -DMLK_CONFIG_MULTILEVEL_NO_SHARED -DMLK_CONFIG_PARAMETER_SET=768 $(CFLAGS) -c $^ -o $@
 
 $(MLKEM1024_OBJS): $(MLKEM1024_DIR)/%.c.o: %.c
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -DMLK_MULTILEVEL_BUILD_NO_SHARED -DMLKEM_K=4 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC) -DMLK_CONFIG_MULTILEVEL_NO_SHARED -DMLK_CONFIG_PARAMETER_SET=1024 $(CFLAGS) -c $^ -o $@
 
 mlkem512_objs: $(MLKEM512_OBJS)
 mlkem768_objs: $(MLKEM768_OBJS)
@@ -84,7 +84,7 @@ CFLAGS := \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
 	-fomit-frame-pointer \
-        -DMLK_NAMESPACE_PREFIX=mlkem \
+        -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem \
 	-std=c99 \
 	-pedantic \
 	-MMD \

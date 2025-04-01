@@ -6,7 +6,7 @@
 #include "../../../common.h"
 
 #if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include "../../../verify.h"
 #include "arith_native_x86_64.h"
@@ -66,10 +66,10 @@ void mlk_polyvec_basemul_acc_montgomery_cached_avx2(unsigned k,
   mlk_zeroize(t, sizeof(t));
 }
 
-#else /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_MULTILEVEL_BUILD_NO_SHARED \
+#else /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
        */
 
 MLK_EMPTY_CU(avx2_basemul)
 
 #endif /* !(MLK_ARITH_BACKEND_X86_64_DEFAULT && \
-          !MLK_MULTILEVEL_BUILD_NO_SHARED) */
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED) */

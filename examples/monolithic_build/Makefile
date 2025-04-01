@@ -72,9 +72,6 @@ CFLAGS := \
 	-O3 \
         $(CFLAGS)
 
-# Set this flag to give all non-global functions internal linkage
-CFLAGS += -DMLK_MONOBUILD
-
 BIN512_FULL=$(BUILD_DIR)/$(BIN512)
 BIN768_FULL=$(BUILD_DIR)/$(BIN768)
 BIN1024_FULL=$(BUILD_DIR)/$(BIN1024)

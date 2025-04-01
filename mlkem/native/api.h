@@ -213,7 +213,7 @@ __contract__(
 #endif /* MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE */
 
 #if defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
-#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 2
+#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 2
 /*************************************************
  * Name:        poly_mulcache_compute_k2_native
  *
@@ -254,9 +254,9 @@ __contract__(
 			  0, MLKEM_UINT12_LIMIT)))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
 );
-#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 2 */
+#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 */
 
-#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 3
+#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 3
 /*************************************************
  * Name:        poly_mulcache_compute_k3_native
  *
@@ -297,9 +297,9 @@ __contract__(
 			  0, MLKEM_UINT12_LIMIT)))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
 );
-#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 3 */
+#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 3 */
 
-#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
+#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4
 /*************************************************
  * Name:        poly_mulcache_compute_k4_native
  *
@@ -340,7 +340,7 @@ __contract__(
 			  0, MLKEM_UINT12_LIMIT)))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
 );
-#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 4 */
+#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
 #endif /* MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
 #if defined(MLK_USE_NATIVE_POLY_TOBYTES)
@@ -423,7 +423,7 @@ __contract__(
 );
 #endif /* MLK_USE_NATIVE_REJ_UNIFORM */
 
-#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
+#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D4)
 /*************************************************
  * Name:        mlk_poly_compress_d4_native
@@ -495,9 +495,9 @@ static MLK_INLINE void mlk_poly_decompress_d4_native(
 static MLK_INLINE void mlk_poly_decompress_d10_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10]);
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D10 */
-#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
+#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
 
-#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
+#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D5)
 /*************************************************
  * Name:        mlk_poly_compress_d5_native
@@ -569,6 +569,6 @@ static MLK_INLINE void mlk_poly_decompress_d5_native(
 static MLK_INLINE void mlk_poly_decompress_d11_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]);
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D11 */
-#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 4 */
+#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
 
 #endif /* !MLK_NATIVE_API_H */

@@ -9,7 +9,7 @@ HARNESS_FILE = keccakf1600x4_permute_native_x4_harness
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
 PROOF_UID = keccakf1600x4_permute_native_x4
 
-DEFINES += -DMLK_USE_NATIVE_BACKEND_FIPS202 -DMLK_FIPS202_BACKEND_FILE="\"dummy_backend_fips202_x4.h\""
+DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLK_CONFIG_FIPS202_BACKEND_FILE="\"dummy_backend_fips202_x4.h\""
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
