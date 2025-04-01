@@ -10,8 +10,7 @@ The library is built 3 times in different build directories `build/mlkem{512,768
 `MLK_MULTILEVEL_BUILD_WITH_SHARED` to force the inclusion of all level-independent code in the
 MLKEM512-build. For MLKEM-768 and MLKEM-1024, we set `MLK_MULTILEVEL_BUILD_NO_SHARED` to not include any
 level-independent code. Finally, we use the common namespace prefix `mlkem` as `MLK_NAMESPACE_PREFIX` for all three
-builds, but set `MLK_NAMESPACE_PREFIX_ADD_LEVEL` to additionally suffix level-dependent functions with `512/768/1024`,
-while level-independent functions are named `mlkem_xxx`.
+builds; the suffix 512/768/1024 will be added to level-dependent functions automatically.
 
 ## Usage
 
