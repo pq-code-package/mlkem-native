@@ -5,9 +5,9 @@
 	func_768 kat_768 nistkat_768 acvp_768 \
 	func_1024 kat_1024 nistkat_1024 acvp_1024 \
 	run_func run_kat run_nistkat run_acvp \
-	run_func_512 run_kat_512 run_nistkat_512 run_acvp_512 \
-	run_func_768 run_kat_768 run_nistkat_768 run_acvp_768 \
-	run_func_1024 run_kat_1024 run_nistkat_1024 run_acvp_1024 \
+	run_func_512 run_kat_512 run_nistkat_512 \
+	run_func_768 run_kat_768 run_nistkat_768 \
+	run_func_1024 run_kat_1024 run_nistkat_1024 \
 	bench_512 bench_768 bench_1024 bench \
 	run_bench_512 run_bench_768 run_bench_1024 run_bench \
 	bench_components_512 bench_components_768 bench_components_1024 bench_components \
