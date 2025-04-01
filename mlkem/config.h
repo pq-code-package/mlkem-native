@@ -315,6 +315,18 @@
 /* #define MLK_EXTERNAL_API_QUALIFIER */
 
 /******************************************************************************
+ * Name:        MLK_CT_TESTING_ENABLED
+ *
+ * Description: If set, mlkem-native annotates data as secret / public using
+ *              valgrind's annotations VALGRIND_MAKE_MEM_UNDEFINED and
+ *              VALGRIND_MAKE_MEM_DEFINED, enabling various checks for secret-
+ *              dependent control flow of variable time execution (depending
+ *              on the exact version of valgrind installed).
+ *
+ *****************************************************************************/
+/* #define MLK_CT_TESTING_ENABLED */
+
+/******************************************************************************
  * Name:        MLK_NO_ASM
  *
  * Description: If this option is set, mlkem-native will be built without
