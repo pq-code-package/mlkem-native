@@ -200,7 +200,7 @@ class TEST_TYPES(Enum):
     ACVP = 6
     BRING_YOUR_OWN_FIPS202 = 7
     CUSTOM_BACKEND = 8
-    MLK_AS_CODE_PACKAGE = 9
+    MLKEM_NATIVE_AS_CODE_PACKAGE = 9
     MONOLITHIC_BUILD = 10
     MONOLITHIC_BUILD_MULTILEVEL = 11
     MULTILEVEL_BUILD = 12
@@ -218,7 +218,7 @@ class TEST_TYPES(Enum):
         return [
             TEST_TYPES.BRING_YOUR_OWN_FIPS202,
             TEST_TYPES.CUSTOM_BACKEND,
-            TEST_TYPES.MLK_AS_CODE_PACKAGE,
+            TEST_TYPES.MLKEM_NATIVE_AS_CODE_PACKAGE,
             TEST_TYPES.MONOLITHIC_BUILD,
             TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL,
             TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE,
@@ -255,7 +255,7 @@ class TEST_TYPES(Enum):
             return "Example (Bring-Your-Own-FIPS202)"
         if self == TEST_TYPES.CUSTOM_BACKEND:
             return "Example (Custom Backend)"
-        if self == TEST_TYPES.MLK_AS_CODE_PACKAGE:
+        if self == TEST_TYPES.MLKEM_NATIVE_AS_CODE_PACKAGE:
             return "Example (mlkem-native as code package)"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return "Example (monobuild)"
@@ -273,7 +273,7 @@ class TEST_TYPES(Enum):
             return "examples/bring_your_own_fips202"
         if self == TEST_TYPES.CUSTOM_BACKEND:
             return "examples/custom_backend"
-        if self == TEST_TYPES.MLK_AS_CODE_PACKAGE:
+        if self == TEST_TYPES.MLKEM_NATIVE_AS_CODE_PACKAGE:
             return "examples/mlkem_native_as_code_package"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return "examples/monolithic_build"
@@ -304,7 +304,7 @@ class TEST_TYPES(Enum):
             return ""
         if self == TEST_TYPES.CUSTOM_BACKEND:
             return ""
-        if self == TEST_TYPES.MLK_AS_CODE_PACKAGE:
+        if self == TEST_TYPES.MLKEM_NATIVE_AS_CODE_PACKAGE:
             return ""
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return ""
