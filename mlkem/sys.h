@@ -27,7 +27,7 @@
 #define MLK_SYS_WINDOWS
 #endif
 
-#if !defined(MLK_NO_ASM) && (defined(__GNUC__) || defined(__clang__))
+#if !defined(MLK_CONFIG_NO_ASM) && (defined(__GNUC__) || defined(__clang__))
 #define MLK_HAVE_INLINE_ASM
 #endif
 
@@ -145,13 +145,13 @@
 #endif
 #endif /* MLK_SYS_X86_64 */
 
-#if defined(MLK_CT_TESTING_ENABLED) && !defined(__ASSEMBLER__)
+#if defined(MLK_CONFIG_CT_TESTING_ENABLED) && !defined(__ASSEMBLER__)
 #include <valgrind/memcheck.h>
 #define MLK_CT_TESTING_SECRET(ptr, len) \
   VALGRIND_MAKE_MEM_UNDEFINED((ptr), (len))
 #define MLK_CT_TESTING_DECLASSIFY(ptr, len) \
   VALGRIND_MAKE_MEM_DEFINED((ptr), (len))
-#else /* MLK_CT_TESTING_ENABLED && !__ASSEMBLER__ */
+#else /* MLK_CONFIG_CT_TESTING_ENABLED && !__ASSEMBLER__ */
 #define MLK_CT_TESTING_SECRET(ptr, len) \
   do                                    \
   {                                     \
@@ -160,7 +160,7 @@
   do                                        \
   {                                         \
   } while (0)
-#endif /* !(MLK_CT_TESTING_ENABLED && !__ASSEMBLER__) */
+#endif /* !(MLK_CONFIG_CT_TESTING_ENABLED && !__ASSEMBLER__) */
 
 #if defined(__GNUC__) || defined(clang)
 #define MLK_MUST_CHECK_RETURN_VALUE __attribute__((warn_unused_result))

@@ -39,11 +39,12 @@
    We use the empty-ASM value barrier for GCC and clang, and fall
    back to the global volatile barrier otherwise.
 
-   The global value barrier can be forced by setting MLK_NO_ASM_VALUE_BARRIER.
+   The global value barrier can be forced by setting
+   MLK_CONFIG_NO_ASM_VALUE_BARRIER.
 
 */
 
-#if defined(MLK_HAVE_INLINE_ASM) && !defined(MLK_NO_ASM_VALUE_BARRIER)
+#if defined(MLK_HAVE_INLINE_ASM) && !defined(MLK_CONFIG_NO_ASM_VALUE_BARRIER)
 #define MLK_USE_ASM_VALUE_BARRIER
 #endif
 
@@ -392,7 +393,7 @@ __contract__(
  **************************************************/
 
 /* Reference: Not present in the reference implementation. */
-#if !defined(MLK_CUSTOM_ZEROIZE)
+#if !defined(MLK_CONFIG_CUSTOM_ZEROIZE)
 #if defined(MLK_SYS_WINDOWS)
 #include <windows.h>
 static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
@@ -415,8 +416,8 @@ __contract__(
   __asm__ __volatile__("" : : "r"(ptr) : "memory");
 }
 #else /* !MLK_SYS_WINDOWS && MLK_HAVE_INLINE_ASM */
-#error No plausibly-secure implementation of mlk_zeroize available. Please provide your own using MLK_CUSTOM_ZEROIZE.
+#error No plausibly-secure implementation of mlk_zeroize available. Please provide your own using MLK_CONFIG_CUSTOM_ZEROIZE.
 #endif /* !MLK_SYS_WINDOWS && !MLK_HAVE_INLINE_ASM */
-#endif /* !MLK_CUSTOM_ZEROIZE */
+#endif /* !MLK_CONFIG_CUSTOM_ZEROIZE */
 
 #endif /* !MLK_VERIFY_H */

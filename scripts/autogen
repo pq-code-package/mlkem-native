@@ -716,7 +716,7 @@ def gen_aarch64_zeta_file(dry_run=False):
         yield '#include "../../../common.h"'
         yield ""
         yield "#if defined(MLK_ARITH_BACKEND_AARCH64) && \\"
-        yield "    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)"
+        yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
         yield ""
         yield "#include <stdint.h>"
         yield '#include "arith_native_aarch64.h"'
@@ -794,7 +794,7 @@ def gen_aarch64_rej_uniform_table(dry_run=False):
         yield '#include "../../../common.h"'
         yield ""
         yield "#if defined(MLK_ARITH_BACKEND_AARCH64) && \\"
-        yield "    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)"
+        yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
         yield ""
         yield "#include <stdint.h>"
         yield '#include "arith_native_aarch64.h"'
@@ -851,7 +851,7 @@ def gen_avx2_rej_uniform_table(dry_run=False):
         yield '#include "../../../common.h"'
         yield ""
         yield "#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \\"
-        yield "    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)"
+        yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
         yield ""
         yield "#include <stdint.h>"
         yield '#include "arith_native_x86_64.h"'
@@ -1155,7 +1155,7 @@ def gen_monolithic_source_file(dry_run=False):
         yield "#endif"
         yield ""
         yield from gen_monolithic_undef_all_core(
-            filt=k_specific, desc="MLKEM_K-specific files"
+            filt=k_specific, desc="MLK_CONFIG_PARAMETER_SET-specific files"
         )
         yield ""
         yield "#if !defined(MLK_MONOBUILD_KEEP_SHARED_HEADERS)"
@@ -1164,7 +1164,7 @@ def gen_monolithic_source_file(dry_run=False):
             and k_generic(c)
             and not fips202(c)
             and "cbmc.h" not in c,
-            desc="MLKEM_K-generic files",
+            desc="MLK_CONFIG_PARAMETER_SET-generic files",
         )
         # Handle cbmc.h manually -- most #define's therein are only defined when CBMC is set
         # and need not be #undef'ed. In fact, #undef'ing them is risky since their names may

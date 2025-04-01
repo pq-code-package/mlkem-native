@@ -4,7 +4,7 @@
  */
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64) &&  !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_AARCH64) &&  !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
 .macro ld2_wrap a, ptr
@@ -273,4 +273,4 @@ poly_tobytes_asm_asm_loop_start:
         .unreq count
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

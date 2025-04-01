@@ -4,7 +4,7 @@
  */
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64) &&  !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_AARCH64) &&  !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
@@ -106,4 +106,4 @@ poly_tobytes_asm_asm_loop_start:
         st3	{ v22.8b, v23.8b, v24.8b }, [x0], #24
         ret
 
-#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

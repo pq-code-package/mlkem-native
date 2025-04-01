@@ -29,57 +29,57 @@ OPT = 0
 # compilation for mlkem512
 {mlkem}.c{$(MLKEM512_BUILD_DIR)\mlkem}.obj::
     @if NOT EXIST $(MLKEM512_BUILD_DIR)\mlkem mkdir $(MLKEM512_BUILD_DIR)\mlkem
-    $(CC) $(CFLAGS) /D MLKEM_K=2 /c /Fo$(MLKEM512_BUILD_DIR)\mlkem\ $<
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\mlkem\ $<
 
 {mlkem\fips202}.c{$(MLKEM512_BUILD_DIR)\mlkem\fips202}.obj::
     @if NOT EXIST $(MLKEM512_BUILD_DIR)\mlkem\fips202 mkdir $(MLKEM512_BUILD_DIR)\mlkem\fips202
-    $(CC) $(CFLAGS) /D MLKEM_K=2 /c /Fo$(MLKEM512_BUILD_DIR)\mlkem\fips202\ $<
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\mlkem\fips202\ $<
 
 {test}.c{$(MLKEM512_BUILD_DIR)\test}.obj::
     @if NOT EXIST $(MLKEM512_BUILD_DIR)\test mkdir $(MLKEM512_BUILD_DIR)\test
-    $(CC) $(CFLAGS) /D MLKEM_K=2 /c /Fo$(MLKEM512_BUILD_DIR)\test\ $<
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\test\ $<
 
 # compilation for mlkem768
 {mlkem}.c{$(MLKEM768_BUILD_DIR)\mlkem}.obj::
     @if NOT EXIST $(MLKEM768_BUILD_DIR)\mlkem mkdir $(MLKEM768_BUILD_DIR)\mlkem
-    $(CC) $(CFLAGS) /D MLKEM_K=3 /c /Fo$(MLKEM768_BUILD_DIR)\mlkem\ $<
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\mlkem\ $<
 
 {mlkem\fips202}.c{$(MLKEM768_BUILD_DIR)\mlkem\fips202}.obj::
     @if NOT EXIST $(MLKEM768_BUILD_DIR)\mlkem\fips202 mkdir $(MLKEM768_BUILD_DIR)\mlkem\fips202
-    $(CC) $(CFLAGS) /D MLKEM_K=3 /c /Fo$(MLKEM768_BUILD_DIR)\mlkem\fips202\ $<
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\mlkem\fips202\ $<
 
 {test}.c{$(MLKEM768_BUILD_DIR)\test}.obj::
     @if NOT EXIST $(MLKEM768_BUILD_DIR)\test mkdir $(MLKEM768_BUILD_DIR)\test
-    $(CC) $(CFLAGS) /D MLKEM_K=3 /c /Fo$(MLKEM768_BUILD_DIR)\test\ $<
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\test\ $<
 
 # compilation for mlkem1024
 {mlkem}.c{$(MLKEM1024_BUILD_DIR)\mlkem}.obj::
     @if NOT EXIST $(MLKEM1024_BUILD_DIR)\mlkem mkdir $(MLKEM1024_BUILD_DIR)\mlkem
-    $(CC) $(CFLAGS) /D MLKEM_K=4 /c /Fo$(MLKEM1024_BUILD_DIR)\mlkem\ $<
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\mlkem\ $<
 
 {mlkem\fips202}.c{$(MLKEM1024_BUILD_DIR)\mlkem\fips202}.obj::
     @if NOT EXIST $(MLKEM1024_BUILD_DIR)\mlkem\fips202 mkdir $(MLKEM1024_BUILD_DIR)\mlkem\fips202
-    $(CC) $(CFLAGS) /D MLKEM_K=4 /c /Fo$(MLKEM1024_BUILD_DIR)\mlkem\fips202\ $<
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\mlkem\fips202\ $<
 
 {test}.c{$(MLKEM1024_BUILD_DIR)\test}.obj::
     @if NOT EXIST $(MLKEM1024_BUILD_DIR)\test mkdir $(MLKEM1024_BUILD_DIR)\test
-    $(CC) $(CFLAGS) /D MLKEM_K=4 /c /Fo$(MLKEM1024_BUILD_DIR)\test\ $<
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\test\ $<
 
 
 # compile functional test for mlkem512
 test_mlkem512: $(OBJ_FILES_512) $(MLKEM512_BUILD_DIR)\test\test_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
     @if NOT EXIST $(MLKEM512_BUILD_DIR)\bin mkdir $(MLKEM512_BUILD_DIR)\bin
-    $(CC) $(CFLAGS) /D MLKEM_K=2 /Fe$(MLKEM512_BUILD_DIR)\bin\test_mlkem512 $** /link
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /Fe$(MLKEM512_BUILD_DIR)\bin\test_mlkem512 $** /link
 
 # compile functional test for mlkem768
 test_mlkem768: $(OBJ_FILES_768) $(MLKEM768_BUILD_DIR)\test\test_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
     @if NOT EXIST $(MLKEM768_BUILD_DIR)\bin mkdir $(MLKEM768_BUILD_DIR)\bin
-    $(CC) $(CFLAGS) /D MLKEM_K=3 /Fe$(MLKEM768_BUILD_DIR)\bin\test_mlkem768 $** /link
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /Fe$(MLKEM768_BUILD_DIR)\bin\test_mlkem768 $** /link
 
 # compile functional test for mlkem1024
 test_mlkem1024: $(OBJ_FILES_1024) $(MLKEM1024_BUILD_DIR)\test\test_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
     @if NOT EXIST $(MLKEM1024_BUILD_DIR)\bin mkdir $(MLKEM1024_BUILD_DIR)\bin
-    $(CC) $(CFLAGS) /D MLKEM_K=4 /Fe$(MLKEM1024_BUILD_DIR)\bin\test_mlkem1024 $** /link
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /Fe$(MLKEM1024_BUILD_DIR)\bin\test_mlkem1024 $** /link
 
 quickcheck: test_mlkem512 test_mlkem768 test_mlkem1024
     $(MLKEM512_BUILD_DIR)\bin\test_mlkem512.exe

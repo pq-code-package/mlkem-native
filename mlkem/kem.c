@@ -126,7 +126,7 @@ __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES)));
 
-#if defined(MLK_KEYGEN_PCT)
+#if defined(MLK_CONFIG_KEYGEN_PCT)
 /* Specification:
  * Partially implements 'Pairwise Consistency Test' [FIPS 140-3 IG] and
  * [FIPS 203, Section 7.1, Pairwise Consistency]. */
@@ -151,13 +151,13 @@ static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
     goto cleanup;
   }
 
-#if defined(MLK_KEYGEN_PCT_BREAKAGE_TEST)
+#if defined(MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST)
   /* Deliberately break PCT for testing purposes */
   if (mlk_break_pct())
   {
     ss_enc[0] = ~ss_enc[0];
   }
-#endif /* MLK_KEYGEN_PCT_BREAKAGE_TEST */
+#endif /* MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST */
 
   res = mlk_ct_memcmp(ss_enc, ss_dec, sizeof(ss_dec));
 
@@ -172,7 +172,7 @@ cleanup:
   mlk_zeroize(ss_dec, sizeof(ss_dec));
   return res;
 }
-#else  /* MLK_KEYGEN_PCT */
+#else  /* MLK_CONFIG_KEYGEN_PCT */
 static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                          uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
@@ -181,7 +181,7 @@ static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   ((void)sk);
   return 0;
 }
-#endif /* !MLK_KEYGEN_PCT */
+#endif /* !MLK_CONFIG_KEYGEN_PCT */
 
 /* Reference: `crypto_kem_keypair_derand()` in the reference implementation
  *            - We optionally include PCT which is not present in

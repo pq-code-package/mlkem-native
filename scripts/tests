@@ -1056,7 +1056,7 @@ def cli():
 
     cbmc_parser.add_argument(
         "--k",
-        help="MLKEM parameter set (MLKEM_K)",
+        help="Value of MLKEM_K, determining the parameter set",
         choices=["2", "3", "4", "ALL"],
         type=str.upper,
         default="ALL",

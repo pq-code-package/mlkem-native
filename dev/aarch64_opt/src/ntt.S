@@ -26,7 +26,7 @@
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64) && \
-    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
 // Bounds:
@@ -954,4 +954,4 @@ ntt_loop1:
     .unreq t3
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

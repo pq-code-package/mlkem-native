@@ -11,7 +11,7 @@
 #include "../../../common.h"
 
 #if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <stdint.h>
 #include "arith_native_x86_64.h"
@@ -151,10 +151,10 @@ MLK_ALIGN const uint8_t mlk_rej_uniform_table[256][8] = {
     {2, 4, 6, 8, 10, 12, 14, -1},     {0, 2, 4, 6, 8, 10, 12, 14},
 };
 
-#else /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_MULTILEVEL_BUILD_NO_SHARED \
+#else /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
        */
 
 MLK_EMPTY_CU(avx2_rej_uniform_table)
 
 #endif /* !(MLK_ARITH_BACKEND_X86_64_DEFAULT && \
-          !MLK_MULTILEVEL_BUILD_NO_SHARED) */
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED) */

@@ -9,7 +9,7 @@ HARNESS_FILE = ct_get_optblocker_u8_harness
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
 PROOF_UID = mlk_ct_get_optblocker_u8
 
-DEFINES += -DMLK_NO_ASM_VALUE_BARRIER
+DEFINES += -DMLK_CONFIG_NO_ASM_VALUE_BARRIER
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=

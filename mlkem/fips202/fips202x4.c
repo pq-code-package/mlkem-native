@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "../common.h"
-#if !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
+#if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <string.h>
 #include "../verify.h"
@@ -188,8 +188,8 @@ void mlk_shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
   mlk_zeroize(tmp3, sizeof(tmp3));
 }
 
-#else /* !MLK_MULTILEVEL_BUILD_NO_SHARED */
+#else /* !MLK_CONFIG_MULTILEVEL_NO_SHARED */
 
 MLK_EMPTY_CU(fips202x4)
 
-#endif /* MLK_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_CONFIG_MULTILEVEL_NO_SHARED */

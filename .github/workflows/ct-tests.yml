@@ -47,42 +47,42 @@ jobs:
         if: ${{ matrix.nix-shell !=  'ci_valgrind-varlat_gcc48' && matrix.nix-shell !=  'ci_valgrind-varlat_gcc49' && matrix.nix-shell !=  'ci_valgrind-varlat_gcc7' && matrix.nix-shell !=  'ci_valgrind-varlat_gcc11'}}
         uses: ./.github/actions/ct-test
         with:
-          cflags: -Oz -DMLK_KEYGEN_PCT
+          cflags: -Oz -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
       - name:  Build and run test (-Os)
         uses: ./.github/actions/ct-test
         with:
-          cflags: -Os -DMLK_KEYGEN_PCT
+          cflags: -Os -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
       - name:  Build and run test (-O3)
         uses: ./.github/actions/ct-test
         with:
-          cflags: -O3 -DMLK_KEYGEN_PCT
+          cflags: -O3 -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
       - name:  Build and run test (-Ofast)
         # -Ofast got deprecated in clang19; -O3 -ffast-math should be used instead
         if: ${{ matrix.nix-shell != 'ci_valgrind-varlat_clang19' &&  matrix.nix-shell !=  'ci_valgrind-varlat_clang20' }}
         uses: ./.github/actions/ct-test
         with:
-          cflags: -Ofast -DMLK_KEYGEN_PCT
+          cflags: -Ofast -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
       - name:  Build and run test (-O3 -ffast-math)
         uses: ./.github/actions/ct-test
         with:
-          cflags: -O3 -ffast-math -DMLK_KEYGEN_PCT
+          cflags: -O3 -ffast-math -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
       - name:  Build and run test (-O2)
         uses: ./.github/actions/ct-test
         with:
-          cflags: -O2 -DMLK_KEYGEN_PCT
+          cflags: -O2 -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
       - name:  Build and run test (-O1)
         uses: ./.github/actions/ct-test
         with:
-          cflags: -O1 -DMLK_KEYGEN_PCT
+          cflags: -O1 -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
       - name:  Build and run test (-O0)
         uses: ./.github/actions/ct-test
         with:
-          cflags: -O0 -DMLK_KEYGEN_PCT
+          cflags: -O0 -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes

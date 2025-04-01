@@ -9,7 +9,7 @@ HARNESS_FILE = poly_tomont_native_harness
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
 PROOF_UID = mlk_poly_tomont_native
 
-DEFINES += -DMLK_USE_NATIVE_BACKEND_ARITH -DMLK_ARITH_BACKEND_FILE="\"dummy_backend.h\""
+DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_ARITH_BACKEND_FILE="\"dummy_backend.h\""
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=

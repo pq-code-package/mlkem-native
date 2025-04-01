@@ -11,8 +11,18 @@
 #include "config.h"
 #endif
 
-#if !defined(MLKEM_K)
-#error MLKEM_K is not defined
+#if !defined(MLK_CONFIG_PARAMETER_SET)
+#error MLK_CONFIG_PARAMETER_SET is not defined
+#endif
+
+#if MLK_CONFIG_PARAMETER_SET == 512
+#define MLKEM_K 2
+#elif MLK_CONFIG_PARAMETER_SET == 768
+#define MLKEM_K 3
+#elif MLK_CONFIG_PARAMETER_SET == 1024
+#define MLKEM_K 4
+#else
+#error Invalid value for MLK_CONFIG_PARAMETER_SET. Must be 512, 768, or 1024.
 #endif
 
 #define MLKEM_N 256

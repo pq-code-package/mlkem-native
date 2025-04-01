@@ -69,8 +69,8 @@ CFLAGS := \
 	-MMD \
 	-O3 \
 	$(CFLAGS)
-CFLAGS += -DMLK_FIPS202_CUSTOM_HEADER="\"../custom_fips202/fips202.h\""
-CFLAGS += -DMLK_FIPS202X4_CUSTOM_HEADER="\"../custom_fips202/fips202x4.h\""
+CFLAGS += -DMLK_CONFIG_FIPS202_CUSTOM_HEADER="\"../custom_fips202/fips202.h\""
+CFLAGS += -DMLK_CONFIG_FIPS202X4_CUSTOM_HEADER="\"../custom_fips202/fips202x4.h\""
 
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 

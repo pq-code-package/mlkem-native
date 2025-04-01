@@ -63,7 +63,7 @@
 #endif /* MLK_MONOBUILD_WITH_NATIVE_FIPS202 */
 
 /*
- * Undefine macros from MLKEM_K-specific files
+ * Undefine macros from MLK_CONFIG_PARAMETER_SET-specific files
  */
 /* mlkem/common.h */
 #undef MLK_ADD_LEVEL
@@ -81,12 +81,12 @@
 #undef MLK_NAMESPACE
 #undef MLK_NAMESPACE_K
 /* mlkem/config.h */
-#undef MLKEM_K
-#undef MLK_ARITH_BACKEND_FILE
+#undef MLK_CONFIG_ARITH_BACKEND_FILE
+#undef MLK_CONFIG_FIPS202_BACKEND_FILE
 #undef MLK_CONFIG_H
+#undef MLK_CONFIG_NAMESPACE_PREFIX
+#undef MLK_CONFIG_PARAMETER_SET
 #undef MLK_DEFAULT_NAMESPACE_PREFIX
-#undef MLK_FIPS202_BACKEND_FILE
-#undef MLK_NAMESPACE_PREFIX
 /* mlkem/indcpa.h */
 #undef MLK_INDCPA_H
 #undef mlk_gen_matrix
@@ -154,6 +154,7 @@
 #undef MLKEM_INDCPA_MSGBYTES
 #undef MLKEM_INDCPA_PUBLICKEYBYTES
 #undef MLKEM_INDCPA_SECRETKEYBYTES
+#undef MLKEM_K
 #undef MLKEM_LVL
 #undef MLKEM_N
 #undef MLKEM_POLYBYTES
@@ -218,7 +219,7 @@
 
 #if !defined(MLK_MONOBUILD_KEEP_SHARED_HEADERS)
 /*
- * Undefine macros from MLKEM_K-generic files
+ * Undefine macros from MLK_CONFIG_PARAMETER_SET-generic files
  */
 /* mlkem/compress.h */
 #undef MLK_COMPRESS_H

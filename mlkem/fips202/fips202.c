@@ -12,7 +12,7 @@
  * by Gilles Van Assche, Daniel J. Bernstein, and Peter Schwabe */
 
 #include "../common.h"
-#if !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
+#if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <stddef.h>
 #include <stdint.h>
@@ -222,8 +222,8 @@ void mlk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
   mlk_zeroize(ctx, sizeof(ctx));
 }
 
-#else /* !MLK_MULTILEVEL_BUILD_NO_SHARED */
+#else /* !MLK_CONFIG_MULTILEVEL_NO_SHARED */
 
 MLK_EMPTY_CU(fips202)
 
-#endif /* MLK_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_CONFIG_MULTILEVEL_NO_SHARED */

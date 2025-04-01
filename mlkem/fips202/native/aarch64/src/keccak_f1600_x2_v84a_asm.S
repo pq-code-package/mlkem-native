@@ -39,7 +39,7 @@
 
 #include "../../../../common.h"
 #if defined(MLK_FIPS202_AARCH64_NEED_X2_V84A) && \
-    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #if defined(__ARM_FEATURE_SHA3)
 
@@ -220,5 +220,5 @@ keccak_f1600_x2_v84a_loop:
 
 #endif /* __ARM_FEATURE_SHA3 */
 
-#endif /* MLK_FIPS202_AARCH64_NEED_X2_V84A && !MLK_MULTILEVEL_BUILD_NO_SHARED \
+#endif /* MLK_FIPS202_AARCH64_NEED_X2_V84A && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */

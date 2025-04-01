@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "common.h"
-#if !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
+#if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <stdint.h>
 #include <string.h>
@@ -12,7 +12,7 @@
 #include "debug.h"
 #include "verify.h"
 
-#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
+#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
 #if !defined(MLK_USE_NATIVE_POLY_COMPRESS_D4)
 /* Reference: `poly_compress()` in the reference implementation,
  *            for ML-KEM-{512,768}.
@@ -174,9 +174,9 @@ void mlk_poly_decompress_d10(mlk_poly *r,
   mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D10 */
-#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
+#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
 
-#if defined(MLK_MULTILEVEL_BUILD_WITH_SHARED) || MLKEM_K == 4
+#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4
 #if !defined(MLK_USE_NATIVE_POLY_COMPRESS_D5)
 /* Reference: `poly_compress()` in the reference implementation,
  *            for ML-KEM-1024.
@@ -385,7 +385,7 @@ void mlk_poly_decompress_d11(mlk_poly *r,
 }
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D11 */
 
-#endif /* MLK_MULTILEVEL_BUILD_WITH_SHARED || MLKEM_K == 4 */
+#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
 
 #if !defined(MLK_USE_NATIVE_POLY_TOBYTES)
 /* Reference: `poly_tobytes()` in the reference implementation.
@@ -525,8 +525,8 @@ void mlk_poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const mlk_poly *a)
   }
 }
 
-#else /* !MLK_MULTILEVEL_BUILD_NO_SHARED */
+#else /* !MLK_CONFIG_MULTILEVEL_NO_SHARED */
 
 MLK_EMPTY_CU(compress)
 
-#endif /* MLK_MULTILEVEL_BUILD_NO_SHARED */
+#endif /* MLK_CONFIG_MULTILEVEL_NO_SHARED */

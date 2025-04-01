@@ -129,7 +129,7 @@ jobs:
           compile_mode: 'native'
           opt: 'opt'
           examples: 'false'
-          cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLK_FORCE_AARCH64 -DMLK_FIPS202_BACKEND_FILE=\\\\\\\"fips202/native/aarch64/${{ matrix.backend }}.h\\\\\\\""
+          cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLK_FORCE_AARCH64 -DMLK_CONFIG_FIPS202_BACKEND_FILE=\\\\\\\"fips202/native/aarch64/${{ matrix.backend }}.h\\\\\\\""
           check_namespace: 'false'
   compiler_tests:
     name: Compiler tests  (${{ matrix.compiler.name }}, ${{ matrix.target.name }})
@@ -296,7 +296,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
-          cflags: "-DMLK_KEYGEN_PCT -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          cflags: "-DMLK_CONFIG_KEYGEN_PCT -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           func: true
           nistkat: false
           kat: true

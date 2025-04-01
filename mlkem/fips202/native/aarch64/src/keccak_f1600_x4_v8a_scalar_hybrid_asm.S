@@ -29,7 +29,7 @@
 
 #include "../../../../common.h"
 #if defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID) && \
-    !defined(MLK_MULTILEVEL_BUILD_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
@@ -1018,4 +1018,4 @@ keccak_f1600_x4_v8a_scalar_hybrid_done:
         ret
 
 #endif /* MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID && \
-          !MLK_MULTILEVEL_BUILD_NO_SHARED */
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED */
