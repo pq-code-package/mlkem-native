@@ -60,7 +60,6 @@ CFLAGS := \
 	-Wno-unused-command-line-argument \
 	-fomit-frame-pointer \
 	-DMLK_NAMESPACE_PREFIX=mlkem \
-	-DMLK_NAMESPACE_PREFIX_ADD_LEVEL \
 	-std=c99 \
 	-pedantic \
 	-MMD \
