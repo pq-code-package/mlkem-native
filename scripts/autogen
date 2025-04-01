@@ -1089,7 +1089,7 @@ def gen_monolithic_source_file(dry_run=False):
             "sys.h",
             "mlkem_native.h",
             "params.h",
-            "config.h",
+            # Deliberately omit config.h, which is not #undef'ed
             "common.h",
             "indcpa.c",
             "indcpa.h",
@@ -1104,7 +1104,7 @@ def gen_monolithic_source_file(dry_run=False):
         return False
 
     def k_generic(c):
-        return not k_specific(c)
+        return not k_specific(c) and c != "mlkem/config.h"
 
     def gen():
         c_sources = get_c_source_files(main_only=True)
