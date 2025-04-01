@@ -4,7 +4,6 @@
  */
 
 #define MLK_MULTILEVEL_BUILD
-#define MLK_EXTERNAL_API static
 
 /* Three instances of mlkem-native for all security levels */
 
@@ -14,8 +13,6 @@
 #define MLK_MONOBUILD_WITH_NATIVE_ARITH
 #define MLK_MONOBUILD_WITH_NATIVE_FIPS202
 #define MLK_MONOBUILD_KEEP_SHARED_HEADERS
-/* Indicate that this is a monobuild */
-#define MLK_MONOBUILD
 
 #define MLKEM_K 2
 #define MLK_CONFIG_FILE "multilevel_config.h"

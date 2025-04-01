@@ -126,4 +126,31 @@
 #define MLK_FIPS202_BACKEND_FILE "fips202/native/auto.h"
 #endif
 
+/******************************************************************************
+ * Name:        MLK_INTERNAL_API_QUALIFIER
+ *
+ * Description: If set, this option provides an additional function
+ *              qualifier to be added to declarations of internal API.
+ *
+ *              The primary use case for this option are single-CU builds,
+ *              in which case this option can be set to `static`.
+ *
+ *****************************************************************************/
+#define MLK_INTERNAL_API_QUALIFIER static
+
+/******************************************************************************
+ * Name:        MLK_EXTERNAL_API_QUALIFIER
+ *
+ * Description: If set, this option provides an additional function
+ *              qualifier to be added to declarations of mlkem-native's
+ *              public API.
+ *
+ *              The primary use case for this option are single-CU builds
+ *              where the public API exposed by mlkem-native is wrapped by
+ *              another API in the consuming application. In this case,
+ *              even mlkem-native's public API can be marked `static`.
+ *
+ *****************************************************************************/
+#define MLK_EXTERNAL_API_QUALIFIER static
+
 #endif /* MLkEM_NATIVE_CONFIG_H */
