@@ -17,7 +17,7 @@
 
 /* Include level-independent code */
 #define MLK_CONFIG_MULTILEVEL_WITH_SHARED
-#define MLK_MONOBUILD_KEEP_SHARED_HEADERS
+#define MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
 
 #define MLK_CONFIG_PARAMETER_SET 512
 #define MLK_CONFIG_FILE "multilevel_config.h"
@@ -33,7 +33,7 @@
 #include "mlkem_native_monobuild.c"
 #undef MLK_CONFIG_FILE
 
-#undef MLK_MONOBUILD_KEEP_SHARED_HEADERS
+#undef MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
 
 #define MLK_CONFIG_PARAMETER_SET 1024
 #define MLK_CONFIG_FILE "multilevel_config.h"

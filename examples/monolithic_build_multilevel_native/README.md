@@ -19,12 +19,12 @@ appropriately first, and then includes the monobuild:
 
 /* Include level-independent code */
 #define MLK_CONFIG_MULTILEVEL_WITH_SHARED 1
-#define MLK_MONOBUILD_KEEP_SHARED_HEADERS
+#define MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
 /* Include C files accompanying native code */
-#define MLK_MONOBUILD_WITH_NATIVE_ARITH
-#define MLK_MONOBUILD_WITH_NATIVE_FIPS202
+#define MLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH
+#define MLK_CONFIG_MONOBUILD_WITH_NATIVE_FIPS202
 /* Indicate that this is a monobuild */
-#define MLK_MONOBUILD
+#define MLK_CONFIG_MONOBUILD
 
 #define MLK_CONFIG_PARAMETER_SET 512
 #define MLK_CONFIG_FILE "multilevel_config.h"
@@ -40,7 +40,7 @@ appropriately first, and then includes the monobuild:
 #include "mlkem_native_monobuild.c"
 #undef MLK_CONFIG_FILE
 
-#undef MLK_MONOBUILD_KEEP_SHARED_HEADERS
+#undef MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
 
 #define MLK_CONFIG_PARAMETER_SET 1024
 #define MLK_CONFIG_FILE "multilevel_config.h"
@@ -50,7 +50,7 @@ appropriately first, and then includes the monobuild:
 
 Note the setting `MLK_CONFIG_MULTILEVEL_WITH_SHARED` which forces the inclusion of all level-independent
 code in the MLKEM-512 build, and the setting `MLK_CONFIG_MULTILEVEL_NO_SHARED`, which drops all
-level-independent code in the subsequent builds. Finally, `MLK_MONOBUILD_KEEP_SHARED_HEADERS` entails that
+level-independent code in the subsequent builds. Finally, `MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS` entails that
 `mlkem_native_monobuild.c` does not `#undefine` the `#define` clauses from level-independent files.
 
 To make the monolithic multi-level build accessible from the application sources, we provide
