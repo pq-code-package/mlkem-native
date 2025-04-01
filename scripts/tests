@@ -686,7 +686,7 @@ class Tests:
             if nistkat is True:
                 self._run_schemes(TEST_TYPES.NISTKAT, opt)
             if acvp is True:
-                self._run_schemes(TEST_TYPES.ACVP, opt)
+                self._run_scheme(TEST_TYPES.ACVP, opt, None)
 
         if self.do_no_opt():
             _all(False)
