@@ -14,19 +14,18 @@
 #include "params.h"
 #include "sys.h"
 
-/* For a monobuild (where all compilation units are merged into one), mark
- * all non-public API as static since they don't need external linkage. */
-#if !defined(MLK_MONOBUILD)
+/* Internal and public API have external linkage by default, but
+ * this can be overwritten by the user, e.g. for single-CU builds. */
+#if !defined(MLK_INTERNAL_API_QUALIFIER)
 #define MLK_INTERNAL_API
 #else
-#define MLK_INTERNAL_API static
+#define MLK_INTERNAL_API MLK_INTERNAL_API_QUALIFIER
 #endif
 
-/* Public API may have internal or external linkage, depending on how
- * mlkem-native is used in the monobuild. Keep it external by default,
- * but allow the user to overwrite this in the config. */
-#if !defined(MLK_EXTERNAL_API)
+#if !defined(MLK_EXTERNAL_API_QUALIFIER)
 #define MLK_EXTERNAL_API
+#else
+#define MLK_EXTERNAL_API MLK_EXTERNAL_API_QUALIFIER
 #endif
 
 #if defined(MLK_MULTILEVEL_BUILD_NO_SHARED) || \
