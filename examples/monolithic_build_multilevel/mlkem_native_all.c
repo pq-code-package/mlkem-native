@@ -7,8 +7,6 @@
  * imported into the individual builds below via MLK_CHECK_APIS. */
 #include "mlkem_native_all.h"
 
-#define MLK_MULTILEVEL_BUILD
-
 /* Include mlkem_native.h into each level-build to ensure consistency
  * with kem.h and mlkem_native_all.h above. */
 #define MLK_CHECK_APIS

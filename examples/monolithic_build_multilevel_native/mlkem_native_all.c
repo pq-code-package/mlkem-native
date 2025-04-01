@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#define MLK_MULTILEVEL_BUILD
-
 /* Three instances of mlkem-native for all security levels */
 
 /* Include level-independent code */
