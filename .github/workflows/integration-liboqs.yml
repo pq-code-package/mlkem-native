@@ -36,7 +36,7 @@ jobs:
           packages: 'cmake python3-jinja2 python3-tabulate python3-git python3-pytest valgrind'
       - uses: ./.github/actions/setup-oqs
         with:
-          commit: 'bf515a36091e2bd1dd0fbfe8ce1747a45371312e'
+          commit: '6337a8424deae09aa835ddd920faff83a8f0e1d7'
       - name: Apply patch
         run: |
           cd $LIBOQS_DIR
@@ -44,6 +44,8 @@ jobs:
           sed -i "/name: mlkem-native/,/preserve_folder_structure/s%git_url: .*%git_url: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY%" scripts/copy_from_upstream/copy_from_upstream.yml
           sed -i "/name: mlkem-native/,/preserve_folder_structure/s/git_branch: .*/git_branch: $GITHUB_SHA/" scripts/copy_from_upstream/copy_from_upstream.yml
           sed -i "/name: mlkem-native/,/preserve_folder_structure/s/git_commit: .*/git_commit: $GITHUB_SHA/" scripts/copy_from_upstream/copy_from_upstream.yml
+          # Remove patch
+          sed -i "/name: mlkem-native/,/preserve_folder_structure/{/patches:/d}" scripts/copy_from_upstream/copy_from_upstream.yml
           git diff >> $GITHUB_STEP_SUMMARY
       - name: Configure
         run: |
