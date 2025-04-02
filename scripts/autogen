@@ -13,6 +13,9 @@ import sys
 import pyparsing as pp
 import os
 
+from concurrent.futures import ThreadPoolExecutor
+from functools import partial
+
 modulus = 3329
 root_of_unity = 17
 montgomery_factor = pow(2, 16, modulus)
@@ -389,8 +392,11 @@ def gen_preprocessor_comments_for(source_file, dry_run=False):
 
 
 def gen_preprocessor_comments(dry_run=False):
-    for h in get_c_source_files() + get_asm_source_files() + get_header_files():
-        gen_preprocessor_comments_for(h, dry_run=dry_run)
+    files = get_c_source_files() + get_asm_source_files() + get_header_files()
+    with ThreadPoolExecutor() as executor:
+        results = list(
+            executor.map(partial(gen_preprocessor_comments_for, dry_run=dry_run), files)
+        )
 
 
 def update_file(filename, content, dry_run=False, force_format=False):
@@ -1332,63 +1338,105 @@ def update_via_simpasm(
     update_file(outfile_full, new_contents, dry_run=dry_run)
 
 
+def gen_hol_light_asm_file(job, dry_run=False):
+    infile, outfile, indir, cflags = job
+    update_via_simpasm(
+        f"{indir}/{infile}",
+        "proofs/hol_light/arm/mlkem",
+        outfile=outfile,
+        cflags=cflags,
+        preserve_header=False,
+        dry_run=dry_run,
+    )
+
+
 def gen_hol_light_asm(dry_run=False):
-    def gen_hol_light_arith_asm_file(infile, outfile):
-        update_via_simpasm(
-            f"dev/aarch64_opt/src/{infile}",
-            "proofs/hol_light/arm/mlkem",
-            outfile=outfile,
-            cflags="-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
-            preserve_header=False,
-            dry_run=dry_run,
+
+    joblist = [
+        (
+            "ntt.S",
+            "mlkem_ntt.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+        ),
+        (
+            "intt.S",
+            "mlkem_intt.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+        ),
+        (
+            "poly_tomont_asm.S",
+            "mlkem_poly_tomont.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+        ),
+        (
+            "poly_reduce_asm.S",
+            "mlkem_poly_reduce.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+        ),
+        (
+            "poly_mulcache_compute_asm.S",
+            "mlkem_poly_mulcache_compute.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+        ),
+        (
+            "polyvec_basemul_acc_montgomery_cached_asm_k2.S",
+            "mlkem_poly_basemul_acc_montgomery_cached_k2.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+        ),
+        (
+            "polyvec_basemul_acc_montgomery_cached_asm_k3.S",
+            "mlkem_poly_basemul_acc_montgomery_cached_k3.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+        ),
+        (
+            "polyvec_basemul_acc_montgomery_cached_asm_k4.S",
+            "mlkem_poly_basemul_acc_montgomery_cached_k4.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+        ),
+        (
+            "keccak_f1600_x1_scalar_asm.S",
+            "keccak_f1600_x1_scalar.S",
+            "dev/fips202/aarch64/src",
+            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/ -DMLK_FIPS202_BACKEND_AARCH64_DEFAULT",
+        ),
+        (
+            "keccak_f1600_x1_v84a_asm.S",
+            "keccak_f1600_x1_v84a.S",
+            "dev/fips202/aarch64/src",
+            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/ -DMLK_FIPS202_BACKEND_AARCH64_DEFAULT",
+        ),
+        (
+            "keccak_f1600_x2_v84a_asm.S",
+            "keccak_f1600_x2_v84a.S",
+            "dev/fips202/aarch64/src",
+            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/ -DMLK_FIPS202_BACKEND_AARCH64_DEFAULT",
+        ),
+        (
+            "keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S",
+            "keccak_f1600_x4_v8a_v84a_scalar.S",
+            "dev/fips202/aarch64/src",
+            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/ -DMLK_FIPS202_BACKEND_AARCH64_DEFAULT",
+        ),
+        (
+            "keccak_f1600_x4_v8a_scalar_hybrid_asm.S",
+            "keccak_f1600_x4_v8a_scalar.S",
+            "dev/fips202/aarch64/src",
+            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/ -DMLK_FIPS202_BACKEND_AARCH64_DEFAULT",
+        ),
+    ]
+
+    with ThreadPoolExecutor() as executor:
+        _ = list(
+            executor.map(partial(gen_hol_light_asm_file, dry_run=dry_run), joblist)
         )
-
-    gen_hol_light_arith_asm_file("ntt.S", "mlkem_ntt.S")
-    gen_hol_light_arith_asm_file("intt.S", "mlkem_intt.S")
-    gen_hol_light_arith_asm_file("poly_tomont_asm.S", "mlkem_poly_tomont.S")
-    gen_hol_light_arith_asm_file("poly_reduce_asm.S", "mlkem_poly_reduce.S")
-    gen_hol_light_arith_asm_file(
-        "poly_mulcache_compute_asm.S", "mlkem_poly_mulcache_compute.S"
-    )
-    gen_hol_light_arith_asm_file(
-        "polyvec_basemul_acc_montgomery_cached_asm_k2.S",
-        "mlkem_poly_basemul_acc_montgomery_cached_k2.S",
-    )
-    gen_hol_light_arith_asm_file(
-        "polyvec_basemul_acc_montgomery_cached_asm_k3.S",
-        "mlkem_poly_basemul_acc_montgomery_cached_k3.S",
-    )
-    gen_hol_light_arith_asm_file(
-        "polyvec_basemul_acc_montgomery_cached_asm_k4.S",
-        "mlkem_poly_basemul_acc_montgomery_cached_k4.S",
-    )
-
-    def gen_hol_light_fips202_asm_file(infile, outfile):
-        update_via_simpasm(
-            f"dev/fips202/aarch64/src/{infile}",
-            "proofs/hol_light/arm/mlkem",
-            outfile=outfile,
-            cflags="-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/ -DMLK_FIPS202_BACKEND_AARCH64_DEFAULT",
-            preserve_header=False,
-            dry_run=dry_run,
-        )
-
-    gen_hol_light_fips202_asm_file(
-        "keccak_f1600_x1_scalar_asm.S", "keccak_f1600_x1_scalar.S"
-    )
-    gen_hol_light_fips202_asm_file(
-        "keccak_f1600_x1_v84a_asm.S", "keccak_f1600_x1_v84a.S"
-    )
-    gen_hol_light_fips202_asm_file(
-        "keccak_f1600_x2_v84a_asm.S", "keccak_f1600_x2_v84a.S"
-    )
-    gen_hol_light_fips202_asm_file(
-        "keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S",
-        "keccak_f1600_x4_v8a_v84a_scalar.S",
-    )
-    gen_hol_light_fips202_asm_file(
-        "keccak_f1600_x4_v8a_scalar_hybrid_asm.S", "keccak_f1600_x4_v8a_scalar.S"
-    )
 
 
 def update_via_copy(infile_full, outfile_full, dry_run=False, transform=None):
@@ -1415,32 +1463,61 @@ def update_via_remove(filename, dry_run=False):
     os.remove(filename)
 
 
+def synchronize_file(
+    f, in_dir, out_dir, dry_run=False, delete=False, no_simplify=False, **kwargs
+):
+
+    # Only synchronize sources, but not README.md, Makefile and so on
+    extensions = (".c", ".h", ".i", ".inc", ".S")
+
+    if not f.endswith(extensions):
+        return None
+
+    basename = os.path.basename(f)
+
+    if delete is True:
+        return basename
+
+    if no_simplify is False and f.endswith(".S"):
+        update_via_simpasm(f, out_dir, dry_run=dry_run, **kwargs)
+    else:
+        # Update via copy
+        _, infile = os.path.split(f)
+        outfile_full = os.path.join(out_dir, infile)
+        # The header guards will also be checked later, but if we
+        # don't do it here, the dry-run would fail because of a
+        # mismatching intermediate file
+        if f.endswith(".h"):
+            transform = lambda c: adjust_header_guard_for_filename(c, outfile_full)
+        else:
+            transform = None
+        update_via_copy(f, outfile_full, dry_run=dry_run, transform=transform)
+
+    return basename
+
+
 def synchronize_backend(
     in_dir, out_dir, dry_run=False, delete=False, no_simplify=False, **kwargs
 ):
     copied = []
-    # Only synchronize sources, but not README.md, Makefile and so on
-    extensions = (".c", ".h", ".i", ".inc", ".S")
-    for f in get_files(os.path.join(in_dir, "*")):
-        if not f.endswith(extensions):
-            continue
-        copied.append(os.path.basename(f))
-        if delete is True:
-            continue
-        if no_simplify is False and f.endswith(".S"):
-            update_via_simpasm(f, out_dir, dry_run=dry_run, **kwargs)
-        else:
-            # Update via copy
-            _, infile = os.path.split(f)
-            outfile_full = os.path.join(out_dir, infile)
-            # The header guards will also be checked later, but if we
-            # don't do it here, the dry-run would fail because of a
-            # mismatching intermediate file
-            if f.endswith(".h"):
-                transform = lambda c: adjust_header_guard_for_filename(c, outfile_full)
-            else:
-                transform = None
-            update_via_copy(f, outfile_full, dry_run=dry_run, transform=transform)
+
+    with ThreadPoolExecutor() as executor:
+        pool_results = list(
+            executor.map(
+                partial(
+                    synchronize_file,
+                    in_dir=in_dir,
+                    out_dir=out_dir,
+                    dry_run=dry_run,
+                    delete=delete,
+                    no_simplify=no_simplify,
+                    **kwargs,
+                ),
+                get_files(os.path.join(in_dir, "*")),
+            )
+        )
+
+    copied = [r for r in pool_results if r is not None]
 
     if delete is False:
         return
@@ -1590,8 +1667,10 @@ def gen_header_guard(header_file, dry_run=False):
 
 
 def gen_header_guards(dry_run=False):
-    for h in get_header_files():
-        gen_header_guard(h, dry_run=dry_run)
+    with ThreadPoolExecutor() as executor:
+        _ = list(
+            executor.map(partial(gen_header_guard, dry_run=dry_run), get_header_files())
+        )
 
 
 def gen_source_undefs(source_file, dry_run=False):
@@ -1652,8 +1731,12 @@ def gen_source_undefs(source_file, dry_run=False):
 
 
 def gen_undefs(dry_run=False):
-    for c in get_c_source_files():
-        gen_source_undefs(c, dry_run=dry_run)
+    with ThreadPoolExecutor() as executor:
+        _ = list(
+            executor.map(
+                partial(gen_source_undefs, dry_run=dry_run), get_c_source_files()
+            )
+        )
 
 
 def _main():
