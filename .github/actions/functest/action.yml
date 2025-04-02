@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name: Functional tests
-description: Run functional tests for MLKEM-C_AArch64
+description: Run functional tests
 
 inputs:
   nix-shell:
