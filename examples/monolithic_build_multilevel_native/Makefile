@@ -92,6 +92,7 @@ CFLAGS := \
 	-Wpointer-arith \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
+	-Wredundant-decls \
 	-Wno-unused-command-line-argument \
 	-fomit-frame-pointer \
 	-std=c99 \

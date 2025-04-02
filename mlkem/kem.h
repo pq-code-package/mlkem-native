@@ -13,7 +13,9 @@
 #if defined(MLK_CHECK_APIS)
 /* Include to ensure consistency between internal kem.h
  * and external mlkem_native.h. */
+#define MLK_CONFIG_API_NO_SUPERCOP
 #include "mlkem_native.h"
+#undef MLK_CONFIG_API_NO_SUPERCOP
 
 #if MLKEM_INDCCA_SECRETKEYBYTES != MLKEM_SECRETKEYBYTES(MLKEM_LVL)
 #error Mismatch for SECRETKEYBYTES between kem.h and mlkem_native.h
@@ -27,13 +29,13 @@
 #error Mismatch for CIPHERTEXTBYTES between kem.h and mlkem_native.h
 #endif
 
-#else /* MLK_CHECK_APIS */
+#endif /* MLK_CHECK_APIS */
+
 #define crypto_kem_keypair_derand MLK_NAMESPACE_K(keypair_derand)
 #define crypto_kem_keypair MLK_NAMESPACE_K(keypair)
 #define crypto_kem_enc_derand MLK_NAMESPACE_K(enc_derand)
 #define crypto_kem_enc MLK_NAMESPACE_K(enc)
 #define crypto_kem_dec MLK_NAMESPACE_K(dec)
-#endif /* !MLK_CHECK_APIS */
 
 /*************************************************
  * Name:        crypto_kem_keypair_derand

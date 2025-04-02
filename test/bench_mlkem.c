@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../mlkem/common.h"
 #include "../mlkem/mlkem_native.h"
 #include "../mlkem/randombytes.h"
 #include "hal.h"

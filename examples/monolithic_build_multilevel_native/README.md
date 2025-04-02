@@ -17,35 +17,32 @@ appropriately first, and then includes the monobuild:
 ```C
 /* Three instances of mlkem-native for all security levels */
 
-/* Include level-independent code */
-#define MLK_CONFIG_MULTILEVEL_WITH_SHARED 1
-#define MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
+#define MLK_CONFIG_FILE "multilevel_config.h"
+
 /* Include C files accompanying native code */
 #define MLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH
 #define MLK_CONFIG_MONOBUILD_WITH_NATIVE_FIPS202
-/* Indicate that this is a monobuild */
-#define MLK_CONFIG_MONOBUILD
 
+/* Include level-independent code */
+#define MLK_CONFIG_MULTILEVEL_WITH_SHARED 1
+/* Keep level-independent headers at the end of monobuild file */
+#define MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
 #define MLK_CONFIG_PARAMETER_SET 512
-#define MLK_CONFIG_FILE "multilevel_config.h"
 #include "mlkem_native_monobuild.c"
-#undef MLK_CONFIG_FILE
+#undef MLK_CONFIG_MULTILEVEL_WITH_SHARED
+#undef MLK_CONFIG_PARAMETER_SET
 
 /* Exclude level-independent code */
-#undef MLK_CONFIG_MULTILEVEL_WITH_SHARED
 #define MLK_CONFIG_MULTILEVEL_NO_SHARED
-
 #define MLK_CONFIG_PARAMETER_SET 768
-#define MLK_CONFIG_FILE "multilevel_config.h"
 #include "mlkem_native_monobuild.c"
-#undef MLK_CONFIG_FILE
-
+/* `#undef` all headers at the and of the monobuild file */
 #undef MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
+#undef MLK_CONFIG_PARAMETER_SET
 
 #define MLK_CONFIG_PARAMETER_SET 1024
-#define MLK_CONFIG_FILE "multilevel_config.h"
 #include "mlkem_native_monobuild.c"
-#undef MLK_CONFIG_FILE
+#undef MLK_CONFIG_PARAMETER_SET
 ```
 
 Note the setting `MLK_CONFIG_MULTILEVEL_WITH_SHARED` which forces the inclusion of all level-independent
@@ -53,42 +50,15 @@ code in the MLKEM-512 build, and the setting `MLK_CONFIG_MULTILEVEL_NO_SHARED`, 
 level-independent code in the subsequent builds. Finally, `MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS` entails that
 `mlkem_native_monobuild.c` does not `#undefine` the `#define` clauses from level-independent files.
 
-To make the monolithic multi-level build accessible from the application sources, we provide
-[mlkem_native_all.h](mlkem_native_all.h), which includes [mlkem_native.h](../../mlkem/mlkem_native.h) once per
-configuration. Note that we don't refer to the configuration using `MLK_CONFIG_FILE`, but by setting
-`MLK_BUILD_INFO_XXX` explicitly. Otherwise, [mlkem_native.h](../../mlkem/mlkem_native.h) would include the confg, which
-would lead to name-clashes upon multiple use.
+Since we embed [mlkem_native_all.c](mlkem_native_all.c) directly into the application source [main.c](main.c), we don't
+need a header for function declarations. However, we still import [mlkem_native.h](../../mlkem/mlkem_native.h) once
+with `MLK_CONFIG_API_CONSTANTS_ONLY`, for definitions of the sizes of the key material. Excerpt from [main.c](main.c):
 
-```C
-/* API for MLKEM-512 */
-#define MLK_BUILD_INFO_LVL 512
-#define MLK_BUILD_INFO_NAMESPACE(sym) mlkem512_##sym
-#define MLK_BUILD_INFO_NO_STANDARD_API
-#include "mlkem_native.h"
-#undef MLK_BUILD_INFO_LVL
-#undef MLK_BUILD_INFO_NAMESPACE
-#undef MLK_BUILD_INFO_NO_STANDARD_API
-#undef MLK_H
+```c
+#include "mlkem_native_all.c"
 
-/* API for MLKEM-768 */
-#define MLK_BUILD_INFO_LVL 768
-#define MLK_BUILD_INFO_NAMESPACE(sym) mlkem768_##sym
-#define MLK_BUILD_INFO_NO_STANDARD_API
-#include "mlkem_native.h"
-#undef MLK_BUILD_INFO_LVL
-#undef MLK_BUILD_INFO_NAMESPACE
-#undef MLK_BUILD_INFO_NO_STANDARD_API
-#undef MLK_H
-
-/* API for MLKEM-1024 */
-#define MLK_BUILD_INFO_LVL 1024
-#define MLK_BUILD_INFO_NAMESPACE(sym) mlkem1024_##sym
-#define MLK_BUILD_INFO_NO_STANDARD_API
-#include "mlkem_native.h"
-#undef MLK_BUILD_INFO_LVL
-#undef MLK_BUILD_INFO_NAMESPACE
-#undef MLK_BUILD_INFO_NO_STANDARD_API
-#undef MLK_H
+#define MLK_CONFIG_API_CONSTANTS_ONLY
+#include <mlkem_native.h>
 ```
 
 ## Usage
