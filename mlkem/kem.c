@@ -189,7 +189,7 @@ static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 MLK_EXTERNAL_API
 int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                               uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
-                              const uint8_t *coins)
+                              const uint8_t coins[2 * MLKEM_SYMBYTES])
 {
   mlk_indcpa_keypair_derand(pk, sk, coins);
   memcpy(sk + MLKEM_INDCPA_SECRETKEYBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);

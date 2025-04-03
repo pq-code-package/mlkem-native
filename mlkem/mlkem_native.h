@@ -137,7 +137,7 @@ MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(keypair_derand)(
     uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
     uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-    const uint8_t *coins);
+    const uint8_t coins[2 * MLKEM_SYMBYTES]);
 
 /*************************************************
  * Name:        crypto_kem_keypair

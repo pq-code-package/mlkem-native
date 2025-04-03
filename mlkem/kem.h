@@ -63,7 +63,7 @@ MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                               uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
-                              const uint8_t *coins)
+                              const uint8_t coins[2 * MLKEM_SYMBYTES])
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
