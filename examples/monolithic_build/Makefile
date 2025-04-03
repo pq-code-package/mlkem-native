@@ -104,17 +104,17 @@ $(LIB1024_FULL): $(MLK_SOURCE)
 $(BIN512_FULL): $(APP_SOURCE) $(LIB512_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_FILE="\"config_512.h\"" $(INC) $^ -o $@
+	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_API_PARAMETER_SET=512 $(INC) $^ -o $@
 
 $(BIN768_FULL): $(APP_SOURCE) $(LIB768_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_FILE="\"config_768.h\"" $(INC) $^ -o $@
+	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_API_PARAMETER_SET=768 $(INC) $^ -o $@
 
 $(BIN1024_FULL): $(APP_SOURCE) $(LIB1024_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_FILE="\"config_1024.h\"" $(INC) $^ -o $@
+	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_API_PARAMETER_SET=1024 $(INC) $^ -o $@
 
 all: build
 

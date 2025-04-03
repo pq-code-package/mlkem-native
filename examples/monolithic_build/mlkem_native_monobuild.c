@@ -13,6 +13,42 @@
  * mlkem-native
  */
 
+/******************************************************************************
+ *
+ * Single compilation unit (SCU) for fixed-level build of mlkem-native
+ *
+ * This compilation unit bundles together all source files for a build
+ * of mlkem-native for a fixed security level (MLKEM-512/768/1024).
+ *
+ * # API
+ *
+ * The API exposed by this file is described in mlkem_native.h.
+ *
+ * # Multilevel build
+ *
+ * If you want an SCU build of mlkem-native with support for multiple security
+ * levels, you need to include this file multiple times, and set
+ * MLK_CONFIG_MULTILEVEL_WITH_SHARED and MLK_CONFIG_MULTILEVEL_NO_SHARED
+ * appropriately. This is exemplified in examples/monolithic_build_multilevel.
+ *
+ * # Configuration
+ *
+ * - MLK_CONFIG_MONOBUILD_CUSTOM_FIPS202
+ *   Set this option if you use a custom FIPS202 implementation.
+ *
+ * - MLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH
+ *   Set this option if you want to include the native arithmetic backends
+ *   in your build.
+ *
+ * - MLK_CONFIG_MONOBUILD_WITH_NATIVE_FIPS202
+ *   Set this option if you want to include the native FIPS202 backends
+ *   in your build.
+ *
+ * - MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
+ *   Set this option if you want to keep the directives defined in
+ *   level-independent headers. This is needed for a multilevel build.
+ */
+
 /* If parts of the mlkem-native source tree are not used,
  * consider reducing this header via `unifdef`.
  *
@@ -72,6 +108,8 @@
 #undef MLK_COMMON_H
 #undef MLK_CONCAT
 #undef MLK_CONCAT_
+#undef MLK_CONFIG_API_NAMESPACE_PREFIX
+#undef MLK_CONFIG_API_PARAMETER_SET
 #undef MLK_EMPTY_CU
 #undef MLK_EXTERNAL_API
 #undef MLK_FIPS202X4_HEADER_FILE
@@ -87,6 +125,7 @@
 #undef mlk_indcpa_enc
 #undef mlk_indcpa_keypair_derand
 /* mlkem/kem.h */
+#undef MLK_CONFIG_API_NO_SUPERCOP
 #undef MLK_KEM_H
 #undef crypto_kem_dec
 #undef crypto_kem_enc
@@ -122,14 +161,12 @@
 #undef MLKEM_SECRETKEYBYTES
 #undef MLKEM_SECRETKEYBYTES_
 #undef MLKEM_SYMBYTES
-#undef MLK_BUILD_INFO_CONCAT2
-#undef MLK_BUILD_INFO_CONCAT2_
-#undef MLK_BUILD_INFO_CONCAT3
-#undef MLK_BUILD_INFO_CONCAT3_
-#undef MLK_BUILD_INFO_LVL
-#undef MLK_BUILD_INFO_NAMESPACE
+#undef MLK_API_CONCAT
+#undef MLK_API_CONCAT_
+#undef MLK_API_CONCAT_UNDERSCORE
+#undef MLK_API_MUST_CHECK_RETURN_VALUE
+#undef MLK_API_NAMESPACE
 #undef MLK_H
-#undef MLK_MUST_CHECK_RETURN_VALUE
 #undef crypto_kem_dec
 #undef crypto_kem_enc
 #undef crypto_kem_enc_derand

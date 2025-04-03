@@ -17,7 +17,8 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLK_CONFIG_PARAMETER_SET 768 /* We want MLKEM-768 */
+/* This is set on the command line */
+/* #define MLK_CONFIG_PARAMETER_SET 768 */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_FILE

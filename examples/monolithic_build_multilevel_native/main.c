@@ -8,7 +8,10 @@
 #include <string.h>
 
 #include "mlkem_native_all.c"
-#include "mlkem_native_all.h"
+
+#define MLK_CONFIG_API_CONSTANTS_ONLY
+#include <mlkem_native.h>
+
 #include "test_only_rng/notrandombytes.h"
 
 #define CHECK(x)                                              \

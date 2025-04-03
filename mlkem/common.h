@@ -125,4 +125,20 @@
 #define MLK_FIPS202X4_HEADER_FILE MLK_CONFIG_FIPS202X4_CUSTOM_HEADER
 #endif
 
+/* Just in case we want to include mlkem_native.h, set the configuration
+ * for that header in accordance with the configuration used here. */
+
+/* Double-check that this is not conflicting with pre-existing definitions. */
+#if defined(MLK_CONFIG_API_PARAMETER_SET) ||    \
+    defined(MLK_CONFIG_API_NAMESPACE_PREFIX) || \
+    defined(MLK_CONFIG_API_NO_SUPERCOP) ||      \
+    defined(MLK_CONFIG_API_CONSTANTS_ONLY)
+#error Pre-existing MLK_CONFIG_API_XXX configuration is neither useful nor allowed during an mlkem-native build
+#endif /* MLK_CONFIG_API_PARAMETER_SET || MLK_CONFIG_API_NAMESPACE_PREFIX || \
+          MLK_CONFIG_API_NO_SUPERCOP || MLK_CONFIG_API_CONSTANTS_ONLY */
+
+#define MLK_CONFIG_API_PARAMETER_SET MLK_CONFIG_PARAMETER_SET
+#define MLK_CONFIG_API_NAMESPACE_PREFIX \
+  MLK_ADD_LEVEL(MLK_CONFIG_NAMESPACE_PREFIX)
+
 #endif /* !MLK_COMMON_H */
