@@ -118,9 +118,13 @@ unsigned mlk_rej_uniform_avx2(int16_t *MLK_RESTRICT r, const uint8_t *buf)
     pos += 3;
 
     if (val0 < MLKEM_Q)
+    {
       r[ctr++] = val0;
+    }
     if (val1 < MLKEM_Q && ctr < MLKEM_N)
+    {
       r[ctr++] = val1;
+    }
   }
 
   return ctr;

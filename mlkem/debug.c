@@ -48,7 +48,9 @@ void mlk_debug_check_bounds(const char *file, int line, const int16_t *ptr,
   }
 
   if (err == 1)
+  {
     exit(1);
+  }
 }
 
 #else /* !MLK_CONFIG_MULTILEVEL_NO_SHARED && MLKEM_DEBUG */

@@ -16,6 +16,7 @@ IncludeBlocks: Preserve
 # Designate CBMC contracts/macros that appear in .h files
 # as "attributes" so they don't get increasingly indented line after line
 BreakBeforeBraces: Allman
+InsertBraces: true
 WhitespaceSensitiveMacros: ['__contract__', '__loop__' ]
 Macros:
  # Make this artifically long to avoid function bodies after short contracts
