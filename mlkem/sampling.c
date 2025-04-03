@@ -38,7 +38,7 @@ __contract__(
   while (ctr < target && pos + 3 <= buflen)
   __loop__(
     invariant(offset <= ctr && ctr <= target && pos <= buflen)
-    invariant(ctr > 0 ==> array_bound(r, 0, ctr, 0, MLKEM_Q)))
+    invariant(array_bound(r, 0, ctr, 0, MLKEM_Q)))
   {
     val0 = ((buf[pos + 0] >> 0) | ((uint16_t)buf[pos + 1] << 8)) & 0xFFF;
     val1 = ((buf[pos + 1] >> 4) | ((uint16_t)buf[pos + 2] << 4)) & 0xFFF;
