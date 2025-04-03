@@ -62,7 +62,9 @@ static int test_keys_mlkem512(void)
   {
     size_t i;
     for (i = 0; i < sizeof(key_a); i++)
+    {
       printf("%02x", key_a[i]);
+    }
   }
   printf("\n");
 
@@ -115,7 +117,9 @@ static int test_keys_mlkem768(void)
   {
     size_t i;
     for (i = 0; i < sizeof(key_a); i++)
+    {
       printf("%02x", key_a[i]);
+    }
   }
   printf("\n");
 
@@ -169,7 +173,9 @@ static int test_keys_mlkem1024(void)
   {
     size_t i;
     for (i = 0; i < sizeof(key_a); i++)
+    {
       printf("%02x", key_a[i]);
+    }
   }
   printf("\n");
 
