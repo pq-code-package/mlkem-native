@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: Apache-2.0
+
+name: Setup AWS-LC
+description: Setup AWS-LC
+
+inputs:
+  dir:
+    description: Directory to fetch AWS-LC into
+    default: 'AWS-LC'
+  repository:
+    description: Repository to fetch from
+    default: 'aws/AWS-LC'
+  commit:
+    description: Commit to fetch
+    default: 'HEAD'
+  gh_token:
+    description: Github access token to use
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Fetch AWS-LC
+      shell: bash
+      run: |
+        mkdir ${{ inputs.dir }} && cd ${{ inputs.dir }}
+        git config --global --add safe.directory $GITHUB_WORKSPACE/${{ inputs.dir }}
+        git init
+        git remote add origin $GITHUB_SERVER_URL/${{ inputs.repository }}
+        git fetch origin --depth 1 ${{ inputs.commit }}
+        git checkout FETCH_HEAD
+
+        # Remember AWS-LC directory
+        echo AWSLC_DIR="$GITHUB_WORKSPACE/${{ inputs.dir }}" >> $GITHUB_ENV
