@@ -129,7 +129,7 @@ contracts and loop invariants from the code; they will be ignored unless `CBMC` 
 
 Yes. The security level is a compile-time parameter configured by setting `MLK_CONFIG_PARAMETER_SET=512/768/1024` in [config.h](mlkem/config.h).
 If your library/application requires multiple security levels, you can build + link three instances of mlkem-native
-while sharing common code; this is called a 'multilevel build' and is demonstrated in [examples/multilevel_build](examples/multilevel_build).
+while sharing common code; this is called a 'multi-level build' and is demonstrated in [examples/multilevel_build](examples/multilevel_build).
 
 ### Can I bring my own backend?
 

@@ -9,7 +9,7 @@
 /******************************************************************************
  * Name:        MLK_CONFIG_PARAMETER_SET
  *
- * Description: Determines the security level for ML-KEM
+ * Description: Specifies the parameter set for ML-KEM
  *              - MLK_CONFIG_PARAMETER_SET=512 corresponds to ML-KEM-512
  *              - MLK_CONFIG_PARAMETER_SET=768 corresponds to ML-KEM-768
  *              - MLK_CONFIG_PARAMETER_SET=1024 corresponds to ML-KEM-1024
@@ -31,7 +31,7 @@
  *              - MLK_CONFIG_MULTILEVEL_WITH_SHARED, or
  *              - MLK_CONFIG_MULTILEVEL_NO_SHARED,
  *              are set, level-dependent symbols will additionally be prefixed
- *              with the security level.
+ *              with the parameter set (512/768/1024).
  *
  *              This can also be set using CFLAGS.
  *

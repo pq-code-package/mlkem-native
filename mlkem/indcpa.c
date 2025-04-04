@@ -15,18 +15,18 @@
 #include "sampling.h"
 #include "symmetric.h"
 
-/* Level namespacing
+/* Parameter set namespacing
  * This is to facilitate building multiple instances
- * of mlkem-native (e.g. with varying security levels)
+ * of mlkem-native (e.g. with varying parameter sets)
  * within a single compilation unit. */
-#define mlk_pack_pk MLK_ADD_LEVEL(mlk_pack_pk)
-#define mlk_unpack_pk MLK_ADD_LEVEL(mlk_unpack_pk)
-#define mlk_pack_sk MLK_ADD_LEVEL(mlk_pack_sk)
-#define mlk_unpack_sk MLK_ADD_LEVEL(mlk_unpack_sk)
-#define mlk_pack_ciphertext MLK_ADD_LEVEL(mlk_pack_ciphertext)
-#define mlk_unpack_ciphertext MLK_ADD_LEVEL(mlk_unpack_ciphertext)
-#define mlk_matvec_mul MLK_ADD_LEVEL(mlk_matvec_mul)
-/* End of level namespacing */
+#define mlk_pack_pk MLK_ADD_PARAM_SET(mlk_pack_pk)
+#define mlk_unpack_pk MLK_ADD_PARAM_SET(mlk_unpack_pk)
+#define mlk_pack_sk MLK_ADD_PARAM_SET(mlk_pack_sk)
+#define mlk_unpack_sk MLK_ADD_PARAM_SET(mlk_unpack_sk)
+#define mlk_pack_ciphertext MLK_ADD_PARAM_SET(mlk_pack_ciphertext)
+#define mlk_unpack_ciphertext MLK_ADD_PARAM_SET(mlk_unpack_ciphertext)
+#define mlk_matvec_mul MLK_ADD_PARAM_SET(mlk_matvec_mul)
+/* End of parameter set namespacing */
 
 /*************************************************
  * Name:        mlk_pack_pk
@@ -166,7 +166,7 @@ static void mlk_unpack_ciphertext(mlk_polyvec b, mlk_poly *v,
 /* This namespacing is not done at the top to avoid a naming conflict
  * with native backends, which are currently not yet namespaced. */
 #define mlk_poly_permute_bitrev_to_custom \
-  MLK_ADD_LEVEL(mlk_poly_permute_bitrev_to_custom)
+  MLK_ADD_PARAM_SET(mlk_poly_permute_bitrev_to_custom)
 
 static MLK_INLINE void mlk_poly_permute_bitrev_to_custom(int16_t data[MLKEM_N])
 __contract__(

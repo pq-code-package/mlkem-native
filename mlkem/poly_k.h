@@ -10,14 +10,14 @@
 #include "compress.h"
 #include "poly.h"
 
-/* Level namespacing
+/* Parameter set namespacing
  * This is to facilitate building multiple instances
- * of mlkem-native (e.g. with varying security levels)
+ * of mlkem-native (e.g. with varying parameter sets)
  * within a single compilation unit. */
-#define mlk_polyvec MLK_ADD_LEVEL(mlk_polyvec)
-#define mlk_polymat MLK_ADD_LEVEL(mlk_polymat)
-#define mlk_polyvec_mulcache MLK_ADD_LEVEL(mlk_polyvec_mulcache)
-/* End of level namespacing */
+#define mlk_polyvec MLK_ADD_PARAM_SET(mlk_polyvec)
+#define mlk_polymat MLK_ADD_PARAM_SET(mlk_polymat)
+#define mlk_polyvec_mulcache MLK_ADD_PARAM_SET(mlk_polyvec_mulcache)
+/* End of parameter set namespacing */
 
 typedef mlk_poly mlk_polyvec[MLKEM_K];
 typedef mlk_poly mlk_polymat[MLKEM_K * MLKEM_K];
