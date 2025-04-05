@@ -96,12 +96,7 @@ runs:
         shell: ${{ env.SHELL }}
         run: |
           make clean
-          ./scripts/tests all --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.NISTKAT }} --${{ env.ACVP }} --${{ env.EXAMPLES }} -v
-      - name: Check namespacing ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.NISTKAT }}, ${{ env.EXAMPLES }})
-        if: ${{ inputs.check_namespace == 'true' }}
-        shell: ${{ env.SHELL }}
-        run: |
-          ./scripts/check-namespace
+          ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.NISTKAT }} --${{ env.ACVP }} --${{ env.EXAMPLES }} -v
       - name: Post ${{ env.MODE }} Tests
         shell: ${{ env.SHELL }}
         if: success() || failure()

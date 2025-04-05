@@ -540,6 +540,14 @@ class Tests:
     def func(self):
         def _func(opt):
             self._compile_schemes(TEST_TYPES.FUNC, opt)
+            if self.args.check_namespace is True:
+                p = subprocess.run(
+                    ["python3", "check-namespace"],
+                    stdout=subprocess.DEVNULL if not self.args.verbose else None,
+                    cwd="scripts",
+                )
+                if p.returncode != 0:
+                    self.fail(f"Namespacing failed for opt={opt}")
             if self.args.run:
                 self._run_schemes(TEST_TYPES.FUNC, opt)
 
@@ -934,6 +942,13 @@ def cli():
         "all", help="Run all tests (except benchmark for now)", parents=[common_parser]
     )
 
+    all_parser.add_argument(
+        "--check-namespace",
+        help="Check namespacing of binaries",
+        action="store_true",
+        default=False,
+    )
+
     func_group = all_parser.add_mutually_exclusive_group()
     func_group.add_argument(
         "--func", action="store_true", dest="func", help="Run func test", default=True
@@ -1134,6 +1149,12 @@ def cli():
         "func",
         help="Run the functional tests for all parameter sets",
         parents=[common_parser],
+    )
+    func_parser.add_argument(
+        "--check-namespace",
+        help="Check namespacing of binaries",
+        action="store_true",
+        default=False,
     )
 
     # kat arguments
