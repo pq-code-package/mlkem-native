@@ -12,14 +12,14 @@
 #include "symmetric.h"
 #include "verify.h"
 
-/* Level namespacing
+/* Parameter set namespacing
  * This is to facilitate building multiple instances
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
-#define mlk_check_pk MLK_ADD_LEVEL(mlk_check_pk)
-#define mlk_check_sk MLK_ADD_LEVEL(mlk_check_sk)
-#define mlk_check_pct MLK_ADD_LEVEL(mlk_check_pct)
-/* End of level namespacing */
+#define mlk_check_pk MLK_ADD_PARAM_SET(mlk_check_pk)
+#define mlk_check_sk MLK_ADD_PARAM_SET(mlk_check_sk)
+#define mlk_check_pct MLK_ADD_PARAM_SET(mlk_check_pct)
+/* End of parameter set namespacing */
 
 #if defined(CBMC)
 /* Redeclaration with contract needed for CBMC only */

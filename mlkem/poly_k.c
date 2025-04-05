@@ -11,13 +11,13 @@
 #include "sampling.h"
 #include "symmetric.h"
 
-/* Level namespacing
+/* Parameter set namespacing
  * This is to facilitate building multiple instances
- * of mlkem-native (e.g. with varying security levels)
+ * of mlkem-native (e.g. with varying parameter sets)
  * within a single compilation unit. */
-#define mlk_poly_cbd_eta1 MLK_ADD_LEVEL(mlk_poly_cbd_eta1)
-#define mlk_poly_cbd_eta2 MLK_ADD_LEVEL(mlk_poly_cbd_eta2)
-/* End of level namespacing */
+#define mlk_poly_cbd_eta1 MLK_ADD_PARAM_SET(mlk_poly_cbd_eta1)
+#define mlk_poly_cbd_eta2 MLK_ADD_PARAM_SET(mlk_poly_cbd_eta2)
+/* End of parameter set namespacing */
 
 /* Reference: `polyvec_compress()` in the reference implementation
  *            - In contrast to the reference implementation, we assume
@@ -251,7 +251,7 @@ void mlk_polyvec_tomont(mlk_polyvec r)
  *              - const uint8_t *buf: pointer to input byte array
  *
  * Specification: Implements [FIPS 203, Algorithm 8, SamplePolyCBD_eta1], where
- *                eta1 is specified per level in [FIPS 203, Table 2]
+ *                eta1 is specified per parameter set in [FIPS 203, Table 2]
  *                and represented as MLKEM_ETA1 here.
  *
  **************************************************/
@@ -324,7 +324,7 @@ void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
  *              - const uint8_t *buf: pointer to input byte array
  *
  * Specification: Implements [FIPS 203, Algorithm 8, SamplePolyCBD_eta2], where
- *                eta2 is specified per level in [FIPS 203, Table 2]
+ *                eta2 is specified per parameter set in [FIPS 203, Table 2]
  *                and represented as MLKEM_ETA2 here.
  *
  **************************************************/

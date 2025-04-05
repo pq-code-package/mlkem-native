@@ -25,14 +25,14 @@
  *   The namespace prefix used for the build.
  *
  *   NOTE:
- *   For a multilevel build, you must include the 512/768/1024 suffixes
+ *   For a multi-level build, you must include the 512/768/1024 suffixes
  *   in MLK_CONFIG_API_NAMESPACE_PREFIX.
  *
  * - MLK_CONFIG_API_NO_SUPERCOP [optional]
  *
  *   By default, this header will also expose the mlkem-native API in the
  *   SUPERCOP naming convention crypto_kem_xxx. If you don't want/need this,
- *   set MLK_CONFIG_API_NO_SUPERCOP. You must set this for a multilevel build.
+ *   set MLK_CONFIG_API_NO_SUPERCOP. You must set this for a multi-level build.
  *
  * - MLK_CONFIG_API_CONSTANTS_ONLY [optional]
  *
@@ -42,7 +42,7 @@
  *   MLK_CONFIG_API_PARAMETER_SET or MLK_CONFIG_API_NAMESPACE_PREFIX,
  *   nor include a configuration.
  *
- * # Multilevel builds
+ * # Multi-level builds
  *
  * This header specifies a build of mlkem-native for a fixed security level.
  * If you need multiple builds, e.g. to build a library offering multiple
@@ -53,7 +53,7 @@
 
 /******************************* Key sizes ************************************/
 
-/* Sizes of cryptographic material, per level */
+/* Sizes of cryptographic material, per parameter set */
 /* See mlke/common.h for the arithmetic expressions giving rise to these */
 /* check-magic: off */
 #define MLKEM512_SECRETKEYBYTES 1632

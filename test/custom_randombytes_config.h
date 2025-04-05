@@ -9,7 +9,7 @@
 /******************************************************************************
  * Name:        MLK_CONFIG_PARAMETER_SET
  *
- * Description: Determines the security level for ML-KEM
+ * Description: Specifies the parameter set for ML-KEM
  *              - MLK_CONFIG_PARAMETER_SET=512 corresponds to ML-KEM-512
  *              - MLK_CONFIG_PARAMETER_SET=768 corresponds to ML-KEM-768
  *              - MLK_CONFIG_PARAMETER_SET=1024 corresponds to ML-KEM-1024
@@ -49,7 +49,7 @@
  *              - MLK_CONFIG_MULTILEVEL_WITH_SHARED, or
  *              - MLK_CONFIG_MULTILEVEL_NO_SHARED,
  *              are set, level-dependent symbols will additionally be prefixed
- *              with the security level.
+ *              with the parameter set (512/768/1024).
  *
  *              This can also be set using CFLAGS.
  *
@@ -62,23 +62,21 @@
  * Name:        MLK_CONFIG_MULTILEVEL_WITH_SHARED
  *
  * Description: This is for multi-level builds of mlkem-native only. If you
- *              need only a single security level build of mlkem-native,
- *              keep this unset.
+ *              need only a single parameter set, keep this unset.
  *
  *              If this is set, all MLK_CONFIG_PARAMETER_SET-independent
  *              code will be included in the build, including code needed only
- *              for other security levels.
+ *              for other parameter sets.
  *
  *              Example: mlk_poly_cbd3 is only needed for
  *              MLK_CONFIG_PARAMETER_SET == 512. Yet, if this option is set
  *              for a build with MLK_CONFIG_PARAMETER_SET == 768/1024, it
  *              would be included.
  *
- *              To build mlkem-native with support for all security levels,
- *              build it three times -- once per level -- and set the option
- *              MLK_CONFIG_MULTILEVEL_WITH_SHARED for exactly one of
- *              them, and MLK_CONFIG_MULTILEVEL_NO_SHARED for the
- *              others.
+ *              To build mlkem-native with support for all parameter sets,
+ *              build it three times -- once per parameter set -- and set the
+ *              option MLK_CONFIG_MULTILEVEL_WITH_SHARED for exactly one of
+ *              them, and MLK_CONFIG_MULTILEVEL_NO_SHARED for the others.
  *
  *              See examples/multilevel_build for an example.
  *
@@ -91,17 +89,15 @@
  * Name:        MLK_CONFIG_MULTILEVEL_NO_SHARED
  *
  * Description: This is for multi-level builds of mlkem-native only. If you
- *              need only a single security level build of mlkem-native,
- *              keep this unset.
+ *              need only a single parameter set, keep this unset.
  *
  *              If this is set, no MLK_CONFIG_PARAMETER_SET-independent code
  *              will be included in the build.
  *
- *              To build mlkem-native with support for all security levels,
- *              build it three times -- once per level -- and set the option
- *              MLK_CONFIG_MULTILEVEL_WITH_SHARED for exactly one of
- *              them, and MLK_CONFIG_MULTILEVEL_NO_SHARED for the
- *              others.
+ *              To build mlkem-native with support for all parameter sets,
+ *              build it three times -- once per parameter set -- and set the
+ *              option MLK_CONFIG_MULTILEVEL_WITH_SHARED for exactly one of
+ *              them, and MLK_CONFIG_MULTILEVEL_NO_SHARED for the others.
  *
  *              See examples/multilevel_build for an example.
  *

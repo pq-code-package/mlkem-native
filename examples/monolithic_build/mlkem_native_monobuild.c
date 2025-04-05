@@ -24,7 +24,7 @@
  *
  * The API exposed by this file is described in mlkem_native.h.
  *
- * # Multilevel build
+ * # Multi-level build
  *
  * If you want an SCU build of mlkem-native with support for multiple security
  * levels, you need to include this file multiple times, and set
@@ -46,7 +46,7 @@
  *
  * - MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
  *   Set this option if you want to keep the directives defined in
- *   level-independent headers. This is needed for a multilevel build.
+ *   level-independent headers. This is needed for a multi-level build.
  */
 
 /* If parts of the mlkem-native source tree are not used,
@@ -102,7 +102,7 @@
  * Undefine macros from MLK_CONFIG_PARAMETER_SET-specific files
  */
 /* mlkem/common.h */
-#undef MLK_ADD_LEVEL
+#undef MLK_ADD_PARAM_SET
 #undef MLK_ASM_FN_SYMBOL
 #undef MLK_ASM_NAMESPACE
 #undef MLK_COMMON_H
@@ -185,7 +185,6 @@
 #undef MLKEM_INDCPA_PUBLICKEYBYTES
 #undef MLKEM_INDCPA_SECRETKEYBYTES
 #undef MLKEM_K
-#undef MLKEM_LVL
 #undef MLKEM_N
 #undef MLKEM_POLYBYTES
 #undef MLKEM_POLYCOMPRESSEDBYTES_D10

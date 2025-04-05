@@ -1085,7 +1085,7 @@ def gen_monolithic_source_file(dry_run=False):
 
     # List of level-specific source files
     # All other files only need including and building once
-    # in multilevel build.
+    # in multi-level build.
     def k_specific(c):
         k_specific_sources = [
             # sys.h is not k-specific, but has some macro-overlap with
@@ -1130,7 +1130,7 @@ def gen_monolithic_source_file(dry_run=False):
         yield " *"
         yield " * The API exposed by this file is described in mlkem_native.h."
         yield " *"
-        yield " * # Multilevel build"
+        yield " * # Multi-level build"
         yield " *"
         yield " * If you want an SCU build of mlkem-native with support for multiple security"
         yield " * levels, you need to include this file multiple times, and set"
@@ -1152,7 +1152,7 @@ def gen_monolithic_source_file(dry_run=False):
         yield " *"
         yield " * - MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS"
         yield " *   Set this option if you want to keep the directives defined in"
-        yield " *   level-independent headers. This is needed for a multilevel build."
+        yield " *   level-independent headers. This is needed for a multi-level build."
         yield " */"
         yield ""
         yield "/* If parts of the mlkem-native source tree are not used,"
