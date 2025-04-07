@@ -87,7 +87,7 @@ condition (usually depending on `k`).
 
 A prominent condition built from `forall` are `array_bound`:
 `array_bound(arr, idx_low, idx_high, value_low, value_high)` asserts that the values of the array `arr` within
-`[idx_low, ..., idx_high - 1]` are within the range `[value_low, ..., value_high]`. There is also `array_abs_bound(...)`
+`[idx_low, ..., idx_high - 1]` are within the range `[value_low, ..., value_high - 1]`. There is also `array_abs_bound(...)`
 for absolute value constraints.
 
 ### Loop invariants
@@ -456,13 +456,12 @@ We can use the macros in [mlkem/cbmc.h](../../mlkem/cbmc.h) to help, thus:
 void mlk_poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
 __contract__(
   requires(memory_no_alias(a, sizeof(mlk_poly)))
-  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, (MLKEM_Q - 1)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
   assigns(object_whole(r)));
 ```
 
 `array_bound` is a macro that expands to a quantified expression that expresses that the elemtns of `a->coeffs` between
-index values `0` (inclusive) and `MLKEM_N` (exclusive) are in the range `0` through `(MLKEM_Q - 1)` (both
-inclusive). See the macro definition in [mlkem/cbmc.h](../../mlkem/cbmc.h) for details.
+index values `0` (inclusive) and `MLKEM_N` (exclusive) are in the range `0` (inclusive) through `MLKEM_Q` (exclusive). See the macro definition in [mlkem/cbmc.h](../../mlkem/cbmc.h) for details.
 
 ### Interior contracts and loop invariants
 
