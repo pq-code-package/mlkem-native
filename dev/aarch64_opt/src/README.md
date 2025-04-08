@@ -2,56 +2,16 @@
 
 # mlkem-native AArch64 backend SLOTHY-optimized code
 
-This directory contains the AArch64 backend _after_ it has
-been optimized by SLOTHY.
+This directory contains the AArch64 backend after it has been optimized by [SLOTHY](https://github.com/slothy-optimizer/slothy/).
 
-## Running SLOTHY from the Makefile
+## Re-running SLOTHY
 
-If the "clean" backend sources in [`../../aarch64_clean/src/*.S`](../../aarch64_clean/src/) change,
-then the `Makefile` in this directory can be used to re-generate the
-optimized sources using SLOTHY.
+If the "clean" sources [`../../aarch64_clean/src/*.S`](../../aarch64_clean/src/) change, take the following steps to re-optimize and install them into the main source tree:
 
-The Makefile requires you to have a working SLOTHY setup. Note that mlkem-native's nix shell does currently not include SLOTHY.
-See the [SLOTHY Readme](https://github.com/slothy-optimizer/slothy/) for more details.
+1. Run `make` to re-generate the optimized sources using SLOTHY. This assumes a working SLOTHY setup, as established e.g. by the default nix shell for mlkem-native. See also the [SLOTHY README](https://github.com/slothy-optimizer/slothy/).
 
-## Example set up on macOS
+2. Run `autogen` to transfer the newly optimized files into the main source tree [mlkem/native](../../../mlkem/native).
 
-On macOS, let's say we have SLOTHY installed below
-$SLOTHY_ROOT, the mlkem-native repo in $MLKEM_NATIVE_ROOT, and llvm-mc in /opt/homebrew/opt/llvm/bin,
-then
+3. Run `tests all --opt=OPT` to check that that the new assembly is still functional.
 
-```
-cd $SLOTHY_ROOT
-# Force Python 3.11
-pyenv local 3.11
-# Start the python venv
-source venv/bin/activate
-
-# Add slothy-cli and llvm-mc to PATH
-PATH=$SLOTHY_ROOT:/opt/homebrew/opt/llvm/bin:$PATH
-export PATH
-
-# Goto mlkem-native repo
-cd $MLKEM_NATIVE_ROOT
-cd dev/aarch64_opt/src
-make
-```
-
-should apply SLOTHY to whatever clean assembly sources require processing.
-
-Do
-```
-make -B all
-```
-to process all the sources.
-
-To transfer the newly optimized files into the main source tree [mlkem/native](../../../mlkem/native), run `autogen` from the `nix` shell.
-
-## Current exceptions - file not processed by SLOTHY
-
-At present, `rej_uniform_asm.S` is not passed through SLOTHY, owing to complexity
-in its control flow. The Makefile simply copies this file from the "clean" directory unmodified.
-
-An additional target in the Makefile called
-`rej_uniform_asm_with_slothy.S` can be used to force SLOTHY to run on these units. This
-can be used to test SLOTHY as and when SLOTHY can process it.
+Note: By default, [rej_uniform_asm.S](rej_uniform_asm.S) is not passed through SLOTHY: The Makefile simply copies this file from the "clean" directory unmodified. The target `rej_uniform_asm_with_slothy.S` can be used to force SLOTHY to run on this file. This can be used to test SLOTHY as and when SLOTHY can process it.
