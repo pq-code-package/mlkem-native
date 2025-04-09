@@ -40,12 +40,32 @@ jobs:
     uses: ./.github/workflows/cbmc.yml
     secrets: inherit
   oqs_integration:
-    name: Integration
+    name: libOQS
     permissions:
       contents: 'read'
       id-token: 'write'
     needs: [ base ]
     uses: ./.github/workflows/integration-liboqs.yml
+    secrets: inherit
+  awslc_integration_fixed:
+    name: AWS-LC (412be9)
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/integration-awslc.yml
+    with:
+      commit: 412be9d1bb4f9d2f962dba1beac41249dbacdb55
+    secrets: inherit
+  awslc_integration_head:
+    name: AWS-LC (HEAD)
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/integration-awslc.yml
+    with:
+      commit: main
     secrets: inherit
   ct-test:
     name: Constant-time
