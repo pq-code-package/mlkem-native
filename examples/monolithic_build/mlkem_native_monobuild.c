@@ -118,6 +118,8 @@
 #undef MLK_MULTILEVEL_BUILD
 #undef MLK_NAMESPACE
 #undef MLK_NAMESPACE_K
+#undef MLK_NAMESPACE_PREFIX
+#undef MLK_NAMESPACE_PREFIX_K
 /* mlkem/indcpa.h */
 #undef MLK_INDCPA_H
 #undef mlk_gen_matrix
