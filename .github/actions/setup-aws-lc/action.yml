@@ -32,3 +32,9 @@ runs:
 
         # Remember AWS-LC directory
         echo AWSLC_DIR="$GITHUB_WORKSPACE/${{ inputs.dir }}" >> $GITHUB_ENV
+        AWSLC_DIR=$GITHUB_WORKSPACE/${{ inputs.dir }}
+
+        # TEMPORARY: Patch up importer
+        if [[ "$(uname)" == "Darwin" ]]; then
+          sed -i '' 's/\$SED_I/"${SED_I[@]}"/g' $AWSLC_DIR/crypto/fipsmodule/ml_kem/importer.sh
+        fi
