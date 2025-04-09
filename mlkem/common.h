@@ -42,10 +42,20 @@
 #define MLK_ADD_PARAM_SET(s) s
 #endif
 
-#define MLK_NAMESPACE(s) \
-  MLK_CONCAT(MLK_CONCAT(MLK_CONFIG_NAMESPACE_PREFIX, _), s)
-#define MLK_NAMESPACE_K(s) \
-  MLK_CONCAT(MLK_CONCAT(MLK_ADD_PARAM_SET(MLK_CONFIG_NAMESPACE_PREFIX), _), s)
+#define MLK_NAMESPACE_PREFIX MLK_CONCAT(MLK_CONFIG_NAMESPACE_PREFIX, _)
+#define MLK_NAMESPACE_PREFIX_K \
+  MLK_CONCAT(MLK_ADD_PARAM_SET(MLK_CONFIG_NAMESPACE_PREFIX), _)
+
+/* Functions are prefixed by MLK_CONFIG_NAMESPACE.
+ *
+ * If multiple parameter sets are used, functions depending on the parameter
+ * set are additionally prefixed with 512/768/1024. See config.h.
+ *
+ * Example: If MLK_CONFIG_NAMESPACE_PREFIX is mlkem, then
+ * MLK_NAMESPACE_K(enc) becomes mlkem512_enc/mlkem768_enc/mlkem1024_enc.
+ */
+#define MLK_NAMESPACE(s) MLK_CONCAT(MLK_NAMESPACE_PREFIX, s)
+#define MLK_NAMESPACE_K(s) MLK_CONCAT(MLK_NAMESPACE_PREFIX_K, s)
 
 /* On Apple platforms, we need to emit leading underscore
  * in front of assembly symbols. We thus introducee a separate
