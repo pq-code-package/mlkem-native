@@ -20,7 +20,7 @@ let
   # protobuf 5.28.3
   protobuf_6_30_1 = python312Packages.buildPythonPackage rec {
     pname = "protobuf";
-    version = "6.30.1";
+    version = "5.29.3";
 
     propagatedBuildInputs = [
       python312Packages.setuptools
@@ -39,7 +39,7 @@ let
 
     src = fetchPypi {
       inherit pname version;
-      hash = "sha256-U1+05E0CNok9XPEmOg9wbxFgtomnq5YunaipzkBQt4A=";
+      hash = "sha256-XaD0HtrxF73jFkBLrRpIbLTt7fjkpUiRKW9kjo4HZiA=";
     };
   };
 
@@ -121,13 +121,13 @@ let
 in
 stdenvNoCC.mkDerivation rec {
   pname = "slothy-cli";
-  version = "9416181b5bbb61992dc1928116e84eead100838e";
+  version = "e75cf47f96a51646660fe5d8492f0e2ba118ba96";
 
   src = fetchFromGitHub {
     owner = "slothy-optimizer";
     repo = "slothy";
     rev = version;
-    sha256 = "sha256-zmF2+9oUM5J8PzvyEA5lN1o4aucOqP4Db4x+H2MO4vI=";
+    sha256 = "sha256-BCwVkOxtjyDUPpSGzADa0I4gMuF5TxcrP8zs6KrlJyg=";
   };
 
   nativeBuildInputs = [ pkgs.makeWrapper ];
