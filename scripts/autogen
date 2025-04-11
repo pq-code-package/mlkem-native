@@ -1775,11 +1775,52 @@ def gen_undefs(dry_run=False):
         )
 
 
+def gen_slothy(funcs, dry_run=False):
+    if dry_run is True:
+        # Do nothing for a dry run
+        return
+
+    if not isinstance(funcs, list):
+        return
+    elif len(funcs) == 0:
+        targets = ["all"]
+    else:
+        targets = list(map(lambda s: s + ".S", funcs))
+
+    for t in targets:
+        status_update("SLOTHY", f"Regenerating {t}")
+
+        # Remove file(s) to be re-generated
+        if t.endswith(".S"):
+            subprocess.run(["rm", "-f", f"dev/aarch64_opt/src/{t}"])
+        elif t == "all":
+            subprocess.run(["make", "clean", "-C", "dev/aarch64_opt/src"])
+
+        p = subprocess.run(["make"] + targets + ["-C", "dev/aarch64_opt/src"])
+        if p.returncode != 0:
+            print(f"Failed to run SLOTHY on {t}!")
+            exit(1)
+
+
 def _main():
+    slothy_choices = [
+        "ntt",
+        "intt",
+        "poly_tobytes_asm",
+        "poly_tomont_asm",
+        "poly_reduce_asm",
+        "poly_mulcache_compute_asm",
+        "polyvec_basemul_acc_montgomery_cached_asm_k2",
+        "polyvec_basemul_acc_montgomery_cached_asm_k3",
+        "polyvec_basemul_acc_montgomery_cached_asm_k4",
+        "rej_uniform_asm",
+    ]
+
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument("--dry-run", default=False, action="store_true")
+    parser.add_argument("--slothy", nargs="*", default=None, choices=slothy_choices)
     parser.add_argument("--aarch64-clean", default=False, action="store_true")
     parser.add_argument("--no-simplify", default=False, action="store_true")
     parser.add_argument("--force-cross", default=False, action="store_true")
@@ -1787,6 +1828,8 @@ def _main():
     args = parser.parse_args()
 
     os.chdir(os.path.join(os.path.dirname(__file__), ".."))
+
+    gen_slothy(args.slothy, args.dry_run)
 
     check_asm_register_aliases()
 

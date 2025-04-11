@@ -186,9 +186,7 @@ jobs:
           nix-cache: true
           nix-shell: ci-slothy
           script: |
-            make -C dev/aarch64_opt/src/ clean
-            make -C dev/aarch64_opt/src/
-            autogen
+            autogen --slothy
             tests all --opt opt
   stop-ec2-runner:
     name: Stop instance (${{ inputs.ec2_instance_type }})
