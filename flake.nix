@@ -27,6 +27,19 @@
             bitwuzla = pkgs-unstable.bitwuzla;
             z3 = pkgs-unstable.z3_4_14;
           };
+          zigWrapCC = zig: pkgs.symlinkJoin {
+            name = "zig-wrappers";
+            paths = [
+              (pkgs.writeShellScriptBin "cc"
+                ''
+                  exec ${zig}/bin/zig cc "$@"
+                '')
+              (pkgs.writeShellScriptBin "ar"
+                ''
+                  exec ${zig}/bin/zig ar "$@"
+                '')
+            ];
+          };
         in
         {
           _module.args.pkgs = import inputs.nixpkgs {
@@ -56,7 +69,8 @@
                 inherit (config.packages) linters cbmc hol_light s2n_bignum slothy toolchains_native;
                 inherit (pkgs)
                   direnv
-                  nix-direnv;
+                  nix-direnv
+                  zig_0_13;
               } ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ config.packages.valgrind_varlat ];
           };
 
@@ -90,6 +104,11 @@
           devShells.ci_clang18 = util.mkShellWithCC' pkgs.clang_18;
           devShells.ci_clang19 = util.mkShellWithCC' pkgs.clang_19;
           devShells.ci_clang20 = util.mkShellWithCC' pkgs.clang_20;
+
+          devShells.ci_zig0_10 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_10);
+          devShells.ci_zig0_11 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_11);
+          devShells.ci_zig0_12 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_12);
+          devShells.ci_zig0_13 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_13);
 
           devShells.ci_gcc48 = util.mkShellWithCC' pkgs.gcc48;
           devShells.ci_gcc49 = util.mkShellWithCC' pkgs.gcc49;
@@ -135,6 +154,7 @@
                 util.hol_light'
                 util.s2n_bignum
                 util.toolchains_native
+                pkgs.zig_0_13
               ]
               ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ util.valgrind_varlat ];
           };
