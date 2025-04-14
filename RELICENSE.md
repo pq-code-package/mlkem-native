@@ -12,3 +12,4 @@ By adding my name to the list below, I agree to relicense all my contributions
 in the mlkem-native project under `Apache-2.0 OR ISC OR MIT`.
 
 - Hanno Becker <beckphan@amazon.co.uk>
+- Duc Tri Nguyen <cothannguyen@gmail.com>
