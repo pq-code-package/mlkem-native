@@ -15,3 +15,4 @@ in the mlkem-native project under `Apache-2.0 OR ISC OR MIT`.
 - Duc Tri Nguyen <cothannguyen@gmail.com>
 - John Harrison <jargh@amazon.com>
 - Matthias J. Kannwischer <matthias@kannwischer.eu>
+- Thing Han, Lim <potsrevenmil@gmail.com>
