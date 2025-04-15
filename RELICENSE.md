@@ -17,3 +17,4 @@ in the mlkem-native project under `Apache-2.0 OR ISC OR MIT`.
 - Matthias J. Kannwischer <matthias@kannwischer.eu>
 - Thing Han, Lim <potsrevenmil@gmail.com>
 - Spencer Wilson <spencer.wilson@uwaterloo.ca>
+- Basil Hess <bhe@zurich.ibm.com>
