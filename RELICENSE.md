@@ -18,3 +18,4 @@ in the mlkem-native project under `Apache-2.0 OR ISC OR MIT`.
 - Thing Han, Lim <potsrevenmil@gmail.com>
 - Spencer Wilson <spencer.wilson@uwaterloo.ca>
 - Basil Hess <bhe@zurich.ibm.com>
+- Mila Anastasova <manastasova2017@fau.edu>
