@@ -14,3 +14,4 @@ in the mlkem-native project under `Apache-2.0 OR ISC OR MIT`.
 - Hanno Becker <beckphan@amazon.co.uk>
 - Duc Tri Nguyen <cothannguyen@gmail.com>
 - John Harrison <jargh@amazon.com>
+- Matthias J. Kannwischer <matthias@kannwischer.eu>
