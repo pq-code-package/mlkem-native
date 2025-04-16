@@ -149,46 +149,98 @@ jobs:
            darwin: False
            c17: False
            c23: False
+           opt: all
+           examples: true
          - name: gcc-4.9
            shell: ci_gcc49
            darwin: False
            c17: False
            c23: False
+           opt: all
+           examples: true
          - name: gcc-7
            shell: ci_gcc7
            darwin: False
            c17: False
            c23: False
+           opt: all
+           examples: true
          - name: gcc-11
            shell: ci_gcc11
            darwin: True
            c17: True
            c23: False
+           opt: all
+           examples: true
          - name: gcc-13
            shell: ci_gcc13
            darwin: True
            c17: True
            c23: False
+           opt: all
+           examples: true
          - name: gcc-14
            shell: ci_gcc14
            darwin: True
            c17: True
            c23: True
+           opt: all
+           examples: true
          - name: clang-18
            shell: ci_clang18
            darwin: True
            c17: True
            c23: True
+           opt: all
+           examples: true
          - name: clang-19
            shell: ci_clang19
            darwin: True
            c17: True
            c23: True
+           opt: all
+           examples: true
          - name: clang-20
            shell: ci_clang20
            darwin: True
            c17: True
            c23: True
+           opt: all
+           examples: true
+         # CPU flags are not correctly passed to the zig assembler
+         # https://github.com/ziglang/zig/issues/23576
+         # We therefore only test the C backend
+         #
+         # We omit all examples since there is currently no way to run
+         # only those examples not involving native code.
+         - name: zig-0.10
+           shell: ci_zig0_10
+           darwin: False
+           c17: True
+           c23: False
+           examples: False
+           opt: no_opt
+         - name: zig-0.11
+           shell: ci_zig0_11
+           darwin: True
+           c17: True
+           c23: False
+           examples: False
+           opt: no_opt
+         - name: zig-0.12
+           shell: ci_zig0_12
+           darwin: True
+           c17: True
+           c23: False
+           examples: False
+           opt: no_opt
+         - name: zig-0.13
+           shell: ci_zig0_13
+           darwin: True
+           c17: True
+           c23: False
+           examples: False
+           opt: no_opt
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -202,6 +254,8 @@ jobs:
           nistkat: false
           kat: false
           acvp: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
       - name: native build+functest (C90)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
@@ -213,6 +267,8 @@ jobs:
           nistkat: false
           kat: false
           acvp: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c90"
       - name: native build+functest (C99)
@@ -225,6 +281,8 @@ jobs:
           nistkat: false
           kat: false
           acvp: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c99"
       - name: native build+functest (C11)
@@ -237,6 +295,8 @@ jobs:
           nistkat: false
           kat: false
           acvp: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c11"
       - name: native build+functest (C17)
@@ -250,6 +310,8 @@ jobs:
           nistkat: false
           kat: false
           acvp: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c17"
       - name: native build+functest (C23)
@@ -263,6 +325,8 @@ jobs:
           nistkat: false
           kat: false
           acvp: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c23"
   config_variations:
