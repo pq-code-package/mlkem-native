@@ -87,6 +87,7 @@ endif
 CFLAGS := \
 	-Wall \
 	-Wextra \
+	-Werror \
 	-Wmissing-prototypes \
 	-Wshadow \
 	-Wpointer-arith \
