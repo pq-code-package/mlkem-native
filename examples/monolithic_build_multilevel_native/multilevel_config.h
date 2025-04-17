@@ -129,6 +129,38 @@
 #endif
 
 /******************************************************************************
+ * Name:        MLK_CONFIG_CUSTOM_RANDOMBYTES
+ *
+ * Description: mlkem-native does not provide a secure randombytes
+ *              implementation. Such an implementation has to provided by the
+ *              consumer.
+ *
+ *              If this option is not set, mlkem-native expects a function
+ *              void randombytes(uint8_t *out, size_t outlen).
+ *
+ *              Set this option and define `mlk_randombytes` if you want to
+ *              use a custom method to sample randombytes with a different name
+ *              or signature.
+ *
+ *****************************************************************************/
+
+/* Even though we use the default randombytes signature here, registering it
+ * as a custom implementation avoids double-declaration of randombytes via
+ * mlkem/randombytes.h and test_only_rng/notrandombytes.h: The former is by
+ * default included by mlkem-native, and the latter is needed for this example
+ * since we rely on the additional randombytes_reset() API. */
+#define MLK_CONFIG_CUSTOM_RANDOMBYTES
+#if !defined(__ASSEMBLER__)
+#include <stdint.h>
+#include "sys.h"
+#include "test_only_rng/notrandombytes.h"
+static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
+{
+  randombytes(ptr, len);
+}
+#endif
+
+/******************************************************************************
  * Name:        MLK_CONFIG_INTERNAL_API_QUALIFIER
  *
  * Description: If set, this option provides an additional function

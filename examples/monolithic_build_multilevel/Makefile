@@ -51,6 +51,7 @@ LIB=libmlkem.a
 CFLAGS := \
 	-Wall \
 	-Wextra \
+	-Werror \
 	-Wmissing-prototypes \
 	-Wshadow \
 	-Wpointer-arith \
