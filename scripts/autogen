@@ -12,6 +12,7 @@ import re
 import sys
 import pyparsing as pp
 import os
+import yaml
 
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
@@ -993,6 +994,10 @@ def get_header_files(main_only=False, core_only=False):
         return get_files("**/*.h")
 
 
+def get_markdown_files(main_only=False):
+    return get_files("**/*.md")
+
+
 def get_files(pattern):
     return [
         str(p)
@@ -1655,12 +1660,6 @@ def adjust_header_guard_for_filename(content, header_file):
     if header_file in exceptions.keys():
         guard_name = exceptions[header_file]
 
-    def gen_copyright():
-        yield "/*"
-        yield " * Copyright (c) 2024-2025 The mlkem-native project authors"
-        yield " * SPDX-License-Identifier: Apache-2.0"
-        yield " */"
-
     def gen_guard():
         yield f"#ifndef {guard_name}"
         yield f"#define {guard_name}"
@@ -1669,15 +1668,18 @@ def adjust_header_guard_for_filename(content, header_file):
         yield f"#endif"
         yield ""
 
-    cr = list(gen_copyright())
     guard = list(gen_guard())
     footer = list(gen_footer())
 
-    # Check if header file begins with copyright notice; otherwise, add it.
-    if content[: len(cr)] != cr:
-        assert False
-        content = cr + content
-    i = len(cr)
+    # Skip over initial commentary
+    insert_at = None
+    for i, l in enumerate(content):
+        if l.strip() == "" or l.startswith(("/*", " *")):
+            continue
+        insert_at = i
+        break
+
+    i = insert_at
     while content[i].strip() == "":
         i += 1
     # Check if header file has some guard -- if so, drop it
@@ -1816,6 +1818,214 @@ def gen_slothy(funcs, dry_run=False):
             exit(1)
 
 
+class BibliographyEntry:
+    def __init__(self, raw_dict):
+        self._raw = raw_dict
+        self._usages = set()
+
+    def register_usage(self, filename):
+        self._usages.add(filename)
+
+    @property
+    def usages(self):
+        return self._usages
+
+    @property
+    def name(self):
+        return self._raw["name"]
+
+    @property
+    def short(self):
+        if "short" in self._raw.keys():
+            return self._raw["short"]
+        return self.name
+
+    @property
+    def id(self):
+        return self._raw["id"]
+
+    @property
+    def url(self):
+        return self._raw["url"]
+
+    @property
+    def authors(self):
+        author = self._raw["author"]
+        if not isinstance(author, list):
+            author = [author]
+        return author
+
+    @property
+    def authors_text(self):
+        def surname(name):
+            return name.split(",")[0].strip()
+
+        def full_name(name):
+            if "," not in name:
+                return name
+            surname, forename = name.split(",")
+            return forename.strip() + " " + surname.strip()
+
+        if len(self.authors) > 1:
+            authors = ", ".join(map(surname, self.authors))
+        else:
+            authors = full_name(self.authors[0])
+        return authors
+
+
+def gen_markdown_citations_for(filename, bibliography, dry_run=False):
+
+    with open(filename, "r") as f:
+        content = f.read()
+
+    # Lookup all citations in style `[^ID]`
+    citations = set()
+    for m in re.finditer(r"\[\^(?P<id>\w+)\]", content):
+        citations.add(m.group("id"))
+
+    content = content.split("\n")
+    # Find and remove any existing citation footnotes
+    footnote_footer_start = "<!--- bibliography --->"
+    try:
+        i = content.index(footnote_footer_start)
+        content = content[:i]
+    except ValueError:
+        pass
+
+    # Add footnotes for all citations found
+    if len(citations) > 0:
+        content.append(footnote_footer_start)
+    cite_ids = list(citations)
+    cite_ids.sort()
+    for cite_id in cite_ids:
+        entry = bibliography.get(cite_id, None)
+        if entry is None:
+            raise Exception(
+                f"Could not find bibliography entry {cite_id} referenced in {filename}. Known entries: {list(bibliography.keys())}"
+            )
+        content.append(
+            f"[^{cite_id}]: {entry.authors_text}: {entry.name}, [{entry.url}]({entry.url})"
+        )
+
+        # Remember this usage of the bibliography entry
+        entry.register_usage(filename)
+
+    if len(citations) > 0:
+        content.append("")
+
+    update_file(filename, "\n".join(content), dry_run=dry_run)
+
+
+def gen_c_citations_for(filename, bibliography, dry_run=False):
+
+    with open(filename, "r") as f:
+        content = f.read()
+
+    references_start = [
+        "/* References",
+        " * ==========",
+    ]
+    references_end = [" */"]
+
+    # Lookup all citations in style `[@ID`
+    # Don't match the closing `]` because we want to match `[@ID, ...]`, too.
+    citations = set()
+    for m in re.finditer(r"\[@(?P<id>\w+)", content):
+        citations.add(m.group("id"))
+
+    # Find and remove any existing reference section
+    ref_pattern = r"/\* (# )?References.*?\*/\n+"
+    content = re.sub(ref_pattern, "", content, flags=re.DOTALL)
+
+    content = content.split("\n")
+
+    # Add references section
+    references = []
+    references += references_start
+
+    cite_ids = list(citations)
+    cite_ids.sort()
+    for cite_id in cite_ids:
+        entry = bibliography.get(cite_id, None)
+        if entry is None:
+            raise Exception(
+                f"Could not find bibliography entry {cite_id} referenced in {filename}"
+            )
+        references.append(f" *")
+        references.append(f" * - [{cite_id}]")
+        references.append(f" *   {entry.name}")
+        references.append(f" *   {entry.authors_text}")
+        references.append(f" *   {entry.url}")
+
+        # Remember this usage of the bibliography entry
+        entry.register_usage(filename)
+
+    references += references_end
+
+    # Pre-update formatting messes up overly long comment lines which are
+    # likely here. Thus, we explicitly format and fix bad indentation manually.
+    references = "\n".join(references)
+    references = format_content(references)
+    references = re.sub(r" \* (\w.*)", r" *   \1", references)
+    references = references.split("\n")
+
+    if len(cite_ids) > 0:
+        # Add references to file after initial header section
+        # Skip over copyright
+        insert_at = None
+        for i, l in enumerate(content):
+            if l.startswith(("/*", " *")):
+                continue
+            insert_at = i
+            break
+        content = content[:insert_at] + [""] + references + content[insert_at:]
+
+    update_file(filename, "\n".join(content), dry_run=dry_run)
+
+
+def gen_citations_for(filename, bibliography, dry_run=False):
+    if filename.endswith(".md"):
+        gen_markdown_citations_for(filename, bibliography, dry_run=dry_run)
+    elif filename.endswith((".c", ".h", ".S")):
+        gen_c_citations_for(filename, bibliography, dry_run=dry_run)
+    else:
+        raise Exception(f"Unexpected file extension in {filename}")
+
+
+def gen_citations(dry_run=False):
+    # Load bibliography
+    with open("references.yml", "r") as f:
+        bibliography_raw = yaml.safe_load(f.read())
+
+    bibliography = {}
+    for r in bibliography_raw:
+        cite_id = r["id"]
+        bibliography[cite_id] = BibliographyEntry(r)
+
+    with ThreadPoolExecutor() as executor:
+        _ = list(
+            executor.map(
+                partial(
+                    gen_citations_for,
+                    bibliography=bibliography,
+                    dry_run=dry_run,
+                ),
+                get_markdown_files()
+                + get_asm_source_files()
+                + get_c_source_files()
+                + get_header_files(),
+            )
+        )
+
+    # Check that every bibliography entry has been used as least once
+    for e in bibliography.values():
+        if len(e.usages) == 0:
+            raise Exception(
+                f"Bibliography entry {e.id} is unused! "
+                "Add a citation or remove from references.yml."
+            )
+
+
 def _main():
     slothy_choices = [
         "ntt",
@@ -1842,6 +2052,8 @@ def _main():
     args = parser.parse_args()
 
     os.chdir(os.path.join(os.path.dirname(__file__), ".."))
+
+    gen_citations(args.dry_run)
 
     gen_slothy(args.slothy, args.dry_run)
 

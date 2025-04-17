@@ -38,7 +38,7 @@ rec {
     pkgs.lib.optionals cross [ pkgs.qemu x86_64-gcc aarch64-gcc riscv64-gcc ]
     ++ pkgs.lib.optionals (cross && pkgs.stdenv.isLinux && pkgs.stdenv.isx86_64) [ aarch64_be-gcc ]
     ++ pkgs.lib.optionals cross [ native-gcc ]
-    # NOTE: Tools in /Library/Developer/CommandLineTools/usr/bin on macOS are inaccessible in the Nix shell. This issue is addressed in https://github.com/NixOS/nixpkgs/pull/353893 but hasn’t been merged into the 24.11 channel yet. As a workaround, we include this dependency for macOS temporary. 
+    # NOTE: Tools in /Library/Developer/CommandLineTools/usr/bin on macOS are inaccessible in the Nix shell. This issue is addressed in https://github.com/NixOS/nixpkgs/pull/353893 but hasn’t been merged into the 24.11 channel yet. As a workaround, we include this dependency for macOS temporary.
     ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [ pkgs.git ]
     ++ builtins.attrValues {
       inherit (pkgs.python3Packages) sympy pyyaml;
@@ -85,7 +85,7 @@ rec {
         shfmt;
 
       inherit (pkgs.python3Packages)
-        mpmath sympy black pyparsing;
+        mpmath sympy black pyparsing pyyaml;
     };
   };
 

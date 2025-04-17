@@ -84,10 +84,14 @@ At present, this directory contains functional correctness proofs for the follow
   * AArch64 modular reduction: [mlkem_poly_reduce.S](mlkem/mlkem_poly_reduce.S)
   * AArch64 'multiplication cache' computation: [mlkem_poly_mulcache_compute.S](mlkem/mlkem_poly_mulcache_compute.S)
 - FIPS202:
-  * Keccak-F1600 using lazy rotations (see [this paper](https://eprint.iacr.org/2022/1243)): [keccak_f1600_x1_scalar.S](mlkem/keccak_f1600_x1_scalar.S)
+  * Keccak-F1600 using lazy rotations[^HYBRID]: [keccak_f1600_x1_scalar.S](mlkem/keccak_f1600_x1_scalar.S)
   * Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x1_v84a.S](mlkem/keccak_f1600_x1_v84a.S)
   * 2-fold Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x2_v84a.S](mlkem/keccak_f1600_x2_v84a.S)
   * 'Hybrid' 4-fold Keccak-F1600 using scalar and v8-A Neon instructions: [keccak_f1600_x4_v8a_scalar.S](mlkem/keccak_f1600_x4_v8a_scalar.S)
   * 'Triple hybrid' 4-fold Keccak-F1600 using scalar, v8-A Neon and v8.4-A+SHA3 Neon instructions:[keccak_f1600_x4_v8a_v84a_scalar.S](mlkem/keccak_f1600_x4_v8a_v84a_scalar.S)
 
 The NTT and invNTT functions are super-optimized using [SLOTHY](https://github.com/slothy-optimizer/slothy/).
+
+<!--- bibliography --->
+[^HYBRID]: Becker, Kannwischer: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64, [https://eprint.iacr.org/2022/1243](https://eprint.iacr.org/2022/1243)
+[^SLOTHY]: Abdulrahman, Becker, Kannwischer, Klein: SLOTHY superoptimizer, [https://github.com/slothy-optimizer/slothy/](https://github.com/slothy-optimizer/slothy/)

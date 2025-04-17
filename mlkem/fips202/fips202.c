@@ -1,15 +1,35 @@
-
 /*
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* Based on the CC0 implementation in https://github.com/mupq/mupq and
- * the public domain implementation in
- * crypto_hash/keccakc512/simple/ from http://bench.cr.yp.to/supercop.html
- * by Ronny Van Keer
- * and the public domain "TweetFips202" implementation
- * from https://twitter.com/tweetfips202
- * by Gilles Van Assche, Daniel J. Bernstein, and Peter Schwabe */
+
+/* References
+ * ==========
+ *
+ * - [FIPS203]
+ *   FIPS 203 Module-Lattice-Based Key-Encapsulation Mechanism Standard
+ *   National Institute of Standards and Technology
+ *   https://csrc.nist.gov/pubs/fips/203/final
+ *
+ * - [mupq]
+ *   Common files for pqm4, pqm3, pqriscv
+ *   Kannwischer et. al
+ *   https://github.com/mupq/mupq
+ *
+ * - [supercop]
+ *   SUPERCOP benchmarking framework
+ *   Daniel J. Bernstein
+ *   http://bench.cr.yp.to/supercop.html
+ *
+ * - [tweetfips]
+ *   'tweetfips202' FIPS202 implementation
+ *   Van Assche, Bernstein, Schwabe
+ *   https://twitter.com/tweetfips202
+ */
+
+/* Based on the CC0 implementation from [@mupq] and the public domain
+ * implementation [@supercop, crypto_hash/keccakc512/simple/]
+ * by Ronny Van Keer, and the public domain [@tweetfips] implementation. */
 
 #include "../common.h"
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
@@ -180,7 +200,7 @@ void mlk_shake128_init(mlk_shake128ctx *state) { (void)state; }
 void mlk_shake128_release(mlk_shake128ctx *state)
 {
   /* Specification: Partially implements
-   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
+   * [@FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(state, sizeof(mlk_shake128ctx));
 }
 
@@ -194,7 +214,7 @@ void mlk_shake256(uint8_t *output, size_t outlen, const uint8_t *input,
   /* Squeeze output */
   mlk_keccak_squeeze_once(output, outlen, state.ctx, SHAKE256_RATE);
   /* Specification: Partially implements
-   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
+   * [@FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(&state, sizeof(state));
 }
 
@@ -206,7 +226,7 @@ void mlk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
   /* Squeeze output */
   mlk_keccak_squeeze_once(output, 32, ctx, SHA3_256_RATE);
   /* Specification: Partially implements
-   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
+   * [@FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(ctx, sizeof(ctx));
 }
 
@@ -218,7 +238,7 @@ void mlk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
   /* Squeeze output */
   mlk_keccak_squeeze_once(output, 64, ctx, SHA3_512_RATE);
   /* Specification: Partially implements
-   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
+   * [@FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(ctx, sizeof(ctx));
 }
 

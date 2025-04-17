@@ -1,14 +1,8 @@
 /*
  * Copyright (c) 2024-2025 The mlkem-native project authors
- * SPDX-License-Identifier: MIT
- */
-
-/*
- * AES implementation based on code from BearSSL (https://bearssl.org/)
- * by Thomas Pornin.
- *
- *
  * Copyright (c) 2016 Thomas Pornin <pornin@bolet.org>
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -29,6 +23,23 @@
  * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ */
+
+/* References
+ * ==========
+ *
+ * - [BearSSL]
+ *   BearSSL library
+ *   Thomas Pornin
+ *   https://bearssl.org
+ *
+ * - [BoyarPeralta]
+ *   A new combinational logic minimization technique with applications to
+ *   cryptology Boyar, Peralta https://eprint.iacr.org/2009/191.pdf
+ */
+
+/*
+ * AES implementation based on [@BearSSL].
  */
 
 #include <stdint.h>
@@ -78,9 +89,7 @@ static void br_aes_ct64_bitslice_Sbox(uint64_t *q)
 {
   /*
    * This S-box implementation is a straightforward translation of
-   * the circuit described by Boyar and Peralta in "A new
-   * combinational logic minimization technique with applications
-   * to cryptology" (https://eprint.iacr.org/2009/191.pdf).
+   * the circuit described in [@BoyarPeralta].
    *
    * Note that variables x* (input) and s* (output) are numbered
    * in "reverse" order (x0 is the high bit, x7 is the low bit).

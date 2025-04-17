@@ -3,6 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* References
+ * ==========
+ *
+ * - [FIPS203]
+ *   FIPS 203 Module-Lattice-Based Key-Encapsulation Mechanism Standard
+ *   National Institute of Standards and Technology
+ *   https://csrc.nist.gov/pubs/fips/203/final
+ *
+ * - [REF_AVX2]
+ *   CRYSTALS-Kyber optimized AVX2 implementation
+ *   Bos, Ducas, Kiltz, Lepoint, Lyubashevsky, Schanck, Schwabe, Seiler, Stehlé
+ *   https://github.com/pq-crystals/kyber/tree/main/avx2
+ */
+
+/*
+ * This file is derived from the public domain
+ * AVX2 Kyber implementation [@REF_AVX2].
+ */
+
 #include "../../../common.h"
 
 #if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
@@ -20,10 +39,6 @@ static void poly_basemul_montgomery_avx2(int16_t r[MLKEM_N],
                    mlk_qdata.vec);
 }
 
-/*
- * Implementation from Kyber reference repository
- * https://github.com/pq-crystals/kyber/blob/main/avx2
- */
 static void poly_add_avx2(int16_t r[MLKEM_N], const int16_t a[MLKEM_N],
                           const int16_t b[MLKEM_N])
 {
@@ -62,7 +77,7 @@ void mlk_polyvec_basemul_acc_montgomery_cached_avx2(unsigned k,
   }
 
   /* Specification: Partially implements
-   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
+   * [@FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(t, sizeof(t));
 }
 

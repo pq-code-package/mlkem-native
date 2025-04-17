@@ -2,6 +2,16 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
+
+/* References
+ * ==========
+ *
+ * - [FIPS203]
+ *   FIPS 203 Module-Lattice-Based Key-Encapsulation Mechanism Standard
+ *   National Institute of Standards and Technology
+ *   https://csrc.nist.gov/pubs/fips/203/final
+ */
+
 #ifndef MLK_KEM_H
 #define MLK_KEM_H
 
@@ -59,7 +69,7 @@
  * Returns:     - 0: On success
  *              - -1: On PCT failure (if MLK_CONFIG_KEYGEN_PCT) is enabled.
  *
- * Specification: Implements [FIPS 203, Algorithm 16, ML-KEM.KeyGen_Internal]
+ * Specification: Implements [@FIPS203, Algorithm 16, ML-KEM.KeyGen_Internal]
  *
  **************************************************/
 MLK_EXTERNAL_API
@@ -91,7 +101,7 @@ __contract__(
  * Returns:     - 0: On success
  *              - -1: On PCT failure (if MLK_CONFIG_KEYGEN_PCT) is enabled.
  *
- * Specification: Implements [FIPS 203, Algorithm 19, ML-KEM.KeyGen]
+ * Specification: Implements [@FIPS203, Algorithm 19, ML-KEM.KeyGen]
  *
  **************************************************/
 MLK_EXTERNAL_API
@@ -124,10 +134,10 @@ __contract__(
  *                 bytes)
  *
  * Returns: - 0 on success
- *          - -1 if the 'modulus check' [FIPS 203, Section 7.2]
+ *          - -1 if the 'modulus check' [@FIPS203, Section 7.2]
  *            for the public key fails.
  *
- * Specification: Implements [FIPS 203, Algorithm 17, ML-KEM.Encaps_Internal]
+ * Specification: Implements [@FIPS203, Algorithm 17, ML-KEM.Encaps_Internal]
  *
  **************************************************/
 MLK_EXTERNAL_API
@@ -161,10 +171,10 @@ __contract__(
  *                 bytes)
  *
  * Returns: - 0 on success
- *          - -1 if the 'modulus check' [FIPS 203, Section 7.2]
+ *          - -1 if the 'modulus check' [@FIPS203, Section 7.2]
  *            for the public key fails.
  *
- * Specification: Implements [FIPS 203, Algorithm 20, ML-KEM.Encaps]
+ * Specification: Implements [@FIPS203, Algorithm 20, ML-KEM.Encaps]
  *
  **************************************************/
 MLK_EXTERNAL_API
@@ -196,10 +206,10 @@ __contract__(
  *                 bytes)
  *
  * Returns: - 0 on success
- *          - -1 if the 'hash check' [FIPS 203, Section 7.3]
+ *          - -1 if the 'hash check' [@FIPS203, Section 7.3]
  *            for the secret key fails.
  *
- * Specification: Implements [FIPS 203, Algorithm 21, ML-KEM.Decaps]
+ * Specification: Implements [@FIPS203, Algorithm 21, ML-KEM.Decaps]
  *
  **************************************************/
 MLK_EXTERNAL_API

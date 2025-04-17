@@ -3,6 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+ * This file is derived from the public domain
+ * AVX2 Kyber implementation [@REF_AVX2].
+ */
+
 .macro shuffle8 r0,r1,r2,r3
 vperm2i128	$0x20,%ymm\r1,%ymm\r0,%ymm\r2
 vperm2i128	$0x31,%ymm\r1,%ymm\r0,%ymm\r3

@@ -3,7 +3,7 @@
 Relation to reference implementation
 ====================================
 
-mlkem-native is a fork of the ML-KEM [reference implementation](https://github.com/pq-crystals/kyber).
+mlkem-native is a fork of the ML-KEM reference implementation[^REF].
 
 The following gives an overview of the major changes:
 
@@ -18,3 +18,6 @@ The following gives an overview of the major changes:
 - More inlining: Modular multiplication and primitives are in a header rather than a separate compilation unit.
 
 For details, please see the source code: Functions in the mlkem-native source tree are annotated with `/* Reference: ... */` comments to outline how they relate to the reference implementation.
+
+<!--- bibliography --->
+[^REF]: Bos, Ducas, Kiltz, Lepoint, Lyubashevsky, Schanck, Schwabe, Seiler, Stehlé: CRYSTALS-Kyber C reference implementation, [https://github.com/pq-crystals/kyber/tree/main/ref](https://github.com/pq-crystals/kyber/tree/main/ref)

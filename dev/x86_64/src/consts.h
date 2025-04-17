@@ -3,12 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* References
+ * ==========
+ *
+ * - [REF_AVX2]
+ *   CRYSTALS-Kyber optimized AVX2 implementation
+ *   Bos, Ducas, Kiltz, Lepoint, Lyubashevsky, Schanck, Schwabe, Seiler, Stehlé
+ *   https://github.com/pq-crystals/kyber/tree/main/avx2
+ */
+
+/*
+ * This file is derived from the public domain
+ * AVX2 Kyber implementation [@REF_AVX2].
+ */
+
 #ifndef MLK_DEV_X86_64_SRC_CONSTS_H
 #define MLK_DEV_X86_64_SRC_CONSTS_H
-/*
- * Implementation from Kyber reference repository
- * https://github.com/pq-crystals/kyber/blob/main/avx2/consts.h
- */
 #include "../../../common.h"
 
 #define MLK_AVX2_BACKEND_DATA_OFFSET_16XQ 0

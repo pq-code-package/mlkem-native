@@ -2,12 +2,17 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-//
-// AArch64 re-implementation of the asymmetric base multiplication from:
-//
-// Neon NTT: Faster Dilithium, Kyber, and Saber on Cortex-A72 and Apple M1
-// https://eprint.iacr.org/2021/986
-// https://github.com/neon-ntt/neon-ntt
+
+/* References
+ * ==========
+ *
+ * - [NeonNTT]
+ *   Neon NTT: Faster Dilithium, Kyber, and Saber on Cortex-A72 and Apple M1
+ *   Becker, Hwang, Kannwischer, Yang, Yang
+ *   https://tches.iacr.org/index.php/TCHES/article/view/9295
+ */
+
+/* Re-implementation of asymmetric base multiplication following [@NeonNTT] */
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64) && \
