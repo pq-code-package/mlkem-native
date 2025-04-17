@@ -4,8 +4,7 @@
  */
 
 /*
- * Implementation from Kyber reference repository
- * https://github.com/pq-crystals/kyber/blob/main/avx2
+ * Implementation from Kyber reference repository [@REF_AVX2]
  */
 
 #include "../../../common.h"

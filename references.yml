@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: Apache-2.0
+
+references:
+- id: FIPS203
+  name: FIPS 203 Module-Lattice-Based Key-Encapsulation Mechanism Standard
+  author: National Institute of Standards and Technology
+  url: https://csrc.nist.gov/pubs/fips/203/final
+- id: FIPS202
+  name: FIPS202 SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions
+  author: National Institute of Standards and Technology
+  url: https://csrc.nist.gov/pubs/fips/202/final
+- id: FIPS140_3_IG
+  name: Implementation Guidance for FIPS 140-3 and the Cryptographic Module Validation Program
+  author: National Institute of Standards and Technology
+  url: https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
+- id: REF
+  name: CRYSTALS-Kyber C reference implementation
+  author: The CRYSTALS-Kyber submission team
+  url: https://github.com/pq-crystals/kyber/tree/main/ref
+- id: REF_AVX2
+  name: CRYSTALS-Kyber optimized AVX2 implementation
+  author: The CRYSTALS-Kyber submission team
+  url: https://github.com/pq-crystals/kyber/tree/main/avx2
+- id: KYBERSLASH
+  name: KyberSlash: Exploiting secret-dependent division timings in Kyber implementations
+  author:
+  - Daniel J. Bernstein
+  - Karthikeyan Bhargavan
+  - Shivam Bhasin
+  - Anupam Chattopadhyay
+  - Tee Kiah Chia
+  - Matthias J. Kannwischer
+  - Franziskus Kiefer
+  - Thales Paiva
+  - Prasanna Ravi
+  - Goutam Tamvada
+  url: https://kyberslash.cr.yp.to/papers.html
+- id: HYBRID
+  name: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64
+  author:
+  - Hanno Becker
+  - Matthias J. Kannwischer
+  url: https://eprint.iacr.org/2022/1243
+- id: SLOTHY_PAPER
+  name: Fast and Clean: Auditable high-performance assembly via constraint solving
+  author:
+  - Amin Abdulrahman
+  - Hanno Becker
+  - Matthias J. Kannwischer
+  - Fabien Klein
+  url: https://eprint.iacr.org/2022/1303
+- id: SLOTHY
+  name: SLOTHY superoptimizer
+  author:
+  - Amin Abdulrahman
+  - Hanno Becker
+  - Matthias J. Kannwischer
+  - Fabien Klein
+  url: https://github.com/slothy-optimizer/slothy/

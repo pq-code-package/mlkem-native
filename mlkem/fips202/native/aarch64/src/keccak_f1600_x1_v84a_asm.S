@@ -28,11 +28,7 @@
 // Author: Hanno Becker <hanno.becker@arm.com>
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
 //
-// This implementation is essentially from the paper
-//
-//   Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64
-//   https://eprint.iacr.org/2022/1243
-//
+// This implementation is essentially from the paper [@HYBRID].
 // The only difference is interleaving/deinterleaving of Keccak state
 // during load and store, so that the caller need not do this.
 //

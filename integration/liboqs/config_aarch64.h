@@ -206,10 +206,9 @@ static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
 /******************************************************************************
  * Name:        MLK_CONFIG_KEYGEN_PCT
  *
- * Description: Compliance with [FIPS 140-3
- *IG](https://csrc.nist.gov/csrc/media/Projects/cryptographic-module-validation-program/documents/fips%20140-3/FIPS%20140-3%20IG.pdf)
- *              requires a Pairwise Consistency Test (PCT) to be carried out
- *              on a freshly generated keypair before it can be exported.
+ * Description: Compliance with [@FIPS140_3_IG, p.87] requires a
+ *              Pairwise Consistency Test (PCT) to be carried out on a freshly
+ *              generated keypair before it can be exported.
  *
  *              Set this option if such a check should be implemented.
  *              In this case, crypto_kem_keypair_derand and crypto_kem_keypair

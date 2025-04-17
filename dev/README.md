@@ -16,11 +16,10 @@ The files in this directory are handwritten and kept readable through the extens
 
 #### Optimized
 
-[`aarch64_opt`](aarch64_opt) contains the results of running the [SLOTHY](https://github.com/slothy-optimizer/slothy/)
-superoptimizer on the clean assembly files in [`aarch64_clean`](aarch64_clean). The optimized sections are 'raw'
-assembly in the sense that they no longer use register macros or aliases, but the surrounding code (such as the
+[`aarch64_opt`](aarch64_opt) contains the results of running the [@SLOTHY] superoptimizer on the clean assembly files in [`aarch64_clean`](aarch64_clean).
+The optimized sections are 'raw' assembly in the sense that they no longer use register macros or aliases, but the surrounding code (such as the
 function preamble and postamble) typically still use those register aliases/macros. Also, the macros and alias
-definitions themselves are still kept.
+definitions themselves are still kept. See [@SLOTHY_PAPER] for more details on SLOTHY.
 
 #### Final
 

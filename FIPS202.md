@@ -2,7 +2,7 @@
 
 # Replacing FIPS-202
 
-If your library has a FIPS-202 implementation, you can use it instead of the one shipped with mlkem-native.
+If your library has a [@FIPS202] implementation, you can use it instead of the one shipped with mlkem-native.
 
 1. Replace `mlkem/fips202/*` by your own FIPS-202 implementation.
 2. Provide replacements for the headers [`mlkem/fips202/fips202.h`](mlkem/fips202/fips202.h) and [`mlkem/fips202/fips202x4.h`](mlkem/fips202/fips202x4.h) and the

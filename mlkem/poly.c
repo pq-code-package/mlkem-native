@@ -32,7 +32,7 @@
  *
  **************************************************/
 
-/* Reference: `fqmul()` in reference implementation. */
+/* Reference: `fqmul()` in the reference implementation [@REF]. */
 static MLK_INLINE int16_t mlk_fqmul(int16_t a, int16_t b)
 __contract__(
   requires(b > -MLKEM_Q_HALF && b < MLKEM_Q_HALF)
@@ -70,7 +70,7 @@ __contract__(
  *
  **************************************************/
 
-/* Reference: `barrett_reduce()` in reference implementation. */
+/* Reference: `barrett_reduce()` in the reference implementation [@REF]. */
 static MLK_INLINE int16_t mlk_barrett_reduce(int16_t a)
 __contract__(
   ensures(return_value > -MLKEM_Q_HALF && return_value < MLKEM_Q_HALF)
@@ -106,7 +106,7 @@ __contract__(
 #endif /* !MLK_USE_NATIVE_POLY_REDUCE || !MLK_USE_NATIVE_INTT */
 
 #if !defined(MLK_USE_NATIVE_POLY_TOMONT)
-/* Reference: `poly_tomont()` in reference implementation. */
+/* Reference: `poly_tomont()` in the reference implementation [@REF]. */
 MLK_INTERNAL_API
 void mlk_poly_tomont(mlk_poly *r)
 {
@@ -143,9 +143,9 @@ void mlk_poly_tomont(mlk_poly *r)
  *
  ************************************************************/
 
-/* Reference: Not present in reference implementation.
+/* Reference: Not present in the reference implementation [@REF].
  *            - Used here to implement different semantics of `poly_reduce()`;
- *              see below. In the reference implementation, this logic is
+ *              see below. in the reference implementation [@REF], this logic is
  *              part of all compression functions (see `compress.c`). */
 static MLK_INLINE uint16_t mlk_scalar_signed_to_unsigned_q(int16_t c)
 __contract__(
@@ -163,7 +163,7 @@ __contract__(
   return (uint16_t)c;
 }
 
-/* Reference: `poly_reduce()` in reference implementation
+/* Reference: `poly_reduce()` in the reference implementation [@REF]
  *            - We use _unsigned_ canonical outputs, while the reference
  *              implementation uses _signed_ canonical outputs.
  *              Accordingly, we need a conditional addition of MLKEM_Q
@@ -196,7 +196,7 @@ void mlk_poly_reduce(mlk_poly *r)
 }
 #endif /* MLK_USE_NATIVE_POLY_REDUCE */
 
-/* Reference: `poly_add()` in the reference implementation.
+/* Reference: `poly_add()` in the reference implementation [@REF].
  *            - We use destructive version (output=first input) to avoid
  *              reasoning about aliasing in the CBMC specification */
 MLK_INTERNAL_API
@@ -213,7 +213,7 @@ void mlk_poly_add(mlk_poly *r, const mlk_poly *b)
   }
 }
 
-/* Reference: `poly_sub()` in the reference implementation.
+/* Reference: `poly_sub()` in the reference implementation [@REF].
  *            - We use destructive version (output=first input) to avoid
  *              reasoning about aliasing in the CBMC specification */
 MLK_INTERNAL_API
@@ -238,7 +238,7 @@ void mlk_poly_sub(mlk_poly *r, const mlk_poly *b)
 #endif
 
 #if !defined(MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE)
-/* Reference: Does not exist in the reference implementation.
+/* Reference: Does not exist in the reference implementation [@REF].
  *            - The reference implementation does not use a
  *              multiplication cache ('mulcache'). This is an idea
  *              originally taken from https://ia.cr/2021/986
@@ -303,7 +303,7 @@ void mlk_poly_mulcache_compute(mlk_poly_mulcache *x, const mlk_poly *a)
  *             5 -- 7
  */
 
-/* Reference: Embedded in `ntt()` in the reference implementation. */
+/* Reference: Embedded in `ntt()` in the reference implementation [@REF]. */
 static void mlk_ntt_butterfly_block(int16_t r[MLKEM_N], int16_t zeta,
                                     unsigned start, unsigned len, int bound)
 __contract__(
@@ -347,7 +347,7 @@ __contract__(
  * - layer: Variable indicating which layer is being applied.
  */
 
-/* Reference: Embedded in `ntt()` in the reference implementation. */
+/* Reference: Embedded in `ntt()` in the reference implementation [@REF]. */
 static void mlk_ntt_layer(int16_t r[MLKEM_N], unsigned layer)
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
@@ -381,7 +381,7 @@ __contract__(
  * the proof may need strengthening.
  */
 
-/* Reference: `ntt()` in the reference implementation.
+/* Reference: `ntt()` in the reference implementation [@REF].
  * - Iterate over `layer` instead of `len` in the outer loop
  *   to simplify computation of zeta index. */
 MLK_INTERNAL_API
@@ -418,7 +418,7 @@ void mlk_poly_ntt(mlk_poly *p)
 
 /* Compute one layer of inverse NTT */
 
-/* Reference: Embedded into `invntt()` in the reference implementation */
+/* Reference: Embedded into `invntt()` in the reference implementation [@REF] */
 static void mlk_invntt_layer(int16_t *r, unsigned layer)
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
@@ -453,7 +453,7 @@ __contract__(
   }
 }
 
-/* Reference: `invntt()` in the reference implementation
+/* Reference: `invntt()` in the reference implementation [@REF]
  *            - We normalize at the beginning of the inverse NTT,
  *              while the reference implementation normalizes at
  *              the end. This allows us to drop a call to `poly_reduce()`
