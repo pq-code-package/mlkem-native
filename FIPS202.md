@@ -2,7 +2,7 @@
 
 # Replacing FIPS-202
 
-If your library has a FIPS-202 implementation, you can use it instead of the one shipped with mlkem-native.
+If your library has a FIPS-202[^FIPS202] implementation, you can use it instead of the one shipped with mlkem-native.
 
 1. Replace `mlkem/fips202/*` by your own FIPS-202 implementation.
 2. Provide replacements for the headers [`mlkem/fips202/fips202.h`](mlkem/fips202/fips202.h) and [`mlkem/fips202/fips202x4.h`](mlkem/fips202/fips202x4.h) and the
@@ -25,3 +25,6 @@ implementation which tracks the current offset in its state.
 
 See [`examples/bring_your_own_fips202/`](examples/bring_your_own_fips202/) for an example how to use a custom FIPS-202
 implementation.
+
+<!--- bibliography --->
+[^FIPS202]: National Institute of Standards and Technology: FIPS202 SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions, [https://csrc.nist.gov/pubs/fips/202/final](https://csrc.nist.gov/pubs/fips/202/final)

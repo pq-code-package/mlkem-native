@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* Implementation based on Kyber repository
- * https://github.com/pq-crystals/kyber/blob/main/avx2
+/*
+ * Implementation from Kyber reference repository [@REF_AVX2]
  *
  * Changes to placement of modular reductions have
  * been made to simplify reasoning of non-overflow */

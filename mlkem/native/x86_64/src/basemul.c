@@ -21,8 +21,7 @@ static void poly_basemul_montgomery_avx2(int16_t r[MLKEM_N],
 }
 
 /*
- * Implementation from Kyber reference repository
- * https://github.com/pq-crystals/kyber/blob/main/avx2
+ * Implementation from Kyber reference repository [@REF_AVX2]
  */
 static void poly_add_avx2(int16_t r[MLKEM_N], const int16_t a[MLKEM_N],
                           const int16_t b[MLKEM_N])
@@ -62,7 +61,7 @@ void mlk_polyvec_basemul_acc_montgomery_cached_avx2(unsigned k,
   }
 
   /* Specification: Partially implements
-   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
+   * [@FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(t, sizeof(t));
 }
 

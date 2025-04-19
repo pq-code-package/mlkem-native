@@ -14,7 +14,7 @@
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
 #if !defined(MLK_USE_NATIVE_POLY_COMPRESS_D4)
-/* Reference: `poly_compress()` in the reference implementation,
+/* Reference: `poly_compress()` in the reference implementation [@REF],
  *            for ML-KEM-{512,768}.
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
@@ -104,7 +104,7 @@ void mlk_poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D10 */
 
 #if !defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D4)
-/* Reference: `poly_decompress()` in the reference implementation,
+/* Reference: `poly_decompress()` in the reference implementation [@REF],
  *            for ML-KEM-{512,768}. */
 MLK_INTERNAL_API
 void mlk_poly_decompress_d4(mlk_poly *r,
@@ -178,7 +178,7 @@ void mlk_poly_decompress_d10(mlk_poly *r,
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4
 #if !defined(MLK_USE_NATIVE_POLY_COMPRESS_D5)
-/* Reference: `poly_compress()` in the reference implementation,
+/* Reference: `poly_compress()` in the reference implementation [@REF],
  *            for ML-KEM-1024.
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
@@ -281,7 +281,7 @@ void mlk_poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D11 */
 
 #if !defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D5)
-/* Reference: `poly_decompress()` in the reference implementation,
+/* Reference: `poly_decompress()` in the reference implementation [@REF],
  *            for ML-KEM-1024. */
 MLK_INTERNAL_API
 void mlk_poly_decompress_d5(mlk_poly *r,
@@ -388,7 +388,7 @@ void mlk_poly_decompress_d11(mlk_poly *r,
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
 
 #if !defined(MLK_USE_NATIVE_POLY_TOBYTES)
-/* Reference: `poly_tobytes()` in the reference implementation.
+/* Reference: `poly_tobytes()` in the reference implementation [@REF].
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
@@ -434,7 +434,7 @@ void mlk_poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
 #endif /* MLK_USE_NATIVE_POLY_TOBYTES */
 
 #if !defined(MLK_USE_NATIVE_POLY_FROMBYTES)
-/* Reference: `poly_frombytes()` in the reference implementation. */
+/* Reference: `poly_frombytes()` in the reference implementation [@REF]. */
 MLK_INTERNAL_API
 void mlk_poly_frombytes(mlk_poly *r, const uint8_t a[MLKEM_POLYBYTES])
 {
@@ -462,7 +462,7 @@ void mlk_poly_frombytes(mlk_poly *r, const uint8_t a[MLKEM_POLYBYTES])
 }
 #endif /* MLK_USE_NATIVE_POLY_FROMBYTES */
 
-/* Reference: `poly_frommsg()` in the reference implementation.
+/* Reference: `poly_frommsg()` in the reference implementation [@REF].
  *            - We use a value barrier around the bit-selection mask to
  *              reduce the risk of compiler-introduced branches.
  *              The reference implementation contains the expression
@@ -488,7 +488,7 @@ void mlk_poly_frommsg(mlk_poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
       invariant(array_bound(r->coeffs, 0, 8 * i + j, 0, MLKEM_Q)))
     {
       /* mlk_ct_sel_int16(MLKEM_Q_HALF, 0, b) is `Decompress_1(b != 0)`
-       * as per [FIPS 203, Eq (4.8)]. */
+       * as per [@FIPS203, Eq (4.8)]. */
 
       /* Prevent the compiler from recognizing this as a bit selection */
       uint8_t mask = mlk_value_barrier_u8(1u << j);
@@ -498,7 +498,7 @@ void mlk_poly_frommsg(mlk_poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
   mlk_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
 }
 
-/* Reference: `poly_tomsg()` in the reference implementation.
+/* Reference: `poly_tomsg()` in the reference implementation [@REF].
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients

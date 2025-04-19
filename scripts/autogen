@@ -12,6 +12,7 @@ import re
 import sys
 import pyparsing as pp
 import os
+import yaml
 
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
@@ -987,6 +988,10 @@ def get_header_files(main_only=False):
         )
 
 
+def get_markdown_files(main_only=False):
+    return get_files("**/*.md")
+
+
 def get_files(pattern):
     return [str(p) for p in pathlib.Path().glob(pattern) if p.is_file()]
 
@@ -1802,6 +1807,106 @@ def gen_slothy(funcs, dry_run=False):
             exit(1)
 
 
+class BibliographyEntry:
+    def __init__(self, raw_dict):
+        self.__raw = raw_dict
+
+    @property
+    def name(self):
+        return self.__raw["name"]
+
+    @property
+    def short(self):
+        if "short" in self.__raw.keys():
+            return self.__raw["short"]
+        return self.name
+
+    @property
+    def url(self):
+        return self.__raw["url"]
+
+    @property
+    def authors(self):
+        author = self.__raw["author"]
+        if not isinstance(author, list):
+            author = [author]
+        return author
+
+    @property
+    def authors_text(self):
+        def surname(full_name):
+            return full_name.split(" ")[-1]
+
+        if len(self.authors) > 1:
+            authors = ", ".join(map(surname, self.authors))
+        else:
+            authors = self.authors[0]
+        return authors
+
+
+def gen_markdown_citations_for(filename, bibliography, dry_run=False):
+
+    with open(filename, "r") as f:
+        content = f.read()
+
+    citations = set()
+    for m in re.finditer(r'\[\^(?P<id>\w+)\]', content):
+        citations.add(m.group('id'))
+
+    content = content.split("\n")
+    # Find and remove any existing citation footnotes
+    footnote_footer_start = "<!--- bibliography --->"
+    try:
+        i = content.index(footnote_footer_start)
+        content = content[:i]
+    except ValueError:
+        pass
+
+    # Add footnotes for all citations found
+    if len(citations) > 0:
+        content.append(footnote_footer_start)
+    cite_ids = list(citations)
+    cite_ids.sort()
+    for cite_id in cite_ids:
+        entry = bibliography.get(cite_id, None)
+        if entry is None:
+            raise Exception(f"Could not find bibliography entry {cite_id} referenced in {filename}")
+        content.append(
+            f"[^{cite_id}]: {entry.authors_text}: {entry.name}, [{entry.url}]({entry.url})"
+        )
+    if len(citations) > 0:
+        content.append("")
+
+    update_file(filename, "\n".join(content), dry_run=dry_run)
+
+
+def gen_markdown_citations(dry_run=False):
+    # Load bibliography
+    with open("references.yml", "r") as f:
+        bibliography_raw = yaml.safe_load(f.read())
+
+    bibliography = {}
+    for r in bibliography_raw:
+        cite_id = r["id"]
+        bibliography[cite_id] = BibliographyEntry(r)
+
+    with ThreadPoolExecutor() as executor:
+        _ = list(
+            executor.map(
+                partial(
+                    gen_markdown_citations_for,
+                    bibliography=bibliography,
+                    dry_run=dry_run,
+                ),
+                get_markdown_files(),
+            )
+        )
+
+
+def gen_citations(dry_run=False):
+    gen_markdown_citations(dry_run=dry_run)
+
+
 def _main():
     slothy_choices = [
         "ntt",
@@ -1829,38 +1934,40 @@ def _main():
 
     os.chdir(os.path.join(os.path.dirname(__file__), ".."))
 
-    gen_slothy(args.slothy, args.dry_run)
+    gen_citations(args.dry_run)
 
-    check_asm_register_aliases()
+    # gen_slothy(args.slothy, args.dry_run)
 
-    gen_c_zeta_file(args.dry_run)
-    gen_aarch64_hol_light_zeta_file(args.dry_run)
-    gen_aarch64_zeta_file(args.dry_run)
-    gen_aarch64_rej_uniform_table(args.dry_run)
-    gen_avx2_zeta_file(args.dry_run)
-    gen_avx2_rej_uniform_table(args.dry_run)
+    # check_asm_register_aliases()
 
-    if platform.machine().lower() in ["arm64", "aarch64"]:
-        gen_hol_light_asm(args.dry_run)
+    # gen_c_zeta_file(args.dry_run)
+    # gen_aarch64_hol_light_zeta_file(args.dry_run)
+    # gen_aarch64_zeta_file(args.dry_run)
+    # gen_aarch64_rej_uniform_table(args.dry_run)
+    # gen_avx2_zeta_file(args.dry_run)
+    # gen_avx2_rej_uniform_table(args.dry_run)
 
-    synchronize_backends(
-        dry_run=args.dry_run,
-        clean=args.aarch64_clean,
-        no_simplify=args.no_simplify,
-        force_cross=args.force_cross,
-    )
-    gen_header_guards(args.dry_run)
-    gen_preprocessor_comments(args.dry_run)
-    gen_monolithic_source_file(args.dry_run)
-    gen_undefs(args.dry_run)
+    # if platform.machine().lower() in ["arm64", "aarch64"]:
+    #     gen_hol_light_asm(args.dry_run)
 
-    synchronize_backends(
-        dry_run=args.dry_run,
-        clean=args.aarch64_clean,
-        delete=True,
-        force_cross=args.force_cross,
-        no_simplify=args.no_simplify,
-    )
+    # synchronize_backends(
+    #     dry_run=args.dry_run,
+    #     clean=args.aarch64_clean,
+    #     no_simplify=args.no_simplify,
+    #     force_cross=args.force_cross,
+    # )
+    # gen_header_guards(args.dry_run)
+    # gen_preprocessor_comments(args.dry_run)
+    # gen_monolithic_source_file(args.dry_run)
+    # gen_undefs(args.dry_run)
+
+    # synchronize_backends(
+    #     dry_run=args.dry_run,
+    #     clean=args.aarch64_clean,
+    #     delete=True,
+    #     force_cross=args.force_cross,
+    #     no_simplify=args.no_simplify,
+    # )
 
     print()
 

@@ -6,8 +6,7 @@
 #ifndef MLK_NATIVE_X86_64_SRC_CONSTS_H
 #define MLK_NATIVE_X86_64_SRC_CONSTS_H
 /*
- * Implementation from Kyber reference repository
- * https://github.com/pq-crystals/kyber/blob/main/avx2/consts.h
+ * Implementation from Kyber reference repository [@REF_AVX2]
  */
 #include "../../../common.h"
 
