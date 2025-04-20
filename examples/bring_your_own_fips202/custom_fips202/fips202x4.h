@@ -108,4 +108,4 @@ __contract__(
   mlk_shake256(out3, outlen, in3, inlen);
 }
 
-#endif
+#endif /* !FIPS_202X4_H */

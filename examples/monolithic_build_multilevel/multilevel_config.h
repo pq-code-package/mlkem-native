@@ -127,4 +127,4 @@
  *****************************************************************************/
 #define MLK_CONFIG_INTERNAL_API_QUALIFIER static
 
-#endif /* MLkEM_NATIVE_CONFIG_H */
+#endif /* !MLK_CONFIG_H */

@@ -31,4 +31,4 @@ void enable_cyclecounter(void);
 void disable_cyclecounter(void);
 uint64_t get_cyclecounter(void);
 
-#endif
+#endif /* !HAL_H */

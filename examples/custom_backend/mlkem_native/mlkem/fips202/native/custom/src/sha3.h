@@ -47,4 +47,4 @@ void *tiny_sha3(const void *in, size_t inlen, void *md, int mdlen);
 void tiny_shake_xof(sha3_ctx_t *c);
 void tiny_shake_out(sha3_ctx_t *c, void *out, size_t len);
 
-#endif
+#endif /* !SHA3_H */

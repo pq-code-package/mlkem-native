@@ -259,7 +259,7 @@ static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
 {
   explicit_bzero(ptr, len);
 }
-#endif
+#endif /* !__ASSEMBLER__ */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_NO_ASM
@@ -344,4 +344,4 @@ static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
 #define MLK_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM1024
 #endif
 
-#endif /* MLK_CONFIG_H */
+#endif /* !MLK_CONFIG_H */

@@ -21,4 +21,4 @@
 
 #include "../mlkem/native/api.h"
 
-#endif /* MLK_ARITH_PROFILE_H */
+#endif /* !MLK_ARITH_PROFILE_H */

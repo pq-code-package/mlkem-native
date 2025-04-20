@@ -126,4 +126,4 @@
  *****************************************************************************/
 #define MLK_API_STANDARD
 
-#endif /* MLkEM_NATIVE_CONFIG_H */
+#endif /* !MLK_CONFIG_H */

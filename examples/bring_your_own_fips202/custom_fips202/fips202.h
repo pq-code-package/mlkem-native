@@ -141,4 +141,4 @@ static MLK_INLINE void mlk_sha3_512(uint8_t *output, const uint8_t *input,
   (void)sha3(input, inlen, output, SHA3_512_HASHBYTES);
 }
 
-#endif
+#endif /* !FIPS202_H */

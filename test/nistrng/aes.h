@@ -75,4 +75,4 @@ void aes256_ctr(unsigned char *out, size_t outlen, const unsigned char *iv,
 /** Frees the context **/
 void aes256_ctx_release(aes256ctx *r);
 
-#endif
+#endif /* !AES_H */

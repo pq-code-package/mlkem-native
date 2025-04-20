@@ -15,4 +15,4 @@ void nist_kat_init(
         personalization_string[AES256_KEYBYTES + AES_BLOCKBYTES],
     int security_strength);
 
-#endif
+#endif /* !NISTRNG_H */
