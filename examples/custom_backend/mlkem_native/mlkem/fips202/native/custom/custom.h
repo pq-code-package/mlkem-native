@@ -16,4 +16,4 @@ static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
 }
 #endif /* !__ASSEMBLER__ */
 
-#endif /* MLK_FIPS202_CUSTOM_TINY_SHA3_H */
+#endif /* !MLK_FIPS202_CUSTOM_TINY_SHA3_H */

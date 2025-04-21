@@ -43,7 +43,7 @@ void sha3_keccakf(uint64_t st[25])
             (((uint64_t)v[4]) << 32) | (((uint64_t)v[5]) << 40) |
             (((uint64_t)v[6]) << 48) | (((uint64_t)v[7]) << 56);
   }
-#endif
+#endif /* __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__ */
 
   /* actual iteration */
   for (r = 0; r < KECCAKF_ROUNDS; r++)
@@ -105,7 +105,7 @@ void sha3_keccakf(uint64_t st[25])
     v[6] = (t >> 48) & 0xFF;
     v[7] = (t >> 56) & 0xFF;
   }
-#endif
+#endif /* __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__ */
 }
 
 /* Initialize the context for SHA3 */

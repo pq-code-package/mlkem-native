@@ -12,4 +12,4 @@
 
 #include "../../mlkem/fips202/native/api.h"
 
-#endif /* MLK_FIPS202_PROFILE_H */
+#endif /* !MLK_FIPS202_PROFILE_H */

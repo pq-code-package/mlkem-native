@@ -286,7 +286,7 @@ static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
 {
   randombytes(ptr, len);
 }
-#endif
+#endif /* !__ASSEMBLER__ */
 
 
 
@@ -373,4 +373,4 @@ static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
 #define MLK_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM1024
 #endif
 
-#endif /* MLK_CONFIG_H */
+#endif /* !MLK_CONFIG_H */

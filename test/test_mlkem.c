@@ -177,8 +177,7 @@ static int test_poly_compress_no_overflow(void)
     memset(r, 0, sizeof(r));
     mlk_poly_decompress_d10(&s, r);
   }
-#endif /* defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || (MLKEM_K == 2 \
-          || MLKEM_K == 3) */
+#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4
   {

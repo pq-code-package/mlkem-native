@@ -300,7 +300,7 @@ static MLK_INLINE int mlk_break_pct(void)
   const char *val = getenv("MLK_BREAK_PCT");
   return val != NULL && strcmp(val, "1") == 0;
 }
-#endif
+#endif /* !__ASSEMBLER__ */
 
 /*************************  Config internals  ********************************/
 
@@ -324,4 +324,4 @@ static MLK_INLINE int mlk_break_pct(void)
 #define MLK_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM1024
 #endif
 
-#endif /* MLK_CONFIG_H */
+#endif /* !MLK_CONFIG_H */

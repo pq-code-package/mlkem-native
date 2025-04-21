@@ -33,4 +33,4 @@
 #undef MLK_CONFIG_API_NO_SUPERCOP
 #undef MLK_H
 
-#endif /* MLK_ALL_H */
+#endif /* !MLK_ALL_H */

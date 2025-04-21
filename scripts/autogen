@@ -962,33 +962,43 @@ def gen_avx2_zeta_file(dry_run=False):
     )
 
 
-def get_c_source_files(main_only=False):
+def get_c_source_files(main_only=False, core_only=False):
     if main_only is True:
         return get_files("mlkem/**/*.c")
-    else:
+    elif core_only is True:
         return get_files("mlkem/**/*.c") + get_files("dev/**/*.c")
+    else:
+        return get_files("**/*.c")
 
 
-def get_asm_source_files(main_only=False):
+def get_asm_source_files(main_only=False, core_only=False):
     if main_only is True:
         return get_files("mlkem/**/*.S")
-    else:
+    elif core_only is True:
         return get_files("mlkem/**/*.S") + get_files("dev/**/*.S")
+    else:
+        return get_files("**/*.S")
 
 
-def get_header_files(main_only=False):
+def get_header_files(main_only=False, core_only=False):
     if main_only is True:
         return get_files("mlkem/**/*.h")
-    else:
+    elif core_only is True:
         return (
             get_files("mlkem/**/*.h")
             + get_files("dev/**/*.h")
             + get_files("integration/**/*.h")
         )
+    else:
+        return get_files("**/*.h")
 
 
 def get_files(pattern):
-    return [str(p) for p in pathlib.Path().glob(pattern) if p.is_file()]
+    return [
+        str(p)
+        for p in pathlib.Path().glob(pattern)
+        if p.is_file() and not p.is_symlink()
+    ]
 
 
 def get_defines_from_file(c):
@@ -1705,7 +1715,10 @@ def gen_header_guard(header_file, dry_run=False):
 def gen_header_guards(dry_run=False):
     with ThreadPoolExecutor() as executor:
         _ = list(
-            executor.map(partial(gen_header_guard, dry_run=dry_run), get_header_files())
+            executor.map(
+                partial(gen_header_guard, dry_run=dry_run),
+                get_header_files(core_only=True),
+            )
         )
 
 
@@ -1770,7 +1783,8 @@ def gen_undefs(dry_run=False):
     with ThreadPoolExecutor() as executor:
         _ = list(
             executor.map(
-                partial(gen_source_undefs, dry_run=dry_run), get_c_source_files()
+                partial(gen_source_undefs, dry_run=dry_run),
+                get_c_source_files(core_only=True),
             )
         )
 

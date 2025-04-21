@@ -30,4 +30,4 @@
 #undef MLK_CONFIG_API_NAMESPACE_PREFIX
 #undef MLK_H
 
-#endif /* MLK_ALL_H */
+#endif /* !MLK_ALL_H */

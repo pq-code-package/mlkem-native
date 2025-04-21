@@ -123,7 +123,7 @@ static int bench(void)
                                      (mlk_poly *)data2, (mlk_poly *)data3,
                                      (uint8_t *)data4, nonce0, nonce1, nonce2,
                                      nonce3))
-#endif
+#endif /* MLKEM_K == 2 */
 
   /* mlk_poly_tomont */
   BENCH("mlk_poly_tomont", mlk_poly_tomont((mlk_poly *)data0))
@@ -223,7 +223,7 @@ static int bench(void)
         mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(
             (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
             (int16_t *)data3));
-#endif
+#endif /* MLKEM_K == 4 */
 
 #endif /* MLK_ARITH_BACKEND_AARCH64 */
 

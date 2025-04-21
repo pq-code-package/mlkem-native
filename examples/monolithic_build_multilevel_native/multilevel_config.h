@@ -158,7 +158,7 @@ static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
 {
   randombytes(ptr, len);
 }
-#endif
+#endif /* !__ASSEMBLER__ */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_INTERNAL_API_QUALIFIER
@@ -187,4 +187,4 @@ static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
  *****************************************************************************/
 #define MLK_CONFIG_EXTERNAL_API_QUALIFIER static
 
-#endif /* MLkEM_NATIVE_CONFIG_H */
+#endif /* !MLK_CONFIG_H */
