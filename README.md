@@ -13,9 +13,9 @@
 mlkem-native is a secure, fast, and portable C90 implementation of [ML-KEM](https://doi.org/10.6028/NIST.FIPS.203).
 It is a fork of the ML-KEM [reference implementation](https://github.com/pq-crystals/kyber/tree/main/ref).
 
-Large parts of mlkem-native are formally verified: All C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202) is verified
-using [CBMC](https://github.com/diffblue/cbmc) to be free of various classes of undefined behaviour. [HOL-Light](https://github.com/jrh13/hol-light) is used to verify
-the functional correctness of core AArch64 assembly routines.
+All C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202) is formally verified using [CBMC](https://github.com/diffblue/cbmc)
+to be memory-safe (no buffer overflow) and type-safe (no integer overflow). [HOL-Light](https://github.com/jrh13/hol-light) is used to
+verify the functional correctness of core AArch64 assembly routines.
 
 mlkem-native includes native backends for AArch64 and AVX2, offering competitive performance on most Arm, Intel, and AMD platforms
 (see [benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/)).
@@ -51,15 +51,13 @@ mlkem-native is used in [libOQS](https://github.com/open-quantum-safe/liboqs/) o
 
 ## Security
 
-mlkem-native is being developed with security at the top of mind. All native code is constant-time in the sense that
-it is free of secret-dependent control flow, memory access, and instructions that are commonly variable-time,
-thwarting most timing side channels.
-The C code is hardened against compiler-introduced timing side channels (such as
-[KyberSlash](https://kyberslash.cr.yp.to/) or [clangover](https://github.com/antoonpurnal/clangover))
+All assembly in mlkem-native is constant-time in the sense that it is free of secret-dependent control flow, memory access,
+and instructions that are commonly variable-time, thwarting most timing side channels. C code is hardened against compiler-introduced
+timing side channels (such as [KyberSlash](https://kyberslash.cr.yp.to/) or [clangover](https://github.com/antoonpurnal/clangover))
 through suitable barriers and constant-time patterns.
-Absence of secret-dependent branches, memory-access patterns
-and variable-latency instructions is also tested using `valgrind` with various combinations of compilers and
-compilation options.
+
+Absence of secret-dependent branches, memory-access patterns and variable-latency instructions is also tested using `valgrind`
+with various combinations of compilers and compilation options.
 
 ## Formal Verification
 
@@ -68,20 +66,7 @@ undefined behaviour in C, including out of bounds memory accesses and integer ov
 all C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202) involved in running mlkem-native with its C backend.
 See [proofs/cbmc](proofs/cbmc) for details.
 
-The functional correctness of various AArch64 assembly routines is established using [HOL-Light](https://github.com/jrh13/hol-light) and the [s2n-bignum](https://github.com/awslabs/s2n-bignum/) verification infrastructure. The proofs can be found in [proofs/hol_light/arm](proofs/hol_light/arm) and were largely contributed by John Harrison. So far, the following functions have been proven correct:
-- ML-KEM Arithmetic:
-  * AArch64 forward NTT: [mlkem_ntt.S](proofs/hol_light/arm/mlkem/mlkem_ntt.S)
-  * AArch64 inverse NTT: [mlkem_intt.S](proofs/hol_light/arm/mlkem/mlkem_intt.S)
-  * AArch64 base multiplications: [mlkem_poly_basemul_acc_montgomery_cached_k2.S](proofs/hol_light/arm/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.S) [mlkem_poly_basemul_acc_montgomery_cached_k3.S](proofs/hol_light/arm/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.S) [mlkem_poly_basemul_acc_montgomery_cached_k4.S](proofs/hol_light/arm/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.S)
-  * AArch64 modular reduction: [mlkem_poly_reduce.S](proofs/hol_light/arm/mlkem/mlkem_poly_reduce.S)
-  * AArch64 conversion to Montgomery form: [mlkem_poly_tomont.S](proofs/hol_light/arm/mlkem/mlkem_poly_tomont.S)
-  * AArch64 'multiplication cache' computation: [mlkem_poly_mulcache_compute.S](proofs/hol_light/arm/mlkem/mlkem_poly_mulcache_compute.S)
-- FIPS202:
-  * Keccak-F1600 using lazy rotations (see [this paper](https://eprint.iacr.org/2022/1243)): [keccak_f1600_x1_scalar.S](proofs/hol_light/arm/mlkem/keccak_f1600_x1_scalar.S)
-  * Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x1_v84a.S](proofs/hol_light/arm/mlkem/keccak_f1600_x1_v84a.S)
-  * 2-fold Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x2_v84a.S](proofs/hol_light/arm/mlkem/keccak_f1600_x2_v84a.S)
-  * 'Hybrid' 4-fold Keccak-F1600 using scalar and v8-A Neon instructions: [keccak_f1600_x4_v8a_scalar.S](proofs/hol_light/arm/mlkem/keccak_f1600_x4_v8a_scalar.S)
-  * 'Triple hybrid' 4-fold Keccak-F1600 using scalar, v8-A Neon and v8.4-A+SHA3 Neon instructions: [keccak_f1600_x4_v8a_v84a_scalar.S](proofs/hol_light/arm/mlkem/keccak_f1600_x4_v8a_v84a_scalar.S)
+The functional correctness of core AArch64 assembly routines is established using [HOL-Light](https://github.com/jrh13/hol-light) and the [s2n-bignum](https://github.com/awslabs/s2n-bignum/) verification infrastructure. See [proofs/hol_light/arm](proofs/hol_light/arm) for the list of functions covered, and the proofs.
 
 ## State
 
