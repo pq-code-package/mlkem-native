@@ -2035,10 +2035,10 @@ def gen_bib_file(bibliography, dry_run=False):
 
     content = [
         "[//]: # (SPDX-License-Identifier: CC-BY-4.0)",
-        "[//]: # (This file is auto-generated from references.yml)",
+        "[//]: # (This file is auto-generated from BIBLIOGRAPHY.yml)",
         "[//]: # (Do not modify it directly)",
         "",
-        "# References",
+        "# Bibliography",
         "",
         "This file lists the citations made throughout the mlkem-native ",
         "source code and documentation.",
@@ -2072,7 +2072,7 @@ def gen_bib_file(bibliography, dry_run=False):
 
 def gen_citations(dry_run=False):
     # Load bibliography
-    with open("references.yml", "r") as f:
+    with open("BIBLIOGRAPHY.yml", "r") as f:
         bibliography_raw = yaml.safe_load(f.read())
 
     bibliography = {}
@@ -2100,7 +2100,7 @@ def gen_citations(dry_run=False):
         if len(e.usages) == 0:
             raise Exception(
                 f"Bibliography entry {e.id} is unused! "
-                "Add a citation or remove from references.yml."
+                "Add a citation or remove from BIBLIOGRAPHY.yml."
             )
 
     gen_bib_file(bibliography, dry_run=False)

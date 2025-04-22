@@ -1,8 +1,8 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
-[//]: # (This file is auto-generated from references.yml)
+[//]: # (This file is auto-generated from BIBLIOGRAPHY.yml)
 [//]: # (Do not modify it directly)
 
-# References
+# Bibliography
 
 This file lists the citations made throughout the mlkem-native 
 source code and documentation.
@@ -20,7 +20,7 @@ source code and documentation.
 
 * ACVP ML-KEM JSON Specification
 * Author(s):
-  - Celi, Christopher
+  - Christopher Celi
 * URL: https://pages.nist.gov/ACVP/draft-celi-acvp-ml-kem.html
 * Referenced from:
   - [test/acvp_data/README.md](test/acvp_data/README.md)
@@ -29,7 +29,7 @@ source code and documentation.
 
 * Faster AVX2 optimized NTT multiplication for Ring-LWE lattice cryptography.
 * Author(s):
-  - Seiler, Gregor
+  - Gregor Seiler
 * URL: https://eprint.iacr.org/2018/039
 * Referenced from:
   - [dev/x86_64/src/intt.S](dev/x86_64/src/intt.S)
@@ -41,7 +41,7 @@ source code and documentation.
 
 * BearSSL library
 * Author(s):
-  - Pornin, Thomas
+  - Thomas Pornin
 * URL: https://bearssl.org
 * Referenced from:
   - [test/nistrng/aes.c](test/nistrng/aes.c)
@@ -50,8 +50,8 @@ source code and documentation.
 
 * A new combinational logic minimization technique with applications to cryptology
 * Author(s):
-  - Boyar, Joan
-  - Peralta, Rene
+  - Joan Boyar
+  - Rene Peralta
 * URL: https://eprint.iacr.org/2009/191.pdf
 * Referenced from:
   - [test/nistrng/aes.c](test/nistrng/aes.c)
@@ -114,8 +114,8 @@ source code and documentation.
 
 * Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64
 * Author(s):
-  - Becker, Hanno
-  - Kannwischer, Matthias J.
+  - Hanno Becker
+  - Matthias J. Kannwischer
 * URL: https://eprint.iacr.org/2022/1243
 * Referenced from:
   - [README.md](README.md)
@@ -133,16 +133,16 @@ source code and documentation.
 
 * KyberSlash: Exploiting secret-dependent division timings in Kyber implementations
 * Author(s):
-  - Bernstein, Daniel J.
-  - Bhargavan, Karthikeyan
-  - Bhasin, Shivam
-  - Chattopadhyay, Anupam
-  - Chia, Tee Kiah
-  - Kannwischer, Matthias J.
-  - Kiefer, Franziskus
-  - Paiva, Thales
-  - Ravi, Prasanna
-  - Tamvada, Goutam
+  - Daniel J. Bernstein
+  - Karthikeyan Bhargavan
+  - Shivam Bhasin
+  - Anupam Chattopadhyay
+  - Tee Kiah Chia
+  - Matthias J. Kannwischer
+  - Franziskus Kiefer
+  - Thales Paiva
+  - Prasanna Ravi
+  - Goutam Tamvada
 * URL: https://kyberslash.cr.yp.to/papers.html
 * Referenced from:
   - [README.md](README.md)
@@ -152,11 +152,11 @@ source code and documentation.
 
 * Neon NTT: Faster Dilithium, Kyber, and Saber on Cortex-A72 and Apple M1
 * Author(s):
-  - Becker, Hanno
-  - Hwang, Vincent
-  - Kannwischer, Matthias J.
-  - Yang, Bo-Yin
-  - Yang, Shang-Yi
+  - Hanno Becker
+  - Vincent Hwang
+  - Matthias J. Kannwischer
+  - Bo-Yin Yang
+  - Shang-Yi Yang
 * URL: https://tches.iacr.org/index.php/TCHES/article/view/9295
 * Referenced from:
   - [dev/aarch64_clean/README.md](dev/aarch64_clean/README.md)
@@ -189,15 +189,15 @@ source code and documentation.
 
 * CRYSTALS-Kyber C reference implementation
 * Author(s):
-  - Bos, Joppe
-  - Ducas, Léo
-  - Kiltz, Eike
-  - Lepoint, Tancrède
-  - Lyubashevsky, Vadim
-  - Schanck, John
-  - Schwabe, Peter
-  - Seiler, Gregor
-  - Stehlé, Damien
+  - Joppe Bos
+  - Léo Ducas
+  - Eike Kiltz
+  - Tancrède Lepoint
+  - Vadim Lyubashevsky
+  - John Schanck
+  - Peter Schwabe
+  - Gregor Seiler
+  - Damien Stehlé
 * URL: https://github.com/pq-crystals/kyber/tree/main/ref
 * Referenced from:
   - [README.md](README.md)
@@ -215,15 +215,15 @@ source code and documentation.
 
 * CRYSTALS-Kyber optimized AVX2 implementation
 * Author(s):
-  - Bos, Joppe
-  - Ducas, Léo
-  - Kiltz, Eike
-  - Lepoint, Tancrède
-  - Lyubashevsky, Vadim
-  - Schanck, John
-  - Schwabe, Peter
-  - Seiler, Gregor
-  - Stehlé, Damien
+  - Joppe Bos
+  - Léo Ducas
+  - Eike Kiltz
+  - Tancrède Lepoint
+  - Vadim Lyubashevsky
+  - John Schanck
+  - Peter Schwabe
+  - Gregor Seiler
+  - Damien Stehlé
 * URL: https://github.com/pq-crystals/kyber/tree/main/avx2
 * Referenced from:
   - [dev/x86_64/src/align.h](dev/x86_64/src/align.h)
@@ -261,10 +261,10 @@ source code and documentation.
 
 * SLOTHY superoptimizer
 * Author(s):
-  - Abdulrahman, Amin
-  - Becker, Hanno
-  - Kannwischer, Matthias J.
-  - Klein, Fabien
+  - Amin Abdulrahman
+  - Hanno Becker
+  - Matthias J. Kannwischer
+  - Fabien Klein
 * URL: https://github.com/slothy-optimizer/slothy/
 * Referenced from:
   - [dev/README.md](dev/README.md)
@@ -274,10 +274,10 @@ source code and documentation.
 
 * Fast and Clean: Auditable high-performance assembly via constraint solving
 * Author(s):
-  - Abdulrahman, Amin
-  - Becker, Hanno
-  - Kannwischer, Matthias J.
-  - Klein, Fabien
+  - Amin Abdulrahman
+  - Hanno Becker
+  - Matthias J. Kannwischer
+  - Fabien Klein
 * URL: https://eprint.iacr.org/2022/1303
 * Referenced from:
   - [README.md](README.md)
@@ -298,7 +298,7 @@ source code and documentation.
 
 * clangover
 * Author(s):
-  - Purnal, Antoon
+  - Antoon Purnal
 * URL: https://github.com/antoonpurnal/clangover
 * Referenced from:
   - [README.md](README.md)
@@ -307,8 +307,8 @@ source code and documentation.
 
 * libmceliece implementation of Classic McEliece
 * Author(s):
-  - Bernstein, Daniel J.
-  - Chou, Tung
+  - Daniel J. Bernstein
+  - Tung Chou
 * URL: https://lib.mceliece.org/
 * Referenced from:
   - [mlkem/verify.h](mlkem/verify.h)
@@ -317,7 +317,7 @@ source code and documentation.
 
 * Cycle counting on Apple M1
 * Author(s):
-  - Johnson, Dougall
+  - Dougall Johnson
 * URL: https://gist.github.com/dougallj/5bafb113492047c865c0c8cfbc930155#file-m1_robsize-c-L390
 * Referenced from:
   - [test/hal/hal.c](test/hal/hal.c)
@@ -336,7 +336,7 @@ source code and documentation.
 
 * PQC forum post on opt-blockers using volatile globals
 * Author(s):
-  - Bernstein, Daniel J.
+  - Daniel J. Bernstein
 * URL: https://groups.google.com/a/list.nist.gov/g/pqc-forum/c/hqbtIGFKIpU/m/H14H0wOlBgAJ
 * Referenced from:
   - [mlkem/verify.h](mlkem/verify.h)
@@ -345,7 +345,7 @@ source code and documentation.
 
 * SUPERCOP benchmarking framework
 * Author(s):
-  - Bernstein, Daniel J.
+  - Daniel J. Bernstein
 * URL: http://bench.cr.yp.to/supercop.html
 * Referenced from:
   - [mlkem/fips202/fips202.c](mlkem/fips202/fips202.c)
@@ -355,7 +355,7 @@ source code and documentation.
 
 * SURF: Simple Unpredictable Random Function
 * Author(s):
-  - Bernstein, Daniel J.
+  - Daniel J. Bernstein
 * URL: https://cr.yp.to/papers.html#surf
 * Referenced from:
   - [test/notrandombytes/notrandombytes.c](test/notrandombytes/notrandombytes.c)
@@ -365,7 +365,7 @@ source code and documentation.
 
 * tiny_sha3
 * Author(s):
-  - Saarinen, Markku-Juhani O.
+  - Markku-Juhani O. Saarinen
 * URL: https://github.com/mjosaarinen/tiny_sha3
 * Referenced from:
   - [README.md](README.md)
@@ -377,9 +377,9 @@ source code and documentation.
 
 * 'tweetfips202' FIPS202 implementation
 * Author(s):
-  - Van Assche, Gilles
-  - Bernstein, Daniel J.
-  - Schwabe, Peter
+  - Gilles Van Assche
+  - Daniel J. Bernstein
+  - Peter Schwabe
 * URL: https://twitter.com/tweetfips202
 * Referenced from:
   - [mlkem/fips202/fips202.c](mlkem/fips202/fips202.c)
