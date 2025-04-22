@@ -20,3 +20,4 @@ in the mlkem-native project under `Apache-2.0 OR ISC OR MIT`.
 - Basil Hess <bhe@zurich.ibm.com>
 - Mila Anastasova <manastasova2017@fau.edu>
 - Ry Jones <ry@linux.com>
+- Rod Chapman <rodchap@amazon.co.uk>
