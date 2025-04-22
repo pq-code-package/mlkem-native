@@ -380,7 +380,7 @@ source code and documentation.
   - Gilles Van Assche
   - Daniel J. Bernstein
   - Peter Schwabe
-* URL: https://twitter.com/tweetfips202
+* URL: https://keccak.team/2015/tweetfips202.html
 * Referenced from:
   - [mlkem/fips202/fips202.c](mlkem/fips202/fips202.c)
   - [mlkem/fips202/keccakf1600.c](mlkem/fips202/keccakf1600.c)

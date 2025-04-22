@@ -19,7 +19,7 @@
  * - [tweetfips]
  *   'tweetfips202' FIPS202 implementation
  *   Van Assche, Bernstein, Schwabe
- *   https://twitter.com/tweetfips202
+ *   https://keccak.team/2015/tweetfips202.html
  */
 
 /* Based on the CC0 implementation from [@mupq] and the public domain
