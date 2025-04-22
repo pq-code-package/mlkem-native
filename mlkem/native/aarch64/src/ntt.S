@@ -1,28 +1,43 @@
-///
-/// Copyright (c) 2022 Arm Limited
-/// Copyright (c) 2022 Hanno Becker
-/// Copyright (c) 2023 Amin Abdulrahman, Matthias Kannwischer
-/// Copyright (c) 2024-2025 The mlkem-native project authors
-// SPDX-License-Identifier: MIT
-///
-/// Permission is hereby granted, free of charge, to any person obtaining a copy
-/// of this software and associated documentation files (the "Software"), to deal
-/// in the Software without restriction, including without limitation the rights
-/// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-/// copies of the Software, and to permit persons to whom the Software is
-/// furnished to do so, subject to the following conditions:
-///
-/// The above copyright notice and this permission notice shall be included in all
-/// copies or substantial portions of the Software.
-///
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-/// SOFTWARE.
-///
+/* Copyright (c) 2024-2025 The mlkem-native project authors
+ * Copyright (c) 2022 Arm Limited
+ * Copyright (c) 2022 Hanno Becker
+ * Copyright (c) 2023 Amin Abdulrahman, Matthias Kannwischer
+ * SPDX-License-Identifier: MIT
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+/* References
+ * ==========
+ *
+ * - [NeonNTT]
+ *   Neon NTT: Faster Dilithium, Kyber, and Saber on Cortex-A72 and Apple M1
+ *   Becker, Hwang, Kannwischer, Yang, Yang
+ *   https://tches.iacr.org/index.php/TCHES/article/view/9295
+ *
+ * - [SLOTHY_Paper]
+ *   Fast and Clean: Auditable high-performance assembly via constraint solving
+ *   Abdulrahman, Becker, Kannwischer, Klein
+ *   https://eprint.iacr.org/2022/1303
+ */
+
+/* AArch64 ML-KEM forward NTT following [@NeonNTT] and [@SLOTHY_Paper]. */
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64) && \

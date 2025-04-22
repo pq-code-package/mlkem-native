@@ -16,11 +16,10 @@ The files in this directory are handwritten and kept readable through the extens
 
 #### Optimized
 
-[`aarch64_opt`](aarch64_opt) contains the results of running the [SLOTHY](https://github.com/slothy-optimizer/slothy/)
-superoptimizer on the clean assembly files in [`aarch64_clean`](aarch64_clean). The optimized sections are 'raw'
-assembly in the sense that they no longer use register macros or aliases, but the surrounding code (such as the
+[`aarch64_opt`](aarch64_opt) contains the results of running the SLOTHY superoptimizer on the clean assembly files in [`aarch64_clean`](aarch64_clean).
+The optimized sections are 'raw' assembly in the sense that they no longer use register macros or aliases, but the surrounding code (such as the
 function preamble and postamble) typically still use those register aliases/macros. Also, the macros and alias
-definitions themselves are still kept.
+definitions themselves are still kept. See the SLOTHY paper[^SLOTHY_Paper] for more details on SLOTHY.
 
 #### Final
 
@@ -48,3 +47,7 @@ on the assembly in [fips202/aarch64/src](fips202/aarch64/src). Non-assembly file
 
 As for the AArch64 arithmetic assembly, the final x86_64 arithmetic assembly is the result of running [`simpasm`](../scripts/simpasm)
 on the assembly in [x86_64/src](x86_64/src). Non-assembly files are synchronized by copy.
+
+<!--- bibliography --->
+[^SLOTHY]: Abdulrahman, Becker, Kannwischer, Klein: SLOTHY superoptimizer, [https://github.com/slothy-optimizer/slothy/](https://github.com/slothy-optimizer/slothy/)
+[^SLOTHY_Paper]: Abdulrahman, Becker, Kannwischer, Klein: Fast and Clean: Auditable high-performance assembly via constraint solving, [https://eprint.iacr.org/2022/1303](https://eprint.iacr.org/2022/1303)

@@ -2,13 +2,29 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* Based on the CC0 implementation in https://github.com/mupq/mupq and
- * the public domain implementation in
- * crypto_hash/keccakc512/simple/ from http://bench.cr.yp.to/supercop.html
- * by Ronny Van Keer
- * and the public domain "TweetFips202" implementation
- * from https://twitter.com/tweetfips202
- * by Gilles Van Assche, Daniel J. Bernstein, and Peter Schwabe */
+
+/* References
+ * ==========
+ *
+ * - [mupq]
+ *   Common files for pqm4, pqm3, pqriscv
+ *   Kannwischer et. al
+ *   https://github.com/mupq/mupq
+ *
+ * - [supercop]
+ *   SUPERCOP benchmarking framework
+ *   Daniel J. Bernstein
+ *   http://bench.cr.yp.to/supercop.html
+ *
+ * - [tweetfips]
+ *   'tweetfips202' FIPS202 implementation
+ *   Van Assche, Bernstein, Schwabe
+ *   https://keccak.team/2015/tweetfips202.html
+ */
+
+/* Based on the CC0 implementation from [@mupq] and the public domain
+ * implementation [@supercop, crypto_hash/keccakc512/simple/]
+ * by Ronny Van Keer, and the public domain [@tweetfips] implementation. */
 
 #include <assert.h>
 #include <stdint.h>

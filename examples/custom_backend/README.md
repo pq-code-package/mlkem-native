@@ -3,8 +3,7 @@
 # Using a custom configuration and FIPS-202 backend
 
 This directory contains a minimal example for how to use mlkem-native as a code package, with a custom FIPS-202
-backend and a custom configuration. We use the [tiny_sha3](https://github.com/mjosaarinen/tiny_sha3/) by Markku-J. O.
-Saarinen as an example.
+backend and a custom configuration. We use [^tiny_sha3] as an example.
 
 ## Components
 
@@ -35,3 +34,6 @@ mlkem-native's FIPS202 frontend assumes a standard presentation, the correspondi
 ## Usage
 
 Build this example with `make build`, run with `make run`.
+
+<!--- bibliography --->
+[^tiny_sha3]: Markku-Juhani O. Saarinen: tiny_sha3, [https://github.com/mjosaarinen/tiny_sha3](https://github.com/mjosaarinen/tiny_sha3)

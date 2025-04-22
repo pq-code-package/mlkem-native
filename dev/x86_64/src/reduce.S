@@ -3,13 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Implementation based on Kyber reference repository
-// https://github.com/pq-crystals/kyber/blob/main/avx2
+/* References
+ * ==========
+ *
+ * - [REF_AVX2]
+ *   CRYSTALS-Kyber optimized AVX2 implementation
+ *   Bos, Ducas, Kiltz, Lepoint, Lyubashevsky, Schanck, Schwabe, Seiler, Stehlé
+ *   https://github.com/pq-crystals/kyber/tree/main/avx2
+ */
 
-// Changes:
-// - Add call to csub in reduce128_avx to produce outputs
-//   in [0,1,...,q-1] rather than [0,1,...,q], matching the
-//   semantics of mlk_poly_reduce().
+/*
+ * This file is derived from the public domain
+ * AVX2 Kyber implementation [@REF_AVX2].
+ *
+ * Changes:
+ * - Add call to csub in reduce128_avx to produce outputs
+ *   in [0,1,...,q-1] rather than [0,1,...,q], matching the
+ *   semantics of mlk_poly_reduce().
+ */
 
 #include "../../../common.h"
 

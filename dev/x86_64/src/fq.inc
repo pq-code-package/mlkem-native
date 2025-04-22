@@ -4,8 +4,8 @@
  */
 
 /*
- * Implementation from Kyber reference repository
- * https://github.com/pq-crystals/kyber/blob/main/avx2
+ * This file is derived from the public domain
+ * AVX2 Kyber implementation [@REF_AVX2].
  */
 
 .macro red16 r,rs=0,x=12

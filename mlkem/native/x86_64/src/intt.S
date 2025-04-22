@@ -3,11 +3,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* Implementation based on Kyber repository
- * https://github.com/pq-crystals/kyber/blob/main/avx2
+/* References
+ * ==========
  *
- * Changes to placement of modular reductions have
- * been made to simplify reasoning of non-overflow */
+ * - [AVX2_NTT]
+ *   Faster AVX2 optimized NTT multiplication for Ring-LWE lattice cryptography.
+ *   Gregor Seiler
+ *   https://eprint.iacr.org/2018/039
+ *
+ * - [REF_AVX2]
+ *   CRYSTALS-Kyber optimized AVX2 implementation
+ *   Bos, Ducas, Kiltz, Lepoint, Lyubashevsky, Schanck, Schwabe, Seiler, Stehlé
+ *   https://github.com/pq-crystals/kyber/tree/main/avx2
+ */
+
+/*
+ * This file is derived from the public domain
+ * AVX2 Kyber implementation [@REF_AVX2].
+ *
+ * The core ideas behind the implementation are described in [@AVX2_NTT].
+ *
+ * Changes:
+ * - Different placement of modular reductions to simplify
+ *   reasoning of non-overflow
+ */
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \

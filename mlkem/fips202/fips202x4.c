@@ -2,6 +2,16 @@
  * Copyright (c) 2024-2025 The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0
  */
+
+/* References
+ * ==========
+ *
+ * - [FIPS203]
+ *   FIPS 203 Module-Lattice-Based Key-Encapsulation Mechanism Standard
+ *   National Institute of Standards and Technology
+ *   https://csrc.nist.gov/pubs/fips/203/final
+ */
+
 #include "../common.h"
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
@@ -126,7 +136,7 @@ void mlk_shake128x4_init(mlk_shake128x4ctx *state) { (void)state; }
 void mlk_shake128x4_release(mlk_shake128x4ctx *state)
 {
   /* Specification: Partially implements
-   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
+   * [@FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(state, sizeof(mlk_shake128x4ctx));
 }
 
@@ -180,7 +190,7 @@ void mlk_shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
   }
 
   /* Specification: Partially implements
-   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
+   * [@FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(&statex, sizeof(statex));
   mlk_zeroize(tmp0, sizeof(tmp0));
   mlk_zeroize(tmp1, sizeof(tmp1));

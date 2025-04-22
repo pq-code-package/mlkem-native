@@ -3,11 +3,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* Implementation based on Kyber repository
- * https://github.com/pq-crystals/kyber/blob/main/avx2
+/* References
+ * ==========
  *
- * Changes to placement of modular reductions have
- * been made to simplify reasoning of non-overflow */
+ * - [AVX2_NTT]
+ *   Faster AVX2 optimized NTT multiplication for Ring-LWE lattice cryptography.
+ *   Gregor Seiler
+ *   https://eprint.iacr.org/2018/039
+ *
+ * - [REF_AVX2]
+ *   CRYSTALS-Kyber optimized AVX2 implementation
+ *   Bos, Ducas, Kiltz, Lepoint, Lyubashevsky, Schanck, Schwabe, Seiler, Stehlé
+ *   https://github.com/pq-crystals/kyber/tree/main/avx2
+ */
+
+/*
+ * This file is derived from the public domain
+ * AVX2 Kyber implementation [@REF_AVX2].
+ *
+ * The core ideas behind the implementation are described in [@AVX2_NTT].
+ *
+ * Changes:
+ * - Different placement of modular reductions to simplify
+ *   reasoning of non-overflow
+ */
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
@@ -149,8 +168,7 @@ butterfly	10,3,6,5,4,8,7,11,2,2,9,9
  * 5,6 abs bound < 2q
  * 4,8,7,11 abs bound < q */
 
-/* REF-CHANGE: The official AVX2 implementation from
- * https://github.com/pq-crystals/kyber/blob/main/avx2
+/* Reference: The official AVX2 implementation from [@REF_AVX2]
  * does not have this reduction. We add it here to simplify reasoning of
  * non-overflow. Without it, one has to work with more precise bounds for
  * the output of a Montgomery multiplication; with this reduction,
