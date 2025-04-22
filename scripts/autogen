@@ -1821,10 +1821,10 @@ def gen_slothy(funcs, dry_run=False):
 class BibliographyEntry:
     def __init__(self, raw_dict):
         self._raw = raw_dict
-        self._usages = set()
+        self._usages = []
 
-    def register_usage(self, filename):
-        self._usages.add(filename)
+    def register_usages(self, lst):
+        self._usages += lst
 
     @property
     def usages(self):
@@ -1848,56 +1848,72 @@ class BibliographyEntry:
     def url(self):
         return self._raw["url"]
 
+    @staticmethod
+    def full_name(name):
+        if "," not in name:
+            return name
+        surname, forename = name.split(",")
+        return forename.strip() + " " + surname.strip()
+
     @property
     def authors(self):
-        author = self._raw["author"]
-        if not isinstance(author, list):
-            author = [author]
-        return author
+        authors = self._raw["author"]
+        if not isinstance(authors, list):
+            authors = [authors]
+        authors = list(map(BibliographyEntry.full_name, authors))
+        return authors
 
     @property
     def authors_text(self):
+        authors = self._raw["author"]
+        if not isinstance(authors, list):
+            authors = [authors]
+
         def surname(name):
             return name.split(",")[0].strip()
 
-        def full_name(name):
-            if "," not in name:
-                return name
-            surname, forename = name.split(",")
-            return forename.strip() + " " + surname.strip()
-
-        if len(self.authors) > 1:
-            authors = ", ".join(map(surname, self.authors))
+        if len(authors) > 1:
+            authors = ", ".join(map(surname, authors))
         else:
-            authors = full_name(self.authors[0])
+            authors = BibliographyEntry.full_name(authors[0])
         return authors
 
 
 def gen_markdown_citations_for(filename, bibliography, dry_run=False):
 
+    # Skip BIBLIOGRAPHY.md
+    if filename == "BIBLIOGRAPHY.md":
+        return
+
     with open(filename, "r") as f:
         content = f.read()
+    content = content.split("\n")
 
     # Lookup all citations in style `[^ID]`
-    citations = set()
-    for m in re.finditer(r"\[\^(?P<id>\w+)\]", content):
-        citations.add(m.group("id"))
+    citations = {}
+    for i, l in enumerate(content):
+        for m in re.finditer(r"\[\^(?P<id>\w+)\]", l):
+            cite_id = m.group("id")
+            uses = citations.get(cite_id, [])
+            uses.append((filename, i))
+            citations[cite_id] = uses
 
-    content = content.split("\n")
     # Find and remove any existing citation footnotes
     footnote_footer_start = "<!--- bibliography --->"
     try:
         i = content.index(footnote_footer_start)
         content = content[:i]
     except ValueError:
+        assert len(citations) == 0
         pass
 
     # Add footnotes for all citations found
     if len(citations) > 0:
         content.append(footnote_footer_start)
-    cite_ids = list(citations)
+    cite_ids = list(citations.keys())
     cite_ids.sort()
     for cite_id in cite_ids:
+        uses = citations[cite_id]
         entry = bibliography.get(cite_id, None)
         if entry is None:
             raise Exception(
@@ -1908,7 +1924,7 @@ def gen_markdown_citations_for(filename, bibliography, dry_run=False):
         )
 
         # Remember this usage of the bibliography entry
-        entry.register_usage(filename)
+        entry.register_usages(uses)
 
     if len(citations) > 0:
         content.append("")
@@ -1927,25 +1943,30 @@ def gen_c_citations_for(filename, bibliography, dry_run=False):
     ]
     references_end = [" */"]
 
-    # Lookup all citations in style `[@ID`
-    # Don't match the closing `]` because we want to match `[@ID, ...]`, too.
-    citations = set()
-    for m in re.finditer(r"\[@(?P<id>\w+)", content):
-        citations.add(m.group("id"))
-
     # Find and remove any existing reference section
     ref_pattern = r"/\* (# )?References.*?\*/\n+"
     content = re.sub(ref_pattern, "", content, flags=re.DOTALL)
 
     content = content.split("\n")
 
+    # Lookup all citations in style `[^ID]`
+    citations = {}
+    for i, l in enumerate(content):
+        for m in re.finditer(r"\[@(?P<id>\w+)", l):
+            cite_id = m.group("id")
+            uses = citations.get(cite_id, [])
+            # Remember usage. +1 because line counting starts at 1
+            uses.append((filename, i + 1))
+            citations[cite_id] = uses
+
     # Add references section
     references = []
     references += references_start
 
-    cite_ids = list(citations)
+    cite_ids = list(citations.keys())
     cite_ids.sort()
     for cite_id in cite_ids:
+        uses = citations[cite_id]
         entry = bibliography.get(cite_id, None)
         if entry is None:
             raise Exception(
@@ -1957,9 +1978,6 @@ def gen_c_citations_for(filename, bibliography, dry_run=False):
         references.append(f" *   {entry.authors_text}")
         references.append(f" *   {entry.url}")
 
-        # Remember this usage of the bibliography entry
-        entry.register_usage(filename)
-
     references += references_end
 
     # Pre-update formatting messes up overly long comment lines which are
@@ -1968,6 +1986,7 @@ def gen_c_citations_for(filename, bibliography, dry_run=False):
     references = format_content(references)
     references = re.sub(r" \* (\w.*)", r" *   \1", references)
     references = references.split("\n")
+    references = [""] + references
 
     if len(cite_ids) > 0:
         # Add references to file after initial header section
@@ -1978,7 +1997,22 @@ def gen_c_citations_for(filename, bibliography, dry_run=False):
                 continue
             insert_at = i
             break
-        content = content[:insert_at] + [""] + references + content[insert_at:]
+        content = content[:insert_at] + references + content[insert_at:]
+
+    # Remember uses -- needs to happen after insertion of references
+    # since we need to adjust the line count
+    for cite_id in cite_ids:
+        uses = citations[cite_id]
+        entry = bibliography.get(cite_id, None)
+
+        # Adjust line count after insertion of references
+        def bump_line_count(x):
+            return (x[0], x[1] + len(references))
+
+        uses = list(map(bump_line_count, uses))
+
+        # Remember this usage of the bibliography entry
+        entry.register_usages(uses)
 
     update_file(filename, "\n".join(content), dry_run=dry_run)
 
@@ -1990,6 +2024,45 @@ def gen_citations_for(filename, bibliography, dry_run=False):
         gen_c_citations_for(filename, bibliography, dry_run=dry_run)
     else:
         raise Exception(f"Unexpected file extension in {filename}")
+
+
+def gen_bib_file(bibliography, dry_run=False):
+
+    content = [
+        "[//]: # (SPDX-License-Identifier: CC-BY-4.0)",
+        "[//]: # (This file is auto-generated from references.yml)",
+        "[//]: # (Do not modify it directly)",
+        "",
+        "# References",
+        "",
+        "This file lists the citations made throughout the mlkem-native ",
+        "source code and documentation.",
+        "",
+    ]
+
+    cite_ids = list(bibliography.keys())
+    cite_ids.sort()
+
+    for cite_id in cite_ids:
+        entry = bibliography[cite_id]
+        content.append(f"### `{cite_id}`")
+        content.append("")
+        content.append(f"* {entry.name}")
+        content.append(f"* Author(s):")
+        for author in entry.authors:
+            content.append(f"  - {author}")
+        content.append(f"* URL: {entry.url}")
+        content.append(f"* Referenced from:")
+        # Usages are pairs of (filename, line_count)
+        # Ignore line_count for now, as it would require `autogen` after
+        # a change to source files.
+        files = list(set(map(lambda x: x[0], entry.usages)))
+        files.sort()
+        for filename in files:
+            content.append(f"  - [{filename}]({filename})")
+        content.append("")
+
+    update_file("BIBLIOGRAPHY.md", "\n".join(content), dry_run=dry_run)
 
 
 def gen_citations(dry_run=False):
@@ -2024,6 +2097,8 @@ def gen_citations(dry_run=False):
                 f"Bibliography entry {e.id} is unused! "
                 "Add a citation or remove from references.yml."
             )
+
+    gen_bib_file(bibliography, dry_run=False)
 
 
 def _main():
