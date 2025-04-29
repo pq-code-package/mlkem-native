@@ -37,3 +37,4 @@ the AArch64 assembly in mlkem-native to `Apache-2.0 OR ISC OR MIT`.
 
 - Hanno Becker <beckphan@amazon.co.uk>
 - Amin Abdulrahman <amin@abdulrahman.de>
+- Matthias J. Kannwischer <matthias@kannwischer.eu>
