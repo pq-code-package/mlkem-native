@@ -32,8 +32,8 @@
 #include "keccakf1600.h"
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
-#define NROUNDS 24
-#define ROL(a, offset) ((a << offset) ^ (a >> (64 - offset)))
+#define MLK_KECCAK_NROUNDS 24
+#define MLK_KECCAK_ROL(a, offset) ((a << offset) ^ (a >> (64 - offset)))
 
 void mlk_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
                                    unsigned offset, unsigned length)
@@ -125,7 +125,7 @@ void mlk_keccakf1600x4_permute(uint64_t *state)
 }
 
 #if !defined(MLK_USE_FIPS202_X1_NATIVE)
-static const uint64_t mlk_KeccakF_RoundConstants[NROUNDS] = {
+static const uint64_t mlk_KeccakF_RoundConstants[MLK_KECCAK_NROUNDS] = {
     (uint64_t)0x0000000000000001ULL, (uint64_t)0x0000000000008082ULL,
     (uint64_t)0x800000000000808aULL, (uint64_t)0x8000000080008000ULL,
     (uint64_t)0x000000000000808bULL, (uint64_t)0x0000000080000001ULL,
@@ -183,33 +183,33 @@ void mlk_keccakf1600_permute(uint64_t *state)
   Aso = state[23];
   Asu = state[24];
 
-  for (round = 0; round < NROUNDS; round += 2)
-  __loop__(invariant(round <= NROUNDS && round % 2 == 0))
+  for (round = 0; round < MLK_KECCAK_NROUNDS; round += 2)
+  __loop__(invariant(round <= MLK_KECCAK_NROUNDS && round % 2 == 0))
   {
-    /*    prepareTheta */
+    /* prepareTheta */
     BCa = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
     BCe = Abe ^ Age ^ Ake ^ Ame ^ Ase;
     BCi = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
     BCo = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
     BCu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
 
-    /* thetaRhoPiChiIotaPrepareTheta(round  , A, E) */
-    Da = BCu ^ ROL(BCe, 1);
-    De = BCa ^ ROL(BCi, 1);
-    Di = BCe ^ ROL(BCo, 1);
-    Do = BCi ^ ROL(BCu, 1);
-    Du = BCo ^ ROL(BCa, 1);
+    /* thetaRhoPiChiIotaPrepareTheta(round, A, E) */
+    Da = BCu ^ MLK_KECCAK_ROL(BCe, 1);
+    De = BCa ^ MLK_KECCAK_ROL(BCi, 1);
+    Di = BCe ^ MLK_KECCAK_ROL(BCo, 1);
+    Do = BCi ^ MLK_KECCAK_ROL(BCu, 1);
+    Du = BCo ^ MLK_KECCAK_ROL(BCa, 1);
 
     Aba ^= Da;
     BCa = Aba;
     Age ^= De;
-    BCe = ROL(Age, 44);
+    BCe = MLK_KECCAK_ROL(Age, 44);
     Aki ^= Di;
-    BCi = ROL(Aki, 43);
+    BCi = MLK_KECCAK_ROL(Aki, 43);
     Amo ^= Do;
-    BCo = ROL(Amo, 21);
+    BCo = MLK_KECCAK_ROL(Amo, 21);
     Asu ^= Du;
-    BCu = ROL(Asu, 14);
+    BCu = MLK_KECCAK_ROL(Asu, 14);
     Eba = BCa ^ ((~BCe) & BCi);
     Eba ^= (uint64_t)mlk_KeccakF_RoundConstants[round];
     Ebe = BCe ^ ((~BCi) & BCo);
@@ -218,15 +218,15 @@ void mlk_keccakf1600_permute(uint64_t *state)
     Ebu = BCu ^ ((~BCa) & BCe);
 
     Abo ^= Do;
-    BCa = ROL(Abo, 28);
+    BCa = MLK_KECCAK_ROL(Abo, 28);
     Agu ^= Du;
-    BCe = ROL(Agu, 20);
+    BCe = MLK_KECCAK_ROL(Agu, 20);
     Aka ^= Da;
-    BCi = ROL(Aka, 3);
+    BCi = MLK_KECCAK_ROL(Aka, 3);
     Ame ^= De;
-    BCo = ROL(Ame, 45);
+    BCo = MLK_KECCAK_ROL(Ame, 45);
     Asi ^= Di;
-    BCu = ROL(Asi, 61);
+    BCu = MLK_KECCAK_ROL(Asi, 61);
     Ega = BCa ^ ((~BCe) & BCi);
     Ege = BCe ^ ((~BCi) & BCo);
     Egi = BCi ^ ((~BCo) & BCu);
@@ -234,15 +234,15 @@ void mlk_keccakf1600_permute(uint64_t *state)
     Egu = BCu ^ ((~BCa) & BCe);
 
     Abe ^= De;
-    BCa = ROL(Abe, 1);
+    BCa = MLK_KECCAK_ROL(Abe, 1);
     Agi ^= Di;
-    BCe = ROL(Agi, 6);
+    BCe = MLK_KECCAK_ROL(Agi, 6);
     Ako ^= Do;
-    BCi = ROL(Ako, 25);
+    BCi = MLK_KECCAK_ROL(Ako, 25);
     Amu ^= Du;
-    BCo = ROL(Amu, 8);
+    BCo = MLK_KECCAK_ROL(Amu, 8);
     Asa ^= Da;
-    BCu = ROL(Asa, 18);
+    BCu = MLK_KECCAK_ROL(Asa, 18);
     Eka = BCa ^ ((~BCe) & BCi);
     Eke = BCe ^ ((~BCi) & BCo);
     Eki = BCi ^ ((~BCo) & BCu);
@@ -250,15 +250,15 @@ void mlk_keccakf1600_permute(uint64_t *state)
     Eku = BCu ^ ((~BCa) & BCe);
 
     Abu ^= Du;
-    BCa = ROL(Abu, 27);
+    BCa = MLK_KECCAK_ROL(Abu, 27);
     Aga ^= Da;
-    BCe = ROL(Aga, 36);
+    BCe = MLK_KECCAK_ROL(Aga, 36);
     Ake ^= De;
-    BCi = ROL(Ake, 10);
+    BCi = MLK_KECCAK_ROL(Ake, 10);
     Ami ^= Di;
-    BCo = ROL(Ami, 15);
+    BCo = MLK_KECCAK_ROL(Ami, 15);
     Aso ^= Do;
-    BCu = ROL(Aso, 56);
+    BCu = MLK_KECCAK_ROL(Aso, 56);
     Ema = BCa ^ ((~BCe) & BCi);
     Eme = BCe ^ ((~BCi) & BCo);
     Emi = BCi ^ ((~BCo) & BCu);
@@ -266,22 +266,22 @@ void mlk_keccakf1600_permute(uint64_t *state)
     Emu = BCu ^ ((~BCa) & BCe);
 
     Abi ^= Di;
-    BCa = ROL(Abi, 62);
+    BCa = MLK_KECCAK_ROL(Abi, 62);
     Ago ^= Do;
-    BCe = ROL(Ago, 55);
+    BCe = MLK_KECCAK_ROL(Ago, 55);
     Aku ^= Du;
-    BCi = ROL(Aku, 39);
+    BCi = MLK_KECCAK_ROL(Aku, 39);
     Ama ^= Da;
-    BCo = ROL(Ama, 41);
+    BCo = MLK_KECCAK_ROL(Ama, 41);
     Ase ^= De;
-    BCu = ROL(Ase, 2);
+    BCu = MLK_KECCAK_ROL(Ase, 2);
     Esa = BCa ^ ((~BCe) & BCi);
     Ese = BCe ^ ((~BCi) & BCo);
     Esi = BCi ^ ((~BCo) & BCu);
     Eso = BCo ^ ((~BCu) & BCa);
     Esu = BCu ^ ((~BCa) & BCe);
 
-    /*    prepareTheta */
+    /* prepareTheta */
     BCa = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
     BCe = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
     BCi = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
@@ -289,22 +289,22 @@ void mlk_keccakf1600_permute(uint64_t *state)
     BCu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
 
     /* thetaRhoPiChiIotaPrepareTheta(round+1, E, A) */
-    Da = BCu ^ ROL(BCe, 1);
-    De = BCa ^ ROL(BCi, 1);
-    Di = BCe ^ ROL(BCo, 1);
-    Do = BCi ^ ROL(BCu, 1);
-    Du = BCo ^ ROL(BCa, 1);
+    Da = BCu ^ MLK_KECCAK_ROL(BCe, 1);
+    De = BCa ^ MLK_KECCAK_ROL(BCi, 1);
+    Di = BCe ^ MLK_KECCAK_ROL(BCo, 1);
+    Do = BCi ^ MLK_KECCAK_ROL(BCu, 1);
+    Du = BCo ^ MLK_KECCAK_ROL(BCa, 1);
 
     Eba ^= Da;
     BCa = Eba;
     Ege ^= De;
-    BCe = ROL(Ege, 44);
+    BCe = MLK_KECCAK_ROL(Ege, 44);
     Eki ^= Di;
-    BCi = ROL(Eki, 43);
+    BCi = MLK_KECCAK_ROL(Eki, 43);
     Emo ^= Do;
-    BCo = ROL(Emo, 21);
+    BCo = MLK_KECCAK_ROL(Emo, 21);
     Esu ^= Du;
-    BCu = ROL(Esu, 14);
+    BCu = MLK_KECCAK_ROL(Esu, 14);
     Aba = BCa ^ ((~BCe) & BCi);
     Aba ^= (uint64_t)mlk_KeccakF_RoundConstants[round + 1];
     Abe = BCe ^ ((~BCi) & BCo);
@@ -313,15 +313,15 @@ void mlk_keccakf1600_permute(uint64_t *state)
     Abu = BCu ^ ((~BCa) & BCe);
 
     Ebo ^= Do;
-    BCa = ROL(Ebo, 28);
+    BCa = MLK_KECCAK_ROL(Ebo, 28);
     Egu ^= Du;
-    BCe = ROL(Egu, 20);
+    BCe = MLK_KECCAK_ROL(Egu, 20);
     Eka ^= Da;
-    BCi = ROL(Eka, 3);
+    BCi = MLK_KECCAK_ROL(Eka, 3);
     Eme ^= De;
-    BCo = ROL(Eme, 45);
+    BCo = MLK_KECCAK_ROL(Eme, 45);
     Esi ^= Di;
-    BCu = ROL(Esi, 61);
+    BCu = MLK_KECCAK_ROL(Esi, 61);
     Aga = BCa ^ ((~BCe) & BCi);
     Age = BCe ^ ((~BCi) & BCo);
     Agi = BCi ^ ((~BCo) & BCu);
@@ -329,15 +329,15 @@ void mlk_keccakf1600_permute(uint64_t *state)
     Agu = BCu ^ ((~BCa) & BCe);
 
     Ebe ^= De;
-    BCa = ROL(Ebe, 1);
+    BCa = MLK_KECCAK_ROL(Ebe, 1);
     Egi ^= Di;
-    BCe = ROL(Egi, 6);
+    BCe = MLK_KECCAK_ROL(Egi, 6);
     Eko ^= Do;
-    BCi = ROL(Eko, 25);
+    BCi = MLK_KECCAK_ROL(Eko, 25);
     Emu ^= Du;
-    BCo = ROL(Emu, 8);
+    BCo = MLK_KECCAK_ROL(Emu, 8);
     Esa ^= Da;
-    BCu = ROL(Esa, 18);
+    BCu = MLK_KECCAK_ROL(Esa, 18);
     Aka = BCa ^ ((~BCe) & BCi);
     Ake = BCe ^ ((~BCi) & BCo);
     Aki = BCi ^ ((~BCo) & BCu);
@@ -345,15 +345,15 @@ void mlk_keccakf1600_permute(uint64_t *state)
     Aku = BCu ^ ((~BCa) & BCe);
 
     Ebu ^= Du;
-    BCa = ROL(Ebu, 27);
+    BCa = MLK_KECCAK_ROL(Ebu, 27);
     Ega ^= Da;
-    BCe = ROL(Ega, 36);
+    BCe = MLK_KECCAK_ROL(Ega, 36);
     Eke ^= De;
-    BCi = ROL(Eke, 10);
+    BCi = MLK_KECCAK_ROL(Eke, 10);
     Emi ^= Di;
-    BCo = ROL(Emi, 15);
+    BCo = MLK_KECCAK_ROL(Emi, 15);
     Eso ^= Do;
-    BCu = ROL(Eso, 56);
+    BCu = MLK_KECCAK_ROL(Eso, 56);
     Ama = BCa ^ ((~BCe) & BCi);
     Ame = BCe ^ ((~BCi) & BCo);
     Ami = BCi ^ ((~BCo) & BCu);
@@ -361,15 +361,15 @@ void mlk_keccakf1600_permute(uint64_t *state)
     Amu = BCu ^ ((~BCa) & BCe);
 
     Ebi ^= Di;
-    BCa = ROL(Ebi, 62);
+    BCa = MLK_KECCAK_ROL(Ebi, 62);
     Ego ^= Do;
-    BCe = ROL(Ego, 55);
+    BCe = MLK_KECCAK_ROL(Ego, 55);
     Eku ^= Du;
-    BCi = ROL(Eku, 39);
+    BCi = MLK_KECCAK_ROL(Eku, 39);
     Ema ^= Da;
-    BCo = ROL(Ema, 41);
+    BCo = MLK_KECCAK_ROL(Ema, 41);
     Ese ^= De;
-    BCu = ROL(Ese, 2);
+    BCu = MLK_KECCAK_ROL(Ese, 2);
     Asa = BCa ^ ((~BCe) & BCi);
     Ase = BCe ^ ((~BCi) & BCo);
     Asi = BCi ^ ((~BCo) & BCu);
@@ -403,8 +403,6 @@ void mlk_keccakf1600_permute(uint64_t *state)
   state[22] = Asi;
   state[23] = Aso;
   state[24] = Asu;
-
-#undef round
 }
 #else  /* !MLK_USE_FIPS202_X1_NATIVE */
 void mlk_keccakf1600_permute(uint64_t *state)
@@ -421,5 +419,5 @@ MLK_EMPTY_CU(keccakf1600)
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
-#undef NROUNDS
-#undef ROL
+#undef MLK_KECCAK_NROUNDS
+#undef MLK_KECCAK_ROL
