@@ -341,6 +341,15 @@ source code and documentation.
 * Referenced from:
   - [mlkem/verify.h](mlkem/verify.h)
 
+### `pqcarchive`
+
+* NIST PQC Archive
+* Author(s):
+  - National Institute of Standards and Technology
+* URL: https://csrc.nist.gov/Projects/post-quantum-cryptography/pqc-archive
+* Referenced from:
+  - [test/nistrng/rng.c](test/nistrng/rng.c)
+
 ### `supercop`
 
 * SUPERCOP benchmarking framework
