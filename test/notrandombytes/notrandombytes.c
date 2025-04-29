@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2024-2025 The mlkem-native project authors
- * SPDX-License-Identifier: LicenseRef-PD-hp OR CC0-1.0 OR 0BSD OR MIT-0 OR MI
+ * SPDX-License-Identifier: LicenseRef-PD-hp OR CC0-1.0 OR 0BSD OR MIT-0 OR MIT
  */
 
 /* References
