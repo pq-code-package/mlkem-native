@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Copyright (c) 2024-2025 The mlkem-native project authors
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 #
 # This tiny script just lists the proof directories in proof/cbmc,
 # which are those containing a *harness.c file.

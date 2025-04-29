@@ -1,4 +1,5 @@
-# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2024-2025 The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 include ../Makefile_params.common
 

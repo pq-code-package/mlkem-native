@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2024-2025 The mlkem-native project authors
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 #ifndef MLK_COMMON_H
 #define MLK_COMMON_H
