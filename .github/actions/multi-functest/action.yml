@@ -75,7 +75,7 @@ runs:
           nix-verbose: ${{ inputs.nix-verbose }}
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
-          cflags: ${{ inputs.cflags }}
+          cflags: "${{ inputs.cflags }} -DMLK_FORCE_X86_64"
           cross_prefix: x86_64-unknown-linux-gnu-
           exec_wrapper: qemu-x86_64
           opt: ${{ inputs.opt }}
@@ -94,9 +94,28 @@ runs:
           nix-verbose: ${{ inputs.nix-verbose }}
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
-          cflags: ${{ inputs.cflags }}
+          cflags: "${{ inputs.cflags }} -DMLK_FORCE_AARCH64"
           cross_prefix: aarch64-unknown-linux-gnu-
           exec_wrapper: qemu-aarch64
+          opt: ${{ inputs.opt }}
+          func: ${{ inputs.func }}
+          kat: ${{ inputs.kat }}
+          nistkat: ${{ inputs.nistkat }}
+          acvp: ${{ inputs.acvp }}
+          examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
+      - name: Cross ppc64le Tests
+        if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-ppc64le') && (success() || failure()) }}
+        uses: ./.github/actions/functest
+        with:
+          nix-shell: ${{ inputs.nix-shell }}
+          nix-cache: ${{ inputs.nix-cache }}
+          nix-verbose: ${{ inputs.nix-verbose }}
+          gh_token: ${{ inputs.gh_token }}
+          custom_shell: ${{ inputs.custom_shell }}
+          cflags: "${{ inputs.cflags }} -DMLK_FORCE_PPC64LE"
+          cross_prefix: powerpc64le-unknown-linux-gnu-
+          exec_wrapper: qemu-ppc64le
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
@@ -113,7 +132,7 @@ runs:
           nix-verbose: ${{ inputs.nix-verbose }}
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
-          cflags: "${{ inputs.cflags }} -static"
+          cflags: "${{ inputs.cflags }} -static  -DMLK_FORCE_AARCH64_EB"
           cross_prefix: aarch64_be-none-linux-gnu-
           exec_wrapper: qemu-aarch64_be
           opt: ${{ inputs.opt }}
@@ -132,7 +151,7 @@ runs:
           nix-verbose: ${{ inputs.nix-verbose }}
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
-          cflags: ${{ inputs.cflags }}
+          cflags: "${{ inputs.cflags }} -DMLK_FORCE_RISCV64"
           cross_prefix: riscv64-unknown-linux-gnu-
           exec_wrapper: qemu-riscv64
           opt: ${{ inputs.opt }}

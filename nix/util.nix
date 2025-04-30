@@ -26,6 +26,7 @@ rec {
       x86_64-gcc = wrap-gcc pkgs.pkgsCross.gnu64;
       aarch64-gcc = wrap-gcc pkgs.pkgsCross.aarch64-multiplatform;
       riscv64-gcc = wrap-gcc pkgs.pkgsCross.riscv64;
+      ppc64le-gcc = wrap-gcc pkgs.pkgsCross.powernv;
       aarch64_be-gcc = (pkgs.callPackage ./aarch64_be-none-linux-gnu-gcc.nix { });
     in
     # NOTE:
@@ -35,7 +36,7 @@ rec {
       #   and won't just work for now
       # - equip all toolchains if cross is explicitly set to true
       # - On some machines, `native-gcc` needed to be evaluated lastly (placed as the last element of the toolchain list), or else would result in environment variables (CC, AR, ...) overriding issue.
-    pkgs.lib.optionals cross [ pkgs.qemu x86_64-gcc aarch64-gcc riscv64-gcc ]
+    pkgs.lib.optionals cross [ pkgs.qemu x86_64-gcc aarch64-gcc riscv64-gcc ppc64le-gcc ]
     ++ pkgs.lib.optionals (cross && pkgs.stdenv.isLinux && pkgs.stdenv.isx86_64) [ aarch64_be-gcc ]
     ++ pkgs.lib.optionals cross [ native-gcc ]
     # NOTE: Tools in /Library/Developer/CommandLineTools/usr/bin on macOS are inaccessible in the Nix shell. This issue is addressed in https://github.com/NixOS/nixpkgs/pull/353893 but hasn’t been merged into the 24.11 channel yet. As a workaround, we include this dependency for macOS temporary.

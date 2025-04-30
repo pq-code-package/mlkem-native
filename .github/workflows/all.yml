@@ -11,10 +11,6 @@ on:
     branches: ["main"]
     types: [ "opened", "synchronize" ]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   base:
     name: Base
@@ -23,12 +19,20 @@ jobs:
       id-token: 'write'
     uses: ./.github/workflows/base.yml
     secrets: inherit
+  nix:
+    name: Nix
+    permissions:
+      actions: 'write'
+      contents: 'read'
+      id-token: 'write'
+    uses: ./.github/workflows/nix.yml
+    secrets: inherit
   ci:
     name: Extended
     permissions:
       contents: 'read'
       id-token: 'write'
-    needs: [ base ]
+    needs: [ base, nix ]
     uses: ./.github/workflows/ci.yml
     secrets: inherit
   cbmc:
