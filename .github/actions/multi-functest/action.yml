@@ -104,6 +104,25 @@ runs:
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
+      - name: Cross ppc64le Tests
+        if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-ppc64le') && (success() || failure()) }}
+        uses: ./.github/actions/functest
+        with:
+          nix-shell: ${{ inputs.nix-shell }}
+          nix-cache: ${{ inputs.nix-cache }}
+          nix-verbose: ${{ inputs.nix-verbose }}
+          gh_token: ${{ inputs.gh_token }}
+          custom_shell: ${{ inputs.custom_shell }}
+          cflags: ${{ inputs.cflags }}
+          cross_prefix: powerpc64le-unknown-linux-gnu-
+          exec_wrapper: qemu-ppc64le
+          opt: ${{ inputs.opt }}
+          func: ${{ inputs.func }}
+          kat: ${{ inputs.kat }}
+          nistkat: ${{ inputs.nistkat }}
+          acvp: ${{ inputs.acvp }}
+          examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
       - name: Cross aarch64_be Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-aarch64_be') && (success() || failure()) }}
         uses: ./.github/actions/functest

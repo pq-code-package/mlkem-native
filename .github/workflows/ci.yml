@@ -35,6 +35,10 @@ jobs:
            name: 'ubuntu-latest (aarch64)'
            arch: riscv64
            mode: cross-riscv64
+         - runner: pqcp-arm64
+           name: 'ubuntu-latest (ppc64le)'
+           arch: ppc64le
+           mode: cross-ppc64le
          - runner: pqcp-x64
            name: 'ubuntu-latest (x86_64)'
            arch: x86_64
@@ -71,6 +75,13 @@ jobs:
              }}
           - {external: true,
              target: {
+               runner: pqcp-arm64,
+               name: 'ubuntu-latest (ppc64le)',
+               arch: ppc64le,
+               mode: cross-ppc64le
+             }}
+          - {external: true,
+             target: {
                runner: pqcp-x64,
                name: 'ubuntu-latest (x86_64)',
                arch: x86_64,
@@ -101,8 +112,8 @@ jobs:
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: ${{ matrix.target.mode }}
-          # There is no native code on R-V or AArch64_be yet, so no point running opt tests
-          opt: ${{ (matrix.target.arch != 'riscv64' && matrix.target.arch != 'aarch64_be') && 'all' || 'no_opt' }}
+          # There is no native code yet on PPC64LE, R-V or AArch64_be, so no point running opt tests
+          opt: ${{ (matrix.target.arch != 'ppc64le' && matrix.target.arch != 'riscv64' && matrix.target.arch != 'aarch64_be') && 'all' || 'no_opt' }}
       - name: build + test (+debug+memsan+ubsan)
         uses: ./.github/actions/multi-functest
         if: ${{ matrix.target.mode == 'native' }}
