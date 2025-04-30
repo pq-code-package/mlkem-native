@@ -44,6 +44,10 @@
 #define MLK_SYS_PPC64LE
 #endif
 
+#if defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 64
+#define MLK_SYS_RISCV64
+#endif
+
 #if defined(_WIN32)
 #define MLK_SYS_WINDOWS
 #endif
