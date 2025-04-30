@@ -21,6 +21,11 @@
  *
  * This header defines the public API of a single build of mlkem-native.
  *
+ * # Examples
+ *
+ * See [examples/mlkem_native_as_code_package], [examples/multilevel_build], and
+ * [examples/multilevel_build_native] for examples of how to use this header.
+ *
  * # Usage
  *
  * To use this header, configure the following options:
@@ -55,15 +60,17 @@
  *
  * This header specifies a build of mlkem-native for a fixed security level.
  * If you need multiple builds, e.g. to build a library offering multiple
- * security levels, you need multiple instances of this header. In this case,
- * make sure to rename or #undef the header guard.
+ * security levels, you need multiple instances of this header.
+ *
+ * NOTE: In this case, you must rename or #undef the MLK_H header guard
+ *       prior to subsequent inclusions of this file.
  *
  ******************************************************************************/
 
 /******************************* Key sizes ************************************/
 
 /* Sizes of cryptographic material, per parameter set */
-/* See mlke/common.h for the arithmetic expressions giving rise to these */
+/* See mlkem/common.h for the arithmetic expressions giving rise to these */
 /* check-magic: off */
 #define MLKEM512_SECRETKEYBYTES 1632
 #define MLKEM512_PUBLICKEYBYTES 800
