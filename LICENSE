@@ -16,7 +16,7 @@ forward and inverse NTT for ML-KEM, carries the MIT license.
 Copyright (c) 2022 Arm Limited
 Copyright (c) 2022 Hanno Becker
 Copyright (c) 2023 Amin Abdulrahman, Matthias Kannwischer
-Copyright (c) 2024-2025 The mlkem-native project authors
+Copyright (c) The mlkem-native project authors
 SPDX-License-Identifier: MIT
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -42,7 +42,7 @@ Keccak-F1600 permutation, carries the MIT license.
 
 Copyright (c) 2021-2022 Arm Limited
 Copyright (c) 2022 Matthias Kannwischer
-Copyright (c) 2024-2025 The mlkem-native project authors
+Copyright (c) The mlkem-native project authors
 SPDX-License-Identifier: MIT
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -105,7 +105,7 @@ The code in test/nistrng/aes.* is derived from code in BearSSL
 and carries the MIT license. It is only used for testing purposes.
 
 ```
-Copyright (c) 2024-2025 The mlkem-native project authors
+Copyright (c) The mlkem-native project authors
 Copyright (c) 2016 Thomas Pornin <pornin@bolet.org>
 
 SPDX-License-Identifier: MIT
@@ -140,7 +140,7 @@ The benchmarking code in test/hal/hal.c carries the
 MIT license. It is only used for testing purposes.
 
 ```
-Copyright (c) 2024-2025 The mlkem-native project authors
+Copyright (c) The mlkem-native project authors
 Copyright (c) 2022 Arm Limited
 Copyright (c) 2020 Dougall Johnson
 SPDX-License-Identifier: MIT
@@ -176,7 +176,7 @@ SPDX-License-Identifier: MIT
 ISC license for mlkem-native content
 ------------------------------------
 
-Copyright (c) 2024-2025 The mlkem-native project authors
+Copyright (c) The mlkem-native project authors
 
 Permission to use, copy, modify, and/or distribute this software for any purpose
 with or without fee is hereby granted, provided that the above copyright notice
@@ -194,7 +194,7 @@ THIS SOFTWARE.
 MIT license for mlkem-native content
 ------------------------------------
 
-Copyright (c) 2024-2025 The mlkem-native project authors
+Copyright (c) The mlkem-native project authors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the “Software”), to deal in
@@ -404,7 +404,7 @@ Apache-2.0 license for mlkem-native content
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright (c) 2024-2025 The mlkem-native project authors
+   Copyright (c) The mlkem-native project authors
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
