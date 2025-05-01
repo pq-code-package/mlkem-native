@@ -88,13 +88,13 @@ def _get_status_and_proof_summaries(run_dict):
     count_statuses = {}
     proofs = [["Proof", "Status", "Duration (in s)"]]
     for proof_pipeline in run_dict["pipelines"]:
+        if proof_pipeline["name"] == "print_tool_versions":
+            continue
         status_pretty_name = proof_pipeline["status"].title().replace("_", " ")
         try:
             count_statuses[status_pretty_name] += 1
         except KeyError:
             count_statuses[status_pretty_name] = 1
-        if proof_pipeline["name"] == "print_tool_versions":
-            continue
         duration = 0
         for stage in proof_pipeline["ci_stages"]:
             for job in stage["jobs"]:
