@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2024-2025 The mlkem-native project authors
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) The mlkem-native project authors
+ * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 #ifndef MLK_FIPS202_NATIVE_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H
 #define MLK_FIPS202_NATIVE_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H

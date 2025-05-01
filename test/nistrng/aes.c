@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 The mlkem-native project authors
+ * Copyright (c) The mlkem-native project authors
  * Copyright (c) 2016 Thomas Pornin <pornin@bolet.org>
  *
  * SPDX-License-Identifier: MIT

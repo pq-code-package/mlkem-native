@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2024-2025 The mlkem-native project authors
-# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 #
 # This tiny script just lists the names of source files for which
 # we have a spec and proof in HOL-Light.
