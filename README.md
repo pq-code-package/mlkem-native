@@ -52,6 +52,10 @@ See [BUILDING.md](BUILDING.md) for more information.
 
 mlkem-native is used in [libOQS](https://github.com/open-quantum-safe/liboqs/) of the Open Quantum Safe project, and in AWS' Cryptography library [AWS-LC](https://github.com/aws/aws-lc/).
 
+## License
+
+Most of mlkem-native is available under Apache-2.0 and ISC and MIT -- choose whichever you prefer. See [LICENSE](License) for details.
+
 ## Security
 
 All assembly in mlkem-native is constant-time in the sense that it is free of secret-dependent control flow, memory access,
