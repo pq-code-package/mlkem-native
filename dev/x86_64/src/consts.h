@@ -33,6 +33,7 @@
 #define MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXD 144
 #define MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP 160
 #define MLK_AVX2_BACKEND_DATA_OFFSET_16XSHIFT 624
+#define MLK_AVX2_BACKEND_DATA_OFFSET_MULCACHE_TWIDDLES 640
 
 /* The C ABI on MacOS exports all symbols with a leading
  * underscore. This means that any symbols we refer to from
@@ -44,7 +45,7 @@
 
 #ifndef __ASSEMBLER__
 #include "align.h"
-typedef MLK_ALIGNED_INT16(640) qdata_t;
+typedef MLK_ALIGNED_INT16(768) qdata_t;
 #define mlk_qdata MLK_NAMESPACE(qdata)
 extern const qdata_t mlk_qdata;
 #endif /* !__ASSEMBLER__ */

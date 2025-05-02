@@ -499,6 +499,7 @@
 #undef mlk_poly_decompress_d11_avx2
 #undef mlk_poly_decompress_d4_avx2
 #undef mlk_poly_decompress_d5_avx2
+#undef mlk_poly_mulcache_compute_avx2
 #undef mlk_polyvec_basemul_acc_montgomery_cached_avx2
 #undef mlk_reduce_avx2
 #undef mlk_rej_uniform_avx2
@@ -514,6 +515,7 @@
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_16XQINV
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_16XSHIFT
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_16XV
+#undef MLK_AVX2_BACKEND_DATA_OFFSET_MULCACHE_TWIDDLES
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXB
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXD
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP

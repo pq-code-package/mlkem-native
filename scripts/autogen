@@ -952,6 +952,29 @@ def gen_avx2_fwd_ntt_zetas():
         yield from gen_twiddles_many(6, i * (2**5), range(1, 32, 2), 1)
 
 
+def gen_avx2_mulcache_twiddles():
+    for i in range(2):
+        for idx in range(16):
+            root, root_twisted = prepare_root_for_montmul(
+                pow(root_of_unity, bitreverse(64 + 32 * i + 2 * idx, 7), modulus))
+            yield root
+
+        for idx in range(16):
+            root, root_twisted = prepare_root_for_montmul(
+                pow(root_of_unity, bitreverse(64 + 32 * i + 2 * idx + 1, 7), modulus))
+            yield root
+
+    for i in range(2):
+        for idx in range(16):
+            root, root_twisted = prepare_root_for_montmul(
+                pow(root_of_unity, bitreverse(64 + 32 * i + 2 * idx, 7), modulus))
+            yield root_twisted
+
+        for idx in range(16):
+            root, root_twisted = prepare_root_for_montmul(
+                pow(root_of_unity, bitreverse(64 + 32 * i + 2 * idx + 1, 7), modulus))
+            yield root_twisted
+
 def gen_avx2_zeta_file(dry_run=False):
     def gen():
         yield from gen_header()
@@ -965,6 +988,21 @@ def gen_avx2_zeta_file(dry_run=False):
 
     update_file(
         "mlkem/native/x86_64/src/x86_64_zetas.i", "\n".join(gen()), dry_run=dry_run
+    )
+
+def gen_avx2_mulcache_twiddles_file(dry_run=False):
+    def gen():
+        yield from gen_header()
+        yield "/*"
+        yield " * Table of twiddle values used in the AVX2 mulcache"
+        yield " * See autogen for details."
+        yield " */"
+        yield ""
+        yield from map(lambda t: str(t) + ",", gen_avx2_mulcache_twiddles())
+        yield ""
+
+    update_file(
+        "dev/x86_64/src/x86_64_mulcache_twiddles.i", "\n".join(gen()), dry_run=dry_run
     )
 
 
@@ -2145,6 +2183,7 @@ def _main():
     gen_aarch64_rej_uniform_table(args.dry_run)
     gen_avx2_zeta_file(args.dry_run)
     gen_avx2_rej_uniform_table(args.dry_run)
+    gen_avx2_mulcache_twiddles_file(args.dry_run)
 
     if platform.machine().lower() in ["arm64", "aarch64"]:
         gen_hol_light_asm(args.dry_run)
