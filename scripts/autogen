@@ -410,7 +410,7 @@ def update_file(filename, content, dry_run=False, force_format=False):
         with open(filename, "r") as f:
             current_content = f.read()
     else:
-        currrent_content = None
+        current_content = None
 
     if current_content == content:
         return
