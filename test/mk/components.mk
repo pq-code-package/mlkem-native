@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 FIPS202_SRCS = $(wildcard mlkem/fips202/*.c)
 ifeq ($(OPT),1)

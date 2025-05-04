@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 $(BUILD_DIR)/mlkem512/bin/%: $(CONFIG)
 	$(Q)echo "  LD      $@"

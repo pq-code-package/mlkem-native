@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 name: CT Test
 description: Builds the library with given flags and runs Valgrind-based constant-time tests
