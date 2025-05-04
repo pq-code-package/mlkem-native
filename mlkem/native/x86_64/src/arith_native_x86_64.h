@@ -37,7 +37,11 @@ void mlk_reduce_avx2(__m256i *r, const __m256i *mlk_qdata);
 
 #define mlk_basemul_avx2 MLK_NAMESPACE(basemul_avx2)
 void mlk_basemul_avx2(__m256i *r, const __m256i *a, const __m256i *b,
-                      const __m256i *mlk_qdata);
+                      const __m256i *b_cache, const __m256i *mlk_qdata);
+
+#define mlk_poly_mulcache_compute_avx2 MLK_NAMESPACE(poly_mulcache_compute_avx2)
+void mlk_poly_mulcache_compute_avx2(__m256i *out, const __m256i *in,
+                                    const __m256i *mlk_qdata);
 
 #define mlk_polyvec_basemul_acc_montgomery_cached_avx2 \
   MLK_NAMESPACE(polyvec_basemul_acc_montgomery_cached_avx2)

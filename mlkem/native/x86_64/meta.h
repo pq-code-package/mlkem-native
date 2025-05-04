@@ -75,9 +75,8 @@ static MLK_INLINE void mlk_poly_tomont_native(int16_t data[MLKEM_N])
 static MLK_INLINE void mlk_poly_mulcache_compute_native(
     int16_t x[MLKEM_N / 2], const int16_t y[MLKEM_N])
 {
-  /* AVX2 backend does not use mulcache */
-  ((void)y);
-  ((void)x);
+  mlk_poly_mulcache_compute_avx2((__m256i *)x, (const __m256i *)y,
+                                 mlk_qdata.vec);
 }
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 2

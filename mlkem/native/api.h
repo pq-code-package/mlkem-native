@@ -209,6 +209,7 @@ __contract__(
   requires(memory_no_alias(cache, sizeof(int16_t) * (MLKEM_N / 2)))
   requires(memory_no_alias(mlk_poly, sizeof(int16_t) * MLKEM_N))
   assigns(object_whole(cache))
+  ensures(array_abs_bound(cache, 0, MLKEM_N / 2, MLKEM_Q))
 );
 #endif /* MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE */
 
