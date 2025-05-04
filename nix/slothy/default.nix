@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 { stdenvNoCC
 , fetchFromGitHub
@@ -84,8 +84,8 @@ let
   };
 
   # TODO: switch to unicorn from nixpkgs
-  # nixpkgs 24.11 currently has 2.1.1 - we are experiencing some issues with 
-  # that version on MacOS. 2.1.2/2.1.3 (and also some older versions) don't 
+  # nixpkgs 24.11 currently has 2.1.1 - we are experiencing some issues with
+  # that version on MacOS. 2.1.2/2.1.3 (and also some older versions) don't
   # have that problem
   unicorn_2_1_3 = python312Packages.buildPythonPackage rec {
     pname = "unicorn";

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 #
 # Automatically detect system architecture and set preprocessor etc accordingly
 ifeq ($(HOST_PLATFORM),Linux-x86_64)
