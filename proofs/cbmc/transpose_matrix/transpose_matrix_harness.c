@@ -3,11 +3,10 @@
 // SPDX-License-Identifier: MIT-0
 
 #include <indcpa.h>
-#include <poly.h>
 
+void mlk_transpose_matrix(mlk_polymat a);
 void harness(void)
 {
-  uint8_t *m, *c;
-  mlk_indcpa_secret_key *sk;
-  mlk_indcpa_dec(m, c, sk);
+  mlk_polymat a;
+  mlk_transpose_matrix(a);
 }

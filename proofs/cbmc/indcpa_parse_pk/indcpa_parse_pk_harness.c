@@ -3,11 +3,10 @@
 // SPDX-License-Identifier: MIT-0
 
 #include <indcpa.h>
-#include <poly.h>
 
 void harness(void)
 {
-  uint8_t *m, *c;
-  mlk_indcpa_secret_key *sk;
-  mlk_indcpa_dec(m, c, sk);
+  uint8_t *pk;
+  mlk_indcpa_public_key *pks;
+  mlk_indcpa_parse_pk(pks, pk);
 }

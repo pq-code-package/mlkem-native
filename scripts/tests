@@ -761,6 +761,11 @@ class Tests:
                     if p.stderr is not None:
                         log.error(p.stderr.decode())
                     self.fail(f"CBMC proof for {func}")
+                    if self.args.fail_upon_error:
+                        log.error(
+                            "Aborting proofs, as requested by -f/--fail-upon-error"
+                        )
+                        exit(1)
                 else:
                     log.info(f"   SUCCESS (after {dur}s)")
 

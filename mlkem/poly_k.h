@@ -318,7 +318,7 @@ __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   requires(forall(j, 0, MLKEM_K,
   array_abs_bound(r[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, sizeof(mlk_polyvec)))
   ensures(forall(j, 0, MLKEM_K,
   array_abs_bound(r[j].coeffs, 0, MLKEM_N, MLK_NTT_BOUND)))
 );
@@ -456,7 +456,7 @@ MLK_INTERNAL_API
 void mlk_polyvec_reduce(mlk_polyvec r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, sizeof(mlk_polyvec)))
   ensures(forall(k0, 0, MLKEM_K,
     array_bound(r[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 );
@@ -495,7 +495,7 @@ __contract__(
   requires(forall(j1, 0, MLKEM_K,
           forall(k1, 0, MLKEM_N,
             (int32_t)r[j1].coeffs[k1] + b[j1].coeffs[k1] >= INT16_MIN)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, sizeof(mlk_polyvec)))
 );
 
 #define mlk_polyvec_tomont MLK_NAMESPACE_K(polyvec_tomont)
@@ -518,7 +518,6 @@ void mlk_polyvec_tomont(mlk_polyvec r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   assigns(memory_slice(r, sizeof(mlk_polyvec)))
-  assigns(object_whole(r))
   ensures(forall(j, 0, MLKEM_K,
     array_abs_bound(r[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
 );

@@ -1,14 +1,13 @@
-# Copyright (c) The mlkem-native project authors
-# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+# SPDX-License-Identifier: Apache-2.0
 
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = crypto_kem_enc_derand_harness
+HARNESS_FILE = indcpa_parse_pk_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = crypto_kem_enc_derand
+PROOF_UID = indcpa_parse_pk
 
 DEFINES +=
 INCLUDES +=
@@ -17,10 +16,10 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mlkem/kem.c
+PROJECT_SOURCES += $(SRCDIR)/mlkem/indcpa.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_enc_derand
-USE_FUNCTION_CONTRACTS=mlk_parse_pk mlk_enc_derand_struct mlk_zeroize
+CHECK_FUNCTION_CONTRACTS=mlk_indcpa_parse_pk
+USE_FUNCTION_CONTRACTS=mlk_polyvec_frombytes mlk_gen_matrix
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -28,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = mlk_enc_derand
+FUNCTION_NAME = indcpa_parse_pk
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

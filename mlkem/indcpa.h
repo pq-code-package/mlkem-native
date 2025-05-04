@@ -20,6 +20,70 @@
 #include "common.h"
 #include "poly_k.h"
 
+#define mlk_indcpa_secret_key MLK_NAMESPACE_K(mlk_indcpa_secret_key)
+typedef struct
+{
+  mlk_polyvec skpv;
+} MLK_ALIGN mlk_indcpa_secret_key;
+
+#define mlk_indcpa_public_key MLK_NAMESPACE_K(mlk_indcpa_public_key)
+typedef struct
+{
+  mlk_polymat at; /* transposed matrix */
+  mlk_polyvec pkpv;
+  MLK_ALIGN uint8_t seed[MLKEM_SYMBYTES];
+} MLK_ALIGN mlk_indcpa_public_key;
+
+#define mlk_indcpa_marshal_pk MLK_NAMESPACE_K(indcpa_marshal_pk)
+MLK_INTERNAL_API
+void mlk_indcpa_marshal_pk(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
+                           const mlk_indcpa_public_key *pks)
+__contract__(
+  requires(memory_no_alias(pk,  MLKEM_INDCPA_PUBLICKEYBYTES))
+  requires(memory_no_alias(pks, sizeof(mlk_indcpa_public_key)))
+  requires(forall(k0, 0, MLKEM_K,
+    array_bound(pks->pkpv[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+  assigns(object_whole(pk))
+);
+
+#define mlk_indcpa_parse_pk MLK_NAMESPACE_K(indcpa_parse_pk)
+MLK_INTERNAL_API
+void mlk_indcpa_parse_pk(mlk_indcpa_public_key *pks,
+                         const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES])
+__contract__(
+  requires(memory_no_alias(pks, sizeof(mlk_indcpa_public_key)))
+  requires(memory_no_alias(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
+  assigns(memory_slice(pks, sizeof(mlk_indcpa_public_key)))
+  ensures(forall(k1, 0, MLKEM_K,
+    array_bound(pks->pkpv[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+  ensures(forall(x, 0, MLKEM_K * MLKEM_K,
+    array_bound(pks->at[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+);
+
+#define mlk_indcpa_marshal_sk MLK_NAMESPACE_K(indcpa_marshal_sk)
+MLK_INTERNAL_API
+void mlk_indcpa_marshal_sk(uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
+                           const mlk_indcpa_secret_key *sks)
+__contract__(
+  requires(memory_no_alias(sk,  MLKEM_INDCPA_SECRETKEYBYTES))
+  requires(memory_no_alias(sks, sizeof(mlk_indcpa_secret_key)))
+  requires(forall(k0, 0, MLKEM_K,
+    array_bound(sks->skpv[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+  assigns(object_whole(sk))
+);
+
+#define mlk_indcpa_parse_sk MLK_NAMESPACE_K(indcpa_parse_sk)
+MLK_INTERNAL_API
+void mlk_indcpa_parse_sk(mlk_indcpa_secret_key *sks,
+                         const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
+__contract__(
+  requires(memory_no_alias(sks, sizeof(mlk_indcpa_secret_key)))
+  requires(memory_no_alias(sk, MLKEM_INDCPA_SECRETKEYBYTES))
+  assigns(memory_slice(sks, sizeof(mlk_indcpa_secret_key)))
+  ensures(forall(k0, 0, MLKEM_K,
+    array_bound(sks->skpv[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+);
+
 #define mlk_gen_matrix MLK_NAMESPACE_K(gen_matrix)
 /*************************************************
  * Name:        mlk_gen_matrix
@@ -45,7 +109,7 @@ __contract__(
   requires(memory_no_alias(a, sizeof(mlk_polymat)))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
   requires(transposed == 0 || transposed == 1)
-  assigns(object_whole(a))
+  assigns(memory_slice(a, sizeof(mlk_poly) * MLKEM_K * MLKEM_K))
   ensures(forall(x, 0, MLKEM_K * MLKEM_K,
     array_bound(a[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 );
@@ -68,15 +132,21 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                               uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
+void mlk_indcpa_keypair_derand(mlk_indcpa_public_key *pk,
+                               mlk_indcpa_secret_key *sk,
                                const uint8_t coins[MLKEM_SYMBYTES])
 __contract__(
-  requires(memory_no_alias(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
-  requires(memory_no_alias(sk, MLKEM_INDCPA_SECRETKEYBYTES))
+  requires(memory_no_alias(pk, sizeof(mlk_indcpa_public_key)))
+  requires(memory_no_alias(sk, sizeof(mlk_indcpa_secret_key)))
   requires(memory_no_alias(coins, MLKEM_SYMBYTES))
-  assigns(object_whole(pk))
-  assigns(object_whole(sk))
+  assigns(memory_slice(pk, sizeof(mlk_indcpa_public_key)))
+  assigns(memory_slice(sk, sizeof(mlk_indcpa_secret_key)))
+  ensures(forall(k0, 0, MLKEM_K,
+    array_bound(pk->pkpv[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+  ensures(forall(x, 0, MLKEM_K * MLKEM_K,
+    array_bound(pk->at[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+  ensures(forall(k1, 0, MLKEM_K,
+    array_bound(sk->skpv[k1].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 );
 
 #define mlk_indcpa_enc MLK_NAMESPACE_K(indcpa_enc)
@@ -102,12 +172,16 @@ __contract__(
 MLK_INTERNAL_API
 void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
                     const uint8_t m[MLKEM_INDCPA_MSGBYTES],
-                    const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
+                    const mlk_indcpa_public_key *pk,
                     const uint8_t coins[MLKEM_SYMBYTES])
 __contract__(
   requires(memory_no_alias(c, MLKEM_INDCPA_BYTES))
   requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES))
-  requires(memory_no_alias(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
+  requires(memory_no_alias(pk, sizeof(mlk_indcpa_public_key)))
+  requires(forall(k0, 0, MLKEM_K,
+    array_bound(pk->pkpv[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+  requires(forall(x, 0, MLKEM_K * MLKEM_K,
+      array_bound(pk->at[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
   requires(memory_no_alias(coins, MLKEM_SYMBYTES))
   assigns(object_whole(c))
 );
@@ -132,11 +206,13 @@ __contract__(
 MLK_INTERNAL_API
 void mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
                     const uint8_t c[MLKEM_INDCPA_BYTES],
-                    const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
+                    const mlk_indcpa_secret_key *sk)
 __contract__(
   requires(memory_no_alias(c, MLKEM_INDCPA_BYTES))
   requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES))
-  requires(memory_no_alias(sk, MLKEM_INDCPA_SECRETKEYBYTES))
+  requires(memory_no_alias(sk, sizeof(mlk_indcpa_secret_key)))
+  requires(forall(k0, 0, MLKEM_K,
+    array_bound(sk->skpv[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
   assigns(object_whole(m))
 );
 

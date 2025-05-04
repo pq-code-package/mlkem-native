@@ -7,6 +7,7 @@
 
 void harness(void)
 {
-  uint8_t *a, *b, *c, *d;
-  mlk_indcpa_enc(a, b, c, d);
+  uint8_t *a, *b, *d;
+  mlk_indcpa_public_key *pk;
+  mlk_indcpa_enc(a, b, pk, d);
 }
