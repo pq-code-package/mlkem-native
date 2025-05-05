@@ -63,7 +63,7 @@ void mlk_indcpa_marshal_pk(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
                            const mlk_indcpa_public_key *pks)
 {
   mlk_assert_bound_2d(pks->pkpv, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
-  mlk_polyvec_tobytes(pk, pks->pkpv);
+  memcpy(pk, pks->pkpv_compressed, MLKEM_POLYVECBYTES);
   memcpy(pk + MLKEM_POLYVECBYTES, pks->seed, MLKEM_SYMBYTES);
 }
 
@@ -89,8 +89,10 @@ void mlk_indcpa_parse_pk(mlk_indcpa_public_key *pks,
                          const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES])
 {
   mlk_polyvec_frombytes(pks->pkpv, pk);
+  memcpy(pks->pkpv_compressed, pk, MLKEM_POLYVECBYTES);
   memcpy(pks->seed, pk + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
   mlk_gen_matrix(pks->at, pk + MLKEM_POLYVECBYTES, 1);
+  pks->transposed = 1;
 
   /* NOTE: If a modulus check was conducted on the PK, we know at this
    * point that the coefficients of `pk` are unsigned canonical. The
@@ -199,28 +201,14 @@ __contract__(
   ensures(array_bound(data, 0, MLKEM_N, 0, MLKEM_Q))) { ((void)data); }
 #endif /* !MLK_USE_NATIVE_NTT_CUSTOM_ORDER */
 
-static void mlk_transpose_matrix(mlk_polymat a)
-__contract__(
-  requires(memory_no_alias(a, MLKEM_K*MLKEM_K*sizeof(mlk_poly)))
-  requires(forall(k0, 0, MLKEM_K * MLKEM_K,
-      array_bound(a[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
-  assigns(memory_slice(a, MLKEM_K*MLKEM_K*sizeof(mlk_poly)))
-  ensures(forall(k0, 0, MLKEM_K * MLKEM_K,
-      array_bound(a[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
-)
+static void mlk_transpose_matrix(mlk_polymat out, const mlk_polymat in)
 {
-  unsigned int i, j, k;
-  int16_t t;
+  unsigned int i, j;
   for (i = 0; i < MLKEM_K; i++)
   {
-    for (j = i + 1; j < MLKEM_K; j++)
+    for (j = 0; j < MLKEM_K; j++)
     {
-      for (k = 0; k < MLKEM_N; k++)
-      {
-        t = a[i * MLKEM_K + j].coeffs[k];
-        a[i * MLKEM_K + j].coeffs[k] = a[j * MLKEM_K + i].coeffs[k];
-        a[j * MLKEM_K + i].coeffs[k] = t;
-      }
+      memcpy(&out[i * MLKEM_K + j], &in[j * MLKEM_K + i], sizeof(mlk_poly));
     }
   }
 }
@@ -422,8 +410,10 @@ void mlk_indcpa_keypair_derand(mlk_indcpa_public_key *pk,
   mlk_polyvec_reduce(pk->pkpv);
   mlk_polyvec_reduce(sk->skpv);
 
-  mlk_transpose_matrix(pk->at);
+  pk->transposed = 0;
+
   memcpy(pk->seed, publicseed, MLKEM_SYMBYTES);
+  mlk_polyvec_tobytes(pk->pkpv_compressed, pk->pkpv);
 
 
   /* Specification: Partially implements
@@ -451,7 +441,15 @@ void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
   mlk_polyvec sp, ep, b;
   mlk_poly v, k, epp;
   mlk_polyvec_mulcache sp_cache;
+  mlk_polymat at;
+
   mlk_poly_frommsg(&k, m);
+
+  if (pk->transposed == 0) {
+    mlk_transpose_matrix(at, pk->at);
+  } else {
+    memcpy(at, pk->at, sizeof(mlk_polymat));
+  }
 
 #if MLKEM_K == 2
   mlk_poly_getnoise_eta1122_4x(&sp[0], &sp[1], &ep[0], &ep[1], coins, 0, 1, 2,
@@ -475,7 +473,7 @@ void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
   mlk_polyvec_ntt(sp);
 
   mlk_polyvec_mulcache_compute(sp_cache, sp);
-  mlk_matvec_mul(b, pk->at, sp, sp_cache);
+  mlk_matvec_mul(b, at, sp, sp_cache);
   mlk_polyvec_basemul_acc_montgomery_cached(&v, pk->pkpv, sp, sp_cache);
 
   mlk_polyvec_invntt_tomont(b);
