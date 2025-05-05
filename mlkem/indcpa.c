@@ -63,10 +63,8 @@ void mlk_indcpa_marshal_pk(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
                            const mlk_indcpa_public_key *pks)
 {
   mlk_assert_bound_2d(pks->pkpv, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
-  memcpy(pk, pks->pkpv_compressed, MLKEM_POLYVECBYTES);
-  memcpy(pk + MLKEM_POLYVECBYTES, pks->seed, MLKEM_SYMBYTES);
+  memcpy(pk, pks->marshalled, MLKEM_INDCPA_PUBLICKEYBYTES);
 }
-
 
 /*************************************************
  * Name:        mlk_indcpa_parse_pk
@@ -89,8 +87,7 @@ void mlk_indcpa_parse_pk(mlk_indcpa_public_key *pks,
                          const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES])
 {
   mlk_polyvec_frombytes(pks->pkpv, pk);
-  memcpy(pks->pkpv_compressed, pk, MLKEM_POLYVECBYTES);
-  memcpy(pks->seed, pk + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
+  memcpy(pks->marshalled, pk, MLKEM_INDCPA_PUBLICKEYBYTES);
   mlk_gen_matrix(pks->at, pk + MLKEM_POLYVECBYTES, 1);
   pks->transposed = 1;
 
@@ -412,8 +409,9 @@ void mlk_indcpa_keypair_derand(mlk_indcpa_public_key *pk,
 
   pk->transposed = 0;
 
-  memcpy(pk->seed, publicseed, MLKEM_SYMBYTES);
-  mlk_polyvec_tobytes(pk->pkpv_compressed, pk->pkpv);
+  /* Pack & marshal PK */
+  mlk_polyvec_tobytes(pk->marshalled, pk->pkpv);
+  memcpy(pk->marshalled + MLKEM_POLYVECBYTES, publicseed, MLKEM_SYMBYTES);
 
   /* Specification: Partially implements
    * [@FIPS203, Section 3.3, Destruction of intermediate values] */
@@ -443,9 +441,12 @@ void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
 
   mlk_poly_frommsg(&k, m);
 
-  if (pk->transposed == 0) {
+  if (pk->transposed == 0)
+  {
     mlk_transpose_matrix(at, pk->at);
-  } else {
+  }
+  else
+  {
     memcpy(at, pk->at, sizeof(mlk_polymat));
   }
 

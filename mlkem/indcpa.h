@@ -32,8 +32,7 @@ typedef struct
 {
   mlk_polymat at; /* transposed matrix */
   mlk_polyvec pkpv;
-  MLK_ALIGN uint8_t pkpv_compressed[MLKEM_POLYVECBYTES];
-  MLK_ALIGN uint8_t seed[MLKEM_SYMBYTES];
+  MLK_ALIGN uint8_t marshalled[MLKEM_INDCCA_PUBLICKEYBYTES];
   int transposed;
 } MLK_ALIGN mlk_indcpa_public_key;
 

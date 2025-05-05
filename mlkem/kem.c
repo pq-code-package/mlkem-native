@@ -266,13 +266,10 @@ MLK_EXTERNAL_API
 int crypto_kem_keypair_derand_struct(mlk_public_key *pk, mlk_secret_key *sk,
                                      const uint8_t coins[2 * MLKEM_SYMBYTES])
 {
-  MLK_ALIGN uint8_t pks[MLKEM_INDCCA_PUBLICKEYBYTES];
-
   mlk_indcpa_keypair_derand(&sk->indcpa_pk, &sk->indcpa_sk, coins);
 
   /* pre-compute H(pk) */
-  mlk_indcpa_marshal_pk(pks, &sk->indcpa_pk);
-  mlk_hash_h(sk->hpk, pks, MLKEM_INDCCA_PUBLICKEYBYTES);
+  mlk_hash_h(sk->hpk, sk->indcpa_pk.marshalled, MLKEM_INDCPA_PUBLICKEYBYTES);
 
   /*
    * copy over indcpa pk and H(pk) to public key
@@ -290,9 +287,6 @@ int crypto_kem_keypair_derand_struct(mlk_public_key *pk, mlk_secret_key *sk,
   /* Declassify public key */
   MLK_CT_TESTING_DECLASSIFY(&pk->indcpa_pk, sizeof(mlk_indcpa_public_key));
 
-  /* Specification: Partially implements
-   * [FIPS 203, Section 3.3, Destruction of intermediate values] */
-  mlk_zeroize(pks, sizeof(pks));
   return 0;
 }
 
