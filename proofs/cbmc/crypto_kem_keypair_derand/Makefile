@@ -20,7 +20,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/kem.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_keypair_derand
-USE_FUNCTION_CONTRACTS=mlk_sha3_256 mlk_indcpa_keypair_derand mlk_check_pct
+USE_FUNCTION_CONTRACTS=mlk_keypair_derand_struct mlk_marshal_pk mlk_marshal_sk mlk_check_pct mlk_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

@@ -1,14 +1,13 @@
-# Copyright (c) The mlkem-native project authors
-# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+# SPDX-License-Identifier: Apache-2.0
 
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = crypto_kem_enc_derand_harness
+HARNESS_FILE = crypto_kem_dec_struct_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = crypto_kem_enc_derand
+PROOF_UID = crypto_kem_dec_struct
 
 DEFINES +=
 INCLUDES +=
@@ -19,8 +18,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/kem.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_enc_derand
-USE_FUNCTION_CONTRACTS=mlk_parse_pk mlk_enc_derand_struct mlk_zeroize
+CHECK_FUNCTION_CONTRACTS=mlk_dec_struct
+USE_FUNCTION_CONTRACTS=mlk_sha3_512 mlk_sha3_256 mlk_indcpa_enc mlk_indcpa_dec mlk_shake256 mlk_ct_memcmp mlk_ct_cmov_zero memcmp mlk_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -28,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = mlk_enc_derand
+FUNCTION_NAME = mlk_dec_struct
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
@@ -49,7 +48,7 @@ CBMC_OBJECT_BITS = 10
 # $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_OBJECTS = baz
 # Care is required with variables on the left-hand side: REWRITTEN_SOURCES must
 # be set before including Makefile.common, but any use of variables on the
-# left-hand side requires those variables to be defined. Hence, _SOURCE,
+# left-hand side requires those variables to be defined. Hdece, _SOURCE,
 # _FUNCTIONS, _OBJECTS is set after including Makefile.common.
 
 include ../Makefile.common

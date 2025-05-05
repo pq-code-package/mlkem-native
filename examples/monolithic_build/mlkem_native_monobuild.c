@@ -126,14 +126,33 @@
 #undef mlk_indcpa_dec
 #undef mlk_indcpa_enc
 #undef mlk_indcpa_keypair_derand
+#undef mlk_indcpa_marshal_pk
+#undef mlk_indcpa_marshal_sk
+#undef mlk_indcpa_parse_pk
+#undef mlk_indcpa_parse_sk
+#undef mlk_indcpa_public_key
+#undef mlk_indcpa_secret_key
 /* mlkem/kem.h */
 #undef MLK_CONFIG_API_NO_SUPERCOP
 #undef MLK_KEM_H
 #undef crypto_kem_dec
+#undef crypto_kem_dec_struct
 #undef crypto_kem_enc
 #undef crypto_kem_enc_derand
+#undef crypto_kem_enc_derand_struct
+#undef crypto_kem_enc_struct
 #undef crypto_kem_keypair
 #undef crypto_kem_keypair_derand
+#undef crypto_kem_keypair_derand_struct
+#undef crypto_kem_keypair_struct
+#undef crypto_kem_marshal_pk
+#undef crypto_kem_marshal_sk
+#undef crypto_kem_parse_pk
+#undef crypto_kem_parse_sk
+#undef crypto_kem_pk_from_sk
+#undef crypto_kem_sk_from_seed
+#undef mlk_public_key
+#undef mlk_secret_key
 /* mlkem/mlkem_native.h */
 #undef CRYPTO_BYTES
 #undef CRYPTO_CIPHERTEXTBYTES
