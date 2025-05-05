@@ -24,6 +24,7 @@
 typedef struct
 {
   mlk_polyvec skpv;
+  mlk_polyvec_mulcache skpv_cache;
 } MLK_ALIGN mlk_indcpa_secret_key;
 
 #define mlk_indcpa_public_key MLK_NAMESPACE_K(mlk_indcpa_public_key)

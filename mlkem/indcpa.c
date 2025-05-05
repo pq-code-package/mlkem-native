@@ -140,6 +140,7 @@ void mlk_indcpa_parse_sk(mlk_indcpa_secret_key *sks,
                          const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
 {
   mlk_polyvec_frombytes(sks->skpv, sk);
+  mlk_polyvec_mulcache_compute(sks->skpv_cache, sks->skpv);
 }
 
 /*************************************************
@@ -360,7 +361,6 @@ void mlk_indcpa_keypair_derand(mlk_indcpa_public_key *pk,
   const uint8_t *noiseseed = buf + MLKEM_SYMBYTES;
 
   mlk_polyvec e;
-  mlk_polyvec_mulcache skpv_cache;
 
   MLK_ALIGN uint8_t coins_with_domain_separator[MLKEM_SYMBYTES + 1];
   /* Concatenate coins with MLKEM_K for domain separation of security levels */
@@ -402,8 +402,8 @@ void mlk_indcpa_keypair_derand(mlk_indcpa_public_key *pk,
   mlk_polyvec_ntt(sk->skpv);
   mlk_polyvec_ntt(e);
 
-  mlk_polyvec_mulcache_compute(skpv_cache, sk->skpv);
-  mlk_matvec_mul(pk->pkpv, pk->at, sk->skpv, skpv_cache);
+  mlk_polyvec_mulcache_compute(sk->skpv_cache, sk->skpv);
+  mlk_matvec_mul(pk->pkpv, pk->at, sk->skpv, sk->skpv_cache);
   mlk_polyvec_tomont(pk->pkpv);
 
   mlk_polyvec_add(pk->pkpv, e);
@@ -415,13 +415,11 @@ void mlk_indcpa_keypair_derand(mlk_indcpa_public_key *pk,
   memcpy(pk->seed, publicseed, MLKEM_SYMBYTES);
   mlk_polyvec_tobytes(pk->pkpv_compressed, pk->pkpv);
 
-
   /* Specification: Partially implements
    * [@FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(buf, sizeof(buf));
   mlk_zeroize(coins_with_domain_separator, sizeof(coins_with_domain_separator));
   mlk_zeroize(&e, sizeof(e));
-  mlk_zeroize(&skpv_cache, sizeof(skpv_cache));
 }
 
 /* Reference: `indcpa_enc()` in the reference implementation [@REF].
@@ -509,13 +507,11 @@ void mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
 {
   mlk_polyvec b;
   mlk_poly v, sb;
-  mlk_polyvec_mulcache b_cache;
 
   mlk_unpack_ciphertext(b, &v, c);
 
   mlk_polyvec_ntt(b);
-  mlk_polyvec_mulcache_compute(b_cache, b);
-  mlk_polyvec_basemul_acc_montgomery_cached(&sb, sk->skpv, b, b_cache);
+  mlk_polyvec_basemul_acc_montgomery_cached(&sb, b, sk->skpv, sk->skpv_cache);
   mlk_poly_invntt_tomont(&sb);
 
   mlk_poly_sub(&v, &sb);
@@ -526,7 +522,6 @@ void mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
   /* Specification: Partially implements
    * [@FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(&b, sizeof(b));
-  mlk_zeroize(&b_cache, sizeof(b_cache));
   mlk_zeroize(&v, sizeof(v));
   mlk_zeroize(&sb, sizeof(sb));
 }
