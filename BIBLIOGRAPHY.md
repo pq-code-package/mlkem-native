@@ -226,6 +226,7 @@ source code and documentation.
   - Damien Stehlé
 * URL: https://github.com/pq-crystals/kyber/tree/main/avx2
 * Referenced from:
+  - [dev/x86_64/README.md](dev/x86_64/README.md)
   - [dev/x86_64/src/align.h](dev/x86_64/src/align.h)
   - [dev/x86_64/src/basemul.S](dev/x86_64/src/basemul.S)
   - [dev/x86_64/src/basemul.c](dev/x86_64/src/basemul.c)
