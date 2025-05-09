@@ -37,7 +37,7 @@
  *   https://eprint.iacr.org/2022/1303
  */
 
-/* AArch64 ML-KEM forward NTT following [@NeonNTT] and [@SLOTHY_Paper]. */
+/* AArch64 ML-KEM forward NTT following @[NeonNTT] and @[SLOTHY_Paper]. */
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64) && \

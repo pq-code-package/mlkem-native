@@ -12,7 +12,7 @@
  *   https://tches.iacr.org/index.php/TCHES/article/view/9295
  */
 
-/* Re-implementation of asymmetric base multiplication following [@NeonNTT] */
+/* Re-implementation of asymmetric base multiplication following @[NeonNTT] */
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64) && \

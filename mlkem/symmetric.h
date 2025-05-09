@@ -24,17 +24,17 @@
 
 /* Macros denoting FIPS 203 specific Hash functions */
 
-/* Hash function H, [@FIPS203, Section 4.1, Eq (4.4)] */
+/* Hash function H, @[FIPS203, Section 4.1, Eq (4.4)] */
 #define mlk_hash_h(OUT, IN, INBYTES) mlk_sha3_256(OUT, IN, INBYTES)
 
-/* Hash function G, [@FIPS203, Section 4.1, Eq (4.5)] */
+/* Hash function G, @[FIPS203, Section 4.1, Eq (4.5)] */
 #define mlk_hash_g(OUT, IN, INBYTES) mlk_sha3_512(OUT, IN, INBYTES)
 
-/* Hash function J, [@FIPS203, Section 4.1, Eq (4.4)] */
+/* Hash function J, @[FIPS203, Section 4.1, Eq (4.4)] */
 #define mlk_hash_j(OUT, IN, INBYTES) \
   mlk_shake256(OUT, MLKEM_SYMBYTES, IN, INBYTES)
 
-/* PRF function, [@FIPS203, Section 4.1, Eq (4.3)]
+/* PRF function, @[FIPS203, Section 4.1, Eq (4.3)]
  * Referring to (eq 4.3), `OUT` is assumed to contain `s || b`. */
 #define mlk_prf_eta(ETA, OUT, IN) \
   mlk_shake256(OUT, (ETA) * MLKEM_N / 4, IN, MLKEM_SYMBYTES + 1)

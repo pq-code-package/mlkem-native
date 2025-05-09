@@ -37,7 +37,7 @@
  *   https://eprint.iacr.org/2022/1303
  */
 
-/* AArch64 ML-KEM inverse NTT following [@NeonNTT] and [@SLOTHY_Paper]. */
+/* AArch64 ML-KEM inverse NTT following @[NeonNTT] and @[SLOTHY_Paper]. */
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64) &&  !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
@@ -48,7 +48,7 @@
 
 // See mlken/reduce.c and test/test_bounds.py for more details.
 .macro mulmodq dst, src, const, idx0, idx1
-        // Signed barrett multiplication [@NeonNTT, Section 3.1.2] using
+        // Signed barrett multiplication @[NeonNTT, Section 3.1.2] using
         // round-to-nearest-even-integer approximation. Following loc.cit.,
         // this is functionally the same as a signed Montgomery multiplication
         // with a suitable constant of absolute value < q.

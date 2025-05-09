@@ -146,7 +146,7 @@
  * Returns:     - 0: On success
  *              - -1: On PCT failure (if MLK_CONFIG_KEYGEN_PCT) is enabled.
  *
- * Specification: Implements [@FIPS203, Algorithm 16, ML-KEM.KeyGen_Internal]
+ * Specification: Implements @[FIPS203, Algorithm 16, ML-KEM.KeyGen_Internal]
  *
  **************************************************/
 MLK_API_MUST_CHECK_RETURN_VALUE
@@ -169,7 +169,7 @@ int MLK_API_NAMESPACE(keypair_derand)(
  * Returns:     - 0: On success
  *              - -1: On PCT failure (if MLK_CONFIG_KEYGEN_PCT) is enabled.
  *
- * Specification: Implements [@FIPS203, Algorithm 19, ML-KEM.KeyGen]
+ * Specification: Implements @[FIPS203, Algorithm 19, ML-KEM.KeyGen]
  *
  **************************************************/
 MLK_API_MUST_CHECK_RETURN_VALUE
@@ -193,10 +193,10 @@ int MLK_API_NAMESPACE(keypair)(
  *                 MLKEM_SYMBYTES bytes.
  *
  * Returns: - 0 on success
- *          - -1 if the 'modulus check' [@FIPS203, Section 7.2]
+ *          - -1 if the 'modulus check' @[FIPS203, Section 7.2]
  *            for the public key fails.
  *
- * Specification: Implements [@FIPS203, Algorithm 17, ML-KEM.Encaps_Internal]
+ * Specification: Implements @[FIPS203, Algorithm 17, ML-KEM.Encaps_Internal]
  *
  **************************************************/
 MLK_API_MUST_CHECK_RETURN_VALUE
@@ -220,10 +220,10 @@ int MLK_API_NAMESPACE(enc_derand)(
  *                 MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
  *
  * Returns: - 0 on success
- *          - -1 if the 'modulus check' [@FIPS203, Section 7.2]
+ *          - -1 if the 'modulus check' @[FIPS203, Section 7.2]
  *            for the public key fails.
  *
- * Specification: Implements [@FIPS203, Algorithm 20, ML-KEM.Encaps]
+ * Specification: Implements @[FIPS203, Algorithm 20, ML-KEM.Encaps]
  *
  **************************************************/
 MLK_API_MUST_CHECK_RETURN_VALUE
@@ -246,10 +246,10 @@ int MLK_API_NAMESPACE(enc)(
  *                 MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
  *
  * Returns: - 0 on success
- *          - -1 if the 'hash check' [@FIPS203, Section 7.3]
+ *          - -1 if the 'hash check' @[FIPS203, Section 7.3]
  *            for the secret key fails.
  *
- * Specification: Implements [@FIPS203, Algorithm 21, ML-KEM.Decaps]
+ * Specification: Implements @[FIPS203, Algorithm 21, ML-KEM.Decaps]
  *
  **************************************************/
 MLK_API_MUST_CHECK_RETURN_VALUE

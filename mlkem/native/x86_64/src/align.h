@@ -17,7 +17,7 @@
 
 /*
  * This file is derived from the public domain
- * AVX2 Kyber implementation [@REF_AVX2].
+ * AVX2 Kyber implementation @[REF_AVX2].
  */
 
 #include <immintrin.h>

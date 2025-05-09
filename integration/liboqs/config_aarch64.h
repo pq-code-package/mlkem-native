@@ -215,7 +215,7 @@ static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
 /******************************************************************************
  * Name:        MLK_CONFIG_KEYGEN_PCT
  *
- * Description: Compliance with [@FIPS140_3_IG, p.87] requires a
+ * Description: Compliance with @[FIPS140_3_IG, p.87] requires a
  *              Pairwise Consistency Test (PCT) to be carried out on a freshly
  *              generated keypair before it can be exported.
  *

@@ -36,7 +36,7 @@
  * Arguments: - u: Unsigned canonical modulus modulo q
  *                 to be compressed.
  *
- * Specification: Compress_1 from [@FIPS203, Eq (4.7)].
+ * Specification: Compress_1 from @[FIPS203, Eq (4.7)].
  *
  ************************************************************/
 
@@ -49,7 +49,7 @@
 #pragma CPROVER check disable "unsigned-overflow"
 #endif
 
-/* Reference: Part of poly_tomsg() in the reference implementation [@REF]. */
+/* Reference: Part of poly_tomsg() in the reference implementation @[REF]. */
 static MLK_INLINE uint32_t mlk_scalar_compress_d1(uint16_t u)
 __contract__(
   requires(u <= MLKEM_Q - 1)
@@ -79,7 +79,7 @@ __contract__(
  * Arguments: - u: Unsigned canonical modulus modulo q
  *                 to be compressed.
  *
- * Specification: Compress_4 from [@FIPS203, Eq (4.7)].
+ * Specification: Compress_4 from @[FIPS203, Eq (4.7)].
  *
  ************************************************************/
 /*
@@ -92,7 +92,7 @@ __contract__(
 #endif
 
 /* Reference: Embedded into `poly_compress()` in the
- *            reference implementation [@REF]. */
+ *            reference implementation @[REF]. */
 static MLK_INLINE uint32_t mlk_scalar_compress_d4(uint16_t u)
 __contract__(
   requires(u <= MLKEM_Q - 1)
@@ -122,12 +122,12 @@ __contract__(
  * Arguments: - u: Unsigned canonical modulus modulo 16
  *                 to be decompressed.
  *
- * Specification: Decompress_4 from [@FIPS203, Eq (4.8)].
+ * Specification: Decompress_4 from @[FIPS203, Eq (4.8)].
  *
  ************************************************************/
 
 /* Reference: Embedded into `poly_decompress()` in the
- *            reference implementation [@REF]. */
+ *            reference implementation @[REF]. */
 static MLK_INLINE uint16_t mlk_scalar_decompress_d4(uint32_t u)
 __contract__(
   requires(0 <= u && u < 16)
@@ -142,7 +142,7 @@ __contract__(
  * Arguments: - u: Unsigned canonical modulus modulo q
  *                 to be compressed.
  *
- * Specification: Compress_5 from [@FIPS203, Eq (4.7)].
+ * Specification: Compress_5 from @[FIPS203, Eq (4.7)].
  *
  ************************************************************/
 /*
@@ -155,7 +155,7 @@ __contract__(
 #endif
 
 /* Reference: Embedded into `poly_compress()` in the
- *            reference implementation [@REF]. */
+ *            reference implementation @[REF]. */
 static MLK_INLINE uint32_t mlk_scalar_compress_d5(uint16_t u)
 __contract__(
   requires(u <= MLKEM_Q - 1)
@@ -185,12 +185,12 @@ __contract__(
  * Arguments: - u: Unsigned canonical modulus modulo 32
  *                 to be decompressed.
  *
- * Specification: Decompress_5 from [@FIPS203, Eq (4.8)].
+ * Specification: Decompress_5 from @[FIPS203, Eq (4.8)].
  *
  ************************************************************/
 
 /* Reference: Embedded into `poly_decompress()` in the
- *            reference implementation [@REF]. */
+ *            reference implementation @[REF]. */
 static MLK_INLINE uint16_t mlk_scalar_decompress_d5(uint32_t u)
 __contract__(
   requires(0 <= u && u < 32)
@@ -205,7 +205,7 @@ __contract__(
  * Arguments: - u: Unsigned canonical modulus modulo q
  *                 to be compressed.
  *
- * Specification: Compress_10 from [@FIPS203, Eq (4.7)].
+ * Specification: Compress_10 from @[FIPS203, Eq (4.7)].
  *
  ************************************************************/
 /*
@@ -218,7 +218,7 @@ __contract__(
 #endif
 
 /* Reference: Embedded into `polyvec_compress()` in the
- *            reference implementation [@REF]. */
+ *            reference implementation @[REF]. */
 static MLK_INLINE uint32_t mlk_scalar_compress_d10(uint16_t u)
 __contract__(
   requires(u <= MLKEM_Q - 1)
@@ -249,12 +249,12 @@ __contract__(
  * Arguments: - u: Unsigned canonical modulus modulo 1024
  *                 to be decompressed.
  *
- * Specification: Decompress_10 from [@FIPS203, Eq (4.8)].
+ * Specification: Decompress_10 from @[FIPS203, Eq (4.8)].
  *
  ************************************************************/
 
 /* Reference: Embedded into `polyvec_decompress()` in the
- *            reference implementation [@REF]. */
+ *            reference implementation @[REF]. */
 static MLK_INLINE uint16_t mlk_scalar_decompress_d10(uint32_t u)
 __contract__(
   requires(0 <= u && u < 1024)
@@ -269,7 +269,7 @@ __contract__(
  * Arguments: - u: Unsigned canonical modulus modulo q
  *                 to be compressed.
  *
- * Specification: Compress_11 from [@FIPS203, Eq (4.7)].
+ * Specification: Compress_11 from @[FIPS203, Eq (4.7)].
  *
  ************************************************************/
 /*
@@ -282,7 +282,7 @@ __contract__(
 #endif
 
 /* Reference: Embedded into `polyvec_compress()` in the
- *            reference implementation [@REF]. */
+ *            reference implementation @[REF]. */
 static MLK_INLINE uint32_t mlk_scalar_compress_d11(uint16_t u)
 __contract__(
   requires(u <= MLKEM_Q - 1)
@@ -313,12 +313,12 @@ __contract__(
  * Arguments: - u: Unsigned canonical modulus modulo 2048
  *                 to be decompressed.
  *
- * Specification: Decompress_11 from [@FIPS203, Eq (4.8)].
+ * Specification: Decompress_11 from @[FIPS203, Eq (4.8)].
  *
  ************************************************************/
 
 /* Reference: Embedded into `polyvec_decompress()` in the
- *            reference implementation [@REF]. */
+ *            reference implementation @[REF]. */
 static MLK_INLINE uint16_t mlk_scalar_decompress_d11(uint32_t u)
 __contract__(
   requires(0 <= u && u < 2048)
@@ -340,13 +340,13 @@ __contract__(
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  *
  * Specification: Implements `ByteEncode_4 (Compress_4 (a))`:
- *                - ByteEncode_d: [@FIPS203, Algorithm 5],
- *                - Compress_d: [@FIPS203, Eq (4.7)]
+ *                - ByteEncode_d: @[FIPS203, Algorithm 5],
+ *                - Compress_d: @[FIPS203, Eq (4.7)]
  *                  Extended to vectors as per
- *                  [@FIPS203, 2.4.8 Applying Algorithms to Arrays]
+ *                  @[FIPS203, 2.4.8 Applying Algorithms to Arrays]
  *                - `ByteEncode_{d_v} (Compress_{d_v} (v))` appears in
- *                  [@FIPS203, Algorithm 14 (K-PKE.Encrypt), L23],
- *                  where `d_v=4` for ML-KEM-{512,768} [@FIPS203, Table 2].
+ *                  @[FIPS203, Algorithm 14 (K-PKE.Encrypt), L23],
+ *                  where `d_v=4` for ML-KEM-{512,768} @[FIPS203, Table 2].
  *
  **************************************************/
 MLK_INTERNAL_API
@@ -367,13 +367,13 @@ void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  *
  * Specification: Implements `ByteEncode_10 (Compress_10 (a))`:
- *                - ByteEncode_d: [@FIPS203, Algorithm 5],
- *                - Compress_d: [@FIPS203, Eq (4.7)]
+ *                - ByteEncode_d: @[FIPS203, Algorithm 5],
+ *                - Compress_d: @[FIPS203, Eq (4.7)]
  *                  Extended to vectors as per
- *                  [@FIPS203, 2.4.8 Applying Algorithms to Arrays]
+ *                  @[FIPS203, 2.4.8 Applying Algorithms to Arrays]
  *                - `ByteEncode_{d_u} (Compress_{d_u} (u))` appears in
- *                  [@FIPS203, Algorithm 14 (K-PKE.Encrypt), L22],
- *                  where `d_u=10` for ML-KEM-{512,768} [@FIPS203, Table 2].
+ *                  @[FIPS203, Algorithm 14 (K-PKE.Encrypt), L22],
+ *                  where `d_u=10` for ML-KEM-{512,768} @[FIPS203, Table 2].
  *
  **************************************************/
 MLK_INTERNAL_API
@@ -395,13 +395,13 @@ void mlk_poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
  * (non-negative and smaller than MLKEM_Q).
  *
  * Specification: Implements `Decompress_4 (ByteDecode_4 (a))`:
- *                - ByteDecode_d: [@FIPS203, Algorithm 6],
- *                - Decompress_d: [@FIPS203, Eq (4.8)]
+ *                - ByteDecode_d: @[FIPS203, Algorithm 6],
+ *                - Decompress_d: @[FIPS203, Eq (4.8)]
  *                  Extended to vectors as per
- *                  [@FIPS203, 2.4.8 Applying Algorithms to Arrays]
+ *                  @[FIPS203, 2.4.8 Applying Algorithms to Arrays]
  *                - `Decompress_{d_v} (ByteDecode_{d_v} (v))` appears in
- *                  [@FIPS203, Algorithm 15 (K-PKE.Decrypt), L4],
- *                  where `d_v=4` for ML-KEM-{512,768} [@FIPS203, Table 2].
+ *                  @[FIPS203, Algorithm 15 (K-PKE.Decrypt), L4],
+ *                  where `d_v=4` for ML-KEM-{512,768} @[FIPS203, Table 2].
  *
  **************************************************/
 MLK_INTERNAL_API
@@ -423,13 +423,13 @@ void mlk_poly_decompress_d4(mlk_poly *r,
  * (non-negative and smaller than MLKEM_Q).
  *
  * Specification: Implements `Decompress_10 (ByteDecode_10 (a))`:
- *                - ByteDecode_d: [@FIPS203, Algorithm 6],
- *                - Decompress_d: [@FIPS203, Eq (4.8)]
+ *                - ByteDecode_d: @[FIPS203, Algorithm 6],
+ *                - Decompress_d: @[FIPS203, Eq (4.8)]
  *                  Extended to vectors as per
- *                  [@FIPS203, 2.4.8 Applying Algorithms to Arrays]
+ *                  @[FIPS203, 2.4.8 Applying Algorithms to Arrays]
  *                - `Decompress_{d_u} (ByteDecode_{d_u} (u))` appears in
- *                  [@FIPS203, Algorithm 15 (K-PKE.Decrypt), L3],
- *                  where `d_u=10` for ML-KEM-{512,768} [@FIPS203, Table 2].
+ *                  @[FIPS203, Algorithm 15 (K-PKE.Decrypt), L3],
+ *                  where `d_u=10` for ML-KEM-{512,768} @[FIPS203, Table 2].
  *
  **************************************************/
 MLK_INTERNAL_API
@@ -452,13 +452,13 @@ void mlk_poly_decompress_d10(mlk_poly *r,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  *
  * Specification: Implements `ByteEncode_5 (Compress_5 (a))`:
- *                - ByteEncode_d: [@FIPS203, Algorithm 5],
- *                - Compress_d: [@FIPS203, Eq (4.7)]
+ *                - ByteEncode_d: @[FIPS203, Algorithm 5],
+ *                - Compress_d: @[FIPS203, Eq (4.7)]
  *                  Extended to vectors as per
- *                  [@FIPS203, 2.4.8 Applying Algorithms to Arrays]
+ *                  @[FIPS203, 2.4.8 Applying Algorithms to Arrays]
  *                - `ByteEncode_{d_v} (Compress_{d_v} (v))` appears in
- *                  [@FIPS203, Algorithm 14 (K-PKE.Encrypt), L23],
- *                  where `d_v=5` for ML-KEM-1024 [@FIPS203, Table 2].
+ *                  @[FIPS203, Algorithm 14 (K-PKE.Encrypt), L23],
+ *                  where `d_v=5` for ML-KEM-1024 @[FIPS203, Table 2].
  *
  **************************************************/
 MLK_INTERNAL_API
@@ -479,13 +479,13 @@ void mlk_poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  *
  * Specification: `ByteEncode_11 (Compress_11 (a))`:
- *                - ByteEncode_d: [@FIPS203, Algorithm 5],
- *                - Compress_d: [@FIPS203, Eq (4.7)]
+ *                - ByteEncode_d: @[FIPS203, Algorithm 5],
+ *                - Compress_d: @[FIPS203, Eq (4.7)]
  *                  Extended to vectors as per
- *                  [@FIPS203, 2.4.8 Applying Algorithms to Arrays]
+ *                  @[FIPS203, 2.4.8 Applying Algorithms to Arrays]
  *                - `ByteEncode_{d_u} (Compress_{d_u} (u))` appears in
- *                  [@FIPS203, Algorithm 14 (K-PKE.Encrypt), L22],
- *                  where `d_u=11` for ML-KEM-1024 [@FIPS203, Table 2].
+ *                  @[FIPS203, Algorithm 14 (K-PKE.Encrypt), L22],
+ *                  where `d_u=11` for ML-KEM-1024 @[FIPS203, Table 2].
  *
  **************************************************/
 MLK_INTERNAL_API
@@ -507,13 +507,13 @@ void mlk_poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
  * (non-negative and smaller than MLKEM_Q).
  *
  * Specification: Implements `Decompress_5 (ByteDecode_5 (a))`:
- *                - ByteDecode_d: [@FIPS203, Algorithm 6],
- *                - Decompress_d: [@FIPS203, Eq (4.8)]
+ *                - ByteDecode_d: @[FIPS203, Algorithm 6],
+ *                - Decompress_d: @[FIPS203, Eq (4.8)]
  *                  Extended to vectors as per
- *                  [@FIPS203, 2.4.8 Applying Algorithms to Arrays]
+ *                  @[FIPS203, 2.4.8 Applying Algorithms to Arrays]
  *                - `Decompress_{d_v} (ByteDecode_{d_v} (v))` appears in
- *                  [@FIPS203, Algorithm 15 (K-PKE.Decrypt), L4],
- *                  where `d_v=5` for ML-KEM-1024 [@FIPS203, Table 2].
+ *                  @[FIPS203, Algorithm 15 (K-PKE.Decrypt), L4],
+ *                  where `d_v=5` for ML-KEM-1024 @[FIPS203, Table 2].
  *
  **************************************************/
 MLK_INTERNAL_API
@@ -535,13 +535,13 @@ void mlk_poly_decompress_d5(mlk_poly *r,
  * (non-negative and smaller than MLKEM_Q).
  *
  * Specification: Implements `Decompress_11 (ByteDecode_11 (a))`:
- *                - ByteDecode_d: [@FIPS203, Algorithm 6],
- *                - Decompress_d: [@FIPS203, Eq (4.8)]
+ *                - ByteDecode_d: @[FIPS203, Algorithm 6],
+ *                - Decompress_d: @[FIPS203, Eq (4.8)]
  *                  Extended to vectors as per
- *                  [@FIPS203, 2.4.8 Applying Algorithms to Arrays]
+ *                  @[FIPS203, 2.4.8 Applying Algorithms to Arrays]
  *                - `Decompress_{d_u} (ByteDecode_{d_u} (u))` appears in
- *                  [@FIPS203, Algorithm 15 (K-PKE.Decrypt), L3],
- *                  where `d_u=11` for ML-KEM-1024 [@FIPS203, Table 2].
+ *                  @[FIPS203, Algorithm 15 (K-PKE.Decrypt), L3],
+ *                  where `d_u=11` for ML-KEM-1024 @[FIPS203, Table 2].
  *
  **************************************************/
 MLK_INTERNAL_API
@@ -564,9 +564,9 @@ void mlk_poly_decompress_d11(mlk_poly *r,
  *              - r: pointer to output byte array
  *                   (of MLKEM_POLYBYTES bytes)
  *
- * Specification: Implements ByteEncode_12 [@FIPS203, Algorithm 5].
+ * Specification: Implements ByteEncode_12 @[FIPS203, Algorithm 5].
  *                Extended to vectors as per
- *                [@FIPS203, 2.4.8 Applying Algorithms to Arrays]
+ *                @[FIPS203, 2.4.8 Applying Algorithms to Arrays]
  *
  **************************************************/
 MLK_INTERNAL_API
@@ -593,9 +593,9 @@ __contract__(
  *                   each coefficient unsigned and in the range
  *                   0 .. 4095
  *
- * Specification: Implements ByteDecode_12 [@FIPS203, Algorithm 6].
+ * Specification: Implements ByteDecode_12 @[FIPS203, Algorithm 6].
  *                Extended to vectors as per
- *                [@FIPS203, 2.4.8 Applying Algorithms to Arrays]
+ *                @[FIPS203, 2.4.8 Applying Algorithms to Arrays]
  *
  **************************************************/
 MLK_INTERNAL_API
@@ -618,12 +618,12 @@ __contract__(
  *              - const uint8_t *msg: pointer to input message
  *
  * Specification: Implements `Decompress_1 (ByteDecode_1 (a))`:
- *                - ByteDecode_d: [@FIPS203, Algorithm 6],
- *                - Decompress_d: [@FIPS203, Eq (4.8)]
+ *                - ByteDecode_d: @[FIPS203, Algorithm 6],
+ *                - Decompress_d: @[FIPS203, Eq (4.8)]
  *                  Extended to vectors as per
- *                  [@FIPS203, 2.4.8 Applying Algorithms to Arrays]
+ *                  @[FIPS203, 2.4.8 Applying Algorithms to Arrays]
  *                - `Decompress_1 (ByteDecode_1 (w))` appears in
- *                  [@FIPS203, Algorithm 15 (K-PKE.Encrypt), L20].
+ *                  @[FIPS203, Algorithm 15 (K-PKE.Encrypt), L20].
  *
  **************************************************/
 MLK_INTERNAL_API
@@ -646,12 +646,12 @@ __contract__(
  *                Coefficients must be unsigned canonical
  *
  * Specification: Implements `ByteEncode_1 (Compress_1 (a))`:
- *                - ByteEncode_d: [@FIPS203, Algorithm 5],
- *                - Compress_d: [@FIPS203, Eq (4.7)]
+ *                - ByteEncode_d: @[FIPS203, Algorithm 5],
+ *                - Compress_d: @[FIPS203, Eq (4.7)]
  *                  Extended to vectors as per
- *                  [@FIPS203, 2.4.8 Applying Algorithms to Arrays]
+ *                  @[FIPS203, 2.4.8 Applying Algorithms to Arrays]
  *                - `ByteEncode_1 (Compress_1 (w))` appears in
- *                  [@FIPS203, Algorithm 14 (K-PKE.Decrypt), L7].
+ *                  @[FIPS203, Algorithm 14 (K-PKE.Decrypt), L7].
  *
  **************************************************/
 MLK_INTERNAL_API

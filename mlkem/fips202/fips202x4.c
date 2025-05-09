@@ -136,7 +136,7 @@ void mlk_shake128x4_init(mlk_shake128x4ctx *state) { (void)state; }
 void mlk_shake128x4_release(mlk_shake128x4ctx *state)
 {
   /* Specification: Partially implements
-   * [@FIPS203, Section 3.3, Destruction of intermediate values] */
+   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(state, sizeof(mlk_shake128x4ctx));
 }
 
@@ -190,7 +190,7 @@ void mlk_shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
   }
 
   /* Specification: Partially implements
-   * [@FIPS203, Section 3.3, Destruction of intermediate values] */
+   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(&statex, sizeof(statex));
   mlk_zeroize(tmp0, sizeof(tmp0));
   mlk_zeroize(tmp1, sizeof(tmp1));

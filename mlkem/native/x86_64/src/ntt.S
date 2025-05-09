@@ -19,9 +19,9 @@
 
 /*
  * This file is derived from the public domain
- * AVX2 Kyber implementation [@REF_AVX2].
+ * AVX2 Kyber implementation @[REF_AVX2].
  *
- * The core ideas behind the implementation are described in [@AVX2_NTT].
+ * The core ideas behind the implementation are described in @[AVX2_NTT].
  */
 
 #include "../../../common.h"

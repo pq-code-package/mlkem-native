@@ -12,7 +12,7 @@
  *   https://cr.yp.to/papers.html#surf
  */
 
-/* Based on [@surf]. */
+/* Based on @[surf]. */
 
 #ifndef NOTRANDOMBYTES_H
 #define NOTRANDOMBYTES_H

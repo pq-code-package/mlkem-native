@@ -33,8 +33,8 @@
  *              - const uint8_t *seed: pointer to input seed
  *              - int transposed: boolean deciding whether A or A^T is generated
  *
- * Specification: Implements [@FIPS203, Algorithm 13 (K-PKE.KeyGen), L3-7]
- *                and [@FIPS203, Algorithm 14 (K-PKE.Encrypt), L4-8].
+ * Specification: Implements @[FIPS203, Algorithm 13 (K-PKE.KeyGen), L3-7]
+ *                and @[FIPS203, Algorithm 14 (K-PKE.Encrypt), L4-8].
  *                The `transposed` parameter only affects internal presentation.
  *
  **************************************************/
@@ -64,7 +64,7 @@ __contract__(
  *              - const uint8_t *coins: pointer to input randomness
  *                             (of length MLKEM_SYMBYTES bytes)
  *
- * Specification: Implements [@FIPS203, Algorithm 13 (K-PKE.KeyGen)].
+ * Specification: Implements @[FIPS203, Algorithm 13 (K-PKE.KeyGen)].
  *
  **************************************************/
 MLK_INTERNAL_API
@@ -96,7 +96,7 @@ __contract__(
  *                 seed (of length MLKEM_SYMBYTES) to deterministically generate
  *                 all randomness
  *
- * Specification: Implements [@FIPS203, Algorithm 14 (K-PKE.Encrypt)].
+ * Specification: Implements @[FIPS203, Algorithm 14 (K-PKE.Encrypt)].
  *
  **************************************************/
 MLK_INTERNAL_API
@@ -126,7 +126,7 @@ __contract__(
  *              - const uint8_t *sk: pointer to input secret key
  *                                   (of length MLKEM_INDCPA_SECRETKEYBYTES)
  *
- * Specification: Implements [@FIPS203, Algorithm 15 (K-PKE.Decrypt)].
+ * Specification: Implements @[FIPS203, Algorithm 15 (K-PKE.Decrypt)].
  *
  **************************************************/
 MLK_INTERNAL_API

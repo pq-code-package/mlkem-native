@@ -12,7 +12,7 @@
  *   https://csrc.nist.gov/Projects/post-quantum-cryptography/pqc-archive
  */
 
-/* Derived from [@pqcarchive, Source Code Files for KATs] provided by NIST
+/* Derived from @[pqcarchive, Source Code Files for KATs] provided by NIST
  * under the following terms of use:
  *
  *
