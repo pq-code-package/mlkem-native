@@ -37,7 +37,7 @@
  *   https://eprint.iacr.org/2022/1303
  */
 
-/* AArch64 ML-KEM inverse NTT following [@NeonNTT] and [@SLOTHY_Paper]. */
+/* AArch64 ML-KEM inverse NTT following @[NeonNTT] and @[SLOTHY_Paper]. */
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64) &&  !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)

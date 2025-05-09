@@ -5,7 +5,7 @@
 
 /*
  * This file is derived from the public domain
- * AVX2 Kyber implementation [@REF_AVX2].
+ * AVX2 Kyber implementation @[REF_AVX2].
  */
 
 .macro shuffle8 r0,r1,r2,r3

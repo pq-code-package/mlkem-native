@@ -39,7 +39,7 @@
  */
 
 /*
- * AES implementation based on [@BearSSL].
+ * AES implementation based on @[BearSSL].
  */
 
 #include <stdint.h>
@@ -89,7 +89,7 @@ static void br_aes_ct64_bitslice_Sbox(uint64_t *q)
 {
   /*
    * This S-box implementation is a straightforward translation of
-   * the circuit described in [@BoyarPeralta].
+   * the circuit described in @[BoyarPeralta].
    *
    * Note that variables x* (input) and s* (output) are numbered
    * in "reverse" order (x0 is the high bit, x7 is the low bit).

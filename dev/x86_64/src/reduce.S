@@ -14,7 +14,7 @@
 
 /*
  * This file is derived from the public domain
- * AVX2 Kyber implementation [@REF_AVX2].
+ * AVX2 Kyber implementation @[REF_AVX2].
  *
  * Changes:
  * - Add call to csub in reduce128_avx to produce outputs

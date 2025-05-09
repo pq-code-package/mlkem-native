@@ -48,8 +48,8 @@
    We consider two approaches to implement a value barrier:
    - An empty inline asm block which marks the target value as clobbered.
    - XOR'ing with the value of a volatile global that's set to 0;
-     see [@optblocker] for a discussion of this idea, and
-     [@libmceliece, inttypes/crypto_intN.h] for an implementation.
+     see @[optblocker] for a discussion of this idea, and
+     @[libmceliece, inttypes/crypto_intN.h] for an implementation.
 
    The first approach is cheap because it only prevents the compiler
    from reasoning about the value of the variable past the barrier,
@@ -154,7 +154,7 @@ __contract__(ensures(return_value == b))
  *
  **************************************************/
 
-/* Reference: Embedded in `cmov_int16()` in the reference implementation [@REF].
+/* Reference: Embedded in `cmov_int16()` in the reference implementation @[REF].
  *            - Use value barrier and shift instead of `b = -b` to
  *              convert condition into mask. */
 static MLK_INLINE uint16_t mlk_ct_cmask_nonzero_u16(uint16_t x)
@@ -175,7 +175,7 @@ __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFFFF)))
  **************************************************/
 
 /* Reference: Embedded in `verify()` and `cmov()` in the
- *            reference implementation [@REF].
+ *            reference implementation @[REF].
  *            - We include a value barrier not present in the
  *              reference implementation, to prevent the compiler
  *              from realizing that this function returns a mask. */
@@ -212,7 +212,7 @@ __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFF)))
  **************************************************/
 
 /* Reference: Embedded in polynomial compression function in the
- *            reference implementation [@REF].
+ *            reference implementation @[REF].
  *            - Used as part of signed->unsigned conversion for modular
  *              representatives to detect whether the input is negative.
  *              This happen in `mlk_poly_reduce()` here, and as part of
@@ -257,21 +257,21 @@ __contract__(ensures(return_value == ((x < 0) ? 0xFFFF : 0)))
  *
  * Specification:
  * - With `a = MLKEM_Q_HALF` and `b=0`, this essentially
- *   implements `Decompress_1` [@FIPS203, Eq (4.8)] in `mlk_poly_frommsg()`.
+ *   implements `Decompress_1` @[FIPS203, Eq (4.8)] in `mlk_poly_frommsg()`.
  * - With `a = x + MLKEM_Q`, `b = x`, and `cond` indicating whether `x`
  *   is negative, implements signed->unsigned conversion of modular
  *   representatives. Questions of representation are not considered
- *   in the specification [@FIPS203, Section 2.4.1, "The pseudocode is
+ *   in the specification @[FIPS203, Section 2.4.1, "The pseudocode is
  *   agnostic regarding how an integer modulo 𝑚 is represented in
  *   actual implementations"].
  *
  **************************************************/
 
 /* Reference: Embedded in polynomial compression function in the
- *            reference implementation [@REF].
+ *            reference implementation @[REF].
  *            - Used as part of signed->unsigned conversion for modular
  *              representatives. This happen in `mlk_poly_reduce()` here,
- *              and as part of polynomial compression functions in [@REF].
+ *              and as part of polynomial compression functions in @[REF].
  *              See `mlk_poly_reduce()`.
  *            - Barrier to reduce the risk of compiler-introduced branches.
  *            For `a = MLKEM_Q_HALF` and `b=0`, also embedded in
@@ -303,7 +303,7 @@ __contract__(ensures(return_value == (cond ? a : b)))
  *
  **************************************************/
 
-/* Reference: Embedded into `cmov()` in the reference implementation [@REF].
+/* Reference: Embedded into `cmov()` in the reference implementation @[REF].
  *            - Use value barrier to get mask from condition value. */
 static MLK_INLINE uint8_t mlk_ct_sel_uint8(uint8_t a, uint8_t b, uint8_t cond)
 __contract__(ensures(return_value == (cond ? a : b)))
@@ -324,11 +324,11 @@ __contract__(ensures(return_value == (cond ? a : b)))
  *
  * Specification:
  * - Used to securely compute conditional move in
- *   [@FIPS203, Algorithm 18 (ML-KEM.Decaps_Internal, L9-11]
+ *   @[FIPS203, Algorithm 18 (ML-KEM.Decaps_Internal, L9-11]
  *
  **************************************************/
 
-/* Reference: `cmov()` in the reference implementation [@REF]
+/* Reference: `cmov()` in the reference implementation @[REF]
  *            - We return `uint8_t`, not `int`.
  *            - We use an additional XOR-accumulator in the comparison loop
  *              which prevents early abort if the OR-accumulator is 0xFF.
@@ -381,11 +381,11 @@ __contract__(
  *
  * Specification:
  * - Used to securely compute conditional move in
- *   [@FIPS203, Algorithm 18 (ML-KEM.Decaps_Internal, L9-11]
+ *   @[FIPS203, Algorithm 18 (ML-KEM.Decaps_Internal, L9-11]
  *
  **************************************************/
 
-/* Reference: `cmov()` in the reference implementation [@REF].
+/* Reference: `cmov()` in the reference implementation @[REF].
  *            - We move if condition value is `0`, not `1`.
  *            - We use `mlk_ct_sel_uint8` for constant-time selection. */
 static MLK_INLINE void mlk_ct_cmov_zero(uint8_t *r, const uint8_t *x,
@@ -412,11 +412,11 @@ __contract__(
  *              size_t len:       Amount of bytes to be zeroed
  *
  * Specification: Used to implement
- * [@FIPS203, Section 3.3, Destruction of intermediate values]
+ * @[FIPS203, Section 3.3, Destruction of intermediate values]
  *
  **************************************************/
 
-/* Reference: Not present in the reference implementation [@REF]. */
+/* Reference: Not present in the reference implementation @[REF]. */
 #if !defined(MLK_CONFIG_CUSTOM_ZEROIZE)
 #if defined(MLK_SYS_WINDOWS)
 #include <windows.h>

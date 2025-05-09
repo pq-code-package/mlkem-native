@@ -26,7 +26,7 @@
  *
  * - On Arm-based Apple CPUs, we pick a pure Neon implementation.
  * - Otherwise, unless MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER is set,
- *   we use lazy-rotation scalar assembly from [@HYBRID].
+ *   we use lazy-rotation scalar assembly from @[HYBRID].
  * - Otherwise, if MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER is set, we
  *   fall back to the standard C implementation.
  */
@@ -39,7 +39,7 @@
 /*
  * Keccak-f1600x2/x4
  *
- * The optimal implementation is highly CPU-specific; see [@HYBRID].
+ * The optimal implementation is highly CPU-specific; see @[HYBRID].
  *
  * For now, if v8.4-A is not implemented, we fall back to Keccak-f1600.
  * If v8.4-A is implemented and we are on an Apple CPU, we use a plain

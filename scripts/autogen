@@ -1998,10 +1998,10 @@ def gen_c_citations_for(filename, bibliography, dry_run=False):
 
     content = content.split("\n")
 
-    # Lookup all citations in style `[^ID]`
+    # Lookup all citations in style `@[ID]`
     citations = {}
     for i, l in enumerate(content):
-        for m in re.finditer(r"\[@(?P<id>\w+)", l):
+        for m in re.finditer(r"@\[(?P<id>\w+)", l):
             cite_id = m.group("id")
             uses = citations.get(cite_id, [])
             # Remember usage. +1 because line counting starts at 1

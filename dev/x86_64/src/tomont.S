@@ -13,7 +13,7 @@
  */
 
 /*
- * Implementation from Kyber reference repository [@REF_AVX2]
+ * Implementation from Kyber reference repository @[REF_AVX2]
  *
  * Changes:
  * - Add call to csub in reduce128_avx to produce outputs

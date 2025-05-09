@@ -22,9 +22,9 @@
  *   https://keccak.team/2015/tweetfips202.html
  */
 
-/* Based on the CC0 implementation from [@mupq] and the public domain
- * implementation [@supercop, crypto_hash/keccakc512/simple/]
- * by Ronny Van Keer, and the public domain [@tweetfips] implementation. */
+/* Based on the CC0 implementation from @[mupq] and the public domain
+ * implementation @[supercop, crypto_hash/keccakc512/simple/]
+ * by Ronny Van Keer, and the public domain @[tweetfips] implementation. */
 
 #include <assert.h>
 #include <stdint.h>

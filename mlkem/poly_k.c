@@ -39,7 +39,7 @@
 #define mlk_poly_cbd_eta2 MLK_ADD_PARAM_SET(mlk_poly_cbd_eta2)
 /* End of parameter set namespacing */
 
-/* Reference: `polyvec_compress()` in the reference implementation [@REF]
+/* Reference: `polyvec_compress()` in the reference implementation @[REF]
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
@@ -57,7 +57,7 @@ void mlk_polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
   }
 }
 
-/* Reference: `polyvec_decompress()` in the reference implementation [@REF]. */
+/* Reference: `polyvec_decompress()` in the reference implementation @[REF]. */
 MLK_INTERNAL_API
 void mlk_polyvec_decompress_du(mlk_polyvec r,
                                const uint8_t a[MLKEM_POLYVECCOMPRESSEDBYTES_DU])
@@ -71,7 +71,7 @@ void mlk_polyvec_decompress_du(mlk_polyvec r,
   mlk_assert_bound_2d(r, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
 }
 
-/* Reference: `polyvec_tobytes()` in the reference implementation [@REF].
+/* Reference: `polyvec_tobytes()` in the reference implementation @[REF].
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
@@ -88,7 +88,7 @@ void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec a)
   }
 }
 
-/* Reference: `polyvec_frombytes()` in the reference implementation [@REF]. */
+/* Reference: `polyvec_frombytes()` in the reference implementation @[REF]. */
 MLK_INTERNAL_API
 void mlk_polyvec_frombytes(mlk_polyvec r, const uint8_t a[MLKEM_POLYVECBYTES])
 {
@@ -101,7 +101,7 @@ void mlk_polyvec_frombytes(mlk_polyvec r, const uint8_t a[MLKEM_POLYVECBYTES])
   mlk_assert_bound_2d(r, MLKEM_K, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
 }
 
-/* Reference: `polyvec_ntt()` in the reference implementation [@REF]. */
+/* Reference: `polyvec_ntt()` in the reference implementation @[REF]. */
 MLK_INTERNAL_API
 void mlk_polyvec_ntt(mlk_polyvec r)
 {
@@ -114,7 +114,7 @@ void mlk_polyvec_ntt(mlk_polyvec r)
   mlk_assert_abs_bound_2d(r, MLKEM_K, MLKEM_N, MLK_NTT_BOUND);
 }
 
-/* Reference: `polyvec_invntt_tomont()` in the reference implementation [@REF].
+/* Reference: `polyvec_invntt_tomont()` in the reference implementation @[REF].
  *            - We normalize at the beginning of the inverse NTT,
  *              while the reference implementation normalizes at
  *              the end. This allows us to drop a call to `poly_reduce()`
@@ -133,10 +133,10 @@ void mlk_polyvec_invntt_tomont(mlk_polyvec r)
 
 #if !defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
 /* Reference: `polyvec_basemul_acc_montgomery()` in the
- *            reference implementation [@REF].
+ *            reference implementation @[REF].
  *            - We use a multiplication cache ('mulcache') here
- *              which is not present in the reference implementation [@REF].
- *              This idea originates from [@NeonNTT] and is used
+ *              which is not present in the reference implementation @[REF].
+ *              This idea originates from @[NeonNTT] and is used
  *              at the C level here.
  *            - We compute the coefficients of the scalar product in 32-bit
  *              coefficients and perform only a single modular reduction
@@ -199,10 +199,10 @@ void mlk_polyvec_basemul_acc_montgomery_cached(
 }
 #endif /* MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
-/* Reference: Does not exist in the reference implementation [@REF].
+/* Reference: Does not exist in the reference implementation @[REF].
  *            - The reference implementation does not use a
  *              multiplication cache ('mulcache'). This idea originates
- *              from [@NeonNTT] and is used at the C level here. */
+ *              from @[NeonNTT] and is used at the C level here. */
 MLK_INTERNAL_API
 void mlk_polyvec_mulcache_compute(mlk_polyvec_mulcache x, const mlk_polyvec a)
 {
@@ -213,7 +213,7 @@ void mlk_polyvec_mulcache_compute(mlk_polyvec_mulcache x, const mlk_polyvec a)
   }
 }
 
-/* Reference: `polyvec_reduce()` in the reference implementation [@REF].
+/* Reference: `polyvec_reduce()` in the reference implementation @[REF].
  *            - We use _unsigned_ canonical outputs, while the reference
  *              implementation uses _signed_ canonical outputs.
  *              Accordingly, we need a conditional addition of MLKEM_Q
@@ -232,7 +232,7 @@ void mlk_polyvec_reduce(mlk_polyvec r)
   mlk_assert_bound_2d(r, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
 }
 
-/* Reference: `polyvec_add()` in the reference implementation [@REF].
+/* Reference: `polyvec_add()` in the reference implementation @[REF].
  *            - We use destructive version (output=first input) to avoid
  *              reasoning about aliasing in the CBMC specification */
 MLK_INTERNAL_API
@@ -245,7 +245,7 @@ void mlk_polyvec_add(mlk_polyvec r, const mlk_polyvec b)
   }
 }
 
-/* Reference: `polyvec_tomont()` in the reference implementation [@REF]. */
+/* Reference: `polyvec_tomont()` in the reference implementation @[REF]. */
 MLK_INTERNAL_API
 void mlk_polyvec_tomont(mlk_polyvec r)
 {
@@ -269,13 +269,13 @@ void mlk_polyvec_tomont(mlk_polyvec r)
  * Arguments:   - mlk_poly *r: pointer to output polynomial
  *              - const uint8_t *buf: pointer to input byte array
  *
- * Specification: Implements [@FIPS203, Algorithm 8, SamplePolyCBD_eta1], where
- *                eta1 is specified per parameter set in [@FIPS203, Table 2]
+ * Specification: Implements @[FIPS203, Algorithm 8, SamplePolyCBD_eta1], where
+ *                eta1 is specified per parameter set in @[FIPS203, Table 2]
  *                and represented as MLKEM_ETA1 here.
  *
  **************************************************/
 
-/* Reference: `poly_cbd_eta1` in the reference implementation [@REF]. */
+/* Reference: `poly_cbd_eta1` in the reference implementation @[REF]. */
 static MLK_INLINE void mlk_poly_cbd_eta1(
     mlk_poly *r, const uint8_t buf[MLKEM_ETA1 * MLKEM_N / 4])
 __contract__(
@@ -294,7 +294,7 @@ __contract__(
 #endif
 }
 
-/* Reference: Does not exist in the reference implementation [@REF].
+/* Reference: Does not exist in the reference implementation @[REF].
  *            - This implements a x4-batched version of `poly_getnoise_eta1()`
  *              from the reference implementation, to leverage
  *              batched Keccak-f1600.*/
@@ -326,7 +326,7 @@ void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
   mlk_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA1 + 1);
 
   /* Specification: Partially implements
-   * [@FIPS203, Section 3.3, Destruction of intermediate values] */
+   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(buf, sizeof(buf));
   mlk_zeroize(extkey, sizeof(extkey));
 }
@@ -342,13 +342,13 @@ void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
  * Arguments:   - mlk_poly *r: pointer to output polynomial
  *              - const uint8_t *buf: pointer to input byte array
  *
- * Specification: Implements [@FIPS203, Algorithm 8, SamplePolyCBD_eta2], where
- *                eta2 is specified per parameter set in [@FIPS203, Table 2]
+ * Specification: Implements @[FIPS203, Algorithm 8, SamplePolyCBD_eta2], where
+ *                eta2 is specified per parameter set in @[FIPS203, Table 2]
  *                and represented as MLKEM_ETA2 here.
  *
  **************************************************/
 
-/* Reference: `poly_cbd_eta2` in the reference implementation [@REF]. */
+/* Reference: `poly_cbd_eta2` in the reference implementation @[REF]. */
 static MLK_INLINE void mlk_poly_cbd_eta2(
     mlk_poly *r, const uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4])
 __contract__(
@@ -364,7 +364,7 @@ __contract__(
 #endif
 }
 
-/* Reference: `poly_getnoise_eta1()` in the reference implementation [@REF].
+/* Reference: `poly_getnoise_eta1()` in the reference implementation @[REF].
  *            - We include buffer zeroization. */
 MLK_INTERNAL_API
 void mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
@@ -382,14 +382,14 @@ void mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
   mlk_assert_abs_bound(r, MLKEM_N, MLKEM_ETA1 + 1);
 
   /* Specification: Partially implements
-   * [@FIPS203, Section 3.3, Destruction of intermediate values] */
+   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(buf, sizeof(buf));
   mlk_zeroize(extkey, sizeof(extkey));
 }
 #endif /* MLKEM_K == 2 || MLKEM_K == 4 */
 
 #if MLKEM_K == 2
-/* Reference: Does not exist in the reference implementation [@REF].
+/* Reference: Does not exist in the reference implementation @[REF].
  *            - This implements a x4-batched version of `poly_getnoise_eta1()`
  *              and `poly_getnoise_eta1()` from the reference implementation,
  *              leveraging batched Keccak-f1600.
@@ -441,7 +441,7 @@ void mlk_poly_getnoise_eta1122_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
   mlk_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA2 + 1);
 
   /* Specification: Partially implements
-   * [@FIPS203, Section 3.3, Destruction of intermediate values] */
+   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(buf, sizeof(buf));
   mlk_zeroize(extkey, sizeof(extkey));
 }

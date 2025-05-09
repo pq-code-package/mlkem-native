@@ -19,7 +19,7 @@
 
 /*
  * This file is derived from the public domain
- * AVX2 Kyber implementation [@REF_AVX2].
+ * AVX2 Kyber implementation @[REF_AVX2].
  */
 
 #include "../../../common.h"
@@ -76,7 +76,7 @@ void mlk_polyvec_basemul_acc_montgomery_cached_avx2(unsigned k,
   }
 
   /* Specification: Partially implements
-   * [@FIPS203, Section 3.3, Destruction of intermediate values] */
+   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(t, sizeof(t));
 }
 

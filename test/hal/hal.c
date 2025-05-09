@@ -153,7 +153,7 @@ uint64_t get_cyclecounter(void)
   return cpu_cycles;
 }
 #elif defined(MAC_CYCLES)
-/* Based on [@m1cycles] */
+/* Based on @[m1cycles] */
 
 #include <dlfcn.h>
 #include <pthread.h>
