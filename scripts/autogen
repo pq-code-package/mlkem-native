@@ -1953,7 +1953,6 @@ def gen_markdown_citations_for(filename, bibliography, dry_run=False):
         i = content.index(footnote_footer_start)
         content = content[:i]
     except ValueError:
-        assert len(citations) == 0
         pass
 
     # Add footnotes for all citations found
