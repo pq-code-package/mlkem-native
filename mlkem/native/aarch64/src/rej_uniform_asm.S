@@ -19,8 +19,8 @@
  * Returns number of sampled 16-bit integers (at most MLKEM_N).
  **************************************************/
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64)  \
-    && !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_AARCH64) && \
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
@@ -47,6 +47,18 @@ MLK_ASM_FN_SYMBOL(rej_uniform_asm)
         mov	w11, #0xd01             // =3329
         dup	v30.8h, w11
         mov	x8, sp
+        mov	x7, x8
+        mov	w11, #0x0               // =0
+        eor	v16.16b, v16.16b, v16.16b
+
+initial_zero:
+        str	q16, [x7], #0x40
+        stur	q16, [x7, #-0x30]
+        stur	q16, [x7, #-0x20]
+        stur	q16, [x7, #-0x10]
+        add	w11, w11, #0x20
+        cmp	w11, #0x100
+        b.lt	initial_zero
         mov	x7, x8
         mov	w9, #0x0                // =0
         mov	w4, #0x100              // =256

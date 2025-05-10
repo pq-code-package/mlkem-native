@@ -56,6 +56,7 @@
 
     /* Temporary registers */
     tmp                         .req w11
+    initial_zero_count          .req w11
     final_copy_count            .req w11
 
     rec_idx_0                   .req w12
@@ -136,6 +137,22 @@ MLK_ASM_FN_SYMBOL(rej_uniform_asm)
     dup  mlkem_q.8h, tmp
 
     add output_tmp_base, sp, #STACK_OFFSET_TMP_OUTPUT
+    mov output_tmp, output_tmp_base
+
+    // The entire temporary stack buffer is copied to the output buffer
+    // at the end of this routine. To avoid leaking original stack contents
+    // in case not enough bytes have been sampled, zero the temporary buffer.
+    mov initial_zero_count, #0
+    eor val0.16b, val0.16b, val0.16b
+initial_zero:
+        str val0q, [output_tmp], #64
+        str val0q, [output_tmp, #-48]
+        str val0q, [output_tmp, #-32]
+        str val0q, [output_tmp, #-16]
+        add initial_zero_count, initial_zero_count, #32
+        cmp initial_zero_count, #MLKEM_N
+        b.lt initial_zero
+
     mov output_tmp, output_tmp_base
 
     mov count, #0
@@ -359,6 +376,7 @@ return:
     .unreq tmp
     .unreq xtmp
     .unreq final_copy_count
+    .unreq initial_zero_count
     .unreq rec_idx_0
     .unreq rec_idx_1
     .unreq rec_idx_2
