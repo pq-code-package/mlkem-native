@@ -1862,7 +1862,7 @@ def gen_slothy(funcs, dry_run=False):
         if t.endswith(".S"):
             subprocess.run(["rm", "-f", f"{base}/{t}"])
 
-        p = subprocess.run(["make"] + targets + ["-C", base])
+        p = subprocess.run(["make", t] + ["-C", base])
         if p.returncode != 0:
             print(f"Failed to run SLOTHY on {t}!")
             exit(1)
