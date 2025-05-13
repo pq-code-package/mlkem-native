@@ -73,6 +73,7 @@ OBJ = mlkem/mlkem_ntt.o                                   \
       mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o \
       mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.o \
       mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.o \
+      mlkem/mlkem_rej_uniform.o				  \
       mlkem/keccak_f1600_x1_scalar.o                      \
       mlkem/keccak_f1600_x1_v84a.o                        \
       mlkem/keccak_f1600_x2_v84a.o                        \

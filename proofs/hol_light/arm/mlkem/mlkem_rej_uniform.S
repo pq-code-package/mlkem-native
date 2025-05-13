@@ -18,9 +18,6 @@
  *
  * Returns number of sampled 16-bit integers (at most MLKEM_N).
  **************************************************/
-#include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
@@ -30,8 +27,13 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(rej_uniform_asm)
-MLK_ASM_FN_SYMBOL(rej_uniform_asm)
+#ifdef __APPLE__
+.global _PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_asm
+_PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_asm:
+#else
+.global PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_asm
+PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_asm:
+#endif
 
         sub	sp, sp, #0x240
         mov	x7, #0x1                // =1
@@ -195,5 +197,3 @@ final_copy:
 return:
         add	sp, sp, #0x240
         ret
-
-#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

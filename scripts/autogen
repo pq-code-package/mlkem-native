@@ -1502,6 +1502,12 @@ def gen_hol_light_asm(dry_run=False):
             "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
         ),
         (
+            "rej_uniform_asm.S",
+            "mlkem_rej_uniform.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+        ),
+        (
             "keccak_f1600_x1_scalar_asm.S",
             "keccak_f1600_x1_scalar.S",
             "dev/fips202/aarch64/src",
