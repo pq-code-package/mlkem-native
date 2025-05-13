@@ -1847,21 +1847,22 @@ def gen_slothy(funcs, dry_run=False):
 
     if not isinstance(funcs, list):
         return
-    elif len(funcs) == 0:
-        targets = ["all"]
-    else:
-        targets = list(map(lambda s: s + ".S", funcs))
+
+    targets = list(map(lambda s: s + ".S", funcs))
 
     for t in targets:
         status_update("SLOTHY", f"Regenerating {t}")
 
+        if t.startswith("keccak"):
+            base = "dev/fips202/aarch64/src"
+        else:
+            base = "dev/aarch64_opt/src"
+
         # Remove file(s) to be re-generated
         if t.endswith(".S"):
-            subprocess.run(["rm", "-f", f"dev/aarch64_opt/src/{t}"])
-        elif t == "all":
-            subprocess.run(["make", "clean", "-C", "dev/aarch64_opt/src"])
+            subprocess.run(["rm", "-f", f"{base}/{t}"])
 
-        p = subprocess.run(["make"] + targets + ["-C", "dev/aarch64_opt/src"])
+        p = subprocess.run(["make", t] + ["-C", base])
         if p.returncode != 0:
             print(f"Failed to run SLOTHY on {t}!")
             exit(1)
@@ -2161,6 +2162,7 @@ def _main():
         "polyvec_basemul_acc_montgomery_cached_asm_k3",
         "polyvec_basemul_acc_montgomery_cached_asm_k4",
         "rej_uniform_asm",
+        "keccak_f1600_x1_scalar_asm",
     ]
 
     parser = argparse.ArgumentParser(
@@ -2178,6 +2180,8 @@ def _main():
 
     gen_citations(args.dry_run)
 
+    if args.slothy == []:
+        args.slothy = slothy_choices
     gen_slothy(args.slothy, args.dry_run)
 
     check_asm_register_aliases()
