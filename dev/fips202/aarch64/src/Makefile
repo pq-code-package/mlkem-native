@@ -68,7 +68,42 @@ keccak_f1600_x4_v8a_scalar_hybrid_asm.S: ../../aarch64_symbolic/keccak_f1600_x4_
            -s keccak_f1600_x4_v8a_scalar_hybrid_loop \
            -e keccak_f1600_x4_v8a_scalar_hybrid_loop_end
 
-ALL=keccak_f1600_x1_scalar_asm.S keccak_f1600_x4_v8a_scalar_hybrid_asm.S
+keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S: ../../aarch64_symbolic/keccak_f1600_x4_v8a_v84a_scalar_hybrid_clean.S
+	slothy-cli Arm_AArch64 Arm_Cortex_A55 \
+	   $^ -o $@                           \
+	   -c reserved_regs="[x18,sp]"        \
+	   -c inputs_are_outputs \
+	   -c variable_size \
+	   -c constraints.stalls_first_attempt=64 \
+	   -c split_heuristic \
+	   -c split_heuristic_repeat=0 \
+	   -c split_heuristic_preprocess_naive_interleaving \
+	   -c split_heuristic_preprocess_naive_interleaving_strategy="alternate" \
+	   -c split_heuristic_estimate_performance=False \
+	   -c absorb_spills=False \
+           -c outputs="[hint_STACK_OFFSET_COUNT]" \
+           -s keccak_f1600_x4_v8a_v84a_scalar_hybrid_initial \
+           -e keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop
+
+	slothy-cli Arm_AArch64 Arm_Cortex_A55 \
+	   $@ -o $@                           \
+	   -c reserved_regs="[x18,sp]"        \
+	   -c inputs_are_outputs \
+	   -c variable_size \
+	   -c constraints.stalls_first_attempt=64 \
+	   -c split_heuristic \
+	   -c split_heuristic_repeat=0 \
+	   -c split_heuristic_preprocess_naive_interleaving \
+	   -c split_heuristic_preprocess_naive_interleaving_strategy="alternate" \
+	   -c split_heuristic_estimate_performance=False \
+           -c outputs="[hint_STACK_OFFSET_COUNT]" \
+	   -c absorb_spills=False \
+           -s keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop \
+           -e keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop_end
+
+ALL=keccak_f1600_x1_scalar_asm.S                \
+  keccak_f1600_x4_v8a_scalar_hybrid_asm.S       \
+  keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S
 
 all: $(ALL)
 
