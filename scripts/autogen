@@ -2169,6 +2169,7 @@ def _main():
         "polyvec_basemul_acc_montgomery_cached_asm_k4",
         "rej_uniform_asm",
         "keccak_f1600_x1_scalar_asm",
+        "keccak_f1600_x4_v8a_scalar_hybrid_asm",
     ]
 
     parser = argparse.ArgumentParser(
