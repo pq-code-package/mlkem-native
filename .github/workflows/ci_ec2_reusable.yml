@@ -192,6 +192,10 @@ jobs:
             # We can't run the examples here because some of them also specify the backend
             make clean
             tests all --no-examples --opt opt --cflags="-DMLK_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x1_scalar.h\\\""
+            make clean
+            tests all --no-examples --opt opt --cflags="-DMLK_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x4_v8a_scalar.h\\\""
+            make clean
+            tests all --no-examples --opt opt --cflags="-march=armv8.4-a+sha3 -DMLK_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x4_v8a_v84a_scalar.h\\\""
   stop-ec2-runner:
     name: Stop instance (${{ inputs.ec2_instance_type }})
     permissions:

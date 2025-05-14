@@ -885,6 +885,8 @@ keccak_f1600_x4_v8a_scalar_hybrid_loop:
         ld1r	{ v28.2d }, [x30], #8
         str	x30, [sp, #0x10]
         eor	v0.16b, v0.16b, v28.16b
+
+keccak_f1600_x4_v8a_scalar_hybrid_loop_end:
         b.le	keccak_f1600_x4_v8a_scalar_hybrid_loop
         ror	x2, x2, #0x3d
         ror	x3, x3, #0x27
