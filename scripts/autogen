@@ -669,23 +669,24 @@ def gen_aarch64_mulcache_twiddles_twisted():
         yield prepare_root_for_barrett(root)[1]
 
 
-def print_hol_light_int_array(g):
+def print_hol_light_array(g, as_int=True, entries_per_line=8, pad=0):
 
     # Format of integer list entries, including `;` separator:
     # - Positive numbers: &42;
     # - Negative numbers: -- &42;
+    # If as_int is false, we omit `&` and emit constant as numerals.
     def format_hol_light_int(n):
         prefix = ""
         if n < 0:
             prefix = "-- "
             n = -n
-        return f"{prefix}&{n};"
+        c = "&" if as_int is True else ""
+        return f"{prefix}{c}{n:>{pad}};"
 
     l = list(map(format_hol_light_int, g))
     # Remove `;` from end of last entry
     l[-1] = l[-1][:-1]
 
-    entries_per_line = 8
     for i in range(0, len(l), entries_per_line):
         yield "  " + " ".join(l[i : i + entries_per_line])
 
@@ -699,19 +700,19 @@ def gen_aarch64_hol_light_zeta_file(dry_run=False):
         yield " *)"
         yield ""
         yield "let ntt_zetas_layer12345 = define `ntt_zetas_layer12345:int list = ["
-        yield from print_hol_light_int_array(gen_aarch64_fwd_ntt_zetas_layer12345())
+        yield from print_hol_light_array(gen_aarch64_fwd_ntt_zetas_layer12345())
         yield "]`;;"
         yield ""
         yield "let ntt_zetas_layer67 = define `ntt_zetas_layer67:int list = ["
-        yield from print_hol_light_int_array(gen_aarch64_fwd_ntt_zetas_layer67())
+        yield from print_hol_light_array(gen_aarch64_fwd_ntt_zetas_layer67())
         yield "]`;;"
         yield ""
         yield "let intt_zetas_layer12345 = define `intt_zetas_layer12345:int list = ["
-        yield from print_hol_light_int_array(gen_aarch64_inv_ntt_zetas_layer12345())
+        yield from print_hol_light_array(gen_aarch64_inv_ntt_zetas_layer12345())
         yield "]`;;"
         yield ""
         yield "let intt_zetas_layer67 = define `intt_zetas_layer67:int list = ["
-        yield from print_hol_light_int_array(gen_aarch64_inv_ntt_zetas_layer67())
+        yield from print_hol_light_array(gen_aarch64_inv_ntt_zetas_layer67())
         yield "]`;;"
         yield ""
 
@@ -796,8 +797,30 @@ def gen_aarch64_rej_uniform_table_rows():
         # Replace each index by two consecutive indices
         idxs = [j for i in idxs for j in [2 * i, 2 * i + 1]]
         # Pad by -1
-        idxs = idxs + [-1] * (16 - len(idxs))
-        yield ",".join(map(str, idxs)) + f" /* {i} */"
+        idxs = idxs + [255] * (16 - len(idxs))
+        yield idxs
+
+
+def gen_aarch64_hol_light_rej_uniform_table(dry_run=False):
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * Constant table values used in the AArch64 rejection sampling."
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        yield "let mlkem_rej_uniform_table = (REWRITE_RULE[MAP] o define)"
+        yield "  `mlkem_rej_uniform_table:byte list = MAP word ["
+        data = [i for idxs in gen_aarch64_rej_uniform_table_rows() for i in idxs]
+        yield from print_hol_light_array(data, as_int=False, entries_per_line=16, pad=3)
+        yield "]`;;"
+        yield ""
+
+    update_file(
+        "proofs/hol_light/arm/proofs/mlkem_rej_uniform_table.ml",
+        "\n".join(gen()),
+        dry_run=dry_run,
+    )
 
 
 def gen_aarch64_rej_uniform_table(dry_run=False):
@@ -816,7 +839,8 @@ def gen_aarch64_rej_uniform_table(dry_run=False):
         yield " * See autogen for details."
         yield " */"
         yield "MLK_ALIGN const uint8_t mlk_rej_uniform_table[] = {"
-        yield from map(lambda t: str(t) + ",", gen_aarch64_rej_uniform_table_rows())
+        for i, idxs in enumerate(gen_aarch64_rej_uniform_table_rows()):
+            yield ",".join(map(str, idxs)) + f" /* {i} */,"
         yield "};"
         yield ""
         yield "#else"
@@ -2196,6 +2220,7 @@ def _main():
 
     gen_c_zeta_file(args.dry_run)
     gen_aarch64_hol_light_zeta_file(args.dry_run)
+    gen_aarch64_hol_light_rej_uniform_table(args.dry_run)
     gen_aarch64_zeta_file(args.dry_run)
     gen_aarch64_rej_uniform_table(args.dry_run)
     gen_avx2_zeta_file(args.dry_run)
