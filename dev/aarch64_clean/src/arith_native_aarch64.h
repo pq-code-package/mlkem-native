@@ -36,7 +36,7 @@ void mlk_ntt_asm(int16_t *, const int16_t *, const int16_t *);
 void mlk_intt_asm(int16_t *, const int16_t *, const int16_t *);
 
 #define mlk_rej_uniform_asm MLK_NAMESPACE(rej_uniform_asm)
-unsigned mlk_rej_uniform_asm(int16_t *r, const uint8_t *buf, unsigned buflen,
+uint64_t mlk_rej_uniform_asm(int16_t *r, const uint8_t *buf, unsigned buflen,
                              const uint8_t *table);
 
 #define mlk_poly_reduce_asm MLK_NAMESPACE(poly_reduce_asm)

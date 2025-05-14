@@ -27,7 +27,6 @@
 // output buffer only in the end. This is because the main loop can overwrite
 // by up to 62 bytes, which we account for here (we use 64 bytes for alignment).
 #define STACK_SIZE (2*MLKEM_N + 64)
-#define STACK_OFFSET_TMP_OUTPUT 0
 
 .macro push_stack
         sub sp, sp, #STACK_SIZE
@@ -40,10 +39,10 @@
     /* Parameters */
     output                      .req x0
     buf                         .req x1
-    buflen                      .req w2
+    buflen                      .req x2
     table_idx                   .req x3
 
-    len                         .req w4
+    len                         .req x4
 
     /* Temporary output on the stack */
     xtmp                        .req x7
@@ -51,23 +50,33 @@
     output_tmp_base             .req x8
 
     /* Number of coefficients sampled so far */
-    count                       .req w9
-    buf_consumed                .req w10
+    count                       .req x9
+    buf_consumed                .req x10
 
     /* Temporary registers */
     tmp                         .req w11
-    initial_zero_count          .req w11
-    final_copy_count            .req w11
+    initial_zero_count          .req x11
+    final_copy_count            .req x11
 
-    rec_idx_0                   .req w12
-    rec_idx_1                   .req w13
-    rec_idx_2                   .req w14
-    rec_idx_3                   .req w15
+    rec_idx_0                   .req x12
+    rec_idx_1                   .req x13
+    rec_idx_2                   .req x14
+    rec_idx_3                   .req x15
 
-    ctr0                        .req w12
-    ctr1                        .req w13
-    ctr2                        .req w14
-    ctr3                        .req w15
+    rec_idx_0_w                 .req w12
+    rec_idx_1_w                 .req w13
+    rec_idx_2_w                 .req w14
+    rec_idx_3_w                 .req w15
+
+    ctr0                        .req x12
+    ctr1                        .req x13
+    ctr2                        .req x14
+    ctr3                        .req x15
+
+    ctr0_w                      .req w12
+    ctr1_w                      .req w13
+    ctr2_w                      .req w14
+    ctr3_w                      .req w15
 
     ctr01                       .req ctr0
     ctr23                       .req ctr2
@@ -136,7 +145,7 @@ MLK_ASM_FN_SYMBOL(rej_uniform_asm)
     movz tmp, #MLKEM_Q
     dup  mlkem_q.8h, tmp
 
-    add output_tmp_base, sp, #STACK_OFFSET_TMP_OUTPUT
+    mov output_tmp_base, sp
     mov output_tmp, output_tmp_base
 
     // The entire temporary stack buffer is copied to the output buffer
@@ -221,15 +230,15 @@ loop48:
         uaddlv  t2, sign2.8h
         uaddlv  t3, sign3.8h
 
-        fmov    rec_idx_0, t0
-        fmov    rec_idx_1, t1
-        fmov    rec_idx_2, t2
-        fmov    rec_idx_3, t3
+        fmov    rec_idx_0_w, t0
+        fmov    rec_idx_1_w, t1
+        fmov    rec_idx_2_w, t2
+        fmov    rec_idx_3_w, t3
 
-        ldr     table0q, [table_idx, rec_idx_0, uxtw #4]
-        ldr     table1q, [table_idx, rec_idx_1, uxtw #4]
-        ldr     table2q, [table_idx, rec_idx_2, uxtw #4]
-        ldr     table3q, [table_idx, rec_idx_3, uxtw #4]
+        ldr     table0q, [table_idx, rec_idx_0, lsl #4]
+        ldr     table1q, [table_idx, rec_idx_1, lsl #4]
+        ldr     table2q, [table_idx, rec_idx_2, lsl #4]
+        ldr     table3q, [table_idx, rec_idx_3, lsl #4]
 
         // Compute number of valid coefficients. Recall that at this
         // point, lane i has value 2^i (hence popcount 1) if its coefficient
@@ -245,10 +254,10 @@ loop48:
         uaddlv  t2, sign2.8h
         uaddlv  t3, sign3.8h
 
-        fmov    ctr0, t0
-        fmov    ctr1, t1
-        fmov    ctr2, t2
-        fmov    ctr3, t3
+        fmov    ctr0_w, t0
+        fmov    ctr1_w, t1
+        fmov    ctr2_w, t2
+        fmov    ctr3_w, t3
 
         // Move valid coefficients to the front
         tbl     val0.16b, {val0.16b}, table0.16b
@@ -257,16 +266,16 @@ loop48:
         tbl     val3.16b, {val3.16b}, table3.16b
 
         str     val0q, [output_tmp]
-        add     output_tmp, output_tmp, ctr0, uxtw #1
+        add     output_tmp, output_tmp, ctr0, lsl #1
 
         str     val1q, [output_tmp]
-        add     output_tmp, output_tmp, ctr1, uxtw #1
+        add     output_tmp, output_tmp, ctr1, lsl #1
 
         str     val2q, [output_tmp]
-        add     output_tmp, output_tmp, ctr2, uxtw #1
+        add     output_tmp, output_tmp, ctr2, lsl #1
 
         str     val3q, [output_tmp]
-        add     output_tmp, output_tmp, ctr3, uxtw #1
+        add     output_tmp, output_tmp, ctr3, lsl #1
 
         add     ctr01, ctr0, ctr1
         add     ctr23, ctr2, ctr3
@@ -305,11 +314,11 @@ loop48_end:
         uaddlv  t0, sign0.8h
         uaddlv  t1, sign1.8h
 
-        fmov    rec_idx_0, t0
-        fmov    rec_idx_1, t1
+        fmov    rec_idx_0_w, t0
+        fmov    rec_idx_1_w, t1
 
-        ldr     table0q, [table_idx, rec_idx_0, uxtw #4]
-        ldr     table1q, [table_idx, rec_idx_1, uxtw #4]
+        ldr     table0q, [table_idx, rec_idx_0, lsl #4]
+        ldr     table1q, [table_idx, rec_idx_1, lsl #4]
 
         cnt     sign0.16b, sign0.16b
         cnt     sign1.16b, sign1.16b
@@ -317,17 +326,17 @@ loop48_end:
         uaddlv  t0, sign0.8h
         uaddlv  t1, sign1.8h
 
-        fmov    ctr0, t0
-        fmov    ctr1, t1
+        fmov    ctr0_w, t0
+        fmov    ctr1_w, t1
 
         tbl     val0.16b, {val0.16b}, table0.16b
         tbl     val1.16b, {val1.16b}, table1.16b
 
         str     val0q, [output_tmp]
-        add     output_tmp, output_tmp, ctr0, uxtw #1
+        add     output_tmp, output_tmp, ctr0, lsl #1
 
         str     val1q, [output_tmp]
-        add     output_tmp, output_tmp, ctr1, uxtw #1
+        add     output_tmp, output_tmp, ctr1, lsl #1
 
         add     count, count, ctr0
         add     count, count, ctr1
@@ -355,7 +364,7 @@ final_copy:
         cmp final_copy_count, #MLKEM_N
         b.lt final_copy
 
-    mov w0, count
+    mov x0, count
     b return
 
 return:
@@ -420,6 +429,14 @@ return:
     .unreq table3q
     .unreq mlkem_q
     .unreq bits
+    .unreq rec_idx_0_w
+    .unreq rec_idx_1_w
+    .unreq rec_idx_2_w
+    .unreq rec_idx_3_w
+    .unreq ctr0_w
+    .unreq ctr1_w
+    .unreq ctr2_w
+    .unreq ctr3_w
 
 /* simpasm: footer-start */
 #endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
