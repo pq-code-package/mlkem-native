@@ -23,7 +23,7 @@ buildEnv {
         };
       });
       litani = callPackage ./litani.nix { }; # 1.29.0
-      cbmc-viewer = callPackage ./cbmc-viewer.nix { }; # 3.10
+      cbmc-viewer = callPackage ./cbmc-viewer.nix { }; # 3.11
 
       inherit
         cadical#1.9.5
