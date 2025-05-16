@@ -69,6 +69,10 @@
 #error "MLK_FORCE_PPC64LE is set, but we don't seem to be on a PPC64LE system."
 #endif
 
+#if defined(MLK_FORCE_RISCV64) && !defined(MLK_SYS_RISCV64)
+#error "MLK_FORCE_RISCV64 is set, but we don't seem to be on a RISCV64 system."
+#endif
+
 /*
  * C90 does not have the inline compiler directive yet.
  * We don't use it in C90 builds.
