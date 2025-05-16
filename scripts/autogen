@@ -1496,6 +1496,12 @@ def gen_hol_light_asm(dry_run=False):
             "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
         ),
         (
+            "poly_tobytes_asm.S",
+            "mlkem_poly_tobytes.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+        ),
+        (
             "poly_reduce_asm.S",
             "mlkem_poly_reduce.S",
             "dev/aarch64_opt/src",
