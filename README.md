@@ -16,9 +16,9 @@
 mlkem-native is a secure, fast, and portable C90 implementation of ML-KEM[^FIPS203].
 It is a fork of the ML-KEM reference implementation[^REF].
 
-All C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202) is formally verified using [CBMC](https://github.com/diffblue/cbmc)
-to be memory-safe (no buffer overflow) and type-safe (no integer overflow). [HOL-Light](https://github.com/jrh13/hol-light) is used to
-verify the functional correctness of core AArch64 assembly routines.
+All C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202) is proved memory-safe (no memory overflow) and type-safe (no integer overflow)
+using [CBMC](https://github.com/diffblue/cbmc). All AArch64 assembly is proved functionally correct at the object code level using
+[HOL-Light](https://github.com/jrh13/hol-light).
 
 mlkem-native includes fast assembly for AArch64 and AVX2, offering competitive performance on most Arm, Intel, and AMD platforms
 (see [benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/)).
@@ -52,6 +52,16 @@ See [BUILDING.md](BUILDING.md) for more information.
 
 mlkem-native is used in [libOQS](https://github.com/open-quantum-safe/liboqs/) of the Open Quantum Safe project, and in AWS' Cryptography library [AWS-LC](https://github.com/aws/aws-lc/).
 
+## Formal Verification
+
+All C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202) is proved memory-safe (no memory overflow) and type-safe (no integer overflow).
+This uses the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) and builds on function contracts and loop invariant annotations
+in the source code. See [proofs/cbmc](proofs/cbmc) for details.
+
+All AArch64 assembly is proved functionally correct at the object-code level. This uses the [HOL-Light](https://github.com/jrh13/hol-light)
+interactive theorem prover and the [s2n-bignum](https://github.com/awslabs/s2n-bignum/) verification infrastructure (which includes a model of the
+relevant parts of the Arm architecture). See [proofs/hol_light/arm](proofs/hol_light/arm) for details.
+
 ## Security
 
 All assembly in mlkem-native is constant-time in the sense that it is free of secret-dependent control flow, memory access,
@@ -61,15 +71,6 @@ through suitable barriers and constant-time patterns.
 
 Absence of secret-dependent branches, memory-access patterns and variable-latency instructions is also tested using `valgrind`
 with various combinations of compilers and compilation options.
-
-## Formal Verification
-
-We use the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) to prove absence of various classes of
-undefined behaviour in C, including out of bounds memory accesses and integer overflows. The proofs cover
-all C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202) involved in running mlkem-native with its C backend.
-See [proofs/cbmc](proofs/cbmc) for details.
-
-The functional correctness of core AArch64 assembly routines is established using [HOL-Light](https://github.com/jrh13/hol-light) and the [s2n-bignum](https://github.com/awslabs/s2n-bignum/) verification infrastructure. See [proofs/hol_light/arm](proofs/hol_light/arm) for the list of functions covered, and the proofs.
 
 ## State
 
