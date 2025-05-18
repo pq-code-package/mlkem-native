@@ -378,7 +378,8 @@ let poly_basemul_acc_montgomery_cached_k2_SPEC = prove(poly_basemul_acc_montgome
     CONV_TAC INT_RING
 );;
 
-(* NOTE: This needs to be kept in sync with the CBMC spec in native/api.h *)
+(* NOTE: This needs to be kept in sync with the CBMC spec in
+ * mlkem/native/aarch64/src/arith_native_aarch64.h *)
 let poly_basemul_acc_montgomery_cached_k2_SPEC' = prove(
    `forall srcA srcB srcBt dst x0 y0 y0t x1 y1 y1t pc returnaddress stackpointer.
       aligned 16 stackpointer /\
