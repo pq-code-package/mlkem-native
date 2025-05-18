@@ -82,8 +82,19 @@ __contract__(
 );
 
 #define mlk_poly_mulcache_compute_asm MLK_NAMESPACE(poly_mulcache_compute_asm)
-void mlk_poly_mulcache_compute_asm(int16_t *, const int16_t *, const int16_t *,
-                                   const int16_t *);
+void mlk_poly_mulcache_compute_asm(int16_t *cache, const int16_t *mlk_poly,
+                                   const int16_t *zetas,
+                                   const int16_t *zetas_twisted)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/arm/proofs/mlkem_poly_mulcache_compute.ml */
+__contract__(
+  requires(memory_no_alias(cache, sizeof(int16_t) * (MLKEM_N / 2)))
+  requires(memory_no_alias(mlk_poly, sizeof(int16_t) * MLKEM_N))
+  requires(zetas == mlk_aarch64_zetas_mulcache_native)
+  requires(zetas_twisted == mlk_aarch64_zetas_mulcache_twisted_native)
+  assigns(object_whole(cache))
+  ensures(array_abs_bound(cache, 0, MLKEM_N / 2, MLKEM_Q))
+);
 
 #define mlk_poly_tobytes_asm MLK_NAMESPACE(poly_tobytes_asm)
 void mlk_poly_tobytes_asm(uint8_t *r, const int16_t *a)
