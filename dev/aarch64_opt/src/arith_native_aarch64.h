@@ -6,6 +6,7 @@
 #define MLK_DEV_AARCH64_OPT_SRC_ARITH_NATIVE_AARCH64_H
 
 #include <stdint.h>
+#include "../../../cbmc.h"
 #include "../../../common.h"
 
 #define mlk_aarch64_ntt_zetas_layer12345 \
@@ -71,6 +72,17 @@ void mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(int16_t *r,
 
 #define mlk_rej_uniform_asm MLK_NAMESPACE(rej_uniform_asm)
 uint64_t mlk_rej_uniform_asm(int16_t *r, const uint8_t *buf, unsigned buflen,
-                             const uint8_t *table);
+                             const uint8_t *table)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/arm/proofs/mlkem_rej_uniform.ml. */
+__contract__(
+    requires(buflen % 24 == 0)
+    requires(memory_no_alias(buf, buflen))
+    requires(table == mlk_rej_uniform_table)
+    requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
+    assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+    ensures(return_value <= MLKEM_N)
+    ensures(array_bound(r, 0, (unsigned) return_value, 0, MLKEM_Q))
+);
 
 #endif /* !MLK_DEV_AARCH64_OPT_SRC_ARITH_NATIVE_AARCH64_H */
