@@ -75,6 +75,9 @@ let POLY_TOMONT_EXEC = ARM_MK_EXEC_RULE poly_tomont_asm_mc;;
 (* Specification                                                             *)
 (* ------------------------------------------------------------------------- *)
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
+
 let POLY_TOMONT_GOAL = `forall pc ptr x returnaddress.
     nonoverlapping (word pc, LENGTH poly_tomont_asm_mc) (ptr, 512)
     ==>
