@@ -168,6 +168,9 @@ let lemma =
   CONV_RULE(EXPAND_CASES_CONV THENC
             DEPTH_CONV (NUM_RED_CONV ORELSEC EL_CONV)) th';;
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
+
 let MLKEM_POLY_TOBYTES_CORRECT = prove
  (`!r a (l:int16 list) pc.
         ALL (nonoverlapping (r,384)) [(word pc,0x158); (a,512)]
