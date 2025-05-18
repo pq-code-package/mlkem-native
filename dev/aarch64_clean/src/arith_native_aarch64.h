@@ -79,7 +79,15 @@ void mlk_poly_mulcache_compute_asm(int16_t *, const int16_t *, const int16_t *,
                                    const int16_t *);
 
 #define mlk_poly_tobytes_asm MLK_NAMESPACE(poly_tobytes_asm)
-void mlk_poly_tobytes_asm(uint8_t *r, const int16_t *a);
+void mlk_poly_tobytes_asm(uint8_t *r, const int16_t *a)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/arm/proofs/mlkem_poly_tobytes.ml */
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYBYTES))
+  requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_N))
+  requires(array_bound(a, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT))
+  assigns(object_whole(r))
+);
 
 #define mlk_polyvec_basemul_acc_montgomery_cached_asm_k2 \
   MLK_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2)
