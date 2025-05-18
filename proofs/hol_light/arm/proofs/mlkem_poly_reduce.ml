@@ -118,6 +118,9 @@ let overall_lemma = prove
   REWRITE_TAC[MATCH_MP lemma_rem (CONGBOUND_RULE `barred x`)] THEN
   BITBLAST_TAC);;
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
+
 let MLKEM_POLY_REDUCE_CORRECT = prove
  (`!a x pc.
         nonoverlapping (word pc,0x124) (a,512)

@@ -62,7 +62,14 @@ __contract__(
 );
 
 #define mlk_poly_reduce_asm MLK_NAMESPACE(poly_reduce_asm)
-void mlk_poly_reduce_asm(int16_t *);
+void mlk_poly_reduce_asm(int16_t *p)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/arm/proofs/mlkem_poly_reduce.ml */
+__contract__(
+  requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
+  assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
+  ensures(array_bound(p, 0, MLKEM_N, 0, MLKEM_Q))
+);
 
 #define mlk_poly_tomont_asm MLK_NAMESPACE(poly_tomont_asm)
 void mlk_poly_tomont_asm(int16_t *p)
