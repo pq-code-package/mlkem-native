@@ -47,7 +47,19 @@ __contract__(
 );
 
 #define mlk_intt_asm MLK_NAMESPACE(intt_asm)
-void mlk_intt_asm(int16_t *, const int16_t *, const int16_t *);
+void mlk_intt_asm(int16_t *p, const int16_t *twiddles12345,
+                  const int16_t *twiddles56)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/arm/proofs/mlkem_intt.ml */
+__contract__(
+  requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
+  requires(twiddles12345 == mlk_aarch64_invntt_zetas_layer12345)
+  requires(twiddles56 == mlk_aarch64_invntt_zetas_layer67)
+  assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
+  /* check-magic: off */
+  ensures(array_abs_bound(p, 0, MLKEM_N, 26625))
+  /* check-magic: on */
+);
 
 #define mlk_poly_reduce_asm MLK_NAMESPACE(poly_reduce_asm)
 void mlk_poly_reduce_asm(int16_t *);
