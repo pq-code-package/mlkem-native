@@ -180,6 +180,9 @@ let MLKEM_POLY_REDUCE_CORRECT = prove
   ASM_REWRITE_TAC[WORD_ADD_0] THEN DISCARD_STATE_TAC "s276" THEN
   REWRITE_TAC[GSYM barred; overall_lemma]);;
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
+
 let MLKEM_POLY_REDUCE_SUBROUTINE_CORRECT = prove
  (`!a x pc returnaddress.
         nonoverlapping (word pc,0x124) (a,512)
