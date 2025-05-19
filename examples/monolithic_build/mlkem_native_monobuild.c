@@ -455,6 +455,37 @@
 #undef MLK_NTT_BOUND
 /* mlkem/native/meta.h */
 #undef MLK_NATIVE_META_H
+/* mlkem/native/riscv64/meta.h */
+#undef MLK_ARITH_BACKEND_RISCV64
+#undef MLK_NATIVE_RISCV64_META_H
+#undef MLK_USE_NATIVE_INTT
+#undef MLK_USE_NATIVE_NTT
+#undef MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED
+#undef MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE
+#undef MLK_USE_NATIVE_POLY_REDUCE
+#undef MLK_USE_NATIVE_POLY_TOMONT
+#undef MLK_USE_NATIVE_REJ_UNIFORM
+/* mlkem/native/riscv64/src/arith_native_riscv64.h */
+#undef MLK_NATIVE_RISCV64_SRC_ARITH_NATIVE_RISCV64_H
+#undef mlk_rv64v_poly_add
+#undef mlk_rv64v_poly_basemul_mont_add_k2
+#undef mlk_rv64v_poly_basemul_mont_add_k3
+#undef mlk_rv64v_poly_basemul_mont_add_k4
+#undef mlk_rv64v_poly_invntt_tomont
+#undef mlk_rv64v_poly_ntt
+#undef mlk_rv64v_poly_reduce
+#undef mlk_rv64v_poly_sub
+#undef mlk_rv64v_poly_tomont
+#undef mlk_rv64v_rej_uniform
+/* mlkem/native/riscv64/src/rv64v_settings.h */
+#undef MLKEM_QI
+#undef MLK_MONT_NR
+#undef MLK_MONT_R1
+#undef MLK_MONT_R2
+#undef MLK_NATIVE_RISCV64_SRC_RV64V_SETTINGS_H
+#undef MLK_RVV_E16M1_VL
+#undef MLK_RVV_VLEN
+#undef MLK_RVV_WIDENING_MUL
 /* mlkem/native/x86_64/meta.h */
 #undef MLK_ARITH_BACKEND_X86_64_DEFAULT
 #undef MLK_NATIVE_X86_64_META_H

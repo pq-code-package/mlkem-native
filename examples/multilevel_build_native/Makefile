@@ -36,6 +36,7 @@ else ifneq ($(findstring aarch64_be, $(CROSS_PREFIX)),)
 else ifneq ($(findstring aarch64, $(CROSS_PREFIX)),)
 	CFLAGS += -DMLK_FORCE_AARCH64
 else ifneq ($(findstring riscv64, $(CROSS_PREFIX)),)
+	CFLAGS += -march=rv64gcv_zvl256b
 	CFLAGS += -DMLK_FORCE_RISCV64
 else ifneq ($(findstring powerpc64le, $(CROSS_PREFIX)),)
 	CFLAGS += -DMLK_FORCE_PPC64LE
