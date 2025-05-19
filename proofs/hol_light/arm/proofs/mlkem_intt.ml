@@ -482,8 +482,6 @@ let intt_constants = define
 (* Correctness proof.                                                        *)
 (* ------------------------------------------------------------------------- *)
 
-(* NOTE: This must be kept in sync with the CBMC specification
- * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
 
 let MLKEM_INTT_CORRECT = prove
  (`!a z_12345 z_67 x pc.
@@ -577,6 +575,9 @@ let MLKEM_INTT_CORRECT = prove
       CONV_TAC INT_REDUCE_CONV]));;
 
 (*** Subroutine form, somewhat messy elaboration of the usual wrapper ***)
+
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
 
 let MLKEM_INTT_SUBROUTINE_CORRECT = prove
  (`!a z_12345 z_67 x pc stackpointer returnaddress.

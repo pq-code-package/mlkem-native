@@ -455,9 +455,6 @@ let DIMINDEX_384 = DIMINDEX_CONV `dimindex(:384)`;;
 (* Now the actual proof.                                                     *)
 (* ------------------------------------------------------------------------- *)
 
-(* NOTE: This must be kept in sync with the CBMC specification
- * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
-
 let MLKEM_REJ_UNIFORM_CORRECT = prove
  (`!res buf buflen table (inlist:(12 word)list) pc stackpointer.
         24 divides val buflen /\
@@ -1603,6 +1600,9 @@ let MLKEM_REJ_UNIFORM_CORRECT = prove
   SUBST1_TAC(SYM(ASSUME `curlen1 + len1:num = curlen2`)) THEN
   SUBST1_TAC(SYM(ASSUME `curlen + len0:num = curlen1`)) THEN
   CONV_TAC WORD_RULE);;
+
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
 
 let MLKEM_REJ_UNIFORM_SUBROUTINE_CORRECT = prove
  (`!res buf buflen table (inlist:(12 word)list) pc stackpointer returnaddress.

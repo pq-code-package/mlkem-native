@@ -118,9 +118,6 @@ let overall_lemma = prove
   REWRITE_TAC[MATCH_MP lemma_rem (CONGBOUND_RULE `barred x`)] THEN
   BITBLAST_TAC);;
 
-(* NOTE: This must be kept in sync with the CBMC specification
- * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
-
 let MLKEM_POLY_REDUCE_CORRECT = prove
  (`!a x pc.
         nonoverlapping (word pc,0x124) (a,512)
@@ -182,6 +179,9 @@ let MLKEM_POLY_REDUCE_CORRECT = prove
   CONV_TAC(EXPAND_CASES_CONV THENC ONCE_DEPTH_CONV NUM_MULT_CONV) THEN
   ASM_REWRITE_TAC[WORD_ADD_0] THEN DISCARD_STATE_TAC "s276" THEN
   REWRITE_TAC[GSYM barred; overall_lemma]);;
+
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
 
 let MLKEM_POLY_REDUCE_SUBROUTINE_CORRECT = prove
  (`!a x pc returnaddress.

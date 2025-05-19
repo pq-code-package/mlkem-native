@@ -168,9 +168,6 @@ let lemma =
   CONV_RULE(EXPAND_CASES_CONV THENC
             DEPTH_CONV (NUM_RED_CONV ORELSEC EL_CONV)) th';;
 
-(* NOTE: This must be kept in sync with the CBMC specification
- * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
-
 let MLKEM_POLY_TOBYTES_CORRECT = prove
  (`!r a (l:int16 list) pc.
         ALL (nonoverlapping (r,384)) [(word pc,0x158); (a,512)]
@@ -246,6 +243,9 @@ let MLKEM_POLY_TOBYTES_CORRECT = prove
     GEN_REWRITE_CONV I [BITVAL_CLAUSES; OR_CLAUSES; AND_CLAUSES])) THEN
   REWRITE_TAC[GSYM REAL_OF_NUM_CLAUSES] THEN
   ABBREV_TAC `twae = &2:real` THEN REAL_ARITH_TAC);;
+
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
 
 let MLKEM_POLY_TOBYTES_SUBROUTINE_CORRECT = prove
  (`!r a (l:int16 list) pc returnaddress.
