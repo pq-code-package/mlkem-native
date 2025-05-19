@@ -38,11 +38,6 @@ __contract__(
   assigns(memory_slice(state, sizeof(uint64_t) * 25 * 2))
 );
 
-#define mlk_keccak_f1600_x2_v8a_v84a_asm_hybrid \
-  MLK_NAMESPACE(keccak_f1600_x2_v8a_v84a_asm_hybrid)
-void mlk_keccak_f1600_x2_v8a_v84a_asm_hybrid(uint64_t *state,
-                                             uint64_t const *rc);
-
 #define mlk_keccak_f1600_x4_scalar_v8a_asm_hybrid \
   MLK_NAMESPACE(keccak_f1600_x4_scalar_v8a_asm_hybrid)
 void mlk_keccak_f1600_x4_scalar_v8a_asm_hybrid(uint64_t *state,
