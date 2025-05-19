@@ -39,8 +39,8 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_asm_hybrid)
-MLK_ASM_FN_SYMBOL(keccak_f1600_x4_scalar_v8a_asm_hybrid)
+.global MLK_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_hybrid_asm)
+MLK_ASM_FN_SYMBOL(keccak_f1600_x4_scalar_v8a_hybrid_asm)
 
         sub	sp, sp, #0xe0
         stp	x19, x20, [sp, #0x30]

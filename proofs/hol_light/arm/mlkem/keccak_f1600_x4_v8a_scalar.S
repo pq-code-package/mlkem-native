@@ -37,11 +37,11 @@
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_scalar_v8a_asm_hybrid
-_PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_scalar_v8a_asm_hybrid:
+.global _PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_scalar_v8a_hybrid_asm
+_PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_scalar_v8a_hybrid_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_scalar_v8a_asm_hybrid
-PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_scalar_v8a_asm_hybrid:
+.global PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_scalar_v8a_hybrid_asm
+PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_scalar_v8a_hybrid_asm:
 #endif
 
         sub	sp, sp, #0xe0
