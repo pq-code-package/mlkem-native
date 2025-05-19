@@ -842,9 +842,9 @@
 .endm
 
     .text
-    .global MLK_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_asm_hybrid)
+    .global MLK_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_hybrid_asm)
     .balign 4
-MLK_ASM_FN_SYMBOL(keccak_f1600_x4_scalar_v8a_asm_hybrid)
+MLK_ASM_FN_SYMBOL(keccak_f1600_x4_scalar_v8a_hybrid_asm)
     alloc_stack
     save_gprs
     save_vregs

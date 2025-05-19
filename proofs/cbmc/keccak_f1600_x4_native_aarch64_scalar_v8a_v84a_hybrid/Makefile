@@ -10,7 +10,7 @@ HARNESS_FILE = keccak_f1600_x4_native_aarch64_scalar_v8a_v84a_hybrid_harness
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
 PROOF_UID = keccak_f1600_x4_native_aarch64_scalar_v8a_v84a_hybrid
 
-DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLK_CONFIG_FIPS202_BACKEND_FILE="\"$(SRCDIR)/mlkem/fips202/native/aarch64/x4_v8a_v84a_scalar.h\"" -DMLK_CHECK_APIS
+DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLK_CONFIG_FIPS202_BACKEND_FILE="\"$(SRCDIR)/mlkem/fips202/native/aarch64/x4_v8a_v84a_scalar.h\"" -DMLK_CHECK_APIS -D__ARM_FEATURE_SHA3
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
