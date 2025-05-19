@@ -18,4 +18,8 @@
 #include "x86_64/meta.h"
 #endif
 
+#if defined(MLK_SYS_RISCV64_V256)
+#include "riscv64/meta.h"
+#endif
+
 #endif /* !MLK_NATIVE_META_H */
