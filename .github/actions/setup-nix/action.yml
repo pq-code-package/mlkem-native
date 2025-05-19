@@ -90,7 +90,7 @@ runs:
 
         echo "cache_prefix=$cache_prefix" >> $GITHUB_OUTPUT
 
-        if [[ ${{ steps.nix-pre-check.outputs.installed }} == 'false' ]]; then
+        if [[ "${{ steps.nix-pre-check.outputs.installed }}" == 'false' ]]; then
           sudo chown -R $USER:nixbld /nix
         fi
 
