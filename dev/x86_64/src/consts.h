@@ -35,14 +35,6 @@
 #define MLK_AVX2_BACKEND_DATA_OFFSET_16XSHIFT 624
 #define MLK_AVX2_BACKEND_DATA_OFFSET_MULCACHE_TWIDDLES 640
 
-/* The C ABI on MacOS exports all symbols with a leading
- * underscore. This means that any symbols we refer to from
- * C files (functions) can't be found, and all symbols we
- * refer to from ASM also can't be found.
- *
- * This define helps us get around this
- */
-
 #ifndef __ASSEMBLER__
 #include "align.h"
 typedef MLK_ALIGNED_INT16(768) qdata_t;
