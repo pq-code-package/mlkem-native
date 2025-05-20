@@ -36,7 +36,7 @@
 
 static MLK_INLINE void mlk_poly_permute_bitrev_to_custom(int16_t data[MLKEM_N])
 {
-  mlk_nttunpack_avx2((__m256i *)(data), mlk_qdata.vec);
+  mlk_nttunpack_avx2((__m256i *)(data));
 }
 
 static MLK_INLINE int mlk_rej_uniform_native(int16_t *r, unsigned len,

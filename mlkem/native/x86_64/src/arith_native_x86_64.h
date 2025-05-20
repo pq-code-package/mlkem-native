@@ -27,7 +27,7 @@ void mlk_ntt_avx2(__m256i *r, const __m256i *mlk_qdata);
 void mlk_invntt_avx2(__m256i *r, const __m256i *mlk_qdata);
 
 #define mlk_nttunpack_avx2 MLK_NAMESPACE(nttunpack_avx2)
-void mlk_nttunpack_avx2(__m256i *r, const __m256i *mlk_qdata);
+void mlk_nttunpack_avx2(__m256i *r);
 
 #define mlk_reduce_avx2 MLK_NAMESPACE(reduce_avx2)
 void mlk_reduce_avx2(__m256i *r, const __m256i *mlk_qdata);
