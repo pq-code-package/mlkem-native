@@ -486,7 +486,6 @@
 #undef mlk_invntt_avx2
 #undef mlk_ntt_avx2
 #undef mlk_nttfrombytes_avx2
-#undef mlk_nttpack_avx2
 #undef mlk_ntttobytes_avx2
 #undef mlk_nttunpack_avx2
 #undef mlk_poly_compress_d10_avx2
