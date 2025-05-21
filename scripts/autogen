@@ -715,6 +715,15 @@ def gen_aarch64_hol_light_zeta_file(dry_run=False):
         yield from print_hol_light_array(gen_aarch64_inv_ntt_zetas_layer67())
         yield "]`;;"
         yield ""
+        yield "let mulcache_zetas = define `mulcache_zetas:int list = ["
+        yield from print_hol_light_array(gen_aarch64_mulcache_twiddles())
+        yield "]`;;"
+        yield ""
+        yield ""
+        yield "let mulcache_zetas_twisted = define `mulcache_zetas_twisted:int list = ["
+        yield from print_hol_light_array(gen_aarch64_mulcache_twiddles_twisted())
+        yield "]`;;"
+        yield ""
 
     update_file(
         "proofs/hol_light/arm/proofs/mlkem_zetas.ml",
