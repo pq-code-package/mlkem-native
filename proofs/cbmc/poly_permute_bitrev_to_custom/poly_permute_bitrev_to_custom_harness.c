@@ -9,6 +9,6 @@ void mlk_poly_permute_bitrev_to_custom(int16_t data[MLKEM_N]);
 
 void harness(void)
 {
-  int16_t data[MLKEM_N];
+  int16_t *data;
   mlk_poly_permute_bitrev_to_custom(data);
 }
