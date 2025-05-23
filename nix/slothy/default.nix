@@ -15,35 +15,10 @@
 
 
 let
-  # TODO: switch to protobuf from nixpkgs
-  # ortools 9.12 requires protobuf >= 5.29.3 - currently nixpkgs 24.11 has
-  # protobuf 5.28.3
-  protobuf_6_30_1 = python312Packages.buildPythonPackage rec {
-    pname = "protobuf";
-    version = "5.29.3";
 
-    propagatedBuildInputs = [
-      python312Packages.setuptools
-    ];
-
-    build-system = with python312Packages; [
-      setuptools
-    ];
-
-    dontConfigure = true;
-    nativeBuildInputs =
-      [
-        cmake
-        pkg-config
-      ];
-
-    src = fetchPypi {
-      inherit pname version;
-      hash = "sha256-XaD0HtrxF73jFkBLrRpIbLTt7fjkpUiRKW9kjo4HZiA=";
-    };
-  };
-
-
+  # I have experimented with the ortools (9.12) that is packaged in nixpkgs.
+  # However, it results in _much_ poorer SLOTHY performance and, we hence,
+  # instead stick to the pre-built ones from pypi.
   ortools912 = python312Packages.buildPythonPackage rec {
     pname = "ortools";
     version = "9.12.4544";
@@ -78,44 +53,15 @@ let
     propagatedBuildInputs = with python312Packages; [
       numpy
       pandas
-      protobuf_6_30_1
+      protobuf
     ];
 
-  };
-
-  # TODO: switch to unicorn from nixpkgs
-  # nixpkgs 24.11 currently has 2.1.1 - we are experiencing some issues with
-  # that version on MacOS. 2.1.2/2.1.3 (and also some older versions) don't
-  # have that problem
-  unicorn_2_1_3 = python312Packages.buildPythonPackage rec {
-    pname = "unicorn";
-    version = "2.1.3";
-
-    propagatedBuildInputs = [
-      python312Packages.setuptools
-    ];
-
-    build-system = with python312Packages; [
-      setuptools
-    ];
-
-    dontConfigure = true;
-    nativeBuildInputs =
-      [
-        cmake
-        pkg-config
-      ];
-
-    src = fetchPypi {
-      inherit pname version;
-      hash = "sha256-DAZFbPVQwijyADzHA2avpK7OLm5+TDLY9LIscXumtyk=";
-    };
   };
 
   pythonEnv = python312.withPackages (ps: with ps; [
     ortools912
     sympy
-    unicorn_2_1_3
+    unicorn
   ]);
 
 in

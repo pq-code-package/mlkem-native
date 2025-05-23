@@ -5,7 +5,7 @@
 
   inputs = {
     nixpkgs-2405.url = "github:NixOS/nixpkgs/nixos-24.05";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     flake-parts = {
@@ -23,9 +23,10 @@
           pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
           pkgs-2405 = inputs.nixpkgs-2405.legacyPackages.${system};
           util = pkgs.callPackage ./nix/util.nix {
+            # Keep those around in case we want to switch to unstable versions
             cbmc = pkgs.cbmc;
-            bitwuzla = pkgs-unstable.bitwuzla;
-            z3 = pkgs-unstable.z3_4_14;
+            bitwuzla = pkgs.bitwuzla;
+            z3 = pkgs.z3;
           };
           zigWrapCC = zig: pkgs.symlinkJoin {
             name = "zig-wrappers";
@@ -48,8 +49,9 @@
               (_:_: {
                 gcc48 = pkgs-2405.gcc48;
                 gcc49 = pkgs-2405.gcc49;
-                qemu = pkgs-unstable.qemu; # 9.2.2
-                clang_20 = pkgs-unstable.clang_20;
+                gcc7 = pkgs-2405.gcc7;
+                zig_0_10 = pkgs-2405.zig_0_10;
+                zig_0_11 = pkgs-2405.zig_0_11;
               })
             ];
           };
@@ -109,6 +111,7 @@
           devShells.ci_zig0_11 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_11);
           devShells.ci_zig0_12 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_12);
           devShells.ci_zig0_13 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_13);
+          devShells.ci_zig0_14 = util.mkShellWithCC' (zigWrapCC pkgs.zig);
 
           devShells.ci_gcc48 = util.mkShellWithCC' pkgs.gcc48;
           devShells.ci_gcc49 = util.mkShellWithCC' pkgs.gcc49;
@@ -142,8 +145,8 @@
             util = pkgs.callPackage ./nix/util.nix {
               inherit pkgs;
               cbmc = pkgs.cbmc;
-              bitwuzla = pkgs-unstable.bitwuzla;
-              z3 = pkgs-unstable.z3_4_14;
+              bitwuzla = pkgs.bitwuzla;
+              z3 = pkgs.z3;
             };
           in
           util.mkShell {
