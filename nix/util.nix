@@ -8,7 +8,7 @@ rec {
   };
 
   wrap-gcc = p: p.buildPackages.wrapCCWith {
-    cc = p.buildPackages.gcc14.cc;
+    cc = p.buildPackages.gcc.cc;
     bintools = p.buildPackages.wrapBintoolsWith {
       bintools = p.buildPackages.binutils-unwrapped;
       libc = glibc-join p;
@@ -17,7 +17,7 @@ rec {
 
   native-gcc =
     if pkgs.stdenv.isDarwin
-    then pkgs.clang_16
+    then pkgs.clang
     else wrap-gcc pkgs;
 
   # cross is for determining whether to install the cross toolchain dependencies or not
@@ -39,7 +39,8 @@ rec {
     pkgs.lib.optionals cross [ pkgs.qemu x86_64-gcc aarch64-gcc riscv64-gcc ppc64le-gcc ]
     ++ pkgs.lib.optionals (cross && pkgs.stdenv.isLinux && pkgs.stdenv.isx86_64) [ aarch64_be-gcc ]
     ++ pkgs.lib.optionals cross [ native-gcc ]
-    # NOTE: Tools in /Library/Developer/CommandLineTools/usr/bin on macOS are inaccessible in the Nix shell. This issue is addressed in https://github.com/NixOS/nixpkgs/pull/353893 but hasn’t been merged into the 24.11 channel yet. As a workaround, we include this dependency for macOS temporary.
+    # git is not available in the nix shell on Darwin. As a workaround we add git as a dependency here.
+    # Initially, we expected this to be fixed by https://github.com/NixOS/nixpkgs/pull/353893, but that does not seem to be the case.
     ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [ pkgs.git ]
     ++ builtins.attrValues {
       inherit (pkgs.python3Packages) sympy pyyaml;
@@ -75,10 +76,10 @@ rec {
     name = "pqcp-linters";
     paths = builtins.attrValues {
       clang-tools = pkgs.clang-tools.overrideAttrs {
-        unwrapped = pkgs.llvmPackages_18.clang-unwrapped;
+        unwrapped = pkgs.llvmPackages.clang-unwrapped;
       };
 
-      inherit (pkgs.llvmPackages_18)
+      inherit (pkgs.llvmPackages)
         bintools;
 
       inherit (pkgs)

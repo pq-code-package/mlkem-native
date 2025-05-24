@@ -40,7 +40,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-    needs: [ base ]
+    needs: [ base, nix ]
     uses: ./.github/workflows/cbmc.yml
     secrets: inherit
   oqs_integration:
@@ -76,7 +76,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-    needs: [ base ]
+    needs: [ base, nix ]
     uses: ./.github/workflows/ct-tests.yml
     secrets: inherit
   slothy:
@@ -84,6 +84,6 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-    needs: [ base ]
+    needs: [ base, nix ]
     uses: ./.github/workflows/slothy.yml
     secrets: inherit

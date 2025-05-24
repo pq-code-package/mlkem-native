@@ -252,6 +252,13 @@ jobs:
            c23: False
            examples: False
            opt: no_opt
+         - name: zig-0.14
+           shell: ci_zig0_14
+           darwin: True
+           c17: True
+           c23: True
+           examples: False
+           opt: no_opt
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
