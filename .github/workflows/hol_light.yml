@@ -11,6 +11,8 @@ on:
      - 'proofs/hol_light/arm/Makefile'
      - 'proofs/hol_light/arm/**/*.S'
      - 'proofs/hol_light/arm/**/*.ml'
+     - 'flake.nix'
+     - 'flake.lock'
      - 'nix/hol_light/*'
      - 'nix/s2n_bignum/*'
   pull_request:
@@ -20,6 +22,8 @@ on:
       - 'proofs/hol_light/arm/Makefile'
       - 'proofs/hol_light/arm/**/*.S'
       - 'proofs/hol_light/arm/**/*.ml'
+      - 'flake.nix'
+      - 'flake.lock'
       - 'nix/hol_light/*'
       - 'nix/s2n_bignum/*'
 
@@ -90,7 +94,7 @@ jobs:
           done
 
           # Always re-run upon change to nix files for HOL-Light
-          if [[ "$changed_files" == *"nix/"* ]] || [[ "$changed_files" == *"hol_light.yml"* ]] || [[ "$changed_files" == *"proofs/hol_light/arm/Makefile"* ]]; then
+          if [[ "$changed_files" == *"nix/"* ]] || [[ "$changed_files" == *"hol_light.yml"* ]] || [[ "$changed_files" == *"flake"* ]] || [[ "$changed_files" == *"proofs/hol_light/arm/Makefile"* ]]; then
             run_needed=1
           fi
 
