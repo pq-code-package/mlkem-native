@@ -93,6 +93,7 @@ __contract__(
   requires(zetas == mlk_aarch64_zetas_mulcache_native)
   requires(zetas_twisted == mlk_aarch64_zetas_mulcache_twisted_native)
   assigns(object_whole(cache))
+  ensures(array_abs_bound(cache, 0, MLKEM_N/2, MLKEM_Q))
 );
 
 #define mlk_poly_tobytes_asm MLK_NAMESPACE(poly_tobytes_asm)
