@@ -83,7 +83,8 @@ let poly_mulcache_compute_GOAL = `forall pc src dst zetas zetas_twisted x y retu
            read PC s = returnaddress /\
            // Odd coefficients have been multiplied with respective root of unity
            (!i. i < 128 ==> let z_i = read(memory :> bytes16(word_add dst (word (2 * i)))) s
-                            in (ival z_i == (mulcache (ival o x)) i) (mod &3329)))
+                            in (ival z_i == (mulcache (ival o x)) i) (mod &3329) /\
+                                abs(ival z_i) <= &3328))
       // Register and memory footprint
       (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
        MAYCHANGE [memory :> bytes(dst, 256)])
@@ -144,30 +145,36 @@ let poly_mulcache_compute_SPEC = prove(poly_mulcache_compute_GOAL,
     (* Forget all assumptions *)
     POP_ASSUM_LIST (K ALL_TAC) THEN
 
-    (* Split into one congruence goals per index. *)
-    REPEAT CONJ_TAC THEN
+    (* Split into pairs of congruence and absolute value goals *)
+    REPEAT(W(fun (asl,w) ->
+    if length(conjuncts w) > 3 then CONJ_TAC else NO_TAC)) THEN
 
     REWRITE_TAC[mulcache; mulcache_zetas_twisted; mulcache_zetas] THEN
     CONV_TAC(ONCE_DEPTH_CONV EL_CONV) THEN
 
     (* Instantiate general congruence and bounds rule for Barrett multiplication
      * so it matches the current goal, and add as new assumption. *)
-    W (MP_TAC o CONGBOUND_RULE o rand o lhand o rator o snd) THEN
+    W (MP_TAC o CONGBOUND_RULE o rand o rand o rator o rator o lhand o snd) THEN
     ASM_REWRITE_TAC [o_THM] THEN
 
-    (* CONGBOUND_RULE gives a correctness and a bounds result -- here, we only
-     * need the correctness result since poly_mulcache_compute makes no statement
-     * about output coefficient bounds. *)
-    MATCH_MP_TAC (TAUT `(x ==> z) ==> (x /\ y ==> z)`) THEN
+    MATCH_MP_TAC MONO_AND THEN (CONJ_TAC THENL [
+      (* Correctness *)
+      REWRITE_TAC [GSYM INT_REM_EQ; o_THM] THEN
+      CONV_TAC INT_REM_DOWN_CONV THEN
+      STRIP_TAC THEN ASM_REWRITE_TAC [] THEN
+      CONV_TAC ((GEN_REWRITE_CONV ONCE_DEPTH_CONV [BITREVERSE7_CLAUSES])
+                THENC (REPEATC (CHANGED_CONV (ONCE_DEPTH_CONV NUM_RED_CONV)))) THEN
+      REWRITE_TAC[INT_REM_EQ] THEN
+        REWRITE_TAC [REAL_INT_CONGRUENCE; INT_OF_NUM_EQ; ARITH_EQ] THEN
+        REWRITE_TAC[GSYM REAL_OF_INT_CLAUSES] THEN
+        CONV_TAC(RAND_CONV REAL_POLY_CONV) THEN REAL_INTEGER_TAC
 
-    REWRITE_TAC [GSYM INT_REM_EQ] THEN
-    CONV_TAC INT_REM_DOWN_CONV THEN
-    STRIP_TAC THEN ASM_REWRITE_TAC [] THEN
-    CONV_TAC ((GEN_REWRITE_CONV ONCE_DEPTH_CONV [BITREVERSE7_CLAUSES])
-              THENC (REPEATC (CHANGED_CONV (ONCE_DEPTH_CONV NUM_RED_CONV)))) THEN
+      ;
 
-    REWRITE_TAC[INT_REM_EQ] THEN
-    REWRITE_TAC [REAL_INT_CONGRUENCE; INT_OF_NUM_EQ; ARITH_EQ] THEN
-    REWRITE_TAC[GSYM REAL_OF_INT_CLAUSES] THEN
-    CONV_TAC(RAND_CONV REAL_POLY_CONV) THEN REAL_INTEGER_TAC
+      (* Bounds *)
+      REWRITE_TAC [INT_ABS_BOUNDS] THEN
+      MATCH_MP_TAC(INT_ARITH
+        `l':int <= l /\ u <= u'
+         ==> l <= x /\ x <= u ==> l' <= x /\ x <= u'`) THEN
+      CONV_TAC INT_REDUCE_CONV])
 );;
