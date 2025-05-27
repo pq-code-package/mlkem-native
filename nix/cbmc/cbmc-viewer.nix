@@ -8,7 +8,7 @@ python3Packages.buildPythonApplication rec {
   version = "3.11";
   src = fetchurl {
     url = "https://github.com/model-checking/${pname}/releases/download/viewer-${version}/cbmc_viewer-${version}-py3-none-any.whl";
-    hash = "sha256-nt3AUmuL3kT1+Bl1XXDHHkMzPR1GbxvceFYluAnzkJ8=";
+    hash = "sha256-Oy51I64KMbtE8lG8xuFXdK4RvXFvWt4zYKBlcXqwILg=";
   };
   format = "wheel";
   dontUseSetuptoolsCheck = true;
