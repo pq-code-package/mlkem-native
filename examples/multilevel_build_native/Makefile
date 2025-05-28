@@ -14,36 +14,31 @@ endif
 
 # Automatically detect system architecture and set preprocessor etc accordingly
 HOST_PLATFORM := $(shell uname -s)-$(shell uname -m)
+
 # linux x86_64
 ifeq ($(HOST_PLATFORM),Linux-x86_64)
 	CFLAGS += -z noexecstack
 endif
 
-ifeq ($(HOST_PLATFORM),Linux-x86_64)
+# Native compilation
 ifeq ($(CROSS_PREFIX),)
+ifeq ($(HOST_PLATFORM),Linux-x86_64)
 	CFLAGS += -mavx2 -mbmi2 -mpopcnt -maes
 	CFLAGS += -DMLK_FORCE_X86_64
+else ifeq ($(HOST_PLATFORM),Linux-aarch64)
+	CFLAGS += -DMLK_FORCE_AARCH64
+else ifeq ($(HOST_PLATFORM),Darwin-arm64)
+	CFLAGS += -DMLK_FORCE_AARCH64
+endif
+# Cross compilation
 else ifneq ($(findstring aarch64_be, $(CROSS_PREFIX)),)
 	CFLAGS += -DMLK_FORCE_AARCH64_EB
 else ifneq ($(findstring aarch64, $(CROSS_PREFIX)),)
 	CFLAGS += -DMLK_FORCE_AARCH64
-else
-
-endif
-
-# linux aarch64
-else ifeq ($(HOST_PLATFORM),Linux-aarch64)
-ifeq ($(CROSS_PREFIX),)
-	CFLAGS += -DMLK_FORCE_AARCH64
-else ifneq ($(findstring x86_64, $(CROSS_PREFIX)),)
-	CFLAGS += -mavx2 -mbmi2 -mpopcnt -maes
-	CFLAGS += -DMLK_FORCE_X86_64
-else
-endif
-
-# darwin aarch64
-else ifeq ($(HOST_PLATFORM),Darwin-arm64)
-	CFLAGS += -DMLK_FORCE_AARCH64
+else ifneq ($(findstring riscv64, $(CROSS_PREFIX)),)
+	CFLAGS += -DMLK_FORCE_RISCV64
+else ifneq ($(findstring powerpc64le, $(CROSS_PREFIX)),)
+	CFLAGS += -DMLK_FORCE_PPC64LE
 endif
 
 CFLAGS := \
