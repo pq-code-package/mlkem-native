@@ -87,6 +87,9 @@
 #include "mlkem/native/x86_64/src/rej_uniform_avx2.c"
 #include "mlkem/native/x86_64/src/rej_uniform_table.c"
 #endif /* MLK_SYS_X86_64 */
+#if defined(MLK_SYS_RISCV64)
+#include "mlkem/native/riscv64/src/rv64v_poly.c"
+#endif
 #endif /* MLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH */
 
 #if defined(MLK_CONFIG_MONOBUILD_WITH_NATIVE_FIPS202)
