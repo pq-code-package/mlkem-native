@@ -12,5 +12,5 @@ and most preprocessor directives by [`scripts/simpasm`](../../../scripts/simpasm
 If you want to understand how the assembly works, and/or make changes to it, consult [dev/](../../../dev).
 
 <!--- bibliography --->
-[^NeonNTT]: Becker, Hwang, Kannwischer, Yang, Yang: Neon NTT: Faster Dilithium, Kyber, and Saber on Cortex-A72 and Apple M1, [https://tches.iacr.org/index.php/TCHES/article/view/9295](https://tches.iacr.org/index.php/TCHES/article/view/9295)
+[^NeonNTT]: Becker, Hwang, Kannwischer, Yang, Yang: Neon NTT: Faster Dilithium, Kyber, and Saber on Cortex-A72 and Apple M1, [https://eprint.iacr.org/2021/986](https://eprint.iacr.org/2021/986)
 [^SLOTHY_Paper]: Abdulrahman, Becker, Kannwischer, Klein: Fast and Clean: Auditable high-performance assembly via constraint solving, [https://eprint.iacr.org/2022/1303](https://eprint.iacr.org/2022/1303)
