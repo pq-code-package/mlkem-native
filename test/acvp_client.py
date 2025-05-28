@@ -15,7 +15,7 @@ import subprocess
 
 # Check if we need to use a wrapper for execution (e.g. QEMU)
 exec_prefix = os.environ.get("EXEC_WRAPPER", "")
-exec_prefix = [exec_prefix] if exec_prefix != "" else []
+exec_prefix = exec_prefix.split(" ") if exec_prefix != "" else []
 
 acvp_dir = "test/acvp_data"
 acvp_keygen_jsons = [
