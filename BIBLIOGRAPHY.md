@@ -157,7 +157,7 @@ source code and documentation.
   - Matthias J. Kannwischer
   - Bo-Yin Yang
   - Shang-Yi Yang
-* URL: https://tches.iacr.org/index.php/TCHES/article/view/9295
+* URL: https://eprint.iacr.org/2021/986
 * Referenced from:
   - [dev/aarch64_clean/README.md](dev/aarch64_clean/README.md)
   - [dev/aarch64_clean/src/intt.S](dev/aarch64_clean/src/intt.S)

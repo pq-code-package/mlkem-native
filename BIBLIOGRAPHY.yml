@@ -102,7 +102,7 @@
 - id: NeonNTT
   name: "Neon NTT: Faster Dilithium, Kyber, and Saber on Cortex-A72 and Apple M1"
   year: 2022
-  url: https://tches.iacr.org/index.php/TCHES/article/view/9295
+  url: https://eprint.iacr.org/2021/986
   author:
   - Becker, Hanno
   - Hwang, Vincent
