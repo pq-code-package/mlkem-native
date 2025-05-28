@@ -1220,6 +1220,10 @@ def x86_64(c):
     return "/x86_64/" in c
 
 
+def riscv64(c):
+    return "/riscv64/" in c
+
+
 def native_fips202(c):
     return native(c) and fips202(c)
 
@@ -1252,9 +1256,16 @@ def native_arith_x86_64(c):
     return native_arith(c) and x86_64(c)
 
 
+def native_arith_riscv64(c):
+    return native_arith(c) and riscv64(c)
+
+
 def native_arith_core(c):
     return (
-        native_arith(c) and not native_arith_x86_64(c) and not native_arith_aarch64(c)
+        native_arith(c)
+        and not native_arith_x86_64(c)
+        and not native_arith_aarch64(c)
+        and not native_arith_riscv64(c)
     )
 
 
@@ -1513,6 +1524,10 @@ def gen_monolithic_asm_file(dry_run=False):
         yield "#endif"
         yield "#if defined(MLK_SYS_X86_64)"
         for c in filter(native_arith_x86_64, asm_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLK_SYS_RISCV64)"
+        for c in filter(native_arith_riscv64, asm_sources):
             yield f'#include "{c}"'
         yield "#endif"
         yield "#endif"
