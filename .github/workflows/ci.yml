@@ -141,8 +141,8 @@ jobs:
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: ${{ matrix.target.mode }}
-          # There is no native code yet on PPC64LE, R-V or AArch64_be, so no point running opt tests
-          opt: ${{ (matrix.target.arch != 'ppc64le' && matrix.target.arch != 'riscv64' && matrix.target.arch != 'riscv32' && matrix.target.arch != 'aarch64_be') && 'all' || 'no_opt' }}
+          # There is no native code yet on PPC64LE, riscv32 or AArch64_be, so no point running opt tests
+          opt: ${{ (matrix.target.arch != 'ppc64le' && matrix.target.arch != 'riscv32' && matrix.target.arch != 'aarch64_be') && 'all' || 'no_opt' }}
       - name: build + test (+debug+memsan+ubsan)
         uses: ./.github/actions/multi-functest
         if: ${{ matrix.target.mode == 'native' }}
