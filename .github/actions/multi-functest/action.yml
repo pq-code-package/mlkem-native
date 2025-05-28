@@ -23,7 +23,7 @@ inputs:
     description: CFLAGS to pass to compilation
     default: ""
   compile_mode:
-    description: all | native | cross-x86_64 | cross-aarch64 | cross-riscv64
+    description: all | native | cross-x86_64 | cross-aarch64 | cross-riscv64 | cross-riscv32
     default: "native"
   opt:
     description: all | opt | no_opt
@@ -154,6 +154,25 @@ runs:
           cflags: "${{ inputs.cflags }} -DMLK_FORCE_RISCV64"
           cross_prefix: riscv64-unknown-linux-gnu-
           exec_wrapper: qemu-riscv64
+          opt: ${{ inputs.opt }}
+          func: ${{ inputs.func }}
+          kat: ${{ inputs.kat }}
+          nistkat: ${{ inputs.nistkat }}
+          acvp: ${{ inputs.acvp }}
+          examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
+      - name: Cross riscv32 Tests
+        if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-riscv32') && (success() || failure()) }}
+        uses: ./.github/actions/functest
+        with:
+          nix-shell: ${{ inputs.nix-shell }}
+          nix-cache: ${{ inputs.nix-cache }}
+          nix-verbose: ${{ inputs.nix-verbose }}
+          gh_token: ${{ inputs.gh_token }}
+          custom_shell: ${{ inputs.custom_shell }}
+          cflags: "${{ inputs.cflags }} -DMLK_FORCE_RISCV32"
+          cross_prefix: riscv32-unknown-linux-gnu-
+          exec_wrapper: qemu-riscv32
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}

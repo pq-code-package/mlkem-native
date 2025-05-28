@@ -48,6 +48,10 @@
 #define MLK_SYS_RISCV64
 #endif
 
+#if defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 32
+#define MLK_SYS_RISCV32
+#endif
+
 #if defined(_WIN32)
 #define MLK_SYS_WINDOWS
 #endif
@@ -71,6 +75,10 @@
 
 #if defined(MLK_FORCE_RISCV64) && !defined(MLK_SYS_RISCV64)
 #error "MLK_FORCE_RISCV64 is set, but we don't seem to be on a RISCV64 system."
+#endif
+
+#if defined(MLK_FORCE_RISCV32) && !defined(MLK_SYS_RISCV32)
+#error "MLK_FORCE_RISCV32 is set, but we don't seem to be on a RISCV32 system."
 #endif
 
 /*
