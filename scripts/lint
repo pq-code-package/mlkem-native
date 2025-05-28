@@ -92,6 +92,14 @@ check-spdx()
       success=false
     fi
   done
+  # For source files in dev/* and mlkem/*, we enforce `Apache-2.0 OR ISC OR MIT`
+  for file in $(git ls-files -- "*.[chsSi]" | grep "^dev/\|^mlkem/"); do
+    # Ignore symlinks
+    if [[ ! -L $file && $(grep "SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT" $file | wc -l) == 0 ]]; then
+      echo "::error file=$file,line=${line:-1},title=Missing license header error::$file is not licensed under 'Apache-2.0 OR ISC OR MIT'"
+      success=false
+    fi
+  done
 
   if $success; then
     echo ":white_check_mark: Check SPDX + Copyright" >>"$GITHUB_STEP_SUMMARY"
