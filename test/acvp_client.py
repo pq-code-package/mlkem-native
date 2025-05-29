@@ -1,9 +1,10 @@
+#!/usr/bin/env python3
 # Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 # ACVP client for ML-KEM
 #
-# Processes 'internalProjection.json' files from
+# Processes json files from
 # https://github.com/usnistgov/ACVP-Server/blob/master/gen-val/json-files
 #
 # Invokes `acvp_mlkem{lvl}` under the hood.
@@ -18,25 +19,41 @@ exec_prefix = os.environ.get("EXEC_WRAPPER", "")
 exec_prefix = exec_prefix.split(" ") if exec_prefix != "" else []
 
 acvp_dir = "test/acvp_data"
-acvp_keygen_jsons = [
-    f"{acvp_dir}/acvp_v1.1.0.36_keygen_internalProjection.json",
-    f"{acvp_dir}/acvp_v1.1.0.38_keygen_internalProjection.json",
+acvp_jsons = [
+    (
+        f"{acvp_dir}/acvp_v1.1.0.36_keyGen_prompt.json",
+        f"{acvp_dir}/acvp_v1.1.0.36_keyGen_expectedResults.json",
+    ),
+    (
+        f"{acvp_dir}/acvp_v1.1.0.38_keyGen_prompt.json",
+        f"{acvp_dir}/acvp_v1.1.0.38_keyGen_expectedResults.json",
+    ),
+    (
+        f"{acvp_dir}/acvp_v1.1.0.39_keyGen_prompt.json",
+        f"{acvp_dir}/acvp_v1.1.0.39_keyGen_expectedResults.json",
+    ),
+    (
+        f"{acvp_dir}/acvp_v1.1.0.36_encapDecap_prompt.json",
+        f"{acvp_dir}/acvp_v1.1.0.36_encapDecap_expectedResults.json",
+    ),
+    (
+        f"{acvp_dir}/acvp_v1.1.0.38_encapDecap_prompt.json",
+        f"{acvp_dir}/acvp_v1.1.0.38_encapDecap_expectedResults.json",
+    ),
+    (
+        f"{acvp_dir}/acvp_v1.1.0.39_encapDecap_prompt.json",
+        f"{acvp_dir}/acvp_v1.1.0.39_encapDecap_expectedResults.json",
+    ),
 ]
-acvp_encapDecap_jsons = [
-    f"{acvp_dir}/acvp_v1.1.0.36_encapDecap_internalProjection.json",
-    f"{acvp_dir}/acvp_v1.1.0.38_encapDecap_internalProjection.json",
-]
 
-acvp_keygen_data = []
-for acvp_keygen_json in acvp_keygen_jsons:
-    with open(acvp_keygen_json, "r") as f:
-        acvp_keygen_data.append(json.load(f))
+acvp_data = []
+for prompt, expectedResults in acvp_jsons:
+    with open(prompt, "r") as f:
+        promptData = json.load(f)
+    with open(expectedResults, "r") as f:
+        expectedResultsData = json.load(f)
 
-
-acvp_encapDecap_data = []
-for acvp_encapDecap_json in acvp_encapDecap_jsons:
-    with open(acvp_encapDecap_json, "r") as f:
-        acvp_encapDecap_data.append(json.load(f))
+    acvp_data.append((promptData, expectedResultsData))
 
 
 def err(msg, **kwargs):
@@ -62,6 +79,8 @@ def get_acvp_binary(tg):
 
 def run_encapDecap_test(tg, tc):
     info(f"Running encapDecap test case {tc['tcId']} ({tg['function']}) ... ", end="")
+
+    results = {"tcId": tc["tcId"]}
     if tg["function"] == "encapsulation":
         acvp_bin = get_acvp_binary(tg)
         acvp_call = exec_prefix + [
@@ -78,14 +97,10 @@ def run_encapDecap_test(tg, tc):
             err(f"{acvp_call} failed with error code {result.returncode}")
             err(result.stderr)
             exit(1)
-        # Extract results and compare to expected data
+        # Extract results
         for l in result.stdout.splitlines():
             (k, v) = l.split("=")
-            if v != tc[k]:
-                err("FAIL!")
-                err(f"Mismatching result for {k}: expected {tc[k]}, got {v}")
-                exit(1)
-        info("OK")
+            results[k] = v
     elif tg["function"] == "decapsulation":
         acvp_bin = get_acvp_binary(tg)
         acvp_call = exec_prefix + [
@@ -102,18 +117,18 @@ def run_encapDecap_test(tg, tc):
             err(f"{acvp_call} failed with error code {result.returncode}")
             err(result.stderr)
             exit(1)
-        # Extract results and compare to expected data
+        # Extract results
         for l in result.stdout.splitlines():
             (k, v) = l.split("=")
-            if v != tc[k]:
-                err("FAIL!")
-                err(f"Mismatching result for {k}: expected {tc[k]}, got {v}")
-                exit(1)
-        info("OK")
+            results[k] = v
+    info("done")
+    return results
 
 
 def run_keyGen_test(tg, tc):
     info(f"Running keyGen test case {tc['tcId']} ... ", end="")
+    results = {"tcId": tc["tcId"]}
+
     acvp_bin = get_acvp_binary(tg)
     acvp_call = exec_prefix + [
         acvp_bin,
@@ -128,24 +143,49 @@ def run_keyGen_test(tg, tc):
         err(f"{acvp_call} failed with error code {result.returncode}")
         err(result.stderr)
         exit(1)
-    # Extract results and compare to expected data
+    # Extract results
     for l in result.stdout.splitlines():
         (k, v) = l.split("=")
-        if v != tc[k]:
-            err("FAIL!")
-            err(f"Mismatching result for {k}: expected {tc[k]}, got {v}")
-            exit(1)
+        results[k] = v
+    info("done")
+    return results
+
+
+for acvp, json_name in zip(acvp_data, acvp_jsons):
+    info(f"Running ACVP tests for {json_name[0]}")
+
+    prompt, expectedResults = acvp
+
+    assert prompt["algorithm"] == "ML-KEM"
+    assert prompt["mode"] == "encapDecap" or prompt["mode"] == "keyGen"
+
+    results = {
+        "vsId": prompt["vsId"],
+        "algorithm": "ML-KEM",
+        "mode": prompt["mode"],
+        "revision": prompt["revision"],
+        "isSample": prompt["isSample"],
+        "testGroups": [],
+    }
+    for tg in prompt["testGroups"]:
+        tgResult = {
+            "tgId": tg["tgId"],
+            "tests": [],
+        }
+        results["testGroups"].append(tgResult)
+        for tc in tg["tests"]:
+            if prompt["mode"] == "encapDecap":
+                result = run_encapDecap_test(tg, tc)
+            elif prompt["mode"] == "keyGen":
+                result = run_keyGen_test(tg, tc)
+            tgResult["tests"].append(result)
+
+    # Compare to expected results
+    if json.dumps(results, sort_keys=True) != json.dumps(
+        expectedResults, sort_keys=True
+    ):
+        err("FAIL!")
+        err(f"Mismatching result for {json_name[0]}")
+        exit(1)
     info("OK")
-
-
-for acvp_encapDecap, json_name in zip(acvp_encapDecap_data, acvp_encapDecap_jsons):
-    info(f"Running ACVP tests for {json_name}")
-    for tg in acvp_encapDecap["testGroups"]:
-        for tc in tg["tests"]:
-            run_encapDecap_test(tg, tc)
-
-for acvp_keygen, json_name in zip(acvp_keygen_data, acvp_keygen_jsons):
-    info(f"Running ACVP tests for {json_name}")
-    for tg in acvp_keygen["testGroups"]:
-        for tc in tg["tests"]:
-            run_keyGen_test(tg, tc)
+info("ALL GOOD!")
