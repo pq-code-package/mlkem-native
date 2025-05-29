@@ -18,7 +18,7 @@
 typedef struct
 {
   uint64_t ctx[MLK_KECCAK_LANES * MLK_KECCAK_WAY];
-} mlk_shake128x4ctx;
+} MLK_ALIGN mlk_shake128x4ctx;
 
 #define mlk_shake128x4_absorb_once MLK_NAMESPACE(shake128x4_absorb_once)
 void mlk_shake128x4_absorb_once(mlk_shake128x4ctx *state, const uint8_t *in0,
