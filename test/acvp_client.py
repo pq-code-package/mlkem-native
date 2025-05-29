@@ -1,13 +1,15 @@
+#!/usr/bin/env python3
 # Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 # ACVP client for ML-KEM
 #
-# Processes 'internalProjection.json' files from
+# Processes json files from
 # https://github.com/usnistgov/ACVP-Server/blob/master/gen-val/json-files
 #
 # Invokes `acvp_mlkem{lvl}` under the hood.
 
+import argparse
 import os
 import json
 import sys
@@ -18,25 +20,50 @@ exec_prefix = os.environ.get("EXEC_WRAPPER", "")
 exec_prefix = exec_prefix.split(" ") if exec_prefix != "" else []
 
 acvp_dir = "test/acvp_data"
-acvp_keygen_jsons = [
-    f"{acvp_dir}/acvp_v1.1.0.36_keygen_internalProjection.json",
-    f"{acvp_dir}/acvp_v1.1.0.38_keygen_internalProjection.json",
+acvp_jsons = [
+    (
+        f"{acvp_dir}/acvp_v1.1.0.36_keyGen_prompt.json",
+        f"{acvp_dir}/acvp_v1.1.0.36_keyGen_expectedResults.json",
+    ),
+    (
+        f"{acvp_dir}/acvp_v1.1.0.38_keyGen_prompt.json",
+        f"{acvp_dir}/acvp_v1.1.0.38_keyGen_expectedResults.json",
+    ),
+    (
+        f"{acvp_dir}/acvp_v1.1.0.39_keyGen_prompt.json",
+        f"{acvp_dir}/acvp_v1.1.0.39_keyGen_expectedResults.json",
+    ),
+    (
+        f"{acvp_dir}/acvp_v1.1.0.36_encapDecap_prompt.json",
+        f"{acvp_dir}/acvp_v1.1.0.36_encapDecap_expectedResults.json",
+    ),
+    (
+        f"{acvp_dir}/acvp_v1.1.0.38_encapDecap_prompt.json",
+        f"{acvp_dir}/acvp_v1.1.0.38_encapDecap_expectedResults.json",
+    ),
+    (
+        f"{acvp_dir}/acvp_v1.1.0.39_encapDecap_prompt.json",
+        f"{acvp_dir}/acvp_v1.1.0.39_encapDecap_expectedResults.json",
+    ),
 ]
-acvp_encapDecap_jsons = [
-    f"{acvp_dir}/acvp_v1.1.0.36_encapDecap_internalProjection.json",
-    f"{acvp_dir}/acvp_v1.1.0.38_encapDecap_internalProjection.json",
-]
-
-acvp_keygen_data = []
-for acvp_keygen_json in acvp_keygen_jsons:
-    with open(acvp_keygen_json, "r") as f:
-        acvp_keygen_data.append(json.load(f))
 
 
-acvp_encapDecap_data = []
-for acvp_encapDecap_json in acvp_encapDecap_jsons:
-    with open(acvp_encapDecap_json, "r") as f:
-        acvp_encapDecap_data.append(json.load(f))
+def loadAcvpData(prompt, expectedResults):
+    with open(prompt, "r") as f:
+        promptData = json.load(f)
+    expectedResultsData = None
+    if expectedResults is not None:
+        with open(expectedResults, "r") as f:
+            expectedResultsData = json.load(f)
+
+    return (prompt, promptData, expectedResults, expectedResultsData)
+
+
+def loadDefaultAcvpData():
+    acvp_data = []
+    for prompt, expectedResults in acvp_jsons:
+        acvp_data.append(loadAcvpData(prompt, expectedResults))
+    return acvp_data
 
 
 def err(msg, **kwargs):
@@ -62,6 +89,8 @@ def get_acvp_binary(tg):
 
 def run_encapDecap_test(tg, tc):
     info(f"Running encapDecap test case {tc['tcId']} ({tg['function']}) ... ", end="")
+
+    results = {"tcId": tc["tcId"]}
     if tg["function"] == "encapsulation":
         acvp_bin = get_acvp_binary(tg)
         acvp_call = exec_prefix + [
@@ -78,14 +107,10 @@ def run_encapDecap_test(tg, tc):
             err(f"{acvp_call} failed with error code {result.returncode}")
             err(result.stderr)
             exit(1)
-        # Extract results and compare to expected data
+        # Extract results
         for l in result.stdout.splitlines():
             (k, v) = l.split("=")
-            if v != tc[k]:
-                err("FAIL!")
-                err(f"Mismatching result for {k}: expected {tc[k]}, got {v}")
-                exit(1)
-        info("OK")
+            results[k] = v
     elif tg["function"] == "decapsulation":
         acvp_bin = get_acvp_binary(tg)
         acvp_call = exec_prefix + [
@@ -102,18 +127,18 @@ def run_encapDecap_test(tg, tc):
             err(f"{acvp_call} failed with error code {result.returncode}")
             err(result.stderr)
             exit(1)
-        # Extract results and compare to expected data
+        # Extract results
         for l in result.stdout.splitlines():
             (k, v) = l.split("=")
-            if v != tc[k]:
-                err("FAIL!")
-                err(f"Mismatching result for {k}: expected {tc[k]}, got {v}")
-                exit(1)
-        info("OK")
+            results[k] = v
+    info("done")
+    return results
 
 
 def run_keyGen_test(tg, tc):
     info(f"Running keyGen test case {tc['tcId']} ... ", end="")
+    results = {"tcId": tc["tcId"]}
+
     acvp_bin = get_acvp_binary(tg)
     acvp_call = exec_prefix + [
         acvp_bin,
@@ -128,24 +153,104 @@ def run_keyGen_test(tg, tc):
         err(f"{acvp_call} failed with error code {result.returncode}")
         err(result.stderr)
         exit(1)
-    # Extract results and compare to expected data
+    # Extract results
     for l in result.stdout.splitlines():
         (k, v) = l.split("=")
-        if v != tc[k]:
+        results[k] = v
+    info("done")
+    return results
+
+
+def runTestSingle(promptName, prompt, expectedResultName, expectedResult, output):
+    info(f"Running ACVP tests for {promptName}")
+
+    assert expectedResult is not None or output is not None
+    assert prompt["algorithm"] == "ML-KEM"
+    assert prompt["mode"] == "encapDecap" or prompt["mode"] == "keyGen"
+
+    results = {
+        "vsId": prompt["vsId"],
+        "algorithm": "ML-KEM",
+        "mode": prompt["mode"],
+        "revision": prompt["revision"],
+        "isSample": prompt["isSample"],
+        "testGroups": [],
+    }
+    for tg in prompt["testGroups"]:
+        tgResult = {
+            "tgId": tg["tgId"],
+            "tests": [],
+        }
+        results["testGroups"].append(tgResult)
+        for tc in tg["tests"]:
+            if prompt["mode"] == "encapDecap":
+                result = run_encapDecap_test(tg, tc)
+            elif prompt["mode"] == "keyGen":
+                result = run_keyGen_test(tg, tc)
+            tgResult["tests"].append(result)
+
+    # Compare to expected results
+    if expectedResult is not None:
+        info(f"Comparing results with {expectedResultName}")
+        if json.dumps(results, sort_keys=True) != json.dumps(
+            expectedResult, sort_keys=True
+        ):
             err("FAIL!")
-            err(f"Mismatching result for {k}: expected {tc[k]}, got {v}")
+            err(f"Mismatching result for {promptName}")
             exit(1)
-    info("OK")
+        info("OK")
+    else:
+        info(
+            "Results could not be validated as no expected resulted were provided to --expected"
+        )
+
+    # Write results to file
+    if output is not None:
+        info(f"Writing results to {output}")
+        with open(output, "w") as f:
+            json.dump(results, f, sort_keys=True)
 
 
-for acvp_encapDecap, json_name in zip(acvp_encapDecap_data, acvp_encapDecap_jsons):
-    info(f"Running ACVP tests for {json_name}")
-    for tg in acvp_encapDecap["testGroups"]:
-        for tc in tg["tests"]:
-            run_encapDecap_test(tg, tc)
+def runTest(data, output):
+    # if output is defined we expect only one input
+    assert output is None or len(data) == 1
 
-for acvp_keygen, json_name in zip(acvp_keygen_data, acvp_keygen_jsons):
-    info(f"Running ACVP tests for {json_name}")
-    for tg in acvp_keygen["testGroups"]:
-        for tc in tg["tests"]:
-            run_keyGen_test(tg, tc)
+    for promptName, prompt, expectedResultName, expectedResult in data:
+        runTestSingle(promptName, prompt, expectedResultName, expectedResult, output)
+    info("ALL GOOD!")
+
+
+def test(prompt, expected, output):
+    assert (
+        prompt is not None or output is None
+    ), "cannot produce output if there is no input"
+
+    assert prompt is None or (
+        output is not None or expected is not None
+    ), "if there is a prompt, either output or expectedResult required"
+
+    # if prompt is passed, use it
+    if prompt is not None:
+        data = [loadAcvpData(prompt, expected)]
+    else:
+        # otherwise, load default data from acvp_data
+        data = loadDefaultAcvpData()
+
+    runTest(data, output)
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-p", "--prompt", help="Path to prompt file in json format", required=False
+)
+parser.add_argument(
+    "-e",
+    "--expected",
+    help="Path to expectedResults file in json format",
+    required=False,
+)
+parser.add_argument(
+    "-o", "--output", help="Path to output file in json format", required=False
+)
+args = parser.parse_args()
+test(args.prompt, args.expected, args.output)
