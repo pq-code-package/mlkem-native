@@ -9,6 +9,7 @@
 #
 # Invokes `acvp_mlkem{lvl}` under the hood.
 
+import argparse
 import os
 import json
 import sys
@@ -46,14 +47,23 @@ acvp_jsons = [
     ),
 ]
 
-acvp_data = []
-for prompt, expectedResults in acvp_jsons:
+
+def loadAcvpData(prompt, expectedResults):
     with open(prompt, "r") as f:
         promptData = json.load(f)
-    with open(expectedResults, "r") as f:
-        expectedResultsData = json.load(f)
+    expectedResultsData = None
+    if expectedResults is not None:
+        with open(expectedResults, "r") as f:
+            expectedResultsData = json.load(f)
 
-    acvp_data.append((promptData, expectedResultsData))
+    return (prompt, promptData, expectedResults, expectedResultsData)
+
+
+def loadDefaultAcvpData():
+    acvp_data = []
+    for prompt, expectedResults in acvp_jsons:
+        acvp_data.append(loadAcvpData(prompt, expectedResults))
+    return acvp_data
 
 
 def err(msg, **kwargs):
@@ -151,11 +161,10 @@ def run_keyGen_test(tg, tc):
     return results
 
 
-for acvp, json_name in zip(acvp_data, acvp_jsons):
-    info(f"Running ACVP tests for {json_name[0]}")
+def runTestSingle(promptName, prompt, expectedResultName, expectedResult, output):
+    info(f"Running ACVP tests for {promptName}")
 
-    prompt, expectedResults = acvp
-
+    assert expectedResult is not None or output is not None
     assert prompt["algorithm"] == "ML-KEM"
     assert prompt["mode"] == "encapDecap" or prompt["mode"] == "keyGen"
 
@@ -181,11 +190,67 @@ for acvp, json_name in zip(acvp_data, acvp_jsons):
             tgResult["tests"].append(result)
 
     # Compare to expected results
-    if json.dumps(results, sort_keys=True) != json.dumps(
-        expectedResults, sort_keys=True
-    ):
-        err("FAIL!")
-        err(f"Mismatching result for {json_name[0]}")
-        exit(1)
-    info("OK")
-info("ALL GOOD!")
+    if expectedResult is not None:
+        info(f"Comparing results with {expectedResultName}")
+        if json.dumps(results, sort_keys=True) != json.dumps(
+            expectedResult, sort_keys=True
+        ):
+            err("FAIL!")
+            err(f"Mismatching result for {promptName}")
+            exit(1)
+        info("OK")
+    else:
+        info(
+            "Results could not be validated as no expected resulted were provided to --expected"
+        )
+
+    # Write results to file
+    if output is not None:
+        info(f"Writing results to {output}")
+        with open(output, "w") as f:
+            json.dump(results, f, sort_keys=True)
+
+
+def runTest(data, output):
+    # if output is defined we expect only one input
+    assert output is None or len(data) == 1
+
+    for promptName, prompt, expectedResultName, expectedResult in data:
+        runTestSingle(promptName, prompt, expectedResultName, expectedResult, output)
+    info("ALL GOOD!")
+
+
+def test(prompt, expected, output):
+    assert (
+        prompt is not None or output is None
+    ), "cannot produce output if there is no input"
+
+    assert prompt is None or (
+        output is not None or expected is not None
+    ), "if there is a prompt, either output or expectedResult required"
+
+    # if prompt is passed, use it
+    if prompt is not None:
+        data = [loadAcvpData(prompt, expected)]
+    else:
+        # otherwise, load default data from acvp_data
+        data = loadDefaultAcvpData()
+
+    runTest(data, output)
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-p", "--prompt", help="Path to prompt file in json format", required=False
+)
+parser.add_argument(
+    "-e",
+    "--expected",
+    help="Path to expectedResults file in json format",
+    required=False,
+)
+parser.add_argument(
+    "-o", "--output", help="Path to output file in json format", required=False
+)
+args = parser.parse_args()
+test(args.prompt, args.expected, args.output)
