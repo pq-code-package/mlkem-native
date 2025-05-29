@@ -95,7 +95,10 @@ jobs:
           - runner: ubuntu-24.04
             container:
             install: 'apt'
-          - runner: macos-latest
+          - runner: macos-14
+            container:
+            install: 'installer'
+          - runner: macos-15
             container:
             install: 'installer'
           - runner: ubuntu-22.04

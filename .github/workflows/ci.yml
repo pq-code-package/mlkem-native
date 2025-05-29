@@ -15,8 +15,12 @@ jobs:
         external:
          - ${{ github.repository_owner != 'pq-code-package' }}
         target:
-         - runner: macos-latest
-           name: 'MacOS (aarch64)'
+         - runner: macos-15
+           name: 'MacOS 15 (aarch64)'
+           arch: mac
+           mode: native
+         - runner: macos-14
+           name: 'MacOS 14 (aarch64)'
            arch: mac
            mode: native
          - runner: macos-13
@@ -139,7 +143,7 @@ jobs:
       fail-fast: false
       matrix:
         backend: [x1_scalar, x1_v84a, x2_v84a, x4_v8a_scalar, x4_v8a_v84a_scalar]
-    runs-on: macos-latest
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: build + test
@@ -163,7 +167,7 @@ jobs:
            name: 'aarch64'
          - runner: ubuntu-latest
            name: 'x86_64'
-         - runner: macos-latest
+         - runner: macos-15
            name: 'macos'
         compiler:
          - name: gcc-4.8
@@ -274,7 +278,7 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: native build+functest (default)
-        if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
+        if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-15' }}
         uses: ./.github/actions/multi-functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -287,7 +291,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
       - name: native build+functest (C90)
-        if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
+        if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-15' }}
         uses: ./.github/actions/multi-functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -301,7 +305,7 @@ jobs:
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c90"
       - name: native build+functest (C99)
-        if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
+        if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-15' }}
         uses: ./.github/actions/multi-functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -315,7 +319,7 @@ jobs:
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c99"
       - name: native build+functest (C11)
-        if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
+        if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-15' }}
         uses: ./.github/actions/multi-functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -329,7 +333,7 @@ jobs:
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c11"
       - name: native build+functest (C17)
-        if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
+        if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-15') &&
                 matrix.compiler.c17 }}
         uses: ./.github/actions/multi-functest
         with:
@@ -344,7 +348,7 @@ jobs:
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c17"
       - name: native build+functest (C23)
-        if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
+        if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-15') &&
                 matrix.compiler.c23 }}
         uses: ./.github/actions/multi-functest
         with:
