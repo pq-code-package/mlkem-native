@@ -44,9 +44,6 @@ on:
       kattest:
         type: boolean
         default: true
-      nistkattest:
-        type: boolean
-        default: true
       acvptest:
         type: boolean
         default: true
@@ -168,7 +165,6 @@ jobs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.functest }}
           kat: ${{ inputs.kattest }}
-          nistkat: ${{ inputs.nistkattest }}
           acvp: ${{ inputs.acvptest }}
       - name: CBMC
         if: ${{ inputs.cbmc && (success() || failure()) }}

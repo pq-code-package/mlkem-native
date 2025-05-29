@@ -65,7 +65,6 @@ jobs:
       opt: ${{ inputs.opt }}
       functest: ${{ inputs.compile_mode != 'none' }}
       kattest: ${{ inputs.compile_mode != 'none' }}
-      nistkattest: ${{ inputs.compile_mode != 'none' }}
       acvptest: ${{ inputs.compile_mode != 'none' }}
       lint: true
       cbmc: ${{ inputs.cbmc }}
