@@ -53,26 +53,32 @@ static MLK_INLINE void mlk_poly_mulcache_compute_native(
                                 mlk_aarch64_zetas_mulcache_twisted_native);
 }
 
+#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 2
 static MLK_INLINE void mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
     int16_t r[MLKEM_N], const int16_t a[2 * MLKEM_N],
     const int16_t b[2 * MLKEM_N], const int16_t b_cache[2 * (MLKEM_N / 2)])
 {
   mlk_polyvec_basemul_acc_montgomery_cached_asm_k2(r, a, b, b_cache);
 }
+#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 */
 
+#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 3
 static MLK_INLINE void mlk_polyvec_basemul_acc_montgomery_cached_k3_native(
     int16_t r[MLKEM_N], const int16_t a[3 * MLKEM_N],
     const int16_t b[3 * MLKEM_N], const int16_t b_cache[3 * (MLKEM_N / 2)])
 {
   mlk_polyvec_basemul_acc_montgomery_cached_asm_k3(r, a, b, b_cache);
 }
+#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 3 */
 
+#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4
 static MLK_INLINE void mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
     int16_t r[MLKEM_N], const int16_t a[4 * MLKEM_N],
     const int16_t b[4 * MLKEM_N], const int16_t b_cache[4 * (MLKEM_N / 2)])
 {
   mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(r, a, b, b_cache);
 }
+#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
 
 static MLK_INLINE void mlk_poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
                                                const int16_t a[MLKEM_N])
