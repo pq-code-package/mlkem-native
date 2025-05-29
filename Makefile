@@ -1,14 +1,14 @@
 # Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-.PHONY: func kat nistkat acvp \
-	func_512 kat_512 nistkat_512 acvp_512 \
-	func_768 kat_768 nistkat_768 acvp_768 \
-	func_1024 kat_1024 nistkat_1024 acvp_1024 \
-	run_func run_kat run_nistkat run_acvp \
-	run_func_512 run_kat_512 run_nistkat_512 \
-	run_func_768 run_kat_768 run_nistkat_768 \
-	run_func_1024 run_kat_1024 run_nistkat_1024 \
+.PHONY: func kat acvp \
+	func_512 kat_512 acvp_512 \
+	func_768 kat_768 acvp_768 \
+	func_1024 kat_1024 acvp_1024 \
+	run_func run_kat run_acvp \
+	run_func_512 run_kat_512 \
+	run_func_768 run_kat_768 \
+	run_func_1024 run_kat_1024 \
 	bench_512 bench_768 bench_1024 bench \
 	run_bench_512 run_bench_768 run_bench_1024 run_bench \
 	bench_components_512 bench_components_768 bench_components_1024 bench_components \
@@ -27,10 +27,10 @@ include test/mk/rules.mk
 
 quickcheck: test
 
-build: func nistkat kat acvp
+build: func kat acvp
 	$(Q)echo "  Everything builds fine!"
 
-test: run_kat run_nistkat run_func run_acvp
+test: run_kat run_func run_acvp
 	$(Q)echo "  Everything checks fine!"
 
 run_kat_512: kat_512
@@ -40,14 +40,6 @@ run_kat_768: kat_768
 run_kat_1024: kat_1024
 	$(W) $(MLKEM1024_DIR)/bin/gen_KAT1024 | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-1024  kat-sha256
 run_kat: run_kat_512 run_kat_768 run_kat_1024
-
-run_nistkat_512: nistkat_512
-	$(W) $(MLKEM512_DIR)/bin/gen_NISTKAT512 | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-512  nistkat-sha256
-run_nistkat_768: nistkat_768
-	$(W) $(MLKEM768_DIR)/bin/gen_NISTKAT768 | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-768  nistkat-sha256
-run_nistkat_1024: nistkat_1024
-	$(W) $(MLKEM1024_DIR)/bin/gen_NISTKAT1024 | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-1024  nistkat-sha256
-run_nistkat: run_nistkat_512 run_nistkat_768 run_nistkat_1024
 
 run_func_512: func_512
 	$(W) $(MLKEM512_DIR)/bin/test_mlkem512
@@ -67,14 +59,6 @@ func_768:  $(MLKEM768_DIR)/bin/test_mlkem768
 func_1024: $(MLKEM1024_DIR)/bin/test_mlkem1024
 	$(Q)echo "  FUNC       ML-KEM-1024:  $^"
 func: func_512 func_768 func_1024
-
-nistkat_512: $(MLKEM512_DIR)/bin/gen_NISTKAT512
-	$(Q)echo "  NISTKAT    ML-KEM-512:   $^"
-nistkat_768: $(MLKEM768_DIR)/bin/gen_NISTKAT768
-	$(Q)echo "  NISTKAT    ML-KEM-768:   $^"
-nistkat_1024: $(MLKEM1024_DIR)/bin/gen_NISTKAT1024
-	$(Q)echo "  NISTKAT    ML-KEM-1024:  $^"
-nistkat: nistkat_512 nistkat_768 nistkat_1024
 
 kat_512: $(MLKEM512_DIR)/bin/gen_KAT512
 	$(Q)echo "  KAT        ML-KEM-512:   $^"

@@ -34,9 +34,6 @@ inputs:
   kat:
     description: Determine whether to run kat test or not
     default: "true"
-  nistkat:
-    description: Determine whether to run nistkat test or not
-    default: "true"
   acvp:
     description: Determine whether to run acvp test or not
     default: "true"
@@ -62,7 +59,6 @@ runs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
-          nistkat: ${{ inputs.nistkat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
@@ -81,7 +77,6 @@ runs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
-          nistkat: ${{ inputs.nistkat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
@@ -100,7 +95,6 @@ runs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
-          nistkat: ${{ inputs.nistkat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
@@ -119,7 +113,6 @@ runs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
-          nistkat: ${{ inputs.nistkat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
@@ -138,7 +131,6 @@ runs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
-          nistkat: ${{ inputs.nistkat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
@@ -157,7 +149,6 @@ runs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
-          nistkat: ${{ inputs.nistkat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
@@ -176,7 +167,6 @@ runs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
-          nistkat: ${{ inputs.nistkat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}

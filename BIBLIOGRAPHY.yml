@@ -18,11 +18,6 @@
   author: National Institute of Standards and Technology
   url: https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
 
-- id: pqcarchive
-  name: NIST PQC Archive
-  author: National Institute of Standards and Technology
-  url: https://csrc.nist.gov/Projects/post-quantum-cryptography/pqc-archive
-
 - id: REF
   name: "CRYSTALS-Kyber C reference implementation"
   author:
@@ -155,11 +150,6 @@
   name: Cycle counting on Apple M1
   url: https://gist.github.com/dougallj/5bafb113492047c865c0c8cfbc930155#file-m1_robsize-c-L390
 
-- id: BearSSL
-  author: Pornin, Thomas
-  name: BearSSL library
-  url: https://bearssl.org
-
 - id: ACVP_Server
   author: National Institute of Standards and Technology
   name: ACVP Test Vectors
@@ -169,13 +159,6 @@
   author: Celi, Christopher
   name: ACVP ML-KEM JSON Specification
   url: https://pages.nist.gov/ACVP/draft-celi-acvp-ml-kem.html
-
-- id: BoyarPeralta
-  author:
-  - Boyar, Joan
-  - Peralta, Rene
-  url: https://eprint.iacr.org/2009/191.pdf
-  name: "A new combinational logic minimization technique with applications to cryptology"
 
 - id: tiny_sha3
   name: tiny_sha3

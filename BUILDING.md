@@ -19,7 +19,6 @@ To merely build test components, use the following `make` targets:
 
 ```bash
 make func
-make nistkat
 make kat
 make acvp
 ```
@@ -28,7 +27,6 @@ To run them, add `run_`:
 
 ```bash
 make run_func
-make run_nistkat
 make run_kat
 make run_acvp
 ```

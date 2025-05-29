@@ -37,25 +37,6 @@ source code and documentation.
   - [mlkem/native/x86_64/src/intt.S](mlkem/native/x86_64/src/intt.S)
   - [mlkem/native/x86_64/src/ntt.S](mlkem/native/x86_64/src/ntt.S)
 
-### `BearSSL`
-
-* BearSSL library
-* Author(s):
-  - Thomas Pornin
-* URL: https://bearssl.org
-* Referenced from:
-  - [test/nistrng/aes.c](test/nistrng/aes.c)
-
-### `BoyarPeralta`
-
-* A new combinational logic minimization technique with applications to cryptology
-* Author(s):
-  - Joan Boyar
-  - Rene Peralta
-* URL: https://eprint.iacr.org/2009/191.pdf
-* Referenced from:
-  - [test/nistrng/aes.c](test/nistrng/aes.c)
-
 ### `FIPS140_3_IG`
 
 * Implementation Guidance for FIPS 140-3 and the Cryptographic Module Validation Program
@@ -339,15 +320,6 @@ source code and documentation.
 * URL: https://groups.google.com/a/list.nist.gov/g/pqc-forum/c/hqbtIGFKIpU/m/H14H0wOlBgAJ
 * Referenced from:
   - [mlkem/verify.h](mlkem/verify.h)
-
-### `pqcarchive`
-
-* NIST PQC Archive
-* Author(s):
-  - National Institute of Standards and Technology
-* URL: https://csrc.nist.gov/Projects/post-quantum-cryptography/pqc-archive
-* Referenced from:
-  - [test/nistrng/rng.c](test/nistrng/rng.c)
 
 ### `supercop`
 

@@ -194,18 +194,17 @@ class SCHEME(Enum):
 class TEST_TYPES(Enum):
     FUNC = 1
     BENCH = 2
-    NISTKAT = 3
-    KAT = 4
-    BENCH_COMPONENTS = 5
-    ACVP = 6
-    BRING_YOUR_OWN_FIPS202 = 7
-    CUSTOM_BACKEND = 8
-    MLKEM_NATIVE_AS_CODE_PACKAGE = 9
-    MONOLITHIC_BUILD = 10
-    MONOLITHIC_BUILD_MULTILEVEL = 11
-    MULTILEVEL_BUILD = 12
-    MULTILEVEL_BUILD_NATIVE = 13
-    MONOLITHIC_BUILD_MULTILEVEL_NATIVE = 14
+    KAT = 3
+    BENCH_COMPONENTS = 4
+    ACVP = 5
+    BRING_YOUR_OWN_FIPS202 = 6
+    CUSTOM_BACKEND = 7
+    MLKEM_NATIVE_AS_CODE_PACKAGE = 8
+    MONOLITHIC_BUILD = 9
+    MONOLITHIC_BUILD_MULTILEVEL = 10
+    MULTILEVEL_BUILD = 11
+    MULTILEVEL_BUILD_NATIVE = 12
+    MONOLITHIC_BUILD_MULTILEVEL_NATIVE = 13
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -245,8 +244,6 @@ class TEST_TYPES(Enum):
             return "Benchmark"
         if self == TEST_TYPES.BENCH_COMPONENTS:
             return "Benchmark Components"
-        if self == TEST_TYPES.NISTKAT:
-            return "Nistkat Test"
         if self == TEST_TYPES.KAT:
             return "Kat Test"
         if self == TEST_TYPES.ACVP:
@@ -294,8 +291,6 @@ class TEST_TYPES(Enum):
             return "bench"
         if self == TEST_TYPES.BENCH_COMPONENTS:
             return "bench_components"
-        if self == TEST_TYPES.NISTKAT:
-            return "nistkat"
         if self == TEST_TYPES.KAT:
             return "kat"
         if self == TEST_TYPES.ACVP:
@@ -558,19 +553,6 @@ class Tests:
 
         self.check_fail()
 
-    def nistkat(self):
-        def _nistkat(opt):
-            self._compile_schemes(TEST_TYPES.NISTKAT, opt)
-            if self.args.run:
-                self._run_schemes(TEST_TYPES.NISTKAT, opt)
-
-        if self.do_no_opt():
-            _nistkat(False)
-        if self.do_opt():
-            _nistkat(True)
-
-        self.check_fail()
-
     def kat(self):
         def _kat(opt):
             self._compile_schemes(TEST_TYPES.KAT, opt)
@@ -670,7 +652,6 @@ class Tests:
     def all(self):
         func = self.args.func
         kat = self.args.kat
-        nistkat = self.args.nistkat
         acvp = self.args.acvp
         examples = self.args.examples
 
@@ -679,8 +660,6 @@ class Tests:
                 self._compile_schemes(TEST_TYPES.FUNC, opt)
             if kat is True:
                 self._compile_schemes(TEST_TYPES.KAT, opt)
-            if nistkat is True:
-                self._compile_schemes(TEST_TYPES.NISTKAT, opt)
             if acvp is True:
                 self._compile_schemes(TEST_TYPES.ACVP, opt)
 
@@ -691,8 +670,6 @@ class Tests:
                 self._run_schemes(TEST_TYPES.FUNC, opt)
             if kat is True:
                 self._run_schemes(TEST_TYPES.KAT, opt)
-            if nistkat is True:
-                self._run_schemes(TEST_TYPES.NISTKAT, opt)
             if acvp is True:
                 self._run_scheme(TEST_TYPES.ACVP, opt, None)
 
@@ -965,21 +942,6 @@ def cli():
         "--no-kat", action="store_false", dest="kat", help="Do not run kat test"
     )
 
-    nistkat_group = all_parser.add_mutually_exclusive_group()
-    nistkat_group.add_argument(
-        "--nistkat",
-        action="store_true",
-        dest="nistkat",
-        help="Run nistkat test",
-        default=True,
-    )
-    nistkat_group.add_argument(
-        "--no-nistkatkat",
-        action="store_false",
-        dest="nistkat",
-        help="Do not run nistkat test",
-    )
-
     acvp_group = all_parser.add_mutually_exclusive_group()
     acvp_group.add_argument(
         "--acvp", action="store_true", dest="acvp", help="Run acvp test", default=True
@@ -1162,13 +1124,6 @@ def cli():
         "kat", help="Run the kat tests for all parameter sets", parents=[common_parser]
     )
 
-    # nistkat arguments
-    nistkat_parser = cmd_subparsers.add_parser(
-        "nistkat",
-        help="Run the nistkat tests for all parameter sets",
-        parents=[common_parser],
-    )
-
     args = main_parser.parse_args()
 
     if not hasattr(args, "mac_taskpolicy"):
@@ -1194,8 +1149,6 @@ def cli():
         Tests(args).func()
     elif args.cmd == "kat":
         Tests(args).kat()
-    elif args.cmd == "nistkat":
-        Tests(args).nistkat()
 
 
 if __name__ == "__main__":
