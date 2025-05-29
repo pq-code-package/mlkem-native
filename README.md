@@ -72,12 +72,6 @@ through suitable barriers and constant-time patterns.
 Absence of secret-dependent branches, memory-access patterns and variable-latency instructions is also tested using `valgrind`
 with various combinations of compilers and compilation options.
 
-## State
-
-mlkem-native is in beta-release stage. We believe it is ready for use, and hope to spark experiments on
-integration into other software before issuing a stable release. If you have any feedback, please reach out! See
-[RELEASE.md](RELEASE.md) for details.
-
 ## Design
 
 mlkem-native is split into a _frontend_ and two _backends_ for arithmetic and FIPS202 / SHA3. The frontend is
