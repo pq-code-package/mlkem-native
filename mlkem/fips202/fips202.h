@@ -19,7 +19,7 @@
 typedef struct
 {
   uint64_t ctx[25];
-} mlk_shake128ctx;
+} MLK_ALIGN mlk_shake128ctx;
 
 #define mlk_shake128_absorb_once MLK_NAMESPACE(shake128_absorb_once)
 /*************************************************
