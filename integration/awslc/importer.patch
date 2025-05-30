@@ -1,0 +1,25 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+diff --git a/crypto/fipsmodule/ml_kem/importer.sh b/crypto/fipsmodule/ml_kem/importer.sh
+index b1114479c..922f20afa 100755
+--- a/crypto/fipsmodule/ml_kem/importer.sh
++++ b/crypto/fipsmodule/ml_kem/importer.sh
+@@ -89,7 +89,7 @@ cp $TMP/.clang-format $SRC
+ unifdef -DMLK_CONFIG_MONOBUILD_CUSTOM_FIPS202                          \
+         -UMLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH                       \
+         -UMLK_CONFIG_MONOBUILD_WITH_NATIVE_FIPS202                     \
+-        $TMP/examples/monolithic_build/mlkem_native_monobuild.c \
++        $TMP/mlkem/mlkem_native.c                                      \
+         > $SRC/mlkem_native_bcm.c
+
+ # Modify include paths to match position of mlkem_native_bcm.c
+@@ -102,7 +102,7 @@ else
+   SED_I=(-i)
+ fi
+ echo "Fixup include paths"
+-sed "${SED_I[@]}" 's/#include "mlkem\/\([^"]*\)"/#include "\1"/' $SRC/mlkem_native_bcm.c
++sed "${SED_I[@]}" 's/#include "src\/\([^"]*\)"/#include "\1"/' $SRC/mlkem_native_bcm.c
+
+ echo "Remove temporary artifacts ..."
+ rm -rf $TMP
