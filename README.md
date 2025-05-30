@@ -95,7 +95,7 @@ See [dev/README.md](dev/README.md) for more details.
 ## Usage
 
 mlkem-native is intended as a code package: If you want to use mlkem-native, import [mlkem/*](mlkem) into your
-project's source tree and build using your favourite build system. See [examples/mlkem_native_as_code_package](examples/mlkem_native_as_code_package)
+project's source tree and build using your favourite build system. See [examples/basic](examples/basic)
 for an example. The build system provided in this repository is for development purposes only.
 
 ### Can I bring my own FIPS-202?
