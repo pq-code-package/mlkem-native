@@ -24,7 +24,7 @@
           pkgs-2405 = inputs.nixpkgs-2405.legacyPackages.${system};
           util = pkgs.callPackage ./nix/util.nix {
             # Keep those around in case we want to switch to unstable versions
-            cbmc = pkgs.cbmc;
+            cbmc = pkgs-unstable.cbmc;
             bitwuzla = pkgs.bitwuzla;
             z3 = pkgs.z3;
           };
@@ -144,7 +144,7 @@
             pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
             util = pkgs.callPackage ./nix/util.nix {
               inherit pkgs;
-              cbmc = pkgs.cbmc;
+              cbmc = pkgs-unstable.cbmc;
               bitwuzla = pkgs.bitwuzla;
               z3 = pkgs.z3;
             };
