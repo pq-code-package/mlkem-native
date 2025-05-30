@@ -1047,13 +1047,15 @@ def gen_avx2_mulcache_twiddles_file(dry_run=False):
     )
 
 
-def get_c_source_files(main_only=False, core_only=False):
+def get_c_source_files(main_only=False, core_only=False, strip_mlkem=False):
     if main_only is True:
-        return get_files("mlkem/src/**/*.c")
+        return get_files("mlkem/src/**/*.c", strip_mlkem=strip_mlkem)
     elif core_only is True:
-        return get_files("mlkem/src/**/*.c") + get_files("dev/**/*.c")
+        return get_files("mlkem/src/**/*.c", strip_mlkem=strip_mlkem) + get_files(
+            "dev/**/*.c"
+        )
     else:
-        return get_files("**/*.c")
+        return get_files("**/*.c", strip_mlkem=strip_mlkem)
 
 
 def get_asm_source_files(main_only=False, core_only=False):
@@ -1083,9 +1085,9 @@ def get_markdown_files(main_only=False):
     return get_files("**/*.md")
 
 
-def get_files(pattern):
+def get_files(pattern, strip_mlkem=False):
     return [
-        str(p)
+        str(p).removeprefix("mlkem/") if strip_mlkem else str(p)
         for p in pathlib.Path().glob(pattern)
         if p.is_file() and not p.is_symlink()
     ]
@@ -1226,7 +1228,7 @@ def gen_monolithic_source_file(dry_run=False):
         return not k_specific(c) and c != "mlkem/src/config.h"
 
     def gen():
-        c_sources = get_c_source_files(main_only=True)
+        c_sources = get_c_source_files(main_only=True, strip_mlkem=True)
         yield from gen_header()
 
         yield "/*"
@@ -1277,11 +1279,11 @@ def gen_monolithic_source_file(dry_run=False):
         yield " *"
         yield " * Example:"
         yield " * ```bash"
-        yield " * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native_monobuild.c"
+        yield " * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native.c"
         yield " * ```"
         yield " */"
         yield ""
-        yield '#include "mlkem/src/common.h"'
+        yield '#include "src/common.h"'
         yield ""
         for c in filter(lambda c: not native(c) and not fips202(c), c_sources):
             yield f'#include "{c}"'
@@ -1352,7 +1354,7 @@ def gen_monolithic_source_file(dry_run=False):
         yield ""
 
     update_file(
-        "examples/monolithic_build/mlkem_native_monobuild.c",
+        "mlkem/mlkem_native.c",
         "\n".join(gen()),
         dry_run=dry_run,
     )

@@ -57,40 +57,40 @@
  *
  * Example:
  * ```bash
- * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native_monobuild.c
+ * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native.c
  * ```
  */
 
-#include "mlkem/src/common.h"
+#include "src/common.h"
 
-#include "mlkem/src/compress.c"
-#include "mlkem/src/debug.c"
-#include "mlkem/src/indcpa.c"
-#include "mlkem/src/kem.c"
-#include "mlkem/src/poly.c"
-#include "mlkem/src/poly_k.c"
-#include "mlkem/src/sampling.c"
-#include "mlkem/src/verify.c"
+#include "src/compress.c"
+#include "src/debug.c"
+#include "src/indcpa.c"
+#include "src/kem.c"
+#include "src/poly.c"
+#include "src/poly_k.c"
+#include "src/sampling.c"
+#include "src/verify.c"
 
 #if !defined(MLK_CONFIG_FIPS202_CUSTOM_HEADER)
-#include "mlkem/src/fips202/fips202.c"
-#include "mlkem/src/fips202/fips202x4.c"
-#include "mlkem/src/fips202/keccakf1600.c"
-#include "mlkem/src/fips202/native/aarch64/src/keccakf1600_round_constants.c"
-#include "mlkem/src/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.c"
-#endif /* !MLK_CONFIG_FIPS202_CUSTOM_HEADER */
+#include "src/fips202/fips202.c"
+#include "src/fips202/fips202x4.c"
+#include "src/fips202/keccakf1600.c"
+#include "src/fips202/native/aarch64/src/keccakf1600_round_constants.c"
+#include "src/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.c"
+#endif /* !MLK_CONFIG_MONOBUILD_CUSTOM_FIPS202 */
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
 #if defined(MLK_SYS_AARCH64)
-#include "mlkem/src/native/aarch64/src/aarch64_zetas.c"
-#include "mlkem/src/native/aarch64/src/rej_uniform_table.c"
+#include "src/native/aarch64/src/aarch64_zetas.c"
+#include "src/native/aarch64/src/rej_uniform_table.c"
 #endif
 #if defined(MLK_SYS_X86_64)
-#include "mlkem/src/native/x86_64/src/basemul.c"
-#include "mlkem/src/native/x86_64/src/compress_avx2.c"
-#include "mlkem/src/native/x86_64/src/consts.c"
-#include "mlkem/src/native/x86_64/src/rej_uniform_avx2.c"
-#include "mlkem/src/native/x86_64/src/rej_uniform_table.c"
+#include "src/native/x86_64/src/basemul.c"
+#include "src/native/x86_64/src/compress_avx2.c"
+#include "src/native/x86_64/src/consts.c"
+#include "src/native/x86_64/src/rej_uniform_avx2.c"
+#include "src/native/x86_64/src/rej_uniform_table.c"
 #endif /* MLK_SYS_X86_64 */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
