@@ -23,13 +23,6 @@ buildEnv {
           hash = "sha256-ot0vVBgiSVru/RE7KeyTsXzDfs0CSa5vaFsON+PCZZo=";
           tag = "cbmc-6.6.0";
         };
-        # TODO: Remove those once upstream has removed the third patch
-        patches = [
-          (replaceVars ./0001-Do-not-download-sources-in-cmake.patch {
-            cudd = cudd.src;
-          })
-          ./0002-Do-not-download-sources-in-cmake.patch
-        ];
       });
       litani = callPackage ./litani.nix { }; # 1.29.0
       cbmc-viewer = callPackage ./cbmc-viewer.nix { }; # 3.11
