@@ -1212,6 +1212,7 @@ def gen_monolithic_source_file(dry_run=False):
     def gen():
         c_sources = get_c_source_files(main_only=True)
         yield from gen_header()
+
         yield "/*"
         yield " * Monolithic compilation unit bundling all compilation units within mlkem-native"
         yield " */"
@@ -1236,14 +1237,16 @@ def gen_monolithic_source_file(dry_run=False):
         yield " *"
         yield " * # Configuration"
         yield " *"
-        yield " * - MLK_CONFIG_MONOBUILD_CUSTOM_FIPS202"
+        yield " * The following options from the mlkem-native configuration are relevant:"
+        yield " *"
+        yield " * - MLK_CONFIG_FIPS202_CUSTOM_HEADER"
         yield " *   Set this option if you use a custom FIPS202 implementation."
         yield " *"
-        yield " * - MLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH"
+        yield " * - MLK_CONFIG_USE_NATIVE_BACKEND_ARITH"
         yield " *   Set this option if you want to include the native arithmetic backends"
         yield " *   in your build."
         yield " *"
-        yield " * - MLK_CONFIG_MONOBUILD_WITH_NATIVE_FIPS202"
+        yield " * - MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202"
         yield " *   Set this option if you want to include the native FIPS202 backends"
         yield " *   in your build."
         yield " *"
@@ -1251,27 +1254,27 @@ def gen_monolithic_source_file(dry_run=False):
         yield " *   Set this option if you want to keep the directives defined in"
         yield " *   level-independent headers. This is needed for a multi-level build."
         yield " */"
-        yield ""
-        yield "/* If parts of the mlkem-native source tree are not used,"
+        yield " "
+        yield " /* If parts of the mlkem-native source tree are not used,"
         yield " * consider reducing this header via `unifdef`."
         yield " *"
         yield " * Example:"
         yield " * ```bash"
-        yield " * unifdef -UMLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH mlkem_native_monobuild.c"
+        yield " * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native_monobuild.c"
         yield " * ```"
         yield " */"
         yield ""
-        yield '#include "mlkem/sys.h"'
+        yield '#include "mlkem/common.h"'
         yield ""
         for c in filter(lambda c: not native(c) and not fips202(c), c_sources):
             yield f'#include "{c}"'
         yield ""
-        yield "#if !defined(MLK_CONFIG_MONOBUILD_CUSTOM_FIPS202)"
+        yield "#if !defined(MLK_CONFIG_FIPS202_CUSTOM_HEADER)"
         for c in filter(lambda c: not native(c) and fips202(c), c_sources):
             yield f'#include "{c}"'
         yield "#endif"
         yield ""
-        yield "#if defined(MLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH)"
+        yield "#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)"
         yield "#if defined(MLK_SYS_AARCH64)"
         for c in filter(native_arith_aarch64, c_sources):
             yield f'#include "{c}"'
@@ -1282,7 +1285,7 @@ def gen_monolithic_source_file(dry_run=False):
         yield "#endif"
         yield "#endif"
         yield ""
-        yield "#if defined(MLK_CONFIG_MONOBUILD_WITH_NATIVE_FIPS202)"
+        yield "#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)"
         yield "#if defined(MLK_SYS_AARCH64)"
         for c in filter(native_fips202_aarch64, c_sources):
             yield f'#include "{c}"'
@@ -1313,19 +1316,19 @@ def gen_monolithic_source_file(dry_run=False):
         yield "#undef __contract__"
         yield "#undef __loop__"
         yield ""
-        yield "#if !defined(MLK_CONFIG_MONOBUILD_CUSTOM_FIPS202)"
+        yield "#if !defined(MLK_CONFIG_FIPS202_CUSTOM_HEADER)"
         yield from gen_monolithic_undef_all_core(
             filt=lambda c: not native(c) and k_generic(c) and fips202(c),
             desc="FIPS-202 files",
         )
         yield "#endif"
         yield ""
-        yield "#if defined(MLK_CONFIG_MONOBUILD_WITH_NATIVE_FIPS202)"
+        yield "#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)"
         yield from gen_monolithic_undef_all_core(
             filt=native_fips202, desc="native code"
         )
         yield "#endif"
-        yield "#if defined(MLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH)"
+        yield "#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)"
         yield from gen_monolithic_undef_all_core(filt=native_arith, desc="native code")
         yield "#endif"
         yield "#endif"
