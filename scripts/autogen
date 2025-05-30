@@ -1620,6 +1620,10 @@ def check_macro_typos():
             if rest.startswith("\\") or m in ["MLK_XXX", "MLK_SOURCE_XXX"]:
                 return True
 
+        # 5. AWS-LC importer patch
+        if is_autogen or filename == "integration/awslc/awslc.patch":
+            return True
+
         return False
 
     with ThreadPoolExecutor() as executor:
