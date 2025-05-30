@@ -25,7 +25,7 @@ Q ?= @
 # Here, we use just a single monolithic compilation unit to include
 # multiple instances of mlkem-native.
 
-MLK_SOURCE=mlkem_native_monobuild.c
+MLK_SOURCE=mlkem/mlkem_native.c
 
 INC=-Imlkem/ -I./
 
