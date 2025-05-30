@@ -23,7 +23,7 @@ endif
 # Here, the mlkem-native C source is directly included in main.c.
 MLK_SOURCE_ASM = mlkem_native_monobuild.S
 
-INC=-Imlkem/ -I./
+INC=-Imlkem/ -Imlkem/src/ -I./
 
 # Part B:
 #

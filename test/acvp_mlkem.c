@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../mlkem/src/common.h"
 
-#include "../mlkem/common.h"
 #include "../mlkem/mlkem_native.h"
 
 #define USAGE \

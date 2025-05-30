@@ -34,8 +34,8 @@ source code and documentation.
 * Referenced from:
   - [dev/x86_64/src/intt.S](dev/x86_64/src/intt.S)
   - [dev/x86_64/src/ntt.S](dev/x86_64/src/ntt.S)
-  - [mlkem/native/x86_64/src/intt.S](mlkem/native/x86_64/src/intt.S)
-  - [mlkem/native/x86_64/src/ntt.S](mlkem/native/x86_64/src/ntt.S)
+  - [mlkem/src/native/x86_64/src/intt.S](mlkem/src/native/x86_64/src/intt.S)
+  - [mlkem/src/native/x86_64/src/ntt.S](mlkem/src/native/x86_64/src/ntt.S)
 
 ### `FIPS140_3_IG`
 
@@ -47,8 +47,8 @@ source code and documentation.
   - [integration/liboqs/config_aarch64.h](integration/liboqs/config_aarch64.h)
   - [integration/liboqs/config_c.h](integration/liboqs/config_c.h)
   - [integration/liboqs/config_x86_64.h](integration/liboqs/config_x86_64.h)
-  - [mlkem/config.h](mlkem/config.h)
-  - [mlkem/kem.c](mlkem/kem.c)
+  - [mlkem/src/config.h](mlkem/src/config.h)
+  - [mlkem/src/kem.c](mlkem/src/kem.c)
   - [test/break_pct_config.h](test/break_pct_config.h)
   - [test/custom_randombytes_config.h](test/custom_randombytes_config.h)
   - [test/custom_zeroize_config.h](test/custom_zeroize_config.h)
@@ -73,23 +73,23 @@ source code and documentation.
 * Referenced from:
   - [README.md](README.md)
   - [dev/x86_64/src/basemul.c](dev/x86_64/src/basemul.c)
-  - [mlkem/compress.c](mlkem/compress.c)
-  - [mlkem/compress.h](mlkem/compress.h)
-  - [mlkem/fips202/fips202.c](mlkem/fips202/fips202.c)
-  - [mlkem/fips202/fips202x4.c](mlkem/fips202/fips202x4.c)
-  - [mlkem/indcpa.c](mlkem/indcpa.c)
-  - [mlkem/indcpa.h](mlkem/indcpa.h)
-  - [mlkem/kem.c](mlkem/kem.c)
-  - [mlkem/kem.h](mlkem/kem.h)
   - [mlkem/mlkem_native.h](mlkem/mlkem_native.h)
-  - [mlkem/native/x86_64/src/basemul.c](mlkem/native/x86_64/src/basemul.c)
-  - [mlkem/poly.h](mlkem/poly.h)
-  - [mlkem/poly_k.c](mlkem/poly_k.c)
-  - [mlkem/poly_k.h](mlkem/poly_k.h)
-  - [mlkem/sampling.c](mlkem/sampling.c)
-  - [mlkem/sampling.h](mlkem/sampling.h)
-  - [mlkem/symmetric.h](mlkem/symmetric.h)
-  - [mlkem/verify.h](mlkem/verify.h)
+  - [mlkem/src/compress.c](mlkem/src/compress.c)
+  - [mlkem/src/compress.h](mlkem/src/compress.h)
+  - [mlkem/src/fips202/fips202.c](mlkem/src/fips202/fips202.c)
+  - [mlkem/src/fips202/fips202x4.c](mlkem/src/fips202/fips202x4.c)
+  - [mlkem/src/indcpa.c](mlkem/src/indcpa.c)
+  - [mlkem/src/indcpa.h](mlkem/src/indcpa.h)
+  - [mlkem/src/kem.c](mlkem/src/kem.c)
+  - [mlkem/src/kem.h](mlkem/src/kem.h)
+  - [mlkem/src/native/x86_64/src/basemul.c](mlkem/src/native/x86_64/src/basemul.c)
+  - [mlkem/src/poly.h](mlkem/src/poly.h)
+  - [mlkem/src/poly_k.c](mlkem/src/poly_k.c)
+  - [mlkem/src/poly_k.h](mlkem/src/poly_k.h)
+  - [mlkem/src/sampling.c](mlkem/src/sampling.c)
+  - [mlkem/src/sampling.h](mlkem/src/sampling.h)
+  - [mlkem/src/symmetric.h](mlkem/src/symmetric.h)
+  - [mlkem/src/verify.h](mlkem/src/verify.h)
 
 ### `HYBRID`
 
@@ -103,9 +103,9 @@ source code and documentation.
   - [dev/fips202/aarch64/auto.h](dev/fips202/aarch64/auto.h)
   - [dev/fips202/aarch64/src/keccak_f1600_x1_v84a_asm.S](dev/fips202/aarch64/src/keccak_f1600_x1_v84a_asm.S)
   - [dev/fips202/aarch64/src/keccak_f1600_x2_v84a_asm.S](dev/fips202/aarch64/src/keccak_f1600_x2_v84a_asm.S)
-  - [mlkem/fips202/native/aarch64/auto.h](mlkem/fips202/native/aarch64/auto.h)
-  - [mlkem/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S](mlkem/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S)
-  - [mlkem/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S](mlkem/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S)
+  - [mlkem/src/fips202/native/aarch64/auto.h](mlkem/src/fips202/native/aarch64/auto.h)
+  - [mlkem/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S](mlkem/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S)
+  - [mlkem/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S](mlkem/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S)
   - [proofs/hol_light/arm/README.md](proofs/hol_light/arm/README.md)
   - [proofs/hol_light/arm/mlkem/keccak_f1600_x1_v84a.S](proofs/hol_light/arm/mlkem/keccak_f1600_x1_v84a.S)
   - [proofs/hol_light/arm/mlkem/keccak_f1600_x2_v84a.S](proofs/hol_light/arm/mlkem/keccak_f1600_x2_v84a.S)
@@ -152,14 +152,14 @@ source code and documentation.
   - [dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S](dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S)
   - [dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S](dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S)
   - [dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S](dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S)
-  - [mlkem/native/aarch64/README.md](mlkem/native/aarch64/README.md)
-  - [mlkem/native/aarch64/src/intt.S](mlkem/native/aarch64/src/intt.S)
-  - [mlkem/native/aarch64/src/ntt.S](mlkem/native/aarch64/src/ntt.S)
-  - [mlkem/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S](mlkem/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S)
-  - [mlkem/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S](mlkem/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S)
-  - [mlkem/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S](mlkem/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S)
-  - [mlkem/poly.c](mlkem/poly.c)
-  - [mlkem/poly_k.c](mlkem/poly_k.c)
+  - [mlkem/src/native/aarch64/README.md](mlkem/src/native/aarch64/README.md)
+  - [mlkem/src/native/aarch64/src/intt.S](mlkem/src/native/aarch64/src/intt.S)
+  - [mlkem/src/native/aarch64/src/ntt.S](mlkem/src/native/aarch64/src/ntt.S)
+  - [mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S](mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S)
+  - [mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S](mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S)
+  - [mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S](mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S)
+  - [mlkem/src/poly.c](mlkem/src/poly.c)
+  - [mlkem/src/poly_k.c](mlkem/src/poly_k.c)
   - [proofs/hol_light/arm/mlkem/mlkem_intt.S](proofs/hol_light/arm/mlkem/mlkem_intt.S)
   - [proofs/hol_light/arm/mlkem/mlkem_ntt.S](proofs/hol_light/arm/mlkem/mlkem_ntt.S)
   - [proofs/hol_light/arm/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.S](proofs/hol_light/arm/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.S)
@@ -183,14 +183,14 @@ source code and documentation.
 * Referenced from:
   - [README.md](README.md)
   - [REFERENCE.md](REFERENCE.md)
-  - [mlkem/compress.c](mlkem/compress.c)
-  - [mlkem/compress.h](mlkem/compress.h)
-  - [mlkem/indcpa.c](mlkem/indcpa.c)
-  - [mlkem/kem.c](mlkem/kem.c)
-  - [mlkem/poly.c](mlkem/poly.c)
-  - [mlkem/poly_k.c](mlkem/poly_k.c)
-  - [mlkem/sampling.c](mlkem/sampling.c)
-  - [mlkem/verify.h](mlkem/verify.h)
+  - [mlkem/src/compress.c](mlkem/src/compress.c)
+  - [mlkem/src/compress.h](mlkem/src/compress.h)
+  - [mlkem/src/indcpa.c](mlkem/src/indcpa.c)
+  - [mlkem/src/kem.c](mlkem/src/kem.c)
+  - [mlkem/src/poly.c](mlkem/src/poly.c)
+  - [mlkem/src/poly_k.c](mlkem/src/poly_k.c)
+  - [mlkem/src/sampling.c](mlkem/src/sampling.c)
+  - [mlkem/src/verify.h](mlkem/src/verify.h)
 
 ### `REF_AVX2`
 
@@ -222,20 +222,20 @@ source code and documentation.
   - [dev/x86_64/src/reduce.S](dev/x86_64/src/reduce.S)
   - [dev/x86_64/src/rej_uniform_avx2.c](dev/x86_64/src/rej_uniform_avx2.c)
   - [dev/x86_64/src/tomont.S](dev/x86_64/src/tomont.S)
-  - [mlkem/native/x86_64/src/align.h](mlkem/native/x86_64/src/align.h)
-  - [mlkem/native/x86_64/src/basemul.S](mlkem/native/x86_64/src/basemul.S)
-  - [mlkem/native/x86_64/src/basemul.c](mlkem/native/x86_64/src/basemul.c)
-  - [mlkem/native/x86_64/src/compress_avx2.c](mlkem/native/x86_64/src/compress_avx2.c)
-  - [mlkem/native/x86_64/src/consts.c](mlkem/native/x86_64/src/consts.c)
-  - [mlkem/native/x86_64/src/consts.h](mlkem/native/x86_64/src/consts.h)
-  - [mlkem/native/x86_64/src/intt.S](mlkem/native/x86_64/src/intt.S)
-  - [mlkem/native/x86_64/src/ntt.S](mlkem/native/x86_64/src/ntt.S)
-  - [mlkem/native/x86_64/src/nttfrombytes.S](mlkem/native/x86_64/src/nttfrombytes.S)
-  - [mlkem/native/x86_64/src/ntttobytes.S](mlkem/native/x86_64/src/ntttobytes.S)
-  - [mlkem/native/x86_64/src/nttunpack.S](mlkem/native/x86_64/src/nttunpack.S)
-  - [mlkem/native/x86_64/src/reduce.S](mlkem/native/x86_64/src/reduce.S)
-  - [mlkem/native/x86_64/src/rej_uniform_avx2.c](mlkem/native/x86_64/src/rej_uniform_avx2.c)
-  - [mlkem/native/x86_64/src/tomont.S](mlkem/native/x86_64/src/tomont.S)
+  - [mlkem/src/native/x86_64/src/align.h](mlkem/src/native/x86_64/src/align.h)
+  - [mlkem/src/native/x86_64/src/basemul.S](mlkem/src/native/x86_64/src/basemul.S)
+  - [mlkem/src/native/x86_64/src/basemul.c](mlkem/src/native/x86_64/src/basemul.c)
+  - [mlkem/src/native/x86_64/src/compress_avx2.c](mlkem/src/native/x86_64/src/compress_avx2.c)
+  - [mlkem/src/native/x86_64/src/consts.c](mlkem/src/native/x86_64/src/consts.c)
+  - [mlkem/src/native/x86_64/src/consts.h](mlkem/src/native/x86_64/src/consts.h)
+  - [mlkem/src/native/x86_64/src/intt.S](mlkem/src/native/x86_64/src/intt.S)
+  - [mlkem/src/native/x86_64/src/ntt.S](mlkem/src/native/x86_64/src/ntt.S)
+  - [mlkem/src/native/x86_64/src/nttfrombytes.S](mlkem/src/native/x86_64/src/nttfrombytes.S)
+  - [mlkem/src/native/x86_64/src/ntttobytes.S](mlkem/src/native/x86_64/src/ntttobytes.S)
+  - [mlkem/src/native/x86_64/src/nttunpack.S](mlkem/src/native/x86_64/src/nttunpack.S)
+  - [mlkem/src/native/x86_64/src/reduce.S](mlkem/src/native/x86_64/src/reduce.S)
+  - [mlkem/src/native/x86_64/src/rej_uniform_avx2.c](mlkem/src/native/x86_64/src/rej_uniform_avx2.c)
+  - [mlkem/src/native/x86_64/src/tomont.S](mlkem/src/native/x86_64/src/tomont.S)
 
 ### `SLOTHY`
 
@@ -268,9 +268,9 @@ source code and documentation.
   - [dev/aarch64_opt/README.md](dev/aarch64_opt/README.md)
   - [dev/aarch64_opt/src/intt.S](dev/aarch64_opt/src/intt.S)
   - [dev/aarch64_opt/src/ntt.S](dev/aarch64_opt/src/ntt.S)
-  - [mlkem/native/aarch64/README.md](mlkem/native/aarch64/README.md)
-  - [mlkem/native/aarch64/src/intt.S](mlkem/native/aarch64/src/intt.S)
-  - [mlkem/native/aarch64/src/ntt.S](mlkem/native/aarch64/src/ntt.S)
+  - [mlkem/src/native/aarch64/README.md](mlkem/src/native/aarch64/README.md)
+  - [mlkem/src/native/aarch64/src/intt.S](mlkem/src/native/aarch64/src/intt.S)
+  - [mlkem/src/native/aarch64/src/ntt.S](mlkem/src/native/aarch64/src/ntt.S)
   - [proofs/hol_light/arm/mlkem/mlkem_intt.S](proofs/hol_light/arm/mlkem/mlkem_intt.S)
   - [proofs/hol_light/arm/mlkem/mlkem_ntt.S](proofs/hol_light/arm/mlkem/mlkem_ntt.S)
 
@@ -291,7 +291,7 @@ source code and documentation.
   - Tung Chou
 * URL: https://lib.mceliece.org/
 * Referenced from:
-  - [mlkem/verify.h](mlkem/verify.h)
+  - [mlkem/src/verify.h](mlkem/src/verify.h)
 
 ### `m1cycles`
 
@@ -309,8 +309,8 @@ source code and documentation.
   - Kannwischer et. al
 * URL: https://github.com/mupq/mupq
 * Referenced from:
-  - [mlkem/fips202/fips202.c](mlkem/fips202/fips202.c)
-  - [mlkem/fips202/keccakf1600.c](mlkem/fips202/keccakf1600.c)
+  - [mlkem/src/fips202/fips202.c](mlkem/src/fips202/fips202.c)
+  - [mlkem/src/fips202/keccakf1600.c](mlkem/src/fips202/keccakf1600.c)
 
 ### `optblocker`
 
@@ -319,7 +319,7 @@ source code and documentation.
   - Daniel J. Bernstein
 * URL: https://groups.google.com/a/list.nist.gov/g/pqc-forum/c/hqbtIGFKIpU/m/H14H0wOlBgAJ
 * Referenced from:
-  - [mlkem/verify.h](mlkem/verify.h)
+  - [mlkem/src/verify.h](mlkem/src/verify.h)
 
 ### `supercop`
 
@@ -328,8 +328,8 @@ source code and documentation.
   - Daniel J. Bernstein
 * URL: http://bench.cr.yp.to/supercop.html
 * Referenced from:
-  - [mlkem/fips202/fips202.c](mlkem/fips202/fips202.c)
-  - [mlkem/fips202/keccakf1600.c](mlkem/fips202/keccakf1600.c)
+  - [mlkem/src/fips202/fips202.c](mlkem/src/fips202/fips202.c)
+  - [mlkem/src/fips202/keccakf1600.c](mlkem/src/fips202/keccakf1600.c)
 
 ### `surf`
 
@@ -362,5 +362,5 @@ source code and documentation.
   - Peter Schwabe
 * URL: https://keccak.team/2015/tweetfips202.html
 * Referenced from:
-  - [mlkem/fips202/fips202.c](mlkem/fips202/fips202.c)
-  - [mlkem/fips202/keccakf1600.c](mlkem/fips202/keccakf1600.c)
+  - [mlkem/src/fips202/fips202.c](mlkem/src/fips202/fips202.c)
+  - [mlkem/src/fips202/keccakf1600.c](mlkem/src/fips202/keccakf1600.c)

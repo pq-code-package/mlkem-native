@@ -413,7 +413,7 @@ The significant changes are:
 ```
 HARNESS_FILE = poly_tobytes_harness
 PROOF_UID = mlk_poly_tobytes
-PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c
+PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c
 CHECK_FUNCTION_CONTRACTS=mlk_poly_tobytes
 USE_FUNCTION_CONTRACTS=
 FUNCTION_NAME = mlk_poly_tobytes

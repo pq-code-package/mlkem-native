@@ -14,13 +14,13 @@ endif
 # Part A:
 #
 # mlkem-native source and header files
-MLK_SOURCE=$(wildcard          \
-	mlkem_native/*.c		\
-	mlkem_native/**/*.c		\
-	mlkem_native/**/**/*.c	        \
-	mlkem_native/**/**/**/*.c)
+MLK_SOURCE=$(wildcard              \
+	mlkem_native/src/*.c           \
+	mlkem_native/src/**/*.c        \
+	mlkem_native/src/**/**/*.c     \
+	mlkem_native/src/**/**/**/*.c)
 
-INC=-Imlkem_native/
+INC=-Imlkem_native/src/ -Imlkem_native/
 
 # Part B:
 #

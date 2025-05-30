@@ -8,6 +8,6 @@
 
 #define MLK_USE_FIPS202_X2_NATIVE
 
-#include "../../mlkem/fips202/native/api.h"
+#include "../../mlkem/src/fips202/native/api.h"
 
 #endif /* !MLK_DUMMY_FIPS202X2_BACKEND_H */

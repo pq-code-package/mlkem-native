@@ -61,82 +61,49 @@
  * ```
  */
 
-#include "mlkem/common.h"
+#include "mlkem/src/common.h"
 
-#include "mlkem/compress.c"
-#include "mlkem/debug.c"
-#include "mlkem/indcpa.c"
-#include "mlkem/kem.c"
-#include "mlkem/poly.c"
-#include "mlkem/poly_k.c"
-#include "mlkem/sampling.c"
-#include "mlkem/verify.c"
+#include "mlkem/src/compress.c"
+#include "mlkem/src/debug.c"
+#include "mlkem/src/indcpa.c"
+#include "mlkem/src/kem.c"
+#include "mlkem/src/poly.c"
+#include "mlkem/src/poly_k.c"
+#include "mlkem/src/sampling.c"
+#include "mlkem/src/verify.c"
 
 #if !defined(MLK_CONFIG_FIPS202_CUSTOM_HEADER)
-#include "mlkem/fips202/fips202.c"
-#include "mlkem/fips202/fips202x4.c"
-#include "mlkem/fips202/keccakf1600.c"
-#endif
+#include "mlkem/src/fips202/fips202.c"
+#include "mlkem/src/fips202/fips202x4.c"
+#include "mlkem/src/fips202/keccakf1600.c"
+#include "mlkem/src/fips202/native/aarch64/src/keccakf1600_round_constants.c"
+#include "mlkem/src/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.c"
+#endif /* !MLK_CONFIG_FIPS202_CUSTOM_HEADER */
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
 #if defined(MLK_SYS_AARCH64)
-#include "mlkem/native/aarch64/src/aarch64_zetas.c"
-#include "mlkem/native/aarch64/src/rej_uniform_table.c"
+#include "mlkem/src/native/aarch64/src/aarch64_zetas.c"
+#include "mlkem/src/native/aarch64/src/rej_uniform_table.c"
 #endif
 #if defined(MLK_SYS_X86_64)
-#include "mlkem/native/x86_64/src/basemul.c"
-#include "mlkem/native/x86_64/src/compress_avx2.c"
-#include "mlkem/native/x86_64/src/consts.c"
-#include "mlkem/native/x86_64/src/rej_uniform_avx2.c"
-#include "mlkem/native/x86_64/src/rej_uniform_table.c"
+#include "mlkem/src/native/x86_64/src/basemul.c"
+#include "mlkem/src/native/x86_64/src/compress_avx2.c"
+#include "mlkem/src/native/x86_64/src/consts.c"
+#include "mlkem/src/native/x86_64/src/rej_uniform_avx2.c"
+#include "mlkem/src/native/x86_64/src/rej_uniform_table.c"
 #endif /* MLK_SYS_X86_64 */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
 #if defined(MLK_SYS_AARCH64)
-#include "mlkem/fips202/native/aarch64/src/keccakf1600_round_constants.c"
 #endif
 #if defined(MLK_SYS_X86_64)
-#include "mlkem/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.c"
 #endif
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 
 /*
  * Undefine macros from MLK_CONFIG_PARAMETER_SET-specific files
  */
-/* mlkem/common.h */
-#undef MLK_ADD_PARAM_SET
-#undef MLK_ASM_FN_SYMBOL
-#undef MLK_ASM_NAMESPACE
-#undef MLK_COMMON_H
-#undef MLK_CONCAT
-#undef MLK_CONCAT_
-#undef MLK_CONFIG_API_NAMESPACE_PREFIX
-#undef MLK_CONFIG_API_PARAMETER_SET
-#undef MLK_EMPTY_CU
-#undef MLK_EXTERNAL_API
-#undef MLK_FIPS202X4_HEADER_FILE
-#undef MLK_FIPS202_HEADER_FILE
-#undef MLK_INTERNAL_API
-#undef MLK_MULTILEVEL_BUILD
-#undef MLK_NAMESPACE
-#undef MLK_NAMESPACE_K
-#undef MLK_NAMESPACE_PREFIX
-#undef MLK_NAMESPACE_PREFIX_K
-/* mlkem/indcpa.h */
-#undef MLK_INDCPA_H
-#undef mlk_gen_matrix
-#undef mlk_indcpa_dec
-#undef mlk_indcpa_enc
-#undef mlk_indcpa_keypair_derand
-/* mlkem/kem.h */
-#undef MLK_CONFIG_API_NO_SUPERCOP
-#undef MLK_KEM_H
-#undef crypto_kem_dec
-#undef crypto_kem_enc
-#undef crypto_kem_enc_derand
-#undef crypto_kem_keypair
-#undef crypto_kem_keypair_derand
 /* mlkem/mlkem_native.h */
 #undef CRYPTO_BYTES
 #undef CRYPTO_CIPHERTEXTBYTES
@@ -177,7 +144,40 @@
 #undef crypto_kem_enc_derand
 #undef crypto_kem_keypair
 #undef crypto_kem_keypair_derand
-/* mlkem/params.h */
+/* mlkem/src/common.h */
+#undef MLK_ADD_PARAM_SET
+#undef MLK_ASM_FN_SYMBOL
+#undef MLK_ASM_NAMESPACE
+#undef MLK_COMMON_H
+#undef MLK_CONCAT
+#undef MLK_CONCAT_
+#undef MLK_CONFIG_API_NAMESPACE_PREFIX
+#undef MLK_CONFIG_API_PARAMETER_SET
+#undef MLK_EMPTY_CU
+#undef MLK_EXTERNAL_API
+#undef MLK_FIPS202X4_HEADER_FILE
+#undef MLK_FIPS202_HEADER_FILE
+#undef MLK_INTERNAL_API
+#undef MLK_MULTILEVEL_BUILD
+#undef MLK_NAMESPACE
+#undef MLK_NAMESPACE_K
+#undef MLK_NAMESPACE_PREFIX
+#undef MLK_NAMESPACE_PREFIX_K
+/* mlkem/src/indcpa.h */
+#undef MLK_INDCPA_H
+#undef mlk_gen_matrix
+#undef mlk_indcpa_dec
+#undef mlk_indcpa_enc
+#undef mlk_indcpa_keypair_derand
+/* mlkem/src/kem.h */
+#undef MLK_CONFIG_API_NO_SUPERCOP
+#undef MLK_KEM_H
+#undef crypto_kem_dec
+#undef crypto_kem_enc
+#undef crypto_kem_enc_derand
+#undef crypto_kem_keypair
+#undef crypto_kem_keypair_derand
+/* mlkem/src/params.h */
 #undef MLKEM_DU
 #undef MLKEM_DV
 #undef MLKEM_ETA1
@@ -206,7 +206,7 @@
 #undef MLKEM_SYMBYTES
 #undef MLKEM_UINT12_LIMIT
 #undef MLK_PARAMS_H
-/* mlkem/poly_k.h */
+/* mlkem/src/poly_k.h */
 #undef MLK_POLY_K_H
 #undef mlk_poly_compress_du
 #undef mlk_poly_compress_dv
@@ -230,7 +230,7 @@
 #undef mlk_polyvec_reduce
 #undef mlk_polyvec_tobytes
 #undef mlk_polyvec_tomont
-/* mlkem/sys.h */
+/* mlkem/src/sys.h */
 #undef MLK_ALIGN
 #undef MLK_ALIGN_UP
 #undef MLK_ALWAYS_INLINE
@@ -258,7 +258,7 @@
 /*
  * Undefine macros from MLK_CONFIG_PARAMETER_SET-generic files
  */
-/* mlkem/compress.h */
+/* mlkem/src/compress.h */
 #undef MLK_COMPRESS_H
 #undef mlk_poly_compress_d10
 #undef mlk_poly_compress_d11
@@ -272,7 +272,7 @@
 #undef mlk_poly_frommsg
 #undef mlk_poly_tobytes
 #undef mlk_poly_tomsg
-/* mlkem/debug.h */
+/* mlkem/src/debug.h */
 #undef MLK_DEBUG_H
 #undef mlk_assert
 #undef mlk_assert_abs_bound
@@ -281,7 +281,7 @@
 #undef mlk_assert_bound_2d
 #undef mlk_debug_check_assert
 #undef mlk_debug_check_bounds
-/* mlkem/poly.h */
+/* mlkem/src/poly.h */
 #undef MLK_INVNTT_BOUND
 #undef MLK_NTT_BOUND
 #undef MLK_POLY_H
@@ -292,15 +292,15 @@
 #undef mlk_poly_reduce
 #undef mlk_poly_sub
 #undef mlk_poly_tomont
-/* mlkem/randombytes.h */
+/* mlkem/src/randombytes.h */
 #undef MLK_RANDOMBYTES_H
-/* mlkem/sampling.h */
+/* mlkem/src/sampling.h */
 #undef MLK_SAMPLING_H
 #undef mlk_poly_cbd2
 #undef mlk_poly_cbd3
 #undef mlk_poly_rej_uniform
 #undef mlk_poly_rej_uniform_x4
-/* mlkem/symmetric.h */
+/* mlkem/src/symmetric.h */
 #undef MLK_SYMMETRIC_H
 #undef MLK_XOF_RATE
 #undef mlk_hash_g
@@ -320,11 +320,11 @@
 #undef mlk_xof_x4_init
 #undef mlk_xof_x4_release
 #undef mlk_xof_x4_squeezeblocks
-/* mlkem/verify.h */
+/* mlkem/src/verify.h */
 #undef MLK_USE_ASM_VALUE_BARRIER
 #undef MLK_VERIFY_H
 #undef mlk_ct_opt_blocker_u64
-/* mlkem/cbmc.h */
+/* mlkem/src/cbmc.h */
 #undef MLK_CBMC_H
 #undef __contract__
 #undef __loop__
@@ -333,7 +333,7 @@
 /*
  * Undefine macros from FIPS-202 files
  */
-/* mlkem/fips202/fips202.h */
+/* mlkem/src/fips202/fips202.h */
 #undef FIPS202_X4_DEFAULT_IMPLEMENTATION
 #undef MLK_FIPS202_FIPS202_H
 #undef SHA3_256_HASHBYTES
@@ -350,14 +350,14 @@
 #undef mlk_shake128_release
 #undef mlk_shake128_squeezeblocks
 #undef mlk_shake256
-/* mlkem/fips202/fips202x4.h */
+/* mlkem/src/fips202/fips202x4.h */
 #undef MLK_FIPS202_FIPS202X4_H
 #undef mlk_shake128x4_absorb_once
 #undef mlk_shake128x4_init
 #undef mlk_shake128x4_release
 #undef mlk_shake128x4_squeezeblocks
 #undef mlk_shake256x4
-/* mlkem/fips202/keccakf1600.h */
+/* mlkem/src/fips202/keccakf1600.h */
 #undef MLK_FIPS202_KECCAKF1600_H
 #undef MLK_KECCAK_LANES
 #undef MLK_KECCAK_WAY
@@ -367,15 +367,9 @@
 #undef mlk_keccakf1600x4_extract_bytes
 #undef mlk_keccakf1600x4_permute
 #undef mlk_keccakf1600x4_xor_bytes
-#endif /* !MLK_CONFIG_FIPS202_CUSTOM_HEADER */
-
-#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
-/*
- * Undefine macros from native code
- */
-/* mlkem/fips202/native/aarch64/auto.h */
+/* mlkem/src/fips202/native/aarch64/auto.h */
 #undef MLK_FIPS202_NATIVE_AARCH64_AUTO_H
-/* mlkem/fips202/native/aarch64/src/fips202_native_aarch64.h */
+/* mlkem/src/fips202/native/aarch64/src/fips202_native_aarch64.h */
 #undef MLK_FIPS202_NATIVE_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H
 #undef mlk_keccak_f1600_x1_scalar_asm
 #undef mlk_keccak_f1600_x1_v84a_asm
@@ -383,43 +377,49 @@
 #undef mlk_keccak_f1600_x4_scalar_v8a_hybrid_asm
 #undef mlk_keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm
 #undef mlk_keccakf1600_round_constants
-/* mlkem/fips202/native/aarch64/x1_scalar.h */
+/* mlkem/src/fips202/native/aarch64/x1_scalar.h */
 #undef MLK_FIPS202_AARCH64_NEED_X1_SCALAR
 #undef MLK_FIPS202_NATIVE_AARCH64_X1_SCALAR_H
 #undef MLK_USE_FIPS202_X1_NATIVE
-/* mlkem/fips202/native/aarch64/x1_v84a.h */
+/* mlkem/src/fips202/native/aarch64/x1_v84a.h */
 #undef MLK_FIPS202_AARCH64_NEED_X1_V84A
 #undef MLK_FIPS202_NATIVE_AARCH64_X1_V84A_H
 #undef MLK_USE_FIPS202_X1_NATIVE
-/* mlkem/fips202/native/aarch64/x2_v84a.h */
+/* mlkem/src/fips202/native/aarch64/x2_v84a.h */
 #undef MLK_FIPS202_AARCH64_NEED_X2_V84A
 #undef MLK_FIPS202_NATIVE_AARCH64_X2_V84A_H
 #undef MLK_USE_FIPS202_X2_NATIVE
-/* mlkem/fips202/native/aarch64/x4_v8a_scalar.h */
+/* mlkem/src/fips202/native/aarch64/x4_v8a_scalar.h */
 #undef MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID
 #undef MLK_FIPS202_NATIVE_AARCH64_X4_V8A_SCALAR_H
 #undef MLK_USE_FIPS202_X4_NATIVE
-/* mlkem/fips202/native/aarch64/x4_v8a_v84a_scalar.h */
+/* mlkem/src/fips202/native/aarch64/x4_v8a_v84a_scalar.h */
 #undef MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID
 #undef MLK_FIPS202_NATIVE_AARCH64_X4_V8A_V84A_SCALAR_H
 #undef MLK_USE_FIPS202_X4_NATIVE
-/* mlkem/fips202/native/api.h */
+/* mlkem/src/fips202/native/api.h */
 #undef MLK_FIPS202_NATIVE_API_H
-/* mlkem/fips202/native/auto.h */
+/* mlkem/src/fips202/native/auto.h */
 #undef MLK_FIPS202_NATIVE_AUTO_H
-/* mlkem/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.h */
+/* mlkem/src/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.h */
 #undef MLK_FIPS202_NATIVE_X86_64_SRC_KECCAKP_1600_TIMES4_SIMD256_H
 #undef mlk_keccakf1600x4_permute24
-/* mlkem/fips202/native/x86_64/xkcp.h */
+/* mlkem/src/fips202/native/x86_64/xkcp.h */
 #undef MLK_FIPS202_NATIVE_X86_64_XKCP_H
 #undef MLK_FIPS202_X86_64_XKCP
 #undef MLK_USE_FIPS202_X4_NATIVE
-#endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
+#endif /* !MLK_CONFIG_FIPS202_CUSTOM_HEADER */
+
+#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
+/*
+ * Undefine macros from native code
+ */
+#endif
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
 /*
  * Undefine macros from native code
  */
-/* mlkem/native/aarch64/meta.h */
+/* mlkem/src/native/aarch64/meta.h */
 #undef MLK_ARITH_BACKEND_AARCH64
 #undef MLK_NATIVE_AARCH64_META_H
 #undef MLK_USE_NATIVE_INTT
@@ -430,7 +430,7 @@
 #undef MLK_USE_NATIVE_POLY_TOBYTES
 #undef MLK_USE_NATIVE_POLY_TOMONT
 #undef MLK_USE_NATIVE_REJ_UNIFORM
-/* mlkem/native/aarch64/src/arith_native_aarch64.h */
+/* mlkem/src/native/aarch64/src/arith_native_aarch64.h */
 #undef MLK_NATIVE_AARCH64_SRC_ARITH_NATIVE_AARCH64_H
 #undef mlk_aarch64_invntt_zetas_layer12345
 #undef mlk_aarch64_invntt_zetas_layer67
@@ -449,17 +449,17 @@
 #undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k4
 #undef mlk_rej_uniform_asm
 #undef mlk_rej_uniform_table
-/* mlkem/native/aarch64/src/consts.h */
+/* mlkem/src/native/aarch64/src/consts.h */
 #undef MLK_NATIVE_AARCH64_SRC_CONSTS_H
 #undef mlk_zetas_mulcache_native
 #undef mlk_zetas_mulcache_twisted_native
-/* mlkem/native/api.h */
+/* mlkem/src/native/api.h */
 #undef MLK_INVNTT_BOUND
 #undef MLK_NATIVE_API_H
 #undef MLK_NTT_BOUND
-/* mlkem/native/meta.h */
+/* mlkem/src/native/meta.h */
 #undef MLK_NATIVE_META_H
-/* mlkem/native/x86_64/meta.h */
+/* mlkem/src/native/x86_64/meta.h */
 #undef MLK_ARITH_BACKEND_X86_64_DEFAULT
 #undef MLK_NATIVE_X86_64_META_H
 #undef MLK_USE_NATIVE_INTT
@@ -480,10 +480,10 @@
 #undef MLK_USE_NATIVE_POLY_TOBYTES
 #undef MLK_USE_NATIVE_POLY_TOMONT
 #undef MLK_USE_NATIVE_REJ_UNIFORM
-/* mlkem/native/x86_64/src/align.h */
+/* mlkem/src/native/x86_64/src/align.h */
 #undef MLK_ALIGNED_INT16
 #undef MLK_NATIVE_X86_64_SRC_ALIGN_H
-/* mlkem/native/x86_64/src/arith_native_x86_64.h */
+/* mlkem/src/native/x86_64/src/arith_native_x86_64.h */
 #undef MLK_AVX2_REJ_UNIFORM_BUFLEN
 #undef MLK_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H
 #undef mlk_basemul_avx2
@@ -506,7 +506,7 @@
 #undef mlk_rej_uniform_avx2
 #undef mlk_rej_uniform_table
 #undef mlk_tomont_avx2
-/* mlkem/native/x86_64/src/consts.h */
+/* mlkem/src/native/x86_64/src/consts.h */
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_16XFHI
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_16XFLO
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_16XMASK

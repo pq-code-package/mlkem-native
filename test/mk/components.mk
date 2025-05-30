@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-FIPS202_SRCS = $(wildcard mlkem/fips202/*.c)
+FIPS202_SRCS = $(wildcard mlkem/src/fips202/*.c)
 ifeq ($(OPT),1)
-	FIPS202_SRCS += $(wildcard mlkem/fips202/native/aarch64/src/*.S) $(wildcard mlkem/fips202/native/aarch64/src/*.c) $(wildcard mlkem/fips202/native/x86_64/src/*.c)
+	FIPS202_SRCS += $(wildcard mlkem/src/fips202/native/aarch64/src/*.S) $(wildcard mlkem/src/fips202/native/aarch64/src/*.c) $(wildcard mlkem/src/fips202/native/x86_64/src/*.c)
 endif
 
-SOURCES += $(wildcard mlkem/*.c)
+SOURCES += $(wildcard mlkem/src/*.c)
 ifeq ($(OPT),1)
-	SOURCES += $(wildcard mlkem/native/aarch64/src/*.[csS]) $(wildcard mlkem/native/x86_64/src/*.[csS])
+	SOURCES += $(wildcard mlkem/src/native/aarch64/src/*.[csS]) $(wildcard mlkem/src/native/x86_64/src/*.[csS])
 	CFLAGS += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
 endif
 
