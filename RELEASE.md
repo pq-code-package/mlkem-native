@@ -9,7 +9,7 @@ mlkem-native is a secure, fast and portable C90 implementation of [ML-KEM](https
 It is a fork of the ML-KEM [reference implementation](https://github.com/pq-crystals/kyber/tree/main/ref).
 
 mlkem-native includes native backends for AArch64 and AVX2, offering competitive performance on most Arm, Intel and AMD platforms
-(see [benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/)). The frontend and the C backend (i.e., all C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202)) are verified
+(see [benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/)). The frontend and the C backend (i.e., all C code in [mlkem/*](mlkem) and [mlkem/src/fips202/*](mlkem/src/fips202)) are verified
 using [CBMC](https://github.com/diffblue/cbmc) to be free of undefined behaviour. In particular, there are no out of
 bounds accesses, nor integer overflows during optimized modular arithmetic.
 HOL-Light is used to verify functional correctness of selected AArch64 assembly routines.

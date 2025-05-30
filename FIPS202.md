@@ -4,8 +4,8 @@
 
 If your library has a FIPS-202[^FIPS202] implementation, you can use it instead of the one shipped with mlkem-native.
 
-1. Replace `mlkem/fips202/*` by your own FIPS-202 implementation.
-2. Provide replacements for the headers [`mlkem/fips202/fips202.h`](mlkem/fips202/fips202.h) and [`mlkem/fips202/fips202x4.h`](mlkem/fips202/fips202x4.h) and the
+1. Replace `mlkem/src/fips202/*` by your own FIPS-202 implementation.
+2. Provide replacements for the headers [`mlkem/src/fips202/fips202.h`](mlkem/src/fips202/fips202.h) and [`mlkem/src/fips202/fips202x4.h`](mlkem/src/fips202/fips202x4.h) and the
 functionalities specified therein:
   * Structure definitions for `mlk_shake128ctx` and `mlk_shake128x4ctx`
   * `mlk_shake128_absorb_once()`: Initialize a SHAKE-128 context and perform a single absorb step.
@@ -17,7 +17,7 @@ functionalities specified therein:
   * `mlk_shake128x4_squeezeblocks()`: Squeeze 4x-batched SHAKE-128 context
   * `mlk_shake128x4_release()`: Release a 4x-batched SHAKE-128 context after use
 
-See [`mlkem/fips202/fips202.h`](mlkem/fips202/fips202.h) and [`mlkem/fips202/fips202x4.h`](mlkem/fips202/fips202x4.h) for more details. Note that the structure
+See [`mlkem/src/fips202/fips202.h`](mlkem/src/fips202/fips202.h) and [`mlkem/src/fips202/fips202x4.h`](mlkem/src/fips202/fips202x4.h) for more details. Note that the structure
 definitions may differ from those shipped with mlkem-native: In particular, you may fall back to an incremental hashing
 implementation which tracks the current offset in its state.
 
