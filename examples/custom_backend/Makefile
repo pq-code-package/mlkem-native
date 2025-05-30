@@ -17,14 +17,14 @@ endif
 #
 # If you are not concerned about minimizing for a specific backend,
 # you can just include _all_ source files into your build.
-MLK_SOURCE=$(wildcard          \
-    mlkem_native/**/*.c                 \
+MLK_SOURCE=$(wildcard                   \
     mlkem_native/**/**/*.c              \
     mlkem_native/**/**/**/*.c           \
     mlkem_native/**/**/**/**/*.c        \
-    mlkem_native/**/**/**/**/**/*.c)
+    mlkem_native/**/**/**/**/**/*.c     \
+	mlkem_native/**/**/**/**/**/**/*.c)
 
-INC=-Imlkem_native -Imlkem_native/mlkem
+INC=-Imlkem_native -Imlkem_native/mlkem -Imlkem_native/mlkem/src
 
 # Part B:
 #
