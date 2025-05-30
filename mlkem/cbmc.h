@@ -9,12 +9,12 @@
  * Basic replacements for __CPROVER_XXX contracts
  ***************************************************/
 
-#ifndef CBMC
+#ifndef MLK_CBMC
 
 #define __contract__(x)
 #define __loop__(x)
 
-#else /* !CBMC */
+#else /* !MLK_CBMC */
 
 #define __contract__(x) x
 #define __loop__(x) x
@@ -137,6 +137,6 @@
 #define array_abs_bound(arr, lb, ub, k) \
   array_bound((arr), (lb), (ub), -((int)(k)) + 1, (k))
 
-#endif /* CBMC */
+#endif /* MLK_CBMC */
 
 #endif /* !MLK_CBMC_H */

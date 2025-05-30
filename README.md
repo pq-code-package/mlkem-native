@@ -116,8 +116,8 @@ and unset `MLK_CONFIG_USE_NATIVE_BACKEND_ARITH` and/or `MLK_CONFIG_USE_NATIVE_BA
 ### Do I need to setup CBMC to use mlkem-native?
 
 No. While we recommend that you consider using it, mlkem-native will build + run fine without CBMC -- just make sure to
-include [cbmc.h](mlkem/cbmc.h) and have `CBMC` undefined. In particular, you do _not_ need to remove all function
-contracts and loop invariants from the code; they will be ignored unless `CBMC` is set.
+include [cbmc.h](mlkem/cbmc.h) and have `MLK_CBMC` undefined. In particular, you do _not_ need to remove all function
+contracts and loop invariants from the code; they will be ignored unless `MLK_CBMC` is set.
 
 ### Does mlkem-native support all security levels of ML-KEM?
 
