@@ -4,10 +4,9 @@
 
 This directory contains minimal examples demonstrating how you can use mlkem-native.
 
-## Single-level build
+## Basic
 
-See [mlkem_native_as_code_package](mlkem_native_as_code_package) for a basic example of how to build a single instance
-of mlkem-native.
+See [basic](basic) for a basic example of how to build a single instance of mlkem-native.
 
 ## Multi-level build (C only)
 
