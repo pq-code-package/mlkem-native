@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-CFLAGS = /nologo /O2 /Imlkem /Imlkem/fips202 /Imlkem/fips202/native /Imlkem/sys /Imlkem/native
+CFLAGS = /nologo /O2 /Imlkem /Imlkem/src /Imlkem/src/fips202 /Imlkem/src/fips202/native /Imlkem/src/sys /Imlkem/src/native
 
 OBJ_FILES = .\mlkem\*.obj \
             .\mlkem\fips202\*.obj
@@ -27,11 +27,11 @@ OPT = 0
     $(CC) $(CFLAGS) /c /Fo$(BUILD_DIR)\randombytes\ $<
 
 # compilation for mlkem512
-{mlkem}.c{$(MLKEM512_BUILD_DIR)\mlkem}.obj::
+{mlkem\src}.c{$(MLKEM512_BUILD_DIR)\mlkem}.obj::
     @if NOT EXIST $(MLKEM512_BUILD_DIR)\mlkem mkdir $(MLKEM512_BUILD_DIR)\mlkem
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\mlkem\ $<
 
-{mlkem\fips202}.c{$(MLKEM512_BUILD_DIR)\mlkem\fips202}.obj::
+{mlkem\src\fips202}.c{$(MLKEM512_BUILD_DIR)\mlkem\fips202}.obj::
     @if NOT EXIST $(MLKEM512_BUILD_DIR)\mlkem\fips202 mkdir $(MLKEM512_BUILD_DIR)\mlkem\fips202
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\mlkem\fips202\ $<
 
@@ -40,11 +40,11 @@ OPT = 0
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\test\ $<
 
 # compilation for mlkem768
-{mlkem}.c{$(MLKEM768_BUILD_DIR)\mlkem}.obj::
+{mlkem\src}.c{$(MLKEM768_BUILD_DIR)\mlkem}.obj::
     @if NOT EXIST $(MLKEM768_BUILD_DIR)\mlkem mkdir $(MLKEM768_BUILD_DIR)\mlkem
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\mlkem\ $<
 
-{mlkem\fips202}.c{$(MLKEM768_BUILD_DIR)\mlkem\fips202}.obj::
+{mlkem\src\fips202}.c{$(MLKEM768_BUILD_DIR)\mlkem\fips202}.obj::
     @if NOT EXIST $(MLKEM768_BUILD_DIR)\mlkem\fips202 mkdir $(MLKEM768_BUILD_DIR)\mlkem\fips202
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\mlkem\fips202\ $<
 
@@ -53,11 +53,11 @@ OPT = 0
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\test\ $<
 
 # compilation for mlkem1024
-{mlkem}.c{$(MLKEM1024_BUILD_DIR)\mlkem}.obj::
+{mlkem\src}.c{$(MLKEM1024_BUILD_DIR)\mlkem}.obj::
     @if NOT EXIST $(MLKEM1024_BUILD_DIR)\mlkem mkdir $(MLKEM1024_BUILD_DIR)\mlkem
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\mlkem\ $<
 
-{mlkem\fips202}.c{$(MLKEM1024_BUILD_DIR)\mlkem\fips202}.obj::
+{mlkem\src\fips202}.c{$(MLKEM1024_BUILD_DIR)\mlkem\fips202}.obj::
     @if NOT EXIST $(MLKEM1024_BUILD_DIR)\mlkem\fips202 mkdir $(MLKEM1024_BUILD_DIR)\mlkem\fips202
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\mlkem\fips202\ $<
 
