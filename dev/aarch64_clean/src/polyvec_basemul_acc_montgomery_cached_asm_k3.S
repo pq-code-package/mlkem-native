@@ -166,7 +166,7 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k3)
         add b2_cache_ptr, b0_cache_ptr, #(2 * 512/2)
 
         mov count, #(MLKEM_N / 16)
-k3_loop_start:
+polyvec_basemul_acc_montgomery_cached_k3_loop_start:
 
         load_polys aa, bb, a0_ptr, b0_ptr, b0_cache_ptr
         pmull res, aa, bb
@@ -181,7 +181,7 @@ k3_loop_start:
         st2_wrap out, out
 
         subs count, count, #1
-        cbnz count, k3_loop_start
+        cbnz count, polyvec_basemul_acc_montgomery_cached_k3_loop_start
 
         pop_stack
         ret
