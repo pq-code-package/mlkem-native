@@ -151,7 +151,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x1_scalar_asm)
     alloc_stack
     save_gprs
 
-initial:
+keccak_f1600_x1_scalar_initial:
     mov const_addr, input_rc
     str input_rc, [sp, #STACK_LOC_CONST]
     load_state

@@ -230,7 +230,7 @@ MLK_ASM_FN_SYMBOL(ntt_asm)
         // mul v17.8H, v11.8H, v0.H[0]      // ...............*...............
 
         sub count, count, #1
-layer123_start:
+ntt_layer123_start:
                                                 // Instructions:    76
                                                 // Expected cycles: 84
                                                 // Expected IPC:    0.90
@@ -402,7 +402,7 @@ layer123_start:
         // str q15, [x0, #(-16 + 7*(512/8))]          // .....................~.....'.............................................................................*
 
         subs count, count, 1
-        cbnz count, layer123_start
+        cbnz count, ntt_layer123_start
                                                 // Instructions:    66
                                                 // Expected cycles: 67
                                                 // Expected IPC:    0.99
@@ -615,7 +615,7 @@ layer123_start:
         // mls v27.8H, v19.8H, v7.H[0]            // .......................*.......
 
         sub count, count, #1
-layer4567_start:
+ntt_layer4567_start:
                                                  // Instructions:    71
                                                  // Expected cycles: 82
                                                  // Expected IPC:    0.87
@@ -777,7 +777,7 @@ layer4567_start:
         // str q11, [x0, #(-16*1)]                    // ...........................................~.'...............................................................................*
 
         subs count, count, 1
-        cbnz count, layer4567_start
+        cbnz count, ntt_layer4567_start
                                               // Instructions:    52
                                               // Expected cycles: 59
                                               // Expected IPC:    0.88

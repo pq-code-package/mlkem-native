@@ -124,7 +124,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_asm_k3:
         ld1	{ v25.8h }, [x9], #16
         sub	x13, x13, #0x2
 
-polyvec_basemul_acc_montgomery_cached_asm_k3_loop:
+polyvec_basemul_acc_montgomery_cached_k3_loop:
         ldr	q20, [x1], #0x20
         uzp1	v7.8h, v15.8h, v16.8h
         uzp2	v15.8h, v15.8h, v16.8h
@@ -191,7 +191,7 @@ polyvec_basemul_acc_montgomery_cached_asm_k3_loop:
         ldur	q18, [x8, #-0x10]
         ld1	{ v25.8h }, [x9], #16
         sub	x13, x13, #0x1
-        cbnz	x13, polyvec_basemul_acc_montgomery_cached_asm_k3_loop
+        cbnz	x13, polyvec_basemul_acc_montgomery_cached_k3_loop
         ldr	q7, [x1], #0x20
         uzp1	v20.8h, v15.8h, v16.8h
         uzp2	v15.8h, v15.8h, v16.8h
