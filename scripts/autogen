@@ -1848,6 +1848,21 @@ def gen_source_undefs(source_file, dry_run=False):
     # the up-to-date one.
     with open(source_file, "r") as f:
         content = f.read().split("\n")
+
+    footer_start = None
+    if source_file.endswith(".S"):
+        # Try to split off simpasm footer
+        footer_start_marker = "simpasm: footer-start"
+        for i, l in enumerate(content):
+            if footer_start_marker in l:
+                footer_start = i
+                break
+    if footer_start is not None:
+        simpasm_footer = content[footer_start:]
+        content = content[:footer_start]
+    else:
+        simpasm_footer = []
+
     while True:
         l = content[-1].strip()
         if (
@@ -1874,7 +1889,7 @@ def gen_source_undefs(source_file, dry_run=False):
     else:
         content = content + [""]
 
-    new_content = "\n".join(content)
+    new_content = "\n".join(content + simpasm_footer)
     update_file(source_file, new_content, dry_run=dry_run)
 
 
@@ -1883,7 +1898,8 @@ def gen_undefs(dry_run=False):
         _ = list(
             executor.map(
                 partial(gen_source_undefs, dry_run=dry_run),
-                get_c_source_files(core_only=True),
+                get_c_source_files(core_only=True)
+                + get_asm_source_files(core_only=True),
             )
         )
 
