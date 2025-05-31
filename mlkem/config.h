@@ -116,6 +116,22 @@
 /* #define MLK_CONFIG_MULTILEVEL_NO_SHARED */
 
 /******************************************************************************
+ * Name:        MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
+ *
+ * Description: This is only relevant for single compilation unit (SCU)
+ *              builds of mlkem-native. In this case, it determines whether
+ *              directives defined in parameter-set-independent headers should
+ *              be #undef'ined or not at the of the SCU file. This is needed
+ *              in multilevel builds.
+ *
+ *              See examples/multilevel_build_native for an example.
+ *
+ *              This can also be set using CFLAGS.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS */
+
+/******************************************************************************
  * Name:        MLK_CONFIG_USE_NATIVE_BACKEND_ARITH
  *
  * Description: Determines whether an native arithmetic backend should be used.
