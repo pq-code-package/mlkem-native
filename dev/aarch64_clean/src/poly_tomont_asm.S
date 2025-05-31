@@ -54,7 +54,7 @@ MLK_ASM_FN_SYMBOL(poly_tomont_asm)
         dup factor_t.8h, wtmp
 
         mov count, #8
-poly_tomont_asm_loop:
+poly_tomont_loop:
 
         ldr q_data, [src], #64
         mulmod res, data, factor, factor_t
@@ -73,7 +73,7 @@ poly_tomont_asm_loop:
         str q_res, [src, #-16]
 
         sub count, count, #1
-        cbnz count, poly_tomont_asm_loop
+        cbnz count, poly_tomont_loop
 
         ret
 

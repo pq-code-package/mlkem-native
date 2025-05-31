@@ -33,7 +33,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_scalar_asm:
         stp	x27, x28, [sp, #0x60]
         stp	x29, x30, [sp, #0x70]
 
-initial:
+keccak_f1600_x1_scalar_initial:
         mov	x26, x1
         str	x1, [sp, #0x8]
         ldp	x1, x6, [x0]

@@ -174,7 +174,7 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k4)
         // before Montgomery reduction is bound by 2^30.
 
         mov count, #(MLKEM_N / 16)
-k4_loop_start:
+polyvec_basemul_acc_montgomery_cached_k4_loop_start:
 
         load_polys aa, bb, a0_ptr, b0_ptr, b0_cache_ptr
         pmull res, aa, bb
@@ -191,7 +191,7 @@ k4_loop_start:
         st2_wrap out, out
 
         subs count, count, #1
-        cbnz count, k4_loop_start
+        cbnz count, polyvec_basemul_acc_montgomery_cached_k4_loop_start
 
         pop_stack
         ret

@@ -192,7 +192,7 @@ MLK_ASM_FN_SYMBOL(ntt_asm)
         //
         // See test/test_bounds.py for more details.
 
-layer123_start:
+ntt_layer123_start:
 
         ldr q_data0, [in, #0]
         ldr q_data1, [in, #(1*(512/8))]
@@ -228,13 +228,13 @@ layer123_start:
         str q_data7, [in, #(-16 + 7*(512/8))]
 
         subs count, count, #1
-        cbnz count, layer123_start
+        cbnz count, ntt_layer123_start
 
         mov in, inp
         mov count, #8
 
         .p2align 2
-layer4567_start:
+ntt_layer4567_start:
 
         ldr q_data0, [in, #(16*0)]
         ldr q_data1, [in, #(16*1)]
@@ -264,7 +264,7 @@ layer4567_start:
         str q_data3, [in, #(-16*1)]
 
         subs count, count, #1
-        cbnz count, layer4567_start
+        cbnz count, ntt_layer4567_start
 
         pop_stack
         ret

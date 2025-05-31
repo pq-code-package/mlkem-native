@@ -894,7 +894,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_loop_end:
         ror	x25, x25, #0x9
         ldr	x30, [sp, #0x20]
         cmp	x30, #0x1
-        b.eq	keccak_f1600_x4_v8a_scalar_hybrid_done
+        b.eq	keccak_f1600_x4_scalar_v8a_hybrid_done
         mov	x30, #0x1               // =1
         str	x30, [sp, #0x20]
         ldr	x0, [sp]
@@ -930,7 +930,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_loop_end:
         sub	x0, x0, #0x258
         b	keccak_f1600_x4_v8a_scalar_hybrid_initial
 
-keccak_f1600_x4_v8a_scalar_hybrid_done:
+keccak_f1600_x4_scalar_v8a_hybrid_done:
         ldr	x0, [sp]
         add	x0, x0, #0x258
         stp	x1, x6, [x0]

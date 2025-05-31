@@ -51,23 +51,23 @@ MLK_ASM_FN_SYMBOL(rej_uniform_asm)
         mov	x11, #0x0               // =0
         eor	v16.16b, v16.16b, v16.16b
 
-initial_zero:
+rej_uniform_initial_zero:
         str	q16, [x7], #0x40
         stur	q16, [x7, #-0x30]
         stur	q16, [x7, #-0x20]
         stur	q16, [x7, #-0x10]
         add	x11, x11, #0x20
         cmp	x11, #0x100
-        b.lt	initial_zero
+        b.lt	rej_uniform_initial_zero
         mov	x7, x8
         mov	x9, #0x0                // =0
         mov	x4, #0x100              // =256
         cmp	x2, #0x30
-        b.lo	loop48_end
+        b.lo	rej_uniform_loop48_end
 
-loop48:
+rej_uniform_loop48:
         cmp	x9, x4
-        b.hs	memory_copy
+        b.hs	rej_uniform_memory_copy
         sub	x2, x2, #0x30
         ld3	{ v0.16b, v1.16b, v2.16b }, [x1], #48
         zip1	v4.16b, v0.16b, v1.16b
@@ -131,13 +131,13 @@ loop48:
         add	x9, x9, x12
         add	x9, x9, x14
         cmp	x2, #0x30
-        b.hs	loop48
+        b.hs	rej_uniform_loop48
 
-loop48_end:
+rej_uniform_loop48_end:
         cmp	x9, x4
-        b.hs	memory_copy
+        b.hs	rej_uniform_memory_copy
         cmp	x2, #0x18
-        b.lo	memory_copy
+        b.lo	rej_uniform_memory_copy
         sub	x2, x2, #0x18
         ld3	{ v0.8b, v1.8b, v2.8b }, [x1], #24
         zip1	v4.16b, v0.16b, v1.16b
@@ -171,13 +171,13 @@ loop48_end:
         add	x9, x9, x12
         add	x9, x9, x13
 
-memory_copy:
+rej_uniform_memory_copy:
         cmp	x9, x4
         csel	x9, x9, x4, lo
         mov	x11, #0x0               // =0
         mov	x7, x8
 
-final_copy:
+rej_uniform_final_copy:
         ldr	q16, [x7], #0x40
         ldur	q17, [x7, #-0x30]
         ldur	q18, [x7, #-0x20]
@@ -188,11 +188,11 @@ final_copy:
         stur	q19, [x0, #-0x10]
         add	x11, x11, #0x20
         cmp	x11, #0x100
-        b.lt	final_copy
+        b.lt	rej_uniform_final_copy
         mov	x0, x9
-        b	return
+        b	rej_uniform_return
 
-return:
+rej_uniform_return:
         add	sp, sp, #0x240
         ret
 

@@ -208,7 +208,7 @@ MLK_ASM_FN_SYMBOL(intt_asm)
         mov inp, in
         mov count, #8
 
-scale_start:
+intt_scale_start:
 
         ldr q_data0, [inp, #(16*0)]
         ldr q_data1, [inp, #(16*1)]
@@ -224,7 +224,7 @@ scale_start:
         str q_data3, [inp, #(-64 + 16*3)]
 
         subs count, count, #1
-        cbnz count, scale_start
+        cbnz count, intt_scale_start
 
         mov inp, in
         mov count, #8
@@ -399,7 +399,7 @@ scale_start:
         // sqrdmulh v12.8H, v5.8H, v12.8H       // .......................................................................................*....
 
         sub count, count, #2
-layer4567_start:
+intt_layer4567_start:
                                                 // Instructions:    80
                                                 // Expected cycles: 91
                                                 // Expected IPC:    0.88
@@ -579,7 +579,7 @@ layer4567_start:
         // str q11, [x3, #(-64 + 16*3)]               // ..........................................................................~.'........................................................................................~.'........................................................................................l
 
         subs count, count, 1
-        cbnz count, layer4567_start
+        cbnz count, intt_layer4567_start
                                                 // Instructions:    85
                                                 // Expected cycles: 91
                                                 // Expected IPC:    0.93
@@ -949,7 +949,7 @@ layer4567_start:
         // ldr q28, [x0, #80]                    // .......................................................................................*
 
         sub count, count, #2
-layer123_start:
+intt_layer123_start:
                                                 // Instructions:    76
                                                 // Expected cycles: 84
                                                 // Expected IPC:    0.90
@@ -1121,7 +1121,7 @@ layer123_start:
         // str q11, [x0, #(-16 + 3*(512/8))]          // ..........................................~......................'............................................................*......................'............................................................~..............
 
         subs count, count, 1
-        cbnz count, layer123_start
+        cbnz count, intt_layer123_start
                                                 // Instructions:    75
                                                 // Expected cycles: 81
                                                 // Expected IPC:    0.93
