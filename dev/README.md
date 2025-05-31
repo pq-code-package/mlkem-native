@@ -23,7 +23,7 @@ definitions themselves are still kept. See the SLOTHY paper[^SLOTHY_Paper] for m
 
 #### Final
 
-The final AArch64 arithmetic assembly from [mlkem/native/aarch64/src](../mlkem/native/aarch64/src) is auto-generated
+The final AArch64 arithmetic assembly from [mlkem/src/native/aarch64/src](../mlkem/src/native/aarch64/src) is auto-generated
 from the optimized assembly using the [`simpasm`](../scripts/simpasm) script, which simplifies it through a combination
 of assembly+disassembly. This final assembly does not contain any register aliases or macros anymore.
 
@@ -32,11 +32,11 @@ Non-assembly files are synchronized by copy between this directory and [`mlkem`]
 
 #### Testing clean/optimized assembly
 
-To test the clean assembly, run `autogen --aarch64-clean`. This will import the clean backend into `mlkem/native/aarch64/*`,
+To test the clean assembly, run `autogen --aarch64-clean`. This will import the clean backend into `mlkem/src/native/aarch64/*`,
 replacing the optimized one. With `autogen --aarch64-clean --no-simplify` or `autogen --no-simplify` you can moreover reinstate
 the non-simplified assembly in the main source tree.
 
-Alternatively, you can also just manually copy the entire `aarch64_clean` and `aarch64_opt` trees into `mlkem/native/aarch64/`.
+Alternatively, you can also just manually copy the entire `aarch64_clean` and `aarch64_opt` trees into [mlkem/src/native/aarch64/](../mlkem/src/native/aarch64).
 
 ## AArch64 FIPS-202 assembly
 

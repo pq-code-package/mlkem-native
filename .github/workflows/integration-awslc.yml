@@ -42,8 +42,10 @@ jobs:
           commit: ${{ inputs.commit }}
       - name: Run importer
         run: |
+          cp integration/awslc/importer.patch $AWSLC_DIR
           cd $AWSLC_DIR/crypto/fipsmodule/ml_kem
           rm -rf mlkem
+          git apply importer.patch
           GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA ./importer.sh --force
       - name: Build+Test AWS-LC (FIPS=${{ matrix.fips }})
         run: |

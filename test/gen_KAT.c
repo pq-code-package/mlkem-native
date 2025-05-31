@@ -5,7 +5,8 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include "../mlkem/fips202/fips202.h"
+#include "../mlkem/src/fips202/fips202.h"
+
 #include "../mlkem/mlkem_native.h"
 
 #if defined(_WIN64) || defined(_WIN32)

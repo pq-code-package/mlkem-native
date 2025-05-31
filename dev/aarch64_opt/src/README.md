@@ -10,7 +10,7 @@ If the "clean" sources [`../../aarch64_clean/src/*.S`](../../aarch64_clean/src/)
 
 1. Run `make` to re-generate the optimized sources using SLOTHY. This assumes a working SLOTHY setup, as established e.g. by the default nix shell for mlkem-native. See also the [SLOTHY README](https://github.com/slothy-optimizer/slothy/).
 
-2. Run `autogen` to transfer the newly optimized files into the main source tree [mlkem/native](../../../mlkem/native).
+2. Run `autogen` to transfer the newly optimized files into the main source tree [mlkem/src/native](../../../mlkem/src/native).
 
 3. Run `tests all --opt=OPT` to check that that the new assembly is still functional.
 

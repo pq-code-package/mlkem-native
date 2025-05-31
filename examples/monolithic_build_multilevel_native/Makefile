@@ -28,7 +28,7 @@ MLK_SOURCE_ASM = $(wildcard \
 	mlkem/**/**/**/**/*.S        \
 	mlkem/**/**/**/**/**/*.S)
 
-INC=-Imlkem/ -I./
+INC=-Imlkem/ -Imlkem/src/ -I./
 
 # Part B:
 #
