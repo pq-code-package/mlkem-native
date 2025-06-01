@@ -84,7 +84,7 @@ MLK_ASM_FN_SYMBOL(poly_tomont_asm)
         // ldr q27, [x0, #32]                // ......*........................
 
         sub count, count, #1
-poly_tomont_asm_loop:
+poly_tomont_loop:
                                               // Instructions:    20
                                               // Expected cycles: 24
                                               // Expected IPC:    0.83
@@ -144,7 +144,7 @@ poly_tomont_asm_loop:
         // str q1, [x0, #-16]                     // ..............'...*...................
 
         sub count, count, 1
-        cbnz count, poly_tomont_asm_loop
+        cbnz count, poly_tomont_loop
                                               // Instructions:    15
                                               // Expected cycles: 18
                                               // Expected IPC:    0.83

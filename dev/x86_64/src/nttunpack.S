@@ -31,12 +31,12 @@
 .global MLK_ASM_NAMESPACE(nttunpack_avx2)
 .balign 4
 MLK_ASM_FN_SYMBOL(nttunpack_avx2)
-call		nttunpack128_avx2
+call		nttunpack_avx2_core
 add		$256,%rdi
-call		nttunpack128_avx2
+call		nttunpack_avx2_core
 ret
 
-nttunpack128_avx2:
+nttunpack_avx2_core:
 #load
 vmovdqa		(%rdi),%ymm4
 vmovdqa		32(%rdi),%ymm5

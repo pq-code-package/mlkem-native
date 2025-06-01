@@ -102,7 +102,7 @@ MLK_ASM_FN_SYMBOL(poly_reduce_asm)
         // add v16.8H, v2.8H, v27.8H              // .....................*.........
 
         sub count, count, #1
-poly_reduce_asm_loop:
+poly_reduce_loop:
                                                // Instructions:    32
                                                // Expected cycles: 36
                                                // Expected IPC:    0.89
@@ -186,7 +186,7 @@ poly_reduce_asm_loop:
         // str q0, [x0, #-16]                     // .....~............................'......*..........................
 
         sub count, count, 1
-        cbnz count, poly_reduce_asm_loop
+        cbnz count, poly_reduce_loop
                                                // Instructions:    17
                                                // Expected cycles: 23
                                                // Expected IPC:    0.74
