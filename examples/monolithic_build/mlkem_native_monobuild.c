@@ -33,14 +33,16 @@
  *
  * # Configuration
  *
- * - MLK_CONFIG_MONOBUILD_CUSTOM_FIPS202
+ * The following options from the mlkem-native configuration are relevant:
+ *
+ * - MLK_CONFIG_FIPS202_CUSTOM_HEADER
  *   Set this option if you use a custom FIPS202 implementation.
  *
- * - MLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH
+ * - MLK_CONFIG_USE_NATIVE_BACKEND_ARITH
  *   Set this option if you want to include the native arithmetic backends
  *   in your build.
  *
- * - MLK_CONFIG_MONOBUILD_WITH_NATIVE_FIPS202
+ * - MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
  *   Set this option if you want to include the native FIPS202 backends
  *   in your build.
  *
@@ -54,11 +56,11 @@
  *
  * Example:
  * ```bash
- * unifdef -UMLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH mlkem_native_monobuild.c
+ * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native_monobuild.c
  * ```
  */
 
-#include "mlkem/sys.h"
+#include "mlkem/common.h"
 
 #include "mlkem/compress.c"
 #include "mlkem/debug.c"
@@ -69,13 +71,13 @@
 #include "mlkem/sampling.c"
 #include "mlkem/verify.c"
 
-#if !defined(MLK_CONFIG_MONOBUILD_CUSTOM_FIPS202)
+#if !defined(MLK_CONFIG_FIPS202_CUSTOM_HEADER)
 #include "mlkem/fips202/fips202.c"
 #include "mlkem/fips202/fips202x4.c"
 #include "mlkem/fips202/keccakf1600.c"
 #endif
 
-#if defined(MLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH)
+#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
 #if defined(MLK_SYS_AARCH64)
 #include "mlkem/native/aarch64/src/aarch64_zetas.c"
 #include "mlkem/native/aarch64/src/rej_uniform_table.c"
@@ -87,16 +89,16 @@
 #include "mlkem/native/x86_64/src/rej_uniform_avx2.c"
 #include "mlkem/native/x86_64/src/rej_uniform_table.c"
 #endif /* MLK_SYS_X86_64 */
-#endif /* MLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH */
+#endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
-#if defined(MLK_CONFIG_MONOBUILD_WITH_NATIVE_FIPS202)
+#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
 #if defined(MLK_SYS_AARCH64)
 #include "mlkem/fips202/native/aarch64/src/keccakf1600_round_constants.c"
 #endif
 #if defined(MLK_SYS_X86_64)
 #include "mlkem/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.c"
 #endif
-#endif /* MLK_CONFIG_MONOBUILD_WITH_NATIVE_FIPS202 */
+#endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 
 /*
  * Undefine macros from MLK_CONFIG_PARAMETER_SET-specific files
@@ -326,7 +328,7 @@
 #undef __contract__
 #undef __loop__
 
-#if !defined(MLK_CONFIG_MONOBUILD_CUSTOM_FIPS202)
+#if !defined(MLK_CONFIG_FIPS202_CUSTOM_HEADER)
 /*
  * Undefine macros from FIPS-202 files
  */
@@ -364,9 +366,9 @@
 #undef mlk_keccakf1600x4_extract_bytes
 #undef mlk_keccakf1600x4_permute
 #undef mlk_keccakf1600x4_xor_bytes
-#endif /* !MLK_CONFIG_MONOBUILD_CUSTOM_FIPS202 */
+#endif /* !MLK_CONFIG_FIPS202_CUSTOM_HEADER */
 
-#if defined(MLK_CONFIG_MONOBUILD_WITH_NATIVE_FIPS202)
+#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
 /*
  * Undefine macros from native code
  */
@@ -411,8 +413,8 @@
 #undef MLK_FIPS202_NATIVE_X86_64_XKCP_H
 #undef MLK_FIPS202_X86_64_XKCP
 #undef MLK_USE_FIPS202_X4_NATIVE
-#endif /* MLK_CONFIG_MONOBUILD_WITH_NATIVE_FIPS202 */
-#if defined(MLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH)
+#endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
+#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
 /*
  * Undefine macros from native code
  */
@@ -519,5 +521,5 @@
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP
 #undef MLK_NATIVE_X86_64_SRC_CONSTS_H
 #undef mlk_qdata
-#endif /* MLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH */
+#endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 #endif /* !MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS */

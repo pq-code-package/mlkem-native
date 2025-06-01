@@ -19,10 +19,6 @@ appropriately first, and then includes the monobuild:
 
 #define MLK_CONFIG_FILE "multilevel_config.h"
 
-/* Include C files accompanying native code */
-#define MLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH
-#define MLK_CONFIG_MONOBUILD_WITH_NATIVE_FIPS202
-
 /* Include level-independent code */
 #define MLK_CONFIG_MULTILEVEL_WITH_SHARED 1
 /* Keep level-independent headers at the end of monobuild file */
