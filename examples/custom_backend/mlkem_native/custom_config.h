@@ -53,7 +53,7 @@
  *              If this option is unset, the C backend will be used.
  *
  *              If this option is set, the arithmetic backend to be use is
- *              determined by MLK_ARITH_BACKEND: If the latter is
+ *              determined by MLK_CONFIG_ARITH_BACKEND_FILE: If the latter is
  *              unset, the default backend for your the target architecture
  *              will be used. If set, it must be the name of a backend metadata
  *              file.
@@ -92,7 +92,7 @@
  *              If this option is unset, the C backend will be used.
  *
  *              If this option is set, the FIPS202 backend to be use is
- *              determined by MLK_FIPS202_BACKEND: If the latter is
+ *              determined by MLK_CONFIG_FIPS202_BACKEND_FILE: If the latter is
  *              unset, the default backend for your the target architecture
  *              will be used. If set, it must be the name of a backend metadata
  *              file.
@@ -115,15 +115,5 @@
  *
  *****************************************************************************/
 #define MLK_CONFIG_FIPS202_BACKEND_FILE "fips202/native/custom/custom.h"
-
-/******************************************************************************
- * Name:        MLK_API_STANDARD
- *
- * Description: Define this to extend api.h to also export key sizes and public
- *              API in the CRYPTO_xxx and crypto_kem_xxx format as used e.g. by
- *              SUPERCOP.
- *
- *****************************************************************************/
-#define MLK_API_STANDARD
 
 #endif /* !MLK_CONFIG_H */

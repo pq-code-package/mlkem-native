@@ -33,7 +33,7 @@ montgomery_factor = pow(2, 16, modulus)
 
 
 def status_update(task, msg):
-    print(f"\r{'':<140}", end="", flush=True)
+    print(f"\r{'':<160}", end="", flush=True)
     print(f"\r[{task}]: {msg} ...", end="", flush=True)
 
 
@@ -1088,6 +1088,15 @@ def get_files(pattern):
     ]
 
 
+def get_all_files():
+    # All git-tracked files, including symlinks
+    r = subprocess.run(["git", "ls-files"], capture_output=True, text=True)
+    assert r.returncode == 0
+    files = r.stdout.split("\n")
+    files = filter(lambda s: s != "" and pathlib.Path(s).is_symlink() is False, files)
+    return files
+
+
 def get_defines_from_file(c):
     with open(c, "r") as f:
         for l in f.read().split("\n"):
@@ -1102,8 +1111,12 @@ def get_defines_from_file(c):
                 )
 
 
-def get_defines():
-    for c in get_header_files(main_only=True):
+def get_defines(all=False):
+    if all is False:
+        files = get_header_files(main_only=True)
+    else:
+        files = get_header_files() + get_c_source_files() + get_asm_source_files()
+    for c in files:
         yield from get_defines_from_file(c)
 
 
@@ -1503,12 +1516,12 @@ def gen_monolithic_asm_file(dry_run=False):
         )
         yield "#endif"
         yield ""
-        yield "#if defined(MLK_CONFIG_MONOBUILD_WITH_NATIVE_FIPS202)"
+        yield "#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)"
         yield from gen_monolithic_undef_all_core(
             filt=native_fips202, desc="native code"
         )
         yield "#endif"
-        yield "#if defined(MLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH)"
+        yield "#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)"
         yield from gen_monolithic_undef_all_core(filt=native_arith, desc="native code")
         yield "#endif"
         yield "#endif"
@@ -1520,6 +1533,96 @@ def gen_monolithic_asm_file(dry_run=False):
         dry_run=dry_run,
         force_format=True,
     )
+
+
+def get_config_options():
+    with open("mlkem/config.h", "r") as f:
+        content = f.read()
+    config_pattern = r"Name:\s*(MLK_CONFIG_\w+)"
+
+    configs = re.findall(config_pattern, content)
+
+    configs += [
+        "MLK_FORCE_AARCH64",
+        "MLK_FORCE_AARCH64_EB",
+        "MLK_FORCE_X86_64",
+        "MLK_FORCE_PPC64LE",
+        "MLK_FORCE_RISCV64",
+        "MLK_FORCE_RISCV32",
+        "MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER",
+        "MLKEM_DEBUG",  # TODO: Rename?
+        "MLK_BREAK_PCT",  # Use in PCT breakage test]
+        "MLK_CONFIG_NO_ASM_VALUE_BARRIER",  # TODO: Add to config?
+        "MLK_CHECK_APIS",
+        "MLK_CONFIG_API_XXX",
+        "MLK_USE_NATIVE_XXX",
+    ]
+
+    return configs
+
+
+def check_macro_typos_in_file(filename, macro_check):
+    """Checks for typos in MLK_XXX and MLKEM_XXX identifiers."""
+    status_update("check-macros", filename)
+    with open(filename, "r") as f:
+        content = f.read()
+
+    pattern = r"[^_]((?:MLK_|MLKEM_)\w+)(.*)$"
+    for m in re.finditer(pattern, content, flags=re.M):
+        txt = m.group(1)
+        rest = m.group(2)
+        if macro_check(txt, rest, filename) is False:
+            line_no = content[: m.start()].count("\n") + 1
+            raise Exception(
+                f"Likely typo {txt} in {filename}:{line_no}? Not a defined macro."
+            )
+
+
+def check_macro_typos():
+    files = get_all_files()
+    configs = get_config_options()
+
+    macros = set(map(lambda t: t[1], get_defines(all=True)))
+    macros.update(get_config_options())
+
+    def macro_check(m, rest, filename):
+        if m in macros:
+            return True
+
+        is_autogen = filename == "scripts/autogen"
+
+        #
+        # Register some file-specific exceptions
+        #
+
+        # 1. Makefiles use MLK_SOURCE_XXX to list source files
+        if is_autogen or filename.endswith("/Makefile"):
+            if m.startswith("MLK_SOURCE") or m.startswith("MLK_OBJ"):
+                return True
+
+        # 2. libOQS specific identifier
+        if is_autogen or filename.startswith("integration/liboqs"):
+            if m.startswith("MLKEM_NATIVE_MLKEM") or m in ["MLKEM_DIR"]:
+                return True
+
+        # 3. Exclude HOL-Light proof scripts
+        if is_autogen or filename.startswith("proofs/hol_light"):
+            if filename.endswith(".ml"):
+                return True
+
+        # 4. Exclude regexp patterns in `autogen`
+        if is_autogen:
+            if rest.startswith("\\") or m in ["MLK_XXX", "MLK_SOURCE_XXX"]:
+                return True
+
+        return False
+
+    with ThreadPoolExecutor() as executor:
+        results = list(
+            executor.map(
+                partial(check_macro_typos_in_file, macro_check=macro_check), files
+            )
+        )
 
 
 def check_asm_register_aliases_for_file(filename):
@@ -1705,91 +1808,91 @@ def gen_hol_light_asm(dry_run=False):
             "ntt.S",
             "mlkem_ntt.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
         ),
         (
             "intt.S",
             "mlkem_intt.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
         ),
         (
             "poly_tomont_asm.S",
             "mlkem_poly_tomont.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
         ),
         (
             "poly_tobytes_asm.S",
             "mlkem_poly_tobytes.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
         ),
         (
             "poly_reduce_asm.S",
             "mlkem_poly_reduce.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
         ),
         (
             "poly_mulcache_compute_asm.S",
             "mlkem_poly_mulcache_compute.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
         ),
         (
             "polyvec_basemul_acc_montgomery_cached_asm_k2.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k2.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
         ),
         (
             "polyvec_basemul_acc_montgomery_cached_asm_k3.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k3.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
         ),
         (
             "polyvec_basemul_acc_montgomery_cached_asm_k4.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k4.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
         ),
         (
             "rej_uniform_asm.S",
             "mlkem_rej_uniform.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src -DMLK_ARITH_BACKEND_AARCH64_OPT",
+            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
         ),
         (
             "keccak_f1600_x1_scalar_asm.S",
             "keccak_f1600_x1_scalar.S",
             "dev/fips202/aarch64/src",
-            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/ -DMLK_FIPS202_BACKEND_AARCH64_DEFAULT",
+            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/",
         ),
         (
             "keccak_f1600_x1_v84a_asm.S",
             "keccak_f1600_x1_v84a.S",
             "dev/fips202/aarch64/src",
-            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/ -DMLK_FIPS202_BACKEND_AARCH64_DEFAULT",
+            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/",
         ),
         (
             "keccak_f1600_x2_v84a_asm.S",
             "keccak_f1600_x2_v84a.S",
             "dev/fips202/aarch64/src",
-            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/ -DMLK_FIPS202_BACKEND_AARCH64_DEFAULT",
+            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/",
         ),
         (
             "keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S",
             "keccak_f1600_x4_v8a_v84a_scalar.S",
             "dev/fips202/aarch64/src",
-            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/ -DMLK_FIPS202_BACKEND_AARCH64_DEFAULT",
+            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/",
         ),
         (
             "keccak_f1600_x4_v8a_scalar_hybrid_asm.S",
             "keccak_f1600_x4_v8a_scalar.S",
             "dev/fips202/aarch64/src",
-            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/ -DMLK_FIPS202_BACKEND_AARCH64_DEFAULT",
+            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/",
         ),
     ]
 
@@ -2497,6 +2600,7 @@ def _main():
         no_simplify=args.no_simplify,
     )
 
+    check_macro_typos()
     print()
 
 

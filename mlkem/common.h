@@ -46,7 +46,7 @@
 #define MLK_NAMESPACE_PREFIX_K \
   MLK_CONCAT(MLK_ADD_PARAM_SET(MLK_CONFIG_NAMESPACE_PREFIX), _)
 
-/* Functions are prefixed by MLK_CONFIG_NAMESPACE.
+/* Functions are prefixed by MLK_CONFIG_NAMESPACE_PREFIX.
  *
  * If multiple parameter sets are used, functions depending on the parameter
  * set are additionally prefixed with 512/768/1024. See config.h.

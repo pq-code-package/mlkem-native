@@ -3,10 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
-#ifdef MLK_ARITH_PROFILE_H
-#error Only one MLKEM_ARITH assembly profile can be defined -- did you include multiple profiles?
-#else
-#define MLK_ARITH_PROFILE_H
+#ifndef MLK_DUMMY_ARITH_BACKEND_H
+#define MLK_DUMMY_ARITH_BACKEND_H
 
 #define MLK_USE_NATIVE_REJ_UNIFORM
 #define MLK_USE_NATIVE_NTT
@@ -21,4 +19,4 @@
 
 #include "../mlkem/native/api.h"
 
-#endif /* !MLK_ARITH_PROFILE_H */
+#endif /* !MLK_DUMMY_ARITH_BACKEND_H */

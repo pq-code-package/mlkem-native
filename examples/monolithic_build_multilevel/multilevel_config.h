@@ -60,7 +60,7 @@
  *              If this option is unset, the C backend will be used.
  *
  *              If this option is set, the arithmetic backend to be use is
- *              determined by MLK_ARITH_BACKEND: If the latter is
+ *              determined by MLK_CONFIG_ARITH_BACKEND_FILE: If the latter is
  *              unset, the default backend for your the target architecture
  *              will be used. If set, it must be the name of a backend metadata
  *              file.
@@ -103,7 +103,7 @@
  *              If this option is unset, the C backend will be used.
  *
  *              If this option is set, the FIPS202 backend to be use is
- *              determined by MLK_FIPS202_BACKEND: If the latter is
+ *              determined by MLK_CONFIG_FIPS202_BACKEND_FILE: If the latter is
  *              unset, the default backend for your the target architecture
  *              will be used. If set, it must be the name of a backend metadata
  *              file.
