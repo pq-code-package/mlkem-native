@@ -52,14 +52,14 @@ jobs:
     uses: ./.github/workflows/integration-liboqs.yml
     secrets: inherit
   awslc_integration_fixed:
-    name: AWS-LC (412be9)
+    name: AWS-LC (1.52.1)
     permissions:
       contents: 'read'
       id-token: 'write'
     needs: [ base ]
     uses: ./.github/workflows/integration-awslc.yml
     with:
-      commit: 7d9cbf39f0fbf78ee47a71046c6a231f04b91e8d # v1.50.1
+      commit: d6ade6ae1537adfff53c0f0489b99ba1a111f0cc # v1.52.1
     secrets: inherit
   awslc_integration_head:
     name: AWS-LC (HEAD)
