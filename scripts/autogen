@@ -1058,13 +1058,15 @@ def get_c_source_files(main_only=False, core_only=False, strip_mlkem=False):
         return get_files("**/*.c", strip_mlkem=strip_mlkem)
 
 
-def get_asm_source_files(main_only=False, core_only=False):
+def get_asm_source_files(main_only=False, core_only=False, strip_mlkem=False):
     if main_only is True:
-        return get_files("mlkem/src/**/*.S")
+        return get_files("mlkem/src/**/*.S", strip_mlkem=strip_mlkem)
     elif core_only is True:
-        return get_files("mlkem/src/**/*.S") + get_files("dev/**/*.S")
+        return get_files("mlkem/src/**/*.S", strip_mlkem=strip_mlkem) + get_files(
+            "dev/**/*.S", strip_mlkem=strip_mlkem
+        )
     else:
-        return get_files("**/*.S")
+        return get_files("**/*.S", strip_mlkem=strip_mlkem)
 
 
 def get_header_files(main_only=False, core_only=False):
@@ -1469,11 +1471,11 @@ def gen_monolithic_asm_file(dry_run=False):
         yield " *"
         yield " * Example:"
         yield " * ```bash"
-        yield " * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native_monobuild.S"
+        yield " * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native.S"
         yield " * ```"
         yield " */"
         yield ""
-        yield '#include "mlkem/common.h"'
+        yield '#include "src/common.h"'
         yield ""
         yield "#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)"
         yield "#if defined(MLK_SYS_AARCH64)"
@@ -1533,7 +1535,7 @@ def gen_monolithic_asm_file(dry_run=False):
         yield ""
 
     update_file(
-        "examples/monolithic_build_multilevel_native/mlkem_native_monobuild.S",
+        "mlkem/mlkem_native.S",
         "\n".join(gen()),
         dry_run=dry_run,
         force_format=True,

@@ -78,7 +78,7 @@
 #include "src/fips202/keccakf1600.c"
 #include "src/fips202/native/aarch64/src/keccakf1600_round_constants.c"
 #include "src/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.c"
-#endif /* !MLK_CONFIG_MONOBUILD_CUSTOM_FIPS202 */
+#endif /* !MLK_CONFIG_FIPS202_CUSTOM_HEADER */
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
 #if defined(MLK_SYS_AARCH64)
