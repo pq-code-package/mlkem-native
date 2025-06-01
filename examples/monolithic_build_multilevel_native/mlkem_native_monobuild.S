@@ -9,28 +9,26 @@
  */
 
 /*
- * Monolithic compilation unit bundling all compilation units within
- * mlkem-native
+ * Monolithic assembly unit bundling all assembly units within mlkem-native
  */
 
 /******************************************************************************
  *
- * Single compilation unit (SCU) for fixed-level build of mlkem-native
+ * Single assembly unit for fixed-level build of mlkem-native
  *
- * This compilation unit bundles together all source files for a build
+ * This assembly unit bundles together all assembly files for a build
  * of mlkem-native for a fixed security level (MLKEM-512/768/1024).
- *
- * # API
- *
- * The API exposed by this file is described in mlkem_native.h.
  *
  * # Multi-level build
  *
  * If you want an SCU build of mlkem-native with support for multiple security
- * levels, you need to include this file multiple times, and set
- * MLK_CONFIG_MULTILEVEL_WITH_SHARED and MLK_CONFIG_MULTILEVEL_NO_SHARED
- * appropriately. This is exemplified in examples/monolithic_build_multilevel
- * and examples/monolithic_build_multilevel_native.
+ * levels, you should include this file once with
+ * MLK_CONFIG_MULTILEVEL_WITH_SHARED set. For convenience, you can also follow
+ * the same pattern as for mlkem_native_monobuild.c and include it for every
+ * level, setting MLK_CONFIG_MULTILEVEL_NO_SHARED for all but one. For builds
+ * with MLK_CONFIG_MULTILEVEL_NO_SHARED, this file will then be ignored. See
+ * examples/monolithic_build_multilevel and
+ * examples/monolithic_build_multilevel_native.
  *
  * # Configuration
  *
@@ -57,47 +55,47 @@
  *
  * Example:
  * ```bash
- * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native_monobuild.c
+ * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native_monobuild.S
  * ```
  */
 
 #include "mlkem/common.h"
 
-#include "mlkem/compress.c"
-#include "mlkem/debug.c"
-#include "mlkem/indcpa.c"
-#include "mlkem/kem.c"
-#include "mlkem/poly.c"
-#include "mlkem/poly_k.c"
-#include "mlkem/sampling.c"
-#include "mlkem/verify.c"
-
-#if !defined(MLK_CONFIG_FIPS202_CUSTOM_HEADER)
-#include "mlkem/fips202/fips202.c"
-#include "mlkem/fips202/fips202x4.c"
-#include "mlkem/fips202/keccakf1600.c"
-#endif
-
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
 #if defined(MLK_SYS_AARCH64)
-#include "mlkem/native/aarch64/src/aarch64_zetas.c"
-#include "mlkem/native/aarch64/src/rej_uniform_table.c"
-#endif
+#include "mlkem/native/aarch64/src/intt.S"
+#include "mlkem/native/aarch64/src/ntt.S"
+#include "mlkem/native/aarch64/src/poly_mulcache_compute_asm.S"
+#include "mlkem/native/aarch64/src/poly_reduce_asm.S"
+#include "mlkem/native/aarch64/src/poly_tobytes_asm.S"
+#include "mlkem/native/aarch64/src/poly_tomont_asm.S"
+#include "mlkem/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S"
+#include "mlkem/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S"
+#include "mlkem/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S"
+#include "mlkem/native/aarch64/src/rej_uniform_asm.S"
+#endif /* MLK_SYS_AARCH64 */
 #if defined(MLK_SYS_X86_64)
-#include "mlkem/native/x86_64/src/basemul.c"
-#include "mlkem/native/x86_64/src/compress_avx2.c"
-#include "mlkem/native/x86_64/src/consts.c"
-#include "mlkem/native/x86_64/src/rej_uniform_avx2.c"
-#include "mlkem/native/x86_64/src/rej_uniform_table.c"
+#include "mlkem/native/x86_64/src/basemul.S"
+#include "mlkem/native/x86_64/src/intt.S"
+#include "mlkem/native/x86_64/src/mulcache_compute.S"
+#include "mlkem/native/x86_64/src/ntt.S"
+#include "mlkem/native/x86_64/src/nttfrombytes.S"
+#include "mlkem/native/x86_64/src/ntttobytes.S"
+#include "mlkem/native/x86_64/src/nttunpack.S"
+#include "mlkem/native/x86_64/src/reduce.S"
+#include "mlkem/native/x86_64/src/tomont.S"
 #endif /* MLK_SYS_X86_64 */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
 #if defined(MLK_SYS_AARCH64)
-#include "mlkem/fips202/native/aarch64/src/keccakf1600_round_constants.c"
-#endif
+#include "mlkem/fips202/native/aarch64/src/keccak_f1600_x1_scalar_asm.S"
+#include "mlkem/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S"
+#include "mlkem/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S"
+#include "mlkem/fips202/native/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_asm.S"
+#include "mlkem/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S"
+#endif /* MLK_SYS_AARCH64 */
 #if defined(MLK_SYS_X86_64)
-#include "mlkem/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.c"
 #endif
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 
@@ -324,10 +322,6 @@
 #undef MLK_USE_ASM_VALUE_BARRIER
 #undef MLK_VERIFY_H
 #undef mlk_ct_opt_blocker_u64
-/* mlkem/cbmc.h */
-#undef MLK_CBMC_H
-#undef __contract__
-#undef __loop__
 
 #if !defined(MLK_CONFIG_FIPS202_CUSTOM_HEADER)
 /*
@@ -369,7 +363,7 @@
 #undef mlk_keccakf1600x4_xor_bytes
 #endif /* !MLK_CONFIG_FIPS202_CUSTOM_HEADER */
 
-#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
+#if defined(MLK_CONFIG_MONOBUILD_WITH_NATIVE_FIPS202)
 /*
  * Undefine macros from native code
  */
@@ -414,8 +408,8 @@
 #undef MLK_FIPS202_NATIVE_X86_64_XKCP_H
 #undef MLK_FIPS202_X86_64_XKCP
 #undef MLK_USE_FIPS202_X4_NATIVE
-#endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
-#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
+#endif /* MLK_CONFIG_MONOBUILD_WITH_NATIVE_FIPS202 */
+#if defined(MLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH)
 /*
  * Undefine macros from native code
  */
@@ -522,5 +516,5 @@
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP
 #undef MLK_NATIVE_X86_64_SRC_CONSTS_H
 #undef mlk_qdata
-#endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
+#endif /* MLK_CONFIG_MONOBUILD_WITH_NATIVE_ARITH */
 #endif /* !MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS */
