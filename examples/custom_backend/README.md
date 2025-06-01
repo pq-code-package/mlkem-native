@@ -17,13 +17,13 @@ An application using mlkem-native with a custom FIPS-202 backend and custom conf
    you can remove all existing backends; that's what this example does.
 4. A custom FIPS-202 backend. In this example, the backend file is
    [custom.h](mlkem_native/mlkem/fips202/native/custom/custom.h), wrapping
-   [sha3.c](mlkem_native/mlkem/fips202/native/custom/src/sha3.c) and setting `MLK_USE_FIPS101_X1_NATIVE` to indicate that we
+   [sha3.c](mlkem_native/mlkem/fips202/native/custom/src/sha3.c) and setting `MLK_USE_FIPS202_X1_NATIVE` to indicate that we
    replace 1-fold Keccak-F1600.
 5. Either modify the existing [config.h](mlkem_native/mlkem/config.h), or register a new config. In this example, we add
    a new config [custom_config.h](mlkem_native/custom_config.h) and register it from the command line for
    `-DMLK_CONFIG_FILE="custom_config.h"` -- no further changes to the build are needed. For the sake of
-   demonstration, we set a custom namespace. We set `MLK_FIPS202_BACKEND` to point to our custom FIPS-202
-   backend, but leave `MLK_ARITH_BACKEND` undefined to indicate that we wish to use the C backend.
+   demonstration, we set a custom namespace. We set `MLK_CONFIG_FIPS202_BACKEND_FILE` to point to our custom FIPS-202
+   backend, but leave `MLK_CONFIG_USE_NATIVE_BACKEND_ARITH` undefined to indicate that we wish to use the C backend.
 
 ## Note
 

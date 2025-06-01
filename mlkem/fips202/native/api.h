@@ -22,8 +22,8 @@
  * A _backend_ is a specific implementation of parts of this interface.
  *
  * You can replace 1-fold, 2-fold, or 4-fold batched Keccak-F1600.
- * To enable, set MLK_USE_FIPS202_X{1,2,4}_NATIVE in your backend,
- * and define the inline wrapper keccak_f1600_x{1,2,4}_native() to
+ * To enable, set MLK_USE_FIPS202_X1_NATIVE etc. in your backend,
+ * and define the inline wrapper keccak_f1600_x1_native() etc. to
  * forward to your implementation.
  */
 
