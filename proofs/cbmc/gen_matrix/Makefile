@@ -17,7 +17,7 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET += mlk_gen_matrix.0:4 mlk_gen_matrix.1:4 mlk_gen_matrix.2:4 mlk_gen_matrix.3:16
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mlkem/indcpa.c
+PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_gen_matrix
 USE_FUNCTION_CONTRACTS=mlk_poly_rej_uniform mlk_poly_rej_uniform_x4 mlk_poly_permute_bitrev_to_custom mlk_zeroize
@@ -41,10 +41,10 @@ CBMC_OBJECT_BITS = 10
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
-# ("mlkem/poly.c") in PROJECT_SOURCES).
+# ("mlkem/src/poly.c") in PROJECT_SOURCES).
 # REWRITTEN_SOURCES = $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i
 # include ../Makefile.common
-# $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_SOURCE = $(SRCDIR)/mlkem/poly.c
+# $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_SOURCE = $(SRCDIR)/mlkem/src/poly.c
 # $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_FUNCTIONS = foo bar
 # $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_OBJECTS = baz
 # Care is required with variables on the left-hand side: REWRITTEN_SOURCES must

@@ -513,7 +513,7 @@ jobs:
       - uses: ./.github/actions/setup-apt
       - name: tests func
         run: |
-          ./scripts/tests func --cflags="-DMLK_CHECK_APIS -Wno-redundant-decls"
+          ./scripts/tests func --cflags="-Imlkem -DMLK_CHECK_APIS -Wno-redundant-decls"
   ec2_functests:
     strategy:
       fail-fast: false
