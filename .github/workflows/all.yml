@@ -40,7 +40,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-    needs: [ base, nix ]
+#    needs: [ base, nix ]
     uses: ./.github/workflows/cbmc.yml
     secrets: inherit
   oqs_integration:
