@@ -1,8 +1,8 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
-# Using mlkem-native as a code package
+# Building mlkem-native
 
-This directory contains a minimal example for how to use mlkem-native as a code package, without modifications.
+This directory contains a minimal example for how to build mlkem-native.
 
 ## Components
 

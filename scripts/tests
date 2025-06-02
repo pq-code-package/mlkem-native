@@ -205,6 +205,7 @@ class TEST_TYPES(Enum):
     MULTILEVEL_BUILD = 11
     MULTILEVEL_BUILD_NATIVE = 12
     MONOLITHIC_BUILD_MULTILEVEL_NATIVE = 13
+    MONOLITHIC_BUILD_NATIVE = 14
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -219,6 +220,7 @@ class TEST_TYPES(Enum):
             TEST_TYPES.CUSTOM_BACKEND,
             TEST_TYPES.BASIC,
             TEST_TYPES.MONOLITHIC_BUILD,
+            TEST_TYPES.MONOLITHIC_BUILD_NATIVE,
             TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL,
             TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE,
             TEST_TYPES.MULTILEVEL_BUILD,
@@ -256,6 +258,8 @@ class TEST_TYPES(Enum):
             return "Example (mlkem-native as code package)"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return "Example (monobuild)"
+        if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
+            return "Example (monobuild, native)"
         if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
             return "Example (monobuild, multilevel)"
         if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE:
@@ -274,6 +278,8 @@ class TEST_TYPES(Enum):
             return "examples/basic"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return "examples/monolithic_build"
+        if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
+            return "examples/monolithic_build_native"
         if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
             return "examples/monolithic_build_multilevel"
         if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE:
@@ -302,6 +308,8 @@ class TEST_TYPES(Enum):
         if self == TEST_TYPES.BASIC:
             return ""
         if self == TEST_TYPES.MONOLITHIC_BUILD:
+            return ""
+        if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
             return ""
         if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
             return ""
@@ -983,6 +991,7 @@ def cli():
             "custom_backend",
             "basic",
             "monolithic_build",
+            "monolithic_build_native",
             "monolithic_build_multilevel",
             "monolithic_build_multilevel_native",
             "multilevel_build",

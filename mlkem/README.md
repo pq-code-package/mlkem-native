@@ -6,7 +6,9 @@ This is the main source tree of mlkem-native.
 
 ## Building
 
-To build a mlkem-native for a fixed parameter set (ML-KEM-512/768/1024), build the compilation in units in `src/*` separately, and link to an RNG and your application. See [examples/basic](../examples/basic) for a simple example. Alternatively, you can use the helper files [mlkem_native.c](mlkem_native.c) and [mlkem_native.S](mlkem_native.S), which bundle all *.c and *.S files together. See [examples/monolithic_build](../examples/monolithic_build) for an example.
+To build a mlkem-native for a fixed parameter set (ML-KEM-512/768/1024), build the compilation in units in `src/*` separately, and link to an RNG and your application. See [examples/basic](../examples/basic) for a simple example.
+
+Alternatively, you can use the auto-geneated helper files [mlkem_native.c](mlkem_native.c) and [mlkem_native.S](mlkem_native.S), which bundle all *.c and *.S files together. See [examples/monolithic_build](../examples/monolithic_build) and [examples/monolithic_build_native](../examples/monolithic_build_native) for examples with and without native code.
 
 ## Configuration
 

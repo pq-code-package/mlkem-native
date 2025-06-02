@@ -94,19 +94,14 @@ See [dev/README.md](dev/README.md) for more details.
 
 ## Usage
 
-mlkem-native is intended as a code package: If you want to use mlkem-native, import [mlkem/src/*](mlkem) into your
-project's source tree and build using your favourite build system. See [examples/basic](examples/basic)
-for an example. The build system provided in this repository is for development purposes only.
+If you want to use mlkem-native, import [mlkem](mlkem) into your project's source tree and build using your favourite build system. See [mlkem](mlkem) for more information, and
+[examples/basic](examples/basic) for a simple example. The build system provided in this repository is for development purposes only.
 
 ### Can I bring my own FIPS-202?
 
-mlkem-native relies on and comes with an implementation of FIPS202[^FIPS202]. If your library has its own FIPS-202 implementation, you
-can use it instead of the one shipped with mlkem-native: Replace
-[`mlkem/src/fips202/*`](mlkem/src/fips202) by your FIPS-202 implementation, and make sure to include replacements for the headers
-[`mlkem/src/fips202/fips202.h`](mlkem/src/fips202/fips202.h) and [`mlkem/src/fips202/fips202x4.h`](mlkem/src/fips202/fips202x4.h) and the functionalities specified
-therein. See [FIPS202.md](FIPS202.md) for details, and
-[examples/bring_your_own_fips202](examples/bring_your_own_fips202) for an example using
-tiny_sha3[^tiny_sha3].
+mlkem-native relies on and comes with an implementation of FIPS-202[^FIPS202]. If your library has its own FIPS-202 implementation, you
+can use it instead of the one shipped with mlkem-native. See [FIPS202.md](FIPS202.md), and [examples/bring_your_own_fips202](examples/bring_your_own_fips202)
+for an example using tiny_sha3[^tiny_sha3].
 
 ### Do I need to use the assembly backends?
 
@@ -123,7 +118,7 @@ contracts and loop invariants from the code; they will be ignored unless `CBMC` 
 
 Yes. The security level is a compile-time parameter configured by setting `MLK_CONFIG_PARAMETER_SET=512/768/1024` in [config.h](mlkem/src/config.h).
 If your library/application requires multiple security levels, you can build + link three instances of mlkem-native
-while sharing common code; this is called a 'multi-level build' and is demonstrated in [examples/multilevel_build](examples/multilevel_build).
+while sharing common code; this is called a 'multi-level build' and is demonstrated in [examples/multilevel_build](examples/multilevel_build). See also [mlkem](mlkem).
 
 ### Can I bring my own backend?
 
