@@ -21,9 +21,9 @@ endif
 # mlkem-native source and header files
 #
 # Here, the mlkem-native C source is directly included in main.c.
-MLK_SOURCE_ASM = mlkem_native_monobuild.S
+MLK_SOURCE_ASM = mlkem/mlkem_native.S
 
-INC=-Imlkem/ -I./
+INC=-Imlkem/ -Imlkem/src/ -I./
 
 # Part B:
 #

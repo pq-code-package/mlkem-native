@@ -392,7 +392,7 @@ jobs:
       - name: "PCT enabled + broken"
         run: |
           make clean
-          CFLAGS='-DMLK_CONFIG_FILE=\"../test/break_pct_config.h\"' make func -j4
+          CFLAGS='-DMLK_CONFIG_FILE=\"../../test/break_pct_config.h\"' make func -j4
           # PCT breakage is done at runtime via MLK_BREAK_PCT
           make run_func                 # Should be OK
           MLK_BREAK_PCT=0 make run_func # Should be OK
@@ -407,7 +407,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
-          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../test/custom_zeroize_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_zeroize_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           func: true
           kat: true
           acvp: true
@@ -417,7 +417,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
-          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../test/no_asm_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/no_asm_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           func: true
           kat: true
           acvp: true
@@ -427,7 +427,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
-          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../test/custom_randombytes_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_randombytes_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           func: true
           kat: true
           acvp: true
@@ -507,13 +507,13 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: make quickcheck
         run: |
-          OPT=0 CFLAGS="-DMLK_CHECK_APIS -Wno-redundant-decls" make quickcheck
+          OPT=0 CFLAGS="-Imlkem -DMLK_CHECK_APIS -Wno-redundant-decls" make quickcheck
           make clean >/dev/null
-          OPT=1 CFLAGS="-DMLK_CHECK_APIS -Wno-redundant-decls" make quickcheck
+          OPT=1 CFLAGS="-Imlkem -DMLK_CHECK_APIS -Wno-redundant-decls" make quickcheck
       - uses: ./.github/actions/setup-apt
       - name: tests func
         run: |
-          ./scripts/tests func --cflags="-DMLK_CHECK_APIS -Wno-redundant-decls"
+          ./scripts/tests func --cflags="-Imlkem -DMLK_CHECK_APIS -Wno-redundant-decls"
   ec2_functests:
     strategy:
       fail-fast: false

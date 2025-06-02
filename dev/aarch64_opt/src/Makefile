@@ -30,7 +30,7 @@ RESERVE_X_ONLY_FLAG=-c reserved_regs="[x18--x30,sp]"
 # Restrict SLOTHY to caller-saved registers.
 RESERVE_ALL_FLAG=-c reserved_regs="[x18--x30,sp,v8--v15]"
 
-COMMON_H=../../../mlkem/common.h
+COMMON_H=../../../mlkem/src/common.h
 
 all: ntt.S \
      intt.S \

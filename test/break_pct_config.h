@@ -35,7 +35,7 @@
  * Name:        MLK_CONFIG_FILE
  *
  * Description: If defined, this is a header that will be included instead
- *              of this default configuration file mlkem/config.h.
+ *              of this default configuration file mlkem/src/config.h.
  *
  *              When you need to build mlkem-native in multiple configurations,
  *              using varying MLK_CONFIG_FILE can be more convenient
@@ -301,7 +301,7 @@
 #if !defined(__ASSEMBLER__)
 #include <stdlib.h>
 #include <string.h>
-#include "../mlkem/sys.h"
+#include "../mlkem/src/sys.h"
 static MLK_INLINE int mlk_break_pct(void)
 {
   /* Break PCT if and only if MLK_BREAK_PCT is set to 1 */

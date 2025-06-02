@@ -10,16 +10,16 @@ HARNESS_FILE = poly_mulcache_compute_native_aarch64_harness
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
 PROOF_UID = poly_mulcache_compute_native_aarch64
 
-# We need to set MLK_CHECK_APIS as otherwise mlkem/native/api.h won't be
+# We need to set MLK_CHECK_APIS as otherwise mlkem/src/native/api.h won't be
 # included, which contains the CBMC specifications.
-DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_ARITH_BACKEND_FILE="\"$(SRCDIR)/mlkem/native/aarch64/meta.h\"" -DMLK_CHECK_APIS
+DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_ARITH_BACKEND_FILE="\"$(SRCDIR)/mlkem/src/native/aarch64/meta.h\"" -DMLK_CHECK_APIS
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c  $(SRCDIR)/mlkem/native/aarch64/src/aarch64_zetas.c
+PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c  $(SRCDIR)/mlkem/src/native/aarch64/src/aarch64_zetas.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_poly_mulcache_compute_native
 USE_FUNCTION_CONTRACTS=mlk_poly_mulcache_compute_asm
@@ -43,10 +43,10 @@ CBMC_OBJECT_BITS = 8
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
-# ("mlkem/poly.c") in PROJECT_SOURCES).
+# ("mlkem/src/poly.c") in PROJECT_SOURCES).
 # REWRITTEN_SOURCES = $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i
 # include ../Makefile.common
-# $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_SOURCE = $(SRCDIR)/mlkem/poly.c
+# $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_SOURCE = $(SRCDIR)/mlkem/src/poly.c
 # $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_FUNCTIONS = foo bar
 # $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_OBJECTS = baz
 # Care is required with variables on the left-hand side: REWRITTEN_SOURCES must

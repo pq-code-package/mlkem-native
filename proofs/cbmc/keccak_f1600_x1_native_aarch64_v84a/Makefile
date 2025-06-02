@@ -10,14 +10,14 @@ HARNESS_FILE = keccak_f1600_x1_native_aarch64_v84a_harness
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
 PROOF_UID = keccak_f1600_x1_native_aarch64_v84a
 
-DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLK_CONFIG_FIPS202_BACKEND_FILE="\"$(SRCDIR)/mlkem/fips202/native/aarch64/x1_v84a.h\"" -DMLK_CHECK_APIS -D__ARM_FEATURE_SHA3
+DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLK_CONFIG_FIPS202_BACKEND_FILE="\"$(SRCDIR)/mlkem/src/fips202/native/aarch64/x1_v84a.h\"" -DMLK_CHECK_APIS -D__ARM_FEATURE_SHA3
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mlkem/fips202/native/aarch64/src/keccakf1600_round_constants.c 
+PROJECT_SOURCES += $(SRCDIR)/mlkem/src/fips202/native/aarch64/src/keccakf1600_round_constants.c 
 
 CHECK_FUNCTION_CONTRACTS=mlk_keccak_f1600_x1_native
 USE_FUNCTION_CONTRACTS=mlk_keccak_f1600_x1_v84a_asm
@@ -41,10 +41,10 @@ CBMC_OBJECT_BITS = 8
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
-# ("mlkem/poly.c") in PROJECT_SOURCES).
+# ("mlkem/src/poly.c") in PROJECT_SOURCES).
 # REWRITTEN_SOURCES = $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i
 # include ../Makefile.common
-# $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_SOURCE = $(SRCDIR)/mlkem/poly.c
+# $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_SOURCE = $(SRCDIR)/mlkem/src/poly.c
 # $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_FUNCTIONS = foo bar
 # $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_OBJECTS = baz
 # Care is required with variables on the left-hand side: REWRITTEN_SOURCES must

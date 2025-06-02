@@ -5,9 +5,9 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include "../mlkem/compress.h"
-#include "../mlkem/mlkem_native.h"
+#include "../mlkem/src/compress.h"
 
+#include "../mlkem/mlkem_native.h"
 #include "notrandombytes/notrandombytes.h"
 
 #ifndef NTESTS

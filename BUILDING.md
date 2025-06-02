@@ -6,6 +6,10 @@
 
 To build **mlkem-native**, you need `make` and a C90 compiler. To use the test scripts, you need Python3 (>= 3.7).
 
+### By hand
+
+See [mlkem](mlkem).
+
 ### Using `make`
 
 You can build and test **mlkem-native** as follows:

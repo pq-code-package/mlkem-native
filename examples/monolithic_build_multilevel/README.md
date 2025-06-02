@@ -5,12 +5,12 @@
 This directory contains a minimal example for how to build multiple instances of mlkem-native in a single compilation
 unit. Only the C-backend is exercised.
 
-The auto-generated source file [mlkem_native_monobuild.c](mlkem_native_monobuild.c) includes all mlkem-native C source
+The auto-generated source file [mlkem_native.c](mlkem/mlkem_native.c) includes all mlkem-native C source
 files. Moreover, it clears all `#define`s clauses set by mlkem-native at the end, and is hence amenable to multiple
 inclusion in another compilation unit.
 
 The manually written source file [mlkem_native_all.c](mlkem_native_all.c) includes
-[mlkem_native_monobuild.c](mlkem_native_monobuild.c) three times, each time using the fixed config
+[mlkem_native.c](mlkem/mlkem_native.c) three times, each time using the fixed config
 [multilevel_config.h](multilevel_config.h), but changing the security level (specified
 by `MLK_CONFIG_PARAMETER_SET`) every time.
 ```C
@@ -23,27 +23,27 @@ by `MLK_CONFIG_PARAMETER_SET`) every time.
 /* Keep level-independent headers at the end of monobuild file */
 #define MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
 #define MLK_CONFIG_PARAMETER_SET 512
-#include "mlkem_native_monobuild.c"
+#include "mlkem_native.c"
 #undef MLK_CONFIG_PARAMETER_SET
 #undef MLK_CONFIG_MULTILEVEL_WITH_SHARED
 
 /* Exclude level-independent code */
 #define MLK_CONFIG_MULTILEVEL_NO_SHARED
 #define MLK_CONFIG_PARAMETER_SET 768
-#include "mlkem_native_monobuild.c"
+#include "mlkem_native.c"
 #undef MLK_CONFIG_PARAMETER_SET
 /* `#undef` all headers at the and of the monobuild file */
 #undef MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
 
 #define MLK_CONFIG_PARAMETER_SET 1024
-#include "mlkem_native_monobuild.c"
+#include "mlkem_native.c"
 #undef MLK_CONFIG_PARAMETER_SET
 ```
 
 Note the setting `MLK_CONFIG_MULTILEVEL_WITH_SHARED` which forces the inclusion of all level-independent
 code in the MLKEM-512 build, and the setting `MLK_CONFIG_MULTILEVEL_NO_SHARED`, which drops all
 level-independent code in the subsequent builds. Finally, `MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS` entails that
-`mlkem_native_monobuild.c` does not `#undefine` the `#define` clauses from level-independent files.
+`mlkem_native.c` does not `#undefine` the `#define` clauses from level-independent files.
 
 To make the monolithic multi-level build accessible from the application source [main.c](main.c), we provide
 [mlkem_native_all.h](mlkem_native_all.h), which includes [mlkem_native.h](../../mlkem/mlkem_native.h) once per

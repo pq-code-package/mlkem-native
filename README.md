@@ -16,7 +16,7 @@
 mlkem-native is a secure, fast, and portable C90 implementation of ML-KEM[^FIPS203].
 It is a fork of the ML-KEM reference implementation[^REF].
 
-All C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202) is proved memory-safe (no memory overflow) and type-safe (no integer overflow)
+All C code in [mlkem/src/*](mlkem) and [mlkem/src/fips202/*](mlkem/src/fips202) is proved memory-safe (no memory overflow) and type-safe (no integer overflow)
 using [CBMC](https://github.com/diffblue/cbmc). All AArch64 assembly is proved functionally correct at the object code level using
 [HOL-Light](https://github.com/jrh13/hol-light).
 
@@ -54,7 +54,7 @@ mlkem-native is used in [libOQS](https://github.com/open-quantum-safe/liboqs/) o
 
 ## Formal Verification
 
-All C code in [mlkem/*](mlkem) and [mlkem/fips202/*](mlkem/fips202) is proved memory-safe (no memory overflow) and type-safe (no integer overflow).
+All C code in [mlkem/src/*](mlkem) and [mlkem/src/fips202/*](mlkem/src/fips202) is proved memory-safe (no memory overflow) and type-safe (no integer overflow).
 This uses the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) and builds on function contracts and loop invariant annotations
 in the source code. See [proofs/cbmc](proofs/cbmc) for details.
 
@@ -83,8 +83,8 @@ integration into other software before issuing a stable release. If you have any
 mlkem-native is split into a _frontend_ and two _backends_ for arithmetic and FIPS202 / SHA3. The frontend is
 fixed, written in C, and covers all routines that are not critical to performance. The backends are flexible, take care of
 performance-sensitive routines, and can be implemented in C or native code (assembly/intrinsics); see
-[mlkem/native/api.h](mlkem/native/api.h) for the arithmetic backend and
-[mlkem/fips202/native/api.h](mlkem/fips202/native/api.h) for the FIPS-202 backend. mlkem-native currently
+[mlkem/src/native/api.h](mlkem/src/native/api.h) for the arithmetic backend and
+[mlkem/src/fips202/native/api.h](mlkem/src/fips202/native/api.h) for the FIPS-202 backend. mlkem-native currently
 offers three backends for C, AArch64, and x86_64 - if you'd like contribute new backends, please reach out or just open a
 PR.
 
@@ -94,36 +94,31 @@ See [dev/README.md](dev/README.md) for more details.
 
 ## Usage
 
-mlkem-native is intended as a code package: If you want to use mlkem-native, import [mlkem/*](mlkem) into your
-project's source tree and build using your favourite build system. See [examples/basic](examples/basic)
-for an example. The build system provided in this repository is for development purposes only.
+If you want to use mlkem-native, import [mlkem](mlkem) into your project's source tree and build using your favourite build system. See [mlkem](mlkem) for more information, and
+[examples/basic](examples/basic) for a simple example. The build system provided in this repository is for development purposes only.
 
 ### Can I bring my own FIPS-202?
 
-mlkem-native relies on and comes with an implementation of FIPS202[^FIPS202]. If your library has its own FIPS-202 implementation, you
-can use it instead of the one shipped with mlkem-native: Replace
-[`mlkem/fips202/*`](mlkem/fips202) by your FIPS-202 implementation, and make sure to include replacements for the headers
-[`mlkem/fips202/fips202.h`](mlkem/fips202/fips202.h) and [`mlkem/fips202/fips202x4.h`](mlkem/fips202/fips202x4.h) and the functionalities specified
-therein. See [FIPS202.md](FIPS202.md) for details, and
-[examples/bring_your_own_fips202](examples/bring_your_own_fips202) for an example using
-tiny_sha3[^tiny_sha3].
+mlkem-native relies on and comes with an implementation of FIPS-202[^FIPS202]. If your library has its own FIPS-202 implementation, you
+can use it instead of the one shipped with mlkem-native. See [FIPS202.md](FIPS202.md), and [examples/bring_your_own_fips202](examples/bring_your_own_fips202)
+for an example using tiny_sha3[^tiny_sha3].
 
 ### Do I need to use the assembly backends?
 
-No. If you want a C-only build, just omit the directories [mlkem/native](mlkem/native) and/or [mlkem/fips202/native](mlkem/fips202/native) from your import
-and unset `MLK_CONFIG_USE_NATIVE_BACKEND_ARITH` and/or `MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202` in your [config.h](mlkem/config.h).
+No. If you want a C-only build, just omit the directories [mlkem/src/native](mlkem/src/native) and/or [mlkem/src/fips202/native](mlkem/src/fips202/native) from your import
+and unset `MLK_CONFIG_USE_NATIVE_BACKEND_ARITH` and/or `MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202` in your [config.h](mlkem/src/config.h).
 
 ### Do I need to setup CBMC to use mlkem-native?
 
 No. While we recommend that you consider using it, mlkem-native will build + run fine without CBMC -- just make sure to
-include [cbmc.h](mlkem/cbmc.h) and have `CBMC` undefined. In particular, you do _not_ need to remove all function
+include [cbmc.h](mlkem/src/cbmc.h) and have `CBMC` undefined. In particular, you do _not_ need to remove all function
 contracts and loop invariants from the code; they will be ignored unless `CBMC` is set.
 
 ### Does mlkem-native support all security levels of ML-KEM?
 
-Yes. The security level is a compile-time parameter configured by setting `MLK_CONFIG_PARAMETER_SET=512/768/1024` in [config.h](mlkem/config.h).
+Yes. The security level is a compile-time parameter configured by setting `MLK_CONFIG_PARAMETER_SET=512/768/1024` in [config.h](mlkem/src/config.h).
 If your library/application requires multiple security levels, you can build + link three instances of mlkem-native
-while sharing common code; this is called a 'multi-level build' and is demonstrated in [examples/multilevel_build](examples/multilevel_build).
+while sharing common code; this is called a 'multi-level build' and is demonstrated in [examples/multilevel_build](examples/multilevel_build). See also [mlkem](mlkem).
 
 ### Can I bring my own backend?
 

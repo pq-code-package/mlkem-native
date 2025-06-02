@@ -9,7 +9,7 @@
 import yaml
 import os
 
-MLKEM_DIR = "../../mlkem"
+MLKEM_DIR = "../../mlkem/src"
 
 
 def load(fname):
@@ -20,18 +20,18 @@ def load(fname):
 def get_shared_sources(backend):
     # add files mlkem/*
     sources = [
-        f"mlkem/{f}"
+        f"mlkem/src/{f}"
         for f in os.listdir(MLKEM_DIR)
         if os.path.isfile(f"{MLKEM_DIR}/{f}")
     ]
     # add files mlkem/native/* (API definitions)
     sources += [
-        f"mlkem/native/{f}"
+        f"mlkem/src/native/{f}"
         for f in os.listdir(f"{MLKEM_DIR}/native")
         if os.path.isfile(f"{MLKEM_DIR}/native/{f}")
     ]
     # We use a custom config
-    sources.remove("mlkem/config.h")
+    sources.remove("mlkem/src/config.h")
     # Add FIPS202 glue code
     sources += [
         "integration/liboqs/fips202_glue.h",
@@ -46,7 +46,7 @@ def get_shared_sources(backend):
 
 
 def get_native_sources(backend):
-    return [f"mlkem/native/{backend}"]
+    return [f"mlkem/src/native/{backend}"]
 
 
 def check_implementation(impl):

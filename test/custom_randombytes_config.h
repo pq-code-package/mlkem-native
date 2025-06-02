@@ -35,7 +35,7 @@
  * Name:        MLK_CONFIG_FILE
  *
  * Description: If defined, this is a header that will be included instead
- *              of this default configuration file mlkem/config.h.
+ *              of this default configuration file mlkem/src/config.h.
  *
  *              When you need to build mlkem-native in multiple configurations,
  *              using varying MLK_CONFIG_FILE can be more convenient
@@ -263,7 +263,7 @@
 #if !defined(__ASSEMBLER__)
 #include <stdint.h>
 #include <string.h>
-#include "../mlkem/sys.h"
+#include "../mlkem/src/sys.h"
 static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
 {
   explicit_bzero(ptr, len);
@@ -289,7 +289,7 @@ static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
 #define MLK_CONFIG_CUSTOM_RANDOMBYTES
 #if !defined(__ASSEMBLER__)
 #include <stdint.h>
-#include "../mlkem/sys.h"
+#include "../mlkem/src/sys.h"
 #include "notrandombytes/notrandombytes.h"
 static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
 {

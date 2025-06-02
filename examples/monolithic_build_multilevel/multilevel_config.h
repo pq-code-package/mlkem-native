@@ -26,7 +26,7 @@
  * Name:        MLK_CONFIG_FILE
  *
  * Description: If defined, this is a header that will be included instead
- *              of mlkem/config.h.
+ *              of mlkem/src/config.h.
  *
  *              This _must_ be set on the command line using
  *              `-DMLK_CONFIG_FILE="..."`.

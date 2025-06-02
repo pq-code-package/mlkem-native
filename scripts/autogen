@@ -478,7 +478,9 @@ def gen_c_zeta_file(dry_run=False):
         yield "};"
         yield ""
 
-    update_file("mlkem/zetas.inc", "\n".join(gen()), dry_run=dry_run, force_format=True)
+    update_file(
+        "mlkem/src/zetas.inc", "\n".join(gen()), dry_run=dry_run, force_format=True
+    )
 
 
 def prepare_root_for_barrett(root):
@@ -917,7 +919,7 @@ def gen_avx2_rej_uniform_table(dry_run=False):
         yield ""
 
     update_file(
-        "mlkem/native/x86_64/src/rej_uniform_table.c",
+        "mlkem/src/native/x86_64/src/rej_uniform_table.c",
         "\n".join(gen()),
         dry_run=dry_run,
     )
@@ -1025,7 +1027,7 @@ def gen_avx2_zeta_file(dry_run=False):
         yield ""
 
     update_file(
-        "mlkem/native/x86_64/src/x86_64_zetas.i", "\n".join(gen()), dry_run=dry_run
+        "mlkem/src/native/x86_64/src/x86_64_zetas.i", "\n".join(gen()), dry_run=dry_run
     )
 
 
@@ -1045,30 +1047,35 @@ def gen_avx2_mulcache_twiddles_file(dry_run=False):
     )
 
 
-def get_c_source_files(main_only=False, core_only=False):
+def get_c_source_files(main_only=False, core_only=False, strip_mlkem=False):
     if main_only is True:
-        return get_files("mlkem/**/*.c")
+        return get_files("mlkem/src/**/*.c", strip_mlkem=strip_mlkem)
     elif core_only is True:
-        return get_files("mlkem/**/*.c") + get_files("dev/**/*.c")
+        return get_files("mlkem/src/**/*.c", strip_mlkem=strip_mlkem) + get_files(
+            "dev/**/*.c"
+        )
     else:
-        return get_files("**/*.c")
+        return get_files("**/*.c", strip_mlkem=strip_mlkem)
 
 
-def get_asm_source_files(main_only=False, core_only=False):
+def get_asm_source_files(main_only=False, core_only=False, strip_mlkem=False):
     if main_only is True:
-        return get_files("mlkem/**/*.S")
+        return get_files("mlkem/src/**/*.S", strip_mlkem=strip_mlkem)
     elif core_only is True:
-        return get_files("mlkem/**/*.S") + get_files("dev/**/*.S")
+        return get_files("mlkem/src/**/*.S", strip_mlkem=strip_mlkem) + get_files(
+            "dev/**/*.S", strip_mlkem=strip_mlkem
+        )
     else:
-        return get_files("**/*.S")
+        return get_files("**/*.S", strip_mlkem=strip_mlkem)
 
 
 def get_header_files(main_only=False, core_only=False):
     if main_only is True:
-        return get_files("mlkem/**/*.h")
+        return get_files("mlkem/*.h") + get_files("mlkem/src/**/*.h")
     elif core_only is True:
         return (
-            get_files("mlkem/**/*.h")
+            get_files("mlkem/*.h")
+            + get_files("mlkem/src/**/*.h")
             + get_files("dev/**/*.h")
             + get_files("integration/**/*.h")
         )
@@ -1080,9 +1087,9 @@ def get_markdown_files(main_only=False):
     return get_files("**/*.md")
 
 
-def get_files(pattern):
+def get_files(pattern, strip_mlkem=False):
     return [
-        str(p)
+        str(p).removeprefix("mlkem/") if strip_mlkem else str(p)
         for p in pathlib.Path().glob(pattern)
         if p.is_file() and not p.is_symlink()
     ]
@@ -1164,10 +1171,10 @@ def gen_monolithic_undef_all_core(filt=None, desc=""):
 def gen_monolithic_source_file(dry_run=False):
 
     def native(c):
-        return "native/" in c
+        return "src/native/" in c
 
     def fips202(c):
-        return "fips202" in c
+        return "src/fips202" in c
 
     def aarch64(c):
         return "aarch64" in c
@@ -1220,10 +1227,10 @@ def gen_monolithic_source_file(dry_run=False):
         return False
 
     def k_generic(c):
-        return not k_specific(c) and c != "mlkem/config.h"
+        return not k_specific(c) and c != "mlkem/src/config.h"
 
     def gen():
-        c_sources = get_c_source_files(main_only=True)
+        c_sources = get_c_source_files(main_only=True, strip_mlkem=True)
         yield from gen_header()
 
         yield "/*"
@@ -1274,11 +1281,11 @@ def gen_monolithic_source_file(dry_run=False):
         yield " *"
         yield " * Example:"
         yield " * ```bash"
-        yield " * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native_monobuild.c"
+        yield " * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native.c"
         yield " * ```"
         yield " */"
         yield ""
-        yield '#include "mlkem/common.h"'
+        yield '#include "src/common.h"'
         yield ""
         for c in filter(lambda c: not native(c) and not fips202(c), c_sources):
             yield f'#include "{c}"'
@@ -1325,7 +1332,7 @@ def gen_monolithic_source_file(dry_run=False):
         # Handle cbmc.h manually -- most #define's therein are only defined when CBMC is set
         # and need not be #undef'ed. In fact, #undef'ing them is risky since their names may
         # well already be occupied.
-        yield "/* mlkem/cbmc.h */"
+        yield "/* mlkem/src/cbmc.h */"
         yield "#undef MLK_CBMC_H"
         yield "#undef __contract__"
         yield "#undef __loop__"
@@ -1349,7 +1356,7 @@ def gen_monolithic_source_file(dry_run=False):
         yield ""
 
     update_file(
-        "examples/monolithic_build/mlkem_native_monobuild.c",
+        "mlkem/mlkem_native.c",
         "\n".join(gen()),
         dry_run=dry_run,
     )
@@ -1414,7 +1421,7 @@ def gen_monolithic_asm_file(dry_run=False):
         return False
 
     def k_generic(c):
-        return not k_specific(c) and c != "mlkem/config.h"
+        return not k_specific(c) and c != "mlkem/src/config.h"
 
     def gen():
         asm_sources = get_asm_source_files(main_only=True)
@@ -1464,11 +1471,11 @@ def gen_monolithic_asm_file(dry_run=False):
         yield " *"
         yield " * Example:"
         yield " * ```bash"
-        yield " * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native_monobuild.S"
+        yield " * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native.S"
         yield " * ```"
         yield " */"
         yield ""
-        yield '#include "mlkem/common.h"'
+        yield '#include "src/common.h"'
         yield ""
         yield "#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)"
         yield "#if defined(MLK_SYS_AARCH64)"
@@ -1528,7 +1535,7 @@ def gen_monolithic_asm_file(dry_run=False):
         yield ""
 
     update_file(
-        "examples/monolithic_build_multilevel_native/mlkem_native_monobuild.S",
+        "mlkem/mlkem_native.S",
         "\n".join(gen()),
         dry_run=dry_run,
         force_format=True,
@@ -1536,7 +1543,7 @@ def gen_monolithic_asm_file(dry_run=False):
 
 
 def get_config_options():
-    with open("mlkem/config.h", "r") as f:
+    with open("mlkem/src/config.h", "r") as f:
         content = f.read()
     config_pattern = r"Name:\s*(MLK_CONFIG_\w+)"
 
@@ -1614,6 +1621,10 @@ def check_macro_typos():
         if is_autogen:
             if rest.startswith("\\") or m in ["MLK_XXX", "MLK_SOURCE_XXX"]:
                 return True
+
+        # 5. AWS-LC importer patch
+        if is_autogen or filename == "integration/awslc/awslc.patch":
+            return True
 
         return False
 
@@ -1808,91 +1819,91 @@ def gen_hol_light_asm(dry_run=False):
             "ntt.S",
             "mlkem_ntt.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
         ),
         (
             "intt.S",
             "mlkem_intt.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
         ),
         (
             "poly_tomont_asm.S",
             "mlkem_poly_tomont.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
         ),
         (
             "poly_tobytes_asm.S",
             "mlkem_poly_tobytes.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
         ),
         (
             "poly_reduce_asm.S",
             "mlkem_poly_reduce.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
         ),
         (
             "poly_mulcache_compute_asm.S",
             "mlkem_poly_mulcache_compute.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
         ),
         (
             "polyvec_basemul_acc_montgomery_cached_asm_k2.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k2.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
         ),
         (
             "polyvec_basemul_acc_montgomery_cached_asm_k3.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k3.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
         ),
         (
             "polyvec_basemul_acc_montgomery_cached_asm_k4.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k4.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
         ),
         (
             "rej_uniform_asm.S",
             "mlkem_rej_uniform.S",
             "dev/aarch64_opt/src",
-            "-march=armv8.4-a+sha3 -Imlkem/native/aarch64/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
         ),
         (
             "keccak_f1600_x1_scalar_asm.S",
             "keccak_f1600_x1_scalar.S",
             "dev/fips202/aarch64/src",
-            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/",
+            "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
         ),
         (
             "keccak_f1600_x1_v84a_asm.S",
             "keccak_f1600_x1_v84a.S",
             "dev/fips202/aarch64/src",
-            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/",
+            "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
         ),
         (
             "keccak_f1600_x2_v84a_asm.S",
             "keccak_f1600_x2_v84a.S",
             "dev/fips202/aarch64/src",
-            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/",
+            "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
         ),
         (
             "keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S",
             "keccak_f1600_x4_v8a_v84a_scalar.S",
             "dev/fips202/aarch64/src",
-            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/",
+            "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
         ),
         (
             "keccak_f1600_x4_v8a_scalar_hybrid_asm.S",
             "keccak_f1600_x4_v8a_scalar.S",
             "dev/fips202/aarch64/src",
-            "-march=armv8.4-a+sha3 -Imlkem/fips202/native/aarch64/src/",
+            "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
         ),
     ]
 
@@ -2005,42 +2016,42 @@ def synchronize_backends(
         # We may switch the AArch64 arithmetic backend, so adjust the metadata file
         update_via_copy(
             f"dev/aarch64_{ty}/meta.h",
-            "mlkem/native/aarch64/meta.h",
+            "mlkem/src/native/aarch64/meta.h",
             transform=lambda c: adjust_header_guard_for_filename(
-                c, "mlkem/native/aarch64/meta.h"
+                c, "mlkem/src/native/aarch64/meta.h"
             ),
         )
 
     synchronize_backend(
         f"dev/aarch64_{ty}/src",
-        "mlkem/native/aarch64/src",
+        "mlkem/src/native/aarch64/src",
         dry_run=dry_run,
         delete=delete,
         force_cross=force_cross,
         no_simplify=no_simplify,
-        cflags="-Imlkem/native/aarch64/src",
+        cflags="-Imlkem/src/native/aarch64/src",
     )
     synchronize_backend(
         "dev/fips202/aarch64/src",
-        "mlkem/fips202/native/aarch64/src",
+        "mlkem/src/fips202/native/aarch64/src",
         dry_run=dry_run,
         delete=delete,
         force_cross=force_cross,
         no_simplify=no_simplify,
-        cflags="-Imlkem/fips202/native/aarch64/src -march=armv8.4-a+sha3",
+        cflags="-Imlkem/src/fips202/native/aarch64/src -march=armv8.4-a+sha3",
     )
     synchronize_backend(
         "dev/fips202/aarch64",
-        "mlkem/fips202/native/aarch64",
+        "mlkem/src/fips202/native/aarch64",
         dry_run=dry_run,
         delete=delete,
         force_cross=force_cross,
         no_simplify=no_simplify,
-        cflags="-Imlkem/fips202/native/aarch64 -march=armv8.4-a+sha3",
+        cflags="-Imlkem/src/fips202/native/aarch64 -march=armv8.4-a+sha3",
     )
     synchronize_backend(
         "dev/x86_64/src",
-        "mlkem/native/x86_64/src",
+        "mlkem/src/native/x86_64/src",
         dry_run=dry_run,
         delete=delete,
         force_cross=force_cross,
@@ -2052,7 +2063,7 @@ def synchronize_backends(
         # macro.
         # This leads to duplicate endbr64 instructions causing a failure when
         # comparing the object code before and after simplification.
-        cflags="-Imlkem/native/x86_64/src/ -mavx2 -fcf-protection=none",
+        cflags="-Imlkem/src/native/x86_64/src/ -mavx2 -fcf-protection=none",
     )
 
 
@@ -2065,7 +2076,10 @@ def adjust_header_guard_for_filename(content, header_file):
 
     # Use full filename as the header guard, with '/' and '.' replaced by '_'
     guard_name = (
-        header_file.removeprefix("mlkem/").replace("/", "_").replace(".", "_").upper()
+        header_file.removeprefix("mlkem/src/")
+        .replace("/", "_")
+        .replace(".", "_")
+        .upper()
     )
     guard_name = "MLK_" + guard_name
 

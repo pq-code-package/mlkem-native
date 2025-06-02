@@ -23,7 +23,7 @@ context described by the annotations; if the annotations add further constraints
 function contract annotation provides contextual assumptions about a function as _preconditions_ to CBMC, and adds
 further _constraints_ for the program state at function return.
 
-In mlkem-native, we use abbreviated forms of the CBMC annotations defined by macros in the [cbmc.h](../../mlkem/cbmc.h). We
+In mlkem-native, we use abbreviated forms of the CBMC annotations defined by macros in the [cbmc.h](../../mlkem/src/cbmc.h). We
 now list the most prominent.
 
 ### Function contracts
@@ -413,7 +413,7 @@ The significant changes are:
 ```
 HARNESS_FILE = poly_tobytes_harness
 PROOF_UID = mlk_poly_tobytes
-PROJECT_SOURCES += $(SRCDIR)/mlkem/poly.c
+PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c
 CHECK_FUNCTION_CONTRACTS=mlk_poly_tobytes
 USE_FUNCTION_CONTRACTS=
 FUNCTION_NAME = mlk_poly_tobytes
@@ -450,7 +450,7 @@ So we need to write a requires contract to constrain the ranges of the coefficie
 is no constraint on the output byte array, other than it must be the right length, which is given by the function
 prototype.
 
-We can use the macros in [mlkem/cbmc.h](../../mlkem/cbmc.h) to help, thus:
+We can use the macros in [mlkem/src/cbmc.h](../../mlkem/src/cbmc.h) to help, thus:
 
 ```
 void mlk_poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
@@ -461,7 +461,7 @@ __contract__(
 ```
 
 `array_bound` is a macro that expands to a quantified expression that expresses that the elemtns of `a->coeffs` between
-index values `0` (inclusive) and `MLKEM_N` (exclusive) are in the range `0` (inclusive) through `MLKEM_Q` (exclusive). See the macro definition in [mlkem/cbmc.h](../../mlkem/cbmc.h) for details.
+index values `0` (inclusive) and `MLKEM_N` (exclusive) are in the range `0` (inclusive) through `MLKEM_Q` (exclusive). See the macro definition in [mlkem/src/cbmc.h](../../mlkem/src/cbmc.h) for details.
 
 ### Interior contracts and loop invariants
 

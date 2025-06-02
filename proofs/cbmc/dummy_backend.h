@@ -17,6 +17,6 @@
 #define MLK_USE_NATIVE_POLY_FROMBYTES
 #define MLK_USE_NATIVE_NTT_CUSTOM_ORDER
 
-#include "../mlkem/native/api.h"
+#include "../mlkem/src/native/api.h"
 
 #endif /* !MLK_DUMMY_ARITH_BACKEND_H */

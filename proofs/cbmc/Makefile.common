@@ -323,7 +323,8 @@ INCLUDES ?=
 INCLUDES += -I$(PROOFDIR)
 INCLUDES += -I$(SRCDIR)/proofs/cbmc
 INCLUDES += -I$(SRCDIR)/mlkem
-INCLUDES += -I$(SRCDIR)/mlkem/fips202
+INCLUDES += -I$(SRCDIR)/mlkem/src/
+INCLUDES += -I$(SRCDIR)/mlkem/src/fips202
 
 # Preprocessor definitions -D...
 DEFINES ?=

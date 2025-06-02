@@ -18,11 +18,11 @@ endif
 #
 # If you are not concerned about minimizing for a specific backend,
 # you can just include _all_ source files into your build.
-MLK_SOURCE_ALL := $(wildcard \
-	mlkem_native/**/*.c	  	\
-	mlkem_native/**/**/*.c		\
-	mlkem_native/**/**/**/*.c	\
-	mlkem_native/**/**/**/**/*.c)
+MLK_SOURCE_ALL := $(wildcard             \
+    mlkem_native/mlkem/src/*.c           \
+    mlkem_native/mlkem/src/**/*.c        \
+    mlkem_native/mlkem/src/**/**/*.c     \
+    mlkem_native/mlkem/src/**/**/**/*.c)
 MLK_SOURCE:=$(foreach S,$(MLK_SOURCE_ALL),\
   $(if $(findstring /native/,$S),,$S))
 

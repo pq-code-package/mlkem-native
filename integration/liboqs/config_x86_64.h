@@ -105,7 +105,8 @@
  *              the same API (see FIPS202.md).
  *
  *****************************************************************************/
-#define MLK_CONFIG_FIPS202_CUSTOM_HEADER "../integration/liboqs/fips202_glue.h"
+#define MLK_CONFIG_FIPS202_CUSTOM_HEADER \
+  "../../integration/liboqs/fips202_glue.h"
 
 /******************************************************************************
  * Name:        MLK_CONFIG_FIPS202X4_CUSTOM_HEADER
@@ -122,7 +123,7 @@
  *
  *****************************************************************************/
 #define MLK_CONFIG_FIPS202X4_CUSTOM_HEADER \
-  "../integration/liboqs/fips202x4_glue.h"
+  "../../integration/liboqs/fips202x4_glue.h"
 
 /******************************************************************************
  * Name:        MLK_CONFIG_CUSTOM_ZEROIZE
@@ -182,7 +183,7 @@
 #if !defined(__ASSEMBLER__)
 #include <oqs/rand.h>
 #include <stdint.h>
-#include "../../mlkem/sys.h"
+#include "../../mlkem/src/sys.h"
 static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
 {
   OQS_randombytes(ptr, len);
