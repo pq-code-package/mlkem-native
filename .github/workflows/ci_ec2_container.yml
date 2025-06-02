@@ -92,14 +92,14 @@ jobs:
           echo "Using AMI ID: $AMI_ID"
           echo "AMI_ID=$AMI_ID" >> $GITHUB_OUTPUT
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
       - name: Start EC2 runner
         id: start-ec2-runner-first
         continue-on-error: true
-        uses: machulav/ec2-github-runner@a8c20fc0876503410b2b966c124abc2311984ce2 # v2.3.9
+        uses: machulav/ec2-github-runner@fb91019e71385fb10dfcbec812b4de8c61589f7b # v2.4.1
         with:
           mode: start
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
@@ -116,7 +116,7 @@ jobs:
       - name: Start EC2 runner (retry)
         id: start-ec2-runner-second
         if: steps.start-ec2-runner-first.outcome == 'failure'
-        uses: machulav/ec2-github-runner@a8c20fc0876503410b2b966c124abc2311984ce2 # v2.3.9
+        uses: machulav/ec2-github-runner@fb91019e71385fb10dfcbec812b4de8c61589f7b # v2.4.1
         with:
           mode: start
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
@@ -194,12 +194,12 @@ jobs:
     if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
       - name: Stop EC2 runner
-        uses: machulav/ec2-github-runner@a8c20fc0876503410b2b966c124abc2311984ce2 # v2.3.9
+        uses: machulav/ec2-github-runner@fb91019e71385fb10dfcbec812b4de8c61589f7b # v2.4.1
         with:
           mode: stop
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
