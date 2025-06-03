@@ -150,7 +150,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        system: [windows-latest, windows-2022, windows-2019]
+        system: [windows-2025, windows-2022]
     name: Quickcheck ${{ matrix.system }}
     runs-on: ${{ matrix.system }}
     steps:
