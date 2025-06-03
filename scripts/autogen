@@ -1168,75 +1168,137 @@ def gen_monolithic_undef_all_core(filt=None, desc=""):
         yield f"#undef {d}"
 
 
+def native(c):
+    return "/native/" in c
+
+
+def fips202(c):
+    return "/fips202/" in c
+
+
+def aarch64(c):
+    return "/aarch64/" in c
+
+
+def x86_64(c):
+    return "/x86_64/" in c
+
+
+def native_fips202(c):
+    return native(c) and fips202(c)
+
+
+def native_arith(c):
+    return native(c) and not fips202(c)
+
+
+def native_fips202_aarch64(c):
+    return native_fips202(c) and aarch64(c)
+
+
+def native_fips202_x86_64(c):
+    return native_fips202(c) and x86_64(c)
+
+
+def native_arith_aarch64(c):
+    return native_arith(c) and aarch64(c)
+
+
+def native_arith_x86_64(c):
+    return native_arith(c) and x86_64(c)
+
+
+# List of level-specific source files
+# All other files only need including and building once
+# in multi-level build.
+def k_specific(c):
+    k_specific_sources = [
+        # sys.h is not k-specific, but has some macro-overlap with
+        # mlkem_native.h. Since the macros from mlkem_native.h are
+        # undef'ed after each level-include in a multi-level build
+        # we thus have to re-include sys.h as well.
+        "sys.h",
+        "mlkem_native.h",
+        "params.h",
+        # Deliberately omit config.h, which is not #undef'ed
+        "common.h",
+        "indcpa.c",
+        "indcpa.h",
+        "kem.c",
+        "kem.h",
+        "poly_k.c",
+        "poly_k.h",
+    ]
+    for f in k_specific_sources:
+        if c.endswith(f):
+            return True
+    return False
+
+
+def k_generic(c):
+    return not k_specific(c) and c != "mlkem/src/config.h"
+
+
+def gen_macro_undefs(extra_notes=None):
+    if extra_notes is None:
+        extra_notes = []
+
+    yield "/* Macro #undef's"
+    yield " *"
+    yield " * The following undefines macros from headers"
+    yield " * included by the source files imported above."
+    yield " *"
+    yield " * This is to allow building and linking multiple builds"
+    yield " * of mlkem-native for varying parameter sets through concatenation"
+    yield " * of this file, as if the files had been compiled separately."
+    yield " * If this is not relevant to you, you may remove the following."
+    for e in extra_notes:
+        yield f" * {e}"
+    yield " */"
+    yield ""
+    yield from gen_monolithic_undef_all_core(
+        filt=k_specific, desc="MLK_CONFIG_PARAMETER_SET-specific files"
+    )
+    yield ""
+    yield "#if !defined(MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS)"
+    yield from gen_monolithic_undef_all_core(
+        filt=lambda c: not native(c)
+        and k_generic(c)
+        and not fips202(c)
+        and "cbmc.h" not in c,
+        desc="MLK_CONFIG_PARAMETER_SET-generic files",
+    )
+    # Handle cbmc.h manually -- most #define's therein are only defined when CBMC is set
+    # and need not be #undef'ed. In fact, #undef'ing them is risky since their names may
+    # well already be occupied.
+    yield "/* mlkem/src/cbmc.h */"
+    yield "#undef MLK_CBMC_H"
+    yield "#undef __contract__"
+    yield "#undef __loop__"
+    yield ""
+    yield "#if !defined(MLK_CONFIG_FIPS202_CUSTOM_HEADER)"
+    yield from gen_monolithic_undef_all_core(
+        filt=lambda c: not native(c) and k_generic(c) and fips202(c),
+        desc="FIPS-202 files",
+    )
+    yield "#endif"
+    yield ""
+    yield "#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)"
+    yield from gen_monolithic_undef_all_core(filt=native_fips202, desc="native code")
+    yield "#endif"
+    yield "#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)"
+    yield from gen_monolithic_undef_all_core(filt=native_arith, desc="native code")
+    yield "#endif"
+    yield "#endif"
+    yield ""
+
+
 def gen_monolithic_source_file(dry_run=False):
-
-    def native(c):
-        return "src/native/" in c
-
-    def fips202(c):
-        return "src/fips202" in c
-
-    def aarch64(c):
-        return "aarch64" in c
-
-    def x86_64(c):
-        return "x86_64" in c
-
-    def native_fips202(c):
-        return native(c) and fips202(c)
-
-    def native_arith(c):
-        return native(c) and not fips202(c)
-
-    def native_fips202_aarch64(c):
-        return native_fips202(c) and aarch64(c)
-
-    def native_fips202_x86_64(c):
-        return native_fips202(c) and x86_64(c)
-
-    def native_arith_aarch64(c):
-        return native_arith(c) and aarch64(c)
-
-    def native_arith_x86_64(c):
-        return native_arith(c) and x86_64(c)
-
-    # List of level-specific source files
-    # All other files only need including and building once
-    # in multi-level build.
-    def k_specific(c):
-        k_specific_sources = [
-            # sys.h is not k-specific, but has some macro-overlap with
-            # mlkem_native.h. Since the macros from mlkem_native.h are
-            # undef'ed after each level-include in a multi-level build
-            # we thus have to re-include sys.h as well.
-            "sys.h",
-            "mlkem_native.h",
-            "params.h",
-            # Deliberately omit config.h, which is not #undef'ed
-            "common.h",
-            "indcpa.c",
-            "indcpa.h",
-            "kem.c",
-            "kem.h",
-            "poly_k.c",
-            "poly_k.h",
-        ]
-        for f in k_specific_sources:
-            if c.endswith(f):
-                return True
-        return False
-
-    def k_generic(c):
-        return not k_specific(c) and c != "mlkem/src/config.h"
 
     def gen():
         c_sources = get_c_source_files(main_only=True, strip_mlkem=True)
         yield from gen_header()
 
-        yield "/*"
-        yield " * Monolithic compilation unit bundling all compilation units within mlkem-native"
-        yield " */"
-        yield ""
         yield "/******************************************************************************"
         yield " *"
         yield " * Single compilation unit (SCU) for fixed-level build of mlkem-native"
@@ -1317,43 +1379,7 @@ def gen_monolithic_source_file(dry_run=False):
         yield "#endif"
         yield "#endif"
         yield ""
-        yield from gen_monolithic_undef_all_core(
-            filt=k_specific, desc="MLK_CONFIG_PARAMETER_SET-specific files"
-        )
-        yield ""
-        yield "#if !defined(MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS)"
-        yield from gen_monolithic_undef_all_core(
-            filt=lambda c: not native(c)
-            and k_generic(c)
-            and not fips202(c)
-            and "cbmc.h" not in c,
-            desc="MLK_CONFIG_PARAMETER_SET-generic files",
-        )
-        # Handle cbmc.h manually -- most #define's therein are only defined when CBMC is set
-        # and need not be #undef'ed. In fact, #undef'ing them is risky since their names may
-        # well already be occupied.
-        yield "/* mlkem/src/cbmc.h */"
-        yield "#undef MLK_CBMC_H"
-        yield "#undef __contract__"
-        yield "#undef __loop__"
-        yield ""
-        yield "#if !defined(MLK_CONFIG_FIPS202_CUSTOM_HEADER)"
-        yield from gen_monolithic_undef_all_core(
-            filt=lambda c: not native(c) and k_generic(c) and fips202(c),
-            desc="FIPS-202 files",
-        )
-        yield "#endif"
-        yield ""
-        yield "#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)"
-        yield from gen_monolithic_undef_all_core(
-            filt=native_fips202, desc="native code"
-        )
-        yield "#endif"
-        yield "#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)"
-        yield from gen_monolithic_undef_all_core(filt=native_arith, desc="native code")
-        yield "#endif"
-        yield "#endif"
-        yield ""
+        yield from gen_macro_undefs()
 
     update_file(
         "mlkem/mlkem_native.c",
@@ -1364,72 +1390,9 @@ def gen_monolithic_source_file(dry_run=False):
 
 def gen_monolithic_asm_file(dry_run=False):
 
-    def native(c):
-        return "native/" in c
-
-    def fips202(c):
-        return "fips202" in c
-
-    def aarch64(c):
-        return "aarch64" in c
-
-    def x86_64(c):
-        return "x86_64" in c
-
-    def native_fips202(c):
-        return native(c) and fips202(c)
-
-    def native_arith(c):
-        return native(c) and not fips202(c)
-
-    def native_fips202_aarch64(c):
-        return native_fips202(c) and aarch64(c)
-
-    def native_fips202_x86_64(c):
-        return native_fips202(c) and x86_64(c)
-
-    def native_arith_aarch64(c):
-        return native_arith(c) and aarch64(c)
-
-    def native_arith_x86_64(c):
-        return native_arith(c) and x86_64(c)
-
-    # List of level-specific source files
-    # All other files only need including and building once
-    # in multi-level build.
-    def k_specific(c):
-        k_specific_sources = [
-            # sys.h is not k-specific, but has some macro-overlap with
-            # mlkem_native.h. Since the macros from mlkem_native.h are
-            # undef'ed after each level-include in a multi-level build
-            # we thus have to re-include sys.h as well.
-            "sys.h",
-            "mlkem_native.h",
-            "params.h",
-            # Deliberately omit config.h, which is not #undef'ed
-            "common.h",
-            "indcpa.c",
-            "indcpa.h",
-            "kem.c",
-            "kem.h",
-            "poly_k.c",
-            "poly_k.h",
-        ]
-        for f in k_specific_sources:
-            if c.endswith(f):
-                return True
-        return False
-
-    def k_generic(c):
-        return not k_specific(c) and c != "mlkem/src/config.h"
-
     def gen():
         asm_sources = get_asm_source_files(main_only=True)
         yield from gen_header()
-        yield "/*"
-        yield " * Monolithic assembly unit bundling all assembly units within mlkem-native"
-        yield " */"
-        yield ""
         yield "/******************************************************************************"
         yield " *"
         yield " * Single assembly unit for fixed-level build of mlkem-native"
@@ -1441,10 +1404,11 @@ def gen_monolithic_asm_file(dry_run=False):
         yield " *"
         yield " * If you want an SCU build of mlkem-native with support for multiple security"
         yield " * levels, you should include this file once with MLK_CONFIG_MULTILEVEL_WITH_SHARED set."
-        yield " * For convenience, you can also follow the same pattern as for mlkem_native_monobuild.c"
-        yield " * and include it for every level, setting MLK_CONFIG_MULTILEVEL_NO_SHARED for all but one."
-        yield " * For builds with MLK_CONFIG_MULTILEVEL_NO_SHARED, this file will then be ignored."
-        yield " * See examples/monolithic_build_multilevel and examples/monolithic_build_multilevel_native."
+        yield " *"
+        yield " * (You could also follow the same pattern as for mlkem_native_monobuild.c"
+        yield " *  and include it for every level, setting MLK_CONFIG_MULTILEVEL_NO_SHARED"
+        yield " *  for all but one. For builds with MLK_CONFIG_MULTILEVEL_NO_SHARED, this"
+        yield " *  file will then be ignored.)"
         yield " *"
         yield " * # Configuration"
         yield " *"
@@ -1503,36 +1467,18 @@ def gen_monolithic_asm_file(dry_run=False):
         # included by the assembly files. This does not harm, and avoids
         # having to trace which headers are being pulled in from common.h
         # included from the assembly files.
-        yield from gen_monolithic_undef_all_core(
-            filt=k_specific, desc="MLK_CONFIG_PARAMETER_SET-specific files"
-        )
         yield ""
-        yield "#if !defined(MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS)"
-        yield from gen_monolithic_undef_all_core(
-            filt=lambda c: not native(c)
-            and k_generic(c)
-            and not fips202(c)
-            and "cbmc.h" not in c,
-            desc="MLK_CONFIG_PARAMETER_SET-generic files",
-        )
-        yield ""
-        yield "#if !defined(MLK_CONFIG_FIPS202_CUSTOM_HEADER)"
-        yield from gen_monolithic_undef_all_core(
-            filt=lambda c: not native(c) and k_generic(c) and fips202(c),
-            desc="FIPS-202 files",
-        )
-        yield "#endif"
-        yield ""
-        yield "#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)"
-        yield from gen_monolithic_undef_all_core(
-            filt=native_fips202, desc="native code"
-        )
-        yield "#endif"
-        yield "#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)"
-        yield from gen_monolithic_undef_all_core(filt=native_arith, desc="native code")
-        yield "#endif"
-        yield "#endif"
-        yield ""
+        extra = [
+            "",
+            "NOTE: This is not needed for the assembly SCU since, at present,",
+            "there is no need to include it multiple times.",
+            "We keep it for uniformity with mlkem_native.c only.",
+            "",
+            "NOTE: To avoid having to distinguish between which headers are included",
+            "from the assembly files, we #undef the same set of directives",
+            "as in mlkem_native.c",
+        ]
+        yield from gen_macro_undefs(extra_notes=extra)
 
     update_file(
         "mlkem/mlkem_native.S",
