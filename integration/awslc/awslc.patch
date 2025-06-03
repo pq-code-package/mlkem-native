@@ -1,7 +1,7 @@
 # Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 diff --git a/crypto/fipsmodule/ml_kem/importer.sh b/crypto/fipsmodule/ml_kem/importer.sh
-index b1114479c..8cbf7015e 100755
+index b1114479c..59ba61cce 100755
 --- a/crypto/fipsmodule/ml_kem/importer.sh
 +++ b/crypto/fipsmodule/ml_kem/importer.sh
 @@ -74,7 +74,7 @@ echo "Pull source code from remote repository..."
@@ -13,7 +13,7 @@ index b1114479c..8cbf7015e 100755
  
  # We use the custom `mlkem_native_config.h`, so can remove the default one
  rm $SRC/config.h
-@@ -86,10 +86,10 @@ cp $TMP/.clang-format $SRC
+@@ -86,12 +86,18 @@ cp $TMP/.clang-format $SRC
  # The static simplification is not necessary, but improves readability
  # by removing directives related to native backends that are irrelevant
  # for the C-only import.
@@ -27,8 +27,16 @@ index b1114479c..8cbf7015e 100755
 +        $TMP/mlkem/mlkem_native.c                                      \
          > $SRC/mlkem_native_bcm.c
  
++# Copy mlkem-native header
++# This is only needed for access to the various macros defining key sizes.
++# The function declarations itself are all visible in ml_kem.c by virtue
++# of everything being inlined into that file.
++cp $TMP/mlkem/mlkem_native.h $SRC
++
  # Modify include paths to match position of mlkem_native_bcm.c
-@@ -102,7 +102,7 @@ else
+ # In mlkem-native, the include path is "mlkem/*", while here we
+ # embed mlkem_native_bcm.c in the main source directory of mlkem-native,
+@@ -102,7 +108,7 @@ else
    SED_I=(-i)
  fi
  echo "Fixup include paths"
