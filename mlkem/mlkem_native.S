@@ -8,10 +8,6 @@
  *          Do not modify it directly.
  */
 
-/*
- * Monolithic assembly unit bundling all assembly units within mlkem-native
- */
-
 /******************************************************************************
  *
  * Single assembly unit for fixed-level build of mlkem-native
@@ -23,12 +19,12 @@
  *
  * If you want an SCU build of mlkem-native with support for multiple security
  * levels, you should include this file once with
- * MLK_CONFIG_MULTILEVEL_WITH_SHARED set. For convenience, you can also follow
- * the same pattern as for mlkem_native_monobuild.c and include it for every
- * level, setting MLK_CONFIG_MULTILEVEL_NO_SHARED for all but one. For builds
- * with MLK_CONFIG_MULTILEVEL_NO_SHARED, this file will then be ignored. See
- * examples/monolithic_build_multilevel and
- * examples/monolithic_build_multilevel_native.
+ * MLK_CONFIG_MULTILEVEL_WITH_SHARED set.
+ *
+ * (You could also follow the same pattern as for mlkem_native_monobuild.c
+ *  and include it for every level, setting MLK_CONFIG_MULTILEVEL_NO_SHARED
+ *  for all but one. For builds with MLK_CONFIG_MULTILEVEL_NO_SHARED, this
+ *  file will then be ignored.)
  *
  * # Configuration
  *
@@ -98,6 +94,26 @@
 #if defined(MLK_SYS_X86_64)
 #endif
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
+
+
+/* Macro #undef's
+ *
+ * The following undefines macros from headers
+ * included by the source files imported above.
+ *
+ * This is to allow building and linking multiple builds
+ * of mlkem-native for varying parameter sets through concatenation
+ * of this file, as if the files had been compiled separately.
+ * If this is not relevant to you, you may remove the following.
+ *
+ * NOTE: This is not needed for the assembly SCU since, at present,
+ * there is no need to include it multiple times.
+ * We keep it for uniformity with mlkem_native.c only.
+ *
+ * NOTE: To avoid having to distinguish between which headers are included
+ * from the assembly files, we #undef the same set of directives
+ * as in mlkem_native.c
+ */
 
 /*
  * Undefine macros from MLK_CONFIG_PARAMETER_SET-specific files
@@ -322,6 +338,10 @@
 #undef MLK_USE_ASM_VALUE_BARRIER
 #undef MLK_VERIFY_H
 #undef mlk_ct_opt_blocker_u64
+/* mlkem/src/cbmc.h */
+#undef MLK_CBMC_H
+#undef __contract__
+#undef __loop__
 
 #if !defined(MLK_CONFIG_FIPS202_CUSTOM_HEADER)
 /*

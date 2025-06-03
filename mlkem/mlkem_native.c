@@ -8,11 +8,6 @@
  *          Do not modify it directly.
  */
 
-/*
- * Monolithic compilation unit bundling all compilation units within
- * mlkem-native
- */
-
 /******************************************************************************
  *
  * Single compilation unit (SCU) for fixed-level build of mlkem-native
@@ -100,6 +95,17 @@
 #include "src/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.c"
 #endif
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
+
+/* Macro #undef's
+ *
+ * The following undefines macros from headers
+ * included by the source files imported above.
+ *
+ * This is to allow building and linking multiple builds
+ * of mlkem-native for varying parameter sets through concatenation
+ * of this file, as if the files had been compiled separately.
+ * If this is not relevant to you, you may remove the following.
+ */
 
 /*
  * Undefine macros from MLK_CONFIG_PARAMETER_SET-specific files
