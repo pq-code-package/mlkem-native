@@ -1171,16 +1171,16 @@ def gen_monolithic_undef_all_core(filt=None, desc=""):
 def gen_monolithic_source_file(dry_run=False):
 
     def native(c):
-        return "src/native/" in c
+        return "/native/" in c
 
     def fips202(c):
-        return "src/fips202" in c
+        return "/fips202/" in c
 
     def aarch64(c):
-        return "aarch64" in c
+        return "/aarch64/" in c
 
     def x86_64(c):
-        return "x86_64" in c
+        return "/x86_64/" in c
 
     def native_fips202(c):
         return native(c) and fips202(c)
@@ -1365,16 +1365,16 @@ def gen_monolithic_source_file(dry_run=False):
 def gen_monolithic_asm_file(dry_run=False):
 
     def native(c):
-        return "native/" in c
+        return "/native/" in c
 
     def fips202(c):
-        return "fips202" in c
+        return "/fips202/" in c
 
     def aarch64(c):
-        return "aarch64" in c
+        return "/aarch64/" in c
 
     def x86_64(c):
-        return "x86_64" in c
+        return "/x86_64/" in c
 
     def native_fips202(c):
         return native(c) and fips202(c)

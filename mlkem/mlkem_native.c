@@ -76,9 +76,7 @@
 #include "src/fips202/fips202.c"
 #include "src/fips202/fips202x4.c"
 #include "src/fips202/keccakf1600.c"
-#include "src/fips202/native/aarch64/src/keccakf1600_round_constants.c"
-#include "src/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.c"
-#endif /* !MLK_CONFIG_FIPS202_CUSTOM_HEADER */
+#endif
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
 #if defined(MLK_SYS_AARCH64)
@@ -96,8 +94,10 @@
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
 #if defined(MLK_SYS_AARCH64)
+#include "src/fips202/native/aarch64/src/keccakf1600_round_constants.c"
 #endif
 #if defined(MLK_SYS_X86_64)
+#include "src/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.c"
 #endif
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 
@@ -367,6 +367,12 @@
 #undef mlk_keccakf1600x4_extract_bytes
 #undef mlk_keccakf1600x4_permute
 #undef mlk_keccakf1600x4_xor_bytes
+#endif /* !MLK_CONFIG_FIPS202_CUSTOM_HEADER */
+
+#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
+/*
+ * Undefine macros from native code
+ */
 /* mlkem/src/fips202/native/aarch64/auto.h */
 #undef MLK_FIPS202_NATIVE_AARCH64_AUTO_H
 /* mlkem/src/fips202/native/aarch64/src/fips202_native_aarch64.h */
@@ -408,13 +414,7 @@
 #undef MLK_FIPS202_NATIVE_X86_64_XKCP_H
 #undef MLK_FIPS202_X86_64_XKCP
 #undef MLK_USE_FIPS202_X4_NATIVE
-#endif /* !MLK_CONFIG_FIPS202_CUSTOM_HEADER */
-
-#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
-/*
- * Undefine macros from native code
- */
-#endif
+#endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
 /*
  * Undefine macros from native code
