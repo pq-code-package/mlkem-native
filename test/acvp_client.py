@@ -165,17 +165,29 @@ def runTestSingle(promptName, prompt, expectedResultName, expectedResult, output
     info(f"Running ACVP tests for {promptName}")
 
     assert expectedResult is not None or output is not None
+
+    # The ACVTS data structure is very slightly different from the sample files
+    # in the usnistgov/ACVP-Server Github repository:
+    # The prompt consists of a 2-element list, where the first element is
+    # solely consisting of {"acvVersion": "1.0"} and the second element is
+    # the usual prompt containing the test values.
+    # See https://pages.nist.gov/ACVP/draft-celi-acvp-ml-kem.txt for details.
+    # We automatically detect that case here and extract the second element
+    isAcvts = False
+    if type(prompt) is list:
+        isAcvts = True
+        assert len(prompt) == 2
+        acvVersion = prompt[0]
+        assert len(acvVersion) == 1
+        prompt = prompt[1]
+
     assert prompt["algorithm"] == "ML-KEM"
     assert prompt["mode"] == "encapDecap" or prompt["mode"] == "keyGen"
 
-    results = {
-        "vsId": prompt["vsId"],
-        "algorithm": "ML-KEM",
-        "mode": prompt["mode"],
-        "revision": prompt["revision"],
-        "isSample": prompt["isSample"],
-        "testGroups": [],
-    }
+    # copy top level fields into the results
+    results = prompt.copy()
+
+    results["testGroups"] = []
     for tg in prompt["testGroups"]:
         tgResult = {
             "tgId": tg["tgId"],
@@ -189,12 +201,18 @@ def runTestSingle(promptName, prompt, expectedResultName, expectedResult, output
                 result = run_keyGen_test(tg, tc)
             tgResult["tests"].append(result)
 
+    # In case the testvectors are from the ACVTS server, it is expected
+    # that the acvVersion is included in the output results.
+    # See note on ACVTS data structure above.
+    if isAcvts is True:
+        results = [acvVersion, results]
+
     # Compare to expected results
     if expectedResult is not None:
         info(f"Comparing results with {expectedResultName}")
-        if json.dumps(results, sort_keys=True) != json.dumps(
-            expectedResult, sort_keys=True
-        ):
+        # json.dumps() is guaranteed to preserve insertion order (since Python 3.7)
+        # Enforce strictly the same order as in the expected Result
+        if json.dumps(results) != json.dumps(expectedResult):
             err("FAIL!")
             err(f"Mismatching result for {promptName}")
             exit(1)
@@ -208,7 +226,7 @@ def runTestSingle(promptName, prompt, expectedResultName, expectedResult, output
     if output is not None:
         info(f"Writing results to {output}")
         with open(output, "w") as f:
-            json.dump(results, f, sort_keys=True)
+            json.dump(results, f)
 
 
 def runTest(data, output):
