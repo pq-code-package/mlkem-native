@@ -20,6 +20,8 @@ A clear and concise description of what the bug is.
 
 **Compiler**: e.g., gcc 13.2.0 (installed through nix)
 
+**mlkem-native version**: e.g., v1.0.0 or main-branch
+
 **How to reproduce**
 Steps to reproduce the behavior:
 ```
