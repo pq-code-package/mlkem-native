@@ -5,7 +5,7 @@ mlkem-native v1.0.0
 Release notes
 -------------
 
-v1.0.0 is the first stable release of mlkem-native, a secure, fast and portable C90 implementation of [ML-KEM](https://csrc.nist.gov/pubs/fips/202/final) derived from the ML-KEM reference implementation. mlkem-native v1.0.0 offers:
+v1.0.0 is the first stable release of mlkem-native, a secure, fast and portable C90 implementation of [ML-KEM](https://csrc.nist.gov/pubs/fips/203/final) derived from the ML-KEM reference implementation. mlkem-native v1.0.0 offers:
 * High maintainability and extensibility through modular frontend/backend design.
 * High performance through Arch64 and AVX2 assembly backends and the use of the [SLOTHY super-optimizer](https://github.com/slothy-optimizer/slothy).
 * High assurance through memory- and type-safety proofs for the C frontend + backend, functional correctness proofs for all AArch64 assembly, and extensive constant-time testing.
