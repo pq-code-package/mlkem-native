@@ -315,22 +315,35 @@ intt_layer123_start:
         ldr q_data6, [in, #(6*(512/8))]
         ldr q_data7, [in, #(7*(512/8))]
 
+        // Input bounds: all < q
         gs_butterfly data0, data1, root0, 6, 7
         gs_butterfly data2, data3, root1, 0, 1
         gs_butterfly data4, data5, root1, 2, 3
         gs_butterfly data6, data7, root1, 4, 5
+        // data0,2,4,6 < 2q
+        // data1,3,5,7 < q
 
         gs_butterfly data0, data2, root0, 2, 3
         gs_butterfly data1, data3, root0, 2, 3
         gs_butterfly data4, data6, root0, 4, 5
         gs_butterfly data5, data7, root0, 4, 5
+        // data0 < 4q
+        // data1 < 2q
+        // data4 < 4q
+        // data5 < 2q
+        // data2,3,6,7 < q
 
         gs_butterfly data0, data4, root0, 0, 1
         gs_butterfly data1, data5, root0, 0, 1
         gs_butterfly data2, data6, root0, 0, 1
         gs_butterfly data3, data7, root0, 0, 1
+        // data0 < 8q
+        // data1 < 4q
+        // data2 < 2q
+        // data3 < 2q
+        // data4,5,6,7 < q
 
-        // Bounds: < 8q
+        // Therefore, all < 8q
 
         str q_data4, [in, #(4*(512/8))]
         str q_data5, [in, #(5*(512/8))]
