@@ -284,7 +284,8 @@ intt_layer4567_start:
         // data2, data3: < q
 
         // data0 needs to be reduced now before it can
-        // be stored.
+        // be stored. Reduction of data1 and its offspring
+        // are deferred to follow layer 2 below.
         barrett_reduce data0
         // data1: < 2q
         // data0, data2, data3: < q
@@ -318,6 +319,7 @@ intt_layer123_start:
         //  data1, data5 < 2q
         //  data0,2,3,4,6,7 < q
 
+        // Layer 3
         gs_butterfly data0, data1, root0, 6, 7
         gs_butterfly data2, data3, root1, 0, 1
         gs_butterfly data4, data5, root1, 2, 3
@@ -328,6 +330,7 @@ intt_layer123_start:
         // data6 < 2q
         // data1,3,5,7 < q
 
+        // Layer 2
         gs_butterfly data0, data2, root0, 2, 3
         gs_butterfly data1, data3, root0, 2, 3
         gs_butterfly data4, data6, root0, 4, 5
@@ -338,17 +341,21 @@ intt_layer123_start:
         // data5 < 2q
         // data2,3,6,7 < q
 
+        barrett_reduce data0
+        // data0 < q
+
+        // Layer 1
         gs_butterfly data0, data4, root0, 0, 1
         gs_butterfly data1, data5, root0, 0, 1
         gs_butterfly data2, data6, root0, 0, 1
         gs_butterfly data3, data7, root0, 0, 1
-        // data0 < 10q OVERFLOW! since 10q = 33290 > 32767
+        // data0 < 6q
         // data1 < 4q
         // data2 < 2q
         // data3 < 2q
         // data4,5,6,7 < q
 
-        // Therefore, all < 8q except data0! Doh!
+        // Therefore, all < 8q
 
         str q_data4, [in, #(4*(512/8))]
         str q_data5, [in, #(5*(512/8))]
