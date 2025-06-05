@@ -283,11 +283,11 @@ intt_layer4567_start:
         // data1: < 2q
         // data2, data3: < q
 
-        // data0 and data1 need to be reduced now before they can
-        // be stored, so
+        // data0 needs to be reduced now before it can
+        // be stored.
         barrett_reduce data0
-        barrett_reduce data1
-        // all < q
+        // data1: < 2q
+        // data0, data2, data3: < q
 
         str q_data0, [inp], #(64)
         str q_data1, [inp, #(-64 + 16*1)]
@@ -314,8 +314,10 @@ intt_layer123_start:
         ldr q_data5, [in, #(5*(512/8))]
         ldr q_data6, [in, #(6*(512/8))]
         ldr q_data7, [in, #(7*(512/8))]
+        // Input bounds:
+        //  data1, data5 < 2q
+        //  data0,2,3,4,6,7 < q
 
-        // Input bounds: all < q
         gs_butterfly data0, data1, root0, 6, 7
         gs_butterfly data2, data3, root1, 0, 1
         gs_butterfly data4, data5, root1, 2, 3
