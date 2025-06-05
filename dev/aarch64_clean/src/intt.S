@@ -234,28 +234,6 @@ MLK_ASM_FN_SYMBOL(intt_asm)
 
         mov inp, in
         mov count, #8
-
-intt_scale_start:
-
-        ldr q_data0, [inp, #(16*0)]
-        ldr q_data1, [inp, #(16*1)]
-        ldr q_data2, [inp, #(16*2)]
-        ldr q_data3, [inp, #(16*3)]
-
-        mul_ninv data0, data1, data2, data3, data0, data1, data2, data3
-        // Bounds: Absolute value < q
-
-        str q_data0, [inp], #64
-        str q_data1, [inp, #(-64 + 16*1)]
-        str q_data2, [inp, #(-64 + 16*2)]
-        str q_data3, [inp, #(-64 + 16*3)]
-
-        subs count, count, #1
-        cbnz count, intt_scale_start
-
-        mov inp, in
-        mov count, #8
-
         .p2align 2
 intt_layer4567_start:
 
@@ -264,6 +242,8 @@ intt_layer4567_start:
         ldr q_data2, [inp, #(16*2)]
         ldr q_data3, [inp, #(16*3)]
 
+        // Absolute Bounds: all coeffs < INT16_MAX/2
+
         transpose4 data // manual ld4
 
         load_next_roots_67
@@ -271,16 +251,18 @@ intt_layer4567_start:
         // Layer 7
         gs_butterfly_v data0, data1, root1, root1_tw
         gs_butterfly_v data2, data3, root2, root2_tw
-        // Bounds:
-        // data0, data2: < 2q
+        // data0, data2: < INT16_MAX
         // data1, data3: < q
+
+        // data0 and data2 are now bounded to INT16_MAX, so we
+        // invert and reduce here to get everything back to < q
+        mul_ninv data0, data1, data2, data3, data0, data1, data2, data3
+        // all < q
 
         // Layer 6
         gs_butterfly_v data0, data2, root0, root0_tw
         gs_butterfly_v data1, data3, root0, root0_tw
-        // Bounds:
-        // data0: < 4q
-        // data1: < 2q
+        // data0, data1: < 2q
         // data2, data3: < q
 
         transpose4 data
@@ -290,25 +272,22 @@ intt_layer4567_start:
         // Layer 5
         gs_butterfly data0, data1, root0, 2, 3
         gs_butterfly data2, data3, root0, 4, 5
-        // data0, data2: < 8q
+        // data0: < 4q
+        // data2: < 2q
         // data1, data3: < q
 
-        // data0 and data2 have reached a bound of 8q now, so
-        // reduction of them is required.
-        barrett_reduce data0
-        barrett_reduce data2
-        // data0, data2: < q/2
-        // data1, data3: < q
-
+        // Layer 4
         gs_butterfly data0, data2, root0, 0, 1
         gs_butterfly data1, data3, root0, 0, 1
-        // data0, data2, data3: < q
+        // data0: < 8q
         // data1: < 2q
+        // data2, data3: < q
 
+        // data0 and data1 need to be reduced now before they can
+        // be stored, so
+        barrett_reduce data0
         barrett_reduce data1
-        // data1: < q/2 < q
-        // data0, data2, data3: < q
-        // Therefore, all < q
+        // all < q
 
         str q_data0, [inp], #(64)
         str q_data1, [inp, #(-64 + 16*1)]
