@@ -236,20 +236,6 @@ jobs:
          #
          # We omit all examples since there is currently no way to run
          # only those examples not involving native code.
-         - name: zig-0.10
-           shell: ci_zig0_10
-           darwin: False
-           c17: True
-           c23: False
-           examples: False
-           opt: no_opt
-         - name: zig-0.11
-           shell: ci_zig0_11
-           darwin: True
-           c17: True
-           c23: False
-           examples: False
-           opt: no_opt
          - name: zig-0.12
            shell: ci_zig0_12
            darwin: True
