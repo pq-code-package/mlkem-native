@@ -284,11 +284,12 @@ intt_layer4567_start:
         // data2, data3: < q
 
         // data0 needs to be reduced now before it can
-        // be stored. Reduction of data1 and its offspring
-        // are deferred to follow layer 2 below.
+        // be stored.
         barrett_reduce data0
+        // data0: < q/2
         // data1: < 2q
-        // data0, data2, data3: < q
+        // data2: < q
+        // data3: < q
 
         str q_data0, [inp], #(64)
         str q_data1, [inp, #(-64 + 16*1)]
@@ -316,46 +317,44 @@ intt_layer123_start:
         ldr q_data6, [in, #(6*(512/8))]
         ldr q_data7, [in, #(7*(512/8))]
         // Input bounds:
-        //  data1, data5 < 2q
-        //  data0,2,3,4,6,7 < q
+        // data0:   < q/2
+        // data1:   < 2q
+        // data2,3: < q
+        // data4:   < q/2
+        // data5:   < 2q
+        // data6,7: < q
 
-        // Layer 3
         gs_butterfly data0, data1, root0, 6, 7
         gs_butterfly data2, data3, root1, 0, 1
         gs_butterfly data4, data5, root1, 2, 3
         gs_butterfly data6, data7, root1, 4, 5
-        // data0 < 3q
+        // data0 < 2.5q
         // data2 < 2q
-        // data4 < 3q
+        // data4 < 2.5q
         // data6 < 2q
         // data1,3,5,7 < q
 
-        // Layer 2
         gs_butterfly data0, data2, root0, 2, 3
         gs_butterfly data1, data3, root0, 2, 3
         gs_butterfly data4, data6, root0, 4, 5
         gs_butterfly data5, data7, root0, 4, 5
-        // data0 < 5q
+        // data0 < 4.5q
         // data1 < 2q
-        // data4 < 5q
+        // data4 < 4.5q
         // data5 < 2q
         // data2,3,6,7 < q
 
-        barrett_reduce data0
-        // data0 < q
-
-        // Layer 1
         gs_butterfly data0, data4, root0, 0, 1
         gs_butterfly data1, data5, root0, 0, 1
         gs_butterfly data2, data6, root0, 0, 1
         gs_butterfly data3, data7, root0, 0, 1
-        // data0 < 6q
+        // data0 < 9q
         // data1 < 4q
         // data2 < 2q
         // data3 < 2q
         // data4,5,6,7 < q
 
-        // Therefore, all < 8q
+        // Therefore, all < 9q <= 32767, so all is well.
 
         str q_data4, [in, #(4*(512/8))]
         str q_data5, [in, #(5*(512/8))]
