@@ -50,8 +50,6 @@
                 gcc48 = pkgs-2405.gcc48;
                 gcc49 = pkgs-2405.gcc49;
                 gcc7 = pkgs-2405.gcc7;
-                zig_0_10 = pkgs-2405.zig_0_10;
-                zig_0_11 = pkgs-2405.zig_0_11;
               })
             ];
           };
@@ -107,8 +105,6 @@
           devShells.ci_clang19 = util.mkShellWithCC' pkgs.clang_19;
           devShells.ci_clang20 = util.mkShellWithCC' pkgs.clang_20;
 
-          devShells.ci_zig0_10 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_10);
-          devShells.ci_zig0_11 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_11);
           devShells.ci_zig0_12 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_12);
           devShells.ci_zig0_13 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_13);
           devShells.ci_zig0_14 = util.mkShellWithCC' (zigWrapCC pkgs.zig);
