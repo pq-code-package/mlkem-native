@@ -10,7 +10,7 @@
 TARGET_ISA=Arm_AArch64
 
 # MicroArch target to optimize for
-TARGET_MICROARCH=Arm_Cortex_A55
+TARGET_MICROARCH=Arm_Neoverse_N1_experimental
 
 SLOTHY_EXTRA_FLAGS ?=
 
