@@ -10,7 +10,7 @@
 TARGET_ISA=Arm_AArch64
 
 # MicroArch target to optimize for
-TARGET_MICROARCH=Arm_Cortex_A55
+TARGET_MICROARCH=Arm_Neoverse_N1_experimental
 
 SLOTHY_EXTRA_FLAGS ?=
 
@@ -51,14 +51,15 @@ ntt.S: ../../aarch64_clean/src/ntt.S $(COMMON_H)
 
 intt.S: ../../aarch64_clean/src/intt.S $(COMMON_H)
 	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l intt_layer123_start -l intt_layer4567_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
+
 polyvec_basemul_acc_montgomery_cached_asm_k2.S: ../../aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S $(COMMON_H)
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l polyvec_basemul_acc_montgomery_cached_k2_loop_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l polyvec_basemul_acc_montgomery_cached_k2_loop_start -ctimeout=60 $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
 
 polyvec_basemul_acc_montgomery_cached_asm_k3.S: ../../aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S $(COMMON_H)
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l polyvec_basemul_acc_montgomery_cached_k3_loop_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l polyvec_basemul_acc_montgomery_cached_k3_loop_start -ctimeout=60 $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
 
 polyvec_basemul_acc_montgomery_cached_asm_k4.S: ../../aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S $(COMMON_H)
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l polyvec_basemul_acc_montgomery_cached_k4_loop_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l polyvec_basemul_acc_montgomery_cached_k4_loop_start -ctimeout=60 $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
 
 
 
@@ -71,10 +72,15 @@ poly_reduce_asm.S: ../../aarch64_clean/src/poly_reduce_asm.S $(COMMON_H)
 	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l poly_reduce_loop_start $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG)
 
 poly_mulcache_compute_asm.S: ../../aarch64_clean/src/poly_mulcache_compute_asm.S $(COMMON_H)
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l poly_mulcache_compute_loop_start $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG)
+        # Unroll twice since kernel is small
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l poly_mulcache_compute_loop_start $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG) -c sw_pipelining.unroll=2
 
 poly_tobytes_asm.S: ../../aarch64_clean/src/poly_tobytes_asm.S $(COMMON_H)
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l poly_tobytes_loop_start $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG) -c sw_pipelining.unroll=4
+        # Somehow SLOTHY tends to mark almost all instructions as 'early', which isn't
+        # wrong but looks a bit odd in the optimized code. Minimize overlapping to avoid this.
+        #
+        # Unroll twice since kernel is small
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l poly_tobytes_loop_start $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG) -c sw_pipelining.unroll=2 -c sw_pipelining.minimize_overlapping -ctimeout=60
 
 # At the moment, SLOTHY can't process rej_uniform_asm.S
 rej_uniform_asm.S: ../../aarch64_clean/src/rej_uniform_asm.S $(COMMON_H)
