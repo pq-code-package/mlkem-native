@@ -94,10 +94,13 @@ bench: bench_512 bench_768 bench_1024
 
 run_bench_512: bench_512
 	$(W) $(MLKEM512_DIR)/bin/bench_mlkem512
+	$(Q)$(SIZE) $(BUILD_DIR)/*mlkem512.a
 run_bench_768: bench_768
 	$(W) $(MLKEM768_DIR)/bin/bench_mlkem768
+	$(Q)$(SIZE) $(BUILD_DIR)/*mlkem768.a
 run_bench_1024: bench_1024
 	$(W) $(MLKEM1024_DIR)/bin/bench_mlkem1024
+	$(Q)$(SIZE) $(BUILD_DIR)/*mlkem1024.a
 
 # Use .WAIT to prevent parallel execution when -j is passed
 run_bench: \
