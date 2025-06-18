@@ -1,14 +1,19 @@
 # (SPDX-License-Identifier: CC-BY-4.0)
 
-.PHONY: build run clean
+.PHONY: build run clean size
 .DEFAULT_GOAL := all
 
 # Append cross-prefix for cross compilation
 # Remove or ignore for native builds
 CC  ?= gcc
+SIZE ?= size
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
+endif
+
+ifeq (,$(findstring $(CROSS_PREFIX),$(SIZE)))
+SIZE  := $(CROSS_PREFIX)$(SIZE)
 endif
 
 # Part A:
@@ -80,7 +85,7 @@ $(BINARIES_FULL): $(ALL_SOURCE)
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ -o $@
 
-all: build
+all: build size
 
 build: $(BINARIES_FULL)
 
@@ -88,6 +93,14 @@ run: $(BINARIES_FULL)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL_512)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL_768)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL_1024)
+
+size: build
+	@echo "=== Size info for $(BINARY_NAME_FULL_512) ==="
+	@$(SIZE) $(BINARY_NAME_FULL_512)
+	@echo "=== Size info for $(BINARY_NAME_FULL_768) ==="
+	@$(SIZE) $(BINARY_NAME_FULL_768)
+	@echo "=== Size info for $(BINARY_NAME_FULL_1024) ==="
+	@$(SIZE) $(BINARY_NAME_FULL_1024)
 
 clean:
 	rm -rf $(BUILD_DIR)

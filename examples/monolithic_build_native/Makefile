@@ -1,12 +1,13 @@
 # (SPDX-License-Identifier: CC-BY-4.0)
 
-.PHONY: build run clean
+.PHONY: build run clean size
 .DEFAULT_GOAL := all
 
 # Append cross-prefix for cross compilation
 # Remove or ignore for native builds
 CC  ?= gcc
 AR  ?= ar
+SIZE ?= size
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
@@ -16,8 +17,11 @@ ifeq (,$(findstring $(CROSS_PREFIX),$(AR)))
 AR  := $(CROSS_PREFIX)$(AR)
 endif
 
-Q ?= @
+ifeq (,$(findstring $(CROSS_PREFIX),$(SIZE)))
+SIZE  := $(CROSS_PREFIX)$(SIZE)
+endif
 
+Q ?= @
 # Part A:
 #
 # mlkem-native source and header files
@@ -129,7 +133,7 @@ $(BIN1024_FULL): $(APP_SOURCE) $(LIB1024_FULL)
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
 	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_API_PARAMETER_SET=1024 $(INC) $^ -o $@
 
-all: build
+all: build size
 
 build: $(BIN512_FULL) $(BIN768_FULL) $(BIN1024_FULL)
 
@@ -137,6 +141,12 @@ run: $(BIN512_FULL) $(BIN768_FULL) $(BIN1024_FULL)
 	$(Q)$(EXEC_WRAPPER) ./$(BIN512_FULL)
 	$(Q)$(EXEC_WRAPPER) ./$(BIN768_FULL)
 	$(Q)$(EXEC_WRAPPER) ./$(BIN1024_FULL)
+
+size: build
+	@echo "=== Size info for static libs ==="
+	$(Q)$(SIZE) $(LIB512_FULL) | (read header; echo "$$header"; awk '$$5 != 0' | sort -k5 -n -r)
+	$(Q)$(SIZE) $(LIB768_FULL) | (read header; echo "$$header"; awk '$$5 != 0' | sort -k5 -n -r)
+	$(Q)$(SIZE) $(LIB1024_FULL) | (read header; echo "$$header"; awk '$$5 != 0' | sort -k5 -n -r)
 
 clean:
 	rm -rf $(BUILD_DIR)
