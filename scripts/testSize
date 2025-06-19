@@ -1,0 +1,827 @@
+#!/usr/bin/env python3
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+"""Convenience CLI script wrapping various `make` invocations for
+building and running tests and benchmarks.
+
+See the command line interface for more information."""
+
+import platform
+import argparse
+import os
+import re
+import sys
+import time
+import logging
+import subprocess
+import json
+
+from enum import Enum
+from functools import reduce
+
+#
+# Some utility functions
+#
+
+
+def dict2str(dict):
+    s = ""
+    for k, v in dict.items():
+        s += f"{k}={v} "
+    return s
+
+
+def github_log(msg):
+    if os.environ.get("GITHUB_ENV") is None:
+        return
+    print(msg)
+
+
+def github_summary(title, test_label, results):
+    """Generate summary for GitHub CI"""
+    summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
+
+    res = list(results.values())
+
+    if isinstance(results[SCHEME.MLKEM512], str):
+        summaries = list(
+            map(
+                lambda s: f" {s} |",
+                reduce(
+                    lambda acc, s: [
+                        line1 + " | " + line2 for line1, line2 in zip(acc, s)
+                    ],
+                    [s.splitlines() for s in res],
+                ),
+            )
+        )
+        summaries = [f"| {test_label} |" + summaries[0]] + [
+            "| |" + x for x in summaries[1:]
+        ]
+    else:
+        summaries = [
+            reduce(
+                lambda acc, b: f"{acc} " + (":x: |" if b else ":white_check_mark: |"),
+                res,
+                f"| {test_label} |",
+            )
+        ]
+
+    def find_last_consecutive_match(l, s):
+        for i, v in enumerate(l[s + 1 :]):
+            if not v.startswith("|") or not v.endswith("|"):
+                return i + 1
+        return len(l)
+
+    def add_summaries(fn, title, summaries):
+        summary_title = "| Tests |"
+        summary_table_format = "| ----- |"
+        for s in SCHEME:
+            summary_title += f" {s} |"
+            summary_table_format += " ----- |"
+
+        with open(fn, "r") as f:
+            pre_summaries = [x for x in f.read().splitlines() if x]
+            if title in pre_summaries:
+                if summary_title not in pre_summaries:
+                    summaries = [summary_title, summary_table_format] + summaries
+                    pre_summaries = (
+                        pre_summaries[: pre_summaries.index(title) + 1]
+                        + summaries
+                        + pre_summaries[pre_summaries.index(title) + 1 :]
+                    )
+                else:
+                    i = find_last_consecutive_match(
+                        pre_summaries, pre_summaries.index(title)
+                    )
+                    pre_summaries = pre_summaries[:i] + summaries + pre_summaries[i:]
+                return ("w", pre_summaries)
+            else:
+                pre_summaries = [
+                    title,
+                    summary_title,
+                    summary_table_format,
+                ] + summaries
+                return ("a", pre_summaries)
+
+    if summary_file is not None:
+        (access_mode, summaries) = add_summaries(summary_file, title, summaries)
+        with open(summary_file, access_mode) as f:
+            print("\n".join(summaries), file=f)
+
+
+logging.basicConfig(
+    stream=sys.stdout, format="%(levelname)-5s > %(name)-40s %(message)s"
+)
+
+
+def config_logger(verbose):
+    logger = logging.getLogger()
+
+    if verbose:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
+
+
+def logger(test_type, scheme, cross_prefix, opt):
+    """Emit line indicating the processing of the given test"""
+
+    test_desc = str(test_type)
+
+    compile_mode = "cross" if cross_prefix else "native"
+    if opt is None:
+        opt_label = ""
+    elif opt is True:
+        opt_label = " opt"
+    else:
+        opt_label = " no_opt"
+
+    if isinstance(test_type, TEST_TYPES) and test_type.is_example():
+        sz = 40
+    else:
+        sz = 18
+
+    return logging.getLogger(
+        "{0:<{1}} {2:<11} {3:<17}".format(
+            test_desc,
+            sz,
+            str(scheme),
+            "({}{}):".format(compile_mode, opt_label),
+        )
+    )
+
+
+#
+# Core classes providing a wrapper around invocations to `make`
+# for building and running tests and benchmarks
+#
+
+
+class SCHEME(Enum):
+    MLKEM512 = 1
+    MLKEM768 = 2
+    MLKEM1024 = 3
+
+    def __str__(self):
+        if self == SCHEME.MLKEM512:
+            return "ML-KEM-512"
+        if self == SCHEME.MLKEM768:
+            return "ML-KEM-768"
+        if self == SCHEME.MLKEM1024:
+            return "ML-KEM-1024"
+
+    def suffix(self):
+        if self == SCHEME.MLKEM512:
+            return "512"
+        if self == SCHEME.MLKEM768:
+            return "768"
+        if self == SCHEME.MLKEM1024:
+            return "1024"
+
+    def from_k(k):
+        if isinstance(k, str):
+            k = int(k)
+        if k == 2:
+            return SCHEME.MLKEM512
+        if k == 3:
+            return SCHEME.MLKEM768
+        if k == 4:
+            return SCHEME.MLKEM1024
+
+
+class TEST_TYPES(Enum):
+    BENCH = 1
+    BENCH_COMPONENTS = 2
+    BRING_YOUR_OWN_FIPS202 = 3
+    CUSTOM_BACKEND = 4
+    BASIC = 5
+    MONOLITHIC_BUILD = 6
+    MONOLITHIC_BUILD_MULTILEVEL = 7
+    MULTILEVEL_BUILD = 8
+    MULTILEVEL_BUILD_NATIVE = 9
+    MONOLITHIC_BUILD_MULTILEVEL_NATIVE = 10
+    MONOLITHIC_BUILD_NATIVE = 11
+    SIZE = 12
+
+    def is_benchmark(self):
+        return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
+    
+    def is_measurementCodeSize(self):
+        return self in [TEST_TYPES.SIZE]
+
+    def is_example(self):
+        return self in TEST_TYPES.examples()
+
+    @staticmethod
+    def examples():
+        return [
+            TEST_TYPES.BRING_YOUR_OWN_FIPS202,
+            TEST_TYPES.CUSTOM_BACKEND,
+            TEST_TYPES.BASIC,
+            TEST_TYPES.MONOLITHIC_BUILD,
+            TEST_TYPES.MONOLITHIC_BUILD_NATIVE,
+            TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL,
+            TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE,
+            TEST_TYPES.MULTILEVEL_BUILD,
+            TEST_TYPES.MULTILEVEL_BUILD_NATIVE,
+        ]
+
+    @staticmethod
+    def from_string(s):
+        for e in TEST_TYPES.examples():
+            if str.lower(e.name) == str.lower(s):
+                return e
+        raise Exception(
+            f"Could not find example {s}. Examples: {list(map(lambda e: str.lower(e.name), TEST_TYPES.examples()))}"
+        )
+
+    def __str__(self):
+        return self.desc()
+
+    def desc(self):
+        if self == TEST_TYPES.BENCH:
+            return "Benchmark"
+        if self == TEST_TYPES.BENCH_COMPONENTS:
+            return "Benchmark Components"
+        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
+            return "Example (Bring-Your-Own-FIPS202)"
+        if self == TEST_TYPES.CUSTOM_BACKEND:
+            return "Example (Custom Backend)"
+        if self == TEST_TYPES.BASIC:
+            return "Example (mlkem-native as code package)"
+        if self == TEST_TYPES.MONOLITHIC_BUILD:
+            return "Example (monobuild)"
+        if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
+            return "Example (monobuild, native)"
+        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
+            return "Example (monobuild, multilevel)"
+        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE:
+            return "Example (monobuild, multilevel, native)"
+        if self == TEST_TYPES.MULTILEVEL_BUILD:
+            return "Example (multilevel build)"
+        if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
+            return "Example (multilevel build, native)"
+        if self == TEST_TYPES.SIZE:
+            return "Measurement Code Size"
+
+    def make_dir(self):
+        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
+            return "examples/bring_your_own_fips202"
+        if self == TEST_TYPES.CUSTOM_BACKEND:
+            return "examples/custom_backend"
+        if self == TEST_TYPES.BASIC:
+            return "examples/basic"
+        if self == TEST_TYPES.MONOLITHIC_BUILD:
+            return "examples/monolithic_build"
+        if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
+            return "examples/monolithic_build_native"
+        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
+            return "examples/monolithic_build_multilevel"
+        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE:
+            return "examples/monolithic_build_multilevel_native"
+        if self == TEST_TYPES.MULTILEVEL_BUILD:
+            return "examples/multilevel_build"
+        if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
+            return "examples/multilevel_build_native"
+        return ""
+
+    def make_target(self):
+        if self == TEST_TYPES.BENCH:
+            return "bench"
+        if self == TEST_TYPES.BENCH_COMPONENTS:
+            return "bench_components"
+        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
+            return ""
+        if self == TEST_TYPES.CUSTOM_BACKEND:
+            return ""
+        if self == TEST_TYPES.BASIC:
+            return ""
+        if self == TEST_TYPES.MONOLITHIC_BUILD:
+            return ""
+        if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
+            return ""
+        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
+            return ""
+        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE:
+            return ""
+        if self == TEST_TYPES.MULTILEVEL_BUILD:
+            return ""
+        if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
+            return ""
+        if self == TEST_TYPES.SIZE:
+            return "size"
+
+    def make_run_target(self, scheme):
+        t = self.make_target()
+        if t == "":
+            run_t = "run"
+        else:
+            run_t = f"run_{t}"
+        if scheme is not None:
+            return f"{run_t}_{scheme.suffix()}"
+        else:
+            return run_t
+
+
+class Tests:
+    def __init__(self, args):
+        config_logger(args.verbose)
+        self.args = args
+        self.failed = []
+
+    def fail(self, info):
+        self.failed.append(info)
+
+    def check_fail(self):
+        num_failed = len(self.failed)
+        if num_failed > 0:
+            print(f"{num_failed} tests FAILED")
+            for info in self.failed:
+                print(f"* {info}")
+            exit(1)
+        print("All good!")
+        exit(0)
+
+    def cmd_prefix(self):
+        res = []
+        if self.args.run_as_root is True:
+            res += ["sudo"]
+        if self.args.exec_wrapper is not None and self.args.exec_wrapper != "":
+            res += self.args.exec_wrapper.split(" ")
+        if self.args.mac_taskpolicy is not None:
+            res += ["taskpolicy", "-c", f"{self.args.mac_taskpolicy}"]
+
+        return res
+
+    def make_j(self):
+        if self.args.j is None or int(self.args.j) == 1:
+            return []
+        return [f"-j{self.args.j}"]
+
+    def do_opt_all(self):
+        return self.args.opt.lower() == "all"
+
+    def do_opt(self):
+        return self.args.opt.lower() in ["all", "opt"]
+
+    def do_no_opt(self):
+        return self.args.opt.lower() in ["all", "no_opt"]
+
+    def compile_mode(self):
+        return "Cross" if self.args.cross_prefix != "" else "Native"
+
+    def _compile_schemes(self, test_type, opt):
+        """compile or cross compile with some extra environment variables and makefile arguments"""
+
+        if opt is None:
+            opt_label = ""
+        elif opt is True:
+            opt_label = " opt"
+        else:
+            opt_label = " no_opt"
+
+        github_log(
+            f"::group::compile {self.compile_mode()}{opt_label} {test_type.desc()}"
+        )
+
+        log = logger(test_type, "Compile", self.args.cross_prefix, opt)
+
+        extra_make_args = []
+        # Those options are not used in the examples
+        if test_type.is_example() is False:
+            extra_make_args += [f"OPT={int(opt)}", f"AUTO={int(self.args.auto)}"]
+        if test_type.is_benchmark() is True:
+            extra_make_args += [f"CYCLES={self.args.cycles}"]
+        if test_type.make_dir() != "":
+            extra_make_args += ["-C", test_type.make_dir()]
+        extra_make_args += self.make_j()
+
+        target = test_type.make_target()
+        target = [target] if target != "" else []
+        args = ["make"] + target + extra_make_args
+
+
+        # Force static compilation for cross builds
+        cflags = self.args.cflags
+        if cflags is None:
+            cflags = ""
+
+        if test_type.is_example() and self.args.cross_prefix != "":
+            cflags += " -static"
+
+        env_update = {}
+        if cflags != "":
+            env_update["CFLAGS"] = cflags
+        if self.args.cross_prefix != "":
+            env_update["CROSS_PREFIX"] = self.args.cross_prefix
+
+        env = os.environ.copy()
+        env.update(env_update)
+
+        log.info(dict2str(env_update) + " ".join(args))
+
+
+        p = subprocess.run(
+            args,
+            stdout=subprocess.DEVNULL if not self.args.verbose else None,
+            env=env,
+        )
+
+        if p.returncode != 0:
+            log.error(f"make failed: {p.returncode}")
+            self.fail(f"Compilation for ({test_type}{opt_label})")
+
+        github_log("::endgroup::")
+
+    def _run_scheme(
+        self,
+        test_type,
+        opt,
+        scheme,
+        suppress_output=True,
+    ):
+        """Run the binary in all different ways
+
+        Arguments:
+
+        - scheme: Scheme to test
+        - suppress_output: Indicate whether to suppress or print-and-return the output
+        """
+
+        if opt is None:
+            opt_label = ""
+        elif opt is True:
+            opt_label = " opt"
+        else:
+            opt_label = " no_opt"
+
+        if scheme is None:
+            scheme_str = "All"
+        else:
+            scheme_str = str(scheme)
+
+        log = logger(test_type, scheme_str, self.args.cross_prefix, opt)
+
+        args = ["make", test_type.make_run_target(scheme)]
+        if test_type.is_benchmark() is False and test_type.is_example() is False:
+            args += self.make_j()
+        if test_type.make_dir() != "":
+            args += ["-C", test_type.make_dir()]
+
+        env_update = {}
+        if len(self.cmd_prefix()) > 0:
+            env_update["EXEC_WRAPPER"] = " ".join(self.cmd_prefix())
+
+        env = os.environ.copy()
+        env.update(env_update)
+
+        cmd_str = dict2str(env_update) + " ".join(args)
+        log.info(cmd_str)
+
+        p = subprocess.run(args, capture_output=True, universal_newlines=False, env=env)
+
+        if p.returncode != 0:
+            log.error(f"'{cmd_str}' failed with with {p.returncode}")
+            log.error(p.stderr.decode())
+            self.fail(f"{test_type.desc()} ({scheme_str}{opt_label})")
+            return True  # Failure
+        elif suppress_output is True:
+            if self.args.verbose is True:
+                log.info(p.stdout.decode())
+            return False  # No failure
+        else:
+            result = p.stdout.decode()
+            log.info(result)
+            return result
+
+    def _run_schemes(self, test_type, opt, suppress_output=True):
+        """Arguments:
+
+        - opt: Whether native backends should be enabled
+        - suppress_output: Indicate whether to suppress or print-and-return the output
+        """
+
+        results = {}
+
+        k = "opt" if opt else "no_opt"
+
+        github_log(f"::group::run {self.compile_mode()} {k} {test_type.desc()}")
+
+        results[k] = {}
+        for scheme in SCHEME:
+            result = self._run_scheme(
+                test_type,
+                opt,
+                scheme,
+                suppress_output,
+            )
+
+            results[k][scheme] = result
+
+        title = "## " + (self.compile_mode()) + " " + (k.capitalize()) + " Tests"
+        github_summary(title, test_type.desc(), results[k])
+
+        github_log("::endgroup::")
+
+        if suppress_output is True:
+            # In this case, we only gather success/failure booleans
+            return reduce(
+                lambda acc, c: acc or c,
+                [r for rs in results.values() for r in rs.values()],
+                False,
+            )
+        else:
+            return results
+
+
+    def examples(self):
+        if self.args.l is None:
+            l = TEST_TYPES.examples()
+        else:
+            l = list(map(TEST_TYPES.from_string, self.args.l))
+        for e in l:
+            self._compile_schemes(e, None)
+            self._run_scheme(e, None, None)
+
+    def bench(self):
+        output = self.args.output
+        components = self.args.components
+
+        if components is False:
+            test_type = TEST_TYPES.BENCH
+        else:
+            test_type = TEST_TYPES.BENCH_COMPONENTS
+            output = False
+
+        # NOTE: We haven't yet decided how to output both opt/no-opt benchmark results
+        resultss = None
+        if self.do_opt_all():
+            self._compile_schemes(test_type, False)
+            if self.args.run:
+                self._run_schemes(test_type, False, suppress_output=False)
+            self._compile_schemes(test_type, True)
+            if self.args.run:
+                resultss = self._run_schemes(test_type, True, suppress_output=False)
+        else:
+            self._compile_schemes(test_type, self.do_opt())
+            if self.args.run:
+                resultss = self._run_schemes(
+                    test_type, self.do_opt(), suppress_output=False
+                )
+
+        if resultss is None:
+            self.check_fail()
+
+        # NOTE: There will only be one items in resultss, as we haven't yet decided how to write both opt/no-opt benchmark results
+        for k, results in resultss.items():
+            if not (results is not None and output is not None and components is False):
+                continue
+
+            v = []
+            for scheme in results:
+                schemeStr = str(scheme)
+                r = results[scheme]
+
+                # The first 3 lines of the output are expected to be
+                # keypair cycles=X
+                # encaps cycles=X
+                # decaps cycles=X
+
+                lines = [line for line in r.splitlines() if "=" in line]
+
+                d = {k.strip(): int(v) for k, v in (l.split("=") for l in lines)}
+                for primitive in ["keypair", "encaps", "decaps"]:
+                    v.append(
+                        {
+                            "name": f"{schemeStr} {primitive}",
+                            "unit": "cycles",
+                            "value": d[f"{primitive} cycles"],
+                        }
+                    )
+
+            with open(output, "w") as f:
+                f.write(json.dumps(v))
+
+        self.check_fail()
+
+    def size(self):
+        output = self.args.output
+
+        test_type = TEST_TYPES.SIZE
+
+        resultss = None
+        if self.do_opt_all():
+            self._compile_schemes(test_type, False)
+            if self.args.run:
+                self._run_schemes(test_type, False, suppress_output=False)
+            self._compile_schemes(test_type, True)
+            if self.args.run:
+                resultss = self._run_schemes(test_type, True, suppress_output=False)
+        else:
+            self._compile_schemes(test_type, self.do_opt())
+            if self.args.run:
+                resultss = self._run_schemes(
+                    test_type, self.do_opt(), suppress_output=False
+                )
+        
+        if resultss is None:
+            self.check_fail()
+
+        # NOTE: There will only be one items in resultss, as we haven't yet decided how to write both opt/no-opt benchmark results
+        for k, results in resultss.items():
+            if not (results is not None and output is not None):
+                continue
+
+            v = []
+            for scheme in results:
+                schemeStr = str(scheme)
+                r = results[scheme]
+
+                # The first 3 lines of the output are expected to be
+                # keypair cycles=X
+                # encaps cycles=X
+                # decaps cycles=X
+
+                lines = [line for line in r.splitlines() if "=" in line]
+
+                d = {k.strip(): int(v) for k, v in (l.split("=") for l in lines)}
+                for primitive in ["keypair", "encaps", "decaps"]:
+                    v.append(
+                        {
+                            "name": f"{schemeStr} {primitive}",
+                            "unit": "cycles",
+                            "value": d[f"{primitive} cycles"],
+                        }
+                    )
+
+            with open(output, "w") as f:
+                f.write(json.dumps(v))
+
+        self.check_fail()
+
+
+
+
+#
+# Command line interface
+#
+
+
+def cli():
+    common_parser = argparse.ArgumentParser(add_help=False)
+
+    # Common arguments for all sub-commands
+    common_parser.add_argument(
+        "-v", "--verbose", help="Show verbose output or not", action="store_true"
+    )
+    common_parser.add_argument(
+        "-cp", "--cross-prefix", help="Cross prefix for compilation", default=""
+    )
+    common_parser.add_argument(
+        "--cflags", help="Extra cflags to passed in (e.g. '-mcpu=cortex-a72')"
+    )
+    common_parser.add_argument(
+        "-j",
+        help="Number of jobs to be used for `make` invocations",
+        default=os.cpu_count(),
+    )
+
+    # --auto / --no-auto
+    auto_group = common_parser.add_mutually_exclusive_group()
+    auto_group.add_argument(
+        "--auto",
+        action="store_true",
+        dest="auto",
+        help="Allow makefile to auto configure system specific preprocessor",
+        default=True,
+    )
+    auto_group.add_argument(
+        "--no-auto",
+        action="store_false",
+        dest="auto",
+        help="Disallow makefile to auto configure system specific preprocessor",
+    )
+
+    common_parser.add_argument(
+        "--opt",
+        help="Determine whether to compile/run the opt/no_opt binary or both",
+        choices=["ALL", "OPT", "NO_OPT"],
+        type=str.upper,
+        default="ALL",
+    )
+
+    # --run / --no-run
+    run_group = common_parser.add_mutually_exclusive_group()
+    run_group.add_argument(
+        "--run", action="store_true", dest="run", help="Run the binaries", default=True
+    )
+    run_group.add_argument(
+        "--no-run", action="store_false", dest="run", help="Do not run the binaries"
+    )
+
+    common_parser.add_argument(
+        "-w", "--exec-wrapper", help="Run the binary with the user-customized wrapper"
+    )
+    common_parser.add_argument(
+        "-r",
+        "--run-as-root",
+        default=False,
+        action="store_true",
+        help="Run the binary as root",
+    )
+
+
+    
+
+    main_parser = argparse.ArgumentParser()
+
+    cmd_subparsers = main_parser.add_subparsers(title="Commands", dest="cmd")
+
+    # examples arguments
+    examples_parser = cmd_subparsers.add_parser(
+        "examples", help="Run examples", parents=[common_parser]
+    )
+
+    examples_parser.add_argument(
+        "-l",
+        help="Explicitly list the examples to run; can be called multiple times",
+        choices=[
+            "bring_your_own_fips202",
+            "custom_backend",
+            "basic",
+            "monolithic_build",
+            "monolithic_build_native",
+            "monolithic_build_multilevel",
+            "monolithic_build_multilevel_native",
+            "multilevel_build",
+            "multilevel_build_native",
+        ],
+        action="append",
+    )
+
+
+    # bench arguments
+    bench_parser = cmd_subparsers.add_parser(
+        "bench",
+        help="Run the benchmarks for all parameter sets",
+        parents=[common_parser],
+    )
+
+    bench_parser.add_argument(
+        "-c",
+        "--cycles",
+        help="Method for counting clock cycles. PMU requires (user-space) access to the Arm Performance Monitor Unit (PMU). PERF requires a kernel with perf support. MAC works on some Apple platforms, at least Apple M1.",
+        choices=["NO", "PMU", "PERF", "MAC"],
+        type=str.upper,
+        required=True,
+    )
+    bench_parser.add_argument(
+        "-o", "--output", help="Path to output file in json format"
+    )
+    if platform.system() == "Darwin":
+        bench_parser.add_argument(
+            "-t",
+            "--mac-taskpolicy",
+            help="Run the program using the specified QoS clamp. Applies to MacOS only. Setting this flag to 'background' guarantees running on E-cores. This is an abbreviation of --exec-wrapper 'taskpolicy -c {mac_taskpolicy}'.",
+            choices=["utility", "background", "maintenance"],
+            type=str.lower,
+        )
+    bench_parser.add_argument(
+        "--components",
+        help="Benchmark low-level components",
+        action="store_true",
+        default=False,
+    )
+
+    size_parser = cmd_subparsers.add_parser(
+        "size",
+        help="Run the code size measurement for all object file",
+        parents=[common_parser],
+    )
+
+    size_parser.add_argument(
+        "-o", "--output", help="Path to output file in json format"
+    )
+
+    args = main_parser.parse_args()
+
+    if not hasattr(args, "mac_taskpolicy"):
+        args.mac_taskpolicy = None
+    if not hasattr(args, "l"):
+        args.l = None
+
+    os.chdir(os.path.join(os.path.dirname(__file__), ".."))
+
+
+    if args.cmd == "examples":
+        Tests(args).examples()
+    elif args.cmd == "bench":
+        Tests(args).bench()
+    elif args.cmd == "size":
+        Tests(args).size()
+
+
+if __name__ == "__main__":
+    cli()

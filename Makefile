@@ -14,7 +14,9 @@
 	bench_components_512 bench_components_768 bench_components_1024 bench_components \
 	run_bench_components_512 run_bench_components_768 run_bench_components_1024 run_bench_components \
 	build test all \
-	clean quickcheck check-defined-CYCLES
+	clean quickcheck check-defined-CYCLES \
+	size_512 size_768 size_1024 size \
+	run_size_512 run_size_768 run_size_1024 run_size 
 
 .DEFAULT_GOAL := build
 all: build
@@ -94,13 +96,10 @@ bench: bench_512 bench_768 bench_1024
 
 run_bench_512: bench_512
 	$(W) $(MLKEM512_DIR)/bin/bench_mlkem512
-	$(Q)$(SIZE) $(BUILD_DIR)/*mlkem512.a
 run_bench_768: bench_768
 	$(W) $(MLKEM768_DIR)/bin/bench_mlkem768
-	$(Q)$(SIZE) $(BUILD_DIR)/*mlkem768.a
 run_bench_1024: bench_1024
 	$(W) $(MLKEM1024_DIR)/bin/bench_mlkem1024
-	$(Q)$(SIZE) $(BUILD_DIR)/*mlkem1024.a
 
 # Use .WAIT to prevent parallel execution when -j is passed
 run_bench: \
@@ -128,6 +127,24 @@ run_bench_components: \
 	run_bench_components_512 .WAIT\
 	run_bench_components_768 .WAIT\
 	run_bench_components_1024
+
+
+size_512: $(BUILD_DIR)/libmlkem512.a
+size_768: $(BUILD_DIR)/libmlkem768.a
+size_1024: $(BUILD_DIR)/libmlkem1024.a
+size: size_512 size_768 size_1024
+
+run_size_512: size_512
+	$(SIZE) $(BUILD_DIR)/libmlkem512.a
+run_size_768: size_768
+	$(SIZE) $(BUILD_DIR)/libmlkem768.a
+run_size_1024: size_1024
+	$(SIZE) $(BUILD_DIR)/libmlkem1024.a
+
+run_size: \
+	run_bench_512 \
+	run_bench_768 \
+	run_bench_1024
 
 clean:
 	-$(RM) -rf *.gcno *.gcda *.lcov *.o *.so
