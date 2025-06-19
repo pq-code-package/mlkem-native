@@ -7,6 +7,7 @@
 # Remove or ignore for native builds
 CC  ?= gcc
 AR  ?= ar
+SIZE ?= size
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
@@ -14,6 +15,10 @@ endif
 
 ifeq (,$(findstring $(CROSS_PREFIX),$(AR)))
 AR  := $(CROSS_PREFIX)$(AR)
+endif
+
+ifeq (,$(findstring $(CROSS_PREFIX),$(SIZE)))
+SIZE  := $(CROSS_PREFIX)$(SIZE)
 endif
 
 # Part A:
@@ -123,12 +128,20 @@ $(BINARY_NAME_FULL): $(APP_SOURCE) $(MLK_OBJ_ASM)
 	$(Q)$(CC) $(CFLAGS) $(INC) $^ -o $@
 	$(Q)strip -S $@
 
-all: build
+all: build size_objs
 
 build: $(BINARY_NAME_FULL)
 
 run: $(BINARY_NAME_FULL)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
+
+size_objs: size
+	@echo "=== Object size summary ==="
+	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem -name '*.o')
+
+size: build 
+	@echo "=== Size info for binaries ==="
+	$(Q)$(SIZE) $(BINARY_NAME_FULL)
 
 clean:
 	rm -rf $(BUILD_DIR)
