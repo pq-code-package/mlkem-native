@@ -7,9 +7,14 @@ Q ?= @
 # Append cross-prefix for cross compilation
 # Remove or ignore for native builds
 CC  ?= gcc
+SIZE ?= size
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
+endif
+
+ifeq (,$(findstring $(CROSS_PREFIX),$(SIZE)))
+SIZE  := $(CROSS_PREFIX)$(SIZE)
 endif
 
 # Part A:
@@ -98,12 +103,22 @@ $(BINARY_NAME_FULL): $(APP_SOURCE) $(RNG_SOURCE) $(MLKEM512_OBJS) $(MLKEM768_OBJ
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ -o $@
 
-all: build
+all: build size_objs
 
 build: $(BINARY_NAME_FULL)
 
 run: $(BINARY_NAME_FULL)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
+
+size: build
+	@echo "=== Size info for $(BINARY_NAME_FULL) ==="
+	$(Q)$(SIZE) $(BINARY_NAME_FULL)
+
+size_objs: size
+	@echo "=== Object size summary ==="
+	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem512 -name '*.o')
+	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem768 -name '*.o')
+	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem1024 -name '*.o')
 
 clean:
 	rm -rf $(BUILD_DIR)
