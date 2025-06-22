@@ -22,6 +22,11 @@
 .balign 4
 .global MLK_ASM_NAMESPACE(keccak_f1600_x1_scalar_asm)
 MLK_ASM_FN_SYMBOL(keccak_f1600_x1_scalar_asm)
+/* The following marker may be useful for implementing basic assembly
+   transformations (e.g. changing the header and footer) making it suitable
+   for other toolchains. */
+
+/* Assembly start: keccak_f1600_x1_scalar_asm */
 
         sub	sp, sp, #0x80
         stp	x19, x20, [sp, #0x20]
@@ -315,6 +320,8 @@ keccak_f1600_x1_scalar_loop:
         ldp	x29, x30, [sp, #0x70]
         add	sp, sp, #0x80
         ret
+
+/* Assembly end: keccak_f1600_x1_scalar_asm */
 
 #endif /* MLK_FIPS202_AARCH64_NEED_X1_SCALAR && \
           !MLK_CONFIG_MULTILEVEL_NO_SHARED */

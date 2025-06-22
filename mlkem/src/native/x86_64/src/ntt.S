@@ -38,6 +38,11 @@
 .balign 4
 .global MLK_ASM_NAMESPACE(ntt_avx2)
 MLK_ASM_FN_SYMBOL(ntt_avx2)
+/* The following marker may be useful for implementing basic assembly
+   transformations (e.g. changing the header and footer) making it suitable
+   for other toolchains. */
+
+/* Assembly start: ntt_avx2 */
 
         vmovdqa	(%rsi), %ymm0
         vpbroadcastq	0x140(%rsi), %ymm15
@@ -625,6 +630,8 @@ MLK_ASM_FN_SYMBOL(ntt_avx2)
         vmovdqa	%ymm9, 0x1c0(%rdi)
         vmovdqa	%ymm11, 0x1e0(%rdi)
         retq
+
+/* Assembly end */
 
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */

@@ -32,6 +32,12 @@
 .balign 4
 .global MLK_ASM_NAMESPACE(nttunpack_avx2)
 MLK_ASM_FN_SYMBOL(nttunpack_avx2)
+/* The following marker may be useful for implementing basic assembly
+   transformations (e.g. changing the header and footer) making it suitable
+   for other toolchains. */
+
+/* Assembly start: nttunpack_avx2 */
+
 
         callq	nttunpack_avx2_core
         addq	$0x100, %rdi            # imm = 0x100
@@ -104,6 +110,8 @@ nttunpack_avx2_core:
         vmovdqa	%ymm7, 0xc0(%rdi)
         vmovdqa	%ymm11, 0xe0(%rdi)
         retq
+
+/* Assembly end */
 
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */

@@ -175,6 +175,7 @@ def simplify(logger, args, asm_input, asm_output=None):
         )
         raise Exception("simpasm failed")
     sym = syms[0]
+    func_name = re.sub(r'MLK_ASM_NAMESPACE\((.*?)\)', r'\1', sym)
 
     if args.cflags is not None:
         cflags = args.cflags.split(" ")
@@ -278,11 +279,22 @@ def simplify(logger, args, asm_input, asm_output=None):
         else:
             autogen_header += [
                 f".global {sym}",
-                f"{sym.replace('MLK_ASM_NAMESPACE', 'MLK_ASM_FN_SYMBOL')}",
+                f"MLK_ASM_FN_SYMBOL({func_name})"
                 "",
             ]
+
+            start_marker = [
+                "/* The following marker may be useful for implementing basic assembly",
+                "   transformations (e.g. changing the header and footer) making it suitable",
+                "   for other toolchains. */", "",
+                f"/* Assembly start: {func_name} */", ""]
+            end_marker = [f"/* Assembly end: {func_name} */", ""]
+
+            autogen_header += start_marker
+
             simplified_header = header
-            simplified_footer = footer
+            simplified_footer = end_marker + footer
+
 
         # Write simplified assembly file
         full_simplified = (

@@ -32,6 +32,11 @@
 .balign 4
 .global MLK_ASM_NAMESPACE(rej_uniform_asm)
 MLK_ASM_FN_SYMBOL(rej_uniform_asm)
+/* The following marker may be useful for implementing basic assembly
+   transformations (e.g. changing the header and footer) making it suitable
+   for other toolchains. */
+
+/* Assembly start: rej_uniform_asm */
 
         sub	sp, sp, #0x240
         mov	x7, #0x1                // =1
@@ -195,5 +200,7 @@ rej_uniform_final_copy:
 rej_uniform_return:
         add	sp, sp, #0x240
         ret
+
+/* Assembly end: rej_uniform_asm */
 
 #endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

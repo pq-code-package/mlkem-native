@@ -17,6 +17,11 @@
 .balign 4
 .global MLK_ASM_NAMESPACE(poly_mulcache_compute_asm)
 MLK_ASM_FN_SYMBOL(poly_mulcache_compute_asm)
+/* The following marker may be useful for implementing basic assembly
+   transformations (e.g. changing the header and footer) making it suitable
+   for other toolchains. */
+
+/* Assembly start: poly_mulcache_compute_asm */
 
         mov	w5, #0xd01              // =3329
         dup	v6.8h, w5
@@ -47,5 +52,7 @@ poly_mulcache_compute_loop:
         mls	v2.8h, v27.8h, v6.h[0]
         str	q2, [x0], #0x10
         ret
+
+/* Assembly end: poly_mulcache_compute_asm */
 
 #endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

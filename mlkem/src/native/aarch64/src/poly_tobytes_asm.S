@@ -16,6 +16,11 @@
 .balign 4
 .global MLK_ASM_NAMESPACE(poly_tobytes_asm)
 MLK_ASM_FN_SYMBOL(poly_tobytes_asm)
+/* The following marker may be useful for implementing basic assembly
+   transformations (e.g. changing the header and footer) making it suitable
+   for other toolchains. */
+
+/* Assembly start: poly_tobytes_asm */
 
         mov	x2, #0x10               // =16
         ldr	q6, [x1], #0x20
@@ -105,5 +110,7 @@ poly_tobytes_loop_start:
         sli	v23.8b, v5.8b, #0x4
         st3	{ v22.8b, v23.8b, v24.8b }, [x0], #24
         ret
+
+/* Assembly end: poly_tobytes_asm */
 
 #endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

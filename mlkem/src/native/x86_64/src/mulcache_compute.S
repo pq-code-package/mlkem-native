@@ -17,6 +17,11 @@
 .balign 4
 .global MLK_ASM_NAMESPACE(poly_mulcache_compute_avx2)
 MLK_ASM_FN_SYMBOL(poly_mulcache_compute_avx2)
+/* The following marker may be useful for implementing basic assembly
+   transformations (e.g. changing the header and footer) making it suitable
+   for other toolchains. */
+
+/* Assembly start: poly_mulcache_compute_avx2 */
 
         vmovdqa	(%rdx), %ymm0
         vmovdqa	0x20(%rsi), %ymm2
@@ -76,6 +81,8 @@ MLK_ASM_FN_SYMBOL(poly_mulcache_compute_avx2)
         vmovdqa	%ymm7, 0xc0(%rdi)
         vmovdqa	%ymm8, 0xe0(%rdi)
         retq
+
+/* Assembly end */
 
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */

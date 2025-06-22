@@ -34,6 +34,11 @@
 .balign 4
 .global MLK_ASM_NAMESPACE(intt_asm)
 MLK_ASM_FN_SYMBOL(intt_asm)
+/* The following marker may be useful for implementing basic assembly
+   transformations (e.g. changing the header and footer) making it suitable
+   for other toolchains. */
+
+/* Assembly start: intt_asm */
 
         sub	sp, sp, #0x40
         stp	d8, d9, [sp]
@@ -563,5 +568,7 @@ intt_layer123_start:
         ldp	d14, d15, [sp, #0x30]
         add	sp, sp, #0x40
         ret
+
+/* Assembly end: intt_asm */
 
 #endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

@@ -35,6 +35,11 @@
 .balign 4
 .global MLK_ASM_NAMESPACE(tomont_avx2)
 MLK_ASM_FN_SYMBOL(tomont_avx2)
+/* The following marker may be useful for implementing basic assembly
+   transformations (e.g. changing the header and footer) making it suitable
+   for other toolchains. */
+
+/* Assembly start: tomont_avx2 */
 
         vmovdqa	(%rsi), %ymm0
         vmovdqa	0xa0(%rsi), %ymm1
@@ -94,6 +99,8 @@ tomont_avx2_core:
         vmovdqa	%ymm9, 0xc0(%rdi)
         vmovdqa	%ymm10, 0xe0(%rdi)
         retq
+
+/* Assembly end */
 
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */

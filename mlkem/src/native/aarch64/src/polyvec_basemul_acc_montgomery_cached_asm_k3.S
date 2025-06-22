@@ -29,6 +29,11 @@
 .balign 4
 .global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k3)
 MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k3)
+/* The following marker may be useful for implementing basic assembly
+   transformations (e.g. changing the header and footer) making it suitable
+   for other toolchains. */
+
+/* Assembly start: polyvec_basemul_acc_montgomery_cached_asm_k3 */
 
         sub	sp, sp, #0x40
         stp	d8, d9, [sp]
@@ -252,6 +257,8 @@ polyvec_basemul_acc_montgomery_cached_k3_loop:
         ldp	d14, d15, [sp, #0x30]
         add	sp, sp, #0x40
         ret
+
+/* Assembly end: polyvec_basemul_acc_montgomery_cached_asm_k3 */
 
 #endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED && \
           (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 3) */

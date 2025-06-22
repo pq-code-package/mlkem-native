@@ -17,6 +17,11 @@
 .balign 4
 .global MLK_ASM_NAMESPACE(poly_tomont_asm)
 MLK_ASM_FN_SYMBOL(poly_tomont_asm)
+/* The following marker may be useful for implementing basic assembly
+   transformations (e.g. changing the header and footer) making it suitable
+   for other toolchains. */
+
+/* Assembly start: poly_tomont_asm */
 
         mov	w2, #0xd01              // =3329
         dup	v4.8h, w2
@@ -73,5 +78,7 @@ poly_tomont_loop:
         stur	q27, [x0, #-0x20]
         stur	q23, [x0, #-0x40]
         ret
+
+/* Assembly end: poly_tomont_asm */
 
 #endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

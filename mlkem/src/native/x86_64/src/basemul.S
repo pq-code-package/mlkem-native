@@ -33,6 +33,11 @@
 .balign 4
 .global MLK_ASM_NAMESPACE(basemul_avx2)
 MLK_ASM_FN_SYMBOL(basemul_avx2)
+/* The following marker may be useful for implementing basic assembly
+   transformations (e.g. changing the header and footer) making it suitable
+   for other toolchains. */
+
+/* Assembly start: basemul_avx2 */
 
         movq	%rsp, %r11
         andq	$-0x20, %rsp
@@ -267,6 +272,8 @@ MLK_ASM_FN_SYMBOL(basemul_avx2)
         vmovdqa	%ymm11, 0x1e0(%rdi)
         movq	%r11, %rsp
         retq
+
+/* Assembly end */
 
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */
