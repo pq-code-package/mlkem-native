@@ -464,10 +464,6 @@
 #undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k4
 #undef mlk_rej_uniform_asm
 #undef mlk_rej_uniform_table
-/* mlkem/src/native/aarch64/src/consts.h */
-#undef MLK_NATIVE_AARCH64_SRC_CONSTS_H
-#undef mlk_zetas_mulcache_native
-#undef mlk_zetas_mulcache_twisted_native
 /* mlkem/src/native/api.h */
 #undef MLK_INVNTT_BOUND
 #undef MLK_NATIVE_API_H
