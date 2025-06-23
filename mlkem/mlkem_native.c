@@ -377,8 +377,13 @@
 #endif /* !MLK_CONFIG_FIPS202_CUSTOM_HEADER */
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
+/* mlkem/src/fips202/native/api.h */
+#undef MLK_FIPS202_NATIVE_API_H
+/* mlkem/src/fips202/native/auto.h */
+#undef MLK_FIPS202_NATIVE_AUTO_H
+#if defined(MLK_SYS_AARCH64)
 /*
- * Undefine macros from native code
+ * Undefine macros from native code (FIPS202, AArch64)
  */
 /* mlkem/src/fips202/native/aarch64/auto.h */
 #undef MLK_FIPS202_NATIVE_AARCH64_AUTO_H
@@ -410,10 +415,11 @@
 #undef MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID
 #undef MLK_FIPS202_NATIVE_AARCH64_X4_V8A_V84A_SCALAR_H
 #undef MLK_USE_FIPS202_X4_NATIVE
-/* mlkem/src/fips202/native/api.h */
-#undef MLK_FIPS202_NATIVE_API_H
-/* mlkem/src/fips202/native/auto.h */
-#undef MLK_FIPS202_NATIVE_AUTO_H
+#endif /* MLK_SYS_AARCH64 */
+#if defined(MLK_SYS_X86_64)
+/*
+ * Undefine macros from native code (FIPS202, x86_64)
+ */
 /* mlkem/src/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.h */
 #undef MLK_FIPS202_NATIVE_X86_64_SRC_KECCAKP_1600_TIMES4_SIMD256_H
 #undef mlk_keccakf1600x4_permute24
@@ -421,10 +427,18 @@
 #undef MLK_FIPS202_NATIVE_X86_64_XKCP_H
 #undef MLK_FIPS202_X86_64_XKCP
 #undef MLK_USE_FIPS202_X4_NATIVE
+#endif /* MLK_SYS_X86_64 */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
+/* mlkem/src/native/api.h */
+#undef MLK_INVNTT_BOUND
+#undef MLK_NATIVE_API_H
+#undef MLK_NTT_BOUND
+/* mlkem/src/native/meta.h */
+#undef MLK_NATIVE_META_H
+#if defined(MLK_SYS_AARCH64)
 /*
- * Undefine macros from native code
+ * Undefine macros from native code (Arith, AArch64)
  */
 /* mlkem/src/native/aarch64/meta.h */
 #undef MLK_ARITH_BACKEND_AARCH64
@@ -456,12 +470,11 @@
 #undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k4
 #undef mlk_rej_uniform_asm
 #undef mlk_rej_uniform_table
-/* mlkem/src/native/api.h */
-#undef MLK_INVNTT_BOUND
-#undef MLK_NATIVE_API_H
-#undef MLK_NTT_BOUND
-/* mlkem/src/native/meta.h */
-#undef MLK_NATIVE_META_H
+#endif /* MLK_SYS_AARCH64 */
+#if defined(MLK_SYS_X86_64)
+/*
+ * Undefine macros from native code (Arith, X86_64)
+ */
 /* mlkem/src/native/x86_64/meta.h */
 #undef MLK_ARITH_BACKEND_X86_64_DEFAULT
 #undef MLK_NATIVE_X86_64_META_H
@@ -525,5 +538,6 @@
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP
 #undef MLK_NATIVE_X86_64_SRC_CONSTS_H
 #undef mlk_qdata
+#endif /* MLK_SYS_X86_64 */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 #endif /* !MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS */
