@@ -1153,9 +1153,10 @@ def gen_monolithic_undef_all_core(filt=None, desc=""):
     if filt is None:
         filt = lambda c: True
 
-    yield "/*"
-    yield f" * Undefine macros from {desc}"
-    yield " */"
+    if desc != "":
+        yield "/*"
+        yield f" * Undefine macros from {desc}"
+        yield " */"
 
     defines = list(set(get_checked_defines()))
     defines.sort()
@@ -1202,12 +1203,26 @@ def native_fips202_x86_64(c):
     return native_fips202(c) and x86_64(c)
 
 
+def native_fips202_core(c):
+    return (
+        native_fips202(c)
+        and not native_fips202_x86_64(c)
+        and not native_fips202_aarch64(c)
+    )
+
+
 def native_arith_aarch64(c):
     return native_arith(c) and aarch64(c)
 
 
 def native_arith_x86_64(c):
     return native_arith(c) and x86_64(c)
+
+
+def native_arith_core(c):
+    return (
+        native_arith(c) and not native_arith_x86_64(c) and not native_arith_aarch64(c)
+    )
 
 
 # List of level-specific source files
@@ -1286,10 +1301,30 @@ def gen_macro_undefs(extra_notes=None):
     yield "#endif"
     yield ""
     yield "#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)"
-    yield from gen_monolithic_undef_all_core(filt=native_fips202, desc="native code")
+    yield from gen_monolithic_undef_all_core(filt=native_fips202_core, desc="")
+    yield "#if defined(MLK_SYS_AARCH64)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_fips202_aarch64, desc="native code (FIPS202, AArch64)"
+    )
+    yield "#endif"
+    yield "#if defined(MLK_SYS_X86_64)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_fips202_x86_64, desc="native code (FIPS202, x86_64)"
+    )
+    yield "#endif"
     yield "#endif"
     yield "#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)"
-    yield from gen_monolithic_undef_all_core(filt=native_arith, desc="native code")
+    yield from gen_monolithic_undef_all_core(filt=native_arith_core, desc="")
+    yield "#if defined(MLK_SYS_AARCH64)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_arith_aarch64, desc="native code (Arith, AArch64)"
+    )
+    yield "#endif"
+    yield "#if defined(MLK_SYS_X86_64)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_arith_x86_64, desc="native code (Arith, X86_64)"
+    )
+    yield "#endif"
     yield "#endif"
     yield "#endif"
     yield ""
