@@ -72,13 +72,15 @@
 #include "mlkem/src/native/aarch64/src/rej_uniform_asm.S"
 #endif /* MLK_SYS_AARCH64 */
 #if defined(MLK_SYS_X86_64)
-#include "mlkem/src/native/x86_64/src/basemul.S"
 #include "mlkem/src/native/x86_64/src/intt.S"
 #include "mlkem/src/native/x86_64/src/mulcache_compute.S"
 #include "mlkem/src/native/x86_64/src/ntt.S"
 #include "mlkem/src/native/x86_64/src/nttfrombytes.S"
 #include "mlkem/src/native/x86_64/src/ntttobytes.S"
 #include "mlkem/src/native/x86_64/src/nttunpack.S"
+#include "mlkem/src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S"
+#include "mlkem/src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S"
+#include "mlkem/src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S"
 #include "mlkem/src/native/x86_64/src/reduce.S"
 #include "mlkem/src/native/x86_64/src/tomont.S"
 #endif /* MLK_SYS_X86_64 */
@@ -525,7 +527,9 @@
 #undef mlk_poly_decompress_d4_avx2
 #undef mlk_poly_decompress_d5_avx2
 #undef mlk_poly_mulcache_compute_avx2
-#undef mlk_polyvec_basemul_acc_montgomery_cached_avx2
+#undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k2
+#undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k3
+#undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k4
 #undef mlk_reduce_avx2
 #undef mlk_rej_uniform_avx2
 #undef mlk_rej_uniform_table
