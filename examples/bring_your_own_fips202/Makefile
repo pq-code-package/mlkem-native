@@ -102,10 +102,12 @@ run: $(BINARIES_FULL)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL_1024)
 
 size: build
-	@echo "=== Size info for binaries ==="
-	$(SIZE) $(BINARY_NAME_FULL_512)
-	$(SIZE) $(BINARY_NAME_FULL_768)
-	$(SIZE) $(BINARY_NAME_FULL_1024)
+	@echo "=== Size info for binaries $(BINARY_NAME_FULL_512)==="
+	@$(SIZE) $(BINARY_NAME_FULL_512)
+	@echo "=== Size info for binaries $(BINARY_NAME_FULL_768)==="
+	@$(SIZE) $(BINARY_NAME_FULL_768)
+	@echo "=== Size info for binaries $(BINARY_NAME_FULL_1024)==="
+	@$(SIZE) $(BINARY_NAME_FULL_1024)
 
 clean:
 	rm -rf $(BUILD_DIR)

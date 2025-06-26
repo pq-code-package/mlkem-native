@@ -702,25 +702,19 @@ class Tests:
 
         resultss = None
 
-        if self.args.l is None:
-            if self.do_opt_all():
-                self._compile_schemes(test_type, False)
-                if self.args.run:
-                    self._run_schemes(test_type, False, suppress_output=False)
-                self._compile_schemes(test_type, True)
-                if self.args.run:
-                    resultss = self._run_schemes(test_type, True, suppress_output=False)
-            else:
-                self._compile_schemes(test_type, self.do_opt())
-                if self.args.run:
-                    resultss = self._run_schemes(
-                        test_type, self.do_opt(), suppress_output=False
-                    )
+        if self.do_opt_all():
+            self._compile_schemes(test_type, False)
+            if self.args.run:
+                self._run_schemes(test_type, False, suppress_output=False)
+            self._compile_schemes(test_type, True)
+            if self.args.run:
+                resultss = self._run_schemes(test_type, True, suppress_output=False)
         else:
-            l = list(map(TEST_TYPES.from_string, self.args.l))
-            for e in l:
-                self._compile_schemes(e, None)
-                self._run_scheme(e, None, None)
+            self._compile_schemes(test_type, self.do_opt())
+            if self.args.run:
+                resultss = self._run_schemes(
+                    test_type, self.do_opt(), suppress_output=False
+                )
 
         if resultss is None:
             self.check_fail()

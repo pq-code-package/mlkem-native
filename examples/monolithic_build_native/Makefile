@@ -144,13 +144,46 @@ run: $(BIN512_FULL) $(BIN768_FULL) $(BIN1024_FULL)
 
 size: build
 	@echo "=== Size info for static lib ==="
-	$(Q)$(SIZE) $(LIB512_FULL)
-	$(Q)$(SIZE) $(LIB768_FULL)
-	$(Q)$(SIZE) $(LIB1024_FULL)
+	$(Q)rm -f .size_static.txt .tmp_size_512.txt .tmp_size_768.txt .tmp_size_1024.txt
+
+	$(Q)$(SIZE) $(LIB512_FULL) > .tmp_size_512.txt
+	$(Q)head -n 1 .tmp_size_512.txt > .size_static.txt
+	$(Q)tail -n +2 .tmp_size_512.txt | sort -k5 -n -r >> .size_static.txt
+	$(Q)rm -rf .tmp_size_512.txt
+
+
+	$(Q)$(SIZE) $(LIB768_FULL) > .tmp_size_768.txt
+	$(Q)tail -n +2 .tmp_size_768.txt | sort -k5 -n -r >> .size_static.txt
+	$(Q)rm -rf .tmp_size_768.txt
+
+
+	$(Q)$(SIZE) $(LIB1024_FULL) > .tmp_size_1024.txt
+	$(Q)tail -n +2 .tmp_size_1024.txt | sort -k5 -n -r >> .size_static.txt
+	$(Q)rm -rf .tmp_size_1024.txt
+
+	$(Q)cat .size_static.txt
+	$(Q)rm -f .size_static.txt
 
 size_objs: size
-	@echo "=== Object size summary ==="
-	$(Q)$(SIZE) $(shell find $(BUILD_DIR) -name '*.o')
+	$(Q)echo "=== Object size summary ==="
+
+	$(Q)rm -f .size_object.txt .tmp_size_512.txt .tmp_size_768.txt .tmp_size_1024.txt
+
+	$(Q)$(SIZE) $(shell find $(BUILD_DIR) -name '*512*.o') > .tmp_size_512.txt
+	$(Q)head -n 1 .tmp_size_512.txt > .size_object.txt
+	$(Q)tail -n +2 .tmp_size_512.txt | sort -k5 -n -r >> .size_object.txt
+	$(Q)rm -rf .tmp_size_512.txt
+
+	$(Q)$(SIZE) $(shell find $(BUILD_DIR) -name '*768*.o') > .tmp_size_768.txt
+	$(Q)tail -n +2 .tmp_size_768.txt | sort -k5 -n -r >> .size_object.txt
+	$(Q)rm -rf .tmp_size_768.txt
+
+	$(Q)$(SIZE) $(shell find $(BUILD_DIR) -name '*1024*.o') > .tmp_size_1024.txt
+	$(Q)tail -n +2 .tmp_size_1024.txt | sort -k5 -n -r >> .size_object.txt
+	$(Q)rm -rf .tmp_size_1024.txt
+
+	$(Q)cat .size_object.txt
+	$(Q)rm -f .size_object.txt
 
 clean:
 	rm -rf $(BUILD_DIR)

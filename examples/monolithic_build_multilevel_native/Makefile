@@ -136,11 +136,11 @@ run: $(BINARY_NAME_FULL)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
 
 size_objs: size
-	@echo "=== Object size summary ==="
-	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem -name '*.o')
+	$(Q)echo "=== Object size summary ==="
+	$(SIZE) $(shell find $(BUILD_DIR)/mlkem -name '*.o')
 
 size: build 
-	@echo "=== Size info for binaries ==="
+	$(Q)echo "=== Size info for binaries $(BINARY_NAME_FULL)==="
 	$(Q)$(SIZE) $(BINARY_NAME_FULL)
 
 clean:

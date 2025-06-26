@@ -96,10 +96,10 @@ run: $(BINARY_NAME_FULL)
 
 size_objs: size
 	$(Q)echo "=== Object size summary ==="
-	$(Q)$(SIZE) $(shell find $(BUILD_DIR) -name '*.o')
+	$(SIZE) $(shell find $(BUILD_DIR) -name '*.o')
 
 size: build
-	@echo "=== Size info for static lib ==="
+	$(Q)echo "=== Size info for static lib ${LIB_NAME_FULL}==="
 	$(Q)$(SIZE) ${LIB_NAME_FULL}
 
 clean:
