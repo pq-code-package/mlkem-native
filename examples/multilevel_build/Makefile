@@ -115,10 +115,24 @@ size: build
 	$(Q)$(SIZE) $(BINARY_NAME_FULL)
 
 size_objs: size
-	@echo "=== Object size summary ==="
-	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem512 -name '*.o')
-	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem768 -name '*.o')
-	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem1024 -name '*.o')
+	$(Q)echo "=== Object size summary ==="
 
+	$(Q)rm -f .size_object.txt .tmp_size_512.txt .tmp_size_768.txt .tmp_size_1024.txt
+
+	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem512 -name '*.o') > .tmp_size_512.txt
+	$(Q)head -n 1 .tmp_size_512.txt > .size_object.txt
+	$(Q)tail -n +2 .tmp_size_512.txt | while read line; do dec=$$(echo $$line | cut -d' ' -f5); [ "$$dec" -ne 0 ] && echo "$$line"; done | sort -k5 -n -r >> .size_object.txt
+	$(Q)rm -rf .tmp_size_512.txt
+
+	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem768 -name '*.o') > .tmp_size_768.txt
+	$(Q)tail -n +2 .tmp_size_768.txt | while read line; do dec=$$(echo $$line | cut -d' ' -f5); [ "$$dec" -ne 0 ] && echo "$$line"; done | sort -k5 -n -r >> .size_object.txt
+	$(Q)rm -rf .tmp_size_768.txt
+
+	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem1024 -name '*.o') > .tmp_size_1024.txt
+	$(Q)tail -n +2 .tmp_size_1024.txt | while read line; do dec=$$(echo $$line | cut -d' ' -f5); [ "$$dec" -ne 0 ] && echo "$$line"; done | sort -k5 -n -r >> .size_object.txt
+	$(Q)rm -rf .tmp_size_1024.txt
+
+	$(Q)cat .size_object.txt
+	$(Q)rm -f .size_object.txt
 clean:
 	rm -rf $(BUILD_DIR)

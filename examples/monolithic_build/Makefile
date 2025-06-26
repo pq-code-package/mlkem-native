@@ -131,13 +131,15 @@ run: $(BIN512_FULL) $(BIN768_FULL) $(BIN1024_FULL)
 	$(Q)$(EXEC_WRAPPER) ./$(BIN1024_FULL)
 
 size: build
-	@echo "=== Size info for static lib ==="
-	$(Q)$(SIZE) $(LIB512_FULL)
-	$(Q)$(SIZE) $(LIB768_FULL)
-	$(Q)$(SIZE) $(LIB1024_FULL)
+	@echo "=== Size info for static lib $(LIB512_FULL)==="
+	@$(Q)$(SIZE) $(LIB512_FULL)
+	@echo "=== Size info for static lib $(LIB768_FULL)==="
+	@$(Q)$(SIZE) $(LIB768_FULL)
+	@echo "=== Size info for static lib $(LIB1024_FULL)==="
+	@$(Q)$(SIZE) $(LIB1024_FULL)
 	
 size_objs: size
-	@echo "=== Object size summary ==="
-	$(Q)$(SIZE) $(shell find $(BUILD_DIR) -name '*.o')
+	@echo "=== Object size summary for all mlkem_{512, 768, 1024} Object==="
+	$(SIZE) $(shell find $(BUILD_DIR) -name '*.o')
 clean:
 	rm -rf $(BUILD_DIR)

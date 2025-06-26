@@ -135,16 +135,34 @@ size_1024: $(BUILD_DIR)/libmlkem1024.a
 size: size_512 size_768 size_1024
 
 run_size_512: size_512
-	$(SIZE) $(BUILD_DIR)/libmlkem512.a
+	$(SIZE) $(BUILD_DIR)/libmlkem512.a > .tmp_size_512.txt
+	$(Q)head -n 1 .tmp_size_512.txt > .size_static_512.txt
+	$(Q)tail -n +2 .tmp_size_512.txt | while read line; do dec=$$(echo $$line | cut -d' ' -f5); [ "$$dec" -ne 0 ] && echo "$$line"; done | sort -k5 -n -r >> .size_static_512.txt
+	$(Q)rm -rf .tmp_size_512.txt
+	$(Q)cat .size_static_512.txt
+	$(Q)rm -f .size_static_512.txt
+
 run_size_768: size_768
-	$(SIZE) $(BUILD_DIR)/libmlkem768.a
+	$(SIZE) $(BUILD_DIR)/libmlkem768.a > .tmp_size_768.txt
+	$(Q)head -n 1 .tmp_size_768.txt > .size_static_768.txt
+	$(Q)tail -n +2 .tmp_size_768.txt | while read line; do dec=$$(echo $$line | cut -d' ' -f5); [ "$$dec" -ne 0 ] && echo "$$line"; done | sort -k5 -n -r >> .size_static_768.txt
+	$(Q)rm -rf .tmp_size_768.txt
+	$(Q)cat .size_static_768.txt
+	$(Q)rm -f .size_static_768.txt
+
 run_size_1024: size_1024
-	$(SIZE) $(BUILD_DIR)/libmlkem1024.a
+	$(SIZE) $(BUILD_DIR)/libmlkem1024.a > .tmp_size_1024.txt
+	$(Q)head -n 1 .tmp_size_1024.txt > .size_static_1024.txt
+	$(Q)tail -n +2 .tmp_size_1024.txt | while read line; do dec=$$(echo $$line | cut -d' ' -f5); [ "$$dec" -ne 0 ] && echo "$$line"; done | sort -k5 -n -r >> .size_static_1024.txt
+	$(Q)rm -rf .tmp_size_1024.txt
+	$(Q)cat .size_static_1024.txt
+	$(Q)rm -f .size_static_1024.txt
+
 
 run_size: \
-	run_bench_512 \
-	run_bench_768 \
-	run_bench_1024
+	run_size_512 \
+	run_size_768 \
+	run_size_1024
 
 clean:
 	-$(RM) -rf *.gcno *.gcda *.lcov *.o *.so
