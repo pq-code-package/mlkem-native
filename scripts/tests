@@ -206,6 +206,7 @@ class TEST_TYPES(Enum):
     MULTILEVEL_BUILD_NATIVE = 12
     MONOLITHIC_BUILD_MULTILEVEL_NATIVE = 13
     MONOLITHIC_BUILD_NATIVE = 14
+    STACK = 15
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -250,6 +251,8 @@ class TEST_TYPES(Enum):
             return "Kat Test"
         if self == TEST_TYPES.ACVP:
             return "ACVP Test"
+        if self == TEST_TYPES.STACK:
+            return "Stack Usage Test"
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
             return "Example (Bring-Your-Own-FIPS202)"
         if self == TEST_TYPES.CUSTOM_BACKEND:
@@ -301,6 +304,8 @@ class TEST_TYPES(Enum):
             return "kat"
         if self == TEST_TYPES.ACVP:
             return "acvp"
+        if self == TEST_TYPES.STACK:
+            return "stack"
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
             return ""
         if self == TEST_TYPES.CUSTOM_BACKEND:
@@ -656,6 +661,70 @@ class Tests:
                 f.write(json.dumps(v))
 
         self.check_fail()
+
+    def stack(self):
+        """Stack usage analysis"""
+        if self.args.run is False:
+            # For --no-run, just build with stack usage flags without analysis
+            def _stack_compile(opt):
+                self._compile_schemes(TEST_TYPES.STACK, opt)
+
+            if self.do_no_opt():
+                _stack_compile(False)
+            if self.do_opt():
+                _stack_compile(True)
+        else:
+            # Normal case: run full stack analysis (build + run + analyze) via make
+            if self.do_no_opt():
+                self._run_stack_analysis(False)
+            if self.do_opt():
+                self._run_stack_analysis(True)
+
+        self.check_fail()
+
+    def _run_stack_analysis(self, opt):
+        """Run stack analysis by calling make run_stack targets"""
+
+        if opt is None:
+            opt_label = ""
+        elif opt is True:
+            opt_label = " opt"
+        else:
+            opt_label = " no_opt"
+
+        github_log(f"::group::stack analysis {self.compile_mode()}{opt_label}")
+
+        log = logger(TEST_TYPES.STACK, None, self.args.cross_prefix, opt)
+
+        # Build the make command
+        make_cmd = ["make", "run_stack"]
+        make_cmd.extend([f"OPT={1 if opt else 0}"])
+        make_cmd.extend([f"AUTO={1 if self.args.auto else 0}"])
+        make_cmd.extend([f"-j{self.args.j}"])
+
+        if self.args.cross_prefix:
+            make_cmd.extend([f"CROSS_PREFIX={self.args.cross_prefix}"])
+
+        # Handle CFLAGS properly
+        env = os.environ.copy()
+        if self.args.cflags:
+            env["CFLAGS"] = self.args.cflags
+
+        # Add per-function flag if requested
+        if hasattr(self.args, "per_function") and self.args.per_function:
+            env["STACK_ANALYSIS_FLAGS"] = "--per-function"
+
+        log.info(f"Stack analysis: {' '.join(make_cmd)}")
+
+        p = subprocess.run(
+            make_cmd, capture_output=False, universal_newlines=True, env=env
+        )
+
+        if p.returncode != 0:
+            log.error(f"Stack analysis failed")
+            self.fail(f"Stack analysis {self.compile_mode()}{opt_label}")
+
+        github_log("::endgroup::")
 
     def all(self):
         func = self.args.func
@@ -1133,6 +1202,19 @@ def cli():
         "kat", help="Run the kat tests for all parameter sets", parents=[common_parser]
     )
 
+    # stack arguments
+    stack_parser = cmd_subparsers.add_parser(
+        "stack",
+        help="Analyze stack usage for all parameter sets",
+        parents=[common_parser],
+    )
+    stack_parser.add_argument(
+        "--per-function",
+        action="store_true",
+        help="Show per-function stack usage details",
+        default=False,
+    )
+
     args = main_parser.parse_args()
 
     if not hasattr(args, "mac_taskpolicy"):
@@ -1158,6 +1240,8 @@ def cli():
         Tests(args).func()
     elif args.cmd == "kat":
         Tests(args).kat()
+    elif args.cmd == "stack":
+        Tests(args).stack()
 
 
 if __name__ == "__main__":

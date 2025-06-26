@@ -24,6 +24,13 @@ $(MLKEM768_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=768
 MLKEM1024_OBJS = $(call MAKE_OBJS,$(MLKEM1024_DIR),$(SOURCES) $(FIPS202_SRCS))
 $(MLKEM1024_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024
 
+
+
+# Add stack usage flags to library objects when building for stack analysis
+# This is a simple approach - we'll add the flag to all objects
+.PHONY: stack-build-with-flags
+stack-build-with-flags:
+	$(MAKE) CFLAGS="$(CFLAGS) -fstack-usage" stack
 $(BUILD_DIR)/libmlkem512.a: $(MLKEM512_OBJS)
 $(BUILD_DIR)/libmlkem768.a: $(MLKEM768_OBJS)
 $(BUILD_DIR)/libmlkem1024.a: $(MLKEM1024_OBJS)
