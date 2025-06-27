@@ -43,7 +43,9 @@ typedef enum
 typedef enum
 {
   encapsulation,
-  decapsulation
+  decapsulation, 
+  encapsulationKeyCheck, 
+  decapsulationKeyCheck
 } acvp_encapDecap_function;
 
 /* Decode hex character [0-9A-Fa-f] into 0-15 */
@@ -151,6 +153,26 @@ static void acvp_mlkem_encapDecp_VAL_decapsulation(
   print_hex("k", ss, sizeof(ss));
 }
 
+static void acvp_mlkem_encapDecp_VAL_encapsulationKeyCheck(
+    unsigned char const ek[CRYPTO_SECRETKEYBYTES])
+{
+  unsigned char ss[CRYPTO_BYTES];
+
+  CHECK(crypto_kem_dec(ss, c, dk) == 0);
+
+  print_hex("k", ss, sizeof(ss));
+}
+
+static void acvp_mlkem_encapDecp_VAL_decapsulationKeyCheck(
+    unsigned char const dk[CRYPTO_SECRETKEYBYTES])
+{
+  unsigned char ss[CRYPTO_BYTES];
+
+  CHECK(crypto_kem_dec(ss, c, dk) == 0);
+
+  print_hex("k", ss, sizeof(ss));
+}
+
 static void acvp_mlkem_keyGen_AFT(unsigned char const z[CRYPTO_SYMBYTES],
                                   unsigned char const d[CRYPTO_SYMBYTES])
 {
@@ -238,6 +260,14 @@ int main(int argc, char *argv[])
       {
         encapDecap_function = decapsulation;
       }
+      else if (strcmp(*argv, "encapsulationKeyCheck") == 0)
+      {
+        encapDecap_function = encapsulationKeyCheck;
+      }
+      else if (strcmp(*argv, "decapsulationKeyCheck") == 0)
+      {
+        encapDecap_function = decapsulationKeyCheck;
+      }
       else
       {
         goto usage;
@@ -300,6 +330,46 @@ int main(int argc, char *argv[])
 
           /* Call function under test */
           acvp_mlkem_encapDecp_VAL_decapsulation(dk, c);
+          break;
+        }
+        case encapsulationKeyCheck:
+        {
+          unsigned char ek[CRYPTO_PUBLICKEYBYTES];
+          /* Encapsulation only for "AFT" */
+          if (type != VAL)
+          {
+            goto encaps_usage;
+          }
+
+          /* Parse ek */
+          if (argc == 0 || decode_hex("ek", ek, sizeof(ek), *argv) != 0)
+          {
+            goto encaps_usage;
+          }
+          argc--, argv++;
+
+          /* Call function under test */
+          acvp_mlkem_encapDecp_VAL_encapsulationKeyCheck(ek);
+          break;
+        }
+        case decapsulationKeyCheck:
+        {
+          unsigned char dk[CRYPTO_SECRETKEYBYTES];
+          /* Encapsulation only for "AFT" */
+          if (type != VAL)
+          {
+            goto encaps_usage;
+          }
+
+          /* Parse dk */
+          if (argc == 0 || decode_hex("dk", dk, sizeof(dk), *argv) != 0)
+          {
+            goto decaps_usage;
+          }
+          argc--, argv++;
+
+          /* Call function under test */
+          acvp_mlkem_encapDecp_VAL_decapsulationKeyCheck(dk);
           break;
         }
       }
