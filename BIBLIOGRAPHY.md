@@ -188,6 +188,7 @@ source code and documentation.
   - [mlkem/src/compress.h](mlkem/src/compress.h)
   - [mlkem/src/indcpa.c](mlkem/src/indcpa.c)
   - [mlkem/src/kem.c](mlkem/src/kem.c)
+  - [mlkem/src/kem.h](mlkem/src/kem.h)
   - [mlkem/src/poly.c](mlkem/src/poly.c)
   - [mlkem/src/poly_k.c](mlkem/src/poly_k.c)
   - [mlkem/src/sampling.c](mlkem/src/sampling.c)

@@ -1,6 +1,6 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
-This directory contains the ACVP test vectors from [^ACVP_Server], versions v1.1.0.36, v1.1.0.38, and v1.1.0.39. See [^ACVP_Spec] for the
+This directory contains the ACVP test vectors from [^ACVP_Server], versions v1.1.0.38, v1.1.0.39, and v1.1.0.40. See [^ACVP_Spec] for the
 specification of the ACVP tests.
 
 <!--- bibliography --->

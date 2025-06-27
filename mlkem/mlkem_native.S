@@ -191,6 +191,8 @@
 /* mlkem/src/kem.h */
 #undef MLK_CONFIG_API_NO_SUPERCOP
 #undef MLK_KEM_H
+#undef crypto_kem_check_pk
+#undef crypto_kem_check_sk
 #undef crypto_kem_dec
 #undef crypto_kem_enc
 #undef crypto_kem_enc_derand
