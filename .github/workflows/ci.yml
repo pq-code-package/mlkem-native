@@ -19,42 +19,52 @@ jobs:
            name: 'MacOS (aarch64)'
            arch: mac
            mode: native
+           archflags: ''
          - runner: macos-13
            name: 'MacOS (x86_64)'
            arch: mac
            mode: native
+           archflags: '-mavx2 -mbmi2 -mpopcnt -maes'
          - runner: pqcp-arm64
            name: 'ubuntu-latest (aarch64)'
            arch: aarch64
            mode: native
+           archflags: ''
          - runner: pqcp-arm64
            name: 'ubuntu-latest (aarch64)'
            arch: x86_64
            mode: cross-x86_64
+           archflags: '-mavx2 -mbmi2 -mpopcnt -maes'
          - runner: pqcp-arm64
            name: 'ubuntu-latest (aarch64)'
            arch: riscv64
            mode: cross-riscv64
+           archflags: ''
          - runner: pqcp-arm64
            name: 'ubuntu-latest (aarch64)'
            arch: riscv32
            mode: cross-riscv32
+           archflags: ''
          - runner: pqcp-arm64
            name: 'ubuntu-latest (ppc64le)'
            arch: ppc64le
            mode: cross-ppc64le
+           archflags: ''
          - runner: pqcp-x64
            name: 'ubuntu-latest (x86_64)'
            arch: x86_64
            mode: native
+           archflags: '-mavx2 -mbmi2 -mpopcnt -maes'
          - runner: pqcp-x64
            name: 'ubuntu-latest (x86_64)'
            arch: aarch64
            mode: cross-aarch64
+           archflags: ''
          - runner: pqcp-x64
            name: 'ubuntu-latest (x86_64)'
            arch: aarch64_be
            mode: cross-aarch64_be
+           archflags: ''
         exclude:
           - {external: true,
              target: {
@@ -123,6 +133,7 @@ jobs:
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: ${{ matrix.target.mode }}
+          cflags: ${{ matrix.target.archflags }}
           # There is no native code yet on PPC64LE, R-V or AArch64_be, so no point running opt tests
           opt: ${{ (matrix.target.arch != 'ppc64le' && matrix.target.arch != 'riscv64' && matrix.target.arch != 'riscv32' && matrix.target.arch != 'aarch64_be') && 'all' || 'no_opt' }}
       - name: build + test (+debug+memsan+ubsan)
@@ -131,7 +142,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
-          cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all ${{ matrix.target.archflags }}"
           check_namespace: 'false'
   backend_tests:
     name: AArch64 FIPS202 backends (${{ matrix.backend }})
@@ -162,10 +173,13 @@ jobs:
         target:
          - runner: pqcp-arm64
            name: 'aarch64'
+           archflags: ''
          - runner: ubuntu-latest
            name: 'x86_64'
+           archflags: '-mavx2 -mbmi2 -mpopcnt -maes'
          - runner: macos-latest
            name: 'macos'
+           archflags: ''
         compiler:
          - name: gcc-4.8
            shell: ci_gcc48
@@ -272,7 +286,7 @@ jobs:
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "${{ matrix.cflags }}"
+          cflags: "${{ matrix.cflags }} ${{ matrix.target.archflags }}"
       - name: native build+functest (C90)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
         uses: ./.github/actions/multi-functest
@@ -285,7 +299,7 @@ jobs:
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-std=c90 ${{ matrix.cflags }}"
+          cflags: "-std=c90 ${{ matrix.cflags }} ${{ matrix.target.archflags }}"
       - name: native build+functest (C99)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
         uses: ./.github/actions/multi-functest
@@ -298,7 +312,7 @@ jobs:
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-std=c99 ${{ matrix.cflags }}"
+          cflags: "-std=c99 ${{ matrix.cflags }} ${{ matrix.target.archflags }}"
       - name: native build+functest (C11)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
         uses: ./.github/actions/multi-functest
@@ -311,7 +325,7 @@ jobs:
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-std=c11 ${{ matrix.cflags }}"
+          cflags: "-std=c11 ${{ matrix.cflags }} ${{ matrix.target.archflags }}"
       - name: native build+functest (C17)
         if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
                 matrix.compiler.c17 }}
@@ -325,7 +339,7 @@ jobs:
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-std=c17 ${{ matrix.cflags }}"
+          cflags: "-std=c17 ${{ matrix.cflags }} ${{ matrix.target.archflags }}"
       - name: native build+functest (C23)
         if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
                 matrix.compiler.c23 }}
@@ -339,7 +353,7 @@ jobs:
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
-          cflags: "-std=c23 ${{ matrix.cflags }}"
+          cflags: "-std=c23 ${{ matrix.cflags }} ${{ matrix.target.archflags }}"
   config_variations:
     name: Non-standard configurations
     strategy:
@@ -350,8 +364,10 @@ jobs:
         target:
          - runner: pqcp-arm64
            name: 'ubuntu-latest (aarch64)'
+           archflags: ''
          - runner: pqcp-x64
            name: 'ubuntu-latest (x86_64)'
+           archflags: '-mavx2 -mbmi2 -mpopcnt -maes'
         exclude:
           - {external: true,
              target: {
@@ -371,7 +387,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
-          cflags: "-DMLK_CONFIG_KEYGEN_PCT -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          cflags: "-DMLK_CONFIG_KEYGEN_PCT -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all ${{ matrix.target.archflags }}"
           func: true
           kat: true
           acvp: true
@@ -393,7 +409,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
-          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_zeroize_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_zeroize_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all ${{ matrix.target.archflags }}"
           func: true
           kat: true
           acvp: true
@@ -403,7 +419,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
-          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/no_asm_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/no_asm_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all ${{ matrix.target.archflags }}"
           func: true
           kat: true
           acvp: true
@@ -413,7 +429,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
-          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_randombytes_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_randombytes_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all ${{ matrix.target.archflags }}"
           func: true
           kat: true
           acvp: true
@@ -423,7 +439,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
-          cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=1"
+          cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=1 ${{ matrix.target.archflags }}"
           func: true
           kat: true
           acvp: true
@@ -432,7 +448,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
-          cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=2"
+          cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=2 ${{ matrix.target.archflags }}"
           func: true
           kat: true
           acvp: true
@@ -441,7 +457,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
-          cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=4"
+          cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=4 ${{ matrix.target.archflags }}"
           func: true
           kat: true
           acvp: true
@@ -464,7 +480,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
-          cflags: "-Wl,-z,cet-report=error -fcf-protection=full"
+          cflags: "-Wl,-z,cet-report=error -fcf-protection=full -mavx2 -mbmi2 -mpopcnt -maes"
           func: true
           kat: true
           acvp: true
@@ -479,8 +495,10 @@ jobs:
         target:
          - runner: pqcp-arm64
            name: 'aarch64'
+           archflags: ''
          - runner: ubuntu-latest
            name: 'x86_64'
+           archflags: '-mavx2 -mbmi2 -mpopcnt -maes'
         exclude:
           - {external: true,
              target: {
@@ -493,13 +511,13 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: make quickcheck
         run: |
-          OPT=0 CFLAGS="-Imlkem -DMLK_CHECK_APIS -Wno-redundant-decls" make quickcheck
+          OPT=0 CFLAGS="-Imlkem -DMLK_CHECK_APIS -Wno-redundant-decls ${{ matrix.target.archflags }}" make quickcheck
           make clean >/dev/null
-          OPT=1 CFLAGS="-Imlkem -DMLK_CHECK_APIS -Wno-redundant-decls" make quickcheck
+          OPT=1 CFLAGS="-Imlkem -DMLK_CHECK_APIS -Wno-redundant-decls ${{ matrix.target.archflags }}" make quickcheck
       - uses: ./.github/actions/setup-apt
       - name: tests func
         run: |
-          ./scripts/tests func --cflags="-Imlkem -DMLK_CHECK_APIS -Wno-redundant-decls"
+          ./scripts/tests func --cflags="-Imlkem -DMLK_CHECK_APIS -Wno-redundant-decls ${{ matrix.target.archflags }}"
   ec2_functests:
     strategy:
       fail-fast: false
@@ -511,12 +529,14 @@ jobs:
             ec2_ami_id: ami-0d47e137a1108e078 # x86_64 ubuntu-latest, 32g
             compile_mode: native
             opt: all
+            cflags: "-mavx2 -mbmi2 -mpopcnt -maes"
           - name: Intel Xeon 4th gen (t3)
             ec2_instance_type: t3.small
             ec2_ami: ubuntu-latest (custom AMI)
             ec2_ami_id: ami-0d47e137a1108e078 # x86_64 ubuntu-latest, 32g
             compile_mode: native
             opt: all
+            cflags: "-mavx2 -mbmi2 -mpopcnt -maes"
           - name: Graviton2 (c6g.medium)
             ec2_instance_type: c6g.medium
             ec2_ami: ubuntu-latest (custom AMI)
@@ -542,6 +562,7 @@ jobs:
       ec2_ami_id: ${{ matrix.target.ec2_ami_id }}
       compile_mode: ${{ matrix.target.compile_mode }}
       opt: ${{ matrix.target.opt }}
+      cflags: ${{ matrix.target.cflags || '' }}
       functest: true
       kattest: true
       acvptest: true
@@ -593,6 +614,7 @@ jobs:
         uses: ./.github/actions/multi-functest
         with:
           nix-shell: ""
+          cflags: "-mavx2 -mbmi2 -mpopcnt -maes"
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
   ec2_compatibilitytests:
     strategy:
