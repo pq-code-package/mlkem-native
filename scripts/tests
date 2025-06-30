@@ -206,9 +206,13 @@ class TEST_TYPES(Enum):
     MULTILEVEL_BUILD_NATIVE = 12
     MONOLITHIC_BUILD_MULTILEVEL_NATIVE = 13
     MONOLITHIC_BUILD_NATIVE = 14
+    SIZE = 15
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
+
+    def is_measurementCodeSize(self):
+        return self in [TEST_TYPES.SIZE]
 
     def is_example(self):
         return self in TEST_TYPES.examples()
@@ -268,6 +272,8 @@ class TEST_TYPES(Enum):
             return "Example (multilevel build)"
         if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
             return "Example (multilevel build, native)"
+        if self == TEST_TYPES.SIZE:
+            return "Measurement Code Size"
 
     def make_dir(self):
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
@@ -319,6 +325,8 @@ class TEST_TYPES(Enum):
             return ""
         if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
             return ""
+        if self == TEST_TYPES.SIZE:
+            return "size"
 
     def make_run_target(self, scheme):
         t = self.make_target()
@@ -656,6 +664,60 @@ class Tests:
                 f.write(json.dumps(v))
 
         self.check_fail()
+
+    def size(self):
+        output = self.args.output
+
+        test_type = TEST_TYPES.SIZE
+
+        resultss = None
+
+        if self.do_opt_all():
+            self._compile_schemes(test_type, False)
+            if self.args.run:
+                self._run_schemes(test_type, False, suppress_output=False)
+            self._compile_schemes(test_type, True)
+            if self.args.run:
+                resultss = self._run_schemes(test_type, True, suppress_output=False)
+        else:
+            self._compile_schemes(test_type, self.do_opt())
+            if self.args.run:
+                resultss = self._run_schemes(
+                    test_type, self.do_opt(), suppress_output=False
+                )
+
+        if resultss is None:
+            self.check_fail()
+
+        # # NOTE: There will only be one items in resultss, as we haven't yet decided how to write both opt/no-opt benchmark results
+        # for k, results in resultss.items():
+        #     if not (results is not None and output is not None):
+        #         continue
+
+        #     v = []
+        #     for scheme in results:
+        #         schemeStr = str(scheme)
+        #         r = results[scheme]
+
+        #         # The first 3 lines of the output are expected to be
+        #         # keypair cycles=X
+        #         # encaps cycles=X
+        #         # decaps cycles=X
+
+        #         lines = [line for line in r.splitlines() if "=" in line]
+
+        #         d = {k.strip(): int(v) for k, v in (l.split("=") for l in lines)}
+        #         for primitive in ["keypair", "encaps", "decaps"]:
+        #             v.append(
+        #                 {
+        #                     "name": f"{schemeStr} {primitive}",
+        #                     "unit": "cycles",
+        #                     "value": d[f"{primitive} cycles"],
+        #                 }
+        #             )
+
+        #     with open(output, "w") as f:
+        #         f.write(json.dumps(v))
 
     def all(self):
         func = self.args.func
@@ -1032,6 +1094,32 @@ def cli():
         action="store_true",
         default=False,
     )
+    size_parser = cmd_subparsers.add_parser(
+        "size",
+        help="Run the code size measurement for all object file",
+        parents=[common_parser],
+    )
+
+    size_parser.add_argument(
+        "-o", "--output", help="Path to output file in json format"
+    )
+
+    size_parser.add_argument(
+        "-l",
+        help="Explicitly list the examples to run; can be called multiple times",
+        choices=[
+            "bring_your_own_fips202",
+            "custom_backend",
+            "basic",
+            "monolithic_build",
+            "monolithic_build_native",
+            "monolithic_build_multilevel",
+            "monolithic_build_multilevel_native",
+            "multilevel_build",
+            "multilevel_build_native",
+        ],
+        action="append",
+    )
 
     # cbmc arguments
     cbmc_parser = cmd_subparsers.add_parser(
@@ -1158,6 +1246,8 @@ def cli():
         Tests(args).func()
     elif args.cmd == "kat":
         Tests(args).kat()
+    elif args.cmd == "size":
+        Tests(args).size()
 
 
 if __name__ == "__main__":

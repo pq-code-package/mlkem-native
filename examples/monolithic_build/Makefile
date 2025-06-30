@@ -7,6 +7,7 @@
 # Remove or ignore for native builds
 CC  ?= gcc
 AR  ?= ar
+SIZE ?= size
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
@@ -14,6 +15,10 @@ endif
 
 ifeq (,$(findstring $(CROSS_PREFIX),$(AR)))
 AR  := $(CROSS_PREFIX)$(AR)
+endif
+
+ifeq (,$(findstring $(CROSS_PREFIX),$(SIZE)))
+SIZE  := $(CROSS_PREFIX)$(SIZE)
 endif
 
 Q ?= @
@@ -116,7 +121,7 @@ $(BIN1024_FULL): $(APP_SOURCE) $(LIB1024_FULL)
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
 	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_API_PARAMETER_SET=1024 $(INC) $^ -o $@
 
-all: build
+all: build size size_objs
 
 build: $(BIN512_FULL) $(BIN768_FULL) $(BIN1024_FULL)
 
@@ -125,5 +130,16 @@ run: $(BIN512_FULL) $(BIN768_FULL) $(BIN1024_FULL)
 	$(Q)$(EXEC_WRAPPER) ./$(BIN768_FULL)
 	$(Q)$(EXEC_WRAPPER) ./$(BIN1024_FULL)
 
+size: build
+	@echo "=== Size info for static lib $(LIB512_FULL)==="
+	@$(Q)$(SIZE) $(LIB512_FULL)
+	@echo "=== Size info for static lib $(LIB768_FULL)==="
+	@$(Q)$(SIZE) $(LIB768_FULL)
+	@echo "=== Size info for static lib $(LIB1024_FULL)==="
+	@$(Q)$(SIZE) $(LIB1024_FULL)
+	
+size_objs: size
+	@echo "=== Object size summary for all mlkem_{512, 768, 1024} Object==="
+	$(SIZE) $(shell find $(BUILD_DIR) -name '*.o')
 clean:
 	rm -rf $(BUILD_DIR)
