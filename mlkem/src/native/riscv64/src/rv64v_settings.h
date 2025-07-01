@@ -10,9 +10,7 @@
 #define MLK_RVV_VLEN 256
 #endif
 
-/*
-#define MLK_RVV_WIDENING_MUL
-*/
+
 
 /*  vl value for a 16-bit wide type */
 #define MLK_RVV_E16M1_VL (MLK_RVV_VLEN / 16)
