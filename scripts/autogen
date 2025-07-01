@@ -1364,6 +1364,11 @@ def gen_macro_undefs(extra_notes=None):
         filt=native_arith_x86_64, desc="native code (Arith, X86_64)"
     )
     yield "#endif"
+    yield "#if defined(MLK_SYS_RISCV64)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_arith_riscv64, desc="native code (Arith, RISC-V 64)"
+    )
+    yield "#endif"
     yield "#endif"
     yield "#endif"
     yield ""
@@ -1440,6 +1445,10 @@ def gen_monolithic_source_file(dry_run=False):
         yield "#endif"
         yield "#if defined(MLK_SYS_X86_64)"
         for c in filter(native_arith_x86_64, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLK_SYS_RISCV64)"
+        for c in filter(native_arith_riscv64, c_sources):
             yield f'#include "{c}"'
         yield "#endif"
         yield "#endif"

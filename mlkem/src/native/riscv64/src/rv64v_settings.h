@@ -15,7 +15,6 @@
 */
 
 /*  vl value for a 16-bit wide type */
-/* #define MLK_RVV_16M1_VL __riscv_vsetvlmax_e16m1() */
 #define MLK_RVV_E16M1_VL (MLK_RVV_VLEN / 16)
 
 /* check-magic: off */

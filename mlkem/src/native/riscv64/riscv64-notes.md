@@ -50,26 +50,6 @@ time make
 This installs the tools locally locally (no `make install`.)
 
 
-###	An experimental spike emulator with a RISC-V Keccak instruction:
-
-The patch provides a single vector instruction for "full Keccak" used by
-`mlkem/fips202/native/riscv64/keccak_inst.h` when
-`MLK_SYS_RISCV64_KECCAK_INST` is set.
-The corresponding ISA extension flag (that needs to be passed to spike)
-is  `_zvkk`.
-
-```
-cd $RVSRC
-git clone https://github.com/mjosaarinen/riscv-isa-sim.git
-cd riscv-isa-sim
-git checkout dev-keccak
-mkdir build
-cd build
-../configure --prefix=$RISCV --with-target=riscv64-unknown-linux-gnu
-time make
-make install
-```
-
 ### You'll also need pk
 ```
 cd $RVSRC
