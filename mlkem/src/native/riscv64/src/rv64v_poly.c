@@ -14,7 +14,6 @@
 #include "arith_native_riscv64.h"
 #include "rv64v_settings.h"
 
-#ifndef MLK_RVV_WIDENING_MUL
 static inline vint16m1_t fq_redc(vint16m1_t rh, vint16m1_t rl, size_t vl)
 {
   vint16m1_t t;
@@ -27,7 +26,6 @@ static inline vint16m1_t fq_redc(vint16m1_t rh, vint16m1_t rl, size_t vl)
 
   return t;
 }
-#endif /* !MLK_RVV_WIDENING_MUL */
 
 /*  Narrowing reduction */
 
@@ -86,30 +84,22 @@ static inline vint16m1_t fq_csub(vint16m1_t rx, size_t vl)
 
 static inline vint16m1_t fq_mul_vv(vint16m1_t rx, vint16m1_t ry, size_t vl)
 {
-#ifndef MLK_RVV_WIDENING_MUL
   vint16m1_t rl, rh;
 
   rh = __riscv_vmulh_vv_i16m1(rx, ry, vl); /*  h = (x * y) / R */
   rl = __riscv_vmul_vv_i16m1(rx, ry, vl);  /*  l = (x * y) % R */
   return fq_redc(rh, rl, vl);
-#else  /* !MLK_RVV_WIDENING_MUL */
-  return fq_redc2(__riscv_vwmul_vv_i32m2(rx, ry, vl), vl);
-#endif /* MLK_RVV_WIDENING_MUL */
 }
 
 /*  Montgomery multiply: vector-scalar  */
 
 static inline vint16m1_t fq_mul_vx(vint16m1_t rx, int16_t ry, size_t vl)
 {
-#ifndef MLK_RVV_WIDENING_MUL
   vint16m1_t rl, rh;
 
   rh = __riscv_vmulh_vx_i16m1(rx, ry, vl); /*  h = (x * y) / R */
   rl = __riscv_vmul_vx_i16m1(rx, ry, vl);  /*  l = (x * y) % R */
   return fq_redc(rh, rl, vl);
-#else  /* !MLK_RVV_WIDENING_MUL */
-  return fq_redc2(__riscv_vwmul_vx_i32m2(rx, ry, vl), vl);
-#endif /* MLK_RVV_WIDENING_MUL */
 }
 
 /*  full normalization  */
