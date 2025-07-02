@@ -340,6 +340,39 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c23 ${{ matrix.cflags }}"
+  stack_analysis:
+    name: Stack analysis (${{ matrix.target.name }}, ${{ matrix.cflags }})
+    strategy:
+      fail-fast: false
+      matrix:
+        external:
+         - ${{ github.repository_owner != 'pq-code-package' }}
+        target:
+          - runner: pqcp-x64
+            name: x86_64
+          - runner: pqcp-arm64
+            name: aarch64
+        cflags: ['-O3', '-Os']
+        exclude:
+          - external: true
+    runs-on: ${{ matrix.target.runner }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Stack analysis
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          nix-shell: ci_valgrind-varlat_gcc14
+          nix-cache: false
+          opt: all
+          cflags: "${{ matrix.cflags }}"
+          func: false
+          kat: false
+          acvp: false
+          examples: false
+          stack: true
+          check_namespace: false
   config_variations:
     name: Non-standard configurations
     strategy:
