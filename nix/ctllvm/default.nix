@@ -4,13 +4,13 @@
 
 stdenv.mkDerivation rec {
   pname = "ct-llvm";
-  version = "e8e169a7a44e67e7f8d90cd8ff139b984ae3fb73";
+  version = "4a502a1fd1bb9609c676fc2b36f5a77bd90ec850";
 
   src = fetchFromGitHub {
     owner = "Neo-Outis";
     repo = "CT-LLVM-Artifact";
-    rev = "e8e169a7a44e67e7f8d90cd8ff139b984ae3fb73";
-    hash = "sha256-5IhdTf6cskSj8JoyXtmPczgkeQBLgG/FeFqy0uYWcTw=";
+    rev = "4a502a1fd1bb9609c676fc2b36f5a77bd90ec850";
+    hash = "sha256-j/e5feXFJkWJD4z7BXFFmMQsXUUj8Hzf1XSjUNaAXCk=";
   };
 
   nativeBuildInputs = [ llvmPackages.clang ];

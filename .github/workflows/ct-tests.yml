@@ -22,7 +22,7 @@ jobs:
           - shell: ci_valgrind-varlat_clang14
             ctllvm: true
           - shell: ci_valgrind-varlat_clang15
-            ctllvm: false
+            ctllvm: true
           - shell: ci_valgrind-varlat_clang16
             ctllvm: true
           - shell: ci_valgrind-varlat_clang17
@@ -32,7 +32,7 @@ jobs:
           - shell: ci_valgrind-varlat_clang19
             ctllvm: true
           - shell: ci_valgrind-varlat_clang20
-            ctllvm: false  # TODO: Fix CT-LLVM compatibility with LLVM 20 - API changes in callback signatures
+            ctllvm: true
           - shell: ci_valgrind-varlat_gcc48
             ctllvm: false
           - shell: ci_valgrind-varlat_gcc49
