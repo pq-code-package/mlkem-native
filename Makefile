@@ -1,14 +1,14 @@
 # Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-.PHONY: func kat acvp \
-	func_512 kat_512 acvp_512 \
-	func_768 kat_768 acvp_768 \
-	func_1024 kat_1024 acvp_1024 \
-	run_func run_kat run_acvp \
-	run_func_512 run_kat_512 \
-	run_func_768 run_kat_768 \
-	run_func_1024 run_kat_1024 \
+.PHONY: func kat acvp stack \
+	func_512 kat_512 acvp_512 stack_512 \
+	func_768 kat_768 acvp_768 stack_768 \
+	func_1024 kat_1024 acvp_1024 stack_1024 \
+	run_func run_kat run_acvp run_stack \
+	run_func_512 run_kat_512 run_stack_512 \
+	run_func_768 run_kat_768 run_stack_768 \
+	run_func_1024 run_kat_1024 run_stack_1024 \
 	bench_512 bench_768 bench_1024 bench \
 	run_bench_512 run_bench_768 run_bench_1024 run_bench \
 	bench_components_512 bench_components_768 bench_components_1024 bench_components \
@@ -75,6 +75,22 @@ acvp_768:  $(MLKEM768_DIR)/bin/acvp_mlkem768
 acvp_1024: $(MLKEM1024_DIR)/bin/acvp_mlkem1024
 	$(Q)echo "  ACVP       ML-KEM-1024:  $^"
 acvp: acvp_512 acvp_768 acvp_1024
+
+stack_512: $(MLKEM512_DIR)/bin/test_stack512
+	$(Q)echo "  STACK      ML-KEM-512:   $^"
+stack_768: $(MLKEM768_DIR)/bin/test_stack768
+	$(Q)echo "  STACK      ML-KEM-768:   $^"
+stack_1024: $(MLKEM1024_DIR)/bin/test_stack1024
+	$(Q)echo "  STACK      ML-KEM-1024:  $^"
+stack: stack_512 stack_768 stack_1024
+
+run_stack_512: stack_512
+	$(Q)python3 scripts/stack $(MLKEM512_DIR)/bin/test_stack512 --build-dir $(MLKEM512_DIR) $(STACK_ANALYSIS_FLAGS)
+run_stack_768: stack_768
+	$(Q)python3 scripts/stack $(MLKEM768_DIR)/bin/test_stack768 --build-dir $(MLKEM768_DIR) $(STACK_ANALYSIS_FLAGS)
+run_stack_1024: stack_1024
+	$(Q)python3 scripts/stack $(MLKEM1024_DIR)/bin/test_stack1024 --build-dir $(MLKEM1024_DIR) $(STACK_ANALYSIS_FLAGS)
+run_stack: run_stack_512 run_stack_768 run_stack_1024
 
 lib: $(BUILD_DIR)/libmlkem.a $(BUILD_DIR)/libmlkem512.a $(BUILD_DIR)/libmlkem768.a $(BUILD_DIR)/libmlkem1024.a
 
