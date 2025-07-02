@@ -36,7 +36,7 @@ jobs:
           packages: 'cmake python3-jinja2 python3-tabulate python3-git python3-pytest valgrind'
       - uses: ./.github/actions/setup-oqs
         with:
-          commit: '429c98ee7e4aae548cca2a97265ca4337600cb59'
+          commit: 'b5d3dac4ebdfbbc5de1f6ab9fc6a94c3fd47d13d' # latest from main as of 2025-07-02
       - name: Apply patch
         run: |
           cd $LIBOQS_DIR
