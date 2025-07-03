@@ -72,7 +72,6 @@ source code and documentation.
 * URL: https://csrc.nist.gov/pubs/fips/203/final
 * Referenced from:
   - [README.md](README.md)
-  - [dev/x86_64/src/basemul.c](dev/x86_64/src/basemul.c)
   - [mlkem/mlkem_native.h](mlkem/mlkem_native.h)
   - [mlkem/src/compress.c](mlkem/src/compress.c)
   - [mlkem/src/compress.h](mlkem/src/compress.h)
@@ -82,7 +81,6 @@ source code and documentation.
   - [mlkem/src/indcpa.h](mlkem/src/indcpa.h)
   - [mlkem/src/kem.c](mlkem/src/kem.c)
   - [mlkem/src/kem.h](mlkem/src/kem.h)
-  - [mlkem/src/native/x86_64/src/basemul.c](mlkem/src/native/x86_64/src/basemul.c)
   - [mlkem/src/poly.h](mlkem/src/poly.h)
   - [mlkem/src/poly_k.c](mlkem/src/poly_k.c)
   - [mlkem/src/poly_k.h](mlkem/src/poly_k.h)
@@ -209,8 +207,6 @@ source code and documentation.
 * Referenced from:
   - [dev/x86_64/README.md](dev/x86_64/README.md)
   - [dev/x86_64/src/align.h](dev/x86_64/src/align.h)
-  - [dev/x86_64/src/basemul.S](dev/x86_64/src/basemul.S)
-  - [dev/x86_64/src/basemul.c](dev/x86_64/src/basemul.c)
   - [dev/x86_64/src/compress_avx2.c](dev/x86_64/src/compress_avx2.c)
   - [dev/x86_64/src/consts.c](dev/x86_64/src/consts.c)
   - [dev/x86_64/src/consts.h](dev/x86_64/src/consts.h)
@@ -223,8 +219,6 @@ source code and documentation.
   - [dev/x86_64/src/rej_uniform_avx2.c](dev/x86_64/src/rej_uniform_avx2.c)
   - [dev/x86_64/src/tomont.S](dev/x86_64/src/tomont.S)
   - [mlkem/src/native/x86_64/src/align.h](mlkem/src/native/x86_64/src/align.h)
-  - [mlkem/src/native/x86_64/src/basemul.S](mlkem/src/native/x86_64/src/basemul.S)
-  - [mlkem/src/native/x86_64/src/basemul.c](mlkem/src/native/x86_64/src/basemul.c)
   - [mlkem/src/native/x86_64/src/compress_avx2.c](mlkem/src/native/x86_64/src/compress_avx2.c)
   - [mlkem/src/native/x86_64/src/consts.c](mlkem/src/native/x86_64/src/consts.c)
   - [mlkem/src/native/x86_64/src/consts.h](mlkem/src/native/x86_64/src/consts.h)

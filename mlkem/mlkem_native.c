@@ -80,7 +80,6 @@
 #include "src/native/aarch64/src/rej_uniform_table.c"
 #endif
 #if defined(MLK_SYS_X86_64)
-#include "src/native/x86_64/src/basemul.c"
 #include "src/native/x86_64/src/compress_avx2.c"
 #include "src/native/x86_64/src/consts.c"
 #include "src/native/x86_64/src/rej_uniform_avx2.c"
@@ -517,7 +516,9 @@
 #undef mlk_poly_decompress_d4_avx2
 #undef mlk_poly_decompress_d5_avx2
 #undef mlk_poly_mulcache_compute_avx2
-#undef mlk_polyvec_basemul_acc_montgomery_cached_avx2
+#undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k2
+#undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k3
+#undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k4
 #undef mlk_reduce_avx2
 #undef mlk_rej_uniform_avx2
 #undef mlk_rej_uniform_table

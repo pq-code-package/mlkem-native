@@ -84,7 +84,8 @@ static MLK_INLINE void mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
     int16_t r[MLKEM_N], const int16_t a[2 * MLKEM_N],
     const int16_t b[2 * MLKEM_N], const int16_t b_cache[2 * (MLKEM_N / 2)])
 {
-  mlk_polyvec_basemul_acc_montgomery_cached_avx2(2, r, a, b, b_cache);
+  mlk_polyvec_basemul_acc_montgomery_cached_asm_k2(r, a, b, b_cache,
+                                                   mlk_qdata.coeffs);
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 */
 
@@ -93,7 +94,8 @@ static MLK_INLINE void mlk_polyvec_basemul_acc_montgomery_cached_k3_native(
     int16_t r[MLKEM_N], const int16_t a[3 * MLKEM_N],
     const int16_t b[3 * MLKEM_N], const int16_t b_cache[3 * (MLKEM_N / 2)])
 {
-  mlk_polyvec_basemul_acc_montgomery_cached_avx2(3, r, a, b, b_cache);
+  mlk_polyvec_basemul_acc_montgomery_cached_asm_k3(r, a, b, b_cache,
+                                                   mlk_qdata.coeffs);
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 3 */
 
@@ -102,7 +104,8 @@ static MLK_INLINE void mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
     int16_t r[MLKEM_N], const int16_t a[4 * MLKEM_N],
     const int16_t b[4 * MLKEM_N], const int16_t b_cache[4 * (MLKEM_N / 2)])
 {
-  mlk_polyvec_basemul_acc_montgomery_cached_avx2(4, r, a, b, b_cache);
+  mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(r, a, b, b_cache,
+                                                   mlk_qdata.coeffs);
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
 
