@@ -346,16 +346,22 @@
  *              void *mlk_memset(void *s, int c, size_t n)
  *
  *****************************************************************************/
-/* #define MLK_CONFIG_CUSTOM_MEMSET
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "sys.h"
-   static MLK_INLINE void *mlk_memset(void *s, int c, size_t n)
-   {
-       ... your implementation ...
-   }
-   #endif
-*/
+#define MLK_CONFIG_CUSTOM_MEMSET
+#if !defined(__ASSEMBLER__)
+#include <stddef.h>
+#include <stdint.h>
+#include "../mlkem/src/sys.h"
+static MLK_INLINE void *mlk_memset(void *s, int c, size_t n)
+{
+  /* Simple byte-by-byte set implementation for testing */
+  unsigned char *ptr = (unsigned char *)s;
+  for (size_t i = 0; i < n; i++)
+  {
+    ptr[i] = (unsigned char)c;
+  }
+  return s;
+}
+#endif /* !__ASSEMBLER__ */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_INTERNAL_API_QUALIFIER

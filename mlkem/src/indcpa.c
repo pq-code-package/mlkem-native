@@ -64,7 +64,7 @@ static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], mlk_polyvec pk,
 {
   mlk_assert_bound_2d(pk, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
   mlk_polyvec_tobytes(r, pk);
-  memcpy(r + MLKEM_POLYVECBYTES, seed, MLKEM_SYMBYTES);
+  mlk_memcpy(r + MLKEM_POLYVECBYTES, seed, MLKEM_SYMBYTES);
 }
 
 /*************************************************
@@ -87,7 +87,7 @@ static void mlk_unpack_pk(mlk_polyvec pk, uint8_t seed[MLKEM_SYMBYTES],
                           const uint8_t packedpk[MLKEM_INDCPA_PUBLICKEYBYTES])
 {
   mlk_polyvec_frombytes(pk, packedpk);
-  memcpy(seed, packedpk + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
+  mlk_memcpy(seed, packedpk + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
 
   /* NOTE: If a modulus check was conducted on the PK, we know at this
    * point that the coefficients of `pk` are unsigned canonical. The
@@ -215,7 +215,7 @@ void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
 
   for (j = 0; j < 4; j++)
   {
-    memcpy(seed_ext[j], seed, MLKEM_SYMBYTES);
+    mlk_memcpy(seed_ext[j], seed, MLKEM_SYMBYTES);
   }
 
   /* Sample 4 matrix entries a time. */
@@ -344,7 +344,7 @@ void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
 
   MLK_ALIGN uint8_t coins_with_domain_separator[MLKEM_SYMBYTES + 1];
   /* Concatenate coins with MLKEM_K for domain separation of security levels */
-  memcpy(coins_with_domain_separator, coins, MLKEM_SYMBYTES);
+  mlk_memcpy(coins_with_domain_separator, coins, MLKEM_SYMBYTES);
   coins_with_domain_separator[MLKEM_SYMBYTES] = MLKEM_K;
 
   mlk_hash_g(buf, coins_with_domain_separator, MLKEM_SYMBYTES + 1);
