@@ -19,98 +19,116 @@ jobs:
            name: 'MacOS (aarch64)'
            arch: mac
            mode: native
+           nix_shell: ci
          - runner: macos-13
            name: 'MacOS (x86_64)'
            arch: mac
            mode: native
+           nix_shell: ci
          - runner: pqcp-arm64
            name: 'ubuntu-latest (aarch64)'
            arch: aarch64
            mode: native
+           nix_shell: ci
          - runner: pqcp-arm64
            name: 'ubuntu-latest (aarch64)'
            arch: x86_64
            mode: cross-x86_64
+           nix_shell: ci-cross-x86_64
          - runner: pqcp-arm64
            name: 'ubuntu-latest (aarch64)'
            arch: riscv64
            mode: cross-riscv64
+           nix_shell: ci-cross-riscv64
          - runner: pqcp-arm64
            name: 'ubuntu-latest (aarch64)'
            arch: riscv32
            mode: cross-riscv32
+           nix_shell: ci-cross-riscv32
          - runner: pqcp-arm64
            name: 'ubuntu-latest (ppc64le)'
            arch: ppc64le
            mode: cross-ppc64le
+           nix_shell: ci-cross-ppc64le
          - runner: pqcp-x64
            name: 'ubuntu-latest (x86_64)'
            arch: x86_64
            mode: native
+           nix_shell: ci
          - runner: pqcp-x64
            name: 'ubuntu-latest (x86_64)'
            arch: aarch64
            mode: cross-aarch64
+           nix_shell: ci-cross-aarch64
          - runner: pqcp-x64
            name: 'ubuntu-latest (x86_64)'
            arch: aarch64_be
            mode: cross-aarch64_be
+           nix_shell: ci-cross-aarch64_be
         exclude:
           - {external: true,
              target: {
                runner: pqcp-arm64,
                name: 'ubuntu-latest (aarch64)',
                arch: aarch64,
-               mode: native
+               mode: native,
+               nix_shell: ci
              }}
           - {external: true,
              target: {
                runner: pqcp-arm64,
                name: 'ubuntu-latest (aarch64)',
                arch: x86_64,
-               mode: cross-x86_64
+               mode: cross-x86_64,
+               nix_shell: ci-cross-x86_64
              }}
           - {external: true,
              target: {
                runner: pqcp-arm64,
                name: 'ubuntu-latest (aarch64)',
                arch: riscv64,
-               mode: cross-riscv64
+               mode: cross-riscv64,
+               nix_shell: ci-cross-riscv64
              }}
           - {external: true,
              target: {
                runner: pqcp-arm64,
                name: 'ubuntu-latest (aarch64)',
                arch: riscv32,
-               mode: cross-riscv32
+               mode: cross-riscv32,
+               nix_shell: ci-cross-riscv32
              }}
           - {external: true,
              target: {
                runner: pqcp-arm64,
                name: 'ubuntu-latest (ppc64le)',
                arch: ppc64le,
-               mode: cross-ppc64le
+               mode: cross-ppc64le,
+               nix_shell: ci-cross-ppc64le
              }}
           - {external: true,
              target: {
                runner: pqcp-x64,
                name: 'ubuntu-latest (x86_64)',
                arch: x86_64,
-               mode: native
+               mode: native,
+               nix_shell: ci
              }}
           - {external: true,
              target: {
                runner: pqcp-x64,
                name: 'ubuntu-latest (x86_64)',
                arch: aarch64,
-               mode: cross-aarch64
+               mode: cross-aarch64,
+               nix_shell: ci-cross-aarch64
              }}
           - {external: true,
              target: {
                runner: pqcp-x64,
                name: 'ubuntu-latest (x86_64)',
                arch: aarch64_be,
-               mode: cross-aarch64_be
+               mode: cross-aarch64_be,
+               nix_shell: ci-cross-aarch64_be
              }}
     name: Functional tests (${{ matrix.target.arch }}${{ matrix.target.mode != 'native' && ', cross' || ''}})
     runs-on: ${{ matrix.target.runner }}
@@ -119,7 +137,7 @@ jobs:
       - name: build + test
         uses: ./.github/actions/multi-functest
         with:
-          nix-shell: ${{ matrix.target.mode == 'native' && 'ci' || 'ci-cross' }}
+          nix-shell: ${{ matrix.target.nix_shell }}
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: ${{ matrix.target.mode }}

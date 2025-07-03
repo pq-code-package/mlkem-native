@@ -101,6 +101,54 @@ rec {
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
   slothy = pkgs.callPackage ./slothy { };
 
+  # Helper function to build individual cross toolchains
+  _individual_toolchain = { name, cross_compilers }:
+    let
+      common_deps = builtins.attrValues
+        {
+          inherit (pkgs.python3Packages) sympy pyyaml;
+          inherit (pkgs)
+            gnumake
+            python3
+            qemu;
+        } ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [ pkgs.git ];
+    in
+    pkgs.symlinkJoin {
+      name = "toolchain-${name}";
+      paths = cross_compilers ++ common_deps ++ [ native-gcc ];
+    };
+
+  # Individual cross toolchains
+  toolchain_x86_64 = _individual_toolchain {
+    name = "x86_64";
+    cross_compilers = [ (wrap-gcc pkgs.pkgsCross.gnu64) ];
+  };
+
+  toolchain_aarch64 = _individual_toolchain {
+    name = "aarch64";
+    cross_compilers = [ (wrap-gcc pkgs.pkgsCross.aarch64-multiplatform) ];
+  };
+
+  toolchain_riscv64 = _individual_toolchain {
+    name = "riscv64";
+    cross_compilers = [ (wrap-gcc pkgs.pkgsCross.riscv64) ];
+  };
+
+  toolchain_riscv32 = _individual_toolchain {
+    name = "riscv32";
+    cross_compilers = [ (wrap-gcc pkgs.pkgsCross.riscv32) ];
+  };
+
+  toolchain_ppc64le = _individual_toolchain {
+    name = "ppc64le";
+    cross_compilers = [ (wrap-gcc pkgs.pkgsCross.powernv) ];
+  };
+
+  toolchain_aarch64_be = _individual_toolchain {
+    name = "aarch64_be";
+    cross_compilers = pkgs.lib.optionals (pkgs.stdenv.isLinux && pkgs.stdenv.isx86_64) [ (pkgs.callPackage ./aarch64_be-none-linux-gnu-gcc.nix { }) ];
+  };
+
   toolchains = pkgs.symlinkJoin {
     name = "toolchains";
     paths = _toolchains { };
