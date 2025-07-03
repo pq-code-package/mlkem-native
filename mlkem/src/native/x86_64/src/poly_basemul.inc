@@ -100,12 +100,12 @@ vpaddw _s0, _s1, _s0
 vmovdqa _r0, (32*\iter +  0)*2(%rdi)
 vmovdqa _s0, (32*\iter + 16)*2(%rdi)
 /* Bounds. The only assumptions we make on the input are:
- *  abs(a, b) < 2^12 and abs(c, d, dz) < 2^15.
+ *  abs(a, b) < 2^12 and abs(c, d, dz) <= 2^15.
  * Therefore we have that the products a*c, b*dz, a*d, b*c are bounded by 3713.
  * For example,
  *  a*c <= ceil(abs(a) * abs(c) / 2^16) + (Q + 1)/2
  *      <= ceil(2^12 * 2*15 / 2^16) + (3329 + 1)/2
- *      <= 3713 
+ *       = 3713
  * In the worst case, we accumulate 8 such products, which bounds the output
  * coefficients to 8 * 3713 which is less than 2^15 and fits in int16_t.
  */
