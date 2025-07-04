@@ -8,13 +8,17 @@
 #include <string.h>
 #include "../mlkem/src/common.h"
 
-#include "../mlkem/mlkem_native.h"
+#include "../mlkem/src/kem.h"
 
 #define USAGE \
   "acvp_mlkem{lvl} [encapDecap|keyGen] [AFT|VAL] {test specific arguments}"
 #define ENCAPS_USAGE "acvp_mlkem{lvl} encapDecap AFT encaps ek=HEX m=HEX"
 #define DECAPS_USAGE "acvp_mlkem{lvl} encapDecap VAL decaps dk=HEX c=HEX"
 #define KEYGEN_USAGE "acvp_mlkem{lvl} keyGen AFT z=HEX d=HEX"
+#define ENCAPS_KEY_CHECK_USAGE \
+  "acvp_mlkem{lvl} encapDecap VAL encapsulationKeyCheck ek=HEX"
+#define DECAPS_KEY_CHECK_USAGE \
+  "acvp_mlkem{lvl} encapDecap VAL decapsulationKeyCheck dk=HEX"
 
 #define CHECK(x)                                              \
   do                                                          \
@@ -43,7 +47,9 @@ typedef enum
 typedef enum
 {
   encapsulation,
-  decapsulation
+  decapsulation,
+  encapsulationKeyCheck,
+  decapsulationKeyCheck
 } acvp_encapDecap_function;
 
 /* Decode hex character [0-9A-Fa-f] into 0-15 */
@@ -73,7 +79,6 @@ static int decode_hex(const char *prefix, unsigned char *out, size_t out_len,
   size_t i;
   size_t hex_len = strlen(hex);
   size_t prefix_len = strlen(prefix);
-
   /*
    * Check that hex starts with `prefix=`
    * Use memcmp, not strcmp
@@ -89,7 +94,7 @@ static int decode_hex(const char *prefix, unsigned char *out, size_t out_len,
 
   if (hex_len != 2 * out_len)
   {
-    goto hex_usage;
+    return 1;
   }
 
   for (i = 0; i < out_len; i++, hex += 2, out++)
@@ -128,11 +133,11 @@ static void print_hex(const char *name, const unsigned char *raw, size_t len)
 }
 
 static void acvp_mlkem_encapDecp_AFT_encapsulation(
-    unsigned char const ek[CRYPTO_PUBLICKEYBYTES],
-    unsigned char const m[CRYPTO_SYMBYTES])
+    unsigned char const ek[MLKEM_INDCCA_PUBLICKEYBYTES],
+    unsigned char const m[MLKEM_SYMBYTES])
 {
-  unsigned char ct[CRYPTO_CIPHERTEXTBYTES];
-  unsigned char ss[CRYPTO_BYTES];
+  unsigned char ct[MLKEM_INDCCA_CIPHERTEXTBYTES];
+  unsigned char ss[MLKEM_SSBYTES];
 
   CHECK(crypto_kem_enc_derand(ct, ss, ek, m) == 0);
 
@@ -141,25 +146,41 @@ static void acvp_mlkem_encapDecp_AFT_encapsulation(
 }
 
 static void acvp_mlkem_encapDecp_VAL_decapsulation(
-    unsigned char const dk[CRYPTO_SECRETKEYBYTES],
-    unsigned char const c[CRYPTO_CIPHERTEXTBYTES])
+    unsigned char const dk[MLKEM_INDCCA_SECRETKEYBYTES],
+    unsigned char const c[MLKEM_INDCCA_CIPHERTEXTBYTES])
 {
-  unsigned char ss[CRYPTO_BYTES];
+  unsigned char ss[MLKEM_SSBYTES];
 
   CHECK(crypto_kem_dec(ss, c, dk) == 0);
 
   print_hex("k", ss, sizeof(ss));
 }
 
-static void acvp_mlkem_keyGen_AFT(unsigned char const z[CRYPTO_SYMBYTES],
-                                  unsigned char const d[CRYPTO_SYMBYTES])
+static void acvp_mlkem_encapDecp_VAL_encapsulationKeyCheck(
+    unsigned char const ek[MLKEM_INDCCA_PUBLICKEYBYTES])
 {
-  unsigned char ek[CRYPTO_PUBLICKEYBYTES];
-  unsigned char dk[CRYPTO_SECRETKEYBYTES];
+  int rc = 0;
+  rc = (crypto_kem_check_pk(ek) == 0) ? 1 : 0;
+  printf("testPassed=%d\n", rc);
+}
 
-  unsigned char zd[2 * CRYPTO_SYMBYTES];
-  memcpy(zd, d, CRYPTO_SYMBYTES);
-  memcpy(zd + CRYPTO_SYMBYTES, z, CRYPTO_SYMBYTES);
+static void acvp_mlkem_encapDecp_VAL_decapsulationKeyCheck(
+    unsigned char const dk[MLKEM_INDCCA_SECRETKEYBYTES])
+{
+  int rc = 0;
+  rc = (crypto_kem_check_sk(dk) == 0) ? 1 : 0;
+  printf("testPassed=%d\n", rc);
+}
+
+static void acvp_mlkem_keyGen_AFT(unsigned char const z[MLKEM_SYMBYTES],
+                                  unsigned char const d[MLKEM_SYMBYTES])
+{
+  unsigned char ek[MLKEM_INDCCA_PUBLICKEYBYTES];
+  unsigned char dk[MLKEM_INDCCA_SECRETKEYBYTES];
+
+  unsigned char zd[2 * MLKEM_SYMBYTES];
+  memcpy(zd, d, MLKEM_SYMBYTES);
+  memcpy(zd + MLKEM_SYMBYTES, z, MLKEM_SYMBYTES);
 
   CHECK(crypto_kem_keypair_derand(ek, dk, zd) == 0);
 
@@ -238,6 +259,14 @@ int main(int argc, char *argv[])
       {
         encapDecap_function = decapsulation;
       }
+      else if (strcmp(*argv, "encapsulationKeyCheck") == 0)
+      {
+        encapDecap_function = encapsulationKeyCheck;
+      }
+      else if (strcmp(*argv, "decapsulationKeyCheck") == 0)
+      {
+        encapDecap_function = decapsulationKeyCheck;
+      }
       else
       {
         goto usage;
@@ -248,8 +277,8 @@ int main(int argc, char *argv[])
       {
         case encapsulation:
         {
-          unsigned char ek[CRYPTO_PUBLICKEYBYTES];
-          unsigned char m[CRYPTO_SYMBYTES];
+          unsigned char ek[MLKEM_INDCCA_PUBLICKEYBYTES];
+          unsigned char m[MLKEM_SYMBYTES];
           /* Encapsulation only for "AFT" */
           if (type != AFT)
           {
@@ -276,8 +305,8 @@ int main(int argc, char *argv[])
         }
         case decapsulation:
         {
-          unsigned char dk[CRYPTO_SECRETKEYBYTES];
-          unsigned char c[CRYPTO_CIPHERTEXTBYTES];
+          unsigned char dk[MLKEM_INDCCA_SECRETKEYBYTES];
+          unsigned char c[MLKEM_INDCCA_CIPHERTEXTBYTES];
           /* Decapsulation only for "VAL" */
           if (type != VAL)
           {
@@ -302,13 +331,65 @@ int main(int argc, char *argv[])
           acvp_mlkem_encapDecp_VAL_decapsulation(dk, c);
           break;
         }
+        case encapsulationKeyCheck:
+        {
+          unsigned char ek[MLKEM_INDCCA_PUBLICKEYBYTES];
+          /* encapsulationKeyCheck only for "VAL" */
+          if (type != VAL || argc == 0)
+          {
+            goto encapsulationKeyCheck_usage;
+          }
+
+          /* Parse ek */
+          if (decode_hex("ek", ek, sizeof(ek), *argv) != 0)
+          {
+            /*
+              ACVP 1.1.0.40+ {en, de}capsulationKeyCheck test cases test keys of
+              incorrect length. The mlkem-native API does not allow passing keys
+              of incorrect length. We, hence, fail during decoding instead.
+            */
+            printf("testPassed=0\n");
+            return 0;
+          }
+          argc--, argv++;
+
+          /* Call function under test */
+          acvp_mlkem_encapDecp_VAL_encapsulationKeyCheck(ek);
+          break;
+        }
+        case decapsulationKeyCheck:
+        {
+          unsigned char dk[MLKEM_INDCCA_SECRETKEYBYTES];
+          /* Encapsulation only for "VAL" */
+          if (type != VAL || argc == 0)
+          {
+            goto decapsulationKeyCheck_usage;
+          }
+
+          /* Parse dk */
+          if (decode_hex("dk", dk, sizeof(dk), *argv) != 0)
+          {
+            /*
+              ACVP 1.1.0.40+ {en, de}capsulationKeyCheck test cases test keys of
+              incorrect length. The mlkem-native API does not allow passing keys
+              of incorrect length. We, hence, fail during decoding instead.
+            */
+            printf("testPassed=0\n");
+            return 0;
+          }
+          argc--, argv++;
+
+          /* Call function under test */
+          acvp_mlkem_encapDecp_VAL_decapsulationKeyCheck(dk);
+          break;
+        }
       }
       break;
     }
     case keyGen:
     {
-      unsigned char z[CRYPTO_SYMBYTES];
-      unsigned char d[CRYPTO_SYMBYTES];
+      unsigned char z[MLKEM_SYMBYTES];
+      unsigned char d[MLKEM_SYMBYTES];
       /* keyGen only for "AFT" */
       if (type != AFT)
       {
@@ -353,5 +434,13 @@ decaps_usage:
 
 keygen_usage:
   fprintf(stderr, KEYGEN_USAGE "\n");
+  return (1);
+
+encapsulationKeyCheck_usage:
+  fprintf(stderr, ENCAPS_KEY_CHECK_USAGE "\n");
+  return (1);
+
+decapsulationKeyCheck_usage:
+  fprintf(stderr, DECAPS_KEY_CHECK_USAGE "\n");
   return (1);
 }

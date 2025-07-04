@@ -22,10 +22,6 @@ exec_prefix = exec_prefix.split(" ") if exec_prefix != "" else []
 acvp_dir = "test/acvp_data"
 acvp_jsons = [
     (
-        f"{acvp_dir}/acvp_v1.1.0.36_keyGen_prompt.json",
-        f"{acvp_dir}/acvp_v1.1.0.36_keyGen_expectedResults.json",
-    ),
-    (
         f"{acvp_dir}/acvp_v1.1.0.38_keyGen_prompt.json",
         f"{acvp_dir}/acvp_v1.1.0.38_keyGen_expectedResults.json",
     ),
@@ -34,8 +30,8 @@ acvp_jsons = [
         f"{acvp_dir}/acvp_v1.1.0.39_keyGen_expectedResults.json",
     ),
     (
-        f"{acvp_dir}/acvp_v1.1.0.36_encapDecap_prompt.json",
-        f"{acvp_dir}/acvp_v1.1.0.36_encapDecap_expectedResults.json",
+        f"{acvp_dir}/acvp_v1.1.0.40_keyGen_prompt.json",
+        f"{acvp_dir}/acvp_v1.1.0.40_keyGen_expectedResults.json",
     ),
     (
         f"{acvp_dir}/acvp_v1.1.0.38_encapDecap_prompt.json",
@@ -44,6 +40,10 @@ acvp_jsons = [
     (
         f"{acvp_dir}/acvp_v1.1.0.39_encapDecap_prompt.json",
         f"{acvp_dir}/acvp_v1.1.0.39_encapDecap_expectedResults.json",
+    ),
+    (
+        f"{acvp_dir}/acvp_v1.1.0.40_encapDecap_prompt.json",
+        f"{acvp_dir}/acvp_v1.1.0.40_encapDecap_expectedResults.json",
     ),
 ]
 
@@ -113,12 +113,15 @@ def run_encapDecap_test(tg, tc):
             results[k] = v
     elif tg["function"] == "decapsulation":
         acvp_bin = get_acvp_binary(tg)
+        # TODO: Remove this fallback workaround. v.1.1.0.40 moved the dk from the
+        # tg to the tc. This can be removed when v1.1.0.39 is removed.
+        dk_value = tc.get("dk", tg.get("dk"))
         acvp_call = exec_prefix + [
             acvp_bin,
             "encapDecap",
             "VAL",
             "decapsulation",
-            f"dk={tg['dk']}",
+            f"dk={dk_value}",
             f"c={tc['c']}",
         ]
         result = subprocess.run(acvp_call, encoding="utf-8", capture_output=True)
@@ -131,6 +134,45 @@ def run_encapDecap_test(tg, tc):
         for l in result.stdout.splitlines():
             (k, v) = l.split("=")
             results[k] = v
+    elif tg["function"] == "encapsulationKeyCheck":
+        acvp_bin = get_acvp_binary(tg)
+        acvp_call = exec_prefix + [
+            acvp_bin,
+            "encapDecap",
+            "VAL",
+            "encapsulationKeyCheck",
+            f"ek={tc['ek']}",
+        ]
+        result = subprocess.run(acvp_call, encoding="utf-8", capture_output=True)
+        if result.returncode != 0:
+            err("FAIL!")
+            err(f"{acvp_call} failed with error code {result.returncode}")
+            err(result.stderr)
+            exit(1)
+        # Extract results
+        for l in result.stdout.splitlines():
+            (k, v) = l.split("=")
+            results[k] = v == "1"
+
+    elif tg["function"] == "decapsulationKeyCheck":
+        acvp_bin = get_acvp_binary(tg)
+        acvp_call = exec_prefix + [
+            acvp_bin,
+            "encapDecap",
+            "VAL",
+            "decapsulationKeyCheck",
+            f"dk={tc['dk']}",
+        ]
+        result = subprocess.run(acvp_call, encoding="utf-8", capture_output=True)
+        if result.returncode != 0:
+            err("FAIL!")
+            err(f"{acvp_call} failed with error code {result.returncode}")
+            err(result.stderr)
+            exit(1)
+        # Extract results
+        for l in result.stdout.splitlines():
+            (k, v) = l.split("=")
+            results[k] = v == "1"
     info("done")
     return results
 
