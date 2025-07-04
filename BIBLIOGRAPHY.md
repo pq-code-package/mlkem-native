@@ -50,7 +50,10 @@ source code and documentation.
   - [mlkem/src/config.h](mlkem/src/config.h)
   - [mlkem/src/kem.c](mlkem/src/kem.c)
   - [test/break_pct_config.h](test/break_pct_config.h)
+  - [test/custom_memcpy_config.h](test/custom_memcpy_config.h)
+  - [test/custom_memset_config.h](test/custom_memset_config.h)
   - [test/custom_randombytes_config.h](test/custom_randombytes_config.h)
+  - [test/custom_stdlib_config.h](test/custom_stdlib_config.h)
   - [test/custom_zeroize_config.h](test/custom_zeroize_config.h)
   - [test/no_asm_config.h](test/no_asm_config.h)
 

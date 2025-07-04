@@ -135,7 +135,7 @@ void mlk_poly_compress_d10_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
     t1 = _mm256_extracti128_si256(f0, 1);
     t0 = _mm_blend_epi16(t0, t1, 0xE0);
     _mm_storeu_si128((__m128i *)&r[20 * i + 0], t0);
-    memcpy(&r[20 * i + 16], &t1, 4);
+    mlk_memcpy(&r[20 * i + 16], &t1, 4);
   }
 }
 
@@ -167,7 +167,7 @@ void mlk_poly_decompress_d10_avx2(
   }
 
   /* Handle load in last iteration especially to avoid buffer overflow */
-  memcpy(&f, &a[20 * i], 20);
+  mlk_memcpy(&f, &a[20 * i], 20);
   /* The rest is the same */
   f = _mm256_permute4x64_epi64(f, 0x94);
   f = _mm256_shuffle_epi8(f, shufbidx);
@@ -219,7 +219,7 @@ void mlk_poly_compress_d5_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
     t1 = _mm256_extracti128_si256(f0, 1);
     t0 = _mm_blendv_epi8(t0, t1, _mm256_castsi256_si128(shufbidx));
     _mm_storeu_si128((__m128i *)&r[20 * i + 0], t0);
-    memcpy(&r[20 * i + 16], &t1, 4);
+    mlk_memcpy(&r[20 * i + 16], &t1, 4);
   }
 }
 
@@ -245,7 +245,7 @@ void mlk_poly_decompress_d5_avx2(__m256i *MLK_RESTRICT r,
   for (i = 0; i < MLKEM_N / 16; i++)
   {
     t = _mm_loadl_epi64((__m128i *)&a[10 * i + 0]);
-    memcpy(&ti, &a[10 * i + 8], 2);
+    mlk_memcpy(&ti, &a[10 * i + 8], 2);
     t = _mm_insert_epi16(t, ti, 4);
     f = _mm256_broadcastsi128_si256(t);
     f = _mm256_shuffle_epi8(f, shufbidx);
@@ -326,7 +326,7 @@ void mlk_poly_compress_d11_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
   t0 = _mm_blendv_epi8(t0, t1, _mm256_castsi256_si128(shufbidx));
   _mm_storeu_si128((__m128i *)&r[22 * i + 0], t0);
   /* Handle store in last iteration especially to avoid overflow */
-  memcpy(&r[22 * i + 16], &t1, 6);
+  mlk_memcpy(&r[22 * i + 16], &t1, 6);
 }
 
 void mlk_poly_decompress_d11_avx2(
@@ -363,7 +363,7 @@ void mlk_poly_decompress_d11_avx2(
   }
 
   /* Handle load of last iteration especially */
-  memcpy(&f, &a[22 * i], 22);
+  mlk_memcpy(&f, &a[22 * i], 22);
   /* The rest of the iteration is the same */
   f = _mm256_permute4x64_epi64(f, 0x94);
   f = _mm256_shuffle_epi8(f, shufbidx);

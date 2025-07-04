@@ -44,6 +44,10 @@ jobs:
         run: |
           cd $AWSLC_DIR/crypto/fipsmodule/ml_kem
           GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA ./importer.sh --force
+      - name: Apply custom stdlib patch
+        run: |
+          cd $AWSLC_DIR
+          patch -p0 < $GITHUB_WORKSPACE/integration/aws-lc/add-custom-stdlib.patch
       - name: Build+Test AWS-LC (FIPS=${{ matrix.fips }})
         run: |
           cd $AWSLC_DIR
@@ -91,6 +95,10 @@ jobs:
         run: |
           cd $AWSLC_DIR/crypto/fipsmodule/ml_kem
           GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA ./importer.sh --force
+      - name: Apply custom stdlib patch
+        run: |
+          cd $AWSLC_DIR
+          patch -p0 < $GITHUB_WORKSPACE/integration/aws-lc/add-custom-stdlib.patch
       - name: Run test
         run: |
           cd $AWSLC_DIR
@@ -123,6 +131,10 @@ jobs:
         run: |
           cd $AWSLC_DIR/crypto/fipsmodule/ml_kem
           GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA ./importer.sh --force
+      - name: Apply custom stdlib patch
+        run: |
+          cd $AWSLC_DIR
+          patch -p0 < $GITHUB_WORKSPACE/integration/aws-lc/add-custom-stdlib.patch
       - name: Run test
         run: |
           cd $AWSLC_DIR

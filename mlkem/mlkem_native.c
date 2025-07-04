@@ -169,6 +169,8 @@
 #undef MLK_NAMESPACE_K
 #undef MLK_NAMESPACE_PREFIX
 #undef MLK_NAMESPACE_PREFIX_K
+#undef mlk_memcpy
+#undef mlk_memset
 /* mlkem/src/indcpa.h */
 #undef MLK_INDCPA_H
 #undef mlk_gen_matrix

@@ -119,7 +119,7 @@ void mlk_shake128x4_absorb_once(mlk_shake128x4ctx *state, const uint8_t *in0,
                                 const uint8_t *in1, const uint8_t *in2,
                                 const uint8_t *in3, size_t inlen)
 {
-  memset(state, 0, sizeof(mlk_shake128x4ctx));
+  mlk_memset(state, 0, sizeof(mlk_shake128x4ctx));
   mlk_keccak_absorb_once_x4(state->ctx, SHAKE128_RATE, in0, in1, in2, in3,
                             inlen, 0x1F);
 }
@@ -145,7 +145,7 @@ static void mlk_shake256x4_absorb_once(mlk_shake256x4_ctx *state,
                                        const uint8_t *in2, const uint8_t *in3,
                                        size_t inlen)
 {
-  memset(state, 0, sizeof(mlk_shake128x4ctx));
+  mlk_memset(state, 0, sizeof(mlk_shake128x4ctx));
   mlk_keccak_absorb_once_x4(state->ctx, SHAKE256_RATE, in0, in1, in2, in3,
                             inlen, 0x1F);
 }
@@ -183,10 +183,10 @@ void mlk_shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
   if (outlen)
   {
     mlk_shake256x4_squeezeblocks(tmp0, tmp1, tmp2, tmp3, 1, &statex);
-    memcpy(out0, tmp0, outlen);
-    memcpy(out1, tmp1, outlen);
-    memcpy(out2, tmp2, outlen);
-    memcpy(out3, tmp3, outlen);
+    mlk_memcpy(out0, tmp0, outlen);
+    mlk_memcpy(out1, tmp1, outlen);
+    mlk_memcpy(out2, tmp2, outlen);
+    mlk_memcpy(out3, tmp3, outlen);
   }
 
   /* Specification: Partially implements
