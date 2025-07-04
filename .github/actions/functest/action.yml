@@ -49,6 +49,9 @@ inputs:
   stack:
     description: Determine whether to run stack analysis or not
     default: "false"
+  extra_args:
+    description: Additional arguments to pass to the tests script
+    default: ""
 runs:
   using: composite
   steps:
@@ -96,7 +99,7 @@ runs:
         shell: ${{ env.SHELL }}
         run: |
           make clean
-          ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.EXAMPLES }} --${{ env.STACK }} -v
+          ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.EXAMPLES }} --${{ env.STACK }} -v ${{ inputs.extra_args }}
       - name: Post ${{ env.MODE }} Tests
         shell: ${{ env.SHELL }}
         if: success() || failure()

@@ -46,6 +46,9 @@ inputs:
   stack:
     description: Determine whether to run stack analysis or not
     default: "false"
+  extra_args:
+    description: Additional arguments to pass to the tests script
+    default: ""
 runs:
   using: composite
   steps:
@@ -66,6 +69,7 @@ runs:
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
+          extra_args: ${{ inputs.extra_args }}
       - name: Cross x86_64 Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-x86_64') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -85,6 +89,7 @@ runs:
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
+          extra_args: ${{ inputs.extra_args }}
       - name: Cross aarch64 Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-aarch64') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -104,6 +109,7 @@ runs:
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
+          extra_args: ${{ inputs.extra_args }}
       - name: Cross ppc64le Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-ppc64le') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -123,6 +129,7 @@ runs:
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
+          extra_args: ${{ inputs.extra_args }}
       - name: Cross aarch64_be Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-aarch64_be') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -142,6 +149,7 @@ runs:
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
+          extra_args: ${{ inputs.extra_args }}
       - name: Cross riscv64 Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-riscv64') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -161,6 +169,7 @@ runs:
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
+          extra_args: ${{ inputs.extra_args }}
       - name: Cross riscv32 Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-riscv32') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -180,3 +189,4 @@ runs:
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
+          extra_args: ${{ inputs.extra_args }}

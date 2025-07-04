@@ -169,8 +169,9 @@ jobs:
           compile_mode: 'native'
           opt: 'opt'
           examples: 'false'
-          cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLK_FORCE_AARCH64 -DMLK_CONFIG_FIPS202_BACKEND_FILE=\\\\\\\"fips202/native/aarch64/${{ matrix.backend }}.h\\\\\\\""
+          cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           check_namespace: 'false'
+          extra_args: "--fips202-aarch64-backend ${{ matrix.backend }}"
   compiler_tests:
     name: Compiler tests  (${{ matrix.compiler.name }}, ${{ matrix.target.name }}, ${{ matrix.cflags }})
     strategy:
