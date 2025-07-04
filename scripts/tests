@@ -422,6 +422,18 @@ class Tests:
         if test_type.is_example() and self.args.cross_prefix != "":
             cflags += " -static"
 
+        # Add FIPS202 backend selection if specified and this is an OPT build
+        if self.args.fips202_aarch64_backend != "auto" and opt is True:
+            # Make sure we're forcing AArch64 architecture
+            if not " -DMLK_FORCE_AARCH64" in cflags:
+                cflags += " -DMLK_FORCE_AARCH64"
+
+            # Enable native backend for FIPS202
+            cflags += " -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202"
+
+            # Specify the backend file
+            cflags += f' -DMLK_CONFIG_FIPS202_BACKEND_FILE=\\"fips202/native/aarch64/{self.args.fips202_aarch64_backend}.h\\"'
+
         env_update = {}
         if cflags != "":
             env_update["CFLAGS"] = cflags
@@ -931,6 +943,21 @@ def cli():
         choices=["ALL", "OPT", "NO_OPT"],
         type=str.upper,
         default="ALL",
+    )
+
+    common_parser.add_argument(
+        "--fips202-aarch64-backend",
+        help="Select FIPS202 AArch64 backend",
+        choices=[
+            "auto",
+            "x1_scalar",
+            "x1_v84a",
+            "x2_v84a",
+            "x4_v8a_scalar",
+            "x4_v8a_v84a_scalar",
+        ],
+        default="auto",
+        type=str,
     )
 
     # --run / --no-run
