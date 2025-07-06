@@ -11,6 +11,29 @@ set -o pipefail
 ROOT="$(realpath "$(dirname "$0")"/../)"
 GITHUB_STEP_SUMMARY=${GITHUB_STEP_SUMMARY:-/dev/stdout}
 
+# Check if we're in GitHub context
+IN_GITHUB_CONTEXT=false
+if [[ $GITHUB_STEP_SUMMARY != "/dev/stdout" ]]; then
+  IN_GITHUB_CONTEXT=true
+fi
+
+# Standard color definitions
+GREEN="\033[32m"
+RED="\033[31m"
+BLUE="\033[94m"
+BOLD="\033[1m"
+NORMAL="\033[0m"
+
+info()
+{
+  printf "%b %b\n" "${GREEN}✓" "${NORMAL}${*}"
+}
+
+error()
+{
+  printf "%b %b\n" "${RED}✗" "${NORMAL}${*}"
+}
+
 checkerr()
 {
   local code=$?
@@ -22,44 +45,92 @@ checkerr()
   fi
 
   if [[ ${#out} != 0 ]]; then
-    echo "$out" | while read -r file line; do
-      echo "::error file=$file,line=${line:-1},title=Format error::$file require to be formatted"
-    done
+    if $IN_GITHUB_CONTEXT; then
+      echo "$out" | while read -r file line; do
+        echo "::error file=$file,line=${line:-1},title=Format error::$file require to be formatted"
+      done
+    fi
     success=false
   fi
 
   if $success; then
-    echo ":white_check_mark: $title" >>"$GITHUB_STEP_SUMMARY"
+    info "$title"
+    gh_summary_success "$title"
   else
+    error "$title"
     SUCCESS=false
-    echo ":x: $title" >>"$GITHUB_STEP_SUMMARY"
+    gh_summary_failure "$title"
+  fi
+}
+
+gh_group_start()
+{
+  if $IN_GITHUB_CONTEXT; then
+    echo "::group::$1"
+  fi
+}
+
+gh_group_end()
+{
+  if $IN_GITHUB_CONTEXT; then
+    echo "::endgroup::"
+  fi
+}
+
+gh_summary_success()
+{
+  if $IN_GITHUB_CONTEXT; then
+    echo ":white_check_mark: $1" >>"$GITHUB_STEP_SUMMARY"
+  fi
+}
+
+gh_summary_failure()
+{
+  if $IN_GITHUB_CONTEXT; then
+    echo ":x: $1" >>"$GITHUB_STEP_SUMMARY"
+  fi
+}
+
+gh_error()
+{
+  if $IN_GITHUB_CONTEXT; then
+    echo "::error file=$1,line=${2:-1},title=$3::$4"
+  fi
+}
+
+gh_error_simple()
+{
+  if $IN_GITHUB_CONTEXT; then
+    echo "::error title=$1::$2"
   fi
 }
 
 # Formatting
 SUCCESS=true
 
-echo "::group::Linting nix files with nixpkgs-fmt"
+gh_group_start "Linting nix files with nixpkgs-fmt"
 checkerr "Lint nix" "$(nixpkgs-fmt --check "$ROOT")"
-echo "::endgroup::"
+gh_group_end
 
-echo "::group::Linting shell scripts with shfmt"
+gh_group_start "Linting shell scripts with shfmt"
 checkerr "Lint shell" "$(shfmt -s -l -i 2 -ci -fn $(shfmt -f $(git grep -l '' :/)))"
-echo "::endgroup::"
+gh_group_end
 
-echo "::group::Linting python scripts with black"
+gh_group_start "Linting python scripts with black"
 if ! diff=$(black --check --diff -q --include "(scripts/tests|scripts/simpasm|scripts/autogen|scripts/check-namespace|\.py$)" "$ROOT"); then
-  echo "::error title=Format error::$diff"
+  gh_error_simple "Format error" "$diff"
+  error "Lint python"
   SUCCESS=false
-  echo ":x: Lint python" >>"$GITHUB_STEP_SUMMARY"
+  gh_summary_failure "Lint python"
 else
-  echo ":white_check_mark: Lint Python" >>"$GITHUB_STEP_SUMMARY"
+  info "Lint Python"
+  gh_summary_success "Lint Python"
 fi
-echo "::endgroup::"
+gh_group_end
 
-echo "::group::Linting c files with clang-format"
+gh_group_start "Linting c files with clang-format"
 checkerr "Lint C" "$(clang-format $(git ls-files ":/*.c" ":/*.h") --Werror --dry-run 2>&1 | grep "error:" | cut -d ':' -f 1,2 | tr ':' ' ')"
-echo "::endgroup::"
+gh_group_end
 
 check-eol-dry-run()
 {
@@ -71,9 +142,9 @@ check-eol-dry-run()
     fi
   done
 }
-echo "::group::Checking eol"
+gh_group_start "Checking eol"
 checkerr "Check eol" "$(check-eol-dry-run)"
-echo "::endgroup::"
+gh_group_end
 
 check-spdx()
 {
@@ -81,14 +152,14 @@ check-spdx()
   for file in $(git ls-files -- ":/" ":/!:*.json" ":/!:*.png" ":/!:*LICENSE*" ":/!:.git*" ":/!:flake.lock"); do
     # Ignore symlinks
     if [[ ! -L $file && $(grep "SPDX-License-Identifier:" $file | wc -l) == 0 ]]; then
-      echo "::error file=$file,line=${line:-1},title=Missing license header error::$file is missing SPDX License header"
+      gh_error "$file" "${line:-1}" "Missing license header error" "$file is missing SPDX License header"
       success=false
     fi
   done
   for file in $(git ls-files -- "*.[chsS]" "*.py" ":/!proofs/cbmc/*.py" ":/!examples/bring_your_own_fips202/custom_fips202/tiny_sha3/*" ":/!examples/custom_backend/mlkem_native/mlkem/src/fips202/native/custom/src/*"); do
     # Ignore symlinks
     if [[ ! -L $file && $(grep "Copyright (c) The mlkem-native project authors" $file | wc -l) == 0 ]]; then
-      echo "::error file=$file,line=${line:-1},title=Missing copyright header error::$file is missing copyright header"
+      gh_error "$file" "${line:-1}" "Missing copyright header error" "$file is missing copyright header"
       success=false
     fi
   done
@@ -96,49 +167,55 @@ check-spdx()
   for file in $(git ls-files -- "*.[chsSi]" | grep "^dev/\|^mlkem/"); do
     # Ignore symlinks
     if [[ ! -L $file && $(grep "SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT" $file | wc -l) == 0 ]]; then
-      echo "::error file=$file,line=${line:-1},title=Missing license header error::$file is not licensed under 'Apache-2.0 OR ISC OR MIT'"
+      gh_error "$file" "${line:-1}" "Missing license header error" "$file is not licensed under 'Apache-2.0 OR ISC OR MIT'"
       success=false
     fi
   done
 
   if $success; then
-    echo ":white_check_mark: Check SPDX + Copyright" >>"$GITHUB_STEP_SUMMARY"
+    info "Check SPDX + Copyright"
+    gh_summary_success "Check SPDX + Copyright"
   else
+    error "Check SPDX + Copyright"
     SUCCESS=false
-    echo ":x: Check SPDX + Copyright" >>"$GITHUB_STEP_SUMMARY"
+    gh_summary_failure "Check SPDX + Copyright"
   fi
 }
-echo "::group::Checking SPDX + Copyright headers"
+gh_group_start "Checking SPDX + Copyright headers"
 check-spdx
-echo "::endgroup::"
+gh_group_end
 
 check-autogenerated-files()
 {
   if python3 $ROOT/scripts/autogen --dry-run; then
-    echo ":white_check_mark: Check native auto-generated files" >>"$GITHUB_STEP_SUMMARY"
+    info "Check native auto-generated files"
+    gh_summary_success "Check native auto-generated files"
   else
-    echo ":x: Check native auto-generated files" >>"$GITHUB_STEP_SUMMARY"
+    error "Check native auto-generated files"
+    gh_summary_failure "Check native auto-generated files"
     SUCCESS=false
   fi
 }
 
-echo "::group::Check native auto-generated files"
+gh_group_start "Check native auto-generated files"
 check-autogenerated-files
-echo "::endgroup::"
+gh_group_end
 
 check-magic()
 {
   if python3 $ROOT/scripts/check-magic >/dev/null; then
-    echo ":white_check_mark: Check magic constants" >>"$GITHUB_STEP_SUMMARY"
+    info "Check magic constants"
+    gh_summary_success "Check magic constants"
   else
-    echo ":x: Check magic constants" >>"$GITHUB_STEP_SUMMARY"
+    error "Check magic constants"
+    gh_summary_failure "Check magic constants"
     SUCCESS=false
   fi
 }
 
-echo "::group::Check magic constants"
+gh_group_start "Check magic constants"
 check-magic
-echo "::endgroup::"
+gh_group_end
 
 if ! $SUCCESS; then
   exit 1
@@ -147,16 +224,18 @@ fi
 check-contracts()
 {
   if python3 $ROOT/scripts/check-contracts >/dev/null; then
-    echo ":white_check_mark: Check contracts" >>"$GITHUB_STEP_SUMMARY"
+    info "Check contracts"
+    gh_summary_success "Check contracts"
   else
-    echo ":x: Check contracts" >>"$GITHUB_STEP_SUMMARY"
+    error "Check contracts"
+    gh_summary_failure "Check contracts"
     SUCCESS=false
   fi
 }
 
-echo "::group::Check contracts"
+gh_group_start "Check contracts"
 check-contracts
-echo "::endgroup::"
+gh_group_end
 
 if ! $SUCCESS; then
   exit 1

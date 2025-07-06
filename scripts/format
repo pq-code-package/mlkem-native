@@ -10,18 +10,27 @@ set -o pipefail
 # consts
 ROOT="$(realpath "$(dirname "$0")"/../)"
 
-GREEN="$(tput setaf 2)"
-NORMAL="$(tput sgr0)"
+# Standard color definitions
+GREEN="\033[32m"
+RED="\033[31m"
+BLUE="\033[94m"
+BOLD="\033[1m"
+NORMAL="\033[0m"
 
 # utility
 info()
 {
-  printf "%s %b\n" "${GREEN}info" "${NORMAL}${*}"
+  printf "%b %b\n" "${GREEN}info" "${NORMAL}${*}"
+}
+
+error()
+{
+  printf "%b %b\n" "${RED}error" "${NORMAL}${*}"
 }
 
 info "Formatting nix files"
 if ! command -v nixpkgs-fmt 2>&1 >/dev/null; then
-  echo "nixpkgs-fmt not found. Are you running in a nix shell? See BUILDING.md."
+  error "nixpkgs-fmt not found. Are you running in a nix shell? See BUILDING.md."
   exit 1
 fi
 
@@ -29,21 +38,21 @@ nixpkgs-fmt "$ROOT"
 
 info "Formatting shell scripts"
 if ! command -v shfmt 2>&1 >/dev/null; then
-  echo "shfmt not found. Are you running in a nix shell? See BUILDING.md."
+  error "shfmt not found. Are you running in a nix shell? See BUILDING.md."
   exit 1
 fi
 shfmt -s -w -l -i 2 -ci -fn $(shfmt -f $(git grep -l '' :/))
 
 info "Formatting python scripts"
 if ! command -v black 2>&1 >/dev/null; then
-  echo "black not found. Are you running in a nix shell? See BUILDING.md."
+  error "black not found. Are you running in a nix shell? See BUILDING.md."
   exit 1
 fi
 black --include "(scripts/tests|scripts/simpasm|scripts/autogen|scripts/check-namespace|\.py$)" "$ROOT"
 
 info "Formatting c files"
 if ! command -v clang-format 2>&1 >/dev/null; then
-  echo "clang-format not found. Are you running in a nix shell? See BUILDING.md."
+  error "clang-format not found. Are you running in a nix shell? See BUILDING.md."
   exit 1
 fi
 
