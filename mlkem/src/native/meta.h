@@ -18,7 +18,7 @@
 #include "x86_64/meta.h"
 #endif
 
-#ifdef MLK_SYS_RISCV64
+#if defined(MLK_SYS_RISCV64_V256)
 #include "riscv64/meta.h"
 #endif
 
