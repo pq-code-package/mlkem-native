@@ -135,7 +135,7 @@ static vuint16m2_t bitswap_perm(unsigned a, unsigned b, size_t vl)
  * Description: Computes negacyclic number-theoretic transform (NTT) of
  *              a polynomial in place;
  *              inputs assumed to be in normal order, output in
- *bitreversed order
+ *              bitreversed order
  *
  * Arguments:   - uint16_t *r: pointer to in/output polynomial
  **************************************************/
@@ -332,7 +332,7 @@ void mlk_rv64v_poly_ntt(int16_t *r)
  * Description: Computes inverse of negacyclic number-theoretic transform (NTT)
  *              of a polynomial in place;
  *              inputs assumed to be in bitreversed order,
- *output in normal order
+ *              output in normal order
  *
  * Arguments:   - uint16_t *r: pointer to in/output polynomial
  **************************************************/
