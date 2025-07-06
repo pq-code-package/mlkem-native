@@ -15,23 +15,18 @@
 /*  vl value for a 16-bit wide type */
 #define MLK_RVV_E16M1_VL (MLK_RVV_VLEN / 16)
 
-/* check-magic: off */
-
 /*  Montgomery reduction constants */
 /*  n   = 256; q   = 3329; r   = 2^16 */
-/*  qi  = lift(Mod(-q, r)^-1) */
+/* check-magic: 3327 == unsigned_mod(-pow(MLKEM_Q,-1,2^16), 2^16) */
 #define MLKEM_QI 3327
 
-/*  r1  = lift(Mod(r, q)) */
+/* check-magic: 2285 == unsigned_mod(2^16, MLKEM_Q) */
 #define MLK_MONT_R1 2285
 
-/*  r2  = lift(Mod(r, q)^2) */
+/* check-magic: 1353 == pow(2, 32, MLKEM_Q) */
 #define MLK_MONT_R2 1353
 
-/*  in  = lift(Mod(n / 2, q)^-1) */
-/*  nr  = (in * r^2) % q */
+/* check-magic: 1441 == pow(2,32-7,MLKEM_Q) */
 #define MLK_MONT_NR 1441
-
-/* check-magic: on */
 
 #endif /* !MLK_NATIVE_RISCV64_SRC_RV64V_SETTINGS_H */
