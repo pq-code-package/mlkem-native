@@ -596,6 +596,12 @@
 #undef MLK_RVV_MONT_R2
 #undef MLK_RVV_QI
 #undef MLK_RVV_VLEN
+#undef mlk_assert_abs_bound_int16m1
+#undef mlk_assert_abs_bound_int16m2
+#undef mlk_assert_bound_int16m1
+#undef mlk_assert_bound_int16m2
+#undef mlk_debug_check_bounds_int16m1
+#undef mlk_debug_check_bounds_int16m2
 #endif /* MLK_SYS_RISCV64 */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 #endif /* !MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS */

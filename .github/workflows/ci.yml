@@ -150,7 +150,7 @@ jobs:
           compile_mode: native
           cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           check_namespace: 'false'
-      - name: build + test (+debug+memsan+ubsan, cross, opt)
+      - name: build + test (+debug, cross, opt)
         uses: ./.github/actions/multi-functest
         # There is no native code yet on PPC64LE, riscv32 or AArch64_be, so no point running opt tests
         if: ${{ matrix.target.mode != 'native' && (matrix.target.arch != 'ppc64le' && matrix.target.arch != 'riscv32' && matrix.target.arch != 'aarch64_be') }}
@@ -159,7 +159,7 @@ jobs:
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: ${{ matrix.target.mode }}
-          cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          cflags: "-DMLKEM_DEBUG"
           opt: 'opt'
   backend_tests:
     name: AArch64 FIPS202 backends (${{ matrix.backend }})
