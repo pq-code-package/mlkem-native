@@ -19,10 +19,10 @@ static inline vint16m1_t fq_redc(vint16m1_t rh, vint16m1_t rl, size_t vl)
   vint16m1_t t;
   vbool16_t c;
 
-  t = __riscv_vmul_vx_i16m1(rl, MLKEM_QI, vl); /* t = l * -Q^-1  */
-  t = __riscv_vmulh_vx_i16m1(t, MLKEM_Q, vl);  /* t = (t*Q) / R  */
-  c = __riscv_vmsne_vx_i16m1_b16(rl, 0, vl);   /* c = l == 0     */
-  t = __riscv_vadc_vvm_i16m1(t, rh, c, vl);    /* t += h + c     */
+  t = __riscv_vmul_vx_i16m1(rl, MLK_RVV_QI, vl); /* t = l * -Q^-1  */
+  t = __riscv_vmulh_vx_i16m1(t, MLKEM_Q, vl);    /* t = (t*Q) / R  */
+  c = __riscv_vmsne_vx_i16m1_b16(rl, 0, vl);     /* c = l == 0     */
+  t = __riscv_vadc_vvm_i16m1(t, rh, c, vl);      /* t += h + c     */
 
   return t;
 }
@@ -33,7 +33,7 @@ static inline vint16m1_t fq_redc2(vint32m2_t z, size_t vl)
 {
   vint16m1_t t;
 
-  t = __riscv_vmul_vx_i16m1(__riscv_vncvt_x_x_w_i16m1(z, vl), MLKEM_QI,
+  t = __riscv_vmul_vx_i16m1(__riscv_vncvt_x_x_w_i16m1(z, vl), MLK_RVV_QI,
                             vl); /*    t = l * -Q^-1 */
   z = __riscv_vadd_vv_i32m2(z, __riscv_vwmul_vx_i32m2(t, MLKEM_Q, vl),
                             vl); /*    x = (x + (t*Q)) */
@@ -206,8 +206,8 @@ static vint16m2_t mlk_rv64v_ntt2(vint16m2_t vp, vint16m1_t cz)
   MLK_RVV_BFLY_FV(t0, t1, vt, c0, vl);
 
   /*    normalize   */
-  t0 = fq_mulq_vx(t0, MLK_MONT_R1, vl);
-  t1 = fq_mulq_vx(t1, MLK_MONT_R1, vl);
+  t0 = fq_mulq_vx(t0, MLK_RVV_MONT_R1, vl);
+  t1 = fq_mulq_vx(t1, MLK_RVV_MONT_R1, vl);
 
   /*    reorganize  */
   vp = __riscv_vcreate_v_i16m1_i16m2(t0, t1);
@@ -392,8 +392,8 @@ static vint16m2_t mlk_rv64v_intt2(vint16m2_t vp, vint16m1_t cz)
   t1 = __riscv_vget_v_i16m2_i16m1(vp, 1);
 
   /*    normalize   */
-  t0 = fq_mulq_vx(t0, MLK_MONT_R1, vl);
-  t1 = fq_mulq_vx(t1, MLK_MONT_R1, vl);
+  t0 = fq_mulq_vx(t0, MLK_RVV_MONT_R1, vl);
+  t1 = fq_mulq_vx(t1, MLK_RVV_MONT_R1, vl);
 
   vp = __riscv_vcreate_v_i16m1_i16m2(t0, t1);
 
@@ -489,22 +489,22 @@ void mlk_rv64v_poly_invntt_tomont(int16_t *r)
   MLK_RVV_BFLY_RX(v6, ve, vt, izeta[0x01], vl);
   MLK_RVV_BFLY_RX(v7, vf, vt, izeta[0x01], vl);
 
-  v0 = fq_mulq_vx(v0, MLK_MONT_NR, vl);
-  v1 = fq_mulq_vx(v1, MLK_MONT_NR, vl);
-  v2 = fq_mulq_vx(v2, MLK_MONT_NR, vl);
-  v3 = fq_mulq_vx(v3, MLK_MONT_NR, vl);
-  v4 = fq_mulq_vx(v4, MLK_MONT_NR, vl);
-  v5 = fq_mulq_vx(v5, MLK_MONT_NR, vl);
-  v6 = fq_mulq_vx(v6, MLK_MONT_NR, vl);
-  v7 = fq_mulq_vx(v7, MLK_MONT_NR, vl);
-  v8 = fq_mulq_vx(v8, MLK_MONT_NR, vl);
-  v9 = fq_mulq_vx(v9, MLK_MONT_NR, vl);
-  va = fq_mulq_vx(va, MLK_MONT_NR, vl);
-  vb = fq_mulq_vx(vb, MLK_MONT_NR, vl);
-  vc = fq_mulq_vx(vc, MLK_MONT_NR, vl);
-  vd = fq_mulq_vx(vd, MLK_MONT_NR, vl);
-  ve = fq_mulq_vx(ve, MLK_MONT_NR, vl);
-  vf = fq_mulq_vx(vf, MLK_MONT_NR, vl);
+  v0 = fq_mulq_vx(v0, MLK_RVV_MONT_NR, vl);
+  v1 = fq_mulq_vx(v1, MLK_RVV_MONT_NR, vl);
+  v2 = fq_mulq_vx(v2, MLK_RVV_MONT_NR, vl);
+  v3 = fq_mulq_vx(v3, MLK_RVV_MONT_NR, vl);
+  v4 = fq_mulq_vx(v4, MLK_RVV_MONT_NR, vl);
+  v5 = fq_mulq_vx(v5, MLK_RVV_MONT_NR, vl);
+  v6 = fq_mulq_vx(v6, MLK_RVV_MONT_NR, vl);
+  v7 = fq_mulq_vx(v7, MLK_RVV_MONT_NR, vl);
+  v8 = fq_mulq_vx(v8, MLK_RVV_MONT_NR, vl);
+  v9 = fq_mulq_vx(v9, MLK_RVV_MONT_NR, vl);
+  va = fq_mulq_vx(va, MLK_RVV_MONT_NR, vl);
+  vb = fq_mulq_vx(vb, MLK_RVV_MONT_NR, vl);
+  vc = fq_mulq_vx(vc, MLK_RVV_MONT_NR, vl);
+  vd = fq_mulq_vx(vd, MLK_RVV_MONT_NR, vl);
+  ve = fq_mulq_vx(ve, MLK_RVV_MONT_NR, vl);
+  vf = fq_mulq_vx(vf, MLK_RVV_MONT_NR, vl);
 
   __riscv_vse16_v_i16m1(&r[0x00], v0, vl);
   __riscv_vse16_v_i16m1(&r[0x10], v1, vl);
@@ -615,7 +615,7 @@ void mlk_rv64v_poly_tomont(int16_t *r)
   for (size_t i = 0; i < MLKEM_N; i += vl)
   {
     __riscv_vse16_v_i16m1(
-        &r[i], fq_mul_vx(__riscv_vle16_v_i16m1(&r[i], vl), MLK_MONT_R2, vl),
+        &r[i], fq_mul_vx(__riscv_vle16_v_i16m1(&r[i], vl), MLK_RVV_MONT_R2, vl),
         vl);
   }
 }
