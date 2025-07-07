@@ -577,12 +577,12 @@
 #undef mlk_rv64v_poly_tomont
 #undef mlk_rv64v_rej_uniform
 /* mlkem/src/native/riscv64/src/rv64v_settings.h */
-#undef MLKEM_QI
-#undef MLK_MONT_NR
-#undef MLK_MONT_R1
-#undef MLK_MONT_R2
 #undef MLK_NATIVE_RISCV64_SRC_RV64V_SETTINGS_H
 #undef MLK_RVV_E16M1_VL
+#undef MLK_RVV_MONT_NR
+#undef MLK_RVV_MONT_R1
+#undef MLK_RVV_MONT_R2
+#undef MLK_RVV_QI
 #undef MLK_RVV_VLEN
 #endif /* MLK_SYS_RISCV64 */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
