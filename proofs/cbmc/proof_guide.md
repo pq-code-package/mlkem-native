@@ -429,7 +429,7 @@ void harness(void) {
   mlk_poly *a;
   uint8_t *r;
 
-  /* Contracts for this function are in poly.h */
+  /* Contracts for this function are in compress.h */
   mlk_poly_tobytes(r, a);
 }
 ```
@@ -510,7 +510,7 @@ and so on for the other two statements in the loop body.
 With those changes, CBMC completes the proof in about 10 seconds:
 
 ```
-cd proofs/cbmc/mlk_poly_tobytes
+cd proofs/cbmc/poly_tobytes
 make result
 cat logs/result.txt
 ```
@@ -524,12 +524,12 @@ We can also use the higher-level Python script to prove just that one function:
 
 ```
 cd proofs/cbmc
-MLKEM_K=3 ./run-cbmc-proofs.py --summarize -j$(nproc) -p mlk_poly_tobytes
+MLKEM_K=3 ./run-cbmc-proofs.py --summarize -j$(nproc) -p poly_tobytes
 ```
 yields
 ```
-| Proof        | Status  |
-|--------------|---------|
+| Proof            | Status  |
+|------------------|---------|
 | mlk_poly_tobytes | Success |
 
 ```
