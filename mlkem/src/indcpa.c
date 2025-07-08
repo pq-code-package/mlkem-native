@@ -221,10 +221,9 @@ void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
   /* Sample 4 matrix entries a time. */
   for (i = 0; i < (MLKEM_K * MLKEM_K / 4) * 4; i += 4)
   {
-    uint8_t x, y;
-
     for (j = 0; j < 4; j++)
     {
+      uint8_t x, y;
       x = (i + j) / MLKEM_K;
       y = (i + j) % MLKEM_K;
       if (transposed)
@@ -239,11 +238,7 @@ void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
       }
     }
 
-    /*
-     * This call writes across mlk_polyvec boundaries for K=2 and K=3.
-     * This is intentional and safe.
-     */
-    mlk_poly_rej_uniform_x4(&a[i], seed_ext);
+    mlk_poly_rej_uniform_x4(&a[i], &a[i + 1], &a[i + 2], &a[i + 3], seed_ext);
   }
 
   /* For MLKEM_K == 3, sample the last entry individually. */
