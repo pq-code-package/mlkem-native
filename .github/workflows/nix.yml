@@ -54,7 +54,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [ ubuntu-24.04, ubuntu-24.04-arm, macos-latest ]
+        runner: [ ubuntu-24.04, ubuntu-24.04-arm, macos-15 ]
     name: build nix cache (${{ matrix.runner }})
     runs-on: ${{ matrix.runner }}
     steps:
@@ -95,7 +95,7 @@ jobs:
           - runner: ubuntu-24.04
             container:
             install: 'apt'
-          - runner: macos-latest
+          - runner: macos-15
             container:
             install: 'installer'
           - runner: ubuntu-22.04

@@ -110,7 +110,7 @@ jobs:
       max-parallel: 8
       fail-fast: false
       matrix:
-        system: [ubuntu-latest, pqcp-arm64, macos-latest, macos-13]
+        system: [ubuntu-latest, pqcp-arm64, macos-15, macos-13]
         test:
           - name: Prefix+Debug
             flags:
