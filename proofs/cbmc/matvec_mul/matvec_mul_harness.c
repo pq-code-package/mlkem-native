@@ -6,12 +6,14 @@
 #include "poly_k.h"
 
 #define mlk_matvec_mul MLK_NAMESPACE(matvec_mul)
-void mlk_matvec_mul(mlk_polyvec out, const mlk_polymat a, mlk_polyvec const v,
-                    mlk_polyvec_mulcache const vc);
+void mlk_matvec_mul(mlk_polyvec *out, const mlk_polymat *a,
+                    mlk_polyvec const *v, mlk_polyvec_mulcache const *vc);
 
 void harness(void)
 {
-  mlk_poly *out, *a, *v;
-  mlk_poly_mulcache *vc;
+  mlk_polyvec *out;
+  mlk_polymat *a;
+  mlk_polyvec *v;
+  mlk_polyvec_mulcache *vc;
   mlk_matvec_mul(out, a, v, vc);
 }
