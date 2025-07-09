@@ -39,15 +39,15 @@
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
+void mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
                     int transposed)
 __contract__(
   requires(memory_no_alias(a, sizeof(mlk_polymat)))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
   requires(transposed == 0 || transposed == 1)
   assigns(object_whole(a))
-  ensures(forall(x, 0, MLKEM_K * MLKEM_K,
-    array_bound(a[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+  ensures(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
+  array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
 );
 
 #define mlk_indcpa_keypair_derand MLK_NAMESPACE_K(indcpa_keypair_derand)
