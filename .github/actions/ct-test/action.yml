@@ -10,6 +10,9 @@ inputs:
   valgrind_flags:
     description: Extra flags to pass to valgrind
     default: ""
+  ctllvm:
+    description: whether to run CT-LLVM or not (requires LLVM)
+    default: "false"
 
 runs:
   using: composite
@@ -40,3 +43,11 @@ runs:
         run: |
           make clean
           tests func --exec-wrapper="valgrind --error-exitcode=1 --track-origins=yes ${{ inputs.valgrind_flags }}" --cflags="-DMLK_CONFIG_CT_TESTING_ENABLED -DNTESTS=50 ${{ inputs.cflags }}"
+      - name: Run CT-LLVM analysis
+        shell: ${{ env.SHELL }}
+        if: ${{ inputs.ctllvm == 'true' }}
+        run: |
+          make clean
+          # Run CT-LLVM analysis on monolithic build with single-threaded compilation
+          # CT-LLVM plugin is available directly in PATH via nix package
+          ./scripts/tests examples --no-run -l monolithic_build --cflags="-fpass-plugin=$(which ctllvm.so) -g ${{ inputs.cflags }}" -j1
