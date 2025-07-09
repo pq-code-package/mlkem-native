@@ -1,0 +1,4 @@
+:white_check_mark: Lint nix
+:white_check_mark: Lint shell
+:x: Lint python
+:white_check_mark: Lint C

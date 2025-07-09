@@ -1,0 +1,11 @@
+# Proofs for mlkem-native
+
+This directory contains various proofs for C and assembly routines within mlkem-native.
+
+## C verification: CBMC
+
+We use the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) for the showing the absence of various classes of undefined behaviour in the mlkem-native C source, including out of bounds memory accesses and integer overflows.
+
+The CBMC specifications are inlined in the *.c and *.h files are contract and loop annotations. The infrastructure for running the CBMC proofs can be found in [proofs/cbmc](cbmc).
+
+## Assembly verification: HOL-Light

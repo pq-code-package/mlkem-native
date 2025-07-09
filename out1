@@ -1,0 +1,394 @@
+
+/tmp/nix-shell.wosUnU/tmpmdsxjlmu.o:	file format mach-o arm64
+
+Disassembly of section __TEXT,__text:
+
+0000000000000000 <ltmp0>:
+       0: d10703ff     	sub	sp, sp, #0x1c0
+       4: a90253f3     	stp	x19, x20, [sp, #0x20]
+       8: a9035bf5     	stp	x21, x22, [sp, #0x30]
+       c: a90463f7     	stp	x23, x24, [sp, #0x40]
+      10: a9056bf9     	stp	x25, x26, [sp, #0x50]
+      14: a90673fb     	stp	x27, x28, [sp, #0x60]
+      18: a9077bfd     	stp	x29, x30, [sp, #0x70]
+
+000000000000001c <initial>:
+      1c: aa0103fa     	mov	x26, x1
+      20: f90007e1     	str	x1, [sp, #0x8]
+      24: a9401801     	ldp	x1, x6, [x0]
+      28: a941400b     	ldp	x11, x16, [x0, #0x10]
+      2c: a9420815     	ldp	x21, x2, [x0, #0x20]
+      30: a9433007     	ldp	x7, x12, [x0, #0x30]
+      34: a9445811     	ldp	x17, x22, [x0, #0x40]
+      38: a9452003     	ldp	x3, x8, [x0, #0x50]
+      3c: a946700d     	ldp	x13, x28, [x0, #0x60]
+      40: a9471017     	ldp	x23, x4, [x0, #0x70]
+      44: a9483809     	ldp	x9, x14, [x0, #0x80]
+      48: a9496013     	ldp	x19, x24, [x0, #0x90]
+      4c: a94a2805     	ldp	x5, x10, [x0, #0xa0]
+      50: a94b500f     	ldp	x15, x20, [x0, #0xb0]
+      54: f9406019     	ldr	x25, [x0, #0xc0]
+      58: f90003e0     	str	x0, [sp]
+
+000000000000005c <keccak_f1600_x1_scalar_initial_start>:
+      5c: ca19031e     	eor	x30, x24, x25
+      60: ca1503db     	eor	x27, x30, x21
+      64: ca16037d     	eor	x29, x27, x22
+      68: ca0a013b     	eor	x27, x9, x10
+      6c: ca06037e     	eor	x30, x27, x6
+      70: ca0703db     	eor	x27, x30, x7
+      74: ca08037e     	eor	x30, x27, x8
+      78: ca1703a0     	eor	x0, x29, x23
+      7c: cadefc1b     	eor	x27, x0, x30, ror #63
+      80: ca1b007d     	eor	x29, x3, x27
+      84: f90043fd     	str	x29, [sp, #0x80]
+      88: ca1b003d     	eor	x29, x1, x27
+      8c: ca0f01da     	eor	x26, x14, x15
+      90: ca0b035a     	eor	x26, x26, x11
+      94: ca0c035a     	eor	x26, x26, x12
+      98: ca0d035a     	eor	x26, x26, x13
+      9c: f90047fa     	str	x26, [sp, #0x88]
+      a0: ca1b009a     	eor	x26, x4, x27
+      a4: f9004bfa     	str	x26, [sp, #0x90]
+      a8: ca050084     	eor	x4, x4, x5
+      ac: ca01009a     	eor	x26, x4, x1
+      b0: ca1b00a5     	eor	x5, x5, x27
+      b4: ca020344     	eor	x4, x26, x2
+      b8: f94047fa     	ldr	x26, [sp, #0x88]
+      bc: ca030083     	eor	x3, x4, x3
+      c0: cadafc64     	eor	x4, x3, x26, ror #63
+      c4: cac0ff40     	eor	x0, x26, x0, ror #63
+      c8: ca140261     	eor	x1, x19, x20
+      cc: ca100021     	eor	x1, x1, x16
+      d0: ca110021     	eor	x1, x1, x17
+      d4: ca1b0042     	eor	x2, x2, x27
+      d8: ca04015b     	eor	x27, x10, x4
+      dc: ca1c002a     	eor	x10, x1, x28
+      e0: ca000261     	eor	x1, x19, x0
+      e4: cacaffda     	eor	x26, x30, x10, ror #63
+      e8: ca1a01be     	eor	x30, x13, x26
+      ec: cac3fd53     	eor	x19, x10, x3, ror #63
+      f0: 8afea82a     	bic	x10, x1, x30, ror #42
+      f4: f90047ea     	str	x10, [sp, #0x88]
+      f8: ca130339     	eor	x25, x25, x19
+      fc: f94007ed     	ldr	x13, [sp, #0x8]
+     100: f9004fed     	str	x13, [sp, #0x98]
+     104: ca0400e7     	eor	x7, x7, x4
+     108: ca00039c     	eor	x28, x28, x0
+     10c: ca130318     	eor	x24, x24, x19
+     110: ca1a018c     	eor	x12, x12, x26
+     114: 8aec4f83     	bic	x3, x28, x12, ror #19
+     118: 8af828ad     	bic	x13, x5, x24, ror #10
+     11c: ca0400ca     	eor	x10, x6, x4
+     120: ca040108     	eor	x8, x8, x4
+     124: 8afcbf06     	bic	x6, x24, x28, ror #47
+     128: cadce5ad     	eor	x13, x13, x28, ror #57
+     12c: f90053ed     	str	x13, [sp, #0xa0]
+     130: 8ae2991c     	bic	x28, x8, x2, ror #38
+     134: f90057fc     	str	x28, [sp, #0xa8]
+     138: 8aea159c     	bic	x28, x12, x10, ror #5
+     13c: caca6063     	eor	x3, x3, x10, ror #24
+     140: f9005be3     	str	x3, [sp, #0xb0]
+     144: 8ae5bd4a     	bic	x10, x10, x5, ror #47
+     148: f9005fea     	str	x10, [sp, #0xb8]
+     14c: d280002d     	mov	x13, #0x1               ; =1
+     150: f90063ed     	str	x13, [sp, #0xc0]
+     154: ca1302d6     	eor	x22, x22, x19
+     158: 8ae7ffcd     	bic	x13, x30, x7, ror #63
+     15c: ca1a0163     	eor	x3, x11, x26
+     160: 8ae1e72b     	bic	x11, x25, x1, ror #57
+     164: f90067eb     	str	x11, [sp, #0xc8]
+     168: ca04012a     	eor	x10, x9, x4
+     16c: ca1a01ef     	eor	x15, x15, x26
+     170: 8aea41e4     	bic	x4, x15, x10, ror #16
+     174: f9006be4     	str	x4, [sp, #0xd0]
+     178: ca1a01c4     	eor	x4, x14, x26
+     17c: 8ae81489     	bic	x9, x4, x8, ror #5
+     180: cac2ad29     	eor	x9, x9, x2, ror #43
+     184: f9006fe9     	str	x9, [sp, #0xd8]
+     188: ca000289     	eor	x9, x20, x0
+     18c: ca1302eb     	eor	x11, x23, x19
+     190: ca1302b5     	eor	x21, x21, x19
+     194: 8ae98eba     	bic	x26, x21, x9, ror #35
+     198: cac43353     	eor	x19, x26, x4, ror #12
+     19c: f9404bfa     	ldr	x26, [sp, #0x90]
+     1a0: 8afbf077     	bic	x23, x3, x27, ror #60
+     1a4: cada56f4     	eor	x20, x23, x26, ror #21
+     1a8: 8ae4a52e     	bic	x14, x9, x4, ror #41
+     1ac: cac8b9ce     	eor	x14, x14, x8, ror #46
+     1b0: cacc08c8     	eor	x8, x6, x12, ror #2
+     1b4: ca000210     	eor	x16, x16, x0
+     1b8: 8af9cba6     	bic	x6, x29, x25, ror #50
+     1bc: 8af52444     	bic	x4, x2, x21, ror #9
+     1c0: f9004be4     	str	x4, [sp, #0x90]
+     1c4: 8afdb0e2     	bic	x2, x7, x29, ror #44
+     1c8: cac5d397     	eor	x23, x28, x5, ror #52
+     1cc: 8af0e2c4     	bic	x4, x22, x16, ror #56
+     1d0: f90073e4     	str	x4, [sp, #0xe0]
+     1d4: cacd57a4     	eor	x4, x29, x13, ror #21
+     1d8: f9404fed     	ldr	x13, [sp, #0x98]
+     1dc: f9004fe4     	str	x4, [sp, #0x98]
+     1e0: f94001ad     	ldr	x13, [x13]
+     1e4: f90077ed     	str	x13, [sp, #0xe8]
+     1e8: 8aef7e0d     	bic	x13, x16, x15, ror #31
+     1ec: ca000225     	eor	x5, x17, x0
+     1f0: f94057fc     	ldr	x28, [sp, #0xa8]
+     1f4: 8ae3e4a0     	bic	x0, x5, x3, ror #57
+     1f8: cacabdb1     	eor	x17, x13, x10, ror #47
+     1fc: f94063ed     	ldr	x13, [sp, #0xc0]
+     200: cad5bf84     	eor	x4, x28, x21, ror #47
+     204: f90057e4     	str	x4, [sp, #0xa8]
+     208: f9000bed     	str	x13, [sp, #0x10]
+     20c: cad97855     	eor	x21, x2, x25, ror #30
+     210: f94043fd     	ldr	x29, [sp, #0x80]
+     214: 8af6bfa4     	bic	x4, x29, x22, ror #47
+     218: cad09c82     	eor	x2, x4, x16, ror #39
+     21c: cac1acd0     	eor	x16, x6, x1, ror #43
+     220: 8afa676d     	bic	x13, x27, x26, ror #25
+     224: f90043ed     	str	x13, [sp, #0x80]
+     228: 8ae5c16d     	bic	x13, x11, x5, ror #48
+     22c: cadbd419     	eor	x25, x0, x27, ror #53
+     230: 8aeb0b44     	bic	x4, x26, x11, ror #2
+     234: f90063e4     	str	x4, [sp, #0xc0]
+     238: 8afda94a     	bic	x10, x10, x29, ror #42
+     23c: f94063e4     	ldr	x4, [sp, #0xc0]
+     240: f90063ea     	str	x10, [sp, #0xc0]
+     244: cac5c88a     	eor	x10, x4, x5, ror #50
+     248: f9406be4     	ldr	x4, [sp, #0xd0]
+     24c: f9006bea     	str	x10, [sp, #0xd0]
+     250: cadde88c     	eor	x12, x4, x29, ror #58
+     254: f94073e4     	ldr	x4, [sp, #0xe0]
+     258: f94047ea     	ldr	x10, [sp, #0x88]
+     25c: cac3a5a5     	eor	x5, x13, x3, ror #41
+     260: f94077ed     	ldr	x13, [sp, #0xe8]
+     264: f9405be3     	ldr	x3, [sp, #0xb0]
+     268: cac7a546     	eor	x6, x10, x7, ror #41
+     26c: f94063ea     	ldr	x10, [sp, #0xc0]
+     270: cad66547     	eor	x7, x10, x22, ror #25
+     274: f9405fea     	ldr	x10, [sp, #0xb8]
+     278: cad8e55c     	eor	x28, x10, x24, ror #57
+     27c: f9406bea     	ldr	x10, [sp, #0xd0]
+     280: cacf5c96     	eor	x22, x4, x15, ror #23
+     284: f9404fe4     	ldr	x4, [sp, #0x98]
+     288: ca0d0081     	eor	x1, x4, x13
+     28c: f9404be4     	ldr	x4, [sp, #0x90]
+     290: f94043ed     	ldr	x13, [sp, #0x80]
+     294: cac9b098     	eor	x24, x4, x9, ror #44
+     298: f94057e4     	ldr	x4, [sp, #0xa8]
+     29c: f9406fe9     	ldr	x9, [sp, #0xd8]
+     2a0: cacb6daf     	eor	x15, x13, x11, ror #27
+     2a4: f94053ed     	ldr	x13, [sp, #0xa0]
+     2a8: f94067eb     	ldr	x11, [sp, #0xc8]
+     2ac: cade8d6b     	eor	x11, x11, x30, ror #35
+
+00000000000002b0 <keccak_f1600_x1_scalar_loop>:
+     2b0: cadcfe1d     	eor	x29, x16, x28, ror #63
+     2b4: cad397bd     	eor	x29, x29, x19, ror #37
+     2b8: cad193bd     	eor	x29, x29, x17, ror #36
+     2bc: cad40bba     	eor	x26, x29, x20, ror #2
+     2c0: cac9e51d     	eor	x29, x8, x9, ror #57
+     2c4: cac6cfbd     	eor	x29, x29, x6, ror #51
+     2c8: caca7fbe     	eor	x30, x29, x10, ror #31
+     2cc: cac76fdd     	eor	x29, x30, x7, ror #27
+     2d0: 93dde3bb     	ror	x27, x29, #0x38
+     2d4: cadaff7e     	eor	x30, x27, x26, ror #63
+     2d8: f90043fe     	str	x30, [sp, #0x80]
+     2dc: cac2f43b     	eor	x27, x1, x2, ror #61
+     2e0: cac4db7e     	eor	x30, x27, x4, ror #54
+     2e4: cac39fde     	eor	x30, x30, x3, ror #39
+     2e8: cac567db     	eor	x27, x30, x5, ror #25
+     2ec: cacbd1fe     	eor	x30, x15, x11, ror #52
+     2f0: cacdc3c0     	eor	x0, x30, x13, ror #48
+     2f4: cace281e     	eor	x30, x0, x14, ror #10
+     2f8: cacc17de     	eor	x30, x30, x12, ror #5
+     2fc: 93defbc0     	ror	x0, x30, #0x3e
+     300: cadef77e     	eor	x30, x27, x30, ror #61
+     304: cac6afc6     	eor	x6, x30, x6, ror #43
+     308: f90047e6     	str	x6, [sp, #0x88]
+     30c: cac8e3c8     	eor	x8, x30, x8, ror #56
+     310: f9004be8     	str	x8, [sp, #0x90]
+     314: cad6cae8     	eor	x8, x23, x22, ror #50
+     318: cad88906     	eor	x6, x8, x24, ror #34
+     31c: cad568c8     	eor	x8, x6, x21, ror #26
+     320: cad93d08     	eor	x8, x8, x25, ror #15
+     324: cac8e400     	eor	x0, x0, x8, ror #57
+     328: cac74fc7     	eor	x7, x30, x7, ror #19
+     32c: f9004fe7     	str	x7, [sp, #0x98]
+     330: caca5fc6     	eor	x6, x30, x10, ror #23
+     334: f90053e6     	str	x6, [sp, #0xa0]
+     338: cac9c7c9     	eor	x9, x30, x9, ror #49
+     33c: f94043fe     	ldr	x30, [sp, #0x80]
+     340: cacffbcf     	eor	x15, x30, x15, ror #62
+     344: cad19006     	eor	x6, x0, x17, ror #36
+     348: f90043e6     	str	x6, [sp, #0x80]
+     34c: ca100010     	eor	x16, x0, x16
+     350: f94047e6     	ldr	x6, [sp, #0x88]
+     354: 8aef7e0a     	bic	x10, x16, x15, ror #31
+     358: cac9bd51     	eor	x17, x10, x9, ror #47
+     35c: f90047f1     	str	x17, [sp, #0x88]
+     360: 93c8e907     	ror	x7, x8, #0x3a
+     364: cadddce7     	eor	x7, x7, x29, ror #55
+     368: cac2f4fd     	eor	x29, x7, x2, ror #61
+     36c: cadbff5a     	eor	x26, x26, x27, ror #63
+     370: cad55351     	eor	x17, x26, x21, ror #20
+     374: 8af127a8     	bic	x8, x29, x17, ror #9
+     378: cac564e5     	eor	x5, x7, x5, ror #25
+     37c: 8ae5bcd5     	bic	x21, x6, x5, ror #47
+     380: cad87358     	eor	x24, x26, x24, ror #28
+     384: cadcfc0a     	eor	x10, x0, x28, ror #63
+     388: 8aeabf1c     	bic	x28, x24, x10, ror #47
+     38c: f90057fc     	str	x28, [sp, #0xa8]
+     390: cad40814     	eor	x20, x0, x20, ror #2
+     394: cad8e6bc     	eor	x28, x21, x24, ror #57
+     398: f9005bfc     	str	x28, [sp, #0xb0]
+     39c: 8af828bc     	bic	x28, x5, x24, ror #10
+     3a0: cad4b118     	eor	x24, x8, x20, ror #44
+     3a4: f9404be8     	ldr	x8, [sp, #0x90]
+     3a8: cace23db     	eor	x27, x30, x14, ror #8
+     3ac: 8afba68e     	bic	x14, x20, x27, ror #41
+     3b0: cac8b9ce     	eor	x14, x14, x8, ror #46
+     3b4: f9004bee     	str	x14, [sp, #0x90]
+     3b8: 8afd990e     	bic	x14, x8, x29, ror #38
+     3bc: f9005fee     	str	x14, [sp, #0xb8]
+     3c0: 8ae81775     	bic	x21, x27, x8, ror #5
+     3c4: cacc0fc2     	eor	x2, x30, x12, ror #3
+     3c8: 8ae24d48     	bic	x8, x10, x2, ror #19
+     3cc: cac39cec     	eor	x12, x7, x3, ror #39
+     3d0: cacdbbc3     	eor	x3, x30, x13, ror #46
+     3d4: 8ae6144e     	bic	x14, x2, x6, ror #5
+     3d8: f90063ee     	str	x14, [sp, #0xc0]
+     3dc: cad7eb4e     	eor	x14, x26, x23, ror #58
+     3e0: f90067ee     	str	x14, [sp, #0xc8]
+     3e4: 8ae941ee     	bic	x14, x15, x9, ror #16
+     3e8: cacae78d     	eor	x13, x28, x10, ror #57
+     3ec: 8aeca93c     	bic	x28, x9, x12, ror #42
+     3f0: f9006bfc     	str	x28, [sp, #0xd0]
+     3f4: caddaea9     	eor	x9, x21, x29, ror #43
+     3f8: cacbcbdd     	eor	x29, x30, x11, ror #50
+     3fc: cac4d8fe     	eor	x30, x7, x4, ror #54
+     400: cad6b34b     	eor	x11, x26, x22, ror #44
+     404: f9400bfc     	ldr	x28, [sp, #0x10]
+     408: f9006ffc     	str	x28, [sp, #0xd8]
+     40c: ca0100f6     	eor	x22, x7, x1
+     410: f9406bfc     	ldr	x28, [sp, #0xd0]
+     414: cacb6787     	eor	x7, x28, x11, ror #25
+     418: f9006be7     	str	x7, [sp, #0xd0]
+     41c: cad92755     	eor	x21, x26, x25, ror #9
+     420: 8af48e27     	bic	x7, x17, x20, ror #35
+     424: f90073e7     	str	x7, [sp, #0xe0]
+     428: cad39413     	eor	x19, x0, x19, ror #37
+     42c: f9404fe7     	ldr	x7, [sp, #0x98]
+     430: 8aebbd84     	bic	x4, x12, x11, ror #47
+     434: f9004fe4     	str	x4, [sp, #0x98]
+     438: 8af0e177     	bic	x23, x11, x16, ror #56
+     43c: f9404fe4     	ldr	x4, [sp, #0x98]
+     440: f9004ff7     	str	x23, [sp, #0x98]
+     444: f94007fa     	ldr	x26, [sp, #0x8]
+     448: f90077fa     	str	x26, [sp, #0xe8]
+     44c: 8af3e6b7     	bic	x23, x21, x19, ror #57
+     450: cac38eeb     	eor	x11, x23, x3, ror #35
+     454: f9404ff7     	ldr	x23, [sp, #0x98]
+     458: 8af6b0e1     	bic	x1, x7, x22, ror #44
+     45c: f9004fe1     	str	x1, [sp, #0x98]
+     460: cacce9cc     	eor	x12, x14, x12, ror #58
+     464: f94067ee     	ldr	x14, [sp, #0xc8]
+     468: 8ae7fc7c     	bic	x28, x3, x7, ror #63
+     46c: f90067fc     	str	x28, [sp, #0xc8]
+     470: 8ae3aa60     	bic	x0, x19, x3, ror #42
+     474: f94057fc     	ldr	x28, [sp, #0xa8]
+     478: cac66103     	eor	x3, x8, x6, ror #24
+     47c: f94043e6     	ldr	x6, [sp, #0x80]
+     480: cac20b88     	eor	x8, x28, x2, ror #2
+     484: f94067fc     	ldr	x28, [sp, #0xc8]
+     488: cad09c82     	eor	x2, x4, x16, ror #39
+     48c: 8af5cad0     	bic	x16, x22, x21, ror #50
+     490: cadc56c1     	eor	x1, x22, x28, ror #21
+     494: f9406ffc     	ldr	x28, [sp, #0xd8]
+     498: f90043e1     	str	x1, [sp, #0x80]
+     49c: cacf5ef6     	eor	x22, x23, x15, ror #23
+     4a0: 8aee0bd4     	bic	x20, x30, x14, ror #2
+     4a4: cac6ca8a     	eor	x10, x20, x6, ror #50
+     4a8: 8ae6c1da     	bic	x26, x14, x6, ror #48
+     4ac: 8afde4d7     	bic	x23, x6, x29, ror #57
+     4b0: f94053e6     	ldr	x6, [sp, #0xa0]
+     4b4: cac6d6f9     	eor	x25, x23, x6, ror #53
+     4b8: 8ae6f3a4     	bic	x4, x29, x6, ror #60
+     4bc: cade5494     	eor	x20, x4, x30, ror #21
+     4c0: 8afe64c1     	bic	x1, x6, x30, ror #25
+     4c4: cac7a406     	eor	x6, x0, x7, ror #41
+     4c8: f94073e7     	ldr	x7, [sp, #0xe0]
+     4cc: cace6c2f     	eor	x15, x1, x14, ror #27
+     4d0: f9405fee     	ldr	x14, [sp, #0xb8]
+     4d4: f9404fe1     	ldr	x1, [sp, #0x98]
+     4d8: cad1bdc4     	eor	x4, x14, x17, ror #47
+     4dc: f94047f1     	ldr	x17, [sp, #0x88]
+     4e0: f94063ee     	ldr	x14, [sp, #0xc0]
+     4e4: cad57835     	eor	x21, x1, x21, ror #30
+     4e8: cac5d1d7     	eor	x23, x14, x5, ror #52
+     4ec: f9404bee     	ldr	x14, [sp, #0x90]
+     4f0: cadda745     	eor	x5, x26, x29, ror #41
+     4f4: f94077fa     	ldr	x26, [sp, #0xe8]
+     4f8: cad3ae10     	eor	x16, x16, x19, ror #43
+     4fc: 91000780     	add	x0, x28, #0x1
+     500: f90047e0     	str	x0, [sp, #0x88]
+     504: cadb30f3     	eor	x19, x7, x27, ror #12
+     508: f9406be7     	ldr	x7, [sp, #0xd0]
+     50c: f87c7b40     	ldr	x0, [x26, x28, lsl #3]
+     510: f9405bfc     	ldr	x28, [sp, #0xb0]
+     514: f94043e1     	ldr	x1, [sp, #0x80]
+     518: ca000021     	eor	x1, x1, x0
+     51c: f94047e0     	ldr	x0, [sp, #0x88]
+     520: f9000be0     	str	x0, [sp, #0x10]
+     524: f1005c1f     	cmp	x0, #0x17
+
+0000000000000528 <keccak_f1600_x1_scalar_end_loop>:
+     528: 54ffec4d     	b.le	0x2b0 <keccak_f1600_x1_scalar_loop>
+
+000000000000052c <final>:
+     52c: 93c6acc6     	ror	x6, x6, #0x2b
+     530: 93cbc96b     	ror	x11, x11, #0x32
+     534: 93d552b5     	ror	x21, x21, #0x14
+     538: 93c2f442     	ror	x2, x2, #0x3d
+     53c: 93c74ce7     	ror	x7, x7, #0x13
+     540: 93cc0d8c     	ror	x12, x12, #0x3
+     544: 93d19231     	ror	x17, x17, #0x24
+     548: 93d6b2d6     	ror	x22, x22, #0x2c
+     54c: 93c39c63     	ror	x3, x3, #0x27
+     550: 93c8e108     	ror	x8, x8, #0x38
+     554: 93cdb9ad     	ror	x13, x13, #0x2e
+     558: 93dcff9c     	ror	x28, x28, #0x3f
+     55c: 93d7eaf7     	ror	x23, x23, #0x3a
+     560: 93c4d884     	ror	x4, x4, #0x36
+     564: 93c9c529     	ror	x9, x9, #0x31
+     568: 93ce21ce     	ror	x14, x14, #0x8
+     56c: 93d39673     	ror	x19, x19, #0x25
+     570: 93d87318     	ror	x24, x24, #0x1c
+     574: 93c564a5     	ror	x5, x5, #0x19
+     578: 93ca5d4a     	ror	x10, x10, #0x17
+     57c: 93cff9ef     	ror	x15, x15, #0x3e
+     580: 93d40a94     	ror	x20, x20, #0x2
+     584: 93d92739     	ror	x25, x25, #0x9
+     588: f94003e0     	ldr	x0, [sp]
+     58c: a9001801     	stp	x1, x6, [x0]
+     590: a901400b     	stp	x11, x16, [x0, #0x10]
+     594: a9020815     	stp	x21, x2, [x0, #0x20]
+     598: a9033007     	stp	x7, x12, [x0, #0x30]
+     59c: a9045811     	stp	x17, x22, [x0, #0x40]
+     5a0: a9052003     	stp	x3, x8, [x0, #0x50]
+     5a4: a906700d     	stp	x13, x28, [x0, #0x60]
+     5a8: a9071017     	stp	x23, x4, [x0, #0x70]
+     5ac: a9083809     	stp	x9, x14, [x0, #0x80]
+     5b0: a9096013     	stp	x19, x24, [x0, #0x90]
+     5b4: a90a2805     	stp	x5, x10, [x0, #0xa0]
+     5b8: a90b500f     	stp	x15, x20, [x0, #0xb0]
+     5bc: f9006019     	str	x25, [x0, #0xc0]
+
+00000000000005c0 <end_final>:
+     5c0: a94253f3     	ldp	x19, x20, [sp, #0x20]
+     5c4: a9435bf5     	ldp	x21, x22, [sp, #0x30]
+     5c8: a94463f7     	ldp	x23, x24, [sp, #0x40]
+     5cc: a9456bf9     	ldp	x25, x26, [sp, #0x50]
+     5d0: a94673fb     	ldp	x27, x28, [sp, #0x60]
+     5d4: a9477bfd     	ldp	x29, x30, [sp, #0x70]
+     5d8: 910703ff     	add	sp, sp, #0x1c0
+     5dc: d65f03c0     	ret

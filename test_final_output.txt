@@ -1,0 +1,41 @@
+warning: Git tree '/Users/beckphan/repos/mlkem-native' is dirty
+INFO  > Functional Test    Compile     (native no_opt):  make func OPT=0 AUTO=1 -j10
+make: *** Deleting file 'test/build/mlkem512/mlkem/src/sampling.c.o'
+make: *** Deleting file 'test/build/mlkem512/mlkem/src/poly.c.o'
+make: *** [test/mk/rules.mk:37: test/build/mlkem768/mlkem/src/kem.c.o] Interrupt: 2
+make: *** [test/mk/rules.mk:37: test/build/mlkem768/mlkem/src/indcpa.c.o] Interrupt: 2
+make: *** [test/mk/rules.mk:37: test/build/mlkem768/mlkem/src/compress.c.o] Interrupt: 2
+make: *** [test/mk/rules.mk:37: test/build/mlkem768/mlkem/src/debug.c.o] Interrupt: 2
+make: *** [test/mk/rules.mk:37: test/build/mlkem768/test/test_mlkem.c.o] Interrupt: 2
+make: *** [test/mk/rules.mk:25: test/build/mlkem512/mlkem/src/sampling.c.o] Interrupt: 2
+make: *** [test/mk/rules.mk:25: test/build/mlkem512/mlkem/src/poly.c.o] Interrupt: 2
+make: *** [test/mk/rules.mk:25: test/build/mlkem512/mlkem/src/fips202/keccakf1600.c.o] Interrupt: 2
+make: *** [test/mk/rules.mk:25: test/build/mlkem512/mlkem/src/fips202/fips202x4.c.o] Interrupt: 2
+make: *** [test/mk/rules.mk:25: test/build/mlkem512/test/notrandombytes/notrandombytes.c.o] Interrupt: 2
+Traceback (most recent call last):
+  File "/Users/beckphan/repos/mlkem-native/./scripts/tests", line 1262, in <module>
+    cli()
+  File "/Users/beckphan/repos/mlkem-native/./scripts/tests", line 1254, in cli
+    Tests(args).func()
+  File "/Users/beckphan/repos/mlkem-native/./scripts/tests", line 585, in func
+    _func(False)
+  File "/Users/beckphan/repos/mlkem-native/./scripts/tests", line 572, in _func
+    self._compile_schemes(TEST_TYPES.FUNC, opt)
+  File "/Users/beckphan/repos/mlkem-native/./scripts/tests", line 448, in _compile_schemes
+    p = subprocess.run(
+        ^^^^^^^^^^^^^^^
+  File "/nix/store/v0vy1c59f0vf71h64caw17hzymvg0zms-python3-3.12.10/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/v0vy1c59f0vf71h64caw17hzymvg0zms-python3-3.12.10/lib/python3.12/subprocess.py", line 1201, in communicate
+    self.wait()
+  File "/nix/store/v0vy1c59f0vf71h64caw17hzymvg0zms-python3-3.12.10/lib/python3.12/subprocess.py", line 1264, in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/v0vy1c59f0vf71h64caw17hzymvg0zms-python3-3.12.10/lib/python3.12/subprocess.py", line 2053, in _wait
+    (pid, sts) = self._try_wait(0)
+                 ^^^^^^^^^^^^^^^^^
+  File "/nix/store/v0vy1c59f0vf71h64caw17hzymvg0zms-python3-3.12.10/lib/python3.12/subprocess.py", line 2011, in _try_wait
+    (pid, sts) = os.waitpid(self.pid, wait_flags)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

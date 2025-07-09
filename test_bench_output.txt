@@ -1,0 +1,70 @@
+warning: Git tree '/Users/beckphan/repos/mlkem-native' is dirty
+INFO  > Benchmark          Compile     (native no_opt):  make bench OPT=0 AUTO=1 CYCLES=NO -j10
+INFO  > Benchmark          ML-KEM-512  (native no_opt):  make run_bench_512
+INFO  > Benchmark          ML-KEM-512  (native no_opt):  test/build/mlkem512/bin/bench_mlkem512
+   keypair cycles = 0
+    encaps cycles = 0
+    decaps cycles = 0
+
+           percentile      1     10     20     30     40     50     60     70     80     90     99
+   keypair percentiles:      0      0      0      0      0      0      0      0      0      0      0
+    encaps percentiles:      0      0      0      0      0      0      0      0      0      0      0
+    decaps percentiles:      0      0      0      0      0      0      0      0      0      0      0
+
+INFO  > Benchmark          ML-KEM-768  (native no_opt):  make run_bench_768
+INFO  > Benchmark          ML-KEM-768  (native no_opt):  test/build/mlkem768/bin/bench_mlkem768
+   keypair cycles = 0
+    encaps cycles = 0
+    decaps cycles = 0
+
+           percentile      1     10     20     30     40     50     60     70     80     90     99
+   keypair percentiles:      0      0      0      0      0      0      0      0      0      0      0
+    encaps percentiles:      0      0      0      0      0      0      0      0      0      0      0
+    decaps percentiles:      0      0      0      0      0      0      0      0      0      0      0
+
+INFO  > Benchmark          ML-KEM-1024 (native no_opt):  make run_bench_1024
+INFO  > Benchmark          ML-KEM-1024 (native no_opt):  test/build/mlkem1024/bin/bench_mlkem1024
+   keypair cycles = 0
+    encaps cycles = 0
+    decaps cycles = 0
+
+           percentile      1     10     20     30     40     50     60     70     80     90     99
+   keypair percentiles:      0      0      0      0      0      0      0      0      0      0      0
+    encaps percentiles:      0      0      0      0      0      0      0      0      0      0      0
+    decaps percentiles:      0      0      0      0      0      0      0      0      0      0      0
+
+INFO  > Benchmark          Compile     (native opt):     make bench OPT=1 AUTO=1 CYCLES=NO -j10
+INFO  > Benchmark          ML-KEM-512  (native opt):     make run_bench_512
+INFO  > Benchmark          ML-KEM-512  (native opt):     test/build/mlkem512/bin/bench_mlkem512
+   keypair cycles = 0
+    encaps cycles = 0
+    decaps cycles = 0
+
+           percentile      1     10     20     30     40     50     60     70     80     90     99
+   keypair percentiles:      0      0      0      0      0      0      0      0      0      0      0
+    encaps percentiles:      0      0      0      0      0      0      0      0      0      0      0
+    decaps percentiles:      0      0      0      0      0      0      0      0      0      0      0
+
+INFO  > Benchmark          ML-KEM-768  (native opt):     make run_bench_768
+INFO  > Benchmark          ML-KEM-768  (native opt):     test/build/mlkem768/bin/bench_mlkem768
+   keypair cycles = 0
+    encaps cycles = 0
+    decaps cycles = 0
+
+           percentile      1     10     20     30     40     50     60     70     80     90     99
+   keypair percentiles:      0      0      0      0      0      0      0      0      0      0      0
+    encaps percentiles:      0      0      0      0      0      0      0      0      0      0      0
+    decaps percentiles:      0      0      0      0      0      0      0      0      0      0      0
+
+INFO  > Benchmark          ML-KEM-1024 (native opt):     make run_bench_1024
+INFO  > Benchmark          ML-KEM-1024 (native opt):     test/build/mlkem1024/bin/bench_mlkem1024
+   keypair cycles = 0
+    encaps cycles = 0
+    decaps cycles = 0
+
+           percentile      1     10     20     30     40     50     60     70     80     90     99
+   keypair percentiles:      0      0      0      0      0      0      0      0      0      0      0
+    encaps percentiles:      0      0      0      0      0      0      0      0      0      0      0
+    decaps percentiles:      0      0      0      0      0      0      0      0      0      0      0
+
+All good!

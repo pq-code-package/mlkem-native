@@ -1,0 +1,152 @@
+warning: Git tree '/Users/beckphan/repos/mlkem-native' is dirty
+INFO  > Functional Test    Compile     (native no_opt):  make func OPT=0 AUTO=1 -j10
+mlkem/src/indcpa.c:400:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  400 |   mlk_zeroize(a, sizeof(a));
+      |               ^
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:483:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  483 |   mlk_zeroize(at, sizeof(at));
+      |               ^~
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+2 errors generated.
+make: *** [test/mk/rules.mk:27: test/build/mlkem512/mlkem/src/indcpa.c.o] Error 1
+make: *** Waiting for unfinished jobs....
+ERROR > Functional Test    Compile     (native no_opt):  make failed: 2
+INFO  > Functional Test    ML-KEM-512  (native no_opt):  make run_func_512 -j10
+ERROR > Functional Test    ML-KEM-512  (native no_opt):  'make run_func_512 -j10' failed with with 2
+ERROR > Functional Test    ML-KEM-512  (native no_opt):  mlkem/src/indcpa.c:400:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  400 |   mlk_zeroize(a, sizeof(a));
+      |               ^
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:483:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  483 |   mlk_zeroize(at, sizeof(at));
+      |               ^~
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+2 errors generated.
+make: *** [test/mk/rules.mk:27: test/build/mlkem512/mlkem/src/indcpa.c.o] Error 1
+make: *** Waiting for unfinished jobs....
+
+INFO  > Functional Test    ML-KEM-768  (native no_opt):  make run_func_768 -j10
+ERROR > Functional Test    ML-KEM-768  (native no_opt):  'make run_func_768 -j10' failed with with 2
+ERROR > Functional Test    ML-KEM-768  (native no_opt):  mlkem/src/indcpa.c:400:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  400 |   mlk_zeroize(a, sizeof(a));
+      |               ^
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:483:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  483 |   mlk_zeroize(at, sizeof(at));
+      |               ^~
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+2 errors generated.
+make: *** [test/mk/rules.mk:35: test/build/mlkem768/mlkem/src/indcpa.c.o] Error 1
+make: *** Waiting for unfinished jobs....
+
+INFO  > Functional Test    ML-KEM-1024 (native no_opt):  make run_func_1024 -j10
+ERROR > Functional Test    ML-KEM-1024 (native no_opt):  'make run_func_1024 -j10' failed with with 2
+ERROR > Functional Test    ML-KEM-1024 (native no_opt):  mlkem/src/indcpa.c:400:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  400 |   mlk_zeroize(a, sizeof(a));
+      |               ^
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:483:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  483 |   mlk_zeroize(at, sizeof(at));
+      |               ^~
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+2 errors generated.
+make: *** [test/mk/rules.mk:47: test/build/mlkem1024/mlkem/src/indcpa.c.o] Error 1
+make: *** Waiting for unfinished jobs....
+
+INFO  > Functional Test    Compile     (native opt):     make func OPT=1 AUTO=1 -j10
+mlkem/src/indcpa.c:400:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  400 |   mlk_zeroize(a, sizeof(a));
+      |               ^
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:483:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  483 |   mlk_zeroize(at, sizeof(at));
+      |               ^~
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+2 errors generated.
+make: *** [test/mk/rules.mk:25: test/build/mlkem512/mlkem/src/indcpa.c.o] Error 1
+make: *** Waiting for unfinished jobs....
+ERROR > Functional Test    Compile     (native opt):     make failed: 2
+INFO  > Functional Test    ML-KEM-512  (native opt):     make run_func_512 -j10
+ERROR > Functional Test    ML-KEM-512  (native opt):     'make run_func_512 -j10' failed with with 2
+ERROR > Functional Test    ML-KEM-512  (native opt):     mlkem/src/indcpa.c:400:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  400 |   mlk_zeroize(a, sizeof(a));
+      |               ^
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:483:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  483 |   mlk_zeroize(at, sizeof(at));
+      |               ^~
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+2 errors generated.
+make: *** [test/mk/rules.mk:25: test/build/mlkem512/mlkem/src/indcpa.c.o] Error 1
+make: *** Waiting for unfinished jobs....
+
+INFO  > Functional Test    ML-KEM-768  (native opt):     make run_func_768 -j10
+ERROR > Functional Test    ML-KEM-768  (native opt):     'make run_func_768 -j10' failed with with 2
+ERROR > Functional Test    ML-KEM-768  (native opt):     mlkem/src/indcpa.c:400:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  400 |   mlk_zeroize(a, sizeof(a));
+      |               ^
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:483:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  483 |   mlk_zeroize(at, sizeof(at));
+      |               ^~
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+2 errors generated.
+make: *** [test/mk/rules.mk:35: test/build/mlkem768/mlkem/src/indcpa.c.o] Error 1
+make: *** Waiting for unfinished jobs....
+
+INFO  > Functional Test    ML-KEM-1024 (native opt):     make run_func_1024 -j10
+ERROR > Functional Test    ML-KEM-1024 (native opt):     'make run_func_1024 -j10' failed with with 2
+ERROR > Functional Test    ML-KEM-1024 (native opt):     mlkem/src/indcpa.c:400:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  400 |   mlk_zeroize(a, sizeof(a));
+      |               ^
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:483:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  483 |   mlk_zeroize(at, sizeof(at));
+      |               ^~
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+2 errors generated.
+make: *** [test/mk/rules.mk:45: test/build/mlkem1024/mlkem/src/indcpa.c.o] Error 1
+make: *** Waiting for unfinished jobs....
+
+8 tests FAILED
+* Compilation for (Functional Test no_opt)
+* Functional Test (ML-KEM-512 no_opt)
+* Functional Test (ML-KEM-768 no_opt)
+* Functional Test (ML-KEM-1024 no_opt)
+* Compilation for (Functional Test opt)
+* Functional Test (ML-KEM-512 opt)
+* Functional Test (ML-KEM-768 opt)
+* Functional Test (ML-KEM-1024 opt)

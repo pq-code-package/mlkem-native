@@ -1,0 +1,40 @@
+warning: Git tree '/Users/beckphan/repos/mlkem-native' is dirty
+INFO  > Functional Test    Compile     (native no_opt):  make func OPT=0 AUTO=1 -j10
+INFO  > Kat Test           Compile     (native no_opt):  make kat OPT=0 AUTO=1 -j10
+INFO  > ACVP Test          Compile     (native no_opt):  make acvp OPT=0 AUTO=1 -j10
+INFO  > Functional Test    ML-KEM-512  (native no_opt):  make run_func_512 -j10
+INFO  > Functional Test    ML-KEM-768  (native no_opt):  make run_func_768 -j10
+INFO  > Functional Test    ML-KEM-1024 (native no_opt):  make run_func_1024 -j10
+INFO  > Kat Test           ML-KEM-512  (native no_opt):  make run_kat_512 -j10
+INFO  > Kat Test           ML-KEM-768  (native no_opt):  make run_kat_768 -j10
+INFO  > Kat Test           ML-KEM-1024 (native no_opt):  make run_kat_1024 -j10
+INFO  > ACVP Test          All         (native no_opt):  make run_acvp -j10
+INFO  > Functional Test    Compile     (native opt):     make func OPT=1 AUTO=1 -j10
+INFO  > Kat Test           Compile     (native opt):     make kat OPT=1 AUTO=1 -j10
+INFO  > ACVP Test          Compile     (native opt):     make acvp OPT=1 AUTO=1 -j10
+INFO  > Functional Test    ML-KEM-512  (native opt):     make run_func_512 -j10
+INFO  > Functional Test    ML-KEM-768  (native opt):     make run_func_768 -j10
+INFO  > Functional Test    ML-KEM-1024 (native opt):     make run_func_1024 -j10
+INFO  > Kat Test           ML-KEM-512  (native opt):     make run_kat_512 -j10
+INFO  > Kat Test           ML-KEM-768  (native opt):     make run_kat_768 -j10
+INFO  > Kat Test           ML-KEM-1024 (native opt):     make run_kat_1024 -j10
+INFO  > ACVP Test          All         (native opt):     make run_acvp -j10
+INFO  > Example (Bring-Your-Own-FIPS202)         Compile     (native):         make -C examples/bring_your_own_fips202 -j10
+INFO  > Example (Bring-Your-Own-FIPS202)         All         (native):         make run -C examples/bring_your_own_fips202
+INFO  > Example (Custom Backend)                 Compile     (native):         make -C examples/custom_backend -j10
+INFO  > Example (Custom Backend)                 All         (native):         make run -C examples/custom_backend
+INFO  > Example (mlkem-native as code package)   Compile     (native):         make -C examples/basic -j10
+INFO  > Example (mlkem-native as code package)   All         (native):         make run -C examples/basic
+INFO  > Example (monobuild)                      Compile     (native):         make -C examples/monolithic_build -j10
+INFO  > Example (monobuild)                      All         (native):         make run -C examples/monolithic_build
+INFO  > Example (monobuild, native)              Compile     (native):         make -C examples/monolithic_build_native -j10
+INFO  > Example (monobuild, native)              All         (native):         make run -C examples/monolithic_build_native
+INFO  > Example (monobuild, multilevel)          Compile     (native):         make -C examples/monolithic_build_multilevel -j10
+INFO  > Example (monobuild, multilevel)          All         (native):         make run -C examples/monolithic_build_multilevel
+INFO  > Example (monobuild, multilevel, native)  Compile     (native):         make -C examples/monolithic_build_multilevel_native -j10
+INFO  > Example (monobuild, multilevel, native)  All         (native):         make run -C examples/monolithic_build_multilevel_native
+INFO  > Example (multilevel build)               Compile     (native):         make -C examples/multilevel_build -j10
+INFO  > Example (multilevel build)               All         (native):         make run -C examples/multilevel_build
+INFO  > Example (multilevel build, native)       Compile     (native):         make -C examples/multilevel_build_native -j10
+INFO  > Example (multilevel build, native)       All         (native):         make run -C examples/multilevel_build_native
+All good!

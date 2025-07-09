@@ -1,0 +1,73 @@
+warning: Git tree '/Users/beckphan/repos/mlkem-native' is dirty
+Configuring CBMC proofs:   0 / 129Configuring CBMC proofs:   0 / 129Configuring CBMC proofs:   0 / 129Configuring CBMC proofs:   0 / 129Configuring CBMC proofs:   0 / 129Configuring CBMC proofs:   0 / 129Configuring CBMC proofs:   0 / 129Configuring CBMC proofs:   0 / 129Configuring CBMC proofs:   1 / 129Configuring CBMC proofs:   1 / 129Configuring CBMC proofs:   2 / 129Configuring CBMC proofs:   2 / 129Configuring CBMC proofs:   3 / 129Configuring CBMC proofs:   3 / 129Configuring CBMC proofs:   4 / 129Configuring CBMC proofs:   4 / 129Configuring CBMC proofs:   5 / 129Configuring CBMC proofs:   5 / 129Configuring CBMC proofs:   6 / 129Configuring CBMC proofs:   6 / 129Configuring CBMC proofs:   7 / 129Configuring CBMC proofs:   7 / 129Configuring CBMC proofs:   8 / 129Configuring CBMC proofs:   8 / 129Configuring CBMC proofs:   9 / 129Configuring CBMC proofs:   9 / 129Configuring CBMC proofs:  10 / 129Configuring CBMC proofs:  10 / 129Configuring CBMC proofs:  11 / 129Configuring CBMC proofs:  11 / 129Configuring CBMC proofs:  12 / 129Configuring CBMC proofs:  12 / 129Configuring CBMC proofs:  13 / 129Configuring CBMC proofs:  13 / 129Configuring CBMC proofs:  14 / 129Configuring CBMC proofs:  14 / 129Configuring CBMC proofs:  15 / 129Configuring CBMC proofs:  15 / 129Configuring CBMC proofs:  16 / 129Configuring CBMC proofs:  16 / 129Configuring CBMC proofs:  17 / 129Configuring CBMC proofs:  17 / 129Configuring CBMC proofs:  18 / 129Configuring CBMC proofs:  18 / 129Configuring CBMC proofs:  19 / 129Configuring CBMC proofs:  19 / 129Configuring CBMC proofs:  20 / 129Configuring CBMC proofs:  20 / 129Configuring CBMC proofs:  21 / 129Configuring CBMC proofs:  21 / 129Configuring CBMC proofs:  22 / 129Configuring CBMC proofs:  22 / 129Configuring CBMC proofs:  23 / 129Configuring CBMC proofs:  23 / 129Configuring CBMC proofs:  24 / 129Configuring CBMC proofs:  24 / 129Configuring CBMC proofs:  25 / 129Configuring CBMC proofs:  25 / 129Configuring CBMC proofs:  26 / 129Configuring CBMC proofs:  26 / 129Configuring CBMC proofs:  27 / 129Configuring CBMC proofs:  27 / 129Configuring CBMC proofs:  28 / 129Configuring CBMC proofs:  28 / 129Configuring CBMC proofs:  29 / 129Configuring CBMC proofs:  29 / 129Configuring CBMC proofs:  30 / 129Configuring CBMC proofs:  30 / 129Configuring CBMC proofs:  31 / 129Configuring CBMC proofs:  31 / 129Configuring CBMC proofs:  32 / 129Configuring CBMC proofs:  32 / 129Configuring CBMC proofs:  33 / 129Configuring CBMC proofs:  33 / 129Configuring CBMC proofs:  34 / 129Configuring CBMC proofs:  34 / 129Configuring CBMC proofs:  35 / 129Configuring CBMC proofs:  35 / 129Configuring CBMC proofs:  36 / 129Configuring CBMC proofs:  36 / 129Configuring CBMC proofs:  37 / 129Configuring CBMC proofs:  37 / 129Configuring CBMC proofs:  38 / 129Configuring CBMC proofs:  38 / 129Configuring CBMC proofs:  39 / 129Configuring CBMC proofs:  39 / 129Configuring CBMC proofs:  40 / 129Configuring CBMC proofs:  40 / 129Configuring CBMC proofs:  41 / 129Configuring CBMC proofs:  41 / 129Configuring CBMC proofs:  42 / 129Configuring CBMC proofs:  42 / 129Configuring CBMC proofs:  43 / 129Configuring CBMC proofs:  43 / 129Configuring CBMC proofs:  44 / 129Configuring CBMC proofs:  44 / 129Configuring CBMC proofs:  45 / 129Configuring CBMC proofs:  45 / 129Configuring CBMC proofs:  46 / 129Configuring CBMC proofs:  46 / 129Configuring CBMC proofs:  47 / 129Configuring CBMC proofs:  47 / 129Configuring CBMC proofs:  48 / 129Configuring CBMC proofs:  48 / 129Configuring CBMC proofs:  49 / 129Configuring CBMC proofs:  49 / 129Configuring CBMC proofs:  50 / 129Configuring CBMC proofs:  50 / 129Configuring CBMC proofs:  51 / 129Configuring CBMC proofs:  51 / 129Configuring CBMC proofs:  52 / 129Configuring CBMC proofs:  52 / 129Configuring CBMC proofs:  53 / 129Configuring CBMC proofs:  53 / 129Configuring CBMC proofs:  54 / 129Configuring CBMC proofs:  54 / 129Configuring CBMC proofs:  55 / 129Configuring CBMC proofs:  55 / 129Configuring CBMC proofs:  56 / 129Configuring CBMC proofs:  56 / 129Configuring CBMC proofs:  57 / 129Configuring CBMC proofs:  57 / 129Configuring CBMC proofs:  58 / 129Configuring CBMC proofs:  58 / 129Configuring CBMC proofs:  59 / 129Configuring CBMC proofs:  59 / 129Configuring CBMC proofs:  60 / 129Configuring CBMC proofs:  60 / 129Configuring CBMC proofs:  61 / 129Configuring CBMC proofs:  61 / 129Configuring CBMC proofs:  62 / 129Configuring CBMC proofs:  62 / 129Configuring CBMC proofs:  63 / 129Configuring CBMC proofs:  63 / 129Configuring CBMC proofs:  64 / 129Configuring CBMC proofs:  64 / 129Configuring CBMC proofs:  65 / 129Configuring CBMC proofs:  65 / 129Configuring CBMC proofs:  66 / 129Configuring CBMC proofs:  66 / 129Configuring CBMC proofs:  67 / 129Configuring CBMC proofs:  67 / 129Configuring CBMC proofs:  68 / 129Configuring CBMC proofs:  68 / 129Configuring CBMC proofs:  69 / 129Configuring CBMC proofs:  69 / 129Configuring CBMC proofs:  70 / 129Configuring CBMC proofs:  70 / 129Configuring CBMC proofs:  71 / 129Configuring CBMC proofs:  71 / 129Configuring CBMC proofs:  72 / 129Configuring CBMC proofs:  72 / 129Configuring CBMC proofs:  73 / 129Configuring CBMC proofs:  73 / 129Configuring CBMC proofs:  74 / 129Configuring CBMC proofs:  74 / 129Configuring CBMC proofs:  75 / 129Configuring CBMC proofs:  75 / 129Configuring CBMC proofs:  76 / 129Configuring CBMC proofs:  76 / 129Configuring CBMC proofs:  77 / 129Configuring CBMC proofs:  77 / 129Configuring CBMC proofs:  78 / 129Configuring CBMC proofs:  78 / 129Configuring CBMC proofs:  79 / 129Configuring CBMC proofs:  79 / 129Configuring CBMC proofs:  80 / 129Configuring CBMC proofs:  80 / 129Configuring CBMC proofs:  81 / 129Configuring CBMC proofs:  81 / 129Configuring CBMC proofs:  82 / 129Configuring CBMC proofs:  82 / 129Configuring CBMC proofs:  83 / 129Configuring CBMC proofs:  83 / 129Configuring CBMC proofs:  84 / 129Configuring CBMC proofs:  84 / 129Configuring CBMC proofs:  85 / 129Configuring CBMC proofs:  85 / 129Configuring CBMC proofs:  86 / 129Configuring CBMC proofs:  86 / 129Configuring CBMC proofs:  87 / 129Configuring CBMC proofs:  87 / 129Configuring CBMC proofs:  88 / 129Configuring CBMC proofs:  88 / 129Configuring CBMC proofs:  89 / 129Configuring CBMC proofs:  89 / 129Configuring CBMC proofs:  90 / 129Configuring CBMC proofs:  90 / 129Configuring CBMC proofs:  91 / 129Configuring CBMC proofs:  91 / 129Configuring CBMC proofs:  92 / 129Configuring CBMC proofs:  92 / 129Configuring CBMC proofs:  93 / 129Configuring CBMC proofs:  93 / 129Configuring CBMC proofs:  94 / 129Configuring CBMC proofs:  94 / 129Configuring CBMC proofs:  95 / 129Configuring CBMC proofs:  95 / 129Configuring CBMC proofs:  96 / 129Configuring CBMC proofs:  96 / 129Configuring CBMC proofs:  97 / 129Configuring CBMC proofs:  97 / 129Configuring CBMC proofs:  98 / 129Configuring CBMC proofs:  98 / 129Configuring CBMC proofs:  99 / 129Configuring CBMC proofs:  99 / 129Configuring CBMC proofs: 100 / 129Configuring CBMC proofs: 100 / 129Configuring CBMC proofs: 101 / 129Configuring CBMC proofs: 101 / 129Configuring CBMC proofs: 102 / 129Configuring CBMC proofs: 102 / 129Configuring CBMC proofs: 103 / 129Configuring CBMC proofs: 103 / 129Configuring CBMC proofs: 104 / 129Configuring CBMC proofs: 104 / 129Configuring CBMC proofs: 105 / 129Configuring CBMC proofs: 105 / 129Configuring CBMC proofs: 106 / 129Configuring CBMC proofs: 106 / 129Configuring CBMC proofs: 107 / 129Configuring CBMC proofs: 107 / 129Configuring CBMC proofs: 108 / 129Configuring CBMC proofs: 108 / 129Configuring CBMC proofs: 109 / 129Configuring CBMC proofs: 109 / 129Configuring CBMC proofs: 110 / 129Configuring CBMC proofs: 110 / 129Configuring CBMC proofs: 111 / 129Configuring CBMC proofs: 111 / 129Configuring CBMC proofs: 112 / 129Configuring CBMC proofs: 112 / 129Configuring CBMC proofs: 113 / 129Configuring CBMC proofs: 113 / 129Configuring CBMC proofs: 114 / 129Configuring CBMC proofs: 114 / 129Configuring CBMC proofs: 115 / 129Configuring CBMC proofs: 115 / 129Configuring CBMC proofs: 116 / 129Configuring CBMC proofs: 116 / 129Configuring CBMC proofs: 117 / 129Configuring CBMC proofs: 117 / 129Configuring CBMC proofs: 118 / 129Configuring CBMC proofs: 118 / 129Configuring CBMC proofs: 119 / 129Configuring CBMC proofs: 119 / 129Configuring CBMC proofs: 120 / 129Configuring CBMC proofs: 120 / 129Configuring CBMC proofs: 121 / 129Configuring CBMC proofs: 121 / 129Configuring CBMC proofs: 122 / 129Configuring CBMC proofs: 122 / 129Configuring CBMC proofs: 123 / 129Configuring CBMC proofs: 123 / 129Configuring CBMC proofs: 124 / 129Configuring CBMC proofs: 124 / 129Configuring CBMC proofs: 125 / 129Configuring CBMC proofs: 125 / 129Configuring CBMC proofs: 126 / 129Configuring CBMC proofs: 126 / 129Configuring CBMC proofs: 127 / 129Configuring CBMC proofs: 127 / 129
+For your convenience, the output of this run will be symbolically linked to  /Users/beckphan/repos/mlkem-native/proofs/cbmc/output/latest/html/index.html 
+
+Traceback (most recent call last):
+  File "/nix/store/v0vy1c59f0vf71h64caw17hzymvg0zms-python3-3.12.10/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/v0vy1c59f0vf71h64caw17hzymvg0zms-python3-3.12.10/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/Users/beckphan/repos/mlkem-native/proofs/cbmc/run-cbmc-proofs.py", line 504, in main
+    await proof_queue.join()
+  File "/nix/store/v0vy1c59f0vf71h64caw17hzymvg0zms-python3-3.12.10/lib/python3.12/asyncio/queues.py", line 215, in join
+    await self._finished.wait()
+  File "/nix/store/v0vy1c59f0vf71h64caw17hzymvg0zms-python3-3.12.10/lib/python3.12/asyncio/locks.py", line 212, in wait
+    await fut
+asyncio.exceptions.CancelledError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/beckphan/repos/mlkem-native/proofs/cbmc/run-cbmc-proofs.py", line 525, in <module>
+    asyncio.run(main())
+  File "/nix/store/v0vy1c59f0vf71h64caw17hzymvg0zms-python3-3.12.10/lib/python3.12/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/nix/store/v0vy1c59f0vf71h64caw17hzymvg0zms-python3-3.12.10/lib/python3.12/asyncio/runners.py", line 123, in run
+    raise KeyboardInterrupt()
+KeyboardInterrupt
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-8' coro=<configure_proof_dirs() done, defined at /Users/beckphan/repos/mlkem-native/proofs/cbmc/run-cbmc-proofs.py:337> exception=KeyError(' rej_uniform_native_aarch64\n')>
+Traceback (most recent call last):
+  File "/Users/beckphan/repos/mlkem-native/proofs/cbmc/run-cbmc-proofs.py", line 350, in configure_proof_dirs
+    check_uid_uniqueness(path, proof_uids)
+  File "/Users/beckphan/repos/mlkem-native/proofs/cbmc/run-cbmc-proofs.py", line 313, in check_uid_uniqueness
+    proof_uids[match["uid"]],
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: ' rej_uniform_native_aarch64\n'
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-4' coro=<configure_proof_dirs() done, defined at /Users/beckphan/repos/mlkem-native/proofs/cbmc/run-cbmc-proofs.py:337> exception=KeyError(' rej_uniform_native_aarch64\n')>
+Traceback (most recent call last):
+  File "/Users/beckphan/repos/mlkem-native/proofs/cbmc/run-cbmc-proofs.py", line 350, in configure_proof_dirs
+    check_uid_uniqueness(path, proof_uids)
+  File "/Users/beckphan/repos/mlkem-native/proofs/cbmc/run-cbmc-proofs.py", line 313, in check_uid_uniqueness
+    proof_uids[match["uid"]],
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: ' rej_uniform_native_aarch64\n'
+Traceback (most recent call last):
+  File "/Users/beckphan/repos/mlkem-native/./scripts/tests", line 1262, in <module>
+    cli()
+  File "/Users/beckphan/repos/mlkem-native/./scripts/tests", line 1250, in cli
+    Tests(args).cbmc()
+  File "/Users/beckphan/repos/mlkem-native/./scripts/tests", line 835, in cbmc
+    run_cbmc("2")
+  File "/Users/beckphan/repos/mlkem-native/./scripts/tests", line 822, in run_cbmc
+    p = subprocess.run(
+        ^^^^^^^^^^^^^^^
+  File "/nix/store/v0vy1c59f0vf71h64caw17hzymvg0zms-python3-3.12.10/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/v0vy1c59f0vf71h64caw17hzymvg0zms-python3-3.12.10/lib/python3.12/subprocess.py", line 1201, in communicate
+    self.wait()
+  File "/nix/store/v0vy1c59f0vf71h64caw17hzymvg0zms-python3-3.12.10/lib/python3.12/subprocess.py", line 1264, in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/v0vy1c59f0vf71h64caw17hzymvg0zms-python3-3.12.10/lib/python3.12/subprocess.py", line 2053, in _wait
+    (pid, sts) = self._try_wait(0)
+                 ^^^^^^^^^^^^^^^^^
+  File "/nix/store/v0vy1c59f0vf71h64caw17hzymvg0zms-python3-3.12.10/lib/python3.12/subprocess.py", line 2011, in _try_wait
+    (pid, sts) = os.waitpid(self.pid, wait_flags)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

@@ -1,0 +1,10 @@
+warning: Git tree '/Users/beckphan/repos/mlkem-native' is dirty
+INFO  > Functional Test    Compile     (native no_opt):  make func OPT=0 AUTO=1 -j10
+INFO  > Functional Test    ML-KEM-512  (native no_opt):  make run_func_512 -j10
+INFO  > Functional Test    ML-KEM-768  (native no_opt):  make run_func_768 -j10
+INFO  > Functional Test    ML-KEM-1024 (native no_opt):  make run_func_1024 -j10
+INFO  > Functional Test    Compile     (native opt):     make func OPT=1 AUTO=1 -j10
+INFO  > Functional Test    ML-KEM-512  (native opt):     make run_func_512 -j10
+INFO  > Functional Test    ML-KEM-768  (native opt):     make run_func_768 -j10
+INFO  > Functional Test    ML-KEM-1024 (native opt):     make run_func_1024 -j10
+All good!

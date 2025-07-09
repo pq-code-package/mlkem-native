@@ -1,0 +1,867 @@
+warning: Git tree '/Users/beckphan/repos/mlkem-native' is dirty
+INFO  > Functional Test    Compile     (native no_opt):  make func OPT=0 AUTO=1 -j10
+mlkem/src/indcpa.c:66:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+   66 |   mlk_polyvec_tobytes(r, pk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:89:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+   89 |   mlk_polyvec_frombytes(pk, packedpk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:114:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  114 |   mlk_polyvec_tobytes(r, sk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:134:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  134 |   mlk_polyvec_frombytes(sk, packedsk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:155:30: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  155 |   mlk_polyvec_compress_du(r, b);
+      |                              ^
+      |                              &
+mlkem/src/poly_k.h:214:49: note: passing argument to parameter 'a' here
+  214 |                              const mlk_polyvec *a)
+      |                                                 ^
+mlkem/src/indcpa.c:176:29: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  176 |   mlk_polyvec_decompress_du(b, c);
+      |                             ^
+      |                             &
+mlkem/src/poly_k.h:242:45: note: passing argument to parameter 'r' here
+  242 | void mlk_polyvec_decompress_du(mlk_polyvec *r,
+      |                                             ^
+mlkem/src/indcpa.c:393:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  393 |   mlk_pack_sk(sk, &skpv);
+      |                   ^~~~~
+mlkem/src/indcpa.c:111:77: note: passing argument to parameter 'sk' here
+  111 | static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], mlk_polyvec sk)
+      |                                                                             ^
+mlkem/src/indcpa.c:394:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  394 |   mlk_pack_pk(pk, &pkpv, publicseed);
+      |                   ^~~~~
+mlkem/src/indcpa.c:62:77: note: passing argument to parameter 'pk' here
+   62 | static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], mlk_polyvec pk,
+      |                                                                             ^
+mlkem/src/indcpa.c:400:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  400 |   mlk_zeroize(a, sizeof(a));
+      |               ^
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:426:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  426 |   mlk_unpack_pk(&pkpv, seed, pk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:86:39: note: passing argument to parameter 'pk' here
+   86 | static void mlk_unpack_pk(mlk_polyvec pk, uint8_t seed[MLKEM_SYMBYTES],
+      |                                       ^
+mlkem/src/indcpa.c:474:26: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  474 |   mlk_pack_ciphertext(c, &b, &v);
+      |                          ^~
+mlkem/src/indcpa.c:152:76: note: passing argument to parameter 'b' here
+  152 | static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES], mlk_polyvec b,
+      |                                                                            ^
+mlkem/src/indcpa.c:483:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  483 |   mlk_zeroize(at, sizeof(at));
+      |               ^~
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:501:25: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  501 |   mlk_unpack_ciphertext(&b, &v, c);
+      |                         ^~
+mlkem/src/indcpa.c:173:47: note: passing argument to parameter 'b' here
+  173 | static void mlk_unpack_ciphertext(mlk_polyvec b, mlk_poly *v,
+      |                                               ^
+mlkem/src/indcpa.c:502:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  502 |   mlk_unpack_sk(&skpv, sk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:131:39: note: passing argument to parameter 'sk' here
+  131 | static void mlk_unpack_sk(mlk_polyvec sk,
+      |                                       ^
+14 errors generated.
+make: *** [test/mk/rules.mk:25: test/build/mlkem512/mlkem/src/indcpa.c.o] Error 1
+make: *** Waiting for unfinished jobs....
+mlkem/src/indcpa.c:66:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+   66 |   mlk_polyvec_tobytes(r, pk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:89:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+   89 |   mlk_polyvec_frombytes(pk, packedpk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:114:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  114 |   mlk_polyvec_tobytes(r, sk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:134:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  134 |   mlk_polyvec_frombytes(sk, packedsk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:155:30: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  155 |   mlk_polyvec_compress_du(r, b);
+      |                              ^
+      |                              &
+mlkem/src/poly_k.h:214:49: note: passing argument to parameter 'a' here
+  214 |                              const mlk_polyvec *a)
+      |                                                 ^
+mlkem/src/indcpa.c:176:29: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  176 |   mlk_polyvec_decompress_du(b, c);
+      |                             ^
+      |                             &
+mlkem/src/poly_k.h:242:45: note: passing argument to parameter 'r' here
+  242 | void mlk_polyvec_decompress_du(mlk_polyvec *r,
+      |                                             ^
+mlkem/src/indcpa.c:393:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  393 |   mlk_pack_sk(sk, &skpv);
+      |                   ^~~~~
+mlkem/src/indcpa.c:111:77: note: passing argument to parameter 'sk' here
+  111 | static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], mlk_polyvec sk)
+      |                                                                             ^
+mlkem/src/indcpa.c:394:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  394 |   mlk_pack_pk(pk, &pkpv, publicseed);
+      |                   ^~~~~
+mlkem/src/indcpa.c:62:77: note: passing argument to parameter 'pk' here
+   62 | static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], mlk_polyvec pk,
+      |                                                                             ^
+mlkem/src/indcpa.c:400:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  400 |   mlk_zeroize(a, sizeof(a));
+      |               ^
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:426:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  426 |   mlk_unpack_pk(&pkpv, seed, pk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:86:39: note: passing argument to parameter 'pk' here
+   86 | static void mlk_unpack_pk(mlk_polyvec pk, uint8_t seed[MLKEM_SYMBYTES],
+      |                                       ^
+mlkem/src/indcpa.c:474:26: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  474 |   mlk_pack_ciphertext(c, &b, &v);
+      |                          ^~
+mlkem/src/indcpa.c:152:76: note: passing argument to parameter 'b' here
+  152 | static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES], mlk_polyvec b,
+      |                                                                            ^
+mlkem/src/indcpa.c:483:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  483 |   mlk_zeroize(at, sizeof(at));
+      |               ^~
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:501:25: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  501 |   mlk_unpack_ciphertext(&b, &v, c);
+      |                         ^~
+mlkem/src/indcpa.c:173:47: note: passing argument to parameter 'b' here
+  173 | static void mlk_unpack_ciphertext(mlk_polyvec b, mlk_poly *v,
+      |                                               ^
+mlkem/src/indcpa.c:502:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  502 |   mlk_unpack_sk(&skpv, sk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:131:39: note: passing argument to parameter 'sk' here
+  131 | static void mlk_unpack_sk(mlk_polyvec sk,
+      |                                       ^
+14 errors generated.
+make: *** [test/mk/rules.mk:35: test/build/mlkem768/mlkem/src/indcpa.c.o] Error 1
+ERROR > Functional Test    Compile     (native no_opt):  make failed: 2
+INFO  > Functional Test    ML-KEM-512  (native no_opt):  make run_func_512 -j10
+ERROR > Functional Test    ML-KEM-512  (native no_opt):  'make run_func_512 -j10' failed with with 2
+ERROR > Functional Test    ML-KEM-512  (native no_opt):  mlkem/src/indcpa.c:66:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+   66 |   mlk_polyvec_tobytes(r, pk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:89:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+   89 |   mlk_polyvec_frombytes(pk, packedpk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:114:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  114 |   mlk_polyvec_tobytes(r, sk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:134:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  134 |   mlk_polyvec_frombytes(sk, packedsk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:155:30: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  155 |   mlk_polyvec_compress_du(r, b);
+      |                              ^
+      |                              &
+mlkem/src/poly_k.h:214:49: note: passing argument to parameter 'a' here
+  214 |                              const mlk_polyvec *a)
+      |                                                 ^
+mlkem/src/indcpa.c:176:29: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  176 |   mlk_polyvec_decompress_du(b, c);
+      |                             ^
+      |                             &
+mlkem/src/poly_k.h:242:45: note: passing argument to parameter 'r' here
+  242 | void mlk_polyvec_decompress_du(mlk_polyvec *r,
+      |                                             ^
+mlkem/src/indcpa.c:393:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  393 |   mlk_pack_sk(sk, &skpv);
+      |                   ^~~~~
+mlkem/src/indcpa.c:111:77: note: passing argument to parameter 'sk' here
+  111 | static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], mlk_polyvec sk)
+      |                                                                             ^
+mlkem/src/indcpa.c:394:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  394 |   mlk_pack_pk(pk, &pkpv, publicseed);
+      |                   ^~~~~
+mlkem/src/indcpa.c:62:77: note: passing argument to parameter 'pk' here
+   62 | static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], mlk_polyvec pk,
+      |                                                                             ^
+mlkem/src/indcpa.c:400:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  400 |   mlk_zeroize(a, sizeof(a));
+      |               ^
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:426:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  426 |   mlk_unpack_pk(&pkpv, seed, pk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:86:39: note: passing argument to parameter 'pk' here
+   86 | static void mlk_unpack_pk(mlk_polyvec pk, uint8_t seed[MLKEM_SYMBYTES],
+      |                                       ^
+mlkem/src/indcpa.c:474:26: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  474 |   mlk_pack_ciphertext(c, &b, &v);
+      |                          ^~
+mlkem/src/indcpa.c:152:76: note: passing argument to parameter 'b' here
+  152 | static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES], mlk_polyvec b,
+      |                                                                            ^
+mlkem/src/indcpa.c:483:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  483 |   mlk_zeroize(at, sizeof(at));
+      |               ^~
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:501:25: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  501 |   mlk_unpack_ciphertext(&b, &v, c);
+      |                         ^~
+mlkem/src/indcpa.c:173:47: note: passing argument to parameter 'b' here
+  173 | static void mlk_unpack_ciphertext(mlk_polyvec b, mlk_poly *v,
+      |                                               ^
+mlkem/src/indcpa.c:502:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  502 |   mlk_unpack_sk(&skpv, sk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:131:39: note: passing argument to parameter 'sk' here
+  131 | static void mlk_unpack_sk(mlk_polyvec sk,
+      |                                       ^
+14 errors generated.
+make: *** [test/mk/rules.mk:27: test/build/mlkem512/mlkem/src/indcpa.c.o] Error 1
+
+INFO  > Functional Test    ML-KEM-768  (native no_opt):  make run_func_768 -j10
+ERROR > Functional Test    ML-KEM-768  (native no_opt):  'make run_func_768 -j10' failed with with 2
+ERROR > Functional Test    ML-KEM-768  (native no_opt):  mlkem/src/indcpa.c:66:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+   66 |   mlk_polyvec_tobytes(r, pk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:89:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+   89 |   mlk_polyvec_frombytes(pk, packedpk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:114:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  114 |   mlk_polyvec_tobytes(r, sk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:134:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  134 |   mlk_polyvec_frombytes(sk, packedsk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:155:30: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  155 |   mlk_polyvec_compress_du(r, b);
+      |                              ^
+      |                              &
+mlkem/src/poly_k.h:214:49: note: passing argument to parameter 'a' here
+  214 |                              const mlk_polyvec *a)
+      |                                                 ^
+mlkem/src/indcpa.c:176:29: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  176 |   mlk_polyvec_decompress_du(b, c);
+      |                             ^
+      |                             &
+mlkem/src/poly_k.h:242:45: note: passing argument to parameter 'r' here
+  242 | void mlk_polyvec_decompress_du(mlk_polyvec *r,
+      |                                             ^
+mlkem/src/indcpa.c:393:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  393 |   mlk_pack_sk(sk, &skpv);
+      |                   ^~~~~
+mlkem/src/indcpa.c:111:77: note: passing argument to parameter 'sk' here
+  111 | static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], mlk_polyvec sk)
+      |                                                                             ^
+mlkem/src/indcpa.c:394:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  394 |   mlk_pack_pk(pk, &pkpv, publicseed);
+      |                   ^~~~~
+mlkem/src/indcpa.c:62:77: note: passing argument to parameter 'pk' here
+   62 | static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], mlk_polyvec pk,
+      |                                                                             ^
+mlkem/src/indcpa.c:400:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  400 |   mlk_zeroize(a, sizeof(a));
+      |               ^
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:426:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  426 |   mlk_unpack_pk(&pkpv, seed, pk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:86:39: note: passing argument to parameter 'pk' here
+   86 | static void mlk_unpack_pk(mlk_polyvec pk, uint8_t seed[MLKEM_SYMBYTES],
+      |                                       ^
+mlkem/src/indcpa.c:474:26: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  474 |   mlk_pack_ciphertext(c, &b, &v);
+      |                          ^~
+mlkem/src/indcpa.c:152:76: note: passing argument to parameter 'b' here
+  152 | static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES], mlk_polyvec b,
+      |                                                                            ^
+mlkem/src/indcpa.c:483:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  483 |   mlk_zeroize(at, sizeof(at));
+      |               ^~
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:501:25: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  501 |   mlk_unpack_ciphertext(&b, &v, c);
+      |                         ^~
+mlkem/src/indcpa.c:173:47: note: passing argument to parameter 'b' here
+  173 | static void mlk_unpack_ciphertext(mlk_polyvec b, mlk_poly *v,
+      |                                               ^
+mlkem/src/indcpa.c:502:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  502 |   mlk_unpack_sk(&skpv, sk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:131:39: note: passing argument to parameter 'sk' here
+  131 | static void mlk_unpack_sk(mlk_polyvec sk,
+      |                                       ^
+14 errors generated.
+make: *** [test/mk/rules.mk:35: test/build/mlkem768/mlkem/src/indcpa.c.o] Error 1
+make: *** Waiting for unfinished jobs....
+
+INFO  > Functional Test    ML-KEM-1024 (native no_opt):  make run_func_1024 -j10
+ERROR > Functional Test    ML-KEM-1024 (native no_opt):  'make run_func_1024 -j10' failed with with 2
+ERROR > Functional Test    ML-KEM-1024 (native no_opt):  mlkem/src/indcpa.c:66:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+   66 |   mlk_polyvec_tobytes(r, pk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:89:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+   89 |   mlk_polyvec_frombytes(pk, packedpk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:114:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  114 |   mlk_polyvec_tobytes(r, sk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:134:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  134 |   mlk_polyvec_frombytes(sk, packedsk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:155:30: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  155 |   mlk_polyvec_compress_du(r, b);
+      |                              ^
+      |                              &
+mlkem/src/poly_k.h:214:49: note: passing argument to parameter 'a' here
+  214 |                              const mlk_polyvec *a)
+      |                                                 ^
+mlkem/src/indcpa.c:176:29: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  176 |   mlk_polyvec_decompress_du(b, c);
+      |                             ^
+      |                             &
+mlkem/src/poly_k.h:242:45: note: passing argument to parameter 'r' here
+  242 | void mlk_polyvec_decompress_du(mlk_polyvec *r,
+      |                                             ^
+mlkem/src/indcpa.c:393:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  393 |   mlk_pack_sk(sk, &skpv);
+      |                   ^~~~~
+mlkem/src/indcpa.c:111:77: note: passing argument to parameter 'sk' here
+  111 | static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], mlk_polyvec sk)
+      |                                                                             ^
+mlkem/src/indcpa.c:394:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  394 |   mlk_pack_pk(pk, &pkpv, publicseed);
+      |                   ^~~~~
+mlkem/src/indcpa.c:62:77: note: passing argument to parameter 'pk' here
+   62 | static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], mlk_polyvec pk,
+      |                                                                             ^
+mlkem/src/indcpa.c:400:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  400 |   mlk_zeroize(a, sizeof(a));
+      |               ^
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:426:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  426 |   mlk_unpack_pk(&pkpv, seed, pk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:86:39: note: passing argument to parameter 'pk' here
+   86 | static void mlk_unpack_pk(mlk_polyvec pk, uint8_t seed[MLKEM_SYMBYTES],
+      |                                       ^
+mlkem/src/indcpa.c:474:26: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  474 |   mlk_pack_ciphertext(c, &b, &v);
+      |                          ^~
+mlkem/src/indcpa.c:152:76: note: passing argument to parameter 'b' here
+  152 | static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES], mlk_polyvec b,
+      |                                                                            ^
+mlkem/src/indcpa.c:483:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  483 |   mlk_zeroize(at, sizeof(at));
+      |               ^~
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:501:25: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  501 |   mlk_unpack_ciphertext(&b, &v, c);
+      |                         ^~
+mlkem/src/indcpa.c:173:47: note: passing argument to parameter 'b' here
+  173 | static void mlk_unpack_ciphertext(mlk_polyvec b, mlk_poly *v,
+      |                                               ^
+mlkem/src/indcpa.c:502:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  502 |   mlk_unpack_sk(&skpv, sk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:131:39: note: passing argument to parameter 'sk' here
+  131 | static void mlk_unpack_sk(mlk_polyvec sk,
+      |                                       ^
+14 errors generated.
+make: *** [test/mk/rules.mk:45: test/build/mlkem1024/mlkem/src/indcpa.c.o] Error 1
+make: *** Waiting for unfinished jobs....
+
+INFO  > Functional Test    Compile     (native opt):     make func OPT=1 AUTO=1 -j10
+mlkem/src/indcpa.c:66:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+   66 |   mlk_polyvec_tobytes(r, pk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:89:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+   89 |   mlk_polyvec_frombytes(pk, packedpk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:114:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  114 |   mlk_polyvec_tobytes(r, sk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:134:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  134 |   mlk_polyvec_frombytes(sk, packedsk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:155:30: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  155 |   mlk_polyvec_compress_du(r, b);
+      |                              ^
+      |                              &
+mlkem/src/poly_k.h:214:49: note: passing argument to parameter 'a' here
+  214 |                              const mlk_polyvec *a)
+      |                                                 ^
+mlkem/src/indcpa.c:176:29: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  176 |   mlk_polyvec_decompress_du(b, c);
+      |                             ^
+      |                             &
+mlkem/src/poly_k.h:242:45: note: passing argument to parameter 'r' here
+  242 | void mlk_polyvec_decompress_du(mlk_polyvec *r,
+      |                                             ^
+mlkem/src/indcpa.c:393:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  393 |   mlk_pack_sk(sk, &skpv);
+      |                   ^~~~~
+mlkem/src/indcpa.c:111:77: note: passing argument to parameter 'sk' here
+  111 | static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], mlk_polyvec sk)
+      |                                                                             ^
+mlkem/src/indcpa.c:394:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  394 |   mlk_pack_pk(pk, &pkpv, publicseed);
+      |                   ^~~~~
+mlkem/src/indcpa.c:62:77: note: passing argument to parameter 'pk' here
+   62 | static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], mlk_polyvec pk,
+      |                                                                             ^
+mlkem/src/indcpa.c:400:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  400 |   mlk_zeroize(a, sizeof(a));
+      |               ^
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:426:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  426 |   mlk_unpack_pk(&pkpv, seed, pk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:86:39: note: passing argument to parameter 'pk' here
+   86 | static void mlk_unpack_pk(mlk_polyvec pk, uint8_t seed[MLKEM_SYMBYTES],
+      |                                       ^
+mlkem/src/indcpa.c:474:26: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  474 |   mlk_pack_ciphertext(c, &b, &v);
+      |                          ^~
+mlkem/src/indcpa.c:152:76: note: passing argument to parameter 'b' here
+  152 | static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES], mlk_polyvec b,
+      |                                                                            ^
+mlkem/src/indcpa.c:483:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  483 |   mlk_zeroize(at, sizeof(at));
+      |               ^~
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:501:25: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  501 |   mlk_unpack_ciphertext(&b, &v, c);
+      |                         ^~
+mlkem/src/indcpa.c:173:47: note: passing argument to parameter 'b' here
+  173 | static void mlk_unpack_ciphertext(mlk_polyvec b, mlk_poly *v,
+      |                                               ^
+mlkem/src/indcpa.c:502:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  502 |   mlk_unpack_sk(&skpv, sk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:131:39: note: passing argument to parameter 'sk' here
+  131 | static void mlk_unpack_sk(mlk_polyvec sk,
+      |                                       ^
+14 errors generated.
+make: *** [test/mk/rules.mk:25: test/build/mlkem512/mlkem/src/indcpa.c.o] Error 1
+make: *** Waiting for unfinished jobs....
+ERROR > Functional Test    Compile     (native opt):     make failed: 2
+INFO  > Functional Test    ML-KEM-512  (native opt):     make run_func_512 -j10
+ERROR > Functional Test    ML-KEM-512  (native opt):     'make run_func_512 -j10' failed with with 2
+ERROR > Functional Test    ML-KEM-512  (native opt):     mlkem/src/indcpa.c:66:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+   66 |   mlk_polyvec_tobytes(r, pk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:89:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+   89 |   mlk_polyvec_frombytes(pk, packedpk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:114:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  114 |   mlk_polyvec_tobytes(r, sk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:134:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  134 |   mlk_polyvec_frombytes(sk, packedsk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:155:30: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  155 |   mlk_polyvec_compress_du(r, b);
+      |                              ^
+      |                              &
+mlkem/src/poly_k.h:214:49: note: passing argument to parameter 'a' here
+  214 |                              const mlk_polyvec *a)
+      |                                                 ^
+mlkem/src/indcpa.c:176:29: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  176 |   mlk_polyvec_decompress_du(b, c);
+      |                             ^
+      |                             &
+mlkem/src/poly_k.h:242:45: note: passing argument to parameter 'r' here
+  242 | void mlk_polyvec_decompress_du(mlk_polyvec *r,
+      |                                             ^
+mlkem/src/indcpa.c:393:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  393 |   mlk_pack_sk(sk, &skpv);
+      |                   ^~~~~
+mlkem/src/indcpa.c:111:77: note: passing argument to parameter 'sk' here
+  111 | static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], mlk_polyvec sk)
+      |                                                                             ^
+mlkem/src/indcpa.c:394:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  394 |   mlk_pack_pk(pk, &pkpv, publicseed);
+      |                   ^~~~~
+mlkem/src/indcpa.c:62:77: note: passing argument to parameter 'pk' here
+   62 | static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], mlk_polyvec pk,
+      |                                                                             ^
+mlkem/src/indcpa.c:400:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  400 |   mlk_zeroize(a, sizeof(a));
+      |               ^
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:426:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  426 |   mlk_unpack_pk(&pkpv, seed, pk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:86:39: note: passing argument to parameter 'pk' here
+   86 | static void mlk_unpack_pk(mlk_polyvec pk, uint8_t seed[MLKEM_SYMBYTES],
+      |                                       ^
+mlkem/src/indcpa.c:474:26: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  474 |   mlk_pack_ciphertext(c, &b, &v);
+      |                          ^~
+mlkem/src/indcpa.c:152:76: note: passing argument to parameter 'b' here
+  152 | static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES], mlk_polyvec b,
+      |                                                                            ^
+mlkem/src/indcpa.c:483:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  483 |   mlk_zeroize(at, sizeof(at));
+      |               ^~
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:501:25: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  501 |   mlk_unpack_ciphertext(&b, &v, c);
+      |                         ^~
+mlkem/src/indcpa.c:173:47: note: passing argument to parameter 'b' here
+  173 | static void mlk_unpack_ciphertext(mlk_polyvec b, mlk_poly *v,
+      |                                               ^
+mlkem/src/indcpa.c:502:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  502 |   mlk_unpack_sk(&skpv, sk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:131:39: note: passing argument to parameter 'sk' here
+  131 | static void mlk_unpack_sk(mlk_polyvec sk,
+      |                                       ^
+14 errors generated.
+make: *** [test/mk/rules.mk:27: test/build/mlkem512/mlkem/src/indcpa.c.o] Error 1
+make: *** Waiting for unfinished jobs....
+
+INFO  > Functional Test    ML-KEM-768  (native opt):     make run_func_768 -j10
+ERROR > Functional Test    ML-KEM-768  (native opt):     'make run_func_768 -j10' failed with with 2
+ERROR > Functional Test    ML-KEM-768  (native opt):     mlkem/src/indcpa.c:66:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+   66 |   mlk_polyvec_tobytes(r, pk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:89:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+   89 |   mlk_polyvec_frombytes(pk, packedpk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:114:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  114 |   mlk_polyvec_tobytes(r, sk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:134:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  134 |   mlk_polyvec_frombytes(sk, packedsk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:155:30: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  155 |   mlk_polyvec_compress_du(r, b);
+      |                              ^
+      |                              &
+mlkem/src/poly_k.h:214:49: note: passing argument to parameter 'a' here
+  214 |                              const mlk_polyvec *a)
+      |                                                 ^
+mlkem/src/indcpa.c:176:29: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  176 |   mlk_polyvec_decompress_du(b, c);
+      |                             ^
+      |                             &
+mlkem/src/poly_k.h:242:45: note: passing argument to parameter 'r' here
+  242 | void mlk_polyvec_decompress_du(mlk_polyvec *r,
+      |                                             ^
+mlkem/src/indcpa.c:393:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  393 |   mlk_pack_sk(sk, &skpv);
+      |                   ^~~~~
+mlkem/src/indcpa.c:111:77: note: passing argument to parameter 'sk' here
+  111 | static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], mlk_polyvec sk)
+      |                                                                             ^
+mlkem/src/indcpa.c:394:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  394 |   mlk_pack_pk(pk, &pkpv, publicseed);
+      |                   ^~~~~
+mlkem/src/indcpa.c:62:77: note: passing argument to parameter 'pk' here
+   62 | static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], mlk_polyvec pk,
+      |                                                                             ^
+mlkem/src/indcpa.c:400:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  400 |   mlk_zeroize(a, sizeof(a));
+      |               ^
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:426:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  426 |   mlk_unpack_pk(&pkpv, seed, pk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:86:39: note: passing argument to parameter 'pk' here
+   86 | static void mlk_unpack_pk(mlk_polyvec pk, uint8_t seed[MLKEM_SYMBYTES],
+      |                                       ^
+mlkem/src/indcpa.c:474:26: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  474 |   mlk_pack_ciphertext(c, &b, &v);
+      |                          ^~
+mlkem/src/indcpa.c:152:76: note: passing argument to parameter 'b' here
+  152 | static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES], mlk_polyvec b,
+      |                                                                            ^
+mlkem/src/indcpa.c:483:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  483 |   mlk_zeroize(at, sizeof(at));
+      |               ^~
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:501:25: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  501 |   mlk_unpack_ciphertext(&b, &v, c);
+      |                         ^~
+mlkem/src/indcpa.c:173:47: note: passing argument to parameter 'b' here
+  173 | static void mlk_unpack_ciphertext(mlk_polyvec b, mlk_poly *v,
+      |                                               ^
+mlkem/src/indcpa.c:502:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  502 |   mlk_unpack_sk(&skpv, sk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:131:39: note: passing argument to parameter 'sk' here
+  131 | static void mlk_unpack_sk(mlk_polyvec sk,
+      |                                       ^
+14 errors generated.
+make: *** [test/mk/rules.mk:35: test/build/mlkem768/mlkem/src/indcpa.c.o] Error 1
+make: *** Waiting for unfinished jobs....
+
+INFO  > Functional Test    ML-KEM-1024 (native opt):     make run_func_1024 -j10
+ERROR > Functional Test    ML-KEM-1024 (native opt):     'make run_func_1024 -j10' failed with with 2
+ERROR > Functional Test    ML-KEM-1024 (native opt):     mlkem/src/indcpa.c:66:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+   66 |   mlk_polyvec_tobytes(r, pk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:89:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+   89 |   mlk_polyvec_frombytes(pk, packedpk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:114:26: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  114 |   mlk_polyvec_tobytes(r, sk);
+      |                          ^~
+      |                          &
+mlkem/src/poly_k.h:270:76: note: passing argument to parameter 'a' here
+  270 | void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
+      |                                                                            ^
+mlkem/src/indcpa.c:134:25: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  134 |   mlk_polyvec_frombytes(sk, packedsk);
+      |                         ^~
+      |                         &
+mlkem/src/poly_k.h:298:41: note: passing argument to parameter 'r' here
+  298 | void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
+      |                                         ^
+mlkem/src/indcpa.c:155:30: error: passing 'mlk_polyvec' to parameter of incompatible type 'const mlk_polyvec *'; take the address with &
+  155 |   mlk_polyvec_compress_du(r, b);
+      |                              ^
+      |                              &
+mlkem/src/poly_k.h:214:49: note: passing argument to parameter 'a' here
+  214 |                              const mlk_polyvec *a)
+      |                                                 ^
+mlkem/src/indcpa.c:176:29: error: passing 'mlk_polyvec' to parameter of incompatible type 'mlk_polyvec *'; take the address with &
+  176 |   mlk_polyvec_decompress_du(b, c);
+      |                             ^
+      |                             &
+mlkem/src/poly_k.h:242:45: note: passing argument to parameter 'r' here
+  242 | void mlk_polyvec_decompress_du(mlk_polyvec *r,
+      |                                             ^
+mlkem/src/indcpa.c:393:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  393 |   mlk_pack_sk(sk, &skpv);
+      |                   ^~~~~
+mlkem/src/indcpa.c:111:77: note: passing argument to parameter 'sk' here
+  111 | static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], mlk_polyvec sk)
+      |                                                                             ^
+mlkem/src/indcpa.c:394:19: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  394 |   mlk_pack_pk(pk, &pkpv, publicseed);
+      |                   ^~~~~
+mlkem/src/indcpa.c:62:77: note: passing argument to parameter 'pk' here
+   62 | static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], mlk_polyvec pk,
+      |                                                                             ^
+mlkem/src/indcpa.c:400:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  400 |   mlk_zeroize(a, sizeof(a));
+      |               ^
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:426:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  426 |   mlk_unpack_pk(&pkpv, seed, pk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:86:39: note: passing argument to parameter 'pk' here
+   86 | static void mlk_unpack_pk(mlk_polyvec pk, uint8_t seed[MLKEM_SYMBYTES],
+      |                                       ^
+mlkem/src/indcpa.c:474:26: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  474 |   mlk_pack_ciphertext(c, &b, &v);
+      |                          ^~
+mlkem/src/indcpa.c:152:76: note: passing argument to parameter 'b' here
+  152 | static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES], mlk_polyvec b,
+      |                                                                            ^
+mlkem/src/indcpa.c:483:15: error: passing 'mlk_polymat' to parameter of incompatible type 'void *'
+  483 |   mlk_zeroize(at, sizeof(at));
+      |               ^~
+mlkem/src/verify.h:429:42: note: passing argument to parameter 'ptr' here
+  429 | static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+      |                                          ^
+mlkem/src/indcpa.c:501:25: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  501 |   mlk_unpack_ciphertext(&b, &v, c);
+      |                         ^~
+mlkem/src/indcpa.c:173:47: note: passing argument to parameter 'b' here
+  173 | static void mlk_unpack_ciphertext(mlk_polyvec b, mlk_poly *v,
+      |                                               ^
+mlkem/src/indcpa.c:502:17: error: passing 'mlk_polyvec *' to parameter of incompatible type 'mlk_polyvec'; remove &
+  502 |   mlk_unpack_sk(&skpv, sk);
+      |                 ^~~~~
+mlkem/src/indcpa.c:131:39: note: passing argument to parameter 'sk' here
+  131 | static void mlk_unpack_sk(mlk_polyvec sk,
+      |                                       ^
+14 errors generated.
+make: *** [test/mk/rules.mk:45: test/build/mlkem1024/mlkem/src/indcpa.c.o] Error 1
+make: *** Waiting for unfinished jobs....
+
+8 tests FAILED
+* Compilation for (Functional Test no_opt)
+* Functional Test (ML-KEM-512 no_opt)
+* Functional Test (ML-KEM-768 no_opt)
+* Functional Test (ML-KEM-1024 no_opt)
+* Compilation for (Functional Test opt)
+* Functional Test (ML-KEM-512 opt)
+* Functional Test (ML-KEM-768 opt)
+* Functional Test (ML-KEM-1024 opt)
