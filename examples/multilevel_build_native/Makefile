@@ -7,9 +7,14 @@ Q ?= @
 # Append cross-prefix for cross compilation
 # Remove or ignore for native builds
 CC  ?= gcc
+SIZE ?= size
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
+endif
+
+ifeq (,$(findstring $(CROSS_PREFIX),$(SIZE)))
+SIZE  := $(CROSS_PREFIX)$(SIZE)
 endif
 
 # Automatically detect system architecture and set preprocessor etc accordingly
@@ -138,12 +143,37 @@ $(BINARY_NAME_FULL): $(APP_SOURCE) $(RNG_SOURCE) $(MLKEM512_OBJS) $(MLKEM768_OBJ
 	$(Q)mkdir -p $(BUILD_DIR)
 	$(Q)$(CC) $(CFLAGS) $^ -o $@
 
-all: build
+all: build size_objs
 
 build: $(BINARY_NAME_FULL)
 
 run: $(BINARY_NAME_FULL)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
+
+size: build
+	@echo "=== Size info for $(BINARY_NAME_FULL) ==="
+	$(Q)$(SIZE) $(BINARY_NAME_FULL)
+
+size_objs: size
+	$(Q)echo "=== Object size summary ==="
+
+	$(Q)rm -f .size_object.txt .tmp_size_512.txt .tmp_size_768.txt .tmp_size_1024.txt
+
+	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem512 -name '*.o') > .tmp_size_512.txt
+	$(Q)head -n 1 .tmp_size_512.txt > .size_object.txt
+	$(Q)tail -n +2 .tmp_size_512.txt | while read line; do dec=$$(echo $$line | cut -d' ' -f5); [ "$$dec" -ne 0 ] && echo "$$line"; done | sort -k5 -n -r >> .size_object.txt
+	$(Q)rm -rf .tmp_size_512.txt
+
+	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem768 -name '*.o') > .tmp_size_768.txt
+	$(Q)tail -n +2 .tmp_size_768.txt | while read line; do dec=$$(echo $$line | cut -d' ' -f5); [ "$$dec" -ne 0 ] && echo "$$line"; done | sort -k5 -n -r >> .size_object.txt
+	$(Q)rm -rf .tmp_size_768.txt
+
+	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem1024 -name '*.o') > .tmp_size_1024.txt
+	$(Q)tail -n +2 .tmp_size_1024.txt | while read line; do dec=$$(echo $$line | cut -d' ' -f5); [ "$$dec" -ne 0 ] && echo "$$line"; done | sort -k5 -n -r >> .size_object.txt
+	$(Q)rm -rf .tmp_size_1024.txt
+
+	$(Q)cat .size_object.txt
+	$(Q)rm -f .size_object.txt
 
 clean:
 	rm -rf $(BUILD_DIR)
