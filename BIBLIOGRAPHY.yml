@@ -150,16 +150,6 @@
   name: Cycle counting on Apple M1
   url: https://gist.github.com/dougallj/5bafb113492047c865c0c8cfbc930155#file-m1_robsize-c-L390
 
-- id: ACVP_Server
-  author: National Institute of Standards and Technology
-  name: ACVP Test Vectors
-  url: https://github.com/usnistgov/ACVP-Server/tree/master/gen-val/json-files
-
-- id: ACVP_Spec
-  author: Celi, Christopher
-  name: ACVP ML-KEM JSON Specification
-  url: https://pages.nist.gov/ACVP/draft-celi-acvp-ml-kem.html
-
 - id: tiny_sha3
   name: tiny_sha3
   author: Saarinen, Markku-Juhani O.
