@@ -506,6 +506,10 @@ class Tests:
             if stack_flags:
                 env_update["STACK_ANALYSIS_FLAGS"] = " ".join(stack_flags)
 
+        # Add ACVP version for ACVP tests
+        if test_type == TEST_TYPES.ACVP and hasattr(self.args, "version"):
+            env_update["ACVP_VERSION"] = self.args.version
+
         env = os.environ.copy()
         env.update(env_update)
 
@@ -1053,6 +1057,11 @@ def cli():
     # acvp arguments
     acvp_parser = cmd_subparsers.add_parser(
         "acvp", help="Run ACVP client", parents=[common_parser]
+    )
+    acvp_parser.add_argument(
+        "--version",
+        default="v1.1.0.40",
+        help="ACVP test vector version (default: v1.1.0.40)",
     )
 
     # examples arguments
