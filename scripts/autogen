@@ -519,7 +519,7 @@ def gen_c_zeta_file(dry_run=False):
         yield " * Table of zeta values used in the reference NTT and inverse NTT."
         yield " * See autogen for details."
         yield " */"
-        yield "static MLK_ALIGN const int16_t zetas[128] = {"
+        yield "static MLK_ALIGN const int16_t mlk_zetas[128] = {"
         yield from map(lambda t: str(t) + ",", gen_c_zetas())
         yield "};"
         yield ""
