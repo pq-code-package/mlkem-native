@@ -3,10 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 # ACVP client for ML-KEM
-#
-# Processes json files from
-# https://github.com/usnistgov/ACVP-Server/blob/master/gen-val/json-files
-#
+# See https://pages.nist.gov/ACVP/draft-celi-acvp-ml-kem.html and
+# https://github.com/usnistgov/ACVP-Server/tree/master/gen-val/json-files
 # Invokes `acvp_mlkem{lvl}` under the hood.
 
 import argparse
@@ -14,38 +12,55 @@ import os
 import json
 import sys
 import subprocess
+import urllib.request
+from pathlib import Path
 
 # Check if we need to use a wrapper for execution (e.g. QEMU)
 exec_prefix = os.environ.get("EXEC_WRAPPER", "")
 exec_prefix = exec_prefix.split(" ") if exec_prefix != "" else []
 
-acvp_dir = "test/acvp_data"
-acvp_jsons = [
-    (
-        f"{acvp_dir}/acvp_v1.1.0.38_keyGen_prompt.json",
-        f"{acvp_dir}/acvp_v1.1.0.38_keyGen_expectedResults.json",
-    ),
-    (
-        f"{acvp_dir}/acvp_v1.1.0.39_keyGen_prompt.json",
-        f"{acvp_dir}/acvp_v1.1.0.39_keyGen_expectedResults.json",
-    ),
-    (
-        f"{acvp_dir}/acvp_v1.1.0.40_keyGen_prompt.json",
-        f"{acvp_dir}/acvp_v1.1.0.40_keyGen_expectedResults.json",
-    ),
-    (
-        f"{acvp_dir}/acvp_v1.1.0.38_encapDecap_prompt.json",
-        f"{acvp_dir}/acvp_v1.1.0.38_encapDecap_expectedResults.json",
-    ),
-    (
-        f"{acvp_dir}/acvp_v1.1.0.39_encapDecap_prompt.json",
-        f"{acvp_dir}/acvp_v1.1.0.39_encapDecap_expectedResults.json",
-    ),
-    (
-        f"{acvp_dir}/acvp_v1.1.0.40_encapDecap_prompt.json",
-        f"{acvp_dir}/acvp_v1.1.0.40_encapDecap_expectedResults.json",
-    ),
-]
+
+def download_acvp_files(version="v1.1.0.40"):
+    """Download ACVP test files for the specified version if not present."""
+    base_url = f"https://raw.githubusercontent.com/usnistgov/ACVP-Server/{version}/gen-val/json-files"
+
+    # Files we need to download for ML-KEM
+    files_to_download = [
+        "ML-KEM-keyGen-FIPS203/prompt.json",
+        "ML-KEM-keyGen-FIPS203/expectedResults.json",
+        "ML-KEM-encapDecap-FIPS203/prompt.json",
+        "ML-KEM-encapDecap-FIPS203/expectedResults.json",
+    ]
+
+    # Create directory structure
+    data_dir = Path(f"test/.acvp-data/{version}/files")
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    for file_path in files_to_download:
+        local_file = data_dir / file_path
+        local_file.parent.mkdir(parents=True, exist_ok=True)
+
+        if not local_file.exists():
+            url = f"{base_url}/{file_path}"
+            print(f"Downloading {file_path}...", file=sys.stderr)
+            try:
+                urllib.request.urlretrieve(url, local_file)
+                # Verify the file is valid JSON
+                with open(local_file, "r") as f:
+                    json.load(f)
+            except json.JSONDecodeError as e:
+                print(
+                    f"Error: Downloaded file {file_path} is not valid JSON: {e}",
+                    file=sys.stderr,
+                )
+                local_file.unlink(missing_ok=True)
+                return False
+            except Exception as e:
+                print(f"Error downloading {file_path}: {e}", file=sys.stderr)
+                local_file.unlink(missing_ok=True)
+                return False
+
+    return True
 
 
 def loadAcvpData(prompt, expectedResults):
@@ -59,9 +74,21 @@ def loadAcvpData(prompt, expectedResults):
     return (prompt, promptData, expectedResults, expectedResultsData)
 
 
-def loadDefaultAcvpData():
+def loadDefaultAcvpData(version="v1.1.0.40"):
+
+    data_dir = f"test/.acvp-data/{version}/files"
+    acvp_jsons_for_version = [
+        (
+            f"{data_dir}/ML-KEM-keyGen-FIPS203/prompt.json",
+            f"{data_dir}/ML-KEM-keyGen-FIPS203/expectedResults.json",
+        ),
+        (
+            f"{data_dir}/ML-KEM-encapDecap-FIPS203/prompt.json",
+            f"{data_dir}/ML-KEM-encapDecap-FIPS203/expectedResults.json",
+        ),
+    ]
     acvp_data = []
-    for prompt, expectedResults in acvp_jsons:
+    for prompt, expectedResults in acvp_jsons_for_version:
         acvp_data.append(loadAcvpData(prompt, expectedResults))
     return acvp_data
 
@@ -280,7 +307,7 @@ def runTest(data, output):
     info("ALL GOOD!")
 
 
-def test(prompt, expected, output):
+def test(prompt, expected, output, version="v1.1.0.40"):
     assert (
         prompt is not None or output is None
     ), "cannot produce output if there is no input"
@@ -293,8 +320,8 @@ def test(prompt, expected, output):
     if prompt is not None:
         data = [loadAcvpData(prompt, expected)]
     else:
-        # otherwise, load default data from acvp_data
-        data = loadDefaultAcvpData()
+        # load data from downloaded files
+        data = loadDefaultAcvpData(version)
 
     runTest(data, output)
 
@@ -312,5 +339,20 @@ parser.add_argument(
 parser.add_argument(
     "-o", "--output", help="Path to output file in json format", required=False
 )
+parser.add_argument(
+    "--version",
+    "-v",
+    default="v1.1.0.40",
+    help="ACVP test vector version (default: v1.1.0.40)",
+)
 args = parser.parse_args()
-test(args.prompt, args.expected, args.output)
+
+if args.prompt is None:
+    print(f"Using ACVP test vectors version {args.version}", file=sys.stderr)
+
+    # Download files if needed
+    if not download_acvp_files(args.version):
+        print("Failed to download ACVP test files", file=sys.stderr)
+        sys.exit(1)
+
+test(args.prompt, args.expected, args.output, args.version)

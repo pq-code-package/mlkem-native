@@ -50,7 +50,7 @@ run_func_1024: func_1024
 run_func: run_func_512 run_func_768 run_func_1024
 
 run_acvp: acvp
-	python3 ./test/acvp_client.py
+	python3 ./test/acvp_client.py $(if $(ACVP_VERSION),--version $(ACVP_VERSION))
 
 func_512:  $(MLKEM512_DIR)/bin/test_mlkem512
 	$(Q)echo "  FUNC       ML-KEM-512:   $^"

@@ -7,24 +7,6 @@
 This file lists the citations made throughout the mlkem-native 
 source code and documentation.
 
-### `ACVP_Server`
-
-* ACVP Test Vectors
-* Author(s):
-  - National Institute of Standards and Technology
-* URL: https://github.com/usnistgov/ACVP-Server/tree/master/gen-val/json-files
-* Referenced from:
-  - [test/acvp_data/README.md](test/acvp_data/README.md)
-
-### `ACVP_Spec`
-
-* ACVP ML-KEM JSON Specification
-* Author(s):
-  - Christopher Celi
-* URL: https://pages.nist.gov/ACVP/draft-celi-acvp-ml-kem.html
-* Referenced from:
-  - [test/acvp_data/README.md](test/acvp_data/README.md)
-
 ### `AVX2_NTT`
 
 * Faster AVX2 optimized NTT multiplication for Ring-LWE lattice cryptography.

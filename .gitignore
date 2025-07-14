@@ -5,3 +5,5 @@
 .idea
 test/build
 __pycache__/
+# Downloaded ACVP test data
+test/.acvp-data/
