@@ -4,8 +4,7 @@
  */
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_AARCH64) &&  !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
@@ -23,29 +22,38 @@ MLK_ASM_FN_SYMBOL(poly_mulcache_compute_asm)
         mov	w5, #0x4ebf             // =20159
         dup	v7.8h, w5
         mov	x4, #0x10               // =16
-        ldr	q1, [x1, #0x10]
-        ldr	q27, [x1], #0x20
-        ldr	q23, [x2], #0x10
-        uzp2	v27.8h, v27.8h, v1.8h
-        ldr	q1, [x3], #0x10
-        mul	v2.8h, v27.8h, v23.8h
-        sqrdmulh	v27.8h, v27.8h, v1.8h
-        sub	x4, x4, #0x1
-
-poly_mulcache_compute_loop:
+        ldr	q18, [x1], #0x20
+        ldur	q0, [x1, #-0x10]
+        ldr	q4, [x3], #0x10
+        ldr	q26, [x2], #0x10
         ldr	q29, [x1, #0x10]
-        ldr	q21, [x2], #0x10
-        mls	v2.8h, v27.8h, v6.h[0]
-        ldr	q27, [x1], #0x20
-        ldr	q7, [x3], #0x10
-        uzp2	v28.8h, v27.8h, v29.8h
-        str	q2, [x0], #0x10
-        mul	v2.8h, v28.8h, v21.8h
-        sqrdmulh	v27.8h, v28.8h, v7.8h
-        sub	x4, x4, #0x1
-        cbnz	x4, poly_mulcache_compute_loop
-        mls	v2.8h, v27.8h, v6.h[0]
-        str	q2, [x0], #0x10
+        ldr	q5, [x1], #0x20
+        uzp2	v17.8h, v18.8h, v0.8h
+        ldr	q18, [x3], #0x10
+        sqrdmulh	v0.8h, v17.8h, v4.8h
+        mul	v26.8h, v17.8h, v26.8h
+        sub	x4, x4, #0x2
+
+poly_mulcache_compute_loop_start:
+        uzp2	v17.8h, v5.8h, v29.8h
+        mls	v26.8h, v0.8h, v6.h[0]
+        ldr	q16, [x2], #0x10
+        ldr	q5, [x1], #0x20
+        sqrdmulh	v0.8h, v17.8h, v18.8h
+        ldur	q29, [x1, #-0x10]
+        ldr	q18, [x3], #0x10
+        str	q26, [x0], #0x10
+        mul	v26.8h, v17.8h, v16.8h
+        subs	x4, x4, #0x1
+        cbnz	x4, poly_mulcache_compute_loop_start
+        mls	v26.8h, v0.8h, v6.h[0]
+        uzp2	v16.8h, v5.8h, v29.8h
+        ldr	q4, [x2], #0x10
+        sqrdmulh	v2.8h, v16.8h, v18.8h
+        str	q26, [x0], #0x10
+        mul	v29.8h, v16.8h, v4.8h
+        mls	v29.8h, v2.8h, v6.h[0]
+        str	q29, [x0], #0x10
         ret
 
 #endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
