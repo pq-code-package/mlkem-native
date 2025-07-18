@@ -6,6 +6,12 @@ This document acts as a guide to how we develop proofs of mlkem-native's C code 
 [CBMC](https://model-checking.github.io/cbmc-training/). It concentrates on the use of _contracts_ to achieve
 _unbounded_ and _modular_ proofs of type-safety and correctness properties.
 
+## Installation
+
+Before you start, follow the installation instructions [here](README.md) to ensure you have all the
+required tools installed at the right version.
+It is not uncommon for proofs to fail or have significantly worse performance when switching to different tool versions.
+
 ## Scope
 
 Our CBMC proofs confirm the absence of certain classes of undefined behaviour, such as integer overflow or out of bounds
