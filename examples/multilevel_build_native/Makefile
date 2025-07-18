@@ -1,15 +1,20 @@
 # (SPDX-License-Identifier: CC-BY-4.0)
 
-.PHONY: build run clean mlkem512_objs mlkem768_objs mlkem1024_objs mlkem_objs
+.PHONY: build run clean mlkem512_objs mlkem768_objs mlkem1024_objs mlkem_objs size size_objs
 .DEFAULT_GOAL := all
 
 Q ?= @
 # Append cross-prefix for cross compilation
 # Remove or ignore for native builds
 CC  ?= gcc
+SIZE ?= size
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
+endif
+
+ifeq (,$(findstring $(CROSS_PREFIX),$(SIZE)))
+SIZE  := $(CROSS_PREFIX)$(SIZE)
 endif
 
 # Automatically detect system architecture and set preprocessor etc accordingly
@@ -138,12 +143,22 @@ $(BINARY_NAME_FULL): $(APP_SOURCE) $(RNG_SOURCE) $(MLKEM512_OBJS) $(MLKEM768_OBJ
 	$(Q)mkdir -p $(BUILD_DIR)
 	$(Q)$(CC) $(CFLAGS) $^ -o $@
 
-all: build
+all: build size_objs
 
 build: $(BINARY_NAME_FULL)
 
 run: $(BINARY_NAME_FULL)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
+
+size: build
+	@echo "=== Size info for $(BINARY_NAME_FULL) ==="
+	$(Q)$(SIZE) $(BINARY_NAME_FULL)
+
+size_objs: size
+	$(Q)echo "=== Object size summary ==="
+	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem512 -name '*.o') | (read header; echo "$$header"; awk '$$5 != 0' | sort -k5 -n -r)
+	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem768 -name '*.o') | (read header; echo "$$header"; awk '$$5 != 0' | sort -k5 -n -r)
+	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem1024 -name '*.o') | (read header; echo "$$header"; awk '$$5 != 0' | sort -k5 -n -r)
 
 clean:
 	rm -rf $(BUILD_DIR)

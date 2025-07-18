@@ -1,12 +1,14 @@
 # (SPDX-License-Identifier: CC-BY-4.0)
 
-.PHONY: build run clean
+.PHONY: build run clean size
 .DEFAULT_GOAL := all
 
 # Append cross-prefix for cross compilation
 # Remove or ignore for native builds
 CC  ?= gcc
 AR  ?= ar
+SIZE ?= size
+Q ?= @
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
@@ -15,6 +17,11 @@ endif
 ifeq (,$(findstring $(CROSS_PREFIX),$(AR)))
 AR  := $(CROSS_PREFIX)$(AR)
 endif
+
+ifeq (,$(findstring $(CROSS_PREFIX),$(SIZE)))
+SIZE  := $(CROSS_PREFIX)$(SIZE)
+endif
+
 
 # Part A:
 #
@@ -80,12 +87,16 @@ $(BINARY_NAME_FULL): $(APP_SOURCE) $(LIB_NAME_FULL)
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INC) $^ -o $@
 
-all: build
+all: build size
 
 build: $(BINARY_NAME_FULL)
 
 run: $(BINARY_NAME_FULL)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
+
+size: build
+	$(Q)echo "=== Size info for static lib ==="
+	$(Q)$(SIZE) ${LIB_NAME_FULL}
 
 clean:
 	rm -rf $(BUILD_DIR)

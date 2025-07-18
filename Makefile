@@ -14,7 +14,9 @@
 	bench_components_512 bench_components_768 bench_components_1024 bench_components \
 	run_bench_components_512 run_bench_components_768 run_bench_components_1024 run_bench_components \
 	build test all \
-	clean quickcheck check-defined-CYCLES
+	clean quickcheck check-defined-CYCLES \
+	size_512 size_768 size_1024 size \
+	run_size_512 run_size_768 run_size_1024 run_size 
 
 .DEFAULT_GOAL := build
 all: build
@@ -141,6 +143,30 @@ run_bench_components: \
 	run_bench_components_512 .WAIT\
 	run_bench_components_768 .WAIT\
 	run_bench_components_1024
+
+
+size_512: $(BUILD_DIR)/libmlkem512.a
+size_768: $(BUILD_DIR)/libmlkem768.a
+size_1024: $(BUILD_DIR)/libmlkem1024.a
+size: size_512 size_768 size_1024
+
+run_size_512: size_512
+	$(Q)echo "size $(BUILD_DIR)/libmlkem512.a"
+	$(Q)$(SIZE) $(BUILD_DIR)/libmlkem512.a | (read header; echo "$$header"; awk '$$5 != 0' | sort -k5 -n -r)
+
+run_size_768: size_768
+	$(Q)echo "size $(BUILD_DIR)/libmlkem768.a"
+	$(Q)$(SIZE) $(BUILD_DIR)/libmlkem768.a | (read header; echo "$$header"; awk '$$5 != 0' | sort -k5 -n -r)
+
+run_size_1024: size_1024
+	$(Q)echo "size $(BUILD_DIR)/libmlkem1024.a"
+	$(Q)$(SIZE) $(BUILD_DIR)/libmlkem1024.a | (read header; echo "$$header"; awk '$$5 != 0' | sort -k5 -n -r)
+
+
+run_size: \
+	run_size_512 \
+	run_size_768 \
+	run_size_1024
 
 clean:
 	-$(RM) -rf *.gcno *.gcda *.lcov *.o *.so
