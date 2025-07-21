@@ -83,8 +83,12 @@ void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec a)
   mlk_assert_bound_2d(a, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_K; i++)
+  __loop__(
+    assigns(i, object_whole(r))
+    invariant(i <= MLKEM_K)
+  )
   {
-    mlk_poly_tobytes(r + i * MLKEM_POLYBYTES, &a[i]);
+    mlk_poly_tobytes(&r[i * MLKEM_POLYBYTES], &a[i]);
   }
 }
 
