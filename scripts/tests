@@ -207,6 +207,7 @@ class TEST_TYPES(Enum):
     MONOLITHIC_BUILD_MULTILEVEL_NATIVE = 13
     MONOLITHIC_BUILD_NATIVE = 14
     STACK = 15
+    SIZE = 16
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -271,6 +272,8 @@ class TEST_TYPES(Enum):
             return "Example (multilevel build)"
         if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
             return "Example (multilevel build, native)"
+        if self == TEST_TYPES.SIZE:
+            return "Measurement Code Size"
 
     def make_dir(self):
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
@@ -324,6 +327,8 @@ class TEST_TYPES(Enum):
             return ""
         if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
             return ""
+        if self == TEST_TYPES.SIZE:
+            return "size"
 
     def make_run_target(self, scheme):
         t = self.make_target()
@@ -702,6 +707,29 @@ class Tests:
             _stack(True)
 
         self.check_fail()
+
+    def size(self):
+
+        test_type = TEST_TYPES.SIZE
+
+        resultss = None
+
+        if self.do_opt_all():
+            self._compile_schemes(test_type, False)
+            if self.args.run:
+                self._run_schemes(test_type, False, suppress_output=False)
+            self._compile_schemes(test_type, True)
+            if self.args.run:
+                resultss = self._run_schemes(test_type, True, suppress_output=False)
+        else:
+            self._compile_schemes(test_type, self.do_opt())
+            if self.args.run:
+                resultss = self._run_schemes(
+                    test_type, self.do_opt(), suppress_output=False
+                )
+
+        if resultss is None:
+            self.check_fail()
 
     def all(self):
         func = self.args.func
@@ -1118,6 +1146,11 @@ def cli():
         action="store_true",
         default=False,
     )
+    size_parser = cmd_subparsers.add_parser(
+        "size",
+        help="Run the code size measurement for all object file",
+        parents=[common_parser],
+    )
 
     # cbmc arguments
     cbmc_parser = cmd_subparsers.add_parser(
@@ -1265,6 +1298,8 @@ def cli():
         Tests(args).kat()
     elif args.cmd == "stack":
         Tests(args).stack()
+    elif args.cmd == "size":
+        Tests(args).size()
 
 
 if __name__ == "__main__":
