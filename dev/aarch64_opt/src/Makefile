@@ -28,7 +28,7 @@ RESERVE_X_ONLY_FLAG=-c reserved_regs="[x18--x30,sp]"
 
 # Used for kernels which don't stash callee-saved registers.
 # Restrict SLOTHY to caller-saved registers.
-RESERVE_ALL_FLAG=-c reserved_regs="[x18--x30,sp,v8--v15]"
+RESERVE_ALL_FLAG=-c locked_registers="[x0--x30,sp,v0--v31]"
 
 COMMON_H=../../../mlkem/src/common.h
 
@@ -76,13 +76,10 @@ poly_mulcache_compute_asm.S: ../../aarch64_clean/src/poly_mulcache_compute_asm.S
 poly_tobytes_asm.S: ../../aarch64_clean/src/poly_tobytes_asm.S $(COMMON_H)
 	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l poly_tobytes_loop_start $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG) -c sw_pipelining.unroll=4
 
-# At the moment, SLOTHY can't process rej_uniform_asm.S
-rej_uniform_asm.S: ../../aarch64_clean/src/rej_uniform_asm.S $(COMMON_H)
-	cp $< $@
 
-# Extra target to test SLOTHY on rej_uniform_asm.S in future
-rej_uniform_asm_with_slothy.S: ../../aarch64_clean/src/rej_uniform_asm.S $(COMMON_H)
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l rej_uniform_loop48 $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG)
+# SLOTHY selftest produces UC_ERR_READ_UNMAPPED when hitting ldr     table0q, [table_idx, rec_idx_0, lsl #4] (as rec_idx_0 is random rather than 0-255)
+rej_uniform_asm.S: ../../aarch64_clean/src/rej_uniform_asm.S $(COMMON_H)
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -s rej_uniform_slothy_start -e rej_uniform_slothy_end $(SLOTHY_FLAGS) -c reserved_regs="[x18--x30,x0,x4,x8,sp,v8--v15]" -c selftest=False -c sw_pipelining.enabled=false
 
 
 clean:
