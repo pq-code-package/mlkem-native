@@ -28,7 +28,7 @@ RESERVE_X_ONLY_FLAG=-c reserved_regs="[x18--x30,sp]"
 
 # Used for kernels which don't stash callee-saved registers.
 # Restrict SLOTHY to caller-saved registers.
-RESERVE_ALL_FLAG=-c locked_registers="[x0--x30,sp,v0--v31]"
+RESERVE_ALL_FLAG=-c locked_registers="[x18--x30,sp,v8--v15]"
 
 COMMON_H=../../../mlkem/src/common.h
 
