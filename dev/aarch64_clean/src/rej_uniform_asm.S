@@ -174,13 +174,13 @@ rej_uniform_loop48:
         // Finish once we've generated sufficiently many coefficients
         cmp     count, len
         b.hs    rej_uniform_memory_copy
-
         // First, we unpack the byte stream into a stream of signed
         // coefficients, interpreting each consecutive 3 bytes as two
         // signed 12-bit coefficients, presented as 16-bit integers.
         //
         // We handle 16 such triples a time, and use ld3 for the required
         // de-interleaving of the byte stream.
+rej_uniform_slothy_start:
         sub     buflen, buflen, #48
         ld3     {buf0.16b, buf1.16b, buf2.16b}, [buf], #48
 
@@ -191,8 +191,8 @@ rej_uniform_loop48:
         zip1    tmp2.16b, buf1.16b, buf2.16b
         zip2    tmp3.16b, buf1.16b, buf2.16b
 
-        bic     tmp0.8h, #0xf0, lsl 8
-        bic     tmp1.8h, #0xf0, lsl 8
+        bic     tmp0.8h, #0xf0, lsl #8
+        bic     tmp1.8h, #0xf0, lsl #8
         ushr    tmp2.8h, tmp2.8h, #4
         ushr    tmp3.8h, tmp3.8h, #4
 
@@ -281,7 +281,7 @@ rej_uniform_loop48:
         add     ctr23, ctr2, ctr3
         add     count, count, ctr01
         add     count, count, ctr23
-
+rej_uniform_slothy_end:
         cmp buflen, #48
         b.hs rej_uniform_loop48
 rej_uniform_loop48_end:
