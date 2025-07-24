@@ -25,7 +25,7 @@
           util = pkgs.callPackage ./nix/util.nix {
             # Keep those around in case we want to switch to unstable versions
             cbmc = pkgs-unstable.cbmc;
-            bitwuzla = pkgs.bitwuzla;
+            bitwuzla = pkgs-unstable.bitwuzla;
             z3 = pkgs.z3;
           };
           zigWrapCC = zig: pkgs.symlinkJoin {
@@ -165,7 +165,7 @@
             util = pkgs.callPackage ./nix/util.nix {
               inherit pkgs;
               cbmc = pkgs-unstable.cbmc;
-              bitwuzla = pkgs.bitwuzla;
+              bitwuzla = pkgs-unstable.bitwuzla;
               z3 = pkgs.z3;
             };
           in

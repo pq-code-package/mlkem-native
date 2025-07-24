@@ -61,8 +61,8 @@ buildEnv {
       });
 
       inherit
-        cadical#2.1.3
-        bitwuzla# 0.7.0
+        cadical# 2.1.3
+        bitwuzla# 0.8.1
         ninja; # 1.12.1
     };
 }
