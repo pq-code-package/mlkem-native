@@ -18,7 +18,7 @@
 unsigned mlk_rej_uniform_avx2(int16_t *r, const uint8_t *buf);
 
 #define mlk_rej_uniform_table MLK_NAMESPACE(rej_uniform_table)
-extern const uint8_t mlk_rej_uniform_table[256][8];
+extern const uint8_t mlk_rej_uniform_table[];
 
 #define mlk_ntt_avx2 MLK_NAMESPACE(ntt_avx2)
 void mlk_ntt_avx2(__m256i *r, const __m256i *mlk_qdata);
