@@ -16,7 +16,7 @@
 	build test all \
 	clean quickcheck check-defined-CYCLES \
 	size_512 size_768 size_1024 size \
-	run_size_512 run_size_768 run_size_1024 run_size 
+	run_size_512 run_size_768 run_size_1024 run_size
 
 .DEFAULT_GOAL := build
 all: build
@@ -36,11 +36,11 @@ test: run_kat run_func run_acvp
 	$(Q)echo "  Everything checks fine!"
 
 run_kat_512: kat_512
-	$(W) $(MLKEM512_DIR)/bin/gen_KAT512 | shasum -a 256 | cut -d " " -f 1 | xargs ./META.sh ML-KEM-512  kat-sha256
+	/bin/bash set -o pipefail; $(W) $(MLKEM512_DIR)/bin/gen_KAT512 | shasum -a 256 | cut -d " " -f 1 | xargs ./META.sh ML-KEM-512  kat-sha256
 run_kat_768: kat_768
-	$(W) $(MLKEM768_DIR)/bin/gen_KAT768 | shasum -a 256 | cut -d " " -f 1 | xargs ./META.sh ML-KEM-768  kat-sha256
+	/bin/bash set -o pipefail; $(W) $(MLKEM768_DIR)/bin/gen_KAT768 | shasum -a 256 | cut -d " " -f 1 | xargs ./META.sh ML-KEM-768  kat-sha256
 run_kat_1024: kat_1024
-	$(W) $(MLKEM1024_DIR)/bin/gen_KAT1024 | shasum -a 256 | cut -d " " -f 1 | xargs ./META.sh ML-KEM-1024  kat-sha256
+	/bin/bash set -o pipefail; $(W) $(MLKEM1024_DIR)/bin/gen_KAT1024 | shasum -a 256 | cut -d " " -f 1 | xargs ./META.sh ML-KEM-1024  kat-sha256
 run_kat: run_kat_512 run_kat_768 run_kat_1024
 
 run_func_512: func_512
