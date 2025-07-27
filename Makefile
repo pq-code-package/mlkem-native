@@ -16,9 +16,11 @@
 	build test all \
 	clean quickcheck check-defined-CYCLES \
 	size_512 size_768 size_1024 size \
-	run_size_512 run_size_768 run_size_1024 run_size 
+	run_size_512 run_size_768 run_size_1024 run_size
 
+SHELL := /bin/bash
 .DEFAULT_GOAL := build
+
 all: build
 
 W := $(EXEC_WRAPPER)
@@ -35,12 +37,18 @@ build: func kat acvp
 test: run_kat run_func run_acvp
 	$(Q)echo "  Everything checks fine!"
 
+# Detect available SHA256 command
+SHA256SUM := $(shell command -v shasum >/dev/null 2>&1 && echo "shasum -a 256" || (command -v sha256sum >/dev/null 2>&1 && echo "sha256sum" || echo ""))
+ifeq ($(SHA256SUM),)
+$(error Neither 'shasum' nor 'sha256sum' found. Please install one of these tools.)
+endif
+
 run_kat_512: kat_512
-	$(W) $(MLKEM512_DIR)/bin/gen_KAT512 | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-512  kat-sha256
+	set -o pipefail; $(W) $(MLKEM512_DIR)/bin/gen_KAT512 | $(SHA256SUM) | cut -d " " -f 1 | xargs ./META.sh ML-KEM-512 kat-sha256
 run_kat_768: kat_768
-	$(W) $(MLKEM768_DIR)/bin/gen_KAT768 | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-768  kat-sha256
+	set -o pipefail; $(W) $(MLKEM768_DIR)/bin/gen_KAT768 | $(SHA256SUM) | cut -d " " -f 1 | xargs ./META.sh ML-KEM-768  kat-sha256
 run_kat_1024: kat_1024
-	$(W) $(MLKEM1024_DIR)/bin/gen_KAT1024 | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-KEM-1024  kat-sha256
+	set -o pipefail; $(W) $(MLKEM1024_DIR)/bin/gen_KAT1024 | $(SHA256SUM) | cut -d " " -f 1 | xargs ./META.sh ML-KEM-1024  kat-sha256
 run_kat: run_kat_512 run_kat_768 run_kat_1024
 
 run_func_512: func_512
