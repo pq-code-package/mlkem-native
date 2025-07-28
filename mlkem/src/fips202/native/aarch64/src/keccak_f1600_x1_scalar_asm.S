@@ -8,6 +8,31 @@
 // Author: Hanno Becker <hanno.becker@arm.com>
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
 
+/*
+ * Function: keccak_f1600_x1_scalar_asm
+ * Description: AArch64 scalar implementation of Keccak-f[1600] permutation for single state
+ *
+ * C Signature: void mlk_keccak_f1600_x1_scalar_asm(uint64_t state[25], const uint64_t rc[24])
+ *
+ * Register ABI:
+ * ```yaml
+ *   x0:
+ *     type: buffer
+ *     size_bytes: 200
+ *     permissions: read/write
+ *     c_parameter: uint64_t *state
+ *     description: Keccak state (25 x uint64_t)
+ *   x1:
+ *     type: buffer
+ *     size_bytes: 192
+ *     permissions: read-only
+ *     c_parameter: uint64_t const *rc
+ *     description: Round constants (24 x uint64_t)
+ * ```
+ *
+ * Stack Usage: 128 bytes for register preservation and temporary storage
+ */
+
 #include "../../../../common.h"
 #if defined(MLK_FIPS202_AARCH64_NEED_X1_SCALAR) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)

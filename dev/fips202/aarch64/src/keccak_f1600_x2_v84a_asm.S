@@ -14,6 +14,31 @@
  *   https://eprint.iacr.org/2022/1243
  */
 
+/*
+ * Function: keccak_f1600_x2_v84a_asm
+ * Description: AArch64 ARMv8.4-A implementation of Keccak-f[1600] permutation for two sequential states
+ *
+ * C Signature: void mlk_keccak_f1600_x2_v84a_asm(uint64_t state[50], const uint64_t rc[24])
+ *
+ * Register ABI:
+ * ```yaml
+ *   x0:
+ *     type: buffer
+ *     size_bytes: 400
+ *     permissions: read/write
+ *     c_parameter: uint64_t state[50]
+ *     description: Two sequential Keccak states (state0[25], state1[25])
+ *   x1:
+ *     type: buffer
+ *     size_bytes: 192
+ *     permissions: read-only
+ *     c_parameter: const uint64_t rc[24]
+ *     description: Round constants (24 x uint64_t)
+ * ```
+ *
+ * Stack Usage: 64 bytes for register preservation
+ */
+
 //
 // Author: Hanno Becker <hanno.becker@arm.com>
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>

@@ -3,6 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
+/*
+ * Function: poly_tomont_asm
+ * Description: Convert polynomial to Montgomery domain
+ *
+ * C Signature: void mlk_poly_tomont_asm(int16_t p[256])
+ *
+ * Register ABI:
+ * ```yaml
+ *   x0:
+ *     type: buffer
+ *     size_bytes: 512
+ *     permissions: read/write
+ *     c_parameter: int16_t p[256]
+ *     description: Input/output polynomial
+ * ```
+ *
+ * Stack Usage: No stack usage
+ */
+
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
@@ -15,10 +34,6 @@
         mul      \dst\().8h, \src\().8h, \const\().8h
         mls      \dst\().8h, tmp0.8h,    modulus.h[0]
 .endm
-
-/**********************************
- *      mlk_poly_tomont()         *
- **********************************/
 
         src               .req x0
         count             .req x1

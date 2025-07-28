@@ -3,6 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
+/*
+ * Function: poly_tobytes_asm
+ * Description: Convert polynomial to byte representation
+ *
+ * C Signature: void mlk_poly_tobytes_asm(uint8_t r[384], const int16_t a[256])
+ *
+ * Register ABI:
+ * ```yaml
+ *   x0:
+ *     type: buffer
+ *     size_bytes: 384
+ *     permissions: write-only
+ *     c_parameter: uint8_t r[384]
+ *     description: Output byte array
+ *   x1:
+ *     type: buffer
+ *     size_bytes: 512
+ *     permissions: read-only
+ *     c_parameter: const int16_t a[256]
+ *     description: Input polynomial
+ * ```
+ *
+ * Stack Usage: No stack usage
+ */
+
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
@@ -14,10 +39,6 @@
         uzp1 \a\()0.8h, tmp0.8h, tmp1.8h
         uzp2 \a\()1.8h, tmp0.8h, tmp1.8h
 .endm
-
-/********************************************
- *         mlk_poly_tobytes()               *
- ********************************************/
 
         data0  .req v0
         data1  .req v1

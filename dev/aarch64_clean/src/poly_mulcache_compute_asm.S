@@ -3,6 +3,43 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
+/*
+ * Function: poly_mulcache_compute_asm
+ * Description: Compute multiplication cache for polynomial
+ *
+ * C Signature: void mlk_poly_mulcache_compute_asm(int16_t cache[128], const int16_t mlk_poly[256], const int16_t zetas[128], const int16_t zetas_twisted[128])
+ *
+ * Register ABI:
+ * ```yaml
+ *   x0:
+ *     type: buffer
+ *     size_bytes: 256
+ *     permissions: write-only
+ *     c_parameter: int16_t cache[128]
+ *     description: Output cache
+ *   x1:
+ *     type: buffer
+ *     size_bytes: 512
+ *     permissions: read-only
+ *     c_parameter: const int16_t mlk_poly[256]
+ *     description: Input polynomial
+ *   x2:
+ *     type: buffer
+ *     size_bytes: 256
+ *     permissions: read-only
+ *     c_parameter: const int16_t zetas[128]
+ *     description: Zeta values
+ *   x3:
+ *     type: buffer
+ *     size_bytes: 256
+ *     permissions: read-only
+ *     c_parameter: const int16_t zetas_twisted[128]
+ *     description: Twisted zeta values
+ * ```
+ *
+ * Stack Usage: No stack usage
+ */
+
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
@@ -15,10 +52,6 @@
         mul      \dst\().8h, \src\().8h, \const\().8h
         mls      \dst\().8h, tmp0.8h,    modulus.h[0]
 .endm
-
-/********************************************
- *      mlk_poly_mulcache_compute()         *
- ********************************************/
 
         cache_ptr         .req x0
         data_ptr          .req x1
