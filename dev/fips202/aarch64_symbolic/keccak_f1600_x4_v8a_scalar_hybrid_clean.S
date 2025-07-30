@@ -8,6 +8,28 @@
 // Author: Hanno Becker <hannobecker@posteo.de>
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
 
+/*yaml
+  Name: keccak_f1600_x4_v8a_scalar_hybrid_clean
+  Description: AArch64 hybrid scalar/vector clean implementation of Keccak-f[1600] permutation for four sequential states (clean version for optimization)
+  Signature: void mlk_keccak_f1600_x4_scalar_v8a_hybrid_asm(uint64_t state[100], const uint64_t rc[24])
+  ABI:
+    x0:
+      type: buffer
+      size_bytes: 800
+      permissions: read/write
+      c_parameter: uint64_t *state
+      description: Four sequential Keccak states (state0[25], state1[25], state2[25], state3[25])
+    x1:
+      type: buffer
+      size_bytes: 192
+      permissions: read-only
+      c_parameter: uint64_t const *rc
+      description: Round constants (24 x uint64_t)
+  Stack:
+    bytes: 224
+    description: register preservation and temporary storage
+*/
+
 #include "../../../../common.h"
 #if defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)

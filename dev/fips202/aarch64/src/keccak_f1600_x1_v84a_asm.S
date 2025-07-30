@@ -14,6 +14,28 @@
  *   https://eprint.iacr.org/2022/1243
  */
 
+/*yaml
+  Name: keccak_f1600_x1_v84a_asm
+  Description: AArch64 ARMv8.4-A implementation of Keccak-f[1600] permutation for single state
+  Signature: void mlk_keccak_f1600_x1_v84a_asm(uint64_t state[25], const uint64_t rc[24])
+  ABI:
+    x0:
+      type: buffer
+      size_bytes: 200
+      permissions: read/write
+      c_parameter: uint64_t state[25]
+      description: Keccak state (25 x uint64_t)
+    x1:
+      type: buffer
+      size_bytes: 192
+      permissions: read-only
+      c_parameter: const uint64_t rc[24]
+      description: Round constants (24 x uint64_t)
+  Stack:
+    bytes: 64
+    description: register preservation
+*/
+
 //
 // Author: Hanno Becker <hanno.becker@arm.com>
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
