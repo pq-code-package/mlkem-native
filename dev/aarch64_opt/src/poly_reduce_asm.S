@@ -3,24 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
-/*
- * Function: poly_reduce_asm
- * Description: Barrett reduction of polynomial coefficients
- *
- * C Signature: void mlk_poly_reduce_asm(int16_t p[256])
- *
- * Register ABI:
- * ```yaml
- *   x0:
- *     type: buffer
- *     size_bytes: 512
- *     permissions: read/write
- *     c_parameter: int16_t p[256]
- *     description: Input/output polynomial
- * ```
- *
- * Stack Usage: No stack usage
- */
+/*yaml
+  Name: poly_reduce_asm
+  Description: Barrett reduction of polynomial coefficients
+  Signature: void mlk_poly_reduce_asm(int16_t p[256])
+  ABI:
+    x0:
+      type: buffer
+      size_bytes: 512
+      permissions: read/write
+      c_parameter: int16_t p[256]
+      description: Input/output polynomial
+  Stack:
+    bytes: 0
+*/
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64) && \

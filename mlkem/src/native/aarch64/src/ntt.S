@@ -19,36 +19,33 @@
  *   https://eprint.iacr.org/2022/1303
  */
 
-/*
- * Function: ntt_asm
- * Description: AArch64 ML-KEM forward NTT following @[NeonNTT] and @[SLOTHY_Paper]
- *
- * C Signature: void mlk_ntt_asm(int16_t p[256], const int16_t twiddles12345[80], const int16_t twiddles56[384])
- *
- * Register ABI:
- * ```yaml
- *   x0:
- *     type: buffer
- *     size_bytes: 512
- *     permissions: read/write
- *     c_parameter: int16_t p[256]
- *     description: Input/output polynomial
- *   x1:
- *     type: buffer
- *     size_bytes: 160
- *     permissions: read-only
- *     c_parameter: const int16_t twiddles12345[80]
- *     description: Twiddle factors for layers 1-5
- *   x2:
- *     type: buffer
- *     size_bytes: 768
- *     permissions: read-only
- *     c_parameter: const int16_t twiddles56[384]
- *     description: Twiddle factors for layers 6-7
- * ```
- *
- * Stack Usage: 64 bytes for saving callee-saved Neon registers
- */
+/*yaml
+  Name: ntt_asm
+  Description: AArch64 ML-KEM forward NTT following @[NeonNTT] and @[SLOTHY_Paper]
+  Signature: void mlk_ntt_asm(int16_t p[256], const int16_t twiddles12345[80], const int16_t twiddles56[384])
+  ABI:
+    x0:
+      type: buffer
+      size_bytes: 512
+      permissions: read/write
+      c_parameter: int16_t p[256]
+      description: Input/output polynomial
+    x1:
+      type: buffer
+      size_bytes: 160
+      permissions: read-only
+      c_parameter: const int16_t twiddles12345[80]
+      description: Twiddle factors for layers 1-5
+    x2:
+      type: buffer
+      size_bytes: 768
+      permissions: read-only
+      c_parameter: const int16_t twiddles56[384]
+      description: Twiddle factors for layers 6-7
+  Stack:
+    bytes: 64
+    description: saving callee-saved Neon registers
+*/
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64) &&  !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
