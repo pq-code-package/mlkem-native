@@ -395,8 +395,8 @@
 #undef mlk_keccak_f1600_x1_scalar_asm
 #undef mlk_keccak_f1600_x1_v84a_asm
 #undef mlk_keccak_f1600_x2_v84a_asm
-#undef mlk_keccak_f1600_x4_scalar_v8a_hybrid_asm
-#undef mlk_keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm
+#undef mlk_keccak_f1600_x4_v8a_scalar_hybrid_asm
+#undef mlk_keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm
 #undef mlk_keccakf1600_round_constants
 /* mlkem/src/fips202/native/aarch64/x1_scalar.h */
 #undef MLK_FIPS202_AARCH64_NEED_X1_SCALAR
