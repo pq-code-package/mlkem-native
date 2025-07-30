@@ -70,3 +70,57 @@ $(foreach scheme,mlkem512 mlkem768 mlkem1024, \
 $(ALL_TESTS:%=$(MLKEM512_DIR)/bin/%512): $(call MAKE_OBJS, $(MLKEM512_DIR), $(wildcard test/notrandombytes/*.c))
 $(ALL_TESTS:%=$(MLKEM768_DIR)/bin/%768): $(call MAKE_OBJS, $(MLKEM768_DIR), $(wildcard test/notrandombytes/*.c))
 $(ALL_TESTS:%=$(MLKEM1024_DIR)/bin/%1024): $(call MAKE_OBJS, $(MLKEM1024_DIR), $(wildcard test/notrandombytes/*.c))
+
+ABICHECK_DIR = $(BUILD_DIR)/abicheck
+
+# ABI checker sources
+ABICHECK_SOURCES = test/abicheck/abicheck.c test/abicheck/abicheckutil.c test/abicheck/aarch64_callstub.S
+ABICHECK_SOURCES += $(wildcard test/abicheck/check_*.c)
+ABICHECK_SOURCES += $(wildcard test/notrandombytes/*.c)
+
+# Assembly sources for the functions under test (only aarch64 for now)
+# Only include AArch64 assembly sources on AArch64 platforms
+ABICHECK_ASM_SOURCES =
+
+ifeq ($(IS_AARCH64),1)
+	ABICHECK_ASM_SOURCES += $(wildcard mlkem/src/fips202/native/aarch64/src/*.S)
+	ABICHECK_ASM_SOURCES += $(wildcard mlkem/src/native/aarch64/src/*.S)
+else ifeq ($(IS_X86_64),1)
+# NOTE: We need this even though the ABI checker is currently AArch64 only,
+# as common.h pulls in the backend.
+	ABICHECK_ASM_SOURCES += $(wildcard mlkem/src/fips202/native/x86_64/src/*.S)
+	ABICHECK_ASM_SOURCES += $(wildcard mlkem/src/native/x86_64/src/*.S)
+endif
+
+# All ABI checker sources
+ABICHECK_ALL_SOURCES = $(ABICHECK_SOURCES) $(ABICHECK_ASM_SOURCES)
+
+# ABI checker objects
+ABICHECK_OBJS = $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_ALL_SOURCES))
+
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlk
+
+# The hackery below is to work around the preprocessor guards in the ASM files.
+# TODO: We should really be working with 'raw' ASM files without guards.
+ifeq ($(IS_AARCH64),1)
+# The ASM files pull in common.h, which pulls in the backend meta files if
+# MLK_CONFIG_USE_NATIVE_BACKEND_XXX is set. This, in turn, selects a subset
+# of MLK_FIPS202_AARCH64_NEED_XXX via `#define ...` in the source, conflicting
+# with us setting all of them below using `-D...` which leads to `#define .. 1`.
+# To work around, we disable the backends in the config but explicitly enable
+# the directives that guard the ASM files. Again, this is hacky and should be
+# improved in the future.
+$(ABICHECK_DIR)/mlkem/src/native/aarch64/%.S.o: CFLAGS += -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
+$(ABICHECK_DIR)/mlkem/src/native/aarch64/%.S.o: CFLAGS += -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH
+$(ABICHECK_DIR)/mlkem/src/native/aarch64/%.S.o: CFLAGS += -DMLK_ARITH_BACKEND_AARCH64
+$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -UMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
+$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X1_SCALAR
+$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X1_SCALAR
+$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X1_V84A
+$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X2_V84A
+$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID
+$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID
+endif
+
+# ABI checker binary
+$(ABICHECK_DIR)/bin/abicheck: $(ABICHECK_OBJS)
