@@ -17,7 +17,7 @@
 	clean quickcheck check-defined-CYCLES \
 	size_512 size_768 size_1024 size \
 	run_size_512 run_size_768 run_size_1024 run_size \
-	host_info
+	host_info abicheck run_abicheck
 
 SHELL := /bin/bash
 .DEFAULT_GOAL := build
@@ -37,7 +37,7 @@ quickcheck: test
 build: func kat acvp
 	$(Q)echo "  Everything builds fine!"
 
-test: run_kat run_func run_acvp
+test: run_kat run_func run_acvp run_abicheck
 	$(Q)echo "  Everything checks fine!"
 
 # Detect available SHA256 command
@@ -181,6 +181,12 @@ run_size_768: size_768
 run_size_1024: size_1024
 	$(Q)echo "size $(BUILD_DIR)/libmlkem1024.a"
 	$(Q)$(SIZE) $(BUILD_DIR)/libmlkem1024.a | (read header; echo "$$header"; awk '$$5 != 0' | sort -k5 -n -r)
+
+# ABI checker for assembly functions
+abicheck: $(ABICHECK_DIR)/bin/abicheck
+
+run_abicheck: abicheck
+	$(W) $(ABICHECK_DIR)/bin/abicheck
 
 
 run_size: \
