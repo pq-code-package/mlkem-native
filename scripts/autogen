@@ -2074,7 +2074,7 @@ def synchronize_backends(
         # macro.
         # This leads to duplicate endbr64 instructions causing a failure when
         # comparing the object code before and after simplification.
-        cflags="-Imlkem/src/native/x86_64/src/ -mavx2 -fcf-protection=none",
+        cflags="-Imlkem/src/native/x86_64/src/ -mavx2 -mbmi2 -msse4 -fcf-protection=none",
     )
 
 

@@ -82,6 +82,7 @@
 #include "mlkem/src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S"
 #include "mlkem/src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S"
 #include "mlkem/src/native/x86_64/src/reduce.S"
+#include "mlkem/src/native/x86_64/src/rej_uniform_asm.S"
 #include "mlkem/src/native/x86_64/src/tomont.S"
 #endif /* MLK_SYS_X86_64 */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
@@ -535,7 +536,7 @@
 #undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k3
 #undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k4
 #undef mlk_reduce_avx2
-#undef mlk_rej_uniform_avx2
+#undef mlk_rej_uniform_asm
 #undef mlk_rej_uniform_table
 #undef mlk_tomont_avx2
 /* mlkem/src/native/x86_64/src/consts.h */

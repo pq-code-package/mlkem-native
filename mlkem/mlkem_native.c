@@ -82,9 +82,8 @@
 #if defined(MLK_SYS_X86_64)
 #include "src/native/x86_64/src/compress_avx2.c"
 #include "src/native/x86_64/src/consts.c"
-#include "src/native/x86_64/src/rej_uniform_avx2.c"
 #include "src/native/x86_64/src/rej_uniform_table.c"
-#endif /* MLK_SYS_X86_64 */
+#endif
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
@@ -524,7 +523,7 @@
 #undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k3
 #undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k4
 #undef mlk_reduce_avx2
-#undef mlk_rej_uniform_avx2
+#undef mlk_rej_uniform_asm
 #undef mlk_rej_uniform_table
 #undef mlk_tomont_avx2
 /* mlkem/src/native/x86_64/src/consts.h */

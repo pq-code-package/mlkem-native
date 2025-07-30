@@ -202,7 +202,6 @@ source code and documentation.
   - [dev/x86_64/src/ntttobytes.S](dev/x86_64/src/ntttobytes.S)
   - [dev/x86_64/src/nttunpack.S](dev/x86_64/src/nttunpack.S)
   - [dev/x86_64/src/reduce.S](dev/x86_64/src/reduce.S)
-  - [dev/x86_64/src/rej_uniform_avx2.c](dev/x86_64/src/rej_uniform_avx2.c)
   - [dev/x86_64/src/tomont.S](dev/x86_64/src/tomont.S)
   - [mlkem/src/native/x86_64/src/align.h](mlkem/src/native/x86_64/src/align.h)
   - [mlkem/src/native/x86_64/src/compress_avx2.c](mlkem/src/native/x86_64/src/compress_avx2.c)
@@ -214,7 +213,6 @@ source code and documentation.
   - [mlkem/src/native/x86_64/src/ntttobytes.S](mlkem/src/native/x86_64/src/ntttobytes.S)
   - [mlkem/src/native/x86_64/src/nttunpack.S](mlkem/src/native/x86_64/src/nttunpack.S)
   - [mlkem/src/native/x86_64/src/reduce.S](mlkem/src/native/x86_64/src/reduce.S)
-  - [mlkem/src/native/x86_64/src/rej_uniform_avx2.c](mlkem/src/native/x86_64/src/rej_uniform_avx2.c)
   - [mlkem/src/native/x86_64/src/tomont.S](mlkem/src/native/x86_64/src/tomont.S)
 
 ### `SLOTHY`
