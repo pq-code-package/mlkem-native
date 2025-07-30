@@ -70,3 +70,45 @@ $(foreach scheme,mlkem512 mlkem768 mlkem1024, \
 $(ALL_TESTS:%=$(MLKEM512_DIR)/bin/%512): $(call MAKE_OBJS, $(MLKEM512_DIR), $(wildcard test/notrandombytes/*.c))
 $(ALL_TESTS:%=$(MLKEM768_DIR)/bin/%768): $(call MAKE_OBJS, $(MLKEM768_DIR), $(wildcard test/notrandombytes/*.c))
 $(ALL_TESTS:%=$(MLKEM1024_DIR)/bin/%1024): $(call MAKE_OBJS, $(MLKEM1024_DIR), $(wildcard test/notrandombytes/*.c))
+
+ABICHECK_DIR = $(BUILD_DIR)/abicheck
+
+# ABI checker sources
+ABICHECK_SOURCES = test/abicheck/abicheck.c test/abicheck/abicheckutil.c test/abicheck/aarch64_callstub.S
+ABICHECK_SOURCES += $(wildcard test/abicheck/check_*.c)
+ABICHECK_SOURCES += $(wildcard test/notrandombytes/*.c)
+
+# Assembly sources for the functions under test (only aarch64 for now)
+# Only include AArch64 assembly sources on AArch64 platforms
+ABICHECK_ASM_SOURCES =
+
+# Include AArch64 assembly sources if building for AArch64
+ifeq ($(IS_AARCH64),1)
+	ABICHECK_ASM_SOURCES += $(wildcard mlkem/src/fips202/native/aarch64/src/*.S)
+	ABICHECK_ASM_SOURCES += $(wildcard mlkem/src/native/aarch64/src/*.S)
+endif
+
+# All ABI checker sources
+ABICHECK_ALL_SOURCES = $(ABICHECK_SOURCES) $(ABICHECK_ASM_SOURCES)
+
+# ABI checker objects
+ABICHECK_OBJS = $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_ALL_SOURCES))
+
+$(ABICHECK_OBJS): CFLAGS += -Wno-redundant-decls
+
+# This is a bit of a hack... we manually force compilation options that lead to
+# all of the assembly files to be considered.
+# Only apply AArch64-specific flags on AArch64 platforms
+ifeq ($(IS_AARCH64),1)
+$(ABICHECK_DIR)/mlkem/src/native/aarch64/%.S.o: CFLAGS += -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
+$(ABICHECK_DIR)/mlkem/src/fips202/%.S.o: CFLAGS += -UMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
+$(ABICHECK_DIR)/mlkem/src/fips202/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X1_SCALAR
+$(ABICHECK_DIR)/mlkem/src/fips202/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X1_SCALAR
+$(ABICHECK_DIR)/mlkem/src/fips202/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X1_V84A
+$(ABICHECK_DIR)/mlkem/src/fips202/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X2_V84A
+$(ABICHECK_DIR)/mlkem/src/fips202/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID
+$(ABICHECK_DIR)/mlkem/src/fips202/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID
+endif
+
+# ABI checker binary
+$(ABICHECK_DIR)/bin/abicheck: $(ABICHECK_OBJS)
