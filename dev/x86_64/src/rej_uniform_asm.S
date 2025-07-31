@@ -55,10 +55,12 @@
 //
 //  Notes:
 //    - We exit early if we find the required number of good values,
-//    - We use the stack as a temporary storage because the algorithm
-//      can write up to 7 values more than the output size. In the end,
-//      we copy over the generated values to the output array.
-#define STACK_SIZE ((256 + 7) * 2)
+//    - We use the stack as a temporary storage and copy to the actual
+//      output buffer only in the end. This is because the algorithm
+//      can overwrite up to 14 bytes (we use 16B for alignment), 
+//    - The implementation uses x86 SSE and BMI2 extensions.
+
+#define STACK_SIZE (2*MLKEM_N + 16)
 
 .text
 .global MLK_ASM_NAMESPACE(rej_uniform_asm)
@@ -85,16 +87,23 @@ MLK_ASM_FN_SYMBOL(rej_uniform_asm)
 
   movq $0, cnt // cnt counts the number of good values we've found.
   movq $0, pos // pos is the current position in the input buffer.
-  movq $21845, pext_mask // 0x5555 mask to extract every second bit.
+  movq $0x5555, pext_mask // 0x5555 mask to extract every second bit.
 
 rej_uniform_asm_loop_start:
   // 1. Split 96 bits into eight 12-bit integers where each integer.
+  //    We explain the algorithm by considering the lowest 64 bits of vals.
   movdqu  (in, pos), vals
+  //    vals: [ 63..48 | 47..32 | 31..16 | 15..0 ]
   pshufb  shuffle_in_mask, vals
+  //    vals: [ 47..32 | 39..24 | 23..8 | 15..0 ]
   movdqa  vals, temp1
+  //    temp: [ 47..32 | 39..24 | 23..8 | 15..0 ]
   psrlw   $4, temp1
-  pblendw $170, temp1, vals
+  //    temp: [ 47..36 | 39..28 | 23..12 | 15..4 ]
+  pblendw $0xAA, temp1, vals
+  //    vals: [ 47..36 | 39..24 | 23..12 | 15..0]
   pand    and_mask, vals
+  //    vals: [ 47..36 | 35..24 | 23..12 | 12..0]
 
   // 2. Compute an 8-bit value `good` such that
   //      good[i] = vals[i] < MLKEM_Q ? 1 : 0, for i in [0, 7],

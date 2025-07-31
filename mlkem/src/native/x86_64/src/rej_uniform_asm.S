@@ -34,7 +34,7 @@
 .global MLK_ASM_NAMESPACE(rej_uniform_asm)
 MLK_ASM_FN_SYMBOL(rej_uniform_asm)
 
-        subq	$0x20e, %rsp            # imm = 0x20E
+        subq	$0x210, %rsp            # imm = 0x210
         movabsq	$0xd010d010d010d01, %rax # imm = 0xD010D010D010D01
         movq	%rax, %xmm0
         pinsrq	$0x1, %rax, %xmm0
@@ -81,7 +81,7 @@ rej_uniform_asm_final_copy:
         movq	%rax, %rcx
         shlq	%rcx
         rep		movsb	(%rsi), %es:(%rdi)
-        addq	$0x20e, %rsp            # imm = 0x20E
+        addq	$0x210, %rsp            # imm = 0x210
         retq
 
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
