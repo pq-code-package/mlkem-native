@@ -839,7 +839,7 @@ def gen_aarch64_zeta_file(dry_run=False):
     )
 
 
-def gen_aarch64_rej_uniform_table_rows():
+def gen_rej_uniform_table_rows():
     # The index into the lookup table is an 8-bit bitmap, i.e. a number 0..255.
     # Conceptually, the table entry at index i is a vector of 8 16-bit values, of
     # which only the first popcount(i) are set; those are the indices of the set-bits
@@ -868,7 +868,7 @@ def gen_aarch64_hol_light_rej_uniform_table(dry_run=False):
         yield ""
         yield "let mlkem_rej_uniform_table = (REWRITE_RULE[MAP] o define)"
         yield "  `mlkem_rej_uniform_table:byte list = MAP word ["
-        data = [i for idxs in gen_aarch64_rej_uniform_table_rows() for i in idxs]
+        data = [i for idxs in gen_rej_uniform_table_rows() for i in idxs]
         yield from print_hol_light_array(data, as_int=False, entries_per_line=16, pad=3)
         yield "]`;;"
         yield ""
@@ -896,7 +896,7 @@ def gen_aarch64_rej_uniform_table(dry_run=False):
         yield " * See autogen for details."
         yield " */"
         yield "MLK_ALIGN const uint8_t mlk_rej_uniform_table[] = {"
-        for i, idxs in enumerate(gen_aarch64_rej_uniform_table_rows()):
+        for i, idxs in enumerate(gen_rej_uniform_table_rows()):
             yield ",".join(map(str, idxs)) + f" /* {i} */,"
         yield "};"
         yield ""
@@ -920,24 +920,6 @@ def gen_aarch64_rej_uniform_table(dry_run=False):
     )
 
 
-def gen_avx2_rej_uniform_table_rows():
-    # The index into the lookup table is an 8-bit bitmap, i.e. a number 0..255.
-    # Conceptually, the table entry at index i is a vector of 8 16-bit values, of
-    # which only the first popcount(i) are set; those are the indices of the set-bits
-    # in i.
-    def get_set_bits_idxs(i):
-        bits = list(map(int, format(i, "08b")))
-        bits.reverse()
-        return [bit_idx for bit_idx in range(8) if bits[bit_idx] == 1]
-
-    for i in range(256):
-        idxs = get_set_bits_idxs(i)
-        idxs = [2 * i for i in idxs]
-        # Pad by -1
-        idxs = idxs + [-1] * (8 - len(idxs))
-        yield "{" + ",".join(map(str, idxs)) + "}"
-
-
 def gen_avx2_rej_uniform_table(dry_run=False):
     def gen():
         yield from gen_header()
@@ -953,8 +935,9 @@ def gen_avx2_rej_uniform_table(dry_run=False):
         yield " * Lookup table used by rejection sampling of the public matrix."
         yield " * See autogen for details."
         yield " */"
-        yield "MLK_ALIGN const uint8_t mlk_rej_uniform_table[256][8] = {"
-        yield from map(lambda t: str(t) + ",", gen_avx2_rej_uniform_table_rows())
+        yield "MLK_ALIGN const uint8_t mlk_rej_uniform_table[] = {"
+        for i, idxs in enumerate(gen_rej_uniform_table_rows()):
+            yield ",".join(map(str, idxs)) + f" /* {i} */,"
         yield "};"
         yield ""
         yield "#else"
@@ -965,7 +948,7 @@ def gen_avx2_rej_uniform_table(dry_run=False):
         yield ""
 
     update_file(
-        "mlkem/src/native/x86_64/src/rej_uniform_table.c",
+        "dev/x86_64/src/rej_uniform_table.c",
         "\n".join(gen()),
         dry_run=dry_run,
     )
@@ -2091,7 +2074,7 @@ def synchronize_backends(
         # macro.
         # This leads to duplicate endbr64 instructions causing a failure when
         # comparing the object code before and after simplification.
-        cflags="-Imlkem/src/native/x86_64/src/ -mavx2 -fcf-protection=none",
+        cflags="-Imlkem/src/native/x86_64/src/ -mavx2 -mbmi2 -msse4 -fcf-protection=none",
     )
 
 

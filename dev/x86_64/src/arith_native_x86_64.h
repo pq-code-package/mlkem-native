@@ -14,11 +14,12 @@
 #define MLK_AVX2_REJ_UNIFORM_BUFLEN \
   (3 * 168) /* REJ_UNIFORM_NBLOCKS * SHAKE128_RATE */
 
-#define mlk_rej_uniform_avx2 MLK_NAMESPACE(rej_uniform_avx2)
-unsigned mlk_rej_uniform_avx2(int16_t *r, const uint8_t *buf);
+#define mlk_rej_uniform_asm MLK_NAMESPACE(rej_uniform_asm)
+uint64_t mlk_rej_uniform_asm(int16_t *r, const uint8_t *buf, unsigned buflen,
+                             const uint8_t *table);
 
 #define mlk_rej_uniform_table MLK_NAMESPACE(rej_uniform_table)
-extern const uint8_t mlk_rej_uniform_table[256][8];
+extern const uint8_t mlk_rej_uniform_table[];
 
 #define mlk_ntt_avx2 MLK_NAMESPACE(ntt_avx2)
 void mlk_ntt_avx2(__m256i *r, const __m256i *mlk_qdata);

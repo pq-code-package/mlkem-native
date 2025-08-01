@@ -43,13 +43,11 @@ static MLK_INLINE int mlk_rej_uniform_native(int16_t *r, unsigned len,
                                              const uint8_t *buf,
                                              unsigned buflen)
 {
-  /* AVX2 implementation assumes specific buffer lengths */
-  if (len != MLKEM_N || buflen != MLK_AVX2_REJ_UNIFORM_BUFLEN)
+  if (len != MLKEM_N || buflen % 12 != 0)
   {
     return -1;
   }
-
-  return (int)mlk_rej_uniform_avx2(r, buf);
+  return (int)mlk_rej_uniform_asm(r, buf, buflen, mlk_rej_uniform_table);
 }
 
 static MLK_INLINE void mlk_ntt_native(int16_t data[MLKEM_N])
