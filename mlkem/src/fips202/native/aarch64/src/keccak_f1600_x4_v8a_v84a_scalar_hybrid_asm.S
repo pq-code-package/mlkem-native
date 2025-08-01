@@ -11,7 +11,7 @@
 /*yaml
   Name: keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm
   Description: AArch64 hybrid scalar/vector implementation of Keccak-f[1600] permutation for four sequential states with ARMv8.4-A optimizations
-  Signature: void mlk_keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm(uint64_t state[100], const uint64_t rc[24])
+  Signature: void mlk_keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm(uint64_t state[100], const uint64_t rc[24])
   ABI:
     x0:
       type: buffer
@@ -44,8 +44,8 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm)
-MLK_ASM_FN_SYMBOL(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm)
+.global MLK_ASM_NAMESPACE(keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm)
+MLK_ASM_FN_SYMBOL(keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm)
 
         sub	sp, sp, #0xe0
         stp	x19, x20, [sp, #0x30]
@@ -824,7 +824,7 @@ keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop_end:
         ror	x25, x25, #0x9
         ldr	x30, [sp, #0x20]
         cmp	x30, #0x1
-        b.eq	keccak_f1600_x4_scalar_v8a_v84a_hybrid_done
+        b.eq	keccak_f1600_x4_v8a_v84a_scalar_hybrid_done
         mov	x30, #0x1               // =1
         str	x30, [sp, #0x20]
         ldr	x0, [sp]
@@ -860,7 +860,7 @@ keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop_end:
         sub	x0, x0, #0x258
         b	keccak_f1600_x4_v8a_v84a_scalar_hybrid_initial
 
-keccak_f1600_x4_scalar_v8a_v84a_hybrid_done:
+keccak_f1600_x4_v8a_v84a_scalar_hybrid_done:
         ldr	x0, [sp]
         add	x0, x0, #0x258
         stp	x1, x6, [x0]
