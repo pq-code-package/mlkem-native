@@ -59,7 +59,7 @@ jobs:
     needs: [ base ]
     uses: ./.github/workflows/integration-awslc.yml
     with:
-      commit: 8568a08d366bcbd5c1279132ccb299c0826799de # v1.54.0
+      commit: bce1d2cbfd702f3bb6dcbc5ffd2da45bce08adcb # v1.56.0
     secrets: inherit
   awslc_integration_head:
     name: AWS-LC (HEAD)
