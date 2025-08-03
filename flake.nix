@@ -140,6 +140,7 @@
           devShells.ci_gcc12 = util.mkShellWithCC' pkgs.gcc12;
           devShells.ci_gcc13 = util.mkShellWithCC' pkgs.gcc13;
           devShells.ci_gcc14 = util.mkShellWithCC' pkgs.gcc14;
+          devShells.ci_gcc15 = util.mkShellWithCC' pkgs.gcc15;
 
           # valgrind with a patch for detecting variable-latency instructions
           devShells.ci_valgrind-varlat_clang14 = util.mkShellWithCC_valgrind' pkgs.clang_14;
@@ -156,6 +157,7 @@
           devShells.ci_valgrind-varlat_gcc12 = util.mkShellWithCC_valgrind' pkgs.gcc12;
           devShells.ci_valgrind-varlat_gcc13 = util.mkShellWithCC_valgrind' pkgs.gcc13;
           devShells.ci_valgrind-varlat_gcc14 = util.mkShellWithCC_valgrind' pkgs.gcc14;
+          devShells.ci_valgrind-varlat_gcc15 = util.mkShellWithCC_valgrind' pkgs.gcc15;
         };
       flake = {
         devShell.x86_64-linux =
