@@ -1572,11 +1572,26 @@ def get_config_options():
         "MLK_BREAK_PCT",  # Use in PCT breakage test]
         "MLK_CONFIG_NO_ASM_VALUE_BARRIER",  # TODO: Add to config?
         "MLK_CHECK_APIS",
-        "MLK_CONFIG_API_XXX",
-        "MLK_USE_NATIVE_XXX",
     ]
 
     return configs
+
+
+def is_macro_pattern(m):
+    if not m.endswith("_XXX"):
+        return None
+    return m[:-4]
+
+
+def is_valid_macro_pattern(m, macros):
+    pattern = is_macro_pattern(m)
+    if pattern is None:
+        return False
+    # Check that there is at least one macro following the pattern
+    for mp in macros:
+        if mp.startswith(pattern):
+            return True
+    return False
 
 
 def check_macro_typos_in_file(filename, macro_check):
@@ -1591,9 +1606,14 @@ def check_macro_typos_in_file(filename, macro_check):
         rest = m.group(2)
         if macro_check(txt, rest, filename) is False:
             line_no = content[: m.start()].count("\n") + 1
-            raise Exception(
-                f"Likely typo {txt} in {filename}:{line_no}? Not a defined macro."
-            )
+            if is_macro_pattern(txt):
+                raise Exception(
+                    f"Likely typo {txt} in {filename}:{line_no}? No macro following the pattern exists"
+                )
+            else:
+                raise Exception(
+                    f"Likely typo {txt} in {filename}:{line_no}? Not a defined macro nor valid pattern"
+                )
 
 
 def get_syscaps():
@@ -1610,7 +1630,7 @@ def check_macro_typos():
     macros.update(get_config_options())
 
     def macro_check(m, rest, filename):
-        if m in macros:
+        if m in macros or is_valid_macro_pattern(m, macros):
             return True
 
         is_autogen = filename == "scripts/autogen"
@@ -1638,12 +1658,7 @@ def check_macro_typos():
             if filename.endswith(".ml"):
                 return True
 
-        # 4. Exclude regexp patterns in `autogen`
-        if is_autogen:
-            if rest.startswith("\\") or m in ["MLK_XXX", "MLK_SOURCE_XXX"]:
-                return True
-
-        # 5. AWS-LC importer patch
+        # 4. AWS-LC importer patch
         if is_autogen or filename == "integration/awslc/awslc.patch":
             return True
 
