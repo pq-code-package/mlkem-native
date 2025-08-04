@@ -61,7 +61,7 @@ endif
 # Native compilation
 ifeq ($(CROSS_PREFIX),)
 ifeq ($(HOST_PLATFORM),Linux-x86_64)
-	CFLAGS += -mavx2 -mbmi2 -mpopcnt -maes
+	CFLAGS += -mavx2 -mbmi2
 	CFLAGS += -DMLK_FORCE_X86_64
 else ifeq ($(HOST_PLATFORM),Linux-aarch64)
 	CFLAGS += -DMLK_FORCE_AARCH64
@@ -70,7 +70,7 @@ else ifeq ($(HOST_PLATFORM),Darwin-arm64)
 endif
 # Cross compilation
 else ifneq ($(findstring x86_64, $(CROSS_PREFIX)),)
-	CFLAGS += -mavx2 -mbmi2 -mpopcnt -maes
+	CFLAGS += -mavx2 -mbmi2
 	CFLAGS += -DMLK_FORCE_X86_64
 else ifneq ($(findstring aarch64_be, $(CROSS_PREFIX)),)
 	CFLAGS += -DMLK_FORCE_AARCH64_EB
