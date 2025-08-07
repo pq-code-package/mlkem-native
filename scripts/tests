@@ -983,6 +983,7 @@ def cli():
         choices=[
             "auto",
             "x1_scalar",
+            "x1_scalar_no_lazy",
             "x1_v84a",
             "x2_v84a",
             "x4_v8a_scalar",
