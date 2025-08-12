@@ -4,15 +4,15 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = ntt_native_aarch64_harness
+HARNESS_FILE = is_native_capable_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = ntt_native_aarch64
+PROOF_UID = is_native_capable
 
 # We need to set MLK_CHECK_APIS as otherwise mlkem/src/native/api.h won't be
 # included, which contains the CBMC specifications.
-DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_ARITH_BACKEND_FILE="\"$(SRCDIR)/mlkem/src/native/aarch64/meta.h\"" -DMLK_CHECK_APIS
+DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
@@ -21,8 +21,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c $(SRCDIR)/mlkem/src/native/aarch64/src/aarch64_zetas.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_ntt_native
-USE_FUNCTION_CONTRACTS=mlk_ntt_asm mlk_is_native_capable
+CHECK_FUNCTION_CONTRACTS=mlk_is_native_capable
+USE_FUNCTION_CONTRACTS=
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -30,7 +30,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = ntt_native_aarch64
+FUNCTION_NAME = is_native_capable
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

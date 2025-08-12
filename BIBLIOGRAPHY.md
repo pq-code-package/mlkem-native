@@ -34,6 +34,8 @@ source code and documentation.
   - [test/break_pct_config.h](test/break_pct_config.h)
   - [test/custom_memcpy_config.h](test/custom_memcpy_config.h)
   - [test/custom_memset_config.h](test/custom_memset_config.h)
+  - [test/custom_native_capability_config_0.h](test/custom_native_capability_config_0.h)
+  - [test/custom_native_capability_config_1.h](test/custom_native_capability_config_1.h)
   - [test/custom_randombytes_config.h](test/custom_randombytes_config.h)
   - [test/custom_stdlib_config.h](test/custom_stdlib_config.h)
   - [test/custom_zeroize_config.h](test/custom_zeroize_config.h)

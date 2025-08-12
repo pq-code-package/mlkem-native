@@ -458,6 +458,26 @@ jobs:
           kat: true
           acvp: true
           examples: false # Some examples use a custom config themselves
+      - name: "Custom native capability functions (static ON)"
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_native_capability_config_1.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          func: true
+          kat: true
+          acvp: true
+          examples: false # Some examples use a custom config themselves
+      - name: "Custom native capability functions (static OFF)"
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_native_capability_config_0.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          func: true
+          kat: true
+          acvp: true
+          examples: false # Some examples use a custom config themselves
       - name: "No ASM"
         uses: ./.github/actions/multi-functest
         with:

@@ -435,6 +435,8 @@
 /* mlkem/src/native/api.h */
 #undef MLK_INVNTT_BOUND
 #undef MLK_NATIVE_API_H
+#undef MLK_NATIVE_FUNC_FALLBACK
+#undef MLK_NATIVE_FUNC_SUCCESS
 #undef MLK_NTT_BOUND
 /* mlkem/src/native/meta.h */
 #undef MLK_NATIVE_META_H
