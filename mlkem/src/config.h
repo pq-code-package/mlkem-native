@@ -312,6 +312,29 @@
 */
 
 /******************************************************************************
+ * Name:        MLK_CONFIG_CUSTOM_NATIVE_CAPABILITY_FUNC
+ *
+ * Description: mlkem-native provides a way for the consumer to define their
+ *              own CPU capability function that can be used by the backend
+ *              to perform runtime dispatch between implementations that
+ *              require different CPU capabilities.
+ *
+ *              If this option is not set, mlkem-native expects a function
+ *              void randombytes(uint8_t *out, size_t outlen).
+ *
+ *              Set this option and define `mlk_randombytes` if you want to
+ *              use a custom method to sample randombytes with a different name
+ *              or signature.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_CUSTOM_NATIVE_CAPABILITY_FUNC
+   static MLK_INLINE int mlk_is_native_capable(void)
+   {
+       ... your implementation ...
+   }
+*/
+
+/******************************************************************************
  * Name:        MLK_CONFIG_CUSTOM_MEMCPY
  *
  * Description: Set this option and define `mlk_memcpy` if you want to

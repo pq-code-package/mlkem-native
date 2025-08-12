@@ -2033,6 +2033,15 @@ def synchronize_backends(
             ),
         )
 
+        update_via_copy(
+            f"dev/x86_64/meta.h",
+            "mlkem/src/native/x86_64/meta.h",
+            dry_run=dry_run,
+            transform=lambda c: adjust_header_guard_for_filename(
+                c, "mlkem/src/native/x86_64/meta.h"
+            ),
+        )
+
     synchronize_backend(
         f"dev/aarch64_{ty}/src",
         "mlkem/src/native/aarch64/src",
