@@ -13,6 +13,12 @@ See [basic](basic) for a basic example of how to build a single instance of mlke
 See [multilevel_build](multilevel_build) for an example of how to build one instance of mlkem-native per security level,
 in such a way that level-independent code is shared.
 
+## Multi-level build with no stdlib (C only)
+
+See [multilevel_build_no_stdlib](multilevel_build_no_stdlib) for an example of how to build one instance of mlkem-native per security level,
+with `-nostdlib` flag, the `mlk_memcpy` and `mlk_memset` are replaced by custom implementation.
+in such a way that level-independent code with no stadard libary is shared.
+
 ## Multi-level build (with native code)
 
 See [multilevel_build_native](multilevel_build_native) for an example of how to build one instance of mlkem-native per
