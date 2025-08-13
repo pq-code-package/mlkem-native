@@ -24,12 +24,14 @@ endif
 # If you are not concerned about minimizing for a specific backend,
 # you can just include _all_ source files into your build.
 MLK_SOURCE_ALL := $(wildcard             \
-    mlkem_native/mlkem/src/*.c           \
-    mlkem_native/mlkem/src/**/*.c        \
-    mlkem_native/mlkem/src/**/**/*.c     \
-    mlkem_native/mlkem/src/**/**/**/*.c)
+	mlkem_native/mlkem/src/*.c           \
+	mlkem_native/mlkem/src/**/*.c        \
+	mlkem_native/mlkem/src/**/**/*.c     \
+	mlkem_native/mlkem/src/**/**/**/*.c)
 MLK_SOURCE:=$(foreach S,$(MLK_SOURCE_ALL),\
   $(if $(findstring /native/,$S),,$S))
+
+INC=-Imlkem_native -Imlkem_native/mlkem -Imlkem_native/mlkem/src
 
 BUILD_DIR=build
 MLKEM512_DIR = $(BUILD_DIR)/mlkem512
@@ -42,15 +44,15 @@ MLKEM1024_OBJS=$(patsubst %,$(MLKEM1024_DIR)/%.o,$(MLK_SOURCE))
 
 $(MLKEM512_OBJS): $(MLKEM512_DIR)/%.c.o: %.c
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC)  -DMLK_CONFIG_MULTILEVEL_WITH_SHARED -DMLK_CONFIG_PARAMETER_SET=512 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC)  -nostdlib -DMLK_CONFIG_MULTILEVEL_WITH_SHARED -DMLK_CONFIG_PARAMETER_SET=512 $(INC) $(CFLAGS) -c $^ -o $@
 
 $(MLKEM768_OBJS): $(MLKEM768_DIR)/%.c.o: %.c
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -DMLK_CONFIG_MULTILEVEL_NO_SHARED -DMLK_CONFIG_PARAMETER_SET=768 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC) -nostdlib -DMLK_CONFIG_MULTILEVEL_NO_SHARED -DMLK_CONFIG_PARAMETER_SET=768 $(INC) $(CFLAGS) -c $^ -o $@
 
 $(MLKEM1024_OBJS): $(MLKEM1024_DIR)/%.c.o: %.c
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -DMLK_CONFIG_MULTILEVEL_NO_SHARED -DMLK_CONFIG_PARAMETER_SET=1024 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC) -nostdlib -DMLK_CONFIG_MULTILEVEL_NO_SHARED -DMLK_CONFIG_PARAMETER_SET=1024 $(INC) $(CFLAGS) -c $^ -o $@
 
 mlkem512_objs: $(MLKEM512_OBJS)
 mlkem768_objs: $(MLKEM768_OBJS)
@@ -89,7 +91,7 @@ CFLAGS := \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
 	-fomit-frame-pointer \
-    -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem \
+	-DMLK_CONFIG_NAMESPACE_PREFIX=mlkem \
 	-std=c99 \
 	-pedantic \
 	-MMD \
@@ -98,10 +100,12 @@ CFLAGS := \
 
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 
+CFLAGS += -DMLK_CONFIG_FILE="\"example_no_stdlib_config.h\""
+
 $(BINARY_NAME_FULL): $(APP_SOURCE) $(RNG_SOURCE) $(MLKEM512_OBJS) $(MLKEM768_OBJS) $(MLKEM1024_OBJS)
 	echo "$@"
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $(INC) $^ -o $@
 
 all: build size_objs
 

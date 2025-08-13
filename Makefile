@@ -236,3 +236,4 @@ clean:
 	-make clean -C examples/monolithic_build_multilevel_native >/dev/null
 	-make clean -C examples/multilevel_build >/dev/null
 	-make clean -C examples/multilevel_build_native >/dev/null
+	-make clean -C examples/multilevel_build_no_stdlib > /dev/null

@@ -254,6 +254,9 @@ jobs:
       - name: multilevel_build_native
         run: |
           CFLAGS="-O0" make run -C examples/multilevel_build_native
+      - name: multilevel_build_no_stdlib
+        run: |
+          CFLAGS="-O0" make run -C examples/multilevel_build_no_stdlib
   simpasm:
     strategy:
       fail-fast: false
