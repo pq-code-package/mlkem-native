@@ -210,6 +210,7 @@ class TEST_TYPES(Enum):
     SIZE = 16
     BASIC_DETERMINISTIC = 17
     UNIT = 18
+    MULTILEVEL_BUILD_NO_STDLIB = 19
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -223,6 +224,7 @@ class TEST_TYPES(Enum):
             TEST_TYPES.BRING_YOUR_OWN_FIPS202,
             TEST_TYPES.CUSTOM_BACKEND,
             TEST_TYPES.BASIC,
+            TEST_TYPES.MULTILEVEL_BUILD_NO_STDLIB,
             TEST_TYPES.MONOLITHIC_BUILD,
             TEST_TYPES.MONOLITHIC_BUILD_NATIVE,
             TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL,
@@ -265,6 +267,8 @@ class TEST_TYPES(Enum):
             return "Example (mlkem-native as code package)"
         if self == TEST_TYPES.BASIC_DETERMINISTIC:
             return "Example (mlkem-native as code package without randombytes() implementation)"
+        if self == TEST_TYPES.MULTILEVEL_BUILD_NO_STDLIB:
+            return "Example (multilevel build, no_stdlib)"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return "Example (monobuild)"
         if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
@@ -291,6 +295,8 @@ class TEST_TYPES(Enum):
             return "examples/basic"
         if self == TEST_TYPES.BASIC_DETERMINISTIC:
             return "examples/basic_deterministic"
+        if self == TEST_TYPES.MULTILEVEL_BUILD_NO_STDLIB:
+            return "examples/multilevel_build_no_stdlib"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return "examples/monolithic_build"
         if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
@@ -325,6 +331,8 @@ class TEST_TYPES(Enum):
         if self == TEST_TYPES.BASIC:
             return ""
         if self == TEST_TYPES.BASIC_DETERMINISTIC:
+            return ""
+        if self == TEST_TYPES.MULTILEVEL_BUILD_NO_STDLIB:
             return ""
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return ""
@@ -1169,6 +1177,7 @@ def cli():
             "custom_backend",
             "basic",
             "basic_deterministic",
+            "multilevel_build_no_stdlib",
             "monolithic_build",
             "monolithic_build_native",
             "monolithic_build_multilevel",
