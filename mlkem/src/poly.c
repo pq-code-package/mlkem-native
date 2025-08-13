@@ -386,11 +386,10 @@ __contract__(
 MLK_INTERNAL_API
 void mlk_poly_ntt(mlk_poly *p)
 {
-  unsigned layer;
-  int16_t *r;
+  mlk_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
+
 #if defined(MLK_USE_NATIVE_NTT)
   int ret;
-  mlk_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
   ret = mlk_ntt_native(p->coeffs);
   if (ret != -1)
   {
@@ -399,7 +398,9 @@ void mlk_poly_ntt(mlk_poly *p)
   }
 #endif /* MLK_USE_NATIVE_NTT */
 
-  mlk_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
+  unsigned layer;
+  int16_t *r;
+
   r = p->coeffs;
 
   for (layer = 1; layer <= 7; layer++)

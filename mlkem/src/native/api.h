@@ -79,7 +79,9 @@ __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   requires(array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
-  ensures(array_abs_bound(p, 0, MLKEM_N, MLK_NTT_BOUND))
+  ensures(return_value == -1 || return_value == 1)
+  ensures((return_value == 1) ==> array_abs_bound(p, 0, MLKEM_N, MLK_NTT_BOUND))
+  ensures((return_value == -1) ==> array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
 );
 #endif /* MLK_USE_NATIVE_NTT */
 
