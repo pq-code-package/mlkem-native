@@ -386,20 +386,22 @@ __contract__(
 MLK_INTERNAL_API
 void mlk_poly_ntt(mlk_poly *p)
 {
+  unsigned layer;
+  int16_t *r;
+
   mlk_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
 
 #if defined(MLK_USE_NATIVE_NTT)
-  int ret;
-  ret = mlk_ntt_native(p->coeffs);
-  if (ret != -1)
   {
-    mlk_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
-    return;
+    int ret;
+    ret = mlk_ntt_native(p->coeffs);
+    if (ret != -1)
+    {
+      mlk_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
+      return;
+    }
   }
 #endif /* MLK_USE_NATIVE_NTT */
-
-  unsigned layer;
-  int16_t *r;
 
   r = p->coeffs;
 
