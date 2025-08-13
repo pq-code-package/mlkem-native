@@ -37,7 +37,10 @@
 
 static MLK_INLINE void mlk_poly_permute_bitrev_to_custom(int16_t data[MLKEM_N])
 {
-  mlk_nttunpack_avx2((__m256i *)(data));
+  if (mlk_is_native_capable())
+  {
+    mlk_nttunpack_avx2((__m256i *)(data));
+  }
 }
 
 static MLK_INLINE int mlk_rej_uniform_native(int16_t *r, unsigned len,
@@ -60,7 +63,7 @@ static MLK_INLINE int mlk_ntt_native(int16_t data[MLKEM_N])
   else
   {
     mlk_ntt_avx2((__m256i *)data, mlk_qdata.vec);
-    return 1;
+    return 0;
   }
 }
 
@@ -73,7 +76,7 @@ static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
   else
   {
     mlk_invntt_avx2((__m256i *)data, mlk_qdata.vec);
-    return 1;
+    return 0;
   }
 }
 
@@ -86,7 +89,7 @@ static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])
   else
   {
     mlk_reduce_avx2((__m256i *)data, mlk_qdata.vec);
-    return 1;
+    return 0;
   }
 }
 
@@ -99,7 +102,7 @@ static MLK_INLINE int mlk_poly_tomont_native(int16_t data[MLKEM_N])
   else
   {
     mlk_tomont_avx2((__m256i *)data, mlk_qdata.vec);
-    return 1;
+    return 0;
   }
 }
 
@@ -114,7 +117,7 @@ static MLK_INLINE int mlk_poly_mulcache_compute_native(int16_t x[MLKEM_N / 2],
   {
     mlk_poly_mulcache_compute_avx2((__m256i *)x, (const __m256i *)y,
                                    mlk_qdata.vec);
-    return 1;
+    return 0;
   }
 }
 
@@ -131,7 +134,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
   {
     mlk_polyvec_basemul_acc_montgomery_cached_asm_k2(r, a, b, b_cache,
                                                      mlk_qdata.coeffs);
-    return 1;
+    return 0;
   }
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 */
@@ -149,7 +152,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k3_native(
   {
     mlk_polyvec_basemul_acc_montgomery_cached_asm_k3(r, a, b, b_cache,
                                                      mlk_qdata.coeffs);
-    return 1;
+    return 0;
   }
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 3 */
@@ -167,7 +170,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
   {
     mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(r, a, b, b_cache,
                                                      mlk_qdata.coeffs);
-    return 1;
+    return 0;
   }
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
@@ -182,7 +185,7 @@ static MLK_INLINE int mlk_poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
   else
   {
     mlk_ntttobytes_avx2(r, (const __m256i *)a, mlk_qdata.vec);
-    return 1;
+    return 0;
   }
 }
 
@@ -196,7 +199,7 @@ static MLK_INLINE int mlk_poly_frombytes_native(
   else
   {
     mlk_nttfrombytes_avx2((__m256i *)r, a, mlk_qdata.vec);
-    return 1;
+    return 0;
   }
 }
 
@@ -211,7 +214,7 @@ static MLK_INLINE int mlk_poly_compress_d4_native(
   else
   {
     mlk_poly_compress_d4_avx2(r, (const __m256i *)a);
-    return 1;
+    return 0;
   }
 }
 
@@ -225,7 +228,7 @@ static MLK_INLINE int mlk_poly_compress_d10_native(
   else
   {
     mlk_poly_compress_d10_avx2(r, (const __m256i *)a);
-    return 1;
+    return 0;
   }
 }
 
@@ -239,7 +242,7 @@ static MLK_INLINE int mlk_poly_decompress_d4_native(
   else
   {
     mlk_poly_decompress_d4_avx2((__m256i *)r, a);
-    return 1;
+    return 0;
   }
 }
 
@@ -253,7 +256,7 @@ static MLK_INLINE int mlk_poly_decompress_d10_native(
   else
   {
     mlk_poly_decompress_d10_avx2((__m256i *)r, a);
-    return 1;
+    return 0;
   }
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
@@ -269,7 +272,7 @@ static MLK_INLINE int mlk_poly_compress_d5_native(
   else
   {
     mlk_poly_compress_d5_avx2(r, (const __m256i *)a);
-    return 1;
+    return 0;
   }
 }
 
@@ -283,7 +286,7 @@ static MLK_INLINE int mlk_poly_compress_d11_native(
   else
   {
     mlk_poly_compress_d11_avx2(r, (const __m256i *)a);
-    return 1;
+    return 0;
   }
 }
 
@@ -297,7 +300,7 @@ static MLK_INLINE int mlk_poly_decompress_d5_native(
   else
   {
     mlk_poly_decompress_d5_avx2((__m256i *)r, a);
-    return 1;
+    return 0;
   }
 }
 
@@ -311,7 +314,7 @@ static MLK_INLINE int mlk_poly_decompress_d11_native(
   else
   {
     mlk_poly_decompress_d11_avx2((__m256i *)r, a);
-    return 1;
+    return 0;
   }
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */

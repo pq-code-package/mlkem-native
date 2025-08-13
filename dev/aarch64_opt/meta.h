@@ -35,7 +35,7 @@ static MLK_INLINE int mlk_ntt_native(int16_t data[MLKEM_N])
   {
     mlk_ntt_asm(data, mlk_aarch64_ntt_zetas_layer12345,
                 mlk_aarch64_ntt_zetas_layer67);
-    return 1;
+    return 0;
   }
 }
 
@@ -49,7 +49,7 @@ static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
   {
     mlk_intt_asm(data, mlk_aarch64_invntt_zetas_layer12345,
                  mlk_aarch64_invntt_zetas_layer67);
-    return 1;
+    return 0;
   }
 }
 
@@ -62,7 +62,7 @@ static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])
   else
   {
     mlk_poly_reduce_asm(data);
-    return 1;
+    return 0;
   }
 }
 
@@ -75,7 +75,7 @@ static MLK_INLINE int mlk_poly_tomont_native(int16_t data[MLKEM_N])
   else
   {
     mlk_poly_tomont_asm(data);
-    return 1;
+    return 0;
   }
 }
 
@@ -90,7 +90,7 @@ static MLK_INLINE int mlk_poly_mulcache_compute_native(int16_t x[MLKEM_N / 2],
   {
     mlk_poly_mulcache_compute_asm(x, y, mlk_aarch64_zetas_mulcache_native,
                                   mlk_aarch64_zetas_mulcache_twisted_native);
-    return 1;
+    return 0;
   }
 }
 
@@ -106,7 +106,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
   else
   {
     mlk_polyvec_basemul_acc_montgomery_cached_asm_k2(r, a, b, b_cache);
-    return 1;
+    return 0;
   }
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 */
@@ -123,7 +123,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k3_native(
   else
   {
     mlk_polyvec_basemul_acc_montgomery_cached_asm_k3(r, a, b, b_cache);
-    return 1;
+    return 0;
   }
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 3 */
@@ -140,7 +140,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
   else
   {
     mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(r, a, b, b_cache);
-    return 1;
+    return 0;
   }
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
@@ -155,7 +155,7 @@ static MLK_INLINE int mlk_poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
   else
   {
     mlk_poly_tobytes_asm(r, a);
-    return 1;
+    return 0;
   }
 }
 

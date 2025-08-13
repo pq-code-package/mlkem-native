@@ -79,8 +79,8 @@ __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   requires(array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
-  ensures(return_value == -1 || return_value == 1)
-  ensures((return_value == 1) ==> array_abs_bound(p, 0, MLKEM_N, MLK_NTT_BOUND))
+  ensures(return_value == -1 || return_value == 0)
+  ensures((return_value == 0) ==> array_abs_bound(p, 0, MLKEM_N, MLK_NTT_BOUND))
   ensures((return_value == -1) ==> array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
 );
 #endif /* MLK_USE_NATIVE_NTT */
@@ -146,8 +146,8 @@ static MLK_INLINE int mlk_intt_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
-  ensures(return_value == -1 || return_value == 1)
-  ensures((return_value == 1) ==> array_abs_bound(p, 0, MLKEM_N, MLK_INVNTT_BOUND))
+  ensures(return_value == -1 || return_value == 0)
+  ensures((return_value == 0) ==> array_abs_bound(p, 0, MLKEM_N, MLK_INVNTT_BOUND))
 );
 #endif /* MLK_USE_NATIVE_INTT */
 
@@ -247,7 +247,7 @@ __contract__(
   requires(memory_no_alias(b_cache, sizeof(int16_t) * 2 * (MLKEM_N / 2)))
   requires(array_bound(a, 0, 2 * MLKEM_N, 0, MLKEM_UINT12_LIMIT))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
-  ensures(return_value == -1 || return_value == 1)
+  ensures(return_value == -1 || return_value == 0)
 );
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 */
 
@@ -281,7 +281,7 @@ __contract__(
   requires(memory_no_alias(b_cache, sizeof(int16_t) * 3 * (MLKEM_N / 2)))
   requires(array_bound(a, 0, 3 * MLKEM_N, 0, MLKEM_UINT12_LIMIT))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
-  ensures(return_value == -1 || return_value == 1)
+  ensures(return_value == -1 || return_value == 0)
 );
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 3 */
 
@@ -315,7 +315,7 @@ __contract__(
   requires(memory_no_alias(b_cache, sizeof(int16_t) * 4 * (MLKEM_N / 2)))
   requires(array_bound(a, 0, 4 * MLKEM_N, 0, MLKEM_UINT12_LIMIT))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
-  ensures(return_value == -1 || return_value == 1)
+  ensures(return_value == -1 || return_value == 0)
 );
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
 #endif /* MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */

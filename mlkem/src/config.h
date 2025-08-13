@@ -320,11 +320,10 @@
  *              require different CPU capabilities.
  *
  *              If this option is not set, mlkem-native expects a function
- *              void randombytes(uint8_t *out, size_t outlen).
+ *              int mlk_is_native_capable(void).
  *
- *              Set this option and define `mlk_randombytes` if you want to
- *              use a custom method to sample randombytes with a different name
- *              or signature.
+ *              Set this option and define `mlk_is_native_capable` if you want
+ *              to use a custom method to dispatch between implementations.
  *
  *****************************************************************************/
 /* #define MLK_CONFIG_CUSTOM_NATIVE_CAPABILITY_FUNC
