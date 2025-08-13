@@ -146,7 +146,8 @@ static MLK_INLINE int mlk_intt_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
-  ensures(array_abs_bound(p, 0, MLKEM_N, MLK_INVNTT_BOUND))
+  ensures(return_value == -1 || return_value == 1)
+  ensures((return_value == 1) ==> array_abs_bound(p, 0, MLKEM_N, MLK_INVNTT_BOUND))
 );
 #endif /* MLK_USE_NATIVE_INTT */
 
