@@ -400,6 +400,8 @@ void mlk_poly_ntt(mlk_poly *p)
       mlk_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
       return;
     }
+
+    mlk_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
   }
 #endif /* MLK_USE_NATIVE_NTT */
 

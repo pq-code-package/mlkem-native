@@ -137,6 +137,17 @@
 #define array_abs_bound(arr, lb, ub, k) \
   array_bound((arr), (lb), (ub), -((int)(k)) + 1, (k))
 
+#define array_unchanged_core(qvar, qvar_lb, qvar_ub, array_var)        \
+  __CPROVER_forall                                                     \
+  {                                                                    \
+    unsigned qvar;                                                     \
+    ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) ==>                    \
+        ((array_var)[(qvar)]) == old((array_var)[(qvar)])              \
+  }
+
+#define array_unchanged(array_var, qvar_lb, qvar_ub) \
+    array_unchanged_core(CBMC_CONCAT(_cbmc_idx, __LINE__), (qvar_lb), (qvar_ub), (array_var))
+
 #endif /* CBMC */
 
 #endif /* !MLK_CBMC_H */
