@@ -10,6 +10,9 @@
 
 #include "common.h"
 
+#define MLK_NATIVE_FUNC_SUCCESS (0)
+#define MLK_NATIVE_FUNC_FAIL (-1)
+
 #if !defined(MLK_CONFIG_CUSTOM_NATIVE_CAPABILITY_FUNC)
 static MLK_INLINE int mlk_is_native_capable(void) { return 1; }
 #endif

@@ -21,6 +21,7 @@
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include "debug.h"
+#include "native_capability.h"
 #include "sampling.h"
 #include "symmetric.h"
 
@@ -126,7 +127,7 @@ __contract__(
   {
     int ret;
     ret = mlk_rej_uniform_native(r, target, buf, buflen);
-    if (ret != -1)
+    if (ret == MLK_NATIVE_FUNC_SUCCESS)
     {
       unsigned res = (unsigned)ret;
       mlk_assert_bound(r, res, 0, MLKEM_Q);

@@ -27,6 +27,7 @@
 
 #include "compress.h"
 #include "debug.h"
+#include "native_capability.h"
 #include "poly_k.h"
 #include "sampling.h"
 #include "symmetric.h"
@@ -173,7 +174,7 @@ void mlk_polyvec_basemul_acc_montgomery_cached(
         r->coeffs, (const int16_t *)a, (const int16_t *)b,
         (const int16_t *)b_cache);
 #endif
-    if (ret != -1)
+    if (ret == MLK_NATIVE_FUNC_SUCCESS)
     {
       return;
     }

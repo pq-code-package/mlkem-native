@@ -305,6 +305,8 @@
 #undef mlk_debug_check_bounds
 /* mlkem/src/native_capability.h */
 #undef MLK_NATIVE_CAPABILITY_H
+#undef MLK_NATIVE_FUNC_FAIL
+#undef MLK_NATIVE_FUNC_SUCCESS
 /* mlkem/src/poly.h */
 #undef MLK_INVNTT_BOUND
 #undef MLK_NTT_BOUND

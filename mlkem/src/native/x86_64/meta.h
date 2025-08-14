@@ -49,7 +49,7 @@ static MLK_INLINE int mlk_rej_uniform_native(int16_t *r, unsigned len,
 {
   if (!mlk_is_native_capable() || len != MLKEM_N || buflen % 12 != 0)
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   return (int)mlk_rej_uniform_asm(r, buf, buflen, mlk_rej_uniform_table);
 }
@@ -58,12 +58,12 @@ static MLK_INLINE int mlk_ntt_native(int16_t data[MLKEM_N])
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_ntt_avx2((__m256i *)data, mlk_qdata.vec);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 
@@ -71,12 +71,12 @@ static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_invntt_avx2((__m256i *)data, mlk_qdata.vec);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 
@@ -84,12 +84,12 @@ static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_reduce_avx2((__m256i *)data, mlk_qdata.vec);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 
@@ -97,12 +97,12 @@ static MLK_INLINE int mlk_poly_tomont_native(int16_t data[MLKEM_N])
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_tomont_avx2((__m256i *)data, mlk_qdata.vec);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 
@@ -111,13 +111,13 @@ static MLK_INLINE int mlk_poly_mulcache_compute_native(int16_t x[MLKEM_N / 2],
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_poly_mulcache_compute_avx2((__m256i *)x, (const __m256i *)y,
                                    mlk_qdata.vec);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 
@@ -128,13 +128,13 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_polyvec_basemul_acc_montgomery_cached_asm_k2(r, a, b, b_cache,
                                                      mlk_qdata.coeffs);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 */
@@ -146,13 +146,13 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k3_native(
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_polyvec_basemul_acc_montgomery_cached_asm_k3(r, a, b, b_cache,
                                                      mlk_qdata.coeffs);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 3 */
@@ -164,13 +164,13 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(r, a, b, b_cache,
                                                      mlk_qdata.coeffs);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
@@ -180,12 +180,12 @@ static MLK_INLINE int mlk_poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_ntttobytes_avx2(r, (const __m256i *)a, mlk_qdata.vec);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 
@@ -194,12 +194,12 @@ static MLK_INLINE int mlk_poly_frombytes_native(
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_nttfrombytes_avx2((__m256i *)r, a, mlk_qdata.vec);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 
@@ -209,12 +209,12 @@ static MLK_INLINE int mlk_poly_compress_d4_native(
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_poly_compress_d4_avx2(r, (const __m256i *)a);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 
@@ -223,12 +223,12 @@ static MLK_INLINE int mlk_poly_compress_d10_native(
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_poly_compress_d10_avx2(r, (const __m256i *)a);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 
@@ -237,12 +237,12 @@ static MLK_INLINE int mlk_poly_decompress_d4_native(
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_poly_decompress_d4_avx2((__m256i *)r, a);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 
@@ -251,12 +251,12 @@ static MLK_INLINE int mlk_poly_decompress_d10_native(
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_poly_decompress_d10_avx2((__m256i *)r, a);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
@@ -267,12 +267,12 @@ static MLK_INLINE int mlk_poly_compress_d5_native(
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_poly_compress_d5_avx2(r, (const __m256i *)a);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 
@@ -281,12 +281,12 @@ static MLK_INLINE int mlk_poly_compress_d11_native(
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_poly_compress_d11_avx2(r, (const __m256i *)a);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 
@@ -295,12 +295,12 @@ static MLK_INLINE int mlk_poly_decompress_d5_native(
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_poly_decompress_d5_avx2((__m256i *)r, a);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 
@@ -309,12 +309,12 @@ static MLK_INLINE int mlk_poly_decompress_d11_native(
 {
   if (!mlk_is_native_capable())
   {
-    return -1;
+    return MLK_NATIVE_FUNC_FAIL;
   }
   else
   {
     mlk_poly_decompress_d11_avx2((__m256i *)r, a);
-    return 0;
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */

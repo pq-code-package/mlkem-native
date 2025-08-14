@@ -25,6 +25,7 @@
 #include "cbmc.h"
 #include "compress.h"
 #include "debug.h"
+#include "native_capability.h"
 #include "verify.h"
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
@@ -43,7 +44,7 @@ void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
   int ret;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
   ret = mlk_poly_compress_d4_native(r, a->coeffs);
-  if (ret != -1)
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
     return;
   }
@@ -85,7 +86,7 @@ void mlk_poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
   int ret;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
   ret = mlk_poly_compress_d10_native(r, a->coeffs);
-  if (ret != -1)
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
     return;
   }
@@ -126,7 +127,7 @@ void mlk_poly_decompress_d4(mlk_poly *r,
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D4)
   int ret;
   ret = mlk_poly_decompress_d4_native(r->coeffs, a);
-  if (ret != -1)
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
     mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
     return;
@@ -154,7 +155,7 @@ void mlk_poly_decompress_d10(mlk_poly *r,
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D10)
   int ret;
   ret = mlk_poly_decompress_d10_native(r->coeffs, a);
-  if (ret != -1)
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
     mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
     return;
@@ -203,7 +204,7 @@ void mlk_poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
   int ret;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
   ret = mlk_poly_compress_d5_native(r, a->coeffs);
-  if (ret != -1)
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
     return;
   }
@@ -251,7 +252,7 @@ void mlk_poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
   int ret;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
   ret = mlk_poly_compress_d11_native(r, a->coeffs);
-  if (ret != -1)
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
     return;
   }
@@ -299,7 +300,7 @@ void mlk_poly_decompress_d5(mlk_poly *r,
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D5)
   int ret;
   ret = mlk_poly_decompress_d5_native(r->coeffs, a);
-  if (ret != -1)
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
     mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
     return;
@@ -355,7 +356,7 @@ void mlk_poly_decompress_d11(mlk_poly *r,
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D11)
   int ret;
   ret = mlk_poly_decompress_d11_native(r->coeffs, a);
-  if (ret != -1)
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
     mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
     return;
@@ -407,7 +408,7 @@ void mlk_poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
   int ret;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
   ret = mlk_poly_tobytes_native(r, a->coeffs);
-  if (ret != -1)
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
     return;
   }
@@ -448,7 +449,7 @@ void mlk_poly_frombytes(mlk_poly *r, const uint8_t a[MLKEM_POLYBYTES])
 #if defined(MLK_USE_NATIVE_POLY_FROMBYTES)
   int ret;
   ret = mlk_poly_frombytes_native(r->coeffs, a);
-  if (ret != -1)
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
     return;
   }

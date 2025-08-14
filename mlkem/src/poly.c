@@ -24,6 +24,7 @@
 #include <string.h>
 #include "cbmc.h"
 #include "debug.h"
+#include "native_capability.h"
 #include "poly.h"
 #include "sampling.h"
 #include "symmetric.h"
@@ -122,7 +123,7 @@ void mlk_poly_tomont(mlk_poly *r)
 #if defined(MLK_USE_NATIVE_POLY_TOMONT)
   int ret;
   ret = mlk_poly_tomont_native(r->coeffs);
-  if (ret != -1)
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
     mlk_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
     return;
@@ -184,7 +185,7 @@ void mlk_poly_reduce(mlk_poly *r)
 #if defined(MLK_USE_NATIVE_POLY_REDUCE)
   int ret;
   ret = mlk_poly_reduce_native(r->coeffs);
-  if (ret != -1)
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
     mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
     return;
@@ -252,7 +253,7 @@ void mlk_poly_mulcache_compute(mlk_poly_mulcache *x, const mlk_poly *a)
 #if defined(MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE)
   int ret;
   ret = mlk_poly_mulcache_compute_native(x->coeffs, a->coeffs);
-  if (ret != -1)
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
     return;
   }
@@ -395,7 +396,7 @@ void mlk_poly_ntt(mlk_poly *p)
   {
     int ret;
     ret = mlk_ntt_native(p->coeffs);
-    if (ret != -1)
+    if (ret == MLK_NATIVE_FUNC_SUCCESS)
     {
       mlk_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
       return;
@@ -469,7 +470,7 @@ void mlk_poly_invntt_tomont(mlk_poly *p)
 #if defined(MLK_USE_NATIVE_INTT)
   int ret;
   ret = mlk_intt_native(p->coeffs);
-  if (ret != -1)
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
     mlk_assert_abs_bound(p, MLKEM_N, MLK_INVNTT_BOUND);
     return;
