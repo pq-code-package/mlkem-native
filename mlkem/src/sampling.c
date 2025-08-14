@@ -127,7 +127,7 @@ __contract__(
   {
     int ret;
     ret = mlk_rej_uniform_native(r, target, buf, buflen);
-    if (ret == MLK_NATIVE_FUNC_SUCCESS)
+    if (ret != MLK_NATIVE_FUNC_FAIL)
     {
       unsigned res = (unsigned)ret;
       mlk_assert_bound(r, res, 0, MLKEM_Q);
