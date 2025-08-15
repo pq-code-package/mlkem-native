@@ -320,7 +320,7 @@
  *              require different CPU capabilities.
  *
  *              If this option is not set, mlkem-native expects a function
- *              int mlk_is_native_capable(void).
+ *              int mlk_is_native_capable(void), which returns 0 or 1
  *
  *              Set this option and define `mlk_is_native_capable` if you want
  *              to use a custom method to dispatch between implementations.
@@ -328,6 +328,9 @@
  *****************************************************************************/
 /* #define MLK_CONFIG_CUSTOM_NATIVE_CAPABILITY_FUNC
    static MLK_INLINE int mlk_is_native_capable(void)
+   __contract__(
+     ensures(return_value == 0 || return_value == 1)
+   )
    {
        ... your implementation ...
    }

@@ -163,7 +163,8 @@ static MLK_INLINE int mlk_poly_reduce_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
-  ensures(array_bound(p, 0, MLKEM_N, 0, MLKEM_Q))
+  ensures(return_value == -1 || return_value == 0)
+  ensures((return_value == 0) ==> array_bound(p, 0, MLKEM_N, 0, MLKEM_Q))
 );
 #endif /* MLK_USE_NATIVE_POLY_REDUCE */
 
@@ -180,7 +181,8 @@ static MLK_INLINE int mlk_poly_tomont_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
-  ensures(array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
+  ensures(return_value == -1 || return_value == 0)
+  ensures((return_value == 0) ==> array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
 );
 #endif /* MLK_USE_NATIVE_POLY_TOMONT */
 
@@ -212,7 +214,8 @@ __contract__(
   requires(memory_no_alias(cache, sizeof(int16_t) * (MLKEM_N / 2)))
   requires(memory_no_alias(mlk_poly, sizeof(int16_t) * MLKEM_N))
   assigns(object_whole(cache))
-  ensures(array_abs_bound(cache, 0, MLKEM_N/2, MLKEM_Q))
+  ensures(return_value == 0 || return_value == -1)
+  ensures((return_value == 0) ==> array_abs_bound(cache, 0, MLKEM_N/2, MLKEM_Q))
 );
 #endif /* MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE */
 
@@ -342,6 +345,7 @@ __contract__(
   requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_N))
   requires(array_bound(a, 0, MLKEM_N, 0, MLKEM_Q))
   assigns(object_whole(r))
+  ensures(return_value == 0 || return_value == -1)
 );
 #endif /* MLK_USE_NATIVE_POLY_TOBYTES */
 
