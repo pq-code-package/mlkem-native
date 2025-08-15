@@ -187,4 +187,15 @@
 #define MLK_MUST_CHECK_RETURN_VALUE
 #endif
 
+#if !defined(MLK_CONFIG_CUSTOM_NATIVE_CAPABILITY_FUNC) && \
+    !defined(MLK_IS_NATIVE_CAPABLE_DEFINED) && !defined(__ASSEMBLER__)
+#define MLK_IS_NATIVE_CAPABLE_DEFINED
+#include "cbmc.h"
+static MLK_INLINE int mlk_is_native_capable(void)
+__contract__(
+  ensures(return_value == 0 || return_value == 1)
+) { return 1; }
+#endif /* !MLK_CONFIG_CUSTOM_NATIVE_CAPABILITY_FUNC && \
+          !MLK_IS_NATIVE_CAPABLE_DEFINED && !__ASSEMBLER__ */
+
 #endif /* !MLK_SYS_H */

@@ -22,7 +22,6 @@
 
 
 #if !defined(__ASSEMBLER__)
-#include "../../native_capability.h"
 #include "../api.h"
 #include "src/arith_native_aarch64.h"
 

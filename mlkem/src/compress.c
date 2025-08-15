@@ -25,7 +25,6 @@
 #include "cbmc.h"
 #include "compress.h"
 #include "debug.h"
-#include "native_capability.h"
 #include "verify.h"
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)

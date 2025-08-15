@@ -24,7 +24,6 @@
 #include <string.h>
 #include "cbmc.h"
 #include "debug.h"
-#include "native_capability.h"
 #include "poly.h"
 #include "sampling.h"
 #include "symmetric.h"

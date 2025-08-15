@@ -32,7 +32,6 @@
 #if !defined(__ASSEMBLER__)
 #include <string.h>
 #include "../../common.h"
-#include "../../native_capability.h"
 #include "../api.h"
 #include "src/arith_native_x86_64.h"
 

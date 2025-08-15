@@ -27,7 +27,6 @@
 
 #include "compress.h"
 #include "debug.h"
-#include "native_capability.h"
 #include "poly_k.h"
 #include "sampling.h"
 #include "symmetric.h"

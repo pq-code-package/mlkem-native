@@ -21,7 +21,6 @@
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include "debug.h"
-#include "native_capability.h"
 #include "sampling.h"
 #include "symmetric.h"
 
