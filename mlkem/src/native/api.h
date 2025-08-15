@@ -21,6 +21,19 @@
 #include "../cbmc.h"
 #include "../common.h"
 
+/* On some CPUs, a native back-end function might be able to
+ * execute if the particular CPU (micro-)architecture does
+ * not support the required instruction set. In these cases
+ * back-end native functions return either MLK_NATIVE_FUNC_SUCCESS
+ * which means that the call succeeded, or MLK_NATIVE_FUNC_FAIL if
+ * the function was not able to run successfully. In the latter case
+ * the calling function is expected to fall back on an alternative
+ * implementation, such as the portable C back-end.
+ */
+#define MLK_NATIVE_FUNC_SUCCESS (0)
+#define MLK_NATIVE_FUNC_FAIL (-1)
+
+
 /* Absolute exclusive upper bound for the output of the inverse NTT
  *
  * NOTE: This is the same bound as in poly.h and has to be kept
@@ -79,9 +92,9 @@ __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   requires(array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
-  ensures(return_value == -1 || return_value == 0)
-  ensures((return_value == 0) ==> array_abs_bound(p, 0, MLKEM_N, MLK_NTT_BOUND))
-  ensures((return_value == -1) ==> array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
+  ensures(return_value == MLK_NATIVE_FUNC_FAIL || return_value == MLK_NATIVE_FUNC_SUCCESS)
+  ensures((return_value == MLK_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(p, 0, MLKEM_N, MLK_NTT_BOUND))
+  ensures((return_value == MLK_NATIVE_FUNC_FAIL) ==> array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
 );
 #endif /* MLK_USE_NATIVE_NTT */
 
@@ -146,8 +159,8 @@ static MLK_INLINE int mlk_intt_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
-  ensures(return_value == -1 || return_value == 0)
-  ensures((return_value == 0) ==> array_abs_bound(p, 0, MLKEM_N, MLK_INVNTT_BOUND))
+  ensures(return_value == MLK_NATIVE_FUNC_FAIL || return_value == MLK_NATIVE_FUNC_SUCCESS)
+  ensures((return_value == MLK_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(p, 0, MLKEM_N, MLK_INVNTT_BOUND))
 );
 #endif /* MLK_USE_NATIVE_INTT */
 
@@ -163,8 +176,8 @@ static MLK_INLINE int mlk_poly_reduce_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
-  ensures(return_value == -1 || return_value == 0)
-  ensures((return_value == 0) ==> array_bound(p, 0, MLKEM_N, 0, MLKEM_Q))
+  ensures(return_value == MLK_NATIVE_FUNC_FAIL || return_value == MLK_NATIVE_FUNC_SUCCESS)
+  ensures((return_value == MLK_NATIVE_FUNC_SUCCESS) ==> array_bound(p, 0, MLKEM_N, 0, MLKEM_Q))
 );
 #endif /* MLK_USE_NATIVE_POLY_REDUCE */
 
@@ -181,8 +194,8 @@ static MLK_INLINE int mlk_poly_tomont_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
-  ensures(return_value == -1 || return_value == 0)
-  ensures((return_value == 0) ==> array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
+  ensures(return_value == MLK_NATIVE_FUNC_FAIL || return_value == MLK_NATIVE_FUNC_SUCCESS)
+  ensures((return_value == MLK_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
 );
 #endif /* MLK_USE_NATIVE_POLY_TOMONT */
 
@@ -214,8 +227,8 @@ __contract__(
   requires(memory_no_alias(cache, sizeof(int16_t) * (MLKEM_N / 2)))
   requires(memory_no_alias(mlk_poly, sizeof(int16_t) * MLKEM_N))
   assigns(object_whole(cache))
-  ensures(return_value == 0 || return_value == -1)
-  ensures((return_value == 0) ==> array_abs_bound(cache, 0, MLKEM_N/2, MLKEM_Q))
+  ensures(return_value == MLK_NATIVE_FUNC_FAIL || return_value == MLK_NATIVE_FUNC_SUCCESS)
+  ensures((return_value == MLK_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(cache, 0, MLKEM_N/2, MLKEM_Q))
 );
 #endif /* MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE */
 
@@ -250,7 +263,7 @@ __contract__(
   requires(memory_no_alias(b_cache, sizeof(int16_t) * 2 * (MLKEM_N / 2)))
   requires(array_bound(a, 0, 2 * MLKEM_N, 0, MLKEM_UINT12_LIMIT))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
-  ensures(return_value == -1 || return_value == 0)
+  ensures(return_value == MLK_NATIVE_FUNC_FAIL || return_value == MLK_NATIVE_FUNC_SUCCESS)
 );
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 */
 
@@ -284,7 +297,7 @@ __contract__(
   requires(memory_no_alias(b_cache, sizeof(int16_t) * 3 * (MLKEM_N / 2)))
   requires(array_bound(a, 0, 3 * MLKEM_N, 0, MLKEM_UINT12_LIMIT))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
-  ensures(return_value == -1 || return_value == 0)
+  ensures(return_value == MLK_NATIVE_FUNC_FAIL || return_value == MLK_NATIVE_FUNC_SUCCESS)
 );
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 3 */
 
@@ -318,7 +331,7 @@ __contract__(
   requires(memory_no_alias(b_cache, sizeof(int16_t) * 4 * (MLKEM_N / 2)))
   requires(array_bound(a, 0, 4 * MLKEM_N, 0, MLKEM_UINT12_LIMIT))
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
-  ensures(return_value == -1 || return_value == 0)
+  ensures(return_value == MLK_NATIVE_FUNC_FAIL || return_value == MLK_NATIVE_FUNC_SUCCESS)
 );
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
 #endif /* MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
@@ -345,7 +358,7 @@ __contract__(
   requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_N))
   requires(array_bound(a, 0, MLKEM_N, 0, MLKEM_Q))
   assigns(object_whole(r))
-  ensures(return_value == 0 || return_value == -1)
+  ensures(return_value == MLK_NATIVE_FUNC_SUCCESS || return_value == MLK_NATIVE_FUNC_FAIL)
 );
 #endif /* MLK_USE_NATIVE_POLY_TOBYTES */
 
@@ -369,7 +382,8 @@ __contract__(
   requires(memory_no_alias(r, MLKEM_POLYBYTES))
   requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(a, sizeof(int16_t) * MLKEM_N))
-  ensures(array_bound(a, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT))
+  ensures(return_value == MLK_NATIVE_FUNC_SUCCESS || return_value == MLK_NATIVE_FUNC_FAIL)
+  ensures((return_value == MLK_NATIVE_FUNC_SUCCESS) ==> array_bound(a, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT))
 );
 #endif /* MLK_USE_NATIVE_POLY_FROMBYTES */
 
@@ -399,7 +413,7 @@ __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * len))
   requires(memory_no_alias(buf, buflen))
   assigns(memory_slice(r, sizeof(int16_t) * len))
-  ensures(return_value == -1 || (0 <= return_value && return_value <= len))
+  ensures(return_value == MLK_NATIVE_FUNC_FAIL || (0 <= return_value && return_value <= len))
   ensures(return_value != -1 ==> array_bound(r, 0, (unsigned) return_value, 0, MLKEM_Q))
 );
 #endif /* MLK_USE_NATIVE_REJ_UNIFORM */
