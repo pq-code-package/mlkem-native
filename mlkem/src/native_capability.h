@@ -19,6 +19,6 @@ static MLK_INLINE int mlk_is_native_capable(void)
 __contract__(
   ensures(return_value == 0 || return_value == 1)
 ) { return 1; }
-#endif
+#endif /* !MLK_CONFIG_CUSTOM_NATIVE_CAPABILITY_FUNC */
 
 #endif /* !MLK_NATIVE_CAPABILITY_H */
