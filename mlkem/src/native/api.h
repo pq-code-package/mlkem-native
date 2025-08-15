@@ -95,6 +95,7 @@ __contract__(
   ensures(return_value == MLK_NATIVE_FUNC_FAIL || return_value == MLK_NATIVE_FUNC_SUCCESS)
   ensures((return_value == MLK_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(p, 0, MLKEM_N, MLK_NTT_BOUND))
   ensures((return_value == MLK_NATIVE_FUNC_FAIL) ==> array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
+  ensures((return_value == MLK_NATIVE_FUNC_FAIL) ==> forall(k, 0, MLKEM_N, p[k] == old(* (int16_t (*)[MLKEM_N])p)[k]))
 );
 #endif /* MLK_USE_NATIVE_NTT */
 
@@ -161,6 +162,7 @@ __contract__(
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
   ensures(return_value == MLK_NATIVE_FUNC_FAIL || return_value == MLK_NATIVE_FUNC_SUCCESS)
   ensures((return_value == MLK_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(p, 0, MLKEM_N, MLK_INVNTT_BOUND))
+  ensures((return_value == MLK_NATIVE_FUNC_FAIL) ==> forall(k, 0, MLKEM_N, p[k] == old(* (int16_t (*)[MLKEM_N])p)[k]))
 );
 #endif /* MLK_USE_NATIVE_INTT */
 
@@ -178,6 +180,7 @@ __contract__(
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
   ensures(return_value == MLK_NATIVE_FUNC_FAIL || return_value == MLK_NATIVE_FUNC_SUCCESS)
   ensures((return_value == MLK_NATIVE_FUNC_SUCCESS) ==> array_bound(p, 0, MLKEM_N, 0, MLKEM_Q))
+  ensures((return_value == MLK_NATIVE_FUNC_FAIL) ==> forall(k, 0, MLKEM_N, p[k] == old(* (int16_t (*)[MLKEM_N])p)[k]))
 );
 #endif /* MLK_USE_NATIVE_POLY_REDUCE */
 
@@ -196,6 +199,7 @@ __contract__(
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
   ensures(return_value == MLK_NATIVE_FUNC_FAIL || return_value == MLK_NATIVE_FUNC_SUCCESS)
   ensures((return_value == MLK_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
+  ensures((return_value == MLK_NATIVE_FUNC_FAIL) ==> forall(k, 0, MLKEM_N, p[k] == old(* (int16_t (*)[MLKEM_N])p)[k]))
 );
 #endif /* MLK_USE_NATIVE_POLY_TOMONT */
 
