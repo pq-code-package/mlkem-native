@@ -33,6 +33,7 @@
 #include <string.h>
 #include "../../common.h"
 #include "../../native_capability.h"
+#include "../api.h"
 #include "src/arith_native_x86_64.h"
 
 static MLK_INLINE void mlk_poly_permute_bitrev_to_custom(int16_t data[MLKEM_N])
