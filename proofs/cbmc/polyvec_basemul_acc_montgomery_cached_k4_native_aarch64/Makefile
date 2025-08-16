@@ -22,7 +22,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly_k.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_polyvec_basemul_acc_montgomery_cached_k4_native
-USE_FUNCTION_CONTRACTS=mlk_polyvec_basemul_acc_montgomery_cached_asm_k4
+USE_FUNCTION_CONTRACTS=mlk_polyvec_basemul_acc_montgomery_cached_asm_k4 mlk_is_native_capable
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

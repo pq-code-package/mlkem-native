@@ -116,22 +116,6 @@
 /* #define MLK_CONFIG_MULTILEVEL_NO_SHARED */
 
 /******************************************************************************
- * Name:        MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
- *
- * Description: This is only relevant for single compilation unit (SCU)
- *              builds of mlkem-native. In this case, it determines whether
- *              directives defined in parameter-set-independent headers should
- *              be #undef'ined or not at the of the SCU file. This is needed
- *              in multilevel builds.
- *
- *              See examples/multilevel_build_native for an example.
- *
- *              This can also be set using CFLAGS.
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS */
-
-/******************************************************************************
  * Name:        MLK_CONFIG_USE_NATIVE_BACKEND_ARITH
  *
  * Description: Determines whether an native arithmetic backend should be used.
@@ -274,152 +258,14 @@
  *              provides. In this case, you can set mlk_zeroize to a no-op.
  *
  *****************************************************************************/
-/* #define MLK_CONFIG_CUSTOM_ZEROIZE
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "sys.h"
-   static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
-   {
-       ... your implementation ...
-   }
-   #endif
-*/
 
-/******************************************************************************
- * Name:        MLK_CONFIG_CUSTOM_RANDOMBYTES
- *
- * Description: mlkem-native does not provide a secure randombytes
- *              implementation. Such an implementation has to provided by the
- *              consumer.
- *
- *              If this option is not set, mlkem-native expects a function
- *              void randombytes(uint8_t *out, size_t outlen).
- *
- *              Set this option and define `mlk_randombytes` if you want to
- *              use a custom method to sample randombytes with a different name
- *              or signature.
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_CUSTOM_RANDOMBYTES
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "sys.h"
-   static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
-   {
-       ... your implementation ...
-   }
-   #endif
-*/
-
-/******************************************************************************
- * Name:        MLK_CONFIG_CUSTOM_NATIVE_CAPABILITY_FUNC
- *
- * Description: mlkem-native provides a way for the consumer to define their
- *              own CPU capability function that can be used by the backend
- *              to perform runtime dispatch between implementations that
- *              require different CPU capabilities.
- *
- *              If this option is not set, mlkem-native expects a function
- *              int mlk_is_native_capable(void), which returns 0 or 1
- *
- *              Set this option and define `mlk_is_native_capable` if you want
- *              to use a custom method to dispatch between implementations.
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_CUSTOM_NATIVE_CAPABILITY_FUNC
-   static MLK_INLINE int mlk_is_native_capable(void)
-   __contract__(
-     ensures(return_value == 0 || return_value == 1)
-   )
-   {
-       ... your implementation ...
-   }
-*/
-
-/******************************************************************************
- * Name:        MLK_CONFIG_CUSTOM_MEMCPY
- *
- * Description: Set this option and define `mlk_memcpy` if you want to
- *              use a custom method to copy memory instead of the standard
- *              library memcpy function.
- *
- *              The custom implementation must have the same signature and
- *              behavior as the standard memcpy function:
- *              void *mlk_memcpy(void *dest, const void *src, size_t n)
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_CUSTOM_MEMCPY
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "sys.h"
-   static MLK_INLINE void *mlk_memcpy(void *dest, const void *src, size_t n)
-   {
-       ... your implementation ...
-   }
-   #endif
-*/
-
-/******************************************************************************
- * Name:        MLK_CONFIG_CUSTOM_MEMSET
- *
- * Description: Set this option and define `mlk_memset` if you want to
- *              use a custom method to set memory instead of the standard
- *              library memset function.
- *
- *              The custom implementation must have the same signature and
- *              behavior as the standard memset function:
- *              void *mlk_memset(void *s, int c, size_t n)
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_CUSTOM_MEMSET
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "sys.h"
-   static MLK_INLINE void *mlk_memset(void *s, int c, size_t n)
-   {
-       ... your implementation ...
-   }
-   #endif
-*/
-
-/******************************************************************************
- * Name:        MLK_CONFIG_INTERNAL_API_QUALIFIER
- *
- * Description: If set, this option provides an additional function
- *              qualifier to be added to declarations of internal API.
- *
- *              The primary use case for this option are single-CU builds,
- *              in which case this option can be set to `static`.
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_INTERNAL_API_QUALIFIER */
-
-/******************************************************************************
- * Name:        MLK_CONFIG_EXTERNAL_API_QUALIFIER
- *
- * Description: If set, this option provides an additional function
- *              qualifier to be added to declarations of mlkem-native's
- *              public API.
- *
- *              The primary use case for this option are single-CU builds
- *              where the public API exposed by mlkem-native is wrapped by
- *              another API in the consuming application. In this case,
- *              even mlkem-native's public API can be marked `static`.
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_EXTERNAL_API_QUALIFIER */
-
-/******************************************************************************
- * Name:        MLK_CONFIG_CT_TESTING_ENABLED
- *
- * Description: If set, mlkem-native annotates data as secret / public using
- *              valgrind's annotations VALGRIND_MAKE_MEM_UNDEFINED and
- *              VALGRIND_MAKE_MEM_DEFINED, enabling various checks for secret-
- *              dependent control flow of variable time execution (depending
- *              on the exact version of valgrind installed).
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_CT_TESTING_ENABLED */
+#define MLK_CONFIG_CUSTOM_NATIVE_CAPABILITY_FUNC
+#if !defined(__ASSEMBLER__)
+#include <stdint.h>
+#include <string.h>
+#include "../mlkem/src/sys.h"
+static MLK_INLINE int mlk_is_native_capable(void) { return 0; }
+#endif /* !__ASSEMBLER__ */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_NO_ASM

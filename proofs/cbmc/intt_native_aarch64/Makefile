@@ -22,7 +22,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c $(SRCDIR)/mlkem/src/native/aarch64/src/aarch64_zetas.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_intt_native
-USE_FUNCTION_CONTRACTS=mlk_intt_asm
+USE_FUNCTION_CONTRACTS=mlk_intt_asm mlk_is_native_capable
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
