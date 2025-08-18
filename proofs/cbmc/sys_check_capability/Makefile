@@ -4,11 +4,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = is_native_capable_harness
+HARNESS_FILE = sys_check_capability_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = is_native_capable
+PROOF_UID = sys_check_capability
 
 # We need to set MLK_CHECK_APIS as otherwise mlkem/src/native/api.h won't be
 # included, which contains the CBMC specifications.
@@ -19,9 +19,9 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c $(SRCDIR)/mlkem/src/native/aarch64/src/aarch64_zetas.c
+PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_is_native_capable
+CHECK_FUNCTION_CONTRACTS=mlk_sys_check_capability
 USE_FUNCTION_CONTRACTS=
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1

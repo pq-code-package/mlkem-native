@@ -20,7 +20,7 @@
 #include "src/fips202_native_aarch64.h"
 static MLK_INLINE int mlk_keccak_f1600_x4_native(uint64_t *state)
 {
-  if (!mlk_is_native_capable())
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_SHA3))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }

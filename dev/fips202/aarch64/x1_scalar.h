@@ -16,11 +16,6 @@
 #include "src/fips202_native_aarch64.h"
 static MLK_INLINE int mlk_keccak_f1600_x1_native(uint64_t *state)
 {
-  if (!mlk_is_native_capable())
-  {
-    return MLK_NATIVE_FUNC_FALLBACK;
-  }
-
   mlk_keccak_f1600_x1_scalar_asm(state, mlk_keccakf1600_round_constants);
   return MLK_NATIVE_FUNC_SUCCESS;
 }

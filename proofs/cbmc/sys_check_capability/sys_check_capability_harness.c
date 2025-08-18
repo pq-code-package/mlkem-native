@@ -7,5 +7,6 @@
 void harness(void)
 {
   int t;
-  t = mlk_is_native_capable();
+  mlk_sys_cap cap;
+  t = mlk_sys_check_capability(cap);
 }

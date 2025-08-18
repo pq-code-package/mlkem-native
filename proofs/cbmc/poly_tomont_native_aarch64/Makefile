@@ -22,7 +22,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_poly_tomont_native
-USE_FUNCTION_CONTRACTS=mlk_poly_tomont_asm mlk_is_native_capable
+USE_FUNCTION_CONTRACTS=mlk_poly_tomont_asm mlk_sys_check_capability
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

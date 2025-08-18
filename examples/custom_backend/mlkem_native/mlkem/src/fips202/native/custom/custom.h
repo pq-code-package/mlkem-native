@@ -13,11 +13,6 @@
 #define MLK_USE_FIPS202_X1_NATIVE
 static MLK_INLINE int mlk_keccak_f1600_x1_native(uint64_t *state)
 {
-  if (!mlk_is_native_capable())
-  {
-    return MLK_NATIVE_FUNC_FALLBACK;
-  }
-
   tiny_sha3_keccakf(state);
   return MLK_NATIVE_FUNC_SUCCESS;
 }

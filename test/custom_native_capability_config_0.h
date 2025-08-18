@@ -280,8 +280,8 @@
  *              detection at _runtime_ is needed to decided whether a backend
  *              can be used or not.
  *
- *              Set this option and define `mlk_is_native_capable` if you want
- *              to use a custom method to dispatch between implementations.
+ *              Set this option and define `mlk_sys_check_capability` if you
+ *              want to use a custom method to dispatch between implementations.
  *
  *              If this option is not set, mlkem-native uses compile-time
  *              feature detection only to decide which backend to use.
@@ -290,15 +290,18 @@
  *              capabilities than the system that the resulting binary/library
  *              will be run on, you must use this option.
  *
- *              NOTE: This API is not yet stable. It is expected that a
- *                    capability parameter will be added.
- *
  *****************************************************************************/
 #define MLK_CONFIG_CUSTOM_CAPABILITY_FUNC
 #if !defined(__ASSEMBLER__)
 #include "../mlkem/src/sys.h"
-static MLK_INLINE int mlk_is_native_capable(void) { return 0; }
-#endif
+/* System capability enumeration */
+
+static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
+{
+  (void)cap; /* Ignore parameter */
+  return 0;
+}
+#endif /* !__ASSEMBLER__ */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_NO_ASM

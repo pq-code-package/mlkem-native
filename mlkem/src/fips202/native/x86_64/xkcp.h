@@ -18,7 +18,7 @@
 #define MLK_USE_FIPS202_X4_NATIVE
 static MLK_INLINE int mlk_keccak_f1600_x4_native(uint64_t *state)
 {
-  if (!mlk_is_native_capable())
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
