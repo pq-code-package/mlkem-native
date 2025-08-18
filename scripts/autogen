@@ -2587,7 +2587,18 @@ def gen_oqs_meta_file(filename, dry_run=False):
     # Parse YAML while preserving structure
     yml_data = yaml.safe_load(content)
 
-    # TODO: Update file list
+    for impl in yml_data["implementations"]:
+        name = impl["name"]
+
+        sources = get_oqs_shared_sources(name)
+
+        # NOTE: Sorting at the end causes the libOQS importer to fail.
+        # Somehow, the native directory cannot be imported too early.
+        sources.sort()
+
+        if name != "ref":
+            sources += get_oqs_native_sources(name)
+        impl["sources"] = " ".join(sources)
 
     # Convert back to YAML string with standard copyright header
     yaml_header = "\n".join(gen_yaml_header())
