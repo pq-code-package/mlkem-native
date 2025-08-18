@@ -12,58 +12,76 @@ length-keypair-seed: 64
 nistkat-sha256: 5352539586b6c3df58be6158a6250aeff402bd73060b0a3de68850ac074c17c3
 testvectors-sha256: 667c8ca2ca93729c0df6ff24588460bad1bbdbfb64ece0fe8563852a7ff348c6
 principal-submitters:
-  - Peter Schwabe
+- Peter Schwabe
 auxiliary-submitters:
-  - Roberto Avanzi
-  - Joppe Bos
-  - Léo Ducas
-  - Eike Kiltz
-  - Tancrède Lepoint
-  - Vadim Lyubashevsky
-  - John M. Schanck
-  - Gregor Seiler
-  - Damien Stehlé
+- Roberto Avanzi
+- Joppe Bos
+- Léo Ducas
+- Eike Kiltz
+- Tancrède Lepoint
+- Vadim Lyubashevsky
+- John M. Schanck
+- Gregor Seiler
+- Damien Stehlé
 implementations:
-  - name: ref
-    version: FIPS203
-    folder_name: .
-    compile_opts: -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE="../../integration/liboqs/config_c.h"
-    signature_keypair: PQCP_MLKEM_NATIVE_MLKEM768_C_keypair
-    signature_keypair_derand: PQCP_MLKEM_NATIVE_MLKEM768_C_keypair_derand
-    signature_enc: PQCP_MLKEM_NATIVE_MLKEM768_C_enc
-    signature_dec: PQCP_MLKEM_NATIVE_MLKEM768_C_dec
-    sources: integration/liboqs/config_c.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h mlkem/src/cbmc.h mlkem/src/common.h mlkem/src/compress.c mlkem/src/compress.h mlkem/src/debug.c mlkem/src/debug.h mlkem/src/indcpa.c mlkem/src/indcpa.h mlkem/src/kem.c mlkem/src/kem.h mlkem/src/native/api.h mlkem/src/native/meta.h mlkem/src/params.h mlkem/src/poly.c mlkem/src/poly.h mlkem/src/poly_k.c mlkem/src/poly_k.h mlkem/src/randombytes.h mlkem/src/sampling.c mlkem/src/sampling.h mlkem/src/symmetric.h mlkem/src/sys.h mlkem/src/verify.c mlkem/src/verify.h mlkem/src/zetas.inc
-  - name: x86_64
-    version: FIPS203
-    folder_name: .
-    compile_opts: -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE="../../integration/liboqs/config_x86_64.h"
-    signature_keypair: PQCP_MLKEM_NATIVE_MLKEM768_X86_64_keypair
-    signature_keypair_derand: PQCP_MLKEM_NATIVE_MLKEM768_X86_64_keypair_derand
-    signature_enc: PQCP_MLKEM_NATIVE_MLKEM768_X86_64_enc
-    signature_dec: PQCP_MLKEM_NATIVE_MLKEM768_X86_64_dec
-    sources: integration/liboqs/config_x86_64.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h mlkem/src/cbmc.h mlkem/src/common.h mlkem/src/compress.c mlkem/src/compress.h mlkem/src/debug.c mlkem/src/debug.h mlkem/src/indcpa.c mlkem/src/indcpa.h mlkem/src/kem.c mlkem/src/kem.h mlkem/src/native/api.h mlkem/src/native/meta.h mlkem/src/native/x86_64 mlkem/src/params.h mlkem/src/poly.c mlkem/src/poly.h mlkem/src/poly_k.c mlkem/src/poly_k.h mlkem/src/randombytes.h mlkem/src/sampling.c mlkem/src/sampling.h mlkem/src/symmetric.h mlkem/src/sys.h mlkem/src/verify.c mlkem/src/verify.h mlkem/src/zetas.inc
-    supported_platforms:
-      - architecture: x86_64
-        operating_systems:
-          - Linux
-          - Darwin
-        required_flags:
-          - avx2
-          - bmi2
-          - popcnt
-  - name: aarch64
-    version: FIPS203
-    folder_name: .
-    compile_opts: -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE="../../integration/liboqs/config_aarch64.h"
-    signature_keypair: PQCP_MLKEM_NATIVE_MLKEM768_AARCH64_keypair
-    signature_keypair_derand: PQCP_MLKEM_NATIVE_MLKEM768_AARCH64_keypair_derand
-    signature_enc: PQCP_MLKEM_NATIVE_MLKEM768_AARCH64_enc
-    signature_dec: PQCP_MLKEM_NATIVE_MLKEM768_AARCH64_dec
-    sources: integration/liboqs/config_aarch64.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h mlkem/src/cbmc.h mlkem/src/common.h mlkem/src/compress.c mlkem/src/compress.h mlkem/src/debug.c mlkem/src/debug.h mlkem/src/indcpa.c mlkem/src/indcpa.h mlkem/src/kem.c mlkem/src/kem.h mlkem/src/native/api.h mlkem/src/native/meta.h mlkem/src/native/aarch64 mlkem/src/params.h mlkem/src/poly.c mlkem/src/poly.h mlkem/src/poly_k.c mlkem/src/poly_k.h mlkem/src/randombytes.h mlkem/src/sampling.c mlkem/src/sampling.h mlkem/src/symmetric.h mlkem/src/sys.h mlkem/src/verify.c mlkem/src/verify.h mlkem/src/zetas.inc
-    supported_platforms:
-      - architecture: arm_8
-        operating_systems:
-            - Linux
-            - Darwin
-        required_flags:
-            - asimd
+- name: ref
+  version: FIPS203
+  folder_name: .
+  compile_opts: -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE="../../integration/liboqs/config_c.h"
+  signature_keypair: PQCP_MLKEM_NATIVE_MLKEM768_C_keypair
+  signature_keypair_derand: PQCP_MLKEM_NATIVE_MLKEM768_C_keypair_derand
+  signature_enc: PQCP_MLKEM_NATIVE_MLKEM768_C_enc
+  signature_dec: PQCP_MLKEM_NATIVE_MLKEM768_C_dec
+  sources: integration/liboqs/config_c.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h
+    mlkem/src/cbmc.h mlkem/src/common.h mlkem/src/compress.c mlkem/src/compress.h
+    mlkem/src/debug.c mlkem/src/debug.h mlkem/src/indcpa.c mlkem/src/indcpa.h mlkem/src/kem.c
+    mlkem/src/kem.h mlkem/src/native/api.h mlkem/src/native/meta.h mlkem/src/params.h
+    mlkem/src/poly.c mlkem/src/poly.h mlkem/src/poly_k.c mlkem/src/poly_k.h mlkem/src/randombytes.h
+    mlkem/src/sampling.c mlkem/src/sampling.h mlkem/src/symmetric.h mlkem/src/sys.h
+    mlkem/src/verify.c mlkem/src/verify.h mlkem/src/zetas.inc
+- name: x86_64
+  version: FIPS203
+  folder_name: .
+  compile_opts: -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE="../../integration/liboqs/config_x86_64.h"
+  signature_keypair: PQCP_MLKEM_NATIVE_MLKEM768_X86_64_keypair
+  signature_keypair_derand: PQCP_MLKEM_NATIVE_MLKEM768_X86_64_keypair_derand
+  signature_enc: PQCP_MLKEM_NATIVE_MLKEM768_X86_64_enc
+  signature_dec: PQCP_MLKEM_NATIVE_MLKEM768_X86_64_dec
+  sources: integration/liboqs/config_x86_64.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h
+    mlkem/src/cbmc.h mlkem/src/common.h mlkem/src/compress.c mlkem/src/compress.h
+    mlkem/src/debug.c mlkem/src/debug.h mlkem/src/indcpa.c mlkem/src/indcpa.h mlkem/src/kem.c
+    mlkem/src/kem.h mlkem/src/native/api.h mlkem/src/native/meta.h mlkem/src/native/x86_64
+    mlkem/src/params.h mlkem/src/poly.c mlkem/src/poly.h mlkem/src/poly_k.c mlkem/src/poly_k.h
+    mlkem/src/randombytes.h mlkem/src/sampling.c mlkem/src/sampling.h mlkem/src/symmetric.h
+    mlkem/src/sys.h mlkem/src/verify.c mlkem/src/verify.h mlkem/src/zetas.inc
+  supported_platforms:
+  - architecture: x86_64
+    operating_systems:
+    - Linux
+    - Darwin
+    required_flags:
+    - avx2
+    - bmi2
+    - popcnt
+- name: aarch64
+  version: FIPS203
+  folder_name: .
+  compile_opts: -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE="../../integration/liboqs/config_aarch64.h"
+  signature_keypair: PQCP_MLKEM_NATIVE_MLKEM768_AARCH64_keypair
+  signature_keypair_derand: PQCP_MLKEM_NATIVE_MLKEM768_AARCH64_keypair_derand
+  signature_enc: PQCP_MLKEM_NATIVE_MLKEM768_AARCH64_enc
+  signature_dec: PQCP_MLKEM_NATIVE_MLKEM768_AARCH64_dec
+  sources: integration/liboqs/config_aarch64.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h
+    mlkem/src/cbmc.h mlkem/src/common.h mlkem/src/compress.c mlkem/src/compress.h
+    mlkem/src/debug.c mlkem/src/debug.h mlkem/src/indcpa.c mlkem/src/indcpa.h mlkem/src/kem.c
+    mlkem/src/kem.h mlkem/src/native/api.h mlkem/src/native/meta.h mlkem/src/native/aarch64
+    mlkem/src/params.h mlkem/src/poly.c mlkem/src/poly.h mlkem/src/poly_k.c mlkem/src/poly_k.h
+    mlkem/src/randombytes.h mlkem/src/sampling.c mlkem/src/sampling.h mlkem/src/symmetric.h
+    mlkem/src/sys.h mlkem/src/verify.c mlkem/src/verify.h mlkem/src/zetas.inc
+  supported_platforms:
+  - architecture: arm_8
+    operating_systems:
+    - Linux
+    - Darwin
+    required_flags:
+    - asimd

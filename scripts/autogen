@@ -99,6 +99,12 @@ def gen_hol_light_header():
     yield ""
 
 
+def gen_yaml_header():
+    yield "# Copyright (c) The mlkem-native project authors"
+    yield "# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT"
+    yield ""
+
+
 def format_content(content):
     p = subprocess.run(
         ["clang-format"], capture_output=True, input=content, text=True, shell=True
@@ -2535,6 +2541,83 @@ def gen_bib_file(bibliography, dry_run=False):
     update_file("BIBLIOGRAPHY.md", "\n".join(content), dry_run=dry_run)
 
 
+def get_oqs_shared_sources(backend):
+    """Get shared source files for OQS integration"""
+    mlkem_dir = "mlkem/src"
+
+    # add files mlkem/src/*
+    sources = [
+        f"mlkem/src/{f}"
+        for f in os.listdir(mlkem_dir)
+        if os.path.isfile(f"{mlkem_dir}/{f}") and not f.endswith(".o")
+    ]
+    # add files mlkem/src/native/* (API definitions)
+    sources += [
+        f"mlkem/src/native/{f}"
+        for f in os.listdir(f"{mlkem_dir}/native")
+        if os.path.isfile(f"{mlkem_dir}/native/{f}")
+    ]
+    # We use a custom config
+    sources.remove("mlkem/src/config.h")
+    # Add FIPS202 glue code
+    sources += [
+        "integration/liboqs/fips202_glue.h",
+        "integration/liboqs/fips202x4_glue.h",
+    ]
+    # Add custom config
+    if backend == "ref":
+        backend = "c"
+    sources.append(f"integration/liboqs/config_{backend.lower()}.h")
+
+    return sources
+
+
+def get_oqs_native_sources(backend):
+    """Get native source files for OQS integration"""
+    return [f"mlkem/src/native/{backend}"]
+
+
+def gen_oqs_meta_file(filename, dry_run=False):
+    """Generate OQS META.yml file with updated source lists"""
+    status_update("OQS META", filename)
+
+    with open(filename, "r") as f:
+        content = f.read()
+
+    # Parse YAML while preserving structure
+    yml_data = yaml.safe_load(content)
+
+    # TODO: Update file list
+
+    # Convert back to YAML string with standard copyright header
+    yaml_header = "\n".join(gen_yaml_header())
+
+    new_content = yaml.dump(
+        yml_data,
+        default_flow_style=False,
+        sort_keys=False,
+        allow_unicode=True,
+        encoding=None,
+    )
+
+    # Combine copyright header with new YAML content
+    new_content = yaml_header + new_content
+
+    update_file(filename, new_content, dry_run=dry_run)
+
+
+def gen_oqs_meta_files(dry_run=False):
+    """Generate all OQS META.yml files"""
+    meta_files = [
+        "integration/liboqs/ML-KEM-512_META.yml",
+        "integration/liboqs/ML-KEM-768_META.yml",
+        "integration/liboqs/ML-KEM-1024_META.yml",
+    ]
+
+    for meta_file in meta_files:
+        gen_oqs_meta_file(meta_file, dry_run=dry_run)
+
+
 def gen_citations(dry_run=False):
     # Load bibliography
     with open("BIBLIOGRAPHY.yml", "r") as f:
@@ -2603,6 +2686,9 @@ def _main():
 
     gen_citations(args.dry_run)
     high_level_status("Generated citations")
+
+    gen_oqs_meta_files(args.dry_run)
+    high_level_status("Generated OQS META.yml files")
 
     if args.slothy == []:
         args.slothy = slothy_choices
