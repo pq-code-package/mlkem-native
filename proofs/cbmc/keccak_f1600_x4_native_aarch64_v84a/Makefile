@@ -4,11 +4,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = keccak_f1600_x2_native_aarch64_v84a_harness
+HARNESS_FILE = keccak_f1600_x4_native_aarch64_v84a_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = keccak_f1600_x2_native_aarch64_v84a
+PROOF_UID = keccak_f1600_x4_native_aarch64_v84a
 
 DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLK_CONFIG_FIPS202_BACKEND_FILE="\"$(SRCDIR)/mlkem/src/fips202/native/aarch64/x2_v84a.h\"" -DMLK_CHECK_APIS -D__ARM_FEATURE_SHA3
 INCLUDES +=
@@ -17,9 +17,9 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mlkem/src/fips202/native/aarch64/src/keccakf1600_round_constants.c 
+PROJECT_SOURCES += $(SRCDIR)/mlkem/src/fips202/native/aarch64/src/keccakf1600_round_constants.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_keccak_f1600_x2_native
+CHECK_FUNCTION_CONTRACTS=mlk_keccak_f1600_x4_native
 USE_FUNCTION_CONTRACTS=mlk_keccak_f1600_x2_v84a_asm
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
@@ -28,7 +28,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = keccak_f1600_x2_native_aarch64_v84a
+FUNCTION_NAME = keccak_f1600_x4_native_aarch64_v84a
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

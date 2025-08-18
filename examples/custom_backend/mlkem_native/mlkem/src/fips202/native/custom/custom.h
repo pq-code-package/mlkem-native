@@ -7,12 +7,19 @@
 #define MLK_FIPS202_CUSTOM_TINY_SHA3_H
 
 #if !defined(__ASSEMBLER__)
+#include "../api.h"
 #include "src/sha3.h"
 /* Replace (single) Keccak-F1600 by tiny-SHA3's */
 #define MLK_USE_FIPS202_X1_NATIVE
-static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
+static MLK_INLINE int mlk_keccak_f1600_x1_native(uint64_t *state)
 {
+  if (!mlk_is_native_capable())
+  {
+    return MLK_NATIVE_FUNC_FALLBACK;
+  }
+
   tiny_sha3_keccakf(state);
+  return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* !__ASSEMBLER__ */
 

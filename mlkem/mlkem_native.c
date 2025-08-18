@@ -381,6 +381,8 @@
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
 /* mlkem/src/fips202/native/api.h */
 #undef MLK_FIPS202_NATIVE_API_H
+#undef MLK_NATIVE_FUNC_FALLBACK
+#undef MLK_NATIVE_FUNC_SUCCESS
 /* mlkem/src/fips202/native/auto.h */
 #undef MLK_FIPS202_NATIVE_AUTO_H
 #if defined(MLK_SYS_AARCH64)
@@ -408,7 +410,7 @@
 /* mlkem/src/fips202/native/aarch64/x2_v84a.h */
 #undef MLK_FIPS202_AARCH64_NEED_X2_V84A
 #undef MLK_FIPS202_NATIVE_AARCH64_X2_V84A_H
-#undef MLK_USE_FIPS202_X2_NATIVE
+#undef MLK_USE_FIPS202_X4_NATIVE
 /* mlkem/src/fips202/native/aarch64/x4_v8a_scalar.h */
 #undef MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID
 #undef MLK_FIPS202_NATIVE_AARCH64_X4_V8A_SCALAR_H

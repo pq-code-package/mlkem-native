@@ -136,6 +136,17 @@
 
 #define array_unchanged(array_var, N) \
     array_unchanged_core(CBMC_CONCAT(_cbmc_idx, __LINE__), 0, (N), (array_var))
+
+#define array_unchanged_u64_core(qvar, qvar_lb, qvar_ub, array_var)        \
+  __CPROVER_forall                                                     \
+  {                                                                    \
+    unsigned qvar;                                                     \
+    ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) ==>                    \
+    ((array_var)[(qvar)]) == (old(* (uint64_t (*)[(qvar_ub)])(array_var)))[(qvar)] \
+  }
+
+#define array_unchanged_u64(array_var, N) \
+    array_unchanged_u64_core(CBMC_CONCAT(_cbmc_idx, __LINE__), 0, (N), (array_var))
 /* clang-format on */
 
 /* Wrapper around array_bound operating on absolute values.

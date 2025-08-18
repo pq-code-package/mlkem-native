@@ -10,7 +10,7 @@ HARNESS_FILE = poly_getnoise_eta1122_4x_native_harness
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
 PROOF_UID = poly_getnoise_eta1122_4x_native
 
-DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLK_CONFIG_FIPS202_BACKEND_FILE="\"dummy_backend_fips202_x2.h\""
+DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLK_CONFIG_FIPS202_BACKEND_FILE="\"dummy_backend_fips202_x4.h\""
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
