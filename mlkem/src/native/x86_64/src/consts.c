@@ -22,7 +22,6 @@
 #if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
-#include "align.h"
 #include "consts.h"
 
 #define MLK_AVX2_Q MLKEM_Q
@@ -43,7 +42,7 @@
 #define MLK_AVX2_MASK 4095
 #define MLK_AVX2_SHIFT 32
 
-const qdata_t mlk_qdata = {{
+const __attribute__((aligned(32))) qdata_t mlk_qdata = {
 #define MLK_AVX2_BACKEND_DATA_OFFSET_16XQ 0
     MLK_AVX2_Q,
     MLK_AVX2_Q,
@@ -249,7 +248,7 @@ const qdata_t mlk_qdata = {{
     MLK_AVX2_SHIFT,
 #define MLK_AVX2_BACKEND_DATA_OFFSET_MULCACHE_TWIDDLES 640
 #include "x86_64_mulcache_twiddles.i"
-}};
+};
 
 #else /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
        */
