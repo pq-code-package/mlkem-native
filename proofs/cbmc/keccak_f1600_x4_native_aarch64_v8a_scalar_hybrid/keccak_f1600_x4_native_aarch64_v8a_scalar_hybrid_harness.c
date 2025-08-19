@@ -4,10 +4,10 @@
 
 #include <stdint.h>
 
-void mlk_keccak_f1600_x4_native(uint64_t *state);
+int mlk_keccak_f1600_x4_native(uint64_t *state);
 
 void harness(void)
 {
   uint64_t *s;
-  mlk_keccak_f1600_x4_native(s);
+  int t = mlk_keccak_f1600_x4_native(s);
 }

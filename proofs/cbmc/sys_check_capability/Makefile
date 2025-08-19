@@ -4,31 +4,33 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = keccakf1600x4_permute_native_x2_harness
+HARNESS_FILE = sys_check_capability_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = keccakf1600x4_permute_native_x2
+PROOF_UID = sys_check_capability
 
-DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLK_CONFIG_FIPS202_BACKEND_FILE="\"dummy_backend_fips202_x2.h\""
+# We need to set MLK_CHECK_APIS as otherwise mlkem/src/native/api.h won't be
+# included, which contains the CBMC specifications.
+DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mlkem/src/fips202/keccakf1600.c
+PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_keccakf1600x4_permute
-USE_FUNCTION_CONTRACTS=mlk_keccak_f1600_x2_native
+CHECK_FUNCTION_CONTRACTS=mlk_sys_check_capability
+USE_FUNCTION_CONTRACTS=
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--bitwuzla
+CBMCFLAGS=--smt2
 
-FUNCTION_NAME = keccakf1600x4_permute_native_x2
+FUNCTION_NAME = is_native_capable
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

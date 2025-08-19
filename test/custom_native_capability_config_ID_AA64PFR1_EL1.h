@@ -116,22 +116,6 @@
 /* #define MLK_CONFIG_MULTILEVEL_NO_SHARED */
 
 /******************************************************************************
- * Name:        MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
- *
- * Description: This is only relevant for single compilation unit (SCU)
- *              builds of mlkem-native. In this case, it determines whether
- *              directives defined in parameter-set-independent headers should
- *              be #undef'ined or not at the of the SCU file. This is needed
- *              in multilevel builds.
- *
- *              See examples/multilevel_build_native for an example.
- *
- *              This can also be set using CFLAGS.
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS */
-
-/******************************************************************************
  * Name:        MLK_CONFIG_USE_NATIVE_BACKEND_ARITH
  *
  * Description: Determines whether an native arithmetic backend should be used.
@@ -286,32 +270,6 @@
 */
 
 /******************************************************************************
- * Name:        MLK_CONFIG_CUSTOM_RANDOMBYTES
- *
- * Description: mlkem-native does not provide a secure randombytes
- *              implementation. Such an implementation has to provided by the
- *              consumer.
- *
- *              If this option is not set, mlkem-native expects a function
- *              void randombytes(uint8_t *out, size_t outlen).
- *
- *              Set this option and define `mlk_randombytes` if you want to
- *              use a custom method to sample randombytes with a different name
- *              or signature.
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_CUSTOM_RANDOMBYTES
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "sys.h"
-   static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
-   {
-       ... your implementation ...
-   }
-   #endif
-*/
-
-/******************************************************************************
  * Name:        MLK_CONFIG_CUSTOM_CAPABILITY_FUNC
  *
  * Description: mlkem-native backends may rely on specific hardware features.
@@ -333,100 +291,35 @@
  *              will be run on, you must use this option.
  *
  *****************************************************************************/
-/* #define MLK_CONFIG_CUSTOM_CAPABILITY_FUNC
-   static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
-   __contract__(
-     ensures(return_value == 0 || return_value == 1)
-   )
-   {
-       ... your implementation ...
-   }
-*/
+#if !defined(__ASSEMBLER__)
+#define MLK_CONFIG_CUSTOM_CAPABILITY_FUNC
+#include <stdint.h>
+#include "../mlkem/src/sys.h"
 
-/******************************************************************************
- * Name:        MLK_CONFIG_CUSTOM_MEMCPY
- *
- * Description: Set this option and define `mlk_memcpy` if you want to
- *              use a custom method to copy memory instead of the standard
- *              library memcpy function.
- *
- *              The custom implementation must have the same signature and
- *              behavior as the standard memcpy function:
- *              void *mlk_memcpy(void *dest, const void *src, size_t n)
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_CUSTOM_MEMCPY
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "sys.h"
-   static MLK_INLINE void *mlk_memcpy(void *dest, const void *src, size_t n)
-   {
-       ... your implementation ...
-   }
-   #endif
-*/
+#if !defined(MLK_SYS_AARCH64) || !defined(MLK_SYS_LINUX)
+#error This configuration is only suitable for Linux/AArch64 systems
+#endif
 
-/******************************************************************************
- * Name:        MLK_CONFIG_CUSTOM_MEMSET
- *
- * Description: Set this option and define `mlk_memset` if you want to
- *              use a custom method to set memory instead of the standard
- *              library memset function.
- *
- *              The custom implementation must have the same signature and
- *              behavior as the standard memset function:
- *              void *mlk_memset(void *s, int c, size_t n)
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_CUSTOM_MEMSET
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "sys.h"
-   static MLK_INLINE void *mlk_memset(void *s, int c, size_t n)
-   {
-       ... your implementation ...
-   }
-   #endif
-*/
+static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
+{
+  if (cap == MLK_SYS_CAP_SHA3)
+  {
+    uint64_t id_aa64pfr1_el1;
 
-/******************************************************************************
- * Name:        MLK_CONFIG_INTERNAL_API_QUALIFIER
- *
- * Description: If set, this option provides an additional function
- *              qualifier to be added to declarations of internal API.
- *
- *              The primary use case for this option are single-CU builds,
- *              in which case this option can be set to `static`.
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_INTERNAL_API_QUALIFIER */
+    /* Read ID_AA64PFR1_EL1 system register */
+    __asm__ volatile("mrs %0, id_aa64pfr1_el1" : "=r"(id_aa64pfr1_el1));
 
-/******************************************************************************
- * Name:        MLK_CONFIG_EXTERNAL_API_QUALIFIER
- *
- * Description: If set, this option provides an additional function
- *              qualifier to be added to declarations of mlkem-native's
- *              public API.
- *
- *              The primary use case for this option are single-CU builds
- *              where the public API exposed by mlkem-native is wrapped by
- *              another API in the consuming application. In this case,
- *              even mlkem-native's public API can be marked `static`.
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_EXTERNAL_API_QUALIFIER */
+    /* Extract SHA3 field (bits 35:32) and check if SHA3 is supported */
+    /* SHA3 field: 0b0000 = not implemented, 0b0001 = SHA3 implemented */
+    uint64_t sha3_field = (id_aa64pfr1_el1 >> 32) & 0xF;
 
-/******************************************************************************
- * Name:        MLK_CONFIG_CT_TESTING_ENABLED
- *
- * Description: If set, mlkem-native annotates data as secret / public using
- *              valgrind's annotations VALGRIND_MAKE_MEM_UNDEFINED and
- *              VALGRIND_MAKE_MEM_DEFINED, enabling various checks for secret-
- *              dependent control flow of variable time execution (depending
- *              on the exact version of valgrind installed).
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_CT_TESTING_ENABLED */
+    return (sha3_field == 1) ? 1 : 0;
+  }
+
+  /* Default to 0 (conservative) for unknown capabilities */
+  return 0;
+}
+#endif /* !__ASSEMBLER__ */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_NO_ASM

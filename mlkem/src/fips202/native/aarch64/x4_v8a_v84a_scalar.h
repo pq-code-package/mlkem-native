@@ -16,11 +16,18 @@
 #define MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID
 
 #if !defined(__ASSEMBLER__)
+#include "../api.h"
 #include "src/fips202_native_aarch64.h"
-static MLK_INLINE void mlk_keccak_f1600_x4_native(uint64_t *state)
+static MLK_INLINE int mlk_keccak_f1600_x4_native(uint64_t *state)
 {
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_SHA3))
+  {
+    return MLK_NATIVE_FUNC_FALLBACK;
+  }
+
   mlk_keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm(
       state, mlk_keccakf1600_round_constants);
+  return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* !__ASSEMBLER__ */
 

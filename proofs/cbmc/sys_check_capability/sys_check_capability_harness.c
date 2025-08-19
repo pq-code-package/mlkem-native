@@ -2,12 +2,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
-#include <stdint.h>
-
-void mlk_keccak_f1600_x2_native(uint64_t *state);
+#include "sys.h"
 
 void harness(void)
 {
-  uint64_t *s;
-  mlk_keccak_f1600_x2_native(s);
+  int t;
+  mlk_sys_cap cap;
+  t = mlk_sys_check_capability(cap);
 }

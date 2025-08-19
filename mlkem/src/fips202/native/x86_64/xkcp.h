@@ -12,12 +12,19 @@
 
 #if !defined(__ASSEMBLER__)
 #include <stdint.h>
+#include "../api.h"
 #include "src/KeccakP_1600_times4_SIMD256.h"
 
 #define MLK_USE_FIPS202_X4_NATIVE
-static MLK_INLINE void mlk_keccak_f1600_x4_native(uint64_t *state)
+static MLK_INLINE int mlk_keccak_f1600_x4_native(uint64_t *state)
 {
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
+  {
+    return MLK_NATIVE_FUNC_FALLBACK;
+  }
+
   mlk_keccakf1600x4_permute24(state);
+  return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* !__ASSEMBLER__ */
 

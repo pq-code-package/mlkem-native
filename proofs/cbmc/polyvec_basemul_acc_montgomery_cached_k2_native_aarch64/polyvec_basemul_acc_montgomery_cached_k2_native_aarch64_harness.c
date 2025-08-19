@@ -7,7 +7,7 @@
 #include "cbmc.h"
 #include "common.h"
 
-void mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
+int mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
     int16_t r[MLKEM_N], const int16_t a[2 * MLKEM_N],
     const int16_t b[2 * MLKEM_N], const int16_t b_cache[2 * (MLKEM_N / 2)]);
 
@@ -17,5 +17,6 @@ void harness(void)
   const int16_t *a;
   const int16_t *b;
   const int16_t *b_cache;
-  mlk_polyvec_basemul_acc_montgomery_cached_k2_native(r, a, b, b_cache);
+  int t;
+  t = mlk_polyvec_basemul_acc_montgomery_cached_k2_native(r, a, b, b_cache);
 }

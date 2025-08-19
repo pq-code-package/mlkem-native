@@ -1590,11 +1590,17 @@ def check_macro_typos_in_file(filename, macro_check):
             )
 
 
+def get_syscaps():
+    return ["MLK_SYS_CAP_AVX2", "MLK_SYS_CAP_SHA3", "MLK_SYS_CAP_DUMMY"]
+
+
 def check_macro_typos():
     files = get_all_files()
     configs = get_config_options()
+    syscaps = get_syscaps()
 
     macros = set(map(lambda t: t[1], get_defines(all=True)))
+    # Add configuration options to the list of allows macro names
     macros.update(get_config_options())
 
     def macro_check(m, rest, filename):
@@ -1602,6 +1608,10 @@ def check_macro_typos():
             return True
 
         is_autogen = filename == "scripts/autogen"
+
+        # Exclude system capabilities, which are enum values
+        if m in syscaps:
+            return True
 
         #
         # Register some file-specific exceptions
@@ -2025,6 +2035,15 @@ def synchronize_backends(
             dry_run=dry_run,
             transform=lambda c: adjust_header_guard_for_filename(
                 c, "mlkem/src/native/aarch64/meta.h"
+            ),
+        )
+
+        update_via_copy(
+            f"dev/x86_64/meta.h",
+            "mlkem/src/native/x86_64/meta.h",
+            dry_run=dry_run,
+            transform=lambda c: adjust_header_guard_for_filename(
+                c, "mlkem/src/native/x86_64/meta.h"
             ),
         )
 
