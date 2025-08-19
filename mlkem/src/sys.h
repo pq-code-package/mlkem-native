@@ -56,6 +56,14 @@
 #define MLK_SYS_WINDOWS
 #endif
 
+#if defined(__linux__)
+#define MLK_SYS_LINUX
+#endif
+
+#if defined(__APPLE__)
+#define MLK_SYS_APPLE
+#endif
+
 #if defined(MLK_FORCE_AARCH64) && !defined(MLK_SYS_AARCH64)
 #error "MLK_FORCE_AARCH64 is set, but we don't seem to be on an AArch64 system."
 #endif

@@ -53,6 +53,10 @@ on:
       test:
         type: boolean
         default: true
+      config_variations:
+        type: string
+        description: List of configuration variation tests to run (space-separated IDs) or empty for no tests
+        default: ''
       cbmc:
         type: boolean
         default: false
@@ -166,6 +170,13 @@ jobs:
           func: ${{ inputs.functest }}
           kat: ${{ inputs.kattest }}
           acvp: ${{ inputs.acvptest }}
+      - name: Config Variations
+        if: ${{ inputs.config_variations != '' && (success() || failure()) }}
+        uses: ./.github/actions/config-variations
+        with:
+          gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
+          tests: ${{ inputs.config_variations }}
+          opt: opt
       - name: CBMC
         if: ${{ inputs.cbmc && (success() || failure()) }}
         uses: ./.github/actions/cbmc
