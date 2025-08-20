@@ -110,25 +110,25 @@ jobs:
           - name: AMD EPYC 4th gen (c7a)
             ec2_instance_type: c7a.medium
             ec2_ami: ubuntu-latest (x86_64)
-            archflags: -mavx2 -mbmi2 -mpopcnt -maes -march=znver4
+            archflags: -mavx2 -mbmi2 -mpopcnt -march=znver4
             cflags: "-flto -DMLK_FORCE_X86_64"
             perf: PMU
           - name: Intel Xeon 4th gen (c7i)
             ec2_instance_type: c7i.metal-24xl
             ec2_ami: ubuntu-latest (x86_64)
-            archflags: -mavx2 -mbmi2 -mpopcnt -maes -march=sapphirerapids
+            archflags: -mavx2 -mbmi2 -mpopcnt -march=sapphirerapids
             cflags: "-flto -DMLK_FORCE_X86_64"
             perf: PMU
           - name: AMD EPYC 3rd gen (c6a)
             ec2_instance_type: c6a.large
             ec2_ami: ubuntu-latest (x86_64)
-            archflags: -mavx2 -mbmi2 -mpopcnt -maes -march=znver3
+            archflags: -mavx2 -mbmi2 -mpopcnt -march=znver3
             cflags: "-flto -DMLK_FORCE_X86_64"
             perf: PMU
           - name: Intel Xeon 3rd gen (c6i)
             ec2_instance_type: c6i.large
             ec2_ami: ubuntu-latest (x86_64)
-            archflags: -mavx2 -mbmi2 -mpopcnt -maes -march=icelake-server
+            archflags: -mavx2 -mbmi2 -mpopcnt -march=icelake-server
             cflags: "-flto -DMLK_FORCE_X86_64"
             perf: PMU
     uses: ./.github/workflows/bench_ec2_reusable.yml
