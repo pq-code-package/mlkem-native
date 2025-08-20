@@ -517,13 +517,9 @@
 #undef MLK_USE_NATIVE_POLY_TOBYTES
 #undef MLK_USE_NATIVE_POLY_TOMONT
 #undef MLK_USE_NATIVE_REJ_UNIFORM
-/* mlkem/src/native/x86_64/src/align.h */
-#undef MLK_ALIGNED_INT16
-#undef MLK_NATIVE_X86_64_SRC_ALIGN_H
 /* mlkem/src/native/x86_64/src/arith_native_x86_64.h */
 #undef MLK_AVX2_REJ_UNIFORM_BUFLEN
 #undef MLK_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H
-#undef mlk_basemul_avx2
 #undef mlk_invntt_avx2
 #undef mlk_ntt_avx2
 #undef mlk_nttfrombytes_avx2

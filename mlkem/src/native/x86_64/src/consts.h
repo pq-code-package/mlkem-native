@@ -36,10 +36,8 @@
 #define MLK_AVX2_BACKEND_DATA_OFFSET_MULCACHE_TWIDDLES 640
 
 #ifndef __ASSEMBLER__
-#include "align.h"
-typedef MLK_ALIGNED_INT16(768) qdata_t;
 #define mlk_qdata MLK_NAMESPACE(qdata)
-extern const qdata_t mlk_qdata;
-#endif /* !__ASSEMBLER__ */
+extern const int16_t mlk_qdata[768];
+#endif
 
 #endif /* !MLK_NATIVE_X86_64_SRC_CONSTS_H */
