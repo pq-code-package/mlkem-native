@@ -42,7 +42,7 @@
 #define MLK_AVX2_MASK 4095
 #define MLK_AVX2_SHIFT 32
 
-const __attribute__((aligned(32))) qdata_t mlk_qdata = {
+MLK_ALIGN const int16_t mlk_qdata[768] = {
 #define MLK_AVX2_BACKEND_DATA_OFFSET_16XQ 0
     MLK_AVX2_Q,
     MLK_AVX2_Q,

@@ -36,9 +36,8 @@
 #define MLK_AVX2_BACKEND_DATA_OFFSET_MULCACHE_TWIDDLES 640
 
 #ifndef __ASSEMBLER__
-typedef int16_t qdata_t[768];
 #define mlk_qdata MLK_NAMESPACE(qdata)
-extern const qdata_t mlk_qdata;
+extern const int16_t mlk_qdata[768];
 #endif
 
 #endif /* !MLK_DEV_X86_64_SRC_CONSTS_H */
