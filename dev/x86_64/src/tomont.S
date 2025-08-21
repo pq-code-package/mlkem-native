@@ -37,12 +37,12 @@ MLK_ASM_FN_SYMBOL(tomont_avx2)
 vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
 vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XMONTSQLO*2(%rsi),%ymm1
 vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XMONTSQHI*2(%rsi),%ymm2
-call		tomont_avx2_core
+call		Ltomont_avx2_core
 add		$256,%rdi
-call		tomont_avx2_core
+call		Ltomont_avx2_core
 ret
 
-tomont_avx2_core:
+Ltomont_avx2_core:
 #load
 vmovdqa		(%rdi),%ymm3
 vmovdqa		32(%rdi),%ymm4

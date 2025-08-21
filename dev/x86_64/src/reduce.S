@@ -38,12 +38,12 @@ MLK_ASM_FN_SYMBOL(reduce_avx2)
 #consts
 vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
 vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XV*2(%rsi),%ymm1
-call		reduce_avx2_core
+call		Lreduce_avx2_core
 add		$256,%rdi
-call		reduce_avx2_core
+call		Lreduce_avx2_core
 ret
 
-reduce_avx2_core:
+Lreduce_avx2_core:
 #load
 vmovdqa		(%rdi),%ymm2
 vmovdqa		32(%rdi),%ymm3

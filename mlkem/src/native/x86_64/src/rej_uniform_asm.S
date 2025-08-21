@@ -49,7 +49,7 @@ MLK_ASM_FN_SYMBOL(rej_uniform_asm)
         movq	$0x0, %r8
         movq	$0x5555, %r9            # imm = 0x5555
 
-rej_uniform_asm_loop_start:
+Lrej_uniform_asm_loop_start:
         movdqu	(%rsi,%r8), %xmm2
         pshufb	%xmm4, %xmm2
         movdqa	%xmm2, %xmm6
@@ -68,12 +68,12 @@ rej_uniform_asm_loop_start:
         popcntq	%r11, %r11
         addq	%r11, %rax
         cmpq	$0x100, %rax            # imm = 0x100
-        jae	rej_uniform_asm_final_copy
+        jae	Lrej_uniform_asm_final_copy
         addq	$0xc, %r8
         cmpq	%r8, %rdx
-        ja	rej_uniform_asm_loop_start
+        ja	Lrej_uniform_asm_loop_start
 
-rej_uniform_asm_final_copy:
+Lrej_uniform_asm_final_copy:
         movq	$0x100, %rcx            # imm = 0x100
         cmpq	$0x100, %rax            # imm = 0x100
         cmovaq	%rcx, %rax

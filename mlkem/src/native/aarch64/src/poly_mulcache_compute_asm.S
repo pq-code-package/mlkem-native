@@ -64,8 +64,7 @@ MLK_ASM_FN_SYMBOL(poly_mulcache_compute_asm)
         mul	v2.8h, v27.8h, v23.8h
         sqrdmulh	v27.8h, v27.8h, v1.8h
         sub	x4, x4, #0x1
-
-poly_mulcache_compute_loop:
+Lpoly_mulcache_compute_asm_0x34:
         ldr	q29, [x1, #0x10]
         ldr	q21, [x2], #0x10
         mls	v2.8h, v27.8h, v6.h[0]
@@ -76,7 +75,7 @@ poly_mulcache_compute_loop:
         mul	v2.8h, v28.8h, v21.8h
         sqrdmulh	v27.8h, v28.8h, v7.8h
         sub	x4, x4, #0x1
-        cbnz	x4, poly_mulcache_compute_loop
+        cbnz	x4, Lpoly_mulcache_compute_asm_0x34
         mls	v2.8h, v27.8h, v6.h[0]
         str	q2, [x0], #0x10
         ret

@@ -33,13 +33,13 @@
 MLK_ASM_FN_SYMBOL(nttfrombytes_avx2)
 #consts
 vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XMASK*2(%rdx),%ymm0
-call		nttfrombytes_avx2_core
+call		Lnttfrombytes_avx2_core
 add		$256,%rdi
 add		$192,%rsi
-call		nttfrombytes_avx2_core
+call		Lnttfrombytes_avx2_core
 ret
 
-nttfrombytes_avx2_core:
+Lnttfrombytes_avx2_core:
 #load
 vmovdqu		(%rsi),%ymm4
 vmovdqu		32(%rsi),%ymm5

@@ -49,8 +49,7 @@ MLK_ASM_FN_SYMBOL(poly_tobytes_asm)
         ldur	q4, [x1, #-0x10]
         lsr	x2, x2, #2
         sub	x2, x2, #0x1
-
-poly_tobytes_loop_start:
+Lpoly_tobytes_asm_0x2c:
         uzp1	v25.8h, v6.8h, v24.8h
         uzp2	v6.8h, v6.8h, v24.8h
         xtn	v24.8b, v25.8h
@@ -92,7 +91,7 @@ poly_tobytes_loop_start:
         ldr	q19, [x1], #0x20
         ldur	q4, [x1, #-0x10]
         sub	x2, x2, #0x1
-        cbnz	x2, poly_tobytes_loop_start
+        cbnz	x2, Lpoly_tobytes_asm_0x2c
         uzp1	v25.8h, v30.8h, v22.8h
         uzp2	v18.8h, v30.8h, v22.8h
         uzp1	v30.8h, v6.8h, v24.8h

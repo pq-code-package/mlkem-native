@@ -414,25 +414,25 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x1_scalar_asm)
     alloc_stack
     save_gprs
 
-keccak_f1600_x1_scalar_initial:
+Lkeccak_f1600_x1_scalar_initial:
     mov const_addr, input_rc
     str input_rc, [sp, #STACK_LOC_CONST]
     load_state
     str input_addr, [sp, #STACK_LOC_INPUT] // @slothy:writes=STACK_LOC_INPUT
 
-keccak_f1600_x1_scalar_initial_start:
+Lkeccak_f1600_x1_scalar_initial_start:
    keccak_f1600_round_initial
 
-keccak_f1600_x1_scalar_loop:
+Lkeccak_f1600_x1_scalar_loop:
     keccak_f1600_round_noninitial
-keccak_f1600_x1_scalar_end_loop:
-    ble keccak_f1600_x1_scalar_loop
+Lkeccak_f1600_x1_scalar_end_loop:
+    ble Lkeccak_f1600_x1_scalar_loop
 
-keccak_f1600_x1_scalar_final:
+Lkeccak_f1600_x1_scalar_final:
     final_rotate
     ldr input_addr, [sp, #STACK_LOC_INPUT] // @slothy:reads=STACK_LOC_INPUT
     store_state
-keccak_f1600_x1_scalar_end_final:
+Lkeccak_f1600_x1_scalar_end_final:
 
     restore_gprs
     free_stack

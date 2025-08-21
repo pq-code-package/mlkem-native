@@ -121,7 +121,7 @@ MLK_ASM_FN_SYMBOL(poly_mulcache_compute_asm)
         // sqrdmulh v27.8H, v28.8H, v7.8H       // ...........*...................
 
         sub count, count, #1
-poly_mulcache_compute_loop:
+Lpoly_mulcache_compute_loop:
                                               // Instructions:    9
                                               // Expected cycles: 13
                                               // Expected IPC:    0.69
@@ -159,7 +159,7 @@ poly_mulcache_compute_loop:
         // str q5, [x0], #16                       // ..........~..'.........*..'....
 
         sub count, count, 1
-        cbnz count, poly_mulcache_compute_loop
+        cbnz count, Lpoly_mulcache_compute_loop
                                           // Instructions:    2
                                           // Expected cycles: 5
                                           // Expected IPC:    0.40

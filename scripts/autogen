@@ -1727,7 +1727,7 @@ def check_asm_loop_labels_for_file(filename):
     if res is None:
         raise Exception(f"Could not find function symbol in assembly file {filename}")
     funcname = res.group(1)
-    lbl_prefix = funcname.replace("_asm", "") + "_"
+    lbl_prefix = "L" + funcname.replace("_asm", "") + "_"
     lbl_pattern = r"^(\w+):"
     for m in re.finditer(lbl_pattern, content, flags=re.M):
         lbl = m.group(1)
@@ -1827,7 +1827,7 @@ def gen_hol_light_asm_file(job, dry_run=False):
         f"{indir}/{infile}",
         "proofs/hol_light/arm/mlkem",
         outfile=outfile,
-        cflags=cflags,
+        cflags=cflags + " -DMLK_CONFIG_NAMESPACE_PREFIX=mlk",
         preserve_header=False,
         dry_run=dry_run,
     )

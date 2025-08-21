@@ -83,7 +83,7 @@ MLK_ASM_FN_SYMBOL(poly_mulcache_compute_asm)
         dup modulus_twisted.8h, wtmp
 
         mov count, #16
-poly_mulcache_compute_loop_start:
+Lpoly_mulcache_compute_loop_start:
         ldr q_tmp0, [data_ptr], #32
         ldr q_tmp1, [data_ptr, #-16]
         ldr q_zeta, [zeta_ptr], #16
@@ -98,7 +98,7 @@ poly_mulcache_compute_loop_start:
         str q_dst, [cache_ptr], #16
 
         subs count, count, #1
-        cbnz count, poly_mulcache_compute_loop_start
+        cbnz count, Lpoly_mulcache_compute_loop_start
 
         ret
 

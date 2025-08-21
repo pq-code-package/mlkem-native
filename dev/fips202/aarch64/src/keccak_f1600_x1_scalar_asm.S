@@ -173,7 +173,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x1_scalar_asm)
     alloc_stack
     save_gprs
 
-keccak_f1600_x1_scalar_initial:
+Lkeccak_f1600_x1_scalar_initial:
     mov const_addr, input_rc
     str input_rc, [sp, #STACK_LOC_CONST]
     load_state
@@ -295,7 +295,7 @@ keccak_f1600_x1_scalar_initial:
     eor x14, x26, x6, ror #46                 // .....................................................*
     eor x6, x27, x29, ror #41                 // .....................................................*
 
-    keccak_f1600_x1_scalar_loop:
+    Lkeccak_f1600_x1_scalar_loop:
                                               // (Optimized for Cortex-A55)
                                               // Instructions:    112
                                               // Expected cycles: 57
@@ -416,7 +416,7 @@ keccak_f1600_x1_scalar_initial:
     bic x3, x0, x30, ror #5                   // .......................................................*.
     eor x23, x3, x26, ror #52                 // ........................................................*
     eor x3, x29, x30, ror #24                 // ........................................................*
-    ble keccak_f1600_x1_scalar_loop
+    ble Lkeccak_f1600_x1_scalar_loop
 
     final_rotate
     ldr input_addr, [sp, #STACK_LOC_INPUT]

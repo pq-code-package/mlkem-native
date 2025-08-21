@@ -33,12 +33,12 @@
 .global MLK_ASM_NAMESPACE(nttunpack_avx2)
 MLK_ASM_FN_SYMBOL(nttunpack_avx2)
 
-        callq	nttunpack_avx2_core
+        callq	Lnttunpack_avx2_core
         addq	$0x100, %rdi            # imm = 0x100
-        callq	nttunpack_avx2_core
+        callq	Lnttunpack_avx2_core
         retq
 
-nttunpack_avx2_core:
+Lnttunpack_avx2_core:
         vmovdqa	(%rdi), %ymm4
         vmovdqa	0x20(%rdi), %ymm5
         vmovdqa	0x40(%rdi), %ymm6

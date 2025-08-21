@@ -40,11 +40,11 @@
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_scalar_asm
-_PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_scalar_asm:
+.global _mlk_keccak_f1600_x1_scalar_asm
+_mlk_keccak_f1600_x1_scalar_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_scalar_asm
-PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_scalar_asm:
+.global mlk_keccak_f1600_x1_scalar_asm
+mlk_keccak_f1600_x1_scalar_asm:
 #endif
 
         sub	sp, sp, #0x80
@@ -54,8 +54,6 @@ PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_scalar_asm:
         stp	x25, x26, [sp, #0x50]
         stp	x27, x28, [sp, #0x60]
         stp	x29, x30, [sp, #0x70]
-
-keccak_f1600_x1_scalar_initial:
         mov	x26, x1
         str	x1, [sp, #0x8]
         ldp	x1, x6, [x0]
@@ -179,8 +177,7 @@ keccak_f1600_x1_scalar_initial:
         eor	x19, x0, x14, ror #12
         eor	x14, x26, x6, ror #46
         eor	x6, x27, x29, ror #41
-
-keccak_f1600_x1_scalar_loop:
+Lmlk_keccak_f1600_x1_scalar_asm_0x208:
         eor	x0, x15, x11, ror #52
         eor	x0, x0, x13, ror #48
         eor	x26, x8, x9, ror #57
@@ -293,7 +290,7 @@ keccak_f1600_x1_scalar_loop:
         bic	x3, x0, x30, ror #5
         eor	x23, x3, x26, ror #52
         eor	x3, x29, x30, ror #24
-        b.le	keccak_f1600_x1_scalar_loop
+        b.le	Lmlk_keccak_f1600_x1_scalar_asm_0x208
         ror	x6, x6, #0x2b
         ror	x11, x11, #0x32
         ror	x21, x21, #0x14

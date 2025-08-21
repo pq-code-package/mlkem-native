@@ -56,11 +56,11 @@
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_asm_k2
-_PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_asm_k2:
+.global _mlk_polyvec_basemul_acc_montgomery_cached_asm_k2
+_mlk_polyvec_basemul_acc_montgomery_cached_asm_k2:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_asm_k2
-PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_asm_k2:
+.global mlk_polyvec_basemul_acc_montgomery_cached_asm_k2
+mlk_polyvec_basemul_acc_montgomery_cached_asm_k2:
 #endif
 
         sub	sp, sp, #0x40
@@ -152,8 +152,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_asm_k2:
         smlal2	v11.4s, v14.8h, v0.8h
         ld1	{ v4.8h }, [x3], #16
         sub	x13, x13, #0x2
-
-polyvec_basemul_acc_montgomery_cached_k2_loop:
+Lmlk_polyvec_basemul_acc_montgomery_cached_asm_k2_0x164:
         smull2	v20.4s, v3.8h, v17.8h
         ldr	q18, [x4], #0x20
         ldr	q30, [x5], #0x20
@@ -203,7 +202,7 @@ polyvec_basemul_acc_montgomery_cached_k2_loop:
         ld1	{ v4.8h }, [x3], #16
         smlal2	v11.4s, v14.8h, v0.8h
         sub	x13, x13, #0x1
-        cbnz	x13, polyvec_basemul_acc_montgomery_cached_k2_loop
+        cbnz	x13, Lmlk_polyvec_basemul_acc_montgomery_cached_asm_k2_0x164
         smull2	v5.4s, v3.8h, v17.8h
         smlal	v12.4s, v14.4h, v0.4h
         smlal	v23.4s, v10.4h, v4.4h

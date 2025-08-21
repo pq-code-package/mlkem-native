@@ -54,8 +54,7 @@ MLK_ASM_FN_SYMBOL(poly_reduce_asm)
         and	v7.16b, v3.16b, v30.16b
         add	v16.8h, v23.8h, v7.8h
         sub	x1, x1, #0x1
-
-poly_reduce_loop:
+Lpoly_reduce_asm_0x54:
         ldr	q6, [x0], #0x40
         ldr	q30, [x0, #0x20]
         sqdmulh	v31.8h, v6.8h, v4.h[0]
@@ -89,7 +88,7 @@ poly_reduce_loop:
         and	v27.16b, v3.16b, v18.16b
         add	v16.8h, v2.8h, v27.8h
         sub	x1, x1, #0x1
-        cbnz	x1, poly_reduce_loop
+        cbnz	x1, Lpoly_reduce_asm_0x54
         sqdmulh	v20.8h, v5.8h, v4.h[0]
         ldr	q24, [x0], #0x40
         stur	q21, [x0, #-0x20]

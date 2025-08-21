@@ -234,7 +234,7 @@ MLK_ASM_FN_SYMBOL(intt_asm)
         mov inp, in
         mov count, #8
 
-intt_scale_start:
+Lintt_scale_start:
 
         ldr q_data0, [inp, #(16*0)]
         ldr q_data1, [inp, #(16*1)]
@@ -250,7 +250,7 @@ intt_scale_start:
         str q_data3, [inp, #(-64 + 16*3)]
 
         subs count, count, #1
-        cbnz count, intt_scale_start
+        cbnz count, Lintt_scale_start
 
         mov inp, in
         mov count, #8
@@ -425,7 +425,7 @@ intt_scale_start:
         // sqrdmulh v12.8H, v5.8H, v12.8H       // .......................................................................................*....
 
         sub count, count, #2
-intt_layer4567_start:
+Lintt_layer4567_start:
                                                 // Instructions:    80
                                                 // Expected cycles: 91
                                                 // Expected IPC:    0.88
@@ -605,7 +605,7 @@ intt_layer4567_start:
         // str q11, [x3, #(-64 + 16*3)]               // ..........................................................................~.'........................................................................................~.'........................................................................................l
 
         subs count, count, 1
-        cbnz count, intt_layer4567_start
+        cbnz count, Lintt_layer4567_start
                                                 // Instructions:    85
                                                 // Expected cycles: 91
                                                 // Expected IPC:    0.93
@@ -975,7 +975,7 @@ intt_layer4567_start:
         // ldr q28, [x0, #80]                    // .......................................................................................*
 
         sub count, count, #2
-intt_layer123_start:
+Lintt_layer123_start:
                                                 // Instructions:    76
                                                 // Expected cycles: 84
                                                 // Expected IPC:    0.90
@@ -1147,7 +1147,7 @@ intt_layer123_start:
         // str q11, [x0, #(-16 + 3*(512/8))]          // ..........................................~......................'............................................................*......................'............................................................~..............
 
         subs count, count, 1
-        cbnz count, intt_layer123_start
+        cbnz count, Lintt_layer123_start
                                                 // Instructions:    75
                                                 // Expected cycles: 81
                                                 // Expected IPC:    0.93

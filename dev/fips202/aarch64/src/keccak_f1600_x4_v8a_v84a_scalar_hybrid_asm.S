@@ -881,7 +881,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm)
     load_input_vector   // Vector input
     load_input_scalar 0 // First scalar input
 
-        keccak_f1600_x4_v8a_v84a_scalar_hybrid_initial:
+        Lkeccak_f1600_x4_v8a_v84a_scalar_hybrid_initial:
                                                          // Instructions:    334
                                                          // Expected cycles: 167
                                                          // Expected IPC:    2.00
@@ -1562,7 +1562,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm)
         // bcax v4.16b, v4.16b, v27.16b, v30.16b            // ................................................................................................................................................................*......
         // eor v0.16b, v0.16b, v28.16b                      // ......................................................................................................................................................................*
 
-        keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop:
+        Lkeccak_f1600_x4_v8a_v84a_scalar_hybrid_loop:
                                                          // Instructions:    339
                                                          // Expected cycles: 169
                                                          // Expected IPC:    2.01
@@ -2253,15 +2253,15 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm)
         // bcax v4.16b, v4.16b, v27.16b, v30.16b           // ..................................................................................................................................................................*.......
         // eor v0.16b, v0.16b, v28.16b                     // .........................................................................................................................................................................*
 
-        keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop_end:
+        Lkeccak_f1600_x4_v8a_v84a_scalar_hybrid_loop_end:
 
-    ble keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop
+    ble Lkeccak_f1600_x4_v8a_v84a_scalar_hybrid_loop
     final_scalar_rotate
 
     // Read outer loop flag: We repeat the above twice
     ldr outer, [sp, #STACK_OFFSET_OUTER]      // @slothy:reads=STACK_OFFSET_OUTER
     cmp outer, #1
-    beq keccak_f1600_x4_v8a_v84a_scalar_hybrid_done
+    beq Lkeccak_f1600_x4_v8a_v84a_scalar_hybrid_done
 
     // Update outer loop flag
     mov outer, #1
@@ -2271,8 +2271,8 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm)
     store_input_scalar 0 // Store first scalar data
     load_input_scalar  1 // Load second scalar input
 
-    b keccak_f1600_x4_v8a_v84a_scalar_hybrid_initial
-keccak_f1600_x4_v8a_v84a_scalar_hybrid_done:
+    b Lkeccak_f1600_x4_v8a_v84a_scalar_hybrid_initial
+Lkeccak_f1600_x4_v8a_v84a_scalar_hybrid_done:
 
     ldr input_addr, [sp, #STACK_OFFSET_INPUT] // @slothy:reads=STACK_OFFSET_INPUT
     store_input_scalar 1

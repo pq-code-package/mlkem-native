@@ -39,12 +39,12 @@ MLK_ASM_FN_SYMBOL(tomont_avx2)
         vmovdqa	(%rsi), %ymm0
         vmovdqa	0xa0(%rsi), %ymm1
         vmovdqa	0xc0(%rsi), %ymm2
-        callq	tomont_avx2_core
+        callq	Ltomont_avx2_core
         addq	$0x100, %rdi            # imm = 0x100
-        callq	tomont_avx2_core
+        callq	Ltomont_avx2_core
         retq
 
-tomont_avx2_core:
+Ltomont_avx2_core:
         vmovdqa	(%rdi), %ymm3
         vmovdqa	0x20(%rdi), %ymm4
         vmovdqa	0x40(%rdi), %ymm5

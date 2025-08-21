@@ -76,8 +76,7 @@ MLK_ASM_FN_SYMBOL(intt_asm)
         dup	v30.8h, w5
         mov	x3, x0
         mov	x4, #0x8                // =8
-
-intt_scale_start:
+Lintt_asm_0x3c:
         ldr	q8, [x3]
         ldr	q9, [x3, #0x10]
         ldr	q10, [x3, #0x20]
@@ -99,7 +98,7 @@ intt_scale_start:
         stur	q10, [x3, #-0x20]
         stur	q11, [x3, #-0x10]
         subs	x4, x4, #0x1
-        cbnz	x4, intt_scale_start
+        cbnz	x4, Lintt_asm_0x3c
         mov	x3, x0
         mov	x4, #0x8                // =8
         ldr	q3, [x3, #0x10]
@@ -178,8 +177,7 @@ intt_scale_start:
         mls	v6.8h, v3.8h, v7.h[0]
         ldr	q14, [x2], #0x60
         sub	x4, x4, #0x2
-
-intt_layer4567_start:
+Lintt_asm_0x1cc:
         str	q6, [x3, #0x20]
         ldur	q18, [x2, #-0x50]
         mul	v26.8h, v5.8h, v19.8h
@@ -261,7 +259,7 @@ intt_layer4567_start:
         stur	q9, [x3, #-0x10]
         sqrdmulh	v12.8h, v5.8h, v12.8h
         subs	x4, x4, #0x1
-        cbnz	x4, intt_layer4567_start
+        cbnz	x4, Lintt_asm_0x1cc
         mul	v21.8h, v22.8h, v0.h[2]
         mul	v28.8h, v5.8h, v19.8h
         trn1	v10.2d, v10.2d, v31.2d
@@ -428,8 +426,7 @@ intt_layer4567_start:
         mul	v20.8h, v10.8h, v1.h[0]
         ldr	q28, [x0, #0x50]
         sub	x4, x4, #0x2
-
-intt_layer123_start:
+Lintt_asm_0x5ac:
         mls	v20.8h, v19.8h, v7.h[0]
         ldr	q31, [x0, #0x1d0]
         sub	v22.8h, v11.8h, v28.8h
@@ -507,7 +504,7 @@ intt_layer123_start:
         sqrdmulh	v21.8h, v2.8h, v0.h[1]
         ldr	q28, [x0, #0x50]
         subs	x4, x4, #0x1
-        cbnz	x4, intt_layer123_start
+        cbnz	x4, Lintt_asm_0x5ac
         mls	v20.8h, v19.8h, v7.h[0]
         sub	v10.8h, v11.8h, v28.8h
         add	v11.8h, v11.8h, v28.8h

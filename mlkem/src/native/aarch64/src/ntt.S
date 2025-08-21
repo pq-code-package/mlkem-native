@@ -85,8 +85,7 @@ MLK_ASM_FN_SYMBOL(ntt_asm)
         mul	v17.8h, v11.8h, v0.h[0]
         ldr	q19, [x0, #0x180]
         sub	x4, x4, #0x1
-
-ntt_layer123_start:
+Lntt_asm_0x60:
         sqrdmulh	v8.8h, v24.8h, v0.h[1]
         sqrdmulh	v24.8h, v2.8h, v0.h[1]
         mul	v2.8h, v2.8h, v0.h[0]
@@ -164,7 +163,7 @@ ntt_layer123_start:
         ldr	q19, [x0, #0x180]
         mul	v17.8h, v11.8h, v0.h[0]
         subs	x4, x4, #0x1
-        cbnz	x4, ntt_layer123_start
+        cbnz	x4, Lntt_asm_0x60
         sqrdmulh	v6.8h, v11.8h, v0.h[1]
         mul	v25.8h, v19.8h, v0.h[0]
         sqrdmulh	v12.8h, v19.8h, v0.h[1]
@@ -253,8 +252,7 @@ ntt_layer123_start:
         mls	v27.8h, v8.8h, v7.h[0]
         ldr	q5, [x2, #0x50]
         sub	x4, x4, #0x1
-
-ntt_layer4567_start:
+Lntt_asm_0x2f8:
         ldr	q8, [x0]
         ldr	q17, [x2, #0x10]
         sub	v1.8h, v8.8h, v14.8h
@@ -327,7 +325,7 @@ ntt_layer4567_start:
         stur	q25, [x0, #-0x10]
         mls	v27.8h, v19.8h, v7.h[0]
         subs	x4, x4, #0x1
-        cbnz	x4, ntt_layer4567_start
+        cbnz	x4, Lntt_asm_0x2f8
         ldr	q23, [x0]
         ldr	q17, [x2], #0x60
         sub	v19.8h, v23.8h, v14.8h

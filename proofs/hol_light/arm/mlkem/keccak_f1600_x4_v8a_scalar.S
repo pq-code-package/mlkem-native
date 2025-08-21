@@ -40,11 +40,11 @@
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_v8a_scalar_hybrid_asm
-_PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_v8a_scalar_hybrid_asm:
+.global _mlk_keccak_f1600_x4_v8a_scalar_hybrid_asm
+_mlk_keccak_f1600_x4_v8a_scalar_hybrid_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_v8a_scalar_hybrid_asm
-PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_v8a_scalar_hybrid_asm:
+.global mlk_keccak_f1600_x4_v8a_scalar_hybrid_asm
+mlk_keccak_f1600_x4_v8a_scalar_hybrid_asm:
 #endif
 
         sub	sp, sp, #0xe0
@@ -119,8 +119,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_v8a_scalar_hybrid_asm:
         ldp	x15, x20, [x0, #0xb0]
         ldr	x25, [x0, #0xc0]
         sub	x0, x0, #0x190
-
-keccak_f1600_x4_v8a_scalar_hybrid_initial:
+Lmlk_keccak_f1600_x4_v8a_scalar_hybrid_asm_0x120:
         eor	x30, x24, x25
         eor	x27, x9, x10
         eor	v30.16b, v0.16b, v5.16b
@@ -502,8 +501,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_initial:
         ld1r	{ v28.2d }, [x30], #8
         str	x30, [sp, #0x10]
         eor	v0.16b, v0.16b, v28.16b
-
-keccak_f1600_x4_v8a_scalar_hybrid_loop:
+Lmlk_keccak_f1600_x4_v8a_scalar_hybrid_asm_0x714:
         eor	x0, x15, x11, ror #52
         eor	x0, x0, x13, ror #48
         eor	v30.16b, v0.16b, v5.16b
@@ -890,9 +888,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_loop:
         ld1r	{ v28.2d }, [x30], #8
         str	x30, [sp, #0x10]
         eor	v0.16b, v0.16b, v28.16b
-
-keccak_f1600_x4_v8a_scalar_hybrid_loop_end:
-        b.le	keccak_f1600_x4_v8a_scalar_hybrid_loop
+        b.le	Lmlk_keccak_f1600_x4_v8a_scalar_hybrid_asm_0x714
         ror	x2, x2, #0x3d
         ror	x3, x3, #0x27
         ror	x4, x4, #0x36
@@ -918,7 +914,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_loop_end:
         ror	x25, x25, #0x9
         ldr	x30, [sp, #0x20]
         cmp	x30, #0x1
-        b.eq	keccak_f1600_x4_v8a_scalar_hybrid_done
+        b.eq	Lmlk_keccak_f1600_x4_v8a_scalar_hybrid_asm_0xe10
         mov	x30, #0x1               // =1
         str	x30, [sp, #0x20]
         ldr	x0, [sp]
@@ -952,9 +948,8 @@ keccak_f1600_x4_v8a_scalar_hybrid_loop_end:
         ldp	x15, x20, [x0, #0xb0]
         ldr	x25, [x0, #0xc0]
         sub	x0, x0, #0x258
-        b	keccak_f1600_x4_v8a_scalar_hybrid_initial
-
-keccak_f1600_x4_v8a_scalar_hybrid_done:
+        b	Lmlk_keccak_f1600_x4_v8a_scalar_hybrid_asm_0x120
+Lmlk_keccak_f1600_x4_v8a_scalar_hybrid_asm_0xe10:
         ldr	x0, [sp]
         add	x0, x0, #0x258
         stp	x1, x6, [x0]

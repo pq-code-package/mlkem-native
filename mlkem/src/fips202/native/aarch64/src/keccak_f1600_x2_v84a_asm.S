@@ -108,8 +108,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x2_v84a_asm)
         ldr	d27, [x2, #0xc0]
         trn1	v24.2d, v25.2d, v27.2d
         mov	x2, #0x18               // =24
-
-keccak_f1600_x2_v84a_loop:
+Lkeccak_f1600_x2_v84a_asm_0xb8:
         eor3	v30.16b, v0.16b, v5.16b, v10.16b
         eor3	v29.16b, v1.16b, v6.16b, v11.16b
         eor3	v28.16b, v2.16b, v7.16b, v12.16b
@@ -178,7 +177,7 @@ keccak_f1600_x2_v84a_loop:
         bcax	v4.16b, v4.16b, v27.16b, v30.16b
         eor	v0.16b, v0.16b, v31.16b
         sub	x2, x2, #0x1
-        cbnz	x2, keccak_f1600_x2_v84a_loop
+        cbnz	x2, Lkeccak_f1600_x2_v84a_asm_0xb8
         add	x2, x0, #0xc8
         trn1	v25.2d, v0.2d, v1.2d
         trn1	v26.2d, v2.2d, v3.2d

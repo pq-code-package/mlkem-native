@@ -56,11 +56,11 @@
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_v84a_asm
-_PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_v84a_asm:
+.global _mlk_keccak_f1600_x1_v84a_asm
+_mlk_keccak_f1600_x1_v84a_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_v84a_asm
-PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_v84a_asm:
+.global mlk_keccak_f1600_x1_v84a_asm
+mlk_keccak_f1600_x1_v84a_asm:
 #endif
 
         sub	sp, sp, #0x40
@@ -82,8 +82,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x1_v84a_asm:
         ldp	d22, d23, [x0, #0xb0]
         ldr	d24, [x0, #0xc0]
         mov	x2, #0x18               // =24
-
-keccak_f1600_x1_v84a_loop:
+Lmlk_keccak_f1600_x1_v84a_asm_0x4c:
         eor3	v30.16b, v0.16b, v5.16b, v10.16b
         eor3	v29.16b, v1.16b, v6.16b, v11.16b
         eor3	v28.16b, v2.16b, v7.16b, v12.16b
@@ -152,7 +151,7 @@ keccak_f1600_x1_v84a_loop:
         bcax	v4.16b, v4.16b, v27.16b, v30.16b
         eor	v0.16b, v0.16b, v31.16b
         sub	x2, x2, #0x1
-        cbnz	x2, keccak_f1600_x1_v84a_loop
+        cbnz	x2, Lmlk_keccak_f1600_x1_v84a_asm_0x4c
         stp	d0, d1, [x0]
         stp	d2, d3, [x0, #0x10]
         stp	d4, d5, [x0, #0x20]

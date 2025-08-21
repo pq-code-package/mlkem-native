@@ -89,7 +89,7 @@ MLK_ASM_FN_SYMBOL(rej_uniform_asm)
   movq $0, pos // pos is the current position in the input buffer.
   movq $0x5555, pext_mask // 0x5555 mask to extract every second bit.
 
-rej_uniform_asm_loop_start:
+Lrej_uniform_asm_loop_start:
   // 1. Split 96 bits into eight 12-bit integers where each integer.
   //    We explain the algorithm by considering the lowest 64 bits of vals.
   movdqu  (in, pos), vals
@@ -125,13 +125,13 @@ rej_uniform_asm_loop_start:
   addq good, cnt
 
   cmpq $256, cnt
-  jnb rej_uniform_asm_final_copy
+  jnb Lrej_uniform_asm_final_copy
 
   addq $12, pos
   cmpq pos, len
-  ja rej_uniform_asm_loop_start
+  ja Lrej_uniform_asm_loop_start
 
-rej_uniform_asm_final_copy:
+Lrej_uniform_asm_final_copy:
   // Copy up to 256 values to the output: min(cnt, 256).
   mov   $256, %rcx
   cmp   $256, cnt

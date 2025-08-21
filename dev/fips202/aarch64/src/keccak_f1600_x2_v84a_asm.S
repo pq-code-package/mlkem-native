@@ -333,10 +333,10 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x2_v84a_asm)
     load_input
 
     mov count, #(KECCAK_F1600_ROUNDS)
-keccak_f1600_x2_v84a_loop:
+Lkeccak_f1600_x2_v84a_loop:
     keccak_f1600_round
     sub count, count, #1
-    cbnz count, keccak_f1600_x2_v84a_loop
+    cbnz count, Lkeccak_f1600_x2_v84a_loop
 
     store_input
     restore_vregs

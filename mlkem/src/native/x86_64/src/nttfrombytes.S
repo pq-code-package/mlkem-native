@@ -34,13 +34,13 @@
 MLK_ASM_FN_SYMBOL(nttfrombytes_avx2)
 
         vmovdqa	0xe0(%rdx), %ymm0
-        callq	nttfrombytes_avx2_core
+        callq	Lnttfrombytes_avx2_core
         addq	$0x100, %rdi            # imm = 0x100
         addq	$0xc0, %rsi
-        callq	nttfrombytes_avx2_core
+        callq	Lnttfrombytes_avx2_core
         retq
 
-nttfrombytes_avx2_core:
+Lnttfrombytes_avx2_core:
         vmovdqu	(%rsi), %ymm4
         vmovdqu	0x20(%rsi), %ymm5
         vmovdqu	0x40(%rsi), %ymm6

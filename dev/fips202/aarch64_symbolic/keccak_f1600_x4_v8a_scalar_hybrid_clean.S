@@ -863,22 +863,22 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_v8a_scalar_hybrid_asm)
     load_input_vector   // Vector input
     load_input_scalar 0 // First scalar input
 
-keccak_f1600_x4_v8a_scalar_hybrid_initial:
+Lkeccak_f1600_x4_v8a_scalar_hybrid_initial:
     scalar_round_initial    // @slothy:interleaving_class=0
     scalar_round_noninitial // @slothy:interleaving_class=0
     vector_round            // @slothy:interleaving_class=1
-keccak_f1600_x4_v8a_scalar_hybrid_loop:
+Lkeccak_f1600_x4_v8a_scalar_hybrid_loop:
     scalar_round_noninitial // @slothy:interleaving_class=0
     scalar_round_noninitial // @slothy:interleaving_class=0
     vector_round            // @slothy:interleaving_class=1
-keccak_f1600_x4_v8a_scalar_hybrid_loop_end:
-    ble keccak_f1600_x4_v8a_scalar_hybrid_loop
+Lkeccak_f1600_x4_v8a_scalar_hybrid_loop_end:
+    ble Lkeccak_f1600_x4_v8a_scalar_hybrid_loop
     final_scalar_rotate
 
     // Read outer loop flag: We repeat the above twice
     ldr outer, [sp, #STACK_OFFSET_OUTER]      // @slothy:reads=STACK_OFFSET_OUTER
     cmp outer, #1
-    beq keccak_f1600_x4_v8a_scalar_hybrid_done
+    beq Lkeccak_f1600_x4_v8a_scalar_hybrid_done
 
     // Update outer loop flag
     mov outer, #1
@@ -888,8 +888,8 @@ keccak_f1600_x4_v8a_scalar_hybrid_loop_end:
     store_input_scalar 0 // Store first scalar data
     load_input_scalar  1 // Load second scalar input
 
-    b keccak_f1600_x4_v8a_scalar_hybrid_initial
-keccak_f1600_x4_v8a_scalar_hybrid_done:
+    b Lkeccak_f1600_x4_v8a_scalar_hybrid_initial
+Lkeccak_f1600_x4_v8a_scalar_hybrid_done:
 
     ldr input_addr, [sp, #STACK_OFFSET_INPUT] // @slothy:reads=STACK_OFFSET_INPUT
     store_input_scalar 1
