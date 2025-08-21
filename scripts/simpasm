@@ -13,12 +13,12 @@ import os
 import re
 
 
-def patchup_disasm(asm):
+def patchup_disasm(asm, funcname):
     asm = asm.split("\n")
     indentation = 8
 
     def decode_label(asm_line):
-        r = re.search(r"^\s*[0-9a-fA-F]+\s*<([a-zA-Z0-9_]+)>:\s*$", asm_line)
+        r = re.search(r"^\s*[0-9a-fA-F]+\s*<([^>]+)>:\s*$", asm_line)
         if r is None:
             return None
         return r.group(1)
@@ -33,34 +33,72 @@ def patchup_disasm(asm):
 
     asm = asm[i + 1 :]
 
-    def gen(asm):
-        for l in asm:
-            if l.strip() == "":
-                yield ""
-                continue
-            lbl = decode_label(l)
-            # Re-format labels as assembly labels
-            if lbl is not None:
-                yield make_label(lbl)
-                continue
-            # Drop comments
-            l = l.split(";")[0]
-            # Re-format references to labels
-            # Those are assumed to have the form `0xDEADBEEF <label>`
-            l = re.sub(
-                r"(0x)?[0-9a-fA-F]+\s+<(?P<label>[a-zA-Z0-9_]+)>", r"\g<label>", l
-            )
-            # Drop address and byte code from line
-            d = re.search(
-                r"^\s*[0-9a-fA-F]+:\s+([0-9a-fA-F][0-9a-fA-F][ ]*)+\s+(?P<inst>.*)$", l
-            )
-            if d is None:
-                raise Exception(
-                    f'The following does not seem to be an assembly line of the expected format `ADDRESS: BYTECODE INSTRUCTION`:\n"{l}"'
-                )
-            yield " " * indentation + d.group("inst")
+    # Parse all lines into triples (label, address, instruction)
+    triples = []
+    for l in asm:
+        if l.strip() == "":
+            triples.append((None, None, ""))
+            continue
 
-    return list(gen(asm))
+        lbl = decode_label(l)
+        if lbl is not None:
+            triples.append((lbl, None, None))
+            continue
+
+        # Parse instruction line
+        d = re.search(r"^\s*([0-9a-fA-F]+):\s+([0-9a-fA-F][0-9a-fA-F][ ]*)+\s+(.*)$", l)
+        if d is None:
+            continue
+
+        addr = int(d.group(1), 16)
+        inst = d.group(3)
+
+        # Drop comments
+        inst = inst.split(";")[0]
+
+        triples.append((None, addr, inst))
+
+    # Find instructions with relative or global label references
+    # Patch them up and remember where to create additional local labels
+    addr_to_local_label = {}
+    for i in range(len(triples)):
+
+        label, addr, inst = triples[i]
+
+        if inst is None:
+            continue
+
+        # Find relative references like "0xDEADBEEF <LABEL + 0xOFFSET>"
+        for match in re.finditer(r"0x([0-9a-fA-F]+)\s+<([^>]+)>", inst):
+            ref_addr = int(match.group(1), 16)
+            ref_text = match.group(2)
+
+            # Check if this is a relative reference (contains + indicating offset from main function)
+            # If so, remember where to create a new local label for target
+            if "+" in ref_text:
+                lbl_txt = f"L{funcname}_0x{ref_addr:x}"
+                addr_to_local_label[ref_addr] = lbl_txt
+            else:
+                lbl_txt = ref_text
+
+            inst = inst.replace(match.group(0), lbl_txt)
+            triples[i] = (label, addr, inst)
+
+    # Generate final assembly
+    result = []
+    for label, addr, inst in triples:
+        if inst == "":
+            result.append("")
+        elif label is not None:
+            result.append(make_label(label))
+        elif inst is not None:
+            # Add dummy label if this address needs one
+            if addr in addr_to_local_label:
+                result.append(make_label(addr_to_local_label[addr]))
+
+            result.append(" " * indentation + inst)
+
+    return result
 
 
 def find_header_footer(asm, filename):
@@ -176,6 +214,12 @@ def simplify(logger, args, asm_input, asm_output=None):
         raise Exception("simpasm failed")
     sym = syms[0]
 
+    func_pattern = r"MLK_ASM_NAMESPACE\((.*)\)"
+    res = re.search(func_pattern, sym)
+    if res is None:
+        raise Exception(f"Could not find function symbol in {asm_input}")
+    funcname = res.group(1)
+
     if args.cflags is not None:
         cflags = args.cflags.split(" ")
     else:
@@ -236,7 +280,10 @@ def simplify(logger, args, asm_input, asm_output=None):
         if args.preserve_preprocessor_directives is False:
             # Expecting format "ADDRESS T SYMBOL"
             sym = sym_info[2]
+            if platform.system() == "Darwin" and sym[0] == "_":
+                sym = sym[1:]
             logger.debug(f"Using raw global symbol {sym} going forward ...")
+            funcname = sym
 
         cmd = [args.objdump, "--disassemble", tmp_objfile0]
         if platform.system() == "Darwin":
@@ -245,8 +292,8 @@ def simplify(logger, args, asm_input, asm_output=None):
         logger.debug(f"Disassembling temporary object file {tmp_objfile0} ...")
         disasm = run_cmd(cmd).stdout
 
-        logger.debug("Patching up disassembly ...")
-        simplified = patchup_disasm(disasm)
+        logger.debug(f"Patching up disassembly (funcname {funcname})...")
+        simplified = patchup_disasm(disasm, funcname)
 
         autogen_header = [
             "",
@@ -261,8 +308,6 @@ def simplify(logger, args, asm_input, asm_output=None):
         ]
 
         if args.preserve_preprocessor_directives is False:
-            if platform.system() == "Darwin" and sym[0] == "_":
-                sym = sym[1:]
             autogen_header += [
                 "#ifdef __APPLE__",
                 f".global _{sym}",
