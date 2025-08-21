@@ -208,6 +208,7 @@ class TEST_TYPES(Enum):
     MONOLITHIC_BUILD_NATIVE = 14
     STACK = 15
     SIZE = 16
+    ABICHECK = 17
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -274,6 +275,8 @@ class TEST_TYPES(Enum):
             return "Example (multilevel build, native)"
         if self == TEST_TYPES.SIZE:
             return "Measurement Code Size"
+        if self == TEST_TYPES.ABICHECK:
+            return "ABI Compliance Test"
 
     def make_dir(self):
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
@@ -329,6 +332,8 @@ class TEST_TYPES(Enum):
             return ""
         if self == TEST_TYPES.SIZE:
             return "size"
+        if self == TEST_TYPES.ABICHECK:
+            return "abicheck"
 
     def make_run_target(self, scheme):
         t = self.make_target()
@@ -731,12 +736,24 @@ class Tests:
         if resultss is None:
             self.check_fail()
 
+    def abicheck(self):
+        """Run ABI compliance tests for assembly functions."""
+        if not self.do_opt():
+            return
+
+        self._compile_schemes(TEST_TYPES.ABICHECK, True)
+        if self.args.run:
+            self._run_scheme(TEST_TYPES.ABICHECK, True, None)
+
+        self.check_fail()
+
     def all(self):
         func = self.args.func
         kat = self.args.kat
         acvp = self.args.acvp
         examples = self.args.examples
         stack = self.args.stack
+        abicheck = self.args.abicheck
 
         def _all(opt):
             if func is True:
@@ -767,6 +784,9 @@ class Tests:
 
         if examples is True:
             self.examples()
+
+        if abicheck is True:
+            self.abicheck()
 
         self.check_fail()
 
@@ -1082,6 +1102,21 @@ def cli():
         help="Do not run stack analysis",
     )
 
+    abicheck_group = all_parser.add_mutually_exclusive_group()
+    abicheck_group.add_argument(
+        "--abicheck",
+        action="store_true",
+        dest="abicheck",
+        help="Run ABI compliance tests",
+        default=True,
+    )
+    abicheck_group.add_argument(
+        "--no-abicheck",
+        action="store_false",
+        dest="abicheck",
+        help="Do not run ABI compliance tests",
+    )
+
     # acvp arguments
     acvp_parser = cmd_subparsers.add_parser(
         "acvp", help="Run ACVP client", parents=[common_parser]
@@ -1271,6 +1306,13 @@ def cli():
         default=False,
     )
 
+    # abicheck arguments
+    abicheck_parser = cmd_subparsers.add_parser(
+        "abicheck",
+        help="Run ABI compliance tests for assembly functions",
+        parents=[common_parser],
+    )
+
     args = main_parser.parse_args()
 
     if not hasattr(args, "mac_taskpolicy"):
@@ -1300,6 +1342,8 @@ def cli():
         Tests(args).stack()
     elif args.cmd == "size":
         Tests(args).size()
+    elif args.cmd == "abicheck":
+        Tests(args).abicheck()
 
 
 if __name__ == "__main__":
