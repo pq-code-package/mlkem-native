@@ -1,0 +1,43 @@
+commit a259728550f06c688eec3b3670d87577ba060e76
+Author: Hanno Becker <beckphan@amazon.co.uk>
+Date:   Fri Aug 22 09:05:56 2025 +0100
+
+    ML-KEM: Fix mlkem-native importer.sh
+    
+    Commit 10a0611 broke the mlkem-native importer on MacOS
+    (both AArch64 and x86_64) because of a missing quotation
+    around `sed` invocations. This commit fixes this.
+    
+    Found by mlkem-native CI.
+    
+    Signed-off-by: Hanno Becker <beckphan@amazon.co.uk>
+
+diff --git a/crypto/fipsmodule/ml_kem/importer.sh b/crypto/fipsmodule/ml_kem/importer.sh
+index e3d8650ce..24832abb7 100755
+--- a/crypto/fipsmodule/ml_kem/importer.sh
++++ b/crypto/fipsmodule/ml_kem/importer.sh
+@@ -115,15 +115,15 @@ else
+ fi
+ 
+ # Exclude POLY_COMPRESS/DECOMPRESS functions from the x86 backend for now.
+-sed ${SED_I[@]} '/compress_avx2.c/d' $SRC/mlkem_native_bcm.c
+-sed ${SED_I[@]} '/MLK_USE_NATIVE_POLY_COMPRESS_D4/d' $SRC/native/x86_64/meta.h
+-sed ${SED_I[@]} '/MLK_USE_NATIVE_POLY_COMPRESS_D5/d' $SRC/native/x86_64/meta.h
+-sed ${SED_I[@]} '/MLK_USE_NATIVE_POLY_COMPRESS_D10/d' $SRC/native/x86_64/meta.h
+-sed ${SED_I[@]} '/MLK_USE_NATIVE_POLY_COMPRESS_D11/d' $SRC/native/x86_64/meta.h
+-sed ${SED_I[@]} '/MLK_USE_NATIVE_POLY_DECOMPRESS_D4/d' $SRC/native/x86_64/meta.h
+-sed ${SED_I[@]} '/MLK_USE_NATIVE_POLY_DECOMPRESS_D5/d' $SRC/native/x86_64/meta.h
+-sed ${SED_I[@]} '/MLK_USE_NATIVE_POLY_DECOMPRESS_D10/d' $SRC/native/x86_64/meta.h
+-sed ${SED_I[@]} '/MLK_USE_NATIVE_POLY_DECOMPRESS_D11/d' $SRC/native/x86_64/meta.h
++sed "${SED_I[@]}" '/compress_avx2.c/d' $SRC/mlkem_native_bcm.c
++sed "${SED_I[@]}" '/MLK_USE_NATIVE_POLY_COMPRESS_D4/d' $SRC/native/x86_64/meta.h
++sed "${SED_I[@]}" '/MLK_USE_NATIVE_POLY_COMPRESS_D5/d' $SRC/native/x86_64/meta.h
++sed "${SED_I[@]}" '/MLK_USE_NATIVE_POLY_COMPRESS_D10/d' $SRC/native/x86_64/meta.h
++sed "${SED_I[@]}" '/MLK_USE_NATIVE_POLY_COMPRESS_D11/d' $SRC/native/x86_64/meta.h
++sed "${SED_I[@]}" '/MLK_USE_NATIVE_POLY_DECOMPRESS_D4/d' $SRC/native/x86_64/meta.h
++sed "${SED_I[@]}" '/MLK_USE_NATIVE_POLY_DECOMPRESS_D5/d' $SRC/native/x86_64/meta.h
++sed "${SED_I[@]}" '/MLK_USE_NATIVE_POLY_DECOMPRESS_D10/d' $SRC/native/x86_64/meta.h
++sed "${SED_I[@]}" '/MLK_USE_NATIVE_POLY_DECOMPRESS_D11/d' $SRC/native/x86_64/meta.h
+ 
+ # Copy mlkem-native header
+ # This is only needed for access to the various macros defining key sizes.
