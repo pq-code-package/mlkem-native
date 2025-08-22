@@ -19,6 +19,7 @@
 .global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2)
 MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k2)
 
+        .cfi_startproc
         vmovdqa	(%r8), %ymm0
         vmovdqa	0x20(%r8), %ymm1
         vmovdqa	(%rsi), %ymm2
@@ -485,6 +486,7 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k2)
         vpaddw	%ymm9, %ymm10, %ymm9
         vmovdqa	%ymm7, 0x1c0(%rdi)
         vmovdqa	%ymm9, 0x1e0(%rdi)
+        .cfi_endproc
         retq
 
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
