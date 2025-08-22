@@ -40,14 +40,22 @@ jobs:
         with:
           repository: ${{ inputs.repository }}
           commit: ${{ inputs.commit }}
+      - name: Apply pre-import patch if present
+        run: |
+          cd $AWSLC_DIR
+          if [ -f "$GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch" ]; then
+            git apply $GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch
+          fi
       - name: Run importer
         run: |
           cd $AWSLC_DIR/crypto/fipsmodule/ml_kem
           GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA ./importer.sh --force
-      - name: Apply custom stdlib patch
+      - name: Apply post-import patch if present
         run: |
           cd $AWSLC_DIR
-          patch -p0 < $GITHUB_WORKSPACE/integration/aws-lc/add-custom-stdlib.patch
+          if [ -f "$GITHUB_WORKSPACE/integration/aws-lc/post_import.patch" ]; then
+            git apply $GITHUB_WORKSPACE/integration/aws-lc/post_import.patch
+          fi
       - name: Build+Test AWS-LC (FIPS=${{ matrix.fips }})
         run: |
           cd $AWSLC_DIR
@@ -91,14 +99,22 @@ jobs:
         with:
           repository: ${{ inputs.repository }}
           commit: ${{ inputs.commit }}
+      - name: Apply pre-import patch if present
+        run: |
+          cd $AWSLC_DIR
+          if [ -f "$GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch" ]; then
+            git apply $GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch
+          fi
       - name: Run importer
         run: |
           cd $AWSLC_DIR/crypto/fipsmodule/ml_kem
           GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA ./importer.sh --force
-      - name: Apply custom stdlib patch
+      - name: Apply post-import patch if present
         run: |
           cd $AWSLC_DIR
-          patch -p0 < $GITHUB_WORKSPACE/integration/aws-lc/add-custom-stdlib.patch
+          if [ -f "$GITHUB_WORKSPACE/integration/aws-lc/post_import.patch" ]; then
+            git apply $GITHUB_WORKSPACE/integration/aws-lc/post_import.patch
+          fi
       - name: Run test
         run: |
           cd $AWSLC_DIR
@@ -127,14 +143,22 @@ jobs:
         with:
           repository: ${{ inputs.repository }}
           commit: ${{ inputs.commit }}
+      - name: Apply pre-import patch if present
+        run: |
+          cd $AWSLC_DIR
+          if [ -f "$GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch" ]; then
+            git apply $GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch
+          fi
       - name: Run importer
         run: |
           cd $AWSLC_DIR/crypto/fipsmodule/ml_kem
           GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA ./importer.sh --force
-      - name: Apply custom stdlib patch
+      - name: Apply post-import patch if present
         run: |
           cd $AWSLC_DIR
-          patch -p0 < $GITHUB_WORKSPACE/integration/aws-lc/add-custom-stdlib.patch
+          if [ -f "$GITHUB_WORKSPACE/integration/aws-lc/post_import.patch" ]; then
+            git apply $GITHUB_WORKSPACE/integration/aws-lc/post_import.patch
+          fi
       - name: Run test
         run: |
           cd $AWSLC_DIR
