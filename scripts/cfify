@@ -1,0 +1,215 @@
+#!/usr/bin/env python3
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+import sys
+import re
+import argparse
+
+
+def add_cfi_directives(text, arch):
+    lines = text.split("\n")
+    result = []
+
+    for line in lines:
+        line = line.rstrip()
+
+        if arch == "aarch64":
+            # Rule 3: str Xn/Dn, [sp, #offset] -> .cfi_rel_offset Xn/Dn, offset
+            match = re.match(
+                r"(\s*)str\s+([XxDd]\d+),\s*\[sp,\s*#(0x[0-9a-fA-F]+|\d+)\]",
+                line,
+                re.IGNORECASE,
+            )
+            if match:
+                indent, reg, offset_str = match.groups()
+                offset = (
+                    int(offset_str, 16)
+                    if offset_str.lower().startswith("0x")
+                    else int(offset_str)
+                )
+                result.append(line)
+                result.append(f"{indent}.cfi_rel_offset {reg}, {offset:#x}")
+                continue
+
+            # Rule 4: stp Xn/Dn, Xm/Dm, [sp, #offset] -> .cfi_rel_offset Xn/Dn, offset and .cfi_rel_offset Xm/Dm, (offset + 8)
+            match = re.match(
+                r"(\s*)stp\s+([XxDd]\d+),\s*([XxDd]\d+),\s*\[sp,\s*#(0x[0-9a-fA-F]+|\d+)\]",
+                line,
+                re.IGNORECASE,
+            )
+            if match:
+                indent, reg1, reg2, offset_str = match.groups()
+                offset = (
+                    int(offset_str, 16)
+                    if offset_str.lower().startswith("0x")
+                    else int(offset_str)
+                )
+                result.append(line)
+                result.append(f"{indent}.cfi_rel_offset {reg1}, {offset:#x}")
+                result.append(f"{indent}.cfi_rel_offset {reg2}, {offset + 8:#x}")
+                continue
+
+            # Rule 5: ldr Xn/Dn, [sp, #offset] -> .cfi_restore Xn/Dn
+            match = re.match(
+                r"(\s*)ldr\s+([XxDd]\d+),\s*\[sp,\s*#(0x[0-9a-fA-F]+|\d+)\]",
+                line,
+                re.IGNORECASE,
+            )
+            if match:
+                indent, reg, offset_str = match.groups()
+                result.append(line)
+                result.append(f"{indent}.cfi_restore {reg}")
+                continue
+
+            # Rule 6: ldp Xn/Dn, Xm/Dm, [sp, #offset] -> .cfi_restore Xn/Dn and .cfi_restore Xm/Dm
+            match = re.match(
+                r"(\s*)ldp\s+([XxDd]\d+),\s*([XxDd]\d+),\s*\[sp,\s*#(0x[0-9a-fA-F]+|\d+)\]",
+                line,
+                re.IGNORECASE,
+            )
+            if match:
+                indent, reg1, reg2, offset_str = match.groups()
+                result.append(line)
+                result.append(f"{indent}.cfi_restore {reg1}")
+                result.append(f"{indent}.cfi_restore {reg2}")
+                continue
+
+            # Rule 7: add sp, sp, #offset -> .cfi_adjust_cfa_offset (-(offset))
+            match = re.match(
+                r"(\s*)add\s+sp,\s*sp,\s*#(0x[0-9a-fA-F]+|\d+)", line, re.IGNORECASE
+            )
+            if match:
+                indent, offset_str = match.groups()
+                offset = (
+                    int(offset_str, 16)
+                    if offset_str.lower().startswith("0x")
+                    else int(offset_str)
+                )
+                result.append(line)
+                result.append(f"{indent}.cfi_adjust_cfa_offset -{offset:#x}")
+                continue
+
+            # Rule 8: sub sp, sp, #offset -> .cfi_adjust_cfa_offset (offset)
+            match = re.match(
+                r"(\s*)sub\s+sp,\s*sp,\s*#(0x[0-9a-fA-F]+|\d+)", line, re.IGNORECASE
+            )
+            if match:
+                indent, offset_str = match.groups()
+                offset = (
+                    int(offset_str, 16)
+                    if offset_str.lower().startswith("0x")
+                    else int(offset_str)
+                )
+                result.append(line)
+                result.append(f"{indent}.cfi_adjust_cfa_offset {offset:#x}")
+                continue
+
+            # Rule 2: ret -> .cfi_endproc before ret
+            match = re.match(r"(\s*)ret\s*$", line, re.IGNORECASE)
+            if match:
+                indent = match.group(1)
+                result.append(f"{indent}.cfi_endproc")
+                result.append(line)
+                continue
+
+        elif arch == "x86_64":
+            # Check for labels and see if there's a corresponding callq
+            label_match = re.match(r"^([a-zA-Z_][a-zA-Z0-9_]*):$", line)
+            if label_match:
+                label = label_match.group(1)
+                # Check if this label is called anywhere in the text
+                if re.search(rf"\s*callq\s+{re.escape(label)}\b", text, re.IGNORECASE):
+                    result.append(line)
+                    result.append("        .cfi_startproc")
+                    continue
+
+            # x86_64: subq $OFFSET, %rsp -> .cfi_adjust_cfa_offset OFFSET (stack alloc)
+            match = re.match(
+                r"(\s*)subq\s+\$(0x[0-9a-fA-F]+|\d+),\s*%rsp", line, re.IGNORECASE
+            )
+            if match:
+                indent, offset_str = match.groups()
+                offset = (
+                    int(offset_str, 16)
+                    if offset_str.lower().startswith("0x")
+                    else int(offset_str)
+                )
+                result.append(line)
+                result.append(f"{indent}.cfi_adjust_cfa_offset {offset:#x}")
+                continue
+
+            # x86_64: addq $OFFSET, %rsp -> .cfi_adjust_cfa_offset -OFFSET (stack free)
+            match = re.match(
+                r"(\s*)addq\s+\$(0x[0-9a-fA-F]+|\d+),\s*%rsp", line, re.IGNORECASE
+            )
+            if match:
+                indent, offset_str = match.groups()
+                offset = (
+                    int(offset_str, 16)
+                    if offset_str.lower().startswith("0x")
+                    else int(offset_str)
+                )
+                result.append(line)
+                result.append(f"{indent}.cfi_adjust_cfa_offset -{offset:#x}")
+                continue
+
+            # x86_64: retq -> .cfi_endproc before retq
+            match = re.match(r"(\s*)retq\s*$", line, re.IGNORECASE)
+            if match:
+                indent = match.group(1)
+                result.append(f"{indent}.cfi_endproc")
+                result.append(line)
+                continue
+
+        result.append(line)
+
+    return "\n".join(result)
+
+
+def main():
+    import re
+
+    parser = argparse.ArgumentParser(
+        description="Add CFI directives to AArch64 assembly"
+    )
+    parser.add_argument("-i", "--input", help="Input file (default: stdin)")
+    parser.add_argument("-o", "--output", help="Output file (default: stdout)")
+    parser.add_argument(
+        "--emit-cfi-proc-start",
+        action="store_true",
+        help="Emit .cfi_proc_start as first line",
+    )
+    parser.add_argument(
+        "--arch",
+        choices=["aarch64", "x86_64"],
+        default="aarch64",
+        help="Target architecture (default: aarch64)",
+    )
+    args = parser.parse_args()
+
+    input_file = open(args.input, "r") if args.input else sys.stdin
+    output_file = open(args.output, "w") if args.output else sys.stdout
+
+    try:
+        # Read all input
+        text = input_file.read()
+
+        # Add initial .cfi_startproc if requested
+        if args.emit_cfi_proc_start:
+            text = "        .cfi_startproc\n" + text
+
+        # Process the text
+        result = add_cfi_directives(text, args.arch)
+
+        # Write output
+        output_file.write(result)
+    finally:
+        if args.input:
+            input_file.close()
+        if args.output:
+            output_file.close()
+
+
+if __name__ == "__main__":
+    main()

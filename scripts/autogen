@@ -1787,9 +1787,14 @@ def update_via_simpasm(
 
     with tempfile.NamedTemporaryFile(suffix=".S") as tmp:
         try:
+            # Determine architecture from filename
+            arch = "aarch64" if "aarch64" in infile_full else "x86_64"
+
             cmd = [
                 "./scripts/simpasm",
                 "--objdump=llvm-objdump",
+                "--cfify",
+                "--arch=" + arch,
                 "-i",
                 infile_full,
                 "-o",

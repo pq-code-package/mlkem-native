@@ -47,22 +47,47 @@ _PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_v8a_scalar_hybrid_asm:
 PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_v8a_scalar_hybrid_asm:
 #endif
 
+        .cfi_startproc
         sub	sp, sp, #0xe0
+        .cfi_adjust_cfa_offset 0xe0
         stp	x19, x20, [sp, #0x30]
+        .cfi_rel_offset x19, 0x30
+        .cfi_rel_offset x20, 0x38
         stp	x21, x22, [sp, #0x40]
+        .cfi_rel_offset x21, 0x40
+        .cfi_rel_offset x22, 0x48
         stp	x23, x24, [sp, #0x50]
+        .cfi_rel_offset x23, 0x50
+        .cfi_rel_offset x24, 0x58
         stp	x25, x26, [sp, #0x60]
+        .cfi_rel_offset x25, 0x60
+        .cfi_rel_offset x26, 0x68
         stp	x27, x28, [sp, #0x70]
+        .cfi_rel_offset x27, 0x70
+        .cfi_rel_offset x28, 0x78
         stp	x29, x30, [sp, #0x80]
+        .cfi_rel_offset x29, 0x80
+        .cfi_rel_offset x30, 0x88
         stp	d8, d9, [sp, #0x90]
+        .cfi_rel_offset d8, 0x90
+        .cfi_rel_offset d9, 0x98
         stp	d10, d11, [sp, #0xa0]
+        .cfi_rel_offset d10, 0xa0
+        .cfi_rel_offset d11, 0xa8
         stp	d12, d13, [sp, #0xb0]
+        .cfi_rel_offset d12, 0xb0
+        .cfi_rel_offset d13, 0xb8
         stp	d14, d15, [sp, #0xc0]
+        .cfi_rel_offset d14, 0xc0
+        .cfi_rel_offset d15, 0xc8
         mov	x29, x1
         mov	x30, #0x0               // =0
         str	x30, [sp, #0x20]
+        .cfi_rel_offset x30, 0x20
         str	x29, [sp, #0x8]
+        .cfi_rel_offset x29, 0x8
         str	x29, [sp, #0x10]
+        .cfi_rel_offset x29, 0x10
         str	x0, [sp]
         add	x4, x0, #0xc8
         ldp	q25, q26, [x0]
@@ -120,7 +145,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_v8a_scalar_hybrid_asm:
         ldr	x25, [x0, #0xc0]
         sub	x0, x0, #0x190
 
-keccak_f1600_x4_v8a_scalar_hybrid_initial:
+Lkeccak_f1600_x4_v8a_scalar_hybrid_initial:
         eor	x30, x24, x25
         eor	x27, x9, x10
         eor	v30.16b, v0.16b, v5.16b
@@ -161,6 +186,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_initial:
         eor	x23, x23, x30
         eor	v26.16b, v4.16b, v9.16b
         str	x23, [sp, #0xd0]
+        .cfi_rel_offset x23, 0xd0
         eor	v26.16b, v26.16b, v14.16b
         eor	x23, x14, x15
         eor	x14, x14, x0
@@ -209,6 +235,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_initial:
         eor	v31.16b, v2.16b, v29.16b
         eor	x5, x5, x27
         ldr	x27, [sp, #0xd0]
+        .cfi_restore x27
         shl	v0.2d, v31.2d, #0x3e
         bic	x25, x17, x2, ror #5
         sri	v0.2d, v31.2d, #0x2
@@ -262,6 +289,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_initial:
         eor	x5, x20, x11, ror #41
         sri	v1.2d, v31.2d, #0x9
         ldr	x11, [sp, #0x8]
+        .cfi_restore x11
         eor	x20, x17, x4, ror #21
         eor	v31.16b, v16.16b, v25.16b
         eor	x17, x24, x9, ror #47
@@ -270,6 +298,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_initial:
         sri	v8.2d, v31.2d, #0x13
         bic	x9, x0, x16, ror #9
         str	x24, [sp, #0x18]
+        .cfi_rel_offset x24, 0x18
         eor	v31.16b, v7.16b, v29.16b
         bic	x24, x29, x1, ror #44
         shl	v16.2d, v31.2d, #0x6
@@ -342,6 +371,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_initial:
         eor	x28, x30, x28, ror #63
         eor	v31.16b, v4.16b, v27.16b
         str	x28, [sp, #0xd0]
+        .cfi_rel_offset x28, 0xd0
         eor	x29, x29, x17, ror #36
         shl	v20.2d, v31.2d, #0x1b
         eor	x28, x1, x2, ror #61
@@ -436,9 +466,11 @@ keccak_f1600_x4_v8a_scalar_hybrid_initial:
         bic	x19, x25, x19, ror #57
         eor	v17.16b, v31.16b, v17.16b
         ldr	x25, [sp, #0x18]
+        .cfi_restore x25
         eor	x17, x10, x9, ror #47
         bic	v31.16b, v20.16b, v19.16b
         ldr	x9, [sp, #0x8]
+        .cfi_restore x9
         eor	v18.16b, v31.16b, v18.16b
         eor	x15, x20, x28, ror #27
         bic	v31.16b, v21.16b, v20.16b
@@ -455,9 +487,11 @@ keccak_f1600_x4_v8a_scalar_hybrid_initial:
         ldr	x28, [x9, x25, lsl #3]
         eor	v21.16b, v31.16b, v1.16b
         ldr	x9, [sp, #0xd0]
+        .cfi_restore x9
         bic	v31.16b, v24.16b, v23.16b
         add	x25, x25, #0x1
         str	x25, [sp, #0x18]
+        .cfi_rel_offset x25, 0x18
         eor	v22.16b, v31.16b, v22.16b
         cmp	x25, #0x17
         bic	v31.16b, v0.16b, v24.16b
@@ -499,11 +533,13 @@ keccak_f1600_x4_v8a_scalar_hybrid_initial:
         eor	x23, x3, x26, ror #52
         eor	x3, x29, x30, ror #24
         ldr	x30, [sp, #0x10]
+        .cfi_restore x30
         ld1r	{ v28.2d }, [x30], #8
         str	x30, [sp, #0x10]
+        .cfi_rel_offset x30, 0x10
         eor	v0.16b, v0.16b, v28.16b
 
-keccak_f1600_x4_v8a_scalar_hybrid_loop:
+Lkeccak_f1600_x4_v8a_scalar_hybrid_loop:
         eor	x0, x15, x11, ror #52
         eor	x0, x0, x13, ror #48
         eor	v30.16b, v0.16b, v5.16b
@@ -538,6 +574,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_loop:
         eor	v27.16b, v27.16b, v13.16b
         eor	x28, x30, x28, ror #63
         str	x28, [sp, #0xd0]
+        .cfi_rel_offset x28, 0xd0
         eor	v27.16b, v27.16b, v18.16b
         eor	x29, x29, x17, ror #36
         eor	v27.16b, v27.16b, v23.16b
@@ -631,10 +668,12 @@ keccak_f1600_x4_v8a_scalar_hybrid_loop:
         shl	v23.2d, v31.2d, #0x29
         bic	x19, x25, x19, ror #57
         ldr	x25, [sp, #0x18]
+        .cfi_restore x25
         sri	v23.2d, v31.2d, #0x17
         eor	x17, x10, x9, ror #47
         eor	v31.16b, v1.16b, v25.16b
         ldr	x9, [sp, #0x8]
+        .cfi_restore x9
         eor	x15, x20, x28, ror #27
         shl	v15.2d, v31.2d, #0x1
         bic	x20, x4, x28, ror #2
@@ -650,10 +689,12 @@ keccak_f1600_x4_v8a_scalar_hybrid_loop:
         eor	v31.16b, v16.16b, v25.16b
         ldr	x28, [x9, x25, lsl #3]
         ldr	x9, [sp, #0xd0]
+        .cfi_restore x9
         shl	v8.2d, v31.2d, #0x2d
         add	x25, x25, #0x1
         sri	v8.2d, v31.2d, #0x13
         str	x25, [sp, #0x18]
+        .cfi_rel_offset x25, 0x18
         cmp	x25, #0x17
         eor	v31.16b, v7.16b, v29.16b
         eor	x25, x1, x27, ror #53
@@ -731,6 +772,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_loop:
         shl	v20.2d, v31.2d, #0x1b
         eor	x28, x30, x28, ror #63
         str	x28, [sp, #0xd0]
+        .cfi_rel_offset x28, 0xd0
         sri	v20.2d, v31.2d, #0x25
         eor	x29, x29, x17, ror #36
         eor	v31.16b, v24.16b, v27.16b
@@ -824,10 +866,12 @@ keccak_f1600_x4_v8a_scalar_hybrid_loop:
         eor	v17.16b, v31.16b, v17.16b
         bic	x19, x25, x19, ror #57
         ldr	x25, [sp, #0x18]
+        .cfi_restore x25
         bic	v31.16b, v20.16b, v19.16b
         eor	x17, x10, x9, ror #47
         eor	v18.16b, v31.16b, v18.16b
         ldr	x9, [sp, #0x8]
+        .cfi_restore x9
         eor	x15, x20, x28, ror #27
         bic	v31.16b, v21.16b, v20.16b
         bic	x20, x4, x28, ror #2
@@ -843,10 +887,12 @@ keccak_f1600_x4_v8a_scalar_hybrid_loop:
         eor	v21.16b, v31.16b, v1.16b
         ldr	x28, [x9, x25, lsl #3]
         ldr	x9, [sp, #0xd0]
+        .cfi_restore x9
         bic	v31.16b, v24.16b, v23.16b
         add	x25, x25, #0x1
         eor	v22.16b, v31.16b, v22.16b
         str	x25, [sp, #0x18]
+        .cfi_rel_offset x25, 0x18
         cmp	x25, #0x17
         bic	v31.16b, v0.16b, v24.16b
         eor	x25, x1, x27, ror #53
@@ -887,12 +933,14 @@ keccak_f1600_x4_v8a_scalar_hybrid_loop:
         eor	x23, x3, x26, ror #52
         eor	x3, x29, x30, ror #24
         ldr	x30, [sp, #0x10]
+        .cfi_restore x30
         ld1r	{ v28.2d }, [x30], #8
         str	x30, [sp, #0x10]
+        .cfi_rel_offset x30, 0x10
         eor	v0.16b, v0.16b, v28.16b
 
-keccak_f1600_x4_v8a_scalar_hybrid_loop_end:
-        b.le	keccak_f1600_x4_v8a_scalar_hybrid_loop
+Lkeccak_f1600_x4_v8a_scalar_hybrid_loop_end:
+        b.le	Lkeccak_f1600_x4_v8a_scalar_hybrid_loop
         ror	x2, x2, #0x3d
         ror	x3, x3, #0x27
         ror	x4, x4, #0x36
@@ -917,10 +965,12 @@ keccak_f1600_x4_v8a_scalar_hybrid_loop_end:
         ror	x24, x24, #0x1c
         ror	x25, x25, #0x9
         ldr	x30, [sp, #0x20]
+        .cfi_restore x30
         cmp	x30, #0x1
-        b.eq	keccak_f1600_x4_v8a_scalar_hybrid_done
+        b.eq	Lkeccak_f1600_x4_v8a_scalar_hybrid_done
         mov	x30, #0x1               // =1
         str	x30, [sp, #0x20]
+        .cfi_rel_offset x30, 0x20
         ldr	x0, [sp]
         add	x0, x0, #0x190
         stp	x1, x6, [x0]
@@ -952,9 +1002,9 @@ keccak_f1600_x4_v8a_scalar_hybrid_loop_end:
         ldp	x15, x20, [x0, #0xb0]
         ldr	x25, [x0, #0xc0]
         sub	x0, x0, #0x258
-        b	keccak_f1600_x4_v8a_scalar_hybrid_initial
+        b	Lkeccak_f1600_x4_v8a_scalar_hybrid_initial
 
-keccak_f1600_x4_v8a_scalar_hybrid_done:
+Lkeccak_f1600_x4_v8a_scalar_hybrid_done:
         ldr	x0, [sp]
         add	x0, x0, #0x258
         stp	x1, x6, [x0]
@@ -1012,14 +1062,36 @@ keccak_f1600_x4_v8a_scalar_hybrid_done:
         trn2	v25.2d, v24.2d, v24.2d
         str	d25, [x4, #0xc0]
         ldp	d14, d15, [sp, #0xc0]
+        .cfi_restore d14
+        .cfi_restore d15
         ldp	d12, d13, [sp, #0xb0]
+        .cfi_restore d12
+        .cfi_restore d13
         ldp	d10, d11, [sp, #0xa0]
+        .cfi_restore d10
+        .cfi_restore d11
         ldp	d8, d9, [sp, #0x90]
+        .cfi_restore d8
+        .cfi_restore d9
         ldp	x19, x20, [sp, #0x30]
+        .cfi_restore x19
+        .cfi_restore x20
         ldp	x21, x22, [sp, #0x40]
+        .cfi_restore x21
+        .cfi_restore x22
         ldp	x23, x24, [sp, #0x50]
+        .cfi_restore x23
+        .cfi_restore x24
         ldp	x25, x26, [sp, #0x60]
+        .cfi_restore x25
+        .cfi_restore x26
         ldp	x27, x28, [sp, #0x70]
+        .cfi_restore x27
+        .cfi_restore x28
         ldp	x29, x30, [sp, #0x80]
+        .cfi_restore x29
+        .cfi_restore x30
         add	sp, sp, #0xe0
+        .cfi_adjust_cfa_offset -0xe0
+        .cfi_endproc
         ret
