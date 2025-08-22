@@ -33,14 +33,17 @@
 .global MLK_ASM_NAMESPACE(nttfrombytes_avx2)
 MLK_ASM_FN_SYMBOL(nttfrombytes_avx2)
 
+        .cfi_startproc
         vmovdqa	0xe0(%rdx), %ymm0
-        callq	nttfrombytes_avx2_core
+        callq	Lnttfrombytes_avx2_core
         addq	$0x100, %rdi            # imm = 0x100
         addq	$0xc0, %rsi
-        callq	nttfrombytes_avx2_core
+        callq	Lnttfrombytes_avx2_core
         retq
+        .cfi_endproc
 
-nttfrombytes_avx2_core:
+Lnttfrombytes_avx2_core:
+        .cfi_startproc
         vmovdqu	(%rsi), %ymm4
         vmovdqu	0x20(%rsi), %ymm5
         vmovdqu	0x40(%rsi), %ymm6
@@ -114,6 +117,7 @@ nttfrombytes_avx2_core:
         vmovdqa	%ymm15, 0xc0(%rdi)
         vmovdqa	%ymm1, 0xe0(%rdi)
         retq
+        .cfi_endproc
 
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */

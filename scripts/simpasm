@@ -13,7 +13,7 @@ import os
 import re
 
 
-def patchup_disasm(asm):
+def patchup_disasm(asm, cfify=False):
     asm = asm.split("\n")
     indentation = 8
 
@@ -24,6 +24,8 @@ def patchup_disasm(asm):
         return r.group(1)
 
     def make_label(lbl):
+        if cfify:
+            return "L" + lbl + ":"
         return lbl + ":"
 
     # Find first label
@@ -47,9 +49,14 @@ def patchup_disasm(asm):
             l = l.split(";")[0]
             # Re-format references to labels
             # Those are assumed to have the form `0xDEADBEEF <label>`
-            l = re.sub(
-                r"(0x)?[0-9a-fA-F]+\s+<(?P<label>[a-zA-Z0-9_]+)>", r"\g<label>", l
-            )
+            if cfify:
+                l = re.sub(
+                    r"(0x)?[0-9a-fA-F]+\s+<(?P<label>[a-zA-Z0-9_]+)>", r"L\g<label>", l
+                )
+            else:
+                l = re.sub(
+                    r"(0x)?[0-9a-fA-F]+\s+<(?P<label>[a-zA-Z0-9_]+)>", r"\g<label>", l
+                )
             # Drop address and byte code from line
             d = re.search(
                 r"^\s*[0-9a-fA-F]+:\s+([0-9a-fA-F][0-9a-fA-F][ ]*)+\s+(?P<inst>.*)$", l
@@ -246,7 +253,7 @@ def simplify(logger, args, asm_input, asm_output=None):
         disasm = run_cmd(cmd).stdout
 
         logger.debug("Patching up disassembly ...")
-        simplified = patchup_disasm(disasm)
+        simplified = patchup_disasm(disasm, cfify=args.cfify)
 
         autogen_header = [
             "",
@@ -284,10 +291,19 @@ def simplify(logger, args, asm_input, asm_output=None):
             simplified_header = header
             simplified_footer = footer
 
+        # Apply CFI directives if requested
+        if args.cfify:
+            logger.debug("Applying CFI directives...")
+            cfify_script = os.path.join(os.path.dirname(__file__), "cfify")
+            cfify_cmd = [cfify_script, "--emit-cfi-proc-start", "--arch", args.arch]
+            cfify_result = run_cmd(cfify_cmd, input="\n".join(simplified))
+            simplified = cfify_result.stdout.split("\n")
+
         # Write simplified assembly file
         full_simplified = (
             simplified_header + autogen_header + simplified + simplified_footer
         )
+
         logger.debug(f"Writing simplified assembly to {asm_output} ...")
         with open(asm_output, "w+") as f:
             f.write("\n".join(full_simplified))
@@ -297,14 +313,17 @@ def simplify(logger, args, asm_input, asm_output=None):
             + cflags
             + ["-o", tmp_objfile1, "-"]
         )
-        logger.debug(f"Assembling simplified assembly ...")
-        logger.debug(f"Command: {' '.join(cmd)}")
+
         new_asm = "\n".join(
             drop_if_from_header(simplified_header)
             + autogen_header
             + simplified
             + simplified_footer
         )
+
+        logger.debug(f"Assembling simplified assembly ...")
+        logger.debug(new_asm)
+        logger.debug(f"Command: {' '.join(cmd)}")
         run_cmd(cmd, input=new_asm)
 
         # Get binary contents of re-assembled object file
@@ -312,12 +331,55 @@ def simplify(logger, args, asm_input, asm_output=None):
         simplified_obj = tmp1.read()
 
         logger.debug("Checking that byte-code is unchanged ...")
-        if orig_obj != simplified_obj:
-            logger.error(
-                f"Object files {tmp_objfile0} and {tmp_objfile1} before/after simplification are not byte-wise equal -- aborting"
-            )
-            logger.error("I'll keep them around for you to have a look")
-            raise Exception("simpasm failed")
+
+        # When CFI is enabled, compare only the __text section content
+        if args.cfify:
+            logger.debug("Comparing __text section content for CFI comparison...")
+
+            # Extract __text section from both files
+            orig_text_cmd = [
+                args.objdump,
+                "-s",
+                "--section=__text",
+                "--section=.text",
+                tmp_objfile0,
+            ]
+            simplified_text_cmd = [
+                args.objdump,
+                "-s",
+                "--section=__text",
+                "--section=.text",
+                tmp_objfile1,
+            ]
+
+            orig_text_result = run_cmd(orig_text_cmd)
+            simplified_text_result = run_cmd(simplified_text_cmd)
+
+            # Remove filename lines from both outputs
+            orig_lines = [
+                line
+                for line in orig_text_result.stdout.split("\n")
+                if tmp_objfile0 not in line
+            ]
+            simplified_lines = [
+                line
+                for line in simplified_text_result.stdout.split("\n")
+                if tmp_objfile1 not in line
+            ]
+
+            if orig_lines != simplified_lines:
+                logger.error(
+                    f"__text section content of {tmp_objfile0} and {tmp_objfile1} before/after simplification differs -- aborting"
+                )
+                logger.error("I'll keep them around for you to have a look")
+                raise Exception("simpasm failed")
+        else:
+            if orig_obj != simplified_obj:
+                logger.error(
+                    f"Object files {tmp_objfile0} and {tmp_objfile1} before/after simplification are not byte-wise equal -- aborting"
+                )
+                logger.error("I'll keep them around for you to have a look")
+                raise Exception("simpasm failed")
 
     os.unlink(tmp_objfile0)
     os.unlink(tmp_objfile1)
@@ -341,7 +403,15 @@ def _main():
     )
     parser.add_argument("--nm", type=str, default="nm")
     parser.add_argument("--objdump", type=str, default="objdump")
+    parser.add_argument("--strip", type=str, default="llvm-strip")
     parser.add_argument("--cflags", type=str)
+    parser.add_argument("--cfify", action="store_true", help="Apply CFI directives")
+    parser.add_argument(
+        "--arch",
+        type=str,
+        default="aarch64",
+        help="Target architecture for CFI directives",
+    )
 
     args = parser.parse_args()
 

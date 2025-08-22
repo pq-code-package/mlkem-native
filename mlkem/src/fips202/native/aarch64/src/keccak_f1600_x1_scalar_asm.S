@@ -45,15 +45,29 @@
 .global MLK_ASM_NAMESPACE(keccak_f1600_x1_scalar_asm)
 MLK_ASM_FN_SYMBOL(keccak_f1600_x1_scalar_asm)
 
+        .cfi_startproc
         sub	sp, sp, #0x80
+        .cfi_adjust_cfa_offset 0x80
         stp	x19, x20, [sp, #0x20]
+        .cfi_rel_offset x19, 0x20
+        .cfi_rel_offset x20, 0x28
         stp	x21, x22, [sp, #0x30]
+        .cfi_rel_offset x21, 0x30
+        .cfi_rel_offset x22, 0x38
         stp	x23, x24, [sp, #0x40]
+        .cfi_rel_offset x23, 0x40
+        .cfi_rel_offset x24, 0x48
         stp	x25, x26, [sp, #0x50]
+        .cfi_rel_offset x25, 0x50
+        .cfi_rel_offset x26, 0x58
         stp	x27, x28, [sp, #0x60]
+        .cfi_rel_offset x27, 0x60
+        .cfi_rel_offset x28, 0x68
         stp	x29, x30, [sp, #0x70]
+        .cfi_rel_offset x29, 0x70
+        .cfi_rel_offset x30, 0x78
 
-keccak_f1600_x1_scalar_initial:
+Lkeccak_f1600_x1_scalar_initial:
         mov	x26, x1
         str	x1, [sp, #0x8]
         ldp	x1, x6, [x0]
@@ -178,7 +192,7 @@ keccak_f1600_x1_scalar_initial:
         eor	x14, x26, x6, ror #46
         eor	x6, x27, x29, ror #41
 
-keccak_f1600_x1_scalar_loop:
+Lkeccak_f1600_x1_scalar_loop:
         eor	x0, x15, x11, ror #52
         eor	x0, x0, x13, ror #48
         eor	x26, x8, x9, ror #57
@@ -291,7 +305,7 @@ keccak_f1600_x1_scalar_loop:
         bic	x3, x0, x30, ror #5
         eor	x23, x3, x26, ror #52
         eor	x3, x29, x30, ror #24
-        b.le	keccak_f1600_x1_scalar_loop
+        b.le	Lkeccak_f1600_x1_scalar_loop
         ror	x6, x6, #0x2b
         ror	x11, x11, #0x32
         ror	x21, x21, #0x14
@@ -330,13 +344,27 @@ keccak_f1600_x1_scalar_loop:
         stp	x15, x20, [x0, #0xb0]
         str	x25, [x0, #0xc0]
         ldp	x19, x20, [sp, #0x20]
+        .cfi_restore x19
+        .cfi_restore x20
         ldp	x21, x22, [sp, #0x30]
+        .cfi_restore x21
+        .cfi_restore x22
         ldp	x23, x24, [sp, #0x40]
+        .cfi_restore x23
+        .cfi_restore x24
         ldp	x25, x26, [sp, #0x50]
+        .cfi_restore x25
+        .cfi_restore x26
         ldp	x27, x28, [sp, #0x60]
+        .cfi_restore x27
+        .cfi_restore x28
         ldp	x29, x30, [sp, #0x70]
+        .cfi_restore x29
+        .cfi_restore x30
         add	sp, sp, #0x80
+        .cfi_adjust_cfa_offset -0x80
         ret
+        .cfi_endproc
 
 #endif /* MLK_FIPS202_AARCH64_NEED_X1_SCALAR && \
           !MLK_CONFIG_MULTILEVEL_NO_SHARED */
