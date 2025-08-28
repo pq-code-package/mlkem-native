@@ -50,6 +50,7 @@
                 gcc48 = pkgs-2405.gcc48;
                 gcc49 = pkgs-2405.gcc49;
                 gcc7 = pkgs-2405.gcc7;
+                clang_21 = pkgs-unstable.clang_21;
               })
             ];
           };
@@ -128,6 +129,7 @@
           devShells.ci_clang18 = util.mkShellWithCC' pkgs.clang_18;
           devShells.ci_clang19 = util.mkShellWithCC' pkgs.clang_19;
           devShells.ci_clang20 = util.mkShellWithCC' pkgs.clang_20;
+          devShells.ci_clang21 = util.mkShellWithCC' pkgs.clang_21;
 
           devShells.ci_zig0_12 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_12);
           devShells.ci_zig0_13 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_13);
@@ -150,6 +152,7 @@
           devShells.ci_valgrind-varlat_clang18 = util.mkShellWithCC_valgrind' pkgs.clang_18;
           devShells.ci_valgrind-varlat_clang19 = util.mkShellWithCC_valgrind' pkgs.clang_19;
           devShells.ci_valgrind-varlat_clang20 = util.mkShellWithCC_valgrind' pkgs.clang_20;
+          devShells.ci_valgrind-varlat_clang21 = util.mkShellWithCC_valgrind' pkgs.clang_21;
           devShells.ci_valgrind-varlat_gcc48 = util.mkShellWithCC_valgrind' pkgs.gcc48;
           devShells.ci_valgrind-varlat_gcc49 = util.mkShellWithCC_valgrind' pkgs.gcc49;
           devShells.ci_valgrind-varlat_gcc7 = util.mkShellWithCC_valgrind' pkgs.gcc7;
