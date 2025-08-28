@@ -64,11 +64,19 @@ _PQCP_MLKEM_NATIVE_MLKEM768_ntt_asm:
 PQCP_MLKEM_NATIVE_MLKEM768_ntt_asm:
 #endif
 
+        .cfi_startproc
         sub	sp, sp, #0x40
+        .cfi_adjust_cfa_offset 0x40
         stp	d8, d9, [sp]
         stp	d10, d11, [sp, #0x10]
+        .cfi_rel_offset d10, 0x10
+        .cfi_rel_offset d11, 0x18
         stp	d12, d13, [sp, #0x20]
+        .cfi_rel_offset d12, 0x20
+        .cfi_rel_offset d13, 0x28
         stp	d14, d15, [sp, #0x30]
+        .cfi_rel_offset d14, 0x30
+        .cfi_rel_offset d15, 0x38
         mov	w5, #0xd01              // =3329
         mov	v7.h[0], w5
         mov	w5, #0x4ebf             // =20159
@@ -89,7 +97,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_ntt_asm:
         ldr	q19, [x0, #0x180]
         sub	x4, x4, #0x1
 
-ntt_layer123_start:
+Lntt_layer123_start:
         sqrdmulh	v8.8h, v24.8h, v0.h[1]
         sqrdmulh	v24.8h, v2.8h, v0.h[1]
         mul	v2.8h, v2.8h, v0.h[0]
@@ -167,7 +175,7 @@ ntt_layer123_start:
         ldr	q19, [x0, #0x180]
         mul	v17.8h, v11.8h, v0.h[0]
         subs	x4, x4, #0x1
-        cbnz	x4, ntt_layer123_start
+        cbnz	x4, Lntt_layer123_start
         sqrdmulh	v6.8h, v11.8h, v0.h[1]
         mul	v25.8h, v19.8h, v0.h[0]
         sqrdmulh	v12.8h, v19.8h, v0.h[1]
@@ -257,7 +265,7 @@ ntt_layer123_start:
         ldr	q5, [x2, #0x50]
         sub	x4, x4, #0x1
 
-ntt_layer4567_start:
+Lntt_layer4567_start:
         ldr	q8, [x0]
         ldr	q17, [x2, #0x10]
         sub	v1.8h, v8.8h, v14.8h
@@ -330,7 +338,7 @@ ntt_layer4567_start:
         stur	q25, [x0, #-0x10]
         mls	v27.8h, v19.8h, v7.h[0]
         subs	x4, x4, #0x1
-        cbnz	x4, ntt_layer4567_start
+        cbnz	x4, Lntt_layer4567_start
         ldr	q23, [x0]
         ldr	q17, [x2], #0x60
         sub	v19.8h, v23.8h, v14.8h
@@ -385,7 +393,15 @@ ntt_layer4567_start:
         stur	q24, [x0, #-0x30]
         ldp	d8, d9, [sp]
         ldp	d10, d11, [sp, #0x10]
+        .cfi_restore d10
+        .cfi_restore d11
         ldp	d12, d13, [sp, #0x20]
+        .cfi_restore d12
+        .cfi_restore d13
         ldp	d14, d15, [sp, #0x30]
+        .cfi_restore d14
+        .cfi_restore d15
         add	sp, sp, #0x40
+        .cfi_adjust_cfa_offset -0x40
+        .cfi_endproc
         ret
