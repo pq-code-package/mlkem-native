@@ -9,6 +9,7 @@ length-ciphertext: 768
 length-secret-key: 1632
 length-shared-secret: 32
 length-keypair-seed: 64
+length-encaps-seed: 32
 nistkat-sha256: c70041a761e01cd6426fa60e9fd6a4412c2be817386c8d0f3334898082512782
 testvectors-sha256: 6730bb552c22d9d2176ffb5568e48eb30952cf1f065073ec5f9724f6a3c6ea85
 principal-submitters:
@@ -31,6 +32,7 @@ implementations:
   signature_keypair: PQCP_MLKEM_NATIVE_MLKEM512_C_keypair
   signature_keypair_derand: PQCP_MLKEM_NATIVE_MLKEM512_C_keypair_derand
   signature_enc: PQCP_MLKEM_NATIVE_MLKEM512_C_enc
+  signature_enc_derand: PQCP_MLKEM_NATIVE_MLKEM512_C_enc_derand
   signature_dec: PQCP_MLKEM_NATIVE_MLKEM512_C_dec
   sources: integration/liboqs/config_c.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h
     mlkem/src/cbmc.h mlkem/src/common.h mlkem/src/compress.c mlkem/src/compress.h
@@ -46,6 +48,7 @@ implementations:
   signature_keypair: PQCP_MLKEM_NATIVE_MLKEM512_X86_64_keypair
   signature_keypair_derand: PQCP_MLKEM_NATIVE_MLKEM512_X86_64_keypair_derand
   signature_enc: PQCP_MLKEM_NATIVE_MLKEM512_X86_64_enc
+  signature_enc_derand: PQCP_MLKEM_NATIVE_MLKEM512_X86_64_enc_derand
   signature_dec: PQCP_MLKEM_NATIVE_MLKEM512_X86_64_dec
   sources: integration/liboqs/config_x86_64.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h
     mlkem/src/cbmc.h mlkem/src/common.h mlkem/src/compress.c mlkem/src/compress.h
@@ -70,6 +73,7 @@ implementations:
   signature_keypair: PQCP_MLKEM_NATIVE_MLKEM512_AARCH64_keypair
   signature_keypair_derand: PQCP_MLKEM_NATIVE_MLKEM512_AARCH64_keypair_derand
   signature_enc: PQCP_MLKEM_NATIVE_MLKEM512_AARCH64_enc
+  signature_enc_derand: PQCP_MLKEM_NATIVE_MLKEM512_AARCH64_enc_derand
   signature_dec: PQCP_MLKEM_NATIVE_MLKEM512_AARCH64_dec
   sources: integration/liboqs/config_aarch64.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h
     mlkem/src/cbmc.h mlkem/src/common.h mlkem/src/compress.c mlkem/src/compress.h
