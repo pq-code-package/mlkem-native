@@ -88,68 +88,72 @@ rej_uniform_initial_zero:
 rej_uniform_loop48:
         cmp	x9, x4
         b.hs	rej_uniform_memory_copy
+
+rej_uniform_slothy_start:
+        ld3	{ v20.16b, v21.16b, v22.16b }, [x1], #48
         sub	x2, x2, #0x30
-        ld3	{ v0.16b, v1.16b, v2.16b }, [x1], #48
-        zip1	v4.16b, v0.16b, v1.16b
-        zip2	v5.16b, v0.16b, v1.16b
-        zip1	v6.16b, v1.16b, v2.16b
-        zip2	v7.16b, v1.16b, v2.16b
-        bic	v4.8h, #0xf0, lsl #8
-        bic	v5.8h, #0xf0, lsl #8
-        ushr	v6.8h, v6.8h, #0x4
-        ushr	v7.8h, v7.8h, #0x4
-        zip1	v16.8h, v4.8h, v6.8h
-        zip2	v17.8h, v4.8h, v6.8h
-        zip1	v18.8h, v5.8h, v7.8h
-        zip2	v19.8h, v5.8h, v7.8h
-        cmhi	v4.8h, v30.8h, v16.8h
-        cmhi	v5.8h, v30.8h, v17.8h
-        cmhi	v6.8h, v30.8h, v18.8h
-        cmhi	v7.8h, v30.8h, v19.8h
-        and	v4.16b, v4.16b, v31.16b
-        and	v5.16b, v5.16b, v31.16b
-        and	v6.16b, v6.16b, v31.16b
-        and	v7.16b, v7.16b, v31.16b
-        uaddlv	s20, v4.8h
-        uaddlv	s21, v5.8h
-        uaddlv	s22, v6.8h
-        uaddlv	s23, v7.8h
-        fmov	w12, s20
-        fmov	w13, s21
-        fmov	w14, s22
-        fmov	w15, s23
-        ldr	q24, [x3, x12, lsl #4]
-        ldr	q25, [x3, x13, lsl #4]
-        ldr	q26, [x3, x14, lsl #4]
-        ldr	q27, [x3, x15, lsl #4]
-        cnt	v4.16b, v4.16b
-        cnt	v5.16b, v5.16b
+        zip1	v5.16b, v21.16b, v22.16b
+        zip1	v26.16b, v20.16b, v21.16b
+        ushr	v7.8h, v5.8h, #0x4
+        bic	v26.8h, #0xf0, lsl #8
+        zip2	v17.16b, v20.16b, v21.16b
+        zip2	v19.8h, v26.8h, v7.8h
+        zip1	v1.8h, v26.8h, v7.8h
+        cmhi	v0.8h, v30.8h, v19.8h
+        cmhi	v18.8h, v30.8h, v1.8h
+        and	v16.16b, v0.16b, v31.16b
+        cnt	v26.16b, v16.16b
+        and	v6.16b, v18.16b, v31.16b
+        uaddlv	s26, v26.8h
+        bic	v17.8h, #0xf0, lsl #8
+        zip2	v7.16b, v21.16b, v22.16b
+        fmov	w6, s26
+        ushr	v28.8h, v7.8h, #0x4
+        uaddlv	s7, v6.8h
         cnt	v6.16b, v6.16b
-        cnt	v7.16b, v7.16b
-        uaddlv	s20, v4.8h
-        uaddlv	s21, v5.8h
-        uaddlv	s22, v6.8h
-        uaddlv	s23, v7.8h
-        fmov	w12, s20
-        fmov	w13, s21
-        fmov	w14, s22
-        fmov	w15, s23
-        tbl	v16.16b, { v16.16b }, v24.16b
-        tbl	v17.16b, { v17.16b }, v25.16b
-        tbl	v18.16b, { v18.16b }, v26.16b
-        tbl	v19.16b, { v19.16b }, v27.16b
-        str	q16, [x7]
-        add	x7, x7, x12, lsl #1
-        str	q17, [x7]
-        add	x7, x7, x13, lsl #1
-        str	q18, [x7]
-        add	x7, x7, x14, lsl #1
-        str	q19, [x7]
-        add	x7, x7, x15, lsl #1
-        add	x12, x12, x13
-        add	x14, x14, x15
-        add	x9, x9, x12
-        add	x9, x9, x14
+        uaddlv	s3, v16.8h
+        uaddlv	s26, v6.8h
+        zip2	v29.8h, v17.8h, v28.8h
+        fmov	w17, s7
+        fmov	w15, s26
+        cmhi	v26.8h, v30.8h, v29.8h
+        add	x14, x7, x15, lsl #1
+        ldr	q18, [x3, x17, lsl #4]
+        add	x17, x15, x6
+        and	v26.16b, v26.16b, v31.16b
+        uaddlv	s4, v26.8h
+        cnt	v26.16b, v26.16b
+        zip1	v0.8h, v17.8h, v28.8h
+        uaddlv	s27, v26.8h
+        cmhi	v26.8h, v30.8h, v0.8h
+        tbl	v6.16b, { v1.16b }, v18.16b
+        fmov	w5, s3
+        add	x16, x14, x6, lsl #1
+        and	v26.16b, v26.16b, v31.16b
+        str	q6, [x7]
+        uaddlv	s7, v26.8h
+        add	x17, x9, x17
+        ldr	q21, [x3, x5, lsl #4]
+        fmov	w7, s27
+        fmov	w5, s7
+        tbl	v6.16b, { v19.16b }, v21.16b
+        ldr	q7, [x3, x5, lsl #4]
+        fmov	w12, s4
+        cnt	v23.16b, v26.16b
+        tbl	v26.16b, { v0.16b }, v7.16b
+        uaddlv	s5, v23.8h
+        ldr	q18, [x3, x12, lsl #4]
+        str	q6, [x14]
+        fmov	w15, s5
+        tbl	v4.16b, { v29.16b }, v18.16b
+        add	x12, x16, x15, lsl #1
+        str	q26, [x16]
+        add	x14, x15, x7
+        add	x7, x12, x7, lsl #1
+        str	q4, [x12]
+        add	x9, x17, x14
+
+rej_uniform_slothy_end:
         cmp	x2, #0x30
         b.hs	rej_uniform_loop48
 
