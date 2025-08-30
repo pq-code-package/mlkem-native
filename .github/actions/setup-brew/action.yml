@@ -19,12 +19,9 @@ runs:
       shell: bash
       run: |
         brew update
-    - name: Install base packages
+    - name: Install packages
       shell: bash
       run: |
-        brew install make
-    - name: Install additional packages
-      if: ${{ inputs.packages != ''}}
-      shell: bash
-      run: |
-        brew install ${{ inputs.packages }}
+        for pkg in make ${{ inputs.packages }}; do
+          brew list "$pkg" &>/dev/null || brew install "$pkg"
+        done
