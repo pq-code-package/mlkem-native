@@ -99,7 +99,7 @@ jobs:
           echo "Using AMI ID: $AMI_ID"
           echo "AMI_ID=$AMI_ID" >> $GITHUB_OUTPUT
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
@@ -215,7 +215,7 @@ jobs:
     if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
