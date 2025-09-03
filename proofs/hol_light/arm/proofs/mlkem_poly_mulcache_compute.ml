@@ -9,41 +9,49 @@ needs "proofs/mlkem_specs.ml";;
 needs "proofs/mlkem_utils.ml";;
 needs "proofs/mlkem_zetas.ml";;
 
-(**** print_literal_from_elf "mlkem/poly_mulcache_compute.o";;
+(**** print_literal_from_elf "mlkem/mlkem_poly_mulcache_compute.o";;
 ****)
-
 
 let poly_mulcache_compute_mc = define_assert_from_elf
    "poly_mulcache_compute_mc" "mlkem/mlkem_poly_mulcache_compute.o"
-   [
-       0x5281a025;       (* arm_MOV W5 (rvalue (word 3329)) *)
-       0x4e020ca6;       (* arm_DUP_GEN Q6 X5 16 128 *)
-       0x5289d7e5;       (* arm_MOV W5 (rvalue (word 20159)) *)
-       0x4e020ca7;       (* arm_DUP_GEN Q7 X5 16 128 *)
-       0xd2800204;       (* arm_MOV X4 (rvalue (word 16)) *)
-       0x3dc00421;       (* arm_LDR Q1 X1 (Immediate_Offset (word 16)) *)
-       0x3cc2043b;       (* arm_LDR Q27 X1 (Postimmediate_Offset (word 32)) *)
-       0x3cc10457;       (* arm_LDR Q23 X2 (Postimmediate_Offset (word 16)) *)
-       0x4e415b7b;       (* arm_UZP2 Q27 Q27 Q1 16 *)
-       0x3cc10461;       (* arm_LDR Q1 X3 (Postimmediate_Offset (word 16)) *)
-       0x4e779f62;       (* arm_MUL_VEC Q2 Q27 Q23 16 128 *)
-       0x6e61b77b;       (* arm_SQRDMULH_VEC Q27 Q27 Q1 16 128 *)
-       0xd1000484;       (* arm_SUB X4 X4 (rvalue (word 1)) *)
-       0x3dc0043d;       (* arm_LDR Q29 X1 (Immediate_Offset (word 16)) *)
-       0x3cc10455;       (* arm_LDR Q21 X2 (Postimmediate_Offset (word 16)) *)
-       0x6f464362;       (* arm_MLS_VEC Q2 Q27 (Q6 :> LANE_H 0) 16 128 *)
-       0x3cc2043b;       (* arm_LDR Q27 X1 (Postimmediate_Offset (word 32)) *)
-       0x3cc10467;       (* arm_LDR Q7 X3 (Postimmediate_Offset (word 16)) *)
-       0x4e5d5b7c;       (* arm_UZP2 Q28 Q27 Q29 16 *)
-       0x3c810402;       (* arm_STR Q2 X0 (Postimmediate_Offset (word 16)) *)
-       0x4e759f82;       (* arm_MUL_VEC Q2 Q28 Q21 16 128 *)
-       0x6e67b79b;       (* arm_SQRDMULH_VEC Q27 Q28 Q7 16 128 *)
-       0xd1000484;       (* arm_SUB X4 X4 (rvalue (word 1)) *)
-       0xb5fffec4;       (* arm_CBNZ X4 (word 2097112) *)
-       0x6f464362;       (* arm_MLS_VEC Q2 Q27 (Q6 :> LANE_H 0) 16 128 *)
-       0x3c810402;       (* arm_STR Q2 X0 (Postimmediate_Offset (word 16)) *)
-       0xd65f03c0        (* arm_RET X30 *)
-     ];;
+[
+  0x5281a025;       (* arm_MOV W5 (rvalue (word 3329)) *)
+  0x4e020ca6;       (* arm_DUP_GEN Q6 X5 16 128 *)
+  0x5289d7e5;       (* arm_MOV W5 (rvalue (word 20159)) *)
+  0x4e020ca7;       (* arm_DUP_GEN Q7 X5 16 128 *)
+  0xd2800204;       (* arm_MOV X4 (rvalue (word 16)) *)
+  0x3cc20432;       (* arm_LDR Q18 X1 (Postimmediate_Offset (word 32)) *)
+  0x3cdf0020;       (* arm_LDR Q0 X1 (Immediate_Offset (word 18446744073709551600)) *)
+  0x3cc10464;       (* arm_LDR Q4 X3 (Postimmediate_Offset (word 16)) *)
+  0x3cc1045a;       (* arm_LDR Q26 X2 (Postimmediate_Offset (word 16)) *)
+  0x3dc0043d;       (* arm_LDR Q29 X1 (Immediate_Offset (word 16)) *)
+  0x3cc20425;       (* arm_LDR Q5 X1 (Postimmediate_Offset (word 32)) *)
+  0x4e405a51;       (* arm_UZP2 Q17 Q18 Q0 16 *)
+  0x3cc10472;       (* arm_LDR Q18 X3 (Postimmediate_Offset (word 16)) *)
+  0x6e64b620;       (* arm_SQRDMULH_VEC Q0 Q17 Q4 16 128 *)
+  0x4e7a9e3a;       (* arm_MUL_VEC Q26 Q17 Q26 16 128 *)
+  0xd1000884;       (* arm_SUB X4 X4 (rvalue (word 2)) *)
+  0x4e5d58b1;       (* arm_UZP2 Q17 Q5 Q29 16 *)
+  0x6f46401a;       (* arm_MLS_VEC Q26 Q0 (Q6 :> LANE_H 0) 16 128 *)
+  0x3cc10450;       (* arm_LDR Q16 X2 (Postimmediate_Offset (word 16)) *)
+  0x3cc20425;       (* arm_LDR Q5 X1 (Postimmediate_Offset (word 32)) *)
+  0x6e72b620;       (* arm_SQRDMULH_VEC Q0 Q17 Q18 16 128 *)
+  0x3cdf003d;       (* arm_LDR Q29 X1 (Immediate_Offset (word 18446744073709551600)) *)
+  0x3cc10472;       (* arm_LDR Q18 X3 (Postimmediate_Offset (word 16)) *)
+  0x3c81041a;       (* arm_STR Q26 X0 (Postimmediate_Offset (word 16)) *)
+  0x4e709e3a;       (* arm_MUL_VEC Q26 Q17 Q16 16 128 *)
+  0xf1000484;       (* arm_SUBS X4 X4 (rvalue (word 1)) *)
+  0xb5fffec4;       (* arm_CBNZ X4 (word 2097112) *)
+  0x6f46401a;       (* arm_MLS_VEC Q26 Q0 (Q6 :> LANE_H 0) 16 128 *)
+  0x4e5d58b0;       (* arm_UZP2 Q16 Q5 Q29 16 *)
+  0x3cc10444;       (* arm_LDR Q4 X2 (Postimmediate_Offset (word 16)) *)
+  0x6e72b602;       (* arm_SQRDMULH_VEC Q2 Q16 Q18 16 128 *)
+  0x3c81041a;       (* arm_STR Q26 X0 (Postimmediate_Offset (word 16)) *)
+  0x4e649e1d;       (* arm_MUL_VEC Q29 Q16 Q4 16 128 *)
+  0x6f46405d;       (* arm_MLS_VEC Q29 Q2 (Q6 :> LANE_H 0) 16 128 *)
+  0x3c81041d;       (* arm_STR Q29 X0 (Postimmediate_Offset (word 16)) *)
+  0xd65f03c0        (* arm_RET X30 *)
+];;
 
 let poly_mulcache_compute_EXEC = ARM_MK_EXEC_RULE poly_mulcache_compute_mc;;
 
@@ -126,7 +134,7 @@ let poly_mulcache_compute_SPEC = prove(poly_mulcache_compute_GOAL,
     REPEAT STRIP_TAC THEN
     MAP_EVERY (fun n -> ARM_STEPS_TAC poly_mulcache_compute_EXEC [n] THEN
                (SIMD_SIMPLIFY_TAC [barmul]))
-              (1--181) THEN
+              (1--179) THEN
     ENSURES_FINAL_STATE_TAC THEN
     REPEAT CONJ_TAC THEN
     ASM_REWRITE_TAC [] THEN
