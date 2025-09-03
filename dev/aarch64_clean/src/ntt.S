@@ -56,6 +56,29 @@
 // If C is chosen so that |src| < q * C, then |dst| < q * (0.0508 * C + 1/2)
 //
 // See mlken/reduce.c and test/test_bounds.py for more details.
+
+.macro push_pair reg1, reg2, offset
+    stp \reg1, \reg2, [sp, #\offset]
+    .cfi_rel_offset \reg1, \offset
+    .cfi_rel_offset \reg2, (\offset + 8)
+.endm
+
+.macro restore_pair reg1, reg2, offset
+    ldp \reg1, \reg2, [sp, #\offset]
+    .cfi_restore \reg1
+    .cfi_restore \reg2
+.endm
+
+.macro alloc_stack size
+    sub sp, sp, #\size
+    .cfi_adjust_cfa_offset \size
+.endm
+
+.macro free_stack size
+    add sp, sp, #\size
+    .cfi_adjust_cfa_offset -\size
+.endm
+
 .macro mulmodq dst, src, const, idx0, idx1
         // Signed barrett multiplication @[NeonNTT, Section 3.1.2] using
         // round-to-nearest-even-integer approximation. Following loc.cit.,
@@ -115,19 +138,19 @@
 .endm
 
 .macro save_vregs
-        sub sp, sp, #(16*4)
-        stp  d8,  d9, [sp, #16*0]
-        stp d10, d11, [sp, #16*1]
-        stp d12, d13, [sp, #16*2]
-        stp d14, d15, [sp, #16*3]
+        alloc_stack (16*4)
+        push_pair d8, d9, 16*0
+        push_pair d10, d11, 16*1
+        push_pair d12, d13, 16*2
+        push_pair d14, d15, 16*3
 .endm
 
 .macro restore_vregs
-        ldp  d8,  d9, [sp, #16*0]
-        ldp d10, d11, [sp, #16*1]
-        ldp d12, d13, [sp, #16*2]
-        ldp d14, d15, [sp, #16*3]
-        add sp, sp, #(16*4)
+        restore_pair d8, d9, 16*0
+        restore_pair d10, d11, 16*1
+        restore_pair d12, d13, 16*2
+        restore_pair d14, d15, 16*3
+        free_stack (16*4)
 .endm
 
 .macro push_stack
@@ -191,6 +214,7 @@
         .global MLK_ASM_NAMESPACE(ntt_asm)
         .balign 4
 MLK_ASM_FN_SYMBOL(ntt_asm)
+        .cfi_startproc
         push_stack
 
         mov wtmp, #3329
@@ -218,7 +242,7 @@ MLK_ASM_FN_SYMBOL(ntt_asm)
         //
         // See test/test_bounds.py for more details.
 
-ntt_layer123_start:
+Lntt_layer123_start:
 
         ldr q_data0, [in, #0]
         ldr q_data1, [in, #(1*(512/8))]
@@ -254,13 +278,13 @@ ntt_layer123_start:
         str q_data7, [in, #(-16 + 7*(512/8))]
 
         subs count, count, #1
-        cbnz count, ntt_layer123_start
+        cbnz count, Lntt_layer123_start
 
         mov in, inp
         mov count, #8
 
         .p2align 2
-ntt_layer4567_start:
+Lntt_layer4567_start:
 
         ldr q_data0, [in, #(16*0)]
         ldr q_data1, [in, #(16*1)]
@@ -290,10 +314,12 @@ ntt_layer4567_start:
         str q_data3, [in, #(-16*1)]
 
         subs count, count, #1
-        cbnz count, ntt_layer4567_start
+        cbnz count, Lntt_layer4567_start
 
         pop_stack
         ret
+
+        .cfi_endproc
 
 /****************** REGISTER DEALLOCATIONS *******************/
     .unreq in

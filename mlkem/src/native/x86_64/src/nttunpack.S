@@ -33,12 +33,15 @@
 .global MLK_ASM_NAMESPACE(nttunpack_avx2)
 MLK_ASM_FN_SYMBOL(nttunpack_avx2)
 
-        callq	nttunpack_avx2_core
+        .cfi_startproc
+        callq	Lnttunpack_avx2_core
         addq	$0x100, %rdi            # imm = 0x100
-        callq	nttunpack_avx2_core
+        callq	Lnttunpack_avx2_core
+        .cfi_endproc
         retq
 
-nttunpack_avx2_core:
+Lnttunpack_avx2_core:
+        .cfi_startproc
         vmovdqa	(%rdi), %ymm4
         vmovdqa	0x20(%rdi), %ymm5
         vmovdqa	0x40(%rdi), %ymm6
@@ -103,6 +106,7 @@ nttunpack_avx2_core:
         vmovdqa	%ymm3, 0xa0(%rdi)
         vmovdqa	%ymm7, 0xc0(%rdi)
         vmovdqa	%ymm11, 0xe0(%rdi)
+        .cfi_endproc
         retq
 
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \

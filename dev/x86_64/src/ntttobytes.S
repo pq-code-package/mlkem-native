@@ -31,6 +31,7 @@
 .global MLK_ASM_NAMESPACE(ntttobytes_avx2)
 .balign 4
 MLK_ASM_FN_SYMBOL(ntttobytes_avx2)
+.cfi_startproc
 #consts
 vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rdx),%ymm0
 call            ntttobytes_avx2_core
@@ -38,8 +39,10 @@ add		$256,%rsi
 add		$192,%rdi
 call		ntttobytes_avx2_core
 ret
+.cfi_endproc
 
-ntttobytes_avx2_core:
+Lntttobytes_avx2_core:
+.cfi_startproc
 #load
 vmovdqa		(%rsi),%ymm5
 vmovdqa		32(%rsi),%ymm6
@@ -98,6 +101,7 @@ vmovdqu		%ymm3,128(%rdi)
 vmovdqu		%ymm9,160(%rdi)
 
 ret
+.cfi_endproc
 
 /* simpasm: footer-start */
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \

@@ -80,30 +80,45 @@
 #define STACK_LOC_COUNT (2*8)
 #define STACK_LOC_MISC0 (3*8)
 
-.macro alloc_stack
-    sub sp, sp, #(STACK_SIZE)
+
+.macro push_pair reg1, reg2, offset
+    stp \reg1, \reg2, [sp, #\offset]
+    .cfi_rel_offset \reg1, \offset
+    .cfi_rel_offset \reg2, (\offset + 8)
 .endm
 
-.macro free_stack
-    add sp, sp, #(STACK_SIZE)
+.macro restore_pair reg1, reg2, offset
+    ldp \reg1, \reg2, [sp, #\offset]
+    .cfi_restore \reg1
+    .cfi_restore \reg2
+.endm
+
+.macro alloc_stack stack_size
+    sub sp, sp, #\stack_size
+    .cfi_adjust_cfa_offset \stack_size
+.endm
+
+.macro free_stack stack_size
+    add sp, sp, #\stack_size
+    .cfi_adjust_cfa_offset -\stack_size
 .endm
 
 .macro save_gprs
-    stp x19, x20, [sp, #(STACK_BASE_GPRS + 16*0)]
-    stp x21, x22, [sp, #(STACK_BASE_GPRS + 16*1)]
-    stp x23, x24, [sp, #(STACK_BASE_GPRS + 16*2)]
-    stp x25, x26, [sp, #(STACK_BASE_GPRS + 16*3)]
-    stp x27, x28, [sp, #(STACK_BASE_GPRS + 16*4)]
-    stp x29, x30, [sp, #(STACK_BASE_GPRS + 16*5)]
+    push_pair x19, x20, (STACK_BASE_GPRS + 16*0)
+    push_pair x21, x22, (STACK_BASE_GPRS + 16*1)
+    push_pair x23, x24, (STACK_BASE_GPRS + 16*2)
+    push_pair x25, x26, (STACK_BASE_GPRS + 16*3)
+    push_pair x27, x28, (STACK_BASE_GPRS + 16*4)
+    push_pair x29, x30, (STACK_BASE_GPRS + 16*5)
 .endm
 
 .macro restore_gprs
-    ldp x19, x20, [sp, #(STACK_BASE_GPRS + 16*0)]
-    ldp x21, x22, [sp, #(STACK_BASE_GPRS + 16*1)]
-    ldp x23, x24, [sp, #(STACK_BASE_GPRS + 16*2)]
-    ldp x25, x26, [sp, #(STACK_BASE_GPRS + 16*3)]
-    ldp x27, x28, [sp, #(STACK_BASE_GPRS + 16*4)]
-    ldp x29, x30, [sp, #(STACK_BASE_GPRS + 16*5)]
+    restore_pair x19, x20, (STACK_BASE_GPRS + 16*0)
+    restore_pair x21, x22, (STACK_BASE_GPRS + 16*1)
+    restore_pair x23, x24, (STACK_BASE_GPRS + 16*2)
+    restore_pair x25, x26, (STACK_BASE_GPRS + 16*3)
+    restore_pair x27, x28, (STACK_BASE_GPRS + 16*4)
+    restore_pair x29, x30, (STACK_BASE_GPRS + 16*5)
 .endm
 
 .macro load_state
@@ -170,10 +185,11 @@
     .global MLK_ASM_NAMESPACE(keccak_f1600_x1_scalar_asm)
     .balign 4
 MLK_ASM_FN_SYMBOL(keccak_f1600_x1_scalar_asm)
-    alloc_stack
+        .cfi_startproc
+    alloc_stack STACK_SIZE
     save_gprs
 
-keccak_f1600_x1_scalar_initial:
+Lkeccak_f1600_x1_scalar_initial:
     mov const_addr, input_rc
     str input_rc, [sp, #STACK_LOC_CONST]
     load_state
@@ -295,7 +311,7 @@ keccak_f1600_x1_scalar_initial:
     eor x14, x26, x6, ror #46                 // .....................................................*
     eor x6, x27, x29, ror #41                 // .....................................................*
 
-    keccak_f1600_x1_scalar_loop:
+    Lkeccak_f1600_x1_scalar_loop:
                                               // (Optimized for Cortex-A55)
                                               // Instructions:    112
                                               // Expected cycles: 57
@@ -416,15 +432,16 @@ keccak_f1600_x1_scalar_initial:
     bic x3, x0, x30, ror #5                   // .......................................................*.
     eor x23, x3, x26, ror #52                 // ........................................................*
     eor x3, x29, x30, ror #24                 // ........................................................*
-    ble keccak_f1600_x1_scalar_loop
+    ble Lkeccak_f1600_x1_scalar_loop
 
     final_rotate
     ldr input_addr, [sp, #STACK_LOC_INPUT]
     store_state
 
     restore_gprs
-    free_stack
+    free_stack STACK_SIZE
     ret
+        .cfi_endproc
 
 /****************** REGISTER DEALLOCATIONS *******************/
     .unreq input_addr

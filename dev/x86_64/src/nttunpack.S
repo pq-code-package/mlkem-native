@@ -31,12 +31,15 @@
 .global MLK_ASM_NAMESPACE(nttunpack_avx2)
 .balign 4
 MLK_ASM_FN_SYMBOL(nttunpack_avx2)
+.cfi_startproc
 call		nttunpack_avx2_core
 add		$256,%rdi
 call		nttunpack_avx2_core
 ret
+.cfi_endproc
 
-nttunpack_avx2_core:
+Lnttunpack_avx2_core:
+.cfi_startproc
 #load
 vmovdqa		(%rdi),%ymm4
 vmovdqa		32(%rdi),%ymm5
@@ -78,6 +81,7 @@ vmovdqa		%ymm7,192(%rdi)
 vmovdqa		%ymm11,224(%rdi)
 
 ret
+.cfi_endproc
 
 /* simpasm: footer-start */
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \

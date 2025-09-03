@@ -35,7 +35,7 @@ vmovdqa %ymm8, (32*\i+16)*2(%rdi)
 .global MLK_ASM_NAMESPACE(poly_mulcache_compute_avx2)
 .balign 4
 MLK_ASM_FN_SYMBOL(poly_mulcache_compute_avx2)
-
+.cfi_startproc
 vmovdqa MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rdx),%ymm0
 
 mulcache_compute_iter 0
@@ -44,6 +44,7 @@ mulcache_compute_iter 2
 mulcache_compute_iter 3
 
 ret
+.cfi_endproc
 
 /* simpasm: footer-start */
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \

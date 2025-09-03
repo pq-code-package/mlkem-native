@@ -60,7 +60,7 @@
         .global MLK_ASM_NAMESPACE(poly_reduce_asm)
         .balign 4
 MLK_ASM_FN_SYMBOL(poly_reduce_asm)
-
+        .cfi_startproc
         mov wtmp, #3329 // ML-KEM modulus
         dup modulus.8h, wtmp
 
@@ -117,7 +117,7 @@ MLK_ASM_FN_SYMBOL(poly_reduce_asm)
         // add v16.8H, v2.8H, v27.8H              // .....................*.........
 
         sub count, count, #1
-poly_reduce_loop:
+Lpoly_reduce_loop:
                                                // Instructions:    32
                                                // Expected cycles: 36
                                                // Expected IPC:    0.89
@@ -201,7 +201,7 @@ poly_reduce_loop:
         // str q0, [x0, #-16]                     // .....~............................'......*..........................
 
         sub count, count, 1
-        cbnz count, poly_reduce_loop
+        cbnz count, Lpoly_reduce_loop
                                                // Instructions:    17
                                                // Expected cycles: 23
                                                // Expected IPC:    0.74
@@ -256,6 +256,7 @@ poly_reduce_loop:
 
 
         ret
+        .cfi_endproc
 
         .unreq ptr
         .unreq count

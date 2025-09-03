@@ -61,11 +61,21 @@
 .global MLK_ASM_NAMESPACE(ntt_asm)
 MLK_ASM_FN_SYMBOL(ntt_asm)
 
+        .cfi_startproc
         sub	sp, sp, #0x40
+        .cfi_adjust_cfa_offset 64
         stp	d8, d9, [sp]
+        .cfi_rel_offset d8, 0
+        .cfi_rel_offset d9, 8
         stp	d10, d11, [sp, #0x10]
+        .cfi_rel_offset d10, 16
+        .cfi_rel_offset d11, 24
         stp	d12, d13, [sp, #0x20]
+        .cfi_rel_offset d12, 32
+        .cfi_rel_offset d13, 40
         stp	d14, d15, [sp, #0x30]
+        .cfi_rel_offset d14, 48
+        .cfi_rel_offset d15, 56
         mov	w5, #0xd01              // =3329
         mov	v7.h[0], w5
         mov	w5, #0x4ebf             // =20159
@@ -85,8 +95,7 @@ MLK_ASM_FN_SYMBOL(ntt_asm)
         mul	v17.8h, v11.8h, v0.h[0]
         ldr	q19, [x0, #0x180]
         sub	x4, x4, #0x1
-
-ntt_layer123_start:
+1:
         sqrdmulh	v8.8h, v24.8h, v0.h[1]
         sqrdmulh	v24.8h, v2.8h, v0.h[1]
         mul	v2.8h, v2.8h, v0.h[0]
@@ -164,7 +173,7 @@ ntt_layer123_start:
         ldr	q19, [x0, #0x180]
         mul	v17.8h, v11.8h, v0.h[0]
         subs	x4, x4, #0x1
-        cbnz	x4, ntt_layer123_start
+        cbnz	x4, 1b
         sqrdmulh	v6.8h, v11.8h, v0.h[1]
         mul	v25.8h, v19.8h, v0.h[0]
         sqrdmulh	v12.8h, v19.8h, v0.h[1]
@@ -253,8 +262,7 @@ ntt_layer123_start:
         mls	v27.8h, v8.8h, v7.h[0]
         ldr	q5, [x2, #0x50]
         sub	x4, x4, #0x1
-
-ntt_layer4567_start:
+2:
         ldr	q8, [x0]
         ldr	q17, [x2, #0x10]
         sub	v1.8h, v8.8h, v14.8h
@@ -327,7 +335,7 @@ ntt_layer4567_start:
         stur	q25, [x0, #-0x10]
         mls	v27.8h, v19.8h, v7.h[0]
         subs	x4, x4, #0x1
-        cbnz	x4, ntt_layer4567_start
+        cbnz	x4, 2b
         ldr	q23, [x0]
         ldr	q17, [x2], #0x60
         sub	v19.8h, v23.8h, v14.8h
@@ -381,10 +389,21 @@ ntt_layer4567_start:
         stur	q8, [x0, #-0x20]
         stur	q24, [x0, #-0x30]
         ldp	d8, d9, [sp]
+        .cfi_restore d8
+        .cfi_restore d9
         ldp	d10, d11, [sp, #0x10]
+        .cfi_restore d10
+        .cfi_restore d11
         ldp	d12, d13, [sp, #0x20]
+        .cfi_restore d12
+        .cfi_restore d13
         ldp	d14, d15, [sp, #0x30]
+        .cfi_restore d14
+        .cfi_restore d15
         add	sp, sp, #0x40
+        .cfi_adjust_cfa_offset -64
         ret
+        .cfi_endproc
+
 
 #endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

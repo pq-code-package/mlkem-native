@@ -1727,7 +1727,7 @@ def check_asm_loop_labels_for_file(filename):
     if res is None:
         raise Exception(f"Could not find function symbol in assembly file {filename}")
     funcname = res.group(1)
-    lbl_prefix = funcname.replace("_asm", "") + "_"
+    lbl_prefix = "L" + funcname.replace("_asm", "") + "_"
     lbl_pattern = r"^(\w+):"
     for m in re.finditer(lbl_pattern, content, flags=re.M):
         lbl = m.group(1)
@@ -1787,6 +1787,9 @@ def update_via_simpasm(
 
     with tempfile.NamedTemporaryFile(suffix=".S") as tmp:
         try:
+            # Determine architecture from filename
+            arch = "aarch64" if "aarch64" in infile_full else "x86_64"
+
             cmd = [
                 "./scripts/simpasm",
                 "--objdump=llvm-objdump",

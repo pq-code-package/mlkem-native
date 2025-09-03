@@ -33,6 +33,7 @@
 .global MLK_ASM_NAMESPACE(tomont_avx2)
 .balign 4
 MLK_ASM_FN_SYMBOL(tomont_avx2)
+.cfi_startproc
 #consts
 vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
 vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XMONTSQLO*2(%rsi),%ymm1
@@ -41,8 +42,10 @@ call		tomont_avx2_core
 add		$256,%rdi
 call		tomont_avx2_core
 ret
+.cfi_endproc
 
-tomont_avx2_core:
+Ltomont_avx2_core:
+.cfi_startproc
 #load
 vmovdqa		(%rdi),%ymm3
 vmovdqa		32(%rdi),%ymm4
@@ -71,8 +74,8 @@ vmovdqa		%ymm7,128(%rdi)
 vmovdqa		%ymm8,160(%rdi)
 vmovdqa		%ymm9,192(%rdi)
 vmovdqa		%ymm10,224(%rdi)
-
 ret
+.cfi_endproc
 
 /* simpasm: footer-start */
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \

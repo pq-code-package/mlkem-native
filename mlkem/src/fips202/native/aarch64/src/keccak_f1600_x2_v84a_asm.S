@@ -62,11 +62,21 @@
 .global MLK_ASM_NAMESPACE(keccak_f1600_x2_v84a_asm)
 MLK_ASM_FN_SYMBOL(keccak_f1600_x2_v84a_asm)
 
+        .cfi_startproc
         sub	sp, sp, #0x40
+        .cfi_adjust_cfa_offset 64
         stp	d8, d9, [sp]
+        .cfi_rel_offset d8, 0
+        .cfi_rel_offset d9, 8
         stp	d10, d11, [sp, #0x10]
+        .cfi_rel_offset d10, 16
+        .cfi_rel_offset d11, 24
         stp	d12, d13, [sp, #0x20]
+        .cfi_rel_offset d12, 32
+        .cfi_rel_offset d13, 40
         stp	d14, d15, [sp, #0x30]
+        .cfi_rel_offset d14, 48
+        .cfi_rel_offset d15, 56
         add	x2, x0, #0xc8
         ldp	q25, q26, [x0]
         ldp	q27, q28, [x2]
@@ -108,8 +118,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x2_v84a_asm)
         ldr	d27, [x2, #0xc0]
         trn1	v24.2d, v25.2d, v27.2d
         mov	x2, #0x18               // =24
-
-keccak_f1600_x2_v84a_loop:
+1:
         eor3	v30.16b, v0.16b, v5.16b, v10.16b
         eor3	v29.16b, v1.16b, v6.16b, v11.16b
         eor3	v28.16b, v2.16b, v7.16b, v12.16b
@@ -178,7 +187,7 @@ keccak_f1600_x2_v84a_loop:
         bcax	v4.16b, v4.16b, v27.16b, v30.16b
         eor	v0.16b, v0.16b, v31.16b
         sub	x2, x2, #0x1
-        cbnz	x2, keccak_f1600_x2_v84a_loop
+        cbnz	x2, 1b
         add	x2, x0, #0xc8
         trn1	v25.2d, v0.2d, v1.2d
         trn1	v26.2d, v2.2d, v3.2d
@@ -220,11 +229,22 @@ keccak_f1600_x2_v84a_loop:
         trn2	v25.2d, v24.2d, v24.2d
         str	d25, [x2, #0xc0]
         ldp	d8, d9, [sp]
+        .cfi_restore d8
+        .cfi_restore d9
         ldp	d10, d11, [sp, #0x10]
+        .cfi_restore d10
+        .cfi_restore d11
         ldp	d12, d13, [sp, #0x20]
+        .cfi_restore d12
+        .cfi_restore d13
         ldp	d14, d15, [sp, #0x30]
+        .cfi_restore d14
+        .cfi_restore d15
         add	sp, sp, #0x40
+        .cfi_adjust_cfa_offset -64
         ret
+        .cfi_endproc
+
 
 #endif /* __ARM_FEATURE_SHA3 */
 

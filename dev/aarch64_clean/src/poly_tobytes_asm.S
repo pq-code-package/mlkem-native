@@ -54,9 +54,9 @@
         .global MLK_ASM_NAMESPACE(poly_tobytes_asm)
         .balign 4
 MLK_ASM_FN_SYMBOL(poly_tobytes_asm)
-
+        .cfi_startproc
         mov count, #16
-poly_tobytes_loop_start:
+Lpoly_tobytes_loop_start:
         ld2_wrap data, src
 
         // r[3 * i + 0] = (t0 >> 0);
@@ -74,8 +74,9 @@ poly_tobytes_loop_start:
         st3 {out0.8b, out1.8b, out2.8b}, [dst], #24
 
         subs count, count, #1
-        cbnz count, poly_tobytes_loop_start
+        cbnz count, Lpoly_tobytes_loop_start
         ret
+        .cfi_endproc
 
         .unreq data0
         .unreq data1

@@ -56,7 +56,7 @@
         .global MLK_ASM_NAMESPACE(poly_reduce_asm)
         .balign 4
 MLK_ASM_FN_SYMBOL(poly_reduce_asm)
-
+        .cfi_startproc
         mov wtmp, #3329 // ML-KEM modulus
         dup modulus.8h, wtmp
 
@@ -64,7 +64,7 @@ MLK_ASM_FN_SYMBOL(poly_reduce_asm)
         dup modulus_twisted.8h, wtmp
 
         mov count, #8
-poly_reduce_loop_start:
+Lpoly_reduce_loop_start:
         ldr q_data, [ptr], #64
         barrett_reduce data
         scalar_signed_to_unsigned data
@@ -86,9 +86,10 @@ poly_reduce_loop_start:
         str q_data, [ptr, #-16]
 
         subs count, count, #1
-        cbnz count, poly_reduce_loop_start
+        cbnz count, Lpoly_reduce_loop_start
 
         ret
+        .cfi_endproc
 
         .unreq ptr
         .unreq count

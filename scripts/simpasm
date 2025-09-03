@@ -13,18 +13,273 @@ import os
 import re
 
 
-def patchup_disasm(asm):
+def extract_unwind_info(logger, objdump_cmd, objfile):
+    """Extract list of function start/end addresses"""
+    functions = []
+
+    if platform.system() == 'Darwin':  # macOS
+        # Use --unwind-info
+        cmd = objdump_cmd + ["--unwind-info", objfile]
+        unwind_output = subprocess.run(cmd, capture_output=True, text=True, check=True).stdout
+        start_addr = None
+        base_pc = None
+
+        for line in unwind_output.split('\n'):
+            line = line.strip()
+
+            # Look for start address
+            start_match = re.search(r'start:\s+(0x[0-9a-fA-F]+)', line)
+            if start_match:
+                start_addr = int(start_match.group(1), 16)
+                continue
+
+            # Look for length
+            length_match = re.search(r'length:\s+(0x[0-9a-fA-F]+)', line)
+            if length_match and start_addr is not None:
+                length = int(length_match.group(1), 16)
+                functions.append((start_addr, start_addr + length))
+                start_addr = None  # Reset for next entry
+
+        return functions, 0
+    else:
+        # Fallback: use DWARF frames
+        cmd = objdump_cmd + ["--dwarf=frames", objfile]
+        dwarf_output = subprocess.run(cmd, capture_output=True, text=True, check=True).stdout
+        base_pc = None
+
+        for line in dwarf_output.split('\n'):
+            line = line.strip()
+            fde_match = re.search(r'FDE.*pc=([0-9a-fA-F]+)\.\.\.([0-9a-fA-F]+)', line)
+            if fde_match:
+                fde_start = int(fde_match.group(1), 16)
+                fde_end = int(fde_match.group(2), 16)
+
+                if base_pc is None:
+                    base_pc = fde_start
+
+                # Convert to relative addresses
+                fde_start -= base_pc
+                fde_end -= base_pc
+
+                functions.append((fde_start, fde_end))
+
+        return functions, base_pc
+
+def extract_cfi(logger, objdump_cmd, objfile):
+    """Extract CFI annotations from object file DWARF data.
+
+    Returns dict mapping 0-based instruction offsets to lists of CFI directives.
+    """
+    cmd = objdump_cmd + ["--dwarf=frames", objfile]
+    logger.debug(f"Extracting CFI from {objfile}...")
+    dwarf_output = subprocess.run(cmd, capture_output=True, text=True, check=True).stdout
+
+    cmd = objdump_cmd + ["--unwind-info", objfile]
+    logger.debug(f"Extracting unwind info from {objfile}...")
+    unwind_output = subprocess.run(cmd, capture_output=True, text=True, check=True).stdout
+
+    # Get disassembly to map PC addresses to instruction offsets
+    dis_cmd = objdump_cmd + ["--disassemble", objfile, "--triple=aarch64"]
+    dis_output = subprocess.run(dis_cmd, capture_output=True, text=True, check=True).stdout
+
+    def dic_append(dic, key, entry):
+        if key not in dic:
+            dic[key] = []
+        dic[key].append(entry)
+
+    cfi_map_after = {}
+    cfi_map_before = {}
+
+    # On MacOS, the FDE PC offset need not start at 0
+    # This variable tracks the first FDE PC found and acts as the
+    # offset with respect to which the PC in the disassembly is calculated.
+    base_pc = None
+
+    # PC in CFI state machine; modified by DW_CFA_advance_loc[2]
+    cur_loc = None
+
+    # Current offset of CFA from SP
+    cur_sp_offset = None
+
+    # Find unwind info headers using helper function
+    functions, bae_pc = extract_unwind_info(logger, objdump_cmd, objfile)
+    for start_addr, end_addr in functions:
+        # Add .cfi_startproc at function start
+        dic_append(cfi_map_before, start_addr, ".cfi_startproc")
+        # Add .cfi_endproc at function end - 4
+        dic_append(cfi_map_after, end_addr - 4, ".cfi_endproc")
+        dic_append(cfi_map_after, end_addr, "")
+
+    # Parse all FDE sections to collect them
+    lines = dwarf_output.split('\n')
+    cur_loc = 0
+    cur_sp_offset = 0
+    
+    # Drop everything until first FDE to avoid CIE confusion
+    first_fde_found = False
+
+    for line in lines:
+        line = line.strip()
+
+        # Skip everything until we find the first FDE
+        if not first_fde_found:
+            if 'FDE' not in line or 'pc=' not in line:
+                continue
+            first_fde_found = True
+
+        # Look for first FDE header to get PC offset
+        fde_header = re.search(r'FDE.*pc=([0-9a-fA-F]+)\.\.\.([0-9a-fA-F]+)', line)
+        if fde_header and base_pc is None:
+            base_pc = int(fde_header.group(1), 16)
+            cur_sp_offset = 0
+            continue
+
+        # Handle CFI entries
+
+        # 1. DW_CFA_advance_loc and DW_CFA_advance_loc2
+        advance_match = re.search(r'DW_CFA_advance_loc2?:\s+\d+\s+to\s+(0x[0-9a-fA-F]+)', line)
+        if advance_match:
+            cur_loc = int(advance_match.group(1), 16) - base_pc - 4
+            print(f"Cur loc: {cur_loc}")
+            continue
+
+        # 2. DW_CFA_def_cfa_offset
+        cfa_offset_match = re.search(r'DW_CFA_def_cfa_offset:\s+\+(\d+)', line)
+        if cfa_offset_match:
+            new_offset = int(cfa_offset_match.group(1))
+            adjustment = new_offset - cur_sp_offset
+            if adjustment == 0:
+                continue
+            dic_append(cfi_map_after, cur_loc, f'.cfi_adjust_cfa_offset {adjustment}')
+            cur_sp_offset = new_offset
+            continue
+
+        # 3. DW_CFA_offset
+        offset_match = re.search(r'DW_CFA_offset(?:_extended)?:\s+reg(\d+)\s+(-?\d+)', line)
+        if offset_match:
+            reg_num = int(offset_match.group(1))
+            sp_offset = int(offset_match.group(2))
+
+            # Map register numbers to names
+            if reg_num == 29:
+                reg_name = 'x29'
+            elif reg_num == 30:
+                reg_name = 'x30'
+            elif 19 <= reg_num <= 28:
+                reg_name = f'x{reg_num}'
+            elif 72 <= reg_num <= 79:
+                reg_name = f'd{reg_num - 64}'
+            elif reg_num < 31:
+                reg_name = f'x{reg_num}'
+            else:
+                reg_name = 'sp'
+
+            rel_offset = cur_sp_offset + sp_offset
+            dic_append(cfi_map_after, cur_loc, f'.cfi_rel_offset {reg_name}, {rel_offset}')
+            continue
+
+        # 4. DW_CFA_restore
+        restore_match = re.search(r'DW_CFA_restore(?:_extended)?:\s+reg(\d+)', line)
+        if restore_match:
+            reg_num = int(restore_match.group(1))
+
+            # Map register numbers to names
+            if reg_num == 29:
+                reg_name = 'x29'
+            elif reg_num == 30:
+                reg_name = 'x30'
+            elif 19 <= reg_num <= 28:
+                reg_name = f'x{reg_num}'
+            elif 72 <= reg_num <= 79:
+                reg_name = f'd{reg_num - 64}'
+            elif reg_num < 31:
+                reg_name = f'x{reg_num}'
+            else:
+                reg_name = 'sp'
+
+            dic_append(cfi_map_after, cur_loc, f'.cfi_restore {reg_name}')
+            continue
+
+    # Re-key cfi_map dictionary mapping key `pc` to `pc - base_pc` (already done above)
+
+    print(dict(sorted(cfi_map_before.items())))
+    print(dict(sorted(cfi_map_after.items())))
+
+    return cfi_map_before, cfi_map_after
+
+def globalize_labels(asm_lines):
+    """
+    Convert relative references to global labels in two passes:
+    A) Find relative references, create labels, patch instructions
+    B) Emit labels at appropriate addresses
+    """
+    addr_to_label = {}  # address -> label_name
+    local_counter = 0
+
+    # Pass A: Find relative references and patch instructions
+    intermediate_asm = []
+    for line in asm_lines:
+        # Parse instruction line
+        match = re.search(r"^\s*([0-9a-fA-F]+):\s+([0-9a-fA-F][0-9a-fA-F][ ]*)+\s+(?P<inst>.*)$", line)
+        if match:
+            addr = int(match.group(1), 16)
+            inst = match.group("inst")
+
+            # Look for relative references
+            branch_match = re.search(r'(0x[0-9a-fA-F]+)\s+<([^>]+)>', inst)
+            if branch_match:
+                target_addr = int(branch_match.group(1), 16)
+
+                # Only consider relative references
+                if '+' in branch_match.group(2):
+                    # Create label if not exists
+                    if target_addr not in addr_to_label:
+                        label_name = f"local_label_{local_counter}"
+                        addr_to_label[target_addr] = label_name
+                        local_counter += 1
+                    else:
+                        label_name = addr_to_label[target_addr]
+
+                    # Patch instruction to use label name
+                    inst = re.sub(r'<([^>]+)>', f'<{label_name}>', inst)
+                    line = f"{match.group(1)}:\t{match.group(2)}\t{inst}"
+
+        intermediate_asm.append(line)
+
+    # Pass B: Emit labels at instruction addresses
+    final_asm = []
+    for line in intermediate_asm:
+        match = re.search(r"^\s*([0-9a-fA-F]+):", line)
+        if match:
+            addr = int(match.group(1), 16)
+            # Emit pending label if exists
+            if addr in addr_to_label:
+                final_asm.append(f"{addr:08x} <{addr_to_label[addr]}>:")
+
+        final_asm.append(line)
+
+    return final_asm
+
+
+def patchup_disasm(asm, cfi_map_before=None, cfi_map_after=None):
     asm = asm.split("\n")
     indentation = 8
 
-    def decode_label(asm_line):
-        r = re.search(r"^\s*[0-9a-fA-F]+\s*<([a-zA-Z0-9_]+)>:\s*$", asm_line)
-        if r is None:
-            return None
-        return r.group(1)
+    if cfi_map_before is None:
+        cfi_map_before = {}
+    if cfi_map_after is None:
+        cfi_map_after = {}
 
-    def make_label(lbl):
-        return lbl + ":"
+    def decode_label(asm_line):
+        # Handle objdump format labels
+        r = re.search(r"^\s*[0-9a-fA-F]+\s*<([a-zA-Z0-9_]+)>:\s*$", asm_line)
+        if r is not None:
+            return r.group(1)
+        # Handle globalized labels
+        r = re.search(r"^([a-zA-Z0-9_]+):\s*$", asm_line.strip())
+        if r is not None:
+            return r.group(1)
+        return None
 
     # Find first label
     for i, l in enumerate(asm):
@@ -33,23 +288,47 @@ def patchup_disasm(asm):
 
     asm = asm[i + 1 :]
 
+    # Build label to address dictionary
+    label_to_addr = {}
+    addr_to_number = {}
+    label_counter = 1
+
+    for line_num, l in enumerate(asm):
+        lbl = decode_label(l)
+        if lbl is not None:
+            label_to_addr[lbl] = line_num
+            addr_to_number[line_num] = label_counter
+            label_counter += 1
+
     def gen(asm):
-        for l in asm:
+        current_offset = 0
+
+        for line_num, l in enumerate(asm):
             if l.strip() == "":
                 yield ""
                 continue
+
             lbl = decode_label(l)
-            # Re-format labels as assembly labels
+            # Replace label declarations with numeric labels
             if lbl is not None:
-                yield make_label(lbl)
+                yield f"{addr_to_number[line_num]}:"
                 continue
+
             # Drop comments
             l = l.split(";")[0]
-            # Re-format references to labels
-            # Those are assumed to have the form `0xDEADBEEF <label>`
-            l = re.sub(
-                r"(0x)?[0-9a-fA-F]+\s+<(?P<label>[a-zA-Z0-9_]+)>", r"\g<label>", l
-            )
+
+            # Replace label references with Nf/Nb
+            def replace_label_ref(match):
+                label_name = match.group('label')
+                if label_name in label_to_addr:
+                    target_line = label_to_addr[label_name]
+                    target_number = addr_to_number[target_line]
+                    direction = 'f' if target_line > line_num else 'b'
+                    return f'{target_number}{direction}'
+                return match.group(0)
+
+            l = re.sub(r'(0x[0-9a-fA-F]+)\s+<(?P<label>[a-zA-Z0-9_]+)>', replace_label_ref, l)
+
             # Drop address and byte code from line
             d = re.search(
                 r"^\s*[0-9a-fA-F]+:\s+([0-9a-fA-F][0-9a-fA-F][ ]*)+\s+(?P<inst>.*)$", l
@@ -58,7 +337,25 @@ def patchup_disasm(asm):
                 raise Exception(
                     f'The following does not seem to be an assembly line of the expected format `ADDRESS: BYTECODE INSTRUCTION`:\n"{l}"'
                 )
-            yield " " * indentation + d.group("inst")
+
+            inst = d.group("inst")
+
+            for cfi_directive in cfi_map_before.get(current_offset, []):
+                if cfi_directive != "":
+                    yield " " * indentation + cfi_directive
+                else:
+                    yield ""
+
+            yield " " * indentation + inst
+
+            # Emit CFI directives for current offset (after instruction)
+            for cfi_directive in cfi_map_after.get(current_offset, []):
+                if cfi_directive != "":
+                    yield " " * indentation + cfi_directive
+                else:
+                    yield ""
+
+            current_offset += 4  # Assume 4-byte instructions
 
     return list(gen(asm))
 
@@ -155,6 +452,7 @@ def simplify(logger, args, asm_input, asm_output=None):
         except subprocess.CalledProcessError as e:
             logger.error(f"Command failed: {' '.join(cmd)}")
             logger.error(f"Exit code: {e.returncode}")
+            logger.error(f"stdout: {e.stdout}")
             logger.error(f"stderr: {e.stderr}")
             raise Exception("simpasm failed") from e
 
@@ -245,8 +543,17 @@ def simplify(logger, args, asm_input, asm_output=None):
         logger.debug(f"Disassembling temporary object file {tmp_objfile0} ...")
         disasm = run_cmd(cmd).stdout
 
+        # Extract CFI information from object file
+        logger.debug("Extracting CFI information...")
+        cfi_map_before, cfi_map_after = extract_cfi(logger, [args.objdump], tmp_objfile0)
+
+        logger.debug("Patching up local labels ...")
+        logger.debug(disasm)
+        disasm = '\n'.join(globalize_labels(disasm.split('\n')))
+        logger.debug(disasm)
+
         logger.debug("Patching up disassembly ...")
-        simplified = patchup_disasm(disasm)
+        simplified = patchup_disasm(disasm, cfi_map_before, cfi_map_after)
 
         autogen_header = [
             "",
@@ -288,6 +595,7 @@ def simplify(logger, args, asm_input, asm_output=None):
         full_simplified = (
             simplified_header + autogen_header + simplified + simplified_footer
         )
+
         logger.debug(f"Writing simplified assembly to {asm_output} ...")
         with open(asm_output, "w+") as f:
             f.write("\n".join(full_simplified))
@@ -297,14 +605,17 @@ def simplify(logger, args, asm_input, asm_output=None):
             + cflags
             + ["-o", tmp_objfile1, "-"]
         )
-        logger.debug(f"Assembling simplified assembly ...")
-        logger.debug(f"Command: {' '.join(cmd)}")
+
         new_asm = "\n".join(
             drop_if_from_header(simplified_header)
             + autogen_header
             + simplified
             + simplified_footer
         )
+
+        logger.debug(f"Assembling simplified assembly ...")
+        logger.debug(new_asm)
+        logger.debug(f"Command: {' '.join(cmd)}")
         run_cmd(cmd, input=new_asm)
 
         # Get binary contents of re-assembled object file
@@ -312,7 +623,19 @@ def simplify(logger, args, asm_input, asm_output=None):
         simplified_obj = tmp1.read()
 
         logger.debug("Checking that byte-code is unchanged ...")
-        if orig_obj != simplified_obj:
+
+        # Strip symbol tables before comparison
+        logger.debug("Stripping symbol tables...")
+        run_cmd([args.strip, "--strip-all", tmp_objfile0])
+        run_cmd([args.strip, "--strip-all", tmp_objfile1])
+
+        # Re-read stripped object files
+        with open(tmp_objfile0, 'rb') as f:
+            orig_obj_stripped = f.read()
+        with open(tmp_objfile1, 'rb') as f:
+            simplified_obj_stripped = f.read()
+
+        if orig_obj_stripped != simplified_obj_stripped:
             logger.error(
                 f"Object files {tmp_objfile0} and {tmp_objfile1} before/after simplification are not byte-wise equal -- aborting"
             )
@@ -341,6 +664,7 @@ def _main():
     )
     parser.add_argument("--nm", type=str, default="nm")
     parser.add_argument("--objdump", type=str, default="objdump")
+    parser.add_argument("--strip", type=str, default="llvm-strip")
     parser.add_argument("--cflags", type=str)
 
     args = parser.parse_args()

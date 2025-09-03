@@ -184,6 +184,19 @@
 
 /************************ MACROS ****************************/
 
+
+.macro push_pair reg1, reg2, offset
+    stp \reg1, \reg2, [sp, #\offset]
+    .cfi_rel_offset \reg1, \offset
+    .cfi_rel_offset \reg2, (\offset + 8)
+.endm
+
+.macro restore_pair reg1, reg2, offset
+    ldp \reg1, \reg2, [sp, #\offset]
+    .cfi_restore \reg1
+    .cfi_restore \reg2
+.endm
+
 .macro load_input
     ldp Abad, Abed, [input_addr, #0x00]
     ldp Abid, Abod, [input_addr, #0x10]
@@ -219,26 +232,28 @@
 #define STACK_SIZE (16*4) /* VREGS (16*4) */
 
 #define STACK_BASE_GPRS (16*4)
-.macro alloc_stack
-    sub sp, sp, #(STACK_SIZE)
+.macro alloc_stack stack_size
+    sub sp, sp, #\stack_size
+    .cfi_adjust_cfa_offset \stack_size
 .endm
 
-.macro free_stack
-    add sp, sp, #(STACK_SIZE)
+.macro free_stack stack_size
+    add sp, sp, #\stack_size
+    .cfi_adjust_cfa_offset -\stack_size
 .endm
 
 .macro save_vregs
-    stp  d8,  d9, [sp, #(16*0)]
-    stp d10, d11, [sp, #(16*1)]
-    stp d12, d13, [sp, #(16*2)]
-    stp d14, d15, [sp, #(16*3)]
+    push_pair  d8,  d9, (16*0)
+    push_pair d10, d11, (16*1)
+    push_pair d12, d13, (16*2)
+    push_pair d14, d15, (16*3)
 .endm
 
 .macro restore_vregs
-    ldp  d8,  d9, [sp, #(16*0)]
-    ldp d10, d11, [sp, #(16*1)]
-    ldp d12, d13, [sp, #(16*2)]
-    ldp d14, d15, [sp, #(16*3)]
+    restore_pair  d8,  d9, (16*0)
+    restore_pair d10, d11, (16*1)
+    restore_pair d12, d13, (16*2)
+    restore_pair d14, d15, (16*3)
 .endm
 
 /* Macros using v8.4-A SHA-3 instructions */
@@ -336,7 +351,6 @@
 
     /* iota step */
     eor Aba.16b, Aba.16b, v31.16b
-
 .endm
 
 #define KECCAK_F1600_ROUNDS 24
@@ -345,20 +359,22 @@
     .global MLK_ASM_NAMESPACE(keccak_f1600_x1_v84a_asm)
     .balign 4
 MLK_ASM_FN_SYMBOL(keccak_f1600_x1_v84a_asm)
-    alloc_stack
+        .cfi_startproc
+    alloc_stack STACK_SIZE
     save_vregs
     load_input
 
     mov count, #(KECCAK_F1600_ROUNDS)
-keccak_f1600_x1_v84a_loop:
+Lkeccak_f1600_x1_v84a_loop:
     keccak_f1600_round
     sub count, count, #1
-    cbnz count, keccak_f1600_x1_v84a_loop
+    cbnz count, Lkeccak_f1600_x1_v84a_loop
 
     store_input
     restore_vregs
-    free_stack
+    free_stack STACK_SIZE
     ret
+        .cfi_endproc
 
 /****************** REGISTER DEALLOCATIONS *******************/
     .unreq input_addr

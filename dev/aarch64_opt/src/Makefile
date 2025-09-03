@@ -47,34 +47,34 @@ all: ntt.S \
 # These units explicitly save and restore registers v8-v15, so SLOTHY can freely use
 # those registers.
 ntt.S: ../../aarch64_clean/src/ntt.S $(COMMON_H)
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l ntt_layer123_start -l ntt_layer4567_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l Lntt_layer123_start -l Lntt_layer4567_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
 
 intt.S: ../../aarch64_clean/src/intt.S $(COMMON_H)
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l intt_layer123_start -l intt_layer4567_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l Lintt_layer123_start -l Lintt_layer4567_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
 polyvec_basemul_acc_montgomery_cached_asm_k2.S: ../../aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S $(COMMON_H)
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l polyvec_basemul_acc_montgomery_cached_k2_loop_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l Lpolyvec_basemul_acc_montgomery_cached_k2_loop_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
 
 polyvec_basemul_acc_montgomery_cached_asm_k3.S: ../../aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S $(COMMON_H)
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l polyvec_basemul_acc_montgomery_cached_k3_loop_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l Lpolyvec_basemul_acc_montgomery_cached_k3_loop_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
 
 polyvec_basemul_acc_montgomery_cached_asm_k4.S: ../../aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S $(COMMON_H)
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l polyvec_basemul_acc_montgomery_cached_k4_loop_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l Lpolyvec_basemul_acc_montgomery_cached_k4_loop_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
 
 
 
 # These units do NOT save and restore v8-v15, so we must tell SLOTHY not to use them
 # to respect the ABI.
 poly_tomont_asm.S: ../../aarch64_clean/src/poly_tomont_asm.S $(COMMON_H)
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l poly_tomont_loop $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG)
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l Lpoly_tomont_loop $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG)
 
 poly_reduce_asm.S: ../../aarch64_clean/src/poly_reduce_asm.S $(COMMON_H)
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l poly_reduce_loop_start $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG)
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l Lpoly_reduce_loop_start $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG)
 
 poly_mulcache_compute_asm.S: ../../aarch64_clean/src/poly_mulcache_compute_asm.S $(COMMON_H)
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l poly_mulcache_compute_loop_start $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG)
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l Lpoly_mulcache_compute_loop_start $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG)
 
 poly_tobytes_asm.S: ../../aarch64_clean/src/poly_tobytes_asm.S $(COMMON_H)
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l poly_tobytes_loop_start $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG) -c sw_pipelining.unroll=4
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l Lpoly_tobytes_loop_start $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG) -c sw_pipelining.unroll=4
 
 # At the moment, SLOTHY can't process rej_uniform_asm.S
 rej_uniform_asm.S: ../../aarch64_clean/src/rej_uniform_asm.S $(COMMON_H)
@@ -82,7 +82,7 @@ rej_uniform_asm.S: ../../aarch64_clean/src/rej_uniform_asm.S $(COMMON_H)
 
 # Extra target to test SLOTHY on rej_uniform_asm.S in future
 rej_uniform_asm_with_slothy.S: ../../aarch64_clean/src/rej_uniform_asm.S $(COMMON_H)
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l rej_uniform_loop48 $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG)
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l Lrej_uniform_loop48 $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG)
 
 
 clean:

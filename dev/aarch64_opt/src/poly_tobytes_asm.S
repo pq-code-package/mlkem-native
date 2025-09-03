@@ -57,7 +57,7 @@
         .global MLK_ASM_NAMESPACE(poly_tobytes_asm)
         .balign 4
 MLK_ASM_FN_SYMBOL(poly_tobytes_asm)
-
+        .cfi_startproc
         mov count, #16
                                    // Instructions:    8
                                    // Expected cycles: 15
@@ -95,7 +95,7 @@ MLK_ASM_FN_SYMBOL(poly_tobytes_asm)
 
         lsr count, count, #2
         sub count, count, #1
-poly_tobytes_loop_start:
+Lpoly_tobytes_loop_start:
                                                        // Instructions:    40
                                                        // Expected cycles: 68
                                                        // Expected IPC:    0.59
@@ -195,7 +195,7 @@ poly_tobytes_loop_start:
         // st3 {v2.8b, v3.8b, v4.8b}, [x0], #24      // ................'................................................*
 
         sub count, count, 1
-        cbnz count, poly_tobytes_loop_start
+        cbnz count, Lpoly_tobytes_loop_start
                                                        // Instructions:    32
                                                        // Expected cycles: 50
                                                        // Expected IPC:    0.64
@@ -279,6 +279,7 @@ poly_tobytes_loop_start:
         // st3 {v4.8B, v5.8B, v6.8B}, [x0], #24         // .................................................*
 
         ret
+        .cfi_endproc
 
         .unreq data0
         .unreq data1

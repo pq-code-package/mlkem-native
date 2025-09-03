@@ -51,7 +51,7 @@
         .global MLK_ASM_NAMESPACE(poly_tomont_asm)
         .balign 4
 MLK_ASM_FN_SYMBOL(poly_tomont_asm)
-
+        .cfi_startproc
         mov wtmp, #3329 // ML-KEM modulus
         dup modulus.8h, wtmp
 
@@ -65,7 +65,7 @@ MLK_ASM_FN_SYMBOL(poly_tomont_asm)
         dup factor_t.8h, wtmp
 
         mov count, #8
-poly_tomont_loop:
+Lpoly_tomont_loop:
 
         ldr q_data, [src], #64
         mulmod res, data, factor, factor_t
@@ -84,9 +84,10 @@ poly_tomont_loop:
         str q_res, [src, #-16]
 
         sub count, count, #1
-        cbnz count, poly_tomont_loop
+        cbnz count, Lpoly_tomont_loop
 
         ret
+        .cfi_endproc
 
         .unreq src
         .unreq count

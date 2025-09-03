@@ -58,6 +58,29 @@
 // - Vectors al, ah of 32-bit entries
 // Output:
 // - Montgomery reductions of al || ah, stored in al
+
+.macro push_pair reg1, reg2, offset
+    stp \reg1, \reg2, [sp, #\offset]
+    .cfi_rel_offset \reg1, \offset
+    .cfi_rel_offset \reg2, (\offset + 8)
+.endm
+
+.macro restore_pair reg1, reg2, offset
+    ldp \reg1, \reg2, [sp, #\offset]
+    .cfi_restore \reg1
+    .cfi_restore \reg2
+.endm
+
+.macro alloc_stack size
+    sub sp, sp, #\size
+    .cfi_adjust_cfa_offset \size
+.endm
+
+.macro free_stack size
+    add sp, sp, #\size
+    .cfi_adjust_cfa_offset -\size
+.endm
+
 .macro montgomery_reduce_long x, a
         uzp1   t0.8h, \a\()l.8h, \a\()h.8h
         mul    t0.8h, t0.8h, modulus_twisted.8h
@@ -116,19 +139,19 @@
 .endm
 
 .macro save_vregs
-        sub sp, sp, #(16*4)
-        stp  d8,  d9, [sp, #16*0]
-        stp d10, d11, [sp, #16*1]
-        stp d12, d13, [sp, #16*2]
-        stp d14, d15, [sp, #16*3]
+        alloc_stack (16*4)
+        push_pair d8, d9, 16*0
+        push_pair d10, d11, 16*1
+        push_pair d12, d13, 16*2
+        push_pair d14, d15, 16*3
 .endm
 
 .macro restore_vregs
-        ldp  d8,  d9, [sp, #16*0]
-        ldp d10, d11, [sp, #16*1]
-        ldp d12, d13, [sp, #16*2]
-        ldp d14, d15, [sp, #16*3]
-        add sp, sp, #(16*4)
+        restore_pair d8, d9, 16*0
+        restore_pair d10, d11, 16*1
+        restore_pair d12, d13, 16*2
+        restore_pair d14, d15, 16*3
+        free_stack (16*4)
 .endm
 
 .macro push_stack
@@ -183,6 +206,7 @@
         .global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k3)
         .balign 4
 MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k3)
+        .cfi_startproc
         push_stack
         mov wtmp, #3329
         dup modulus.8h, wtmp
@@ -200,7 +224,7 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k3)
         add b2_cache_ptr, b0_cache_ptr, #(2 * 512/2)
 
         mov count, #(MLKEM_N / 16)
-polyvec_basemul_acc_montgomery_cached_k3_loop_start:
+Lpolyvec_basemul_acc_montgomery_cached_k3_loop_start:
 
         load_polys aa, bb, a0_ptr, b0_ptr, b0_cache_ptr
         pmull res, aa, bb
@@ -215,10 +239,11 @@ polyvec_basemul_acc_montgomery_cached_k3_loop_start:
         st2_wrap out, out
 
         subs count, count, #1
-        cbnz count, polyvec_basemul_acc_montgomery_cached_k3_loop_start
+        cbnz count, Lpolyvec_basemul_acc_montgomery_cached_k3_loop_start
 
         pop_stack
         ret
+        .cfi_endproc
 
 /****************** REGISTER DEALLOCATIONS *******************/
     .unreq out

@@ -35,6 +35,7 @@ _PQCP_MLKEM_NATIVE_MLKEM768_poly_tomont_asm:
 PQCP_MLKEM_NATIVE_MLKEM768_poly_tomont_asm:
 #endif
 
+        .cfi_startproc
         mov	w2, #0xd01              // =3329
         dup	v4.8h, w2
         mov	w2, #0x4ebf             // =20159
@@ -50,8 +51,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_tomont_asm:
         sqrdmulh	v7.8h, v26.8h, v3.8h
         ldr	q27, [x0, #0x20]
         sub	x1, x1, #0x1
-
-poly_tomont_loop:
+1:
         mls	v17.8h, v7.8h, v4.h[0]
         sqrdmulh	v5.8h, v23.8h, v3.8h
         ldr	q7, [x0], #0x40
@@ -73,7 +73,7 @@ poly_tomont_loop:
         ldr	q27, [x0, #0x20]
         stur	q26, [x0, #-0x20]
         sub	x1, x1, #0x1
-        cbnz	x1, poly_tomont_loop
+        cbnz	x1, 1b
         mls	v17.8h, v7.8h, v4.h[0]
         sqrdmulh	v7.8h, v23.8h, v3.8h
         mul	v26.8h, v23.8h, v2.8h
@@ -90,3 +90,5 @@ poly_tomont_loop:
         stur	q27, [x0, #-0x20]
         stur	q23, [x0, #-0x40]
         ret
+        .cfi_endproc
+

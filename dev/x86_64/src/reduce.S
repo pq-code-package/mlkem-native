@@ -35,6 +35,7 @@
 .global MLK_ASM_NAMESPACE(reduce_avx2)
 .balign 4
 MLK_ASM_FN_SYMBOL(reduce_avx2)
+.cfi_startproc
 #consts
 vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
 vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XV*2(%rsi),%ymm1
@@ -42,8 +43,10 @@ call		reduce_avx2_core
 add		$256,%rdi
 call		reduce_avx2_core
 ret
+.cfi_endproc
 
-reduce_avx2_core:
+Lreduce_avx2_core:
+.cfi_startproc
 #load
 vmovdqa		(%rdi),%ymm2
 vmovdqa		32(%rdi),%ymm3
@@ -83,6 +86,7 @@ vmovdqa		%ymm8,192(%rdi)
 vmovdqa		%ymm9,224(%rdi)
 
 ret
+.cfi_endproc
 
 /* simpasm: footer-start */
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
