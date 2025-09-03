@@ -32,7 +32,7 @@ jobs:
     name: AWS-LC FIPS test (${{ matrix.system }}, FIPS=${{ matrix.fips }})
     runs-on: ${{ matrix.system }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: ./.github/actions/setup-os
         with:
           packages: ${{ env.DEPENDENCIES }}
@@ -91,7 +91,7 @@ jobs:
     name: Posix test (${{ matrix.test.name }}, ${{ matrix.system }})
     runs-on: ${{ matrix.system }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: ./.github/actions/setup-os
         with:
           packages: ${{ env.DEPENDENCIES }}
@@ -135,7 +135,7 @@ jobs:
     name: Prefix test (${{ matrix.test.name }}, ${{ matrix.system }})
     runs-on: ${{ matrix.system }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: ./.github/actions/setup-os
         with:
           packages: ${{ env.DEPENDENCIES }}
