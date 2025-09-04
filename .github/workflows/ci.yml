@@ -257,6 +257,13 @@ jobs:
            c23: True
            opt: all
            examples: true
+         - name: clang-21
+           shell: ci_clang21
+           darwin: True
+           c17: True
+           c23: True
+           opt: all
+           examples: true
          # CPU flags are not correctly passed to the zig assembler
          # https://github.com/ziglang/zig/issues/23576
          # We therefore only test the C backend
