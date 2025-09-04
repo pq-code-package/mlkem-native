@@ -33,6 +33,7 @@
 .global MLK_ASM_NAMESPACE(poly_reduce_asm)
 MLK_ASM_FN_SYMBOL(poly_reduce_asm)
 
+        .cfi_startproc
         mov	w2, #0xd01              // =3329
         dup	v3.8h, w2
         mov	w2, #0x4ebf             // =20159
@@ -55,7 +56,7 @@ MLK_ASM_FN_SYMBOL(poly_reduce_asm)
         add	v16.8h, v23.8h, v7.8h
         sub	x1, x1, #0x1
 
-poly_reduce_loop:
+Lpoly_reduce_loop:
         ldr	q6, [x0], #0x40
         ldr	q30, [x0, #0x20]
         sqdmulh	v31.8h, v6.8h, v4.h[0]
@@ -89,7 +90,7 @@ poly_reduce_loop:
         and	v27.16b, v3.16b, v18.16b
         add	v16.8h, v2.8h, v27.8h
         sub	x1, x1, #0x1
-        cbnz	x1, poly_reduce_loop
+        cbnz	x1, Lpoly_reduce_loop
         sqdmulh	v20.8h, v5.8h, v4.h[0]
         ldr	q24, [x0], #0x40
         stur	q21, [x0, #-0x20]
@@ -108,5 +109,6 @@ poly_reduce_loop:
         add	v24.8h, v24.8h, v31.8h
         stur	q24, [x0, #-0x40]
         ret
+        .cfi_endproc
 
 #endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
