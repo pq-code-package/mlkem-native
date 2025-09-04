@@ -79,7 +79,11 @@
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES]);
+int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+__contract__(
+  requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
+  ensures(return_value == 0 || return_value == -1)
+);
 
 
 /*************************************************
@@ -103,8 +107,11 @@ int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES]);
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES]);
-
+int crypto_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+__contract__(
+  requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
+  ensures(return_value == 0 || return_value == -1)
+);
 /*************************************************
  * Name:        crypto_kem_keypair_derand
  *
