@@ -27,26 +27,14 @@
 #include "fq.inc"
 #include "shuffle.inc"
 
-.text
-.global MLK_ASM_NAMESPACE(nttfrombytes_avx2)
-.balign 4
-MLK_ASM_FN_SYMBOL(nttfrombytes_avx2)
-#consts
-vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XMASK*2(%rdx),%ymm0
-call		nttfrombytes_avx2_core
-add		$256,%rdi
-add		$192,%rsi
-call		nttfrombytes_avx2_core
-ret
-
-nttfrombytes_avx2_core:
+.macro nttfrombytes_128_coefficients offset_in offset_out
 #load
-vmovdqu		(%rsi),%ymm4
-vmovdqu		32(%rsi),%ymm5
-vmovdqu		64(%rsi),%ymm6
-vmovdqu		96(%rsi),%ymm7
-vmovdqu		128(%rsi),%ymm8
-vmovdqu		160(%rsi),%ymm9
+vmovdqu	(\offset_in +  0)(%rsi), %ymm4
+vmovdqu	(\offset_in + 32)(%rsi), %ymm5
+vmovdqu	(\offset_in + 64)(%rsi), %ymm6
+vmovdqu	(\offset_in + 96)(%rsi), %ymm7
+vmovdqu	(\offset_in +128)(%rsi), %ymm8
+vmovdqu	(\offset_in +160)(%rsi), %ymm9
 
 shuffle8	4,7,3,7
 shuffle8	5,8,4,8
@@ -94,14 +82,25 @@ vpsrlw		$4,%ymm9,%ymm1
 vpand		%ymm0,%ymm1,%ymm1
 
 #store
-vmovdqa		%ymm10,(%rdi)
-vmovdqa		%ymm11,32(%rdi)
-vmovdqa		%ymm12,64(%rdi)
-vmovdqa		%ymm13,96(%rdi)
-vmovdqa		%ymm8,128(%rdi)
-vmovdqa		%ymm14,160(%rdi)
-vmovdqa		%ymm15,192(%rdi)
-vmovdqa		%ymm1,224(%rdi)
+vmovdqa	%ymm10, (\offset_out +  0)(%rdi)
+vmovdqa	%ymm11, (\offset_out + 32)(%rdi)
+vmovdqa	%ymm12, (\offset_out + 64)(%rdi)
+vmovdqa	%ymm13, (\offset_out + 96)(%rdi)
+vmovdqa	%ymm8,  (\offset_out +128)(%rdi)
+vmovdqa	%ymm14, (\offset_out +160)(%rdi)
+vmovdqa	%ymm15, (\offset_out +192)(%rdi)
+vmovdqa	%ymm1,  (\offset_out +224)(%rdi)
+.endm
+
+.text
+.global MLK_ASM_NAMESPACE(nttfrombytes_avx2)
+.balign 4
+MLK_ASM_FN_SYMBOL(nttfrombytes_avx2)
+#consts
+vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XMASK*2(%rdx),%ymm0
+
+nttfrombytes_128_coefficients 0 0
+nttfrombytes_128_coefficients 192 256
 
 ret
 
