@@ -181,30 +181,63 @@ jobs:
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+        with:
+          arch: amd64_arm64
       - name: Build test
         shell: powershell
         run: |
           # print compiler version
           cl
           nmake /f ./Makefile.Microsoft_nmake quickcheck
+      - name: Analyze binaries
+        if: ${{ matrix.system == 'windows-11-arm' }}
+        shell: powershell
+        run: |
+          Write-Output "## Binary Analysis for ${{ matrix.system }}" | Tee-Object -Append $env:GITHUB_STEP_SUMMARY
+          Write-Output "" | Tee-Object -Append $env:GITHUB_STEP_SUMMARY
+
+          $executables = @(
+            "build\mlkem512\bin\test_mlkem512.exe",
+            "build\mlkem768\bin\test_mlkem768.exe",
+            "build\mlkem1024\bin\test_mlkem1024.exe"
+          )
+
+          foreach ($exe in $executables) {
+            if (Test-Path $exe) {
+              Write-Output "### Analysis of $exe" | Tee-Object -Append $env:GITHUB_STEP_SUMMARY
+              Write-Output "``````" | Tee-Object -Append $env:GITHUB_STEP_SUMMARY
+              dumpbin /headers $exe | Tee-Object -Append $env:GITHUB_STEP_SUMMARY
+              Write-Output "``````" | Tee-Object -Append $env:GITHUB_STEP_SUMMARY
+              Write-Output "" | Tee-Object -Append $env:GITHUB_STEP_SUMMARY
+            }
+          }
   quickcheck-windows-mingw-w64:
     strategy:
       fail-fast: false
       matrix:
         mingw-version: [5.4.0, 11.2.0, 12.2.0, 13.2.0]
     name: Quickcheck (Mingw-w64 ${{ matrix.mingw-version }})
-    runs-on: windows-latest
+    runs-on: windows-11-arm
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Install MinGW-w64
         run: choco install mingw --version=${{ matrix.mingw-version }} -y
         shell: cmd
+      - name: Check environment
+        shell: bash
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY <<-EOF
+            - Compiler location: $(which gcc)
+            - Compiler: $(gcc --version)
+            - Compiler directives:
+            $(gcc -dM -E - < /dev/null)
+          EOF
       - name: make quickcheck
         shell: bash
         run: |
-          CC=gcc OPT=0 make quickcheck
+          CC=gcc CFLAGS="-DMLK_FORCE_AARCH64" OPT=0 make quickcheck
           CC=gcc make clean >/dev/null
-          CC=gcc OPT=1 make quickcheck
+          CC=gcc CFLAGS="-DMLK_FORCE_AARCH64" OPT=1 make quickcheck
   quickcheck-lib:
     name: Quickcheck lib
     strategy:
