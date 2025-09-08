@@ -15,6 +15,11 @@ $(BUILD_DIR)/mlkem1024/bin/%: $(CONFIG)
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(LD) $(CFLAGS) -o $@ $(filter %.o,$^) $(LDLIBS)
 
+$(BUILD_DIR)/abicheck/bin/%: $(CONFIG)
+	$(Q)echo "  LD      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(LD) $(CFLAGS) -o $@ $(filter %.o,$^) $(LDLIBS)
+
 $(BUILD_DIR)/%.a: $(CONFIG)
 	$(Q)echo "  AR      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
@@ -47,6 +52,16 @@ $(BUILD_DIR)/mlkem1024/%.c.o: %.c $(CONFIG)
 	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
 
 $(BUILD_DIR)/mlkem1024/%.S.o: %.S $(CONFIG)
+	$(Q)echo "  AS      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/abicheck/%.c.o: %.c $(CONFIG)
+	$(Q)echo "  CC      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/abicheck/%.S.o: %.S $(CONFIG)
 	$(Q)echo "  AS      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(CC) -c -o $@ $(CFLAGS) $<

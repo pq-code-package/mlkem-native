@@ -60,6 +60,7 @@ ifeq ($(HOST_PLATFORM),Linux-x86_64)
 	CFLAGS += -z noexecstack
 endif
 
+
 ifeq ($(CYCLES),PMU)
 	CFLAGS += -DPMU_CYCLES
 endif
@@ -70,6 +71,42 @@ endif
 
 ifeq ($(CYCLES),MAC)
 	CFLAGS += -DMAC_CYCLES
+endif
+
+##########################
+# Architecture Detection #
+##########################
+
+# Check if we're building for AArch64 (native or cross-compilation)
+IS_AARCH64 := 0
+ifeq ($(CROSS_PREFIX),)
+# Native compilation - check HOST_PLATFORM
+ifeq ($(HOST_PLATFORM),Linux-aarch64)
+	IS_AARCH64 := 1
+else ifeq ($(HOST_PLATFORM),Darwin-arm64)
+	IS_AARCH64 := 1
+endif
+else
+# Cross compilation - check CROSS_PREFIX for aarch64- (not aarch64_be-)
+ifneq ($(findstring aarch64-, $(CROSS_PREFIX)),)
+	IS_AARCH64 := 1
+endif
+endif
+
+# Check if we're building for x86_64 (native or cross-compilation)
+IS_X86_64 := 0
+ifeq ($(CROSS_PREFIX),)
+# Native compilation - check HOST_PLATFORM
+ifeq ($(HOST_PLATFORM),Linux-x86_64)
+	IS_X86_64 := 1
+else ifeq ($(HOST_PLATFORM),Darwin-x86_64)
+	IS_X86_64 := 1
+endif
+else
+# Cross compilation - check CROSS_PREFIX for x86_64-
+ifneq ($(findstring x86_64-, $(CROSS_PREFIX)),)
+	IS_X86_64 := 1
+endif
 endif
 
 ##############################
