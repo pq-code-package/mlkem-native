@@ -18,4 +18,8 @@
 #include "x86_64/meta.h"
 #endif
 
+#ifdef MLK_SYS_PPC64LE
+#include "ppc64le/meta.h"
+#endif /* MLK_SYS_PPC64LE */
+
 #endif /* !MLK_NATIVE_META_H */
