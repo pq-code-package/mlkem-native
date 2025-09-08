@@ -194,9 +194,15 @@ jobs:
       - name: Check MSVC arm64
         shell: powershell
         run: |
-          where cl ; where armasm64
+          where cl ; where cl64; where armasm64
           cl
+          ml64
           armasm64 -h
+      - name: test compiler(armasm64)
+        shell: powershell
+        run: |
+          armasm64 mlkem/src/native/aarch64/src/poly_reduce_asm_testing.S poly_reduce_asm_testing.obj
+          dir
   quickcheck-windows-mingw-w64:
     strategy:
       fail-fast: false
