@@ -187,6 +187,16 @@ jobs:
           # print compiler version
           cl
           nmake /f ./Makefile.Microsoft_nmake quickcheck
+      - name: Setup MSVC (arm64)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64_arm64
+      - name: Check MSVC arm64
+        shell: powershell
+        run: |
+          where cl ; where armasm64
+          cl
+          armasm64 -h
   quickcheck-windows-mingw-w64:
     strategy:
       fail-fast: false
