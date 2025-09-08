@@ -29,6 +29,7 @@ source code and documentation.
   - [examples/basic_deterministic/mlkem_native/custom_no_randomized_config.h](examples/basic_deterministic/mlkem_native/custom_no_randomized_config.h)
   - [integration/liboqs/config_aarch64.h](integration/liboqs/config_aarch64.h)
   - [integration/liboqs/config_c.h](integration/liboqs/config_c.h)
+  - [integration/liboqs/config_ppc64le.h](integration/liboqs/config_ppc64le.h)
   - [integration/liboqs/config_x86_64.h](integration/liboqs/config_x86_64.h)
   - [mlkem/src/config.h](mlkem/src/config.h)
   - [mlkem/src/kem.c](mlkem/src/kem.c)
