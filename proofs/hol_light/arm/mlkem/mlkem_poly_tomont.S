@@ -45,50 +45,50 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_tomont_asm:
         mov	w2, #-0x2824            // =-10276
         dup	v3.8h, w2
         mov	x1, #0x8                // =8
-        ldr	q26, [x0, #0x30]
-        ldr	q23, [x0, #0x10]
-        mul	v17.8h, v26.8h, v2.8h
-        sqrdmulh	v7.8h, v26.8h, v3.8h
-        ldr	q27, [x0, #0x20]
+        ldr	q28, [x0, #0x30]
+        ldr	q26, [x0], #0x40
+        ldur	q17, [x0, #-0x20]
+        sqrdmulh	v16.8h, v28.8h, v3.8h
+        sqrdmulh	v24.8h, v17.8h, v3.8h
+        mul	v18.8h, v26.8h, v2.8h
+        sqrdmulh	v22.8h, v26.8h, v3.8h
+        mul	v26.8h, v28.8h, v2.8h
+        ldur	q28, [x0, #-0x30]
+        mls	v26.8h, v16.8h, v4.h[0]
+        mls	v18.8h, v22.8h, v4.h[0]
+        mul	v0.8h, v28.8h, v2.8h
+        sqrdmulh	v28.8h, v28.8h, v3.8h
+        stur	q18, [x0, #-0x40]
+        mul	v18.8h, v17.8h, v2.8h
         sub	x1, x1, #0x1
 
 Lpoly_tomont_loop:
-        mls	v17.8h, v7.8h, v4.h[0]
-        sqrdmulh	v5.8h, v23.8h, v3.8h
-        ldr	q7, [x0], #0x40
-        stur	q17, [x0, #-0x10]
-        sqrdmulh	v29.8h, v27.8h, v3.8h
-        sqrdmulh	v19.8h, v7.8h, v3.8h
-        mul	v25.8h, v23.8h, v2.8h
-        mul	v0.8h, v7.8h, v2.8h
-        mul	v26.8h, v27.8h, v2.8h
-        ldr	q7, [x0, #0x30]
-        mls	v25.8h, v5.8h, v4.h[0]
-        ldr	q23, [x0, #0x10]
+        mls	v0.8h, v28.8h, v4.h[0]
+        ldr	q19, [x0, #0x10]
+        ldr	q16, [x0, #0x30]
+        ldr	q23, [x0, #0x20]
+        mls	v18.8h, v24.8h, v4.h[0]
+        ldr	q17, [x0], #0x40
+        sqrdmulh	v28.8h, v19.8h, v3.8h
+        stur	q26, [x0, #-0x50]
+        stur	q0, [x0, #-0x70]
+        mul	v0.8h, v19.8h, v2.8h
+        stur	q18, [x0, #-0x60]
+        sqrdmulh	v22.8h, v17.8h, v3.8h
+        mul	v26.8h, v17.8h, v2.8h
+        sqrdmulh	v29.8h, v16.8h, v3.8h
+        mls	v26.8h, v22.8h, v4.h[0]
+        mul	v18.8h, v23.8h, v2.8h
+        sqrdmulh	v24.8h, v23.8h, v3.8h
+        stur	q26, [x0, #-0x40]
+        mul	v26.8h, v16.8h, v2.8h
         mls	v26.8h, v29.8h, v4.h[0]
-        mls	v0.8h, v19.8h, v4.h[0]
-        stur	q25, [x0, #-0x30]
-        mul	v17.8h, v7.8h, v2.8h
-        sqrdmulh	v7.8h, v7.8h, v3.8h
-        stur	q0, [x0, #-0x40]
-        ldr	q27, [x0, #0x20]
-        stur	q26, [x0, #-0x20]
         sub	x1, x1, #0x1
         cbnz	x1, Lpoly_tomont_loop
-        mls	v17.8h, v7.8h, v4.h[0]
-        sqrdmulh	v7.8h, v23.8h, v3.8h
-        mul	v26.8h, v23.8h, v2.8h
-        sqrdmulh	v25.8h, v27.8h, v3.8h
-        ldr	q23, [x0], #0x40
-        mul	v27.8h, v27.8h, v2.8h
-        mls	v26.8h, v7.8h, v4.h[0]
-        sqrdmulh	v7.8h, v23.8h, v3.8h
-        mul	v23.8h, v23.8h, v2.8h
-        stur	q17, [x0, #-0x10]
-        mls	v27.8h, v25.8h, v4.h[0]
-        stur	q26, [x0, #-0x30]
-        mls	v23.8h, v7.8h, v4.h[0]
-        stur	q27, [x0, #-0x20]
-        stur	q23, [x0, #-0x40]
+        mls	v0.8h, v28.8h, v4.h[0]
+        stur	q26, [x0, #-0x10]
+        mls	v18.8h, v24.8h, v4.h[0]
+        stur	q0, [x0, #-0x30]
+        stur	q18, [x0, #-0x20]
         ret
         .cfi_endproc
