@@ -31,7 +31,7 @@ void mlk_invntt_avx2(int16_t *r, const int16_t *mlk_qdata);
 void mlk_nttunpack_avx2(int16_t *r);
 
 #define mlk_reduce_avx2 MLK_NAMESPACE(reduce_avx2)
-void mlk_reduce_avx2(int16_t *r, const int16_t *mlk_qdata);
+void mlk_reduce_avx2(int16_t *r);
 
 #define mlk_poly_mulcache_compute_avx2 MLK_NAMESPACE(poly_mulcache_compute_avx2)
 void mlk_poly_mulcache_compute_avx2(int16_t *out, const int16_t *in,
@@ -42,32 +42,27 @@ void mlk_poly_mulcache_compute_avx2(int16_t *out, const int16_t *in,
 void mlk_polyvec_basemul_acc_montgomery_cached_asm_k2(int16_t *r,
                                                       const int16_t *a,
                                                       const int16_t *b,
-                                                      const int16_t *b_cache,
-                                                      const int16_t *qdata);
+                                                      const int16_t *b_cache);
 
 #define mlk_polyvec_basemul_acc_montgomery_cached_asm_k3 \
   MLK_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k3)
 void mlk_polyvec_basemul_acc_montgomery_cached_asm_k3(int16_t *r,
                                                       const int16_t *a,
                                                       const int16_t *b,
-                                                      const int16_t *b_cache,
-                                                      const int16_t *qdata);
+                                                      const int16_t *b_cache);
 
 #define mlk_polyvec_basemul_acc_montgomery_cached_asm_k4 \
   MLK_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k4)
 void mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(int16_t *r,
                                                       const int16_t *a,
                                                       const int16_t *b,
-                                                      const int16_t *b_cache,
-                                                      const int16_t *qdata);
+                                                      const int16_t *b_cache);
 
 #define mlk_ntttobytes_avx2 MLK_NAMESPACE(ntttobytes_avx2)
-void mlk_ntttobytes_avx2(uint8_t *r, const int16_t *a,
-                         const int16_t *mlk_qdata);
+void mlk_ntttobytes_avx2(uint8_t *r, const int16_t *a);
 
 #define mlk_nttfrombytes_avx2 MLK_NAMESPACE(nttfrombytes_avx2)
-void mlk_nttfrombytes_avx2(int16_t *r, const uint8_t *a,
-                           const int16_t *mlk_qdata);
+void mlk_nttfrombytes_avx2(int16_t *r, const uint8_t *a);
 
 #define mlk_tomont_avx2 MLK_NAMESPACE(tomont_avx2)
 void mlk_tomont_avx2(int16_t *r, const int16_t *mlk_qdata);

@@ -19,7 +19,9 @@
 MLK_ASM_FN_SYMBOL(poly_mulcache_compute_avx2)
 
         .cfi_startproc
-        vmovdqa	(%rdx), %ymm0
+        movl	$0xd010d01, %eax        # imm = 0xD010D01
+        movd	%eax, %xmm0
+        vpbroadcastd	%xmm0, %ymm0
         vmovdqa	0x20(%rsi), %ymm2
         vmovdqa	0x60(%rsi), %ymm3
         vmovdqa	0x500(%rdx), %ymm4
