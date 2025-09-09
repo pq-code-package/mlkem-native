@@ -86,12 +86,15 @@ jobs:
       fail-fast: false
       matrix:
         target:
+          # nixpkgs requires 2.18 since August 2025, see 
+          # https://github.com/NixOS/nixpkgs/pull/428076
+          # TODO: Re-enable tests on Ubuntu 22 once nix has been updated to >= 2.18
+          # - runner: ubuntu-22.04
+          #   container:
+          #   install: 'apt'
           - runner: ubuntu-latest
-            container: nixos/nix:2.6.1
+            container: nixos/nix:2.18.0
             install: 'native'
-          - runner: ubuntu-22.04
-            container:
-            install: 'apt'
           - runner: ubuntu-24.04
             container:
             install: 'apt'

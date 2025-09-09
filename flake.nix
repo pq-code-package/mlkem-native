@@ -25,7 +25,7 @@
           util = pkgs.callPackage ./nix/util.nix {
             # Keep those around in case we want to switch to unstable versions
             cbmc = pkgs-unstable.cbmc;
-            bitwuzla = pkgs.bitwuzla;
+            bitwuzla = pkgs-unstable.bitwuzla;
             z3 = pkgs.z3;
           };
           zigWrapCC = zig: pkgs.symlinkJoin {
@@ -50,6 +50,8 @@
                 gcc48 = pkgs-2405.gcc48;
                 gcc49 = pkgs-2405.gcc49;
                 gcc7 = pkgs-2405.gcc7;
+                clang_21 = pkgs-unstable.clang_21;
+                zig_0_15 = pkgs-unstable.zig_0_15;
               })
             ];
           };
@@ -128,10 +130,12 @@
           devShells.ci_clang18 = util.mkShellWithCC' pkgs.clang_18;
           devShells.ci_clang19 = util.mkShellWithCC' pkgs.clang_19;
           devShells.ci_clang20 = util.mkShellWithCC' pkgs.clang_20;
+          devShells.ci_clang21 = util.mkShellWithCC' pkgs.clang_21;
 
           devShells.ci_zig0_12 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_12);
           devShells.ci_zig0_13 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_13);
           devShells.ci_zig0_14 = util.mkShellWithCC' (zigWrapCC pkgs.zig);
+          devShells.ci_zig0_15 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_15);
 
           devShells.ci_gcc48 = util.mkShellWithCC' pkgs.gcc48;
           devShells.ci_gcc49 = util.mkShellWithCC' pkgs.gcc49;
@@ -150,6 +154,7 @@
           devShells.ci_valgrind-varlat_clang18 = util.mkShellWithCC_valgrind' pkgs.clang_18;
           devShells.ci_valgrind-varlat_clang19 = util.mkShellWithCC_valgrind' pkgs.clang_19;
           devShells.ci_valgrind-varlat_clang20 = util.mkShellWithCC_valgrind' pkgs.clang_20;
+          devShells.ci_valgrind-varlat_clang21 = util.mkShellWithCC_valgrind' pkgs.clang_21;
           devShells.ci_valgrind-varlat_gcc48 = util.mkShellWithCC_valgrind' pkgs.gcc48;
           devShells.ci_valgrind-varlat_gcc49 = util.mkShellWithCC_valgrind' pkgs.gcc49;
           devShells.ci_valgrind-varlat_gcc7 = util.mkShellWithCC_valgrind' pkgs.gcc7;
@@ -167,7 +172,7 @@
             util = pkgs.callPackage ./nix/util.nix {
               inherit pkgs;
               cbmc = pkgs-unstable.cbmc;
-              bitwuzla = pkgs.bitwuzla;
+              bitwuzla = pkgs-unstable.bitwuzla;
               z3 = pkgs.z3;
             };
           in

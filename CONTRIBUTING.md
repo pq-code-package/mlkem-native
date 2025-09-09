@@ -9,7 +9,7 @@ any of the open issues. Here are some things to get you started.
 
 We specify the development environment for mlkem-native using `nix`. If you want to help develop mlkem-native, please
 use `nix`. We recommend using the latest Nix version provided by the [nix installer
-script](https://nixos.org/download/), but we currently support all Nix versions >= 2.6.
+script](https://nixos.org/download/), but we currently support all Nix versions >= 2.18.
 
 All the development and build dependencies are specified in [flake.nix](flake.nix). To execute a bash shell, run
 ```bash
