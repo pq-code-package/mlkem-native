@@ -155,6 +155,7 @@ int MLK_API_NAMESPACE(keypair_derand)(
     uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
     const uint8_t coins[2 * MLKEM_SYMBYTES]);
 
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 /*************************************************
  * Name:        crypto_kem_keypair
  *
@@ -176,6 +177,7 @@ MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(keypair)(
     uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
     uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
 /*************************************************
  * Name:        crypto_kem_enc_derand
@@ -206,6 +208,7 @@ int MLK_API_NAMESPACE(enc_derand)(
     const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
     const uint8_t coins[MLKEM_SYMBYTES]);
 
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 /*************************************************
  * Name:        crypto_kem_enc
  *
@@ -231,6 +234,7 @@ int MLK_API_NAMESPACE(enc)(
     uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
     uint8_t ss[MLKEM_BYTES],
     const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
 /*************************************************
  * Name:        crypto_kem_dec

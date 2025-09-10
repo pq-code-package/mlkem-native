@@ -199,6 +199,7 @@ int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   return 0;
 }
 
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 /* Reference: `crypto_kem_keypair()` in the reference implementation @[REF]
  *            - We zeroize the stack buffer */
 MLK_EXTERNAL_API
@@ -219,6 +220,7 @@ int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   mlk_zeroize(coins, sizeof(coins));
   return res;
 }
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
 /* Reference: `crypto_kem_enc_derand()` in the reference implementation @[REF]
  *            - We include public key check
@@ -258,6 +260,7 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   return 0;
 }
 
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 /* Reference: `crypto_kem_enc()` in the reference implementation @[REF]
  *            - We include stack buffer zeroization */
 MLK_EXTERNAL_API
@@ -278,6 +281,7 @@ int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   mlk_zeroize(coins, sizeof(coins));
   return res;
 }
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
 /* Reference: `crypto_kem_dec()` in the reference implementation @[REF]
  *            - We include secret key check
