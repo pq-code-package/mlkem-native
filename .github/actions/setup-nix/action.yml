@@ -111,6 +111,7 @@ runs:
         purge-created: 0
         purge-primary-key: ${{ inputs.save_cache == 'true' && 'always' || 'never' }}
         token: ${{ inputs.gh_token }}
+        backend: 'buildjet'
     - name: Set Shell
       shell: bash -lo pipefail {0}
       run: |
