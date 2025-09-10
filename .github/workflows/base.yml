@@ -175,7 +175,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        system: [windows-2025, windows-2022]
+        system: [windows-2025, windows-2022, windows-11-arm]
     name: Quickcheck ${{ matrix.system }}
     runs-on: ${{ matrix.system }}
     steps:
@@ -187,6 +187,22 @@ jobs:
           # print compiler version
           cl
           nmake /f ./Makefile.Microsoft_nmake quickcheck
+      - name: Setup MSVC (arm64)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64_arm64
+      - name: Check MSVC arm64
+        shell: powershell
+        run: |
+          where cl ; where cl64; where armasm64
+          cl
+          ml64
+          armasm64 -h
+      - name: test compiler(armasm64)
+        shell: powershell
+        run: |
+          armasm64 mlkem/src/native/aarch64/src/poly_reduce_asm_testing.S poly_reduce_asm_testing.obj
+          dir
   quickcheck-windows-mingw-w64:
     strategy:
       fail-fast: false
