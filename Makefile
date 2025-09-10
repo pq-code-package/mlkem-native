@@ -218,6 +218,7 @@ clean:
 	-make clean -C examples/bring_your_own_fips202 >/dev/null
 	-make clean -C examples/custom_backend >/dev/null
 	-make clean -C examples/basic >/dev/null
+	-make clean -C examples/basic_deterministic >/dev/null
 	-make clean -C examples/monolithic_build >/dev/null
 	-make clean -C examples/monolithic_build_native >/dev/null
 	-make clean -C examples/monolithic_build_multilevel >/dev/null
