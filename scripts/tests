@@ -208,6 +208,7 @@ class TEST_TYPES(Enum):
     MONOLITHIC_BUILD_NATIVE = 14
     STACK = 15
     SIZE = 16
+    BASIC_DETERMINISTIC = 17
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -227,6 +228,7 @@ class TEST_TYPES(Enum):
             TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE,
             TEST_TYPES.MULTILEVEL_BUILD,
             TEST_TYPES.MULTILEVEL_BUILD_NATIVE,
+            TEST_TYPES.BASIC_DETERMINISTIC,
         ]
 
     @staticmethod
@@ -260,6 +262,8 @@ class TEST_TYPES(Enum):
             return "Example (Custom Backend)"
         if self == TEST_TYPES.BASIC:
             return "Example (mlkem-native as code package)"
+        if self == TEST_TYPES.BASIC_DETERMINISTIC:
+            return "Example (mlkem-native as code package without randombytes() implementation)"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return "Example (monobuild)"
         if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
@@ -282,6 +286,8 @@ class TEST_TYPES(Enum):
             return "examples/custom_backend"
         if self == TEST_TYPES.BASIC:
             return "examples/basic"
+        if self == TEST_TYPES.BASIC_DETERMINISTIC:
+            return "examples/basic_deterministic"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return "examples/monolithic_build"
         if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
@@ -314,6 +320,8 @@ class TEST_TYPES(Enum):
         if self == TEST_TYPES.CUSTOM_BACKEND:
             return ""
         if self == TEST_TYPES.BASIC:
+            return ""
+        if self == TEST_TYPES.BASIC_DETERMINISTIC:
             return ""
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return ""
@@ -1104,6 +1112,7 @@ def cli():
             "bring_your_own_fips202",
             "custom_backend",
             "basic",
+            "basic_deterministic",
             "monolithic_build",
             "monolithic_build_native",
             "monolithic_build_multilevel",
