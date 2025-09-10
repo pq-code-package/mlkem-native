@@ -452,6 +452,24 @@
 /* #define MLK_CONFIG_NO_ASM */
 
 /******************************************************************************
+ * Name:        MLK_CONFIG_NO_RANDOMIZED_API
+ *
+ * Description: If this option is set, mlkem-native will be built without the
+ *              randomized API functions (crypto_kem_keypair and
+ *              crypto_kem_enc).
+ *.             This allows users to build mlkem-native without providing a
+ *              randombytes() implementation if they only need the
+ *              deterministic API
+ *              (crypto_kem_keypair_derand, crypto_kem_enc_derand,
+ *              crypto_kem_dec).
+ *
+ *              NOTE: This option is incompatible with MLK_CONFIG_KEYGEN_PCT
+ *              as the current PCT implementation requires crypto_kem_enc().
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_NO_RANDOMIZED_API */
+
+/******************************************************************************
  * Name:        MLK_CONFIG_KEYGEN_PCT
  *
  * Description: Compliance with @[FIPS140_3_IG, p.87] requires a
