@@ -26,6 +26,7 @@ source code and documentation.
   - National Institute of Standards and Technology
 * URL: https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
 * Referenced from:
+  - [examples/basic_deterministic/mlkem_native/custom_no_randomized_config.h](examples/basic_deterministic/mlkem_native/custom_no_randomized_config.h)
   - [integration/liboqs/config_aarch64.h](integration/liboqs/config_aarch64.h)
   - [integration/liboqs/config_c.h](integration/liboqs/config_c.h)
   - [integration/liboqs/config_ppc64le.h](integration/liboqs/config_ppc64le.h)
