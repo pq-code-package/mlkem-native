@@ -2100,6 +2100,11 @@ def synchronize_backends(
             # comparing the object code before and after simplification.
             "-Imlkem/src/native/x86_64/src/ -mavx2 -mbmi2 -msse4 -fcf-protection=none",
         ),
+        (
+            "dev/ppc64le/src",
+            "mlkem/src/native/ppc64le/src",
+            "-Imlkem/src/native/ppc64le/src -mvsx",
+        ),
     ]
 
     for in_dir, out_dir, cflags in worklist:
