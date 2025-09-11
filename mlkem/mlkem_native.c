@@ -84,6 +84,9 @@
 #include "src/native/x86_64/src/consts.c"
 #include "src/native/x86_64/src/rej_uniform_table.c"
 #endif
+#if defined(MLK_SYS_PPC64LE)
+#include "src/native/ppc64le/src/consts.c"
+#endif
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
@@ -446,7 +449,7 @@
 #undef MLK_NATIVE_META_H
 /* mlkem/src/native/ppc64le/meta.h */
 #undef MLK_ARITH_BACKEND_NAME
-#undef MLK_ARITH_BACKEND_PPC64LE_DEFAULT
+#undef MLK_ARITH_BACKEND_PPC64LE
 #undef MLK_NATIVE_PPC64LE_META_H
 #undef MLK_USE_NATIVE_INTT
 #undef MLK_USE_NATIVE_NTT

@@ -1220,6 +1220,10 @@ def x86_64(c):
     return "/x86_64/" in c
 
 
+def ppc64le(c):
+    return "/ppc64le/" in c
+
+
 def native_fips202(c):
     return native(c) and fips202(c)
 
@@ -1250,6 +1254,10 @@ def native_arith_aarch64(c):
 
 def native_arith_x86_64(c):
     return native_arith(c) and x86_64(c)
+
+
+def native_arith_ppc64le(c):
+    return native_arith(c) and ppc64le(c)
 
 
 def native_arith_core(c):
@@ -1517,6 +1525,10 @@ def gen_monolithic_asm_file(dry_run=False):
         yield "#endif"
         yield "#if defined(MLK_SYS_X86_64)"
         for c in filter(native_arith_x86_64, asm_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLK_SYS_PPC64LE)"
+        for c in filter(native_arith_ppc64le, asm_sources):
             yield f'#include "{c}"'
         yield "#endif"
         yield "#endif"
