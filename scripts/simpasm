@@ -246,7 +246,7 @@ def simplify(logger, args, asm_input, asm_output=None):
             logger.debug(f"Using raw global symbol {sym} going forward ...")
 
         cmd = [args.objdump, "--disassemble", tmp_objfile0]
-        if platform.system() == "Darwin":
+        if platform.system() == "Darwin" and args.arch == "aarch64":
             cmd += ["--triple=aarch64"]
 
         logger.debug(f"Disassembling temporary object file {tmp_objfile0} ...")
@@ -254,6 +254,12 @@ def simplify(logger, args, asm_input, asm_output=None):
 
         logger.debug("Patching up disassembly ...")
         simplified = patchup_disasm(disasm, cfify=args.cfify)
+
+        # On ppc64le we're using 16 byte alignment
+        if args.arch == "ppc64le":
+            align = 16
+        else:
+            align = 4
 
         autogen_header = [
             "",
@@ -264,7 +270,7 @@ def simplify(logger, args, asm_input, asm_output=None):
             "",
             "",
             ".text",
-            ".balign 4",
+            f".balign {align}",
         ]
 
         if args.preserve_preprocessor_directives is False:
