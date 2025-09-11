@@ -28,6 +28,7 @@ source code and documentation.
 * Referenced from:
   - [integration/liboqs/config_aarch64.h](integration/liboqs/config_aarch64.h)
   - [integration/liboqs/config_c.h](integration/liboqs/config_c.h)
+  - [integration/liboqs/config_ppc64le.h](integration/liboqs/config_ppc64le.h)
   - [integration/liboqs/config_x86_64.h](integration/liboqs/config_x86_64.h)
   - [mlkem/src/config.h](mlkem/src/config.h)
   - [mlkem/src/kem.c](mlkem/src/kem.c)

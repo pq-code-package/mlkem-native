@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
-#ifndef MLK_NATIVE_PPC64LE_META_H
-#define MLK_NATIVE_PPC64LE_META_H
+#ifndef MLK_DEV_PPC64LE_META_H
+#define MLK_DEV_PPC64LE_META_H
 
 /* Identifier for this backend so that source and assembly files
  * in the build can be appropriately guarded. */
@@ -50,4 +50,4 @@ static MLK_INLINE int mlk_poly_tomont_native(int16_t data[MLKEM_N])
 }
 #endif /* !__ASSEMBLER__ */
 
-#endif /* MLK_NATIVE_PPC64LE_META_H */
+#endif /* !MLK_DEV_PPC64LE_META_H */

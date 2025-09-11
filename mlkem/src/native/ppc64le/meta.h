@@ -50,4 +50,4 @@ static MLK_INLINE int mlk_poly_tomont_native(int16_t data[MLKEM_N])
 }
 #endif /* !__ASSEMBLER__ */
 
-#endif /* MLK_NATIVE_PPC64LE_META_H */
+#endif /* !MLK_NATIVE_PPC64LE_META_H */
