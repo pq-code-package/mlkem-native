@@ -8,7 +8,7 @@
 
 /* Identifier for this backend so that source and assembly files
  * in the build can be appropriately guarded. */
-#define MLK_ARITH_BACKEND_PPC64LE_DEFAULT
+#define MLK_ARITH_BACKEND_PPC64LE
 
 #define MLK_ARITH_BACKEND_NAME PPC64LE_DEFAULT
 

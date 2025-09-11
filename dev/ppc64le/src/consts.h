@@ -16,9 +16,7 @@
 #define C1441_OFFSET 64
 #define C1353_OFFSET 80
 #define ZETA_NTT_OFFSET 96
-#define ZETA_NTT_OFFSET64 1104
-#define IZETA_NTT_OFFSET127 1616
-#define IZETA_NTT_OFFSET63 2128
+#define ZETA_INTT_OFFSET 1104
 /* check-magic: on */
 
 #ifndef __ASSEMBLER__

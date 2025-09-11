@@ -85,6 +85,12 @@
 #include "mlkem/src/native/x86_64/src/rej_uniform_asm.S"
 #include "mlkem/src/native/x86_64/src/tomont.S"
 #endif /* MLK_SYS_X86_64 */
+#if defined(MLK_SYS_PPC64LE)
+#include "mlkem/src/native/ppc64le/src/intt_ppc.S"
+#include "mlkem/src/native/ppc64le/src/ntt_ppc.S"
+#include "mlkem/src/native/ppc64le/src/poly_tomont.S"
+#include "mlkem/src/native/ppc64le/src/reduce.S"
+#endif /* MLK_SYS_PPC64LE */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
@@ -460,7 +466,7 @@
 #undef MLK_NATIVE_META_H
 /* mlkem/src/native/ppc64le/meta.h */
 #undef MLK_ARITH_BACKEND_NAME
-#undef MLK_ARITH_BACKEND_PPC64LE_DEFAULT
+#undef MLK_ARITH_BACKEND_PPC64LE
 #undef MLK_NATIVE_PPC64LE_META_H
 #undef MLK_USE_NATIVE_INTT
 #undef MLK_USE_NATIVE_NTT
@@ -476,14 +482,12 @@
 #undef C1353_OFFSET
 #undef C1441_OFFSET
 #undef C20159_OFFSET
-#undef IZETA_NTT_OFFSET127
-#undef IZETA_NTT_OFFSET63
 #undef MLK_NATIVE_PPC64LE_SRC_CONSTS_H
 #undef NQ_OFFSET
 #undef QINV_OFFSET
 #undef Q_OFFSET
+#undef ZETA_INTT_OFFSET
 #undef ZETA_NTT_OFFSET
-#undef ZETA_NTT_OFFSET64
 #undef mlk_ppc_qdata
 #if defined(MLK_SYS_AARCH64)
 /*
