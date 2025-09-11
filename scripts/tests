@@ -636,6 +636,12 @@ class Tests:
             l = TEST_TYPES.examples()
         else:
             l = list(map(TEST_TYPES.from_string, self.args.l))
+
+        # Filter out excluded examples
+        if hasattr(self.args, "exclude_example") and self.args.exclude_example:
+            excluded = [TEST_TYPES.from_string(ex) for ex in self.args.exclude_example]
+            l = [e for e in l if e not in excluded]
+
         for e in l:
             self._compile_schemes(e, None)
             self._run_scheme(e, None, None)
@@ -1073,6 +1079,25 @@ def cli():
         action="store_false",
         dest="examples",
         help="Do not run examples",
+    )
+
+    all_parser.add_argument(
+        "--exclude-example",
+        help="Exclude specific examples from running (can be used multiple times)",
+        choices=[
+            "bring_your_own_fips202",
+            "custom_backend",
+            "basic",
+            "basic_deterministic",
+            "monolithic_build",
+            "monolithic_build_native",
+            "monolithic_build_multilevel",
+            "monolithic_build_multilevel_native",
+            "multilevel_build",
+            "multilevel_build_native",
+        ],
+        action="append",
+        default=[],
     )
 
     stack_group = all_parser.add_mutually_exclusive_group()
