@@ -3,163 +3,331 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
-#
-# Copyright 2025- IBM Corp.
-#
-#===================================================================================
-# Written by Danny Tsen <dtsen@us.ibm.com>
-#
+/*
+ * Copyright 2025- IBM Corp.
+ *
+ *===================================================================================
+ * Written by Danny Tsen <dtsen@us.ibm.com>
+ *
+ */
 
-# Poly_tomont: Inplace conversion of all coefficients of a polynomial
-#              from normal domain to Montgomery domain
-#
-# Arguments:*r: pointer to input/output polynomial
-#
+// Poly_tomont: Inplace conversion of all coefficients of a polynomial
+//              from normal domain to Montgomery domain
+//
+// Arguments:*r: pointer to input/output polynomial
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
+#if defined(MLK_ARITH_BACKEND_PPC64LE) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
-#include "consts.h"
+/*
+ * WARNING: This file is auto-derived from the mlkem-native source file
+ *   dev/ppc64le/src/poly_tomont.S using scripts/simpasm. Do not modify it directly.
+ */
 
-#define V1353   0
-#define V_QINV  2
-#define V_NMKQ  5
 
-.machine "any"
 .text
-
-#
-# montgomery_reduce
-# t = a * QINV
-# t = (a - (int32_t)t*_MLKEM_Q) >> 16
-#
-#-----------------------------------
-# MREDUCE_4X(_v0, _v1, _v2, _v3)
-#
-.macro MREDUCE_4X _v0 _v1 _v2 _v3
-        lxvd2x  32+13, 0, 3
-        addi    3, 3, 16
-        lxvd2x  32+18, 0, 3
-        addi    3, 3, 16
-        lxvd2x  32+23, 0, 3
-        addi    3, 3, 16
-        lxvd2x  32+7, 0, 3
-        addi    3, 3, 16
-
-        vmladduhm 15, 13, V1353, 3
-        vmladduhm 20, 18, V1353, 3
-        vmladduhm 25, 23, V1353, 3
-        vmladduhm 9, 7, V1353, 3
-
-        vmhraddshs 14, 13, V1353, 3
-        vmhraddshs 19, 18, V1353, 3
-        vmhraddshs 24, 23, V1353, 3
-        vmhraddshs 8, 7, V1353, 3
-
-        vmladduhm 15, 15, V_QINV, 3
-        vmladduhm 20, 20, V_QINV, 3
-        vmladduhm 25, 25, V_QINV, 3
-        vmladduhm 9, 9, V_QINV, 3
-
-        vmhraddshs 15, 15, V_NMKQ, 14
-        vmhraddshs 20, 20, V_NMKQ, 19
-        vmhraddshs 25, 25, V_NMKQ, 24
-        vmhraddshs 9, 9, V_NMKQ, 8
-
-        vsrah \_v0, 15, 4               # >> 1
-        vsrah \_v1, 20, 4               # >> 1
-        vsrah \_v2, 25, 4               # >> 1
-        vsrah \_v3, 9, 4                # >> 1
-.endm
-
-.macro Write_8X
-        stxvd2x 32+27, 4, 3
-        stxvd2x 32+28, 5, 3
-        stxvd2x 32+29, 6, 3
-        stxvd2x 32+30, 7, 3
-        stxvd2x 32+13, 8, 3
-        stxvd2x 32+18, 9, 3
-        stxvd2x 32+23, 10, 3
-        stxvd2x 32+7, 11, 3
-.endm
-
-.align 4
-.globl MLK_ASM_NAMESPACE(poly_tomont_ppc)
+.balign 16
+.global MLK_ASM_NAMESPACE(poly_tomont_ppc)
 MLK_ASM_FN_SYMBOL(poly_tomont_ppc)
-        stdu    1, -320(1)
-        mflr    0
 
-        stxv    32+20, 128(1)
-        stxv    32+21, 144(1)
-        stxv    32+22, 160(1)
-        stxv    32+23, 176(1)
-        stxv    32+24, 192(1)
-        stxv    32+25, 208(1)
-        stxv    32+26, 224(1)
-        stxv    32+27, 240(1)
-        stxv    32+28, 256(1)
-        stxv    32+29, 272(1)
-        stxv    32+30, 288(1)
-
-        lxv     32+V_NMKQ, NQ_OFFSET(4)
-        lxv     32+V_QINV, QINV_OFFSET(4)
-        lxv     32+V1353, C1353_OFFSET(4)
-
-        vxor    3, 3, 3
+        .cfi_startproc
+        stdu 1, -320(1)
+        mflr 0
+        stxv 52, 128(1)
+        stxv 53, 144(1)
+        stxv 54, 160(1)
+        stxv 55, 176(1)
+        stxv 56, 192(1)
+        stxv 57, 208(1)
+        stxv 58, 224(1)
+        stxv 59, 240(1)
+        stxv 60, 256(1)
+        stxv 61, 272(1)
+        stxv 62, 288(1)
+        lxv 37, 0(4)
+        lxv 34, 16(4)
+        lxv 32, 80(4)
+        vxor 3, 3, 3
         vspltish 4, 1
-
-        li      4, -128
-        li      5, -112
-        li      6, -96
-        li      7, -80
-        li      8, -64
-        li      9, -48
-        li      10, -32
-        li      11, -16
-
-        MREDUCE_4X 27, 28, 29, 30
-        MREDUCE_4X 13, 18, 23, 7
-        Write_8X
-
-        MREDUCE_4X 27, 28, 29, 30
-        MREDUCE_4X 13, 18, 23, 7
-        Write_8X
-
-        MREDUCE_4X 27, 28, 29, 30
-        MREDUCE_4X 13, 18, 23, 7
-        Write_8X
-
-        MREDUCE_4X 27, 28, 29, 30
-        MREDUCE_4X 13, 18, 23, 7
-        Write_8X
-
-        lxv     32+20, 128(1)
-        lxv     32+21, 144(1)
-        lxv     32+22, 160(1)
-        lxv     32+23, 176(1)
-        lxv     32+24, 192(1)
-        lxv     32+25, 208(1)
-        lxv     32+26, 224(1)
-        lxv     32+27, 240(1)
-        lxv     32+28, 256(1)
-        lxv     32+29, 272(1)
-        lxv     32+30, 288(1)
-        mtlr    0
-        addi    1, 1, 320
+        li 4, -128
+        li 5, -112
+        li 6, -96
+        li 7, -80
+        li 8, -64
+        li 9, -48
+        li 10, -32
+        li 11, -16
+        lxvd2x 45, 0, 3
+        addi 3, 3, 16
+        lxvd2x 50, 0, 3
+        addi 3, 3, 16
+        lxvd2x 55, 0, 3
+        addi 3, 3, 16
+        lxvd2x 39, 0, 3
+        addi 3, 3, 16
+        vmladduhm 15, 13, 0, 3
+        vmladduhm 20, 18, 0, 3
+        vmladduhm 25, 23, 0, 3
+        vmladduhm 9, 7, 0, 3
+        vmhraddshs 14, 13, 0, 3
+        vmhraddshs 19, 18, 0, 3
+        vmhraddshs 24, 23, 0, 3
+        vmhraddshs 8, 7, 0, 3
+        vmladduhm 15, 15, 2, 3
+        vmladduhm 20, 20, 2, 3
+        vmladduhm 25, 25, 2, 3
+        vmladduhm 9, 9, 2, 3
+        vmhraddshs 15, 15, 5, 14
+        vmhraddshs 20, 20, 5, 19
+        vmhraddshs 25, 25, 5, 24
+        vmhraddshs 9, 9, 5, 8
+        vsrah 27, 15, 4
+        vsrah 28, 20, 4
+        vsrah 29, 25, 4
+        vsrah 30, 9, 4
+        lxvd2x 45, 0, 3
+        addi 3, 3, 16
+        lxvd2x 50, 0, 3
+        addi 3, 3, 16
+        lxvd2x 55, 0, 3
+        addi 3, 3, 16
+        lxvd2x 39, 0, 3
+        addi 3, 3, 16
+        vmladduhm 15, 13, 0, 3
+        vmladduhm 20, 18, 0, 3
+        vmladduhm 25, 23, 0, 3
+        vmladduhm 9, 7, 0, 3
+        vmhraddshs 14, 13, 0, 3
+        vmhraddshs 19, 18, 0, 3
+        vmhraddshs 24, 23, 0, 3
+        vmhraddshs 8, 7, 0, 3
+        vmladduhm 15, 15, 2, 3
+        vmladduhm 20, 20, 2, 3
+        vmladduhm 25, 25, 2, 3
+        vmladduhm 9, 9, 2, 3
+        vmhraddshs 15, 15, 5, 14
+        vmhraddshs 20, 20, 5, 19
+        vmhraddshs 25, 25, 5, 24
+        vmhraddshs 9, 9, 5, 8
+        vsrah 13, 15, 4
+        vsrah 18, 20, 4
+        vsrah 23, 25, 4
+        vsrah 7, 9, 4
+        stxvd2x 59, 4, 3
+        stxvd2x 60, 5, 3
+        stxvd2x 61, 6, 3
+        stxvd2x 62, 7, 3
+        stxvd2x 45, 8, 3
+        stxvd2x 50, 9, 3
+        stxvd2x 55, 10, 3
+        stxvd2x 39, 11, 3
+        lxvd2x 45, 0, 3
+        addi 3, 3, 16
+        lxvd2x 50, 0, 3
+        addi 3, 3, 16
+        lxvd2x 55, 0, 3
+        addi 3, 3, 16
+        lxvd2x 39, 0, 3
+        addi 3, 3, 16
+        vmladduhm 15, 13, 0, 3
+        vmladduhm 20, 18, 0, 3
+        vmladduhm 25, 23, 0, 3
+        vmladduhm 9, 7, 0, 3
+        vmhraddshs 14, 13, 0, 3
+        vmhraddshs 19, 18, 0, 3
+        vmhraddshs 24, 23, 0, 3
+        vmhraddshs 8, 7, 0, 3
+        vmladduhm 15, 15, 2, 3
+        vmladduhm 20, 20, 2, 3
+        vmladduhm 25, 25, 2, 3
+        vmladduhm 9, 9, 2, 3
+        vmhraddshs 15, 15, 5, 14
+        vmhraddshs 20, 20, 5, 19
+        vmhraddshs 25, 25, 5, 24
+        vmhraddshs 9, 9, 5, 8
+        vsrah 27, 15, 4
+        vsrah 28, 20, 4
+        vsrah 29, 25, 4
+        vsrah 30, 9, 4
+        lxvd2x 45, 0, 3
+        addi 3, 3, 16
+        lxvd2x 50, 0, 3
+        addi 3, 3, 16
+        lxvd2x 55, 0, 3
+        addi 3, 3, 16
+        lxvd2x 39, 0, 3
+        addi 3, 3, 16
+        vmladduhm 15, 13, 0, 3
+        vmladduhm 20, 18, 0, 3
+        vmladduhm 25, 23, 0, 3
+        vmladduhm 9, 7, 0, 3
+        vmhraddshs 14, 13, 0, 3
+        vmhraddshs 19, 18, 0, 3
+        vmhraddshs 24, 23, 0, 3
+        vmhraddshs 8, 7, 0, 3
+        vmladduhm 15, 15, 2, 3
+        vmladduhm 20, 20, 2, 3
+        vmladduhm 25, 25, 2, 3
+        vmladduhm 9, 9, 2, 3
+        vmhraddshs 15, 15, 5, 14
+        vmhraddshs 20, 20, 5, 19
+        vmhraddshs 25, 25, 5, 24
+        vmhraddshs 9, 9, 5, 8
+        vsrah 13, 15, 4
+        vsrah 18, 20, 4
+        vsrah 23, 25, 4
+        vsrah 7, 9, 4
+        stxvd2x 59, 4, 3
+        stxvd2x 60, 5, 3
+        stxvd2x 61, 6, 3
+        stxvd2x 62, 7, 3
+        stxvd2x 45, 8, 3
+        stxvd2x 50, 9, 3
+        stxvd2x 55, 10, 3
+        stxvd2x 39, 11, 3
+        lxvd2x 45, 0, 3
+        addi 3, 3, 16
+        lxvd2x 50, 0, 3
+        addi 3, 3, 16
+        lxvd2x 55, 0, 3
+        addi 3, 3, 16
+        lxvd2x 39, 0, 3
+        addi 3, 3, 16
+        vmladduhm 15, 13, 0, 3
+        vmladduhm 20, 18, 0, 3
+        vmladduhm 25, 23, 0, 3
+        vmladduhm 9, 7, 0, 3
+        vmhraddshs 14, 13, 0, 3
+        vmhraddshs 19, 18, 0, 3
+        vmhraddshs 24, 23, 0, 3
+        vmhraddshs 8, 7, 0, 3
+        vmladduhm 15, 15, 2, 3
+        vmladduhm 20, 20, 2, 3
+        vmladduhm 25, 25, 2, 3
+        vmladduhm 9, 9, 2, 3
+        vmhraddshs 15, 15, 5, 14
+        vmhraddshs 20, 20, 5, 19
+        vmhraddshs 25, 25, 5, 24
+        vmhraddshs 9, 9, 5, 8
+        vsrah 27, 15, 4
+        vsrah 28, 20, 4
+        vsrah 29, 25, 4
+        vsrah 30, 9, 4
+        lxvd2x 45, 0, 3
+        addi 3, 3, 16
+        lxvd2x 50, 0, 3
+        addi 3, 3, 16
+        lxvd2x 55, 0, 3
+        addi 3, 3, 16
+        lxvd2x 39, 0, 3
+        addi 3, 3, 16
+        vmladduhm 15, 13, 0, 3
+        vmladduhm 20, 18, 0, 3
+        vmladduhm 25, 23, 0, 3
+        vmladduhm 9, 7, 0, 3
+        vmhraddshs 14, 13, 0, 3
+        vmhraddshs 19, 18, 0, 3
+        vmhraddshs 24, 23, 0, 3
+        vmhraddshs 8, 7, 0, 3
+        vmladduhm 15, 15, 2, 3
+        vmladduhm 20, 20, 2, 3
+        vmladduhm 25, 25, 2, 3
+        vmladduhm 9, 9, 2, 3
+        vmhraddshs 15, 15, 5, 14
+        vmhraddshs 20, 20, 5, 19
+        vmhraddshs 25, 25, 5, 24
+        vmhraddshs 9, 9, 5, 8
+        vsrah 13, 15, 4
+        vsrah 18, 20, 4
+        vsrah 23, 25, 4
+        vsrah 7, 9, 4
+        stxvd2x 59, 4, 3
+        stxvd2x 60, 5, 3
+        stxvd2x 61, 6, 3
+        stxvd2x 62, 7, 3
+        stxvd2x 45, 8, 3
+        stxvd2x 50, 9, 3
+        stxvd2x 55, 10, 3
+        stxvd2x 39, 11, 3
+        lxvd2x 45, 0, 3
+        addi 3, 3, 16
+        lxvd2x 50, 0, 3
+        addi 3, 3, 16
+        lxvd2x 55, 0, 3
+        addi 3, 3, 16
+        lxvd2x 39, 0, 3
+        addi 3, 3, 16
+        vmladduhm 15, 13, 0, 3
+        vmladduhm 20, 18, 0, 3
+        vmladduhm 25, 23, 0, 3
+        vmladduhm 9, 7, 0, 3
+        vmhraddshs 14, 13, 0, 3
+        vmhraddshs 19, 18, 0, 3
+        vmhraddshs 24, 23, 0, 3
+        vmhraddshs 8, 7, 0, 3
+        vmladduhm 15, 15, 2, 3
+        vmladduhm 20, 20, 2, 3
+        vmladduhm 25, 25, 2, 3
+        vmladduhm 9, 9, 2, 3
+        vmhraddshs 15, 15, 5, 14
+        vmhraddshs 20, 20, 5, 19
+        vmhraddshs 25, 25, 5, 24
+        vmhraddshs 9, 9, 5, 8
+        vsrah 27, 15, 4
+        vsrah 28, 20, 4
+        vsrah 29, 25, 4
+        vsrah 30, 9, 4
+        lxvd2x 45, 0, 3
+        addi 3, 3, 16
+        lxvd2x 50, 0, 3
+        addi 3, 3, 16
+        lxvd2x 55, 0, 3
+        addi 3, 3, 16
+        lxvd2x 39, 0, 3
+        addi 3, 3, 16
+        vmladduhm 15, 13, 0, 3
+        vmladduhm 20, 18, 0, 3
+        vmladduhm 25, 23, 0, 3
+        vmladduhm 9, 7, 0, 3
+        vmhraddshs 14, 13, 0, 3
+        vmhraddshs 19, 18, 0, 3
+        vmhraddshs 24, 23, 0, 3
+        vmhraddshs 8, 7, 0, 3
+        vmladduhm 15, 15, 2, 3
+        vmladduhm 20, 20, 2, 3
+        vmladduhm 25, 25, 2, 3
+        vmladduhm 9, 9, 2, 3
+        vmhraddshs 15, 15, 5, 14
+        vmhraddshs 20, 20, 5, 19
+        vmhraddshs 25, 25, 5, 24
+        vmhraddshs 9, 9, 5, 8
+        vsrah 13, 15, 4
+        vsrah 18, 20, 4
+        vsrah 23, 25, 4
+        vsrah 7, 9, 4
+        stxvd2x 59, 4, 3
+        stxvd2x 60, 5, 3
+        stxvd2x 61, 6, 3
+        stxvd2x 62, 7, 3
+        stxvd2x 45, 8, 3
+        stxvd2x 50, 9, 3
+        stxvd2x 55, 10, 3
+        stxvd2x 39, 11, 3
+        lxv 52, 128(1)
+        lxv 53, 144(1)
+        lxv 54, 160(1)
+        lxv 55, 176(1)
+        lxv 56, 192(1)
+        lxv 57, 208(1)
+        lxv 58, 224(1)
+        lxv 59, 240(1)
+        lxv 60, 256(1)
+        lxv 61, 272(1)
+        lxv 62, 288(1)
+        mtlr 0
+        addi 1, 1, 320
         blr
+        .cfi_endproc
 
-/* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
- * Don't modify by hand -- this is auto-generated by scripts/autogen. */
-#undef V1353
-#undef V_QINV
-#undef V_NMKQ
-
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
-          !MLK_CONFIG_MULTILEVEL_NO_SHARED */
-
-/* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
- * Don't modify by hand -- this is auto-generated by scripts/autogen. */
-#undef V1353
-#undef V_QINV
-#undef V_NMKQ
+#endif /* MLK_ARITH_BACKEND_PPC64LE && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
