@@ -28,6 +28,8 @@ runs:
         kat: true
         acvp: true
         opt: ${{ inputs.opt }}
+        examples: true
+        extra_args: "--exclude-example basic_deterministic"
     - name: "PCT enabled + broken"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'pct-enabled-broken') }}
       shell: bash
