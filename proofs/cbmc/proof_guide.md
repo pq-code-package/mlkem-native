@@ -73,6 +73,41 @@ for some struct `foo`, you cannot pass `&foo[0]`, `&foo[1]` as arguments to a fu
 `memory_no_alias(...)` for both, because `&foo[0]`, `&foo[1]` point to the same object. In mlkem-native, we sometimes
 work around this by manually splitting statically-sized arrays into multiple separate objects.
 
+
+### Maximum buffer sizes
+
+CBMC assumes that allocated objects are less than `__CPROVER_max_malloc_size`
+which is an an internal constant defined to be `SIZE_MAX >> (OBJECT_BITS + 1)`
+for that particular run of CBMC, where `SIZE_MAX` is an implementation-defined
+constant (declared in `stdint.h`) and `OBJECT_BITS` is a command-line parameter
+with value typically in the range 8 .. 12
+
+See the [memory bounds checking](https://diffblue.github.io/cbmc/memory-bounds-checking.html)
+section of the CBMC manual for more details.
+
+Pragmatically, `SIZE_MAX` will either be `2**64-1` or `2**32-1` depending on the
+host platform, and we choose the largest value of `OBJECT_BITS` that is used
+for all proofs in this repository.
+
+This matters where a function takes a formal parameter `p` of some pointer type
+`t` and a `len` parameter of type `size_t` that denotes the number of elements
+pointed to by `p`, and those parameters are subject to a
+`memory_no_alias(p, len * sizeof(t))` contract.
+
+In such cases, len must be explicitly bounded to be less that or equal to
+MLK_MAX_BUFFER_SIZE which might be defined in `cbmc.h` as:
+```c
+#define MLK_MAX_BUFFER_SIZE (SIZE_MAX >> 12)
+```
+and used, for example, as follows:
+```c
+void f(t *p, size_t len)
+__contract__(
+  requires(len * sizeof(t) <= MLK_MAX_BUFFER_SIZE)
+  requires(memory_no_alias(p, len * sizeof(t)))
+);
+```
+
 ### Memory footprint
 
 The most common way to specify memory footprint in `assigns(...)` clauses is via `memory_slice(ptr, len)`. This asserts
