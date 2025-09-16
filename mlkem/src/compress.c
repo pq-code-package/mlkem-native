@@ -38,7 +38,9 @@ MLK_INTERNAL_API
 void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
                           const mlk_poly *a)
 {
-  unsigned i;
+  unsigned i, j;
+  int16_t u;
+  uint8_t t[8];
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D4)
   int ret;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
@@ -51,22 +53,20 @@ void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_N / 8; i++)
-  __loop__(invariant(i <= MLKEM_N / 8))
   {
-    unsigned j;
-    uint8_t t[8] = {0};
     for (j = 0; j < 8; j++)
-    __loop__(
-      invariant(i <= MLKEM_N / 8 && j <= 8)
-      invariant(array_bound(t, 0, j, 0, 16)))
     {
-      t[j] = mlk_scalar_compress_d4(a->coeffs[8 * i + j]);
+      /* map to positive standard representatives */
+      u = a->coeffs[8 * i + j];
+      u += (u >> 15) & MLKEM_Q;
+      t[j] = ((((uint16_t)u << 4) + MLKEM_Q / 2) / MLKEM_Q) & 15;
     }
 
-    r[i * 4] = t[0] | (t[1] << 4);
-    r[i * 4 + 1] = t[2] | (t[3] << 4);
-    r[i * 4 + 2] = t[4] | (t[5] << 4);
-    r[i * 4 + 3] = t[6] | (t[7] << 4);
+    r[0] = t[0] | (t[1] << 4);
+    r[1] = t[2] | (t[3] << 4);
+    r[2] = t[4] | (t[5] << 4);
+    r[3] = t[6] | (t[7] << 4);
+    r += 4;
   }
 }
 
