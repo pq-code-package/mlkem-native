@@ -246,7 +246,7 @@ endif
 #   * an entire project when added to Makefile-project-defines
 #   * a specific proof when added to the harness Makefile
 
-CBMC_FLAG_MALLOC_MAY_FAIL ?= # set to --no-malloc-may-fail to disable
+CBMC_FLAG_MALLOC_MAY_FAIL ?= --malloc-fail-assert
 CBMC_FLAG_BOUNDS_CHECK ?= # set to --no-bounds-check to disable
 CBMC_FLAG_CONVERSION_CHECK ?= --conversion-check
 CBMC_FLAG_DIV_BY_ZERO_CHECK ?= # set to --no-div-by-zero-check to disable
