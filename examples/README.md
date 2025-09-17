@@ -8,6 +8,9 @@ This directory contains minimal examples demonstrating how you can use mlkem-nat
 
 See [basic](basic) for a basic example of how to build a single instance of mlkem-native.
 
+## Basic_deterministic
+
+See [basic_deterministic](basic_deterministic) for a basic example of how to build a single instance of mlkem-native without `randombytes()` implementation. This allows users to build mlkem-native using only the deterministic API when randomized functions are not required.
 ## Multi-level build (C only)
 
 See [multilevel_build](multilevel_build) for an example of how to build one instance of mlkem-native per security level,

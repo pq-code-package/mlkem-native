@@ -467,7 +467,7 @@
  *              as the current PCT implementation requires crypto_kem_enc().
  *
  *****************************************************************************/
-/* #define MLK_CONFIG_NO_RANDOMIZED_API */
+#define MLK_CONFIG_NO_RANDOMIZED_API
 
 /******************************************************************************
  * Name:        MLK_CONFIG_KEYGEN_PCT

@@ -227,6 +227,9 @@ jobs:
       - name: basic
         run: |
           CFLAGS="-O0" make run -C examples/basic
+      - name: basic_deterministic
+        run: |
+          CFLAGS="-O0" make run -C examples/basic_deterministic
       - name: bring_your_own_fips202
         run: |
           CFLAGS="-O0" make run -C examples/bring_your_own_fips202
