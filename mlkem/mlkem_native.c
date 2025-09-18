@@ -14,7 +14,7 @@
  * Single compilation unit (SCU) for fixed-level build of mlkem-native
  *
  * This compilation unit bundles together all source files for a build
- * of mlkem-native for a fixed security level (MLKEM-512/768/1024).
+ * of mlkem-native for a fixed security level (ML-KEM-512/768/1024).
  *
  * # API
  *

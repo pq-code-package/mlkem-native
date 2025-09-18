@@ -77,7 +77,7 @@ static int test_keys_mlkem512(void)
       "[WARNING] Skipping KAT test since PCT is enabled and modifies PRNG\n");
 #endif
 
-  printf("[MLKEM-512] OK\n");
+  printf("[ML-KEM-512] OK\n");
   return 0;
 }
 
@@ -132,7 +132,7 @@ static int test_keys_mlkem768(void)
       "[WARNING] Skipping KAT test since PCT is enabled and modifies PRNG\n");
 #endif
 
-  printf("[MLKEM-768] OK\n");
+  printf("[ML-KEM-768] OK\n");
   return 0;
 }
 
@@ -188,7 +188,7 @@ static int test_keys_mlkem1024(void)
       "[WARNING] Skipping KAT test since PCT is enabled and modifies PRNG\n");
 #endif
 
-  printf("[MLKEM-1024] OK\n");
+  printf("[ML-KEM-1024] OK\n");
   return 0;
 }
 
