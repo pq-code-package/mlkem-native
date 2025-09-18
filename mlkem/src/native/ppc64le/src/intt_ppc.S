@@ -11,13 +11,17 @@
 #
 
 #include "../../../common.h"
+#if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+
+#include "consts.h"
 
 .machine "any"
 .text
 
 # Barrett reduce constatnts
 #define V20159  0
-#define V_25	1
+#define V_25    1
 #define V_26    2
 #define V_MKQ   3
 
@@ -29,11 +33,11 @@
 #define V_Z2    9
 #define V_Z3    10
 #define V_ZETA  10
-#define V1441	10
+#define V1441   10
 
 .macro Load_4Coeffs start next step
 	mr	9, \start	# j
-	add	10, 4, 9	# J + len*2
+	add	10, 7, 9	# J + len*2
 	addi	16, 9, \next
 	addi	17, 10, \step
 	addi	18, 16, \next
@@ -73,6 +77,8 @@
 	xxlor	32+3, 6, 6	# V_MKQ
 	xxlor	32+1, 7, 7	# V_25
 	xxlor	32+2, 8, 8	# V_26
+	# Multify Odd/Even signed halfword;
+	#   Results word bound by 2^32 in abs value.
 	vmulosh	6, 8, V20159
 	vmulesh	5, 8, V20159
 	vmulosh	11, 12, V20159
@@ -97,6 +103,8 @@
 	vadduwm	14, 14, V_25
 	vadduwm	17, 17, V_25
 	vadduwm	18, 18, V_25
+	# Right shift and pack lower halfword,
+	#   results bond to 2^16 in abs value
 	vsraw	4, 4, V_26
 	vsraw	5, 5, V_26
 	vsraw	9, 9, V_26
@@ -113,6 +121,8 @@
 	vsubuhm	13, 7, 13
 	vpkuwum	17, 18, 17
 	vsubuhm	17, 7, 17
+	# Modulo multify-Low unsigned halfword;
+	#   results bond to 2^16 * q in abs value.
 	vmladduhm \_v0, 4, V_MKQ, 8
 	vmladduhm \_v1, 9, V_MKQ, 12
 	vmladduhm \_v2, 13, V_MKQ, 16
@@ -123,11 +133,13 @@
 # MREDUCE_4X(len, start, _vz0, _vz1, _vz2, _vz3)
 #
 .macro MREDUCE_4X _vz0 _vz1 _vz2 _vz3 _vo0 _vo1 _vo2 _vo3
+	# Modular multification bond by 2^16 * q in abs value
 	vmladduhm 15, 25, \_vz0, 3
 	vmladduhm 20, 26, \_vz1, 3
 	vmladduhm 27, 30, \_vz2, 3
 	vmladduhm 28, 31, \_vz3, 3
 
+	# Signed multiply-high-round; outputs are bound by 2^15 * q in abs value
 	vmhraddshs 14, 25, \_vz0, 3
 	vmhraddshs 19, 26, \_vz1, 3
 	vmhraddshs 24, 30, \_vz2, 3
@@ -265,50 +277,41 @@ MLK_ASM_FN_SYMBOL(intt_ppc)
 
 	# init vectors and constants
 	# Setup for Montgomery reduce
-	addis	8,2,.nmkq@toc@ha
-	addi	8,8,.nmkq@toc@l
-	lxv	0, 0(8)
+	lxv	0, 0(4)
 
-	lxv	32+V_QINV, 16(8)                # QINV
+	lxv	32+V_QINV, QINV_OFFSET(4)       # QINV
 	xxlxor	32+3, 32+3, 32+3
 	vspltish 4, 1
-	xxlor	2, 32+2, 32+2
-	xxlor	3, 32+3, 32+3
-	xxlor	4, 32+4, 32+4
+	xxlor	2, 32+2, 32+2			# QINV
+	xxlor	3, 32+3, 32+3			# 0
+	xxlor	4, 32+4, 32+4			# 1
 
 	# Setup for Barrett reduce
-	addis	8,2,.mkq@toc@ha
-	addi	8,8,.mkq@toc@l
-	addis	9,2,.C20159@toc@ha
-	addi	9,9,.C20159@toc@l
-	addis	10,2,.C25@toc@ha
-	addi	10,10,.C25@toc@l
-
-	lxv	6, 0(8)		# V_MKQ
-	lxv	32+0, 0(9)	# V20159
-	lxv	7, 0(10)	# V_25
+	lxv	6, Q_OFFSET(4)			# V_MKQ
+	lxv	32+V20159, C20159_OFFSET(4)	# V20159
+	lxv	7, 0(4)	# V_25
 
 	#xxspltiw 8, 26		# for power9 and above
 	vspltisw 8, 13
 	vadduwm  8, 8, 8
-	xxlor	8, 32+8, 32+8
+	xxlor	8, 32+8, 32+8	# V_26 store at vs8
 
-	# zetas array
-	#addis	14,2,.izeta63@toc@ha
-	#addi	14,14,.izeta63@toc@l
+	vspltisw 9, 1
+	vsubuwm	10, 8, 9	# 25
+	vslw	9, 9, 10
+	xxlor	7, 32+9, 32+9	# V_25 syore at vs7
 
 .align 4
-__Len2:
+#__Len2:
 	#
 	# 1. len = 2, start = 0, 4, 8, 12,...244, 248, 252 
 	# Update zetas vectors, each vector has 2 zetas
-	addis	14,2,.izeta127@toc@ha
-	addi	14,14,.izeta127@toc@l
-	li	4, 4
+	addi	14, 4, IZETA_NTT_OFFSET127
+	li	7, 4
 	li	15, 4
 	mtctr	15
 	li	5, 0
-__Loop2:
+intt_ppc__Loop2:
 	Load_4Coeffs 5, 16, 16
 	BREDUCE_4X 4, 9, 13, 17
 	xxlor	10, 32+4, 32+4
@@ -333,19 +336,18 @@ __Loop2:
 	MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, 13, 18, 23, 28
 	Write_Len2_4C 32+13, 32+18, 32+23, 32+28
 	addi	5, 5, 64
-	bdnz	__Loop2
+	bdnz	intt_ppc__Loop2
 
 .align 4
-__Len4:
+#__Len4:
 	#
 	# 2. len = 4, start = 0, 8, 16, 24,...232, 240, 248 
-	addis	14,2,.izeta63@toc@ha
-	addi	14,14,.izeta63@toc@l
+	addi	14, 4, IZETA_NTT_OFFSET63
 	li	5, 0
-	li	4, 8
+	li	7, 8
 	li	15, 4                   # loops
 	mtctr	15
-__Loop4:
+intt_ppc__Loop4:
 	Load_4Coeffs 5, 16, 16
 	BREDUCE_4X 4, 9, 13, 17
 	xxlor	10, 32+4, 32+4
@@ -369,13 +371,13 @@ __Loop4:
 	MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, 13, 18, 23, 28
 	Write_Len4_4C 32+13, 32+18, 32+23, 32+28
 	addi	5, 5, 64
-	bdnz	__Loop4
+	bdnz	intt_ppc__Loop4
 
 .align 4
-__Len8:
+#__Len8:
 	# 3. len = 8, start = 0, 16, 32, 48,...208, 224, 240 
 	#addi	14, 14, 512
-	li	4, 16
+	li	7, 16
 	li	5, 0
 
 	Load_4Coeffs 5, 32, 32
@@ -414,12 +416,12 @@ __Len8:
 	Write_M4C 32+13, 32+18, 32+23, 32+28
 
 .align 4
-__Len16:
+#__Len16:
 	#
 	# 4. len = 16, start = 0, 32, 64,,...160, 192, 224
 	#addi	14, 14, 768
 	li	5, 0
-	li	4, 32
+	li	7, 32
 
 	Load_4Coeffs 5, 64, 64
 	BREDUCE_4X 4, 9, 13, 17
@@ -458,12 +460,12 @@ __Len16:
 	Write_M4C 32+13, 32+18, 32+23, 32+28
 
 .align 4
-__Len32:
+#__Len32:
         #
         # 5. len = 32, start = 0, 64, 128, 192
 	#addi	14, 14, 896
 	li	5, 0
-	li	4, 64
+	li	7, 64
 
 	Load_4Coeffs 5, 16, 16
 	BREDUCE_4X 4, 9, 13, 17
@@ -505,12 +507,12 @@ __Len32:
 	Write_M4C 32+13, 32+18, 32+23, 32+28
 
 .align 4
-__Len64:
+#__Len64:
 	#
 	# 6. len = 64, start = 0, 128
 	#addi	14, 14, 960
 	li	5, 0
-	li	4, 128
+	li	7, 128
 	Load_4Coeffs 5, 16, 16
 	BREDUCE_4X 4, 9, 13, 17
 	Write_B4C 32+4, 32+9, 32+13, 32+17
@@ -549,12 +551,12 @@ __Len64:
 	Write_M4C 32+13, 32+18, 32+23, 32+28
 
 .align 4
-__Len128:
+#__Len128:
 	# 7. len = 128, start = 0
 	#
 	#addi	14, 14, 992
 	li	5, 0            # start
-	li	4, 256          # len * 2
+	li	7, 256          # len * 2
 
 	Load_4Coeffs 5, 16, 16
 	BREDUCE_4X 4, 9, 13, 17
@@ -596,9 +598,8 @@ __Len128:
 	#
 	# Montgomery reduce loops with constant 1441
 	#
-	addis	10,2,.C1441@toc@ha
-	addi	10,10,.C1441@toc@l
-	lvx	V1441, 0, 10
+	addi	14, 4, C1441_OFFSET
+	lvx	V1441, 0, 14
 
 	Reload_4coeffs
 	MREDUCE_4X V1441, V1441, V1441, V1441, 6, 7, 8, 9
@@ -624,7 +625,6 @@ __Len128:
 	MREDUCE_4X V1441, V1441, V1441, V1441, 13, 18, 23, 28
 	MWrite_8X 32+6, 32+7, 32+8, 32+9, 32+13, 32+18, 32+23, 32+28
 
-__intt_out:
 	lxv	32+20, 128(1)
 	lxv	32+21, 144(1)
 	lxv	32+22, 160(1)
@@ -651,123 +651,35 @@ __intt_out:
 	addi    1, 1, 352
 	blr
 
-.data
-.align 4
-# -MLKEM_Q
-.nmkq:
-.short -3329, -3329, -3329, -3329, -3329, -3329, -3329, -3329
-# QINV
-.short  -3327, -3327, -3327, -3327, -3327, -3327, -3327, -3327
+/* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
+ * Don't modify by hand -- this is auto-generated by scripts/autogen. */
+#undef V20159
+#undef V_25
+#undef V_26
+#undef V_MKQ
+#undef V_QINV
+#undef V_NMKQ
+#undef V_Z0
+#undef V_Z1
+#undef V_Z2
+#undef V_Z3
+#undef V_ZETA
+#undef V1441
 
-# MLKEM_Q
-.mkq:
-.short 3329, 3329, 3329, 3329, 3329, 3329, 3329, 3329
+#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED */
 
-.C20159:
-.short  20159, 20159, 20159, 20159, 20159, 20159, 20159, 20159
-
-# 0x2000000
-.C25:
-.long   33554432, 33554432, 33554432, 33554432
-
-.C1441:
-.short 1441, 1441, 1441, 1441, 1441, 1441, 1441, 1441
-
-.align 4
-.izeta127:
-.short 1628, 1628, 1628, 1628, 1522, 1522, 1522, 1522
-.short -1460, -1460, -1460, -1460, 958, 958, 958, 958
-.short 991, 991, 991, 991, 996, 996, 996, 996
-.short -308, -308, -308, -308, -108, -108, -108, -108
-.short 478, 478, 478, 478, -870, -870, -870, -870
-.short -854, -854, -854, -854, -1510, -1510, -1510, -1510
-.short 794, 794, 794, 794, -1278, -1278, -1278, -1278
-.short -1530, -1530, -1530, -1530, -1185, -1185, -1185, -1185
-.short -1659, -1659, -1659, -1659, -1187, -1187, -1187, -1187
-.short 220, 220, 220, 220, -874, -874, -874, -874
-.short -1335, -1335, -1335, -1335, 1218, 1218, 1218, 1218
-.short -136, -136, -136, -136, -1215, -1215, -1215, -1215
-.short 384, 384, 384, 384, -1465, -1465, -1465, -1465
-.short -1285, -1285, -1285, -1285, 1322, 1322, 1322, 1322
-.short 610, 610, 610, 610, 603, 603, 603, 603
-.short 1097, 1097, 1097, 1097, 817, 817, 817, 817
-.short -75, -75, -75, -75, -156, -156, -156, -156
-.short 329, 329, 329, 329, 418, 418, 418, 418
-.short 349, 349, 349, 349, -872, -872, -872, -872
-.short 644, 644, 644, 644, -1590, -1590, -1590, -1590
-.short 1119, 1119, 1119, 1119, -602, -602, -602, -602
-.short 1483, 1483, 1483, 1483, -777, -777, -777, -777
-.short -147, -147, -147, -147, 1159, 1159, 1159, 1159
-.short 778, 778, 778, 778, -246, -246, -246, -246
-.short 1653, 1653, 1653, 1653, 1574, 1574, 1574, 1574
-.short -460, -460, -460, -460, -291, -291, -291, -291
-.short -235, -235, -235, -235, 177, 177, 177, 177
-.short 587, 587, 587, 587, 422, 422, 422, 422
-.short 105, 105, 105, 105, 1550, 1550, 1550, 1550
-.short 871, 871, 871, 871, -1251, -1251, -1251, -1251
-.short 843, 843, 843, 843, 555, 555, 555, 555
-.short 430, 430, 430, 430, -1103, -1103, -1103, -1103
-.izeta63:
-.short -1275, -1275, -1275, -1275, -1275, -1275, -1275, -1275
-.short 677, 677, 677, 677, 677, 677, 677, 677
-.short -1065, -1065, -1065, -1065, -1065, -1065, -1065, -1065
-.short 448, 448, 448, 448, 448, 448, 448, 448
-.short -725, -725, -725, -725, -725, -725, -725, -725
-.short -1508, -1508, -1508, -1508, -1508, -1508, -1508, -1508
-.short 961, 961, 961, 961, 961, 961, 961, 961
-.short -398, -398, -398, -398, -398, -398, -398, -398
-.short -951, -951, -951, -951, -951, -951, -951, -951
-.short -247, -247, -247, -247, -247, -247, -247, -247
-.short -1421, -1421, -1421, -1421, -1421, -1421, -1421, -1421
-.short 107, 107, 107, 107, 107, 107, 107, 107
-.short 830, 830, 830, 830, 830, 830, 830, 830
-.short -271, -271, -271, -271, -271, -271, -271, -271
-.short -90, -90, -90, -90, -90, -90, -90, -90
-.short -853, -853, -853, -853, -853, -853, -853, -853
-.short 1469, 1469, 1469, 1469, 1469, 1469, 1469, 1469
-.short 126, 126, 126, 126, 126, 126, 126, 126
-.short -1162, -1162, -1162, -1162, -1162, -1162, -1162, -1162
-.short -1618, -1618, -1618, -1618, -1618, -1618, -1618, -1618
-.short -666, -666, -666, -666, -666, -666, -666, -666
-.short -320, -320, -320, -320, -320, -320, -320, -320
-.short -8, -8, -8, -8, -8, -8, -8, -8
-.short 516, 516, 516, 516, 516, 516, 516, 516
-.short -1544, -1544, -1544, -1544, -1544, -1544, -1544, -1544
-.short -282, -282, -282, -282, -282, -282, -282, -282
-.short 1491, 1491, 1491, 1491, 1491, 1491, 1491, 1491
-.short -1293, -1293, -1293, -1293, -1293, -1293, -1293, -1293
-.short 1015, 1015, 1015, 1015, 1015, 1015, 1015, 1015
-.short -552, -552, -552, -552, -552, -552, -552, -552
-.short 652, 652, 652, 652, 652, 652, 652, 652
-.short 1223, 1223, 1223, 1223, 1223, 1223, 1223, 1223
-.short -1571, -1571, -1571, -1571, -1571, -1571, -1571, -1571
-.short -205, -205, -205, -205, -205, -205, -205, -205
-.short 411, 411, 411, 411, 411, 411, 411, 411
-.short -1542, -1542, -1542, -1542, -1542, -1542, -1542, -1542
-.short 608, 608, 608, 608, 608, 608, 608, 608
-.short 732, 732, 732, 732, 732, 732, 732, 732
-.short 1017, 1017, 1017, 1017, 1017, 1017, 1017, 1017
-.short -681, -681, -681, -681, -681, -681, -681, -681
-.short -130, -130, -130, -130, -130, -130, -130, -130
-.short -1602, -1602, -1602, -1602, -1602, -1602, -1602, -1602
-.short 1458, 1458, 1458, 1458, 1458, 1458, 1458, 1458
-.short -829, -829, -829, -829, -829, -829, -829, -829
-.short 383, 383, 383, 383, 383, 383, 383, 383
-.short 264, 264, 264, 264, 264, 264, 264, 264
-.short -1325, -1325, -1325, -1325, -1325, -1325, -1325, -1325
-.short 573, 573, 573, 573, 573, 573, 573, 573
-.short 1468, 1468, 1468, 1468, 1468, 1468, 1468, 1468
-.short -1474, -1474, -1474, -1474, -1474, -1474, -1474, -1474
-.short -1202, -1202, -1202, -1202, -1202, -1202, -1202, -1202
-.short 962, 962, 962, 962, 962, 962, 962, 962
-.short 182, 182, 182, 182, 182, 182, 182, 182
-.short 1577, 1577, 1577, 1577, 1577, 1577, 1577, 1577
-.short 622, 622, 622, 622, 622, 622, 622, 622
-.short -171, -171, -171, -171, -171, -171, -171, -171
-.short 202, 202, 202, 202, 202, 202, 202, 202
-.short 287, 287, 287, 287, 287, 287, 287, 287
-.short 1422, 1422, 1422, 1422, 1422, 1422, 1422, 1422
-.short 1493, 1493, 1493, 1493, 1493, 1493, 1493, 1493
-.short -1517, -1517, -1517, -1517, -1517, -1517, -1517, -1517
-.short -359, -359, -359, -359, -359, -359, -359, -359
-.short -758, -758, -758, -758, -758, -758, -758, -758
+/* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
+ * Don't modify by hand -- this is auto-generated by scripts/autogen. */
+#undef V20159
+#undef V_25
+#undef V_26
+#undef V_MKQ
+#undef V_QINV
+#undef V_NMKQ
+#undef V_Z0
+#undef V_Z1
+#undef V_Z2
+#undef V_Z3
+#undef V_ZETA
+#undef V1441

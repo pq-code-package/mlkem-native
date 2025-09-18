@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
-#ifndef MLK_NATIVE_PPC64LE_META_H
-#define MLK_NATIVE_PPC64LE_META_H
+#ifndef MLK_DEV_PPC64LE_META_H
+#define MLK_DEV_PPC64LE_META_H
 
 /* Identifier for this backend so that source and assembly files
  * in the build can be appropriately guarded. */
@@ -25,25 +25,29 @@
 #include "../api.h"
 #include "src/arith_native_ppc64le.h"
 
-static MLK_INLINE int mlk_ntt_native(int16_t data[MLKEM_N]) {
-	mlk_ntt_ppc(data);
-	return MLK_NATIVE_FUNC_SUCCESS;
+static MLK_INLINE int mlk_ntt_native(int16_t data[MLKEM_N])
+{
+  mlk_ntt_ppc(data, mlk_ppc_qdata);
+  return MLK_NATIVE_FUNC_SUCCESS;
 }
 
-static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N]) {
-	mlk_intt_ppc(data);
-	return MLK_NATIVE_FUNC_SUCCESS;
+static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
+{
+  mlk_intt_ppc(data, mlk_ppc_qdata);
+  return MLK_NATIVE_FUNC_SUCCESS;
 }
 
-static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N]) {
-	mlk_reduce_ppc(data);
-	return MLK_NATIVE_FUNC_SUCCESS;
+static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])
+{
+  mlk_reduce_ppc(data, mlk_ppc_qdata);
+  return MLK_NATIVE_FUNC_SUCCESS;
 }
 
-static MLK_INLINE int mlk_poly_tomont_native(int16_t data[MLKEM_N]) {
-	mlk_poly_tomont_ppc(data);
-	return MLK_NATIVE_FUNC_SUCCESS;
+static MLK_INLINE int mlk_poly_tomont_native(int16_t data[MLKEM_N])
+{
+  mlk_poly_tomont_ppc(data, mlk_ppc_qdata);
+  return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* !__ASSEMBLER__ */
 
-#endif /* MLK_NATIVE_PPC64LE_META_H */
+#endif /* !MLK_DEV_PPC64LE_META_H */
