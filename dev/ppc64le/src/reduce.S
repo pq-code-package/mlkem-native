@@ -3,35 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
-#
-# Copyright 2025- IBM Corp.
-#
-#===================================================================================
-# Written by Danny Tsen <dtsen@us.ibm.com>
-#
 
-#
-# poly_reduce: Applies Barrett reduction to all coefficients of a polynomial
-#              for details of the Barrett reduction
-#
-# Arguments: *r: pointer to input/output polynomial
-#
-
+/*
+ * Copyright 2025- IBM Corp.
+ *
+ *===================================================================================
+ * Written by Danny Tsen <dtsen@us.ibm.com>
+ *
+ */
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
+#if defined(MLK_ARITH_BACKEND_PPC64LE) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
 #include "consts.h"
 
-# Barrett reduce constatnts
+// poly_reduce: Applies Barrett reduction to all coefficients of a polynomial
+//              for details of the Barrett reduction
+//
+// Arguments: *r: pointer to input/output polynomial
+
+// Barrett reduce constatnts
 #define V20159  0
 #define V_25    1
 #define V_26    2
 #define V_MKQ   3
-
-.machine "any"
-.text
 
 .macro BREDUCE_4X _v0 _v1 _v2 _v3
         lxvd2x  32+8, 0, 3
@@ -96,9 +92,9 @@
         stxvd2x 32+17, 11, 3
 .endm
 
-#
-# Conditional addition to get unsigned canonical representative
-#
+//
+// Conditional addition to get unsigned canonical representative
+//
 .macro To_unsigned_16
         lxv     32+12, 0(3)
         lxv     32+13, 16(3)
@@ -127,8 +123,9 @@
         stxv    32+0, -48(3)
 .endm
 
-.align 4
-.globl MLK_ASM_NAMESPACE(reduce_ppc)
+.text
+.global MLK_ASM_NAMESPACE(reduce_ppc)
+.balign 16
 MLK_ASM_FN_SYMBOL(reduce_ppc)
         stdu    1, -224(1)
         mflr    0
@@ -181,10 +178,10 @@ MLK_ASM_FN_SYMBOL(reduce_ppc)
         BREDUCE_4X 4, 9, 13, 17
         Write_8X
 
-        #
-        # To unsigned canonical
-        #
 .align 4
+        //
+        // To unsigned canonical
+        //
         addi    3, 3, -512
         xxspltib 32+9 ,0
         vspltish 10, 15
@@ -219,5 +216,4 @@ MLK_ASM_FN_SYMBOL(reduce_ppc)
 #undef V_MKQ
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
-          !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_PPC64LE && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

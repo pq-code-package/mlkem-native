@@ -3,30 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
-#
-# Copyright 2025- IBM Corp.
-#
-#===================================================================================
-# Written by Danny Tsen <dtsen@us.ibm.com>
-#
+/*
+ * Copyright 2025- IBM Corp.
+ *
+ *===================================================================================
+ * Written by Danny Tsen <dtsen@us.ibm.com>
+ *
+ */
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
+#if defined(MLK_ARITH_BACKEND_PPC64LE) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
 #include "consts.h"
 
-.machine "any"
-.text
-
-# Barrett reduce constatnts
+// Barrett reduce constants
 #define V20159  0
 #define V_25    1
 #define V_26    2
 #define V_MKQ   3
 
-# Montgomery reduce constatnts
+// Montgomery reduce constants
 #define V_QINV  2
 #define V_NMKQ  5
 #define V_Z0    7
@@ -37,18 +35,18 @@
 #define V1441   10
 
 .macro Load_4Coeffs start next step
-        mr      9, \start       # j
-        add     10, 7, 9        # J + len*2
+        mr      9, \start       // j
+        add     10, 7, 9        // J + len*2
         addi    16, 9, \next
         addi    17, 10, \step
         addi    18, 16, \next
         addi    19, 17, \step
         addi    20, 18, \next
         addi    21, 19, \step
-        lxvd2x  32+8, 3, 10     # r[j+len]
-        lxvd2x  32+12, 3, 17    # r[j+len]
-        lxvd2x  32+16, 3, 19    # r[j+len]
-        lxvd2x  32+20, 3, 21    # r[j+len]
+        lxvd2x  32+8, 3, 10     // r[j+len]
+        lxvd2x  32+12, 3, 17    // r[j+len]
+        lxvd2x  32+16, 3, 19    // r[j+len]
+        lxvd2x  32+20, 3, 21    // r[j+len]
         xxpermdi 32+8, 32+8, 32+8, 2
         xxpermdi 32+12, 32+12, 32+12, 2
         xxpermdi 32+16, 32+16, 32+16, 2
@@ -63,14 +61,14 @@
         xxpermdi 32+23, 32+23, 32+23, 2
         xxpermdi 32+24, 32+24, 32+24, 2
 
-        vsubuhm 25, 8, 21               # r[j+len] - t
-        vsubuhm 26, 12, 22              # r[j+len] - t
-        vsubuhm 30, 16, 23              # r[j+len] - t
-        vsubuhm 31, 20, 24              # r[j+len] - t
-        vadduhm 8, 8, 21                # r[j+len] + t
-        vadduhm 12, 12, 22              # r[j+len] + t
-        vadduhm 16, 16, 23              # r[j+len] + t
-        vadduhm 20, 20, 24              # r[j+len] + t
+        vsubuhm 25, 8, 21               // r[j+len] - t
+        vsubuhm 26, 12, 22              // r[j+len] - t
+        vsubuhm 30, 16, 23              // r[j+len] - t
+        vsubuhm 31, 20, 24              // r[j+len] - t
+        vadduhm 8, 8, 21                // r[j+len] + t
+        vadduhm 12, 12, 22              // r[j+len] + t
+        vadduhm 16, 16, 23              // r[j+len] + t
+        vadduhm 20, 20, 24              // r[j+len] + t
 .endm
 
 .macro BREDUCE_4X _v0 _v1 _v2 _v3
@@ -78,8 +76,8 @@
         xxlor   32+3, 6, 6      # V_MKQ
         xxlor   32+1, 7, 7      # V_25
         xxlor   32+2, 8, 8      # V_26
-        # Multify Odd/Even signed halfword;
-        #   Results word bound by 2^32 in abs value.
+        // Multiply Odd/Even signed halfword;
+        //   Results word bound by 2^32 in abs value.
         vmulosh 6, 8, V20159
         vmulesh 5, 8, V20159
         vmulosh 11, 12, V20159
@@ -104,8 +102,8 @@
         vadduwm 14, 14, V_25
         vadduwm 17, 17, V_25
         vadduwm 18, 18, V_25
-        # Right shift and pack lower halfword,
-        #   results bond to 2^16 in abs value
+        // Right shift and pack lower halfword,
+        //   results bond to 2^16 in abs value
         vsraw   4, 4, V_26
         vsraw   5, 5, V_26
         vsraw   9, 9, V_26
@@ -122,25 +120,25 @@
         vsubuhm 13, 7, 13
         vpkuwum 17, 18, 17
         vsubuhm 17, 7, 17
-        # Modulo multify-Low unsigned halfword;
-        #   results bond to 2^16 * q in abs value.
+        // Modulo multify-Low unsigned halfword;
+        //   results bond to 2^16 * q in abs value.
         vmladduhm \_v0, 4, V_MKQ, 8
         vmladduhm \_v1, 9, V_MKQ, 12
         vmladduhm \_v2, 13, V_MKQ, 16
         vmladduhm \_v3, 17, V_MKQ, 20
 .endm
 
-#-----------------------------------
-# MREDUCE_4X(len, start, _vz0, _vz1, _vz2, _vz3)
-#
+//-----------------------------------
+// MREDUCE_4X(len, start, _vz0, _vz1, _vz2, _vz3)
+//
 .macro MREDUCE_4X _vz0 _vz1 _vz2 _vz3 _vo0 _vo1 _vo2 _vo3
-        # Modular multification bond by 2^16 * q in abs value
+        // Modular multiplication bond by 2^16 * q in abs value
         vmladduhm 15, 25, \_vz0, 3
         vmladduhm 20, 26, \_vz1, 3
         vmladduhm 27, 30, \_vz2, 3
         vmladduhm 28, 31, \_vz3, 3
 
-        # Signed multiply-high-round; outputs are bound by 2^15 * q in abs value
+        // Signed multiply-high-round; outputs are bound by 2^15 * q in abs value
         vmhraddshs 14, 25, \_vz0, 3
         vmhraddshs 19, 26, \_vz1, 3
         vmhraddshs 24, 30, \_vz2, 3
@@ -156,17 +154,17 @@
         vmhraddshs 25, 25, V_NMKQ, 24
         vmhraddshs 30, 30, V_NMKQ, 29
 
-        vsrah \_vo0, 15, 4              # >> 1
-        vsrah \_vo1, 20, 4              # >> 1
-        vsrah \_vo2, 25, 4              # >> 1
-        vsrah \_vo3, 30, 4              # >> 1
+        vsrah \_vo0, 15, 4              // >> 1
+        vsrah \_vo1, 20, 4              // >> 1
+        vsrah \_vo2, 25, 4              // >> 1
+        vsrah \_vo3, 30, 4              // >> 1
 .endm
 
 .macro Set_mont_consts
-        xxlor   32+5, 0, 0      # V_NMKQ
-        xxlor   32+2, 2, 2      # V_QINV
-        xxlor   32+3, 3, 3      # 0
-        xxlor   32+4, 4, 4      # 1
+        xxlor   32+5, 0, 0      // V_NMKQ
+        xxlor   32+2, 2, 2      // V_QINV
+        xxlor   32+3, 3, 3      // 0
+        xxlor   32+4, 4, 4      // 1
 .endm
 
 .macro Load_next_4zetas
@@ -240,17 +238,18 @@
         stxvd2x   13, 3, 20
 .endm
 
-# intt
-# t = r[j];
-# r[j] = barrett_reduce(t + r[j + len]);
-# r[j + len] = r[j + len] - t;
-# r[j + len] = fqmul(zeta, r[j + len]);
+// intt
+// t = r[j];
+// r[j] = barrett_reduce(t + r[j + len]);
+// r[j + len] = r[j + len] - t;
+// r[j + len] = fqmul(zeta, r[j + len]);
 
-#
-# mlk_intt_ppc(r)
-#
+//
+// mlk_intt_ppc(r)
+//
+.text
 .global MLK_ASM_NAMESPACE(intt_ppc)
-.align 4
+.balign 16
 MLK_ASM_FN_SYMBOL(intt_ppc)
 
         stdu    1, -352(1)
@@ -276,8 +275,8 @@ MLK_ASM_FN_SYMBOL(intt_ppc)
         stxv    32+30, 288(1)
         stxv    32+31, 304(1)
 
-        # init vectors and constants
-        # Setup for Montgomery reduce
+        // init vectors and constants
+        // Setup for Montgomery reduce
         lxv     0, 0(4)
 
         lxv     32+V_QINV, QINV_OFFSET(4)       # QINV
@@ -287,12 +286,12 @@ MLK_ASM_FN_SYMBOL(intt_ppc)
         xxlor   3, 32+3, 32+3                   # 0
         xxlor   4, 32+4, 32+4                   # 1
 
-        # Setup for Barrett reduce
+        // Setup for Barrett reduce
         lxv     6, Q_OFFSET(4)                  # V_MKQ
         lxv     32+V20159, C20159_OFFSET(4)     # V20159
         lxv     7, 0(4) # V_25
 
-        #xxspltiw 8, 26         # for power9 and above
+        // xxspltiw 8, 26         # for power9 and above
         vspltisw 8, 13
         vadduwm  8, 8, 8
         xxlor   8, 32+8, 32+8   # V_26 store at vs8
@@ -303,10 +302,9 @@ MLK_ASM_FN_SYMBOL(intt_ppc)
         xxlor   7, 32+9, 32+9   # V_25 syore at vs7
 
 .align 4
-#__Len2:
-        #
-        # 1. len = 2, start = 0, 4, 8, 12,...244, 248, 252
-        # Update zetas vectors, each vector has 2 zetas
+        //
+        // 1. len = 2, start = 0, 4, 8, 12,...244, 248, 252
+        // Update zetas vectors, each vector has 2 zetas
         addi    14, 4, IZETA_NTT_OFFSET127
         li      7, 4
         li      15, 4
@@ -340,9 +338,7 @@ intt_ppc__Loop2:
         bdnz    intt_ppc__Loop2
 
 .align 4
-#__Len4:
-        #
-        # 2. len = 4, start = 0, 8, 16, 24,...232, 240, 248
+        // 2. len = 4, start = 0, 8, 16, 24,...232, 240, 248
         addi    14, 4, IZETA_NTT_OFFSET63
         li      5, 0
         li      7, 8
@@ -375,9 +371,8 @@ intt_ppc__Loop4:
         bdnz    intt_ppc__Loop4
 
 .align 4
-#__Len8:
-        # 3. len = 8, start = 0, 16, 32, 48,...208, 224, 240
-        #addi   14, 14, 512
+        // 3. len = 8, start = 0, 16, 32, 48,...208, 224, 240
+        // addi   14, 14, 512
         li      7, 16
         li      5, 0
 
@@ -417,10 +412,8 @@ intt_ppc__Loop4:
         Write_M4C 32+13, 32+18, 32+23, 32+28
 
 .align 4
-#__Len16:
-        #
-        # 4. len = 16, start = 0, 32, 64,,...160, 192, 224
-        #addi   14, 14, 768
+        // 4. len = 16, start = 0, 32, 64,,...160, 192, 224
+        // addi   14, 14, 768
         li      5, 0
         li      7, 32
 
@@ -461,10 +454,8 @@ intt_ppc__Loop4:
         Write_M4C 32+13, 32+18, 32+23, 32+28
 
 .align 4
-#__Len32:
-        #
-        # 5. len = 32, start = 0, 64, 128, 192
-        #addi   14, 14, 896
+        // 5. len = 32, start = 0, 64, 128, 192
+        // addi   14, 14, 896
         li      5, 0
         li      7, 64
 
@@ -508,10 +499,8 @@ intt_ppc__Loop4:
         Write_M4C 32+13, 32+18, 32+23, 32+28
 
 .align 4
-#__Len64:
-        #
-        # 6. len = 64, start = 0, 128
-        #addi   14, 14, 960
+        // 6. len = 64, start = 0, 128
+        // addi   14, 14, 960
         li      5, 0
         li      7, 128
         Load_4Coeffs 5, 16, 16
@@ -552,10 +541,8 @@ intt_ppc__Loop4:
         Write_M4C 32+13, 32+18, 32+23, 32+28
 
 .align 4
-#__Len128:
-        # 7. len = 128, start = 0
-        #
-        #addi   14, 14, 992
+        // 7. len = 128, start = 0
+        // addi   14, 14, 992
         li      5, 0            # start
         li      7, 256          # len * 2
 
@@ -596,9 +583,9 @@ intt_ppc__Loop4:
         Write_M4C 32+13, 32+18, 32+23, 32+28
 
 .align 4
-        #
-        # Montgomery reduce loops with constant 1441
-        #
+        //
+        // Montgomery reduce loops with constant 1441
+        //
         addi    14, 4, C1441_OFFSET
         lvx     V1441, 0, 14
 
@@ -668,5 +655,4 @@ intt_ppc__Loop4:
 #undef V1441
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
-          !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_PPC64LE && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
