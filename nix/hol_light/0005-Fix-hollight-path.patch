@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 diff --git a/hol_4.14.sh b/hol_4.14.sh
-index 0fa0f64..313133e 100755
+index 1311255..8b2bc36 100755
 --- a/hol_4.14.sh
 +++ b/hol_4.14.sh
 @@ -5,7 +5,7 @@ export HOLLIGHT_DIR=__DIR__
-
+ 
  if [ "$#" -eq 1 ]; then
    if [ "$1" == "-pp" ]; then
 -    echo "camlp5r pa_lexer.cmo pa_extend.cmo q_MLast.cmo -I "__DIR__" pa_j.cmo"
@@ -13,21 +13,21 @@ index 0fa0f64..313133e 100755
    elif [ "$1" == "-dir" ]; then
      echo "${HOLLIGHT_DIR}"
 diff --git a/hol_4.sh b/hol_4.sh
-index be55568..259ecae 100755
+index 0aaa5c7..5adaf4c 100755
 --- a/hol_4.sh
 +++ b/hol_4.sh
 @@ -5,7 +5,7 @@ export HOLLIGHT_DIR=__DIR__
-
+ 
  if [ "$#" -eq 1 ]; then
    if [ "$1" == "-pp" ]; then
 -    echo "camlp5r pa_lexer.cmo pa_extend.cmo q_MLast.cmo -I "__DIR__" pa_j.cmo"
-+    echo "camlp5r pa_lexer.cmo pa_extend.cmo q_MLast.cmo -I "${HOLLIGHT_DIR}" pa_j.cmo"}
++    echo "camlp5r pa_lexer.cmo pa_extend.cmo q_MLast.cmo -I "${HOLLIGHT_DIR}" pa_j.cmo"
      exit 0
    elif [ "$1" == "-dir" ]; then
      echo "${HOLLIGHT_DIR}"
-@@ -27,4 +27,4 @@ if [ -d "${HOLLIGHT_DIR}/_opam" ]; then
-   eval $(opam env --switch "${HOLLIGHT_DIR}/" --set-switch)
+@@ -32,4 +32,4 @@ if [ "${HOL_ML_PATH}" == "" ]; then
+   HOL_ML_PATH="${HOLLIGHT_DIR}/hol.ml"
  fi
-
--${LINE_EDITOR} ${HOLLIGHT_DIR}/ocaml-hol -I `camlp5 -where` camlp5o.cma -init ${HOLLIGHT_DIR}/hol.ml -safe-string -I ${HOLLIGHT_DIR}
-+${LINE_EDITOR} ${HOLLIGHT_DIR}/ocaml-hol -I $(camlp5 -where) camlp5o.cma -init ${HOLLIGHT_DIR}/hol.ml -safe-string -I ${HOLLIGHT_DIR}
+ 
+-${LINE_EDITOR} ${HOLLIGHT_DIR}/ocaml-hol -I `camlp5 -where` camlp5o.cma -init ${HOL_ML_PATH} -safe-string -I ${HOLLIGHT_DIR}
++${LINE_EDITOR} ${HOLLIGHT_DIR}/ocaml-hol -I $(camlp5 -where) camlp5o.cma -init ${HOL_ML_PATH} -safe-string -I ${HOLLIGHT_DIR}

@@ -28,6 +28,7 @@ static void mlk_keccak_absorb_once_x4(uint64_t *s, uint32_t r,
                                       const uint8_t *in2, const uint8_t *in3,
                                       size_t inlen, uint8_t p)
 __contract__(
+  requires(inlen <= MLK_MAX_BUFFER_SIZE)
   requires(memory_no_alias(s, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY))
   requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)
   requires(memory_no_alias(in0, inlen))
@@ -78,7 +79,8 @@ static void mlk_keccak_squeezeblocks_x4(uint8_t *out0, uint8_t *out1,
                                         size_t nblocks, uint64_t *s, uint32_t r)
 __contract__(
     requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)
-    requires(nblocks <= 8 /* somewhat arbitrary bound */)
+    requires(r == SHAKE128_RATE || r == SHAKE256_RATE)
+    requires(nblocks <= (MLK_MAX_BUFFER_SIZE / SHAKE256_RATE))
     requires(memory_no_alias(s, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY))
     requires(memory_no_alias(out0, nblocks * r))
     requires(memory_no_alias(out1, nblocks * r))

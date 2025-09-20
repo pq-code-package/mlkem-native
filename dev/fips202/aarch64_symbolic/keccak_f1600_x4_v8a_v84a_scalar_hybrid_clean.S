@@ -8,6 +8,28 @@
 // Author: Hanno Becker <hannobecker@posteo.de>
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
 
+/*yaml
+  Name: keccak_f1600_x4_v8a_v84a_scalar_hybrid_clean
+  Description: AArch64 hybrid scalar/vector clean implementation of Keccak-f[1600] permutation for four sequential states with ARMv8.4-A optimizations (clean version for optimization)
+  Signature: void mlk_keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm(uint64_t state[100], const uint64_t rc[24])
+  ABI:
+    x0:
+      type: buffer
+      size_bytes: 800
+      permissions: read/write
+      c_parameter: uint64_t *state
+      description: Four sequential Keccak states (state0[25], state1[25], state2[25], state3[25])
+    x1:
+      type: buffer
+      size_bytes: 192
+      permissions: read-only
+      c_parameter: uint64_t const *rc
+      description: Round constants (24 x uint64_t)
+  Stack:
+    bytes: 224
+    description: register preservation and temporary storage
+*/
+
 #include "../../../../common.h"
 #if defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
@@ -314,10 +336,10 @@
 .endm
 
 .macro restore_vregs
-    ldp d14, d15, [sp,#(STACK_BASE_VREGS+3*16)]
-    ldp d12, d13, [sp,#(STACK_BASE_VREGS+2*16)]
-    ldp d10, d11, [sp,#(STACK_BASE_VREGS+1*16)]
     ldp d8,  d9,  [sp,#(STACK_BASE_VREGS+0*16)]
+    ldp d10, d11, [sp,#(STACK_BASE_VREGS+1*16)]
+    ldp d12, d13, [sp,#(STACK_BASE_VREGS+2*16)]
+    ldp d14, d15, [sp,#(STACK_BASE_VREGS+3*16)]
 .endm
 
 .macro alloc_stack
@@ -841,9 +863,9 @@
 .endm
 
     .text
-    .global MLK_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm)
+    .global MLK_ASM_NAMESPACE(keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm)
     .balign 4
-MLK_ASM_FN_SYMBOL(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm)
+MLK_ASM_FN_SYMBOL(keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm)
     alloc_stack
     save_gprs
     save_vregs
@@ -859,22 +881,22 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm)
     load_input_vector   // Vector input
     load_input_scalar 0 // First scalar input
 
-keccak_f1600_x4_scalar_v8a_v84a_hybrid_initial:
+keccak_f1600_x4_v8a_v84a_scalar_hybrid_initial:
     scalar_round_initial    // @slothy:interleaving_class=0
     scalar_round_noninitial // @slothy:interleaving_class=0
     vector_round            // @slothy:interleaving_class=1
-keccak_f1600_x4_scalar_v8a_v84a_hybrid_loop:
+keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop:
     scalar_round_noninitial // @slothy:interleaving_class=0
     scalar_round_noninitial // @slothy:interleaving_class=0
     vector_round            // @slothy:interleaving_class=1
-keccak_f1600_x4_scalar_v8a_v84a_hybrid_loop_end:
-    ble keccak_f1600_x4_scalar_v8a_v84a_hybrid_loop
+keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop_end:
+    ble keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop
     final_scalar_rotate
 
     // Read outer loop flag: We repeat the above twice
     ldr outer, [sp, #STACK_OFFSET_OUTER]      // @slothy:reads=STACK_OFFSET_OUTER
     cmp outer, #1
-    beq keccak_f1600_x4_scalar_v8a_v84a_hybrid_done
+    beq keccak_f1600_x4_v8a_v84a_scalar_hybrid_done
 
     // Update outer loop flag
     mov outer, #1
@@ -884,8 +906,8 @@ keccak_f1600_x4_scalar_v8a_v84a_hybrid_loop_end:
     store_input_scalar 0 // Store first scalar data
     load_input_scalar  1 // Load second scalar input
 
-    b keccak_f1600_x4_scalar_v8a_v84a_hybrid_initial
-keccak_f1600_x4_scalar_v8a_v84a_hybrid_done:
+    b keccak_f1600_x4_v8a_v84a_scalar_hybrid_initial
+keccak_f1600_x4_v8a_v84a_scalar_hybrid_done:
 
     ldr input_addr, [sp, #STACK_OFFSET_INPUT] // @slothy:reads=STACK_OFFSET_INPUT
     store_input_scalar 1

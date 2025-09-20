@@ -14,6 +14,28 @@
  *   https://eprint.iacr.org/2022/1243
  */
 
+/*yaml
+  Name: keccak_f1600_x2_v84a_asm
+  Description: AArch64 ARMv8.4-A implementation of Keccak-f[1600] permutation for two sequential states
+  Signature: void mlk_keccak_f1600_x2_v84a_asm(uint64_t state[50], const uint64_t rc[24])
+  ABI:
+    x0:
+      type: buffer
+      size_bytes: 400
+      permissions: read/write
+      c_parameter: uint64_t state[50]
+      description: Two sequential Keccak states (state0[25], state1[25])
+    x1:
+      type: buffer
+      size_bytes: 192
+      permissions: read-only
+      c_parameter: const uint64_t rc[24]
+      description: Round constants (24 x uint64_t)
+  Stack:
+    bytes: 64
+    description: register preservation
+*/
+
 //
 // Author: Hanno Becker <hanno.becker@arm.com>
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
@@ -40,11 +62,21 @@
 .global MLK_ASM_NAMESPACE(keccak_f1600_x2_v84a_asm)
 MLK_ASM_FN_SYMBOL(keccak_f1600_x2_v84a_asm)
 
+        .cfi_startproc
         sub	sp, sp, #0x40
+        .cfi_adjust_cfa_offset 0x40
         stp	d8, d9, [sp]
+        .cfi_rel_offset d8, 0x0
+        .cfi_rel_offset d9, 0x8
         stp	d10, d11, [sp, #0x10]
+        .cfi_rel_offset d10, 0x10
+        .cfi_rel_offset d11, 0x18
         stp	d12, d13, [sp, #0x20]
+        .cfi_rel_offset d12, 0x20
+        .cfi_rel_offset d13, 0x28
         stp	d14, d15, [sp, #0x30]
+        .cfi_rel_offset d14, 0x30
+        .cfi_rel_offset d15, 0x38
         add	x2, x0, #0xc8
         ldp	q25, q26, [x0]
         ldp	q27, q28, [x2]
@@ -87,7 +119,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x2_v84a_asm)
         trn1	v24.2d, v25.2d, v27.2d
         mov	x2, #0x18               // =24
 
-keccak_f1600_x2_v84a_loop:
+Lkeccak_f1600_x2_v84a_loop:
         eor3	v30.16b, v0.16b, v5.16b, v10.16b
         eor3	v29.16b, v1.16b, v6.16b, v11.16b
         eor3	v28.16b, v2.16b, v7.16b, v12.16b
@@ -156,7 +188,7 @@ keccak_f1600_x2_v84a_loop:
         bcax	v4.16b, v4.16b, v27.16b, v30.16b
         eor	v0.16b, v0.16b, v31.16b
         sub	x2, x2, #0x1
-        cbnz	x2, keccak_f1600_x2_v84a_loop
+        cbnz	x2, Lkeccak_f1600_x2_v84a_loop
         add	x2, x0, #0xc8
         trn1	v25.2d, v0.2d, v1.2d
         trn1	v26.2d, v2.2d, v3.2d
@@ -198,11 +230,21 @@ keccak_f1600_x2_v84a_loop:
         trn2	v25.2d, v24.2d, v24.2d
         str	d25, [x2, #0xc0]
         ldp	d8, d9, [sp]
+        .cfi_restore d8
+        .cfi_restore d9
         ldp	d10, d11, [sp, #0x10]
+        .cfi_restore d10
+        .cfi_restore d11
         ldp	d12, d13, [sp, #0x20]
+        .cfi_restore d12
+        .cfi_restore d13
         ldp	d14, d15, [sp, #0x30]
+        .cfi_restore d14
+        .cfi_restore d15
         add	sp, sp, #0x40
+        .cfi_adjust_cfa_offset -0x40
         ret
+        .cfi_endproc
 
 #endif /* __ARM_FEATURE_SHA3 */
 

@@ -42,6 +42,18 @@ void mlk_poly_add(mlk_poly *r, const mlk_poly *b)
 
 See the [Proof Guide](proof_guide.md) for a walkthrough of how to use CBMC and develop new proofs.
 
+## Installation
+
+To reproduce the CBMC proofs, you will require several tools ([CBMC](https://github.com/diffblue/cbmc), [z3](https://github.com/Z3Prover/z3), [bitwuzla](https://github.com/bitwuzla/bitwuzla), [litani](https://github.com/awslabs/aws-build-accumulator), [cbmc-viewer](https://github.com/model-checking/cbmc-viewer)) installed.
+It is not uncommon for proofs to fail or have significantly worse performance when switching to different tool versions.
+Therefore, **we highly recommend using our Nix development environment** to install all the necessary tools. See [CONTRIBUTING.md](../../CONTRIBUTING.md).
+
+Note that nix installation is straightforward and only requires running a single command: See https://nixos.org/download/.
+Once Nix is installed, it takes a single command to install all the required tools at the version that have been tested to work well with the mlkem-native proofs:
+```sh
+nix develop --experimental-features 'nix-command flakes'
+```
+
 ## Reproducing the proofs
 
 To run all proofs, print a summary at the end and reflect overall

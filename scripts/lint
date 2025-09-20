@@ -117,7 +117,7 @@ checkerr "Lint shell" "$(shfmt -s -l -i 2 -ci -fn $(shfmt -f $(git grep -l '' :/
 gh_group_end
 
 gh_group_start "Linting python scripts with black"
-if ! diff=$(black --check --diff -q --include "(scripts/tests|scripts/simpasm|scripts/autogen|scripts/check-namespace|\.py$)" "$ROOT"); then
+if ! diff=$(black --check --diff -q --include "(scripts/tests|scripts/simpasm|scripts/cfify|scripts/autogen|scripts/check-namespace|\.py$)" "$ROOT"); then
   gh_error_simple "Format error" "$diff"
   error "Lint python"
   SUCCESS=false

@@ -81,10 +81,6 @@ CYCLES ?=
 OPT ?= 1
 RETAINED_VARS := CROSS_PREFIX CYCLES OPT AUTO
 
-ifeq ($(AUTO),1)
-include test/mk/auto.mk
-endif
-
 BUILD_DIR ?= test/build
 
 MAKE_OBJS = $(2:%=$(1)/%.o)

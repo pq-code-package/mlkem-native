@@ -25,6 +25,7 @@ void mlk_shake128x4_absorb_once(mlk_shake128x4ctx *state, const uint8_t *in0,
                                 const uint8_t *in1, const uint8_t *in2,
                                 const uint8_t *in3, size_t inlen)
 __contract__(
+  requires(inlen <= MLK_MAX_BUFFER_SIZE)
   requires(memory_no_alias(state, sizeof(mlk_shake128x4ctx)))
   requires(memory_no_alias(in0, inlen))
   requires(memory_no_alias(in1, inlen))
@@ -62,7 +63,8 @@ void mlk_shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
                     size_t outlen, uint8_t *in0, uint8_t *in1, uint8_t *in2,
                     uint8_t *in3, size_t inlen)
 __contract__(
-  requires(outlen <= 8 * SHAKE256_RATE /* somewhat arbitrary bound */)
+  requires(inlen <= MLK_MAX_BUFFER_SIZE)
+  requires(outlen <= MLK_MAX_BUFFER_SIZE)
   requires(memory_no_alias(in0, inlen))
   requires(memory_no_alias(in1, inlen))
   requires(memory_no_alias(in2, inlen))

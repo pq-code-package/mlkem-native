@@ -47,6 +47,7 @@ typedef struct
 void mlk_shake128_absorb_once(mlk_shake128ctx *state, const uint8_t *input,
                               size_t inlen)
 __contract__(
+  requires(inlen <= MLK_MAX_BUFFER_SIZE)
   requires(memory_no_alias(state, sizeof(mlk_shake128ctx)))
   requires(memory_no_alias(input, inlen))
   assigns(memory_slice(state, sizeof(mlk_shake128ctx)))
@@ -96,6 +97,8 @@ void mlk_shake128_release(mlk_shake128ctx *state);
 void mlk_shake256(uint8_t *output, size_t outlen, const uint8_t *input,
                   size_t inlen)
 __contract__(
+  requires(inlen <= MLK_MAX_BUFFER_SIZE)
+  requires(outlen <= MLK_MAX_BUFFER_SIZE)
   requires(memory_no_alias(input, inlen))
   requires(memory_no_alias(output, outlen))
   assigns(memory_slice(output, outlen))
@@ -116,6 +119,7 @@ __contract__(
  **************************************************/
 void mlk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
 __contract__(
+  requires(inlen <= MLK_MAX_BUFFER_SIZE)
   requires(memory_no_alias(input, inlen))
   requires(memory_no_alias(output, SHA3_256_HASHBYTES))
   assigns(memory_slice(output, SHA3_256_HASHBYTES))
@@ -136,20 +140,20 @@ __contract__(
  **************************************************/
 void mlk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
 __contract__(
+  requires(inlen <= MLK_MAX_BUFFER_SIZE)
   requires(memory_no_alias(input, inlen))
   requires(memory_no_alias(output, SHA3_512_HASHBYTES))
   assigns(memory_slice(output, SHA3_512_HASHBYTES))
 );
 
 #if !defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202) || \
-    (!defined(MLK_USE_FIPS202_X2_NATIVE) &&            \
-     !defined(MLK_USE_FIPS202_X4_NATIVE))
+    !defined(MLK_USE_FIPS202_X4_NATIVE)
 /* If you provide your own FIPS-202 implementation where the x4-
  * Keccak-f1600-x4 implementation falls back to 4-fold Keccak-f1600,
  * set this to gain a small speedup. */
 #define FIPS202_X4_DEFAULT_IMPLEMENTATION
-#endif /* !MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 || \
-          (!MLK_USE_FIPS202_X2_NATIVE && !MLK_USE_FIPS202_X4_NATIVE) */
+#endif /* !MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 || !MLK_USE_FIPS202_X4_NATIVE \
+        */
 
 
 #endif /* !MLK_FIPS202_FIPS202_H */

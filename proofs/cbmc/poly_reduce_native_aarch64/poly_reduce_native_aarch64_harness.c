@@ -6,10 +6,11 @@
 #include "cbmc.h"
 #include "params.h"
 
-void mlk_poly_reduce_native(int16_t p[MLKEM_N]);
+int mlk_poly_reduce_native(int16_t p[MLKEM_N]);
 
 void harness(void)
 {
   int16_t *r;
-  mlk_poly_reduce_native(r);
+  int t;
+  t = mlk_poly_reduce_native(r);
 }

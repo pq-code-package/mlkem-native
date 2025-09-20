@@ -27,28 +27,16 @@
 #include "fq.inc"
 #include "shuffle.inc"
 
-.text
-.global MLK_ASM_NAMESPACE(ntttobytes_avx2)
-.balign 4
-MLK_ASM_FN_SYMBOL(ntttobytes_avx2)
-#consts
-vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rdx),%ymm0
-call            ntttobytes_avx2_core
-add		$256,%rsi
-add		$192,%rdi
-call		ntttobytes_avx2_core
-ret
-
-ntttobytes_avx2_core:
+.macro ntttobytes_128_coefficients offset_in offset_out
 #load
-vmovdqa		(%rsi),%ymm5
-vmovdqa		32(%rsi),%ymm6
-vmovdqa		64(%rsi),%ymm7
-vmovdqa		96(%rsi),%ymm8
-vmovdqa		128(%rsi),%ymm9
-vmovdqa		160(%rsi),%ymm10
-vmovdqa		192(%rsi),%ymm11
-vmovdqa		224(%rsi),%ymm12
+vmovdqa (\offset_in +   0)(%rsi), %ymm5
+vmovdqa (\offset_in +  32)(%rsi), %ymm6
+vmovdqa (\offset_in +  64)(%rsi), %ymm7
+vmovdqa (\offset_in +  96)(%rsi), %ymm8
+vmovdqa (\offset_in + 128)(%rsi), %ymm9
+vmovdqa (\offset_in + 160)(%rsi), %ymm10
+vmovdqa (\offset_in + 192)(%rsi), %ymm11
+vmovdqa (\offset_in + 224)(%rsi), %ymm12
 
 #bitpack
 vpsllw		$12,%ymm6,%ymm4
@@ -90,12 +78,24 @@ shuffle8	6,3,7,3
 shuffle8	4,9,6,9
 
 #store
-vmovdqu		%ymm5,(%rdi)
-vmovdqu		%ymm7,32(%rdi)
-vmovdqu		%ymm6,64(%rdi)
-vmovdqu		%ymm8,96(%rdi)
-vmovdqu		%ymm3,128(%rdi)
-vmovdqu		%ymm9,160(%rdi)
+vmovdqu	%ymm5, (\offset_out +  0)(%rdi)
+vmovdqu	%ymm7, (\offset_out + 32)(%rdi)
+vmovdqu	%ymm6, (\offset_out + 64)(%rdi)
+vmovdqu	%ymm8, (\offset_out + 96)(%rdi)
+vmovdqu	%ymm3, (\offset_out +128)(%rdi)
+vmovdqu	%ymm9, (\offset_out +160)(%rdi)
+.endm
+
+
+.text
+.global MLK_ASM_NAMESPACE(ntttobytes_avx2)
+.balign 4
+MLK_ASM_FN_SYMBOL(ntttobytes_avx2)
+#consts
+vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rdx),%ymm0
+
+ntttobytes_128_coefficients 0 0
+ntttobytes_128_coefficients 256 192
 
 ret
 

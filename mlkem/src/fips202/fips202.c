@@ -60,6 +60,7 @@
 static void mlk_keccak_absorb_once(uint64_t *s, uint32_t r, const uint8_t *m,
                                    size_t mlen, uint8_t p)
 __contract__(
+    requires(mlen <= MLK_MAX_BUFFER_SIZE)
     requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)
     requires(memory_no_alias(s, sizeof(uint64_t) * MLK_KECCAK_LANES))
     requires(memory_no_alias(m, mlen))
@@ -153,6 +154,7 @@ __contract__(
 static void mlk_keccak_squeeze_once(uint8_t *h, size_t outlen, uint64_t *s,
                                     uint32_t r)
 __contract__(
+    requires(outlen <= MLK_MAX_BUFFER_SIZE)
     requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)
     requires(memory_no_alias(s, sizeof(uint64_t) * MLK_KECCAK_LANES))
     requires(memory_no_alias(h, outlen))

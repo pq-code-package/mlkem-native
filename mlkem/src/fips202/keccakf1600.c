@@ -112,19 +112,17 @@ void mlk_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
 void mlk_keccakf1600x4_permute(uint64_t *state)
 {
 #if defined(MLK_USE_FIPS202_X4_NATIVE)
-  mlk_keccak_f1600_x4_native(state);
-#elif defined(MLK_USE_FIPS202_X2_NATIVE)
-  mlk_keccak_f1600_x2_native(state + 0 * MLK_KECCAK_LANES);
-  mlk_keccak_f1600_x2_native(state + 2 * MLK_KECCAK_LANES);
-#else
+  if (mlk_keccak_f1600_x4_native(state) == MLK_NATIVE_FUNC_SUCCESS)
+  {
+    return;
+  }
+#endif /* MLK_USE_FIPS202_X4_NATIVE */
   mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 0);
   mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 1);
   mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 2);
   mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 3);
-#endif /* !MLK_USE_FIPS202_X4_NATIVE && !MLK_USE_FIPS202_X2_NATIVE */
 }
 
-#if !defined(MLK_USE_FIPS202_X1_NATIVE)
 static const uint64_t mlk_KeccakF_RoundConstants[MLK_KECCAK_NROUNDS] = {
     (uint64_t)0x0000000000000001ULL, (uint64_t)0x0000000000008082ULL,
     (uint64_t)0x800000000000808aULL, (uint64_t)0x8000000080008000ULL,
@@ -139,7 +137,7 @@ static const uint64_t mlk_KeccakF_RoundConstants[MLK_KECCAK_NROUNDS] = {
     (uint64_t)0x8000000080008081ULL, (uint64_t)0x8000000000008080ULL,
     (uint64_t)0x0000000080000001ULL, (uint64_t)0x8000000080008008ULL};
 
-void mlk_keccakf1600_permute(uint64_t *state)
+static void mlk_keccakf1600_permute_c(uint64_t *state)
 {
   unsigned round;
 
@@ -404,12 +402,17 @@ void mlk_keccakf1600_permute(uint64_t *state)
   state[23] = Aso;
   state[24] = Asu;
 }
-#else  /* !MLK_USE_FIPS202_X1_NATIVE */
+
 void mlk_keccakf1600_permute(uint64_t *state)
 {
-  mlk_keccak_f1600_x1_native(state);
-}
+#if defined(MLK_USE_FIPS202_X1_NATIVE)
+  if (mlk_keccak_f1600_x1_native(state) == MLK_NATIVE_FUNC_SUCCESS)
+  {
+    return;
+  }
 #endif /* MLK_USE_FIPS202_X1_NATIVE */
+  mlk_keccakf1600_permute_c(state);
+}
 
 #else /* !MLK_CONFIG_MULTILEVEL_NO_SHARED */
 

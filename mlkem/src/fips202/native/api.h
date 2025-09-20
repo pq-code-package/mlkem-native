@@ -15,35 +15,42 @@
 #include <stdint.h>
 #include "../../cbmc.h"
 
+/* Backends must return MLK_NATIVE_FUNC_SUCCESS upon success. */
+#define MLK_NATIVE_FUNC_SUCCESS (0)
+/* Backends may return MLK_NATIVE_FUNC_FALLBACK to signal to the frontend that
+ * the target/parameters are unsupported; typically, this would be because of
+ * dependencies on CPU features not detected on the host CPU. In this case,
+ * the frontend falls back to the default C implementation. */
+#define MLK_NATIVE_FUNC_FALLBACK (-1)
+
 /*
  * This is the C<->native interface allowing for the drop-in
  * of custom Keccak-F1600 implementations.
  *
  * A _backend_ is a specific implementation of parts of this interface.
  *
- * You can replace 1-fold, 2-fold, or 4-fold batched Keccak-F1600.
- * To enable, set MLK_USE_FIPS202_X1_NATIVE etc. in your backend,
- * and define the inline wrapper keccak_f1600_x1_native() etc. to
- * forward to your implementation.
+ * You can replace 1-fold or 4-fold batched Keccak-F1600.
+ * To enable, set MLK_USE_FIPS202_X1_NATIVE or MLK_USE_FIPS202_X4_NATIVE
+ * in your backend, and define the inline wrappers mlk_keccak_f1600_x1_native()
+ * and/or mlk_keccak_f1600_x4_native(), respectively, to forward to your
+ * implementation.
  */
 
 #if defined(MLK_USE_FIPS202_X1_NATIVE)
-static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
+static MLK_INLINE int mlk_keccak_f1600_x1_native(uint64_t *state)
 __contract__(
   requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 1))
-  assigns(memory_slice(state, sizeof(uint64_t) * 25 * 1)));
+  assigns(memory_slice(state, sizeof(uint64_t) * 25 * 1))
+  ensures(return_value == MLK_NATIVE_FUNC_FALLBACK || return_value == MLK_NATIVE_FUNC_SUCCESS)
+  ensures((return_value == MLK_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 1)));
 #endif /* MLK_USE_FIPS202_X1_NATIVE */
-#if defined(MLK_USE_FIPS202_X2_NATIVE)
-static MLK_INLINE void mlk_keccak_f1600_x2_native(uint64_t *state)
-__contract__(
-  requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 2))
-  assigns(memory_slice(state, sizeof(uint64_t) * 25 * 2)));
-#endif /* MLK_USE_FIPS202_X2_NATIVE */
 #if defined(MLK_USE_FIPS202_X4_NATIVE)
-static MLK_INLINE void mlk_keccak_f1600_x4_native(uint64_t *state)
+static MLK_INLINE int mlk_keccak_f1600_x4_native(uint64_t *state)
 __contract__(
   requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 4))
-  assigns(memory_slice(state, sizeof(uint64_t) * 25 * 4)));
+  assigns(memory_slice(state, sizeof(uint64_t) * 25 * 4))
+  ensures(return_value == MLK_NATIVE_FUNC_FALLBACK || return_value == MLK_NATIVE_FUNC_SUCCESS)
+  ensures((return_value == MLK_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 4)));
 #endif /* MLK_USE_FIPS202_X4_NATIVE */
 
 #endif /* !MLK_FIPS202_NATIVE_API_H */

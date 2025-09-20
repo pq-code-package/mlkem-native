@@ -207,6 +207,8 @@ class TEST_TYPES(Enum):
     MONOLITHIC_BUILD_MULTILEVEL_NATIVE = 13
     MONOLITHIC_BUILD_NATIVE = 14
     STACK = 15
+    SIZE = 16
+    BASIC_DETERMINISTIC = 17
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -226,6 +228,7 @@ class TEST_TYPES(Enum):
             TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE,
             TEST_TYPES.MULTILEVEL_BUILD,
             TEST_TYPES.MULTILEVEL_BUILD_NATIVE,
+            TEST_TYPES.BASIC_DETERMINISTIC,
         ]
 
     @staticmethod
@@ -259,6 +262,8 @@ class TEST_TYPES(Enum):
             return "Example (Custom Backend)"
         if self == TEST_TYPES.BASIC:
             return "Example (mlkem-native as code package)"
+        if self == TEST_TYPES.BASIC_DETERMINISTIC:
+            return "Example (mlkem-native as code package without randombytes() implementation)"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return "Example (monobuild)"
         if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
@@ -271,6 +276,8 @@ class TEST_TYPES(Enum):
             return "Example (multilevel build)"
         if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
             return "Example (multilevel build, native)"
+        if self == TEST_TYPES.SIZE:
+            return "Measurement Code Size"
 
     def make_dir(self):
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
@@ -279,6 +286,8 @@ class TEST_TYPES(Enum):
             return "examples/custom_backend"
         if self == TEST_TYPES.BASIC:
             return "examples/basic"
+        if self == TEST_TYPES.BASIC_DETERMINISTIC:
+            return "examples/basic_deterministic"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return "examples/monolithic_build"
         if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
@@ -312,6 +321,8 @@ class TEST_TYPES(Enum):
             return ""
         if self == TEST_TYPES.BASIC:
             return ""
+        if self == TEST_TYPES.BASIC_DETERMINISTIC:
+            return ""
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return ""
         if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
@@ -324,6 +335,8 @@ class TEST_TYPES(Enum):
             return ""
         if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
             return ""
+        if self == TEST_TYPES.SIZE:
+            return "size"
 
     def make_run_target(self, scheme):
         t = self.make_target()
@@ -506,6 +519,10 @@ class Tests:
             if stack_flags:
                 env_update["STACK_ANALYSIS_FLAGS"] = " ".join(stack_flags)
 
+        # Add ACVP version for ACVP tests
+        if test_type == TEST_TYPES.ACVP and hasattr(self.args, "version"):
+            env_update["ACVP_VERSION"] = self.args.version
+
         env = os.environ.copy()
         env.update(env_update)
 
@@ -619,6 +636,12 @@ class Tests:
             l = TEST_TYPES.examples()
         else:
             l = list(map(TEST_TYPES.from_string, self.args.l))
+
+        # Filter out excluded examples
+        if hasattr(self.args, "exclude_example") and self.args.exclude_example:
+            excluded = [TEST_TYPES.from_string(ex) for ex in self.args.exclude_example]
+            l = [e for e in l if e not in excluded]
+
         for e in l:
             self._compile_schemes(e, None)
             self._run_scheme(e, None, None)
@@ -698,6 +721,29 @@ class Tests:
             _stack(True)
 
         self.check_fail()
+
+    def size(self):
+
+        test_type = TEST_TYPES.SIZE
+
+        resultss = None
+
+        if self.do_opt_all():
+            self._compile_schemes(test_type, False)
+            if self.args.run:
+                self._run_schemes(test_type, False, suppress_output=False)
+            self._compile_schemes(test_type, True)
+            if self.args.run:
+                resultss = self._run_schemes(test_type, True, suppress_output=False)
+        else:
+            self._compile_schemes(test_type, self.do_opt())
+            if self.args.run:
+                resultss = self._run_schemes(
+                    test_type, self.do_opt(), suppress_output=False
+                )
+
+        if resultss is None:
+            self.check_fail()
 
     def all(self):
         func = self.args.func
@@ -1035,6 +1081,25 @@ def cli():
         help="Do not run examples",
     )
 
+    all_parser.add_argument(
+        "--exclude-example",
+        help="Exclude specific examples from running (can be used multiple times)",
+        choices=[
+            "bring_your_own_fips202",
+            "custom_backend",
+            "basic",
+            "basic_deterministic",
+            "monolithic_build",
+            "monolithic_build_native",
+            "monolithic_build_multilevel",
+            "monolithic_build_multilevel_native",
+            "multilevel_build",
+            "multilevel_build_native",
+        ],
+        action="append",
+        default=[],
+    )
+
     stack_group = all_parser.add_mutually_exclusive_group()
     stack_group.add_argument(
         "--stack",
@@ -1054,6 +1119,11 @@ def cli():
     acvp_parser = cmd_subparsers.add_parser(
         "acvp", help="Run ACVP client", parents=[common_parser]
     )
+    acvp_parser.add_argument(
+        "--version",
+        default="v1.1.0.40",
+        help="ACVP test vector version (default: v1.1.0.40)",
+    )
 
     # examples arguments
     examples_parser = cmd_subparsers.add_parser(
@@ -1067,6 +1137,7 @@ def cli():
             "bring_your_own_fips202",
             "custom_backend",
             "basic",
+            "basic_deterministic",
             "monolithic_build",
             "monolithic_build_native",
             "monolithic_build_multilevel",
@@ -1108,6 +1179,11 @@ def cli():
         help="Benchmark low-level components",
         action="store_true",
         default=False,
+    )
+    size_parser = cmd_subparsers.add_parser(
+        "size",
+        help="Run the code size measurement for all object file",
+        parents=[common_parser],
     )
 
     # cbmc arguments
@@ -1256,6 +1332,8 @@ def cli():
         Tests(args).kat()
     elif args.cmd == "stack":
         Tests(args).stack()
+    elif args.cmd == "size":
+        Tests(args).size()
 
 
 if __name__ == "__main__":

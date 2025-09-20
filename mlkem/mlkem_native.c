@@ -82,12 +82,7 @@
 #if defined(MLK_SYS_X86_64)
 #include "src/native/x86_64/src/compress_avx2.c"
 #include "src/native/x86_64/src/consts.c"
-#include "src/native/x86_64/src/rej_uniform_avx2.c"
 #include "src/native/x86_64/src/rej_uniform_table.c"
-#endif /* MLK_SYS_X86_64 */
-#if defined(MLK_SYS_RISCV64)
-#include "src/native/riscv64/src/rv64v_debug.c"
-#include "src/native/riscv64/src/rv64v_poly.c"
 #endif
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
@@ -244,30 +239,6 @@
 #undef mlk_polyvec_reduce
 #undef mlk_polyvec_tobytes
 #undef mlk_polyvec_tomont
-/* mlkem/src/sys.h */
-#undef MLK_ALIGN
-#undef MLK_ALIGN_UP
-#undef MLK_ALWAYS_INLINE
-#undef MLK_CET_ENDBR
-#undef MLK_CT_TESTING_DECLASSIFY
-#undef MLK_CT_TESTING_SECRET
-#undef MLK_DEFAULT_ALIGN
-#undef MLK_HAVE_INLINE_ASM
-#undef MLK_INLINE
-#undef MLK_MUST_CHECK_RETURN_VALUE
-#undef MLK_RESTRICT
-#undef MLK_SYS_AARCH64
-#undef MLK_SYS_AARCH64_EB
-#undef MLK_SYS_BIG_ENDIAN
-#undef MLK_SYS_H
-#undef MLK_SYS_LITTLE_ENDIAN
-#undef MLK_SYS_PPC64LE
-#undef MLK_SYS_RISCV32
-#undef MLK_SYS_RISCV64
-#undef MLK_SYS_RISCV64_V256
-#undef MLK_SYS_WINDOWS
-#undef MLK_SYS_X86_64
-#undef MLK_SYS_X86_64_AVX2
 
 #if !defined(MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS)
 /*
@@ -335,6 +306,31 @@
 #undef mlk_xof_x4_init
 #undef mlk_xof_x4_release
 #undef mlk_xof_x4_squeezeblocks
+/* mlkem/src/sys.h */
+#undef MLK_ALIGN
+#undef MLK_ALIGN_UP
+#undef MLK_ALWAYS_INLINE
+#undef MLK_CET_ENDBR
+#undef MLK_CT_TESTING_DECLASSIFY
+#undef MLK_CT_TESTING_SECRET
+#undef MLK_DEFAULT_ALIGN
+#undef MLK_HAVE_INLINE_ASM
+#undef MLK_INLINE
+#undef MLK_MUST_CHECK_RETURN_VALUE
+#undef MLK_RESTRICT
+#undef MLK_SYS_AARCH64
+#undef MLK_SYS_AARCH64_EB
+#undef MLK_SYS_APPLE
+#undef MLK_SYS_BIG_ENDIAN
+#undef MLK_SYS_H
+#undef MLK_SYS_LINUX
+#undef MLK_SYS_LITTLE_ENDIAN
+#undef MLK_SYS_PPC64LE
+#undef MLK_SYS_RISCV32
+#undef MLK_SYS_RISCV64
+#undef MLK_SYS_WINDOWS
+#undef MLK_SYS_X86_64
+#undef MLK_SYS_X86_64_AVX2
 /* mlkem/src/verify.h */
 #undef MLK_USE_ASM_VALUE_BARRIER
 #undef MLK_VERIFY_H
@@ -387,6 +383,8 @@
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
 /* mlkem/src/fips202/native/api.h */
 #undef MLK_FIPS202_NATIVE_API_H
+#undef MLK_NATIVE_FUNC_FALLBACK
+#undef MLK_NATIVE_FUNC_SUCCESS
 /* mlkem/src/fips202/native/auto.h */
 #undef MLK_FIPS202_NATIVE_AUTO_H
 #if defined(MLK_SYS_AARCH64)
@@ -400,8 +398,8 @@
 #undef mlk_keccak_f1600_x1_scalar_asm
 #undef mlk_keccak_f1600_x1_v84a_asm
 #undef mlk_keccak_f1600_x2_v84a_asm
-#undef mlk_keccak_f1600_x4_scalar_v8a_hybrid_asm
-#undef mlk_keccak_f1600_x4_scalar_v8a_v84a_hybrid_asm
+#undef mlk_keccak_f1600_x4_v8a_scalar_hybrid_asm
+#undef mlk_keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm
 #undef mlk_keccakf1600_round_constants
 /* mlkem/src/fips202/native/aarch64/x1_scalar.h */
 #undef MLK_FIPS202_AARCH64_NEED_X1_SCALAR
@@ -414,7 +412,7 @@
 /* mlkem/src/fips202/native/aarch64/x2_v84a.h */
 #undef MLK_FIPS202_AARCH64_NEED_X2_V84A
 #undef MLK_FIPS202_NATIVE_AARCH64_X2_V84A_H
-#undef MLK_USE_FIPS202_X2_NATIVE
+#undef MLK_USE_FIPS202_X4_NATIVE
 /* mlkem/src/fips202/native/aarch64/x4_v8a_scalar.h */
 #undef MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID
 #undef MLK_FIPS202_NATIVE_AARCH64_X4_V8A_SCALAR_H
@@ -441,6 +439,8 @@
 /* mlkem/src/native/api.h */
 #undef MLK_INVNTT_BOUND
 #undef MLK_NATIVE_API_H
+#undef MLK_NATIVE_FUNC_FALLBACK
+#undef MLK_NATIVE_FUNC_SUCCESS
 #undef MLK_NTT_BOUND
 /* mlkem/src/native/meta.h */
 #undef MLK_NATIVE_META_H
@@ -504,13 +504,9 @@
 #undef MLK_USE_NATIVE_POLY_TOBYTES
 #undef MLK_USE_NATIVE_POLY_TOMONT
 #undef MLK_USE_NATIVE_REJ_UNIFORM
-/* mlkem/src/native/x86_64/src/align.h */
-#undef MLK_ALIGNED_INT16
-#undef MLK_NATIVE_X86_64_SRC_ALIGN_H
 /* mlkem/src/native/x86_64/src/arith_native_x86_64.h */
 #undef MLK_AVX2_REJ_UNIFORM_BUFLEN
 #undef MLK_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H
-#undef mlk_basemul_avx2
 #undef mlk_invntt_avx2
 #undef mlk_ntt_avx2
 #undef mlk_nttfrombytes_avx2
@@ -529,7 +525,7 @@
 #undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k3
 #undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k4
 #undef mlk_reduce_avx2
-#undef mlk_rej_uniform_avx2
+#undef mlk_rej_uniform_asm
 #undef mlk_rej_uniform_table
 #undef mlk_tomont_avx2
 /* mlkem/src/native/x86_64/src/consts.h */

@@ -43,6 +43,7 @@
 .global MLK_ASM_NAMESPACE(invntt_avx2)
 MLK_ASM_FN_SYMBOL(invntt_avx2)
 
+        .cfi_startproc
         vmovdqa	(%rsi), %ymm0
         vmovdqa	0x60(%rsi), %ymm2
         vmovdqa	0x80(%rsi), %ymm3
@@ -693,6 +694,7 @@ MLK_ASM_FN_SYMBOL(invntt_avx2)
         vmovdqa	%ymm10, 0x1c0(%rdi)
         vmovdqa	%ymm11, 0x1e0(%rdi)
         retq
+        .cfi_endproc
 
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */

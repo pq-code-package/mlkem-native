@@ -14,7 +14,6 @@ DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET += mlk_polyvec_tobytes.0:4 # Largest value of MLKEM_K
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly_k.c
@@ -27,6 +26,8 @@ USE_DYNAMIC_FRAMES=1
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
+CBMCFLAGS += --slice-formula
+CBMCFLAGS += --no-array-field-sensitivity
 
 FUNCTION_NAME = mlk_polyvec_tobytes
 

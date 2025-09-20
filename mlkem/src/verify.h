@@ -318,7 +318,8 @@ __contract__(ensures(return_value == (cond ? a : b)))
  *
  * Arguments:   const uint8_t *a: pointer to first byte array
  *              const uint8_t *b: pointer to second byte array
- *              size_t len:       length of the byte arrays
+ *              size_t len:       length of the byte arrays, upper-bounded
+ *                                to INT_MAX to control proof complexity
  *
  * Returns 0 if the byte arrays are equal, a non-zero value otherwise
  *
@@ -338,9 +339,9 @@ __contract__(ensures(return_value == (cond ? a : b)))
 static MLK_INLINE uint8_t mlk_ct_memcmp(const uint8_t *a, const uint8_t *b,
                                         const size_t len)
 __contract__(
+  requires(len <= INT_MAX)
   requires(memory_no_alias(a, len))
   requires(memory_no_alias(b, len))
-  requires(len <= INT_MAX)
   ensures((return_value == 0) == forall(i, 0, len, (a[i] == b[i]))))
 {
   uint8_t r = 0, s = 0;
@@ -391,6 +392,7 @@ __contract__(
 static MLK_INLINE void mlk_ct_cmov_zero(uint8_t *r, const uint8_t *x,
                                         size_t len, uint8_t b)
 __contract__(
+  requires(len <= MLK_MAX_BUFFER_SIZE)
   requires(memory_no_alias(r, len))
   requires(memory_no_alias(x, len))
   assigns(memory_slice(r, len)))

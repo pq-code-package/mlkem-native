@@ -8,15 +8,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  check-oqs-source-list:
-    name: Check META.yml source list
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Run file check
-        run: |
-          cd integration/liboqs
-          python3 liboqs-check-filelist.py
   oqs_basic_build:
     strategy:
       fail-fast: false
@@ -30,13 +21,13 @@ jobs:
     name: Build (${{ matrix.cmake.name }}, ${{ matrix.system }})
     runs-on: ${{ matrix.system }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: ./.github/actions/setup-os
         with:
           packages: 'cmake python3-jinja2 python3-tabulate python3-git python3-pytest valgrind'
       - uses: ./.github/actions/setup-oqs
         with:
-          commit: 'b5d3dac4ebdfbbc5de1f6ab9fc6a94c3fd47d13d' # latest from main as of 2025-07-02
+          commit: '94b421ebb82405c843dba4e9aa521a56ee5a333d' # v0.14.0
       - name: Apply patch
         run: |
           cd $LIBOQS_DIR

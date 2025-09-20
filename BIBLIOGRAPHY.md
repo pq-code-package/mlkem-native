@@ -7,24 +7,6 @@
 This file lists the citations made throughout the mlkem-native 
 source code and documentation.
 
-### `ACVP_Server`
-
-* ACVP Test Vectors
-* Author(s):
-  - National Institute of Standards and Technology
-* URL: https://github.com/usnistgov/ACVP-Server/tree/master/gen-val/json-files
-* Referenced from:
-  - [test/acvp_data/README.md](test/acvp_data/README.md)
-
-### `ACVP_Spec`
-
-* ACVP ML-KEM JSON Specification
-* Author(s):
-  - Christopher Celi
-* URL: https://pages.nist.gov/ACVP/draft-celi-acvp-ml-kem.html
-* Referenced from:
-  - [test/acvp_data/README.md](test/acvp_data/README.md)
-
 ### `AVX2_NTT`
 
 * Faster AVX2 optimized NTT multiplication for Ring-LWE lattice cryptography.
@@ -44,6 +26,7 @@ source code and documentation.
   - National Institute of Standards and Technology
 * URL: https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
 * Referenced from:
+  - [examples/basic_deterministic/mlkem_native/custom_no_randomized_config.h](examples/basic_deterministic/mlkem_native/custom_no_randomized_config.h)
   - [integration/liboqs/config_aarch64.h](integration/liboqs/config_aarch64.h)
   - [integration/liboqs/config_c.h](integration/liboqs/config_c.h)
   - [integration/liboqs/config_x86_64.h](integration/liboqs/config_x86_64.h)
@@ -52,6 +35,10 @@ source code and documentation.
   - [test/break_pct_config.h](test/break_pct_config.h)
   - [test/custom_memcpy_config.h](test/custom_memcpy_config.h)
   - [test/custom_memset_config.h](test/custom_memset_config.h)
+  - [test/custom_native_capability_config_0.h](test/custom_native_capability_config_0.h)
+  - [test/custom_native_capability_config_1.h](test/custom_native_capability_config_1.h)
+  - [test/custom_native_capability_config_CPUID_AVX2.h](test/custom_native_capability_config_CPUID_AVX2.h)
+  - [test/custom_native_capability_config_ID_AA64PFR1_EL1.h](test/custom_native_capability_config_ID_AA64PFR1_EL1.h)
   - [test/custom_randombytes_config.h](test/custom_randombytes_config.h)
   - [test/custom_stdlib_config.h](test/custom_stdlib_config.h)
   - [test/custom_zeroize_config.h](test/custom_zeroize_config.h)
@@ -210,7 +197,6 @@ source code and documentation.
 * URL: https://github.com/pq-crystals/kyber/tree/main/avx2
 * Referenced from:
   - [dev/x86_64/README.md](dev/x86_64/README.md)
-  - [dev/x86_64/src/align.h](dev/x86_64/src/align.h)
   - [dev/x86_64/src/compress_avx2.c](dev/x86_64/src/compress_avx2.c)
   - [dev/x86_64/src/consts.c](dev/x86_64/src/consts.c)
   - [dev/x86_64/src/consts.h](dev/x86_64/src/consts.h)
@@ -220,9 +206,7 @@ source code and documentation.
   - [dev/x86_64/src/ntttobytes.S](dev/x86_64/src/ntttobytes.S)
   - [dev/x86_64/src/nttunpack.S](dev/x86_64/src/nttunpack.S)
   - [dev/x86_64/src/reduce.S](dev/x86_64/src/reduce.S)
-  - [dev/x86_64/src/rej_uniform_avx2.c](dev/x86_64/src/rej_uniform_avx2.c)
   - [dev/x86_64/src/tomont.S](dev/x86_64/src/tomont.S)
-  - [mlkem/src/native/x86_64/src/align.h](mlkem/src/native/x86_64/src/align.h)
   - [mlkem/src/native/x86_64/src/compress_avx2.c](mlkem/src/native/x86_64/src/compress_avx2.c)
   - [mlkem/src/native/x86_64/src/consts.c](mlkem/src/native/x86_64/src/consts.c)
   - [mlkem/src/native/x86_64/src/consts.h](mlkem/src/native/x86_64/src/consts.h)
@@ -232,7 +216,6 @@ source code and documentation.
   - [mlkem/src/native/x86_64/src/ntttobytes.S](mlkem/src/native/x86_64/src/ntttobytes.S)
   - [mlkem/src/native/x86_64/src/nttunpack.S](mlkem/src/native/x86_64/src/nttunpack.S)
   - [mlkem/src/native/x86_64/src/reduce.S](mlkem/src/native/x86_64/src/reduce.S)
-  - [mlkem/src/native/x86_64/src/rej_uniform_avx2.c](mlkem/src/native/x86_64/src/rej_uniform_avx2.c)
   - [mlkem/src/native/x86_64/src/tomont.S](mlkem/src/native/x86_64/src/tomont.S)
 
 ### `SLOTHY`

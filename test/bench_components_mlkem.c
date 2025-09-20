@@ -69,7 +69,9 @@ static int bench(void)
   BENCH("mlk_poly_rej_uniform",
         mlk_poly_rej_uniform((mlk_poly *)data0, (uint8_t *)data1))
   BENCH("mlk_poly_rej_uniform_x4",
-        mlk_poly_rej_uniform_x4((mlk_poly *)data0, (uint8_t(*)[64])data1))
+        mlk_poly_rej_uniform_x4((mlk_poly *)data0, (mlk_poly *)data1,
+                                (mlk_poly *)data2, (mlk_poly *)data3,
+                                (uint8_t(*)[64])data4))
 
   /* mlk_poly */
   /* mlk_poly_compress_du */

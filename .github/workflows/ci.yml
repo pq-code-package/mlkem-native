@@ -133,8 +133,8 @@ jobs:
     name: Functional tests (${{ matrix.target.arch }}${{ matrix.target.mode != 'native' && ', cross' || ''}})
     runs-on: ${{ matrix.target.runner }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: build + test (no-opt)
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: build + test
         uses: ./.github/actions/multi-functest
         with:
           nix-shell: ${{ matrix.target.nix_shell }}
@@ -169,7 +169,7 @@ jobs:
         backend: [x1_scalar, x1_v84a, x2_v84a, x4_v8a_scalar, x4_v8a_v84a_scalar]
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: build + test
         uses: ./.github/actions/multi-functest
         with:
@@ -238,6 +238,14 @@ jobs:
            c23: True
            opt: all
            examples: true
+         - name: gcc-15
+           shell: ci_gcc15
+           # TODO: Add this once gcc15 is supported in nix on aarch64-Darwin
+           darwin: False
+           c17: True
+           c23: True
+           opt: all
+           examples: true
          - name: clang-18
            shell: ci_clang18
            darwin: True
@@ -254,6 +262,13 @@ jobs:
            examples: true
          - name: clang-20
            shell: ci_clang20
+           darwin: True
+           c17: True
+           c23: True
+           opt: all
+           examples: true
+         - name: clang-21
+           shell: ci_clang21
            darwin: True
            c17: True
            c23: True
@@ -286,9 +301,16 @@ jobs:
            c23: True
            examples: False
            opt: no_opt
+         - name: zig-0.15
+           shell: ci_zig0_15
+           darwin: True
+           c17: True
+           c23: True
+           examples: False
+           opt: no_opt
     runs-on: ${{ matrix.target.runner }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: native build+functest (default)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
         uses: ./.github/actions/multi-functest
@@ -386,13 +408,13 @@ jobs:
           - external: true
     runs-on: ${{ matrix.target.runner }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Stack analysis
         uses: ./.github/actions/multi-functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
-          nix-shell: ci_valgrind-varlat_gcc14
+          nix-shell: ci_valgrind-varlat_gcc15
           nix-cache: false
           opt: all
           cflags: "${{ matrix.cflags }}"
@@ -427,116 +449,11 @@ jobs:
              }}
     runs-on: ${{ matrix.target.runner }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: "PCT enabled"
-        uses: ./.github/actions/multi-functest
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: "Config Variations"
+        uses: ./.github/actions/config-variations
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-DMLK_CONFIG_KEYGEN_PCT -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
-          func: true
-          kat: true
-          acvp: true
-      - name: "PCT enabled + broken"
-        run: |
-          make clean
-          CFLAGS='-DMLK_CONFIG_FILE=\"../../test/break_pct_config.h\"' make func -j4
-          # PCT breakage is done at runtime via MLK_BREAK_PCT
-          make run_func                 # Should be OK
-          MLK_BREAK_PCT=0 make run_func # Should be OK
-          if (MLK_BREAK_PCT=1 make run_func 2>&1 >/dev/null); then
-             echo "PCT failure expected"
-             exit 1
-          else
-             echo "PCT failed as expected"
-          fi
-      - name: "Custom zeroization (explicit_bzero)"
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_zeroize_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
-          func: true
-          kat: true
-          acvp: true
-          examples: false # Some examples use a custom config themselves
-      - name: "No ASM"
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/no_asm_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
-          func: true
-          kat: true
-          acvp: true
-          examples: false # Some examples use a custom config themselves
-      - name: "Custom randombytes"
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_randombytes_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
-          func: true
-          kat: true
-          acvp: true
-          examples: false # Some examples use a custom config themselves
-      - name: "Custom memcpy"
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_memcpy_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
-          func: true
-          kat: true
-          acvp: true
-          examples: false # Some examples use a custom config themselves
-      - name: "Custom memset"
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_memset_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
-          func: true
-          kat: true
-          acvp: true
-          examples: false # Some examples use a custom config themselves
-      - name: "Custom stdlib (memcpy + memset)"
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_stdlib_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
-          func: true
-          kat: true
-          acvp: true
-          examples: false # Some examples use a custom config themselves
-      - name: "MLKEM_GEN_MATRIX_NBLOCKS=1"
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=1"
-          func: true
-          kat: true
-          acvp: true
-      - name: "MLKEM_GEN_MATRIX_NBLOCKS=2"
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=2"
-          func: true
-          kat: true
-          acvp: true
-      - name: "MLKEM_GEN_MATRIX_NBLOCKS=4"
-        uses: ./.github/actions/multi-functest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
-          cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=4"
-          func: true
-          kat: true
-          acvp: true
   check-cf-protections:
     name: Test control-flow protections  (${{ matrix.compiler.name }}, x86_64)
     strategy:
@@ -545,12 +462,14 @@ jobs:
         compiler:
          - name: gcc-14
            shell: ci_gcc14
+         - name: gcc-15
+           shell: ci_gcc15
          - name: clang-19
            shell: ci_clang19
     # On AArch64 -fcf-protection is not supported anyway
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Test control-flow protections
         uses: ./.github/actions/multi-functest
         with:
@@ -582,7 +501,7 @@ jobs:
     name: Check API consistency
     runs-on: ${{ matrix.target.runner }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: make quickcheck
         run: |
           OPT=0 CFLAGS="-Imlkem -DMLK_CHECK_APIS -Wno-redundant-decls" make quickcheck
@@ -603,24 +522,28 @@ jobs:
             ec2_ami_id: ami-0d47e137a1108e078 # x86_64 ubuntu-latest, 32g
             compile_mode: native
             opt: all
+            config_variations: 'native-cap-CPUID_AVX2'
           - name: Intel Xeon 4th gen (t3)
             ec2_instance_type: t3.small
             ec2_ami: ubuntu-latest (custom AMI)
             ec2_ami_id: ami-0d47e137a1108e078 # x86_64 ubuntu-latest, 32g
             compile_mode: native
             opt: all
+            config_variations: 'native-cap-CPUID_AVX2'
           - name: Graviton2 (c6g.medium)
             ec2_instance_type: c6g.medium
             ec2_ami: ubuntu-latest (custom AMI)
             ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
             compile_mode: native
             opt: all
+            config_variations: 'native-cap-ON native-cap-OFF native-cap-ID_AA64PFR1_EL1'
           - name: Graviton3 (c7g.medium)
             ec2_instance_type: c7g.medium
             ec2_ami: ubuntu-latest (custom AMI)
             ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
             compile_mode: native
             opt: all
+            config_variations: 'native-cap-ID_AA64PFR1_EL1'
     name: Platform tests  (${{ matrix.target.name }})
     permissions:
       contents: 'read'
@@ -634,6 +557,7 @@ jobs:
       ec2_ami_id: ${{ matrix.target.ec2_ami_id }}
       compile_mode: ${{ matrix.target.compile_mode }}
       opt: ${{ matrix.target.opt }}
+      config_variations: ${{ matrix.target.config_variations || '' }}
       functest: true
       kattest: true
       acvptest: true
@@ -740,7 +664,7 @@ jobs:
     runs-on: ${{ matrix.system }}
     name: Check autogenerated files
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: ./.github/actions/setup-shell
         with:
           nix-shell: 'ci-cross' # Need cross-compiler for ASM simplification

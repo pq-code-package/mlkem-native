@@ -11,15 +11,23 @@
 #endif
 
 /* Part of backend API */
-#define MLK_USE_FIPS202_X2_NATIVE
+#define MLK_USE_FIPS202_X4_NATIVE
 /* Guard for assembly file */
 #define MLK_FIPS202_AARCH64_NEED_X2_V84A
 
 #if !defined(__ASSEMBLER__)
+#include "../api.h"
 #include "src/fips202_native_aarch64.h"
-static MLK_INLINE void mlk_keccak_f1600_x2_native(uint64_t *state)
+static MLK_INLINE int mlk_keccak_f1600_x4_native(uint64_t *state)
 {
-  mlk_keccak_f1600_x2_v84a_asm(state, mlk_keccakf1600_round_constants);
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_SHA3))
+  {
+    return MLK_NATIVE_FUNC_FALLBACK;
+  }
+
+  mlk_keccak_f1600_x2_v84a_asm(state + 0 * 25, mlk_keccakf1600_round_constants);
+  mlk_keccak_f1600_x2_v84a_asm(state + 2 * 25, mlk_keccakf1600_round_constants);
+  return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* !__ASSEMBLER__ */
 

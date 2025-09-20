@@ -20,13 +20,13 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly_k.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_polyvec_basemul_acc_montgomery_cached
-USE_FUNCTION_CONTRACTS=mlk_polyvec_basemul_acc_montgomery_cached_k$(MLKEM_K)_native
+USE_FUNCTION_CONTRACTS=mlk_polyvec_basemul_acc_montgomery_cached_k$(MLKEM_K)_native mlk_montgomery_reduce
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2
+CBMCFLAGS=--bitwuzla
 
 FUNCTION_NAME = polyvec_basemul_acc_montgomery_cached_native
 

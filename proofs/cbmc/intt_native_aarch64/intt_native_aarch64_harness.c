@@ -6,10 +6,11 @@
 #include "cbmc.h"
 #include "params.h"
 
-void mlk_intt_native(int16_t data[MLKEM_N]);
+int mlk_intt_native(int16_t data[MLKEM_N]);
 
 void harness(void)
 {
   int16_t *r;
-  mlk_intt_native(r);
+  int t;
+  t = mlk_intt_native(r);
 }
