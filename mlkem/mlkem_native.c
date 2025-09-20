@@ -84,6 +84,10 @@
 #include "src/native/x86_64/src/consts.c"
 #include "src/native/x86_64/src/rej_uniform_table.c"
 #endif
+#if defined(MLK_SYS_RISCV64)
+#include "src/native/riscv64/src/rv64v_debug.c"
+#include "src/native/riscv64/src/rv64v_poly.c"
+#endif
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
@@ -328,6 +332,7 @@
 #undef MLK_SYS_PPC64LE
 #undef MLK_SYS_RISCV32
 #undef MLK_SYS_RISCV64
+#undef MLK_SYS_RISCV64_V256
 #undef MLK_SYS_WINDOWS
 #undef MLK_SYS_X86_64
 #undef MLK_SYS_X86_64_AVX2
