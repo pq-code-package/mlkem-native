@@ -3,30 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
-#
-# Copyright 2025- IBM Corp.
-#
-#===================================================================================
-# Written by Danny Tsen <dtsen@us.ibm.com>
-#
+/*
+ * Copyright 2025- IBM Corp.
+ *
+ *===================================================================================
+ * Written by Danny Tsen <dtsen@us.ibm.com>
+ *
+ */
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
+#if defined(MLK_ARITH_BACKEND_PPC64LE) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
 #include "consts.h"
 
-.machine "any"
-.text
-
-# Barrett reduce constatnts
+// Barrett reduce constants
 #define V20159  0
 #define V_25    1
 #define V_26    2
 #define V_MKQ   3
 
-# Montgomery reduce constatnts
+// Montgomery reduce constants
 #define V_QINV  2
 #define V_NMKQ  5
 #define V_Z0    7
@@ -123,18 +121,18 @@
 .endm
 
 .macro Load_4Coeffs start next step
-        mr      9, \start       # j
-        add     10, 7, 9        # J + len*2
+        mr      9, \start       // j
+        add     10, 7, 9        // J + len*2
         addi    16, 9, \next
         addi    17, 10, \step
         addi    18, 16, \next
         addi    19, 17, \step
         addi    20, 18, \next
         addi    21, 19, \step
-        lxvd2x  32+8, 3, 10     # r[j+len]
-        lxvd2x  32+12, 3, 17    # r[j+len]
-        lxvd2x  32+16, 3, 19    # r[j+len]
-        lxvd2x  32+20, 3, 21    # r[j+len]
+        lxvd2x  32+8, 3, 10     // r[j+len]
+        lxvd2x  32+12, 3, 17    // r[j+len]
+        lxvd2x  32+16, 3, 19    // r[j+len]
+        lxvd2x  32+20, 3, 21    // r[j+len]
 
         lxvd2x  32+21, 3, 9
         lxvd2x  32+22, 3, 16
@@ -144,14 +142,14 @@
         Compute_4Coeffs
 .endm
 
-#
-# Load Coeffients and setup vectors
-#    aj0, aj1, ajlen2, ajlen3, aj4, aj5, ajlen6, ajlen7
-#    aj8, aj9, ajlen10, ajlen11, aj12, aj13, ajlen14, ajlen15
-#
-#  a[j]=      aj0, aj1, aj8, aj9, aj4, aj5, aj12, aj13
-#  a[j+len]=  ajlen2, ajlen3, ajlen10, ajlen11, ajlen6, ajlen7, ajlen14, ajlen15
-#
+/*
+ * Load Coeffients and setup vectors
+ *    aj0, aj1, ajlen2, ajlen3, aj4, aj5, ajlen6, ajlen7
+ *    aj8, aj9, ajlen10, ajlen11, aj12, aj13, ajlen14, ajlen15
+ *
+ *  a[j]=      aj0, aj1, aj8, aj9, aj4, aj5, aj12, aj13
+ *  a[j+len]=  ajlen2, ajlen3, ajlen10, ajlen11, ajlen6, ajlen7, ajlen14, ajlen15
+ */
 .macro Load_L24Coeffs
         lxvd2x     32+25, 0, 5     # a[j], r[j+len]
         lxvd2x     32+26, 10, 5    # a[j], r[j+len]
@@ -171,15 +169,15 @@
         vmrgow 24, 25, 26
 .endm
 
-#
-# Permute
-#  rj0, rj1, rj2, rj3, rjlen4, rjlen5, rjlen6, rjlen7
-#  rj8, rj9, rj10, rj11, rjlen12, rjlen13, rjlen14, rjlen15
-#
-# to
-#  rjlen4 - rjlen7, rjlen12 - rjlen15
-#  rj0 - rj4, rj8 - rj11
-#
+/*
+ * Permute
+ *  rj0, rj1, rj2, rj3, rjlen4, rjlen5, rjlen6, rjlen7
+ *  rj8, rj9, rj10, rj11, rjlen12, rjlen13, rjlen14, rjlen15
+ *
+ * to
+ *  rjlen4 - rjlen7, rjlen12 - rjlen15
+ *  rj0 - rj4, rj8 - rj11
+ */
 .macro Load_L44Coeffs
         lxvd2x     10, 0, 5       # rj0, rj1, rj2, rj3,
                                   # rjlen4, rjlen5, rjlen6, rjlen7
@@ -206,8 +204,8 @@
         xxlor   32+3, 6, 6      # V_MKQ
         xxlor   32+1, 7, 7      # V_25
         xxlor   32+2, 8, 8      # V_26
-        # Multify Odd/Even signed halfword;
-        #   Results word bound by 2^32 in abs value.
+        // Multiply Odd/Even signed halfword;
+        //   Results word bound by 2^32 in abs value.
         vmulosh 6, 8, V20159
         vmulesh 5, 8, V20159
         vmulosh 11, 12, V20159
@@ -232,8 +230,8 @@
         vadduwm 14, 14, V_25
         vadduwm 17, 17, V_25
         vadduwm 18, 18, V_25
-        # Right shift and pack lower halfword,
-        #   results bond to 2^16 in abs value
+        // Right shift and pack lower halfword,
+        //   results bound by 2^16 in abs value
         vsraw   4, 4, V_26
         vsraw   5, 5, V_26
         vsraw   9, 9, V_26
@@ -250,25 +248,23 @@
         vsubuhm 13, 7, 13
         vpkuwum 17, 18, 17
         vsubuhm 17, 7, 17
-        # Modulo multify-Low unsigned halfword;
-        #   results bond to 2^16 * q in abs value.
+        // Modulo multify-Low unsigned halfword;
+        //   results bound by 2^16 * q in abs value.
         vmladduhm \_v0, 4, V_MKQ, 8
         vmladduhm \_v1, 9, V_MKQ, 12
         vmladduhm \_v2, 13, V_MKQ, 16
         vmladduhm \_v3, 17, V_MKQ, 20
 .endm
 
-#-----------------------------------
-# MREDUCE_4X(_vz0, _vz1, _vz2, _vz3, _vo0, _vo1, _vo2, _vo3)
-#
+/* MREDUCE_4X(_vz0, _vz1, _vz2, _vz3, _vo0, _vo1, _vo2, _vo3) */
 .macro MREDUCE_4X _vz0 _vz1 _vz2 _vz3 _vo0 _vo1 _vo2 _vo3
-        # Modular multification bond by 2^16 * q in abs value
+        // Modular multiplication bound by 2^16 * q in abs value
         vmladduhm 15, 25, \_vz0, 3
         vmladduhm 20, 26, \_vz1, 3
         vmladduhm 27, 30, \_vz2, 3
         vmladduhm 28, 31, \_vz3, 3
 
-        # Signed multiply-high-round; outputs are bound by 2^15 * q in abs value
+        // Signed multiply-high-round; outputs are bound by 2^15 * q in abs value
         vmhraddshs 14, 25, \_vz0, 3
         vmhraddshs 19, 26, \_vz1, 3
         vmhraddshs 24, 30, \_vz2, 3
@@ -284,17 +280,17 @@
         vmhraddshs 25, 25, V_NMKQ, 24
         vmhraddshs 30, 30, V_NMKQ, 29
 
-        vsrah \_vo0, 15, 4              # >> 1
-        vsrah \_vo1, 20, 4              # >> 1
-        vsrah \_vo2, 25, 4              # >> 1
-        vsrah \_vo3, 30, 4              # >> 1
+        vsrah \_vo0, 15, 4              // >> 1
+        vsrah \_vo1, 20, 4              // >> 1
+        vsrah \_vo2, 25, 4              // >> 1
+        vsrah \_vo3, 30, 4              // >> 1
 .endm
 
 .macro Set_mont_consts
-        xxlor   32+5, 0, 0      # V_NMKQ
-        xxlor   32+2, 2, 2      # V_QINV
-        xxlor   32+3, 3, 3      # 0
-        xxlor   32+4, 4, 4      # 1
+        xxlor   32+5, 0, 0      // V_NMKQ
+        xxlor   32+2, 2, 2      // V_QINV
+        xxlor   32+3, 3, 3      // 0
+        xxlor   32+4, 4, 4      // 1
 .endm
 
 .macro Load_next_4zetas
@@ -435,23 +431,15 @@
         Write_M4C 32+13, 32+18, 32+23, 32+28
 .endm
 
-# intt
-# t = r[j];
-# r[j] = barrett_reduce(t + r[j + len]);
-# r[j + len] = r[j + len] - t;
-# r[j + len] = fqmul(zeta, r[j + len]);
-
-#
-# mlk_intt_ppc(r)
-#
+.text
 .global MLK_ASM_NAMESPACE(intt_ppc)
-.align 4
+.balign 16
 MLK_ASM_FN_SYMBOL(intt_ppc)
 
         SAVE_REGS
 
-        # init vectors and constants
-        # Setup for Montgomery reduce
+        /* init vectors and constants
+         * Setup for Montgomery reduce */
         lxvx    0, 0, 4
 
         li      10, QINV_OFFSET
@@ -462,7 +450,7 @@ MLK_ASM_FN_SYMBOL(intt_ppc)
         xxlor   3, 32+3, 32+3                   # 0
         xxlor   4, 32+4, 32+4                   # 1
 
-        # Setup for Barrett reduce
+        /* Setup for Barrett reduce */
         li      10, Q_OFFSET
         li      11, C20159_OFFSET
         lxvx    6, 10, 4                        # V_MKQ
@@ -505,9 +493,10 @@ intt_ppc__Loopf:
         addi    3, 3, -512
 
 .align 4
-        #
-        # 1. len = 2, start = 0, 4, 8, 12,...244, 248, 252
-        # Update zetas vectors, each vector has 2 zetas
+        /*
+         * 1. len = 2, start = 0, 4, 8, 12,...244, 248, 252
+         * Update zetas vectors, each vector has 2 zetas
+         */
         addi    14, 4, ZETA_INTT_OFFSET
         li      7, 4
         li      8, 4
@@ -519,8 +508,7 @@ intt_ppc__Loop2:
         bdnz    intt_ppc__Loop2
 
 .align 4
-        #
-        # 2. len = 4, start = 0, 8, 16, 24,...232, 240, 248
+        /* 2. len = 4, start = 0, 8, 16, 24,...232, 240, 248 */
         mr      5, 3
         li      7, 8
         li      8, 4                   # loops
@@ -531,7 +519,7 @@ intt_ppc__Loop4:
         bdnz    intt_ppc__Loop4
 
 .align 4
-        # 3. len = 8, start = 0, 16, 32, 48,...208, 224, 240
+        /* 3. len = 8, start = 0, 16, 32, 48,...208, 224, 240 */
         li      7, 16
         li      5, 0
         li      15, 4                   # loops
@@ -543,8 +531,7 @@ intt_ppc__Loop8:
         bdnz    intt_ppc__Loop8
 
 .align 4
-        #
-        # 4. len = 16, start = 0, 32, 64,,...160, 192, 224
+        /* 4. len = 16, start = 0, 32, 64,,...160, 192, 224 */
         li      5, 0
         li      7, 32
 
@@ -562,8 +549,7 @@ intt_ppc__Loop8:
         INTT_REDUCE_4X 5, 64, 64
 
 .align 4
-        #
-        # 5. len = 32, start = 0, 64, 128, 192
+        /* 5. len = 32, start = 0, 64, 128, 192 */
         li      5, 0
         li      7, 64
 
@@ -607,8 +593,7 @@ intt_ppc__Loop8:
         Write_M4C 32+13, 32+18, 32+23, 32+28
 
 .align 4
-        #
-        # 6. len = 64, start = 0, 128
+        /* 6. len = 64, start = 0, 128 */
         li      5, 0
         li      7, 128
         Load_4Coeffs 5, 16, 16
@@ -649,8 +634,7 @@ intt_ppc__Loop8:
         Write_M4C 32+13, 32+18, 32+23, 32+28
 
 .align 4
-        # 7. len = 128, start = 0
-        #
+        /* 7. len = 128, start = 0 */
         li      5, 0            # start
         li      7, 256          # len * 2
 
@@ -709,5 +693,4 @@ intt_ppc__Loop8:
 #undef V1441
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
-          !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_PPC64LE && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
