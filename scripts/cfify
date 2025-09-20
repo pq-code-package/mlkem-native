@@ -226,6 +226,19 @@ def add_cfi_directives(text, arch):
                 i += 1
                 continue
 
+        elif arch == "riscv64":
+            # No special handling of riscv64 for now
+            pass
+        elif arch == "ppc64le":
+            # ppc64le: blr -> .cfi_endproc after blr
+            match = re.match(r"(\s*)blr\s*$", line, re.IGNORECASE)
+            if match:
+                indent = match.group(1)
+                result.append(line)
+                result.append(f"{indent}.cfi_endproc")
+                i += 1
+                continue
+
         result.append(line)
         i += 1
 
@@ -246,7 +259,7 @@ def main():
     )
     parser.add_argument(
         "--arch",
-        choices=["aarch64", "x86_64"],
+        choices=["aarch64", "x86_64", "riscv64", "ppc64le"],
         default="aarch64",
         help="Target architecture (default: aarch64)",
     )
