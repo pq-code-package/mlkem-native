@@ -4,13 +4,13 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = poly_ntt_native_harness
+HARNESS_FILE = poly_tomont_c_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = poly_ntt_native
+PROOF_UID = mlk_poly_tomont_c
 
-DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_ARITH_BACKEND_FILE="\"dummy_backend.h\""
+DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
@@ -19,16 +19,16 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_poly_ntt
-USE_FUNCTION_CONTRACTS=mlk_ntt_native mlk_poly_ntt_c
+CHECK_FUNCTION_CONTRACTS=mlk_poly_tomont_c
+USE_FUNCTION_CONTRACTS=mlk_fqmul
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--bitwuzla
+CBMCFLAGS=--smt2
 
-FUNCTION_NAME = mlk_poly_ntt
+FUNCTION_NAME = mlk_poly_tomont_c
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

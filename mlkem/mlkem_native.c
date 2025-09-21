@@ -258,8 +258,10 @@
 #undef mlk_poly_decompress_d4
 #undef mlk_poly_decompress_d5
 #undef mlk_poly_frombytes
+#undef mlk_poly_frombytes_c
 #undef mlk_poly_frommsg
 #undef mlk_poly_tobytes
+#undef mlk_poly_tobytes_c
 #undef mlk_poly_tomsg
 /* mlkem/src/debug.h */
 #undef MLK_DEBUG_H
@@ -276,11 +278,16 @@
 #undef MLK_POLY_H
 #undef mlk_poly_add
 #undef mlk_poly_invntt_tomont
+#undef mlk_poly_invntt_tomont_c
 #undef mlk_poly_mulcache_compute
+#undef mlk_poly_mulcache_compute_c
 #undef mlk_poly_ntt
+#undef mlk_poly_ntt_c
 #undef mlk_poly_reduce
+#undef mlk_poly_reduce_c
 #undef mlk_poly_sub
 #undef mlk_poly_tomont
+#undef mlk_poly_tomont_c
 /* mlkem/src/randombytes.h */
 #undef MLK_RANDOMBYTES_H
 /* mlkem/src/sampling.h */

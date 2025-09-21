@@ -549,6 +549,24 @@ void mlk_poly_decompress_d11(mlk_poly *r,
                              const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]);
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
 
+#define mlk_poly_tobytes_c MLK_NAMESPACE(poly_tobytes_c)
+/*************************************************
+ * Name:        mlk_poly_tobytes_c
+ *
+ * Description: C implementation of mlk_poly_tobytes()
+ *
+ * Arguments:   - uint8_t r[MLKEM_POLYBYTES]: output byte array
+ *              - const mlk_poly *a: pointer to input polynomial
+ **************************************************/
+MLK_INTERNAL_API
+void mlk_poly_tobytes_c(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYBYTES))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(object_whole(r))
+);
+
 #define mlk_poly_tobytes MLK_NAMESPACE(poly_tobytes)
 /*************************************************
  * Name:        mlk_poly_tobytes
@@ -578,6 +596,24 @@ __contract__(
   assigns(object_whole(r))
 );
 
+
+#define mlk_poly_frombytes_c MLK_NAMESPACE(poly_frombytes_c)
+/*************************************************
+ * Name:        mlk_poly_frombytes_c
+ *
+ * Description: C implementation of mlk_poly_frombytes()
+ *
+ * Arguments:   - mlk_poly *r: pointer to output polynomial
+ *              - const uint8_t a[MLKEM_POLYBYTES]: input byte array
+ **************************************************/
+MLK_INTERNAL_API
+void mlk_poly_frombytes_c(mlk_poly *r, const uint8_t a[MLKEM_POLYBYTES])
+__contract__(
+  requires(memory_no_alias(a, MLKEM_POLYBYTES))
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT))
+);
 
 #define mlk_poly_frombytes MLK_NAMESPACE(poly_frombytes)
 /*************************************************

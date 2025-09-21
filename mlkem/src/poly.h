@@ -131,6 +131,22 @@ __contract__(
   return (int16_t)r;
 }
 
+#define mlk_poly_tomont_c MLK_NAMESPACE(poly_tomont_c)
+/*************************************************
+ * Name:        mlk_poly_tomont_c
+ *
+ * Description: C implementation of mlk_poly_tomont()
+ *
+ * Arguments:   - mlk_poly *r: pointer to input/output polynomial
+ **************************************************/
+MLK_INTERNAL_API
+void mlk_poly_tomont_c(mlk_poly *r)
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_Q))
+);
+
 #define mlk_poly_tomont MLK_NAMESPACE(poly_tomont)
 /*************************************************
  * Name:        mlk_poly_tomont
@@ -153,6 +169,23 @@ __contract__(
   requires(memory_no_alias(r, sizeof(mlk_poly)))
   assigns(memory_slice(r, sizeof(mlk_poly)))
   ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_Q))
+);
+
+#define mlk_poly_mulcache_compute_c MLK_NAMESPACE(poly_mulcache_compute_c)
+/************************************************************
+ * Name: mlk_poly_mulcache_compute_c
+ *
+ * Description: C implementation of mlk_poly_mulcache_compute()
+ *
+ * Arguments:   - mlk_poly_mulcache *x: pointer to output mulcache
+ *              - const mlk_poly *a: pointer to input polynomial
+ ************************************************************/
+MLK_INTERNAL_API
+void mlk_poly_mulcache_compute_c(mlk_poly_mulcache *x, const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(x, sizeof(mlk_poly_mulcache)))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  assigns(object_whole(x))
 );
 
 #define mlk_poly_mulcache_compute MLK_NAMESPACE(poly_mulcache_compute)
@@ -188,6 +221,22 @@ __contract__(
   requires(memory_no_alias(x, sizeof(mlk_poly_mulcache)))
   requires(memory_no_alias(a, sizeof(mlk_poly)))
   assigns(object_whole(x))
+);
+
+#define mlk_poly_reduce_c MLK_NAMESPACE(poly_reduce_c)
+/*************************************************
+ * Name:        mlk_poly_reduce_c
+ *
+ * Description: C implementation of mlk_poly_reduce()
+ *
+ * Arguments:   - mlk_poly *r: pointer to input/output polynomial
+ **************************************************/
+MLK_INTERNAL_API
+void mlk_poly_reduce_c(mlk_poly *r)
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
 );
 
 #define mlk_poly_reduce MLK_NAMESPACE(poly_reduce)
@@ -283,6 +332,23 @@ __contract__(
   assigns(object_whole(r))
 );
 
+#define mlk_poly_ntt_c MLK_NAMESPACE(poly_ntt_c)
+/*************************************************
+ * Name:        mlk_poly_ntt_c
+ *
+ * Description: C implementation of mlk_poly_ntt()
+ *
+ * Arguments:   - mlk_poly *r: pointer to input/output polynomial
+ **************************************************/
+MLK_INTERNAL_API
+void mlk_poly_ntt_c(mlk_poly *r)
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_Q))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLK_NTT_BOUND))
+);
+
 #define mlk_poly_ntt MLK_NAMESPACE(poly_ntt)
 /*************************************************
  * Name:        mlk_poly_ntt
@@ -311,6 +377,22 @@ __contract__(
   requires(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_Q))
   assigns(memory_slice(r, sizeof(mlk_poly)))
   ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLK_NTT_BOUND))
+);
+
+#define mlk_poly_invntt_tomont_c MLK_NAMESPACE(poly_invntt_tomont_c)
+/*************************************************
+ * Name:        mlk_poly_invntt_tomont_c
+ *
+ * Description: C implementation of mlk_poly_invntt_tomont()
+ *
+ * Arguments:   - mlk_poly *r: pointer to input/output polynomial
+ **************************************************/
+MLK_INTERNAL_API
+void mlk_poly_invntt_tomont_c(mlk_poly *r)
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND))
 );
 
 #define mlk_poly_invntt_tomont MLK_NAMESPACE(poly_invntt_tomont)

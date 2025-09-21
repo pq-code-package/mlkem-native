@@ -400,18 +400,9 @@ void mlk_poly_decompress_d11(mlk_poly *r,
  *              The reference implementation works with coefficients
  *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
 MLK_INTERNAL_API
-void mlk_poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
+void mlk_poly_tobytes_c(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
 {
   unsigned i;
-#if defined(MLK_USE_NATIVE_POLY_TOBYTES)
-  int ret;
-  mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
-  ret = mlk_poly_tobytes_native(r, a->coeffs);
-  if (ret == MLK_NATIVE_FUNC_SUCCESS)
-  {
-    return;
-  }
-#endif /* MLK_USE_NATIVE_POLY_TOBYTES */
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_N / 2; i++)
@@ -440,19 +431,27 @@ void mlk_poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
   }
 }
 
-/* Reference: `poly_frombytes()` in the reference implementation @[REF]. */
 MLK_INTERNAL_API
-void mlk_poly_frombytes(mlk_poly *r, const uint8_t a[MLKEM_POLYBYTES])
+void mlk_poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
 {
-  unsigned i;
-#if defined(MLK_USE_NATIVE_POLY_FROMBYTES)
+#if defined(MLK_USE_NATIVE_POLY_TOBYTES)
   int ret;
-  ret = mlk_poly_frombytes_native(r->coeffs, a);
+  mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  ret = mlk_poly_tobytes_native(r, a->coeffs);
   if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
     return;
   }
-#endif /* MLK_USE_NATIVE_POLY_FROMBYTES */
+#endif /* MLK_USE_NATIVE_POLY_TOBYTES */
+
+  mlk_poly_tobytes_c(r, a);
+}
+
+/* Reference: `poly_frombytes()` in the reference implementation @[REF]. */
+MLK_INTERNAL_API
+void mlk_poly_frombytes_c(mlk_poly *r, const uint8_t a[MLKEM_POLYBYTES])
+{
+  unsigned i;
   for (i = 0; i < MLKEM_N / 2; i++)
   __loop__(
     invariant(i <= MLKEM_N / 2)
@@ -467,6 +466,21 @@ void mlk_poly_frombytes(mlk_poly *r, const uint8_t a[MLKEM_POLYBYTES])
 
   /* Note that the coefficients are not canonical */
   mlk_assert_bound(r, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
+}
+
+MLK_INTERNAL_API
+void mlk_poly_frombytes(mlk_poly *r, const uint8_t a[MLKEM_POLYBYTES])
+{
+#if defined(MLK_USE_NATIVE_POLY_FROMBYTES)
+  int ret;
+  ret = mlk_poly_frombytes_native(r->coeffs, a);
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
+  {
+    return;
+  }
+#endif /* MLK_USE_NATIVE_POLY_FROMBYTES */
+
+  mlk_poly_frombytes_c(r, a);
 }
 
 /* Reference: `poly_frommsg()` in the reference implementation @[REF].
