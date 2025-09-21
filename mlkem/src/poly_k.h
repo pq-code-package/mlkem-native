@@ -352,6 +352,32 @@ __contract__(
   array_abs_bound(r[j].coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND)))
 );
 
+#define mlk_polyvec_basemul_acc_montgomery_cached_c \
+  MLK_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached_c)
+/*************************************************
+ * Name:        mlk_polyvec_basemul_acc_montgomery_cached_c
+ *
+ * Description: C implementation of mlk_polyvec_basemul_acc_montgomery_cached()
+ *
+ * Arguments:   - mlk_poly *r: pointer to output polynomial
+ *              - const mlk_polyvec a: first input vector of polynomials
+ *              - const mlk_polyvec b: second input vector of polynomials
+ *              - const mlk_polyvec_mulcache b_cache: mulcache for second operand
+ **************************************************/
+MLK_INTERNAL_API
+void mlk_polyvec_basemul_acc_montgomery_cached_c(
+    mlk_poly *r, const mlk_polyvec a, const mlk_polyvec b,
+    const mlk_polyvec_mulcache b_cache)
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(a, sizeof(mlk_polyvec)))
+  requires(memory_no_alias(b, sizeof(mlk_polyvec)))
+  requires(memory_no_alias(b_cache, sizeof(mlk_polyvec_mulcache)))
+  requires(forall(k1, 0, MLKEM_K,
+     array_bound(a[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+  assigns(object_whole(r))
+);
+
 #define mlk_polyvec_basemul_acc_montgomery_cached \
   MLK_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached)
 /*************************************************

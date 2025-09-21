@@ -147,13 +147,42 @@ void mlk_polyvec_invntt_tomont(mlk_polyvec r)
  *              more modular reductions since it reduces after every modular
  *              multiplication. */
 MLK_INTERNAL_API
-void mlk_polyvec_basemul_acc_montgomery_cached(
+MLK_INTERNAL_API
+void mlk_polyvec_basemul_acc_montgomery_cached_c(
     mlk_poly *r, const mlk_polyvec a, const mlk_polyvec b,
     const mlk_polyvec_mulcache b_cache)
 {
   unsigned i;
   mlk_assert_bound_2d(a, MLKEM_K, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
 
+  for (i = 0; i < MLKEM_N / 2; i++)
+  __loop__(invariant(i <= MLKEM_N / 2))
+  {
+    unsigned k;
+    int32_t t[2] = {0};
+    for (k = 0; k < MLKEM_K; k++)
+    __loop__(
+      invariant(k <= MLKEM_K &&
+         t[0] <=    (int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768  &&
+         t[0] >= - ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768) &&
+         t[1] <=   ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768) &&
+         t[1] >= - ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768)))
+    {
+      t[0] += (int32_t)a[k].coeffs[2 * i + 1] * b_cache[k].coeffs[i];
+      t[0] += (int32_t)a[k].coeffs[2 * i] * b[k].coeffs[2 * i];
+      t[1] += (int32_t)a[k].coeffs[2 * i] * b[k].coeffs[2 * i + 1];
+      t[1] += (int32_t)a[k].coeffs[2 * i + 1] * b[k].coeffs[2 * i];
+    }
+    r->coeffs[2 * i + 0] = mlk_montgomery_reduce(t[0]);
+    r->coeffs[2 * i + 1] = mlk_montgomery_reduce(t[1]);
+  }
+}
+
+MLK_INTERNAL_API
+void mlk_polyvec_basemul_acc_montgomery_cached(
+    mlk_poly *r, const mlk_polyvec a, const mlk_polyvec b,
+    const mlk_polyvec_mulcache b_cache)
+{
 #if defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
   {
     int ret;
@@ -180,27 +209,7 @@ void mlk_polyvec_basemul_acc_montgomery_cached(
   }
 #endif /* MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
-  for (i = 0; i < MLKEM_N / 2; i++)
-  __loop__(invariant(i <= MLKEM_N / 2))
-  {
-    unsigned k;
-    int32_t t[2] = {0};
-    for (k = 0; k < MLKEM_K; k++)
-    __loop__(
-      invariant(k <= MLKEM_K &&
-         t[0] <=    (int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768  &&
-         t[0] >= - ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768) &&
-         t[1] <=   ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768) &&
-         t[1] >= - ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768)))
-    {
-      t[0] += (int32_t)a[k].coeffs[2 * i + 1] * b_cache[k].coeffs[i];
-      t[0] += (int32_t)a[k].coeffs[2 * i] * b[k].coeffs[2 * i];
-      t[1] += (int32_t)a[k].coeffs[2 * i] * b[k].coeffs[2 * i + 1];
-      t[1] += (int32_t)a[k].coeffs[2 * i + 1] * b[k].coeffs[2 * i];
-    }
-    r->coeffs[2 * i + 0] = mlk_montgomery_reduce(t[0]);
-    r->coeffs[2 * i + 1] = mlk_montgomery_reduce(t[1]);
-  }
+  mlk_polyvec_basemul_acc_montgomery_cached_c(r, a, b, b_cache);
 }
 
 /* Reference: Does not exist in the reference implementation @[REF].
