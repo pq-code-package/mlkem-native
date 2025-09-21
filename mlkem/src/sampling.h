@@ -93,6 +93,33 @@ __contract__(
   ensures(array_bound(vec2->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
   ensures(array_bound(vec3->coeffs, 0, MLKEM_N, 0, MLKEM_Q)));
 
+#define mlk_rej_uniform_c MLK_NAMESPACE(rej_uniform_c)
+/*************************************************
+ * Name:        mlk_rej_uniform_c
+ *
+ * Description: C implementation of rejection sampling on uniform random bytes
+ *              to generate uniform random integers mod q
+ *
+ * Arguments:   - int16_t *r:          pointer to output buffer
+ *              - unsigned target:     requested number of 16-bit integers
+ *              - unsigned offset:     number of integers already sampled
+ *              - const uint8_t *buf:  pointer to input byte array
+ *              - unsigned buflen:     number of bytes in input array
+ *
+ * Returns number of sampled 16-bit integers (at most target)
+ **************************************************/
+MLK_INTERNAL_API
+unsigned mlk_rej_uniform_c(int16_t *r, unsigned target, unsigned offset,
+                           const uint8_t *buf, unsigned buflen)
+__contract__(
+  requires(offset <= target && target <= 4096 && buflen <= 4096 && buflen % 3 == 0)
+  requires(memory_no_alias(r, sizeof(int16_t) * target))
+  requires(memory_no_alias(buf, buflen))
+  requires(array_bound(r, 0, offset, 0, MLKEM_Q))
+  assigns(memory_slice(r, sizeof(int16_t) * target))
+  ensures(offset <= return_value && return_value <= target)
+  ensures(array_bound(r, 0, return_value, 0, MLKEM_Q)));
+
 #define mlk_poly_rej_uniform MLK_NAMESPACE(poly_rej_uniform)
 /*************************************************
  * Name:        mlk_poly_rej_uniform
