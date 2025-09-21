@@ -266,13 +266,21 @@
 /* mlkem/src/compress.h */
 #undef MLK_COMPRESS_H
 #undef mlk_poly_compress_d10
+#undef mlk_poly_compress_d10_c
 #undef mlk_poly_compress_d11
+#undef mlk_poly_compress_d11_c
 #undef mlk_poly_compress_d4
+#undef mlk_poly_compress_d4_c
 #undef mlk_poly_compress_d5
+#undef mlk_poly_compress_d5_c
 #undef mlk_poly_decompress_d10
+#undef mlk_poly_decompress_d10_c
 #undef mlk_poly_decompress_d11
+#undef mlk_poly_decompress_d11_c
 #undef mlk_poly_decompress_d4
+#undef mlk_poly_decompress_d4_c
 #undef mlk_poly_decompress_d5
+#undef mlk_poly_decompress_d5_c
 #undef mlk_poly_frombytes
 #undef mlk_poly_frombytes_c
 #undef mlk_poly_frommsg

@@ -35,19 +35,10 @@
  *              The reference implementation works with coefficients
  *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
 MLK_INTERNAL_API
-void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
-                          const mlk_poly *a)
+void mlk_poly_compress_d4_c(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
+                            const mlk_poly *a)
 {
   unsigned i;
-#if defined(MLK_USE_NATIVE_POLY_COMPRESS_D4)
-  int ret;
-  mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
-  ret = mlk_poly_compress_d4_native(r, a->coeffs);
-  if (ret == MLK_NATIVE_FUNC_SUCCESS)
-  {
-    return;
-  }
-#endif /* MLK_USE_NATIVE_POLY_COMPRESS_D4 */
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_N / 8; i++)
@@ -70,6 +61,23 @@ void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
   }
 }
 
+MLK_INTERNAL_API
+void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
+                          const mlk_poly *a)
+{
+#if defined(MLK_USE_NATIVE_POLY_COMPRESS_D4)
+  int ret;
+  mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  ret = mlk_poly_compress_d4_native(r, a->coeffs);
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
+  {
+    return;
+  }
+#endif /* MLK_USE_NATIVE_POLY_COMPRESS_D4 */
+
+  mlk_poly_compress_d4_c(r, a);
+}
+
 /* Reference: Embedded into `polyvec_compress()` in the
  *            reference implementation, for ML-KEM-{512,768}.
  *            - In contrast to the reference implementation, we assume
@@ -77,19 +85,10 @@ void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
  *              The reference implementation works with coefficients
  *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
 MLK_INTERNAL_API
-void mlk_poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
-                           const mlk_poly *a)
+void mlk_poly_compress_d10_c(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
+                             const mlk_poly *a)
 {
   unsigned j;
-#if defined(MLK_USE_NATIVE_POLY_COMPRESS_D10)
-  int ret;
-  mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
-  ret = mlk_poly_compress_d10_native(r, a->coeffs);
-  if (ret == MLK_NATIVE_FUNC_SUCCESS)
-  {
-    return;
-  }
-#endif /* MLK_USE_NATIVE_POLY_COMPRESS_D10 */
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
   for (j = 0; j < MLKEM_N / 4; j++)
   __loop__(invariant(j <= MLKEM_N / 4))
@@ -116,22 +115,30 @@ void mlk_poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
   }
 }
 
+MLK_INTERNAL_API
+void mlk_poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
+                           const mlk_poly *a)
+{
+#if defined(MLK_USE_NATIVE_POLY_COMPRESS_D10)
+  int ret;
+  mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  ret = mlk_poly_compress_d10_native(r, a->coeffs);
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
+  {
+    return;
+  }
+#endif /* MLK_USE_NATIVE_POLY_COMPRESS_D10 */
+
+  mlk_poly_compress_d10_c(r, a);
+}
+
 /* Reference: `poly_decompress()` in the reference implementation @[REF],
  *            for ML-KEM-{512,768}. */
 MLK_INTERNAL_API
-void mlk_poly_decompress_d4(mlk_poly *r,
-                            const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
+void mlk_poly_decompress_d4_c(mlk_poly *r,
+                              const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
 {
   unsigned i;
-#if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D4)
-  int ret;
-  ret = mlk_poly_decompress_d4_native(r->coeffs, a);
-  if (ret == MLK_NATIVE_FUNC_SUCCESS)
-  {
-    mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
-    return;
-  }
-#endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D4 */
   for (i = 0; i < MLKEM_N / 2; i++)
   __loop__(
     invariant(i <= MLKEM_N / 2)
@@ -144,22 +151,30 @@ void mlk_poly_decompress_d4(mlk_poly *r,
   mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 
-/* Reference: Embedded into `polyvec_decompress()` in the
- *            reference implementation, for ML-KEM-{512,768}. */
 MLK_INTERNAL_API
-void mlk_poly_decompress_d10(mlk_poly *r,
-                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
+void mlk_poly_decompress_d4(mlk_poly *r,
+                            const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
 {
-  unsigned j;
-#if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D10)
+#if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D4)
   int ret;
-  ret = mlk_poly_decompress_d10_native(r->coeffs, a);
+  ret = mlk_poly_decompress_d4_native(r->coeffs, a);
   if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
     mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
     return;
   }
-#endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D10 */
+#endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D4 */
+
+  mlk_poly_decompress_d4_c(r, a);
+}
+
+/* Reference: Embedded into `polyvec_decompress()` in the
+ *            reference implementation, for ML-KEM-{512,768}. */
+MLK_INTERNAL_API
+void mlk_poly_decompress_d10_c(mlk_poly *r,
+                               const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
+{
+  unsigned j;
   for (j = 0; j < MLKEM_N / 4; j++)
   __loop__(
     invariant(j <= MLKEM_N / 4)
@@ -185,6 +200,23 @@ void mlk_poly_decompress_d10(mlk_poly *r,
 
   mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
+
+MLK_INTERNAL_API
+void mlk_poly_decompress_d10(mlk_poly *r,
+                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
+{
+#if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D10)
+  int ret;
+  ret = mlk_poly_decompress_d10_native(r->coeffs, a);
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
+  {
+    mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+    return;
+  }
+#endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D10 */
+
+  mlk_poly_decompress_d10_c(r, a);
+}
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4
@@ -195,19 +227,10 @@ void mlk_poly_decompress_d10(mlk_poly *r,
  *              The reference implementation works with coefficients
  *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
 MLK_INTERNAL_API
-void mlk_poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
-                          const mlk_poly *a)
+void mlk_poly_compress_d5_c(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
+                            const mlk_poly *a)
 {
   unsigned i;
-#if defined(MLK_USE_NATIVE_POLY_COMPRESS_D5)
-  int ret;
-  mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
-  ret = mlk_poly_compress_d5_native(r, a->coeffs);
-  if (ret == MLK_NATIVE_FUNC_SUCCESS)
-  {
-    return;
-  }
-#endif /* MLK_USE_NATIVE_POLY_COMPRESS_D5 */
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_N / 8; i++)
@@ -236,6 +259,23 @@ void mlk_poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
   }
 }
 
+MLK_INTERNAL_API
+void mlk_poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
+                          const mlk_poly *a)
+{
+#if defined(MLK_USE_NATIVE_POLY_COMPRESS_D5)
+  int ret;
+  mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  ret = mlk_poly_compress_d5_native(r, a->coeffs);
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
+  {
+    return;
+  }
+#endif /* MLK_USE_NATIVE_POLY_COMPRESS_D5 */
+
+  mlk_poly_compress_d5_c(r, a);
+}
+
 /* Reference: Embedded into `polyvec_compress()` in the
  *            reference implementation, for ML-KEM-1024.
  *            - In contrast to the reference implementation, we assume
@@ -243,19 +283,10 @@ void mlk_poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
  *              The reference implementation works with coefficients
  *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
 MLK_INTERNAL_API
-void mlk_poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
-                           const mlk_poly *a)
+void mlk_poly_compress_d11_c(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
+                             const mlk_poly *a)
 {
   unsigned j;
-#if defined(MLK_USE_NATIVE_POLY_COMPRESS_D11)
-  int ret;
-  mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
-  ret = mlk_poly_compress_d11_native(r, a->coeffs);
-  if (ret == MLK_NATIVE_FUNC_SUCCESS)
-  {
-    return;
-  }
-#endif /* MLK_USE_NATIVE_POLY_COMPRESS_D11 */
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
   for (j = 0; j < MLKEM_N / 8; j++)
@@ -289,22 +320,30 @@ void mlk_poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
   }
 }
 
+MLK_INTERNAL_API
+void mlk_poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
+                           const mlk_poly *a)
+{
+#if defined(MLK_USE_NATIVE_POLY_COMPRESS_D11)
+  int ret;
+  mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  ret = mlk_poly_compress_d11_native(r, a->coeffs);
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
+  {
+    return;
+  }
+#endif /* MLK_USE_NATIVE_POLY_COMPRESS_D11 */
+
+  mlk_poly_compress_d11_c(r, a);
+}
+
 /* Reference: `poly_decompress()` in the reference implementation @[REF],
  *            for ML-KEM-1024. */
 MLK_INTERNAL_API
-void mlk_poly_decompress_d5(mlk_poly *r,
-                            const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
+void mlk_poly_decompress_d5_c(mlk_poly *r,
+                              const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
 {
   unsigned i;
-#if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D5)
-  int ret;
-  ret = mlk_poly_decompress_d5_native(r->coeffs, a);
-  if (ret == MLK_NATIVE_FUNC_SUCCESS)
-  {
-    mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
-    return;
-  }
-#endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D5 */
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(
     invariant(i <= MLKEM_N / 8)
@@ -345,22 +384,30 @@ void mlk_poly_decompress_d5(mlk_poly *r,
   mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 }
 
-/* Reference: Embedded into `polyvec_decompress()` in the
- *            reference implementation, for ML-KEM-1024. */
 MLK_INTERNAL_API
-void mlk_poly_decompress_d11(mlk_poly *r,
-                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
+void mlk_poly_decompress_d5(mlk_poly *r,
+                            const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
 {
-  unsigned j;
-#if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D11)
+#if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D5)
   int ret;
-  ret = mlk_poly_decompress_d11_native(r->coeffs, a);
+  ret = mlk_poly_decompress_d5_native(r->coeffs, a);
   if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
     mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
     return;
   }
-#endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D11 */
+#endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D5 */
+
+  mlk_poly_decompress_d5_c(r, a);
+}
+
+/* Reference: Embedded into `polyvec_decompress()` in the
+ *            reference implementation, for ML-KEM-1024. */
+MLK_INTERNAL_API
+void mlk_poly_decompress_d11_c(mlk_poly *r,
+                               const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
+{
+  unsigned j;
   for (j = 0; j < MLKEM_N / 8; j++)
   __loop__(
     invariant(j <= MLKEM_N / 8)
@@ -390,6 +437,23 @@ void mlk_poly_decompress_d11(mlk_poly *r,
   }
 
   mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+}
+
+MLK_INTERNAL_API
+void mlk_poly_decompress_d11(mlk_poly *r,
+                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
+{
+#if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D11)
+  int ret;
+  ret = mlk_poly_decompress_d11_native(r->coeffs, a);
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
+  {
+    mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
+    return;
+  }
+#endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D11 */
+
+  mlk_poly_decompress_d11_c(r, a);
 }
 
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */

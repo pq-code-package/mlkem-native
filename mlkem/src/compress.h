@@ -326,6 +326,19 @@ __contract__(
 ) { return ((u * MLKEM_Q) + 1024) >> 11; }
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
+#define mlk_poly_compress_d4_c MLK_NAMESPACE(poly_compress_d4_c)
+/*************************************************
+ * Name:        mlk_poly_compress_d4_c
+ *
+ * Description: C implementation of mlk_poly_compress_d4()
+ *
+ * Arguments:   - uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4]: output byte array
+ *              - const mlk_poly *a: pointer to input polynomial
+ **************************************************/
+MLK_INTERNAL_API
+void mlk_poly_compress_d4_c(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
+                            const mlk_poly *a);
+
 #define mlk_poly_compress_d4 MLK_NAMESPACE(poly_compress_d4)
 /*************************************************
  * Name:        mlk_poly_compress_d4
@@ -352,6 +365,19 @@ __contract__(
 MLK_INTERNAL_API
 void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
                           const mlk_poly *a);
+
+#define mlk_poly_compress_d10_c MLK_NAMESPACE(poly_compress_d10_c)
+/*************************************************
+ * Name:        mlk_poly_compress_d10_c
+ *
+ * Description: C implementation of mlk_poly_compress_d10()
+ *
+ * Arguments:   - uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10]: output byte array
+ *              - const mlk_poly *a: pointer to input polynomial
+ **************************************************/
+MLK_INTERNAL_API
+void mlk_poly_compress_d10_c(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
+                             const mlk_poly *a);
 
 #define mlk_poly_compress_d10 MLK_NAMESPACE(poly_compress_d10)
 /*************************************************
@@ -380,6 +406,20 @@ MLK_INTERNAL_API
 void mlk_poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
                            const mlk_poly *a);
 
+#define mlk_poly_decompress_d4_c MLK_NAMESPACE(poly_decompress_d4_c)
+/*************************************************
+ * Name:        mlk_poly_decompress_d4_c
+ *
+ * Description: C implementation of mlk_poly_decompress_d4()
+ *
+ * Arguments:   - mlk_poly *r: pointer to output polynomial
+ *              - const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]: input byte
+ *                array
+ **************************************************/
+MLK_INTERNAL_API
+void mlk_poly_decompress_d4_c(mlk_poly *r,
+                              const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]);
+
 #define mlk_poly_decompress_d4 MLK_NAMESPACE(poly_decompress_d4)
 /*************************************************
  * Name:        mlk_poly_decompress_d4
@@ -407,6 +447,20 @@ void mlk_poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
 MLK_INTERNAL_API
 void mlk_poly_decompress_d4(mlk_poly *r,
                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]);
+
+#define mlk_poly_decompress_d10_c MLK_NAMESPACE(poly_decompress_d10_c)
+/*************************************************
+ * Name:        mlk_poly_decompress_d10_c
+ *
+ * Description: C implementation of mlk_poly_decompress_d10()
+ *
+ * Arguments:   - mlk_poly *r: pointer to output polynomial
+ *              - const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10]: input byte
+ *                array
+ **************************************************/
+MLK_INTERNAL_API
+void mlk_poly_decompress_d10_c(mlk_poly *r,
+                               const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10]);
 
 #define mlk_poly_decompress_d10 MLK_NAMESPACE(poly_decompress_d10)
 /*************************************************
@@ -438,6 +492,19 @@ void mlk_poly_decompress_d10(mlk_poly *r,
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4
+#define mlk_poly_compress_d5_c MLK_NAMESPACE(poly_compress_d5_c)
+/*************************************************
+ * Name:        mlk_poly_compress_d5_c
+ *
+ * Description: C implementation of mlk_poly_compress_d5()
+ *
+ * Arguments:   - uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5]: output byte array
+ *              - const mlk_poly *a: pointer to input polynomial
+ **************************************************/
+MLK_INTERNAL_API
+void mlk_poly_compress_d5_c(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
+                            const mlk_poly *a);
+
 #define mlk_poly_compress_d5 MLK_NAMESPACE(poly_compress_d5)
 /*************************************************
  * Name:        mlk_poly_compress_d5
@@ -464,6 +531,19 @@ void mlk_poly_decompress_d10(mlk_poly *r,
 MLK_INTERNAL_API
 void mlk_poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
                           const mlk_poly *a);
+
+#define mlk_poly_compress_d11_c MLK_NAMESPACE(poly_compress_d11_c)
+/*************************************************
+ * Name:        mlk_poly_compress_d11_c
+ *
+ * Description: C implementation of mlk_poly_compress_d11()
+ *
+ * Arguments:   - uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11]: output byte array
+ *              - const mlk_poly *a: pointer to input polynomial
+ **************************************************/
+MLK_INTERNAL_API
+void mlk_poly_compress_d11_c(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
+                             const mlk_poly *a);
 
 #define mlk_poly_compress_d11 MLK_NAMESPACE(poly_compress_d11)
 /*************************************************
@@ -492,6 +572,20 @@ MLK_INTERNAL_API
 void mlk_poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
                            const mlk_poly *a);
 
+#define mlk_poly_decompress_d5_c MLK_NAMESPACE(poly_decompress_d5_c)
+/*************************************************
+ * Name:        mlk_poly_decompress_d5_c
+ *
+ * Description: C implementation of mlk_poly_decompress_d5()
+ *
+ * Arguments:   - mlk_poly *r: pointer to output polynomial
+ *              - const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5]: input byte
+ *                array
+ **************************************************/
+MLK_INTERNAL_API
+void mlk_poly_decompress_d5_c(mlk_poly *r,
+                              const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5]);
+
 #define mlk_poly_decompress_d5 MLK_NAMESPACE(poly_decompress_d5)
 /*************************************************
  * Name:        mlk_poly_decompress_d5
@@ -519,6 +613,20 @@ void mlk_poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
 MLK_INTERNAL_API
 void mlk_poly_decompress_d5(mlk_poly *r,
                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5]);
+
+#define mlk_poly_decompress_d11_c MLK_NAMESPACE(poly_decompress_d11_c)
+/*************************************************
+ * Name:        mlk_poly_decompress_d11_c
+ *
+ * Description: C implementation of mlk_poly_decompress_d11()
+ *
+ * Arguments:   - mlk_poly *r: pointer to output polynomial
+ *              - const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]: input byte
+ *                array
+ **************************************************/
+MLK_INTERNAL_API
+void mlk_poly_decompress_d11_c(mlk_poly *r,
+                               const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]);
 
 #define mlk_poly_decompress_d11 MLK_NAMESPACE(poly_decompress_d11)
 /*************************************************
