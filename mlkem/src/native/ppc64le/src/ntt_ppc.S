@@ -195,7 +195,6 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
 	lxv	32+V_QINV, QINV_OFFSET(4)
 
 .align 4
-#__Len128:
 	#
 	# Compute coefficients of the NTT based on the following loop.
 	#   for (len = 128; len ≥ 2; len =  len/2)
@@ -220,7 +219,6 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
 	Write_One
 
 .align 4
-#__Len64:
 	#
 	# 2. len = 64, start = 0, 128
 	# k += 2
@@ -244,7 +242,6 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
 	Write_One
 
 .align 4
-#__Len32:
 	#
 	# 3. len = 32, start = 0, 64, 128, 192
 	# k += 4
@@ -277,7 +274,6 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
 	Write_One
 
 .align 4
-#__Len16:
 	#
 	# 4. len = 16, start = 0, 32, 64,,...160, 192, 224
 	# k += 8
@@ -299,7 +295,6 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
 	Write_One
 
 .align 4
-#__Len8:
 	#
 	# 5. len = 8, start = 0, 16, 32, 48,...208, 224, 240 
 	# k += 16

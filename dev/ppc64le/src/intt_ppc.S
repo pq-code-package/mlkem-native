@@ -303,7 +303,6 @@ MLK_ASM_FN_SYMBOL(intt_ppc)
 	xxlor	7, 32+9, 32+9	# V_25 syore at vs7
 
 .align 4
-#__Len2:
 	#
 	# 1. len = 2, start = 0, 4, 8, 12,...244, 248, 252 
 	# Update zetas vectors, each vector has 2 zetas
@@ -340,7 +339,6 @@ intt_ppc__Loop2:
 	bdnz	intt_ppc__Loop2
 
 .align 4
-#__Len4:
 	#
 	# 2. len = 4, start = 0, 8, 16, 24,...232, 240, 248 
 	addi	14, 4, IZETA_NTT_OFFSET63
@@ -375,7 +373,6 @@ intt_ppc__Loop4:
 	bdnz	intt_ppc__Loop4
 
 .align 4
-#__Len8:
 	# 3. len = 8, start = 0, 16, 32, 48,...208, 224, 240 
 	#addi	14, 14, 512
 	li	7, 16
@@ -417,7 +414,6 @@ intt_ppc__Loop4:
 	Write_M4C 32+13, 32+18, 32+23, 32+28
 
 .align 4
-#__Len16:
 	#
 	# 4. len = 16, start = 0, 32, 64,,...160, 192, 224
 	#addi	14, 14, 768
@@ -461,7 +457,6 @@ intt_ppc__Loop4:
 	Write_M4C 32+13, 32+18, 32+23, 32+28
 
 .align 4
-#__Len32:
         #
         # 5. len = 32, start = 0, 64, 128, 192
 	#addi	14, 14, 896
@@ -508,7 +503,6 @@ intt_ppc__Loop4:
 	Write_M4C 32+13, 32+18, 32+23, 32+28
 
 .align 4
-#__Len64:
 	#
 	# 6. len = 64, start = 0, 128
 	#addi	14, 14, 960
@@ -552,7 +546,6 @@ intt_ppc__Loop4:
 	Write_M4C 32+13, 32+18, 32+23, 32+28
 
 .align 4
-#__Len128:
 	# 7. len = 128, start = 0
 	#
 	#addi	14, 14, 992
