@@ -25,6 +25,11 @@ jobs:
            arch: mac
            mode: native
            nix_shell: ci
+         - runner: macos-26
+           name: 'MacOS 26 (aarch64)'
+           arch: mac
+           mode: native
+           nix_shell: ci
          - runner: pqcp-arm64
            name: 'ubuntu-latest (aarch64)'
            arch: aarch64
