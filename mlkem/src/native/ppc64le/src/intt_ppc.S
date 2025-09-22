@@ -291,7 +291,6 @@ MLK_ASM_FN_SYMBOL(intt_ppc)
 	lxv	32+V20159, C20159_OFFSET(4)	# V20159
 	lxv	7, 0(4)	# V_25
 
-	#xxspltiw 8, 26		# for power9 and above
 	vspltisw 8, 13
 	vadduwm  8, 8, 8
 	xxlor	8, 32+8, 32+8	# V_26 store at vs8

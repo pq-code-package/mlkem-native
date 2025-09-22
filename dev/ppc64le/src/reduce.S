@@ -186,7 +186,7 @@ MLK_ASM_FN_SYMBOL(reduce_ppc)
 	#
 .align 4
 	addi	3, 3, -512
-	xxspltib 32+9 ,0
+	vxor	9, 9, 9
 	vspltish 10, 15
 	vmr	11, V_MKQ
 
