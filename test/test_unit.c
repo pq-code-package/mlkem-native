@@ -117,6 +117,7 @@ static void generate_i16_array_random(int16_t *data, size_t len)
   }
 }
 
+#if defined(MLK_USE_NATIVE_POLY_TOBYTES)
 static int compare_u8_arrays(const uint8_t *a, const uint8_t *b, size_t len,
                              const char *test_name)
 {
@@ -136,6 +137,7 @@ static int compare_u8_arrays(const uint8_t *a, const uint8_t *b, size_t len,
   }
   return 1;
 }
+#endif /* MLK_USE_NATIVE_POLY_TOBYTES */
 
 static int compare_i16_arrays(const int16_t *a, const int16_t *b, size_t len,
                               const char *test_name, const int16_t *input)
