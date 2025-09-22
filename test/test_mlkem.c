@@ -142,76 +142,6 @@ static int test_invalid_ciphertext(void)
   return 0;
 }
 
-/* This test invokes the polynomial (de)compression routines
- * with minimally sized buffers. When run with address sanitization,
- * this ensures that no buffer overflow is happening. This is of interest
- * because the compressed buffers sometimes have unaligned lengths and
- * are therefore at risk of being overflowed by vectorized code. */
-static int test_poly_compress_no_overflow(void)
-{
-#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
-  {
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4];
-    mlk_poly s;
-    memset((uint8_t *)&s, 0, sizeof(s));
-    mlk_poly_compress_d4(r, &s);
-  }
-
-  {
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4];
-    mlk_poly s;
-    memset(r, 0, sizeof(r));
-    mlk_poly_decompress_d4(&s, r);
-  }
-
-  {
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10];
-    mlk_poly s;
-    memset((uint8_t *)&s, 0, sizeof(s));
-    mlk_poly_compress_d10(r, &s);
-  }
-
-  {
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10];
-    mlk_poly s;
-    memset(r, 0, sizeof(r));
-    mlk_poly_decompress_d10(&s, r);
-  }
-#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
-
-#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4
-  {
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5];
-    mlk_poly s;
-    memset((uint8_t *)&s, 0, sizeof(s));
-    mlk_poly_compress_d5(r, &s);
-  }
-
-  {
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5];
-    mlk_poly s;
-    memset(r, 0, sizeof(r));
-    mlk_poly_decompress_d5(&s, r);
-  }
-
-  {
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11];
-    mlk_poly s;
-    memset((uint8_t *)&s, 0, sizeof(s));
-    mlk_poly_compress_d11(r, &s);
-  }
-
-  {
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11];
-    mlk_poly s;
-    memset(r, 0, sizeof(r));
-    mlk_poly_decompress_d11(&s, r);
-  }
-#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
-
-  return 0;
-}
-
 int main(void)
 {
   unsigned i;
@@ -227,7 +157,6 @@ int main(void)
     CHECK(test_invalid_sk_a() == 0);
     CHECK(test_invalid_sk_b() == 0);
     CHECK(test_invalid_ciphertext() == 0);
-    CHECK(test_poly_compress_no_overflow() == 0);
   }
 
   printf("CRYPTO_SECRETKEYBYTES:  %d\n", CRYPTO_SECRETKEYBYTES);

@@ -29,8 +29,10 @@
  *              in that it adds the offset and always expects the base of the
  *              target buffer. This avoids shifting the buffer base in the
  *              caller, which appears tricky to reason about. */
-static unsigned mlk_rej_uniform_c(int16_t *r, unsigned target, unsigned offset,
-                                  const uint8_t *buf, unsigned buflen)
+MLK_STATIC_TESTABLE unsigned mlk_rej_uniform_c(int16_t *r, unsigned target,
+                                               unsigned offset,
+                                               const uint8_t *buf,
+                                               unsigned buflen)
 __contract__(
   requires(offset <= target && target <= 4096 && buflen <= 4096 && buflen % 3 == 0)
   requires(memory_no_alias(r, sizeof(int16_t) * target))

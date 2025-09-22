@@ -148,7 +148,7 @@ void mlk_polyvec_invntt_tomont(mlk_polyvec r)
  *              at the end. The reference implementation uses 2 * MLKEM_K
  *              more modular reductions since it reduces after every modular
  *              multiplication. */
-static void mlk_polyvec_basemul_acc_montgomery_cached_c(
+MLK_STATIC_TESTABLE void mlk_polyvec_basemul_acc_montgomery_cached_c(
     mlk_poly *r, const mlk_polyvec a, const mlk_polyvec b,
     const mlk_polyvec_mulcache b_cache)
 __contract__(
