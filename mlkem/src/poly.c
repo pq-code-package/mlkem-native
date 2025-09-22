@@ -114,7 +114,7 @@ __contract__(
 }
 
 /* Reference: `poly_tomont()` in the reference implementation @[REF]. */
-static void mlk_poly_tomont_c(mlk_poly *r)
+MLK_STATIC_TESTABLE void mlk_poly_tomont_c(mlk_poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_poly)))
   assigns(memory_slice(r, sizeof(mlk_poly)))
@@ -188,7 +188,7 @@ __contract__(
  *              here to go from signed to unsigned representatives.
  *              This conditional addition is then dropped from all
  *              polynomial compression functions instead (see `compress.c`). */
-static void mlk_poly_reduce_c(mlk_poly *r)
+MLK_STATIC_TESTABLE void mlk_poly_reduce_c(mlk_poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_poly)))
   assigns(memory_slice(r, sizeof(mlk_poly)))
@@ -267,7 +267,8 @@ void mlk_poly_sub(mlk_poly *r, const mlk_poly *b)
  *            - The reference implementation does not use a
  *              multiplication cache ('mulcache'). This idea originates
  *              from @[NeonNTT] and is used at the C level here. */
-static void mlk_poly_mulcache_compute_c(mlk_poly_mulcache *x, const mlk_poly *a)
+MLK_STATIC_TESTABLE void mlk_poly_mulcache_compute_c(mlk_poly_mulcache *x,
+                                                     const mlk_poly *a)
 __contract__(
   requires(memory_no_alias(x, sizeof(mlk_poly_mulcache)))
   requires(memory_no_alias(a, sizeof(mlk_poly)))
@@ -416,7 +417,7 @@ __contract__(
 /* Reference: `ntt()` in the reference implementation @[REF].
  * - Iterate over `layer` instead of `len` in the outer loop
  *   to simplify computation of zeta index. */
-static void mlk_poly_ntt_c(mlk_poly *p)
+MLK_STATIC_TESTABLE void mlk_poly_ntt_c(mlk_poly *p)
 __contract__(
   requires(memory_no_alias(p, sizeof(mlk_poly)))
   requires(array_abs_bound(p->coeffs, 0, MLKEM_N, MLKEM_Q))
@@ -506,7 +507,7 @@ __contract__(
  *              while the reference implementation normalizes at
  *              the end. This allows us to drop a call to `poly_reduce()`
  *              from the base multiplication. */
-static void mlk_poly_invntt_tomont_c(mlk_poly *p)
+MLK_STATIC_TESTABLE void mlk_poly_invntt_tomont_c(mlk_poly *p)
 __contract__(
   requires(memory_no_alias(p, sizeof(mlk_poly)))
   assigns(memory_slice(p, sizeof(mlk_poly)))

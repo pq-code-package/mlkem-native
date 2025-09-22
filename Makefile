@@ -62,6 +62,14 @@ run_func_1024: func_1024
 	$(W) $(MLKEM1024_DIR)/bin/test_mlkem1024
 run_func: run_func_512 run_func_768 run_func_1024
 
+run_unit_512: unit_512
+	$(W) $(MLKEM512_DIR)/bin/test_unit512
+run_unit_768: unit_768
+	$(W) $(MLKEM768_DIR)/bin/test_unit768
+run_unit_1024: unit_1024
+	$(W) $(MLKEM1024_DIR)/bin/test_unit1024
+run_unit: run_unit_512 run_unit_768 run_unit_1024
+
 run_acvp: acvp
 	python3 ./test/acvp_client.py $(if $(ACVP_VERSION),--version $(ACVP_VERSION))
 
@@ -72,6 +80,14 @@ func_768:  $(MLKEM768_DIR)/bin/test_mlkem768
 func_1024: $(MLKEM1024_DIR)/bin/test_mlkem1024
 	$(Q)echo "  FUNC       ML-KEM-1024:  $^"
 func: func_512 func_768 func_1024
+
+unit_512:  $(MLKEM512_DIR)/bin/test_unit512
+	$(Q)echo "  UNIT       ML-KEM-512:   $^"
+unit_768:  $(MLKEM768_DIR)/bin/test_unit768
+	$(Q)echo "  UNIT       ML-KEM-768:   $^"
+unit_1024: $(MLKEM1024_DIR)/bin/test_unit1024
+	$(Q)echo "  UNIT       ML-KEM-1024:  $^"
+unit: unit_512 unit_768 unit_1024
 
 kat_512: $(MLKEM512_DIR)/bin/gen_KAT512
 	$(Q)echo "  KAT        ML-KEM-512:   $^"
