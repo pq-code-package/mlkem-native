@@ -386,6 +386,10 @@ static vint16m2_t mlk_rv64v_intt2(vint16m2_t vp, vint16m1_t cz)
   vp = __riscv_vrgatherei16_vv_i16m2(vp, v2p0, vl2);
   t0 = __riscv_vget_v_i16m2_i16m1(vp, 0);
   t1 = __riscv_vget_v_i16m2_i16m1(vp, 1);
+
+  /*	initial reduction due to lack of input assumptions on INTT */
+  t0 = fq_mul_vx(t0, MLK_RVV_MONT_R1, vl);
+  t1 = fq_mul_vx(t1, MLK_RVV_MONT_R1, vl);
   c0 = __riscv_vrgather_vv_i16m1(cz, cs2, vl);
   MLK_RVV_BFLY_RV(t0, t1, vt, c0, vl);
 
@@ -411,9 +415,8 @@ static vint16m2_t mlk_rv64v_intt2(vint16m2_t vp, vint16m1_t cz)
   t0 = __riscv_vget_v_i16m2_i16m1(vp, 0);
   t1 = __riscv_vget_v_i16m2_i16m1(vp, 1);
 
-  /*    normalize   */
+  /*    normalize first element  */
   t0 = fq_mulq_vx(t0, MLK_RVV_MONT_R1, vl);
-  t1 = fq_mulq_vx(t1, MLK_RVV_MONT_R1, vl);
 
   vp = __riscv_vcreate_v_i16m1_i16m2(t0, t1);
 
