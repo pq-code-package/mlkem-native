@@ -34,8 +34,8 @@
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
  *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
-static void mlk_poly_compress_d4_c(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
-                                   const mlk_poly *a)
+MLK_STATIC_TESTABLE void mlk_poly_compress_d4_c(
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const mlk_poly *a)
 {
   unsigned i;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
@@ -83,8 +83,8 @@ void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
  *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
-static void mlk_poly_compress_d10_c(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
-                                    const mlk_poly *a)
+MLK_STATIC_TESTABLE void mlk_poly_compress_d10_c(
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const mlk_poly *a)
 {
   unsigned j;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
@@ -132,7 +132,7 @@ void mlk_poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
 
 /* Reference: `poly_decompress()` in the reference implementation @[REF],
  *            for ML-KEM-{512,768}. */
-static void mlk_poly_decompress_d4_c(
+MLK_STATIC_TESTABLE void mlk_poly_decompress_d4_c(
     mlk_poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
 {
   unsigned i;
@@ -167,7 +167,7 @@ void mlk_poly_decompress_d4(mlk_poly *r,
 
 /* Reference: Embedded into `polyvec_decompress()` in the
  *            reference implementation, for ML-KEM-{512,768}. */
-static void mlk_poly_decompress_d10_c(
+MLK_STATIC_TESTABLE void mlk_poly_decompress_d10_c(
     mlk_poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
 {
   unsigned j;
@@ -222,8 +222,8 @@ void mlk_poly_decompress_d10(mlk_poly *r,
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
  *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
-static void mlk_poly_compress_d5_c(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
-                                   const mlk_poly *a)
+MLK_STATIC_TESTABLE void mlk_poly_compress_d5_c(
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const mlk_poly *a)
 {
   unsigned i;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
@@ -277,8 +277,8 @@ void mlk_poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
  *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
-static void mlk_poly_compress_d11_c(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
-                                    const mlk_poly *a)
+MLK_STATIC_TESTABLE void mlk_poly_compress_d11_c(
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const mlk_poly *a)
 {
   unsigned j;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
@@ -333,7 +333,7 @@ void mlk_poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
 
 /* Reference: `poly_decompress()` in the reference implementation @[REF],
  *            for ML-KEM-1024. */
-static void mlk_poly_decompress_d5_c(
+MLK_STATIC_TESTABLE void mlk_poly_decompress_d5_c(
     mlk_poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
 {
   unsigned i;
@@ -396,7 +396,7 @@ void mlk_poly_decompress_d5(mlk_poly *r,
 
 /* Reference: Embedded into `polyvec_decompress()` in the
  *            reference implementation, for ML-KEM-1024. */
-static void mlk_poly_decompress_d11_c(
+MLK_STATIC_TESTABLE void mlk_poly_decompress_d11_c(
     mlk_poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
 {
   unsigned j;
@@ -455,7 +455,8 @@ void mlk_poly_decompress_d11(mlk_poly *r,
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
  *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
-static void mlk_poly_tobytes_c(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
+MLK_STATIC_TESTABLE void mlk_poly_tobytes_c(uint8_t r[MLKEM_POLYBYTES],
+                                            const mlk_poly *a)
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYBYTES))
   requires(memory_no_alias(a, sizeof(mlk_poly)))
@@ -509,7 +510,8 @@ void mlk_poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
 }
 
 /* Reference: `poly_frombytes()` in the reference implementation @[REF]. */
-static void mlk_poly_frombytes_c(mlk_poly *r, const uint8_t a[MLKEM_POLYBYTES])
+MLK_STATIC_TESTABLE void mlk_poly_frombytes_c(mlk_poly *r,
+                                              const uint8_t a[MLKEM_POLYBYTES])
 __contract__(
   requires(memory_no_alias(a, MLKEM_POLYBYTES))
   requires(memory_no_alias(r, sizeof(mlk_poly)))

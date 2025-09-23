@@ -209,6 +209,7 @@ class TEST_TYPES(Enum):
     STACK = 15
     SIZE = 16
     BASIC_DETERMINISTIC = 17
+    UNIT = 18
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -278,6 +279,8 @@ class TEST_TYPES(Enum):
             return "Example (multilevel build, native)"
         if self == TEST_TYPES.SIZE:
             return "Measurement Code Size"
+        if self == TEST_TYPES.UNIT:
+            return "Unit Test"
 
     def make_dir(self):
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
@@ -337,6 +340,8 @@ class TEST_TYPES(Enum):
             return ""
         if self == TEST_TYPES.SIZE:
             return "size"
+        if self == TEST_TYPES.UNIT:
+            return "unit"
 
     def make_run_target(self, scheme):
         t = self.make_target()
@@ -618,6 +623,19 @@ class Tests:
 
         self.check_fail()
 
+    def unit(self):
+        def _unit(opt):
+            self._compile_schemes(TEST_TYPES.UNIT, opt)
+            if self.args.run:
+                self._run_schemes(TEST_TYPES.UNIT, opt)
+
+        if self.do_no_opt():
+            _unit(False)
+        if self.do_opt():
+            _unit(True)
+
+        self.check_fail()
+
     def acvp(self):
         def _acvp(opt):
             self._compile_schemes(TEST_TYPES.ACVP, opt)
@@ -751,6 +769,7 @@ class Tests:
         acvp = self.args.acvp
         examples = self.args.examples
         stack = self.args.stack
+        unit = self.args.unit
 
         def _all(opt):
             if func is True:
@@ -761,6 +780,8 @@ class Tests:
                 self._compile_schemes(TEST_TYPES.ACVP, opt)
             if stack is True:
                 self._compile_schemes(TEST_TYPES.STACK, opt)
+            if unit is True:
+                self._compile_schemes(TEST_TYPES.UNIT, opt)
 
             if self.args.run is False:
                 return
@@ -773,6 +794,8 @@ class Tests:
                 self._run_scheme(TEST_TYPES.ACVP, opt, None)
             if stack is True:
                 self._run_schemes(TEST_TYPES.STACK, opt, suppress_output=False)
+            if unit is True:
+                self._run_schemes(TEST_TYPES.UNIT, opt)
 
         if self.do_no_opt():
             _all(False)
@@ -1066,6 +1089,14 @@ def cli():
         "--no-acvp", action="store_false", dest="acvp", help="Do not run acvp test"
     )
 
+    unit_group = all_parser.add_mutually_exclusive_group()
+    unit_group.add_argument(
+        "--unit", action="store_true", dest="unit", help="Run unit test", default=True
+    )
+    unit_group.add_argument(
+        "--no-unit", action="store_false", dest="unit", help="Do not run unit test"
+    )
+
     examples_group = all_parser.add_mutually_exclusive_group()
     examples_group.add_argument(
         "--examples",
@@ -1286,6 +1317,13 @@ def cli():
         "kat", help="Run the kat tests for all parameter sets", parents=[common_parser]
     )
 
+    # unit arguments
+    unit_parser = cmd_subparsers.add_parser(
+        "unit",
+        help="Run the unit tests for all parameter sets",
+        parents=[common_parser],
+    )
+
     # stack arguments
     stack_parser = cmd_subparsers.add_parser(
         "stack",
@@ -1330,6 +1368,8 @@ def cli():
         Tests(args).func()
     elif args.cmd == "kat":
         Tests(args).kat()
+    elif args.cmd == "unit":
+        Tests(args).unit()
     elif args.cmd == "stack":
         Tests(args).stack()
     elif args.cmd == "size":
