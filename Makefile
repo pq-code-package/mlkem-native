@@ -152,12 +152,10 @@ run_bench_768: bench_768
 	$(W) $(MLKEM768_DIR)/bin/bench_mlkem768
 run_bench_1024: bench_1024
 	$(W) $(MLKEM1024_DIR)/bin/bench_mlkem1024
-
-# Use .WAIT to prevent parallel execution when -j is passed
-run_bench: \
-	run_bench_512 .WAIT\
-	run_bench_768 .WAIT\
-	run_bench_1024
+run_bench: bench
+	$(W) $(MLKEM512_DIR)/bin/bench_mlkem512
+	$(W) $(MLKEM768_DIR)/bin/bench_mlkem768
+	$(W) $(MLKEM1024_DIR)/bin/bench_mlkem1024
 
 bench_components_512: check-defined-CYCLES \
 	$(MLKEM512_DIR)/bin/bench_components_mlkem512
@@ -173,13 +171,10 @@ run_bench_components_768: bench_components_768
 	$(W) $(MLKEM768_DIR)/bin/bench_components_mlkem768
 run_bench_components_1024: bench_components_1024
 	$(W) $(MLKEM1024_DIR)/bin/bench_components_mlkem1024
-
-# Use .WAIT to prevent parallel execution when -j is passed
-run_bench_components: \
-	run_bench_components_512 .WAIT\
-	run_bench_components_768 .WAIT\
-	run_bench_components_1024
-
+run_bench_components: bench_components
+	$(W) $(MLKEM512_DIR)/bin/bench_components_mlkem512
+	$(W) $(MLKEM768_DIR)/bin/bench_components_mlkem768
+	$(W) $(MLKEM1024_DIR)/bin/bench_components_mlkem1024
 
 size_512: $(BUILD_DIR)/libmlkem512.a
 size_768: $(BUILD_DIR)/libmlkem768.a
