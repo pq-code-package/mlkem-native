@@ -262,6 +262,21 @@ CBMC_FLAG_UNWINDING_ASSERTIONS ?= # set to --no-unwinding-assertions to disable
 CBMC_DEFAULT_UNWIND ?= --unwind 1
 CBMC_FLAG_FLUSH ?= --flush
 
+# Determine SMT back-end and prover combination chosen by the user
+ifeq ($(findstring --smt2,$(CBMCFLAGS)),--smt2) # User has chosen SMT2 (which defaults to Z3)
+CBMCFLAGS := $(subst --smt2,,$(CBMCFLAGS)) # Remove --smt2 from CBMCFLAGS
+BACKEND := --smt2
+SMT_FORMAT := --z3
+else ifeq ($(findstring --bitwuzla,$(CBMCFLAGS)),--bitwuzla) # User has chosen Bitwuzla
+CBMCFLAGS := $(subst --bitwuzla,,$(CBMCFLAGS)) # Remove --bitwuzla from CBMCFLAGS
+BACKEND := --bitwuzla
+SMT_FORMAT := --bitwuzla
+else ifeq ($(findstring --cvc5,$(CBMCFLAGS)),--cvc5) # User has chosen cvc5
+CBMCFLAGS := $(subst --cvc5,,$(CBMCFLAGS)) # Remove --cvc5 from CBMCFLAGS
+BACKEND := --cvc5
+SMT_FORMAT := --cvc5
+endif
+
 # CBMC flags used for property checking and coverage checking
 
 CBMCFLAGS += $(CBMC_FLAG_FLUSH)
@@ -859,7 +874,7 @@ $(LOGDIR)/result.xml: $(HARNESS_GOTO).goto
 	$(LITANI) add-job \
 	  $(POOL) \
 	  --command \
-	    '$(CBMC) $(CBMC_VERBOSITY) $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --trace --xml-ui $<' \
+	  '$(CBMC) $(CBMC_VERBOSITY) $(BACKEND) $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --trace --xml-ui $<' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --ci-stage test \
@@ -876,7 +891,7 @@ $(LOGDIR)/result.txt: $(HARNESS_GOTO).goto
 	$(LITANI) add-job \
 	  $(POOL) \
 	  --command \
-	    '$(CBMC) $(CBMC_VERBOSITY) $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --trace $<' \
+	    '$(CBMC) $(CBMC_VERBOSITY) $(BACKEND) $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --trace $<' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --ci-stage test \
@@ -889,10 +904,82 @@ $(LOGDIR)/result.txt: $(HARNESS_GOTO).goto
 	  --stderr-file $(LOGDIR)/result-err-log.txt \
 	  --description "$(PROOF_UID): checking safety properties"
 
+# Force SMT generation to file using whatever backend (one of Z3, Bitwuzla, or cvc5) that the user specified
+$(HARNESS_GOTO).smt2: $(HARNESS_GOTO).goto
+	$(LITANI) add-job \
+	  $(POOL) \
+	  --command \
+	    '$(CBMC) $(CBMC_VERBOSITY) $(BACKEND) $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --outfile $@ $(SMT_FORMAT) $<' \
+	  --inputs $^ \
+	  --outputs $@ \
+	  --ci-stage test \
+	  --stdout-file $(LOGDIR)/smt2-log.txt \
+	  $(MEMORY_PROFILING) \
+	  --ignore-returns 10 \
+	  --timeout $(CBMC_TIMEOUT) \
+	  --pipeline-name "$(PROOF_UID)" \
+	  --tags "stats-group:safety checks" \
+	  --stderr-file $(LOGDIR)/smt2-err-log.txt \
+	  --description "$(PROOF_UID): checking safety properties (SMT to file only)"
+
+# Force SMT generation to file, but for Z3, ignoring whatever back-end the user specified
+$(HARNESS_GOTO).smtz: $(HARNESS_GOTO).goto
+	$(LITANI) add-job \
+	  $(POOL) \
+	  --command \
+	    '$(CBMC) $(CBMC_VERBOSITY) --smt2 $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --outfile $@ --z3 $<' \
+	  --inputs $^ \
+	  --outputs $@ \
+	  --ci-stage test \
+	  --stdout-file $(LOGDIR)/smtz-log.txt \
+	  $(MEMORY_PROFILING) \
+	  --ignore-returns 10 \
+	  --timeout $(CBMC_TIMEOUT) \
+	  --pipeline-name "$(PROOF_UID)" \
+	  --tags "stats-group:safety checks" \
+	  --stderr-file $(LOGDIR)/smtz-err-log.txt \
+	  --description "$(PROOF_UID): checking safety properties (SMT for Z3 only)"
+
+# Force SMT generation to file, but for Bitwuzla, ignoring whatever back-end the user specified
+$(HARNESS_GOTO).smtb: $(HARNESS_GOTO).goto
+	$(LITANI) add-job \
+	  $(POOL) \
+	  --command \
+	    '$(CBMC) $(CBMC_VERBOSITY) --bitwuzla $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --outfile $@ --bitwuzla $<' \
+	  --inputs $^ \
+	  --outputs $@ \
+	  --ci-stage test \
+	  --stdout-file $(LOGDIR)/smtb-log.txt \
+	  $(MEMORY_PROFILING) \
+	  --ignore-returns 10 \
+	  --timeout $(CBMC_TIMEOUT) \
+	  --pipeline-name "$(PROOF_UID)" \
+	  --tags "stats-group:safety checks" \
+	  --stderr-file $(LOGDIR)/smtb-err-log.txt \
+	  --description "$(PROOF_UID): checking safety properties (SMT for Bitwuzla only)"
+
+# Force SMT generation to file, but for cvc5, ignoring whatever back-end the user specified
+$(HARNESS_GOTO).smtc: $(HARNESS_GOTO).goto
+	$(LITANI) add-job \
+	  $(POOL) \
+	  --command \
+	    '$(CBMC) $(CBMC_VERBOSITY) --cvc5 $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --outfile $@ --cvc5 $<' \
+	  --inputs $^ \
+	  --outputs $@ \
+	  --ci-stage test \
+	  --stdout-file $(LOGDIR)/smtc-log.txt \
+	  $(MEMORY_PROFILING) \
+	  --ignore-returns 10 \
+	  --timeout $(CBMC_TIMEOUT) \
+	  --pipeline-name "$(PROOF_UID)" \
+	  --tags "stats-group:safety checks" \
+	  --stderr-file $(LOGDIR)/smtc-err-log.txt \
+	  --description "$(PROOF_UID): checking safety properties (SMT for cvc5 only)"
+
 $(LOGDIR)/property.xml: $(HARNESS_GOTO).goto
 	$(LITANI) add-job \
 	  --command \
-	    '$(CBMC) $(CBMC_VERBOSITY) $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --show-properties --xml-ui $<' \
+	    '$(CBMC) $(CBMC_VERBOSITY) $(BACKEND) $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --show-properties --xml-ui $<' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --ci-stage test \
@@ -906,7 +993,7 @@ $(LOGDIR)/coverage.xml: $(HARNESS_GOTO).goto
 	$(LITANI) add-job \
 	  $(POOL) \
 	  --command \
-	    '$(CBMC) $(CBMC_VERBOSITY) $(CBMCFLAGS) $(COVERFLAGS) --cover location --xml-ui $<' \
+	    '$(CBMC) $(CBMC_VERBOSITY) $(BACKEND) $(CBMCFLAGS) $(COVERFLAGS) --cover location --xml-ui $<' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --ci-stage test \
@@ -971,6 +1058,50 @@ result:
 	tail -4 $(LOGDIR)/result.txt
 	-grep FAILURE $(LOGDIR)/result.txt
 
+_smt: $(HARNESS_GOTO).smt2
+smt:
+	@ echo Running 'litani init'
+	$(LITANI) init $(INIT_POOLS) --project $(PROJECT_NAME)
+	@ echo Running 'litani add-job'
+	$(MAKE) -B _smt
+	@ echo Running 'litani build'
+	$(LITANI) run-build
+
+_smtz: $(HARNESS_GOTO).smtz
+smtz:
+	@ echo Running 'litani init'
+	$(LITANI) init $(INIT_POOLS) --project $(PROJECT_NAME)
+	@ echo Running 'litani add-job'
+	$(MAKE) -B _smtz
+	@ echo Running 'litani build'
+	$(LITANI) run-build
+
+_smtb: $(HARNESS_GOTO).smtb
+smtb:
+	@ echo Running 'litani init'
+	$(LITANI) init $(INIT_POOLS) --project $(PROJECT_NAME)
+	@ echo Running 'litani add-job'
+	$(MAKE) -B _smtb
+	@ echo Running 'litani build'
+	$(LITANI) run-build
+
+_smtc: $(HARNESS_GOTO).smtc
+smtc:
+	@ echo Running 'litani init'
+	$(LITANI) init $(INIT_POOLS) --project $(PROJECT_NAME)
+	@ echo Running 'litani add-job'
+	$(MAKE) -B _smtc
+	@ echo Running 'litani build'
+	$(LITANI) run-build
+
+_smtall: $(HARNESS_GOTO).smtz $(HARNESS_GOTO).smtb $(HARNESS_GOTO).smtc
+smtall:
+	@ echo Running 'litani init'
+	$(LITANI) init $(INIT_POOLS) --project $(PROJECT_NAME)
+	@ echo Running 'litani add-job'
+	$(MAKE) -B _smtall
+	@ echo Running 'litani build'
+	$(LITANI) run-build
 
 _property: $(LOGDIR)/property.xml
 property:
