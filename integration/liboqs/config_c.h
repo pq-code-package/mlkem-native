@@ -15,6 +15,16 @@
 #ifndef MLK_INTEGRATION_LIBOQS_CONFIG_C_H
 #define MLK_INTEGRATION_LIBOQS_CONFIG_C_H
 
+/* Enable valgrind-based assertions in mlkem-native through macro
+ * from libOQS. */
+#if !defined(__ASSEMBLER__)
+#include <oqs/common.h>
+#if defined(OQS_ENABLE_TEST_CONSTANT_TIME)
+#define MLK_CONFIG_CT_TESTING_ENABLED
+#endif
+#endif /* !__ASSEMBLER__ */
+
+
 /******************************************************************************
  * Name:        MLK_CONFIG_PARAMETER_SET
  *
@@ -211,14 +221,5 @@ static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
    }
    #endif
 */
-
-/* Enable valgrind-based assertions in mlkem-native through macro
- * from libOQS. */
-#if !defined(__ASSEMBLER__)
-#include <oqs/common.h>
-#if defined(OQS_ENABLE_TEST_CONSTANT_TIME)
-#define MLK_CONFIG_CT_TESTING_ENABLED
-#endif
-#endif /* !__ASSEMBLER__ */
 
 #endif /* !MLK_INTEGRATION_LIBOQS_CONFIG_C_H */
