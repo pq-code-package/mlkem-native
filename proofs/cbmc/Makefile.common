@@ -265,15 +265,18 @@ CBMC_FLAG_FLUSH ?= --flush
 # Determine SMT back-end and prover combination chosen by the user
 ifeq ($(findstring --smt2,$(CBMCFLAGS)),--smt2) # User has chosen SMT2 (which defaults to Z3)
 CBMCFLAGS := $(subst --smt2,,$(CBMCFLAGS)) # Remove --smt2 from CBMCFLAGS
-BACKEND := --smt2
+BACKEND_OPTION := --smt2
+PROVER_NAME=Z3
 SMT_FORMAT := --z3
 else ifeq ($(findstring --bitwuzla,$(CBMCFLAGS)),--bitwuzla) # User has chosen Bitwuzla
 CBMCFLAGS := $(subst --bitwuzla,,$(CBMCFLAGS)) # Remove --bitwuzla from CBMCFLAGS
-BACKEND := --bitwuzla
+BACKEND_OPTION := --bitwuzla
+PROVER_NAME=Bitwuzla
 SMT_FORMAT := --bitwuzla
 else ifeq ($(findstring --cvc5,$(CBMCFLAGS)),--cvc5) # User has chosen cvc5
 CBMCFLAGS := $(subst --cvc5,,$(CBMCFLAGS)) # Remove --cvc5 from CBMCFLAGS
-BACKEND := --cvc5
+BACKEND_OPTION := --cvc5
+PROVER_NAME=cvc5
 SMT_FORMAT := --cvc5
 endif
 
@@ -874,7 +877,7 @@ $(LOGDIR)/result.xml: $(HARNESS_GOTO).goto
 	$(LITANI) add-job \
 	  $(POOL) \
 	  --command \
-	  '$(CBMC) $(CBMC_VERBOSITY) $(BACKEND) $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --trace --xml-ui $<' \
+	    '$(CBMC) $(CBMC_VERBOSITY) $(BACKEND_OPTION) $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --trace --xml-ui $<' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --ci-stage test \
@@ -891,7 +894,7 @@ $(LOGDIR)/result.txt: $(HARNESS_GOTO).goto
 	$(LITANI) add-job \
 	  $(POOL) \
 	  --command \
-	    '$(CBMC) $(CBMC_VERBOSITY) $(BACKEND) $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --trace $<' \
+	    '$(CBMC) $(CBMC_VERBOSITY) $(BACKEND_OPTION) $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --trace $<' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --ci-stage test \
@@ -909,7 +912,7 @@ $(HARNESS_GOTO).smt2: $(HARNESS_GOTO).goto
 	$(LITANI) add-job \
 	  $(POOL) \
 	  --command \
-	    '$(CBMC) $(CBMC_VERBOSITY) $(BACKEND) $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --outfile $@ $(SMT_FORMAT) $<' \
+	    '$(CBMC) $(CBMC_VERBOSITY) $(BACKEND_OPTION) $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --outfile $@ $(SMT_FORMAT) $<' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --ci-stage test \
@@ -979,7 +982,7 @@ $(HARNESS_GOTO).smtc: $(HARNESS_GOTO).goto
 $(LOGDIR)/property.xml: $(HARNESS_GOTO).goto
 	$(LITANI) add-job \
 	  --command \
-	    '$(CBMC) $(CBMC_VERBOSITY) $(BACKEND) $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --show-properties --xml-ui $<' \
+	    '$(CBMC) $(CBMC_VERBOSITY) $(BACKEND_OPTION) $(CBMCFLAGS) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $(CHECKFLAGS) --show-properties --xml-ui $<' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --ci-stage test \
@@ -993,7 +996,7 @@ $(LOGDIR)/coverage.xml: $(HARNESS_GOTO).goto
 	$(LITANI) add-job \
 	  $(POOL) \
 	  --command \
-	    '$(CBMC) $(CBMC_VERBOSITY) $(BACKEND) $(CBMCFLAGS) $(COVERFLAGS) --cover location --xml-ui $<' \
+	    '$(CBMC) $(CBMC_VERBOSITY) $(BACKEND_OPTION) $(CBMCFLAGS) $(COVERFLAGS) --cover location --xml-ui $<' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --ci-stage test \
@@ -1066,6 +1069,7 @@ smt:
 	$(MAKE) -B _smt
 	@ echo Running 'litani build'
 	$(LITANI) run-build
+	@ echo Generated SMT file for $(PROVER_NAME) in $(HARNESS_GOTO).smt2
 
 _smtz: $(HARNESS_GOTO).smtz
 smtz:
@@ -1075,6 +1079,7 @@ smtz:
 	$(MAKE) -B _smtz
 	@ echo Running 'litani build'
 	$(LITANI) run-build
+	@ echo Generated SMT file for Z3 in $(HARNESS_GOTO).smtz
 
 _smtb: $(HARNESS_GOTO).smtb
 smtb:
@@ -1084,6 +1089,7 @@ smtb:
 	$(MAKE) -B _smtb
 	@ echo Running 'litani build'
 	$(LITANI) run-build
+	@ echo Generated SMT file for Bitwuzla in $(HARNESS_GOTO).smtb
 
 _smtc: $(HARNESS_GOTO).smtc
 smtc:
@@ -1093,6 +1099,7 @@ smtc:
 	$(MAKE) -B _smtc
 	@ echo Running 'litani build'
 	$(LITANI) run-build
+	@ echo Generated SMT file for cvc5 in $(HARNESS_GOTO).smtc
 
 _smtall: $(HARNESS_GOTO).smtz $(HARNESS_GOTO).smtb $(HARNESS_GOTO).smtc
 smtall:
@@ -1102,6 +1109,10 @@ smtall:
 	$(MAKE) -B _smtall
 	@ echo Running 'litani build'
 	$(LITANI) run-build
+	@ echo Generated SMT files for provers Z3, Bitwuzla, and cvc5 in
+	@ echo   $(HARNESS_GOTO).smtz
+	@ echo   $(HARNESS_GOTO).smtb
+	@ echo   $(HARNESS_GOTO).smtc
 
 _property: $(LOGDIR)/property.xml
 property:
