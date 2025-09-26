@@ -15,9 +15,9 @@ jobs:
         system: [ubuntu-latest, pqcp-arm64]
         cmake:
           - name: Auto
-            flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=auto -DCMAKE_BUILD_TYPE=Release
+            flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=auto -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
           - name: C
-            flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=generic -DCMAKE_BUILD_TYPE=Release
+            flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=generic -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
     name: Build (${{ matrix.cmake.name }}, ${{ matrix.system }})
     runs-on: ${{ matrix.system }}
     steps:
