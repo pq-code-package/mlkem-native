@@ -350,7 +350,7 @@ void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
    * This is needed because all output of randombytes is marked as secret
    * (=undefined)
    */
-  MLK_CT_TESTING_DECLASSIFY(publicseed, MLKEM_SYMBYTES);
+  //MLK_CT_TESTING_DECLASSIFY(publicseed, MLKEM_SYMBYTES);
 
   mlk_gen_matrix(a, publicseed, 0 /* no transpose */);
 
