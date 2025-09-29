@@ -32,7 +32,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # The proofs also check that the byte code is up to date,
+  # but we use this as a fast path to not even start the proofs
+  # if the byte code needs updating.
+  hol_light_bytecode:
+    name: HOL-Light bytecode check
+    runs-on: pqcp-arm64
+    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-shell
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          nix-shell: 'hol_light'
+          script: |
+            autogen --update-hol-light-bytecode --dry-run
   hol_light_proofs:
+    needs: [ hol_light_bytecode ]
     strategy:
       fail-fast: false
       matrix:

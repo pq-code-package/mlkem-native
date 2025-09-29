@@ -17,6 +17,7 @@ needs "proofs/mlkem_utils.ml";;
 
 let mlkem_poly_tobytes_mc = define_assert_from_elf
   "mlkem_poly_tobytes_mc" "mlkem/mlkem_poly_tobytes.o"
+(*** BYTECODE START ***)
 [
   0xd2800202;       (* arm_MOV X2 (rvalue (word 16)) *)
   0x3cc20426;       (* arm_LDR Q6 X1 (Postimmediate_Offset (word 32)) *)
@@ -105,6 +106,7 @@ let mlkem_poly_tobytes_mc = define_assert_from_elf
   0x0c9f4016;       (* arm_ST3 [Q22; Q23; Q24] X0 (Postimmediate_Offset (word 24)) 64 8 *)
   0xd65f03c0        (* arm_RET X30 *)
 ];;
+(*** BYTECODE END ***)
 
 let MLKEM_POLY_TOBYTES_EXEC = ARM_MK_EXEC_RULE mlkem_poly_tobytes_mc;;
 
