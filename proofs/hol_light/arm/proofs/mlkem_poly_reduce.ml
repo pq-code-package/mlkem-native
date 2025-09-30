@@ -17,6 +17,7 @@ needs "proofs/mlkem_utils.ml";;
 
 let mlkem_poly_reduce_mc = define_assert_from_elf
   "mlkem_poly_reduce_mc" "mlkem/mlkem_poly_reduce.o"
+(*** BYTECODE START ***)
 [
   0x5281a022;       (* arm_MOV W2 (rvalue (word 3329)) *)
   0x4e020c43;       (* arm_DUP_GEN Q3 X2 16 128 *)
@@ -92,6 +93,7 @@ let mlkem_poly_reduce_mc = define_assert_from_elf
   0x3c9c0018;       (* arm_STR Q24 X0 (Immediate_Offset (word 18446744073709551552)) *)
   0xd65f03c0        (* arm_RET X30 *)
 ];;
+(*** BYTECODE END ***)
 
 let MLKEM_POLY_REDUCE_EXEC = ARM_MK_EXEC_RULE mlkem_poly_reduce_mc;;
 

@@ -18,6 +18,7 @@ needs "proofs/mlkem_rej_uniform_table.ml";;
 
 let mlkem_rej_uniform_mc = define_assert_from_elf
   "mlkem_rej_uniform_mc" "mlkem/mlkem_rej_uniform.o"
+(*** BYTECODE START ***)
 [
   0xd10903ff;       (* arm_SUB SP SP (rvalue (word 576)) *)
   0xd2800027;       (* arm_MOV X7 (rvalue (word 1)) *)
@@ -170,6 +171,7 @@ let mlkem_rej_uniform_mc = define_assert_from_elf
   0x910903ff;       (* arm_ADD SP SP (rvalue (word 576)) *)
   0xd65f03c0        (* arm_RET X30 *)
 ];;
+(*** BYTECODE END ***)
 
 let MLKEM_REJ_UNIFORM_EXEC = ARM_MK_EXEC_RULE mlkem_rej_uniform_mc;;
 

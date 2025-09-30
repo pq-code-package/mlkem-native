@@ -18,6 +18,7 @@ needs "proofs/mlkem_zetas.ml";;
 
 let mlkem_ntt_mc = define_assert_from_elf
  "mlkem_ntt_mc" "mlkem/mlkem_ntt.o"
+(*** BYTECODE START ***)
 [
   0xd10103ff;       (* arm_SUB SP SP (rvalue (word 64)) *)
   0x6d0027e8;       (* arm_STP D8 D9 SP (Immediate_Offset (iword (&0))) *)
@@ -341,6 +342,7 @@ let mlkem_ntt_mc = define_assert_from_elf
   0x910103ff;       (* arm_ADD SP SP (rvalue (word 64)) *)
   0xd65f03c0        (* arm_RET X30 *)
 ];;
+(*** BYTECODE END ***)
 
 let MLKEM_NTT_EXEC = ARM_MK_EXEC_RULE mlkem_ntt_mc;;
 

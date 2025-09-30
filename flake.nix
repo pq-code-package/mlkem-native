@@ -84,7 +84,7 @@
 
           devShells.hol_light = util.mkShell {
             packages = builtins.attrValues {
-              inherit (config.packages) hol_light s2n_bignum;
+              inherit (config.packages) linters hol_light s2n_bignum;
             };
           };
           devShells.ci = util.mkShell {

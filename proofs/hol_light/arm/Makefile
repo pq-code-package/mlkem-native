@@ -92,6 +92,9 @@ $(OBJ): %.o : %.S
 	cat $< | $(PREPROCESS) | $(SPLIT) | grep -v -E '^\s+.quad\s+0x[0-9a-f]+$$' | $(ASSEMBLE) -o $@ -
 	$(OBJDUMP) $@ | ( ( ! grep --ignore-case -E 'w18|[^0]x18' ) || ( rm $@ ; exit 1 ) )
 	cat $< | $(PREPROCESS) | $(SPLIT) | $(ASSEMBLE) -o $@ -
+	# MacOS may generate relocations in non-text sections that break
+	# the object file parser in HOL-Light
+	strip $@
 
 clean:; rm -f */*.o */*/*.o */*.correct */*.native
 
@@ -115,6 +118,10 @@ BASE?=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 PROOF_BINS = $(OBJ:.o=.native)
 PROOF_LOGS = $(OBJ:.o=.correct)
 
+# Build precompiled binary for dumping bytecodes
+proofs/dump_bytecode.native: proofs/dump_bytecode.ml $(OBJ)
+	./proofs/build-proof.sh $(BASE)/$< "$(HOLLIGHT)" "$@"
+
 # Build precompiled native binaries of HOL Light proofs
 
 .SECONDEXPANSION:
@@ -135,7 +142,10 @@ run_proofs: build_proofs $(PROOF_LOGS);
 
 proofs: run_proofs ; $(SRC)/tools/count-proofs.sh .
 
-.PHONY: proofs build_proofs run_proofs sematest clean
+dump_bytecode: proofs/dump_bytecode.native
+	./$<
+
+.PHONY: proofs build_proofs run_proofs sematest clean dump_bytecode
 
 # Always run sematest regardless of dependency check
 FORCE: ;

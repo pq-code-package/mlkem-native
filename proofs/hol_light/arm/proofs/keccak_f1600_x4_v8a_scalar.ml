@@ -15,6 +15,7 @@ needs "proofs/keccak_spec.ml";;
 
 let keccak_f1600_x4_v8a_scalar_mc = define_assert_from_elf
   "keccak_f1600_x4_v8a_scalar_mc" "mlkem/keccak_f1600_x4_v8a_scalar.o"
+(*** BYTECODE START ***)
 [
   0xd10383ff;       (* arm_SUB SP SP (rvalue (word 224)) *)
   0xa90353f3;       (* arm_STP X19 X20 SP (Immediate_Offset (iword (&48))) *)
@@ -985,6 +986,7 @@ let keccak_f1600_x4_v8a_scalar_mc = define_assert_from_elf
   0x910383ff;       (* arm_ADD SP SP (rvalue (word 224)) *)
   0xd65f03c0        (* arm_RET X30 *)
 ];;
+(*** BYTECODE END ***)
 
 let KECCAK_F1600_X4_V8A_SCALAR_EXEC = ARM_MK_EXEC_RULE keccak_f1600_x4_v8a_scalar_mc;;
 
