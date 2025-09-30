@@ -2671,30 +2671,28 @@ def gen_citations(dry_run=False):
 
 
 def extract_bytecode_from_output(output_text):
-    """Extract bytecode sections from test.ml output into a dictionary."""
+    """Convert output of proofs/hol_light/arm/proofs/dump_bytecode.native
+    into a dictionary mapping function names to byte code strings."""
     bytecode_dict = {}
 
-    # Find all bytecode sections using a robust approach
     lines = output_text.split("\n")
     i = 0
 
     while i < len(lines):
         line = lines[i]
-        if "=== bytecode start: mlkem/" in line and ".o" in line:
-            # Extract filename
-            match = re.search(r"mlkem/([^/\s]+?)\.o", line)
-            if match:
-                filename = match.group(1)
+        match = re.search(r"=== bytecode start: mlkem/([^/\s]+?)\.o", line)
+        if match:
+            filename = match.group(1)
 
-                # Collect bytecode until end marker
-                bytecode_lines = []
+            # Collect bytecode until end marker
+            bytecode_lines = []
+            i += 1
+            while i < len(lines) and "==== bytecode end" not in lines[i]:
+                bytecode_lines.append(lines[i])
                 i += 1
-                while i < len(lines) and "==== bytecode end" not in lines[i]:
-                    bytecode_lines.append(lines[i])
-                    i += 1
 
-                bytecode = "\n".join(bytecode_lines).strip()
-                bytecode_dict[filename] = bytecode
+            bytecode = "\n".join(bytecode_lines).strip()
+            bytecode_dict[filename] = bytecode
         i += 1
 
     return bytecode_dict
