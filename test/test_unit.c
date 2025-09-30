@@ -90,6 +90,16 @@ static void generate_i16_array_single(int16_t *data, size_t len, size_t pos,
   data[pos] = value;
 }
 
+static void generate_i16_array_constant(int16_t *data, size_t len,
+                                        int16_t value)
+{
+  size_t i;
+  for (i = 0; i < len; i++)
+  {
+    data[i] = value;
+  }
+}
+
 /* This does not generate a uniformly random distribution, but it's
  * good enough for our test.
  *
@@ -338,14 +348,14 @@ static int test_intt_core(const int16_t *input, const char *test_name)
   mlk_poly_reduce_c(&test_poly);
 
   CHECK(compare_i16_arrays(test_poly.coeffs, ref_poly.coeffs, MLKEM_N,
-                           test_name, NULL));
+                           test_name, input));
   return 0;
 }
 
 static int test_native_intt(void)
 {
   int16_t test_data[MLKEM_N];
-  int pos, i;
+  int coeff, pos, i;
 
   generate_i16_array_zeros(test_data, MLKEM_N);
   CHECK(test_intt_core(test_data, "intt_zeros") == 0);
@@ -354,6 +364,22 @@ static int test_native_intt(void)
   {
     generate_i16_array_single(test_data, MLKEM_N, pos, 1);
     CHECK(test_intt_core(test_data, "intt_single") == 0);
+  }
+
+  /* invNTT implementation are at risk of overflow when not
+   * correctly reducing those coefficients which grow exponentially
+   * fast in the number of layers. Most notably, the first and second
+   * coefficients in the output of the invNTT are sums of 128 input
+   * coefficients each, which can easily overflow.
+   *
+   * Test this by running the invNTT on constant input coefficients.
+   * Note that since the invNTT often performs a reduction or normalization
+   * at the beginning, it's unclear which exact choice of constant data
+   * would trigger the largest coefficient growth, so we just try them all. */
+  for (coeff = INT16_MIN; coeff <= INT16_MAX; coeff++)
+  {
+    generate_i16_array_constant(test_data, MLKEM_N, coeff);
+    CHECK(test_intt_core(test_data, "intt_constant") == 0);
   }
 
   for (i = 0; i < NUM_RANDOM_TESTS; i++)
