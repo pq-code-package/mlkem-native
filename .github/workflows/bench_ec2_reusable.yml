@@ -106,7 +106,7 @@ jobs:
           aws-region: ${{ inputs.aws_region }}
       - name: Start EC2 runner
         id: start-ec2-runner
-        uses: machulav/ec2-github-runner@fb91019e71385fb10dfcbec812b4de8c61589f7b # v2.4.1
+        uses: machulav/ec2-github-runner@5ae8cda66fc6f3bae4e633ad93e6e61a061376bb # v2.4.2
         with:
           mode: start
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
@@ -214,7 +214,7 @@ jobs:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ inputs.aws_region }}
       - name: Stop EC2 runner
-        uses: machulav/ec2-github-runner@fb91019e71385fb10dfcbec812b4de8c61589f7b # v2.4.1
+        uses: machulav/ec2-github-runner@5ae8cda66fc6f3bae4e633ad93e6e61a061376bb # v2.4.2
         with:
           mode: stop
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
