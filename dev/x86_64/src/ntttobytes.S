@@ -94,7 +94,7 @@ MLK_ASM_FN_SYMBOL(ntttobytes_avx2)
 
 // Broadcast 3329 (0x0D01) to all elements of ymm0
 movl $0x0D010D01, %eax
-movd %eax, %xmm0
+vmovd %eax, %xmm0
 vpbroadcastd %xmm0, %ymm0
 
 ntttobytes_128_coefficients 0 0

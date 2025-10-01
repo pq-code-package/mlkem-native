@@ -39,13 +39,13 @@ MLK_ASM_FN_SYMBOL(tomont_avx2)
 
         .cfi_startproc
         movl	$0xd010d01, %eax        # imm = 0xD010D01
-        movd	%eax, %xmm0
+        vmovd	%eax, %xmm0
         vpbroadcastd	%xmm0, %ymm0
         movl	$0x50495049, %eax       # imm = 0x50495049
-        movd	%eax, %xmm1
+        vmovd	%eax, %xmm1
         vpbroadcastd	%xmm1, %ymm1
         movl	$0x5490549, %eax        # imm = 0x5490549
-        movd	%eax, %xmm2
+        vmovd	%eax, %xmm2
         vpbroadcastd	%xmm2, %ymm2
         vmovdqa	(%rdi), %ymm3
         vmovdqa	0x20(%rdi), %ymm4

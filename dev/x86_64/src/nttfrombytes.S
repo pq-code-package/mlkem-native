@@ -99,7 +99,7 @@ MLK_ASM_FN_SYMBOL(nttfrombytes_avx2)
 
 // Broadcast 0xFFF to all elements of ymm0
 movl $0x0FFF0FFF, %eax
-movd %eax, %xmm0
+vmovd %eax, %xmm0
 vpbroadcastd %xmm0, %ymm0
 
 nttfrombytes_128_coefficients 0 0

@@ -127,12 +127,12 @@ schoolbook 7 \k
 .macro polyvec_basemul k
   // Broadcast 3329 (0x0D01) to all elements of ymm0
   movl $0x0D010D01, %eax
-  movd %eax, _qx
+  vmovd %eax, _qx
   vpbroadcastd _qx, _q
 
   // Broadcast -3327 (0xF301) to all elements of ymm0
   movl $0xF301F301, %eax
-  movd %eax, _qinvx
+  vmovd %eax, _qinvx
   vpbroadcastd _qinvx, _qinv
 
   .if \k > 0

@@ -77,12 +77,12 @@ MLK_ASM_FN_SYMBOL(reduce_avx2)
 
 // Broadcast 3329 (0x0D01) to all elements of ymm0
 movl $0x0D010D01, %eax
-movd %eax, %xmm0
+vmovd %eax, %xmm0
 vpbroadcastd %xmm0, %ymm0
 
 // Broadcast 20159 (0x4EBF) to all elements of ymm1
 movl $0x4ebf4ebf, %eax
-movd %eax, %xmm1
+vmovd %eax, %xmm1
 vpbroadcastd %xmm1, %ymm1
 
 reduce_128_coefficients 0

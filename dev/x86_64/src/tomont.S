@@ -68,17 +68,17 @@ MLK_ASM_FN_SYMBOL(tomont_avx2)
 
 // Broadcast 3329 (0x0D01) to all elements of ymm0
 movl $0x0D010D01, %eax
-movd %eax, %xmm0
+vmovd %eax, %xmm0
 vpbroadcastd %xmm0, %ymm0
 
 // Broadcast 20553 (0x5049) to all elements of ymm1
 movl $0x50495049, %eax
-movd %eax, %xmm1
+vmovd %eax, %xmm1
 vpbroadcastd %xmm1, %ymm1
 
 // Broadcast 1353 (0x0549) to all elements of ymm2
 movl $0x05490549, %eax
-movd %eax, %xmm2
+vmovd %eax, %xmm2
 vpbroadcastd %xmm2, %ymm2
 
 tomont_128_coefficients 0

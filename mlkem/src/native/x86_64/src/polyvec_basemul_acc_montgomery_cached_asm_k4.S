@@ -21,10 +21,10 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k4)
 
         .cfi_startproc
         movl	$0xd010d01, %eax        # imm = 0xD010D01
-        movd	%eax, %xmm0
+        vmovd	%eax, %xmm0
         vpbroadcastd	%xmm0, %ymm0
         movl	$0xf301f301, %eax       # imm = 0xF301F301
-        movd	%eax, %xmm1
+        vmovd	%eax, %xmm1
         vpbroadcastd	%xmm1, %ymm1
         vmovdqa	(%rsi), %ymm2
         vmovdqa	0x20(%rsi), %ymm3
