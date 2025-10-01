@@ -375,12 +375,23 @@ static int test_native_intt(void)
    * Test this by running the invNTT on constant input coefficients.
    * Note that since the invNTT often performs a reduction or normalization
    * at the beginning, it's unclear which exact choice of constant data
-   * would trigger the largest coefficient growth, so we just try them all. */
-  for (coeff = INT16_MIN; coeff <= INT16_MAX; coeff++)
+   * would trigger the largest coefficient growth, so we just try them all.
+   *
+   * Gradually increase absolute value to find smallest failure first.
+   */
+  for (coeff = 0; coeff <= INT16_MAX; coeff++)
   {
     generate_i16_array_constant(test_data, MLKEM_N, coeff);
     CHECK(test_intt_core(test_data, "intt_constant") == 0);
+
+    generate_i16_array_constant(test_data, MLKEM_N, -coeff);
+    CHECK(test_intt_core(test_data, "intt_constant") == 0);
   }
+
+  /* This one is omitted by the previous loop */
+  generate_i16_array_constant(test_data, MLKEM_N, INT16_MIN);
+  CHECK(test_intt_core(test_data, "intt_constant") == 0);
+
 
   for (i = 0; i < NUM_RANDOM_TESTS; i++)
   {
