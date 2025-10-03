@@ -96,6 +96,7 @@ endif # aarch64_be
 # RISC-V 64-bit CFLAGS configuration
 ifeq ($(ARCH),riscv64)
 CFLAGS += -DMLK_FORCE_RISCV64
+CFLAGS += -march=rv64gcv_zvl256b
 endif # riscv64
 
 # RISC-V 32-bit CFLAGS configuration
