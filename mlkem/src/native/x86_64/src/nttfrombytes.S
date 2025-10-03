@@ -34,7 +34,9 @@
 MLK_ASM_FN_SYMBOL(nttfrombytes_avx2)
 
         .cfi_startproc
-        vmovdqa	0xe0(%rdx), %ymm0
+        movl	$0xfff0fff, %eax        # imm = 0xFFF0FFF
+        vmovd	%eax, %xmm0
+        vpbroadcastd	%xmm0, %ymm0
         vmovdqu	(%rsi), %ymm4
         vmovdqu	0x20(%rsi), %ymm5
         vmovdqu	0x40(%rsi), %ymm6

@@ -38,9 +38,15 @@
 MLK_ASM_FN_SYMBOL(tomont_avx2)
 
         .cfi_startproc
-        vmovdqa	(%rsi), %ymm0
-        vmovdqa	0xa0(%rsi), %ymm1
-        vmovdqa	0xc0(%rsi), %ymm2
+        movl	$0xd010d01, %eax        # imm = 0xD010D01
+        vmovd	%eax, %xmm0
+        vpbroadcastd	%xmm0, %ymm0
+        movl	$0x50495049, %eax       # imm = 0x50495049
+        vmovd	%eax, %xmm1
+        vpbroadcastd	%xmm1, %ymm1
+        movl	$0x5490549, %eax        # imm = 0x5490549
+        vmovd	%eax, %xmm2
+        vpbroadcastd	%xmm2, %ymm2
         vmovdqa	(%rdi), %ymm3
         vmovdqa	0x20(%rdi), %ymm4
         vmovdqa	0x40(%rdi), %ymm5

@@ -40,7 +40,9 @@
 MLK_ASM_FN_SYMBOL(ntt_avx2)
 
         .cfi_startproc
-        vmovdqa	(%rsi), %ymm0
+        movl	$0xd010d01, %eax        # imm = 0xD010D01
+        vmovd	%eax, %xmm0
+        vpbroadcastd	%xmm0, %ymm0
         vpbroadcastq	0x140(%rsi), %ymm15
         vmovdqa	0x100(%rdi), %ymm8
         vmovdqa	0x120(%rdi), %ymm9

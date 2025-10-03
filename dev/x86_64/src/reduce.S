@@ -74,9 +74,16 @@ vmovdqa	%ymm9, (\offset + 224)(%rdi)
 .global MLK_ASM_NAMESPACE(reduce_avx2)
 .balign 4
 MLK_ASM_FN_SYMBOL(reduce_avx2)
-#consts
-vmovdqa	MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
-vmovdqa	MLK_AVX2_BACKEND_DATA_OFFSET_16XV*2(%rsi),%ymm1
+
+// Broadcast 3329 (0x0D01) to all elements of ymm0
+movl $0x0D010D01, %eax
+vmovd %eax, %xmm0
+vpbroadcastd %xmm0, %ymm0
+
+// Broadcast 20159 (0x4EBF) to all elements of ymm1
+movl $0x4ebf4ebf, %eax
+vmovd %eax, %xmm1
+vpbroadcastd %xmm1, %ymm1
 
 reduce_128_coefficients 0
 reduce_128_coefficients 128*2

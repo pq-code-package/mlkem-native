@@ -96,8 +96,11 @@ vmovdqa	%ymm1,  (\offset_out +224)(%rdi)
 .global MLK_ASM_NAMESPACE(nttfrombytes_avx2)
 .balign 4
 MLK_ASM_FN_SYMBOL(nttfrombytes_avx2)
-#consts
-vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XMASK*2(%rdx),%ymm0
+
+// Broadcast 0xFFF to all elements of ymm0
+movl $0x0FFF0FFF, %eax
+vmovd %eax, %xmm0
+vpbroadcastd %xmm0, %ymm0
 
 nttfrombytes_128_coefficients 0 0
 nttfrombytes_128_coefficients 192 256
