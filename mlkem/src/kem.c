@@ -50,7 +50,7 @@ __contract__(
 
 
 /* Reference: Not implemented in the reference implementation @[REF]. */
-MLK_INTERNAL_API
+MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 {
@@ -75,7 +75,7 @@ int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 
 
 /* Reference: Not implemented in the reference implementation @[REF]. */
-MLK_INTERNAL_API
+MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
