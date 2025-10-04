@@ -262,6 +262,45 @@ int MLK_API_NAMESPACE(dec)(
     const uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
     const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
 
+/*************************************************
+ * Name:        crypto_kem_check_pk
+ *
+ * Description: Implements modulus check mandated by FIPS 203,
+ *              i.e., ensures that coefficients are in [0,q-1].
+ *
+ * Arguments:   - const uint8_t *pk: pointer to input public key, an array of
+ *                 MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
+ *
+ * Returns: - 0 on success
+ *          - -1 on failure
+ *
+ * Specification: Implements @[FIPS203, Section 7.2, 'modulus check']
+ *
+ **************************************************/
+MLK_API_MUST_CHECK_RETURN_VALUE
+int MLK_API_NAMESPACE(check_pk)(
+    const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+
+/*************************************************
+ * Name:        crypto_kem_check_sk
+ *
+ * Description: Implements public key hash check mandated by FIPS 203,
+ *              i.e., ensures that
+ *              sk[768𝑘+32 ∶ 768𝑘+64] = H(pk)= H(sk[384𝑘 : 768𝑘+32])
+ *
+ * Arguments:   - const uint8_t *sk: pointer to input private key, an array of
+ *                 MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
+ *
+ * Returns: - 0 on success
+ *          - -1 on failure
+ *
+ * Specification: Implements @[FIPS203, Section 7.3, 'hash check']
+ *
+ **************************************************/
+MLK_API_MUST_CHECK_RETURN_VALUE
+int MLK_API_NAMESPACE(check_sk)(
+    const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+
 /****************************** SUPERCOP API *********************************/
 
 #if !defined(MLK_CONFIG_API_NO_SUPERCOP)
@@ -278,6 +317,8 @@ int MLK_API_NAMESPACE(dec)(
 #define crypto_kem_enc_derand MLK_API_NAMESPACE(enc_derand)
 #define crypto_kem_enc MLK_API_NAMESPACE(enc)
 #define crypto_kem_dec MLK_API_NAMESPACE(dec)
+#define crypto_kem_check_pk MLK_API_NAMESPACE(check_pk)
+#define crypto_kem_check_sk MLK_API_NAMESPACE(check_sk)
 
 #else /* !MLK_CONFIG_API_NO_SUPERCOP */
 
