@@ -50,6 +50,17 @@ let poly_mulcache_compute_mc = define_assert_from_elf
 let poly_mulcache_compute_EXEC = ARM_MK_EXEC_RULE poly_mulcache_compute_mc;;
 
 (* ------------------------------------------------------------------------- *)
+(* Code length constants                                                     *)
+(* ------------------------------------------------------------------------- *)
+
+let LENGTH_POLY_MULCACHE_COMPUTE_MC =
+  REWRITE_CONV[poly_mulcache_compute_mc] `LENGTH poly_mulcache_compute_mc`
+  |> CONV_RULE (RAND_CONV LENGTH_CONV);;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_POLY_MULCACHE_COMPUTE_MC];;
+
+(* ------------------------------------------------------------------------- *)
 (* Specification                                                             *)
 (* ------------------------------------------------------------------------- *)
 
@@ -97,6 +108,7 @@ let poly_mulcache_compute_GOAL = `forall pc src dst zetas zetas_twisted x y retu
 (* ------------------------------------------------------------------------- *)
 
 let poly_mulcache_compute_SPEC = prove(poly_mulcache_compute_GOAL,
+    CONV_TAC LENGTH_SIMPLIFY_CONV THEN
     REWRITE_TAC [MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI;
       NONOVERLAPPING_CLAUSES; ALL; C_ARGUMENTS; fst poly_mulcache_compute_EXEC;
       have_mulcache_zetas] THEN

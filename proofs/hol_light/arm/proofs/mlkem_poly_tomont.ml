@@ -74,6 +74,17 @@ let poly_tomont_asm_mc = define_assert_from_elf
 let POLY_TOMONT_EXEC = ARM_MK_EXEC_RULE poly_tomont_asm_mc;;
 
 (* ------------------------------------------------------------------------- *)
+(* Code length constants                                                     *)
+(* ------------------------------------------------------------------------- *)
+
+let LENGTH_POLY_TOMONT_ASM_MC =
+  REWRITE_CONV[poly_tomont_asm_mc] `LENGTH poly_tomont_asm_mc`
+  |> CONV_RULE (RAND_CONV LENGTH_CONV);;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_POLY_TOMONT_ASM_MC];;
+
+(* ------------------------------------------------------------------------- *)
 (* Specification                                                             *)
 (* ------------------------------------------------------------------------- *)
 
@@ -113,6 +124,7 @@ let POLY_TOMONT_GOAL = `forall pc ptr x returnaddress.
 (* ------------------------------------------------------------------------- *)
 
 let POLY_TOMONT_SPEC = prove(POLY_TOMONT_GOAL,
+    CONV_TAC LENGTH_SIMPLIFY_CONV THEN
     REWRITE_TAC [MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI;
       NONOVERLAPPING_CLAUSES; C_ARGUMENTS; fst POLY_TOMONT_EXEC] THEN
     REPEAT STRIP_TAC THEN
