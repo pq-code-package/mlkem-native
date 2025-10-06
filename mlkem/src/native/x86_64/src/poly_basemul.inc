@@ -24,7 +24,9 @@
  */
 
 #define _q %ymm0
+#define _qx %xmm0
 #define _qinv %ymm1
+#define _qinvx %xmm1
 #define _a %ymm2
 #define _b %ymm3
 #define _c %ymm4
@@ -123,8 +125,16 @@ schoolbook 7 \k
 .endm
 
 .macro polyvec_basemul k
-  vmovdqa MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%r8), _q
-  vmovdqa MLK_AVX2_BACKEND_DATA_OFFSET_16XQINV*2(%r8), _qinv
+  // Broadcast 3329 (0x0D01) to all elements of ymm0
+  movl $0x0D010D01, %eax
+  vmovd %eax, _qx
+  vpbroadcastd _qx, _q
+
+  // Broadcast -3327 (0xF301) to all elements of ymm0
+  movl $0xF301F301, %eax
+  vmovd %eax, _qinvx
+  vpbroadcastd _qinvx, _qinv
+
   .if \k > 0
     poly_basemul 0
   .endif
