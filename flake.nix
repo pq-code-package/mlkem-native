@@ -82,6 +82,15 @@
               } ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ config.packages.valgrind_varlat ];
           };
 
+          # arm-none-eabi-gcc + platform files from pqmx
+          packages.m55-an547 = util.m55-an547;
+          devShells.arm-embedded = util.mkShell {
+            packages = builtins.attrValues
+              {
+                inherit (config.packages) m55-an547;
+                inherit (pkgs) gcc-arm-embedded qemu coreutils python3 git;
+              };
+          };
           devShells.hol_light = util.mkShell {
             packages = builtins.attrValues {
               inherit (config.packages) linters hol_light s2n_bignum;
