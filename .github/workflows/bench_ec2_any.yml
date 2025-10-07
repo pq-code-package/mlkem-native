@@ -46,9 +46,6 @@ on:
       compiler:
         description: Compiler to use. When unset, default nix shell is used.
         default: ''
-      additional_packages:
-        description: Additional packages to install when custom compiler is used.
-        default: ''
 jobs:
   bench-ec2-any:
     name: Ad-hoc benchmark on $${{ inputs.ec2_instance_type }}
@@ -68,5 +65,4 @@ jobs:
       store_results: false
       bench_extra_args: ${{ inputs.bench_extra_args }}
       compiler: ${{ inputs.compiler }}
-      additional_packages: ${{ inputs.additional_packages }}
     secrets: inherit
