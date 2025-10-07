@@ -157,6 +157,8 @@
 #undef MLK_API_MUST_CHECK_RETURN_VALUE
 #undef MLK_API_NAMESPACE
 #undef MLK_H
+#undef crypto_kem_check_pk
+#undef crypto_kem_check_sk
 #undef crypto_kem_dec
 #undef crypto_kem_enc
 #undef crypto_kem_enc_derand
