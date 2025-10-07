@@ -61,8 +61,7 @@
  * Implements @[FIPS203, Algorithm 13 (K-PKE.KeyGen), L19]
  *
  **************************************************/
-static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES],
-                        const mlk_polyvec *pk,
+static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], mlk_polyvec pk,
                         const uint8_t seed[MLKEM_SYMBYTES])
 {
   mlk_assert_bound_2d(pk->vec, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
@@ -86,7 +85,7 @@ static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES],
  * Implements @[FIPS203, Algorithm 14 (K-PKE.Encrypt), L2-3]
  *
  **************************************************/
-static void mlk_unpack_pk(mlk_polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
+static void mlk_unpack_pk(mlk_polyvec pk, uint8_t seed[MLKEM_SYMBYTES],
                           const uint8_t packedpk[MLKEM_INDCPA_PUBLICKEYBYTES])
 {
   mlk_polyvec_frombytes(pk, packedpk);
@@ -111,8 +110,7 @@ static void mlk_unpack_pk(mlk_polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
  * Implements @[FIPS203, Algorithm 13 (K-PKE.KeyGen), L20]
  *
  **************************************************/
-static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES],
-                        const mlk_polyvec *sk)
+static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], mlk_polyvec sk)
 {
   mlk_assert_bound_2d(sk->vec, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
   mlk_polyvec_tobytes(r, sk);
@@ -132,7 +130,7 @@ static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES],
  * Implements @[FIPS203, Algorithm 15 (K-PKE.Decrypt), L5]
  *
  **************************************************/
-static void mlk_unpack_sk(mlk_polyvec *sk,
+static void mlk_unpack_sk(mlk_polyvec sk,
                           const uint8_t packedsk[MLKEM_INDCPA_SECRETKEYBYTES])
 {
   mlk_polyvec_frombytes(sk, packedsk);
@@ -153,8 +151,8 @@ static void mlk_unpack_sk(mlk_polyvec *sk,
  * Implements @[FIPS203, Algorithm 14 (K-PKE.Encrypt), L22-23]
  *
  **************************************************/
-static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES],
-                                const mlk_polyvec *b, mlk_poly *v)
+static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES], mlk_polyvec b,
+                                mlk_poly *v)
 {
   mlk_polyvec_compress_du(r, b);
   mlk_poly_compress_dv(r + MLKEM_POLYVECCOMPRESSEDBYTES_DU, v);
@@ -174,7 +172,7 @@ static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES],
  * Implements @[FIPS203, Algorithm 15 (K-PKE.Decrypt), L1-4]
  *
  **************************************************/
-static void mlk_unpack_ciphertext(mlk_polyvec *b, mlk_poly *v,
+static void mlk_unpack_ciphertext(mlk_polyvec b, mlk_poly *v,
                                   const uint8_t c[MLKEM_INDCPA_BYTES])
 {
   mlk_polyvec_decompress_du(b, c);
@@ -246,7 +244,7 @@ __contract__(
  *
  * Not static for benchmarking */
 MLK_INTERNAL_API
-void mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
+void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
                     int transposed)
 {
   unsigned i, j;
@@ -279,11 +277,7 @@ void mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
       }
     }
 
-    mlk_poly_rej_uniform_x4(&a->vec[i / MLKEM_K].vec[i % MLKEM_K],
-                            &a->vec[(i + 1) / MLKEM_K].vec[(i + 1) % MLKEM_K],
-                            &a->vec[(i + 2) / MLKEM_K].vec[(i + 2) % MLKEM_K],
-                            &a->vec[(i + 3) / MLKEM_K].vec[(i + 3) % MLKEM_K],
-                            seed_ext);
+    mlk_poly_rej_uniform_x4(&a[i], &a[i + 1], &a[i + 2], &a[i + 3], seed_ext);
   }
 #else  /* !MLK_CONFIG_SERIAL_FIPS202_ONLY */
   /* When using serial FIPS202, sample all entries individually. */
@@ -311,7 +305,7 @@ void mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
       seed_ext[0][MLKEM_SYMBYTES + 1] = x;
     }
 
-    mlk_poly_rej_uniform(&a->vec[i / MLKEM_K].vec[i % MLKEM_K], seed_ext[0]);
+    mlk_poly_rej_uniform(&a[i], seed_ext[0]);
   }
 
   mlk_assert(i == MLKEM_K * MLKEM_K);
@@ -346,34 +340,48 @@ void mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
  * Specification: Implements @[FIPS203, Section 2.4.7, Eq (2.12), (2.13)]
  *
  **************************************************/
-static void mlk_matvec_mul(mlk_polyvec *out, const mlk_polymat *a,
-                           const mlk_polyvec *v, const mlk_polyvec_mulcache *vc)
+static void mlk_matvec_mul(mlk_polyvec out, const mlk_polymat a,
+                           const mlk_polyvec v, const mlk_polyvec_mulcache vc)
 __contract__(
   requires(memory_no_alias(out, sizeof(mlk_polyvec)))
   requires(memory_no_alias(a, sizeof(mlk_polymat)))
   requires(memory_no_alias(v, sizeof(mlk_polyvec)))
   requires(memory_no_alias(vc, sizeof(mlk_polyvec_mulcache)))
-  requires(forall(k0, 0, MLKEM_K,
-    forall(k1, 0, MLKEM_K,
-      array_bound(a->vec[k0].vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT))))
+  requires(forall(k0, 0, MLKEM_K * MLKEM_K,
+                  array_bound(a[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
   requires(forall(k1, 0, MLKEM_K,
-     array_abs_bound(v->vec[k1].coeffs, 0, MLKEM_N, MLK_NTT_BOUND)))
+     array_abs_bound(v[k1].coeffs, 0, MLKEM_N, MLK_NTT_BOUND)))
   requires(forall(k2, 0, MLKEM_K,
-     array_abs_bound(vc->vec[k2].coeffs, 0, MLKEM_N/2, MLKEM_Q)))
-  assigns(memory_slice(out, sizeof(mlk_polyvec)))
+     array_abs_bound(vc[k2].coeffs, 0, MLKEM_N/2, MLKEM_Q)))
+  assigns(object_whole(out))
   ensures(forall(k3, 0, MLKEM_K,
-    array_abs_bound(out->vec[k3].coeffs, 0, MLKEM_N, INT16_MAX/2))))
+    array_abs_bound(out[k3].coeffs, 0, MLKEM_N, INT16_MAX/2))))
 {
-  unsigned i;
-  for (i = 0; i < MLKEM_K; i++)
-  __loop__(
-    assigns(i, memory_slice(out, sizeof(mlk_polyvec)))
-    invariant(i <= MLKEM_K)
-    invariant(forall(k, 0, i,
-      array_abs_bound(out->vec[k].coeffs, 0, MLKEM_N, INT16_MAX/2))))
-  {
-    mlk_polyvec_basemul_acc_montgomery_cached(&out->vec[i], &a->vec[i], v, vc);
-  }
+  /* Temporary on the "refine-bounds" branch - unroll to a simple
+   * sequence of calls for each possible value of MLKEM_K to
+   * simplify proof.
+   */
+  mlk_polyvec_basemul_acc_montgomery_cached(&out[0], &a[0], v, vc);
+  mlk_polyvec_basemul_acc_montgomery_cached(&out[1], &a[MLKEM_K], v, vc);
+
+#if MLKEM_K == 3
+  mlk_polyvec_basemul_acc_montgomery_cached(&out[2], &a[MLKEM_K * 2], v, vc);
+#elif MLKEM_K == 4
+  mlk_polyvec_basemul_acc_montgomery_cached(&out[2], &a[MLKEM_K * 2], v, vc);
+  mlk_polyvec_basemul_acc_montgomery_cached(&out[3], &a[MLKEM_K * 3], v, vc);
+#endif
+
+  //  unsigned i;
+  //  for (i = 0; i < MLKEM_K; i++)
+  //  __loop__(
+  //      assigns(i, object_whole(out))
+  //      invariant(i <= MLKEM_K)
+  //      invariant(forall(k, 0, i,
+  //        array_abs_bound(out[k].coeffs, 0, MLKEM_N, INT16_MAX/2))))
+  //  {
+  //    mlk_polyvec_basemul_acc_montgomery_cached(&out[i], &a[MLKEM_K * i], v,
+  //    vc);
+  //  }
 }
 
 /* Reference: `indcpa_keypair_derand()` in the reference implementation @[REF].

@@ -6,6 +6,6 @@
 
 void harness(void)
 {
-  mlk_polyvec *a;
+  mlk_poly *a;
   mlk_polyvec_reduce(a);
 }

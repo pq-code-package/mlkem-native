@@ -39,7 +39,7 @@
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
+void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
                     int transposed)
 __contract__(
   requires(memory_no_alias(a, sizeof(mlk_polymat)))
