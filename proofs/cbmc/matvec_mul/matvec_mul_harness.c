@@ -5,15 +5,15 @@
 #include "indcpa.h"
 #include "poly_k.h"
 
-#define mlk_matvec_mul MLK_NAMESPACE(matvec_mul)
-void mlk_matvec_mul(mlk_polyvec *out, const mlk_polymat *a,
-                    mlk_polyvec const *v, mlk_polyvec_mulcache const *vc);
+#define mlk_matvec_mul MLK_ADD_PARAM_SET(mlk_matvec_mul)
+void mlk_matvec_mul(mlk_polyvec out, const mlk_polymat a, const mlk_polyvec v,
+                    const mlk_polyvec_mulcache vc);
 
 void harness(void)
 {
-  mlk_polyvec *out;
-  mlk_polymat *a;
-  mlk_polyvec *v;
-  mlk_polyvec_mulcache *vc;
+  mlk_poly *out;
+  mlk_poly *a;
+  mlk_poly *v;
+  mlk_poly_mulcache *vc;
   mlk_matvec_mul(out, a, v, vc);
 }
