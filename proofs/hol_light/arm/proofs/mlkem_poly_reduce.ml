@@ -98,6 +98,32 @@ let mlkem_poly_reduce_mc = define_assert_from_elf
 let MLKEM_POLY_REDUCE_EXEC = ARM_MK_EXEC_RULE mlkem_poly_reduce_mc;;
 
 (* ------------------------------------------------------------------------- *)
+(* Code length constants                                                     *)
+(* ------------------------------------------------------------------------- *)
+
+let LENGTH_MLKEM_POLY_REDUCE_MC =
+  REWRITE_CONV[mlkem_poly_reduce_mc] `LENGTH mlkem_poly_reduce_mc`
+  |> CONV_RULE (RAND_CONV LENGTH_CONV);;
+
+let MLKEM_POLY_REDUCE_PREAMBLE_LENGTH = new_definition
+  `MLKEM_POLY_REDUCE_PREAMBLE_LENGTH = 0`;;
+
+let MLKEM_POLY_REDUCE_POSTAMBLE_LENGTH = new_definition
+  `MLKEM_POLY_REDUCE_POSTAMBLE_LENGTH = 4`;;
+
+let MLKEM_POLY_REDUCE_CORE_START = new_definition
+  `MLKEM_POLY_REDUCE_CORE_START = MLKEM_POLY_REDUCE_PREAMBLE_LENGTH`;;
+
+let MLKEM_POLY_REDUCE_CORE_END = new_definition
+  `MLKEM_POLY_REDUCE_CORE_END = LENGTH mlkem_poly_reduce_mc - MLKEM_POLY_REDUCE_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLKEM_POLY_REDUCE_MC;
+              MLKEM_POLY_REDUCE_CORE_START; MLKEM_POLY_REDUCE_CORE_END;
+              MLKEM_POLY_REDUCE_PREAMBLE_LENGTH; MLKEM_POLY_REDUCE_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0] ;;
+
+(* ------------------------------------------------------------------------- *)
 (* Some lemmas, tactics etc.                                                 *)
 (* ------------------------------------------------------------------------- *)
 
@@ -122,21 +148,22 @@ let overall_lemma = prove
 
 let MLKEM_POLY_REDUCE_CORRECT = prove
  (`!a x pc.
-        nonoverlapping (word pc,0x124) (a,512)
+        nonoverlapping (word pc,LENGTH mlkem_poly_reduce_mc) (a,512)
         ==> ensures arm
              (\s. aligned_bytes_loaded s (word pc) mlkem_poly_reduce_mc /\
-                  read PC s = word pc /\
+                  read PC s = word (pc + MLKEM_POLY_REDUCE_CORE_START) /\
                   C_ARGUMENTS [a] s /\
                   !i. i < 256
                       ==> read(memory :> bytes16(word_add a (word(2 * i)))) s =
                           x i)
-             (\s. read PC s = word(pc + 0x120) /\
+             (\s. read PC s = word(pc + MLKEM_POLY_REDUCE_CORE_END) /\
                   !i. i < 256
                       ==> ival(read(memory :> bytes16
                                  (word_add a (word(2 * i)))) s) =
                           ival(x i) rem &3329)
              (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(a,512)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC [`a:int64`; `x:num->int16`; `pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
               NONOVERLAPPING_CLAUSES] THEN
@@ -187,7 +214,7 @@ let MLKEM_POLY_REDUCE_CORRECT = prove
 
 let MLKEM_POLY_REDUCE_SUBROUTINE_CORRECT = prove
  (`!a x pc returnaddress.
-        nonoverlapping (word pc,0x124) (a,512)
+        nonoverlapping (word pc,LENGTH mlkem_poly_reduce_mc) (a,512)
         ==> ensures arm
              (\s. aligned_bytes_loaded s (word pc) mlkem_poly_reduce_mc /\
                   read PC s = word pc /\
@@ -203,10 +230,12 @@ let MLKEM_POLY_REDUCE_SUBROUTINE_CORRECT = prove
                           ival(x i) rem &3329)
              (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(a,512)])`,
+ CONV_TAC LENGTH_SIMPLIFY_CONV THEN
  let TWEAK_CONV =
     ONCE_DEPTH_CONV EXPAND_CASES_CONV THENC
     ONCE_DEPTH_CONV NUM_MULT_CONV THENC
-    PURE_REWRITE_CONV [WORD_ADD_0] in
+    PURE_REWRITE_CONV [WORD_ADD_0]
+     in
   CONV_TAC TWEAK_CONV THEN
   ARM_ADD_RETURN_NOSTACK_TAC MLKEM_POLY_REDUCE_EXEC
-   (CONV_RULE TWEAK_CONV MLKEM_POLY_REDUCE_CORRECT));;
+   (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_POLY_REDUCE_CORRECT)));;

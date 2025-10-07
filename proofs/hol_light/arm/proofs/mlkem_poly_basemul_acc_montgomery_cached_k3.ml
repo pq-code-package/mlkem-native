@@ -278,6 +278,17 @@ let basemul3_odd = define
  let poly_basemul_acc_montgomery_cached_k3_EXEC = ARM_MK_EXEC_RULE poly_basemul_acc_montgomery_cached_k3_mc;;
 
  (* ------------------------------------------------------------------------- *)
+ (* Code length constants                                                     *)
+ (* ------------------------------------------------------------------------- *)
+
+ let LENGTH_POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K3_MC =
+   REWRITE_CONV[poly_basemul_acc_montgomery_cached_k3_mc] `LENGTH poly_basemul_acc_montgomery_cached_k3_mc`
+   |> CONV_RULE (RAND_CONV LENGTH_CONV);;
+
+ let LENGTH_SIMPLIFY_CONV =
+   REWRITE_CONV[LENGTH_POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K3_MC];;
+
+ (* ------------------------------------------------------------------------- *)
  (* Hacky tweaking conversion to write away non-free state component reads.   *)
  (* ------------------------------------------------------------------------- *)
 
@@ -378,6 +389,7 @@ let basemul3_odd = define
   (* ------------------------------------------------------------------------- *)
 
  let poly_basemul_acc_montgomery_cached_k3_SPEC = prove (poly_basemul_acc_montgomery_cached_k3_GOAL,
+       CONV_TAC LENGTH_SIMPLIFY_CONV THEN
        REWRITE_TAC [MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI;
         MODIFIABLE_SIMD_REGS;
         NONOVERLAPPING_CLAUSES; ALL; C_ARGUMENTS; fst poly_basemul_acc_montgomery_cached_k3_EXEC] THEN
