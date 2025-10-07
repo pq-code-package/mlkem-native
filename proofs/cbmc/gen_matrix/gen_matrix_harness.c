@@ -7,7 +7,7 @@
 
 void harness(void)
 {
-  mlk_polymat *a;
+  mlk_poly *a;
   uint8_t *seed;
   int transposed;
   mlk_gen_matrix(a, seed, transposed);
