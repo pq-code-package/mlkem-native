@@ -76,7 +76,14 @@ endif
 # Include retained variables #
 ##############################
 
+
+# Force AUTO=0 when cross-compiling to avoid host architecture detection
+ifneq ($(CROSS_PREFIX),)
+override AUTO:=0
+else
 AUTO ?= 1
+endif
+
 CYCLES ?=
 OPT ?= 1
 RETAINED_VARS := CROSS_PREFIX CYCLES OPT AUTO
