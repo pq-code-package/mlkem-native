@@ -22,6 +22,9 @@ inputs:
   cflags:
     description: CFLAGS to pass to compilation
     default: ""
+  ldflags:
+    description: LDFLAGS to pass to linking
+    default: ""
   compile_mode:
     description: all | native | cross-x86_64 | cross-aarch64 | cross-riscv64 | cross-riscv32
     default: "native"
@@ -62,6 +65,7 @@ runs:
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
           cflags: ${{ inputs.cflags }}
+          ldflags: ${{ inputs.ldflags }}
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
@@ -80,6 +84,7 @@ runs:
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
           cflags: "${{ inputs.cflags }} -DMLK_FORCE_X86_64"
+          ldflags: ${{ inputs.ldflags }}
           cross_prefix: x86_64-unknown-linux-gnu-
           exec_wrapper: qemu-x86_64
           opt: ${{ inputs.opt }}
@@ -100,6 +105,7 @@ runs:
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
           cflags: "${{ inputs.cflags }} -DMLK_FORCE_AARCH64"
+          ldflags: ${{ inputs.ldflags }}
           cross_prefix: aarch64-unknown-linux-gnu-
           exec_wrapper: qemu-aarch64
           opt: ${{ inputs.opt }}
@@ -120,6 +126,7 @@ runs:
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
           cflags: "${{ inputs.cflags }} -DMLK_FORCE_PPC64LE"
+          ldflags: ${{ inputs.ldflags }}
           cross_prefix: powerpc64le-unknown-linux-gnu-
           exec_wrapper: qemu-ppc64le
           opt: ${{ inputs.opt }}
@@ -140,6 +147,7 @@ runs:
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
           cflags: "${{ inputs.cflags }} -static  -DMLK_FORCE_AARCH64_EB"
+          ldflags: "${{ inputs.ldflags }} -static"
           cross_prefix: aarch64_be-none-linux-gnu-
           exec_wrapper: qemu-aarch64_be
           opt: ${{ inputs.opt }}
@@ -160,6 +168,7 @@ runs:
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
           cflags: "${{ inputs.cflags }} -DMLK_FORCE_RISCV64"
+          ldflags: ${{ inputs.ldflags }}
           cross_prefix: riscv64-unknown-linux-gnu-
           exec_wrapper: "qemu-riscv64 -cpu rv64,v=true,vlen=128"
           opt: ${{ inputs.opt }}
@@ -240,6 +249,7 @@ runs:
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
           cflags: "${{ inputs.cflags }} -DMLK_FORCE_RISCV32"
+          ldflags: ${{ inputs.ldflags }}
           cross_prefix: riscv32-unknown-linux-gnu-
           exec_wrapper: qemu-riscv32
           opt: ${{ inputs.opt }}
