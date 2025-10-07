@@ -6,6 +6,6 @@
 
 void harness(void)
 {
-  mlk_polyvec *r, *b;
+  mlk_poly *r, *b;
   mlk_polyvec_add(r, b);
 }

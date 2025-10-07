@@ -277,6 +277,7 @@ __contract__(
   requires(memory_no_alias(x, sizeof(mlk_poly_mulcache)))
   requires(memory_no_alias(a, sizeof(mlk_poly)))
   assigns(memory_slice(x, sizeof(mlk_poly_mulcache)))
+  ensures(array_abs_bound(x->coeffs, 0, MLKEM_N/2, MLKEM_Q))
 )
 {
   unsigned i;
