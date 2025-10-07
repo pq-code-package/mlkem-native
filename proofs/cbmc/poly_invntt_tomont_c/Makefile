@@ -20,7 +20,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_poly_invntt_tomont_c
-USE_FUNCTION_CONTRACTS=mlk_fqmul mlk_invntt_layer
+USE_FUNCTION_CONTRACTS=mlk_invntt_layer7_invert mlk_invntt_layer6 mlk_invntt_layer54 mlk_invntt_layer321
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

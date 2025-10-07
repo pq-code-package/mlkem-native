@@ -309,8 +309,6 @@ void mlk_poly_mulcache_compute(mlk_poly_mulcache *x, const mlk_poly *a)
   mlk_poly_mulcache_compute_c(x, a);
 }
 
-#if !defined(MLK_USE_NATIVE_NTT)
-
 /* 1.1 Forward NTT - Optimized C implementation
  * --------------------------------------------
  *
@@ -428,20 +426,20 @@ __contract__(
     const unsigned ci7 = ci0 + 224;
 
     /* Layer 1 */
-    mlk_ct_butterfly(r, ci0, ci4, zetas[1]);
-    mlk_ct_butterfly(r, ci1, ci5, zetas[1]);
-    mlk_ct_butterfly(r, ci2, ci6, zetas[1]);
-    mlk_ct_butterfly(r, ci3, ci7, zetas[1]);
+    mlk_ct_butterfly(r, ci0, ci4, mlk_zetas[1]);
+    mlk_ct_butterfly(r, ci1, ci5, mlk_zetas[1]);
+    mlk_ct_butterfly(r, ci2, ci6, mlk_zetas[1]);
+    mlk_ct_butterfly(r, ci3, ci7, mlk_zetas[1]);
     /* Layer 2 */
-    mlk_ct_butterfly(r, ci0, ci2, zetas[2]);
-    mlk_ct_butterfly(r, ci1, ci3, zetas[2]);
-    mlk_ct_butterfly(r, ci4, ci6, zetas[3]);
-    mlk_ct_butterfly(r, ci5, ci7, zetas[3]);
+    mlk_ct_butterfly(r, ci0, ci2, mlk_zetas[2]);
+    mlk_ct_butterfly(r, ci1, ci3, mlk_zetas[2]);
+    mlk_ct_butterfly(r, ci4, ci6, mlk_zetas[3]);
+    mlk_ct_butterfly(r, ci5, ci7, mlk_zetas[3]);
     /* Layer 3 */
-    mlk_ct_butterfly(r, ci0, ci1, zetas[4]);
-    mlk_ct_butterfly(r, ci2, ci3, zetas[5]);
-    mlk_ct_butterfly(r, ci4, ci5, zetas[6]);
-    mlk_ct_butterfly(r, ci6, ci7, zetas[7]);
+    mlk_ct_butterfly(r, ci0, ci1, mlk_zetas[4]);
+    mlk_ct_butterfly(r, ci2, ci3, mlk_zetas[5]);
+    mlk_ct_butterfly(r, ci4, ci5, mlk_zetas[6]);
+    mlk_ct_butterfly(r, ci6, ci7, mlk_zetas[7]);
   }
 }
 
@@ -462,9 +460,9 @@ __contract__(
   const unsigned l5zi1 = l4zi * 2;
   const unsigned l5zi2 = l5zi1 + 1;
 
-  const int16_t z1 = zetas[l4zi];
-  const int16_t z2 = zetas[l5zi1];
-  const int16_t z3 = zetas[l5zi2];
+  const int16_t z1 = mlk_zetas[l4zi];
+  const int16_t z2 = mlk_zetas[l5zi1];
+  const int16_t z3 = mlk_zetas[l5zi2];
 
   unsigned j;
   for (j = 0; j < 8; j++)
@@ -531,7 +529,7 @@ __contract__(
     invariant(array_abs_bound(r,     0,   j * 8, MLK_NTT_BOUND7))
     invariant(array_abs_bound(r, j * 8, MLKEM_N, MLK_NTT_BOUND6)))
   {
-    const int16_t zeta = zetas[j + 32];
+    const int16_t zeta = mlk_zetas[j + 32];
     const unsigned ci0 = j * 8;
 
     /* Process 8 coefficients here, all of which need the same Zeta value */
@@ -556,7 +554,7 @@ __contract__(
     invariant(array_abs_bound(r,     0,   j * 4, MLK_NTT_BOUND8))
     invariant(array_abs_bound(r, j * 4, MLKEM_N, MLK_NTT_BOUND7)))
   {
-    const int16_t zeta = zetas[j + 64];
+    const int16_t zeta = mlk_zetas[j + 64];
     const unsigned ci0 = j * 4;
 
     /* Process 4 coefficients here, all of which need the same Zeta value */
@@ -716,7 +714,7 @@ __contract__(
   )
   {
     /* Process 4 coefficients here, all of which need the same Zeta value */
-    const int16_t zeta = zetas[127 - i];
+    const int16_t zeta = mlk_zetas[127 - i];
     const unsigned ci0 = i * 4;
     const unsigned ci1 = ci0 + 1;
     const unsigned ci2 = ci0 + 2;
@@ -752,7 +750,7 @@ __contract__(
     invariant(array_abs_bound(r, i * 8, MLKEM_N, MLK_NTT_BOUND1))
   )
   {
-    const int16_t zeta = zetas[63 - i];
+    const int16_t zeta = mlk_zetas[63 - i];
     const unsigned ci0 = i * 8;
 
     /* Process 8 coefficients here, all of which need the same Zeta value */
@@ -785,9 +783,9 @@ __contract__(
   const unsigned l5zi1 = l4zi * 2;
   const unsigned l5zi2 = l5zi1 + 1;
 
-  const int16_t l4zeta = zetas[l4zi];
-  const int16_t l5zeta1 = zetas[l5zi1];
-  const int16_t l5zeta2 = zetas[l5zi2];
+  const int16_t l4zeta = mlk_zetas[l4zi];
+  const int16_t l5zeta1 = mlk_zetas[l5zi1];
+  const int16_t l5zeta2 = mlk_zetas[l5zi2];
 
   unsigned j;
   for (j = 0; j < 8; j++)
@@ -870,20 +868,20 @@ __contract__(
     const unsigned ci224 = j + 224;
 
     /* Layer 3 */
-    mlk_gs_butterfly_defer(r, ci0, ci32, zetas[7]);
-    mlk_gs_butterfly_defer(r, ci64, ci96, zetas[6]);
-    mlk_gs_butterfly_defer(r, ci128, ci160, zetas[5]);
-    mlk_gs_butterfly_defer(r, ci192, ci224, zetas[4]);
+    mlk_gs_butterfly_defer(r, ci0, ci32, mlk_zetas[7]);
+    mlk_gs_butterfly_defer(r, ci64, ci96, mlk_zetas[6]);
+    mlk_gs_butterfly_defer(r, ci128, ci160, mlk_zetas[5]);
+    mlk_gs_butterfly_defer(r, ci192, ci224, mlk_zetas[4]);
     /* Layer 2 */
-    mlk_gs_butterfly_defer(r, ci0, ci64, zetas[3]);
-    mlk_gs_butterfly_defer(r, ci32, ci96, zetas[3]);
-    mlk_gs_butterfly_defer(r, ci128, ci192, zetas[2]);
-    mlk_gs_butterfly_defer(r, ci160, ci224, zetas[2]);
+    mlk_gs_butterfly_defer(r, ci0, ci64, mlk_zetas[3]);
+    mlk_gs_butterfly_defer(r, ci32, ci96, mlk_zetas[3]);
+    mlk_gs_butterfly_defer(r, ci128, ci192, mlk_zetas[2]);
+    mlk_gs_butterfly_defer(r, ci160, ci224, mlk_zetas[2]);
     /* Layer 1 */
-    mlk_gs_butterfly_defer(r, ci0, ci128, zetas[1]);
-    mlk_gs_butterfly_defer(r, ci32, ci160, zetas[1]);
-    mlk_gs_butterfly_defer(r, ci64, ci192, zetas[1]);
-    mlk_gs_butterfly_defer(r, ci96, ci224, zetas[1]);
+    mlk_gs_butterfly_defer(r, ci0, ci128, mlk_zetas[1]);
+    mlk_gs_butterfly_defer(r, ci32, ci160, mlk_zetas[1]);
+    mlk_gs_butterfly_defer(r, ci64, ci192, mlk_zetas[1]);
+    mlk_gs_butterfly_defer(r, ci96, ci224, mlk_zetas[1]);
   }
 }
 
