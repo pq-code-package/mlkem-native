@@ -24,6 +24,11 @@ SHELL := /bin/bash
 
 all: build
 
+# Extra Makefile to include, e.g., for baremetal targets
+ifneq ($(EXTRA_MAKEFILE),)
+include $(EXTRA_MAKEFILE)
+endif
+
 W := $(EXEC_WRAPPER)
 
 include test/mk/config.mk
