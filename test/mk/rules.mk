@@ -3,17 +3,17 @@
 $(BUILD_DIR)/mlkem512/bin/%: $(CONFIG)
 	$(Q)echo "  LD      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(LD) $(CFLAGS) -o $@ $(filter %.o,$^) $(LDLIBS)
+	$(Q)$(LD) $(LDFLAGS) -o $@ $(filter %.o,$^) $(LDLIBS)
 
 $(BUILD_DIR)/mlkem768/bin/%: $(CONFIG)
 	$(Q)echo "  LD      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(LD) $(CFLAGS) -o $@ $(filter %.o,$^) $(LDLIBS)
+	$(Q)$(LD) $(LDFLAGS) -o $@ $(filter %.o,$^) $(LDLIBS)
 
 $(BUILD_DIR)/mlkem1024/bin/%: $(CONFIG)
 	$(Q)echo "  LD      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(LD) $(CFLAGS) -o $@ $(filter %.o,$^) $(LDLIBS)
+	$(Q)$(LD) $(LDFLAGS) -o $@ $(filter %.o,$^) $(LDLIBS)
 
 $(BUILD_DIR)/%.a: $(CONFIG)
 	$(Q)echo "  AR      $@"

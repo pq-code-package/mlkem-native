@@ -17,6 +17,9 @@ inputs:
   archflags:
     description: ARCHFLAGS to pass to compilation
     default: ""
+  ldflags:
+    description: LDFLAGS to pass to compilation
+    default: ""
   opt:
     description: opt flag to set for tests script
     default: "true"
@@ -75,11 +78,13 @@ runs:
       run: |
         ./scripts/tests bench -c ${{ inputs.perf }} --cross-prefix="${{ inputs.cross_prefix }}" \
               --cflags="${{ inputs.cflags }} ${{ inputs.archflags }}" \
+              --ldflags="${{ inputs.ldflags }}" \
               --opt=$([[ ${{ inputs.opt }} == "false" ]] && echo "no_opt" || echo "opt")  \
               -v --output=output.json ${{ inputs.bench_extra_args }}
 
         ./scripts/tests bench --components -c ${{ inputs.perf }} --cross-prefix="${{ inputs.cross_prefix }}" \
               --cflags="${{ inputs.cflags }} ${{ inputs.archflags }}" \
+              --ldflags="${{ inputs.ldflags }}" \
               --opt=$([[ ${{ inputs.opt }} == "false" ]] && echo "no_opt" || echo "opt")  \
               -v  ${{ inputs.bench_extra_args }}
     - name: Check namespace

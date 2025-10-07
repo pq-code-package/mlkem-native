@@ -30,6 +30,9 @@ on:
       archflags:
         description: Custom ARCH flags for compilation
         default: ''
+      ldflags:
+        description: Custom LDFLAGS for linking
+        default: ''
       opt:
         description: Benchmark optimized, non-optimized, or both
         type: choice
@@ -58,6 +61,7 @@ jobs:
       ec2_ami: ${{ inputs.ec2_ami }}
       ec2_ami_id: ${{ inputs.ec2_ami_id }}
       cflags: ${{ inputs.cflags }}
+      ldflags: ${{ inputs.ldflags }}
       archflags: ${{ inputs.archflags }}
       opt: ${{ inputs.opt }}
       name: ${{ inputs.name }}
