@@ -371,17 +371,18 @@ __contract__(
   mlk_polyvec_basemul_acc_montgomery_cached(&out[3], &a[MLKEM_K * 3], v, vc);
 #endif
 
-  //  unsigned i;
-  //  for (i = 0; i < MLKEM_K; i++)
-  //  __loop__(
-  //      assigns(i, object_whole(out))
-  //      invariant(i <= MLKEM_K)
-  //      invariant(forall(k, 0, i,
-  //        array_abs_bound(out[k].coeffs, 0, MLKEM_N, INT16_MAX/2))))
-  //  {
-  //    mlk_polyvec_basemul_acc_montgomery_cached(&out[i], &a[MLKEM_K * i], v,
-  //    vc);
-  //  }
+  /* unsigned i;
+   * for (i = 0; i < MLKEM_K; i++)
+   * __loop__(
+   *    assigns(i, object_whole(out))
+   *    invariant(i <= MLKEM_K)
+   *    invariant(forall(k, 0, i,
+   *     array_abs_bound(out[k].coeffs, 0, MLKEM_N, INT16_MAX/2))))
+   * {
+   *   mlk_polyvec_basemul_acc_montgomery_cached(&out[i], &a[MLKEM_K * i], v,
+   * vc);
+   * }
+   */
 }
 
 /* Reference: `indcpa_keypair_derand()` in the reference implementation @[REF].
