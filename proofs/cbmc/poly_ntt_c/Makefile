@@ -20,7 +20,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_poly_ntt_c
-USE_FUNCTION_CONTRACTS=mlk_ntt_layer
+USE_FUNCTION_CONTRACTS=mlk_ntt_layer123 mlk_ntt_layer45 mlk_ntt_layer6 mlk_ntt_layer7
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
