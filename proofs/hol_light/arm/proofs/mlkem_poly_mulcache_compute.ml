@@ -138,9 +138,8 @@ let poly_mulcache_compute_SPEC = prove(poly_mulcache_compute_GOAL,
        Note that we simplify eagerly after every step.
        This reduces the proof time *)
     REPEAT STRIP_TAC THEN
-    MAP_EVERY (fun n -> ARM_STEPS_TAC poly_mulcache_compute_EXEC [n] THEN
-               (SIMD_SIMPLIFY_TAC [barmul]))
-              (1--181) THEN
+    MAP_UNTIL_TARGET_PC (fun n -> ARM_STEPS_TAC poly_mulcache_compute_EXEC [n] THEN
+               (SIMD_SIMPLIFY_TAC [barmul])) 1 THEN
     ENSURES_FINAL_STATE_TAC THEN
     REPEAT CONJ_TAC THEN
     ASM_REWRITE_TAC [] THEN
