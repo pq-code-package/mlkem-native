@@ -35,6 +35,17 @@
 #define V_ZETA  10
 #define V1441   10
 
+.macro Compute_4Coeffs
+	vsubuhm 25, 8, 21		# r[j+len] - t
+	vsubuhm 26, 12, 22		# r[j+len] - t
+	vsubuhm 30, 16, 23		# r[j+len] - t
+	vsubuhm 31, 20, 24		# r[j+len] - t
+	vadduhm 8, 8, 21		# r[j+len] + t
+	vadduhm 12, 12, 22		# r[j+len] + t
+	vadduhm 16, 16, 23		# r[j+len] + t
+	vadduhm 20, 20, 24		# r[j+len] + t
+.endm
+
 .macro Load_4Coeffs start next step
 	mr	9, \start	# j
 	add	10, 7, 9	# J + len*2
@@ -62,14 +73,64 @@
 	xxpermdi 32+23, 32+23, 32+23, 2
 	xxpermdi 32+24, 32+24, 32+24, 2
 
-	vsubuhm 25, 8, 21		# r[j+len] - t
-	vsubuhm 26, 12, 22		# r[j+len] - t
-	vsubuhm 30, 16, 23		# r[j+len] - t
-	vsubuhm 31, 20, 24		# r[j+len] - t
-	vadduhm 8, 8, 21		# r[j+len] + t
-	vadduhm 12, 12, 22		# r[j+len] + t
-	vadduhm 16, 16, 23		# r[j+len] + t
-	vadduhm 20, 20, 24		# r[j+len] + t
+	Compute_4Coeffs
+.endm
+
+#
+# Load Coeffients and setup vectors
+#    aj0, aj1, ajlen2, ajlen3, aj4, aj5, ajlen6, ajlen7
+#    aj8, aj9, ajlen10, ajlen11, aj12, aj13, ajlen14, ajlen15
+#
+#  a[j]=      aj0, aj1, aj8, aj9, aj4, aj5, aj12, aj13
+#  a[j+len]=  ajlen2, ajlen3, ajlen10, ajlen11, ajlen6, ajlen7, ajlen14, ajlen15
+#
+.macro Load_L24Coeffs
+        lxv     32+25, 0(5)     # a[j], r[j+len]
+        lxv     32+26, 16(5)    # a[j], r[j+len]
+        vmrgew 8, 25, 26
+        vmrgow 21, 25, 26
+        lxv     32+25, 32(5)    # a[j], r[j+len]
+        lxv     32+26, 48(5)    # a[j], r[j+len]
+        vmrgew 12, 25, 26
+        vmrgow 22, 25, 26
+        lxv     32+25, 64(5)    # a[j], r[j+len]
+        lxv     32+26, 80(5)    # a[j], r[j+len]
+        vmrgew 16, 25, 26
+        vmrgow 23, 25, 26
+        lxv     32+25, 96(5)    # a[j], r[j+len]
+        lxv     32+26, 112(5)   # a[j], r[j+len]
+        vmrgew 20, 25, 26
+        vmrgow 24, 25, 26
+.endm
+
+#
+# Permute
+#  rj0, rj1, rj2, rj3, rjlen4, rjlen5, rjlen6, rjlen7
+#  rj8, rj9, rj10, rj11, rjlen12, rjlen13, rjlen14, rjlen15
+#
+# to
+#  rjlen4 - rjlen7, rjlen12 - rjlen15
+#  rj0 - rj4, rj8 - rj11
+#
+.macro Load_L44Coeffs
+        lxv     10, 0(5)         # rj0, rj1, rj2, rj3,
+                                # rjlen4, rjlen5, rjlen6, rjlen7
+        lxv     11, 16(5)        # rj8, rj9, rj10, rj11
+                                # rjlen12, rjlen13, rjlen14, rjlen15
+        xxpermdi 32+8, 11, 10, 0 # rjlen4 - rjlen7, rjlen12 - rjlen15
+        xxpermdi 32+21, 11, 10, 3 # rj0 - rj4, rj8 - rj11
+        lxv     10, 32(5)
+        lxv     11, 48(5)
+        xxpermdi 32+12, 11, 10, 0
+        xxpermdi 32+22, 11, 10, 3
+        lxv     10, 64(5)
+        lxv     11, 80(5)
+        xxpermdi 32+16, 11, 10, 0
+        xxpermdi 32+23, 11, 10, 3
+        lxv     10, 96(5)
+        lxv     11, 112(5)
+        xxpermdi 32+20, 11, 10, 0
+        xxpermdi 32+24, 11, 10, 3
 .endm
 
 .macro BREDUCE_4X _v0 _v1 _v2 _v3
@@ -130,7 +191,7 @@
 .endm
 
 #-----------------------------------
-# MREDUCE_4X(len, start, _vz0, _vz1, _vz2, _vz3)
+# MREDUCE_4X(_vz0, _vz1, _vz2, _vz3, _vo0, _vo1, _vo2, _vo3)
 #
 .macro MREDUCE_4X _vz0 _vz1 _vz2 _vz3 _vo0 _vo1 _vo2 _vo3
 	# Modular multification bond by 2^16 * q in abs value
@@ -209,34 +270,88 @@
 	stxv	\_vs7, -16(3)
 .endm
 
-.macro Write_Len2_4C _vs0 _vs1 _vs2 _vs3
-        xxmrglw 32+12, \_vs0, 10
-        xxmrghw 32+11, \_vs0, 10
-        xxpermdi 10, 32+12, 32+11, 3
-        xxmrglw 32+16, \_vs1, 11
-        xxmrghw 32+15, \_vs1, 11
-        xxpermdi 11, 32+16, 32+15, 3
-        xxmrglw 32+12, \_vs2, 12
-        xxmrghw 32+11, \_vs2, 12
-        xxpermdi 12, 32+12, 32+11, 3
-        xxmrglw 32+16, \_vs3, 13
-        xxmrghw 32+15, \_vs3, 13
-        xxpermdi 13, 32+16, 32+15, 3
-        stxvd2x   10, 3, 9
-        stxvd2x   11, 3, 16
-        stxvd2x   12, 3, 18
-        stxvd2x   13, 3, 20
+.macro PermWriteL44
+	xxlor	32+14, 10, 10
+	xxlor	32+19, 11, 11
+	xxlor	32+24, 12, 12
+	xxlor	32+29, 13, 13
+	xxpermdi 32+10, 32+13, 32+14, 3
+	xxpermdi 32+11, 32+13, 32+14, 0
+	xxpermdi 32+12, 32+18, 32+19, 3
+	xxpermdi 32+13, 32+18, 32+19, 0
+	xxpermdi 32+14, 32+23, 32+24, 3
+	xxpermdi 32+15, 32+23, 32+24, 0
+	xxpermdi 32+16, 32+28, 32+29, 3
+	xxpermdi 32+17, 32+28, 32+29, 0
+        stxv    32+10, 0(5)
+        stxv    32+11, 16(5)
+        stxv    32+12, 32(5)
+        stxv    32+13, 48(5)
+        stxv    32+14, 64(5)
+        stxv    32+15, 80(5)
+        stxv    32+16, 96(5)
+        stxv    32+17, 112(5)
 .endm
 
-.macro Write_Len4_4C _vs0 _vs1 _vs2 _vs3
-	xxpermdi 10, 10, \_vs0, 3
-	xxpermdi 11, 11, \_vs1, 3
-	xxpermdi 12, 12, \_vs2, 3
-	xxpermdi 13, 13, \_vs3, 3
-        stxvd2x   10, 3, 9
-        stxvd2x   11, 3, 16
-        stxvd2x   12, 3, 18
-        stxvd2x   13, 3, 20
+.macro PermWriteL24
+	xxlor	32+14, 10, 10
+	xxlor	32+19, 11, 11
+	xxlor	32+24, 12, 12
+	xxlor	32+29, 13, 13
+        vmrgew 10, 13, 14
+        vmrgow 11, 13, 14
+        vmrgew 12, 18, 19
+        vmrgow 13, 18, 19
+        vmrgew 14, 23, 24
+        vmrgow 15, 23, 24
+        vmrgew 16, 28, 29
+        vmrgow 17, 28, 29
+        stxv    32+10, 0(5)
+        stxv    32+11, 16(5)
+        stxv    32+12, 32(5)
+        stxv    32+13, 48(5)
+        stxv    32+14, 64(5)
+        stxv    32+15, 80(5)
+        stxv    32+16, 96(5)
+        stxv    32+17, 112(5)
+.endm
+
+.macro INTT_REDUCE_L24
+	Load_L24Coeffs
+	Compute_4Coeffs
+	BREDUCE_4X 4, 9, 13, 17
+	xxlor	10, 32+4, 32+4
+	xxlor	11, 32+9, 32+9
+	xxlor	12, 32+13, 32+13
+	xxlor	13, 32+17, 32+17
+	Set_mont_consts
+	Load_next_4zetas
+	MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, 13, 18, 23, 28
+	PermWriteL24
+.endm
+
+.macro INTT_REDUCE_L44
+	Load_L44Coeffs
+	Compute_4Coeffs
+	BREDUCE_4X 4, 9, 13, 17
+	xxlor	10, 32+4, 32+4
+	xxlor	11, 32+9, 32+9
+	xxlor	12, 32+13, 32+13
+	xxlor	13, 32+17, 32+17
+	Set_mont_consts
+	Load_next_4zetas
+	MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, 13, 18, 23, 28
+	PermWriteL44
+.endm
+
+.macro INTT_REDUCE_4X start next step
+	Load_4Coeffs \start, \next, \step
+	BREDUCE_4X 4, 9, 13, 17
+	Write_B4C 32+4, 32+9, 32+13, 32+17
+	Set_mont_consts
+	Load_next_4zetas
+	MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, 13, 18, 23, 28
+	Write_M4C 32+13, 32+18, 32+23, 32+28
 .endm
 
 # intt
@@ -300,164 +415,85 @@ MLK_ASM_FN_SYMBOL(intt_ppc)
 	vslw	9, 9, 10
 	xxlor	7, 32+9, 32+9	# V_25 syore at vs7
 
+        #
+        # Montgomery reduce loops with constant 1441
+        #
+        addi    14, 4, C1441_OFFSET
+        lvx     V1441, 0, 14
+        li      15, 4                   # loops
+        mtctr   15
+
+        Set_mont_consts
+intt_ppc__Loopf:
+        Reload_4coeffs
+        MREDUCE_4X V1441, V1441, V1441, V1441, 6, 7, 8, 9
+        Reload_4coeffs
+        MREDUCE_4X V1441, V1441, V1441, V1441, 13, 18, 23, 28
+        MWrite_8X 32+6, 32+7, 32+8, 32+9, 32+13, 32+18, 32+23, 32+28
+        bdnz    intt_ppc__Loopf
+
+        addi    3, 3, -512
+
 .align 4
 	#
 	# 1. len = 2, start = 0, 4, 8, 12,...244, 248, 252 
 	# Update zetas vectors, each vector has 2 zetas
-	addi	14, 4, IZETA_NTT_OFFSET127
+	addi	14, 4, ZETA_INTT_OFFSET
 	li	7, 4
 	li	15, 4
 	mtctr	15
-	li	5, 0
+	mr	5, 3
 intt_ppc__Loop2:
-	Load_4Coeffs 5, 16, 16
-	BREDUCE_4X 4, 9, 13, 17
-	xxlor	10, 32+4, 32+4
-	xxlor	11, 32+9, 32+9
-	xxlor	12, 32+13, 32+13
-	xxlor	13, 32+17, 32+17
-	Set_mont_consts
-	Load_next_4zetas
-	MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, 13, 18, 23, 28
-	Write_Len2_4C 32+13, 32+18, 32+23, 32+28
-
-	addi	5, 5, 64
-
-	Load_4Coeffs 5, 16, 16
-	BREDUCE_4X 4, 9, 13, 17
-	xxlor	10, 32+4, 32+4
-	xxlor	11, 32+9, 32+9
-	xxlor	12, 32+13, 32+13
-	xxlor	13, 32+17, 32+17
-	Set_mont_consts
-	Load_next_4zetas
-	MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, 13, 18, 23, 28
-	Write_Len2_4C 32+13, 32+18, 32+23, 32+28
-	addi	5, 5, 64
+	INTT_REDUCE_L24
+	addi	5, 5, 128
 	bdnz	intt_ppc__Loop2
 
 .align 4
 	#
 	# 2. len = 4, start = 0, 8, 16, 24,...232, 240, 248 
-	addi	14, 4, IZETA_NTT_OFFSET63
-	li	5, 0
+	mr	5, 3
 	li	7, 8
 	li	15, 4                   # loops
 	mtctr	15
 intt_ppc__Loop4:
-	Load_4Coeffs 5, 16, 16
-	BREDUCE_4X 4, 9, 13, 17
-	xxlor	10, 32+4, 32+4
-	xxlor	11, 32+9, 32+9
-	xxlor	12, 32+13, 32+13
-	xxlor	13, 32+17, 32+17
-	Set_mont_consts
-	Load_next_4zetas
-	MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, 13, 18, 23, 28
-	Write_Len4_4C 32+13, 32+18, 32+23, 32+28
-	addi	5, 5, 64
-
-	Load_4Coeffs 5, 16, 16
-	BREDUCE_4X 4, 9, 13, 17
-	xxlor	10, 32+4, 32+4
-	xxlor	11, 32+9, 32+9
-	xxlor	12, 32+13, 32+13
-	xxlor	13, 32+17, 32+17
-	Set_mont_consts
-	Load_next_4zetas
-	MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, 13, 18, 23, 28
-	Write_Len4_4C 32+13, 32+18, 32+23, 32+28
-	addi	5, 5, 64
+	INTT_REDUCE_L44
+	addi	5, 5, 128
 	bdnz	intt_ppc__Loop4
 
 .align 4
 	# 3. len = 8, start = 0, 16, 32, 48,...208, 224, 240 
-	#addi	14, 14, 512
 	li	7, 16
 	li	5, 0
+	li	15, 4                   # loops
+	mtctr	15
 
-	Load_4Coeffs 5, 32, 32
-	BREDUCE_4X 4, 9, 13, 17
-	Write_B4C 32+4, 32+9, 32+13, 32+17
-	Set_mont_consts
-	Load_next_4zetas
-	MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, 13, 18, 23, 28
-	Write_M4C 32+13, 32+18, 32+23, 32+28
-	li	5, 128
-
-	Load_4Coeffs 5, 32, 32
-	BREDUCE_4X 4, 9, 13, 17
-	Write_B4C 32+4, 32+9, 32+13, 32+17
-	Set_mont_consts
-	Load_next_4zetas
-	MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, 13, 18, 23, 28
-	Write_M4C 32+13, 32+18, 32+23, 32+28
-	li	5, 256
-
-	Load_4Coeffs 5, 32, 32
-	BREDUCE_4X 4, 9, 13, 17
-	Write_B4C 32+4, 32+9, 32+13, 32+17
-	Set_mont_consts
-	Load_next_4zetas
-	MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, 13, 18, 23, 28
-	Write_M4C 32+13, 32+18, 32+23, 32+28
-	li	5, 384
-
-	Load_4Coeffs 5, 32, 32
-	BREDUCE_4X 4, 9, 13, 17
-	Write_B4C 32+4, 32+9, 32+13, 32+17
-	Set_mont_consts
-	Load_next_4zetas
-	MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, 13, 18, 23, 28
-	Write_M4C 32+13, 32+18, 32+23, 32+28
+intt_ppc__Loop8:
+	INTT_REDUCE_4X 5, 32, 32
+	addi	5, 5, 128
+	bdnz	intt_ppc__Loop8
 
 .align 4
 	#
 	# 4. len = 16, start = 0, 32, 64,,...160, 192, 224
-	#addi	14, 14, 768
 	li	5, 0
 	li	7, 32
 
-	Load_4Coeffs 5, 64, 64
-	BREDUCE_4X 4, 9, 13, 17
-	Write_B4C 32+4, 32+9, 32+13, 32+17
-	Set_mont_consts
-	Load_next_4zetas
-	MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, 13, 18, 23, 28
-	Write_M4C 32+13, 32+18, 32+23, 32+28
+	INTT_REDUCE_4X 5, 64, 64
+
         li      5, 16
-	Load_4Coeffs 5, 64, 64
-	BREDUCE_4X 4, 9, 13, 17
-	Write_B4C 32+4, 32+9, 32+13, 32+17
-	Set_mont_consts
 	addi	14, 14, -64
-	Load_next_4zetas
-	MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, 13, 18, 23, 28
-	Write_M4C 32+13, 32+18, 32+23, 32+28
+	INTT_REDUCE_4X 5, 64, 64
 
         li      5, 256
-	Load_4Coeffs 5, 64, 64
-	BREDUCE_4X 4, 9, 13, 17
-	Write_B4C 32+4, 32+9, 32+13, 32+17
-	Set_mont_consts
-	Load_next_4zetas
-	MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, 13, 18, 23, 28
-	Write_M4C 32+13, 32+18, 32+23, 32+28
+	INTT_REDUCE_4X 5, 64, 64
 
         li      5, 272
-	Load_4Coeffs 5, 64, 64
-	BREDUCE_4X 4, 9, 13, 17
-	Write_B4C 32+4, 32+9, 32+13, 32+17
-	Set_mont_consts
 	addi	14, 14, -64
-	Load_next_4zetas
-        MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, 13, 18, 23, 28
-	Write_M4C 32+13, 32+18, 32+23, 32+28
+	INTT_REDUCE_4X 5, 64, 64
 
 .align 4
         #
         # 5. len = 32, start = 0, 64, 128, 192
-	#addi	14, 14, 896
 	li	5, 0
 	li	7, 64
 
@@ -503,7 +539,6 @@ intt_ppc__Loop4:
 .align 4
 	#
 	# 6. len = 64, start = 0, 128
-	#addi	14, 14, 960
 	li	5, 0
 	li	7, 128
 	Load_4Coeffs 5, 16, 16
@@ -546,7 +581,6 @@ intt_ppc__Loop4:
 .align 4
 	# 7. len = 128, start = 0
 	#
-	#addi	14, 14, 992
 	li	5, 0            # start
 	li	7, 256          # len * 2
 
@@ -585,37 +619,6 @@ intt_ppc__Loop4:
 	xxlor	32+10, 9, 9
 	MREDUCE_4X V_ZETA, V_ZETA, V_ZETA, V_ZETA, 13, 18, 23, 28
 	Write_M4C 32+13, 32+18, 32+23, 32+28
-
-.align 4
-	#
-	# Montgomery reduce loops with constant 1441
-	#
-	addi	14, 4, C1441_OFFSET
-	lvx	V1441, 0, 14
-
-	Reload_4coeffs
-	MREDUCE_4X V1441, V1441, V1441, V1441, 6, 7, 8, 9
-	Reload_4coeffs
-	MREDUCE_4X V1441, V1441, V1441, V1441, 13, 18, 23, 28
-	MWrite_8X 32+6, 32+7, 32+8, 32+9, 32+13, 32+18, 32+23, 32+28
-
-	Reload_4coeffs
-	MREDUCE_4X V1441, V1441, V1441, V1441, 6, 7, 8, 9
-	Reload_4coeffs
-	MREDUCE_4X V1441, V1441, V1441, V1441, 13, 18, 23, 28
-	MWrite_8X 32+6, 32+7, 32+8, 32+9, 32+13, 32+18, 32+23, 32+28
-
-	Reload_4coeffs
-	MREDUCE_4X V1441, V1441, V1441, V1441, 6, 7, 8, 9
-	Reload_4coeffs
-	MREDUCE_4X V1441, V1441, V1441, V1441, 13, 18, 23, 28
-	MWrite_8X 32+6, 32+7, 32+8, 32+9, 32+13, 32+18, 32+23, 32+28
-
-	Reload_4coeffs
-	MREDUCE_4X V1441, V1441, V1441, V1441, 6, 7, 8, 9
-	Reload_4coeffs
-	MREDUCE_4X V1441, V1441, V1441, V1441, 13, 18, 23, 28
-	MWrite_8X 32+6, 32+7, 32+8, 32+9, 32+13, 32+18, 32+23, 32+28
 
 	lxv	32+20, 128(1)
 	lxv	32+21, 144(1)
@@ -660,18 +663,3 @@ intt_ppc__Loop4:
 
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
           !MLK_CONFIG_MULTILEVEL_NO_SHARED */
-
-/* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
- * Don't modify by hand -- this is auto-generated by scripts/autogen. */
-#undef V20159
-#undef V_25
-#undef V_26
-#undef V_MKQ
-#undef V_QINV
-#undef V_NMKQ
-#undef V_Z0
-#undef V_Z1
-#undef V_Z2
-#undef V_Z3
-#undef V_ZETA
-#undef V1441
