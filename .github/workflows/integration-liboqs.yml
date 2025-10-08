@@ -15,9 +15,9 @@ jobs:
         system: [ubuntu-latest, pqcp-arm64]
         cmake:
           - name: Auto
-            flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=auto -DCMAKE_BUILD_TYPE=Release
+            flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=auto -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
           - name: C
-            flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=generic -DCMAKE_BUILD_TYPE=Release
+            flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=generic -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
     name: Build (${{ matrix.cmake.name }}, ${{ matrix.system }})
     runs-on: ${{ matrix.system }}
     steps:
@@ -35,8 +35,12 @@ jobs:
           sed -i "/name: mlkem-native/,/preserve_folder_structure/s%git_url: .*%git_url: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY%" scripts/copy_from_upstream/copy_from_upstream.yml
           sed -i "/name: mlkem-native/,/preserve_folder_structure/s/git_branch: .*/git_branch: $GITHUB_SHA/" scripts/copy_from_upstream/copy_from_upstream.yml
           sed -i "/name: mlkem-native/,/preserve_folder_structure/s/git_commit: .*/git_commit: $GITHUB_SHA/" scripts/copy_from_upstream/copy_from_upstream.yml
+          # TODO: Remove once patch is removed upstream
           # Remove patch
           sed -i "/name: mlkem-native/,/preserve_folder_structure/{/patches:/d}" scripts/copy_from_upstream/copy_from_upstream.yml
+          # TODO: Remove one it has been removed upstream
+          # Remove CT test suppressions
+          echo "" > tests/constant_time/kem/passes/ml_kem
           # Temporarily remove oldpqclean because of build failures in its SHA3 assembly
           yq e -i 'del(.kems[] | select(.name == "kyber"))' scripts/copy_from_upstream/copy_from_upstream.yml
           yq e -i 'del(.sigs[] | select(.name == "dilithium"))' scripts/copy_from_upstream/copy_from_upstream.yml

@@ -20,7 +20,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/compress.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_poly_frombytes
-USE_FUNCTION_CONTRACTS=mlk_poly_frombytes_native
+USE_FUNCTION_CONTRACTS=mlk_poly_frombytes_native mlk_poly_frombytes_c
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

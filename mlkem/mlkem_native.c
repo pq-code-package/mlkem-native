@@ -144,6 +144,8 @@
 #undef MLK_API_MUST_CHECK_RETURN_VALUE
 #undef MLK_API_NAMESPACE
 #undef MLK_H
+#undef crypto_kem_check_pk
+#undef crypto_kem_check_sk
 #undef crypto_kem_dec
 #undef crypto_kem_enc
 #undef crypto_kem_enc_derand
@@ -318,6 +320,7 @@
 #undef MLK_INLINE
 #undef MLK_MUST_CHECK_RETURN_VALUE
 #undef MLK_RESTRICT
+#undef MLK_STATIC_TESTABLE
 #undef MLK_SYS_AARCH64
 #undef MLK_SYS_AARCH64_EB
 #undef MLK_SYS_APPLE

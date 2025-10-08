@@ -40,7 +40,7 @@ jobs:
            name: 'x86_64'
          - runner: macos-latest
            name: 'macos (aarch64)'
-         - runner: macos-13
+         - runner: macos-15-intel
            name: 'macos (x86_64)'
         exclude:
           - {external: true,
@@ -101,7 +101,7 @@ jobs:
            name: 'x86_64'
          - runner: macos-latest
            name: 'macos (aarch64)'
-         - runner: macos-13
+         - runner: macos-15-intel
            name: 'macos (x86_64)'
         exclude:
           - {external: true,
@@ -209,7 +209,7 @@ jobs:
     name: Quickcheck lib
     strategy:
       matrix:
-        system: [macos-latest, macos-13, ubuntu-latest, pqcp-arm64]
+        system: [macos-latest, macos-15-intel, ubuntu-latest, pqcp-arm64]
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -220,7 +220,7 @@ jobs:
     name: Examples
     strategy:
       matrix:
-        system: [macos-latest, macos-13, ubuntu-latest, pqcp-arm64]
+        system: [macos-latest, macos-15-intel, ubuntu-latest, pqcp-arm64]
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0

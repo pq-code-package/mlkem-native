@@ -330,9 +330,8 @@ Edit the Makefile and update the definition of the following variables:
   function for proof, rather than 'inlining' the called function for proof. Include the `mlk_` prefix if
   required
 * EXTERNAL_SAT_SOLVER - should _always_ be "nothing" to prevent CBMC selecting a SAT backend over the selected SMT backend.
-* CBMCFLAGS - additional flags to pass to the final run of CBMC. This is normally set to `--smt2` which tells cbmc to
-  run Z3 as its underlying solver. Can also be set to `--bitwuzla` which is sometimes better at generating
-  counter-examples when Z3 fails.
+* CBMCFLAGS - additional flags to pass to the final run of CBMC. This is normally set to `--smt2` which tells CBMC to
+  run Z3 as its underlying solver. Can also be set to `--bitwuzla` which is sometimes faster than Z3 for some functions.
 * FUNCTION_NAME - set to `XXX` with the `mlk_` prefix if required
 * CBMC_OBJECT_BITS. Normally set to 8, but might need to be increased if CBMC runs out of memory for this proof.
 
@@ -440,6 +439,35 @@ make result VERBOSE=1 >log.txt
 
 and then inspect `log.txt` to see the exact sequence of commands that has been run. With that, you should be able to reproduce a failure on the command-line directly.
 
+### Debugging a proof - additional proof targets to get GOTO and SMT files
+
+The `Makefile.common` also contains make targets that can be used to generate the intermediate files
+for inspection, but without actually running the (time consuming) provers at all.
+
+`make goto` generates all the GOTO files (in `gotos/*.goto`) and then stops. For a function
+x(), the final GOTO file ends up in `gotos/x_harness.goto`.
+
+There are also targets that generate the SMT proof files, but without actually running the selected prover.
+
+For a function x(), (so you're in sub-directory `proofs/cbmc/x`), you can do:
+
+`make smt` generates `gotos/x_harness.smt2` for the prover selected in the `Makefile` (which must be one
+of Z3, Bitwuzla, or CVC5)
+
+`make smtz` generates `gotos/x_harness.smtz` but forces generation for the Z3 prover, ignoring the prover
+selected in the `Makefile`. Similarly
+
+`make smtb` generates `gotos/x_harness.smtb` but forces generation for Bitwuzla.
+
+`make smtc` generates `gotos/x_harness.smtb` but forces generation for cvc5.
+
+Finally,
+
+`make smtall` generates SMT files for all three provers as above.
+
+The final target is useful to generate SMT files for all three provers to see which one is
+most successful and/or fastest on a particular problem.
+
 ## Worked Example - proving mlk_poly_tobytes()
 
 This section follows the recipe above, and adds actual settings, contracts and command to prove the `mlk_poly_tobytes()` function.
@@ -501,7 +529,7 @@ __contract__(
   assigns(object_whole(r)));
 ```
 
-`array_bound` is a macro that expands to a quantified expression that expresses that the elemtns of `a->coeffs` between
+`array_bound` is a macro that expands to a quantified expression that expresses that the elements of `a->coeffs` between
 index values `0` (inclusive) and `MLKEM_N` (exclusive) are in the range `0` (inclusive) through `MLKEM_Q` (exclusive). See the macro definition in [mlkem/src/cbmc.h](../../mlkem/src/cbmc.h) for details.
 
 ### Interior contracts and loop invariants

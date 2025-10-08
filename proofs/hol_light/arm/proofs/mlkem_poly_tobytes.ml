@@ -17,6 +17,7 @@ needs "proofs/mlkem_utils.ml";;
 
 let mlkem_poly_tobytes_mc = define_assert_from_elf
   "mlkem_poly_tobytes_mc" "mlkem/mlkem_poly_tobytes.o"
+(*** BYTECODE START ***)
 [
   0xd2800202;       (* arm_MOV X2 (rvalue (word 16)) *)
   0x3cc20426;       (* arm_LDR Q6 X1 (Postimmediate_Offset (word 32)) *)
@@ -105,8 +106,35 @@ let mlkem_poly_tobytes_mc = define_assert_from_elf
   0x0c9f4016;       (* arm_ST3 [Q22; Q23; Q24] X0 (Postimmediate_Offset (word 24)) 64 8 *)
   0xd65f03c0        (* arm_RET X30 *)
 ];;
+(*** BYTECODE END ***)
 
 let MLKEM_POLY_TOBYTES_EXEC = ARM_MK_EXEC_RULE mlkem_poly_tobytes_mc;;
+
+(* ------------------------------------------------------------------------- *)
+(* Code length constants                                                     *)
+(* ------------------------------------------------------------------------- *)
+
+let LENGTH_MLKEM_POLY_TOBYTES_MC =
+  REWRITE_CONV[mlkem_poly_tobytes_mc] `LENGTH mlkem_poly_tobytes_mc`
+  |> CONV_RULE (RAND_CONV LENGTH_CONV);;
+
+let MLKEM_POLY_TOBYTES_PREAMBLE_LENGTH = new_definition
+  `MLKEM_POLY_TOBYTES_PREAMBLE_LENGTH = 0`;;
+
+let MLKEM_POLY_TOBYTES_POSTAMBLE_LENGTH = new_definition
+  `MLKEM_POLY_TOBYTES_POSTAMBLE_LENGTH = 4`;;
+
+let MLKEM_POLY_TOBYTES_CORE_START = new_definition
+  `MLKEM_POLY_TOBYTES_CORE_START = MLKEM_POLY_TOBYTES_PREAMBLE_LENGTH`;;
+
+let MLKEM_POLY_TOBYTES_CORE_END = new_definition
+  `MLKEM_POLY_TOBYTES_CORE_END = LENGTH mlkem_poly_tobytes_mc - MLKEM_POLY_TOBYTES_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLKEM_POLY_TOBYTES_MC;
+              MLKEM_POLY_TOBYTES_CORE_START; MLKEM_POLY_TOBYTES_CORE_END;
+              MLKEM_POLY_TOBYTES_PREAMBLE_LENGTH; MLKEM_POLY_TOBYTES_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
 (* ------------------------------------------------------------------------- *)
 (* A construct handy to expand out some lists explicitly. The conversion     *)
@@ -170,18 +198,19 @@ let lemma =
 
 let MLKEM_POLY_TOBYTES_CORRECT = prove
  (`!r a (l:int16 list) pc.
-        ALL (nonoverlapping (r,384)) [(word pc,0x158); (a,512)]
+        ALL (nonoverlapping (r,384)) [(word pc,LENGTH mlkem_poly_tobytes_mc); (a,512)]
         ==> ensures arm
              (\s. aligned_bytes_loaded s (word pc) mlkem_poly_tobytes_mc /\
-                  read PC s = word pc /\
+                  read PC s = word (pc + MLKEM_POLY_TOBYTES_CORE_START) /\
                   C_ARGUMENTS [r;a] s /\
                   read (memory :> bytes(a,512)) s = num_of_wordlist l)
-             (\s. read PC s = word(pc + 0x154) /\
+             (\s. read PC s = word(pc + MLKEM_POLY_TOBYTES_CORE_END) /\
                   (LENGTH l = 256
                    ==> read(memory :> bytes(r,384)) s =
                        num_of_wordlist (MAP word_zx l:(12 word)list)))
              (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(r,384)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC [`r:int64`; `a:int64`; `l:int16 list`; `pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
               NONOVERLAPPING_CLAUSES; ALL] THEN
@@ -249,7 +278,7 @@ let MLKEM_POLY_TOBYTES_CORRECT = prove
 
 let MLKEM_POLY_TOBYTES_SUBROUTINE_CORRECT = prove
  (`!r a (l:int16 list) pc returnaddress.
-        ALL (nonoverlapping (r,384)) [(word pc,0x158); (a,512)]
+        ALL (nonoverlapping (r,384)) [(word pc,LENGTH mlkem_poly_tobytes_mc); (a,512)]
         ==> ensures arm
              (\s. aligned_bytes_loaded s (word pc) mlkem_poly_tobytes_mc /\
                   read PC s = word pc /\
@@ -262,5 +291,6 @@ let MLKEM_POLY_TOBYTES_SUBROUTINE_CORRECT = prove
                        num_of_wordlist (MAP word_zx l:(12 word)list)))
              (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(r,384)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   ARM_ADD_RETURN_NOSTACK_TAC MLKEM_POLY_TOBYTES_EXEC
-   MLKEM_POLY_TOBYTES_CORRECT);;
+   (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_POLY_TOBYTES_CORRECT));;

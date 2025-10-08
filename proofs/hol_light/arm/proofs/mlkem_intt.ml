@@ -18,6 +18,7 @@ needs "proofs/mlkem_zetas.ml";;
 
 let mlkem_intt_mc = define_assert_from_elf
  "mlkem_intt_mc" "mlkem/mlkem_intt.o"
+(*** BYTECODE START ***)
 [
   0xd10103ff;       (* arm_SUB SP SP (rvalue (word 64)) *)
   0x6d0027e8;       (* arm_STP D8 D9 SP (Immediate_Offset (iword (&0))) *)
@@ -542,8 +543,35 @@ let mlkem_intt_mc = define_assert_from_elf
   0x910103ff;       (* arm_ADD SP SP (rvalue (word 64)) *)
   0xd65f03c0        (* arm_RET X30 *)
 ];;
+(*** BYTECODE END ***)
 
 let MLKEM_INTT_EXEC = ARM_MK_EXEC_RULE mlkem_intt_mc;;
+
+(* ------------------------------------------------------------------------- *)
+(* Code length constants                                                     *)
+(* ------------------------------------------------------------------------- *)
+
+let LENGTH_MLKEM_INTT_MC =
+  REWRITE_CONV[mlkem_intt_mc] `LENGTH mlkem_intt_mc`
+  |> CONV_RULE (RAND_CONV LENGTH_CONV);;
+
+let MLKEM_INTT_PREAMBLE_LENGTH = new_definition
+  `MLKEM_INTT_PREAMBLE_LENGTH = 20`;;
+
+let MLKEM_INTT_POSTAMBLE_LENGTH = new_definition
+  `MLKEM_INTT_POSTAMBLE_LENGTH = 24`;;
+
+let MLKEM_INTT_CORE_START = new_definition
+  `MLKEM_INTT_CORE_START = MLKEM_INTT_PREAMBLE_LENGTH`;;
+
+let MLKEM_INTT_CORE_END = new_definition
+  `MLKEM_INTT_CORE_END = LENGTH mlkem_intt_mc - MLKEM_INTT_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLKEM_INTT_MC;
+              MLKEM_INTT_CORE_START; MLKEM_INTT_CORE_END;
+              MLKEM_INTT_PREAMBLE_LENGTH; MLKEM_INTT_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
 let intt_constants = define
  `intt_constants z_12345 z_67 s <=>
@@ -562,16 +590,16 @@ let intt_constants = define
 let MLKEM_INTT_CORRECT = prove
  (`!a z_12345 z_67 x pc.
       ALL (nonoverlapping (a,512))
-          [(word pc,0x828); (z_12345,160); (z_67,768)]
+          [(word pc,LENGTH mlkem_intt_mc); (z_12345,160); (z_67,768)]
       ==> ensures arm
            (\s. aligned_bytes_loaded s (word pc) mlkem_intt_mc /\
-                read PC s = word (pc + 0x14) /\
+                read PC s = word (pc + MLKEM_INTT_CORE_START) /\
                 C_ARGUMENTS [a; z_12345; z_67] s /\
                 intt_constants z_12345 z_67 s /\
                 !i. i < 256
                     ==> read(memory :> bytes16(word_add a (word(2 * i)))) s =
                         x i)
-           (\s. read PC s = word(pc + 0x810) /\
+           (\s. read PC s = word(pc + MLKEM_INTT_CORE_END) /\
                 !i. i < 256
                     ==> let zi =
                          read(memory :> bytes16(word_add a (word(2 * i)))) s in
@@ -580,6 +608,7 @@ let MLKEM_INTT_CORRECT = prove
            (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
             MAYCHANGE [Q8; Q9; Q10; Q11; Q12; Q13; Q14; Q15] ,,
             MAYCHANGE [memory :> bytes(a,512)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC
    [`a:int64`; `z_12345:int64`; `z_67:int64`; `x:num->int16`; `pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
@@ -660,7 +689,7 @@ let MLKEM_INTT_SUBROUTINE_CORRECT = prove
       aligned 16 stackpointer /\
       ALLPAIRS nonoverlapping
        [(a,512); (word_sub stackpointer (word 64),64)]
-       [(word pc,0x828); (z_12345,160); (z_67,768)] /\
+       [(word pc,LENGTH mlkem_intt_mc); (z_12345,160); (z_67,768)] /\
       nonoverlapping (a,512) (word_sub stackpointer (word 64),64)
       ==> ensures arm
            (\s. aligned_bytes_loaded s (word pc) mlkem_intt_mc /\
@@ -681,6 +710,7 @@ let MLKEM_INTT_SUBROUTINE_CORRECT = prove
            (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
             MAYCHANGE [memory :> bytes(a,512);
                        memory :> bytes(word_sub stackpointer (word 64),64)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   let TWEAK_CONV =
     REWRITE_CONV[intt_constants] THENC
     ONCE_DEPTH_CONV let_CONV THENC
@@ -690,5 +720,5 @@ let MLKEM_INTT_SUBROUTINE_CORRECT = prove
   REWRITE_TAC[fst MLKEM_INTT_EXEC] THEN
   CONV_TAC TWEAK_CONV THEN
   ARM_ADD_RETURN_STACK_TAC ~pre_post_nsteps:(5,5) MLKEM_INTT_EXEC
-   (REWRITE_RULE[fst MLKEM_INTT_EXEC] (CONV_RULE TWEAK_CONV MLKEM_INTT_CORRECT))
+   (REWRITE_RULE[fst MLKEM_INTT_EXEC] (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_INTT_CORRECT)))
     `[D8; D9; D10; D11; D12; D13; D14; D15]` 64);;

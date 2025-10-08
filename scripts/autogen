@@ -2670,6 +2670,79 @@ def gen_citations(dry_run=False):
     gen_bib_file(bibliography, dry_run=False)
 
 
+def extract_bytecode_from_output(output_text):
+    """Convert output of proofs/hol_light/arm/proofs/dump_bytecode.native
+    into a dictionary mapping function names to byte code strings."""
+    bytecode_dict = {}
+
+    lines = output_text.split("\n")
+    i = 0
+
+    while i < len(lines):
+        line = lines[i]
+        match = re.search(r"=== bytecode start: mlkem/([^/\s]+?)\.o", line)
+        if match:
+            filename = match.group(1)
+
+            # Collect bytecode until end marker
+            bytecode_lines = []
+            i += 1
+            while i < len(lines) and "==== bytecode end" not in lines[i]:
+                bytecode_lines.append(lines[i])
+                i += 1
+
+            bytecode = "\n".join(bytecode_lines).strip()
+            bytecode_dict[filename] = bytecode
+        i += 1
+
+    return bytecode_dict
+
+
+def update_bytecode_in_proof_script(filepath, bytecode, dry_run=False):
+    with open(filepath, "r") as f:
+        content = f.read()
+
+    # Check if markers exist
+    start_marker = "(*** BYTECODE START ***)"
+    end_marker = "(*** BYTECODE END ***)"
+
+    if start_marker not in content or end_marker not in content:
+        raise Exception(f"Could not find BYTECODE START/END markers in {filepath}")
+
+    # Replace content between markers
+    pattern = rf"{re.escape(start_marker)}.*?{re.escape(end_marker)}"
+    replacement = f"{start_marker}\n{bytecode}\n{end_marker}"
+
+    updated_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
+
+    update_file(filepath, updated_content, dry_run=dry_run)
+
+
+def update_hol_light_bytecode(dry_run=False):
+    """Update HOL Light proof files with bytecode from make dump_bytecode."""
+    status_update(
+        "HOL Light bytecode",
+        "Running make dump_bytecode ... (this may take a few minutes)",
+    )
+
+    # Run make to get bytecode output
+    result = subprocess.run(
+        ["make", "-C", "proofs/hol_light/arm", "dump_bytecode"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    output_text = result.stdout
+
+    # Extract bytecode
+    bytecode_dict = extract_bytecode_from_output(output_text)
+
+    # Update each .ml file
+    for obj_name, bytecode in bytecode_dict.items():
+        ml_file = "proofs/hol_light/arm/proofs/" + obj_name + ".ml"
+        update_bytecode_in_proof_script(ml_file, bytecode, dry_run)
+
+
 def _main():
     slothy_choices = [
         "ntt",
@@ -2691,6 +2764,9 @@ def _main():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument("--dry-run", default=False, action="store_true")
+    parser.add_argument(
+        "--update-hol-light-bytecode", default=False, action="store_true"
+    )
     parser.add_argument("--slothy", nargs="*", default=None, choices=slothy_choices)
     parser.add_argument("--aarch64-clean", default=False, action="store_true")
     parser.add_argument("--no-simplify", default=False, action="store_true")
@@ -2757,6 +2833,10 @@ def _main():
         no_simplify=args.no_simplify,
     )
     high_level_status("Completed final backend synchronization")
+
+    if args.update_hol_light_bytecode:
+        update_hol_light_bytecode(args.dry_run)
+        high_level_status("Updated HOL Light bytecode")
 
     check_macro_typos()
     high_level_status("Checked macro typos")

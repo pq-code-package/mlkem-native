@@ -37,7 +37,7 @@ quickcheck: test
 build: func kat acvp
 	$(Q)echo "  Everything builds fine!"
 
-test: run_kat run_func run_acvp
+test: run_kat run_func run_acvp run_unit
 	$(Q)echo "  Everything checks fine!"
 
 # Detect available SHA256 command
@@ -62,6 +62,14 @@ run_func_1024: func_1024
 	$(W) $(MLKEM1024_DIR)/bin/test_mlkem1024
 run_func: run_func_512 run_func_768 run_func_1024
 
+run_unit_512: unit_512
+	$(W) $(MLKEM512_DIR)/bin/test_unit512
+run_unit_768: unit_768
+	$(W) $(MLKEM768_DIR)/bin/test_unit768
+run_unit_1024: unit_1024
+	$(W) $(MLKEM1024_DIR)/bin/test_unit1024
+run_unit: run_unit_512 run_unit_768 run_unit_1024
+
 run_acvp: acvp
 	python3 ./test/acvp_client.py $(if $(ACVP_VERSION),--version $(ACVP_VERSION))
 
@@ -72,6 +80,14 @@ func_768:  $(MLKEM768_DIR)/bin/test_mlkem768
 func_1024: $(MLKEM1024_DIR)/bin/test_mlkem1024
 	$(Q)echo "  FUNC       ML-KEM-1024:  $^"
 func: func_512 func_768 func_1024
+
+unit_512:  $(MLKEM512_DIR)/bin/test_unit512
+	$(Q)echo "  UNIT       ML-KEM-512:   $^"
+unit_768:  $(MLKEM768_DIR)/bin/test_unit768
+	$(Q)echo "  UNIT       ML-KEM-768:   $^"
+unit_1024: $(MLKEM1024_DIR)/bin/test_unit1024
+	$(Q)echo "  UNIT       ML-KEM-1024:  $^"
+unit: unit_512 unit_768 unit_1024
 
 kat_512: $(MLKEM512_DIR)/bin/gen_KAT512
 	$(Q)echo "  KAT        ML-KEM-512:   $^"
@@ -136,12 +152,10 @@ run_bench_768: bench_768
 	$(W) $(MLKEM768_DIR)/bin/bench_mlkem768
 run_bench_1024: bench_1024
 	$(W) $(MLKEM1024_DIR)/bin/bench_mlkem1024
-
-# Use .WAIT to prevent parallel execution when -j is passed
-run_bench: \
-	run_bench_512 .WAIT\
-	run_bench_768 .WAIT\
-	run_bench_1024
+run_bench: bench
+	$(W) $(MLKEM512_DIR)/bin/bench_mlkem512
+	$(W) $(MLKEM768_DIR)/bin/bench_mlkem768
+	$(W) $(MLKEM1024_DIR)/bin/bench_mlkem1024
 
 bench_components_512: check-defined-CYCLES \
 	$(MLKEM512_DIR)/bin/bench_components_mlkem512
@@ -157,13 +171,10 @@ run_bench_components_768: bench_components_768
 	$(W) $(MLKEM768_DIR)/bin/bench_components_mlkem768
 run_bench_components_1024: bench_components_1024
 	$(W) $(MLKEM1024_DIR)/bin/bench_components_mlkem1024
-
-# Use .WAIT to prevent parallel execution when -j is passed
-run_bench_components: \
-	run_bench_components_512 .WAIT\
-	run_bench_components_768 .WAIT\
-	run_bench_components_1024
-
+run_bench_components: bench_components
+	$(W) $(MLKEM512_DIR)/bin/bench_components_mlkem512
+	$(W) $(MLKEM768_DIR)/bin/bench_components_mlkem768
+	$(W) $(MLKEM1024_DIR)/bin/bench_components_mlkem1024
 
 size_512: $(BUILD_DIR)/libmlkem512.a
 size_768: $(BUILD_DIR)/libmlkem768.a

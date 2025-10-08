@@ -15,6 +15,7 @@ needs "proofs/keccak_spec.ml";;
 
 let keccak_f1600_x4_v8a_v84a_scalar_mc = define_assert_from_elf
   "keccak_f1600_x4_v8a_v84a_scalar_mc" "mlkem/keccak_f1600_x4_v8a_v84a_scalar.o"
+(*** BYTECODE START ***)
 [
   0xd10383ff;       (* arm_SUB SP SP (rvalue (word 224)) *)
   0xa90353f3;       (* arm_STP X19 X20 SP (Immediate_Offset (iword (&48))) *)
@@ -891,6 +892,7 @@ let keccak_f1600_x4_v8a_v84a_scalar_mc = define_assert_from_elf
   0x910383ff;       (* arm_ADD SP SP (rvalue (word 224)) *)
   0xd65f03c0        (* arm_RET X30 *)
 ];;
+(*** BYTECODE END ***)
 
 let KECCAK_F1600_X4_V8A_V84A_SCALAR_EXEC = ARM_MK_EXEC_RULE keccak_f1600_x4_v8a_v84a_scalar_mc;;
 
@@ -905,6 +907,32 @@ let deferred_rotates = define
     39; 41; 2; 62; 55]`;;
 
 (* ------------------------------------------------------------------------- *)
+(* Code length constants                                                     *)
+(* ------------------------------------------------------------------------- *)
+
+let LENGTH_KECCAK_F1600_X4_V8A_V84A_SCALAR_MC =
+  REWRITE_CONV[keccak_f1600_x4_v8a_v84a_scalar_mc] `LENGTH keccak_f1600_x4_v8a_v84a_scalar_mc`
+  |> CONV_RULE (RAND_CONV LENGTH_CONV);;
+
+let KECCAK_F1600_X4_V8A_V84A_SCALAR_PREAMBLE_LENGTH = new_definition
+  `KECCAK_F1600_X4_V8A_V84A_SCALAR_PREAMBLE_LENGTH = 44`;;
+
+let KECCAK_F1600_X4_V8A_V84A_SCALAR_POSTAMBLE_LENGTH = new_definition
+  `KECCAK_F1600_X4_V8A_V84A_SCALAR_POSTAMBLE_LENGTH = 48`;;
+
+let KECCAK_F1600_X4_V8A_V84A_SCALAR_CORE_START = new_definition
+  `KECCAK_F1600_X4_V8A_V84A_SCALAR_CORE_START = KECCAK_F1600_X4_V8A_V84A_SCALAR_PREAMBLE_LENGTH`;;
+
+let KECCAK_F1600_X4_V8A_V84A_SCALAR_CORE_END = new_definition
+  `KECCAK_F1600_X4_V8A_V84A_SCALAR_CORE_END = LENGTH keccak_f1600_x4_v8a_v84a_scalar_mc - KECCAK_F1600_X4_V8A_V84A_SCALAR_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_KECCAK_F1600_X4_V8A_V84A_SCALAR_MC;
+              KECCAK_F1600_X4_V8A_V84A_SCALAR_CORE_START; KECCAK_F1600_X4_V8A_V84A_SCALAR_CORE_END;
+              KECCAK_F1600_X4_V8A_V84A_SCALAR_PREAMBLE_LENGTH; KECCAK_F1600_X4_V8A_V84A_SCALAR_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
+
+(* ------------------------------------------------------------------------- *)
 (* Correctness proof                                                         *)
 (* ------------------------------------------------------------------------- *)
 
@@ -914,10 +942,10 @@ let KECCAK_F1600_X4_V8A_V84A_SCALAR_CORRECT = prove
       nonoverlapping (a,800) (stackpointer,216) /\
       ALLPAIRS nonoverlapping
                [(a,800); (stackpointer,216)]
-               [(word pc,0xda8); (rc,192)]
+               [(word pc,LENGTH keccak_f1600_x4_v8a_v84a_scalar_mc); (rc,192)]
       ==> ensures arm
            (\s. aligned_bytes_loaded s (word pc) keccak_f1600_x4_v8a_v84a_scalar_mc /\
-                read PC s = word (pc + 0x2c) /\
+                read PC s = word (pc + KECCAK_F1600_X4_V8A_V84A_SCALAR_CORE_START) /\
                 read SP s = stackpointer /\
                 C_ARGUMENTS [a; rc] s /\
                 wordlist_from_memory(a,25) s = A1 /\
@@ -925,7 +953,7 @@ let KECCAK_F1600_X4_V8A_V84A_SCALAR_CORRECT = prove
                 wordlist_from_memory(word_add a (word 400),25) s = A3 /\
                 wordlist_from_memory(word_add a (word 600),25) s = A4 /\
                 wordlist_from_memory(rc,24) s = round_constants)
-           (\s. read PC s = word(pc + 0xd78) /\
+           (\s. read PC s = word(pc + KECCAK_F1600_X4_V8A_V84A_SCALAR_CORE_END) /\
                 wordlist_from_memory(a,25) s = keccak 24 A1 /\
                 wordlist_from_memory(word_add a (word 200),25) s =
                 keccak 24 A2 /\
@@ -940,6 +968,7 @@ let KECCAK_F1600_X4_V8A_V84A_SCALAR_CORRECT = prove
             MAYCHANGE [memory :> bytes(a,800);
                        memory :> bytes(stackpointer,40);
                        memory :> bytes(word_add stackpointer (word 208),8)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC
    [`a:int64`; `rc:int64`; `A1:int64 list`; `A2:int64 list`;
     `A3:int64 list`; `A4:int64 list`; `pc:num`; `stackpointer:int64`] THEN
@@ -1323,7 +1352,7 @@ let KECCAK_F1600_X4_V8A_V84A_SCALAR_SUBROUTINE_CORRECT = prove
       nonoverlapping (a,800) (word_sub stackpointer (word 224),224) /\
       ALLPAIRS nonoverlapping
                [(a,800); (word_sub stackpointer (word 224),224)]
-               [(word pc,0xda8); (rc,192)]
+               [(word pc,LENGTH keccak_f1600_x4_v8a_v84a_scalar_mc); (rc,192)]
       ==> ensures arm
            (\s. aligned_bytes_loaded s (word pc) keccak_f1600_x4_v8a_v84a_scalar_mc /\
                 read PC s = word pc /\
@@ -1346,12 +1375,13 @@ let KECCAK_F1600_X4_V8A_V84A_SCALAR_SUBROUTINE_CORRECT = prove
            (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
             MAYCHANGE [memory :> bytes(a,800);
                        memory :> bytes(word_sub stackpointer (word 224),224)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   let TWEAK_CONV =
    ONCE_DEPTH_CONV
     (WORDLIST_FROM_MEMORY_CONV THENC
      ONCE_DEPTH_CONV NORMALIZE_RELATIVE_ADDRESS_CONV) in
   CONV_TAC TWEAK_CONV THEN
   ARM_ADD_RETURN_STACK_TAC ~pre_post_nsteps:(11,11) KECCAK_F1600_X4_V8A_V84A_SCALAR_EXEC
-   (CONV_RULE TWEAK_CONV KECCAK_F1600_X4_V8A_V84A_SCALAR_CORRECT)
+   (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV KECCAK_F1600_X4_V8A_V84A_SCALAR_CORRECT))
   `[D8; D9; D10; D11; D12; D13; D14; D15;
     X19; X20; X21; X22; X23; X24; X25; X26; X27; X28; X29; X30]` 224);;

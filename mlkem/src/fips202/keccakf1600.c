@@ -8,7 +8,7 @@
  *
  * - [mupq]
  *   Common files for pqm4, pqm3, pqriscv
- *   Kannwischer et. al
+ *   Kannwischer, Petri, Rijneveld, Schwabe, Stoffelen
  *   https://github.com/mupq/mupq
  *
  * - [supercop]

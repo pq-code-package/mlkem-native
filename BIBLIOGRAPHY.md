@@ -288,7 +288,11 @@ source code and documentation.
 
 * Common files for pqm4, pqm3, pqriscv
 * Author(s):
-  - Kannwischer et. al
+  - Matthias J. Kannwischer
+  - Richard Petri
+  - Joost Rijneveld
+  - Peter Schwabe
+  - Ko Stoffelen
 * URL: https://github.com/mupq/mupq
 * Referenced from:
   - [mlkem/src/fips202/fips202.c](mlkem/src/fips202/fips202.c)
