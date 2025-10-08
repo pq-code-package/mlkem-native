@@ -147,9 +147,8 @@ let POLY_TOMONT_SPEC = prove(POLY_TOMONT_GOAL,
        Note that we simplify eagerly after every step.
        This reduces the proof time *)
     STRIP_TAC THEN
-    MAP_EVERY (fun n -> ARM_STEPS_TAC POLY_TOMONT_EXEC [n] THEN
-               (SIMD_SIMPLIFY_TAC [barmul]))
-              (1--185) THEN
+    MAP_UNTIL_TARGET_PC (fun n -> ARM_STEPS_TAC POLY_TOMONT_EXEC [n] THEN
+               (SIMD_SIMPLIFY_TAC [barmul])) 1 THEN
     ENSURES_FINAL_STATE_TAC THEN
     REPEAT CONJ_TAC THEN
     ASM_REWRITE_TAC [] THEN
