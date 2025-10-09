@@ -38,36 +38,42 @@
 void mlk_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
                                    unsigned offset, unsigned length)
 {
+#if defined(MLK_USE_FIPS202_X1_XOR_NATIVE)
+  mlk_keccakf1600_extract_bytes_native(state, data, offset, length);
+#elif defined(MLK_SYS_LITTLE_ENDIAN)
   unsigned i;
-#if defined(MLK_SYS_LITTLE_ENDIAN)
   uint8_t *state_ptr = (uint8_t *)state + offset;
   for (i = 0; i < length; i++)
   __loop__(invariant(i <= length))
   {
     data[i] = state_ptr[i];
   }
-#else  /* MLK_SYS_LITTLE_ENDIAN */
+#else  /* !MLK_USE_FIPS202_X1_XOR_NATIVE && MLK_SYS_LITTLE_ENDIAN */
+  unsigned i;
   /* Portable version */
   for (i = 0; i < length; i++)
   __loop__(invariant(i <= length))
   {
     data[i] = (state[(offset + i) >> 3] >> (8 * ((offset + i) & 0x07))) & 0xFF;
   }
-#endif /* !MLK_SYS_LITTLE_ENDIAN */
+#endif /* !MLK_USE_FIPS202_X1_XOR_NATIVE && !MLK_SYS_LITTLE_ENDIAN */
 }
 
 void mlk_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
                                unsigned offset, unsigned length)
 {
+#if defined(MLK_USE_FIPS202_X1_XOR_NATIVE)
+  mlk_keccakf1600_xor_bytes_native(state, data, offset, length);
+#elif defined(MLK_SYS_LITTLE_ENDIAN)
   unsigned i;
-#if defined(MLK_SYS_LITTLE_ENDIAN)
   uint8_t *state_ptr = (uint8_t *)state + offset;
   for (i = 0; i < length; i++)
   __loop__(invariant(i <= length))
   {
     state_ptr[i] ^= data[i];
   }
-#else  /* MLK_SYS_LITTLE_ENDIAN */
+#else  /* !MLK_USE_FIPS202_X1_XOR_NATIVE && MLK_SYS_LITTLE_ENDIAN */
+  unsigned i;
   /* Portable version */
   for (i = 0; i < length; i++)
   __loop__(invariant(i <= length))
@@ -75,7 +81,7 @@ void mlk_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
     state[(offset + i) >> 3] ^= (uint64_t)data[i]
                                 << (8 * ((offset + i) & 0x07));
   }
-#endif /* !MLK_SYS_LITTLE_ENDIAN */
+#endif /* !MLK_USE_FIPS202_X1_XOR_NATIVE && !MLK_SYS_LITTLE_ENDIAN */
 }
 
 void mlk_keccakf1600x4_extract_bytes(uint64_t *state, unsigned char *data0,
@@ -83,6 +89,10 @@ void mlk_keccakf1600x4_extract_bytes(uint64_t *state, unsigned char *data0,
                                      unsigned char *data3, unsigned offset,
                                      unsigned length)
 {
+#if defined(MLK_USE_FIPS202_X4_XOR_NATIVE)
+  mlk_keccakf1600_extract_bytes_x4_native(state, data0, data1, data2, data3,
+                                          offset, length);
+#else
   mlk_keccakf1600_extract_bytes(state + MLK_KECCAK_LANES * 0, data0, offset,
                                 length);
   mlk_keccakf1600_extract_bytes(state + MLK_KECCAK_LANES * 1, data1, offset,
@@ -91,6 +101,7 @@ void mlk_keccakf1600x4_extract_bytes(uint64_t *state, unsigned char *data0,
                                 length);
   mlk_keccakf1600_extract_bytes(state + MLK_KECCAK_LANES * 3, data3, offset,
                                 length);
+#endif /* !MLK_USE_FIPS202_X4_XOR_NATIVE */
 }
 
 void mlk_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
@@ -99,6 +110,10 @@ void mlk_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
                                  const unsigned char *data3, unsigned offset,
                                  unsigned length)
 {
+#if defined(MLK_USE_FIPS202_X4_XOR_NATIVE)
+  mlk_keccakf1600_xor_bytes_x4_native(state, data0, data1, data2, data3, offset,
+                                      length);
+#else
   mlk_keccakf1600_xor_bytes(state + MLK_KECCAK_LANES * 0, data0, offset,
                             length);
   mlk_keccakf1600_xor_bytes(state + MLK_KECCAK_LANES * 1, data1, offset,
@@ -107,20 +122,22 @@ void mlk_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
                             length);
   mlk_keccakf1600_xor_bytes(state + MLK_KECCAK_LANES * 3, data3, offset,
                             length);
+#endif /* !MLK_USE_FIPS202_X4_XOR_NATIVE */
 }
 
 void mlk_keccakf1600x4_permute(uint64_t *state)
 {
 #if defined(MLK_USE_FIPS202_X4_NATIVE)
-  if (mlk_keccak_f1600_x4_native(state) == MLK_NATIVE_FUNC_SUCCESS)
-  {
-    return;
-  }
-#endif /* MLK_USE_FIPS202_X4_NATIVE */
+  mlk_keccak_f1600_x4_native(state);
+#elif defined(MLK_USE_FIPS202_X2_NATIVE)
+  mlk_keccak_f1600_x2_native(state + 0 * MLK_KECCAK_LANES);
+  mlk_keccak_f1600_x2_native(state + 2 * MLK_KECCAK_LANES);
+#else
   mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 0);
   mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 1);
   mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 2);
   mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 3);
+#endif /* !MLK_USE_FIPS202_X4_NATIVE && !MLK_USE_FIPS202_X2_NATIVE */
 }
 
 static const uint64_t mlk_KeccakF_RoundConstants[MLK_KECCAK_NROUNDS] = {

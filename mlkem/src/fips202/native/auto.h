@@ -15,6 +15,10 @@
 #include "aarch64/auto.h"
 #endif
 
+#if defined(MLK_SYS_ARMV81M)
+#include "armv8.1_m/auto.h"
+#endif
+
 #if defined(MLK_SYS_X86_64) && defined(MLK_SYS_X86_64_AVX2)
 #include "x86_64/xkcp.h"
 #endif
