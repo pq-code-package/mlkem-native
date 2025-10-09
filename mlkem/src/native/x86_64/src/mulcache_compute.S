@@ -19,11 +19,13 @@
 MLK_ASM_FN_SYMBOL(poly_mulcache_compute_avx2)
 
         .cfi_startproc
-        vmovdqa	(%rdx), %ymm0
+        movl	$0xd010d01, %eax        # imm = 0xD010D01
+        vmovd	%eax, %xmm0
+        vpbroadcastd	%xmm0, %ymm0
         vmovdqa	0x20(%rsi), %ymm2
         vmovdqa	0x60(%rsi), %ymm3
-        vmovdqa	0x500(%rdx), %ymm4
-        vmovdqa	0x580(%rdx), %ymm1
+        vmovdqa	0x3e0(%rdx), %ymm4
+        vmovdqa	0x460(%rdx), %ymm1
         vpmullw	%ymm2, %ymm1, %ymm5
         vpmullw	%ymm3, %ymm1, %ymm6
         vpmulhw	%ymm2, %ymm4, %ymm7
@@ -36,8 +38,8 @@ MLK_ASM_FN_SYMBOL(poly_mulcache_compute_avx2)
         vmovdqa	%ymm8, 0x20(%rdi)
         vmovdqa	0xa0(%rsi), %ymm2
         vmovdqa	0xe0(%rsi), %ymm3
-        vmovdqa	0x520(%rdx), %ymm4
-        vmovdqa	0x5a0(%rdx), %ymm1
+        vmovdqa	0x400(%rdx), %ymm4
+        vmovdqa	0x480(%rdx), %ymm1
         vpmullw	%ymm2, %ymm1, %ymm5
         vpmullw	%ymm3, %ymm1, %ymm6
         vpmulhw	%ymm2, %ymm4, %ymm7
@@ -50,8 +52,8 @@ MLK_ASM_FN_SYMBOL(poly_mulcache_compute_avx2)
         vmovdqa	%ymm8, 0x60(%rdi)
         vmovdqa	0x120(%rsi), %ymm2
         vmovdqa	0x160(%rsi), %ymm3
-        vmovdqa	0x540(%rdx), %ymm4
-        vmovdqa	0x5c0(%rdx), %ymm1
+        vmovdqa	0x420(%rdx), %ymm4
+        vmovdqa	0x4a0(%rdx), %ymm1
         vpmullw	%ymm2, %ymm1, %ymm5
         vpmullw	%ymm3, %ymm1, %ymm6
         vpmulhw	%ymm2, %ymm4, %ymm7
@@ -64,8 +66,8 @@ MLK_ASM_FN_SYMBOL(poly_mulcache_compute_avx2)
         vmovdqa	%ymm8, 0xa0(%rdi)
         vmovdqa	0x1a0(%rsi), %ymm2
         vmovdqa	0x1e0(%rsi), %ymm3
-        vmovdqa	0x560(%rdx), %ymm4
-        vmovdqa	0x5e0(%rdx), %ymm1
+        vmovdqa	0x440(%rdx), %ymm4
+        vmovdqa	0x4c0(%rdx), %ymm1
         vpmullw	%ymm2, %ymm1, %ymm5
         vpmullw	%ymm3, %ymm1, %ymm6
         vpmulhw	%ymm2, %ymm4, %ymm7

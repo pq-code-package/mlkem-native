@@ -227,7 +227,11 @@ vmovdqa		%ymm11,(128*\off+112)*2(%rdi)
 .global MLK_ASM_NAMESPACE(ntt_avx2)
 .balign 4
 MLK_ASM_FN_SYMBOL(ntt_avx2)
-vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
+
+// Broadcast 3329 (0x0D01) to all elements of ymm0
+movl $0x0D010D01, %eax
+vmovd %eax, %xmm0
+vpbroadcastd %xmm0, %ymm0
 
 level0		0
 level0		1

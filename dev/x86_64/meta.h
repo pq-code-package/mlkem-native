@@ -84,7 +84,7 @@ static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_reduce_avx2(data, mlk_qdata);
+  mlk_reduce_avx2(data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
@@ -121,7 +121,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_polyvec_basemul_acc_montgomery_cached_asm_k2(r, a, b, b_cache, mlk_qdata);
+  mlk_polyvec_basemul_acc_montgomery_cached_asm_k2(r, a, b, b_cache);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 */
@@ -136,7 +136,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k3_native(
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_polyvec_basemul_acc_montgomery_cached_asm_k3(r, a, b, b_cache, mlk_qdata);
+  mlk_polyvec_basemul_acc_montgomery_cached_asm_k3(r, a, b, b_cache);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 3 */
@@ -151,7 +151,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(r, a, b, b_cache, mlk_qdata);
+  mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(r, a, b, b_cache);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
@@ -164,7 +164,7 @@ static MLK_INLINE int mlk_poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_ntttobytes_avx2(r, a, mlk_qdata);
+  mlk_ntttobytes_avx2(r, a);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
@@ -176,7 +176,7 @@ static MLK_INLINE int mlk_poly_frombytes_native(
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_nttfrombytes_avx2(r, a, mlk_qdata);
+  mlk_nttfrombytes_avx2(r, a);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 

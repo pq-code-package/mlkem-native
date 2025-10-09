@@ -203,11 +203,11 @@ let MLKEM_POLY_TOBYTES_CORRECT = prove
              (\s. aligned_bytes_loaded s (word pc) mlkem_poly_tobytes_mc /\
                   read PC s = word (pc + MLKEM_POLY_TOBYTES_CORE_START) /\
                   C_ARGUMENTS [r;a] s /\
+                  LENGTH l = 256 /\
                   read (memory :> bytes(a,512)) s = num_of_wordlist l)
              (\s. read PC s = word(pc + MLKEM_POLY_TOBYTES_CORE_END) /\
-                  (LENGTH l = 256
-                   ==> read(memory :> bytes(r,384)) s =
-                       num_of_wordlist (MAP word_zx l:(12 word)list)))
+                  read(memory :> bytes(r,384)) s =
+                    num_of_wordlist (MAP word_zx l:(12 word)list))
              (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(r,384)])`,
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
@@ -216,12 +216,7 @@ let MLKEM_POLY_TOBYTES_CORRECT = prove
               NONOVERLAPPING_CLAUSES; ALL] THEN
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
 
-  (*** Globalize the LENGTH l = 256 hypothesis ***)
-
-  ASM_CASES_TAC `LENGTH(l:int16 list) = 256` THENL
-   [ASM_REWRITE_TAC[] THEN ENSURES_INIT_TAC "s0";
-    ARM_QUICKSIM_TAC MLKEM_POLY_TOBYTES_EXEC
-     [`read X0 s = a`; `read X1 s = z`; `read X2 s = i`] (1--169)] THEN
+  ASM_REWRITE_TAC[] THEN ENSURES_INIT_TAC "s0" THEN
 
   (*** Digitize and tweak the input digits to match 128-bit load size  ****)
 
@@ -242,10 +237,9 @@ let MLKEM_POLY_TOBYTES_CORRECT = prove
 
   (*** Unroll and simulate to the end ***)
 
-  MAP_EVERY (fun n ->
+  MAP_UNTIL_TARGET_PC (fun n ->
     ARM_STEPS_TAC MLKEM_POLY_TOBYTES_EXEC [n] THEN
-    RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)))
-   (1--169) THEN
+    RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV))) 1 THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
   (*** Now fiddle round to make things match up nicely ***)
@@ -284,11 +278,11 @@ let MLKEM_POLY_TOBYTES_SUBROUTINE_CORRECT = prove
                   read PC s = word pc /\
                   read X30 s = returnaddress /\
                   C_ARGUMENTS [r;a] s /\
+                  LENGTH l = 256 /\
                   read (memory :> bytes(a,512)) s = num_of_wordlist l)
              (\s. read PC s = returnaddress /\
-                  (LENGTH l = 256
-                   ==> read(memory :> bytes(r,384)) s =
-                       num_of_wordlist (MAP word_zx l:(12 word)list)))
+                  read(memory :> bytes(r,384)) s =
+                       num_of_wordlist (MAP word_zx l:(12 word)list))
              (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(r,384)])`,
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN

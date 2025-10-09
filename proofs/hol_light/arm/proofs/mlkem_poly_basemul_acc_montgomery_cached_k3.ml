@@ -417,8 +417,8 @@ let basemul3_odd = define
          Note that we simplify eagerly after every step.
          This reduces the proof time *)
       REPEAT STRIP_TAC THEN
-      MAP_EVERY (fun n -> ARM_STEPS_TAC poly_basemul_acc_montgomery_cached_k3_EXEC [n] THEN
-                 (SIMD_SIMPLIFY_TAC [montred])) (1--1080) THEN
+      MAP_UNTIL_TARGET_PC (fun n -> ARM_STEPS_TAC poly_basemul_acc_montgomery_cached_k3_EXEC [n] THEN
+                 (SIMD_SIMPLIFY_TAC [montred])) 1 THEN
 
       ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
       CONV_TAC(LAND_CONV(ONCE_DEPTH_CONV EXPAND_CASES_CONV)) THEN STRIP_TAC THEN
