@@ -6,12 +6,12 @@ hol_light.overrideAttrs (old: {
     export HOLDIR="$1/lib/hol_light"
     export HOLLIGHT_DIR="$1/lib/hol_light"
   '';
-  version = "unstable-2024-12-22";
+  version = "unstable-2025-09-22";
   src = fetchFromGitHub {
     owner = "jrh13";
     repo = "hol-light";
-    rev = "157c99b7bb3a485116dc2bfc4ef3ad00912d883b";
-    hash = "sha256-UFK+STxcgvvTuNx1hcm1S77iB9k3KMF59A2iaKNIz7A=";
+    rev = "bed58fa74649fa74015176f8f90e77f7af5cf8e3";
+    hash = "sha256-QDubbUUChvv04239BdcKPSU+E2gdSzqAWfAETK2Xtg0=";
   };
   patches = [ ./0005-Fix-hollight-path.patch ];
   propagatedBuildInputs = old.propagatedBuildInputs ++ old.nativeBuildInputs;
