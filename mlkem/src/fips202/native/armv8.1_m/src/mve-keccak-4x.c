@@ -6,6 +6,8 @@
  */
 
 #include "../../../../common.h"
+#include "../../../../verify.h"
+#include "../../api.h"
 #if defined(MLK_FIPS202_ARMV81M_NEED_X4) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
@@ -13,6 +15,17 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+
+
+#define KECCAK_TMP_STATE_SIZE (4 * 8 * 25)
+extern void mve_keccak_state_permute_4fold_opt_m55(void *state, void *tmpstate);
+int mlk_keccak_f1600_x4_native_impl(uint64_t *state)
+{
+  uint8_t state_4x_tmp[KECCAK_TMP_STATE_SIZE] __attribute__((aligned(16)));
+  mve_keccak_state_permute_4fold_opt_m55(state, state_4x_tmp);
+  mlk_zeroize(state_4x_tmp, sizeof(state_4x_tmp));
+  return MLK_NATIVE_FUNC_SUCCESS;
+}
 
 extern uint32x4x2_t to_bit_interleaving_4x(uint32x4_t, uint32x4_t);
 extern uint32x4x2_t from_bit_interleaving_4x(uint32x4_t, uint32x4_t);

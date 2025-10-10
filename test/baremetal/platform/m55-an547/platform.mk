@@ -6,7 +6,7 @@ PLATFORM_PATH:=test/baremetal/platform/m55-an547
 
 CROSS_PREFIX=arm-none-eabi-
 CC=gcc
-
+ARM_NONE_ARCH=armv8.1-m.main+mve.fp
 CFLAGS += \
 	-O3 \
 	-Wall -Wextra -Wshadow \

@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <stdint.h>
 
+#include "../verify.h"
 #include "keccakf1600.h"
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 

@@ -21,12 +21,13 @@
 #include <stddef.h>
 #include <stdint.h>
 
-static MLK_INLINE void mlk_zeroize(void *ptr, size_t len);
+#include "../api.h"
 
 extern void KeccakF1600_StatePermute_adomnicai_m4_opt_m7(void *state);
-static MLK_INLINE void mlk_keccak_f1600_x1_native(uint64_t *state)
+static MLK_INLINE int mlk_keccak_f1600_x1_native(uint64_t *state)
 {
   KeccakF1600_StatePermute_adomnicai_m4_opt_m7(state);
+  return MLK_NATIVE_FUNC_SUCCESS;
 }
 
 extern void KeccakF1600_StateXORBytes(void *state, const unsigned char *data,
@@ -49,13 +50,10 @@ static MLK_INLINE void mlk_keccakf1600_extract_bytes_native(
   KeccakF1600_StateExtractBytes(state, data, offset, length);
 }
 
-#define KECCAK_TMP_STATE_SIZE (4 * 8 * 25)
-extern void mve_keccak_state_permute_4fold_opt_m55(void *state, void *tmpstate);
-static MLK_INLINE void mlk_keccak_f1600_x4_native(uint64_t *state)
+int mlk_keccak_f1600_x4_native_impl(uint64_t *state);
+static MLK_INLINE int mlk_keccak_f1600_x4_native(uint64_t *state)
 {
-  uint8_t state_4x_tmp[KECCAK_TMP_STATE_SIZE] __attribute__((aligned(16)));
-  mve_keccak_state_permute_4fold_opt_m55(state, state_4x_tmp);
-  mlk_zeroize(state_4x_tmp, sizeof(state_4x_tmp));
+  return mlk_keccak_f1600_x4_native_impl(state);
 }
 void KeccakF1600x4_StateXORBytes(void *state, const uint8_t *data0,
                                  const uint8_t *data1, const uint8_t *data2,
