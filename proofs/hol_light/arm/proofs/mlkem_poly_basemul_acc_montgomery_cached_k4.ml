@@ -344,8 +344,23 @@ let basemul4_odd = define
    REWRITE_CONV[poly_basemul_acc_montgomery_cached_k4_mc] `LENGTH poly_basemul_acc_montgomery_cached_k4_mc`
    |> CONV_RULE (RAND_CONV LENGTH_CONV);;
 
+ let POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_PREAMBLE_LENGTH = new_definition
+   `POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_PREAMBLE_LENGTH = 20`;;
+
+ let POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_POSTAMBLE_LENGTH = new_definition
+   `POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_POSTAMBLE_LENGTH = 24`;;
+
+ let POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_CORE_START = new_definition
+   `POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_CORE_START = POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_PREAMBLE_LENGTH`;;
+
+ let POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_CORE_END = new_definition
+   `POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_CORE_END = LENGTH poly_basemul_acc_montgomery_cached_k4_mc - POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_POSTAMBLE_LENGTH`;;
+
  let LENGTH_SIMPLIFY_CONV =
-   REWRITE_CONV[LENGTH_POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_MC];;
+   REWRITE_CONV[LENGTH_POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_MC;
+               POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_CORE_START; POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_CORE_END;
+               POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_PREAMBLE_LENGTH; POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_POSTAMBLE_LENGTH] THENC
+   NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
  (* ------------------------------------------------------------------------- *)
  (* Hacky tweaking conversion to write away non-free state component reads.   *)
@@ -413,7 +428,7 @@ let basemul4_odd = define
        ==>
        ensures arm
          (\s. aligned_bytes_loaded s (word pc) poly_basemul_acc_montgomery_cached_k4_mc /\
-              read PC s = word (pc + 20)  /\
+              read PC s = word (pc + POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_CORE_START)  /\
               C_ARGUMENTS [dst; srcA; srcB; srcBt] s  /\
               (!i. i < 256 ==> read(memory :> bytes16(word_add srcA  (word (2 * i)))) s = x0 i)        /\
               (!i. i < 256 ==> read(memory :> bytes16(word_add srcB  (word (2 * i)))) s = y0 i)        /\
@@ -428,7 +443,7 @@ let basemul4_odd = define
               (!i. i < 256 ==> read(memory :> bytes16(word_add srcB  (word (1536 + 2 * i)))) s = y3 i)  /\
               (!i. i < 128 ==> read(memory :> bytes16(word_add srcBt (word (768  + 2 * i)))) s = y3t i)
          )
-         (\s. read PC s = word (pc + 1072) /\
+         (\s. read PC s = word (pc + POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_CORE_END) /\
              ((!i. i < 256 ==> abs(ival(x0 i)) <= &2 pow 12 /\ abs(ival(x1 i)) <= &2 pow 12
                                                             /\ abs(ival(x2 i)) <= &2 pow 12
                                                             /\ abs(ival(x3 i)) <= &2 pow 12)
@@ -576,7 +591,7 @@ let basemul4_odd = define
     REWRITE_TAC[fst poly_basemul_acc_montgomery_cached_k4_EXEC] THEN
     CONV_TAC TWEAK_CONV THEN
     ARM_ADD_RETURN_STACK_TAC ~pre_post_nsteps:(5,5) poly_basemul_acc_montgomery_cached_k4_EXEC
-       (REWRITE_RULE[fst poly_basemul_acc_montgomery_cached_k4_EXEC] (CONV_RULE TWEAK_CONV poly_basemul_acc_montgomery_cached_k4_SPEC))
+       (REWRITE_RULE[fst poly_basemul_acc_montgomery_cached_k4_EXEC] (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV poly_basemul_acc_montgomery_cached_k4_SPEC)))
         `[D8; D9; D10; D11; D12; D13; D14; D15]` 64  THEN
      WORD_ARITH_TAC)
   ;;
