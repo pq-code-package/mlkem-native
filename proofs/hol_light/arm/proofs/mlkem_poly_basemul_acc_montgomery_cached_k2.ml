@@ -225,8 +225,23 @@ let LENGTH_POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_MC =
   REWRITE_CONV[poly_basemul_acc_montgomery_cached_k2_mc] `LENGTH poly_basemul_acc_montgomery_cached_k2_mc`
   |> CONV_RULE (RAND_CONV LENGTH_CONV);;
 
+let POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_PREAMBLE_LENGTH = new_definition
+  `POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_PREAMBLE_LENGTH = 20`;;
+
+let POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_POSTAMBLE_LENGTH = new_definition
+  `POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_POSTAMBLE_LENGTH = 24`;;
+
+let POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORE_START = new_definition
+  `POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORE_START = POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_PREAMBLE_LENGTH`;;
+
+let POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORE_END = new_definition
+  `POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORE_END = LENGTH poly_basemul_acc_montgomery_cached_k2_mc - POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_POSTAMBLE_LENGTH`;;
+
 let LENGTH_SIMPLIFY_CONV =
-  REWRITE_CONV[LENGTH_POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_MC];;
+  REWRITE_CONV[LENGTH_POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_MC;
+              POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORE_START; POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORE_END;
+              POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_PREAMBLE_LENGTH; POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
 (* ------------------------------------------------------------------------- *)
 (* Hacky tweaking conversion to write away non-free state component reads.   *)
@@ -298,7 +313,7 @@ let poly_basemul_acc_montgomery_cached_k2_GOAL = `forall srcA srcB srcBt dst x0 
      ==>
      ensures arm
        (\s. aligned_bytes_loaded s (word pc) poly_basemul_acc_montgomery_cached_k2_mc /\
-            read PC s = word (pc + 20)  /\
+            read PC s = word (pc + POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORE_START)  /\
             C_ARGUMENTS [dst; srcA; srcB; srcBt] s  /\
             (!i. i < 256 ==> read(memory :> bytes16(word_add srcA  (word (2 * i)))) s = x0 i)       /\
             (!i. i < 256 ==> read(memory :> bytes16(word_add srcB  (word (2 * i)))) s = y0 i)       /\
@@ -306,7 +321,7 @@ let poly_basemul_acc_montgomery_cached_k2_GOAL = `forall srcA srcB srcBt dst x0 
             (!i. i < 256 ==> read(memory :> bytes16(word_add srcA  (word (512 + 2 * i)))) s = x1 i) /\
             (!i. i < 256 ==> read(memory :> bytes16(word_add srcB  (word (512 + 2 * i)))) s = y1 i) /\
             (!i. i < 128 ==> read(memory :> bytes16(word_add srcBt (word (256 + 2 * i)))) s = y1t i))
-       (\s. read PC s = word (pc + 640) /\
+       (\s. read PC s = word (pc + POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORE_END) /\
             ((!i. i < 256 ==> abs(ival(x0 i)) <= &2 pow 12 /\  abs(ival(x1 i)) <= &2 pow 12)
              ==> (!i. i < 128
                       ==> (ival(read(memory :> bytes16(word_add dst (word (4 * i)))) s) ==
@@ -434,7 +449,7 @@ let poly_basemul_acc_montgomery_cached_k2_SPEC' = prove(
   REWRITE_TAC[fst poly_basemul_acc_montgomery_cached_k2_EXEC] THEN
   CONV_TAC TWEAK_CONV THEN
   ARM_ADD_RETURN_STACK_TAC ~pre_post_nsteps:(5,5) poly_basemul_acc_montgomery_cached_k2_EXEC
-     (REWRITE_RULE[fst poly_basemul_acc_montgomery_cached_k2_EXEC] (CONV_RULE TWEAK_CONV poly_basemul_acc_montgomery_cached_k2_SPEC))
+     (REWRITE_RULE[fst poly_basemul_acc_montgomery_cached_k2_EXEC] (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV poly_basemul_acc_montgomery_cached_k2_SPEC)))
       `[D8; D9; D10; D11; D12; D13; D14; D15]` 64  THEN
    WORD_ARITH_TAC)
 ;;
