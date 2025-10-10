@@ -119,7 +119,7 @@ runs:
           nix-verbose: ${{ inputs.nix-verbose }}
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
-          cflags: "${{ inputs.cflags }} -DMLK_FORCE_PPC64LE"
+          cflags: "${{ inputs.cflags }} -DMLK_FORCE_PPC64LE -mvsx"
           cross_prefix: powerpc64le-unknown-linux-gnu-
           exec_wrapper: qemu-ppc64le
           opt: ${{ inputs.opt }}

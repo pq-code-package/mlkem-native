@@ -1220,6 +1220,10 @@ def x86_64(c):
     return "/x86_64/" in c
 
 
+def ppc64le(c):
+    return "/ppc64le/" in c
+
+
 def native_fips202(c):
     return native(c) and fips202(c)
 
@@ -1250,6 +1254,10 @@ def native_arith_aarch64(c):
 
 def native_arith_x86_64(c):
     return native_arith(c) and x86_64(c)
+
+
+def native_arith_ppc64le(c):
+    return native_arith(c) and ppc64le(c)
 
 
 def native_arith_core(c):
@@ -1431,6 +1439,10 @@ def gen_monolithic_source_file(dry_run=False):
         for c in filter(native_arith_x86_64, c_sources):
             yield f'#include "{c}"'
         yield "#endif"
+        yield "#if defined(MLK_SYS_PPC64LE)"
+        for c in filter(native_arith_ppc64le, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
         yield "#endif"
         yield ""
         yield "#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)"
@@ -1513,6 +1525,10 @@ def gen_monolithic_asm_file(dry_run=False):
         yield "#endif"
         yield "#if defined(MLK_SYS_X86_64)"
         for c in filter(native_arith_x86_64, asm_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLK_SYS_PPC64LE)"
+        for c in filter(native_arith_ppc64le, asm_sources):
             yield f'#include "{c}"'
         yield "#endif"
         yield "#endif"
@@ -1766,6 +1782,10 @@ def update_via_simpasm(
         source_arch = "aarch64"
     elif "x86_64" in infile_full:
         source_arch = "x86_64"
+    elif "ppc64le" in infile_full:
+        source_arch = "ppc64le"
+    elif "riscv64" in infile_full:
+        source_arch = "riscv64"
     else:
         raise Exception(f"Could not detect architecture of source file {infile_full}.")
     # Check native architecture
@@ -1775,7 +1795,14 @@ def update_via_simpasm(
         native_arch = "x86_64"
 
     if native_arch != source_arch:
-        cross_prefix = f"{source_arch}-unknown-linux-gnu-"
+        arch_to_cross_prefix = {
+            "aarch64": "aarch64-unknown-linux-gnu-",
+            "x86_64": "x86_64-unknown-linux-gnu-",
+            "ppc64le": "powerpc64le-unknown-linux-gnu-",
+            "riscv64": "riscv64-unknown-linux-gnu-",
+        }
+
+        cross_prefix = arch_to_cross_prefix[source_arch]
         cross_gcc = cross_prefix + "gcc"
         # Check if cross-compiler is present
         if shutil.which(cross_gcc) is None:
@@ -1788,13 +1815,12 @@ def update_via_simpasm(
     with tempfile.NamedTemporaryFile(suffix=".S") as tmp:
         try:
             # Determine architecture from filename
-            arch = "aarch64" if "aarch64" in infile_full else "x86_64"
 
             cmd = [
                 "./scripts/simpasm",
                 "--objdump=llvm-objdump",
                 "--cfify",
-                "--arch=" + arch,
+                "--arch=" + source_arch,
                 "-i",
                 infile_full,
                 "-o",
@@ -2058,49 +2084,55 @@ def synchronize_backends(
             ),
         )
 
-    synchronize_backend(
-        f"dev/aarch64_{ty}/src",
-        "mlkem/src/native/aarch64/src",
-        dry_run=dry_run,
-        delete=delete,
-        force_cross=force_cross,
-        no_simplify=no_simplify,
-        cflags="-Imlkem/src/native/aarch64/src",
-    )
-    synchronize_backend(
-        "dev/fips202/aarch64/src",
-        "mlkem/src/fips202/native/aarch64/src",
-        dry_run=dry_run,
-        delete=delete,
-        force_cross=force_cross,
-        no_simplify=no_simplify,
-        cflags="-Imlkem/src/fips202/native/aarch64/src -march=armv8.4-a+sha3",
-    )
-    synchronize_backend(
-        "dev/fips202/aarch64",
-        "mlkem/src/fips202/native/aarch64",
-        dry_run=dry_run,
-        delete=delete,
-        force_cross=force_cross,
-        no_simplify=no_simplify,
-        cflags="-Imlkem/src/fips202/native/aarch64 -march=armv8.4-a+sha3",
-    )
-    synchronize_backend(
-        "dev/x86_64/src",
-        "mlkem/src/native/x86_64/src",
-        dry_run=dry_run,
-        delete=delete,
-        force_cross=force_cross,
-        no_simplify=no_simplify,
-        # Turn off control-flow protection (CET) explicitly. Newer versions of
-        # clang turn it on by default and insert endbr64 instructions at every
-        # global symbol.
-        # We insert endbr64 instruction manually via the MLK_ASM_FN_SYMBOL
-        # macro.
-        # This leads to duplicate endbr64 instructions causing a failure when
-        # comparing the object code before and after simplification.
-        cflags="-Imlkem/src/native/x86_64/src/ -mavx2 -mbmi2 -msse4 -fcf-protection=none",
-    )
+    # Triples of
+    # - input backend directory under dev/
+    # - output backend directory under mlkem/
+    # - cflags
+    worklist = [
+        (
+            f"dev/aarch64_{ty}/src",
+            "mlkem/src/native/aarch64/src",
+            "-Imlkem/src/native/aarch64/src",
+        ),
+        (
+            "dev/fips202/aarch64/src",
+            "mlkem/src/fips202/native/aarch64/src",
+            "-Imlkem/src/fips202/native/aarch64/src -march=armv8.4-a+sha3",
+        ),
+        (
+            "dev/fips202/aarch64",
+            "mlkem/src/fips202/native/aarch64",
+            "-Imlkem/src/fips202/native/aarch64 -march=armv8.4-a+sha3",
+        ),
+        (
+            "dev/x86_64/src",
+            "mlkem/src/native/x86_64/src",
+            # Turn off control-flow protection (CET) explicitly. Newer versions of
+            # clang turn it on by default and insert endbr64 instructions at every
+            # global symbol.
+            # We insert endbr64 instruction manually via the MLK_ASM_FN_SYMBOL
+            # macro.
+            # This leads to duplicate endbr64 instructions causing a failure when
+            # comparing the object code before and after simplification.
+            "-Imlkem/src/native/x86_64/src/ -mavx2 -mbmi2 -msse4 -fcf-protection=none",
+        ),
+        (
+            "dev/ppc64le/src",
+            "mlkem/src/native/ppc64le/src",
+            "-Imlkem/src/native/ppc64le/src -mvsx",
+        ),
+    ]
+
+    for in_dir, out_dir, cflags in worklist:
+        synchronize_backend(
+            in_dir,
+            out_dir,
+            dry_run=dry_run,
+            delete=delete,
+            force_cross=force_cross,
+            no_simplify=no_simplify,
+            cflags=cflags,
+        )
 
 
 def adjust_header_guard_for_filename(content, header_file):
