@@ -129,16 +129,15 @@ void mlk_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
 void mlk_keccakf1600x4_permute(uint64_t *state)
 {
 #if defined(MLK_USE_FIPS202_X4_NATIVE)
-  mlk_keccak_f1600_x4_native(state);
-#elif defined(MLK_USE_FIPS202_X2_NATIVE)
-  mlk_keccak_f1600_x2_native(state + 0 * MLK_KECCAK_LANES);
-  mlk_keccak_f1600_x2_native(state + 2 * MLK_KECCAK_LANES);
-#else
+  if (mlk_keccak_f1600_x4_native(state) == MLK_NATIVE_FUNC_SUCCESS)
+  {
+    return;
+  }
+#endif /* MLK_USE_FIPS202_X4_NATIVE */
   mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 0);
   mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 1);
   mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 2);
   mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 3);
-#endif /* !MLK_USE_FIPS202_X4_NATIVE && !MLK_USE_FIPS202_X2_NATIVE */
 }
 
 static const uint64_t mlk_KeccakF_RoundConstants[MLK_KECCAK_NROUNDS] = {

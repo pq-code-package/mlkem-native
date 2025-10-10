@@ -406,7 +406,6 @@
 /* mlkem/src/fips202/native/armv8.1_m/auto.h */
 #undef MLK_FIPS202_NATIVE_ARMV8_1_M_AUTO_H
 /* mlkem/src/fips202/native/armv8.1_m/x4_v8m_mve.h */
-#undef KECCAK_TMP_STATE_SIZE
 #undef MLK_FIPS202_ARMV81M_NEED_X1
 #undef MLK_FIPS202_ARMV81M_NEED_X4
 #undef MLK_FIPS202_NATIVE_ARMV8_1_M_X4_V8M_MVE_H
