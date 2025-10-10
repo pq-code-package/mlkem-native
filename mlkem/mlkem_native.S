@@ -14,7 +14,7 @@
  * Single assembly unit for fixed-level build of mlkem-native
  *
  * This assembly unit bundles together all assembly files for a build
- * of mlkem-native for a fixed security level (MLKEM-512/768/1024).
+ * of mlkem-native for a fixed security level (ML-KEM-512/768/1024).
  *
  * # Multi-level build
  *
