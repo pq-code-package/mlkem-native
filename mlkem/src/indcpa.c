@@ -17,9 +17,7 @@
  *   https://github.com/pq-crystals/kyber/tree/main/ref
  */
 
-#include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 
 #include "cbmc.h"
 #include "debug.h"

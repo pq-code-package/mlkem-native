@@ -13,6 +13,7 @@
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <stdint.h>
+
 #include "fips202_native_aarch64.h"
 
 MLK_ALIGN const uint64_t mlk_keccakf1600_round_constants[] = {
