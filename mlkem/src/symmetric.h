@@ -15,8 +15,8 @@
 #ifndef MLK_SYMMETRIC_H
 #define MLK_SYMMETRIC_H
 
-#include <stddef.h>
 #include <stdint.h>
+
 #include "cbmc.h"
 #include "common.h"
 #include MLK_FIPS202_HEADER_FILE

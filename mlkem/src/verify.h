@@ -30,9 +30,8 @@
 #ifndef MLK_VERIFY_H
 #define MLK_VERIFY_H
 
-#include <limits.h>
-#include <stddef.h>
 #include <stdint.h>
+
 #include "cbmc.h"
 #include "common.h"
 
@@ -319,7 +318,8 @@ __contract__(ensures(return_value == (cond ? a : b)))
  * Arguments:   const uint8_t *a: pointer to first byte array
  *              const uint8_t *b: pointer to second byte array
  *              size_t len:       length of the byte arrays, upper-bounded
- *                                to INT_MAX to control proof complexity
+ *                                to UINT16_MAX to control proof complexity
+ *                                only.
  *
  * Returns 0 if the byte arrays are equal, a non-zero value otherwise
  *
@@ -339,7 +339,7 @@ __contract__(ensures(return_value == (cond ? a : b)))
 static MLK_INLINE uint8_t mlk_ct_memcmp(const uint8_t *a, const uint8_t *b,
                                         const size_t len)
 __contract__(
-  requires(len <= INT_MAX)
+  requires(len <= UINT16_MAX)
   requires(memory_no_alias(a, len))
   requires(memory_no_alias(b, len))
   ensures((return_value == 0) == forall(i, 0, len, (a[i] == b[i]))))

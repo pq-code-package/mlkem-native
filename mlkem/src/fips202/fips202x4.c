@@ -15,7 +15,6 @@
 #include "../common.h"
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
-#include <string.h>
 #include "../verify.h"
 #include "fips202.h"
 #include "fips202x4.h"

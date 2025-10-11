@@ -23,7 +23,6 @@
  */
 
 #include <stdint.h>
-#include <string.h>
 
 #include "compress.h"
 #include "debug.h"

@@ -20,7 +20,7 @@ jobs:
            arch: mac
            mode: native
            nix_shell: ci
-         - runner: macos-13
+         - runner: macos-15-intel
            name: 'MacOS (x86_64)'
            arch: mac
            mode: native

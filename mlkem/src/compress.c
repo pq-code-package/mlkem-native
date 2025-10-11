@@ -21,7 +21,7 @@
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <stdint.h>
-#include <string.h>
+
 #include "cbmc.h"
 #include "compress.h"
 #include "debug.h"

@@ -51,3 +51,40 @@ let MEMORY_128_FROM_16_TAC =
       let itm = mk_small_numeral(16*i) in
       READ_MEMORY_MERGE_CONV 3 (subst[itm,n_tm] pat') in
     MP_TAC(end_itlist CONJ (map f (0--(n-1))));;
+
+(* This tactic repeated calls `f n with monotonically increasing values of n
+   until the target PC matches one of the assumptions.
+
+   The goal must be of the form `ensure arm ...`. Clauses constraining the PC
+   must be of the form `read PC some_state = some_value`. *)
+let MAP_UNTIL_TARGET_PC f n = fun (asl, w) ->
+  let is_pc_condition = can (term_match [] `read PC some_state = some_value`) in
+  (* We assume that the goal has the form
+     `ensure arm (\s. ... /\ read PC s = some_value /\ ...)` *)
+  let extract_target_pc_from_goal goal =
+    let _, insts, _ = term_match [] `eventually arm (\s'. P) some_state` goal in
+    insts
+      |> rev_assoc `P: bool`
+      |> conjuncts
+      |> find is_pc_condition in
+  (* Find PC-constraining assumption from the list of all assumptions. *)
+  let extract_pc_assumption asl =
+    try Some (find (is_pc_condition o concl o snd) asl |> snd |> concl) with find -> None in
+  (* Check if there is an assumption constraining the PC to the target PC *)
+  let has_matching_pc_assumption asl target_pc =
+    match extract_pc_assumption asl with
+     | None -> false
+     | Some(asm) -> can (term_match [`returnaddress: 64 word`; `pc: num`] target_pc) asm in
+  let target_pc = extract_target_pc_from_goal w in
+  (* ALL_TAC if we reached the target PC, NO_TAC otherwise, so
+     TARGET_PC_REACHED_TAC target_pc ORELSE SOME_OTHER_TACTIC
+     is effectively `if !(target_pc_reached) SOME_OTHER_TACTIC` *)
+  let TARGET_PC_REACHED_TAC target_pc = fun (asl, w) ->
+    if has_matching_pc_assumption asl target_pc then
+      ALL_TAC (asl, w)
+    else
+      NO_TAC (asl, w) in
+  let rec core n (asl, w) =
+    (TARGET_PC_REACHED_TAC target_pc ORELSE (f n THEN core (n + 1))) (asl, w)
+  in
+    core n (asl, w);;

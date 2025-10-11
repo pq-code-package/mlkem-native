@@ -78,8 +78,16 @@ vpsubw		%ymm\rh3,%ymm15,%ymm\rh3    /* rh3 = montmul(rh3-rl3, root0) */
 .macro intt_levels0t5 off
 /* level 0 */
 /* no bounds assumptions */
-vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XFLO*2(%rsi),%ymm2
-vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XFHI*2(%rsi),%ymm3
+
+// Broadcast -10079 (0xd8a1) to all elements of ymm2
+movl $0xd8a1d8a1, %eax
+vmovd %eax, %xmm2
+vpbroadcastd %xmm2, %ymm2
+
+// Broadcast 1441 (0x05a1) to all elements of ymm3
+movl $0x05a105a1, %eax
+vmovd %eax, %xmm3
+vpbroadcastd %xmm3, %ymm3
 
 vmovdqa         (128*\off+  0)*2(%rdi),%ymm4
 vmovdqa         (128*\off+ 32)*2(%rdi),%ymm6
@@ -149,7 +157,10 @@ vpermd		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+128)*2(%rsi),%ymm12
 butterfly	3,4,6,8,5,7,9,11,2,2,10,10
 /* 3 abs bound < 8q, 4 abs bound < 4q, 6,8 abs bound < 2q, 5,7,9,11 abs bound < q */
 
-vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_16XV*2(%rsi),%ymm1
+// Broadcast 20159 (0x4ebf) to all elements of ymm1
+movl $0x4ebf4ebf, %eax
+vmovd %eax, %xmm1
+vpbroadcastd %xmm1, %ymm1
 red16		3
 /*  4 abs bound < 4q, 6,8 abs bound < 2q, 3,5,7,9,11 abs bound < q */
 
@@ -263,7 +274,11 @@ vmovdqa		%ymm11,(64*\off+176)*2(%rdi)
 .global MLK_ASM_NAMESPACE(invntt_avx2)
 .balign 4
 MLK_ASM_FN_SYMBOL(invntt_avx2)
-vmovdqa         MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rsi),%ymm0
+
+// Broadcast 3329 (0x0D01) to all elements of ymm0
+movl $0x0D010D01, %eax
+vmovd %eax, %xmm0
+vpbroadcastd %xmm0, %ymm0
 
 intt_levels0t5	0
 intt_levels0t5	1

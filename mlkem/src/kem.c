@@ -22,9 +22,7 @@
  *   https://github.com/pq-crystals/kyber/tree/main/ref
  */
 
-#include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 
 #include "indcpa.h"
 #include "kem.h"
@@ -39,18 +37,8 @@
 #define mlk_check_pct MLK_ADD_PARAM_SET(mlk_check_pct)
 /* End of parameter set namespacing */
 
-#if defined(CBMC)
-/* Redeclaration with contract needed for CBMC only */
-int memcmp(const void *str1, const void *str2, size_t n)
-__contract__(
-  requires(memory_no_alias(str1, n))
-  requires(memory_no_alias(str2, n))
-);
-#endif /* CBMC */
-
-
 /* Reference: Not implemented in the reference implementation @[REF]. */
-MLK_INTERNAL_API
+MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 {
@@ -75,7 +63,7 @@ int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 
 
 /* Reference: Not implemented in the reference implementation @[REF]. */
-MLK_INTERNAL_API
+MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
@@ -95,8 +83,11 @@ int crypto_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 
   mlk_hash_h(test, sk + MLKEM_INDCPA_SECRETKEYBYTES,
              MLKEM_INDCCA_PUBLICKEYBYTES);
-  res = memcmp(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, test,
-               MLKEM_SYMBYTES)
+  /* This doesn't have to be a constant-time memcmp, but it's the only place
+   * in the library where a normal memcmp would be used otherwise, so for sake
+   * of minimizing stdlib dependency, we use our constant-time one anyway. */
+  res = mlk_ct_memcmp(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES,
+                      test, MLKEM_SYMBYTES)
             ? -1
             : 0;
 

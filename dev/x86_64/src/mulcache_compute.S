@@ -36,7 +36,10 @@ vmovdqa %ymm8, (32*\i+16)*2(%rdi)
 .balign 4
 MLK_ASM_FN_SYMBOL(poly_mulcache_compute_avx2)
 
-vmovdqa MLK_AVX2_BACKEND_DATA_OFFSET_16XQ*2(%rdx),%ymm0
+// Broadcast 3329 (0x0D01) to all elements of ymm0
+movl $0x0D010D01, %eax
+vmovd %eax, %xmm0
+vpbroadcastd %xmm0, %ymm0
 
 mulcache_compute_iter 0
 mulcache_compute_iter 1

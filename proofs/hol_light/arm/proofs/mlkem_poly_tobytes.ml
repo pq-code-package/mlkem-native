@@ -111,6 +111,32 @@ let mlkem_poly_tobytes_mc = define_assert_from_elf
 let MLKEM_POLY_TOBYTES_EXEC = ARM_MK_EXEC_RULE mlkem_poly_tobytes_mc;;
 
 (* ------------------------------------------------------------------------- *)
+(* Code length constants                                                     *)
+(* ------------------------------------------------------------------------- *)
+
+let LENGTH_MLKEM_POLY_TOBYTES_MC =
+  REWRITE_CONV[mlkem_poly_tobytes_mc] `LENGTH mlkem_poly_tobytes_mc`
+  |> CONV_RULE (RAND_CONV LENGTH_CONV);;
+
+let MLKEM_POLY_TOBYTES_PREAMBLE_LENGTH = new_definition
+  `MLKEM_POLY_TOBYTES_PREAMBLE_LENGTH = 0`;;
+
+let MLKEM_POLY_TOBYTES_POSTAMBLE_LENGTH = new_definition
+  `MLKEM_POLY_TOBYTES_POSTAMBLE_LENGTH = 4`;;
+
+let MLKEM_POLY_TOBYTES_CORE_START = new_definition
+  `MLKEM_POLY_TOBYTES_CORE_START = MLKEM_POLY_TOBYTES_PREAMBLE_LENGTH`;;
+
+let MLKEM_POLY_TOBYTES_CORE_END = new_definition
+  `MLKEM_POLY_TOBYTES_CORE_END = LENGTH mlkem_poly_tobytes_mc - MLKEM_POLY_TOBYTES_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLKEM_POLY_TOBYTES_MC;
+              MLKEM_POLY_TOBYTES_CORE_START; MLKEM_POLY_TOBYTES_CORE_END;
+              MLKEM_POLY_TOBYTES_PREAMBLE_LENGTH; MLKEM_POLY_TOBYTES_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
+
+(* ------------------------------------------------------------------------- *)
 (* A construct handy to expand out some lists explicitly. The conversion     *)
 (* is a bit stupid (quadratic) but good enough for this application.         *)
 (* ------------------------------------------------------------------------- *)
@@ -172,29 +198,25 @@ let lemma =
 
 let MLKEM_POLY_TOBYTES_CORRECT = prove
  (`!r a (l:int16 list) pc.
-        ALL (nonoverlapping (r,384)) [(word pc,0x158); (a,512)]
+        ALL (nonoverlapping (r,384)) [(word pc,LENGTH mlkem_poly_tobytes_mc); (a,512)]
         ==> ensures arm
              (\s. aligned_bytes_loaded s (word pc) mlkem_poly_tobytes_mc /\
-                  read PC s = word pc /\
+                  read PC s = word (pc + MLKEM_POLY_TOBYTES_CORE_START) /\
                   C_ARGUMENTS [r;a] s /\
+                  LENGTH l = 256 /\
                   read (memory :> bytes(a,512)) s = num_of_wordlist l)
-             (\s. read PC s = word(pc + 0x154) /\
-                  (LENGTH l = 256
-                   ==> read(memory :> bytes(r,384)) s =
-                       num_of_wordlist (MAP word_zx l:(12 word)list)))
+             (\s. read PC s = word(pc + MLKEM_POLY_TOBYTES_CORE_END) /\
+                  read(memory :> bytes(r,384)) s =
+                    num_of_wordlist (MAP word_zx l:(12 word)list))
              (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(r,384)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC [`r:int64`; `a:int64`; `l:int16 list`; `pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
               NONOVERLAPPING_CLAUSES; ALL] THEN
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
 
-  (*** Globalize the LENGTH l = 256 hypothesis ***)
-
-  ASM_CASES_TAC `LENGTH(l:int16 list) = 256` THENL
-   [ASM_REWRITE_TAC[] THEN ENSURES_INIT_TAC "s0";
-    ARM_QUICKSIM_TAC MLKEM_POLY_TOBYTES_EXEC
-     [`read X0 s = a`; `read X1 s = z`; `read X2 s = i`] (1--169)] THEN
+  ASM_REWRITE_TAC[] THEN ENSURES_INIT_TAC "s0" THEN
 
   (*** Digitize and tweak the input digits to match 128-bit load size  ****)
 
@@ -215,10 +237,9 @@ let MLKEM_POLY_TOBYTES_CORRECT = prove
 
   (*** Unroll and simulate to the end ***)
 
-  MAP_EVERY (fun n ->
+  MAP_UNTIL_TARGET_PC (fun n ->
     ARM_STEPS_TAC MLKEM_POLY_TOBYTES_EXEC [n] THEN
-    RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)))
-   (1--169) THEN
+    RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV))) 1 THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
   (*** Now fiddle round to make things match up nicely ***)
@@ -251,18 +272,19 @@ let MLKEM_POLY_TOBYTES_CORRECT = prove
 
 let MLKEM_POLY_TOBYTES_SUBROUTINE_CORRECT = prove
  (`!r a (l:int16 list) pc returnaddress.
-        ALL (nonoverlapping (r,384)) [(word pc,0x158); (a,512)]
+        ALL (nonoverlapping (r,384)) [(word pc,LENGTH mlkem_poly_tobytes_mc); (a,512)]
         ==> ensures arm
              (\s. aligned_bytes_loaded s (word pc) mlkem_poly_tobytes_mc /\
                   read PC s = word pc /\
                   read X30 s = returnaddress /\
                   C_ARGUMENTS [r;a] s /\
+                  LENGTH l = 256 /\
                   read (memory :> bytes(a,512)) s = num_of_wordlist l)
              (\s. read PC s = returnaddress /\
-                  (LENGTH l = 256
-                   ==> read(memory :> bytes(r,384)) s =
-                       num_of_wordlist (MAP word_zx l:(12 word)list)))
+                  read(memory :> bytes(r,384)) s =
+                       num_of_wordlist (MAP word_zx l:(12 word)list))
              (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(r,384)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   ARM_ADD_RETURN_NOSTACK_TAC MLKEM_POLY_TOBYTES_EXEC
-   MLKEM_POLY_TOBYTES_CORRECT);;
+   (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_POLY_TOBYTES_CORRECT));;

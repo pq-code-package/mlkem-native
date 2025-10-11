@@ -176,6 +176,32 @@ let mlkem_rej_uniform_mc = define_assert_from_elf
 let MLKEM_REJ_UNIFORM_EXEC = ARM_MK_EXEC_RULE mlkem_rej_uniform_mc;;
 
 (* ------------------------------------------------------------------------- *)
+(* Code length constants                                                     *)
+(* ------------------------------------------------------------------------- *)
+
+let LENGTH_MLKEM_REJ_UNIFORM_MC =
+  REWRITE_CONV[mlkem_rej_uniform_mc] `LENGTH mlkem_rej_uniform_mc`
+  |> CONV_RULE (RAND_CONV LENGTH_CONV);;
+
+let MLKEM_REJ_UNIFORM_PREAMBLE_LENGTH = new_definition
+  `MLKEM_REJ_UNIFORM_PREAMBLE_LENGTH = 4`;;
+
+let MLKEM_REJ_UNIFORM_POSTAMBLE_LENGTH = new_definition
+  `MLKEM_REJ_UNIFORM_POSTAMBLE_LENGTH = 8`;;
+
+let MLKEM_REJ_UNIFORM_CORE_START = new_definition
+  `MLKEM_REJ_UNIFORM_CORE_START = MLKEM_REJ_UNIFORM_PREAMBLE_LENGTH`;;
+
+let MLKEM_REJ_UNIFORM_CORE_END = new_definition
+  `MLKEM_REJ_UNIFORM_CORE_END = LENGTH mlkem_rej_uniform_mc - MLKEM_REJ_UNIFORM_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLKEM_REJ_UNIFORM_MC;
+              MLKEM_REJ_UNIFORM_CORE_START; MLKEM_REJ_UNIFORM_CORE_END;
+              MLKEM_REJ_UNIFORM_PREAMBLE_LENGTH; MLKEM_REJ_UNIFORM_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
+
+(* ------------------------------------------------------------------------- *)
 (* This is a general concept that subsumes a lot of specific cases like      *)
 (* num_of_bytelist and bignum_of_wordlist - should standardize a bit.        *)
 (* ------------------------------------------------------------------------- *)
@@ -462,19 +488,19 @@ let MLKEM_REJ_UNIFORM_CORRECT = prove
         24 divides val buflen /\
         8 * val buflen = 12 * LENGTH inlist /\
         ALL (nonoverlapping (stackpointer,576))
-            [(word pc,0x258); (buf,val buflen); (table,4096)] /\
+            [(word pc,LENGTH mlkem_rej_uniform_mc); (buf,val buflen); (table,4096)] /\
         ALL (nonoverlapping (res,512))
-            [(word pc,0x258); (stackpointer,576)]
+            [(word pc,LENGTH mlkem_rej_uniform_mc); (stackpointer,576)]
         ==> ensures arm
              (\s. aligned_bytes_loaded s (word pc) mlkem_rej_uniform_mc /\
-                  read PC s = word(pc + 0x4) /\
+                  read PC s = word(pc + MLKEM_REJ_UNIFORM_CORE_START) /\
                   read SP s = stackpointer /\
                   C_ARGUMENTS [res;buf;buflen;table] s /\
                   read(memory :> bytes(table,4096)) s =
                   num_of_wordlist mlkem_rej_uniform_table /\
                   read(memory :> bytes(buf,val buflen)) s =
                   num_of_wordlist inlist)
-             (\s. read PC s = word(pc + 0x250) /\
+             (\s. read PC s = word(pc + MLKEM_REJ_UNIFORM_CORE_END) /\
                   let outlist = SUB_LIST(0,256) (REJ_SAMPLE inlist) in
                   let outlen = LENGTH outlist in
                   C_RETURN s = word outlen /\
@@ -483,6 +509,7 @@ let MLKEM_REJ_UNIFORM_CORRECT = prove
              (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(res,512);
                          memory :> bytes(stackpointer,576)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC [`res:int64`; `buf:int64`] THEN
   W64_GEN_TAC `buflen:num` THEN
   MAP_EVERY X_GEN_TAC
@@ -1611,9 +1638,9 @@ let MLKEM_REJ_UNIFORM_SUBROUTINE_CORRECT = prove
         24 divides val buflen /\
         8 * val buflen = 12 * LENGTH inlist /\
         ALL (nonoverlapping (word_sub stackpointer (word 576),576))
-            [(word pc,0x258); (buf,val buflen); (table,4096)] /\
+            [(word pc,LENGTH mlkem_rej_uniform_mc); (buf,val buflen); (table,4096)] /\
         ALL (nonoverlapping (res,512))
-            [(word pc,0x258); (word_sub stackpointer (word 576),576)]
+            [(word pc,LENGTH mlkem_rej_uniform_mc); (word_sub stackpointer (word 576),576)]
         ==> ensures arm
              (\s. aligned_bytes_loaded s (word pc) mlkem_rej_uniform_mc /\
                   read PC s = word pc /\
@@ -1633,7 +1660,8 @@ let MLKEM_REJ_UNIFORM_SUBROUTINE_CORRECT = prove
              (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(res,512);
                          memory :> bytes(word_sub stackpointer (word 576),576)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
   ARM_ADD_RETURN_STACK_TAC MLKEM_REJ_UNIFORM_EXEC
-   (CONV_RULE (TOP_DEPTH_CONV let_CONV) MLKEM_REJ_UNIFORM_CORRECT)
+   (CONV_RULE (TOP_DEPTH_CONV let_CONV) (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_REJ_UNIFORM_CORRECT))
     `[]:int64 list` 576);;

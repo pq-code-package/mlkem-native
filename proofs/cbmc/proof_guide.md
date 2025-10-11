@@ -529,7 +529,7 @@ __contract__(
   assigns(object_whole(r)));
 ```
 
-`array_bound` is a macro that expands to a quantified expression that expresses that the elemtns of `a->coeffs` between
+`array_bound` is a macro that expands to a quantified expression that expresses that the elements of `a->coeffs` between
 index values `0` (inclusive) and `MLKEM_N` (exclusive) are in the range `0` (inclusive) through `MLKEM_Q` (exclusive). See the macro definition in [mlkem/src/cbmc.h](../../mlkem/src/cbmc.h) for details.
 
 ### Interior contracts and loop invariants

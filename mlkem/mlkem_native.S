@@ -159,6 +159,8 @@
 #undef MLK_API_MUST_CHECK_RETURN_VALUE
 #undef MLK_API_NAMESPACE
 #undef MLK_H
+#undef crypto_kem_check_pk
+#undef crypto_kem_check_sk
 #undef crypto_kem_dec
 #undef crypto_kem_enc
 #undef crypto_kem_enc_derand
@@ -546,15 +548,6 @@
 #undef mlk_rej_uniform_table
 #undef mlk_tomont_avx2
 /* mlkem/src/native/x86_64/src/consts.h */
-#undef MLK_AVX2_BACKEND_DATA_OFFSET_16XFHI
-#undef MLK_AVX2_BACKEND_DATA_OFFSET_16XFLO
-#undef MLK_AVX2_BACKEND_DATA_OFFSET_16XMASK
-#undef MLK_AVX2_BACKEND_DATA_OFFSET_16XMONTSQHI
-#undef MLK_AVX2_BACKEND_DATA_OFFSET_16XMONTSQLO
-#undef MLK_AVX2_BACKEND_DATA_OFFSET_16XQ
-#undef MLK_AVX2_BACKEND_DATA_OFFSET_16XQINV
-#undef MLK_AVX2_BACKEND_DATA_OFFSET_16XSHIFT
-#undef MLK_AVX2_BACKEND_DATA_OFFSET_16XV
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_MULCACHE_TWIDDLES
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXB
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXD
