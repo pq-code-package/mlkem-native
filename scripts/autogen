@@ -1082,6 +1082,141 @@ def gen_avx2_mulcache_twiddles_file(dry_run=False):
     )
 
 
+def gen_riscv64_root_of_unity_for_block(layer, block, inv=False):
+    # We are computing a negacyclic NTT; the twiddles needed here is
+    # the second half of the twiddles for a cyclic NTT of twice the size.
+    # For ease of calculating the roots, layers are numbers 0 through 6
+    # in this function.
+    log = bitreverse(pow(2, layer) + block, 7)
+    if inv is True:
+        log = -log
+    root = signed_reduce(pow(root_of_unity, log, modulus) * montgomery_factor)
+    return root
+
+
+def gen_riscv64_zetas():
+    zetas_0123 = [
+        signed_reduce(montgomery_factor),
+        gen_riscv64_root_of_unity_for_block(0, 0),
+    ]
+
+    zetas_0123 += [gen_riscv64_root_of_unity_for_block(1, i) for i in range(2)]
+    zetas_0123 += [gen_riscv64_root_of_unity_for_block(2, i) for i in range(4)]
+    zetas_0123 += [gen_riscv64_root_of_unity_for_block(3, i) for i in range(8)]
+
+    for j in range(8):
+        yield from [zetas_0123[j * 2]]
+        yield from [zetas_0123[j * 2 + 1]]
+        for i in range(2):
+            yield from [gen_riscv64_root_of_unity_for_block(4, j * 2 + i)]
+        for i in range(4):
+            yield from [gen_riscv64_root_of_unity_for_block(5, j * 4 + i)]
+        for i in range(8):
+            yield from [gen_riscv64_root_of_unity_for_block(6, j * 8 + i)]
+
+
+def gen_riscv64_izetas():
+    zetas_0123 = [
+        signed_reduce(montgomery_factor),
+        gen_riscv64_root_of_unity_for_block(0, 0, inv=True),
+    ]
+
+    zetas_0123 += [
+        gen_riscv64_root_of_unity_for_block(1, i, inv=True) for i in range(2)
+    ]
+    zetas_0123 += [
+        gen_riscv64_root_of_unity_for_block(2, i, inv=True) for i in range(4)
+    ]
+    zetas_0123 += [
+        gen_riscv64_root_of_unity_for_block(3, i, inv=True) for i in range(8)
+    ]
+
+    for j in range(8):
+        yield from [zetas_0123[j * 2]]
+        yield from [zetas_0123[j * 2 + 1]]
+        for i in range(2):
+            yield from [gen_riscv64_root_of_unity_for_block(4, j * 2 + i, inv=True)]
+        for i in range(4):
+            yield from [gen_riscv64_root_of_unity_for_block(5, j * 4 + i, inv=True)]
+        for i in range(8):
+            yield from [gen_riscv64_root_of_unity_for_block(6, j * 8 + i, inv=True)]
+
+
+def gen_riscv64_basemul_roots():
+    R = signed_reduce(montgomery_factor)
+    for i in range(64):
+        yield from [
+            R,
+            signed_reduce(
+                pow(root_of_unity, bitreverse(64 + i, 7), modulus) * montgomery_factor
+            ),
+        ]
+        yield from [
+            R,
+            signed_reduce(
+                -pow(root_of_unity, bitreverse(64 + i, 7), modulus) * montgomery_factor
+            ),
+        ]
+
+
+def gen_riscv64_zeta_files(dry_run=False):
+    """Generate all RISC-V 64 zeta files"""
+
+    # Generate rv64v_zetas.inc
+    def gen_zetas():
+        yield from gen_header()
+        yield "#include <stdint.h>"
+        yield '#include "arith_native_riscv64.h"'
+        yield ""
+        yield "const int16_t zeta[] = {"
+        yield from map(lambda t: str(t) + ",", gen_riscv64_zetas())
+        yield "};"
+        yield ""
+
+    update_file(
+        "mlkem/src/native/riscv64/src/rv64v_zetas.inc",
+        "\n".join(gen_zetas()),
+        dry_run=dry_run,
+        force_format=True,
+    )
+
+    # Generate rv64v_izetas.inc
+    def gen_izetas():
+        yield from gen_header()
+        yield "#include <stdint.h>"
+        yield '#include "arith_native_riscv64.h"'
+        yield ""
+        yield "const int16_t izeta[] = {"
+        yield from map(lambda t: str(t) + ",", gen_riscv64_izetas())
+        yield "};"
+        yield ""
+
+    update_file(
+        "mlkem/src/native/riscv64/src/rv64v_izetas.inc",
+        "\n".join(gen_izetas()),
+        dry_run=dry_run,
+        force_format=True,
+    )
+
+    # Generate rv64v_zetas_basemul.inc
+    def gen_basemul():
+        yield from gen_header()
+        yield "#include <stdint.h>"
+        yield '#include "arith_native_riscv64.h"'
+        yield "  "
+        yield "const int16_t roots[] = {"
+        yield from map(lambda t: str(t) + ",", gen_riscv64_basemul_roots())
+        yield "};"
+        yield ""
+
+    update_file(
+        "mlkem/src/native/riscv64/src/rv64v_zetas_basemul.inc",
+        "\n".join(gen_basemul()),
+        dry_run=dry_run,
+        force_format=True,
+    )
+
+
 def get_c_source_files(main_only=False, core_only=False, strip_mlkem=False):
     if main_only is True:
         return get_files("mlkem/src/**/*.c", strip_mlkem=strip_mlkem)
@@ -1220,6 +1355,10 @@ def x86_64(c):
     return "/x86_64/" in c
 
 
+def riscv64(c):
+    return "/riscv64/" in c
+
+
 def native_fips202(c):
     return native(c) and fips202(c)
 
@@ -1252,9 +1391,16 @@ def native_arith_x86_64(c):
     return native_arith(c) and x86_64(c)
 
 
+def native_arith_riscv64(c):
+    return native_arith(c) and riscv64(c)
+
+
 def native_arith_core(c):
     return (
-        native_arith(c) and not native_arith_x86_64(c) and not native_arith_aarch64(c)
+        native_arith(c)
+        and not native_arith_x86_64(c)
+        and not native_arith_aarch64(c)
+        and not native_arith_riscv64(c)
     )
 
 
@@ -1353,6 +1499,11 @@ def gen_macro_undefs(extra_notes=None):
         filt=native_arith_x86_64, desc="native code (Arith, X86_64)"
     )
     yield "#endif"
+    yield "#if defined(MLK_SYS_RISCV64)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_arith_riscv64, desc="native code (Arith, RISC-V 64)"
+    )
+    yield "#endif"
     yield "#endif"
     yield "#endif"
     yield ""
@@ -1429,6 +1580,10 @@ def gen_monolithic_source_file(dry_run=False):
         yield "#endif"
         yield "#if defined(MLK_SYS_X86_64)"
         for c in filter(native_arith_x86_64, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLK_SYS_RISCV64)"
+        for c in filter(native_arith_riscv64, c_sources):
             yield f'#include "{c}"'
         yield "#endif"
         yield "#endif"
@@ -1513,6 +1668,10 @@ def gen_monolithic_asm_file(dry_run=False):
         yield "#endif"
         yield "#if defined(MLK_SYS_X86_64)"
         for c in filter(native_arith_x86_64, asm_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLK_SYS_RISCV64)"
+        for c in filter(native_arith_riscv64, asm_sources):
             yield f'#include "{c}"'
         yield "#endif"
         yield "#endif"
@@ -2801,6 +2960,7 @@ def _main():
     gen_avx2_zeta_file(args.dry_run)
     gen_avx2_rej_uniform_table(args.dry_run)
     gen_avx2_mulcache_twiddles_file(args.dry_run)
+    gen_riscv64_zeta_files(args.dry_run)
     high_level_status("Generated zeta and lookup tables")
 
     if platform.machine().lower() in ["arm64", "aarch64"]:
