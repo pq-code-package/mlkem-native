@@ -150,6 +150,7 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
           cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           check_namespace: 'false'
   backend_tests:
     name: AArch64 FIPS202 backends (${{ matrix.backend }})
@@ -170,6 +171,7 @@ jobs:
           opt: 'opt'
           examples: 'false'
           cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           check_namespace: 'false'
           extra_args: "--fips202-aarch64-backend ${{ matrix.backend }}"
   compiler_tests:
