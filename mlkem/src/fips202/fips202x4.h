@@ -5,7 +5,6 @@
 #ifndef MLK_FIPS202_FIPS202X4_H
 #define MLK_FIPS202_FIPS202X4_H
 
-#include <stddef.h>
 #include <stdint.h>
 
 #include "../cbmc.h"
