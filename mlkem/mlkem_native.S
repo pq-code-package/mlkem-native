@@ -581,13 +581,17 @@
 #undef mlk_rv64v_poly_sub
 #undef mlk_rv64v_poly_tomont
 #undef mlk_rv64v_rej_uniform
+/* mlkem/src/native/riscv64/src/rv64v_debug.h */
+#undef MLK_NATIVE_RISCV64_SRC_RV64V_DEBUG_H
+#undef mlk_assert_abs_bound_int16m1
+#undef mlk_assert_abs_bound_int16m2
+#undef mlk_assert_bound_int16m1
+#undef mlk_assert_bound_int16m2
+#undef mlk_debug_check_bounds_int16m1
+#undef mlk_debug_check_bounds_int16m2
 /* mlkem/src/native/riscv64/src/rv64v_settings.h */
 #undef MLK_NATIVE_RISCV64_SRC_RV64V_SETTINGS_H
 #undef MLK_RVV_E16M1_VL
-#undef MLK_RVV_MONT_NR
-#undef MLK_RVV_MONT_R1
-#undef MLK_RVV_MONT_R2
-#undef MLK_RVV_QI
 #undef MLK_RVV_VLEN
 #endif /* MLK_SYS_RISCV64 */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
