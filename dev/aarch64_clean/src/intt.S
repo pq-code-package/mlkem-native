@@ -243,10 +243,10 @@ intt_layer4567_start:
         ldr q_data2, [inp, #(16*2)]
         ldr q_data3, [inp, #(16*3)]
 
+        transpose4 data // manual ld4
+
         mul_ninv data0, data1, data2, data3, data0, data1, data2, data3
         // Bounds: Absolute value < q
-
-        transpose4 data // manual ld4
 
         load_next_roots_67
 
