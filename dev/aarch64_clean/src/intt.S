@@ -235,7 +235,8 @@ MLK_ASM_FN_SYMBOL(intt_asm)
         mov inp, in
         mov count, #8
 
-intt_scale_start:
+        .p2align 2
+intt_layer4567_start:
 
         ldr q_data0, [inp, #(16*0)]
         ldr q_data1, [inp, #(16*1)]
@@ -244,25 +245,6 @@ intt_scale_start:
 
         mul_ninv data0, data1, data2, data3, data0, data1, data2, data3
         // Bounds: Absolute value < q
-
-        str q_data0, [inp], #64
-        str q_data1, [inp, #(-64 + 16*1)]
-        str q_data2, [inp, #(-64 + 16*2)]
-        str q_data3, [inp, #(-64 + 16*3)]
-
-        subs count, count, #1
-        cbnz count, intt_scale_start
-
-        mov inp, in
-        mov count, #8
-
-        .p2align 2
-intt_layer4567_start:
-
-        ldr q_data0, [inp, #(16*0)]
-        ldr q_data1, [inp, #(16*1)]
-        ldr q_data2, [inp, #(16*2)]
-        ldr q_data3, [inp, #(16*3)]
 
         transpose4 data // manual ld4
 
