@@ -10,9 +10,23 @@
 #if defined(MLK_ARITH_BACKEND_RISCV64) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
-#include <riscv_vector.h>
 #include "arith_native_riscv64.h"
+
+#include "rv64v_debug.h"
 #include "rv64v_settings.h"
+
+/* Montgomery reduction constants */
+/* check-magic: 3327 == unsigned_mod(-pow(MLKEM_Q,-1,2^16), 2^16) */
+#define MLK_RVV_QI 3327
+
+/* check-magic: 2285 == unsigned_mod(2^16, MLKEM_Q) */
+#define MLK_RVV_MONT_R1 2285
+
+/* check-magic: 1353 == pow(2, 32, MLKEM_Q) */
+#define MLK_RVV_MONT_R2 1353
+
+/* check-magic: 1441 == pow(2,32-7,MLKEM_Q) */
+#define MLK_RVV_MONT_NR 1441
 
 static inline vint16m1_t fq_redc(vint16m1_t rh, vint16m1_t rl, size_t vl)
 {
@@ -27,7 +41,7 @@ static inline vint16m1_t fq_redc(vint16m1_t rh, vint16m1_t rl, size_t vl)
   return t;
 }
 
-/*  Narrowing reduction */
+/* Narrowing reduction */
 
 static inline vint16m1_t fq_redc2(vint32m2_t z, size_t vl)
 {
@@ -42,7 +56,7 @@ static inline vint16m1_t fq_redc2(vint32m2_t z, size_t vl)
   return t;
 }
 
-/*  Narrowing Barrett (per original Kyber)  */
+/* Narrowing Barrett (per original Kyber)  */
 
 static inline vint16m1_t fq_barrett(vint16m1_t a, size_t vl)
 {
@@ -55,6 +69,7 @@ static inline vint16m1_t fq_barrett(vint16m1_t a, size_t vl)
   t = __riscv_vmul_vx_i16m1(t, MLKEM_Q, vl);
   t = __riscv_vsub_vv_i16m1(a, t, vl);
 
+  mlk_assert_abs_bound_int16m1(t, vl, MLKEM_Q_HALF);
   return t;
 }
 
@@ -106,7 +121,12 @@ static inline vint16m1_t fq_mul_vx(vint16m1_t rx, int16_t ry, size_t vl)
 
 static inline vint16m1_t fq_mulq_vx(vint16m1_t rx, int16_t ry, size_t vl)
 {
-  return fq_cadd(fq_mul_vx(rx, ry, vl), vl);
+  vint16m1_t result;
+
+  result = fq_cadd(fq_mul_vx(rx, ry, vl), vl);
+
+  mlk_assert_bound_int16m1(result, vl, 0, MLKEM_Q);
+  return result;
 }
 
 /*  create a permutation for swapping index bits a and b, a < b */
@@ -142,18 +162,30 @@ static vuint16m2_t bitswap_perm(unsigned a, unsigned b, size_t vl)
 
 /*  forward butterfly operation */
 
-#define MLK_RVV_BFLY_FX(u0, u1, ut, uc, vl) \
-  {                                         \
-    ut = fq_mul_vx(u1, uc, vl);             \
-    u1 = __riscv_vsub_vv_i16m1(u0, ut, vl); \
-    u0 = __riscv_vadd_vv_i16m1(u0, ut, vl); \
+#define MLK_RVV_BFLY_FX(u0, u1, ut, uc, vl, layer)               \
+  {                                                              \
+    mlk_assert_abs_bound(&uc, 1, MLKEM_Q_HALF);                  \
+                                                                 \
+    ut = fq_mul_vx(u1, uc, vl);                                  \
+    mlk_assert_abs_bound_int16m1(ut, vl, MLKEM_Q);               \
+								 \
+    u1 = __riscv_vsub_vv_i16m1(u0, ut, vl);                      \
+    u0 = __riscv_vadd_vv_i16m1(u0, ut, vl);                      \
+    mlk_assert_abs_bound_int16m1(u0, vl, (layer + 1) * MLKEM_Q); \
+    mlk_assert_abs_bound_int16m1(u1, vl, (layer + 1) * MLKEM_Q); \
   }
 
-#define MLK_RVV_BFLY_FV(u0, u1, ut, uc, vl) \
-  {                                         \
-    ut = fq_mul_vv(u1, uc, vl);             \
-    u1 = __riscv_vsub_vv_i16m1(u0, ut, vl); \
-    u0 = __riscv_vadd_vv_i16m1(u0, ut, vl); \
+#define MLK_RVV_BFLY_FV(u0, u1, ut, uc, vl, layer)               \
+  {                                                              \
+    mlk_assert_abs_bound_int16m1(uc, vl, MLKEM_Q_HALF);          \
+                                                                 \
+    ut = fq_mul_vv(u1, uc, vl);                                  \
+    mlk_assert_abs_bound_int16m1(ut, vl, MLKEM_Q);               \
+                                                                 \
+    u1 = __riscv_vsub_vv_i16m1(u0, ut, vl);                      \
+    u0 = __riscv_vadd_vv_i16m1(u0, ut, vl);                      \
+    mlk_assert_abs_bound_int16m1(u0, vl, (layer + 1) * MLKEM_Q); \
+    mlk_assert_abs_bound_int16m1(u1, vl, (layer + 1) * MLKEM_Q); \
   }
 
 static vint16m2_t mlk_rv64v_ntt2(vint16m2_t vp, vint16m1_t cz)
@@ -185,7 +217,7 @@ static vint16m2_t mlk_rv64v_ntt2(vint16m2_t vp, vint16m1_t cz)
   t1 = __riscv_vget_v_i16m2_i16m1(vp, 1);
 
   c0 = __riscv_vrgather_vv_i16m1(cz, cs8, vl);
-  MLK_RVV_BFLY_FV(t0, t1, vt, c0, vl);
+  MLK_RVV_BFLY_FV(t0, t1, vt, c0, vl, 5);
 
   /*    swap 4  */
   vp = __riscv_vcreate_v_i16m1_i16m2(t0, t1);
@@ -194,7 +226,7 @@ static vint16m2_t mlk_rv64v_ntt2(vint16m2_t vp, vint16m1_t cz)
   t1 = __riscv_vget_v_i16m2_i16m1(vp, 1);
 
   c0 = __riscv_vrgather_vv_i16m1(cz, cs4, vl);
-  MLK_RVV_BFLY_FV(t0, t1, vt, c0, vl);
+  MLK_RVV_BFLY_FV(t0, t1, vt, c0, vl, 6);
 
   /*    swap 2  */
   vp = __riscv_vcreate_v_i16m1_i16m2(t0, t1);
@@ -203,7 +235,7 @@ static vint16m2_t mlk_rv64v_ntt2(vint16m2_t vp, vint16m1_t cz)
   t1 = __riscv_vget_v_i16m2_i16m1(vp, 1);
 
   c0 = __riscv_vrgather_vv_i16m1(cz, cs2, vl);
-  MLK_RVV_BFLY_FV(t0, t1, vt, c0, vl);
+  MLK_RVV_BFLY_FV(t0, t1, vt, c0, vl, 7);
 
   /*    normalize   */
   t0 = fq_mulq_vx(t0, MLK_RVV_MONT_R1, vl);
@@ -253,41 +285,41 @@ void mlk_rv64v_poly_ntt(int16_t *r)
   ve = __riscv_vle16_v_i16m1(&r[0xe0], vl);
   vf = __riscv_vle16_v_i16m1(&r[0xf0], vl);
 
-  MLK_RVV_BFLY_FX(v0, v8, vt, zeta[0x01], vl);
-  MLK_RVV_BFLY_FX(v1, v9, vt, zeta[0x01], vl);
-  MLK_RVV_BFLY_FX(v2, va, vt, zeta[0x01], vl);
-  MLK_RVV_BFLY_FX(v3, vb, vt, zeta[0x01], vl);
-  MLK_RVV_BFLY_FX(v4, vc, vt, zeta[0x01], vl);
-  MLK_RVV_BFLY_FX(v5, vd, vt, zeta[0x01], vl);
-  MLK_RVV_BFLY_FX(v6, ve, vt, zeta[0x01], vl);
-  MLK_RVV_BFLY_FX(v7, vf, vt, zeta[0x01], vl);
+  MLK_RVV_BFLY_FX(v0, v8, vt, zeta[0x01], vl, 1);
+  MLK_RVV_BFLY_FX(v1, v9, vt, zeta[0x01], vl, 1);
+  MLK_RVV_BFLY_FX(v2, va, vt, zeta[0x01], vl, 1);
+  MLK_RVV_BFLY_FX(v3, vb, vt, zeta[0x01], vl, 1);
+  MLK_RVV_BFLY_FX(v4, vc, vt, zeta[0x01], vl, 1);
+  MLK_RVV_BFLY_FX(v5, vd, vt, zeta[0x01], vl, 1);
+  MLK_RVV_BFLY_FX(v6, ve, vt, zeta[0x01], vl, 1);
+  MLK_RVV_BFLY_FX(v7, vf, vt, zeta[0x01], vl, 1);
 
-  MLK_RVV_BFLY_FX(v0, v4, vt, zeta[0x10], vl);
-  MLK_RVV_BFLY_FX(v1, v5, vt, zeta[0x10], vl);
-  MLK_RVV_BFLY_FX(v2, v6, vt, zeta[0x10], vl);
-  MLK_RVV_BFLY_FX(v3, v7, vt, zeta[0x10], vl);
-  MLK_RVV_BFLY_FX(v8, vc, vt, zeta[0x11], vl);
-  MLK_RVV_BFLY_FX(v9, vd, vt, zeta[0x11], vl);
-  MLK_RVV_BFLY_FX(va, ve, vt, zeta[0x11], vl);
-  MLK_RVV_BFLY_FX(vb, vf, vt, zeta[0x11], vl);
+  MLK_RVV_BFLY_FX(v0, v4, vt, zeta[0x10], vl, 2);
+  MLK_RVV_BFLY_FX(v1, v5, vt, zeta[0x10], vl, 2);
+  MLK_RVV_BFLY_FX(v2, v6, vt, zeta[0x10], vl, 2);
+  MLK_RVV_BFLY_FX(v3, v7, vt, zeta[0x10], vl, 2);
+  MLK_RVV_BFLY_FX(v8, vc, vt, zeta[0x11], vl, 2);
+  MLK_RVV_BFLY_FX(v9, vd, vt, zeta[0x11], vl, 2);
+  MLK_RVV_BFLY_FX(va, ve, vt, zeta[0x11], vl, 2);
+  MLK_RVV_BFLY_FX(vb, vf, vt, zeta[0x11], vl, 2);
 
-  MLK_RVV_BFLY_FX(v0, v2, vt, zeta[0x20], vl);
-  MLK_RVV_BFLY_FX(v1, v3, vt, zeta[0x20], vl);
-  MLK_RVV_BFLY_FX(v4, v6, vt, zeta[0x21], vl);
-  MLK_RVV_BFLY_FX(v5, v7, vt, zeta[0x21], vl);
-  MLK_RVV_BFLY_FX(v8, va, vt, zeta[0x30], vl);
-  MLK_RVV_BFLY_FX(v9, vb, vt, zeta[0x30], vl);
-  MLK_RVV_BFLY_FX(vc, ve, vt, zeta[0x31], vl);
-  MLK_RVV_BFLY_FX(vd, vf, vt, zeta[0x31], vl);
+  MLK_RVV_BFLY_FX(v0, v2, vt, zeta[0x20], vl, 3);
+  MLK_RVV_BFLY_FX(v1, v3, vt, zeta[0x20], vl, 3);
+  MLK_RVV_BFLY_FX(v4, v6, vt, zeta[0x21], vl, 3);
+  MLK_RVV_BFLY_FX(v5, v7, vt, zeta[0x21], vl, 3);
+  MLK_RVV_BFLY_FX(v8, va, vt, zeta[0x30], vl, 3);
+  MLK_RVV_BFLY_FX(v9, vb, vt, zeta[0x30], vl, 3);
+  MLK_RVV_BFLY_FX(vc, ve, vt, zeta[0x31], vl, 3);
+  MLK_RVV_BFLY_FX(vd, vf, vt, zeta[0x31], vl, 3);
 
-  MLK_RVV_BFLY_FX(v0, v1, vt, zeta[0x40], vl);
-  MLK_RVV_BFLY_FX(v2, v3, vt, zeta[0x41], vl);
-  MLK_RVV_BFLY_FX(v4, v5, vt, zeta[0x50], vl);
-  MLK_RVV_BFLY_FX(v6, v7, vt, zeta[0x51], vl);
-  MLK_RVV_BFLY_FX(v8, v9, vt, zeta[0x60], vl);
-  MLK_RVV_BFLY_FX(va, vb, vt, zeta[0x61], vl);
-  MLK_RVV_BFLY_FX(vc, vd, vt, zeta[0x70], vl);
-  MLK_RVV_BFLY_FX(ve, vf, vt, zeta[0x71], vl);
+  MLK_RVV_BFLY_FX(v0, v1, vt, zeta[0x40], vl, 4);
+  MLK_RVV_BFLY_FX(v2, v3, vt, zeta[0x41], vl, 4);
+  MLK_RVV_BFLY_FX(v4, v5, vt, zeta[0x50], vl, 4);
+  MLK_RVV_BFLY_FX(v6, v7, vt, zeta[0x51], vl, 4);
+  MLK_RVV_BFLY_FX(v8, v9, vt, zeta[0x60], vl, 4);
+  MLK_RVV_BFLY_FX(va, vb, vt, zeta[0x61], vl, 4);
+  MLK_RVV_BFLY_FX(vc, vd, vt, zeta[0x70], vl, 4);
+  MLK_RVV_BFLY_FX(ve, vf, vt, zeta[0x71], vl, 4);
 
   __riscv_vse16_v_i16m2(
       &r[0x00], mlk_rv64v_ntt2(__riscv_vcreate_v_i16m1_i16m2(v0, v1), z0), vl2);
@@ -323,22 +355,28 @@ void mlk_rv64v_poly_ntt(int16_t *r)
 
 /*  reverse butterfly operation */
 
-#define MLK_RVV_BFLY_RX(u0, u1, ut, uc, vl) \
-  {                                         \
-    ut = __riscv_vsub_vv_i16m1(u0, u1, vl); \
-    u0 = __riscv_vadd_vv_i16m1(u0, u1, vl); \
-    u0 = fq_csub(u0, vl);                   \
-    u1 = fq_mul_vx(ut, uc, vl);             \
-    u1 = fq_cadd(u1, vl);                   \
+#define MLK_RVV_BFLY_RX(u0, u1, ut, uc, vl)       \
+  {                                               \
+    ut = __riscv_vsub_vv_i16m1(u0, u1, vl);       \
+    u0 = __riscv_vadd_vv_i16m1(u0, u1, vl);       \
+    u0 = fq_csub(u0, vl);                         \
+    u1 = fq_mul_vx(ut, uc, vl);                   \
+    u1 = fq_cadd(u1, vl);                         \
+                                                  \
+    mlk_assert_bound_int16m1(u0, vl, 0, MLKEM_Q); \
+    mlk_assert_bound_int16m1(u1, vl, 0, MLKEM_Q); \
   }
 
-#define MLK_RVV_BFLY_RV(u0, u1, ut, uc, vl) \
-  {                                         \
-    ut = __riscv_vsub_vv_i16m1(u0, u1, vl); \
-    u0 = __riscv_vadd_vv_i16m1(u0, u1, vl); \
-    u0 = fq_csub(u0, vl);                   \
-    u1 = fq_mul_vv(ut, uc, vl);             \
-    u1 = fq_cadd(u1, vl);                   \
+#define MLK_RVV_BFLY_RV(u0, u1, ut, uc, vl)       \
+  {                                               \
+    ut = __riscv_vsub_vv_i16m1(u0, u1, vl);       \
+    u0 = __riscv_vadd_vv_i16m1(u0, u1, vl);       \
+    u0 = fq_csub(u0, vl);                         \
+    u1 = fq_mul_vv(ut, uc, vl);                   \
+    u1 = fq_cadd(u1, vl);                         \
+                                                  \
+    mlk_assert_bound_int16m1(u0, vl, 0, MLKEM_Q); \
+    mlk_assert_bound_int16m1(u1, vl, 0, MLKEM_Q); \
   }
 
 static vint16m2_t mlk_rv64v_intt2(vint16m2_t vp, vint16m1_t cz)
@@ -606,9 +644,9 @@ void mlk_rv64v_poly_tomont(int16_t *r)
 
   for (size_t i = 0; i < MLKEM_N; i += vl)
   {
-    __riscv_vse16_v_i16m1(
-        &r[i], fq_mul_vx(__riscv_vle16_v_i16m1(&r[i], vl), MLK_RVV_MONT_R2, vl),
-        vl);
+    vint16m1_t vec = __riscv_vle16_v_i16m1(&r[i], vl);
+    vec = fq_mul_vx(vec, MLK_RVV_MONT_R2, vl);
+    __riscv_vse16_v_i16m1(&r[i], vec, vl);
   }
 }
 
@@ -630,8 +668,6 @@ void mlk_rv64v_poly_reduce(int16_t *r)
   {
     vt = __riscv_vle16_v_i16m1(&r[i], vl);
     vt = fq_barrett(vt, vl);
-
-    /*  make positive */
     vt = fq_cadd(vt, vl);
     __riscv_vse16_v_i16m1(&r[i], vt, vl);
   }
@@ -736,6 +772,12 @@ MLK_EMPTY_CU(rv64v_poly)
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
+#undef MLK_RVV_VLEN
+#undef MLK_RVV_E16M1_VL
+#undef MLK_RVV_QI
+#undef MLK_RVV_MONT_R1
+#undef MLK_RVV_MONT_R2
+#undef MLK_RVV_MONT_NR
 #undef MLK_RVV_BFLY_FX
 #undef MLK_RVV_BFLY_FV
 #undef MLK_RVV_BFLY_RX
