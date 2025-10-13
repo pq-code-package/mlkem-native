@@ -59,7 +59,7 @@ static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])
 static MLK_INLINE int mlk_poly_mulcache_compute_native(int16_t x[MLKEM_N / 2],
                                                        const int16_t y[MLKEM_N])
 {
-  (void)x; /*	not using the cache atm  */
+  (void)x; /* not using the cache at the moment */
   (void)y;
   return MLK_NATIVE_FUNC_SUCCESS;
 }
