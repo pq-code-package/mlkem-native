@@ -335,7 +335,7 @@
 #undef MLK_SYS_PPC64LE
 #undef MLK_SYS_RISCV32
 #undef MLK_SYS_RISCV64
-#undef MLK_SYS_RISCV64_V256
+#undef MLK_SYS_RISCV64_RVV
 #undef MLK_SYS_WINDOWS
 #undef MLK_SYS_X86_64
 #undef MLK_SYS_X86_64_AVX2
@@ -578,10 +578,6 @@
 #undef mlk_assert_bound_int16m2
 #undef mlk_debug_check_bounds_int16m1
 #undef mlk_debug_check_bounds_int16m2
-/* mlkem/src/native/riscv64/src/rv64v_settings.h */
-#undef MLK_NATIVE_RISCV64_SRC_RV64V_SETTINGS_H
-#undef MLK_RVV_E16M1_VL
-#undef MLK_RVV_VLEN
 #endif /* MLK_SYS_RISCV64 */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 #endif /* !MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS */

@@ -33,7 +33,7 @@ void mlk_debug_check_bounds_int16m1(const char *file, int line, vint16m1_t vec,
 {
   /* Allocate temporary array to store vector elements
    * We use the maximum possible vector length to be safe */
-  int16_t temp_array[MLK_RVV_E16M1_VL];
+  int16_t temp_array[64];
 
   /* Store vector elements to temporary array for inspection */
   __riscv_vse16_v_i16m1(temp_array, vec, vl);
@@ -58,7 +58,7 @@ void mlk_debug_check_bounds_int16m2(const char *file, int line, vint16m2_t vec,
 {
   /* Allocate temporary array to store vector elements
    * m2 vectors hold 2x the elements of m1 vectors */
-  int16_t temp_array[2 * MLK_RVV_E16M1_VL];
+  int16_t temp_array[2 * 64];
 
   /* Store vector elements to temporary array for inspection */
   __riscv_vse16_v_i16m2(temp_array, vec, 2 * vl);

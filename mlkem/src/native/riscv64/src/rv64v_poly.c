@@ -10,10 +10,10 @@
 #if defined(MLK_ARITH_BACKEND_RISCV64) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
-#include "arith_native_riscv64.h"
+#include <riscv_vector.h>
 
+#include "arith_native_riscv64.h"
 #include "rv64v_debug.h"
-#include "rv64v_settings.h"
 
 /* Montgomery reduction constants */
 /* check-magic: 3327 == unsigned_mod(-pow(MLKEM_Q,-1,2^16), 2^16) */
@@ -145,10 +145,6 @@ static vuint16m2_t bitswap_perm(unsigned a, unsigned b, size_t vl)
   return xa;
 }
 
-/* NOTE: NTT is currently fixed for vlen==256  */
-
-#if (MLK_RVV_VLEN == 256)
-
 /*************************************************
  * Name:        poly_ntt
  *
@@ -190,7 +186,7 @@ static vuint16m2_t bitswap_perm(unsigned a, unsigned b, size_t vl)
 
 static vint16m2_t mlk_rv64v_ntt2(vint16m2_t vp, vint16m1_t cz)
 {
-  size_t vl = MLK_RVV_E16M1_VL;
+  size_t vl = 16; /* We work with 256-bit vectors of 16x16-bit elements */
   size_t vl2 = 2 * vl;
 
   const vuint16m2_t v2p8 = bitswap_perm(3, 4, vl2);
@@ -248,12 +244,13 @@ static vint16m2_t mlk_rv64v_ntt2(vint16m2_t vp, vint16m1_t cz)
   return vp;
 }
 
+/* Only for VLEN=256 for now */
 void mlk_rv64v_poly_ntt(int16_t *r)
 {
 /* zetas can be compiled into vector constants; don't pass as a pointer */
 #include "rv64v_zetas.inc"
 
-  size_t vl = MLK_RVV_E16M1_VL;
+  size_t vl = 16; /* We work with 256-bit vectors of 16x16-bit elements */
   size_t vl2 = 2 * vl;
 
   vint16m1_t vt;
@@ -378,7 +375,7 @@ void mlk_rv64v_poly_ntt(int16_t *r)
 
 static vint16m2_t mlk_rv64v_intt2(vint16m2_t vp, vint16m1_t cz)
 {
-  size_t vl = MLK_RVV_E16M1_VL;
+  size_t vl = 16; /* We work with 256-bit vectors of 16x16-bit elements */
   size_t vl2 = 2 * vl;
 
   const vuint16m2_t v2p8 = bitswap_perm(3, 4, vl2);
@@ -438,12 +435,13 @@ static vint16m2_t mlk_rv64v_intt2(vint16m2_t vp, vint16m1_t cz)
   return vp;
 }
 
+/* Only for VLEN=256 for now */
 void mlk_rv64v_poly_invntt_tomont(int16_t *r)
 {
 /* zetas can be compiled into vector constants; don't pass as a pointer */
 #include "rv64v_izetas.inc"
 
-  size_t vl = MLK_RVV_E16M1_VL;
+  size_t vl = 16; /* We work with 256-bit vectors of 16x16-bit elements */
   size_t vl2 = 2 * vl;
 
   const vint16m1_t z0 = __riscv_vle16_v_i16m1(&izeta[0x00], vl);
@@ -554,7 +552,7 @@ static inline void mlk_rv64v_poly_basemul_mont_add_k(int16_t *r,
 {
 #include "rv64v_zetas_basemul.inc"
 
-  size_t vl = MLK_RVV_E16M1_VL;
+  size_t vl = __riscv_vsetvl_e16m1(MLKEM_N);
   size_t i, j;
 
   const vuint16m1_t sw0 = __riscv_vxor_vx_u16m1(__riscv_vid_v_u16m1(vl), 1, vl);
@@ -622,8 +620,6 @@ void mlk_rv64v_poly_basemul_mont_add_k4(int16_t *r, const int16_t *a,
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
 
-#endif /* MLK_RVV_VLEN == 256 */
-
 /*************************************************
  * Name:        poly_tomont
  *
@@ -634,7 +630,7 @@ void mlk_rv64v_poly_basemul_mont_add_k4(int16_t *r, const int16_t *a,
  **************************************************/
 void mlk_rv64v_poly_tomont(int16_t *r)
 {
-  size_t vl = MLK_RVV_E16M1_VL;
+  size_t vl = __riscv_vsetvl_e16m1(MLKEM_N);
 
   for (size_t i = 0; i < MLKEM_N; i += vl)
   {
@@ -655,7 +651,7 @@ void mlk_rv64v_poly_tomont(int16_t *r)
  **************************************************/
 void mlk_rv64v_poly_reduce(int16_t *r)
 {
-  size_t vl = MLK_RVV_E16M1_VL;
+  size_t vl = __riscv_vsetvl_e16m1(MLKEM_N);
   vint16m1_t vt;
 
   for (size_t i = 0; i < MLKEM_N; i += vl)
@@ -678,7 +674,7 @@ void mlk_rv64v_poly_reduce(int16_t *r)
  **************************************************/
 void mlk_rv64v_poly_add(int16_t *r, const int16_t *a, const int16_t *b)
 {
-  size_t vl = MLK_RVV_E16M1_VL;
+  size_t vl = __riscv_vsetvl_e16m1(MLKEM_N);
 
   for (size_t i = 0; i < MLKEM_N; i += vl)
   {
@@ -701,7 +697,7 @@ void mlk_rv64v_poly_add(int16_t *r, const int16_t *a, const int16_t *b)
  **************************************************/
 void mlk_rv64v_poly_sub(int16_t *r, const int16_t *a, const int16_t *b)
 {
-  size_t vl = MLK_RVV_E16M1_VL;
+  size_t vl = __riscv_vsetvl_e16m1(MLKEM_N);
 
   for (size_t i = 0; i < MLKEM_N; i += vl)
   {
@@ -718,14 +714,6 @@ void mlk_rv64v_poly_sub(int16_t *r, const int16_t *a, const int16_t *b)
 unsigned int mlk_rv64v_rej_uniform(int16_t *r, unsigned int len,
                                    const uint8_t *buf, unsigned int buflen)
 {
-  const size_t vl = MLK_RVV_E16M1_VL;
-  const size_t vl23 = (MLK_RVV_E16M1_VL * 24) / 32;
-
-  const vuint16m1_t vid = __riscv_vid_v_u16m1(vl);
-  const vuint16m1_t srl12v = __riscv_vmul_vx_u16m1(vid, 12, vl);
-  const vuint16m1_t sel12v = __riscv_vsrl_vx_u16m1(srl12v, 4, vl);
-  const vuint16m1_t sll12v = __riscv_vsll_vx_u16m1(vid, 2, vl);
-
   size_t n, ctr, pos;
   vuint16m1_t x, y;
   vbool16_t lt;
@@ -733,8 +721,16 @@ unsigned int mlk_rv64v_rej_uniform(int16_t *r, unsigned int len,
   pos = 0;
   ctr = 0;
 
-  while (ctr < len && pos + (vl23 * 2) <= buflen)
+  while (ctr < len && pos < buflen)
   {
+    const size_t vl = __riscv_vsetvl_e16m1((buflen - pos) * 8 / 12);
+    const size_t vl23 = (vl * 24) / 32;
+
+    const vuint16m1_t vid = __riscv_vid_v_u16m1(vl);
+    const vuint16m1_t srl12v = __riscv_vmul_vx_u16m1(vid, 12, vl);
+    const vuint16m1_t sel12v = __riscv_vsrl_vx_u16m1(srl12v, 4, vl);
+    const vuint16m1_t sll12v = __riscv_vsll_vx_u16m1(vid, 2, vl);
+
     x = __riscv_vle16_v_u16m1((uint16_t *)&buf[pos], vl23);
     pos += vl23 * 2;
     x = __riscv_vrgather_vv_u16m1(x, sel12v, vl);
