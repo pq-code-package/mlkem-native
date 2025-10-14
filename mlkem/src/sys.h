@@ -49,9 +49,8 @@
 #endif
 
 #if defined(MLK_SYS_RISCV64) && defined(__riscv_vector) && \
-    defined(__riscv_v_intrinsic) &&                        \
-    (defined(__riscv_v_min_vlen) && __riscv_v_min_vlen >= 256)
-#define MLK_SYS_RISCV64_V256
+    defined(__riscv_v_intrinsic)
+#define MLK_SYS_RISCV64_RVV
 #endif
 
 #if defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 32

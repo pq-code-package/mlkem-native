@@ -22,17 +22,31 @@
 #include "../../common.h"
 
 #if !defined(__ASSEMBLER__)
+#include <riscv_vector.h>
+
 #include "../api.h"
 #include "src/arith_native_riscv64.h"
 
 static MLK_INLINE int mlk_ntt_native(int16_t data[MLKEM_N])
 {
+  /* VLEN = 256 only for now */
+  if (__riscv_vsetvlmax_e16m1() != 16)
+  {
+    return MLK_NATIVE_FUNC_FALLBACK;
+  }
+
   mlk_rv64v_poly_ntt(data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
 static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
 {
+  /* VLEN = 256 only for now */
+  if (__riscv_vsetvlmax_e16m1() != 16)
+  {
+    return MLK_NATIVE_FUNC_FALLBACK;
+  }
+
   mlk_rv64v_poly_invntt_tomont(data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
