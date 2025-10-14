@@ -95,7 +95,30 @@ uint64_t get_cyclecounter(void)
 }
 
 #else /* (!__x86_64__ && __AARCH64EL__) || _M_ARM64 */
-#error PMU_CYCLES option only supported on x86_64 and AArch64
+
+#if defined(__riscv)
+
+void enable_cyclecounter(void) {}
+
+void disable_cyclecounter(void) {}
+
+uint64_t get_cyclecounter(void)
+{
+#if (__riscv_xlen == 32)
+  uint32_t lo, hi;
+  __asm__ volatile("rdcycle %0" : "=r"(lo));
+  __asm__ volatile("rdcycleh %0" : "=r"(hi));
+  return (((uint64_t)hi) << 32) | ((uint64_t)lo);
+#else  /* __riscv_xlen == 32 */
+  uint64_t retval;
+  __asm__ volatile("rdcycle %0" : "=r"(retval));
+  return retval;
+#endif /* __riscv_xlen != 32 */
+}
+
+#else /* __riscv */
+#error PMU_CYCLES option only supported on x86_64 and AArch64 and RISC-V
+#endif /* !__riscv */
 #endif /* !__x86_64__ && !(__AARCH64EL__ || _M_ARM64) */
 
 #elif defined(PERF_CYCLES)
