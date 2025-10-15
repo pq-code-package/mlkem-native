@@ -16,7 +16,6 @@
 #define MLK_SAMPLING_H
 
 #include <stdint.h>
-#include <stdlib.h>
 #include "cbmc.h"
 #include "common.h"
 #include "poly.h"
