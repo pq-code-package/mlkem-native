@@ -216,6 +216,7 @@ void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
     mlk_memcpy(seed_ext[j], seed, MLKEM_SYMBYTES);
   }
 
+#if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
   /* Sample 4 matrix entries a time. */
   for (i = 0; i < (MLKEM_K * MLKEM_K / 4) * 4; i += 4)
   {
@@ -239,9 +240,15 @@ void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
 
     mlk_poly_rej_uniform_x4(&a[i], &a[i + 1], &a[i + 2], &a[i + 3], seed_ext);
   }
+#else  /* !MLK_CONFIG_SERIAL_FIPS202_ONLY */
+  /* When using serial FIPS202, sample all entries individually. */
+  i = 0;
+#endif /* MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
-  /* For MLKEM_K == 3, sample the last entry individually. */
-  if (i < MLKEM_K * MLKEM_K)
+  /* For MLKEM_K == 3, sample the last entry individually.
+   * When MLK_CONFIG_SERIAL_FIPS202_ONLY is set, sample all entries
+   * individually. */
+  for (; i < MLKEM_K * MLKEM_K; i++)
   {
     uint8_t x, y;
     /* MLKEM_K <= 4, so the values fit in uint8_t. */
@@ -260,7 +267,6 @@ void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
     }
 
     mlk_poly_rej_uniform(&a[i], seed_ext[0]);
-    i++;
   }
 
   mlk_assert(i == MLKEM_K * MLKEM_K);

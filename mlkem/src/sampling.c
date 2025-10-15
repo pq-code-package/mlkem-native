@@ -143,6 +143,7 @@ __contract__(
   ((12 * MLKEM_N / 8 * (1 << 12) / MLKEM_Q + MLK_XOF_RATE) / MLK_XOF_RATE)
 #endif
 
+#if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
 /* Reference: Does not exist in the reference implementation @[REF].
  *            - x4-batched version of `rej_uniform()` from the
  *              reference implementation, leveraging x4-batched Keccak-f1600. */
@@ -211,6 +212,7 @@ void mlk_poly_rej_uniform_x4(mlk_poly *vec0, mlk_poly *vec1, mlk_poly *vec2,
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(buf, sizeof(buf));
 }
+#endif /* !MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
 MLK_INTERNAL_API
 void mlk_poly_rej_uniform(mlk_poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
