@@ -7,7 +7,7 @@ inputs:
     description: 'GitHub token'
     required: true
   tests:
-    description: 'List of tests to run (space-separated IDs) or "all" for all tests. Available IDs: pct-enabled, pct-enabled-broken, custom-zeroize, native-cap-ON, native-cap-OFF, native-cap-ID_AA64PFR1_EL1, native-cap-CPUID_AVX2, no-asm, custom-randombytes, custom-memcpy, custom-memset, custom-stdlib, nblocks-1, nblocks-2, nblocks-4'
+    description: 'List of tests to run (space-separated IDs) or "all" for all tests. Available IDs: pct-enabled, pct-enabled-broken, custom-zeroize, native-cap-ON, native-cap-OFF, native-cap-ID_AA64PFR1_EL1, native-cap-CPUID_AVX2, no-asm, serial-fips202, custom-randombytes, custom-memcpy, custom-memset, custom-stdlib, nblocks-1, nblocks-2, nblocks-4'
     required: false
     default: 'all'
   opt:
@@ -112,6 +112,18 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/no_asm_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        opt: ${{ inputs.opt }}
+        examples: false # Some examples use a custom config themselves
+    - name: "Serial FIPS202 (no batched Keccak)"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'serial-fips202') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/serial_fips202_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true
         acvp: true
