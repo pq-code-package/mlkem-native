@@ -222,8 +222,9 @@ void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
     for (j = 0; j < 4; j++)
     {
       uint8_t x, y;
-      x = (i + j) / MLKEM_K;
-      y = (i + j) % MLKEM_K;
+      /* MLKEM_K <= 4, so the values fit in uint8_t. */
+      x = (uint8_t)((i + j) / MLKEM_K);
+      y = (uint8_t)((i + j) % MLKEM_K);
       if (transposed)
       {
         seed_ext[j][MLKEM_SYMBYTES + 0] = x;
@@ -243,8 +244,9 @@ void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
   if (i < MLKEM_K * MLKEM_K)
   {
     uint8_t x, y;
-    x = i / MLKEM_K;
-    y = i % MLKEM_K;
+    /* MLKEM_K <= 4, so the values fit in uint8_t. */
+    x = (uint8_t)(i / MLKEM_K);
+    y = (uint8_t)(i % MLKEM_K);
 
     if (transposed)
     {

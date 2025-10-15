@@ -94,6 +94,7 @@ CFLAGS := \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
 	-Wredundant-decls \
+	-Wconversion \
 	-Wno-unused-command-line-argument \
 	-fomit-frame-pointer \
 	-std=c99 \
@@ -135,7 +136,7 @@ build: $(BINARY_NAME_FULL)
 run: $(BINARY_NAME_FULL)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
 
-size: build 
+size: build
 	$(Q)echo "=== Size info for binaries $(BINARY_NAME_FULL)==="
 	$(Q)$(SIZE) $(BINARY_NAME_FULL)
 	$(Q)echo " "

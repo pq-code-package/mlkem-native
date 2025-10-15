@@ -96,14 +96,14 @@ void sha3_keccakf(uint64_t st[25])
   {
     v = (uint8_t *)&st[i];
     t = st[i];
-    v[0] = t & 0xFF;
-    v[1] = (t >> 8) & 0xFF;
-    v[2] = (t >> 16) & 0xFF;
-    v[3] = (t >> 24) & 0xFF;
-    v[4] = (t >> 32) & 0xFF;
-    v[5] = (t >> 40) & 0xFF;
-    v[6] = (t >> 48) & 0xFF;
-    v[7] = (t >> 56) & 0xFF;
+    v[0] = (uint8_t)(t & 0xFF);
+    v[1] = (uint8_t)((t >> 8) & 0xFF);
+    v[2] = (uint8_t)((t >> 16) & 0xFF);
+    v[3] = (uint8_t)((t >> 24) & 0xFF);
+    v[4] = (uint8_t)((t >> 32) & 0xFF);
+    v[5] = (uint8_t)((t >> 40) & 0xFF);
+    v[6] = (uint8_t)((t >> 48) & 0xFF);
+    v[7] = (uint8_t)((t >> 56) & 0xFF);
   }
 #endif /* __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__ */
 }

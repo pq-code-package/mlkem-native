@@ -165,7 +165,7 @@ void mlk_poly_tomont(mlk_poly *r)
  *            - Used here to implement different semantics of `poly_reduce()`;
  *              see below. in the reference implementation @[REF], this logic is
  *              part of all compression functions (see `compress.c`). */
-static MLK_INLINE uint16_t mlk_scalar_signed_to_unsigned_q(int16_t c)
+static MLK_INLINE int16_t mlk_scalar_signed_to_unsigned_q(int16_t c)
 __contract__(
   requires(c > -MLKEM_Q && c < MLKEM_Q)
   ensures(return_value >= 0 && return_value < MLKEM_Q)
@@ -173,12 +173,13 @@ __contract__(
 {
   mlk_assert_abs_bound(&c, 1, MLKEM_Q);
 
-  /* Add Q if c is negative, but in constant time */
-  c = mlk_ct_sel_int16(c + MLKEM_Q, c, mlk_ct_cmask_neg_i16(c));
+  /* Add Q if c is negative, but in constant time. */
+  /* Note that c + MLKEM_Q does not overflow int16_t. */
+  c = mlk_ct_sel_int16((int16_t)(c + MLKEM_Q), c, mlk_ct_cmask_neg_i16(c));
 
   /* and therefore cast to uint16_t is safe. */
   mlk_assert_bound(&c, 1, 0, MLKEM_Q);
-  return (uint16_t)c;
+  return c;
 }
 
 /* Reference: `poly_reduce()` in the reference implementation @[REF]
@@ -240,7 +241,8 @@ void mlk_poly_add(mlk_poly *r, const mlk_poly *b)
     invariant(forall(k0, i, MLKEM_N, r->coeffs[k0] == loop_entry(*r).coeffs[k0]))
     invariant(forall(k1, 0, i, r->coeffs[k1] == loop_entry(*r).coeffs[k1] + b->coeffs[k1])))
   {
-    r->coeffs[i] = r->coeffs[i] + b->coeffs[i];
+    /* The preconditions imply that the addition stays within int16_t. */
+    r->coeffs[i] = (int16_t)(r->coeffs[i] + b->coeffs[i]);
   }
 }
 
@@ -257,7 +259,8 @@ void mlk_poly_sub(mlk_poly *r, const mlk_poly *b)
     invariant(forall(k0, i, MLKEM_N, r->coeffs[k0] == loop_entry(*r).coeffs[k0]))
     invariant(forall(k1, 0, i, r->coeffs[k1] == loop_entry(*r).coeffs[k1] - b->coeffs[k1])))
   {
-    r->coeffs[i] = r->coeffs[i] - b->coeffs[i];
+    /* The preconditions imply that the subtraction stays within int16_t. */
+    r->coeffs[i] = (int16_t)(r->coeffs[i] - b->coeffs[i]);
   }
 }
 
@@ -282,7 +285,10 @@ __contract__(
     invariant(array_abs_bound(x->coeffs, 0, 2 * i, MLKEM_Q)))
   {
     x->coeffs[2 * i + 0] = mlk_fqmul(a->coeffs[4 * i + 1], mlk_zetas[64 + i]);
-    x->coeffs[2 * i + 1] = mlk_fqmul(a->coeffs[4 * i + 3], -mlk_zetas[64 + i]);
+    /* The values in zeta table are <= MLKEM_Q in absolute value,
+     * so the negation in int16_t is safe. */
+    x->coeffs[2 * i + 1] =
+        mlk_fqmul(a->coeffs[4 * i + 3], (int16_t)(-mlk_zetas[64 + i]));
   }
 
   /*
@@ -338,7 +344,8 @@ void mlk_poly_mulcache_compute(mlk_poly_mulcache *x, const mlk_poly *a)
 
 /* Reference: Embedded in `ntt()` in the reference implementation @[REF]. */
 static void mlk_ntt_butterfly_block(int16_t r[MLKEM_N], int16_t zeta,
-                                    unsigned start, unsigned len, int bound)
+                                    unsigned start, unsigned len,
+                                    unsigned bound)
 __contract__(
   requires(start < MLKEM_N)
   requires(1 <= len && len <= MLKEM_N / 2 && start + 2 * len <= MLKEM_N)
@@ -368,8 +375,9 @@ __contract__(
   {
     int16_t t;
     t = mlk_fqmul(r[j + len], zeta);
-    r[j + len] = r[j] - t;
-    r[j] = r[j] + t;
+    /* The precondition implies that the arithmetic does not overflow. */
+    r[j + len] = (int16_t)(r[j] - t);
+    r[j] = (int16_t)(r[j] + t);
   }
 }
 
@@ -392,7 +400,7 @@ __contract__(
   unsigned start, k, len;
   /* Twiddle factors for layer n are at indices 2^(n-1)..2^n-1. */
   k = 1u << (layer - 1);
-  len = MLKEM_N >> layer;
+  len = (unsigned)MLKEM_N >> layer;
   for (start = 0; start < MLKEM_N; start += 2 * len)
   __loop__(
     invariant(start < MLKEM_N + 2 * len)
@@ -477,7 +485,7 @@ __contract__(
   ensures(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q)))
 {
   unsigned start, k, len;
-  len = (MLKEM_N >> layer);
+  len = (unsigned)MLKEM_N >> layer;
   k = (1u << layer) - 1;
   for (start = 0; start < MLKEM_N; start += 2 * len)
   __loop__(
@@ -495,8 +503,9 @@ __contract__(
       invariant(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q)))
     {
       int16_t t = r[j];
-      r[j] = mlk_barrett_reduce(t + r[j + len]);
-      r[j + len] = r[j + len] - t;
+      /* The preconditions imply that the arithmetic does not overflow. */
+      r[j] = mlk_barrett_reduce((int16_t)(t + r[j + len]));
+      r[j + len] = (int16_t)(r[j + len] - t);
       r[j + len] = mlk_fqmul(r[j + len], zeta);
     }
   }

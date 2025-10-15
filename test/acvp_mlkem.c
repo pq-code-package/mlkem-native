@@ -61,11 +61,11 @@ static unsigned char decode_hex_char(char hex)
   }
   else if (hex >= 'A' && hex <= 'F')
   {
-    return 10 + (unsigned char)(hex - 'A');
+    return (unsigned char)(10 + (unsigned char)(hex - 'A'));
   }
   else if (hex >= 'a' && hex <= 'f')
   {
-    return 10 + (unsigned char)(hex - 'a');
+    return (unsigned char)(10 + (unsigned char)(hex - 'a'));
   }
   else
   {
@@ -106,7 +106,7 @@ static int decode_hex(const char *prefix, unsigned char *out, size_t out_len,
       goto hex_usage;
     }
 
-    *out = (hex0 << 4) | hex1;
+    *out = (unsigned char)((hex0 << 4) | hex1);
   }
 
   return 0;

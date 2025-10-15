@@ -161,7 +161,7 @@ __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFFFF)))
 {
   uint32_t tmp = mlk_value_barrier_u32(-((uint32_t)x));
   tmp >>= 16;
-  return tmp;
+  return (uint16_t)tmp;
 }
 
 /*************************************************
@@ -183,7 +183,7 @@ __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFF)))
 {
   uint32_t tmp = mlk_value_barrier_u32(-((uint32_t)x));
   tmp >>= 24;
-  return tmp;
+  return (uint8_t)tmp;
 }
 
 /* Put unsigned overflow warnings in CBMC back into scope */
@@ -224,7 +224,10 @@ __contract__(ensures(return_value == ((x < 0) ? 0xFFFF : 0)))
 {
   int32_t tmp = mlk_value_barrier_i32((int32_t)x);
   tmp >>= 16;
-  return (int16_t)tmp;
+  /* This truncation does alter the value of tmp. We deliberately
+   * rely on the defined behavior of signed-to-unsigned conversion
+   * for negative inputs. */
+  return (uint16_t)tmp;
 }
 
 /* Put unsigned-to-signed warnings in CBMC back into scope */
@@ -279,7 +282,10 @@ __contract__(ensures(return_value == ((x < 0) ? 0xFFFF : 0)))
 static MLK_INLINE int16_t mlk_ct_sel_int16(int16_t a, int16_t b, uint16_t cond)
 __contract__(ensures(return_value == (cond ? a : b)))
 {
-  uint16_t au = a, bu = b;
+  /* We work with the bit-presentation of a and b in two's complement here,
+   * relying on the defined conversion from signed to unsigned integers, and
+   * assuming that unsigned to signed conversion is its inverse (see above). */
+  uint16_t au = (uint16_t)a, bu = (uint16_t)b;
   uint16_t res = bu ^ (mlk_ct_cmask_nonzero_u16(cond) & (au ^ bu));
   return (int16_t)res;
 }
