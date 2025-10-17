@@ -27,6 +27,81 @@
 .machine "any"
 .text
 
+.macro SAVE_REGS
+	stdu	1, -352(1)
+	mflr	0
+	std	14, 56(1)
+	std	15, 64(1)
+	std	16, 72(1)
+	std	17, 80(1)
+	std	18, 88(1)
+	std	19, 96(1)
+	std	20, 104(1)
+	std	21, 112(1)
+	li	10, 128
+	li	11, 144
+	li	12, 160
+	li	14, 176
+	li	15, 192
+	li	16, 208
+	stxvx	32+20, 10, 1
+	stxvx	32+21, 11, 1
+	stxvx	32+22, 12, 1
+	stxvx	32+23, 14, 1
+	stxvx	32+24, 15, 1
+	stxvx	32+25, 16, 1
+	li	10, 224
+	li	11, 240
+	li	12, 256
+	li	14, 272
+	li	15, 288
+	li	16, 304
+	stxvx	32+26, 10, 1
+	stxvx	32+27, 11, 1
+	stxvx	32+28, 12, 1
+	stxvx	32+29, 14, 1
+	stxvx	32+30, 15, 1
+	stxvx	32+31, 16, 1
+.endm
+
+.macro RESTORE_REGS
+	li	10, 128
+	li	11, 144
+	li	12, 160
+	li	14, 176
+	li	15, 192
+	li	16, 208
+	lxvx	32+20, 10, 1
+	lxvx	32+21, 11, 1
+	lxvx	32+22, 12, 1
+	lxvx	32+23, 14, 1
+	lxvx	32+24, 15, 1
+	lxvx	32+25, 16, 1
+	li	10, 224
+	li	11, 240
+	li	12, 256
+	li	14, 272
+	li	15, 288
+	li	16, 304
+	lxvx	32+26, 10, 1
+	lxvx	32+27, 11, 1
+	lxvx	32+28, 12, 1
+	lxvx	32+29, 14, 1
+	lxvx	32+30, 15, 1
+	lxvx	32+31, 16, 1
+	ld	14, 56(1)
+	ld	15, 64(1)
+	ld	16, 72(1)
+	ld	17, 80(1)
+	ld	18, 88(1)
+	ld	19, 96(1)
+	ld	20, 104(1)
+	ld	21, 112(1)
+
+	mtlr	0
+	addi    1, 1, 352
+.endm
+
 .macro Load_4Coeffs start next step
 	mr	9, \start
 	add	10, 7, 9	# J + len*2
@@ -40,10 +115,6 @@
 	lxvd2x	32+18, 3, 17	# r[j+len]
 	lxvd2x	32+23, 3, 19	# r[j+len]
 	lxvd2x	32+28, 3, 21	# r[j+len]
-	xxpermdi 32+13, 32+13, 32+13, 2
-	xxpermdi 32+18, 32+18, 32+18, 2
-	xxpermdi 32+23, 32+23, 32+23, 2
-	xxpermdi 32+28, 32+28, 32+28, 2
 .endm
 
 #
@@ -55,20 +126,20 @@
 #  a[j+len]=  ajlen2, ajlen3, ajlen10, ajlen11, ajlen6, ajlen7, ajlen14, ajlen15
 #
 .macro Load_L24Coeffs
-        lxv     32+25, 0(5)     # a[j], r[j+len]
-        lxv     32+26, 16(5)    # a[j], r[j+len]
+        lxvd2x     32+25, 0, 5     # a[j], r[j+len]
+        lxvd2x     32+26, 10, 5    # a[j], r[j+len]
         vmrgew 13, 25, 26
         vmrgow 12, 25, 26
-        lxv     32+25, 32(5)    # a[j], r[j+len]
-        lxv     32+26, 48(5)    # a[j], r[j+len]
+        lxvd2x     32+25, 11, 5     # a[j], r[j+len]
+        lxvd2x     32+26, 12, 5    # a[j], r[j+len]
         vmrgew 18, 25, 26
         vmrgow 17, 25, 26
-        lxv     32+25, 64(5)    # a[j], r[j+len]
-        lxv     32+26, 80(5)    # a[j], r[j+len]
+        lxvd2x     32+25, 15, 5     # a[j], r[j+len]
+        lxvd2x     32+26, 16, 5    # a[j], r[j+len]
         vmrgew 23, 25, 26
         vmrgow 22, 25, 26
-        lxv     32+25, 96(5)    # a[j], r[j+len]
-        lxv     32+26, 112(5)   # a[j], r[j+len]
+        lxvd2x     32+25, 17, 5     # a[j], r[j+len]
+        lxvd2x     32+26, 18, 5    # a[j], r[j+len]
         vmrgew 28, 25, 26
         vmrgow 27, 25, 26
 .endm
@@ -83,24 +154,24 @@
 #  rj0 - rj4, rj8 - rj11
 #
 .macro Load_L44Coeffs
-        lxv     1, 0(5)         # rj0, rj1, rj2, rj3,
+        lxvd2x     1, 0, 5      # rj0, rj1, rj2, rj3,
                                 # rjlen4, rjlen5, rjlen6, rjlen7
-        lxv     2, 16(5)        # rj8, rj9, rj10, rj11
+        lxvd2x     2, 10, 5     # rj8, rj9, rj10, rj11
                                 # rjlen12, rjlen13, rjlen14, rjlen15
-        xxpermdi 32+13, 2, 1, 0 # rjlen4 - rjlen7, rjlen12 - rjlen15
-        xxpermdi 32+12, 2, 1, 3 # rj0 - rj4, rj8 - rj11
-        lxv     3, 32(5)
-        lxv     4, 48(5)
-        xxpermdi 32+18, 4, 3, 0
-        xxpermdi 32+17, 4, 3, 3
-        lxv     1, 64(5)
-        lxv     2, 80(5)
-        xxpermdi 32+23, 2, 1, 0
-        xxpermdi 32+22, 2, 1, 3
-        lxv     3, 96(5)
-        lxv     4, 112(5)
-        xxpermdi 32+28, 4, 3, 0
-        xxpermdi 32+27, 4, 3, 3
+        xxpermdi 32+13, 2, 1, 3 # rjlen4 - rjlen7, rjlen12 - rjlen15
+        xxpermdi 32+12, 2, 1, 0 # rj0 - rj4, rj8 - rj11
+        lxvd2x     3, 11, 5
+        lxvd2x     4, 12, 5
+        xxpermdi 32+18, 4, 3, 3
+        xxpermdi 32+17, 4, 3, 0
+        lxvd2x     1, 15, 5
+        lxvd2x     2, 16, 5
+        xxpermdi 32+23, 2, 1, 3
+        xxpermdi 32+22, 2, 1, 0
+        lxvd2x     3, 17, 5
+        lxvd2x     4, 18, 5
+        xxpermdi 32+28, 4, 3, 3
+        xxpermdi 32+27, 4, 3, 0
 .endm
 
 #
@@ -147,10 +218,6 @@
 	lxvd2x	32+17, 3, 16	# r[j]
 	lxvd2x	32+22, 3, 18	# r[j]
 	lxvd2x	32+27, 3, 20	# r[j]
-	xxpermdi 32+12, 32+12, 32+12, 2
-	xxpermdi 32+17, 32+17, 32+17, 2
-	xxpermdi 32+22, 32+22, 32+22, 2
-	xxpermdi 32+27, 32+27, 32+27, 2
 .endm
 
 .macro Compute_4Coeffs
@@ -175,34 +242,34 @@
 .endm
 
 .macro Write_One
-	stxvx 32+15, 3, 9
-	stxvx 32+16, 3, 10
-	stxvx 32+20, 3, 16
-	stxvx 32+21, 3, 17
-	stxvx 32+25, 3, 18
-	stxvx 32+26, 3, 19
-	stxvx 32+30, 3, 20
-	stxvx 32+31, 3, 21
+	stxvd2x 32+15, 3, 9
+	stxvd2x 32+16, 3, 10
+	stxvd2x 32+20, 3, 16
+	stxvd2x 32+21, 3, 17
+	stxvd2x 32+25, 3, 18
+	stxvd2x 32+26, 3, 19
+	stxvd2x 32+30, 3, 20
+	stxvd2x 32+31, 3, 21
 .endm
 
 .macro PermWriteL44
 	Compute_4Coeffs
-	xxpermdi 0, 32+16, 32+15, 3
-	xxpermdi 1, 32+16, 32+15, 0
-	xxpermdi 2, 32+21, 32+20, 3
-	xxpermdi 3, 32+21, 32+20, 0
-	xxpermdi 4, 32+26, 32+25, 3
-	xxpermdi 5, 32+26, 32+25, 0
-	xxpermdi 6, 32+31, 32+30, 3
-	xxpermdi 7, 32+31, 32+30, 0
-	stxv	0, 0(5)
-	stxv	1, 16(5)
-	stxv	2, 32(5)
-	stxv	3, 48(5)
-	stxv	4, 64(5)
-	stxv	5, 80(5)
-	stxv	6, 96(5)
-	stxv	7, 112(5)
+	xxpermdi 0, 32+15, 32+16, 3
+	xxpermdi 1, 32+15, 32+16, 0
+	xxpermdi 2, 32+20, 32+21, 3
+	xxpermdi 3, 32+20, 32+21, 0
+	xxpermdi 4, 32+25, 32+26, 3
+	xxpermdi 5, 32+25, 32+26, 0
+	xxpermdi 6, 32+30, 32+31, 3
+	xxpermdi 7, 32+30, 32+31, 0
+	stxvd2x	0, 0, 5
+	stxvd2x	1, 10, 5
+	stxvd2x	2, 11, 5
+	stxvd2x	3, 12, 5
+	stxvd2x	4, 15, 5
+	stxvd2x	5, 16, 5
+	stxvd2x	6, 17, 5
+	stxvd2x	7, 18, 5
 .endm
 
 .macro PermWriteL24
@@ -215,22 +282,32 @@
         vmrgow 15, 26, 25
         vmrgew 16, 31, 30
         vmrgow 17, 31, 30
-        stxv    32+10, 0(5)
-        stxv    32+11, 16(5)
-        stxv    32+12, 32(5)
-        stxv    32+13, 48(5)
-        stxv    32+14, 64(5)
-        stxv    32+15, 80(5)
-        stxv    32+16, 96(5)
-        stxv    32+17, 112(5)
+	stxvd2x	32+10, 0, 5
+	stxvd2x	32+11, 10, 5
+	stxvd2x	32+12, 11, 5
+	stxvd2x	32+13, 12, 5
+	stxvd2x	32+14, 15, 5
+	stxvd2x	32+15, 16, 5
+	stxvd2x	32+16, 17, 5
+	stxvd2x	32+17, 18, 5
 .endm
 
 .macro Load_next_4zetas
-	lxv	32+V_Z0, 0(14)
-	lxv	32+V_Z1, 16(14)
-	lxv	32+V_Z2, 32(14)
-	lxv	32+V_Z3, 48(14)
+	li	10, 16
+	li	11, 32
+	li	12, 48
+	lxvd2x	32+V_Z0, 0, 14
+	lxvd2x	32+V_Z1, 10, 14
+	lxvd2x	32+V_Z2, 11, 14
+	lxvd2x	32+V_Z3, 12, 14
 	addi	14, 14, 64
+.endm
+
+.macro Perm_4zetas
+	xxpermdi 32+V_Z0, 32+V_Z0, 32+V_Z0, 2
+	xxpermdi 32+V_Z1, 32+V_Z1, 32+V_Z1, 2
+	xxpermdi 32+V_Z2, 32+V_Z2, 32+V_Z2, 2
+	xxpermdi 32+V_Z3, 32+V_Z3, 32+V_Z3, 2
 .endm
 
 #
@@ -240,28 +317,7 @@
 .align 4
 MLK_ASM_FN_SYMBOL(ntt_ppc)
 
-	stdu	1, -352(1)
-	mflr	0
-	std	14, 56(1)
-	std	15, 64(1)
-	std	16, 72(1)
-	std	17, 80(1)
-	std	18, 88(1)
-	std	19, 96(1)
-	std	20, 104(1)
-	std	21, 112(1)
-	stxv	32+20, 128(1)
-	stxv	32+21, 144(1)
-	stxv	32+22, 160(1)
-	stxv	32+23, 176(1)
-	stxv	32+24, 192(1)
-	stxv	32+25, 208(1)
-	stxv	32+26, 224(1)
-	stxv	32+27, 240(1)
-	stxv	32+28, 256(1)
-	stxv	32+29, 272(1)
-	stxv	32+30, 288(1)
-	stxv	32+31, 304(1)
+	SAVE_REGS
 
 	# get MLKEM_Q
 	lvx	V_NMKQ,0,4
@@ -272,7 +328,8 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
 	vxor	3, 3, 3
 	vspltish 4, 1
 
-	lxv	32+V_QINV, QINV_OFFSET(4)
+	li	10, QINV_OFFSET
+	lvx	V_QINV, 10, 4
 
 .align 4
 	#
@@ -403,9 +460,19 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
 	mtctr	15
         mr      5, 3
 	li	7, 8
+
+	li	10, 16
+	li	11, 32
+	li	12, 48
+	li	15, 64
+	li	16, 80
+	li	17, 96
+	li	18, 112
+
 .align 4
 ntt_ppc__Len4:
 	Load_next_4zetas
+	Perm_4zetas
         Load_L44Coeffs
 	MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3
 	PermWriteL44
@@ -418,10 +485,11 @@ ntt_ppc__Len4:
 	# k += 64
 	# Update zetas vectors, each vector has 2 zetas
 
-	li	15, 4
-	mtctr	15
+	li	8, 4
+	mtctr	8
 	mr	5, 3
 	li	7, 4
+
 .align 4
 ntt_ppc__Len2:
 	Load_next_4zetas
@@ -432,30 +500,7 @@ ntt_ppc__Len2:
 
 	bdnz	ntt_ppc__Len2
 
-	lxv	32+20, 128(1)
-	lxv	32+21, 144(1)
-	lxv	32+22, 160(1)
-	lxv	32+23, 176(1)
-	lxv	32+24, 192(1)
-	lxv	32+25, 208(1)
-	lxv	32+26, 224(1)
-	lxv	32+27, 240(1)
-	lxv	32+28, 256(1)
-	lxv	32+29, 272(1)
-	lxv	32+30, 288(1)
-	lxv	32+31, 304(1)
-	ld	14, 56(1)
-	ld	15, 64(1)
-	ld	16, 72(1)
-	ld	16, 72(1)
-	ld	17, 80(1)
-	ld	18, 88(1)
-	ld	19, 96(1)
-	ld	20, 104(1)
-	ld	21, 112(1)
-
-	mtlr	0
-	addi    1, 1, 352
+	RESTORE_REGS
 	blr
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.

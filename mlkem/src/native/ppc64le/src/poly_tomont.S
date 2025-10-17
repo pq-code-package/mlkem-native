@@ -90,21 +90,35 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc)
 	stdu	1, -320(1)
 	mflr	0
 
-	stxv	32+20, 128(1)
-	stxv	32+21, 144(1)
-	stxv	32+22, 160(1)
-	stxv	32+23, 176(1)
-	stxv	32+24, 192(1)
-	stxv	32+25, 208(1)
-	stxv	32+26, 224(1)
-	stxv	32+27, 240(1)
-	stxv	32+28, 256(1)
-	stxv	32+29, 272(1)
-	stxv	32+30, 288(1)
+	li	6, 128
+	li	7, 144
+	li	8, 160
+	li	9, 176
+	li	10, 192
+	li	11, 208
+	li	12, 224
+	stxvx	32+20, 6, 1
+	stxvx	32+21, 7, 1
+	stxvx	32+22, 8, 1
+	stxvx	32+23, 9, 1
+	stxvx	32+24, 10, 1
+	stxvx	32+25, 11, 1
+	stxvx	32+26, 12, 1
+	li	6, 240
+	li	7, 256
+	li	8, 272
+	li	9, 288
+	stxvx	32+27, 6, 1
+	stxvx	32+28, 7, 1
+	stxvx	32+29, 8, 1
+	stxvx	32+30, 9, 1
 
-	lxv	32+V_NMKQ, NQ_OFFSET(4)
-	lxv	32+V_QINV, QINV_OFFSET(4)
-	lxv	32+V1353, C1353_OFFSET(4)
+	li	6, NQ_OFFSET
+	li	7, QINV_OFFSET
+	li	8, C1353_OFFSET
+	lxvx	32+V_NMKQ, 6, 4
+	lxvx	32+V_QINV, 7, 4
+	lxvx	32+V1353, 8, 4
 
 	vxor	3, 3, 3
 	vspltish 4, 1
@@ -134,17 +148,28 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc)
 	MREDUCE_4X 13, 18, 23, 7
 	Write_8X
 
-	lxv	32+20, 128(1)
-	lxv	32+21, 144(1)
-	lxv	32+22, 160(1)
-	lxv	32+23, 176(1)
-	lxv	32+24, 192(1)
-	lxv	32+25, 208(1)
-	lxv	32+26, 224(1)
-	lxv	32+27, 240(1)
-	lxv	32+28, 256(1)
-	lxv	32+29, 272(1)
-	lxv	32+30, 288(1)
+	li	6, 128
+	li	7, 144
+	li	8, 160
+	li	9, 176
+	li	10, 192
+	li	11, 208
+	li	12, 224
+	lxvx	32+20, 6, 1
+	lxvx	32+21, 7, 1
+	lxvx	32+22, 8, 1
+	lxvx	32+23, 9, 1
+	lxvx	32+24, 10, 1
+	lxvx	32+25, 11, 1
+	lxvx	32+26, 12, 1
+	li	6, 240
+	li	7, 256
+	li	8, 272
+	li	9, 288
+	lxvx	32+27, 6, 1
+	lxvx	32+28, 7, 1
+	lxvx	32+29, 8, 1
+	lxvx	32+30, 9, 1
 	mtlr	0
 	addi	1, 1, 320
 	blr

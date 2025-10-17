@@ -99,10 +99,10 @@
 # Conditional addition to get unsigned canonical representative
 #
 .macro To_unsigned_16
-	lxv	32+12, 0(3)
-	lxv	32+13, 16(3)
-	lxv	32+14, 32(3)
-	lxv	32+15, 48(3)
+        lxvd2x    32+12, 0, 3
+        lxvd2x    32+13, 14, 3
+        lxvd2x    32+14, 15, 3
+        lxvd2x    32+15, 16, 3
 	addi	3, 3, 64
 	vsrh	1, 12, 10
 	vsrh	0, 13, 10
@@ -120,10 +120,10 @@
 	xxsel	32+0, 32+8,32+13, 32+0
 	xxsel	32+3, 32+5,32+14, 32+3
 	xxsel	32+2, 32+6,32+15, 32+2
-	stxv	32+3, -32(3)
-	stxv	32+2, -16(3)
-	stxv	32+1, -64(3)
-	stxv	32+0, -48(3)
+	stxvd2x	32+3, 10, 3
+	stxvd2x	32+2, 11, 3
+	stxvd2x	32+1, 8, 3
+	stxvd2x	32+0, 9, 3
 .endm
 
 .align 4
@@ -134,16 +134,23 @@ MLK_ASM_FN_SYMBOL(reduce_ppc)
 	std	14, 96(1)
 	std	15, 104(1)
 	std	16, 112(1)
-	stxv	32+20, 128(1)
-	stxv	32+21, 144(1)
-	stxv	32+22, 160(1)
-	stxv	32+23, 176(1)
-	stxv	32+24, 192(1)
+	li	6, 128
+	li	7, 144
+	li	8, 160
+	li	9, 176
+	li	10, 192
+	stxvx	32+20, 6, 1
+	stxvx	32+21, 7, 1
+	stxvx	32+22, 8, 1
+	stxvx	32+23, 9, 1
+	stxvx	32+24, 10, 1
 
 	vxor	7, 7, 7
 
-	lxv	32+V_MKQ, Q_OFFSET(4)
-	lxv	32+V20159, C20159_OFFSET(4)
+	li	6, Q_OFFSET
+	li	7, C20159_OFFSET
+	lxvx	32+V_MKQ, 6, 4
+	lxvx	32+V20159, 7, 4
 
 	vspltisw V_26, 13
 	vadduwm	V_26, V_26, V_26
@@ -201,11 +208,16 @@ MLK_ASM_FN_SYMBOL(reduce_ppc)
 	ld	14, 96(1)
 	ld	15, 104(1)
 	ld	16, 112(1)
-	lxv	32+20, 128(1)
-	lxv	32+21, 144(1)
-	lxv	32+22, 160(1)
-	lxv	32+23, 176(1)
-	lxv	32+24, 192(1)
+	li	6, 128
+	li	7, 144
+	li	8, 160
+	li	9, 176
+	li	10, 192
+	lxvx	32+20, 6, 1
+	lxvx	32+21, 7, 1
+	lxvx	32+22, 8, 1
+	lxvx	32+23, 9, 1
+	lxvx	32+24, 10, 1
 	mtlr	0
 	addi	1, 1, 224
 	blr
