@@ -757,24 +757,30 @@ unsigned int mlk_rv64v_rej_uniform(int16_t *r, unsigned int len,
     const vuint16m1_t sel12v = __riscv_vsrl_vx_u16m1(srl12v, 4, vl);
     const vuint16m1_t sll12v = __riscv_vsll_vx_u16m1(vid, 2, vl);
 
-    x = __riscv_vle16_v_u16m1((uint16_t *)&buf[pos], vl23);
-    pos += vl23 * 2;
-    x = __riscv_vrgather_vv_u16m1(x, sel12v, vl);
-    x = __riscv_vor_vv_u16m1(
-        __riscv_vsrl_vv_u16m1(x, srl12v, vl),
-        __riscv_vsll_vv_u16m1(__riscv_vslidedown(x, 1, vl), sll12v, vl), vl);
-    x = __riscv_vand_vx_u16m1(x, 0xFFF, vl);
-
-    lt = __riscv_vmsltu_vx_u16m1_b16(x, MLKEM_Q, vl);
-    y = __riscv_vcompress_vm_u16m1(x, lt, vl);
-    n = __riscv_vcpop_m_b16(lt, vl);
-
-    if (ctr + n > len)
+    /* Functionally, this loop is not necessary, but it avoids re-evaluating
+     * the VL too many times. In particular, in the first outer iteration,
+     * the inner loop will process the bulk of the data with fixed VL. */
+    while (ctr < len && vl23 * 2 <= buflen - pos)
     {
-      n = len - ctr;
+      x = __riscv_vle16_v_u16m1((uint16_t *)&buf[pos], vl23);
+      pos += vl23 * 2;
+      x = __riscv_vrgather_vv_u16m1(x, sel12v, vl);
+      x = __riscv_vor_vv_u16m1(
+          __riscv_vsrl_vv_u16m1(x, srl12v, vl),
+          __riscv_vsll_vv_u16m1(__riscv_vslidedown(x, 1, vl), sll12v, vl), vl);
+      x = __riscv_vand_vx_u16m1(x, 0xFFF, vl);
+
+      lt = __riscv_vmsltu_vx_u16m1_b16(x, MLKEM_Q, vl);
+      y = __riscv_vcompress_vm_u16m1(x, lt, vl);
+      n = __riscv_vcpop_m_b16(lt, vl);
+
+      if (ctr + n > len)
+      {
+        n = len - ctr;
+      }
+      __riscv_vse16_v_u16m1((uint16_t *)&r[ctr], y, n);
+      ctr += n;
     }
-    __riscv_vse16_v_u16m1((uint16_t *)&r[ctr], y, n);
-    ctr += n;
   }
 
   return ctr;
