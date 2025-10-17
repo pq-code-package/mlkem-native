@@ -653,52 +653,6 @@ void mlk_rv64v_poly_reduce(int16_t *r)
   }
 }
 
-/*************************************************
- * Name:        poly_add
- *
- * Description: Add two polynomials; no modular reduction is performed
- *
- * Arguments: - int16_t *r: pointer to output polynomial
- *            - const int16_t *a: pointer to first input polynomial
- *            - const int16_t *b: pointer to second input polynomial
- **************************************************/
-void mlk_rv64v_poly_add(int16_t *r, const int16_t *a, const int16_t *b)
-{
-  size_t vl = __riscv_vsetvl_e16m1(MLKEM_N);
-
-  for (size_t i = 0; i < MLKEM_N; i += vl)
-  {
-    __riscv_vse16_v_i16m1(
-        &r[i],
-        __riscv_vadd_vv_i16m1(__riscv_vle16_v_i16m1(&a[i], vl),
-                              __riscv_vle16_v_i16m1(&b[i], vl), vl),
-        vl);
-  }
-}
-
-/*************************************************
- * Name:        poly_sub
- *
- * Description: Subtract two polynomials; no modular reduction is performed
- *
- * Arguments: - int16_t *r:    pointer to output polynomial
- *            - const int16_t *a: pointer to first input polynomial
- *            - const int16_t *b: pointer to second input polynomial
- **************************************************/
-void mlk_rv64v_poly_sub(int16_t *r, const int16_t *a, const int16_t *b)
-{
-  size_t vl = __riscv_vsetvl_e16m1(MLKEM_N);
-
-  for (size_t i = 0; i < MLKEM_N; i += vl)
-  {
-    __riscv_vse16_v_i16m1(
-        &r[i],
-        __riscv_vsub_vv_i16m1(__riscv_vle16_v_i16m1(&a[i], vl),
-                              __riscv_vle16_v_i16m1(&b[i], vl), vl),
-        vl);
-  }
-}
-
 /* Run rejection sampling to get uniform random integers mod q  */
 
 unsigned int mlk_rv64v_rej_uniform(int16_t *r, unsigned int len,
