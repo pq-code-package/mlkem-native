@@ -16,8 +16,8 @@
 #include "rv64v_debug.h"
 
 /* Montgomery reduction constants */
-/* check-magic: 3327 == unsigned_mod(-pow(MLKEM_Q,-1,2^16), 2^16) */
-#define MLK_RVV_QI 3327
+/* check-magic: -3327 == signed_mod(pow(MLKEM_Q,-1,2^16), 2^16) */
+#define MLK_RVV_QI -3327
 
 /* check-magic: 2285 == unsigned_mod(2^16, MLKEM_Q) */
 #define MLK_RVV_MONT_R1 2285
@@ -31,12 +31,10 @@
 static inline vint16m1_t fq_redc(vint16m1_t rh, vint16m1_t rl, size_t vl)
 {
   vint16m1_t t;
-  vbool16_t c;
 
-  t = __riscv_vmul_vx_i16m1(rl, MLK_RVV_QI, vl); /* t = l * -Q^-1  */
+  t = __riscv_vmul_vx_i16m1(rl, MLK_RVV_QI, vl); /* t = l * Q^-1   */
   t = __riscv_vmulh_vx_i16m1(t, MLKEM_Q, vl);    /* t = (t*Q) / R  */
-  c = __riscv_vmsne_vx_i16m1_b16(rl, 0, vl);     /* c = (l != 0)   */
-  t = __riscv_vadc_vvm_i16m1(t, rh, c, vl);      /* t += h + c     */
+  t = __riscv_vsub_vv_i16m1(rh, t, vl);          /* t = h - t      */
 
   return t;
 }
@@ -48,9 +46,9 @@ static inline vint16m1_t fq_redc2(vint32m2_t z, size_t vl)
   vint16m1_t t;
 
   t = __riscv_vmul_vx_i16m1(__riscv_vncvt_x_x_w_i16m1(z, vl), MLK_RVV_QI,
-                            vl); /*    t = l * -Q^-1 */
-  z = __riscv_vadd_vv_i32m2(z, __riscv_vwmul_vx_i32m2(t, MLKEM_Q, vl),
-                            vl); /*    x = (x + (t*Q)) */
+                            vl); /*    t = l * Q^-1 */
+  z = __riscv_vsub_vv_i32m2(z, __riscv_vwmul_vx_i32m2(t, MLKEM_Q, vl),
+                            vl); /*    x = (x - (t*Q)) */
   t = __riscv_vnsra_wx_i16m1(z, 16, vl);
 
   return t;
