@@ -423,10 +423,6 @@ static vint16m2_t mlk_rv64v_intt2(vint16m2_t vp, vint16m1_t cz)
   /* swap 8  */
   vp = __riscv_vcreate_v_i16m1_i16m2(t0, t1);
   vp = __riscv_vrgatherei16_vv_i16m2(vp, v2p8, vl2);
-  t0 = __riscv_vget_v_i16m2_i16m1(vp, 0);
-  t1 = __riscv_vget_v_i16m2_i16m1(vp, 1);
-
-  vp = __riscv_vcreate_v_i16m1_i16m2(t0, t1);
 
   return vp;
 }
