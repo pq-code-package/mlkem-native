@@ -233,10 +233,6 @@ static vint16m2_t mlk_rv64v_ntt2(vint16m2_t vp, vint16m1_t cz)
   c0 = __riscv_vrgather_vv_i16m1(cz, cs2, vl);
   MLK_RVV_CT_BFLY_FV(t0, t1, vt, c0, vl, 7);
 
-  /* normalize   */
-  t0 = fq_mulq_vx(t0, MLK_RVV_MONT_R1, vl);
-  t1 = fq_mulq_vx(t1, MLK_RVV_MONT_R1, vl);
-
   /* reorganize  */
   vp = __riscv_vcreate_v_i16m1_i16m2(t0, t1);
   vp = __riscv_vrgatherei16_vv_i16m2(vp, v2p1, vl2);
