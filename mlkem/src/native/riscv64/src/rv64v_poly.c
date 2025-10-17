@@ -121,9 +121,9 @@ static inline vint16m1_t fq_mulq_vx(vint16m1_t rx, int16_t ry, size_t vl)
 {
   vint16m1_t result;
 
-  result = fq_cadd(fq_mul_vx(rx, ry, vl), vl);
+  result = fq_mul_vx(rx, ry, vl);
 
-  mlk_assert_bound_int16m1(result, vl, 0, MLKEM_Q);
+  mlk_assert_abs_bound_int16m1(result, vl, MLKEM_Q);
   return result;
 }
 
@@ -343,28 +343,18 @@ void mlk_rv64v_poly_ntt(int16_t *r)
 
 /* Reverse / Gentleman-Sande butterfly operation */
 
-#define MLK_RVV_GS_BFLY_RX(u0, u1, ut, uc, vl)    \
-  {                                               \
-    ut = __riscv_vsub_vv_i16m1(u0, u1, vl);       \
-    u0 = __riscv_vadd_vv_i16m1(u0, u1, vl);       \
-    u0 = fq_csub(u0, vl);                         \
-    u1 = fq_mul_vx(ut, uc, vl);                   \
-    u1 = fq_cadd(u1, vl);                         \
-                                                  \
-    mlk_assert_bound_int16m1(u0, vl, 0, MLKEM_Q); \
-    mlk_assert_bound_int16m1(u1, vl, 0, MLKEM_Q); \
+#define MLK_RVV_GS_BFLY_RX(u0, u1, ut, uc, vl) \
+  {                                            \
+    ut = __riscv_vsub_vv_i16m1(u0, u1, vl);    \
+    u0 = __riscv_vadd_vv_i16m1(u0, u1, vl);    \
+    u1 = fq_mul_vx(ut, uc, vl);                \
   }
 
-#define MLK_RVV_GS_BFLY_RV(u0, u1, ut, uc, vl)    \
-  {                                               \
-    ut = __riscv_vsub_vv_i16m1(u0, u1, vl);       \
-    u0 = __riscv_vadd_vv_i16m1(u0, u1, vl);       \
-    u0 = fq_csub(u0, vl);                         \
-    u1 = fq_mul_vv(ut, uc, vl);                   \
-    u1 = fq_cadd(u1, vl);                         \
-                                                  \
-    mlk_assert_bound_int16m1(u0, vl, 0, MLKEM_Q); \
-    mlk_assert_bound_int16m1(u1, vl, 0, MLKEM_Q); \
+#define MLK_RVV_GS_BFLY_RV(u0, u1, ut, uc, vl) \
+  {                                            \
+    ut = __riscv_vsub_vv_i16m1(u0, u1, vl);    \
+    u0 = __riscv_vadd_vv_i16m1(u0, u1, vl);    \
+    u1 = fq_mul_vv(ut, uc, vl);                \
   }
 
 static vint16m2_t mlk_rv64v_intt2(vint16m2_t vp, vint16m1_t cz)
@@ -395,12 +385,20 @@ static vint16m2_t mlk_rv64v_intt2(vint16m2_t vp, vint16m1_t cz)
   t0 = __riscv_vget_v_i16m2_i16m1(vp, 0);
   t1 = __riscv_vget_v_i16m2_i16m1(vp, 1);
 
-  /* pre-scale and move to positive range [0, q-1] for inverse transform */
+  /* pre-scale */
   t0 = fq_mulq_vx(t0, MLK_RVV_MONT_NR, vl);
   t1 = fq_mulq_vx(t1, MLK_RVV_MONT_NR, vl);
 
+  /* absolute bounds: < t0 < q, t1 < q */
+  mlk_assert_abs_bound_int16m1(t0, vl, MLKEM_Q);
+  mlk_assert_abs_bound_int16m1(t1, vl, MLKEM_Q);
+
   c0 = __riscv_vrgather_vv_i16m1(cz, cs2, vl);
   MLK_RVV_GS_BFLY_RV(t0, t1, vt, c0, vl);
+
+  /* absolute bounds: < t0 < 2*q, t1 < q */
+  mlk_assert_abs_bound_int16m1(t0, vl, 2 * MLKEM_Q);
+  mlk_assert_abs_bound_int16m1(t1, vl, MLKEM_Q);
 
   /* swap 2  */
   vp = __riscv_vcreate_v_i16m1_i16m2(t0, t1);
@@ -410,6 +408,10 @@ static vint16m2_t mlk_rv64v_intt2(vint16m2_t vp, vint16m1_t cz)
   c0 = __riscv_vrgather_vv_i16m1(cz, cs4, vl);
   MLK_RVV_GS_BFLY_RV(t0, t1, vt, c0, vl);
 
+  /* absolute bounds: t0 < 4*q, t1 < q */
+  mlk_assert_abs_bound_int16m1(t0, vl, 4 * MLKEM_Q);
+  mlk_assert_abs_bound_int16m1(t1, vl, MLKEM_Q);
+
   /* swap 4  */
   vp = __riscv_vcreate_v_i16m1_i16m2(t0, t1);
   vp = __riscv_vrgatherei16_vv_i16m2(vp, v2p4, vl2);
@@ -418,12 +420,46 @@ static vint16m2_t mlk_rv64v_intt2(vint16m2_t vp, vint16m1_t cz)
   c0 = __riscv_vrgather_vv_i16m1(cz, cs8, vl);
   MLK_RVV_GS_BFLY_RV(t0, t1, vt, c0, vl);
 
+  /* absolute bounds: < 8*q */
+  mlk_assert_abs_bound_int16m1(t0, vl, 8 * MLKEM_Q);
+  mlk_assert_abs_bound_int16m1(t1, vl, MLKEM_Q);
+
+  t0 = fq_mulq_vx(t0, MLK_RVV_MONT_R1, vl);
+
+  /* absolute bounds: < q */
+  mlk_assert_abs_bound_int16m1(t0, vl, MLKEM_Q);
+  mlk_assert_abs_bound_int16m1(t1, vl, MLKEM_Q);
+
   /* swap 8  */
   vp = __riscv_vcreate_v_i16m1_i16m2(t0, t1);
   vp = __riscv_vrgatherei16_vv_i16m2(vp, v2p8, vl2);
 
   return vp;
 }
+
+#define MLK_RV64V_ABS_BOUNDS16(vl, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, va, \
+                               vb, vc, vd, ve, vf, b0, b1, b2, b3, b4, b5, b6, \
+                               b7, b8, b9, ba, bb, bc, bd, be, bf)             \
+  do                                                                           \
+  {                                                                            \
+    mlk_assert_abs_bound_int16m1(v0, vl, (b0) * MLKEM_Q);                      \
+    mlk_assert_abs_bound_int16m1(v1, vl, (b1) * MLKEM_Q);                      \
+    mlk_assert_abs_bound_int16m1(v2, vl, (b2) * MLKEM_Q);                      \
+    mlk_assert_abs_bound_int16m1(v3, vl, (b3) * MLKEM_Q);                      \
+    mlk_assert_abs_bound_int16m1(v4, vl, (b4) * MLKEM_Q);                      \
+    mlk_assert_abs_bound_int16m1(v5, vl, (b5) * MLKEM_Q);                      \
+    mlk_assert_abs_bound_int16m1(v6, vl, (b6) * MLKEM_Q);                      \
+    mlk_assert_abs_bound_int16m1(v7, vl, (b7) * MLKEM_Q);                      \
+    mlk_assert_abs_bound_int16m1(v8, vl, (b8) * MLKEM_Q);                      \
+    mlk_assert_abs_bound_int16m1(v9, vl, (b9) * MLKEM_Q);                      \
+    mlk_assert_abs_bound_int16m1(va, vl, (ba) * MLKEM_Q);                      \
+    mlk_assert_abs_bound_int16m1(vb, vl, (bb) * MLKEM_Q);                      \
+    mlk_assert_abs_bound_int16m1(vc, vl, (bc) * MLKEM_Q);                      \
+    mlk_assert_abs_bound_int16m1(vd, vl, (bd) * MLKEM_Q);                      \
+    mlk_assert_abs_bound_int16m1(ve, vl, (be) * MLKEM_Q);                      \
+    mlk_assert_abs_bound_int16m1(vf, vl, (bf) * MLKEM_Q);                      \
+  } while (0)
+
 
 /* Only for VLEN=256 for now */
 void mlk_rv64v_poly_invntt_tomont(int16_t *r)
@@ -479,6 +515,11 @@ void mlk_rv64v_poly_invntt_tomont(int16_t *r)
   ve = __riscv_vget_v_i16m2_i16m1(vp, 0);
   vf = __riscv_vget_v_i16m2_i16m1(vp, 1);
 
+  /* absolute bounds < q (see mlk_rv64v_intt2) */
+  MLK_RV64V_ABS_BOUNDS16(vl,
+    v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, va, vb, vc, vd, ve, vf,
+    1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1);
+
   MLK_RVV_GS_BFLY_RX(v0, v1, vt, izeta[0x40], vl);
   MLK_RVV_GS_BFLY_RX(v2, v3, vt, izeta[0x41], vl);
   MLK_RVV_GS_BFLY_RX(v4, v5, vt, izeta[0x50], vl);
@@ -487,6 +528,14 @@ void mlk_rv64v_poly_invntt_tomont(int16_t *r)
   MLK_RVV_GS_BFLY_RX(va, vb, vt, izeta[0x61], vl);
   MLK_RVV_GS_BFLY_RX(vc, vd, vt, izeta[0x70], vl);
   MLK_RVV_GS_BFLY_RX(ve, vf, vt, izeta[0x71], vl);
+
+  /* absolute bounds:
+   * - v{0,2,4,6,8,a,c,e}: < 2*q
+   * - v{1,3,5,7,9,b,d,f}: < 1*q
+   */
+  MLK_RV64V_ABS_BOUNDS16(vl,
+    v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, va, vb, vc, vd, ve, vf,
+    2,  1,  2,  1,  2,  1,  2,  1,  2,  1,  2,  1,  2,  1,  2,  1);
 
   MLK_RVV_GS_BFLY_RX(v0, v2, vt, izeta[0x20], vl);
   MLK_RVV_GS_BFLY_RX(v1, v3, vt, izeta[0x20], vl);
@@ -497,6 +546,15 @@ void mlk_rv64v_poly_invntt_tomont(int16_t *r)
   MLK_RVV_GS_BFLY_RX(vc, ve, vt, izeta[0x31], vl);
   MLK_RVV_GS_BFLY_RX(vd, vf, vt, izeta[0x31], vl);
 
+  /* absolute bounds:
+   * - v{0,4,8,c}: < 4*q
+   * - v{1,5,9,d}: < 2*q
+   * - v{2,3,6,7,a,b,e,f}: < 1*q
+   */
+  MLK_RV64V_ABS_BOUNDS16(vl,
+    v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, va, vb, vc, vd, ve, vf,
+    4,  2,  1,  1,  4,  2,  1,  1,  4,  2,  1,  1,  4,  2,  1,  1);
+
   MLK_RVV_GS_BFLY_RX(v0, v4, vt, izeta[0x10], vl);
   MLK_RVV_GS_BFLY_RX(v1, v5, vt, izeta[0x10], vl);
   MLK_RVV_GS_BFLY_RX(v2, v6, vt, izeta[0x10], vl);
@@ -506,6 +564,25 @@ void mlk_rv64v_poly_invntt_tomont(int16_t *r)
   MLK_RVV_GS_BFLY_RX(va, ve, vt, izeta[0x11], vl);
   MLK_RVV_GS_BFLY_RX(vb, vf, vt, izeta[0x11], vl);
 
+  /* absolute bounds:
+   * - v{0,8}: < 8*q
+   * - v{1,9}: < 4*q
+   * - v{2,3,a,b}: < 2*q
+   * - v{4,5,6,7,c,d,e,f}: < 1*q
+   */
+  MLK_RV64V_ABS_BOUNDS16(vl,
+    v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, va, vb, vc, vd, ve, vf,
+    8,  4,  2,  2,  1,  1,  1,  1,  8,  4,  2,  2,  1,  1,  1,  1);
+
+  /* Reduce v0, v8 to avoid overflow */
+  v0 = fq_mulq_vx(v0, MLK_RVV_MONT_R1, vl);
+  v8 = fq_mulq_vx(v8, MLK_RVV_MONT_R1, vl);
+
+  /* absolute bounds: < 4*q */
+  MLK_RV64V_ABS_BOUNDS16(vl,
+    v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, va, vb, vc, vd, ve, vf,
+    4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4);
+
   MLK_RVV_GS_BFLY_RX(v0, v8, vt, izeta[0x01], vl);
   MLK_RVV_GS_BFLY_RX(v1, v9, vt, izeta[0x01], vl);
   MLK_RVV_GS_BFLY_RX(v2, va, vt, izeta[0x01], vl);
@@ -514,6 +591,11 @@ void mlk_rv64v_poly_invntt_tomont(int16_t *r)
   MLK_RVV_GS_BFLY_RX(v5, vd, vt, izeta[0x01], vl);
   MLK_RVV_GS_BFLY_RX(v6, ve, vt, izeta[0x01], vl);
   MLK_RVV_GS_BFLY_RX(v7, vf, vt, izeta[0x01], vl);
+
+  /* absolute bounds: < 8*q */
+  MLK_RV64V_ABS_BOUNDS16(vl,
+    v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, va, vb, vc, vd, ve, vf,
+    8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8);
 
   __riscv_vse16_v_i16m1(&r[0x00], v0, vl);
   __riscv_vse16_v_i16m1(&r[0x10], v1, vl);
@@ -714,3 +796,4 @@ MLK_EMPTY_CU(rv64v_poly)
 #undef MLK_RVV_CT_BFLY_FV
 #undef MLK_RVV_GS_BFLY_RX
 #undef MLK_RVV_GS_BFLY_RV
+#undef MLK_RV64V_ABS_BOUNDS16
