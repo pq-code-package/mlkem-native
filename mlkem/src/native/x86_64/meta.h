@@ -30,7 +30,6 @@
 #define MLK_USE_NATIVE_POLY_DECOMPRESS_D11
 
 #if !defined(__ASSEMBLER__)
-#include <string.h>
 #include "../../common.h"
 #include "../api.h"
 #include "src/arith_native_x86_64.h"

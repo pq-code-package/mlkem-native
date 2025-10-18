@@ -1,3 +1,4 @@
+# Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 name: Test liboqs integration
@@ -12,13 +13,25 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        system: [ubuntu-latest, pqcp-arm64]
-        cmake:
-          - name: Auto
-            flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=auto -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
-          - name: C
+        include:
+          # x86
+          - system: ubuntu-latest
+            name: Haswell
+            # ubuntu-latest may have AVX512 instructions that are not supported by valgrind
+            # We explicitly compile for an older uarch to work around valgrind failures
+            # TODO: switch this back to auto once valgrind supports AVX512 well
+            flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=haswell -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
+          - system: ubuntu-latest
+            name: C
             flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=generic -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
-    name: Build (${{ matrix.cmake.name }}, ${{ matrix.system }})
+          # AArch64
+          - system: pqcp-arm64
+            name: Auto
+            flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=auto -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
+          - system: pqcp-arm64
+            name: C
+            flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=generic -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
+    name: Build (${{ matrix.name }}, ${{ matrix.system }})
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -60,7 +73,7 @@ jobs:
           cd $LIBOQS_DIR
           mkdir build
           cd build
-          cmake ${{ matrix.cmake.flags }} ..
+          cmake ${{ matrix.flags }} ..
           make -j$(nproc)
       - name: Run KEM-test
         run: |

@@ -34,9 +34,8 @@
 #include "../common.h"
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
-#include <stddef.h>
 #include <stdint.h>
-#include <string.h>
+
 #include "../verify.h"
 #include "fips202.h"
 #include "keccakf1600.h"
