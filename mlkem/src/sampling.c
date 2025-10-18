@@ -43,7 +43,7 @@ __contract__(
   ensures(array_bound(r, 0, return_value, 0, MLKEM_Q)))
 {
   unsigned ctr, pos;
-  uint16_t val0, val1;
+  int16_t val0, val1;
 
   mlk_assert_bound(r, offset, 0, MLKEM_Q);
 
@@ -55,8 +55,8 @@ __contract__(
     invariant(offset <= ctr && ctr <= target && pos <= buflen)
     invariant(array_bound(r, 0, ctr, 0, MLKEM_Q)))
   {
-    val0 = ((buf[pos + 0] >> 0) | ((uint16_t)buf[pos + 1] << 8)) & 0xFFF;
-    val1 = ((buf[pos + 1] >> 4) | ((uint16_t)buf[pos + 2] << 4)) & 0xFFF;
+    val0 = ((buf[pos + 0] >> 0) | (buf[pos + 1] << 8)) & 0xFFF;
+    val1 = ((buf[pos + 1] >> 4) | (buf[pos + 2] << 4)) & 0xFFF;
     pos += 3;
 
     if (val0 < MLKEM_Q)
@@ -293,7 +293,7 @@ void mlk_poly_cbd2(mlk_poly *r, const uint8_t buf[2 * MLKEM_N / 4])
     {
       const int16_t a = (d >> (4 * j + 0)) & 0x3;
       const int16_t b = (d >> (4 * j + 2)) & 0x3;
-      r->coeffs[8 * i + j] = a - b;
+      r->coeffs[8 * i + j] = (int16_t)(a - b);
     }
   }
 }
@@ -345,7 +345,7 @@ void mlk_poly_cbd3(mlk_poly *r, const uint8_t buf[3 * MLKEM_N / 4])
     {
       const int16_t a = (d >> (6 * j + 0)) & 0x7;
       const int16_t b = (d >> (6 * j + 3)) & 0x7;
-      r->coeffs[4 * i + j] = a - b;
+      r->coeffs[4 * i + j] = (int16_t)(a - b);
     }
   }
 }

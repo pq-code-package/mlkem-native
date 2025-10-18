@@ -113,7 +113,8 @@ static void generate_i16_array_ranged(int16_t *data, size_t len, int min_incl,
   randombytes((uint8_t *)data, len * sizeof(int16_t));
   for (i = 0; i < len; i++)
   {
-    data[i] = min_incl + ((unsigned)data[i] % (max_excl - min_incl));
+    data[i] = (int16_t)((unsigned)min_incl +
+                        ((unsigned)data[i] % (unsigned)(max_excl - min_incl)));
   }
 }
 
@@ -215,7 +216,7 @@ static int test_native_poly_reduce(void)
 
   for (pos = 0; pos < MLKEM_N; pos += MLKEM_N / 8)
   {
-    generate_i16_array_single(test_data, MLKEM_N, pos, 1);
+    generate_i16_array_single(test_data, MLKEM_N, (size_t)pos, 1);
     CHECK(test_poly_reduce_core(test_data, "poly_reduce_single") == 0);
   }
 
@@ -259,7 +260,7 @@ static int test_native_poly_tomont(void)
 
   for (pos = 0; pos < MLKEM_N; pos += MLKEM_N / 8)
   {
-    generate_i16_array_single(test_data, MLKEM_N, pos, 1);
+    generate_i16_array_single(test_data, MLKEM_N, (size_t)pos, 1);
     CHECK(test_poly_tomont_core(test_data, "poly_tomont_single") == 0);
   }
 
@@ -314,7 +315,7 @@ static int test_native_ntt(void)
 
   for (pos = 0; pos < MLKEM_N; pos += MLKEM_N / 8)
   {
-    generate_i16_array_single(test_data, MLKEM_N, pos, 1);
+    generate_i16_array_single(test_data, MLKEM_N, (size_t)pos, 1);
     CHECK(test_ntt_core(test_data, "ntt_single") == 0);
   }
 
@@ -362,7 +363,7 @@ static int test_native_intt(void)
 
   for (pos = 0; pos < MLKEM_N; pos += MLKEM_N / 8)
   {
-    generate_i16_array_single(test_data, MLKEM_N, pos, 1);
+    generate_i16_array_single(test_data, MLKEM_N, (size_t)pos, 1);
     CHECK(test_intt_core(test_data, "intt_single") == 0);
   }
 
@@ -381,10 +382,10 @@ static int test_native_intt(void)
    */
   for (coeff = 0; coeff <= INT16_MAX; coeff++)
   {
-    generate_i16_array_constant(test_data, MLKEM_N, coeff);
+    generate_i16_array_constant(test_data, MLKEM_N, (int16_t)coeff);
     CHECK(test_intt_core(test_data, "intt_constant") == 0);
 
-    generate_i16_array_constant(test_data, MLKEM_N, -coeff);
+    generate_i16_array_constant(test_data, MLKEM_N, (int16_t)-coeff);
     CHECK(test_intt_core(test_data, "intt_constant") == 0);
   }
 
@@ -433,7 +434,7 @@ static int test_native_poly_tobytes(void)
 
   for (pos = 0; pos < MLKEM_N; pos += MLKEM_N / 8)
   {
-    generate_i16_array_single(test_data, MLKEM_N, pos, 1);
+    generate_i16_array_single(test_data, MLKEM_N, (size_t)pos, 1);
     CHECK(test_poly_tobytes_core(test_data, "poly_tobytes_single") == 1);
   }
 

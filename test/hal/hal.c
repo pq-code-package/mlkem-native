@@ -121,7 +121,7 @@ void enable_cyclecounter(void)
   pe.exclude_kernel = 1;
   pe.exclude_hv = 1;
 
-  perf_fd = syscall(__NR_perf_event_open, &pe, 0, -1, -1, 0);
+  perf_fd = (int)syscall(__NR_perf_event_open, &pe, 0, -1, -1, 0);
 
   ioctl(perf_fd, PERF_EVENT_IOC_RESET, 0);
   ioctl(perf_fd, PERF_EVENT_IOC_ENABLE, 0);
@@ -150,7 +150,7 @@ uint64_t get_cyclecounter(void)
     exit(EXIT_FAILURE);
   }
   ioctl(perf_fd, PERF_EVENT_IOC_ENABLE, 0);
-  return cpu_cycles;
+  return (uint64_t)cpu_cycles;
 }
 #elif defined(MAC_CYCLES)
 /* Based on @[m1cycles] */

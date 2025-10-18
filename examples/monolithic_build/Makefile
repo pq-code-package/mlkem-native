@@ -67,6 +67,7 @@ CFLAGS := \
 	-Wshadow \
 	-Wpointer-arith \
 	-Wredundant-decls \
+	-Wconversion \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
@@ -135,6 +136,6 @@ size: build
 	@$(Q)$(SIZE) $(LIB512_FULL)
 	@$(Q)$(SIZE) $(LIB768_FULL)
 	@$(Q)$(SIZE) $(LIB1024_FULL)
-	
+
 clean:
 	rm -rf $(BUILD_DIR)

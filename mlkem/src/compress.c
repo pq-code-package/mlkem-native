@@ -53,10 +53,11 @@ MLK_STATIC_TESTABLE void mlk_poly_compress_d4_c(
       t[j] = mlk_scalar_compress_d4(a->coeffs[8 * i + j]);
     }
 
-    r[i * 4] = t[0] | (t[1] << 4);
-    r[i * 4 + 1] = t[2] | (t[3] << 4);
-    r[i * 4 + 2] = t[4] | (t[5] << 4);
-    r[i * 4 + 3] = t[6] | (t[7] << 4);
+    /* All t[i] are 4-bit wide, so the truncations don't alter the value. */
+    r[i * 4] = (uint8_t)(t[0] | (t[1] << 4));
+    r[i * 4 + 1] = (uint8_t)(t[2] | (t[3] << 4));
+    r[i * 4 + 2] = (uint8_t)(t[4] | (t[5] << 4));
+    r[i * 4 + 3] = (uint8_t)(t[6] | (t[7] << 4));
   }
 }
 
@@ -105,11 +106,11 @@ MLK_STATIC_TESTABLE void mlk_poly_compress_d10_c(
      * Make all implicit truncation explicit. No data is being
      * truncated for the LHS's since each t[i] is 10-bit in size.
      */
-    r[5 * j + 0] = (t[0] >> 0) & 0xFF;
-    r[5 * j + 1] = (t[0] >> 8) | ((t[1] << 2) & 0xFF);
-    r[5 * j + 2] = (t[1] >> 6) | ((t[2] << 4) & 0xFF);
-    r[5 * j + 3] = (t[2] >> 4) | ((t[3] << 6) & 0xFF);
-    r[5 * j + 4] = (t[3] >> 2);
+    r[5 * j + 0] = (uint8_t)((t[0] >> 0) & 0xFF);
+    r[5 * j + 1] = (uint8_t)((t[0] >> 8) | ((t[1] << 2) & 0xFF));
+    r[5 * j + 2] = (uint8_t)((t[1] >> 6) | ((t[2] << 4) & 0xFF));
+    r[5 * j + 3] = (uint8_t)((t[2] >> 4) | ((t[3] << 6) & 0xFF));
+    r[5 * j + 4] = (uint8_t)(t[3] >> 2);
   }
 }
 
@@ -241,16 +242,11 @@ MLK_STATIC_TESTABLE void mlk_poly_compress_d5_c(
       t[j] = mlk_scalar_compress_d5(a->coeffs[8 * i + j]);
     }
 
-    /*
-     * Explicitly truncate to avoid warning about
-     * implicit truncation in CBMC, and use array indexing into
-     * r rather than pointer-arithmetic to simplify verification
-     */
-    r[i * 5] = 0xFF & ((t[0] >> 0) | (t[1] << 5));
-    r[i * 5 + 1] = 0xFF & ((t[1] >> 3) | (t[2] << 2) | (t[3] << 7));
-    r[i * 5 + 2] = 0xFF & ((t[3] >> 1) | (t[4] << 4));
-    r[i * 5 + 3] = 0xFF & ((t[4] >> 4) | (t[5] << 1) | (t[6] << 6));
-    r[i * 5 + 4] = 0xFF & ((t[6] >> 2) | (t[7] << 3));
+    r[i * 5] = (uint8_t)(0xFF & ((t[0] >> 0) | (t[1] << 5)));
+    r[i * 5 + 1] = (uint8_t)(0xFF & ((t[1] >> 3) | (t[2] << 2) | (t[3] << 7)));
+    r[i * 5 + 2] = (uint8_t)(0xFF & ((t[3] >> 1) | (t[4] << 4)));
+    r[i * 5 + 3] = (uint8_t)(0xFF & ((t[4] >> 4) | (t[5] << 1) | (t[6] << 6)));
+    r[i * 5 + 4] = (uint8_t)(0xFF & ((t[6] >> 2) | (t[7] << 3)));
   }
 }
 
@@ -300,17 +296,17 @@ MLK_STATIC_TESTABLE void mlk_poly_compress_d11_c(
      * Make all implicit truncation explicit. No data is being
      * truncated for the LHS's since each t[i] is 11-bit in size.
      */
-    r[11 * j + 0] = (t[0] >> 0) & 0xFF;
-    r[11 * j + 1] = (t[0] >> 8) | ((t[1] << 3) & 0xFF);
-    r[11 * j + 2] = (t[1] >> 5) | ((t[2] << 6) & 0xFF);
-    r[11 * j + 3] = (t[2] >> 2) & 0xFF;
-    r[11 * j + 4] = (t[2] >> 10) | ((t[3] << 1) & 0xFF);
-    r[11 * j + 5] = (t[3] >> 7) | ((t[4] << 4) & 0xFF);
-    r[11 * j + 6] = (t[4] >> 4) | ((t[5] << 7) & 0xFF);
-    r[11 * j + 7] = (t[5] >> 1) & 0xFF;
-    r[11 * j + 8] = (t[5] >> 9) | ((t[6] << 2) & 0xFF);
-    r[11 * j + 9] = (t[6] >> 6) | ((t[7] << 5) & 0xFF);
-    r[11 * j + 10] = (t[7] >> 3);
+    r[11 * j + 0] = (uint8_t)((t[0] >> 0) & 0xFF);
+    r[11 * j + 1] = (uint8_t)((t[0] >> 8) | ((t[1] << 3) & 0xFF));
+    r[11 * j + 2] = (uint8_t)((t[1] >> 5) | ((t[2] << 6) & 0xFF));
+    r[11 * j + 3] = (uint8_t)((t[2] >> 2) & 0xFF);
+    r[11 * j + 4] = (uint8_t)((t[2] >> 10) | ((t[3] << 1) & 0xFF));
+    r[11 * j + 5] = (uint8_t)((t[3] >> 7) | ((t[4] << 4) & 0xFF));
+    r[11 * j + 6] = (uint8_t)((t[4] >> 4) | ((t[5] << 7) & 0xFF));
+    r[11 * j + 7] = (uint8_t)((t[5] >> 1) & 0xFF);
+    r[11 * j + 8] = (uint8_t)((t[5] >> 9) | ((t[6] << 2) & 0xFF));
+    r[11 * j + 9] = (uint8_t)((t[6] >> 6) | ((t[7] << 5) & 0xFF));
+    r[11 * j + 10] = (uint8_t)(t[7] >> 3);
   }
 }
 
@@ -470,8 +466,10 @@ __contract__(
   for (i = 0; i < MLKEM_N / 2; i++)
   __loop__(invariant(i <= MLKEM_N / 2))
   {
-    const uint16_t t0 = a->coeffs[2 * i];
-    const uint16_t t1 = a->coeffs[2 * i + 1];
+    /* The conversion to uint16_t is safe since we assume that
+     * the coefficients of `a` are non-negative. */
+    const uint16_t t0 = (uint16_t)a->coeffs[2 * i];
+    const uint16_t t1 = (uint16_t)a->coeffs[2 * i + 1];
     /*
      * t0 and t1 are both < MLKEM_Q, so contain at most 12 bits each of
      * significant data, so these can be packed into 24 bits or exactly
@@ -479,17 +477,20 @@ __contract__(
      */
 
     /* Least significant bits 0 - 7 of t0. */
-    r[3 * i + 0] = t0 & 0xFF;
+    r[3 * i + 0] = (uint8_t)(t0 & 0xFF);
 
     /*
      * Most significant bits 8 - 11 of t0 become the least significant
      * nibble of the second byte. The least significant 4 bits
      * of t1 become the upper nibble of the second byte.
+     *
+     * The conversion to uint8_t does not alter the value.
      */
-    r[3 * i + 1] = (t0 >> 8) | ((t1 << 4) & 0xF0);
+    r[3 * i + 1] = (uint8_t)((t0 >> 8) | ((t1 << 4) & 0xF0));
 
-    /* Bits 4 - 11 of t1 become the third byte. */
-    r[3 * i + 2] = t1 >> 4;
+    /* Bits 4 - 11 of t1 become the third byte. The conversion to uint8_t
+     * does not alter the value because t1 is 12-bit wide. */
+    r[3 * i + 2] = (uint8_t)(t1 >> 4);
   }
 }
 
@@ -528,8 +529,8 @@ __contract__(
     const uint8_t t0 = a[3 * i + 0];
     const uint8_t t1 = a[3 * i + 1];
     const uint8_t t2 = a[3 * i + 2];
-    r->coeffs[2 * i + 0] = t0 | ((t1 << 8) & 0xFFF);
-    r->coeffs[2 * i + 1] = (t1 >> 4) | (t2 << 4);
+    r->coeffs[2 * i + 0] = (int16_t)(t0 | ((t1 << 8) & 0xFFF));
+    r->coeffs[2 * i + 1] = (int16_t)((t1 >> 4) | (t2 << 4));
   }
 
   /* Note that the coefficients are not canonical */
@@ -580,7 +581,7 @@ void mlk_poly_frommsg(mlk_poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
        * as per @[FIPS203, Eq (4.8)]. */
 
       /* Prevent the compiler from recognizing this as a bit selection */
-      uint8_t mask = mlk_value_barrier_u8(1u << j);
+      uint8_t mask = mlk_value_barrier_u8((uint8_t)(1u << j));
       r->coeffs[8 * i + j] = mlk_ct_sel_int16(MLKEM_Q_HALF, 0, msg[i] & mask);
     }
   }
@@ -609,7 +610,7 @@ void mlk_poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const mlk_poly *a)
       invariant(i <= MLKEM_N / 8 && j <= 8))
     {
       uint32_t t = mlk_scalar_compress_d1(a->coeffs[8 * i + j]);
-      msg[i] |= t << j;
+      msg[i] |= (uint8_t)(t << j);
     }
   }
 }

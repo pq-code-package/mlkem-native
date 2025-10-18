@@ -55,19 +55,21 @@ __contract__(
     inlen -= r;
   }
 
+  /* At this point, inlen < r, so the truncations to unsigned are safe below. */
+
   if (inlen > 0)
   {
-    mlk_keccakf1600x4_xor_bytes(s, in0, in1, in2, in3, 0, inlen);
+    mlk_keccakf1600x4_xor_bytes(s, in0, in1, in2, in3, 0, (unsigned int)inlen);
   }
 
   if (inlen == r - 1)
   {
     p |= 128;
-    mlk_keccakf1600x4_xor_bytes(s, &p, &p, &p, &p, inlen, 1);
+    mlk_keccakf1600x4_xor_bytes(s, &p, &p, &p, &p, (unsigned int)inlen, 1);
   }
   else
   {
-    mlk_keccakf1600x4_xor_bytes(s, &p, &p, &p, &p, inlen, 1);
+    mlk_keccakf1600x4_xor_bytes(s, &p, &p, &p, &p, (unsigned int)inlen, 1);
     p = 128;
     mlk_keccakf1600x4_xor_bytes(s, &p, &p, &p, &p, r - 1, 1);
   }

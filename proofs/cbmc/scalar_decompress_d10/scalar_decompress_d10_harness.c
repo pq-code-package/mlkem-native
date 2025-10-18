@@ -6,7 +6,7 @@
 
 void harness(void)
 {
-  uint32_t u;
-  uint16_t d;
+  uint16_t u;
+  int16_t d;
   d = mlk_scalar_decompress_d10(u);
 }
