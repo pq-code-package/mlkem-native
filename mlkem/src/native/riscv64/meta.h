@@ -61,7 +61,10 @@ static MLK_INLINE int mlk_rej_uniform_native(int16_t *r, unsigned len,
                                              const uint8_t *buf,
                                              unsigned buflen)
 {
-  return mlk_rv64v_rej_uniform(r, len, buf, buflen);
+  /* The cast from unsigned to signed integer is safe
+   * because the return value is <= len, which we asssume
+   * to be bound by 4096 and hence <= INT_MAX. */
+  return (int)mlk_rv64v_rej_uniform(r, len, buf, buflen);
 }
 
 static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])

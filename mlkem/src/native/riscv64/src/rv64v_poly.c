@@ -740,7 +740,7 @@ void mlk_rv64v_poly_reduce(int16_t *r)
 unsigned int mlk_rv64v_rej_uniform(int16_t *r, unsigned int len,
                                    const uint8_t *buf, unsigned int buflen)
 {
-  size_t n, ctr, pos;
+  unsigned n, ctr, pos;
   vuint16m1_t x, y;
   vbool16_t lt;
 
@@ -749,8 +749,8 @@ unsigned int mlk_rv64v_rej_uniform(int16_t *r, unsigned int len,
 
   while (ctr < len && pos < buflen)
   {
-    const size_t vl = __riscv_vsetvl_e16m1((buflen - pos) * 8 / 12);
-    const size_t vl23 = (vl * 24) / 32;
+    const unsigned vl = (unsigned)__riscv_vsetvl_e16m1((buflen - pos) * 8 / 12);
+    const unsigned vl23 = (vl * 24) / 32;
 
     const vuint16m1_t vid = __riscv_vid_v_u16m1(vl);
     const vuint16m1_t srl12v = __riscv_vmul_vx_u16m1(vid, 12, vl);
@@ -772,7 +772,7 @@ unsigned int mlk_rv64v_rej_uniform(int16_t *r, unsigned int len,
 
       lt = __riscv_vmsltu_vx_u16m1_b16(x, MLKEM_Q, vl);
       y = __riscv_vcompress_vm_u16m1(x, lt, vl);
-      n = __riscv_vcpop_m_b16(lt, vl);
+      n = (unsigned)__riscv_vcpop_m_b16(lt, vl);
 
       if (ctr + n > len)
       {
