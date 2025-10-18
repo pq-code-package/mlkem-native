@@ -73,8 +73,7 @@ static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])
 static MLK_INLINE int mlk_poly_mulcache_compute_native(int16_t x[MLKEM_N / 2],
                                                        const int16_t y[MLKEM_N])
 {
-  (void)x; /* not using the cache at the moment */
-  (void)y;
+  mlk_rv64v_poly_mulcache_compute(x, y);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
@@ -83,8 +82,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
     int16_t r[MLKEM_N], const int16_t a[2 * MLKEM_N],
     const int16_t b[2 * MLKEM_N], const int16_t b_cache[2 * (MLKEM_N / 2)])
 {
-  (void)b_cache;
-  mlk_rv64v_poly_basemul_mont_add_k2(r, a, b);
+  mlk_rv64v_poly_basemul_mont_add_k2(r, a, b, b_cache);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 */
@@ -94,8 +92,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k3_native(
     int16_t r[MLKEM_N], const int16_t a[3 * MLKEM_N],
     const int16_t b[3 * MLKEM_N], const int16_t b_cache[3 * (MLKEM_N / 2)])
 {
-  (void)b_cache;
-  mlk_rv64v_poly_basemul_mont_add_k3(r, a, b);
+  mlk_rv64v_poly_basemul_mont_add_k3(r, a, b, b_cache);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 3 */
@@ -105,8 +102,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
     int16_t r[MLKEM_N], const int16_t a[4 * MLKEM_N],
     const int16_t b[4 * MLKEM_N], const int16_t b_cache[4 * (MLKEM_N / 2)])
 {
-  (void)b_cache;
-  mlk_rv64v_poly_basemul_mont_add_k4(r, a, b);
+  mlk_rv64v_poly_basemul_mont_add_k4(r, a, b, b_cache);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */

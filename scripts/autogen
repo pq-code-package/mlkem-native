@@ -1145,19 +1145,12 @@ def gen_riscv64_izetas():
 def gen_riscv64_basemul_roots():
     R = signed_reduce(montgomery_factor)
     for i in range(64):
-        yield from [
-            R,
-            signed_reduce(
+        yield signed_reduce(
                 pow(root_of_unity, bitreverse(64 + i, 7), modulus) * montgomery_factor
-            ),
-        ]
-        yield from [
-            R,
-            signed_reduce(
+            )
+        yield signed_reduce(
                 -pow(root_of_unity, bitreverse(64 + i, 7), modulus) * montgomery_factor
-            ),
-        ]
-
+            )
 
 def gen_riscv64_zeta_files(dry_run=False):
     """Generate all RISC-V 64 zeta files"""

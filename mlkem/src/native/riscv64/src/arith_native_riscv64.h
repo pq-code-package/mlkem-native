@@ -16,15 +16,18 @@ void mlk_rv64v_poly_invntt_tomont(int16_t *r);
 
 #define mlk_rv64v_poly_basemul_mont_add_k2 MLK_NAMESPACE(basemul_add_k2_riscv64)
 void mlk_rv64v_poly_basemul_mont_add_k2(int16_t *r, const int16_t *a,
-                                        const int16_t *b);
+                                        const int16_t *b,
+					const int16_t *b_cache);
 
 #define mlk_rv64v_poly_basemul_mont_add_k3 MLK_NAMESPACE(basemul_add_k3_riscv64)
 void mlk_rv64v_poly_basemul_mont_add_k3(int16_t *r, const int16_t *a,
-                                        const int16_t *b);
+                                        const int16_t *b,
+					const int16_t *b_cache);
 
 #define mlk_rv64v_poly_basemul_mont_add_k4 MLK_NAMESPACE(basemul_add_k4_riscv64)
 void mlk_rv64v_poly_basemul_mont_add_k4(int16_t *r, const int16_t *a,
-                                        const int16_t *b);
+                                        const int16_t *b,
+					const int16_t *b_cache);
 
 #define mlk_rv64v_poly_tomont MLK_NAMESPACE(tomont_riscv64)
 void mlk_rv64v_poly_tomont(int16_t *r);
@@ -41,5 +44,9 @@ void mlk_rv64v_poly_sub(int16_t *r, const int16_t *a, const int16_t *b);
 #define mlk_rv64v_rej_uniform MLK_NAMESPACE(rj_uniform_riscv64)
 unsigned int mlk_rv64v_rej_uniform(int16_t *r, unsigned int len,
                                    const uint8_t *buf, unsigned int buflen);
+
+#define mlk_rv64v_poly_mulcache_compute MLK_NAMESPACE(poly_mulcache_compute_riscv64)
+void mlk_rv64v_poly_mulcache_compute(int16_t x[MLKEM_N / 2],
+                                     const int16_t y[MLKEM_N]);
 
 #endif /* !MLK_NATIVE_RISCV64_SRC_ARITH_NATIVE_RISCV64_H */

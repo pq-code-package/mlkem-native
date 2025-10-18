@@ -615,75 +615,88 @@ void mlk_rv64v_poly_invntt_tomont(int16_t *r)
   __riscv_vse16_v_i16m1(&r[0xf0], vf, vl);
 }
 
-/* ML-KEM's middle field GF(3329)[X]/(X^2) multiplication */
+/* ML-KEM's middle field GF(3329)[X]/(X^2) multiplication,
+ * using mulcache. */
+
+void mlk_rv64v_poly_mulcache_compute(int16_t x[MLKEM_N / 2],
+                                     const int16_t y[MLKEM_N])
+{
+#include "rv64v_zetas_basemul.inc"
+
+  size_t vl = __riscv_vsetvl_e16m1(MLKEM_N) / 2;
+  size_t i;
+
+  for (i = 0; i < MLKEM_N; i += 2 * vl)
+  {
+    vint16m1_t b1 = __riscv_vnsra_wx_i16m1(
+	__riscv_vle32_v_i32m2((const int32_t*)&y[i], vl), 16, vl);
+    vint16m1_t z = __riscv_vle16_v_i16m1(&roots[i / 2], vl);
+    vint16m1_t bt = fq_mul_vv(b1, z, vl);
+    __riscv_vse16_v_i16m1(&x[i / 2], bt, vl);
+  }
+}
 
 static inline void mlk_rv64v_poly_basemul_mont_add_k(int16_t *r,
                                                      const int16_t *a,
                                                      const int16_t *b,
+                                                     const int16_t *bc,
                                                      unsigned kn)
 {
-#include "rv64v_zetas_basemul.inc"
-
-  size_t vl = __riscv_vsetvl_e16m1(MLKEM_N);
+  size_t vl = __riscv_vsetvl_e16m1(MLKEM_N) / 2;
   size_t i, j;
 
-  const vuint16m1_t sw0 = __riscv_vxor_vx_u16m1(__riscv_vid_v_u16m1(vl), 1, vl);
-  const vbool16_t sb0 = __riscv_vmseq_vx_u16m1_b16(
-      __riscv_vand_vx_u16m1(__riscv_vid_v_u16m1(vl), 1, vl), 0, vl);
-
-  vint16m1_t vt, vu;
-  vint32m2_t wa, wb, ws;
-
-  for (i = 0; i < MLKEM_N; i += vl)
+  for (i = 0; i < MLKEM_N; i += 2 * vl)
   {
-    const vint16m1_t vz = __riscv_vle16_v_i16m1(&roots[i], vl);
+    vint32m2_t acc0 = __riscv_vmv_v_x_i32m2(0, vl);
+    vint32m2_t acc1 = __riscv_vmv_v_x_i32m2(0, vl);
 
     for (j = 0; j < kn; j += MLKEM_N)
     {
-      vt = __riscv_vle16_v_i16m1(&a[i + j], vl);
-      vu = __riscv_vle16_v_i16m1(&b[i + j], vl);
+      vint16m1x2_t x = __riscv_vlseg2e16_v_i16m1x2(&a[i + j], vl);
+      vint16m1x2_t y = __riscv_vlseg2e16_v_i16m1x2(&b[i + j], vl);
 
-      wa = __riscv_vwmul_vv_i32m2(vz, fq_mul_vv(vt, vu, vl), vl);
-      wb = __riscv_vwmul_vv_i32m2(vt, __riscv_vrgather_vv_i16m1(vu, sw0, vl),
-                                  vl);
+      vint16m1_t x0 = __riscv_vget_v_i16m1x2_i16m1(x, 0);
+      vint16m1_t x1 = __riscv_vget_v_i16m1x2_i16m1(x, 1);
+      vint16m1_t y0 = __riscv_vget_v_i16m1x2_i16m1(y, 0);
+      vint16m1_t y1 = __riscv_vget_v_i16m1x2_i16m1(y, 1);
+      vint16m1_t yt = __riscv_vle16_v_i16m1(&bc[(i + j) / 2], vl);
 
-      wa =
-          __riscv_vadd_vv_i32m2(wa, __riscv_vslidedown_vx_i32m2(wa, 1, vl), vl);
-      wb = __riscv_vadd_vv_i32m2(wb, __riscv_vslideup_vx_i32m2(wb, wb, 1, vl),
-                                 vl);
+      vint32m2_t x0y0 = __riscv_vwmul_vv_i32m2(x0, y0, vl);
+      vint32m2_t x0y1 = __riscv_vwmul_vv_i32m2(x0, y1, vl);
+      vint32m2_t x1y0 = __riscv_vwmul_vv_i32m2(x1, y0, vl);
+      vint32m2_t x1yt = __riscv_vwmul_vv_i32m2(x1, yt, vl);
 
-      wa = __riscv_vmerge_vvm_i32m2(wb, wa, sb0, vl);
-
-      if (j == 0)
-      {
-        ws = wa;
-      }
-      else
-      {
-        ws = __riscv_vadd_vv_i32m2(ws, wa, vl);
-      }
+      acc0 = __riscv_vadd_vv_i32m2(acc0, x0y0, vl);
+      acc0 = __riscv_vadd_vv_i32m2(acc0, x1yt, vl);
+      acc1 = __riscv_vadd_vv_i32m2(acc1, x0y1, vl);
+      acc1 = __riscv_vadd_vv_i32m2(acc1, x1y0, vl);
     }
-    /* the idea is to keep 32-bit intermediate result, reduce in the end */
-    __riscv_vse16_v_i16m1(&r[i], fq_redc2(ws, vl), vl);
+
+    __riscv_vsseg2e16_v_i16m1x2(
+        &r[i],
+        __riscv_vcreate_v_i16m1x2(fq_redc2(acc0, vl), fq_redc2(acc1, vl)), vl);
   }
 }
 
 void mlk_rv64v_poly_basemul_mont_add_k2(int16_t *r, const int16_t *a,
-                                        const int16_t *b)
+                                        const int16_t *b,
+                                        const int16_t *b_cache)
 {
-  mlk_rv64v_poly_basemul_mont_add_k(r, a, b, 2 * MLKEM_N);
+  mlk_rv64v_poly_basemul_mont_add_k(r, a, b, b_cache, 2 * MLKEM_N);
 }
 
 void mlk_rv64v_poly_basemul_mont_add_k3(int16_t *r, const int16_t *a,
-                                        const int16_t *b)
+                                        const int16_t *b,
+                                        const int16_t *b_cache)
 {
-  mlk_rv64v_poly_basemul_mont_add_k(r, a, b, 3 * MLKEM_N);
+  mlk_rv64v_poly_basemul_mont_add_k(r, a, b, b_cache, 3 * MLKEM_N);
 }
 
 void mlk_rv64v_poly_basemul_mont_add_k4(int16_t *r, const int16_t *a,
-                                        const int16_t *b)
+                                        const int16_t *b,
+                                        const int16_t *b_cache)
 {
-  mlk_rv64v_poly_basemul_mont_add_k(r, a, b, 4 * MLKEM_N);
+  mlk_rv64v_poly_basemul_mont_add_k(r, a, b, b_cache, 4 * MLKEM_N);
 }
 
 /*************************************************
