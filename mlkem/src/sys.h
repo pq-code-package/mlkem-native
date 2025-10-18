@@ -48,6 +48,11 @@
 #define MLK_SYS_RISCV64
 #endif
 
+#if defined(MLK_SYS_RISCV64) && defined(__riscv_vector) && \
+    defined(__riscv_v_intrinsic)
+#define MLK_SYS_RISCV64_RVV
+#endif
+
 #if defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 32
 #define MLK_SYS_RISCV32
 #endif
