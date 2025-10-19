@@ -47,34 +47,6 @@ typedef struct
 } MLK_ALIGN mlk_poly_mulcache;
 
 /*************************************************
- * Name:        mlk_cast_uint16_to_int16
- *
- * Description: Cast uint16 value to int16
- *
- * Returns:
- *   input x in     0 .. 32767: returns value unchanged
- *   input x in 32768 .. 65535: returns (x - 65536)
- **************************************************/
-#ifdef CBMC
-#pragma CPROVER check push
-#pragma CPROVER check disable "conversion"
-#endif
-static MLK_ALWAYS_INLINE int16_t mlk_cast_uint16_to_int16(uint16_t x)
-{
-  /*
-   * PORTABILITY: This relies on uint16_t -> int16_t
-   * being implemented as the inverse of int16_t -> uint16_t,
-   * which is implementation-defined (C99 6.3.1.3 (3))
-   * CBMC (correctly) fails to prove this conversion is OK,
-   * so we have to suppress that check here
-   */
-  return (int16_t)x;
-}
-#ifdef CBMC
-#pragma CPROVER check pop
-#endif
-
-/*************************************************
  * Name:        mlk_montgomery_reduce
  *
  * Description: Generic Montgomery reduction; given a 32-bit integer a, computes
@@ -103,8 +75,7 @@ __contract__(
   const uint32_t QINV = 62209;
 
   /* Compute a*q^{-1} mod 2^16 in unsigned representatives. */
-  const uint16_t a_reduced = (uint16_t)(a & (int32_t)UINT16_MAX);
-
+  const uint16_t a_reduced = mlk_cast_int32_to_uint16(a);
   const uint16_t a_inverted = (a_reduced * QINV) & UINT16_MAX;
 
   /* Lift to signed canonical representative mod 2^16. */
