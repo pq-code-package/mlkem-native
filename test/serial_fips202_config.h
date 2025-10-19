@@ -494,7 +494,11 @@
 /******************************************************************************
  * Name:        MLK_CONFIG_SERIAL_FIPS202_ONLY
  *
- * Description: If this option is set, batched Keccak operations will be
+ * Description: Set this to use a FIPS202 implementation with global state
+ *              that supports only one active Keccak computation at a time
+ *              (e.g. some hardware accelerators).
+ *
+ *              If this option is set, batched Keccak operations are
  *              disabled for rejection sampling during matrix generation.
  *              Instead, matrix entries will be generated one at a time.
  *
