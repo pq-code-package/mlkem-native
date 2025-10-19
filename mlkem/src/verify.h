@@ -191,16 +191,6 @@ __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFF)))
 #pragma CPROVER check pop
 #endif
 
-/*
- * The mlk_ct_cmask_neg_i16 function below makes deliberate use of
- * signed to unsigned integer conversion, which is fully defined
- * behaviour in C. It is thus safe to disable this warning.
- */
-#ifdef CBMC
-#pragma CPROVER check push
-#pragma CPROVER check disable "conversion"
-#endif
-
 /*************************************************
  * Name:        mlk_ct_cmask_neg_i16
  *
@@ -227,13 +217,8 @@ __contract__(ensures(return_value == ((x < 0) ? 0xFFFF : 0)))
   /* This truncation does alter the value of tmp. We deliberately
    * rely on the defined behavior of signed-to-unsigned conversion
    * for negative inputs. */
-  return (uint16_t)tmp;
+  return (uint16_t)(tmp & (int32_t)UINT16_MAX);
 }
-
-/* Put unsigned-to-signed warnings in CBMC back into scope */
-#ifdef CBMC
-#pragma CPROVER check pop
-#endif
 
 /*
  * The ct_csel_xxx functions below make deliberate use of unsigned
