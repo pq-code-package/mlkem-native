@@ -62,6 +62,7 @@ CFLAGS := \
 	-Wpointer-arith \
 	-Wredundant-decls \
 	-Wconversion \
+	-Wsign-conversion \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
