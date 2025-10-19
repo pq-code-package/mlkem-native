@@ -48,7 +48,7 @@ FUNCTION_NAME = mlk_polymat_permute_bitrev_to_custom_native
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 12
+CBMC_OBJECT_BITS = 11
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

@@ -9,6 +9,6 @@ void mlk_polymat_permute_bitrev_to_custom(mlk_polymat a);
 
 void harness(void)
 {
-  mlk_polymat a;
+  mlk_poly *a;
   mlk_polymat_permute_bitrev_to_custom(a);
 }
