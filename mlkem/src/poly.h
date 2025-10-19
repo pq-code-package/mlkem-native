@@ -102,8 +102,9 @@ __contract__(
   /* check-magic: 62209 == unsigned_mod(pow(MLKEM_Q, -1, 2^16), 2^16) */
   const uint32_t QINV = 62209;
 
-  /*  Compute a*q^{-1} mod 2^16 in unsigned representatives */
-  const uint16_t a_reduced = (uint16_t)(a & UINT16_MAX);
+  /* Compute a*q^{-1} mod 2^16 in unsigned representatives. */
+  const uint16_t a_reduced = (uint16_t)(a & (int32_t)UINT16_MAX);
+
   const uint16_t a_inverted = (a_reduced * QINV) & UINT16_MAX;
 
   /* Lift to signed canonical representative mod 2^16. */

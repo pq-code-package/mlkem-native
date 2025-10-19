@@ -96,6 +96,7 @@ CFLAGS := \
 	-Wno-unknown-pragmas \
 	-Wredundant-decls \
 	-Wconversion \
+	-Wsign-conversion \
 	-Wno-unused-command-line-argument \
 	-fomit-frame-pointer \
 	-std=c99 \
