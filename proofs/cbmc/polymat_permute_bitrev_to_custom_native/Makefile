@@ -14,7 +14,7 @@ DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_ARITH_BACKEND_FILE
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET +=  mlk_polymat_permute_bitrev_to_custom.0:16
+UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
@@ -48,7 +48,7 @@ FUNCTION_NAME = mlk_polymat_permute_bitrev_to_custom_native
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 10
+CBMC_OBJECT_BITS = 12
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

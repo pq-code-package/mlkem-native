@@ -189,18 +189,20 @@ __contract__(
  requires(forall(x, 0, MLKEM_K * MLKEM_K,
    array_bound(a[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
  assigns(object_whole(a))
- /* ensures(forall(x, 0, MLKEM_K * MLKEM_K, */
- /*   array_bound(a[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q))) */
+  ensures(forall(x, 0, MLKEM_K * MLKEM_K,
+    array_bound(a[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
     )
 {
 #if defined(MLK_USE_NATIVE_NTT_CUSTOM_ORDER)
   unsigned i;
-  for (i = 0; i < MLKEM_K * MLKEM_K; i++)
-  /* __loop__( */
-  /*   assigns(i, object_whole(a)) */
-  /*   invariant(i <= MLKEM_K * MLKEM_K) */
-  /*   invariant(forall(x, 0, MLKEM_K * MLKEM_K, */
-  /*     array_bound(a[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))) */
+  for (i = 0; i < MLKEM_K*MLKEM_K; i++)
+ __loop__(
+     assigns(i, object_whole(a))
+     invariant(i <= MLKEM_K * MLKEM_K)
+     invariant(forall(k0, i, MLKEM_K * MLKEM_K, forall(k1, 0, MLKEM_N, a[k0].coeffs[k1] == loop_entry(a)[k0].coeffs[k1])))
+     invariant(forall(x, 0, MLKEM_K * MLKEM_K,
+       array_bound(a[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+     )
   {
     mlk_poly_permute_bitrev_to_custom(a[i].coeffs);
 //    mlk_poly_permute_bitrev_to_custom(a[1].coeffs);
