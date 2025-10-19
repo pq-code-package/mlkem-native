@@ -39,6 +39,8 @@
 #define mlk_pack_ciphertext MLK_ADD_PARAM_SET(mlk_pack_ciphertext)
 #define mlk_unpack_ciphertext MLK_ADD_PARAM_SET(mlk_unpack_ciphertext)
 #define mlk_matvec_mul MLK_ADD_PARAM_SET(mlk_matvec_mul)
+#define mlk_polymat_permute_bitrev_to_custom \
+  MLK_ADD_PARAM_SET(mlk_polymat_permute_bitrev_to_custom)
 /* End of parameter set namespacing */
 
 /*************************************************
@@ -175,21 +177,40 @@ static void mlk_unpack_ciphertext(mlk_polyvec b, mlk_poly *v,
   mlk_poly_decompress_dv(v, c + MLKEM_POLYVECCOMPRESSEDBYTES_DU);
 }
 
-#if !defined(MLK_USE_NATIVE_NTT_CUSTOM_ORDER)
-/* This namespacing is not done at the top to avoid a naming conflict
- * with native backends, which are currently not yet namespaced. */
-#define mlk_poly_permute_bitrev_to_custom \
-  MLK_ADD_PARAM_SET(mlk_poly_permute_bitrev_to_custom)
-
-static MLK_INLINE void mlk_poly_permute_bitrev_to_custom(int16_t data[MLKEM_N])
+/* Helper function to ensure that the polynomial entries in the output
+ * of gen_matrix use the standard (bitreversed) ordering of coefficients.
+ * No-op unless a native backend with a custom ordering is used.
+ *
+ * We don't inline this into gen_matrix to avoid having to split the CBMC
+ * proof for gen_matrix based on MLK_USE_NATIVE_NTT_CUSTOM_ORDER. */
+static void mlk_polymat_permute_bitrev_to_custom(mlk_polymat a)
 __contract__(
   /* We don't specify that this should be a permutation, but only
    * that it does not change the bound established at the end of mlk_gen_matrix. */
-  requires(memory_no_alias(data, sizeof(int16_t) * MLKEM_N))
-  requires(array_bound(data, 0, MLKEM_N, 0, MLKEM_Q))
-  assigns(memory_slice(data, sizeof(mlk_poly)))
-  ensures(array_bound(data, 0, MLKEM_N, 0, MLKEM_Q))) { ((void)data); }
+ requires(memory_no_alias(a, sizeof(mlk_polymat)))
+ requires(forall(x, 0, MLKEM_K * MLKEM_K,
+   array_bound(a[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+ assigns(object_whole(a))
+ ensures(forall(x, 0, MLKEM_K * MLKEM_K,
+   array_bound(a[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
+{
+#if defined(MLK_USE_NATIVE_NTT_CUSTOM_ORDER)
+  unsigned i;
+  for (i = 0; i < MLKEM_K * MLKEM_K; i++)
+  __loop__(
+     assigns(i, object_whole(a))
+     invariant(i <= MLKEM_K * MLKEM_K)
+     invariant(forall(x, 0, MLKEM_K * MLKEM_K,
+       array_bound(a[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+     )
+  {
+    mlk_poly_permute_bitrev_to_custom(a[i].coeffs);
+  }
+#else  /* MLK_USE_NATIVE_NTT_CUSTOM_ORDER */
+  /* Nothing to do */
+  (void)a;
 #endif /* !MLK_USE_NATIVE_NTT_CUSTOM_ORDER */
+}
 
 /* Reference: `gen_matrix()` in the reference implementation @[REF].
  *            - We use a special subroutine to generate 4 polynomials
@@ -269,10 +290,7 @@ void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
    * The public matrix is generated in NTT domain. If the native backend
    * uses a custom order in NTT domain, permute A accordingly.
    */
-  for (i = 0; i < MLKEM_K * MLKEM_K; i++)
-  {
-    mlk_poly_permute_bitrev_to_custom(a[i].coeffs);
-  }
+  mlk_polymat_permute_bitrev_to_custom(a);
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
@@ -524,4 +542,4 @@ void mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
 #undef mlk_pack_ciphertext
 #undef mlk_unpack_ciphertext
 #undef mlk_matvec_mul
-#undef mlk_poly_permute_bitrev_to_custom
+#undef mlk_polymat_permute_bitrev_to_custom

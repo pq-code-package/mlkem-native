@@ -3,12 +3,12 @@
 // SPDX-License-Identifier: MIT-0
 
 #include <stdint.h>
-#include "params.h"
+#include "poly_k.h"
 
-void mlk_poly_permute_bitrev_to_custom(int16_t data[MLKEM_N]);
+void mlk_polymat_permute_bitrev_to_custom(mlk_polymat a);
 
 void harness(void)
 {
-  int16_t *data;
-  mlk_poly_permute_bitrev_to_custom(data);
+  mlk_poly *a;
+  mlk_polymat_permute_bitrev_to_custom(a);
 }
