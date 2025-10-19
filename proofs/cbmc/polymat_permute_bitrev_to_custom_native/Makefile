@@ -4,22 +4,23 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = poly_permute_bitrev_to_custom_harness
+HARNESS_FILE = polymat_permute_bitrev_to_custom_native_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = mlk_poly_permute_bitrev_to_custom
+PROOF_UID = mlk_polymat_permute_bitrev_to_custom_native
 
-DEFINES +=
+DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_ARITH_BACKEND_FILE="\"dummy_backend.h\""
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
+UNWINDSET +=  mlk_polymat_permute_bitrev_to_custom.0:16
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_poly_permute_bitrev_to_custom
-USE_FUNCTION_CONTRACTS=
+CHECK_FUNCTION_CONTRACTS=mlk_polymat_permute_bitrev_to_custom
+USE_FUNCTION_CONTRACTS= mlk_poly_permute_bitrev_to_custom
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -35,10 +36,10 @@ CBMCFLAGS=--smt2
 #
 # For functions that use large and multi-dimensional arrays, this yields
 # a substantial improvement in proof performance.
-CBMCFLAGS += --no-array-field-sensitivity
-CBMCFLAGS += --slice-formula
+# CBMCFLAGS += --no-array-field-sensitivity
+# CBMCFLAGS += --slice-formula
 
-FUNCTION_NAME = mlk_poly_permute_bitrev_to_custom
+FUNCTION_NAME = mlk_polymat_permute_bitrev_to_custom_native
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
@@ -47,7 +48,7 @@ FUNCTION_NAME = mlk_poly_permute_bitrev_to_custom
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 8
+CBMC_OBJECT_BITS = 10
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

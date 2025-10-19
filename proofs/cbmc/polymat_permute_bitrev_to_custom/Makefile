@@ -4,23 +4,22 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = gen_matrix_native_harness
+HARNESS_FILE = polymat_permute_bitrev_to_custom_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = gen_matrix_native
+PROOF_UID = mlk_polymat_permute_bitrev_to_custom
 
-DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_ARITH_BACKEND_FILE="\"dummy_backend.h\""
+DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET += mlk_gen_matrix.0:4 mlk_gen_matrix.1:4 mlk_gen_matrix.2:4 mlk_gen_matrix.3:16
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_gen_matrix
-USE_FUNCTION_CONTRACTS=mlk_poly_rej_uniform mlk_poly_rej_uniform_x4 mlk_poly_permute_bitrev_to_custom
+CHECK_FUNCTION_CONTRACTS=mlk_polymat_permute_bitrev_to_custom
+USE_FUNCTION_CONTRACTS=
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -28,7 +27,18 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = mlk_gen_matrix_native
+# For this proof we tell CBMC to
+#  - not decompose arrays into their individual cells
+#  - to slice constraints that are not in the cone of influence of the proof obligations
+# These options simplify them modelling of arrays and produce much more compact
+# SMT files, leaving all array-type reasoning to the SMT solver.
+#
+# For functions that use large and multi-dimensional arrays, this yields
+# a substantial improvement in proof performance.
+CBMCFLAGS += --no-array-field-sensitivity
+CBMCFLAGS += --slice-formula
+
+FUNCTION_NAME = mlk_polymat_permute_bitrev_to_custom
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
@@ -37,7 +47,7 @@ FUNCTION_NAME = mlk_gen_matrix_native
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 10
+CBMC_OBJECT_BITS = 8
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

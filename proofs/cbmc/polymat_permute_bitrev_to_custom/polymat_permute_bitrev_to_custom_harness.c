@@ -3,12 +3,12 @@
 // SPDX-License-Identifier: MIT-0
 
 #include <stdint.h>
-#include "indcpa.h"
+#include "poly_k.h"
+
+void mlk_polymat_permute_bitrev_to_custom(mlk_polymat a);
 
 void harness(void)
 {
   mlk_poly *a;
-  uint8_t *seed;
-  int transposed;
-  mlk_gen_matrix(a, seed, transposed);
+  mlk_polymat_permute_bitrev_to_custom(a);
 }
