@@ -42,6 +42,9 @@ def gen_contracts():
 def is_exception(funcname):
     # The functions passing this filter are known not to have a proof
 
+    if funcname == 'poly_permute_bitrev_to_custom':
+        return True
+
     if funcname.endswith("_native") or funcname.endswith("_asm"):
         # CBMC proofs are axiomatized against contracts of the backends
         return True

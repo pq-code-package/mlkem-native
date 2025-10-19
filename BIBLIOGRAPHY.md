@@ -43,6 +43,7 @@ source code and documentation.
   - [test/custom_stdlib_config.h](test/custom_stdlib_config.h)
   - [test/custom_zeroize_config.h](test/custom_zeroize_config.h)
   - [test/no_asm_config.h](test/no_asm_config.h)
+  - [test/serial_fips202_config.h](test/serial_fips202_config.h)
 
 ### `FIPS202`
 

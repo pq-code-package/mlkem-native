@@ -1,7 +1,3 @@
-/*
- * Copyright (c) The mlkem-native project authors
- * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
- */
 
 /* References
  * ==========
@@ -10,6 +6,11 @@
  *   Implementation Guidance for FIPS 140-3 and the Cryptographic Module
  *   Validation Program National Institute of Standards and Technology
  *   https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
+ */
+
+/*
+ * Copyright (c) The mlkem-native project authors
+ * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
 #ifndef MLK_CONFIG_H
@@ -114,22 +115,6 @@
  *
  *****************************************************************************/
 /* #define MLK_CONFIG_MULTILEVEL_NO_SHARED */
-
-/******************************************************************************
- * Name:        MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
- *
- * Description: This is only relevant for single compilation unit (SCU)
- *              builds of mlkem-native. In this case, it determines whether
- *              directives defined in parameter-set-independent headers should
- *              be #undef'ined or not at the of the SCU file. This is needed
- *              in multilevel builds.
- *
- *              See examples/multilevel_build_native for an example.
- *
- *              This can also be set using CFLAGS.
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_USE_NATIVE_BACKEND_ARITH
@@ -457,7 +442,7 @@
  * Description: If this option is set, mlkem-native will be built without the
  *              randomized API functions (crypto_kem_keypair and
  *              crypto_kem_enc).
- *.             This allows users to build mlkem-native without providing a
+ *              This allows users to build mlkem-native without providing a
  *              randombytes() implementation if they only need the
  *              deterministic API
  *              (crypto_kem_keypair_derand, crypto_kem_enc_derand,
@@ -467,7 +452,7 @@
  *              as the current PCT implementation requires crypto_kem_enc().
  *
  *****************************************************************************/
-#define MLK_CONFIG_NO_RANDOMIZED_API
+/* #define MLK_CONFIG_NO_RANDOMIZED_API */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_KEYGEN_PCT
@@ -526,7 +511,7 @@
  *              implementations. Only enable this when you have to.
  *
  *****************************************************************************/
-/* #define MLK_CONFIG_SERIAL_FIPS202_ONLY */
+#define MLK_CONFIG_SERIAL_FIPS202_ONLY
 
 /*************************  Config internals  ********************************/
 
