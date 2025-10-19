@@ -203,12 +203,6 @@ void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
                     int transposed)
 {
   unsigned i, j;
-  /*
-   * We generate four separate seed arrays rather than a single one to work
-   * around limitations in CBMC function contracts dealing with disjoint slices
-   * of the same parent object.
-   */
-
   MLK_ALIGN uint8_t seed_ext[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)];
 
   for (j = 0; j < 4; j++)
