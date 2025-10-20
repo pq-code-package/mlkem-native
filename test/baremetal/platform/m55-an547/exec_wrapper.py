@@ -34,7 +34,7 @@ with tempfile.NamedTemporaryFile(mode="wb", delete=False, suffix=".bin") as fd:
     fd.write(binargs)
 
 try:
-    qemu_cmd = f"qemu-system-arm -M mps3-an547 -nographic -semihosting -kernel {binpath} -device loader,file={args_file},addr=0x{cmdline_offset:x}".split()
+    qemu_cmd = f"qemu-system-arm -M mps3-an547 -monitor none -nographic -semihosting -kernel {binpath} -device loader,file={args_file},addr=0x{cmdline_offset:x}".split()
     result = subprocess.run(qemu_cmd, encoding="utf-8", capture_output=True)
 finally:
     os.unlink(args_file)
