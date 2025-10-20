@@ -15,7 +15,9 @@
 #include "../common.h"
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
+#include "../debug.h"
 #include "../verify.h"
+
 #include "fips202.h"
 #include "fips202x4.h"
 #include "keccakf1600.h"
@@ -131,6 +133,11 @@ void mlk_shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
                                   uint8_t *out3, size_t nblocks,
                                   mlk_shake128x4ctx *state)
 {
+  mlk_assert_alignment(out0, nblocks * SHAKE128_RATE, 8);
+  mlk_assert_alignment(out1, nblocks * SHAKE128_RATE, 8);
+  mlk_assert_alignment(out2, nblocks * SHAKE128_RATE, 8);
+  mlk_assert_alignment(out3, nblocks * SHAKE128_RATE, 8);
+
   mlk_keccak_squeezeblocks_x4(out0, out1, out2, out3, nblocks, state->ctx,
                               SHAKE128_RATE);
 }
@@ -168,10 +175,15 @@ void mlk_shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
 {
   mlk_shake256x4_ctx statex;
   size_t nblocks = outlen / SHAKE256_RATE;
-  uint8_t tmp0[SHAKE256_RATE];
-  uint8_t tmp1[SHAKE256_RATE];
-  uint8_t tmp2[SHAKE256_RATE];
-  uint8_t tmp3[SHAKE256_RATE];
+  uint8_t MLK_ALIGN tmp0[SHAKE256_RATE];
+  uint8_t MLK_ALIGN tmp1[SHAKE256_RATE];
+  uint8_t MLK_ALIGN tmp2[SHAKE256_RATE];
+  uint8_t MLK_ALIGN tmp3[SHAKE256_RATE];
+
+  mlk_assert_alignment(out0, outlen, 8);
+  mlk_assert_alignment(out1, outlen, 8);
+  mlk_assert_alignment(out2, outlen, 8);
+  mlk_assert_alignment(out3, outlen, 8);
 
   mlk_shake256x4_absorb_once(&statex, in0, in1, in2, in3, inlen);
   mlk_shake256x4_squeezeblocks(out0, out1, out2, out3, nblocks, &statex);

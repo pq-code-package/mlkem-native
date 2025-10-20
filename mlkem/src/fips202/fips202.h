@@ -62,6 +62,7 @@ __contract__(
  *              multiple times to keep squeezing, i.e., is incremental.
  *
  * Arguments:   - uint8_t *output:     pointer to output blocks
+ *                                     Can be assumed to be 8-byte aligned.
  *              - size_t nblocks:      number of blocks to be squeezed (written
  *                                     to output)
  *              - mlk_shake128ctx *state:  pointer to in/output Keccak state
@@ -71,6 +72,7 @@ void mlk_shake128_squeezeblocks(uint8_t *output, size_t nblocks,
 __contract__(
   requires(nblocks <= 8 /* somewhat arbitrary bound */)
   requires(memory_no_alias(state, sizeof(mlk_shake128ctx)))
+  /* We can't express alignment of output as a CBMC precondition. */
   requires(memory_no_alias(output, nblocks * SHAKE128_RATE))
   assigns(memory_slice(output, nblocks * SHAKE128_RATE), memory_slice(state, sizeof(mlk_shake128ctx)))
 );
@@ -90,7 +92,9 @@ void mlk_shake128_release(mlk_shake128ctx *state);
  * Description: SHAKE256 XOF with non-incremental API
  *
  * Arguments:   - uint8_t *output:      pointer to output
+ *                                      Can be assumed to be 8-byte aligned.
  *              - size_t outlen:        requested output length in bytes
+ *                                      Can be assumed to be 8-byte aligned.
  *              - const uint8_t *input: pointer to input
  *              - size_t inlen:         length of input in bytes
  **************************************************/
@@ -99,7 +103,12 @@ void mlk_shake256(uint8_t *output, size_t outlen, const uint8_t *input,
 __contract__(
   requires(inlen <= MLK_MAX_BUFFER_SIZE)
   requires(outlen <= MLK_MAX_BUFFER_SIZE)
+  /* The alignment constraint is not needed for the implementation, but
+   * serves as an additional precondition for users wishing to use an
+   * alternative FIPS202 implementation. */
+  requires(outlen % 8 == 0)
   requires(memory_no_alias(input, inlen))
+  /* We can't express alignment of output as a CBMC precondition. */
   requires(memory_no_alias(output, outlen))
   assigns(memory_slice(output, outlen))
 );
@@ -114,6 +123,7 @@ __contract__(
  * Description: SHA3-256 with non-incremental API
  *
  * Arguments:   - uint8_t *output:      pointer to output
+ *                                      Can be assumed to be 8-byte aligned.
  *              - const uint8_t *input: pointer to input
  *              - size_t inlen:         length of input in bytes
  **************************************************/
@@ -121,6 +131,7 @@ void mlk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
 __contract__(
   requires(inlen <= MLK_MAX_BUFFER_SIZE)
   requires(memory_no_alias(input, inlen))
+  /* We can't express alignment of output as a CBMC precondition. */
   requires(memory_no_alias(output, SHA3_256_HASHBYTES))
   assigns(memory_slice(output, SHA3_256_HASHBYTES))
 );
@@ -135,6 +146,7 @@ __contract__(
  * Description: SHA3-512 with non-incremental API
  *
  * Arguments:   - uint8_t *output:      pointer to output
+ *                                      Can be assumed to be 8-byte aligned.
  *              - const uint8_t *input: pointer to input
  *              - size_t inlen:         length of input in bytes
  **************************************************/
@@ -142,6 +154,7 @@ void mlk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
 __contract__(
   requires(inlen <= MLK_MAX_BUFFER_SIZE)
   requires(memory_no_alias(input, inlen))
+  /* We can't express alignment of output and output as a CBMC precondition. */
   requires(memory_no_alias(output, SHA3_512_HASHBYTES))
   assigns(memory_slice(output, SHA3_512_HASHBYTES))
 );

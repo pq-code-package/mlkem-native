@@ -45,6 +45,31 @@ void mlk_debug_check_bounds(const char *file, int line, const int16_t *ptr,
                             unsigned len, int lower_bound_exclusive,
                             int upper_bound_exclusive);
 
+/*************************************************
+ * Name:        mlk_debug_check_alignment
+ *
+ * Description: Check whether a pointer has the specified alignment.
+ *
+ *              Prints an error message to stderr and calls
+ *              exit(1) if not.
+ *
+ * Arguments:   - file: filename
+ *              - line: line number
+ *              - ptr: pointer to be checked for alignment
+ *              - alignment: alignment to check for (e.g. 8, 16)
+ **************************************************/
+#define mlk_debug_check_alignment MLK_NAMESPACE(mlkem_debug_check_alignment)
+void mlk_debug_check_alignment(const char *file, int line, const void *ptr,
+                               size_t ptr_len, unsigned alignment);
+
+
+/* Check that pointer and length is aligned to given alignment. */
+#define mlk_assert_alignment(ptr, len, alignment)                             \
+  do                                                                          \
+  {                                                                           \
+    mlk_debug_check_alignment(__FILE__, __LINE__, (ptr), (len), (alignment)); \
+  } while (0)
+
 /* Check assertion, calling exit() upon failure
  *
  * val: Value that's asserted to be non-zero
@@ -79,6 +104,11 @@ void mlk_debug_check_bounds(const char *file, int line, const int16_t *ptr,
 #elif defined(CBMC)
 #include "cbmc.h"
 
+/* CBMC's memory model does not support talking about pointer alignment,
+ * so we only check the alignment of the buffer length. */
+#define mlk_assert_alignment(ptr, len, alignment) \
+  mlk_assert((len) % (alignment) == 0)
+
 #define mlk_assert(val) cassert(val)
 
 #define mlk_assert_bound(ptr, len, value_lb, value_ub) \
@@ -100,6 +130,11 @@ void mlk_debug_check_bounds(const char *file, int line, const int16_t *ptr,
                                  (value_abs_bd))))
 
 #else /* !MLKEM_DEBUG && CBMC */
+
+#define mlk_assert_alignment(ptr, len, alignment) \
+  do                                              \
+  {                                               \
+  } while (0)
 
 #define mlk_assert(val) \
   do                    \

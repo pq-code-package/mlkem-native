@@ -16,6 +16,28 @@
 
 #define MLK_DEBUG_ERROR_HEADER "[ERROR:%s:%04d] "
 
+void mlk_debug_check_alignment(const char *file, int line, const void *ptr,
+                               size_t ptr_len, unsigned alignment)
+{
+  uintptr_t ptr_uint = (uintptr_t)ptr;
+  if (ptr_uint % alignment != 0)
+  {
+    fprintf(stderr,
+            MLK_DEBUG_ERROR_HEADER
+            "Alignment assertion failed for address %p)\n",
+            file, line, ptr);
+    exit(1);
+  }
+
+  if (ptr_len % alignment != 0)
+  {
+    fprintf(stderr,
+            MLK_DEBUG_ERROR_HEADER
+            "Alignment assertion failed for length %u)\n",
+            file, line, (unsigned)ptr_len);
+    exit(1);
+  }
+}
 void mlk_debug_check_assert(const char *file, int line, const int val)
 {
   if (val == 0)
