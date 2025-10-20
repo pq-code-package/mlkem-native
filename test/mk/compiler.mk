@@ -33,6 +33,8 @@ else ifneq ($(findstring riscv32, $(CROSS_PREFIX)),)
 ARCH := riscv32
 else ifneq ($(findstring powerpc64le, $(CROSS_PREFIX)),)
 ARCH := powerpc64le
+else ifneq ($(findstring arm-none-eabi, $(CROSS_PREFIX)),)
+ARCH := $(ARM_NONE_ARCH)
 endif
 endif # CROSS_PREFIX
 

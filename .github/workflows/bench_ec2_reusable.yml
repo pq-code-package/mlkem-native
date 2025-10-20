@@ -28,6 +28,10 @@ on:
         type: string
         description: Custom ARCH flags for compilation
         default: -mcpu=neoverse-n1 -march=armv8.2-a
+      ldflags:
+        type: string
+        description: Custom LDFLAGS for linking
+        default: ""
       opt:
         type: string
         description: Runs with optimized code if enabled (opt, no_opt, all)
@@ -131,6 +135,7 @@ jobs:
           name: ${{ inputs.name }}
           cflags: ${{ inputs.cflags }}
           archflags: ${{ inputs.archflags }}
+          ldflags: ${{ inputs.ldflags }}
           opt: true
           perf: ${{ inputs.perf }}
           store_results: ${{ inputs.store_results }}
@@ -143,6 +148,7 @@ jobs:
           name: ${{ inputs.name }} (no-opt)
           cflags: ${{ inputs.cflags }}
           archflags: ${{ inputs.archflags }}
+          ldflags: ${{ inputs.ldflags }}
           opt: false
           perf: ${{ inputs.perf }}
           store_results: ${{ inputs.store_results }}
@@ -175,6 +181,7 @@ jobs:
           name: ${{ inputs.name }} (${{ inputs.compiler }})
           cflags: ${{ inputs.cflags }}
           archflags: ${{ inputs.archflags }}
+          ldflags: ${{ inputs.ldflags }}
           opt: true
           perf: ${{ inputs.perf }}
           store_results: ${{ inputs.store_results }}
@@ -190,6 +197,7 @@ jobs:
           name: ${{ inputs.name }} (${{ inputs.compiler }}) (no-opt)
           cflags: ${{ inputs.cflags }}
           archflags: ${{ inputs.archflags }}
+          ldflags: ${{ inputs.ldflags }}
           opt: false
           perf: ${{ inputs.perf }}
           store_results: ${{ inputs.store_results }}

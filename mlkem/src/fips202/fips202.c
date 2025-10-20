@@ -67,8 +67,8 @@ __contract__(
 {
   /* Initialize state */
   size_t i;
-  for (i = 0; i < 25; ++i)
-  __loop__(invariant(i <= 25))
+  for (i = 0; i < MLK_KECCAK_LANES; ++i)
+  __loop__(invariant(i <= MLK_KECCAK_LANES))
   {
     s[i] = 0;
   }
@@ -223,7 +223,7 @@ void mlk_shake256(uint8_t *output, size_t outlen, const uint8_t *input,
 
 void mlk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
 {
-  uint64_t ctx[25];
+  uint64_t ctx[MLK_KECCAK_LANES];
   /* Absorb input */
   mlk_keccak_absorb_once(ctx, SHA3_256_RATE, input, inlen, 0x06);
   /* Squeeze output */
@@ -235,7 +235,7 @@ void mlk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
 
 void mlk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
 {
-  uint64_t ctx[25];
+  uint64_t ctx[MLK_KECCAK_LANES];
   /* Absorb input */
   mlk_keccak_absorb_once(ctx, SHA3_512_RATE, input, inlen, 0x06);
   /* Squeeze output */

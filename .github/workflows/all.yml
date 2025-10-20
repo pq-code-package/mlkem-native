@@ -93,3 +93,11 @@ jobs:
     needs: [ base, nix ]
     uses: ./.github/workflows/slothy.yml
     secrets: inherit
+  baremetal:
+    name: Baremetal
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/baremetal.yml
+    secrets: inherit

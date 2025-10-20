@@ -28,6 +28,7 @@ rec {
       riscv64-gcc = wrap-gcc pkgs.pkgsCross.riscv64;
       riscv32-gcc = wrap-gcc pkgs.pkgsCross.riscv32;
       ppc64le-gcc = wrap-gcc pkgs.pkgsCross.powernv;
+      arm-embedded-gcc = wrap-gcc pkgs.armToolchain;
       aarch64_be-gcc = (pkgs.callPackage ./aarch64_be-none-linux-gnu-gcc.nix { });
     in
     # NOTE:
@@ -100,6 +101,7 @@ rec {
   hol_light' = pkgs.callPackage ./hol_light { };
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
   slothy = pkgs.callPackage ./slothy { };
+  m55-an547 = pkgs.callPackage ./m55-an547-arm-none-eabi { };
 
   # Helper function to build individual cross toolchains
   _individual_toolchain = { name, cross_compilers }:

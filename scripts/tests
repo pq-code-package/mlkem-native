@@ -444,6 +444,9 @@ class Tests:
         cflags = self.args.cflags
         if cflags is None:
             cflags = ""
+        ldflags = self.args.ldflags
+        if ldflags is None:
+            ldflags = ""
 
         if test_type.is_example() and self.args.cross_prefix != "":
             cflags += " -static"
@@ -463,6 +466,8 @@ class Tests:
         env_update = {}
         if cflags != "":
             env_update["CFLAGS"] = cflags
+        if ldflags != "":
+            env_update["LDFLAGS"] = ldflags
         if self.args.cross_prefix != "":
             env_update["CROSS_PREFIX"] = self.args.cross_prefix
 
@@ -991,6 +996,9 @@ def cli():
     )
     common_parser.add_argument(
         "--cflags", help="Extra cflags to passed in (e.g. '-mcpu=cortex-a72')"
+    )
+    common_parser.add_argument(
+        "--ldflags", help="Extra ldflags to passed in (e.g. '-static')"
     )
     common_parser.add_argument(
         "-j",

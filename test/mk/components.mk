@@ -2,7 +2,10 @@
 
 FIPS202_SRCS = $(wildcard mlkem/src/fips202/*.c)
 ifeq ($(OPT),1)
-	FIPS202_SRCS += $(wildcard mlkem/src/fips202/native/aarch64/src/*.S) $(wildcard mlkem/src/fips202/native/aarch64/src/*.c) $(wildcard mlkem/src/fips202/native/x86_64/src/*.c)
+	FIPS202_SRCS += $(wildcard mlkem/src/fips202/native/aarch64/src/*.S) \
+		$(wildcard mlkem/src/fips202/native/aarch64/src/*.c) \
+		$(wildcard mlkem/src/fips202/native/x86_64/src/*.c) \
+		$(wildcard mlkem/src/fips202/native/armv8.1_m/src/*.[csS])
 endif
 
 SOURCES += $(wildcard mlkem/src/*.c)
@@ -99,6 +102,6 @@ $(foreach scheme,mlkem512 mlkem768 mlkem1024, \
 	$(eval $(call ADD_SOURCE_UNIT,$(scheme))) \
 )
 
-$(ALL_TESTS:%=$(MLKEM512_DIR)/bin/%512): $(call MAKE_OBJS, $(MLKEM512_DIR), $(wildcard test/notrandombytes/*.c))
-$(ALL_TESTS:%=$(MLKEM768_DIR)/bin/%768): $(call MAKE_OBJS, $(MLKEM768_DIR), $(wildcard test/notrandombytes/*.c))
-$(ALL_TESTS:%=$(MLKEM1024_DIR)/bin/%1024): $(call MAKE_OBJS, $(MLKEM1024_DIR), $(wildcard test/notrandombytes/*.c))
+$(ALL_TESTS:%=$(MLKEM512_DIR)/bin/%512): $(call MAKE_OBJS, $(MLKEM512_DIR), $(wildcard test/notrandombytes/*.c) $(EXTRA_SOURCES))
+$(ALL_TESTS:%=$(MLKEM768_DIR)/bin/%768): $(call MAKE_OBJS, $(MLKEM768_DIR), $(wildcard test/notrandombytes/*.c) $(EXTRA_SOURCES))
+$(ALL_TESTS:%=$(MLKEM1024_DIR)/bin/%1024): $(call MAKE_OBJS, $(MLKEM1024_DIR), $(wildcard test/notrandombytes/*.c) $(EXTRA_SOURCES))
