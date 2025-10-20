@@ -198,6 +198,7 @@ class TEST_TYPES(Enum):
     BENCH_COMPONENTS = 4
     ACVP = 5
     BRING_YOUR_OWN_FIPS202 = 6
+    BRING_YOUR_OWN_FIPS202_STATIC = 19
     CUSTOM_BACKEND = 7
     BASIC = 8
     MONOLITHIC_BUILD = 9
@@ -221,6 +222,7 @@ class TEST_TYPES(Enum):
     def examples():
         return [
             TEST_TYPES.BRING_YOUR_OWN_FIPS202,
+            TEST_TYPES.BRING_YOUR_OWN_FIPS202_STATIC,
             TEST_TYPES.CUSTOM_BACKEND,
             TEST_TYPES.BASIC,
             TEST_TYPES.MONOLITHIC_BUILD,
@@ -259,6 +261,8 @@ class TEST_TYPES(Enum):
             return "Stack Usage Test"
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
             return "Example (Bring-Your-Own-FIPS202)"
+        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202_STATIC:
+            return "Example (Bring-Your-Own-FIPS202, static)"
         if self == TEST_TYPES.CUSTOM_BACKEND:
             return "Example (Custom Backend)"
         if self == TEST_TYPES.BASIC:
@@ -285,6 +289,8 @@ class TEST_TYPES(Enum):
     def make_dir(self):
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
             return "examples/bring_your_own_fips202"
+        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202_STATIC:
+            return "examples/bring_your_own_fips202_static"
         if self == TEST_TYPES.CUSTOM_BACKEND:
             return "examples/custom_backend"
         if self == TEST_TYPES.BASIC:
@@ -319,6 +325,8 @@ class TEST_TYPES(Enum):
         if self == TEST_TYPES.STACK:
             return "stack"
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
+            return ""
+        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202_STATIC:
             return ""
         if self == TEST_TYPES.CUSTOM_BACKEND:
             return ""
@@ -1117,6 +1125,7 @@ def cli():
         help="Exclude specific examples from running (can be used multiple times)",
         choices=[
             "bring_your_own_fips202",
+            "bring_your_own_fips202_static",
             "custom_backend",
             "basic",
             "basic_deterministic",
@@ -1166,6 +1175,7 @@ def cli():
         help="Explicitly list the examples to run; can be called multiple times",
         choices=[
             "bring_your_own_fips202",
+            "bring_your_own_fips202_static",
             "custom_backend",
             "basic",
             "basic_deterministic",
