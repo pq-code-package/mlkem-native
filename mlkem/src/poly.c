@@ -173,11 +173,12 @@ __contract__(
 {
   mlk_assert_abs_bound(&c, 1, MLKEM_Q);
 
-  /* Add Q if c is negative, but in constant time. */
-  /* Note that c + MLKEM_Q does not overflow int16_t. */
+  /* Add MLKEM_Q if c is negative, but in constant time.
+   *
+   * Note that c + MLKEM_Q does not overflow in int16_t,
+   * so the cast to uint16_t is safe. */
   c = mlk_ct_sel_int16((int16_t)(c + MLKEM_Q), c, mlk_ct_cmask_neg_i16(c));
 
-  /* and therefore cast to uint16_t is safe. */
   mlk_assert_bound(&c, 1, 0, MLKEM_Q);
   return c;
 }
