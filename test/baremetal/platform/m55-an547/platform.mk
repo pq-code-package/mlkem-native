@@ -59,4 +59,7 @@ LDFLAGS += \
 
 # Extra sources to be included in test binaries
 EXTRA_SOURCES = $(wildcard $(M55_AN547_PATH)/*.c)
+# The CMSIS files fail compilation if conversion warnings are enabled
+EXTRA_SOURCES_CFLAGS = -Wno-conversion -Wno-sign-conversion
+
 EXEC_WRAPPER := $(realpath $(PLATFORM_PATH)/exec_wrapper.py)
