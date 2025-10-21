@@ -1,0 +1,85 @@
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: Setup OpenTitan
+description: Setup OpenTitan for testing
+
+inputs:
+  expo-repository:
+    description: 'Expo repository to clone'
+    required: false
+    default: 'https://github.com/zerorisc/expo'
+  expo-commit:
+    description: 'Expo commit to checkout'
+    required: false
+    default: 'master'
+
+runs:
+  using: composite
+  steps:
+    - name: Fetch expo repository
+      shell: bash
+      run: |
+        # Ensure HOME is set for self-hosted runners
+        echo "HOME=${HOME:-/home/runner}" >> $GITHUB_ENV
+
+        git clone ${{ inputs.expo-repository }}
+        cd expo
+        git checkout ${{ inputs.expo-commit }}
+
+        # Remember expo directory
+        echo EXPO_DIR="$GITHUB_WORKSPACE/expo" >> $GITHUB_ENV
+
+    - name: Install OpenTitan dependencies
+      shell: bash
+      run: |
+        sudo apt update
+        cd expo
+        sed -e '/^#/d' -e '/libncursesw5/d' ./apt-requirements.txt | xargs sudo apt install -y
+        # Install runtime dependencies needed by tools
+        sudo apt install -y gcc g++ libtinfo5 srecord pkg-config libudev-dev libssl-dev \
+          libftdi1-dev libelf-dev zlib1g-dev
+        pip3 install --user -r python-requirements.txt --require-hashes
+
+    - name: Cache Verilator
+      id: cache-verilator
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      with:
+        path: /tools/verilator/4.210
+        key: verilator-4.210-ubuntu22-${{ runner.os }}
+
+    - name: Install Verilator
+      if: steps.cache-verilator.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        # Install build-time dependencies for Verilator
+        sudo apt install -y make autoconf bison flex libfl-dev gcc-11 g++-11
+
+        # Build and install Verilator
+        export VERILATOR_VERSION=4.210
+        git clone https://github.com/verilator/verilator.git
+        cd verilator
+        git checkout v$VERILATOR_VERSION
+        autoconf
+        CC=gcc-11 CXX=g++-11 ./configure --prefix=/tools/verilator/$VERILATOR_VERSION
+        CC=gcc-11 CXX=g++-11 make -j$(nproc)
+        sudo CC=gcc-11 CXX=g++-11 make install
+
+    - name: Add Verilator to PATH
+      shell: bash
+      run: |
+        echo "/tools/verilator/4.210/bin" >> $GITHUB_PATH
+
+    - name: Set Bazel cache directory
+      shell: bash
+      run: |
+        echo "BAZEL_CACHE_DIR=/home/runner/bazel_cache" >> $GITHUB_ENV
+
+    - name: Test Verilator setup and build cache
+      shell: bash
+      run: |
+        cd $EXPO_DIR
+        # Run UART smoketest to verify setup
+        ./bazelisk.sh test \
+          --test_output=streamed \
+          --disk_cache=$BAZEL_CACHE_DIR \
+          //sw/device/tests:uart_smoketest_sim_verilator

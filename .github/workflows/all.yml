@@ -57,6 +57,14 @@ jobs:
     needs: [ base ]
     uses: ./.github/workflows/integration-liboqs.yml
     secrets: inherit
+  opentitan_integration:
+    name: OpenTitan
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/integration-opentitan.yml
+    secrets: inherit
   awslc_integration_fixed:
     name: AWS-LC (873ca6f2)
     permissions:
