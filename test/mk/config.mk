@@ -78,7 +78,6 @@ endif
 # Include retained variables #
 ##############################
 
-AUTO ?= 1
 CYCLES ?=
 OPT ?= 1
 RETAINED_VARS := CROSS_PREFIX CYCLES OPT AUTO

@@ -24,6 +24,7 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "-DMLK_CONFIG_KEYGEN_PCT -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true
         acvp: true
@@ -52,6 +53,7 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_zeroize_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true
         acvp: true
@@ -64,6 +66,7 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_native_capability_config_1.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true
         acvp: true
@@ -76,6 +79,7 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_native_capability_config_0.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true
         acvp: true
@@ -88,6 +92,7 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "-std=c11 -march=armv8.4-a+sha3 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_native_capability_config_ID_AA64PFR1_EL1.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true
         acvp: true
@@ -100,6 +105,7 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "-std=c11 -mavx2 -mbmi2 -mpopcnt -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_native_capability_config_CPUID_AVX2.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true
         acvp: true
@@ -112,6 +118,7 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/no_asm_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true
         acvp: true
@@ -124,6 +131,7 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/serial_fips202_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true
         acvp: true
@@ -136,6 +144,7 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_randombytes_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true
         acvp: true
@@ -148,6 +157,7 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_memcpy_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true
         acvp: true
@@ -160,6 +170,7 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_memset_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true
         acvp: true
@@ -172,6 +183,7 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "-std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../../test/custom_stdlib_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true
         acvp: true
@@ -184,6 +196,7 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=1"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true
         acvp: true
@@ -196,6 +209,7 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=2"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true
         acvp: true
@@ -208,6 +222,7 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLKEM_GEN_MATRIX_NBLOCKS=4"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true
         acvp: true

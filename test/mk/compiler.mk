@@ -13,14 +13,15 @@
 ifndef _COMPILER_MK
 _COMPILER_MK :=
 
-# Normalize architecture names
+
+# Override ARCH for cross-compilation based on CROSS_PREFIX
+ifeq ($(CROSS_PREFIX),)
 ARCH := $(shell uname -m)
+# Normalize architecture names
 ifeq ($(ARCH),arm64)
 ARCH := aarch64
 endif
-
-# Override ARCH for cross-compilation based on CROSS_PREFIX
-ifneq ($(CROSS_PREFIX),)
+else # CROSS_PREFIX
 ifneq ($(findstring x86_64, $(CROSS_PREFIX)),)
 ARCH := x86_64
 else ifneq ($(findstring aarch64_be, $(CROSS_PREFIX)),)
@@ -33,6 +34,13 @@ else ifneq ($(findstring riscv32, $(CROSS_PREFIX)),)
 ARCH := riscv32
 else ifneq ($(findstring powerpc64le, $(CROSS_PREFIX)),)
 ARCH := powerpc64le
+else ifneq ($(findstring arm-none-eabi-, $(CROSS_PREFIX)),)
+ARCH := arm
+else
+ifeq ($(AUTO),1)
+$(warning Unknown cross-compilation prefix $(CROSS_PREFIX), no automatic detection of CFLAGS.)
+ARCH := unknown
+endif
 endif
 endif # CROSS_PREFIX
 
