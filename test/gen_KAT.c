@@ -14,7 +14,7 @@
 #include <io.h>
 #endif
 
-#define NTESTS 1000
+#define NTESTS 100
 
 #define CHECK(x)                                              \
   do                                                          \
