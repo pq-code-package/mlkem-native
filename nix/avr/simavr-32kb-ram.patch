@@ -1,0 +1,15 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+--- a/simavr/cores/avr/iom128rfr2.h
++++ b/simavr/cores/avr/iom128rfr2.h
+@@ -6300,8 +6300,8 @@
+ 
+ #define SPM_PAGESIZE                    (256)
+ #define RAMSTART                        (0x200)
+-#define RAMSIZE                         (0x4000)
+-#define RAMEND                          (0x41FF)
++#define RAMSIZE                         (0x8000)
++#define RAMEND                          (0x81FF)
+ #define XRAMSTART                       (0x0000)
+ #define XRAMSIZE                        (0x0000)
+ #define XRAMEND                         RAMEND

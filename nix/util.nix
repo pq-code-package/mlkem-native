@@ -102,6 +102,7 @@ rec {
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
   slothy = pkgs.callPackage ./slothy { };
   m55-an547 = pkgs.callPackage ./m55-an547-arm-none-eabi { };
+  avr-toolchain = pkgs.callPackage ./avr { };
 
   # Helper function to build individual cross toolchains
   _individual_toolchain = { name, cross_compilers }:
