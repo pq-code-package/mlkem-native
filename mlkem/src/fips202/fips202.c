@@ -85,19 +85,21 @@ __contract__(
     m += r;
   }
 
+  /* At this point, mlen < r, so the truncations to unsigned are safe below. */
+
   if (mlen > 0)
   {
-    mlk_keccakf1600_xor_bytes(s, m, 0, mlen);
+    mlk_keccakf1600_xor_bytes(s, m, 0, (unsigned int)mlen);
   }
 
   if (mlen == r - 1)
   {
     p |= 128;
-    mlk_keccakf1600_xor_bytes(s, &p, mlen, 1);
+    mlk_keccakf1600_xor_bytes(s, &p, (unsigned int)mlen, 1);
   }
   else
   {
-    mlk_keccakf1600_xor_bytes(s, &p, mlen, 1);
+    mlk_keccakf1600_xor_bytes(s, &p, (unsigned int)mlen, 1);
     p = 128;
     mlk_keccakf1600_xor_bytes(s, &p, r - 1, 1);
   }
@@ -179,7 +181,7 @@ __contract__(
     {
       len = r;
     }
-    mlk_keccakf1600_extract_bytes(s, h, 0, len);
+    mlk_keccakf1600_extract_bytes(s, h, 0, (unsigned int)len);
     h += len;
     outlen -= len;
   }

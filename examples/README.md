@@ -26,6 +26,12 @@ security level, in such a way that level-independent code is shared, and leverag
 See [bring_your_own_fips202](bring_your_own_fips202) for an example of how to use mlkem-native with your own FIPS-202
 implementation.
 
+## Custom FIPS202 implementation (static state variant)
+
+See [bring_your_own_fips202_static](bring_your_own_fips202_static) for an example of how to use mlkem-native with a
+custom FIPS-202 implementation using a static state. This variant demonstrates the serial-only FIPS-202 configuration
+(`MLK_CONFIG_SERIAL_FIPS202_ONLY`).
+
 ## Custom config + custom FIPS-202 backend
 
 See [custom_backend](custom_backend) for an example of how to use mlkem-native with a custom configuration file and a

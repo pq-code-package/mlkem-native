@@ -7,12 +7,11 @@
 
 
 void mlk_ntt_butterfly_block(int16_t *r, int16_t root, unsigned start,
-                             unsigned len, int bound);
+                             unsigned len, unsigned bound);
 
 void harness(void)
 {
   int16_t *r, root;
-  unsigned start, stride;
-  int bound;
+  unsigned start, stride, bound;
   mlk_ntt_butterfly_block(r, root, start, stride, bound);
 }

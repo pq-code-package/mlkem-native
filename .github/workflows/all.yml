@@ -19,6 +19,12 @@ jobs:
       id-token: 'write'
     uses: ./.github/workflows/base.yml
     secrets: inherit
+  lint-markdown:
+    name: Lint Markdown
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    uses: ./.github/workflows/lint_markdown.yml
   nix:
     name: Nix
     permissions:
@@ -50,6 +56,14 @@ jobs:
       id-token: 'write'
     needs: [ base ]
     uses: ./.github/workflows/integration-liboqs.yml
+    secrets: inherit
+  opentitan_integration:
+    name: OpenTitan
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/integration-opentitan.yml
     secrets: inherit
   awslc_integration_fixed:
     name: AWS-LC (873ca6f2)
@@ -86,4 +100,12 @@ jobs:
       id-token: 'write'
     needs: [ base, nix ]
     uses: ./.github/workflows/slothy.yml
+    secrets: inherit
+  baremetal:
+    name: Baremetal
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/baremetal.yml
     secrets: inherit

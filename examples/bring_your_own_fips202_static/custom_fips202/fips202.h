@@ -1,0 +1,170 @@
+/*
+ * Copyright (c) The mlkem-native project authors
+ * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+ */
+
+/*
+ * This is a shim establishing the FIPS-202 API required by mlkem-native
+ * from the API exposed by tiny_sha3, using a static state.
+ */
+
+#ifndef FIPS202_H
+#define FIPS202_H
+
+#include <assert.h>
+
+#include "common.h"
+#include "tiny_sha3/sha3.h"
+typedef enum
+{
+  FIPS202_STATE_ABSORBING = 1,
+  FIPS202_STATE_SQUEEZING = 2,
+  FIPS202_STATE_RESET = 3
+} fips202_state_t;
+
+#define SHAKE128_RATE 168
+#define SHAKE256_RATE 136
+#define SHA3_256_RATE 136
+#define SHA3_384_RATE 104
+#define SHA3_512_RATE 72
+
+/* Static state for serial FIPS202 */
+static struct
+{
+  fips202_state_t state;
+  sha3_ctx_t ctx;
+} static_shake128_state = {FIPS202_STATE_RESET, {{{0}}, 0, 0, 0}};
+
+/* Dummy context type - the actual state is static */
+typedef struct
+{
+  int dummy;
+} mlk_shake128ctx;
+
+static MLK_INLINE void mlk_shake128_init(mlk_shake128ctx *state)
+{
+  (void)state;
+  assert(static_shake128_state.state == FIPS202_STATE_RESET);
+  shake128_init(&static_shake128_state.ctx);
+  static_shake128_state.state = FIPS202_STATE_ABSORBING;
+}
+
+#define mlk_shake128_absorb_once MLK_NAMESPACE(shake128_absorb_once)
+/*************************************************
+ * Name:        mlk_shake128_absorb_once
+ *
+ * Description: Absorb step of the SHAKE128 XOF.
+ *
+ * Arguments:   - mlk_shake128ctx *state:   pointer to zeroized output Keccak
+ *                                      state
+ *              - const uint8_t *input: pointer to input to be absorbed into
+ *                                      state
+ *              - size_t inlen:         length of input in bytes
+ **************************************************/
+static MLK_INLINE void mlk_shake128_absorb_once(mlk_shake128ctx *state,
+                                                const uint8_t *input,
+                                                size_t inlen)
+{
+  (void)state;
+  assert(static_shake128_state.state == FIPS202_STATE_ABSORBING);
+  shake_update(&static_shake128_state.ctx, input, inlen);
+  shake_xof(&static_shake128_state.ctx);
+  static_shake128_state.state = FIPS202_STATE_SQUEEZING;
+}
+
+/* Squeeze output out of the sponge.
+ *
+ * Supports being called multiple times
+ */
+#define mlk_shake128_squeezeblocks MLK_NAMESPACE(shake128_squeezeblocks)
+/*************************************************
+ * Name:        mlk_shake128_squeezeblocks
+ *
+ * Description: Squeeze step of SHAKE128 XOF. Squeezes full blocks of
+ *              SHAKE128_RATE bytes each. Modifies the state. Can be called
+ *              multiple times to keep squeezing, i.e., is incremental.
+ *
+ * Arguments:   - uint8_t *output:     pointer to output blocks
+ *              - size_t nblocks:      number of blocks to be squeezed (written
+ *                                     to output)
+ *              - mlk_shake128ctx *state:  pointer to in/output Keccak state
+ **************************************************/
+static MLK_INLINE void mlk_shake128_squeezeblocks(uint8_t *output,
+                                                  size_t nblocks,
+                                                  mlk_shake128ctx *state)
+{
+  (void)state;
+  assert(static_shake128_state.state == FIPS202_STATE_SQUEEZING);
+  shake_out(&static_shake128_state.ctx, output, nblocks * SHAKE128_RATE);
+}
+
+/* Free the state */
+#define mlk_shake128_release MLK_NAMESPACE(shake128_release)
+static MLK_INLINE void mlk_shake128_release(mlk_shake128ctx *state)
+{
+  (void)state;
+  static_shake128_state.state = FIPS202_STATE_RESET;
+}
+
+/* One-stop SHAKE256 call. Aliasing between input and
+ * output is not permitted */
+#define mlk_shake256 MLK_NAMESPACE(shake256)
+/*************************************************
+ * Name:        mlk_shake256
+ *
+ * Description: SHAKE256 XOF with non-incremental API
+ *
+ * Arguments:   - uint8_t *output:      pointer to output
+ *              - size_t outlen:        requested output length in bytes
+ *              - const uint8_t *input: pointer to input
+ *              - size_t inlen:         length of input in bytes
+ **************************************************/
+static MLK_INLINE void mlk_shake256(uint8_t *output, size_t outlen,
+                                    const uint8_t *input, size_t inlen)
+{
+  sha3_ctx_t c;
+  shake256_init(&c);
+  shake_update(&c, input, inlen);
+  shake_xof(&c);
+  shake_out(&c, output, outlen);
+}
+
+/* One-stop SHA3_256 call. Aliasing between input and
+ * output is not permitted */
+#define SHA3_256_HASHBYTES 32
+#define mlk_sha3_256 MLK_NAMESPACE(sha3_256)
+/*************************************************
+ * Name:        mlk_sha3_256
+ *
+ * Description: SHA3-256 with non-incremental API
+ *
+ * Arguments:   - uint8_t *output:      pointer to output
+ *              - const uint8_t *input: pointer to input
+ *              - size_t inlen:         length of input in bytes
+ **************************************************/
+static MLK_INLINE void mlk_sha3_256(uint8_t *output, const uint8_t *input,
+                                    size_t inlen)
+{
+  (void)sha3(input, inlen, output, SHA3_256_HASHBYTES);
+}
+
+/* One-stop SHA3_512 call. Aliasing between input and
+ * output is not permitted */
+#define SHA3_512_HASHBYTES 64
+#define mlk_sha3_512 MLK_NAMESPACE(sha3_512)
+/*************************************************
+ * Name:        mlk_sha3_512
+ *
+ * Description: SHA3-512 with non-incremental API
+ *
+ * Arguments:   - uint8_t *output:      pointer to output
+ *              - const uint8_t *input: pointer to input
+ *              - size_t inlen:         length of input in bytes
+ **************************************************/
+static MLK_INLINE void mlk_sha3_512(uint8_t *output, const uint8_t *input,
+                                    size_t inlen)
+{
+  (void)sha3(input, inlen, output, SHA3_512_HASHBYTES);
+}
+
+#endif /* !FIPS202_H */

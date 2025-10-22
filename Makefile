@@ -24,6 +24,11 @@ SHELL := /bin/bash
 
 all: build
 
+# Extra Makefile to include, e.g., for baremetal targets
+ifneq ($(EXTRA_MAKEFILE),)
+include $(EXTRA_MAKEFILE)
+endif
+
 W := $(EXEC_WRAPPER)
 
 include test/mk/config.mk
@@ -71,7 +76,7 @@ run_unit_1024: unit_1024
 run_unit: run_unit_512 run_unit_768 run_unit_1024
 
 run_acvp: acvp
-	python3 ./test/acvp_client.py $(if $(ACVP_VERSION),--version $(ACVP_VERSION))
+	EXEC_WRAPPER="$(EXEC_WRAPPER)" python3 ./test/acvp_client.py $(if $(ACVP_VERSION),--version $(ACVP_VERSION))
 
 func_512:  $(MLKEM512_DIR)/bin/test_mlkem512
 	$(Q)echo "  FUNC       ML-KEM-512:   $^"
@@ -227,6 +232,7 @@ clean:
 	-$(RM) -rf *.gcno *.gcda *.lcov *.o *.so
 	-$(RM) -rf $(BUILD_DIR)
 	-make clean -C examples/bring_your_own_fips202 >/dev/null
+	-make clean -C examples/bring_your_own_fips202_static >/dev/null
 	-make clean -C examples/custom_backend >/dev/null
 	-make clean -C examples/basic >/dev/null
 	-make clean -C examples/basic_deterministic >/dev/null

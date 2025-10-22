@@ -77,6 +77,7 @@ else ifneq ($(findstring aarch64_be, $(CROSS_PREFIX)),)
 else ifneq ($(findstring aarch64, $(CROSS_PREFIX)),)
 	CFLAGS += -DMLK_FORCE_AARCH64
 else ifneq ($(findstring riscv64, $(CROSS_PREFIX)),)
+	CFLAGS += -march=rv64gcv
 	CFLAGS += -DMLK_FORCE_RISCV64
 else ifneq ($(findstring riscv32, $(CROSS_PREFIX)),)
 	CFLAGS += -DMLK_FORCE_RISCV32
@@ -94,6 +95,8 @@ CFLAGS := \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
 	-Wredundant-decls \
+	-Wconversion \
+	-Wsign-conversion \
 	-Wno-unused-command-line-argument \
 	-fomit-frame-pointer \
 	-std=c99 \
@@ -135,7 +138,7 @@ build: $(BINARY_NAME_FULL)
 run: $(BINARY_NAME_FULL)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
 
-size: build 
+size: build
 	$(Q)echo "=== Size info for binaries $(BINARY_NAME_FULL)==="
 	$(Q)$(SIZE) $(BINARY_NAME_FULL)
 	$(Q)echo " "

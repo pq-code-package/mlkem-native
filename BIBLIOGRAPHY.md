@@ -44,6 +44,7 @@ source code and documentation.
   - [test/custom_stdlib_config.h](test/custom_stdlib_config.h)
   - [test/custom_zeroize_config.h](test/custom_zeroize_config.h)
   - [test/no_asm_config.h](test/no_asm_config.h)
+  - [test/serial_fips202_config.h](test/serial_fips202_config.h)
 
 ### `FIPS202`
 
@@ -337,6 +338,8 @@ source code and documentation.
   - [README.md](README.md)
   - [examples/bring_your_own_fips202/README.md](examples/bring_your_own_fips202/README.md)
   - [examples/bring_your_own_fips202/custom_fips202/README.md](examples/bring_your_own_fips202/custom_fips202/README.md)
+  - [examples/bring_your_own_fips202_static/README.md](examples/bring_your_own_fips202_static/README.md)
+  - [examples/bring_your_own_fips202_static/custom_fips202/README.md](examples/bring_your_own_fips202_static/custom_fips202/README.md)
   - [examples/custom_backend/README.md](examples/custom_backend/README.md)
 
 ### `tweetfips`

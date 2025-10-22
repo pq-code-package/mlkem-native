@@ -134,72 +134,63 @@ __contract__(ensures(return_value == b))
 
 #endif /* MLK_USE_ASM_VALUE_BARRIER */
 
-/*
- * The ct_cmask_nonzero_xxx functions below make deliberate use of unsigned
- * overflow, which is fully defined behaviour in C. It is thus safe to disable
- * this warning.
- */
-#ifdef CBMC
-#pragma CPROVER check push
-#pragma CPROVER check disable "unsigned-overflow"
-#endif
-
-/*************************************************
- * Name:        mlk_ct_cmask_nonzero_u16
- *
- * Description: Return 0 if input is zero, and -1 otherwise.
- *
- * Arguments:   uint16_t x: Value to be converted into a mask
- *
- **************************************************/
-
-/* Reference: Embedded in `cmov_int16()` in the reference implementation @[REF].
- *            - Use value barrier and shift instead of `b = -b` to
- *              convert condition into mask. */
-static MLK_INLINE uint16_t mlk_ct_cmask_nonzero_u16(uint16_t x)
-__contract__(ensures(return_value == ((x == 0) ? 0 : 0xFFFF)))
-{
-  uint32_t tmp = mlk_value_barrier_u32(-((uint32_t)x));
-  tmp >>= 16;
-  return tmp;
-}
-
-/*************************************************
- * Name:        mlk_ct_cmask_nonzero_u8
- *
- * Description: Return 0 if input is zero, and -1 otherwise.
- *
- * Arguments:   uint8_t x: Value to be converted into a mask
- *
- **************************************************/
-
-/* Reference: Embedded in `verify()` and `cmov()` in the
- *            reference implementation @[REF].
- *            - We include a value barrier not present in the
- *              reference implementation, to prevent the compiler
- *              from realizing that this function returns a mask. */
-static MLK_INLINE uint8_t mlk_ct_cmask_nonzero_u8(uint8_t x)
-__contract__(ensures(return_value == ((x == 0) ? 0 : 0xFF)))
-{
-  uint32_t tmp = mlk_value_barrier_u32(-((uint32_t)x));
-  tmp >>= 24;
-  return tmp;
-}
-
-/* Put unsigned overflow warnings in CBMC back into scope */
-#ifdef CBMC
-#pragma CPROVER check pop
-#endif
-
-/*
- * The mlk_ct_cmask_neg_i16 function below makes deliberate use of
- * signed to unsigned integer conversion, which is fully defined
- * behaviour in C. It is thus safe to disable this warning.
- */
 #ifdef CBMC
 #pragma CPROVER check push
 #pragma CPROVER check disable "conversion"
 #endif
+/*************************************************
+ * Name:        mlk_cast_uint16_to_int16
+ *
+ * Description: Cast uint16 value to int16
+ *
+ * Returns:     For uint16_t x, the unique y in int16_t
+ *              so that x == y mod 2^16.
+ *
+ *              Concretely:
+ *              - x <  32768: returns x
+ *              - x >= 32768: returns x - 65536
+ *
+ **************************************************/
+static MLK_ALWAYS_INLINE int16_t mlk_cast_uint16_to_int16(uint16_t x)
+{
+  /*
+   * PORTABILITY: This relies on uint16_t -> int16_t
+   * being implemented as the inverse of int16_t -> uint16_t,
+   * which is implementation-defined (C99 6.3.1.3 (3))
+   * CBMC (correctly) fails to prove this conversion is OK,
+   * so we have to suppress that check here
+   */
+  return (int16_t)x;
+}
+#ifdef CBMC
+#pragma CPROVER check pop
+#endif
+
+/*************************************************
+ * Name:        mlk_cast_int32_to_uint16
+ *
+ * Description: Cast int32 value to uint16 as per C standard.
+ *
+ * Returns:     For int32_t x, the unique y in uint16_t
+ *              so that x == y mod 2^16.
+ **************************************************/
+static MLK_ALWAYS_INLINE uint16_t mlk_cast_int32_to_uint16(int32_t x)
+{
+  return (uint16_t)(x & (int32_t)UINT16_MAX);
+}
+
+/*************************************************
+ * Name:        mlk_cast_int16_to_uint16
+ *
+ * Description: Cast int16 value to uint16 as per C standard.
+ *
+ * Returns:     For int16_t x, the unique y in uint16_t
+ *              so that x == y mod 2^16.
+ **************************************************/
+static MLK_ALWAYS_INLINE uint16_t mlk_cast_int16_to_uint16(int32_t x)
+{
+  return mlk_cast_int32_to_uint16((int32_t)x);
+}
 
 /*************************************************
  * Name:        mlk_ct_cmask_neg_i16
@@ -224,24 +215,49 @@ __contract__(ensures(return_value == ((x < 0) ? 0xFFFF : 0)))
 {
   int32_t tmp = mlk_value_barrier_i32((int32_t)x);
   tmp >>= 16;
-  return (int16_t)tmp;
+  return mlk_cast_int32_to_uint16(tmp);
 }
 
-/* Put unsigned-to-signed warnings in CBMC back into scope */
-#ifdef CBMC
-#pragma CPROVER check pop
-#endif
+/*************************************************
+ * Name:        mlk_ct_cmask_nonzero_u16
+ *
+ * Description: Return 0 if input is zero, and -1 otherwise.
+ *
+ * Arguments:   uint16_t x: Value to be converted into a mask
+ *
+ **************************************************/
 
-/*
- * The ct_csel_xxx functions below make deliberate use of unsigned
- * to signed integer conversion, which is implementation-defined
- * behaviour. Here, we assume that uint16_t -> int16_t is inverse
- * to int16_t -> uint16_t.
- */
-#ifdef CBMC
-#pragma CPROVER check push
-#pragma CPROVER check disable "conversion"
-#endif
+/* Reference: Embedded in `cmov_int16()` in the reference implementation @[REF].
+ *            - Use value barrier and shift instead of `b = -b` to
+ *              convert condition into mask. */
+static MLK_INLINE uint16_t mlk_ct_cmask_nonzero_u16(uint16_t x)
+__contract__(ensures(return_value == ((x == 0) ? 0 : 0xFFFF)))
+{
+  int32_t tmp = mlk_value_barrier_i32(-((int32_t)x));
+  tmp >>= 16;
+  return mlk_cast_int32_to_uint16(tmp);
+}
+
+/*************************************************
+ * Name:        mlk_ct_cmask_nonzero_u8
+ *
+ * Description: Return 0 if input is zero, and -1 otherwise.
+ *
+ * Arguments:   uint8_t x: Value to be converted into a mask
+ *
+ **************************************************/
+
+/* Reference: Embedded in `verify()` and `cmov()` in the
+ *            reference implementation @[REF].
+ *            - We include a value barrier not present in the
+ *              reference implementation, to prevent the compiler
+ *              from realizing that this function returns a mask. */
+static MLK_INLINE uint8_t mlk_ct_cmask_nonzero_u8(uint8_t x)
+__contract__(ensures(return_value == ((x == 0) ? 0 : 0xFF)))
+{
+  uint16_t mask = mlk_ct_cmask_nonzero_u16((uint16_t)x);
+  return (uint8_t)(mask & 0xFF);
+}
 
 /*************************************************
  * Name:        mlk_ct_sel_int16
@@ -279,15 +295,11 @@ __contract__(ensures(return_value == ((x < 0) ? 0xFFFF : 0)))
 static MLK_INLINE int16_t mlk_ct_sel_int16(int16_t a, int16_t b, uint16_t cond)
 __contract__(ensures(return_value == (cond ? a : b)))
 {
-  uint16_t au = a, bu = b;
+  uint16_t au = mlk_cast_int16_to_uint16(a);
+  uint16_t bu = mlk_cast_int16_to_uint16(b);
   uint16_t res = bu ^ (mlk_ct_cmask_nonzero_u16(cond) & (au ^ bu));
-  return (int16_t)res;
+  return mlk_cast_uint16_to_int16(res);
 }
-
-/* Put unsigned-to-signed warnings in CBMC back into scope */
-#ifdef CBMC
-#pragma CPROVER check pop
-#endif
 
 /*************************************************
  * Name:        mlk_ct_sel_uint8

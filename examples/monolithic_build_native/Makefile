@@ -60,6 +60,41 @@ LIB1024=libmlkem1024.a
 
 MLK_OBJS=$(BUILD_DIR)/mlkem_native.c.o $(BUILD_DIR)/mlkem_native.S.o
 
+# Automatically detect system architecture and set preprocessor etc accordingly
+HOST_PLATFORM := $(shell uname -s)-$(shell uname -m)
+
+# linux x86_64
+ifeq ($(HOST_PLATFORM),Linux-x86_64)
+	CFLAGS += -z noexecstack
+endif
+
+# Native compilation
+ifeq ($(CROSS_PREFIX),)
+ifeq ($(HOST_PLATFORM),Linux-x86_64)
+	CFLAGS += -mavx2 -mbmi2 -mpopcnt -maes
+	CFLAGS += -DMLK_FORCE_X86_64
+else ifeq ($(HOST_PLATFORM),Linux-aarch64)
+	CFLAGS += -DMLK_FORCE_AARCH64
+else ifeq ($(HOST_PLATFORM),Darwin-arm64)
+	CFLAGS += -DMLK_FORCE_AARCH64
+endif
+# Cross compilation
+else ifneq ($(findstring x86_64, $(CROSS_PREFIX)),)
+	CFLAGS += -mavx2 -mbmi2 -mpopcnt -maes
+	CFLAGS += -DMLK_FORCE_X86_64
+else ifneq ($(findstring aarch64_be, $(CROSS_PREFIX)),)
+	CFLAGS += -DMLK_FORCE_AARCH64_EB
+else ifneq ($(findstring aarch64, $(CROSS_PREFIX)),)
+	CFLAGS += -DMLK_FORCE_AARCH64
+else ifneq ($(findstring riscv64, $(CROSS_PREFIX)),)
+	CFLAGS += -march=rv64gcv
+	CFLAGS += -DMLK_FORCE_RISCV64
+else ifneq ($(findstring riscv32, $(CROSS_PREFIX)),)
+	CFLAGS += -DMLK_FORCE_RISCV32
+else ifneq ($(findstring powerpc64le, $(CROSS_PREFIX)),)
+	CFLAGS += -DMLK_FORCE_PPC64LE
+endif
+
 CFLAGS := \
 	-Wall \
 	-Wextra \
@@ -68,6 +103,8 @@ CFLAGS := \
 	-Wshadow \
 	-Wpointer-arith \
 	-Wredundant-decls \
+	-Wconversion \
+	-Wsign-conversion \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \

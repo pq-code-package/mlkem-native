@@ -39,6 +39,8 @@ CFLAGS := \
 	-Wshadow \
 	-Wpointer-arith \
 	-Wredundant-decls \
+	-Wconversion \
+	-Wsign-conversion \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
@@ -76,7 +78,6 @@ endif
 # Include retained variables #
 ##############################
 
-AUTO ?= 1
 CYCLES ?=
 OPT ?= 1
 RETAINED_VARS := CROSS_PREFIX CYCLES OPT AUTO

@@ -11,8 +11,16 @@
 #ifndef FIPS202_H
 #define FIPS202_H
 
+#include <assert.h>
+
 #include "common.h"
 #include "tiny_sha3/sha3.h"
+typedef enum
+{
+  FIPS202_STATE_ABSORBING = 1,
+  FIPS202_STATE_SQUEEZING = 2,
+  FIPS202_STATE_RESET = 3
+} fips202_state_t;
 
 #define SHAKE128_RATE 168
 #define SHAKE256_RATE 136
@@ -22,11 +30,19 @@
 
 /* NOTE: This is an incremental context, different from the one used by
  * mlkem-native */
-typedef sha3_ctx_t mlk_shake128ctx;
+typedef struct
+{
+  /* We introduce the explicit state as a mechanism to check that
+   * mlkem-native adheres to the FIPS202 state machine. You can safely
+   * remove this from your custom wrapper. */
+  fips202_state_t state;
+  sha3_ctx_t ctx;
+} mlk_shake128ctx;
 
 static MLK_INLINE void mlk_shake128_init(mlk_shake128ctx *state)
 {
-  shake128_init(state);
+  shake128_init(&state->ctx);
+  state->state = FIPS202_STATE_ABSORBING;
 }
 
 #define mlk_shake128_absorb_once MLK_NAMESPACE(shake128_absorb_once)
@@ -45,8 +61,10 @@ static MLK_INLINE void mlk_shake128_absorb_once(mlk_shake128ctx *state,
                                                 const uint8_t *input,
                                                 size_t inlen)
 {
-  shake_update(state, input, inlen);
-  shake_xof(state);
+  assert(state->state == FIPS202_STATE_ABSORBING);
+  shake_update(&state->ctx, input, inlen);
+  shake_xof(&state->ctx);
+  state->state = FIPS202_STATE_SQUEEZING;
 }
 
 /* Squeeze output out of the sponge.
@@ -70,14 +88,15 @@ static MLK_INLINE void mlk_shake128_squeezeblocks(uint8_t *output,
                                                   size_t nblocks,
                                                   mlk_shake128ctx *state)
 {
-  shake_out(state, output, nblocks * SHAKE128_RATE);
+  assert(state->state == FIPS202_STATE_SQUEEZING);
+  shake_out(&state->ctx, output, nblocks * SHAKE128_RATE);
 }
 
 /* Free the state */
 #define mlk_shake128_release MLK_NAMESPACE(shake128_release)
 static MLK_INLINE void mlk_shake128_release(mlk_shake128ctx *state)
 {
-  ((void)state);
+  state->state = FIPS202_STATE_RESET;
 }
 
 /* One-stop SHAKE256 call. Aliasing between input and

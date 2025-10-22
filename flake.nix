@@ -82,11 +82,27 @@
               } ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ config.packages.valgrind_varlat ];
           };
 
-          devShells.hol_light = util.mkShell {
+          # arm-none-eabi-gcc + platform files from pqmx
+          packages.m55-an547 = util.m55-an547;
+          devShells.arm-embedded = util.mkShell {
+            packages = builtins.attrValues
+              {
+                inherit (config.packages) m55-an547;
+                inherit (pkgs) gcc-arm-embedded qemu coreutils python3 git;
+              };
+          };
+
+          devShells.hol_light = (util.mkShell {
             packages = builtins.attrValues {
               inherit (config.packages) linters hol_light s2n_bignum;
             };
-          };
+          }).overrideAttrs (old: {
+            shellHook = ''
+              export PATH=$PWD/scripts:$PATH
+              # Set PROOF_DIR_ARM based on where we entered the shell
+              export PROOF_DIR_ARM="$PWD/proofs/hol_light/arm"
+            '';
+          });
           devShells.ci = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains_native; };
           };

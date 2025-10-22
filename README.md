@@ -20,8 +20,7 @@ All C code in [mlkem/src/*](mlkem) and [mlkem/src/fips202/*](mlkem/src/fips202) 
 using [CBMC](https://github.com/diffblue/cbmc). All AArch64 assembly is proved functionally correct at the object code level using
 [HOL-Light](https://github.com/jrh13/hol-light).
 
-mlkem-native includes fast assembly for AArch64 and AVX2, offering competitive performance on most Arm, Intel, and AMD platforms
-(see [benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/)).
+mlkem-native includes native backends for Arm (64-bit, Neon), Intel/AMD (64-bit, AVX2), and RISC-V (64-bit, RVV). See [benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/) for performance data.
 
 mlkem-native is supported by the [Post-Quantum Cryptography Alliance](https://pqca.org/) as part of the [Linux Foundation](https://linuxfoundation.org/).
 
@@ -81,9 +80,16 @@ mlkem-native is split into a _frontend_ and two _backends_ for arithmetic and FI
 fixed, written in C, and covers all routines that are not critical to performance. The backends are flexible, take care of
 performance-sensitive routines, and can be implemented in C or native code (assembly/intrinsics); see
 [mlkem/src/native/api.h](mlkem/src/native/api.h) for the arithmetic backend and
-[mlkem/src/fips202/native/api.h](mlkem/src/fips202/native/api.h) for the FIPS-202 backend. mlkem-native currently
-offers three backends for C, AArch64, and x86_64 - if you'd like contribute new backends, please reach out or just open a
-PR.
+[mlkem/src/fips202/native/api.h](mlkem/src/fips202/native/api.h) for the FIPS-202 backend.
+
+mlkem-native currently offers the following backends:
+
+* Default portable C backend
+* 64-bit Arm backend (using Neon)
+* 64-bit Intel/AMD backend (using AVX2)
+* 64-bit RISC-V backend (using RVV)
+
+If you'd like contribute new backends, please reach out or just open a PR.
 
 Our AArch64 assembly is developed using the [SLOTHY](https://github.com/slothy-optimizer/slothy) superoptimizer, following the approach described in the SLOTHY paper[^SLOTHY_Paper]:
 We write 'clean' assembly by hand and automate micro-optimizations (e.g. see the [clean](dev/aarch64_clean/src/ntt.S) vs [optimized](dev/aarch64_opt/src/ntt.S) AArch64 NTT).

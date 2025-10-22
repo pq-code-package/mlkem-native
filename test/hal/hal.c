@@ -95,7 +95,30 @@ uint64_t get_cyclecounter(void)
 }
 
 #else /* (!__x86_64__ && __AARCH64EL__) || _M_ARM64 */
-#error PMU_CYCLES option only supported on x86_64 and AArch64
+
+#if defined(__riscv)
+
+void enable_cyclecounter(void) {}
+
+void disable_cyclecounter(void) {}
+
+uint64_t get_cyclecounter(void)
+{
+#if (__riscv_xlen == 32)
+  uint32_t lo, hi;
+  __asm__ volatile("rdcycle %0" : "=r"(lo));
+  __asm__ volatile("rdcycleh %0" : "=r"(hi));
+  return (((uint64_t)hi) << 32) | ((uint64_t)lo);
+#else  /* __riscv_xlen == 32 */
+  uint64_t retval;
+  __asm__ volatile("rdcycle %0" : "=r"(retval));
+  return retval;
+#endif /* __riscv_xlen != 32 */
+}
+
+#else /* __riscv */
+#error PMU_CYCLES option only supported on x86_64 and AArch64 and RISC-V
+#endif /* !__riscv */
 #endif /* !__x86_64__ && !(__AARCH64EL__ || _M_ARM64) */
 
 #elif defined(PERF_CYCLES)
@@ -121,7 +144,7 @@ void enable_cyclecounter(void)
   pe.exclude_kernel = 1;
   pe.exclude_hv = 1;
 
-  perf_fd = syscall(__NR_perf_event_open, &pe, 0, -1, -1, 0);
+  perf_fd = (int)syscall(__NR_perf_event_open, &pe, 0, -1, -1, 0);
 
   ioctl(perf_fd, PERF_EVENT_IOC_RESET, 0);
   ioctl(perf_fd, PERF_EVENT_IOC_ENABLE, 0);
@@ -150,7 +173,7 @@ uint64_t get_cyclecounter(void)
     exit(EXIT_FAILURE);
   }
   ioctl(perf_fd, PERF_EVENT_IOC_ENABLE, 0);
-  return cpu_cycles;
+  return (uint64_t)cpu_cycles;
 }
 #elif defined(MAC_CYCLES)
 /* Based on @[m1cycles] */

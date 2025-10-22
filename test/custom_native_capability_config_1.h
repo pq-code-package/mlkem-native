@@ -362,6 +362,28 @@ static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
    #endif
 */
 
+/******************************************************************************
+ * Name:        MLK_CONFIG_SERIAL_FIPS202_ONLY
+ *
+ * Description: Set this to use a FIPS202 implementation with global state
+ *              that supports only one active Keccak computation at a time
+ *              (e.g. some hardware accelerators).
+ *
+ *              If this option is set, batched Keccak operations are
+ *              disabled for rejection sampling during matrix generation.
+ *              Instead, matrix entries will be generated one at a time.
+ *
+ *              This allows offloading Keccak computations to a hardware
+ *              accelerator that holds only a single Keccak state locally,
+ *              rather than requiring support for batched (4x) Keccak states.
+ *
+ *              NOTE: Depending on the target CPU, disabling batched Keccak
+ *              may reduce performance when using software FIPS202
+ *              implementations. Only enable this when you have to.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_SERIAL_FIPS202_ONLY */
+
 /*************************  Config internals  ********************************/
 
 /* Default namespace
