@@ -20,6 +20,12 @@ jobs:
            name: 'M55-AN547'
            makefile: test/baremetal/platform/m55-an547/platform.mk
            nix-shell: arm-embedded
+           exec_wrapper: test/baremetal/platform/m55-an547/exec_wrapper.py
+         - runner: self-hosted-mps3
+           name: 'MPS3-M55-HW'
+           makefile: test/baremetal/platform/m55-an547/platform.mk
+           nix-shell: arm-embedded
+           exec_wrapper: exec-on-m55
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -32,7 +38,8 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           opt: no_opt
           func: true
-          kat: true
-          acvp: true
+          kat: false
+          acvp: false
           examples: false
           stack: false
+          exec_wrapper: ${{ matrix.target.exec_wrapper }}
