@@ -20,6 +20,16 @@ jobs:
            name: 'M55-AN547'
            makefile: test/baremetal/platform/m55-an547/platform.mk
            nix-shell: arm-embedded
+           func: true
+           kat: true
+           acvp: true
+         - runner: ubuntu-latest
+           name: 'AVR ATmega128RFR2 (modified for 32K RAM)'
+           makefile: test/baremetal/platform/avr/platform.mk
+           nix-shell: avr
+           func: false
+           kat: true
+           acvp: false
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -31,8 +41,8 @@ jobs:
           nix-shell: ${{ matrix.target.nix-shell }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           opt: no_opt
-          func: true
-          kat: true
-          acvp: true
+          func: ${{ matrix.target.func }}
+          kat: ${{ matrix.target.kat }}
+          acvp: ${{ matrix.target.acvp }}
           examples: false
           stack: false
