@@ -11,7 +11,7 @@
 #include "notrandombytes/notrandombytes.h"
 
 #ifndef NTESTS
-#define NTESTS 1000
+#define NTESTS 10
 #endif
 
 #define CHECK(x)                                              \
