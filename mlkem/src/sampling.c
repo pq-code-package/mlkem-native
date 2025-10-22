@@ -139,8 +139,9 @@ __contract__(
 }
 
 #ifndef MLKEM_GEN_MATRIX_NBLOCKS
-#define MLKEM_GEN_MATRIX_NBLOCKS \
-  ((12 * MLKEM_N / 8 * (1 << 12) / MLKEM_Q + MLK_XOF_RATE) / MLK_XOF_RATE)
+#define MLKEM_GEN_MATRIX_NBLOCKS                                       \
+  ((12 * MLKEM_N / 8 * ((uint32_t)1 << 12) / MLKEM_Q + MLK_XOF_RATE) / \
+   MLK_XOF_RATE)
 #endif
 
 #if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
