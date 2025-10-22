@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-{ hol_light, fetchFromGitHub, writeText, ... }:
+{ hol_light, fetchFromGitHub, writeText, ocamlPackages, ledit, ... }:
 hol_light.overrideAttrs (old: {
   setupHook = writeText "setup-hook.sh" ''
     export HOLDIR="$1/lib/hol_light"
     export HOLLIGHT_DIR="$1/lib/hol_light"
+    export PATH="$1/lib/hol_light:$PATH"
   '';
   version = "unstable-2025-09-22";
   src = fetchFromGitHub {
@@ -13,8 +14,11 @@ hol_light.overrideAttrs (old: {
     rev = "bed58fa74649fa74015176f8f90e77f7af5cf8e3";
     hash = "sha256-QDubbUUChvv04239BdcKPSU+E2gdSzqAWfAETK2Xtg0=";
   };
-  patches = [ ./0005-Fix-hollight-path.patch ];
-  propagatedBuildInputs = old.propagatedBuildInputs ++ old.nativeBuildInputs;
+  patches = [
+    ./0005-Configure-hol-sh-for-mlkem-native.patch
+    ./0006-Add-findlib-to-ocaml-hol.patch
+  ];
+  propagatedBuildInputs = old.propagatedBuildInputs ++ old.nativeBuildInputs ++ [ ocamlPackages.pcre2 ledit ];
   buildPhase = ''
     HOLLIGHT_USE_MODULE=1 make hol.sh
     patchShebangs hol.sh

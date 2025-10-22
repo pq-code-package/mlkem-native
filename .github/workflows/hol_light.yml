@@ -49,6 +49,22 @@ jobs:
           nix-shell: 'hol_light'
           script: |
             autogen --update-hol-light-bytecode --dry-run
+  hol_light_interactive:
+    name: HOL-Light interactive shell test
+    runs-on: pqcp-arm64
+    needs: [ hol_light_bytecode ]
+    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-shell
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          nix-shell: 'hol_light'
+          script: |
+            make -C proofs/hol_light/arm mlkem/mlkem_poly_tobytes.o
+            echo 'needs "proofs/mlkem_poly_tobytes.ml";;' | hol.sh
   hol_light_proofs:
     needs: [ hol_light_bytecode ]
     strategy:
