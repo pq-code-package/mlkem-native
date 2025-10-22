@@ -23,7 +23,8 @@ CFLAGS += \
 	-mmcu=$(AVR_MCU) \
 	-DF_CPU=$(AVR_FREQ) \
 	-DAVR_PLATFORM \
-	-fno-fat-lto-objects
+	-fno-fat-lto-objects \
+	-DNTESTS_FUNC=10
 
 CFLAGS += $(CFLAGS_EXTRA)
 
@@ -36,7 +37,7 @@ LDFLAGS += \
 	-lprintf_min
 
 # Add minimal AVR runtime
-EXTRA_SOURCES = $(PLATFORM_PATH)/avr_wrapper.c
+EXTRA_SOURCES = $(PLATFORM_PATH)/avr_wrapper.c $(PLATFORM_PATH)/init7.S
 EXTRA_SOURCES_CFLAGS =
 
 # Use simavr for execution

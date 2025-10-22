@@ -27,9 +27,9 @@ jobs:
            name: 'AVR ATmega128RFR2 (modified for 32K RAM)'
            makefile: test/baremetal/platform/avr/platform.mk
            nix-shell: avr
-           func: false
+           func: true
            kat: true
-           acvp: false
+           acvp: true
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0

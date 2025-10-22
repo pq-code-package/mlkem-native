@@ -40,4 +40,4 @@ runs:
         run: |
           make clean
           # Disable the AArch64 SHA3 extension as it's not yet supported by valgrind
-          MK_COMPILER_SUPPORTS_SHA3=0 tests func --exec-wrapper="valgrind --error-exitcode=1 --track-origins=yes ${{ inputs.valgrind_flags }}" --cflags="-DMLK_CONFIG_CT_TESTING_ENABLED -DNTESTS=50 ${{ inputs.cflags }}"
+          MK_COMPILER_SUPPORTS_SHA3=0 tests func --exec-wrapper="valgrind --error-exitcode=1 --track-origins=yes ${{ inputs.valgrind_flags }}" --cflags="-DMLK_CONFIG_CT_TESTING_ENABLED -DNTESTS_FUNC=50 ${{ inputs.cflags }}"

@@ -9,6 +9,7 @@ let
     patches = (oldAttrs.patches or [ ]) ++ [
       ./simavr-32kb-ram.patch
       ./simavr-uart-output-fix.patch
+      ./simavr-16k-eeprom.patch
     ];
   });
 in

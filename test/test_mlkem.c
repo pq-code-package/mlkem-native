@@ -10,8 +10,8 @@
 #include "../mlkem/mlkem_native.h"
 #include "notrandombytes/notrandombytes.h"
 
-#ifndef NTESTS
-#define NTESTS 1000
+#ifndef NTESTS_FUNC
+#define NTESTS_FUNC 1000
 #endif
 
 #define CHECK(x)                                              \
@@ -168,7 +168,7 @@ int main(void)
    * Normally, you would want to seed a PRNG with trustworthy entropy here. */
   randombytes_reset();
 
-  for (i = 0; i < NTESTS; i++)
+  for (i = 0; i < NTESTS_FUNC; i++)
   {
     CHECK(test_keys() == 0);
     CHECK(test_keys_unaligned() == 0);
