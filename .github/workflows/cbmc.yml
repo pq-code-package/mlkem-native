@@ -17,9 +17,8 @@ jobs:
     uses: ./.github/workflows/ci_ec2_reusable.yml
     with:
       name: CBMC (MLKEM-512)
-      ec2_instance_type: c7g.4xlarge
-      ec2_ami: ubuntu-latest (custom AMI)
-      ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
+      ec2_instance_type: c7g.2xlarge
+      ec2_volume_size: 64
       compile_mode: native
       opt: no_opt
       lint: false
@@ -39,9 +38,8 @@ jobs:
     uses: ./.github/workflows/ci_ec2_reusable.yml
     with:
       name: CBMC (MLKEM-768)
-      ec2_instance_type: c7g.4xlarge
-      ec2_ami: ubuntu-latest (custom AMI)
-      ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
+      ec2_instance_type: c7g.2xlarge
+      ec2_volume_size: 64
       compile_mode: native
       opt: no_opt
       lint: false
@@ -61,9 +59,8 @@ jobs:
     uses: ./.github/workflows/ci_ec2_reusable.yml
     with:
       name: CBMC (MLKEM-1024)
-      ec2_instance_type: c7g.4xlarge
-      ec2_ami: ubuntu-latest (custom AMI)
-      ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
+      ec2_instance_type: c7g.2xlarge
+      ec2_volume_size: 64
       compile_mode: native
       opt: no_opt
       lint: false
