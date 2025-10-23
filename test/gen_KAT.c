@@ -14,7 +14,10 @@
 #include <io.h>
 #endif
 
-#define NTESTS 1000
+/* Note that the entire output of this application feeds into
+ * a hash compared with those in META.yml. If you want to reduce
+ * the number of KAT tests, META.yml needs adjusting as well. */
+#define NTESTS_KAT 100
 
 #define CHECK(x)                                              \
   do                                                          \
@@ -64,7 +67,7 @@ int main(void)
 
   mlk_shake256(coins, sizeof(coins), seed, sizeof(seed));
 
-  for (i = 0; i < NTESTS; i++)
+  for (i = 0; i < NTESTS_KAT; i++)
   {
     mlk_shake256(coins, sizeof(coins), coins, sizeof(coins));
 

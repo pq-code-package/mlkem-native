@@ -1,0 +1,24 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+--- a/simavr/sim/avr_uart.c
++++ b/simavr/sim/avr_uart.c
+@@ -269,15 +269,16 @@
+ 	}
+ 
+ 	if (p->flags & AVR_UART_FLAG_STDIO) {
+-		const int maxsize = 256;
++		const int maxsize = 16384;
+ 		if (!p->stdio_out)
+ 			p->stdio_out = malloc(maxsize);
+-		p->stdio_out[p->stdio_len++] = v < ' ' ? '.' : v;
+-		p->stdio_out[p->stdio_len] = 0;
+ 		if (v == '\n' || p->stdio_len == maxsize) {
+ 			p->stdio_len = 0;
+ 			AVR_LOG(avr, LOG_OUTPUT,
+ 					FONT_GREEN "%s\n" FONT_DEFAULT, p->stdio_out);
++		} else {
++			p->stdio_out[p->stdio_len++] = v;
++			p->stdio_out[p->stdio_len] = 0;
+ 		}
+ 	}
+ 	TRACE(printf("UDR%c(%02x) = %02x\n", p->name, addr, v);)

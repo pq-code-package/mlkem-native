@@ -9,13 +9,13 @@
 
 
 void mlk_keccak_squeezeblocks(uint8_t *h, size_t nblocks, uint64_t *s,
-                              uint32_t r);
+                              unsigned r);
 
 void harness(void)
 {
   uint8_t *h;
   size_t nblocks;
   uint64_t *s;
-  uint32_t r;
+  unsigned r;
   mlk_keccak_squeezeblocks(h, nblocks, s, r);
 }

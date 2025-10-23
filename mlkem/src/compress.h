@@ -66,7 +66,7 @@ __contract__(
   /* check-magic: 1290168 == 2*round(2^31 / MLKEM_Q) */
   uint32_t d0 = (uint32_t)u * 1290168;
   /* Unsigned shifting by 31 positions leaves only the top bit. */
-  return (uint8_t)((d0 + (1u << 30)) >> 31);
+  return (uint8_t)((d0 + ((uint32_t)1u << 30)) >> 31);
 }
 #ifdef CBMC
 #pragma CPROVER check pop
@@ -110,7 +110,7 @@ __contract__(
   /* check-magic: 1290160 == 16 * round(2^28 / MLKEM_Q) */
   uint32_t d0 = (uint32_t)u * 1290160;
   /* The return value is < 16, so not altered by the conversion to uint8_t. */
-  return (uint8_t)((d0 + (1u << 27)) >> 28); /* round(d0/2^28) */
+  return (uint8_t)((d0 + ((uint32_t)1u << 27)) >> 28); /* round(d0/2^28) */
 }
 #ifdef CBMC
 #pragma CPROVER check pop
@@ -138,7 +138,7 @@ __contract__(
 {
   /* The return value is in 0..MLKEM_Q-1, hence not altered by the
    * conversion to int16_t. */
-  return (int16_t)(((u * MLKEM_Q) + 8) >> 4);
+  return (int16_t)((((uint32_t)u * MLKEM_Q) + 8) >> 4);
 }
 
 /************************************************************
@@ -179,7 +179,7 @@ __contract__(
   /* check-magic: 1290176 == 2^5 * round(2^27 / MLKEM_Q) */
   uint32_t d0 = (uint32_t)u * 1290176;
   /* The return value is < 32, so not altered by the conversion to uint8_t. */
-  return (uint8_t)((d0 + (1u << 26)) >> 27); /* round(d0/2^27) */
+  return (uint8_t)((d0 + ((uint32_t)1u << 26)) >> 27); /* round(d0/2^27) */
 }
 #ifdef CBMC
 #pragma CPROVER check pop
@@ -207,7 +207,7 @@ __contract__(
 {
   /* The return value is in 0..MLKEM_Q-1, hence not altered by the
    * conversion to int16_t. */
-  return (int16_t)(((u * MLKEM_Q) + 16) >> 5);
+  return (int16_t)((((uint32_t)u * MLKEM_Q) + 16) >> 5);
 }
 
 /************************************************************
@@ -276,7 +276,7 @@ __contract__(
 {
   /* The return value is in 0..MLKEM_Q-1, hence not altered by the
    * conversion to int16_t. */
-  return (int16_t)(((u * MLKEM_Q) + 512) >> 10);
+  return (int16_t)((((uint32_t)u * MLKEM_Q) + 512) >> 10);
 }
 
 /************************************************************
@@ -345,7 +345,7 @@ __contract__(
 {
   /* The return value is in 0..MLKEM_Q-1, hence not altered by the
    * conversion to int16_t. */
-  return (int16_t)(((u * MLKEM_Q) + 1024) >> 11);
+  return (int16_t)((((uint32_t)u * MLKEM_Q) + 1024) >> 11);
 }
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
