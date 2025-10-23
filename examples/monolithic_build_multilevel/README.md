@@ -41,7 +41,7 @@ by `MLK_CONFIG_PARAMETER_SET`) every time.
 ```
 
 Note the setting `MLK_CONFIG_MULTILEVEL_WITH_SHARED` which forces the inclusion of all level-independent
-code in the MLKEM-512 build, and the setting `MLK_CONFIG_MULTILEVEL_NO_SHARED`, which drops all
+code in the ML-KEM-512 build, and the setting `MLK_CONFIG_MULTILEVEL_NO_SHARED`, which drops all
 level-independent code in the subsequent builds. Finally, `MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS` entails that
 `mlkem_native.c` does not `#undefine` the `#define` clauses from level-independent files.
 
@@ -54,7 +54,7 @@ would lead to name-clashes upon multiple use.
 ```C
 #define MLK_CONFIG_API_NO_SUPERCOP
 
-/* API for MLKEM-512 */
+/* API for ML-KEM-512 */
 #define MLK_CONFIG_API_PARAMETER_SET 512
 #define MLK_CONFIG_API_NAMESPACE_PREFIX mlkem512
 #include <mlkem_native.h>
@@ -62,7 +62,7 @@ would lead to name-clashes upon multiple use.
 #undef MLK_CONFIG_API_NAMESPACE_PREFIX
 #undef MLK_H
 
-/* API for MLKEM-768 */
+/* API for ML-KEM-768 */
 #define MLK_CONFIG_API_PARAMETER_SET 768
 #define MLK_CONFIG_API_NAMESPACE_PREFIX mlkem768
 #include <mlkem_native.h>
@@ -70,7 +70,7 @@ would lead to name-clashes upon multiple use.
 #undef MLK_CONFIG_API_NAMESPACE_PREFIX
 #undef MLK_H
 
-/* API for MLKEM-1024 */
+/* API for ML-KEM-1024 */
 #define MLK_CONFIG_API_PARAMETER_SET 1024
 #define MLK_CONFIG_API_NAMESPACE_PREFIX mlkem1024
 #include <mlkem_native.h>

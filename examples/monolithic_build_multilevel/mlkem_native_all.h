@@ -8,7 +8,7 @@
 
 #define MLK_CONFIG_API_NO_SUPERCOP
 
-/* API for MLKEM-512 */
+/* API for ML-KEM-512 */
 #define MLK_CONFIG_API_PARAMETER_SET 512
 #define MLK_CONFIG_API_NAMESPACE_PREFIX mlkem512
 #include <mlkem_native.h>
@@ -16,7 +16,7 @@
 #undef MLK_CONFIG_API_NAMESPACE_PREFIX
 #undef MLK_H
 
-/* API for MLKEM-768 */
+/* API for ML-KEM-768 */
 #define MLK_CONFIG_API_PARAMETER_SET 768
 #define MLK_CONFIG_API_NAMESPACE_PREFIX mlkem768
 #include <mlkem_native.h>
@@ -24,7 +24,7 @@
 #undef MLK_CONFIG_API_NAMESPACE_PREFIX
 #undef MLK_H
 
-/* API for MLKEM-1024 */
+/* API for ML-KEM-1024 */
 #define MLK_CONFIG_API_PARAMETER_SET 1024
 #define MLK_CONFIG_API_NAMESPACE_PREFIX mlkem1024
 #include <mlkem_native.h>

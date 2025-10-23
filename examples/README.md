@@ -16,6 +16,11 @@ See [basic_deterministic](basic_deterministic) for a basic example of how to bui
 See [multilevel_build](multilevel_build) for an example of how to build one instance of mlkem-native per security level,
 in such a way that level-independent code is shared.
 
+## Multi-level build without the standard library (C only)
+
+See multilevel_build_no_stdlib for an example of how to build one instance of mlkem-native per security level without the standard library.
+In this example, `mlk_memcpy` and `mlk_memset` are replaced with custom implementations through [custom_no_stdlib_config.h](../test/custom_stdlib_config.h).
+
 ## Multi-level build (with native code)
 
 See [multilevel_build_native](multilevel_build_native) for an example of how to build one instance of mlkem-native per

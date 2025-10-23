@@ -42,7 +42,7 @@ appropriately first, and then includes the monobuild:
 ```
 
 Note the setting `MLK_CONFIG_MULTILEVEL_WITH_SHARED` which forces the inclusion of all level-independent
-code in the MLKEM-512 build, and the setting `MLK_CONFIG_MULTILEVEL_NO_SHARED`, which drops all
+code in the ML-KEM-512 build, and the setting `MLK_CONFIG_MULTILEVEL_NO_SHARED`, which drops all
 level-independent code in the subsequent builds. Finally, `MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS` entails that
 [mlkem_native.c](mlkem/mlkem_native.c) does not `#undefine` the `#define` clauses from level-independent files.
 
