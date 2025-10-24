@@ -24,9 +24,7 @@ jobs:
       opt: no_opt
       lint: false
       verbose: true
-      functest: true
-      kattest: false
-      acvptest: false
+      test: false
       cbmc: true
       cbmc_mlkem_k: 2
     secrets: inherit
@@ -46,9 +44,7 @@ jobs:
       opt: no_opt
       lint: false
       verbose: true
-      functest: true
-      kattest: false
-      acvptest: false
+      test: false
       cbmc: true
       cbmc_mlkem_k: 3
     secrets: inherit
@@ -68,9 +64,7 @@ jobs:
       opt: no_opt
       lint: false
       verbose: true
-      functest: true
-      kattest: false
-      acvptest: false
+      test: false
       cbmc: true
       cbmc_mlkem_k: 4
     secrets: inherit
