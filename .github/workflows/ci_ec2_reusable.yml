@@ -69,6 +69,9 @@ on:
       cbmc_mlkem_k:
         type: string
         default: 2
+      cbmc_may_omit_level_agnostic:
+        type: boolean
+        default: false
 env:
   AWS_ROLE: arn:aws:iam::559050233797:role/mlkem-c-aarch64-gh-action
   AWS_REGION: us-east-1
@@ -188,6 +191,7 @@ jobs:
           nix-shell: ci-cbmc
           nix-verbose: ${{ inputs.verbose }}
           mlkem_k: ${{ inputs.cbmc_mlkem_k }}
+          may_omit_level_agnostic: ${{ inputs.cbmc_may_omit_level_agnostic }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
       - name: SLOTHY
         if: ${{ inputs.slothy }}

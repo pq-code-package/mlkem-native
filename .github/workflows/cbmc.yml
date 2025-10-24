@@ -23,10 +23,8 @@ jobs:
       compile_mode: native
       opt: no_opt
       lint: false
-      verbose: true
-      functest: true
-      kattest: false
-      acvptest: false
+      verbose: false
+      test: false
       cbmc: true
       cbmc_mlkem_k: 2
     secrets: inherit
@@ -46,11 +44,10 @@ jobs:
       opt: no_opt
       lint: false
       verbose: true
-      functest: true
-      kattest: false
-      acvptest: false
+      test: false
       cbmc: true
       cbmc_mlkem_k: 3
+      cbmc_may_omit_level_agnostic: true
     secrets: inherit
   cbmc_k4:
     name: CBMC (ML-KEM-1024)
@@ -68,9 +65,8 @@ jobs:
       opt: no_opt
       lint: false
       verbose: true
-      functest: true
-      kattest: false
-      acvptest: false
+      test: false
       cbmc: true
       cbmc_mlkem_k: 4
+      cbmc_may_omit_level_agnostic: true
     secrets: inherit

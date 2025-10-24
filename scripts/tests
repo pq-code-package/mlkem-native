@@ -19,10 +19,58 @@ import json
 
 from enum import Enum
 from functools import reduce
+from pathlib import Path
 
 #
 # Some utility functions
 #
+
+
+def list_cbmc_proofs(may_omit_level_agnostic=False):
+    cmd_str = ["./proofs/cbmc/list_proofs.sh"]
+    p = subprocess.run(cmd_str, capture_output=True, universal_newlines=False)
+    proofs = list(filter(lambda s: s.strip() != "", p.stdout.decode().split("\n")))
+
+    if may_omit_level_agnostic is False:
+        return proofs
+
+    # Listing exactly which functions are level-specific vs. level-agnostic
+    # is not obvious, and we cannot risk falsely declaring functions to be
+    # level-generic. We therefore only list some core files which we are know
+    # to only include level specific functionality.
+    some_k_agnostic_sources = [
+        "sampling.h",
+        "sampling.c",
+        "poly.h",
+        "poly.c",
+        "sys.h",
+        "verify.h",
+        "compress.h",
+        "compress.c",
+        "fips202/fips202.h",
+        "fips202/fips202.c",
+        "fips202/fips202x4.c",
+        "fips202/fips202x4.h",
+        "fips202/keccakf1600.h",
+        "fips202/keccakf1600.c",
+    ]
+
+    contract_pattern = re.compile(r"(\w+)\s*\([^)]*\)\s*\n?\s*__contract__")
+
+    k_generic_funcs = []
+    for src_file in some_k_agnostic_sources:
+        filepath = Path("mlkem/src") / src_file
+        with open(filepath) as f:
+            content = f.read()
+
+        # Verify k-agnostic files don't use MLK_NAMESPACE_K
+        assert "MLK_NAMESPACE_K" not in content
+
+        for match in contract_pattern.finditer(content):
+            funcname = match.group(1).removeprefix("mlk_")
+            k_generic_funcs.append(funcname)
+
+    return list([x for x in proofs if x not in k_generic_funcs])
 
 
 def dict2str(dict):
@@ -822,14 +870,12 @@ class Tests:
 
     def cbmc(self):
 
-        def list_proofs():
-            cmd_str = ["./proofs/cbmc/list_proofs.sh"]
-            p = subprocess.run(cmd_str, capture_output=True, universal_newlines=False)
-            proofs = filter(lambda s: s.strip() != "", p.stdout.decode().split("\n"))
-            return list(proofs)
+        # Filter by --may-omit-level-agnostic if requested
+        all_proofs = list_cbmc_proofs(self.args.may_omit_level_agnostic)
 
+        # If --list-functions, print and exit
         if self.args.list_functions:
-            for p in list_proofs():
+            for p in all_proofs:
                 print(p)
             exit(0)
 
@@ -879,8 +925,8 @@ class Tests:
                     log.info(f"   SUCCESS (after {dur}s)")
 
         def run_cbmc(mlkem_k):
-            all_proofs = list_proofs()
             proofs = all_proofs
+
             if self.args.start_with is not None:
                 try:
                     idx = proofs.index(self.args.start_with)
@@ -1290,6 +1336,13 @@ def cli():
         "-l",
         "--list-functions",
         help="Don't run any proofs, but list all functions for which CBMC proofs are available",
+        action="store_true",
+        default=False,
+    )
+
+    cbmc_parser.add_argument(
+        "--may-omit-level-agnostic",
+        help="Allow dropping of level-agnostic proofs; can save time when running proofs for all security levels",
         action="store_true",
         default=False,
     )

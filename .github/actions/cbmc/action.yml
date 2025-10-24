@@ -19,6 +19,9 @@ inputs:
   mlkem_k:
     description: "Security level for ML-KEM (2,3,4)"
     default: "2"
+  may_omit_level_agnostic:
+    description: "Whether level-agnostic proofs may be skipped"
+    default: 'false'
   gh_token:
     description: Github access token to use
     required: true
@@ -52,5 +55,5 @@ runs:
         shell: ${{ env.SHELL }}
         run: |
           echo "::group::cbmc_${{ inputs.mlkem_k }}"
-          tests cbmc --k ${{ inputs.mlkem_k }};
+          tests cbmc --k ${{ inputs.mlkem_k }} ${{ inputs.may_omit_level_agnostic == 'true' && '--may-omit-level-agnostic' || '' }}
           echo "::endgroup::"
