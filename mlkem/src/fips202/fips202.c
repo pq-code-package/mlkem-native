@@ -36,6 +36,7 @@
 
 #include <stdint.h>
 
+#include "../debug.h"
 #include "../verify.h"
 #include "fips202.h"
 #include "keccakf1600.h"
@@ -196,6 +197,7 @@ void mlk_shake128_absorb_once(mlk_shake128ctx *state, const uint8_t *input,
 void mlk_shake128_squeezeblocks(uint8_t *output, size_t nblocks,
                                 mlk_shake128ctx *state)
 {
+  mlk_assert_alignment(output, nblocks * SHAKE128_RATE, 8);
   mlk_keccak_squeezeblocks(output, nblocks, state->ctx, SHAKE128_RATE);
 }
 
@@ -212,6 +214,8 @@ void mlk_shake256(uint8_t *output, size_t outlen, const uint8_t *input,
                   size_t inlen)
 {
   mlk_shake256ctx state;
+  mlk_assert_alignment(output, outlen, 8);
+
   /* Absorb input */
   mlk_keccak_absorb_once(state.ctx, SHAKE256_RATE, input, inlen, 0x1F);
   /* Squeeze output */
@@ -224,6 +228,8 @@ void mlk_shake256(uint8_t *output, size_t outlen, const uint8_t *input,
 void mlk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
 {
   uint64_t ctx[25];
+  mlk_assert_alignment(output, SHA3_256_RATE, 8);
+
   /* Absorb input */
   mlk_keccak_absorb_once(ctx, SHA3_256_RATE, input, inlen, 0x06);
   /* Squeeze output */
@@ -236,6 +242,8 @@ void mlk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
 void mlk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
 {
   uint64_t ctx[25];
+  mlk_assert_alignment(output, SHA3_512_RATE, 8);
+
   /* Absorb input */
   mlk_keccak_absorb_once(ctx, SHA3_512_RATE, input, inlen, 0x06);
   /* Squeeze output */

@@ -269,8 +269,10 @@
 #undef mlk_assert
 #undef mlk_assert_abs_bound
 #undef mlk_assert_abs_bound_2d
+#undef mlk_assert_alignment
 #undef mlk_assert_bound
 #undef mlk_assert_bound_2d
+#undef mlk_debug_check_alignment
 #undef mlk_debug_check_assert
 #undef mlk_debug_check_bounds
 /* mlkem/src/poly.h */
