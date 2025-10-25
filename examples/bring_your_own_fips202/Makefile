@@ -1,4 +1,5 @@
-# (SPDX-License-Identifier: CC-BY-4.0)
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 .PHONY: build run clean size
 .DEFAULT_GOAL := all
