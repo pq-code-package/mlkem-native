@@ -56,7 +56,7 @@ MLK_SOURCE=$(wildcard \
 	mlkem_native/src/**/**/*.c \
 	mlkem_native/src/**/**/**/*.c)
 
-INC=-Imlkem_native/
+INC=-Imlkem_native/ -Imlkem_native/src
 
 # Part B:
 #
@@ -93,8 +93,6 @@ CFLAGS += -DMLK_CONFIG_SERIAL_FIPS202_ONLY
 # Tell mlkem-native where to find the header for the custom FIPS202
 CFLAGS += -DMLK_CONFIG_FIPS202_CUSTOM_HEADER="\"../custom_fips202/fips202.h\""
 CFLAGS += -DMLK_CONFIG_FIPS202X4_CUSTOM_HEADER="\"../custom_fips202/fips202x4.h\""
-# Add include path so we can easily include common.h from the custom FIPS202
-CFLAGS += -Imlkem_native/src
 
 BUILD_DIR=build
 BIN=test_binary

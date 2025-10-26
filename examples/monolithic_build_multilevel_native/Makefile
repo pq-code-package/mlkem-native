@@ -56,7 +56,7 @@ endif
 # However, we still need to incldue the monolithic assembly file.
 MLK_SOURCE_ASM = mlkem/mlkem_native.S
 
-INC=-Imlkem/ -I./
+INC=-Imlkem/ -Imlkem/src -I./
 
 # Part B:
 #
@@ -77,10 +77,6 @@ APP_SOURCE=$(RNG_SOURCE) main.c
 
 BUILD_DIR=build
 BIN=test_binary
-
-# For include of sys.h from multilevel_config.h
-CFLAGS += -Imlkem/src
-
 
 #
 # Configuration adjustments
