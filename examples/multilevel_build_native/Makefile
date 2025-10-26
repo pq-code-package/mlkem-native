@@ -1,64 +1,22 @@
-# (SPDX-License-Identifier: CC-BY-4.0)
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-.PHONY: build run clean mlkem512_objs mlkem768_objs mlkem1024_objs mlkem_objs size size_objs
+.PHONY: build run clean mlkem512_objs mlkem768_objs mlkem1024_objs mlkem_objs
 .DEFAULT_GOAL := all
 
 Q ?= @
-# Append cross-prefix for cross compilation
-# Remove or ignore for native builds
+
 CC  ?= gcc
-SIZE ?= size
-# When called from the root Makefile, CROSS_PREFIX has already been added here
-ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
-CC  := $(CROSS_PREFIX)$(CC)
-endif
 
-ifeq (,$(findstring $(CROSS_PREFIX),$(SIZE)))
-SIZE  := $(CROSS_PREFIX)$(SIZE)
-endif
-
-# Automatically detect system architecture and set preprocessor etc accordingly
-HOST_PLATFORM := $(shell uname -s)-$(shell uname -m)
-
-# linux x86_64
-ifeq ($(HOST_PLATFORM),Linux-x86_64)
-	CFLAGS += -z noexecstack
-endif
-
-# Native compilation
-ifeq ($(CROSS_PREFIX),)
-ifeq ($(HOST_PLATFORM),Linux-x86_64)
-	CFLAGS += -mavx2 -mbmi2
-	CFLAGS += -DMLK_FORCE_X86_64
-else ifeq ($(HOST_PLATFORM),Linux-aarch64)
-	CFLAGS += -DMLK_FORCE_AARCH64
-else ifeq ($(HOST_PLATFORM),Darwin-arm64)
-	CFLAGS += -DMLK_FORCE_AARCH64
-endif
-# Cross compilation
-else ifneq ($(findstring x86_64, $(CROSS_PREFIX)),)
-	CFLAGS += -mavx2 -mbmi2
-	CFLAGS += -DMLK_FORCE_X86_64
-else ifneq ($(findstring aarch64_be, $(CROSS_PREFIX)),)
-	CFLAGS += -DMLK_FORCE_AARCH64_EB
-else ifneq ($(findstring aarch64, $(CROSS_PREFIX)),)
-	CFLAGS += -DMLK_FORCE_AARCH64
-else ifneq ($(findstring riscv64, $(CROSS_PREFIX)),)
-	CFLAGS += -march=rv64gcv
-	CFLAGS += -DMLK_FORCE_RISCV64
-else ifneq ($(findstring riscv32, $(CROSS_PREFIX)),)
-	CFLAGS += -DMLK_FORCE_RISCV32
-else ifneq ($(findstring powerpc64le, $(CROSS_PREFIX)),)
-	CFLAGS += -DMLK_FORCE_PPC64LE
-endif
-
+# Adjust CFLAGS if needed
 CFLAGS := \
 	-Wall \
 	-Wextra \
+	-Werror=unused-result \
+	-Wpedantic \
 	-Werror \
 	-Wmissing-prototypes \
 	-Wshadow \
-	-Werror \
 	-Wpointer-arith \
 	-Wredundant-decls \
 	-Wconversion \
@@ -66,31 +24,46 @@ CFLAGS := \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
+	-O3 \
 	-fomit-frame-pointer \
 	-DMLK_CONFIG_NAMESPACE_PREFIX=mlkem \
 	-std=c99 \
 	-pedantic \
 	-MMD \
-	-O3 \
 	$(CFLAGS)
 
+# If you want to use the native backends, the compiler needs to know about
+# the target architecture. Here, we import the default host detection from
+# mlkem-native's tests, but you can write your own or specialize accordingly.
+AUTO ?= 1
+include auto.mk
+
+# The following only concerns the cross-compilation tests.
+# You can likely ignore the following for your application.
+#
+# Append cross-prefix for cross compilation
+# When called from the root Makefile, CROSS_PREFIX has already been added here
+ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
+CC  := $(CROSS_PREFIX)$(CC)
+endif
 
 # Part A:
 #
 # mlkem-native source and header files
 #
-# If you are not concerned about minimizing for a specific backend,
-# you can just include _all_ source files into your build.
+# In this example, we compile the individual mlkem-native source files directly.
+# Alternatively, you can compile the 'monobuild' source file mlkem_native.c.
+# See examples/monolithic_build for that.
 MLK_SOURCE := $(wildcard \
-	mlkem_native/mlkem/src/*.c             \
-	mlkem_native/mlkem/src/**/*.c          \
-	mlkem_native/mlkem/src/**/**/*.c       \
-	mlkem_native/mlkem/src/**/**/**/*.c    \
+	mlkem_native/mlkem/src/*.c \
+	mlkem_native/mlkem/src/**/*.c \
+	mlkem_native/mlkem/src/**/**/*.c \
+	mlkem_native/mlkem/src/**/**/**/*.c \
 	mlkem_native/mlkem/src/**/**/**/**/*.c \
-	mlkem_native/mlkem/src/*.S             \
-	mlkem_native/mlkem/src/**/*.S          \
-	mlkem_native/mlkem/src/**/**/*.S       \
-	mlkem_native/mlkem/src/**/**/**/*.S    \
+	mlkem_native/mlkem/src/*.S \
+	mlkem_native/mlkem/src/**/*.S \
+	mlkem_native/mlkem/src/**/**/*.S \
+	mlkem_native/mlkem/src/**/**/**/*.S \
 	mlkem_native/mlkem/src/**/**/**/**/*.S)
 
 BUILD_DIR=build
@@ -146,22 +119,12 @@ $(BINARY_NAME_FULL): $(APP_SOURCE) $(RNG_SOURCE) $(MLKEM512_OBJS) $(MLKEM768_OBJ
 	$(Q)mkdir -p $(BUILD_DIR)
 	$(Q)$(CC) $(CFLAGS) $^ -o $@
 
-all: build size_objs
+all: build
 
 build: $(BINARY_NAME_FULL)
 
 run: $(BINARY_NAME_FULL)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
-
-size: build
-	@echo "=== Size info for $(BINARY_NAME_FULL) ==="
-	$(Q)$(SIZE) $(BINARY_NAME_FULL)
-
-size_objs: size
-	$(Q)echo "=== Object size summary ==="
-	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem512 -name '*.o') | (read header; echo "$$header"; awk '$$5 != 0' | sort -k5 -n -r)
-	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem768 -name '*.o') | (read header; echo "$$header"; awk '$$5 != 0' | sort -k5 -n -r)
-	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem1024 -name '*.o') | (read header; echo "$$header"; awk '$$5 != 0' | sort -k5 -n -r)
 
 clean:
 	rm -rf $(BUILD_DIR)

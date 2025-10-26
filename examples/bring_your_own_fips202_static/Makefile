@@ -1,38 +1,67 @@
-# (SPDX-License-Identifier: CC-BY-4.0)
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-.PHONY: build run clean size
+.PHONY: build run clean
 .DEFAULT_GOAL := all
 
-# Append cross-prefix for cross compilation
-# Remove or ignore for native builds
 CC  ?= gcc
-SIZE ?= size
+
+# Adjust CFLAGS if needed
+CFLAGS := \
+	-Wall \
+	-Wextra \
+	-Werror=unused-result \
+	-Wpedantic \
+	-Werror \
+	-Wmissing-prototypes \
+	-Wshadow \
+	-Wpointer-arith \
+	-Wredundant-decls \
+	-Wconversion \
+	-Wsign-conversion \
+	-Wno-long-long \
+	-Wno-unknown-pragmas \
+	-Wno-unused-command-line-argument \
+	-O3 \
+	-fomit-frame-pointer \
+	-std=c99 \
+	-pedantic \
+	-MMD \
+	$(CFLAGS)
+
+# If you want to use the native backends, the compiler needs to know about
+# the target architecture. Here, we import the default host detection from
+# mlkem-native's tests, but you can write your own or specialize accordingly.
+AUTO ?= 1
+include auto.mk
+
+# The following only concerns the cross-compilation tests.
+# You can likely ignore the following for your application.
+#
+# Append cross-prefix for cross compilation
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
 endif
 
-ifeq (,$(findstring $(CROSS_PREFIX),$(SIZE)))
-SIZE  := $(CROSS_PREFIX)$(SIZE)
-endif
-
 # Part A:
 #
 # mlkem-native source and header files
-MLK_SOURCE=$(wildcard              \
-	mlkem_native/src/*.c           \
-	mlkem_native/src/**/*.c        \
-	mlkem_native/src/**/**/*.c     \
+#
+# In this example, we compile the individual mlkem-native source files directly.
+# Alternatively, you can compile the 'monobuild' source file mlkem_native.c.
+# See examples/monolithic_build for that.
+MLK_SOURCE=$(wildcard \
+	mlkem_native/src/*.c \
+	mlkem_native/src/**/*.c \
+	mlkem_native/src/**/**/*.c \
 	mlkem_native/src/**/**/**/*.c)
 
-INC=-Imlkem_native/src/ -Imlkem_native/
+INC=-Imlkem_native/ -Imlkem_native/src
 
 # Part B:
 #
 # Custom FIPS-202 implementation
-#
-# At present, this must be located in a directory named "fips202".
-# This limitation will be lifted in the future.
 FIPS202_SOURCE=custom_fips202/tiny_sha3/sha3.c
 
 # Part C:
@@ -54,31 +83,20 @@ APP_SOURCE=$(wildcard *.c)
 
 ALL_SOURCE=$(MLK_SOURCE) $(FIPS202_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
 
-BUILD_DIR=build
-BIN=test_binary
+#
+# Configuration adjustments
+#
 
-CFLAGS := \
-	-Wall \
-	-Wextra \
-	-Werror \
-	-Wmissing-prototypes \
-	-Wshadow \
-	-Wpointer-arith \
-	-Wredundant-decls \
-	-Wconversion \
-	-Wno-long-long \
-	-Wno-unknown-pragmas \
-	-Wno-unused-command-line-argument \
-	-fomit-frame-pointer \
-	-std=c99 \
-	-pedantic \
-	-MMD \
-	-O3 \
-	$(CFLAGS)
+# Pick prefix
+CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem
+# Tell mlkem-native to use serial-FIPS202 only
+CFLAGS += -DMLK_CONFIG_SERIAL_FIPS202_ONLY
+# Tell mlkem-native where to find the header for the custom FIPS202
 CFLAGS += -DMLK_CONFIG_FIPS202_CUSTOM_HEADER="\"../custom_fips202/fips202.h\""
 CFLAGS += -DMLK_CONFIG_FIPS202X4_CUSTOM_HEADER="\"../custom_fips202/fips202x4.h\""
-CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem
-CFLAGS += -DMLK_CONFIG_SERIAL_FIPS202_ONLY
+
+BUILD_DIR=build
+BIN=test_binary
 
 BINARY_NAME_FULL_512=$(BUILD_DIR)/$(BIN)512
 BINARY_NAME_FULL_768=$(BUILD_DIR)/$(BIN)768
@@ -94,7 +112,7 @@ $(BINARIES_FULL): $(ALL_SOURCE)
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INC) $^ -o $@
 
-all: build size
+all: build
 
 build: $(BINARIES_FULL)
 
@@ -102,14 +120,6 @@ run: $(BINARIES_FULL)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL_512)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL_768)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL_1024)
-
-size: build
-	@echo "=== Size info for binaries $(BINARY_NAME_FULL_512) ==="
-	@$(SIZE) $(BINARY_NAME_FULL_512)
-	@echo "=== Size info for binaries $(BINARY_NAME_FULL_768) ==="
-	@$(SIZE) $(BINARY_NAME_FULL_768)
-	@echo "=== Size info for binaries $(BINARY_NAME_FULL_1024) ==="
-	@$(SIZE) $(BINARY_NAME_FULL_1024)
 
 clean:
 	rm -rf $(BUILD_DIR)

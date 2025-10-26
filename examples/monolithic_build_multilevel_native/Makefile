@@ -1,13 +1,45 @@
-# (SPDX-License-Identifier: CC-BY-4.0)
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-.PHONY: build run clean size
+.PHONY: build run clean
 .DEFAULT_GOAL := all
 
-# Append cross-prefix for cross compilation
-# Remove or ignore for native builds
 CC  ?= gcc
 AR  ?= ar
-SIZE ?= size
+
+# Adjust CFLAGS if needed
+CFLAGS := \
+	-Wall \
+	-Wextra \
+	-Werror=unused-result \
+	-Wpedantic \
+	-Werror \
+	-Wmissing-prototypes \
+	-Wshadow \
+	-Wpointer-arith \
+	-Wredundant-decls \
+	-Wconversion \
+	-Wsign-conversion \
+	-Wno-long-long \
+	-Wno-unknown-pragmas \
+	-Wno-unused-command-line-argument \
+	-O3 \
+	-fomit-frame-pointer \
+	-std=c99 \
+	-pedantic \
+	-MMD \
+	$(CFLAGS)
+
+# If you want to use the native backends, the compiler needs to know about
+# the target architecture. Here, we import the default host detection from
+# mlkem-native's tests, but you can write your own or specialize accordingly.
+AUTO ?= 1
+include auto.mk
+
+# The following only concerns the cross-compilation tests.
+# You can likely ignore the following for your application.
+#
+# Append cross-prefix for cross compilation
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
@@ -17,18 +49,15 @@ ifeq (,$(findstring $(CROSS_PREFIX),$(AR)))
 AR  := $(CROSS_PREFIX)$(AR)
 endif
 
-ifeq (,$(findstring $(CROSS_PREFIX),$(SIZE)))
-SIZE  := $(CROSS_PREFIX)$(SIZE)
-endif
-
 # Part A:
 #
 # mlkem-native source and header files
 #
-# Here, the mlkem-native C source is directly included in main.c.
+# Here, the monolithic C file for mlkem-native is directly included in main.c,
+# However, we still need to incldue the monolithic assembly file.
 MLK_SOURCE_ASM = mlkem/mlkem_native.S
 
-INC=-Imlkem/ -Imlkem/src/ -I./
+INC=-Imlkem/ -Imlkem/src -I./
 
 # Part B:
 #
@@ -50,60 +79,9 @@ APP_SOURCE=$(RNG_SOURCE) main.c
 BUILD_DIR=build
 BIN=test_binary
 
-# Automatically detect system architecture and set preprocessor etc accordingly
-HOST_PLATFORM := $(shell uname -s)-$(shell uname -m)
-
-# linux x86_64
-ifeq ($(HOST_PLATFORM),Linux-x86_64)
-	CFLAGS += -z noexecstack
-endif
-
-# Native compilation
-ifeq ($(CROSS_PREFIX),)
-ifeq ($(HOST_PLATFORM),Linux-x86_64)
-	CFLAGS += -mavx2 -mbmi2
-	CFLAGS += -DMLK_FORCE_X86_64
-else ifeq ($(HOST_PLATFORM),Linux-aarch64)
-	CFLAGS += -DMLK_FORCE_AARCH64
-else ifeq ($(HOST_PLATFORM),Darwin-arm64)
-	CFLAGS += -DMLK_FORCE_AARCH64
-endif
-# Cross compilation
-else ifneq ($(findstring x86_64, $(CROSS_PREFIX)),)
-	CFLAGS += -mavx2 -mbmi2
-	CFLAGS += -DMLK_FORCE_X86_64
-else ifneq ($(findstring aarch64_be, $(CROSS_PREFIX)),)
-	CFLAGS += -DMLK_FORCE_AARCH64_EB
-else ifneq ($(findstring aarch64, $(CROSS_PREFIX)),)
-	CFLAGS += -DMLK_FORCE_AARCH64
-else ifneq ($(findstring riscv64, $(CROSS_PREFIX)),)
-	CFLAGS += -march=rv64gcv
-	CFLAGS += -DMLK_FORCE_RISCV64
-else ifneq ($(findstring riscv32, $(CROSS_PREFIX)),)
-	CFLAGS += -DMLK_FORCE_RISCV32
-else ifneq ($(findstring powerpc64le, $(CROSS_PREFIX)),)
-	CFLAGS += -DMLK_FORCE_PPC64LE
-endif
-
-CFLAGS := \
-	-Wall \
-	-Wextra \
-	-Werror \
-	-Wmissing-prototypes \
-	-Wshadow \
-	-Wpointer-arith \
-	-Wno-long-long \
-	-Wno-unknown-pragmas \
-	-Wredundant-decls \
-	-Wconversion \
-	-Wsign-conversion \
-	-Wno-unused-command-line-argument \
-	-fomit-frame-pointer \
-	-std=c99 \
-	-pedantic \
-	-MMD \
-	-O3 \
-	$(CFLAGS)
+#
+# Configuration adjustments
+#
 
 ASMFLAGS = -DMLK_CONFIG_FILE=\"multilevel_config.h\"
 ASMFLAGS += -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
@@ -131,18 +109,12 @@ $(BINARY_NAME_FULL): $(APP_SOURCE) $(MLK_OBJ_ASM)
 	$(Q)$(CC) $(CFLAGS) $(INC) $^ -o $@
 	$(Q)strip -S $@
 
-all: build size
+all: build
 
 build: $(BINARY_NAME_FULL)
 
 run: $(BINARY_NAME_FULL)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
-
-size: build
-	$(Q)echo "=== Size info for binaries $(BINARY_NAME_FULL)==="
-	$(Q)$(SIZE) $(BINARY_NAME_FULL)
-	$(Q)echo " "
-
 
 clean:
 	rm -rf $(BUILD_DIR)
