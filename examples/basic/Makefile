@@ -28,6 +28,12 @@ CFLAGS := \
 	-MMD \
 	$(CFLAGS)
 
+# If you want to use the native backends, the compiler needs to know about
+# the target architecture. Here, we import the default host detection from
+# mlkem-native's tests, but you can write your own or specialize accordingly.
+AUTO ?= 1
+include auto.mk
+
 # The following only concerns the cross-compilation tests.
 # You can likely ignore the following for your application.
 #
