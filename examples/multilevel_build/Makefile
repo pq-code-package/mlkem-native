@@ -1,4 +1,5 @@
-# (SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT)
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 .PHONY: build run clean mlkem512_objs mlkem768_objs mlkem1024_objs mlkem_objs
 .DEFAULT_GOAL := all
