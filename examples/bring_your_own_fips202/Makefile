@@ -76,11 +76,12 @@ APP_SOURCE=$(wildcard *.c)
 
 ALL_SOURCE=$(MLK_SOURCE) $(FIPS202_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
 
-BUILD_DIR=build
-BIN=test_binary
+#
+# Configuration adjustments
+#
 
+# Pick prefix
 CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem
-
 # Tell mlkem-native where to find the header for the custom FIPS202
 # The structure names and function signatures exposed in those headers must
 # match those from the standard FIPS202 implementation. See FIPS202.md.
@@ -88,6 +89,9 @@ CFLAGS += -DMLK_CONFIG_FIPS202_CUSTOM_HEADER="\"../custom_fips202/fips202.h\""
 CFLAGS += -DMLK_CONFIG_FIPS202X4_CUSTOM_HEADER="\"../custom_fips202/fips202x4.h\""
 # Add include path so we can easily include common.h from the custom FIPS202
 CFLAGS += -Imlkem_native/src
+
+BUILD_DIR=build
+BIN=test_binary
 
 BINARY_NAME_FULL_512=$(BUILD_DIR)/$(BIN)512
 BINARY_NAME_FULL_768=$(BUILD_DIR)/$(BIN)768

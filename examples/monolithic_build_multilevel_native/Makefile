@@ -75,6 +75,11 @@ BIN=test_binary
 # For include of sys.h from multilevel_config.h
 CFLAGS += -Imlkem/src
 
+
+#
+# Configuration adjustments
+#
+
 ASMFLAGS = -DMLK_CONFIG_FILE=\"multilevel_config.h\"
 ASMFLAGS += -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
 

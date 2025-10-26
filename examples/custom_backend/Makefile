@@ -72,10 +72,16 @@ APP_SOURCE=$(wildcard *.c)
 
 ALL_SOURCE=$(MLK_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
 
+
+#
+# Configuration adjustments
+#
+
+# Pick custom config file
+CFLAGS+=-DMLK_CONFIG_FILE="\"custom_config.h\""
+
 BUILD_DIR=build
 BIN=test_binary
-
-CFLAGS+=-DMLK_CONFIG_FILE="\"custom_config.h\""
 
 BINARY_NAME_FULL_512=$(BUILD_DIR)/$(BIN)512
 BINARY_NAME_FULL_768=$(BUILD_DIR)/$(BIN)768

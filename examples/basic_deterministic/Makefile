@@ -63,8 +63,12 @@ ALL_SOURCE=$(MLK_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
 BUILD_DIR=build
 BIN=test_binary
 
-CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem
+#
+# Configuration adjustments
+#
 
+# Pick prefix
+CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem
 # Set configuration option for deterministic build
 CFLAGS += -DMLK_CONFIG_NO_RANDOMIZED_API
 

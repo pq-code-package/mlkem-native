@@ -75,6 +75,11 @@ ALL_SOURCE=$(MLK_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
 BUILD_DIR=build
 BIN=test_binary
 
+#
+# Configuration adjustments
+#
+
+# Pick prefix
 CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem
 
 BINARY_NAME_FULL_512=$(BUILD_DIR)/$(BIN)512
