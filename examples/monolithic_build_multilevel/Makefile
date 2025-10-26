@@ -29,6 +29,11 @@ CFLAGS := \
 	-MMD \
 	$(CFLAGS)
 
+# The example includes MLK_CHECK_APIS to API consistency checking,
+# which is incompatible with -Wredundant-decls.
+# You may likely ignore this.
+CFLAGS += -Wno-redundant-decls
+
 # The following only concerns the cross-compilation tests.
 # You can likely ignore the following for your application.
 #
