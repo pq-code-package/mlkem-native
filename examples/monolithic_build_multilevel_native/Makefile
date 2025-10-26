@@ -87,19 +87,23 @@ endif
 CFLAGS := \
 	-Wall \
 	-Wextra \
+	-Werror=unused-result \
+	-Wpedantic \
 	-Werror \
 	-Wmissing-prototypes \
 	-Wshadow \
 	-Wpointer-arith \
+	-Wredundant-decls \
+	-Wconversion \
+	-Wsign-conversion \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
-	-Wredundant-decls \
 	-Wno-unused-command-line-argument \
+	-O3 \
 	-fomit-frame-pointer \
 	-std=c99 \
 	-pedantic \
 	-MMD \
-	-O3 \
 	$(CFLAGS)
 
 ASMFLAGS = -DMLK_CONFIG_FILE=\"multilevel_config.h\"

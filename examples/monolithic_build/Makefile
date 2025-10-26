@@ -57,19 +57,23 @@ LIB1024=libmlkem1024.a
 CFLAGS := \
 	-Wall \
 	-Wextra \
+	-Werror=unused-result \
+	-Wpedantic \
 	-Werror \
 	-Wmissing-prototypes \
 	-Wshadow \
 	-Wpointer-arith \
 	-Wredundant-decls \
+	-Wconversion \
+	-Wsign-conversion \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
+	-O3 \
 	-fomit-frame-pointer \
 	-std=c99 \
 	-pedantic \
 	-MMD \
-	-O3 \
         $(CFLAGS)
 
 BIN512_FULL=$(BUILD_DIR)/$(BIN512)

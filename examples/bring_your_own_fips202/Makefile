@@ -55,19 +55,23 @@ BIN=test_binary
 CFLAGS := \
 	-Wall \
 	-Wextra \
+	-Werror=unused-result \
+	-Wpedantic \
 	-Werror \
 	-Wmissing-prototypes \
 	-Wshadow \
 	-Wpointer-arith \
 	-Wredundant-decls \
+	-Wconversion \
+	-Wsign-conversion \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
+	-O3 \
 	-fomit-frame-pointer \
 	-std=c99 \
 	-pedantic \
 	-MMD \
-	-O3 \
 	$(CFLAGS)
 CFLAGS += -DMLK_CONFIG_FIPS202_CUSTOM_HEADER="\"../custom_fips202/fips202.h\""
 CFLAGS += -DMLK_CONFIG_FIPS202X4_CUSTOM_HEADER="\"../custom_fips202/fips202x4.h\""

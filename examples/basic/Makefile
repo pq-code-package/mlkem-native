@@ -48,20 +48,23 @@ BIN=test_binary
 CFLAGS := \
 	-Wall \
 	-Wextra \
+	-Werror=unused-result \
+	-Wpedantic \
 	-Werror \
 	-Wmissing-prototypes \
 	-Wshadow \
-	-Werror \
 	-Wpointer-arith \
 	-Wredundant-decls \
+	-Wconversion \
+	-Wsign-conversion \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
+	-O3 \
 	-fomit-frame-pointer \
 	-std=c99 \
 	-pedantic \
 	-MMD \
-	-O3 \
 	$(CFLAGS)
 
 CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem
