@@ -3,9 +3,12 @@
 .PHONY: build run clean
 .DEFAULT_GOAL := all
 
-# Append cross-prefix for cross compilation
-# Remove or ignore for native builds
 CC  ?= gcc
+
+# The following only concerns the cross-compilation tests.
+# You can likely ignore the following for your application.
+#
+# Append cross-prefix for cross compilation
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
@@ -14,20 +17,21 @@ endif
 # Part A:
 #
 # mlkem-native source and header files
-MLK_SOURCE=$(wildcard          \
-	mlkem_native/*.c		\
-	mlkem_native/**/*.c		\
-	mlkem_native/**/**/*.c	        \
-	mlkem_native/**/**/**/*.c)
+#
+# In this example, we compile the individual mlkem-native source files directly.
+# Alternatively, you can compile the 'monobuild' source file mlkem_native.c.
+# See examples/monolithic_build for that.
+MLK_SOURCE=$(wildcard \
+	mlkem_native/src/*.c \
+	mlkem_native/src/**/*.c \
+	mlkem_native/src/**/**/*.c \
+	mlkem_native/src/**/**/**/*.c)
 
 INC=-Imlkem_native/
 
 # Part B:
 #
 # Custom FIPS-202 implementation
-#
-# At present, this must be located in a directory named "fips202".
-# This limitation will be lifted in the future.
 FIPS202_SOURCE=custom_fips202/tiny_sha3/sha3.c
 
 # Part C:
@@ -73,9 +77,16 @@ CFLAGS := \
 	-pedantic \
 	-MMD \
 	$(CFLAGS)
+
+CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem
+
+# Tell mlkem-native where to find the header for the custom FIPS202
+# The structure names and function signatures exposed in those headers must
+# match those from the standard FIPS202 implementation. See FIPS202.md.
 CFLAGS += -DMLK_CONFIG_FIPS202_CUSTOM_HEADER="\"../custom_fips202/fips202.h\""
 CFLAGS += -DMLK_CONFIG_FIPS202X4_CUSTOM_HEADER="\"../custom_fips202/fips202x4.h\""
-CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem
+# Add include path so we can easily include common.h from the custom FIPS202
+CFLAGS += -Imlkem_native/src
 
 BINARY_NAME_FULL_512=$(BUILD_DIR)/$(BIN)512
 BINARY_NAME_FULL_768=$(BUILD_DIR)/$(BIN)768

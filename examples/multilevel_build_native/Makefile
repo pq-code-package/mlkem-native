@@ -4,9 +4,13 @@
 .DEFAULT_GOAL := all
 
 Q ?= @
-# Append cross-prefix for cross compilation
-# Remove or ignore for native builds
+
 CC  ?= gcc
+
+# The following only concerns the cross-compilation tests.
+# You can likely ignore the following for your application.
+#
+# Append cross-prefix for cross compilation
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
@@ -74,19 +78,20 @@ CFLAGS := \
 #
 # mlkem-native source and header files
 #
-# If you are not concerned about minimizing for a specific backend,
-# you can just include _all_ source files into your build.
+# In this example, we compile the individual mlkem-native source files directly.
+# Alternatively, you can compile the 'monobuild' source file mlkem_native.c.
+# See examples/monolithic_build for that.
 MLK_SOURCE := $(wildcard \
-	mlkem_native/**/*.c	  	\
-	mlkem_native/**/**/*.c		\
-	mlkem_native/**/**/**/*.c	\
-	mlkem_native/**/**/**/**/*.c    \
-	mlkem_native/**/**/**/**/**/*.c \
-	mlkem_native/**/*.S	  	\
-	mlkem_native/**/**/*.S		\
-	mlkem_native/**/**/**/*.S	\
-	mlkem_native/**/**/**/**/*.S    \
-	mlkem_native/**/**/**/**/**/*.S)
+	mlkem_native/mlkem/src/*.c \
+	mlkem_native/mlkem/src/**/*.c \
+	mlkem_native/mlkem/src/**/**/*.c \
+	mlkem_native/mlkem/src/**/**/**/*.c \
+	mlkem_native/mlkem/src/**/**/**/**/*.c \
+	mlkem_native/mlkem/src/*.S \
+	mlkem_native/mlkem/src/**/*.S \
+	mlkem_native/mlkem/src/**/**/*.S \
+	mlkem_native/mlkem/src/**/**/**/*.S \
+	mlkem_native/mlkem/src/**/**/**/**/*.S)
 
 BUILD_DIR=build
 MLKEM512_DIR = $(BUILD_DIR)/mlkem512
