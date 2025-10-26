@@ -1,4 +1,4 @@
-# (SPDX-License-Identifier: CC-BY-4.0)
+# (SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT)
 
 .PHONY: build run clean
 .DEFAULT_GOAL := all
