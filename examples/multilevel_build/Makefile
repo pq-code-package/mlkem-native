@@ -7,6 +7,30 @@ Q ?= @
 
 CC  ?= gcc
 
+# Adjust CFLAGS if needed
+CFLAGS := \
+	-Wall \
+	-Wextra \
+	-Werror=unused-result \
+	-Wpedantic \
+	-Werror \
+	-Wmissing-prototypes \
+	-Wshadow \
+	-Wpointer-arith \
+	-Wredundant-decls \
+	-Wconversion \
+	-Wsign-conversion \
+	-Wno-long-long \
+	-Wno-unknown-pragmas \
+	-Wno-unused-command-line-argument \
+	-O3 \
+	-fomit-frame-pointer \
+        -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem \
+	-std=c99 \
+	-pedantic \
+	-MMD \
+	$(CFLAGS)
+
 # The following only concerns the cross-compilation tests.
 # You can likely ignore the following for your application.
 #
@@ -75,29 +99,6 @@ RNG_SOURCE=$(wildcard test_only_rng/*.c)
 APP_SOURCE=$(wildcard *.c)
 
 BIN=test_binary
-
-CFLAGS := \
-	-Wall \
-	-Wextra \
-	-Werror=unused-result \
-	-Wpedantic \
-	-Werror \
-	-Wmissing-prototypes \
-	-Wshadow \
-	-Wpointer-arith \
-	-Wredundant-decls \
-	-Wconversion \
-	-Wsign-conversion \
-	-Wno-long-long \
-	-Wno-unknown-pragmas \
-	-Wno-unused-command-line-argument \
-	-O3 \
-	-fomit-frame-pointer \
-        -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem \
-	-std=c99 \
-	-pedantic \
-	-MMD \
-	$(CFLAGS)
 
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 

@@ -6,6 +6,29 @@
 CC  ?= gcc
 AR  ?= ar
 
+# Adjust CFLAGS if needed
+CFLAGS := \
+	-Wall \
+	-Wextra \
+	-Werror=unused-result \
+	-Wpedantic \
+	-Werror \
+	-Wmissing-prototypes \
+	-Wshadow \
+	-Wpointer-arith \
+	-Wredundant-decls \
+	-Wconversion \
+	-Wsign-conversion \
+	-Wno-long-long \
+	-Wno-unknown-pragmas \
+	-Wno-unused-command-line-argument \
+	-O3 \
+	-fomit-frame-pointer \
+	-std=c99 \
+	-pedantic \
+	-MMD \
+        $(CFLAGS)
+
 # The following only concerns the cross-compilation tests.
 # You can likely ignore the following for your application.
 #
@@ -55,28 +78,6 @@ BIN1024=test_binary_mlkem1024
 LIB512=libmlkem512.a
 LIB768=libmlkem768.a
 LIB1024=libmlkem1024.a
-
-CFLAGS := \
-	-Wall \
-	-Wextra \
-	-Werror=unused-result \
-	-Wpedantic \
-	-Werror \
-	-Wmissing-prototypes \
-	-Wshadow \
-	-Wpointer-arith \
-	-Wredundant-decls \
-	-Wconversion \
-	-Wsign-conversion \
-	-Wno-long-long \
-	-Wno-unknown-pragmas \
-	-Wno-unused-command-line-argument \
-	-O3 \
-	-fomit-frame-pointer \
-	-std=c99 \
-	-pedantic \
-	-MMD \
-        $(CFLAGS)
 
 BIN512_FULL=$(BUILD_DIR)/$(BIN512)
 BIN768_FULL=$(BUILD_DIR)/$(BIN768)

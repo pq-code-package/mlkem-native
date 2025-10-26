@@ -7,15 +7,7 @@ Q ?= @
 
 CC  ?= gcc
 
-# The following only concerns the cross-compilation tests.
-# You can likely ignore the following for your application.
-#
-# Append cross-prefix for cross compilation
-# When called from the root Makefile, CROSS_PREFIX has already been added here
-ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
-CC  := $(CROSS_PREFIX)$(CC)
-endif
-
+# Adjust CFLAGS if needed
 CFLAGS := \
 	-Wall \
 	-Wextra \
@@ -39,6 +31,14 @@ CFLAGS := \
 	-MMD \
 	$(CFLAGS)
 
+# The following only concerns the cross-compilation tests.
+# You can likely ignore the following for your application.
+#
+# Append cross-prefix for cross compilation
+# When called from the root Makefile, CROSS_PREFIX has already been added here
+ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
+CC  := $(CROSS_PREFIX)$(CC)
+endif
 
 # Part A:
 #

@@ -3,10 +3,36 @@
 .PHONY: build run clean
 .DEFAULT_GOAL := all
 
-# Append cross-prefix for cross compilation
-# Remove or ignore for native builds
 CC  ?= gcc
 AR  ?= ar
+
+# Adjust CFLAGS if needed
+CFLAGS := \
+	-Wall \
+	-Wextra \
+	-Werror=unused-result \
+	-Wpedantic \
+	-Werror \
+	-Wmissing-prototypes \
+	-Wshadow \
+	-Wpointer-arith \
+	-Wredundant-decls \
+	-Wconversion \
+	-Wsign-conversion \
+	-Wno-long-long \
+	-Wno-unknown-pragmas \
+	-Wno-unused-command-line-argument \
+	-O3 \
+	-fomit-frame-pointer \
+	-std=c99 \
+	-pedantic \
+	-MMD \
+	$(CFLAGS)
+
+# The following only concerns the cross-compilation tests.
+# You can likely ignore the following for your application.
+#
+# Append cross-prefix for cross compilation
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
@@ -47,28 +73,6 @@ APP_SOURCE=$(RNG_SOURCE) main.c
 BUILD_DIR=build
 BIN=test_binary
 LIB=libmlkem.a
-
-CFLAGS := \
-	-Wall \
-	-Wextra \
-	-Werror=unused-result \
-	-Wpedantic \
-	-Werror \
-	-Wmissing-prototypes \
-	-Wshadow \
-	-Wpointer-arith \
-	-Wredundant-decls \
-	-Wconversion \
-	-Wsign-conversion \
-	-Wno-long-long \
-	-Wno-unknown-pragmas \
-	-Wno-unused-command-line-argument \
-	-O3 \
-	-fomit-frame-pointer \
-	-std=c99 \
-	-pedantic \
-	-MMD \
-	$(CFLAGS)
 
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 LIB_NAME_FULL=$(BUILD_DIR)/$(LIB)

@@ -5,6 +5,29 @@
 
 CC  ?= gcc
 
+# Adjust CFLAGS if needed
+CFLAGS := \
+	-Wall \
+	-Wextra \
+	-Werror=unused-result \
+	-Wpedantic \
+	-Werror \
+	-Wmissing-prototypes \
+	-Wshadow \
+	-Wpointer-arith \
+	-Wredundant-decls \
+	-Wconversion \
+	-Wsign-conversion \
+	-Wno-long-long \
+	-Wno-unknown-pragmas \
+	-Wno-unused-command-line-argument \
+	-O3 \
+	-fomit-frame-pointer \
+	-std=c99 \
+	-pedantic \
+	-MMD \
+	$(CFLAGS)
+
 # The following only concerns the cross-compilation tests.
 # You can likely ignore the following for your application.
 #
@@ -51,28 +74,6 @@ ALL_SOURCE=$(MLK_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
 
 BUILD_DIR=build
 BIN=test_binary
-
-CFLAGS := \
-	-Wall \
-	-Wextra \
-	-Werror=unused-result \
-	-Wpedantic \
-	-Werror \
-	-Wmissing-prototypes \
-	-Wshadow \
-	-Wpointer-arith \
-	-Wredundant-decls \
-	-Wconversion \
-	-Wsign-conversion \
-	-Wno-long-long \
-	-Wno-unknown-pragmas \
-	-Wno-unused-command-line-argument \
-	-O3 \
-	-fomit-frame-pointer \
-	-std=c99 \
-	-pedantic \
-	-MMD \
-	$(CFLAGS)
 
 CFLAGS+=-DMLK_CONFIG_FILE="\"custom_config.h\""
 
