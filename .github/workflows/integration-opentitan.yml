@@ -39,7 +39,7 @@ jobs:
           mode: start
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
           ec2-image-id: ${{ env.AMI_UBUNTU_22_04_X86_64 }}
-          ec2-instance-type: c6i.2xlarge
+          ec2-instance-type: c7i.2xlarge
           ec2-volume-size: 32
           subnet-id: subnet-07b2729e5e065962f
           security-group-id: sg-0ab2e297196c8c381
