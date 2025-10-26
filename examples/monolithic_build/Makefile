@@ -3,10 +3,13 @@
 .PHONY: build run clean
 .DEFAULT_GOAL := all
 
-# Append cross-prefix for cross compilation
-# Remove or ignore for native builds
 CC  ?= gcc
 AR  ?= ar
+
+# The following only concerns the cross-compilation tests.
+# You can likely ignore the following for your application.
+#
+# Append cross-prefix for cross compilation
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
@@ -25,7 +28,7 @@ Q ?= @
 # Here, we use just a single monolithic compilation unit to include
 # multiple instances of mlkem-native.
 
-MLK_SOURCE=mlkem_native_monobuild.c
+MLK_SOURCE=mlkem/mlkem_native.c
 
 INC=-Imlkem/ -I./
 
