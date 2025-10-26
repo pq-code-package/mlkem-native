@@ -3,10 +3,13 @@
 .PHONY: build run clean
 .DEFAULT_GOAL := all
 
-# Append cross-prefix for cross compilation
-# Remove or ignore for native builds
 CC  ?= gcc
 AR  ?= ar
+
+# The following only concerns the cross-compilation tests.
+# You can likely ignore the following for your application.
+#
+# Append cross-prefix for cross compilation
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
@@ -20,13 +23,9 @@ endif
 #
 # mlkem-native source and header files
 #
-# Here, the mlkem-native C source is directly included in main.c.
-MLK_SOURCE_ASM = $(wildcard \
-	mlkem/**/*.S                 \
-	mlkem/**/**/*.S              \
-	mlkem/**/**/**/*.S           \
-	mlkem/**/**/**/**/*.S        \
-	mlkem/**/**/**/**/**/*.S)
+# Here, the monolithic C file for mlkem-native is directly included in main.c,
+# However, we still need to incldue the monolithic assembly file.
+MLK_SOURCE_ASM = mlkem/mlkem_native.S
 
 INC=-Imlkem/ -I./
 
@@ -105,6 +104,9 @@ CFLAGS := \
 	-pedantic \
 	-MMD \
 	$(CFLAGS)
+
+# For include of sys.h from multilevel_config.h
+CFLAGS += -Imlkem/src
 
 ASMFLAGS = -DMLK_CONFIG_FILE=\"multilevel_config.h\"
 ASMFLAGS += -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
