@@ -14,7 +14,7 @@ An application using mlkem-native with a custom FIPS-202 implementation needs th
 1. Arithmetic part of the mlkem-native source tree: [`mlkem/src/`](../../mlkem/src)
 2. A secure pseudo random number generator, implementing [`randombytes.h`](../../mlkem/src/randombytes.h).
 2. A custom FIPS202 with `fips202.h` header compatible with [`mlkem/src/fips202/fips202.h`](../../mlkem/src/fips202/fips202.h).
-   The FIPS202x4 header `fips202x4.h` can is unused with `MLK_CONFIG_SERIAL_FIPS202_ONLY` and can be filled with stubs.
+   The FIPS202x4 header `fips202x4.h` is unused with `MLK_CONFIG_SERIAL_FIPS202_ONLY` and can be filled with stubs.
 3. The application source code
 
 **WARNING:** The `randombytes()` implementation used here is for TESTING ONLY. You MUST NOT use this implementation

@@ -1,33 +1,64 @@
-# (SPDX-License-Identifier: CC-BY-4.0)
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-.PHONY: build run clean mlkem512_objs mlkem768_objs mlkem1024_objs mlkem_objs size size_objs
+.PHONY: build run clean mlkem512_objs mlkem768_objs mlkem1024_objs mlkem_objs
 .DEFAULT_GOAL := all
 
 Q ?= @
-# Append cross-prefix for cross compilation
-# Remove or ignore for native builds
+
 CC  ?= gcc
-SIZE ?= size
+
+# Adjust CFLAGS if needed
+CFLAGS := \
+	-Wall \
+	-Wextra \
+	-Werror=unused-result \
+	-Wpedantic \
+	-Werror \
+	-Wmissing-prototypes \
+	-Wshadow \
+	-Wpointer-arith \
+	-Wredundant-decls \
+	-Wconversion \
+	-Wsign-conversion \
+	-Wno-long-long \
+	-Wno-unknown-pragmas \
+	-Wno-unused-command-line-argument \
+	-O3 \
+	-fomit-frame-pointer \
+        -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem \
+	-std=c99 \
+	-pedantic \
+	-MMD \
+	$(CFLAGS)
+
+# If you want to use the native backends, the compiler needs to know about
+# the target architecture. Here, we import the default host detection from
+# mlkem-native's tests, but you can write your own or specialize accordingly.
+AUTO ?= 1
+include auto.mk
+
+# The following only concerns the cross-compilation tests.
+# You can likely ignore the following for your application.
+#
+# Append cross-prefix for cross compilation
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
-endif
-
-ifeq (,$(findstring $(CROSS_PREFIX),$(SIZE)))
-SIZE  := $(CROSS_PREFIX)$(SIZE)
 endif
 
 # Part A:
 #
 # mlkem-native source and header files
 #
-# If you are not concerned about minimizing for a specific backend,
-# you can just include _all_ source files into your build.
-MLK_SOURCE_ALL := $(wildcard             \
-    mlkem_native/mlkem/src/*.c           \
-    mlkem_native/mlkem/src/**/*.c        \
-    mlkem_native/mlkem/src/**/**/*.c     \
-    mlkem_native/mlkem/src/**/**/**/*.c)
+# In this example, we compile the individual mlkem-native source files directly.
+# Alternatively, you can compile the 'monobuild' source file mlkem_native.c.
+# See examples/monolithic_build for that.
+MLK_SOURCE_ALL := $(wildcard \
+	mlkem_native/mlkem/src/*.c \
+	mlkem_native/mlkem/src/**/*.c \
+	mlkem_native/mlkem/src/**/**/*.c \
+	mlkem_native/mlkem/src/**/**/**/*.c)
 MLK_SOURCE:=$(foreach S,$(MLK_SOURCE_ALL),\
   $(if $(findstring /native/,$S),,$S))
 
@@ -76,28 +107,6 @@ APP_SOURCE=$(wildcard *.c)
 
 BIN=test_binary
 
-CFLAGS := \
-	-Wall \
-	-Wextra \
-	-Werror \
-	-Wmissing-prototypes \
-	-Wshadow \
-	-Werror \
-	-Wpointer-arith \
-	-Wredundant-decls \
-	-Wconversion \
-	-Wsign-conversion \
-	-Wno-long-long \
-	-Wno-unknown-pragmas \
-	-Wno-unused-command-line-argument \
-	-fomit-frame-pointer \
-        -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem \
-	-std=c99 \
-	-pedantic \
-	-MMD \
-	-O3 \
-	$(CFLAGS)
-
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 
 $(BINARY_NAME_FULL): $(APP_SOURCE) $(RNG_SOURCE) $(MLKEM512_OBJS) $(MLKEM768_OBJS) $(MLKEM1024_OBJS)
@@ -105,22 +114,12 @@ $(BINARY_NAME_FULL): $(APP_SOURCE) $(RNG_SOURCE) $(MLKEM512_OBJS) $(MLKEM768_OBJ
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ -o $@
 
-all: build size_objs
+all: build
 
 build: $(BINARY_NAME_FULL)
 
 run: $(BINARY_NAME_FULL)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
-
-size: build
-	@echo "=== Size info for $(BINARY_NAME_FULL) ==="
-	$(Q)$(SIZE) $(BINARY_NAME_FULL)
-
-size_objs: size
-	$(Q)echo "=== Object size summary ==="
-	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem512 -name '*.o') | (read header; echo "$$header"; awk '$$5 != 0' | sort -k5 -n -r)
-	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem768 -name '*.o') | (read header; echo "$$header"; awk '$$5 != 0' | sort -k5 -n -r)
-	$(Q)$(SIZE) $(shell find $(BUILD_DIR)/mlkem1024 -name '*.o') | (read header; echo "$$header"; awk '$$5 != 0' | sort -k5 -n -r)
 
 clean:
 	rm -rf $(BUILD_DIR)

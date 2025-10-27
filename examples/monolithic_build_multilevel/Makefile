@@ -1,14 +1,44 @@
-# (SPDX-License-Identifier: CC-BY-4.0)
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-.PHONY: build run clean size
+.PHONY: build run clean
 .DEFAULT_GOAL := all
 
-# Append cross-prefix for cross compilation
-# Remove or ignore for native builds
 CC  ?= gcc
 AR  ?= ar
-SIZE ?= size
-Q ?= @
+
+# Adjust CFLAGS if needed
+CFLAGS := \
+	-Wall \
+	-Wextra \
+	-Werror=unused-result \
+	-Wpedantic \
+	-Werror \
+	-Wmissing-prototypes \
+	-Wshadow \
+	-Wpointer-arith \
+	-Wredundant-decls \
+	-Wconversion \
+	-Wsign-conversion \
+	-Wno-long-long \
+	-Wno-unknown-pragmas \
+	-Wno-unused-command-line-argument \
+	-O3 \
+	-fomit-frame-pointer \
+	-std=c99 \
+	-pedantic \
+	-MMD \
+	$(CFLAGS)
+
+# The example includes MLK_CHECK_APIS to API consistency checking,
+# which is incompatible with -Wredundant-decls.
+# You may likely ignore this.
+CFLAGS += -Wno-redundant-decls
+
+# The following only concerns the cross-compilation tests.
+# You can likely ignore the following for your application.
+#
+# Append cross-prefix for cross compilation
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
@@ -17,11 +47,6 @@ endif
 ifeq (,$(findstring $(CROSS_PREFIX),$(AR)))
 AR  := $(CROSS_PREFIX)$(AR)
 endif
-
-ifeq (,$(findstring $(CROSS_PREFIX),$(SIZE)))
-SIZE  := $(CROSS_PREFIX)$(SIZE)
-endif
-
 
 # Part A:
 #
@@ -55,23 +80,6 @@ BUILD_DIR=build
 BIN=test_binary
 LIB=libmlkem.a
 
-CFLAGS := \
-	-Wall \
-	-Wextra \
-	-Werror \
-	-Wmissing-prototypes \
-	-Wshadow \
-	-Wpointer-arith \
-	-Wno-long-long \
-	-Wno-unknown-pragmas \
-	-Wno-unused-command-line-argument \
-	-fomit-frame-pointer \
-	-std=c99 \
-	-pedantic \
-	-MMD \
-	-O3 \
-	$(CFLAGS)
-
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 LIB_NAME_FULL=$(BUILD_DIR)/$(LIB)
 
@@ -87,16 +95,12 @@ $(BINARY_NAME_FULL): $(APP_SOURCE) $(LIB_NAME_FULL)
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INC) $^ -o $@
 
-all: build size
+all: build
 
 build: $(BINARY_NAME_FULL)
 
 run: $(BINARY_NAME_FULL)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
-
-size: build
-	$(Q)echo "=== Size info for static lib ==="
-	$(Q)$(SIZE) ${LIB_NAME_FULL}
 
 clean:
 	rm -rf $(BUILD_DIR)

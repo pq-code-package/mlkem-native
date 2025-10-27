@@ -1,13 +1,39 @@
-# (SPDX-License-Identifier: CC-BY-4.0)
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-.PHONY: build run clean size
+.PHONY: build run clean
 .DEFAULT_GOAL := all
 
-# Append cross-prefix for cross compilation
-# Remove or ignore for native builds
 CC  ?= gcc
 AR  ?= ar
-SIZE ?= size
+
+# Adjust CFLAGS if needed
+CFLAGS := \
+	-Wall \
+	-Wextra \
+	-Werror=unused-result \
+	-Wpedantic \
+	-Werror \
+	-Wmissing-prototypes \
+	-Wshadow \
+	-Wpointer-arith \
+	-Wredundant-decls \
+	-Wconversion \
+	-Wsign-conversion \
+	-Wno-long-long \
+	-Wno-unknown-pragmas \
+	-Wno-unused-command-line-argument \
+	-O3 \
+	-fomit-frame-pointer \
+	-std=c99 \
+	-pedantic \
+	-MMD \
+        $(CFLAGS)
+
+# The following only concerns the cross-compilation tests.
+# You can likely ignore the following for your application.
+#
+# Append cross-prefix for cross compilation
 # When called from the root Makefile, CROSS_PREFIX has already been added here
 ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
 CC  := $(CROSS_PREFIX)$(CC)
@@ -15,10 +41,6 @@ endif
 
 ifeq (,$(findstring $(CROSS_PREFIX),$(AR)))
 AR  := $(CROSS_PREFIX)$(AR)
-endif
-
-ifeq (,$(findstring $(CROSS_PREFIX),$(SIZE)))
-SIZE  := $(CROSS_PREFIX)$(SIZE)
 endif
 
 Q ?= @
@@ -58,26 +80,6 @@ BIN1024=test_binary_mlkem1024
 LIB512=libmlkem512.a
 LIB768=libmlkem768.a
 LIB1024=libmlkem1024.a
-
-CFLAGS := \
-	-Wall \
-	-Wextra \
-	-Werror \
-	-Wmissing-prototypes \
-	-Wshadow \
-	-Wpointer-arith \
-	-Wredundant-decls \
-	-Wconversion \
-	-Wsign-conversion \
-	-Wno-long-long \
-	-Wno-unknown-pragmas \
-	-Wno-unused-command-line-argument \
-	-fomit-frame-pointer \
-	-std=c99 \
-	-pedantic \
-	-MMD \
-	-O3 \
-        $(CFLAGS)
 
 BIN512_FULL=$(BUILD_DIR)/$(BIN512)
 BIN768_FULL=$(BUILD_DIR)/$(BIN768)
@@ -123,7 +125,7 @@ $(BIN1024_FULL): $(APP_SOURCE) $(LIB1024_FULL)
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
 	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_API_PARAMETER_SET=1024 $(INC) $^ -o $@
 
-all: build size
+all: build
 
 build: $(BIN512_FULL) $(BIN768_FULL) $(BIN1024_FULL)
 
@@ -131,12 +133,6 @@ run: $(BIN512_FULL) $(BIN768_FULL) $(BIN1024_FULL)
 	$(Q)$(EXEC_WRAPPER) ./$(BIN512_FULL)
 	$(Q)$(EXEC_WRAPPER) ./$(BIN768_FULL)
 	$(Q)$(EXEC_WRAPPER) ./$(BIN1024_FULL)
-
-size: build
-	@echo "=== Size info for static libs ==="
-	@$(Q)$(SIZE) $(LIB512_FULL)
-	@$(Q)$(SIZE) $(LIB768_FULL)
-	@$(Q)$(SIZE) $(LIB1024_FULL)
 
 clean:
 	rm -rf $(BUILD_DIR)

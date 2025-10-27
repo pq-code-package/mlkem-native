@@ -8,13 +8,13 @@
 #include <string.h>
 
 
-void mlk_keccak_absorb_once(uint64_t *s, uint32_t r, const uint8_t *m,
+void mlk_keccak_absorb_once(uint64_t *s, unsigned r, const uint8_t *m,
                             size_t mlen, uint8_t p);
 
 void harness(void)
 {
   uint64_t *s;
-  uint32_t r;
+  unsigned r;
   const uint8_t *m;
   size_t mlen;
   uint8_t p;

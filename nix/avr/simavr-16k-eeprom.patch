@@ -1,0 +1,9 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+diff --git a/simavr/cores/avr/iom128rfr2.h b/simavr/cores/avr/iom128rfr2.h
+index 1234567..abcdefg 100644
+--- a/simavr/cores/avr/iom128rfr2.h
++++ b/simavr/cores/avr/iom128rfr2.h
+@@ -1,1 +1,1 @@
+-#define E2END                           (0xFFF)
++#define E2END                           (0x3FFF)

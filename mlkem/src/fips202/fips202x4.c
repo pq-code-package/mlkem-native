@@ -22,7 +22,7 @@
 
 typedef mlk_shake128x4ctx mlk_shake256x4_ctx;
 
-static void mlk_keccak_absorb_once_x4(uint64_t *s, uint32_t r,
+static void mlk_keccak_absorb_once_x4(uint64_t *s, unsigned r,
                                       const uint8_t *in0, const uint8_t *in1,
                                       const uint8_t *in2, const uint8_t *in3,
                                       size_t inlen, uint8_t p)
@@ -77,7 +77,7 @@ __contract__(
 
 static void mlk_keccak_squeezeblocks_x4(uint8_t *out0, uint8_t *out1,
                                         uint8_t *out2, uint8_t *out3,
-                                        size_t nblocks, uint64_t *s, uint32_t r)
+                                        size_t nblocks, uint64_t *s, unsigned r)
 __contract__(
     requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)
     requires(r == SHAKE128_RATE || r == SHAKE256_RATE)

@@ -84,6 +84,7 @@
 
           # arm-none-eabi-gcc + platform files from pqmx
           packages.m55-an547 = util.m55-an547;
+          packages.avr-toolchain = util.avr-toolchain;
           devShells.arm-embedded = util.mkShell {
             packages = builtins.attrValues
               {
@@ -92,6 +93,7 @@
               };
           };
 
+          devShells.avr = util.mkShell (import ./nix/avr { inherit pkgs; });
           devShells.hol_light = (util.mkShell {
             packages = builtins.attrValues {
               inherit (config.packages) linters hol_light s2n_bignum;

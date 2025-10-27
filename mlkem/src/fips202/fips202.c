@@ -50,13 +50,13 @@
  *
  * Arguments:   - uint64_t *s:       pointer to (uninitialized) output Keccak
  *                                   state
- *              - uint32_t r:        rate in bytes (e.g., 168 for SHAKE128)
+ *              - unsigned r:        rate in bytes (e.g., 168 for SHAKE128)
  *              - const uint8_t *m:  pointer to input to be absorbed into s
  *              - size_t mlen:       length of input in bytes
  *              - uint8_t p:         domain-separation byte for different
  *                                   Keccak-derived functions
  **************************************************/
-static void mlk_keccak_absorb_once(uint64_t *s, uint32_t r, const uint8_t *m,
+static void mlk_keccak_absorb_once(uint64_t *s, unsigned r, const uint8_t *m,
                                    size_t mlen, uint8_t p)
 __contract__(
     requires(mlen <= MLK_MAX_BUFFER_SIZE)
@@ -113,10 +113,10 @@ __contract__(
  * Arguments:   - uint8_t *h: pointer to output bytes
  *              - size_t nblocks: number of blocks to be squeezed
  *              - uint64_t *s_inc: pointer to input/output state
- *              - uint32_t r: rate in bytes (e.g., 168 for SHAKE128)
+ *              - unsigned r: rate in bytes (e.g., 168 for SHAKE128)
  **************************************************/
 static void mlk_keccak_squeezeblocks(uint8_t *h, size_t nblocks, uint64_t *s,
-                                     uint32_t r)
+                                     unsigned r)
 __contract__(
     requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)
     requires(nblocks <= 8 /* somewhat arbitrary bound */)
@@ -150,10 +150,10 @@ __contract__(
  * Arguments:   - uint8_t *h: pointer to output bytes
  *              - size_t outlen: number of bytes to be squeezed
  *              - uint64_t *s_inc: pointer to Keccak state
- *              - uint32_t r: rate in bytes (e.g., 168 for SHAKE128)
+ *              - unsigned r: rate in bytes (e.g., 168 for SHAKE128)
  **************************************************/
 static void mlk_keccak_squeeze_once(uint8_t *h, size_t outlen, uint64_t *s,
-                                    uint32_t r)
+                                    unsigned r)
 __contract__(
     requires(outlen <= MLK_MAX_BUFFER_SIZE)
     requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)

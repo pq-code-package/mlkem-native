@@ -101,7 +101,7 @@ __contract__(
    * Here, we assume it's sign-preserving "arithmetic" shift right.
    * See (C99 6.5.7 (5))
    */
-  const int32_t t = (magic * a + (1 << 25)) >> 26;
+  const int32_t t = (magic * a + ((int32_t)1 << 25)) >> 26;
 
   /*
    * t is in -10 .. +10, so we need 32-bit math to
