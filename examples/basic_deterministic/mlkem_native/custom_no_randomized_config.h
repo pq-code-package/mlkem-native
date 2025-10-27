@@ -12,6 +12,21 @@
  *   https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
  */
 
+/*
+ * WARNING: This file is auto-generated from scripts/autogen
+ *          in the mlkem-native repository.
+ *          Do not modify it directly.
+ */
+
+/*
+ * Test configuration: Config without randomized API
+ *
+ * This configuration differs from the default mlkem/src/config.h in the
+ * following places:
+ *   - MLK_CONFIG_NO_RANDOMIZED_API
+ */
+
+
 #ifndef MLK_CONFIG_H
 #define MLK_CONFIG_H
 
@@ -35,7 +50,7 @@
  * Name:        MLK_CONFIG_FILE
  *
  * Description: If defined, this is a header that will be included instead
- *              of this default configuration file mlkem/src/config.h.
+ *              of the default configuration file mlkem/src/config.h.
  *
  *              When you need to build mlkem-native in multiple configurations,
  *              using varying MLK_CONFIG_FILE can be more convenient
@@ -47,6 +62,7 @@
  *              on the command line.
  *
  *****************************************************************************/
+/* No need to set this -- we _are_ already in a custom config */
 /* #define MLK_CONFIG_FILE "config.h" */
 
 /******************************************************************************

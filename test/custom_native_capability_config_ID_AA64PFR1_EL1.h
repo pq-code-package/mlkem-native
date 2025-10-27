@@ -12,6 +12,22 @@
  *   https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
  */
 
+/*
+ * WARNING: This file is auto-generated from scripts/autogen
+ *          in the mlkem-native repository.
+ *          Do not modify it directly.
+ */
+
+/*
+ * Test configuration: Test configuration with ARM system register capability
+ * detection
+ *
+ * This configuration differs from the default mlkem/src/config.h in the
+ * following places:
+ *   - MLK_CONFIG_CUSTOM_CAPABILITY_FUNC
+ */
+
+
 #ifndef MLK_CONFIG_H
 #define MLK_CONFIG_H
 
@@ -35,7 +51,7 @@
  * Name:        MLK_CONFIG_FILE
  *
  * Description: If defined, this is a header that will be included instead
- *              of this default configuration file mlkem/src/config.h.
+ *              of the default configuration file mlkem/src/config.h.
  *
  *              When you need to build mlkem-native in multiple configurations,
  *              using varying MLK_CONFIG_FILE can be more convenient
@@ -114,6 +130,22 @@
  *
  *****************************************************************************/
 /* #define MLK_CONFIG_MULTILEVEL_NO_SHARED */
+
+/******************************************************************************
+ * Name:        MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
+ *
+ * Description: This is only relevant for single compilation unit (SCU)
+ *              builds of mlkem-native. In this case, it determines whether
+ *              directives defined in parameter-set-independent headers should
+ *              be #undef'ined or not at the of the SCU file. This is needed
+ *              in multilevel builds.
+ *
+ *              See examples/multilevel_build_native for an example.
+ *
+ *              This can also be set using CFLAGS.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_USE_NATIVE_BACKEND_ARITH
@@ -270,6 +302,32 @@
 */
 
 /******************************************************************************
+ * Name:        MLK_CONFIG_CUSTOM_RANDOMBYTES
+ *
+ * Description: mlkem-native does not provide a secure randombytes
+ *              implementation. Such an implementation has to provided by the
+ *              consumer.
+ *
+ *              If this option is not set, mlkem-native expects a function
+ *              void randombytes(uint8_t *out, size_t outlen).
+ *
+ *              Set this option and define `mlk_randombytes` if you want to
+ *              use a custom method to sample randombytes with a different name
+ *              or signature.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_CUSTOM_RANDOMBYTES
+   #if !defined(__ASSEMBLER__)
+   #include <stdint.h>
+   #include "sys.h"
+   static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
+   {
+       ... your implementation ...
+   }
+   #endif
+*/
+
+/******************************************************************************
  * Name:        MLK_CONFIG_CUSTOM_CAPABILITY_FUNC
  *
  * Description: mlkem-native backends may rely on specific hardware features.
@@ -291,8 +349,8 @@
  *              will be run on, you must use this option.
  *
  *****************************************************************************/
-#if !defined(__ASSEMBLER__)
 #define MLK_CONFIG_CUSTOM_CAPABILITY_FUNC
+#if !defined(__ASSEMBLER__)
 #include <stdint.h>
 #include "../mlkem/src/sys.h"
 
@@ -321,6 +379,92 @@ static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
 }
 #endif /* !__ASSEMBLER__ */
 
+
+/******************************************************************************
+ * Name:        MLK_CONFIG_CUSTOM_MEMCPY
+ *
+ * Description: Set this option and define `mlk_memcpy` if you want to
+ *              use a custom method to copy memory instead of the standard
+ *              library memcpy function.
+ *
+ *              The custom implementation must have the same signature and
+ *              behavior as the standard memcpy function:
+ *              void *mlk_memcpy(void *dest, const void *src, size_t n)
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_CUSTOM_MEMCPY
+   #if !defined(__ASSEMBLER__)
+   #include <stdint.h>
+   #include "sys.h"
+   static MLK_INLINE void *mlk_memcpy(void *dest, const void *src, size_t n)
+   {
+       ... your implementation ...
+   }
+   #endif
+*/
+
+/******************************************************************************
+ * Name:        MLK_CONFIG_CUSTOM_MEMSET
+ *
+ * Description: Set this option and define `mlk_memset` if you want to
+ *              use a custom method to set memory instead of the standard
+ *              library memset function.
+ *
+ *              The custom implementation must have the same signature and
+ *              behavior as the standard memset function:
+ *              void *mlk_memset(void *s, int c, size_t n)
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_CUSTOM_MEMSET
+   #if !defined(__ASSEMBLER__)
+   #include <stdint.h>
+   #include "sys.h"
+   static MLK_INLINE void *mlk_memset(void *s, int c, size_t n)
+   {
+       ... your implementation ...
+   }
+   #endif
+*/
+
+/******************************************************************************
+ * Name:        MLK_CONFIG_INTERNAL_API_QUALIFIER
+ *
+ * Description: If set, this option provides an additional function
+ *              qualifier to be added to declarations of internal API.
+ *
+ *              The primary use case for this option are single-CU builds,
+ *              in which case this option can be set to `static`.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_INTERNAL_API_QUALIFIER */
+
+/******************************************************************************
+ * Name:        MLK_CONFIG_EXTERNAL_API_QUALIFIER
+ *
+ * Description: If set, this option provides an additional function
+ *              qualifier to be added to declarations of mlkem-native's
+ *              public API.
+ *
+ *              The primary use case for this option are single-CU builds
+ *              where the public API exposed by mlkem-native is wrapped by
+ *              another API in the consuming application. In this case,
+ *              even mlkem-native's public API can be marked `static`.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_EXTERNAL_API_QUALIFIER */
+
+/******************************************************************************
+ * Name:        MLK_CONFIG_CT_TESTING_ENABLED
+ *
+ * Description: If set, mlkem-native annotates data as secret / public using
+ *              valgrind's annotations VALGRIND_MAKE_MEM_UNDEFINED and
+ *              VALGRIND_MAKE_MEM_DEFINED, enabling various checks for secret-
+ *              dependent control flow of variable time execution (depending
+ *              on the exact version of valgrind installed).
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_CT_TESTING_ENABLED */
+
 /******************************************************************************
  * Name:        MLK_CONFIG_NO_ASM
  *
@@ -343,6 +487,24 @@ static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
  *
  *****************************************************************************/
 /* #define MLK_CONFIG_NO_ASM */
+
+/******************************************************************************
+ * Name:        MLK_CONFIG_NO_RANDOMIZED_API
+ *
+ * Description: If this option is set, mlkem-native will be built without the
+ *              randomized API functions (crypto_kem_keypair and
+ *              crypto_kem_enc).
+ *.             This allows users to build mlkem-native without providing a
+ *              randombytes() implementation if they only need the
+ *              deterministic API
+ *              (crypto_kem_keypair_derand, crypto_kem_enc_derand,
+ *              crypto_kem_dec).
+ *
+ *              NOTE: This option is incompatible with MLK_CONFIG_KEYGEN_PCT
+ *              as the current PCT implementation requires crypto_kem_enc().
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_NO_RANDOMIZED_API */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_KEYGEN_PCT

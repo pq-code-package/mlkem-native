@@ -12,6 +12,21 @@
  *   https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
  */
 
+/*
+ * WARNING: This file is auto-generated from scripts/autogen
+ *          in the mlkem-native repository.
+ *          Do not modify it directly.
+ */
+
+/*
+ * Test configuration: Test configuration with custom memset
+ *
+ * This configuration differs from the default mlkem/src/config.h in the
+ * following places:
+ *   - MLK_CONFIG_CUSTOM_MEMSET
+ */
+
+
 #ifndef MLK_CONFIG_H
 #define MLK_CONFIG_H
 
@@ -35,7 +50,7 @@
  * Name:        MLK_CONFIG_FILE
  *
  * Description: If defined, this is a header that will be included instead
- *              of this default configuration file mlkem/src/config.h.
+ *              of the default configuration file mlkem/src/config.h.
  *
  *              When you need to build mlkem-native in multiple configurations,
  *              using varying MLK_CONFIG_FILE can be more convenient
@@ -312,6 +327,38 @@
 */
 
 /******************************************************************************
+ * Name:        MLK_CONFIG_CUSTOM_CAPABILITY_FUNC
+ *
+ * Description: mlkem-native backends may rely on specific hardware features.
+ *              Those backends will only be included in an mlkem-native build
+ *              if support for the respective features is enabled at
+ *              compile-time. However, when building for a heteroneous set
+ *              of CPUs to run the resulting binary/library on, feature
+ *              detection at _runtime_ is needed to decided whether a backend
+ *              can be used or not.
+ *
+ *              Set this option and define `mlk_sys_check_capability` if you
+ *              want to use a custom method to dispatch between implementations.
+ *
+ *              If this option is not set, mlkem-native uses compile-time
+ *              feature detection only to decide which backend to use.
+ *
+ *              If you compile mlkem-native on a system with different
+ *              capabilities than the system that the resulting binary/library
+ *              will be run on, you must use this option.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_CUSTOM_CAPABILITY_FUNC
+   static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
+   __contract__(
+     ensures(return_value == 0 || return_value == 1)
+   )
+   {
+       ... your implementation ...
+   }
+*/
+
+/******************************************************************************
  * Name:        MLK_CONFIG_CUSTOM_MEMCPY
  *
  * Description: Set this option and define `mlk_memcpy` if you want to
@@ -362,6 +409,7 @@ static MLK_INLINE void *mlk_memset(void *s, int c, size_t n)
   return s;
 }
 #endif /* !__ASSEMBLER__ */
+
 
 /******************************************************************************
  * Name:        MLK_CONFIG_INTERNAL_API_QUALIFIER
@@ -424,6 +472,24 @@ static MLK_INLINE void *mlk_memset(void *s, int c, size_t n)
  *
  *****************************************************************************/
 /* #define MLK_CONFIG_NO_ASM */
+
+/******************************************************************************
+ * Name:        MLK_CONFIG_NO_RANDOMIZED_API
+ *
+ * Description: If this option is set, mlkem-native will be built without the
+ *              randomized API functions (crypto_kem_keypair and
+ *              crypto_kem_enc).
+ *.             This allows users to build mlkem-native without providing a
+ *              randombytes() implementation if they only need the
+ *              deterministic API
+ *              (crypto_kem_keypair_derand, crypto_kem_enc_derand,
+ *              crypto_kem_dec).
+ *
+ *              NOTE: This option is incompatible with MLK_CONFIG_KEYGEN_PCT
+ *              as the current PCT implementation requires crypto_kem_enc().
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_NO_RANDOMIZED_API */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_KEYGEN_PCT

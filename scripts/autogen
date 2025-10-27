@@ -71,17 +71,21 @@ def file_updated(filename):
     print(f"\r{BOLD}updated {filename}{NORMAL}")
 
 
-def gen_header():
-    yield "/*"
-    yield " * Copyright (c) The mlkem-native project authors"
-    yield " * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT"
-    yield " */"
+def gen_autogen_warning():
     yield ""
     yield "/*"
     yield " * WARNING: This file is auto-generated from scripts/autogen"
     yield " *          in the mlkem-native repository."
     yield " *          Do not modify it directly."
     yield " */"
+
+
+def gen_header():
+    yield "/*"
+    yield " * Copyright (c) The mlkem-native project authors"
+    yield " * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT"
+    yield " */"
+    yield from gen_autogen_warning()
     yield ""
 
 
@@ -2902,6 +2906,141 @@ def update_hol_light_bytecode(dry_run=False):
         update_bytecode_in_proof_script(ml_file, bytecode, dry_run)
 
 
+def gen_test_config(config_path, config_spec, default_config_content, dry_run=False):
+    """Generate a config file by modifying the default config."""
+    status_update("test configs", config_path)
+
+    # Start with the default config
+    lines = default_config_content.split("\n")
+
+    # Find copyright and reference header
+    references_start = None
+    references_end = None
+
+    # NOTE: This needs further work if any custom config contains citations
+    # not included in the default configuration. In this case, the reference
+    # section needs to be updated.
+
+    for i, line in enumerate(lines):
+        if "/* References" in line:
+            references_start = i
+        elif (
+            references_start is not None
+            and references_end is None
+            and line.strip() == "*/"
+        ):
+            references_end = i + 1
+            break
+
+    header = lines[:references_end]
+    header += list(gen_autogen_warning())
+
+    header.append("")
+    header.append("/*")
+    header.append(f" * Test configuration: {config_spec['description']}")
+    header.append(" *")
+    header.append(
+        " * This configuration differs from the default mlkem/src/config.h in the following places:"
+    )
+
+    def spec_has_value(opt_value):
+        if not isinstance(opt_value, dict):
+            return True
+        else:
+            return "value" in opt_value.keys() or "content" in opt_value.keys()
+
+    for opt_name, opt_value in config_spec["defines"].items():
+        if not spec_has_value(opt_value):
+            continue
+        header.append(f" *   - {opt_name}")
+    header.append(" */")
+    header.append("")
+
+    # Combine: new header + config body
+    lines = header + lines[references_end:]
+
+    def locate_config_option(lines, opt_name):
+        """Locate configuration option in lines. Returns (start, end) line indices"""
+        i = 0
+        while i < len(lines):
+            if re.search(rf"\* Name:\s+{re.escape(opt_name)}\b", lines[i]):
+                # Skip to the end of this comment block (find the closing */)
+                while i < len(lines) and not lines[i].strip().endswith("*/"):
+                    i += 1
+                i += 1  # Skip the closing */
+
+                start = i
+                # Find the next config option (starts with /*****)
+                while i < len(lines):
+                    if lines[i].strip().startswith("/****"):
+                        # Back up to exclude empty line before next option
+                        while i > start and lines[i - 1].strip() == "":
+                            i -= 1
+                        return (start, i)
+                    i += 1
+                # If no next option found, go to end
+                return (start, len(lines))
+            i += 1
+        raise Exception(f"Could not find config option {opt_name} in default config")
+
+    def replace_config_option(lines, opt_name, opt_value):
+        """Replace config option with new value"""
+        block_start, block_end = locate_config_option(lines, opt_name)
+
+        def content_from_value(value):
+            if value is True:
+                return [f"#define {opt_name}"]
+            elif value is False:
+                return [f"/* #define {opt_name} */"]
+            else:
+                return [f"#define {opt_name} {str(value)}"]
+
+        # Extract value, follow_up, and comment
+        if isinstance(opt_value, dict):
+            if "content" in opt_value:
+                content = opt_value.get("content").split("\n")
+            elif "value" in opt_value:
+                content = content_from_value(opt_value["value"])
+            else:
+                # Use original content
+                content = lines[block_start:block_end]
+            if "comment" in opt_value:
+                comment = opt_value.get("comment").split("\n")
+            else:
+                comment = []
+        else:
+            content = content_from_value(opt_value)
+            comment = []
+
+        lines[block_start:block_end] = comment + content
+
+    # Apply modifications for each defined option
+    for opt_name, opt_value in config_spec["defines"].items():
+        replace_config_option(lines, opt_name, opt_value)
+
+    content = "\n".join(lines)
+    update_file(
+        config_path,
+        content,
+        dry_run=dry_run,
+    )
+
+
+def gen_test_configs(dry_run=False):
+    """Generate all test configuration files from metadata."""
+    # Load metadata
+    with open("test/configs.yml", "r") as f:
+        metadata = yaml.safe_load(f)
+
+    # Load default config
+    with open("mlkem/src/config.h", "r") as f:
+        default_config = f.read()
+
+    # Generate each test config
+    for config_spec in metadata["configs"]:
+        gen_test_config(config_spec["path"], config_spec, default_config, dry_run)
+
+
 def _main():
     slothy_choices = [
         "ntt",
@@ -3000,6 +3139,9 @@ def _main():
 
     check_macro_typos()
     high_level_status("Checked macro typos")
+
+    gen_test_configs(args.dry_run)
+    high_level_status("Generated test configs")
 
 
 if __name__ == "__main__":
