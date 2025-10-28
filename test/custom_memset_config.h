@@ -479,7 +479,7 @@ static MLK_INLINE void *mlk_memset(void *s, int c, size_t n)
  * Description: If this option is set, mlkem-native will be built without the
  *              randomized API functions (crypto_kem_keypair and
  *              crypto_kem_enc).
- *.             This allows users to build mlkem-native without providing a
+ *              This allows users to build mlkem-native without providing a
  *              randombytes() implementation if they only need the
  *              deterministic API
  *              (crypto_kem_keypair_derand, crypto_kem_enc_derand,

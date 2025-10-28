@@ -315,6 +315,12 @@
  *              or signature.
  *
  *****************************************************************************/
+/* Even though we use the default randombytes signature here, registering it
+ * as a custom implementation avoids double-declaration of randombytes via
+ * mlkem/randombytes.h and test_only_rng/notrandombytes.h: The former is by
+ * default included by mlkem-native, and the latter is needed for this example
+ * since we rely on the additional randombytes_reset() API. */
+
 #define MLK_CONFIG_CUSTOM_RANDOMBYTES
 #if !defined(__ASSEMBLER__)
 #include <stdint.h>
@@ -473,7 +479,7 @@ static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
  * Description: If this option is set, mlkem-native will be built without the
  *              randomized API functions (crypto_kem_keypair and
  *              crypto_kem_enc).
- *.             This allows users to build mlkem-native without providing a
+ *              This allows users to build mlkem-native without providing a
  *              randombytes() implementation if they only need the
  *              deterministic API
  *              (crypto_kem_keypair_derand, crypto_kem_enc_derand,

@@ -2995,7 +2995,6 @@ def gen_test_config(config_path, config_spec, default_config_content, dry_run=Fa
             else:
                 return [f"#define {opt_name} {str(value)}"]
 
-        # Extract value, follow_up, and comment
         if isinstance(opt_value, dict):
             if "content" in opt_value:
                 content = opt_value.get("content").split("\n")

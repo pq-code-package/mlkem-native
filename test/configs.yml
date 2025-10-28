@@ -355,6 +355,12 @@ configs:
       MLK_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
       MLK_CONFIG_CUSTOM_RANDOMBYTES:
+        comment: |
+          /* Even though we use the default randombytes signature here, registering it
+           * as a custom implementation avoids double-declaration of randombytes via
+           * mlkem/randombytes.h and test_only_rng/notrandombytes.h: The former is by
+           * default included by mlkem-native, and the latter is needed for this example
+           * since we rely on the additional randombytes_reset() API. */
         content: |
           #define MLK_CONFIG_CUSTOM_RANDOMBYTES
           #if !defined(__ASSEMBLER__)
