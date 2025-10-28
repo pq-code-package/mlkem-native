@@ -1,0 +1,395 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+# Metadata for test configuration files
+# Each entry describes how a test config differs from mlkem/src/config.h
+
+configs:
+  - path: test/no_asm_config.h
+    description: "Test configuration with no assembly code"
+    defines:
+      MLK_CONFIG_NO_ASM: true
+      MLK_CONFIG_CUSTOM_ZEROIZE:
+        content: |
+          #define MLK_CONFIG_CUSTOM_ZEROIZE
+          #if !defined(__ASSEMBLER__)
+          #include <stdint.h>
+          #include <string.h>
+          #include "../mlkem/src/sys.h"
+          static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+          {
+            explicit_bzero(ptr, len);
+          }
+          #endif /* !__ASSEMBLER__ */
+
+  - path: test/serial_fips202_config.h
+    description: "Test configuration with serial FIPS202 only"
+    defines:
+      MLK_CONFIG_SERIAL_FIPS202_ONLY: true
+
+  - path: test/custom_randombytes_config.h
+    description: "Test configuration with custom randombytes"
+    defines:
+      MLK_CONFIG_CUSTOM_RANDOMBYTES:
+        content: |
+          #define MLK_CONFIG_CUSTOM_RANDOMBYTES
+          #if !defined(__ASSEMBLER__)
+          #include <stdint.h>
+          #include "../mlkem/src/sys.h"
+          #include "notrandombytes/notrandombytes.h"
+          static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
+          {
+            randombytes(ptr, len);
+          }
+          #endif /* !__ASSEMBLER__ */
+
+  - path: test/custom_zeroize_config.h
+    description: "Test configuration with custom zeroize"
+    defines:
+      MLK_CONFIG_CUSTOM_ZEROIZE:
+        content: |
+          #define MLK_CONFIG_CUSTOM_ZEROIZE
+          #if !defined(__ASSEMBLER__)
+          #include <stdint.h>
+          #include <string.h>
+          #include "../mlkem/src/sys.h"
+          static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+          {
+            explicit_bzero(ptr, len);
+          }
+          #endif /* !__ASSEMBLER__ */
+
+  - path: test/custom_memcpy_config.h
+    description: "Test configuration with custom memcpy"
+    defines:
+      MLK_CONFIG_CUSTOM_MEMCPY:
+        content: |
+          #define MLK_CONFIG_CUSTOM_MEMCPY
+          #if !defined(__ASSEMBLER__)
+          #include <stddef.h>
+          #include <stdint.h>
+          #include "../mlkem/src/sys.h"
+          static MLK_INLINE void *mlk_memcpy(void *dest, const void *src, size_t n)
+          {
+            /* Simple byte-by-byte copy implementation for testing */
+            unsigned char *d = (unsigned char *)dest;
+            const unsigned char *s = (const unsigned char *)src;
+            for (size_t i = 0; i < n; i++)
+            {
+              d[i] = s[i];
+            }
+            return dest;
+          }
+          #endif /* !__ASSEMBLER__ */
+
+  - path: test/custom_memset_config.h
+    description: "Test configuration with custom memset"
+    defines:
+      MLK_CONFIG_CUSTOM_MEMSET:
+        content: |
+          #define MLK_CONFIG_CUSTOM_MEMSET
+          #if !defined(__ASSEMBLER__)
+          #include <stddef.h>
+          #include <stdint.h>
+          #include "../mlkem/src/sys.h"
+          static MLK_INLINE void *mlk_memset(void *s, int c, size_t n)
+          {
+            /* Simple byte-by-byte set implementation for testing */
+            unsigned char *ptr = (unsigned char *)s;
+            for (size_t i = 0; i < n; i++)
+            {
+              ptr[i] = (unsigned char)c;
+            }
+            return s;
+          }
+          #endif /* !__ASSEMBLER__ */
+
+  - path: test/custom_stdlib_config.h
+    description: "Test configuration with custom stdlib functions"
+    defines:
+      MLK_CONFIG_CUSTOM_MEMCPY:
+        content: |
+          #define MLK_CONFIG_CUSTOM_MEMCPY
+          #if !defined(__ASSEMBLER__)
+          #include <stddef.h>
+          #include <stdint.h>
+          #include "../mlkem/src/sys.h"
+          static MLK_INLINE void *mlk_memcpy(void *dest, const void *src, size_t n)
+          {
+            /* Simple byte-by-byte copy implementation for testing */
+            unsigned char *d = (unsigned char *)dest;
+            const unsigned char *s = (const unsigned char *)src;
+            for (size_t i = 0; i < n; i++)
+            {
+              d[i] = s[i];
+            }
+            return dest;
+          }
+          #endif /* !__ASSEMBLER__ */
+      MLK_CONFIG_CUSTOM_MEMSET:
+        content: |
+          #define MLK_CONFIG_CUSTOM_MEMSET
+          #if !defined(__ASSEMBLER__)
+          #include <stddef.h>
+          #include <stdint.h>
+          #include "../mlkem/src/sys.h"
+          static MLK_INLINE void *mlk_memset(void *s, int c, size_t n)
+          {
+            /* Simple byte-by-byte set implementation for testing */
+            unsigned char *ptr = (unsigned char *)s;
+            for (size_t i = 0; i < n; i++)
+            {
+              ptr[i] = (unsigned char)c;
+            }
+            return s;
+          }
+          #endif /* !__ASSEMBLER__ */
+
+  - path: test/break_pct_config.h
+    description: "Test configuration for PCT breakage testing"
+    defines:
+      MLK_CONFIG_KEYGEN_PCT: true
+      MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST:
+        content: |
+          #define MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
+          #if !defined(__ASSEMBLER__)
+          #include <stdlib.h>
+          #include <string.h>
+          #include "../mlkem/src/sys.h"
+          static MLK_INLINE int mlk_break_pct(void)
+          {
+            /* Break PCT if and only if MLK_BREAK_PCT is set to 1 */
+            const char *val = getenv("MLK_BREAK_PCT");
+            return val != NULL && strcmp(val, "1") == 0;
+          }
+          #endif /* !__ASSEMBLER__ */
+
+  - path: test/custom_native_capability_config_0.h
+    description: "Test configuration with custom capability function returning 0"
+    defines:
+      MLK_CONFIG_CUSTOM_CAPABILITY_FUNC:
+        content: |
+          #define MLK_CONFIG_CUSTOM_CAPABILITY_FUNC
+          #if !defined(__ASSEMBLER__)
+          #include "../mlkem/src/sys.h"
+          /* System capability enumeration */
+
+          static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
+          {
+            (void)cap; /* Ignore parameter */
+            return 0;
+          }
+          #endif /* !__ASSEMBLER__ */
+
+  - path: test/custom_native_capability_config_1.h
+    description: "Test configuration with custom capability function returning 1"
+    defines:
+      MLK_CONFIG_CUSTOM_CAPABILITY_FUNC:
+        content: |
+          #define MLK_CONFIG_CUSTOM_CAPABILITY_FUNC
+          #if !defined(__ASSEMBLER__)
+          #include "../mlkem/src/sys.h"
+
+          static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
+          {
+            (void)cap; /* Ignore parameter */
+            return 1;
+          }
+          #endif /* !__ASSEMBLER__ */
+
+  - path: test/custom_native_capability_config_CPUID_AVX2.h
+    description: "Test configuration with CPUID-based AVX2 capability detection"
+    defines:
+      MLK_CONFIG_CUSTOM_CAPABILITY_FUNC:
+        content: |
+          #define MLK_CONFIG_CUSTOM_CAPABILITY_FUNC
+          #if !defined(__ASSEMBLER__)
+          #include <stdint.h>
+          #include "../mlkem/src/sys.h"
+
+          /* Assert this config is only used on Linux/x86_64 systems */
+          #if !defined(MLK_SYS_X86_64) || !defined(MLK_SYS_LINUX)
+          #error "This configuration is only supported on Linux/x86_64 systems"
+          #endif
+
+          static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
+          {
+            if (cap == MLK_SYS_CAP_AVX2)
+            {
+              uint32_t eax, ebx, ecx, edx;
+
+              /* AVX2 support is queried using `cpuid` with EAX=7, ECX=0.
+               * Check first if `cpuid` supports EAX=7 by calling it with
+               * EAX=0, which gives the maximum supported value of EAX in
+               * EAX. */
+
+              __asm__ volatile("cpuid"
+                               : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx)
+                               : "a"(0));
+
+              if (eax < 7)
+              {
+                return 0; /* Extended features not supported */
+              }
+
+              __asm__ volatile("cpuid"
+                               : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx)
+                               : "a"(7), "c"(0));
+
+              /* AVX2 is bit 5 in EBX */
+              return (ebx & (1 << 5)) ? 1 : 0;
+            }
+
+            /* Default to 0 (conservative) for unknown capabilities */
+            return 0;
+          }
+          #endif /* !__ASSEMBLER__ */
+
+  - path: test/custom_native_capability_config_ID_AA64PFR1_EL1.h
+    description: "Test configuration with ARM system register capability detection"
+    defines:
+      MLK_CONFIG_CUSTOM_CAPABILITY_FUNC:
+        content: |
+          #define MLK_CONFIG_CUSTOM_CAPABILITY_FUNC
+          #if !defined(__ASSEMBLER__)
+          #include <stdint.h>
+          #include "../mlkem/src/sys.h"
+
+          #if !defined(MLK_SYS_AARCH64) || !defined(MLK_SYS_LINUX)
+          #error This configuration is only suitable for Linux/AArch64 systems
+          #endif
+
+          static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
+          {
+            if (cap == MLK_SYS_CAP_SHA3)
+            {
+              uint64_t id_aa64pfr1_el1;
+
+              /* Read ID_AA64PFR1_EL1 system register */
+              __asm__ volatile("mrs %0, id_aa64pfr1_el1" : "=r"(id_aa64pfr1_el1));
+
+              /* Extract SHA3 field (bits 35:32) and check if SHA3 is supported */
+              /* SHA3 field: 0b0000 = not implemented, 0b0001 = SHA3 implemented */
+              uint64_t sha3_field = (id_aa64pfr1_el1 >> 32) & 0xF;
+
+              return (sha3_field == 1) ? 1 : 0;
+            }
+
+            /* Default to 0 (conservative) for unknown capabilities */
+            return 0;
+          }
+          #endif /* !__ASSEMBLER__ */
+
+
+  # Example configs
+  - path: examples/monolithic_build/config_512.h
+    description: "Monolithic build config for ML-KEM-512"
+    defines:
+      MLK_CONFIG_PARAMETER_SET: 512
+      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
+      MLK_CONFIG_INTERNAL_API_QUALIFIER: static
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/monolithic_build/config_768.h
+    description: "Monolithic build config for ML-KEM-768"
+    defines:
+      MLK_CONFIG_PARAMETER_SET: 768
+      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
+      MLK_CONFIG_INTERNAL_API_QUALIFIER: static
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/monolithic_build/config_1024.h
+    description: "Monolithic build config for ML-KEM-1024"
+    defines:
+      MLK_CONFIG_PARAMETER_SET: 1024
+      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
+      MLK_CONFIG_INTERNAL_API_QUALIFIER: static
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/monolithic_build_native/config_512.h
+    description: "Monolithic build config for ML-KEM-512 (native backends disabled)"
+    defines:
+      MLK_CONFIG_PARAMETER_SET: 512
+      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
+      MLK_CONFIG_INTERNAL_API_QUALIFIER: static
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/monolithic_build_native/config_768.h
+    description: "Monolithic build config for ML-KEM-768 (native backends disabled)"
+    defines:
+      MLK_CONFIG_PARAMETER_SET: 768
+      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
+      MLK_CONFIG_INTERNAL_API_QUALIFIER: static
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/monolithic_build_native/config_1024.h
+    description: "Monolithic build config for ML-KEM-1024 (native backends disabled)"
+    defines:
+      MLK_CONFIG_PARAMETER_SET: 1024
+      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
+      MLK_CONFIG_INTERNAL_API_QUALIFIER: static
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/monolithic_build_multilevel/multilevel_config.h
+    description: "Multilevel monolithic build config"
+    defines:
+      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
+      MLK_CONFIG_INTERNAL_API_QUALIFIER: static
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/monolithic_build_multilevel_native/multilevel_config.h
+    description: "Multilevel monolithic build config with native backends"
+    defines:
+      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
+      MLK_CONFIG_USE_NATIVE_BACKEND_ARITH: true
+      MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
+      MLK_CONFIG_INTERNAL_API_QUALIFIER: static
+      MLK_CONFIG_EXTERNAL_API_QUALIFIER: static
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+      MLK_CONFIG_CUSTOM_RANDOMBYTES:
+        comment: |
+          /* Even though we use the default randombytes signature here, registering it
+           * as a custom implementation avoids double-declaration of randombytes via
+           * mlkem/randombytes.h and test_only_rng/notrandombytes.h: The former is by
+           * default included by mlkem-native, and the latter is needed for this example
+           * since we rely on the additional randombytes_reset() API. */
+        content: |
+          #define MLK_CONFIG_CUSTOM_RANDOMBYTES
+          #if !defined(__ASSEMBLER__)
+          #include <stdint.h>
+          #include "sys.h"
+          #include "test_only_rng/notrandombytes.h"
+          static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
+          {
+            randombytes(ptr, len);
+          }
+          #endif /* !__ASSEMBLER__ */
+
+  - path: examples/custom_backend/mlkem_native/custom_config.h
+    description: "Custom backend config with tiny SHA3"
+    defines:
+      MLK_CONFIG_PARAMETER_SET:
+        comment: "/* This is set on the command line */"
+      MLK_CONFIG_USE_NATIVE_BACKEND_ARITH:
+        comment: "/* No native arithmetic backend */"
+        value: false
+      MLK_CONFIG_NAMESPACE_PREFIX: CUSTOM_TINY_SHA3
+      MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
+      MLK_CONFIG_FIPS202_BACKEND_FILE: '"fips202/native/custom/custom.h"'
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/basic_deterministic/mlkem_native/custom_no_randomized_config.h
+    description: "Config without randomized API"
+    defines:
+      MLK_CONFIG_NO_RANDOMIZED_API: true
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"

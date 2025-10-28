@@ -35,7 +35,7 @@
  * Name:        MLK_CONFIG_FILE
  *
  * Description: If defined, this is a header that will be included instead
- *              of this default configuration file mlkem/src/config.h.
+ *              of the default configuration file mlkem/src/config.h.
  *
  *              When you need to build mlkem-native in multiple configurations,
  *              using varying MLK_CONFIG_FILE can be more convenient
@@ -457,7 +457,7 @@
  * Description: If this option is set, mlkem-native will be built without the
  *              randomized API functions (crypto_kem_keypair and
  *              crypto_kem_enc).
- *.             This allows users to build mlkem-native without providing a
+ *              This allows users to build mlkem-native without providing a
  *              randombytes() implementation if they only need the
  *              deterministic API
  *              (crypto_kem_keypair_derand, crypto_kem_enc_derand,
