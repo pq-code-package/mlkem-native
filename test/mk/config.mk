@@ -78,9 +78,17 @@ endif
 # Include retained variables #
 ##############################
 
+RETAINED_VARS := CROSS_PREFIX CYCLES OPT AUTO
+
+# Capture values of environment variables before setting defaults,
+# this ensures we can detect when they change in order to trigger a rebuild.
+define CAPTURE_VAR
+$(1)_FROM_ENV := $$($(1))
+endef
+$(foreach var,$(RETAINED_VARS),$(eval $(call CAPTURE_VAR,$(var))))
+
 CYCLES ?=
 OPT ?= 1
-RETAINED_VARS := CROSS_PREFIX CYCLES OPT AUTO
 
 BUILD_DIR ?= test/build
 
@@ -90,6 +98,14 @@ OBJS = $(call MAKE_OBJS,$(BUILD_DIR),$(1))
 CONFIG := $(BUILD_DIR)/config.mk
 
 -include $(CONFIG)
+
+# After including the cached config, restore environment/command-line values if they were set
+define RESTORE_VAR
+ifneq ($$($(1)_FROM_ENV),)
+  $(1) := $$($(1)_FROM_ENV)
+endif
+endef
+$(foreach var,$(RETAINED_VARS),$(eval $(call RESTORE_VAR,$(var))))
 
 $(CONFIG):
 	@echo "  GEN     $@"
