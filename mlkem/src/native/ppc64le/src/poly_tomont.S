@@ -3,18 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
-#
-# Copyright 2025- IBM Corp.
-#
-#===================================================================================
-# Written by Danny Tsen <dtsen@us.ibm.com>
-#
+/*
+ * Copyright 2025- IBM Corp.
+ *
+ * ===================================================================================
+ * Written by Danny Tsen <dtsen@us.ibm.com>
+ */
 
-# Poly_tomont: Inplace conversion of all coefficients of a polynomial
-#              from normal domain to Montgomery domain
-#
-# Arguments:*r: pointer to input/output polynomial
-#
+/*
+ * Poly_tomont: Inplace conversion of all coefficients of a polynomial
+ *              from normal domain to Montgomery domain
+ *
+ * Arguments:*r: pointer to input/output polynomial
+ */
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
@@ -29,150 +30,151 @@
 .machine "any"
 .text
 
-#
-# montgomery_reduce
-# t = a * QINV
-# t = (a - (int32_t)t*_MLKEM_Q) >> 16
-#
-#-----------------------------------
-# MREDUCE_4X(_v0, _v1, _v2, _v3)
-#
+/*
+ * montgomery_reduce
+ * t = a * QINV
+ * t = (a - (int32_t)t*_MLKEM_Q) >> 16
+ *
+ * -----------------------------------
+ * MREDUCE_4X(_v0, _v1, _v2, _v3)
+ */
 .macro MREDUCE_4X _v0 _v1 _v2 _v3
-	lxvd2x	32+13, 0, 3
-	addi	3, 3, 16
-	lxvd2x	32+18, 0, 3
-	addi	3, 3, 16
-	lxvd2x	32+23, 0, 3
-	addi	3, 3, 16
-	lxvd2x	32+7, 0, 3
-	addi	3, 3, 16
+        lxvd2x  32+13, 0, 3
+        addi    3, 3, 16
+        lxvd2x  32+18, 0, 3
+        addi    3, 3, 16
+        lxvd2x  32+23, 0, 3
+        addi    3, 3, 16
+        lxvd2x  32+7, 0, 3
+        addi    3, 3, 16
 
-	vmladduhm 15, 13, V1353, 3
-	vmladduhm 20, 18, V1353, 3
-	vmladduhm 25, 23, V1353, 3
-	vmladduhm 9, 7, V1353, 3
+        vmladduhm 15, 13, V1353, 3
+        vmladduhm 20, 18, V1353, 3
+        vmladduhm 25, 23, V1353, 3
+        vmladduhm 9, 7, V1353, 3
 
-	vmhraddshs 14, 13, V1353, 3
-	vmhraddshs 19, 18, V1353, 3
-	vmhraddshs 24, 23, V1353, 3
-	vmhraddshs 8, 7, V1353, 3
+        vmhraddshs 14, 13, V1353, 3
+        vmhraddshs 19, 18, V1353, 3
+        vmhraddshs 24, 23, V1353, 3
+        vmhraddshs 8, 7, V1353, 3
 
-	vmladduhm 15, 15, V_QINV, 3
-	vmladduhm 20, 20, V_QINV, 3
-	vmladduhm 25, 25, V_QINV, 3
-	vmladduhm 9, 9, V_QINV, 3
+        vmladduhm 15, 15, V_QINV, 3
+        vmladduhm 20, 20, V_QINV, 3
+        vmladduhm 25, 25, V_QINV, 3
+        vmladduhm 9, 9, V_QINV, 3
 
-	vmhraddshs 15, 15, V_NMKQ, 14
-	vmhraddshs 20, 20, V_NMKQ, 19
-	vmhraddshs 25, 25, V_NMKQ, 24
-	vmhraddshs 9, 9, V_NMKQ, 8
+        vmhraddshs 15, 15, V_NMKQ, 14
+        vmhraddshs 20, 20, V_NMKQ, 19
+        vmhraddshs 25, 25, V_NMKQ, 24
+        vmhraddshs 9, 9, V_NMKQ, 8
 
-	vsrah \_v0, 15, 4		# >> 1
-	vsrah \_v1, 20, 4		# >> 1
-	vsrah \_v2, 25, 4		# >> 1
-	vsrah \_v3, 9, 4		# >> 1
+        /* Shift right 1 bit */
+        vsrah \_v0, 15, 4
+        vsrah \_v1, 20, 4
+        vsrah \_v2, 25, 4
+        vsrah \_v3, 9, 4
 .endm
 
 .macro Write_8X
-	stxvd2x	32+27, 4, 3
-	stxvd2x	32+28, 5, 3
-	stxvd2x	32+29, 6, 3
-	stxvd2x	32+30, 7, 3
-	stxvd2x	32+13, 8, 3
-	stxvd2x	32+18, 9, 3
-	stxvd2x	32+23, 10, 3
-	stxvd2x	32+7, 11, 3
+        stxvd2x 32+27, 4, 3
+        stxvd2x 32+28, 5, 3
+        stxvd2x 32+29, 6, 3
+        stxvd2x 32+30, 7, 3
+        stxvd2x 32+13, 8, 3
+        stxvd2x 32+18, 9, 3
+        stxvd2x 32+23, 10, 3
+        stxvd2x 32+7, 11, 3
 .endm
 
 .align 4
 .globl MLK_ASM_NAMESPACE(poly_tomont_ppc)
 MLK_ASM_FN_SYMBOL(poly_tomont_ppc)
-	stdu	1, -320(1)
-	mflr	0
+        stdu    1, -320(1)
+        mflr    0
 
-	li	6, 128
-	li	7, 144
-	li	8, 160
-	li	9, 176
-	li	10, 192
-	li	11, 208
-	li	12, 224
-	stxvx	32+20, 6, 1
-	stxvx	32+21, 7, 1
-	stxvx	32+22, 8, 1
-	stxvx	32+23, 9, 1
-	stxvx	32+24, 10, 1
-	stxvx	32+25, 11, 1
-	stxvx	32+26, 12, 1
-	li	6, 240
-	li	7, 256
-	li	8, 272
-	li	9, 288
-	stxvx	32+27, 6, 1
-	stxvx	32+28, 7, 1
-	stxvx	32+29, 8, 1
-	stxvx	32+30, 9, 1
+        li      6, 128
+        li      7, 144
+        li      8, 160
+        li      9, 176
+        li      10, 192
+        li      11, 208
+        li      12, 224
+        stxvx   32+20, 6, 1
+        stxvx   32+21, 7, 1
+        stxvx   32+22, 8, 1
+        stxvx   32+23, 9, 1
+        stxvx   32+24, 10, 1
+        stxvx   32+25, 11, 1
+        stxvx   32+26, 12, 1
+        li      6, 240
+        li      7, 256
+        li      8, 272
+        li      9, 288
+        stxvx   32+27, 6, 1
+        stxvx   32+28, 7, 1
+        stxvx   32+29, 8, 1
+        stxvx   32+30, 9, 1
 
-	li	6, NQ_OFFSET
-	li	7, QINV_OFFSET
-	li	8, C1353_OFFSET
-	lxvx	32+V_NMKQ, 6, 4
-	lxvx	32+V_QINV, 7, 4
-	lxvx	32+V1353, 8, 4
+        li      6, NQ_OFFSET
+        li      7, QINV_OFFSET
+        li      8, C1353_OFFSET
+        lxvx    32+V_NMKQ, 6, 4
+        lxvx    32+V_QINV, 7, 4
+        lxvx    32+V1353, 8, 4
 
-	vxor	3, 3, 3
-	vspltish 4, 1
+        vxor    3, 3, 3
+        vspltish 4, 1
 
-	li	4, -128
-	li	5, -112
-	li	6, -96
-	li	7, -80
-	li	8, -64
-	li	9, -48
-	li	10, -32
-	li	11, -16
+        li      4, -128
+        li      5, -112
+        li      6, -96
+        li      7, -80
+        li      8, -64
+        li      9, -48
+        li      10, -32
+        li      11, -16
 
-	MREDUCE_4X 27, 28, 29, 30
-	MREDUCE_4X 13, 18, 23, 7
-	Write_8X
+        MREDUCE_4X 27, 28, 29, 30
+        MREDUCE_4X 13, 18, 23, 7
+        Write_8X
 
-	MREDUCE_4X 27, 28, 29, 30
-	MREDUCE_4X 13, 18, 23, 7
-	Write_8X
+        MREDUCE_4X 27, 28, 29, 30
+        MREDUCE_4X 13, 18, 23, 7
+        Write_8X
 
-	MREDUCE_4X 27, 28, 29, 30
-	MREDUCE_4X 13, 18, 23, 7
-	Write_8X
+        MREDUCE_4X 27, 28, 29, 30
+        MREDUCE_4X 13, 18, 23, 7
+        Write_8X
 
-	MREDUCE_4X 27, 28, 29, 30
-	MREDUCE_4X 13, 18, 23, 7
-	Write_8X
+        MREDUCE_4X 27, 28, 29, 30
+        MREDUCE_4X 13, 18, 23, 7
+        Write_8X
 
-	li	6, 128
-	li	7, 144
-	li	8, 160
-	li	9, 176
-	li	10, 192
-	li	11, 208
-	li	12, 224
-	lxvx	32+20, 6, 1
-	lxvx	32+21, 7, 1
-	lxvx	32+22, 8, 1
-	lxvx	32+23, 9, 1
-	lxvx	32+24, 10, 1
-	lxvx	32+25, 11, 1
-	lxvx	32+26, 12, 1
-	li	6, 240
-	li	7, 256
-	li	8, 272
-	li	9, 288
-	lxvx	32+27, 6, 1
-	lxvx	32+28, 7, 1
-	lxvx	32+29, 8, 1
-	lxvx	32+30, 9, 1
-	mtlr	0
-	addi	1, 1, 320
-	blr
+        li      6, 128
+        li      7, 144
+        li      8, 160
+        li      9, 176
+        li      10, 192
+        li      11, 208
+        li      12, 224
+        lxvx    32+20, 6, 1
+        lxvx    32+21, 7, 1
+        lxvx    32+22, 8, 1
+        lxvx    32+23, 9, 1
+        lxvx    32+24, 10, 1
+        lxvx    32+25, 11, 1
+        lxvx    32+26, 12, 1
+        li      6, 240
+        li      7, 256
+        li      8, 272
+        li      9, 288
+        lxvx    32+27, 6, 1
+        lxvx    32+28, 7, 1
+        lxvx    32+29, 8, 1
+        lxvx    32+30, 9, 1
+        mtlr    0
+        addi    1, 1, 320
+        blr
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
