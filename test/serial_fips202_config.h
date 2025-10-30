@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) The mlkem-native project authors
+ * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+ */
 
 /* References
  * ==========
@@ -9,9 +13,19 @@
  */
 
 /*
- * Copyright (c) The mlkem-native project authors
- * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+ * WARNING: This file is auto-generated from scripts/autogen
+ *          in the mlkem-native repository.
+ *          Do not modify it directly.
  */
+
+/*
+ * Test configuration: Test configuration with serial FIPS202 only
+ *
+ * This configuration differs from the default mlkem/src/config.h in the
+ * following places:
+ *   - MLK_CONFIG_SERIAL_FIPS202_ONLY
+ */
+
 
 #ifndef MLK_CONFIG_H
 #define MLK_CONFIG_H
@@ -36,7 +50,7 @@
  * Name:        MLK_CONFIG_FILE
  *
  * Description: If defined, this is a header that will be included instead
- *              of this default configuration file mlkem/src/config.h.
+ *              of the default configuration file mlkem/src/config.h.
  *
  *              When you need to build mlkem-native in multiple configurations,
  *              using varying MLK_CONFIG_FILE can be more convenient
@@ -115,6 +129,22 @@
  *
  *****************************************************************************/
 /* #define MLK_CONFIG_MULTILEVEL_NO_SHARED */
+
+/******************************************************************************
+ * Name:        MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
+ *
+ * Description: This is only relevant for single compilation unit (SCU)
+ *              builds of mlkem-native. In this case, it determines whether
+ *              directives defined in parameter-set-independent headers should
+ *              be #undef'ined or not at the of the SCU file. This is needed
+ *              in multilevel builds.
+ *
+ *              See examples/multilevel_build_native for an example.
+ *
+ *              This can also be set using CFLAGS.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_USE_NATIVE_BACKEND_ARITH

@@ -54,7 +54,7 @@ jobs:
         with:
           # TODO: switch to upstream once merged
           expo-repository: https://github.com/mkannwischer/expo
-          expo-commit: 8c1fdb65ca6ff026c446cdefb106d08fd43ba7e9
+          expo-commit: 8e6cfe2d1cc918fa3ae6cd076e806909bb1c09e0
 
       - name: Patch mlkem-native dependency
         run: |

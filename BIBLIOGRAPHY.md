@@ -27,6 +27,15 @@ source code and documentation.
 * URL: https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
 * Referenced from:
   - [examples/basic_deterministic/mlkem_native/custom_no_randomized_config.h](examples/basic_deterministic/mlkem_native/custom_no_randomized_config.h)
+  - [examples/custom_backend/mlkem_native/custom_config.h](examples/custom_backend/mlkem_native/custom_config.h)
+  - [examples/monolithic_build/config_1024.h](examples/monolithic_build/config_1024.h)
+  - [examples/monolithic_build/config_512.h](examples/monolithic_build/config_512.h)
+  - [examples/monolithic_build/config_768.h](examples/monolithic_build/config_768.h)
+  - [examples/monolithic_build_multilevel/multilevel_config.h](examples/monolithic_build_multilevel/multilevel_config.h)
+  - [examples/monolithic_build_multilevel_native/multilevel_config.h](examples/monolithic_build_multilevel_native/multilevel_config.h)
+  - [examples/monolithic_build_native/config_1024.h](examples/monolithic_build_native/config_1024.h)
+  - [examples/monolithic_build_native/config_512.h](examples/monolithic_build_native/config_512.h)
+  - [examples/monolithic_build_native/config_768.h](examples/monolithic_build_native/config_768.h)
   - [integration/liboqs/config_aarch64.h](integration/liboqs/config_aarch64.h)
   - [integration/liboqs/config_c.h](integration/liboqs/config_c.h)
   - [integration/liboqs/config_ppc64le.h](integration/liboqs/config_ppc64le.h)
