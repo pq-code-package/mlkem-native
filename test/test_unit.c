@@ -29,8 +29,8 @@ void mlk_poly_invntt_tomont_c(mlk_poly *r);
 void mlk_poly_tobytes_c(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a);
 void mlk_poly_frombytes_c(mlk_poly *r, const uint8_t a[MLKEM_POLYBYTES]);
 void mlk_polyvec_basemul_acc_montgomery_cached_c(
-    mlk_poly *r, const mlk_polyvec a, const mlk_polyvec b,
-    const mlk_polyvec_mulcache b_cache);
+    mlk_poly *r, const mlk_polyvec *a, const mlk_polyvec *b,
+    const mlk_polyvec_mulcache *b_cache);
 void mlk_poly_mulcache_compute_c(mlk_poly_mulcache *x, const mlk_poly *a);
 
 #define CHECK(x)                                              \
@@ -509,24 +509,24 @@ static int test_polyvec_basemul_core(const int16_t *a, const int16_t *b,
   /* Copy test data to structures */
   for (i = 0; i < MLKEM_K; i++)
   {
-    memcpy(test_a[i].coeffs, &a[i * MLKEM_N], MLKEM_N * sizeof(int16_t));
-    memcpy(test_b[i].coeffs, &b[i * MLKEM_N], MLKEM_N * sizeof(int16_t));
-    memcpy(ref_a[i].coeffs, &a[i * MLKEM_N], MLKEM_N * sizeof(int16_t));
-    memcpy(ref_b[i].coeffs, &b[i * MLKEM_N], MLKEM_N * sizeof(int16_t));
+    memcpy(test_a.vec[i].coeffs, &a[i * MLKEM_N], MLKEM_N * sizeof(int16_t));
+    memcpy(test_b.vec[i].coeffs, &b[i * MLKEM_N], MLKEM_N * sizeof(int16_t));
+    memcpy(ref_a.vec[i].coeffs, &a[i * MLKEM_N], MLKEM_N * sizeof(int16_t));
+    memcpy(ref_b.vec[i].coeffs, &b[i * MLKEM_N], MLKEM_N * sizeof(int16_t));
 
 #ifdef MLK_USE_NATIVE_NTT_CUSTOM_ORDER
-    mlk_poly_permute_bitrev_to_custom(test_a[i].coeffs);
-    mlk_poly_permute_bitrev_to_custom(test_b[i].coeffs);
+    mlk_poly_permute_bitrev_to_custom(test_a.vec[i].coeffs);
+    mlk_poly_permute_bitrev_to_custom(test_b.vec[i].coeffs);
 #endif
 
-    mlk_poly_mulcache_compute_c(&ref_cache[i], &ref_b[i]);
-    mlk_poly_mulcache_compute(&test_cache[i], &test_b[i]);
+    mlk_poly_mulcache_compute_c(&ref_cache.vec[i], &ref_b.vec[i]);
+    mlk_poly_mulcache_compute(&test_cache.vec[i], &test_b.vec[i]);
   }
 
-  mlk_polyvec_basemul_acc_montgomery_cached(&test_result, test_a, test_b,
-                                            test_cache);
-  mlk_polyvec_basemul_acc_montgomery_cached_c(&ref_result, ref_a, ref_b,
-                                              ref_cache);
+  mlk_polyvec_basemul_acc_montgomery_cached(&test_result, &test_a, &test_b,
+                                            &test_cache);
+  mlk_polyvec_basemul_acc_montgomery_cached_c(&ref_result, &ref_a, &ref_b,
+                                              &ref_cache);
 
 #ifdef MLK_USE_NATIVE_NTT_CUSTOM_ORDER
   mlk_poly_permute_bitrev_to_custom(ref_result.coeffs);
