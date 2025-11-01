@@ -21,6 +21,16 @@ modulus = 3329
 root_of_unity = 17
 montgomery_factor = pow(2, 16, modulus)
 
+# Compiled regex patterns
+_RE_DEFINED = re.compile(r"defined\(([^)]+)\)")
+_RE_MARKDOWN_CITE = re.compile(r"\[\^(?P<id>\w+)\]")
+_RE_C_CITE = re.compile(r"@\[(?P<id>\w+)")
+_RE_BYTECODE_START = re.compile(r"=== bytecode start: mlkem/([^/\s]+?)\.o")
+_RE_FUNC_SYMBOL = re.compile(r"MLK_ASM_FN_SYMBOL\((.*)\)")
+_RE_LABEL = re.compile(r"^(\w+):")
+_RE_CONFIG_NAME = re.compile(r"\* Name:\s+(\w+)")
+_RE_INDENT_FIX = re.compile(r" \* (\w.*)")
+
 # File cache: {filename: {"content": str, "original": str, "force_format": bool}}
 # Caches content of files in preparation/modification to avoid repeated
 # read/writes to the file system.
@@ -519,7 +529,7 @@ def adjust_preprocessor_comments_for_filename(content, source_file, show_status=
     parser = CondParser()
 
     def format_condition(cond):
-        cond = re.sub(r"defined\(([^)]+)\)", r"\1", cond)
+        cond = _RE_DEFINED.sub(r"\1", cond)
         return parser.normalize_condition(cond)
 
     def format_conditions(conds, branch):
@@ -1965,7 +1975,7 @@ def check_asm_loop_labels_for_file(filename):
 
     # Find function symbol name
     func_pattern = r"MLK_ASM_FN_SYMBOL\((.*)\)"
-    res = re.search(func_pattern, content)
+    res = _RE_FUNC_SYMBOL.search(content)
     if res is None:
         raise Exception(f"Could not find function symbol in assembly file {filename}")
     funcname = res.group(1)
@@ -2590,7 +2600,7 @@ def gen_markdown_citations_for(filename, bibliography):
     # Lookup all citations in style `[^ID]`
     citations = {}
     for i, l in enumerate(content):
-        for m in re.finditer(r"\[\^(?P<id>\w+)\]", l):
+        for m in _RE_MARKDOWN_CITE.finditer(l):
             cite_id = m.group("id")
             uses = citations.get(cite_id, [])
             uses.append((filename, i))
@@ -2648,7 +2658,7 @@ def gen_c_citations_for(filename, bibliography):
     # Lookup all citations in style `@[ID]`
     citations = {}
     for i, l in enumerate(content):
-        for m in re.finditer(r"@\[(?P<id>\w+)", l):
+        for m in _RE_C_CITE.finditer(l):
             cite_id = m.group("id")
             uses = citations.get(cite_id, [])
             # Remember usage. +1 because line counting starts at 1
@@ -2680,7 +2690,7 @@ def gen_c_citations_for(filename, bibliography):
     # likely here. Thus, we explicitly format and fix bad indentation manually.
     references = "\n".join(references)
     references = format_content(references)
-    references = re.sub(r" \* (\w.*)", r" *   \1", references)
+    references = _RE_INDENT_FIX.sub(r" *   \1", references)
     references = references.split("\n")
     references = [""] + references
 
@@ -2891,7 +2901,7 @@ def extract_bytecode_from_output(output_text):
 
     while i < len(lines):
         line = lines[i]
-        match = re.search(r"=== bytecode start: mlkem/([^/\s]+?)\.o", line)
+        match = _RE_BYTECODE_START.search(line)
         if match:
             filename = match.group(1)
 
