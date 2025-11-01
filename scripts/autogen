@@ -29,6 +29,8 @@ _RE_BYTECODE_START = re.compile(r"=== bytecode start: mlkem/([^/\s]+?)\.o")
 _RE_FUNC_SYMBOL = re.compile(r"MLK_ASM_FN_SYMBOL\((.*)\)")
 _RE_LABEL = re.compile(r"^(\w+):")
 _RE_CONFIG_NAME = re.compile(r"\* Name:\s+(\w+)")
+_RE_MACRO_CHECK = re.compile(r"[^_]((?:MLK_|MLKEM_)\w+)(.*)$", re.M)
+_RE_DEFINE = re.compile(r"^\s*#define\s+(\w+)")
 
 # File cache: {filename: {"content": str, "original": str, "force_format": bool}}
 # Caches content of files in preparation/modification to avoid repeated
@@ -1409,15 +1411,9 @@ def get_all_files():
 
 def get_defines_from_file(c):
     for l in read_file(c).split("\n"):
-        if l.lstrip().startswith("#define "):
-            yield (
-                c,
-                l.lstrip()
-                .removeprefix("#define ")
-                .split(" ")[0]
-                .split("(")[0]
-                .replace("'", ""),
-            )
+        m = _RE_DEFINE.match(l)
+        if m:
+            yield (c, m.group(1))
 
 
 def get_defines(all=False):
@@ -1425,6 +1421,7 @@ def get_defines(all=False):
         files = get_header_files(main_only=True)
     else:
         files = get_header_files() + get_c_source_files() + get_asm_source_files()
+
     for c in files:
         yield from get_defines_from_file(c)
 
@@ -1865,8 +1862,7 @@ def check_macro_typos_in_file(filename, macro_check):
     status_update("check-macros", filename)
     content = read_file(filename)
 
-    pattern = r"[^_]((?:MLK_|MLKEM_)\w+)(.*)$"
-    for m in re.finditer(pattern, content, flags=re.M):
+    for m in _RE_MACRO_CHECK.finditer(content):
         txt = m.group(1)
         rest = m.group(2)
         if macro_check(txt, rest, filename) is False:
@@ -1886,6 +1882,7 @@ def check_macro_typos():
     syscaps = get_syscaps()
 
     macros = set(map(lambda t: t[1], get_defines(all=True)))
+
     # Add configuration options to the list of allows macro names
     macros.update(get_config_options())
 
