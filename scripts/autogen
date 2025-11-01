@@ -29,7 +29,6 @@ _RE_BYTECODE_START = re.compile(r"=== bytecode start: mlkem/([^/\s]+?)\.o")
 _RE_FUNC_SYMBOL = re.compile(r"MLK_ASM_FN_SYMBOL\((.*)\)")
 _RE_LABEL = re.compile(r"^(\w+):")
 _RE_CONFIG_NAME = re.compile(r"\* Name:\s+(\w+)")
-_RE_INDENT_FIX = re.compile(r" \* (\w.*)")
 
 # File cache: {filename: {"content": str, "original": str, "force_format": bool}}
 # Caches content of files in preparation/modification to avoid repeated
@@ -2595,7 +2594,11 @@ def gen_markdown_citations_for(filename, bibliography):
     if filename == "BIBLIOGRAPHY.md":
         return
 
-    content = read_file(filename).split("\n")
+    content = read_file(filename)
+    if not _RE_MARKDOWN_CITE.search(content):
+        return
+
+    content = content.split("\n")
 
     # Lookup all citations in style `[^ID]`
     citations = {}
@@ -2643,6 +2646,9 @@ def gen_c_citations_for(filename, bibliography):
 
     content = read_file(filename)
 
+    if not _RE_C_CITE.search(content):
+        return
+
     references_start = [
         "/* References",
         " * ==========",
@@ -2680,17 +2686,27 @@ def gen_c_citations_for(filename, bibliography):
             )
         references.append(f" *")
         references.append(f" * - [{cite_id}]")
-        references.append(f" *   {entry.name}")
-        references.append(f" *   {entry.authors_text}")
-        references.append(f" *   {entry.url}")
+        prefix = " *   "
+        # Wrap long lines at 80 chars
+        for line in [entry.name, entry.authors_text, entry.url]:
+            if len(line) + len(prefix) <= 80:
+                references.append(f"{prefix}{line}")
+            else:
+                words = line.split()
+                current = prefix
+                for word in words:
+                    if len(current) + len(word) <= 80 or current == prefix:
+                        current += word + " "
+                    else:
+                        references.append(current.rstrip())
+                        current = prefix + word + " "
+                if current.rstrip() != prefix.rstrip():
+                    references.append(current.rstrip())
 
     references += references_end
 
-    # Pre-update formatting messes up overly long comment lines which are
-    # likely here. Thus, we explicitly format and fix bad indentation manually.
+    # Fix indentation for comment lines
     references = "\n".join(references)
-    references = format_content(references)
-    references = _RE_INDENT_FIX.sub(r" *   \1", references)
     references = references.split("\n")
     references = [""] + references
 
