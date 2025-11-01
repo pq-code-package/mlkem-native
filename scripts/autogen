@@ -13,6 +13,7 @@ import sys
 import pyparsing as pp
 import os
 import yaml
+import time
 
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
@@ -210,11 +211,15 @@ def status_update(task, msg):
     print(f"\r{BLUE}[{task}]{NORMAL}: {msg} ...", end="", flush=True)
 
 
+_step_start_time = time.time()
+
+
 def high_level_status(msg):
+    global _step_start_time
     clear_status_line()
-    print(
-        f"\r{GREEN}✓{NORMAL} {msg}"
-    )  # This will end with a newline, clearing the status line
+    elapsed = f" ({time.time() - _step_start_time:.1f}s)"
+    print(f"\r{GREEN}✓{NORMAL} {msg}{elapsed}")
+    _step_start_time = time.time()
 
 
 def info(msg):
