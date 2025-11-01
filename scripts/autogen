@@ -450,7 +450,7 @@ class CondParser:
         return CondParser.print_exp(self.parse_condition(exp))
 
 
-def adjust_preprocessor_comments_for_filename(content, source_file, show_status=False):
+def adjust_preprocessor_comments_for_filename(content, source_file, parser, show_status=False):
     """Automatically add comments to large `#if ... #else ... #endif`
     blocks indicating the guarding conditions.
 
@@ -525,8 +525,6 @@ def adjust_preprocessor_comments_for_filename(content, source_file, show_status=
             return True
         return False
 
-    parser = CondParser()
-
     def format_condition(cond):
         cond = _RE_DEFINED.sub(r"\1", cond)
         return parser.normalize_condition(cond)
@@ -539,11 +537,39 @@ def adjust_preprocessor_comments_for_filename(content, source_file, show_status=
         full_cond = "&&".join(prev_conds + [final_cond])
         return format_condition(full_cond)
 
-    def adhoc_format(line):
+    def wrap_long_directive(directive, condition, max_len=80):
+        """Manually wrap long preprocessor comment lines without subprocess overhead"""
+        single_line = directive + " " + condition
+        if len(single_line) <= max_len:
+            return single_line
+
+        # Wrap condition across multiple lines with backslash continuation
+        words = condition.split()
+        lines = []
+        current = f"{directive} "
+        indent = (len(directive) + 4) * " "
+        indent_final = (len(directive) + 2) * " "
+
+        for word in words:
+            if len(current) + len(word) + 1 <= max_len:
+                current += word + " "
+            else:
+                lines.append(current.rstrip() + " \\")
+                if word == "*/":
+                    current = indent_final + word
+                else:
+                    current = indent + word + " "
+
+        lines.append(current.rstrip())
+
+        return "\n".join(lines)
+
+    def adhoc_format(directive, content):
         # .c and .h files are formatted as a whole
         if not source_file.endswith(".S"):
-            return line
-        return format_content(line)
+            return directive + " /* " + content + " */"
+        # For .S files, manually wrap long lines
+        return wrap_long_directive(directive, "/* " + content + " */")
 
     i = 0
     while i < len(content):
@@ -573,7 +599,7 @@ def adjust_preprocessor_comments_for_filename(content, source_file, show_status=
             if_stack.append((conds, i, False, print_else))
             if print_else is True:
                 cond = format_conditions(conds, True)
-                new_content.append(adhoc_format("#else /* " + cond + " */"))
+                new_content.append(adhoc_format("#else", cond))
             else:
                 new_content.append("#else")
         elif l.startswith("#endif"):
@@ -585,7 +611,7 @@ def adjust_preprocessor_comments_for_filename(content, source_file, show_status=
                 new_content.append("#endif")
             else:
                 cond = format_conditions(conds, branch)
-                new_content.append(adhoc_format("#endif /* " + cond + " */"))
+                new_content.append(adhoc_format("#endif", cond))
         else:
             # Skip over multiline comments -- we don't want to
             # handle `#if ...` inside documentation as this would
@@ -598,18 +624,19 @@ def adjust_preprocessor_comments_for_filename(content, source_file, show_status=
     return "\n".join(new_content)
 
 
-def gen_preprocessor_comments_for(source_file):
+def gen_preprocessor_comments_for(parser, source_file):
     content = read_file(source_file)
     new_content = adjust_preprocessor_comments_for_filename(
-        content, source_file, show_status=True
+        content, source_file, parser, show_status=True
     )
     update_file(source_file, new_content)
 
 
 def gen_preprocessor_comments():
     files = get_c_source_files() + get_asm_source_files() + get_header_files()
+    parser = CondParser()
     with ThreadPoolExecutor() as executor:
-        results = list(executor.map(gen_preprocessor_comments_for, files))
+        results = list(executor.map(partial(gen_preprocessor_comments_for, parser), files))
 
 
 def bitreverse(i, n):
