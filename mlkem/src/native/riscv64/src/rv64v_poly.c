@@ -717,7 +717,7 @@ void mlk_rv64v_poly_tomont(int16_t *r)
  *
  * Description: Applies Barrett reduction to all coefficients of a polynomial
  *              for details of the Barrett reduction see
- *              comments in reduce.c
+ *              comments in poly.c
  *
  * Arguments:   - int16_t *r: pointer to input/output polynomial
  **************************************************/
