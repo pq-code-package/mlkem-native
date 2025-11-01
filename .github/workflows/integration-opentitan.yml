@@ -52,9 +52,8 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: ./.github/actions/setup-opentitan
         with:
-          # TODO: switch to upstream once merged
-          expo-repository: https://github.com/mkannwischer/expo
-          expo-commit: 8e6cfe2d1cc918fa3ae6cd076e806909bb1c09e0
+          expo-repository: https://github.com/zerorisc/expo
+          expo-commit: 941d302a6d2d1ec5b1e3d7448846f56809333cee
 
       - name: Patch mlkem-native dependency
         run: |
