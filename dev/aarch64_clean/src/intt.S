@@ -55,7 +55,7 @@
 // Bounds:
 // If C is chosen so that |src| < q * C, then |dst| < q * (0.0508 * C + 1/2)
 //
-// See mlken/reduce.c and test/test_bounds.py for more details.
+// See mlkem/src/poly.c and test/test_bounds.py for more details.
 .macro mulmodq dst, src, const, idx0, idx1
         // Signed barrett multiplication @[NeonNTT, Section 3.1.2] using
         // round-to-nearest-even-integer approximation. Following loc.cit.,
