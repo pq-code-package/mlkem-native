@@ -5,10 +5,10 @@
 #include <stdint.h>
 #include "poly_k.h"
 
-void mlk_polymat_permute_bitrev_to_custom(mlk_polymat a);
+void mlk_polyvec_permute_bitrev_to_custom(mlk_polyvec *v);
 
 void harness(void)
 {
-  mlk_poly *a;
-  mlk_polymat_permute_bitrev_to_custom(a);
+  mlk_polyvec *v;
+  mlk_polyvec_permute_bitrev_to_custom(v);
 }
