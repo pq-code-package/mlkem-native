@@ -53,9 +53,9 @@ int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
     goto cleanup;
   }
 
-  mlk_polyvec_frombytes(p, pk);
-  mlk_polyvec_reduce(p);
-  mlk_polyvec_tobytes(p_reencoded, p);
+  mlk_polyvec_frombytes(&p, pk);
+  mlk_polyvec_reduce(&p);
+  mlk_polyvec_tobytes(p_reencoded, &p);
 
   /* We use a constant-time memcmp here to avoid having to
    * declassify the PK before the PCT has succeeded. */

@@ -211,7 +211,7 @@ __contract__(
  **************************************************/
 MLK_INTERNAL_API
 void mlk_polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
-                             const mlk_polyvec a)
+                             const mlk_polyvec *a)
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(a, sizeof(mlk_polyvec)))
@@ -239,14 +239,14 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_polyvec_decompress_du(mlk_polyvec r,
+void mlk_polyvec_decompress_du(mlk_polyvec *r,
                                const uint8_t a[MLKEM_POLYVECCOMPRESSEDBYTES_DU])
 __contract__(
   requires(memory_no_alias(a, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   assigns(memory_slice(r, sizeof(mlk_polyvec)))
   ensures(forall(k0, 0, MLKEM_K,
-         array_bound(r[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+         array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 );
 
 #define mlk_polyvec_tobytes MLK_NAMESPACE_K(polyvec_tobytes)
@@ -267,7 +267,7 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec a)
+void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
 __contract__(
   requires(memory_no_alias(a, sizeof(mlk_polyvec)))
   requires(memory_no_alias(r, MLKEM_POLYVECBYTES))
@@ -295,13 +295,13 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_polyvec_frombytes(mlk_polyvec r, const uint8_t a[MLKEM_POLYVECBYTES])
+void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   requires(memory_no_alias(a, MLKEM_POLYVECBYTES))
   assigns(memory_slice(r, sizeof(mlk_polyvec)))
   ensures(forall(k0, 0, MLKEM_K,
-        array_bound(r[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+        array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
 );
 
 #define mlk_polyvec_ntt MLK_NAMESPACE_K(polyvec_ntt)
@@ -324,14 +324,14 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_polyvec_ntt(mlk_polyvec r)
+void mlk_polyvec_ntt(mlk_polyvec *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   requires(forall(j, 0, MLKEM_K,
   array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
   assigns(memory_slice(r, sizeof(mlk_polyvec)))
   ensures(forall(j, 0, MLKEM_K,
-  array_abs_bound(r[j].coeffs, 0, MLKEM_N, MLK_NTT_BOUND)))
+  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLK_NTT_BOUND)))
 );
 
 #define mlk_polyvec_invntt_tomont MLK_NAMESPACE_K(polyvec_invntt_tomont)
@@ -355,14 +355,14 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_polyvec_invntt_tomont(mlk_polyvec r)
+void mlk_polyvec_invntt_tomont(mlk_polyvec *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   requires(forall(k0, 0, MLKEM_K,
     array_abs_bound(r->vec[k0].coeffs, 0, MLKEM_N, INT16_MAX/2)))
   assigns(memory_slice(r, sizeof(mlk_polyvec)))
   ensures(forall(j, 0, MLKEM_K,
-  array_abs_bound(r[j].coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND)))
+  array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND)))
 );
 
 #define mlk_polyvec_basemul_acc_montgomery_cached \
@@ -397,15 +397,15 @@ __contract__(
  **************************************************/
 MLK_INTERNAL_API
 void mlk_polyvec_basemul_acc_montgomery_cached(
-    mlk_poly *r, const mlk_polyvec a, const mlk_polyvec b,
-    const mlk_polyvec_mulcache b_cache)
+    mlk_poly *r, const mlk_polyvec *a, const mlk_polyvec *b,
+    const mlk_polyvec_mulcache *b_cache)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_poly)))
   requires(memory_no_alias(a, sizeof(mlk_polyvec)))
   requires(memory_no_alias(b, sizeof(mlk_polyvec)))
   requires(memory_no_alias(b_cache, sizeof(mlk_polyvec_mulcache)))
   requires(forall(k1, 0, MLKEM_K,
-     array_bound(a[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+     array_bound(a->vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
   requires(forall(k2, 0, MLKEM_K,
      array_abs_bound(b[k2].coeffs, 0, MLKEM_N, MLK_NTT_BOUND)))
   requires(forall(k3, 0, MLKEM_K,
@@ -446,7 +446,7 @@ __contract__(
  * higher level safety proofs, and thus not part of the spec.
  */
 MLK_INTERNAL_API
-void mlk_polyvec_mulcache_compute(mlk_polyvec_mulcache x, const mlk_polyvec a)
+void mlk_polyvec_mulcache_compute(mlk_polyvec_mulcache *x, const mlk_polyvec *a)
 __contract__(
   requires(memory_no_alias(x, sizeof(mlk_polyvec_mulcache)))
   requires(memory_no_alias(a, sizeof(mlk_polyvec)))
@@ -478,12 +478,12 @@ __contract__(
  *       use of mlk_poly_reduce() in the context of (de)serialization.
  */
 MLK_INTERNAL_API
-void mlk_polyvec_reduce(mlk_polyvec r)
+void mlk_polyvec_reduce(mlk_polyvec *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   assigns(memory_slice(r, sizeof(mlk_polyvec)))
   ensures(forall(k0, 0, MLKEM_K,
-    array_bound(r[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+    array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 );
 
 #define mlk_polyvec_add MLK_NAMESPACE_K(polyvec_add)
@@ -510,13 +510,13 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_polyvec_add(mlk_polyvec r, const mlk_polyvec b)
+void mlk_polyvec_add(mlk_polyvec *r, const mlk_polyvec *b)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   requires(memory_no_alias(b, sizeof(mlk_polyvec)))
   requires(forall(j0, 0, MLKEM_K,
           forall(k0, 0, MLKEM_N,
-            (int32_t)r[j0].coeffs[k0] + b[j0].coeffs[k0] <= INT16_MAX)))
+            (int32_t)r->vec[j0].coeffs[k0] + b->vec[j0].coeffs[k0] <= INT16_MAX)))
   requires(forall(j1, 0, MLKEM_K,
           forall(k1, 0, MLKEM_N,
             (int32_t)r->vec[j1].coeffs[k1] + b->vec[j1].coeffs[k1] >= INT16_MIN)))
@@ -539,12 +539,12 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_polyvec_tomont(mlk_polyvec r)
+void mlk_polyvec_tomont(mlk_polyvec *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   assigns(memory_slice(r, sizeof(mlk_polyvec)))
   ensures(forall(j, 0, MLKEM_K,
-    array_abs_bound(r[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
+    array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
 );
 
 #define mlk_poly_getnoise_eta1_4x MLK_NAMESPACE_K(poly_getnoise_eta1_4x)
