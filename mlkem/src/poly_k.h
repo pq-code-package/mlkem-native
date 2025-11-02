@@ -436,7 +436,7 @@ __contract__(
  *
  * Description: Applies Barrett reduction to each coefficient
  *              of each element of a vector of polynomials;
- *              for details of the Barrett reduction see comments in reduce.c
+ *              for details of the Barrett reduction see comments in poly.c
  *
  * Arguments:   - mlk_polyvec r: pointer to input/output polynomial
  *
