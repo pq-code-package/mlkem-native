@@ -25,7 +25,7 @@ USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2
+CBMCFLAGS=--bitwuzla
 
 # For this proof we tell CBMC to
 #  - not decompose arrays into their individual cells
@@ -35,7 +35,7 @@ CBMCFLAGS=--smt2
 #
 # For functions that use large and multi-dimensional arrays, this yields
 # a substantial improvement in proof performance.
-CBMCFLAGS += --arrays-uf-always
+CBMCFLAGS += --no-array-field-sensitivity
 CBMCFLAGS += --slice-formula
 
 FUNCTION_NAME = mlk_matvec_mul
