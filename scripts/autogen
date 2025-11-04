@@ -1916,6 +1916,7 @@ def update_via_simpasm(
     preserve_header=True,
     dry_run=False,
     force_cross=False,
+    x86_64_syntax="att",
 ):
     status_update("simpasm", infile_full)
 
@@ -1971,6 +1972,9 @@ def update_via_simpasm(
                 cmd += [f'--cflags="{cflags}"']
             if preserve_header is True:
                 cmd += ["-p"]
+            # Add syntax option for x86_64
+            if arch == "x86_64" and x86_64_syntax != "att":
+                cmd += ["--syntax", x86_64_syntax]
             r = subprocess.run(
                 cmd,
                 stdout=subprocess.DEVNULL,
@@ -2194,7 +2198,13 @@ def synchronize_backend(
 
 
 def synchronize_backends(
-    *, dry_run=False, force_cross=False, clean=False, delete=False, no_simplify=False
+    *,
+    dry_run=False,
+    force_cross=False,
+    clean=False,
+    delete=False,
+    no_simplify=False,
+    x86_64_syntax="att",
 ):
     if clean is False:
         ty = "opt"
@@ -2255,6 +2265,7 @@ def synchronize_backends(
         delete=delete,
         force_cross=force_cross,
         no_simplify=no_simplify,
+        x86_64_syntax=x86_64_syntax,
         # Turn off control-flow protection (CET) explicitly. Newer versions of
         # clang turn it on by default and insert endbr64 instructions at every
         # global symbol.
@@ -3068,6 +3079,13 @@ def _main():
     parser.add_argument("--aarch64-clean", default=False, action="store_true")
     parser.add_argument("--no-simplify", default=False, action="store_true")
     parser.add_argument("--force-cross", default=False, action="store_true")
+    parser.add_argument(
+        "--x86-64-syntax",
+        type=str,
+        choices=["att", "intel"],
+        default="att",
+        help="Assembly syntax for x86_64 disassembly output (att or intel)",
+    )
 
     args = parser.parse_args()
 
@@ -3110,6 +3128,7 @@ def _main():
         clean=args.aarch64_clean,
         no_simplify=args.no_simplify,
         force_cross=args.force_cross,
+        x86_64_syntax=args.x86_64_syntax,
     )
     high_level_status("Synchronized backends")
 
@@ -3129,6 +3148,7 @@ def _main():
         delete=True,
         force_cross=args.force_cross,
         no_simplify=args.no_simplify,
+        x86_64_syntax=args.x86_64_syntax,
     )
     high_level_status("Completed final backend synchronization")
 
