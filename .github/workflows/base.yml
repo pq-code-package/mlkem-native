@@ -279,6 +279,20 @@ jobs:
             ./scripts/autogen ${{ matrix.backend.arg }} ${{ matrix.simplify.arg }}
             make clean
             OPT=1 make quickcheck
+  x86_64_intel_syntax:
+    name: x86_64 Intel syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Generate with Intel syntax and test
+        uses: ./.github/actions/setup-shell
+        with:
+          nix-shell: 'ci'
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            ./scripts/autogen --x86-64-syntax intel
+            make clean
+            ./scripts/tests all
   scan-build:
     strategy:
       fail-fast: false

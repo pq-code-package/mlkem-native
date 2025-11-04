@@ -217,8 +217,8 @@ def add_cfi_directives(text, arch):
                 i += 1
                 continue
 
-            # x86_64: retq -> .cfi_endproc after retq
-            match = re.match(r"(\s*)retq\s*$", line, re.IGNORECASE)
+            # x86_64: ret/retq -> .cfi_endproc after ret
+            match = re.match(r"(\s*)retq?\s*$", line, re.IGNORECASE)
             if match:
                 indent = match.group(1)
                 result.append(line)
