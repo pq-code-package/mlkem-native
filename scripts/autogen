@@ -1405,18 +1405,24 @@ def get_files(pattern, strip_mlkem=False):
     def normalize(f):
         return f.removeprefix("mlkem/") if strip_mlkem else f
 
-    fs_files = {
-        str(p)
-        for p in pathlib.Path().glob(pattern)
-        if p.is_file() and not p.is_symlink()
-    }
-    cache_files = {f for f in _file_cache.keys() if pathlib.Path(f).match(pattern)}
+    fs_files = {f for f in get_all_files() if pathlib.Path(f).is_file()}
+    cache_files = set(_file_cache.keys())
+
+    # Convert glob pattern to compiled regex
+    pattern = pattern.replace(".", r"\.")
+    pattern = pattern.replace("**/", "<<<DOUBLESTAR>>>")
+    pattern = pattern.replace("*", "[^/]*")
+    pattern = pattern.replace("<<<DOUBLESTAR>>>", "(?:.*/)?")
+    regexp = re.compile(f"^{pattern}$")
 
     # Remove files which are scheduled to be deleted
     res = list(
         map(
             normalize,
-            filter(lambda f: read_file(f) is not None, fs_files | cache_files),
+            filter(
+                lambda f: regexp.match(f) and (read_file(f) is not None),
+                fs_files | cache_files,
+            ),
         )
     )
 
