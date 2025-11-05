@@ -1445,8 +1445,9 @@ def get_defines(all=False):
     else:
         files = get_header_files() + get_c_source_files() + get_asm_source_files()
 
-    for c in files:
-        yield from get_defines_from_file(c)
+    with ThreadPoolExecutor() as executor:
+        for results in executor.map(get_defines_from_file, files):
+            yield from results
 
 
 def get_checked_defines():
