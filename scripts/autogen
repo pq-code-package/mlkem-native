@@ -2247,8 +2247,7 @@ def gen_hol_light_asm():
 def update_via_copy(infile_full, outfile_full, transform=None):
     status_update("copy", f"{infile_full} -> {outfile_full}")
 
-    with open(infile_full, "r") as f:
-        content = f.read()
+    content = read_file(infile_full)
 
     if transform is not None:
         content = transform(content)
@@ -2462,8 +2461,7 @@ def adjust_header_guard_for_filename(content, header_file):
 
 
 def gen_header_guard(header_file):
-    with open(header_file, "r") as f:
-        content = f.read()
+    content = read_file(header_file)
     new_content = adjust_header_guard_for_filename(content, header_file)
     update_file(header_file, new_content)
 
