@@ -1,0 +1,4 @@
+#!/bin/bash
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+z3 rewriter.bv_sort_ac=true "$@"
