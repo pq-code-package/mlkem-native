@@ -48,7 +48,7 @@ FUNCTION_NAME = mlk_polyvec_add
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 8
+CBMC_OBJECT_BITS = 10
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
