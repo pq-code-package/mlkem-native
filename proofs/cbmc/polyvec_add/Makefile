@@ -26,7 +26,7 @@ USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2
+CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_bv_sort --z3
 
 # For this proof we tell CBMC to
 #  - not decompose arrays into their individual cells
@@ -48,7 +48,7 @@ FUNCTION_NAME = mlk_polyvec_add
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 8
+CBMC_OBJECT_BITS = 10
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

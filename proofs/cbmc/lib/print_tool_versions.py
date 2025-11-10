@@ -14,8 +14,6 @@ _TOOLS = [
     "cadical",
     "cbmc",
     "cbmc-viewer",
-    "cbmc-starter-kit-update",
-    "kissat",
     "litani",
 ]
 

@@ -104,13 +104,13 @@ jobs:
           echo "Using AMI ID: $AMI_ID"
           echo "AMI_ID=$AMI_ID" >> $GITHUB_OUTPUT
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v5.0.0
+        uses: aws-actions/configure-aws-credentials@00943011d9042930efac3dcd3a170e4273319bc8 # v5.1.0
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ inputs.aws_region }}
       - name: Start EC2 runner
         id: start-ec2-runner
-        uses: machulav/ec2-github-runner@5ae8cda66fc6f3bae4e633ad93e6e61a061376bb # v2.4.2
+        uses: machulav/ec2-github-runner@a6dbcefcf8a31a861f5e078bb153ed332130c512 # v2.4.3
         with:
           mode: start
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
@@ -217,12 +217,12 @@ jobs:
     if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v5.0.0
+        uses: aws-actions/configure-aws-credentials@00943011d9042930efac3dcd3a170e4273319bc8 # v5.1.0
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ inputs.aws_region }}
       - name: Stop EC2 runner
-        uses: machulav/ec2-github-runner@5ae8cda66fc6f3bae4e633ad93e6e61a061376bb # v2.4.2
+        uses: machulav/ec2-github-runner@a6dbcefcf8a31a861f5e078bb153ed332130c512 # v2.4.3
         with:
           mode: stop
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}

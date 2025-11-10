@@ -357,6 +357,40 @@ This is not helpful when trying to understand a failed proof. Bitwuzla works bet
 Once a proof is working OK, you may revert to Z3 to check if it _also_ passes with Z3, and perhaps faster. If it does,
 then keep Z3 as the selected prover. If not, then stick with Bitwuzla.
 
+#### Selecting custom options for Z3 or Bitwuzla
+
+By default, CBMC invokes provers with no special command-line options. If you want to pass additional flags to the prover,
+e.g. to improve proof performance, you can create a small wrapper script and pass it to CBMC via `--external-smt2-solver XXX` (introduced in 6.8.0).
+
+An example of such a script is [lib/z3_smt_only](lib/z3_smt_only) which looks like this:
+
+```
+#!/bin/bash
+z3 tactic.default_tactic=smt "$@"
+```
+
+There is also a script [lib/z3_bv_sort](lib/z3_bv_sort) which looks like this:
+
+```
+#!/bin/bash
+z3 rewriter.bv_sort_ac "$@"
+```
+
+Both these extra options have been found to be effective in improving Z3's performance in some cases.
+
+To select the special prover, we update the proof `Makefile` for a particular function, replacing the
+`--smt2` or `--bitwuzla` option with `--external-smt2-solver`.  For example, the proof of
+`polyvec_add()` is much faster using the `z3_bv_sort` wrapper, so we change the `Makefile`, replacing
+
+```
+CBMCFLAGS=--smt2
+```
+with
+```
+CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_bv_sort --z3
+```
+Note that we still need the ``--z3`` option now to inform CBMC to generate SMTLib specifically for Z3.
+
 ### Update harness function
 
 The file `XXX_harness.c` should declare a single function called `XXX_harness()` that calls `XXX` exactly once, with

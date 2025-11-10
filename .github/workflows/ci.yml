@@ -530,29 +530,29 @@ jobs:
         target:
           - name: AMD EPYC 4th gen (t3a)
             ec2_instance_type: t3a.small
-            ec2_ami: ubuntu-latest (custom AMI)
-            ec2_ami_id: ami-0d47e137a1108e078 # x86_64 ubuntu-latest, 32g
+            ec2_ami: ubuntu-latest (x86_64)
+            ec2_volume_size: 20
             compile_mode: native
             opt: all
             config_variations: 'native-cap-CPUID_AVX2'
           - name: Intel Xeon 4th gen (t3)
             ec2_instance_type: t3.small
-            ec2_ami: ubuntu-latest (custom AMI)
-            ec2_ami_id: ami-0d47e137a1108e078 # x86_64 ubuntu-latest, 32g
+            ec2_ami: ubuntu-latest (x86_64)
+            ec2_volume_size: 20
             compile_mode: native
             opt: all
             config_variations: 'native-cap-CPUID_AVX2'
           - name: Graviton2 (c6g.medium)
             ec2_instance_type: c6g.medium
-            ec2_ami: ubuntu-latest (custom AMI)
-            ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
+            ec2_ami: ubuntu-latest (aarch64)
+            ec2_volume_size: 20
             compile_mode: native
             opt: all
             config_variations: 'native-cap-ON native-cap-OFF native-cap-ID_AA64PFR1_EL1'
           - name: Graviton3 (c7g.medium)
             ec2_instance_type: c7g.medium
-            ec2_ami: ubuntu-latest (custom AMI)
-            ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
+            ec2_ami: ubuntu-latest (aarch64)
+            ec2_volume_size: 20
             compile_mode: native
             opt: all
             config_variations: 'native-cap-ID_AA64PFR1_EL1'
