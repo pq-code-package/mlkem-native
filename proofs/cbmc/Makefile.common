@@ -88,7 +88,7 @@ CBMC_STARTER_KIT_VERSION = CBMC starter kit 2.11
 # results that are hard to explain.  Dependency handling in this
 # Makefile.common may not be perfect.
 
-SHELL=/bin/bash
+SHELL=/usr/bin/env bash
 
 default: report
 
