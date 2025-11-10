@@ -1,3 +1,4 @@
+# Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 #
 # Automatically detect system architecture and set preprocessor flags accordingly
