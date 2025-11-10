@@ -693,3 +693,11 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             python3 ./scripts/autogen --dry-run --force-cross
+      - uses: ./.github/actions/setup-shell
+        # Building the HOL-Light bytecode currently requires native compilation
+        if: ${{ matrix.system == 'pqcp-arm64' }}
+        with:
+          nix-shell: 'hol_light'
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            python3 ./scripts/autogen --dry-run --update-hol-light-bytecode
