@@ -3027,7 +3027,7 @@ def update_hol_light_bytecode():
     # Update each .ml file
     for obj_name, bytecode in bytecode_dict.items():
         ml_file = "proofs/hol_light/arm/proofs/" + obj_name + ".ml"
-        update_bytecode_in_proof_script(ml_file, bytecode, dry_run)
+        update_bytecode_in_proof_script(ml_file, bytecode)
 
 
 def gen_test_config(config_path, config_spec, default_config_content):
