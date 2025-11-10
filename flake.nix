@@ -26,7 +26,7 @@
             # Keep those around in case we want to switch to unstable versions
             cbmc = pkgs-unstable.cbmc;
             bitwuzla = pkgs-unstable.bitwuzla;
-            z3 = pkgs.z3;
+            z3 = pkgs-unstable.z3;
           };
           zigWrapCC = zig: pkgs.symlinkJoin {
             name = "zig-wrappers";
@@ -191,7 +191,7 @@
               inherit pkgs;
               cbmc = pkgs-unstable.cbmc;
               bitwuzla = pkgs-unstable.bitwuzla;
-              z3 = pkgs.z3;
+              z3 = pkgs-unstable.z3;
             };
           in
           util.mkShell {
