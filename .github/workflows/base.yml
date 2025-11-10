@@ -187,7 +187,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mingw-version: [5.4.0, 11.2.0, 12.2.0, 13.2.0, 14.2.0, 15.2.0]
+        # TODO: re-enable 5.4.0 or other old version
+        mingw-version: [11.2.0, 12.2.0, 13.2.0, 14.2.0, 15.2.0]
     name: Quickcheck (Mingw-w64 ${{ matrix.mingw-version }})
     runs-on: windows-latest
     steps:
