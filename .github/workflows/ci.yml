@@ -466,6 +466,7 @@ jobs:
         uses: ./.github/actions/config-variations
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
+          tests: 'pct-enabled invalid-test-id'
   check-cf-protections:
     name: Test control-flow protections  (${{ matrix.compiler.name }}, x86_64)
     strategy:
