@@ -17,6 +17,11 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: "Validate test IDs"
+      shell: bash
+      run: |
+        ALLOWED="all pct-enabled pct-enabled-broken custom-zeroize native-cap-ON native-cap-OFF native-cap-ID_AA64PFR1_EL1 native-cap-CPUID_AVX2 no-asm serial-fips202 custom-randombytes custom-memcpy custom-memset custom-stdlib nblocks-1 nblocks-2 nblocks-4"
+        for t in ${{ inputs.tests }}; do echo "$ALLOWED" | grep -qw "$t" || { echo "Invalid test ID: $t. Allowed: $ALLOWED"; exit 1; }; done
     - name: "PCT enabled"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'pct-enabled') }}
       uses: ./.github/actions/multi-functest
