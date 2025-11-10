@@ -365,14 +365,14 @@ e.g. to improve proof performance, you can create a small wrapper script and pas
 An example of such a script is [lib/z3_smt_only](lib/z3_smt_only) which looks like this:
 
 ```
-#!/bin/bash
+#!/usr/bin/env bash
 z3 tactic.default_tactic=smt "$@"
 ```
 
 There is also a script [lib/z3_bv_sort](lib/z3_bv_sort) which looks like this:
 
 ```
-#!/bin/bash
+#!/usr/bin/env bash
 z3 rewriter.bv_sort_ac "$@"
 ```
 
