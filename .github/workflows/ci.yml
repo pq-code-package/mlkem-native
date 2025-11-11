@@ -584,6 +584,8 @@ jobs:
         container:
           - id: debian:bullseye
           - id: debian:bookworm
+          - id: nixos/nix:latest
+            nix_shell: 'nix-shell -p python3 gcc gnumake perl'
     name: Compatibility tests (${{ matrix.container.id }})
     runs-on: ubuntu-latest
     container:
@@ -613,14 +615,20 @@ jobs:
         with:
           sudo: ""
       - name: make quickcheck
+        shell: bash
         run: |
-          OPT=0 make quickcheck
-          make clean >/dev/null
-          OPT=1 make quickcheck
+          if [ -n "${{ matrix.container.nix_shell }}" ]; then
+            ${{ matrix.container.nix_shell }} --run "CC=gcc OPT=0 make quickcheck && make clean >/dev/null && CC=gcc OPT=1 make quickcheck"
+          else
+            CC=gcc OPT=0 make quickcheck
+            make clean >/dev/null
+            CC=gcc OPT=1 make quickcheck
+          fi
       - name: Functional Tests
         uses: ./.github/actions/multi-functest
         with:
           nix-shell: ""
+          custom_shell: ${{ matrix.container.nix_shell && format('{0} --run \"bash -e {{0}}\"', matrix.container.nix_shell) || 'bash' }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
   ec2_compatibilitytests:
     strategy:
