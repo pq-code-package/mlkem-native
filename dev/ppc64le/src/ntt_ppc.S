@@ -29,78 +29,78 @@
 .text
 
 .macro SAVE_REGS
-        stdu    1, -352(1)
-        mflr    0
-        std     14, 56(1)
-        std     15, 64(1)
-        std     16, 72(1)
-        std     17, 80(1)
-        std     18, 88(1)
-        std     19, 96(1)
-        std     20, 104(1)
-        std     21, 112(1)
-        li      10, 128
-        li      11, 144
-        li      12, 160
-        li      14, 176
-        li      15, 192
-        li      16, 208
-        stxvx   32+20, 10, 1
-        stxvx   32+21, 11, 1
-        stxvx   32+22, 12, 1
-        stxvx   32+23, 14, 1
-        stxvx   32+24, 15, 1
-        stxvx   32+25, 16, 1
-        li      10, 224
-        li      11, 240
-        li      12, 256
-        li      14, 272
-        li      15, 288
-        li      16, 304
-        stxvx   32+26, 10, 1
-        stxvx   32+27, 11, 1
-        stxvx   32+28, 12, 1
-        stxvx   32+29, 14, 1
-        stxvx   32+30, 15, 1
-        stxvx   32+31, 16, 1
+        stdu    r1, -352(r1)
+        mflr    r0
+        std     r14, 56(r1)
+        std     r15, 64(r1)
+        std     r16, 72(r1)
+        std     r17, 80(r1)
+        std     r18, 88(r1)
+        std     r19, 96(r1)
+        std     r20, 104(r1)
+        std     r21, 112(r1)
+        li      r10, 128
+        li      r11, 144
+        li      r12, 160
+        li      r14, 176
+        li      r15, 192
+        li      r16, 208
+        stxvx   32+v20, r10, r1
+        stxvx   32+v21, r11, r1
+        stxvx   32+v22, r12, r1
+        stxvx   32+v23, r14, r1
+        stxvx   32+v24, r15, r1
+        stxvx   32+v25, r16, r1
+        li      r10, 224
+        li      r11, 240
+        li      r12, 256
+        li      r14, 272
+        li      r15, 288
+        li      r16, 304
+        stxvx   32+v26, r10, r1
+        stxvx   32+v27, r11, r1
+        stxvx   32+v28, r12, r1
+        stxvx   32+v29, r14, r1
+        stxvx   32+v30, r15, r1
+        stxvx   32+v31, r16, r1
 .endm
 
 .macro RESTORE_REGS
-        li      10, 128
-        li      11, 144
-        li      12, 160
-        li      14, 176
-        li      15, 192
-        li      16, 208
-        lxvx    32+20, 10, 1
-        lxvx    32+21, 11, 1
-        lxvx    32+22, 12, 1
-        lxvx    32+23, 14, 1
-        lxvx    32+24, 15, 1
-        lxvx    32+25, 16, 1
-        li      10, 224
-        li      11, 240
-        li      12, 256
-        li      14, 272
-        li      15, 288
-        li      16, 304
-        lxvx    32+26, 10, 1
-        lxvx    32+27, 11, 1
-        lxvx    32+28, 12, 1
-        lxvx    32+29, 14, 1
-        lxvx    32+30, 15, 1
-        lxvx    32+31, 16, 1
-        ld      14, 56(1)
-        ld      15, 64(1)
-        ld      16, 72(1)
-        ld      17, 80(1)
-        ld      18, 88(1)
-        ld      19, 96(1)
-        ld      20, 104(1)
-        ld      21, 112(1)
+        li      r10, 128
+        li      r11, 144
+        li      r12, 160
+        li      r14, 176
+        li      r15, 192
+        li      r16, 208
+        lxvx    32+v20, r10, r1
+        lxvx    32+v21, r11, r1
+        lxvx    32+v22, r12, r1
+        lxvx    32+v23, r14, r1
+        lxvx    32+v24, r15, r1
+        lxvx    32+v25, r16, r1
+        li      r10, 224
+        li      r11, 240
+        li      r12, 256
+        li      r14, 272
+        li      r15, 288
+        li      r16, 304
+        lxvx    32+v26, r10, r1
+        lxvx    32+v27, r11, r1
+        lxvx    32+v28, r12, r1
+        lxvx    32+v29, r14, r1
+        lxvx    32+v30, r15, r1
+        lxvx    32+v31, r16, r1
+        ld      r14, 56(r1)
+        ld      r15, 64(r1)
+        ld      r16, 72(r1)
+        ld      r17, 80(r1)
+        ld      r18, 88(r1)
+        ld      r19, 96(r1)
+        ld      r20, 104(r1)
+        ld      r21, 112(r1)
 
-        mtlr    0
-        addi    1, 1, 352
+        mtlr    r0
+        addi    r1, r1, 352
 .endm
 
 /*
@@ -125,14 +125,14 @@
  *
  */
 .macro Init_Coeffs_offset start next
-        li      9, \start       /* first offset to j */
-        add     10, 7, 9        /* J + len*2 */
-        addi    16, 9, \next
-        addi    17, 10, \next
-        addi    18, 16, \next
-        addi    19, 17, \next
-        addi    20, 18, \next
-        addi    21, 19, \next
+        li      r9, \start         /* first offset to j */
+        add     r10, r7, r9        /* J + len*2 */
+        addi    r16, r9, \next
+        addi    r17, r10, \next
+        addi    r18, r16, \next
+        addi    r19, r17, \next
+        addi    r20, r18, \next
+        addi    r21, r19, \next
 .endm
 
 /*
@@ -140,10 +140,10 @@
  *  r[j+len]: V13, V18, V23, V28
  */
 .macro Load_4Rjp
-        lxvd2x  32+13, 3, 10    /* V13: vector r'0 */
-        lxvd2x  32+18, 3, 17    /* V18: vector for r'1 */
-        lxvd2x  32+23, 3, 19    /* V23: vector for r'2 */
-        lxvd2x  32+28, 3, 21    /* V28: vector for r'3 */
+        lxvd2x  32+v13, r3, r10    /* V13: vector r'0 */
+        lxvd2x  32+v18, r3, r17    /* V18: vector for r'1 */
+        lxvd2x  32+v23, r3, r19    /* V23: vector for r'2 */
+        lxvd2x  32+v28, r3, r21    /* V28: vector for r'3 */
 .endm
 
 /*
@@ -174,22 +174,22 @@
  * in the proper order to match the multiplication.
  */
 .macro Load_L24Coeffs
-        lxvd2x     32+25, 0, 5
-        lxvd2x     32+26, 10, 5
-        vmrgew 13, 25, 26
-        vmrgow 12, 25, 26
-        lxvd2x     32+25, 11, 5
-        lxvd2x     32+26, 12, 5
-        vmrgew 18, 25, 26
-        vmrgow 17, 25, 26
-        lxvd2x     32+25, 15, 5
-        lxvd2x     32+26, 16, 5
-        vmrgew 23, 25, 26
-        vmrgow 22, 25, 26
-        lxvd2x     32+25, 17, 5
-        lxvd2x     32+26, 18, 5
-        vmrgew 28, 25, 26
-        vmrgow 27, 25, 26
+        lxvd2x     32+v25, 0, r5
+        lxvd2x     32+v26, r10, r5
+        vmrgew v13, v25, v26
+        vmrgow v12, v25, v26
+        lxvd2x     32+v25, r11, r5
+        lxvd2x     32+v26, r12, r5
+        vmrgew v18, v25, v26
+        vmrgow v17, v25, v26
+        lxvd2x     32+v25, r15, r5
+        lxvd2x     32+v26, r16, r5
+        vmrgew v23, v25, v26
+        vmrgow v22, v25, v26
+        lxvd2x     32+v25, r17, r5
+        lxvd2x     32+v26, r18, r5
+        vmrgew v28, v25, v26
+        vmrgow v27, v25, v26
 .endm
 
 /*
@@ -208,22 +208,22 @@
  * in the proper order to match the multiplication.
  */
 .macro Load_L44Coeffs
-        lxvd2x     1, 0, 5
-        lxvd2x     2, 10, 5
-        xxpermdi 32+13, 2, 1, 3
-        xxpermdi 32+12, 2, 1, 0
-        lxvd2x     3, 11, 5
-        lxvd2x     4, 12, 5
-        xxpermdi 32+18, 4, 3, 3
-        xxpermdi 32+17, 4, 3, 0
-        lxvd2x     1, 15, 5
-        lxvd2x     2, 16, 5
-        xxpermdi 32+23, 2, 1, 3
-        xxpermdi 32+22, 2, 1, 0
-        lxvd2x     3, 17, 5
-        lxvd2x     4, 18, 5
-        xxpermdi 32+28, 4, 3, 3
-        xxpermdi 32+27, 4, 3, 0
+        lxvd2x     vs1, 0, r5
+        lxvd2x     vs2, r10, r5
+        xxpermdi 32+v13, vs2, vs1, 3
+        xxpermdi 32+v12, vs2, vs1, 0
+        lxvd2x     vs3, r11, r5
+        lxvd2x     vs4, r12, r5
+        xxpermdi 32+v18, vs4, vs3, 3
+        xxpermdi 32+v17, vs4, vs3, 0
+        lxvd2x     vs1, r15, r5
+        lxvd2x     vs2, r16, r5
+        xxpermdi 32+v23, vs2, vs1, 3
+        xxpermdi 32+v22, vs2, vs1, 0
+        lxvd2x     vs3, r17, r5
+        lxvd2x     vs4, r18, r5
+        xxpermdi 32+v28, vs4, vs3, 3
+        xxpermdi 32+v27, vs4, vs3, 0
 .endm
 
 /*
@@ -237,32 +237,32 @@
 .macro MREDUCE_4X _vz0 _vz1 _vz2 _vz3
         /* fqmul = zeta * coefficient
            Modular multification bond by 2^16 * q in abs value */
-        vmladduhm 15, 13, \_vz0, 3
-        vmladduhm 20, 18, \_vz1, 3
-        vmladduhm 25, 23, \_vz2, 3
-        vmladduhm 30, 28, \_vz3, 3
+        vmladduhm v15, v13, \_vz0, v3
+        vmladduhm v20, v18, \_vz1, v3
+        vmladduhm v25, v23, \_vz2, v3
+        vmladduhm v30, v28, \_vz3, v3
 
         /* Signed multiply-high-round; outputs are bound by 2^15 * q in abs value */
-        vmhraddshs 14, 13, \_vz0, 3
-        vmhraddshs 19, 18, \_vz1, 3
-        vmhraddshs 24, 23, \_vz2, 3
-        vmhraddshs 29, 28, \_vz3, 3
+        vmhraddshs v14, v13, \_vz0, v3
+        vmhraddshs v19, v18, \_vz1, v3
+        vmhraddshs v24, v23, \_vz2, v3
+        vmhraddshs v29, v28, \_vz3, v3
 
-        vmladduhm 15, 15, V_QINV, 3
-        vmladduhm 20, 20, V_QINV, 3
-        vmladduhm 25, 25, V_QINV, 3
-        vmladduhm 30, 30, V_QINV, 3
+        vmladduhm v15, v15, V_QINV, v3
+        vmladduhm v20, v20, V_QINV, v3
+        vmladduhm v25, v25, V_QINV, v3
+        vmladduhm v30, v30, V_QINV, v3
 
-        vmhraddshs 15, 15, V_NMKQ, 14
-        vmhraddshs 20, 20, V_NMKQ, 19
-        vmhraddshs 25, 25, V_NMKQ, 24
-        vmhraddshs 30, 30, V_NMKQ, 29
+        vmhraddshs v15, v15, V_NMKQ, v14
+        vmhraddshs v20, v20, V_NMKQ, v19
+        vmhraddshs v25, v25, V_NMKQ, v24
+        vmhraddshs v30, v30, V_NMKQ, v29
 
         /* Shift right 1 bit */
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vsrah v13, v15, v4
+        vsrah v18, v20, v4
+        vsrah v23, v25, v4
+        vsrah v28, v30, v4
 .endm
 
 /*
@@ -271,10 +271,10 @@
  *  r[j]: V12, V17, V22, V27
  */
 .macro Load_4Rj
-        lxvd2x  32+12, 3, 9     /* V12: vector r0 */
-        lxvd2x  32+17, 3, 16    /* V17: vector r1 */
-        lxvd2x  32+22, 3, 18    /* V22: vector r2 */
-        lxvd2x  32+27, 3, 20    /* V27: vector r3 */
+        lxvd2x  32+v12, r3, r9     /* V12: vector r0 */
+        lxvd2x  32+v17, r3, r16    /* V17: vector r1 */
+        lxvd2x  32+v22, r3, r18    /* V22: vector r2 */
+        lxvd2x  32+v27, r3, r20    /* V27: vector r3 */
 .endm
 
 /*
@@ -289,25 +289,25 @@
            r[j] = r[j] + t.
            r[j+len] = r[j] - t
          */
-        vsubuhm 16, 12, 13
-        vadduhm 15, 13, 12
-        vsubuhm 21, 17, 18
-        vadduhm 20, 18, 17
-        vsubuhm 26, 22, 23
-        vadduhm 25, 23, 22
-        vsubuhm 31, 27, 28
-        vadduhm 30, 28, 27
+        vsubuhm v16, v12, v13
+        vadduhm v15, v13, v12
+        vsubuhm v21, v17, v18
+        vadduhm v20, v18, v17
+        vsubuhm v26, v22, v23
+        vadduhm v25, v23, v22
+        vsubuhm v31, v27, v28
+        vadduhm v30, v28, v27
 .endm
 
 .macro Write_One
-        stxvd2x 32+15, 3, 9
-        stxvd2x 32+16, 3, 10
-        stxvd2x 32+20, 3, 16
-        stxvd2x 32+21, 3, 17
-        stxvd2x 32+25, 3, 18
-        stxvd2x 32+26, 3, 19
-        stxvd2x 32+30, 3, 20
-        stxvd2x 32+31, 3, 21
+        stxvd2x 32+v15, r3, r9
+        stxvd2x 32+v16, r3, r10
+        stxvd2x 32+v20, r3, r16
+        stxvd2x 32+v21, r3, r17
+        stxvd2x 32+v25, r3, r18
+        stxvd2x 32+v26, r3, r19
+        stxvd2x 32+v30, r3, r20
+        stxvd2x 32+v31, r3, r21
 .endm
 
 /*
@@ -316,22 +316,22 @@
  */
 .macro PermWriteL44
         Compute_4Coeffs
-        xxpermdi 0, 32+15, 32+16, 3
-        xxpermdi 1, 32+15, 32+16, 0
-        xxpermdi 2, 32+20, 32+21, 3
-        xxpermdi 3, 32+20, 32+21, 0
-        xxpermdi 4, 32+25, 32+26, 3
-        xxpermdi 5, 32+25, 32+26, 0
-        xxpermdi 6, 32+30, 32+31, 3
-        xxpermdi 7, 32+30, 32+31, 0
-        stxvd2x 0, 0, 5
-        stxvd2x 1, 10, 5
-        stxvd2x 2, 11, 5
-        stxvd2x 3, 12, 5
-        stxvd2x 4, 15, 5
-        stxvd2x 5, 16, 5
-        stxvd2x 6, 17, 5
-        stxvd2x 7, 18, 5
+        xxpermdi vs0, 32+v15, 32+v16, 3
+        xxpermdi vs1, 32+v15, 32+v16, 0
+        xxpermdi vs2, 32+v20, 32+v21, 3
+        xxpermdi vs3, 32+v20, 32+v21, 0
+        xxpermdi vs4, 32+v25, 32+v26, 3
+        xxpermdi vs5, 32+v25, 32+v26, 0
+        xxpermdi vs6, 32+v30, 32+v31, 3
+        xxpermdi vs7, 32+v30, 32+v31, 0
+        stxvd2x vs0, 0, r5
+        stxvd2x vs1, r10, r5
+        stxvd2x vs2, r11, r5
+        stxvd2x vs3, r12, r5
+        stxvd2x vs4, r15, r5
+        stxvd2x vs5, r16, r5
+        stxvd2x vs6, r17, r5
+        stxvd2x vs7, r18, r5
 .endm
 
 /*
@@ -340,33 +340,33 @@
  */
 .macro PermWriteL24
         Compute_4Coeffs
-        vmrgew 10, 16, 15
-        vmrgow 11, 16, 15
-        vmrgew 12, 21, 20
-        vmrgow 13, 21, 20
-        vmrgew 14, 26, 25
-        vmrgow 15, 26, 25
-        vmrgew 16, 31, 30
-        vmrgow 17, 31, 30
-        stxvd2x 32+10, 0, 5
-        stxvd2x 32+11, 10, 5
-        stxvd2x 32+12, 11, 5
-        stxvd2x 32+13, 12, 5
-        stxvd2x 32+14, 15, 5
-        stxvd2x 32+15, 16, 5
-        stxvd2x 32+16, 17, 5
-        stxvd2x 32+17, 18, 5
+        vmrgew v10, v16, v15
+        vmrgow v11, v16, v15
+        vmrgew v12, v21, v20
+        vmrgow v13, v21, v20
+        vmrgew v14, v26, v25
+        vmrgow v15, v26, v25
+        vmrgew v16, v31, v30
+        vmrgow v17, v31, v30
+        stxvd2x 32+v10, 0, r5
+        stxvd2x 32+v11, r10, r5
+        stxvd2x 32+v12, r11, r5
+        stxvd2x 32+v13, r12, r5
+        stxvd2x 32+v14, r15, r5
+        stxvd2x 32+v15, r16, r5
+        stxvd2x 32+v16, r17, r5
+        stxvd2x 32+v17, r18, r5
 .endm
 
 .macro Load_next_4zetas
-        li      10, 16
-        li      11, 32
-        li      12, 48
-        lxvd2x  32+V_Z0, 0, 14
-        lxvd2x  32+V_Z1, 10, 14
-        lxvd2x  32+V_Z2, 11, 14
-        lxvd2x  32+V_Z3, 12, 14
-        addi    14, 14, 64
+        li      r10, 16
+        li      r11, 32
+        li      r12, 48
+        lxvd2x  32+V_Z0, 0, r14
+        lxvd2x  32+V_Z1, r10, r14
+        lxvd2x  32+V_Z2, r11, r14
+        lxvd2x  32+V_Z3, r12, r14
+        addi    r14, r14, 64
 .endm
 
 /*
@@ -398,16 +398,16 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
         SAVE_REGS
 
         /* load MLKEM_Q */
-        lvx     V_NMKQ,0,4
+        lvx     V_NMKQ,0,r4
 
         /* Register 14 as pointer to zetas array */
-        addi    14, 4, ZETA_NTT_OFFSET
+        addi    r14, r4, ZETA_NTT_OFFSET
 
-        vxor    3, 3, 3
-        vspltish 4, 1
+        vxor    v3, v3, v3
+        vspltish v4, 1
 
-        li      10, QINV_OFFSET
-        lvx     V_QINV, 10, 4
+        li      r10, QINV_OFFSET
+        lvx     V_QINV, r10, r4
 
 .align 4
         /*
@@ -416,9 +416,9 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
          *
          * 1. len = 128, start = 0
          */
-        li      7, 256          /* len * 2 */
-        lvx     V_ZETA, 0, 14
-        addi    14, 14, 16
+        li      r7, 256          /* len * 2 */
+        lvx     V_ZETA, 0, r14
+        addi    r14, r14, 16
 
         NTT_MREDUCE_4X 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
         NTT_MREDUCE_4X 64, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
@@ -430,14 +430,14 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
          * 2. len = 64, start = 0, 128
          * k += 2
          */
-        li      7, 128
-        lvx     V_ZETA, 0, 14
-        addi    14, 14, 16
+        li      r7, 128
+        lvx     V_ZETA, 0, r14
+        addi    r14, r14, 16
         NTT_MREDUCE_4X 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
         NTT_MREDUCE_4X 64, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
-        lvx     V_ZETA, 0, 14
-        addi    14, 14, 16
+        lvx     V_ZETA, 0, r14
+        addi    r14, r14, 16
         NTT_MREDUCE_4X 256, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
         NTT_MREDUCE_4X 320, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
@@ -446,21 +446,21 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
          * 3. len = 32, start = 0, 64, 128, 192
          * k += 4
          */
-        li      7, 64
-        lvx     V_ZETA, 0, 14
-        addi    14, 14, 16
+        li      r7, 64
+        lvx     V_ZETA, 0, r14
+        addi    r14, r14, 16
         NTT_MREDUCE_4X 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
-        lvx     V_ZETA, 0, 14
-        addi    14, 14, 16
+        lvx     V_ZETA, 0, r14
+        addi    r14, r14, 16
         NTT_MREDUCE_4X 128, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
-        lvx     V_ZETA, 0, 14
-        addi    14, 14, 16
+        lvx     V_ZETA, 0, r14
+        addi    r14, r14, 16
         NTT_MREDUCE_4X 256, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
-        lvx     V_ZETA, 0, 14
-        addi    14, 14, 16
+        lvx     V_ZETA, 0, r14
+        addi    r14, r14, 16
         NTT_MREDUCE_4X 384, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
 .align 4
@@ -468,7 +468,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
          * 4. len = 16, start = 0, 32, 64,,...160, 192, 224
          * k += 8
          */
-        li      7, 32
+        li      r7, 32
         Load_next_4zetas
         NTT_MREDUCE_4X 0, 64, V_Z0, V_Z1, V_Z2, V_Z3
         NTT_MREDUCE_4X 16, 64, V_Z0, V_Z1, V_Z2, V_Z3
@@ -482,7 +482,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
          * 5. len = 8, start = 0, 16, 32, 48,...208, 224, 240
          * k += 16
          */
-        li      7, 16
+        li      r7, 16
         Load_next_4zetas
         NTT_MREDUCE_4X 0, 32, V_Z0, V_Z1, V_Z2, V_Z3
 
@@ -500,18 +500,18 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
          * k += 32
          * Load zeta vectors in 4-4 layout
          */
-        li      15, 4
-        mtctr   15
-        mr      5, 3                 /* Let r5 points to coefficient array */
-        li      7, 8
+        li      r15, 4
+        mtctr   r15
+        mr      r5, r3                 /* Let r5 points to coefficient array */
+        li      r7, 8
 
-        li      10, 16
-        li      11, 32
-        li      12, 48
-        li      15, 64
-        li      16, 80
-        li      17, 96
-        li      18, 112
+        li      r10, 16
+        li      r11, 32
+        li      r12, 48
+        li      r15, 64
+        li      r16, 80
+        li      r17, 96
+        li      r18, 112
 
 .align 4
 ntt_ppc__Len4:
@@ -520,7 +520,7 @@ ntt_ppc__Len4:
         Load_L44Coeffs
         MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3
         PermWriteL44
-        addi    5, 5, 128
+        addi    r5, r5, 128
 
         bdnz    ntt_ppc__Len4
 
@@ -530,10 +530,10 @@ ntt_ppc__Len4:
          * Load zeta vectors in 2-2-2-2 layout
          */
 
-        li      8, 4
-        mtctr   8
-        mr      5, 3                  /* Let r5 points to coefficient array */
-        li      7, 4
+        li      r8, 4
+        mtctr   r8
+        mr      r5, r3                  /* Let r5 points to coefficient array */
+        li      r7, 4
 
 .align 4
 ntt_ppc__Len2:
@@ -541,7 +541,7 @@ ntt_ppc__Len2:
         Load_L24Coeffs
         MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3
         PermWriteL24
-        addi    5, 5, 128
+        addi    r5, r5, 128
 
         bdnz    ntt_ppc__Len2
 

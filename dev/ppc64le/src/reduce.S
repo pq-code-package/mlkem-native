@@ -34,168 +34,168 @@
 .text
 
 .macro BREDUCE_4X _v0 _v1 _v2 _v3
-        lxvd2x  32+8, 0, 3
-        lxvd2x  32+12, 14, 3
-        lxvd2x  32+16, 15, 3
-        lxvd2x  32+20, 16, 3
-        addi    3, 3, 64
-        vmulosh 6, 8, V20159
-        vmulesh 5, 8, V20159
-        vmulosh 11, 12, V20159
-        vmulesh 10, 12, V20159
-        vmulosh 15, 16, V20159
-        vmulesh 14, 16, V20159
-        vmulosh 19, 20, V20159
-        vmulesh 18, 20, V20159
-        xxmrglw 32+4, 32+5, 32+6
-        xxmrghw 32+5, 32+5, 32+6
-        xxmrglw 32+9, 32+10, 32+11
-        xxmrghw 32+10, 32+10, 32+11
-        xxmrglw 32+13, 32+14, 32+15
-        xxmrghw 32+14, 32+14, 32+15
-        xxmrglw 32+17, 32+18, 32+19
-        xxmrghw 32+18, 32+18, 32+19
-        vadduwm 4, 4, V_25
-        vadduwm 5, 5, V_25
-        vadduwm 9, 9, V_25
-        vadduwm 10, 10, V_25
-        vadduwm 13, 13, V_25
-        vadduwm 14, 14, V_25
-        vadduwm 17, 17, V_25
-        vadduwm 18, 18, V_25
-        vsraw   4, 4, V_26
-        vsraw   5, 5, V_26
-        vsraw   9, 9, V_26
-        vsraw   10, 10, V_26
-        vsraw   13, 13, V_26
-        vsraw   14, 14, V_26
-        vsraw   17, 17, V_26
-        vsraw   18, 18, V_26
-        vpkuwum 4, 5, 4
-        vsubuhm 4, 7, 4
-        vpkuwum 9, 10, 9
-        vsubuhm 9, 7, 9
-        vpkuwum 13, 14, 13
-        vsubuhm 13, 7, 13
-        vpkuwum 17, 18, 17
-        vsubuhm 17, 7, 17
-        vmladduhm \_v0, 4, V_MKQ, 8
-        vmladduhm \_v1, 9, V_MKQ, 12
-        vmladduhm \_v2, 13, V_MKQ, 16
-        vmladduhm \_v3, 17, V_MKQ, 20
+        lxvd2x  32+v8, 0, r3
+        lxvd2x  32+v12, r14, r3
+        lxvd2x  32+v16, r15, r3
+        lxvd2x  32+v20, r16, r3
+        addi    r3, r3, 64
+        vmulosh v6, v8, V20159
+        vmulesh v5, v8, V20159
+        vmulosh v11, v12, V20159
+        vmulesh v10, v12, V20159
+        vmulosh v15, v16, V20159
+        vmulesh v14, v16, V20159
+        vmulosh v19, v20, V20159
+        vmulesh v18, v20, V20159
+        xxmrglw 32+v4, 32+v5, 32+v6
+        xxmrghw 32+v5, 32+v5, 32+v6
+        xxmrglw 32+v9, 32+v10, 32+v11
+        xxmrghw 32+v10, 32+v10, 32+v11
+        xxmrglw 32+v13, 32+v14, 32+v15
+        xxmrghw 32+v14, 32+v14, 32+v15
+        xxmrglw 32+v17, 32+v18, 32+v19
+        xxmrghw 32+v18, 32+v18, 32+v19
+        vadduwm v4, v4, V_25
+        vadduwm v5, v5, V_25
+        vadduwm v9, v9, V_25
+        vadduwm v10, v10, V_25
+        vadduwm v13, v13, V_25
+        vadduwm v14, v14, V_25
+        vadduwm v17, v17, V_25
+        vadduwm v18, v18, V_25
+        vsraw   v4, v4, V_26
+        vsraw   v5, v5, V_26
+        vsraw   v9, v9, V_26
+        vsraw   v10, v10, V_26
+        vsraw   v13, v13, V_26
+        vsraw   v14, v14, V_26
+        vsraw   v17, v17, V_26
+        vsraw   v18, v18, V_26
+        vpkuwum v4, v5, v4
+        vsubuhm v4, v7, v4
+        vpkuwum v9, v10, v9
+        vsubuhm v9, v7, v9
+        vpkuwum v13, v14, v13
+        vsubuhm v13, v7, v13
+        vpkuwum v17, v18, v17
+        vsubuhm v17, v7, v17
+        vmladduhm \_v0, v4, V_MKQ, v8
+        vmladduhm \_v1, v9, V_MKQ, v12
+        vmladduhm \_v2, v13, V_MKQ, v16
+        vmladduhm \_v3, v17, V_MKQ, v20
 .endm
 
 .macro Write_8X
-        stxvd2x 32+21, 4, 3
-        stxvd2x 32+22, 5, 3
-        stxvd2x 32+23, 6, 3
-        stxvd2x 32+24, 7, 3
-        stxvd2x 32+4, 8, 3
-        stxvd2x 32+9, 9, 3
-        stxvd2x 32+13, 10, 3
-        stxvd2x 32+17, 11, 3
+        stxvd2x 32+v21, r4, r3
+        stxvd2x 32+v22, r5, r3
+        stxvd2x 32+v23, r6, r3
+        stxvd2x 32+v24, r7, r3
+        stxvd2x 32+v4, r8, r3
+        stxvd2x 32+v9, r9, r3
+        stxvd2x 32+v13, r10, r3
+        stxvd2x 32+v17, r11, r3
 .endm
 
 /*
  * Conditional addition to get unsigned canonical representative
  */
 .macro To_unsigned_16
-        lxvd2x    32+12, 0, 3
-        lxvd2x    32+13, 14, 3
-        lxvd2x    32+14, 15, 3
-        lxvd2x    32+15, 16, 3
-        addi    3, 3, 64
-        vsrh    1, 12, 10
-        vsrh    0, 13, 10
-        vsrh    3, 14, 10
-        vsrh    2, 15, 10
-        vadduhm 7, 12, 11
-        vadduhm 8, 13, 11
-        vadduhm 5, 14, 11
-        vadduhm 6, 15, 11
-        vcmpequh 1, 1, 9
-        vcmpequh 0, 0, 9
-        vcmpequh 3, 3, 9
-        vcmpequh 2, 2, 9
-        xxsel   32+1, 32+7,32+12, 32+1
-        xxsel   32+0, 32+8,32+13, 32+0
-        xxsel   32+3, 32+5,32+14, 32+3
-        xxsel   32+2, 32+6,32+15, 32+2
-        stxvd2x 32+3, 10, 3
-        stxvd2x 32+2, 11, 3
-        stxvd2x 32+1, 8, 3
-        stxvd2x 32+0, 9, 3
+        lxvd2x    32+v12, 0, r3
+        lxvd2x    32+v13, r14, r3
+        lxvd2x    32+v14, r15, r3
+        lxvd2x    32+v15, r16, r3
+        addi    r3, r3, 64
+        vsrh    v1, v12, v10
+        vsrh    v0, v13, v10
+        vsrh    v3, v14, v10
+        vsrh    v2, v15, v10
+        vadduhm v7, v12, v11
+        vadduhm v8, v13, v11
+        vadduhm v5, v14, v11
+        vadduhm v6, v15, v11
+        vcmpequh v1, v1, v9
+        vcmpequh v0, v0, v9
+        vcmpequh v3, v3, v9
+        vcmpequh v2, v2, v9
+        xxsel   32+v1, 32+v7,32+v12, 32+v1
+        xxsel   32+v0, 32+v8,32+v13, 32+v0
+        xxsel   32+v3, 32+v5,32+v14, 32+v3
+        xxsel   32+v2, 32+v6,32+v15, 32+v2
+        stxvd2x 32+v3, r10, r3
+        stxvd2x 32+v2, r11, r3
+        stxvd2x 32+v1, r8, r3
+        stxvd2x 32+v0, r9, r3
 .endm
 
 .align 4
 .globl MLK_ASM_NAMESPACE(reduce_ppc)
 MLK_ASM_FN_SYMBOL(reduce_ppc)
-        stdu    1, -224(1)
-        mflr    0
-        std     14, 96(1)
-        std     15, 104(1)
-        std     16, 112(1)
-        li      6, 128
-        li      7, 144
-        li      8, 160
-        li      9, 176
-        li      10, 192
-        stxvx   32+20, 6, 1
-        stxvx   32+21, 7, 1
-        stxvx   32+22, 8, 1
-        stxvx   32+23, 9, 1
-        stxvx   32+24, 10, 1
+        stdu    r1, -224(r1)
+        mflr    r0
+        std     r14, 96(r1)
+        std     r15, 104(r1)
+        std     r16, 112(r1)
+        li      r6, 128
+        li      r7, 144
+        li      r8, 160
+        li      r9, 176
+        li      r10, 192
+        stxvx   32+v20, r6, r1
+        stxvx   32+v21, r7, r1
+        stxvx   32+v22, r8, r1
+        stxvx   32+v23, r9, r1
+        stxvx   32+v24, r10, r1
 
-        vxor    7, 7, 7
+        vxor    v7, v7, v7
 
-        li      6, Q_OFFSET
-        li      7, C20159_OFFSET
-        lxvx    32+V_MKQ, 6, 4
-        lxvx    32+V20159, 7, 4
+        li      r6, Q_OFFSET
+        li      r7, C20159_OFFSET
+        lxvx    32+V_MKQ, r6, r4
+        lxvx    32+V20159, r7, r4
 
         vspltisw V_26, 13
         vadduwm V_26, V_26, V_26
-        vspltisw 4, 1
-        vsubuwm 5, V_26, 4
-        vslw    V_25, 4, 5
+        vspltisw v4, 1
+        vsubuwm v5, V_26, v4
+        vslw    V_25, v4, v5
 
-        li      4, -128
-        li      5, -112
-        li      6, -96
-        li      7, -80
-        li      8, -64
-        li      9, -48
-        li      10, -32
-        li      11, -16
+        li      r4, -128
+        li      r5, -112
+        li      r6, -96
+        li      r7, -80
+        li      r8, -64
+        li      r9, -48
+        li      r10, -32
+        li      r11, -16
 
-        li      14, 16
-        li      15, 32
-        li      16, 48
+        li      r14, 16
+        li      r15, 32
+        li      r16, 48
 
-        BREDUCE_4X 21, 22, 23, 24
-        BREDUCE_4X 4, 9, 13, 17
+        BREDUCE_4X v21, v22, v23, v24
+        BREDUCE_4X v4, v9, v13, v17
         Write_8X
 
-        BREDUCE_4X 21, 22, 23, 24
-        BREDUCE_4X 4, 9, 13, 17
+        BREDUCE_4X v21, v22, v23, v24
+        BREDUCE_4X v4, v9, v13, v17
         Write_8X
 
-        BREDUCE_4X 21, 22, 23, 24
-        BREDUCE_4X 4, 9, 13, 17
+        BREDUCE_4X v21, v22, v23, v24
+        BREDUCE_4X v4, v9, v13, v17
         Write_8X
 
-        BREDUCE_4X 21, 22, 23, 24
-        BREDUCE_4X 4, 9, 13, 17
+        BREDUCE_4X v21, v22, v23, v24
+        BREDUCE_4X v4, v9, v13, v17
         Write_8X
 
         /*
          * To unsigned canonical
          */
 .align 4
-        addi    3, 3, -512
-        vxor    9, 9, 9
-        vspltish 10, 15
-        vmr     11, V_MKQ
+        addi    r3, r3, -512
+        vxor    v9, v9, v9
+        vspltish v10, 15
+        vmr     v11, V_MKQ
 
         To_unsigned_16
         To_unsigned_16
@@ -206,21 +206,21 @@ MLK_ASM_FN_SYMBOL(reduce_ppc)
         To_unsigned_16
         To_unsigned_16
 
-        ld      14, 96(1)
-        ld      15, 104(1)
-        ld      16, 112(1)
-        li      6, 128
-        li      7, 144
-        li      8, 160
-        li      9, 176
-        li      10, 192
-        lxvx    32+20, 6, 1
-        lxvx    32+21, 7, 1
-        lxvx    32+22, 8, 1
-        lxvx    32+23, 9, 1
-        lxvx    32+24, 10, 1
-        mtlr    0
-        addi    1, 1, 224
+        ld      r14, 96(r1)
+        ld      r15, 104(r1)
+        ld      r16, 112(r1)
+        li      r6, 128
+        li      r7, 144
+        li      r8, 160
+        li      r9, 176
+        li      r10, 192
+        lxvx    32+v20, r6, r1
+        lxvx    32+v21, r7, r1
+        lxvx    32+v22, r8, r1
+        lxvx    32+v23, r9, r1
+        lxvx    32+v24, r10, r1
+        mtlr    r0
+        addi    r1, r1, 224
         blr
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
