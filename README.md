@@ -96,6 +96,49 @@ Our AArch64 assembly is developed using the [SLOTHY](https://github.com/slothy-o
 We write 'clean' assembly by hand and automate micro-optimizations (e.g. see the [clean](dev/aarch64_clean/src/ntt.S) vs [optimized](dev/aarch64_opt/src/ntt.S) AArch64 NTT).
 See [dev/README.md](dev/README.md) for more details.
 
+## ACVP Testing
+
+mlkem-native is tested against all official ACVP ML-KEM test vectors[^ACVP].
+
+You can run ACVP tests using the [`tests`](./scripts/tests) script or the [ACVP client](./test/acvp_client.py) directly:
+
+```bash
+# Using the tests script
+./scripts/tests acvp
+# Using a specific ACVP release
+./scripts/tests acvp --version v1.1.0.40
+
+# Using the ACVP client directly
+python3 ./test/acvp_client.py
+python3 ./test/acvp_client.py --version v1.1.0.40
+
+# Using specific ACVP test vector files (downloaded from the ACVP-Server)
+# python3 ./test/acvp_client.py -p {PROMPT}.json -e {EXPECTED_RESULT}.json
+# For example, assuming you have run the above
+python3 ./test/acvp_client.py \
+  -p ./test/.acvp-data/v1.1.0.40/files/ML-KEM-keyGen-FIPS203/prompt.json \
+  -e ./test/.acvp-data/v1.1.0.40/files/ML-KEM-keyGen-FIPS203/expectedResults.json
+```
+
+## Benchmarking
+
+You can measure performance, memory usage, and binary size using the [`tests`](./scripts/tests) script:
+
+```bash
+# Speed benchmarks (-c selects cycle counter: NO, PMU, PERF, or MAC)
+# Note: PERF/MAC may require the -r flag to run benchmarking binaries using sudo
+./scripts/tests bench -c PMU
+./scripts/tests bench -c PERF -r
+
+# Stack usage analysis
+./scripts/tests stack
+
+# Binary size measurement
+./scripts/tests size
+```
+
+For CI benchmark results and historical performance data, see the [benchmarking page](https://pq-code-package.github.io/mlkem-native/dev/bench/).
+
 ## Usage
 
 If you want to use mlkem-native, import [mlkem](mlkem) into your project's source tree and build using your favourite build system. See [mlkem](mlkem) for more information, and
@@ -143,6 +186,7 @@ If you want to help us build mlkem-native, please reach out. You can contact the
 through the [PQCA Discord](https://discord.com/invite/xyVnwzfg5R). See also [CONTRIBUTING.md](CONTRIBUTING.md).
 
 <!--- bibliography --->
+[^ACVP]: National Institute of Standards and Technology: Automated Cryptographic Validation Protocol (ACVP) Server, [https://github.com/usnistgov/ACVP-Server](https://github.com/usnistgov/ACVP-Server)
 [^FIPS202]: National Institute of Standards and Technology: FIPS202 SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions, [https://csrc.nist.gov/pubs/fips/202/final](https://csrc.nist.gov/pubs/fips/202/final)
 [^FIPS203]: National Institute of Standards and Technology: FIPS 203 Module-Lattice-Based Key-Encapsulation Mechanism Standard, [https://csrc.nist.gov/pubs/fips/203/final](https://csrc.nist.gov/pubs/fips/203/final)
 [^HYBRID]: Becker, Kannwischer: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64, [https://eprint.iacr.org/2022/1243](https://eprint.iacr.org/2022/1243)
