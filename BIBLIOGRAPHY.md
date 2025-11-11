@@ -7,6 +7,15 @@
 This file lists the citations made throughout the mlkem-native 
 source code and documentation.
 
+### `ACVP`
+
+* Automated Cryptographic Validation Protocol (ACVP) Server
+* Author(s):
+  - National Institute of Standards and Technology
+* URL: https://github.com/usnistgov/ACVP-Server
+* Referenced from:
+  - [README.md](README.md)
+
 ### `AVX2_NTT`
 
 * Faster AVX2 optimized NTT multiplication for Ring-LWE lattice cryptography.

@@ -1,5 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
+- id: ACVP
+  name: Automated Cryptographic Validation Protocol (ACVP) Server
+  author: National Institute of Standards and Technology
+  url: https://github.com/usnistgov/ACVP-Server
+
 - id: FIPS203
   short: FIPS 203
   name: "FIPS 203 Module-Lattice-Based Key-Encapsulation Mechanism Standard"
