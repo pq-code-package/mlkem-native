@@ -117,6 +117,15 @@
           devShells.ci-slothy = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) slothy linters toolchains_native; };
           };
+          devShells.hol_light-cross = util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) linters toolchains hol_light s2n_bignum; };
+          };
+          devShells.hol_light-cross-aarch64 = util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 hol_light s2n_bignum; };
+          };
+          devShells.hol_light-cross-x86_64 = util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum; };
+          };
           devShells.ci-cross = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains; };
           };
