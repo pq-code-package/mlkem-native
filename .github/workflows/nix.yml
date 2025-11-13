@@ -1,4 +1,5 @@
 # Copyright (c) The mlkem-native project authors
+# Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 name: Nix
@@ -48,7 +49,7 @@ jobs:
 
   build_nix_cache:
     needs: [ check_modified_files ]
-    if: ${{ needs.check_modified_files.outputs.run_needed == '1' }}
+    if: ${{ needs.check_modified_files.outputs.run_needed == '1' && github.ref == 'refs/heads/main' }}
     permissions:
       actions: 'write'
       contents: 'read'

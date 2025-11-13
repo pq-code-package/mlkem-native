@@ -1,4 +1,5 @@
 # Copyright (c) The mlkem-native project authors
+# Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 name: Setup nix
@@ -103,9 +104,8 @@ runs:
       if: ${{ env.NIX_CACHE_ENABLED != 1 && inputs.cache == 'true' }}
       continue-on-error: true
       with:
-        primary-key: ${{ steps.nix-post-check.outputs.cache_prefix }}-${{ hashFiles('**/*.nix') }}
-        restore-prefixes-first-match: ${{ steps.nix-post-check.outputs.cache_prefix }}
-        gc-max-store-size-linux: 536870912
+        primary-key: ${{ steps.nix-post-check.outputs.cache_prefix }}
+        gc-max-store-size-linux: 3221225472
         purge: ${{ inputs.save_cache == 'true' }}
         save: ${{ inputs.save_cache == 'true' }}
         purge-prefixes: cache-${{ steps.nix-post-check.outputs.cache_prefix }}
