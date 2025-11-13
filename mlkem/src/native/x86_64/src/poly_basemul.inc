@@ -50,7 +50,7 @@
  *    r = ac + bdz = r0 + r1,
  *    s = ad + bc = s0 + s1.
  */
-.macro schoolbook iter k
+.macro schoolbook iter, k
 vmovdqa (256*\k + 32*\iter +  0)*2(%rsi), _a
 vmovdqa (256*\k + 32*\iter + 16)*2(%rsi), _b
 vmovdqa (256*\k + 32*\iter +  0)*2(%rdx), _c
@@ -114,14 +114,14 @@ vmovdqa _s0, (32*\iter + 16)*2(%rdi)
 .endm
 
 .macro poly_basemul k
-schoolbook 0 \k
-schoolbook 1 \k
-schoolbook 2 \k
-schoolbook 3 \k
-schoolbook 4 \k
-schoolbook 5 \k
-schoolbook 6 \k
-schoolbook 7 \k
+schoolbook 0, \k
+schoolbook 1, \k
+schoolbook 2, \k
+schoolbook 3, \k
+schoolbook 4, \k
+schoolbook 5, \k
+schoolbook 6, \k
+schoolbook 7, \k
 .endm
 
 .macro polyvec_basemul k
