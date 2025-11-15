@@ -67,14 +67,14 @@ jobs:
     uses: ./.github/workflows/integration-opentitan.yml
     secrets: inherit
   awslc_integration_fixed:
-    name: AWS-LC (873ca6f2)
+    name: AWS-LC (v1.64.0)
     permissions:
       contents: 'read'
       id-token: 'write'
     needs: [ base ]
     uses: ./.github/workflows/integration-awslc.yml
     with:
-      commit: 6d2eb62ba375ebba7ab20ab277332f5bff9e13f0
+      commit: 7187ab572ddcdae4fa408e932d3e878c9941137b # v1.64.0
     secrets: inherit
   awslc_integration_head:
     name: AWS-LC (HEAD)
