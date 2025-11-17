@@ -20,6 +20,15 @@
 #error "__BYTE_ORDER__ defined, but don't recognize value."
 #endif
 #endif /* __BYTE_ORDER__ */
+
+/* MSVC does not define __BYTE_ORDER__. However, MSVC only supports
+ * little endian x86, x86_64, and AArch64. It is, hence, safe to assume
+ * little endian. */
+#if defined(_MSC_VER) && (defined(_M_X64) || defined(_M_AMD64) || \
+                          defined(_M_IX86) || defined(_M_ARM64))
+#define MLK_SYS_LITTLE_ENDIAN
+#endif
+
 #endif /* !MLK_SYS_LITTLE_ENDIAN && !MLK_SYS_BIG_ENDIAN */
 
 /* Check if we're running on an AArch64 little endian system. _M_ARM64 is set by
