@@ -1169,8 +1169,8 @@ def cli():
     )
     acvp_parser.add_argument(
         "--version",
-        default="v1.1.0.40",
-        help="ACVP test vector version (default: v1.1.0.40)",
+        default="v1.1.0.41",
+        help="ACVP test vector version (default: v1.1.0.41)",
     )
 
     # examples arguments

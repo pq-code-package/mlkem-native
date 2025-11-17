@@ -68,7 +68,7 @@ jobs:
            name: 'aarch64'
          - runner: ubuntu-latest
            name: 'x86_64'
-        acvp-version: [v1.1.0.38, v1.1.0.39, v1.1.0.40]
+        acvp-version: [v1.1.0.39, v1.1.0.40, v1.1.0.41]
         exclude:
           - {external: true,
              target: {
