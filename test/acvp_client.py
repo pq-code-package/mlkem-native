@@ -20,7 +20,7 @@ exec_prefix = os.environ.get("EXEC_WRAPPER", "")
 exec_prefix = exec_prefix.split(" ") if exec_prefix != "" else []
 
 
-def download_acvp_files(version="v1.1.0.40"):
+def download_acvp_files(version):
     """Download ACVP test files for the specified version if not present."""
     base_url = f"https://raw.githubusercontent.com/usnistgov/ACVP-Server/{version}/gen-val/json-files"
 
@@ -74,7 +74,7 @@ def loadAcvpData(prompt, expectedResults):
     return (prompt, promptData, expectedResults, expectedResultsData)
 
 
-def loadDefaultAcvpData(version="v1.1.0.40"):
+def loadDefaultAcvpData(version):
 
     data_dir = f"test/.acvp-data/{version}/files"
     acvp_jsons_for_version = [
@@ -307,7 +307,7 @@ def runTest(data, output):
     info("ALL GOOD!")
 
 
-def test(prompt, expected, output, version="v1.1.0.40"):
+def test(prompt, expected, output, version):
     assert (
         prompt is not None or output is None
     ), "cannot produce output if there is no input"
@@ -342,8 +342,8 @@ parser.add_argument(
 parser.add_argument(
     "--version",
     "-v",
-    default="v1.1.0.40",
-    help="ACVP test vector version (default: v1.1.0.40)",
+    default="v1.1.0.41",
+    help="ACVP test vector version (default: v1.1.0.41)",
 )
 args = parser.parse_args()
 

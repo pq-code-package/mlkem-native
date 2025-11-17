@@ -106,18 +106,18 @@ You can run ACVP tests using the [`tests`](./scripts/tests) script or the [ACVP 
 # Using the tests script
 ./scripts/tests acvp
 # Using a specific ACVP release
-./scripts/tests acvp --version v1.1.0.40
+./scripts/tests acvp --version v1.1.0.41
 
 # Using the ACVP client directly
 python3 ./test/acvp_client.py
-python3 ./test/acvp_client.py --version v1.1.0.40
+python3 ./test/acvp_client.py --version v1.1.0.41
 
 # Using specific ACVP test vector files (downloaded from the ACVP-Server)
 # python3 ./test/acvp_client.py -p {PROMPT}.json -e {EXPECTED_RESULT}.json
 # For example, assuming you have run the above
 python3 ./test/acvp_client.py \
-  -p ./test/.acvp-data/v1.1.0.40/files/ML-KEM-keyGen-FIPS203/prompt.json \
-  -e ./test/.acvp-data/v1.1.0.40/files/ML-KEM-keyGen-FIPS203/expectedResults.json
+  -p ./test/.acvp-data/v1.1.0.41/files/ML-KEM-keyGen-FIPS203/prompt.json \
+  -e ./test/.acvp-data/v1.1.0.41/files/ML-KEM-keyGen-FIPS203/expectedResults.json
 ```
 
 ## Benchmarking
