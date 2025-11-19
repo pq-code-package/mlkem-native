@@ -19,8 +19,8 @@ jobs:
     with:
       name: SLOTHY
       ec2_instance_type: c8g.8xlarge
-      ec2_ami: ubuntu-latest (custom AMI)
-      ec2_ami_id: ami-08ddb0acd99dc3d33 # aarch64, ubuntu-latest, 64g
+      ec2_ami: ubuntu-latest (aarch64)
+      ec2_volume_size: 20
       lint: false
       test: false
       cbmc: false
