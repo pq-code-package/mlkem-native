@@ -191,28 +191,25 @@ def simplify(logger, args, asm_input, asm_output=None):
     # Create temporary object files for byte code before/after simplification
     with tempfile.NamedTemporaryFile(
         suffix=".o", delete=False
-    ) as tmp0, tempfile.NamedTemporaryFile(suffix=".o", delete=False) as tmp1:
+    ) as tmp0, tempfile.NamedTemporaryFile(suffix=".o", delete=False) as tmp1, tempfile.NamedTemporaryFile(suffix=".o", delete=False) as tmp0_pre:
 
+        tmp_objfile0_pre = tmp0_pre.name
         tmp_objfile0 = tmp0.name
         tmp_objfile1 = tmp1.name
 
         cmd = (
             [args.cc, "-c", "-x", "assembler-with-cpp"]
             + cflags
-            + ["-o", tmp_objfile0, "-"]
+            + ["-o", tmp_objfile0_pre, "-"]
         )
         logger.debug(f"Assembling {asm_input} ...")
         asm_no_if = "\n".join(drop_if_from_header(header) + body + footer)
         run_cmd(cmd, input=asm_no_if)
 
-        # Remember the binary contents of the object file for later
-        tmp0.seek(0)
-        orig_obj = tmp0.read()
-
         # Check that there is exactly one global symbol at location 0
-        cmd = [args.nm, "--extern-only", tmp_objfile0]
+        cmd = [args.nm, "--extern-only", tmp_objfile0_pre]
         logger.debug(
-            f"Extracting symbols from temporary object file {tmp_objfile0} ..."
+            f"Extracting symbols from temporary object file {tmp_objfile0_pre} ..."
         )
         r = run_cmd(cmd)
 
@@ -244,6 +241,14 @@ def simplify(logger, args, asm_input, asm_output=None):
             # Expecting format "ADDRESS T SYMBOL"
             sym = sym_info[2]
             logger.debug(f"Using raw global symbol {sym} going forward ...")
+
+        # Link to get rid of potential relocation symbols in the assembly
+        cmd = [args.cc, "-nostartfiles", "-e", sym_info[2], '-o', tmp_objfile0, tmp_objfile0_pre]
+        r = run_cmd(cmd)
+
+        # Remember the binary contents of the object file for later
+        tmp0.seek(0)
+        orig_obj = tmp0.read()
 
         cmd = [args.objdump, "--disassemble", tmp_objfile0]
         if platform.system() == "Darwin" and args.arch == "aarch64":
@@ -319,7 +324,7 @@ def simplify(logger, args, asm_input, asm_output=None):
             f.write("\n".join(full_simplified))
 
         cmd = (
-            [args.cc, "-c", "-x", "assembler-with-cpp"]
+            [args.cc, "-nostartfiles", "-e", sym_info[2], "-x", "assembler-with-cpp"]
             + cflags
             + ["-o", tmp_objfile1, "-"]
         )
