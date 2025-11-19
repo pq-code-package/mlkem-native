@@ -27,7 +27,7 @@
 #include "fq.inc"
 #include "shuffle.inc"
 
-.macro nttfrombytes_128_coefficients offset_in offset_out
+.macro nttfrombytes_128_coefficients offset_in, offset_out
 #load
 vmovdqu	(\offset_in +  0)(%rsi), %ymm4
 vmovdqu	(\offset_in + 32)(%rsi), %ymm5
@@ -102,8 +102,8 @@ movl $0x0FFF0FFF, %eax
 vmovd %eax, %xmm0
 vpbroadcastd %xmm0, %ymm0
 
-nttfrombytes_128_coefficients 0 0
-nttfrombytes_128_coefficients 192 256
+nttfrombytes_128_coefficients 0, 0
+nttfrombytes_128_coefficients 192, 256
 
 ret
 

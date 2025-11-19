@@ -41,7 +41,7 @@
  * Butterflies 0,1 use root zh0 and twisted root zl0, and butterflies
  * 2,3 use root zh1 and twisted root zl1
  * Results are again in rl{0-3} and rh{0-3} */
-.macro butterfly rl0,rl1,rl2,rl3,rh0,rh1,rh2,rh3,zl0=2,zl1=2,zh0=3,zh1=3
+.macro butterfly rl0, rl1, rl2, rl3, rh0, rh1, rh2, rh3, zl0=2, zl1=2, zh0=3, zh1=3
 vpsubw		%ymm\rl0,%ymm\rh0,%ymm12    /* ymm12 = rh0 - rl0 */
 vpaddw		%ymm\rh0,%ymm\rl0,%ymm\rl0  /* rl0   = rh0 + rl0 */
 vpsubw		%ymm\rl1,%ymm\rh1,%ymm13    /* ymm13 = rh1 - rl1 */
@@ -121,7 +121,7 @@ vpshufb		%ymm12,%ymm1,%ymm1
 vpshufb		%ymm12,%ymm2,%ymm2
 vpshufb		%ymm12,%ymm3,%ymm3
 
-butterfly	4,5,8,9,6,7,10,11,15,1,2,3
+butterfly	4, 5, 8, 9, 6, 7, 10, 11, 15, 1, 2, 3
 
 /* Montgmoery multiplication with a signed canonical twiddle
  * always has absolute value < q. This is used henceforth to
@@ -137,7 +137,7 @@ vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXB*2(%rsi),%ymm1
 vpshufb		%ymm1,%ymm2,%ymm2
 vpshufb		%ymm1,%ymm3,%ymm3
 
-butterfly	4,5,6,7,8,9,10,11,2,2,3,3
+butterfly	4, 5, 6, 7, 8, 9, 10, 11, 2, 2, 3, 3
 
 /* For 8,9,10,11, it is sufficient to use the bound <q (much weaker
  * than what we used above) for the absolute value of the Montgomery
@@ -154,7 +154,7 @@ vmovdqa		MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXD*2(%rsi),%ymm12
 vpermd		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+112)*2(%rsi),%ymm12,%ymm2
 vpermd		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+128)*2(%rsi),%ymm12,%ymm10
 
-butterfly	3,4,6,8,5,7,9,11,2,2,10,10
+butterfly	3, 4, 6, 8, 5, 7, 9, 11, 2, 2, 10, 10
 /* 3 abs bound < 8q, 4 abs bound < 4q, 6,8 abs bound < 2q, 5,7,9,11 abs bound < q */
 
 // Broadcast 20159 (0x4ebf) to all elements of ymm1
@@ -173,7 +173,7 @@ shuffle2	9,11,5,11  // 5,11 abs bound < q
 vpermq		$0x1B,(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+80)*2(%rsi),%ymm2
 vpermq		$0x1B,(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+96)*2(%rsi),%ymm9
 
-butterfly	10,3,6,5,4,8,7,11,2,2,9,9
+butterfly	10, 3, 6, 5, 4, 8, 7, 11, 2, 2, 9, 9
 /* 10 abs bound < 8q
  * 3 abs bound < 4q
  * 5,6 abs bound < 2q
@@ -198,7 +198,7 @@ shuffle4	7,11,4,11  /* 4,11 abs bound < q */
 vpermq		$0x4E,(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+48)*2(%rsi),%ymm2
 vpermq		$0x4E,(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+64)*2(%rsi),%ymm7
 
-butterfly	9,10,6,4,3,5,8,11,2,2,7,7
+butterfly	9, 10, 6, 4, 3, 5, 8, 11, 2, 2, 7, 7
 /* 9 abs bound < 8q
  * 10 abs bound < 4q
  * 4,6 abs bound <2q
@@ -217,7 +217,7 @@ shuffle8	8,11,3,11  /* 3,11 abs bound < q */
 vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+16)*2(%rsi),%ymm2
 vmovdqa		(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+(1-\off)*224+32)*2(%rsi),%ymm8
 
-butterfly	7,9,6,3,10,4,5,11,2,2,8,8
+butterfly	7, 9, 6, 3, 10, 4, 5, 11, 2, 2, 8, 8
 /* 7         abs bound <8q
  * 9         abs bound <4q
  * 6,3       abs bound < 2q
@@ -254,7 +254,7 @@ vmovdqa         (64*\off+ 48)*2(%rdi),%ymm7
 vmovdqa         (64*\off+176)*2(%rdi),%ymm11
 vpbroadcastq	(MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP+4)*2(%rsi),%ymm3
 
-butterfly	4,5,6,7,8,9,10,11
+butterfly	4, 5, 6, 7, 8, 9, 10, 11
 /* global abs bound < 8q */
 
 /* REF-CHANGE: The official AVX2 implementation has a `red16 4` for `off=0`.
