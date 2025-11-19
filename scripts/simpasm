@@ -256,6 +256,8 @@ def simplify(logger, args, asm_input, asm_output=None):
         logger.debug(f"Disassembling temporary object file {tmp_objfile0} ...")
         disasm = run_cmd(cmd).stdout
 
+        print(disasm)
+
         logger.debug("Patching up disassembly ...")
         simplified = patchup_disasm(disasm, cfify=args.cfify)
 

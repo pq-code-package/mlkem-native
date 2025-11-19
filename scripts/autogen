@@ -2199,17 +2199,19 @@ def update_via_simpasm(
             # Add syntax option for x86_64
             if arch == "x86_64" and x86_64_syntax != "att":
                 cmd += ["--syntax", x86_64_syntax]
+            cmd += ["-v"]
             r = subprocess.run(
                 cmd,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
                 check=True,
                 text=True,
             )
+            print(r.stdout)
         except subprocess.CalledProcessError as e:
             print(f"Command failed: {' '.join(cmd)}")
             print(f"Exit code: {e.returncode}")
-            print(f"stderr: {e.stderr}")
+            print(f"stdout/stderr: {e.stdout}")
             raise Exception("Failed to run simpasm") from e
         tmp.seek(0)
         new_contents = tmp.read().decode()
