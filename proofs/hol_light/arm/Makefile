@@ -19,6 +19,28 @@ ARCHTYPE_RESULT=$(shell uname -m)
 SRC ?= $(S2N_BIGNUM_DIR)
 SRC_ARM ?= $(SRC)/arm
 
+ARCHFLAGS=-march=armv8.4-a+sha3
+
+# If actually on an AArch64 machine, just use the assembler (as). Otherwise
+# use a cross-assembling version so that the code can still be assembled
+# and the proofs checked against the object files (though you won't be able
+# to run code without additional emulation infrastructure).
+
+ifeq ($(ARCHTYPE_RESULT)-$(OSTYPE_RESULT),x86_64-Darwin)
+ASSEMBLE=as -arch arm64
+OBJDUMP=otool -tvV
+else
+ifeq ($(filter $(ARCHTYPE_RESULT),aarch64 arm64),)
+CROSS_PREFIX=aarch64-unknown-linux-gnu-
+# Check if cross-toolchain exists
+ifeq ($(shell command -v $(ASSEMBLE) >/dev/null 2>&1 && echo yes || echo no),no)
+$(error Cross-toolchain not found. Please run in the 'hol_light' nix shell via: nix develop .#hol_light)
+endif
+endif
+ASSEMBLE=$(CROSS_PREFIX)as $(ARCHFLAGS)
+OBJDUMP=$(CROSS_PREFIX)objdump -d
+endif
+
 # Add explicit language input parameter to cpp, otherwise the use of #n for
 # numeric literals in ARM code is a problem when used inside #define macros
 # since normally that means stringization.
@@ -26,45 +48,16 @@ SRC_ARM ?= $(SRC)/arm
 # Some clang-based preprocessors seem to behave differently, and get confused
 # by single-quote characters in comments, so we eliminate // comments first.
 
-ARCHFLAGS=-march=armv8.4-a+sha3
 ifeq ($(OSTYPE_RESULT),Darwin)
 PREPROCESS=sed -e 's/\/\/.*//' | $(CC) -E -xassembler-with-cpp -
 else
-PREPROCESS=$(CC) $(ARCHFLAGS) -E -xassembler-with-cpp -
+PREPROCESS=$(CC) -E -xassembler-with-cpp -
 endif
 
 # Generally GNU-type assemblers are happy with multiple instructions on
 # a line, but we split them up anyway just in case.
 
 SPLIT=tr ';' '\n'
-
-# If actually on an ARM8 machine, just use the assembler (as). Otherwise
-# use a cross-assembling version so that the code can still be assembled
-# and the proofs checked against the object files (though you won't be able
-# to run code without additional emulation infrastructure). For the clang
-# version on OS X we just add the "-arch arm64" option. For the Linux/gcc
-# toolchain we assume the presence of the special cross-assembler. This
-# can be installed via something like:
-#
-#  sudo apt-get install binutils-aarch64-linux-gnu
-
-ifeq ($(ARCHTYPE_RESULT),aarch64)
-ASSEMBLE=as $(ARCHFLAGS)
-OBJDUMP=objdump -d
-else
-ifeq ($(ARCHTYPE_RESULT),arm64)
-ASSEMBLE=as $(ARCHFLAGS)
-OBJDUMP=objdump -d
-else
-ifeq ($(OSTYPE_RESULT),Darwin)
-ASSEMBLE=as -arch arm64
-OBJDUMP=otool -tvV
-else
-ASSEMBLE=aarch64-linux-gnu-as $(ARCHFLAGS)
-OBJDUMP=aarch64-linux-gnu-objdump -d
-endif
-endif
-endif
 
 OBJ = mlkem/mlkem_ntt.o                                   \
       mlkem/mlkem_intt.o                                  \
