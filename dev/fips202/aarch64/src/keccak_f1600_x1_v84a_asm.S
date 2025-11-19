@@ -243,19 +243,19 @@
 
 /* Macros using v8.4-A SHA-3 instructions */
 
-.macro eor3_m0 d s0 s1 s2
+.macro eor3_m0 d, s0, s1, s2
     eor3 \d\().16b, \s0\().16b, \s1\().16b, \s2\().16b
 .endm
 
-.macro rax1_m0 d s0 s1
+.macro rax1_m0 d, s0, s1
     rax1 \d\().2d, \s0\().2d, \s1\().2d
 .endm
 
-.macro xar_m0 d s0 s1 imm
+.macro xar_m0 d, s0, s1, imm
     xar \d\().2d, \s0\().2d, \s1\().2d, #\imm
 .endm
 
-.macro bcax_m0 d s0 s1 s2
+.macro bcax_m0 d, s0, s1, s2
     bcax \d\().16b, \s0\().16b, \s1\().16b, \s2\().16b
 .endm
 
