@@ -413,7 +413,7 @@ class CondParser:
                     args = None
                     break
             if args is None:
-                return
+                return res
             # Check if all args are numerical and different
             if rhs.isdigit() and all(
                 map(lambda a: a.isdigit() and int(a) != int(rhs), args)
