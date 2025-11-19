@@ -166,24 +166,24 @@
 
 /************************ MACROS ****************************/
 
-.macro eor3_m1 d s0 s1 s2
+.macro eor3_m1 d, s0, s1, s2
    eor \d\().16b, \s0\().16b, \s1\().16b
    eor \d\().16b, \d\().16b,  \s2\().16b
 .endm
 
-.macro rax1_m1 d s0 s1
+.macro rax1_m1 d, s0, s1
    add vtmp.2d, \s1\().2d, \s1\().2d
    sri vtmp.2d, \s1\().2d, #63
    eor \d\().16b, vtmp.16b, \s0\().16b
 .endm
 
-.macro xar_m1 d s0 s1 imm
+.macro xar_m1 d, s0, s1, imm
    eor vtmp.16b, \s0\().16b, \s1\().16b
    shl \d\().2d, vtmp.2d, #(64-\imm)
    sri \d\().2d, vtmp.2d, #(\imm)
 .endm
 
-.macro bcax_m1 d s0 s1 s2
+.macro bcax_m1 d, s0, s1, s2
     bic vtmp.16b, \s1\().16b, \s2\().16b
     eor \d\().16b, vtmp.16b, \s0\().16b
 .endm
