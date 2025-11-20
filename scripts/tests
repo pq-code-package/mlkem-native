@@ -796,6 +796,15 @@ class Tests:
             if unit is True:
                 self._compile_schemes(TEST_TYPES.UNIT, opt)
 
+            if self.args.check_namespace is True:
+                p = subprocess.run(
+                    ["python3", "check-namespace"],
+                    stdout=subprocess.DEVNULL if not self.args.verbose else None,
+                    cwd="scripts",
+                )
+                if p.returncode != 0:
+                    self.fail(f"Namespacing failed for opt={opt}")
+
             if self.args.run is False:
                 return
 
