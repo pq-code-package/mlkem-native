@@ -39,6 +39,8 @@
 #define mlk_pack_ciphertext MLK_ADD_PARAM_SET(mlk_pack_ciphertext)
 #define mlk_unpack_ciphertext MLK_ADD_PARAM_SET(mlk_unpack_ciphertext)
 #define mlk_matvec_mul MLK_ADD_PARAM_SET(mlk_matvec_mul)
+#define mlk_polyvec_permute_bitrev_to_custom \
+  MLK_ADD_PARAM_SET(mlk_polyvec_permute_bitrev_to_custom)
 #define mlk_polymat_permute_bitrev_to_custom \
   MLK_ADD_PARAM_SET(mlk_polymat_permute_bitrev_to_custom)
 /* End of parameter set namespacing */
@@ -59,10 +61,11 @@
  * Implements @[FIPS203, Algorithm 13 (K-PKE.KeyGen), L19]
  *
  **************************************************/
-static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], mlk_polyvec pk,
+static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES],
+                        const mlk_polyvec *pk,
                         const uint8_t seed[MLKEM_SYMBYTES])
 {
-  mlk_assert_bound_2d(pk, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
+  mlk_assert_bound_2d(pk->vec, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
   mlk_polyvec_tobytes(r, pk);
   mlk_memcpy(r + MLKEM_POLYVECBYTES, seed, MLKEM_SYMBYTES);
 }
@@ -83,7 +86,7 @@ static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES], mlk_polyvec pk,
  * Implements @[FIPS203, Algorithm 14 (K-PKE.Encrypt), L2-3]
  *
  **************************************************/
-static void mlk_unpack_pk(mlk_polyvec pk, uint8_t seed[MLKEM_SYMBYTES],
+static void mlk_unpack_pk(mlk_polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
                           const uint8_t packedpk[MLKEM_INDCPA_PUBLICKEYBYTES])
 {
   mlk_polyvec_frombytes(pk, packedpk);
@@ -108,9 +111,10 @@ static void mlk_unpack_pk(mlk_polyvec pk, uint8_t seed[MLKEM_SYMBYTES],
  * Implements @[FIPS203, Algorithm 13 (K-PKE.KeyGen), L20]
  *
  **************************************************/
-static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], mlk_polyvec sk)
+static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES],
+                        const mlk_polyvec *sk)
 {
-  mlk_assert_bound_2d(sk, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
+  mlk_assert_bound_2d(sk->vec, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
   mlk_polyvec_tobytes(r, sk);
 }
 
@@ -128,7 +132,7 @@ static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES], mlk_polyvec sk)
  * Implements @[FIPS203, Algorithm 15 (K-PKE.Decrypt), L5]
  *
  **************************************************/
-static void mlk_unpack_sk(mlk_polyvec sk,
+static void mlk_unpack_sk(mlk_polyvec *sk,
                           const uint8_t packedsk[MLKEM_INDCPA_SECRETKEYBYTES])
 {
   mlk_polyvec_frombytes(sk, packedsk);
@@ -149,8 +153,8 @@ static void mlk_unpack_sk(mlk_polyvec sk,
  * Implements @[FIPS203, Algorithm 14 (K-PKE.Encrypt), L22-23]
  *
  **************************************************/
-static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES], mlk_polyvec b,
-                                mlk_poly *v)
+static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES],
+                                const mlk_polyvec *b, mlk_poly *v)
 {
   mlk_polyvec_compress_du(r, b);
   mlk_poly_compress_dv(r + MLKEM_POLYVECCOMPRESSEDBYTES_DU, v);
@@ -170,7 +174,7 @@ static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES], mlk_polyvec b,
  * Implements @[FIPS203, Algorithm 15 (K-PKE.Decrypt), L1-4]
  *
  **************************************************/
-static void mlk_unpack_ciphertext(mlk_polyvec b, mlk_poly *v,
+static void mlk_unpack_ciphertext(mlk_polyvec *b, mlk_poly *v,
                                   const uint8_t c[MLKEM_INDCPA_BYTES])
 {
   mlk_polyvec_decompress_du(b, c);
@@ -183,33 +187,55 @@ static void mlk_unpack_ciphertext(mlk_polyvec b, mlk_poly *v,
  *
  * We don't inline this into gen_matrix to avoid having to split the CBMC
  * proof for gen_matrix based on MLK_USE_NATIVE_NTT_CUSTOM_ORDER. */
-static void mlk_polymat_permute_bitrev_to_custom(mlk_polymat a)
+static void mlk_polyvec_permute_bitrev_to_custom(mlk_polyvec *v)
 __contract__(
   /* We don't specify that this should be a permutation, but only
    * that it does not change the bound established at the end of mlk_gen_matrix. */
- requires(memory_no_alias(a, sizeof(mlk_polymat)))
- requires(forall(x, 0, MLKEM_K * MLKEM_K,
-   array_bound(a[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
- assigns(object_whole(a))
- ensures(forall(x, 0, MLKEM_K * MLKEM_K,
-   array_bound(a[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
+  requires(memory_no_alias(v, sizeof(mlk_polyvec)))
+  requires(forall(x, 0, MLKEM_K,
+    array_bound(v->vec[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+  assigns(memory_slice(v, sizeof(mlk_polyvec)))
+  ensures(forall(x, 0, MLKEM_K,
+    array_bound(v->vec[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
 {
 #if defined(MLK_USE_NATIVE_NTT_CUSTOM_ORDER)
   unsigned i;
-  for (i = 0; i < MLKEM_K * MLKEM_K; i++)
+  for (i = 0; i < MLKEM_K; i++)
   __loop__(
-     assigns(i, object_whole(a))
-     invariant(i <= MLKEM_K * MLKEM_K)
-     invariant(forall(x, 0, MLKEM_K * MLKEM_K,
-       array_bound(a[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
-     )
+     assigns(i, memory_slice(v, sizeof(mlk_polyvec)))
+     invariant(i <= MLKEM_K)
+     invariant(forall(x, 0, MLKEM_K,
+       array_bound(v->vec[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
   {
-    mlk_poly_permute_bitrev_to_custom(a[i].coeffs);
+    mlk_poly_permute_bitrev_to_custom(v->vec[i].coeffs);
   }
 #else  /* MLK_USE_NATIVE_NTT_CUSTOM_ORDER */
   /* Nothing to do */
-  (void)a;
+  (void)v;
 #endif /* !MLK_USE_NATIVE_NTT_CUSTOM_ORDER */
+}
+
+static void mlk_polymat_permute_bitrev_to_custom(mlk_polymat *a)
+__contract__(
+  /* We don't specify that this should be a permutation, but only
+   * that it does not change the bound established at the end of mlk_gen_matrix. */
+  requires(memory_no_alias(a, sizeof(mlk_polymat)))
+  requires(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
+    array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
+  assigns(object_whole(a))
+  ensures(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
+    array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))))
+{
+  unsigned i;
+  for (i = 0; i < MLKEM_K; i++)
+  __loop__(
+     assigns(i, object_whole(a))
+     invariant(i <= MLKEM_K)
+     invariant(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
+       array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))))
+  {
+    mlk_polyvec_permute_bitrev_to_custom(&a->vec[i]);
+  }
 }
 
 /* Reference: `gen_matrix()` in the reference implementation @[REF].
@@ -220,7 +246,7 @@ __contract__(
  *
  * Not static for benchmarking */
 MLK_INTERNAL_API
-void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
+void mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
                     int transposed)
 {
   unsigned i, j;
@@ -253,7 +279,11 @@ void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
       }
     }
 
-    mlk_poly_rej_uniform_x4(&a[i], &a[i + 1], &a[i + 2], &a[i + 3], seed_ext);
+    mlk_poly_rej_uniform_x4(&a->vec[i / MLKEM_K].vec[i % MLKEM_K],
+                            &a->vec[(i + 1) / MLKEM_K].vec[(i + 1) % MLKEM_K],
+                            &a->vec[(i + 2) / MLKEM_K].vec[(i + 2) % MLKEM_K],
+                            &a->vec[(i + 3) / MLKEM_K].vec[(i + 3) % MLKEM_K],
+                            seed_ext);
   }
 #else  /* !MLK_CONFIG_SERIAL_FIPS202_ONLY */
   /* When using serial FIPS202, sample all entries individually. */
@@ -281,7 +311,7 @@ void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
       seed_ext[0][MLKEM_SYMBYTES + 1] = x;
     }
 
-    mlk_poly_rej_uniform(&a[i], seed_ext[0]);
+    mlk_poly_rej_uniform(&a->vec[i / MLKEM_K].vec[i % MLKEM_K], seed_ext[0]);
   }
 
   mlk_assert(i == MLKEM_K * MLKEM_K);
@@ -314,15 +344,16 @@ void mlk_gen_matrix(mlk_polymat a, const uint8_t seed[MLKEM_SYMBYTES],
  * Specification: Implements @[FIPS203, Section 2.4.7, Eq (2.12), (2.13)]
  *
  **************************************************/
-static void mlk_matvec_mul(mlk_polyvec out, const mlk_polymat a,
-                           const mlk_polyvec v, const mlk_polyvec_mulcache vc)
+static void mlk_matvec_mul(mlk_polyvec *out, const mlk_polymat *a,
+                           const mlk_polyvec *v, const mlk_polyvec_mulcache *vc)
 __contract__(
   requires(memory_no_alias(out, sizeof(mlk_polyvec)))
   requires(memory_no_alias(a, sizeof(mlk_polymat)))
   requires(memory_no_alias(v, sizeof(mlk_polyvec)))
   requires(memory_no_alias(vc, sizeof(mlk_polyvec_mulcache)))
-  requires(forall(k0, 0, MLKEM_K * MLKEM_K,
-    array_bound(a[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+  requires(forall(k0, 0, MLKEM_K,
+    forall(k1, 0, MLKEM_K,
+      array_bound(a->vec[k0].vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT))))
   assigns(object_whole(out)))
 {
   unsigned i;
@@ -331,7 +362,7 @@ __contract__(
     assigns(i, object_whole(out))
     invariant(i <= MLKEM_K))
   {
-    mlk_polyvec_basemul_acc_montgomery_cached(&out[i], &a[MLKEM_K * i], v, vc);
+    mlk_polyvec_basemul_acc_montgomery_cached(&out->vec[i], &a->vec[i], v, vc);
   }
 }
 
@@ -370,47 +401,49 @@ void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
    */
   MLK_CT_TESTING_DECLASSIFY(publicseed, MLKEM_SYMBYTES);
 
-  mlk_gen_matrix(a, publicseed, 0 /* no transpose */);
+  mlk_gen_matrix(&a, publicseed, 0 /* no transpose */);
 
 #if MLKEM_K == 2
-  mlk_poly_getnoise_eta1_4x(&skpv[0], &skpv[1], &e[0], &e[1], noiseseed, 0, 1,
-                            2, 3);
+  mlk_poly_getnoise_eta1_4x(&skpv.vec[0], &skpv.vec[1], &e.vec[0], &e.vec[1],
+                            noiseseed, 0, 1, 2, 3);
 #elif MLKEM_K == 3
   /*
    * Only the first three output buffers are needed.
    * The laster parameter is a dummy that's overwritten later.
    */
-  mlk_poly_getnoise_eta1_4x(&skpv[0], &skpv[1], &skpv[2],
-                            &pkpv[0] /* irrelevant */, noiseseed, 0, 1, 2,
+  mlk_poly_getnoise_eta1_4x(&skpv.vec[0], &skpv.vec[1], &skpv.vec[2],
+                            &pkpv.vec[0] /* irrelevant */, noiseseed, 0, 1, 2,
                             0xFF /* irrelevant */);
   /* Same here */
-  mlk_poly_getnoise_eta1_4x(&e[0], &e[1], &e[2], &pkpv[0] /* irrelevant */,
-                            noiseseed, 3, 4, 5, 0xFF /* irrelevant */);
+  mlk_poly_getnoise_eta1_4x(&e.vec[0], &e.vec[1], &e.vec[2],
+                            &pkpv.vec[0] /* irrelevant */, noiseseed, 3, 4, 5,
+                            0xFF /* irrelevant */);
 #elif MLKEM_K == 4
-  mlk_poly_getnoise_eta1_4x(&skpv[0], &skpv[1], &skpv[2], &skpv[3], noiseseed,
-                            0, 1, 2, 3);
-  mlk_poly_getnoise_eta1_4x(&e[0], &e[1], &e[2], &e[3], noiseseed, 4, 5, 6, 7);
-#endif
+  mlk_poly_getnoise_eta1_4x(&skpv.vec[0], &skpv.vec[1], &skpv.vec[2],
+                            &skpv.vec[3], noiseseed, 0, 1, 2, 3);
+  mlk_poly_getnoise_eta1_4x(&e.vec[0], &e.vec[1], &e.vec[2], &e.vec[3],
+                            noiseseed, 4, 5, 6, 7);
+#endif /* MLKEM_K == 4 */
 
-  mlk_polyvec_ntt(skpv);
-  mlk_polyvec_ntt(e);
+  mlk_polyvec_ntt(&skpv);
+  mlk_polyvec_ntt(&e);
 
-  mlk_polyvec_mulcache_compute(skpv_cache, skpv);
-  mlk_matvec_mul(pkpv, a, skpv, skpv_cache);
-  mlk_polyvec_tomont(pkpv);
+  mlk_polyvec_mulcache_compute(&skpv_cache, &skpv);
+  mlk_matvec_mul(&pkpv, &a, &skpv, &skpv_cache);
+  mlk_polyvec_tomont(&pkpv);
 
-  mlk_polyvec_add(pkpv, e);
-  mlk_polyvec_reduce(pkpv);
-  mlk_polyvec_reduce(skpv);
+  mlk_polyvec_add(&pkpv, &e);
+  mlk_polyvec_reduce(&pkpv);
+  mlk_polyvec_reduce(&skpv);
 
-  mlk_pack_sk(sk, skpv);
-  mlk_pack_pk(pk, pkpv, publicseed);
+  mlk_pack_sk(sk, &skpv);
+  mlk_pack_pk(pk, &pkpv, publicseed);
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(buf, sizeof(buf));
   mlk_zeroize(coins_with_domain_separator, sizeof(coins_with_domain_separator));
-  mlk_zeroize(a, sizeof(a));
+  mlk_zeroize(&a, sizeof(a));
   mlk_zeroize(&e, sizeof(e));
   mlk_zeroize(&skpv, sizeof(skpv));
   mlk_zeroize(&skpv_cache, sizeof(skpv_cache));
@@ -436,7 +469,7 @@ void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
   mlk_poly v, k, epp;
   mlk_polyvec_mulcache sp_cache;
 
-  mlk_unpack_pk(pkpv, seed, pk);
+  mlk_unpack_pk(&pkpv, seed, pk);
   mlk_poly_frommsg(&k, m);
 
   /*
@@ -447,44 +480,47 @@ void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
    */
   MLK_CT_TESTING_DECLASSIFY(seed, MLKEM_SYMBYTES);
 
-  mlk_gen_matrix(at, seed, 1 /* transpose */);
+  mlk_gen_matrix(&at, seed, 1 /* transpose */);
 
 #if MLKEM_K == 2
-  mlk_poly_getnoise_eta1122_4x(&sp[0], &sp[1], &ep[0], &ep[1], coins, 0, 1, 2,
-                               3);
+  mlk_poly_getnoise_eta1122_4x(&sp.vec[0], &sp.vec[1], &ep.vec[0], &ep.vec[1],
+                               coins, 0, 1, 2, 3);
   mlk_poly_getnoise_eta2(&epp, coins, 4);
 #elif MLKEM_K == 3
   /*
    * In this call, only the first three output buffers are needed.
    * The last parameter is a dummy that's overwritten later.
    */
-  mlk_poly_getnoise_eta1_4x(&sp[0], &sp[1], &sp[2], &b[0], coins, 0, 1, 2,
-                            0xFF);
+  mlk_poly_getnoise_eta1_4x(&sp.vec[0], &sp.vec[1], &sp.vec[2], &b.vec[0],
+                            coins, 0, 1, 2, 0xFF);
   /* The fourth output buffer in this call _is_ used. */
-  mlk_poly_getnoise_eta2_4x(&ep[0], &ep[1], &ep[2], &epp, coins, 3, 4, 5, 6);
+  mlk_poly_getnoise_eta2_4x(&ep.vec[0], &ep.vec[1], &ep.vec[2], &epp, coins, 3,
+                            4, 5, 6);
 #elif MLKEM_K == 4
-  mlk_poly_getnoise_eta1_4x(&sp[0], &sp[1], &sp[2], &sp[3], coins, 0, 1, 2, 3);
-  mlk_poly_getnoise_eta2_4x(&ep[0], &ep[1], &ep[2], &ep[3], coins, 4, 5, 6, 7);
+  mlk_poly_getnoise_eta1_4x(&sp.vec[0], &sp.vec[1], &sp.vec[2], &sp.vec[3],
+                            coins, 0, 1, 2, 3);
+  mlk_poly_getnoise_eta2_4x(&ep.vec[0], &ep.vec[1], &ep.vec[2], &ep.vec[3],
+                            coins, 4, 5, 6, 7);
   mlk_poly_getnoise_eta2(&epp, coins, 8);
-#endif
+#endif /* MLKEM_K == 4 */
 
-  mlk_polyvec_ntt(sp);
+  mlk_polyvec_ntt(&sp);
 
-  mlk_polyvec_mulcache_compute(sp_cache, sp);
-  mlk_matvec_mul(b, at, sp, sp_cache);
-  mlk_polyvec_basemul_acc_montgomery_cached(&v, pkpv, sp, sp_cache);
+  mlk_polyvec_mulcache_compute(&sp_cache, &sp);
+  mlk_matvec_mul(&b, &at, &sp, &sp_cache);
+  mlk_polyvec_basemul_acc_montgomery_cached(&v, &pkpv, &sp, &sp_cache);
 
-  mlk_polyvec_invntt_tomont(b);
+  mlk_polyvec_invntt_tomont(&b);
   mlk_poly_invntt_tomont(&v);
 
-  mlk_polyvec_add(b, ep);
+  mlk_polyvec_add(&b, &ep);
   mlk_poly_add(&v, &epp);
   mlk_poly_add(&v, &k);
 
-  mlk_polyvec_reduce(b);
+  mlk_polyvec_reduce(&b);
   mlk_poly_reduce(&v);
 
-  mlk_pack_ciphertext(c, b, &v);
+  mlk_pack_ciphertext(c, &b, &v);
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
@@ -493,7 +529,7 @@ void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
   mlk_zeroize(&sp_cache, sizeof(sp_cache));
   mlk_zeroize(&b, sizeof(b));
   mlk_zeroize(&v, sizeof(v));
-  mlk_zeroize(at, sizeof(at));
+  mlk_zeroize(&at, sizeof(at));
   mlk_zeroize(&k, sizeof(k));
   mlk_zeroize(&ep, sizeof(ep));
   mlk_zeroize(&epp, sizeof(epp));
@@ -511,12 +547,12 @@ void mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
   mlk_poly v, sb;
   mlk_polyvec_mulcache b_cache;
 
-  mlk_unpack_ciphertext(b, &v, c);
-  mlk_unpack_sk(skpv, sk);
+  mlk_unpack_ciphertext(&b, &v, c);
+  mlk_unpack_sk(&skpv, sk);
 
-  mlk_polyvec_ntt(b);
-  mlk_polyvec_mulcache_compute(b_cache, b);
-  mlk_polyvec_basemul_acc_montgomery_cached(&sb, skpv, b, b_cache);
+  mlk_polyvec_ntt(&b);
+  mlk_polyvec_mulcache_compute(&b_cache, &b);
+  mlk_polyvec_basemul_acc_montgomery_cached(&sb, &skpv, &b, &b_cache);
   mlk_poly_invntt_tomont(&sb);
 
   mlk_poly_sub(&v, &sb);
@@ -542,4 +578,5 @@ void mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
 #undef mlk_pack_ciphertext
 #undef mlk_unpack_ciphertext
 #undef mlk_matvec_mul
+#undef mlk_polyvec_permute_bitrev_to_custom
 #undef mlk_polymat_permute_bitrev_to_custom
