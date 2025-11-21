@@ -53,5 +53,5 @@ runs:
         shell: ${{ env.SHELL }}
         run: |
           echo "::group::cbmc_${{ inputs.mlkem_k }}"
-          tests cbmc --k ${{ inputs.mlkem_k }};
+          tests cbmc --k ${{ inputs.mlkem_k }} --per-proof-timeout 1800;
           echo "::endgroup::"

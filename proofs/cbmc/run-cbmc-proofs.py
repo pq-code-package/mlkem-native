@@ -181,6 +181,13 @@ def get_args():
             "action": "store_true",
             "help": "do property checking without coverage checking",
         },
+        {
+            "flags": ["--per-proof-timeout"],
+            "type": int,
+            "metavar": "SECONDS",
+            "default": 1800,
+            "help": "timeout for each individual proof in seconds (default: 1800)",
+        },
     ]:
         flags = arg.pop("flags")
         pars.add_argument(*flags, **arg)
@@ -342,6 +349,7 @@ async def configure_proof_dirs(  # pylint: disable=too-many-arguments
     enable_memory_profiling,
     report_target,
     debug,
+    timeout,
 ):
     while True:
         print_counter(counter)
@@ -351,6 +359,10 @@ async def configure_proof_dirs(  # pylint: disable=too-many-arguments
 
         pools = ["ENABLE_POOLS=true"] if enable_pools else []
         profiling = ["ENABLE_MEMORY_PROFILING=true"] if enable_memory_profiling else []
+
+        # Set up environment with CBMC_TIMEOUT
+        env = os.environ.copy()
+        env["CBMC_TIMEOUT"] = str(timeout)
 
         # delete old reports
         proc = await asyncio.create_subprocess_exec(
@@ -373,6 +385,7 @@ async def configure_proof_dirs(  # pylint: disable=too-many-arguments
             report_target,
             "" if debug else "--quiet",
             cwd=path,
+            env=env,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
@@ -497,6 +510,7 @@ async def main():  # pylint: disable=too-many-locals
                 enable_memory_profiling,
                 report_target,
                 args.debug,
+                args.per_proof_timeout,
             )
         )
         tasks.append(task)

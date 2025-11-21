@@ -90,17 +90,32 @@ def _get_status_and_proof_summaries(run_dict):
     for proof_pipeline in run_dict["pipelines"]:
         if proof_pipeline["name"] == "print_tool_versions":
             continue
-        status_pretty_name = proof_pipeline["status"].title().replace("_", " ")
+
+        # Check if any job timed out
+        has_timeout = False
+        duration = 0
+        for stage in proof_pipeline["ci_stages"]:
+            for job in stage["jobs"]:
+                if job.get("timeout_reached", False):
+                    has_timeout = True
+                if "duration" in job.keys():
+                    duration += int(job["duration"])
+
+        # Determine status display
+        if has_timeout:
+            status_pretty_name = "Timeout"
+            duration_str = "TIMEOUT"
+        else:
+            status_pretty_name = proof_pipeline["status"].title().replace("_", " ")
+            duration_str = str(duration)
+
+        # Count statuses
         try:
             count_statuses[status_pretty_name] += 1
         except KeyError:
             count_statuses[status_pretty_name] = 1
-        duration = 0
-        for stage in proof_pipeline["ci_stages"]:
-            for job in stage["jobs"]:
-                if "duration" in job.keys():
-                    duration += int(job["duration"])
-        proofs.append([proof_pipeline["name"], status_pretty_name, str(duration)])
+
+        proofs.append([proof_pipeline["name"], status_pretty_name, duration_str])
     statuses = [["Status", "Count"]]
     for status, count in count_statuses.items():
         statuses.append([status, str(count)])
@@ -134,8 +149,15 @@ def print_proof_results(out_file):
         "Click the 'Summary' button to view a Markdown table "
         "summarizing all proof results"
     )
-    if run_dict["status"] != "success":
+
+    # Check for timeouts by examining status table
+    has_timeout = any(row[0] == "Timeout" for row in status_table[1:])
+    has_failure = run_dict["status"] != "success"
+
+    if has_timeout or has_failure:
         logging.error("Not all proofs passed.")
+        if has_timeout:
+            logging.error("Some proofs timed out.")
         logging.error(msg)
         sys.exit(1)
     logging.info(msg)
