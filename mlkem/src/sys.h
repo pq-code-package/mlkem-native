@@ -217,15 +217,10 @@
 /* System capability enumeration */
 typedef enum
 {
-#if defined(MLK_SYS_X86_64)
-  MLK_SYS_CAP_AVX2
-#elif defined(MLK_SYS_AARCH64)
+  /* x86_64 */
+  MLK_SYS_CAP_AVX2,
+  /* AArch64 */
   MLK_SYS_CAP_SHA3
-#else
-  /* C90 does not allow empty enums, so use a dummy value
-   * for architectures other than AArch64 and x86_64. */
-  MLK_SYS_CAP_DUMMY
-#endif
 } mlk_sys_cap;
 
 #if !defined(MLK_CONFIG_CUSTOM_CAPABILITY_FUNC)
