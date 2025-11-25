@@ -2215,10 +2215,10 @@ def update_via_simpasm(
 
 
 def gen_hol_light_asm_file(job):
-    infile, outfile, indir, cflags = job
+    infile, outfile, indir, cflags, arm_or_x86 = job
     update_via_simpasm(
         f"{indir}/{infile}",
-        "proofs/hol_light/arm/mlkem",
+        "proofs/hol_light/" + arm_or_x86 + "/mlkem",
         outfile=outfile,
         cflags=cflags,
         preserve_header=False,
@@ -2227,98 +2227,144 @@ def gen_hol_light_asm_file(job):
 
 def gen_hol_light_asm():
 
-    joblist = [
+    joblist_arm = [
         (
             "ntt.S",
             "mlkem_ntt.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "arm",
         ),
         (
             "intt.S",
             "mlkem_intt.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "arm",
         ),
         (
             "poly_tomont_asm.S",
             "mlkem_poly_tomont.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "arm",
         ),
         (
             "poly_tobytes_asm.S",
             "mlkem_poly_tobytes.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "arm",
         ),
         (
             "poly_reduce_asm.S",
             "mlkem_poly_reduce.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "arm",
         ),
         (
             "poly_mulcache_compute_asm.S",
             "mlkem_poly_mulcache_compute.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "arm",
         ),
         (
             "polyvec_basemul_acc_montgomery_cached_asm_k2.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k2.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "arm",
         ),
         (
             "polyvec_basemul_acc_montgomery_cached_asm_k3.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k3.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "arm",
         ),
         (
             "polyvec_basemul_acc_montgomery_cached_asm_k4.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k4.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "arm",
         ),
         (
             "rej_uniform_asm.S",
             "mlkem_rej_uniform.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "arm",
         ),
         (
             "keccak_f1600_x1_scalar_asm.S",
             "keccak_f1600_x1_scalar.S",
             "dev/fips202/aarch64/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
+            "arm",
         ),
         (
             "keccak_f1600_x1_v84a_asm.S",
             "keccak_f1600_x1_v84a.S",
             "dev/fips202/aarch64/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
+            "arm",
         ),
         (
             "keccak_f1600_x2_v84a_asm.S",
             "keccak_f1600_x2_v84a.S",
             "dev/fips202/aarch64/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
+            "arm",
         ),
         (
             "keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S",
             "keccak_f1600_x4_v8a_v84a_scalar.S",
             "dev/fips202/aarch64/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
+            "arm",
         ),
         (
             "keccak_f1600_x4_v8a_scalar_hybrid_asm.S",
             "keccak_f1600_x4_v8a_scalar.S",
             "dev/fips202/aarch64/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
+            "arm",
         ),
     ]
+
+    joblist_x86 = [
+        (
+            "polyvec_basemul_acc_montgomery_cached_asm_k2.S",
+            "mlkem_poly_basemul_acc_montgomery_cached_k2.S",
+            "dev/x86_64/src",
+            "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+            "x86",
+        ),
+        (
+            "polyvec_basemul_acc_montgomery_cached_asm_k3.S",
+            "mlkem_poly_basemul_acc_montgomery_cached_k3.S",
+            "dev/x86_64/src",
+            "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+            "x86",
+        ),
+        (
+            "polyvec_basemul_acc_montgomery_cached_asm_k4.S",
+            "mlkem_poly_basemul_acc_montgomery_cached_k4.S",
+            "dev/x86_64/src",
+            "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+            "x86",
+        ),
+    ]
+
+    if platform.machine().lower() in ["arm64", "aarch64"]:
+        joblist = joblist_arm
+    elif platform.machine().lower() in ["x86_64"]:
+        joblist = joblist_x86
+    else:
+        return
 
     with ThreadPoolExecutor() as executor:
         _ = list(executor.map(partial(gen_hol_light_asm_file), joblist))
@@ -3039,7 +3085,7 @@ def gen_citations():
 
 
 def extract_bytecode_from_output(output_text):
-    """Convert output of proofs/hol_light/arm/proofs/dump_bytecode.native
+    """Convert output of proofs/hol_light/arm_or_x86/proofs/dump_bytecode.native
     into a dictionary mapping function names to byte code strings."""
     bytecode_dict = {}
 
@@ -3085,16 +3131,10 @@ def update_bytecode_in_proof_script(filepath, bytecode):
     update_file(filepath, updated_content)
 
 
-def update_hol_light_bytecode():
-    """Update HOL Light proof files with bytecode from make dump_bytecode."""
-    status_update(
-        "HOL Light bytecode",
-        "Running make dump_bytecode ... (this may take a few minutes)",
-    )
-
+def update_hol_light_bytecode_for_arch(arm_or_x86):
     # Run make to get bytecode output
     result = subprocess.run(
-        ["make", "-C", "proofs/hol_light/arm", "dump_bytecode"],
+        ["make", "-C", "proofs/hol_light/" + arm_or_x86, "dump_bytecode"],
         capture_output=True,
         text=True,
         check=True,
@@ -3106,8 +3146,23 @@ def update_hol_light_bytecode():
 
     # Update each .ml file
     for obj_name, bytecode in bytecode_dict.items():
-        ml_file = "proofs/hol_light/arm/proofs/" + obj_name + ".ml"
+        ml_file = "proofs/hol_light/" + arm_or_x86 + "/proofs/" + obj_name + ".ml"
         update_bytecode_in_proof_script(ml_file, bytecode)
+
+
+def update_hol_light_bytecode():
+    """Update HOL Light proof files with bytecode from make dump_bytecode."""
+    status_update(
+        "HOL Light bytecode",
+        "Running make dump_bytecode ... (this may take a few minutes)",
+    )
+
+    if platform.machine().lower() in ["arm64", "aarch64"]:
+        update_hol_light_bytecode_for_arch("arm")
+    elif platform.machine().lower() in ["x86_64"]:
+        update_hol_light_bytecode_for_arch("x86")
+    else:
+        return
 
 
 def gen_test_config(config_path, config_spec, default_config_content):
@@ -3308,7 +3363,7 @@ def _main():
     gen_riscv64_zeta_files()
     high_level_status("Generated zeta and lookup tables")
 
-    if platform.machine().lower() in ["arm64", "aarch64"]:
+    if platform.machine().lower() in ["arm64", "aarch64", "x86_64"]:
         gen_hol_light_asm()
         high_level_status("Generated HOL Light assembly")
 
