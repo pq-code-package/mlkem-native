@@ -7,12 +7,12 @@ hol_light.overrideAttrs (old: {
     export HOLLIGHT_DIR="$1/lib/hol_light"
     export PATH="$1/lib/hol_light:$PATH"
   '';
-  version = "unstable-2025-09-22";
+  version = "unstable-2025-11-17";
   src = fetchFromGitHub {
     owner = "jrh13";
     repo = "hol-light";
-    rev = "bed58fa74649fa74015176f8f90e77f7af5cf8e3";
-    hash = "sha256-QDubbUUChvv04239BdcKPSU+E2gdSzqAWfAETK2Xtg0=";
+    rev = "08bcac75772d37c2447a90c90d1dff9ab415f217";
+    hash = "sha256-kYOzGW7uQGOM/b+JPWQfpqqtgMmMku/BkN58WZTtokU=";
   };
   patches = [
     ./0005-Configure-hol-sh-for-mlkem-native.patch
@@ -20,6 +20,8 @@ hol_light.overrideAttrs (old: {
   ];
   propagatedBuildInputs = old.propagatedBuildInputs ++ old.nativeBuildInputs ++ [ ocamlPackages.pcre2 ledit ];
   buildPhase = ''
+    patchShebangs pa_j/chooser.sh
+    patchShebangs update_database/chooser.sh
     HOLLIGHT_USE_MODULE=1 make hol.sh
     patchShebangs hol.sh
     HOLLIGHT_USE_MODULE=1 make

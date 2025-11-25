@@ -9,15 +9,15 @@
 
 needs "arm/proofs/base.ml";;
 
-needs "proofs/mlkem_specs.ml";;
-needs "proofs/mlkem_utils.ml";;
-needs "proofs/mlkem_zetas.ml";;
+needs "common/mlkem_specs.ml";;
+needs "arm/proofs/mlkem_utils.ml";;
+needs "arm/proofs/mlkem_zetas.ml";;
 
-(**** print_literal_from_elf "mlkem/mlkem_intt.o";;
+(**** print_literal_from_elf "arm/mlkem/mlkem_intt.o";;
  ****)
 
 let mlkem_intt_mc = define_assert_from_elf
- "mlkem_intt_mc" "mlkem/mlkem_intt.o"
+ "mlkem_intt_mc" "arm/mlkem/mlkem_intt.o"
 (*** BYTECODE START ***)
 [
   0xd10103ff;       (* arm_SUB SP SP (rvalue (word 64)) *)

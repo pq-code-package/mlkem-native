@@ -5,15 +5,15 @@
 
 needs "arm/proofs/base.ml";;
 
-needs "proofs/mlkem_specs.ml";;
-needs "proofs/mlkem_utils.ml";;
+needs "common/mlkem_specs.ml";;
+needs "arm/proofs/mlkem_utils.ml";;
 
-(**** print_literal_from_elf "mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.o";;
+(**** print_literal_from_elf "arm/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.o";;
  ****)
 
 
 let poly_basemul_acc_montgomery_cached_k3_mc = define_assert_from_elf
-    "poly_basemul_acc_montgomery_cached_k3_mc" "mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.o"
+    "poly_basemul_acc_montgomery_cached_k3_mc" "arm/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.o"
 (*** BYTECODE START ***)
 [
   0xd10103ff;       (* arm_SUB SP SP (rvalue (word 64)) *)
