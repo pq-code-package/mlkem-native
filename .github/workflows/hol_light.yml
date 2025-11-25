@@ -12,6 +12,9 @@ on:
      - 'proofs/hol_light/arm/Makefile'
      - 'proofs/hol_light/arm/**/*.S'
      - 'proofs/hol_light/arm/**/*.ml'
+     - 'proofs/hol_light/x86/Makefile'
+     - 'proofs/hol_light/x86/**/*.S'
+     - 'proofs/hol_light/x86/**/*.ml'
      - 'flake.nix'
      - 'flake.lock'
      - 'nix/hol_light/*'
@@ -23,6 +26,9 @@ on:
       - 'proofs/hol_light/arm/Makefile'
       - 'proofs/hol_light/arm/**/*.S'
       - 'proofs/hol_light/arm/**/*.ml'
+      - 'proofs/hol_light/x86/Makefile'
+      - 'proofs/hol_light/x86/**/*.S'
+      - 'proofs/hol_light/x86/**/*.ml'
       - 'flake.nix'
       - 'flake.lock'
       - 'nix/hol_light/*'
@@ -37,7 +43,7 @@ jobs:
   # but we use this as a fast path to not even start the proofs
   # if the byte code needs updating.
   hol_light_bytecode:
-    name: HOL-Light bytecode check
+    name: AArch64 HOL-Light bytecode check
     runs-on: pqcp-arm64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
@@ -51,7 +57,7 @@ jobs:
           script: |
             autogen --update-hol-light-bytecode --dry-run
   hol_light_interactive:
-    name: HOL-Light interactive shell test
+    name: AArch64 HOL-Light interactive shell test
     runs-on: pqcp-arm64
     needs: [ hol_light_bytecode ]
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
@@ -65,7 +71,7 @@ jobs:
           nix-shell: 'hol_light'
           script: |
             make -C proofs/hol_light/arm mlkem/mlkem_poly_tobytes.o
-            echo 'needs "proofs/mlkem_poly_tobytes.ml";;' | hol.sh
+            echo 'needs "arm/proofs/mlkem_poly_tobytes.ml";;' | hol.sh
   hol_light_proofs:
     needs: [ hol_light_bytecode ]
     strategy:
@@ -103,7 +109,7 @@ jobs:
             needs: ["keccak_specs.ml"]
           - name: keccak_f1600_x4_v8a_scalar
             needs: ["keccak_specs.ml"]
-    name: HOL Light proof for ${{ matrix.proof.name }}.S
+    name: AArch64 HOL Light proof for ${{ matrix.proof.name }}.S
     runs-on: pqcp-arm64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
@@ -130,6 +136,90 @@ jobs:
 
           # Always re-run upon change to nix files for HOL-Light
           if [[ "$changed_files" == *"nix/"* ]] || [[ "$changed_files" == *"hol_light.yml"* ]] || [[ "$changed_files" == *"flake"* ]] || [[ "$changed_files" == *"proofs/hol_light/arm/Makefile"* ]]; then
+            run_needed=1
+          fi
+
+          echo "run_needed=${run_needed}" >> $GITHUB_OUTPUT
+      - uses: ./.github/actions/setup-shell
+        if: |
+          steps.check_run.outputs.run_needed == '1'
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          nix-shell: 'hol_light'
+          script: |
+            tests hol_light -p ${{ matrix.proof.name }} --verbose
+
+  # x86_64 proofs
+  hol_light_bytecode_x86_64:
+    name: x86_64 HOL-Light bytecode check
+    runs-on: pqcp-x64
+    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-shell
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          nix-shell: 'hol_light'
+          script: |
+            autogen --update-hol-light-bytecode --dry-run
+  hol_light_interactive_x86_64:
+    name: x86_64 HOL-Light interactive shell test
+    runs-on: pqcp-x64
+    needs: [ hol_light_bytecode_x86_64 ]
+    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-shell
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          nix-shell: 'hol_light'
+          script: |
+            make -C proofs/hol_light/x86 mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o
+            echo 'needs "x86/proofs/mlkem_poly_basemul_acc_montgomery_cached_k2.ml";;' | hol.sh
+  hol_light_proofs_x86_64:
+    needs: [ hol_light_bytecode_x86_64 ]
+    strategy:
+      fail-fast: false
+      matrix:
+        proof:
+          # Dependencies on {name}.{S,ml} are implicit
+          - name: mlkem_poly_basemul_acc_montgomery_cached_k2
+            needs: ["mlkem_specs.ml"]
+          - name: mlkem_poly_basemul_acc_montgomery_cached_k3
+            needs: ["mlkem_specs.ml"]
+          - name: mlkem_poly_basemul_acc_montgomery_cached_k4
+            needs: ["mlkem_specs.ml"]
+    name: x86_64 HOL Light proof for ${{ matrix.proof.name }}.S
+    runs-on: pqcp-x64
+    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
+      - name: Check if dependencies changed
+        id: check_run
+        shell: bash
+        run: |
+          run_needed=0
+          changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
+          dependencies="${{ join(matrix.proof.needs, ' ') }} ${{ format('{0}.S {0}.ml', matrix.proof.name) }}"
+          for changed in $changed_files; do
+            for needs in $dependencies; do
+               if [[ "$changed" == *"$needs" ]]; then
+                 run_needed=1
+               fi
+            done
+          done
+
+          # Always re-run upon change to nix files for HOL-Light
+          if [[ "$changed_files" == *"nix/"* ]] || [[ "$changed_files" == *"hol_light.yml"* ]] || [[ "$changed_files" == *"flake"* ]] || [[ "$changed_files" == *"proofs/hol_light/x86/Makefile"* ]]; then
             run_needed=1
           fi
 

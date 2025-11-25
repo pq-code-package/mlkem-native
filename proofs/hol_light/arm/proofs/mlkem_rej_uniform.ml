@@ -9,15 +9,15 @@
 
 needs "arm/proofs/base.ml";;
 
-needs "proofs/mlkem_specs.ml";;
-needs "proofs/mlkem_utils.ml";;
-needs "proofs/mlkem_rej_uniform_table.ml";;
+needs "common/mlkem_specs.ml";;
+needs "arm/proofs/mlkem_utils.ml";;
+needs "arm/proofs/mlkem_rej_uniform_table.ml";;
 
-(**** print_literal_from_elf "mlkem/mlkem_rej_uniform.o";;
+(**** print_literal_from_elf "arm/mlkem/mlkem_rej_uniform.o";;
  ****)
 
 let mlkem_rej_uniform_mc = define_assert_from_elf
-  "mlkem_rej_uniform_mc" "mlkem/mlkem_rej_uniform.o"
+  "mlkem_rej_uniform_mc" "arm/mlkem/mlkem_rej_uniform.o"
 (*** BYTECODE START ***)
 [
   0xd10903ff;       (* arm_SUB SP SP (rvalue (word 576)) *)

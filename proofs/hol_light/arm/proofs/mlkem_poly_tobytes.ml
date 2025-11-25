@@ -9,14 +9,14 @@
 
 needs "arm/proofs/base.ml";;
 
-needs "proofs/mlkem_specs.ml";;
-needs "proofs/mlkem_utils.ml";;
+needs "common/mlkem_specs.ml";;
+needs "arm/proofs/mlkem_utils.ml";;
 
-(**** print_literal_from_elf "mlkem/mlkem_poly_tobytes.o";;
+(**** print_literal_from_elf "arm/mlkem/mlkem_poly_tobytes.o";;
  ****)
 
 let mlkem_poly_tobytes_mc = define_assert_from_elf
-  "mlkem_poly_tobytes_mc" "mlkem/mlkem_poly_tobytes.o"
+  "mlkem_poly_tobytes_mc" "arm/mlkem/mlkem_poly_tobytes.o"
 (*** BYTECODE START ***)
 [
   0xd2800202;       (* arm_MOV X2 (rvalue (word 16)) *)

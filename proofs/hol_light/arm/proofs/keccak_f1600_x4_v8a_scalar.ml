@@ -8,13 +8,13 @@
 (* ========================================================================= *)
 
 needs "arm/proofs/base.ml";;
-needs "proofs/keccak_spec.ml";;
+needs "arm/proofs/keccak_spec.ml";;
 
 (**** print_literal_from_elf "mlkem/keccak_f1600_x4_v8a_scalar.o";;
  ****)
 
 let keccak_f1600_x4_v8a_scalar_mc = define_assert_from_elf
-  "keccak_f1600_x4_v8a_scalar_mc" "mlkem/keccak_f1600_x4_v8a_scalar.o"
+  "keccak_f1600_x4_v8a_scalar_mc" "arm/mlkem/keccak_f1600_x4_v8a_scalar.o"
 (*** BYTECODE START ***)
 [
   0xd10383ff;       (* arm_SUB SP SP (rvalue (word 224)) *)

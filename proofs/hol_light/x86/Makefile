@@ -5,7 +5,7 @@
 #############################################################################
 
 #
-# This Makefile is derived from the Makefile arm/Makefile in s2n-bignum.
+# This Makefile is derived from the Makefile x86/Makefile in s2n-bignum.
 # - Remove all s2n-bignum proofs and tutorial, add mlkem-native proofs
 # - Minor path modifications to support base theories from s2n-bignum
 #   to reside in a separate read-only directory
@@ -17,20 +17,19 @@ OSTYPE_RESULT=$(shell uname -s)
 ARCHTYPE_RESULT=$(shell uname -m)
 
 SRC ?= $(S2N_BIGNUM_DIR)
-SRC_ARM ?= $(SRC)/arm
+SRC_X86 ?= $(SRC)/x86
 
 # Add explicit language input parameter to cpp, otherwise the use of #n for
-# numeric literals in ARM code is a problem when used inside #define macros
+# numeric literals in x86 code is a problem when used inside #define macros
 # since normally that means stringization.
 #
 # Some clang-based preprocessors seem to behave differently, and get confused
 # by single-quote characters in comments, so we eliminate // comments first.
 
-ARCHFLAGS=-march=armv8.4-a+sha3
 ifeq ($(OSTYPE_RESULT),Darwin)
 PREPROCESS=sed -e 's/\/\/.*//' | $(CC) -E -xassembler-with-cpp -
 else
-PREPROCESS=$(CC) $(ARCHFLAGS) -E -xassembler-with-cpp -
+PREPROCESS=$(CC) -E -xassembler-with-cpp -
 endif
 
 # Generally GNU-type assemblers are happy with multiple instructions on
@@ -38,60 +37,39 @@ endif
 
 SPLIT=tr ';' '\n'
 
-# If actually on an ARM8 machine, just use the assembler (as). Otherwise
+# If actually on an x86_64 machine, just use the assembler (as). Otherwise
 # use a cross-assembling version so that the code can still be assembled
 # and the proofs checked against the object files (though you won't be able
 # to run code without additional emulation infrastructure). For the clang
-# version on OS X we just add the "-arch arm64" option. For the Linux/gcc
+# version on OS X we just add the "-arch x86_64" option. For the Linux/gcc
 # toolchain we assume the presence of the special cross-assembler. This
 # can be installed via something like:
 #
-#  sudo apt-get install binutils-aarch64-linux-gnu
+#  sudo apt-get install binutils-x86-64-linux-gnu
 
-ifeq ($(ARCHTYPE_RESULT),aarch64)
-ASSEMBLE=as $(ARCHFLAGS)
-OBJDUMP=objdump -d
-else
-ifeq ($(ARCHTYPE_RESULT),arm64)
-ASSEMBLE=as $(ARCHFLAGS)
+ifeq ($(ARCHTYPE_RESULT),x86_64)
+ASSEMBLE=as
 OBJDUMP=objdump -d
 else
 ifeq ($(OSTYPE_RESULT),Darwin)
-ASSEMBLE=as -arch arm64
+ASSEMBLE=as -arch x86_64
 OBJDUMP=otool -tvV
 else
-ASSEMBLE=aarch64-linux-gnu-as $(ARCHFLAGS)
-OBJDUMP=aarch64-linux-gnu-objdump -d
-endif
+ASSEMBLE=x86_64-linux-gnu-as
+OBJDUMP=x86_64-linux-gnu-objdump -d
 endif
 endif
 
-OBJ = mlkem/mlkem_ntt.o                                   \
-      mlkem/mlkem_intt.o                                  \
-      mlkem/mlkem_poly_tomont.o                           \
-      mlkem/mlkem_poly_mulcache_compute.o                 \
-      mlkem/mlkem_poly_reduce.o                           \
-      mlkem/mlkem_poly_tobytes.o                          \
-      mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o \
+OBJ = mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o \
       mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.o \
-      mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.o \
-      mlkem/mlkem_rej_uniform.o				  \
-      mlkem/keccak_f1600_x1_scalar.o                      \
-      mlkem/keccak_f1600_x1_v84a.o                        \
-      mlkem/keccak_f1600_x2_v84a.o                        \
-      mlkem/keccak_f1600_x4_v8a_v84a_scalar.o             \
-      mlkem/keccak_f1600_x4_v8a_scalar.o
+      mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.o
 
-# According to
-# https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms,
-# x18 should not be used for Apple platforms. Check this using grep.
+# Build object files from assembly sources
 $(OBJ): %.o : %.S
 	@echo "Preparing $@ ..."
 	@echo "AS: `$(ASSEMBLE) --version`"
 	@echo "OBJDUMP: `$(OBJDUMP) --version`"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	cat $< | $(PREPROCESS) | $(SPLIT) | grep -v -E '^\s+.quad\s+0x[0-9a-f]+$$' | $(ASSEMBLE) -o $@ -
-	$(OBJDUMP) $@ | ( ( ! grep --ignore-case -E 'w18|[^0]x18' ) || ( rm $@ ; exit 1 ) )
 	cat $< | $(PREPROCESS) | $(SPLIT) | $(ASSEMBLE) -o $@ -
 	# MacOS may generate relocations in non-text sections that break
 	# the object file parser in HOL-Light
@@ -130,7 +108,7 @@ proofs/dump_bytecode.native: proofs/dump_bytecode.ml $(OBJ)
 
 # Run them and print the standard output+error at *.correct
 %.correct: %.native
-	cd .. ; ./arm/$< 2>&1 | tee ./arm/$@
+	cd .. ; ./x86/$< 2>&1 | tee ./x86/$@
 	@if (grep -i "error:\|exception:" "$@" >/dev/null); then  \
 		echo "$< had errors!";			          \
 		exit 1;					          \
@@ -154,5 +132,5 @@ FORCE: ;
 # A portable way of getting the number of max. cores:
 # https://stackoverflow.com/a/23569003/1488216
 NUM_CORES_FOR_SEMATEST = $(shell getconf _NPROCESSORS_ONLN)
-sematest: FORCE $(OBJ) $(SRC_ARM)/proofs/simulator_iclasses.ml $(SRC_ARM)/proofs/simulator.native
-	$(SRC)/tools/run-sematest.sh arm $(NUM_CORES_FOR_SEMATEST)
+sematest: FORCE $(OBJ) $(SRC_X86)/proofs/simulator_iclasses.ml $(SRC_X86)/proofs/simulator.native
+	$(SRC)/tools/run-sematest.sh x86 $(NUM_CORES_FOR_SEMATEST)
