@@ -9,7 +9,7 @@
 
 needs "arm/proofs/base.ml";;
 
-needs "proofs/mlkem_specs.ml";;
+needs "../common/mlkem_specs.ml";;
 needs "proofs/mlkem_utils.ml";;
 needs "proofs/mlkem_zetas.ml";;
 

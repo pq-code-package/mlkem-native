@@ -9,7 +9,7 @@
 
 needs "x86/proofs/base.ml";;
 
-needs "proofs/mlkem_specs.ml";;
+needs "../common/mlkem_specs.ml";;
 
 let mlkem_basemul_k2_mc =
   define_assert_from_elf "mlkem_basemul_k2_mc" "mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o"

@@ -5,7 +5,7 @@
 
 needs "arm/proofs/base.ml";;
 
-needs "proofs/mlkem_specs.ml";;
+needs "../common/mlkem_specs.ml";;
 needs "proofs/mlkem_utils.ml";;
 
 (**** print_literal_from_elf "mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o";;

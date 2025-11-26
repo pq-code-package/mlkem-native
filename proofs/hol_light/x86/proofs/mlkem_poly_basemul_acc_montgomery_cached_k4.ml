@@ -8,7 +8,7 @@
 (* ========================================================================= *)
 
 needs "x86/proofs/base.ml";;
-needs "common/mlkem_mldsa.ml";;
+needs "../common/mlkem_specs.ml";;
 
 let mlkem_basemul_k4_mc =
   define_assert_from_elf "mlkem_basemul_k4_mc" "mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.o"
