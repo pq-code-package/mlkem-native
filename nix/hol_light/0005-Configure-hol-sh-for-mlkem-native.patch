@@ -21,10 +21,10 @@ index 1311255..8b2bc36 100755
 +SITELIB=$(dirname $(ocamlfind query findlib 2>/dev/null) 2>/dev/null)
 +
 +# Set HOLLIGHT_LOAD_PATH to include S2N_BIGNUM_DIR and mlkem-native proofs
-+export HOLLIGHT_LOAD_PATH="${S2N_BIGNUM_DIR}:${PROOF_DIR_ARM}:${HOLLIGHT_LOAD_PATH}"
++export HOLLIGHT_LOAD_PATH="${S2N_BIGNUM_DIR}:${PROOF_DIR}:${HOLLIGHT_LOAD_PATH}"
 +
 +# Change to mlkem-native proofs directory if set, so define_from_elf can find object files
-+[ -n "${PROOF_DIR_ARM}" ] && cd "${PROOF_DIR_ARM}"
++[ -n "${PROOF_DIR}" ] && cd "${PROOF_DIR}"
 +
 +${LINE_EDITOR} ${HOLLIGHT_DIR}/ocaml-hol -init ${HOL_ML_PATH} -I ${HOLLIGHT_DIR} ${SITELIB:+-I "$SITELIB"}
 diff --git a/hol_4.sh b/hol_4.sh

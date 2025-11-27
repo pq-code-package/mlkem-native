@@ -9,10 +9,10 @@
 
 needs "x86/proofs/base.ml";;
 
-needs "../common/mlkem_specs.ml";;
+needs "common/mlkem_specs.ml";;
 
 let mlkem_basemul_k2_mc =
-  define_assert_from_elf "mlkem_basemul_k2_mc" "mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o"
+  define_assert_from_elf "mlkem_basemul_k2_mc" "x86/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o"
 (*** BYTECODE START ***)
 [
   0xf3; 0x0f; 0x1e; 0xfa;  (* ENDBR64 *)
