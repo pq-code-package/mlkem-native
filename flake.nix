@@ -101,8 +101,8 @@
           }).overrideAttrs (old: {
             shellHook = ''
               export PATH=$PWD/scripts:$PATH
-              # Set PROOF_DIR_ARM based on where we entered the shell
-              export PROOF_DIR_ARM="$PWD/proofs/hol_light/arm"
+              # Set PROOF_DIR based on where we entered the shell
+              export PROOF_DIR="$PWD/proofs/hol_light"
             '';
           });
           devShells.ci = util.mkShell {

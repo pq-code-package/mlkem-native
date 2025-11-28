@@ -5,14 +5,14 @@
 
 needs "arm/proofs/base.ml";;
 
-needs "proofs/mlkem_specs.ml";;
-needs "proofs/mlkem_utils.ml";;
+needs "common/mlkem_specs.ml";;
+needs "arm/proofs/mlkem_utils.ml";;
 
-(**** print_literal_from_elf "mlkem/mlkem_poly_tomont.o";;
+(**** print_literal_from_elf "arm/mlkem/mlkem_poly_tomont.o";;
  ****)
 
 let poly_tomont_asm_mc = define_assert_from_elf
-  "poly_tomont_asm_mc" "mlkem/mlkem_poly_tomont.o"
+  "poly_tomont_asm_mc" "arm/mlkem/mlkem_poly_tomont.o"
 (*** BYTECODE START ***)
 [
   0x5281a022;       (* arm_MOV W2 (rvalue (word 3329)) *)

@@ -5,16 +5,16 @@
 
 needs "arm/proofs/base.ml";;
 
-needs "proofs/mlkem_specs.ml";;
-needs "proofs/mlkem_utils.ml";;
-needs "proofs/mlkem_zetas.ml";;
+needs "common/mlkem_specs.ml";;
+needs "arm/proofs/mlkem_utils.ml";;
+needs "arm/proofs/mlkem_zetas.ml";;
 
 (**** print_literal_from_elf "mlkem/poly_mulcache_compute.o";;
 ****)
 
 
 let poly_mulcache_compute_mc = define_assert_from_elf
-   "poly_mulcache_compute_mc" "mlkem/mlkem_poly_mulcache_compute.o"
+   "poly_mulcache_compute_mc" "arm/mlkem/mlkem_poly_mulcache_compute.o"
 (*** BYTECODE START ***)
 [
   0x5281a025;       (* arm_MOV W5 (rvalue (word 3329)) *)

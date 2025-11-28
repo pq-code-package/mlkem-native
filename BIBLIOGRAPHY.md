@@ -113,7 +113,7 @@ source code and documentation.
   - [mlkem/src/fips202/native/aarch64/auto.h](mlkem/src/fips202/native/aarch64/auto.h)
   - [mlkem/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S](mlkem/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S)
   - [mlkem/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S](mlkem/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S)
-  - [proofs/hol_light/arm/README.md](proofs/hol_light/arm/README.md)
+  - [proofs/hol_light/README.md](proofs/hol_light/README.md)
   - [proofs/hol_light/arm/mlkem/keccak_f1600_x1_v84a.S](proofs/hol_light/arm/mlkem/keccak_f1600_x1_v84a.S)
   - [proofs/hol_light/arm/mlkem/keccak_f1600_x2_v84a.S](proofs/hol_light/arm/mlkem/keccak_f1600_x2_v84a.S)
 
@@ -248,7 +248,7 @@ source code and documentation.
 * URL: https://github.com/slothy-optimizer/slothy/
 * Referenced from:
   - [dev/README.md](dev/README.md)
-  - [proofs/hol_light/arm/README.md](proofs/hol_light/arm/README.md)
+  - [proofs/hol_light/README.md](proofs/hol_light/README.md)
 
 ### `SLOTHY_Paper`
 

@@ -16,7 +16,7 @@
 # - Removal of s2n-bignum specific code that is not relevant for
 #   the mlkem-native proofs.
 
-ROOT="$(realpath "$(dirname "$0")"/../../)"
+ROOT="$(realpath "$(dirname "$0")"/../..)"
 
 if [ "$#" -ne 3 ]; then
   echo "${ROOT}/build-proof.sh <.ml file path> <hol.sh> <output .native path>"
