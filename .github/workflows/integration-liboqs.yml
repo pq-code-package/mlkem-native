@@ -25,10 +25,10 @@ jobs:
             name: C
             flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=generic -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
           # AArch64
-          - system: pqcp-arm64
+          - system: ubuntu-24.04-arm
             name: Auto
             flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=auto -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
-          - system: pqcp-arm64
+          - system: ubuntu-24.04-arm
             name: C
             flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=generic -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
     name: Build (${{ matrix.name }}, ${{ matrix.system }})
