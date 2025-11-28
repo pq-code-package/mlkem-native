@@ -26,42 +26,42 @@ jobs:
            arch: mac
            mode: native
            nix_shell: ci
-         - runner: pqcp-arm64
+         - runner: ubuntu-24.04-arm
            name: 'ubuntu-latest (aarch64)'
            arch: aarch64
            mode: native
            nix_shell: ci
-         - runner: pqcp-arm64
+         - runner: ubuntu-24.04-arm
            name: 'ubuntu-latest (aarch64)'
            arch: x86_64
            mode: cross-x86_64
            nix_shell: ci-cross-x86_64
-         - runner: pqcp-arm64
+         - runner: ubuntu-24.04-arm
            name: 'ubuntu-latest (aarch64)'
            arch: riscv64
            mode: cross-riscv64
            nix_shell: ci-cross-riscv64
-         - runner: pqcp-arm64
+         - runner: ubuntu-24.04-arm
            name: 'ubuntu-latest (aarch64)'
            arch: riscv32
            mode: cross-riscv32
            nix_shell: ci-cross-riscv32
-         - runner: pqcp-arm64
+         - runner: ubuntu-24.04-arm
            name: 'ubuntu-latest (ppc64le)'
            arch: ppc64le
            mode: cross-ppc64le
            nix_shell: ci-cross-ppc64le
-         - runner: pqcp-x64
+         - runner: ubuntu-latest
            name: 'ubuntu-latest (x86_64)'
            arch: x86_64
            mode: native
            nix_shell: ci
-         - runner: pqcp-x64
+         - runner: ubuntu-latest
            name: 'ubuntu-latest (x86_64)'
            arch: aarch64
            mode: cross-aarch64
            nix_shell: ci-cross-aarch64
-         - runner: pqcp-x64
+         - runner: ubuntu-latest
            name: 'ubuntu-latest (x86_64)'
            arch: aarch64_be
            mode: cross-aarch64_be
@@ -69,7 +69,7 @@ jobs:
         exclude:
           - {external: true,
              target: {
-               runner: pqcp-arm64,
+               runner: ubuntu-24.04-arm,
                name: 'ubuntu-latest (aarch64)',
                arch: aarch64,
                mode: native,
@@ -77,7 +77,7 @@ jobs:
              }}
           - {external: true,
              target: {
-               runner: pqcp-arm64,
+               runner: ubuntu-24.04-arm,
                name: 'ubuntu-latest (aarch64)',
                arch: x86_64,
                mode: cross-x86_64,
@@ -85,7 +85,7 @@ jobs:
              }}
           - {external: true,
              target: {
-               runner: pqcp-arm64,
+               runner: ubuntu-24.04-arm,
                name: 'ubuntu-latest (aarch64)',
                arch: riscv64,
                mode: cross-riscv64,
@@ -93,7 +93,7 @@ jobs:
              }}
           - {external: true,
              target: {
-               runner: pqcp-arm64,
+               runner: ubuntu-24.04-arm,
                name: 'ubuntu-latest (aarch64)',
                arch: riscv32,
                mode: cross-riscv32,
@@ -101,7 +101,7 @@ jobs:
              }}
           - {external: true,
              target: {
-               runner: pqcp-arm64,
+               runner: ubuntu-24.04-arm,
                name: 'ubuntu-latest (ppc64le)',
                arch: ppc64le,
                mode: cross-ppc64le,
@@ -109,7 +109,7 @@ jobs:
              }}
           - {external: true,
              target: {
-               runner: pqcp-x64,
+               runner: ubuntu-latest,
                name: 'ubuntu-latest (x86_64)',
                arch: x86_64,
                mode: native,
@@ -117,7 +117,7 @@ jobs:
              }}
           - {external: true,
              target: {
-               runner: pqcp-x64,
+               runner: ubuntu-latest,
                name: 'ubuntu-latest (x86_64)',
                arch: aarch64,
                mode: cross-aarch64,
@@ -125,7 +125,7 @@ jobs:
              }}
           - {external: true,
              target: {
-               runner: pqcp-x64,
+               runner: ubuntu-latest,
                name: 'ubuntu-latest (x86_64)',
                arch: aarch64_be,
                mode: cross-aarch64_be,
@@ -202,7 +202,7 @@ jobs:
       matrix:
         cflags: [ "-O0", "-Os", "-O3" ]
         target:
-         - runner: pqcp-arm64
+         - runner: ubuntu-24.04-arm
            name: 'aarch64'
          - runner: ubuntu-latest
            name: 'x86_64'
@@ -412,9 +412,9 @@ jobs:
         external:
          - ${{ github.repository_owner != 'pq-code-package' }}
         target:
-          - runner: pqcp-x64
+          - runner: ubuntu-latest
             name: x86_64
-          - runner: pqcp-arm64
+          - runner: ubuntu-24.04-arm
             name: aarch64
         cflags: ['-O3', '-Os']
         exclude:
@@ -445,19 +445,19 @@ jobs:
         external:
          - ${{ github.repository_owner != 'pq-code-package' }}
         target:
-         - runner: pqcp-arm64
+         - runner: ubuntu-24.04-arm
            name: 'ubuntu-latest (aarch64)'
-         - runner: pqcp-x64
+         - runner: ubuntu-latest
            name: 'ubuntu-latest (x86_64)'
         exclude:
           - {external: true,
              target: {
-               runner: pqcp-arm64,
+               runner: ubuntu-24.04-arm,
                name: 'ubuntu-latest (aarch64)',
              }}
           - {external: true,
              target: {
-               runner: pqcp-x64,
+               runner: ubuntu-latest,
                name: 'ubuntu-latest (x86_64)',
              }}
     runs-on: ${{ matrix.target.runner }}
@@ -501,14 +501,14 @@ jobs:
         external:
          - ${{ github.repository_owner != 'pq-code-package' }}
         target:
-         - runner: pqcp-arm64
+         - runner: ubuntu-24.04-arm
            name: 'aarch64'
          - runner: ubuntu-latest
            name: 'x86_64'
         exclude:
           - {external: true,
              target: {
-               runner: pqcp-arm64,
+               runner: ubuntu-24.04-arm,
                name: 'aarch64'
              }}
     name: Check API consistency
@@ -681,7 +681,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        system: [ubuntu-latest, pqcp-arm64]
+        system: [ubuntu-latest, ubuntu-24.04-arm]
     runs-on: ${{ matrix.system }}
     name: Check autogenerated files
     steps:
@@ -695,7 +695,7 @@ jobs:
             python3 ./scripts/autogen --dry-run --force-cross
       - uses: ./.github/actions/setup-shell
         # Building the HOL-Light bytecode currently requires native compilation
-        if: ${{ matrix.system == 'pqcp-arm64' }}
+        if: ${{ matrix.system == 'ubuntu-24.04-arm' }}
         with:
           nix-shell: 'hol_light'
           gh_token: ${{ secrets.GITHUB_TOKEN }}
