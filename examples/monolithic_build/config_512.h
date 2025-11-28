@@ -11,6 +11,11 @@
  *   Validation Program
  *   National Institute of Standards and Technology
  *   https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
+ *
+ * - [FIPS203]
+ *   FIPS 203 Module-Lattice-Based Key-Encapsulation Mechanism Standard
+ *   National Institute of Standards and Technology
+ *   https://csrc.nist.gov/pubs/fips/203/final
  */
 
 /*
@@ -263,8 +268,9 @@
 /******************************************************************************
  * Name:        MLK_CONFIG_CUSTOM_ZEROIZE
  *
- * Description: In compliance with FIPS 203 Section 3.3, mlkem-native zeroizes
- *              intermediate stack buffers before returning from function calls.
+ * Description: In compliance with @[FIPS203, Section 3.3], mlkem-native
+ *              zeroizes intermediate stack buffers before returning from
+ *              function calls.
  *
  *              Set this option and define `mlk_zeroize` if you want to
  *              use a custom method to zeroize intermediate stack buffers.
@@ -464,6 +470,20 @@
  *
  *****************************************************************************/
 /* #define MLK_CONFIG_NO_ASM */
+
+/******************************************************************************
+ * Name:        MLK_CONFIG_NO_ASM_VALUE_BARRIER
+ *
+ * Description: If this option is set, mlkem-native will be built without
+ *              use of native code or inline assembly for value barriers.
+ *
+ *              By default, inline assembly (if available) is used to implement
+ *              value barriers.
+ *              Without inline assembly, mlkem-native will use a global volatile
+ *              'opt blocker' instead; see verify.h.
+ *
+ *****************************************************************************/
+/* #define MLk_CONFIG_NO_ASM_VALUE_BARRIER */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_NO_RANDOMIZED_API

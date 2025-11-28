@@ -1880,7 +1880,6 @@ def get_config_options():
         "MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER",
         "MLKEM_DEBUG",  # TODO: Rename?
         "MLK_BREAK_PCT",  # Use in PCT breakage test]
-        "MLK_CONFIG_NO_ASM_VALUE_BARRIER",  # TODO: Add to config?
         "MLK_CHECK_APIS",
         "MLK_CONFIG_API_XXX",
         "MLK_USE_NATIVE_XXX",
