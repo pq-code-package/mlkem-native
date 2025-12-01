@@ -30,8 +30,7 @@ CC_AR  := $(CROSS_PREFIX)$(CC_AR)
 #################
 # Common config #
 #################
-
-override CFLAGS := \
+CFLAGS := \
 	-Wall \
 	-Wextra \
 	-Werror=unused-result \
