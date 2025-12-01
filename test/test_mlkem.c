@@ -98,7 +98,7 @@ static int test_invalid_sk_a(void)
   /* Bob derives a secret key and creates a response */
   CHECK(crypto_kem_enc(ct, key_b, pk) == 0);
   /* Replace first part of secret key with random values */
-  randombytes(sk, 10);
+  CHECK(randombytes(sk, 10) == 0);
   /* Alice uses Bobs response to get her shared key
    * This should fail due to wrong sk */
   CHECK(crypto_kem_dec(key_a, ct, sk) == 0);
@@ -122,7 +122,7 @@ static int test_invalid_sk_b(void)
   /* Bob derives a secret key and creates a response */
   CHECK(crypto_kem_enc(ct, key_b, pk) == 0);
   /* Replace H(pk) with radom values; */
-  randombytes(sk + CRYPTO_SECRETKEYBYTES - 64, 32);
+  CHECK(randombytes(sk + CRYPTO_SECRETKEYBYTES - 64, 32) == 0);
   /* Alice uses Bobs response to get her shared key
    * This should fail due to the input validation */
   CHECK(crypto_kem_dec(key_a, ct, sk) != 0);
@@ -141,9 +141,9 @@ static int test_invalid_ciphertext(void)
 
   do
   {
-    randombytes(&b, sizeof(uint8_t));
+    CHECK(randombytes(&b, sizeof(uint8_t)) == 0);
   } while (!b);
-  randombytes((uint8_t *)&pos, sizeof(size_t));
+  CHECK(randombytes((uint8_t *)&pos, sizeof(size_t)) == 0);
 
   /* Alice generates a public key */
   CHECK(crypto_kem_keypair(pk, sk) == 0);

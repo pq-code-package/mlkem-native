@@ -110,7 +110,10 @@ static void generate_i16_array_ranged(int16_t *data, size_t len, int min_incl,
 {
   size_t i;
 
-  randombytes((uint8_t *)data, len * sizeof(int16_t));
+  if (randombytes((uint8_t *)data, len * sizeof(int16_t)) != 0)
+  {
+    return;
+  }
   for (i = 0; i < len; i++)
   {
     data[i] = (int16_t)((unsigned)min_incl +

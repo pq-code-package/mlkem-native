@@ -29,6 +29,6 @@
  */
 
 void randombytes_reset(void);
-void randombytes(uint8_t *buf, size_t n);
+int randombytes(uint8_t *buf, size_t n);
 
 #endif /* !NOTRANDOMBYTES_H */

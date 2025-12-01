@@ -327,9 +327,9 @@
 #include <stdint.h>
 #include "sys.h"
 #include "test_only_rng/notrandombytes.h"
-static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
+static MLK_INLINE int mlk_randombytes(uint8_t *ptr, size_t len)
 {
-  randombytes(ptr, len);
+  return randombytes(ptr, len);
 }
 #endif /* !__ASSEMBLER__ */
 

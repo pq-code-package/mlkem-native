@@ -27,14 +27,14 @@ static int cmp_uint64_t(const void *a, const void *b)
   return (int)((*((const uint64_t *)a)) - (*((const uint64_t *)b)));
 }
 
-#define BENCH(txt, code)                                \
-  for (i = 0; i < NTESTS; i++)                          \
-  {                                                     \
-    randombytes((uint8_t *)data0, sizeof(data0));       \
-    randombytes((uint8_t *)data1, sizeof(data1));       \
-    randombytes((uint8_t *)data2, sizeof(data2));       \
-    randombytes((uint8_t *)data3, sizeof(data3));       \
-    randombytes((uint8_t *)data4, sizeof(data4));       \
+#define BENCH(txt, code)                                            \
+  for (i = 0; i < NTESTS; i++)                                      \
+  {                                                                 \
+    CHECK(randombytes((uint8_t *)data0, sizeof(data0)) == 0);       \
+    CHECK(randombytes((uint8_t *)data1, sizeof(data1)) == 0);       \
+    CHECK(randombytes((uint8_t *)data2, sizeof(data2)) == 0);       \
+    CHECK(randombytes((uint8_t *)data3, sizeof(data3)) == 0);       \
+    CHECK(randombytes((uint8_t *)data4, sizeof(data4)) == 0);       \
     for (j = 0; j < NWARMUP; j++)                       \
     {                                                   \
       code;                                             \

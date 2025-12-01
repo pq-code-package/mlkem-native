@@ -80,8 +80,8 @@ static int bench(void)
   for (i = 0; i < NTESTS; i++)
   {
     int ret = 0;
-    randombytes(kg_rand, 2 * CRYPTO_BYTES);
-    randombytes(enc_rand, CRYPTO_BYTES);
+    CHECK(randombytes(kg_rand, 2 * CRYPTO_BYTES) == 0);
+    CHECK(randombytes(enc_rand, CRYPTO_BYTES) == 0);
 
     /* Key-pair generation */
     for (j = 0; j < NWARMUP; j++)
