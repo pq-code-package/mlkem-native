@@ -41,7 +41,10 @@ if ! command -v shfmt 2>&1 >/dev/null; then
   error "shfmt not found. Are you running in a nix shell? See CONTRIBUTING.md."
   exit 1
 fi
-shfmt -s -w -l -i 2 -ci -fn $(shfmt -f $(git grep -l '' :/))
+
+# Find all scripts in the repo
+SHELL_SCRIPTS=$(git grep -l '' :/ | xargs printf "'%s' " | xargs -L 1 shfmt -f)
+echo $SHELL_SCRIPTS | xargs -L 1 shfmt -s -w -l -i 2 -ci -fn
 
 info "Formatting python scripts"
 if ! command -v black 2>&1 >/dev/null; then
