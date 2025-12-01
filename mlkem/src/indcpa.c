@@ -442,11 +442,12 @@ void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(buf, sizeof(buf));
-  mlk_zeroize(coins_with_domain_separator, sizeof(coins_with_domain_separator));
   mlk_zeroize(&a, sizeof(a));
   mlk_zeroize(&e, sizeof(e));
+  mlk_zeroize(&pkpv, sizeof(pkpv));
   mlk_zeroize(&skpv, sizeof(skpv));
   mlk_zeroize(&skpv_cache, sizeof(skpv_cache));
+  mlk_zeroize(coins_with_domain_separator, sizeof(coins_with_domain_separator));
 }
 
 /* Reference: `indcpa_enc()` in the reference implementation @[REF].
@@ -525,14 +526,15 @@ void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(seed, sizeof(seed));
+  mlk_zeroize(&at, sizeof(at));
   mlk_zeroize(&sp, sizeof(sp));
-  mlk_zeroize(&sp_cache, sizeof(sp_cache));
+  mlk_zeroize(&pkpv, sizeof(pkpv));
+  mlk_zeroize(&ep, sizeof(ep));
   mlk_zeroize(&b, sizeof(b));
   mlk_zeroize(&v, sizeof(v));
-  mlk_zeroize(&at, sizeof(at));
   mlk_zeroize(&k, sizeof(k));
-  mlk_zeroize(&ep, sizeof(ep));
   mlk_zeroize(&epp, sizeof(epp));
+  mlk_zeroize(&sp_cache, sizeof(sp_cache));
 }
 
 /* Reference: `indcpa_dec()` in the reference implementation @[REF].
@@ -562,11 +564,11 @@ void mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  mlk_zeroize(&skpv, sizeof(skpv));
   mlk_zeroize(&b, sizeof(b));
-  mlk_zeroize(&b_cache, sizeof(b_cache));
+  mlk_zeroize(&skpv, sizeof(skpv));
   mlk_zeroize(&v, sizeof(v));
   mlk_zeroize(&sb, sizeof(sb));
+  mlk_zeroize(&b_cache, sizeof(b_cache));
 }
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
