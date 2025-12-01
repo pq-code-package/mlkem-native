@@ -20,8 +20,6 @@ fi
 # Standard color definitions
 GREEN="\033[32m"
 RED="\033[31m"
-BLUE="\033[94m"
-BOLD="\033[1m"
 NORMAL="\033[0m"
 
 info()
@@ -151,7 +149,7 @@ fi
 gh_group_end
 
 gh_group_start "Linting c files with clang-format"
-checkerr "Lint C" "$(clang-format $(git ls-files ":/*.c" ":/*.h") --Werror --dry-run 2>&1 | grep "error:" | cut -d ':' -f 1,2 | tr ':' ' ')"
+checkerr "Lint C" "$(clang-format "$(git ls-files ":/*.c" ":/*.h")" --Werror --dry-run 2>&1 | grep "error:" | cut -d ':' -f 1,2 | tr ':' ' ')"
 gh_group_end
 
 check-eol-dry-run()

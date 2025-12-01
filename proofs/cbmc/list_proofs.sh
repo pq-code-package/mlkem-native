@@ -6,5 +6,5 @@
 # which are those containing a *harness.c file.
 
 ROOT=$(git rev-parse --show-toplevel)
-cd $ROOT
+cd "$ROOT" || exit
 ls -1 proofs/cbmc/**/*harness.c | cut -d '/' -f 3

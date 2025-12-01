@@ -34,7 +34,8 @@ output_path=$3
 output_dir=$(dirname "$output_path")
 [ -d "$output_dir" ] || mkdir -p "$output_dir"
 
-export HOLLIGHT_DIR="$(dirname ${hol_sh_cmd})"
+HOLLIGHT_DIR="$(dirname "${hol_sh_cmd}")"
+export HOLLIGHT_DIR
 if [ ! -f "${HOLLIGHT_DIR}/hol_lib.cmxa" ]; then
   echo "hol_lib.cmxa does not exist in HOLLIGHT_DIR('${HOLLIGHT_DIR}')."
   echo "Did you compile HOL Light with HOLLIGHT_USE_MODULE set to 1?"
@@ -50,20 +51,20 @@ echo "Generating a template .ml that loads the file...: ${template_ml}"
   echo "check_axioms ();;"
   echo 'let proof_end_time = Unix.time();;'
   echo 'Printf.printf "Running time: %f sec, Start unixtime: %f, End unixtime: %f\n" (proof_end_time -. proof_start_time) proof_start_time proof_end_time;;'
-) >>${template_ml}
+) >>"${template_ml}"
 
 inlined_prefix="$(mktemp)"
 inlined_ml="${inlined_prefix}.ml"
 inlined_cmx="${inlined_prefix}.cmx"
-(cd "${S2N_BIGNUM_DIR}" && HOLLIGHT_LOAD_PATH=${ROOT} ocaml ${HOLLIGHT_DIR}/inline_load.ml "${template_ml}" "${inlined_ml}")
+(cd "${S2N_BIGNUM_DIR}" && HOLLIGHT_LOAD_PATH=${ROOT} ocaml "${HOLLIGHT_DIR}"/inline_load.ml "${template_ml}" "${inlined_ml}")
 
 # Give a large stack size.
 OCAMLRUNPARAM=l=2000000000 \
   ocamlopt.byte -pp "$(${hol_sh_cmd} -pp)" -I "${HOLLIGHT_DIR}" -I +unix -c \
-  hol_lib.cmxa ${inlined_ml} -o ${inlined_cmx} -w -a
+  hol_lib.cmxa "${inlined_ml}" -o "${inlined_cmx}" -w -a
 ocamlfind ocamlopt -package zarith,unix -linkpkg hol_lib.cmxa \
-  -I "${HOLLIGHT_DIR}" ${inlined_cmx} \
+  -I "${HOLLIGHT_DIR}" "${inlined_cmx}" \
   -o "${output_path}"
 
 # Remove the intermediate files to save disk space
-rm -f ${inlined_cmx} ${template_ml} ${inlined_ml}
+rm -f "${inlined_cmx}" "${template_ml}" "${inlined_ml}"
