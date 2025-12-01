@@ -22,6 +22,7 @@
  *
  */
 
+#include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -32,12 +33,29 @@ static uint32_t seed[32] = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 8, 9, 7, 9, 3,
 static uint32_t in[12];
 static uint32_t out[8];
 static int32_t outleft = 0;
+static int fail_after = -1;
+static size_t call_index = 0;
 
 void randombytes_reset(void)
 {
   memset(in, 0, sizeof(in));
   memset(out, 0, sizeof(out));
   outleft = 0;
+  call_index = 0;
+  fail_after = -1;
+}
+
+void randombytes_force_failure(int call_idx)
+{
+  call_index = 0;
+  if (call_idx < 0)
+  {
+    fail_after = -1;
+  }
+  else
+  {
+    fail_after = call_idx;
+  }
 }
 
 #define ROTATE(x, b) (((x) << (b)) | ((x) >> (32 - (b))))
@@ -88,6 +106,13 @@ static void surf(void)
 
 int randombytes(uint8_t *buf, size_t n)
 {
+  if (fail_after >= 0 && call_index == (size_t)fail_after)
+  {
+    fail_after = -1;
+    call_index++;
+    return -1;
+  }
+  call_index++;
   while (n > 0)
   {
     if (!outleft)

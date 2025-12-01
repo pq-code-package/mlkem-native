@@ -29,6 +29,7 @@
  */
 
 void randombytes_reset(void);
+void randombytes_force_failure(int call_idx);
 int randombytes(uint8_t *buf, size_t n);
 
 #endif /* !NOTRANDOMBYTES_H */

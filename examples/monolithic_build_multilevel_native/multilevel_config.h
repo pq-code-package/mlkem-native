@@ -309,7 +309,7 @@
  *              consumer.
  *
  *              If this option is not set, mlkem-native expects a function
- *              void randombytes(uint8_t *out, size_t outlen).
+ *              int randombytes(uint8_t *out, size_t outlen).
  *
  *              Set this option and define `mlk_randombytes` if you want to
  *              use a custom method to sample randombytes with a different name
@@ -327,9 +327,9 @@
 #include <stdint.h>
 #include "sys.h"
 #include "test_only_rng/notrandombytes.h"
-static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
+static MLK_INLINE int mlk_randombytes(uint8_t *ptr, size_t len)
 {
-  randombytes(ptr, len);
+  return randombytes(ptr, len);
 }
 #endif /* !__ASSEMBLER__ */
 
