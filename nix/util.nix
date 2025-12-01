@@ -86,7 +86,8 @@ rec {
 
       inherit (pkgs)
         nixpkgs-fmt
-        shfmt;
+        shfmt
+        shellcheck;
 
       inherit (pkgs.python3Packages)
         mpmath sympy black pyparsing pyyaml rich;

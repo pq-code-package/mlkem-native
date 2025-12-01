@@ -106,15 +106,36 @@ gh_error_simple()
   fi
 }
 
+run-shellcheck()
+{
+  if ! command -v shellcheck >/dev/null; then
+    gh_error_simple "Shellcheck missing" "shellcheck is not installed"
+    error "Lint shellcheck"
+    SUCCESS=false
+    gh_summary_failure "Lint shellcheck"
+    return 0
+  fi
+
+  checkerr "Lint shellcheck" "$(echo $SHELL_SCRIPTS | xargs shellcheck --severity=warning)"
+}
+
 # Formatting
 SUCCESS=true
+
+# Get list of shell scripts and .c/.h files for linting
+ALL_C_FILES=$(git ls-files ":/*.c" ":/*.h")
+SHELL_SCRIPTS=$(git grep -l '' :/ | xargs printf "'%s' " | xargs -L 1 shfmt -f)
 
 gh_group_start "Linting nix files with nixpkgs-fmt"
 checkerr "Lint nix" "$(nixpkgs-fmt --check "$ROOT")"
 gh_group_end
 
 gh_group_start "Linting shell scripts with shfmt"
-checkerr "Lint shell" "$(shfmt -s -l -i 2 -ci -fn $(shfmt -f $(git grep -l '' :/)))"
+checkerr "Lint shell" "$(echo $SHELL_SCRIPTS | xargs -L 1 shfmt -s -l -i 2 -ci -fn)"
+gh_group_end
+
+gh_group_start "Linting shell scripts with shellcheck"
+run-shellcheck
 gh_group_end
 
 gh_group_start "Linting python scripts with black"
