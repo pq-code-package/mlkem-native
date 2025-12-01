@@ -91,7 +91,7 @@ jobs:
       label: ${{ steps.start-ec2-runner.outputs.label }}
       ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - name: Determine AMI ID
         id: det_ami_id
         run: |
@@ -128,7 +128,7 @@ jobs:
     needs: start-ec2-runner # required to start the main job when the runner is ready
     if: ${{ inputs.compiler == '' }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - uses: ./.github/actions/bench
         if: ${{ inputs.opt == 'all' || inputs.opt == 'opt' }}
         with:
@@ -165,7 +165,7 @@ jobs:
     needs: start-ec2-runner # required to start the main job when the runner is ready
     if: ${{ inputs.compiler != '' }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - uses: ./.github/actions/setup-apt
         with:
           packages: ${{ inputs.additional_packages }}
