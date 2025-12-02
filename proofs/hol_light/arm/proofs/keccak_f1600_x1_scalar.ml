@@ -10,7 +10,7 @@
 needs "arm/proofs/base.ml";;
 needs "arm/proofs/keccak_spec.ml";;
 
-(**** print_literal_from_elf "mlkem/keccak_f1600_x1_scalar.o";;
+(**** print_literal_from_elf "arm/mlkem/keccak_f1600_x1_scalar.o";;
  ****)
 
 let keccak_f1600_x1_scalar_mc = define_assert_from_elf

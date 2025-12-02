@@ -144,7 +144,7 @@ run_proofs: build_proofs $(PROOF_LOGS);
 proofs: run_proofs ; $(SRC)/tools/count-proofs.sh .
 
 dump_bytecode: proofs/dump_bytecode.native
-	./$<
+	cd .. ; ./arm/$<
 
 .PHONY: proofs build_proofs run_proofs sematest clean dump_bytecode
 
