@@ -9,7 +9,7 @@ needs "common/mlkem_specs.ml";;
 needs "arm/proofs/mlkem_utils.ml";;
 needs "arm/proofs/mlkem_zetas.ml";;
 
-(**** print_literal_from_elf "mlkem/poly_mulcache_compute.o";;
+(**** print_literal_from_elf "arm/mlkem/poly_mulcache_compute.o";;
 ****)
 
 
