@@ -181,40 +181,6 @@ static void mlk_unpack_ciphertext(mlk_polyvec *b, mlk_poly *v,
   mlk_poly_decompress_dv(v, c + MLKEM_POLYVECCOMPRESSEDBYTES_DU);
 }
 
-/* Helper function to ensure that the polynomial entries in the output
- * of gen_matrix use the standard (bitreversed) ordering of coefficients.
- * No-op unless a native backend with a custom ordering is used.
- *
- * We don't inline this into gen_matrix to avoid having to split the CBMC
- * proof for gen_matrix based on MLK_USE_NATIVE_NTT_CUSTOM_ORDER. */
-static void mlk_polyvec_permute_bitrev_to_custom(mlk_polyvec *v)
-__contract__(
-  /* We don't specify that this should be a permutation, but only
-   * that it does not change the bound established at the end of mlk_gen_matrix. */
-  requires(memory_no_alias(v, sizeof(mlk_polyvec)))
-  requires(forall(x, 0, MLKEM_K,
-    array_bound(v->vec[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
-  assigns(memory_slice(v, sizeof(mlk_polyvec)))
-  ensures(forall(x, 0, MLKEM_K,
-    array_bound(v->vec[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
-{
-#if defined(MLK_USE_NATIVE_NTT_CUSTOM_ORDER)
-  unsigned i;
-  for (i = 0; i < MLKEM_K; i++)
-  __loop__(
-     assigns(i, memory_slice(v, sizeof(mlk_polyvec)))
-     invariant(i <= MLKEM_K)
-     invariant(forall(x, 0, MLKEM_K,
-       array_bound(v->vec[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
-  {
-    mlk_poly_permute_bitrev_to_custom(v->vec[i].coeffs);
-  }
-#else  /* MLK_USE_NATIVE_NTT_CUSTOM_ORDER */
-  /* Nothing to do */
-  (void)v;
-#endif /* !MLK_USE_NATIVE_NTT_CUSTOM_ORDER */
-}
-
 static void mlk_polymat_permute_bitrev_to_custom(mlk_polymat *a)
 __contract__(
   /* We don't specify that this should be a permutation, but only
@@ -226,16 +192,22 @@ __contract__(
   ensures(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
     array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))))
 {
+#if defined(MLK_USE_NATIVE_NTT_CUSTOM_ORDER)
   unsigned i;
-  for (i = 0; i < MLKEM_K; i++)
+  for (i = 0; i < MLKEM_K * MLKEM_K; i++)
   __loop__(
      assigns(i, object_whole(a))
-     invariant(i <= MLKEM_K)
+     invariant(i <= MLKEM_K * MLKEM_K)
      invariant(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
        array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))))
   {
-    mlk_polyvec_permute_bitrev_to_custom(&a->vec[i]);
+    mlk_poly_permute_bitrev_to_custom(
+        a->vec[i / MLKEM_K].vec[i % MLKEM_K].coeffs);
   }
+#else  /* MLK_USE_NATIVE_NTT_CUSTOM_ORDER */
+  /* Nothing to do */
+  (void)a;
+#endif /* !MLK_USE_NATIVE_NTT_CUSTOM_ORDER */
 }
 
 /* Reference: `gen_matrix()` in the reference implementation @[REF].
