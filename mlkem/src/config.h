@@ -470,7 +470,7 @@
  *              'opt blocker' instead; see verify.h.
  *
  *****************************************************************************/
-/* #define MLk_CONFIG_NO_ASM_VALUE_BARRIER */
+#define MLK_CONFIG_NO_ASM_VALUE_BARRIER
 
 /******************************************************************************
  * Name:        MLK_CONFIG_NO_RANDOMIZED_API
