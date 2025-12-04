@@ -42,6 +42,9 @@
  *   dev/aarch64_opt/src/rej_uniform_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
+#if defined(__ELF__)
+.section .note.GNU-stack,"",@progbits
+#endif
 
 .text
 .balign 4

@@ -36,6 +36,9 @@
  *   dev/fips202/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
+#if defined(__ELF__)
+.section .note.GNU-stack,"",@progbits
+#endif
 
 .text
 .balign 4
