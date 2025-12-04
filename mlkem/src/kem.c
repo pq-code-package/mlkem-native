@@ -176,7 +176,7 @@ int crypto_kem_keypair_derand(
     uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
     const uint8_t coins[2 * MLKEM_SYMBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 {
-  mlk_indcpa_keypair_derand(pk, sk, coins);
+  mlk_indcpa_keypair_derand(pk, sk, coins MLK_CONTEXT_PARAMETER);
   mlk_memcpy(sk + MLKEM_INDCPA_SECRETKEYBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
   mlk_hash_h(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, pk,
              MLKEM_INDCCA_PUBLICKEYBYTES);
@@ -246,7 +246,7 @@ int crypto_kem_enc_derand(
   mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
 
   /* coins are in kr+MLKEM_SYMBYTES */
-  mlk_indcpa_enc(ct, buf, pk, kr + MLKEM_SYMBYTES);
+  mlk_indcpa_enc(ct, buf, pk, kr + MLKEM_SYMBYTES MLK_CONTEXT_PARAMETER);
 
   mlk_memcpy(ss, kr, MLKEM_SYMBYTES);
 
@@ -305,7 +305,7 @@ int crypto_kem_dec(
     return -1;
   }
 
-  mlk_indcpa_dec(buf, ct, sk);
+  mlk_indcpa_dec(buf, ct, sk MLK_CONTEXT_PARAMETER);
 
   /* Multitarget countermeasure for coins + contributory KEM */
   mlk_memcpy(buf + MLKEM_SYMBYTES,
@@ -315,7 +315,7 @@ int crypto_kem_dec(
 
   /* Recompute and compare ciphertext */
   /* coins are in kr+MLKEM_SYMBYTES */
-  mlk_indcpa_enc(tmp, buf, pk, kr + MLKEM_SYMBYTES);
+  mlk_indcpa_enc(tmp, buf, pk, kr + MLKEM_SYMBYTES MLK_CONTEXT_PARAMETER);
   fail = mlk_ct_memcmp(ct, tmp, MLKEM_INDCCA_CIPHERTEXTBYTES);
 
   /* Compute rejection key */

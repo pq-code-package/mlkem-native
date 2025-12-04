@@ -68,9 +68,10 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                               uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
-                               const uint8_t coins[MLKEM_SYMBYTES])
+void mlk_indcpa_keypair_derand(
+    uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
+    uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
+    const uint8_t coins[MLKEM_SYMBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCPA_SECRETKEYBYTES))
@@ -100,10 +101,10 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
-                    const uint8_t m[MLKEM_INDCPA_MSGBYTES],
-                    const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                    const uint8_t coins[MLKEM_SYMBYTES])
+void mlk_indcpa_enc(
+    uint8_t c[MLKEM_INDCPA_BYTES], const uint8_t m[MLKEM_INDCPA_MSGBYTES],
+    const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
+    const uint8_t coins[MLKEM_SYMBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 __contract__(
   requires(memory_no_alias(c, MLKEM_INDCPA_BYTES))
   requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES))
@@ -130,9 +131,10 @@ __contract__(
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
-                    const uint8_t c[MLKEM_INDCPA_BYTES],
-                    const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
+void mlk_indcpa_dec(
+    uint8_t m[MLKEM_INDCPA_MSGBYTES], const uint8_t c[MLKEM_INDCPA_BYTES],
+    const uint8_t
+        sk[MLKEM_INDCPA_SECRETKEYBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 __contract__(
   requires(memory_no_alias(c, MLKEM_INDCPA_BYTES))
   requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES))
