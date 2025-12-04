@@ -13,8 +13,6 @@ ROOT="$(realpath "$(dirname "$0")"/../)"
 # Standard color definitions
 GREEN="\033[32m"
 RED="\033[31m"
-BLUE="\033[94m"
-BOLD="\033[1m"
 NORMAL="\033[0m"
 
 # utility
@@ -29,7 +27,7 @@ error()
 }
 
 info "Formatting nix files"
-if ! command -v nixpkgs-fmt 2>&1 >/dev/null; then
+if ! command -v nixpkgs-fmt >/dev/null 2>&1; then
   error "nixpkgs-fmt not found. Are you running in a nix shell? See BUILDING.md."
   exit 1
 fi
@@ -37,21 +35,25 @@ fi
 nixpkgs-fmt "$ROOT"
 
 info "Formatting shell scripts"
-if ! command -v shfmt 2>&1 >/dev/null; then
+if ! command -v shfmt >/dev/null 2>&1; then
   error "shfmt not found. Are you running in a nix shell? See BUILDING.md."
   exit 1
 fi
-shfmt -s -w -l -i 2 -ci -fn $(shfmt -f $(git grep -l '' :/))
+
+# Find all scripts in the repo
+ALL_FILES=$(git grep -l '' :/)
+SHELL_SCRIPTS=$(echo "$ALL_FILES" | xargs shfmt -f)
+shfmt -s -l -i 2 -ci -fn $SHELL_SCRIPTS
 
 info "Formatting python scripts"
-if ! command -v black 2>&1 >/dev/null; then
+if ! command -v black >/dev/null 2>&1; then
   error "black not found. Are you running in a nix shell? See BUILDING.md."
   exit 1
 fi
 black --include "(scripts/tests|scripts/simpasm|scripts/cfify|scripts/autogen|scripts/check-namespace|\.py$)" "$ROOT"
 
 info "Formatting c files"
-if ! command -v clang-format 2>&1 >/dev/null; then
+if ! command -v clang-format >/dev/null 2>&1; then
   error "clang-format not found. Are you running in a nix shell? See BUILDING.md."
   exit 1
 fi

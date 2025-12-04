@@ -20,8 +20,6 @@ fi
 # Standard color definitions
 GREEN="\033[32m"
 RED="\033[31m"
-BLUE="\033[94m"
-BOLD="\033[1m"
 NORMAL="\033[0m"
 
 info()
@@ -106,15 +104,36 @@ gh_error_simple()
   fi
 }
 
+run-shellcheck()
+{
+  if ! command -v shellcheck >/dev/null; then
+    gh_error_simple "Shellcheck missing" "shellcheck is not installed"
+    error "Lint shellcheck"
+    SUCCESS=false
+    gh_summary_failure "Lint shellcheck"
+    return 0
+  fi
+
+  checkerr "Lint shellcheck" "$(shellcheck --severity=warning $SHELL_SCRIPTS)"
+}
+
 # Formatting
 SUCCESS=true
+
+# Get list of shell scripts for linting
+ALL_FILES=$(git grep -l '' :/)
+SHELL_SCRIPTS=$(echo "$ALL_FILES" | xargs shfmt -f)
 
 gh_group_start "Linting nix files with nixpkgs-fmt"
 checkerr "Lint nix" "$(nixpkgs-fmt --check "$ROOT")"
 gh_group_end
 
 gh_group_start "Linting shell scripts with shfmt"
-checkerr "Lint shell" "$(shfmt -s -l -i 2 -ci -fn $(shfmt -f $(git grep -l '' :/)))"
+checkerr "Lint shell" "$(echo $SHELL_SCRIPTS | xargs shfmt -s -l -i 2 -ci -fn)"
+gh_group_end
+
+gh_group_start "Linting shell scripts with shellcheck"
+run-shellcheck
 gh_group_end
 
 gh_group_start "Linting python scripts with black"
@@ -130,7 +149,7 @@ fi
 gh_group_end
 
 gh_group_start "Linting c files with clang-format"
-checkerr "Lint C" "$(clang-format $(git ls-files ":/*.c" ":/*.h") --Werror --dry-run 2>&1 | grep "error:" | cut -d ':' -f 1,2 | tr ':' ' ')"
+checkerr "Lint C" "$(clang-format "$(git ls-files ":/*.c" ":/*.h")" --Werror --dry-run 2>&1 | grep "error:" | cut -d ':' -f 1,2 | tr ':' ' ')"
 gh_group_end
 
 check-eol-dry-run()
