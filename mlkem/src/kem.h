@@ -79,7 +79,9 @@
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+int crypto_kem_check_pk(
+    const uint8_t
+        pk[MLKEM_INDCCA_PUBLICKEYBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   ensures(return_value == 0 || return_value == -1)
@@ -107,7 +109,9 @@ __contract__(
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+int crypto_kem_check_sk(
+    const uint8_t
+        sk[MLKEM_INDCCA_SECRETKEYBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 __contract__(
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
   ensures(return_value == 0 || return_value == -1)
@@ -136,9 +140,10 @@ __contract__(
  **************************************************/
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                              uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
-                              const uint8_t coins[2 * MLKEM_SYMBYTES])
+int crypto_kem_keypair_derand(
+    uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+    uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
+    const uint8_t coins[2 * MLKEM_SYMBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
@@ -168,8 +173,9 @@ __contract__(
  **************************************************/
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                       uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+int crypto_kem_keypair(
+    uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+    uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
@@ -204,10 +210,10 @@ __contract__(
  **************************************************/
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                          uint8_t ss[MLKEM_SSBYTES],
-                          const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                          const uint8_t coins[MLKEM_SYMBYTES])
+int crypto_kem_enc_derand(
+    uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES], uint8_t ss[MLKEM_SSBYTES],
+    const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+    const uint8_t coins[MLKEM_SYMBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 __contract__(
   requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
   requires(memory_no_alias(ss, MLKEM_SSBYTES))
@@ -241,9 +247,10 @@ __contract__(
  **************************************************/
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                   uint8_t ss[MLKEM_SSBYTES],
-                   const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+int crypto_kem_enc(
+    uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES], uint8_t ss[MLKEM_SSBYTES],
+    const uint8_t
+        pk[MLKEM_INDCCA_PUBLICKEYBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 __contract__(
   requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
   requires(memory_no_alias(ss, MLKEM_SSBYTES))
@@ -276,9 +283,10 @@ __contract__(
  **************************************************/
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
-                   const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                   const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+int crypto_kem_dec(
+    uint8_t ss[MLKEM_SSBYTES], const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
+    const uint8_t
+        sk[MLKEM_INDCCA_SECRETKEYBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 __contract__(
   requires(memory_no_alias(ss, MLKEM_SSBYTES))
   requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))

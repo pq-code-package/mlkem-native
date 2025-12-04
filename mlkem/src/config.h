@@ -549,6 +549,26 @@
  *****************************************************************************/
 /* #define MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
+/******************************************************************************
+ * Name:        MLK_CONFIG_INTEGRATION_REQUIRES_CONTEXT
+ *
+ * Description: Set this to add a context parameter that is provided to public
+ *              API functions and is then available in custom callbacks.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_INTEGRATION_REQUIRES_CONTEXT */
+
+/******************************************************************************
+ * Name:        MLK_CONTEXT_PARAMETER_TYPE
+ *
+ * Description: Set this to define a custom type for the context parameter used
+ *              by MLK_CONFIG_INTEGRATION_REQUIRES_CONTEXT.  This should be the
+ *              type of the pointee: the context parameter is always a pointer.
+ *              If this is not set, the context parameter will be void*.
+ *
+ *****************************************************************************/
+/* #define MLK_CONTEXT_PARAMETER_TYPE void */
+
 /*************************  Config internals  ********************************/
 
 /* Default namespace
