@@ -386,10 +386,3 @@ configs:
       MLK_CONFIG_FIPS202_BACKEND_FILE: '"fips202/native/custom/custom.h"'
       MLK_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
-
-  - path: examples/basic_deterministic/mlkem_native/custom_no_randomized_config.h
-    description: "Config without randomized API"
-    defines:
-      MLK_CONFIG_NO_RANDOMIZED_API: true
-      MLK_CONFIG_FILE:
-        comment: "/* No need to set this -- we _are_ already in a custom config */"

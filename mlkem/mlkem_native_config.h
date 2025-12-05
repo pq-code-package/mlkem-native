@@ -18,8 +18,8 @@
  *   https://csrc.nist.gov/pubs/fips/203/final
  */
 
-#ifndef MLK_CONFIG_H
-#define MLK_CONFIG_H
+#ifndef MLK_NATIVE_CONFIG_H
+#define MLK_NATIVE_CONFIG_H
 
 /******************************************************************************
  * Name:        MLK_CONFIG_PARAMETER_SET
@@ -571,4 +571,4 @@
 #define MLK_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM1024
 #endif
 
-#endif /* !MLK_CONFIG_H */
+#endif /* !MLK_NATIVE_CONFIG_H */

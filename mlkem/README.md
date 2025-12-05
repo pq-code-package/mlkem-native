@@ -12,11 +12,11 @@ Alternatively, you can use the auto-geneated helper files [mlkem_native.c](mlkem
 
 ## Configuration
 
-The build is configured by [src/config.h](src/config.h). Note in particular `MLK_CONFIG_PARAMETER_SET` and `MLK_CONFIG_NAMESPACE_PREFIX`, which set the parameter set and namespace prefix, respectively.
+The build is configured by [mlkem_native_config.h](mlkem_native_config.h), or by the file pointed to by `MLK_CONFIG_FILE`. Note in particular `MLK_CONFIG_PARAMETER_SET` and `MLK_CONFIG_NAMESPACE_PREFIX`, which set the parameter set and namespace prefix, respectively.
 
 ## API
 
-The public API is defined in [mlkem_native.h](mlkem_native.h). Before you include [mlkem_native.h](mlkem_native.h), you must set `MLK_CONFIG_API_PARAMETER_SET` and `MLK_CONFIG_API_NAMESPACE_PREFIX`, mirroring `MLK_CONFIG_PARAMETER_SET` and `MLK_CONFIG_NAMESPACE_PREFIX` that was used in the build (we hope to make this more convenient in the future).
+The public API is defined in [mlkem_native.h](mlkem_native.h).
 
 ## Supporting multiple parameter sets
 

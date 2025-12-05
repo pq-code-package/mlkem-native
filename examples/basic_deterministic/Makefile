@@ -74,6 +74,8 @@ BIN=test_binary
 # Configuration adjustments
 #
 
+# Include path for config
+CFLAGS += -Imlkem_native/mlkem
 # Pick prefix
 CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem
 # Set configuration option for deterministic build
