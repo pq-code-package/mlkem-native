@@ -56,6 +56,10 @@
  *   MLK_CONFIG_API_PARAMETER_SET or MLK_CONFIG_API_NAMESPACE_PREFIX,
  *   nor include a configuration.
  *
+ * - MLK_CONFIG_API_QUALIFIER [optional]
+ *
+ *   Any custom attribute or declspec needed for public APIs functions.
+ *
  * # Multi-level builds
  *
  * This header specifies a build of mlkem-native for a fixed security level.
@@ -128,6 +132,13 @@
 #define MLK_API_MUST_CHECK_RETURN_VALUE
 #endif
 
+
+#ifdef MLK_CONFIG_API_QUALIFIER
+#define MLK_API_QUALIFIER MLK_CONFIG_API_QUALIFIER
+#else
+#define MLK_API_QUALIFIER
+#endif
+
 #include <stdint.h>
 
 /*************************************************
@@ -149,8 +160,8 @@
  * Specification: Implements @[FIPS203, Algorithm 16, ML-KEM.KeyGen_Internal]
  *
  **************************************************/
-MLK_API_MUST_CHECK_RETURN_VALUE
-int MLK_API_NAMESPACE(keypair_derand)(
+MLK_API_QUALIFIER MLK_API_MUST_CHECK_RETURN_VALUE int MLK_API_NAMESPACE(
+    keypair_derand)(
     uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
     uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
     const uint8_t coins[2 * MLKEM_SYMBYTES]);
@@ -173,10 +184,9 @@ int MLK_API_NAMESPACE(keypair_derand)(
  * Specification: Implements @[FIPS203, Algorithm 19, ML-KEM.KeyGen]
  *
  **************************************************/
-MLK_API_MUST_CHECK_RETURN_VALUE
-int MLK_API_NAMESPACE(keypair)(
-    uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-    uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+MLK_API_QUALIFIER MLK_API_MUST_CHECK_RETURN_VALUE int MLK_API_NAMESPACE(
+    keypair)(uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
+             uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
 /*************************************************
@@ -201,8 +211,8 @@ int MLK_API_NAMESPACE(keypair)(
  * Specification: Implements @[FIPS203, Algorithm 17, ML-KEM.Encaps_Internal]
  *
  **************************************************/
-MLK_API_MUST_CHECK_RETURN_VALUE
-int MLK_API_NAMESPACE(enc_derand)(
+MLK_API_QUALIFIER MLK_API_MUST_CHECK_RETURN_VALUE int MLK_API_NAMESPACE(
+    enc_derand)(
     uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
     uint8_t ss[MLKEM_BYTES],
     const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
@@ -229,8 +239,7 @@ int MLK_API_NAMESPACE(enc_derand)(
  * Specification: Implements @[FIPS203, Algorithm 20, ML-KEM.Encaps]
  *
  **************************************************/
-MLK_API_MUST_CHECK_RETURN_VALUE
-int MLK_API_NAMESPACE(enc)(
+MLK_API_QUALIFIER MLK_API_MUST_CHECK_RETURN_VALUE int MLK_API_NAMESPACE(enc)(
     uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
     uint8_t ss[MLKEM_BYTES],
     const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
@@ -256,8 +265,7 @@ int MLK_API_NAMESPACE(enc)(
  * Specification: Implements @[FIPS203, Algorithm 21, ML-KEM.Decaps]
  *
  **************************************************/
-MLK_API_MUST_CHECK_RETURN_VALUE
-int MLK_API_NAMESPACE(dec)(
+MLK_API_QUALIFIER MLK_API_MUST_CHECK_RETURN_VALUE int MLK_API_NAMESPACE(dec)(
     uint8_t ss[MLKEM_BYTES],
     const uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
     const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
@@ -277,8 +285,8 @@ int MLK_API_NAMESPACE(dec)(
  * Specification: Implements @[FIPS203, Section 7.2, 'modulus check']
  *
  **************************************************/
-MLK_API_MUST_CHECK_RETURN_VALUE
-int MLK_API_NAMESPACE(check_pk)(
+MLK_API_QUALIFIER MLK_API_MUST_CHECK_RETURN_VALUE int MLK_API_NAMESPACE(
+    check_pk)(
     const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
 
 /*************************************************
@@ -297,8 +305,8 @@ int MLK_API_NAMESPACE(check_pk)(
  * Specification: Implements @[FIPS203, Section 7.3, 'hash check']
  *
  **************************************************/
-MLK_API_MUST_CHECK_RETURN_VALUE
-int MLK_API_NAMESPACE(check_sk)(
+MLK_API_QUALIFIER MLK_API_MUST_CHECK_RETURN_VALUE int MLK_API_NAMESPACE(
+    check_sk)(
     const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
 
 /****************************** SUPERCOP API *********************************/
