@@ -34,7 +34,6 @@
  *   - MLK_CONFIG_INTERNAL_API_QUALIFIER
  */
 
-
 #ifndef MLK_CONFIG_H
 #define MLK_CONFIG_H
 
