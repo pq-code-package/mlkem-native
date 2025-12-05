@@ -18,6 +18,10 @@
 #include "x86_64/meta.h"
 #endif
 
+#ifdef MLK_SYS_PPC64LE
+#include "ppc64le/meta.h"
+#endif
+
 #if defined(MLK_SYS_RISCV64_RVV)
 #include "riscv64/meta.h"
 #endif
