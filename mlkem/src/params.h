@@ -15,6 +15,25 @@
 #error MLK_CONFIG_PARAMETER_SET is not defined
 #endif
 
+/*
+ * If the integration wants to provide a context parameter for use in
+ * platform-specific hooks, then it should define this parameter.
+ */
+#ifdef MLK_CONFIG_INTEGRATION_REQUIRES_CONTEXT
+#ifndef MLK_CONTEXT_PARAMETER_TYPE
+#define MLK_CONTEXT_PARAMETER_TYPE void
+#endif
+#define MLK_CONTEXT_PARAMETER_DECLARATION , MLK_CONTEXT_PARAMETER_TYPE *context
+#define MLK_CONTEXT_PARAMETER , context
+#else
+#ifdef MLK_CONTEXT_PARAMETER_TYPE
+#error MLK_CONTEXT_PARAMETER_TYPE is defined but MLK_CONFIG_INTEGRATION_REQUIRES_CONTEXT is not.
+#endif
+#define MLK_CONTEXT_PARAMETER_DECLARATION
+#define MLK_CONTEXT_PARAMETER
+#endif
+
+
 #if MLK_CONFIG_PARAMETER_SET == 512
 #define MLKEM_K 2
 #elif MLK_CONFIG_PARAMETER_SET == 768
