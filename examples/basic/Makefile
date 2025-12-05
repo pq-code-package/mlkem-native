@@ -86,6 +86,8 @@ BIN=test_binary
 # Configuration adjustments
 #
 
+# Include path for mlkem_native_config.h
+CFLAGS += -I mlkem_native/mlkem
 # Pick prefix
 CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem
 

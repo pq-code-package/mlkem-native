@@ -8,7 +8,7 @@
 #if defined(MLK_CONFIG_FILE)
 #include MLK_CONFIG_FILE
 #else
-#include "config.h"
+#include "mlkem_native_config.h"
 #endif
 
 #if !defined(MLK_CONFIG_PARAMETER_SET)

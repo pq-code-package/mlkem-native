@@ -87,6 +87,8 @@ ALL_SOURCE=$(MLK_SOURCE) $(FIPS202_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
 # Configuration adjustments
 #
 
+# Include path for mlkem_native_config.h
+CFLAGS += -Imlkem_native
 # Pick prefix
 CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem
 # Tell mlkem-native where to find the header for the custom FIPS202

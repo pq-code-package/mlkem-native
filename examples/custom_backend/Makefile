@@ -84,6 +84,8 @@ ALL_SOURCE=$(MLK_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
 # Configuration adjustments
 #
 
+# Include path for custom_config.h
+CFLAGS += -I mlkem_native/mlkem
 # Pick custom config file
 CFLAGS+=-DMLK_CONFIG_FILE="\"custom_config.h\""
 

@@ -26,6 +26,7 @@ CFLAGS := \
 	-Wno-unused-command-line-argument \
 	-O3 \
 	-fomit-frame-pointer \
+	-I mlkem_native/mlkem \
         -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem \
 	-std=c99 \
 	-pedantic \
