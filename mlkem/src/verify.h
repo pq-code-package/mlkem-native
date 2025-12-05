@@ -114,21 +114,21 @@ __contract__(ensures(return_value == b)) { return (b ^ mlk_ct_get_optblocker_u8(
 static MLK_INLINE uint32_t mlk_value_barrier_u32(uint32_t b)
 __contract__(ensures(return_value == b))
 {
-  __asm__("" : "+r"(b));
+  __asm__ volatile("" : "+r"(b));
   return b;
 }
 
 static MLK_INLINE int32_t mlk_value_barrier_i32(int32_t b)
 __contract__(ensures(return_value == b))
 {
-  __asm__("" : "+r"(b));
+  __asm__ volatile("" : "+r"(b));
   return b;
 }
 
 static MLK_INLINE uint8_t mlk_value_barrier_u8(uint8_t b)
 __contract__(ensures(return_value == b))
 {
-  __asm__("" : "+r"(b));
+  __asm__ volatile("" : "+r"(b));
   return b;
 }
 
