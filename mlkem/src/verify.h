@@ -114,21 +114,21 @@ __contract__(ensures(return_value == b)) { return (b ^ mlk_ct_get_optblocker_u8(
 static MLK_INLINE uint32_t mlk_value_barrier_u32(uint32_t b)
 __contract__(ensures(return_value == b))
 {
-  __asm__("" : "+r"(b));
+  __asm__ volatile("" : "+r"(b));
   return b;
 }
 
 static MLK_INLINE int32_t mlk_value_barrier_i32(int32_t b)
 __contract__(ensures(return_value == b))
 {
-  __asm__("" : "+r"(b));
+  __asm__ volatile("" : "+r"(b));
   return b;
 }
 
 static MLK_INLINE uint8_t mlk_value_barrier_u8(uint8_t b)
 __contract__(ensures(return_value == b))
 {
-  __asm__("" : "+r"(b));
+  __asm__ volatile("" : "+r"(b));
   return b;
 }
 
@@ -451,7 +451,7 @@ __contract__(
    *
    * If there was a reliable way to detect availability of memset_s(),
    * that would be preferred. */
-  __asm__ __volatile__("" : : "r"(ptr) : "memory");
+  __asm__ volatile("" : : "r"(ptr) : "memory");
 }
 #else /* !MLK_SYS_WINDOWS && MLK_HAVE_INLINE_ASM */
 #error No plausibly-secure implementation of mlk_zeroize available. Please provide your own using MLK_CONFIG_CUSTOM_ZEROIZE.
