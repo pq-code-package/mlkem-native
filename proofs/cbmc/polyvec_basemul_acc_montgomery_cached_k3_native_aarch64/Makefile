@@ -12,7 +12,7 @@ PROOF_UID = polyvec_basemul_acc_montgomery_cached_k3_native_aarch64
 
 # We need to set MLK_CHECK_APIS as otherwise mlkem/src/native/api.h won't be
 # included, which contains the CBMC specifications.
-DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_ARITH_BACKEND_FILE="\"$(SRCDIR)/mlkem/src/native/aarch64/meta.h\"" -DMLK_CHECK_APIS -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
+DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_ARITH_BACKEND_FILE="\"$(SRCDIR)/mlkem/src/native/aarch64/meta.h\"" -DMLK_CHECK_APIS -DMLK_CONFIG_MULTILEVEL -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=

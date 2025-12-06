@@ -15,20 +15,30 @@
 #ifndef MLK_H
 #define MLK_H
 
-/******************************************************************************
- *
- * Public API for mlkem-native
+/*
+ * Public API for mlkem-native.
  *
  * This header defines the public API of a single build of mlkem-native.
  *
- * # Examples
+ * Make sure the configuration file is in the include path
+ * (this is "mlkem_native_config.h" by default, or MLK_CONFIG_FILE if defined).
  *
- * See [examples/basic], [examples/multilevel_build], and
- * [examples/multilevel_build_native] for examples of how to use this header.
+ * # Multi-level builds
  *
- * # Usage
+ * This header specifies a build of mlkem-native for a fixed security level.
+ * If you need multiple security levels, leave the security level unspecified
+ * in the configuration file and include this header multiple times, setting
+ * MLK_CONFIG_PARAMETER_SET accordingly for each, and #undef'ing the MLK_H
+ * guard to allow multiple inclusions.
  *
- * To use this header, configure the following options:
+ * # Legacy configuration (deprecated)
+ *
+ * Instead of providing the config file used for the build, you can
+ * alternatively set the following configuration options prior to
+ * including this header.
+ *
+ * This method of configuration is deprecated.
+ * It will be removed in mlkem-native-v2.
  *
  * - MLK_CONFIG_API_PARAMETER_SET [required]
  *
@@ -56,14 +66,9 @@
  *   MLK_CONFIG_API_PARAMETER_SET or MLK_CONFIG_API_NAMESPACE_PREFIX,
  *   nor include a configuration.
  *
- * # Multi-level builds
+ * - MLK_CONFIG_API_QUALIFIER [optional]
  *
- * This header specifies a build of mlkem-native for a fixed security level.
- * If you need multiple builds, e.g. to build a library offering multiple
- * security levels, you need multiple instances of this header.
- *
- * NOTE: In this case, you must rename or #undef the MLK_H header guard
- *       prior to subsequent inclusions of this file.
+ *   Qualifier to apply to external API.
  *
  ******************************************************************************/
 
@@ -106,19 +111,51 @@
 
 /****************************** Function API **********************************/
 
-#if !defined(MLK_CONFIG_API_CONSTANTS_ONLY)
-
-#if !defined(MLK_CONFIG_API_PARAMETER_SET)
-#error MLK_CONFIG_API_PARAMETER_SET not defined
-#endif
-#if !defined(MLK_CONFIG_API_NAMESPACE_PREFIX)
-#error MLK_CONFIG_API_NAMESPACE_PREFIX not defined
-#endif
-
-/* Derive namespacing macro */
 #define MLK_API_CONCAT_(x, y) x##y
 #define MLK_API_CONCAT(x, y) MLK_API_CONCAT_(x, y)
 #define MLK_API_CONCAT_UNDERSCORE(x, y) MLK_API_CONCAT(MLK_API_CONCAT(x, _), y)
+
+#if !defined(MLK_CONFIG_API_PARAMETER_SET)
+/* Recommended configuration via same config file as used for the build. */
+
+/* For now, we derive the legacy API configuration MLK_CONFIG_API_XXX from
+ * the config file. In mlkem-native-v2, this will be removed and we will
+ * exclusively work with MLK_CONFIG_XXX. */
+
+/* You need to make sure the config file is in the include path. */
+#if defined(MLK_CONFIG_FILE)
+#include MLK_CONFIG_FILE
+#else
+#include "mlkem_native_config.h"
+#endif
+
+#define MLK_CONFIG_API_PARAMETER_SET MLK_CONFIG_PARAMETER_SET
+
+#if defined(MLK_CONFIG_MULTILEVEL_BUILD)
+#define MLK_CONFIG_API_NAMESPACE_PREFIX \
+  MLK_API_CONCAT(MLK_CONFIG_NAMESPACE_PREFIX, MLK_CONFIG_PARAMETER_SET)
+#else
+#define MLK_CONFIG_API_NAMESPACE_PREFIX MLK_CONFIG_NAMESPACE_PREFIX
+#endif
+
+#if defined(MLK_CONFIG_NO_SUPERCOP)
+#define MLK_CONFIG_API_NO_SUPERCOP
+#endif
+
+#if defined(MLK_CONFIG_CONSTANTS_ONLY)
+#define MLK_CONFIG_API_CONSTANTS_ONLY
+#endif
+
+#if defined(MLK_CONFIG_EXTERNAL_API_QUALIFIER)
+#define MLK_CONFIG_API_QUALIFIER MLK_CONFIG_EXTERNAL_API_QUALIFIER
+#endif
+
+#else /* !MLK_CONFIG_API_PARAMETER_SET */
+
+#define MLK_API_LEGACY_CONFIG
+
+#endif /* MLK_CONFIG_API_PARAMETER_SET */
+
 #define MLK_API_NAMESPACE(sym) \
   MLK_API_CONCAT_UNDERSCORE(MLK_CONFIG_API_NAMESPACE_PREFIX, sym)
 
@@ -127,6 +164,14 @@
 #else
 #define MLK_API_MUST_CHECK_RETURN_VALUE
 #endif
+
+#if defined(MLK_CONFIG_API_QUALIFIER)
+#define MLK_API_QUALIFIER MLK_CONFIG_API_QUALIFIER
+#else
+#define MLK_API_QUALIFIER
+#endif
+
+#if !defined(MLK_CONFIG_API_CONSTANTS_ONLY)
 
 #include <stdint.h>
 
@@ -149,6 +194,7 @@
  * Specification: Implements @[FIPS203, Algorithm 16, ML-KEM.KeyGen_Internal]
  *
  **************************************************/
+MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(keypair_derand)(
     uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
@@ -173,6 +219,7 @@ int MLK_API_NAMESPACE(keypair_derand)(
  * Specification: Implements @[FIPS203, Algorithm 19, ML-KEM.KeyGen]
  *
  **************************************************/
+MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(keypair)(
     uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
@@ -201,6 +248,7 @@ int MLK_API_NAMESPACE(keypair)(
  * Specification: Implements @[FIPS203, Algorithm 17, ML-KEM.Encaps_Internal]
  *
  **************************************************/
+MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(enc_derand)(
     uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
@@ -229,6 +277,7 @@ int MLK_API_NAMESPACE(enc_derand)(
  * Specification: Implements @[FIPS203, Algorithm 20, ML-KEM.Encaps]
  *
  **************************************************/
+MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(enc)(
     uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
@@ -256,6 +305,7 @@ int MLK_API_NAMESPACE(enc)(
  * Specification: Implements @[FIPS203, Algorithm 21, ML-KEM.Decaps]
  *
  **************************************************/
+MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(dec)(
     uint8_t ss[MLKEM_BYTES],
@@ -277,6 +327,7 @@ int MLK_API_NAMESPACE(dec)(
  * Specification: Implements @[FIPS203, Section 7.2, 'modulus check']
  *
  **************************************************/
+MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(check_pk)(
     const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
@@ -297,6 +348,7 @@ int MLK_API_NAMESPACE(check_pk)(
  * Specification: Implements @[FIPS203, Section 7.3, 'hash check']
  *
  **************************************************/
+MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(check_sk)(
     const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
@@ -324,11 +376,21 @@ int MLK_API_NAMESPACE(check_sk)(
 
 /* If the SUPERCOP API is not needed, we can undefine the various helper macros
  * above. Otherwise, they are needed for lazy evaluation of crypto_kem_xxx. */
+#if !defined(MLK_API_LEGACY_CONFIG)
+#undef MLK_CONFIG_API_PARAMETER_SET
+#undef MLK_CONFIG_API_NAMESPACE_PREFIX
+#undef MLK_CONFIG_API_NO_SUPERCOP
+#undef MLK_CONFIG_API_CONSTANTS_ONLY
+#undef MLK_CONFIG_API_QUALIFIER
+#endif /* !MLK_API_LEGACY_CONFIG */
+
 #undef MLK_API_CONCAT
 #undef MLK_API_CONCAT_
 #undef MLK_API_CONCAT_UNDERSCORE
 #undef MLK_API_NAMESPACE
 #undef MLK_API_MUST_CHECK_RETURN_VALUE
+#undef MLK_API_QUALIFIER
+#undef MLK_API_LEGACY_CONFIG
 
 #endif /* MLK_CONFIG_API_NO_SUPERCOP */
 #endif /* !MLK_CONFIG_API_CONSTANTS_ONLY */

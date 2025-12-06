@@ -28,9 +28,9 @@
 #if defined(MLK_CHECK_APIS)
 /* Include to ensure consistency between internal kem.h
  * and external mlkem_native.h. */
-#define MLK_CONFIG_API_NO_SUPERCOP
+#define MLK_CONFIG_NO_SUPERCOP
 #include "mlkem_native.h"
-#undef MLK_CONFIG_API_NO_SUPERCOP
+#undef MLK_CONFIG_NO_SUPERCOP
 
 #if MLKEM_INDCCA_SECRETKEYBYTES != \
     MLKEM_SECRETKEYBYTES(MLK_CONFIG_PARAMETER_SET)
