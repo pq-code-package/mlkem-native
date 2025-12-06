@@ -1,29 +1,55 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
-# Bring your own FIPS-202
+# Bring Your Own FIPS-202
 
-This directory contains a minimal example for how to use mlkem-native as a code package, with a custom FIPS-202
+This directory contains a minimal example for using mlkem-native with a custom FIPS-202 (SHA-3/SHAKE)
 implementation. We use tiny_sha3[^tiny_sha3] as an example.
+
+## Use Case
+
+Use this approach when:
+- Your application already has a FIPS-202 software/hardware implementation you want to reuse
 
 ## Components
 
-An application using mlkem-native with a custom FIPS-202 implementation needs the following:
+1. Arithmetic part of mlkem-native: [`mlkem/src/`](../../mlkem/src) (excluding `fips202/`)
+2. A secure random number generator implementing [`randombytes.h`](../../mlkem/src/randombytes.h)
+3. Custom FIPS-202 implementation with headers compatible with:
+   - [`fips202.h`](../../mlkem/src/fips202/fips202.h)
+   - [`fips202x4.h`](../../mlkem/src/fips202/fips202x4.h)
+4. Your application source code
 
-1. Arithmetic part of the mlkem-native source tree: [`mlkem/src/`](../../mlkem/src)
-2. A secure pseudo random number generator, implementing [`randombytes.h`](../../mlkem/src/randombytes.h).
-3. A custom FIPS-202 with `fips202.h` and `fips202x4.h` headers compatible with
-   [`mlkem/src/fips202/fips202.h`](../../mlkem/src/fips202/fips202.h) and [`mlkem/src/fips202/fips202x4.h`](../../mlkem/src/fips202/fips202x4.h).
-4. The application source code
+## Configuration
 
-The configuration file [mlkem_native_config.h](mlkem_native/mlkem_native_config.h) sets
-`MLK_CONFIG_FIPS202_CUSTOM_HEADER` and `MLK_CONFIG_FIPS202X4_CUSTOM_HEADER` to point to the custom FIPS-202 headers.
+The configuration file [mlkem_native_config.h](mlkem_native/mlkem_native_config.h) sets:
+- `MLK_CONFIG_FIPS202_CUSTOM_HEADER`: Path to your custom `fips202.h`
+- `MLK_CONFIG_FIPS202X4_CUSTOM_HEADER`: Path to your custom `fips202x4.h`
 
-**WARNING:** The `randombytes()` implementation used here is for TESTING ONLY. You MUST NOT use this implementation
-outside of testing.
+Your custom FIPS-202 implementation must provide:
+- `mlk_shake128_absorb_once()`, `mlk_shake128_squeezeblocks()`, `mlk_shake128_release()`
+- `mlk_shake256()`, `mlk_sha3_256()`, `mlk_sha3_512()`
+- `mlk_shake256x4()`
+- `mlk_shake128x4_absorb_once()`, `mlk_shake128x4_squeezeblocks()`, `mlk_shake128x4_release()`
+- Structure definitions for `mlk_shake128ctx` and `mlk_shake128x4ctx`
+
+See [FIPS202.md](../../FIPS202.md) for the complete API specification.
+
+## Notes
+
+- The 4x batched functions (`x4`) can fall back to 4 sequential calls if batching isn't available
+- Structure definitions may differ from mlkem-native's defaults (e.g., for incremental hashing)
 
 ## Usage
 
-Build this example with `make build`, run with `make run`.
+```bash
+make build   # Build the example
+make run     # Run the example
+```
+
+## Warning
+
+The `randombytes()` implementation in `test_only_rng/` is for TESTING ONLY.
+You MUST provide a cryptographically secure RNG for production use.
 
 <!--- bibliography --->
 [^tiny_sha3]: Markku-Juhani O. Saarinen: tiny_sha3, [https://github.com/mjosaarinen/tiny_sha3](https://github.com/mjosaarinen/tiny_sha3)

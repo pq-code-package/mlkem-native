@@ -1,20 +1,41 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
-# Building mlkem-native
+# Basic build
 
-This directory contains a minimal example for how to build mlkem-native.
+This directory contains a minimal example for how to build mlkem-native for a single security level.
+
+## Use Case
+
+Use this approach when:
+- You need only one ML-KEM security level (512, 768, or 1024)
+- You want to build the mlkem-native C files separately, not as a single compilation unit.
+- You're using C only, no native backends.
 
 ## Components
 
-An application using mlkem-native as-is needs to include the following components:
+1. mlkem-native source tree: [`mlkem/src/`](../../mlkem/src) and [`mlkem/src/fips202/`](../../mlkem/src/fips202)
+2. A secure random number generator implementing [`randombytes.h`](../../mlkem/src/randombytes.h)
+3. Your application source code
 
-1. mlkem-native source tree, including [`mlkem/src/`](../../mlkem/src) and [`mlkem/src/fips202/`](../../mlkem/src/fips202).
-2. A secure pseudo random number generator, implementing [`randombytes.h`](../../mlkem/src/randombytes.h).
-3. The application source code
+## Configuration
 
-**WARNING:** The `randombytes()` implementation used here is for TESTING ONLY. You MUST NOT use this implementation
-outside of testing.
+The configuration file [mlkem_native_config.h](mlkem_native/mlkem_native_config.h) sets:
+- `MLK_CONFIG_PARAMETER_SET`: Security level (512, 768, or 1024). Default is 768.
+- `MLK_CONFIG_NAMESPACE_PREFIX`: Symbol prefix for the API. Set to `mlkem` in this example.
+
+To change the security level, modify `MLK_CONFIG_PARAMETER_SET` in the config file or pass it via CFLAGS:
+```bash
+make build CFLAGS="-DMLK_CONFIG_PARAMETER_SET=512"
+```
 
 ## Usage
 
-Build this example with `make build`, run with `make run`.
+```bash
+make build   # Build the example
+make run     # Run the example
+```
+
+## Warning
+
+The `randombytes()` implementation in `test_only_rng/` is for TESTING ONLY.
+You MUST provide a cryptographically secure RNG for production use.

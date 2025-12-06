@@ -1,17 +1,45 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
-# Single-level mlkem-native in a single compilation unit, with native code
+# Monolithic Build (Native Backend)
 
-This directory contains a minimal example for how to build a single instance of mlkem-native in a single compilation
-unit, including the native backends.
+This directory contains a minimal example for building mlkem-native as a single compilation unit
+with native assembly backends, using the auto-generated `mlkem_native.c` and `mlkem_native.S` files.
 
-The auto-generated source file [mlkem_native.c](mlkem_native/mlkem_native.c) includes all mlkem-native C source
-files. Similarly, [mlkem_native.S](mlkem_native/mlkem_native.S) includes all assembly files.
-It exposes the API [mlkem_native.h](mlkem_native/mlkem_native.h).
+## Use Case
+
+Use this approach when:
+- You want simple build integration with optimal performance
+- You need only one parameter set
+
+## Components
+
+1. Auto-generated [mlkem_native.c](mlkem_native/mlkem_native.c) (includes all C sources)
+2. Auto-generated [mlkem_native.S](mlkem_native/mlkem_native.S) (includes all assembly sources)
+3. A secure random number generator implementing [`randombytes.h`](../../mlkem/src/randombytes.h)
+4. Your application source code
+
+## Configuration
+
+The configuration file [mlkem_native_config.h](mlkem_native/mlkem_native_config.h) sets:
+- `MLK_CONFIG_PARAMETER_SET`: Security level (default 768)
+- `MLK_CONFIG_NAMESPACE_PREFIX`: Symbol prefix (set to `mlkem`)
+- `MLK_CONFIG_USE_NATIVE_BACKEND_ARITH`: Enables native arithmetic backend
+- `MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202`: Enables native FIPS-202 backend
+
+## Notes
+
+- Both `mlkem_native.c` and `mlkem_native.S` must be compiled and linked
+- Native backends are auto-selected based on target architecture
+- On unsupported platforms, the C backend is used automatically
 
 ## Usage
 
-Build this example with `make build`, run with `make run`.
+```bash
+make build   # Build the example
+make run     # Run the example
+```
 
-**WARNING:** The `randombytes()` implementation used here is for TESTING ONLY. You MUST NOT use this implementation
-outside of testing.
+## Warning
+
+The `randombytes()` implementation in `test_only_rng/` is for TESTING ONLY.
+You MUST provide a cryptographically secure RNG for production use.
