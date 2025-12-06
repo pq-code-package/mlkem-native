@@ -456,17 +456,14 @@ __contract__(
 MLK_INTERNAL_API
 void mlk_poly_ntt(mlk_poly *p)
 {
-  mlk_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
-
 #if defined(MLK_USE_NATIVE_NTT)
+  int ret;
+  mlk_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
+  ret = mlk_ntt_native(p->coeffs);
+  if (ret == MLK_NATIVE_FUNC_SUCCESS)
   {
-    int ret;
-    ret = mlk_ntt_native(p->coeffs);
-    if (ret == MLK_NATIVE_FUNC_SUCCESS)
-    {
-      mlk_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
-      return;
-    }
+    mlk_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
+    return;
   }
 #endif /* MLK_USE_NATIVE_NTT */
 

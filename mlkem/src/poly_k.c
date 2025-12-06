@@ -194,9 +194,7 @@ void mlk_polyvec_basemul_acc_montgomery_cached(
 #if defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
   {
     int ret;
-    /* Omitting bounds assertion for cache since native implementations may
-     * decide not to use a mulcache. Note that the C backend implementation
-     * of poly_basemul_montgomery_cached() does still include the check. */
+    mlk_assert_bound_2d(a->vec, MLKEM_K, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
 #if MLKEM_K == 2
     ret = mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
         r->coeffs, (const int16_t *)a, (const int16_t *)b,
