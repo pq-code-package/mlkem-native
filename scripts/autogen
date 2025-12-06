@@ -1588,7 +1588,7 @@ def k_specific(c):
 
 
 def k_generic(c):
-    return not k_specific(c) and c != "mlkem/src/config.h"
+    return not k_specific(c) and c != "mlkem/mlkem_native_config.h"
 
 
 def gen_macro_undefs(extra_notes=None):
@@ -1768,7 +1768,7 @@ def gen_monolithic_source_file():
 def gen_monolithic_asm_file():
 
     def gen():
-        asm_sources = get_asm_source_files(main_only=True)
+        asm_sources = get_asm_source_files(main_only=True, strip_mlkem=True)
         yield from gen_header()
         yield "/******************************************************************************"
         yield " *"
@@ -1865,7 +1865,7 @@ def gen_monolithic_asm_file():
 
 
 def get_config_options():
-    content = read_file("mlkem/src/config.h")
+    content = read_file("mlkem/mlkem_native_config.h")
     config_pattern = r"Name:\s*(MLK_CONFIG_\w+)"
 
     configs = re.findall(config_pattern, content)
@@ -1881,7 +1881,7 @@ def get_config_options():
         "MLKEM_DEBUG",  # TODO: Rename?
         "MLK_BREAK_PCT",  # Use in PCT breakage test]
         "MLK_CHECK_APIS",
-        "MLK_CONFIG_API_XXX",
+        "MLK_CONFIG_XXX",
         "MLK_USE_NATIVE_XXX",
     ]
 
@@ -2145,6 +2145,10 @@ def update_via_simpasm(
         outfile = infile
     outfile_full = os.path.join(outdir, outfile)
 
+    if cflags is None:
+        cflags = ""
+    cflags += " -Imlkem"
+
     # Check if we need to use a cross-compiler
     if "aarch64" in infile_full:
         source_arch = "aarch64"
@@ -2219,7 +2223,7 @@ def gen_hol_light_asm_file(job):
         f"{indir}/{infile}",
         "proofs/hol_light/" + arm_or_x86 + "/mlkem",
         outfile=outfile,
-        cflags=cflags,
+        cflags=cflags + " -Imlkem",
         preserve_header=False,
     )
 
@@ -2524,7 +2528,10 @@ def adjust_header_guard_for_filename(content, header_file):
     status_update("header guards", header_file)
 
     content = content.split("\n")
-    exceptions = {"mlkem/mlkem_native.h": "MLK_H"}
+    exceptions = {
+        "mlkem/mlkem_native.h": "MLK_H",
+        "mlkem/mlkem_native_config.h": "MLK_CONFIG_H",
+    }
 
     # Use full filename as the header guard, with '/' and '.' replaced by '_'
     guard_name = (
@@ -2980,8 +2987,6 @@ def get_oqs_shared_sources(backend):
         for f in os.listdir(f"{mlkem_dir}/native")
         if os.path.isfile(f"{mlkem_dir}/native/{f}")
     ]
-    # We use a custom config
-    sources.remove("mlkem/src/config.h")
     # Add FIPS202 glue code
     sources += [
         "integration/liboqs/fips202_glue.h",
@@ -3198,7 +3203,7 @@ def gen_test_config(config_path, config_spec, default_config_content):
     header.append(f" * Test configuration: {config_spec['description']}")
     header.append(" *")
     header.append(
-        " * This configuration differs from the default mlkem/src/config.h in the following places:"
+        " * This configuration differs from the default mlkem/mlkem_native_config.h in the following places:"
     )
 
     def spec_has_value(opt_value):
@@ -3285,7 +3290,7 @@ def gen_test_configs():
     metadata = yaml.safe_load(read_file("test/configs.yml"))
 
     # Load default config
-    default_config = read_file("mlkem/src/config.h")
+    default_config = read_file("mlkem/mlkem_native_config.h")
 
     # Generate each test config
     for config_spec in metadata["configs"]:

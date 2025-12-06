@@ -26,8 +26,7 @@ CFLAGS := \
 	-Wno-unused-command-line-argument \
 	-O3 \
 	-fomit-frame-pointer \
-	-I mlkem_native/mlkem \
-        -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem \
+	-I mlkem_native \
 	-std=c99 \
 	-pedantic \
 	-MMD \
@@ -56,10 +55,10 @@ endif
 # Alternatively, you can compile the 'monobuild' source file mlkem_native.c.
 # See examples/monolithic_build for that.
 MLK_SOURCE_ALL := $(wildcard \
-	mlkem_native/mlkem/src/*.c \
-	mlkem_native/mlkem/src/**/*.c \
-	mlkem_native/mlkem/src/**/**/*.c \
-	mlkem_native/mlkem/src/**/**/**/*.c)
+	mlkem_native/src/*.c \
+	mlkem_native/src/**/*.c \
+	mlkem_native/src/**/**/*.c \
+	mlkem_native/src/**/**/**/*.c)
 MLK_SOURCE:=$(foreach S,$(MLK_SOURCE_ALL),\
   $(if $(findstring /native/,$S),,$S))
 
@@ -74,7 +73,7 @@ MLKEM1024_OBJS=$(patsubst %,$(MLKEM1024_DIR)/%.o,$(MLK_SOURCE))
 
 $(MLKEM512_OBJS): $(MLKEM512_DIR)/%.c.o: %.c
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC)  -DMLK_CONFIG_MULTILEVEL_WITH_SHARED -DMLK_CONFIG_PARAMETER_SET=512 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC) -DMLK_CONFIG_MULTILEVEL_WITH_SHARED -DMLK_CONFIG_PARAMETER_SET=512 $(CFLAGS) -c $^ -o $@
 
 $(MLKEM768_OBJS): $(MLKEM768_DIR)/%.c.o: %.c
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)

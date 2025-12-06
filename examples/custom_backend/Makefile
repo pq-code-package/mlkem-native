@@ -52,13 +52,13 @@ endif
 # Alternatively, you can compile the 'monobuild' source file mlkem_native.c.
 # See examples/monolithic_build for that.
 MLK_SOURCE=$(wildcard \
-    mlkem_native/mlkem/src/*.c \
-    mlkem_native/mlkem/src/**/*.c \
-    mlkem_native/mlkem/src/**/**/*.c \
-    mlkem_native/mlkem/src/**/**/**/*.c \
-    mlkem_native/mlkem/src/**/**/**/**/*.c)
+    mlkem_native/src/*.c \
+    mlkem_native/src/**/*.c \
+    mlkem_native/src/**/**/*.c \
+    mlkem_native/src/**/**/**/*.c \
+    mlkem_native/src/**/**/**/**/*.c)
 
-INC=-Imlkem_native -Imlkem_native/mlkem
+INC=-Imlkem_native
 
 # Part B:
 #
@@ -84,10 +84,7 @@ ALL_SOURCE=$(MLK_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
 # Configuration adjustments
 #
 
-# Include path for custom_config.h
-CFLAGS += -I mlkem_native/mlkem
-# Pick custom config file
-CFLAGS+=-DMLK_CONFIG_FILE="\"custom_config.h\""
+CFLAGS += -Imlkem_native
 
 BUILD_DIR=build
 BIN=test_binary

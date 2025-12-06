@@ -60,30 +60,30 @@
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
 #if defined(MLK_SYS_AARCH64)
-#include "mlkem/src/native/aarch64/src/intt.S"
-#include "mlkem/src/native/aarch64/src/ntt.S"
-#include "mlkem/src/native/aarch64/src/poly_mulcache_compute_asm.S"
-#include "mlkem/src/native/aarch64/src/poly_reduce_asm.S"
-#include "mlkem/src/native/aarch64/src/poly_tobytes_asm.S"
-#include "mlkem/src/native/aarch64/src/poly_tomont_asm.S"
-#include "mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S"
-#include "mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S"
-#include "mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S"
-#include "mlkem/src/native/aarch64/src/rej_uniform_asm.S"
+#include "src/native/aarch64/src/intt.S"
+#include "src/native/aarch64/src/ntt.S"
+#include "src/native/aarch64/src/poly_mulcache_compute_asm.S"
+#include "src/native/aarch64/src/poly_reduce_asm.S"
+#include "src/native/aarch64/src/poly_tobytes_asm.S"
+#include "src/native/aarch64/src/poly_tomont_asm.S"
+#include "src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S"
+#include "src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S"
+#include "src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S"
+#include "src/native/aarch64/src/rej_uniform_asm.S"
 #endif /* MLK_SYS_AARCH64 */
 #if defined(MLK_SYS_X86_64)
-#include "mlkem/src/native/x86_64/src/intt.S"
-#include "mlkem/src/native/x86_64/src/mulcache_compute.S"
-#include "mlkem/src/native/x86_64/src/ntt.S"
-#include "mlkem/src/native/x86_64/src/nttfrombytes.S"
-#include "mlkem/src/native/x86_64/src/ntttobytes.S"
-#include "mlkem/src/native/x86_64/src/nttunpack.S"
-#include "mlkem/src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S"
-#include "mlkem/src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S"
-#include "mlkem/src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S"
-#include "mlkem/src/native/x86_64/src/reduce.S"
-#include "mlkem/src/native/x86_64/src/rej_uniform_asm.S"
-#include "mlkem/src/native/x86_64/src/tomont.S"
+#include "src/native/x86_64/src/intt.S"
+#include "src/native/x86_64/src/mulcache_compute.S"
+#include "src/native/x86_64/src/ntt.S"
+#include "src/native/x86_64/src/nttfrombytes.S"
+#include "src/native/x86_64/src/ntttobytes.S"
+#include "src/native/x86_64/src/nttunpack.S"
+#include "src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S"
+#include "src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S"
+#include "src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S"
+#include "src/native/x86_64/src/reduce.S"
+#include "src/native/x86_64/src/rej_uniform_asm.S"
+#include "src/native/x86_64/src/tomont.S"
 #endif /* MLK_SYS_X86_64 */
 #if defined(MLK_SYS_RISCV64)
 #endif
@@ -91,11 +91,11 @@
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
 #if defined(MLK_SYS_AARCH64)
-#include "mlkem/src/fips202/native/aarch64/src/keccak_f1600_x1_scalar_asm.S"
-#include "mlkem/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S"
-#include "mlkem/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S"
-#include "mlkem/src/fips202/native/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_asm.S"
-#include "mlkem/src/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S"
+#include "src/fips202/native/aarch64/src/keccak_f1600_x1_scalar_asm.S"
+#include "src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S"
+#include "src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S"
+#include "src/fips202/native/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_asm.S"
+#include "src/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S"
 #endif /* MLK_SYS_AARCH64 */
 #if defined(MLK_SYS_X86_64)
 #endif
@@ -158,6 +158,7 @@
 #undef MLK_API_CONCAT_UNDERSCORE
 #undef MLK_API_MUST_CHECK_RETURN_VALUE
 #undef MLK_API_NAMESPACE
+#undef MLK_API_QUALIFIER
 #undef MLK_H
 #undef crypto_kem_check_pk
 #undef crypto_kem_check_sk
@@ -170,17 +171,15 @@
 #undef MLK_ADD_PARAM_SET
 #undef MLK_ASM_FN_SYMBOL
 #undef MLK_ASM_NAMESPACE
+#undef MLK_BUILD_INTERNAL
 #undef MLK_COMMON_H
 #undef MLK_CONCAT
 #undef MLK_CONCAT_
-#undef MLK_CONFIG_API_NAMESPACE_PREFIX
-#undef MLK_CONFIG_API_PARAMETER_SET
 #undef MLK_EMPTY_CU
 #undef MLK_EXTERNAL_API
 #undef MLK_FIPS202X4_HEADER_FILE
 #undef MLK_FIPS202_HEADER_FILE
 #undef MLK_INTERNAL_API
-#undef MLK_MULTILEVEL_BUILD
 #undef MLK_NAMESPACE
 #undef MLK_NAMESPACE_K
 #undef MLK_NAMESPACE_PREFIX
@@ -194,7 +193,7 @@
 #undef mlk_indcpa_enc
 #undef mlk_indcpa_keypair_derand
 /* mlkem/src/kem.h */
-#undef MLK_CONFIG_API_NO_SUPERCOP
+#undef MLK_CONFIG_NO_SUPERCOP
 #undef MLK_KEM_H
 #undef crypto_kem_check_pk
 #undef crypto_kem_check_sk

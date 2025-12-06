@@ -26,8 +26,7 @@ CFLAGS := \
 	-Wno-unused-command-line-argument \
 	-O3 \
 	-fomit-frame-pointer \
-	-I mlkem_native/mlkem \
-	-DMLK_CONFIG_NAMESPACE_PREFIX=mlkem \
+	-I mlkem_native \
 	-std=c99 \
 	-pedantic \
 	-MMD \
@@ -56,16 +55,16 @@ endif
 # Alternatively, you can compile the 'monobuild' source file mlkem_native.c.
 # See examples/monolithic_build for that.
 MLK_SOURCE := $(wildcard \
-	mlkem_native/mlkem/src/*.c \
-	mlkem_native/mlkem/src/**/*.c \
-	mlkem_native/mlkem/src/**/**/*.c \
-	mlkem_native/mlkem/src/**/**/**/*.c \
-	mlkem_native/mlkem/src/**/**/**/**/*.c \
-	mlkem_native/mlkem/src/*.S \
-	mlkem_native/mlkem/src/**/*.S \
-	mlkem_native/mlkem/src/**/**/*.S \
-	mlkem_native/mlkem/src/**/**/**/*.S \
-	mlkem_native/mlkem/src/**/**/**/**/*.S)
+	mlkem_native/src/*.c \
+	mlkem_native/src/**/*.c \
+	mlkem_native/src/**/**/*.c \
+	mlkem_native/src/**/**/**/*.c \
+	mlkem_native/src/**/**/**/**/*.c \
+	mlkem_native/src/*.S \
+	mlkem_native/src/**/*.S \
+	mlkem_native/src/**/**/*.S \
+	mlkem_native/src/**/**/**/*.S \
+	mlkem_native/src/**/**/**/**/*.S)
 
 BUILD_DIR=build
 MLKEM512_DIR = $(BUILD_DIR)/mlkem512
@@ -79,17 +78,17 @@ MLKEM1024_OBJS=$(patsubst %,$(MLKEM1024_DIR)/%.o,$(MLK_SOURCE))
 $(MLKEM512_OBJS): $(MLKEM512_DIR)/%.o: %
 	$(Q)echo "  CC      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLK_CONFIG_MULTILEVEL_WITH_SHARED -DMLK_CONFIG_PARAMETER_SET=512 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC) -DMLK_CONFIG_MULTILEVEL_WITH_SHARED -DMLK_CONFIG_PARAMETER_SET=512 $(CFLAGS) -c $^ -o $@
 
 $(MLKEM768_OBJS): $(MLKEM768_DIR)/%.o: %
 	$(Q)echo "  CC      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLK_CONFIG_MULTILEVEL_NO_SHARED -DMLK_CONFIG_PARAMETER_SET=768 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC) -DMLK_CONFIG_MULTILEVEL_NO_SHARED -DMLK_CONFIG_PARAMETER_SET=768 $(CFLAGS) -c $^ -o $@
 
 $(MLKEM1024_OBJS): $(MLKEM1024_DIR)/%.o: %
 	$(Q)echo "  CC      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLK_CONFIG_MULTILEVEL_NO_SHARED -DMLK_CONFIG_PARAMETER_SET=1024 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC) -DMLK_CONFIG_MULTILEVEL_NO_SHARED -DMLK_CONFIG_PARAMETER_SET=1024 $(CFLAGS) -c $^ -o $@
 
 mlkem512_objs: $(MLKEM512_OBJS)
 mlkem768_objs: $(MLKEM768_OBJS)

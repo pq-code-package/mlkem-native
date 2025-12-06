@@ -11,8 +11,6 @@
  * with kem.h and mlkem_native_all.h above. */
 #define MLK_CHECK_APIS
 
-#define MLK_CONFIG_FILE "multilevel_config.h"
-
 /* Three instances of mlkem-native for all security levels */
 
 /* Include level-independent code */

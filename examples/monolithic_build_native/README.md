@@ -5,9 +5,9 @@
 This directory contains a minimal example for how to build a single instance of mlkem-native in a single compilation
 unit, including the native backends.
 
-The auto-generated source file [mlkem_native.c](mlkem/mlkem_native.c) includes all mlkem-native C source
-files. Similarly, [mlkem_native.S](mlkem/mlkem_native.S) includes all assembly files.
-It exposes the API [mlkem/mlkem_native.h](mlkem/mlkem_native.h).
+The auto-generated source file [mlkem_native.c](mlkem_native/mlkem_native.c) includes all mlkem-native C source
+files. Similarly, [mlkem_native.S](mlkem_native/mlkem_native.S) includes all assembly files.
+It exposes the API [mlkem_native.h](mlkem_native/mlkem_native.h).
 
 ## Usage
 

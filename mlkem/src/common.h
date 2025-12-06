@@ -5,6 +5,8 @@
 #ifndef MLK_COMMON_H
 #define MLK_COMMON_H
 
+#define MLK_BUILD_INTERNAL
+
 #if defined(MLK_CONFIG_FILE)
 #include MLK_CONFIG_FILE
 #else
@@ -28,15 +30,16 @@
 #define MLK_EXTERNAL_API MLK_CONFIG_EXTERNAL_API_QUALIFIER
 #endif
 
-#if defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) || \
-    defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED)
-#define MLK_MULTILEVEL_BUILD
-#endif
-
 #define MLK_CONCAT_(x1, x2) x1##x2
 #define MLK_CONCAT(x1, x2) MLK_CONCAT_(x1, x2)
 
-#if defined(MLK_MULTILEVEL_BUILD)
+#if defined(MLK_CONFIG_MULTILEVEL_BUILD) !=        \
+    (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || \
+     defined(MLK_CONFIG_MULTILEVEL_NO_SHARED))
+#error Bad configuration: MLK_CONFIG_MULTILEVEL_BUILD should be set precisely if one of MLK_CONFIG_MULTILEVEL_WITH_SHARED or MLK_CONFIG_MULTILEVEL_NO_SHARED is set.
+#endif
+
+#if defined(MLK_CONFIG_MULTILEVEL_BUILD)
 #define MLK_ADD_PARAM_SET(s) MLK_CONCAT(s, MLK_CONFIG_PARAMETER_SET)
 #else
 #define MLK_ADD_PARAM_SET(s) s
@@ -151,21 +154,5 @@
 #define mlk_memset memset
 #endif
 #endif /* !__ASSEMBLER__ */
-
-/* Just in case we want to include mlkem_native.h, set the configuration
- * for that header in accordance with the configuration used here. */
-
-/* Double-check that this is not conflicting with pre-existing definitions. */
-#if defined(MLK_CONFIG_API_PARAMETER_SET) ||    \
-    defined(MLK_CONFIG_API_NAMESPACE_PREFIX) || \
-    defined(MLK_CONFIG_API_NO_SUPERCOP) ||      \
-    defined(MLK_CONFIG_API_CONSTANTS_ONLY)
-#error Pre-existing MLK_CONFIG_API_XXX configuration is neither useful nor allowed during an mlkem-native build
-#endif /* MLK_CONFIG_API_PARAMETER_SET || MLK_CONFIG_API_NAMESPACE_PREFIX || \
-          MLK_CONFIG_API_NO_SUPERCOP || MLK_CONFIG_API_CONSTANTS_ONLY */
-
-#define MLK_CONFIG_API_PARAMETER_SET MLK_CONFIG_PARAMETER_SET
-#define MLK_CONFIG_API_NAMESPACE_PREFIX \
-  MLK_ADD_PARAM_SET(MLK_CONFIG_NAMESPACE_PREFIX)
 
 #endif /* !MLK_COMMON_H */

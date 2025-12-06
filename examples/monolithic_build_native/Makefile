@@ -57,9 +57,9 @@ Q ?= @
 #
 # Here, we use just a single C and assembly unit.
 
-MLK_SOURCE=mlkem/mlkem_native.c mlkem/mlkem_native.S
+MLK_SOURCE=mlkem_native/mlkem_native.c mlkem_native/mlkem_native.S
 
-INC=-Imlkem/ -I./
+INC=-Imlkem_native/
 
 # Part B:
 #
@@ -97,41 +97,41 @@ LIB1024_FULL=$(BUILD_DIR)/$(LIB1024)
 $(LIB512_FULL): $(MLK_SOURCE)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) -c $(CFLAGS) -DMLK_CONFIG_FILE="\"config_512.h\"" $(INC) mlkem/mlkem_native.c -o $(BUILD_DIR)/mlkem_native512.c.o
-	$(Q)$(CC) -c $(CFLAGS) -DMLK_CONFIG_FILE="\"config_512.h\"" $(INC) mlkem/mlkem_native.S -o $(BUILD_DIR)/mlkem_native512.S.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLK_CONFIG_PARAMETER_SET=512 $(INC) mlkem_native/mlkem_native.c -o $(BUILD_DIR)/mlkem_native512.c.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLK_CONFIG_PARAMETER_SET=512 $(INC) mlkem_native/mlkem_native.S -o $(BUILD_DIR)/mlkem_native512.S.o
 	$(Q)$(AR) rcs $@ $(BUILD_DIR)/mlkem_native512.c.o $(BUILD_DIR)/mlkem_native512.S.o
 	$(Q)strip -S $@
 
 $(LIB768_FULL): $(MLK_SOURCE)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) -c $(CFLAGS) -DMLK_CONFIG_FILE="\"config_768.h\"" $(INC) mlkem/mlkem_native.c -o $(BUILD_DIR)/mlkem_native768.c.o
-	$(Q)$(CC) -c $(CFLAGS) -DMLK_CONFIG_FILE="\"config_768.h\"" $(INC) mlkem/mlkem_native.S -o $(BUILD_DIR)/mlkem_native768.S.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLK_CONFIG_PARAMETER_SET=768 $(INC) mlkem_native/mlkem_native.c -o $(BUILD_DIR)/mlkem_native768.c.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLK_CONFIG_PARAMETER_SET=768 $(INC) mlkem_native/mlkem_native.S -o $(BUILD_DIR)/mlkem_native768.S.o
 	$(Q)$(AR) rcs $@ $(BUILD_DIR)/mlkem_native768.c.o $(BUILD_DIR)/mlkem_native768.S.o
 	$(Q)strip -S $@
 
 $(LIB1024_FULL): $(MLK_SOURCE)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) -c $(CFLAGS) -DMLK_CONFIG_FILE="\"config_1024.h\"" $(INC) mlkem/mlkem_native.c -o $(BUILD_DIR)/mlkem_native1024.c.o
-	$(Q)$(CC) -c $(CFLAGS) -DMLK_CONFIG_FILE="\"config_1024.h\"" $(INC) mlkem/mlkem_native.S -o $(BUILD_DIR)/mlkem_native1024.S.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLK_CONFIG_PARAMETER_SET=1024 $(INC) mlkem_native/mlkem_native.c -o $(BUILD_DIR)/mlkem_native1024.c.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLK_CONFIG_PARAMETER_SET=1024 $(INC) mlkem_native/mlkem_native.S -o $(BUILD_DIR)/mlkem_native1024.S.o
 	$(Q)$(AR) rcs $@ $(BUILD_DIR)/mlkem_native1024.c.o $(BUILD_DIR)/mlkem_native1024.S.o
 	$(Q)strip -S $@
 
 $(BIN512_FULL): $(APP_SOURCE) $(LIB512_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_API_PARAMETER_SET=512 $(INC) $^ -o $@
+	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_PARAMETER_SET=512 $(INC) $^ -o $@
 
 $(BIN768_FULL): $(APP_SOURCE) $(LIB768_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_API_PARAMETER_SET=768 $(INC) $^ -o $@
+	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_PARAMETER_SET=768 $(INC) $^ -o $@
 
 $(BIN1024_FULL): $(APP_SOURCE) $(LIB1024_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_API_PARAMETER_SET=1024 $(INC) $^ -o $@
+	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_PARAMETER_SET=1024 $(INC) $^ -o $@
 
 all: build
 

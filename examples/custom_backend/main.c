@@ -11,8 +11,7 @@
  * This requires specifying the parameter set and namespace prefix
  * used for the build.
  */
-#define MLK_CONFIG_API_PARAMETER_SET MLK_CONFIG_PARAMETER_SET
-#define MLK_CONFIG_API_NAMESPACE_PREFIX CUSTOM_TINY_SHA3
+#define MLK_CONFIG_NAMESPACE_PREFIX CUSTOM_TINY_SHA3
 #include <mlkem_native.h>
 
 #include "test_only_rng/notrandombytes.h"

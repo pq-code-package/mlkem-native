@@ -282,71 +282,53 @@ configs:
 
 
   # Example configs
-  - path: examples/monolithic_build/config_512.h
-    description: "Monolithic build config for ML-KEM-512"
+  - path: examples/monolithic_build/mlkem_native/mlkem_native_config.h
+    description: "Monolithic build config"
     defines:
-      MLK_CONFIG_PARAMETER_SET: 512
       MLK_CONFIG_NAMESPACE_PREFIX: mlkem
       MLK_CONFIG_INTERNAL_API_QUALIFIER: static
       MLK_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
-  - path: examples/monolithic_build/config_768.h
-    description: "Monolithic build config for ML-KEM-768"
+  - path: examples/monolithic_build_native/mlkem_native/mlkem_native_config.h
+    description: "Monolithic build config (native backends disabled)"
     defines:
-      MLK_CONFIG_PARAMETER_SET: 768
       MLK_CONFIG_NAMESPACE_PREFIX: mlkem
       MLK_CONFIG_INTERNAL_API_QUALIFIER: static
       MLK_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
-  - path: examples/monolithic_build/config_1024.h
-    description: "Monolithic build config for ML-KEM-1024"
-    defines:
-      MLK_CONFIG_PARAMETER_SET: 1024
-      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
-      MLK_CONFIG_INTERNAL_API_QUALIFIER: static
-      MLK_CONFIG_FILE:
-        comment: "/* No need to set this -- we _are_ already in a custom config */"
-
-  - path: examples/monolithic_build_native/config_512.h
-    description: "Monolithic build config for ML-KEM-512 (native backends disabled)"
-    defines:
-      MLK_CONFIG_PARAMETER_SET: 512
-      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
-      MLK_CONFIG_INTERNAL_API_QUALIFIER: static
-      MLK_CONFIG_FILE:
-        comment: "/* No need to set this -- we _are_ already in a custom config */"
-
-  - path: examples/monolithic_build_native/config_768.h
-    description: "Monolithic build config for ML-KEM-768 (native backends disabled)"
-    defines:
-      MLK_CONFIG_PARAMETER_SET: 768
-      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
-      MLK_CONFIG_INTERNAL_API_QUALIFIER: static
-      MLK_CONFIG_FILE:
-        comment: "/* No need to set this -- we _are_ already in a custom config */"
-
-  - path: examples/monolithic_build_native/config_1024.h
-    description: "Monolithic build config for ML-KEM-1024 (native backends disabled)"
-    defines:
-      MLK_CONFIG_PARAMETER_SET: 1024
-      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
-      MLK_CONFIG_INTERNAL_API_QUALIFIER: static
-      MLK_CONFIG_FILE:
-        comment: "/* No need to set this -- we _are_ already in a custom config */"
-
-  - path: examples/monolithic_build_multilevel/multilevel_config.h
+  - path: examples/monolithic_build_multilevel/mlkem_native/mlkem_native_config.h
     description: "Multilevel monolithic build config"
     defines:
+      MLK_CONFIG_MULTILEVEL_BUILD: true
       MLK_CONFIG_NAMESPACE_PREFIX: mlkem
       MLK_CONFIG_INTERNAL_API_QUALIFIER: static
       MLK_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
-  - path: examples/monolithic_build_multilevel_native/multilevel_config.h
+  - path: examples/multilevel_build/mlkem_native/mlkem_native_config.h
+    description: "Multilevel build config"
+    defines:
+      MLK_CONFIG_MULTILEVEL_BUILD: true
+      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/multilevel_build_native/mlkem_native/mlkem_native_config.h
+    description: "Multilevel build config"
+    defines:
+      MLK_CONFIG_MULTILEVEL_BUILD: true
+      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
+      MLK_CONFIG_USE_NATIVE_BACKEND_ARITH: true
+      MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/monolithic_build_multilevel_native/mlkem_native/mlkem_native_config.h
     description: "Multilevel monolithic build config with native backends"
     defines:
+      MLK_CONFIG_MULTILEVEL_BUILD: true
       MLK_CONFIG_NAMESPACE_PREFIX: mlkem
       MLK_CONFIG_USE_NATIVE_BACKEND_ARITH: true
       MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
@@ -365,7 +347,7 @@ configs:
           #define MLK_CONFIG_CUSTOM_RANDOMBYTES
           #if !defined(__ASSEMBLER__)
           #include <stdint.h>
-          #include "sys.h"
+          #include "src/sys.h"
           #include "test_only_rng/notrandombytes.h"
           static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
           {
@@ -373,7 +355,7 @@ configs:
           }
           #endif /* !__ASSEMBLER__ */
 
-  - path: examples/custom_backend/mlkem_native/custom_config.h
+  - path: examples/custom_backend/mlkem_native/mlkem_native_config.h
     description: "Custom backend config with tiny SHA3"
     defines:
       MLK_CONFIG_PARAMETER_SET:
@@ -384,5 +366,32 @@ configs:
       MLK_CONFIG_NAMESPACE_PREFIX: CUSTOM_TINY_SHA3
       MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
       MLK_CONFIG_FIPS202_BACKEND_FILE: '"fips202/native/custom/custom.h"'
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/bring_your_own_fips202/mlkem_native/mlkem_native_config.h
+    description: "Configuration for custom FIPS202 implementation"
+    defines:
+      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
+      MLK_CONFIG_FIPS202_CUSTOM_HEADER: "\"../custom_fips202/fips202.h\""
+      MLK_CONFIG_FIPS202X4_CUSTOM_HEADER: "\"../custom_fips202/fips202x4.h\""
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/bring_your_own_fips202_static/mlkem_native/mlkem_native_config.h
+    description: "Configuration for custom serial FIPS202 implementation"
+    defines:
+      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
+      MLK_CONFIG_SERIAL_FIPS202_ONLY: true
+      MLK_CONFIG_FIPS202_CUSTOM_HEADER: "\"../custom_fips202/fips202.h\""
+      MLK_CONFIG_FIPS202X4_CUSTOM_HEADER: "\"../custom_fips202/fips202x4.h\""
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/basic_deterministic/mlkem_native/mlkem_native_config.h
+    description: "Configuration for deterministic-only build of mlkem-native"
+    defines:
+      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
+      MLK_CONFIG_NO_RANDOMIZED_API: true
       MLK_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"

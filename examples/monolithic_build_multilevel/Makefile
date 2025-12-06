@@ -57,7 +57,7 @@ endif
 
 MLK_SOURCE=mlkem_native_all.c
 
-INC=-Imlkem/ -I./
+INC=-Imlkem_native
 
 # Part B:
 #

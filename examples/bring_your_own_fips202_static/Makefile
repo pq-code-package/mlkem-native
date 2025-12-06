@@ -89,13 +89,6 @@ ALL_SOURCE=$(MLK_SOURCE) $(FIPS202_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
 
 # Include path for mlkem_native_config.h
 CFLAGS += -Imlkem_native
-# Pick prefix
-CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem
-# Tell mlkem-native to use serial-FIPS202 only
-CFLAGS += -DMLK_CONFIG_SERIAL_FIPS202_ONLY
-# Tell mlkem-native where to find the header for the custom FIPS202
-CFLAGS += -DMLK_CONFIG_FIPS202_CUSTOM_HEADER="\"../custom_fips202/fips202.h\""
-CFLAGS += -DMLK_CONFIG_FIPS202X4_CUSTOM_HEADER="\"../custom_fips202/fips202x4.h\""
 
 BUILD_DIR=build
 BIN=test_binary
