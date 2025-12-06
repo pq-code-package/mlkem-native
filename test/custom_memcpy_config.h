@@ -27,8 +27,8 @@
 /*
  * Test configuration: Test configuration with custom memcpy
  *
- * This configuration differs from the default mlkem/src/config.h in the
- * following places:
+ * This configuration differs from the default mlkem/mlkem_native_config.h in
+ * the following places:
  *   - MLK_CONFIG_CUSTOM_MEMCPY
  */
 
@@ -43,6 +43,11 @@
  *              - MLK_CONFIG_PARAMETER_SET=512 corresponds to ML-KEM-512
  *              - MLK_CONFIG_PARAMETER_SET=768 corresponds to ML-KEM-768
  *              - MLK_CONFIG_PARAMETER_SET=1024 corresponds to ML-KEM-1024
+ *
+ *              If you want to support multiple parameter sets, build the
+ *              library multiple times and set MLK_CONFIG_MULTILEVEL_BUILD.
+ *              See MLK_CONFIG_MULTILEVEL_BUILD for how to do this while
+ *              minimizing code duplication.
  *
  *              This can also be set using CFLAGS.
  *
@@ -75,11 +80,8 @@
  *
  * Description: The prefix to use to namespace global symbols from mlkem/.
  *
- *              In a multi-level build (that is, if either
- *              - MLK_CONFIG_MULTILEVEL_WITH_SHARED, or
- *              - MLK_CONFIG_MULTILEVEL_NO_SHARED,
- *              are set, level-dependent symbols will additionally be prefixed
- *              with the parameter set (512/768/1024).
+ *              In a multi-level build, level-dependent symbols will
+ *              additionally be prefixed with the parameter set (512/768/1024).
  *
  *              This can also be set using CFLAGS.
  *
@@ -88,6 +90,95 @@
 #define MLK_CONFIG_NAMESPACE_PREFIX MLK_DEFAULT_NAMESPACE_PREFIX
 #endif
 
+/******************************************************************************
+ * Name:        MLK_CONFIG_MULTILEVEL_BUILD
+ *
+ * Description: Set this if the build is part of a multi-level build supporting
+ *              multiple parameter sets.
+ *
+ *              If you need only a single parameter set, keep this unset.
+ *
+ *              To build mlkem-native with support for all parameter sets,
+ *              build it three times -- once per parameter set -- and set the
+ *              option MLK_CONFIG_MULTILEVEL_WITH_SHARED for exactly one of
+ *              them, and MLK_CONFIG_MULTILEVEL_NO_SHARED for the others.
+ *              MLK_CONFIG_MULTILEVEL_BUILD should be set for all of them.
+ *
+ *              See examples/multilevel_build for an example.
+ *
+ *              This can also be set using CFLAGS.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_MULTILEVEL_BUILD */
+
+/******************************************************************************
+ * Name:        MLK_CONFIG_EXTERNAL_API_QUALIFIER
+ *
+ * Description: If set, this option provides an additional function
+ *              qualifier to be added to declarations of mlkem-native's
+ *              public API.
+ *
+ *              The primary use case for this option are single-CU builds
+ *              where the public API exposed by mlkem-native is wrapped by
+ *              another API in the consuming application. In this case,
+ *              even mlkem-native's public API can be marked `static`.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_EXTERNAL_API_QUALIFIER */
+
+/******************************************************************************
+ * Name:        MLK_CONFIG_NO_RANDOMIZED_API
+ *
+ * Description: If this option is set, mlkem-native will be built without the
+ *              randomized API functions (crypto_kem_keypair and
+ *              crypto_kem_enc).
+ *              This allows users to build mlkem-native without providing a
+ *              randombytes() implementation if they only need the
+ *              deterministic API
+ *              (crypto_kem_keypair_derand, crypto_kem_enc_derand,
+ *              crypto_kem_dec).
+ *
+ *              NOTE: This option is incompatible with MLK_CONFIG_KEYGEN_PCT
+ *              as the current PCT implementation requires crypto_kem_enc().
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_NO_RANDOMIZED_API */
+
+/******************************************************************************
+ * Name:        MLK_CONFIG_NO_SUPERCOP
+ *
+ * Description: By default, mlkem_native.h exposes the mlkem-native API in the
+ *              SUPERCOP naming convention (crypto_kem_xxx). If you don't need
+ *              this, set MLK_CONFIG_NO_SUPERCOP.
+ *
+ *              NOTE: You must set this for a multi-level build as the SUPERCOP
+ *              naming does not disambiguate between the parameter sets.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_NO_SUPERCOP */
+
+/******************************************************************************
+ * Name:        MLK_CONFIG_CONSTANTS_ONLY
+ *
+ * Description: If you only need the size constants (MLKEM_PUBLICKEYBYTES, etc.)
+ *              but no function declarations, set MLK_CONFIG_CONSTANTS_ONLY.
+ *
+ *              This only affects the public header mlkem_native.h, not
+ *              the implementation.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_CONSTANTS_ONLY */
+
+/******************************************************************************
+ *
+ * Build-only configuration options
+ *
+ * The remaining configurations are build-options only.
+ * They do not affect the API described in mlkem_native.h.
+ *
+ *****************************************************************************/
+
+#if defined(MLK_BUILD_INTERNAL)
 /******************************************************************************
  * Name:        MLK_CONFIG_MULTILEVEL_WITH_SHARED
  *
@@ -107,6 +198,7 @@
  *              build it three times -- once per parameter set -- and set the
  *              option MLK_CONFIG_MULTILEVEL_WITH_SHARED for exactly one of
  *              them, and MLK_CONFIG_MULTILEVEL_NO_SHARED for the others.
+ *              MLK_CONFIG_MULTILEVEL_BUILD should be set for all of them.
  *
  *              See examples/multilevel_build for an example.
  *
@@ -128,6 +220,7 @@
  *              build it three times -- once per parameter set -- and set the
  *              option MLK_CONFIG_MULTILEVEL_WITH_SHARED for exactly one of
  *              them, and MLK_CONFIG_MULTILEVEL_NO_SHARED for the others.
+ *              MLK_CONFIG_MULTILEVEL_BUILD should be set for all of them.
  *
  *              See examples/multilevel_build for an example.
  *
@@ -299,7 +392,7 @@
 /* #define MLK_CONFIG_CUSTOM_ZEROIZE
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
-   #include "sys.h"
+   #include "src/sys.h"
    static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
    {
        ... your implementation ...
@@ -325,7 +418,7 @@
 /* #define MLK_CONFIG_CUSTOM_RANDOMBYTES
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
-   #include "sys.h"
+   #include "src/sys.h"
    static MLK_INLINE void mlk_randombytes(uint8_t *ptr, size_t len)
    {
        ... your implementation ...
@@ -411,7 +504,7 @@ static MLK_INLINE void *mlk_memcpy(void *dest, const void *src, size_t n)
 /* #define MLK_CONFIG_CUSTOM_MEMSET
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
-   #include "sys.h"
+   #include "src/sys.h"
    static MLK_INLINE void *mlk_memset(void *s, int c, size_t n)
    {
        ... your implementation ...
@@ -430,21 +523,6 @@ static MLK_INLINE void *mlk_memcpy(void *dest, const void *src, size_t n)
  *
  *****************************************************************************/
 /* #define MLK_CONFIG_INTERNAL_API_QUALIFIER */
-
-/******************************************************************************
- * Name:        MLK_CONFIG_EXTERNAL_API_QUALIFIER
- *
- * Description: If set, this option provides an additional function
- *              qualifier to be added to declarations of mlkem-native's
- *              public API.
- *
- *              The primary use case for this option are single-CU builds
- *              where the public API exposed by mlkem-native is wrapped by
- *              another API in the consuming application. In this case,
- *              even mlkem-native's public API can be marked `static`.
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_EXTERNAL_API_QUALIFIER */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_CT_TESTING_ENABLED
@@ -496,24 +574,6 @@ static MLK_INLINE void *mlk_memcpy(void *dest, const void *src, size_t n)
 /* #define MLk_CONFIG_NO_ASM_VALUE_BARRIER */
 
 /******************************************************************************
- * Name:        MLK_CONFIG_NO_RANDOMIZED_API
- *
- * Description: If this option is set, mlkem-native will be built without the
- *              randomized API functions (crypto_kem_keypair and
- *              crypto_kem_enc).
- *              This allows users to build mlkem-native without providing a
- *              randombytes() implementation if they only need the
- *              deterministic API
- *              (crypto_kem_keypair_derand, crypto_kem_enc_derand,
- *              crypto_kem_dec).
- *
- *              NOTE: This option is incompatible with MLK_CONFIG_KEYGEN_PCT
- *              as the current PCT implementation requires crypto_kem_enc().
- *
- *****************************************************************************/
-/* #define MLK_CONFIG_NO_RANDOMIZED_API */
-
-/******************************************************************************
  * Name:        MLK_CONFIG_KEYGEN_PCT
  *
  * Description: Compliance with @[FIPS140_3_IG, p.87] requires a
@@ -542,7 +602,7 @@ static MLK_INLINE void *mlk_memcpy(void *dest, const void *src, size_t n)
  *****************************************************************************/
 /* #define MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
    #if !defined(__ASSEMBLER__)
-   #include "sys.h"
+   #include "src/sys.h"
    static MLK_INLINE int mlk_break_pct(void)
    {
        ... return 0/1 depending on whether PCT should be broken ...
@@ -573,6 +633,8 @@ static MLK_INLINE void *mlk_memcpy(void *dest, const void *src, size_t n)
 /* #define MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
 /*************************  Config internals  ********************************/
+
+#endif /* MLK_BUILD_INTERNAL */
 
 /* Default namespace
  *

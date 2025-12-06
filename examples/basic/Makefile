@@ -54,11 +54,11 @@ endif
 # In this example, we compile the individual mlkem-native source files directly.
 # Alternatively, you can compile the 'monobuild' source file mlkem_native.c.
 # See examples/monolithic_build for that.
-MLK_SOURCE=$(wildcard 			        \
-	mlkem_native/mlkem/src/*.c	  	\
-	mlkem_native/mlkem/src/**/*.c		\
-	mlkem_native/mlkem/src/**/**/*.c	\
-	mlkem_native/mlkem/src/**/**/**/*.c)
+MLK_SOURCE=$(wildcard 		        \
+	mlkem_native/src/*.c	  	\
+	mlkem_native/src/**/*.c		\
+	mlkem_native/src/**/**/*.c	\
+	mlkem_native/src/**/**/**/*.c)
 
 # Part B:
 #
@@ -87,7 +87,7 @@ BIN=test_binary
 #
 
 # Include path for mlkem_native_config.h
-CFLAGS += -I mlkem_native/mlkem
+CFLAGS += -I mlkem_native
 # Pick prefix
 CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem
 

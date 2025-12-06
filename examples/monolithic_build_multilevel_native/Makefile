@@ -55,9 +55,9 @@ endif
 #
 # Here, the monolithic C file for mlkem-native is directly included in main.c,
 # However, we still need to incldue the monolithic assembly file.
-MLK_SOURCE_ASM = mlkem/mlkem_native.S
+MLK_SOURCE_ASM = mlkem_native/mlkem_native.S
 
-INC=-Imlkem/ -Imlkem/src -I./
+INC=-Imlkem_native/ -I./
 
 # Part B:
 #
@@ -83,8 +83,7 @@ BIN=test_binary
 # Configuration adjustments
 #
 
-ASMFLAGS = -DMLK_CONFIG_FILE=\"multilevel_config.h\"
-ASMFLAGS += -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
+ASMFLAGS = -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
 
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 

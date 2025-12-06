@@ -9,7 +9,7 @@
 
 #include "mlkem_native_all.c"
 
-#define MLK_CONFIG_API_CONSTANTS_ONLY
+#define MLK_CONFIG_CONSTANTS_ONLY
 #include <mlkem_native.h>
 
 #include "test_only_rng/notrandombytes.h"

@@ -55,10 +55,10 @@ endif
 # Alternatively, you can compile the 'monobuild' source file mlkem_native.c.
 # See examples/monolithic_build for that.
 MLK_SOURCE=$(wildcard 			        \
-	mlkem_native/mlkem/src/*.c	  	\
-	mlkem_native/mlkem/src/**/*.c		\
-	mlkem_native/mlkem/src/**/**/*.c	\
-	mlkem_native/mlkem/src/**/**/**/*.c)
+	mlkem_native/src/*.c	  	\
+	mlkem_native/src/**/*.c		\
+	mlkem_native/src/**/**/*.c	\
+	mlkem_native/src/**/**/**/*.c)
 
 # Part B:
 #
@@ -75,11 +75,7 @@ BIN=test_binary
 #
 
 # Include path for config
-CFLAGS += -Imlkem_native/mlkem
-# Pick prefix
-CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlkem
-# Set configuration option for deterministic build
-CFLAGS += -DMLK_CONFIG_NO_RANDOMIZED_API
+CFLAGS += -Imlkem_native
 
 BINARY_NAME_FULL_512=$(BUILD_DIR)/$(BIN)512
 BINARY_NAME_FULL_768=$(BUILD_DIR)/$(BIN)768
