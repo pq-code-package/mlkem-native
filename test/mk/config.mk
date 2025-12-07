@@ -91,8 +91,6 @@ $(foreach var,$(RETAINED_VARS),$(eval $(call CAPTURE_VAR,$(var))))
 CYCLES ?=
 OPT ?= 1
 
-BUILD_DIR ?= test/build
-
 MAKE_OBJS = $(2:%=$(1)/%.o)
 OBJS = $(call MAKE_OBJS,$(BUILD_DIR),$(1))
 

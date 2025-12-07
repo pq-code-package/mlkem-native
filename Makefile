@@ -31,11 +31,16 @@ endif
 
 W := $(EXEC_WRAPPER)
 
+BUILD_DIR ?= test/build
+
+# Skip includes for clean target
+ifneq ($(MAKECMDGOALS),clean)
 include test/mk/config.mk
 include test/mk/compiler.mk
 include test/mk/auto.mk
 include test/mk/components.mk
 include test/mk/rules.mk
+endif
 
 quickcheck: test
 
@@ -228,17 +233,27 @@ else
 	@echo "No specific feature detection available for $(ARCH)"
 endif
 
-clean:
-	-$(RM) -rf *.gcno *.gcda *.lcov *.o *.so
-	-$(RM) -rf $(BUILD_DIR)
-	-make clean -C examples/bring_your_own_fips202 >/dev/null
-	-make clean -C examples/bring_your_own_fips202_static >/dev/null
-	-make clean -C examples/custom_backend >/dev/null
-	-make clean -C examples/basic >/dev/null
-	-make clean -C examples/basic_deterministic >/dev/null
-	-make clean -C examples/monolithic_build >/dev/null
-	-make clean -C examples/monolithic_build_native >/dev/null
-	-make clean -C examples/monolithic_build_multilevel >/dev/null
-	-make clean -C examples/monolithic_build_multilevel_native >/dev/null
-	-make clean -C examples/multilevel_build >/dev/null
-	-make clean -C examples/multilevel_build_native >/dev/null
+EXAMPLE_DIRS := \
+	examples/bring_your_own_fips202 \
+	examples/bring_your_own_fips202_static \
+	examples/custom_backend \
+	examples/basic \
+	examples/basic_deterministic \
+	examples/monolithic_build \
+	examples/monolithic_build_native \
+	examples/monolithic_build_multilevel \
+	examples/monolithic_build_multilevel_native \
+	examples/multilevel_build \
+	examples/multilevel_build_native
+
+EXAMPLE_CLEAN_TARGETS := $(EXAMPLE_DIRS:%=clean-%)
+
+.PHONY: $(EXAMPLE_CLEAN_TARGETS)
+
+$(EXAMPLE_CLEAN_TARGETS): clean-%:
+	@echo "  CLEAN   $*"
+	-@$(MAKE) clean -C $* >/dev/null
+
+clean: $(EXAMPLE_CLEAN_TARGETS)
+	@echo "  RM      $(BUILD_DIR)"
+	-@$(RM) -rf $(BUILD_DIR)
