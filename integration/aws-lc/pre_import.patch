@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+diff --git a/crypto/fipsmodule/ml_kem/importer.sh b/crypto/fipsmodule/ml_kem/importer.sh
+index 24832abb7..df4247eea 100755
+--- a/crypto/fipsmodule/ml_kem/importer.sh
++++ b/crypto/fipsmodule/ml_kem/importer.sh
+@@ -92,8 +92,6 @@ cp $TMP/mlkem/src/native/api.h $SRC/native
+ cp $TMP/mlkem/src/native/x86_64/meta.h $SRC/native/x86_64
+ cp $TMP/mlkem/src/native/x86_64/src/* $SRC/native/x86_64/src
+
+-# We use the custom `mlkem_native_config.h`, so can remove the default one
+-rm $SRC/config.h
+
+ # Copy formatting file
+ cp $TMP/.clang-format $SRC
+@@ -125,11 +123,6 @@ sed "${SED_I[@]}" '/MLK_USE_NATIVE_POLY_DECOMPRESS_D5/d' $SRC/native/x86_64/meta
+ sed "${SED_I[@]}" '/MLK_USE_NATIVE_POLY_DECOMPRESS_D10/d' $SRC/native/x86_64/meta.h
+ sed "${SED_I[@]}" '/MLK_USE_NATIVE_POLY_DECOMPRESS_D11/d' $SRC/native/x86_64/meta.h
+
+-# Copy mlkem-native header
+-# This is only needed for access to the various macros defining key sizes.
+-# The function declarations itself are all visible in ml_kem.c by virtue
+-# of everything being inlined into that file.
+-cp $TMP/mlkem/mlkem_native.h $SRC
+
+ # Modify include paths to match position of mlkem_native_bcm.c
+ # In mlkem-native, the include path is "mlkem/*", while here we
+diff --git a/crypto/fipsmodule/ml_kem/mlkem_native_config.h b/crypto/fipsmodule/ml_kem/mlkem_native_config.h
+index 76df78c3b..8beeea9e5 100644
+--- a/crypto/fipsmodule/ml_kem/mlkem_native_config.h
++++ b/crypto/fipsmodule/ml_kem/mlkem_native_config.h
+@@ -8,6 +8,8 @@
+ #include "../../internal.h"
+ #endif
+
++#define MLK_CONFIG_MULTILEVEL_BUILD
++
+ // Namespacing: All symbols are of the form mlkem*. Level-specific
+ // symbols are further prefixed with their security level, e.g.
+ // mlkem512*, mlkem768*, mlkem1024*.
