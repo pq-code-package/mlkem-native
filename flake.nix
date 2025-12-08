@@ -5,7 +5,7 @@
 
   inputs = {
     nixpkgs-2405.url = "github:NixOS/nixpkgs/nixos-24.05";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     flake-parts = {
@@ -24,7 +24,6 @@
           pkgs-2405 = inputs.nixpkgs-2405.legacyPackages.${system};
           util = pkgs.callPackage ./nix/util.nix {
             # Keep those around in case we want to switch to unstable versions
-            cbmc = pkgs-unstable.cbmc;
             bitwuzla = pkgs-unstable.bitwuzla;
             z3 = pkgs-unstable.z3;
           };
@@ -189,7 +188,6 @@
             pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
             util = pkgs.callPackage ./nix/util.nix {
               inherit pkgs;
-              cbmc = pkgs-unstable.cbmc;
               bitwuzla = pkgs-unstable.bitwuzla;
               z3 = pkgs-unstable.z3;
             };
