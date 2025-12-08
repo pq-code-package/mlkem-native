@@ -80,11 +80,25 @@ nmke /f .\Makefile.Microsoft_nmake quickcheck
 
 # Checking the proofs
 
+## CBMC
+
 ### Prerequisites
 
-To run the CBMC proofs, you need the CBMC version as specified in our `nix` development environment. Please setup `nix`
-as described in [CONTRIBUTING.md](CONTRIBUTING.md).
+To run the CBMC proofs, you need specific versions of CBMC and the underlying solvers, e.g. as specified in our `nix` environment; see [nix/cbmc](nix/cbmc/).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions on how to setup and use `nix`.
 
-### Running CBMC
+### Running the CBMC proofs
 
-To check the CBMC proofs, enter the `nix` development environment and use `tests cbmc`.
+Once you are in the `nix` shell or have all tools setup by hand, use `./scripts/tests cbmc` (or just `tests cbmc` in the `nix` shell) to re-check the CBMC proofs.
+See `tests cbmc --help` for details on the command line options, and [proofs/cbmc](proofs/cbmc) for more details on the CBMC proofs in general.
+
+## HOL-Light
+
+### Prerequisites
+
+To run the HOL-Light proofs, you need recent versions of HOL-Light and s2n-bignum, e.g. as specified in our `nix` environment; see [nix/s2n-bignum](nix/s2n-bignum/) and [nix/hol_light](nix/hol_light./).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions on how to setup and use `nix`.
+
+### Running the HOL-Light proofs
+
+Once you are in the `nix` shell or have all tools setup by hand, use `./scripts/tests hol_light` (or just `tests hol_light` in the `nix` shell) to re-check the HOL-Light proofs. Note that depending on the function, they will take a long time. See `tests hol_light --help` for details on the command line options, and [proofs/hol_light](proofs/hol_light) for more details on the HOL-Light proofs in general.
