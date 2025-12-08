@@ -375,9 +375,10 @@ __contract__(
  *            - We include buffer zeroization.
  */
 MLK_INTERNAL_API
-void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                               uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
-                               const uint8_t coins[MLKEM_SYMBYTES])
+void mlk_indcpa_keypair_derand(
+    uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
+    uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
+    const uint8_t coins[MLKEM_SYMBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 {
   MLK_ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
   const uint8_t *publicseed = buf;
@@ -459,10 +460,10 @@ void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
  *            - We include buffer zeroization.
  */
 MLK_INTERNAL_API
-void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
-                    const uint8_t m[MLKEM_INDCPA_MSGBYTES],
-                    const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                    const uint8_t coins[MLKEM_SYMBYTES])
+void mlk_indcpa_enc(
+    uint8_t c[MLKEM_INDCPA_BYTES], const uint8_t m[MLKEM_INDCPA_MSGBYTES],
+    const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
+    const uint8_t coins[MLKEM_SYMBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 {
   MLK_ALIGN uint8_t seed[MLKEM_SYMBYTES];
   mlk_polymat at;
@@ -541,9 +542,10 @@ void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
  *            - We use a mulcache for the scalar product.
  *            - We include buffer zeroization. */
 MLK_INTERNAL_API
-void mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
-                    const uint8_t c[MLKEM_INDCPA_BYTES],
-                    const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
+void mlk_indcpa_dec(
+    uint8_t m[MLKEM_INDCPA_MSGBYTES], const uint8_t c[MLKEM_INDCPA_BYTES],
+    const uint8_t
+        sk[MLKEM_INDCPA_SECRETKEYBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 {
   mlk_polyvec b, skpv;
   mlk_poly v, sb;

@@ -41,7 +41,9 @@
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+int crypto_kem_check_pk(
+    const uint8_t
+        pk[MLKEM_INDCCA_PUBLICKEYBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 {
   int res;
   mlk_polyvec p;
@@ -66,7 +68,9 @@ int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+int crypto_kem_check_sk(
+    const uint8_t
+        sk[MLKEM_INDCCA_SECRETKEYBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 {
   int res;
   MLK_ALIGN uint8_t test[MLKEM_SYMBYTES];
@@ -167,11 +171,12 @@ static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
  *            - We optionally include PCT which is not present in
  *              the reference code. */
 MLK_EXTERNAL_API
-int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                              uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
-                              const uint8_t coins[2 * MLKEM_SYMBYTES])
+int crypto_kem_keypair_derand(
+    uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+    uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
+    const uint8_t coins[2 * MLKEM_SYMBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 {
-  mlk_indcpa_keypair_derand(pk, sk, coins);
+  mlk_indcpa_keypair_derand(pk, sk, coins MLK_CONTEXT_PARAMETER);
   mlk_memcpy(sk + MLKEM_INDCPA_SECRETKEYBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
   mlk_hash_h(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, pk,
              MLKEM_INDCCA_PUBLICKEYBYTES);
@@ -195,8 +200,9 @@ int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 /* Reference: `crypto_kem_keypair()` in the reference implementation @[REF]
  *            - We zeroize the stack buffer */
 MLK_EXTERNAL_API
-int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                       uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+int crypto_kem_keypair(
+    uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+    uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 {
   int res;
   MLK_ALIGN uint8_t coins[2 * MLKEM_SYMBYTES];
@@ -205,7 +211,7 @@ int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   mlk_randombytes(coins, 2 * MLKEM_SYMBYTES);
   MLK_CT_TESTING_SECRET(coins, sizeof(coins));
 
-  res = crypto_kem_keypair_derand(pk, sk, coins);
+  res = crypto_kem_keypair_derand(pk, sk, coins MLK_CONTEXT_PARAMETER);
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
@@ -218,17 +224,17 @@ int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
  *            - We include public key check
  *            - We include stack buffer zeroization */
 MLK_EXTERNAL_API
-int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                          uint8_t ss[MLKEM_SSBYTES],
-                          const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                          const uint8_t coins[MLKEM_SYMBYTES])
+int crypto_kem_enc_derand(
+    uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES], uint8_t ss[MLKEM_SSBYTES],
+    const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+    const uint8_t coins[MLKEM_SYMBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 {
   MLK_ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
   /* Will contain key, coins */
   MLK_ALIGN uint8_t kr[2 * MLKEM_SYMBYTES];
 
   /* Specification: Implements @[FIPS203, Section 7.2, Modulus check] */
-  if (crypto_kem_check_pk(pk))
+  if (crypto_kem_check_pk(pk MLK_CONTEXT_PARAMETER))
   {
     return -1;
   }
@@ -240,7 +246,7 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
 
   /* coins are in kr+MLKEM_SYMBYTES */
-  mlk_indcpa_enc(ct, buf, pk, kr + MLKEM_SYMBYTES);
+  mlk_indcpa_enc(ct, buf, pk, kr + MLKEM_SYMBYTES MLK_CONTEXT_PARAMETER);
 
   mlk_memcpy(ss, kr, MLKEM_SYMBYTES);
 
@@ -256,9 +262,10 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
 /* Reference: `crypto_kem_enc()` in the reference implementation @[REF]
  *            - We include stack buffer zeroization */
 MLK_EXTERNAL_API
-int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                   uint8_t ss[MLKEM_SSBYTES],
-                   const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+int crypto_kem_enc(
+    uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES], uint8_t ss[MLKEM_SSBYTES],
+    const uint8_t
+        pk[MLKEM_INDCCA_PUBLICKEYBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 {
   int res;
   MLK_ALIGN uint8_t coins[MLKEM_SYMBYTES];
@@ -266,7 +273,7 @@ int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   mlk_randombytes(coins, MLKEM_SYMBYTES);
   MLK_CT_TESTING_SECRET(coins, sizeof(coins));
 
-  res = crypto_kem_enc_derand(ct, ss, pk, coins);
+  res = crypto_kem_enc_derand(ct, ss, pk, coins MLK_CONTEXT_PARAMETER);
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
@@ -279,9 +286,10 @@ int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
  *            - We include secret key check
  *            - We include stack buffer zeroization */
 MLK_EXTERNAL_API
-int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
-                   const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                   const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+int crypto_kem_dec(
+    uint8_t ss[MLKEM_SSBYTES], const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
+    const uint8_t
+        sk[MLKEM_INDCCA_SECRETKEYBYTES] MLK_CONTEXT_PARAMETER_DECLARATION)
 {
   uint8_t fail;
   MLK_ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
@@ -292,12 +300,12 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   const uint8_t *pk = sk + MLKEM_INDCPA_SECRETKEYBYTES;
 
   /* Specification: Implements @[FIPS203, Section 7.3, Hash check] */
-  if (crypto_kem_check_sk(sk))
+  if (crypto_kem_check_sk(sk MLK_CONTEXT_PARAMETER))
   {
     return -1;
   }
 
-  mlk_indcpa_dec(buf, ct, sk);
+  mlk_indcpa_dec(buf, ct, sk MLK_CONTEXT_PARAMETER);
 
   /* Multitarget countermeasure for coins + contributory KEM */
   mlk_memcpy(buf + MLKEM_SYMBYTES,
@@ -307,7 +315,7 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
 
   /* Recompute and compare ciphertext */
   /* coins are in kr+MLKEM_SYMBYTES */
-  mlk_indcpa_enc(tmp, buf, pk, kr + MLKEM_SYMBYTES);
+  mlk_indcpa_enc(tmp, buf, pk, kr + MLKEM_SYMBYTES MLK_CONTEXT_PARAMETER);
   fail = mlk_ct_memcmp(ct, tmp, MLKEM_INDCCA_CIPHERTEXTBYTES);
 
   /* Compute rejection key */
