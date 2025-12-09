@@ -74,6 +74,12 @@ jobs:
           echo "=== Patched extensions.bzl ==="
           cat third_party/mlkem_native/extensions.bzl
 
+      - name: Patch functest to only test deterministic API
+        run: |
+          cd $EXPO_DIR
+          # speed-up tests in CI by only running deterministic tests
+          git apply $GITHUB_WORKSPACE/integration/opentitan/derand-only.patch
+
       - name: Run mlkem functest
         run: |
           cd $EXPO_DIR
