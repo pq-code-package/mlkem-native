@@ -21,7 +21,21 @@ To confirm that everything worked, try `lint` or `tests cbmc`.
 ### Coding style
 
 We use auto-formatting using `clang-format` as specified in [.clang-format](.clang-format). Use the `./scripts/format`
-script (in your `PATH` when using`nix`) to re-format the files accordingly.
+script (in your `PATH` when using `nix`) to re-format the files accordingly.
+
+When using `Debian`, the following dependencies are needed to be installed:
+
+```bash
+sudo apt install shfmt black clang-format
+```
+
+When using `Debian`, `nixpkgs-fmt` is needed to be compiled from source:
+
+```bash
+sudo apt install cargo
+cargo install nixpkgs-fmt
+export PATH="$PATH:~/.cargo/bin"
+```
 
 ### Namespacing
 
