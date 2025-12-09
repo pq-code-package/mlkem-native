@@ -346,7 +346,7 @@ __contract__(
  *
  * Arguments:   INPUT:
  *              - a: const pointer to input polynomial,
- *                with each coefficient in the range -Q+1 .. Q-1
+ *                with each coefficient in the range 0 .. Q-1
  *              OUTPUT
  *              - r: pointer to output byte array
  *                   (of MLKEM_POLYBYTES bytes)
