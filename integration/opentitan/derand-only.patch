@@ -1,0 +1,198 @@
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+diff --git a/sw/device/tests/crypto/mlkem_functest.c b/sw/device/tests/crypto/mlkem_functest.c
+--- a/sw/device/tests/crypto/mlkem_functest.c
++++ b/sw/device/tests/crypto/mlkem_functest.c
+@@ -280,182 +280,9 @@ static void test_mlkem1024_derand(void) {
+   CHECK_ARRAYS_EQ(key_a_blob, key_b_blob, ARRAYSIZE(key_a_blob));
+   CHECK_ARRAYS_EQ((unsigned char *)key_a_blob, expected_key,
+                   kOtcryptoMlkem1024SharedSecretBytes);
+-}
+-
+-static void test_mlkem512_randomized(void) {
+-  uint64_t t0;
+-  uint32_t pk[ceil_div(kOtcryptoMlkem512PublicKeyBytes, sizeof(uint32_t))];
+-  uint8_t ct[kOtcryptoMlkem512CiphertextBytes];
+-
+-  otcrypto_unblinded_key_t pk_buf = {
+-      .key_mode = kOtcryptoKeyModeMlkem512,
+-      .key_length = sizeof(pk),
+-      .key = pk,
+-  };
+-  pk_buf.checksum = integrity_unblinded_checksum(&pk_buf);
+-  uint32_t
+-      sk_blob[ceil_div(kOtcryptoMlkem512SecretKeyBytes, sizeof(uint32_t)) * 2];
+-  memset(sk_blob, 0, sizeof(sk_blob));
+-  otcrypto_blinded_key_t sk_buf = {
+-      .config = kMlkem512SecretKeyConfig,
+-      .keyblob_length = sizeof(sk_blob),
+-      .keyblob = sk_blob,
+-  };
+-  sk_buf.checksum = integrity_blinded_checksum(&sk_buf);
+-  t0 = profile_start();
+-  CHECK_STATUS_OK(otcrypto_mlkem512_keygen(&pk_buf, &sk_buf));
+-  profile_end_and_print(t0, "otcrypto_mlkem512_keygen");
+-
+-  otcrypto_byte_buf_t ct_buf = {.data = ct, .len = sizeof(ct)};
+-  uint32_t key_b_blob[ceil_div(kOtcryptoMlkem512SharedSecretBytes,
+-                               sizeof(uint32_t)) *
+-                      2];
+-  memset(key_b_blob, 0, sizeof(key_b_blob));
+-  otcrypto_blinded_key_t key_b_buf = {
+-      .config = kMlkem512SharedSecretConfig,
+-      .keyblob_length = sizeof(key_b_blob),
+-      .keyblob = key_b_blob,
+-  };
+-  key_b_buf.checksum = integrity_blinded_checksum(&key_b_buf);
+-  t0 = profile_start();
+-  CHECK_STATUS_OK(otcrypto_mlkem512_encapsulate(&pk_buf, ct_buf, &key_b_buf));
+-  profile_end_and_print(t0, "otcrypto_mlkem512_encapsulate");
+-
+-  otcrypto_const_byte_buf_t ct_const_buf = {.data = ct, .len = sizeof(ct)};
+-  uint32_t key_a_blob[ceil_div(kOtcryptoMlkem512SharedSecretBytes,
+-                               sizeof(uint32_t)) *
+-                      2];
+-  memset(key_a_blob, 0, sizeof(key_a_blob));
+-  otcrypto_blinded_key_t key_a_buf = {
+-      .config = kMlkem512SharedSecretConfig,
+-      .keyblob_length = sizeof(key_a_blob),
+-      .keyblob = key_a_blob,
+-  };
+-  key_a_buf.checksum = integrity_blinded_checksum(&key_a_buf);
+-  t0 = profile_start();
+-  CHECK_STATUS_OK(
+-      otcrypto_mlkem512_decapsulate(&sk_buf, ct_const_buf, &key_a_buf));
+-  profile_end_and_print(t0, "otcrypto_mlkem512_decapsulate");
+-
+-  CHECK_ARRAYS_EQ(key_a_blob, key_b_blob, ARRAYSIZE(key_a_blob));
+-}
+-
+-static void test_mlkem768_randomized(void) {
+-  uint64_t t0;
+-  uint32_t pk[ceil_div(kOtcryptoMlkem768PublicKeyBytes, sizeof(uint32_t))];
+-  uint8_t ct[kOtcryptoMlkem768CiphertextBytes];
+-
+-  otcrypto_unblinded_key_t pk_buf = {
+-      .key_mode = kOtcryptoKeyModeMlkem768,
+-      .key_length = sizeof(pk),
+-      .key = pk,
+-  };
+-  pk_buf.checksum = integrity_unblinded_checksum(&pk_buf);
+-  uint32_t
+-      sk_blob[ceil_div(kOtcryptoMlkem768SecretKeyBytes, sizeof(uint32_t)) * 2];
+-  memset(sk_blob, 0, sizeof(sk_blob));
+-  otcrypto_blinded_key_t sk_buf = {
+-      .config = kMlkem768SecretKeyConfig,
+-      .keyblob_length = sizeof(sk_blob),
+-      .keyblob = sk_blob,
+-  };
+-  sk_buf.checksum = integrity_blinded_checksum(&sk_buf);
+-  t0 = profile_start();
+-  CHECK_STATUS_OK(otcrypto_mlkem768_keygen(&pk_buf, &sk_buf));
+-  profile_end_and_print(t0, "otcrypto_mlkem768_keygen");
+-
+-  otcrypto_byte_buf_t ct_buf = {.data = ct, .len = sizeof(ct)};
+-  uint32_t key_b_blob[ceil_div(kOtcryptoMlkem768SharedSecretBytes,
+-                               sizeof(uint32_t)) *
+-                      2];
+-  memset(key_b_blob, 0, sizeof(key_b_blob));
+-  otcrypto_blinded_key_t key_b_buf = {
+-      .config = kMlkem768SharedSecretConfig,
+-      .keyblob_length = sizeof(key_b_blob),
+-      .keyblob = key_b_blob,
+-  };
+-  key_b_buf.checksum = integrity_blinded_checksum(&key_b_buf);
+-  t0 = profile_start();
+-  CHECK_STATUS_OK(otcrypto_mlkem768_encapsulate(&pk_buf, ct_buf, &key_b_buf));
+-  profile_end_and_print(t0, "otcrypto_mlkem768_encapsulate");
+-
+-  otcrypto_const_byte_buf_t ct_const_buf = {.data = ct, .len = sizeof(ct)};
+-  uint32_t key_a_blob[ceil_div(kOtcryptoMlkem768SharedSecretBytes,
+-                               sizeof(uint32_t)) *
+-                      2];
+-  memset(key_a_blob, 0, sizeof(key_a_blob));
+-  otcrypto_blinded_key_t key_a_buf = {
+-      .config = kMlkem768SharedSecretConfig,
+-      .keyblob_length = sizeof(key_a_blob),
+-      .keyblob = key_a_blob,
+-  };
+-  key_a_buf.checksum = integrity_blinded_checksum(&key_a_buf);
+-  t0 = profile_start();
+-  CHECK_STATUS_OK(
+-      otcrypto_mlkem768_decapsulate(&sk_buf, ct_const_buf, &key_a_buf));
+-  profile_end_and_print(t0, "otcrypto_mlkem768_decapsulate");
+-
+-  CHECK_ARRAYS_EQ(key_a_blob, key_b_blob, ARRAYSIZE(key_a_blob));
+ }
+
+-static void test_mlkem1024_randomized(void) {
+-  uint64_t t0;
+-  uint32_t pk[ceil_div(kOtcryptoMlkem1024PublicKeyBytes, sizeof(uint32_t))];
+-  uint8_t ct[kOtcryptoMlkem1024CiphertextBytes];
+
+-  otcrypto_unblinded_key_t pk_buf = {
+-      .key_mode = kOtcryptoKeyModeMlkem1024,
+-      .key_length = sizeof(pk),
+-      .key = pk,
+-  };
+-  pk_buf.checksum = integrity_unblinded_checksum(&pk_buf);
+-  uint32_t
+-      sk_blob[ceil_div(kOtcryptoMlkem1024SecretKeyBytes, sizeof(uint32_t)) * 2];
+-  memset(sk_blob, 0, sizeof(sk_blob));
+-  otcrypto_blinded_key_t sk_buf = {
+-      .config = kMlkem1024SecretKeyConfig,
+-      .keyblob_length = sizeof(sk_blob),
+-      .keyblob = sk_blob,
+-  };
+-  sk_buf.checksum = integrity_blinded_checksum(&sk_buf);
+-  t0 = profile_start();
+-  CHECK_STATUS_OK(otcrypto_mlkem1024_keygen(&pk_buf, &sk_buf));
+-  profile_end_and_print(t0, "otcrypto_mlkem1024_keygen");
+-
+-  otcrypto_byte_buf_t ct_buf = {.data = ct, .len = sizeof(ct)};
+-  uint32_t key_b_blob[ceil_div(kOtcryptoMlkem1024SharedSecretBytes,
+-                               sizeof(uint32_t)) *
+-                      2];
+-  memset(key_b_blob, 0, sizeof(key_b_blob));
+-  otcrypto_blinded_key_t key_b_buf = {
+-      .config = kMlkem1024SharedSecretConfig,
+-      .keyblob_length = sizeof(key_b_blob),
+-      .keyblob = key_b_blob,
+-  };
+-  key_b_buf.checksum = integrity_blinded_checksum(&key_b_buf);
+-  t0 = profile_start();
+-  CHECK_STATUS_OK(otcrypto_mlkem1024_encapsulate(&pk_buf, ct_buf, &key_b_buf));
+-  profile_end_and_print(t0, "otcrypto_mlkem1024_encapsulate");
+-
+-  otcrypto_const_byte_buf_t ct_const_buf = {.data = ct, .len = sizeof(ct)};
+-  uint32_t key_a_blob[ceil_div(kOtcryptoMlkem1024SharedSecretBytes,
+-                               sizeof(uint32_t)) *
+-                      2];
+-  memset(key_a_blob, 0, sizeof(key_a_blob));
+-  otcrypto_blinded_key_t key_a_buf = {
+-      .config = kMlkem1024SharedSecretConfig,
+-      .keyblob_length = sizeof(key_a_blob),
+-      .keyblob = key_a_blob,
+-  };
+-  key_a_buf.checksum = integrity_blinded_checksum(&key_a_buf);
+-  t0 = profile_start();
+-  CHECK_STATUS_OK(
+-      otcrypto_mlkem1024_decapsulate(&sk_buf, ct_const_buf, &key_a_buf));
+-  profile_end_and_print(t0, "otcrypto_mlkem1024_decapsulate");
+-
+-  CHECK_ARRAYS_EQ(key_a_blob, key_b_blob, ARRAYSIZE(key_a_blob));
+-}
+-
+ bool test_main(void) {
+   CHECK_STATUS_OK(entropy_testutils_auto_mode_init());
+
+@@ -464,10 +291,5 @@ bool test_main(void) {
+   test_mlkem768_derand();
+   test_mlkem1024_derand();
+
+-  // Run randomized tests
+-  test_mlkem512_randomized();
+-  test_mlkem768_randomized();
+-  test_mlkem1024_randomized();
+-
+   return true;
+ }
