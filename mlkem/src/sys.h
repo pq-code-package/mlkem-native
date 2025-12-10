@@ -235,8 +235,8 @@ __contract__(
    * If a feature is enabled at compile-time, we assume it is supported by
    * the host that the resulting library/binary will be built on.
    * If this assumption is not true, you MUST overwrite this function.
-   * See the documentation of MLK_CONFIG_CUSTOM_CAPABILITY_FUNC in config.h
-   * for more information. */
+   * See the documentation of MLK_CONFIG_CUSTOM_CAPABILITY_FUNC in
+   * mlkem_native_config.h for more information. */
   (void)cap;
   return 1;
 }
