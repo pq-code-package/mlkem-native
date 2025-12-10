@@ -63,7 +63,7 @@
  * Name:        MLK_CONFIG_FILE
  *
  * Description: If defined, this is a header that will be included instead
- *              of the default configuration file mlkem/src/config.h.
+ *              of the default configuration file mlkem/mlkem_native_config.h.
  *
  *              When you need to build mlkem-native in multiple configurations,
  *              using varying MLK_CONFIG_FILE can be more convenient
@@ -76,7 +76,7 @@
  *
  *****************************************************************************/
 /* No need to set this -- we _are_ already in a custom config */
-/* #define MLK_CONFIG_FILE "config.h" */
+/* #define MLK_CONFIG_FILE "mlkem_native_config.h" */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_NAMESPACE_PREFIX

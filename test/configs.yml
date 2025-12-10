@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 # Metadata for test configuration files
-# Each entry describes how a test config differs from mlkem/src/config.h
+# Each entry describes how a test config differs from mlkem/mlkem_native_config.h
 
 configs:
   - path: test/no_asm_config.h

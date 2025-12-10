@@ -47,7 +47,7 @@
 /* Functions are prefixed by MLK_CONFIG_NAMESPACE_PREFIX.
  *
  * If multiple parameter sets are used, functions depending on the parameter
- * set are additionally prefixed with 512/768/1024. See config.h.
+ * set are additionally prefixed with 512/768/1024. See mlkem_native_config.h.
  *
  * Example: If MLK_CONFIG_NAMESPACE_PREFIX is mlkem, then
  * MLK_NAMESPACE_K(enc) becomes mlkem512_enc/mlkem768_enc/mlkem1024_enc.
