@@ -20,12 +20,12 @@ VAL=$(cat $META |
   cut -d ":" -f 2 | tr -d ' ')
 
 # More robust extraction using yq
-if (which yq 2>&1 >/dev/null); then
+if (which yq >/dev/null 2>&1); then
   QUERY=".implementations | .[] | select(.name==\"$1\") | .\"$2\""
-  echo "cat $META | yq "$QUERY" -r"
+  echo "cat $META | yq \"$QUERY\" -r"
   VAL_JQ=$(cat $META | yq "$QUERY" -r)
 
-  if [[ $VAL_JQ != $VAL ]]; then
+  if [[ $VAL_JQ != "$VAL" ]]; then
     echo "ERROR parsing metadata file $META"
     exit 1
   fi
@@ -41,5 +41,5 @@ if [[ $INPUT != "" ]]; then
     exit 0
   fi
 else
-  echo $VAL
+  echo "$VAL"
 fi
