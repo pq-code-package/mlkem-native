@@ -23,10 +23,7 @@ The configuration file [mlkem_native_config.h](mlkem_native/mlkem_native_config.
 - `MLK_CONFIG_PARAMETER_SET`: Security level (512, 768, or 1024). Default is 768.
 - `MLK_CONFIG_NAMESPACE_PREFIX`: Symbol prefix for the API. Set to `mlkem` in this example.
 
-To change the security level, modify `MLK_CONFIG_PARAMETER_SET` in the config file or pass it via CFLAGS:
-```bash
-make build CFLAGS="-DMLK_CONFIG_PARAMETER_SET=512"
-```
+To change the security level, modify `MLK_CONFIG_PARAMETER_SET` in the config file or pass it via CFLAGS.
 
 ## Usage
 
