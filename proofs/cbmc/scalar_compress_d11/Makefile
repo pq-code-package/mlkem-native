@@ -23,10 +23,7 @@ CHECK_FUNCTION_CONTRACTS=mlk_scalar_compress_d11
 USE_FUNCTION_CONTRACTS=
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
-
-# SMT backend for proving with contracts and quantifiers
-# To be re-enabled when CBMC Issue #8303 is fixed.
-# CBMCFLAGS=--smt2
+CBMCFLAGS=--smt2
 
 # Uncomment this to see what commands litani is running...
 #VERBOSE=on
