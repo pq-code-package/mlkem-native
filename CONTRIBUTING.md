@@ -2,8 +2,9 @@
 
 # Contributing to mlkem-native
 
-We welcome contributors who can help us build mlkem-native. If you are interested, please contact us, or volunteer for
-any of the open issues. Here are some things to get you started.
+We welcome contributors who can help us build mlkem-native. If you are interested, please contact us via e-mail or discord,
+so we can introduce each other and understand your background and interest. We do not accept contributions from people we
+don't know.
 
 ### nix setup
 
