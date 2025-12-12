@@ -4,13 +4,13 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = polyvec_permute_bitrev_to_custom_harness
+HARNESS_FILE = polymat_permute_bitrev_to_custom_native_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = mlk_polyvec_permute_bitrev_to_custom
+PROOF_UID = mlk_polymat_permute_bitrev_to_custom_native
 
-DEFINES +=
+DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_ARITH_BACKEND_FILE="\"dummy_backend.h\""
 INCLUDES +=
 UNWINDSET +=
 
@@ -19,8 +19,8 @@ REMOVE_FUNCTION_BODY +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_polyvec_permute_bitrev_to_custom
-USE_FUNCTION_CONTRACTS=
+CHECK_FUNCTION_CONTRACTS=mlk_polymat_permute_bitrev_to_custom
+USE_FUNCTION_CONTRACTS=mlk_poly_permute_bitrev_to_custom
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -28,7 +28,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = mlk_polyvec_permute_bitrev_to_custom
+FUNCTION_NAME = mlk_polymat_permute_bitrev_to_custom_native
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
