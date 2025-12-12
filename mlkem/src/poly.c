@@ -344,9 +344,9 @@ void mlk_poly_mulcache_compute(mlk_poly_mulcache *x, const mlk_poly *a)
  */
 
 /* Reference: Embedded in `ntt()` in the reference implementation @[REF]. */
-static void mlk_ntt_butterfly_block(int16_t r[MLKEM_N], int16_t zeta,
-                                    unsigned start, unsigned len,
-                                    unsigned bound)
+static MLK_INLINE void mlk_ntt_butterfly_block(int16_t r[MLKEM_N], int16_t zeta,
+                                               unsigned start, unsigned len,
+                                               unsigned bound)
 __contract__(
   requires(start < MLKEM_N)
   requires(1 <= len && len <= MLKEM_N / 2 && start + 2 * len <= MLKEM_N)
@@ -390,7 +390,7 @@ __contract__(
  */
 
 /* Reference: Embedded in `ntt()` in the reference implementation @[REF]. */
-static void mlk_ntt_layer(int16_t r[MLKEM_N], unsigned layer)
+static MLK_INLINE void mlk_ntt_layer(int16_t r[MLKEM_N], unsigned layer)
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
   requires(1 <= layer && layer <= 7)
@@ -474,7 +474,7 @@ void mlk_poly_ntt(mlk_poly *p)
 /* Compute one layer of inverse NTT */
 
 /* Reference: Embedded into `invntt()` in the reference implementation @[REF] */
-static void mlk_invntt_layer(int16_t *r, unsigned layer)
+static MLK_INLINE void mlk_invntt_layer(int16_t *r, unsigned layer)
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
   requires(1 <= layer && layer <= 7)
