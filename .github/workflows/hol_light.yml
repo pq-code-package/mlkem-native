@@ -187,6 +187,8 @@ jobs:
       matrix:
         proof:
           # Dependencies on {name}.{S,ml} are implicit
+          - name: mlkem_ntt
+            needs: ["mlkem_specs.ml", "mlkem_zetas.ml"]
           - name: mlkem_poly_basemul_acc_montgomery_cached_k2
             needs: ["mlkem_specs.ml"]
           - name: mlkem_poly_basemul_acc_montgomery_cached_k3

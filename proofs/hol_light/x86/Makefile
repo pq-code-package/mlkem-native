@@ -62,7 +62,8 @@ endif
 
 OBJ = mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o \
       mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.o \
-      mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.o
+      mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.o \
+      mlkem/mlkem_ntt.o
 
 # Build object files from assembly sources
 $(OBJ): %.o : %.S
