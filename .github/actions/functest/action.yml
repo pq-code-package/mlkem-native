@@ -47,6 +47,9 @@ inputs:
   examples:
     description: Determine whether to run examples or not
     default: "true"
+  unit:
+    description: Determine whether to run unit tests or not
+    default: "true"
   check_namespace:
     description: Determine whether to check namespacing or not
     default: "true"
@@ -66,6 +69,7 @@ runs:
           echo MODE="${{ inputs.cross_prefix == '' && 'native' || 'cross' }}" >> $GITHUB_ENV
           echo FUNC="${{ inputs.func == 'true' && 'func' || 'no-func' }}" >> $GITHUB_ENV
           echo KAT="${{ inputs.kat == 'true' && 'kat' || 'no-kat' }}" >> $GITHUB_ENV
+          echo UNIT="${{ inputs.unit == 'true' && 'unit' || 'no-unit' }}" >> $GITHUB_ENV
           echo ACVP="${{ inputs.acvp == 'true' && 'acvp' || 'no-acvp' }}" >> $GITHUB_ENV
           echo EXAMPLES="${{ inputs.examples == 'true' && 'examples' || 'no-examples' }}" >> $GITHUB_ENV
           echo STACK="${{ inputs.stack == 'true' && 'stack' || 'no-stack' }}" >> $GITHUB_ENV
@@ -99,11 +103,11 @@ runs:
             - $(python3 --version)
             - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
           EOF
-      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.EXAMPLES }}, ${{ env.STACK }})
+      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.EXAMPLES }}, ${{ env.STACK }}, ${{ env.UNIT }})
         shell: ${{ env.SHELL }}
         run: |
           make clean
-          ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --ldflags="${{ inputs.ldflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.EXAMPLES }} --${{ env.STACK }} -v ${{ inputs.extra_args }}
+          ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --ldflags="${{ inputs.ldflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.EXAMPLES }} --${{ env.STACK }} --${{ env.UNIT }} -v ${{ inputs.extra_args }}
       - name: Post ${{ env.MODE }} Tests
         shell: ${{ env.SHELL }}
         if: success() || failure()
