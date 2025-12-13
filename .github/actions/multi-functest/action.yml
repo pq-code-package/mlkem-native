@@ -44,6 +44,9 @@ inputs:
   examples:
     description: Determine whether to run examples or not
     default: "true"
+  unit:
+    description: Determine whether to run unit tests or not
+    default: "true"
   check_namespace:
     description: Determine whether to check namespacing or not
     default: "true"
@@ -70,6 +73,7 @@ runs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
+          unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
@@ -91,6 +95,7 @@ runs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
+          unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
@@ -112,6 +117,7 @@ runs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
+          unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
@@ -133,6 +139,7 @@ runs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
+          unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
@@ -154,6 +161,7 @@ runs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
+          unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
@@ -175,6 +183,7 @@ runs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
+          unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
@@ -195,6 +204,7 @@ runs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
+          unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
@@ -215,6 +225,7 @@ runs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
+          unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
@@ -235,6 +246,7 @@ runs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
+          unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
@@ -256,6 +268,7 @@ runs:
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
+          unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
