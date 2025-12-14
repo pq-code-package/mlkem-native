@@ -9,6 +9,10 @@ print_string "=== bytecode start: x86/mlkem/mlkem_ntt.o ===\n";;
 print_literal_from_elf "x86/mlkem/mlkem_ntt.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
+print_string "=== bytecode start: x86/mlkem/mlkem_intt.o ===\n";;
+print_literal_from_elf "x86/mlkem/mlkem_intt.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
 print_string "=== bytecode start: x86/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o ===\n";;
 print_literal_from_elf "x86/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o";;
 print_string "==== bytecode end =====================================\n\n";;
