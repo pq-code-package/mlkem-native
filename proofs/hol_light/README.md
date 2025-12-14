@@ -89,7 +89,7 @@ All AArch64 assembly routines used in mlkem-native are covered. Those are:
   * AArch64 modular reduction: [mlkem_poly_reduce.S](arm/mlkem/mlkem_poly_reduce.S)
   * AArch64 'multiplication cache' computation: [mlkem_poly_mulcache_compute.S](arm/mlkem/mlkem_poly_mulcache_compute.S)
   * AArch64 rejection sampling: [mlkem_rej_uniform.S](arm/mlkem/mlkem_rej_uniform.S)
-  * AArch64 polynomial compresseion: [mlkem_poly_tobytes.S](arm/mlkem/mlkem_poly_tobytes.S)
+  * AArch64 polynomial compression: [mlkem_poly_tobytes.S](arm/mlkem/mlkem_poly_tobytes.S)
 - FIPS202:
   * Keccak-F1600 using lazy rotations[^HYBRID]: [keccak_f1600_x1_scalar.S](arm/mlkem/keccak_f1600_x1_scalar.S)
   * Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x1_v84a.S](arm/mlkem/keccak_f1600_x1_v84a.S)
@@ -104,6 +104,7 @@ The following x86_64 assembly routines used in mlkem-native are covered:
   * x86_64 forward NTT: [mlkem_ntt.S](x86/mlkem/mlkem_ntt.S)
   * x86_64 inverse NTT: [mlkem_intt.S](x86/mlkem/mlkem_intt.S)
   * x86_64 base multiplications: [mlkem_poly_basemul_acc_montgomery_cached_k2.S](x86/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.S) [mlkem_poly_basemul_acc_montgomery_cached_k3.S](x86/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.S) [mlkem_poly_basemul_acc_montgomery_cached_k4.S](x86/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.S)
+  * x86_64 modular reduction: [mlkem_reduce.S](x86/mlkem/mlkem_reduce.S)
 
 <!--- bibliography --->
 [^HYBRID]: Becker, Kannwischer: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64, [https://eprint.iacr.org/2022/1243](https://eprint.iacr.org/2022/1243)

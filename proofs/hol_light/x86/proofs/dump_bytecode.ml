@@ -24,3 +24,7 @@ print_string "==== bytecode end =====================================\n\n";;
 print_string "=== bytecode start: x86/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.o ===\n";;
 print_literal_from_elf "x86/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.o";;
 print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: x86/mlkem/mlkem_reduce.o ===\n";;
+print_literal_from_elf "x86/mlkem/mlkem_reduce.o";;
+print_string "==== bytecode end =====================================\n\n";;

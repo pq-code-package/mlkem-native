@@ -64,7 +64,8 @@ OBJ = mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o \
       mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.o \
       mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.o \
       mlkem/mlkem_ntt.o \
-      mlkem/mlkem_intt.o
+      mlkem/mlkem_intt.o \
+      mlkem/mlkem_reduce.o
 
 # Build object files from assembly sources
 $(OBJ): %.o : %.S
