@@ -44,6 +44,23 @@ let avx2_ntt_order = define
  `avx2_ntt_order i =
     bitreverse7(64 * (i DIV 64) + ((i MOD 64) DIV 16) + 4 * (i MOD 16))`;;
 
+let avx2_ntt_order' = define
+ `avx2_ntt_order' i =
+    let j = bitreverse7 i in
+    (64 * (j DIV 64) + 16 * (j MOD 4) + (j MOD 64) DIV 4)`;;
+
+let avx2_reorder = define
+ `avx2_reorder i =
+    let r = (i DIV 16) MOD 2
+    and q = 16 * (i DIV 32) + i MOD 16 in
+    2 * avx2_ntt_order q + r`;;
+
+let avx2_reorder' = define
+ `avx2_reorder' i =
+    let r = i MOD 2
+    and q = avx2_ntt_order'(i DIV 2) in
+    (q DIV 16) * 32 + r * 16 + q MOD 16`;;
+
 (* ------------------------------------------------------------------------- *)
 (* Conversion of each element of an array to Montgomery form with B = 2^16.  *)
 (* ------------------------------------------------------------------------- *)
@@ -91,6 +108,14 @@ let avx2_forward_ntt = define
                        &17 pow ((2 * avx2_ntt_order q + 1) * j))
     rem &3329`;;
 
+let avx2_inverse_ntt = define
+ `avx2_inverse_ntt f k =
+    (&512 * isum (0..127)
+                 (\j. f(avx2_ntt_order' j DIV 16 * 32 +
+                        k MOD 2 * 16 +
+                        avx2_ntt_order' j MOD 16) *
+                      &1175 pow ((2 * j + 1) * k DIV 2)))
+    rem &3329`;;
 (* ------------------------------------------------------------------------- *)
 (* Show how these relate to the "pure" ones.                                 *)
 (* ------------------------------------------------------------------------- *)
@@ -109,6 +134,26 @@ let INVERSE_NTT = prove
   REWRITE_TAC[ARITH_RULE `(2 * x + i MOD 2) DIV 2 = x`] THEN
   REWRITE_TAC[MOD_MULT_ADD; MOD_MOD_REFL] THEN
   MAP_EVERY X_GEN_TAC [`a:num->int`; `i:num`] THEN
+  CONV_TAC INT_REM_DOWN_CONV THEN REWRITE_TAC[INT_MUL_ASSOC] THEN
+  ONCE_REWRITE_TAC[GSYM INT_MUL_REM] THEN CONV_TAC INT_REDUCE_CONV);;
+
+let AVX2_FORWARD_NTT = prove
+ (`avx2_forward_ntt = reorder avx2_reorder o pure_forward_ntt`,
+  REWRITE_TAC[FUN_EQ_THM; o_DEF; avx2_reorder; reorder] THEN
+  REWRITE_TAC[avx2_forward_ntt; pure_forward_ntt] THEN
+  MAP_EVERY X_GEN_TAC [`x:num->int`; `k:num`] THEN
+  CONV_TAC(ONCE_DEPTH_CONV let_CONV) THEN
+  SIMP_TAC[MOD_MULT_ADD; DIV_MULT_ADD; ARITH_EQ; MOD_MOD_REFL] THEN
+  REWRITE_TAC[ARITH_RULE `x MOD 2 DIV 2 = 0`; ADD_CLAUSES]);;
+
+let AVX2_INVERSE_NTT = prove
+ (`avx2_inverse_ntt = tomont_3329 o pure_inverse_ntt o reorder avx2_reorder'`,
+  REWRITE_TAC[FUN_EQ_THM; o_DEF; avx2_reorder'; reorder] THEN
+  REWRITE_TAC[avx2_inverse_ntt; pure_inverse_ntt; tomont_3329] THEN
+  REWRITE_TAC[ARITH_RULE `(2 * x + i MOD 2) DIV 2 = x`] THEN
+  REWRITE_TAC[MOD_MULT_ADD; MOD_MOD_REFL] THEN
+  MAP_EVERY X_GEN_TAC [`x:num->int`; `k:num`] THEN
+  CONV_TAC(ONCE_DEPTH_CONV let_CONV) THEN
   CONV_TAC INT_REM_DOWN_CONV THEN REWRITE_TAC[INT_MUL_ASSOC] THEN
   ONCE_REWRITE_TAC[GSYM INT_MUL_REM] THEN CONV_TAC INT_REDUCE_CONV);;
 
@@ -172,6 +217,25 @@ let INVERSE_NTT_ALT = prove
   CONV_TAC INT_REM_DOWN_CONV THEN
   AP_THM_TAC THEN AP_TERM_TAC THEN CONV_TAC INT_ARITH);;
 
+let AVX2_INVERSE_NTT_ALT = prove
+ (`avx2_inverse_ntt f k =
+    isum (0..127)
+      (\j. f(avx2_ntt_order' j DIV 16 * 32 +
+             k MOD 2 * 16 +
+             avx2_ntt_order' j MOD 16) *
+           (&512 *
+            (&1175 pow ((2 * j + 1) * k DIV 2)) rem &3329)
+           rem &3329) rem &3329`,
+  REWRITE_TAC[avx2_inverse_ntt; GSYM ISUM_LMUL] THEN
+  MATCH_MP_TAC (REWRITE_RULE[] (ISPEC
+      `(\x y. x rem &3329 = y rem &3329)` ISUM_RELATED)) THEN
+  REWRITE_TAC[INT_REM_EQ; FINITE_NUMSEG; INT_CONG_ADD] THEN
+  X_GEN_TAC `i:num` THEN DISCH_TAC THEN
+  REWRITE_TAC[GSYM INT_OF_NUM_REM; GSYM INT_OF_NUM_CLAUSES;
+              GSYM INT_REM_EQ] THEN
+  CONV_TAC INT_REM_DOWN_CONV THEN
+  AP_THM_TAC THEN AP_TERM_TAC THEN CONV_TAC INT_ARITH);;
+
 let FORWARD_NTT_CONV =
   GEN_REWRITE_CONV I [FORWARD_NTT_ALT] THENC
   LAND_CONV EXPAND_ISUM_CONV THENC
@@ -185,6 +249,12 @@ let AVX2_NTT_ORDER_CLAUSES = end_itlist CONJ (map
  (GEN_REWRITE_CONV I [avx2_ntt_order] THENC DEPTH_CONV WORD_NUM_RED_CONV THENC
   GEN_REWRITE_CONV I [BITREVERSE7_CLAUSES])
  (map (curry mk_comb `avx2_ntt_order` o mk_small_numeral) (0--127)));;
+
+let AVX2_NTT_ORDER_CLAUSES' = end_itlist CONJ (map
+ (GEN_REWRITE_CONV I [avx2_ntt_order'] THENC DEPTH_CONV WORD_NUM_RED_CONV THENC
+ DEPTH_CONV let_CONV THENC
+ GEN_REWRITE_CONV ONCE_DEPTH_CONV [BITREVERSE7_CLAUSES] THENC NUM_REDUCE_CONV)
+ (map (curry mk_comb `avx2_ntt_order'` o mk_small_numeral) (0--127)));;
 
 let AVX2_FORWARD_NTT_CONV =
   GEN_REWRITE_CONV I [AVX2_FORWARD_NTT_ALT] THENC
@@ -201,6 +271,16 @@ let INVERSE_NTT_CONV =
   LAND_CONV EXPAND_ISUM_CONV THENC
   DEPTH_CONV NUM_RED_CONV THENC
   GEN_REWRITE_CONV ONCE_DEPTH_CONV [BITREVERSE7_CLAUSES] THENC
+  DEPTH_CONV NUM_RED_CONV THENC
+  GEN_REWRITE_CONV DEPTH_CONV [INT_OF_NUM_POW; INT_OF_NUM_REM] THENC
+  ONCE_DEPTH_CONV EXP_MOD_CONV THENC INT_REDUCE_CONV;;
+
+let AVX2_INVERSE_NTT_CONV =
+  GEN_REWRITE_CONV I [AVX2_INVERSE_NTT_ALT] THENC
+  NUM_REDUCE_CONV THENC ONCE_DEPTH_CONV let_CONV THENC
+  LAND_CONV EXPAND_ISUM_CONV THENC
+  DEPTH_CONV NUM_RED_CONV THENC
+  GEN_REWRITE_CONV ONCE_DEPTH_CONV [AVX2_NTT_ORDER_CLAUSES'] THENC
   DEPTH_CONV NUM_RED_CONV THENC
   GEN_REWRITE_CONV DEPTH_CONV [INT_OF_NUM_POW; INT_OF_NUM_REM] THENC
   ONCE_DEPTH_CONV EXP_MOD_CONV THENC INT_REDUCE_CONV;;
@@ -543,7 +623,7 @@ let CONGBOUND_BARRED_X86 = prove
  (`!a a' l u.
         ((ival a == a') (mod &3329) /\ l <= ival a /\ ival a <= u)
         ==> (ival(barred_x86 a) == a') (mod &3329) /\
-            &0 <= ival(barred_x86 a) /\ ival(barred_x86 a) < &6658`,
+            &0 <= ival(barred_x86 a) /\ ival(barred_x86 a) <= &6657`,
   REPEAT GEN_TAC THEN STRIP_TAC THEN REWRITE_TAC[barred_x86] THEN
   REWRITE_TAC[WORD_BLAST
    `word_ishr (word_subword (x:int32) (16,16):int16) 10 =

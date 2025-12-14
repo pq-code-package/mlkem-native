@@ -27,6 +27,7 @@ source code and documentation.
   - [dev/x86_64/src/ntt.S](dev/x86_64/src/ntt.S)
   - [mlkem/src/native/x86_64/src/intt.S](mlkem/src/native/x86_64/src/intt.S)
   - [mlkem/src/native/x86_64/src/ntt.S](mlkem/src/native/x86_64/src/ntt.S)
+  - [proofs/hol_light/x86/mlkem/mlkem_intt.S](proofs/hol_light/x86/mlkem/mlkem_intt.S)
   - [proofs/hol_light/x86/mlkem/mlkem_ntt.S](proofs/hol_light/x86/mlkem/mlkem_ntt.S)
 
 ### `FIPS140_3_IG`
@@ -260,6 +261,7 @@ source code and documentation.
   - [mlkem/src/native/x86_64/src/nttunpack.S](mlkem/src/native/x86_64/src/nttunpack.S)
   - [mlkem/src/native/x86_64/src/reduce.S](mlkem/src/native/x86_64/src/reduce.S)
   - [mlkem/src/native/x86_64/src/tomont.S](mlkem/src/native/x86_64/src/tomont.S)
+  - [proofs/hol_light/x86/mlkem/mlkem_intt.S](proofs/hol_light/x86/mlkem/mlkem_intt.S)
   - [proofs/hol_light/x86/mlkem/mlkem_ntt.S](proofs/hol_light/x86/mlkem/mlkem_ntt.S)
 
 ### `SLOTHY`

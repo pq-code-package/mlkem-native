@@ -102,6 +102,7 @@ The NTT and invNTT functions are super-optimized using [SLOTHY](https://github.c
 The following x86_64 assembly routines used in mlkem-native are covered:
 - ML-KEM Arithmetic:
   * x86_64 forward NTT: [mlkem_ntt.S](x86/mlkem/mlkem_ntt.S)
+  * x86_64 inverse NTT: [mlkem_intt.S](x86/mlkem/mlkem_intt.S)
   * x86_64 base multiplications: [mlkem_poly_basemul_acc_montgomery_cached_k2.S](x86/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.S) [mlkem_poly_basemul_acc_montgomery_cached_k3.S](x86/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.S) [mlkem_poly_basemul_acc_montgomery_cached_k4.S](x86/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.S)
 
 <!--- bibliography --->
