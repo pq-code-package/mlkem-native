@@ -105,6 +105,7 @@ The following x86_64 assembly routines used in mlkem-native are covered:
   * x86_64 inverse NTT: [mlkem_intt.S](x86/mlkem/mlkem_intt.S)
   * x86_64 base multiplications: [mlkem_poly_basemul_acc_montgomery_cached_k2.S](x86/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.S) [mlkem_poly_basemul_acc_montgomery_cached_k3.S](x86/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.S) [mlkem_poly_basemul_acc_montgomery_cached_k4.S](x86/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.S)
   * x86_64 modular reduction: [mlkem_reduce.S](x86/mlkem/mlkem_reduce.S)
+  * x86_64 polynomial compression: [mlkem_tobytes.S](arm/mlkem/mlkem_tobytes.S)
 
 <!--- bibliography --->
 [^HYBRID]: Becker, Kannwischer: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64, [https://eprint.iacr.org/2022/1243](https://eprint.iacr.org/2022/1243)
