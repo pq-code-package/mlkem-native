@@ -25,13 +25,11 @@
  */
 
 /*
- * Test configuration: Configuration for custom FIPS202 implementation
+ * Test configuration: Test configuration with heap-based allocation
  *
  * This configuration differs from the default mlkem/mlkem_native_config.h in
  * the following places:
- *   - MLK_CONFIG_NAMESPACE_PREFIX
- *   - MLK_CONFIG_FIPS202_CUSTOM_HEADER
- *   - MLK_CONFIG_FIPS202X4_CUSTOM_HEADER
+ *   - MLK_CONFIG_CUSTOM_ALLOC_FREE
  */
 
 
@@ -75,7 +73,6 @@
  *              on the command line.
  *
  *****************************************************************************/
-/* No need to set this -- we _are_ already in a custom config */
 /* #define MLK_CONFIG_FILE "mlkem_native_config.h" */
 
 /******************************************************************************
@@ -89,7 +86,9 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLK_CONFIG_NAMESPACE_PREFIX mlkem
+#if !defined(MLK_CONFIG_NAMESPACE_PREFIX)
+#define MLK_CONFIG_NAMESPACE_PREFIX MLK_DEFAULT_NAMESPACE_PREFIX
+#endif
 
 /******************************************************************************
  * Name:        MLK_CONFIG_MULTILEVEL_BUILD
@@ -343,7 +342,7 @@
  *              the same API (see FIPS202.md).
  *
  *****************************************************************************/
-#define MLK_CONFIG_FIPS202_CUSTOM_HEADER "../custom_fips202/fips202.h"
+/* #define MLK_CONFIG_FIPS202_CUSTOM_HEADER "SOME_FILE.h" */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_FIPS202X4_CUSTOM_HEADER
@@ -359,7 +358,7 @@
  *              the same API (see FIPS202.md).
  *
  *****************************************************************************/
-#define MLK_CONFIG_FIPS202X4_CUSTOM_HEADER "../custom_fips202/fips202x4.h"
+/* #define MLK_CONFIG_FIPS202X4_CUSTOM_HEADER "SOME_FILE.h" */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_CUSTOM_ZEROIZE
@@ -495,15 +494,14 @@
  *              code will handle this case and invoke MLK_CUSTOM_FREE.
  *
  *****************************************************************************/
-/* #define MLK_CONFIG_CUSTOM_ALLOC_FREE
-   #if !defined(__ASSEMBLER__)
-   #include <stdlib.h>
-   #define MLK_CUSTOM_ALLOC(v, T, N)                              \
-     T* (v) = (T *)aligned_alloc(MLK_DEFAULT_ALIGN,               \
-                                 MLK_ALIGN_UP(sizeof(T) * (N)))
-   #define MLK_CUSTOM_FREE(v, T, N) free(v)
-   #endif
-*/
+#define MLK_CONFIG_CUSTOM_ALLOC_FREE
+#if !defined(__ASSEMBLER__)
+#include <stdlib.h>
+#define MLK_CUSTOM_ALLOC(v, T, N) \
+  T *v = (T *)aligned_alloc(MLK_DEFAULT_ALIGN, MLK_ALIGN_UP(sizeof(T) * (N)))
+#define MLK_CUSTOM_FREE(v, T, N) free(v)
+#endif /* !__ASSEMBLER__ */
+
 
 /******************************************************************************
  * Name:        MLK_CONFIG_CUSTOM_MEMCPY
