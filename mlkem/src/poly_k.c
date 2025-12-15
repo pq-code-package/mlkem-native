@@ -333,16 +333,20 @@ void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
   extkey[1][MLKEM_SYMBYTES] = nonce1;
   extkey[2][MLKEM_SYMBYTES] = nonce2;
   extkey[3][MLKEM_SYMBYTES] = nonce3;
+
   mlk_prf_eta1_x4(buf, extkey);
   mlk_poly_cbd_eta1(r0, buf[0]);
   mlk_poly_cbd_eta1(r1, buf[1]);
   mlk_poly_cbd_eta1(r2, buf[2]);
-  mlk_poly_cbd_eta1(r3, buf[3]);
+  if (r3 != NULL)
+  {
+    mlk_poly_cbd_eta1(r3, buf[3]);
+    mlk_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA1 + 1);
+  }
 
   mlk_assert_abs_bound(r0, MLKEM_N, MLKEM_ETA1 + 1);
   mlk_assert_abs_bound(r1, MLKEM_N, MLKEM_ETA1 + 1);
   mlk_assert_abs_bound(r2, MLKEM_N, MLKEM_ETA1 + 1);
-  mlk_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA1 + 1);
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */

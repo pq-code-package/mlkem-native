@@ -541,7 +541,8 @@ __contract__(
  *              and nonces, with output polynomials close to centered binomial
  *              distribution with parameter MLKEM_ETA1.
  *
- * Arguments:   - mlk_poly *r{0,1,2,3}: pointer to output polynomial
+ * Arguments:   - mlk_poly *r{0,1,2,3}: pointer to output polynomial. The last
+ *                polynomial pointer may be NULL.
  *              - const uint8_t *seed: pointer to input seed
  *                                     (of length MLKEM_SYMBYTES bytes)
  *              - uint8_t nonce{0,1,2,3}: one-byte input nonce
@@ -565,16 +566,15 @@ __contract__(
   requires(memory_no_alias(r0, sizeof(mlk_poly)))
   requires(memory_no_alias(r1, sizeof(mlk_poly)))
   requires(memory_no_alias(r2, sizeof(mlk_poly)))
-  requires(memory_no_alias(r3, sizeof(mlk_poly)))
+  requires(r3 == NULL || memory_no_alias(r3, sizeof(mlk_poly)))
   assigns(memory_slice(r0, sizeof(mlk_poly)))
   assigns(memory_slice(r1, sizeof(mlk_poly)))
   assigns(memory_slice(r2, sizeof(mlk_poly)))
-  assigns(memory_slice(r3, sizeof(mlk_poly)))
-  ensures(
-    array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
-    && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
-    && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
-    && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1));
+  assigns(r3 != NULL: memory_slice(r3, sizeof(mlk_poly)))
+  ensures(array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1))
+  ensures(array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1))
+  ensures(array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1))
+  ensures(r3 != NULL ==> array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1))
 );
 
 #if MLKEM_ETA1 == MLKEM_ETA2
