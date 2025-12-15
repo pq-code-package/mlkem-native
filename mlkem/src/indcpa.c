@@ -424,13 +424,11 @@ int mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
    * Only the first three output buffers are needed.
    * The laster parameter is a dummy that's overwritten later.
    */
-  mlk_poly_getnoise_eta1_4x(&skpv->vec[0], &skpv->vec[1], &skpv->vec[2],
-                            &pkpv->vec[0] /* irrelevant */, noiseseed, 0, 1, 2,
-                            0xFF /* irrelevant */);
+  mlk_poly_getnoise_eta1_4x(&skpv->vec[0], &skpv->vec[1], &skpv->vec[2], NULL,
+                            noiseseed, 0, 1, 2, 0xFF /* irrelevant */);
   /* Same here */
-  mlk_poly_getnoise_eta1_4x(&e->vec[0], &e->vec[1], &e->vec[2],
-                            &pkpv->vec[0] /* irrelevant */, noiseseed, 3, 4, 5,
-                            0xFF /* irrelevant */);
+  mlk_poly_getnoise_eta1_4x(&e->vec[0], &e->vec[1], &e->vec[2], NULL, noiseseed,
+                            3, 4, 5, 0xFF /* irrelevant */);
 #elif MLKEM_K == 4
   mlk_poly_getnoise_eta1_4x(&skpv->vec[0], &skpv->vec[1], &skpv->vec[2],
                             &skpv->vec[3], noiseseed, 0, 1, 2, 3);
@@ -520,8 +518,8 @@ int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
    * In this call, only the first three output buffers are needed.
    * The last parameter is a dummy that's overwritten later.
    */
-  mlk_poly_getnoise_eta1_4x(&sp->vec[0], &sp->vec[1], &sp->vec[2], &b->vec[0],
-                            coins, 0, 1, 2, 0xFF);
+  mlk_poly_getnoise_eta1_4x(&sp->vec[0], &sp->vec[1], &sp->vec[2], NULL, coins,
+                            0, 1, 2, 0xFF /* irrelevant */);
   /* The fourth output buffer in this call _is_ used. */
   mlk_poly_getnoise_eta2_4x(&ep->vec[0], &ep->vec[1], &ep->vec[2], epp, coins,
                             3, 4, 5, 6);
