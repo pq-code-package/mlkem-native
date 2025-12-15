@@ -189,10 +189,7 @@ void mlk_poly_rej_uniform_x4(mlk_poly *vec0, mlk_poly *vec1, mlk_poly *vec2,
             memory_slice(vec1, sizeof(mlk_poly)),
             memory_slice(vec2, sizeof(mlk_poly)),
             memory_slice(vec3, sizeof(mlk_poly)),
-            object_whole(buf[0]),
-            object_whole(buf[1]),
-            object_whole(buf[2]),
-            object_whole(buf[3]))
+            object_whole(buf))
     invariant(ctr[0] <= MLKEM_N && ctr[1] <= MLKEM_N)
     invariant(ctr[2] <= MLKEM_N && ctr[3] <= MLKEM_N)
     invariant(array_bound(vec0->coeffs, 0, ctr[0], 0, MLKEM_Q))

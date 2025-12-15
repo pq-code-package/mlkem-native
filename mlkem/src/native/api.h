@@ -226,7 +226,7 @@ static MLK_INLINE int mlk_poly_mulcache_compute_native(
 __contract__(
   requires(memory_no_alias(cache, sizeof(int16_t) * (MLKEM_N / 2)))
   requires(memory_no_alias(mlk_poly, sizeof(int16_t) * MLKEM_N))
-  assigns(object_whole(cache))
+  assigns(memory_slice(cache, sizeof(int16_t) * (MLKEM_N / 2)))
   ensures(return_value == MLK_NATIVE_FUNC_FALLBACK || return_value == MLK_NATIVE_FUNC_SUCCESS)
   ensures((return_value == MLK_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(cache, 0, MLKEM_N/2, MLKEM_Q))
 );
@@ -357,7 +357,7 @@ __contract__(
   requires(memory_no_alias(r, MLKEM_POLYBYTES))
   requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_N))
   requires(array_bound(a, 0, MLKEM_N, 0, MLKEM_Q))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, MLKEM_POLYBYTES))
   ensures(return_value == MLK_NATIVE_FUNC_SUCCESS || return_value == MLK_NATIVE_FUNC_FALLBACK)
 );
 #endif /* MLK_USE_NATIVE_POLY_TOBYTES */

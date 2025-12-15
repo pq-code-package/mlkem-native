@@ -45,7 +45,7 @@ __contract__(
   requires(memory_no_alias(a, sizeof(mlk_polymat)))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
   requires(transposed == 0 || transposed == 1)
-  assigns(object_whole(a))
+  assigns(memory_slice(a, sizeof(mlk_polymat)))
   ensures(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
   array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
 );
@@ -75,8 +75,8 @@ __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCPA_SECRETKEYBYTES))
   requires(memory_no_alias(coins, MLKEM_SYMBYTES))
-  assigns(object_whole(pk))
-  assigns(object_whole(sk))
+  assigns(memory_slice(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
+  assigns(memory_slice(sk, MLKEM_INDCPA_SECRETKEYBYTES))
 );
 
 #define mlk_indcpa_enc MLK_NAMESPACE_K(indcpa_enc)
@@ -109,7 +109,7 @@ __contract__(
   requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES))
   requires(memory_no_alias(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
   requires(memory_no_alias(coins, MLKEM_SYMBYTES))
-  assigns(object_whole(c))
+  assigns(memory_slice(c, MLKEM_INDCPA_BYTES))
 );
 
 #define mlk_indcpa_dec MLK_NAMESPACE_K(indcpa_dec)
@@ -137,7 +137,7 @@ __contract__(
   requires(memory_no_alias(c, MLKEM_INDCPA_BYTES))
   requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCPA_SECRETKEYBYTES))
-  assigns(object_whole(m))
+  assigns(memory_slice(m, MLKEM_INDCPA_MSGBYTES))
 );
 
 #endif /* !MLK_INDCPA_H */

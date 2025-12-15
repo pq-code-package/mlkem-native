@@ -93,7 +93,7 @@ __contract__(
   requires(memory_no_alias(mlk_poly, sizeof(int16_t) * MLKEM_N))
   requires(zetas == mlk_aarch64_zetas_mulcache_native)
   requires(zetas_twisted == mlk_aarch64_zetas_mulcache_twisted_native)
-  assigns(object_whole(cache))
+  assigns(memory_slice(cache, sizeof(int16_t) * (MLKEM_N / 2)))
   ensures(array_abs_bound(cache, 0, MLKEM_N/2, MLKEM_Q))
 );
 
@@ -105,7 +105,7 @@ __contract__(
   requires(memory_no_alias(r, MLKEM_POLYBYTES))
   requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_N))
   requires(array_bound(a, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, MLKEM_POLYBYTES))
 );
 
 #define mlk_polyvec_basemul_acc_montgomery_cached_asm_k2 \

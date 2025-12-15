@@ -276,7 +276,7 @@ MLK_STATIC_TESTABLE void mlk_poly_mulcache_compute_c(mlk_poly_mulcache *x,
 __contract__(
   requires(memory_no_alias(x, sizeof(mlk_poly_mulcache)))
   requires(memory_no_alias(a, sizeof(mlk_poly)))
-  assigns(object_whole(x))
+  assigns(memory_slice(x, sizeof(mlk_poly_mulcache)))
 )
 {
   unsigned i;

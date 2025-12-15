@@ -30,7 +30,7 @@ __contract__(
   requires(memory_no_alias(in1, inlen))
   requires(memory_no_alias(in2, inlen))
   requires(memory_no_alias(in3, inlen))
-  assigns(object_whole(state))
+  assigns(memory_slice(state, sizeof(mlk_shake128x4ctx)))
 );
 
 #define mlk_shake128x4_squeezeblocks MLK_NAMESPACE(shake128x4_squeezeblocks)
@@ -48,7 +48,7 @@ __contract__(
     memory_slice(out1, nblocks * SHAKE128_RATE),
     memory_slice(out2, nblocks * SHAKE128_RATE),
     memory_slice(out3, nblocks * SHAKE128_RATE),
-    object_whole(state))
+    memory_slice(state, sizeof(mlk_shake128x4ctx)))
 );
 
 #define mlk_shake128x4_init MLK_NAMESPACE(shake128x4_init)

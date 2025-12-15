@@ -50,7 +50,6 @@
  */
 #define object_whole(...) __CPROVER_object_whole(__VA_ARGS__)
 #define memory_slice(...) __CPROVER_object_upto(__VA_ARGS__)
-#define same_object(...) __CPROVER_same_object(__VA_ARGS__)
 
 /*
  * Pointer-related predicates

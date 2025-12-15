@@ -142,7 +142,7 @@ __contract__(
   requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_DV))
   requires(memory_no_alias(a, sizeof(mlk_poly)))
   requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
-  assigns(object_whole(r)))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_DV)))
 {
 #if MLKEM_DV == 4
   mlk_poly_compress_d4(r, a);
@@ -179,7 +179,7 @@ static MLK_INLINE void mlk_poly_decompress_dv(
 __contract__(
   requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_DV))
   requires(memory_no_alias(r, sizeof(mlk_poly)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
   ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 {
 #if MLKEM_DV == 4
@@ -217,7 +217,7 @@ __contract__(
   requires(memory_no_alias(a, sizeof(mlk_polyvec)))
   requires(forall(k0, 0, MLKEM_K,
          array_bound(a->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
 );
 
 #define mlk_polyvec_decompress_du MLK_NAMESPACE_K(polyvec_decompress_du)
@@ -244,7 +244,7 @@ void mlk_polyvec_decompress_du(mlk_polyvec *r,
 __contract__(
   requires(memory_no_alias(a, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, sizeof(mlk_polyvec)))
   ensures(forall(k0, 0, MLKEM_K,
          array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 );
@@ -273,7 +273,7 @@ __contract__(
   requires(memory_no_alias(r, MLKEM_POLYVECBYTES))
   requires(forall(k0, 0, MLKEM_K,
          array_bound(a->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, MLKEM_POLYVECBYTES))
 );
 
 #define mlk_polyvec_frombytes MLK_NAMESPACE_K(polyvec_frombytes)
@@ -299,7 +299,7 @@ void mlk_polyvec_frombytes(mlk_polyvec *r, const uint8_t a[MLKEM_POLYVECBYTES])
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   requires(memory_no_alias(a, MLKEM_POLYVECBYTES))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, sizeof(mlk_polyvec)))
   ensures(forall(k0, 0, MLKEM_K,
         array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
 );
@@ -329,7 +329,7 @@ __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   requires(forall(j, 0, MLKEM_K,
   array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, sizeof(mlk_polyvec)))
   ensures(forall(j, 0, MLKEM_K,
   array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLK_NTT_BOUND)))
 );
@@ -358,7 +358,7 @@ MLK_INTERNAL_API
 void mlk_polyvec_invntt_tomont(mlk_polyvec *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, sizeof(mlk_polyvec)))
   ensures(forall(j, 0, MLKEM_K,
   array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND)))
 );
@@ -400,7 +400,7 @@ __contract__(
   requires(memory_no_alias(b_cache, sizeof(mlk_polyvec_mulcache)))
   requires(forall(k1, 0, MLKEM_K,
      array_bound(a->vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
 );
 
 #define mlk_polyvec_mulcache_compute MLK_NAMESPACE_K(polyvec_mulcache_compute)
@@ -438,7 +438,7 @@ void mlk_polyvec_mulcache_compute(mlk_polyvec_mulcache *x, const mlk_polyvec *a)
 __contract__(
   requires(memory_no_alias(x, sizeof(mlk_polyvec_mulcache)))
   requires(memory_no_alias(a, sizeof(mlk_polyvec)))
-  assigns(object_whole(x))
+  assigns(memory_slice(x, sizeof(mlk_polyvec_mulcache)))
 );
 
 #define mlk_polyvec_reduce MLK_NAMESPACE_K(polyvec_reduce)
@@ -467,7 +467,7 @@ MLK_INTERNAL_API
 void mlk_polyvec_reduce(mlk_polyvec *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, sizeof(mlk_polyvec)))
   ensures(forall(k0, 0, MLKEM_K,
     array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 );
@@ -506,7 +506,7 @@ __contract__(
   requires(forall(j1, 0, MLKEM_K,
           forall(k1, 0, MLKEM_N,
             (int32_t)r->vec[j1].coeffs[k1] + b->vec[j1].coeffs[k1] >= INT16_MIN)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, sizeof(mlk_polyvec)))
 );
 
 #define mlk_polyvec_tomont MLK_NAMESPACE_K(polyvec_tomont)
@@ -529,7 +529,6 @@ void mlk_polyvec_tomont(mlk_polyvec *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
   assigns(memory_slice(r, sizeof(mlk_polyvec)))
-  assigns(object_whole(r))
   ensures(forall(j, 0, MLKEM_K,
     array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
 );
@@ -615,7 +614,7 @@ void mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_poly)))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
   ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_ETA2 + 1))
 );
 #endif /* MLKEM_K == 2 || MLKEM_K == 4 */
@@ -651,15 +650,19 @@ void mlk_poly_getnoise_eta1122_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
                                   uint8_t nonce0, uint8_t nonce1,
                                   uint8_t nonce2, uint8_t nonce3)
 __contract__(
-  requires( /* r0, r1 consecutive, r2, r3 consecutive */
- (memory_no_alias(r0, 2 * sizeof(mlk_poly)) && memory_no_alias(r2, 2 * sizeof(mlk_poly)) &&
-   r1 == r0 + 1 && r3 == r2 + 1 && !same_object(r0, r2)))
+  requires(memory_no_alias(r0, sizeof(mlk_poly)))
+  requires(memory_no_alias(r1, sizeof(mlk_poly)))
+  requires(memory_no_alias(r2, sizeof(mlk_poly)))
+  requires(memory_no_alias(r3, sizeof(mlk_poly)))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
-  assigns(object_whole(r0), object_whole(r1), object_whole(r2), object_whole(r3))
+  assigns(memory_slice(r0, sizeof(mlk_poly)))
+  assigns(memory_slice(r1, sizeof(mlk_poly)))
+  assigns(memory_slice(r2, sizeof(mlk_poly)))
+  assigns(memory_slice(r3, sizeof(mlk_poly)))
   ensures(array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
-     && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
-     && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA2 + 1)
-     && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA2 + 1));
+       && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+       && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA2 + 1)
+       && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA2 + 1))
 );
 #endif /* MLKEM_K == 2 */
 

@@ -159,7 +159,7 @@ void mlk_poly_mulcache_compute(mlk_poly_mulcache *x, const mlk_poly *a)
 __contract__(
   requires(memory_no_alias(x, sizeof(mlk_poly_mulcache)))
   requires(memory_no_alias(a, sizeof(mlk_poly)))
-  assigns(object_whole(x))
+  assigns(memory_slice(x, sizeof(mlk_poly_mulcache)))
 );
 
 #define mlk_poly_reduce MLK_NAMESPACE(poly_reduce)
@@ -252,7 +252,7 @@ __contract__(
   requires(forall(k0, 0, MLKEM_N, (int32_t) r->coeffs[k0] - b->coeffs[k0] <= INT16_MAX))
   requires(forall(k1, 0, MLKEM_N, (int32_t) r->coeffs[k1] - b->coeffs[k1] >= INT16_MIN))
   ensures(forall(k, 0, MLKEM_N, r->coeffs[k] == old(*r).coeffs[k] - b->coeffs[k]))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
 );
 
 #define mlk_poly_ntt MLK_NAMESPACE(poly_ntt)

@@ -85,7 +85,7 @@ void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
 
   for (i = 0; i < MLKEM_K; i++)
   __loop__(
-    assigns(i, object_whole(r))
+    assigns(i, memory_slice(r, MLKEM_POLYVECBYTES))
     invariant(i <= MLKEM_K)
   )
   {
@@ -157,7 +157,7 @@ __contract__(
   requires(memory_no_alias(b_cache, sizeof(mlk_polyvec_mulcache)))
   requires(forall(k1, 0, MLKEM_K,
      array_bound(a->vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
 )
 {
   unsigned i;

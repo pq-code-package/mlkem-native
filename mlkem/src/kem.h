@@ -143,8 +143,8 @@ __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
   requires(memory_no_alias(coins, 2 * MLKEM_SYMBYTES))
-  assigns(object_whole(pk))
-  assigns(object_whole(sk))
+  assigns(memory_slice(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
+  assigns(memory_slice(sk, MLKEM_INDCCA_SECRETKEYBYTES))
 );
 
 /*************************************************
@@ -173,8 +173,8 @@ int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
-  assigns(object_whole(pk))
-  assigns(object_whole(sk))
+  assigns(memory_slice(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
+  assigns(memory_slice(sk, MLKEM_INDCCA_SECRETKEYBYTES))
 );
 
 /*************************************************
@@ -213,8 +213,8 @@ __contract__(
   requires(memory_no_alias(ss, MLKEM_SSBYTES))
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   requires(memory_no_alias(coins, MLKEM_SYMBYTES))
-  assigns(object_whole(ct))
-  assigns(object_whole(ss))
+  assigns(memory_slice(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
+  assigns(memory_slice(ss, MLKEM_SSBYTES))
 );
 
 /*************************************************
@@ -248,8 +248,8 @@ __contract__(
   requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
   requires(memory_no_alias(ss, MLKEM_SSBYTES))
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
-  assigns(object_whole(ct))
-  assigns(object_whole(ss))
+  assigns(memory_slice(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
+  assigns(memory_slice(ss, MLKEM_SSBYTES))
 );
 
 /*************************************************
@@ -283,7 +283,7 @@ __contract__(
   requires(memory_no_alias(ss, MLKEM_SSBYTES))
   requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
-  assigns(object_whole(ss))
+  assigns(memory_slice(ss, MLKEM_SSBYTES))
 );
 
 #endif /* !MLK_KEM_H */
