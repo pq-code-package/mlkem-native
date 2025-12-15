@@ -56,6 +56,9 @@ inputs:
   extra_args:
     description: Additional arguments to pass to the tests script
     default: ""
+  extra_env:
+    description: Additional environment variables to set when calling the tests script
+    default: ""
 runs:
   using: composite
   steps:
@@ -79,6 +82,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
+          extra_env: ${{ inputs.extra_env }}
       - name: Cross x86_64 Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-x86_64') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -101,6 +105,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
+          extra_env: ${{ inputs.extra_env }}
       - name: Cross aarch64 Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-aarch64') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -123,6 +128,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
+          extra_env: ${{ inputs.extra_env }}
       - name: Cross ppc64le Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-ppc64le') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -145,6 +151,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
+          extra_env: ${{ inputs.extra_env }}
       - name: Cross aarch64_be Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-aarch64_be') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -167,6 +174,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
+          extra_env: ${{ inputs.extra_env }}
       - name: Cross riscv64 Tests (RVV, VLEN=128)
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-riscv64') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -189,6 +197,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
+          extra_env: ${{ inputs.extra_env }}
       - name: Cross riscv64 Tests (RVV, VLEN=256)
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-riscv64') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -210,6 +219,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
+          extra_env: ${{ inputs.extra_env }}
       - name: Cross riscv64 Tests (RVV, VLEN=512)
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-riscv64') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -231,6 +241,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
+          extra_env: ${{ inputs.extra_env }}
       - name: Cross riscv64 Tests (RVV, VLEN=1024)
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-riscv64') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -252,6 +263,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
+          extra_env: ${{ inputs.extra_env }}
       - name: Cross riscv32 Tests
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-riscv32') && (success() || failure()) }}
         uses: ./.github/actions/functest
@@ -274,3 +286,4 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
+          extra_env: ${{ inputs.extra_env }}
