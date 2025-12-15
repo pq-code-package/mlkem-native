@@ -267,6 +267,9 @@ let MLKEM_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_CORRECT  = prove(
   CONV_TAC TWEAK_CONV THEN
   X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_mulcache_compute_tmc (CONV_RULE TWEAK_CONV MLKEM_MULCACHE_COMPUTE_CORRECT));;
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
+
 let MLKEM_MULCACHE_COMPUTE_SUBROUTINE_CORRECT = prove(
  `!r a zetas (zetas_list:int16 list) x pc stackpointer returnaddress.
     aligned 32 r /\
