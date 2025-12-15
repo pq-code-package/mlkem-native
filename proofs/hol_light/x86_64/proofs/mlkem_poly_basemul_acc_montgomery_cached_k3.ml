@@ -1551,6 +1551,9 @@ let MLKEM_BASEMUL_K3_NOIBT_SUBROUTINE_CORRECT = prove(
                MAYCHANGE [memory :> bytes(dst, 512)])`,
   X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_basemul_k3_tmc MLKEM_BASEMUL_K3_CORRECT);;
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
+
 let MLKEM_BASEMUL_K3_SUBROUTINE_CORRECT = prove(
   `!src1 src2 src2t dst a0 b0 c0 d0 dz0 a1 b1 c1 d1 dz1 a2 b2 c2 d2 dz2 pc stackpointer returnaddress.
         aligned 32 src1 /\
