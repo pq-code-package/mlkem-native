@@ -8,9 +8,9 @@ HARNESS_FILE = poly_getnoise_eta1_4x_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = mlk_poly_getnoise_eta1_4x
+PROOF_UID = mlk_poly_getnoise_eta1_4x_native
 
-DEFINES +=
+DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLK_CONFIG_FIPS202_BACKEND_FILE="\"dummy_backend_fips202_x4.h\""
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
@@ -20,7 +20,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly_k.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_poly_getnoise_eta1_4x
-USE_FUNCTION_CONTRACTS=mlk_poly_cbd_eta1 mlk_shake256 mlk_zeroize
+USE_FUNCTION_CONTRACTS=mlk_poly_cbd_eta1 mlk_shake256x4 mlk_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

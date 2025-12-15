@@ -334,7 +334,20 @@ void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
   extkey[2][MLKEM_SYMBYTES] = nonce2;
   extkey[3][MLKEM_SYMBYTES] = nonce3;
 
+#if !defined(FIPS202_X4_DEFAULT_IMPLEMENTATION) && \
+    !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
   mlk_prf_eta1_x4(buf, extkey);
+#else
+  mlk_prf_eta1(buf[0], extkey[0]);
+  mlk_prf_eta1(buf[1], extkey[1]);
+  mlk_prf_eta1(buf[2], extkey[2]);
+  if (r3 != NULL)
+  {
+    mlk_prf_eta1(buf[3], extkey[3]);
+  }
+#endif /* !(!FIPS202_X4_DEFAULT_IMPLEMENTATION && \
+          !MLK_CONFIG_SERIAL_FIPS202_ONLY) */
+
   mlk_poly_cbd_eta1(r0, buf[0]);
   mlk_poly_cbd_eta1(r1, buf[1]);
   mlk_poly_cbd_eta1(r2, buf[2]);
@@ -444,14 +457,16 @@ void mlk_poly_getnoise_eta1122_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
   /* On systems with fast batched Keccak, we use 4-fold batched PRF,
    * even though that means generating more random data in buf[2] and buf[3]
    * than necessary. */
-#if !defined(FIPS202_X4_DEFAULT_IMPLEMENTATION)
+#if !defined(FIPS202_X4_DEFAULT_IMPLEMENTATION) && \
+    !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
   mlk_prf_eta1_x4(buf, extkey);
 #else
   mlk_prf_eta1(buf[0], extkey[0]);
   mlk_prf_eta1(buf[1], extkey[1]);
   mlk_prf_eta2(buf[2], extkey[2]);
   mlk_prf_eta2(buf[3], extkey[3]);
-#endif /* FIPS202_X4_DEFAULT_IMPLEMENTATION */
+#endif /* !(!FIPS202_X4_DEFAULT_IMPLEMENTATION && \
+          !MLK_CONFIG_SERIAL_FIPS202_ONLY) */
 
   mlk_poly_cbd_eta1(r0, buf[0]);
   mlk_poly_cbd_eta1(r1, buf[1]);
