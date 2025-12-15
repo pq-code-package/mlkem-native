@@ -3461,11 +3461,11 @@ def _main():
     gen_undefs()
     high_level_status("Generated undefs")
 
-    check_macro_typos()
-    high_level_status("Checked macro typos")
-
     gen_test_configs()
     high_level_status("Generated test configs")
+
+    check_macro_typos()
+    high_level_status("Checked macro typos")
 
     gen_preprocessor_comments()
     high_level_status("Generated preprocessor comments")
