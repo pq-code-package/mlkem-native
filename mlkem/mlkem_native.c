@@ -232,6 +232,7 @@
 #undef mlk_poly_compress_dv
 #undef mlk_poly_decompress_du
 #undef mlk_poly_decompress_dv
+#undef mlk_poly_getnoise_eta1
 #undef mlk_poly_getnoise_eta1122_4x
 #undef mlk_poly_getnoise_eta1_4x
 #undef mlk_poly_getnoise_eta2

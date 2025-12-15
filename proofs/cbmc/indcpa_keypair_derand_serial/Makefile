@@ -4,13 +4,13 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = indcpa_enc_harness
+HARNESS_FILE = indcpa_keypair_derand_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = mlk_indcpa_enc
+PROOF_UID = mlk_indcpa_keypair_derand
 
-DEFINES +=
+DEFINES += -DMLK_CONFIG_SERIAL_FIPS202_ONLY
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
@@ -19,37 +19,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_indcpa_enc
-
-USED_FUNCTIONS  = poly_frommsg
-USED_FUNCTIONS += gen_matrix
-# USED_FUNCTIONS += enc_sample_sp_ep_epp
-ifeq ($(MLKEM_K),2)
-USED_FUNCTIONS += poly_getnoise_eta1122_4x
-USED_FUNCTIONS += poly_getnoise_eta2
-else ifeq ($(MLKEM_K),3)
-USED_FUNCTIONS += poly_getnoise_eta1_4x
-else ifeq ($(MLKEM_K),4)
-USED_FUNCTIONS += poly_getnoise_eta1_4x
-USED_FUNCTIONS += poly_getnoise_eta2
-endif
-USED_FUNCTIONS += polyvec_ntt
-USED_FUNCTIONS += polyvec_mulcache_compute
-USED_FUNCTIONS += polyvec_basemul_acc_montgomery_cached
-USED_FUNCTIONS += polyvec_invntt_tomont
-USED_FUNCTIONS += poly_invntt_tomont
-USED_FUNCTIONS += polyvec_add
-USED_FUNCTIONS += poly_add
-USED_FUNCTIONS += polyvec_reduce
-USED_FUNCTIONS += poly_reduce
-USED_FUNCTIONS += polyvec_compress_du
-USED_FUNCTIONS += poly_compress_dv
-USED_FUNCTIONS += polyvec_frombytes
-USED_FUNCTIONS += matvec_mul
-
-USE_FUNCTION_CONTRACTS=$(addprefix mlk_,$(USED_FUNCTIONS))
-USE_FUNCTION_CONTRACTS += mlk_zeroize
-
+CHECK_FUNCTION_CONTRACTS=mlk_indcpa_keypair_derand
+USE_FUNCTION_CONTRACTS=mlk_zeroize mlk_sha3_512 mlk_gen_matrix mlk_poly_getnoise_eta1 mlk_polyvec_ntt mlk_polyvec_mulcache_compute mlk_matvec_mul mlk_polyvec_tomont mlk_polyvec_add mlk_polyvec_reduce mlk_polyvec_tobytes
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -57,7 +28,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = mlk_indcpa_enc
+FUNCTION_NAME = mlk_indcpa_keypair_derand
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

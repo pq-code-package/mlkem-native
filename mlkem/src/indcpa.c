@@ -403,6 +403,24 @@ void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
 
   mlk_gen_matrix(&a, publicseed, 0 /* no transpose */);
 
+#if defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
+  {
+    unsigned i;
+    for (i = 0; i < MLKEM_K; i++)
+    __loop__(
+      assigns(i, memory_slice(&skpv, sizeof(mlk_polyvec)), memory_slice(&e, sizeof(mlk_polyvec)))
+      invariant(i <= MLKEM_K)
+      invariant(forall(k0, 0, i,
+            array_abs_bound(skpv.vec[k0].coeffs, 0, MLKEM_N, MLKEM_ETA1 + 1)))
+      invariant(forall(k1, 0, i,
+            array_abs_bound(e.vec[k1].coeffs, 0, MLKEM_N, MLKEM_ETA1 + 1))))
+    {
+      /* Safety: The max value of MLKEM_K*2 = 8 < 256 */
+      mlk_poly_getnoise_eta1(&skpv.vec[i], noiseseed, (uint8_t)i);
+      mlk_poly_getnoise_eta1(&e.vec[i], noiseseed, (uint8_t)(i + MLKEM_K));
+    }
+  }
+#else /* MLK_CONFIG_SERIAL_FIPS202_ONLY */
 #if MLKEM_K == 2
   mlk_poly_getnoise_eta1_4x(&skpv.vec[0], &skpv.vec[1], &e.vec[0], &e.vec[1],
                             noiseseed, 0, 1, 2, 3);
@@ -424,6 +442,7 @@ void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
   mlk_poly_getnoise_eta1_4x(&e.vec[0], &e.vec[1], &e.vec[2], &e.vec[3],
                             noiseseed, 4, 5, 6, 7);
 #endif /* MLKEM_K == 4 */
+#endif /* !MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
   mlk_polyvec_ntt(&skpv);
   mlk_polyvec_ntt(&e);
@@ -483,6 +502,25 @@ void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
 
   mlk_gen_matrix(&at, seed, 1 /* transpose */);
 
+#if defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
+  {
+    unsigned i;
+    /* Safety: The max value of MLKEM_K*2 = 8 < 256 */
+    for (i = 0; i < MLKEM_K; i++)
+    __loop__(
+      assigns(i, memory_slice(&sp, sizeof(mlk_polyvec)), memory_slice(&ep, sizeof(mlk_polyvec)))
+      invariant(i <= MLKEM_K)
+      invariant(forall(k0, 0, i,
+              array_abs_bound(sp.vec[k0].coeffs, 0, MLKEM_N, MLKEM_ETA1 + 1)))
+      invariant(forall(k1, 0, i,
+              array_abs_bound(ep.vec[k1].coeffs, 0, MLKEM_N, MLKEM_ETA2 + 1))))
+    {
+      mlk_poly_getnoise_eta1(&sp.vec[i], coins, (uint8_t)i);
+      mlk_poly_getnoise_eta2(&ep.vec[i], coins, (uint8_t)(MLKEM_K + i));
+    }
+    mlk_poly_getnoise_eta2(&epp, coins, (uint8_t)(MLKEM_K + MLKEM_K));
+  }
+#else /* MLK_CONFIG_SERIAL_FIPS202_ONLY */
 #if MLKEM_K == 2
   mlk_poly_getnoise_eta1122_4x(&sp.vec[0], &sp.vec[1], &ep.vec[0], &ep.vec[1],
                                coins, 0, 1, 2, 3);
@@ -492,7 +530,7 @@ void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
    * In this call, only the first three output buffers are needed.
    * The last parameter is a dummy that's overwritten later.
    */
-  mlk_poly_getnoise_eta1_4x(&sp.vec[0], &sp.vec[1], &sp.vec[2], &b.vec[0],
+  mlk_poly_getnoise_eta1_4x(&sp.vec[0], &sp.vec[1], &sp.vec[2], &ep.vec[0],
                             coins, 0, 1, 2, 0xFF);
   /* The fourth output buffer in this call _is_ used. */
   mlk_poly_getnoise_eta2_4x(&ep.vec[0], &ep.vec[1], &ep.vec[2], &epp, coins, 3,
@@ -504,6 +542,8 @@ void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
                             coins, 4, 5, 6, 7);
   mlk_poly_getnoise_eta2(&epp, coins, 8);
 #endif /* MLKEM_K == 4 */
+#endif /* !MLK_CONFIG_SERIAL_FIPS202_ONLY */
+
 
   mlk_polyvec_ntt(&sp);
 

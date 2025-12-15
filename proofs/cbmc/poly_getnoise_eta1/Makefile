@@ -4,52 +4,23 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = indcpa_enc_harness
+HARNESS_FILE = poly_getnoise_eta1_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = mlk_indcpa_enc
+PROOF_UID = mlk_poly_getnoise_eta1
 
-DEFINES +=
+DEFINES += -DMLK_CONFIG_SERIAL_FIPS202_ONLY
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
+PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly_k.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_indcpa_enc
-
-USED_FUNCTIONS  = poly_frommsg
-USED_FUNCTIONS += gen_matrix
-# USED_FUNCTIONS += enc_sample_sp_ep_epp
-ifeq ($(MLKEM_K),2)
-USED_FUNCTIONS += poly_getnoise_eta1122_4x
-USED_FUNCTIONS += poly_getnoise_eta2
-else ifeq ($(MLKEM_K),3)
-USED_FUNCTIONS += poly_getnoise_eta1_4x
-else ifeq ($(MLKEM_K),4)
-USED_FUNCTIONS += poly_getnoise_eta1_4x
-USED_FUNCTIONS += poly_getnoise_eta2
-endif
-USED_FUNCTIONS += polyvec_ntt
-USED_FUNCTIONS += polyvec_mulcache_compute
-USED_FUNCTIONS += polyvec_basemul_acc_montgomery_cached
-USED_FUNCTIONS += polyvec_invntt_tomont
-USED_FUNCTIONS += poly_invntt_tomont
-USED_FUNCTIONS += polyvec_add
-USED_FUNCTIONS += poly_add
-USED_FUNCTIONS += polyvec_reduce
-USED_FUNCTIONS += poly_reduce
-USED_FUNCTIONS += polyvec_compress_du
-USED_FUNCTIONS += poly_compress_dv
-USED_FUNCTIONS += polyvec_frombytes
-USED_FUNCTIONS += matvec_mul
-
-USE_FUNCTION_CONTRACTS=$(addprefix mlk_,$(USED_FUNCTIONS))
-USE_FUNCTION_CONTRACTS += mlk_zeroize
-
+CHECK_FUNCTION_CONTRACTS=mlk_poly_getnoise_eta1
+USE_FUNCTION_CONTRACTS=mlk_poly_cbd_eta1 mlk_shake256 mlk_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -57,7 +28,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = mlk_indcpa_enc
+FUNCTION_NAME = mlk_poly_getnoise_eta1
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
@@ -66,7 +37,7 @@ FUNCTION_NAME = mlk_indcpa_enc
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 10
+CBMC_OBJECT_BITS = 9
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
