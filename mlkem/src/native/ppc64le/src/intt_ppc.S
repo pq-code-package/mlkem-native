@@ -63,6 +63,20 @@
 #define vresult_mont3 23
 #define vresult_mont4 28
 
+#define rinp      3
+#define dup_rinp  5
+#define qinp      4
+#define len_2     7
+#define zeta_inp  14
+#define a1_offset 9
+#define a2_offset 16
+#define a3_offset 18
+#define a4_offset 20
+#define b1_offset 10
+#define b2_offset 17
+#define b3_offset 19
+#define b4_offset 21
+
 .macro SAVE_REGS
         stdu    1, -352(1)
         mflr    0
@@ -176,14 +190,14 @@
  *
  */
 .macro Init_Coeffs_offset start next
-        li      9, \start       /* first offset to j */
-        add     10, 7, 9        /* J + len*2 */
-        addi    16, 9, \next
-        addi    17, 10, \next
-        addi    18, 16, \next
-        addi    19, 17, \next
-        addi    20, 18, \next
-        addi    21, 19, \next
+        li      a1_offset, \start               /* first offset to j */
+        add     b1_offset, len_2, a1_offset     /* J + len*2 */
+        addi    a2_offset, a1_offset, \next
+        addi    b2_offset, b1_offset, \next
+        addi    a3_offset, a2_offset, \next
+        addi    b3_offset, b2_offset, \next
+        addi    a4_offset, a3_offset, \next
+        addi    b4_offset, b3_offset, \next
 .endm
 
 /*
@@ -195,15 +209,15 @@
  *  r[j]: V21, V22, V23, V24
  */
 .macro Load_4Rjp
-        lxvd2x  32+vdata_b1, 3, 10     /* V8: vector r'0 */
-        lxvd2x  32+vdata_b2, 3, 17    /* V12: vector for r'1 */
-        lxvd2x  32+vdata_b3, 3, 19    /* V16: vector for r'2 */
-        lxvd2x  32+vdata_b4, 3, 21    /* V20: vector for r'3 */
+        lxvd2x  32+vdata_b1, rinp, b1_offset    /* V8: vector r'0 */
+        lxvd2x  32+vdata_b2, rinp, b2_offset    /* V12: vector for r'1 */
+        lxvd2x  32+vdata_b3, rinp, b3_offset    /* V16: vector for r'2 */
+        lxvd2x  32+vdata_b4, rinp, b4_offset    /* V20: vector for r'3 */
 
-        lxvd2x  32+vdata_a1, 3, 9     /* V21: vector r0 */
-        lxvd2x  32+vdata_a2, 3, 16    /* V22: vector r1 */
-        lxvd2x  32+vdata_a3, 3, 18    /* V23: vector r2 */
-        lxvd2x  32+vdata_a4, 3, 20    /* V24: vector r3 */
+        lxvd2x  32+vdata_a1, rinp, a1_offset     /* V21: vector r0 */
+        lxvd2x  32+vdata_a2, rinp, a2_offset    /* V22: vector r1 */
+        lxvd2x  32+vdata_a3, rinp, a3_offset    /* V23: vector r2 */
+        lxvd2x  32+vdata_a4, rinp, a4_offset    /* V24: vector r3 */
 .endm
 
 /*
@@ -235,20 +249,20 @@
  * in the proper order to match the multiplication.
  */
 .macro Load_L24Coeffs
-        lxvd2x     32+25, 0, 5
-        lxvd2x     32+26, 10, 5
+        lxvd2x     32+25, 0, dup_rinp
+        lxvd2x     32+26, 10, dup_rinp
         vmrgew vdata_b1, 25, 26
         vmrgow vdata_a1, 25, 26
-        lxvd2x     32+25, 11, 5
-        lxvd2x     32+26, 12, 5
+        lxvd2x     32+25, 11, dup_rinp
+        lxvd2x     32+26, 12, dup_rinp
         vmrgew vdata_b2, 25, 26
         vmrgow vdata_a2, 25, 26
-        lxvd2x     32+25, 15, 5
-        lxvd2x     32+26, 16, 5
+        lxvd2x     32+25, 15, dup_rinp
+        lxvd2x     32+26, 16, dup_rinp
         vmrgew vdata_b3, 25, 26
         vmrgow vdata_a3, 25, 26
-        lxvd2x     32+25, 17, 5
-        lxvd2x     32+26, 18, 5
+        lxvd2x     32+25, 17, dup_rinp
+        lxvd2x     32+26, 18, dup_rinp
         vmrgew vdata_b4, 25, 26
         vmrgow vdata_a4, 25, 26
 .endm
@@ -269,20 +283,20 @@
  * in the proper order to match the multiplication.
  */
 .macro Load_L44Coeffs
-        lxvd2x     10, 0, 5
-        lxvd2x     11, 10, 5
+        lxvd2x     10, 0, dup_rinp
+        lxvd2x     11, 10, dup_rinp
         xxpermdi 32+vdata_b1, 11, 10, 3
         xxpermdi 32+vdata_a1, 11, 10, 0
-        lxvd2x     10, 11, 5
-        lxvd2x     11, 12, 5
+        lxvd2x     10, 11, dup_rinp
+        lxvd2x     11, 12, dup_rinp
         xxpermdi 32+vdata_b2, 11, 10, 3
         xxpermdi 32+vdata_a2, 11, 10, 0
-        lxvd2x     10, 15, 5
-        lxvd2x     11, 16, 5
+        lxvd2x     10, 15, dup_rinp
+        lxvd2x     11, 16, dup_rinp
         xxpermdi 32+vdata_b3, 11, 10, 3
         xxpermdi 32+vdata_a3, 11, 10, 0
-        lxvd2x     10, 17, 5
-        lxvd2x     11, 18, 5
+        lxvd2x     10, 17, dup_rinp
+        lxvd2x     11, 18, dup_rinp
         xxpermdi 32+vdata_b4, 11, 10, 3
         xxpermdi 32+vdata_a4, 11, 10, 0
 .endm
@@ -352,16 +366,16 @@
  */
 .macro MREDUCE_4X _vz0 _vz1 _vz2 _vz3 _vo0 _vo1 _vo2 _vo3
         /* Modular multification bond by 2^16 * q in abs value */
-        vmladduhm 15, vdata_mont1, \_vz0, 3
-        vmladduhm 20, vdata_mont2, \_vz1, 3
-        vmladduhm 27, vdata_mont3, \_vz2, 3
-        vmladduhm 28, vdata_mont4, \_vz3, 3
+        vmladduhm 15, vdata_mont1, \_vz0, rinp
+        vmladduhm 20, vdata_mont2, \_vz1, rinp
+        vmladduhm 27, vdata_mont3, \_vz2, rinp
+        vmladduhm 28, vdata_mont4, \_vz3, rinp
 
         /* Signed multiply-high-round; outputs are bound by 2^15 * q in abs value */
-        vmhraddshs 14, vdata_mont1, \_vz0, 3
-        vmhraddshs 19, vdata_mont2, \_vz1, 3
-        vmhraddshs 24, vdata_mont3, \_vz2, 3
-        vmhraddshs 29, vdata_mont4, \_vz3, 3
+        vmhraddshs 14, vdata_mont1, \_vz0, rinp
+        vmhraddshs 19, vdata_mont2, \_vz1, rinp
+        vmhraddshs 24, vdata_mont3, \_vz2, rinp
+        vmhraddshs 29, vdata_mont4, \_vz3, rinp
 
         vmladduhm 15, 15, V_QINV, 3
         vmladduhm 20, 20, V_QINV, 3
@@ -395,11 +409,11 @@
         li      8, 16
         li      11, 32
         li      12, 48
-        lxvd2x    32+V_Z0, 0, 14
-        lxvd2x    32+V_Z1, 8, 14
-        lxvd2x    32+V_Z2, 11, 14
-        lxvd2x    32+V_Z3, 12, 14
-        addi    14, 14, 64
+        lxvd2x    32+V_Z0, 0, zeta_inp
+        lxvd2x    32+V_Z1, 8, zeta_inp
+        lxvd2x    32+V_Z2, 11, zeta_inp
+        lxvd2x    32+V_Z3, 12, zeta_inp
+        addi    zeta_inp, zeta_inp, 64
 .endm
 
 /*
@@ -414,38 +428,38 @@
 .endm
 
 .macro Write_B4C _vs0 _vs1 _vs2 _vs3
-        stxvd2x \_vs0, 3, 9
-        stxvd2x \_vs1, 3, 16
-        stxvd2x \_vs2, 3, 18
-        stxvd2x \_vs3, 3, 20
+        stxvd2x \_vs0, rinp, a1_offset
+        stxvd2x \_vs1, rinp, a2_offset
+        stxvd2x \_vs2, rinp, a3_offset
+        stxvd2x \_vs3, rinp, a4_offset
 .endm
 
 .macro Write_M4C _vs0 _vs1 _vs2 _vs3
-        stxvd2x \_vs0, 3, 10
-        stxvd2x \_vs1, 3, 17
-        stxvd2x \_vs2, 3, 19
-        stxvd2x \_vs3, 3, 21
+        stxvd2x \_vs0, rinp, b1_offset
+        stxvd2x \_vs1, rinp, b2_offset
+        stxvd2x \_vs2, rinp, b3_offset
+        stxvd2x \_vs3, rinp, b4_offset
 .endm
 
 .macro Reload_4coeffs
-        lxvd2x  32+vdata_mont1, 0, 3
-        lxvd2x  32+vdata_mont2, 10, 3
-        lxvd2x  32+vdata_mont3, 11, 3
-        lxvd2x  32+vdata_mont4, 12, 3
-        addi    3, 3, 64
+        lxvd2x  32+vdata_mont1, 0, rinp
+        lxvd2x  32+vdata_mont2, 10, rinp
+        lxvd2x  32+vdata_mont3, 11, rinp
+        lxvd2x  32+vdata_mont4, 12, rinp
+        addi    rinp, rinp, 64
 .endm
 
 .macro MWrite_8X _vs0 _vs1 _vs2 _vs3 _vs4 _vs5 _vs6 _vs7
-        addi    3, 3, -128
-        stxvd2x \_vs0, 0, 3
-        stxvd2x \_vs1, 10, 3
-        stxvd2x \_vs2, 11, 3
-        stxvd2x \_vs3, 12, 3
-        stxvd2x \_vs4, 15, 3
-        stxvd2x \_vs5, 16, 3
-        stxvd2x \_vs6, 17, 3
-        stxvd2x \_vs7, 18, 3
-        addi    3, 3, 128
+        addi    rinp, rinp, -128
+        stxvd2x \_vs0, 0, rinp
+        stxvd2x \_vs1, 10, rinp
+        stxvd2x \_vs2, 11, rinp
+        stxvd2x \_vs3, 12, rinp
+        stxvd2x \_vs4, 15, rinp
+        stxvd2x \_vs5, 16, rinp
+        stxvd2x \_vs6, 17, rinp
+        stxvd2x \_vs7, 18, rinp
+        addi    rinp, rinp, 128
 .endm
 
 /*
@@ -465,14 +479,14 @@
         xxpermdi 32+15, 32+24, 32+vresult_mont3, 0
         xxpermdi 32+16, 32+29, 32+vresult_mont4, 3
         xxpermdi 32+17, 32+29, 32+vresult_mont4, 0
-        stxvd2x    32+10, 0, 5
-        stxvd2x    32+11, 10, 5
-        stxvd2x    32+12, 11, 5
-        stxvd2x    32+13, 12, 5
-        stxvd2x    32+14, 15, 5
-        stxvd2x    32+15, 16, 5
-        stxvd2x    32+16, 17, 5
-        stxvd2x    32+17, 18, 5
+        stxvd2x    32+10, 0, dup_rinp
+        stxvd2x    32+11, 10, dup_rinp
+        stxvd2x    32+12, 11, dup_rinp
+        stxvd2x    32+13, 12, dup_rinp
+        stxvd2x    32+14, 15, dup_rinp
+        stxvd2x    32+15, 16, dup_rinp
+        stxvd2x    32+16, 17, dup_rinp
+        stxvd2x    32+17, 18, dup_rinp
 .endm
 
 /*
@@ -492,14 +506,14 @@
         vmrgow 15, vresult_mont3, 24
         vmrgew 16, vresult_mont4, 29
         vmrgow 17, vresult_mont4, 29
-        stxvd2x    32+10, 0, 5
-        stxvd2x    32+11, 10, 5
-        stxvd2x    32+12, 11, 5
-        stxvd2x    32+13, 12, 5
-        stxvd2x    32+14, 15, 5
-        stxvd2x    32+15, 16, 5
-        stxvd2x    32+16, 17, 5
-        stxvd2x    32+17, 18, 5
+        stxvd2x    32+10, 0, dup_rinp
+        stxvd2x    32+11, 10, dup_rinp
+        stxvd2x    32+12, 11, dup_rinp
+        stxvd2x    32+13, 12, dup_rinp
+        stxvd2x    32+14, 15, dup_rinp
+        stxvd2x    32+15, 16, dup_rinp
+        stxvd2x    32+16, 17, dup_rinp
+        stxvd2x    32+17, 18, dup_rinp
 .endm
 
 /*
@@ -606,10 +620,10 @@ MLK_ASM_FN_SYMBOL(intt_ppc)
 
         /* init vectors and constants
            Setup for Montgomery reduce */
-        lxvx    0, 0, 4
+        lxvx    0, 0, qinp
 
         li      10, QINV_OFFSET
-        lxvx    32+V_QINV, 10, 4
+        lxvx    32+V_QINV, 10, qinp
         xxlxor  32+3, 32+3, 32+3
         vspltish 4, 1
         xxlor   2, 32+2, 32+2        /* QINV */
@@ -619,8 +633,8 @@ MLK_ASM_FN_SYMBOL(intt_ppc)
         /*  Setup for Barrett reduce */
         li      10, Q_OFFSET
         li      11, C20159_OFFSET
-        lxvx    6, 10, 4             /* V_MKQ */
-        lxvx    32+V20159, 11, 4     /* V20159 */
+        lxvx    6, 10, qinp             /* V_MKQ */
+        lxvx    32+V20159, 11, qinp     /* V20159 */
 
         vspltisw 8, 13
         vadduwm  8, 8, 8
@@ -642,8 +656,8 @@ MLK_ASM_FN_SYMBOL(intt_ppc)
         /*
          * Montgomery reduce loops with constant 1441
          */
-        addi    14, 4, C1441_OFFSET
-        lvx     V1441, 0, 14
+        addi    zeta_inp, qinp, C1441_OFFSET
+        lvx     V1441, 0, zeta_inp
         li      8, 4
         mtctr   8
 
@@ -656,7 +670,7 @@ intt_ppc__Loopf:
         MWrite_8X 32+6, 32+7, 32+8, 32+9, 32+13, 32+18, 32+23, 32+28
         bdnz    intt_ppc__Loopf
 
-        addi    3, 3, -512
+        addi    rinp, rinp, -512
 
 .align 4
         /*
@@ -673,18 +687,18 @@ intt_ppc__Loopf:
          *
          *     These are indexes to the 16 bits array.  Each loads 4 vectors.
          */
-        addi    14, 4, ZETA_INTT_OFFSET
-        li      7, 4        /* len * 2 */
-        mr      5, 3
+        addi    zeta_inp, qinp, ZETA_INTT_OFFSET
+        li      len_2, 4        /* len * 2 */
+        mr      dup_rinp, rinp
 
         INTT_REDUCE_L24
-        addi    5, 5, 128
+        addi    dup_rinp, dup_rinp, 128
         INTT_REDUCE_L24
-        addi    5, 5, 128
+        addi    dup_rinp, dup_rinp, 128
         INTT_REDUCE_L24
-        addi    5, 5, 128
+        addi    dup_rinp, dup_rinp, 128
         INTT_REDUCE_L24
-        addi    5, 5, 128
+        addi    dup_rinp, dup_rinp, 128
 
 .align 4
         /*
@@ -700,17 +714,17 @@ intt_ppc__Loopf:
          *
          *     These are indexes to the 16 bits array.  Each loads 4 vectors.
          */
-        mr      5, 3
-        li      7, 8
+        mr      dup_rinp, rinp
+        li      len_2, 8
 
         INTT_REDUCE_L44
-        addi    5, 5, 128
+        addi    dup_rinp, dup_rinp, 128
         INTT_REDUCE_L44
-        addi    5, 5, 128
+        addi    dup_rinp, dup_rinp, 128
         INTT_REDUCE_L44
-        addi    5, 5, 128
+        addi    dup_rinp, dup_rinp, 128
         INTT_REDUCE_L44
-        addi    5, 5, 128
+        addi    dup_rinp, dup_rinp, 128
 
 .align 4
         /*
@@ -724,7 +738,7 @@ intt_ppc__Loopf:
          *
          *     These are indexes to the 16 bits array
          */
-        li      7, 16
+        li      len_2, 16
 
         INTT_REDUCE_4X 0, 32
         INTT_REDUCE_4X 128, 32
@@ -743,16 +757,16 @@ intt_ppc__Loopf:
          *
          *     These are indexes to the 16 bits array
          */
-        li      7, 32
+        li      len_2, 32
 
         INTT_REDUCE_4X 0, 64
 
-        addi    14, 14, -64
+        addi    zeta_inp, zeta_inp, -64
         INTT_REDUCE_4X 16, 64
 
         INTT_REDUCE_4X 256, 64
 
-        addi    14, 14, -64
+        addi    zeta_inp, zeta_inp, -64
         INTT_REDUCE_4X 272, 64
 
 .align 4
@@ -767,16 +781,16 @@ intt_ppc__Loopf:
          *
          *     These are indexes to the 16 bits array
          */
-        li      7, 64
+        li      len_2, 64
 
         INTT_REDUCE_L567 0, 16
-        addi    14, 14, 16
+        addi    zeta_inp, zeta_inp, 16
         INTT_REDUCE_L567 128, 16
-        addi    14, 14, 16
+        addi    zeta_inp, zeta_inp, 16
         INTT_REDUCE_L567 256, 16
-        addi    14, 14, 16
+        addi    zeta_inp, zeta_inp, 16
         INTT_REDUCE_L567 384, 16
-        addi    14, 14, 16
+        addi    zeta_inp, zeta_inp, 16
 
 .align 4
         /*
@@ -790,14 +804,14 @@ intt_ppc__Loopf:
          *
          *     These are indexes to the 16 bits array
          */
-        li      7, 128
+        li      len_2, 128
 
         INTT_REDUCE_L567 0, 16
         INTT_REDUCE_L567 64, 16
-        addi    14, 14, 16
+        addi    zeta_inp, zeta_inp, 16
         INTT_REDUCE_L567 256, 16
         INTT_REDUCE_L567 320, 16
-        addi    14, 14, 16
+        addi    zeta_inp, zeta_inp, 16
 
 .align 4
         /*
@@ -811,7 +825,7 @@ intt_ppc__Loopf:
          *
          *     These are indexes to the 16 bits array
          */
-        li      7, 256          /* len*2 */
+        li      len_2, 256          /* len*2 */
 
         INTT_REDUCE_L567 0, 16
         INTT_REDUCE_L567 64, 16

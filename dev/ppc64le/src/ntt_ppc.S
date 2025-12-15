@@ -43,6 +43,20 @@
 #define vresult_a4 30
 #define vresult_b4 31
 
+#define rinp      3
+#define dup_rinp  5
+#define qinp      4
+#define len_2     7
+#define zeta_inp  14
+#define a1_offset 9
+#define a2_offset 16
+#define a3_offset 18
+#define a4_offset 20
+#define b1_offset 10
+#define b2_offset 17
+#define b3_offset 19
+#define b4_offset 21
+
 .machine "any"
 .text
 
@@ -143,14 +157,14 @@
  *
  */
 .macro Init_Coeffs_offset start next
-        li      9, \start       /* first offset to j */
-        add     10, 7, 9        /* J + len*2 */
-        addi    16, 9, \next
-        addi    17, 10, \next
-        addi    18, 16, \next
-        addi    19, 17, \next
-        addi    20, 18, \next
-        addi    21, 19, \next
+        li      a1_offset, \start               /* first offset to j */
+        add     b1_offset, len_2, a1_offset     /* J + len*2 */
+        addi    a2_offset, a1_offset, \next
+        addi    b2_offset, b1_offset, \next
+        addi    a3_offset, a2_offset, \next
+        addi    b3_offset, b2_offset, \next
+        addi    a4_offset, a3_offset, \next
+        addi    b4_offset, b3_offset, \next
 .endm
 
 /*
@@ -158,10 +172,10 @@
  *  r[j+len]: V13, V18, V23, V28
  */
 .macro Load_4Rjp
-        lxvd2x  32+vdata_b1, 3, 10    /* V13: vector r'0 */
-        lxvd2x  32+vdata_b2, 3, 17    /* V18: vector for r'1 */
-        lxvd2x  32+vdata_b3, 3, 19    /* V23: vector for r'2 */
-        lxvd2x  32+vdata_b4, 3, 21    /* V28: vector for r'3 */
+        lxvd2x  32+vdata_b1, rinp, b1_offset    /* V13: vector r'0 */
+        lxvd2x  32+vdata_b2, rinp, b2_offset    /* V18: vector for r'1 */
+        lxvd2x  32+vdata_b3, rinp, b3_offset    /* V23: vector for r'2 */
+        lxvd2x  32+vdata_b4, rinp, b4_offset    /* V28: vector for r'3 */
 .endm
 
 /*
@@ -192,20 +206,20 @@
  * in the proper order to match the multiplication.
  */
 .macro Load_L24Coeffs
-        lxvd2x     32+25, 0, 5
-        lxvd2x     32+26, 10, 5
+        lxvd2x     32+25, 0, dup_rinp
+        lxvd2x     32+26, 10, dup_rinp
         vmrgew vdata_b1, 25, 26
         vmrgow vdata_a1, 25, 26
-        lxvd2x     32+25, 11, 5
-        lxvd2x     32+26, 12, 5
+        lxvd2x     32+25, 11, dup_rinp
+        lxvd2x     32+26, 12, dup_rinp
         vmrgew vdata_b2, 25, 26
         vmrgow vdata_a2, 25, 26
-        lxvd2x     32+25, 15, 5
-        lxvd2x     32+26, 16, 5
+        lxvd2x     32+25, 15, dup_rinp
+        lxvd2x     32+26, 16, dup_rinp
         vmrgew vdata_b3, 25, 26
         vmrgow vdata_a3, 25, 26
-        lxvd2x     32+25, 17, 5
-        lxvd2x     32+26, 18, 5
+        lxvd2x     32+25, 17, dup_rinp
+        lxvd2x     32+26, 18, dup_rinp
         vmrgew vdata_b4, 25, 26
         vmrgow vdata_a4, 25, 26
 .endm
@@ -226,20 +240,20 @@
  * in the proper order to match the multiplication.
  */
 .macro Load_L44Coeffs
-        lxvd2x     1, 0, 5
-        lxvd2x     2, 10, 5
+        lxvd2x     1, 0, dup_rinp
+        lxvd2x     2, 10, dup_rinp
         xxpermdi 32+vdata_b1, 2, 1, 3
         xxpermdi 32+vdata_a1, 2, 1, 0
-        lxvd2x     3, 11, 5
-        lxvd2x     4, 12, 5
+        lxvd2x     3, 11, dup_rinp
+        lxvd2x     4, 12, dup_rinp
         xxpermdi 32+vdata_b2, 4, 3, 3
         xxpermdi 32+vdata_a2, 4, 3, 0
-        lxvd2x     1, 15, 5
-        lxvd2x     2, 16, 5
+        lxvd2x     1, 15, dup_rinp
+        lxvd2x     2, 16, dup_rinp
         xxpermdi 32+vdata_b3, 2, 1, 3
         xxpermdi 32+vdata_a3, 2, 1, 0
-        lxvd2x     3, 17, 5
-        lxvd2x     4, 18, 5
+        lxvd2x     3, 17, dup_rinp
+        lxvd2x     4, 18, dup_rinp
         xxpermdi 32+vdata_b4, 4, 3, 3
         xxpermdi 32+vdata_a4, 4, 3, 0
 .endm
@@ -255,21 +269,21 @@
 .macro MREDUCE_4X _vz0 _vz1 _vz2 _vz3
         /* fqmul = zeta * coefficient
            Modular multification bond by 2^16 * q in abs value */
-        vmladduhm 15, vdata_b1, \_vz0, 3
-        vmladduhm 20, vdata_b2, \_vz1, 3
-        vmladduhm 25, vdata_b3, \_vz2, 3
-        vmladduhm 30, vdata_b4, \_vz3, 3
+        vmladduhm 15, vdata_b1, \_vz0, rinp
+        vmladduhm 20, vdata_b2, \_vz1, rinp
+        vmladduhm 25, vdata_b3, \_vz2, rinp
+        vmladduhm 30, vdata_b4, \_vz3, rinp
 
         /* Signed multiply-high-round; outputs are bound by 2^15 * q in abs value */
-        vmhraddshs 14, vdata_b1, \_vz0, 3
-        vmhraddshs 19, vdata_b2, \_vz1, 3
-        vmhraddshs 24, vdata_b3, \_vz2, 3
-        vmhraddshs 29, vdata_b4, \_vz3, 3
+        vmhraddshs 14, vdata_b1, \_vz0, rinp
+        vmhraddshs 19, vdata_b2, \_vz1, rinp
+        vmhraddshs 24, vdata_b3, \_vz2, rinp
+        vmhraddshs 29, vdata_b4, \_vz3, rinp
 
-        vmladduhm 15, 15, V_QINV, 3
-        vmladduhm 20, 20, V_QINV, 3
-        vmladduhm 25, 25, V_QINV, 3
-        vmladduhm 30, 30, V_QINV, 3
+        vmladduhm 15, 15, V_QINV, rinp
+        vmladduhm 20, 20, V_QINV, rinp
+        vmladduhm 25, 25, V_QINV, rinp
+        vmladduhm 30, 30, V_QINV, rinp
 
         vmhraddshs 15, 15, V_NMKQ, 14
         vmhraddshs 20, 20, V_NMKQ, 19
@@ -289,10 +303,10 @@
  *  r[j]: V12, V17, V22, V27
  */
 .macro Load_4Rj
-        lxvd2x  32+vdata_a1, 3, 9     /* V12: vector r0 */
-        lxvd2x  32+vdata_a2, 3, 16    /* V17: vector r1 */
-        lxvd2x  32+vdata_a3, 3, 18    /* V22: vector r2 */
-        lxvd2x  32+vdata_a4, 3, 20    /* V27: vector r3 */
+        lxvd2x  32+vdata_a1, rinp, a1_offset     /* V12: vector r0 */
+        lxvd2x  32+vdata_a2, rinp, a2_offset    /* V17: vector r1 */
+        lxvd2x  32+vdata_a3, rinp, a3_offset    /* V22: vector r2 */
+        lxvd2x  32+vdata_a4, rinp, a4_offset    /* V27: vector r3 */
 .endm
 
 /*
@@ -318,14 +332,14 @@
 .endm
 
 .macro Write_One
-        stxvd2x 32+vresult_a1, 3, 9
-        stxvd2x 32+vresult_b1, 3, 10
-        stxvd2x 32+vresult_a2, 3, 16
-        stxvd2x 32+vresult_b2, 3, 17
-        stxvd2x 32+vresult_a3, 3, 18
-        stxvd2x 32+vresult_b3, 3, 19
-        stxvd2x 32+vresult_a4, 3, 20
-        stxvd2x 32+vresult_b4, 3, 21
+        stxvd2x 32+vresult_a1, rinp, a1_offset
+        stxvd2x 32+vresult_b1, rinp, b1_offset
+        stxvd2x 32+vresult_a2, rinp, a2_offset
+        stxvd2x 32+vresult_b2, rinp, b2_offset
+        stxvd2x 32+vresult_a3, rinp, a3_offset
+        stxvd2x 32+vresult_b3, rinp, b3_offset
+        stxvd2x 32+vresult_a4, rinp, a4_offset
+        stxvd2x 32+vresult_b4, rinp, b4_offset
 .endm
 
 /*
@@ -342,14 +356,14 @@
         xxpermdi 5, 32+vresult_a3, 32+vresult_b3, 0
         xxpermdi 6, 32+vresult_a4, 32+vresult_b4, 3
         xxpermdi 7, 32+vresult_a4, 32+vresult_b4, 0
-        stxvd2x 0, 0, 5
-        stxvd2x 1, 10, 5
-        stxvd2x 2, 11, 5
-        stxvd2x 3, 12, 5
-        stxvd2x 4, 15, 5
-        stxvd2x 5, 16, 5
-        stxvd2x 6, 17, 5
-        stxvd2x 7, 18, 5
+        stxvd2x 0, 0, dup_rinp
+        stxvd2x 1, 10, dup_rinp
+        stxvd2x 2, 11, dup_rinp
+        stxvd2x 3, 12, dup_rinp
+        stxvd2x 4, 15, dup_rinp
+        stxvd2x 5, 16, dup_rinp
+        stxvd2x 6, 17, dup_rinp
+        stxvd2x 7, 18, dup_rinp
 .endm
 
 /*
@@ -366,25 +380,25 @@
         vmrgow 15, vresult_b3, vresult_a3
         vmrgew 16, vresult_b4, vresult_a4
         vmrgow 17, vresult_b4, vresult_a4
-        stxvd2x 32+10, 0, 5
-        stxvd2x 32+11, 10, 5
-        stxvd2x 32+12, 11, 5
-        stxvd2x 32+13, 12, 5
-        stxvd2x 32+14, 15, 5
-        stxvd2x 32+15, 16, 5
-        stxvd2x 32+16, 17, 5
-        stxvd2x 32+17, 18, 5
+        stxvd2x 32+10, 0, dup_rinp
+        stxvd2x 32+11, 10, dup_rinp
+        stxvd2x 32+12, 11, dup_rinp
+        stxvd2x 32+13, 12, dup_rinp
+        stxvd2x 32+14, 15, dup_rinp
+        stxvd2x 32+15, 16, dup_rinp
+        stxvd2x 32+16, 17, dup_rinp
+        stxvd2x 32+17, 18, dup_rinp
 .endm
 
 .macro Load_next_4zetas
         li      10, 16
         li      11, 32
         li      12, 48
-        lxvd2x  32+V_Z0, 0, 14
-        lxvd2x  32+V_Z1, 10, 14
-        lxvd2x  32+V_Z2, 11, 14
-        lxvd2x  32+V_Z3, 12, 14
-        addi    14, 14, 64
+        lxvd2x  32+V_Z0, 0, zeta_inp
+        lxvd2x  32+V_Z1, 10, zeta_inp
+        lxvd2x  32+V_Z2, 11, zeta_inp
+        lxvd2x  32+V_Z3, 12, zeta_inp
+        addi    zeta_inp, zeta_inp, 64
 .endm
 
 /*
@@ -398,6 +412,32 @@
         xxpermdi 32+V_Z3, 32+V_Z3, 32+V_Z3, 2
 .endm
 
+/*
+ * NTT layer Len=2.
+ */
+.macro NTT_REDUCE_L24
+        Load_next_4zetas
+        Load_L24Coeffs
+        MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3
+        PermWriteL24
+        addi    dup_rinp, dup_rinp, 128
+.endm
+
+/*
+ * NTT layer Len=4.
+ */
+.macro NTT_REDUCE_L44
+        Load_next_4zetas
+        Perm_4zetas
+        Load_L44Coeffs
+        MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3
+        PermWriteL44
+        addi    dup_rinp, dup_rinp, 128
+.endm
+
+/*
+ * NTT other layers.
+ */
 .macro NTT_MREDUCE_4X start next _vz0 _vz1 _vz2 _vz3
         Load_4Coeffs \start, \next
         MREDUCE_4x \_vz0, \_vz1, \_vz2, \_vz3
@@ -448,16 +488,16 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
         SAVE_REGS
 
         /* load MLKEM_Q */
-        lvx     V_NMKQ,0,4
+        lvx     V_NMKQ,0,qinp
 
         /* Register 14 as pointer to zetas array */
-        addi    14, 4, ZETA_NTT_OFFSET
+        addi    zeta_inp, qinp, ZETA_NTT_OFFSET
 
         vxor    3, 3, 3
         vspltish 4, 1
 
         li      10, QINV_OFFSET
-        lvx     V_QINV, 10, 4
+        lvx     V_QINV, 10, qinp
 
 .align 4
         /*
@@ -471,9 +511,9 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
          *
          *     These are indexes to the 16 bits array
          */
-        li      7, 256          /* len * 2 */
-        lvx     V_ZETA, 0, 14
-        addi    14, 14, 16
+        li      len_2, 256          /* len * 2 */
+        lvx     V_ZETA, 0, zeta_inp
+        addi    zeta_inp, zeta_inp, 16
 
         NTT_MREDUCE_4X 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
         NTT_MREDUCE_4X 64, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
@@ -492,14 +532,14 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
          *
          *     These are indexes to the 16 bits array
          */
-        li      7, 128
-        lvx     V_ZETA, 0, 14
-        addi    14, 14, 16
+        li      len_2, 128
+        lvx     V_ZETA, 0, zeta_inp
+        addi    zeta_inp, zeta_inp, 16
         NTT_MREDUCE_4X 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
         NTT_MREDUCE_4X 64, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
-        lvx     V_ZETA, 0, 14
-        addi    14, 14, 16
+        lvx     V_ZETA, 0, zeta_inp
+        addi    zeta_inp, zeta_inp, 16
         NTT_MREDUCE_4X 256, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
         NTT_MREDUCE_4X 320, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
@@ -515,21 +555,21 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
          *
          *     These are indexes to the 16 bits array
          */
-        li      7, 64
-        lvx     V_ZETA, 0, 14
-        addi    14, 14, 16
+        li      len_2, 64
+        lvx     V_ZETA, 0, zeta_inp
+        addi    zeta_inp, zeta_inp, 16
         NTT_MREDUCE_4X 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
-        lvx     V_ZETA, 0, 14
-        addi    14, 14, 16
+        lvx     V_ZETA, 0, zeta_inp
+        addi    zeta_inp, zeta_inp, 16
         NTT_MREDUCE_4X 128, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
-        lvx     V_ZETA, 0, 14
-        addi    14, 14, 16
+        lvx     V_ZETA, 0, zeta_inp
+        addi    zeta_inp, zeta_inp, 16
         NTT_MREDUCE_4X 256, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
-        lvx     V_ZETA, 0, 14
-        addi    14, 14, 16
+        lvx     V_ZETA, 0, zeta_inp
+        addi    zeta_inp, zeta_inp, 16
         NTT_MREDUCE_4X 384, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
 .align 4
@@ -544,7 +584,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
          *
          *     These are indexes to the 16 bits array
          */
-        li      7, 32
+        li      len_2, 32
         Load_next_4zetas
         NTT_MREDUCE_4X 0, 64, V_Z0, V_Z1, V_Z2, V_Z3
         NTT_MREDUCE_4X 16, 64, V_Z0, V_Z1, V_Z2, V_Z3
@@ -565,7 +605,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
          *
          *     These are indexes to the 16 bits array
          */
-        li      7, 16
+        li      len_2, 16
         Load_next_4zetas
         NTT_MREDUCE_4X 0, 32, V_Z0, V_Z1, V_Z2, V_Z3
 
@@ -591,10 +631,8 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
          *
          *     These are indexes to the 16 bits array.  Each loads 4 vectors.
          */
-        li      15, 4
-        mtctr   15
-        mr      5, 3                 /* Let r5 points to coefficient array */
-        li      7, 8
+        mr      dup_rinp, rinp                 /* Let r5 points to coefficient array */
+        li      len_2, 8
 
         li      10, 16
         li      11, 32
@@ -605,15 +643,10 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
         li      18, 112
 
 .align 4
-ntt_ppc__Len4:
-        Load_next_4zetas
-        Perm_4zetas
-        Load_L44Coeffs
-        MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3
-        PermWriteL44
-        addi    5, 5, 128
-
-        bdnz    ntt_ppc__Len4
+        NTT_REDUCE_L44
+        NTT_REDUCE_L44
+        NTT_REDUCE_L44
+        NTT_REDUCE_L44
 
         /*
          * 7. len = 2, start = 0, 4, 8, 12,...244, 248, 252
@@ -628,21 +661,14 @@ ntt_ppc__Len4:
          *
          *     These are indexes to the 16 bits array.  Each loads 4 vectors.
          */
-
-        li      8, 4
-        mtctr   8
-        mr      5, 3                  /* Let r5 points to coefficient array */
-        li      7, 4
+        mr      dup_rinp, rinp                  /* Let r5 points to coefficient array */
+        li      len_2, 4
 
 .align 4
-ntt_ppc__Len2:
-        Load_next_4zetas
-        Load_L24Coeffs
-        MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3
-        PermWriteL24
-        addi    5, 5, 128
-
-        bdnz    ntt_ppc__Len2
+        NTT_REDUCE_L24
+        NTT_REDUCE_L24
+        NTT_REDUCE_L24
+        NTT_REDUCE_L24
 
         RESTORE_REGS
         blr
