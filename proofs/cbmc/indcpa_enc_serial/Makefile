@@ -10,7 +10,7 @@ HARNESS_FILE = indcpa_enc_harness
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
 PROOF_UID = mlk_indcpa_enc
 
-DEFINES +=
+DEFINES += -DMLK_CONFIG_SERIAL_FIPS202_ONLY
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
@@ -23,16 +23,8 @@ CHECK_FUNCTION_CONTRACTS=mlk_indcpa_enc
 
 USED_FUNCTIONS  = poly_frommsg
 USED_FUNCTIONS += gen_matrix
-# USED_FUNCTIONS += enc_sample_sp_ep_epp
-ifeq ($(MLKEM_K),2)
-USED_FUNCTIONS += poly_getnoise_eta1122_4x
+USED_FUNCTIONS += poly_getnoise_eta1
 USED_FUNCTIONS += poly_getnoise_eta2
-else ifeq ($(MLKEM_K),3)
-USED_FUNCTIONS += poly_getnoise_eta1_4x
-else ifeq ($(MLKEM_K),4)
-USED_FUNCTIONS += poly_getnoise_eta1_4x
-USED_FUNCTIONS += poly_getnoise_eta2
-endif
 USED_FUNCTIONS += polyvec_ntt
 USED_FUNCTIONS += polyvec_mulcache_compute
 USED_FUNCTIONS += polyvec_basemul_acc_montgomery_cached

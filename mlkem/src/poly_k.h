@@ -534,6 +534,7 @@ __contract__(
     array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
 );
 
+#if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
 #define mlk_poly_getnoise_eta1_4x MLK_NAMESPACE_K(poly_getnoise_eta1_4x)
 /*************************************************
  * Name:        mlk_poly_getnoise_eta1_4x
@@ -577,6 +578,7 @@ __contract__(
     && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
     && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1));
 );
+#endif /* !MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
 #if MLKEM_ETA1 == MLKEM_ETA2
 /*
@@ -587,7 +589,41 @@ __contract__(
 #define mlk_poly_getnoise_eta2_4x mlk_poly_getnoise_eta1_4x
 #endif /* MLKEM_ETA1 == MLKEM_ETA2 */
 
-#if MLKEM_K == 2 || MLKEM_K == 4
+
+#if defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
+#define mlk_poly_getnoise_eta1 MLK_NAMESPACE_K(poly_getnoise_eta1)
+/*************************************************
+ * Name:        mlk_poly_getnoise_eta1
+ *
+ * Description: Sample a polynomial deterministically from a seed and a nonce,
+ *              with output polynomial close to centered binomial distribution
+ *              with parameter MLKEM_ETA1
+ *
+ * Arguments:   - mlk_poly *r: pointer to output polynomial
+ *              - const uint8_t *seed: pointer to input seed
+ *                                     (of length MLKEM_SYMBYTES bytes)
+ *              - uint8_t nonce: one-byte input nonce
+ *
+ * Specification:
+ * Implements `SamplePolyCBD_{eta1} (PRF_{eta1} (sigma, N))`:
+ * - @[FIPS203, Algorithm 8, SamplePolyCBD_eta]
+ * - @[FIPS203, Eq (4.3), PRF_eta]
+ * - `SamplePolyCBD_{eta1} (PRF_{eta1} (sigma, N))` appears in
+ *   @[FIPS203, Algorithm 14, K-PKE.Encrypt, L14]
+ *
+ **************************************************/
+MLK_INTERNAL_API
+void mlk_poly_getnoise_eta1(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
+                            uint8_t nonce)
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(seed, MLKEM_SYMBYTES))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_ETA1 + 1))
+);
+#endif /* MLK_CONFIG_SERIAL_FIPS202_ONLY */
+
+#if MLKEM_K == 2 || MLKEM_K == 4 || defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
 #define mlk_poly_getnoise_eta2 MLK_NAMESPACE_K(poly_getnoise_eta2)
 /*************************************************
  * Name:        mlk_poly_getnoise_eta2
@@ -615,12 +651,12 @@ void mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_poly)))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
   ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_ETA2 + 1))
 );
-#endif /* MLKEM_K == 2 || MLKEM_K == 4 */
+#endif /* MLKEM_K == 2 || MLKEM_K == 4 || MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
-#if MLKEM_K == 2
+#if MLKEM_K == 2 && !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
 #define mlk_poly_getnoise_eta1122_4x MLK_NAMESPACE_K(poly_getnoise_eta1122_4x)
 /*************************************************
  * Name:        mlk_poly_getnoise_eta1122_4x
@@ -661,6 +697,6 @@ __contract__(
      && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA2 + 1)
      && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA2 + 1));
 );
-#endif /* MLKEM_K == 2 */
+#endif /* MLKEM_K == 2 && !MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
 #endif /* !MLK_POLY_K_H */
