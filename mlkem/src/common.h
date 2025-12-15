@@ -148,6 +148,63 @@
 #include <string.h>
 #define mlk_memset memset
 #endif
+
+
+/* Allocation macros for large local structures
+ *
+ * MLK_ALLOC(v, T, N) declares T *v and attempts to point it to an T[N]
+ * MLK_FREE(v, T, N) zeroizes and frees the allocation
+ *
+ * Default implementation uses stack allocation.
+ * Can be overridden by setting the config option MLK_CONFIG_CUSTOM_ALLOC_FREE
+ * and defining MLK_CUSTOM_ALLOC and MLK_CUSTOM_FREE.
+ */
+#if defined(MLK_CONFIG_CUSTOM_ALLOC_FREE) != \
+    (defined(MLK_CUSTOM_ALLOC) && defined(MLK_CUSTOM_FREE))
+#error Bad configuration: MLK_CONFIG_CUSTOM_ALLOC_FREE must be set together with MLK_CUSTOM_ALLOC and MLK_CUSTOM_FREE
+#endif
+
+#if !defined(MLK_CONFIG_CUSTOM_ALLOC_FREE)
+/* Default: stack allocation */
+
+#define MLK_ALLOC(v, T, N)      \
+  MLK_ALIGN T mlk_alloc_##v[N]; \
+  T *v = mlk_alloc_##v
+
+/* TODO: This leads to a circular dependency between common and verify.h
+ * It just works out before we're at the end of the file, but it's still
+ * prone to issues in the future. */
+#include "verify.h"
+#define MLK_FREE(v, T, N)                              \
+  do                                                   \
+  {                                                    \
+    mlk_zeroize(mlk_alloc_##v, sizeof(mlk_alloc_##v)); \
+    (v) = NULL;                                        \
+  } while (0)
+
+#else /* !MLK_CONFIG_CUSTOM_ALLOC_FREE */
+
+/* Custom allocation */
+
+#define MLK_ALLOC(v, T, N) MLK_CUSTOM_ALLOC(v, T, N)
+#define MLK_FREE(v, T, N)            \
+  do                                 \
+  {                                  \
+    mlk_zeroize(v, sizeof(T) * (N)); \
+    MLK_CUSTOM_FREE(v, T, N);        \
+    v = NULL;                        \
+  } while (0)
+
+#endif /* MLK_CONFIG_CUSTOM_ALLOC_FREE */
+
+/****************************** Error codes ***********************************/
+
+/* Generic failure condition */
+#define MLK_ERR_FAIL -1
+/* An allocation failed. This can only happen if MLK_CONFIG_CUSTOM_ALLOC_FREE
+ * is defined and the provided MLK_CUSTOM_ALLOC can fail. */
+#define MLK_ERR_OUT_OF_MEMORY -2
+
 #endif /* !__ASSEMBLER__ */
 
 #endif /* !MLK_COMMON_H */

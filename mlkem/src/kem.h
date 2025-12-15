@@ -70,7 +70,9 @@
  *                 bytes)
  *
  * Returns: - 0 on success
- *          - -1 on failure
+ *          - MLK_ERR_FAIL: If the modulus check failed.
+ *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
+ *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Section 7.2, 'modulus check']
  *
@@ -98,7 +100,9 @@ __contract__(
  *                 bytes)
  *
  * Returns: - 0 on success
- *          - -1 on failure
+ *          - MLK_ERR_FAIL: If the public key hash check failed.
+ *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
+ *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Section 7.3, 'hash check']
  *
@@ -112,6 +116,7 @@ __contract__(
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
   ensures(return_value == 0 || return_value == -1)
 );
+
 /*************************************************
  * Name:        crypto_kem_keypair_derand
  *
@@ -129,7 +134,10 @@ __contract__(
  *                 random bytes)
  *
  * Returns:     - 0: On success
- *              - -1: On PCT failure (if MLK_CONFIG_KEYGEN_PCT) is enabled.
+ *              - MLK_ERR_FAIL: If MLK_CONFIG_KEYGEN_PCT is enabled and the
+ *                  PCT failed.
+ *              - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Algorithm 16, ML-KEM.KeyGen_Internal]
  *
@@ -161,7 +169,10 @@ __contract__(
  *                 bytes)
  *
  * Returns:     - 0: On success
- *              - -1: On PCT failure (if MLK_CONFIG_KEYGEN_PCT) is enabled.
+ *              - MLK_ERR_FAIL: If MLK_CONFIG_KEYGEN_PCT is enabled and the
+ *                  PCT failed.
+ *              - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Algorithm 19, ML-KEM.KeyGen]
  *
@@ -196,8 +207,10 @@ __contract__(
  *                 bytes)
  *
  * Returns: - 0 on success
- *          - -1 if the 'modulus check' @[FIPS203, Section 7.2]
- *            for the public key fails.
+ *          - MLK_ERR_FAIL: If the 'modulus check' @[FIPS203, Section 7.2]
+ *              for the public key fails.
+ *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
+ *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Algorithm 17, ML-KEM.Encaps_Internal]
  *
@@ -233,8 +246,10 @@ __contract__(
  *                 bytes)
  *
  * Returns: - 0 on success
- *          - -1 if the 'modulus check' @[FIPS203, Section 7.2]
- *            for the public key fails.
+ *          - MLK_ERR_FAIL: If the 'modulus check' @[FIPS203, Section 7.2]
+ *              for the public key fails.
+ *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
+ *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Algorithm 20, ML-KEM.Encaps]
  *
@@ -268,8 +283,10 @@ __contract__(
  *                 bytes)
  *
  * Returns: - 0 on success
- *          - -1 if the 'hash check' @[FIPS203, Section 7.3]
- *            for the secret key fails.
+ *          - MLK_ERR_FAIL: If the 'hash check' @[FIPS203, Section 7.3]
+ *              for the secret key fails.
+ *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
+ *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Algorithm 21, ML-KEM.Decaps]
  *

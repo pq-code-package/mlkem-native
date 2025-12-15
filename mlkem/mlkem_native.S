@@ -165,6 +165,8 @@
 #undef MLK_CONFIG_API_NO_SUPERCOP
 #undef MLK_CONFIG_API_PARAMETER_SET
 #undef MLK_CONFIG_API_QUALIFIER
+#undef MLK_ERR_FAIL
+#undef MLK_ERR_OUT_OF_MEMORY
 #undef MLK_H
 #undef crypto_kem_check_pk
 #undef crypto_kem_check_sk
@@ -175,6 +177,7 @@
 #undef crypto_kem_keypair_derand
 /* mlkem/src/common.h */
 #undef MLK_ADD_PARAM_SET
+#undef MLK_ALLOC
 #undef MLK_ASM_FN_SYMBOL
 #undef MLK_ASM_NAMESPACE
 #undef MLK_BUILD_INTERNAL
@@ -182,9 +185,12 @@
 #undef MLK_CONCAT
 #undef MLK_CONCAT_
 #undef MLK_EMPTY_CU
+#undef MLK_ERR_FAIL
+#undef MLK_ERR_OUT_OF_MEMORY
 #undef MLK_EXTERNAL_API
 #undef MLK_FIPS202X4_HEADER_FILE
 #undef MLK_FIPS202_HEADER_FILE
+#undef MLK_FREE
 #undef MLK_INTERNAL_API
 #undef MLK_NAMESPACE
 #undef MLK_NAMESPACE_K

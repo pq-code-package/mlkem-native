@@ -375,18 +375,31 @@ __contract__(
  *            - We include buffer zeroization.
  */
 MLK_INTERNAL_API
-void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                               uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
-                               const uint8_t coins[MLKEM_SYMBYTES])
+int mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
+                              uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
+                              const uint8_t coins[MLKEM_SYMBYTES])
 {
-  MLK_ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
-  const uint8_t *publicseed = buf;
-  const uint8_t *noiseseed = buf + MLKEM_SYMBYTES;
-  mlk_polymat a;
-  mlk_polyvec e, pkpv, skpv;
-  mlk_polyvec_mulcache skpv_cache;
+  int ret = 0;
+  const uint8_t *publicseed;
+  const uint8_t *noiseseed;
+  MLK_ALLOC(buf, uint8_t, 2 * MLKEM_SYMBYTES);
+  MLK_ALLOC(coins_with_domain_separator, uint8_t, MLKEM_SYMBYTES + 1);
+  MLK_ALLOC(a, mlk_polymat, 1);
+  MLK_ALLOC(e, mlk_polyvec, 1);
+  MLK_ALLOC(pkpv, mlk_polyvec, 1);
+  MLK_ALLOC(skpv, mlk_polyvec, 1);
+  MLK_ALLOC(skpv_cache, mlk_polyvec_mulcache, 1);
 
-  MLK_ALIGN uint8_t coins_with_domain_separator[MLKEM_SYMBYTES + 1];
+  if (buf == NULL || coins_with_domain_separator == NULL || a == NULL ||
+      e == NULL || pkpv == NULL || skpv == NULL || skpv_cache == NULL)
+  {
+    ret = MLK_ERR_OUT_OF_MEMORY;
+    goto cleanup;
+  }
+
+  publicseed = buf;
+  noiseseed = buf + MLKEM_SYMBYTES;
+
   /* Concatenate coins with MLKEM_K for domain separation of security levels */
   mlk_memcpy(coins_with_domain_separator, coins, MLKEM_SYMBYTES);
   coins_with_domain_separator[MLKEM_SYMBYTES] = MLKEM_K;
@@ -401,53 +414,55 @@ void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
    */
   MLK_CT_TESTING_DECLASSIFY(publicseed, MLKEM_SYMBYTES);
 
-  mlk_gen_matrix(&a, publicseed, 0 /* no transpose */);
+  mlk_gen_matrix(a, publicseed, 0 /* no transpose */);
 
 #if MLKEM_K == 2
-  mlk_poly_getnoise_eta1_4x(&skpv.vec[0], &skpv.vec[1], &e.vec[0], &e.vec[1],
-                            noiseseed, 0, 1, 2, 3);
+  mlk_poly_getnoise_eta1_4x(&skpv->vec[0], &skpv->vec[1], &e->vec[0],
+                            &e->vec[1], noiseseed, 0, 1, 2, 3);
 #elif MLKEM_K == 3
   /*
    * Only the first three output buffers are needed.
    * The laster parameter is a dummy that's overwritten later.
    */
-  mlk_poly_getnoise_eta1_4x(&skpv.vec[0], &skpv.vec[1], &skpv.vec[2],
-                            &pkpv.vec[0] /* irrelevant */, noiseseed, 0, 1, 2,
+  mlk_poly_getnoise_eta1_4x(&skpv->vec[0], &skpv->vec[1], &skpv->vec[2],
+                            &pkpv->vec[0] /* irrelevant */, noiseseed, 0, 1, 2,
                             0xFF /* irrelevant */);
   /* Same here */
-  mlk_poly_getnoise_eta1_4x(&e.vec[0], &e.vec[1], &e.vec[2],
-                            &pkpv.vec[0] /* irrelevant */, noiseseed, 3, 4, 5,
+  mlk_poly_getnoise_eta1_4x(&e->vec[0], &e->vec[1], &e->vec[2],
+                            &pkpv->vec[0] /* irrelevant */, noiseseed, 3, 4, 5,
                             0xFF /* irrelevant */);
 #elif MLKEM_K == 4
-  mlk_poly_getnoise_eta1_4x(&skpv.vec[0], &skpv.vec[1], &skpv.vec[2],
-                            &skpv.vec[3], noiseseed, 0, 1, 2, 3);
-  mlk_poly_getnoise_eta1_4x(&e.vec[0], &e.vec[1], &e.vec[2], &e.vec[3],
+  mlk_poly_getnoise_eta1_4x(&skpv->vec[0], &skpv->vec[1], &skpv->vec[2],
+                            &skpv->vec[3], noiseseed, 0, 1, 2, 3);
+  mlk_poly_getnoise_eta1_4x(&e->vec[0], &e->vec[1], &e->vec[2], &e->vec[3],
                             noiseseed, 4, 5, 6, 7);
 #endif /* MLKEM_K == 4 */
 
-  mlk_polyvec_ntt(&skpv);
-  mlk_polyvec_ntt(&e);
+  mlk_polyvec_ntt(skpv);
+  mlk_polyvec_ntt(e);
 
-  mlk_polyvec_mulcache_compute(&skpv_cache, &skpv);
-  mlk_matvec_mul(&pkpv, &a, &skpv, &skpv_cache);
-  mlk_polyvec_tomont(&pkpv);
+  mlk_polyvec_mulcache_compute(skpv_cache, skpv);
+  mlk_matvec_mul(pkpv, a, skpv, skpv_cache);
+  mlk_polyvec_tomont(pkpv);
 
-  mlk_polyvec_add(&pkpv, &e);
-  mlk_polyvec_reduce(&pkpv);
-  mlk_polyvec_reduce(&skpv);
+  mlk_polyvec_add(pkpv, e);
+  mlk_polyvec_reduce(pkpv);
+  mlk_polyvec_reduce(skpv);
 
-  mlk_pack_sk(sk, &skpv);
-  mlk_pack_pk(pk, &pkpv, publicseed);
+  mlk_pack_sk(sk, skpv);
+  mlk_pack_pk(pk, pkpv, publicseed);
 
+cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  mlk_zeroize(buf, sizeof(buf));
-  mlk_zeroize(&a, sizeof(a));
-  mlk_zeroize(&e, sizeof(e));
-  mlk_zeroize(&pkpv, sizeof(pkpv));
-  mlk_zeroize(&skpv, sizeof(skpv));
-  mlk_zeroize(&skpv_cache, sizeof(skpv_cache));
-  mlk_zeroize(coins_with_domain_separator, sizeof(coins_with_domain_separator));
+  MLK_FREE(buf, uint8_t, 2 * MLKEM_SYMBYTES);
+  MLK_FREE(coins_with_domain_separator, uint8_t, MLKEM_SYMBYTES + 1);
+  MLK_FREE(a, mlk_polymat, 1);
+  MLK_FREE(e, mlk_polyvec, 1);
+  MLK_FREE(pkpv, mlk_polyvec, 1);
+  MLK_FREE(skpv, mlk_polyvec, 1);
+  MLK_FREE(skpv_cache, mlk_polyvec_mulcache, 1);
+  return ret;
 }
 
 /* Reference: `indcpa_enc()` in the reference implementation @[REF].
@@ -459,19 +474,32 @@ void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
  *            - We include buffer zeroization.
  */
 MLK_INTERNAL_API
-void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
-                    const uint8_t m[MLKEM_INDCPA_MSGBYTES],
-                    const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                    const uint8_t coins[MLKEM_SYMBYTES])
+int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
+                   const uint8_t m[MLKEM_INDCPA_MSGBYTES],
+                   const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
+                   const uint8_t coins[MLKEM_SYMBYTES])
 {
-  MLK_ALIGN uint8_t seed[MLKEM_SYMBYTES];
-  mlk_polymat at;
-  mlk_polyvec sp, pkpv, ep, b;
-  mlk_poly v, k, epp;
-  mlk_polyvec_mulcache sp_cache;
+  int ret = 0;
+  MLK_ALLOC(seed, uint8_t, MLKEM_SYMBYTES);
+  MLK_ALLOC(at, mlk_polymat, 1);
+  MLK_ALLOC(sp, mlk_polyvec, 1);
+  MLK_ALLOC(pkpv, mlk_polyvec, 1);
+  MLK_ALLOC(ep, mlk_polyvec, 1);
+  MLK_ALLOC(b, mlk_polyvec, 1);
+  MLK_ALLOC(v, mlk_poly, 1);
+  MLK_ALLOC(k, mlk_poly, 1);
+  MLK_ALLOC(epp, mlk_poly, 1);
+  MLK_ALLOC(sp_cache, mlk_polyvec_mulcache, 1);
 
-  mlk_unpack_pk(&pkpv, seed, pk);
-  mlk_poly_frommsg(&k, m);
+  if (seed == NULL || at == NULL || sp == NULL || pkpv == NULL || ep == NULL ||
+      b == NULL || v == NULL || k == NULL || epp == NULL || sp_cache == NULL)
+  {
+    ret = MLK_ERR_OUT_OF_MEMORY;
+    goto cleanup;
+  }
+
+  mlk_unpack_pk(pkpv, seed, pk);
+  mlk_poly_frommsg(k, m);
 
   /*
    * Declassify the public seed.
@@ -481,94 +509,107 @@ void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
    */
   MLK_CT_TESTING_DECLASSIFY(seed, MLKEM_SYMBYTES);
 
-  mlk_gen_matrix(&at, seed, 1 /* transpose */);
+  mlk_gen_matrix(at, seed, 1 /* transpose */);
 
 #if MLKEM_K == 2
-  mlk_poly_getnoise_eta1122_4x(&sp.vec[0], &sp.vec[1], &ep.vec[0], &ep.vec[1],
-                               coins, 0, 1, 2, 3);
-  mlk_poly_getnoise_eta2(&epp, coins, 4);
+  mlk_poly_getnoise_eta1122_4x(&sp->vec[0], &sp->vec[1], &ep->vec[0],
+                               &ep->vec[1], coins, 0, 1, 2, 3);
+  mlk_poly_getnoise_eta2(epp, coins, 4);
 #elif MLKEM_K == 3
   /*
    * In this call, only the first three output buffers are needed.
    * The last parameter is a dummy that's overwritten later.
    */
-  mlk_poly_getnoise_eta1_4x(&sp.vec[0], &sp.vec[1], &sp.vec[2], &b.vec[0],
+  mlk_poly_getnoise_eta1_4x(&sp->vec[0], &sp->vec[1], &sp->vec[2], &b->vec[0],
                             coins, 0, 1, 2, 0xFF);
   /* The fourth output buffer in this call _is_ used. */
-  mlk_poly_getnoise_eta2_4x(&ep.vec[0], &ep.vec[1], &ep.vec[2], &epp, coins, 3,
-                            4, 5, 6);
+  mlk_poly_getnoise_eta2_4x(&ep->vec[0], &ep->vec[1], &ep->vec[2], epp, coins,
+                            3, 4, 5, 6);
 #elif MLKEM_K == 4
-  mlk_poly_getnoise_eta1_4x(&sp.vec[0], &sp.vec[1], &sp.vec[2], &sp.vec[3],
+  mlk_poly_getnoise_eta1_4x(&sp->vec[0], &sp->vec[1], &sp->vec[2], &sp->vec[3],
                             coins, 0, 1, 2, 3);
-  mlk_poly_getnoise_eta2_4x(&ep.vec[0], &ep.vec[1], &ep.vec[2], &ep.vec[3],
+  mlk_poly_getnoise_eta2_4x(&ep->vec[0], &ep->vec[1], &ep->vec[2], &ep->vec[3],
                             coins, 4, 5, 6, 7);
-  mlk_poly_getnoise_eta2(&epp, coins, 8);
+  mlk_poly_getnoise_eta2(epp, coins, 8);
 #endif /* MLKEM_K == 4 */
 
-  mlk_polyvec_ntt(&sp);
+  mlk_polyvec_ntt(sp);
 
-  mlk_polyvec_mulcache_compute(&sp_cache, &sp);
-  mlk_matvec_mul(&b, &at, &sp, &sp_cache);
-  mlk_polyvec_basemul_acc_montgomery_cached(&v, &pkpv, &sp, &sp_cache);
+  mlk_polyvec_mulcache_compute(sp_cache, sp);
+  mlk_matvec_mul(b, at, sp, sp_cache);
+  mlk_polyvec_basemul_acc_montgomery_cached(v, pkpv, sp, sp_cache);
 
-  mlk_polyvec_invntt_tomont(&b);
-  mlk_poly_invntt_tomont(&v);
+  mlk_polyvec_invntt_tomont(b);
+  mlk_poly_invntt_tomont(v);
 
-  mlk_polyvec_add(&b, &ep);
-  mlk_poly_add(&v, &epp);
-  mlk_poly_add(&v, &k);
+  mlk_polyvec_add(b, ep);
+  mlk_poly_add(v, epp);
+  mlk_poly_add(v, k);
 
-  mlk_polyvec_reduce(&b);
-  mlk_poly_reduce(&v);
+  mlk_polyvec_reduce(b);
+  mlk_poly_reduce(v);
 
-  mlk_pack_ciphertext(c, &b, &v);
+  mlk_pack_ciphertext(c, b, v);
 
+cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  mlk_zeroize(seed, sizeof(seed));
-  mlk_zeroize(&at, sizeof(at));
-  mlk_zeroize(&sp, sizeof(sp));
-  mlk_zeroize(&pkpv, sizeof(pkpv));
-  mlk_zeroize(&ep, sizeof(ep));
-  mlk_zeroize(&b, sizeof(b));
-  mlk_zeroize(&v, sizeof(v));
-  mlk_zeroize(&k, sizeof(k));
-  mlk_zeroize(&epp, sizeof(epp));
-  mlk_zeroize(&sp_cache, sizeof(sp_cache));
+  MLK_FREE(seed, uint8_t, MLKEM_SYMBYTES);
+  MLK_FREE(at, mlk_polymat, 1);
+  MLK_FREE(sp, mlk_polyvec, 1);
+  MLK_FREE(pkpv, mlk_polyvec, 1);
+  MLK_FREE(ep, mlk_polyvec, 1);
+  MLK_FREE(b, mlk_polyvec, 1);
+  MLK_FREE(v, mlk_poly, 1);
+  MLK_FREE(k, mlk_poly, 1);
+  MLK_FREE(epp, mlk_poly, 1);
+  MLK_FREE(sp_cache, mlk_polyvec_mulcache, 1);
+  return ret;
 }
 
 /* Reference: `indcpa_dec()` in the reference implementation @[REF].
  *            - We use a mulcache for the scalar product.
  *            - We include buffer zeroization. */
 MLK_INTERNAL_API
-void mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
-                    const uint8_t c[MLKEM_INDCPA_BYTES],
-                    const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
+int mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
+                   const uint8_t c[MLKEM_INDCPA_BYTES],
+                   const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
 {
-  mlk_polyvec b, skpv;
-  mlk_poly v, sb;
-  mlk_polyvec_mulcache b_cache;
+  int ret = 0;
+  MLK_ALLOC(b, mlk_polyvec, 1);
+  MLK_ALLOC(skpv, mlk_polyvec, 1);
+  MLK_ALLOC(v, mlk_poly, 1);
+  MLK_ALLOC(sb, mlk_poly, 1);
+  MLK_ALLOC(b_cache, mlk_polyvec_mulcache, 1);
 
-  mlk_unpack_ciphertext(&b, &v, c);
-  mlk_unpack_sk(&skpv, sk);
+  if (b == NULL || skpv == NULL || v == NULL || sb == NULL || b_cache == NULL)
+  {
+    ret = MLK_ERR_OUT_OF_MEMORY;
+    goto cleanup;
+  }
 
-  mlk_polyvec_ntt(&b);
-  mlk_polyvec_mulcache_compute(&b_cache, &b);
-  mlk_polyvec_basemul_acc_montgomery_cached(&sb, &skpv, &b, &b_cache);
-  mlk_poly_invntt_tomont(&sb);
+  mlk_unpack_ciphertext(b, v, c);
+  mlk_unpack_sk(skpv, sk);
 
-  mlk_poly_sub(&v, &sb);
-  mlk_poly_reduce(&v);
+  mlk_polyvec_ntt(b);
+  mlk_polyvec_mulcache_compute(b_cache, b);
+  mlk_polyvec_basemul_acc_montgomery_cached(sb, skpv, b, b_cache);
+  mlk_poly_invntt_tomont(sb);
 
-  mlk_poly_tomsg(m, &v);
+  mlk_poly_sub(v, sb);
+  mlk_poly_reduce(v);
 
+  mlk_poly_tomsg(m, v);
+
+cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  mlk_zeroize(&b, sizeof(b));
-  mlk_zeroize(&skpv, sizeof(skpv));
-  mlk_zeroize(&v, sizeof(v));
-  mlk_zeroize(&sb, sizeof(sb));
-  mlk_zeroize(&b_cache, sizeof(b_cache));
+  MLK_FREE(b, mlk_polyvec, 1);
+  MLK_FREE(skpv, mlk_polyvec, 1);
+  MLK_FREE(v, mlk_poly, 1);
+  MLK_FREE(sb, mlk_poly, 1);
+  MLK_FREE(b_cache, mlk_polyvec_mulcache, 1);
+  return ret;
 }
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.

@@ -109,6 +109,14 @@
 #define MLKEM_PUBLICKEYBYTES(LVL) MLKEM_PUBLICKEYBYTES_(LVL)
 #define MLKEM_CIPHERTEXTBYTES(LVL) MLKEM_CIPHERTEXTBYTES_(LVL)
 
+/****************************** Error codes ***********************************/
+
+/* Generic failure condition */
+#define MLK_ERR_FAIL -1
+/* An allocation failed. This can only happen if MLK_CONFIG_CUSTOM_ALLOC_FREE
+ * is defined and the provided MLK_CUSTOM_ALLOC can fail. */
+#define MLK_ERR_OUT_OF_MEMORY -2
+
 /****************************** Function API **********************************/
 
 #define MLK_API_CONCAT_(x, y) x##y
@@ -189,7 +197,10 @@
  *                  2*MLKEM_SYMBYTES uniformly random bytes.
  *
  * Returns:     - 0: On success
- *              - -1: On PCT failure (if MLK_CONFIG_KEYGEN_PCT) is enabled.
+ *              - MLK_ERR_FAIL: If MLK_CONFIG_KEYGEN_PCT is enabled and the
+ *                  PCT failed.
+ *              - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Algorithm 16, ML-KEM.KeyGen_Internal]
  *
@@ -214,7 +225,10 @@ int MLK_API_NAMESPACE(keypair_derand)(
  *                 MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
  *
  * Returns:     - 0: On success
- *              - -1: On PCT failure (if MLK_CONFIG_KEYGEN_PCT) is enabled.
+ *              - MLK_ERR_FAIL: If MLK_CONFIG_KEYGEN_PCT is enabled and the
+ *                  PCT failed.
+ *              - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Algorithm 19, ML-KEM.KeyGen]
  *
@@ -242,8 +256,10 @@ int MLK_API_NAMESPACE(keypair)(
  *                 MLKEM_SYMBYTES bytes.
  *
  * Returns: - 0 on success
- *          - -1 if the 'modulus check' @[FIPS203, Section 7.2]
- *            for the public key fails.
+ *          - MLK_ERR_FAIL: If the 'modulus check' @[FIPS203, Section 7.2]
+ *              for the public key fails.
+ *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
+ *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Algorithm 17, ML-KEM.Encaps_Internal]
  *
@@ -271,8 +287,10 @@ int MLK_API_NAMESPACE(enc_derand)(
  *                 MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
  *
  * Returns: - 0 on success
- *          - -1 if the 'modulus check' @[FIPS203, Section 7.2]
- *            for the public key fails.
+ *          - MLK_ERR_FAIL: If the 'modulus check' @[FIPS203, Section 7.2]
+ *              for the public key fails.
+ *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
+ *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Algorithm 20, ML-KEM.Encaps]
  *
@@ -299,8 +317,10 @@ int MLK_API_NAMESPACE(enc)(
  *                 MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
  *
  * Returns: - 0 on success
- *          - -1 if the 'hash check' @[FIPS203, Section 7.3]
- *            for the secret key fails.
+ *          - MLK_ERR_FAIL: If the 'hash check' @[FIPS203, Section 7.3]
+ *              for the secret key fails.
+ *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
+ *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Algorithm 21, ML-KEM.Decaps]
  *
@@ -322,7 +342,9 @@ int MLK_API_NAMESPACE(dec)(
  *                 MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
  *
  * Returns: - 0 on success
- *          - -1 on failure
+ *          - MLK_ERR_FAIL: If the modulus check failed.
+ *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
+ *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Section 7.2, 'modulus check']
  *
@@ -343,7 +365,9 @@ int MLK_API_NAMESPACE(check_pk)(
  *                 MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
  *
  * Returns: - 0 on success
- *          - -1 on failure
+ *          - MLK_ERR_FAIL: If the public key hash check failed.
+ *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
+ *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Section 7.3, 'hash check']
  *
