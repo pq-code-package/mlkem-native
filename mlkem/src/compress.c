@@ -457,7 +457,7 @@ __contract__(
   requires(memory_no_alias(r, MLKEM_POLYBYTES))
   requires(memory_no_alias(a, sizeof(mlk_poly)))
   requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, MLKEM_POLYBYTES))
 )
 {
   unsigned i;

@@ -598,7 +598,7 @@ __contract__(
   requires(memory_no_alias(r, MLKEM_POLYBYTES))
   requires(memory_no_alias(a, sizeof(mlk_poly)))
   requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, MLKEM_POLYBYTES))
 );
 
 
@@ -654,7 +654,7 @@ void mlk_poly_frommsg(mlk_poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
 __contract__(
   requires(memory_no_alias(msg, MLKEM_INDCPA_MSGBYTES))
   requires(memory_no_alias(r, sizeof(mlk_poly)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
   ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
 );
 
@@ -683,7 +683,7 @@ __contract__(
   requires(memory_no_alias(msg, MLKEM_INDCPA_MSGBYTES))
   requires(memory_no_alias(r, sizeof(mlk_poly)))
   requires(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
-  assigns(object_whole(msg))
+  assigns(memory_slice(msg, MLKEM_INDCPA_MSGBYTES))
 );
 
 #endif /* !MLK_COMPRESS_H */

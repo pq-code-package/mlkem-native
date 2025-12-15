@@ -222,14 +222,14 @@ __contract__(
   requires(memory_no_alias(a, sizeof(mlk_polymat)))
   requires(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
     array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
-  assigns(object_whole(a))
+  assigns(memory_slice(a, sizeof(mlk_polymat)))
   ensures(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
     array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))))
 {
   unsigned i;
   for (i = 0; i < MLKEM_K; i++)
   __loop__(
-     assigns(i, object_whole(a))
+     assigns(i, memory_slice(a, sizeof(mlk_polymat)))
      invariant(i <= MLKEM_K)
      invariant(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
        array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))))
@@ -354,12 +354,12 @@ __contract__(
   requires(forall(k0, 0, MLKEM_K,
     forall(k1, 0, MLKEM_K,
       array_bound(a->vec[k0].vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT))))
-  assigns(object_whole(out)))
+  assigns(memory_slice(out, sizeof(mlk_polyvec))))
 {
   unsigned i;
   for (i = 0; i < MLKEM_K; i++)
   __loop__(
-    assigns(i, object_whole(out))
+    assigns(i, memory_slice(out, sizeof(mlk_polyvec)))
     invariant(i <= MLKEM_K))
   {
     mlk_polyvec_basemul_acc_montgomery_cached(&out->vec[i], &a->vec[i], v, vc);
