@@ -8,9 +8,9 @@
 
 /* Expose declaration of allocator (normally internal) */
 #define MLK_BUILD_INTERNAL
-#include "../mlkem/mlkem_native.h"
-#include "../mlkem/src/common.h"
-#include "notrandombytes/notrandombytes.h"
+#include "../../mlkem/mlkem_native.h"
+#include "../../mlkem/src/common.h"
+#include "../notrandombytes/notrandombytes.h"
 
 /*
  * This test checks that

@@ -5,10 +5,10 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include "../mlkem/src/compress.h"
+#include "../../mlkem/src/compress.h"
 
-#include "../mlkem/mlkem_native.h"
-#include "notrandombytes/notrandombytes.h"
+#include "../../mlkem/mlkem_native.h"
+#include "../notrandombytes/notrandombytes.h"
 
 #ifndef NTESTS_FUNC
 #define NTESTS_FUNC 1000

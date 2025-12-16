@@ -12,7 +12,12 @@ ifeq ($(OPT),1)
 	CFLAGS += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
 endif
 
-ALL_TESTS = test_mlkem test_unit acvp_mlkem bench_mlkem bench_components_mlkem gen_KAT test_stack test_alloc
+BASIC_TESTS = test_mlkem gen_KAT test_stack
+ACVP_TESTS = acvp_mlkem
+BENCH_TESTS = bench_mlkem bench_components_mlkem
+UNIT_TESTS = test_unit
+ALLOC_TESTS = test_alloc
+ALL_TESTS = $(BASIC_TESTS) $(ACVP_TESTS) $(BENCH_TESTS) $(UNIT_TESTS) $(ALLOC_TESTS)
 
 MLKEM512_DIR = $(BUILD_DIR)/mlkem512
 MLKEM768_DIR = $(BUILD_DIR)/mlkem768
@@ -71,9 +76,9 @@ $(MLKEM512_DIR)/bin/test_stack512: CFLAGS += -Imlkem/src -fstack-usage
 $(MLKEM768_DIR)/bin/test_stack768: CFLAGS += -Imlkem/src -fstack-usage
 $(MLKEM1024_DIR)/bin/test_stack1024: CFLAGS += -Imlkem/src -fstack-usage
 
-$(MLKEM512_DIR)/test/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
-$(MLKEM768_DIR)/test/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
-$(MLKEM1024_DIR)/test/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
+$(MLKEM512_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
+$(MLKEM768_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
+$(MLKEM1024_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 
 $(MLKEM512_DIR)/bin/test_unit512: CFLAGS += -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
 $(MLKEM768_DIR)/bin/test_unit768: CFLAGS += -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
@@ -98,32 +103,32 @@ $(MLKEM1024_DIR)/bin/%: CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024
 # Link tests with respective library (except test_unit which includes sources directly)
 define ADD_SOURCE
 $(BUILD_DIR)/$(1)/bin/$(2)$(subst mlkem,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)
-$(BUILD_DIR)/$(1)/bin/$(2)$(subst mlkem,,$(1)): $(BUILD_DIR)/$(1)/test/$(2).c.o $(BUILD_DIR)/lib$(1).a
+$(BUILD_DIR)/$(1)/bin/$(2)$(subst mlkem,,$(1)): $(BUILD_DIR)/$(1)/test/$(3)$(2).c.o $(BUILD_DIR)/lib$(1).a
 endef
 
 # Special rule for test_unit - link against unit libraries with exposed internal functions
 define ADD_SOURCE_UNIT
 $(BUILD_DIR)/$(1)/bin/test_unit$(subst mlkem,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)_unit
-$(BUILD_DIR)/$(1)/bin/test_unit$(subst mlkem,,$(1)): $(BUILD_DIR)/$(1)/test/test_unit.c.o $(BUILD_DIR)/lib$(1)_unit.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
+$(BUILD_DIR)/$(1)/bin/test_unit$(subst mlkem,,$(1)): $(BUILD_DIR)/$(1)/test/src/test_unit.c.o $(BUILD_DIR)/lib$(1)_unit.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
 endef
 
 # Special rule for test_alloc - link against alloc libraries with custom alloc config
 define ADD_SOURCE_ALLOC
 $(BUILD_DIR)/$(1)/bin/test_alloc$(subst mlkem,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)_alloc
-$(BUILD_DIR)/$(1)/bin/test_alloc$(subst mlkem,,$(1)): $(BUILD_DIR)/$(1)/test/test_alloc.c.o $(BUILD_DIR)/lib$(1)_alloc.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
+$(BUILD_DIR)/$(1)/bin/test_alloc$(subst mlkem,,$(1)): $(BUILD_DIR)/$(1)/test/src/test_alloc.c.o $(BUILD_DIR)/lib$(1)_alloc.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
 endef
 
 $(foreach scheme,mlkem512 mlkem768 mlkem1024, \
-	$(foreach test,$(filter-out test_unit test_alloc,$(ALL_TESTS)), \
-		$(eval $(call ADD_SOURCE,$(scheme),$(test))) \
+	$(foreach test,$(ACVP_TESTS), \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),)) \
 	) \
-)
-
-$(foreach scheme,mlkem512 mlkem768 mlkem1024, \
+	$(foreach test,$(BENCH_TESTS), \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),)) \
+	) \
+	$(foreach test,$(BASIC_TESTS), \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),src/)) \
+	) \
 	$(eval $(call ADD_SOURCE_UNIT,$(scheme))) \
-)
-
-$(foreach scheme,mlkem512 mlkem768 mlkem1024, \
 	$(eval $(call ADD_SOURCE_ALLOC,$(scheme))) \
 )
 
