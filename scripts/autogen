@@ -3445,7 +3445,7 @@ def gen_test_config(config_path, config_spec, default_config_content):
 def gen_test_configs():
     """Generate all test configuration files from metadata."""
     # Load metadata
-    metadata = yaml.safe_load(read_file("test/configs.yml"))
+    metadata = yaml.safe_load(read_file("test/configs/configs.yml"))
 
     # Load default config
     default_config = read_file("mlkem/mlkem_native_config.h")

@@ -35,11 +35,11 @@ $(MLKEM1024_UNIT_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024 -DMLK_STATIC_T
 
 # Alloc test object files - same sources but with custom alloc config
 MLKEM512_ALLOC_OBJS = $(call MAKE_OBJS,$(MLKEM512_DIR)/alloc,$(SOURCES) $(FIPS202_SRCS))
-$(MLKEM512_ALLOC_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=512 -DMLK_CONFIG_FILE=\"../test/test_alloc_config.h\"
+$(MLKEM512_ALLOC_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=512 -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 MLKEM768_ALLOC_OBJS = $(call MAKE_OBJS,$(MLKEM768_DIR)/alloc,$(SOURCES) $(FIPS202_SRCS))
-$(MLKEM768_ALLOC_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\"../test/test_alloc_config.h\"
+$(MLKEM768_ALLOC_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 MLKEM1024_ALLOC_OBJS = $(call MAKE_OBJS,$(MLKEM1024_DIR)/alloc,$(SOURCES) $(FIPS202_SRCS))
-$(MLKEM1024_ALLOC_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024 -DMLK_CONFIG_FILE=\"../test/test_alloc_config.h\"
+$(MLKEM1024_ALLOC_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024 -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 
 
 CFLAGS += -Imlkem
@@ -71,9 +71,9 @@ $(MLKEM512_DIR)/bin/test_stack512: CFLAGS += -Imlkem/src -fstack-usage
 $(MLKEM768_DIR)/bin/test_stack768: CFLAGS += -Imlkem/src -fstack-usage
 $(MLKEM1024_DIR)/bin/test_stack1024: CFLAGS += -Imlkem/src -fstack-usage
 
-$(MLKEM512_DIR)/test/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/test_alloc_config.h\"
-$(MLKEM768_DIR)/test/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/test_alloc_config.h\"
-$(MLKEM1024_DIR)/test/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/test_alloc_config.h\"
+$(MLKEM512_DIR)/test/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
+$(MLKEM768_DIR)/test/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
+$(MLKEM1024_DIR)/test/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 
 $(MLKEM512_DIR)/bin/test_unit512: CFLAGS += -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
 $(MLKEM768_DIR)/bin/test_unit768: CFLAGS += -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes

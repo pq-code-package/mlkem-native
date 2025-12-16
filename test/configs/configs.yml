@@ -5,7 +5,7 @@
 # Each entry describes how a test config differs from mlkem/mlkem_native_config.h
 
 configs:
-  - path: test/no_asm_config.h
+  - path: test/configs/no_asm_config.h
     description: "Test configuration with no assembly code"
     defines:
       MLK_CONFIG_NO_ASM: true
@@ -22,12 +22,12 @@ configs:
           }
           #endif /* !__ASSEMBLER__ */
 
-  - path: test/serial_fips202_config.h
+  - path: test/configs/serial_fips202_config.h
     description: "Test configuration with serial FIPS202 only"
     defines:
       MLK_CONFIG_SERIAL_FIPS202_ONLY: true
 
-  - path: test/custom_randombytes_config.h
+  - path: test/configs/custom_randombytes_config.h
     description: "Test configuration with custom randombytes"
     defines:
       MLK_CONFIG_CUSTOM_RANDOMBYTES:
@@ -43,7 +43,7 @@ configs:
           }
           #endif /* !__ASSEMBLER__ */
 
-  - path: test/custom_zeroize_config.h
+  - path: test/configs/custom_zeroize_config.h
     description: "Test configuration with custom zeroize"
     defines:
       MLK_CONFIG_CUSTOM_ZEROIZE:
@@ -59,7 +59,7 @@ configs:
           }
           #endif /* !__ASSEMBLER__ */
 
-  - path: test/custom_memcpy_config.h
+  - path: test/configs/custom_memcpy_config.h
     description: "Test configuration with custom memcpy"
     defines:
       MLK_CONFIG_CUSTOM_MEMCPY:
@@ -82,7 +82,7 @@ configs:
           }
           #endif /* !__ASSEMBLER__ */
 
-  - path: test/custom_memset_config.h
+  - path: test/configs/custom_memset_config.h
     description: "Test configuration with custom memset"
     defines:
       MLK_CONFIG_CUSTOM_MEMSET:
@@ -104,7 +104,7 @@ configs:
           }
           #endif /* !__ASSEMBLER__ */
 
-  - path: test/custom_stdlib_config.h
+  - path: test/configs/custom_stdlib_config.h
     description: "Test configuration with custom stdlib functions"
     defines:
       MLK_CONFIG_CUSTOM_MEMCPY:
@@ -145,7 +145,7 @@ configs:
           }
           #endif /* !__ASSEMBLER__ */
 
-  - path: test/break_pct_config.h
+  - path: test/configs/break_pct_config.h
     description: "Test configuration for PCT breakage testing"
     defines:
       MLK_CONFIG_KEYGEN_PCT: true
@@ -164,7 +164,7 @@ configs:
           }
           #endif /* !__ASSEMBLER__ */
 
-  - path: test/custom_native_capability_config_0.h
+  - path: test/configs/custom_native_capability_config_0.h
     description: "Test configuration with custom capability function returning 0"
     defines:
       MLK_CONFIG_CUSTOM_CAPABILITY_FUNC:
@@ -181,7 +181,7 @@ configs:
           }
           #endif /* !__ASSEMBLER__ */
 
-  - path: test/custom_native_capability_config_1.h
+  - path: test/configs/custom_native_capability_config_1.h
     description: "Test configuration with custom capability function returning 1"
     defines:
       MLK_CONFIG_CUSTOM_CAPABILITY_FUNC:
@@ -197,7 +197,7 @@ configs:
           }
           #endif /* !__ASSEMBLER__ */
 
-  - path: test/custom_native_capability_config_CPUID_AVX2.h
+  - path: test/configs/custom_native_capability_config_CPUID_AVX2.h
     description: "Test configuration with CPUID-based AVX2 capability detection"
     defines:
       MLK_CONFIG_CUSTOM_CAPABILITY_FUNC:
@@ -245,7 +245,7 @@ configs:
           }
           #endif /* !__ASSEMBLER__ */
 
-  - path: test/custom_native_capability_config_ID_AA64PFR1_EL1.h
+  - path: test/configs/custom_native_capability_config_ID_AA64PFR1_EL1.h
     description: "Test configuration with ARM system register capability detection"
     defines:
       MLK_CONFIG_CUSTOM_CAPABILITY_FUNC:
@@ -388,7 +388,7 @@ configs:
       MLK_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
-  - path: test/custom_heap_alloc_config.h
+  - path: test/configs/custom_heap_alloc_config.h
     description: "Test configuration with heap-based allocation"
     defines:
       MLK_CONFIG_CUSTOM_ALLOC_FREE:
@@ -426,7 +426,7 @@ configs:
       MLK_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
-  - path: test/test_alloc_config.h
+  - path: test/configs/test_alloc_config.h
     description: "Using custom allocation that can be made fail at specific invocation"
     defines:
       MLK_CONFIG_NAMESPACE_PREFIX: mlk
