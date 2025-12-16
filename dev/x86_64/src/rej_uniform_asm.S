@@ -60,13 +60,13 @@
 //      can overwrite up to 14 bytes (we use 16B for alignment), 
 //    - The implementation uses x86 SSE and BMI2 extensions.
 
-#define STACK_SIZE (2*MLKEM_N + 16)
+#define MLK_STACK_SIZE (2*MLKEM_N + 16)
 
 .text
 .global MLK_ASM_NAMESPACE(rej_uniform_asm)
 .balign 4
 MLK_ASM_FN_SYMBOL(rej_uniform_asm)
-  subq $STACK_SIZE, %rsp
+  subq $MLK_STACK_SIZE, %rsp
 
   // Broadcast MLKEM_Q (3329) to all 16-bit elements of bound reg.
   movq $0x0D010D010D010D01, %rax
@@ -142,7 +142,7 @@ rej_uniform_asm_final_copy:
   shlq $1, %rcx
   rep  movsb
 
-  addq $STACK_SIZE, %rsp
+  addq $MLK_STACK_SIZE, %rsp
   ret
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
@@ -163,7 +163,7 @@ rej_uniform_asm_final_copy:
 #undef shuffle_out_mask
 #undef shuffle_in_mask
 #undef and_mask
-#undef STACK_SIZE
+#undef MLK_STACK_SIZE
 
 /* simpasm: footer-start */
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
