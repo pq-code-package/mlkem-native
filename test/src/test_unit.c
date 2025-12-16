@@ -6,11 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "notrandombytes/notrandombytes.h"
+#include "../notrandombytes/notrandombytes.h"
 
-#include "../mlkem/src/compress.h"
-#include "../mlkem/src/poly.h"
-#include "../mlkem/src/poly_k.h"
+#include "../../mlkem/src/compress.h"
+#include "../../mlkem/src/poly.h"
+#include "../../mlkem/src/poly_k.h"
 
 #ifndef NUM_RANDOM_TESTS
 #ifdef MLKEM_DEBUG
