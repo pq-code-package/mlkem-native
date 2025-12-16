@@ -26,7 +26,7 @@ keccak_f1600_x1_scalar_asm.S: ../../aarch64_symbolic/keccak_f1600_x1_scalar_symb
            -c reserved_regs="[x18,sp]" \
 	   -c variable_size \
 	   -c inputs_are_outputs \
-           -c outputs="[hint_STACK_LOC_COUNT]" \
+           -c outputs="[hint_MLK_STACK_LOC_COUNT]" \
 	   -c constraints.stalls_first_attempt=64 \
 	   -c constraints.allow_spills \
 	   -c constraints.minimize_spills \
@@ -48,7 +48,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_asm.S: ../../aarch64_symbolic/keccak_f1600_x4_
 	   -c split_heuristic_preprocess_naive_interleaving_strategy="alternate" \
 	   -c split_heuristic_estimate_performance=False \
 	   -c absorb_spills=False \
-           -c outputs="[hint_STACK_OFFSET_COUNT]" \
+           -c outputs="[hint_MLK_STACK_OFFSET_COUNT]" \
            -s keccak_f1600_x4_v8a_scalar_hybrid_initial \
            -e keccak_f1600_x4_v8a_scalar_hybrid_loop
 
@@ -63,7 +63,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_asm.S: ../../aarch64_symbolic/keccak_f1600_x4_
 	   -c split_heuristic_preprocess_naive_interleaving \
 	   -c split_heuristic_preprocess_naive_interleaving_strategy="alternate" \
 	   -c split_heuristic_estimate_performance=False \
-           -c outputs="[hint_STACK_OFFSET_COUNT]" \
+           -c outputs="[hint_MLK_STACK_OFFSET_COUNT]" \
 	   -c absorb_spills=False \
            -s keccak_f1600_x4_v8a_scalar_hybrid_loop \
            -e keccak_f1600_x4_v8a_scalar_hybrid_loop_end
@@ -81,7 +81,7 @@ keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S: ../../aarch64_symbolic/keccak_f160
 	   -c split_heuristic_preprocess_naive_interleaving_strategy="alternate" \
 	   -c split_heuristic_estimate_performance=False \
 	   -c absorb_spills=False \
-           -c outputs="[hint_STACK_OFFSET_COUNT]" \
+           -c outputs="[hint_MLK_STACK_OFFSET_COUNT]" \
            -s keccak_f1600_x4_v8a_v84a_scalar_hybrid_initial \
            -e keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop
 
@@ -96,7 +96,7 @@ keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S: ../../aarch64_symbolic/keccak_f160
 	   -c split_heuristic_preprocess_naive_interleaving \
 	   -c split_heuristic_preprocess_naive_interleaving_strategy="alternate" \
 	   -c split_heuristic_estimate_performance=False \
-           -c outputs="[hint_STACK_OFFSET_COUNT]" \
+           -c outputs="[hint_MLK_STACK_OFFSET_COUNT]" \
 	   -c absorb_spills=False \
            -s keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop \
            -e keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop_end
