@@ -17,12 +17,12 @@ let
 in
 stdenvNoCC.mkDerivation rec {
   pname = "slothy-cli";
-  version = "915c224166207ce07b31152194305c3b6687d09b";
+  version = "2ffb9c389bc85884c4dbbbdbdf328d9b09b027e9";
   src = fetchFromGitHub {
     owner = "slothy-optimizer";
     repo = "slothy";
     rev = version;
-    sha256 = "sha256-ebZjm+nhmML/+DZF78eN1ezoxbv5Rrc5kWsh0Ycww4U=";
+    sha256 = "sha256-7KWTJ6/pSva/2ODhrYS9WAhPZr9Q8maKd7959BzwM3g=";
   };
 
   nativeBuildInputs = [ pkgs.makeWrapper ];
