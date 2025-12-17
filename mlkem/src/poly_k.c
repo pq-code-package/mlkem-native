@@ -158,9 +158,9 @@ __contract__(
   requires(forall(k1, 0, MLKEM_K,
      array_bound(a->vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
   requires(forall(k2, 0, MLKEM_K,
-     array_abs_bound(b[k2].coeffs, 0, MLKEM_N, MLK_NTT_BOUND)))
+     array_abs_bound(b->vec[k2].coeffs, 0, MLKEM_N, MLK_NTT_BOUND)))
   requires(forall(k3, 0, MLKEM_K,
-     array_abs_bound(b_cache[k3].coeffs, 0, MLKEM_N/2, MLKEM_Q)))
+     array_abs_bound(b_cache->vec[k3].coeffs, 0, MLKEM_N/2, MLKEM_Q)))
   assigns(memory_slice(r, sizeof(mlk_poly)))
   ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, INT16_MAX/2))
 )
