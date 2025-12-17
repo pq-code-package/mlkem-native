@@ -368,13 +368,13 @@ __contract__(
   for (i = 0; i < MLKEM_K; i++)
   __loop__(
     assigns(i, object_whole(out))
-    invariant(i <= MLKEM_K))
+    invariant(i <= MLKEM_K)
     invariant(forall(k, 0, i,
-                     array_abs_bound(out[k].coeffs, 0, MLKEM_N, INT16_MAX/2))))
-    {
-      mlk_polyvec_basemul_acc_montgomery_cached(&out->vec[i], &a->vec[i], v,
-                                                vc);
-    }
+                     array_abs_bound(out[k].coeffs, 0, MLKEM_N, INT16_MAX/2)))
+  )
+  {
+    mlk_polyvec_basemul_acc_montgomery_cached(&out->vec[i], &a->vec[i], v, vc);
+  }
 }
 
 /* Reference: `indcpa_keypair_derand()` in the reference implementation @[REF].
@@ -425,7 +425,7 @@ int mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
    */
   MLK_CT_TESTING_DECLASSIFY(publicseed, MLKEM_SYMBYTES);
 
-  mlk_gen_matrix(&a, publicseed, 0 /* no transpose */);
+  mlk_gen_matrix(a, publicseed, 0 /* no transpose */);
 
 #if MLKEM_K == 2
   mlk_poly_getnoise_eta1_4x(&skpv->vec[0], &skpv->vec[1], &e->vec[0],
@@ -449,19 +449,19 @@ int mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
                             noiseseed, 4, 5, 6, 7);
 #endif /* MLKEM_K == 4 */
 
-  mlk_polyvec_ntt(&skpv);
-  mlk_polyvec_ntt(&e);
+  mlk_polyvec_ntt(skpv);
+  mlk_polyvec_ntt(e);
 
-  mlk_polyvec_mulcache_compute(&skpv_cache, &skpv);
-  mlk_matvec_mul(&pkpv, &a, &skpv, &skpv_cache);
-  mlk_polyvec_tomont(&pkpv);
+  mlk_polyvec_mulcache_compute(skpv_cache, skpv);
+  mlk_matvec_mul(pkpv, a, skpv, skpv_cache);
+  mlk_polyvec_tomont(pkpv);
 
-  mlk_polyvec_add(&pkpv, &e);
-  mlk_polyvec_reduce(&pkpv);
-  mlk_polyvec_reduce(&skpv);
+  mlk_polyvec_add(pkpv, e);
+  mlk_polyvec_reduce(pkpv);
+  mlk_polyvec_reduce(skpv);
 
-  mlk_pack_sk(sk, &skpv);
-  mlk_pack_pk(pk, &pkpv, publicseed);
+  mlk_pack_sk(sk, skpv);
+  mlk_pack_pk(pk, pkpv, publicseed);
 
 cleanup:
   /* Specification: Partially implements
@@ -520,7 +520,7 @@ int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
    */
   MLK_CT_TESTING_DECLASSIFY(seed, MLKEM_SYMBYTES);
 
-  mlk_gen_matrix(&at, seed, 1 /* transpose */);
+  mlk_gen_matrix(at, seed, 1 /* transpose */);
 
 #if MLKEM_K == 2
   mlk_poly_getnoise_eta1122_4x(&sp->vec[0], &sp->vec[1], &ep->vec[0],
@@ -544,7 +544,7 @@ int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
   mlk_poly_getnoise_eta2(epp, coins, 8);
 #endif /* MLKEM_K == 4 */
 
-  mlk_polyvec_ntt(&sp);
+  mlk_polyvec_ntt(sp);
 
   mlk_polyvec_mulcache_compute(sp_cache, sp);
   mlk_matvec_mul(b, at, sp, sp_cache);
