@@ -368,13 +368,13 @@ __contract__(
   for (i = 0; i < MLKEM_K; i++)
   __loop__(
     assigns(i, object_whole(out))
-    invariant(i <= MLKEM_K))
+    invariant(i <= MLKEM_K)
     invariant(forall(k, 0, i,
-                     array_abs_bound(out[k].coeffs, 0, MLKEM_N, INT16_MAX/2))))
-    {
-      mlk_polyvec_basemul_acc_montgomery_cached(&out->vec[i], &a->vec[i], v,
-                                                vc);
-    }
+                     array_abs_bound(out[k].coeffs, 0, MLKEM_N, INT16_MAX/2)))
+  )
+  {
+    mlk_polyvec_basemul_acc_montgomery_cached(&out->vec[i], &a->vec[i], v, vc);
+  }
 }
 
 /* Reference: `indcpa_keypair_derand()` in the reference implementation @[REF].
