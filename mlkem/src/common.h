@@ -187,12 +187,15 @@
 /* Custom allocation */
 
 #define MLK_ALLOC(v, T, N) MLK_CUSTOM_ALLOC(v, T, N)
-#define MLK_FREE(v, T, N)            \
-  do                                 \
-  {                                  \
-    mlk_zeroize(v, sizeof(T) * (N)); \
-    MLK_CUSTOM_FREE(v, T, N);        \
-    v = NULL;                        \
+#define MLK_FREE(v, T, N)              \
+  do                                   \
+  {                                    \
+    if (v != NULL)                     \
+    {                                  \
+      mlk_zeroize(v, sizeof(T) * (N)); \
+      MLK_CUSTOM_FREE(v, T, N);        \
+      v = NULL;                        \
+    }                                  \
   } while (0)
 
 #endif /* MLK_CONFIG_CUSTOM_ALLOC_FREE */
