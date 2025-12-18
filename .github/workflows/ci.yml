@@ -173,6 +173,22 @@ jobs:
           compile_mode: ${{ matrix.target.mode }}
           cflags: "-DMLKEM_DEBUG"
           opt: 'opt'
+  ppc64le_tests:
+    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    name: Functional tests (ppc64le/POWER10, native)
+    runs-on: pqcp-ppc64
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: build + test
+        uses: ./.github/actions/multi-functest
+        with:
+          nix-shell: ''
+          cflags: "-DMLK_FORCE_PPC64LE"
+      - name: build + test (+debug)
+        uses: ./.github/actions/multi-functest
+        with:
+          nix-shell: ''
+          cflags: "-DMLKEM_DEBUG -DMLK_FORCE_PPC64LE"
   backend_tests:
     name: AArch64 FIPS202 backends (${{ matrix.backend }})
     strategy:
