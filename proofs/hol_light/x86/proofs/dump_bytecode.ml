@@ -32,3 +32,7 @@ print_string "==== bytecode end =====================================\n\n";;
 print_string "=== bytecode start: x86/mlkem/mlkem_tobytes.o ===\n";;
 print_literal_from_elf "x86/mlkem/mlkem_tobytes.o";;
 print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: x86/mlkem/mlkem_rej_uniform.o ===\n";;
+print_literal_from_elf "x86/mlkem/mlkem_rej_uniform.o";;
+print_string "==== bytecode end =====================================\n\n";;
