@@ -69,6 +69,14 @@ jobs:
           ldflags: "-flto"
           bench_extra_args: "-r"
           nix_shell: ci-bench
+        - system: pqcp-ppc64
+          name:  ppc64le (POWER10) benchmarks
+          bench_pmu: PERF
+          archflags: "-mcpu=native"
+          cflags: "-flto -DMLK_FORCE_PPC64LE"
+          ldflags: "-flto"
+          bench_extra_args: "-r"
+          nix_shell: ''
     if: github.repository_owner == 'pq-code-package' && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
     runs-on: self-hosted-${{ matrix.target.system }}
     steps:
