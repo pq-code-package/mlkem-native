@@ -120,7 +120,7 @@ endef
 
 $(foreach scheme,mlkem512 mlkem768 mlkem1024, \
 	$(foreach test,$(ACVP_TESTS), \
-		$(eval $(call ADD_SOURCE,$(scheme),$(test),)) \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),acvp/)) \
 	) \
 	$(foreach test,$(BENCH_TESTS), \
 		$(eval $(call ADD_SOURCE,$(scheme),$(test),)) \
