@@ -40,6 +40,9 @@ MLK_ASM_FN_SYMBOL(rej_uniform_asm)
         .cfi_startproc
         subq	$0x210, %rsp            # imm = 0x210
         .cfi_adjust_cfa_offset 0x210
+        xorl	%eax, %eax
+        testq	%rdx, %rdx
+        je	Lrej_uniform_asm_end
         movabsq	$0xd010d010d010d01, %rax # imm = 0xD010D010D010D01
         movq	%rax, %xmm0
         pinsrq	$0x1, %rax, %xmm0
@@ -57,9 +60,9 @@ MLK_ASM_FN_SYMBOL(rej_uniform_asm)
 Lrej_uniform_asm_loop_start:
         movdqu	(%rsi,%r8), %xmm2
         pshufb	%xmm4, %xmm2
-        movdqa	%xmm2, %xmm6
-        psrlw	$0x4, %xmm6
-        pblendw	$0xaa, %xmm6, %xmm2     # xmm2 = xmm2[0],xmm6[1],xmm2[2],xmm6[3],xmm2[4],xmm6[5],xmm2[6],xmm6[7]
+        movdqa	%xmm2, %xmm3
+        psrlw	$0x4, %xmm3
+        pblendw	$0xaa, %xmm3, %xmm2     # xmm2 = xmm2[0],xmm3[1],xmm2[2],xmm3[3],xmm2[4],xmm3[5],xmm2[6],xmm3[7]
         pand	%xmm5, %xmm2
         movdqa	%xmm0, %xmm1
         pcmpgtw	%xmm2, %xmm1
@@ -86,6 +89,8 @@ Lrej_uniform_asm_final_copy:
         movq	%rax, %rcx
         shlq	%rcx
         rep		movsb	(%rsi), %es:(%rdi)
+
+Lrej_uniform_asm_end:
         addq	$0x210, %rsp            # imm = 0x210
         .cfi_adjust_cfa_offset -0x210
         retq

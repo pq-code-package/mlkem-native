@@ -30,6 +30,7 @@
 #define tab %rcx
 
 #define cnt %rax
+#define ecnt %eax
 #define pos %r8
 
 #define good %r11
@@ -38,7 +39,7 @@
 
 #define bound %xmm0
 #define temp0 %xmm1
-#define temp1 %xmm6
+#define temp1 %xmm3
 #define vals %xmm2
 #define shuffle_out_mask %xmm3
 #define shuffle_in_mask %xmm4
@@ -67,6 +68,11 @@
 .balign 4
 MLK_ASM_FN_SYMBOL(rej_uniform_asm)
   subq $STACK_SIZE, %rsp
+
+  // Return if input length is 0
+  xorl ecnt, ecnt
+  testq len, len
+  jz rej_uniform_asm_end
 
   // Broadcast MLKEM_Q (3329) to all 16-bit elements of bound reg.
   movq $0x0D010D010D010D01, %rax
@@ -142,6 +148,8 @@ rej_uniform_asm_final_copy:
   shlq $1, %rcx
   rep  movsb
 
+rej_uniform_asm_end:
+
   addq $STACK_SIZE, %rsp
   ret
 
@@ -152,6 +160,7 @@ rej_uniform_asm_final_copy:
 #undef len
 #undef tab
 #undef cnt
+#undef ecnt
 #undef pos
 #undef good
 #undef pext_mask
