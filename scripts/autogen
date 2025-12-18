@@ -1083,6 +1083,26 @@ def gen_aarch64_rej_uniform_table():
     update_file("dev/aarch64_clean/src/rej_uniform_table.c", "\n".join(gen()))
 
 
+def gen_avx2_hol_light_rej_uniform_table():
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * Constant table values used in the AArch64 rejection sampling."
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        yield "let mlkem_rej_uniform_table = (REWRITE_RULE[MAP] o define)"
+        yield "  `mlkem_rej_uniform_table:byte list = MAP word ["
+        data = [i for idxs in gen_rej_uniform_table_rows() for i in idxs]
+        yield from print_hol_light_array(data, as_int=False, entries_per_line=16, pad=3)
+        yield "]`;;"
+        yield ""
+
+    update_file(
+        "proofs/hol_light/x86/proofs/mlkem_rej_uniform_table.ml", "\n".join(gen())
+    )
+
+
 def gen_avx2_rej_uniform_table():
     def gen():
         yield from gen_header()
@@ -2440,7 +2460,7 @@ def gen_hol_light_asm():
             "dev/x86_64/src",
             "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
             "x86",
-        )
+        ),
     ]
 
     if platform.machine().lower() in ["arm64", "aarch64"]:
@@ -3442,6 +3462,7 @@ def _main():
     gen_aarch64_zeta_file()
     gen_aarch64_rej_uniform_table()
     gen_avx2_hol_light_zeta_file()
+    gen_avx2_hol_light_rej_uniform_table()
     gen_avx2_zeta_file()
     gen_avx2_rej_uniform_table()
     gen_avx2_mulcache_twiddles_file()
