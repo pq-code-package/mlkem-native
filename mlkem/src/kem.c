@@ -162,10 +162,16 @@ static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 #endif /* MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST */
 
   ret = mlk_ct_memcmp(ss_enc, ss_dec, MLKEM_SSBYTES);
-
-cleanup:
   /* The result of the PCT is public. */
   MLK_CT_TESTING_DECLASSIFY(&ret, sizeof(ret));
+  if (ret != 0)
+  {
+    /* The non-zero return value of mlk_ct_memcmp is unspecified.
+     * Map it to the toplevel error code. */
+    ret = MLK_ERR_FAIL;
+  }
+
+cleanup:
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
@@ -214,12 +220,7 @@ int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   MLK_CT_TESTING_DECLASSIFY(pk, MLKEM_INDCCA_PUBLICKEYBYTES);
 
   /* Pairwise Consistency Test (PCT) @[FIPS140_3_IG, p.87] */
-  if (mlk_check_pct(pk, sk))
-  {
-    return MLK_ERR_FAIL;
-  }
-
-  return 0;
+  return mlk_check_pct(pk, sk);
 }
 
 #if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
