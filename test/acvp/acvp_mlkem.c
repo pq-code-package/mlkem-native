@@ -6,9 +6,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../mlkem/src/common.h"
+#include "../../mlkem/src/common.h"
 
-#include "../mlkem/src/kem.h"
+#include "../../mlkem/src/kem.h"
 
 #define USAGE \
   "acvp_mlkem{lvl} [encapDecap|keyGen] [AFT|VAL] {test specific arguments}"

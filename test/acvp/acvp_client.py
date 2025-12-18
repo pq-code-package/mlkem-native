@@ -33,7 +33,7 @@ def download_acvp_files(version):
     ]
 
     # Create directory structure
-    data_dir = Path(f"test/.acvp-data/{version}/files")
+    data_dir = Path(f"test/acvp/.acvp-data/{version}/files")
     data_dir.mkdir(parents=True, exist_ok=True)
 
     for file_path in files_to_download:
@@ -76,7 +76,7 @@ def loadAcvpData(prompt, expectedResults):
 
 def loadDefaultAcvpData(version):
 
-    data_dir = f"test/.acvp-data/{version}/files"
+    data_dir = f"test/acvp/.acvp-data/{version}/files"
     acvp_jsons_for_version = [
         (
             f"{data_dir}/ML-KEM-keyGen-FIPS203/prompt.json",
