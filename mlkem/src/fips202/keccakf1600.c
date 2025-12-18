@@ -153,7 +153,7 @@ static void mlk_keccakf1600_permute_c(uint64_t *state)
   uint64_t Ema, Eme, Emi, Emo, Emu;
   uint64_t Esa, Ese, Esi, Eso, Esu;
 
-  /* copyFromState(A, state) */
+  /* MLK_COPY_FROM_STATE(A, state) */
   Aba = state[0];
   Abe = state[1];
   Abi = state[2];
@@ -183,14 +183,14 @@ static void mlk_keccakf1600_permute_c(uint64_t *state)
   for (round = 0; round < MLK_KECCAK_NROUNDS; round += 2)
   __loop__(invariant(round <= MLK_KECCAK_NROUNDS && round % 2 == 0))
   {
-    /* prepareTheta */
+    /* MLK_prepareTheta */
     BCa = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
     BCe = Abe ^ Age ^ Ake ^ Ame ^ Ase;
     BCi = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
     BCo = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
     BCu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
 
-    /* thetaRhoPiChiIotaPrepareTheta(round, A, E) */
+    /* MLK_thetaRhoPiChiIotaPrepareTheta(round, A, E) */
     Da = BCu ^ MLK_KECCAK_ROL(BCe, 1);
     De = BCa ^ MLK_KECCAK_ROL(BCi, 1);
     Di = BCe ^ MLK_KECCAK_ROL(BCo, 1);
@@ -278,14 +278,14 @@ static void mlk_keccakf1600_permute_c(uint64_t *state)
     Eso = BCo ^ ((~BCu) & BCa);
     Esu = BCu ^ ((~BCa) & BCe);
 
-    /* prepareTheta */
+    /* MLK_prepareTheta */
     BCa = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
     BCe = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
     BCi = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
     BCo = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
     BCu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
 
-    /* thetaRhoPiChiIotaPrepareTheta(round+1, E, A) */
+    /* MLK_thetaRhoPiChiIotaPrepareTheta(round+1, E, A) */
     Da = BCu ^ MLK_KECCAK_ROL(BCe, 1);
     De = BCa ^ MLK_KECCAK_ROL(BCi, 1);
     Di = BCe ^ MLK_KECCAK_ROL(BCo, 1);
@@ -374,7 +374,7 @@ static void mlk_keccakf1600_permute_c(uint64_t *state)
     Asu = BCu ^ ((~BCa) & BCe);
   }
 
-  /* copyToState(state, A) */
+  /* MLK_COPY_TO_STATE(state, A) */
   state[0] = Aba;
   state[1] = Abe;
   state[2] = Abi;
