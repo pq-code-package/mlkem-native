@@ -2468,6 +2468,13 @@ def gen_hol_light_asm():
             "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
             "x86",
         ),
+        (
+            "tomont.S",
+            "mlkem_tomont.S",
+            "dev/x86_64/src",
+            "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+            "x86",
+        ),
     ]
 
     if platform.machine().lower() in ["arm64", "aarch64"]:
