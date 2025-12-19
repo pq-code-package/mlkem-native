@@ -103,7 +103,7 @@ $(MLKEM1024_DIR)/bin/%: CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024
 # Link tests with respective library (except test_unit which includes sources directly)
 define ADD_SOURCE
 $(BUILD_DIR)/$(1)/bin/$(2)$(subst mlkem,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)
-$(BUILD_DIR)/$(1)/bin/$(2)$(subst mlkem,,$(1)): $(BUILD_DIR)/$(1)/test/$(3)$(2).c.o $(BUILD_DIR)/lib$(1).a
+$(BUILD_DIR)/$(1)/bin/$(2)$(subst mlkem,,$(1)): $(BUILD_DIR)/$(1)/test/$(3)/$(2).c.o $(BUILD_DIR)/lib$(1).a
 endef
 
 # Special rule for test_unit - link against unit libraries with exposed internal functions
@@ -120,13 +120,13 @@ endef
 
 $(foreach scheme,mlkem512 mlkem768 mlkem1024, \
 	$(foreach test,$(ACVP_TESTS), \
-		$(eval $(call ADD_SOURCE,$(scheme),$(test),acvp/)) \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),acvp)) \
 	) \
 	$(foreach test,$(BENCH_TESTS), \
-		$(eval $(call ADD_SOURCE,$(scheme),$(test),)) \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),bench)) \
 	) \
 	$(foreach test,$(BASIC_TESTS), \
-		$(eval $(call ADD_SOURCE,$(scheme),$(test),src/)) \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),src)) \
 	) \
 	$(eval $(call ADD_SOURCE_UNIT,$(scheme))) \
 	$(eval $(call ADD_SOURCE_ALLOC,$(scheme))) \
