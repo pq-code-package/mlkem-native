@@ -107,6 +107,7 @@ The following x86_64 assembly routines used in mlkem-native are covered:
   * x86_64 modular reduction: [mlkem_reduce.S](x86/mlkem/mlkem_reduce.S)
   * x86_64 polynomial compression: [mlkem_tobytes.S](x86/mlkem/mlkem_tobytes.S)
   * x86_64 rejection sampling: [mlkem_rej_uniform.S](x86/mlkem/mlkem_rej_uniform.S)
+  * x86_64 polynomial deserialization: [mlkem_frombytes.S](x86/mlkem/mlkem_frombytes.S)
 
 <!--- bibliography --->
 [^HYBRID]: Becker, Kannwischer: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64, [https://eprint.iacr.org/2022/1243](https://eprint.iacr.org/2022/1243)

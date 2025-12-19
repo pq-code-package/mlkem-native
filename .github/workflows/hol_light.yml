@@ -202,6 +202,8 @@ jobs:
           - name: mlkem_tobytes
             needs: ["mlkem_specs.ml"]
           - name: mlkem_rej_uniform
+            needs: ["mlkem_specs.ml", "mlkem_rej_uniform_table.ml"]
+          - name: mlkem_frombytes
             needs: ["mlkem_specs.ml"]
     name: x86_64 HOL Light proof for ${{ matrix.proof.name }}.S
     runs-on: pqcp-x64
