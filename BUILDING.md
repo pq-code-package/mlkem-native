@@ -96,7 +96,7 @@ See `tests cbmc --help` for details on the command line options, and [proofs/cbm
 
 ### Prerequisites
 
-To run the HOL-Light proofs, you need recent versions of HOL-Light and s2n-bignum, e.g. as specified in our `nix` environment; see [nix/s2n-bignum](nix/s2n-bignum/) and [nix/hol_light](nix/hol_light./).
+To run the HOL-Light proofs, you need recent versions of HOL-Light and s2n-bignum, e.g. as specified in our `nix` environment; see [nix/s2n_bignum](nix/s2n_bignum) and [nix/hol_light](nix/hol_light).
 See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions on how to setup and use `nix`.
 
 ### Running the HOL-Light proofs

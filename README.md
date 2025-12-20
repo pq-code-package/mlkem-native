@@ -153,7 +153,7 @@ for an example using tiny_sha3[^tiny_sha3].
 ### Do I need to use the assembly backends?
 
 No. If you want a C-only build, just omit the directories [mlkem/src/native](mlkem/src/native) and/or [mlkem/src/fips202/native](mlkem/src/fips202/native) from your import
-and unset `MLK_CONFIG_USE_NATIVE_BACKEND_ARITH` and/or `MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202` in your [config.h](mlkem/src/config.h).
+and unset `MLK_CONFIG_USE_NATIVE_BACKEND_ARITH` and/or `MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202` in your [mlkem_native_config.h](mlkem/mlkem_native_config.h).
 
 ### Do I need to setup CBMC to use mlkem-native?
 
@@ -163,7 +163,7 @@ contracts and loop invariants from the code; they will be ignored unless `CBMC` 
 
 ### Does mlkem-native support all security levels of ML-KEM?
 
-Yes. The security level is a compile-time parameter configured by setting `MLK_CONFIG_PARAMETER_SET=512/768/1024` in [config.h](mlkem/src/config.h).
+Yes. The security level is a compile-time parameter configured by setting `MLK_CONFIG_PARAMETER_SET=512/768/1024` in [mlkem_native_config.h](mlkem/mlkem_native_config.h).
 If your library/application requires multiple security levels, you can build + link three instances of mlkem-native
 while sharing common code; this is called a 'multi-level build' and is demonstrated in [examples/multilevel_build](examples/multilevel_build). See also [mlkem](mlkem).
 

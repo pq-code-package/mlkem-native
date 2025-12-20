@@ -28,7 +28,7 @@ An application using mlkem-native as a monolithic multi-level build needs:
 
 ## Configuration
 
-The configuration file [multilevel_config.h](mlkem_native/multilevel_config.h) sets:
+The configuration file [mlkem_native_config.h](mlkem_native/mlkem_native_config.h) sets:
 - `MLK_CONFIG_MULTILEVEL_BUILD`: Enables multi-level mode
 - `MLK_CONFIG_NAMESPACE_PREFIX=mlkem`: Base prefix
 - `MLK_CONFIG_INTERNAL_API_QUALIFIER=static`: Makes internal functions static
