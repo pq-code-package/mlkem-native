@@ -269,6 +269,7 @@ source code and documentation.
   - [proofs/hol_light/x86/mlkem/mlkem_reduce.S](proofs/hol_light/x86/mlkem/mlkem_reduce.S)
   - [proofs/hol_light/x86/mlkem/mlkem_tobytes.S](proofs/hol_light/x86/mlkem/mlkem_tobytes.S)
   - [proofs/hol_light/x86/mlkem/mlkem_tomont.S](proofs/hol_light/x86/mlkem/mlkem_tomont.S)
+  - [proofs/hol_light/x86/mlkem/mlkem_unpack.S](proofs/hol_light/x86/mlkem/mlkem_unpack.S)
 
 ### `SLOTHY`
 
