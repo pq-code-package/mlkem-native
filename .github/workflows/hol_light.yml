@@ -207,6 +207,8 @@ jobs:
             needs: ["mlkem_specs.ml"]
           - name: mlkem_tomont
             needs: ["mlkem_specs.ml"]
+          - name: mlkem_unpack
+            needs: ["mlkem_specs.ml"]
     name: x86_64 HOL Light proof for ${{ matrix.proof.name }}.S
     runs-on: pqcp-x64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork

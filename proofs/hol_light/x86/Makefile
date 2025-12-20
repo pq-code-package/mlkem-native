@@ -69,7 +69,8 @@ OBJ = mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o \
       mlkem/mlkem_tobytes.o \
       mlkem/mlkem_rej_uniform.o \
       mlkem/mlkem_frombytes.o \
-      mlkem/mlkem_tomont.o
+      mlkem/mlkem_tomont.o \
+      mlkem/mlkem_unpack.o
 
 # Build object files from assembly sources
 $(OBJ): %.o : %.S
