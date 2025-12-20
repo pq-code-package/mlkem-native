@@ -360,6 +360,18 @@ let ntt_montmul = define
       (word 3329:int32))
     (16,16))`;;
 
+let ntt_montmul_alt = prove
+(`ntt_montmul (a:int32, b:int16) (x:int16) =
+  word_sub
+  (word_subword (word_mul a (word_sx (x:int16)):int32) (16,16):int16)
+  (word_subword
+    (word_mul
+      (word 3329:int32)
+      (word_sx ((word_mul b (x:int16):int16))))
+    (16,16))`,
+  REWRITE_TAC[ntt_montmul; WORD_MUL_SYM]);;
+
+
 let ntt_montmul_add = prove
  (`word_add y (ntt_montmul (a, b) x) =
    word_sub
