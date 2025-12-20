@@ -26,7 +26,7 @@ Use this approach when:
 
 ## Configuration
 
-The configuration file [multilevel_config.h](multilevel_config.h) sets:
+The configuration file [mlkem_native_config.h](mlkem_native/mlkem_native_config.h) sets:
 - `MLK_CONFIG_MULTILEVEL_BUILD`: Enables multi-level mode
 - `MLK_CONFIG_NAMESPACE_PREFIX=mlkem`: Base prefix
 - `MLK_CONFIG_USE_NATIVE_BACKEND_ARITH`: Enables native arithmetic backend
