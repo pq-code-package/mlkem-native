@@ -45,4 +45,6 @@ print_string "=== bytecode start: x86/mlkem/mlkem_unpack.o ===\n";;
 print_literal_from_elf "x86/mlkem/mlkem_unpack.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-
+print_string "=== bytecode start: x86/mlkem/mlkem_mulcache_compute.o ===\n";;
+print_literal_from_elf "x86/mlkem/mlkem_mulcache_compute.o";;
+print_string "==== bytecode end =====================================\n\n";;
