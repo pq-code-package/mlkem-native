@@ -455,13 +455,13 @@ int mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(buf, uint8_t, 2 * MLKEM_SYMBYTES);
-  MLK_FREE(coins_with_domain_separator, uint8_t, MLKEM_SYMBYTES + 1);
-  MLK_FREE(a, mlk_polymat, 1);
-  MLK_FREE(e, mlk_polyvec, 1);
-  MLK_FREE(pkpv, mlk_polyvec, 1);
-  MLK_FREE(skpv, mlk_polyvec, 1);
   MLK_FREE(skpv_cache, mlk_polyvec_mulcache, 1);
+  MLK_FREE(skpv, mlk_polyvec, 1);
+  MLK_FREE(pkpv, mlk_polyvec, 1);
+  MLK_FREE(e, mlk_polyvec, 1);
+  MLK_FREE(a, mlk_polymat, 1);
+  MLK_FREE(coins_with_domain_separator, uint8_t, MLKEM_SYMBYTES + 1);
+  MLK_FREE(buf, uint8_t, 2 * MLKEM_SYMBYTES);
   return ret;
 }
 
@@ -554,16 +554,16 @@ int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(seed, uint8_t, MLKEM_SYMBYTES);
-  MLK_FREE(at, mlk_polymat, 1);
-  MLK_FREE(sp, mlk_polyvec, 1);
-  MLK_FREE(pkpv, mlk_polyvec, 1);
-  MLK_FREE(ep, mlk_polyvec, 1);
-  MLK_FREE(b, mlk_polyvec, 1);
-  MLK_FREE(v, mlk_poly, 1);
-  MLK_FREE(k, mlk_poly, 1);
-  MLK_FREE(epp, mlk_poly, 1);
   MLK_FREE(sp_cache, mlk_polyvec_mulcache, 1);
+  MLK_FREE(epp, mlk_poly, 1);
+  MLK_FREE(k, mlk_poly, 1);
+  MLK_FREE(v, mlk_poly, 1);
+  MLK_FREE(b, mlk_polyvec, 1);
+  MLK_FREE(ep, mlk_polyvec, 1);
+  MLK_FREE(pkpv, mlk_polyvec, 1);
+  MLK_FREE(sp, mlk_polyvec, 1);
+  MLK_FREE(at, mlk_polymat, 1);
+  MLK_FREE(seed, uint8_t, MLKEM_SYMBYTES);
   return ret;
 }
 
@@ -604,11 +604,11 @@ int mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(b, mlk_polyvec, 1);
-  MLK_FREE(skpv, mlk_polyvec, 1);
-  MLK_FREE(v, mlk_poly, 1);
-  MLK_FREE(sb, mlk_poly, 1);
   MLK_FREE(b_cache, mlk_polyvec_mulcache, 1);
+  MLK_FREE(sb, mlk_poly, 1);
+  MLK_FREE(v, mlk_poly, 1);
+  MLK_FREE(skpv, mlk_polyvec, 1);
+  MLK_FREE(b, mlk_polyvec, 1);
   return ret;
 }
 
