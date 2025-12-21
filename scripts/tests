@@ -917,7 +917,6 @@ class Tests:
                     "python3",
                     "run-cbmc-proofs.py",
                     "--summarize",
-                    "--no-coverage",
                     "--per-proof-timeout",
                     str(self.args.per_proof_timeout),
                     "-p",
