@@ -1114,7 +1114,7 @@ let MLKEM_NTT_CORRECT = prove
   CONV_TAC(LAND_CONV WORD_REDUCE_CONV) THEN STRIP_TAC THEN
 
   MAP_EVERY (fun n -> X86_STEPS_TAC MLKEM_NTT_TMC_EXEC [n] THEN
-                      SIMD_SIMPLIFY_TAC[ntt_montmul; ntt_montmul_add; ntt_montmul_sub])
+                      SIMD_SIMPLIFY_ABBREV_TAC[ntt_montmul] [ntt_montmul_add; ntt_montmul_sub])
         (1--587) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
@@ -1130,6 +1130,12 @@ let MLKEM_NTT_CORRECT = prove
   ASM_REWRITE_TAC[WORD_ADD_0]  THEN
 
   ASM_REWRITE_TAC[] THEN DISCARD_STATE_TAC "s587" THEN
+
+  W(fun (asl,w) ->
+     let asms =
+        map snd (filter (is_local_definition [ntt_montmul] o concl o snd) asl) in
+     MP_TAC(end_itlist CONJ (rev asms)) THEN
+     MAP_EVERY (fun t -> UNDISCH_THEN (concl t) (K ALL_TAC)) asms) THEN
 
   REWRITE_TAC[WORD_BLAST `word_subword (x:int32) (0, 32) = x`] THEN
   REWRITE_TAC[WORD_BLAST `word_subword (x:int64) (0, 64) = x`] THEN
@@ -1152,31 +1158,35 @@ let MLKEM_NTT_CORRECT = prove
 
   CONV_TAC(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV) THEN
 
+  STRIP_TAC THEN
+
   CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
   REWRITE_TAC[GSYM CONJ_ASSOC] THEN
+
+  W(fun (asl,w) ->
+    let lfn = PROCESS_BOUND_ASSUMPTIONS
+      (CONJUNCTS(tryfind (CONV_RULE EXPAND_CASES_CONV o snd) asl))
+    and asms =
+      map snd (filter (is_local_definition [ntt_montmul] o concl o snd) asl) in
+    let lfn' = LOCAL_CONGBOUND_RULE lfn (rev asms) in
+
   REPEAT(GEN_REWRITE_TAC I
    [TAUT `p /\ q /\ r /\ s <=> (p /\ q /\ r) /\ s`] THEN CONJ_TAC) THEN
 
-  FIRST_X_ASSUM(MP_TAC o CONV_RULE EXPAND_CASES_CONV) THEN
-  POP_ASSUM_LIST(K ALL_TAC) THEN
-  CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
-  DISCH_THEN(fun aboth ->
-    W(MP_TAC o GEN_CONGBOUND_RULE (CONJUNCTS aboth) o
-      rand o lhand o rator o lhand o snd)) THEN
-
-  (MATCH_MP_TAC MONO_AND THEN CONJ_TAC THENL
-   [REWRITE_TAC[INVERSE_MOD_CONV `inverse_mod 3329 65536`] THEN
-    MATCH_MP_TAC(REWRITE_RULE[IMP_CONJ_ALT] INT_CONG_TRANS) THEN
-    CONV_TAC(ONCE_DEPTH_CONV AVX2_FORWARD_NTT_CONV) THEN
-    REWRITE_TAC[GSYM INT_REM_EQ; o_THM] THEN CONV_TAC INT_REM_DOWN_CONV THEN
-    REWRITE_TAC[INT_REM_EQ] THEN
-    REWRITE_TAC[REAL_INT_CONGRUENCE; INT_OF_NUM_EQ; ARITH_EQ] THEN
-    REWRITE_TAC[GSYM REAL_OF_INT_CLAUSES] THEN
-    CONV_TAC(RAND_CONV REAL_POLY_CONV) THEN REAL_INTEGER_TAC;
-    MATCH_MP_TAC(INT_ARITH
-     `l':int <= l /\ u <= u'
-      ==> l <= x /\ x <= u ==> l' <= x /\ x <= u'`) THEN
-    CONV_TAC INT_REDUCE_CONV])
+    W(MP_TAC o ASM_CONGBOUND_RULE lfn' o rand o lhand o rator o lhand o snd) THEN
+   (MATCH_MP_TAC MONO_AND THEN CONJ_TAC THENL
+    [REWRITE_TAC[INVERSE_MOD_CONV `inverse_mod 3329 65536`] THEN
+     MATCH_MP_TAC(REWRITE_RULE[IMP_CONJ_ALT] INT_CONG_TRANS) THEN
+     CONV_TAC(ONCE_DEPTH_CONV AVX2_FORWARD_NTT_CONV) THEN
+     REWRITE_TAC[GSYM INT_REM_EQ; o_THM] THEN CONV_TAC INT_REM_DOWN_CONV THEN
+     REWRITE_TAC[INT_REM_EQ] THEN
+     REWRITE_TAC[REAL_INT_CONGRUENCE; INT_OF_NUM_EQ; ARITH_EQ] THEN
+     REWRITE_TAC[GSYM REAL_OF_INT_CLAUSES] THEN
+     CONV_TAC(RAND_CONV REAL_POLY_CONV) THEN REAL_INTEGER_TAC;
+     MATCH_MP_TAC(INT_ARITH
+      `l':int <= l /\ u <= u'
+       ==> l <= x /\ x <= u ==> l' <= x /\ x <= u'`) THEN
+     CONV_TAC INT_REDUCE_CONV]))
 );;
 
 let MLKEM_NTT_NOIBT_SUBROUTINE_CORRECT  = prove
