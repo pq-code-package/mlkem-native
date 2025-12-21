@@ -84,7 +84,8 @@ MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
-  ensures(return_value == 0 || return_value == -1)
+  ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
+          return_value == MLK_ERR_OUT_OF_MEMORY)
 );
 
 
@@ -114,7 +115,8 @@ MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 __contract__(
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
-  ensures(return_value == 0 || return_value == -1)
+  ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
+          return_value == MLK_ERR_OUT_OF_MEMORY)
 );
 
 /*************************************************
@@ -153,6 +155,8 @@ __contract__(
   requires(memory_no_alias(coins, 2 * MLKEM_SYMBYTES))
   assigns(memory_slice(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   assigns(memory_slice(sk, MLKEM_INDCCA_SECRETKEYBYTES))
+  ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
+          return_value == MLK_ERR_OUT_OF_MEMORY)
 );
 
 /*************************************************
@@ -186,6 +190,8 @@ __contract__(
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
   assigns(memory_slice(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   assigns(memory_slice(sk, MLKEM_INDCCA_SECRETKEYBYTES))
+  ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
+          return_value == MLK_ERR_OUT_OF_MEMORY)
 );
 
 /*************************************************
@@ -228,6 +234,8 @@ __contract__(
   requires(memory_no_alias(coins, MLKEM_SYMBYTES))
   assigns(memory_slice(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
   assigns(memory_slice(ss, MLKEM_SSBYTES))
+  ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
+          return_value == MLK_ERR_OUT_OF_MEMORY)
 );
 
 /*************************************************
@@ -265,6 +273,8 @@ __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   assigns(memory_slice(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
   assigns(memory_slice(ss, MLKEM_SSBYTES))
+  ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
+          return_value == MLK_ERR_OUT_OF_MEMORY)
 );
 
 /*************************************************
@@ -301,6 +311,8 @@ __contract__(
   requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
   assigns(memory_slice(ss, MLKEM_SSBYTES))
+  ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
+          return_value == MLK_ERR_OUT_OF_MEMORY)
 );
 
 #endif /* !MLK_KEM_H */

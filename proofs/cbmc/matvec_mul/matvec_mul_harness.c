@@ -11,6 +11,11 @@ void mlk_matvec_mul(mlk_polyvec *out, const mlk_polymat *a,
 
 void harness(void)
 {
+  {
+    /* Dummy use of `free` to work around CBMC issue #8814. */
+    free(NULL);
+  }
+
   mlk_polyvec *out, *v;
   mlk_polymat *a;
   mlk_polyvec_mulcache *vc;

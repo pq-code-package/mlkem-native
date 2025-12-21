@@ -9,6 +9,11 @@ void mlk_polymat_permute_bitrev_to_custom(mlk_polymat *a);
 
 void harness(void)
 {
+  {
+    /* Dummy use of `free` to work around CBMC issue #8814. */
+    free(NULL);
+  }
+
   mlk_polymat *a;
   mlk_polymat_permute_bitrev_to_custom(a);
 }

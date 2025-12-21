@@ -247,7 +247,7 @@ endif
 #   * an entire project when added to Makefile-project-defines
 #   * a specific proof when added to the harness Makefile
 
-CBMC_FLAG_MALLOC_MAY_FAIL ?= --malloc-fail-assert
+CBMC_FLAG_MALLOC_MAY_FAIL ?= --malloc-may-fail --malloc-fail-null # alloc may fail with returning NULL
 CBMC_FLAG_BOUNDS_CHECK ?= # set to --no-bounds-check to disable
 CBMC_FLAG_CONVERSION_CHECK ?= --conversion-check
 CBMC_FLAG_DIV_BY_ZERO_CHECK ?= # set to --no-div-by-zero-check to disable
@@ -566,8 +566,7 @@ else
 $(error Invalid value for MLKEM_K)
 endif
 
-DEFINES += -DMLK_CONFIG_KEYGEN_PCT
-DEFINES += -DMLK_CONFIG_NAMESPACE_PREFIX=mlk
+DEFINES += -DMLK_CONFIG_FILE="\"mlkem_native_config_cbmc.h\""
 DEFINES += -DMLK_CONFIG_PARAMETER_SET=$(MLK_CONFIG_PARAMETER_SET)
 # Give visibility to all static functions
 DEFINES += -Dstatic=

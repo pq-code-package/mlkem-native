@@ -78,6 +78,8 @@ __contract__(
   requires(memory_no_alias(coins, MLKEM_SYMBYTES))
   assigns(memory_slice(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
   assigns(memory_slice(sk, MLKEM_INDCPA_SECRETKEYBYTES))
+  ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
+          return_value == MLK_ERR_OUT_OF_MEMORY)
 );
 
 #define mlk_indcpa_enc MLK_NAMESPACE_K(indcpa_enc)
@@ -112,6 +114,8 @@ __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
   requires(memory_no_alias(coins, MLKEM_SYMBYTES))
   assigns(memory_slice(c, MLKEM_INDCPA_BYTES))
+  ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
+          return_value == MLK_ERR_OUT_OF_MEMORY)
 );
 
 #define mlk_indcpa_dec MLK_NAMESPACE_K(indcpa_dec)
@@ -141,6 +145,8 @@ __contract__(
   requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCPA_SECRETKEYBYTES))
   assigns(memory_slice(m, MLKEM_INDCPA_MSGBYTES))
+  ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
+          return_value == MLK_ERR_OUT_OF_MEMORY)
 );
 
 #endif /* !MLK_INDCPA_H */

@@ -10,6 +10,11 @@ int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 
 void harness(void)
 {
+  {
+    /* Dummy use of `free` to work around CBMC issue #8814. */
+    free(NULL);
+  }
+
   uint8_t *a, *b;
   mlk_check_pct(a, b);
 }
