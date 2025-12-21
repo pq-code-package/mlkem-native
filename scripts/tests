@@ -931,7 +931,7 @@ class Tests:
             if p.returncode != 0:
                 self.fail(f"CBMC proofs for k={mlkem_k}")
 
-        k = self.args.k
+        k = self.args.mlkem_parameter_set
         if k == "ALL":
             run_cbmc("2")
             run_cbmc("3")
@@ -1269,7 +1269,8 @@ def cli():
     )
 
     cbmc_parser.add_argument(
-        "--k",
+        "-k",
+        "--mlkem-parameter-set",
         help="Value of MLKEM_K, determining the parameter set",
         choices=["2", "3", "4", "ALL"],
         type=str.upper,
