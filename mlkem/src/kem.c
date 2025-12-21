@@ -64,8 +64,8 @@ int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(p, mlk_polyvec, 1);
   MLK_FREE(p_reencoded, uint8_t, MLKEM_POLYVECBYTES);
+  MLK_FREE(p, mlk_polyvec, 1);
   return ret;
 }
 
@@ -177,9 +177,9 @@ cleanup:
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(ct, uint8_t, MLKEM_INDCCA_CIPHERTEXTBYTES);
-  MLK_FREE(ss_enc, uint8_t, MLKEM_SSBYTES);
   MLK_FREE(ss_dec, uint8_t, MLKEM_SSBYTES);
+  MLK_FREE(ss_enc, uint8_t, MLKEM_SSBYTES);
+  MLK_FREE(ct, uint8_t, MLKEM_INDCCA_CIPHERTEXTBYTES);
   return ret;
 }
 #else  /* MLK_CONFIG_KEYGEN_PCT */
@@ -305,8 +305,8 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(buf, uint8_t, 2 * MLKEM_SYMBYTES);
   MLK_FREE(kr, uint8_t, 2 * MLKEM_SYMBYTES);
+  MLK_FREE(buf, uint8_t, 2 * MLKEM_SYMBYTES);
   return ret;
 }
 
@@ -402,9 +402,9 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(buf, uint8_t, 2 * MLKEM_SYMBYTES);
-  MLK_FREE(kr, uint8_t, 2 * MLKEM_SYMBYTES);
   MLK_FREE(tmp, uint8_t, MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES);
+  MLK_FREE(kr, uint8_t, 2 * MLKEM_SYMBYTES);
+  MLK_FREE(buf, uint8_t, 2 * MLKEM_SYMBYTES);
 
   return ret;
 }

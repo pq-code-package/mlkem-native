@@ -12,7 +12,7 @@ ifeq ($(OPT),1)
 	CFLAGS += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
 endif
 
-ALL_TESTS = test_mlkem test_unit acvp_mlkem bench_mlkem bench_components_mlkem gen_KAT test_stack
+ALL_TESTS = test_mlkem test_unit acvp_mlkem bench_mlkem bench_components_mlkem gen_KAT test_stack test_alloc
 
 MLKEM512_DIR = $(BUILD_DIR)/mlkem512
 MLKEM768_DIR = $(BUILD_DIR)/mlkem768
@@ -33,6 +33,14 @@ $(MLKEM768_UNIT_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_STATIC_TES
 MLKEM1024_UNIT_OBJS = $(call MAKE_OBJS,$(MLKEM1024_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
 $(MLKEM1024_UNIT_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024 -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
 
+# Alloc test object files - same sources but with custom alloc config
+MLKEM512_ALLOC_OBJS = $(call MAKE_OBJS,$(MLKEM512_DIR)/alloc,$(SOURCES) $(FIPS202_SRCS))
+$(MLKEM512_ALLOC_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=512 -DMLK_CONFIG_FILE=\"../test/test_alloc_config.h\"
+MLKEM768_ALLOC_OBJS = $(call MAKE_OBJS,$(MLKEM768_DIR)/alloc,$(SOURCES) $(FIPS202_SRCS))
+$(MLKEM768_ALLOC_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\"../test/test_alloc_config.h\"
+MLKEM1024_ALLOC_OBJS = $(call MAKE_OBJS,$(MLKEM1024_DIR)/alloc,$(SOURCES) $(FIPS202_SRCS))
+$(MLKEM1024_ALLOC_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024 -DMLK_CONFIG_FILE=\"../test/test_alloc_config.h\"
+
 
 CFLAGS += -Imlkem
 
@@ -44,6 +52,11 @@ $(BUILD_DIR)/libmlkem1024.a: $(MLKEM1024_OBJS)
 $(BUILD_DIR)/libmlkem512_unit.a: $(MLKEM512_UNIT_OBJS)
 $(BUILD_DIR)/libmlkem768_unit.a: $(MLKEM768_UNIT_OBJS)
 $(BUILD_DIR)/libmlkem1024_unit.a: $(MLKEM1024_UNIT_OBJS)
+
+# Alloc test libraries with custom alloc config
+$(BUILD_DIR)/libmlkem512_alloc.a: $(MLKEM512_ALLOC_OBJS)
+$(BUILD_DIR)/libmlkem768_alloc.a: $(MLKEM768_ALLOC_OBJS)
+$(BUILD_DIR)/libmlkem1024_alloc.a: $(MLKEM1024_ALLOC_OBJS)
 
 $(BUILD_DIR)/libmlkem.a: $(MLKEM512_OBJS) $(MLKEM768_OBJS) $(MLKEM1024_OBJS)
 
@@ -57,6 +70,10 @@ $(MLKEM1024_DIR)/bin/bench_components_mlkem1024: CFLAGS += -Itest/hal
 $(MLKEM512_DIR)/bin/test_stack512: CFLAGS += -Imlkem/src -fstack-usage
 $(MLKEM768_DIR)/bin/test_stack768: CFLAGS += -Imlkem/src -fstack-usage
 $(MLKEM1024_DIR)/bin/test_stack1024: CFLAGS += -Imlkem/src -fstack-usage
+
+$(MLKEM512_DIR)/test/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/test_alloc_config.h\"
+$(MLKEM768_DIR)/test/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/test_alloc_config.h\"
+$(MLKEM1024_DIR)/test/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/test_alloc_config.h\"
 
 $(MLKEM512_DIR)/bin/test_unit512: CFLAGS += -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
 $(MLKEM768_DIR)/bin/test_unit768: CFLAGS += -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
@@ -90,14 +107,24 @@ $(BUILD_DIR)/$(1)/bin/test_unit$(subst mlkem,,$(1)): LDLIBS += -L$(BUILD_DIR) -l
 $(BUILD_DIR)/$(1)/bin/test_unit$(subst mlkem,,$(1)): $(BUILD_DIR)/$(1)/test/test_unit.c.o $(BUILD_DIR)/lib$(1)_unit.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
 endef
 
+# Special rule for test_alloc - link against alloc libraries with custom alloc config
+define ADD_SOURCE_ALLOC
+$(BUILD_DIR)/$(1)/bin/test_alloc$(subst mlkem,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)_alloc
+$(BUILD_DIR)/$(1)/bin/test_alloc$(subst mlkem,,$(1)): $(BUILD_DIR)/$(1)/test/test_alloc.c.o $(BUILD_DIR)/lib$(1)_alloc.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
+endef
+
 $(foreach scheme,mlkem512 mlkem768 mlkem1024, \
-	$(foreach test,$(filter-out test_unit,$(ALL_TESTS)), \
+	$(foreach test,$(filter-out test_unit test_alloc,$(ALL_TESTS)), \
 		$(eval $(call ADD_SOURCE,$(scheme),$(test))) \
 	) \
 )
 
 $(foreach scheme,mlkem512 mlkem768 mlkem1024, \
 	$(eval $(call ADD_SOURCE_UNIT,$(scheme))) \
+)
+
+$(foreach scheme,mlkem512 mlkem768 mlkem1024, \
+	$(eval $(call ADD_SOURCE_ALLOC,$(scheme))) \
 )
 
 $(ALL_TESTS:%=$(MLKEM512_DIR)/bin/%512): $(call MAKE_OBJS, $(MLKEM512_DIR), $(wildcard test/notrandombytes/*.c) $(EXTRA_SOURCES))
