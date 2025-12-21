@@ -409,3 +409,19 @@ configs:
       MLK_CONFIG_NO_RANDOMIZED_API: true
       MLK_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: proofs/cbmc/mlkem_native_config_cbmc.h
+    description: "mlkem-native configuration used for CBMC proofs, using instrumented alloc/free"
+    defines:
+      MLK_CONFIG_NAMESPACE_PREFIX: mlk
+      MLK_CONFIG_KEYGEN_PCT: true
+      MLK_CONFIG_CUSTOM_ALLOC_FREE:
+        content: |
+          #define MLK_CONFIG_CUSTOM_ALLOC_FREE
+          #if !defined(__ASSEMBLER__)
+          #include <stdlib.h>
+          #define MLK_CUSTOM_ALLOC(v, T, N) T* v = (T *)malloc(sizeof(T) * (N))
+          #define MLK_CUSTOM_FREE(v, T, N) free(v)
+          #endif /* !__ASSEMBLER__ */
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"

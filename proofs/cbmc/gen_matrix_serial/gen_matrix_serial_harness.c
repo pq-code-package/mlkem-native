@@ -7,6 +7,11 @@
 
 void harness(void)
 {
+  {
+    /* Dummy use of `free` to work around CBMC issue #8814. */
+    free(NULL);
+  }
+
   mlk_polymat *a;
   uint8_t *seed;
   int transposed;
