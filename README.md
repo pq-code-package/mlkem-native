@@ -100,7 +100,7 @@ See [dev/README.md](dev/README.md) for more details.
 
 mlkem-native is tested against all official ACVP ML-KEM test vectors[^ACVP].
 
-You can run ACVP tests using the [`tests`](./scripts/tests) script or the [ACVP client](./test/acvp_client.py) directly:
+You can run ACVP tests using the [`tests`](./scripts/tests) script or the [ACVP client](./test/acvp/acvp_client.py) directly:
 
 ```bash
 # Using the tests script
@@ -109,15 +109,15 @@ You can run ACVP tests using the [`tests`](./scripts/tests) script or the [ACVP 
 ./scripts/tests acvp --version v1.1.0.41
 
 # Using the ACVP client directly
-python3 ./test/acvp_client.py
-python3 ./test/acvp_client.py --version v1.1.0.41
+python3 ./test/acvp/acvp_client.py
+python3 ./test/acvp/acvp_client.py --version v1.1.0.41
 
 # Using specific ACVP test vector files (downloaded from the ACVP-Server)
-# python3 ./test/acvp_client.py -p {PROMPT}.json -e {EXPECTED_RESULT}.json
+# python3 ./test/acvp/acvp_client.py -p {PROMPT}.json -e {EXPECTED_RESULT}.json
 # For example, assuming you have run the above
-python3 ./test/acvp_client.py \
-  -p ./test/.acvp-data/v1.1.0.41/files/ML-KEM-keyGen-FIPS203/prompt.json \
-  -e ./test/.acvp-data/v1.1.0.41/files/ML-KEM-keyGen-FIPS203/expectedResults.json
+python3 ./test/acvp/acvp_client.py \
+  -p ./test/acvp/.acvp-data/v1.1.0.41/files/ML-KEM-keyGen-FIPS203/prompt.json \
+  -e ./test/acvp/.acvp-data/v1.1.0.41/files/ML-KEM-keyGen-FIPS203/expectedResults.json
 ```
 
 ## Benchmarking

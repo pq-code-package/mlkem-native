@@ -12,7 +12,11 @@ ifeq ($(OPT),1)
 	CFLAGS += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
 endif
 
-ALL_TESTS = test_mlkem test_unit acvp_mlkem bench_mlkem bench_components_mlkem gen_KAT test_stack
+BASIC_TESTS = test_mlkem gen_KAT test_stack
+ACVP_TESTS = acvp_mlkem
+BENCH_TESTS = bench_mlkem bench_components_mlkem
+UNIT_TESTS = test_unit
+ALL_TESTS = $(BASIC_TESTS) $(ACVP_TESTS) $(BENCH_TESTS) $(UNIT_TESTS)
 
 MLKEM512_DIR = $(BUILD_DIR)/mlkem512
 MLKEM768_DIR = $(BUILD_DIR)/mlkem768
@@ -81,22 +85,25 @@ $(MLKEM1024_DIR)/bin/%: CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024
 # Link tests with respective library (except test_unit which includes sources directly)
 define ADD_SOURCE
 $(BUILD_DIR)/$(1)/bin/$(2)$(subst mlkem,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)
-$(BUILD_DIR)/$(1)/bin/$(2)$(subst mlkem,,$(1)): $(BUILD_DIR)/$(1)/test/$(2).c.o $(BUILD_DIR)/lib$(1).a
+$(BUILD_DIR)/$(1)/bin/$(2)$(subst mlkem,,$(1)): $(BUILD_DIR)/$(1)/test/$(3)$(2).c.o $(BUILD_DIR)/lib$(1).a
 endef
 
 # Special rule for test_unit - link against unit libraries with exposed internal functions
 define ADD_SOURCE_UNIT
 $(BUILD_DIR)/$(1)/bin/test_unit$(subst mlkem,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)_unit
-$(BUILD_DIR)/$(1)/bin/test_unit$(subst mlkem,,$(1)): $(BUILD_DIR)/$(1)/test/test_unit.c.o $(BUILD_DIR)/lib$(1)_unit.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
+$(BUILD_DIR)/$(1)/bin/test_unit$(subst mlkem,,$(1)): $(BUILD_DIR)/$(1)/test/src/test_unit.c.o $(BUILD_DIR)/lib$(1)_unit.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
 endef
 
 $(foreach scheme,mlkem512 mlkem768 mlkem1024, \
-	$(foreach test,$(filter-out test_unit,$(ALL_TESTS)), \
-		$(eval $(call ADD_SOURCE,$(scheme),$(test))) \
+	$(foreach test,$(ACVP_TESTS), \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),acvp/)) \
 	) \
-)
-
-$(foreach scheme,mlkem512 mlkem768 mlkem1024, \
+	$(foreach test,$(BENCH_TESTS), \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),)) \
+	) \
+	$(foreach test,$(BASIC_TESTS), \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),src/)) \
+	) \
 	$(eval $(call ADD_SOURCE_UNIT,$(scheme))) \
 )
 

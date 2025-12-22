@@ -39,6 +39,10 @@ OPT = 0
     @if NOT EXIST $(MLKEM512_BUILD_DIR)\test mkdir $(MLKEM512_BUILD_DIR)\test
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\test\ $<
 
+{test\src}.c{$(MLKEM512_BUILD_DIR)\test}.obj::
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\test mkdir $(MLKEM512_BUILD_DIR)\test
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\test\ $<
+
 # compilation for mlkem768
 {mlkem\src}.c{$(MLKEM768_BUILD_DIR)\mlkem}.obj::
     @if NOT EXIST $(MLKEM768_BUILD_DIR)\mlkem mkdir $(MLKEM768_BUILD_DIR)\mlkem
@@ -49,6 +53,10 @@ OPT = 0
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\mlkem\fips202\ $<
 
 {test}.c{$(MLKEM768_BUILD_DIR)\test}.obj::
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\test mkdir $(MLKEM768_BUILD_DIR)\test
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\test\ $<
+
+{test\src}.c{$(MLKEM768_BUILD_DIR)\test}.obj::
     @if NOT EXIST $(MLKEM768_BUILD_DIR)\test mkdir $(MLKEM768_BUILD_DIR)\test
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\test\ $<
 
@@ -65,6 +73,9 @@ OPT = 0
     @if NOT EXIST $(MLKEM1024_BUILD_DIR)\test mkdir $(MLKEM1024_BUILD_DIR)\test
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\test\ $<
 
+{test\src}.c{$(MLKEM1024_BUILD_DIR)\test}.obj::
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\test mkdir $(MLKEM1024_BUILD_DIR)\test
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\test\ $<
 
 # compile functional test for mlkem512
 test_mlkem512: $(OBJ_FILES_512) $(MLKEM512_BUILD_DIR)\test\test_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj

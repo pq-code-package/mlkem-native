@@ -81,7 +81,7 @@ run_unit_1024: unit_1024
 run_unit: run_unit_512 run_unit_768 run_unit_1024
 
 run_acvp: acvp
-	EXEC_WRAPPER="$(EXEC_WRAPPER)" python3 ./test/acvp_client.py $(if $(ACVP_VERSION),--version $(ACVP_VERSION))
+	EXEC_WRAPPER="$(EXEC_WRAPPER)" python3 ./test/acvp/acvp_client.py $(if $(ACVP_VERSION),--version $(ACVP_VERSION))
 
 func_512:  $(MLKEM512_DIR)/bin/test_mlkem512
 	$(Q)echo "  FUNC       ML-KEM-512:   $^"
