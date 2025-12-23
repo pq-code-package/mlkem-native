@@ -248,8 +248,6 @@ source code and documentation.
 * Referenced from:
   - [dev/x86_64/README.md](dev/x86_64/README.md)
   - [dev/x86_64/src/compress_avx2.c](dev/x86_64/src/compress_avx2.c)
-  - [dev/x86_64/src/consts.c](dev/x86_64/src/consts.c)
-  - [dev/x86_64/src/consts.h](dev/x86_64/src/consts.h)
   - [dev/x86_64/src/intt.S](dev/x86_64/src/intt.S)
   - [dev/x86_64/src/ntt.S](dev/x86_64/src/ntt.S)
   - [dev/x86_64/src/nttfrombytes.S](dev/x86_64/src/nttfrombytes.S)
@@ -258,8 +256,6 @@ source code and documentation.
   - [dev/x86_64/src/reduce.S](dev/x86_64/src/reduce.S)
   - [dev/x86_64/src/tomont.S](dev/x86_64/src/tomont.S)
   - [mlkem/src/native/x86_64/src/compress_avx2.c](mlkem/src/native/x86_64/src/compress_avx2.c)
-  - [mlkem/src/native/x86_64/src/consts.c](mlkem/src/native/x86_64/src/consts.c)
-  - [mlkem/src/native/x86_64/src/consts.h](mlkem/src/native/x86_64/src/consts.h)
   - [mlkem/src/native/x86_64/src/intt.S](mlkem/src/native/x86_64/src/intt.S)
   - [mlkem/src/native/x86_64/src/ntt.S](mlkem/src/native/x86_64/src/ntt.S)
   - [mlkem/src/native/x86_64/src/nttfrombytes.S](mlkem/src/native/x86_64/src/nttfrombytes.S)
