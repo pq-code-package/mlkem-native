@@ -1223,36 +1223,44 @@ def gen_avx2_mulcache_twiddles():
             yield root_twisted
 
 
-def gen_avx2_hol_light_zeta_file():
+def gen_avx2_zetas_qdata():
+    # Twiddle permutation indices for INTT (used with vpshufb and vpermd)
     def offset_revidxb():
-        yield from [
-            3854,
-            3340,
-            2826,
-            2312,
-            1798,
-            1284,
-            770,
-            256,
-            3854,
-            3340,
-            2826,
-            2312,
-            1798,
-            1284,
-            770,
-            256,
-        ]
+        # vpshufb control: reverses 16-bit elements within each 128-bit lane
+        # Each int16 = (hi_byte_idx << 8) | lo_byte_idx
+        for _ in range(2):  # Same for both lanes
+            for i in range(8):
+                lo = 2 * (7 - i)
+                yield ((lo + 1) << 8) | lo
 
     def offset_revidxd():
-        yield from [7, 0, 6, 0, 5, 0, 4, 0, 3, 0, 2, 0, 1, 0, 0, 0]
+        # vpermd control: reverses 32-bit dwords across YMM register
+        # Stored as int16 pairs (idx, 0) forming 32-bit indices
+        for i in range(8):
+            yield 7 - i
+            yield 0
 
-    def qdata():
-        yield from offset_revidxb()
-        yield from offset_revidxd()
-        yield from gen_avx2_fwd_ntt_zetas()
-        yield from gen_avx2_mulcache_twiddles()
+    revidxb = list(offset_revidxb())
+    revidxd = list(offset_revidxd())
+    ntt_zetas = list(gen_avx2_fwd_ntt_zetas())
+    mulcache_twiddles = list(gen_avx2_mulcache_twiddles())
 
+    revidxb_idx = 0
+    revidxd_idx = revidxb_idx + len(revidxb)
+    ntt_zetas_idx = revidxd_idx + len(revidxd)
+    mulcache_twiddles_idx = ntt_zetas_idx + len(ntt_zetas)
+
+    constants = revidxb + revidxd + ntt_zetas + mulcache_twiddles
+    offsets = {
+        "revidxb": revidxb_idx,
+        "revidxd": revidxd_idx,
+        "zetas": ntt_zetas_idx,
+        "mulcache_twiddles": mulcache_twiddles_idx,
+    }
+    return constants, offsets
+
+
+def gen_avx2_hol_light_zeta_file():
     def gen():
         yield from gen_hol_light_header()
         yield "(*"
@@ -1261,7 +1269,8 @@ def gen_avx2_hol_light_zeta_file():
         yield " *)"
         yield ""
         yield "let qdata_full = define `qdata_full:int list = ["
-        yield from print_hol_light_array(qdata())
+        constants, _ = gen_avx2_zetas_qdata()
+        yield from print_hol_light_array(constants)
         yield "]`;;"
         yield ""
 
@@ -1269,31 +1278,52 @@ def gen_avx2_hol_light_zeta_file():
 
 
 def gen_avx2_zeta_file():
-    def gen():
+    constants, offsets = gen_avx2_zetas_qdata()
+
+    def gen_c():
         yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield "#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \\"
+        yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
+        yield ""
+        yield '#include "consts.h"'
+        yield ""
         yield "/*"
         yield " * Table of zeta values used in the AVX2 NTTs"
         yield " * See autogen for details."
         yield " */"
+        yield f"MLK_ALIGN const int16_t mlk_qdata[{len(constants)}] = {{"
+        yield from map(lambda t: str(t) + ",", constants)
+        yield "};"
         yield ""
-        yield from map(lambda t: str(t) + ",", gen_avx2_fwd_ntt_zetas())
+        yield "#else"
+        yield ""
+        yield "MLK_EMPTY_CU(avx2_consts)"
+        yield ""
+        yield "#endif"
         yield ""
 
-    update_file("mlkem/src/native/x86_64/src/x86_64_zetas.i", "\n".join(gen()))
-
-
-def gen_avx2_mulcache_twiddles_file():
-    def gen():
+    def gen_h():
         yield from gen_header()
-        yield "/*"
-        yield " * Table of twiddle values used in the AVX2 mulcache"
-        yield " * See autogen for details."
-        yield " */"
+        yield "#ifndef MLK_DEV_X86_64_SRC_CONSTS_H"
+        yield "#define MLK_DEV_X86_64_SRC_CONSTS_H"
+        yield '#include "../../../common.h"'
+        yield f"#define MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXB {offsets['revidxb']}"
+        yield f"#define MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXD {offsets['revidxd']}"
+        yield f"#define MLK_AVX2_BACKEND_DATA_OFFSET_ZETAS_EXP {offsets['zetas']}"
+        yield f"#define MLK_AVX2_BACKEND_DATA_OFFSET_MULCACHE_TWIDDLES {offsets['mulcache_twiddles']}"
         yield ""
-        yield from map(lambda t: str(t) + ",", gen_avx2_mulcache_twiddles())
+        yield "#ifndef __ASSEMBLER__"
+        yield "#define mlk_qdata MLK_NAMESPACE(qdata)"
+        yield f"extern const int16_t mlk_qdata[{len(constants)}];"
+        yield "#endif"
+        yield ""
+        yield "#endif"
         yield ""
 
-    update_file("dev/x86_64/src/x86_64_mulcache_twiddles.i", "\n".join(gen()))
+    update_file("dev/x86_64/src/consts.c", "\n".join(gen_c()))
+    update_file("dev/x86_64/src/consts.h", "\n".join(gen_h()))
 
 
 def gen_riscv64_root_of_unity_for_block(layer, block, inv=False):
@@ -3493,7 +3523,6 @@ def _main():
     gen_avx2_hol_light_rej_uniform_table()
     gen_avx2_zeta_file()
     gen_avx2_rej_uniform_table()
-    gen_avx2_mulcache_twiddles_file()
     gen_riscv64_zeta_files()
     high_level_status("Generated zeta and lookup tables")
 
