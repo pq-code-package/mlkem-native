@@ -7,16 +7,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../mlkem/src/kem.h"
-#include "../mlkem/src/randombytes.h"
-#include "../mlkem/src/sampling.h"
+#include "../../mlkem/src/kem.h"
+#include "../../mlkem/src/randombytes.h"
+#include "../../mlkem/src/sampling.h"
 #include "hal.h"
 
-#include "../mlkem/src/fips202/fips202.h"
-#include "../mlkem/src/fips202/keccakf1600.h"
-#include "../mlkem/src/indcpa.h"
-#include "../mlkem/src/poly.h"
-#include "../mlkem/src/poly_k.h"
+#include "../../mlkem/src/fips202/fips202.h"
+#include "../../mlkem/src/fips202/keccakf1600.h"
+#include "../../mlkem/src/indcpa.h"
+#include "../../mlkem/src/poly.h"
+#include "../../mlkem/src/poly_k.h"
 
 #define NWARMUP 50
 #define NITERATIONS 300
