@@ -34,7 +34,8 @@ output_path=$3
 output_dir=$(dirname "$output_path")
 [ -d "$output_dir" ] || mkdir -p "$output_dir"
 
-export HOLLIGHT_DIR="$(dirname ${hol_sh_cmd})"
+HOLLIGHT_DIR="$(dirname "${hol_sh_cmd}")"
+export HOLLIGHT_DIR
 if [ ! -f "${HOLLIGHT_DIR}/hol_lib.cmxa" ]; then
   echo "hol_lib.cmxa does not exist in HOLLIGHT_DIR('${HOLLIGHT_DIR}')."
   echo "Did you compile HOL Light with HOLLIGHT_USE_MODULE set to 1?"
