@@ -11,6 +11,7 @@
 #include "../../mlkem/src/compress.h"
 #include "../../mlkem/src/poly.h"
 #include "../../mlkem/src/poly_k.h"
+#include "../../mlkem/src/sampling.h"
 
 #ifndef NUM_RANDOM_TESTS
 #ifdef MLKEM_DEBUG
@@ -19,6 +20,14 @@
 #define NUM_RANDOM_TESTS 10000
 #endif
 #endif /* !NUM_RANDOM_TESTS */
+
+#ifndef NUM_RANDOM_TESTS_REJ_UNIFORM
+#ifdef MLKEM_DEBUG
+#define NUM_RANDOM_TESTS_REJ_UNIFORM 100
+#else
+#define NUM_RANDOM_TESTS_REJ_UNIFORM 1000
+#endif
+#endif /* !NUM_RANDOM_TESTS_REJ_UNIFORM */
 
 /* Declarations for _c functions exposed by MLK_STATIC_TESTABLE= */
 
@@ -669,6 +678,49 @@ static int test_poly_compress_no_overflow(void)
   return 0;
 }
 
+/* poly_rej_uniform and poly_rej_uniform_4x implement the same
+ * functionality with different degrees of batching. This unit
+ * test makes sure these functions indeed produce the same
+ * outputs. */
+#if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
+static int test_poly_rej_uniform_consistency(void)
+{
+  mlk_poly vec_x4[4], vec_x1[4];
+  MLK_ALIGN uint8_t seed[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)];
+  int i, j;
+
+
+  for (i = 0; i < NUM_RANDOM_TESTS_REJ_UNIFORM; i++)
+  {
+    for (j = 0; j < 4; j++)
+    {
+      randombytes(seed[j], MLKEM_SYMBYTES + 2);
+    }
+
+    /* Test x4 version */
+    mlk_poly_rej_uniform_x4(&vec_x4[0], &vec_x4[1], &vec_x4[2], &vec_x4[3],
+                            seed);
+
+    /* Test x1 version with same seeds */
+    for (j = 0; j < 4; j++)
+    {
+      mlk_poly_rej_uniform(&vec_x1[j], seed[j]);
+    }
+
+    /* Compare results */
+    for (j = 0; j < 4; j++)
+    {
+      CHECK(memcmp(vec_x4[j].coeffs, vec_x1[j].coeffs,
+                   MLKEM_N * sizeof(int16_t)) == 0);
+    }
+  }
+
+  return 0;
+}
+#endif /* !MLK_CONFIG_SERIAL_FIPS202_ONLY */
+
+
+
 int main(void)
 {
   /* WARNING: Test-only
@@ -689,6 +741,10 @@ int main(void)
 
   /* Test poly compress no overflow */
   CHECK(test_poly_compress_no_overflow() == 0);
+
+#if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
+  CHECK(test_poly_rej_uniform_consistency() == 0);
+#endif
 
   return 0;
 }
