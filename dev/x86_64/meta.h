@@ -94,7 +94,7 @@ static MLK_INLINE int mlk_poly_tomont_native(int16_t data[MLKEM_N])
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_tomont_avx2(data, mlk_qdata);
+  mlk_tomont_avx2(data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
