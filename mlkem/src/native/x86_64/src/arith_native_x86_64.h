@@ -65,7 +65,7 @@ void mlk_ntttobytes_avx2(uint8_t *r, const int16_t *a);
 void mlk_nttfrombytes_avx2(int16_t *r, const uint8_t *a);
 
 #define mlk_tomont_avx2 MLK_NAMESPACE(tomont_avx2)
-void mlk_tomont_avx2(int16_t *r, const int16_t *mlk_qdata);
+void mlk_tomont_avx2(int16_t *r);
 
 #define mlk_poly_compress_d4_avx2 MLK_NAMESPACE(poly_compress_d4_avx2)
 void mlk_poly_compress_d4_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
