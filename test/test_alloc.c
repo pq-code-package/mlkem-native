@@ -9,6 +9,7 @@
 /* Expose declaration of allocator (normally internal) */
 #define MLK_BUILD_INTERNAL
 #include "../mlkem/mlkem_native.h"
+#include "../mlkem/src/common.h"
 #include "notrandombytes/notrandombytes.h"
 
 /*
@@ -370,7 +371,7 @@ static int test_check_sk_alloc_failure(void)
 
 int main(void)
 {
-  uint8_t bump_buffer_storage[MLK_BUMP_ALLOC_SIZE];
+  MLK_ALIGN uint8_t bump_buffer_storage[MLK_BUMP_ALLOC_SIZE];
   bump_buffer = bump_buffer_storage;
 
   if (test_keygen_alloc_failure() != 0)
