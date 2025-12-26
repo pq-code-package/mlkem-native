@@ -46,3 +46,4 @@ jobs:
           acvp: ${{ matrix.target.acvp }}
           examples: false
           stack: false
+          alloc: false
