@@ -70,10 +70,12 @@ runs:
       run: |
         echo "/tools/verilator/4.210/bin" >> $GITHUB_PATH
 
-    - name: Set Bazel cache directory
+    - name: Set Bazel cache directory and mirror
       shell: bash
       run: |
         echo "BAZEL_CACHE_DIR=/home/runner/bazel_cache" >> $GITHUB_ENV
+        # Use GitHub mirror for Bazel binaries to avoid certificate issues with releases.bazel.build
+        echo "BAZELISK_BASE_URL=https://github.com/bazelbuild/bazel/releases/download" >> $GITHUB_ENV
 
     - name: Test Verilator setup and build cache
       shell: bash
@@ -83,4 +85,5 @@ runs:
         ./bazelisk.sh test \
           --test_output=streamed \
           --disk_cache=$BAZEL_CACHE_DIR \
+          --registry=https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main/ \
           //sw/device/tests:uart_smoketest_sim_verilator

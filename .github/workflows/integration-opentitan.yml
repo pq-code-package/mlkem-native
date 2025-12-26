@@ -87,6 +87,7 @@ jobs:
           ./bazelisk.sh test \
             --test_output=streamed \
             --disk_cache=$BAZEL_CACHE_DIR \
+            --registry=https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main/ \
             //sw/device/tests/crypto:mlkem_functest_sim_verilator
 
   stop-ec2-runner:
