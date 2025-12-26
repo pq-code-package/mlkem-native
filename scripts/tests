@@ -211,6 +211,7 @@ class TEST_TYPES(Enum):
     SIZE = 17
     BASIC_DETERMINISTIC = 18
     UNIT = 19
+    ALLOC = 20
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -285,6 +286,8 @@ class TEST_TYPES(Enum):
             return "Measurement Code Size"
         if self == TEST_TYPES.UNIT:
             return "Unit Test"
+        if self == TEST_TYPES.ALLOC:
+            return "Alloc Test"
 
     def make_dir(self):
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
@@ -350,6 +353,8 @@ class TEST_TYPES(Enum):
             return "size"
         if self == TEST_TYPES.UNIT:
             return "unit"
+        if self == TEST_TYPES.ALLOC:
+            return "alloc"
 
     def make_run_target(self, scheme):
         t = self.make_target()
@@ -649,6 +654,19 @@ class Tests:
 
         self.check_fail()
 
+    def alloc(self):
+        def _alloc(opt):
+            self._compile_schemes(TEST_TYPES.ALLOC, opt)
+            if self.args.run:
+                self._run_schemes(TEST_TYPES.ALLOC, opt)
+
+        if self.do_no_opt():
+            _alloc(False)
+        if self.do_opt():
+            _alloc(True)
+
+        self.check_fail()
+
     def acvp(self):
         def _acvp(opt):
             self._compile_schemes(TEST_TYPES.ACVP, opt)
@@ -783,6 +801,7 @@ class Tests:
         examples = self.args.examples
         stack = self.args.stack
         unit = self.args.unit
+        alloc = self.args.alloc
 
         def _all(opt):
             if func is True:
@@ -795,6 +814,8 @@ class Tests:
                 self._compile_schemes(TEST_TYPES.STACK, opt)
             if unit is True:
                 self._compile_schemes(TEST_TYPES.UNIT, opt)
+            if alloc is True:
+                self._compile_schemes(TEST_TYPES.ALLOC, opt)
 
             if self.args.check_namespace is True:
                 p = subprocess.run(
@@ -818,6 +839,8 @@ class Tests:
                 self._run_schemes(TEST_TYPES.STACK, opt, suppress_output=False)
             if unit is True:
                 self._run_schemes(TEST_TYPES.UNIT, opt)
+            if alloc is True:
+                self._run_schemes(TEST_TYPES.ALLOC, opt)
 
         if self.do_no_opt():
             _all(False)
@@ -1189,6 +1212,21 @@ def cli():
         help="Do not run stack analysis",
     )
 
+    alloc_group = all_parser.add_mutually_exclusive_group()
+    alloc_group.add_argument(
+        "--alloc",
+        action="store_true",
+        dest="alloc",
+        help="Run alloc tests",
+        default=True,
+    )
+    alloc_group.add_argument(
+        "--no-alloc",
+        action="store_false",
+        dest="alloc",
+        help="Do not run alloc tests",
+    )
+
     # acvp arguments
     acvp_parser = cmd_subparsers.add_parser(
         "acvp", help="Run ACVP client", parents=[common_parser]
@@ -1395,6 +1433,13 @@ def cli():
         default=False,
     )
 
+    # alloc arguments
+    alloc_parser = cmd_subparsers.add_parser(
+        "alloc",
+        help="Run the alloc tests for all parameter sets",
+        parents=[common_parser],
+    )
+
     args = main_parser.parse_args()
 
     if not hasattr(args, "mac_taskpolicy"):
@@ -1426,6 +1471,8 @@ def cli():
         Tests(args).stack()
     elif args.cmd == "size":
         Tests(args).size()
+    elif args.cmd == "alloc":
+        Tests(args).alloc()
 
 
 if __name__ == "__main__":

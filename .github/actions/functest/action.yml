@@ -56,6 +56,9 @@ inputs:
   stack:
     description: Determine whether to run stack analysis or not
     default: "false"
+  alloc:
+    description: Determine whether to run alloc tests or not
+    default: "true"
   extra_args:
     description: Additional arguments to pass to the tests script
     default: ""
@@ -76,6 +79,7 @@ runs:
           echo ACVP="${{ inputs.acvp == 'true' && 'acvp' || 'no-acvp' }}" >> $GITHUB_ENV
           echo EXAMPLES="${{ inputs.examples == 'true' && 'examples' || 'no-examples' }}" >> $GITHUB_ENV
           echo STACK="${{ inputs.stack == 'true' && 'stack' || 'no-stack' }}" >> $GITHUB_ENV
+          echo ALLOC="${{ inputs.alloc == 'true' && 'alloc' || 'no-alloc' }}" >> $GITHUB_ENV
       - name: Setup nix
         uses: ./.github/actions/setup-shell
         with:
@@ -106,11 +110,11 @@ runs:
             - $(python3 --version)
             - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
           EOF
-      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.EXAMPLES }}, ${{ env.STACK }}, ${{ env.UNIT }})
+      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.EXAMPLES }}, ${{ env.STACK }}, ${{ env.UNIT }}, ${{ env.ALLOC }})
         shell: ${{ env.SHELL }}
         run: |
           make clean
-          ${{ inputs.extra_env }} ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --ldflags="${{ inputs.ldflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.EXAMPLES }} --${{ env.STACK }} --${{ env.UNIT }} -v ${{ inputs.extra_args }}
+          ${{ inputs.extra_env }} ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --ldflags="${{ inputs.ldflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.EXAMPLES }} --${{ env.STACK }} --${{ env.UNIT }} --${{ env.ALLOC }} -v ${{ inputs.extra_args }}
       - name: Post ${{ env.MODE }} Tests
         shell: ${{ env.SHELL }}
         if: success() || failure()
