@@ -30,7 +30,7 @@ error()
 
 info "Formatting nix files"
 if ! command -v nixpkgs-fmt 2>&1 >/dev/null; then
-  error "nixpkgs-fmt not found. Are you running in a nix shell? See BUILDING.md."
+  error "nixpkgs-fmt not found. Are you running in a nix shell? See CONTRIBUTING.md."
   exit 1
 fi
 
@@ -38,21 +38,21 @@ nixpkgs-fmt "$ROOT"
 
 info "Formatting shell scripts"
 if ! command -v shfmt 2>&1 >/dev/null; then
-  error "shfmt not found. Are you running in a nix shell? See BUILDING.md."
+  error "shfmt not found. Are you running in a nix shell? See CONTRIBUTING.md."
   exit 1
 fi
 shfmt -s -w -l -i 2 -ci -fn $(shfmt -f $(git grep -l '' :/))
 
 info "Formatting python scripts"
 if ! command -v black 2>&1 >/dev/null; then
-  error "black not found. Are you running in a nix shell? See BUILDING.md."
+  error "black not found. Are you running in a nix shell? See CONTRIBUTING.md."
   exit 1
 fi
 black --include "(scripts/tests|scripts/simpasm|scripts/cfify|scripts/autogen|scripts/check-namespace|\.py$)" "$ROOT"
 
 info "Formatting c files"
 if ! command -v clang-format 2>&1 >/dev/null; then
-  error "clang-format not found. Are you running in a nix shell? See BUILDING.md."
+  error "clang-format not found. Are you running in a nix shell? See CONTRIBUTING.md."
   exit 1
 fi
 
