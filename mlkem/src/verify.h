@@ -407,11 +407,14 @@ __contract__(
   requires(len <= MLK_MAX_BUFFER_SIZE)
   requires(memory_no_alias(r, len))
   requires(memory_no_alias(x, len))
-  assigns(memory_slice(r, len)))
+  assigns(memory_slice(r, len))
+  ensures(forall(i, 0, len, (r[i] == (b == 0 ? x[i] : old(r)[i])))))
 {
   size_t i;
   for (i = 0; i < len; i++)
-  __loop__(invariant(i <= len))
+  __loop__(
+    invariant(i <= len)
+    invariant(forall(k, 0, i, r[k] == (b == 0 ? x[k] : loop_entry(r)[k]))))
   {
     r[i] = mlk_ct_sel_uint8(r[i], x[i], b);
   }

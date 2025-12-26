@@ -26,7 +26,7 @@ USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2
+CBMCFLAGS=--bitwuzla
 
 FUNCTION_NAME = mlk_ct_cmov_zero
 
@@ -37,7 +37,7 @@ FUNCTION_NAME = mlk_ct_cmov_zero
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 8
+CBMC_OBJECT_BITS = 10
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
