@@ -20,7 +20,9 @@
 #include "cbmc.h"
 #include "common.h"
 #include MLK_FIPS202_HEADER_FILE
+#if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
 #include MLK_FIPS202X4_HEADER_FILE
+#endif
 
 /* Macros denoting FIPS 203 specific Hash functions */
 
