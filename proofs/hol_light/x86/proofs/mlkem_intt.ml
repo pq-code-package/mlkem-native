@@ -1102,7 +1102,8 @@ let MLKEM_INTT_CORRECT = prove
   CONV_TAC(LAND_CONV WORD_REDUCE_CONV) THEN STRIP_TAC THEN
 
   MAP_EVERY (fun n -> X86_STEPS_TAC MLKEM_INTT_TMC_EXEC [n] THEN
-                      SIMD_SIMPLIFY_TAC[ntt_montmul; ntt_montmul_add; ntt_montmul_sub; barred_x86])
+                      SIMD_SIMPLIFY_ABBREV_TAC[ntt_montmul; barred_x86]
+                              [ntt_montmul_add; ntt_montmul_sub])
         (1--663) THEN
 
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
@@ -1119,6 +1120,13 @@ let MLKEM_INTT_CORRECT = prove
   ASM_REWRITE_TAC[WORD_ADD_0] THEN
 
   ASM_REWRITE_TAC[] THEN DISCARD_STATE_TAC "s663" THEN
+
+  W(fun (asl,w) ->
+     let asms =
+        map snd (filter (is_local_definition
+          [ntt_montmul; barred_x86] o concl o snd) asl) in
+     MP_TAC(end_itlist CONJ (rev asms)) THEN
+     MAP_EVERY (fun t -> UNDISCH_THEN (concl t) (K ALL_TAC)) asms) THEN
 
   REWRITE_TAC[WORD_BLAST `word_subword (x:int32) (0, 32) = x`] THEN
   REWRITE_TAC[WORD_BLAST `word_subword (x:int64) (0, 64) = x`] THEN
@@ -1143,13 +1151,22 @@ let MLKEM_INTT_CORRECT = prove
      word_subword x (0, 16)`] THEN
   CONV_TAC(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV) THEN
 
+  STRIP_TAC THEN
+
   CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
   REWRITE_TAC[GSYM CONJ_ASSOC] THEN
-  REPEAT(GEN_REWRITE_TAC I
-   [TAUT `p /\ q /\ r /\ s <=> (p /\ q /\ r) /\ s`] THEN CONJ_TAC) THEN
-  POP_ASSUM_LIST(K ALL_TAC) THEN
-  (W(MP_TAC o CONGBOUND_RULE o rand o lhand o rator o lhand o snd) THEN
-   MATCH_MP_TAC MONO_AND THEN CONJ_TAC THENL
+
+  W(fun (asl,w) ->
+    let lfn = undefined
+    and asms =
+      map snd (filter (is_local_definition [ntt_montmul; barred_x86] o concl o snd) asl) in
+    let lfn' = LOCAL_CONGBOUND_RULE lfn (rev asms) in
+
+    REPEAT(GEN_REWRITE_TAC I
+     [TAUT `p /\ q /\ r /\ s <=> (p /\ q /\ r) /\ s`] THEN CONJ_TAC) THEN
+
+    W(MP_TAC o ASM_CONGBOUND_RULE lfn' o rand o lhand o rator o lhand o snd) THEN
+   (MATCH_MP_TAC MONO_AND THEN CONJ_TAC THENL
    [REWRITE_TAC[INVERSE_MOD_CONV `inverse_mod 3329 65536`] THEN
     MATCH_MP_TAC(REWRITE_RULE[IMP_CONJ_ALT] INT_CONG_TRANS) THEN
     CONV_TAC(ONCE_DEPTH_CONV AVX2_INVERSE_NTT_CONV) THEN
@@ -1161,7 +1178,7 @@ let MLKEM_INTT_CORRECT = prove
     MATCH_MP_TAC(INT_ARITH
      `l':int <= l /\ u <= u'
       ==> l <= x /\ x <= u ==> l' <= x /\ x <= u'`) THEN
-    CONV_TAC INT_REDUCE_CONV])
+    CONV_TAC INT_REDUCE_CONV]))
 );;
 
 let MLKEM_INTT_NOIBT_SUBROUTINE_CORRECT  = prove

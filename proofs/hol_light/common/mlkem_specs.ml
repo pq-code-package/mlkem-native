@@ -957,9 +957,7 @@ let CONCL_BOUNDS_RULE =
 let SIDE_ELIM_RULE th =
   MP th (EQT_ELIM(DIMINDEX_INT_REDUCE_CONV(lhand(concl th))));;
 
-let GEN_CONGBOUND_RULE aboths =
-  let lfn = PROCESS_BOUND_ASSUMPTIONS aboths in
-  let rec rule tm =
+let rec ASM_CONGBOUND_RULE lfn tm =
     try apply lfn tm with Failure _ ->
     match tm with
       Comb(Const("word",_),n) when is_numeral n ->
@@ -972,60 +970,76 @@ let GEN_CONGBOUND_RULE aboths =
         let th2 = WORD_RED_CONV(lhand(lhand(snd(strip_forall(concl th1))))) in
         SUBS[SYM th0] (MATCH_MP th1 th2)
     | Comb(Comb(Const("barmul",_),kb),t) ->
-        let ktm,btm = dest_pair kb and th0 = rule t in
+        let ktm,btm = dest_pair kb and th0 = ASM_CONGBOUND_RULE lfn t in
         let th0' = WEAKEN_INTCONG_RULE (num 3329) th0 in
         let th1 = SPECL [ktm;btm] (MATCH_MP CONGBOUND_BARMUL th0') in
         CONCL_BOUNDS_RULE(SIDE_ELIM_RULE th1)
     | Comb(Comb(Const("montmul_x86",_),ltm),rtm) ->
-        let lth = WEAKEN_INTCONG_RULE (num 3329) (rule ltm)
-        and rth = WEAKEN_INTCONG_RULE (num 3329) (rule rtm) in
+        let lth = WEAKEN_INTCONG_RULE (num 3329) (ASM_CONGBOUND_RULE lfn ltm)
+        and rth = WEAKEN_INTCONG_RULE (num 3329) (ASM_CONGBOUND_RULE lfn rtm) in
         let th1 = MATCH_MP CONGBOUND_MONTMUL_X86
                    (UNIFY_INTCONG_RULE lth rth) in
         CONCL_BOUNDS_RULE(th1)
     | Comb(Const("barred",_),t) ->
-        let th1 = WEAKEN_INTCONG_RULE (num 3329) (rule t) in
+        let th1 = WEAKEN_INTCONG_RULE (num 3329) (ASM_CONGBOUND_RULE lfn t) in
         MATCH_MP CONGBOUND_BARRED th1
     | Comb(Const("barred_x86",_),t) ->
-        let th1 = WEAKEN_INTCONG_RULE (num 3329) (rule t) in
+        let th1 = WEAKEN_INTCONG_RULE (num 3329) (ASM_CONGBOUND_RULE lfn t) in
         MATCH_MP CONGBOUND_BARRED_X86 th1
     | Comb(Const("montred",_),t) ->
-        let th1 = WEAKEN_INTCONG_RULE (num 3329) (rule t) in
+        let th1 = WEAKEN_INTCONG_RULE (num 3329) (ASM_CONGBOUND_RULE lfn t) in
         CONCL_BOUNDS_RULE(SIDE_ELIM_RULE(MATCH_MP CONGBOUND_MONTRED th1))
     | Comb(Comb(Const("ntt_montmul",_),ab),t) ->
-        let atm,btm = dest_pair ab and th0 = rule t in
+        let atm,btm = dest_pair ab and th0 = ASM_CONGBOUND_RULE lfn t in
         let th0' = WEAKEN_INTCONG_RULE (num 3329) th0 in
         let th1 = SPECL [atm;btm] (MATCH_MP CONGBOUND_NTT_MONTMUL th0') in
         CONCL_BOUNDS_RULE(SIDE_ELIM_RULE th1)
     | Comb(Const("word_sx",_),t) ->
-        let th0 = rule t in
+        let th0 = ASM_CONGBOUND_RULE lfn t in
         let tyin = type_match
          (type_of(rator(rand(lhand(funpow 4 rand (snd(dest_forall
             (concl CONGBOUND_WORD_SX)))))))) (type_of(rator tm)) [] in
         let th1 = MATCH_MP (INST_TYPE tyin CONGBOUND_WORD_SX) th0 in
         CONCL_BOUNDS_RULE(SIDE_ELIM_RULE th1)
     | Comb(Const("word_neg",_),t) ->
-        let th0 = rule t in
+        let th0 = ASM_CONGBOUND_RULE lfn t in
         let th1 = MATCH_MP CONGBOUND_WORD_NEG th0 in
         CONCL_BOUNDS_RULE(SIDE_ELIM_RULE th1)
     | Comb(Comb(Const("word_add",_),ltm),rtm) ->
-        let lth = rule ltm and rth = rule rtm in
+        let lth = ASM_CONGBOUND_RULE lfn ltm
+        and rth = ASM_CONGBOUND_RULE lfn rtm in
         let th1 = MATCH_MP CONGBOUND_WORD_ADD (UNIFY_INTCONG_RULE lth rth) in
         CONCL_BOUNDS_RULE(SIDE_ELIM_RULE th1)
     | Comb(Comb(Const("word_sub",_),ltm),rtm) ->
-        let lth = rule ltm and rth = rule rtm in
+        let lth = ASM_CONGBOUND_RULE lfn ltm
+        and rth = ASM_CONGBOUND_RULE lfn rtm in
         let th1 = MATCH_MP CONGBOUND_WORD_SUB (UNIFY_INTCONG_RULE lth rth) in
         CONCL_BOUNDS_RULE(SIDE_ELIM_RULE th1)
     | Comb(Comb(Const("word_mul",_),ltm),rtm) ->
-        let lth = rule ltm and rth = rule rtm in
+        let lth = ASM_CONGBOUND_RULE lfn ltm
+        and rth = ASM_CONGBOUND_RULE lfn rtm in
         let th1 = MATCH_MP CONGBOUND_WORD_MUL (UNIFY_INTCONG_RULE lth rth) in
         CONCL_BOUNDS_RULE(SIDE_ELIM_RULE th1)
-    | _ -> CONCL_BOUNDS_RULE(ISPEC tm CONGBOUND_ATOM) in
-  rule;;
+    | _ -> CONCL_BOUNDS_RULE(ISPEC tm CONGBOUND_ATOM);;
+
+let GEN_CONGBOUND_RULE aboths =
+  ASM_CONGBOUND_RULE (PROCESS_BOUND_ASSUMPTIONS aboths);;
 
 let CONGBOUND_RULE = GEN_CONGBOUND_RULE [];;
 
+let rec LOCAL_CONGBOUND_RULE lfn asms =
+  match asms with
+    [] -> lfn
+  | th::ths ->
+      let bod,var = dest_eq (concl th) in
+      let th1 = ASM_CONGBOUND_RULE lfn bod in
+      let th2 = SUBS[th] th1 in
+      let lfn' = (var |-> th2) lfn in
+      LOCAL_CONGBOUND_RULE lfn' ths;;
+
 (* ------------------------------------------------------------------------- *)
-(* Simplify SIMD cruft and fold abbreviations when encountered.              *)
+(* Simplify SIMD cruft and fold relevant definitions when encountered.       *)
+(* The ABBREV form also introduces abbreviations for relevant subterms.      *)
 (* ------------------------------------------------------------------------- *)
 
 let SIMD_SIMPLIFY_CONV unfold_defs =
@@ -1042,3 +1056,31 @@ let SIMD_SIMPLIFY_TAC unfold_defs =
    (ASSUME_TAC o
     CONV_RULE(RAND_CONV (SIMD_SIMPLIFY_CONV unfold_defs)) o
     check (simdable o concl)));;
+
+let is_local_definition unfold_defs =
+  let pats = map (lhand o snd o strip_forall o concl) unfold_defs in
+  let pam t = exists (fun p -> can(term_match [] p) t) pats in
+  fun tm -> is_eq tm && is_var(rand tm) && pam(lhand tm);;
+
+let AUTO_ABBREV_TAC tm =
+  let gv = genvar(type_of tm) in
+  ABBREV_TAC(mk_eq(gv,tm));;
+
+let SIMD_SIMPLIFY_ABBREV_TAC =
+  let arm_simdable =
+    can (term_match [] `read X (s:armstate):int128 = whatever`)
+  and x86_simdable =
+    can (term_match [] `read X (s:x86state):int256 = whatever`) in
+  let simdable tm = arm_simdable tm || x86_simdable tm in
+  fun unfold_defs unfold_aux ->
+    let pats = map (lhand o snd o strip_forall o concl) unfold_defs in
+    let pam t = exists (fun p -> can(term_match [] p) t) pats in
+    let ttac th (asl,w) =
+      let th' = CONV_RULE(RAND_CONV
+                 (SIMD_SIMPLIFY_CONV (unfold_defs @ unfold_aux))) th in
+      let asms =
+        map snd (filter (is_local_definition unfold_defs o concl o snd) asl) in
+      let th'' = GEN_REWRITE_RULE (RAND_CONV o TOP_DEPTH_CONV) asms th' in
+      let tms = sort free_in (find_terms pam (rand(concl th''))) in
+      (MP_TAC th'' THEN MAP_EVERY AUTO_ABBREV_TAC tms THEN DISCH_TAC) (asl,w) in
+  TRY(FIRST_X_ASSUM(ttac o check (simdable o concl)));;
