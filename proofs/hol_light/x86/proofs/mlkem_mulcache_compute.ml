@@ -138,7 +138,8 @@ let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(
                !i. i < 128
                    ==> let zi =
                       read(memory :> bytes16(word_add r (word(2 * i)))) s in
-                      (ival zi == avx2_mulcache (ival o x) i) (mod &3329))
+                      (ival zi == avx2_mulcache (ival o x) i) (mod &3329) /\
+                      (abs(ival zi) <= &3328))
           (MAYCHANGE [events] ,,
            MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8; ZMM9; ZMM10] ,,
            MAYCHANGE [RIP] ,, MAYCHANGE [RAX] ,,
@@ -198,7 +199,9 @@ let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(
   POP_ASSUM_LIST (K ALL_TAC) THEN
 
   (* Split into one congruence goals per index. *)
-  REPEAT CONJ_TAC THEN
+  (* Split into pairs of congruence and absolute value goals *)
+  REPEAT(W(fun (asl,w) ->
+  if length(conjuncts w) > 3 then CONJ_TAC else NO_TAC)) THEN
 
   REWRITE_TAC[avx2_mulcache; avx2_ntt_order] THEN
   CONV_TAC(DEPTH_CONV let_CONV) THEN
@@ -206,24 +209,30 @@ let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(
 
   (* Instantiate general congruence and bounds rule for Montgomery multiplication
    * so it matches the current goal, and add as new assumption. *)
-  W (MP_TAC o CONGBOUND_RULE o rand o lhand o rator o snd) THEN
+  W (MP_TAC o CONGBOUND_RULE o rand o rand o rator o rator o lhand o snd) THEN
   ASM_REWRITE_TAC [o_THM] THEN
 
-  (* CONGBOUND_RULE gives a correctness and a bounds result -- here, we only
-   * need the correctness result since mlkem_mulcache_compute makes no
-   * statement about output coefficient bounds. *)
-  MATCH_MP_TAC (TAUT `(x ==> z) ==> (x /\ y ==> z)`) THEN
+  MATCH_MP_TAC MONO_AND THEN (CONJ_TAC THENL [
+    (* Correctness *)
+    REWRITE_TAC[INVERSE_MOD_CONV `inverse_mod 3329 65536`] THEN
+    REWRITE_TAC [GSYM INT_REM_EQ] THEN
+    CONV_TAC INT_REM_DOWN_CONV THEN
+    STRIP_TAC THEN ASM_REWRITE_TAC [] THEN
+    CONV_TAC ((GEN_REWRITE_CONV DEPTH_CONV [BITREVERSE7_CLAUSES])
+              THENC (REPEATC (CHANGED_CONV (ONCE_DEPTH_CONV NUM_RED_CONV)))) THEN
+    REWRITE_TAC[INT_REM_EQ] THEN
+    REWRITE_TAC [REAL_INT_CONGRUENCE; INT_OF_NUM_EQ; ARITH_EQ] THEN
+    REWRITE_TAC[GSYM REAL_OF_INT_CLAUSES] THEN
+    CONV_TAC(RAND_CONV REAL_POLY_CONV) THEN REAL_INTEGER_TAC
 
-  REWRITE_TAC[INVERSE_MOD_CONV `inverse_mod 3329 65536`] THEN
-  REWRITE_TAC [GSYM INT_REM_EQ] THEN
-  CONV_TAC INT_REM_DOWN_CONV THEN
-  STRIP_TAC THEN ASM_REWRITE_TAC [] THEN
-  CONV_TAC ((GEN_REWRITE_CONV DEPTH_CONV [BITREVERSE7_CLAUSES])
-            THENC (REPEATC (CHANGED_CONV (ONCE_DEPTH_CONV NUM_RED_CONV)))) THEN
-  REWRITE_TAC[INT_REM_EQ] THEN
-  REWRITE_TAC [REAL_INT_CONGRUENCE; INT_OF_NUM_EQ; ARITH_EQ] THEN
-  REWRITE_TAC[GSYM REAL_OF_INT_CLAUSES] THEN
-  CONV_TAC(RAND_CONV REAL_POLY_CONV) THEN REAL_INTEGER_TAC
+    ;
+
+    (* Bounds *)
+    REWRITE_TAC [INT_ABS_BOUNDS] THEN
+    MATCH_MP_TAC(INT_ARITH
+      `l':int <= l /\ u <= u'
+       ==> l <= x /\ x <= u ==> l' <= x /\ x <= u'`) THEN
+    CONV_TAC INT_REDUCE_CONV])
 );;
 
 let MLKEM_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_CORRECT  = prove(
@@ -248,7 +257,8 @@ let MLKEM_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_CORRECT  = prove(
                !i. i < 128
                    ==> let zi =
                       read(memory :> bytes16(word_add r (word(2 * i)))) s in
-                      (ival zi == avx2_mulcache (ival o x) i) (mod &3329))
+                      (ival zi == avx2_mulcache (ival o x) i) (mod &3329) /\
+                      (abs(ival zi) <= &3328))
           (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
            MAYCHANGE [memory :> bytes(r, 256)])`,
   let TWEAK_CONV = ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV in
@@ -277,7 +287,8 @@ let MLKEM_MULCACHE_COMPUTE_SUBROUTINE_CORRECT = prove(
                !i. i < 128
                    ==> let zi =
                       read(memory :> bytes16(word_add r (word(2 * i)))) s in
-                      (ival zi == avx2_mulcache (ival o x) i) (mod &3329))
+                      (ival zi == avx2_mulcache (ival o x) i) (mod &3329) /\
+                      (abs(ival zi) <= &3328))
           (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
            MAYCHANGE [memory :> bytes(r, 256)])`,
   let TWEAK_CONV = ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV in
