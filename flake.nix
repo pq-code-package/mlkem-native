@@ -41,6 +41,10 @@
                 '')
             ];
           };
+          holLightShellHook = ''
+            export PATH=$PWD/scripts:$PATH
+            export PROOF_DIR="$PWD/proofs/hol_light"
+          '';
         in
         {
           _module.args.pkgs = import inputs.nixpkgs {
@@ -95,16 +99,17 @@
 
           devShells.avr = util.mkShell (import ./nix/avr { inherit pkgs; });
           devShells.hol_light = (util.mkShell {
-            packages = builtins.attrValues {
-              inherit (config.packages) linters hol_light s2n_bignum;
-            };
-          }).overrideAttrs (old: {
-            shellHook = ''
-              export PATH=$PWD/scripts:$PATH
-              # Set PROOF_DIR based on where we entered the shell
-              export PROOF_DIR="$PWD/proofs/hol_light"
-            '';
-          });
+            packages = builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum; };
+          }).overrideAttrs (old: { shellHook = holLightShellHook; });
+          devShells.hol_light-cross = (util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) linters toolchains hol_light s2n_bignum; };
+          }).overrideAttrs (old: { shellHook = holLightShellHook; });
+          devShells.hol_light-cross-aarch64 = (util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 hol_light s2n_bignum; };
+          }).overrideAttrs (old: { shellHook = holLightShellHook; });
+          devShells.hol_light-cross-x86_64 = (util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum; };
+          }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.ci = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains_native; };
           };
