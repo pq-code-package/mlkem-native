@@ -730,7 +730,7 @@ jobs:
       matrix:
         target:
           - system: macos-latest
-            nix_cache: 'false'
+            nix_cache: 'true'
             nix_shell: 'hol_light-cross-x86_64'
             extra_args: '--force-cross'
           # TODO: autogen does not yet work on macos15-intel (#1304)
