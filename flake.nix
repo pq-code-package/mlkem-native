@@ -54,6 +54,7 @@
                 gcc48 = pkgs-2405.gcc48;
                 gcc49 = pkgs-2405.gcc49;
                 gcc7 = pkgs-2405.gcc7;
+                gcc15 = pkgs-unstable.gcc15;
                 clang_21 = pkgs-unstable.clang_21;
                 zig_0_15 = pkgs-unstable.zig_0_15;
               })
