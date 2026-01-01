@@ -19,6 +19,19 @@ ARCHTYPE_RESULT=$(shell uname -m)
 SRC ?= $(S2N_BIGNUM_DIR)
 SRC_X86 ?= $(SRC)/x86
 
+# If actually on an x86_64 machine, just use the assembler (as). Otherwise
+# use a cross-assembling version so that the code can still be assembled
+# and the proofs checked against the object files (though you won't be able
+# to run code without additional emulation infrastructure).
+ifeq ($(filter $(ARCHTYPE_RESULT),x86_64),)
+CROSS_PREFIX=x86_64-unknown-linux-gnu-
+ifeq ($(shell command -v $(ASSEMBLE) >/dev/null 2>&1 && echo yes || echo no),no)
+$(error Cross-toolchain not found. Please run in the 'hol_light-cross-x86_64' nix shell via: nix develop .#hol_light-cross-x86_64)
+endif
+endif
+ASSEMBLE=$(CROSS_PREFIX)as $(ARCHFLAGS)
+OBJDUMP=$(CROSS_PREFIX)objdump -d
+
 # Add explicit language input parameter to cpp, otherwise the use of #n for
 # numeric literals in x86 code is a problem when used inside #define macros
 # since normally that means stringization.
@@ -36,29 +49,6 @@ endif
 # a line, but we split them up anyway just in case.
 
 SPLIT=tr ';' '\n'
-
-# If actually on an x86_64 machine, just use the assembler (as). Otherwise
-# use a cross-assembling version so that the code can still be assembled
-# and the proofs checked against the object files (though you won't be able
-# to run code without additional emulation infrastructure). For the clang
-# version on OS X we just add the "-arch x86_64" option. For the Linux/gcc
-# toolchain we assume the presence of the special cross-assembler. This
-# can be installed via something like:
-#
-#  sudo apt-get install binutils-x86-64-linux-gnu
-
-ifeq ($(ARCHTYPE_RESULT),x86_64)
-ASSEMBLE=as
-OBJDUMP=objdump -d
-else
-ifeq ($(OSTYPE_RESULT),Darwin)
-ASSEMBLE=as -arch x86_64
-OBJDUMP=otool -tvV
-else
-ASSEMBLE=x86_64-linux-gnu-as
-OBJDUMP=x86_64-linux-gnu-objdump -d
-endif
-endif
 
 OBJ = mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o \
       mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.o \

@@ -246,7 +246,7 @@ def simplify(logger, args, asm_input, asm_output=None):
             logger.debug(f"Using raw global symbol {sym} going forward ...")
 
         cmd = [args.objdump, "--disassemble", tmp_objfile0]
-        if platform.system() == "Darwin":
+        if platform.system() == "Darwin" and args.arch == "aarch64":
             cmd += ["--triple=aarch64"]
 
         # Add syntax option if specified
