@@ -69,10 +69,11 @@ jobs:
           devShell: ci
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            # NOTE: we're not running cross compilation tests on macOS currently
-            #       and building cross compilation toolchain on macOS runner took
-            #       extremely long time
-            if [[ ${{ runner.os }} != 'macOS' ]]; then
+            # We only run cross-compilation checks for x86 on macos-latest,
+            # so restrict caching to the corresponding cross shell.
+            if [[ ${{ runner.os }} == 'macOS' ]]; then
+              nix develop .#ci-cross-x86_64 --profile tmp-cross
+            else
               nix develop .#ci-cross --profile tmp-cross
               # GH ubuntu-24.04 image tend to run outof space
               if [[ ${{ matrix.runner }} == 'ubuntu-24.04' ]]; then
