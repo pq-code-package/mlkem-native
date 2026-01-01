@@ -269,8 +269,7 @@ jobs:
            examples: true
          - name: gcc-15
            shell: ci_gcc15
-           # TODO: Add this once gcc15 is supported in nix on aarch64-Darwin
-           darwin: False
+           darwin: True
            c17: True
            c23: True
            opt: all
