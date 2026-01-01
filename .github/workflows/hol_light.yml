@@ -47,7 +47,7 @@ jobs:
     runs-on: pqcp-arm64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup-shell
@@ -62,7 +62,7 @@ jobs:
     needs: [ hol_light_bytecode ]
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup-shell
@@ -113,7 +113,7 @@ jobs:
     runs-on: pqcp-arm64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
       - name: Get changed files
@@ -155,7 +155,7 @@ jobs:
     runs-on: pqcp-x64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup-shell
@@ -170,7 +170,7 @@ jobs:
     needs: [ hol_light_bytecode_x86_64 ]
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup-shell
@@ -215,7 +215,7 @@ jobs:
     runs-on: pqcp-x64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
       - name: Get changed files
