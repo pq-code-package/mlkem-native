@@ -698,18 +698,19 @@ jobs:
       matrix:
         target:
           - system: macos-latest
-            nix_cache: 'false'
-            nix_shell: 'ci'
+            nix_shell: 'ci-cross-x86_64'
+            nix_cache: 'true'
+            extra_args: '--force-cross'
           # TODO: This does not yet work (#1304)
           # - system: macos-15-intel
           #   nix_cache: 'false'
           #   nix_shell: 'ci'
           - system: ubuntu-latest
-            nix_shell: 'ci-cross'
+            nix_shell: 'ci-cross-aarch64'
             nix_cache: 'true'
             extra_args: '--force-cross'
           - system: ubuntu-24.04-arm
-            nix_shell: 'ci-cross'
+            nix_shell: 'ci-cross-x86_64'
             nix_cache: 'true'
             extra_args: '--force-cross'
     runs-on: ${{ matrix.target.system }}
@@ -723,9 +724,35 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             python3 ./scripts/autogen --dry-run ${{ matrix.target.extra_args }}
+  check_hol_light_object_code:
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - system: macos-latest
+            nix_cache: 'false'
+            nix_shell: 'hol_light-cross-x86_64'
+            extra_args: '--force-cross'
+          # TODO: autogen does not yet work on macos15-intel (#1304)
+          # - system: macos-15-intel
+          #   nix_cache: 'false'
+          #   nix_shell: 'ci'
+          - system: ubuntu-latest
+            nix_shell: 'hol_light-cross-aarch64'
+            nix_cache: 'true'
+            extra_args: '--force-cross'
+          - system: ubuntu-24.04-arm
+            nix_shell: 'hol_light-cross-x86_64'
+            nix_cache: 'true'
+            extra_args: '--force-cross'
+    runs-on: ${{ matrix.target.system }}
+    name: Check object code in HOL-Light proofs
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: ./.github/actions/setup-shell
         with:
-          nix-shell: 'hol_light'
+          nix-shell: ${{ matrix.target.nix_shell }}
+          nix-cache: ${{ matrix.target.nix_cache }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            python3 ./scripts/autogen --dry-run --update-hol-light-bytecode
+            python3 ./scripts/autogen --dry-run --update-hol-light-bytecode ${{ matrix.target.extra_args }}

@@ -3293,7 +3293,30 @@ def update_bytecode_in_proof_script(filepath, bytecode):
     update_file(filepath, updated_content)
 
 
-def update_hol_light_bytecode_for_arch(arm_or_x86):
+def update_hol_light_bytecode_for_arch(arm_or_x86, force_cross=False):
+    status_update(
+        f"HOL Light bytecode ({arm_or_x86})",
+        f"Running make dump_bytecode ({arm_or_x86})... (this may take a few minutes)",
+    )
+
+    if arm_or_x86 == "arm":
+        source_arch = "aarch64"
+    else:
+        source_arch = "x86_64"
+    if platform.machine().lower() in ["arm64", "aarch64"]:
+        native_arch = "aarch64"
+    else:
+        native_arch = "x86_64"
+
+    if native_arch != source_arch:
+        cross_prefix = f"{source_arch}-unknown-linux-gnu-"
+        cross_gcc = cross_prefix + "gcc"
+        # Check if cross-compiler is present
+        if shutil.which(cross_gcc) is None:
+            if force_cross is False:
+                return
+            raise Exception(f"Could not find cross toolchain {cross_prefix}")
+
     # Run make to get bytecode output
     result = subprocess.run(
         ["make", "-C", "proofs/hol_light/" + arm_or_x86, "dump_bytecode"],
@@ -3312,19 +3335,10 @@ def update_hol_light_bytecode_for_arch(arm_or_x86):
         update_bytecode_in_proof_script(ml_file, bytecode)
 
 
-def update_hol_light_bytecode():
+def update_hol_light_bytecode(force_cross=False):
     """Update HOL Light proof files with bytecode from make dump_bytecode."""
-    status_update(
-        "HOL Light bytecode",
-        "Running make dump_bytecode ... (this may take a few minutes)",
-    )
-
-    if platform.machine().lower() in ["arm64", "aarch64"]:
-        update_hol_light_bytecode_for_arch("arm")
-    elif platform.machine().lower() in ["x86_64"]:
-        update_hol_light_bytecode_for_arch("x86")
-    else:
-        return
+    update_hol_light_bytecode_for_arch("arm", force_cross=force_cross)
+    update_hol_light_bytecode_for_arch("x86", force_cross=force_cross)
 
 
 def gen_test_config(config_path, config_spec, default_config_content):
@@ -3551,7 +3565,7 @@ def _main():
     high_level_status("Completed final backend synchronization")
 
     if args.update_hol_light_bytecode:
-        update_hol_light_bytecode()
+        update_hol_light_bytecode(args.force_cross)
         high_level_status("Updated HOL Light bytecode")
 
     gen_monolithic_source_file()
