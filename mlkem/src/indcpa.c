@@ -43,7 +43,46 @@
   MLK_ADD_PARAM_SET(mlk_polyvec_permute_bitrev_to_custom)
 #define mlk_polymat_permute_bitrev_to_custom \
   MLK_ADD_PARAM_SET(mlk_polymat_permute_bitrev_to_custom)
+#define mlk_indcpa_keypair_derand_workspace \
+  MLK_ADD_PARAM_SET(mlk_indcpa_keypair_derand_workspace)
+#define mlk_indcpa_enc_workspace MLK_ADD_PARAM_SET(mlk_indcpa_enc_workspace)
+#define mlk_indcpa_dec_workspace MLK_ADD_PARAM_SET(mlk_indcpa_dec_workspace)
 /* End of parameter set namespacing */
+
+/* Hoisted workspace structures */
+typedef struct
+{
+  MLK_ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
+  MLK_ALIGN uint8_t coins_with_domain_separator[MLKEM_SYMBYTES + 1];
+  mlk_polymat a;
+  mlk_polyvec e;
+  mlk_polyvec pkpv;
+  mlk_polyvec skpv;
+  mlk_polyvec_mulcache skpv_cache;
+} mlk_indcpa_keypair_derand_workspace;
+
+typedef struct
+{
+  MLK_ALIGN uint8_t seed[MLKEM_SYMBYTES];
+  mlk_polymat at;
+  mlk_polyvec sp;
+  mlk_polyvec pkpv;
+  mlk_polyvec ep;
+  mlk_polyvec b;
+  mlk_poly v;
+  mlk_poly k;
+  mlk_poly epp;
+  mlk_polyvec_mulcache sp_cache;
+} mlk_indcpa_enc_workspace;
+
+typedef struct
+{
+  mlk_polyvec b;
+  mlk_polyvec skpv;
+  mlk_poly v;
+  mlk_poly sb;
+  mlk_polyvec_mulcache b_cache;
+} mlk_indcpa_dec_workspace;
 
 /*************************************************
  * Name:        mlk_pack_pk
@@ -379,21 +418,10 @@ int mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
                               uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
                               const uint8_t coins[MLKEM_SYMBYTES])
 {
-  typedef struct
-  {
-    MLK_ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
-    MLK_ALIGN uint8_t coins_with_domain_separator[MLKEM_SYMBYTES + 1];
-    mlk_polymat a;
-    mlk_polyvec e;
-    mlk_polyvec pkpv;
-    mlk_polyvec skpv;
-    mlk_polyvec_mulcache skpv_cache;
-  } workspace;
-
   int ret = 0;
   const uint8_t *publicseed;
   const uint8_t *noiseseed;
-  MLK_ALLOC(ws, workspace, 1);
+  MLK_ALLOC(ws, mlk_indcpa_keypair_derand_workspace, 1);
 
   if (ws == NULL)
   {
@@ -459,7 +487,7 @@ int mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(ws, workspace, 1);
+  MLK_FREE(ws, mlk_indcpa_keypair_derand_workspace, 1);
   return ret;
 }
 
@@ -477,22 +505,8 @@ int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
                    const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
                    const uint8_t coins[MLKEM_SYMBYTES])
 {
-  typedef struct
-  {
-    MLK_ALIGN uint8_t seed[MLKEM_SYMBYTES];
-    mlk_polymat at;
-    mlk_polyvec sp;
-    mlk_polyvec pkpv;
-    mlk_polyvec ep;
-    mlk_polyvec b;
-    mlk_poly v;
-    mlk_poly k;
-    mlk_poly epp;
-    mlk_polyvec_mulcache sp_cache;
-  } workspace;
-
   int ret = 0;
-  MLK_ALLOC(ws, workspace, 1);
+  MLK_ALLOC(ws, mlk_indcpa_enc_workspace, 1);
 
   if (ws == NULL)
   {
@@ -557,7 +571,7 @@ int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(ws, workspace, 1);
+  MLK_FREE(ws, mlk_indcpa_enc_workspace, 1);
   return ret;
 }
 
@@ -569,17 +583,8 @@ int mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
                    const uint8_t c[MLKEM_INDCPA_BYTES],
                    const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
 {
-  typedef struct
-  {
-    mlk_polyvec b;
-    mlk_polyvec skpv;
-    mlk_poly v;
-    mlk_poly sb;
-    mlk_polyvec_mulcache b_cache;
-  } workspace;
-
   int ret = 0;
-  MLK_ALLOC(ws, workspace, 1);
+  MLK_ALLOC(ws, mlk_indcpa_dec_workspace, 1);
 
   if (ws == NULL)
   {
@@ -604,7 +609,7 @@ int mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(ws, workspace, 1);
+  MLK_FREE(ws, mlk_indcpa_dec_workspace, 1);
   return ret;
 }
 
