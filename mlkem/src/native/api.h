@@ -83,6 +83,7 @@
  *
  * Arguments:   - int16_t p[MLKEM_N]: pointer to in/output polynomial
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_ntt_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
@@ -152,6 +153,7 @@ __contract__(
  *
  * Arguments:   - uint16_t *a: pointer to in/output polynomial
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_intt_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
@@ -170,6 +172,7 @@ __contract__(
  *
  * Arguments:   - int16_t r[MLKEM_N]: pointer to input/output polynomial
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_reduce_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
@@ -189,6 +192,7 @@ __contract__(
  *
  * Arguments:   - int16_t r[MLKEM_N]: pointer to input/output polynomial
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_tomont_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
@@ -221,6 +225,7 @@ __contract__(
  *              OUTPUT
  *              - cache: pointer to multiplication cache
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_mulcache_compute_native(
     int16_t cache[MLKEM_N / 2], const int16_t mlk_poly[MLKEM_N])
 __contract__(
@@ -253,6 +258,7 @@ __contract__(
  *              - r: The result of the scalar product. This is again
  *                   in NTT domain, and of the same ordering as a and b.
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
     int16_t r[MLKEM_N], const int16_t a[2 * MLKEM_N],
     const int16_t b[2 * MLKEM_N], const int16_t b_cache[2 * (MLKEM_N / 2)])
@@ -287,6 +293,7 @@ __contract__(
  *              - r: The result of the scalar product. This is again
  *                   in NTT domain, and of the same ordering as a and b.
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k3_native(
     int16_t r[MLKEM_N], const int16_t a[3 * MLKEM_N],
     const int16_t b[3 * MLKEM_N], const int16_t b_cache[3 * (MLKEM_N / 2)])
@@ -321,6 +328,7 @@ __contract__(
  *              - r: The result of the scalar product. This is again
  *                   in NTT domain, and of the same ordering as a and b.
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
     int16_t r[MLKEM_N], const int16_t a[4 * MLKEM_N],
     const int16_t b[4 * MLKEM_N], const int16_t b_cache[4 * (MLKEM_N / 2)])
@@ -351,6 +359,7 @@ __contract__(
  *              - r: pointer to output byte array
  *                   (of MLKEM_POLYBYTES bytes)
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
                                               const int16_t a[MLKEM_N])
 __contract__(
@@ -376,6 +385,7 @@ __contract__(
  *              - a: const pointer to input byte array
  *                   (of MLKEM_POLYBYTES bytes)
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_frombytes_native(
     int16_t a[MLKEM_N], const uint8_t r[MLKEM_POLYBYTES])
 __contract__(
@@ -405,6 +415,7 @@ __contract__(
  * Otherwise, returns non-negative number of sampled 16-bit integers (at most
  * len).
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_rej_uniform_native(int16_t *r, unsigned len,
                                              const uint8_t *buf,
                                              unsigned buflen)
@@ -434,6 +445,7 @@ __contract__(
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_compress_d4_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const int16_t a[MLKEM_N]);
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D4 */
@@ -451,6 +463,7 @@ static MLK_INLINE int mlk_poly_compress_d4_native(
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_compress_d10_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const int16_t a[MLKEM_N]);
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D10 */
@@ -470,6 +483,7 @@ static MLK_INLINE int mlk_poly_compress_d10_native(
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_decompress_d4_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]);
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D4 */
@@ -489,6 +503,7 @@ static MLK_INLINE int mlk_poly_decompress_d4_native(
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_decompress_d10_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10]);
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D10 */
@@ -508,6 +523,7 @@ static MLK_INLINE int mlk_poly_decompress_d10_native(
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_compress_d5_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const int16_t a[MLKEM_N]);
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D5 */
@@ -525,6 +541,7 @@ static MLK_INLINE int mlk_poly_compress_d5_native(
  *                  Coefficients must be unsigned canonical,
  *                  i.e. in [0,1,..,MLKEM_Q-1].
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_compress_d11_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const int16_t a[MLKEM_N]);
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D11 */
@@ -544,6 +561,7 @@ static MLK_INLINE int mlk_poly_compress_d11_native(
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_decompress_d5_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5]);
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D5 */
@@ -563,6 +581,7 @@ static MLK_INLINE int mlk_poly_decompress_d5_native(
  * (non-negative and smaller than MLKEM_Q).
  *
  **************************************************/
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_decompress_d11_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]);
 #endif /* MLK_USE_NATIVE_POLY_DECOMPRESS_D11 */
