@@ -781,6 +781,9 @@ let MLKEM_REJ_UNIFORM_NOIBT_SUBROUTINE_CORRECT = prove
   X86_PROMOTE_RETURN_STACK_TAC mlkem_rej_uniform_tmc
     (CONV_RULE TWEAK_CONV MLKEM_REJ_UNIFORM_CORRECT) `[]` 528);;
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
+
 let MLKEM_REJ_UNIFORM_SUBROUTINE_CORRECT = prove
  (`!res buf buflen table (inlist:(12 word)list) pc stackpointer returnaddress.
       12 divides val buflen /\
