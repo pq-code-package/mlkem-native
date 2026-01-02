@@ -14,6 +14,7 @@
 #if !defined(__ASSEMBLER__)
 #include "../api.h"
 #include "src/fips202_native_aarch64.h"
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_keccak_f1600_x1_native(uint64_t *state)
 {
   mlk_keccak_f1600_x1_scalar_asm(state, mlk_keccakf1600_round_constants);

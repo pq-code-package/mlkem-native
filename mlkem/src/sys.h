@@ -234,6 +234,7 @@ typedef enum
 #if !defined(MLK_CONFIG_CUSTOM_CAPABILITY_FUNC)
 #include "cbmc.h"
 
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
 __contract__(
   ensures(return_value == 0 || return_value == 1)
