@@ -37,6 +37,7 @@
  */
 
 #if defined(MLK_USE_FIPS202_X1_NATIVE)
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_keccak_f1600_x1_native(uint64_t *state)
 __contract__(
   requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 1))
@@ -45,6 +46,7 @@ __contract__(
   ensures((return_value == MLK_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 1)));
 #endif /* MLK_USE_FIPS202_X1_NATIVE */
 #if defined(MLK_USE_FIPS202_X4_NATIVE)
+MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_keccak_f1600_x4_native(uint64_t *state)
 __contract__(
   requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 4))

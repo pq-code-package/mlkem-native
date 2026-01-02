@@ -39,6 +39,7 @@ void mlk_rv64v_poly_add(int16_t *r, const int16_t *a, const int16_t *b);
 void mlk_rv64v_poly_sub(int16_t *r, const int16_t *a, const int16_t *b);
 
 #define mlk_rv64v_rej_uniform MLK_NAMESPACE(rj_uniform_riscv64)
+MLK_MUST_CHECK_RETURN_VALUE
 unsigned int mlk_rv64v_rej_uniform(int16_t *r, unsigned int len,
                                    const uint8_t *buf, unsigned int buflen);
 
