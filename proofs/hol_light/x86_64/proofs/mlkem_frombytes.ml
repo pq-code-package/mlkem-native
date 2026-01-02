@@ -446,6 +446,9 @@ let MLKEM_FROMBYTES_NOIBT_SUBROUTINE_CORRECT = prove(
               MAYCHANGE [RSP] ,, MAYCHANGE [memory :> bytes(r, 512)])`,
   X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_frombytes_tmc MLKEM_FROMBYTES_CORRECT);;
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
+
 let MLKEM_FROMBYTES_SUBROUTINE_CORRECT = prove(
     `!r a (l:(12 word) list) pc.
         aligned 32 a /\
