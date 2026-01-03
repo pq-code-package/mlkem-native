@@ -63,7 +63,7 @@ in the source code. See [proofs/cbmc](proofs/cbmc) for details.
 
 All AArch64 assembly is proved functionally correct at the object-code level. This uses the [HOL-Light](https://github.com/jrh13/hol-light)
 interactive theorem prover and the [s2n-bignum](https://github.com/awslabs/s2n-bignum/) verification infrastructure (which includes a model of the
-relevant parts of the Arm architecture). See [proofs/hol_light/arm](proofs/hol_light/arm) for details.
+relevant parts of the Arm architecture). See [proofs/hol_light/aarch64](proofs/hol_light/aarch64) for details.
 
 ## Security
 

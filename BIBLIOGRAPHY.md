@@ -27,8 +27,8 @@ source code and documentation.
   - [dev/x86_64/src/ntt.S](dev/x86_64/src/ntt.S)
   - [mlkem/src/native/x86_64/src/intt.S](mlkem/src/native/x86_64/src/intt.S)
   - [mlkem/src/native/x86_64/src/ntt.S](mlkem/src/native/x86_64/src/ntt.S)
-  - [proofs/hol_light/x86/mlkem/mlkem_intt.S](proofs/hol_light/x86/mlkem/mlkem_intt.S)
-  - [proofs/hol_light/x86/mlkem/mlkem_ntt.S](proofs/hol_light/x86/mlkem/mlkem_ntt.S)
+  - [proofs/hol_light/x86_64/mlkem/mlkem_intt.S](proofs/hol_light/x86_64/mlkem/mlkem_intt.S)
+  - [proofs/hol_light/x86_64/mlkem/mlkem_ntt.S](proofs/hol_light/x86_64/mlkem/mlkem_ntt.S)
 
 ### `FIPS140_3_IG`
 
@@ -145,8 +145,8 @@ source code and documentation.
   - [mlkem/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S](mlkem/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S)
   - [mlkem/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S](mlkem/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S)
   - [proofs/hol_light/README.md](proofs/hol_light/README.md)
-  - [proofs/hol_light/arm/mlkem/keccak_f1600_x1_v84a.S](proofs/hol_light/arm/mlkem/keccak_f1600_x1_v84a.S)
-  - [proofs/hol_light/arm/mlkem/keccak_f1600_x2_v84a.S](proofs/hol_light/arm/mlkem/keccak_f1600_x2_v84a.S)
+  - [proofs/hol_light/aarch64/mlkem/keccak_f1600_x1_v84a.S](proofs/hol_light/aarch64/mlkem/keccak_f1600_x1_v84a.S)
+  - [proofs/hol_light/aarch64/mlkem/keccak_f1600_x2_v84a.S](proofs/hol_light/aarch64/mlkem/keccak_f1600_x2_v84a.S)
 
 ### `KyberSlash`
 
@@ -198,11 +198,11 @@ source code and documentation.
   - [mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S](mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S)
   - [mlkem/src/poly.c](mlkem/src/poly.c)
   - [mlkem/src/poly_k.c](mlkem/src/poly_k.c)
-  - [proofs/hol_light/arm/mlkem/mlkem_intt.S](proofs/hol_light/arm/mlkem/mlkem_intt.S)
-  - [proofs/hol_light/arm/mlkem/mlkem_ntt.S](proofs/hol_light/arm/mlkem/mlkem_ntt.S)
-  - [proofs/hol_light/arm/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.S](proofs/hol_light/arm/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.S)
-  - [proofs/hol_light/arm/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.S](proofs/hol_light/arm/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.S)
-  - [proofs/hol_light/arm/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.S](proofs/hol_light/arm/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.S)
+  - [proofs/hol_light/aarch64/mlkem/mlkem_intt.S](proofs/hol_light/aarch64/mlkem/mlkem_intt.S)
+  - [proofs/hol_light/aarch64/mlkem/mlkem_ntt.S](proofs/hol_light/aarch64/mlkem/mlkem_ntt.S)
+  - [proofs/hol_light/aarch64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.S](proofs/hol_light/aarch64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.S)
+  - [proofs/hol_light/aarch64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.S](proofs/hol_light/aarch64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.S)
+  - [proofs/hol_light/aarch64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.S](proofs/hol_light/aarch64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.S)
 
 ### `REF`
 
@@ -263,13 +263,13 @@ source code and documentation.
   - [mlkem/src/native/x86_64/src/nttunpack.S](mlkem/src/native/x86_64/src/nttunpack.S)
   - [mlkem/src/native/x86_64/src/reduce.S](mlkem/src/native/x86_64/src/reduce.S)
   - [mlkem/src/native/x86_64/src/tomont.S](mlkem/src/native/x86_64/src/tomont.S)
-  - [proofs/hol_light/x86/mlkem/mlkem_frombytes.S](proofs/hol_light/x86/mlkem/mlkem_frombytes.S)
-  - [proofs/hol_light/x86/mlkem/mlkem_intt.S](proofs/hol_light/x86/mlkem/mlkem_intt.S)
-  - [proofs/hol_light/x86/mlkem/mlkem_ntt.S](proofs/hol_light/x86/mlkem/mlkem_ntt.S)
-  - [proofs/hol_light/x86/mlkem/mlkem_reduce.S](proofs/hol_light/x86/mlkem/mlkem_reduce.S)
-  - [proofs/hol_light/x86/mlkem/mlkem_tobytes.S](proofs/hol_light/x86/mlkem/mlkem_tobytes.S)
-  - [proofs/hol_light/x86/mlkem/mlkem_tomont.S](proofs/hol_light/x86/mlkem/mlkem_tomont.S)
-  - [proofs/hol_light/x86/mlkem/mlkem_unpack.S](proofs/hol_light/x86/mlkem/mlkem_unpack.S)
+  - [proofs/hol_light/x86_64/mlkem/mlkem_frombytes.S](proofs/hol_light/x86_64/mlkem/mlkem_frombytes.S)
+  - [proofs/hol_light/x86_64/mlkem/mlkem_intt.S](proofs/hol_light/x86_64/mlkem/mlkem_intt.S)
+  - [proofs/hol_light/x86_64/mlkem/mlkem_ntt.S](proofs/hol_light/x86_64/mlkem/mlkem_ntt.S)
+  - [proofs/hol_light/x86_64/mlkem/mlkem_reduce.S](proofs/hol_light/x86_64/mlkem/mlkem_reduce.S)
+  - [proofs/hol_light/x86_64/mlkem/mlkem_tobytes.S](proofs/hol_light/x86_64/mlkem/mlkem_tobytes.S)
+  - [proofs/hol_light/x86_64/mlkem/mlkem_tomont.S](proofs/hol_light/x86_64/mlkem/mlkem_tomont.S)
+  - [proofs/hol_light/x86_64/mlkem/mlkem_unpack.S](proofs/hol_light/x86_64/mlkem/mlkem_unpack.S)
 
 ### `SLOTHY`
 
@@ -305,8 +305,8 @@ source code and documentation.
   - [mlkem/src/native/aarch64/README.md](mlkem/src/native/aarch64/README.md)
   - [mlkem/src/native/aarch64/src/intt.S](mlkem/src/native/aarch64/src/intt.S)
   - [mlkem/src/native/aarch64/src/ntt.S](mlkem/src/native/aarch64/src/ntt.S)
-  - [proofs/hol_light/arm/mlkem/mlkem_intt.S](proofs/hol_light/arm/mlkem/mlkem_intt.S)
-  - [proofs/hol_light/arm/mlkem/mlkem_ntt.S](proofs/hol_light/arm/mlkem/mlkem_ntt.S)
+  - [proofs/hol_light/aarch64/mlkem/mlkem_intt.S](proofs/hol_light/aarch64/mlkem/mlkem_intt.S)
+  - [proofs/hol_light/aarch64/mlkem/mlkem_ntt.S](proofs/hol_light/aarch64/mlkem/mlkem_ntt.S)
 
 ### `clangover`
 
