@@ -26,7 +26,9 @@ montgomery_factor = pow(2, 16, modulus)
 _RE_DEFINED = re.compile(r"defined\(([^)]+)\)")
 _RE_MARKDOWN_CITE = re.compile(r"\[\^(?P<id>\w+)\]")
 _RE_C_CITE = re.compile(r"@\[(?P<id>\w+)")
-_RE_BYTECODE_START = re.compile(r"=== bytecode start: (?:arm|x86)/mlkem/([^/\s]+?)\.o")
+_RE_BYTECODE_START = re.compile(
+    r"=== bytecode start: (?:aarch64|x86_64)/mlkem/([^/\s]+?)\.o"
+)
 _RE_FUNC_SYMBOL = re.compile(r"MLK_ASM_FN_SYMBOL\((.*)\)")
 _RE_LABEL = re.compile(r"^(\w+):")
 _RE_CONFIG_NAME = re.compile(r"\* Name:\s+(\w+)")
@@ -958,7 +960,7 @@ def gen_aarch64_hol_light_zeta_file():
         yield "]`;;"
         yield ""
 
-    update_file("proofs/hol_light/arm/proofs/mlkem_zetas.ml", "\n".join(gen()))
+    update_file("proofs/hol_light/aarch64/proofs/mlkem_zetas.ml", "\n".join(gen()))
 
 
 def gen_aarch64_zeta_file():
@@ -1047,7 +1049,7 @@ def gen_aarch64_hol_light_rej_uniform_table():
         yield ""
 
     update_file(
-        "proofs/hol_light/arm/proofs/mlkem_rej_uniform_table.ml", "\n".join(gen())
+        "proofs/hol_light/aarch64/proofs/mlkem_rej_uniform_table.ml", "\n".join(gen())
     )
 
 
@@ -1099,7 +1101,7 @@ def gen_avx2_hol_light_rej_uniform_table():
         yield ""
 
     update_file(
-        "proofs/hol_light/x86/proofs/mlkem_rej_uniform_table.ml", "\n".join(gen())
+        "proofs/hol_light/x86_64/proofs/mlkem_rej_uniform_table.ml", "\n".join(gen())
     )
 
 
@@ -1274,7 +1276,7 @@ def gen_avx2_hol_light_zeta_file():
         yield "]`;;"
         yield ""
 
-    update_file("proofs/hol_light/x86/proofs/mlkem_zetas.ml", "\n".join(gen()))
+    update_file("proofs/hol_light/x86_64/proofs/mlkem_zetas.ml", "\n".join(gen()))
 
 
 def gen_avx2_zeta_file():
@@ -2314,10 +2316,10 @@ def update_via_simpasm(
 
 
 def gen_hol_light_asm_file(job):
-    infile, outfile, indir, cflags, arm_or_x86 = job
+    infile, outfile, indir, cflags, arch = job
     update_via_simpasm(
         f"{indir}/{infile}",
-        "proofs/hol_light/" + arm_or_x86 + "/mlkem",
+        "proofs/hol_light/" + arch + "/mlkem",
         outfile=outfile,
         cflags=cflags + " -Imlkem",
         preserve_header=False,
@@ -2326,208 +2328,203 @@ def gen_hol_light_asm_file(job):
 
 def gen_hol_light_asm():
 
-    joblist_arm = [
+    joblist_aarch64 = [
         (
             "ntt.S",
             "mlkem_ntt.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
-            "arm",
+            "aarch64",
         ),
         (
             "intt.S",
             "mlkem_intt.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
-            "arm",
+            "aarch64",
         ),
         (
             "poly_tomont_asm.S",
             "mlkem_poly_tomont.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
-            "arm",
+            "aarch64",
         ),
         (
             "poly_tobytes_asm.S",
             "mlkem_poly_tobytes.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
-            "arm",
+            "aarch64",
         ),
         (
             "poly_reduce_asm.S",
             "mlkem_poly_reduce.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
-            "arm",
+            "aarch64",
         ),
         (
             "poly_mulcache_compute_asm.S",
             "mlkem_poly_mulcache_compute.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
-            "arm",
+            "aarch64",
         ),
         (
             "polyvec_basemul_acc_montgomery_cached_asm_k2.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k2.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
-            "arm",
+            "aarch64",
         ),
         (
             "polyvec_basemul_acc_montgomery_cached_asm_k3.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k3.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
-            "arm",
+            "aarch64",
         ),
         (
             "polyvec_basemul_acc_montgomery_cached_asm_k4.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k4.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
-            "arm",
+            "aarch64",
         ),
         (
             "rej_uniform_asm.S",
             "mlkem_rej_uniform.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
-            "arm",
+            "aarch64",
         ),
         (
             "keccak_f1600_x1_scalar_asm.S",
             "keccak_f1600_x1_scalar.S",
             "dev/fips202/aarch64/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
-            "arm",
+            "aarch64",
         ),
         (
             "keccak_f1600_x1_v84a_asm.S",
             "keccak_f1600_x1_v84a.S",
             "dev/fips202/aarch64/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
-            "arm",
+            "aarch64",
         ),
         (
             "keccak_f1600_x2_v84a_asm.S",
             "keccak_f1600_x2_v84a.S",
             "dev/fips202/aarch64/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
-            "arm",
+            "aarch64",
         ),
         (
             "keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S",
             "keccak_f1600_x4_v8a_v84a_scalar.S",
             "dev/fips202/aarch64/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
-            "arm",
+            "aarch64",
         ),
         (
             "keccak_f1600_x4_v8a_scalar_hybrid_asm.S",
             "keccak_f1600_x4_v8a_scalar.S",
             "dev/fips202/aarch64/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
-            "arm",
+            "aarch64",
         ),
     ]
 
-    joblist_x86 = [
+    x86_64_flags = "-mavx2 -mbmi2 -msse4 -fcf-protection=full"
+    joblist_x86_64 = [
         (
             "polyvec_basemul_acc_montgomery_cached_asm_k2.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k2.S",
             "dev/x86_64/src",
-            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
-            "x86",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
         ),
         (
             "polyvec_basemul_acc_montgomery_cached_asm_k3.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k3.S",
             "dev/x86_64/src",
-            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
-            "x86",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
         ),
         (
             "polyvec_basemul_acc_montgomery_cached_asm_k4.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k4.S",
             "dev/x86_64/src",
-            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
-            "x86",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
         ),
         (
             "ntt.S",
             "mlkem_ntt.S",
             "dev/x86_64/src",
-            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
-            "x86",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
         ),
         (
             "intt.S",
             "mlkem_intt.S",
             "dev/x86_64/src",
-            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
-            "x86",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
         ),
         (
             "reduce.S",
             "mlkem_reduce.S",
             "dev/x86_64/src",
-            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
-            "x86",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
         ),
         (
             "ntttobytes.S",
             "mlkem_tobytes.S",
             "dev/x86_64/src",
-            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
-            "x86",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
         ),
         (
             "rej_uniform_asm.S",
             "mlkem_rej_uniform.S",
             "dev/x86_64/src",
-            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
-            "x86",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
         ),
         (
             "nttfrombytes.S",
             "mlkem_frombytes.S",
             "dev/x86_64/src",
-            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
-            "x86",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
         ),
         (
             "tomont.S",
             "mlkem_tomont.S",
             "dev/x86_64/src",
-            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
-            "x86",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
         ),
         (
             "nttunpack.S",
             "mlkem_unpack.S",
             "dev/x86_64/src",
-            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
-            "x86",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
         ),
         (
             "mulcache_compute.S",
             "mlkem_mulcache_compute.S",
             "dev/x86_64/src",
-            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
-            "x86",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
         ),
     ]
 
-    if platform.machine().lower() in ["arm64", "aarch64"]:
-        joblist = joblist_arm
-    elif platform.machine().lower() in ["x86_64"]:
-        joblist = joblist_x86
-    else:
-        return
-
+    joblist = joblist_aarch64 + joblist_x86_64
     with ThreadPoolExecutor() as executor:
         _ = list(executor.map(partial(gen_hol_light_asm_file), joblist))
 
@@ -3252,7 +3249,7 @@ def gen_citations():
 
 
 def extract_bytecode_from_output(output_text):
-    """Convert output of proofs/hol_light/arm_or_x86/proofs/dump_bytecode.native
+    """Convert output of proofs/hol_light/{aarch64,x86_64}/proofs/dump_bytecode.native
     into a dictionary mapping function names to byte code strings."""
     bytecode_dict = {}
 
@@ -3297,16 +3294,13 @@ def update_bytecode_in_proof_script(filepath, bytecode):
     update_file(filepath, updated_content)
 
 
-def update_hol_light_bytecode_for_arch(arm_or_x86, force_cross=False):
+def update_hol_light_bytecode_for_arch(arch, force_cross=False):
     status_update(
-        f"HOL Light bytecode ({arm_or_x86})",
-        f"Running make dump_bytecode ({arm_or_x86})... (this may take a few minutes)",
+        f"HOL Light bytecode ({arch})",
+        f"Running make dump_bytecode ({arch})... (this may take a few minutes)",
     )
 
-    if arm_or_x86 == "arm":
-        source_arch = "aarch64"
-    else:
-        source_arch = "x86_64"
+    source_arch = arch
     if platform.machine().lower() in ["arm64", "aarch64"]:
         native_arch = "aarch64"
     else:
@@ -3323,7 +3317,7 @@ def update_hol_light_bytecode_for_arch(arm_or_x86, force_cross=False):
 
     # Run make to get bytecode output
     result = subprocess.run(
-        ["make", "-C", "proofs/hol_light/" + arm_or_x86, "dump_bytecode"],
+        ["make", "-C", "proofs/hol_light/" + arch, "dump_bytecode"],
         capture_output=True,
         text=True,
         check=True,
@@ -3335,14 +3329,14 @@ def update_hol_light_bytecode_for_arch(arm_or_x86, force_cross=False):
 
     # Update each .ml file
     for obj_name, bytecode in bytecode_dict.items():
-        ml_file = "proofs/hol_light/" + arm_or_x86 + "/proofs/" + obj_name + ".ml"
+        ml_file = "proofs/hol_light/" + arch + "/proofs/" + obj_name + ".ml"
         update_bytecode_in_proof_script(ml_file, bytecode)
 
 
 def update_hol_light_bytecode(force_cross=False):
     """Update HOL Light proof files with bytecode from make dump_bytecode."""
-    update_hol_light_bytecode_for_arch("arm", force_cross=force_cross)
-    update_hol_light_bytecode_for_arch("x86", force_cross=force_cross)
+    update_hol_light_bytecode_for_arch("aarch64", force_cross=force_cross)
+    update_hol_light_bytecode_for_arch("x86_64", force_cross=force_cross)
 
 
 def gen_test_config(config_path, config_spec, default_config_content):

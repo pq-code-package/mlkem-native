@@ -9,12 +9,12 @@ on:
     branches: ["main"]
     paths:
      - '.github/workflows/hol_light.yml'
-     - 'proofs/hol_light/arm/Makefile'
-     - 'proofs/hol_light/arm/**/*.S'
-     - 'proofs/hol_light/arm/**/*.ml'
-     - 'proofs/hol_light/x86/Makefile'
-     - 'proofs/hol_light/x86/**/*.S'
-     - 'proofs/hol_light/x86/**/*.ml'
+     - 'proofs/hol_light/aarch64/Makefile'
+     - 'proofs/hol_light/aarch64/**/*.S'
+     - 'proofs/hol_light/aarch64/**/*.ml'
+     - 'proofs/hol_light/x86_64/Makefile'
+     - 'proofs/hol_light/x86_64/**/*.S'
+     - 'proofs/hol_light/x86_64/**/*.ml'
      - 'flake.nix'
      - 'flake.lock'
      - 'nix/hol_light/*'
@@ -23,12 +23,12 @@ on:
     branches: ["main"]
     paths:
       - '.github/workflows/hol_light.yml'
-      - 'proofs/hol_light/arm/Makefile'
-      - 'proofs/hol_light/arm/**/*.S'
-      - 'proofs/hol_light/arm/**/*.ml'
-      - 'proofs/hol_light/x86/Makefile'
-      - 'proofs/hol_light/x86/**/*.S'
-      - 'proofs/hol_light/x86/**/*.ml'
+      - 'proofs/hol_light/aarch64/Makefile'
+      - 'proofs/hol_light/aarch64/**/*.S'
+      - 'proofs/hol_light/aarch64/**/*.ml'
+      - 'proofs/hol_light/x86_64/Makefile'
+      - 'proofs/hol_light/x86_64/**/*.S'
+      - 'proofs/hol_light/x86_64/**/*.ml'
       - 'flake.nix'
       - 'flake.lock'
       - 'nix/hol_light/*'
@@ -70,8 +70,8 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: 'hol_light'
           script: |
-            make -C proofs/hol_light/arm mlkem/mlkem_poly_tobytes.o
-            echo 'needs "arm/proofs/mlkem_poly_tobytes.ml";;' | hol.sh
+            make -C proofs/hol_light/aarch64 mlkem/mlkem_poly_tobytes.o
+            echo 'needs "aarch64/proofs/mlkem_poly_tobytes.ml";;' | hol.sh
   hol_light_proofs:
     needs: [ hol_light_bytecode ]
     strategy:
@@ -135,7 +135,7 @@ jobs:
           done
 
           # Always re-run upon change to nix files for HOL-Light
-          if [[ "$changed_files" == *"nix/"* ]] || [[ "$changed_files" == *"hol_light.yml"* ]] || [[ "$changed_files" == *"flake"* ]] || [[ "$changed_files" == *"proofs/hol_light/arm/Makefile"* ]]; then
+          if [[ "$changed_files" == *"nix/"* ]] || [[ "$changed_files" == *"hol_light.yml"* ]] || [[ "$changed_files" == *"flake"* ]] || [[ "$changed_files" == *"proofs/hol_light/aarch64/Makefile"* ]]; then
             run_needed=1
           fi
 
@@ -178,8 +178,8 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: 'hol_light'
           script: |
-            make -C proofs/hol_light/x86 mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o
-            echo 'needs "x86/proofs/mlkem_poly_basemul_acc_montgomery_cached_k2.ml";;' | hol.sh
+            make -C proofs/hol_light/x86_64 mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o
+            echo 'needs "x86_64/proofs/mlkem_poly_basemul_acc_montgomery_cached_k2.ml";;' | hol.sh
   hol_light_proofs_x86_64:
     needs: [ hol_light_bytecode_x86_64 ]
     strategy:
@@ -237,7 +237,7 @@ jobs:
           done
 
           # Always re-run upon change to nix files for HOL-Light
-          if [[ "$changed_files" == *"nix/"* ]] || [[ "$changed_files" == *"hol_light.yml"* ]] || [[ "$changed_files" == *"flake"* ]] || [[ "$changed_files" == *"proofs/hol_light/x86/Makefile"* ]]; then
+          if [[ "$changed_files" == *"nix/"* ]] || [[ "$changed_files" == *"hol_light.yml"* ]] || [[ "$changed_files" == *"flake"* ]] || [[ "$changed_files" == *"proofs/hol_light/x86_64/Makefile"* ]]; then
             run_needed=1
           fi
 
