@@ -10,6 +10,7 @@ keccak_f1600_x1_scalar_asm.S: ../../aarch64_symbolic/keccak_f1600_x1_scalar_symb
 
 	slothy-cli Arm_AArch64 Arm_Cortex_A55 \
 	   $^ -o $@ \
+           --stack-loc-prefix=MLK_STACK_LOC \
            -c reserved_regs="[x18,sp]" \
 	   -c inputs_are_outputs \
 	   -c variable_size \
@@ -23,6 +24,7 @@ keccak_f1600_x1_scalar_asm.S: ../../aarch64_symbolic/keccak_f1600_x1_scalar_symb
 
 	slothy-cli Arm_AArch64 Arm_Cortex_A55 \
 	   $@ -o $@ \
+           --stack-loc-prefix=MLK_STACK_LOC \
            -c reserved_regs="[x18,sp]" \
 	   -c variable_size \
 	   -c inputs_are_outputs \
@@ -38,6 +40,7 @@ keccak_f1600_x1_scalar_asm.S: ../../aarch64_symbolic/keccak_f1600_x1_scalar_symb
 keccak_f1600_x4_v8a_scalar_hybrid_asm.S: ../../aarch64_symbolic/keccak_f1600_x4_v8a_scalar_hybrid_clean.S
 	slothy-cli Arm_AArch64 Arm_Cortex_A55 \
 	   $^ -o $@                           \
+           --stack-loc-prefix=MLK_STACK_LOC \
 	   -c reserved_regs="[x18,sp]"        \
 	   -c inputs_are_outputs \
 	   -c variable_size \
@@ -54,6 +57,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_asm.S: ../../aarch64_symbolic/keccak_f1600_x4_
 
 	slothy-cli Arm_AArch64 Arm_Cortex_A55 \
 	   $@ -o $@                           \
+           --stack-loc-prefix=MLK_STACK_LOC \
 	   -c reserved_regs="[x18,sp]"        \
 	   -c inputs_are_outputs \
 	   -c variable_size \
@@ -71,6 +75,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_asm.S: ../../aarch64_symbolic/keccak_f1600_x4_
 keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S: ../../aarch64_symbolic/keccak_f1600_x4_v8a_v84a_scalar_hybrid_clean.S
 	slothy-cli Arm_AArch64 Arm_Cortex_A55 \
 	   $^ -o $@                           \
+           --stack-loc-prefix=MLK_STACK_LOC \
 	   -c reserved_regs="[x18,sp]"        \
 	   -c inputs_are_outputs \
 	   -c variable_size \
@@ -87,6 +92,7 @@ keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S: ../../aarch64_symbolic/keccak_f160
 
 	slothy-cli Arm_AArch64 Arm_Cortex_A55 \
 	   $@ -o $@                           \
+           --stack-loc-prefix=MLK_STACK_LOC \
 	   -c reserved_regs="[x18,sp]"        \
 	   -c inputs_are_outputs \
 	   -c variable_size \
