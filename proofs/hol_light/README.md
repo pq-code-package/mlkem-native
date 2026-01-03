@@ -65,12 +65,12 @@ nix develop --experimental-features 'nix-command flakes'
 from mlkem-native's base directory. Then
 
 ```bash
-make -C proofs/hol_light/arm
+make -C proofs/hol_light/aarch64
 ```
 or
 
 ```bash
-make -C proofs/hol_light/x86
+make -C proofs/hol_light/x86_64
 ```
 
 will build and run the proofs. Note that this make take hours even on powerful machines.
