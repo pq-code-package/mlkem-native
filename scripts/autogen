@@ -2439,84 +2439,84 @@ def gen_hol_light_asm():
             "polyvec_basemul_acc_montgomery_cached_asm_k2.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k2.S",
             "dev/x86_64/src",
-            "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
             "x86",
         ),
         (
             "polyvec_basemul_acc_montgomery_cached_asm_k3.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k3.S",
             "dev/x86_64/src",
-            "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
             "x86",
         ),
         (
             "polyvec_basemul_acc_montgomery_cached_asm_k4.S",
             "mlkem_poly_basemul_acc_montgomery_cached_k4.S",
             "dev/x86_64/src",
-            "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
             "x86",
         ),
         (
             "ntt.S",
             "mlkem_ntt.S",
             "dev/x86_64/src",
-            "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
             "x86",
         ),
         (
             "intt.S",
             "mlkem_intt.S",
             "dev/x86_64/src",
-            "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
             "x86",
         ),
         (
             "reduce.S",
             "mlkem_reduce.S",
             "dev/x86_64/src",
-            "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
             "x86",
         ),
         (
             "ntttobytes.S",
             "mlkem_tobytes.S",
             "dev/x86_64/src",
-            "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
             "x86",
         ),
         (
             "rej_uniform_asm.S",
             "mlkem_rej_uniform.S",
             "dev/x86_64/src",
-            "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
             "x86",
         ),
         (
             "nttfrombytes.S",
             "mlkem_frombytes.S",
             "dev/x86_64/src",
-            "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
             "x86",
         ),
         (
             "tomont.S",
             "mlkem_tomont.S",
             "dev/x86_64/src",
-            "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
             "x86",
         ),
         (
             "nttunpack.S",
             "mlkem_unpack.S",
             "dev/x86_64/src",
-            "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
             "x86",
         ),
         (
             "mulcache_compute.S",
             "mlkem_mulcache_compute.S",
             "dev/x86_64/src",
-            "-Imlkem/src/native/x86_64/src -Imlkem/src/common.h -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+            "-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=full",
             "x86",
         ),
     ]
@@ -2559,6 +2559,10 @@ def synchronize_file(f, in_dir, out_dir, delete=False, no_simplify=False, **kwar
 
     if delete is True:
         return basename
+
+    # Skip .inc files when simplification is enabled (they get inlined by simpasm)
+    if no_simplify is False and f.endswith(".inc"):
+        return None
 
     if no_simplify is False and f.endswith(".S"):
         update_via_simpasm(f, out_dir, **kwargs)
@@ -2646,7 +2650,7 @@ def synchronize_backends(
         delete=delete,
         force_cross=force_cross,
         no_simplify=no_simplify,
-        cflags="-Imlkem/src/native/aarch64/src",
+        cflags=f"-Idev/aarch64_{ty}/src -Imlkem/src/native/aarch64/src",
     )
     synchronize_backend(
         "dev/fips202/aarch64/src",
@@ -2654,7 +2658,7 @@ def synchronize_backends(
         delete=delete,
         force_cross=force_cross,
         no_simplify=no_simplify,
-        cflags="-Imlkem/src/fips202/native/aarch64/src -march=armv8.4-a+sha3",
+        cflags="-Idev/fips202/aarch64/src -Imlkem/src/fips202/native/aarch64/src -march=armv8.4-a+sha3",
     )
     synchronize_backend(
         "dev/fips202/aarch64",
@@ -2662,7 +2666,7 @@ def synchronize_backends(
         delete=delete,
         force_cross=force_cross,
         no_simplify=no_simplify,
-        cflags="-Imlkem/src/fips202/native/aarch64 -march=armv8.4-a+sha3",
+        cflags="-Idev/fips202/aarch64 -Imlkem/src/fips202/native/aarch64 -march=armv8.4-a+sha3",
     )
     synchronize_backend(
         "dev/x86_64/src",
@@ -2678,7 +2682,7 @@ def synchronize_backends(
         # macro.
         # This leads to duplicate endbr64 instructions causing a failure when
         # comparing the object code before and after simplification.
-        cflags="-Imlkem/src/native/x86_64/src/ -mavx2 -mbmi2 -msse4 -fcf-protection=none",
+        cflags="-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src/ -mavx2 -mbmi2 -msse4 -fcf-protection=none",
     )
 
 
