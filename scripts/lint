@@ -150,14 +150,14 @@ gh_group_end
 check-spdx()
 {
   local success=true
-  for file in $(git ls-files -- ":/" ":/!:*.json" ":/!:*.png" ":/!:*LICENSE*" ":/!:.git*" ":/!:flake.lock"); do
+  for file in $(git ls-files -- ":/" ":/!:*.json" ":/!:*.png" ":/!:*.patch" ":/!:*LICENSE*" ":/!:.git*" ":/!:flake.lock"); do
     # Ignore symlinks
     if [[ ! -L $file && $(grep "SPDX-License-Identifier:" $file | wc -l) == 0 ]]; then
       gh_error "$file" "${line:-1}" "Missing license header error" "$file is missing SPDX License header"
       success=false
     fi
   done
-  for file in $(git ls-files -- "*.[chsS]" "*.py" "*.mk" "*.yml" "**/Makefile*" ":/!proofs/cbmc/*.py" ":/!examples/bring_your_own_fips202/custom_fips202/tiny_sha3/*" ":/!examples/custom_backend/mlkem_native/src/fips202/native/custom/src/*"); do
+  for file in $(git ls-files -- "*.[chsS]" "*.py" "*.mk" "*.yml" "**/Makefile*" ":/!proofs/cbmc/*.py" ":/!examples/bring_your_own_fips202/custom_fips202/tiny_sha3/*" ":/!examples/custom_backend/mlkem_native/src/fips202/native/custom/src/*" ":/!:*.patch"); do
     # Ignore symlinks
     if [[ ! -L $file && $(grep "Copyright (c) The mlkem-native project authors" $file | wc -l) == 0 ]]; then
       gh_error "$file" "${line:-1}" "Missing copyright header error" "$file is missing copyright header"
@@ -165,7 +165,7 @@ check-spdx()
     fi
   done
   # For source files in dev/* and mlkem/*, we enforce `Apache-2.0 OR ISC OR MIT`
-  for file in $(git ls-files -- "*.[chsSi]" | grep "^dev/\|^mlkem/"); do
+  for file in $(git ls-files -- "*.[chsSi]" | grep "^dev/\|^mlkem/" | grep -v "\.patch$"); do
     # Ignore symlinks
     if [[ ! -L $file && $(grep "SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT" $file | wc -l) == 0 ]]; then
       gh_error "$file" "${line:-1}" "Missing license header error" "$file is not licensed under 'Apache-2.0 OR ISC OR MIT'"

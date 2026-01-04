@@ -116,6 +116,9 @@
 /* An allocation failed. This can only happen if MLK_CONFIG_CUSTOM_ALLOC_FREE
  * is defined and the provided MLK_CUSTOM_ALLOC can fail. */
 #define MLK_ERR_OUT_OF_MEMORY -2
+/* An rng failure occured. Might be due to insufficient entropy or
+ * system misconfiguration. */
+#define MLK_ERR_RNG_FAIL -3
 
 /****************************** Function API **********************************/
 
@@ -240,6 +243,7 @@ int MLK_API_NAMESPACE(keypair_derand)(
  *                  PCT failed.
  *              - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
  *                  used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
+ *              - MLK_ERR_RNG_FAIL: Random number generation failed.
  *
  * Specification: Implements @[FIPS203, Algorithm 19, ML-KEM.KeyGen]
  *
@@ -312,6 +316,7 @@ int MLK_API_NAMESPACE(enc_derand)(
  *              for the public key fails.
  *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
  *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
+ *          - MLK_ERR_RNG_FAIL: Random number generation failed.
  *
  * Specification: Implements @[FIPS203, Algorithm 20, ML-KEM.Encaps]
  *

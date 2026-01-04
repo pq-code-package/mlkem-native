@@ -123,7 +123,8 @@ __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
-	  return_value == MLK_ERR_OUT_OF_MEMORY)
+          return_value == MLK_ERR_OUT_OF_MEMORY ||
+          return_value == MLK_ERR_RNG_FAIL)
 );
 
 #if defined(MLK_CONFIG_KEYGEN_PCT)
@@ -258,7 +259,12 @@ int mlk_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   }
 
   /* Acquire necessary randomness, and mark it as secret. */
-  mlk_randombytes(coins, 2 * MLKEM_SYMBYTES);
+  if (mlk_randombytes(coins, 2 * MLKEM_SYMBYTES) != 0)
+  {
+    ret = MLK_ERR_RNG_FAIL;
+    goto cleanup;
+  }
+
   MLK_CT_TESTING_SECRET(coins, 2 * MLKEM_SYMBYTES);
 
   ret = mlk_kem_keypair_derand(pk, sk, coins, context);
@@ -339,7 +345,12 @@ int mlk_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
     goto cleanup;
   }
 
-  mlk_randombytes(coins, MLKEM_SYMBYTES);
+  if (mlk_randombytes(coins, MLKEM_SYMBYTES) != 0)
+  {
+    ret = MLK_ERR_RNG_FAIL;
+    goto cleanup;
+  }
+
   MLK_CT_TESTING_SECRET(coins, MLKEM_SYMBYTES);
 
   ret = mlk_kem_enc_derand(ct, ss, pk, coins, context);

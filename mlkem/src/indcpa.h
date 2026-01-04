@@ -81,7 +81,8 @@ __contract__(
   assigns(memory_slice(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
   assigns(memory_slice(sk, MLKEM_INDCPA_SECRETKEYBYTES))
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
-          return_value == MLK_ERR_OUT_OF_MEMORY)
+          return_value == MLK_ERR_OUT_OF_MEMORY ||
+          return_value == MLK_ERR_RNG_FAIL)
 );
 
 #define mlk_indcpa_enc MLK_NAMESPACE_K(indcpa_enc) MLK_CONTEXT_PARAMETERS_4
