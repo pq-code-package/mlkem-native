@@ -191,7 +191,8 @@ __contract__(
   assigns(memory_slice(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   assigns(memory_slice(sk, MLKEM_INDCCA_SECRETKEYBYTES))
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
-          return_value == MLK_ERR_OUT_OF_MEMORY)
+          return_value == MLK_ERR_OUT_OF_MEMORY ||
+          return_value == MLK_ERR_RNG_FAIL)
 );
 
 /*************************************************
@@ -274,7 +275,8 @@ __contract__(
   assigns(memory_slice(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
   assigns(memory_slice(ss, MLKEM_SSBYTES))
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
-          return_value == MLK_ERR_OUT_OF_MEMORY)
+          return_value == MLK_ERR_OUT_OF_MEMORY ||
+          return_value == MLK_ERR_RNG_FAIL)
 );
 
 /*************************************************
