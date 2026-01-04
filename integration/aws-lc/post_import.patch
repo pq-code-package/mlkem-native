@@ -1,0 +1,28 @@
+From dc1fb278d8d15bf931a805faf1298403c9c49c99 Mon Sep 17 00:00:00 2001
+From: Andreas Hatziiliou <andreas.hatziiliou@savoirfairelinux.com>
+Date: Mon, 12 Jan 2026 09:51:43 -0500
+Subject: [PATCH] post_import
+
+---
+ crypto/fipsmodule/ml_kem/mlkem_native_config.h | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/crypto/fipsmodule/ml_kem/mlkem_native_config.h b/crypto/fipsmodule/ml_kem/mlkem_native_config.h
+index 76df78c3b..7b5a2228a 100644
+--- a/crypto/fipsmodule/ml_kem/mlkem_native_config.h
++++ b/crypto/fipsmodule/ml_kem/mlkem_native_config.h
+@@ -78,8 +78,9 @@ static MLK_INLINE void mlk_zeroize(void *ptr, size_t len) {
+ #include <stdint.h>
+ #include "mlkem/sys.h"
+ #include <openssl/rand.h>
+-static MLK_INLINE void mlk_randombytes(void *ptr, size_t len) {
+-    RAND_bytes(ptr, len);
++static MLK_INLINE int mlk_randombytes(void *ptr, size_t len) {
++  RAND_bytes(ptr, len);
++  return 0;
+ }
+ #endif // !__ASSEMBLER__
+ 
+-- 
+2.52.0
+

@@ -156,7 +156,8 @@ __contract__(
   assigns(memory_slice(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   assigns(memory_slice(sk, MLKEM_INDCCA_SECRETKEYBYTES))
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
-          return_value == MLK_ERR_OUT_OF_MEMORY)
+          return_value == MLK_ERR_OUT_OF_MEMORY ||
+          return_value == MLK_ERR_RNG_FAIL)
 );
 
 /*************************************************
@@ -173,10 +174,11 @@ __contract__(
  *                 bytes)
  *
  * Returns:     - 0: On success
- *              - MLK_ERR_FAIL: If MLK_CONFIG_KEYGEN_PCT is enabled and the
- *                  PCT failed.
  *              - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
  *                  used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
+ *              - MLK_ERR_RNG_FAIL: Random number generation failed.
+ *              - MLK_ERR_FAIL: If MLK_CONFIG_KEYGEN_PCT is enabled and the
+ *                  PCT failed.
  *
  * Specification: Implements @[FIPS203, Algorithm 19, ML-KEM.KeyGen]
  *
@@ -192,7 +194,8 @@ __contract__(
   assigns(memory_slice(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   assigns(memory_slice(sk, MLKEM_INDCCA_SECRETKEYBYTES))
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
-          return_value == MLK_ERR_OUT_OF_MEMORY)
+          return_value == MLK_ERR_OUT_OF_MEMORY ||
+          return_value == MLK_ERR_RNG_FAIL)
 );
 
 /*************************************************
@@ -256,10 +259,11 @@ __contract__(
  *                 bytes)
  *
  * Returns: - 0 on success
- *          - MLK_ERR_FAIL: If the 'modulus check' @[FIPS203, Section 7.2]
- *              for the public key fails.
  *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
  *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
+ *          - MLK_ERR_RNG_FAIL: Random number generation failed.
+ *          - MLK_ERR_FAIL: If the 'modulus check' @[FIPS203, Section 7.2]
+ *              for the public key fails.
  *
  * Specification: Implements @[FIPS203, Algorithm 20, ML-KEM.Encaps]
  *
@@ -277,7 +281,8 @@ __contract__(
   assigns(memory_slice(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
   assigns(memory_slice(ss, MLKEM_SSBYTES))
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
-          return_value == MLK_ERR_OUT_OF_MEMORY)
+          return_value == MLK_ERR_OUT_OF_MEMORY ||
+          return_value == MLK_ERR_RNG_FAIL)
 );
 
 /*************************************************
