@@ -41,7 +41,6 @@ static void reset_all(void)
 int randombytes(uint8_t *buf, size_t len)
 {
   int current_invocation = randombytes_counter++;
-  size_t i;
 
   if (current_invocation == randombytes_fail_on_counter)
   {
