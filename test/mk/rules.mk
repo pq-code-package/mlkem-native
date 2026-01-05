@@ -111,3 +111,4 @@ $(BUILD_DIR)/mlkem1024/alloc/%.S.o: %.S $(CONFIG)
 	$(Q)echo "  AS      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
