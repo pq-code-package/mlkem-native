@@ -212,6 +212,7 @@ class TEST_TYPES(Enum):
     BASIC_DETERMINISTIC = 18
     UNIT = 19
     ALLOC = 20
+    RNG_FAIL = 21
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -288,6 +289,8 @@ class TEST_TYPES(Enum):
             return "Unit Test"
         if self == TEST_TYPES.ALLOC:
             return "Alloc Test"
+        if self == TEST_TYPES.RNG_FAIL:
+            return "RNG Failure Test"
 
     def make_dir(self):
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
@@ -355,6 +358,8 @@ class TEST_TYPES(Enum):
             return "unit"
         if self == TEST_TYPES.ALLOC:
             return "alloc"
+        if self == TEST_TYPES.RNG_FAIL:
+            return "rng_fail"
 
     def make_run_target(self, scheme):
         t = self.make_target()
@@ -667,6 +672,19 @@ class Tests:
 
         self.check_fail()
 
+    def rng_fail(self):
+        def _rng_fail(opt):
+            self._compile_schemes(TEST_TYPES.RNG_FAIL, opt)
+            if self.args.run:
+                self._run_schemes(TEST_TYPES.RNG_FAIL, opt)
+
+        if self.do_no_opt():
+            _rng_fail(False)
+        if self.do_opt():
+            _rng_fail(True)
+
+        self.check_fail()
+
     def acvp(self):
         def _acvp(opt):
             self._compile_schemes(TEST_TYPES.ACVP, opt)
@@ -802,6 +820,7 @@ class Tests:
         stack = self.args.stack
         unit = self.args.unit
         alloc = self.args.alloc
+        rng_fail = self.args.rng_fail
 
         def _all(opt):
             if func is True:
@@ -816,6 +835,8 @@ class Tests:
                 self._compile_schemes(TEST_TYPES.UNIT, opt)
             if alloc is True:
                 self._compile_schemes(TEST_TYPES.ALLOC, opt)
+            if rng_fail is True:
+                self._compile_schemes(TEST_TYPES.RNG_FAIL, opt)
 
             if self.args.check_namespace is True:
                 p = subprocess.run(
@@ -841,6 +862,8 @@ class Tests:
                 self._run_schemes(TEST_TYPES.UNIT, opt)
             if alloc is True:
                 self._run_schemes(TEST_TYPES.ALLOC, opt)
+            if rng_fail is True:
+                self._run_schemes(TEST_TYPES.RNG_FAIL, opt)
 
         if self.do_no_opt():
             _all(False)
@@ -1232,6 +1255,21 @@ def cli():
         help="Do not run alloc tests",
     )
 
+    rng_fail_group = all_parser.add_mutually_exclusive_group()
+    rng_fail_group.add_argument(
+        "--rng-fail",
+        action="store_true",
+        dest="rng_fail",
+        help="Run RNG failure tests",
+        default=True,
+    )
+    rng_fail_group.add_argument(
+        "--no-rng-fail",
+        action="store_false",
+        dest="rng_fail",
+        help="Do not run RNG failure tests",
+    )
+
     # acvp arguments
     acvp_parser = cmd_subparsers.add_parser(
         "acvp", help="Run ACVP client", parents=[common_parser]
@@ -1451,6 +1489,13 @@ def cli():
         parents=[common_parser],
     )
 
+    # rng_fail arguments
+    rng_fail_parser = cmd_subparsers.add_parser(
+        "rng_fail",
+        help="Run the RNG failure tests for all parameter sets",
+        parents=[common_parser],
+    )
+
     args = main_parser.parse_args()
 
     if not hasattr(args, "mac_taskpolicy"):
@@ -1484,6 +1529,8 @@ def cli():
         Tests(args).size()
     elif args.cmd == "alloc":
         Tests(args).alloc()
+    elif args.cmd == "rng_fail":
+        Tests(args).rng_fail()
 
 
 if __name__ == "__main__":
