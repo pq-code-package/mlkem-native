@@ -56,6 +56,9 @@ inputs:
   alloc:
     description: Determine whether to run alloc tests or not
     default: "true"
+  rng_fail:
+    description: Determine whether to run rng fail tests or not
+    default: "true"
   extra_args:
     description: Additional arguments to pass to the tests script
     default: ""
@@ -85,6 +88,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           alloc: ${{ inputs.alloc }}
+          rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
       - name: Cross x86_64 Tests
@@ -109,6 +113,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           alloc: ${{ inputs.alloc }}
+          rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
       - name: Cross aarch64 Tests
@@ -133,6 +138,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           alloc: ${{ inputs.alloc }}
+          rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
       - name: Cross ppc64le Tests
@@ -157,6 +163,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           alloc: ${{ inputs.alloc }}
+          rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
       - name: Cross aarch64_be Tests
@@ -181,6 +188,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           alloc: ${{ inputs.alloc }}
+          rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
       - name: Cross riscv64 Tests (RVV, VLEN=128)
@@ -205,6 +213,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           alloc: ${{ inputs.alloc }}
+          rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
       - name: Cross riscv64 Tests (RVV, VLEN=256)
@@ -228,6 +237,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           alloc: ${{ inputs.alloc }}
+          rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
       - name: Cross riscv64 Tests (RVV, VLEN=512)
@@ -251,6 +261,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           alloc: ${{ inputs.alloc }}
+          rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
       - name: Cross riscv64 Tests (RVV, VLEN=1024)
@@ -274,6 +285,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           alloc: ${{ inputs.alloc }}
+          rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
       - name: Cross riscv32 Tests
@@ -298,5 +310,6 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           alloc: ${{ inputs.alloc }}
+          rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}

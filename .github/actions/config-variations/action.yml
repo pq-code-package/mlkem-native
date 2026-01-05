@@ -65,6 +65,7 @@ runs:
         extra_env: 'ASAN_OPTIONS=detect_leaks=1'
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
+        rng_fail: true
     - name: "Custom zeroization (explicit_bzero)"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'custom-zeroize') }}
       uses: ./.github/actions/multi-functest
@@ -79,6 +80,7 @@ runs:
         opt: ${{ inputs.opt }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
+        rng_fail: true
     - name: "Custom native capability functions (static ON)"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'native-cap-ON') }}
       uses: ./.github/actions/multi-functest
@@ -93,6 +95,7 @@ runs:
         opt: ${{ inputs.opt }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
+        rng_fail: true
     - name: "Custom native capability functions (static OFF)"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'native-cap-OFF') }}
       uses: ./.github/actions/multi-functest
@@ -107,6 +110,7 @@ runs:
         opt: ${{ inputs.opt }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
+        rng_fail: true
     - name: "Custom native capability functions (ID_AA64PFR1_EL1 detection)"
       if: ${{ (inputs.tests == 'all' || contains(inputs.tests, 'native-cap-ID_AA64PFR1_EL1')) && runner.os == 'Linux' && runner.arch == 'ARM64' }}
       uses: ./.github/actions/multi-functest
@@ -121,6 +125,7 @@ runs:
         opt: ${{ inputs.opt }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
+        rng_fail: true
     - name: "Custom native capability functions (CPUID AVX2 detection)"
       if: ${{ (inputs.tests == 'all' || contains(inputs.tests, 'native-cap-CPUID_AVX2')) && runner.os == 'Linux' && runner.arch == 'X64' }}
       uses: ./.github/actions/multi-functest
@@ -135,6 +140,7 @@ runs:
         opt: ${{ inputs.opt }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
+        rng_fail: true
     - name: "No ASM"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'no-asm') }}
       uses: ./.github/actions/multi-functest
@@ -149,6 +155,7 @@ runs:
         opt: ${{ inputs.opt }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
+        rng_fail: true
     - name: "Serial FIPS202 (no batched Keccak)"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'serial-fips202') }}
       uses: ./.github/actions/multi-functest
@@ -163,6 +170,7 @@ runs:
         opt: ${{ inputs.opt }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
+        rng_fail: true
     - name: "Custom randombytes"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'custom-randombytes') }}
       uses: ./.github/actions/multi-functest
@@ -177,6 +185,7 @@ runs:
         opt: ${{ inputs.opt }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
+        rng_fail: false # Uses its own randombytes implementation
     - name: "Custom memcpy"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'custom-memcpy') }}
       uses: ./.github/actions/multi-functest
@@ -191,6 +200,7 @@ runs:
         opt: ${{ inputs.opt }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
+        rng_fail: true
     - name: "Custom memset"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'custom-memset') }}
       uses: ./.github/actions/multi-functest
@@ -205,6 +215,7 @@ runs:
         opt: ${{ inputs.opt }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
+        rng_fail: true
     - name: "Custom stdlib (memcpy + memset)"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'custom-stdlib') }}
       uses: ./.github/actions/multi-functest
@@ -219,6 +230,7 @@ runs:
         opt: ${{ inputs.opt }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
+        rng_fail: true
     - name: "MLKEM_GEN_MATRIX_NBLOCKS=1"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'nblocks-1') }}
       uses: ./.github/actions/multi-functest
@@ -233,6 +245,7 @@ runs:
         opt: ${{ inputs.opt }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
+        rng_fail: true
     - name: "MLKEM_GEN_MATRIX_NBLOCKS=2"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'nblocks-2') }}
       uses: ./.github/actions/multi-functest
@@ -247,6 +260,7 @@ runs:
         opt: ${{ inputs.opt }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
+        rng_fail: true
     - name: "MLKEM_GEN_MATRIX_NBLOCKS=4"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'nblocks-4') }}
       uses: ./.github/actions/multi-functest
@@ -261,3 +275,4 @@ runs:
         opt: ${{ inputs.opt }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
+        rng_fail: true

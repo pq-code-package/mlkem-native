@@ -53,6 +53,7 @@ jobs:
           examples: false
           stack: false
           alloc: ${{ matrix.target.alloc }}
+          rng_fail: true
       - name: Baremetal bench
         if: ${{ matrix.target.bench }}
         uses: ./.github/actions/bench
