@@ -116,8 +116,8 @@
 /* An allocation failed. This can only happen if MLK_CONFIG_CUSTOM_ALLOC_FREE
  * is defined and the provided MLK_CUSTOM_ALLOC can fail. */
 #define MLK_ERR_OUT_OF_MEMORY -2
-/* An rng failure occured. Might be due to insufficient entropy or                                                                     
- * system misconfiguration. */                                                                                                         
+/* An rng failure occured. Might be due to insufficient entropy or
+ * system misconfiguration. */
 #define MLK_ERR_RNG_FAIL -3
 
 /****************************** Function API **********************************/

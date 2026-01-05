@@ -156,6 +156,7 @@
 #undef MLK_CONFIG_API_QUALIFIER
 #undef MLK_ERR_FAIL
 #undef MLK_ERR_OUT_OF_MEMORY
+#undef MLK_ERR_RNG_FAIL
 #undef MLK_H
 #undef crypto_kem_check_pk
 #undef crypto_kem_check_sk
@@ -176,6 +177,7 @@
 #undef MLK_EMPTY_CU
 #undef MLK_ERR_FAIL
 #undef MLK_ERR_OUT_OF_MEMORY
+#undef MLK_ERR_RNG_FAIL
 #undef MLK_EXTERNAL_API
 #undef MLK_FIPS202X4_HEADER_FILE
 #undef MLK_FIPS202_HEADER_FILE
