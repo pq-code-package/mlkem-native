@@ -61,12 +61,12 @@ source code and documentation.
   - [test/configs/custom_native_capability_config_1.h](test/configs/custom_native_capability_config_1.h)
   - [test/configs/custom_native_capability_config_CPUID_AVX2.h](test/configs/custom_native_capability_config_CPUID_AVX2.h)
   - [test/configs/custom_native_capability_config_ID_AA64PFR1_EL1.h](test/configs/custom_native_capability_config_ID_AA64PFR1_EL1.h)
-  - [test/configs/custom_randombytes_config.h](test/configs/custom_randombytes_config.h)
   - [test/configs/custom_stdlib_config.h](test/configs/custom_stdlib_config.h)
   - [test/configs/custom_zeroize_config.h](test/configs/custom_zeroize_config.h)
   - [test/configs/no_asm_config.h](test/configs/no_asm_config.h)
   - [test/configs/serial_fips202_config.h](test/configs/serial_fips202_config.h)
   - [test/configs/test_alloc_config.h](test/configs/test_alloc_config.h)
+  - [test/configs/test_rng_fail_config.h](test/configs/test_rng_fail_config.h)
 
 ### `FIPS202`
 
@@ -122,12 +122,12 @@ source code and documentation.
   - [test/configs/custom_native_capability_config_1.h](test/configs/custom_native_capability_config_1.h)
   - [test/configs/custom_native_capability_config_CPUID_AVX2.h](test/configs/custom_native_capability_config_CPUID_AVX2.h)
   - [test/configs/custom_native_capability_config_ID_AA64PFR1_EL1.h](test/configs/custom_native_capability_config_ID_AA64PFR1_EL1.h)
-  - [test/configs/custom_randombytes_config.h](test/configs/custom_randombytes_config.h)
   - [test/configs/custom_stdlib_config.h](test/configs/custom_stdlib_config.h)
   - [test/configs/custom_zeroize_config.h](test/configs/custom_zeroize_config.h)
   - [test/configs/no_asm_config.h](test/configs/no_asm_config.h)
   - [test/configs/serial_fips202_config.h](test/configs/serial_fips202_config.h)
   - [test/configs/test_alloc_config.h](test/configs/test_alloc_config.h)
+  - [test/configs/test_rng_fail_config.h](test/configs/test_rng_fail_config.h)
 
 ### `HYBRID`
 

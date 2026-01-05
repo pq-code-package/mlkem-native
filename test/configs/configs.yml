@@ -447,3 +447,19 @@ configs:
           #endif /* !__ASSEMBLER__ */
       MLK_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: test/configs/test_rng_fail_config.h
+    description: "Using custom randombytes that can fail at specific invocation"
+    defines:
+      MLK_CONFIG_NAMESPACE_PREFIX: mlk
+      MLK_CONFIG_CUSTOM_RANDOMBYTES:
+        content: |
+          #define MLK_CONFIG_CUSTOM_RANDOMBYTES
+          #if !defined(__ASSEMBLER__)
+          #include <stddef.h>
+          #include <stdint.h>
+          #include "src/sys.h"
+          int mlk_randombytes(uint8_t *out, size_t outlen);
+          #endif
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
