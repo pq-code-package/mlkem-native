@@ -23,6 +23,15 @@ jobs:
           nix-shell: ci-linter
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           cross-prefix: "aarch64-unknown-linux-gnu-"
+  lint-check-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: mristin/opinionated-commit-message@f3b9cec249cabffbae7cd564542fd302cc576827 # v3.1.1
+        with:
+          validate-pull-request-commits: 'true'
+          max-subject-line-length: '72'
+          allow-one-liners: 'true'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
   quickcheck:
     strategy:
       fail-fast: false
