@@ -15,6 +15,7 @@
   (3 * 168) /* REJ_UNIFORM_NBLOCKS * SHAKE128_RATE */
 
 #define mlk_rej_uniform_asm MLK_NAMESPACE(rej_uniform_asm)
+MLK_MUST_CHECK_RETURN_VALUE
 uint64_t mlk_rej_uniform_asm(int16_t *r, const uint8_t *buf, unsigned buflen,
                              const uint8_t *table);
 

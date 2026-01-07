@@ -36,21 +36,48 @@
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
 #define mlk_check_pct MLK_ADD_PARAM_SET(mlk_check_pct)
+#define crypto_kem_check_pk_workspace \
+  MLK_ADD_PARAM_SET(crypto_kem_check_pk_workspace)
+#define mlk_check_pct_workspace MLK_ADD_PARAM_SET(mlk_check_pct_workspace)
+#define crypto_kem_enc_derand_workspace \
+  MLK_ADD_PARAM_SET(crypto_kem_enc_derand_workspace)
+#define crypto_kem_dec_workspace MLK_ADD_PARAM_SET(crypto_kem_dec_workspace)
 /* End of parameter set namespacing */
+
+/* Hoisted workspace structures */
+typedef struct
+{
+  mlk_polyvec p;
+  MLK_ALIGN uint8_t p_reencoded[MLKEM_POLYVECBYTES];
+} crypto_kem_check_pk_workspace;
+
+typedef struct
+{
+  MLK_ALIGN uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES];
+  MLK_ALIGN uint8_t ss_enc[MLKEM_SSBYTES];
+  MLK_ALIGN uint8_t ss_dec[MLKEM_SSBYTES];
+} mlk_check_pct_workspace;
+
+typedef struct
+{
+  MLK_ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
+  MLK_ALIGN uint8_t kr[2 * MLKEM_SYMBYTES];
+} crypto_kem_enc_derand_workspace;
+
+typedef struct
+{
+  MLK_ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
+  MLK_ALIGN uint8_t kr[2 * MLKEM_SYMBYTES];
+  MLK_ALIGN uint8_t tmp[MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES];
+} crypto_kem_dec_workspace;
 
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 {
-  typedef struct
-  {
-    mlk_polyvec p;
-    MLK_ALIGN uint8_t p_reencoded[MLKEM_POLYVECBYTES];
-  } workspace;
-
   int ret = 0;
-  MLK_ALLOC(ws, workspace, 1);
+  MLK_ALLOC(ws, crypto_kem_check_pk_workspace, 1);
 
   if (ws == NULL)
   {
@@ -70,7 +97,7 @@ int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(ws, workspace, 1);
+  MLK_FREE(ws, crypto_kem_check_pk_workspace, 1);
   return ret;
 }
 
@@ -138,15 +165,8 @@ MLK_MUST_CHECK_RETURN_VALUE
 static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                          uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
-  typedef struct
-  {
-    MLK_ALIGN uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES];
-    MLK_ALIGN uint8_t ss_enc[MLKEM_SSBYTES];
-    MLK_ALIGN uint8_t ss_dec[MLKEM_SSBYTES];
-  } workspace;
-
   int ret = 0;
-  MLK_ALLOC(ws, workspace, 1);
+  MLK_ALLOC(ws, mlk_check_pct_workspace, 1);
 
   if (ws == NULL)
   {
@@ -188,7 +208,7 @@ cleanup:
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(ws, workspace, 1);
+  MLK_FREE(ws, mlk_check_pct_workspace, 1);
   return ret;
 }
 #else  /* MLK_CONFIG_KEYGEN_PCT */
@@ -279,14 +299,8 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                           const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                           const uint8_t coins[MLKEM_SYMBYTES])
 {
-  typedef struct
-  {
-    MLK_ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
-    MLK_ALIGN uint8_t kr[2 * MLKEM_SYMBYTES];
-  } workspace;
-
   int ret = 0;
-  MLK_ALLOC(ws, workspace, 1);
+  MLK_ALLOC(ws, crypto_kem_enc_derand_workspace, 1);
 
   if (ws == NULL)
   {
@@ -319,7 +333,7 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(ws, workspace, 1);
+  MLK_FREE(ws, crypto_kem_enc_derand_workspace, 1);
   return ret;
 }
 
@@ -361,17 +375,10 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
                    const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                    const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
-  typedef struct
-  {
-    MLK_ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
-    MLK_ALIGN uint8_t kr[2 * MLKEM_SYMBYTES];
-    MLK_ALIGN uint8_t tmp[MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES];
-  } workspace;
-
   int ret = 0;
   uint8_t fail;
   const uint8_t *pk = sk + MLKEM_INDCPA_SECRETKEYBYTES;
-  MLK_ALLOC(ws, workspace, 1);
+  MLK_ALLOC(ws, crypto_kem_dec_workspace, 1);
 
   if (ws == NULL)
   {
@@ -420,7 +427,7 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(ws, workspace, 1);
+  MLK_FREE(ws, crypto_kem_dec_workspace, 1);
   return ret;
 }
 
