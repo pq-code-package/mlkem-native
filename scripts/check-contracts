@@ -45,7 +45,7 @@ def is_exception(funcname):
     if funcname == 'poly_permute_bitrev_to_custom':
         return True
 
-    if funcname.endswith("_native") or funcname.endswith("_asm"):
+    if funcname.endswith("_native") or funcname.endswith("_asm") or funcname.endswith("avx2"):
         # CBMC proofs are axiomatized against contracts of the backends
         return True
 
