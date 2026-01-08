@@ -257,7 +257,12 @@ int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   }
 
   /* Acquire necessary randomness, and mark it as secret. */
-  mlk_randombytes(coins, 2 * MLKEM_SYMBYTES);
+  if (mlk_randombytes(coins, 2 * MLKEM_SYMBYTES) != 0)
+  {
+    ret = MLK_ERR_RNG_FAIL;
+    goto cleanup;
+  }
+
   MLK_CT_TESTING_SECRET(coins, 2 * MLKEM_SYMBYTES);
 
   ret = crypto_kem_keypair_derand(pk, sk, coins);
@@ -340,7 +345,12 @@ int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
     goto cleanup;
   }
 
-  mlk_randombytes(coins, MLKEM_SYMBYTES);
+  if (mlk_randombytes(coins, MLKEM_SYMBYTES) != 0)
+  {
+    ret = MLK_ERR_RNG_FAIL;
+    goto cleanup;
+  }
+
   MLK_CT_TESTING_SECRET(coins, MLKEM_SYMBYTES);
 
   ret = crypto_kem_enc_derand(ct, ss, pk, coins);

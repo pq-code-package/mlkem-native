@@ -111,3 +111,33 @@ $(BUILD_DIR)/mlkem1024/alloc/%.S.o: %.S $(CONFIG)
 	$(Q)echo "  AS      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mlkem512/rng_fail/%.c.o: %.c $(CONFIG)
+	$(Q)echo "  CC      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mlkem512/rng_fail/%.S.o: %.S $(CONFIG)
+	$(Q)echo "  AS      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mlkem768/rng_fail/%.c.o: %.c $(CONFIG)
+	$(Q)echo "  CC      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mlkem768/rng_fail/%.S.o: %.S $(CONFIG)
+	$(Q)echo "  AS      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mlkem1024/rng_fail/%.c.o: %.c $(CONFIG)
+	$(Q)echo "  CC      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mlkem1024/rng_fail/%.S.o: %.S $(CONFIG)
+	$(Q)echo "  AS      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<

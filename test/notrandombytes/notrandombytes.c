@@ -86,7 +86,7 @@ static void surf(void)
   }
 }
 
-void randombytes(uint8_t *buf, size_t n)
+int randombytes(uint8_t *buf, size_t n)
 {
   while (n > 0)
   {
@@ -109,4 +109,5 @@ void randombytes(uint8_t *buf, size_t n)
     ++buf;
     --n;
   }
+  return 0;
 }

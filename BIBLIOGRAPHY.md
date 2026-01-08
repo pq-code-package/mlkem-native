@@ -67,6 +67,7 @@ source code and documentation.
   - [test/configs/no_asm_config.h](test/configs/no_asm_config.h)
   - [test/configs/serial_fips202_config.h](test/configs/serial_fips202_config.h)
   - [test/configs/test_alloc_config.h](test/configs/test_alloc_config.h)
+  - [test/configs/test_rng_fail_config.h](test/configs/test_rng_fail_config.h)
 
 ### `FIPS202`
 
@@ -128,6 +129,7 @@ source code and documentation.
   - [test/configs/no_asm_config.h](test/configs/no_asm_config.h)
   - [test/configs/serial_fips202_config.h](test/configs/serial_fips202_config.h)
   - [test/configs/test_alloc_config.h](test/configs/test_alloc_config.h)
+  - [test/configs/test_rng_fail_config.h](test/configs/test_rng_fail_config.h)
 
 ### `HYBRID`
 

@@ -17,7 +17,8 @@ ACVP_TESTS = acvp_mlkem
 BENCH_TESTS = bench_mlkem bench_components_mlkem
 UNIT_TESTS = test_unit
 ALLOC_TESTS = test_alloc
-ALL_TESTS = $(BASIC_TESTS) $(ACVP_TESTS) $(BENCH_TESTS) $(UNIT_TESTS) $(ALLOC_TESTS)
+RNG_FAIL_TESTS = test_rng_fail
+ALL_TESTS = $(BASIC_TESTS) $(ACVP_TESTS) $(BENCH_TESTS) $(UNIT_TESTS) $(ALLOC_TESTS) $(RNG_FAIL_TESTS)
 
 MLKEM512_DIR = $(BUILD_DIR)/mlkem512
 MLKEM768_DIR = $(BUILD_DIR)/mlkem768
@@ -46,6 +47,14 @@ $(MLKEM768_ALLOC_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FI
 MLKEM1024_ALLOC_OBJS = $(call MAKE_OBJS,$(MLKEM1024_DIR)/alloc,$(SOURCES) $(FIPS202_SRCS))
 $(MLKEM1024_ALLOC_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024 -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 
+# RNG fail test object files - same sources but with custom randombytes config
+MLKEM512_RNG_FAIL_OBJS = $(call MAKE_OBJS,$(MLKEM512_DIR)/rng_fail,$(SOURCES) $(FIPS202_SRCS))
+$(MLKEM512_RNG_FAIL_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=512 -DMLK_CONFIG_FILE=\"../test/configs/test_rng_fail_config.h\"
+MLKEM768_RNG_FAIL_OBJS = $(call MAKE_OBJS,$(MLKEM768_DIR)/rng_fail,$(SOURCES) $(FIPS202_SRCS))
+$(MLKEM768_RNG_FAIL_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\"../test/configs/test_rng_fail_config.h\"
+MLKEM1024_RNG_FAIL_OBJS = $(call MAKE_OBJS,$(MLKEM1024_DIR)/rng_fail,$(SOURCES) $(FIPS202_SRCS))
+$(MLKEM1024_RNG_FAIL_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024 -DMLK_CONFIG_FILE=\"../test/configs/test_rng_fail_config.h\"
+
 
 CFLAGS += -Imlkem
 
@@ -63,6 +72,11 @@ $(BUILD_DIR)/libmlkem512_alloc.a: $(MLKEM512_ALLOC_OBJS)
 $(BUILD_DIR)/libmlkem768_alloc.a: $(MLKEM768_ALLOC_OBJS)
 $(BUILD_DIR)/libmlkem1024_alloc.a: $(MLKEM1024_ALLOC_OBJS)
 
+# RNG fail test libraries with custom randombytes config
+$(BUILD_DIR)/libmlkem512_rng_fail.a: $(MLKEM512_RNG_FAIL_OBJS)
+$(BUILD_DIR)/libmlkem768_rng_fail.a: $(MLKEM768_RNG_FAIL_OBJS)
+$(BUILD_DIR)/libmlkem1024_rng_fail.a: $(MLKEM1024_RNG_FAIL_OBJS)
+
 $(BUILD_DIR)/libmlkem.a: $(MLKEM512_OBJS) $(MLKEM768_OBJS) $(MLKEM1024_OBJS)
 
 $(MLKEM512_DIR)/bin/bench_mlkem512: CFLAGS += -Itest/hal
@@ -79,6 +93,10 @@ $(MLKEM1024_DIR)/bin/test_stack1024: CFLAGS += -Imlkem/src -fstack-usage
 $(MLKEM512_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 $(MLKEM768_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 $(MLKEM1024_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
+
+$(MLKEM512_DIR)/test/src/test_rng_fail.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_rng_fail_config.h\"
+$(MLKEM768_DIR)/test/src/test_rng_fail.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_rng_fail_config.h\"
+$(MLKEM1024_DIR)/test/src/test_rng_fail.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_rng_fail_config.h\"
 
 $(MLKEM512_DIR)/bin/test_unit512: CFLAGS += -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
 $(MLKEM768_DIR)/bin/test_unit768: CFLAGS += -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
@@ -118,6 +136,12 @@ $(BUILD_DIR)/$(1)/bin/test_alloc$(subst mlkem,,$(1)): LDLIBS += -L$(BUILD_DIR) -
 $(BUILD_DIR)/$(1)/bin/test_alloc$(subst mlkem,,$(1)): $(BUILD_DIR)/$(1)/test/src/test_alloc.c.o $(BUILD_DIR)/lib$(1)_alloc.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
 endef
 
+# Special rule for test_rng_fail - link against rng_fail libraries with custom randombytes config
+define ADD_SOURCE_RNG_FAIL
+$(BUILD_DIR)/$(1)/bin/test_rng_fail$(subst mlkem,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)_rng_fail
+$(BUILD_DIR)/$(1)/bin/test_rng_fail$(subst mlkem,,$(1)): $(BUILD_DIR)/$(1)/test/src/test_rng_fail.c.o $(BUILD_DIR)/lib$(1)_rng_fail.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
+endef
+
 $(foreach scheme,mlkem512 mlkem768 mlkem1024, \
 	$(foreach test,$(ACVP_TESTS), \
 		$(eval $(call ADD_SOURCE,$(scheme),$(test),acvp)) \
@@ -130,6 +154,7 @@ $(foreach scheme,mlkem512 mlkem768 mlkem1024, \
 	) \
 	$(eval $(call ADD_SOURCE_UNIT,$(scheme))) \
 	$(eval $(call ADD_SOURCE_ALLOC,$(scheme))) \
+	$(eval $(call ADD_SOURCE_RNG_FAIL,$(scheme))) \
 )
 
 $(ALL_TESTS:%=$(MLKEM512_DIR)/bin/%512): $(call MAKE_OBJS, $(MLKEM512_DIR), $(wildcard test/notrandombytes/*.c) $(EXTRA_SOURCES))

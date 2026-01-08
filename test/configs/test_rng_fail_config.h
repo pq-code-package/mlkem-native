@@ -25,11 +25,13 @@
  */
 
 /*
- * Test configuration: Test configuration with custom memcpy
+ * Test configuration: Using custom randombytes that can fail at specific
+ * invocation
  *
  * This configuration differs from the default mlkem/mlkem_native_config.h in
  * the following places:
- *   - MLK_CONFIG_CUSTOM_MEMCPY
+ *   - MLK_CONFIG_NAMESPACE_PREFIX
+ *   - MLK_CONFIG_CUSTOM_RANDOMBYTES
  */
 
 
@@ -73,6 +75,7 @@
  *              on the command line.
  *
  *****************************************************************************/
+/* No need to set this -- we _are_ already in a custom config */
 /* #define MLK_CONFIG_FILE "mlkem_native_config.h" */
 
 /******************************************************************************
@@ -86,9 +89,7 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#if !defined(MLK_CONFIG_NAMESPACE_PREFIX)
-#define MLK_CONFIG_NAMESPACE_PREFIX MLK_DEFAULT_NAMESPACE_PREFIX
-#endif
+#define MLK_CONFIG_NAMESPACE_PREFIX mlk
 
 /******************************************************************************
  * Name:        MLK_CONFIG_MULTILEVEL_BUILD
@@ -415,17 +416,14 @@
  *              or signature.
  *
  *****************************************************************************/
-/* #define MLK_CONFIG_CUSTOM_RANDOMBYTES
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "src/sys.h"
-   static MLK_INLINE int mlk_randombytes(uint8_t *ptr, size_t len)
-   {
-       ... your implementation ...
-       return 0;
-   }
-   #endif
-*/
+#define MLK_CONFIG_CUSTOM_RANDOMBYTES
+#if !defined(__ASSEMBLER__)
+#include <stddef.h>
+#include <stdint.h>
+#include "src/sys.h"
+int mlk_randombytes(uint8_t *out, size_t outlen);
+#endif /* !__ASSEMBLER__ */
+
 
 /******************************************************************************
  * Name:        MLK_CONFIG_CUSTOM_CAPABILITY_FUNC
@@ -517,24 +515,16 @@
  *              void *mlk_memcpy(void *dest, const void *src, size_t n)
  *
  *****************************************************************************/
-#define MLK_CONFIG_CUSTOM_MEMCPY
-#if !defined(__ASSEMBLER__)
-#include <stddef.h>
-#include <stdint.h>
-#include "../mlkem/src/sys.h"
-static MLK_INLINE void *mlk_memcpy(void *dest, const void *src, size_t n)
-{
-  /* Simple byte-by-byte copy implementation for testing */
-  unsigned char *d = (unsigned char *)dest;
-  const unsigned char *s = (const unsigned char *)src;
-  for (size_t i = 0; i < n; i++)
-  {
-    d[i] = s[i];
-  }
-  return dest;
-}
-#endif /* !__ASSEMBLER__ */
-
+/* #define MLK_CONFIG_CUSTOM_MEMCPY
+   #if !defined(__ASSEMBLER__)
+   #include <stdint.h>
+   #include "src/sys.h"
+   static MLK_INLINE void *mlk_memcpy(void *dest, const void *src, size_t n)
+   {
+       ... your implementation ...
+   }
+   #endif
+*/
 
 /******************************************************************************
  * Name:        MLK_CONFIG_CUSTOM_MEMSET
