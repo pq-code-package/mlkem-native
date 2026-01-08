@@ -215,7 +215,13 @@ MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(keypair_derand)(
     uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
     uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-    const uint8_t coins[2 * MLKEM_SYMBYTES]);
+    const uint8_t coins[2 * MLKEM_SYMBYTES]
+#ifdef MLK_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
+
 
 #if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 /*************************************************
@@ -242,7 +248,12 @@ MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(keypair)(
     uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-    uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+    uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]
+#ifdef MLK_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
 /*************************************************
@@ -275,7 +286,12 @@ int MLK_API_NAMESPACE(enc_derand)(
     uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
     uint8_t ss[MLKEM_BYTES],
     const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-    const uint8_t coins[MLKEM_SYMBYTES]);
+    const uint8_t coins[MLKEM_SYMBYTES]
+#ifdef MLK_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 #if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 /*************************************************
@@ -305,7 +321,12 @@ MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(enc)(
     uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
     uint8_t ss[MLKEM_BYTES],
-    const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+    const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]
+#ifdef MLK_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
 /*************************************************
@@ -335,7 +356,13 @@ MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(dec)(
     uint8_t ss[MLKEM_BYTES],
     const uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-    const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+    const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]
+#ifdef MLK_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
+
 
 /*************************************************
  * Name:        crypto_kem_check_pk
@@ -357,7 +384,12 @@ int MLK_API_NAMESPACE(dec)(
 MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(check_pk)(
-    const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+    const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]
+#ifdef MLK_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 /*************************************************
  * Name:        crypto_kem_check_sk
@@ -380,7 +412,12 @@ int MLK_API_NAMESPACE(check_pk)(
 MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(check_sk)(
-    const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+    const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]
+#ifdef MLK_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 #ifdef __cplusplus
 }

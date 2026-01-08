@@ -7,5 +7,5 @@
 void harness(void)
 {
   uint8_t *a;
-  mlk_kem_check_pk(a);
+  mlk_kem_check_pk(a, NULL /* context will be dropped by preprocessor */);
 }

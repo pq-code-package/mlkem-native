@@ -50,7 +50,8 @@ __contract__(
   array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
 );
 
-#define mlk_indcpa_keypair_derand MLK_NAMESPACE_K(indcpa_keypair_derand)
+#define mlk_indcpa_keypair_derand \
+  MLK_NAMESPACE_K(indcpa_keypair_derand) MLK_CONTEXT_PARAMETERS_3
 /*************************************************
  * Name:        mlk_indcpa_keypair_derand
  *
@@ -71,7 +72,8 @@ MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
                               uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
-                              const uint8_t coins[MLKEM_SYMBYTES])
+                              const uint8_t coins[MLKEM_SYMBYTES],
+                              MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCPA_SECRETKEYBYTES))
@@ -82,7 +84,7 @@ __contract__(
           return_value == MLK_ERR_OUT_OF_MEMORY)
 );
 
-#define mlk_indcpa_enc MLK_NAMESPACE_K(indcpa_enc)
+#define mlk_indcpa_enc MLK_NAMESPACE_K(indcpa_enc) MLK_CONTEXT_PARAMETERS_4
 /*************************************************
  * Name:        mlk_indcpa_enc
  *
@@ -107,7 +109,8 @@ MLK_MUST_CHECK_RETURN_VALUE
 int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
                    const uint8_t m[MLKEM_INDCPA_MSGBYTES],
                    const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                   const uint8_t coins[MLKEM_SYMBYTES])
+                   const uint8_t coins[MLKEM_SYMBYTES],
+                   MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(c, MLKEM_INDCPA_BYTES))
   requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES))
@@ -118,7 +121,7 @@ __contract__(
           return_value == MLK_ERR_OUT_OF_MEMORY)
 );
 
-#define mlk_indcpa_dec MLK_NAMESPACE_K(indcpa_dec)
+#define mlk_indcpa_dec MLK_NAMESPACE_K(indcpa_dec) MLK_CONTEXT_PARAMETERS_3
 /*************************************************
  * Name:        mlk_indcpa_dec
  *
@@ -139,7 +142,8 @@ MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
                    const uint8_t c[MLKEM_INDCPA_BYTES],
-                   const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
+                   const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
+                   MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(c, MLKEM_INDCPA_BYTES))
   requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES))
