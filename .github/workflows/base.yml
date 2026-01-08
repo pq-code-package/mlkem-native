@@ -318,3 +318,8 @@ jobs:
           scan-build --status-bugs make quickcheck OPT=0
           make clean >/dev/null
           scan-build --status-bugs make quickcheck OPT=1
+  symlink-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+    - uses: donatj/symlink-check-action@b3c737d0fd4e52752f0b8c71a03f3f775fa015cb
