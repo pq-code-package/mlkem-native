@@ -164,18 +164,49 @@
 #error Bad configuration: MLK_CONFIG_CUSTOM_ALLOC_FREE must be set together with MLK_CUSTOM_ALLOC and MLK_CUSTOM_FREE
 #endif
 
+/*
+ * If the integration wants to provide a context parameter for use in
+ * platform-specific hooks, then it should define this parameter.
+ *
+ * The MLK_CONTEXT_PARAMETERS_n macros are intended to be used with macros
+ * defining the function names and expand to either pass or discard the context
+ * argument as required by the current build.  If there is no context parameter
+ * requested then these are removed from the prototypes and from all calls.
+ */
+#ifdef MLK_CONFIG_INTEGRATION_REQUIRES_CONTEXT
+#define MLK_CONTEXT_PARAMETERS_0(context) (context)
+#define MLK_CONTEXT_PARAMETERS_1(arg0, context) (arg0, context)
+#define MLK_CONTEXT_PARAMETERS_2(arg0, arg1, context) (arg0, arg1, context)
+#define MLK_CONTEXT_PARAMETERS_3(arg0, arg1, arg2, context) \
+  (arg0, arg1, arg2, context)
+#define MLK_CONTEXT_PARAMETERS_4(arg0, arg1, arg2, arg3, context) \
+  (arg0, arg1, arg2, arg3, context)
+#else
+#define MLK_CONTEXT_PARAMETERS_0() ()
+#define MLK_CONTEXT_PARAMETERS_1(arg0) (arg0)
+#define MLK_CONTEXT_PARAMETERS_2(arg0, arg1) (arg0, arg1)
+#define MLK_CONTEXT_PARAMETERS_3(arg0, arg1, arg2) (arg0, arg1, arg2)
+#define MLK_CONTEXT_PARAMETERS_4(arg0, arg1, arg2, arg3) \
+  (arg0, arg1, arg2, arg3)
+#endif
+
+#if defined(MLK_CONFIG_CONTEXT_PARAMETER_TYPE) != \
+    defined(MLK_CONFIG_INTEGRATION_REQUIRES_CONTEXT)
+#error MLK_CONFIG_CONTEXT_PARAMETER_TYPE must be defined if and only if MLK_CONFIG_INTEGRATION_REQUIRES_CONTEXT is defined
+#endif
+
 #if !defined(MLK_CONFIG_CUSTOM_ALLOC_FREE)
 /* Default: stack allocation */
 
-#define MLK_ALLOC(v, T, N)      \
-  MLK_ALIGN T mlk_alloc_##v[N]; \
+#define MLK_ALLOC(v, T, N, context) \
+  MLK_ALIGN T mlk_alloc_##v[N];     \
   T *v = mlk_alloc_##v
 
 /* TODO: This leads to a circular dependency between common and verify.h
  * It just works out before we're at the end of the file, but it's still
  * prone to issues in the future. */
 #include "verify.h"
-#define MLK_FREE(v, T, N)                              \
+#define MLK_FREE(v, T, N, context)                     \
   do                                                   \
   {                                                    \
     mlk_zeroize(mlk_alloc_##v, sizeof(mlk_alloc_##v)); \
@@ -186,16 +217,23 @@
 
 /* Custom allocation */
 
-#define MLK_ALLOC(v, T, N) MLK_CUSTOM_ALLOC(v, T, N)
-#define MLK_FREE(v, T, N)              \
-  do                                   \
-  {                                    \
-    if (v != NULL)                     \
-    {                                  \
-      mlk_zeroize(v, sizeof(T) * (N)); \
-      MLK_CUSTOM_FREE(v, T, N);        \
-      v = NULL;                        \
-    }                                  \
+/*
+ * The indirection here is necessary to use MLK_CONTEXT_PARAMETERS_3 here.
+ */
+#define MLK_APPLY(f, args) f args
+
+#define MLK_ALLOC(v, T, N, context) \
+  MLK_APPLY(MLK_CUSTOM_ALLOC, MLK_CONTEXT_PARAMETERS_3(v, T, N, context))
+
+#define MLK_FREE(v, T, N, context)                                           \
+  do                                                                         \
+  {                                                                          \
+    if (v != NULL)                                                           \
+    {                                                                        \
+      mlk_zeroize(v, sizeof(T) * (N));                                       \
+      MLK_APPLY(MLK_CUSTOM_FREE, MLK_CONTEXT_PARAMETERS_3(v, T, N, context)) \
+      v = NULL;                                                              \
+    }                                                                        \
   } while (0)
 
 #endif /* MLK_CONFIG_CUSTOM_ALLOC_FREE */

@@ -377,7 +377,8 @@ __contract__(
 MLK_INTERNAL_API
 int mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
                               uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
-                              const uint8_t coins[MLKEM_SYMBYTES])
+                              const uint8_t coins[MLKEM_SYMBYTES],
+                              MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   typedef struct
   {
@@ -393,7 +394,7 @@ int mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
   int ret = 0;
   const uint8_t *publicseed;
   const uint8_t *noiseseed;
-  MLK_ALLOC(ws, workspace, 1);
+  MLK_ALLOC(ws, workspace, 1, context);
 
   if (ws == NULL)
   {
@@ -459,7 +460,7 @@ int mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(ws, workspace, 1);
+  MLK_FREE(ws, workspace, 1, context);
   return ret;
 }
 
@@ -475,7 +476,8 @@ MLK_INTERNAL_API
 int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
                    const uint8_t m[MLKEM_INDCPA_MSGBYTES],
                    const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                   const uint8_t coins[MLKEM_SYMBYTES])
+                   const uint8_t coins[MLKEM_SYMBYTES],
+                   MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   typedef struct
   {
@@ -492,7 +494,7 @@ int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
   } workspace;
 
   int ret = 0;
-  MLK_ALLOC(ws, workspace, 1);
+  MLK_ALLOC(ws, workspace, 1, context);
 
   if (ws == NULL)
   {
@@ -557,7 +559,7 @@ int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(ws, workspace, 1);
+  MLK_FREE(ws, workspace, 1, context);
   return ret;
 }
 
@@ -567,7 +569,8 @@ cleanup:
 MLK_INTERNAL_API
 int mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
                    const uint8_t c[MLKEM_INDCPA_BYTES],
-                   const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
+                   const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
+                   MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   typedef struct
   {
@@ -579,7 +582,7 @@ int mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
   } workspace;
 
   int ret = 0;
-  MLK_ALLOC(ws, workspace, 1);
+  MLK_ALLOC(ws, workspace, 1, context);
 
   if (ws == NULL)
   {
@@ -604,7 +607,7 @@ int mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(ws, workspace, 1);
+  MLK_FREE(ws, workspace, 1, context);
   return ret;
 }
 
