@@ -333,7 +333,7 @@ __contract__(ensures(return_value == (cond ? a : b)))
  *                                to UINT16_MAX to control proof complexity
  *                                only.
  *
- * Returns 0 if the byte arrays are equal, a non-zero value otherwise
+ * Returns 0 if the byte arrays are equal, 0xFF otherwise.
  *
  * Specification:
  * - Used to securely compute conditional move in
@@ -354,6 +354,7 @@ __contract__(
   requires(len <= UINT16_MAX)
   requires(memory_no_alias(a, len))
   requires(memory_no_alias(b, len))
+  ensures((return_value == 0) || (return_value == 0xFF))
   ensures((return_value == 0) == forall(i, 0, len, (a[i] == b[i]))))
 {
   uint8_t r = 0, s = 0;
