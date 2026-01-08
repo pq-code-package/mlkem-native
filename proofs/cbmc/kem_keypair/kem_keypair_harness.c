@@ -7,5 +7,5 @@
 void harness(void)
 {
   uint8_t *a, *b;
-  mlk_kem_keypair(a, b);
+  mlk_kem_keypair(a, b, NULL /* context will be dropped by preprocessor */);
 }
