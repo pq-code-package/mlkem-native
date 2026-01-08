@@ -7,5 +7,6 @@
 void harness(void)
 {
   uint8_t *a, *b, *c, *d;
-  mlk_kem_enc_derand(a, b, c, d);
+  mlk_kem_enc_derand(a, b, c, d,
+                     NULL /* context will be dropped by preprocessor */);
 }

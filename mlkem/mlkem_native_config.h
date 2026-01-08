@@ -655,6 +655,24 @@
  *****************************************************************************/
 /* #define MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
+/******************************************************************************
+ * Name:        MLK_CONFIG_INTEGRATION_REQUIRES_CONTEXT
+ *
+ * Description: Set this to add a context parameter that is provided to public
+ *              API functions and is then available in custom callbacks.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_INTEGRATION_REQUIRES_CONTEXT */
+
+/******************************************************************************
+ * Name:        MLK_CONFIG_CONTEXT_PARAMETER_TYPE
+ *
+ * Description: Set this to define the custom type for the context parameter
+ *              used by MLK_CONFIG_INTEGRATION_REQUIRES_CONTEXT.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_CONTEXT_PARAMETER_TYPE void* */
+
 /*************************  Config internals  ********************************/
 
 #endif /* MLK_BUILD_INTERNAL */

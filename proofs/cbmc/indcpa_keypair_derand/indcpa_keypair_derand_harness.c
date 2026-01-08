@@ -7,5 +7,6 @@
 void harness(void)
 {
   uint8_t *a, *b, *c;
-  mlk_indcpa_keypair_derand(a, b, c);
+  mlk_indcpa_keypair_derand(a, b, c,
+                            NULL /* context will be dropped by preprocessor */);
 }
