@@ -6,12 +6,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "kem.h"
+#include "mlkem_native.h"
 
 static void test_keygen_only(void)
 {
-  unsigned char pk[MLKEM_INDCCA_PUBLICKEYBYTES];
-  unsigned char sk[MLKEM_INDCCA_SECRETKEYBYTES];
+  unsigned char pk[CRYPTO_PUBLICKEYBYTES];
+  unsigned char sk[CRYPTO_SECRETKEYBYTES];
 
   /* Only call keypair - this is what we're measuring */
   /* Uses the notrandombytes implementation for deterministic randomness */
@@ -21,9 +21,9 @@ static void test_keygen_only(void)
 
 static void test_encaps_only(void)
 {
-  unsigned char pk[MLKEM_INDCCA_PUBLICKEYBYTES] = {0};
-  unsigned char ct[MLKEM_INDCCA_CIPHERTEXTBYTES];
-  unsigned char ss[MLKEM_SSBYTES];
+  unsigned char pk[CRYPTO_PUBLICKEYBYTES] = {0};
+  unsigned char ct[CRYPTO_CIPHERTEXTBYTES];
+  unsigned char ss[CRYPTO_BYTES];
 
   /* Only call encaps - this is what we're measuring */
   /* pk is zero-initialized (invalid key, but OK for stack measurement) */
@@ -33,9 +33,9 @@ static void test_encaps_only(void)
 
 static void test_decaps_only(void)
 {
-  unsigned char sk[MLKEM_INDCCA_SECRETKEYBYTES] = {0};
-  unsigned char ct[MLKEM_INDCCA_CIPHERTEXTBYTES] = {0};
-  unsigned char ss[MLKEM_SSBYTES];
+  unsigned char sk[CRYPTO_SECRETKEYBYTES] = {0};
+  unsigned char ct[CRYPTO_CIPHERTEXTBYTES] = {0};
+  unsigned char ss[CRYPTO_BYTES];
 
   /* Only call decaps - this is what we're measuring */
   /* sk and ct are zero-initialized (invalid, but OK for stack measurement) */
