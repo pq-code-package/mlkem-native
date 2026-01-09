@@ -183,6 +183,11 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /*************************************************
  * Name:        crypto_kem_keypair_derand
  *
@@ -376,6 +381,10 @@ MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(check_sk)(
     const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+
+#ifdef __cplusplus
+}
+#endif
 
 /****************************** SUPERCOP API *********************************/
 
