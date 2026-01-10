@@ -7,5 +7,5 @@
 void harness(void)
 {
   uint8_t *a, *b, *c;
-  crypto_kem_keypair_derand(a, b, c);
+  mlk_kem_enc(a, b, c);
 }
