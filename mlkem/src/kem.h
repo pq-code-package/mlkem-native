@@ -28,9 +28,7 @@
 #if defined(MLK_CHECK_APIS)
 /* Include to ensure consistency between internal kem.h
  * and external mlkem_native.h. */
-#define MLK_CONFIG_NO_SUPERCOP
 #include "mlkem_native.h"
-#undef MLK_CONFIG_NO_SUPERCOP
 
 #if MLKEM_INDCCA_SECRETKEYBYTES != \
     MLKEM_SECRETKEYBYTES(MLK_CONFIG_PARAMETER_SET)
@@ -49,18 +47,16 @@
 
 #endif /* MLK_CHECK_APIS */
 
-#define crypto_kem_keypair_derand MLK_NAMESPACE_K(keypair_derand)
-#define crypto_kem_keypair MLK_NAMESPACE_K(keypair)
-#define crypto_kem_enc_derand MLK_NAMESPACE_K(enc_derand)
-#define crypto_kem_enc MLK_NAMESPACE_K(enc)
-#define crypto_kem_dec MLK_NAMESPACE_K(dec)
-#define crypto_kem_check_pk MLK_NAMESPACE_K(check_pk)
-#define crypto_kem_check_sk MLK_NAMESPACE_K(check_sk)
-
-
+#define mlk_kem_keypair_derand MLK_NAMESPACE_K(keypair_derand)
+#define mlk_kem_keypair MLK_NAMESPACE_K(keypair)
+#define mlk_kem_enc_derand MLK_NAMESPACE_K(enc_derand)
+#define mlk_kem_enc MLK_NAMESPACE_K(enc)
+#define mlk_kem_dec MLK_NAMESPACE_K(dec)
+#define mlk_kem_check_pk MLK_NAMESPACE_K(check_pk)
+#define mlk_kem_check_sk MLK_NAMESPACE_K(check_sk)
 
 /*************************************************
- * Name:        crypto_kem_check_pk
+ * Name:        mlk_kem_check_pk
  *
  * Description: Implements modulus check mandated by FIPS 203,
  *              i.e., ensures that coefficients are in [0,q-1].
@@ -81,7 +77,7 @@
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+int mlk_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
@@ -90,7 +86,7 @@ __contract__(
 
 
 /*************************************************
- * Name:        crypto_kem_check_sk
+ * Name:        mlk_kem_check_sk
  *
  * Description: Implements public key hash check mandated by FIPS 203,
  *              i.e., ensures that
@@ -112,7 +108,7 @@ __contract__(
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+int mlk_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 __contract__(
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
@@ -120,7 +116,7 @@ __contract__(
 );
 
 /*************************************************
- * Name:        crypto_kem_keypair_derand
+ * Name:        mlk_kem_keypair_derand
  *
  * Description: Generates public and private key
  *              for CCA-secure ML-KEM key encapsulation mechanism
@@ -146,9 +142,9 @@ __contract__(
  **************************************************/
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                              uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
-                              const uint8_t coins[2 * MLKEM_SYMBYTES])
+int mlk_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+                           uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
+                           const uint8_t coins[2 * MLKEM_SYMBYTES])
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
@@ -160,7 +156,7 @@ __contract__(
 );
 
 /*************************************************
- * Name:        crypto_kem_keypair
+ * Name:        mlk_kem_keypair
  *
  * Description: Generates public and private key
  *              for CCA-secure ML-KEM key encapsulation mechanism
@@ -183,8 +179,8 @@ __contract__(
  **************************************************/
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                       uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+int mlk_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+                    uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
@@ -195,7 +191,7 @@ __contract__(
 );
 
 /*************************************************
- * Name:        crypto_kem_enc_derand
+ * Name:        mlk_kem_enc_derand
  *
  * Description: Generates cipher text and shared
  *              secret for given public key
@@ -223,10 +219,10 @@ __contract__(
  **************************************************/
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                          uint8_t ss[MLKEM_SSBYTES],
-                          const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                          const uint8_t coins[MLKEM_SYMBYTES])
+int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
+                       uint8_t ss[MLKEM_SSBYTES],
+                       const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+                       const uint8_t coins[MLKEM_SYMBYTES])
 __contract__(
   requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
   requires(memory_no_alias(ss, MLKEM_SSBYTES))
@@ -239,7 +235,7 @@ __contract__(
 );
 
 /*************************************************
- * Name:        crypto_kem_enc
+ * Name:        mlk_kem_enc
  *
  * Description: Generates cipher text and shared
  *              secret for given public key
@@ -264,9 +260,9 @@ __contract__(
  **************************************************/
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                   uint8_t ss[MLKEM_SSBYTES],
-                   const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+int mlk_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
+                uint8_t ss[MLKEM_SSBYTES],
+                const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 __contract__(
   requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
   requires(memory_no_alias(ss, MLKEM_SSBYTES))
@@ -278,7 +274,7 @@ __contract__(
 );
 
 /*************************************************
- * Name:        crypto_kem_dec
+ * Name:        mlk_kem_dec
  *
  * Description: Generates shared secret for given
  *              cipher text and private key
@@ -303,9 +299,9 @@ __contract__(
  **************************************************/
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
-                   const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                   const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+int mlk_kem_dec(uint8_t ss[MLKEM_SSBYTES],
+                const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
+                const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 __contract__(
   requires(memory_no_alias(ss, MLKEM_SSBYTES))
   requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
