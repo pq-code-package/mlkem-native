@@ -465,4 +465,65 @@ int MLK_API_NAMESPACE(check_sk)(
 #endif /* MLK_CONFIG_API_NO_SUPERCOP */
 #endif /* !MLK_CONFIG_API_CONSTANTS_ONLY */
 
+
+/***************************** Memory Usage **********************************/
+
+/*
+ * By default mlkem-native performs all memory allocations on the stack.
+ * Alternatively, mlkem-native supports custom allocation of large structures
+ * through the `MLK_CONFIG_CUSTOM_ALLOC_FREE` configuration option.
+ * See mlkem_native_config.h for details.
+ *
+ * `MLK_TOTAL_ALLOC_{512,768,1024}_{KEYPAIR,ENCAPS,DECAPS}` indicates the
+ * maximum (accumulative) allocation via MLK_ALLOC for each parameter set and
+ * operation. Note that some stack allocation remains even when using custom
+ * allocators, so these values are lower than total stack usage with the default
+ * stack-only allocation.
+ *
+ * These constants may be used to implement custom allocations using a
+ * fixed-sized buffer and a simple allocator (e.g., bump allocator).
+ */
+/* check-magic: off */
+#define MLK_TOTAL_ALLOC_512_KEYPAIR 10048
+#define MLK_TOTAL_ALLOC_512_ENCAPS 8384
+#define MLK_TOTAL_ALLOC_512_DECAPS 9152
+#define MLK_TOTAL_ALLOC_768_KEYPAIR 15552
+#define MLK_TOTAL_ALLOC_768_ENCAPS 13248
+#define MLK_TOTAL_ALLOC_768_DECAPS 14336
+#define MLK_TOTAL_ALLOC_1024_KEYPAIR 22400
+#define MLK_TOTAL_ALLOC_1024_ENCAPS 19136
+#define MLK_TOTAL_ALLOC_1024_DECAPS 20704
+/* check-magic: on */
+
+/*
+ * `MLK_MAX_TOTAL_ALLOC_{KEYPAIR,ENCAPS,DECAPS}` is the maximum across all
+ * parameter sets for each operation.
+ * `MLK_MAX_TOTAL_ALLOC` is the maximum across all parameter sets and
+ * operations.
+ */
+#define MLK_MAX_TOTAL_ALLOC_KEYPAIR MLK_TOTAL_ALLOC_1024_KEYPAIR
+#define MLK_MAX_TOTAL_ALLOC_ENCAPS MLK_TOTAL_ALLOC_1024_ENCAPS
+#define MLK_MAX_TOTAL_ALLOC_DECAPS MLK_TOTAL_ALLOC_1024_DECAPS
+
+#define MLK_MAX3_(a, b, c) \
+  ((a) > (b) ? ((a) > (c) ? (a) : (c)) : ((b) > (c) ? (b) : (c)))
+
+/*
+ * `MLK_TOTAL_ALLOC_{512,768,1024}` is the maximum across all operations for
+ * each parameter set.
+ * `MLK_MAX_TOTAL_ALLOC` is the maximum across all parameter sets and
+ * operations.
+ */
+#define MLK_TOTAL_ALLOC_512                                          \
+  MLK_MAX3_(MLK_TOTAL_ALLOC_512_KEYPAIR, MLK_TOTAL_ALLOC_512_ENCAPS, \
+            MLK_TOTAL_ALLOC_512_DECAPS)
+#define MLK_TOTAL_ALLOC_768                                          \
+  MLK_MAX3_(MLK_TOTAL_ALLOC_768_KEYPAIR, MLK_TOTAL_ALLOC_768_ENCAPS, \
+            MLK_TOTAL_ALLOC_768_DECAPS)
+#define MLK_TOTAL_ALLOC_1024                                           \
+  MLK_MAX3_(MLK_TOTAL_ALLOC_1024_KEYPAIR, MLK_TOTAL_ALLOC_1024_ENCAPS, \
+            MLK_TOTAL_ALLOC_1024_DECAPS)
+
+#define MLK_MAX_TOTAL_ALLOC MLK_TOTAL_ALLOC_1024
+
 #endif /* !MLK_H */

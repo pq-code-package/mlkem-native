@@ -13,6 +13,30 @@
 #include "../notrandombytes/notrandombytes.h"
 
 /*
+ * Level-dependent allocation limit macros.
+ * These expand to the right MLK_TOTAL_ALLOC_{512,768,1024}_* constant
+ * based on MLK_CONFIG_API_PARAMETER_SET.
+ */
+#define MLK_TOTAL_ALLOC_KEYPAIR__(LVL) MLK_TOTAL_ALLOC_##LVL##_KEYPAIR
+#define MLK_TOTAL_ALLOC_KEYPAIR_(LVL) MLK_TOTAL_ALLOC_KEYPAIR__(LVL)
+#define MLK_TOTAL_ALLOC_KEYPAIR \
+  MLK_TOTAL_ALLOC_KEYPAIR_(MLK_CONFIG_API_PARAMETER_SET)
+
+#define MLK_TOTAL_ALLOC_ENCAPS__(LVL) MLK_TOTAL_ALLOC_##LVL##_ENCAPS
+#define MLK_TOTAL_ALLOC_ENCAPS_(LVL) MLK_TOTAL_ALLOC_ENCAPS__(LVL)
+#define MLK_TOTAL_ALLOC_ENCAPS \
+  MLK_TOTAL_ALLOC_ENCAPS_(MLK_CONFIG_API_PARAMETER_SET)
+
+#define MLK_TOTAL_ALLOC_DECAPS__(LVL) MLK_TOTAL_ALLOC_##LVL##_DECAPS
+#define MLK_TOTAL_ALLOC_DECAPS_(LVL) MLK_TOTAL_ALLOC_DECAPS__(LVL)
+#define MLK_TOTAL_ALLOC_DECAPS \
+  MLK_TOTAL_ALLOC_DECAPS_(MLK_CONFIG_API_PARAMETER_SET)
+
+#define MLK_TOTAL_ALLOC__(LVL) MLK_TOTAL_ALLOC_##LVL
+#define MLK_TOTAL_ALLOC_(LVL) MLK_TOTAL_ALLOC__(LVL)
+#define MLK_TOTAL_ALLOC MLK_TOTAL_ALLOC_(MLK_CONFIG_API_PARAMETER_SET)
+
+/*
  * This test checks that
  * - we handle allocator failures correctly, propagating MLK_ERR_OUT_OF_MEMORY
  *   and cleaning up all memory, and
@@ -51,6 +75,10 @@ struct test_ctx_t
   uint8_t *buffer;
   size_t offset;
   size_t high_mark;
+  size_t global_high_mark;
+  size_t global_high_mark_keypair;
+  size_t global_high_mark_encaps;
+  size_t global_high_mark_decaps;
 
   /* Allocation tracker */
   alloc_info_t alloc_stack[MLK_MAX_IN_FLIGHT_ALLOCS];
@@ -207,79 +235,93 @@ void custom_free(test_ctx_t *ctx, void *p, size_t sz, const char *file,
   }
 }
 
-#define TEST_ALLOC_FAILURE(test_name, call)                                   \
-  do                                                                          \
-  {                                                                           \
-    int num_allocs, i, rc;                                                    \
-    /* First pass: count allocations */                                       \
-    ctx->high_mark = 0;                                                       \
-    reset_all(ctx);                                                           \
-    rc = call;                                                                \
-    if (rc != 0)                                                              \
-    {                                                                         \
-      fprintf(stderr, "ERROR: %s failed with %d in counting pass\n",          \
-              test_name, rc);                                                 \
-      return 1;                                                               \
-    }                                                                         \
-    if (ctx->alloc_stack_top != 0)                                            \
-    {                                                                         \
-      fprintf(stderr, "ERROR: %s leaked %d allocation(s) in counting pass\n", \
-              test_name, ctx->alloc_stack_top);                               \
-      return 1;                                                               \
-    }                                                                         \
-    num_allocs = ctx->alloc_counter;                                          \
-    /* Second pass: test each allocation failure */                           \
-    for (i = 0; i < num_allocs; i++)                                          \
-    {                                                                         \
-      reset_all(ctx);                                                         \
-      ctx->fail_on_counter = i;                                               \
-      rc = call;                                                              \
-      if (rc != MLK_ERR_OUT_OF_MEMORY)                                        \
-      {                                                                       \
-        int rc2;                                                              \
-        /* Re-run dry-run and print debug info */                             \
-        ctx->print_debug_info = 1;                                            \
-        reset_all(ctx);                                                       \
-        rc2 = call;                                                           \
-        (void)rc2;                                                            \
-        if (rc == 0)                                                          \
-        {                                                                     \
-          fprintf(stderr,                                                     \
-                  "ERROR: %s unexpectedly succeeded when allocation %d/%d "   \
-                  "was instrumented to fail\n",                               \
-                  test_name, i + 1, num_allocs);                              \
-        }                                                                     \
-        else                                                                  \
-        {                                                                     \
-          fprintf(stderr,                                                     \
-                  "ERROR: %s failed with wrong error code %d "                \
-                  "(expected %d) when allocation %d/%d was instrumented "     \
-                  "to fail\n",                                                \
-                  test_name, rc, MLK_ERR_OUT_OF_MEMORY, i + 1, num_allocs);   \
-        }                                                                     \
-        return 1;                                                             \
-      }                                                                       \
-      if (ctx->alloc_stack_top != 0)                                          \
-      {                                                                       \
-        fprintf(stderr,                                                       \
-                "ERROR: %s leaked %d allocation(s) when allocation %d/%d "    \
-                "was instrumented to fail\n",                                 \
-                test_name, ctx->alloc_stack_top, i + 1, num_allocs);          \
-        return 1;                                                             \
-      }                                                                       \
-      if (ctx->offset != 0)                                                   \
-      {                                                                       \
-        fprintf(stderr,                                                       \
-                "ERROR: %s leaked %d bytes when allocation %d/%d "            \
-                "was instrumented to fail\n",                                 \
-                test_name, (int)ctx->offset, i + 1, num_allocs);              \
-        return 1;                                                             \
-      }                                                                       \
-    }                                                                         \
-    printf(                                                                   \
-        "Allocation test for %s PASSED.\n"                                    \
-        "  Max dynamic allocation: %d bytes\n",                               \
-        test_name, (int)ctx->high_mark);                                      \
+#define TEST_ALLOC_FAILURE(test_name, call, alloc_limit, global_high_mark_ptr) \
+  do                                                                           \
+  {                                                                            \
+    int num_allocs, i, rc;                                                     \
+    /* First pass: count allocations */                                        \
+    ctx->high_mark = 0;                                                        \
+    reset_all(ctx);                                                            \
+    rc = call;                                                                 \
+    if (rc != 0)                                                               \
+    {                                                                          \
+      fprintf(stderr, "ERROR: %s failed with %d in counting pass\n",           \
+              test_name, rc);                                                  \
+      return 1;                                                                \
+    }                                                                          \
+    if (ctx->alloc_stack_top != 0)                                             \
+    {                                                                          \
+      fprintf(stderr, "ERROR: %s leaked %d allocation(s) in counting pass\n",  \
+              test_name, ctx->alloc_stack_top);                                \
+      return 1;                                                                \
+    }                                                                          \
+    num_allocs = ctx->alloc_counter;                                           \
+    /* Second pass: test each allocation failure */                            \
+    for (i = 0; i < num_allocs; i++)                                           \
+    {                                                                          \
+      reset_all(ctx);                                                          \
+      ctx->fail_on_counter = i;                                                \
+      rc = call;                                                               \
+      if (rc != MLK_ERR_OUT_OF_MEMORY)                                         \
+      {                                                                        \
+        int rc2;                                                               \
+        /* Re-run dry-run and print debug info */                              \
+        ctx->print_debug_info = 1;                                             \
+        reset_all(ctx);                                                        \
+        rc2 = call;                                                            \
+        (void)rc2;                                                             \
+        if (rc == 0)                                                           \
+        {                                                                      \
+          fprintf(stderr,                                                      \
+                  "ERROR: %s unexpectedly succeeded when allocation %d/%d "    \
+                  "was instrumented to fail\n",                                \
+                  test_name, i + 1, num_allocs);                               \
+        }                                                                      \
+        else                                                                   \
+        {                                                                      \
+          fprintf(stderr,                                                      \
+                  "ERROR: %s failed with wrong error code %d "                 \
+                  "(expected %d) when allocation %d/%d was instrumented "      \
+                  "to fail\n",                                                 \
+                  test_name, rc, MLK_ERR_OUT_OF_MEMORY, i + 1, num_allocs);    \
+        }                                                                      \
+        return 1;                                                              \
+      }                                                                        \
+      if (ctx->alloc_stack_top != 0)                                           \
+      {                                                                        \
+        fprintf(stderr,                                                        \
+                "ERROR: %s leaked %d allocation(s) when allocation %d/%d "     \
+                "was instrumented to fail\n",                                  \
+                test_name, ctx->alloc_stack_top, i + 1, num_allocs);           \
+        return 1;                                                              \
+      }                                                                        \
+      if (ctx->offset != 0)                                                    \
+      {                                                                        \
+        fprintf(stderr,                                                        \
+                "ERROR: %s leaked %d bytes when allocation %d/%d "             \
+                "was instrumented to fail\n",                                  \
+                test_name, (int)ctx->offset, i + 1, num_allocs);               \
+        return 1;                                                              \
+      }                                                                        \
+    }                                                                          \
+    if (ctx->high_mark > (alloc_limit))                                        \
+    {                                                                          \
+      fprintf(stderr, "ERROR: max allocation %u in %s exceeded limit %d\n",    \
+              (unsigned)ctx->high_mark, test_name, (int)(alloc_limit));        \
+      return 1;                                                                \
+    }                                                                          \
+    printf(                                                                    \
+        "Allocation test for %s PASSED.\n"                                     \
+        "  Max dynamic allocation: %d bytes\n",                                \
+        test_name, (int)ctx->high_mark);                                       \
+    if (ctx->high_mark > ctx->global_high_mark)                                \
+    {                                                                          \
+      ctx->global_high_mark = ctx->high_mark;                                  \
+    }                                                                          \
+    if (ctx->high_mark > *(global_high_mark_ptr))                              \
+    {                                                                          \
+      *(global_high_mark_ptr) = ctx->high_mark;                                \
+    }                                                                          \
   } while (0)
 
 static int test_keygen_alloc_failure(test_ctx_t *ctx)
@@ -287,7 +329,8 @@ static int test_keygen_alloc_failure(test_ctx_t *ctx)
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
 
-  TEST_ALLOC_FAILURE("crypto_kem_keypair", crypto_kem_keypair(pk, sk, ctx));
+  TEST_ALLOC_FAILURE("crypto_kem_keypair", crypto_kem_keypair(pk, sk, ctx),
+                     MLK_TOTAL_ALLOC_KEYPAIR, &ctx->global_high_mark_keypair);
   return 0;
 }
 
@@ -306,7 +349,8 @@ static int test_enc_alloc_failure(test_ctx_t *ctx)
     return 1;
   }
 
-  TEST_ALLOC_FAILURE("crypto_kem_enc", crypto_kem_enc(ct, key, pk, ctx));
+  TEST_ALLOC_FAILURE("crypto_kem_enc", crypto_kem_enc(ct, key, pk, ctx),
+                     MLK_TOTAL_ALLOC_ENCAPS, &ctx->global_high_mark_encaps);
   return 0;
 }
 
@@ -332,7 +376,8 @@ static int test_dec_alloc_failure(test_ctx_t *ctx)
     return 1;
   }
 
-  TEST_ALLOC_FAILURE("crypto_kem_dec", crypto_kem_dec(key_dec, ct, sk, ctx));
+  TEST_ALLOC_FAILURE("crypto_kem_dec", crypto_kem_dec(key_dec, ct, sk, ctx),
+                     MLK_TOTAL_ALLOC_DECAPS, &ctx->global_high_mark_decaps);
   return 0;
 }
 
@@ -349,7 +394,8 @@ static int test_check_pk_alloc_failure(test_ctx_t *ctx)
     return 1;
   }
 
-  TEST_ALLOC_FAILURE("crypto_kem_check_pk", crypto_kem_check_pk(pk, ctx));
+  TEST_ALLOC_FAILURE("crypto_kem_check_pk", crypto_kem_check_pk(pk, ctx),
+                     MLK_TOTAL_ALLOC_KEYPAIR, &ctx->global_high_mark_keypair);
   return 0;
 }
 
@@ -366,9 +412,24 @@ static int test_check_sk_alloc_failure(test_ctx_t *ctx)
     return 1;
   }
 
-  TEST_ALLOC_FAILURE("crypto_kem_check_sk", crypto_kem_check_sk(sk, ctx));
+  TEST_ALLOC_FAILURE("crypto_kem_check_sk", crypto_kem_check_sk(sk, ctx),
+                     MLK_TOTAL_ALLOC_KEYPAIR, &ctx->global_high_mark_keypair);
   return 0;
 }
+
+/*
+ * Helper macro to check allocation high watermark matches expected limit.
+ */
+#define CHECK_ALLOC_MATCH(high_mark, expected)                               \
+  do                                                                         \
+  {                                                                          \
+    if ((expected) != (high_mark))                                           \
+    {                                                                        \
+      fprintf(stderr, "ERROR: %s = %u does not match %s = %d\n", #high_mark, \
+              (unsigned)(high_mark), #expected, (int)(expected));            \
+      return 1;                                                              \
+    }                                                                        \
+  } while (0)
 
 int main(void)
 {
@@ -378,6 +439,10 @@ int main(void)
       NULL,  /* buffer (set below) */
       0,     /* offset */
       0,     /* high_mark */
+      0,     /* global_high_mark */
+      0,     /* global_high_mark_keypair */
+      0,     /* global_high_mark_encaps */
+      0,     /* global_high_mark_decaps */
       {{0}}, /* alloc_stack */
       0,     /* alloc_stack_top */
       0,     /* alloc_counter */
@@ -410,6 +475,23 @@ int main(void)
   {
     return 1;
   }
+
+  /* Check per-operation high watermarks match the declared limits */
+  CHECK_ALLOC_MATCH(ctx.global_high_mark_keypair, MLK_TOTAL_ALLOC_KEYPAIR);
+  CHECK_ALLOC_MATCH(ctx.global_high_mark_encaps, MLK_TOTAL_ALLOC_ENCAPS);
+  CHECK_ALLOC_MATCH(ctx.global_high_mark_decaps, MLK_TOTAL_ALLOC_DECAPS);
+  CHECK_ALLOC_MATCH(ctx.global_high_mark, MLK_TOTAL_ALLOC);
+
+  /*
+   * For parameter set 1024, also check that the high watermarks match
+   * the MLK_MAX_TOTAL_ALLOC_* constants (which are defined as the 1024 values).
+   */
+#if MLK_CONFIG_API_PARAMETER_SET == 1024
+  CHECK_ALLOC_MATCH(ctx.global_high_mark_keypair, MLK_MAX_TOTAL_ALLOC_KEYPAIR);
+  CHECK_ALLOC_MATCH(ctx.global_high_mark_encaps, MLK_MAX_TOTAL_ALLOC_ENCAPS);
+  CHECK_ALLOC_MATCH(ctx.global_high_mark_decaps, MLK_MAX_TOTAL_ALLOC_DECAPS);
+  CHECK_ALLOC_MATCH(ctx.global_high_mark, MLK_MAX_TOTAL_ALLOC);
+#endif /* MLK_CONFIG_API_PARAMETER_SET == 1024 */
 
   return 0;
 }
