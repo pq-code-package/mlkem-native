@@ -20,7 +20,8 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/fips202/fips202x4.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_keccak_absorb_once_x4
-USE_FUNCTION_CONTRACTS=mlk_keccakf1600x4_permute mlk_keccakf1600x4_xor_bytes
+USE_FUNCTION_CONTRACTS = mlk_keccakf1600x4_permute
+USE_FUNCTION_CONTRACTS += mlk_keccakf1600x4_xor_bytes
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

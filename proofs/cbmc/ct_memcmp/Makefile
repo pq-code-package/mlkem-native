@@ -20,7 +20,8 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_ct_memcmp
-USE_FUNCTION_CONTRACTS=mlk_value_barrier_u8 mlk_ct_cmask_nonzero_u8
+USE_FUNCTION_CONTRACTS = mlk_value_barrier_u8
+USE_FUNCTION_CONTRACTS += mlk_ct_cmask_nonzero_u8
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

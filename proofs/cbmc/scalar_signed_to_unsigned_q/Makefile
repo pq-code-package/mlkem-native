@@ -20,7 +20,8 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_scalar_signed_to_unsigned_q
-USE_FUNCTION_CONTRACTS=mlk_ct_sel_int16 mlk_ct_cmask_neg_i16
+USE_FUNCTION_CONTRACTS = mlk_ct_sel_int16
+USE_FUNCTION_CONTRACTS += mlk_ct_cmask_neg_i16
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

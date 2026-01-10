@@ -20,7 +20,10 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_gen_matrix
-USE_FUNCTION_CONTRACTS=mlk_poly_rej_uniform mlk_poly_rej_uniform_x4 mlk_polymat_permute_bitrev_to_custom mlk_zeroize
+USE_FUNCTION_CONTRACTS = mlk_poly_rej_uniform
+USE_FUNCTION_CONTRACTS += mlk_poly_rej_uniform_x4
+USE_FUNCTION_CONTRACTS += mlk_polymat_permute_bitrev_to_custom
+USE_FUNCTION_CONTRACTS += mlk_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
