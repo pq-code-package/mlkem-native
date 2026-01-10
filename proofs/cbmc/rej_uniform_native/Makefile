@@ -20,7 +20,11 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/sampling.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_rej_uniform
-USE_FUNCTION_CONTRACTS=mlk_rej_uniform_native mlk_rej_uniform_c
+
+USED_FUNCTIONS = rej_uniform_native
+USED_FUNCTIONS += rej_uniform_c
+USE_FUNCTION_CONTRACTS=$(addprefix $(NAMESPACE_PREFIX),$(USED_FUNCTIONS))
+
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

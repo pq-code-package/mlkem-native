@@ -20,7 +20,20 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_indcpa_keypair_derand
-USE_FUNCTION_CONTRACTS=mlk_zeroize mlk_sha3_512 mlk_gen_matrix mlk_poly_getnoise_eta1_4x mlk_polyvec_ntt mlk_polyvec_mulcache_compute mlk_matvec_mul mlk_polyvec_tomont mlk_polyvec_add mlk_polyvec_reduce mlk_polyvec_tobytes
+
+USED_FUNCTIONS = zeroize
+USED_FUNCTIONS += sha3_512
+USED_FUNCTIONS += gen_matrix
+USED_FUNCTIONS += poly_getnoise_eta1_4x
+USED_FUNCTIONS += polyvec_ntt
+USED_FUNCTIONS += polyvec_mulcache_compute
+USED_FUNCTIONS += matvec_mul
+USED_FUNCTIONS += polyvec_tomont
+USED_FUNCTIONS += polyvec_add
+USED_FUNCTIONS += polyvec_reduce
+USED_FUNCTIONS += polyvec_tobytes
+USE_FUNCTION_CONTRACTS=$(addprefix $(NAMESPACE_PREFIX),$(USED_FUNCTIONS))
+
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

@@ -22,7 +22,12 @@ PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly_k.c
 # Only relevant for K=2
 ifeq ($(MLKEM_K),2)
 CHECK_FUNCTION_CONTRACTS=mlk_poly_getnoise_eta1122_4x
-USE_FUNCTION_CONTRACTS=mlk_poly_cbd_eta1 mlk_poly_cbd_eta2 mlk_shake256 mlk_zeroize
+
+USED_FUNCTIONS = poly_cbd_eta1
+USED_FUNCTIONS += poly_cbd_eta2
+USED_FUNCTIONS += shake256
+USED_FUNCTIONS += zeroize
+USE_FUNCTION_CONTRACTS=$(addprefix $(NAMESPACE_PREFIX),$(USED_FUNCTIONS))
 else
 CHECK_FUNCTION_CONTRACTS=
 USE_FUNCTION_CONTRACTS=

@@ -20,7 +20,10 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c # Dummy because the Makefile wants _some_ project source
 
 CHECK_FUNCTION_CONTRACTS=mlk_ct_cmask_neg_i16
-USE_FUNCTION_CONTRACTS=mlk_value_barrier_i32
+
+USED_FUNCTIONS = value_barrier_i32
+USE_FUNCTION_CONTRACTS=$(addprefix $(NAMESPACE_PREFIX),$(USED_FUNCTIONS))
+
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

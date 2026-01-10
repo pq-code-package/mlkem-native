@@ -6,3 +6,6 @@ ifndef MLKEM_K
 endif
 
 MLKEM_K ?= 3
+
+# Namespace prefix for function contracts
+NAMESPACE_PREFIX = mlk_

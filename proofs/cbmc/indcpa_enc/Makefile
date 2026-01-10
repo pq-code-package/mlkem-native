@@ -21,7 +21,7 @@ PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_indcpa_enc
 
-USED_FUNCTIONS  = poly_frommsg
+USED_FUNCTIONS = poly_frommsg
 USED_FUNCTIONS += gen_matrix
 ifeq ($(MLKEM_K),2)
 USED_FUNCTIONS += poly_getnoise_eta1122_4x
@@ -46,9 +46,9 @@ USED_FUNCTIONS += polyvec_compress_du
 USED_FUNCTIONS += poly_compress_dv
 USED_FUNCTIONS += polyvec_frombytes
 USED_FUNCTIONS += matvec_mul
+USE_FUNCTION_CONTRACTS=$(addprefix $(NAMESPACE_PREFIX),$(USED_FUNCTIONS))
 
-USE_FUNCTION_CONTRACTS=$(addprefix mlk_,$(USED_FUNCTIONS))
-USE_FUNCTION_CONTRACTS += mlk_zeroize
+USE_FUNCTION_CONTRACTS += $(NAMESPACE_PREFIX)zeroize
 
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
