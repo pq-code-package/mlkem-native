@@ -4,11 +4,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = crypto_kem_check_sk_harness
+HARNESS_FILE = kem_keypair_derand_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = crypto_kem_check_sk
+PROOF_UID = kem_keypair_derand
 
 DEFINES +=
 INCLUDES +=
@@ -19,8 +19,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/kem.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_check_sk
-USE_FUNCTION_CONTRACTS=mlk_sha3_256 mlk_zeroize mlk_ct_memcmp
+CHECK_FUNCTION_CONTRACTS=mlk_keypair_derand
+USE_FUNCTION_CONTRACTS=mlk_sha3_256 mlk_indcpa_keypair_derand mlk_check_pct
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -28,7 +28,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = mlk_check_sk
+FUNCTION_NAME = mlk_keypair_derand
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

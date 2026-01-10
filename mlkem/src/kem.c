@@ -41,7 +41,7 @@
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+int mlk_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 {
   typedef struct
   {
@@ -78,7 +78,7 @@ cleanup:
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+int mlk_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
   int ret = 0;
   MLK_ALLOC(test, uint8_t, MLKEM_SYMBYTES);
@@ -154,13 +154,13 @@ static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
     goto cleanup;
   }
 
-  ret = crypto_kem_enc(ws->ct, ws->ss_enc, pk);
+  ret = mlk_kem_enc(ws->ct, ws->ss_enc, pk);
   if (ret != 0)
   {
     goto cleanup;
   }
 
-  ret = crypto_kem_dec(ws->ss_dec, ws->ct, sk);
+  ret = mlk_kem_dec(ws->ss_dec, ws->ct, sk);
   if (ret != 0)
   {
     goto cleanup;
@@ -208,9 +208,9 @@ static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
  *            - We optionally include PCT which is not present in
  *              the reference code. */
 MLK_EXTERNAL_API
-int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                              uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
-                              const uint8_t coins[2 * MLKEM_SYMBYTES])
+int mlk_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+                           uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
+                           const uint8_t coins[2 * MLKEM_SYMBYTES])
 {
   int ret;
 
@@ -244,8 +244,8 @@ int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 /* Reference: `crypto_kem_keypair()` in the reference implementation @[REF]
  *            - We zeroize the stack buffer */
 MLK_EXTERNAL_API
-int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                       uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+int mlk_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+                    uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
   int ret = 0;
   MLK_ALLOC(coins, uint8_t, 2 * MLKEM_SYMBYTES);
@@ -260,7 +260,7 @@ int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   mlk_randombytes(coins, 2 * MLKEM_SYMBYTES);
   MLK_CT_TESTING_SECRET(coins, 2 * MLKEM_SYMBYTES);
 
-  ret = crypto_kem_keypair_derand(pk, sk, coins);
+  ret = mlk_kem_keypair_derand(pk, sk, coins);
 
 cleanup:
   /* Specification: Partially implements
@@ -274,10 +274,10 @@ cleanup:
  *            - We include public key check
  *            - We include stack buffer zeroization */
 MLK_EXTERNAL_API
-int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                          uint8_t ss[MLKEM_SSBYTES],
-                          const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                          const uint8_t coins[MLKEM_SYMBYTES])
+int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
+                       uint8_t ss[MLKEM_SSBYTES],
+                       const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+                       const uint8_t coins[MLKEM_SYMBYTES])
 {
   typedef struct
   {
@@ -295,7 +295,7 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   }
 
   /* Specification: Implements @[FIPS203, Section 7.2, Modulus check] */
-  ret = crypto_kem_check_pk(pk);
+  ret = mlk_kem_check_pk(pk);
   if (ret != 0)
   {
     goto cleanup;
@@ -327,9 +327,9 @@ cleanup:
 /* Reference: `crypto_kem_enc()` in the reference implementation @[REF]
  *            - We include stack buffer zeroization */
 MLK_EXTERNAL_API
-int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                   uint8_t ss[MLKEM_SSBYTES],
-                   const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+int mlk_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
+                uint8_t ss[MLKEM_SSBYTES],
+                const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 {
   int ret = 0;
   MLK_ALLOC(coins, uint8_t, MLKEM_SYMBYTES);
@@ -343,7 +343,7 @@ int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   mlk_randombytes(coins, MLKEM_SYMBYTES);
   MLK_CT_TESTING_SECRET(coins, MLKEM_SYMBYTES);
 
-  ret = crypto_kem_enc_derand(ct, ss, pk, coins);
+  ret = mlk_kem_enc_derand(ct, ss, pk, coins);
 
 cleanup:
   /* Specification: Partially implements
@@ -357,9 +357,9 @@ cleanup:
  *            - We include secret key check
  *            - We include stack buffer zeroization */
 MLK_EXTERNAL_API
-int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
-                   const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                   const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+int mlk_kem_dec(uint8_t ss[MLKEM_SSBYTES],
+                const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
+                const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 {
   typedef struct
   {
@@ -380,7 +380,7 @@ int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   }
 
   /* Specification: Implements @[FIPS203, Section 7.3, Hash check] */
-  ret = crypto_kem_check_sk(sk);
+  ret = mlk_kem_check_sk(sk);
   if (ret != 0)
   {
     goto cleanup;
