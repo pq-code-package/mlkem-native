@@ -20,36 +20,32 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_indcpa_enc
-
-USED_FUNCTIONS  = poly_frommsg
-USED_FUNCTIONS += gen_matrix
+USE_FUNCTION_CONTRACTS = mlk_poly_frommsg
+USE_FUNCTION_CONTRACTS += mlk_gen_matrix
 ifeq ($(MLKEM_K),2)
-USED_FUNCTIONS += poly_getnoise_eta1122_4x
-USED_FUNCTIONS += poly_getnoise_eta2
+USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta1122_4x
+USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta2
 else ifeq ($(MLKEM_K),3)
-USED_FUNCTIONS += poly_getnoise_eta1_4x
+USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta1_4x
 else ifeq ($(MLKEM_K),4)
-USED_FUNCTIONS += poly_getnoise_eta1_4x
-USED_FUNCTIONS += poly_getnoise_eta2
+USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta1_4x
+USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta2
 endif
 
-USED_FUNCTIONS += polyvec_ntt
-USED_FUNCTIONS += polyvec_mulcache_compute
-USED_FUNCTIONS += polyvec_basemul_acc_montgomery_cached
-USED_FUNCTIONS += polyvec_invntt_tomont
-USED_FUNCTIONS += poly_invntt_tomont
-USED_FUNCTIONS += polyvec_add
-USED_FUNCTIONS += poly_add
-USED_FUNCTIONS += polyvec_reduce
-USED_FUNCTIONS += poly_reduce
-USED_FUNCTIONS += polyvec_compress_du
-USED_FUNCTIONS += poly_compress_dv
-USED_FUNCTIONS += polyvec_frombytes
-USED_FUNCTIONS += matvec_mul
-
-USE_FUNCTION_CONTRACTS=$(addprefix mlk_,$(USED_FUNCTIONS))
+USE_FUNCTION_CONTRACTS += mlk_polyvec_ntt
+USE_FUNCTION_CONTRACTS += mlk_polyvec_mulcache_compute
+USE_FUNCTION_CONTRACTS += mlk_polyvec_basemul_acc_montgomery_cached
+USE_FUNCTION_CONTRACTS += mlk_polyvec_invntt_tomont
+USE_FUNCTION_CONTRACTS += mlk_poly_invntt_tomont
+USE_FUNCTION_CONTRACTS += mlk_polyvec_add
+USE_FUNCTION_CONTRACTS += mlk_poly_add
+USE_FUNCTION_CONTRACTS += mlk_polyvec_reduce
+USE_FUNCTION_CONTRACTS += mlk_poly_reduce
+USE_FUNCTION_CONTRACTS += mlk_polyvec_compress_du
+USE_FUNCTION_CONTRACTS += mlk_poly_compress_dv
+USE_FUNCTION_CONTRACTS += mlk_polyvec_frombytes
+USE_FUNCTION_CONTRACTS += mlk_matvec_mul
 USE_FUNCTION_CONTRACTS += mlk_zeroize
-
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

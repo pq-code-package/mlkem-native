@@ -20,8 +20,8 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/compress.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_poly_compress_dv
+USE_FUNCTION_CONTRACTS=
 
-USE_FUNCTION_CONTRACTS =
 # TODO: We should be calling scalar_decompress_xxx by contract here,
 # but it does not seem to work yet because they are marked as static inline.
 # ifeq ($(MLKEM_K),4)

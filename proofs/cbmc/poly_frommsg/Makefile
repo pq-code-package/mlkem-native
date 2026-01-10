@@ -20,7 +20,8 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/compress.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_poly_frommsg
-USE_FUNCTION_CONTRACTS=mlk_ct_sel_int16 mlk_value_barrier_u8
+USE_FUNCTION_CONTRACTS = mlk_ct_sel_int16
+USE_FUNCTION_CONTRACTS += mlk_value_barrier_u8
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

@@ -20,7 +20,17 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_indcpa_keypair_derand
-USE_FUNCTION_CONTRACTS=mlk_zeroize mlk_sha3_512 mlk_gen_matrix mlk_poly_getnoise_eta1_4x mlk_polyvec_ntt mlk_polyvec_mulcache_compute mlk_matvec_mul mlk_polyvec_tomont mlk_polyvec_add mlk_polyvec_reduce mlk_polyvec_tobytes
+USE_FUNCTION_CONTRACTS = mlk_zeroize
+USE_FUNCTION_CONTRACTS += mlk_sha3_512
+USE_FUNCTION_CONTRACTS += mlk_gen_matrix
+USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta1_4x
+USE_FUNCTION_CONTRACTS += mlk_polyvec_ntt
+USE_FUNCTION_CONTRACTS += mlk_polyvec_mulcache_compute
+USE_FUNCTION_CONTRACTS += mlk_matvec_mul
+USE_FUNCTION_CONTRACTS += mlk_polyvec_tomont
+USE_FUNCTION_CONTRACTS += mlk_polyvec_add
+USE_FUNCTION_CONTRACTS += mlk_polyvec_reduce
+USE_FUNCTION_CONTRACTS += mlk_polyvec_tobytes
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
