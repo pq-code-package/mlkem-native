@@ -2025,6 +2025,10 @@ def check_macro_typos():
         if m in macros:
             return True
 
+        # Ignore alloc macros only defined in mlkem_native.h
+        if m.startswith("MLK_TOTAL_ALLOC") or m.startswith("MLK_MAX_TOTAL_ALLOC"):
+            return True
+
         is_autogen = filename == "scripts/autogen"
 
         # Exclude system capabilities, which are enum values
