@@ -21,7 +21,9 @@ PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly_k.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_polyvec_decompress_du
 
-USE_FUNCTION_CONTRACTS=mlk_poly_decompress_du
+USED_FUNCTIONS = poly_decompress_du
+USE_FUNCTION_CONTRACTS=$(addprefix $(NAMESPACE_PREFIX),$(USED_FUNCTIONS))
+
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

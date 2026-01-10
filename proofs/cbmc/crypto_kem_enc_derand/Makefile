@@ -20,7 +20,17 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/kem.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_enc_derand
-USE_FUNCTION_CONTRACTS=mlk_check_pk mlk_sha3_256 mlk_sha3_512 mlk_indcpa_enc mlk_polyvec_frombytes mlk_polyvec_reduce mlk_polyvec_tobytes mlk_zeroize
+
+USED_FUNCTIONS = check_pk
+USED_FUNCTIONS += sha3_256
+USED_FUNCTIONS += sha3_512
+USED_FUNCTIONS += indcpa_enc
+USED_FUNCTIONS += polyvec_frombytes
+USED_FUNCTIONS += polyvec_reduce
+USED_FUNCTIONS += polyvec_tobytes
+USED_FUNCTIONS += zeroize
+USE_FUNCTION_CONTRACTS=$(addprefix $(NAMESPACE_PREFIX),$(USED_FUNCTIONS))
+
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

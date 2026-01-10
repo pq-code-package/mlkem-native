@@ -22,7 +22,11 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c $(SRCDIR)/mlkem/src/native/aarch64/src/aarch64_zetas.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_ntt_native
-USE_FUNCTION_CONTRACTS=mlk_ntt_asm mlk_sys_check_capability
+
+USED_FUNCTIONS = ntt_asm
+USED_FUNCTIONS += sys_check_capability
+USE_FUNCTION_CONTRACTS=$(addprefix $(NAMESPACE_PREFIX),$(USED_FUNCTIONS))
+
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

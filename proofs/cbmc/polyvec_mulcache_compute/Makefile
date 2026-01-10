@@ -20,7 +20,10 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c $(SRCDIR)/mlkem/src/poly_k.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_polyvec_mulcache_compute
-USE_FUNCTION_CONTRACTS=mlk_poly_mulcache_compute
+
+USED_FUNCTIONS = poly_mulcache_compute
+USE_FUNCTION_CONTRACTS=$(addprefix $(NAMESPACE_PREFIX),$(USED_FUNCTIONS))
+
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

@@ -19,7 +19,10 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_matvec_mul
-USE_FUNCTION_CONTRACTS=mlk_polyvec_basemul_acc_montgomery_cached
+
+USED_FUNCTIONS = polyvec_basemul_acc_montgomery_cached
+USE_FUNCTION_CONTRACTS=$(addprefix $(NAMESPACE_PREFIX),$(USED_FUNCTIONS))
+
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

@@ -22,7 +22,11 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_poly_reduce_native
-USE_FUNCTION_CONTRACTS=mlk_poly_reduce_asm mlk_sys_check_capability
+
+USED_FUNCTIONS = poly_reduce_asm
+USED_FUNCTIONS += sys_check_capability
+USE_FUNCTION_CONTRACTS=$(addprefix $(NAMESPACE_PREFIX),$(USED_FUNCTIONS))
+
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

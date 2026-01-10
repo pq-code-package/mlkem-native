@@ -20,7 +20,11 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/fips202/fips202.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_shake256
-USE_FUNCTION_CONTRACTS=mlk_keccak_absorb_once mlk_keccak_squeeze_once
+
+USED_FUNCTIONS = keccak_absorb_once
+USED_FUNCTIONS += keccak_squeeze_once
+USE_FUNCTION_CONTRACTS=$(addprefix $(NAMESPACE_PREFIX),$(USED_FUNCTIONS))
+
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
