@@ -6,6 +6,6 @@
 
 void harness(void)
 {
-  uint8_t *a, *b, *c;
-  crypto_kem_dec(a, b, c);
+  uint8_t *a;
+  mlk_kem_check_sk(a, NULL /* context will be dropped by preprocessor */);
 }

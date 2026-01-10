@@ -178,12 +178,18 @@
 /* mlkem/src/common.h */
 #undef MLK_ADD_PARAM_SET
 #undef MLK_ALLOC
+#undef MLK_APPLY
 #undef MLK_ASM_FN_SYMBOL
 #undef MLK_ASM_NAMESPACE
 #undef MLK_BUILD_INTERNAL
 #undef MLK_COMMON_H
 #undef MLK_CONCAT
 #undef MLK_CONCAT_
+#undef MLK_CONTEXT_PARAMETERS_0
+#undef MLK_CONTEXT_PARAMETERS_1
+#undef MLK_CONTEXT_PARAMETERS_2
+#undef MLK_CONTEXT_PARAMETERS_3
+#undef MLK_CONTEXT_PARAMETERS_4
 #undef MLK_EMPTY_CU
 #undef MLK_ERR_FAIL
 #undef MLK_ERR_OUT_OF_MEMORY
@@ -205,15 +211,14 @@
 #undef mlk_indcpa_enc
 #undef mlk_indcpa_keypair_derand
 /* mlkem/src/kem.h */
-#undef MLK_CONFIG_NO_SUPERCOP
 #undef MLK_KEM_H
-#undef crypto_kem_check_pk
-#undef crypto_kem_check_sk
-#undef crypto_kem_dec
-#undef crypto_kem_enc
-#undef crypto_kem_enc_derand
-#undef crypto_kem_keypair
-#undef crypto_kem_keypair_derand
+#undef mlk_kem_check_pk
+#undef mlk_kem_check_sk
+#undef mlk_kem_dec
+#undef mlk_kem_enc
+#undef mlk_kem_enc_derand
+#undef mlk_kem_keypair
+#undef mlk_kem_keypair_derand
 /* mlkem/src/params.h */
 #undef MLKEM_DU
 #undef MLKEM_DV

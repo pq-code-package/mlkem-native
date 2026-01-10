@@ -6,6 +6,6 @@
 
 void harness(void)
 {
-  uint8_t *a, *b, *c;
-  crypto_kem_keypair_derand(a, b, c);
+  uint8_t *a;
+  mlk_kem_check_pk(a, NULL /* context will be dropped by preprocessor */);
 }

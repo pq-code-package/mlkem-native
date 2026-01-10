@@ -2029,29 +2029,33 @@ def check_macro_typos():
         # Register some file-specific exceptions
         #
 
-        # 1. Makefiles use MLK_SOURCE_XXX to list source files
+        # Makefiles use MLK_SOURCE_XXX to list source files
         if is_autogen or filename.endswith("/Makefile"):
             if m.startswith("MLK_SOURCE") or m.startswith("MLK_OBJ"):
                 return True
 
-        # 2. libOQS specific identifier
+        # libOQS specific identifier
         if is_autogen or filename.startswith("integration/liboqs"):
             if m.startswith("MLKEM_NATIVE_MLKEM") or m in ["MLKEM_DIR"]:
                 return True
 
-        # 3. Exclude HOL-Light proof scripts
+        # Exclude HOL-Light proof scripts
         if is_autogen or filename.startswith("proofs/hol_light"):
             if filename.endswith(".ml"):
                 return True
 
-        # 4. Exclude regexp patterns in `autogen`
+        # Exclude regexp patterns in `autogen`
         if is_autogen:
             if rest.startswith("\\") or m in ["MLK_XXX", "MLK_SOURCE_XXX"]:
                 return True
 
-        # 5. AWS-LC importer patch
+        # AWS-LC importer patch
         if is_autogen or filename == "integration/awslc/awslc.patch":
             return True
+
+        if is_autogen or filename == "mlkem/src/common.h":
+            if m == "MLK_CONTEXT_PARAMETERS_n":
+                return True
 
         return False
 
