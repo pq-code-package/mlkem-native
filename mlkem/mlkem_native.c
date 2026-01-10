@@ -194,15 +194,14 @@
 #undef mlk_indcpa_enc
 #undef mlk_indcpa_keypair_derand
 /* mlkem/src/kem.h */
-#undef MLK_CONFIG_NO_SUPERCOP
 #undef MLK_KEM_H
-#undef crypto_kem_check_pk
-#undef crypto_kem_check_sk
-#undef crypto_kem_dec
-#undef crypto_kem_enc
-#undef crypto_kem_enc_derand
-#undef crypto_kem_keypair
-#undef crypto_kem_keypair_derand
+#undef mlk_kem_check_pk
+#undef mlk_kem_check_sk
+#undef mlk_kem_dec
+#undef mlk_kem_enc
+#undef mlk_kem_enc_derand
+#undef mlk_kem_keypair
+#undef mlk_kem_keypair_derand
 /* mlkem/src/params.h */
 #undef MLKEM_DU
 #undef MLKEM_DV

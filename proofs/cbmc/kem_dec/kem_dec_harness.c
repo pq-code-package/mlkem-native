@@ -6,6 +6,6 @@
 
 void harness(void)
 {
-  uint8_t *a;
-  crypto_kem_check_pk(a);
+  uint8_t *a, *b, *c;
+  mlk_kem_dec(a, b, c);
 }
