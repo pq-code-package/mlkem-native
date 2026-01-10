@@ -49,13 +49,15 @@
 
 #endif /* MLK_CHECK_APIS */
 
-#define crypto_kem_keypair_derand MLK_NAMESPACE_K(keypair_derand)
-#define crypto_kem_keypair MLK_NAMESPACE_K(keypair)
-#define crypto_kem_enc_derand MLK_NAMESPACE_K(enc_derand)
-#define crypto_kem_enc MLK_NAMESPACE_K(enc)
-#define crypto_kem_dec MLK_NAMESPACE_K(dec)
-#define crypto_kem_check_pk MLK_NAMESPACE_K(check_pk)
-#define crypto_kem_check_sk MLK_NAMESPACE_K(check_sk)
+#define crypto_kem_keypair_derand \
+  MLK_NAMESPACE_K(keypair_derand) MLK_CONTEXT_PARAMETERS_3
+#define crypto_kem_keypair MLK_NAMESPACE_K(keypair) MLK_CONTEXT_PARAMETERS_2
+#define crypto_kem_enc_derand \
+  MLK_NAMESPACE_K(enc_derand) MLK_CONTEXT_PARAMETERS_4
+#define crypto_kem_enc MLK_NAMESPACE_K(enc) MLK_CONTEXT_PARAMETERS_3
+#define crypto_kem_dec MLK_NAMESPACE_K(dec) MLK_CONTEXT_PARAMETERS_3
+#define crypto_kem_check_pk MLK_NAMESPACE_K(check_pk) MLK_CONTEXT_PARAMETERS_1
+#define crypto_kem_check_sk MLK_NAMESPACE_K(check_sk) MLK_CONTEXT_PARAMETERS_1
 
 
 
@@ -81,7 +83,8 @@
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+int crypto_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+                        MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
@@ -112,7 +115,8 @@ __contract__(
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int crypto_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+int crypto_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
+                        MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
@@ -148,7 +152,8 @@ MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                               uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
-                              const uint8_t coins[2 * MLKEM_SYMBYTES])
+                              const uint8_t coins[2 * MLKEM_SYMBYTES],
+                              MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
@@ -184,7 +189,8 @@ __contract__(
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                       uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+                       uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
+                       MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
@@ -226,7 +232,8 @@ MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                           uint8_t ss[MLKEM_SSBYTES],
                           const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                          const uint8_t coins[MLKEM_SYMBYTES])
+                          const uint8_t coins[MLKEM_SYMBYTES],
+                          MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
   requires(memory_no_alias(ss, MLKEM_SSBYTES))
@@ -266,7 +273,8 @@ MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                    uint8_t ss[MLKEM_SSBYTES],
-                   const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+                   const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+                   MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
   requires(memory_no_alias(ss, MLKEM_SSBYTES))
@@ -305,7 +313,8 @@ MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int crypto_kem_dec(uint8_t ss[MLKEM_SSBYTES],
                    const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                   const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+                   const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
+                   MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(ss, MLKEM_SSBYTES))
   requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
