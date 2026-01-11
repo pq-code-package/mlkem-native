@@ -435,15 +435,18 @@ configs:
           #if !defined(MLK_CONFIG_KEYGEN_PCT)
           #define MLK_CONFIG_KEYGEN_PCT
           #endif
+      MLK_CONFIG_CONTEXT_PARAMETER: true
+      MLK_CONFIG_CONTEXT_PARAMETER_TYPE: struct test_ctx_t *
       MLK_CONFIG_CUSTOM_ALLOC_FREE:
         content: |
           #define MLK_CONFIG_CUSTOM_ALLOC_FREE
           #if !defined(__ASSEMBLER__)
           #include <stdlib.h>
-          void * custom_alloc(size_t sz, const char *file, int line, const char *var, const char *type);
-          void custom_free(void *p, size_t sz, const char *file, int line, const char *var, const char *type);
-          #define MLK_CUSTOM_ALLOC(v, T, N) T *v = custom_alloc(sizeof(T)*(N), __FILE__, __LINE__, #v, #T)
-          #define MLK_CUSTOM_FREE(v, T, N) custom_free(v, sizeof(T)*(N), __FILE__, __LINE__, #v, #T)
+          struct test_ctx_t; /* Forward declaration */
+          void * custom_alloc(struct test_ctx_t *ctx, size_t sz, const char *file, int line, const char *var, const char *type);
+          void custom_free(struct test_ctx_t *ctx, void *p, size_t sz, const char *file, int line, const char *var, const char *type);
+          #define MLK_CUSTOM_ALLOC(v, T, N, ctx) T *v = custom_alloc(ctx, sizeof(T)*(N), __FILE__, __LINE__, #v, #T)
+          #define MLK_CUSTOM_FREE(v, T, N, ctx) custom_free(ctx, v, sizeof(T)*(N), __FILE__, __LINE__, #v, #T)
           #endif /* !__ASSEMBLER__ */
       MLK_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
