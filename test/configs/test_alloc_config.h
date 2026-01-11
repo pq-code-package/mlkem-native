@@ -32,6 +32,8 @@
  * the following places:
  *   - MLK_CONFIG_NAMESPACE_PREFIX
  *   - MLK_CONFIG_KEYGEN_PCT
+ *   - MLK_CONFIG_CONTEXT_PARAMETER
+ *   - MLK_CONFIG_CONTEXT_PARAMETER_TYPE
  *   - MLK_CONFIG_CUSTOM_ALLOC_FREE
  */
 
@@ -499,14 +501,15 @@
 #define MLK_CONFIG_CUSTOM_ALLOC_FREE
 #if !defined(__ASSEMBLER__)
 #include <stdlib.h>
-void *custom_alloc(size_t sz, const char *file, int line, const char *var,
-                   const char *type);
-void custom_free(void *p, size_t sz, const char *file, int line,
-                 const char *var, const char *type);
-#define MLK_CUSTOM_ALLOC(v, T, N) \
-  T *v = custom_alloc(sizeof(T) * (N), __FILE__, __LINE__, #v, #T)
-#define MLK_CUSTOM_FREE(v, T, N) \
-  custom_free(v, sizeof(T) * (N), __FILE__, __LINE__, #v, #T)
+struct test_ctx_t; /* Forward declaration */
+void *custom_alloc(struct test_ctx_t *ctx, size_t sz, const char *file,
+                   int line, const char *var, const char *type);
+void custom_free(struct test_ctx_t *ctx, void *p, size_t sz, const char *file,
+                 int line, const char *var, const char *type);
+#define MLK_CUSTOM_ALLOC(v, T, N, ctx) \
+  T *v = custom_alloc(ctx, sizeof(T) * (N), __FILE__, __LINE__, #v, #T)
+#define MLK_CUSTOM_FREE(v, T, N, ctx) \
+  custom_free(ctx, v, sizeof(T) * (N), __FILE__, __LINE__, #v, #T)
 #endif /* !__ASSEMBLER__ */
 
 
@@ -689,7 +692,7 @@ void custom_free(void *p, size_t sz, const char *file, int line,
  *              MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  *****************************************************************************/
-/* #define MLK_CONFIG_CONTEXT_PARAMETER */
+#define MLK_CONFIG_CONTEXT_PARAMETER
 
 /******************************************************************************
  * Name:        MLK_CONFIG_CONTEXT_PARAMETER_TYPE
@@ -700,7 +703,7 @@ void custom_free(void *p, size_t sz, const char *file, int line,
  *              This is only relevant if MLK_CONFIG_CONTEXT_PARAMETER is set.
  *
  *****************************************************************************/
-/* #define MLK_CONFIG_CONTEXT_PARAMETER_TYPE void* */
+#define MLK_CONFIG_CONTEXT_PARAMETER_TYPE struct test_ctx_t *
 
 /*************************  Config internals  ********************************/
 
