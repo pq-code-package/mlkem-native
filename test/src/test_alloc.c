@@ -16,6 +16,9 @@
  * Level-dependent allocation limit macros.
  * These expand to the right MLK_TOTAL_ALLOC_{512,768,1024}_* constant
  * based on MLK_CONFIG_API_PARAMETER_SET.
+ *
+ * Note: MLK_TOTAL_ALLOC_*_KEYPAIR in the header automatically adapts
+ * based on MLK_CONFIG_KEYGEN_PCT.
  */
 #define MLK_TOTAL_ALLOC_KEYPAIR__(LVL) MLK_TOTAL_ALLOC_##LVL##_KEYPAIR
 #define MLK_TOTAL_ALLOC_KEYPAIR_(LVL) MLK_TOTAL_ALLOC_KEYPAIR__(LVL)
@@ -485,6 +488,7 @@ int main(void)
   /*
    * For parameter set 1024, also check that the high watermarks match
    * the MLK_MAX_TOTAL_ALLOC_* constants (which are defined as the 1024 values).
+   * MLK_MAX_TOTAL_ALLOC_KEYPAIR adapts based on MLK_CONFIG_KEYGEN_PCT.
    */
 #if MLK_CONFIG_API_PARAMETER_SET == 1024
   CHECK_ALLOC_MATCH(ctx.global_high_mark_keypair, MLK_MAX_TOTAL_ALLOC_KEYPAIR);

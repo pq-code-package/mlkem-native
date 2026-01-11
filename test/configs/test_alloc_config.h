@@ -31,7 +31,6 @@
  * This configuration differs from the default mlkem/mlkem_native_config.h in
  * the following places:
  *   - MLK_CONFIG_NAMESPACE_PREFIX
- *   - MLK_CONFIG_KEYGEN_PCT
  *   - MLK_CONFIG_CONTEXT_PARAMETER
  *   - MLK_CONFIG_CONTEXT_PARAMETER_TYPE
  *   - MLK_CONFIG_CUSTOM_ALLOC_FREE
@@ -635,10 +634,7 @@ void custom_free(struct test_ctx_t *ctx, void *p, size_t sz, const char *file,
  *              key generation.
  *
  *****************************************************************************/
-#if !defined(MLK_CONFIG_KEYGEN_PCT)
-#define MLK_CONFIG_KEYGEN_PCT
-#endif
-
+/* #define MLK_CONFIG_KEYGEN_PCT */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST

@@ -434,11 +434,6 @@ configs:
     description: "Using custom allocation that can be made fail at specific invocation"
     defines:
       MLK_CONFIG_NAMESPACE_PREFIX: mlk
-      MLK_CONFIG_KEYGEN_PCT:
-        content: |
-          #if !defined(MLK_CONFIG_KEYGEN_PCT)
-          #define MLK_CONFIG_KEYGEN_PCT
-          #endif
       MLK_CONFIG_CONTEXT_PARAMETER: true
       MLK_CONFIG_CONTEXT_PARAMETER_TYPE: struct test_ctx_t *
       MLK_CONFIG_CUSTOM_ALLOC_FREE:
