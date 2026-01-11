@@ -202,10 +202,16 @@ BLUE = "\033[94m"
 BOLD = "\033[1m"
 NORMAL = "\033[0m"
 
+# Set terminal width, fallback to default on systems where none is present.
+try:
+    TERMINAL_WIDTH = os.get_terminal_size().columns
+except OSError:
+    TERMINAL_WIDTH = 160
+
 
 def clear_status_line():
     """Clear any existing status line by overwriting with spaces and returning to start of line"""
-    print(f"\r{' ' * 160}", end="", flush=True)
+    print(f"\r{' ' * TERMINAL_WIDTH}", end="", flush=True)
 
 
 def status_update(task, msg):
