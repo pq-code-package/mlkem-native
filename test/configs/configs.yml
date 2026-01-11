@@ -301,6 +301,7 @@ configs:
   - path: examples/monolithic_build_multilevel/mlkem_native/mlkem_native_config.h
     description: "Multilevel monolithic build config"
     defines:
+      MLK_CONFIG_NO_SUPERCOP: true
       MLK_CONFIG_MULTILEVEL_BUILD: true
       MLK_CONFIG_NAMESPACE_PREFIX: mlkem
       MLK_CONFIG_INTERNAL_API_QUALIFIER: static
@@ -310,6 +311,7 @@ configs:
   - path: examples/multilevel_build/mlkem_native/mlkem_native_config.h
     description: "Multilevel build config"
     defines:
+      MLK_CONFIG_NO_SUPERCOP: true
       MLK_CONFIG_MULTILEVEL_BUILD: true
       MLK_CONFIG_NAMESPACE_PREFIX: mlkem
       MLK_CONFIG_FILE:
@@ -318,6 +320,7 @@ configs:
   - path: examples/multilevel_build_native/mlkem_native/mlkem_native_config.h
     description: "Multilevel build config"
     defines:
+      MLK_CONFIG_NO_SUPERCOP: true
       MLK_CONFIG_MULTILEVEL_BUILD: true
       MLK_CONFIG_NAMESPACE_PREFIX: mlkem
       MLK_CONFIG_USE_NATIVE_BACKEND_ARITH: true
@@ -328,6 +331,7 @@ configs:
   - path: examples/monolithic_build_multilevel_native/mlkem_native/mlkem_native_config.h
     description: "Multilevel monolithic build config with native backends"
     defines:
+      MLK_CONFIG_NO_SUPERCOP: true
       MLK_CONFIG_MULTILEVEL_BUILD: true
       MLK_CONFIG_NAMESPACE_PREFIX: mlkem
       MLK_CONFIG_USE_NATIVE_BACKEND_ARITH: true

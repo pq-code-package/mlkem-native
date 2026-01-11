@@ -29,6 +29,7 @@
  *
  * This configuration differs from the default mlkem/mlkem_native_config.h in
  * the following places:
+ *   - MLK_CONFIG_NO_SUPERCOP
  *   - MLK_CONFIG_MULTILEVEL_BUILD
  *   - MLK_CONFIG_NAMESPACE_PREFIX
  *   - MLK_CONFIG_USE_NATIVE_BACKEND_ARITH
@@ -160,7 +161,7 @@
  *              naming does not disambiguate between the parameter sets.
  *
  *****************************************************************************/
-/* #define MLK_CONFIG_NO_SUPERCOP */
+#define MLK_CONFIG_NO_SUPERCOP
 
 /******************************************************************************
  * Name:        MLK_CONFIG_CONSTANTS_ONLY
