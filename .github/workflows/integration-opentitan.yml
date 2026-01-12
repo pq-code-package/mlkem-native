@@ -54,7 +54,7 @@ jobs:
       - uses: ./.github/actions/setup-opentitan
         with:
           expo-repository: https://github.com/zerorisc/expo
-          expo-commit: 941d302a6d2d1ec5b1e3d7448846f56809333cee
+          expo-commit: 375803409deee1f5f7965f0757e316670b13f544
 
       - name: Patch mlkem-native dependency
         run: |
