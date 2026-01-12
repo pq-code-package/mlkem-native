@@ -10,6 +10,7 @@ import shutil
 import pathlib
 import re
 import sys
+import threading
 import pyparsing as pp
 import os
 import yaml
@@ -17,6 +18,23 @@ import time
 
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
+from rich.console import Console
+from rich.progress import (
+    Progress,
+    BarColumn,
+    TextColumn,
+    TaskProgressColumn,
+    TimeElapsedColumn,
+)
+
+console = Console()
+
+# Global progress bar - initialized in _main()
+_progress = None
+_main_task = None
+_current_task = ""
+
+_progress_lock = threading.Lock()
 
 modulus = 3329
 root_of_unity = 17
@@ -42,8 +60,6 @@ _RE_LEADING_SPACE = re.compile(r"^(\s*)")
 # File cache: {filename: {"content": str, "original": str, "force_format": bool}}
 # Caches content of files in preparation/modification to avoid repeated
 # read/writes to the file system.
-import threading
-
 _file_cache = {}
 _file_cache_lock = threading.Lock()
 
@@ -131,8 +147,6 @@ def finalize_file(item, dry_run):
     """Write a single file or delete it if content is None"""
     filename, data = item
 
-    status_update("finalize", filename)
-
     content_old = data["original"]
     content_new = data["content"]
 
@@ -159,9 +173,8 @@ def finalize_file(item, dry_run):
         error(filename, filename_new)
 
 
-def finalize(dry_run):
-    """Apply formatting once and write dirty files to filesystem"""
-    # Filter files to format upfront
+def format_files(dry_run):
+    """Apply formatting to files"""
     to_format = [
         filename
         for filename, data in _file_cache.items()
@@ -174,15 +187,12 @@ def finalize(dry_run):
         to_format[i : i + batch_size] for i in range(0, len(to_format), batch_size)
     ]
 
-    # Format all batches in parallel
-    with ThreadPoolExecutor() as executor:
-        list(executor.map(finalize_format_batch, batches))
+    run_parallel(batches, finalize_format_batch)
 
-    # Write dirty files in parallel
-    with ThreadPoolExecutor() as executor:
-        list(executor.map(partial(finalize_file, dry_run=dry_run), _file_cache.items()))
 
-    return print_check_errors()
+def finalize(dry_run):
+    """Write dirty files to filesystem"""
+    run_parallel(_file_cache.items(), partial(finalize_file, dry_run=dry_run))
 
 
 # This file re-generated auto-generated source files in mlkem-native.
@@ -195,44 +205,62 @@ def finalize(dry_run):
 # - header guards
 # - #undef's for CU-local macros
 
-# Standard color definitions
-GREEN = "\033[32m"
-RED = "\033[31m"
-BLUE = "\033[94m"
-BOLD = "\033[1m"
-NORMAL = "\033[0m"
-
-# Set terminal width, fallback to default on systems where none is present.
-try:
-    TERMINAL_WIDTH = os.get_terminal_size().columns
-except OSError:
-    TERMINAL_WIDTH = 160
-
-
-def clear_status_line():
-    """Clear any existing status line by overwriting with spaces and returning to start of line"""
-    print(f"\r{' ' * TERMINAL_WIDTH}", end="", flush=True)
-
-
-def status_update(task, msg):
-    clear_status_line()
-    print(f"\r{BLUE}[{task}]{NORMAL}: {msg} ...", end="", flush=True)
-
-
 _step_start_time = time.time()
 
 
-def high_level_status(msg):
+def high_level_task(msg):
+    """Set the current high-level task description"""
+    global _current_task
+    _current_task = msg
+    if _progress:
+        _progress.update(_main_task, description=f"[cyan]{msg}[/]")
+
+
+def high_level_status(msg, skipped=False):
+    """Complete a high-level step and print status"""
     global _step_start_time
-    clear_status_line()
-    elapsed = f" ({time.time() - _step_start_time:.1f}s)"
-    print(f"\r{GREEN}✓{NORMAL} {msg}{elapsed}")
+    elapsed = time.time() - _step_start_time
+    if skipped:
+        symbol = "[dim]–[/dim]"
+    else:
+        symbol = "[green]✓[/green]"
+    if _progress:
+        _progress.print(f"{symbol} {msg} ({elapsed:.1f}s)", highlight=False)
+        _progress.advance(_main_task)
+    else:
+        console.print(f"{symbol} {msg} ({elapsed:.1f}s)", highlight=False)
     _step_start_time = time.time()
 
 
-def info(msg):
-    clear_status_line()
-    print(f"\r{GREEN}info{NORMAL} {msg}")
+def run_parallel(files, func):
+    """Run func over files in parallel with progress tracking"""
+    if not files:
+        return []
+
+    files = list(files)
+    total = len(files)
+    state = {"completed": 0, "last_file": ""}
+
+    def update_progress():
+        if _progress and total > 0:
+            suffix = (
+                f" {os.path.basename(state['last_file'])}" if state["last_file"] else ""
+            )
+            _progress.update(
+                _main_task,
+                description=f"[cyan]{_current_task}[/] [dim][{state['completed']}/{total}]{suffix}[/]",
+            )
+
+    def wrapped(f):
+        result = func(f)
+        with _progress_lock:
+            state["completed"] += 1
+            state["last_file"] = str(f[0]) if isinstance(f, tuple) else str(f)
+            update_progress()
+        return result
+
+    with ThreadPoolExecutor() as executor:
+        return list(executor.map(wrapped, files))
 
 
 def error(filename, filename_new):
@@ -242,16 +270,15 @@ def error(filename, filename_new):
 
 def print_check_errors():
     for filename, filename_new in _errors:
-        clear_status_line()
-        print(f"\r{RED}error{NORMAL} {filename}")
+        console.print(f"[red]error[/] {filename}")
         if filename_new is not None:
-            print(
+            console.print(
                 f"Autogenerated file {filename} needs updating. Have you called scripts/autogen? Wrote new version to {filename_new}."
             )
             if os.path.exists(filename):
                 subprocess.run(["diff", filename, filename_new])
         else:
-            print(
+            console.print(
                 f"Autogenerated file {filename} needs removing. Have you called scripts/autogen?"
             )
 
@@ -259,11 +286,10 @@ def print_check_errors():
 
 
 def file_updated(filename, removed=False):
-    clear_status_line()
     if removed is False:
-        print(f"\r{BOLD}updated {filename}{NORMAL}")
+        console.print(f"[bold]updated {filename}[/]")
     else:
-        print(f"\r{BOLD}removed {filename}{NORMAL}")
+        console.print(f"[bold]removed {filename}[/]")
 
 
 def gen_autogen_warning():
@@ -515,9 +541,6 @@ def adjust_preprocessor_comments_for_filename(
 
     ```
     """
-    if show_status:
-        status_update("if-else", source_file)
-
     content = content.split("\n")
     new_content = []
 
@@ -670,8 +693,7 @@ def gen_preprocessor_comments_for(parser, source_file):
 def gen_preprocessor_comments():
     files = get_c_source_files() + get_asm_source_files() + get_header_files()
     parser = CondParser()
-    with ThreadPoolExecutor() as executor:
-        _ = list(executor.map(partial(gen_preprocessor_comments_for, parser), files))
+    run_parallel(files, partial(gen_preprocessor_comments_for, parser))
 
 
 def bitreverse(i, n):
@@ -1994,7 +2016,6 @@ def get_config_options():
 
 def check_macro_typos_in_file(filename, macro_check):
     """Checks for typos in MLK_XXX and MLKEM_XXX identifiers."""
-    status_update("check-macros", filename)
     content = read_file(filename)
 
     for m in _RE_MACRO_CHECK.finditer(content):
@@ -2069,17 +2090,13 @@ def check_macro_typos():
 
         return False
 
-    with ThreadPoolExecutor() as executor:
-        _ = list(
-            executor.map(
-                partial(check_macro_typos_in_file, macro_check=macro_check), files
-            )
-        )
+    run_parallel(
+        list(files), partial(check_macro_typos_in_file, macro_check=macro_check)
+    )
 
 
 def check_asm_register_aliases_for_file(filename):
     """Checks that `filename` has no mismatching or dangling register aliases"""
-    status_update("reg alises", filename)
 
     def get_alias_def(l):
         s = list(filter(lambda s: s != "", l.strip().split(" ")))
@@ -2129,13 +2146,11 @@ def check_asm_register_aliases_for_file(filename):
 
 
 def check_asm_register_aliases():
-    for asm_file in get_asm_source_files():
-        check_asm_register_aliases_for_file(asm_file)
+    run_parallel(get_asm_source_files(), check_asm_register_aliases_for_file)
 
 
 def check_asm_loop_labels_for_file(filename):
     """Checks that all labels in `filename` are prefixed according to the function defined in the file"""
-    status_update("asm-labels", filename)
 
     content = read_file(filename)
 
@@ -2159,8 +2174,7 @@ def check_asm_loop_labels():
     # Operate on assembly files in dev/ only. The ones in mlkem/ are autogenerated
     # from that and don't have the original MLK_ASM_FN_SYMBOL marker anymore.
     files = list(filter(lambda s: s.startswith("dev/"), get_asm_source_files()))
-    with ThreadPoolExecutor() as executor:
-        _ = list(executor.map(check_asm_loop_labels_for_file, files))
+    run_parallel(files, check_asm_loop_labels_for_file)
 
 
 def normalize_comma_separated_args(args_str):
@@ -2185,7 +2199,6 @@ def normalize_comma_separated_args(args_str):
 
 def normalize_asm_macro_syntax_for_file(filename):
     """Normalize macro definitions and invocations to use commas with spaces"""
-    status_update("asm-macro-syntax", filename)
 
     content = read_file(filename)
     lines = content.split("\n")
@@ -2237,8 +2250,7 @@ def normalize_asm_macro_syntax():
     # Operate on assembly files in dev/ only. The ones in mlkem/ are autogenerated.
     files = list(filter(lambda s: s.startswith("dev/"), get_asm_source_files()))
     files += list(filter(lambda s: s.endswith(".inc"), get_files("dev/**/*.inc")))
-    with ThreadPoolExecutor() as executor:
-        _ = list(executor.map(normalize_asm_macro_syntax_for_file, files))
+    run_parallel(files, normalize_asm_macro_syntax_for_file)
 
 
 def update_via_simpasm(
@@ -2250,7 +2262,6 @@ def update_via_simpasm(
     force_cross=False,
     x86_64_syntax="att",
 ):
-    status_update("simpasm", infile_full)
 
     _, infile = os.path.split(infile_full)
     if outfile is None:
@@ -2539,12 +2550,10 @@ def gen_hol_light_asm():
     ]
 
     joblist = joblist_aarch64 + joblist_x86_64
-    with ThreadPoolExecutor() as executor:
-        _ = list(executor.map(partial(gen_hol_light_asm_file), joblist))
+    run_parallel(joblist, gen_hol_light_asm_file)
 
 
 def update_via_copy(infile_full, outfile_full, transform=None):
-    status_update("copy", f"{infile_full} -> {outfile_full}")
 
     content = read_file(infile_full)
 
@@ -2596,20 +2605,18 @@ def synchronize_file(f, in_dir, out_dir, delete=False, no_simplify=False, **kwar
 def synchronize_backend(in_dir, out_dir, delete=False, no_simplify=False, **kwargs):
     copied = []
 
-    with ThreadPoolExecutor() as executor:
-        pool_results = list(
-            executor.map(
-                partial(
-                    synchronize_file,
-                    in_dir=in_dir,
-                    out_dir=out_dir,
-                    delete=delete,
-                    no_simplify=no_simplify,
-                    **kwargs,
-                ),
-                get_files(os.path.join(in_dir, "*")),
-            )
-        )
+    files = get_files(os.path.join(in_dir, "*"))
+    pool_results = run_parallel(
+        files,
+        partial(
+            synchronize_file,
+            in_dir=in_dir,
+            out_dir=out_dir,
+            delete=delete,
+            no_simplify=no_simplify,
+            **kwargs,
+        ),
+    )
 
     copied = [r for r in pool_results if r is not None]
 
@@ -2699,8 +2706,6 @@ def synchronize_backends(
 
 def adjust_header_guard_for_filename(content, header_file):
 
-    status_update("header guards", header_file)
-
     content = content.split("\n")
     exceptions = {
         "mlkem/mlkem_native.h": "MLK_H",
@@ -2773,14 +2778,10 @@ def gen_header_guard(header_file):
 
 
 def gen_header_guards():
-    with ThreadPoolExecutor() as executor:
-        _ = list(
-            executor.map(partial(gen_header_guard), get_header_files(core_only=True))
-        )
+    run_parallel(get_header_files(core_only=True), gen_header_guard)
 
 
 def gen_source_undefs(source_file):
-    status_update("undefs", source_file)
 
     # Get list of #define's clauses in this source file (ignore filename)
     undef_list = list(map(lambda c: c[1], get_defines_from_file(source_file)))
@@ -2850,14 +2851,8 @@ def gen_source_undefs(source_file):
 
 
 def gen_undefs():
-    with ThreadPoolExecutor() as executor:
-        _ = list(
-            executor.map(
-                partial(gen_source_undefs),
-                get_c_source_files(core_only=True)
-                + get_asm_source_files(core_only=True),
-            )
-        )
+    files = get_c_source_files(core_only=True) + get_asm_source_files(core_only=True)
+    run_parallel(files, gen_source_undefs)
 
 
 def gen_slothy(funcs):
@@ -2867,7 +2862,6 @@ def gen_slothy(funcs):
     targets = list(map(lambda s: s + ".S", funcs))
 
     for t in targets:
-        status_update("SLOTHY", f"Regenerating {t}")
 
         if t.startswith("keccak"):
             base = "dev/fips202/aarch64/src"
@@ -3097,7 +3091,6 @@ def gen_c_citations_for(filename, bibliography):
 
 
 def gen_citations_for(filename, bibliography):
-    status_update("citations", filename)
     if filename.endswith(".md"):
         gen_markdown_citations_for(filename, bibliography)
     elif filename.endswith((".c", ".h", ".S")):
@@ -3181,7 +3174,6 @@ def get_oqs_native_sources(backend):
 
 def gen_oqs_meta_file(filename):
     """Generate OQS META.yml file with updated source lists"""
-    status_update("OQS META", filename)
 
     content = read_file(filename)
 
@@ -3240,16 +3232,13 @@ def gen_citations():
         cite_id = r["id"]
         bibliography[cite_id] = BibliographyEntry(r)
 
-    with ThreadPoolExecutor() as executor:
-        _ = list(
-            executor.map(
-                partial(gen_citations_for, bibliography=bibliography),
-                get_markdown_files()
-                + get_asm_source_files()
-                + get_c_source_files()
-                + get_header_files(),
-            )
-        )
+    files = (
+        get_markdown_files()
+        + get_asm_source_files()
+        + get_c_source_files()
+        + get_header_files()
+    )
+    run_parallel(files, partial(gen_citations_for, bibliography=bibliography))
 
     # Check that every bibliography entry has been used as least once
     for e in bibliography.values():
@@ -3309,11 +3298,6 @@ def update_bytecode_in_proof_script(filepath, bytecode):
 
 
 def update_hol_light_bytecode_for_arch(arch, force_cross=False):
-    status_update(
-        f"HOL Light bytecode ({arch})",
-        f"Running make dump_bytecode ({arch})... (this may take a few minutes)",
-    )
-
     source_arch = arch
     if platform.machine().lower() in ["arm64", "aarch64"]:
         native_arch = "aarch64"
@@ -3355,7 +3339,6 @@ def update_hol_light_bytecode(force_cross=False):
 
 def gen_test_config(config_path, config_spec, default_config_content):
     """Generate a config file by modifying the default config."""
-    status_update("test configs", config_path)
 
     # Start with the default config
     lines = default_config_content.split("\n")
@@ -3521,89 +3504,115 @@ def _main():
 
     os.chdir(os.path.join(os.path.dirname(__file__), ".."))
 
-    gen_citations()
-    high_level_status("Generated citations")
-
-    gen_oqs_meta_files()
-    high_level_status("Generated OQS META.yml files")
-
     if args.slothy == []:
         args.slothy = slothy_choices
-    if args.slothy is not None and args.dry_run is not None:
-        gen_slothy(args.slothy)
-        high_level_status("Generated SLOTHY optimized assembly")
 
-    check_asm_register_aliases()
-    high_level_status("Checked assembly register aliases")
-    check_asm_loop_labels()
-    high_level_status("Checked assembly loop labels")
-    normalize_asm_macro_syntax()
-    high_level_status("Normalize assembly macro syntax")
+    def sync_backends():
+        synchronize_backends(
+            clean=args.aarch64_clean,
+            no_simplify=args.no_simplify,
+            force_cross=args.force_cross,
+            x86_64_syntax=args.x86_64_syntax,
+        )
 
-    gen_c_zeta_file()
-    gen_aarch64_hol_light_zeta_file()
-    gen_aarch64_hol_light_rej_uniform_table()
-    gen_aarch64_zeta_file()
-    gen_aarch64_rej_uniform_table()
-    gen_avx2_hol_light_zeta_file()
-    gen_avx2_hol_light_rej_uniform_table()
-    gen_avx2_zeta_file()
-    gen_avx2_rej_uniform_table()
-    gen_riscv64_zeta_files()
-    high_level_status("Generated zeta and lookup tables")
+    def sync_backends_final():
+        synchronize_backends(
+            clean=args.aarch64_clean,
+            delete=True,
+            force_cross=args.force_cross,
+            no_simplify=args.no_simplify,
+            x86_64_syntax=args.x86_64_syntax,
+        )
 
-    if platform.machine().lower() in ["arm64", "aarch64", "x86_64"]:
-        gen_hol_light_asm()
-        high_level_status("Generated HOL Light assembly")
+    # Build step list: (description, function, enabled)
+    # If enabled is False, step is skipped
+    steps = [
+        ("Generate citations", gen_citations),
+        ("Generate OQS META.yml files", gen_oqs_meta_files),
+        (
+            "Generate SLOTHY optimized assembly",
+            lambda: gen_slothy(args.slothy),
+            args.slothy is not None and not args.dry_run,
+        ),
+    ]
 
-    synchronize_backends(
-        clean=args.aarch64_clean,
-        no_simplify=args.no_simplify,
-        force_cross=args.force_cross,
-        x86_64_syntax=args.x86_64_syntax,
-    )
-    high_level_status("Synchronized backends")
+    def gen_zeta_tables():
+        gen_c_zeta_file()
+        gen_aarch64_hol_light_zeta_file()
+        gen_aarch64_hol_light_rej_uniform_table()
+        gen_aarch64_zeta_file()
+        gen_aarch64_rej_uniform_table()
+        gen_avx2_hol_light_zeta_file()
+        gen_avx2_hol_light_rej_uniform_table()
+        gen_avx2_zeta_file()
+        gen_avx2_rej_uniform_table()
+        gen_riscv64_zeta_files()
 
-    gen_header_guards()
-    high_level_status("Generated header guards")
+    def gen_monolithic():
+        gen_monolithic_source_file()
+        gen_monolithic_asm_file()
 
-    synchronize_backends(
-        clean=args.aarch64_clean,
-        delete=True,
-        force_cross=args.force_cross,
-        no_simplify=args.no_simplify,
-        x86_64_syntax=args.x86_64_syntax,
-    )
-    high_level_status("Completed final backend synchronization")
+    hol_light_asm_supported = platform.machine().lower() in [
+        "arm64",
+        "aarch64",
+        "x86_64",
+    ]
 
-    if args.update_hol_light_bytecode:
-        update_hol_light_bytecode(args.force_cross)
-        high_level_status("Updated HOL Light bytecode")
+    steps += [
+        ("Check assembly register aliases", check_asm_register_aliases),
+        ("Check assembly loop labels", check_asm_loop_labels),
+        ("Normalize assembly macro syntax", normalize_asm_macro_syntax),
+        ("Generate zeta and lookup tables", gen_zeta_tables),
+        ("Generate HOL Light assembly", gen_hol_light_asm, hol_light_asm_supported),
+        ("Synchronize backends", sync_backends),
+        ("Generate header guards", gen_header_guards),
+        ("Complete final backend synchronization", sync_backends_final),
+        (
+            "Update HOL Light bytecode",
+            lambda: update_hol_light_bytecode(args.force_cross),
+            args.update_hol_light_bytecode,
+        ),
+        ("Generate monolithic source files", gen_monolithic),
+        ("Generate undefs", gen_undefs),
+        ("Generate test configs", gen_test_configs),
+        ("Check macro typos", check_macro_typos),
+        ("Generate preprocessor comments", gen_preprocessor_comments),
+        # Formatting should be the last step
+        ("Format files", lambda: format_files(args.dry_run)),
+    ]
 
-    gen_monolithic_source_file()
-    gen_monolithic_asm_file()
-    high_level_status("Generated monolithic source files")
-    gen_undefs()
-    high_level_status("Generated undefs")
+    global _progress, _main_task
+    with Progress(
+        BarColumn(),
+        TaskProgressColumn(),
+        TimeElapsedColumn(),
+        TextColumn("{task.description}"),
+        console=console,
+    ) as progress:
+        _progress = progress
+        _main_task = progress.add_task("autogen", total=len(steps) + 1)
 
-    gen_test_configs()
-    high_level_status("Generated test configs")
+        for step in steps:
+            desc, func = step[0], step[1]
+            enabled = step[2] if len(step) > 2 else True
+            high_level_task(desc)
+            if enabled:
+                func()
+            high_level_status(desc, skipped=not enabled)
 
-    check_macro_typos()
-    high_level_status("Checked macro typos")
-
-    gen_preprocessor_comments()
-    high_level_status("Generated preprocessor comments")
-
-    res = finalize(args.dry_run)
-    if res:
-        if args.dry_run:
-            txt = "Finalized and checked files are up to date"
-        else:
-            txt = "Finalized and wrote files"
+        high_level_task("Write files")
+        finalize(args.dry_run)
+        txt = (
+            "Finalize and check files are up to date"
+            if args.dry_run
+            else "Finalize and write files"
+        )
         high_level_status(txt)
 
-    return res
+        _progress.update(_main_task, description="[green] Done ✓[/]")
+        _progress = None
+
+    return print_check_errors()
 
 
 if __name__ == "__main__":
