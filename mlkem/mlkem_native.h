@@ -513,22 +513,12 @@ int MLK_API_NAMESPACE(check_sk)(
 #define MLK_TOTAL_ALLOC_1024_KEYPAIR MLK_TOTAL_ALLOC_1024_KEYPAIR_NO_PCT
 #endif
 
-/*
- * `MLK_MAX_TOTAL_ALLOC_{KEYPAIR,ENCAPS,DECAPS}` is the maximum across all
- * parameter sets for each operation.
- */
-#define MLK_MAX_TOTAL_ALLOC_KEYPAIR MLK_TOTAL_ALLOC_1024_KEYPAIR
-#define MLK_MAX_TOTAL_ALLOC_ENCAPS MLK_TOTAL_ALLOC_1024_ENCAPS
-#define MLK_MAX_TOTAL_ALLOC_DECAPS MLK_TOTAL_ALLOC_1024_DECAPS
-
 #define MLK_MAX3_(a, b, c) \
   ((a) > (b) ? ((a) > (c) ? (a) : (c)) : ((b) > (c) ? (b) : (c)))
 
 /*
  * `MLK_TOTAL_ALLOC_{512,768,1024}` is the maximum across all operations for
  * each parameter set.
- * `MLK_MAX_TOTAL_ALLOC` is the maximum across all parameter sets and
- * operations.
  */
 #define MLK_TOTAL_ALLOC_512                                          \
   MLK_MAX3_(MLK_TOTAL_ALLOC_512_KEYPAIR, MLK_TOTAL_ALLOC_512_ENCAPS, \
@@ -539,7 +529,5 @@ int MLK_API_NAMESPACE(check_sk)(
 #define MLK_TOTAL_ALLOC_1024                                           \
   MLK_MAX3_(MLK_TOTAL_ALLOC_1024_KEYPAIR, MLK_TOTAL_ALLOC_1024_ENCAPS, \
             MLK_TOTAL_ALLOC_1024_DECAPS)
-
-#define MLK_MAX_TOTAL_ALLOC MLK_TOTAL_ALLOC_1024
 
 #endif /* !MLK_H */
