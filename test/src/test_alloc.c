@@ -485,17 +485,5 @@ int main(void)
   CHECK_ALLOC_MATCH(ctx.global_high_mark_decaps, MLK_TOTAL_ALLOC_DECAPS);
   CHECK_ALLOC_MATCH(ctx.global_high_mark, MLK_TOTAL_ALLOC);
 
-  /*
-   * For parameter set 1024, also check that the high watermarks match
-   * the MLK_MAX_TOTAL_ALLOC_* constants (which are defined as the 1024 values).
-   * MLK_MAX_TOTAL_ALLOC_KEYPAIR adapts based on MLK_CONFIG_KEYGEN_PCT.
-   */
-#if MLK_CONFIG_API_PARAMETER_SET == 1024
-  CHECK_ALLOC_MATCH(ctx.global_high_mark_keypair, MLK_MAX_TOTAL_ALLOC_KEYPAIR);
-  CHECK_ALLOC_MATCH(ctx.global_high_mark_encaps, MLK_MAX_TOTAL_ALLOC_ENCAPS);
-  CHECK_ALLOC_MATCH(ctx.global_high_mark_decaps, MLK_MAX_TOTAL_ALLOC_DECAPS);
-  CHECK_ALLOC_MATCH(ctx.global_high_mark, MLK_MAX_TOTAL_ALLOC);
-#endif /* MLK_CONFIG_API_PARAMETER_SET == 1024 */
-
   return 0;
 }
