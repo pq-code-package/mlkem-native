@@ -89,7 +89,7 @@ rec {
         shfmt;
 
       inherit (pkgs.python3Packages)
-        mpmath sympy black pyparsing pyyaml;
+        mpmath sympy black pyparsing pyyaml rich;
     };
   };
 
