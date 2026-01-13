@@ -6,8 +6,6 @@
 #if !defined(MLK_ALL_H)
 #define MLK_ALL_H
 
-#define MLK_CONFIG_NO_SUPERCOP
-
 /* API for MLKEM-512 */
 #define MLK_CONFIG_PARAMETER_SET 512
 #include <mlkem_native.h>
