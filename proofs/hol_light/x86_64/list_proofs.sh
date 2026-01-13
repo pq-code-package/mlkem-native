@@ -6,5 +6,5 @@
 # we have a spec and proof in HOL-Light.
 
 ROOT=$(git rev-parse --show-toplevel)
-cd $ROOT
+cd "$ROOT" || exit
 ls -1 proofs/hol_light/x86_64/mlkem/*.S | cut -d '/' -f 5 | sed 's/\.S//'
