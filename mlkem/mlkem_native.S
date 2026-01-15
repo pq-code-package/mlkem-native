@@ -98,6 +98,7 @@
 #include "src/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S"
 #endif /* MLK_SYS_AARCH64 */
 #if defined(MLK_SYS_X86_64)
+#include "src/fips202/native/x86_64/src/sha3_keccak4_f1600.S"
 #endif
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 
@@ -581,6 +582,7 @@
 #undef mlk_reduce_avx2
 #undef mlk_rej_uniform_asm
 #undef mlk_rej_uniform_table
+#undef mlk_sha3_keccak4_f1600
 #undef mlk_tomont_avx2
 /* mlkem/src/native/x86_64/src/consts.h */
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_MULCACHE_TWIDDLES

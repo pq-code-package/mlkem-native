@@ -570,6 +570,7 @@
 #undef mlk_reduce_avx2
 #undef mlk_rej_uniform_asm
 #undef mlk_rej_uniform_table
+#undef mlk_sha3_keccak4_f1600
 #undef mlk_tomont_avx2
 /* mlkem/src/native/x86_64/src/consts.h */
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_MULCACHE_TWIDDLES
