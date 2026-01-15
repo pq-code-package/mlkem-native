@@ -21,10 +21,10 @@ buildEnv {
       cbmc = cbmc.overrideAttrs (old: rec {
         version = "6.8.0";
         src = fetchFromGitHub {
-          owner = "diffblue";
+          owner = "tautschnig";
           repo = "cbmc";
-          hash = "sha256-PT6AYiwkplCeyMREZnGZA0BKl4ZESRC02/9ibKg7mYU=";
-          tag = "cbmc-6.8.0";
+          hash = "sha256-ng1zjICpmoHUWkG1PuLRmLtaUBmEALpRgNEpbsrnMV8=";
+          rev = "4f514dbd70c89e3bae03a59f1dc9837acf25885c";
         };
       });
       litani = callPackage ./litani.nix { }; # 1.29.0
