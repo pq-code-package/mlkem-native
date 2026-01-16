@@ -104,34 +104,42 @@
 #endif
 
 /*
- * C90 does not have the inline compiler directive yet.
- * We don't use it in C90 builds.
- * However, in that case the compiler warns about some inline functions in
- * header files not being used in every compilation unit that includes that
- * header. To work around it we silence that warning in that case using
- * __attribute__((unused)).
+ * MLK_INLINE: Hint for inlining.
+ * - MSVC: __inline
+ * - C99+: inline
+ * - GCC/Clang C90: __attribute__((unused)) to silence warnings
+ * - Other C90: empty
  */
-
-/* Do not use inline for C90 builds*/
 #if !defined(MLK_INLINE)
-#if !defined(inline)
 #if defined(_MSC_VER)
 #define MLK_INLINE __inline
-/* Don't combine __inline and __forceinline */
-#define MLK_ALWAYS_INLINE __forceinline
-#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#elif defined(inline) || \
+    (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)
 #define MLK_INLINE inline
+#elif defined(__GNUC__) || defined(__clang__)
+#define MLK_INLINE __attribute__((unused))
+#else
+#define MLK_INLINE
+#endif
+#endif /* !MLK_INLINE */
+
+/*
+ * MLK_ALWAYS_INLINE: Force inlining.
+ * - MSVC: __forceinline
+ * - GCC/Clang C99+: MLK_INLINE __attribute__((always_inline))
+ * - Other: MLK_INLINE (no forced inlining)
+ */
+#if !defined(MLK_ALWAYS_INLINE)
+#if defined(_MSC_VER)
+#define MLK_ALWAYS_INLINE __forceinline
+#elif (defined(__GNUC__) || defined(__clang__)) && \
+    (defined(inline) ||                            \
+     (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L))
 #define MLK_ALWAYS_INLINE MLK_INLINE __attribute__((always_inline))
 #else
-#define MLK_INLINE __attribute__((unused))
 #define MLK_ALWAYS_INLINE MLK_INLINE
 #endif
-
-#else /* !inline */
-#define MLK_INLINE inline
-#define MLK_ALWAYS_INLINE MLK_INLINE __attribute__((always_inline))
-#endif /* inline */
-#endif /* !MLK_INLINE */
+#endif /* !MLK_ALWAYS_INLINE */
 
 #ifndef MLK_STATIC_TESTABLE
 #define MLK_STATIC_TESTABLE static
@@ -207,7 +215,7 @@
   } while (0)
 #endif /* !(MLK_CONFIG_CT_TESTING_ENABLED && !__ASSEMBLER__) */
 
-#if defined(__GNUC__) || defined(clang)
+#if defined(__GNUC__) || defined(__clang__)
 #define MLK_MUST_CHECK_RETURN_VALUE __attribute__((warn_unused_result))
 #else
 #define MLK_MUST_CHECK_RETURN_VALUE
