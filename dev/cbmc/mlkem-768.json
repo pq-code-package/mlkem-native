@@ -10,12 +10,12 @@
     {
       "name": "mlk_poly_tomont",
       "status": "Fail",
-      "duration": "1"
+      "duration": "2"
     },
     {
       "name": "mlk_poly_tomont_native",
       "status": "Fail",
-      "duration": "4"
+      "duration": "3"
     }
   ],
   "runtimes": [
@@ -42,22 +42,22 @@
     {
       "name": "mlk_poly_tobytes_native",
       "unit": "seconds",
-      "value": 3
+      "value": 2
     },
     {
       "name": "mlk_poly_tomont_c",
       "unit": "seconds",
-      "value": 1
+      "value": 4
     },
     {
       "name": "mlk_poly_tomsg",
       "unit": "seconds",
-      "value": 4
+      "value": 2
     },
     {
       "name": "poly_tobytes_native_aarch64",
       "unit": "seconds",
-      "value": 4
+      "value": 2
     },
     {
       "name": "poly_tomont_native_aarch64",
