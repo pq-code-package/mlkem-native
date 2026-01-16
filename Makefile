@@ -36,7 +36,6 @@ BUILD_DIR ?= test/build
 # Skip includes for clean target
 ifneq ($(MAKECMDGOALS),clean)
 include test/mk/config.mk
-include test/mk/compiler.mk
 include test/mk/auto.mk
 include test/mk/components.mk
 include test/mk/rules.mk
