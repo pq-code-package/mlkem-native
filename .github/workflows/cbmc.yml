@@ -15,6 +15,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
+      pull-requests: 'write'
     uses: ./.github/workflows/ci_ec2_reusable.yml
     with:
       name: CBMC (MLKEM-512)
@@ -35,6 +36,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
+      pull-requests: 'write'
     uses: ./.github/workflows/ci_ec2_reusable.yml
     with:
       name: CBMC (MLKEM-768)
@@ -55,6 +57,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
+      pull-requests: 'write'
     uses: ./.github/workflows/ci_ec2_reusable.yml
     with:
       name: CBMC (MLKEM-1024)

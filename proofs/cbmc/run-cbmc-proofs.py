@@ -16,7 +16,7 @@ import sys
 import tempfile
 import uuid
 
-from lib.summarize import print_proof_results
+from lib.summarize import print_proof_results, export_result_json
 
 
 DESCRIPTION = "Configure and run all CBMC proofs in parallel"
@@ -188,6 +188,11 @@ def get_args():
             "default": 1800,
             "help": "timeout for each individual proof in seconds (default: 1800)",
         },
+        {
+            "flags": ["--output-result-json"],
+            "metavar": "FILE",
+            "help": "path to export result JSON",
+        },
     ]:
         flags = arg.pop("flags")
         pars.add_argument(*flags, **arg)
@@ -243,7 +248,7 @@ def get_proof_dirs(proof_root, proof_list, marker_file):
         sys.exit(1)
 
 
-def run_build(litani, jobs, fail_on_proof_failure, summarize):
+def run_build(litani, jobs, fail_on_proof_failure, summarize, output_result_json=None):
     cmd = [str(litani), "run-build"]
     if jobs:
         cmd.extend(["-j", str(jobs)])
@@ -261,6 +266,7 @@ def run_build(litani, jobs, fail_on_proof_failure, summarize):
         sys.exit(1)
 
     if summarize:
+        export_result_json(output_result_json, out_file)
         print_proof_results(out_file)
         out_file.unlink()
 
@@ -531,7 +537,11 @@ async def main():  # pylint: disable=too-many-locals
 
     if not args.no_standalone:
         run_build(
-            litani, args.parallel_jobs, args.fail_on_proof_failure, args.summarize
+            litani,
+            args.parallel_jobs,
+            args.fail_on_proof_failure,
+            args.summarize,
+            args.output_result_json,
         )
 
 

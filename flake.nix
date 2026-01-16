@@ -118,7 +118,7 @@
             packages = builtins.attrValues { inherit (config.packages) toolchains_native; };
           };
           devShells.ci-cbmc = util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) cbmc toolchains_native; };
+            packages = builtins.attrValues { inherit (config.packages) cbmc toolchains_native; } ++ [ pkgs.gh ];
           };
           devShells.ci-slothy = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) slothy linters toolchains_native; };

@@ -20,7 +20,12 @@ def get_args():
             "flags": ["--run-file"],
             "help": "path to the Litani run.json file",
             "required": True,
-        }
+        },
+        {
+            "flags": ["--output-result-json"],
+            "help": "path to export result JSON",
+            "required": False,
+        },
     ]:
         flags = arg.pop("flags")
         parser.add_argument(*flags, **arg)
@@ -69,6 +74,21 @@ def _get_rendered_table(data):
     return "".join(table)
 
 
+def _parse_proof_pipeline(proof_pipeline):
+    """Parse a single proof pipeline, returning (name, status, duration, has_timeout)."""
+    duration = 0
+    has_timeout = False
+    for stage in proof_pipeline["ci_stages"]:
+        for job in stage["jobs"]:
+            if job.get("timeout_reached", False):
+                has_timeout = True
+            if "duration" in job:
+                duration += int(job["duration"])
+
+    status = "Timeout" if has_timeout else proof_pipeline["status"].title()
+    return proof_pipeline["name"], status, duration, has_timeout
+
+
 def _get_status_and_proof_summaries(run_dict):
     """Parse a dict representing a Litani run and create lists summarizing the
     proof results.
@@ -91,35 +111,63 @@ def _get_status_and_proof_summaries(run_dict):
         if proof_pipeline["name"] == "print_tool_versions":
             continue
 
-        # Check if any job timed out
-        has_timeout = False
-        duration = 0
-        for stage in proof_pipeline["ci_stages"]:
-            for job in stage["jobs"]:
-                if job.get("timeout_reached", False):
-                    has_timeout = True
-                if "duration" in job.keys():
-                    duration += int(job["duration"])
+        name, status, duration, has_timeout = _parse_proof_pipeline(proof_pipeline)
+        status_pretty = status.replace("_", " ")
+        duration_str = "TIMEOUT" if has_timeout else str(duration)
 
-        # Determine status display
-        if has_timeout:
-            status_pretty_name = "Timeout"
-            duration_str = "TIMEOUT"
-        else:
-            status_pretty_name = proof_pipeline["status"].title().replace("_", " ")
-            duration_str = str(duration)
+        count_statuses[status_pretty] = count_statuses.get(status_pretty, 0) + 1
+        proofs.append([name, status_pretty, duration_str])
 
-        # Count statuses
-        try:
-            count_statuses[status_pretty_name] += 1
-        except KeyError:
-            count_statuses[status_pretty_name] = 1
-
-        proofs.append([proof_pipeline["name"], status_pretty_name, duration_str])
     statuses = [["Status", "Count"]]
     for status, count in count_statuses.items():
         statuses.append([status, str(count)])
     return [statuses, proofs]
+
+
+def export_result_json(output_path, run_file):
+    """Export JSON with summary, failures, and runtimes."""
+    if output_path is None:
+        return
+
+    with open(run_file, encoding="utf-8") as f:
+        run_dict = json.load(f)
+
+    _, proof_table = _get_status_and_proof_summaries(run_dict)
+    # proof_table: [["Proof", "Status", "Duration (in s)"], [name, status, duration], ...]
+
+    failures, runtimes = [], []
+    for name, status, duration_str in proof_table[1:]:  # skip header
+        is_timeout = duration_str == "TIMEOUT"
+        is_success = status == "Success"
+
+        if not is_success:
+            failures.append({"name": name, "status": status, "duration": duration_str})
+
+        runtime = {"name": name, "unit": "seconds"}
+        if is_success:
+            runtime["value"] = int(duration_str)
+        else:
+            runtime["status"] = "failed"
+        runtimes.append(runtime)
+
+    total = len(runtimes)
+    failed = sum(1 for f in failures if f["status"] != "Timeout")
+    timeout = sum(1 for f in failures if f["status"] == "Timeout")
+
+    result = {
+        "mlkem_k": os.getenv("MLKEM_K", "unknown"),
+        "summary": {
+            "total": total,
+            "success": total - failed - timeout,
+            "failed": failed,
+            "timeout": timeout,
+        },
+        "failures": failures,
+        "runtimes": runtimes,
+    }
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(result, f, indent=2)
 
 
 def print_proof_results(out_file):
@@ -167,6 +215,7 @@ if __name__ == "__main__":
     args = get_args()
     logging.basicConfig(format="%(levelname)s: %(message)s")
     try:
+        export_result_json(args.output_result_json, args.run_file)
         print_proof_results(args.run_file)
     except Exception as ex:  # pylint: disable=broad-except
         logging.critical("Could not print results. Exception: %s", str(ex))
