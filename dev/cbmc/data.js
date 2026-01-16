@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1768539210594,
+  "lastUpdate": 1768539297962,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "CBMC Runtime (ML-KEM-1024)": [
@@ -210,6 +210,98 @@ window.BENCHMARK_DATA = {
           {
             "name": "polyvec_basemul_acc_montgomery_cached_native",
             "value": 116,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "pq-code-package",
+            "username": "pq-code-package"
+          },
+          "committer": {
+            "name": "pq-code-package",
+            "username": "pq-code-package"
+          },
+          "id": "39ee7ff841a4e201a4cd954239df229ab4298291",
+          "message": "CI: Comment on PRs if CBMC proofs fail",
+          "timestamp": "2026-01-13T21:45:38Z",
+          "url": "https://github.com/pq-code-package/mlkem-native/pull/1478/commits/39ee7ff841a4e201a4cd954239df229ab4298291"
+        },
+        "date": 1768539215108,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "mlk_poly_tomont",
+            "value": 999999,
+            "unit": "seconds",
+            "extra": "Failed in 2 seconds"
+          },
+          {
+            "name": "mlk_poly_tomont_native",
+            "value": 999999,
+            "unit": "seconds",
+            "extra": "Failed in 2 seconds"
+          },
+          {
+            "name": "keccakf1600x4_permute_native_x4",
+            "value": 20,
+            "unit": "seconds"
+          },
+          {
+            "name": "mlk_indcpa_enc",
+            "value": 467,
+            "unit": "seconds"
+          },
+          {
+            "name": "mlk_indcpa_keypair_derand",
+            "value": 299,
+            "unit": "seconds"
+          },
+          {
+            "name": "mlk_keccak_squeezeblocks_x4",
+            "value": 156,
+            "unit": "seconds"
+          },
+          {
+            "name": "mlk_ntt_layer",
+            "value": 22,
+            "unit": "seconds"
+          },
+          {
+            "name": "mlk_poly_decompress_dv",
+            "value": 41,
+            "unit": "seconds"
+          },
+          {
+            "name": "mlk_poly_rej_uniform",
+            "value": 41,
+            "unit": "seconds"
+          },
+          {
+            "name": "mlk_polyvec_add",
+            "value": 123,
+            "unit": "seconds"
+          },
+          {
+            "name": "mlk_polyvec_basemul_acc_montgomery_cached_c",
+            "value": 56,
+            "unit": "seconds"
+          },
+          {
+            "name": "mlk_rej_uniform_c",
+            "value": 77,
+            "unit": "seconds"
+          },
+          {
+            "name": "poly_ntt_native",
+            "value": 31,
+            "unit": "seconds"
+          },
+          {
+            "name": "polyvec_basemul_acc_montgomery_cached_native",
+            "value": 121,
             "unit": "seconds"
           }
         ]
