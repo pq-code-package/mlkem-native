@@ -23,6 +23,10 @@ inputs:
   gh_token:
     description: Github access token to use
     required: true
+  store_results:
+    type: boolean
+    description: Indicates if results should be pushed to github pages
+    default: false
 runs:
   using: composite
   steps:
@@ -50,8 +54,47 @@ runs:
               - $(bash --version | grep -m1 "")
             EOF
       - name: Run CBMC proofs (MLKEM_K=${{ inputs.mlkem_k }})
+        id: cbmc_run
         shell: ${{ env.SHELL }}
+        env:
+          CBMC_RESULT_JSON: ${{ github.workspace }}/cbmc_result_k${{ inputs.mlkem_k }}.json
         run: |
           echo "::group::cbmc_${{ inputs.mlkem_k }}"
-          tests cbmc --mlkem-parameter-set ${{ inputs.mlkem_k }} --per-proof-timeout 1800;
+          tests cbmc --mlkem-parameter-set ${{ inputs.mlkem_k }} --per-proof-timeout 1800 || echo "cbmc_failed=true" >> $GITHUB_OUTPUT
           echo "::endgroup::"
+      - name: Process CBMC results
+        id: process_results
+        shell: bash
+        run: |
+          case "${{ inputs.mlkem_k }}" in
+            2) echo "name=512" >> $GITHUB_OUTPUT ;;
+            3) echo "name=768" >> $GITHUB_OUTPUT ;;
+            4) echo "name=1024" >> $GITHUB_OUTPUT ;;
+          esac
+          RESULT_JSON="cbmc_result_k${{ inputs.mlkem_k }}.json"
+          # Filter on runtimes >=20s
+          jq '[.runtimes[] | select(.value >= 20)]' "$RESULT_JSON" | tee cbmc_runtime_k${{ inputs.mlkem_k }}.json
+      - name: Track CBMC runtime performance
+        uses: benchmark-action/github-action-benchmark@d48d326b4ca9ba73ca0cd0d59f108f9e02a381c7 # v1.20.4
+        with:
+          name: "CBMC Runtime (ML-KEM-${{ steps.process_results.outputs.name }})"
+          tool: "customSmallerIsBetter"
+          output-file-path: cbmc_runtime_k${{ inputs.mlkem_k }}.json
+          github-token: ${{ inputs.gh_token }}
+          auto-push: true
+          comment-on-alert: true
+          summary-always: true
+          alert-threshold: "150%"
+          comment-always: true
+          benchmark-data-dir-path: "dev/cbmc"
+      # - name: Reset gh-pages if result is not pushed to gh-pages
+      #   shell: ${{ env.SHELL }}
+      #   if: ${{ inputs.store_results != 'true' }}
+      #   run: |
+      #     git -c advice.detachedHead=false switch gh-pages
+      #     git reset --hard HEAD~1
+      #     git checkout -
+      - name: Fail if CBMC failed
+        if: ${{ steps.cbmc_run.outputs.cbmc_failed == 'true' }}
+        shell: bash
+        run: exit 1

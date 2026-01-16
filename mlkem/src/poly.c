@@ -146,7 +146,7 @@ void mlk_poly_tomont(mlk_poly *r)
     return;
   }
 #endif /* MLK_USE_NATIVE_POLY_TOMONT */
-
+  cassert(0); /* deliberate issue */
   mlk_poly_tomont_c(r);
 }
 

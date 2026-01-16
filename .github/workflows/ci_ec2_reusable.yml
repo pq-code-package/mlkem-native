@@ -191,6 +191,7 @@ jobs:
           nix-verbose: ${{ inputs.verbose }}
           mlkem_k: ${{ inputs.cbmc_mlkem_k }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
+          store_results: ${{ github.repository_owner == 'pq-code-package' && github.ref == 'refs/heads/main' }}
       - name: SLOTHY
         if: ${{ inputs.slothy }}
         uses: ./.github/actions/setup-shell

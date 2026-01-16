@@ -20,7 +20,12 @@ def get_args():
             "flags": ["--run-file"],
             "help": "path to the Litani run.json file",
             "required": True,
-        }
+        },
+        {
+            "flags": ["--output-result-json"],
+            "help": "path to export unified result JSON",
+            "required": False,
+        },
     ]:
         flags = arg.pop("flags")
         parser.add_argument(*flags, **arg)
@@ -122,6 +127,80 @@ def _get_status_and_proof_summaries(run_dict):
     return [statuses, proofs]
 
 
+def export_result_json(output_path, run_file):
+    """Export unified JSON with summary, failures, and runtimes."""
+    if output_path is None:
+        return
+
+    with open(run_file, encoding="utf-8") as f:
+        run_dict = json.load(f)
+
+    failures = []
+    runtimes = []
+
+    for proof_pipeline in run_dict["pipelines"]:
+        if proof_pipeline["name"] == "print_tool_versions":
+            continue
+
+        duration = 0
+        additional_info = None
+        has_timeout = False
+
+        for stage in proof_pipeline["ci_stages"]:
+            for job in stage["jobs"]:
+                if job.get("timeout_reached", False):
+                    has_timeout = True
+                if "duration" in job.keys():
+                    duration += int(job["duration"])
+
+        status = "Timeout" if has_timeout else proof_pipeline["status"].title()
+
+        if status != "Success":
+            failures.append(
+                {
+                    "name": proof_pipeline["name"],
+                    "status": status,
+                    "duration": duration if not has_timeout else "TIMEOUT",
+                }
+            )
+
+            if has_timeout:
+                additional_info = "Timeout"
+            else:
+                additional_info = f"Failed in {duration} seconds"
+
+            # Report threshold runtime for failed proofs, so that the benchmark
+            # action warns about them specifically
+            duration = 999999
+
+        runtime = {"name": proof_pipeline["name"], "value": duration, "unit": "seconds"}
+        if additional_info is not None:
+            runtime["extra"] = additional_info
+        runtimes.append(runtime)
+
+    total = len(runtimes)
+    failed = len([f for f in failures if f["status"] != "Timeout"])
+    timeout = len([f for f in failures if f["status"] == "Timeout"])
+
+    # Get MLKEM_K from environment
+    mlkem_k = os.getenv("MLKEM_K", "unknown")
+
+    result = {
+        "mlkem_k": mlkem_k,
+        "summary": {
+            "total": total,
+            "success": total - failed - timeout,
+            "failed": failed,
+            "timeout": timeout,
+        },
+        "failures": failures,
+        "runtimes": runtimes,
+    }
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(result, f, indent=2)
+
+
 def print_proof_results(out_file):
     """
     Print 2 strings that summarize the proof results.
@@ -145,6 +224,14 @@ def print_proof_results(out_file):
     else:
         logging.warning("$GITHUB_STEP_SUMMARY not set, not writing summary file")
 
+    # Write failure summary for PR comments
+    failure_file = os.getenv("CBMC_FAILURE_SUMMARY_FILE")
+    if failure_file:
+        failed = [proof_table[0]] + [r for r in proof_table[1:] if r[1] != "Success"]
+        if len(failed) > 1:
+            with open(failure_file, "w") as handle:
+                handle.write(_get_rendered_table(failed))
+
     msg = (
         "Click the 'Summary' button to view a Markdown table "
         "summarizing all proof results"
@@ -167,6 +254,8 @@ if __name__ == "__main__":
     args = get_args()
     logging.basicConfig(format="%(levelname)s: %(message)s")
     try:
+        export_result_json(args.output_result_json, args.run_file)
+
         print_proof_results(args.run_file)
     except Exception as ex:  # pylint: disable=broad-except
         logging.critical("Could not print results. Exception: %s", str(ex))

@@ -261,7 +261,20 @@ def run_build(litani, jobs, fail_on_proof_failure, summarize):
         sys.exit(1)
 
     if summarize:
-        print_proof_results(out_file)
+        # Export result JSON if CBMC_RESULT_JSON env var is set
+        result_json = os.getenv("CBMC_RESULT_JSON")
+        if result_json:
+            cmd_summarize = [
+                sys.executable,
+                str(pathlib.Path(__file__).parent / "lib" / "summarize.py"),
+                "--run-file",
+                str(out_file),
+                "--output-result-json",
+                result_json,
+            ]
+            subprocess.run(cmd_summarize, check=True)
+        else:
+            print_proof_results(out_file)
         out_file.unlink()
 
     if proc.returncode:
