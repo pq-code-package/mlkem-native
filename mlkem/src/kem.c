@@ -44,34 +44,29 @@ MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                      MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
-  typedef struct
-  {
-    mlk_polyvec p;
-    MLK_ALIGN uint8_t p_reencoded[MLKEM_POLYVECBYTES];
-  } workspace;
-
   int ret = 0;
-  MLK_ALLOC(ws, workspace, 1, context);
+  MLK_ALLOC(p, mlk_polyvec, 1, context);
+  MLK_ALLOC(p_reencoded, uint8_t, MLKEM_POLYVECBYTES, context);
 
-  if (ws == NULL)
+  if (p == NULL || p_reencoded == NULL)
   {
     ret = MLK_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
 
-  mlk_polyvec_frombytes(&ws->p, pk);
-  mlk_polyvec_reduce(&ws->p);
-  mlk_polyvec_tobytes(ws->p_reencoded, &ws->p);
+  mlk_polyvec_frombytes(p, pk);
+  mlk_polyvec_reduce(p);
+  mlk_polyvec_tobytes(p_reencoded, p);
 
   /* We use a constant-time memcmp here to avoid having to
    * declassify the PK before the PCT has succeeded. */
-  ret =
-      mlk_ct_memcmp(pk, ws->p_reencoded, MLKEM_POLYVECBYTES) ? MLK_ERR_FAIL : 0;
+  ret = mlk_ct_memcmp(pk, p_reencoded, MLKEM_POLYVECBYTES) ? MLK_ERR_FAIL : 0;
 
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(ws, workspace, 1, context);
+  MLK_FREE(p_reencoded, uint8_t, MLKEM_POLYVECBYTES, context);
+  MLK_FREE(p, mlk_polyvec, 1, context);
   return ret;
 }
 
@@ -142,29 +137,24 @@ static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                          uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES],
                          MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
-  typedef struct
-  {
-    MLK_ALIGN uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES];
-    MLK_ALIGN uint8_t ss_enc[MLKEM_SSBYTES];
-    MLK_ALIGN uint8_t ss_dec[MLKEM_SSBYTES];
-  } workspace;
-
   int ret = 0;
-  MLK_ALLOC(ws, workspace, 1, context);
+  MLK_ALLOC(ct, uint8_t, MLKEM_INDCCA_CIPHERTEXTBYTES, context);
+  MLK_ALLOC(ss_enc, uint8_t, MLKEM_SSBYTES, context);
+  MLK_ALLOC(ss_dec, uint8_t, MLKEM_SSBYTES, context);
 
-  if (ws == NULL)
+  if (ct == NULL || ss_enc == NULL || ss_dec == NULL)
   {
     ret = MLK_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
 
-  ret = mlk_kem_enc(ws->ct, ws->ss_enc, pk, context);
+  ret = mlk_kem_enc(ct, ss_enc, pk, context);
   if (ret != 0)
   {
     goto cleanup;
   }
 
-  ret = mlk_kem_dec(ws->ss_dec, ws->ct, sk, context);
+  ret = mlk_kem_dec(ss_dec, ct, sk, context);
   if (ret != 0)
   {
     goto cleanup;
@@ -174,12 +164,11 @@ static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   /* Deliberately break PCT for testing purposes */
   if (mlk_break_pct())
   {
-    ws->ss_enc[0] = ~ws->ss_enc[0];
+    ss_enc[0] = ~ss_enc[0];
   }
 #endif /* MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST */
 
-  ret = mlk_ct_memcmp(ws->ss_enc, ws->ss_dec, MLKEM_SSBYTES);
-
+  ret = mlk_ct_memcmp(ss_enc, ss_dec, MLKEM_SSBYTES);
   /* The result of the PCT is public. */
   MLK_CT_TESTING_DECLASSIFY(&ret, sizeof(ret));
 
@@ -192,7 +181,9 @@ cleanup:
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(ws, workspace, 1, context);
+  MLK_FREE(ss_dec, uint8_t, MLKEM_SSBYTES, context);
+  MLK_FREE(ss_enc, uint8_t, MLKEM_SSBYTES, context);
+  MLK_FREE(ct, uint8_t, MLKEM_INDCCA_CIPHERTEXTBYTES, context);
   return ret;
 }
 #else /* MLK_CONFIG_KEYGEN_PCT */
@@ -290,16 +281,11 @@ int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                        const uint8_t coins[MLKEM_SYMBYTES],
                        MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
-  typedef struct
-  {
-    MLK_ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
-    MLK_ALIGN uint8_t kr[2 * MLKEM_SYMBYTES];
-  } workspace;
-
   int ret = 0;
-  MLK_ALLOC(ws, workspace, 1, context);
+  MLK_ALLOC(buf, uint8_t, 2 * MLKEM_SYMBYTES, context);
+  MLK_ALLOC(kr, uint8_t, 2 * MLKEM_SYMBYTES, context);
 
-  if (ws == NULL)
+  if (buf == NULL || kr == NULL)
   {
     ret = MLK_ERR_OUT_OF_MEMORY;
     goto cleanup;
@@ -312,25 +298,26 @@ int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
     goto cleanup;
   }
 
-  mlk_memcpy(ws->buf, coins, MLKEM_SYMBYTES);
+  mlk_memcpy(buf, coins, MLKEM_SYMBYTES);
 
   /* Multitarget countermeasure for coins + contributory KEM */
-  mlk_hash_h(ws->buf + MLKEM_SYMBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
-  mlk_hash_g(ws->kr, ws->buf, 2 * MLKEM_SYMBYTES);
+  mlk_hash_h(buf + MLKEM_SYMBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
+  mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
 
   /* coins are in kr+MLKEM_SYMBYTES */
-  ret = mlk_indcpa_enc(ct, ws->buf, pk, ws->kr + MLKEM_SYMBYTES, context);
+  ret = mlk_indcpa_enc(ct, buf, pk, kr + MLKEM_SYMBYTES, context);
   if (ret != 0)
   {
     goto cleanup;
   }
 
-  mlk_memcpy(ss, ws->kr, MLKEM_SYMBYTES);
+  mlk_memcpy(ss, kr, MLKEM_SYMBYTES);
 
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(ws, workspace, 1, context);
+  MLK_FREE(kr, uint8_t, 2 * MLKEM_SYMBYTES, context);
+  MLK_FREE(buf, uint8_t, 2 * MLKEM_SYMBYTES, context);
   return ret;
 }
 
@@ -374,19 +361,15 @@ int mlk_kem_dec(uint8_t ss[MLKEM_SSBYTES],
                 const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
                 MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
-  typedef struct
-  {
-    MLK_ALIGN uint8_t buf[2 * MLKEM_SYMBYTES];
-    MLK_ALIGN uint8_t kr[2 * MLKEM_SYMBYTES];
-    MLK_ALIGN uint8_t tmp[MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES];
-  } workspace;
-
   int ret = 0;
   uint8_t fail;
   const uint8_t *pk = sk + MLKEM_INDCPA_SECRETKEYBYTES;
-  MLK_ALLOC(ws, workspace, 1, context);
+  MLK_ALLOC(buf, uint8_t, 2 * MLKEM_SYMBYTES, context);
+  MLK_ALLOC(kr, uint8_t, 2 * MLKEM_SYMBYTES, context);
+  MLK_ALLOC(tmp, uint8_t, MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES,
+            context);
 
-  if (ws == NULL)
+  if (buf == NULL || kr == NULL || tmp == NULL)
   {
     ret = MLK_ERR_OUT_OF_MEMORY;
     goto cleanup;
@@ -399,41 +382,45 @@ int mlk_kem_dec(uint8_t ss[MLKEM_SSBYTES],
     goto cleanup;
   }
 
-  ret = mlk_indcpa_dec(ws->buf, ct, sk, context);
+  ret = mlk_indcpa_dec(buf, ct, sk, context);
   if (ret != 0)
   {
     goto cleanup;
   }
 
   /* Multitarget countermeasure for coins + contributory KEM */
-  mlk_memcpy(ws->buf + MLKEM_SYMBYTES,
+  mlk_memcpy(buf + MLKEM_SYMBYTES,
              sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES,
              MLKEM_SYMBYTES);
-  mlk_hash_g(ws->kr, ws->buf, 2 * MLKEM_SYMBYTES);
+  mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
 
   /* Recompute and compare ciphertext */
   /* coins are in kr+MLKEM_SYMBYTES */
-  ret = mlk_indcpa_enc(ws->tmp, ws->buf, pk, ws->kr + MLKEM_SYMBYTES, context);
+  ret = mlk_indcpa_enc(tmp, buf, pk, kr + MLKEM_SYMBYTES, context);
   if (ret != 0)
   {
     goto cleanup;
   }
 
-  fail = mlk_ct_memcmp(ct, ws->tmp, MLKEM_INDCCA_CIPHERTEXTBYTES);
+  fail = mlk_ct_memcmp(ct, tmp, MLKEM_INDCCA_CIPHERTEXTBYTES);
 
   /* Compute rejection key */
-  mlk_memcpy(ws->tmp, sk + MLKEM_INDCCA_SECRETKEYBYTES - MLKEM_SYMBYTES,
+  mlk_memcpy(tmp, sk + MLKEM_INDCCA_SECRETKEYBYTES - MLKEM_SYMBYTES,
              MLKEM_SYMBYTES);
-  mlk_memcpy(ws->tmp + MLKEM_SYMBYTES, ct, MLKEM_INDCCA_CIPHERTEXTBYTES);
-  mlk_hash_j(ss, ws->tmp, MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES);
+  mlk_memcpy(tmp + MLKEM_SYMBYTES, ct, MLKEM_INDCCA_CIPHERTEXTBYTES);
+  mlk_hash_j(ss, tmp, MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES);
 
   /* Copy true key to return buffer if fail is 0 */
-  mlk_ct_cmov_zero(ss, ws->kr, MLKEM_SYMBYTES, fail);
+  mlk_ct_cmov_zero(ss, kr, MLKEM_SYMBYTES, fail);
 
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(ws, workspace, 1, context);
+  MLK_FREE(tmp, uint8_t, MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES,
+           context);
+  MLK_FREE(kr, uint8_t, 2 * MLKEM_SYMBYTES, context);
+  MLK_FREE(buf, uint8_t, 2 * MLKEM_SYMBYTES, context);
+
   return ret;
 }
 
