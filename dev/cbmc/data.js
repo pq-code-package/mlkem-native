@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1768537523907,
+  "lastUpdate": 1768537734441,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "CBMC Runtime (ML-KEM-1024)": [
@@ -549,6 +549,78 @@ window.BENCHMARK_DATA = {
           {
             "name": "poly_tomont_native_aarch64",
             "value": 2,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "pq-code-package",
+            "username": "pq-code-package"
+          },
+          "committer": {
+            "name": "pq-code-package",
+            "username": "pq-code-package"
+          },
+          "id": "8141a8a264ff8121bb0a9cf614045cf117e4bee9",
+          "message": "CI: Comment on PRs if CBMC proofs fail",
+          "timestamp": "2026-01-13T21:45:38Z",
+          "url": "https://github.com/pq-code-package/mlkem-native/pull/1478/commits/8141a8a264ff8121bb0a9cf614045cf117e4bee9"
+        },
+        "date": 1768537653347,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "mlk_poly_tomont",
+            "value": 999999,
+            "unit": "seconds",
+            "extra": "Failed in 2 seconds"
+          },
+          {
+            "name": "mlk_poly_tomont_native",
+            "value": 999999,
+            "unit": "seconds",
+            "extra": "Failed in 2 seconds"
+          },
+          {
+            "name": "mlk_indcpa_enc",
+            "value": 424,
+            "unit": "seconds"
+          },
+          {
+            "name": "mlk_indcpa_keypair_derand",
+            "value": 597,
+            "unit": "seconds"
+          },
+          {
+            "name": "mlk_keccak_squeezeblocks_x4",
+            "value": 160,
+            "unit": "seconds"
+          },
+          {
+            "name": "mlk_poly_rej_uniform",
+            "value": 42,
+            "unit": "seconds"
+          },
+          {
+            "name": "mlk_polyvec_basemul_acc_montgomery_cached_c",
+            "value": 82,
+            "unit": "seconds"
+          },
+          {
+            "name": "mlk_rej_uniform_c",
+            "value": 87,
+            "unit": "seconds"
+          },
+          {
+            "name": "poly_ntt_native",
+            "value": 31,
+            "unit": "seconds"
+          },
+          {
+            "name": "polyvec_basemul_acc_montgomery_cached_native",
+            "value": 59,
             "unit": "seconds"
           }
         ]
