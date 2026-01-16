@@ -68,294 +68,222 @@ static const uint64_t rho56[4] = {0x0007060504030201, 0x080F0E0D0C0B0A09,
   __m256i Ca, Ce, Ci, Co, Cu;      \
   __m256i Ca1, Ce1, Ci1, Co1, Cu1; \
   __m256i Da, De, Di, Do, Du;      \
-  __m256i Eba, Ebe, Ebi, Ebo, Ebu; \
-  __m256i Ega, Ege, Egi, Ego, Egu; \
-  __m256i Eka, Eke, Eki, Eko, Eku; \
-  __m256i Ema, Eme, Emi, Emo, Emu; \
-  __m256i Esa, Ese, Esi, Eso, Esu;
-
-#define prepareTheta                                            \
-  Ca = XOR256(Aba, XOR256(Aga, XOR256(Aka, XOR256(Ama, Asa)))); \
-  Ce = XOR256(Abe, XOR256(Age, XOR256(Ake, XOR256(Ame, Ase)))); \
-  Ci = XOR256(Abi, XOR256(Agi, XOR256(Aki, XOR256(Ami, Asi)))); \
-  Co = XOR256(Abo, XOR256(Ago, XOR256(Ako, XOR256(Amo, Aso)))); \
-  Cu = XOR256(Abu, XOR256(Agu, XOR256(Aku, XOR256(Amu, Asu))));
-
-/*
- * --- Theta Rho Pi Chi Iota Prepare-theta
- * --- 64-bit lanes mapped to 64-bit words
- */
-#define thetaRhoPiChiIotaPrepareTheta(i, A, E)                \
-  ROL64in256(Ce1, Ce, 1);                                     \
-  Da = XOR256(Cu, Ce1);                                       \
-  ROL64in256(Ci1, Ci, 1);                                     \
-  De = XOR256(Ca, Ci1);                                       \
-  ROL64in256(Co1, Co, 1);                                     \
-  Di = XOR256(Ce, Co1);                                       \
-  ROL64in256(Cu1, Cu, 1);                                     \
-  Do = XOR256(Ci, Cu1);                                       \
-  ROL64in256(Ca1, Ca, 1);                                     \
-  Du = XOR256(Co, Ca1);                                       \
-                                                              \
-  XOReq256(A##ba, Da);                                        \
-  Bba = A##ba;                                                \
-  XOReq256(A##ge, De);                                        \
-  ROL64in256(Bbe, A##ge, 44);                                 \
-  XOReq256(A##ki, Di);                                        \
-  ROL64in256(Bbi, A##ki, 43);                                 \
-  E##ba = XOR256(Bba, ANDnu256(Bbe, Bbi));                    \
-  XOReq256(E##ba, CONST256_64(keccakf1600RoundConstants[i])); \
-  Ca = E##ba;                                                 \
-  XOReq256(A##mo, Do);                                        \
-  ROL64in256(Bbo, A##mo, 21);                                 \
-  E##be = XOR256(Bbe, ANDnu256(Bbi, Bbo));                    \
-  Ce = E##be;                                                 \
-  XOReq256(A##su, Du);                                        \
-  ROL64in256(Bbu, A##su, 14);                                 \
-  E##bi = XOR256(Bbi, ANDnu256(Bbo, Bbu));                    \
-  Ci = E##bi;                                                 \
-  E##bo = XOR256(Bbo, ANDnu256(Bbu, Bba));                    \
-  Co = E##bo;                                                 \
-  E##bu = XOR256(Bbu, ANDnu256(Bba, Bbe));                    \
-  Cu = E##bu;                                                 \
-                                                              \
-  XOReq256(A##bo, Do);                                        \
-  ROL64in256(Bga, A##bo, 28);                                 \
-  XOReq256(A##gu, Du);                                        \
-  ROL64in256(Bge, A##gu, 20);                                 \
-  XOReq256(A##ka, Da);                                        \
-  ROL64in256(Bgi, A##ka, 3);                                  \
-  E##ga = XOR256(Bga, ANDnu256(Bge, Bgi));                    \
-  XOReq256(Ca, E##ga);                                        \
-  XOReq256(A##me, De);                                        \
-  ROL64in256(Bgo, A##me, 45);                                 \
-  E##ge = XOR256(Bge, ANDnu256(Bgi, Bgo));                    \
-  XOReq256(Ce, E##ge);                                        \
-  XOReq256(A##si, Di);                                        \
-  ROL64in256(Bgu, A##si, 61);                                 \
-  E##gi = XOR256(Bgi, ANDnu256(Bgo, Bgu));                    \
-  XOReq256(Ci, E##gi);                                        \
-  E##go = XOR256(Bgo, ANDnu256(Bgu, Bga));                    \
-  XOReq256(Co, E##go);                                        \
-  E##gu = XOR256(Bgu, ANDnu256(Bga, Bge));                    \
-  XOReq256(Cu, E##gu);                                        \
-                                                              \
-  XOReq256(A##be, De);                                        \
-  ROL64in256(Bka, A##be, 1);                                  \
-  XOReq256(A##gi, Di);                                        \
-  ROL64in256(Bke, A##gi, 6);                                  \
-  XOReq256(A##ko, Do);                                        \
-  ROL64in256(Bki, A##ko, 25);                                 \
-  E##ka = XOR256(Bka, ANDnu256(Bke, Bki));                    \
-  XOReq256(Ca, E##ka);                                        \
-  XOReq256(A##mu, Du);                                        \
-  ROL64in256_8(Bko, A##mu);                                   \
-  E##ke = XOR256(Bke, ANDnu256(Bki, Bko));                    \
-  XOReq256(Ce, E##ke);                                        \
-  XOReq256(A##sa, Da);                                        \
-  ROL64in256(Bku, A##sa, 18);                                 \
-  E##ki = XOR256(Bki, ANDnu256(Bko, Bku));                    \
-  XOReq256(Ci, E##ki);                                        \
-  E##ko = XOR256(Bko, ANDnu256(Bku, Bka));                    \
-  XOReq256(Co, E##ko);                                        \
-  E##ku = XOR256(Bku, ANDnu256(Bka, Bke));                    \
-  XOReq256(Cu, E##ku);                                        \
-                                                              \
-  XOReq256(A##bu, Du);                                        \
-  ROL64in256(Bma, A##bu, 27);                                 \
-  XOReq256(A##ga, Da);                                        \
-  ROL64in256(Bme, A##ga, 36);                                 \
-  XOReq256(A##ke, De);                                        \
-  ROL64in256(Bmi, A##ke, 10);                                 \
-  E##ma = XOR256(Bma, ANDnu256(Bme, Bmi));                    \
-  XOReq256(Ca, E##ma);                                        \
-  XOReq256(A##mi, Di);                                        \
-  ROL64in256(Bmo, A##mi, 15);                                 \
-  E##me = XOR256(Bme, ANDnu256(Bmi, Bmo));                    \
-  XOReq256(Ce, E##me);                                        \
-  XOReq256(A##so, Do);                                        \
-  ROL64in256_56(Bmu, A##so);                                  \
-  E##mi = XOR256(Bmi, ANDnu256(Bmo, Bmu));                    \
-  XOReq256(Ci, E##mi);                                        \
-  E##mo = XOR256(Bmo, ANDnu256(Bmu, Bma));                    \
-  XOReq256(Co, E##mo);                                        \
-  E##mu = XOR256(Bmu, ANDnu256(Bma, Bme));                    \
-  XOReq256(Cu, E##mu);                                        \
-                                                              \
-  XOReq256(A##bi, Di);                                        \
-  ROL64in256(Bsa, A##bi, 62);                                 \
-  XOReq256(A##go, Do);                                        \
-  ROL64in256(Bse, A##go, 55);                                 \
-  XOReq256(A##ku, Du);                                        \
-  ROL64in256(Bsi, A##ku, 39);                                 \
-  E##sa = XOR256(Bsa, ANDnu256(Bse, Bsi));                    \
-  XOReq256(Ca, E##sa);                                        \
-  XOReq256(A##ma, Da);                                        \
-  ROL64in256(Bso, A##ma, 41);                                 \
-  E##se = XOR256(Bse, ANDnu256(Bsi, Bso));                    \
-  XOReq256(Ce, E##se);                                        \
-  XOReq256(A##se, De);                                        \
-  ROL64in256(Bsu, A##se, 2);                                  \
-  E##si = XOR256(Bsi, ANDnu256(Bso, Bsu));                    \
-  XOReq256(Ci, E##si);                                        \
-  E##so = XOR256(Bso, ANDnu256(Bsu, Bsa));                    \
-  XOReq256(Co, E##so);                                        \
-  E##su = XOR256(Bsu, ANDnu256(Bsa, Bse));                    \
-  XOReq256(Cu, E##su);
-
-
-/*
- * --- Theta Rho Pi Chi Iota
- * --- 64-bit lanes mapped to 64-bit words
- */
-#define thetaRhoPiChiIota(i, A, E)                            \
-  ROL64in256(Ce1, Ce, 1);                                     \
-  Da = XOR256(Cu, Ce1);                                       \
-  ROL64in256(Ci1, Ci, 1);                                     \
-  De = XOR256(Ca, Ci1);                                       \
-  ROL64in256(Co1, Co, 1);                                     \
-  Di = XOR256(Ce, Co1);                                       \
-  ROL64in256(Cu1, Cu, 1);                                     \
-  Do = XOR256(Ci, Cu1);                                       \
-  ROL64in256(Ca1, Ca, 1);                                     \
-  Du = XOR256(Co, Ca1);                                       \
-                                                              \
-  XOReq256(A##ba, Da);                                        \
-  Bba = A##ba;                                                \
-  XOReq256(A##ge, De);                                        \
-  ROL64in256(Bbe, A##ge, 44);                                 \
-  XOReq256(A##ki, Di);                                        \
-  ROL64in256(Bbi, A##ki, 43);                                 \
-  E##ba = XOR256(Bba, ANDnu256(Bbe, Bbi));                    \
-  XOReq256(E##ba, CONST256_64(keccakf1600RoundConstants[i])); \
-  XOReq256(A##mo, Do);                                        \
-  ROL64in256(Bbo, A##mo, 21);                                 \
-  E##be = XOR256(Bbe, ANDnu256(Bbi, Bbo));                    \
-  XOReq256(A##su, Du);                                        \
-  ROL64in256(Bbu, A##su, 14);                                 \
-  E##bi = XOR256(Bbi, ANDnu256(Bbo, Bbu));                    \
-  E##bo = XOR256(Bbo, ANDnu256(Bbu, Bba));                    \
-  E##bu = XOR256(Bbu, ANDnu256(Bba, Bbe));                    \
-                                                              \
-  XOReq256(A##bo, Do);                                        \
-  ROL64in256(Bga, A##bo, 28);                                 \
-  XOReq256(A##gu, Du);                                        \
-  ROL64in256(Bge, A##gu, 20);                                 \
-  XOReq256(A##ka, Da);                                        \
-  ROL64in256(Bgi, A##ka, 3);                                  \
-  E##ga = XOR256(Bga, ANDnu256(Bge, Bgi));                    \
-  XOReq256(A##me, De);                                        \
-  ROL64in256(Bgo, A##me, 45);                                 \
-  E##ge = XOR256(Bge, ANDnu256(Bgi, Bgo));                    \
-  XOReq256(A##si, Di);                                        \
-  ROL64in256(Bgu, A##si, 61);                                 \
-  E##gi = XOR256(Bgi, ANDnu256(Bgo, Bgu));                    \
-  E##go = XOR256(Bgo, ANDnu256(Bgu, Bga));                    \
-  E##gu = XOR256(Bgu, ANDnu256(Bga, Bge));                    \
-                                                              \
-  XOReq256(A##be, De);                                        \
-  ROL64in256(Bka, A##be, 1);                                  \
-  XOReq256(A##gi, Di);                                        \
-  ROL64in256(Bke, A##gi, 6);                                  \
-  XOReq256(A##ko, Do);                                        \
-  ROL64in256(Bki, A##ko, 25);                                 \
-  E##ka = XOR256(Bka, ANDnu256(Bke, Bki));                    \
-  XOReq256(A##mu, Du);                                        \
-  ROL64in256_8(Bko, A##mu);                                   \
-  E##ke = XOR256(Bke, ANDnu256(Bki, Bko));                    \
-  XOReq256(A##sa, Da);                                        \
-  ROL64in256(Bku, A##sa, 18);                                 \
-  E##ki = XOR256(Bki, ANDnu256(Bko, Bku));                    \
-  E##ko = XOR256(Bko, ANDnu256(Bku, Bka));                    \
-  E##ku = XOR256(Bku, ANDnu256(Bka, Bke));                    \
-                                                              \
-  XOReq256(A##bu, Du);                                        \
-  ROL64in256(Bma, A##bu, 27);                                 \
-  XOReq256(A##ga, Da);                                        \
-  ROL64in256(Bme, A##ga, 36);                                 \
-  XOReq256(A##ke, De);                                        \
-  ROL64in256(Bmi, A##ke, 10);                                 \
-  E##ma = XOR256(Bma, ANDnu256(Bme, Bmi));                    \
-  XOReq256(A##mi, Di);                                        \
-  ROL64in256(Bmo, A##mi, 15);                                 \
-  E##me = XOR256(Bme, ANDnu256(Bmi, Bmo));                    \
-  XOReq256(A##so, Do);                                        \
-  ROL64in256_56(Bmu, A##so);                                  \
-  E##mi = XOR256(Bmi, ANDnu256(Bmo, Bmu));                    \
-  E##mo = XOR256(Bmo, ANDnu256(Bmu, Bma));                    \
-  E##mu = XOR256(Bmu, ANDnu256(Bma, Bme));                    \
-                                                              \
-  XOReq256(A##bi, Di);                                        \
-  ROL64in256(Bsa, A##bi, 62);                                 \
-  XOReq256(A##go, Do);                                        \
-  ROL64in256(Bse, A##go, 55);                                 \
-  XOReq256(A##ku, Du);                                        \
-  ROL64in256(Bsi, A##ku, 39);                                 \
-  E##sa = XOR256(Bsa, ANDnu256(Bse, Bsi));                    \
-  XOReq256(A##ma, Da);                                        \
-  ROL64in256(Bso, A##ma, 41);                                 \
-  E##se = XOR256(Bse, ANDnu256(Bsi, Bso));                    \
-  XOReq256(A##se, De);                                        \
-  ROL64in256(Bsu, A##se, 2);                                  \
-  E##si = XOR256(Bsi, ANDnu256(Bso, Bsu));                    \
-  E##so = XOR256(Bso, ANDnu256(Bsu, Bsa));                    \
-  E##su = XOR256(Bsu, ANDnu256(Bsa, Bse));
-
+  __m256i Tba, Tbe, Tbi, Tbo, Tbu; \
+  __m256i Tga, Tge, Tgi, Tgo, Tgu; \
+  __m256i Tka, Tke, Tki, Tko, Tku; \
+  __m256i Tma, Tme, Tmi, Tmo, Tmu; \
+  __m256i Tsa, Tse, Tsi, Tso, Tsu;
 
 static MLK_ALIGN const uint64_t keccakf1600RoundConstants[24] = {
-    (uint64_t)0x0000000000000001ULL, (uint64_t)0x0000000000008082ULL,
-    (uint64_t)0x800000000000808aULL, (uint64_t)0x8000000080008000ULL,
-    (uint64_t)0x000000000000808bULL, (uint64_t)0x0000000080000001ULL,
-    (uint64_t)0x8000000080008081ULL, (uint64_t)0x8000000000008009ULL,
-    (uint64_t)0x000000000000008aULL, (uint64_t)0x0000000000000088ULL,
-    (uint64_t)0x0000000080008009ULL, (uint64_t)0x000000008000000aULL,
-    (uint64_t)0x000000008000808bULL, (uint64_t)0x800000000000008bULL,
-    (uint64_t)0x8000000000008089ULL, (uint64_t)0x8000000000008003ULL,
-    (uint64_t)0x8000000000008002ULL, (uint64_t)0x8000000000000080ULL,
-    (uint64_t)0x000000000000800aULL, (uint64_t)0x800000008000000aULL,
-    (uint64_t)0x8000000080008081ULL, (uint64_t)0x8000000000008080ULL,
-    (uint64_t)0x0000000080000001ULL, (uint64_t)0x8000000080008008ULL};
+    0x0000000000000001ULL, 0x0000000000008082ULL, 0x800000000000808aULL,
+    0x8000000080008000ULL, 0x000000000000808bULL, 0x0000000080000001ULL,
+    0x8000000080008081ULL, 0x8000000000008009ULL, 0x000000000000008aULL,
+    0x0000000000000088ULL, 0x0000000080008009ULL, 0x000000008000000aULL,
+    0x000000008000808bULL, 0x800000000000008bULL, 0x8000000000008089ULL,
+    0x8000000000008003ULL, 0x8000000000008002ULL, 0x8000000000000080ULL,
+    0x000000000000800aULL, 0x800000008000000aULL, 0x8000000080008081ULL,
+    0x8000000000008080ULL, 0x0000000080000001ULL, 0x8000000080008008ULL};
 
-#include <stdint.h>
+/* thetaRhoPiChiIota with round index parameter (rc accessed via global pointer)
+ */
+#define thetaRhoPiChiIota(i, A)                                           \
+  Ca = XOR256(A##ba, XOR256(A##ga, XOR256(A##ka, XOR256(A##ma, A##sa)))); \
+  Ce = XOR256(A##be, XOR256(A##ge, XOR256(A##ke, XOR256(A##me, A##se)))); \
+  Ci = XOR256(A##bi, XOR256(A##gi, XOR256(A##ki, XOR256(A##mi, A##si)))); \
+  Co = XOR256(A##bo, XOR256(A##go, XOR256(A##ko, XOR256(A##mo, A##so)))); \
+  Cu = XOR256(A##bu, XOR256(A##gu, XOR256(A##ku, XOR256(A##mu, A##su)))); \
+                                                                          \
+  ROL64in256(Ce1, Ce, 1);                                                 \
+  Da = XOR256(Cu, Ce1);                                                   \
+  ROL64in256(Ci1, Ci, 1);                                                 \
+  De = XOR256(Ca, Ci1);                                                   \
+  ROL64in256(Co1, Co, 1);                                                 \
+  Di = XOR256(Ce, Co1);                                                   \
+  ROL64in256(Cu1, Cu, 1);                                                 \
+  Do = XOR256(Ci, Cu1);                                                   \
+  ROL64in256(Ca1, Ca, 1);                                                 \
+  Du = XOR256(Co, Ca1);                                                   \
+                                                                          \
+  XOReq256(A##ba, Da);                                                    \
+  Bba = A##ba;                                                            \
+  XOReq256(A##ge, De);                                                    \
+  ROL64in256(Bbe, A##ge, 44);                                             \
+  XOReq256(A##ki, Di);                                                    \
+  ROL64in256(Bbi, A##ki, 43);                                             \
+  Tba = XOR256(Bba, ANDnu256(Bbe, Bbi));                                  \
+  XOReq256(Tba, CONST256_64(keccakf1600RoundConstants[i]));               \
+  Ca = Tba;                                                               \
+  XOReq256(A##mo, Do);                                                    \
+  ROL64in256(Bbo, A##mo, 21);                                             \
+  Tbe = XOR256(Bbe, ANDnu256(Bbi, Bbo));                                  \
+  Ce = Tbe;                                                               \
+  XOReq256(A##su, Du);                                                    \
+  ROL64in256(Bbu, A##su, 14);                                             \
+  Tbi = XOR256(Bbi, ANDnu256(Bbo, Bbu));                                  \
+  Ci = Tbi;                                                               \
+  Tbo = XOR256(Bbo, ANDnu256(Bbu, Bba));                                  \
+  Co = Tbo;                                                               \
+  Tbu = XOR256(Bbu, ANDnu256(Bba, Bbe));                                  \
+  Cu = Tbu;                                                               \
+                                                                          \
+  XOReq256(A##bo, Do);                                                    \
+  ROL64in256(Bga, A##bo, 28);                                             \
+  XOReq256(A##gu, Du);                                                    \
+  ROL64in256(Bge, A##gu, 20);                                             \
+  XOReq256(A##ka, Da);                                                    \
+  ROL64in256(Bgi, A##ka, 3);                                              \
+  Tga = XOR256(Bga, ANDnu256(Bge, Bgi));                                  \
+  XOReq256(Ca, Tga);                                                      \
+  XOReq256(A##me, De);                                                    \
+  ROL64in256(Bgo, A##me, 45);                                             \
+  Tge = XOR256(Bge, ANDnu256(Bgi, Bgo));                                  \
+  XOReq256(Ce, Tge);                                                      \
+  XOReq256(A##si, Di);                                                    \
+  ROL64in256(Bgu, A##si, 61);                                             \
+  Tgi = XOR256(Bgi, ANDnu256(Bgo, Bgu));                                  \
+  XOReq256(Ci, Tgi);                                                      \
+  Tgo = XOR256(Bgo, ANDnu256(Bgu, Bga));                                  \
+  XOReq256(Co, Tgo);                                                      \
+  Tgu = XOR256(Bgu, ANDnu256(Bga, Bge));                                  \
+  XOReq256(Cu, Tgu);                                                      \
+                                                                          \
+  XOReq256(A##be, De);                                                    \
+  ROL64in256(Bka, A##be, 1);                                              \
+  XOReq256(A##gi, Di);                                                    \
+  ROL64in256(Bke, A##gi, 6);                                              \
+  XOReq256(A##ko, Do);                                                    \
+  ROL64in256(Bki, A##ko, 25);                                             \
+  Tka = XOR256(Bka, ANDnu256(Bke, Bki));                                  \
+  XOReq256(Ca, Tka);                                                      \
+  XOReq256(A##mu, Du);                                                    \
+  ROL64in256_8(Bko, A##mu);                                               \
+  Tke = XOR256(Bke, ANDnu256(Bki, Bko));                                  \
+  XOReq256(Ce, Tke);                                                      \
+  XOReq256(A##sa, Da);                                                    \
+  ROL64in256(Bku, A##sa, 18);                                             \
+  Tki = XOR256(Bki, ANDnu256(Bko, Bku));                                  \
+  XOReq256(Ci, Tki);                                                      \
+  Tko = XOR256(Bko, ANDnu256(Bku, Bka));                                  \
+  XOReq256(Co, Tko);                                                      \
+  Tku = XOR256(Bku, ANDnu256(Bka, Bke));                                  \
+  XOReq256(Cu, Tku);                                                      \
+                                                                          \
+  XOReq256(A##bu, Du);                                                    \
+  ROL64in256(Bma, A##bu, 27);                                             \
+  XOReq256(A##ga, Da);                                                    \
+  ROL64in256(Bme, A##ga, 36);                                             \
+  XOReq256(A##ke, De);                                                    \
+  ROL64in256(Bmi, A##ke, 10);                                             \
+  Tma = XOR256(Bma, ANDnu256(Bme, Bmi));                                  \
+  XOReq256(Ca, Tma);                                                      \
+  XOReq256(A##mi, Di);                                                    \
+  ROL64in256(Bmo, A##mi, 15);                                             \
+  Tme = XOR256(Bme, ANDnu256(Bmi, Bmo));                                  \
+  XOReq256(Ce, Tme);                                                      \
+  XOReq256(A##so, Do);                                                    \
+  ROL64in256_56(Bmu, A##so);                                              \
+  Tmi = XOR256(Bmi, ANDnu256(Bmo, Bmu));                                  \
+  XOReq256(Ci, Tmi);                                                      \
+  Tmo = XOR256(Bmo, ANDnu256(Bmu, Bma));                                  \
+  XOReq256(Co, Tmo);                                                      \
+  Tmu = XOR256(Bmu, ANDnu256(Bma, Bme));                                  \
+  XOReq256(Cu, Tmu);                                                      \
+                                                                          \
+  XOReq256(A##bi, Di);                                                    \
+  ROL64in256(Bsa, A##bi, 62);                                             \
+  XOReq256(A##go, Do);                                                    \
+  ROL64in256(Bse, A##go, 55);                                             \
+  XOReq256(A##ku, Du);                                                    \
+  ROL64in256(Bsi, A##ku, 39);                                             \
+  Tsa = XOR256(Bsa, ANDnu256(Bse, Bsi));                                  \
+  XOReq256(Ca, Tsa);                                                      \
+  XOReq256(A##ma, Da);                                                    \
+  ROL64in256(Bso, A##ma, 41);                                             \
+  Tse = XOR256(Bse, ANDnu256(Bsi, Bso));                                  \
+  XOReq256(Ce, Tse);                                                      \
+  XOReq256(A##se, De);                                                    \
+  ROL64in256(Bsu, A##se, 2);                                              \
+  Tsi = XOR256(Bsi, ANDnu256(Bso, Bsu));                                  \
+  XOReq256(Ci, Tsi);                                                      \
+  Tso = XOR256(Bso, ANDnu256(Bsu, Bsa));                                  \
+  XOReq256(Co, Tso);                                                      \
+  Tsu = XOR256(Bsu, ANDnu256(Bsa, Bse));                                  \
+  XOReq256(Cu, Tsu);                                                      \
+                                                                          \
+  A##ba = Tba;                                                            \
+  A##be = Tbe;                                                            \
+  A##bi = Tbi;                                                            \
+  A##bo = Tbo;                                                            \
+  A##bu = Tbu;                                                            \
+  A##ga = Tga;                                                            \
+  A##ge = Tge;                                                            \
+  A##gi = Tgi;                                                            \
+  A##go = Tgo;                                                            \
+  A##gu = Tgu;                                                            \
+  A##ka = Tka;                                                            \
+  A##ke = Tke;                                                            \
+  A##ki = Tki;                                                            \
+  A##ko = Tko;                                                            \
+  A##ku = Tku;                                                            \
+  A##ma = Tma;                                                            \
+  A##me = Tme;                                                            \
+  A##mi = Tmi;                                                            \
+  A##mo = Tmo;                                                            \
+  A##mu = Tmu;                                                            \
+  A##sa = Tsa;                                                            \
+  A##se = Tse;                                                            \
+  A##si = Tsi;                                                            \
+  A##so = Tso;                                                            \
+  A##su = Tsu;
 
-#define copyFromState(X, state)                                             \
-  do                                                                        \
-  {                                                                         \
-    const uint64_t *state64 = (const uint64_t *)(state);                    \
-    __m256i _idx =                                                          \
-        _mm256_set_epi64x((long long)&state64[75], (long long)&state64[50], \
-                          (long long)&state64[25], (long long)&state64[0]); \
-    X##ba = _mm256_i64gather_epi64((long long *)(0 * 8), _idx, 1);          \
-    X##be = _mm256_i64gather_epi64((long long *)(1 * 8), _idx, 1);          \
-    X##bi = _mm256_i64gather_epi64((long long *)(2 * 8), _idx, 1);          \
-    X##bo = _mm256_i64gather_epi64((long long *)(3 * 8), _idx, 1);          \
-    X##bu = _mm256_i64gather_epi64((long long *)(4 * 8), _idx, 1);          \
-    X##ga = _mm256_i64gather_epi64((long long *)(5 * 8), _idx, 1);          \
-    X##ge = _mm256_i64gather_epi64((long long *)(6 * 8), _idx, 1);          \
-    X##gi = _mm256_i64gather_epi64((long long *)(7 * 8), _idx, 1);          \
-    X##go = _mm256_i64gather_epi64((long long *)(8 * 8), _idx, 1);          \
-    X##gu = _mm256_i64gather_epi64((long long *)(9 * 8), _idx, 1);          \
-    X##ka = _mm256_i64gather_epi64((long long *)(10 * 8), _idx, 1);         \
-    X##ke = _mm256_i64gather_epi64((long long *)(11 * 8), _idx, 1);         \
-    X##ki = _mm256_i64gather_epi64((long long *)(12 * 8), _idx, 1);         \
-    X##ko = _mm256_i64gather_epi64((long long *)(13 * 8), _idx, 1);         \
-    X##ku = _mm256_i64gather_epi64((long long *)(14 * 8), _idx, 1);         \
-    X##ma = _mm256_i64gather_epi64((long long *)(15 * 8), _idx, 1);         \
-    X##me = _mm256_i64gather_epi64((long long *)(16 * 8), _idx, 1);         \
-    X##mi = _mm256_i64gather_epi64((long long *)(17 * 8), _idx, 1);         \
-    X##mo = _mm256_i64gather_epi64((long long *)(18 * 8), _idx, 1);         \
-    X##mu = _mm256_i64gather_epi64((long long *)(19 * 8), _idx, 1);         \
-    X##sa = _mm256_i64gather_epi64((long long *)(20 * 8), _idx, 1);         \
-    X##se = _mm256_i64gather_epi64((long long *)(21 * 8), _idx, 1);         \
-    X##si = _mm256_i64gather_epi64((long long *)(22 * 8), _idx, 1);         \
-    X##so = _mm256_i64gather_epi64((long long *)(23 * 8), _idx, 1);         \
-    X##su = _mm256_i64gather_epi64((long long *)(24 * 8), _idx, 1);         \
-  } while (0);
+#define LOAD_LANE(X, state, lane)                                  \
+  do                                                               \
+  {                                                                \
+    const uint64_t *state64 = (const uint64_t *)(state);           \
+    __m256i t0, t1, t2, t3, t4, t6;                                \
+    t0 = _mm256_loadu_si256((const __m256i *)&state64[lane]);      \
+    t1 = _mm256_loadu_si256((const __m256i *)&state64[lane + 25]); \
+    t2 = _mm256_loadu_si256((const __m256i *)&state64[lane + 50]); \
+    t3 = _mm256_loadu_si256((const __m256i *)&state64[lane + 75]); \
+    t4 = _mm256_unpacklo_epi64(t0, t1);                            \
+    t6 = _mm256_unpacklo_epi64(t2, t3);                            \
+    X = _mm256_permute2x128_si256(t4, t6, 0x20);                   \
+  } while (0)
+
+#define copyFromState(X, state)  \
+  do                             \
+  {                              \
+    LOAD_LANE(X##ba, state, 0);  \
+    LOAD_LANE(X##be, state, 1);  \
+    LOAD_LANE(X##bi, state, 2);  \
+    LOAD_LANE(X##bo, state, 3);  \
+    LOAD_LANE(X##bu, state, 4);  \
+    LOAD_LANE(X##ga, state, 5);  \
+    LOAD_LANE(X##ge, state, 6);  \
+    LOAD_LANE(X##gi, state, 7);  \
+    LOAD_LANE(X##go, state, 8);  \
+    LOAD_LANE(X##gu, state, 9);  \
+    LOAD_LANE(X##ka, state, 10); \
+    LOAD_LANE(X##ke, state, 11); \
+    LOAD_LANE(X##ki, state, 12); \
+    LOAD_LANE(X##ko, state, 13); \
+    LOAD_LANE(X##ku, state, 14); \
+    LOAD_LANE(X##ma, state, 15); \
+    LOAD_LANE(X##me, state, 16); \
+    LOAD_LANE(X##mi, state, 17); \
+    LOAD_LANE(X##mo, state, 18); \
+    LOAD_LANE(X##mu, state, 19); \
+    LOAD_LANE(X##sa, state, 20); \
+    LOAD_LANE(X##se, state, 21); \
+    LOAD_LANE(X##si, state, 22); \
+    LOAD_LANE(X##so, state, 23); \
+    LOAD_LANE(X##su, state, 24); \
+  } while (0)
 
 #define SCATTER_STORE256(state, idx, v)                        \
   do                                                           \
   {                                                            \
-    const uint64_t *state64 = (const uint64_t *)(state);       \
+    uint64_t *state64 = (uint64_t *)(state);                   \
     __m128d t = _mm_castsi128_pd(_mm256_castsi256_si128((v))); \
     _mm_storel_pd((double *)&state64[0 + (idx)], t);           \
     _mm_storeh_pd((double *)&state64[25 + (idx)], t);          \
@@ -391,67 +319,26 @@ static MLK_ALIGN const uint64_t keccakf1600RoundConstants[24] = {
   SCATTER_STORE256(state, 23, X##so); \
   SCATTER_STORE256(state, 24, X##su);
 
-#define copyStateVariables(X, Y) \
-  X##ba = Y##ba;                 \
-  X##be = Y##be;                 \
-  X##bi = Y##bi;                 \
-  X##bo = Y##bo;                 \
-  X##bu = Y##bu;                 \
-  X##ga = Y##ga;                 \
-  X##ge = Y##ge;                 \
-  X##gi = Y##gi;                 \
-  X##go = Y##go;                 \
-  X##gu = Y##gu;                 \
-  X##ka = Y##ka;                 \
-  X##ke = Y##ke;                 \
-  X##ki = Y##ki;                 \
-  X##ko = Y##ko;                 \
-  X##ku = Y##ku;                 \
-  X##ma = Y##ma;                 \
-  X##me = Y##me;                 \
-  X##mi = Y##mi;                 \
-  X##mo = Y##mo;                 \
-  X##mu = Y##mu;                 \
-  X##sa = Y##sa;                 \
-  X##se = Y##se;                 \
-  X##si = Y##si;                 \
-  X##so = Y##so;                 \
-  X##su = Y##su;
 
 /* clang-format off */
-#define rounds24 \
-    prepareTheta \
-    thetaRhoPiChiIotaPrepareTheta( 0, A, E) \
-    thetaRhoPiChiIotaPrepareTheta( 1, E, A) \
-    thetaRhoPiChiIotaPrepareTheta( 2, A, E) \
-    thetaRhoPiChiIotaPrepareTheta( 3, E, A) \
-    thetaRhoPiChiIotaPrepareTheta( 4, A, E) \
-    thetaRhoPiChiIotaPrepareTheta( 5, E, A) \
-    thetaRhoPiChiIotaPrepareTheta( 6, A, E) \
-    thetaRhoPiChiIotaPrepareTheta( 7, E, A) \
-    thetaRhoPiChiIotaPrepareTheta( 8, A, E) \
-    thetaRhoPiChiIotaPrepareTheta( 9, E, A) \
-    thetaRhoPiChiIotaPrepareTheta(10, A, E) \
-    thetaRhoPiChiIotaPrepareTheta(11, E, A) \
-    thetaRhoPiChiIotaPrepareTheta(12, A, E) \
-    thetaRhoPiChiIotaPrepareTheta(13, E, A) \
-    thetaRhoPiChiIotaPrepareTheta(14, A, E) \
-    thetaRhoPiChiIotaPrepareTheta(15, E, A) \
-    thetaRhoPiChiIotaPrepareTheta(16, A, E) \
-    thetaRhoPiChiIotaPrepareTheta(17, E, A) \
-    thetaRhoPiChiIotaPrepareTheta(18, A, E) \
-    thetaRhoPiChiIotaPrepareTheta(19, E, A) \
-    thetaRhoPiChiIotaPrepareTheta(20, A, E) \
-    thetaRhoPiChiIotaPrepareTheta(21, E, A) \
-    thetaRhoPiChiIotaPrepareTheta(22, A, E) \
-    thetaRhoPiChiIota(23, E, A)
-/* clang-format on */
+#define rounds24_loop \
+      do { \
+        int i; \
+        for (i = 0; i < 12; i++) { \
+            thetaRhoPiChiIota( 2*i, A) \
+            thetaRhoPiChiIota( 2*i+1, A) \
+        } \
+    } while(0)
 
 void mlk_keccakf1600x4_permute24(void *states)
 {
   __m256i *statesAsLanes = (__m256i *)states;
-  declareABCDE copyFromState(A, statesAsLanes)
-      rounds24 copyToState(statesAsLanes, A)
+  /* Set the global pointer to use the passed-in round constants */
+  declareABCDE
+  copyFromState(A, statesAsLanes);
+  /* Use loop-based rounds: 12 iterations x 2 rounds each */
+  rounds24_loop;
+  copyToState(statesAsLanes, A);
 }
 
 #else /* MLK_FIPS202_X86_64_XKCP && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
@@ -473,11 +360,9 @@ MLK_EMPTY_CU(fips202_avx2_keccakx4)
 #undef XOReq256
 #undef SnP_laneLengthInBytes
 #undef declareABCDE
-#undef prepareTheta
-#undef thetaRhoPiChiIotaPrepareTheta
 #undef thetaRhoPiChiIota
+#undef LOAD_LANE
 #undef copyFromState
 #undef SCATTER_STORE256
 #undef copyToState
-#undef copyStateVariables
-#undef rounds24
+#undef rounds24_loop
