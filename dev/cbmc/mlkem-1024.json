@@ -1,0 +1,68 @@
+{
+  "mlkem_k": "4",
+  "summary": {
+    "total": 9,
+    "success": 7,
+    "failed": 2,
+    "timeout": 0
+  },
+  "failures": [
+    {
+      "name": "mlk_poly_tomont",
+      "status": "Fail",
+      "duration": "2"
+    },
+    {
+      "name": "mlk_poly_tomont_native",
+      "status": "Fail",
+      "duration": "1"
+    }
+  ],
+  "runtimes": [
+    {
+      "name": "mlk_poly_tomont",
+      "unit": "seconds",
+      "status": "failed"
+    },
+    {
+      "name": "mlk_poly_tomont_native",
+      "unit": "seconds",
+      "status": "failed"
+    },
+    {
+      "name": "mlk_poly_tobytes",
+      "unit": "seconds",
+      "value": 4
+    },
+    {
+      "name": "mlk_poly_tobytes_c",
+      "unit": "seconds",
+      "value": 2
+    },
+    {
+      "name": "mlk_poly_tobytes_native",
+      "unit": "seconds",
+      "value": 4
+    },
+    {
+      "name": "mlk_poly_tomont_c",
+      "unit": "seconds",
+      "value": 1
+    },
+    {
+      "name": "mlk_poly_tomsg",
+      "unit": "seconds",
+      "value": 1
+    },
+    {
+      "name": "poly_tobytes_native_aarch64",
+      "unit": "seconds",
+      "value": 2
+    },
+    {
+      "name": "poly_tomont_native_aarch64",
+      "unit": "seconds",
+      "value": 2
+    }
+  ]
+}
