@@ -51,7 +51,17 @@ runs:
             EOF
       - name: Run CBMC proofs (MLKEM_K=${{ inputs.mlkem_k }})
         shell: ${{ env.SHELL }}
+        env:
+          GH_TOKEN: ${{ inputs.gh_token }}
         run: |
           echo "::group::cbmc_${{ inputs.mlkem_k }}"
-          tests cbmc --mlkem-parameter-set ${{ inputs.mlkem_k }} --per-proof-timeout 1800;
+          tests cbmc --mlkem-parameter-set ${{ inputs.mlkem_k }} --per-proof-timeout 1800 --output-result-json ${{ github.workspace }}/cbmc_result_k${{ inputs.mlkem_k }}.json || cbmc_failed=true
           echo "::endgroup::"
+          python3 ${{ github.action_path }}/report.py \
+            --results-json "${{ github.workspace }}/cbmc_result_k${{ inputs.mlkem_k }}.json" \
+            --mlkem-k "${{ inputs.mlkem_k }}" \
+            --min-runtime 20 \
+            --regression-threshold 1.5 \
+            --gh-pages-branch gh-pages \
+            --data-dir dev/cbmc
+          if [ "$cbmc_failed" = "true" ]; then exit 1; fi

@@ -47,6 +47,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
+      pull-requests: 'write'
     needs: [ base, nix ]
     uses: ./.github/workflows/cbmc.yml
     secrets: inherit
