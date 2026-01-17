@@ -106,6 +106,15 @@ def classify_proof(r, baseline_runtimes, cfg):
     )
 
 
+def compute_total_runtime(data):
+    """Compute total runtime from proof results."""
+    if not data:
+        return None
+    return sum(
+        r["value"] for r in data.get("runtimes", []) if r.get("status") != "failed"
+    )
+
+
 def build_comment(current, baseline, cfg):
     """Build the PR comment markdown."""
     baseline_runtimes = {r["name"]: r for r in (baseline or {}).get("runtimes", [])}
@@ -121,6 +130,27 @@ def build_comment(current, baseline, cfg):
         return -1 if r.current == "-" else -int(r.current.rstrip("s"))
 
     all_rows.sort(key=sort_key)
+
+    # Compute total runtimes and add as first row
+    cur_total = compute_total_runtime(current)
+    base_total = compute_total_runtime(baseline)
+    if base_total and base_total > 0:
+        total_ratio = cur_total / base_total
+        total_change = f"{(total_ratio - 1) * 100:+.1f}%"
+        total_status = WARN if total_ratio >= 1.25 else OK
+    else:
+        total_change = "-"
+        total_status = OK
+    total_row = ProofResult(
+        "**TOTAL**",
+        total_status,
+        f"{cur_total}s",
+        f"{base_total}s" if base_total else "-",
+        total_change,
+    )
+    all_rows.insert(0, total_row)
+    if total_status == WARN:
+        alerts.insert(0, total_row)
 
     lines = [
         f"<!-- {COMMENT_TAG}(start): mlkem-{cfg.param_set} -->",
