@@ -11,6 +11,10 @@
 #include <stdint.h>
 #include "consts.h"
 
+#define mlk_sha3_keccak4_f1600 MLK_NAMESPACE(mlk_sha3_keccak4_f1600)
+extern void mlk_sha3_keccak4_f1600(void *states,
+                                   const uint64_t *round_constants);
+
 #define MLK_AVX2_REJ_UNIFORM_BUFLEN \
   (3 * 168) /* REJ_UNIFORM_NBLOCKS * SHAKE128_RATE */
 
