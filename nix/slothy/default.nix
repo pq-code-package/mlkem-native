@@ -6,14 +6,14 @@
 , pkgs
 , llvm
 , gcc
+, ortools
 }:
 
 let
   pythonEnv = python3.withPackages (ps: with ps; [
-    ortools
     sympy
     unicorn
-  ]);
+  ] ++ [ ortools ]);
 in
 stdenvNoCC.mkDerivation rec {
   pname = "slothy-cli";

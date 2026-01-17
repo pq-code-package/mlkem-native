@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-{ pkgs, cbmc, bitwuzla, z3 }:
+{ pkgs, cbmc, bitwuzla, z3, ortools, black }:
 rec {
   glibc-join = p: p.buildPackages.symlinkJoin {
     name = "glibc-join";
@@ -77,11 +77,8 @@ rec {
   linters = pkgs.symlinkJoin {
     name = "pqcp-linters";
     paths = builtins.attrValues {
-      clang-tools = pkgs.clang-tools.overrideAttrs {
-        unwrapped = pkgs.llvmPackages.clang-unwrapped;
-      };
-
       inherit (pkgs.llvmPackages)
+        clang-tools
         bintools;
 
       inherit (pkgs)
@@ -89,18 +86,18 @@ rec {
         shfmt;
 
       inherit (pkgs.python3Packages)
-        mpmath sympy black pyparsing pyyaml rich;
+        mpmath sympy pyparsing pyyaml rich;
+
+      inherit black;
     };
   };
 
-  cbmc_pkgs = pkgs.callPackage ./cbmc {
-    inherit cbmc bitwuzla z3;
-  };
+  cbmc_pkgs = pkgs.callPackage ./cbmc { inherit cbmc bitwuzla z3; };
 
   valgrind_varlat = pkgs.callPackage ./valgrind { };
   hol_light' = pkgs.callPackage ./hol_light { };
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
-  slothy = pkgs.callPackage ./slothy { };
+  slothy = pkgs.callPackage ./slothy { inherit ortools; };
   m55-an547 = pkgs.callPackage ./m55-an547-arm-none-eabi { };
   avr-toolchain = pkgs.callPackage ./avr { };
 
