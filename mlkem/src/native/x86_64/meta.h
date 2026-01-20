@@ -282,12 +282,25 @@ MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_decompress_d5_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
 {
+  /* data[0:31] = shufbidx, data[32:63] = mask, data[64:95] = shift */
+  /* check-magic: off */
+  static const int8_t data[96] MLK_ALIGN = {
+      /* shufbidx */
+      0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 6, 7, 7,
+      8, 8, 8, 8, 9, 9, 9,
+      /* mask: 31, 992, 124, 3968, 496, 62, 1984, 248 (repeated) */
+      31, 0, -32, 3, 124, 0, -128, 15, -16, 1, 62, 0, -64, 7, -8, 0, 31, 0, -32,
+      3, 124, 0, -128, 15, -16, 1, 62, 0, -64, 7, -8, 0,
+      /* shift: 1024, 32, 256, 8, 64, 512, 16, 128 (repeated) */
+      0, 4, 32, 0, 0, 1, 8, 0, 64, 0, 0, 2, 16, 0, -128, 0, 0, 4, 32, 0, 0, 1,
+      8, 0, 64, 0, 0, 2, 16, 0, -128, 0};
+  /* check-magic: on */
   if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_poly_decompress_d5_avx2(r, a);
+  mlk_poly_decompress_d5_avx2(r, a, data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
