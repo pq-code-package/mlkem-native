@@ -23,6 +23,8 @@
 
 #include "../api.h"
 
+#define KeccakF1600_StatePermute_adomnicai_m4_opt_m7 \
+  MLK_NAMESPACE(KeccakF1600_StatePermute_adomnicai_m4_opt_m7)
 extern void KeccakF1600_StatePermute_adomnicai_m4_opt_m7(void *state);
 static MLK_INLINE int mlk_keccak_f1600_x1_native(uint64_t *state)
 {
@@ -30,6 +32,7 @@ static MLK_INLINE int mlk_keccak_f1600_x1_native(uint64_t *state)
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
+#define KeccakF1600_StateXORBytes MLK_NAMESPACE(KeccakF1600_StateXORBytes)
 extern void KeccakF1600_StateXORBytes(void *state, const unsigned char *data,
                                       unsigned int offset, unsigned int length);
 static MLK_INLINE void mlk_keccakf1600_xor_bytes_native(
@@ -39,6 +42,8 @@ static MLK_INLINE void mlk_keccakf1600_xor_bytes_native(
   KeccakF1600_StateXORBytes(state, data, offset, length);
 }
 
+#define KeccakF1600_StateExtractBytes \
+  MLK_NAMESPACE(KeccakF1600_StateExtractBytes)
 extern void KeccakF1600_StateExtractBytes(void *state,
                                           const unsigned char *data,
                                           unsigned int offset,

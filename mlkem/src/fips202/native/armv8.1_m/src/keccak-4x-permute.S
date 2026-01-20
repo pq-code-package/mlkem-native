@@ -4,6 +4,10 @@
 /// SPDX-License-Identifier: Apache-2.0 OR MIT OR ISC
 ///
 
+#include "../../../../common.h"
+#if defined(MLK_FIPS202_ARMV81M_NEED_X4) && \
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+
 .thumb
 .syntax unified
 .text
@@ -440,7 +444,7 @@ qA20_l .req q2
 .endm
 
 .text
-RC_table:
+mve_keccak_state_permute_4fold_opt_m55_mve_keccak_state_permute_4fold_RC_table:
     .word RC0_l,  RC0_h
     .word RC1_l,  RC1_h
     .word RC2_l,  RC2_h
@@ -467,15 +471,15 @@ RC_table:
     .word RC23_l, RC23_h
 
 .align 8
-.type mve_keccak_state_permute_4fold_opt_m55, %function
-.global mve_keccak_state_permute_4fold_opt_m55
-mve_keccak_state_permute_4fold_opt_m55:
+.type MLK_ASM_NAMESPACE(mve_keccak_state_permute_4fold_opt_m55), %function
+.global MLK_ASM_NAMESPACE(mve_keccak_state_permute_4fold_opt_m55)
+MLK_ASM_FN_SYMBOL(mve_keccak_state_permute_4fold_opt_m55)
 
     push {r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
     vpush {d8-d15}
     sub sp, #8*16
 
-    adr r6, RC_table
+    adr r6, mve_keccak_state_permute_4fold_opt_m55_mve_keccak_state_permute_4fold_RC_table
 
     // r0: state 0
     // r1: state 1
@@ -497,8 +501,8 @@ mve_keccak_state_permute_4fold_opt_m55:
     vldrw.u32 qA00_l, [r2, #A__00]
     vldrw.u32 qA20_l, [r2, #A__20]
 
-    wls lr, lr, roundend
-        roundstart:
+    wls lr, lr, mve_keccak_state_permute_4fold_opt_m55_roundend
+        mve_keccak_state_permute_4fold_opt_m55_roundstart:
                                                // Instructions:    559
                                                // Expected cycles: 559
                                                // Expected IPC:    1.00
@@ -1629,12 +1633,19 @@ mve_keccak_state_permute_4fold_opt_m55:
         // vstrw.32 q0, [r5, #0]                // ..............................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................*
         // add r6, r6, #8                       // ..................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................*............
 
-        roundend_pre:
+        mve_keccak_state_permute_4fold_opt_m55_roundend_pre:
 
 
-    le lr, roundstart
-roundend:
+    le lr, mve_keccak_state_permute_4fold_opt_m55_roundstart
+mve_keccak_state_permute_4fold_opt_m55_roundend:
     add sp, #8*16
 
     vpop {d8-d15}
     ldmia.w sp!, {r3,r4,r5,r6,r7,r8,r9,r10,r11,r12, pc}
+
+/****************** REGISTER DEALLOCATIONS *******************/
+    .unreq qA00_h
+    .unreq qA00_l
+    .unreq qA20_l
+
+#endif /* MLK_FIPS202_ARMV81M_NEED_X4 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

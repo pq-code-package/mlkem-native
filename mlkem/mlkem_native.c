@@ -393,6 +393,9 @@
 /* mlkem/src/fips202/native/armv8.1_m/auto.h */
 #undef MLK_FIPS202_NATIVE_ARMV8_1_M_AUTO_H
 /* mlkem/src/fips202/native/armv8.1_m/x4_v8m_mve.h */
+#undef KeccakF1600_StateExtractBytes
+#undef KeccakF1600_StatePermute_adomnicai_m4_opt_m7
+#undef KeccakF1600_StateXORBytes
 #undef MLK_FIPS202_ARMV81M_NEED_X1
 #undef MLK_FIPS202_ARMV81M_NEED_X4
 #undef MLK_FIPS202_NATIVE_ARMV8_1_M_X4_V8M_MVE_H

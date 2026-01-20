@@ -2101,6 +2101,13 @@ def synchronize_backends(
         # comparing the object code before and after simplification.
         cflags="-Imlkem/src/native/x86_64/src/ -mavx2 -mbmi2 -msse4 -fcf-protection=none",
     )
+    synchronize_backend(
+        "dev/armv81m_opt/src",
+        "mlkem/src/fips202/native/armv8.1_m/src",
+        dry_run=dry_run,
+        delete=delete,
+        no_simplify=True,
+    )
 
 
 def adjust_header_guard_for_filename(content, header_file):
