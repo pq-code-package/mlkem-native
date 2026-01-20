@@ -275,12 +275,20 @@ MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_compress_d11_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const int16_t a[MLKEM_N])
 {
+  /* data[0:31] = srlvqidx, data[32:63] = shufbidx */
+  static const int8_t data[64] MLK_ALIGN = {
+      /* srlvqidx: 10, 30, 10, 30 as 64-bit values */
+      10, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0,
+      30, 0, 0, 0, 0, 0, 0, 0,
+      /* shufbidx */
+      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -1, -1, -1, -1, -1, 5, 6, 7, 8, 9, 10,
+      -1, -1, -1, -1, 0, 0, 1, 2, 3, 4};
   if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_poly_compress_d11_avx2(r, a);
+  mlk_poly_compress_d11_avx2(r, a, data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
