@@ -209,12 +209,15 @@ MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_compress_d10_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const int16_t a[MLKEM_N])
 {
+  static const int8_t shufbidx[32] MLK_ALIGN = {
+      0, 1,  2,  3,  4,  8,  9,  10, 11, 12, -1, -1, -1, -1, -1, -1,
+      9, 10, 11, 12, -1, -1, -1, -1, -1, -1, 0,  1,  2,  3,  4,  8};
   if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_poly_compress_d10_avx2(r, a);
+  mlk_poly_compress_d10_avx2(r, a, shufbidx);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
