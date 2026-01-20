@@ -34,46 +34,7 @@
 /* mlk_poly_compress_d4_avx2 is now in poly_compress_d4.S */
 /* mlk_poly_decompress_d4_avx2 is now in poly_decompress_d4.S */
 /* mlk_poly_compress_d10_avx2 is now in poly_compress_d10.S */
-
-void mlk_poly_decompress_d10_avx2(
-    int16_t *MLK_RESTRICT r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
-{
-  unsigned int i;
-  __m256i f;
-  const __m256i q = _mm256_set1_epi32((MLKEM_Q << 16) + 4 * MLKEM_Q);
-  const __m256i shufbidx =
-      _mm256_set_epi8(11, 10, 10, 9, 9, 8, 8, 7, 6, 5, 5, 4, 4, 3, 3, 2, 9, 8,
-                      8, 7, 7, 6, 6, 5, 4, 3, 3, 2, 2, 1, 1, 0);
-  const __m256i sllvdidx = _mm256_set1_epi64x(4);
-  /* TODO: Explain magic values */
-  /* check-magic: off */
-  const __m256i mask = _mm256_set1_epi32((32736 << 16) + 8184);
-  /* check-magic: on */
-
-  for (i = 0; i < (MLKEM_N / 16) - 1; i++)
-  {
-    f = _mm256_loadu_si256((__m256i *)&a[20 * i]);
-    f = _mm256_permute4x64_epi64(f, 0x94);
-    f = _mm256_shuffle_epi8(f, shufbidx);
-    f = _mm256_sllv_epi32(f, sllvdidx);
-    f = _mm256_srli_epi16(f, 1);
-    f = _mm256_and_si256(f, mask);
-    f = _mm256_mulhrs_epi16(f, q);
-    _mm256_storeu_si256((__m256i *)&r[16 * i], f);
-  }
-
-  /* Handle load in last iteration especially to avoid buffer overflow */
-  mlk_memcpy(&f, &a[20 * i], 20);
-  /* The rest is the same */
-  f = _mm256_permute4x64_epi64(f, 0x94);
-  f = _mm256_shuffle_epi8(f, shufbidx);
-  f = _mm256_sllv_epi32(f, sllvdidx);
-  f = _mm256_srli_epi16(f, 1);
-  f = _mm256_and_si256(f, mask);
-  f = _mm256_mulhrs_epi16(f, q);
-  _mm256_storeu_si256((__m256i *)&r[16 * i], f);
-}
-
+/* mlk_poly_decompress_d10_avx2 is now in poly_decompress_d10.S */
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4
