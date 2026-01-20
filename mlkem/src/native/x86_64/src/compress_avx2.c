@@ -31,44 +31,7 @@
 #define MLK_AVX2_V 20159
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
-void mlk_poly_compress_d4_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
-                               const int16_t *MLK_RESTRICT a)
-{
-  unsigned int i;
-  __m256i f0, f1, f2, f3;
-  const __m256i v = _mm256_set1_epi16(MLK_AVX2_V);
-  const __m256i shift1 = _mm256_set1_epi16(1 << 9);
-  const __m256i mask = _mm256_set1_epi16(15);
-  const __m256i shift2 = _mm256_set1_epi16((16 << 8) + 1);
-  const __m256i permdidx = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
-
-  for (i = 0; i < MLKEM_N / 64; i++)
-  {
-    f0 = _mm256_load_si256((__m256i *)&a[64 * i + 16 * 0]);
-    f1 = _mm256_load_si256((__m256i *)&a[64 * i + 16 * 1]);
-    f2 = _mm256_load_si256((__m256i *)&a[64 * i + 16 * 2]);
-    f3 = _mm256_load_si256((__m256i *)&a[64 * i + 16 * 3]);
-    f0 = _mm256_mulhi_epi16(f0, v);
-    f1 = _mm256_mulhi_epi16(f1, v);
-    f2 = _mm256_mulhi_epi16(f2, v);
-    f3 = _mm256_mulhi_epi16(f3, v);
-    f0 = _mm256_mulhrs_epi16(f0, shift1);
-    f1 = _mm256_mulhrs_epi16(f1, shift1);
-    f2 = _mm256_mulhrs_epi16(f2, shift1);
-    f3 = _mm256_mulhrs_epi16(f3, shift1);
-    f0 = _mm256_and_si256(f0, mask);
-    f1 = _mm256_and_si256(f1, mask);
-    f2 = _mm256_and_si256(f2, mask);
-    f3 = _mm256_and_si256(f3, mask);
-    f0 = _mm256_packus_epi16(f0, f1);
-    f2 = _mm256_packus_epi16(f2, f3);
-    f0 = _mm256_maddubs_epi16(f0, shift2);
-    f2 = _mm256_maddubs_epi16(f2, shift2);
-    f0 = _mm256_packus_epi16(f0, f2);
-    f0 = _mm256_permutevar8x32_epi32(f0, permdidx);
-    _mm256_storeu_si256((__m256i *)&r[32 * i], f0);
-  }
-}
+/* mlk_poly_compress_d4_avx2 is now in poly_compress_d4.S */
 
 void mlk_poly_decompress_d4_avx2(int16_t *MLK_RESTRICT r,
                                  const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])

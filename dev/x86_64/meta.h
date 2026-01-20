@@ -195,12 +195,13 @@ MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_compress_d4_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const int16_t a[MLKEM_N])
 {
+  static const int32_t permdidx[8] MLK_ALIGN = {0, 4, 1, 5, 2, 6, 3, 7};
   if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_poly_compress_d4_avx2(r, a);
+  mlk_poly_compress_d4_avx2(r, a, permdidx);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
