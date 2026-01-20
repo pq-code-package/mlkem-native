@@ -247,7 +247,6 @@ source code and documentation.
 * URL: https://github.com/pq-crystals/kyber/tree/main/avx2
 * Referenced from:
   - [dev/x86_64/README.md](dev/x86_64/README.md)
-  - [dev/x86_64/src/compress_avx2.c](dev/x86_64/src/compress_avx2.c)
   - [dev/x86_64/src/intt.S](dev/x86_64/src/intt.S)
   - [dev/x86_64/src/ntt.S](dev/x86_64/src/ntt.S)
   - [dev/x86_64/src/nttfrombytes.S](dev/x86_64/src/nttfrombytes.S)
@@ -258,11 +257,11 @@ source code and documentation.
   - [dev/x86_64/src/poly_compress_d4.S](dev/x86_64/src/poly_compress_d4.S)
   - [dev/x86_64/src/poly_compress_d5.S](dev/x86_64/src/poly_compress_d5.S)
   - [dev/x86_64/src/poly_decompress_d10.S](dev/x86_64/src/poly_decompress_d10.S)
+  - [dev/x86_64/src/poly_decompress_d11.S](dev/x86_64/src/poly_decompress_d11.S)
   - [dev/x86_64/src/poly_decompress_d4.S](dev/x86_64/src/poly_decompress_d4.S)
   - [dev/x86_64/src/poly_decompress_d5.S](dev/x86_64/src/poly_decompress_d5.S)
   - [dev/x86_64/src/reduce.S](dev/x86_64/src/reduce.S)
   - [dev/x86_64/src/tomont.S](dev/x86_64/src/tomont.S)
-  - [mlkem/src/native/x86_64/src/compress_avx2.c](mlkem/src/native/x86_64/src/compress_avx2.c)
   - [mlkem/src/native/x86_64/src/intt.S](mlkem/src/native/x86_64/src/intt.S)
   - [mlkem/src/native/x86_64/src/ntt.S](mlkem/src/native/x86_64/src/ntt.S)
   - [mlkem/src/native/x86_64/src/nttfrombytes.S](mlkem/src/native/x86_64/src/nttfrombytes.S)
@@ -273,6 +272,7 @@ source code and documentation.
   - [mlkem/src/native/x86_64/src/poly_compress_d4.S](mlkem/src/native/x86_64/src/poly_compress_d4.S)
   - [mlkem/src/native/x86_64/src/poly_compress_d5.S](mlkem/src/native/x86_64/src/poly_compress_d5.S)
   - [mlkem/src/native/x86_64/src/poly_decompress_d10.S](mlkem/src/native/x86_64/src/poly_decompress_d10.S)
+  - [mlkem/src/native/x86_64/src/poly_decompress_d11.S](mlkem/src/native/x86_64/src/poly_decompress_d11.S)
   - [mlkem/src/native/x86_64/src/poly_decompress_d4.S](mlkem/src/native/x86_64/src/poly_decompress_d4.S)
   - [mlkem/src/native/x86_64/src/poly_decompress_d5.S](mlkem/src/native/x86_64/src/poly_decompress_d5.S)
   - [mlkem/src/native/x86_64/src/reduce.S](mlkem/src/native/x86_64/src/reduce.S)
