@@ -1,3 +1,5 @@
+# Copyright (c) The mlkem-native project authors
+# Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 {
@@ -80,7 +82,7 @@
           devShells.default = util.mkShell {
             packages = builtins.attrValues
               {
-                inherit (config.packages) linters cbmc hol_light s2n_bignum slothy toolchains_native;
+                inherit (config.packages) linters cbmc hol_light s2n_bignum slothy toolchains_native hol_server;
                 inherit (pkgs)
                   direnv
                   nix-direnv
@@ -88,17 +90,18 @@
               } ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ config.packages.valgrind_varlat ];
           };
 
+          packages.hol_server = util.hol_server.hol_server_start;
           devShells.hol_light = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum; };
+            packages = builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum hol_server; };
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchains hol_light s2n_bignum gcc-arm-embedded; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchains hol_light s2n_bignum gcc-arm-embedded hol_server; };
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross-aarch64 = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 hol_light s2n_bignum gcc-arm-embedded; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 hol_light s2n_bignum gcc-arm-embedded hol_server; };
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross-x86_64 = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum gcc-arm-embedded; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum gcc-arm-embedded hol_server; };
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.ci = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains_native; };
