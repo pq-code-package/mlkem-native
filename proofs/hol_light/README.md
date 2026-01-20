@@ -77,6 +77,23 @@ will build and run the proofs. Note that this make take hours even on powerful m
 
 For convenience, you can also use `tests hol_light` which wraps the `make` invocation above; see `tests hol_light --help`.
 
+## Interactive proof development
+
+For interactive proof development, start the HOL Light server:
+
+```bash
+hol-server [port]  # default port is 2012
+```
+
+Then use the [HOL Light extension for VS Code](https://marketplace.visualstudio.com/items?itemName=monadius.hol-light-simple)
+to connect and send commands interactively.
+
+Alternatively, send commands using netcat:
+
+```bash
+echo '1+1;;' | nc -w 5 127.0.0.1 2012
+```
+
 ## What is covered?
 
 All AArch64 assembly routines used in mlkem-native are covered. Those are:

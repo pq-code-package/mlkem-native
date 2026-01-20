@@ -1,3 +1,5 @@
+# Copyright (c) The mlkem-native project authors
+# Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 { pkgs, cbmc, bitwuzla, z3 }:
@@ -100,6 +102,7 @@ rec {
 
   valgrind_varlat = pkgs.callPackage ./valgrind { };
   hol_light' = pkgs.callPackage ./hol_light { };
+  hol_server = pkgs.callPackage ./hol_light/hol_server.nix { inherit hol_light'; };
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
   slothy = pkgs.callPackage ./slothy { };
   m55-an547 = pkgs.callPackage ./m55-an547-arm-none-eabi { };
