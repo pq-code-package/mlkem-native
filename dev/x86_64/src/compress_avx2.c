@@ -119,46 +119,7 @@ void mlk_poly_decompress_d10_avx2(
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4
-void mlk_poly_compress_d5_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
-                               const int16_t *MLK_RESTRICT a)
-{
-  unsigned int i;
-  __m256i f0, f1;
-  __m128i t0, t1;
-  const __m256i v = _mm256_set1_epi16(MLK_AVX2_V);
-  const __m256i shift1 = _mm256_set1_epi16(1 << 10);
-  const __m256i mask = _mm256_set1_epi16(31);
-  const __m256i shift2 = _mm256_set1_epi16((32 << 8) + 1);
-  const __m256i shift3 = _mm256_set1_epi32((1024 << 16) + 1);
-  const __m256i sllvdidx = _mm256_set1_epi64x(12);
-  const __m256i shufbidx =
-      _mm256_set_epi8(8, -1, -1, -1, -1, -1, 4, 3, 2, 1, 0, -1, 12, 11, 10, 9,
-                      -1, 12, 11, 10, 9, 8, -1, -1, -1, -1, -1, 4, 3, 2, 1, 0);
-
-  for (i = 0; i < MLKEM_N / 32; i++)
-  {
-    f0 = _mm256_load_si256((__m256i *)&a[32 * i + 16 * 0]);
-    f1 = _mm256_load_si256((__m256i *)&a[32 * i + 16 * 1]);
-    f0 = _mm256_mulhi_epi16(f0, v);
-    f1 = _mm256_mulhi_epi16(f1, v);
-    f0 = _mm256_mulhrs_epi16(f0, shift1);
-    f1 = _mm256_mulhrs_epi16(f1, shift1);
-    f0 = _mm256_and_si256(f0, mask);
-    f1 = _mm256_and_si256(f1, mask);
-    f0 = _mm256_packus_epi16(f0, f1);
-    f0 = _mm256_maddubs_epi16(
-        f0, shift2); /* a0 a1 a2 a3 b0 b1 b2 b3 a4 a5 a6 a7 b4 b5 b6 b7 */
-    f0 = _mm256_madd_epi16(f0, shift3); /* a0 a1 b0 b1 a2 a3 b2 b3 */
-    f0 = _mm256_sllv_epi32(f0, sllvdidx);
-    f0 = _mm256_srlv_epi64(f0, sllvdidx);
-    f0 = _mm256_shuffle_epi8(f0, shufbidx);
-    t0 = _mm256_castsi256_si128(f0);
-    t1 = _mm256_extracti128_si256(f0, 1);
-    t0 = _mm_blendv_epi8(t0, t1, _mm256_castsi256_si128(shufbidx));
-    _mm_storeu_si128((__m128i *)&r[20 * i + 0], t0);
-    mlk_memcpy(&r[20 * i + 16], &t1, 4);
-  }
-}
+/* mlk_poly_compress_d5_avx2 is now in poly_compress_d5.S */
 
 void mlk_poly_decompress_d5_avx2(int16_t *MLK_RESTRICT r,
                                  const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
