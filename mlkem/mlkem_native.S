@@ -79,6 +79,7 @@
 #include "src/native/x86_64/src/ntttobytes.S"
 #include "src/native/x86_64/src/nttunpack.S"
 #include "src/native/x86_64/src/poly_compress_d4.S"
+#include "src/native/x86_64/src/poly_decompress_d4.S"
 #include "src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S"
 #include "src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S"
 #include "src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S"
