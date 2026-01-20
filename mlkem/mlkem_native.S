@@ -83,6 +83,7 @@
 #include "src/native/x86_64/src/poly_compress_d4.S"
 #include "src/native/x86_64/src/poly_compress_d5.S"
 #include "src/native/x86_64/src/poly_decompress_d10.S"
+#include "src/native/x86_64/src/poly_decompress_d11.S"
 #include "src/native/x86_64/src/poly_decompress_d4.S"
 #include "src/native/x86_64/src/poly_decompress_d5.S"
 #include "src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S"

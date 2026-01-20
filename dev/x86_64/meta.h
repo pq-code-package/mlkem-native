@@ -322,12 +322,28 @@ MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_decompress_d11_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
 {
+  /* data[0:31] = shufbidx, data[32:63] = srlvdidx,
+   * data[64:95] = srlvqidx, data[96:127] = shift */
+  static const int8_t data[128] MLK_ALIGN = {
+      /* shufbidx: from _mm256_set_epi8(13,12,12,11,10,9,9,8,8,7,6,5,5,4,4,3,
+                                        10,9,9,8,7,6,6,5,5,4,3,2,2,1,1,0) */
+      0, 1, 1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9, 9, 10, 3, 4, 4, 5, 5, 6, 7, 8,
+      8, 9, 9, 10, 11, 12, 12, 13,
+      /* srlvdidx: from _mm256_set_epi32(0, 0, 1, 0, 0, 0, 1, 0) */
+      0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0,
+      /* srlvqidx: from _mm256_set_epi64x(2, 0, 2, 0) */
+      0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
+      0, 0, 0, 0, 0, 0, 0,
+      /* shift: from _mm256_set_epi16(4,32,1,8,32,1,4,32, 4,32,1,8,32,1,4,32) */
+      32, 0, 4, 0, 1, 0, 32, 0, 8, 0, 1, 0, 32, 0, 4, 0, 32, 0, 4, 0, 1, 0, 32,
+      0, 8, 0, 1, 0, 32, 0, 4, 0};
   if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_poly_decompress_d11_avx2(r, a);
+  mlk_poly_decompress_d11_avx2(r, a, data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
