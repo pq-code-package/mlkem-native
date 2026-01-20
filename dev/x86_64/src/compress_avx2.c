@@ -120,38 +120,7 @@ void mlk_poly_decompress_d10_avx2(
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4
 /* mlk_poly_compress_d5_avx2 is now in poly_compress_d5.S */
-
-void mlk_poly_decompress_d5_avx2(int16_t *MLK_RESTRICT r,
-                                 const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
-{
-  unsigned int i;
-  __m128i t;
-  __m256i f;
-  int16_t ti;
-  const __m256i q = _mm256_set1_epi16(MLKEM_Q);
-  const __m256i shufbidx =
-      _mm256_set_epi8(9, 9, 9, 8, 8, 8, 8, 7, 7, 6, 6, 6, 6, 5, 5, 5, 4, 4, 4,
-                      3, 3, 3, 3, 2, 2, 1, 1, 1, 1, 0, 0, 0);
-  /* TODO: Document those magic values */
-  /* check-magic: off */
-  const __m256i mask = _mm256_set_epi16(248, 1984, 62, 496, 3968, 124, 992, 31,
-                                        248, 1984, 62, 496, 3968, 124, 992, 31);
-  const __m256i shift = _mm256_set_epi16(128, 16, 512, 64, 8, 256, 32, 1024,
-                                         128, 16, 512, 64, 8, 256, 32, 1024);
-  /* check-magic: on */
-  for (i = 0; i < MLKEM_N / 16; i++)
-  {
-    t = _mm_loadl_epi64((__m128i *)&a[10 * i + 0]);
-    mlk_memcpy(&ti, &a[10 * i + 8], 2);
-    t = _mm_insert_epi16(t, ti, 4);
-    f = _mm256_broadcastsi128_si256(t);
-    f = _mm256_shuffle_epi8(f, shufbidx);
-    f = _mm256_and_si256(f, mask);
-    f = _mm256_mullo_epi16(f, shift);
-    f = _mm256_mulhrs_epi16(f, q);
-    _mm256_storeu_si256((__m256i *)&r[16 * i], f);
-  }
-}
+/* mlk_poly_decompress_d5_avx2 is now in poly_decompress_d5.S */
 
 void mlk_poly_compress_d11_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
                                 const int16_t *MLK_RESTRICT a)
