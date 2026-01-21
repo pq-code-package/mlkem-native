@@ -94,9 +94,28 @@ uint64_t get_cyclecounter(void)
   return retval;
 }
 
-#else /* (!__x86_64__ && __AARCH64EL__) || _M_ARM64 */
+#elif defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8_1M_MAIN__)
+#include <ARMCM55.h>
+#include <system_ARMCM55.h>
+#include "pmu_armv8.h"
 
-#if defined(__riscv)
+void enable_cyclecounter(void)
+{
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+  ARM_PMU_Enable();
+  ARM_PMU_CYCCNT_Reset();
+  ARM_PMU_CNTR_Enable(PMU_CNTENSET_CCNTR_ENABLE_Msk);
+}
+
+void disable_cyclecounter(void)
+{
+  ARM_PMU_CNTR_Disable(PMU_CNTENSET_CCNTR_ENABLE_Msk);
+  ARM_PMU_Disable();
+}
+
+uint64_t get_cyclecounter(void) { return ARM_PMU_Get_CCNTR(); }
+
+#elif defined(__riscv)
 
 void enable_cyclecounter(void) {}
 
@@ -116,10 +135,11 @@ uint64_t get_cyclecounter(void)
 #endif /* __riscv_xlen != 32 */
 }
 
-#else /* __riscv */
-#error PMU_CYCLES option only supported on x86_64 and AArch64 and RISC-V
-#endif /* !__riscv */
-#endif /* !__x86_64__ && !(__AARCH64EL__ || _M_ARM64) */
+#else /* !__x86_64__ && !(__AARCH64EL__ || _M_ARM64) && !(__ARM_ARCH_8M_MAIN__ \
+         || __ARM_ARCH_8_1M_MAIN__) && __riscv */
+#error PMU_CYCLES option only supported on x86_64, AArch64, Armv8-M, and RISC-V
+#endif /* !__x86_64__ && !(__AARCH64EL__ || _M_ARM64) && \
+          !(__ARM_ARCH_8M_MAIN__ || __ARM_ARCH_8_1M_MAIN__) && !__riscv */
 
 #elif defined(PERF_CYCLES)
 
