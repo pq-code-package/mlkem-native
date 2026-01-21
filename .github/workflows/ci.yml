@@ -698,7 +698,7 @@ jobs:
       matrix:
         target:
           - system: macos-latest
-            nix_shell: 'cross-x86_64'
+            nix_shell: 'cross-autogen'
             nix_cache: 'true'
             extra_args: '--force-cross'
           # TODO: This does not yet work (#1304)
@@ -706,11 +706,11 @@ jobs:
           #   nix_cache: 'false'
           #   nix_shell: 'ci'
           - system: ubuntu-latest
-            nix_shell: 'cross-aarch64'
+            nix_shell: 'cross-autogen'
             nix_cache: 'true'
             extra_args: '--force-cross'
           - system: ubuntu-24.04-arm
-            nix_shell: 'cross-x86_64'
+            nix_shell: 'cross-autogen'
             nix_cache: 'true'
             extra_args: '--force-cross'
     runs-on: ${{ matrix.target.system }}

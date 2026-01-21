@@ -89,6 +89,7 @@ mlkem-native currently offers the following backends:
 * 64-bit Arm backend (using Neon)
 * 64-bit Intel/AMD backend (using AVX2)
 * 64-bit RISC-V backend (using RVV)
+* _Experimental:_ 32-bit Armv8.1-M backend (using Helium/MVE) -- see [#1501](https://github.com/pq-code-package/mlkem-native/issues/1501)
 
 If you'd like contribute new backends, please reach out or just open a PR.
 
