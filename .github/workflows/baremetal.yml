@@ -19,7 +19,7 @@ jobs:
          - runner: ubuntu-latest
            name: 'M55-AN547'
            makefile: test/baremetal/platform/m55-an547/platform.mk
-           nix-shell: arm-embedded
+           nix-shell: ci-cross-arm-embedded
            func: true
            kat: true
            acvp: true
@@ -29,7 +29,7 @@ jobs:
          - runner: ubuntu-latest
            name: 'AVR ATmega128RFR2 (modified for 32K RAM)'
            makefile: test/baremetal/platform/avr/platform.mk
-           nix-shell: avr
+           nix-shell: ci-cross-avr
            func: true
            kat: true
            acvp: true
