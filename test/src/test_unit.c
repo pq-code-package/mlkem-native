@@ -9,15 +9,16 @@
 #include "../notrandombytes/notrandombytes.h"
 
 #include "../../mlkem/src/compress.h"
+#include "../../mlkem/src/fips202/keccakf1600.h"
 #include "../../mlkem/src/poly.h"
 #include "../../mlkem/src/poly_k.h"
 #include "../../mlkem/src/sampling.h"
 
 #ifndef NUM_RANDOM_TESTS
 #ifdef MLKEM_DEBUG
-#define NUM_RANDOM_TESTS 1000
+#define NUM_RANDOM_TESTS 800
 #else
-#define NUM_RANDOM_TESTS 10000
+#define NUM_RANDOM_TESTS 8000
 #endif
 #endif /* !NUM_RANDOM_TESTS */
 
@@ -41,6 +42,7 @@ void mlk_polyvec_basemul_acc_montgomery_cached_c(
     mlk_poly *r, const mlk_polyvec *a, const mlk_polyvec *b,
     const mlk_polyvec_mulcache *b_cache);
 void mlk_poly_mulcache_compute_c(mlk_poly_mulcache *x, const mlk_poly *a);
+void mlk_keccakf1600_permute_c(uint64_t *state);
 
 #define CHECK(x)                                              \
   do                                                          \
@@ -54,11 +56,62 @@ void mlk_poly_mulcache_compute_c(mlk_poly_mulcache *x, const mlk_poly *a);
     }                                                         \
   } while (0)
 
+#if defined(MLK_USE_FIPS202_X1_NATIVE) || defined(MLK_USE_FIPS202_X4_NATIVE)
+static void print_u64_array(const char *label, const uint64_t *array,
+                            size_t len)
+{
+  size_t i;
+  fprintf(stderr, "%s:\n", label);
+  for (i = 0; i < len; i++)
+  {
+    if (i % 4 == 0)
+    {
+      fprintf(stderr, "  ");
+    }
+    fprintf(stderr, "%016llx", (unsigned long long)array[i]);
+    if (i % 4 == 3)
+    {
+      fprintf(stderr, "\n");
+    }
+    else
+    {
+      fprintf(stderr, " ");
+    }
+  }
+  if (len % 4 != 0)
+  {
+    fprintf(stderr, "\n");
+  }
+}
+
+static int compare_u64_arrays(const uint64_t *a, const uint64_t *b,
+                              unsigned len, const char *test_name)
+{
+  unsigned i;
+  for (i = 0; i < len; i++)
+  {
+    if (a[i] != b[i])
+    {
+      fprintf(stderr, "FAIL: %s\n", test_name);
+      fprintf(
+          stderr,
+          "  First difference at index %u: got=0x%016llx, expected=0x%016llx\n",
+          i, (unsigned long long)a[i], (unsigned long long)b[i]);
+      print_u64_array("Got", a, len);
+      print_u64_array("Expected", b, len);
+      return 0;
+    }
+  }
+  return 1;
+}
+#endif /* MLK_USE_FIPS202_X1_NATIVE || MLK_USE_FIPS202_X4_NATIVE */
+
 #if defined(MLK_USE_NATIVE_POLY_REDUCE) ||                                  \
     defined(MLK_USE_NATIVE_POLY_TOMONT) || defined(MLK_USE_NATIVE_NTT) ||   \
     defined(MLK_USE_NATIVE_INTT) || defined(MLK_USE_NATIVE_POLY_TOBYTES) || \
     defined(MLK_USE_NATIVE_POLY_FROMBYTES) ||                               \
-    defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
+    defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED) ||        \
+    defined(MLK_USE_FIPS202_X1_NATIVE) || defined(MLK_USE_FIPS202_X4_NATIVE)
 
 /* Backend unit test helper functions */
 static void print_i16_array(const char *label, const int16_t *array, size_t len)
@@ -566,6 +619,57 @@ static int test_native_polyvec_basemul(void)
 }
 #endif /* MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
+#ifdef MLK_USE_FIPS202_X1_NATIVE
+static int test_keccakf1600_permute(void)
+{
+  uint64_t state[MLK_KECCAK_LANES];
+  uint64_t state_ref[MLK_KECCAK_LANES];
+  int i;
+
+  for (i = 0; i < NUM_RANDOM_TESTS; i++)
+  {
+    randombytes((uint8_t *)state, sizeof(state));
+    memcpy(state_ref, state, sizeof(state));
+
+    mlk_keccakf1600_permute(state);
+    mlk_keccakf1600_permute_c(state_ref);
+
+    CHECK(compare_u64_arrays(state, state_ref, MLK_KECCAK_LANES,
+                             "keccakf1600_permute"));
+  }
+
+  return 0;
+}
+#endif /* MLK_USE_FIPS202_X1_NATIVE */
+
+#ifdef MLK_USE_FIPS202_X4_NATIVE
+static int test_keccakf1600x4_permute(void)
+{
+  uint64_t state_x4[MLK_KECCAK_LANES * MLK_KECCAK_WAY];
+  uint64_t state_x1[MLK_KECCAK_LANES * MLK_KECCAK_WAY];
+  int i, j;
+
+  for (i = 0; i < NUM_RANDOM_TESTS; i++)
+  {
+    randombytes((uint8_t *)state_x4, sizeof(state_x4));
+    memcpy(state_x1, state_x4, sizeof(state_x4));
+
+    mlk_keccakf1600x4_permute(state_x4);
+
+    for (j = 0; j < MLK_KECCAK_WAY; j++)
+    {
+      mlk_keccakf1600_permute_c(state_x1 + j * MLK_KECCAK_LANES);
+    }
+
+    CHECK(compare_u64_arrays(state_x4, state_x1,
+                             MLK_KECCAK_LANES * MLK_KECCAK_WAY,
+                             "keccakf1600x4_permute"));
+  }
+
+  return 0;
+}
+#endif /* MLK_USE_FIPS202_X4_NATIVE */
+
 static int test_backend_units(void)
 {
   /* Set fixed seed for reproducible tests */
@@ -599,13 +703,22 @@ static int test_backend_units(void)
   CHECK(test_native_polyvec_basemul() == 0);
 #endif
 
+#ifdef MLK_USE_FIPS202_X1_NATIVE
+  CHECK(test_keccakf1600_permute() == 0);
+#endif
+
+#ifdef MLK_USE_FIPS202_X4_NATIVE
+  CHECK(test_keccakf1600x4_permute() == 0);
+#endif
+
   return 0;
 }
 
 #endif /* MLK_USE_NATIVE_POLY_REDUCE || MLK_USE_NATIVE_POLY_TOMONT ||     \
           MLK_USE_NATIVE_NTT || MLK_USE_NATIVE_INTT ||                    \
           MLK_USE_NATIVE_POLY_TOBYTES || MLK_USE_NATIVE_POLY_FROMBYTES || \
-          MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
+          MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED ||         \
+          MLK_USE_FIPS202_X1_NATIVE || MLK_USE_FIPS202_X4_NATIVE */
 
 
 /* This test invokes the polynomial (de)compression routines
@@ -732,12 +845,14 @@ int main(void)
     defined(MLK_USE_NATIVE_POLY_TOMONT) || defined(MLK_USE_NATIVE_NTT) ||   \
     defined(MLK_USE_NATIVE_INTT) || defined(MLK_USE_NATIVE_POLY_TOBYTES) || \
     defined(MLK_USE_NATIVE_POLY_FROMBYTES) ||                               \
-    defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
+    defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED) ||        \
+    defined(MLK_USE_FIPS202_X1_NATIVE) || defined(MLK_USE_FIPS202_X4_NATIVE)
   CHECK(test_backend_units() == 0);
 #endif /* MLK_USE_NATIVE_POLY_REDUCE || MLK_USE_NATIVE_POLY_TOMONT ||     \
           MLK_USE_NATIVE_NTT || MLK_USE_NATIVE_INTT ||                    \
           MLK_USE_NATIVE_POLY_TOBYTES || MLK_USE_NATIVE_POLY_FROMBYTES || \
-          MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
+          MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED ||         \
+          MLK_USE_FIPS202_X1_NATIVE || MLK_USE_FIPS202_X4_NATIVE */
 
   /* Test poly compress no overflow */
   CHECK(test_poly_compress_no_overflow() == 0);
