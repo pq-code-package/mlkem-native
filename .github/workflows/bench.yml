@@ -35,7 +35,7 @@ jobs:
           cflags: "-flto -DMLK_FORCE_AARCH64"
           ldflags: "-flto"
           bench_extra_args: ""
-          nix_shell: ci-bench
+          nix_shell: bench
         - system: rpi5
           name: Arm Cortex-A76 (Raspberry Pi 5) benchmarks
           bench_pmu: PERF
@@ -43,7 +43,7 @@ jobs:
           cflags: "-flto -DMLK_FORCE_AARCH64"
           ldflags: "-flto"
           bench_extra_args: ""
-          nix_shell: ci-bench
+          nix_shell: bench
         - system: a55
           name: Arm Cortex-A55 (Snapdragon 888) benchmarks
           bench_pmu: PERF
@@ -51,7 +51,7 @@ jobs:
           cflags: "-flto -DMLK_FORCE_AARCH64 -DMLK_CONFIG_FIPS202_BACKEND_FILE=\\\\\\\"fips202/native/aarch64/x1_scalar.h\\\\\\\""
           ldflags: "-flto -static"
           bench_extra_args: -w exec-on-a55
-          nix_shell: ci-bench
+          nix_shell: bench
         - system: bpi
           name: SpacemiT K1 8 (Banana Pi F3) benchmarks
           bench_pmu: PERF
@@ -60,7 +60,7 @@ jobs:
           ldflags: "-static"
           bench_extra_args: -w exec-on-bpi
           cross_prefix: riscv64-unknown-linux-gnu-
-          nix_shell: ci-cross-riscv64
+          nix_shell: cross-riscv64
         - system: m1-mac-mini
           name: Mac Mini (M1, 2020) benchmarks
           bench_pmu: MAC
@@ -68,7 +68,7 @@ jobs:
           cflags: "-flto"
           ldflags: "-flto"
           bench_extra_args: "-r"
-          nix_shell: ci-bench
+          nix_shell: bench
         - system: pqcp-ppc64
           name:  ppc64le (POWER10) benchmarks
           bench_pmu: PERF

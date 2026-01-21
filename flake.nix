@@ -102,90 +102,90 @@
           devShells.ci = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains_native; };
           };
-          devShells.ci-bench = util.mkShell {
+          devShells.bench = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) toolchains_native; };
           };
-          devShells.ci-cbmc = util.mkShell {
+          devShells.cbmc = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) cbmc toolchains_native; } ++ [ pkgs.gh ];
           };
-          devShells.ci-slothy = util.mkShell {
+          devShells.slothy = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) slothy linters toolchains_native; };
           };
-          devShells.ci-cross = util.mkShell {
+          devShells.cross = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains; };
           };
-          devShells.ci-cross-x86_64 = util.mkShell {
+          devShells.cross-x86_64 = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64; };
           };
-          devShells.ci-cross-aarch64 = util.mkShell {
+          devShells.cross-aarch64 = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64; };
           };
-          devShells.ci-cross-riscv64 = util.mkShell {
+          devShells.cross-riscv64 = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchain_riscv64; };
           };
-          devShells.ci-cross-riscv32 = util.mkShell {
+          devShells.cross-riscv32 = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchain_riscv32; };
           };
-          devShells.ci-cross-ppc64le = util.mkShell {
+          devShells.cross-ppc64le = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchain_ppc64le; };
           };
-          devShells.ci-cross-aarch64_be = util.mkShell {
+          devShells.cross-aarch64_be = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64_be; };
           };
-  
+
           # arm-none-eabi-gcc + platform files from pqmx
-          devShells.ci-cross-arm-embedded = util.mkShell {
+          devShells.cross-arm-embedded = util.mkShell {
             packages = builtins.attrValues
               {
                 inherit (util) m55-an547;
                 inherit (pkgs) gcc-arm-embedded qemu coreutils python3 git;
               };
           };
-          devShells.ci-cross-avr = util.mkShell (import ./nix/avr { inherit pkgs; });
+          devShells.cross-avr = util.mkShell (import ./nix/avr { inherit pkgs; });
 
-          devShells.ci-linter = util.mkShellNoCC {
+          devShells.linter = util.mkShellNoCC {
             packages = builtins.attrValues { inherit (config.packages) linters; };
           };
-          devShells.ci_clang14 = util.mkShellWithCC' pkgs.clang_14;
-          devShells.ci_clang15 = util.mkShellWithCC' pkgs.clang_15;
-          devShells.ci_clang16 = util.mkShellWithCC' pkgs.clang_16;
-          devShells.ci_clang17 = util.mkShellWithCC' pkgs.clang_17;
-          devShells.ci_clang18 = util.mkShellWithCC' pkgs.clang_18;
-          devShells.ci_clang19 = util.mkShellWithCC' pkgs.clang_19;
-          devShells.ci_clang20 = util.mkShellWithCC' pkgs.clang_20;
-          devShells.ci_clang21 = util.mkShellWithCC' pkgs.clang_21;
+          devShells.clang14 = util.mkShellWithCC' pkgs.clang_14;
+          devShells.clang15 = util.mkShellWithCC' pkgs.clang_15;
+          devShells.clang16 = util.mkShellWithCC' pkgs.clang_16;
+          devShells.clang17 = util.mkShellWithCC' pkgs.clang_17;
+          devShells.clang18 = util.mkShellWithCC' pkgs.clang_18;
+          devShells.clang19 = util.mkShellWithCC' pkgs.clang_19;
+          devShells.clang20 = util.mkShellWithCC' pkgs.clang_20;
+          devShells.clang21 = util.mkShellWithCC' pkgs.clang_21;
 
-          devShells.ci_zig0_12 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_12);
-          devShells.ci_zig0_13 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_13);
-          devShells.ci_zig0_14 = util.mkShellWithCC' (zigWrapCC pkgs.zig);
-          devShells.ci_zig0_15 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_15);
+          devShells.zig0_12 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_12);
+          devShells.zig0_13 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_13);
+          devShells.zig0_14 = util.mkShellWithCC' (zigWrapCC pkgs.zig);
+          devShells.zig0_15 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_15);
 
-          devShells.ci_gcc48 = util.mkShellWithCC' pkgs.gcc48;
-          devShells.ci_gcc49 = util.mkShellWithCC' pkgs.gcc49;
-          devShells.ci_gcc7 = util.mkShellWithCC' pkgs.gcc7;
-          devShells.ci_gcc11 = util.mkShellWithCC' pkgs.gcc11;
-          devShells.ci_gcc12 = util.mkShellWithCC' pkgs.gcc12;
-          devShells.ci_gcc13 = util.mkShellWithCC' pkgs.gcc13;
-          devShells.ci_gcc14 = util.mkShellWithCC' pkgs.gcc14;
-          devShells.ci_gcc15 = util.mkShellWithCC' pkgs.gcc15;
+          devShells.gcc48 = util.mkShellWithCC' pkgs.gcc48;
+          devShells.gcc49 = util.mkShellWithCC' pkgs.gcc49;
+          devShells.gcc7 = util.mkShellWithCC' pkgs.gcc7;
+          devShells.gcc11 = util.mkShellWithCC' pkgs.gcc11;
+          devShells.gcc12 = util.mkShellWithCC' pkgs.gcc12;
+          devShells.gcc13 = util.mkShellWithCC' pkgs.gcc13;
+          devShells.gcc14 = util.mkShellWithCC' pkgs.gcc14;
+          devShells.gcc15 = util.mkShellWithCC' pkgs.gcc15;
 
           # valgrind with a patch for detecting variable-latency instructions
-          devShells.ci_valgrind-varlat_clang14 = util.mkShellWithCC_valgrind' pkgs.clang_14;
-          devShells.ci_valgrind-varlat_clang15 = util.mkShellWithCC_valgrind' pkgs.clang_15;
-          devShells.ci_valgrind-varlat_clang16 = util.mkShellWithCC_valgrind' pkgs.clang_16;
-          devShells.ci_valgrind-varlat_clang17 = util.mkShellWithCC_valgrind' pkgs.clang_17;
-          devShells.ci_valgrind-varlat_clang18 = util.mkShellWithCC_valgrind' pkgs.clang_18;
-          devShells.ci_valgrind-varlat_clang19 = util.mkShellWithCC_valgrind' pkgs.clang_19;
-          devShells.ci_valgrind-varlat_clang20 = util.mkShellWithCC_valgrind' pkgs.clang_20;
-          devShells.ci_valgrind-varlat_clang21 = util.mkShellWithCC_valgrind' pkgs.clang_21;
-          devShells.ci_valgrind-varlat_gcc48 = util.mkShellWithCC_valgrind' pkgs.gcc48;
-          devShells.ci_valgrind-varlat_gcc49 = util.mkShellWithCC_valgrind' pkgs.gcc49;
-          devShells.ci_valgrind-varlat_gcc7 = util.mkShellWithCC_valgrind' pkgs.gcc7;
-          devShells.ci_valgrind-varlat_gcc11 = util.mkShellWithCC_valgrind' pkgs.gcc11;
-          devShells.ci_valgrind-varlat_gcc12 = util.mkShellWithCC_valgrind' pkgs.gcc12;
-          devShells.ci_valgrind-varlat_gcc13 = util.mkShellWithCC_valgrind' pkgs.gcc13;
-          devShells.ci_valgrind-varlat_gcc14 = util.mkShellWithCC_valgrind' pkgs.gcc14;
-          devShells.ci_valgrind-varlat_gcc15 = util.mkShellWithCC_valgrind' pkgs.gcc15;
+          devShells.valgrind-varlat_clang14 = util.mkShellWithCC_valgrind' pkgs.clang_14;
+          devShells.valgrind-varlat_clang15 = util.mkShellWithCC_valgrind' pkgs.clang_15;
+          devShells.valgrind-varlat_clang16 = util.mkShellWithCC_valgrind' pkgs.clang_16;
+          devShells.valgrind-varlat_clang17 = util.mkShellWithCC_valgrind' pkgs.clang_17;
+          devShells.valgrind-varlat_clang18 = util.mkShellWithCC_valgrind' pkgs.clang_18;
+          devShells.valgrind-varlat_clang19 = util.mkShellWithCC_valgrind' pkgs.clang_19;
+          devShells.valgrind-varlat_clang20 = util.mkShellWithCC_valgrind' pkgs.clang_20;
+          devShells.valgrind-varlat_clang21 = util.mkShellWithCC_valgrind' pkgs.clang_21;
+          devShells.valgrind-varlat_gcc48 = util.mkShellWithCC_valgrind' pkgs.gcc48;
+          devShells.valgrind-varlat_gcc49 = util.mkShellWithCC_valgrind' pkgs.gcc49;
+          devShells.valgrind-varlat_gcc7 = util.mkShellWithCC_valgrind' pkgs.gcc7;
+          devShells.valgrind-varlat_gcc11 = util.mkShellWithCC_valgrind' pkgs.gcc11;
+          devShells.valgrind-varlat_gcc12 = util.mkShellWithCC_valgrind' pkgs.gcc12;
+          devShells.valgrind-varlat_gcc13 = util.mkShellWithCC_valgrind' pkgs.gcc13;
+          devShells.valgrind-varlat_gcc14 = util.mkShellWithCC_valgrind' pkgs.gcc14;
+          devShells.valgrind-varlat_gcc15 = util.mkShellWithCC_valgrind' pkgs.gcc15;
         };
       flake = {
         devShell.x86_64-linux =

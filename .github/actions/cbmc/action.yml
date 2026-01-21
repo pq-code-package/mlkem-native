@@ -7,7 +7,7 @@ description: Run CBMC proofs for mlkem-native
 inputs:
   nix-shell:
     description: Run in the specified Nix environment if exists
-    default: "ci-cbmc"
+    default: "cbmc"
   nix-cache:
     description: Determine whether to enable nix cache
     default: 'true'

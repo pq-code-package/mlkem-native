@@ -159,14 +159,14 @@ jobs:
         if: ${{ inputs.lint }}
         uses: ./.github/actions/lint
         with:
-          nix-shell: ci-linter
+          nix-shell: linter
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
           nix-verbose: ${{ inputs.verbose }}
       - name: Functional Tests
         if: ${{ inputs.test }}
         uses: ./.github/actions/multi-functest
         with:
-          nix-shell: ${{ (inputs.compile_mode == 'cross' || inputs.compile_mode == 'all') && 'ci-cross' || 'ci' }}
+          nix-shell: ${{ (inputs.compile_mode == 'cross' || inputs.compile_mode == 'all') && 'cross' || 'ci' }}
           nix-cache: ${{ inputs.cbmc || inputs.compile_mode == 'cross' || inputs.compile_mode == 'all' }}
           nix-verbose: ${{ inputs.verbose }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
@@ -187,7 +187,7 @@ jobs:
         if: ${{ inputs.cbmc && (success() || failure()) }}
         uses: ./.github/actions/cbmc
         with:
-          nix-shell: ci-cbmc
+          nix-shell: cbmc
           nix-verbose: ${{ inputs.verbose }}
           mlkem_k: ${{ inputs.cbmc_mlkem_k }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
@@ -197,7 +197,7 @@ jobs:
         with:
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
           nix-cache: true
-          nix-shell: ci-slothy
+          nix-shell: slothy
           script: |
             autogen --slothy
             tests all --opt opt
