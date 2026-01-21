@@ -7,12 +7,20 @@ PLATFORM_PATH:=test/baremetal/platform/m55-an547
 CROSS_PREFIX=arm-none-eabi-
 CC=gcc
 
+# Use PMU cycle counting by default
+CYCLES ?= PMU
+
+# Reduce iterations for benchmarking
+CFLAGS += -DMLK_BENCHMARK_NTESTS=10 -DMLK_BENCHMARK_NITERATIONS=10 -DMLK_BENCHMARK_NWARMUP=10
+
 CFLAGS += \
 	-O3 \
 	-Wall -Wextra -Wshadow \
 	-Wno-pedantic \
 	-Wno-redundant-decls \
 	-Wno-missing-prototypes \
+	-Wno-conversion \
+	-Wno-sign-conversion \
 	-fno-common \
 	-ffunction-sections \
 	-fdata-sections \
