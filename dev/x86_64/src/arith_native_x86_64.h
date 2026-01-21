@@ -71,15 +71,9 @@ void mlk_tomont_avx2(int16_t *r);
 #define mlk_poly_compress_d4_avx2 MLK_NAMESPACE(poly_compress_d4_avx2)
 void mlk_poly_compress_d4_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
                                const int16_t *MLK_RESTRICT a);
-#define mlk_poly_decompress_d4_avx2 MLK_NAMESPACE(poly_decompress_d4_avx2)
-void mlk_poly_decompress_d4_avx2(int16_t *MLK_RESTRICT r,
-                                 const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]);
 #define mlk_poly_compress_d10_avx2 MLK_NAMESPACE(poly_compress10_avx2)
 void mlk_poly_compress_d10_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
                                 const int16_t *MLK_RESTRICT a);
-#define mlk_poly_decompress_d10_avx2 MLK_NAMESPACE(poly_decompress10_avx2)
-void mlk_poly_decompress_d10_avx2(
-    int16_t *MLK_RESTRICT r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10]);
 #define mlk_poly_compress_d5_avx2 MLK_NAMESPACE(poly_compress_d5_avx2)
 void mlk_poly_compress_d5_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
                                const int16_t *MLK_RESTRICT a);

@@ -548,9 +548,7 @@
 #undef MLK_USE_NATIVE_POLY_COMPRESS_D11
 #undef MLK_USE_NATIVE_POLY_COMPRESS_D4
 #undef MLK_USE_NATIVE_POLY_COMPRESS_D5
-#undef MLK_USE_NATIVE_POLY_DECOMPRESS_D10
 #undef MLK_USE_NATIVE_POLY_DECOMPRESS_D11
-#undef MLK_USE_NATIVE_POLY_DECOMPRESS_D4
 #undef MLK_USE_NATIVE_POLY_DECOMPRESS_D5
 #undef MLK_USE_NATIVE_POLY_FROMBYTES
 #undef MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE
@@ -570,9 +568,7 @@
 #undef mlk_poly_compress_d11_avx2
 #undef mlk_poly_compress_d4_avx2
 #undef mlk_poly_compress_d5_avx2
-#undef mlk_poly_decompress_d10_avx2
 #undef mlk_poly_decompress_d11_avx2
-#undef mlk_poly_decompress_d4_avx2
 #undef mlk_poly_decompress_d5_avx2
 #undef mlk_poly_mulcache_compute_avx2
 #undef mlk_polyvec_basemul_acc_montgomery_cached_asm_k2

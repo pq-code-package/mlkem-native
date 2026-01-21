@@ -24,9 +24,7 @@
 #define MLK_USE_NATIVE_POLY_COMPRESS_D5
 #define MLK_USE_NATIVE_POLY_COMPRESS_D10
 #define MLK_USE_NATIVE_POLY_COMPRESS_D11
-#define MLK_USE_NATIVE_POLY_DECOMPRESS_D4
 #define MLK_USE_NATIVE_POLY_DECOMPRESS_D5
-#define MLK_USE_NATIVE_POLY_DECOMPRESS_D10
 #define MLK_USE_NATIVE_POLY_DECOMPRESS_D11
 
 #if !defined(__ASSEMBLER__)
@@ -217,31 +215,6 @@ static MLK_INLINE int mlk_poly_compress_d10_native(
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
-MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_poly_decompress_d4_native(
-    int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
-{
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
-  {
-    return MLK_NATIVE_FUNC_FALLBACK;
-  }
-
-  mlk_poly_decompress_d4_avx2(r, a);
-  return MLK_NATIVE_FUNC_SUCCESS;
-}
-
-MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_poly_decompress_d10_native(
-    int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
-{
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
-  {
-    return MLK_NATIVE_FUNC_FALLBACK;
-  }
-
-  mlk_poly_decompress_d10_avx2(r, a);
-  return MLK_NATIVE_FUNC_SUCCESS;
-}
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4

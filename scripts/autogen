@@ -2088,6 +2088,13 @@ def check_macro_typos():
             if m == "MLK_CONTEXT_PARAMETERS_n":
                 return True
 
+        # Macros for native implementations that don't currently exist
+        if m in [
+            "MLK_USE_NATIVE_POLY_DECOMPRESS_D4",
+            "MLK_USE_NATIVE_POLY_DECOMPRESS_D10",
+        ]:
+            return True
+
         return False
 
     run_parallel(
