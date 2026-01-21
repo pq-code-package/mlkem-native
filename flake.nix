@@ -75,6 +75,7 @@
           packages.toolchain_riscv32 = util.toolchain_riscv32;
           packages.toolchain_ppc64le = util.toolchain_ppc64le;
           packages.toolchain_aarch64_be = util.toolchain_aarch64_be;
+          packages.gcc-arm-embedded = pkgs.gcc-arm-embedded;
 
           devShells.default = util.mkShell {
             packages = builtins.attrValues
@@ -91,13 +92,13 @@
             packages = builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum; };
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchains hol_light s2n_bignum; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchains hol_light s2n_bignum gcc-arm-embedded; };
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross-aarch64 = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 hol_light s2n_bignum; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 hol_light s2n_bignum gcc-arm-embedded; };
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross-x86_64 = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum gcc-arm-embedded; };
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.ci = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains_native; };
@@ -133,11 +134,19 @@
             packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64_be; };
           };
 
+          # autogen shell with cross compiler for the "other" architecture
+          devShells.cross-autogen = util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) linters; inherit (pkgs) gcc-arm-embedded; }
+              ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isx86_64 [ config.packages.toolchain_aarch64 ]
+              ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isAarch64 [ config.packages.toolchain_x86_64 ];
+          };
+
           # arm-none-eabi-gcc + platform files from pqmx
           devShells.cross-arm-embedded = util.mkShell {
             packages = builtins.attrValues
               {
                 inherit (util) m55-an547;
+                inherit (config.packages) linters;
                 inherit (pkgs) gcc-arm-embedded qemu coreutils python3 git;
               };
           };

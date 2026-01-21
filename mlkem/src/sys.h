@@ -42,6 +42,11 @@
 #define MLK_SYS_AARCH64_EB
 #endif
 
+/* Check if we're running on an Armv8.1-M system with MVE */
+#if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_FEATURE_MVE)
+#define MLK_SYS_ARMV81M_MVE
+#endif
+
 #if defined(__x86_64__)
 #define MLK_SYS_X86_64
 #if defined(__AVX2__)

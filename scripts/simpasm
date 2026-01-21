@@ -248,6 +248,9 @@ def simplify(logger, args, asm_input, asm_output=None):
         cmd = [args.objdump, "--disassemble", tmp_objfile0]
         if platform.system() == "Darwin" and args.arch == "aarch64":
             cmd += ["--triple=aarch64"]
+        # Armv8.1-M requires explicit triple for Thumb disassembly
+        if args.arch == "armv81m":
+            cmd += ["--triple=thumbv8.1m.main-none-eabi"]
 
         # Add syntax option if specified
         if args.syntax and args.syntax.lower() != "att":
@@ -266,13 +269,22 @@ def simplify(logger, args, asm_input, asm_output=None):
             f" *   {asm_input} using scripts/simpasm. Do not modify it directly.",
             " */",
             "",
-            "#if defined(__ELF__)",
-            '.section .note.GNU-stack,"",@progbits',
-            "#endif",
-            "",
-            ".text",
-            ".balign 4",
         ]
+
+        # Add ELF section for non-baremetal targets
+        if args.arch != "armv81m":
+            autogen_header += [
+                "#if defined(__ELF__)",
+                '.section .note.GNU-stack,"",@progbits',
+                "#endif",
+                "",
+            ]
+
+        # Add Thumb directives for Armv8.1-M
+        if args.arch == "armv81m":
+            autogen_header += [".thumb", ".syntax unified", ""]
+
+        autogen_header += [".text", ".balign 4"]
 
         # Add syntax specifier for Intel syntax
         if args.syntax and args.syntax.lower() == "intel":
@@ -343,8 +355,8 @@ def simplify(logger, args, asm_input, asm_output=None):
 
         logger.debug("Checking that byte-code is unchanged ...")
 
-        # When CFI is enabled, compare only the __text section content
-        if args.cfify:
+        # When CFI is enabled or for Armv8.1-M, compare only the __text section content
+        if args.cfify or args.arch == "armv81m":
             logger.debug("Comparing __text section content for CFI comparison...")
 
             # Extract __text section from both files

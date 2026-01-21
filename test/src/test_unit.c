@@ -184,7 +184,10 @@ static void generate_i16_array_ranged(int16_t *data, size_t len, int min_incl,
                         ((unsigned)data[i] % (unsigned)(max_excl - min_incl)));
   }
 }
-#endif /* MLK_USE_NATIVE_POLY_REDUCE || MLK_USE_NATIVE_POLY_TOMONT || ... */
+#endif /* MLK_USE_NATIVE_POLY_REDUCE || MLK_USE_NATIVE_POLY_TOMONT ||     \
+          MLK_USE_NATIVE_NTT || MLK_USE_NATIVE_INTT ||                    \
+          MLK_USE_NATIVE_POLY_TOBYTES || MLK_USE_NATIVE_POLY_FROMBYTES || \
+          MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
 #if defined(MLK_USE_NATIVE_POLY_TOBYTES)
 static void print_u8_array(const char *label, const uint8_t *array, size_t len)
@@ -262,7 +265,10 @@ static int compare_i16_arrays(const int16_t *a, const int16_t *b, unsigned len,
   }
   return 1;
 }
-#endif /* MLK_USE_NATIVE_POLY_REDUCE || MLK_USE_NATIVE_POLY_TOMONT || ... */
+#endif /* MLK_USE_NATIVE_POLY_REDUCE || MLK_USE_NATIVE_POLY_TOMONT ||     \
+          MLK_USE_NATIVE_NTT || MLK_USE_NATIVE_INTT ||                    \
+          MLK_USE_NATIVE_POLY_TOBYTES || MLK_USE_NATIVE_POLY_FROMBYTES || \
+          MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
 #ifdef MLK_USE_NATIVE_POLY_REDUCE
 static int test_poly_reduce_core(const int16_t *input, const char *test_name)
