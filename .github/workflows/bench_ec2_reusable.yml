@@ -175,7 +175,7 @@ jobs:
       - uses: ./.github/actions/bench
         if: ${{ inputs.opt == 'all' || inputs.opt == 'opt' }}
         with:
-          nix-shell: 'ci-bench'
+          nix-shell: 'bench'
           custom-shell: 'bash'
           nix-cache: false
           nix-verbose: ${{ inputs.verbose }}
@@ -191,7 +191,7 @@ jobs:
       - uses: ./.github/actions/bench
         if: ${{ inputs.opt == 'all' || inputs.opt == 'no_opt' }}
         with:
-          nix-shell: 'ci-bench'
+          nix-shell: 'bench'
           custom-shell: 'bash'
           nix-cache: false
           nix-verbose: ${{ inputs.verbose }}

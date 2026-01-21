@@ -72,9 +72,9 @@ jobs:
             # We only run cross-compilation checks for x86 on macos-latest,
             # so restrict caching to the corresponding cross shell.
             if [[ ${{ runner.os }} == 'macOS' ]]; then
-              nix develop .#ci-cross-x86_64 --profile tmp-cross
+              nix develop .#cross-x86_64 --profile tmp-cross
             else
-              nix develop .#ci-cross --profile tmp-cross
+              nix develop .#cross --profile tmp-cross
               # GH ubuntu-24.04 image tend to run outof space
               if [[ ${{ matrix.runner }} == 'ubuntu-24.04' ]]; then
                 nix-collect-garbage
