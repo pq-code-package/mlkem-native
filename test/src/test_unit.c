@@ -113,7 +113,12 @@ static int compare_u64_arrays(const uint64_t *a, const uint64_t *b,
     defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED) ||        \
     defined(MLK_USE_FIPS202_X1_NATIVE) || defined(MLK_USE_FIPS202_X4_NATIVE)
 
-/* Backend unit test helper functions */
+/* Backend unit test helper functions for arithmetic native backends */
+#if defined(MLK_USE_NATIVE_POLY_REDUCE) ||                                  \
+    defined(MLK_USE_NATIVE_POLY_TOMONT) || defined(MLK_USE_NATIVE_NTT) ||   \
+    defined(MLK_USE_NATIVE_INTT) || defined(MLK_USE_NATIVE_POLY_TOBYTES) || \
+    defined(MLK_USE_NATIVE_POLY_FROMBYTES) ||                               \
+    defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
 static void print_i16_array(const char *label, const int16_t *array, size_t len)
 {
   size_t i;
@@ -179,6 +184,7 @@ static void generate_i16_array_ranged(int16_t *data, size_t len, int min_incl,
                         ((unsigned)data[i] % (unsigned)(max_excl - min_incl)));
   }
 }
+#endif /* MLK_USE_NATIVE_POLY_REDUCE || MLK_USE_NATIVE_POLY_TOMONT || ... */
 
 #if defined(MLK_USE_NATIVE_POLY_TOBYTES)
 static void print_u8_array(const char *label, const uint8_t *array, size_t len)
@@ -228,6 +234,11 @@ static int compare_u8_arrays(const uint8_t *a, const uint8_t *b, unsigned len,
 }
 #endif /* MLK_USE_NATIVE_POLY_TOBYTES */
 
+#if defined(MLK_USE_NATIVE_POLY_REDUCE) ||                                  \
+    defined(MLK_USE_NATIVE_POLY_TOMONT) || defined(MLK_USE_NATIVE_NTT) ||   \
+    defined(MLK_USE_NATIVE_INTT) || defined(MLK_USE_NATIVE_POLY_TOBYTES) || \
+    defined(MLK_USE_NATIVE_POLY_FROMBYTES) ||                               \
+    defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
 static int compare_i16_arrays(const int16_t *a, const int16_t *b, unsigned len,
                               const char *test_name, const int16_t *input)
 {
@@ -251,6 +262,7 @@ static int compare_i16_arrays(const int16_t *a, const int16_t *b, unsigned len,
   }
   return 1;
 }
+#endif /* MLK_USE_NATIVE_POLY_REDUCE || MLK_USE_NATIVE_POLY_TOMONT || ... */
 
 #ifdef MLK_USE_NATIVE_POLY_REDUCE
 static int test_poly_reduce_core(const int16_t *input, const char *test_name)
