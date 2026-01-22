@@ -258,25 +258,26 @@ static MLK_ALIGN const uint64_t mlk_keccakf1600RoundConstants[24] = {
   A##so = Tso;                                                                \
   A##su = Tsu;
 
-#define MLK_LOAD_LANE_4X(X0, X1, X2, X3, state, lane)              \
-  do                                                               \
-  {                                                                \
-    const uint64_t *state64 = (const uint64_t *)(state);           \
-    __m256i t0, t1, t2, t3;                                        \
-    t0 = _mm256_loadu_si256((const __m256i *)&state64[lane]);      \
-    t1 = _mm256_loadu_si256((const __m256i *)&state64[lane + 25]); \
-    t2 = _mm256_loadu_si256((const __m256i *)&state64[lane + 50]); \
-    t3 = _mm256_loadu_si256((const __m256i *)&state64[lane + 75]); \
-                                                                   \
-    __m256i tmp0 = _mm256_unpacklo_epi64(t0, t1);                  \
-    __m256i tmp1 = _mm256_unpackhi_epi64(t0, t1);                  \
-    __m256i tmp2 = _mm256_unpacklo_epi64(t2, t3);                  \
-    __m256i tmp3 = _mm256_unpackhi_epi64(t2, t3);                  \
-                                                                   \
-    X0 = _mm256_permute2x128_si256(tmp0, tmp2, 0x20);              \
-    X1 = _mm256_permute2x128_si256(tmp1, tmp3, 0x20);              \
-    X2 = _mm256_permute2x128_si256(tmp0, tmp2, 0x31);              \
-    X3 = _mm256_permute2x128_si256(tmp1, tmp3, 0x31);              \
+#define MLK_LOAD_LANE_4X(X0, X1, X2, X3, state, lane)                \
+  do                                                                 \
+  {                                                                  \
+    const uint64_t *state64 = (const uint64_t *)(state);             \
+    __m256i t0, t1, t2, t3;                                          \
+    __m256i tmp0, tmp1, tmp2, tmp3;                                  \
+    tmp0 = _mm256_loadu_si256((const __m256i *)&state64[lane]);      \
+    tmp1 = _mm256_loadu_si256((const __m256i *)&state64[lane + 25]); \
+    tmp2 = _mm256_loadu_si256((const __m256i *)&state64[lane + 50]); \
+    tmp3 = _mm256_loadu_si256((const __m256i *)&state64[lane + 75]); \
+                                                                     \
+    t0 = _mm256_unpacklo_epi64(tmp0, tmp1);                          \
+    t1 = _mm256_unpackhi_epi64(tmp0, tmp1);                          \
+    t2 = _mm256_unpacklo_epi64(tmp2, tmp3);                          \
+    t3 = _mm256_unpackhi_epi64(tmp2, tmp3);                          \
+                                                                     \
+    X0 = _mm256_permute2x128_si256(t0, t2, 0x20);                    \
+    X1 = _mm256_permute2x128_si256(t1, t3, 0x20);                    \
+    X2 = _mm256_permute2x128_si256(t0, t2, 0x31);                    \
+    X3 = _mm256_permute2x128_si256(t1, t3, 0x31);                    \
   } while (0)
 
 #define MLK_LOAD_LANE_1X(X, state, lane)                              \
@@ -304,15 +305,17 @@ static MLK_ALIGN const uint64_t mlk_keccakf1600RoundConstants[24] = {
   do                                                                    \
   {                                                                     \
     uint64_t *state64 = (uint64_t *)(state);                            \
-    __m256i tmp0 = _mm256_unpacklo_epi64(lane0, lane1);                 \
-    __m256i tmp1 = _mm256_unpackhi_epi64(lane0, lane1);                 \
-    __m256i tmp2 = _mm256_unpacklo_epi64(lane2, lane3);                 \
-    __m256i tmp3 = _mm256_unpackhi_epi64(lane2, lane3);                 \
+    __m256i t0, t1, t2, t3;                                             \
+    __m256i tmp0, tmp1, tmp2, tmp3;                                     \
+    tmp0 = _mm256_unpacklo_epi64(lane0, lane1);                         \
+    tmp1 = _mm256_unpackhi_epi64(lane0, lane1);                         \
+    tmp2 = _mm256_unpacklo_epi64(lane2, lane3);                         \
+    tmp3 = _mm256_unpackhi_epi64(lane2, lane3);                         \
                                                                         \
-    __m256i t0 = _mm256_permute2x128_si256(tmp0, tmp2, 0x20);           \
-    __m256i t1 = _mm256_permute2x128_si256(tmp1, tmp3, 0x20);           \
-    __m256i t2 = _mm256_permute2x128_si256(tmp0, tmp2, 0x31);           \
-    __m256i t3 = _mm256_permute2x128_si256(tmp1, tmp3, 0x31);           \
+    t0 = _mm256_permute2x128_si256(tmp0, tmp2, 0x20);                   \
+    t1 = _mm256_permute2x128_si256(tmp1, tmp3, 0x20);                   \
+    t2 = _mm256_permute2x128_si256(tmp0, tmp2, 0x31);                   \
+    t3 = _mm256_permute2x128_si256(tmp1, tmp3, 0x31);                   \
                                                                         \
     _mm256_storeu_si256((__m256i *)&state64[(idx)], t0);                \
     _mm256_storeu_si256((__m256i *)&state64[(idx) + 25], t1);           \
@@ -323,7 +326,7 @@ static MLK_ALIGN const uint64_t mlk_keccakf1600RoundConstants[24] = {
 #define MLK_SCATTER_STORE256_1X(state, idx, v)                 \
   do                                                           \
   {                                                            \
-    uint64_t *state64 = (uint64_t *)(state);                   \
+    const uint64_t *state64 = (const uint64_t *)(state);       \
     __m128d t = _mm_castsi128_pd(_mm256_castsi256_si128((v))); \
     _mm_storel_pd((double *)&state64[0 + (idx)], t);           \
     _mm_storeh_pd((double *)&state64[25 + (idx)], t);          \
@@ -347,7 +350,8 @@ static MLK_ALIGN const uint64_t mlk_keccakf1600RoundConstants[24] = {
 /* clang-format off */
 #define MLK_ROUNDS_x2                                               \
       do {                                                          \
-        for (int i = 0; i < 12; i++) {                              \
+        int i;                                                      \
+        for (i = 0; i < 12; i++) {                                  \
             MLK_thetaRhoPiChiIota( 2*i, A)                          \
             MLK_thetaRhoPiChiIota( 2*i+1, A)                        \
         }                                                           \
