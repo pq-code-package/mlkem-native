@@ -2606,12 +2606,13 @@ def update_via_remove(filename):
     update_file(filename, None)
 
 
+# Only synchronize sources, but not README.md, Makefile and so on
+SYNCHRONIZED_EXTENSIONS = (".c", ".h", ".i", ".inc", ".S")
+
+
 def synchronize_file(f, in_dir, out_dir, delete=False, no_simplify=False, **kwargs):
 
-    # Only synchronize sources, but not README.md, Makefile and so on
-    extensions = (".c", ".h", ".i", ".inc", ".S")
-
-    if not f.endswith(extensions):
+    if not f.endswith(SYNCHRONIZED_EXTENSIONS):
         return None
 
     basename = os.path.basename(f)
@@ -2665,6 +2666,8 @@ def synchronize_backend(in_dir, out_dir, delete=False, no_simplify=False, **kwar
     # Check for files in the target directory that have not been copied
     for f in get_files(os.path.join(out_dir, "*")):
         if os.path.basename(f) in copied:
+            continue
+        if not f.endswith(SYNCHRONIZED_EXTENSIONS):
             continue
         # Otherwise, remove it
         update_via_remove(f)

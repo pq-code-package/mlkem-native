@@ -19,8 +19,10 @@
 #include "x86_64/xkcp.h"
 #endif
 
-#if defined(MLK_SYS_ARMV81M_MVE)
-#include "armv81m/mve.h"
-#endif
+/* We do not yet include the FIPS202 backend for Armv8.1-M+MVE by default
+ * as it is still experimental and undergoing review. */
+/* #if defined(MLK_SYS_ARMV81M_MVE) */
+/* #include "armv81m/mve.h" */
+/* #endif */
 
 #endif /* !MLK_FIPS202_NATIVE_AUTO_H */
