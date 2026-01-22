@@ -34,7 +34,6 @@ http://creativecommons.org/publicdomain/zero/1.0/
  *   MLK_ROUNDS_x2 processing 2 rounds per iteration.
  */
 
-
 #include "../../../../common.h"
 #if defined(MLK_FIPS202_X86_64_XKCP) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
