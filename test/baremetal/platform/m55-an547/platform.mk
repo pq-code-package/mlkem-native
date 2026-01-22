@@ -13,6 +13,10 @@ CYCLES ?= PMU
 # Reduce iterations for benchmarking
 CFLAGS += -DMLK_BENCHMARK_NTESTS=10 -DMLK_BENCHMARK_NITERATIONS=10 -DMLK_BENCHMARK_NWARMUP=10
 
+# Explicitly include experimental Armv8.1-M + MVE backend
+# Remove this once backend is finalized and enabled by default.
+CFLAGS += "-DMLK_CONFIG_FIPS202_BACKEND_FILE=\"fips202/native/armv81m/mve.h\""
+
 CFLAGS += \
 	-O3 \
 	-Wall -Wextra -Wshadow \
