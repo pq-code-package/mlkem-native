@@ -63,26 +63,55 @@ __contract__(
  * representation (e.g., bit-interleaved), as conversion can happen during
  * XOR/extract rather than before/after each permutation.
  *
+ * NOTE: We assume that the custom representation of the zero state is the
+ * all-zero state.
+ *
  * MLK_USE_FIPS202_X4_XOR_BYTES_NATIVE: Backend provides native XOR bytes
  * MLK_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE: Backend provides native extract
  * bytes
  */
 
 #if defined(MLK_USE_FIPS202_X4_XOR_BYTES_NATIVE)
-/* TODO: Add CBMC specs and proofs for mlk_keccakf1600_xor_bytes_x4_native */
-static MLK_INLINE void mlk_keccakf1600_xor_bytes_x4_native(
+MLK_MUST_CHECK_RETURN_VALUE
+static MLK_INLINE int mlk_keccakf1600_xor_bytes_x4_native(
     uint64_t *state, const unsigned char *data0, const unsigned char *data1,
     const unsigned char *data2, const unsigned char *data3, unsigned offset,
-    unsigned length);
+    unsigned length)
+__contract__(
+  requires(0 <= offset && offset <= 25 * sizeof(uint64_t) &&
+           0 <= length && length <= 25 * sizeof(uint64_t) - offset)
+  requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 4))
+  requires(memory_no_alias(data0, length))
+  requires((data0 == data1 &&
+            data0 == data2 &&
+            data0 == data3) ||
+           (memory_no_alias(data1, length) &&
+            memory_no_alias(data2, length) &&
+            memory_no_alias(data3, length)))
+  assigns(memory_slice(state, sizeof(uint64_t) * 25 * 4))
+  ensures(return_value == MLK_NATIVE_FUNC_FALLBACK || return_value == MLK_NATIVE_FUNC_SUCCESS)
+  ensures((return_value == MLK_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 4)));
 #endif /* MLK_USE_FIPS202_X4_XOR_BYTES_NATIVE */
 
 #if defined(MLK_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE)
-/* TODO: Add CBMC specs and proofs for mlk_keccakf1600_extract_bytes_x4_native
- */
-static MLK_INLINE void mlk_keccakf1600_extract_bytes_x4_native(
+MLK_MUST_CHECK_RETURN_VALUE
+static MLK_INLINE int mlk_keccakf1600_extract_bytes_x4_native(
     uint64_t *state, unsigned char *data0, unsigned char *data1,
     unsigned char *data2, unsigned char *data3, unsigned offset,
-    unsigned length);
+    unsigned length)
+__contract__(
+  requires(0 <= offset && offset <= 25 * sizeof(uint64_t) &&
+           0 <= length && length <= 25 * sizeof(uint64_t) - offset)
+  requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 4))
+  requires(memory_no_alias(data0, length))
+  requires(memory_no_alias(data1, length))
+  requires(memory_no_alias(data2, length))
+  requires(memory_no_alias(data3, length))
+  assigns(memory_slice(data0, length))
+  assigns(memory_slice(data1, length))
+  assigns(memory_slice(data2, length))
+  assigns(memory_slice(data3, length))
+  ensures(return_value == MLK_NATIVE_FUNC_FALLBACK || return_value == MLK_NATIVE_FUNC_SUCCESS));
 #endif /* MLK_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE */
 
 #endif /* !MLK_FIPS202_NATIVE_API_H */
