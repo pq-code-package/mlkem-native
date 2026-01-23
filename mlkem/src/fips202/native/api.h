@@ -54,4 +54,35 @@ __contract__(
   ensures((return_value == MLK_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 4)));
 #endif /* MLK_USE_FIPS202_X4_NATIVE */
 
+/*
+ * Native x4 XOR bytes and extract bytes interface.
+ *
+ * These functions allow backends to provide optimized implementations for
+ * XORing input data into the state and extracting output data from the state.
+ * This is particularly useful for backends that use a different internal state
+ * representation (e.g., bit-interleaved), as conversion can happen during
+ * XOR/extract rather than before/after each permutation.
+ *
+ * MLK_USE_FIPS202_X4_XOR_BYTES_NATIVE: Backend provides native XOR bytes
+ * MLK_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE: Backend provides native extract
+ * bytes
+ */
+
+#if defined(MLK_USE_FIPS202_X4_XOR_BYTES_NATIVE)
+/* TODO: Add CBMC specs and proofs for mlk_keccakf1600_xor_bytes_x4_native */
+static MLK_INLINE void mlk_keccakf1600_xor_bytes_x4_native(
+    uint64_t *state, const unsigned char *data0, const unsigned char *data1,
+    const unsigned char *data2, const unsigned char *data3, unsigned offset,
+    unsigned length);
+#endif /* MLK_USE_FIPS202_X4_XOR_BYTES_NATIVE */
+
+#if defined(MLK_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE)
+/* TODO: Add CBMC specs and proofs for mlk_keccakf1600_extract_bytes_x4_native
+ */
+static MLK_INLINE void mlk_keccakf1600_extract_bytes_x4_native(
+    uint64_t *state, unsigned char *data0, unsigned char *data1,
+    unsigned char *data2, unsigned char *data3, unsigned offset,
+    unsigned length);
+#endif /* MLK_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE */
+
 #endif /* !MLK_FIPS202_NATIVE_API_H */
