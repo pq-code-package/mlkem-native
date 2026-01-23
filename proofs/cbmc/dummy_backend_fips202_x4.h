@@ -7,6 +7,8 @@
 #define MLK_DUMMY_FIPS202X4_BACKEND_H
 
 #define MLK_USE_FIPS202_X4_NATIVE
+#define MLK_USE_FIPS202_X4_XOR_BYTES_NATIVE
+#define MLK_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE
 
 #include "../../mlkem/src/fips202/native/api.h"
 

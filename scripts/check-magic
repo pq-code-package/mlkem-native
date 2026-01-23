@@ -37,7 +37,9 @@ def check_magic_numbers():
     exceptions = [mlkem_q,
                   1665, # q/2
                   1600, # For Keccak-F1600
-                  1023, 1024, 2047, 2048, 4095, 4096, 8192, 32767, 32768, 65535, 65536]
+                  1023, 1024, 2047, 2048, 4095, 4096, 8192, 32767, 32768, 65535, 65536,
+                  2025, # years
+                  ]
     enable_marker = "check-magic: on"
     disable_marker = "check-magic: off"
     autogen_marker = "This file is auto-generated from scripts/autogen"
