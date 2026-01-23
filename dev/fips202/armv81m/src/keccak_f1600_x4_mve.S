@@ -425,7 +425,7 @@ qA20_l .req q2
 .endm
 
 .text
-.balign 8
+.balign 4
 .type MLK_ASM_NAMESPACE(keccak_f1600_x4_mve_asm), %function
 .global MLK_ASM_NAMESPACE(keccak_f1600_x4_mve_asm)
 MLK_ASM_FN_SYMBOL(keccak_f1600_x4_mve_asm)

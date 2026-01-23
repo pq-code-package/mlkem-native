@@ -11,114 +11,19 @@
 
 #include "fips202_native_armv81m.h"
 
-/*
- * TEMPORARY: Bit-interleaving using efficient shift-and-mask operations.
- * TODO: Replace with optimized MVE assembly implementations
- * (as a part of XORBytes and ExtractBytes)
- */
-
-/* Extract even-indexed bits from 64-bit value into lower 32 bits */
-static uint32_t bitinterleave_even(uint64_t x)
-{
-  uint64_t t;
-  t = x & 0x5555555555555555ULL;
-  t = (t | (t >> 1)) & 0x3333333333333333ULL;
-  t = (t | (t >> 2)) & 0x0f0f0f0f0f0f0f0fULL;
-  t = (t | (t >> 4)) & 0x00ff00ff00ff00ffULL;
-  t = (t | (t >> 8)) & 0x0000ffff0000ffffULL;
-  t = (t | (t >> 16)) & 0x00000000ffffffffULL;
-  return (uint32_t)t;
-}
-
-/* Extract odd-indexed bits from 64-bit value into lower 32 bits */
-static uint32_t bitinterleave_odd(uint64_t x)
-{
-  return bitinterleave_even(x >> 1);
-}
-
-/* Spread 32-bit value across even bit positions of 64-bit result */
-static uint64_t spread_even(uint32_t x)
-{
-  uint64_t t = x;
-  t = (t | (t << 16)) & 0x0000ffff0000ffffULL;
-  t = (t | (t << 8)) & 0x00ff00ff00ff00ffULL;
-  t = (t | (t << 4)) & 0x0f0f0f0f0f0f0f0fULL;
-  t = (t | (t << 2)) & 0x3333333333333333ULL;
-  t = (t | (t << 1)) & 0x5555555555555555ULL;
-  return t;
-}
-
-/* Combine even and odd 32-bit halves into interleaved 64-bit value */
-static uint64_t bitdeinterleave(uint32_t even, uint32_t odd)
-{
-  return spread_even(even) | (spread_even(odd) << 1);
-}
 
 /*
- * TEMPORARY: Naive C interleaving functions.
- * These will be replaced with optimized MVE assembly implementations.
+ * Keccak-f1600 x4 permutation (on bit-interleaved state)
+ * State is expected to already be in bit-interleaved format.
  */
-static void interleave_4fold(uint64_t *state_4x, const uint64_t *state0,
-                             const uint64_t *state1, const uint64_t *state2,
-                             const uint64_t *state3)
-{
-  uint32_t *state_4xl = (uint32_t *)state_4x;
-  uint32_t *state_4xh = (uint32_t *)state_4x + 100;
-
-  for (size_t i = 0; i < 25; i++)
-  {
-    state_4xl[i * 4 + 0] = bitinterleave_even(state0[i]);
-    state_4xl[i * 4 + 1] = bitinterleave_even(state1[i]);
-    state_4xl[i * 4 + 2] = bitinterleave_even(state2[i]);
-    state_4xl[i * 4 + 3] = bitinterleave_even(state3[i]);
-
-    state_4xh[i * 4 + 0] = bitinterleave_odd(state0[i]);
-    state_4xh[i * 4 + 1] = bitinterleave_odd(state1[i]);
-    state_4xh[i * 4 + 2] = bitinterleave_odd(state2[i]);
-    state_4xh[i * 4 + 3] = bitinterleave_odd(state3[i]);
-  }
-}
-
-static void deinterleave_4fold(uint64_t *state_4x, uint64_t *state0,
-                               uint64_t *state1, uint64_t *state2,
-                               uint64_t *state3)
-{
-  uint32_t *state_4xl = (uint32_t *)state_4x;
-  uint32_t *state_4xh = (uint32_t *)state_4x + 100;
-
-  for (size_t i = 0; i < 25; i++)
-  {
-    state0[i] = bitdeinterleave(state_4xl[i * 4 + 0], state_4xh[i * 4 + 0]);
-    state1[i] = bitdeinterleave(state_4xl[i * 4 + 1], state_4xh[i * 4 + 1]);
-    state2[i] = bitdeinterleave(state_4xl[i * 4 + 2], state_4xh[i * 4 + 2]);
-    state3[i] = bitdeinterleave(state_4xl[i * 4 + 3], state_4xh[i * 4 + 3]);
-  }
-}
-
 #define mlk_keccak_f1600_x4_native_impl \
   MLK_NAMESPACE(keccak_f1600_x4_native_impl)
 int mlk_keccak_f1600_x4_native_impl(uint64_t *state)
 {
-  /*
-   * TEMPORARY: Bit-interleaving using efficient shift-and-mask operations.
-   * TODO: Replace with optimized MVE assembly implementations
-   * (as a part of XORBytes and ExtractBytes)
-   */
-  MLK_ALIGN uint64_t state_4x[100];
-  MLK_ALIGN uint64_t state_4x_tmp[100];
-
-  /* Interleave the 4 states into bit-interleaved format */
-  interleave_4fold(state_4x, &state[0], &state[25], &state[50], &state[75]);
-
-  /* Run the permutation */
-  mlk_keccak_f1600_x4_mve_asm(state_4x, state_4x_tmp,
+  MLK_ALIGN uint64_t state_tmp[100];
+  mlk_keccak_f1600_x4_mve_asm(state, state_tmp,
                               mlk_keccakf1600_round_constants);
-
-  /* Deinterleave back to 4 separate states */
-  deinterleave_4fold(state_4x, &state[0], &state[25], &state[50], &state[75]);
-
-  mlk_zeroize(state_4x, sizeof(state_4x));
-  mlk_zeroize(state_4x_tmp, sizeof(state_4x_tmp));
+  mlk_zeroize(state_tmp, sizeof(state_tmp));
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 

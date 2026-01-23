@@ -63,6 +63,9 @@ __contract__(
  * representation (e.g., bit-interleaved), as conversion can happen during
  * XOR/extract rather than before/after each permutation.
  *
+ * NOTE: We assume that the custom representation of the zero state is the
+ * all-zero state.
+ *
  * MLK_USE_FIPS202_X4_XOR_BYTES_NATIVE: Backend provides native XOR bytes
  * MLK_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE: Backend provides native extract
  * bytes
