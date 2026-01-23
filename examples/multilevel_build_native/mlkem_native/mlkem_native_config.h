@@ -403,15 +403,18 @@
  * Name:        MLK_CONFIG_CUSTOM_RANDOMBYTES
  *
  * Description: mlkem-native does not provide a secure randombytes
- *              implementation. Such an implementation has to provided by the
+ *              implementation. Such an implementation has to be provided by the
  *              consumer.
  *
  *              If this option is not set, mlkem-native expects a function
  *              int randombytes(uint8_t *out, size_t outlen).
+ *              It is expected to return zero on success, and non-zero on
+ *              failure. In case of failure, the top level APIs will return a
+ *              MLK_ERR_RNG_FAIL error code.
  *
- *              Set this option and define `mlk_randombytes` if you want to
- *              use a custom method to sample randombytes with a different name
- *              or signature.
+ *              Set this option and define `mlk_randombytes` (with the same
+ *              signature and behaviour) if you want to use a custom method to
+ *              sample randombytes with a different name or signature.
  *
  *****************************************************************************/
 /* #define MLK_CONFIG_CUSTOM_RANDOMBYTES
