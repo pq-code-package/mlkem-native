@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "../../mlkem/src/compress.h"
+#include "../../mlkem/src/fips202/fips202.h"
 
 #include "../../mlkem/mlkem_native.h"
 #include "../notrandombytes/notrandombytes.h"
@@ -136,6 +137,8 @@ static int test_invalid_ciphertext(void)
   uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
   uint8_t key_a[CRYPTO_BYTES];
   uint8_t key_b[CRYPTO_BYTES];
+  uint8_t key_c[CRYPTO_BYTES];
+  uint8_t z_c[CRYPTO_CIPHERTEXTBYTES+CRYPTO_BYTES];
   uint8_t b;
   size_t pos;
 
@@ -153,10 +156,17 @@ static int test_invalid_ciphertext(void)
   ct[pos % CRYPTO_CIPHERTEXTBYTES] ^= b;
   /* Alice uses Bobs response to get her shared key */
   CHECK(crypto_kem_dec(key_a, ct, sk) == 0);
+  /* calcuate (z||c) to get rejection key */
+  memcpy(z_c, &sk[CRYPTO_SECRETKEYBYTES-32],32);
+  memcpy(&z_c[32], ct, CRYPTO_CIPHERTEXTBYTES);
+  /* J(z||c) as per Algo 18 */
+  mlk_shake256(key_c, CRYPTO_BYTES, z_c, sizeof(z_c));
   /* mark as defined, so we can compare */
   MLK_CT_TESTING_DECLASSIFY(key_a, CRYPTO_BYTES);
   MLK_CT_TESTING_DECLASSIFY(key_b, CRYPTO_BYTES);
+  MLK_CT_TESTING_DECLASSIFY(key_c, CRYPTO_BYTES);
   CHECK(memcmp(key_a, key_b, CRYPTO_BYTES) != 0);
+  CHECK(memcmp(key_a, key_c, CRYPTO_BYTES) == 0);
   return 0;
 }
 
