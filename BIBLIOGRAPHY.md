@@ -49,6 +49,7 @@ source code and documentation.
   - [examples/multilevel_build_native/mlkem_native/mlkem_native_config.h](examples/multilevel_build_native/mlkem_native/mlkem_native_config.h)
   - [integration/liboqs/config_aarch64.h](integration/liboqs/config_aarch64.h)
   - [integration/liboqs/config_c.h](integration/liboqs/config_c.h)
+  - [integration/liboqs/config_ppc64le.h](integration/liboqs/config_ppc64le.h)
   - [integration/liboqs/config_x86_64.h](integration/liboqs/config_x86_64.h)
   - [mlkem/mlkem_native_config.h](mlkem/mlkem_native_config.h)
   - [mlkem/src/kem.c](mlkem/src/kem.c)
