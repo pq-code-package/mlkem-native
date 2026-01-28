@@ -35,7 +35,7 @@
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
-#define KECCAK_F1600_ROUNDS 24
+#define MLK_KECCAK_F1600_ROUNDS 24
 
 /****************** REGISTER ALLOCATIONS *******************/
 
@@ -276,60 +276,60 @@
     sub input_addr, input_addr, #((2 + \idx)*25*8)
 .endm
 
-#define STACK_LOCS 2
+#define MLK_STACK_LOCS 2
 
-#define STACK_SIZE (16*6 + 8*8 + 6*8 + (STACK_LOCS) * 8)
-#define STACK_BASE_GPRS (6*8)
-#define STACK_BASE_VREGS (6*8 + 16*6)
-#define STACK_OFFSET_LOCS (16*6 + 8*8 + 6*8)
+#define MLK_STACK_SIZE (16*6 + 8*8 + 6*8 + (MLK_STACK_LOCS) * 8)
+#define MLK_STACK_BASE_GPRS (6*8)
+#define MLK_STACK_BASE_VREGS (6*8 + 16*6)
+#define MLK_STACK_OFFSET_LOCS (16*6 + 8*8 + 6*8)
 
-#define STACK_OFFSET_INPUT (0*8)
-#define STACK_OFFSET_CONST_SCALAR (1*8)
-#define STACK_OFFSET_CONST_VECTOR (2*8)
-#define STACK_OFFSET_COUNT (3*8)
-#define STACK_OFFSET_OUTER (4*8)
+#define MLK_STACK_OFFSET_INPUT (0*8)
+#define MLK_STACK_OFFSET_CONST_SCALAR (1*8)
+#define MLK_STACK_OFFSET_CONST_VECTOR (2*8)
+#define MLK_STACK_OFFSET_COUNT (3*8)
+#define MLK_STACK_OFFSET_OUTER (4*8)
 
-#define STACK_LOC_0 ((STACK_OFFSET_LOCS) + 0*8)
-#define STACK_LOC_1 ((STACK_OFFSET_LOCS) + 1*8)
+#define MLK_STACK_LOC_0 ((MLK_STACK_OFFSET_LOCS) + 0*8)
+#define MLK_STACK_LOC_1 ((MLK_STACK_OFFSET_LOCS) + 1*8)
 
 .macro save_gprs
-    stp x19, x20, [sp, #(STACK_BASE_GPRS + 16*0)]
-    stp x21, x22, [sp, #(STACK_BASE_GPRS + 16*1)]
-    stp x23, x24, [sp, #(STACK_BASE_GPRS + 16*2)]
-    stp x25, x26, [sp, #(STACK_BASE_GPRS + 16*3)]
-    stp x27, x28, [sp, #(STACK_BASE_GPRS + 16*4)]
-    stp x29, x30, [sp, #(STACK_BASE_GPRS + 16*5)]
+    stp x19, x20, [sp, #(MLK_STACK_BASE_GPRS + 16*0)]
+    stp x21, x22, [sp, #(MLK_STACK_BASE_GPRS + 16*1)]
+    stp x23, x24, [sp, #(MLK_STACK_BASE_GPRS + 16*2)]
+    stp x25, x26, [sp, #(MLK_STACK_BASE_GPRS + 16*3)]
+    stp x27, x28, [sp, #(MLK_STACK_BASE_GPRS + 16*4)]
+    stp x29, x30, [sp, #(MLK_STACK_BASE_GPRS + 16*5)]
 .endm
 
 .macro restore_gprs
-    ldp x19, x20, [sp, #(STACK_BASE_GPRS + 16*0)]
-    ldp x21, x22, [sp, #(STACK_BASE_GPRS + 16*1)]
-    ldp x23, x24, [sp, #(STACK_BASE_GPRS + 16*2)]
-    ldp x25, x26, [sp, #(STACK_BASE_GPRS + 16*3)]
-    ldp x27, x28, [sp, #(STACK_BASE_GPRS + 16*4)]
-    ldp x29, x30, [sp, #(STACK_BASE_GPRS + 16*5)]
+    ldp x19, x20, [sp, #(MLK_STACK_BASE_GPRS + 16*0)]
+    ldp x21, x22, [sp, #(MLK_STACK_BASE_GPRS + 16*1)]
+    ldp x23, x24, [sp, #(MLK_STACK_BASE_GPRS + 16*2)]
+    ldp x25, x26, [sp, #(MLK_STACK_BASE_GPRS + 16*3)]
+    ldp x27, x28, [sp, #(MLK_STACK_BASE_GPRS + 16*4)]
+    ldp x29, x30, [sp, #(MLK_STACK_BASE_GPRS + 16*5)]
 .endm
 
 .macro save_vregs
-    stp d8,  d9,  [sp,#(STACK_BASE_VREGS+0*16)]
-    stp d10, d11, [sp,#(STACK_BASE_VREGS+1*16)]
-    stp d12, d13, [sp,#(STACK_BASE_VREGS+2*16)]
-    stp d14, d15, [sp,#(STACK_BASE_VREGS+3*16)]
+    stp d8,  d9,  [sp,#(MLK_STACK_BASE_VREGS+0*16)]
+    stp d10, d11, [sp,#(MLK_STACK_BASE_VREGS+1*16)]
+    stp d12, d13, [sp,#(MLK_STACK_BASE_VREGS+2*16)]
+    stp d14, d15, [sp,#(MLK_STACK_BASE_VREGS+3*16)]
 .endm
 
 .macro restore_vregs
-    ldp d8,  d9,  [sp,#(STACK_BASE_VREGS+0*16)]
-    ldp d10, d11, [sp,#(STACK_BASE_VREGS+1*16)]
-    ldp d12, d13, [sp,#(STACK_BASE_VREGS+2*16)]
-    ldp d14, d15, [sp,#(STACK_BASE_VREGS+3*16)]
+    ldp d8,  d9,  [sp,#(MLK_STACK_BASE_VREGS+0*16)]
+    ldp d10, d11, [sp,#(MLK_STACK_BASE_VREGS+1*16)]
+    ldp d12, d13, [sp,#(MLK_STACK_BASE_VREGS+2*16)]
+    ldp d14, d15, [sp,#(MLK_STACK_BASE_VREGS+3*16)]
 .endm
 
 .macro alloc_stack
-    sub sp, sp, #(STACK_SIZE)
+    sub sp, sp, #(MLK_STACK_SIZE)
 .endm
 
 .macro free_stack
-    add sp, sp, #(STACK_SIZE)
+    add sp, sp, #(MLK_STACK_SIZE)
 .endm
 
 .macro eor5 dst, src0, src1, src2, src3, src4
@@ -378,7 +378,7 @@
         eor x30, x30, x29, ror #63                // .........*............................................
         eor x22, x22, x30                         // ..........*...........................................
         eor x23, x23, x30                         // ..........*...........................................
-        str x23, [sp, #STACK_LOC_0]               // ...........*.......................................... // @slothy:writes=stack_0
+        str x23, [sp, #MLK_STACK_LOC_0]               // ...........*.......................................... // @slothy:writes=stack_0
         eor x23, x14, x15                         // ...........*..........................................
         eor x14, x14, x0                          // ............*.........................................
         eor x23, x23, x11                         // ............*.........................................
@@ -406,7 +406,7 @@
         eor x12, x3, x27                          // ........................*.............................
         bic x3, x13, x17, ror #19                 // ........................*.............................
         eor x5, x5, x27                           // .........................*............................
-        ldr x27, [sp, #STACK_LOC_0]               // .........................*............................ // @slothy:reads=stack_0
+        ldr x27, [sp, #MLK_STACK_LOC_0]               // .........................*............................ // @slothy:reads=stack_0
         bic x25, x17, x2, ror #5                  // ..........................*...........................
         eor x9, x9, x29                           // ..........................*...........................
         eor x23, x25, x5, ror #52                 // ...........................*..........................
@@ -436,12 +436,12 @@
         eor x12, x15, x12, ror #58                // .......................................*..............
         eor x15, x5, x27, ror #27                 // .......................................*..............
         eor x5, x20, x11, ror #41                 // ........................................*.............
-        ldr x11, [sp, #STACK_OFFSET_CONST_SCALAR] // ........................................*.............
+        ldr x11, [sp, #MLK_STACK_OFFSET_CONST_SCALAR] // ........................................*.............
         eor x20, x17, x4, ror #21                 // .........................................*............
         eor x17, x24, x9, ror #47                 // .........................................*............
         mov x24, #1                               // ..........................................*...........
         bic x9, x0, x16, ror #9                   // ..........................................*...........
-        str x24, [sp, #STACK_OFFSET_COUNT]        // ...........................................*.......... // @slothy:writes=STACK_OFFSET_COUNT
+        str x24, [sp, #MLK_STACK_OFFSET_COUNT]        // ...........................................*.......... // @slothy:writes=MLK_STACK_OFFSET_COUNT
         bic x24, x29, x1, ror #44                 // ...........................................*..........
         bic x27, x1, x21, ror #50                 // ............................................*.........
         bic x4, x26, x29, ror #63                 // ............................................*.........
@@ -502,10 +502,10 @@
     // eor X<sBme>, sAga, X<sE0>
     // eor X<sBbe>, sAge, X<sE1>
 
-    // ldr X<caddr>, [sp, #STACK_OFFSET_CONST_SCALAR]
+    // ldr X<caddr>, [sp, #MLK_STACK_OFFSET_CONST_SCALAR]
     // ldr X<cur_const>, [X<caddr>]
     // mov X<count>, #1
-    // str X<count>, [sp, #STACK_OFFSET_COUNT] // @slothy:writes=STACK_OFFSET_COUNT
+    // str X<count>, [sp, #MLK_STACK_OFFSET_COUNT] // @slothy:writes=MLK_STACK_OFFSET_COUNT
 
     // chi_step_ror sAga, X<sBga>, X<sBgi>, X<sBge>, 47, 39
     // chi_step_ror sAge, X<sBge>, X<sBgo>, X<sBgi>, 42, 25
@@ -577,9 +577,9 @@
    xar_m1 vAsu_, vAse, E1, 62
    xar_m1 vAme_, vAga, E0, 28
    xar_m1 vAbe_, vAge, E1, 20
-   ldr tmp, [sp, #STACK_OFFSET_CONST_VECTOR] // @slothy:reads=STACK_OFFSET_CONST_VECTOR
+   ldr tmp, [sp, #MLK_STACK_OFFSET_CONST_VECTOR] // @slothy:reads=MLK_STACK_OFFSET_CONST_VECTOR
    ld1r {v28.2d}, [tmp], #8
-   str tmp, [sp, #STACK_OFFSET_CONST_VECTOR] // @slothy:writes=STACK_OFFSET_CONST_VECTOR
+   str tmp, [sp, #MLK_STACK_OFFSET_CONST_VECTOR] // @slothy:writes=MLK_STACK_OFFSET_CONST_VECTOR
    bcax_m1 vAga, vAga_, vAgi_, vAge_
    bcax_m1 vAge, vAge_, vAgo_, vAgi_
    bcax_m1 vAgi, vAgi_, vAgu_, vAgo_
@@ -628,7 +628,7 @@
         ror x26, x26, #58                         // ........*................................................
         eor x16, x30, x16                         // .........*...............................................
         eor x28, x30, x28, ror #63                // .........*...............................................
-        str x28, [sp, #STACK_LOC_0]               // ..........*.............................................. // @slothy:writes=stack_0
+        str x28, [sp, #MLK_STACK_LOC_0]               // ..........*.............................................. // @slothy:writes=stack_0
         eor x29, x29, x17, ror #36                // ..........*..............................................
         eor x28, x1, x2, ror #61                  // ...........*.............................................
         eor x19, x30, x19, ror #37                // ...........*.............................................
@@ -682,9 +682,9 @@
         eor x16, x21, x19, ror #43                // ....................................*....................
         eor x21, x17, x25, ror #30                // ....................................*....................
         bic x19, x25, x19, ror #57                // .....................................*...................
-        ldr x25, [sp, #STACK_OFFSET_COUNT]        // .....................................*................... // @slothy:reads=STACK_OFFSET_COUNT
+        ldr x25, [sp, #MLK_STACK_OFFSET_COUNT]        // .....................................*................... // @slothy:reads=MLK_STACK_OFFSET_COUNT
         eor x17, x10, x9, ror #47                 // ......................................*..................
-        ldr x9, [sp, #STACK_OFFSET_CONST_SCALAR]  // ......................................*..................
+        ldr x9, [sp, #MLK_STACK_OFFSET_CONST_SCALAR]  // ......................................*..................
         eor x15, x20, x28, ror #27                // .......................................*.................
         bic x20, x4, x28, ror #2                  // .......................................*.................
         eor x10, x20, x1, ror #50                 // ........................................*................
@@ -693,10 +693,10 @@
         bic x4, x28, x1, ror #48                  // .........................................*...............
         bic x1, x1, x11, ror #57                  // ..........................................*..............
         ldr x28, [x9, x25, LSL #3]                // ..........................................*..............
-        ldr x9, [sp, #STACK_LOC_0]                // ...........................................*............. // @slothy:reads=stack_0
+        ldr x9, [sp, #MLK_STACK_LOC_0]                // ...........................................*............. // @slothy:reads=stack_0
         add x25, x25, #1                          // ...........................................*.............
-        str x25, [sp, #STACK_OFFSET_COUNT]        // ............................................*............ // @slothy:writes=STACK_OFFSET_COUNT
-        cmp x25, #(KECCAK_F1600_ROUNDS-1)         // ............................................*............ // @slothy:ignore_useless_output
+        str x25, [sp, #MLK_STACK_OFFSET_COUNT]        // ............................................*............ // @slothy:writes=MLK_STACK_OFFSET_COUNT
+        cmp x25, #(MLK_KECCAK_F1600_ROUNDS-1)         // ............................................*............ // @slothy:ignore_useless_output
         eor x25, x1, x27, ror #53                 // .............................................*...........
         bic x27, x30, x26, ror #47                // .............................................*...........
         eor x1, x5, x28                           // ..............................................*..........
@@ -782,12 +782,12 @@
     // eor X<sBme>, X<sE0>, sAga, ror #61
     // eor X<sBbe>, X<sE1>, sAge, ror #19
 
-    // ldr X<caddr>, [sp, #STACK_OFFSET_CONST_SCALAR]
-    // ldr X<count>, [sp, #STACK_OFFSET_COUNT] // @slothy:reads=STACK_OFFSET_COUNT
+    // ldr X<caddr>, [sp, #MLK_STACK_OFFSET_CONST_SCALAR]
+    // ldr X<count>, [sp, #MLK_STACK_OFFSET_COUNT] // @slothy:reads=MLK_STACK_OFFSET_COUNT
     // ldr X<cur_const>, [X<caddr>, X<count>, LSL #3]
     // add X<count>, X<count>, #1
-    // cmp X<count>, #(KECCAK_F1600_ROUNDS-1)  // @slothy:ignore_useless_output
-    // str X<count>, [sp, #STACK_OFFSET_COUNT] // @slothy:writes=STACK_OFFSET_COUNT
+    // cmp X<count>, #(MLK_KECCAK_F1600_ROUNDS-1)  // @slothy:ignore_useless_output
+    // str X<count>, [sp, #MLK_STACK_OFFSET_COUNT] // @slothy:writes=MLK_STACK_OFFSET_COUNT
 
     // chi_step_ror sAga, X<sBga>, X<sBgi>, X<sBge>, 47, 39
     // chi_step_ror sAge, X<sBge>, X<sBgo>, X<sBgi>, 42, 25
@@ -855,10 +855,10 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_v8a_scalar_hybrid_asm)
     mov const_addr, input_rc
 
     mov outer, #0
-    str outer,      [sp, #STACK_OFFSET_OUTER]        // @slothy:writes=STACK_OFFSET_OUTER
-    str const_addr, [sp, #STACK_OFFSET_CONST_SCALAR] // @slothy:writes=STACK_OFFSET_CONST_SCALAR
-    str const_addr, [sp, #STACK_OFFSET_CONST_VECTOR] // @slothy:writes=STACK_OFFSET_CONST_VECTOR
-    str input_addr, [sp, #STACK_OFFSET_INPUT]        // @slothy:writes=STACK_OFFSET_INPUT
+    str outer,      [sp, #MLK_STACK_OFFSET_OUTER]        // @slothy:writes=MLK_STACK_OFFSET_OUTER
+    str const_addr, [sp, #MLK_STACK_OFFSET_CONST_SCALAR] // @slothy:writes=MLK_STACK_OFFSET_CONST_SCALAR
+    str const_addr, [sp, #MLK_STACK_OFFSET_CONST_VECTOR] // @slothy:writes=MLK_STACK_OFFSET_CONST_VECTOR
+    str input_addr, [sp, #MLK_STACK_OFFSET_INPUT]        // @slothy:writes=MLK_STACK_OFFSET_INPUT
 
     load_input_vector   // Vector input
     load_input_scalar 0 // First scalar input
@@ -876,22 +876,22 @@ keccak_f1600_x4_v8a_scalar_hybrid_loop_end:
     final_scalar_rotate
 
     // Read outer loop flag: We repeat the above twice
-    ldr outer, [sp, #STACK_OFFSET_OUTER]      // @slothy:reads=STACK_OFFSET_OUTER
+    ldr outer, [sp, #MLK_STACK_OFFSET_OUTER]      // @slothy:reads=MLK_STACK_OFFSET_OUTER
     cmp outer, #1
     beq keccak_f1600_x4_v8a_scalar_hybrid_done
 
     // Update outer loop flag
     mov outer, #1
-    str outer, [sp, #STACK_OFFSET_OUTER]      // @slothy:writes=STACK_OFFSET_OUTER
+    str outer, [sp, #MLK_STACK_OFFSET_OUTER]      // @slothy:writes=MLK_STACK_OFFSET_OUTER
 
-    ldr input_addr, [sp, #STACK_OFFSET_INPUT] // @slothy:reads=STACK_OFFSET_INPUT
+    ldr input_addr, [sp, #MLK_STACK_OFFSET_INPUT] // @slothy:reads=MLK_STACK_OFFSET_INPUT
     store_input_scalar 0 // Store first scalar data
     load_input_scalar  1 // Load second scalar input
 
     b keccak_f1600_x4_v8a_scalar_hybrid_initial
 keccak_f1600_x4_v8a_scalar_hybrid_done:
 
-    ldr input_addr, [sp, #STACK_OFFSET_INPUT] // @slothy:reads=STACK_OFFSET_INPUT
+    ldr input_addr, [sp, #MLK_STACK_OFFSET_INPUT] // @slothy:reads=MLK_STACK_OFFSET_INPUT
     store_input_scalar 1
     store_input_vector
 
@@ -1008,19 +1008,19 @@ keccak_f1600_x4_v8a_scalar_hybrid_done:
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
-#undef KECCAK_F1600_ROUNDS
-#undef STACK_LOCS
-#undef STACK_SIZE
-#undef STACK_BASE_GPRS
-#undef STACK_BASE_VREGS
-#undef STACK_OFFSET_LOCS
-#undef STACK_OFFSET_INPUT
-#undef STACK_OFFSET_CONST_SCALAR
-#undef STACK_OFFSET_CONST_VECTOR
-#undef STACK_OFFSET_COUNT
-#undef STACK_OFFSET_OUTER
-#undef STACK_LOC_0
-#undef STACK_LOC_1
+#undef MLK_KECCAK_F1600_ROUNDS
+#undef MLK_STACK_LOCS
+#undef MLK_STACK_SIZE
+#undef MLK_STACK_BASE_GPRS
+#undef MLK_STACK_BASE_VREGS
+#undef MLK_STACK_OFFSET_LOCS
+#undef MLK_STACK_OFFSET_INPUT
+#undef MLK_STACK_OFFSET_CONST_SCALAR
+#undef MLK_STACK_OFFSET_CONST_VECTOR
+#undef MLK_STACK_OFFSET_COUNT
+#undef MLK_STACK_OFFSET_OUTER
+#undef MLK_STACK_LOC_0
+#undef MLK_STACK_LOC_1
 
 /* simpasm: footer-start */
 #endif /* MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID && \
