@@ -103,6 +103,7 @@
 #include "src/fips202/native/armv81m/src/from_bit_interleaving_x4_mve.S"
 #include "src/fips202/native/armv81m/src/keccak_f1600_x4_mve.S"
 #include "src/fips202/native/armv81m/src/load_bytes_in_lane_x4_mve.S"
+#include "src/fips202/native/armv81m/src/state_extract_bytes_x4_mve.S"
 #include "src/fips202/native/armv81m/src/state_xor_bytes_x4_mve.S"
 #include "src/fips202/native/armv81m/src/to_bit_interleaving_x4_mve.S"
 #endif /* MLK_SYS_ARMV81M_MVE */
