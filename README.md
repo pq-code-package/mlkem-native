@@ -20,9 +20,19 @@ All C code in [mlkem/src/*](mlkem) and [mlkem/src/fips202/*](mlkem/src/fips202) 
 using [CBMC](https://github.com/diffblue/cbmc). All AArch64 assembly is proved functionally correct at the object code level using
 [HOL-Light](https://github.com/jrh13/hol-light).
 
-mlkem-native includes native backends for Arm (64-bit, Neon), Intel/AMD (64-bit, AVX2), and RISC-V (64-bit, RVV). See [benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/) for performance data.
-
 mlkem-native is supported by the [Post-Quantum Cryptography Alliance](https://pqca.org/) as part of the [Linux Foundation](https://linuxfoundation.org/).
+
+## Supported platforms
+
+mlkem-native is highly portable C90 code that is continuously tested across various 16-bit, 32-bit and 64-bit
+C-compilers (including gcc, clang, mingw, msvc, zig, gcc-avr) and target architectures (including x86_64, AArch64,
+RISC-V32, RISC-V64, PPC64LE, AVR). It has minimal dependencies on the standard library, all of which can be customized
+(see [STDLIB.md](STDLIB.md)). If mlkem-native does not work out of the box for you, please file an issue!
+
+mlkem-native also includes native code for the following architectures; see [benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/):
+* Armv8-A + Neon
+* x86_64/AMD64 + AVX2
+* RISC-V64 + RVV
 
 ## Quickstart for Ubuntu
 
