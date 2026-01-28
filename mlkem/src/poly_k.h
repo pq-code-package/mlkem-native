@@ -358,6 +358,8 @@ MLK_INTERNAL_API
 void mlk_polyvec_invntt_tomont(mlk_polyvec *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_polyvec)))
+  requires(forall(k0, 0, MLKEM_K,
+    array_abs_bound(r->vec[k0].coeffs, 0, MLKEM_N, INT16_MAX/2)))
   assigns(memory_slice(r, sizeof(mlk_polyvec)))
   ensures(forall(j, 0, MLKEM_K,
   array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND)))
@@ -373,7 +375,11 @@ __contract__(
  *
  *              Bounds:
  *              - Every coefficient of a is assumed to be in [0..4095]
- *              - No bounds guarantees for the coefficients in the result.
+ *              - Every coefficient of b is assumed to be bound by
+ *                MLK_NTT_BOUND in absolute value.
+ *              - Every coefficient of b_cache is assumed to be bound by
+ *                MLKEM_Q in absolute value.
+ *              - The output bounds are below INT16_MAX/2 in absolute value.
  *
  * Arguments:   - mlk_poly *r: pointer to output polynomial
  *              - const mlk_polyvec a: pointer to first input polynomial vector
@@ -400,8 +406,14 @@ __contract__(
   requires(memory_no_alias(b_cache, sizeof(mlk_polyvec_mulcache)))
   requires(forall(k1, 0, MLKEM_K,
      array_bound(a->vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+  requires(forall(k2, 0, MLKEM_K,
+     array_abs_bound(b->vec[k2].coeffs, 0, MLKEM_N, MLK_NTT_BOUND)))
+  requires(forall(k3, 0, MLKEM_K,
+     array_abs_bound(b_cache->vec[k3].coeffs, 0, MLKEM_N/2, MLKEM_Q)))
   assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, INT16_MAX/2))
 );
+
 
 #define mlk_polyvec_mulcache_compute MLK_NAMESPACE_K(polyvec_mulcache_compute)
 /************************************************************
@@ -439,6 +451,8 @@ __contract__(
   requires(memory_no_alias(x, sizeof(mlk_polyvec_mulcache)))
   requires(memory_no_alias(a, sizeof(mlk_polyvec)))
   assigns(memory_slice(x, sizeof(mlk_polyvec_mulcache)))
+  ensures(forall(k0, 0, MLKEM_K,
+    array_abs_bound(x->vec[k0].coeffs, 0, MLKEM_N/2, MLKEM_Q)))
 );
 
 #define mlk_polyvec_reduce MLK_NAMESPACE_K(polyvec_reduce)

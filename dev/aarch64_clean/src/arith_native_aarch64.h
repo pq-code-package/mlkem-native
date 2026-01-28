@@ -117,6 +117,9 @@ void mlk_polyvec_basemul_acc_montgomery_cached_asm_k2(
 /* This must be kept in sync with the HOL-Light specification in
  * proofs/hol_light/aarch64/proofs/mlkem_poly_basemul_acc_montgomery_cached_k2.ml.
  */
+/* TODO - refine_bounds branch - Check HOL-Light specification has the
+ * INT16_MAX/2 bound on post-condition and re-prove/
+ */
 __contract__(
     requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
     requires(memory_no_alias(a, sizeof(int16_t) * 2 * MLKEM_N))
@@ -124,6 +127,7 @@ __contract__(
     requires(memory_no_alias(b_cache, sizeof(int16_t) * 2 * (MLKEM_N / 2)))
     requires(array_abs_bound(a, 0, 2 * MLKEM_N, MLKEM_UINT12_LIMIT + 1))
     assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+    ensures(array_abs_bound(r, 0, MLKEM_N, INT16_MAX/2))
 );
 
 #define mlk_polyvec_basemul_acc_montgomery_cached_asm_k3 \
@@ -134,6 +138,9 @@ void mlk_polyvec_basemul_acc_montgomery_cached_asm_k3(
 /* This must be kept in sync with the HOL-Light specification in
  * proofs/hol_light/aarch64/proofs/mlkem_poly_basemul_acc_montgomery_cached_k3.ml.
  */
+/* TODO - refine_bounds branch - Check HOL-Light specification has the
+ * INT16_MAX/2 bound on post-condition and re-prove/
+ */
 __contract__(
     requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
     requires(memory_no_alias(a, sizeof(int16_t) * 3 * MLKEM_N))
@@ -141,6 +148,7 @@ __contract__(
     requires(memory_no_alias(b_cache, sizeof(int16_t) * 3 * (MLKEM_N / 2)))
     requires(array_abs_bound(a, 0, 3 * MLKEM_N, MLKEM_UINT12_LIMIT + 1))
     assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+    ensures(array_abs_bound(r, 0, MLKEM_N, INT16_MAX/2))
 );
 
 #define mlk_polyvec_basemul_acc_montgomery_cached_asm_k4 \
@@ -151,6 +159,9 @@ void mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(
 /* This must be kept in sync with the HOL-Light specification in
  * proofs/hol_light/aarch64/proofs/mlkem_poly_basemul_acc_montgomery_cached_k4.ml.
  */
+/* TODO - refine_bounds branch - Check HOL-Light specification has the
+ * INT16_MAX/2 bound on post-condition and re-prove/
+ */
 __contract__(
     requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
     requires(memory_no_alias(a, sizeof(int16_t) * 4 * MLKEM_N))
@@ -158,6 +169,7 @@ __contract__(
     requires(memory_no_alias(b_cache, sizeof(int16_t) * 4 * (MLKEM_N / 2)))
     requires(array_abs_bound(a, 0, 4 * MLKEM_N, MLKEM_UINT12_LIMIT + 1))
     assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+    ensures(array_abs_bound(r, 0, MLKEM_N, INT16_MAX/2))
 );
 
 #define mlk_rej_uniform_asm MLK_NAMESPACE(rej_uniform_asm)
