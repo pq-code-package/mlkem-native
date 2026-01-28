@@ -80,7 +80,6 @@
 #include "src/native/aarch64/src/rej_uniform_table.c"
 #endif
 #if defined(MLK_SYS_X86_64)
-#include "src/native/x86_64/src/compress_avx2.c"
 #include "src/native/x86_64/src/consts.c"
 #include "src/native/x86_64/src/rej_uniform_table.c"
 #endif
