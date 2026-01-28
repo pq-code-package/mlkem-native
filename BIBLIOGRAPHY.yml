@@ -165,3 +165,26 @@
   name: tiny_sha3
   author: Saarinen, Markku-Juhani O.
   url: https://github.com/mjosaarinen/tiny_sha3
+
+- id: XKCP
+  name: eXtended Keccak Code Package
+  author:
+  - Bertoni, Guido
+  - Daemen, Joan
+  - Peeters, Michaël
+  - Van Assche, Gilles
+  - Van Keer, Ronny
+  url: https://github.com/XKCP/XKCP
+
+- id: ADOMNICAI23
+  name: "An update on Keccak performance on ARMv7-M"
+  author: Adomnicai, Alexandre
+  url: https://eprint.iacr.org/2023/773
+
+- id: SLOTHYM7
+  name: "Enabling Microarchitectural Agility: Taking ML-KEM & ML-DSA from Cortex-M4 to M7 with SLOTHY"
+  author:
+  - Abdulrahman, Amin
+  - Kannwischer, Matthias J.
+  - Lim, Thing-Han
+  url: https://eprint.iacr.org/2025/366

@@ -16,6 +16,16 @@ source code and documentation.
 * Referenced from:
   - [README.md](README.md)
 
+### `ADOMNICAI23`
+
+* An update on Keccak performance on ARMv7-M
+* Author(s):
+  - Alexandre Adomnicai
+* URL: https://eprint.iacr.org/2023/773
+* Referenced from:
+  - [dev/fips202/armv81m/src/keccak_f1600_x1_armv7m.S](dev/fips202/armv81m/src/keccak_f1600_x1_armv7m.S)
+  - [mlkem/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m.S](mlkem/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m.S)
+
 ### `AVX2_NTT`
 
 * Faster AVX2 optimized NTT multiplication for Ring-LWE lattice cryptography.
@@ -284,6 +294,18 @@ source code and documentation.
   - [dev/README.md](dev/README.md)
   - [proofs/hol_light/README.md](proofs/hol_light/README.md)
 
+### `SLOTHYM7`
+
+* Enabling Microarchitectural Agility: Taking ML-KEM & ML-DSA from Cortex-M4 to M7 with SLOTHY
+* Author(s):
+  - Amin Abdulrahman
+  - Matthias J. Kannwischer
+  - Thing-Han Lim
+* URL: https://eprint.iacr.org/2025/366
+* Referenced from:
+  - [dev/fips202/armv81m/src/keccak_f1600_x1_armv7m.S](dev/fips202/armv81m/src/keccak_f1600_x1_armv7m.S)
+  - [mlkem/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m.S](mlkem/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m.S)
+
 ### `SLOTHY_Paper`
 
 * Fast and Clean: Auditable high-performance assembly via constraint solving
@@ -307,6 +329,20 @@ source code and documentation.
   - [mlkem/src/native/aarch64/src/ntt.S](mlkem/src/native/aarch64/src/ntt.S)
   - [proofs/hol_light/aarch64/mlkem/mlkem_intt.S](proofs/hol_light/aarch64/mlkem/mlkem_intt.S)
   - [proofs/hol_light/aarch64/mlkem/mlkem_ntt.S](proofs/hol_light/aarch64/mlkem/mlkem_ntt.S)
+
+### `XKCP`
+
+* eXtended Keccak Code Package
+* Author(s):
+  - Guido Bertoni
+  - Joan Daemen
+  - Michaël Peeters
+  - Gilles Van Assche
+  - Ronny Van Keer
+* URL: https://github.com/XKCP/XKCP
+* Referenced from:
+  - [dev/fips202/armv81m/src/keccak_f1600_x1_armv7m.S](dev/fips202/armv81m/src/keccak_f1600_x1_armv7m.S)
+  - [mlkem/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m.S](mlkem/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m.S)
 
 ### `clangover`
 
