@@ -8,13 +8,16 @@
 #include <stdint.h>
 #include "../../../../common.h"
 
-/* Keccak round constants in bit-interleaved form */
+/* Keccak round constants in bit-interleaved form (with terminator for x1) */
 #define mlk_keccakf1600_round_constants \
   MLK_NAMESPACE(keccakf1600_round_constants)
-extern const uint32_t mlk_keccakf1600_round_constants[48];
+extern const uint32_t mlk_keccakf1600_round_constants[49];
 
 #define mlk_keccak_f1600_x4_mve_asm MLK_NAMESPACE(keccak_f1600_x4_mve_asm)
 void mlk_keccak_f1600_x4_mve_asm(uint64_t state[100], uint64_t tmpstate[100],
                                  const uint32_t rc[48]);
+
+#define mlk_keccak_f1600_x1_armv7m_asm MLK_NAMESPACE(keccak_f1600_x1_armv7m_asm)
+void mlk_keccak_f1600_x1_armv7m_asm(uint32_t state[50], const uint32_t rc[49]);
 
 #endif /* !MLK_DEV_FIPS202_ARMV81M_SRC_FIPS202_NATIVE_ARMV81M_H */

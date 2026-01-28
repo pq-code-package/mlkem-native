@@ -100,6 +100,7 @@
 #if defined(MLK_SYS_X86_64)
 #endif
 #if defined(MLK_SYS_ARMV81M_MVE)
+#include "src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m.S"
 #include "src/fips202/native/armv81m/src/keccak_f1600_x4_mve.S"
 #endif
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
@@ -499,13 +500,17 @@
  * Undefine macros from native code (FIPS202, Armv8.1-M)
  */
 /* mlkem/src/fips202/native/armv81m/mve.h */
+#undef MLK_FIPS202_ARMV81M_NEED_X1
 #undef MLK_FIPS202_ARMV81M_NEED_X4
 #undef MLK_FIPS202_NATIVE_ARMV81M
 #undef MLK_FIPS202_NATIVE_ARMV81M_MVE_H
+#undef MLK_USE_FIPS202_X1_NATIVE
 #undef MLK_USE_FIPS202_X4_NATIVE
+#undef mlk_keccak_f1600_x1_native_impl
 #undef mlk_keccak_f1600_x4_native_impl
 /* mlkem/src/fips202/native/armv81m/src/fips202_native_armv81m.h */
 #undef MLK_FIPS202_NATIVE_ARMV81M_SRC_FIPS202_NATIVE_ARMV81M_H
+#undef mlk_keccak_f1600_x1_armv7m_asm
 #undef mlk_keccak_f1600_x4_mve_asm
 #undef mlk_keccakf1600_round_constants
 #endif /* MLK_SYS_ARMV81M_MVE */
