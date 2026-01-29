@@ -67,7 +67,7 @@
 .syntax unified
 .text
 
-.macro deinterleave_even e, tmp 
+.macro deinterleave_even e, tmp
     // De-interleave even bits back into byte order (inverse of interleave_evens)
     // Inflate e                              +------+-----------+-----------+-----------+
     // Single-element annotation follows.  e: |   X  |     X     | l[0],l[1] | l[2],l[3] |
@@ -82,68 +82,6 @@
     vsli.u8     \e, \tmp, #6  //   e: | X3322100 | tmp: | XXXXXXX3 |  (finalize byte compaction)
 .endm
 
-.align 8
-.type keccak_f1600_x4_state_extract_bytes_from_bit_interleaving_4x, %function
-keccak_f1600_x4_state_extract_bytes_from_bit_interleaving_4x:
-keccak_f1600_x4_state_extract_bytes_from_bit_interleaving_4x_start:
-    // Inputs on entry:
-    //   q0 = Even plane (lo16: bytes 0..3, hi16: bytes 4..7) for streams 0..3
-    //   q1 = Odd  plane (lo16: bytes 0..3, hi16: bytes 4..7) for streams 0..3
-    // Output on return:
-    //   q0..q3 contain 8 de-interleaved bytes per stream (see call sites)
-    // Clobbers: r0, q2, q3, q4
-    r    .req r0
-    El   .req q0
-    Ol   .req q1
-    Eu   .req q2
-    Ou   .req q3
-    tmp  .req q4
-    //     +-----+-----+-----+-----+-----+-----+-----+-----+
-    // El: | E0l | E0u | E1l | E1u | E2l | E2u | E3l | E3u |
-    // q1: | O0l | O0u | O1l | O1u | O2l | O2u | O3l | O3u |
-    //     +-----+-----+-----+-----+-----+-----+-----+-----+
-    // clone q0 into temp register and swap
-    vrev32.u16     Eu, El
-    // clone q1 into temp register and swap
-    vrev32.u16     Ou, Ol
-    // deinterleave lower evens into El
-    deinterleave_even El, tmp
-    // deinterleave lower odds into Ol
-    deinterleave_even Ol, tmp
-    .unreq tmp
-    mask .req q4
-    // El and Ol need to merge, but they are full of garbage in the odd bits
-    // Build mask 0x55..55 (01010101b) to isolate even-bit positions, then
-    // shift left the odd plane and OR to reconstruct the original bytes.
-    mov          r, #0x55
-    vdup.u8      mask, r
-    vand.u32     El, El, mask
-    vand.u32     Ol, Ol, mask
-    vshl.u32     Ol, Ol, #1
-    vorr         El, El, Ol
-    .unreq Ol
-    tmp .req q1
-    // deinterleave upper evens into Eu
-    deinterleave_even Eu, tmp
-    // deinterleave lower evens into Ou
-    deinterleave_even Ou, tmp
-    .unreq tmp
-    U .req q1
-    vand.u32     U, Eu, mask       // reconstruct high bytes (even|odd<<1)
-    vand.u32     Ou, Ou, mask
-    vshl.u32     Ou, Ou, #1
-    vorr         U, U, Ou
-keccak_f1600_x4_state_extract_bytes_from_bit_interleaving_4x_exit:
-    .unreq r
-    .unreq U
-    .unreq El
-    .unreq Eu
-    .unreq Ou
-    .unreq mask
-    bx           lr
-
-
-
 // -----------------------------------------------------------------------------
 // mlk_keccak_f1600_x4_state_extract_bytes(void *state, unsigned char *data0,
 //                                              unsigned char *data1,
@@ -154,7 +92,7 @@ keccak_f1600_x4_state_extract_bytes_from_bit_interleaving_4x_exit:
 // AAPCS assumption:
 //   r0=state, r1=d0, r2=d1, r3=d2, stack: d3, offset, length
 // -----------------------------------------------------------------------------
-.balign 8
+.balign 4
 .global MLK_ASM_NAMESPACE(keccak_f1600_x4_state_extract_bytes_asm)
 .type MLK_ASM_NAMESPACE(keccak_f1600_x4_state_extract_bytes_asm), %function
 MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_extract_bytes_asm)
@@ -364,6 +302,66 @@ keccak_f1600_x4_state_extract_bytes_asm_exit:
     .unreq qd1
     .unreq qd2
     .unreq qd3
+
+.balign 4
+.type keccak_f1600_x4_state_extract_bytes_from_bit_interleaving_4x, %function
+keccak_f1600_x4_state_extract_bytes_from_bit_interleaving_4x:
+keccak_f1600_x4_state_extract_bytes_from_bit_interleaving_4x_start:
+    // Inputs on entry:
+    //   q0 = Even plane (lo16: bytes 0..3, hi16: bytes 4..7) for streams 0..3
+    //   q1 = Odd  plane (lo16: bytes 0..3, hi16: bytes 4..7) for streams 0..3
+    // Output on return:
+    //   q0..q3 contain 8 de-interleaved bytes per stream (see call sites)
+    // Clobbers: r0, q2, q3, q4
+    r    .req r0
+    El   .req q0
+    Ol   .req q1
+    Eu   .req q2
+    Ou   .req q3
+    tmp  .req q4
+    //     +-----+-----+-----+-----+-----+-----+-----+-----+
+    // El: | E0l | E0u | E1l | E1u | E2l | E2u | E3l | E3u |
+    // q1: | O0l | O0u | O1l | O1u | O2l | O2u | O3l | O3u |
+    //     +-----+-----+-----+-----+-----+-----+-----+-----+
+    // clone q0 into temp register and swap
+    vrev32.u16     Eu, El
+    // clone q1 into temp register and swap
+    vrev32.u16     Ou, Ol
+    // deinterleave lower evens into El
+    deinterleave_even El, tmp
+    // deinterleave lower odds into Ol
+    deinterleave_even Ol, tmp
+    .unreq tmp
+    mask .req q4
+    // El and Ol need to merge, but they are full of garbage in the odd bits
+    // Build mask 0x55..55 (01010101b) to isolate even-bit positions, then
+    // shift left the odd plane and OR to reconstruct the original bytes.
+    mov          r, #0x55
+    vdup.u8      mask, r
+    vand.u32     El, El, mask
+    vand.u32     Ol, Ol, mask
+    vshl.u32     Ol, Ol, #1
+    vorr         El, El, Ol
+    .unreq Ol
+    tmp .req q1
+    // deinterleave upper evens into Eu
+    deinterleave_even Eu, tmp
+    // deinterleave lower evens into Ou
+    deinterleave_even Ou, tmp
+    .unreq tmp
+    U .req q1
+    vand.u32     U, Eu, mask       // reconstruct high bytes (even|odd<<1)
+    vand.u32     Ou, Ou, mask
+    vshl.u32     Ou, Ou, #1
+    vorr         U, U, Ou
+keccak_f1600_x4_state_extract_bytes_from_bit_interleaving_4x_exit:
+    .unreq r
+    .unreq U
+    .unreq El
+    .unreq Eu
+    .unreq Ou
+    .unreq mask
+    bx           lr
 
 /* simpasm: footer-start */
 #endif /* MLK_FIPS202_ARMV81M_NEED_X4 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

@@ -41,8 +41,8 @@ static MLK_INLINE int mlk_keccak_f1600_x4_native(uint64_t *state)
 void mlk_keccak_f1600_x4_state_xor_bytes(void *state, const uint8_t *data0,
                                          const uint8_t *data1,
                                          const uint8_t *data2,
-                                         const uint8_t *data3, uint32_t offset,
-                                         uint32_t length);
+                                         const uint8_t *data3, unsigned offset,
+                                         unsigned length);
 
 static MLK_INLINE void mlk_keccakf1600_xor_bytes_x4_native(
     uint64_t *state, const uint8_t *data0, const uint8_t *data1,
@@ -59,15 +59,13 @@ static MLK_INLINE void mlk_keccakf1600_xor_bytes_x4_native(
 #define mlk_keccak_f1600_x4_state_extract_bytes \
   MLK_NAMESPACE(keccak_f1600_x4_state_extract_bytes_asm)
 void mlk_keccak_f1600_x4_state_extract_bytes(void *state, uint8_t *data0,
-                                             uint8_t *data1,
-                                             uint8_t *data2,
-                                             uint8_t *data3,
-                                             uint32_t offset, uint32_t length);
+                                             uint8_t *data1, uint8_t *data2,
+                                             uint8_t *data3, unsigned offset,
+                                             unsigned length);
 
 static MLK_INLINE void mlk_keccakf1600_extract_bytes_x4_native(
-    uint64_t *state, uint8_t *data0, uint8_t *data1,
-    uint8_t *data2, uint8_t *data3, unsigned offset,
-    unsigned length)
+    uint64_t *state, uint8_t *data0, uint8_t *data1, uint8_t *data2,
+    uint8_t *data3, unsigned offset, unsigned length)
 {
   mlk_keccak_f1600_x4_state_extract_bytes(state, data0, data1, data2, data3,
                                           offset, length);

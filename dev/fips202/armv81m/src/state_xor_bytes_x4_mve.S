@@ -102,32 +102,6 @@
     vsli.u16    \t, \u, #8       // t = ((t >> 8) & 0x0000FF00) | (t & 0x000000FF)
 .endm
 
-.balign 8
-.type keccak_f1600_x4_state_xor_bytes_asm_internal_to_bit_interleaving_4x, %function
-keccak_f1600_x4_state_xor_bytes_asm_internal_to_bit_interleaving_4x:
-    // NOTE: this function is internal only because it does not
-    // preserve q4. Caller beware!
-    // vpush   {d8 - d9}
-keccak_f1600_x4_state_xor_bytes_asm_to_bit_interleaving_4x_start:
-    // Inputs on entry:
-    //   q0 = [d0l, d1l, d2l, d3l] (bytes 0..3 of each stream, one per 32b lane)
-    //   q1 = [d0h, d1h, d2h, d3h] (bytes 4..7 of each stream)
-    // Output on return:
-    //   q0 = Even bit-plane packed (lo16: bytes 0..3, hi16: bytes 4..7)
-    //   q1 = Odd  bit-plane packed (lo16: bytes 0..3, hi16: bytes 4..7)
-    // Clobbers: q2, q3, q4
-    vshl.u32 q2, q0, #0
-    vshl.u32 q3, q1, #0
-    interleave_evens q0, q4           // pack even bits in q0 (low 16: d?l, high 16: d?h)
-    interleave_evens q3, q4           // pack even bits from the high-half vector
-    vsli.32          q0, q3, #16      // merge: q0 = [even(lo16), even(hi16)]
-    interleave_odds  q2, q4           // pack odd bits from original q0
-    interleave_odds  q1, q4           // pack odd bits from original q1
-    vsri.32          q1, q2, #16      // merge: q1 = [odd(lo16), odd(hi16)]
-keccak_f1600_x4_state_xor_bytes_asm_to_bit_interleaving_4x_exit:
-    // vpop {d8 - d9}
-    bx lr
-
 // -----------------------------------------------------------------------------
 // XOR one lane into state, using post-increment on stores (no explicit add).
 // rSE / rSO are current pointers to stateE/stateO (interleaved layout).
@@ -151,7 +125,7 @@ keccak_f1600_x4_state_xor_bytes_asm_to_bit_interleaving_4x_exit:
 @   r0=state, r1=d0, r2=d1, r3=d2, stack: d3, offset, length
 @ -----------------------------------------------------------------------------
 
-.balign 8
+.balign 4
 .global MLK_ASM_NAMESPACE(keccak_f1600_x4_state_xor_bytes_asm)
 MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
     .equ stack_offset, ((12-4+2)*4+(15-8+1)*8)
@@ -366,6 +340,31 @@ keccak_f1600_x4_state_xor_bytes_asm_exit:
     .unreq qS0
     .unreq qS1
 
+.balign 4
+.type keccak_f1600_x4_state_xor_bytes_asm_internal_to_bit_interleaving_4x, %function
+keccak_f1600_x4_state_xor_bytes_asm_internal_to_bit_interleaving_4x:
+    // NOTE: this function is internal only because it does not
+    // preserve q4. Caller beware!
+    // vpush   {d8 - d9}
+keccak_f1600_x4_state_xor_bytes_asm_to_bit_interleaving_4x_start:
+    // Inputs on entry:
+    //   q0 = [d0l, d1l, d2l, d3l] (bytes 0..3 of each stream, one per 32b lane)
+    //   q1 = [d0h, d1h, d2h, d3h] (bytes 4..7 of each stream)
+    // Output on return:
+    //   q0 = Even bit-plane packed (lo16: bytes 0..3, hi16: bytes 4..7)
+    //   q1 = Odd  bit-plane packed (lo16: bytes 0..3, hi16: bytes 4..7)
+    // Clobbers: q2, q3, q4
+    vshl.u32 q2, q0, #0
+    vshl.u32 q3, q1, #0
+    interleave_evens q0, q4           // pack even bits in q0 (low 16: d?l, high 16: d?h)
+    interleave_evens q3, q4           // pack even bits from the high-half vector
+    vsli.32          q0, q3, #16      // merge: q0 = [even(lo16), even(hi16)]
+    interleave_odds  q2, q4           // pack odd bits from original q0
+    interleave_odds  q1, q4           // pack odd bits from original q1
+    vsri.32          q1, q2, #16      // merge: q1 = [odd(lo16), odd(hi16)]
+keccak_f1600_x4_state_xor_bytes_asm_to_bit_interleaving_4x_exit:
+    // vpop {d8 - d9}
+    bx lr
 
 /* simpasm: footer-start */
 #endif /* MLK_FIPS202_ARMV81M_NEED_X4 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
