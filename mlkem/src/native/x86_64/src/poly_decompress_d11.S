@@ -25,8 +25,9 @@
  * Arguments:   - int16_t *r:       pointer to output polynomial
  *              - const uint8_t *a: pointer to input byte array
  *                                  (of length MLKEM_POLYCOMPRESSEDBYTES_D11)
- *              - const int8_t *data: pointer to constants
- *                                    (shufbidx, srlvdidx, srlvqidx, shift)
+ *              - const uint8_t *data: pointer to constants
+ *                                  (shufbidx[0:32], srlvdidx[32:64],
+ *                                   srlvqidx[64:96], shift[96:128])
  **************************************************/
 
 #include "../../../common.h"

@@ -33,6 +33,7 @@
 #include "../../common.h"
 #include "../api.h"
 #include "src/arith_native_x86_64.h"
+#include "src/compress_consts.h"
 
 static MLK_INLINE void mlk_poly_permute_bitrev_to_custom(int16_t data[MLKEM_N])
 {
@@ -195,13 +196,12 @@ MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_compress_d4_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const int16_t a[MLKEM_N])
 {
-  static const int32_t permdidx[8] MLK_ALIGN = {0, 4, 1, 5, 2, 6, 3, 7};
   if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_poly_compress_d4_avx2(r, a, permdidx);
+  mlk_poly_compress_d4_avx2(r, a, mlk_compress_d4_data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
@@ -209,15 +209,12 @@ MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_compress_d10_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const int16_t a[MLKEM_N])
 {
-  static const int8_t shufbidx[32] MLK_ALIGN = {
-      0, 1,  2,  3,  4,  8,  9,  10, 11, 12, -1, -1, -1, -1, -1, -1,
-      9, 10, 11, 12, -1, -1, -1, -1, -1, -1, 0,  1,  2,  3,  4,  8};
   if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_poly_compress_d10_avx2(r, a, shufbidx);
+  mlk_poly_compress_d10_avx2(r, a, mlk_compress_d10_data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
@@ -225,15 +222,12 @@ MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_decompress_d4_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
 {
-  static const int8_t shufbidx[32] MLK_ALIGN = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2,
-                                                2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5,
-                                                5, 5, 6, 6, 6, 6, 7, 7, 7, 7};
   if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_poly_decompress_d4_avx2(r, a, shufbidx);
+  mlk_poly_decompress_d4_avx2(r, a, mlk_decompress_d4_data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
@@ -241,15 +235,12 @@ MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_decompress_d10_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
 {
-  static const int8_t shufbidx[32] MLK_ALIGN = {
-      0, 1, 1, 2, 2, 3, 3, 4, 5, 6, 6, 7, 7, 8,  8,  9,
-      2, 3, 3, 4, 4, 5, 5, 6, 7, 8, 8, 9, 9, 10, 10, 11};
   if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_poly_decompress_d10_avx2(r, a, shufbidx);
+  mlk_poly_decompress_d10_avx2(r, a, mlk_decompress_d10_data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
@@ -259,15 +250,12 @@ MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_compress_d5_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const int16_t a[MLKEM_N])
 {
-  static const int8_t shufbidx[32] MLK_ALIGN = {
-      0, 1,  2,  3,  4,  -1, -1, -1, -1, -1, 8,  9,  10, 11, 12, -1,
-      9, 10, 11, 12, -1, 0,  1,  2,  3,  4,  -1, -1, -1, -1, -1, 8};
   if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_poly_compress_d5_avx2(r, a, shufbidx);
+  mlk_poly_compress_d5_avx2(r, a, mlk_compress_d5_data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
@@ -275,20 +263,12 @@ MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_compress_d11_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const int16_t a[MLKEM_N])
 {
-  /* data[0:31] = srlvqidx, data[32:63] = shufbidx */
-  static const int8_t data[64] MLK_ALIGN = {
-      /* srlvqidx: 10, 30, 10, 30 as 64-bit values */
-      10, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0,
-      30, 0, 0, 0, 0, 0, 0, 0,
-      /* shufbidx */
-      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -1, -1, -1, -1, -1, 5, 6, 7, 8, 9, 10,
-      -1, -1, -1, -1, 0, 0, 1, 2, 3, 4};
   if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_poly_compress_d11_avx2(r, a, data);
+  mlk_poly_compress_d11_avx2(r, a, mlk_compress_d11_data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
@@ -296,25 +276,12 @@ MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_decompress_d5_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
 {
-  /* data[0:31] = shufbidx, data[32:63] = mask, data[64:95] = shift */
-  /* check-magic: off */
-  static const int8_t data[96] MLK_ALIGN = {
-      /* shufbidx */
-      0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 6, 7, 7,
-      8, 8, 8, 8, 9, 9, 9,
-      /* mask: 31, 992, 124, 3968, 496, 62, 1984, 248 (repeated) */
-      31, 0, -32, 3, 124, 0, -128, 15, -16, 1, 62, 0, -64, 7, -8, 0, 31, 0, -32,
-      3, 124, 0, -128, 15, -16, 1, 62, 0, -64, 7, -8, 0,
-      /* shift: 1024, 32, 256, 8, 64, 512, 16, 128 (repeated) */
-      0, 4, 32, 0, 0, 1, 8, 0, 64, 0, 0, 2, 16, 0, -128, 0, 0, 4, 32, 0, 0, 1,
-      8, 0, 64, 0, 0, 2, 16, 0, -128, 0};
-  /* check-magic: on */
   if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_poly_decompress_d5_avx2(r, a, data);
+  mlk_poly_decompress_d5_avx2(r, a, mlk_decompress_d5_data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
@@ -322,28 +289,12 @@ MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_decompress_d11_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
 {
-  /* data[0:31] = shufbidx, data[32:63] = srlvdidx,
-   * data[64:95] = srlvqidx, data[96:127] = shift */
-  static const int8_t data[128] MLK_ALIGN = {
-      /* shufbidx: from _mm256_set_epi8(13,12,12,11,10,9,9,8,8,7,6,5,5,4,4,3,
-                                        10,9,9,8,7,6,6,5,5,4,3,2,2,1,1,0) */
-      0, 1, 1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9, 9, 10, 3, 4, 4, 5, 5, 6, 7, 8,
-      8, 9, 9, 10, 11, 12, 12, 13,
-      /* srlvdidx: from _mm256_set_epi32(0, 0, 1, 0, 0, 0, 1, 0) */
-      0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0,
-      /* srlvqidx: from _mm256_set_epi64x(2, 0, 2, 0) */
-      0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
-      0, 0, 0, 0, 0, 0, 0,
-      /* shift: from _mm256_set_epi16(4,32,1,8,32,1,4,32, 4,32,1,8,32,1,4,32) */
-      32, 0, 4, 0, 1, 0, 32, 0, 8, 0, 1, 0, 32, 0, 4, 0, 32, 0, 4, 0, 1, 0, 32,
-      0, 8, 0, 1, 0, 32, 0, 4, 0};
   if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_poly_decompress_d11_avx2(r, a, data);
+  mlk_poly_decompress_d11_avx2(r, a, mlk_decompress_d11_data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */

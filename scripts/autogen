@@ -1307,6 +1307,340 @@ def gen_avx2_hol_light_zeta_file():
     update_file("proofs/hol_light/x86_64/proofs/mlkem_zetas.ml", "\n".join(gen()))
 
 
+# =============================================================================
+# AVX2 Compression/Decompression Constants
+# =============================================================================
+#
+# Constants used by the AVX2 polynomial compression and decompression functions.
+# These include shuffle indices, masks, and shift values for the various bit
+# widths (d4, d5, d10, d11).
+#
+# Each function has a single merged constant array (e.g., mlk_compress_d5_data,
+# mlk_decompress_d11_data) containing all required constants at fixed offsets.
+
+
+def gen_compress_d4_permdidx():
+    # Permutation index for poly_compress_d4_avx2.
+    # After vpackuswb, AVX2 interleaves low/high 128-bit lane results.
+    # This permutation deinterleaves: [L0,L1,L2,L3,H0,H1,H2,H3] -> [L0,H0,L1,H1,...]
+    for i in range(4):
+        yield i  # from low lane
+        yield i + 4  # from high lane
+
+
+def gen_decompress_d4_shufbidx():
+    # Shuffle index for poly_decompress_d4_avx2.
+    # Each input byte contains two 4-bit coefficients. To unpack, we replicate
+    # each byte 4 times (will extract high/low nibbles with mask afterwards).
+    # Pattern: byte[i] -> positions [4i, 4i+1, 4i+2, 4i+3]
+    # Only 32 bytes needed; assembly duplicates to both lanes via vinserti128.
+    for byte_idx in range(8):
+        for _ in range(4):
+            yield byte_idx
+
+
+def gen_compress_d5_shufbidx():
+    # Shuffle index for poly_compress_d5_avx2.
+    # 5-bit compression: 8 coefficients -> 5 bytes (40 bits).
+    # Lane 0: extract bytes 0-4 and 8-12 (packed 5-bit values)
+    # Lane 1: overlap pattern for cross-iteration blending
+    # 255 (0xFF) means "zero this byte" in vpshufb
+    yield from [0, 1, 2, 3, 4, 255, 255, 255, 255, 255, 8, 9, 10, 11, 12, 255]
+    yield from [9, 10, 11, 12, 255, 0, 1, 2, 3, 4, 255, 255, 255, 255, 255, 8]
+
+
+def gen_decompress_d5_shufbidx():
+    # Shuffle index for poly_decompress_d5_avx2.
+    # 5-bit decompression: coefficient i at bit position 5*i uses byte floor(5*i/8).
+    # Pattern per lane selects source bytes for each 16-bit output slot.
+    yield from [0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4]
+    yield from [5, 5, 5, 6, 6, 6, 6, 7, 7, 8, 8, 8, 8, 9, 9, 9]
+
+
+def gen_decompress_d5_mask():
+    # Bit masks for poly_decompress_d5_avx2.
+    # Each 16-bit mask isolates 5 bits at different alignments within 16-bit words.
+    # Masks: 31, 992, 124, 3968, 496, 62, 1984, 248 (repeated for both lanes)
+    masks_16bit = [31, 992, 124, 3968, 496, 62, 1984, 248]
+    for m in masks_16bit:
+        yield m & 0xFF
+        yield (m >> 8) & 0xFF
+    for m in masks_16bit:
+        yield m & 0xFF
+        yield (m >> 8) & 0xFF
+
+
+def gen_decompress_d5_shift():
+    # Shift multipliers for poly_decompress_d5_avx2.
+    # Powers of 2 to align extracted 5-bit values for mulhrs scaling.
+    # Shifts: 1024, 32, 256, 8, 64, 512, 16, 128 (repeated for both lanes)
+    shifts_16bit = [1024, 32, 256, 8, 64, 512, 16, 128]
+    for s in shifts_16bit:
+        yield s & 0xFF
+        yield (s >> 8) & 0xFF
+    for s in shifts_16bit:
+        yield s & 0xFF
+        yield (s >> 8) & 0xFF
+
+
+def gen_compress_d10_shufbidx():
+    # Shuffle index for poly_compress_d10_avx2.
+    # 10-bit compression: 4 coefficients -> 5 bytes (40 bits).
+    # Lane 0: extract bytes 0-4 and 8-12, Lane 1: wrap-around for blending
+    # 255 (0xFF) means "zero this byte" in vpshufb
+    yield from [0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 255, 255, 255, 255, 255, 255]
+    yield from [9, 10, 11, 12, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 8]
+
+
+def gen_decompress_d10_shufbidx():
+    # Shuffle index for poly_decompress_d10_avx2.
+    # 10-bit decompression: coefficient i uses byte floor(10*i/8).
+    # Pattern per lane selects source bytes for each 16-bit output slot.
+    yield from [0, 1, 1, 2, 2, 3, 3, 4, 5, 6, 6, 7, 7, 8, 8, 9]
+    yield from [2, 3, 3, 4, 4, 5, 5, 6, 7, 8, 8, 9, 9, 10, 10, 11]
+
+
+def gen_compress_d11_srlvqidx():
+    # 64-bit shift amounts for poly_compress_d11_avx2.
+    # After packing 11-bit values, variable right-shifts align the data.
+    # Pattern: 10, 30, 10, 30 for four 64-bit lanes.
+    for shift in [10, 30, 10, 30]:
+        yield shift
+        yield from [0] * 7  # Pad to 64 bits
+
+
+def gen_compress_d11_shufbidx():
+    # Shuffle index for poly_compress_d11_avx2.
+    # 11-bit compression: 8 coefficients -> 11 bytes (88 bits).
+    # Lane 0: bytes 0-10, Lane 1: overlap pattern for blending
+    # 255 (0xFF) means "zero this byte" in vpshufb
+    yield from [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 255, 255, 255, 255, 255]
+    yield from [5, 6, 7, 8, 9, 10, 255, 255, 255, 255, 0, 0, 1, 2, 3, 4]
+
+
+def gen_decompress_d11_shufbidx():
+    # Shuffle index for poly_decompress_d11_avx2.
+    # 11-bit decompression: coefficient i uses byte floor(11*i/8).
+    # Pattern per lane selects source bytes for each 16-bit output slot.
+    yield from [0, 1, 1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9, 9, 10]
+    yield from [3, 4, 4, 5, 5, 6, 7, 8, 8, 9, 9, 10, 11, 12, 12, 13]
+
+
+def gen_decompress_d11_srlvdidx():
+    # 32-bit shift amounts for poly_decompress_d11_avx2.
+    # Pattern: [0, 1, 0, 0, 0, 1, 0, 0] for 8 dwords.
+    pattern = [0, 1, 0, 0, 0, 1, 0, 0]
+    for val in pattern:
+        yield val
+        yield from [0] * 3  # Pad to 32 bits
+
+
+def gen_decompress_d11_srlvqidx():
+    # 64-bit shift amounts for poly_decompress_d11_avx2.
+    # Pattern: 0, 2, 0, 2 for four 64-bit lanes.
+    for shift in [0, 2, 0, 2]:
+        yield shift
+        yield from [0] * 7  # Pad to 64 bits
+
+
+def gen_decompress_d11_shift():
+    # Shift multipliers for poly_decompress_d11_avx2.
+    # Powers of 2 to align extracted 11-bit values: 32, 4, 1, 32, 8, 1, 32, 4
+    shifts = [32, 4, 1, 32, 8, 1, 32, 4]
+    for s in shifts:
+        yield s & 0xFF
+        yield (s >> 8) & 0xFF
+    for s in shifts:
+        yield s & 0xFF
+        yield (s >> 8) & 0xFF
+
+
+def gen_avx2_compress_consts():
+    # Generate merged constant arrays, one per function.
+    # Returns dict of {name: (sections, dtype, layout_comment, level)}
+    # where sections is a list of (section_name, values) tuples.
+    return {
+        # d4/d10 constants (used for MLKEM_K == 2 or 3)
+        "compress_d4_data": (
+            [("permdidx", list(gen_compress_d4_permdidx()))],
+            "int32_t",
+            "permdidx",
+            "d4_d10",
+        ),
+        "decompress_d4_data": (
+            [("shufbidx", list(gen_decompress_d4_shufbidx()))],
+            "uint8_t",
+            "shufbidx",
+            "d4_d10",
+        ),
+        "compress_d10_data": (
+            [("shufbidx", list(gen_compress_d10_shufbidx()))],
+            "uint8_t",
+            "shufbidx",
+            "d4_d10",
+        ),
+        "decompress_d10_data": (
+            [("shufbidx", list(gen_decompress_d10_shufbidx()))],
+            "uint8_t",
+            "shufbidx",
+            "d4_d10",
+        ),
+        # d5/d11 constants (used for MLKEM_K == 4)
+        "compress_d5_data": (
+            [("shufbidx", list(gen_compress_d5_shufbidx()))],
+            "uint8_t",
+            "shufbidx",
+            "d5_d11",
+        ),
+        "decompress_d5_data": (
+            [
+                ("shufbidx", list(gen_decompress_d5_shufbidx())),
+                ("mask", list(gen_decompress_d5_mask())),
+                ("shift", list(gen_decompress_d5_shift())),
+            ],
+            "uint8_t",
+            "shufbidx, mask, shift",
+            "d5_d11",
+        ),
+        "compress_d11_data": (
+            [
+                ("srlvqidx", list(gen_compress_d11_srlvqidx())),
+                ("shufbidx", list(gen_compress_d11_shufbidx())),
+            ],
+            "uint8_t",
+            "srlvqidx, shufbidx",
+            "d5_d11",
+        ),
+        "decompress_d11_data": (
+            [
+                ("shufbidx", list(gen_decompress_d11_shufbidx())),
+                ("srlvdidx", list(gen_decompress_d11_srlvdidx())),
+                ("srlvqidx", list(gen_decompress_d11_srlvqidx())),
+                ("shift", list(gen_decompress_d11_shift())),
+            ],
+            "uint8_t",
+            "shufbidx, srlvdidx, srlvqidx, shift",
+            "d5_d11",
+        ),
+    }
+
+
+def gen_avx2_compress_consts_file():
+    consts = gen_avx2_compress_consts()
+
+    def gen_const_def(name, sections, dtype, layout):
+        """Generate a merged constant array definition."""
+        # Calculate total size
+        total_size = sum(len(vals) for _, vals in sections)
+        # Generate layout comment for multi-section arrays
+        if len(sections) > 1:
+            offset = 0
+            parts = []
+            for sec_name, vals in sections:
+                parts.append(f"{sec_name}[{offset}:{offset + len(vals)}]")
+                offset += len(vals)
+            yield f"/* {', '.join(parts)} */"
+        yield f"MLK_ALIGN const {dtype} mlk_{name}[{total_size}] = {{"
+        for sec_name, vals in sections:
+            for i in range(0, len(vals), 8):
+                row = vals[i : i + 8]
+                is_last_row = i + 8 >= len(vals)
+                row_str = ", ".join(f"{v:>3}" for v in row) + ","
+                # Add section comment at end of last row to anchor formatting
+                if is_last_row:
+                    yield f"    {row_str} /* {sec_name} */"
+                else:
+                    yield f"    {row_str}"
+        yield "};"
+
+    def gen_c():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield "#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT)"
+        yield ""
+        yield '#include "compress_consts.h"'
+        yield ""
+
+        # d4/d10 constants (K == 2 or 3)
+        yield "#if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \\"
+        yield "    (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 2 || MLKEM_K == 3)"
+        yield ""
+        for name, (sections, dtype, layout, level) in consts.items():
+            if level == "d4_d10":
+                yield from gen_const_def(name, sections, dtype, layout)
+                yield ""
+        yield "#endif /* d4/d10 constants */"
+        yield ""
+
+        # d5/d11 constants (K == 4)
+        yield "#if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \\"
+        yield "    (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4)"
+        yield ""
+        for name, (sections, dtype, layout, level) in consts.items():
+            if level == "d5_d11":
+                yield from gen_const_def(name, sections, dtype, layout)
+                yield ""
+        yield "#endif /* d5/d11 constants */"
+        yield ""
+
+        yield "#else"
+        yield ""
+        yield "MLK_EMPTY_CU(avx2_compress_consts)"
+        yield ""
+        yield "#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT */"
+        yield ""
+
+    def gen_h():
+        yield from gen_header()
+        yield "#ifndef MLK_DEV_X86_64_SRC_COMPRESS_CONSTS_H"
+        yield "#define MLK_DEV_X86_64_SRC_COMPRESS_CONSTS_H"
+        yield ""
+        yield '#include "../../../common.h"'
+        yield ""
+        yield "#ifndef __ASSEMBLER__"
+        yield ""
+
+        # Declare all constants
+        for name, (sections, dtype, layout, level) in consts.items():
+            total_size = sum(len(vals) for _, vals in sections)
+            yield f"#define mlk_{name} MLK_NAMESPACE({name})"
+            yield f"extern const {dtype} mlk_{name}[{total_size}];"
+            yield ""
+
+        yield "#endif /* !__ASSEMBLER__ */"
+        yield ""
+        yield "#endif /* !MLK_DEV_X86_64_SRC_COMPRESS_CONSTS_H */"
+        yield ""
+
+    update_file("dev/x86_64/src/compress_consts.c", "\n".join(gen_c()))
+    update_file("dev/x86_64/src/compress_consts.h", "\n".join(gen_h()))
+
+
+def gen_avx2_hol_light_compress_consts_file():
+    consts = gen_avx2_compress_consts()
+
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(* Compression/decompression constants for AVX2 implementations. *)"
+        yield ""
+
+        for name, (sections, dtype, layout, level) in consts.items():
+            # Flatten all sections into one list
+            all_values = []
+            for _, vals in sections:
+                all_values.extend(vals)
+            yield f"(* {layout} *)"
+            yield f"let {name} = define `{name}:int list = ["
+            yield from print_hol_light_array(all_values)
+            yield "]`;;"
+            yield ""
+
+    update_file(
+        "proofs/hol_light/x86_64/proofs/mlkem_compress_consts.ml", "\n".join(gen())
+    )
+
+
 def gen_avx2_zeta_file():
     constants, offsets = gen_avx2_zetas_qdata()
 
@@ -3602,7 +3936,9 @@ def _main():
         gen_aarch64_rej_uniform_table()
         gen_avx2_hol_light_zeta_file()
         gen_avx2_hol_light_rej_uniform_table()
+        gen_avx2_hol_light_compress_consts_file()
         gen_avx2_zeta_file()
+        gen_avx2_compress_consts_file()
         gen_avx2_rej_uniform_table()
         gen_riscv64_zeta_files()
 
