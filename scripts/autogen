@@ -1303,6 +1303,124 @@ def gen_avx2_hol_light_zeta_file():
     update_file("proofs/hol_light/x86_64/proofs/mlkem_zetas.ml", "\n".join(gen()))
 
 
+# =============================================================================
+# AVX2 Compression/Decompression Constants
+# =============================================================================
+#
+# Constants used by the AVX2 polynomial compression and decompression functions.
+# These include shuffle indices, masks, and shift values for the various bit
+# widths (d4, d5, d10, d11).
+#
+# Each function has a single merged constant array (e.g., mlk_compress_d5_data,
+# mlk_decompress_d11_data) containing all required constants at fixed offsets.
+
+
+def gen_decompress_d4_shufbidx():
+    # Shuffle index for poly_decompress_d4_avx2.
+    # Each input byte contains two 4-bit coefficients. To unpack, we replicate
+    # each byte 4 times (will extract high/low nibbles with mask afterwards).
+    # Pattern: byte[i] -> positions [4i, 4i+1, 4i+2, 4i+3]
+    # Only 32 bytes needed; assembly duplicates to both lanes via vinserti128.
+    for byte_idx in range(8):
+        for _ in range(4):
+            yield byte_idx
+
+
+def gen_avx2_compress_consts():
+    # Generate merged constant arrays, one per function.
+    # Returns dict of {name: (sections, dtype, layout_comment, level)}
+    # where sections is a list of (section_name, values) tuples.
+    return {
+        "decompress_d4_data": (
+            [("shufbidx", list(gen_decompress_d4_shufbidx()))],
+            "uint8_t",
+            "shufbidx",
+            "d4_d10",
+        ),
+    }
+
+
+def gen_avx2_compress_consts_file():
+    consts = gen_avx2_compress_consts()
+
+    def gen_const_def(name, sections, dtype, layout):
+        """Generate a merged constant array definition."""
+        # Calculate total size
+        total_size = sum(len(vals) for _, vals in sections)
+        # Generate layout comment for multi-section arrays
+        if len(sections) > 1:
+            offset = 0
+            parts = []
+            for sec_name, vals in sections:
+                parts.append(f"{sec_name}[{offset}:{offset + len(vals)}]")
+                offset += len(vals)
+            yield f"/* {', '.join(parts)} */"
+        yield f"MLK_ALIGN const {dtype} mlk_{name}[{total_size}] = {{"
+        for sec_name, vals in sections:
+            for i in range(0, len(vals), 8):
+                row = vals[i : i + 8]
+                is_last_row = i + 8 >= len(vals)
+                row_str = ", ".join(f"{v:>3}" for v in row) + ","
+                # Add section comment at end of last row to anchor formatting
+                if is_last_row:
+                    yield f"    {row_str} /* {sec_name} */"
+                else:
+                    yield f"    {row_str}"
+        yield "};"
+
+    def gen_c():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield "#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT)"
+        yield ""
+        yield '#include "compress_consts.h"'
+        yield ""
+
+        # d4/d10 constants (K == 2 or 3)
+        yield "#if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \\"
+        yield "    (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 2 || MLKEM_K == 3)"
+        yield ""
+        for name, (sections, dtype, layout, level) in consts.items():
+            if level == "d4_d10":
+                yield from gen_const_def(name, sections, dtype, layout)
+                yield ""
+        yield "#endif /* d4/d10 constants */"
+        yield ""
+
+        yield "#else"
+        yield ""
+        yield "MLK_EMPTY_CU(avx2_compress_consts)"
+        yield ""
+        yield "#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT */"
+        yield ""
+
+    def gen_h():
+        yield from gen_header()
+        yield "#ifndef MLK_DEV_X86_64_SRC_COMPRESS_CONSTS_H"
+        yield "#define MLK_DEV_X86_64_SRC_COMPRESS_CONSTS_H"
+        yield ""
+        yield '#include "../../../common.h"'
+        yield ""
+        yield "#ifndef __ASSEMBLER__"
+        yield ""
+
+        # Declare all constants
+        for name, (sections, dtype, layout, level) in consts.items():
+            total_size = sum(len(vals) for _, vals in sections)
+            yield f"#define mlk_{name} MLK_NAMESPACE({name})"
+            yield f"extern const {dtype} mlk_{name}[{total_size}];"
+            yield ""
+
+        yield "#endif /* !__ASSEMBLER__ */"
+        yield ""
+        yield "#endif /* !MLK_DEV_X86_64_SRC_COMPRESS_CONSTS_H */"
+        yield ""
+
+    update_file("dev/x86_64/src/compress_consts.c", "\n".join(gen_c()))
+    update_file("dev/x86_64/src/compress_consts.h", "\n".join(gen_h()))
+
+
 def gen_avx2_zeta_file():
     constants, offsets = gen_avx2_zetas_qdata()
 
@@ -3609,6 +3727,7 @@ def _main():
         gen_avx2_hol_light_zeta_file()
         gen_avx2_hol_light_rej_uniform_table()
         gen_avx2_zeta_file()
+        gen_avx2_compress_consts_file()
         gen_avx2_rej_uniform_table()
         gen_riscv64_zeta_files()
 

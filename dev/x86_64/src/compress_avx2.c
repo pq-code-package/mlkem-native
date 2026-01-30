@@ -69,31 +69,7 @@ void mlk_poly_compress_d4_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
   }
 }
 
-void mlk_poly_decompress_d4_avx2(int16_t *MLK_RESTRICT r,
-                                 const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
-{
-  unsigned int i;
-  __m128i t;
-  __m256i f;
-  const __m256i q = _mm256_set1_epi16(MLKEM_Q);
-
-  const __m256i shufbidx =
-      _mm256_set_epi8(7, 7, 7, 7, 6, 6, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3,
-                      3, 2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0);
-  const __m256i mask = _mm256_set1_epi32(0x00F0000F);
-  const __m256i shift = _mm256_set1_epi32((128 << 16) + 2048);
-
-  for (i = 0; i < MLKEM_N / 16; i++)
-  {
-    t = _mm_loadl_epi64((__m128i *)&a[8 * i]);
-    f = _mm256_broadcastsi128_si256(t);
-    f = _mm256_shuffle_epi8(f, shufbidx);
-    f = _mm256_and_si256(f, mask);
-    f = _mm256_mullo_epi16(f, shift);
-    f = _mm256_mulhrs_epi16(f, q);
-    _mm256_storeu_si256((__m256i *)&r[16 * i], f);
-  }
-}
+/* mlk_poly_decompress_d4_avx2 is now in poly_decompress_d4.S */
 
 void mlk_poly_compress_d10_avx2(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
                                 const int16_t *MLK_RESTRICT a)
