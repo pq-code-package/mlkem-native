@@ -7,12 +7,12 @@ hol_light.overrideAttrs (old: {
     export HOLLIGHT_DIR="$1/lib/hol_light"
     export PATH="$1/lib/hol_light:$PATH"
   '';
-  version = "unstable-2025-12-12";
+  version = "unstable-2026-01-09";
   src = fetchFromGitHub {
     owner = "jrh13";
     repo = "hol-light";
-    rev = "b9a430b8fee43cc94babc8e3970cdd2740a994dc";
-    hash = "sha256-aQUVDUZFK3LDfstfXIfTjszR9nf6jTyJalAvVjonvVs=";
+    rev = "e960dd0f636c36d48f79664c7cf11a59ba6f66a3";
+    hash = "sha256-ZgOzAYokQsgO1Ua3m50shxvU9dVSzocuFHRLdIrINmU=";
   };
   patches = [
     ./0005-Configure-hol-sh-for-mlkem-native.patch
