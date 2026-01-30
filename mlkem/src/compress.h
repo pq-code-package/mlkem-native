@@ -20,7 +20,6 @@
 #ifndef MLK_COMPRESS_H
 #define MLK_COMPRESS_H
 
-#include <stdint.h>
 
 #include "cbmc.h"
 #include "common.h"

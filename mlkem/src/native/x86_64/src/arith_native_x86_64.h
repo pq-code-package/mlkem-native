@@ -7,7 +7,6 @@
 
 #include "../../../common.h"
 
-#include <stdint.h>
 #include "consts.h"
 
 #define MLK_AVX2_REJ_UNIFORM_BUFLEN \

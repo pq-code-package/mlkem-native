@@ -5,7 +5,6 @@
 #ifndef MLK_RANDOMBYTES_H
 #define MLK_RANDOMBYTES_H
 
-#include <stdint.h>
 
 #include "cbmc.h"
 #include "common.h"

@@ -5,7 +5,6 @@
 #ifndef MLK_FIPS202_NATIVE_ARMV81M_SRC_FIPS202_NATIVE_ARMV81M_H
 #define MLK_FIPS202_NATIVE_ARMV81M_SRC_FIPS202_NATIVE_ARMV81M_H
 
-#include <stdint.h>
 #include "../../../../common.h"
 
 /* Keccak round constants in bit-interleaved form */

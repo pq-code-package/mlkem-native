@@ -15,7 +15,6 @@
 #ifndef MLK_POLY_K_H
 #define MLK_POLY_K_H
 
-#include <stdint.h>
 #include "common.h"
 #include "compress.h"
 #include "poly.h"

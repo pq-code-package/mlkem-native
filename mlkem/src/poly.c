@@ -20,7 +20,6 @@
 #include "common.h"
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
-#include <stdint.h>
 
 #include "cbmc.h"
 #include "debug.h"

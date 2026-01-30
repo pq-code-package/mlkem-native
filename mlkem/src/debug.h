@@ -7,7 +7,6 @@
 #include "common.h"
 
 #if defined(MLKEM_DEBUG)
-#include <stdint.h>
 
 /*************************************************
  * Name:        mlk_assert
