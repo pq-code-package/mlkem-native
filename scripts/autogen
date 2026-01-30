@@ -1421,6 +1421,30 @@ def gen_avx2_compress_consts_file():
     update_file("dev/x86_64/src/compress_consts.h", "\n".join(gen_h()))
 
 
+def gen_avx2_hol_light_compress_consts_file():
+    consts = gen_avx2_compress_consts()
+
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(* Compression/decompression constants for AVX2 implementations. *)"
+        yield ""
+
+        for name, (sections, dtype, layout, level) in consts.items():
+            # Flatten all sections into one list
+            all_values = []
+            for _, vals in sections:
+                all_values.extend(vals)
+            yield f"(* {layout} *)"
+            yield f"let {name} = define `{name}:int list = ["
+            yield from print_hol_light_array(all_values)
+            yield "]`;;"
+            yield ""
+
+    update_file(
+        "proofs/hol_light/x86_64/proofs/mlkem_compress_consts.ml", "\n".join(gen())
+    )
+
+
 def gen_avx2_zeta_file():
     constants, offsets = gen_avx2_zetas_qdata()
 
@@ -2702,6 +2726,13 @@ def gen_hol_light_asm():
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
+        (
+            "poly_decompress_d4.S",
+            "mlkem_poly_decompress_d4.S",
+            "dev/x86_64/src",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
+        ),
     ]
 
     joblist = joblist_aarch64 + joblist_x86_64
@@ -3728,6 +3759,7 @@ def _main():
         gen_avx2_hol_light_rej_uniform_table()
         gen_avx2_zeta_file()
         gen_avx2_compress_consts_file()
+        gen_avx2_hol_light_compress_consts_file()
         gen_avx2_rej_uniform_table()
         gen_riscv64_zeta_files()
 
