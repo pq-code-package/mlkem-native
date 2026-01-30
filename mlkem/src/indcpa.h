@@ -15,7 +15,6 @@
 #ifndef MLK_INDCPA_H
 #define MLK_INDCPA_H
 
-#include <stdint.h>
 #include "cbmc.h"
 #include "common.h"
 #include "poly_k.h"

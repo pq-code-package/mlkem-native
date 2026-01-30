@@ -15,7 +15,6 @@
 
 #else /* !CBMC */
 
-#include <stdint.h>
 
 #define __contract__(x) x
 #define __loop__(x) x

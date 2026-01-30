@@ -34,7 +34,6 @@
 #include "../common.h"
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
-#include <stdint.h>
 
 #include "../verify.h"
 #include "fips202.h"

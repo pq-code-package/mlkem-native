@@ -17,13 +17,9 @@
  *   https://github.com/pq-crystals/kyber/tree/main/ref
  */
 
-#include <stdint.h>
-
-#include "cbmc.h"
-#include "debug.h"
 #include "indcpa.h"
-#include "poly.h"
-#include "poly_k.h"
+
+#include "debug.h"
 #include "randombytes.h"
 #include "sampling.h"
 #include "symmetric.h"

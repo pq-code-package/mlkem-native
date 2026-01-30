@@ -5,6 +5,10 @@
 #ifndef MLK_COMMON_H
 #define MLK_COMMON_H
 
+#ifndef __ASSEMBLER__
+#include <stdint.h>
+#endif
+
 #define MLK_BUILD_INTERNAL
 
 #if defined(MLK_CONFIG_FILE)

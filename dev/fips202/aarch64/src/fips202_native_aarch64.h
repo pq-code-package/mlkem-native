@@ -5,11 +5,8 @@
 #ifndef MLK_DEV_FIPS202_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H
 #define MLK_DEV_FIPS202_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H
 
-#include <stdint.h>
-
 #include "../../../../cbmc.h"
 #include "../../../../common.h"
-
 
 #define mlk_keccakf1600_round_constants \
   MLK_NAMESPACE(keccakf1600_round_constants)

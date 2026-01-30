@@ -23,10 +23,9 @@
  *   https://github.com/pq-crystals/kyber/tree/main/ref
  */
 
-#include <stdint.h>
+#include "kem.h"
 
 #include "indcpa.h"
-#include "kem.h"
 #include "randombytes.h"
 #include "symmetric.h"
 #include "verify.h"

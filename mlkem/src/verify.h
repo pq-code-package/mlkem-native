@@ -30,7 +30,6 @@
 #ifndef MLK_VERIFY_H
 #define MLK_VERIFY_H
 
-#include <stdint.h>
 
 #include "cbmc.h"
 #include "common.h"

@@ -20,7 +20,6 @@
 #ifndef MLK_KEM_H
 #define MLK_KEM_H
 
-#include <stdint.h>
 #include "cbmc.h"
 #include "common.h"
 #include "sys.h"

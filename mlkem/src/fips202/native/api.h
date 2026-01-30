@@ -12,7 +12,6 @@
  * It should not be included by backend implementations.
  */
 
-#include <stdint.h>
 #include "../../cbmc.h"
 
 /* Backends must return MLK_NATIVE_FUNC_SUCCESS upon success. */

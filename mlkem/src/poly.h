@@ -15,7 +15,6 @@
 #ifndef MLK_POLY_H
 #define MLK_POLY_H
 
-#include <stdint.h>
 
 #include "cbmc.h"
 #include "common.h"

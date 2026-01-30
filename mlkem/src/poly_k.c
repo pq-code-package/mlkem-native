@@ -22,11 +22,9 @@
  *   https://github.com/pq-crystals/kyber/tree/main/ref
  */
 
-#include <stdint.h>
-
-#include "compress.h"
-#include "debug.h"
 #include "poly_k.h"
+
+#include "debug.h"
 #include "sampling.h"
 #include "symmetric.h"
 
