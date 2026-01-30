@@ -81,9 +81,10 @@
 #endif
 #if defined(MLK_SYS_X86_64)
 #include "src/native/x86_64/src/compress_avx2.c"
+#include "src/native/x86_64/src/compress_consts.c"
 #include "src/native/x86_64/src/consts.c"
 #include "src/native/x86_64/src/rej_uniform_table.c"
-#endif
+#endif /* MLK_SYS_X86_64 */
 #if defined(MLK_SYS_RISCV64)
 #include "src/native/riscv64/src/rv64v_debug.c"
 #include "src/native/riscv64/src/rv64v_poly.c"
@@ -593,6 +594,9 @@
 #undef mlk_rej_uniform_asm
 #undef mlk_rej_uniform_table
 #undef mlk_tomont_avx2
+/* mlkem/src/native/x86_64/src/compress_consts.h */
+#undef MLK_NATIVE_X86_64_SRC_COMPRESS_CONSTS_H
+#undef mlk_decompress_d4_data
 /* mlkem/src/native/x86_64/src/consts.h */
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_MULCACHE_TWIDDLES
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXB

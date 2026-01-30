@@ -33,6 +33,7 @@
 #include "../../common.h"
 #include "../api.h"
 #include "src/arith_native_x86_64.h"
+#include "src/compress_consts.h"
 
 static MLK_INLINE void mlk_poly_permute_bitrev_to_custom(int16_t data[MLKEM_N])
 {
@@ -226,7 +227,7 @@ static MLK_INLINE int mlk_poly_decompress_d4_native(
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_poly_decompress_d4_avx2(r, a);
+  mlk_poly_decompress_d4_avx2(r, a, mlk_decompress_d4_data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
