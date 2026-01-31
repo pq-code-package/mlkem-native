@@ -11,7 +11,7 @@ on:
 env:
   AWS_ROLE: arn:aws:iam::559050233797:role/mlkem-c-aarch64-gh-action
   AWS_REGION: us-east-1
-  AMI_UBUNTU_22_04_X86_64: ami-0bbdd8c17ed981ef9
+  AMI_UBUNTU_24_04_X86_64: ami-0b6c6ebed2801a5cb
 
 jobs:
   start-ec2-runner:
@@ -39,7 +39,7 @@ jobs:
         with:
           mode: start
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
-          ec2-image-id: ${{ env.AMI_UBUNTU_22_04_X86_64 }}
+          ec2-image-id: ${{ env.AMI_UBUNTU_24_04_X86_64 }}
           ec2-instance-type: c7i.2xlarge
           ec2-volume-size: 32
           subnet-id: subnet-07b2729e5e065962f
