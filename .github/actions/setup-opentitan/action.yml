@@ -36,10 +36,7 @@ runs:
         sudo apt update
         cd expo
         sed -e '/^#/d' -e '/libncursesw5/d' ./apt-requirements.txt | xargs sudo apt install -y
-        # Install runtime dependencies needed by tools
-        sudo apt install -y gcc g++ libtinfo5 srecord pkg-config libudev-dev libssl-dev \
-          libftdi1-dev libelf-dev zlib1g-dev
-        pip3 install --user -r python-requirements.txt --require-hashes
+        pip3 install --user -r python-requirements.txt --require-hashes --break-system-packages
 
     - name: Cache Verilator
       id: cache-verilator
