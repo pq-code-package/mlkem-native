@@ -164,4 +164,4 @@ jobs:
         run: |
           cd $AWSLC_DIR
           source tests/ci/common_posix_setup.sh
-          build_prefix_and_test ${{ matrix.flags }}
+          build_prefix_and_test ${{ matrix.test.flags }}
