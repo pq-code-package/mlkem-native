@@ -399,6 +399,20 @@ let ntt_montmul_sub = prove
   REWRITE_TAC[ntt_montmul] THEN CONV_TAC WORD_RULE);;
 
 (* ------------------------------------------------------------------------- *)
+(* Decompression routines                                                    *)
+(* ------------------------------------------------------------------------- *)
+
+(* ------------------------------------------------------------------------- *)
+(* decompress_d4 computes round(u * 3329 / 16)                               *)
+(* which equals (u * 3329 + 8) >> 4 for u in 0..15.                          *)
+(* This is Decompress_4 from FIPS 203, Eq (4.8).                             *)
+(* ------------------------------------------------------------------------- *)
+
+let decompress_d4 = new_definition
+  `decompress_d4 (x:4 word) : 16 word =
+   word((val x * 3329 + 8) DIV 16)`;;
+
+(* ------------------------------------------------------------------------- *)
 (* From |- (x == y) (mod m) /\ P   to   |- (x == y) (mod n) /\ P             *)
 (* ------------------------------------------------------------------------- *)
 
@@ -1084,3 +1098,24 @@ let SIMD_SIMPLIFY_ABBREV_TAC =
       let tms = sort free_in (find_terms pam (rand(concl th''))) in
       (MP_TAC th'' THEN MAP_EVERY AUTO_ABBREV_TAC tms THEN DISCH_TAC) (asl,w) in
   TRY(FIRST_X_ASSUM(ttac o check (simdable o concl)));;
+
+(* ------------------------------------------------------------------------- *)
+(* Some word lemmas, likely of more general use                              *)
+(* ------------------------------------------------------------------------- *)
+
+let WORD_MUL_SHL = prove(`!x y n. word_mul (word_shl y n) x = word_shl (word_mul x y) n`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[GSYM VAL_EQ; VAL_WORD_MUL; VAL_WORD_SHL; EXP_2] THEN
+  CONV_TAC MOD_DOWN_CONV THEN REWRITE_TAC[MULT_AC]);;
+
+let VAL_WORD_MUL_EXACT = prove(
+  `!x y. val x * val y < 2 EXP dimindex(:N)
+         ==> val(word_mul x y : N word) = val x * val y`,
+  REWRITE_TAC[VAL_WORD_MUL] THEN SIMP_TAC[MOD_LT]);;
+
+let VAL_WORD_EXACT = prove(
+  `!n. n < 2 EXP dimindex(:N) ==> val(word n : N word) = n`,
+  REWRITE_TAC[VAL_WORD] THEN SIMP_TAC[MOD_LT]);;
+
+let VAL_WORD_ZX_EXACT = prove(
+  `!(x:M word). val x < 2 EXP dimindex(:N) ==> val(word_zx x : N word) = val x`,
+  REWRITE_TAC[VAL_WORD_ZX_GEN] THEN SIMP_TAC[MOD_LT]);;
