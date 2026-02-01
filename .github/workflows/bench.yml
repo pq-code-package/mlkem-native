@@ -95,7 +95,7 @@ jobs:
           cross_prefix: ${{ matrix.target.cross_prefix }}
 
   ec2_all:
-    name: ${{ matrix.target.name }} ${{ matrix.opt.name }}
+    name: ${{ matrix.target.name }}
     permissions:
       contents: write
       pull-requests: write
