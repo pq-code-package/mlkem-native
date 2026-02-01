@@ -597,6 +597,7 @@
 /* mlkem/src/native/x86_64/src/compress_consts.h */
 #undef MLK_NATIVE_X86_64_SRC_COMPRESS_CONSTS_H
 #undef mlk_decompress_d4_data
+#undef mlk_decompress_d5_data
 /* mlkem/src/native/x86_64/src/consts.h */
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_MULCACHE_TWIDDLES
 #undef MLK_AVX2_BACKEND_DATA_OFFSET_REVIDXB
