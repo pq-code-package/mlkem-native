@@ -213,6 +213,8 @@ jobs:
             needs: ["mlkem_specs.ml", "mlkem_zetas.ml"]
           - name: mlkem_poly_decompress_d4
             needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
+          - name: mlkem_poly_decompress_d5
+            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
     name: x86_64 HOL Light proof for ${{ matrix.proof.name }}.S
     runs-on: pqcp-x64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
