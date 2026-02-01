@@ -28,6 +28,22 @@ MLK_ALIGN const uint8_t mlk_decompress_d4_data[32] = {
           (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3) \
         */
 
+#if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
+    (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4)
+
+/* shufbidx[0:32], mask[32:64], shift[64:96] */
+MLK_ALIGN const uint8_t mlk_decompress_d5_data[96] = {
+    0,   0, 0,   1, 1,   1,  1,   2,  2,   3, 3,   3, 3,   4, 4,   4, 5,  5,
+    5,   6, 6,   6, 6,   7,  7,   8,  8,   8, 8,   9, 9,   9, /* shufbidx */
+    31,  0, 224, 3, 124, 0,  128, 15, 240, 1, 62,  0, 192, 7, 248, 0, 31, 0,
+    224, 3, 124, 0, 128, 15, 240, 1,  62,  0, 192, 7, 248, 0, /* mask */
+    0,   4, 32,  0, 0,   1,  8,   0,  64,  0, 0,   2, 16,  0, 128, 0, 0,  4,
+    32,  0, 0,   1, 8,   0,  64,  0,  0,   2, 16,  0, 128, 0, /* shift */
+};
+
+#endif /* !MLK_CONFIG_MULTILEVEL_NO_SHARED && \
+          (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4) */
+
 #else /* MLK_ARITH_BACKEND_X86_64_DEFAULT */
 
 MLK_EMPTY_CU(avx2_compress_consts)
