@@ -1326,6 +1326,40 @@ def gen_decompress_d4_shufbidx():
             yield byte_idx
 
 
+def gen_decompress_d5_shufbidx():
+    # Shuffle index for poly_decompress_d5_avx2.
+    # 5-bit decompression: coefficient i at bit position 5*i uses byte floor(5*i/8).
+    # Pattern per lane selects source bytes for each 16-bit output slot.
+    yield from [0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4]
+    yield from [5, 5, 5, 6, 6, 6, 6, 7, 7, 8, 8, 8, 8, 9, 9, 9]
+
+
+def gen_decompress_d5_mask():
+    # Bit masks for poly_decompress_d5_avx2.
+    # Each 16-bit mask isolates 5 bits at different alignments within 16-bit words.
+    # Masks: 31, 992, 124, 3968, 496, 62, 1984, 248 (repeated for both lanes)
+    masks_16bit = [31, 992, 124, 3968, 496, 62, 1984, 248]
+    for m in masks_16bit:
+        yield m & 0xFF
+        yield (m >> 8) & 0xFF
+    for m in masks_16bit:
+        yield m & 0xFF
+        yield (m >> 8) & 0xFF
+
+
+def gen_decompress_d5_shift():
+    # Shift multipliers for poly_decompress_d5_avx2.
+    # Powers of 2 to align extracted 5-bit values for mulhrs scaling.
+    # Shifts: 1024, 32, 256, 8, 64, 512, 16, 128 (repeated for both lanes)
+    shifts_16bit = [1024, 32, 256, 8, 64, 512, 16, 128]
+    for s in shifts_16bit:
+        yield s & 0xFF
+        yield (s >> 8) & 0xFF
+    for s in shifts_16bit:
+        yield s & 0xFF
+        yield (s >> 8) & 0xFF
+
+
 def gen_avx2_compress_consts():
     # Generate merged constant arrays, one per function.
     # Returns dict of {name: (sections, dtype, layout_comment, level)}
@@ -1336,6 +1370,16 @@ def gen_avx2_compress_consts():
             "uint8_t",
             "shufbidx",
             "d4_d10",
+        ),
+        "decompress_d5_data": (
+            [
+                ("shufbidx", list(gen_decompress_d5_shufbidx())),
+                ("mask", list(gen_decompress_d5_mask())),
+                ("shift", list(gen_decompress_d5_shift())),
+            ],
+            "uint8_t",
+            "shufbidx, mask, shift",
+            "d5_d11",
         ),
     }
 
@@ -1386,6 +1430,17 @@ def gen_avx2_compress_consts_file():
                 yield from gen_const_def(name, sections, dtype, layout)
                 yield ""
         yield "#endif /* d4/d10 constants */"
+        yield ""
+
+        # d5/d11 constants (K == 4)
+        yield "#if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \\"
+        yield "    (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4)"
+        yield ""
+        for name, (sections, dtype, layout, level) in consts.items():
+            if level == "d5_d11":
+                yield from gen_const_def(name, sections, dtype, layout)
+                yield ""
+        yield "#endif /* d5/d11 constants */"
         yield ""
 
         yield "#else"
