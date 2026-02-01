@@ -41,6 +41,7 @@ jobs:
       - uses: ./.github/actions/setup-oqs
         with:
           commit: '97f6b86b1b6d109cfd43cf276ae39c2e776aed80' # v0.15.0
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Apply patch
         run: |
           cd $LIBOQS_DIR
