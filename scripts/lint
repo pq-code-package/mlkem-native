@@ -135,6 +135,22 @@ gh_group_start "Linting shell scripts with shellcheck"
 run-shellcheck
 gh_group_end
 
+gh_group_start "Linting GitHub Actions workflows with actionlint"
+if ! command -v actionlint >/dev/null; then
+  gh_error_simple "actionlint missing" "actionlint is not installed"
+  error "Lint GitHub Actions"
+  SUCCESS=false
+  gh_summary_failure "Lint GitHub Actions"
+elif ! actionlint; then
+  error "Lint GitHub Actions"
+  SUCCESS=false
+  gh_summary_failure "Lint GitHub Actions"
+else
+  info "Lint GitHub Actions"
+  gh_summary_success "Lint GitHub Actions"
+fi
+gh_group_end
+
 gh_group_start "Linting python scripts with black"
 if ! diff=$(black --check --diff -q --include "(scripts/tests|scripts/simpasm|scripts/cfify|scripts/autogen|scripts/check-namespace|\.py$)" "$ROOT"); then
   gh_error_simple "Format error" "$diff"
