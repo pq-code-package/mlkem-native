@@ -58,7 +58,7 @@ jobs:
 
       - name: Patch mlkem-native dependency
         run: |
-          cd $EXPO_DIR
+          cd "$EXPO_DIR"
 
           # Calculate sha256 of mlkem-native at the new commit
           SHA256=$(curl -sL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | sha256sum | cut -d' ' -f1)
@@ -76,17 +76,17 @@ jobs:
 
       - name: Patch functest to only test deterministic API
         run: |
-          cd $EXPO_DIR
+          cd "$EXPO_DIR"
           # speed-up tests in CI by only running deterministic tests
-          git apply $GITHUB_WORKSPACE/integration/opentitan/derand-only.patch
+          git apply "$GITHUB_WORKSPACE/integration/opentitan/derand-only.patch"
 
       - name: Run mlkem functest
         run: |
-          cd $EXPO_DIR
+          cd "$EXPO_DIR"
           # Run the test
           ./bazelisk.sh test \
             --test_output=streamed \
-            --disk_cache=$BAZEL_CACHE_DIR \
+            --disk_cache="$BAZEL_CACHE_DIR" \
             --registry=https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main/ \
             //sw/device/tests/crypto:mlkem_functest_sim_verilator
 

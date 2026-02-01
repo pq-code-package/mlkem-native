@@ -139,7 +139,7 @@ jobs:
             run_needed=1
           fi
 
-          echo "run_needed=${run_needed}" >> $GITHUB_OUTPUT
+          echo "run_needed=${run_needed}" >> "$GITHUB_OUTPUT"
       - uses: ./.github/actions/setup-shell
         if: |
           steps.check_run.outputs.run_needed == '1'
@@ -241,7 +241,7 @@ jobs:
             run_needed=1
           fi
 
-          echo "run_needed=${run_needed}" >> $GITHUB_OUTPUT
+          echo "run_needed=${run_needed}" >> "$GITHUB_OUTPUT"
       - uses: ./.github/actions/setup-shell
         if: |
           steps.check_run.outputs.run_needed == '1'
