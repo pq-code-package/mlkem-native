@@ -271,6 +271,7 @@ source code and documentation.
   - [proofs/hol_light/x86_64/mlkem/mlkem_intt.S](proofs/hol_light/x86_64/mlkem/mlkem_intt.S)
   - [proofs/hol_light/x86_64/mlkem/mlkem_ntt.S](proofs/hol_light/x86_64/mlkem/mlkem_ntt.S)
   - [proofs/hol_light/x86_64/mlkem/mlkem_poly_decompress_d4.S](proofs/hol_light/x86_64/mlkem/mlkem_poly_decompress_d4.S)
+  - [proofs/hol_light/x86_64/mlkem/mlkem_poly_decompress_d5.S](proofs/hol_light/x86_64/mlkem/mlkem_poly_decompress_d5.S)
   - [proofs/hol_light/x86_64/mlkem/mlkem_reduce.S](proofs/hol_light/x86_64/mlkem/mlkem_reduce.S)
   - [proofs/hol_light/x86_64/mlkem/mlkem_tobytes.S](proofs/hol_light/x86_64/mlkem/mlkem_tobytes.S)
   - [proofs/hol_light/x86_64/mlkem/mlkem_tomont.S](proofs/hol_light/x86_64/mlkem/mlkem_tomont.S)
