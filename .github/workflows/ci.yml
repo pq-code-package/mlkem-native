@@ -183,11 +183,13 @@ jobs:
         uses: ./.github/actions/multi-functest
         with:
           nix-shell: ''
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
           cflags: "-DMLK_FORCE_PPC64LE"
       - name: build + test (+debug)
         uses: ./.github/actions/multi-functest
         with:
           nix-shell: ''
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
           cflags: "-DMLKEM_DEBUG -DMLK_FORCE_PPC64LE"
   backend_tests:
     name: AArch64 FIPS202 backends (${{ matrix.backend }})
