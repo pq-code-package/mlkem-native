@@ -44,23 +44,23 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Apply pre-import patch if present
         run: |
-          cd $AWSLC_DIR
+          cd "$AWSLC_DIR"
           if [ -f "$GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch" ]; then
-            git apply $GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch
+            git apply "$GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch"
           fi
       - name: Run importer
         run: |
-          cd $AWSLC_DIR/crypto/fipsmodule/ml_kem
+          cd "$AWSLC_DIR/crypto/fipsmodule/ml_kem"
           GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA ./importer.sh --force
       - name: Apply post-import patch if present
         run: |
-          cd $AWSLC_DIR
+          cd "$AWSLC_DIR"
           if [ -f "$GITHUB_WORKSPACE/integration/aws-lc/post_import.patch" ]; then
-            git apply $GITHUB_WORKSPACE/integration/aws-lc/post_import.patch
+            git apply "$GITHUB_WORKSPACE/integration/aws-lc/post_import.patch"
           fi
       - name: Build+Test AWS-LC (FIPS=${{ matrix.fips }})
         run: |
-          cd $AWSLC_DIR
+          cd "$AWSLC_DIR"
           mkdir build
           cd build
           cmake -DFIPS=${{ matrix.fips }} ..
@@ -104,23 +104,23 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Apply pre-import patch if present
         run: |
-          cd $AWSLC_DIR
+          cd "$AWSLC_DIR"
           if [ -f "$GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch" ]; then
-            git apply $GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch
+            git apply "$GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch"
           fi
       - name: Run importer
         run: |
-          cd $AWSLC_DIR/crypto/fipsmodule/ml_kem
+          cd "$AWSLC_DIR/crypto/fipsmodule/ml_kem"
           GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA ./importer.sh --force
       - name: Apply post-import patch if present
         run: |
-          cd $AWSLC_DIR
+          cd "$AWSLC_DIR"
           if [ -f "$GITHUB_WORKSPACE/integration/aws-lc/post_import.patch" ]; then
-            git apply $GITHUB_WORKSPACE/integration/aws-lc/post_import.patch
+            git apply "$GITHUB_WORKSPACE/integration/aws-lc/post_import.patch"
           fi
       - name: Run test
         run: |
-          cd $AWSLC_DIR
+          cd "$AWSLC_DIR"
           source tests/ci/common_posix_setup.sh
           build_and_test ${{ matrix.test.flags }}
   prefix:
@@ -149,22 +149,22 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Apply pre-import patch if present
         run: |
-          cd $AWSLC_DIR
+          cd "$AWSLC_DIR"
           if [ -f "$GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch" ]; then
-            git apply $GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch
+            git apply "$GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch"
           fi
       - name: Run importer
         run: |
-          cd $AWSLC_DIR/crypto/fipsmodule/ml_kem
+          cd "$AWSLC_DIR/crypto/fipsmodule/ml_kem"
           GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA ./importer.sh --force
       - name: Apply post-import patch if present
         run: |
-          cd $AWSLC_DIR
+          cd "$AWSLC_DIR"
           if [ -f "$GITHUB_WORKSPACE/integration/aws-lc/post_import.patch" ]; then
-            git apply $GITHUB_WORKSPACE/integration/aws-lc/post_import.patch
+            git apply "$GITHUB_WORKSPACE/integration/aws-lc/post_import.patch"
           fi
       - name: Run test
         run: |
-          cd $AWSLC_DIR
+          cd "$AWSLC_DIR"
           source tests/ci/common_posix_setup.sh
           build_prefix_and_test ${{ matrix.test.flags }}

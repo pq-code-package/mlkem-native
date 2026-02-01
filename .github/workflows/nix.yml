@@ -45,7 +45,7 @@ jobs:
               done
             done
           fi
-          echo "run_needed=${run_needed}" >> $GITHUB_OUTPUT
+          echo "run_needed=${run_needed}" >> "$GITHUB_OUTPUT"
 
   build_nix_cache:
     needs: [ check_modified_files ]
@@ -118,7 +118,7 @@ jobs:
       - name: Install git
         shell: bash
         run: |
-          if ! which git 2>&1 >/dev/null; then
+          if ! which git >/dev/null 2>&1; then
             ${{ matrix.target.container == '' && 'sudo' || '' }} apt update
             ${{ matrix.target.container == '' && 'sudo' || '' }} apt install git -y
           fi
@@ -126,9 +126,9 @@ jobs:
         shell: bash
         run: |
           git init
-          git config --global --add safe.directory $GITHUB_WORKSPACE
-          git remote add origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
-          git fetch origin --depth 1 $GITHUB_SHA
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          git fetch origin --depth 1 "$GITHUB_SHA"
           git checkout FETCH_HEAD
       - uses: ./.github/actions/setup-nix
         if: ${{ matrix.target.container == '' }}
