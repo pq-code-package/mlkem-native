@@ -91,8 +91,6 @@ jobs:
         target:
          - runner: ubuntu-24.04-arm
            name: 'aarch64'
-         - runner: ubuntu-24.04-arm
-           name: 'aarch64'
          - runner: ubuntu-latest
            name: 'x86_64'
          - runner: macos-latest
