@@ -24,6 +24,11 @@ MLK_ALIGN const uint8_t mlk_decompress_d4_data[32] = {
     4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, /* shufbidx */
 };
 
+MLK_ALIGN const uint8_t mlk_decompress_d10_data[32] = {
+    0, 1, 1, 2, 2, 3, 3, 4, 5, 6, 6, 7, 7, 8,  8,  9,
+    2, 3, 3, 4, 4, 5, 5, 6, 7, 8, 8, 9, 9, 10, 10, 11, /* shufbidx */
+};
+
 #endif /* !MLK_CONFIG_MULTILEVEL_NO_SHARED &&                                 \
           (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3) \
         */
