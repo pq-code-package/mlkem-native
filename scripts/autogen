@@ -2811,6 +2811,13 @@ def gen_hol_light_asm():
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
+        (
+            "poly_decompress_d10.S",
+            "mlkem_poly_decompress_d10.S",
+            "dev/x86_64/src",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
+        ),
     ]
 
     joblist = joblist_aarch64 + joblist_x86_64
