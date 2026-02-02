@@ -1326,6 +1326,14 @@ def gen_decompress_d4_shufbidx():
             yield byte_idx
 
 
+def gen_decompress_d10_shufbidx():
+    # Shuffle index for poly_decompress_d10_avx2.
+    # 10-bit decompression: coefficient i uses byte floor(10*i/8).
+    # Pattern per lane selects source bytes for each 16-bit output slot.
+    yield from [0, 1, 1, 2, 2, 3, 3, 4, 5, 6, 6, 7, 7, 8, 8, 9]
+    yield from [2, 3, 3, 4, 4, 5, 5, 6, 7, 8, 8, 9, 9, 10, 10, 11]
+
+
 def gen_decompress_d5_shufbidx():
     # Shuffle index for poly_decompress_d5_avx2.
     # 5-bit decompression: coefficient i at bit position 5*i uses byte floor(5*i/8).
@@ -1367,6 +1375,12 @@ def gen_avx2_compress_consts():
     return {
         "decompress_d4_data": (
             [("shufbidx", list(gen_decompress_d4_shufbidx()))],
+            "uint8_t",
+            "shufbidx",
+            "d4_d10",
+        ),
+        "decompress_d10_data": (
+            [("shufbidx", list(gen_decompress_d10_shufbidx()))],
             "uint8_t",
             "shufbidx",
             "d4_d10",
