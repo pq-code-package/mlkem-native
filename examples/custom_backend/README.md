@@ -31,7 +31,7 @@ The configuration file [mlkem_native_config.h](mlkem_native/mlkem_native_config.
 
 A custom backend consists of:
 1. A metadata header (e.g., [custom.h](mlkem_native/src/fips202/native/custom/custom.h)) that:
-   - Sets `MLK_USE_FIPS202_X1_NATIVE` (and/or `X4`) to indicate which functions are replaced
+   - Sets `MLK_USE_NATIVE_FIPS202_X1` (and/or `X4`) to indicate which functions are replaced
    - Includes the implementation header
 2. An implementation providing `mlk_keccakf1600_native()` (and/or batched variants)
 
@@ -41,7 +41,7 @@ Example backend metadata file:
 #define CUSTOM_FIPS202_BACKEND_H
 
 /* Indicate we're replacing 1-fold Keccak-f1600 */
-#define MLK_USE_FIPS202_X1_NATIVE
+#define MLK_USE_NATIVE_FIPS202_X1
 
 /* Include the implementation */
 #include "custom/src/keccak_impl.h"

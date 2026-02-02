@@ -6,7 +6,7 @@
 #ifndef MLK_DUMMY_FIPS202X4_BACKEND_H
 #define MLK_DUMMY_FIPS202X4_BACKEND_H
 
-#define MLK_USE_FIPS202_X4_NATIVE
+#define MLK_USE_NATIVE_FIPS202_X4
 
 #include "../../mlkem/src/fips202/native/api.h"
 
