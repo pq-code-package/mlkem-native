@@ -19,6 +19,9 @@
 #define mlk_decompress_d4_data MLK_NAMESPACE(decompress_d4_data)
 extern const uint8_t mlk_decompress_d4_data[32];
 
+#define mlk_decompress_d10_data MLK_NAMESPACE(decompress_d10_data)
+extern const uint8_t mlk_decompress_d10_data[32];
+
 #define mlk_decompress_d5_data MLK_NAMESPACE(decompress_d5_data)
 extern const uint8_t mlk_decompress_d5_data[96];
 
