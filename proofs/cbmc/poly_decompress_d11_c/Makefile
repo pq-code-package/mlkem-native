@@ -4,11 +4,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = poly_decompress_dv_harness
+HARNESS_FILE = poly_decompress_d11_c_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = mlk_poly_decompress_dv
+PROOF_UID = mlk_poly_decompress_d11_c
 
 DEFINES +=
 INCLUDES +=
@@ -19,22 +19,20 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/compress.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_poly_decompress_dv
-# For K = 2 or 3, MLKEM_DV = 4; for K = 4, MLKEM_DV = 5
 ifeq ($(MLKEM_K),4)
-USE_FUNCTION_CONTRACTS=mlk_poly_decompress_d5
+CHECK_FUNCTION_CONTRACTS=mlk_poly_decompress_d11_c
 else
-USE_FUNCTION_CONTRACTS=mlk_poly_decompress_d4
+CHECK_FUNCTION_CONTRACTS=
 endif
-
+USE_FUNCTION_CONTRACTS=
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--bitwuzla
+CBMCFLAGS=--smt2
 
-FUNCTION_NAME = mlk_poly_decompress_dv
+FUNCTION_NAME = mlk_poly_decompress_d11_c
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
