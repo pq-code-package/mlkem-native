@@ -253,6 +253,7 @@ source code and documentation.
   - [dev/x86_64/src/nttfrombytes.S](dev/x86_64/src/nttfrombytes.S)
   - [dev/x86_64/src/ntttobytes.S](dev/x86_64/src/ntttobytes.S)
   - [dev/x86_64/src/nttunpack.S](dev/x86_64/src/nttunpack.S)
+  - [dev/x86_64/src/poly_compress_d10.S](dev/x86_64/src/poly_compress_d10.S)
   - [dev/x86_64/src/poly_decompress_d10.S](dev/x86_64/src/poly_decompress_d10.S)
   - [dev/x86_64/src/poly_decompress_d11.S](dev/x86_64/src/poly_decompress_d11.S)
   - [dev/x86_64/src/poly_decompress_d4.S](dev/x86_64/src/poly_decompress_d4.S)

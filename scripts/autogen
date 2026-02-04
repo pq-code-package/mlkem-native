@@ -1330,6 +1330,15 @@ def gen_decompress_d4_shufbidx():
             yield byte_idx
 
 
+def gen_compress_d10_shufbidx():
+    # Shuffle index for poly_compress_d10_avx2.
+    # 10-bit compression: 4 coefficients -> 5 bytes (40 bits).
+    # Lane 0: extract bytes 0-4 and 8-12, Lane 1: wrap-around for blending
+    # 255 (0xFF) means "zero this byte" in vpshufb
+    yield from [0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 255, 255, 255, 255, 255, 255]
+    yield from [9, 10, 11, 12, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 8]
+
+
 def gen_decompress_d10_shufbidx():
     # Shuffle index for poly_decompress_d10_avx2.
     # 10-bit decompression: coefficient i uses byte floor(10*i/8).
@@ -1426,6 +1435,12 @@ def gen_avx2_compress_consts():
     return {
         "decompress_d4_data": (
             [("shufbidx", list(gen_decompress_d4_shufbidx()))],
+            "uint8_t",
+            "shufbidx",
+            "d4_d10",
+        ),
+        "compress_d10_data": (
+            [("shufbidx", list(gen_compress_d10_shufbidx()))],
             "uint8_t",
             "shufbidx",
             "d4_d10",

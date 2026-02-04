@@ -20,6 +20,14 @@ let decompress_d4_data = define `decompress_d4_data:int list = [
 ]`;;
 
 (* shufbidx *)
+let compress_d10_data = define `compress_d10_data:int list = [
+  &0; &1; &2; &3; &4; &8; &9; &10;
+  &11; &12; &255; &255; &255; &255; &255; &255;
+  &9; &10; &11; &12; &255; &255; &255; &255;
+  &255; &255; &0; &1; &2; &3; &4; &8
+]`;;
+
+(* shufbidx *)
 let decompress_d10_data = define `decompress_d10_data:int list = [
   &0; &1; &1; &2; &2; &3; &3; &4;
   &5; &6; &6; &7; &7; &8; &8; &9;

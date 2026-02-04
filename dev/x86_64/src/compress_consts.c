@@ -24,6 +24,12 @@ MLK_ALIGN const uint8_t mlk_decompress_d4_data[32] = {
     4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, /* shufbidx */
 };
 
+MLK_ALIGN const uint8_t mlk_compress_d10_data[32] = {
+    0,   1,   2,   3,   4,   8, 9,  10, 11, 12,  255,
+    255, 255, 255, 255, 255, 9, 10, 11, 12, 255, 255,
+    255, 255, 255, 255, 0,   1, 2,  3,  4,  8, /* shufbidx */
+};
+
 MLK_ALIGN const uint8_t mlk_decompress_d10_data[32] = {
     0, 1, 1, 2, 2, 3, 3, 4, 5, 6, 6, 7, 7, 8,  8,  9,
     2, 3, 3, 4, 4, 5, 5, 6, 7, 8, 8, 9, 9, 10, 10, 11, /* shufbidx */
