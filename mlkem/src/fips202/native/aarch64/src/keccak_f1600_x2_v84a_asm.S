@@ -81,44 +81,44 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x2_v84a_asm)
         .cfi_rel_offset d14, 0x30
         .cfi_rel_offset d15, 0x38
         add	x2, x0, #0xc8
-        ldp	q25, q26, [x0]
-        ldp	q27, q28, [x2]
+        ldp	q25, q26, [x0], #0x20
+        ld1	{ v27.2d, v28.2d }, [x2], #32
         trn1	v0.2d, v25.2d, v27.2d
         trn2	v1.2d, v25.2d, v27.2d
         trn1	v2.2d, v26.2d, v28.2d
         trn2	v3.2d, v26.2d, v28.2d
-        ldp	q25, q26, [x0, #0x20]
-        ldp	q27, q28, [x2, #0x20]
+        ldp	q25, q26, [x0], #0x20
+        ld1	{ v27.2d, v28.2d }, [x2], #32
         trn1	v4.2d, v25.2d, v27.2d
         trn2	v5.2d, v25.2d, v27.2d
         trn1	v6.2d, v26.2d, v28.2d
         trn2	v7.2d, v26.2d, v28.2d
-        ldp	q25, q26, [x0, #0x40]
-        ldp	q27, q28, [x2, #0x40]
+        ldp	q25, q26, [x0], #0x20
+        ld1	{ v27.2d, v28.2d }, [x2], #32
         trn1	v8.2d, v25.2d, v27.2d
         trn2	v9.2d, v25.2d, v27.2d
         trn1	v10.2d, v26.2d, v28.2d
         trn2	v11.2d, v26.2d, v28.2d
-        ldp	q25, q26, [x0, #0x60]
-        ldp	q27, q28, [x2, #0x60]
+        ldp	q25, q26, [x0], #0x20
+        ld1	{ v27.2d, v28.2d }, [x2], #32
         trn1	v12.2d, v25.2d, v27.2d
         trn2	v13.2d, v25.2d, v27.2d
         trn1	v14.2d, v26.2d, v28.2d
         trn2	v15.2d, v26.2d, v28.2d
-        ldp	q25, q26, [x0, #0x80]
-        ldp	q27, q28, [x2, #0x80]
+        ldp	q25, q26, [x0], #0x20
+        ld1	{ v27.2d, v28.2d }, [x2], #32
         trn1	v16.2d, v25.2d, v27.2d
         trn2	v17.2d, v25.2d, v27.2d
         trn1	v18.2d, v26.2d, v28.2d
         trn2	v19.2d, v26.2d, v28.2d
-        ldp	q25, q26, [x0, #0xa0]
-        ldp	q27, q28, [x2, #0xa0]
+        ldp	q25, q26, [x0], #0x20
+        ld1	{ v27.2d, v28.2d }, [x2], #32
         trn1	v20.2d, v25.2d, v27.2d
         trn2	v21.2d, v25.2d, v27.2d
         trn1	v22.2d, v26.2d, v28.2d
         trn2	v23.2d, v26.2d, v28.2d
-        ldr	d25, [x0, #0xc0]
-        ldr	d27, [x2, #0xc0]
+        ldr	d25, [x0]
+        ldr	d27, [x2]
         trn1	v24.2d, v25.2d, v27.2d
         mov	x2, #0x18               // =24
 
@@ -192,46 +192,47 @@ Lkeccak_f1600_x2_v84a_loop:
         eor	v0.16b, v0.16b, v31.16b
         sub	x2, x2, #0x1
         cbnz	x2, Lkeccak_f1600_x2_v84a_loop
+        sub	x0, x0, #0xc0
         add	x2, x0, #0xc8
         trn1	v25.2d, v0.2d, v1.2d
         trn1	v26.2d, v2.2d, v3.2d
-        stp	q25, q26, [x0]
+        stp	q25, q26, [x0], #0x20
         trn2	v27.2d, v0.2d, v1.2d
         trn2	v28.2d, v2.2d, v3.2d
-        stp	q27, q28, [x2]
+        st1	{ v27.2d, v28.2d }, [x2], #32
         trn1	v25.2d, v4.2d, v5.2d
         trn1	v26.2d, v6.2d, v7.2d
-        stp	q25, q26, [x0, #0x20]
+        stp	q25, q26, [x0], #0x20
         trn2	v27.2d, v4.2d, v5.2d
         trn2	v28.2d, v6.2d, v7.2d
-        stp	q27, q28, [x2, #0x20]
+        st1	{ v27.2d, v28.2d }, [x2], #32
         trn1	v25.2d, v8.2d, v9.2d
         trn1	v26.2d, v10.2d, v11.2d
-        stp	q25, q26, [x0, #0x40]
+        stp	q25, q26, [x0], #0x20
         trn2	v27.2d, v8.2d, v9.2d
         trn2	v28.2d, v10.2d, v11.2d
-        stp	q27, q28, [x2, #0x40]
+        st1	{ v27.2d, v28.2d }, [x2], #32
         trn1	v25.2d, v12.2d, v13.2d
         trn1	v26.2d, v14.2d, v15.2d
-        stp	q25, q26, [x0, #0x60]
+        stp	q25, q26, [x0], #0x20
         trn2	v27.2d, v12.2d, v13.2d
         trn2	v28.2d, v14.2d, v15.2d
-        stp	q27, q28, [x2, #0x60]
+        st1	{ v27.2d, v28.2d }, [x2], #32
         trn1	v25.2d, v16.2d, v17.2d
         trn1	v26.2d, v18.2d, v19.2d
-        stp	q25, q26, [x0, #0x80]
+        stp	q25, q26, [x0], #0x20
         trn2	v27.2d, v16.2d, v17.2d
         trn2	v28.2d, v18.2d, v19.2d
-        stp	q27, q28, [x2, #0x80]
+        st1	{ v27.2d, v28.2d }, [x2], #32
         trn1	v25.2d, v20.2d, v21.2d
         trn1	v26.2d, v22.2d, v23.2d
-        stp	q25, q26, [x0, #0xa0]
+        stp	q25, q26, [x0], #0x20
         trn2	v27.2d, v20.2d, v21.2d
         trn2	v28.2d, v22.2d, v23.2d
-        stp	q27, q28, [x2, #0xa0]
-        str	d24, [x0, #0xc0]
+        st1	{ v27.2d, v28.2d }, [x2], #32
+        str	d24, [x0]
         trn2	v25.2d, v24.2d, v24.2d
-        str	d25, [x2, #0xc0]
+        str	d25, [x2]
         ldp	d8, d9, [sp]
         .cfi_restore d8
         .cfi_restore d9

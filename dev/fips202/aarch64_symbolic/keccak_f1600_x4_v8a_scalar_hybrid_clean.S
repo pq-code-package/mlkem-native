@@ -188,56 +188,57 @@
     eor \d\().16b, vtmp.16b, \s0\().16b
 .endm
 
-.macro load_lane out0, out1, out2, out3, idx
-    ldp tmp0q, tmp1q, [input_addr,    #(16*(\idx))]
-    ldp tmp2q, tmp3q, [input_addr_hi, #(16*(\idx))]
+.macro load_lane out0, out1, out2, out3
+    ldp tmp0q, tmp1q, [input_addr], #32
+    ld1 {tmp2.2d, tmp3.2d}, [input_addr_hi], #32
     trn1 \out0\().2d, tmp0.2d, tmp2.2d
     trn2 \out1\().2d, tmp0.2d, tmp2.2d
     trn1 \out2\().2d, tmp1.2d, tmp3.2d
     trn2 \out3\().2d, tmp1.2d, tmp3.2d
 .endm
 
-.macro load_lane_single out, idx
-    ldr tmp0d, [input_addr,    #(16*(\idx))]
-    ldr tmp2d, [input_addr_hi, #(16*(\idx))]
+.macro load_lane_single out
+    ldr tmp0d, [input_addr]
+    ldr tmp2d, [input_addr_hi]
     trn1 \out\().2d, tmp0.2d, tmp2.2d
 .endm
 
-.macro store_lane out0, out1, out2, out3, idx
+.macro store_lane out0, out1, out2, out3
     trn1 tmp0\().2d, \out0\().2d, \out1\().2d
     trn1 tmp1\().2d, \out2\().2d, \out3\().2d
-    stp tmp0q, tmp1q, [input_addr,    #(16*(\idx))]
+    stp tmp0q, tmp1q, [input_addr], #32
     trn2 tmp2\().2d, \out0\().2d, \out1\().2d
     trn2 tmp3\().2d, \out2\().2d, \out3\().2d
-    stp tmp2q, tmp3q, [input_addr_hi, #(16*(\idx))]
+    st1 {tmp2.2d, tmp3.2d}, [input_addr_hi], #32
 .endm
 
-.macro store_lane_single out, idx
-    str  \out\()d, [input_addr, #(16*(\idx))]
+.macro store_lane_single out
+    str  \out\()d, [input_addr]
     trn2 tmp0.2d, \out\().2d, \out\().2d
-    str  tmp0d, [input_addr_hi, #(16*(\idx))]
+    str  tmp0d, [input_addr_hi]
 .endm
 
 .macro load_input_vector
     add input_addr_hi, input_addr, #0xc8
-    load_lane vAba, vAbe, vAbi, vAbo, 0
-    load_lane vAbu, vAga, vAge, vAgi, 2
-    load_lane vAgo, vAgu, vAka, vAke, 4
-    load_lane vAki, vAko, vAku, vAma, 6
-    load_lane vAme, vAmi, vAmo, vAmu, 8
-    load_lane vAsa, vAse, vAsi, vAso, 10
-    load_lane_single vAsu, 12
+    load_lane vAba, vAbe, vAbi, vAbo
+    load_lane vAbu, vAga, vAge, vAgi
+    load_lane vAgo, vAgu, vAka, vAke
+    load_lane vAki, vAko, vAku, vAma
+    load_lane vAme, vAmi, vAmo, vAmu
+    load_lane vAsa, vAse, vAsi, vAso
+    load_lane_single vAsu
+    sub input_addr, input_addr, #0xc0
 .endm
 
 .macro store_input_vector
     add input_addr_hi, input_addr, #0xc8
-    store_lane vAba, vAbe, vAbi, vAbo, 0
-    store_lane vAbu, vAga, vAge, vAgi, 2
-    store_lane vAgo, vAgu, vAka, vAke, 4
-    store_lane vAki, vAko, vAku, vAma, 6
-    store_lane vAme, vAmi, vAmo, vAmu, 8
-    store_lane vAsa, vAse, vAsi, vAso, 10
-    store_lane_single vAsu, 12
+    store_lane vAba, vAbe, vAbi, vAbo
+    store_lane vAbu, vAga, vAge, vAgi
+    store_lane vAgo, vAgu, vAka, vAke
+    store_lane vAki, vAko, vAku, vAma
+    store_lane vAme, vAmi, vAmo, vAmu
+    store_lane vAsa, vAse, vAsi, vAso
+    store_lane_single vAsu
 .endm
 
 .macro store_input_scalar idx

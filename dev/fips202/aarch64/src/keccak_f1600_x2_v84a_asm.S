@@ -146,56 +146,57 @@
 
 /************************ MACROS ****************************/
 
-.macro load_lane out0, out1, out2, out3, idx
-    ldp tmp0q, tmp1q, [input_addr,    #(16*(\idx))]
-    ldp tmp2q, tmp3q, [input_addr_hi, #(16*(\idx))]
+.macro load_lane out0, out1, out2, out3
+    ldp tmp0q, tmp1q, [input_addr], #32
+    ld1 {tmp2.2d, tmp3.2d}, [input_addr_hi], #32
     trn1 \out0\().2d, tmp0.2d, tmp2.2d
     trn2 \out1\().2d, tmp0.2d, tmp2.2d
     trn1 \out2\().2d, tmp1.2d, tmp3.2d
     trn2 \out3\().2d, tmp1.2d, tmp3.2d
 .endm
 
-.macro load_lane_single out, idx
-    ldr tmp0d, [input_addr,    #(16*(\idx))]
-    ldr tmp2d, [input_addr_hi, #(16*(\idx))]
+.macro load_lane_single out
+    ldr tmp0d, [input_addr]
+    ldr tmp2d, [input_addr_hi]
     trn1 \out\().2d, tmp0.2d, tmp2.2d
 .endm
 
-.macro store_lane out0, out1, out2, out3, idx
+.macro store_lane out0, out1, out2, out3
     trn1 tmp0\().2d, \out0\().2d, \out1\().2d
     trn1 tmp1\().2d, \out2\().2d, \out3\().2d
-    stp tmp0q, tmp1q, [input_addr,    #(16*(\idx))]
+    stp tmp0q, tmp1q, [input_addr], #32
     trn2 tmp2\().2d, \out0\().2d, \out1\().2d
     trn2 tmp3\().2d, \out2\().2d, \out3\().2d
-    stp tmp2q, tmp3q, [input_addr_hi, #(16*(\idx))]
+    st1 {tmp2.2d, tmp3.2d}, [input_addr_hi], #32
 .endm
 
-.macro store_lane_single out, idx
-    str  \out\()d, [input_addr, #(16*(\idx))]
+.macro store_lane_single out
+    str  \out\()d, [input_addr]
     trn2 tmp0.2d, \out\().2d, \out\().2d
-    str  tmp0d, [input_addr_hi, #(16*(\idx))]
+    str  tmp0d, [input_addr_hi]
 .endm
 
 .macro load_input
     add input_addr_hi, input_addr, #0xc8
-    load_lane Aba, Abe, Abi, Abo, 0
-    load_lane Abu, Aga, Age, Agi, 2
-    load_lane Ago, Agu, Aka, Ake, 4
-    load_lane Aki, Ako, Aku, Ama, 6
-    load_lane Ame, Ami, Amo, Amu, 8
-    load_lane Asa, Ase, Asi, Aso, 10
-    load_lane_single Asu, 12
+    load_lane Aba, Abe, Abi, Abo
+    load_lane Abu, Aga, Age, Agi
+    load_lane Ago, Agu, Aka, Ake
+    load_lane Aki, Ako, Aku, Ama
+    load_lane Ame, Ami, Amo, Amu
+    load_lane Asa, Ase, Asi, Aso
+    load_lane_single Asu
 .endm
 
 .macro store_input
+    sub input_addr, input_addr, #0xc0
     add input_addr_hi, input_addr, #0xc8
-    store_lane Aba, Abe, Abi, Abo, 0
-    store_lane Abu, Aga, Age, Agi, 2
-    store_lane Ago, Agu, Aka, Ake, 4
-    store_lane Aki, Ako, Aku, Ama, 6
-    store_lane Ame, Ami, Amo, Amu, 8
-    store_lane Asa, Ase, Asi, Aso, 10
-    store_lane_single Asu, 12
+    store_lane Aba, Abe, Abi, Abo
+    store_lane Abu, Aga, Age, Agi
+    store_lane Ago, Agu, Aka, Ake
+    store_lane Aki, Ako, Aku, Ama
+    store_lane Ame, Ami, Amo, Amu
+    store_lane Asa, Ase, Asi, Aso
+    store_lane_single Asu
 .endm
 
 #define STACK_SIZE (16*4) /* VREGS (16*4) */
