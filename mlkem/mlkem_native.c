@@ -604,6 +604,7 @@
 /* mlkem/src/native/x86_64/src/compress_consts.h */
 #undef MLK_NATIVE_X86_64_SRC_COMPRESS_CONSTS_H
 #undef mlk_decompress_d10_data
+#undef mlk_decompress_d11_data
 #undef mlk_decompress_d4_data
 #undef mlk_decompress_d5_data
 /* mlkem/src/native/x86_64/src/consts.h */
