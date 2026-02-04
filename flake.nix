@@ -47,6 +47,7 @@
             export PATH=$PWD/scripts:$PATH
             export PROOF_DIR="$PWD/proofs/hol_light"
           '';
+
         in
         {
           _module.args.pkgs = import inputs.nixpkgs {
@@ -90,6 +91,26 @@
               } ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ config.packages.valgrind_varlat ];
           };
 
+          # arm-none-eabi-gcc + platform files from pqmx
+          packages.m55-an547 = util.m55-an547;
+          packages.avr-toolchain = util.avr-toolchain;
+          devShells.arm-embedded = util.mkShell {
+            packages = builtins.attrValues
+              {
+                inherit (config.packages) m55-an547;
+                inherit (pkgs) gcc-arm-embedded qemu coreutils python3 git;
+              };
+          };
+          packages.nucleo-n657x0-q = util.nucleo-n657x0-q;
+          devShells.nucleo-n657x0-q = util.mkShell {
+            packages = builtins.attrValues ({
+              inherit (config.packages) nucleo-n657x0-q;
+              inherit (pkgs) gcc-arm-embedded coreutils git libffi pkg-config;
+            });
+          };
+
+
+          devShells.avr = util.mkShell (import ./nix/avr { inherit pkgs; });
           packages.hol_server = util.hol_server.hol_server_start;
           devShells.hol_light = (util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum hol_server; };
