@@ -66,3 +66,34 @@ jobs:
           perf: PMU
           opt: true
           store_results: false
+
+  baremetal_aarch64_virt:
+    name: AArch64-virt no-MMU (${{ matrix.fips202_backend }})
+    strategy:
+      fail-fast: false
+      matrix:
+        fips202_backend:
+          - x1_scalar
+          - x1_v84a
+          - x2_v84a
+          - x4_v8a_scalar
+          - x4_v8a_v84a_scalar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: baremetal build + test
+        uses: ./.github/actions/functest
+        env:
+          EXTRA_MAKEFILE: test/baremetal/platform/aarch64-virt/platform.mk
+        with:
+          nix-shell: cross-aarch64-embedded
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          opt: opt
+          func: true
+          kat: true
+          acvp: true
+          examples: false
+          stack: false
+          alloc: false
+          rng_fail: true
+          extra_args: '--fips202-aarch64-backend=${{ matrix.fips202_backend }}'
