@@ -461,6 +461,32 @@ let IVAL_DECOMPRESS_D5_BOUND = prove
   REWRITE_TAC[INT_OF_NUM_LE; INT_OF_NUM_LT; LE_0] THEN ASM_ARITH_TAC);;
 
 (* ------------------------------------------------------------------------- *)
+(* decompress_d10 computes round(u * 3329 / 1024)                            *)
+(* which equals (u * 3329 + 512) >> 10 for u in 0..1023.                     *)
+(* This is Decompress_10 from FIPS 203, Eq (4.8).                            *)
+(* ------------------------------------------------------------------------- *)
+let decompress_d10 = new_definition
+  `decompress_d10 (x:10 word) : 16 word =
+   word((val x * 3329 + 512) DIV 1024)`;;
+
+let IVAL_DECOMPRESS_D10_BOUND = prove
+ (`!x:10 word. &0 <= ival(decompress_d10 x) /\ ival(decompress_d10 x) < &3329`,
+  GEN_TAC THEN
+  SUBGOAL_THEN `val(decompress_d10 (x:10 word)) < 2 EXP 15` ASSUME_TAC THENL
+  [REWRITE_TAC[decompress_d10; VAL_WORD; DIMINDEX_16] THEN
+   MP_TAC(ISPEC `x:10 word` VAL_BOUND) THEN CONV_TAC(DEPTH_CONV DIMINDEX_CONV) THEN ARITH_TAC;
+   ALL_TAC] THEN
+  SUBGOAL_THEN `val(decompress_d10 (x:10 word)) < 3329` ASSUME_TAC THENL
+  [REWRITE_TAC[decompress_d10; VAL_WORD; DIMINDEX_16] THEN
+   MP_TAC(ISPEC `x:10 word` VAL_BOUND) THEN CONV_TAC(DEPTH_CONV DIMINDEX_CONV) THEN ARITH_TAC;
+   ALL_TAC] THEN
+  MP_TAC(ISPEC `decompress_d10 (x:10 word):16 word` IVAL_EQ_VAL) THEN
+  REWRITE_TAC[DIMINDEX_16; ARITH] THEN ASM_REWRITE_TAC[] THEN
+  ANTS_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
+  DISCH_THEN SUBST1_TAC THEN
+  REWRITE_TAC[INT_OF_NUM_LE; INT_OF_NUM_LT; LE_0] THEN ASM_ARITH_TAC);;
+
+(* ------------------------------------------------------------------------- *)
 (* From |- (x == y) (mod m) /\ P   to   |- (x == y) (mod n) /\ P             *)
 (* ------------------------------------------------------------------------- *)
 
