@@ -201,7 +201,7 @@ static MLK_INLINE int mlk_poly_compress_d4_native(
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_poly_compress_d4_avx2(r, a);
+  mlk_poly_compress_d4_avx2(r, a, mlk_compress_d4_data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 

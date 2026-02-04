@@ -81,7 +81,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_compress_d10_avx2:
         vpsubw	%ymm9, %ymm8, %ymm8
         vpmulhrsw	%ymm3, %ymm8, %ymm8
         vpand	%ymm4, %ymm8, %ymm8
-        // vpmaddwd	%ymm5, %ymm8, %ymm8
+        vpmaddwd	%ymm5, %ymm8, %ymm8
         vpsllvd	%ymm6, %ymm8, %ymm8
         vpsrlq	$0xc, %ymm8, %ymm8
         vpshufb	%ymm7, %ymm8, %ymm8
@@ -100,7 +100,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_compress_d10_avx2:
         vpsubw	%ymm9, %ymm8, %ymm8
         vpmulhrsw	%ymm3, %ymm8, %ymm8
         vpand	%ymm4, %ymm8, %ymm8
-        // vpmaddwd	%ymm5, %ymm8, %ymm8
+        vpmaddwd	%ymm5, %ymm8, %ymm8
         vpsllvd	%ymm6, %ymm8, %ymm8
         vpsrlq	$0xc, %ymm8, %ymm8
         vpshufb	%ymm7, %ymm8, %ymm8
@@ -119,7 +119,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_compress_d10_avx2:
         vpsubw	%ymm9, %ymm8, %ymm8
         vpmulhrsw	%ymm3, %ymm8, %ymm8
         vpand	%ymm4, %ymm8, %ymm8
-        // vpmaddwd	%ymm5, %ymm8, %ymm8
+        vpmaddwd	%ymm5, %ymm8, %ymm8
         vpsllvd	%ymm6, %ymm8, %ymm8
         vpsrlq	$0xc, %ymm8, %ymm8
         vpshufb	%ymm7, %ymm8, %ymm8
@@ -138,7 +138,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_compress_d10_avx2:
         vpsubw	%ymm9, %ymm8, %ymm8
         vpmulhrsw	%ymm3, %ymm8, %ymm8
         vpand	%ymm4, %ymm8, %ymm8
-        // vpmaddwd	%ymm5, %ymm8, %ymm8
+        vpmaddwd	%ymm5, %ymm8, %ymm8
         vpsllvd	%ymm6, %ymm8, %ymm8
         vpsrlq	$0xc, %ymm8, %ymm8
         vpshufb	%ymm7, %ymm8, %ymm8
@@ -157,7 +157,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_compress_d10_avx2:
         vpsubw	%ymm9, %ymm8, %ymm8
         vpmulhrsw	%ymm3, %ymm8, %ymm8
         vpand	%ymm4, %ymm8, %ymm8
-        // vpmaddwd	%ymm5, %ymm8, %ymm8
+        vpmaddwd	%ymm5, %ymm8, %ymm8
         vpsllvd	%ymm6, %ymm8, %ymm8
         vpsrlq	$0xc, %ymm8, %ymm8
         vpshufb	%ymm7, %ymm8, %ymm8
@@ -176,7 +176,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_compress_d10_avx2:
         vpsubw	%ymm9, %ymm8, %ymm8
         vpmulhrsw	%ymm3, %ymm8, %ymm8
         vpand	%ymm4, %ymm8, %ymm8
-        // vpmaddwd	%ymm5, %ymm8, %ymm8
+        vpmaddwd	%ymm5, %ymm8, %ymm8
         vpsllvd	%ymm6, %ymm8, %ymm8
         vpsrlq	$0xc, %ymm8, %ymm8
         vpshufb	%ymm7, %ymm8, %ymm8
@@ -195,7 +195,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_compress_d10_avx2:
         vpsubw	%ymm9, %ymm8, %ymm8
         vpmulhrsw	%ymm3, %ymm8, %ymm8
         vpand	%ymm4, %ymm8, %ymm8
-        // vpmaddwd	%ymm5, %ymm8, %ymm8
+        vpmaddwd	%ymm5, %ymm8, %ymm8
         vpsllvd	%ymm6, %ymm8, %ymm8
         vpsrlq	$0xc, %ymm8, %ymm8
         vpshufb	%ymm7, %ymm8, %ymm8
@@ -214,7 +214,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_compress_d10_avx2:
         vpsubw	%ymm9, %ymm8, %ymm8
         vpmulhrsw	%ymm3, %ymm8, %ymm8
         vpand	%ymm4, %ymm8, %ymm8
-        // vpmaddwd	%ymm5, %ymm8, %ymm8
+        vpmaddwd	%ymm5, %ymm8, %ymm8
         vpsllvd	%ymm6, %ymm8, %ymm8
         vpsrlq	$0xc, %ymm8, %ymm8
         vpshufb	%ymm7, %ymm8, %ymm8
@@ -233,7 +233,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_compress_d10_avx2:
         vpsubw	%ymm9, %ymm8, %ymm8
         vpmulhrsw	%ymm3, %ymm8, %ymm8
         vpand	%ymm4, %ymm8, %ymm8
-        // vpmaddwd	%ymm5, %ymm8, %ymm8
+        vpmaddwd	%ymm5, %ymm8, %ymm8
         vpsllvd	%ymm6, %ymm8, %ymm8
         vpsrlq	$0xc, %ymm8, %ymm8
         vpshufb	%ymm7, %ymm8, %ymm8
@@ -252,7 +252,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_compress_d10_avx2:
         vpsubw	%ymm9, %ymm8, %ymm8
         vpmulhrsw	%ymm3, %ymm8, %ymm8
         vpand	%ymm4, %ymm8, %ymm8
-        // vpmaddwd	%ymm5, %ymm8, %ymm8
+        vpmaddwd	%ymm5, %ymm8, %ymm8
         vpsllvd	%ymm6, %ymm8, %ymm8
         vpsrlq	$0xc, %ymm8, %ymm8
         vpshufb	%ymm7, %ymm8, %ymm8
@@ -271,7 +271,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_compress_d10_avx2:
         vpsubw	%ymm9, %ymm8, %ymm8
         vpmulhrsw	%ymm3, %ymm8, %ymm8
         vpand	%ymm4, %ymm8, %ymm8
-        // vpmaddwd	%ymm5, %ymm8, %ymm8
+        vpmaddwd	%ymm5, %ymm8, %ymm8
         vpsllvd	%ymm6, %ymm8, %ymm8
         vpsrlq	$0xc, %ymm8, %ymm8
         vpshufb	%ymm7, %ymm8, %ymm8
@@ -290,7 +290,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_compress_d10_avx2:
         vpsubw	%ymm9, %ymm8, %ymm8
         vpmulhrsw	%ymm3, %ymm8, %ymm8
         vpand	%ymm4, %ymm8, %ymm8
-        // vpmaddwd	%ymm5, %ymm8, %ymm8
+        vpmaddwd	%ymm5, %ymm8, %ymm8
         vpsllvd	%ymm6, %ymm8, %ymm8
         vpsrlq	$0xc, %ymm8, %ymm8
         vpshufb	%ymm7, %ymm8, %ymm8
@@ -309,7 +309,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_compress_d10_avx2:
         vpsubw	%ymm9, %ymm8, %ymm8
         vpmulhrsw	%ymm3, %ymm8, %ymm8
         vpand	%ymm4, %ymm8, %ymm8
-        // vpmaddwd	%ymm5, %ymm8, %ymm8
+        vpmaddwd	%ymm5, %ymm8, %ymm8
         vpsllvd	%ymm6, %ymm8, %ymm8
         vpsrlq	$0xc, %ymm8, %ymm8
         vpshufb	%ymm7, %ymm8, %ymm8
@@ -328,7 +328,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_compress_d10_avx2:
         vpsubw	%ymm9, %ymm8, %ymm8
         vpmulhrsw	%ymm3, %ymm8, %ymm8
         vpand	%ymm4, %ymm8, %ymm8
-        // vpmaddwd	%ymm5, %ymm8, %ymm8
+        vpmaddwd	%ymm5, %ymm8, %ymm8
         vpsllvd	%ymm6, %ymm8, %ymm8
         vpsrlq	$0xc, %ymm8, %ymm8
         vpshufb	%ymm7, %ymm8, %ymm8
@@ -347,7 +347,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_compress_d10_avx2:
         vpsubw	%ymm9, %ymm8, %ymm8
         vpmulhrsw	%ymm3, %ymm8, %ymm8
         vpand	%ymm4, %ymm8, %ymm8
-        // vpmaddwd	%ymm5, %ymm8, %ymm8
+        vpmaddwd	%ymm5, %ymm8, %ymm8
         vpsllvd	%ymm6, %ymm8, %ymm8
         vpsrlq	$0xc, %ymm8, %ymm8
         vpshufb	%ymm7, %ymm8, %ymm8
@@ -366,7 +366,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_compress_d10_avx2:
         vpsubw	%ymm9, %ymm8, %ymm8
         vpmulhrsw	%ymm3, %ymm8, %ymm8
         vpand	%ymm4, %ymm8, %ymm8
-        // vpmaddwd	%ymm5, %ymm8, %ymm8
+        vpmaddwd	%ymm5, %ymm8, %ymm8
         vpsllvd	%ymm6, %ymm8, %ymm8
         vpsrlq	$0xc, %ymm8, %ymm8
         vpshufb	%ymm7, %ymm8, %ymm8
