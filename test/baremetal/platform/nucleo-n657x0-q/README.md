@@ -1,5 +1,6 @@
 <!--
 Copyright (c) The mldsa-native project authors
+Copyright (c) The mlkem-native project authors
 Copyright (c) Arm Ltd.
 SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 -->
@@ -17,6 +18,15 @@ This platform runs ML-KEM tests on the ST NUCLEO‑N657X0‑Q board using STM32C
 - Hardware: NUCLEO‑N657X0‑Q connected over USB. Update ST‑LINK firmware if prompted:
   - macOS app: `<CLT>/STM32CubeProgrammer/stlink/STLinkUpgrade.app`
   - CLI: `<CLT>/STM32CubeProgrammer/stlink/STLinkUpgrade`
+
+## DevShell (required)
+Run gdb, make and exec_wrapper.py commands in this README from within the project’s Nix devshell for this board:
+
+```
+nix develop .#nucleo-n657x0-q
+```
+
+Then, in that shell, run the Make targets and Python scripts below.
 
 ## Environment Variables (exec_wrapper.py)
 - `GDB` (default: `arm-none-eabi-gdb`) – gdb binary.
@@ -57,7 +67,17 @@ STM32_Programmer_CLI -c port={transport} freq={speed} {serial_prog} -gdbserver p
 - Add `--verbose` (or `-v`) to print wrapper diagnostics, gdbserver output, and gdb chatter.
 
 ## Argv injection
-- Tests receive arguments via a memory block named `mlkem_cmdline_block`.
+- Tests receive arguments via a reserved BSS block symbol `mlk_cmdline_block`.
+- The wrapper resolves the numeric base address via `arm-none-eabi-nm` (fallback: `readelf -s`);
+  override with `ARG_BLOCK_ADDR` (hex) or choose a different symbol with `ARG_BLOCK_SYMBOL`.
+
+### Argv blob layout (authoritative)
+- 4 bytes: `u32 argc` (little-endian).
+- `argc` × 4 bytes: `u32 argv_ptrs[i]` (absolute addresses): `base + string_offset[i]`.
+- NUL-terminated UTF-8 strings placed sequentially after the pointer table.
+- Alignment: strings start at offset `4 + 4*argc` (4-byte aligned).
+- Helper: `test/baremetal/platform/nucleo-n657x0-q/make_argv_bin.py` can generate `argv.bin` manually.
+
 - The wrapper packs argv into a temporary `argv.bin` and restores it via GDB:
   - Resolves the symbol’s numeric address using `arm-none-eabi-nm` (fallback: `readelf -s`).
   - Uses `restore <argv.bin> binary <addr>` in the GDB batch.
@@ -92,8 +112,9 @@ ST-LINK_gdbserver -p 61234 -l 1 -d -s -cp "$ST_CUBE_PROG_PATH" -m 1   --semihost
 (gdb) target remote :61234
 (gdb) monitor reset
 (gdb) load
-(gdb) restore /tmp/argv.bin binary &mlkem_cmdline_block     # or numeric address
-(gdb) monitor reset
+(gdb) tbreak __wrap_main
+(gdb) continue
+(gdb) restore /tmp/argv.bin binary &mlk_cmdline_block     # or numeric address
 (gdb) continue
 ```
 
@@ -107,3 +128,19 @@ ST-LINK_gdbserver -p 61234 -l 1 -d -s -cp "$ST_CUBE_PROG_PATH" -m 1   --semihost
 ## Notes
 - ST‑LINK gdbserver does not implement the QEMU semihost `SYS_EXIT_EXTENDED`. A sentinel‑based exit workaround is planned in the proposal.
 - This platform uses FSBL‑LRUN startup/system/linker from the Cube template and a 128 KiB stack for tests.
+
+- Clock configuration: `SystemClock_Config()` is generated from the STM32CubeN6 FSBL template (`Projects/NUCLEO-N657X0-Q/Templates/Template_FSBL_LRUN/FSBL/Src/main.c`) into `${NUCLEO_N657X0_Q_PATH}/clock_config.c` by `nix/nucleo-n657x0-q/default.nix`. The devshell build also ensures `${NUCLEO_N657X0_Q_PATH}/Inc/main.h` declares `void SystemClock_Config(void);` and `void Error_Handler(void);`. Do not edit the generated file directly; update the Cube template or the extraction logic if adjustments are needed.
+
+## HW‑testing
+- Run from inside the Nix devshell: `nix develop .#nucleo-n657x0-q`.
+- Hardware runs are opt‑in. Include this platform’s Makefile to target the NUCLEO‑N657X0‑Q board:
+
+```
+make test EXTRA_MAKEFILE=test/baremetal/platform/nucleo-n657x0-q/platform.mk -j1 V=1
+```
+
+- Examples:
+  - Single test: `make run_func_512 EXTRA_MAKEFILE=test/baremetal/platform/nucleo-n657x0-q/platform.mk -j1 V=1`
+  - Direct wrapper: `python3 test/baremetal/platform/nucleo-n657x0-q/exec_wrapper.py test/build/mlkem512/bin/test_mlkem512`
+
+- Without `EXTRA_MAKEFILE`, tests run on the host (no hardware).
