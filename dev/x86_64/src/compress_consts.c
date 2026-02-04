@@ -47,6 +47,13 @@ MLK_ALIGN const uint8_t mlk_decompress_d10_data[32] = {
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
     (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4)
 
+MLK_ALIGN const uint8_t
+    mlk_compress_d5_data[32] = {
+        0, 1,  2,  3,  4,   255, 255, 255, 255, 255, 8,
+        9, 10, 11, 12, 255, 9,   10,  11,  12,  255, 0,
+        1, 2,  3,  4,  255, 255, 255, 255, 255, 8, /* shufbidx */
+};
+
 /* shufbidx[0:32], mask[32:64], shift[64:96] */
 MLK_ALIGN const uint8_t mlk_decompress_d5_data[96] = {
     0,   0, 0,   1, 1,   1,  1,   2,  2,   3, 3,   3, 3,   4, 4,   4, 5,  5,

@@ -1339,6 +1339,15 @@ def gen_compress_d4_permdidx():
         yield from dword.to_bytes(4, "little")
 
 
+def gen_compress_d5_shufbidx():
+    # Shuffle index for poly_compress_d5_avx2.
+    # 5-bit compression: 8 coefficients -> 5 bytes (40 bits).
+    # Also used as vpblendvb mask (high bit selects source).
+    # 255 (0xFF) means "zero this byte" in vpshufb / "select src2" in vpblendvb.
+    yield from [0, 1, 2, 3, 4, 255, 255, 255, 255, 255, 8, 9, 10, 11, 12, 255]
+    yield from [9, 10, 11, 12, 255, 0, 1, 2, 3, 4, 255, 255, 255, 255, 255, 8]
+
+
 def gen_compress_d10_shufbidx():
     # Shuffle index for poly_compress_d10_avx2.
     # 10-bit compression: 4 coefficients -> 5 bytes (40 bits).
@@ -1465,6 +1474,12 @@ def gen_avx2_compress_consts():
             "uint8_t",
             "shufbidx",
             "d4_d10",
+        ),
+        "compress_d5_data": (
+            [("shufbidx", list(gen_compress_d5_shufbidx()))],
+            "uint8_t",
+            "shufbidx",
+            "d5_d11",
         ),
         "decompress_d5_data": (
             [
@@ -2895,6 +2910,13 @@ def gen_hol_light_asm():
         (
             "poly_decompress_d4.S",
             "mlkem_poly_decompress_d4.S",
+            "dev/x86_64/src",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
+        ),
+        (
+            "poly_compress_d5.S",
+            "mlkem_poly_compress_d5.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
