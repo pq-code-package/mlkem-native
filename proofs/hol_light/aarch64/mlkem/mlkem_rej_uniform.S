@@ -143,13 +143,13 @@ Lrej_uniform_loop48:
         tbl	v17.16b, { v17.16b }, v25.16b
         tbl	v18.16b, { v18.16b }, v26.16b
         tbl	v19.16b, { v19.16b }, v27.16b
-        str	q16, [x7]
+        st1	{ v16.8h }, [x7]
         add	x7, x7, x12, lsl #1
-        str	q17, [x7]
+        st1	{ v17.8h }, [x7]
         add	x7, x7, x13, lsl #1
-        str	q18, [x7]
+        st1	{ v18.8h }, [x7]
         add	x7, x7, x14, lsl #1
-        str	q19, [x7]
+        st1	{ v19.8h }, [x7]
         add	x7, x7, x15, lsl #1
         add	x12, x12, x13
         add	x14, x14, x15
@@ -189,9 +189,9 @@ Lrej_uniform_loop48_end:
         fmov	w13, s21
         tbl	v16.16b, { v16.16b }, v24.16b
         tbl	v17.16b, { v17.16b }, v25.16b
-        str	q16, [x7]
+        st1	{ v16.8h }, [x7]
         add	x7, x7, x12, lsl #1
-        str	q17, [x7]
+        st1	{ v17.8h }, [x7]
         add	x7, x7, x13, lsl #1
         add	x9, x9, x12
         add	x9, x9, x13
