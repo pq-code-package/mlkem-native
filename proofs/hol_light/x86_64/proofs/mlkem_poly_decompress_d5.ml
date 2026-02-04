@@ -378,19 +378,8 @@ let WORD_SUBWORD_NUM_OF_WORDLIST_16 = prove(`!ls:(5 word)list k.
   let th = CONV_RULE(DEPTH_CONV DIMINDEX_CONV) th in
   REWRITE_TAC [REWRITE_RULE[ARITH_RULE `80 = 5 * n <=> n = 16`; MESON[] `n = 16 /\ k < n <=> n = 16 /\ k < 16`] th]);;
 
-let WORD_SUBWORD_NUM_OF_WORDLIST_16_ZX = prove
- (`!ls:(5 word)list k.
-    LENGTH ls = 16 /\ k < 16
-    ==> word_subword (word (num_of_wordlist ls) : 80 word) (5*k,5) : 16 word = word_zx (EL k ls)`,
-  REPEAT STRIP_TAC THEN
-  MP_TAC(SPECL [`ls:(5 word)list`; `k:num`] WORD_SUBWORD_NUM_OF_WORDLIST_16) THEN
-  ASM_REWRITE_TAC[] THEN DISCH_THEN(fun th -> REWRITE_TAC[GSYM th]) THEN
-  REWRITE_TAC[GSYM VAL_EQ; VAL_WORD_ZX_GEN; VAL_WORD_SUBWORD] THEN
-  CONV_TAC(DEPTH_CONV DIMINDEX_CONV) THEN
-  REWRITE_TAC[MOD_MOD_EXP_MIN] THEN CONV_TAC NUM_REDUCE_CONV);;
-
 let WORD_SUBWORD_NUM_OF_WORDLIST_CASES =
-  let base = WORD_SUBWORD_NUM_OF_WORDLIST_16_ZX in
+  let base = WORD_SUBWORD_NUM_OF_WORDLIST_16 in
   let mk k =
     let th = SPEC (mk_small_numeral k) (SPEC `ls:(5 word)list` base) in
     CONV_RULE NUM_REDUCE_CONV (REWRITE_RULE[ARITH] th) in
@@ -414,7 +403,7 @@ let mk_bitfiddle n =
              wordlist_for_byte hi_byte hi_bit, `hi_byte: 8 word`]
         `(word_and (word_shl (word_join (hi_byte: 8 word) (lo_byte: 8 word): 16 word) offset) (word 31744))`) in
     subst [word_term, `abstract_entry: 16 word`; mk_small_numeral n, `n: num`; mk_small_numeral (5*n), `i:num`]
-        `(abstract_entry: 16 word) = word_shl (word_subword (t : 80 word) (i,5) : 16 word) 10`;;
+        `word_sx (abstract_entry: 16 word) : 32 word = word_shl (word_zx (word_subword (t : 80 word) (i,5) : 5 word) : 32 word) 10`;;
 
 let BITFIDDLE_LEMMAS = map (fun n -> WORD_BLAST (mk_bitfiddle n)) (0--15);;
 
@@ -425,27 +414,14 @@ let DIMINDEX_5 = DIMINDEX_CONV `dimindex (:5)`
 
 let DECOMPRESS_D5_CORRECT = prove(
   `word_subword (word_add (word_ushr
-     (word_mul (word_sx (word_shl (word_zx x : 16 word) 10) : 32 word) (word 3329 : 32 word))
+     (word_mul (word_shl (word_zx (x : 5 word) : 32 word) 10) (word 3329 : 32 word))
      14) (word 1)) (1, 16) = decompress_d5 x`,
-  let VAL_5_WORD_BOUND = WORD_BLAST `val (x : 5 word) < 32` in
-  REWRITE_TAC[decompress_d5; GSYM VAL_EQ] THEN
-  REWRITE_TAC[WORD_BLAST `!(x : 5 word). word_sx (word_shl (word_zx x : 16 word) 10) : 32 word = word_shl (word_zx x : 32 word) 10`] THEN
-  REWRITE_TAC[WORD_BLAST `!(x : 32 word). word_mul (word_shl x 10) (word 3329 : 32 word) = word_shl (word_mul x (word 3329)) 10`] THEN
-  REWRITE_TAC[VAL_WORD_SUBWORD; VAL_WORD_ADD; VAL_WORD_USHR; VAL_WORD_SHL;
-              VAL_WORD_MUL; VAL_WORD_ZX_GEN; VAL_WORD; DIMINDEX_16; DIMINDEX_32; DIMINDEX_5] THEN
-  CONV_TAC NUM_REDUCE_CONV THEN
-  MP_TAC VAL_5_WORD_BOUND THEN SPEC_TAC (`val (x:5 word)`, `v:num`) THEN GEN_TAC THEN DISCH_TAC THEN
-  MAP_EVERY (fun t -> SUBGOAL_THEN t SUBST1_TAC THENL [MATCH_MP_TAC MOD_LT THEN ASM_ARITH_TAC; ALL_TAC])
-    [`v MOD 4294967296 = v`;
-     `(v * 3329) MOD 4294967296 = v * 3329`;
-     `(1024 * v * 3329) MOD 4294967296 = 1024 * v * 3329`] THEN
-  REWRITE_TAC[ARITH_RULE `1024 * v * 3329 = 1024 * (v * 3329)`] THEN
-  REWRITE_TAC[ARITH_RULE `16384 = 1024 * 16`] THEN
-  SIMP_TAC[GSYM DIV_DIV; ARITH_EQ; DIV_MULT] THEN
-  SUBGOAL_THEN `((v * 3329) DIV 16 + 1) MOD 4294967296 = (v * 3329) DIV 16 + 1` SUBST1_TAC THENL
-    [MATCH_MP_TAC MOD_LT THEN ASM_ARITH_TAC; ALL_TAC] THEN
-  SUBGOAL_THEN `((v * 3329) DIV 16 + 1) DIV 2 = (v * 3329 + 16) DIV 32` SUBST1_TAC THENL
-    [MP_TAC (SPECL [`v * 3329`; `16`] DIVISION) THEN ARITH_TAC; REFL_TAC]);;
+  REWRITE_TAC[decompress_d5; GSYM VAL_EQ; VAL_WORD_SUBWORD; VAL_WORD_ADD;
+              VAL_WORD_USHR; VAL_WORD_MUL; VAL_WORD_SHL; VAL_WORD_ZX_GEN; VAL_WORD] THEN
+  CONV_TAC(DEPTH_CONV DIMINDEX_CONV) THEN CONV_TAC NUM_REDUCE_CONV THEN
+  MP_TAC(ISPEC `x:5 word` VAL_BOUND) THEN CONV_TAC(DEPTH_CONV DIMINDEX_CONV) THEN
+  CONV_TAC NUM_REDUCE_CONV THEN SPEC_TAC(`val(x:5 word)`,`n:num`) THEN
+  CONV_TAC EXPAND_CASES_CONV THEN CONV_TAC NUM_REDUCE_CONV);;
 
 let SIMP_DECOMPOSE_TAC =
   RULE_ASSUM_TAC (CONV_RULE NUM_REDUCE_CONV o REWRITE_RULE ([WORD_SHL_WORD; WORD_SHL_AND] @ SHIFT_LEMMAS)) THEN
