@@ -153,6 +153,15 @@
                 inherit (pkgs) gcc-arm-embedded qemu coreutils python3 git;
               };
           };
+          devShells.cross-aarch64-embedded = util.mkShell {
+            packages = builtins.attrValues
+              {
+                inherit (pkgs) qemu coreutils python3 git;
+              } ++ [
+              pkgs-unstable.pkgsCross.aarch64-embedded.stdenv.cc
+            ];
+          };
+
           devShells.cross-avr = util.mkShell (import ./nix/avr { inherit pkgs; });
 
           devShells.linter = util.mkShellNoCC {
