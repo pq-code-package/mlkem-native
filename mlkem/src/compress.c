@@ -135,6 +135,12 @@ void mlk_poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
  *            for ML-KEM-{512,768}. */
 MLK_STATIC_TESTABLE void mlk_poly_decompress_d4_c(
     mlk_poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_D4))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+)
 {
   unsigned i;
   for (i = 0; i < MLKEM_N / 2; i++)
@@ -152,6 +158,12 @@ MLK_STATIC_TESTABLE void mlk_poly_decompress_d4_c(
 MLK_INTERNAL_API
 void mlk_poly_decompress_d4(mlk_poly *r,
                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_D4))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+)
 {
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D4)
   int ret;
@@ -170,6 +182,12 @@ void mlk_poly_decompress_d4(mlk_poly *r,
  *            reference implementation, for ML-KEM-{512,768}. */
 MLK_STATIC_TESTABLE void mlk_poly_decompress_d10_c(
     mlk_poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_D10))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+)
 {
   unsigned j;
   for (j = 0; j < MLKEM_N / 4; j++)
@@ -201,6 +219,12 @@ MLK_STATIC_TESTABLE void mlk_poly_decompress_d10_c(
 MLK_INTERNAL_API
 void mlk_poly_decompress_d10(mlk_poly *r,
                              const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_D10))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+)
 {
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D10)
   int ret;
@@ -331,6 +355,12 @@ void mlk_poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
  *            for ML-KEM-1024. */
 MLK_STATIC_TESTABLE void mlk_poly_decompress_d5_c(
     mlk_poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_D5))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+)
 {
   unsigned i;
   for (i = 0; i < MLKEM_N / 8; i++)
@@ -376,6 +406,12 @@ MLK_STATIC_TESTABLE void mlk_poly_decompress_d5_c(
 MLK_INTERNAL_API
 void mlk_poly_decompress_d5(mlk_poly *r,
                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_D5))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+)
 {
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D5)
   int ret;
@@ -394,6 +430,12 @@ void mlk_poly_decompress_d5(mlk_poly *r,
  *            reference implementation, for ML-KEM-1024. */
 MLK_STATIC_TESTABLE void mlk_poly_decompress_d11_c(
     mlk_poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_D11))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+)
 {
   unsigned j;
   for (j = 0; j < MLKEM_N / 8; j++)
@@ -430,6 +472,12 @@ MLK_STATIC_TESTABLE void mlk_poly_decompress_d11_c(
 MLK_INTERNAL_API
 void mlk_poly_decompress_d11(mlk_poly *r,
                              const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_D11))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+)
 {
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D11)
   int ret;
