@@ -67,6 +67,18 @@ let decompress_d5_data = define `decompress_d5_data:int list = [
   &64; &0; &0; &2; &16; &0; &128; &0
 ]`;;
 
+(* srlvqidx, shufbidx *)
+let compress_d11_data = define `compress_d11_data:int list = [
+  &10; &0; &0; &0; &0; &0; &0; &0;
+  &30; &0; &0; &0; &0; &0; &0; &0;
+  &10; &0; &0; &0; &0; &0; &0; &0;
+  &30; &0; &0; &0; &0; &0; &0; &0;
+  &0; &1; &2; &3; &4; &5; &6; &7;
+  &8; &9; &10; &255; &255; &255; &255; &255;
+  &5; &6; &7; &8; &9; &10; &255; &255;
+  &255; &255; &0; &0; &1; &2; &3; &4
+]`;;
+
 (* shufbidx, srlvdidx, srlvqidx, shift *)
 let decompress_d11_data = define `decompress_d11_data:int list = [
   &0; &1; &1; &2; &2; &3; &4; &5;

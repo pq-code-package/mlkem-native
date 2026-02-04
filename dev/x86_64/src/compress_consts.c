@@ -64,6 +64,14 @@ MLK_ALIGN const uint8_t mlk_decompress_d5_data[96] = {
     32,  0, 0,   1, 8,   0,  64,  0,  0,   2, 16,  0, 128, 0, /* shift */
 };
 
+/* srlvqidx[0:32], shufbidx[32:64] */
+MLK_ALIGN const uint8_t mlk_compress_d11_data[64] = {
+    10, 0, 0, 0, 0,  0,   0,   0,   30,  0, 0,  0,   0,   0,   0,   0,   10,
+    0,  0, 0, 0, 0,  0,   0,   30,  0,   0, 0,  0,   0,   0,   0, /* srlvqidx */
+    0,  1, 2, 3, 4,  5,   6,   7,   8,   9, 10, 255, 255, 255, 255, 255, 5,
+    6,  7, 8, 9, 10, 255, 255, 255, 255, 0, 0,  1,   2,   3,   4, /* shufbidx */
+};
+
 /* shufbidx[0:32], srlvdidx[32:64], srlvqidx[64:96], shift[96:128] */
 MLK_ALIGN const uint8_t mlk_decompress_d11_data[128] = {
     0,  1, 1, 2, 2, 3, 4,  5, 5, 6, 6, 7,  8,  9,  9,  10,
