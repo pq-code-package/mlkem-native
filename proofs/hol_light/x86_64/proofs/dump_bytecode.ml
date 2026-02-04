@@ -62,6 +62,10 @@ print_string "=== bytecode start: x86_64/mlkem/mlkem_poly_decompress_d5.o ===\n"
 print_literal_from_elf "x86_64/mlkem/mlkem_poly_decompress_d5.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
+print_string "=== bytecode start: x86_64/mlkem/mlkem_poly_compress_d10.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/mlkem_poly_compress_d10.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
 print_string "=== bytecode start: x86_64/mlkem/mlkem_poly_decompress_d10.o ===\n";;
 print_literal_from_elf "x86_64/mlkem/mlkem_poly_decompress_d10.o";;
 print_string "==== bytecode end =====================================\n\n";;

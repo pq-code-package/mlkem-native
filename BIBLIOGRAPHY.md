@@ -266,6 +266,7 @@ source code and documentation.
   - [mlkem/src/native/x86_64/src/nttfrombytes.S](mlkem/src/native/x86_64/src/nttfrombytes.S)
   - [mlkem/src/native/x86_64/src/ntttobytes.S](mlkem/src/native/x86_64/src/ntttobytes.S)
   - [mlkem/src/native/x86_64/src/nttunpack.S](mlkem/src/native/x86_64/src/nttunpack.S)
+  - [mlkem/src/native/x86_64/src/poly_compress_d10.S](mlkem/src/native/x86_64/src/poly_compress_d10.S)
   - [mlkem/src/native/x86_64/src/poly_decompress_d10.S](mlkem/src/native/x86_64/src/poly_decompress_d10.S)
   - [mlkem/src/native/x86_64/src/poly_decompress_d11.S](mlkem/src/native/x86_64/src/poly_decompress_d11.S)
   - [mlkem/src/native/x86_64/src/poly_decompress_d4.S](mlkem/src/native/x86_64/src/poly_decompress_d4.S)

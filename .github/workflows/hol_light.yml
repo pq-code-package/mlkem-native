@@ -215,6 +215,8 @@ jobs:
             needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
           - name: mlkem_poly_decompress_d5
             needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
+          - name: mlkem_poly_compress_d10
+            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
           - name: mlkem_poly_decompress_d10
             needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
           - name: mlkem_poly_decompress_d11
