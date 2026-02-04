@@ -294,7 +294,7 @@ static MLK_INLINE int mlk_poly_decompress_d11_native(
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_poly_decompress_d11_avx2(r, a);
+  mlk_poly_decompress_d11_avx2(r, a, mlk_decompress_d11_data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */

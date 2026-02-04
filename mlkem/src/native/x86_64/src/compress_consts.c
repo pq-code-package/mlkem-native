@@ -46,6 +46,18 @@ MLK_ALIGN const uint8_t mlk_decompress_d5_data[96] = {
     32,  0, 0,   1, 8,   0,  64,  0,  0,   2, 16,  0, 128, 0, /* shift */
 };
 
+/* shufbidx[0:32], srlvdidx[32:64], srlvqidx[64:96], shift[96:128] */
+MLK_ALIGN const uint8_t mlk_decompress_d11_data[128] = {
+    0,  1, 1, 2, 2, 3, 4,  5, 5, 6, 6, 7,  8,  9,  9,  10,
+    3,  4, 4, 5, 5, 6, 7,  8, 8, 9, 9, 10, 11, 12, 12, 13, /* shufbidx */
+    0,  0, 0, 0, 1, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,
+    0,  0, 0, 0, 1, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0, /* srlvdidx */
+    0,  0, 0, 0, 0, 0, 0,  0, 2, 0, 0, 0,  0,  0,  0,  0,
+    0,  0, 0, 0, 0, 0, 0,  0, 2, 0, 0, 0,  0,  0,  0,  0, /* srlvqidx */
+    32, 0, 4, 0, 1, 0, 32, 0, 8, 0, 1, 0,  32, 0,  4,  0,
+    32, 0, 4, 0, 1, 0, 32, 0, 8, 0, 1, 0,  32, 0,  4,  0, /* shift */
+};
+
 #endif /* !MLK_CONFIG_MULTILEVEL_NO_SHARED && \
           (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4) */
 
