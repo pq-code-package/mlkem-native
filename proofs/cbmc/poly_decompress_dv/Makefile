@@ -20,16 +20,12 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/compress.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_poly_decompress_dv
-USE_FUNCTION_CONTRACTS=
-
-# TODO: We should be calling scalar_decompress_xxx by contract here,
-# but it does not seem to work yet because they are marked as static inline.
-# For K = 2 or 3, the code calls mlk_scalar_decompress_d4, so
-# ifeq ($(MLKEM_K),4)
-# USE_FUNCTION_CONTRACTS = mlk_scalar_decompress_d5
-# else
-# USE_FUNCTION_CONTRACTS = mlk_scalar_decompress_d4
-# endif
+# For K = 2 or 3, MLKEM_DV = 4; for K = 4, MLKEM_DV = 5
+ifeq ($(MLKEM_K),4)
+USE_FUNCTION_CONTRACTS=mlk_poly_decompress_d5
+else
+USE_FUNCTION_CONTRACTS=mlk_poly_decompress_d4
+endif
 
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
@@ -47,19 +43,6 @@ FUNCTION_NAME = mlk_poly_decompress_dv
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 12
-
-# If you require access to a file-local ("static") function or object to conduct
-# your proof, set the following (and do not include the original source file
-# ("mlkem/src/poly.c") in PROJECT_SOURCES).
-# REWRITTEN_SOURCES = $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i
-# include ../Makefile.common
-# $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_SOURCE = $(SRCDIR)/mlkem/src/poly.c
-# $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_FUNCTIONS = foo bar
-# $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_OBJECTS = baz
-# Care is required with variables on the left-hand side: REWRITTEN_SOURCES must
-# be set before including Makefile.common, but any use of variables on the
-# left-hand side requires those variables to be defined. Hence, _SOURCE,
-# _FUNCTIONS, _OBJECTS is set after including Makefile.common.
+CBMC_OBJECT_BITS = 8
 
 include ../Makefile.common
