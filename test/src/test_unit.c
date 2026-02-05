@@ -56,7 +56,7 @@ void mlk_keccakf1600_permute_c(uint64_t *state);
     }                                                         \
   } while (0)
 
-#if defined(MLK_USE_FIPS202_X1_NATIVE) || defined(MLK_USE_FIPS202_X4_NATIVE)
+#if defined(MLK_USE_NATIVE_FIPS202_X1) || defined(MLK_USE_NATIVE_FIPS202_X4)
 static void print_u64_array(const char *label, const uint64_t *array,
                             size_t len)
 {
@@ -104,14 +104,14 @@ static int compare_u64_arrays(const uint64_t *a, const uint64_t *b,
   }
   return 1;
 }
-#endif /* MLK_USE_FIPS202_X1_NATIVE || MLK_USE_FIPS202_X4_NATIVE */
+#endif /* MLK_USE_NATIVE_FIPS202_X1 || MLK_USE_NATIVE_FIPS202_X4 */
 
 #if defined(MLK_USE_NATIVE_POLY_REDUCE) ||                                  \
     defined(MLK_USE_NATIVE_POLY_TOMONT) || defined(MLK_USE_NATIVE_NTT) ||   \
     defined(MLK_USE_NATIVE_INTT) || defined(MLK_USE_NATIVE_POLY_TOBYTES) || \
     defined(MLK_USE_NATIVE_POLY_FROMBYTES) ||                               \
     defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED) ||        \
-    defined(MLK_USE_FIPS202_X1_NATIVE) || defined(MLK_USE_FIPS202_X4_NATIVE)
+    defined(MLK_USE_NATIVE_FIPS202_X1) || defined(MLK_USE_NATIVE_FIPS202_X4)
 
 /* Backend unit test helper functions for arithmetic native backends */
 #if defined(MLK_USE_NATIVE_POLY_REDUCE) ||                                  \
@@ -637,7 +637,7 @@ static int test_native_polyvec_basemul(void)
 }
 #endif /* MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
-#ifdef MLK_USE_FIPS202_X1_NATIVE
+#ifdef MLK_USE_NATIVE_FIPS202_X1
 static int test_keccakf1600_permute(void)
 {
   uint64_t state[MLK_KECCAK_LANES];
@@ -658,9 +658,9 @@ static int test_keccakf1600_permute(void)
 
   return 0;
 }
-#endif /* MLK_USE_FIPS202_X1_NATIVE */
+#endif /* MLK_USE_NATIVE_FIPS202_X1 */
 
-#ifdef MLK_USE_FIPS202_X4_NATIVE
+#ifdef MLK_USE_NATIVE_FIPS202_X4
 static int test_keccakf1600x4_permute(void)
 {
   uint64_t state_x4[MLK_KECCAK_LANES * MLK_KECCAK_WAY];
@@ -686,7 +686,7 @@ static int test_keccakf1600x4_permute(void)
 
   return 0;
 }
-#endif /* MLK_USE_FIPS202_X4_NATIVE */
+#endif /* MLK_USE_NATIVE_FIPS202_X4 */
 
 static int test_backend_units(void)
 {
@@ -721,11 +721,11 @@ static int test_backend_units(void)
   CHECK(test_native_polyvec_basemul() == 0);
 #endif
 
-#ifdef MLK_USE_FIPS202_X1_NATIVE
+#ifdef MLK_USE_NATIVE_FIPS202_X1
   CHECK(test_keccakf1600_permute() == 0);
 #endif
 
-#ifdef MLK_USE_FIPS202_X4_NATIVE
+#ifdef MLK_USE_NATIVE_FIPS202_X4
   CHECK(test_keccakf1600x4_permute() == 0);
 #endif
 
@@ -736,7 +736,7 @@ static int test_backend_units(void)
           MLK_USE_NATIVE_NTT || MLK_USE_NATIVE_INTT ||                    \
           MLK_USE_NATIVE_POLY_TOBYTES || MLK_USE_NATIVE_POLY_FROMBYTES || \
           MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED ||         \
-          MLK_USE_FIPS202_X1_NATIVE || MLK_USE_FIPS202_X4_NATIVE */
+          MLK_USE_NATIVE_FIPS202_X1 || MLK_USE_NATIVE_FIPS202_X4 */
 
 
 /* This test invokes the polynomial (de)compression routines
@@ -864,13 +864,13 @@ int main(void)
     defined(MLK_USE_NATIVE_INTT) || defined(MLK_USE_NATIVE_POLY_TOBYTES) || \
     defined(MLK_USE_NATIVE_POLY_FROMBYTES) ||                               \
     defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED) ||        \
-    defined(MLK_USE_FIPS202_X1_NATIVE) || defined(MLK_USE_FIPS202_X4_NATIVE)
+    defined(MLK_USE_NATIVE_FIPS202_X1) || defined(MLK_USE_NATIVE_FIPS202_X4)
   CHECK(test_backend_units() == 0);
 #endif /* MLK_USE_NATIVE_POLY_REDUCE || MLK_USE_NATIVE_POLY_TOMONT ||     \
           MLK_USE_NATIVE_NTT || MLK_USE_NATIVE_INTT ||                    \
           MLK_USE_NATIVE_POLY_TOBYTES || MLK_USE_NATIVE_POLY_FROMBYTES || \
           MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED ||         \
-          MLK_USE_FIPS202_X1_NATIVE || MLK_USE_FIPS202_X4_NATIVE */
+          MLK_USE_NATIVE_FIPS202_X1 || MLK_USE_NATIVE_FIPS202_X4 */
 
   /* Test poly compress no overflow */
   CHECK(test_poly_compress_no_overflow() == 0);

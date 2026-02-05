@@ -15,7 +15,7 @@
 #include "../api.h"
 #include "src/KeccakP_1600_times4_SIMD256.h"
 
-#define MLK_USE_FIPS202_X4_NATIVE
+#define MLK_USE_NATIVE_FIPS202_X4
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_keccak_f1600_x4_native(uint64_t *state)
 {

@@ -9,7 +9,7 @@
 #define MLK_FIPS202_NATIVE_ARMV81M
 
 /* Part of backend API */
-#define MLK_USE_FIPS202_X4_NATIVE
+#define MLK_USE_NATIVE_FIPS202_X4
 /* Guard for assembly file */
 #define MLK_FIPS202_ARMV81M_NEED_X4
 
