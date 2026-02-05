@@ -1397,3 +1397,94 @@ let READ_BYTES_SPLIT_ANY =  prove(`read (bytes(a : int64,k+l)) s = t <=>
       REWRITE_TAC [READ_BYTES_COMBINE] THEN
       REWRITE_TAC [MATCH_MP NUM_BIT_DECOMPOSE_UNIQ bound]
   );;
+
+(* Applies a conversion under an n-fold recursive application of a binary operator.
+ * In our case, we are interested in applying a conversion to each of the 2^n 'lanes'
+ * in an n-fold application of `word_join`; those naturally arise as word representations
+ * of SIMD registers. *)
+let BINOP_CONV_N n cv =
+  let rec go depth i tm =
+    if depth <= 0 then cv i tm
+    else
+      let half = 1 lsl (depth - 1) in
+      COMB2_CONV (RAND_CONV (go (depth-1) (half + i))) (go (depth-1) i) tm in
+  go n 0;;
+
+(* Apply a conversion inside the expression computing a `x |-> round(x * 3329 / 2^15)`
+ * used in the AVX2 decompression routines. *)
+let ROUNDING_MUL_3329_CONV cv tm =
+  let pat = `word_subword (word_add (word_ushr (word_mul (XXX:32 word) (word 3329 : 32 word)) 14) (word 1)) (1, 16) : 16 word` in
+  let _ = term_match [] pat tm in
+  (LAND_CONV (LAND_CONV (LAND_CONV (LAND_CONV cv)))) tm;;
+
+(* Checks if a type is the type of words of the specified bitwidth. *)
+let is_word_type_n n ty =
+  is_type ty &&
+  let name, args = dest_type ty in
+  name = "word" && length args = 1 &&
+  Num.int_of_num (dest_finty (hd args)) = n;;
+
+(* Looks for a word subterm of the specified bitwidth, and returns it upon success. Returns None otherwise.
+ * We use this to locate `word (num_of_wordlist ls)` word subterms of bitwidth 16*b, which stand out for 
+ * their large bitwidth and represent the 16-nibble input to an iteration in the decompression loop. *)
+let rec find_word_subterm_n n tm =
+  if is_word_type_n n (type_of tm) then Some tm
+  else if is_comb tm then
+    match find_word_subterm_n n (rator tm) with
+    | Some t -> Some t
+    | None -> find_word_subterm_n n (rand tm)
+  else if is_abs tm then find_word_subterm_n n (body tm)
+  else None;;
+
+(* DECOMPRESS_LANE_CONV: This conversion takes an index i=0,..,15
+ * and assumes to be given a word expression involving
+ * - A unique 16*b subword,
+ * - Only bit-blastable operations, like join, subword, shift.
+ * It then asserts via WORD_BLAST that the expression -- however complex it may be --
+ * is equivalent to the extraction of the i-th b-bit nibble from the
+ * 16*b subword, zero-extended and potentially with some shift applied.
+ *
+ * This is the workhorse conversion relating the very complex 8/16/32/64-bit granular
+ * word expression encountered during the decompression routines to the underlying
+ * b-bit nibbles in the input data. Instead of replicating the precise bit extraction
+ * logic here, we just check via bitblasting that the result is what we want. *)
+let DECOMPRESS_LANE_CONV l b i tm =
+  let word_bits = 16 * b in
+  match find_word_subterm_n word_bits tm with
+    | Some t_var ->
+        let b_ty = mk_finty (Num.num_of_int b) in
+        let t_ty = mk_finty (Num.num_of_int word_bits) in
+        let goal = mk_eq(tm,
+          subst [mk_small_numeral l, `l:num`; mk_small_numeral (b*i), `pos:num`;
+                 mk_small_numeral b, `b:num`; t_var, mk_var("t", mk_type("word",[t_ty]))]
+            (inst [b_ty, `:B`; t_ty, `:T`]
+              `word_shl (word_zx (word_subword (t : T word) (pos,b) : B word) : 32 word) l`)) in
+        (* For debugging: *)
+        (* let _ = print_term goal in *)
+        WORD_BLAST goal
+    | None -> failwith ("no " ^ string_of_int word_bits ^ "-bit word found")
+
+(* A dummy definition allowing us to mark terms which have already been processed, to prevent
+ * further processing. *)    
+let WRAP = new_definition `WRAP (x : bool) : bool = x`;;
+
+(* DECOMPRESS_256_CONV: Rewrites 16 lanes in a 256-bit word_join tree, then wraps them. *)
+let DECOMPRESS_256_CONV l b = RAND_CONV (BINOP_CONV_N 4 (ROUNDING_MUL_3329_CONV o (DECOMPRESS_LANE_CONV l b))) THENC (ONCE_REWRITE_CONV [GSYM WRAP]);;
+
+(* Rewrite multiplications by 2-powers as shifts *)
+let WORD_MUL_2EXP = map (fun i -> WORD_BLAST (subst [mk_small_numeral (1 lsl i), `n:num`; mk_small_numeral i, `l:num`] 
+  `word_mul (x : 16 word) (word n) = word_shl x l`)) (0--12);;
+
+(* Rewrite multiplications by 2-power multiples of 3329 as combinations of shift and mul. *)
+let WORD_MUL_2EXP_3329 = map (fun i -> WORD_BLAST (subst [mk_small_numeral (3329 * (1 lsl i)), `n:num`; mk_small_numeral i, `l:num`] 
+  `word_mul (x : 32 word) (word n) = word_mul (word_shl x l) (word 3329)`)) (1--4);;
+
+let is_bytes256_read tm =
+  try let f,_ = dest_eq tm in
+      let r,_ = dest_comb f in
+      let rd,c = dest_comb r in
+      name_of rd = "read" &&
+      let _,b = dest_binary ":>" c in
+      let op,_ = dest_comb b in
+      fst(dest_const op) = "bytes256"
+  with Failure _ -> false;;

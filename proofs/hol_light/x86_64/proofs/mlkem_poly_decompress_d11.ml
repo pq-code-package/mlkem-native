@@ -560,73 +560,8 @@ let DECOMPRESS_D11_CORRECT = prove(
   MP_TAC(ISPEC `x:11 word` VAL_BOUND) THEN CONV_TAC(DEPTH_CONV DIMINDEX_CONV) THEN
   CONV_TAC NUM_REDUCE_CONV THEN SPEC_TAC(`val(x:11 word)`,`n:num`) THEN
   CONV_TAC EXPAND_CASES_CONV THEN CONV_TAC NUM_REDUCE_CONV);;
-
-(* WORD_JOIN_CONV: Applies indexed conversion cv to each leaf of n-fold join *)
-let WORD_JOIN_CONV n cv =
-  let rec go depth i tm =
-    if depth <= 0 then cv i tm
-    else
-      let half = 1 lsl (depth - 1) in
-      COMB2_CONV (RAND_CONV (go (depth-1) (half + i))) (go (depth-1) i) tm in
-  go n 0;;
-
-let ROUNDING_MUL_3329_CONV cv tm =
-  let pat = `word_subword (word_add (word_ushr (word_mul (XXX:32 word) (word 3329 : 32 word)) 14) (word 1)) (1, 16) : 16 word` in
-  let _ = term_match [] pat tm in
-  (LAND_CONV (LAND_CONV (LAND_CONV (LAND_CONV cv)))) tm;;
-
-let is_word_type_n n ty =
-  is_type ty &&
-  let name, args = dest_type ty in
-  name = "word" && length args = 1 &&
-  Num.int_of_num (dest_finty (hd args)) = n;;
-
-let rec find_word_subterm_n n tm =
-  if is_word_type_n n (type_of tm) then Some tm
-  else if is_comb tm then
-    match find_word_subterm_n n (rator tm) with
-    | Some t -> Some t
-    | None -> find_word_subterm_n n (rand tm)
-  else if is_abs tm then find_word_subterm_n n (body tm)
-  else None;;
-
-(* DECOMPRESS_LANE_CONV: Rewrites lane i to canonical form via bit-blasting *)
-let DECOMPRESS_LANE_CONV l b i tm =
-  let word_bits = 16 * b in
-  let inner_conv tm =
-    match find_word_subterm_n word_bits tm with
-    | Some t_var ->
-        let b_ty = mk_finty (Num.num_of_int b) in
-        let t_ty = mk_finty (Num.num_of_int word_bits) in
-        let goal = mk_eq(tm,
-          subst [mk_small_numeral l, `l:num`; mk_small_numeral (b*i), `pos:num`;
-                 mk_small_numeral b, `b:num`; t_var, mk_var("t", mk_type("word",[t_ty]))]
-            (inst [b_ty, `:B`; t_ty, `:T`]
-              `word_shl (word_zx (word_subword (t : T word) (pos,b) : B word) : 32 word) l`)) in
-        WORD_BLAST goal
-    | None -> failwith ("no " ^ string_of_int word_bits ^ "-bit word found") in
-  ROUNDING_MUL_3329_CONV inner_conv tm;;
   
-(* DECOMPRESS_256_CONV: Rewrites 16 lanes in a 256-bit word_join tree, then wraps them to prevent
- * repeated consideration. *)
-let WRAP = new_definition `WRAP (x : bool) : bool = x`;;
-let DECOMPRESS_256_CONV l b = RAND_CONV (WORD_JOIN_CONV 4 (DECOMPRESS_LANE_CONV l b)) THENC (ONCE_REWRITE_CONV [GSYM WRAP]);;
-
-(* Rewrite multiplications by 2-powers as shifts *)
-let WORD_MUL_2EXP = map (fun i -> WORD_BLAST (subst [mk_small_numeral (1 lsl i), `n:num`; mk_small_numeral i, `l:num`] 
-  `word_mul (x : 16 word) (word n) = word_shl x l`)) (0--10)
-
-let is_bytes256_read tm =
-  try let f,_ = dest_eq tm in
-      let r,_ = dest_comb f in
-      let rd,c = dest_comb r in
-      name_of rd = "read" &&
-      let _,b = dest_binary ":>" c in
-      let op,_ = dest_comb b in
-      fst(dest_const op) = "bytes256"
-  with Failure _ -> false;;
-  
-let SIMP_DECOMPRESS_TAC =   
+let SIMP_DECOMPRESS_D11_TAC =   
   RULE_ASSUM_TAC (fun th -> let tm = concl th in
     if is_bytes256_read tm then
     CONV_RULE (TRY_CONV (DECOMPRESS_256_CONV 4 11) THENC (ONCE_REWRITE_CONV [DECOMPRESS_D11_CORRECT])) th
@@ -700,8 +635,8 @@ let MLKEM_POLY_DECOMPRESS_D11_CORRECT = prove(
     THENL [ASM_REWRITE_TAC [LENGTH_SUB_LIST] THEN NUM_REDUCE_TAC; ALL_TAC]) (0 -- 15) THEN
 
   (*** Symbolic execution ***)
-  MAP_EVERY (fun n -> X86_STEPS_TAC MLKEM_POLY_DECOMPRESS_D11_TMC_EXEC [n] THEN SIMD_SIMPLIFY_TAC (map GSYM (BASE_SIMPS @ WORD_MUL_2EXP))
-                      THEN SIMP_DECOMPRESS_TAC) (1--218) THEN
+  MAP_EVERY (fun n -> X86_STEPS_TAC MLKEM_POLY_DECOMPRESS_D11_TMC_EXEC [n] THEN SIMD_SIMPLIFY_TAC (map GSYM (BASE_SIMPS @ WORD_MUL_2EXP @ WORD_MUL_2EXP_3329))
+                      THEN SIMP_DECOMPRESS_D11_TAC) (1--218) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
   (* Unwrap assumptions *)
@@ -711,7 +646,7 @@ let MLKEM_POLY_DECOMPRESS_D11_CORRECT = prove(
      (can (term_match [] `read (memory :> bytes256 r) s0 = xxx`) o concl))) THEN
   TRY (IMP_REWRITE_TAC WORD_SUBWORD_NUM_OF_WORDLIST_CASES_D11) THEN
   UNDISCH_THEN `LENGTH (inlist : (11 word) list) = 256` (fun th -> CONV_TAC (TOP_SWEEP_CONV (EL_SUB_LIST_CONV th)) THEN ASSUME_TAC th) THEN
-  REPEAT DISCH_TAC
+  REPEAT DISCH_TAC THEN
 
   (* Spell out input list entry by entry *)
   GEN_REWRITE_TAC (RAND_CONV o RAND_CONV o RAND_CONV) [GSYM LIST_OF_SEQ_EQ_SELF] THEN
@@ -749,7 +684,10 @@ let MLKEM_POLY_DECOMPRESS_D11_NOIBT_SUBROUTINE_CORRECT = prove(
            (MAYCHANGE [RSP] ,,
             MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
             MAYCHANGE [memory :> bytes(r, 512)])`,
-  CHEAT_TAC);; (* TODO: Complete proof using X86_PROMOTE_RETURN_NOSTACK_TAC *)
+  X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_poly_decompress_d11_tmc
+    MLKEM_POLY_DECOMPRESS_D11_CORRECT THEN
+  (* Prove bounds *)
+  REPEAT STRIP_TAC THEN ASM_SIMP_TAC [EL_MAP; ARITH; IVAL_DECOMPRESS_D11_BOUND]);;
 
 let MLKEM_POLY_DECOMPRESS_D11_SUBROUTINE_CORRECT = prove(
   `!r a data (inlist:(11 word) list) pc stackpointer returnaddress.
@@ -775,4 +713,4 @@ let MLKEM_POLY_DECOMPRESS_D11_SUBROUTINE_CORRECT = prove(
            (MAYCHANGE [RSP] ,,
             MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
             MAYCHANGE [memory :> bytes(r, 512)])`,
-  CHEAT_TAC);; (* TODO: Complete proof using ADD_IBT_RULE *)
+  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_POLY_DECOMPRESS_D11_NOIBT_SUBROUTINE_CORRECT));;
