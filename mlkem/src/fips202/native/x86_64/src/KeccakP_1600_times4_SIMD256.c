@@ -31,7 +31,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
  * - Eliminated separate E state variables by using temporaries (Tba, etc.)
  *   and copying back to A at end of each round, removing A/E alternation.
  * - Changed ROUNDS24 from 24 unrolled macro calls to a loop-based
- *   MLK_ROUNDS_X2 processing 2 rounds per iteration.
+ *   MLK_ROUNDS processing one round per iteration.
  */
 
 #include "../../../../common.h"
@@ -347,12 +347,11 @@ static MLK_ALIGN const uint64_t mlk_keccakf1600RoundConstants[24] = {
   } while (0)
 
 /* clang-format off */
-#define MLK_ROUNDS_X2                                               \
+#define MLK_ROUNDS                                                  \
       do {                                                          \
         int i;                                                      \
-        for (i = 0; i < 12; i++) {                                  \
-            MLK_thetaRhoPiChiIota( 2*i, A)                          \
-            MLK_thetaRhoPiChiIota( 2*i+1, A)                        \
+        for (i = 0; i < 24; i++) {                                  \
+            MLK_thetaRhoPiChiIota(i, A)                             \
         }                                                           \
     } while(0)
 /* clang-format on */
@@ -362,7 +361,7 @@ void mlk_keccakf1600x4_permute24(void *states)
   __m256i *statesAsLanes = (__m256i *)states;
   MLK_DECLARE_ABCDE;
   MLK_COPY_FROM_STATE(A, statesAsLanes);
-  MLK_ROUNDS_X2;
+  MLK_ROUNDS;
   MLK_COPY_TO_STATE(statesAsLanes, A);
 }
 
@@ -391,4 +390,4 @@ MLK_EMPTY_CU(fips202_avx2_keccakx4)
 #undef MLK_SCATTER_STORE256_4X
 #undef MLK_SCATTER_STORE256_1X
 #undef MLK_COPY_TO_STATE
-#undef MLK_ROUNDS_X2
+#undef MLK_ROUNDS
