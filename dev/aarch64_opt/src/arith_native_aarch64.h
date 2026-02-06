@@ -5,7 +5,6 @@
 #ifndef MLK_DEV_AARCH64_OPT_SRC_ARITH_NATIVE_AARCH64_H
 #define MLK_DEV_AARCH64_OPT_SRC_ARITH_NATIVE_AARCH64_H
 
-#include <stdint.h>
 #include "../../../cbmc.h"
 #include "../../../common.h"
 
