@@ -283,16 +283,16 @@ rej_uniform_loop48:
         tbl     val2.16b, {val2.16b}, table2.16b
         tbl     val3.16b, {val3.16b}, table3.16b
 
-        str     val0q, [output_tmp]
+        st1     {val0.8h}, [output_tmp]
         add     output_tmp, output_tmp, ctr0, lsl #1
 
-        str     val1q, [output_tmp]
+        st1     {val1.8h}, [output_tmp]
         add     output_tmp, output_tmp, ctr1, lsl #1
 
-        str     val2q, [output_tmp]
+        st1     {val2.8h}, [output_tmp]
         add     output_tmp, output_tmp, ctr2, lsl #1
 
-        str     val3q, [output_tmp]
+        st1     {val3.8h}, [output_tmp]
         add     output_tmp, output_tmp, ctr3, lsl #1
 
         add     ctr01, ctr0, ctr1
@@ -350,10 +350,10 @@ rej_uniform_loop48_end:
         tbl     val0.16b, {val0.16b}, table0.16b
         tbl     val1.16b, {val1.16b}, table1.16b
 
-        str     val0q, [output_tmp]
+        st1     {val0.8h}, [output_tmp]
         add     output_tmp, output_tmp, ctr0, lsl #1
 
-        str     val1q, [output_tmp]
+        st1     {val1.8h}, [output_tmp]
         add     output_tmp, output_tmp, ctr1, lsl #1
 
         add     count, count, ctr0

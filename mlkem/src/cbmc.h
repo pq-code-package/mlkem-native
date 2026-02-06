@@ -94,7 +94,7 @@
     ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) ==> (predicate)   \
   }
 
-#define EXISTS(qvar, qvar_lb, qvar_ub, predicate)         \
+#define exists(qvar, qvar_lb, qvar_ub, predicate)         \
   __CPROVER_exists                                              \
   {                                                             \
     unsigned qvar;                                              \

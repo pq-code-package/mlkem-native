@@ -311,6 +311,9 @@ let MLKEM_TOMONT_NOIBT_SUBROUTINE_CORRECT = prove(
               MAYCHANGE [memory :> bytes(a,512)])`, 
   X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_tomont_tmc MLKEM_TOMONT_CORRECT);;
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
+
 let MLKEM_TOMONT_SUBROUTINE_CORRECT = prove(
   `!a x pc stackpointer returnaddress.
         aligned 32 a /\

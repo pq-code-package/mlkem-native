@@ -19,7 +19,7 @@ jobs:
     outputs:
       run_needed: ${{ steps.check_run.outputs.run_needed }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         if: github.event_name != 'workflow_dispatch'
         with:
           fetch-depth: 0
@@ -45,7 +45,7 @@ jobs:
               done
             done
           fi
-          echo "run_needed=${run_needed}" >> $GITHUB_OUTPUT
+          echo "run_needed=${run_needed}" >> "$GITHUB_OUTPUT"
 
   build_nix_cache:
     needs: [ check_modified_files ]
@@ -60,7 +60,7 @@ jobs:
     name: build nix cache (${{ matrix.runner }})
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: ./.github/actions/setup-nix
         with:
           cache: true
@@ -118,7 +118,7 @@ jobs:
       - name: Install git
         shell: bash
         run: |
-          if ! which git 2>&1 >/dev/null; then
+          if ! which git >/dev/null 2>&1; then
             ${{ matrix.target.container == '' && 'sudo' || '' }} apt update
             ${{ matrix.target.container == '' && 'sudo' || '' }} apt install git -y
           fi
@@ -126,9 +126,9 @@ jobs:
         shell: bash
         run: |
           git init
-          git config --global --add safe.directory $GITHUB_WORKSPACE
-          git remote add origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
-          git fetch origin --depth 1 $GITHUB_SHA
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          git fetch origin --depth 1 "$GITHUB_SHA"
           git checkout FETCH_HEAD
       - uses: ./.github/actions/setup-nix
         if: ${{ matrix.target.container == '' }}

@@ -59,6 +59,7 @@ static int test_keys(void)
   return test_keys_core(pk, sk, ct, key_a, key_b);
 }
 
+#if !defined(MLK_TEST_NO_UNALIGNED)
 static int test_keys_unaligned(void)
 {
   MLK_ALIGN uint8_t pk[CRYPTO_PUBLICKEYBYTES + 1];
@@ -68,6 +69,7 @@ static int test_keys_unaligned(void)
   MLK_ALIGN uint8_t key_b[CRYPTO_BYTES + 1];
   return test_keys_core(pk + 1, sk + 1, ct + 1, key_a + 1, key_b + 1);
 }
+#endif /* !MLK_TEST_NO_UNALIGNED */
 
 static int test_invalid_pk(void)
 {
@@ -181,7 +183,9 @@ int main(void)
   for (i = 0; i < NTESTS_FUNC; i++)
   {
     CHECK(test_keys() == 0);
+#if !defined(MLK_TEST_NO_UNALIGNED)
     CHECK(test_keys_unaligned() == 0);
+#endif
     CHECK(test_invalid_pk() == 0);
     CHECK(test_invalid_sk_a() == 0);
     CHECK(test_invalid_sk_b() == 0);
