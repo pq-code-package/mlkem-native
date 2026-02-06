@@ -5,7 +5,8 @@
 
 #include "../../../../common.h"
 
-#if defined(MLK_FIPS202_ARMV81M_NEED_X4) && \
+#if (defined(MLK_FIPS202_ARMV81M_NEED_X4) ||  \
+     defined(MLK_FIPS202_ARMV81M_NEED_X1)) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <stdint.h>
@@ -17,8 +18,11 @@
  * Each 64-bit constant is split into two 32-bit words:
  * - low word contains even-indexed bits
  * - high word contains odd-indexed bits
+ *
+ * The final entry (0xFF) is a terminator used by the x1 implementation
+ * to detect the end of the round loop.
  */
-MLK_ALIGN const uint32_t mlk_keccakf1600_round_constants[48] = {
+MLK_ALIGN const uint32_t mlk_keccakf1600_round_constants[49] = {
     0x00000001, 0x00000000, /* RC0 */
     0x00000000, 0x00000089, /* RC1 */
     0x00000000, 0x8000008b, /* RC2 */
@@ -43,11 +47,13 @@ MLK_ALIGN const uint32_t mlk_keccakf1600_round_constants[48] = {
     0x00000000, 0x80000088, /* RC21 */
     0x00000001, 0x00008000, /* RC22 */
     0x00000000, 0x80008082, /* RC23 */
+    0x000000FF,             /* Terminator for x1 loop */
 };
 
-#else /* MLK_FIPS202_ARMV81M_NEED_X4 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#else /* (MLK_FIPS202_ARMV81M_NEED_X4 || MLK_FIPS202_ARMV81M_NEED_X1) && \
+         !MLK_CONFIG_MULTILEVEL_NO_SHARED */
 
 MLK_EMPTY_CU(fips202_armv81m_round_constants)
 
-#endif /* !(MLK_FIPS202_ARMV81M_NEED_X4 && !MLK_CONFIG_MULTILEVEL_NO_SHARED) \
-        */
+#endif /* !((MLK_FIPS202_ARMV81M_NEED_X4 || MLK_FIPS202_ARMV81M_NEED_X1) && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED) */
