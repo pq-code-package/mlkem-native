@@ -127,7 +127,8 @@ ST-LINK_gdbserver -p 61234 -l 1 -d -s -cp "$ST_CUBE_PROG_PATH" -m 1   --semihost
 
 ## Notes
 - ST‑LINK gdbserver does not implement the QEMU semihost `SYS_EXIT_EXTENDED`. A sentinel‑based exit workaround is planned in the proposal.
-- This platform uses FSBL‑LRUN startup/system/linker from the Cube template and a 128 KiB stack for tests.
+- This platform uses FSBL‑LRUN startup/system/linker from the Cube template.
+- D‑TCM stack: a startup bootstrap (`src/reset_dtcm_init.S`) checks `SYSCFG_CM55TCMCR` and, if needed, writes `0x99` then resets via AIRCR to apply D‑TCM sizing. Otherwise it sets `MSP=0x30040000` and `MSPLIM=0x30000000` so the runtime stack resides entirely in D‑TCM (256 KiB). A one‑time reset occurs the first time sizing is applied. Compatible with GDB resets.
 
 - Clock configuration: `SystemClock_Config()` is generated from the STM32CubeN6 FSBL template (`Projects/NUCLEO-N657X0-Q/Templates/Template_FSBL_LRUN/FSBL/Src/main.c`) into `${NUCLEO_N657X0_Q_PATH}/clock_config.c` by `nix/nucleo-n657x0-q/default.nix`. The devshell build also ensures `${NUCLEO_N657X0_Q_PATH}/Inc/main.h` declares `void SystemClock_Config(void);` and `void Error_Handler(void);`. Do not edit the generated file directly; update the Cube template or the extraction logic if adjustments are needed.
 

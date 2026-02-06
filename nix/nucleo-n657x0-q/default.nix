@@ -228,29 +228,7 @@ stdenvNoCC.mkDerivation {
       echo "WARNING: FSBL main.c not found at $fsbl_main_c; skipping clock_config generation" >&2
     fi
 
-    # Patch linker script to increase stack to 128 KiB (0x20000) for test workloads
-    # Locate STM32N657XX_LRUN.ld under gcc/ or gcc/linker/
-    ldpath=""
-    for cand in \
-      "$outp/gcc/linker/STM32N657XX_LRUN.ld" \
-      "$outp/gcc/STM32N657XX_LRUN.ld" \
-      $(find "$outp" -type f -name STM32N657XX_LRUN.ld 2>/dev/null | head -n1)
-    do
-      if [ -f "$cand" ]; then ldpath="$cand"; break; fi
-    done
-    if [ -n "$ldpath" ]; then
-      echo "Patching stack size in $ldpath to 0x20000"
-      # Common ST patterns
-      sed -i.bak -E 's/(\b_Min_Stack_Size\s*=\s*)0x[0-9a-fA-F]+;/\10x20000;/' "$ldpath" || true
-      sed -i.bak -E 's/(\b__STACK_SIZE\s*=\s*)0x[0-9a-fA-F]+;/\10x20000;/' "$ldpath" || true
-      sed -i.bak -E 's/(\b__stack_size__\s*=\s*)0x[0-9a-fA-F]+;/\10x20000;/' "$ldpath" || true
-      # If none of the vars exist, try to adjust the stack reservation directly
-      if ! grep -Eq '\b_Min_Stack_Size\b|\b__STACK_SIZE\b|\b__stack_size__\b' "$ldpath"; then
-        sed -i.bak -E 's/(\. = \. \+ )_Min_Stack_Size;/\10x20000;/' "$ldpath" || true
-      fi
-    else
-      echo "WARNING: Could not find STM32N657XX_LRUN.ld to patch stack size" >&2
-    fi
+    # No linker script stack-size patch: MSP/MSPLIM relocation handled in Reset_Handler (reset_dtcm_init.S)
   '';
 
   setupHook = writeText "setup-hook.sh" ''
