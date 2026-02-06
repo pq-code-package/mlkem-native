@@ -33,7 +33,8 @@
 #define MLK_KECCAK_NROUNDS 24
 #define MLK_KECCAK_ROL(a, offset) ((a << offset) ^ (a >> (64 - offset)))
 
-void mlk_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
+MLK_STATIC_TESTABLE
+void mlk_keccakf1600_extract_bytes_c(uint64_t *state, unsigned char *data,
                                    unsigned offset, unsigned length)
 {
   unsigned i;
@@ -45,6 +46,7 @@ void mlk_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
     data[i] = state_ptr[i];
   }
 #else  /* MLK_SYS_LITTLE_ENDIAN */
+  unsigned i;
   /* Portable version */
   for (i = 0; i < length; i++)
   __loop__(invariant(i <= length))
@@ -54,7 +56,20 @@ void mlk_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
 #endif /* !MLK_SYS_LITTLE_ENDIAN */
 }
 
-void mlk_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
+void mlk_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
+                                   unsigned offset, unsigned length)
+{
+#if defined(MLK_USE_FIPS202_X1_EXTRACT_BYTES_NATIVE)
+  if(mlk_keccakf1600_extract_bytes_x1_native(state, data, offset, length) == MLK_NATIVE_FUNC_SUCCESS)
+  {
+    return;
+  }
+#endif
+  mlk_keccakf1600_extract_bytes_c(state, data, offset, length);
+}
+
+MLK_STATIC_TESTABLE
+void mlk_keccakf1600_xor_bytes_c(uint64_t *state, const unsigned char *data,
                                unsigned offset, unsigned length)
 {
   unsigned i;
@@ -74,6 +89,17 @@ void mlk_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
                                 << (8 * ((offset + i) & 0x07));
   }
 #endif /* !MLK_SYS_LITTLE_ENDIAN */
+}
+
+void mlk_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
+                               unsigned offset, unsigned length)
+{
+#if defined(MLK_USE_FIPS202_X1_XOR_BYTES_NATIVE)
+  if (mlk_keccakf1600_xor_bytes_x1_native(state, data, offset, length) == MLK_NATIVE_FUNC_SUCCESS) {
+    return;
+  }
+#endif
+  mlk_keccakf1600_xor_bytes_c(state, data, offset, length);
 }
 
 static void mlk_keccakf1600x4_extract_bytes_c(uint64_t *state,
