@@ -5,22 +5,23 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
-// -----------------------------------------------------------------------------
-// Overview and data layout
-// -----------------------------------------------------------------------------
-// This file provides the MVE/Helium implementation that bit‑interleaves four
-// parallel byte streams and XORs them into the Keccak state in the
-// (even/odd)-bit‑sliced representation used by the 4x permutation.
+// ---------------------------------------------------------------------------
+// Overview
+// ---------------------------------------------------------------------------
+// MVE/Helium implementation: de-interleave the bit-sliced Keccak state back
+// into four parallel byte streams (inverse of state_xor_bytes_x4_mve.S).
 //
-// KeccakF1600x4_StateXORBytes(state, d0, d1, d2, d3, offset, length)
-//   - Inputs: four byte streams d0..d3 and a byte count 'length'.
-//   - Operation: starting at a notional byte 'offset' into the state, consume
-//     'length' bytes from each stream and XOR them into 'state' after splitting
-//     every input byte into its even and odd bit planes. For stream i, the even
-//     plane is denoted e[i] and the odd plane o[i]. The function XORs e[i] into
-//     the E region and o[i] into the O region.
+// void KeccakF1600x4_StateExtractBytes(state, d0, d1, d2, d3, offset, length)
 //
-// State memory layout (bit‑interleaved, 4 streams):
+// Three-phase structure:
+//   Prologue -- extract min(length, 8-(offset%8)) bytes from the unaligned
+//               tail of the first lane via predicated byte stores.
+//   Main     -- process full 8-byte groups: load E/O lanes, de-interleave,
+//               scatter-store via qP.
+//   Tail     -- extract <8 remaining bytes at lane offset 0 via predicated
+//               byte stores.
+//
+// State memory layout (bit-interleaved, 4 streams):
 //   state + 000: E[0](0-3), E[1](0-3), E[2](0-3), E[3](0-3)
 //   state + 016: E[0](4-7), E[1](4-7), E[2](4-7), E[3](4-7)
 //   ...
@@ -31,32 +32,10 @@
 //   state + 784:  O[0](196-199), O[1](196-199), O[2](196-199), O[3](196-199)
 //
 // Notes on the layout:
-//   - The state stores even (E) and odd (O) bit planes in two contiguous blocks.
-//     E occupies 25 lanes × 16 bytes = 400 bytes, followed by O at +400.
-//   - Each 8 input bytes per stream (bytes [0..7], then [8..15], ...) map to one
-//     16‑byte E lane and one 16‑byte O lane. Within each 16‑byte lane the four
-//     u32 words correspond to streams 0..3 respectively: E[0],E[1],E[2],E[3].
-//   - For each u32, the lower 16 bits hold the bit‑plane for bytes [0..3] of the
-//     current 8‑byte chunk; the upper 16 bits hold the bit‑plane for bytes [4..7].
-//
-// High‑level behaviour of KeccakF1600x4_StateXORBytes:
-//   - Computes rSE = state + 2 * floor(offset/8) * 8 and rSO = rSE + 400, so
-//     every 8 input bytes advance the E/O pointers by 16 bytes in memory.
-//   - Prologue: if offset is not 8‑byte aligned, predicated byte‑gathers absorb
-//     min(length, 8‑(offset mod 8)) bytes at the correct intra‑lane position.
-//   - Main: processes as many full 8‑byte groups as possible via vector gathers,
-//     bit‑interleaving to produce e[i]/o[i], then veor into E/O and post‑increment
-//     rSE/rSO by 16.
-//   - Tail: if remaining (<8) bytes exist, another predicated gather absorbs
-//     them at intra‑lane offset 0.
-//
-// Bit‑interleaving details:
-//   - interleave_evens/interleave_odds split even/odd bits within each u32 lane
-//     using a standard sequence of shifts/masks. The helper
-//     _internal_to_bit_interleaving_4x packs results so that, per‑lane, the low
-//     16 bits represent bytes [0..3] and high 16 bits represent bytes [4..7].
-//
-
+//   - E occupies 25 lanes x 16 bytes = 400 bytes, followed by O at +400.
+//   - Each 8 input bytes per stream map to one 16-byte E lane and one 16-byte
+//     O lane.  Within each lane the four u32 words are streams 0..3.
+//   - Per u32: lo16 = bit-plane for bytes [0..3], hi16 = bytes [4..7].
 
 #include "../../../../common.h"
 #if defined(MLK_FIPS202_ARMV81M_NEED_X4) && \
@@ -67,8 +46,14 @@
 .syntax unified
 .text
 
+// ---------------------------------------------------------------------------
+// deinterleave_even: inverse of the even-bit compaction.  Inflates the even
+// bit-plane stored in \e back into byte positions.
+// Inputs:  \e (compacted even bits)
+// Outputs: \e (even bits expanded to byte positions, odd bits are garbage)
+// Clobbers: \tmp
+// ---------------------------------------------------------------------------
 .macro deinterleave_even e, tmp
-    // De-interleave even bits back into byte order (inverse of interleave_evens)
     // Inflate e                              +------+-----------+-----------+-----------+
     // Single-element annotation follows.  e: |   X  |     X     | l[0],l[1] | l[2],l[3] |
     vsli.u32    \e, \e, #8              // e: |   X  | l[0],l[1] | l[2],l[3] | l[2],l[3] |
@@ -82,25 +67,87 @@
     vsli.u8     \e, \tmp, #6  //   e: | X3322100 | tmp: | XXXXXXX3 |  (finalize byte compaction)
 .endm
 
-// -----------------------------------------------------------------------------
-// mlk_keccak_f1600_x4_state_extract_bytes(void *state, unsigned char *data0,
+// ---------------------------------------------------------------------------
+// from_bit_interleaving_4x: reconstruct byte vectors from bit-interleaved
+// even/odd planes.
+// Inputs:  q0 = Even plane, q1 = Odd plane
+//          (per 32b lane: lo16 = bytes 0..3, hi16 = bytes 4..7)
+// Outputs: q0 = [d0l, d1l, d2l, d3l] (low  4 bytes per stream)
+//          q1 = [d0h, d1h, d2h, d3h] (high 4 bytes per stream)
+// Clobbers: r0, q2, q3, q4
+// ---------------------------------------------------------------------------
+.macro from_bit_interleaving_4x
+    //     +-----+-----+-----+-----+-----+-----+-----+-----+
+    // q0: | E0l | E0u | E1l | E1u | E2l | E2u | E3l | E3u |
+    // q1: | O0l | O0u | O1l | O1u | O2l | O2u | O3l | O3u |
+    //     +-----+-----+-----+-----+-----+-----+-----+-----+
+    // Clone and byte-swap to get upper halves into position
+    vrev32.u16     q2, q0
+    vrev32.u16     q3, q1
+    // De-interleave lower evens / lower odds
+    deinterleave_even q0, q4
+    deinterleave_even q1, q4
+    // q0 and q1 now hold valid even-position bits but garbage in odd positions.
+    // Build mask 0x55..55 (01010101b) to isolate even-bit positions, then
+    // shift the odd plane left by 1 and OR to reconstruct the original bytes.
+    mov          r0, #0x55
+    vdup.u8      q4, r0
+    vand.u32     q0, q0, q4
+    vand.u32     q1, q1, q4
+    vshl.u32     q1, q1, #1
+    vorr         q0, q0, q1       // q0 = low bytes reconstructed
+    // De-interleave upper evens / upper odds
+    deinterleave_even q2, q1
+    deinterleave_even q3, q1
+    vand.u32     q1, q2, q4       // reuse mask still in q4
+    vand.u32     q3, q3, q4
+    vshl.u32     q3, q3, #1
+    vorr         q1, q1, q3       // q1 = high bytes reconstructed
+.endm
+
+// ---------------------------------------------------------------------------
+// transpose_lanes_to_streams: rearrange two lane-ordered vectors into four
+// per-stream vectors (inverse of transpose_streams_to_lanes).
+//   q0 = [d0l, d1l, d2l, d3l]  ->  q0 = [d0l, d0h, ?, ?]
+//   q1 = [d0h, d1h, d2h, d3h]  ->  q1 = [d1l, d1h, ?, ?]
+//                                   q2 = [d2l, d2h, ?, ?]
+//                                   q3 = [d3l, d3h, ?, ?]
+// Clobbers: q2, q3, p0, r0
+//
+// Vectors:             ||           q0          ||           q1          ||           q2          ||           q3          ||
+// Elements:            || d0l | d1l | d2l | d3l || d0h | d1h | d2h | d3h ||                       ||                       ||
+// ---------------------------------------------------------------------------
+.macro transpose_lanes_to_streams
+    vrev64.u32 q2, q0    // || d0l | d1l | d2l | d3l || d0h | d1h | d2h | d3h || d1l | d0l | d3l | d2l ||                       ||
+    vrev64.u32 q3, q1    // || d0l | d1l | d2l | d3l || d0h | d1h | d2h | d3h || d1l | d0l | d3l | d2l || d1h | d0h | d3h | d2h ||
+    mov r0, #0x0F0F
+    vmsr p0, r0
+    vpsel q0, q0, q3     // || d0l | d0h | d2l | d2h || d0h | d1h | d2h | d3h || d1l | d0l | d3l | d2l || d1h | d0h | d3h | d2h ||
+    vpsel q1, q2, q1     // || d0l | d0h | d2l | d2h || d1l | d1h | d3l | d3h || d1l | d0l | d3l | d2l || d1h | d0h | d3h | d2h ||
+    vmov d4, d1          // || d0l | d0h | d2l | d2h || d1l | d1h | d3l | d3h || d2l | d2h | d3l | d2l || d1h | d0h | d3h | d2h ||
+    vmov d6, d3          // || d0l | d0h | d2l | d2h || d1l | d1h | d3l | d3h || d2l | d2h | d3l | d2l || d3l | d3h | d3h | d2h ||
+.endm
+
+
+// ---------------------------------------------------------------------------
+// void keccak_f1600_x4_state_extract_bytes_asm(void *state,
+//                                              unsigned char *data0,
 //                                              unsigned char *data1,
 //                                              unsigned char *data2,
 //                                              unsigned char *data3,
-//                                              unsigned offset, unsigned length)
+//                                              unsigned offset,
+//                                              unsigned length)
 //
-// AAPCS assumption:
-//   r0=state, r1=d0, r2=d1, r3=d2, stack: d3, offset, length
-// -----------------------------------------------------------------------------
+// AAPCS: r0=state, r1=d0, r2=d1, r3=d2, stack: d3, offset, length
+// ---------------------------------------------------------------------------
 .balign 4
 .global MLK_ASM_NAMESPACE(keccak_f1600_x4_state_extract_bytes_asm)
 .type MLK_ASM_NAMESPACE(keccak_f1600_x4_state_extract_bytes_asm), %function
 MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_extract_bytes_asm)
     .equ stack_offset, ((12-4+2)*4+(15-8+1)*8)
-    push {r4-r12, lr}
-    vpush {d8-d15}
+    push    {r4-r12, lr}
+    vpush   {d8-d15}
 
-    // Register Assignments
     state             .req r0
     dp0               .req r1
     dp1               .req r2
@@ -113,22 +160,20 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_extract_bytes_asm)
     lane_offset_bytes .req r9
     off_full          .req r10
     mask              .req r11
-    nB                .req lr
     tmp               .req r12
+    nB                .req lr
 
     qP                .req q7
-    qIdx              .req q6
     qd0               .req q0
     qd1               .req q1
     qd2               .req q2
     qd3               .req q3
 
-    // Load the stack arguments
     ldr     dp3,      [sp, #stack_offset+0]
     ldr     off_full, [sp, #stack_offset+4]
     ldr     length,   [sp, #stack_offset+8]
 
-    cmp     length,  #0             // if len==0 done
+    cmp     length,  #0
     beq     keccak_f1600_x4_state_extract_bytes_asm_exit
 
     and     off, off_full, #7
@@ -137,69 +182,52 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_extract_bytes_asm)
     add     rSE, state, lane_offset_bytes, lsl #1
     add     rSO, rSE, #400
 
-    // -------------------------------------------------------------------------
-    // PROLOGUE: if (offset_in_lane != 0) absorb min(len, 8-offset) into one lane
-    // -------------------------------------------------------------------------
-    cmp     off, #0                 // if off==0 skip
+    // -----------------------------------------------------------------------
+    // PROLOGUE: extract min(len, 8-offset%8) bytes from the unaligned lane
+    // -----------------------------------------------------------------------
+    cmp     off, #0
     beq     keccak_f1600_x4_state_extract_bytes_asm_pre_main
 
-    // read the state
+    // Load one E/O lane pair from state (post-increment rSE/rSO by 16)
     vldrw.u32 qd0, [rSE], #16
     vldrw.u32 qd1, [rSO], #16
 
-    // De-interleave one 16B Even lane and one 16B Odd lane into bytes
-    // NOTE: from_bit_interleaving_4x clobbers r0,q2,q3,q4
-    bl keccak_f1600_x4_state_extract_bytes_from_bit_interleaving_4x
+    // De-interleave (clobbers r0, q2, q3, q4)
+    from_bit_interleaving_4x
 
-    // Vector transpose: split q0/q1 into per-stream 8-byte chunks
-    // (inverse of the gather path used in XOR function)
-    // Vectors:             ||           q0          ||           q1          ||           q2          ||           q3          ||
-    // Elements:            || d0l | d1l | d2l | d3l || d0h | d1h | d2h | d3h ||                       ||                       ||
-    vrev64.u32 q2, q0    // || d0l | d1l | d2l | d3l || d0h | d1h | d2h | d3h || d1l | d0l | d3l | d2l ||                       ||
-    vrev64.u32 q3, q1    // || d0l | d1l | d2l | d3l || d0h | d1h | d2h | d3h || d1l | d0l | d3l | d2l || d1h | d0h | d3h | d2h ||
-    mov r0, #0x0F0F
-    vmsr p0, r0
-    vpsel q0, q0, q3     // || d0l | d0h | d2l | d2h || d0h | d1h | d2h | d3h || d1l | d0l | d3l | d2l || d1h | d0h | d3h | d2h ||
-    vpsel q1, q2, q1     // || d0l | d0h | d2l | d2h || d1l | d1h | d3l | d3h || d1l | d0l | d3l | d2l || d1h | d0h | d3h | d2h ||
-    vmov d4, d1          // || d0l | d0h | d2l | d2h || d1l | d1h | d3l | d3h || d2l | d2h | d3l | d2l || d1h | d0h | d3h | d2h ||
-    vmov d6, d3          // || d0l | d0h | d2l | d2h || d1l | d1h | d3l | d3h || d2l | d2h | d3l | d2l || d3l | d3h | d3h | d2h ||
+    // Transpose from per-lane to per-stream layout
+    transpose_lanes_to_streams
 
-    // Now, qd0 through qd3 contain up to 7 bytes. Prepare to write them.
-    // r0 = n = min(length, 8-off)
+    // nB = min(length, 8 - off)
     rsb     nB, off, #8
     cmp     length, nB
     it      ls
     movls   nB, length
 
-    // calculate the predicates
-    // mask = (1 << nB) - 1 over 8-bit lanes, then << off
+    // Build predicate: nB active bytes shifted left by 'off'
     vctp.8 nB
     vmrs mask, p0
-    // mask << offset
     lsl mask, mask, off
     vmsr p0, mask
 
-    // subtract the offset from the addresses to match the predicate
+    // Subtract offset from data pointers so predicate window aligns
     subs dp0, dp0, off
     subs dp1, dp1, off
     subs dp2, dp2, off
     subs dp3, dp3, off
 
-    // Predicated tail store of up to 7 bytes per stream at intra-lane offset
-    // Note that 8 bytes are read, but only post-inc by 4, since
-    // main body pre-increments by 4.
+    // Predicated byte stores (post-increment by 4)
     vpstttt
     vstrbt.u8 qd0, [dp0], #4
     vstrbt.u8 qd1, [dp1], #4
     vstrbt.u8 qd2, [dp2], #4
     vstrbt.u8 qd3, [dp3], #4
 
-    // length -= n
     subs    length, length, nB
     cmp     length, #0
     beq     keccak_f1600_x4_state_extract_bytes_asm_exit
 
-    // Build qP = {d0,d1,d2,d3} as u32 lanes (vector of base addresses)    
+    // Build qP from updated scalar pointers
     vmov    qP[2], qP[0],  dp0, dp2
     vmov    qP[3], qP[1],  dp1, dp3
     b       keccak_f1600_x4_state_extract_bytes_asm_main_body
@@ -210,39 +238,33 @@ keccak_f1600_x4_state_extract_bytes_asm_pre_main:
     mov     tmp, #4
     vsub.u32    qP, qP, tmp
 
-    // -------------------------------------------------------------------------
-    // MAIN BODY: process full 8-byte lanes while len >= 8 and within frame
-    // -------------------------------------------------------------------------
+    // -----------------------------------------------------------------------
+    // MAIN: process full 8-byte lanes
+    // -----------------------------------------------------------------------
 keccak_f1600_x4_state_extract_bytes_asm_main_body:
-    // Calculate the number of full 8-byte lanes to process
     lsr     lr, length, #3
-    // Low-overhead loop on LR
     wls     lr, lr, keccak_f1600_x4_state_extract_bytes_asm_main_loop_end
 keccak_f1600_x4_state_extract_bytes_asm_main_loop_start:
     vldrw.u32 qd0, [rSE], #16
     vldrw.u32 qd1, [rSO], #16
-    // Save/restore LR around BL because LR is used by the low-overhead loop
-    // for wls/le and would be clobbered by the call
-    mov tmp, lr
-    bl keccak_f1600_x4_state_extract_bytes_from_bit_interleaving_4x
-    mov lr, tmp
 
-    // Store to output:
+    // De-interleave (clobbers r0, q2, q3, q4)
+    from_bit_interleaving_4x
+
+    // Scatter-store 8 bytes per stream (two u32 stores with post-increment)
     vstrw.u32   qd0, [qP, #4]!
     vstrw.u32   qd1, [qP, #4]!
+
     le      lr, keccak_f1600_x4_state_extract_bytes_asm_main_loop_start
 keccak_f1600_x4_state_extract_bytes_asm_main_loop_end:
-    // -------------------------------------------------------------------------
-    // TAIL: if length remaining <8, absorb it at offset_in_lane=0
-    // -------------------------------------------------------------------------
 
-    // length &= 7
-    // Placeholder: if r6 == 0, done.
+    // -----------------------------------------------------------------------
+    // TAIL: extract <8 remaining bytes at lane offset 0
+    // -----------------------------------------------------------------------
     ands    length, length, #7
-    cmp     length, #0
     beq     keccak_f1600_x4_state_extract_bytes_asm_exit
 
-    // Tail via predicated byte stores like prologue, but off=0 (no base adjust)
+    // Recover scalar pointers from qP
     mov     tmp, #4
     vadd.u32    qP, qP, tmp
     vmov    dp0, dp2, qP[2], qP[0]
@@ -251,37 +273,23 @@ keccak_f1600_x4_state_extract_bytes_asm_main_loop_end:
     vldrw.u32 qd0, [rSE], #16
     vldrw.u32 qd1, [rSO], #16
 
-    // De-interleave one 16B Even lane and one 16B Odd lane into bytes
-    // NOTE: from_bit_interleaving_4x clobbers r0,q2,q3,q4
-    bl keccak_f1600_x4_state_extract_bytes_from_bit_interleaving_4x
+    // De-interleave (clobbers r0, q2, q3, q4)
+    from_bit_interleaving_4x
 
-    // Vector transpose to obtain per-stream 8-byte chunks
-    // Vectors:             ||           q0          ||           q1          ||           q2          ||           q3          ||
-    // Elements:            || d0l | d1l | d2l | d3l || d0h | d1h | d2h | d3h ||                       ||                       ||
-    vrev64.u32 q2, q0    // || d0l | d1l | d2l | d3l || d0h | d1h | d2h | d3h || d1l | d0l | d3l | d2l ||                       ||
-    vrev64.u32 q3, q1    // || d0l | d1l | d2l | d3l || d0h | d1h | d2h | d3h || d1l | d0l | d3l | d2l || d1h | d0h | d3h | d2h ||
-    mov r0, #0x0F0F
-    vmsr p0, r0
-    vpsel q0, q0, q3     // || d0l | d0h | d2l | d2h || d0h | d1h | d2h | d3h || d1l | d0l | d3l | d2l || d1h | d0h | d3h | d2h ||
-    vpsel q1, q2, q1     // || d0l | d0h | d2l | d2h || d1l | d1h | d3l | d3h || d1l | d0l | d3l | d2l || d1h | d0h | d3h | d2h ||
-    vmov d4, d1          // || d0l | d0h | d2l | d2h || d1l | d1h | d3l | d3h || d2l | d2h | d3l | d2l || d1h | d0h | d3h | d2h ||
-    vmov d6, d3          // || d0l | d0h | d2l | d2h || d1l | d1h | d3l | d3h || d2l | d2h | d3l | d2l || d3l | d3h | d3h | d2h ||
+    // Transpose from per-lane to per-stream layout
+    transpose_lanes_to_streams
 
-    // calculate the predicates
-    // mask = (1 << length)
+    // Predicated byte stores for remaining bytes
     vctp.8 length
-
-    // now write the partial lanes
-    // Note that 8 bytes are read, but only post-inc by 4, since
-    // main body pre-increments by 4.
     vpstttt
     vstrbt.u8 qd0, [dp0], #4
     vstrbt.u8 qd1, [dp1], #4
     vstrbt.u8 qd2, [dp2], #4
     vstrbt.u8 qd3, [dp3], #4
+
 keccak_f1600_x4_state_extract_bytes_asm_exit:
-    vpop {d8-d15}
-    pop {r4-r12, pc}
+    vpop    {d8-d15}
+    pop     {r4-r12, pc}
     .unreq state
     .unreq dp0
     .unreq dp1
@@ -294,74 +302,13 @@ keccak_f1600_x4_state_extract_bytes_asm_exit:
     .unreq lane_offset_bytes
     .unreq off_full
     .unreq mask
-    .unreq nB
     .unreq tmp
+    .unreq nB
     .unreq qP
-    .unreq qIdx
     .unreq qd0
     .unreq qd1
     .unreq qd2
     .unreq qd3
-
-.balign 4
-.type keccak_f1600_x4_state_extract_bytes_from_bit_interleaving_4x, %function
-keccak_f1600_x4_state_extract_bytes_from_bit_interleaving_4x:
-keccak_f1600_x4_state_extract_bytes_from_bit_interleaving_4x_start:
-    // Inputs on entry:
-    //   q0 = Even plane (lo16: bytes 0..3, hi16: bytes 4..7) for streams 0..3
-    //   q1 = Odd  plane (lo16: bytes 0..3, hi16: bytes 4..7) for streams 0..3
-    // Output on return:
-    //   q0..q3 contain 8 de-interleaved bytes per stream (see call sites)
-    // Clobbers: r0, q2, q3, q4
-    r    .req r0
-    El   .req q0
-    Ol   .req q1
-    Eu   .req q2
-    Ou   .req q3
-    tmp  .req q4
-    //     +-----+-----+-----+-----+-----+-----+-----+-----+
-    // El: | E0l | E0u | E1l | E1u | E2l | E2u | E3l | E3u |
-    // q1: | O0l | O0u | O1l | O1u | O2l | O2u | O3l | O3u |
-    //     +-----+-----+-----+-----+-----+-----+-----+-----+
-    // clone q0 into temp register and swap
-    vrev32.u16     Eu, El
-    // clone q1 into temp register and swap
-    vrev32.u16     Ou, Ol
-    // deinterleave lower evens into El
-    deinterleave_even El, tmp
-    // deinterleave lower odds into Ol
-    deinterleave_even Ol, tmp
-    .unreq tmp
-    mask .req q4
-    // El and Ol need to merge, but they are full of garbage in the odd bits
-    // Build mask 0x55..55 (01010101b) to isolate even-bit positions, then
-    // shift left the odd plane and OR to reconstruct the original bytes.
-    mov          r, #0x55
-    vdup.u8      mask, r
-    vand.u32     El, El, mask
-    vand.u32     Ol, Ol, mask
-    vshl.u32     Ol, Ol, #1
-    vorr         El, El, Ol
-    .unreq Ol
-    tmp .req q1
-    // deinterleave upper evens into Eu
-    deinterleave_even Eu, tmp
-    // deinterleave lower evens into Ou
-    deinterleave_even Ou, tmp
-    .unreq tmp
-    U .req q1
-    vand.u32     U, Eu, mask       // reconstruct high bytes (even|odd<<1)
-    vand.u32     Ou, Ou, mask
-    vshl.u32     Ou, Ou, #1
-    vorr         U, U, Ou
-keccak_f1600_x4_state_extract_bytes_from_bit_interleaving_4x_exit:
-    .unreq r
-    .unreq U
-    .unreq El
-    .unreq Eu
-    .unreq Ou
-    .unreq mask
-    bx           lr
 
 /* simpasm: footer-start */
 #endif /* MLK_FIPS202_ARMV81M_NEED_X4 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
