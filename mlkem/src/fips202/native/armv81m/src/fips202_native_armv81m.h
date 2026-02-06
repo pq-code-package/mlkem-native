@@ -35,4 +35,15 @@ void mlk_keccak_f1600_x4_state_extract_bytes_asm(void *state, uint8_t *data0,
 #define mlk_keccak_f1600_x1_armv7m_asm MLK_NAMESPACE(keccak_f1600_x1_armv7m_asm)
 void mlk_keccak_f1600_x1_armv7m_asm(uint32_t state[50], const uint32_t rc[49]);
 
+#define mlk_keccak_f1600_x1_state_xor_bytes_asm MLK_NAMESPACE(keccak_f1600_x1_state_xor_bytes_asm)
+void mlk_keccak_f1600_x1_state_xor_bytes_asm(
+    uint64_t *state, const uint8_t *data, unsigned offset,
+    unsigned length);
+
+#define mlk_keccak_f1600_x1_state_extract_bytes_asm MLK_NAMESPACE(keccak_f1600_x1_state_extract_bytes_asm)
+void mlk_keccak_f1600_x1_state_extract_bytes_asm(
+    uint64_t *state, const uint8_t *data, unsigned offset,
+    unsigned length);
+
+
 #endif /* !MLK_FIPS202_NATIVE_ARMV81M_SRC_FIPS202_NATIVE_ARMV81M_H */
