@@ -730,7 +730,6 @@ def gen_c_zetas():
 def gen_c_zeta_file():
     def gen():
         yield from gen_header()
-        yield "#include <stdint.h>"
         yield ""
         yield "/*"
         yield " * Table of zeta values used in the reference NTT and inverse NTT."
@@ -999,7 +998,6 @@ def gen_aarch64_zeta_file():
         yield "#if defined(MLK_ARITH_BACKEND_AARCH64) && \\"
         yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
         yield ""
-        yield "#include <stdint.h>"
         yield '#include "arith_native_aarch64.h"'
         yield ""
         yield "/*"
@@ -1089,7 +1087,6 @@ def gen_aarch64_rej_uniform_table():
         yield "#if defined(MLK_ARITH_BACKEND_AARCH64) && \\"
         yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
         yield ""
-        yield "#include <stdint.h>"
         yield '#include "arith_native_aarch64.h"'
         yield ""
         yield "/*"
@@ -1141,7 +1138,6 @@ def gen_avx2_rej_uniform_table():
         yield "#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \\"
         yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
         yield ""
-        yield "#include <stdint.h>"
         yield '#include "arith_native_x86_64.h"'
         yield ""
         yield "/*"
@@ -1439,7 +1435,6 @@ def gen_riscv64_zeta_files():
     # Generate rv64v_zetas.inc
     def gen_zetas():
         yield from gen_header()
-        yield "#include <stdint.h>"
         yield '#include "arith_native_riscv64.h"'
         yield ""
         yield "const int16_t zeta[] = {"
@@ -1456,7 +1451,6 @@ def gen_riscv64_zeta_files():
     # Generate rv64v_izetas.inc
     def gen_izetas():
         yield from gen_header()
-        yield "#include <stdint.h>"
         yield '#include "arith_native_riscv64.h"'
         yield ""
         yield "const int16_t izeta[] = {"
@@ -1473,7 +1467,6 @@ def gen_riscv64_zeta_files():
     # Generate rv64v_zetas_basemul.inc
     def gen_basemul():
         yield from gen_header()
-        yield "#include <stdint.h>"
         yield '#include "arith_native_riscv64.h"'
         yield "  "
         yield "const int16_t roots[] = {"
@@ -3031,11 +3024,19 @@ def gen_markdown_citations_for(filename, bibliography):
     except ValueError:
         pass
 
-    # Add footnotes for all citations found
-    if len(citations) > 0:
-        content.append(footnote_footer_start)
-    cite_ids = list(citations.keys())
+    # Find explicit footnote definitions outside the bibliography block
+    # These are lines matching `[^ID]: ...` and should be excluded from autogeneration
+    explicit_footnotes = set()
+    for l in content:
+        m = re.match(r"^\[\^(\w+)\]:", l)
+        if m:
+            explicit_footnotes.add(m.group(1))
+
+    # Add footnotes for all citations found (excluding explicit ones)
+    cite_ids = [c for c in citations.keys() if c not in explicit_footnotes]
     cite_ids.sort()
+    if len(cite_ids) > 0:
+        content.append(footnote_footer_start)
     for cite_id in cite_ids:
         uses = citations[cite_id]
         entry = bibliography.get(cite_id, None)
@@ -3050,7 +3051,7 @@ def gen_markdown_citations_for(filename, bibliography):
         # Remember this usage of the bibliography entry
         entry.register_usages(uses)
 
-    if len(citations) > 0:
+    if len(cite_ids) > 0:
         content.append("")
 
     update_file(filename, "\n".join(content))

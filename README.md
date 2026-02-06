@@ -13,7 +13,7 @@
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-mlkem-native is a secure, fast, and portable C90 implementation of ML-KEM[^FIPS203].
+mlkem-native is a secure, fast, and portable C90[^C90] implementation of ML-KEM[^FIPS203].
 It is a fork of the ML-KEM reference implementation[^REF].
 
 All C code in [mlkem/src/*](mlkem) and [mlkem/src/fips202/*](mlkem/src/fips202) is proved memory-safe (no memory overflow) and type-safe (no integer overflow)
@@ -185,6 +185,8 @@ If you have any other question / non-security related issue / feature request, p
 
 If you want to help us build mlkem-native, please reach out. You can contact the mlkem-native team
 through the [PQCA Discord](https://discord.com/invite/xyVnwzfg5R). See also [CONTRIBUTING.md](CONTRIBUTING.md).
+
+[^C90]: Strictly speaking, we rely on C90 + `stdint.h` + 64-bit `unsigned long long`.
 
 <!--- bibliography --->
 [^ACVP]: National Institute of Standards and Technology: Automated Cryptographic Validation Protocol (ACVP) Server, [https://github.com/usnistgov/ACVP-Server](https://github.com/usnistgov/ACVP-Server)
