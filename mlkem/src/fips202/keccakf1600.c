@@ -38,6 +38,12 @@ void mlk_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
                                    unsigned offset, unsigned length)
 {
   unsigned i;
+#if defined(MLK_USE_FIPS202_X1_EXTRACT_BYTES_NATIVE)
+  if(mlk_keccakf1600_extract_bytes_x1_native(state, data, offset, length) == MLK_NATIVE_FUNC_SUCCESS)
+  {
+    return;
+  }
+#endif
 #if defined(MLK_SYS_LITTLE_ENDIAN)
   uint8_t *state_ptr = (uint8_t *)state + offset;
   for (i = 0; i < length; i++)
@@ -46,6 +52,7 @@ void mlk_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
     data[i] = state_ptr[i];
   }
 #else  /* MLK_SYS_LITTLE_ENDIAN */
+  unsigned i;
   /* Portable version */
   for (i = 0; i < length; i++)
   __loop__(invariant(i <= length))
@@ -59,6 +66,11 @@ void mlk_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
                                unsigned offset, unsigned length)
 {
   unsigned i;
+#if defined(MLK_USE_FIPS202_X1_XOR_BYTES_NATIVE)
+  if (mlk_keccakf1600_xor_bytes_x1_native(state, data, offset, length) == MLK_NATIVE_FUNC_SUCCESS) {
+    return;
+  }
+#endif
 #if defined(MLK_SYS_LITTLE_ENDIAN)
   uint8_t *state_ptr = (uint8_t *)state + offset;
   for (i = 0; i < length; i++)
