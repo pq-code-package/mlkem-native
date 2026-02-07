@@ -2,14 +2,17 @@
 
 # HOL Light functional correctness proofs
 
-This directory contains functional correctness proofs for all AArch64 and some x86_64 assembly routines
-used in mlkem-native. The proofs were largely developed by John Harrison and Dusan Kostic
-and are written in the [HOL Light](https://hol-light.github.io/) theorem
-prover, utilizing the assembly verification infrastructure from [s2n-bignum](https://github.com/awslabs/s2n-bignum).
+This directory contains functional correctness proofs for all of the AArch64 and x86_64 assembly in mlkem-native.
+They are written in the [HOL Light](https://hol-light.github.io/) theorem prover, utilizing the assembly verification
+infrastructure from [s2n-bignum](https://github.com/awslabs/s2n-bignum).
 
 Each function is proved in a separate `.ml` file in [aarch64/proofs/](aarch64/proofs) and [x86_64/proofs/](x86_64/proofs). Each file
-contains the byte code being verified, as well as the specification that is being
-proved.
+contains the byte code being verified, as well as the specification that is being proved.
+
+## Intrinsics
+
+The x86_64 backend still includes some native code written in C intrinsics. This code is **not** covered by proof, currently.
+We are working on rewriting all intrinsics code in assembly and verifying it in HOL-Light/s2n-bignum.
 
 ## Primer
 
@@ -116,7 +119,7 @@ All AArch64 assembly routines used in mlkem-native are covered. Those are:
 
 The NTT and invNTT functions are super-optimized using [SLOTHY](https://github.com/slothy-optimizer/slothy/).
 
-The following x86_64 assembly routines used in mlkem-native are covered:
+All x86_64 assembly routines used in mlkem-native are covered:
 - ML-KEM Arithmetic:
   * x86_64 forward NTT: [mlkem_ntt.S](x86_64/mlkem/mlkem_ntt.S)
   * x86_64 inverse NTT: [mlkem_intt.S](x86_64/mlkem/mlkem_intt.S)
@@ -128,6 +131,8 @@ The following x86_64 assembly routines used in mlkem-native are covered:
   * x86_64 conversion to Montgomery form: [mlkem_tomont.S](x86_64/mlkem/mlkem_tomont.S)
   * x86_64 polynomial unpacking: [mlkem_unpack.S](x86_64/mlkem/mlkem_unpack.S)
   * x86_64 'multiplication cache' computation: [mlkem_mulcache_compute.S](x86_64/mlkem/mlkem_mulcache_compute.S)
+
+Note again, though, that parts of the x86_64 backend are still in intrinsics; see [above](#intrinsics).
 
 <!--- bibliography --->
 [^HYBRID]: Becker, Kannwischer: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64, [https://eprint.iacr.org/2022/1243](https://eprint.iacr.org/2022/1243)
