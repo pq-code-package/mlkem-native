@@ -2077,7 +2077,11 @@ def check_macro_typos():
 
         # Makefiles use MLK_SOURCE_XXX to list source files
         if is_autogen or filename.endswith("/Makefile"):
-            if m.startswith("MLK_SOURCE") or m.startswith("MLK_OBJ"):
+            if (
+                m.startswith("MLK_SOURCE")
+                or m.startswith("MLK_OBJ")
+                or "STACK_LOC" in m
+            ):
                 return True
 
         # libOQS specific identifier

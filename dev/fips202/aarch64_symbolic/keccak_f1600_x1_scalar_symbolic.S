@@ -81,81 +81,81 @@
  * This should to be manually trimmed to the number of stack locations
  * actually used after running SLOTHY.
  */
-#define STACK_LOCS 40
+#define MLK_STACK_LOCS 40
 
 // GPRs (16*6), count (8), const (8), input (8), padding (8)
-#define STACK_SIZE (16*6 + 3*8 + 8 + (STACK_LOCS) * 8)
-#define STACK_BASE_GPRS (3*8+8)
-#define STACK_LOC_INPUT (0*8)
-#define STACK_LOC_CONST (1*8)
-#define STACK_LOC_COUNT (2*8)
-#define STACK_LOC_MISC  (16*6 + 4*8)
+#define MLK_STACK_SIZE (16*6 + 3*8 + 8 + (MLK_STACK_LOCS) * 8)
+#define MLK_STACK_BASE_GPRS (3*8+8)
+#define MLK_STACK_LOC_INPUT (0*8)
+#define MLK_STACK_LOC_CONST (1*8)
+#define MLK_STACK_LOC_COUNT (2*8)
+#define MLK_STACK_LOC_MISC  (16*6 + 4*8)
 
-#define STACK_LOC_0 ((STACK_LOC_MISC) + 0*8)
-#define STACK_LOC_1 ((STACK_LOC_MISC) + 1*8)
-#define STACK_LOC_2 ((STACK_LOC_MISC) + 2*8)
-#define STACK_LOC_3 ((STACK_LOC_MISC) + 3*8)
-#define STACK_LOC_4 ((STACK_LOC_MISC) + 4*8)
-#define STACK_LOC_5 ((STACK_LOC_MISC) + 5*8)
-#define STACK_LOC_6 ((STACK_LOC_MISC) + 6*8)
-#define STACK_LOC_7 ((STACK_LOC_MISC) + 7*8)
-#define STACK_LOC_8 ((STACK_LOC_MISC) + 8*8)
-#define STACK_LOC_9 ((STACK_LOC_MISC) + 9*8)
-#define STACK_LOC_10 ((STACK_LOC_MISC) + 10*8)
-#define STACK_LOC_11 ((STACK_LOC_MISC) + 11*8)
-#define STACK_LOC_12 ((STACK_LOC_MISC) + 12*8)
-#define STACK_LOC_13 ((STACK_LOC_MISC) + 13*8)
-#define STACK_LOC_14 ((STACK_LOC_MISC) + 14*8)
-#define STACK_LOC_15 ((STACK_LOC_MISC) + 15*8)
-#define STACK_LOC_16 ((STACK_LOC_MISC) + 16*8)
-#define STACK_LOC_17 ((STACK_LOC_MISC) + 17*8)
-#define STACK_LOC_18 ((STACK_LOC_MISC) + 18*8)
-#define STACK_LOC_19 ((STACK_LOC_MISC) + 19*8)
-#define STACK_LOC_20 ((STACK_LOC_MISC) + 20*8)
-#define STACK_LOC_21 ((STACK_LOC_MISC) + 21*8)
-#define STACK_LOC_22 ((STACK_LOC_MISC) + 22*8)
-#define STACK_LOC_23 ((STACK_LOC_MISC) + 23*8)
-#define STACK_LOC_24 ((STACK_LOC_MISC) + 24*8)
-#define STACK_LOC_25 ((STACK_LOC_MISC) + 25*8)
-#define STACK_LOC_26 ((STACK_LOC_MISC) + 26*8)
-#define STACK_LOC_27 ((STACK_LOC_MISC) + 27*8)
-#define STACK_LOC_28 ((STACK_LOC_MISC) + 28*8)
-#define STACK_LOC_29 ((STACK_LOC_MISC) + 29*8)
-#define STACK_LOC_30 ((STACK_LOC_MISC) + 30*8)
-#define STACK_LOC_31 ((STACK_LOC_MISC) + 31*8)
-#define STACK_LOC_32 ((STACK_LOC_MISC) + 32*8)
-#define STACK_LOC_33 ((STACK_LOC_MISC) + 33*8)
-#define STACK_LOC_34 ((STACK_LOC_MISC) + 34*8)
-#define STACK_LOC_35 ((STACK_LOC_MISC) + 35*8)
-#define STACK_LOC_36 ((STACK_LOC_MISC) + 36*8)
-#define STACK_LOC_37 ((STACK_LOC_MISC) + 37*8)
-#define STACK_LOC_38 ((STACK_LOC_MISC) + 38*8)
-#define STACK_LOC_39 ((STACK_LOC_MISC) + 39*8)
+#define MLK_STACK_LOC_0 ((MLK_STACK_LOC_MISC) + 0*8)
+#define MLK_STACK_LOC_1 ((MLK_STACK_LOC_MISC) + 1*8)
+#define MLK_STACK_LOC_2 ((MLK_STACK_LOC_MISC) + 2*8)
+#define MLK_STACK_LOC_3 ((MLK_STACK_LOC_MISC) + 3*8)
+#define MLK_STACK_LOC_4 ((MLK_STACK_LOC_MISC) + 4*8)
+#define MLK_STACK_LOC_5 ((MLK_STACK_LOC_MISC) + 5*8)
+#define MLK_STACK_LOC_6 ((MLK_STACK_LOC_MISC) + 6*8)
+#define MLK_STACK_LOC_7 ((MLK_STACK_LOC_MISC) + 7*8)
+#define MLK_STACK_LOC_8 ((MLK_STACK_LOC_MISC) + 8*8)
+#define MLK_STACK_LOC_9 ((MLK_STACK_LOC_MISC) + 9*8)
+#define MLK_STACK_LOC_10 ((MLK_STACK_LOC_MISC) + 10*8)
+#define MLK_STACK_LOC_11 ((MLK_STACK_LOC_MISC) + 11*8)
+#define MLK_STACK_LOC_12 ((MLK_STACK_LOC_MISC) + 12*8)
+#define MLK_STACK_LOC_13 ((MLK_STACK_LOC_MISC) + 13*8)
+#define MLK_STACK_LOC_14 ((MLK_STACK_LOC_MISC) + 14*8)
+#define MLK_STACK_LOC_15 ((MLK_STACK_LOC_MISC) + 15*8)
+#define MLK_STACK_LOC_16 ((MLK_STACK_LOC_MISC) + 16*8)
+#define MLK_STACK_LOC_17 ((MLK_STACK_LOC_MISC) + 17*8)
+#define MLK_STACK_LOC_18 ((MLK_STACK_LOC_MISC) + 18*8)
+#define MLK_STACK_LOC_19 ((MLK_STACK_LOC_MISC) + 19*8)
+#define MLK_STACK_LOC_20 ((MLK_STACK_LOC_MISC) + 20*8)
+#define MLK_STACK_LOC_21 ((MLK_STACK_LOC_MISC) + 21*8)
+#define MLK_STACK_LOC_22 ((MLK_STACK_LOC_MISC) + 22*8)
+#define MLK_STACK_LOC_23 ((MLK_STACK_LOC_MISC) + 23*8)
+#define MLK_STACK_LOC_24 ((MLK_STACK_LOC_MISC) + 24*8)
+#define MLK_STACK_LOC_25 ((MLK_STACK_LOC_MISC) + 25*8)
+#define MLK_STACK_LOC_26 ((MLK_STACK_LOC_MISC) + 26*8)
+#define MLK_STACK_LOC_27 ((MLK_STACK_LOC_MISC) + 27*8)
+#define MLK_STACK_LOC_28 ((MLK_STACK_LOC_MISC) + 28*8)
+#define MLK_STACK_LOC_29 ((MLK_STACK_LOC_MISC) + 29*8)
+#define MLK_STACK_LOC_30 ((MLK_STACK_LOC_MISC) + 30*8)
+#define MLK_STACK_LOC_31 ((MLK_STACK_LOC_MISC) + 31*8)
+#define MLK_STACK_LOC_32 ((MLK_STACK_LOC_MISC) + 32*8)
+#define MLK_STACK_LOC_33 ((MLK_STACK_LOC_MISC) + 33*8)
+#define MLK_STACK_LOC_34 ((MLK_STACK_LOC_MISC) + 34*8)
+#define MLK_STACK_LOC_35 ((MLK_STACK_LOC_MISC) + 35*8)
+#define MLK_STACK_LOC_36 ((MLK_STACK_LOC_MISC) + 36*8)
+#define MLK_STACK_LOC_37 ((MLK_STACK_LOC_MISC) + 37*8)
+#define MLK_STACK_LOC_38 ((MLK_STACK_LOC_MISC) + 38*8)
+#define MLK_STACK_LOC_39 ((MLK_STACK_LOC_MISC) + 39*8)
 
 .macro alloc_stack
-    sub sp, sp, #(STACK_SIZE)
+    sub sp, sp, #(MLK_STACK_SIZE)
 .endm
 
 .macro free_stack
-    add sp, sp, #(STACK_SIZE)
+    add sp, sp, #(MLK_STACK_SIZE)
 .endm
 
 .macro save_gprs
-    stp x19, x20, [sp, #(STACK_BASE_GPRS + 16*0)]
-    stp x21, x22, [sp, #(STACK_BASE_GPRS + 16*1)]
-    stp x23, x24, [sp, #(STACK_BASE_GPRS + 16*2)]
-    stp x25, x26, [sp, #(STACK_BASE_GPRS + 16*3)]
-    stp x27, x28, [sp, #(STACK_BASE_GPRS + 16*4)]
-    stp x29, x30, [sp, #(STACK_BASE_GPRS + 16*5)]
+    stp x19, x20, [sp, #(MLK_STACK_BASE_GPRS + 16*0)]
+    stp x21, x22, [sp, #(MLK_STACK_BASE_GPRS + 16*1)]
+    stp x23, x24, [sp, #(MLK_STACK_BASE_GPRS + 16*2)]
+    stp x25, x26, [sp, #(MLK_STACK_BASE_GPRS + 16*3)]
+    stp x27, x28, [sp, #(MLK_STACK_BASE_GPRS + 16*4)]
+    stp x29, x30, [sp, #(MLK_STACK_BASE_GPRS + 16*5)]
 .endm
 
 .macro restore_gprs
-    ldp x19, x20, [sp, #(STACK_BASE_GPRS + 16*0)]
-    ldp x21, x22, [sp, #(STACK_BASE_GPRS + 16*1)]
-    ldp x23, x24, [sp, #(STACK_BASE_GPRS + 16*2)]
-    ldp x25, x26, [sp, #(STACK_BASE_GPRS + 16*3)]
-    ldp x27, x28, [sp, #(STACK_BASE_GPRS + 16*4)]
-    ldp x29, x30, [sp, #(STACK_BASE_GPRS + 16*5)]
+    ldp x19, x20, [sp, #(MLK_STACK_BASE_GPRS + 16*0)]
+    ldp x21, x22, [sp, #(MLK_STACK_BASE_GPRS + 16*1)]
+    ldp x23, x24, [sp, #(MLK_STACK_BASE_GPRS + 16*2)]
+    ldp x25, x26, [sp, #(MLK_STACK_BASE_GPRS + 16*3)]
+    ldp x27, x28, [sp, #(MLK_STACK_BASE_GPRS + 16*4)]
+    ldp x29, x30, [sp, #(MLK_STACK_BASE_GPRS + 16*5)]
 .endm
 
 .macro eor5 dst, src0, src1, src2, src3, src4
@@ -214,10 +214,10 @@
     eor X<Bme>, Aga, X<E0>
     eor X<Bbe>, Age, X<E1>
 
-    ldr X<caddr>, [sp, #STACK_LOC_CONST]
+    ldr X<caddr>, [sp, #MLK_STACK_LOC_CONST]
     ldr X<cur_const>, [X<caddr>]
     mov X<count>, #1
-    str X<count>, [sp, #STACK_LOC_COUNT] // @slothy:writes=STACK_LOC_COUNT
+    str X<count>, [sp, #MLK_STACK_LOC_COUNT] // @slothy:writes=MLK_STACK_LOC_COUNT
 
     chi_step_ror Aga, X<Bga>, X<Bgi>, X<Bge>, 47, 39
     chi_step_ror Age, X<Bge>, X<Bgo>, X<Bgi>, 42, 25
@@ -311,12 +311,12 @@
     eor X<Bme>, X<E0>, Aga, ror #61
     eor X<Bbe>, X<E1>, Age, ror #19
 
-    ldr X<caddr>, [sp, #STACK_LOC_CONST]
-    ldr X<count>, [sp, #STACK_LOC_COUNT] // @slothy:reads=STACK_LOC_COUNT
+    ldr X<caddr>, [sp, #MLK_STACK_LOC_CONST]
+    ldr X<count>, [sp, #MLK_STACK_LOC_COUNT] // @slothy:reads=MLK_STACK_LOC_COUNT
     ldr X<cur_const>, [X<caddr>, X<count>, LSL #3]
     add X<count>, X<count>, #1
-    cmp X<count>, #(KECCAK_F1600_ROUNDS-1) // @slothy:ignore_useless_output
-    str X<count>, [sp, #STACK_LOC_COUNT] // @slothy:writes=STACK_LOC_COUNT
+    cmp X<count>, #(MLK_KECCAK_F1600_ROUNDS-1) // @slothy:ignore_useless_output
+    str X<count>, [sp, #MLK_STACK_LOC_COUNT] // @slothy:writes=MLK_STACK_LOC_COUNT
 
     chi_step_ror Aga, X<Bga>, X<Bgi>, X<Bge>, 47, 39
     chi_step_ror Age, X<Bge>, X<Bgo>, X<Bgi>, 42, 25
@@ -405,7 +405,7 @@
     ror Asu, Asu,#(64-55)
 .endm
 
-#define KECCAK_F1600_ROUNDS 24
+#define MLK_KECCAK_F1600_ROUNDS 24
 
     .text
     .global MLK_ASM_NAMESPACE(keccak_f1600_x1_scalar_asm)
@@ -416,9 +416,9 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x1_scalar_asm)
 
 keccak_f1600_x1_scalar_initial:
     mov const_addr, input_rc
-    str input_rc, [sp, #STACK_LOC_CONST]
+    str input_rc, [sp, #MLK_STACK_LOC_CONST]
     load_state
-    str input_addr, [sp, #STACK_LOC_INPUT] // @slothy:writes=STACK_LOC_INPUT
+    str input_addr, [sp, #MLK_STACK_LOC_INPUT] // @slothy:writes=MLK_STACK_LOC_INPUT
 
 keccak_f1600_x1_scalar_initial_start:
    keccak_f1600_round_initial
@@ -430,7 +430,7 @@ keccak_f1600_x1_scalar_end_loop:
 
 keccak_f1600_x1_scalar_final:
     final_rotate
-    ldr input_addr, [sp, #STACK_LOC_INPUT] // @slothy:reads=STACK_LOC_INPUT
+    ldr input_addr, [sp, #MLK_STACK_LOC_INPUT] // @slothy:reads=MLK_STACK_LOC_INPUT
     store_state
 keccak_f1600_x1_scalar_end_final:
 
@@ -470,54 +470,54 @@ keccak_f1600_x1_scalar_end_final:
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
-#undef STACK_LOCS
-#undef STACK_SIZE
-#undef STACK_BASE_GPRS
-#undef STACK_LOC_INPUT
-#undef STACK_LOC_CONST
-#undef STACK_LOC_COUNT
-#undef STACK_LOC_MISC
-#undef STACK_LOC_0
-#undef STACK_LOC_1
-#undef STACK_LOC_2
-#undef STACK_LOC_3
-#undef STACK_LOC_4
-#undef STACK_LOC_5
-#undef STACK_LOC_6
-#undef STACK_LOC_7
-#undef STACK_LOC_8
-#undef STACK_LOC_9
-#undef STACK_LOC_10
-#undef STACK_LOC_11
-#undef STACK_LOC_12
-#undef STACK_LOC_13
-#undef STACK_LOC_14
-#undef STACK_LOC_15
-#undef STACK_LOC_16
-#undef STACK_LOC_17
-#undef STACK_LOC_18
-#undef STACK_LOC_19
-#undef STACK_LOC_20
-#undef STACK_LOC_21
-#undef STACK_LOC_22
-#undef STACK_LOC_23
-#undef STACK_LOC_24
-#undef STACK_LOC_25
-#undef STACK_LOC_26
-#undef STACK_LOC_27
-#undef STACK_LOC_28
-#undef STACK_LOC_29
-#undef STACK_LOC_30
-#undef STACK_LOC_31
-#undef STACK_LOC_32
-#undef STACK_LOC_33
-#undef STACK_LOC_34
-#undef STACK_LOC_35
-#undef STACK_LOC_36
-#undef STACK_LOC_37
-#undef STACK_LOC_38
-#undef STACK_LOC_39
-#undef KECCAK_F1600_ROUNDS
+#undef MLK_STACK_LOCS
+#undef MLK_STACK_SIZE
+#undef MLK_STACK_BASE_GPRS
+#undef MLK_STACK_LOC_INPUT
+#undef MLK_STACK_LOC_CONST
+#undef MLK_STACK_LOC_COUNT
+#undef MLK_STACK_LOC_MISC
+#undef MLK_STACK_LOC_0
+#undef MLK_STACK_LOC_1
+#undef MLK_STACK_LOC_2
+#undef MLK_STACK_LOC_3
+#undef MLK_STACK_LOC_4
+#undef MLK_STACK_LOC_5
+#undef MLK_STACK_LOC_6
+#undef MLK_STACK_LOC_7
+#undef MLK_STACK_LOC_8
+#undef MLK_STACK_LOC_9
+#undef MLK_STACK_LOC_10
+#undef MLK_STACK_LOC_11
+#undef MLK_STACK_LOC_12
+#undef MLK_STACK_LOC_13
+#undef MLK_STACK_LOC_14
+#undef MLK_STACK_LOC_15
+#undef MLK_STACK_LOC_16
+#undef MLK_STACK_LOC_17
+#undef MLK_STACK_LOC_18
+#undef MLK_STACK_LOC_19
+#undef MLK_STACK_LOC_20
+#undef MLK_STACK_LOC_21
+#undef MLK_STACK_LOC_22
+#undef MLK_STACK_LOC_23
+#undef MLK_STACK_LOC_24
+#undef MLK_STACK_LOC_25
+#undef MLK_STACK_LOC_26
+#undef MLK_STACK_LOC_27
+#undef MLK_STACK_LOC_28
+#undef MLK_STACK_LOC_29
+#undef MLK_STACK_LOC_30
+#undef MLK_STACK_LOC_31
+#undef MLK_STACK_LOC_32
+#undef MLK_STACK_LOC_33
+#undef MLK_STACK_LOC_34
+#undef MLK_STACK_LOC_35
+#undef MLK_STACK_LOC_36
+#undef MLK_STACK_LOC_37
+#undef MLK_STACK_LOC_38
+#undef MLK_STACK_LOC_39
+#undef MLK_KECCAK_F1600_ROUNDS
 
 /* simpasm: footer-start */
 #endif /* MLK_FIPS202_AARCH64_NEED_X1_SCALAR && \
