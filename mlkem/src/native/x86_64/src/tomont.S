@@ -149,5 +149,7 @@ MLK_ASM_FN_SYMBOL(tomont_avx2)
         retq
         .cfi_endproc
 
+MLK_ASM_FN_SIZE(tomont_avx2)
+
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */

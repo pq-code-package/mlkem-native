@@ -187,5 +187,7 @@ MLK_ASM_FN_SYMBOL(nttfrombytes_avx2)
         retq
         .cfi_endproc
 
+MLK_ASM_FN_SIZE(nttfrombytes_avx2)
+
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */

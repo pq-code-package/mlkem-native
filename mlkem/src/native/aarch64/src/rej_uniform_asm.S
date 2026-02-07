@@ -221,4 +221,6 @@ Lrej_uniform_return:
         ret
         .cfi_endproc
 
+MLK_ASM_FN_SIZE(rej_uniform_asm)
+
 #endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

@@ -1070,5 +1070,7 @@ Lkeccak_f1600_x4_v8a_scalar_hybrid_done:
         ret
         .cfi_endproc
 
+MLK_ASM_FN_SIZE(keccak_f1600_x4_v8a_scalar_hybrid_asm)
+
 #endif /* MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID && \
           !MLK_CONFIG_MULTILEVEL_NO_SHARED */

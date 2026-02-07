@@ -992,5 +992,7 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k4)
         retq
         .cfi_endproc
 
+MLK_ASM_FN_SIZE(polyvec_basemul_acc_montgomery_cached_asm_k4)
+
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
           && (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4) */

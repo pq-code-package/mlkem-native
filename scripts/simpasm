@@ -312,7 +312,10 @@ def simplify(logger, args, asm_input, asm_output=None):
                 "",
             ]
             simplified_header = header
-            simplified_footer = footer
+            simplified_footer = [
+                f"{sym.replace('MLK_ASM_NAMESPACE', 'MLK_ASM_FN_SIZE')}",
+                "",
+            ] + footer
 
         # Apply CFI directives if requested
         if args.cfify:
