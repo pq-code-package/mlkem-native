@@ -362,5 +362,7 @@ Lpolyvec_basemul_acc_montgomery_cached_k4_loop_start:
         ret
         .cfi_endproc
 
+MLK_ASM_FN_SIZE(polyvec_basemul_acc_montgomery_cached_asm_k4)
+
 #endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED && \
           (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4) */

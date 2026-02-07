@@ -96,5 +96,7 @@ Lrej_uniform_asm_end:
         retq
         .cfi_endproc
 
+MLK_ASM_FN_SIZE(rej_uniform_asm)
+
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */

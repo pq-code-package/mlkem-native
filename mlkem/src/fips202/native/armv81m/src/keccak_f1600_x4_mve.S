@@ -632,4 +632,6 @@ keccak_f1600_x4_mve_asm_roundend:
         pop.w	{r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, pc}
         nop
 
+MLK_ASM_FN_SIZE(keccak_f1600_x4_mve_asm)
+
 #endif /* MLK_FIPS202_ARMV81M_NEED_X4 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

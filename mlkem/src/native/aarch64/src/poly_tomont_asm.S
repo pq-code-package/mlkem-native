@@ -93,4 +93,6 @@ Lpoly_tomont_loop:
         ret
         .cfi_endproc
 
+MLK_ASM_FN_SIZE(poly_tomont_asm)
+
 #endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

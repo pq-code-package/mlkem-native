@@ -112,4 +112,6 @@ Lpoly_tobytes_loop_start:
         ret
         .cfi_endproc
 
+MLK_ASM_FN_SIZE(poly_tobytes_asm)
+
 #endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
