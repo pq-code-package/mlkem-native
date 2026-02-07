@@ -1,0 +1,20 @@
+diff --git a/crypto/fipsmodule/ml_kem/importer.sh b/crypto/fipsmodule/ml_kem/importer.sh
+index 24832ab..b81348a 100644
+--- a/crypto/fipsmodule/ml_kem/importer.sh
++++ b/crypto/fipsmodule/ml_kem/importer.sh
+@@ -151,12 +151,14 @@ for file in $SRC/native/aarch64/src/*.S $SRC/native/x86_64/src/*.S; do
+   mv "$tmp_file" "$file"
+ 
+   # Replace common.h include and assembly macros
+-  sed "${SED_I[@]}" 's/#include "\.\.\/\.\.\/\.\.\/common\.h"/#include "_internal_s2n_bignum.h"/' "$file"
++  s2n_header=$(if [[ "$file" == *"aarch64"* ]]; then echo "_internal_s2n_bignum_arm.h"; else echo "_internal_s2n_bignum_x86_att.h"; fi)
++  sed "${SED_I[@]}" "s/#include \"\.\.\/\.\.\/\.\.\/common\.h\"/#include \"$s2n_header\"/" "$file"
+ 
+   func_name=$(grep -o '\.global MLK_ASM_NAMESPACE(\([^)]*\))' "$file" | sed 's/\.global MLK_ASM_NAMESPACE(\([^)]*\))/\1/')
+   if [ -n "$func_name" ]; then
+     sed "${SED_I[@]}" "s/\.global MLK_ASM_NAMESPACE($func_name)/        S2N_BN_SYM_VISIBILITY_DIRECTIVE(mlkem_$func_name)\n        S2N_BN_SYM_PRIVACY_DIRECTIVE(mlkem_$func_name)/" "$file"
+     sed "${SED_I[@]}" "s/MLK_ASM_FN_SYMBOL($func_name)/S2N_BN_SYMBOL(mlkem_$func_name):/" "$file"
++    sed "${SED_I[@]}" "s/MLK_ASM_FN_SIZE($func_name)/S2N_BN_SIZE_DIRECTIVE(mlkem_$func_name)/" "$file"
+   fi
+ done
+ 
