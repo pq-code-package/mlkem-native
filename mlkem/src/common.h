@@ -75,9 +75,15 @@
  */
 #if defined(MLK_SYS_X86_64)
 #define MLK_ASM_FN_SYMBOL(sym) MLK_ASM_NAMESPACE(sym) : MLK_CET_ENDBR
-#else
+#elif defined(MLK_SYS_ARMV81M_MVE)
+/* clang-format off */
+#define MLK_ASM_FN_SYMBOL(sym) \
+  .type MLK_ASM_NAMESPACE(sym), %function; \
+  MLK_ASM_NAMESPACE(sym) :
+/* clang-format on */
+#else /* !MLK_SYS_X86_64 && MLK_SYS_ARMV81M_MVE */
 #define MLK_ASM_FN_SYMBOL(sym) MLK_ASM_NAMESPACE(sym) :
-#endif
+#endif /* !MLK_SYS_X86_64 && !MLK_SYS_ARMV81M_MVE */
 
 /*
  * Output the size of an assembly function.
