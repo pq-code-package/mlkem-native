@@ -257,7 +257,8 @@ jobs:
            examples: true
          - name: gcc-13
            shell: gcc13
-           darwin: True
+           # TODO: gcc13 broken on macOS in nixpkgs 25.11
+           darwin: False
            c17: True
            c23: False
            opt: all

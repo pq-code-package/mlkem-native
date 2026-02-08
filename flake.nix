@@ -7,7 +7,7 @@
 
   inputs = {
     nixpkgs-2405.url = "github:NixOS/nixpkgs/nixos-24.05";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     flake-parts = {
@@ -25,10 +25,9 @@
           pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
           pkgs-2405 = inputs.nixpkgs-2405.legacyPackages.${system};
           util = pkgs.callPackage ./nix/util.nix {
-            # Keep those around in case we want to switch to unstable versions
-            cbmc = pkgs-unstable.cbmc;
-            bitwuzla = pkgs-unstable.bitwuzla;
-            z3 = pkgs-unstable.z3;
+            inherit (pkgs) cbmc bitwuzla z3;
+            # TODO: switch back to stable python3 for slothy once ortools is fixed in 25.11
+            python3-for-slothy = pkgs-unstable.python3;
           };
           zigWrapCC = zig: pkgs.symlinkJoin {
             name = "zig-wrappers";
@@ -53,12 +52,17 @@
             inherit system;
             overlays = [
               (_:_: {
+                # From 24.05 (dropped in 25.11)
                 gcc48 = pkgs-2405.gcc48;
                 gcc49 = pkgs-2405.gcc49;
                 gcc7 = pkgs-2405.gcc7;
-                gcc15 = pkgs-unstable.gcc15;
-                clang_21 = pkgs-unstable.clang_21;
-                zig_0_15 = pkgs-unstable.zig_0_15;
+                gcc11 = pkgs-2405.gcc11;
+                gcc12 = pkgs-2405.gcc12;
+                clang_14 = pkgs-2405.clang_14;
+                clang_15 = pkgs-2405.clang_15;
+                clang_16 = pkgs-2405.clang_16;
+                clang_17 = pkgs-2405.clang_17;
+                zig_0_12 = pkgs-2405.zig_0_12;
               })
             ];
           };
@@ -178,8 +182,8 @@
 
           devShells.zig0_12 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_12);
           devShells.zig0_13 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_13);
-          devShells.zig0_14 = util.mkShellWithCC' (zigWrapCC pkgs.zig);
-          devShells.zig0_15 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_15);
+          devShells.zig0_14 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_14);
+          devShells.zig0_15 = util.mkShellWithCC' (zigWrapCC pkgs.zig);
 
           devShells.gcc48 = util.mkShellWithCC' pkgs.gcc48;
           devShells.gcc49 = util.mkShellWithCC' pkgs.gcc49;
@@ -215,9 +219,9 @@
             pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
             util = pkgs.callPackage ./nix/util.nix {
               inherit pkgs;
-              cbmc = pkgs-unstable.cbmc;
-              bitwuzla = pkgs-unstable.bitwuzla;
-              z3 = pkgs-unstable.z3;
+              inherit (pkgs) cbmc bitwuzla z3;
+              # TODO: switch back to stable python3 for slothy once ortools is fixed in 25.11
+              python3-for-slothy = pkgs-unstable.python3;
             };
           in
           util.mkShell {
