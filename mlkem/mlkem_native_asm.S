@@ -52,7 +52,7 @@
  *
  * Example:
  * ```bash
- * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native.S
+ * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native_asm.S
  * ```
  */
 

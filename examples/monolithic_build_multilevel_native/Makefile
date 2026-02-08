@@ -55,7 +55,7 @@ endif
 #
 # Here, the monolithic C file for mlkem-native is directly included in main.c,
 # However, we still need to incldue the monolithic assembly file.
-MLK_SOURCE_ASM = mlkem_native/mlkem_native.S
+MLK_SOURCE_ASM = mlkem_native/mlkem_native_asm.S
 
 INC=-Imlkem_native/ -I./
 

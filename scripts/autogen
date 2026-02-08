@@ -1948,7 +1948,7 @@ def gen_monolithic_asm_file():
         yield " *"
         yield " * Example:"
         yield " * ```bash"
-        yield " * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native.S"
+        yield " * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native_asm.S"
         yield " * ```"
         yield " */"
         yield ""
@@ -2001,7 +2001,7 @@ def gen_monolithic_asm_file():
         ]
         yield from gen_macro_undefs(extra_notes=extra)
 
-    update_file("mlkem/mlkem_native.S", "\n".join(gen()), force_format=True)
+    update_file("mlkem/mlkem_native_asm.S", "\n".join(gen()), force_format=True)
 
 
 def get_config_options():

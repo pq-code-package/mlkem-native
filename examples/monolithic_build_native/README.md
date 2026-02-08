@@ -3,7 +3,7 @@
 # Monolithic Build (Native Backend)
 
 This directory contains a minimal example for building mlkem-native as a single compilation unit
-with native assembly backends, using the auto-generated `mlkem_native.c` and `mlkem_native.S` files.
+with native assembly backends, using the auto-generated `mlkem_native.c` and `mlkem_native_asm.S` files.
 
 ## Use Case
 
@@ -15,7 +15,7 @@ Use this approach when:
 
 1. Source tree [mlkem_native/*](mlkem_native), including top-level compilation unit
    [mlkem_native.c](mlkem_native/mlkem_native.c) (gathering all C sources),
-   [mlkem_native.S](mlkem_native/mlkem_native.S) (gathering all assembly sources),
+   [mlkem_native_asm.S](mlkem_native/mlkem_native_asm.S) (gathering all assembly sources),
    and the mlkem-native API [mlkem_native.h](mlkem_native/mlkem_native.h).
 2. A secure random number generator implementing [`randombytes.h`](../../mlkem/src/randombytes.h)
 3. Your application source code
@@ -30,7 +30,7 @@ The configuration file [mlkem_native_config.h](mlkem_native/mlkem_native_config.
 
 ## Notes
 
-- Both `mlkem_native.c` and `mlkem_native.S` must be compiled and linked
+- Both `mlkem_native.c` and `mlkem_native_asm.S` must be compiled and linked
 - Native backends are auto-selected based on target architecture
 - On unsupported platforms, the C backend is used automatically
 
