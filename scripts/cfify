@@ -226,6 +226,179 @@ def add_cfi_directives(text, arch):
                 i += 1
                 continue
 
+        elif arch == "armv81m":
+            # Armv8.1-M callee-saved registers
+            armv81m_callee_saved_gprs = {
+                "r4",
+                "r5",
+                "r6",
+                "r7",
+                "r8",
+                "r9",
+                "r10",
+                "r11",
+                "lr",
+            }
+            armv81m_callee_saved_dregs = {
+                "d8",
+                "d9",
+                "d10",
+                "d11",
+                "d12",
+                "d13",
+                "d14",
+                "d15",
+            }
+            # Register aliases: numeric form -> canonical name
+            gpr_aliases = {"r14": "lr", "r15": "pc", "r13": "sp"}
+
+            def parse_reg(s):
+                """Parse a single register, returning (prefix, number) or None."""
+                s = s.strip().lower()
+                # Named aliases
+                if s in ("lr", "pc", "sp"):
+                    return s
+                m = re.match(r"([a-z]+)(\d+)$", s)
+                if not m:
+                    raise ValueError(f"Cannot parse register: {s}")
+                return gpr_aliases.get(s, s)
+
+            def expand_reg_range(token):
+                """Expand 'r4-r11' or 'd8-d15' into a list. Single regs returned as-is."""
+                m = re.match(r"^\s*([a-z]+)(\d+)\s*-\s*([a-z]+)(\d+)\s*$", token)
+                if m:
+                    prefix1, lo, prefix2, hi = (
+                        m.group(1),
+                        int(m.group(2)),
+                        m.group(3),
+                        int(m.group(4)),
+                    )
+                    if prefix1 != prefix2:
+                        raise ValueError(
+                            f"Mismatched register prefixes in range: {token}"
+                        )
+                    return [
+                        gpr_aliases.get(f"{prefix1}{n}", f"{prefix1}{n}")
+                        for n in range(lo, hi + 1)
+                    ]
+                return [parse_reg(token)]
+
+            def parse_reglist(reglist_str):
+                """Parse a register list string, expanding ranges and normalizing aliases."""
+                result = []
+                for token in reglist_str.split(","):
+                    result.extend(expand_reg_range(token))
+                return result
+
+            # push.w {reglist} / push {reglist}
+            match = re.match(r"(\s*)push(?:\.w)?\s*\{([^}]+)\}", line, re.IGNORECASE)
+            if match:
+                indent = match.group(1)
+                regs = parse_reglist(match.group(2))
+                total_size = 4 * len(regs)
+                result.append(line)
+                result.append(f"{indent}.cfi_adjust_cfa_offset {total_size:#x}")
+                for idx, reg in enumerate(regs):
+                    if reg in armv81m_callee_saved_gprs:
+                        offset = 4 * idx
+                        result.append(f"{indent}.cfi_rel_offset {reg}, {offset:#x}")
+                i += 1
+                continue
+
+            # vpush {d-regs}
+            match = re.match(r"(\s*)vpush\s*\{([^}]+)\}", line, re.IGNORECASE)
+            if match:
+                indent = match.group(1)
+                regs = parse_reglist(match.group(2))
+                total_size = 8 * len(regs)
+                result.append(line)
+                result.append(f"{indent}.cfi_adjust_cfa_offset {total_size:#x}")
+                for idx, reg in enumerate(regs):
+                    if reg in armv81m_callee_saved_dregs:
+                        offset = 8 * idx
+                        result.append(f"{indent}.cfi_rel_offset {reg}, {offset:#x}")
+                i += 1
+                continue
+
+            # vpop {d-regs}
+            match = re.match(r"(\s*)vpop\s*\{([^}]+)\}", line, re.IGNORECASE)
+            if match:
+                indent = match.group(1)
+                regs = parse_reglist(match.group(2))
+                total_size = 8 * len(regs)
+                result.append(line)
+                for reg in regs:
+                    if reg in armv81m_callee_saved_dregs:
+                        result.append(f"{indent}.cfi_restore {reg}")
+                result.append(f"{indent}.cfi_adjust_cfa_offset -{total_size:#x}")
+                i += 1
+                continue
+
+            # pop.w {reglist} / pop {reglist}
+            match = re.match(r"(\s*)pop(?:\.w)?\s*\{([^}]+)\}", line, re.IGNORECASE)
+            if match:
+                indent = match.group(1)
+                regs = parse_reglist(match.group(2))
+                total_size = 4 * len(regs)
+                has_pc = "pc" in regs
+                result.append(line)
+                for reg in regs:
+                    if reg in armv81m_callee_saved_gprs:
+                        result.append(f"{indent}.cfi_restore {reg}")
+                    elif reg == "pc":
+                        # pop into pc restores lr
+                        result.append(f"{indent}.cfi_restore lr")
+                result.append(f"{indent}.cfi_adjust_cfa_offset -{total_size:#x}")
+                if has_pc:
+                    result.append(f"{indent}.cfi_endproc")
+                i += 1
+                continue
+
+            # sub.w sp, #imm / sub sp, #imm / sub sp, sp, #imm
+            match = re.match(
+                r"(\s*)sub(?:\.w)?\s+sp,\s*(?:sp,\s*)?#(0x[0-9a-fA-F]+|\d+)",
+                line,
+                re.IGNORECASE,
+            )
+            if match:
+                indent, offset_str = match.groups()
+                offset = (
+                    int(offset_str, 16)
+                    if offset_str.lower().startswith("0x")
+                    else int(offset_str)
+                )
+                result.append(line)
+                result.append(f"{indent}.cfi_adjust_cfa_offset {offset:#x}")
+                i += 1
+                continue
+
+            # add.w sp, #imm / add sp, #imm / add sp, sp, #imm
+            match = re.match(
+                r"(\s*)add(?:\.w)?\s+sp,\s*(?:sp,\s*)?#(0x[0-9a-fA-F]+|\d+)",
+                line,
+                re.IGNORECASE,
+            )
+            if match:
+                indent, offset_str = match.groups()
+                offset = (
+                    int(offset_str, 16)
+                    if offset_str.lower().startswith("0x")
+                    else int(offset_str)
+                )
+                result.append(line)
+                result.append(f"{indent}.cfi_adjust_cfa_offset -{offset:#x}")
+                i += 1
+                continue
+
+            # bx lr — function return
+            match = re.match(r"(\s*)bx\s+lr\s*$", line, re.IGNORECASE)
+            if match:
+                indent = match.group(1)
+                result.append(line)
+                result.append(f"{indent}.cfi_endproc")
+                i += 1
+                continue
+
         result.append(line)
         i += 1
 
@@ -246,7 +419,7 @@ def main():
     )
     parser.add_argument(
         "--arch",
-        choices=["aarch64", "x86_64"],
+        choices=["aarch64", "x86_64", "armv81m"],
         default="aarch64",
         help="Target architecture (default: aarch64)",
     )
