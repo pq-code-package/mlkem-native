@@ -28,8 +28,8 @@
       c_parameter: const uint32_t *rc
       description: Keccak round constants in bit-interleaved form (24 pairs of 32-bit words)
   Stack:
-    bytes: 236
-    description: register preservation (44) + SIMD registers (64) + temporary storage (128)
+    bytes: 228
+    description: register preservation (36) + SIMD registers (64) + temporary storage (128)
 */
 
 #include "../../../../common.h"
@@ -49,7 +49,7 @@
 .global MLK_ASM_NAMESPACE(keccak_f1600_x4_mve_asm)
 MLK_ASM_FN_SYMBOL(keccak_f1600_x4_mve_asm)
 
-        push.w	{r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, lr}
+        push.w	{r4, r5, r6, r7, r8, r9, r10, r11, lr}
         vpush	{d8, d9, d10, d11, d12, d13, d14, d15}
         sub	sp, #0x80
         mov	r6, r2
@@ -629,7 +629,7 @@ keccak_f1600_x4_mve_asm_roundend_pre:
 keccak_f1600_x4_mve_asm_roundend:
         add	sp, #0x80
         vpop	{d8, d9, d10, d11, d12, d13, d14, d15}
-        pop.w	{r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, pc}
+        pop.w	{r4, r5, r6, r7, r8, r9, r10, r11, pc}
         nop
 
 MLK_ASM_FN_SIZE(keccak_f1600_x4_mve_asm)
