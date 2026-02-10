@@ -13,91 +13,9 @@ on:
     types: [ "opened", "synchronize" ]
 
 jobs:
-  base:
-    name: Base
+  compiler-tests:
+    name: Compiler tests (Docker)
     permissions:
       contents: 'read'
-      id-token: 'write'
-    uses: ./.github/workflows/base.yml
-    secrets: inherit
-  lint-markdown:
-    name: Lint Markdown
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    uses: ./.github/workflows/lint_markdown.yml
-  nix:
-    name: Nix
-    permissions:
-      actions: 'write'
-      contents: 'read'
-      id-token: 'write'
-    uses: ./.github/workflows/nix.yml
-    secrets: inherit
-  ci:
-    name: Extended
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    needs: [ base, nix ]
-    uses: ./.github/workflows/ci.yml
-    secrets: inherit
-  cbmc:
-    name: CBMC
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-      pull-requests: 'write'
-    needs: [ base, nix ]
-    uses: ./.github/workflows/cbmc.yml
-    secrets: inherit
-  oqs_integration:
-    name: libOQS
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    needs: [ base ]
-    uses: ./.github/workflows/integration-liboqs.yml
-    secrets: inherit
-  opentitan_integration:
-    name: OpenTitan
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    needs: [ base ]
-    uses: ./.github/workflows/integration-opentitan.yml
-    secrets: inherit
-  awslc_integration:
-    name: AWS-LC
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    needs: [ base ]
-    uses: ./.github/workflows/integration-awslc.yml
-    with:
-      commit: v1.67.0
-    secrets: inherit
-  ct-test:
-    name: Constant-time
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    needs: [ base, nix ]
-    uses: ./.github/workflows/ct-tests.yml
-    secrets: inherit
-  slothy:
-    name: SLOTHY
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    needs: [ base, nix ]
-    uses: ./.github/workflows/slothy.yml
-    secrets: inherit
-  baremetal:
-    name: Baremetal
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    needs: [ base ]
-    uses: ./.github/workflows/baremetal.yml
+    uses: ./.github/workflows/compiler-tests.yml
     secrets: inherit
