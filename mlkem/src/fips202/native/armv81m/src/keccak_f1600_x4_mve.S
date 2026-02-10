@@ -6,7 +6,7 @@
 
 /*yaml
   Name: keccak_f1600_x4_mve_asm
-  Description: Armv8.1-M MVE implementation of 4-way parallel Keccak-f[1600] permutation using bit-interleaved state
+  Description: Armv8.1-M MVE implementation of batched (x4) Keccak-f[1600] permutation using bit-interleaved state
   Signature: void mlk_keccak_f1600_x4_mve_asm(void *state, void *tmpstate, const uint32_t *rc)
   ABI:
     r0:
@@ -14,7 +14,7 @@
       size_bytes: 800
       permissions: read/write
       c_parameter: void *state
-      description: Four bit-interleaved Keccak states (low halves followed by high halves)
+      description: Bit-interleaved state for 4 Keccak instances (even halves followed by odd halves)
     r1:
       type: buffer
       size_bytes: 800
@@ -31,6 +31,36 @@
     bytes: 236
     description: register preservation (44) + SIMD registers (64) + temporary storage (128)
 */
+
+// ---------------------------------------------------------------------------
+// Bit-interleaving background
+// ---------------------------------------------------------------------------
+// Each 64-bit Keccak lane is stored as two 32-bit words:
+//   even half -- bits 0, 2, 4, ..., 62 of the lane
+//   odd half  -- bits 1, 3, 5, ..., 63 of the lane
+// This representation allows 64-bit lane rotations (used in the Keccak
+// round function) to be implemented as pairs of 32-bit rotations.
+//
+// Batched (x4) processing:
+//   Four Keccak instances are processed as a batch.  Their states are
+//   stored interleaved in a single 800-byte buffer: first the even
+//   halves of all 25 lanes (400 bytes), then the odd halves (400 bytes).
+//   Within each 16-byte row, the four u32 words correspond to
+//   instances 0..3 of the same lane, enabling SIMD-parallel operations
+//   across all four instances.
+//
+// State memory layout (25 lanes x 4 instances x 2 halves):
+//   S[i][l]_even/odd = even/odd half of lane l, instance i  (u32)
+//   Each row is 16 bytes (one Q-register).
+//   Offset  Contents
+//     0     S[0][ 0]_even, S[1][ 0]_even, S[2][ 0]_even, S[3][ 0]_even
+//    16     S[0][ 1]_even, S[1][ 1]_even, S[2][ 1]_even, S[3][ 1]_even
+//    ...
+//   384     S[0][24]_even, S[1][24]_even, S[2][24]_even, S[3][24]_even
+//   400     S[0][ 0]_odd,  S[1][ 0]_odd,  S[2][ 0]_odd,  S[3][ 0]_odd
+//   416     S[0][ 1]_odd,  S[1][ 1]_odd,  S[2][ 1]_odd,  S[3][ 1]_odd
+//    ...
+//   784     S[0][24]_odd,  S[1][24]_odd,  S[2][24]_odd,  S[3][24]_odd
 
 #include "../../../../common.h"
 #if defined(MLK_FIPS202_ARMV81M_NEED_X4) && \

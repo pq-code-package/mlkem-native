@@ -230,7 +230,7 @@ def simplify(logger, args, asm_input, asm_output=None):
             )
             raise Exception("simpasm failed")
         sym_info = nm_output[0].split(" ")
-        sym_addr = int(sym_info[0])
+        sym_addr = int(sym_info[0], 16)
         if sym_addr != 0:
             logger.error(
                 f"Global sym {sym} not at address 0 (instead at address {hex(sym_addr)}) -- please reorder the assembly to start with the global function symbol"
