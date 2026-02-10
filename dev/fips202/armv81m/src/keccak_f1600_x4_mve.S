@@ -28,8 +28,8 @@
       c_parameter: const uint32_t *rc
       description: Keccak round constants in bit-interleaved form (24 pairs of 32-bit words)
   Stack:
-    bytes: 236
-    description: register preservation (44) + SIMD registers (64) + temporary storage (128)
+    bytes: 228
+    description: register preservation (36) + SIMD registers (64) + temporary storage (128)
 */
 
 #include "../../../../common.h"
@@ -430,7 +430,7 @@ qA20_l .req q2
 .global MLK_ASM_NAMESPACE(keccak_f1600_x4_mve_asm)
 MLK_ASM_FN_SYMBOL(keccak_f1600_x4_mve_asm)
 
-    push {r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
+    push {r4,r5,r6,r7,r8,r9,r10,r11,lr}
     vpush {d8-d15}
     sub sp, #8*16
 
@@ -1596,7 +1596,7 @@ keccak_f1600_x4_mve_asm_roundend:
     add sp, #8*16
 
     vpop {d8-d15}
-    ldmia.w sp!, {r3,r4,r5,r6,r7,r8,r9,r10,r11,r12, pc}
+    ldmia.w sp!, {r4,r5,r6,r7,r8,r9,r10,r11, pc}
 
 /****************** REGISTER DEALLOCATIONS *******************/
     .unreq qA00_h

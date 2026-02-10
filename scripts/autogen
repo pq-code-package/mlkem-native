@@ -2345,9 +2345,7 @@ def update_via_simpasm(
                 "-o",
                 tmp.name,
             ]
-            # TODO: Support CFI for Armv8.1-M
-            if arch != "armv81m":
-                cmd += ["--cfify"]
+            cmd += ["--cfify"]
             if cross_prefix is not None:
                 # Stick with llvm-objdump for disassembly
                 cmd += ["--cc", cross_prefix + "gcc"]
