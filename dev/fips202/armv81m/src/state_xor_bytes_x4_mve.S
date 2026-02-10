@@ -8,35 +8,52 @@
 // ---------------------------------------------------------------------------
 // Overview
 // ---------------------------------------------------------------------------
-// MVE/Helium implementation: bit-interleave four parallel byte streams and
-// XOR them into the Keccak state in the (even/odd)-bit-sliced layout used by
-// the 4x permutation.
+// MVE/Helium implementation of KeccakF1600x4_StateXORBytes.
 //
 // void KeccakF1600x4_StateXORBytes(state, d0, d1, d2, d3, offset, length)
 //
-// Three-phase structure:
-//   Prologue -- absorb min(length, 8-(offset%8)) bytes at the unaligned tail
-//               of the first lane via predicated byte loads.
-//   Main     -- process full 8-byte groups via gather loads, bit-interleave,
-//               then VEOR into E/O state regions.
-//   Tail     -- absorb <8 remaining bytes at lane offset 0 via predicated
-//               byte loads.
+// Reads 'length' plain bytes from each of four input buffers (d0..d3),
+// splits every byte into its even and odd bits (bit-interleaving), and
+// XORs the result into the Keccak state starting at byte 'offset'.
 //
-// State memory layout (bit-interleaved, 4 streams):
-//   state + 000: E[0](0-3), E[1](0-3), E[2](0-3), E[3](0-3)
-//   state + 016: E[0](4-7), E[1](4-7), E[2](4-7), E[3](4-7)
-//   ...
-//   state + 384: E[0](196-199), E[1](196-199), E[2](196-199), E[3](196-199)
-//   state + 400:  O[0](0-3),  O[1](0-3),  O[2](0-3),  O[3](0-3)
-//   state + 416:  O[0](4-7),  O[1](4-7),  O[2](4-7),  O[3](4-7)
-//   ...
-//   state + 784:  O[0](196-199), O[1](196-199), O[2](196-199), O[3](196-199)
+// ---------------------------------------------------------------------------
+// Bit-interleaving background
+// ---------------------------------------------------------------------------
+// Each 64-bit Keccak lane is stored as two 32-bit words:
+//   even half -- bits 0, 2, 4, ..., 62 of the lane
+//   odd half  -- bits 1, 3, 5, ..., 63 of the lane
+// This representation allows 64-bit lane rotations (used in the Keccak
+// round function) to be implemented as pairs of 32-bit rotations.
 //
-// Notes on the layout:
-//   - E occupies 25 lanes x 16 bytes = 400 bytes, followed by O at +400.
-//   - Each 8 input bytes per stream map to one 16-byte E lane and one 16-byte
-//     O lane.  Within each lane the four u32 words are streams 0..3.
-//   - Per u32: lo16 = bit-plane for bytes [0..3], hi16 = bytes [4..7].
+// Batched (x4) processing:
+//   Four Keccak instances are processed as a batch.  Their states are
+//   stored interleaved in a single 800-byte buffer: first the even
+//   halves of all 25 lanes (400 bytes), then the odd halves (400 bytes).
+//   Within each 16-byte row, the four u32 words correspond to
+//   instances 0..3 of the same lane, enabling SIMD-parallel operations
+//   across all four instances.
+//
+// State memory layout (25 lanes x 4 instances x 2 halves):
+//   S[i][l]_even/odd = even/odd half of lane l, instance i  (u32)
+//   Each row is 16 bytes (one Q-register).
+//   Offset  Contents
+//     0     S[0][ 0]_even, S[1][ 0]_even, S[2][ 0]_even, S[3][ 0]_even
+//    16     S[0][ 1]_even, S[1][ 1]_even, S[2][ 1]_even, S[3][ 1]_even
+//    ...
+//   384     S[0][24]_even, S[1][24]_even, S[2][24]_even, S[3][24]_even
+//   400     S[0][ 0]_odd,  S[1][ 0]_odd,  S[2][ 0]_odd,  S[3][ 0]_odd
+//   416     S[0][ 1]_odd,  S[1][ 1]_odd,  S[2][ 1]_odd,  S[3][ 1]_odd
+//    ...
+//   784     S[0][24]_odd,  S[1][24]_odd,  S[2][24]_odd,  S[3][24]_odd
+//
+// ---------------------------------------------------------------------------
+// Three-phase structure
+// ---------------------------------------------------------------------------
+//   Prologue -- if offset is not 8-byte aligned, absorb
+//               min(length, 8-(offset%8)) bytes via predicated byte loads.
+//   Main     -- process full 8-byte groups via word-level gather loads,
+//               bit-interleave, then VEOR into even/odd state halves.
+//   Tail     -- absorb remaining <8 bytes via predicated byte loads.
 
 #include "../../../../common.h"
 #if defined(MLK_FIPS202_ARMV81M_NEED_X4) && \
@@ -53,7 +70,7 @@
 
 // interleave_odds: in-place SWAR bit permutation that compacts odd-numbered
 // bits of each byte/halfword/word in \t toward the upper half, preparing the
-// odd bit-plane.
+// odd half of the bit-interleaved representation.
 // Inputs:  \t (data)
 // Outputs: \t (odd bits compacted; per 32b lane: lo16=bytes 0..3, hi16=4..7)
 // Clobbers: \u
@@ -72,7 +89,7 @@
 
 // interleave_evens: in-place SWAR bit permutation that compacts even-numbered
 // bits of each byte/halfword/word in \t toward the lower half, preparing the
-// even bit-plane.
+// even half of the bit-interleaved representation.
 // Inputs:  \t (data)
 // Outputs: \t (even bits compacted; per 32b lane: lo16=bytes 0..3, hi16=4..7)
 // Clobbers: \u
@@ -90,12 +107,12 @@
 .endm
 
 // ---------------------------------------------------------------------------
-// to_bit_interleaving_4x: split q0/q1 (low/high 4 bytes per stream) into
-// even and odd bit-planes packed as:
-//   q0 = Even plane (lo16: bytes 0..3, hi16: bytes 4..7)
-//   q1 = Odd  plane (lo16: bytes 0..3, hi16: bytes 4..7)
+// to_bit_interleaving_4x: split q0/q1 (low/high 4 bytes per instance)
+// into even and odd halves packed as:
+//   q0 = even half (lo16: bytes 0..3, hi16: bytes 4..7)
+//   q1 = odd half  (lo16: bytes 0..3, hi16: bytes 4..7)
 // Inputs:  q0 = [d0l, d1l, d2l, d3l], q1 = [d0h, d1h, d2h, d3h]
-// Outputs: q0 (even), q1 (odd)
+// Outputs: q0 (even half), q1 (odd half)
 // Clobbers: q2, q3, q4
 // ---------------------------------------------------------------------------
 .macro to_bit_interleaving_4x
@@ -110,10 +127,10 @@
 .endm
 
 // ---------------------------------------------------------------------------
-// transpose_streams_to_lanes: rearrange four per-stream vectors (q0..q3,
+// transpose_streams_to_lanes: rearrange four per-instance vectors (q0..q3,
 // each holding 8 bytes in its low 64 bits) into two vectors:
-//   q0 = [d0l, d1l, d2l, d3l]  (low  4 bytes of each stream)
-//   q1 = [d0h, d1h, d2h, d3h]  (high 4 bytes of each stream)
+//   q0 = [d0l, d1l, d2l, d3l]  (low  4 bytes of each instance)
+//   q1 = [d0h, d1h, d2h, d3h]  (high 4 bytes of each instance)
 // Clobbers: q2, q3, p0, r0
 //
 // Vectors:             ||           q0          ||           q1          ||           q2          ||           q3          ||
@@ -132,11 +149,11 @@
 
 // ---------------------------------------------------------------------------
 // xor_lane_and_store_postinc: XOR one lane into state with post-increment.
-// rSE / rSO are current pointers to stateE / stateO.
+// rSE / rSO are current pointers to the even / odd state halves.
 // ---------------------------------------------------------------------------
 .macro xor_lane_and_store_postinc qE, qO, qS0, qS1, rSE, rSO
-    vldrw.u32   \qS0, [\rSE]         // load 16B from Even region
-    vldrw.u32   \qS1, [\rSO]         // load 16B from Odd  region
+    vldrw.u32   \qS0, [\rSE]         // load 16B from even half
+    vldrw.u32   \qS1, [\rSO]         // load 16B from odd half
     veor.u32    \qS0, \qS0, \qE
     veor.u32    \qS1, \qS1, \qO
     vstrw.u32   \qS0, [\rSE], #16    // post-inc by 16 bytes
@@ -226,14 +243,14 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
     lsl mask, mask, off
     vmsr p0, mask
 
-    // Predicated byte loads (4 bytes per stream, post-increment by 4)
+    // Predicated byte loads (4 bytes per instance, post-increment by 4)
     vpstttt
     vldrbt.u8 qd0, [dp0], #4
     vldrbt.u8 qd1, [dp1], #4
     vldrbt.u8 qd2, [dp2], #4
     vldrbt.u8 qd3, [dp3], #4
 
-    // Transpose from per-stream layout to per-lane layout
+    // Transpose from per-instance layout to per-lane layout
     transpose_streams_to_lanes
 
     // Bit-interleave (clobbers q2, q3, q4)
@@ -262,7 +279,7 @@ keccak_f1600_x4_state_xor_bytes_asm_main_body:
     lsr     lr, length, #3
     wls     lr, lr, keccak_f1600_x4_state_xor_bytes_asm_main_loop_end
 keccak_f1600_x4_state_xor_bytes_asm_main_loop_start:
-    // Gather 8 bytes per stream (two u32 loads with post-increment)
+    // Gather 8 bytes per instance (two u32 loads with post-increment)
     vldrw.u32 qd0, [qP, #4]!
     vldrw.u32 qd1, [qP, #4]!
 
@@ -294,7 +311,7 @@ keccak_f1600_x4_state_xor_bytes_asm_main_loop_end:
     vldrbt.u8   qd2, [dp2]
     vldrbt.u8   qd3, [dp3]
 
-    // Transpose from per-stream layout to per-lane layout
+    // Transpose from per-instance layout to per-lane layout
     transpose_streams_to_lanes
 
     // Bit-interleave (clobbers q2, q3, q4)
