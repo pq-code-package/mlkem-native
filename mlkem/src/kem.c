@@ -217,7 +217,7 @@ int mlk_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   ret = mlk_indcpa_keypair_derand(pk, sk, coins, context);
   if (ret != 0)
   {
-    return ret;
+    goto cleanup;
   }
 
   mlk_memcpy(sk + MLKEM_INDCPA_SECRETKEYBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
@@ -234,10 +234,17 @@ int mlk_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   ret = mlk_check_pct(pk, sk, context);
   if (ret != 0)
   {
-    return ret;
+    goto cleanup;
   }
 
-  return 0;
+cleanup:
+  if (ret != 0)
+  {
+    mlk_zeroize(pk, MLKEM_INDCCA_PUBLICKEYBYTES);
+    mlk_zeroize(sk, MLKEM_INDCCA_SECRETKEYBYTES);
+  }
+
+  return ret;
 }
 
 #if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
