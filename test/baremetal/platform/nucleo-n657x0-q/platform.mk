@@ -49,8 +49,8 @@ CFLAGS += $(CFLAGS_EXTRA)
 # Try to auto-detect a GCC linker script from the FSBL or CMSIS template; fall back to linker.ld if present
 # Prefer linker scripts under gcc/linker/, fall back to other locations.
 # Try to pick an N657-specific script first.
-# Pin LRUN linker script explicitly for RAM-run
-LDSCRIPT := $(NUCLEO_N657X0_Q_PATH)/gcc/linker/STM32N657XX_LRUN.ld
+# Use custom RAM-only secure linker script for this platform
+LDSCRIPT := $(PLATFORM_PATH)/linker/ram_secure.ld
 
 # Auto-detect startup assembly case and optional board glue
 # Auto-detect startup assembly for STM32N6 family (prefer n657 if present)
@@ -100,13 +100,5 @@ EXTRA_SOURCES_CFLAGS = -Wno-error -Wno-conversion -Wno-sign-conversion -Wno-unus
 
 # Avoid duplicate __wrap_main by excluding the generic integration_argv.c (not generated anymore)
 EXTRA_SOURCES := $(filter-out %/integration_argv.c,$(EXTRA_SOURCES))
-
-# D-TCM stack enable (wrap Reset_Handler to bootstrap TCM sizing and set MSP/MSPLIM)
-NUCLEO_N657X0_Q_DTCM_STACK ?= 1
-ifeq ($(NUCLEO_N657X0_Q_DTCM_STACK),1)
-  EXTRA_SOURCES += $(PLATFORM_PATH)/src/reset_dtcm_init.S
-  # Only wrap SystemInit; let vendor Reset_Handler set initial SP, then relocate in wrapper
-  LDFLAGS += -Wl,--wrap=SystemInit
-endif
 
 EXEC_WRAPPER := $(realpath $(PLATFORM_PATH)/exec_wrapper.py)

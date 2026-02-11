@@ -411,19 +411,33 @@ def main():
                                 err(f"[exec_wrapper] STLinkUpgrade candidate: {h}")
                 return 2
 
-            # Write GDB commands to a temp script and run with -x
+            # Optionally prepend LRUN DTCM GDB script (env gate)
+            lrun_gdb_path = os.path.join(os.path.dirname(__file__), "gdb", "lrun_dtcm_stack.gdb")
             gdb_lines = [
                 "set pagination off",
                 "set confirm off",
                 f"target remote localhost:{port}",
                 "monitor reset",
+            ]
+            if os.path.isfile(lrun_gdb_path):
+                with open(lrun_gdb_path) as fd:
+                    gdb_lines += map(lambda x: x.strip(),fd.readlines())
+                # gdb_lines.append(f"source {lrun_gdb_path}")
+            # Write GDB commands to a temp script and run with -x
+            gdb_lines += [
                 # semihosting enable is handled by gdbserver; keep gdb quiet
                 "load",
+                "set $pc=(&Reset_Handler)|1",
                 "tbreak __wrap_main",
                 "continue",
                 (f"restore {argv_bin} binary {arg_block_addr}" if arg_block_addr else f"restore {argv_bin} binary &{arg_block_sym}"),
                 "continue",
             ]
+
+            if VERBOSE:
+                print('============ GDB SCRIPT ============')
+                print('\n'.join(gdb_lines))
+                print('====================================')
 
             with tempfile.NamedTemporaryFile("w", delete=False, suffix=".gdb") as gs:
                 for line in gdb_lines:
