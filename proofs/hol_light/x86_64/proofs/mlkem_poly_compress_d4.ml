@@ -187,4 +187,293 @@ let mlkem_poly_compress_d4_mc =
 ];;
 (*** BYTECODE END ***)
 
-(* TODO: Prove correctness of poly_compress_d4_avx2 *)
+let mlkem_poly_compress_d4_tmc =
+  define_trimmed "mlkem_poly_compress_d4_tmc" mlkem_poly_compress_d4_mc;;
+let MLKEM_POLY_COMPRESS_D4_TMC_EXEC =
+  X86_MK_CORE_EXEC_RULE mlkem_poly_compress_d4_tmc;;
+
+let LENGTH_MLKEM_POLY_COMPRESS_D4_MC =
+  REWRITE_CONV[mlkem_poly_compress_d4_mc] `LENGTH mlkem_poly_compress_d4_mc`
+  |> CONV_RULE (RAND_CONV LENGTH_CONV);;
+
+let LENGTH_MLKEM_POLY_COMPRESS_D4_TMC =
+  REWRITE_CONV[mlkem_poly_compress_d4_tmc] `LENGTH mlkem_poly_compress_d4_tmc`
+  |> CONV_RULE (RAND_CONV LENGTH_CONV);;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLKEM_POLY_COMPRESS_D4_MC;
+               LENGTH_MLKEM_POLY_COMPRESS_D4_TMC] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV[ADD_0];;
+
+(* ------------------------------------------------------------------------- *)
+(* compress_d4 computes round(16 * u / 3329)                                 *)
+(* which equals (u * 16 + 1664) DIV 3329 for u in 0..3328.                   *)
+(* This is Compress_4 from FIPS 203, Eq (4.7).                               *)
+(* ------------------------------------------------------------------------- *)
+
+let compress_d4 = new_definition
+  `compress_d4 (x:16 word) : 4 word =
+   word((val x * 16 + 1664) DIV 3329)`;;
+
+(* ------------------------------------------------------------------------- *)
+(* AVX2 implementation of compress_d4 as a word expression.                  *)
+(* Like d5, d4 uses VPMULHW with constant 0x4EBF, then VPMULHRSW.           *)
+(* The result is a 4-bit value in the low bits of a 16-bit word.             *)
+(* ------------------------------------------------------------------------- *)
+
+let compress_d4_avx2 = new_definition
+  `compress_d4_avx2 (a:16 word) : 4 word =
+   word_subword (word_and
+    (word_subword
+      (word_add
+        (word_ushr
+          (word_mul
+            (word_sx
+              (word_subword (word_mul (word_sx a) (word 20159) : 32 word) (16,16) : 16 word))
+            (word 512) : 32 word)
+          14)
+        (word 1) : 32 word)
+      (1,16) : 16 word)
+    (word 15)) (0,4) : 4 word`;;
+
+let compress_d4_avx2_alt = prove(
+  `word_zx (compress_d4_avx2 x) : 16 word =
+       (word_and
+          (word_subword
+             (word_add
+                (word_ushr
+                   (word_mul
+                      (word_sx
+                        (word_subword (word_mul (word_sx x) (word 20159) : 32 word) (16,16) : 16 word))
+                      (word 512) : 32 word)
+                   14)
+                (word 1) : 32 word)
+             (1,16) : 16 word)
+          (word 15))`,
+    REWRITE_TAC [compress_d4_avx2] THEN CONV_TAC WORD_BLAST);;
+
+(* ------------------------------------------------------------------------- *)
+(* Helper lemmas for 4-bit compression                                       *)
+(* ------------------------------------------------------------------------- *)
+
+let MULADD_16_1_JOIN = prove(
+  `word_add (word_mul (word_zx (x : 4 word)) (word 1) : 32 word)
+            (word_mul (word_zx (y : 4 word)) (word 16)) =
+   word_zx (word_join y x : 8 word) : 32 word`,
+  BITBLAST_TAC);;
+
+let BIT_15_ZX_4_16 = WORD_BLAST `!a:4 word. bit 15 (word_zx a: 16 word) = false`;;
+let BIT_15_ZX_8_32 = WORD_BLAST `!a:8 word. bit 15 (word_zx a: 32 word) = false`;;
+let BIT_31_ZX_8_32 = WORD_BLAST `!a:8 word. bit 31 (word_zx a: 32 word) = false`;;
+let BIT_15_ZX_8_16 = WORD_BLAST `!a:8 word. bit 15 (word_zx a: 16 word) = false`;;
+
+let WORD_VAL_4_8 = prove(`!(x : 4 word). word (val x) : 8 word = word_zx x`, BITBLAST_TAC);;
+let WORD_ZX_ZX_4_8_32 = WORD_BLAST `!(x : 4 word). word_zx (word_zx x : 8 word) : 32 word = word_zx x`;;
+
+let MIN_ZX_4_16 = prove(
+  `!a:4 word. MIN (val (word_zx a : 16 word)) 255 = val a`,
+  GEN_TAC THEN
+  SIMP_TAC[word_zx; VAL_WORD; DIMINDEX_16; DIMINDEX_CONV `dimindex(:4)`] THEN
+  SUBGOAL_THEN `val (a:4 word) MOD 2 EXP 16 = val a` SUBST1_TAC THENL
+  [MATCH_MP_TAC MOD_LT THEN CONV_TAC NUM_REDUCE_CONV THEN
+   MATCH_MP_TAC LT_TRANS THEN EXISTS_TAC `2 EXP 4` THEN
+   REWRITE_TAC[VAL_BOUND] THEN CONV_TAC NUM_REDUCE_CONV;
+   MP_TAC(ISPEC `a:4 word` VAL_BOUND) THEN
+   REWRITE_TAC[DIMINDEX_CONV `dimindex(:4)`] THEN
+   CONV_TAC NUM_REDUCE_CONV THEN REWRITE_TAC[MIN] THEN ARITH_TAC] THEN
+  MP_TAC(ISPEC `a:4 word` VAL_BOUND) THEN
+  REWRITE_TAC[DIMINDEX_CONV `dimindex(:4)`] THEN
+  CONV_TAC NUM_REDUCE_CONV THEN REWRITE_TAC[MIN] THEN ARITH_TAC);;
+
+let MIN_ZX_8_16 = prove(
+  `!a:8 word. MIN (val (word_zx a : 16 word)) 255 = val a`,
+  GEN_TAC THEN
+  SIMP_TAC[word_zx; VAL_WORD; DIMINDEX_16; DIMINDEX_CONV `dimindex(:8)`] THEN
+  SUBGOAL_THEN `val (a:8 word) MOD 2 EXP 16 = val a` SUBST1_TAC THENL
+  [MATCH_MP_TAC MOD_LT THEN CONV_TAC NUM_REDUCE_CONV THEN
+   MATCH_MP_TAC LT_TRANS THEN EXISTS_TAC `2 EXP 8` THEN
+   REWRITE_TAC[VAL_BOUND] THEN CONV_TAC NUM_REDUCE_CONV;
+   MP_TAC(ISPEC `a:8 word` VAL_BOUND) THEN
+   REWRITE_TAC[DIMINDEX_CONV `dimindex(:8)`] THEN
+   CONV_TAC NUM_REDUCE_CONV THEN REWRITE_TAC[MIN] THEN ARITH_TAC] THEN
+  MP_TAC(ISPEC `a:8 word` VAL_BOUND) THEN
+  REWRITE_TAC[DIMINDEX_CONV `dimindex(:8)`] THEN
+  CONV_TAC NUM_REDUCE_CONV THEN REWRITE_TAC[MIN] THEN ARITH_TAC);;
+
+let WORD_SUBWORD_8_0_16 = WORD_BLAST `!(x : 8 word). word_subword x (0,16) : 16 word = word_zx x`;;
+
+(* ------------------------------------------------------------------------- *)
+(* Correctness of the per-element compression formula                        *)
+(* ------------------------------------------------------------------------- *)
+
+let COMPRESS_D4_CORRECT = prove(
+  `!(x : 16 word). val x < 3329 ==>
+   compress_d4 x = compress_d4_avx2 x`,
+  let CORE = prove(
+    `!(x : num). x < 3329 ==>
+     compress_d4 (word x) = compress_d4_avx2 (word x)`,
+    REWRITE_TAC[compress_d4; compress_d4_avx2] THEN
+    BRUTE_FORCE_WITH (CONV_TAC(WORD_REDUCE_CONV THENC NUM_REDUCE_CONV) THEN CONV_TAC WORD_BLAST)) in
+  GEN_TAC THEN DISCH_TAC THEN
+  MP_TAC(SPEC `val(x:16 word)` CORE) THEN
+  ASM_REWRITE_TAC[WORD_VAL]);;
+
+(* ------------------------------------------------------------------------- *)
+(* Rewrite compress_d4_avx2 back to compress_d4                              *)
+(* ------------------------------------------------------------------------- *)
+
+let REWRITE_COMPRESS =
+  let derive_instance thm tm =
+    let thm' = PART_MATCH rand thm tm in
+    MP thm' (EQT_ELIM(NUM_REDUCE_CONV (fst(dest_imp(concl thm')))))
+  in
+  (UNDISCH_THEN (`forall i. i < 256 ==> val (EL i (inlist : (16 word) list)) < 3329`) (fun thm ->
+   RULE_ASSUM_TAC (CONV_RULE (TOP_DEPTH_CONV (COND_REWRITE_CONV (derive_instance thm) (GSYM COMPRESS_D4_CORRECT))))
+   THEN ASSUME_TAC thm
+  ));;
+
+(* ------------------------------------------------------------------------- *)
+(* Main correctness theorem                                                  *)
+(* d4 processes 64 coefficients per iteration (4 VMOVDQA loads),             *)
+(* outputting 256 bits = 32 bytes (single VMOVDQU) per iteration.            *)
+(* 4 iterations × 64 coefficients = 256 total.                              *)
+(* 4 iterations × 32 bytes = 128 bytes total output.                        *)
+(* ------------------------------------------------------------------------- *)
+
+let MLKEM_POLY_COMPRESS_D4_CORRECT = prove(
+  `!r a data (inlist:(16 word) list) pc.
+      LENGTH inlist = 256 /\
+      aligned 32 a /\
+      aligned 32 data /\
+      ALL (nonoverlapping (r, 128))
+          [(word pc, LENGTH mlkem_poly_compress_d4_tmc); (a, 512); (data, 32)]
+      ==> ensures x86
+           (\s. bytes_loaded s (word pc) (BUTLAST mlkem_poly_compress_d4_tmc) /\
+                read RIP s = word pc /\
+                C_ARGUMENTS [r; a; data] s /\
+                read (memory :> bytes(data, 32)) s =
+                  num_of_wordlist ((MAP iword compress_d4_data): (8 word) list) /\
+                read (memory :> bytes(a, 512)) s = num_of_wordlist inlist /\
+                (!i. i < 256 ==> &0 <= ival (EL i inlist) /\ ival (EL i inlist) <= &3328))
+           (\s. read RIP s = word (pc + 514) /\
+                read (memory :> bytes(r, 128)) s = num_of_wordlist (MAP compress_d4 inlist))
+           (MAYCHANGE [events] ,,
+            MAYCHANGE [memory :> bytes(r, 128)] ,,
+            MAYCHANGE [RIP] ,, MAYCHANGE [RAX] ,,
+            MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8])`,
+
+  MAP_EVERY X_GEN_TAC
+    [`r:int64`; `a:int64`; `data:int64`; `inlist:(16 word) list`; `pc:num`] THEN
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
+  REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
+              NONOVERLAPPING_CLAUSES; ALL] THEN
+  DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
+  ENSURES_INIT_TAC "s0" THEN
+
+  (* Move to 256-bit granular preconditions for input array *)
+  UNDISCH_TAC `read(memory :> bytes(a,512)) (s0 : x86state) = num_of_wordlist(inlist: (16 word) list)` THEN
+  GEN_REWRITE_TAC (LAND_CONV o RAND_CONV o RAND_CONV) [GSYM LIST_OF_SEQ_EQ_SELF] THEN
+  ASM_REWRITE_TAC[] THEN
+  CONV_TAC(LAND_CONV(RAND_CONV(RAND_CONV LIST_OF_SEQ_CONV))) THEN
+  REWRITE_TAC[] THEN
+  REPLICATE_TAC 4
+   (GEN_REWRITE_TAC (LAND_CONV o ONCE_DEPTH_CONV)
+         [GSYM NUM_OF_PAIR_WORDLIST]) THEN
+  REWRITE_TAC[pair_wordlist] THEN
+  CONV_TAC(LAND_CONV BYTES_EQ_NUM_OF_WORDLIST_EXPAND_CONV) THEN
+  REWRITE_TAC[GSYM BYTES256_WBYTES] THEN
+  REPEAT STRIP_TAC THEN
+
+  (* Move to 256-bit granular precondition for constant array *)
+  UNDISCH_TAC
+   `read(memory :> bytes(data,32)) s0 = num_of_wordlist ((MAP iword compress_d4_data) : (8 word) list)` THEN
+  REWRITE_TAC [compress_d4_data; MAP] THEN
+  REPLICATE_TAC 5 (GEN_REWRITE_TAC (LAND_CONV o ONCE_DEPTH_CONV)
+                   [GSYM NUM_OF_PAIR_WORDLIST]) THEN
+  REWRITE_TAC[pair_wordlist] THEN CONV_TAC WORD_REDUCE_CONV THEN
+  CONV_TAC(LAND_CONV BYTES_EQ_NUM_OF_WORDLIST_EXPAND_CONV) THEN
+  REWRITE_TAC[GSYM BYTES256_WBYTES] THEN STRIP_TAC THEN
+
+  SUBGOAL_THEN `!i. i < 256 ==> val (EL i (inlist:(16 word) list)) < 3329` ASSUME_TAC THENL [
+    REPEAT STRIP_TAC THEN
+    FIRST_X_ASSUM(MP_TAC o SPEC `i:num`) THEN ASM_REWRITE_TAC[] THEN
+    REWRITE_TAC[IVAL_VAL; DIMINDEX_16; bitval; BIT_VAL] THEN
+    MP_TAC(ISPEC `EL i (inlist:(16 word) list)` VAL_BOUND) THEN
+    REWRITE_TAC[DIMINDEX_16] THEN ARITH_TAC;
+    ALL_TAC] THEN
+
+  (*** Symbolic execution ***)
+  MAP_EVERY (fun n -> X86_STEPS_TAC MLKEM_POLY_COMPRESS_D4_TMC_EXEC [n] THEN SIMD_SIMPLIFY_TAC
+    ([compress_d4_avx2_alt]
+     @ map GSYM [BIT_15_ZX_4_16; MIN_ZX_4_16; GSYM ADD_ASSOC; (CONV_RULE NUM_REDUCE_CONV BYTES256_JOIN);
+     WORD_VAL_4_8; WORD_ZX_ZX_4_8_32; MULADD_16_1_JOIN; BIT_31_ZX_8_32; BIT_15_ZX_8_32;
+     WORD_SUBWORD_8_0_16; BIT_15_ZX_8_16; MIN_ZX_8_16; WORD_VAL])) (1 -- 105) THEN
+
+  REWRITE_COMPRESS THEN
+  ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
+  GEN_REWRITE_TAC ONCE_DEPTH_CONV [GSYM LIST_OF_SEQ_EQ_SELF] THEN
+  ASM_REWRITE_TAC[LENGTH_MAP] THEN
+  CONV_TAC(ONCE_DEPTH_CONV LIST_OF_SEQ_CONV) THEN
+  ASM_SIMP_TAC [EL_MAP; ARITH] THEN
+  REPLICATE_TAC 6
+   (GEN_REWRITE_TAC (ONCE_DEPTH_CONV)
+         [GSYM NUM_OF_PAIR_WORDLIST]) THEN
+  REWRITE_TAC[pair_wordlist] THEN
+  CONV_TAC(ONCE_DEPTH_CONV BYTES_EQ_NUM_OF_WORDLIST_EXPAND_CONV) THEN
+  REWRITE_TAC[GSYM BYTES256_WBYTES] THEN
+  ASM_REWRITE_TAC []);;
+
+(* ------------------------------------------------------------------------- *)
+(* Subroutine wrappers                                                       *)
+(* ------------------------------------------------------------------------- *)
+
+let MLKEM_POLY_COMPRESS_D4_NOIBT_SUBROUTINE_CORRECT = prove(
+  `!r a data (inlist:(16 word) list) pc stackpointer returnaddress.
+      LENGTH inlist = 256 /\
+      aligned 32 a /\
+      aligned 32 data /\
+      ALL (nonoverlapping (r, 128))
+          [(word pc, LENGTH mlkem_poly_compress_d4_tmc); (a, 512); (data, 32); (stackpointer, 8)]
+      ==> ensures x86
+           (\s. bytes_loaded s (word pc) mlkem_poly_compress_d4_tmc /\
+                read RIP s = word pc /\
+                read RSP s = stackpointer /\
+                read (memory :> bytes64 stackpointer) s = returnaddress /\
+                C_ARGUMENTS [r; a; data] s /\
+                read (memory :> bytes(data, 32)) s =
+                  num_of_wordlist ((MAP iword compress_d4_data): (8 word) list) /\
+                read (memory :> bytes(a, 512)) s = num_of_wordlist inlist /\
+                (!i. i < 256 ==> &0 <= ival (EL i inlist) /\ ival (EL i inlist) <= &3328))
+           (\s. read RIP s = returnaddress /\
+                read RSP s = word_add stackpointer (word 8) /\
+                read (memory :> bytes(r, 128)) s = num_of_wordlist (MAP compress_d4 inlist))
+           (MAYCHANGE [RSP] ,,
+            MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+            MAYCHANGE [memory :> bytes(r, 128)])`,
+  X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_poly_compress_d4_tmc
+    MLKEM_POLY_COMPRESS_D4_CORRECT);;
+
+let MLKEM_POLY_COMPRESS_D4_SUBROUTINE_CORRECT = prove(
+  `!r a data (inlist:(16 word) list) pc stackpointer returnaddress.
+      LENGTH inlist = 256 /\
+      aligned 32 a /\
+      aligned 32 data /\
+      ALL (nonoverlapping (r, 128))
+          [(word pc, LENGTH mlkem_poly_compress_d4_mc); (a, 512); (data, 32); (stackpointer, 8)]
+      ==> ensures x86
+           (\s. bytes_loaded s (word pc) mlkem_poly_compress_d4_mc /\
+                read RIP s = word pc /\
+                read RSP s = stackpointer /\
+                read (memory :> bytes64 stackpointer) s = returnaddress /\
+                C_ARGUMENTS [r; a; data] s /\
+                read (memory :> bytes(data, 32)) s =
+                  num_of_wordlist ((MAP iword compress_d4_data): (8 word) list) /\
+                read (memory :> bytes(a, 512)) s = num_of_wordlist inlist /\
+                (!i. i < 256 ==> &0 <= ival (EL i inlist) /\ ival (EL i inlist) <= &3328))
+           (\s. read RIP s = returnaddress /\
+                read RSP s = word_add stackpointer (word 8) /\
+                read (memory :> bytes(r, 128)) s = num_of_wordlist (MAP compress_d4 inlist))
+           (MAYCHANGE [RSP] ,,
+            MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+            MAYCHANGE [memory :> bytes(r, 128)])`,
+  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_POLY_COMPRESS_D4_NOIBT_SUBROUTINE_CORRECT));;
