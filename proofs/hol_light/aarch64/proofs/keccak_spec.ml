@@ -4,7 +4,7 @@
  *)
 
 (* ========================================================================= *)
-(* Specification of Keccac (https://keccak.team/keccak_specs_summary.html).  *)
+(* Specification of Keccak (https://keccak.team/keccak_specs_summary.html).  *)
 (* ========================================================================= *)
 
 needs "Library/words.ml";;
