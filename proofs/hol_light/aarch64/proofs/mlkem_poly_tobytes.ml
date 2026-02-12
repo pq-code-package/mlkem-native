@@ -269,3 +269,38 @@ let MLKEM_POLY_TOBYTES_SUBROUTINE_CORRECT = prove
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   ARM_ADD_RETURN_NOSTACK_TAC MLKEM_POLY_TOBYTES_EXEC
    (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_POLY_TOBYTES_CORRECT));;
+
+
+(* ------------------------------------------------------------------------- *)
+(* Constant-time and memory safety proof.                                    *)
+(* ------------------------------------------------------------------------- *)
+
+needs "arm/proofs/consttime.ml";;
+needs "aarch64/proofs/subroutine_signatures.ml";;
+
+let full_spec,public_vars = mk_safety_spec
+    ~keep_maychanges:false
+    (assoc "mlkem_tobytes" subroutine_signatures)
+    MLKEM_POLY_TOBYTES_SUBROUTINE_CORRECT
+    MLKEM_POLY_TOBYTES_EXEC;;
+
+let MLKEM_POLY_TOBYTES_SUBROUTINE_SAFE = time prove
+ (`exists f_events.
+       forall e r a pc returnaddress.
+           ALL (nonoverlapping (r,384)) [word pc,LENGTH mlkem_poly_tobytes_mc; a,512]
+           ==> ensures arm
+               (\s.
+                    aligned_bytes_loaded s (word pc) mlkem_poly_tobytes_mc /\
+                    read PC s = word pc /\
+                    read X30 s = returnaddress /\
+                    C_ARGUMENTS [r; a] s /\
+                    read events s = e)
+               (\s.
+                    read PC s = returnaddress /\
+                    exists e2.
+                        read events s = APPEND e2 e /\
+                        e2 = f_events a r pc returnaddress /\
+                        memaccess_inbounds e2 [a,512; r,384] [r,384])
+               (\s s'. true)`,
+  ASSERT_CONCL_TAC full_spec THEN
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLKEM_POLY_TOBYTES_EXEC);;
