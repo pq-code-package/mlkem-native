@@ -28,14 +28,15 @@
 .macro interleave_odds t, u
     vshl.u8     \u, \t, #2       // u = t[5..0],00
     vsri.u8     \t, \u, #1       // t = t[7],u[6..0]  => t = t[7],t[5..0],0
-    vshl.u8     \u, \t, #3       // stage 2 across nibbles
-    vsri.u8     \t, \u, #2
-    vshl.u8     \u, \t, #4       // stage 3 across bytes
-    vsri.u8     \t, \u, #3
-    vshl.u16    \u, \t, #8       // widen within halfwords
-    vsri.u8     \t, \u, #4
-    vshl.u32    \u, \t, #16      // widen within words
-    vsri.u16    \t, \u, #8       // odd bits compacted; per 32b lane: lo16=bytes0..3, hi16=4..7
+    vshl.u8     \u, \t, #3       // u = t[3..0],0000
+    vsri.u8     \t, \u, #2       // t = t[7..6],u[5..0] => t = t[7],t[5],t[3..0],00
+    vshl.u8     \u, \t, #4       // u = t[1..0],000000
+    vsri.u8     \t, \u, #3       // t = t[7],t[5],t[3],u[4..0] => t = t[7],t[5],t[3],t[1..0],000
+                                 // t16 = t[15],t[13],t[11],t[9..8],000,t[7],t[5],t[3],t[1..0],000
+    vshl.u16    \u, \t, #8       // u16 = t[7],t[5],t[3],t[1..0],000
+    vsri.u8     \t, \u, #4       // t16 = t[15,13,11,9,7,5,3,1]
+    vshl.u32    \u, \t, #16      // u32 = t[15,13,11,9,7,5,3,1]
+    vsri.u16    \t, \u, #8       // u16 = t[31,29,27,25,23,21,19,17,15,13,11,9,7,5,3,1]
 .endm
 
 // interleave_evens: in-place SWAR bit permutation that compacts even-numbered
@@ -55,7 +56,7 @@
 .endm
 
 .balign 8
-.macro to_bit_interleaving_x1
+.macro to_bit_interleaving_x1 tmp
     // NOTE: This macro clobbers r0, q0, q1, q2, q3
     // Inputs on entry:
     //   q0 = [d0l, d0h, d1l, d1h] (Two complete 64-bit lanes in 32-bit chunks)
@@ -68,10 +69,10 @@
     vrev64.u32 q2, q1       // || d0l | d0h | d1l | d1h || e0l | e0h | e1l | e1h || e0h | e0l | e1h | e1l ||  X  |  X  |  X  |  X  ||
     vsli.u32   q1, q2, #16  // || d0l | d0h | d1l | d1h || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l ||  X  |  X  |  X  |  X  ||
     interleave_odds  q0, q3 // || o0l | o0h | o1l | o1h || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l ||  X  |  X  |  X  |  X  ||
-    vrev64.u32 q0, q3       // || o0l | o0h | o1l | o1h || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l || o0h | o0l | o1h | o1l ||
+    vrev64.u32 q3, q0       // || o0l | o0h | o1l | o1h || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l || o0h | o0l | o1h | o1l ||
     vsri.u32   q0, q3, #16  // ||  X  | o0  |  X  | o1  || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l || o0h | o0l | o1h | o1l ||
-    mov r0, #0x0F0F
-    vmsr p0, r0
+    mov \tmp, #0x0F0F
+    vmsr p0, \tmp
     vpsel q0, q1, q0        // || e0  | o0  | e1  | o1  || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l || o0h | o0l | o1h | o1l ||
 .endm
 
@@ -145,7 +146,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x1_state_xor_bytes_asm)
 
     // Bit interleave
     // NOTE: q2,q3,q4 are dead here and not preserved.
-    to_bit_interleaving_x1
+    to_bit_interleaving_x1 tmp
 
     vldrw.u32 qs, [state]
     veor      qs, qs, qd
@@ -168,7 +169,7 @@ keccak_f1600_x1_state_xor_bytes_asm_main_loop_start:
     vldrw.u32 qd, [dp], #16
     // Bit interleave
     // NOTE: q2,q3,q4 are dead here and not preserved.
-    to_bit_interleaving_x1
+    to_bit_interleaving_x1 tmp
 
     // XOR into state (stores post-increment state by 16)
     vldrw.u32 qs, [state]
@@ -182,26 +183,20 @@ keccak_f1600_x1_state_xor_bytes_asm_main_loop_end:
     // TAIL: if length remaining <8, absorb it at offset_in_lane=0
     // -------------------------------------------------------------------------
 
-    // length &= 7
+    // length &= 15
     // Placeholder: if r6 == 0, done.
-    ands    length, length, #7
+    ands    length, length, #15
     cmp     length, #0
     beq     keccak_f1600_x1_state_xor_bytes_asm_exit
 
     // Tail via predicated byte loads like prologue, but off=0 (no base adjust)
     vctp.8  length
-    vctp.8 nB
-    vmrs mask, p0
-    // mask << offset
-    lsl mask, mask, off
-    vmsr p0, mask
-    // now load the partial lanes
     vpst
     vldrbt.u8 qd, [dp], #16
 
     // Bit interleave
     // NOTE: q2,q3,q4 are dead here and not preserved.
-    to_bit_interleaving_x1
+    to_bit_interleaving_x1 tmp
 
     vldrw.u32 qs, [state]
     veor      qs, qs, qd

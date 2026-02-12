@@ -39,13 +39,13 @@
 .endm
 
 .balign 8
-.macro from_bit_interleaving_x1
+.macro from_bit_interleaving_x1 tmp
     // Input:  q0 = [e0, o0, e1, o1]
     // Output: q0 = [d0l, d0h, d1l, d1h]
     // Clobbers: r0, q1, q2, q3, q4
     
-    mov         r0, #0x0F0F
-    vmsr        p0, r0
+    mov         \tmp, #0x0F0F
+    vmsr        p0, \tmp
     //                        // q0.u16: [e0l, e0h, o0l, o0h, e1l, e1h, o1l, o1h] 
     vrev32.u16  q1, q0        // q1.u16: [e0h, e0l, o0h, o0l, e1h, e1l, o1h, o1l] 
     vrev64.u32  q2, q1        // q2.u16: [o0h, o0l, e0h, e0l, o1h, o1l, e1h, e1l]
@@ -58,8 +58,8 @@
     deinterleave_even q0, q2
     deinterleave_even q1, q2
     // Zero garbage bits
-    mov         r0, #0x55
-    vdup.u8     q2, r0
+    mov         \tmp, #0x55
+    vdup.u8     q2, \tmp
     vand.u32    q0, q0, q2
     vand.u32    q1, q1, q2
     // Merge vectors
@@ -120,6 +120,11 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x1_state_extract_bytes_asm)
     // length -= n
     subs    length, length, nB
 
+    // Load state for the partial lane
+    vldrw.u32 qd, [state], #16
+    // Deinterleave to bytes
+    from_bit_interleaving_x1 tmp
+    // Predicated byte store of up to 16 bytes
     // calculate the predicates
     // mask = (1 << nB) - 1 over 8-bit lanes, then shift by 'off'.
     // vctp.8 sets p0[0..nB-1]=1 (others 0). We read it as an integer mask,
@@ -130,11 +135,6 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x1_state_extract_bytes_asm)
     // mask << offset
     lsl mask, mask, off
     vmsr p0, mask
-    // Load state for the partial lane
-    vldrw.u32 qd, [state], #16
-    // Deinterleave to bytes
-    from_bit_interleaving_x1
-    // Predicated byte store of up to 16 bytes
     vpst
     vstrbt.u8 qd, [dp], #16
 
@@ -154,7 +154,7 @@ keccak_f1600_x1_state_extract_bytes_asm_main_loop_start:
     // Load 16B (two lanes) from state and bump pointer
     vldrw.u32 qd, [state], #16
     // Deinterleave to bytes
-    from_bit_interleaving_x1
+    from_bit_interleaving_x1 tmp
     // Store 16B of output bytes (post-increment by 16)
     vstrw.u32 qd, [dp], #16
 
@@ -165,16 +165,16 @@ keccak_f1600_x1_state_extract_bytes_asm_main_loop_end:
     // TAIL: if length remaining <8, write it at offset_in_lane=0
     // -------------------------------------------------------------------------
 
-    // length &= 7
-    ands    length, length, #7
+    // length &= 15
+    ands    length, length, #15
     cmp     length, #0
     beq     keccak_f1600_x1_state_extract_bytes_asm_exit
 
-    // Tail via predicated byte stores like prologue, but off=0 (no base adjust)
-    vctp.8  length
     // Load next state lane, deinterleave, store tail
     vldrw.u32 qd, [state], #16
-    from_bit_interleaving_x1
+    from_bit_interleaving_x1 tmp
+    // Tail via predicated byte stores like prologue, but off=0 (no base adjust)
+    vctp.8  length
     vpst
     vstrbt.u8 qd, [dp], #16
 
