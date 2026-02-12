@@ -2919,7 +2919,9 @@ def gen_slothy(funcs):
 
     for t in targets:
 
-        if t.startswith("keccak"):
+        if t.startswith("keccak") and "mve" in t:
+            base = "dev/fips202/armv81m/src"
+        elif t.startswith("keccak"):
             base = "dev/fips202/aarch64/src"
         else:
             base = "dev/aarch64_opt/src"
@@ -3529,7 +3531,7 @@ def gen_test_configs():
 
 
 def _main():
-    slothy_choices = [
+    slothy_aarch64_targets = [
         "ntt",
         "intt",
         "poly_tobytes_asm",
@@ -3544,6 +3546,11 @@ def _main():
         "keccak_f1600_x4_v8a_scalar_hybrid_asm",
         "keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm",
     ]
+    slothy_armv81m_targets = [
+        "keccak_f1600_x4_mve",
+    ]
+    slothy_all_targets = slothy_aarch64_targets + slothy_armv81m_targets
+    slothy_choices = slothy_all_targets + ["aarch64", "armv81m"]
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -3569,7 +3576,18 @@ def _main():
     os.chdir(os.path.join(os.path.dirname(__file__), ".."))
 
     if args.slothy == []:
-        args.slothy = slothy_choices
+        args.slothy = slothy_all_targets
+    elif args.slothy is not None:
+        # Expand group names to their targets
+        expanded = []
+        for t in args.slothy:
+            if t == "aarch64":
+                expanded.extend(slothy_aarch64_targets)
+            elif t == "armv81m":
+                expanded.extend(slothy_armv81m_targets)
+            else:
+                expanded.append(t)
+        args.slothy = expanded
 
     def sync_backends():
         synchronize_backends(
