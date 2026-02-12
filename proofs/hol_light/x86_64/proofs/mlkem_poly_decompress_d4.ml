@@ -10,7 +10,7 @@
 (* Load base theories for x86_64 from s2n-bignum *)
 needs "x86/proofs/base.ml";;
 
-needs "common/mlkem_specs.ml";;
+needs "x86_64/proofs/mlkem_compress_common.ml";;
 needs "x86_64/proofs/mlkem_compress_consts.ml";;
 
 (* print_literal_from_elf "x86_64/mlkem/mlkem_poly_decompress_d4.o";; *)
