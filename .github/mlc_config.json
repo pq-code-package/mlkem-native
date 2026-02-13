@@ -1,0 +1,14 @@
+{
+  "_comment": "Config for markdown-link-check. Domains below are often temporarily unavailable but the links are valid.",
+  "ignorePatterns": [
+    {
+      "pattern": "^https://cr\\.yp\\.to"
+    },
+    {
+      "pattern": "^https://kyberslash\\.cr\\.yp\\.to"
+    },
+    {
+      "pattern": "^https://lib\\.mceliece\\.org"
+    }
+  ]
+}

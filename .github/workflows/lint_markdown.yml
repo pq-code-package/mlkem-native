@@ -16,4 +16,4 @@ jobs:
     - name: Check markdown links
       run: |
         npm install -g markdown-link-check@3.14.2
-        find . -name '*.md' -print0 | xargs -0 -P16 -n1 markdown-link-check -q
+        find . -name '*.md' -print0 | xargs -0 -P16 -n1 markdown-link-check -q -c .github/mlc_config.json
