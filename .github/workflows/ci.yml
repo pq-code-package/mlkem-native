@@ -601,9 +601,15 @@ jobs:
       matrix:
         container:
           - id: debian:bullseye
+            nix_shell: ''
           - id: debian:bookworm
-          - id: nixos/nix:latest
-            nix_shell: 'nix-shell -p python3 gcc gnumake perl'
+            nix_shell: ''
+          # TODO: Re-enable once containerd fixes /etc/group symlink handling.
+          # Docker Engine 29.1.5 (API 1.52, containerd v2.2.0) rejects NixOS
+          # /etc/group symlink into /nix/store/ as "path escapes from parent".
+          # https://github.com/containerd/containerd/issues/12683
+          # - id: nixos/nix:latest
+          #   nix_shell: 'nix-shell -p python3 gcc gnumake perl'
     name: Compatibility tests (${{ matrix.container.id }})
     runs-on: ubuntu-latest
     container:
