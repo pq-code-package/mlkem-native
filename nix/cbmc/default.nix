@@ -36,7 +36,7 @@ buildEnv {
         };
       });
       litani = callPackage ./litani.nix { }; # 1.29.0
-      cbmc-viewer = callPackage ./cbmc-viewer.nix { }; # 3.11
+      cbmc-viewer = callPackage ./cbmc-viewer.nix { }; # 3.12
       z3 = z3.overrideAttrs (old: rec {
         version = "4.15.3";
         src = fetchFromGitHub {
