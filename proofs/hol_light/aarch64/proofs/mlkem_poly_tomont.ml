@@ -82,8 +82,23 @@ let LENGTH_POLY_TOMONT_ASM_MC =
   REWRITE_CONV[poly_tomont_asm_mc] `LENGTH poly_tomont_asm_mc`
   |> CONV_RULE (RAND_CONV LENGTH_CONV);;
 
+let MLKEM_POLY_TOMONT_PREAMBLE_LENGTH = new_definition
+  `MLKEM_POLY_TOMONT_PREAMBLE_LENGTH = 0`;;
+
+let MLKEM_POLY_TOMONT_POSTAMBLE_LENGTH = new_definition
+  `MLKEM_POLY_TOMONT_POSTAMBLE_LENGTH = 4`;;
+
+let MLKEM_POLY_TOMONT_CORE_START = new_definition
+  `MLKEM_POLY_TOMONT_CORE_START = MLKEM_POLY_TOMONT_PREAMBLE_LENGTH`;;
+
+let MLKEM_POLY_TOMONT_CORE_END = new_definition
+  `MLKEM_POLY_TOMONT_CORE_END = LENGTH poly_tomont_asm_mc - MLKEM_POLY_TOMONT_POSTAMBLE_LENGTH`;;
+
 let LENGTH_SIMPLIFY_CONV =
-  REWRITE_CONV[LENGTH_POLY_TOMONT_ASM_MC];;
+  REWRITE_CONV[LENGTH_POLY_TOMONT_ASM_MC;
+              MLKEM_POLY_TOMONT_CORE_START; MLKEM_POLY_TOMONT_CORE_END;
+              MLKEM_POLY_TOMONT_PREAMBLE_LENGTH; MLKEM_POLY_TOMONT_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
 (* ------------------------------------------------------------------------- *)
 (* Specification                                                             *)
@@ -92,23 +107,21 @@ let LENGTH_SIMPLIFY_CONV =
 (* NOTE: This must be kept in sync with the CBMC specification
  * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
 
-let POLY_TOMONT_GOAL = `forall pc ptr x returnaddress.
+let POLY_TOMONT_GOAL = `!ptr x pc.
     nonoverlapping (word pc, LENGTH poly_tomont_asm_mc) (ptr, 512)
     ==>
     ensures arm
       (\s. // Assert that poly_tomont is loaded at PC
            aligned_bytes_loaded s (word pc) poly_tomont_asm_mc /\
            read PC s = word pc  /\
-           // Remember LR as point-to-stop
-           read X30 s = returnaddress /\
            // poly_tomont takes one argument, the base pointer
            C_ARGUMENTS [ptr] s  /\
            // Give name to 16-bit coefficients stored at ptr to be
            // able to refer to them in the post-condition
            (!i. i < 256 ==> read(memory :> bytes16(word_add ptr (word (2 * i)))) s = x i)
       )
-      (\s. // We have reached the LR
-           read PC s = returnaddress /\
+      (\s. // We have reached the end of the core function
+           read PC s = word(pc + MLKEM_POLY_TOMONT_CORE_END) /\
            // Coefficients have changed according to tomont_3329 and
            // are < MLKEM_Q in absolute value.
            (!i. i < 256 ==> let z_i = read(memory :> bytes16(word_add ptr (word (2 * i)))) s
@@ -124,7 +137,7 @@ let POLY_TOMONT_GOAL = `forall pc ptr x returnaddress.
 (* Proof                                                                     *)
 (* ------------------------------------------------------------------------- *)
 
-let POLY_TOMONT_SPEC = prove(POLY_TOMONT_GOAL,
+let MLKEM_TOMONT_CORRECT = prove(POLY_TOMONT_GOAL,
     CONV_TAC LENGTH_SIMPLIFY_CONV THEN
     REWRITE_TAC [MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI;
       NONOVERLAPPING_CLAUSES; C_ARGUMENTS; fst POLY_TOMONT_EXEC] THEN
@@ -202,3 +215,79 @@ let POLY_TOMONT_SPEC = prove(POLY_TOMONT_GOAL,
         CONV_TAC INT_REDUCE_CONV
     ])
 );;
+
+
+let MLKEM_TOMONT_SUBROUTINE_CORRECT = prove
+ (`!ptr x pc returnaddress.
+    nonoverlapping (word pc, LENGTH poly_tomont_asm_mc) (ptr, 512)
+    ==>
+    ensures arm
+      (\s. // Assert that poly_tomont is loaded at PC
+           aligned_bytes_loaded s (word pc) poly_tomont_asm_mc /\
+           read PC s = word pc  /\
+           // Remember LR as point-to-stop
+           read X30 s = returnaddress /\
+           // poly_tomont takes one argument, the base pointer
+           C_ARGUMENTS [ptr] s  /\
+           // Give name to 16-bit coefficients stored at ptr to be
+           // able to refer to them in the post-condition
+           (!i. i < 256
+                ==> read(memory :> bytes16(word_add ptr (word (2 * i)))) s =
+                    x i)
+          )
+      (\s. // We have reached the LR
+           read PC s = returnaddress /\
+           // Coefficients have changed according to tomont_3329 and
+           // are < MLKEM_Q in absolute value.
+           (!i. i < 256
+                ==> let z_i = read(memory :> bytes16
+                                       (word_add ptr (word (2 * i)))) s in
+                    (ival z_i == (tomont_3329 (ival o x)) i) (mod &3329) /\
+                   abs(ival z_i) <= &3328)
+          )
+      // Register and memory footprint
+      (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+       MAYCHANGE [memory :> bytes(ptr, 512)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
+  let TWEAK_CONV =
+    ONCE_DEPTH_CONV EXPAND_CASES_CONV THENC
+    ONCE_DEPTH_CONV NUM_MULT_CONV THENC
+    ONCE_DEPTH_CONV let_CONV THENC
+    PURE_REWRITE_CONV [WORD_ADD_0] in
+  CONV_TAC TWEAK_CONV THEN
+  ARM_ADD_RETURN_NOSTACK_TAC POLY_TOMONT_EXEC
+   (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_TOMONT_CORRECT)));;
+
+(* ------------------------------------------------------------------------- *)
+(* Constant-time and memory safety proof.                                    *)
+(* ------------------------------------------------------------------------- *)
+
+needs "arm/proofs/consttime.ml";;
+needs "aarch64/proofs/subroutine_signatures.ml";;
+
+let full_spec,public_vars = mk_safety_spec
+    ~keep_maychanges:false
+    (assoc "mlkem_tomont" subroutine_signatures)
+    MLKEM_TOMONT_SUBROUTINE_CORRECT
+    POLY_TOMONT_EXEC;;
+
+let MLKEM_TOMONT_SUBROUTINE_SAFE = time prove
+ (`exists f_events.
+       forall e ptr pc returnaddress.
+           nonoverlapping (word pc,LENGTH poly_tomont_asm_mc) (ptr,512)
+           ==> ensures arm
+               (\s.
+                    aligned_bytes_loaded s (word pc) poly_tomont_asm_mc /\
+                    read PC s = word pc /\
+                    read X30 s = returnaddress /\
+                    C_ARGUMENTS [ptr] s /\
+                    read events s = e)
+               (\s.
+                    read PC s = returnaddress /\
+                    exists e2.
+                        read events s = APPEND e2 e /\
+                        e2 = f_events ptr pc returnaddress /\
+                        memaccess_inbounds e2 [ptr,512; ptr,512] [ptr,512])
+               (\s s'. true)`,
+  ASSERT_CONCL_TAC full_spec THEN
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars POLY_TOMONT_EXEC);;
