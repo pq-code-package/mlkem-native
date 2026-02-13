@@ -95,8 +95,23 @@ let LENGTH_POLY_MULCACHE_COMPUTE_MC =
   REWRITE_CONV[poly_mulcache_compute_mc] `LENGTH poly_mulcache_compute_mc`
   |> CONV_RULE (RAND_CONV LENGTH_CONV);;
 
+let MLKEM_POLY_MULCACHE_COMPUTE_PREAMBLE_LENGTH = new_definition
+  `MLKEM_POLY_MULCACHE_COMPUTE_PREAMBLE_LENGTH = 0`;;
+
+let MLKEM_POLY_MULCACHE_COMPUTE_POSTAMBLE_LENGTH = new_definition
+  `MLKEM_POLY_MULCACHE_COMPUTE_POSTAMBLE_LENGTH = 4`;;
+
+let MLKEM_POLY_MULCACHE_COMPUTE_CORE_START = new_definition
+  `MLKEM_POLY_MULCACHE_COMPUTE_CORE_START = MLKEM_POLY_MULCACHE_COMPUTE_PREAMBLE_LENGTH`;;
+
+let MLKEM_POLY_MULCACHE_COMPUTE_CORE_END = new_definition
+  `MLKEM_POLY_MULCACHE_COMPUTE_CORE_END = LENGTH poly_mulcache_compute_mc - MLKEM_POLY_MULCACHE_COMPUTE_POSTAMBLE_LENGTH`;;
+
 let LENGTH_SIMPLIFY_CONV =
-  REWRITE_CONV[LENGTH_POLY_MULCACHE_COMPUTE_MC];;
+  REWRITE_CONV[LENGTH_POLY_MULCACHE_COMPUTE_MC;
+              MLKEM_POLY_MULCACHE_COMPUTE_CORE_START; MLKEM_POLY_MULCACHE_COMPUTE_CORE_END;
+              MLKEM_POLY_MULCACHE_COMPUTE_PREAMBLE_LENGTH; MLKEM_POLY_MULCACHE_COMPUTE_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
 (* ------------------------------------------------------------------------- *)
 (* Specification                                                             *)
@@ -113,7 +128,7 @@ let have_mulcache_zetas = define
 (* NOTE: This must be kept in sync with the CBMC specification
  * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
 
-let poly_mulcache_compute_GOAL = `forall pc src dst zetas zetas_twisted x y returnaddress.
+let poly_mulcache_compute_GOAL = `!dst src zetas zetas_twisted x pc.
     ALL (nonoverlapping (dst, 256))
         [(word pc, LENGTH poly_mulcache_compute_mc); (src, 512); (zetas, 256); (zetas_twisted, 256)]
     ==>
@@ -121,8 +136,6 @@ let poly_mulcache_compute_GOAL = `forall pc src dst zetas zetas_twisted x y retu
       (\s. // Assert that poly_mulcache_compute is loaded at PC
            aligned_bytes_loaded s (word pc) poly_mulcache_compute_mc /\
            read PC s = word pc  /\
-           // Remember LR as point-to-stop
-           read X30 s = returnaddress /\
            C_ARGUMENTS [dst; src; zetas; zetas_twisted] s  /\
            // Give name to 16-bit coefficients stored at src to be
            // able to refer to them in the post-condition
@@ -131,7 +144,7 @@ let poly_mulcache_compute_GOAL = `forall pc src dst zetas zetas_twisted x y retu
            have_mulcache_zetas zetas zetas_twisted s
       )
       (\s. // We have reached the LR
-           read PC s = returnaddress /\
+           read PC s = word(pc + MLKEM_POLY_MULCACHE_COMPUTE_CORE_END) /\
            // Odd coefficients have been multiplied with respective root of unity
            (!i. i < 128 ==> let z_i = read(memory :> bytes16(word_add dst (word (2 * i)))) s
                             in (ival z_i == (mulcache (ival o x)) i) (mod &3329) /\
@@ -145,7 +158,7 @@ let poly_mulcache_compute_GOAL = `forall pc src dst zetas zetas_twisted x y retu
 (* Proof                                                                     *)
 (* ------------------------------------------------------------------------- *)
 
-let poly_mulcache_compute_SPEC = prove(poly_mulcache_compute_GOAL,
+let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(poly_mulcache_compute_GOAL,
     CONV_TAC LENGTH_SIMPLIFY_CONV THEN
     REWRITE_TAC [MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI;
       NONOVERLAPPING_CLAUSES; ALL; C_ARGUMENTS; fst poly_mulcache_compute_EXEC;
@@ -167,10 +180,7 @@ let poly_mulcache_compute_SPEC = prove(poly_mulcache_compute_GOAL,
     MEMORY_128_FROM_16_TAC "zetas" 16 THEN
     ASM_REWRITE_TAC [WORD_ADD_0] THEN
     (* Forget original shape of assumption *)
-    DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes16 src) s = x`] THEN
-    DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes16 dst) s = x`] THEN
-    DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes16 zetas) s = x`] THEN
-    DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes16 zetas_twisted) s = x`] THEN
+    DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes16 any) s = x`] THEN
 
     (* Symbolic execution
        Note that we simplify eagerly after every step.
@@ -229,3 +239,85 @@ let poly_mulcache_compute_SPEC = prove(poly_mulcache_compute_GOAL,
          ==> l <= x /\ x <= u ==> l' <= x /\ x <= u'`) THEN
       CONV_TAC INT_REDUCE_CONV])
 );;
+
+let MLKEM_MULCACHE_COMPUTE_SUBROUTINE_CORRECT = prove
+ (`!dst src zetas zetas_twisted x pc returnaddress.
+    ALL (nonoverlapping (dst, 256))
+        [(word pc, LENGTH poly_mulcache_compute_mc);
+         (src, 512); (zetas, 256); (zetas_twisted, 256)]
+    ==>
+    ensures arm
+      (\s. // Assert that poly_mulcache_compute is loaded at PC
+           aligned_bytes_loaded s (word pc) poly_mulcache_compute_mc /\
+           read PC s = word pc  /\
+           // Remember LR as point-to-stop
+           read X30 s = returnaddress /\
+           C_ARGUMENTS [dst; src; zetas; zetas_twisted] s  /\
+           // Give name to 16-bit coefficients stored at src to be
+           // able to refer to them in the post-condition
+           (!i. i < 256
+                ==> read(memory :> bytes16(word_add src (word (2 * i)))) s =
+                    x i) /\
+           // Assert that zetas are correct
+           have_mulcache_zetas zetas zetas_twisted s)
+      (\s. // We have reached the LR
+           read PC s = returnaddress /\
+           // Odd coefficients have been multiplied with
+           // respective root of unity
+           !i. i < 128
+               ==> let z_i = read(memory :> bytes16
+                                (word_add dst (word (2 * i)))) s in
+                   (ival z_i == (mulcache (ival o x)) i) (mod &3329) /\
+                   (abs(ival z_i) <= &3328))
+      (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+       MAYCHANGE [memory :> bytes(dst, 256)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
+  let TWEAK_CONV =
+    ONCE_DEPTH_CONV EXPAND_CASES_CONV THENC
+    ONCE_DEPTH_CONV NUM_MULT_CONV THENC
+    ONCE_DEPTH_CONV let_CONV THENC
+    PURE_REWRITE_CONV [WORD_ADD_0] in
+  CONV_TAC TWEAK_CONV THEN
+  ARM_ADD_RETURN_NOSTACK_TAC poly_mulcache_compute_EXEC
+   (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_MULCACHE_COMPUTE_CORRECT)));;
+
+
+(* ------------------------------------------------------------------------- *)
+(* Constant-time and memory safety proof.                                    *)
+(* ------------------------------------------------------------------------- *)
+
+needs "arm/proofs/consttime.ml";;
+needs "aarch64/proofs/subroutine_signatures.ml";;
+
+let full_spec,public_vars = mk_safety_spec
+    ~keep_maychanges:false
+    (assoc "mlkem_mulcache_compute" subroutine_signatures)
+    MLKEM_MULCACHE_COMPUTE_SUBROUTINE_CORRECT
+    poly_mulcache_compute_EXEC;;
+
+let MLKEM_MULCACHE_COMPUTE_SUBROUTINE_SAFE = time prove
+ (`exists f_events.
+       forall e dst src zetas zetas_twisted pc returnaddress.
+           ALL (nonoverlapping (dst,256))
+           [word pc,LENGTH poly_mulcache_compute_mc; src,512; zetas,256;
+            zetas_twisted,256]
+           ==> ensures arm
+               (\s.
+                    aligned_bytes_loaded s (word pc)
+                    poly_mulcache_compute_mc /\
+                    read PC s = word pc /\
+                    read X30 s = returnaddress /\
+                    C_ARGUMENTS [dst; src; zetas; zetas_twisted] s /\
+                    read events s = e)
+               (\s.
+                    read PC s = returnaddress /\
+                    exists e2.
+                        read events s = APPEND e2 e /\
+                        e2 =
+                        f_events src zetas zetas_twisted dst pc returnaddress /\
+                        memaccess_inbounds e2
+                        [src,512; zetas,256; zetas_twisted,256; dst,256]
+                        [dst,256])
+               (\s s'. true)`,
+  ASSERT_CONCL_TAC full_spec THEN
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars poly_mulcache_compute_EXEC);;
