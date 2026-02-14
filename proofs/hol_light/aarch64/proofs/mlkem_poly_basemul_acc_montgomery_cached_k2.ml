@@ -410,8 +410,8 @@ let poly_basemul_acc_montgomery_cached_k2_SPEC = prove(poly_basemul_acc_montgome
 
 (* NOTE: This needs to be kept in sync with the CBMC spec in
  * mlkem/native/aarch64/src/arith_native_aarch64.h *)
-let poly_basemul_acc_montgomery_cached_k2_SPEC' = prove(
-   `forall srcA srcB srcBt dst x0 y0 y0t x1 y1 y1t pc returnaddress stackpointer.
+let MLKEM_BASEMUL_K2_SUBROUTINE_CORRECT = prove(
+   `forall srcA srcB srcBt dst x0 y0 y0t x1 y1 y1t pc stackpointer returnaddress.
       aligned 16 stackpointer /\
       ALLPAIRS nonoverlapping
         [(dst, 512); (word_sub stackpointer (word 64),64)]
@@ -454,3 +454,50 @@ let poly_basemul_acc_montgomery_cached_k2_SPEC' = prove(
       `[D8; D9; D10; D11; D12; D13; D14; D15]` 64  THEN
    WORD_ARITH_TAC)
 ;;
+
+
+(* ------------------------------------------------------------------------- *)
+(* Constant-time and memory safety proof.                                    *)
+(* ------------------------------------------------------------------------- *)
+
+needs "aarch64/proofs/subroutine_signatures.ml";;
+
+let full_spec,public_vars = mk_safety_spec
+    ~keep_maychanges:false
+    (assoc "mlkem_basemul_k2" subroutine_signatures)
+    MLKEM_BASEMUL_K2_SUBROUTINE_CORRECT
+    poly_basemul_acc_montgomery_cached_k2_EXEC;;
+
+let MLKEM_BASEMUL_K2_SUBROUTINE_SAFE = time prove
+ (`exists f_events.
+       forall e srcA srcB srcBt dst pc stackpointer returnaddress.
+           aligned 16 stackpointer /\
+           ALLPAIRS nonoverlapping
+           [dst,512; word_sub stackpointer (word 64),64]
+           [word pc,LENGTH poly_basemul_acc_montgomery_cached_k2_mc; srcA,1024; srcB,1024;
+            srcBt,512] /\
+           nonoverlapping (dst,512) (word_sub stackpointer (word 64),64)
+           ==> ensures arm
+               (\s.
+                    aligned_bytes_loaded s (word pc) poly_basemul_acc_montgomery_cached_k2_mc /\
+                    read PC s = word pc /\
+                    read SP s = stackpointer /\
+                    read X30 s = returnaddress /\
+                    C_ARGUMENTS [dst; srcA; srcB; srcBt] s /\
+                    read events s = e)
+               (\s.
+                    read PC s = returnaddress /\
+                    exists e2.
+                        read events s = APPEND e2 e /\
+                        e2 =
+                        f_events srcA srcB srcBt dst pc
+                        (word_sub stackpointer (word 64))
+                        returnaddress /\
+                        memaccess_inbounds e2
+                        [srcA,1024; srcB,1024; srcBt,512; dst,512;
+                         word_sub stackpointer (word 64),64]
+                        [dst,512; word_sub stackpointer (word 64),64])
+               (\s s'. true)`,
+  ASSERT_CONCL_TAC full_spec THEN
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars poly_basemul_acc_montgomery_cached_k2_EXEC);;
+

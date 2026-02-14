@@ -744,3 +744,49 @@ let MLKEM_INTT_SUBROUTINE_CORRECT = prove
   ARM_ADD_RETURN_STACK_TAC ~pre_post_nsteps:(5,5) MLKEM_INTT_EXEC
    (REWRITE_RULE[fst MLKEM_INTT_EXEC] (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_INTT_CORRECT)))
     `[D8; D9; D10; D11; D12; D13; D14; D15]` 64);;
+
+
+
+(* ------------------------------------------------------------------------- *)
+(* Constant-time and memory safety proof.                                    *)
+(* ------------------------------------------------------------------------- *)
+
+needs "aarch64/proofs/subroutine_signatures.ml";;
+
+let full_spec,public_vars = mk_safety_spec
+    ~keep_maychanges:false
+    (assoc "mlkem_intt" subroutine_signatures)
+    MLKEM_INTT_SUBROUTINE_CORRECT
+    MLKEM_INTT_EXEC;;
+
+let MLKEM_INTT_SUBROUTINE_SAFE = time prove
+ (`exists f_events.
+       forall e a z_12345 z_67 pc stackpointer returnaddress.
+           aligned 16 stackpointer /\
+           ALLPAIRS nonoverlapping
+           [a,512; word_sub stackpointer (word 64),64]
+           [word pc,LENGTH mlkem_intt_mc; z_12345,160; z_67,768] /\
+           nonoverlapping (a,512) (word_sub stackpointer (word 64),64)
+           ==> ensures arm
+               (\s.
+                    aligned_bytes_loaded s (word pc) mlkem_intt_mc /\
+                    read PC s = word pc /\
+                    read SP s = stackpointer /\
+                    read X30 s = returnaddress /\
+                    C_ARGUMENTS [a; z_12345; z_67] s /\
+                    read events s = e)
+               (\s.
+                    read PC s = returnaddress /\
+                    exists e2.
+                        read events s = APPEND e2 e /\
+                        e2 =
+                        f_events z_12345 z_67 a pc
+                        (word_sub stackpointer (word 64))
+                        returnaddress /\
+                        memaccess_inbounds e2
+                        [a,512; z_12345,160; z_67,768; a,512;
+                         word_sub stackpointer (word 64),64]
+                        [a,512; word_sub stackpointer (word 64),64])
+               (\s s'. true)`,
+  ASSERT_CONCL_TAC full_spec THEN
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLKEM_INTT_EXEC);;
