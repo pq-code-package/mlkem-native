@@ -272,12 +272,10 @@ let MLKEM_POLY_REDUCE_SUBROUTINE_CORRECT = prove
   ARM_ADD_RETURN_NOSTACK_TAC MLKEM_POLY_REDUCE_EXEC
    (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_POLY_REDUCE_CORRECT)));;
 
-
 (* ------------------------------------------------------------------------- *)
 (* Constant-time and memory safety proof.                                    *)
 (* ------------------------------------------------------------------------- *)
 
-needs "arm/proofs/consttime.ml";;
 needs "aarch64/proofs/subroutine_signatures.ml";;
 
 let full_spec,public_vars = mk_safety_spec
@@ -285,6 +283,8 @@ let full_spec,public_vars = mk_safety_spec
     (assoc "mlkem_reduce" subroutine_signatures)
     MLKEM_POLY_REDUCE_SUBROUTINE_CORRECT
     MLKEM_POLY_REDUCE_EXEC;;
+(* Remove duplicates from memaccess_inbounds lists (s2n-bignum#350) *)
+let full_spec = ONCE_DEPTH_CONV MEMACCESS_INBOUNDS_DEDUP_CONV full_spec |> concl |> rhs;;
 
 let MLKEM_POLY_REDUCE_SUBROUTINE_SAFE = time prove
  (`exists f_events.
@@ -302,7 +302,7 @@ let MLKEM_POLY_REDUCE_SUBROUTINE_SAFE = time prove
                     exists e2.
                         read events s = APPEND e2 e /\
                         e2 = f_events a pc returnaddress /\
-                        memaccess_inbounds e2 [a,512; a,512] [a,512])
+                        memaccess_inbounds e2 [a,512] [a,512])
                (\s s'. true)`,
   ASSERT_CONCL_TAC full_spec THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLKEM_POLY_REDUCE_EXEC);;
