@@ -5,6 +5,7 @@
 
 (* ========================================================================= *)
 (* 4-way batch Keccak-f1600 scalar/vector hybrid code.                       *)
+(* Corresponding s2n-bignum proof: arm/proofs/sha3_keccak4_f1600_alt.ml      *)
 (* ========================================================================= *)
 
 (* Load base theories for AArch64 from s2n-bignum *)
@@ -1388,3 +1389,46 @@ let KECCAK_F1600_X4_V8A_V84A_SCALAR_SUBROUTINE_CORRECT = prove
    (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV KECCAK_F1600_X4_V8A_V84A_SCALAR_CORRECT))
   `[D8; D9; D10; D11; D12; D13; D14; D15;
     X19; X20; X21; X22; X23; X24; X25; X26; X27; X28; X29; X30]` 224);;
+
+(* ------------------------------------------------------------------------- *)
+(* Constant-time and memory safety proof.                                    *)
+(* ------------------------------------------------------------------------- *)
+
+needs "aarch64/proofs/subroutine_signatures.ml";;
+
+let full_spec,public_vars = mk_safety_spec
+    ~keep_maychanges:false
+    (assoc "sha3_keccak4_f1600_alt" subroutine_signatures)
+    KECCAK_F1600_X4_V8A_V84A_SCALAR_SUBROUTINE_CORRECT
+    KECCAK_F1600_X4_V8A_V84A_SCALAR_EXEC;;
+
+let KECCAK_F1600_X4_V8A_V84A_SCALAR_SUBROUTINE_SAFE = time prove
+ (`exists f_events.
+       forall e a rc pc stackpointer returnaddress.
+           aligned 16 stackpointer /\
+           nonoverlapping (a,800) (word_sub stackpointer (word 224),224) /\
+           ALLPAIRS nonoverlapping
+           [a,800; word_sub stackpointer (word 224),224]
+           [word pc,LENGTH keccak_f1600_x4_v8a_v84a_scalar_mc; rc,192]
+           ==> ensures arm
+               (\s.
+                    aligned_bytes_loaded s (word pc) keccak_f1600_x4_v8a_v84a_scalar_mc /\
+                    read PC s = word pc /\
+                    read SP s = stackpointer /\
+                    read X30 s = returnaddress /\
+                    C_ARGUMENTS [a; rc] s /\
+                    read events s = e)
+               (\s.
+                    read PC s = returnaddress /\
+                    exists e2.
+                        read events s = APPEND e2 e /\
+                        e2 =
+                        f_events rc a pc (word_sub stackpointer (word 224))
+                        returnaddress /\
+                        memaccess_inbounds e2
+                        [a,800; rc,192; a,800;
+                         word_sub stackpointer (word 224),224]
+                        [a,800; word_sub stackpointer (word 224),224])
+               (\s s'. true)`,
+  ASSERT_CONCL_TAC full_spec THEN
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars KECCAK_F1600_X4_V8A_V84A_SCALAR_EXEC);;

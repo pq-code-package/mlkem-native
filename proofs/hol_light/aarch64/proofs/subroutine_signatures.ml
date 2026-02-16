@@ -190,4 +190,90 @@ let subroutine_signatures = [
    ])
 );
 
+
+("sha3_keccak_f1600",
+  ([(*args*)
+     ("a", "uint64_t[static 25]", (*is const?*)"false");
+     ("rc", "uint64_t[static 24]", (*is const?*)"true");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a", "25"(* num elems *), 8(* elem bytesize *));
+    ("rc", "24"(* num elems *), 8(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("a", "25"(* num elems *), 8(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
+
+("sha3_keccak_f1600_alt",
+  ([(*args*)
+     ("a", "uint64_t[static 25]", (*is const?*)"false");
+     ("rc", "uint64_t[static 24]", (*is const?*)"true");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a", "25"(* num elems *), 8(* elem bytesize *));
+    ("rc", "24"(* num elems *), 8(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("a", "25"(* num elems *), 8(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
+
+("sha3_keccak2_f1600",
+  ([(*args*)
+     ("a", "uint64_t[static 50]", (*is const?*)"false");
+     ("rc", "uint64_t[static 24]", (*is const?*)"true");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a", "50"(* num elems *), 8(* elem bytesize *));
+    ("rc", "24"(* num elems *), 8(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("a", "50"(* num elems *), 8(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
+
+("sha3_keccak4_f1600",
+  ([(*args*)
+     ("a", "uint64_t[static 100]", (*is const?*)"false");
+     ("rc", "uint64_t[static 24]", (*is const?*)"true");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a", "100"(* num elems *), 8(* elem bytesize *));
+    ("rc", "24"(* num elems *), 8(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("a", "100"(* num elems *), 8(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
+
+("sha3_keccak4_f1600_alt",
+  ([(*args*)
+     ("a", "uint64_t[static 100]", (*is const?*)"false");
+     ("rc", "uint64_t[static 24]", (*is const?*)"true");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a", "100"(* num elems *), 8(* elem bytesize *));
+    ("rc", "24"(* num elems *), 8(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("a", "100"(* num elems *), 8(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
+
 ];;
