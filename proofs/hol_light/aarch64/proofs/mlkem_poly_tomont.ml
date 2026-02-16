@@ -262,7 +262,6 @@ let MLKEM_TOMONT_SUBROUTINE_CORRECT = prove
 (* Constant-time and memory safety proof.                                    *)
 (* ------------------------------------------------------------------------- *)
 
-needs "arm/proofs/consttime.ml";;
 needs "aarch64/proofs/subroutine_signatures.ml";;
 
 let full_spec,public_vars = mk_safety_spec
@@ -270,6 +269,8 @@ let full_spec,public_vars = mk_safety_spec
     (assoc "mlkem_tomont" subroutine_signatures)
     MLKEM_TOMONT_SUBROUTINE_CORRECT
     POLY_TOMONT_EXEC;;
+(* Remove duplicates from memaccess_inbounds lists (s2n-bignum#350) *)
+let full_spec = ONCE_DEPTH_CONV MEMACCESS_INBOUNDS_DEDUP_CONV full_spec |> concl |> rhs;;
 
 let MLKEM_TOMONT_SUBROUTINE_SAFE = time prove
  (`exists f_events.
@@ -287,7 +288,7 @@ let MLKEM_TOMONT_SUBROUTINE_SAFE = time prove
                     exists e2.
                         read events s = APPEND e2 e /\
                         e2 = f_events ptr pc returnaddress /\
-                        memaccess_inbounds e2 [ptr,512; ptr,512] [ptr,512])
+                        memaccess_inbounds e2 [ptr,512] [ptr,512])
                (\s s'. true)`,
   ASSERT_CONCL_TAC full_spec THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars POLY_TOMONT_EXEC);;
