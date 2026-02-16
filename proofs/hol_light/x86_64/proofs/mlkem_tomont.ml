@@ -338,3 +338,38 @@ let MLKEM_TOMONT_SUBROUTINE_CORRECT = prove(
              (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(a,512)])`, 
   MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_TOMONT_NOIBT_SUBROUTINE_CORRECT));;
+
+(* ------------------------------------------------------------------------- *)
+(* Constant-time and memory safety proof.                                    *)
+(* ------------------------------------------------------------------------- *)
+
+needs "x86_64/proofs/mlkem_utils.ml";;
+needs "x86_64/proofs/subroutine_signatures.ml";;
+
+let full_spec,public_vars = mk_safety_spec
+    ~keep_maychanges:false
+    (assoc "mlkem_tomont" subroutine_signatures)
+    MLKEM_TOMONT_CORRECT
+    mlkem_tomont_TMC_EXEC;;
+(* Remove duplicates from memaccess_inbounds lists (s2n-bignum#350) *)
+let full_spec = ONCE_DEPTH_CONV MEMACCESS_INBOUNDS_DEDUP_CONV full_spec |> concl |> rhs;;
+
+let MLKEM_TOMONT_SAFE = time prove
+ (`exists f_events.
+       forall e a pc.
+           aligned 32 a /\ nonoverlapping (word pc,544) (a,512)
+           ==> ensures x86
+               (\s.
+                    bytes_loaded s (word pc) (BUTLAST mlkem_tomont_tmc) /\
+                    read RIP s = word pc /\
+                    C_ARGUMENTS [a] s /\
+                    read events s = e)
+               (\s.
+                    read RIP s = word (pc + 544) /\
+                    (exists e2.
+                         read events s = APPEND e2 e /\
+                         e2 = f_events a pc /\
+                         memaccess_inbounds e2 [a,512] [a,512]))
+               (\s s'. T)`,
+  ASSERT_CONCL_TAC full_spec THEN
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars mlkem_tomont_TMC_EXEC);;

@@ -300,3 +300,44 @@ let MLKEM_MULCACHE_COMPUTE_SUBROUTINE_CORRECT = prove(
   CONV_TAC TWEAK_CONV THEN
   MATCH_ACCEPT_TAC(ADD_IBT_RULE
   (CONV_RULE TWEAK_CONV MLKEM_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_CORRECT)));;
+
+(* ------------------------------------------------------------------------- *)
+(* Constant-time and memory safety proof.                                    *)
+(* ------------------------------------------------------------------------- *)
+
+needs "x86_64/proofs/mlkem_utils.ml";;
+needs "x86_64/proofs/subroutine_signatures.ml";;
+
+let full_spec,public_vars = mk_safety_spec
+    ~keep_maychanges:false
+    (assoc "mlkem_mulcache_compute" subroutine_signatures)
+    MLKEM_MULCACHE_COMPUTE_CORRECT
+    MLKEM_MULCACHE_COMPUTE_TMC_EXEC;;
+
+let MLKEM_MULCACHE_COMPUTE_SAFE = time prove
+ (`exists f_events.
+       forall e r a zetas pc.
+           aligned 32 r /\
+           aligned 32 a /\
+           aligned 32 zetas /\
+           nonoverlapping (r,256) (word pc,323) /\
+           nonoverlapping (r,256) (a,512) /\
+           nonoverlapping (r,256) (zetas,1248)
+           ==> ensures x86
+               (\s.
+                    bytes_loaded s (word pc)
+                      (BUTLAST mlkem_mulcache_compute_tmc) /\
+                    read RIP s = word pc /\
+                    C_ARGUMENTS [r; a; zetas] s /\
+                    read events s = e)
+               (\s.
+                    read RIP s = word (pc + 323) /\
+                    (exists e2.
+                         read events s = APPEND e2 e /\
+                         e2 = f_events a zetas r pc /\
+                         memaccess_inbounds e2
+                           [a,512; zetas,1248; r,256] [r,256]))
+               (\s s'. T)`,
+  ASSERT_CONCL_TAC full_spec THEN
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars
+    MLKEM_MULCACHE_COMPUTE_TMC_EXEC);;
