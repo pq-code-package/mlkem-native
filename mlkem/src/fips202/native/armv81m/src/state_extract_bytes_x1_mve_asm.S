@@ -181,6 +181,18 @@ keccak_f1600_x1_state_extract_bytes_asm_main_loop_end:
 keccak_f1600_x1_state_extract_bytes_asm_exit:
     @ vpop    {d8-d15}
     pop     {r4-r12, pc}
+/****************** REGISTER DEALLOCATIONS *******************/
+    .unreq state
+    .unreq dp
+    .unreq off_full
+    .unreq length
+    .unreq tmp
+    .unreq nB
+    .unreq off
+    .unreq lane_offset_bytes
+    .unreq mask
+    .unreq qd
+    .unreq qs
 
 /* simpasm: footer-start */
 #endif /* MLK_FIPS202_ARMV81M_NEED_X1 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

@@ -51,14 +51,15 @@ static MLK_INLINE int mlk_keccak_f1600_x4_native(uint64_t *state)
  */
 #define mlk_keccak_f1600_x1_state_xor_bytes_impl \
   MLK_NAMESPACE(mlk_keccak_f1600_x1_state_xor_bytes_impl)
-void mlk_keccak_f1600_x1_state_xor_bytes_impl(uint64_t *state, const uint8_t *data,
-                                         unsigned offset,
-                                         unsigned length);
+void mlk_keccak_f1600_x1_state_xor_bytes_impl(uint64_t *state,
+                                              const uint8_t *data,
+                                              unsigned offset, unsigned length);
 
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_keccakf1600_xor_bytes_x1_native(
-    uint64_t *state, const uint8_t *data, unsigned offset,
-    unsigned length)
+static MLK_INLINE int mlk_keccakf1600_xor_bytes_x1_native(uint64_t *state,
+                                                          const uint8_t *data,
+                                                          unsigned offset,
+                                                          unsigned length)
 {
   mlk_keccak_f1600_x1_state_xor_bytes_impl(state, data, offset, length);
   return MLK_NATIVE_FUNC_SUCCESS;
@@ -69,13 +70,16 @@ static MLK_INLINE int mlk_keccakf1600_xor_bytes_x1_native(
  */
 #define mlk_keccak_f1600_x1_state_extract_bytes_impl \
   MLK_NAMESPACE(mlk_keccak_f1600_x1_state_extract_bytes_impl)
-void mlk_keccak_f1600_x1_state_extract_bytes_impl(uint64_t *state, uint8_t *data,
-                                             unsigned offset,
-                                             unsigned length);
+void mlk_keccak_f1600_x1_state_extract_bytes_impl(uint64_t *state,
+                                                  uint8_t *data,
+                                                  unsigned offset,
+                                                  unsigned length);
 
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_keccakf1600_extract_bytes_x1_native(
-    uint64_t *state, uint8_t *data, unsigned offset, unsigned length)
+static MLK_INLINE int mlk_keccakf1600_extract_bytes_x1_native(uint64_t *state,
+                                                              uint8_t *data,
+                                                              unsigned offset,
+                                                              unsigned length)
 {
   mlk_keccak_f1600_x1_state_extract_bytes_impl(state, data, offset, length);
   return MLK_NATIVE_FUNC_SUCCESS;

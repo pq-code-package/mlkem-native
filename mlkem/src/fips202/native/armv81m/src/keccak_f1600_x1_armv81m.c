@@ -12,16 +12,17 @@
 #include <stdint.h>
 #include "fips202_native_armv81m.h"
 
-void mlk_keccak_f1600_x1_state_extract_bytes_impl(
-    uint64_t *state, uint8_t *data, unsigned offset,
-    unsigned length)
+void mlk_keccak_f1600_x1_state_extract_bytes_impl(uint64_t *state,
+                                                  uint8_t *data,
+                                                  unsigned offset,
+                                                  unsigned length)
 {
   mlk_keccak_f1600_x1_state_extract_bytes_asm(state, data, offset, length);
 }
 
-void mlk_keccak_f1600_x1_state_xor_bytes_impl(
-    uint64_t *state, const uint8_t *data, unsigned offset,
-    unsigned length)
+void mlk_keccak_f1600_x1_state_xor_bytes_impl(uint64_t *state,
+                                              const uint8_t *data,
+                                              unsigned offset, unsigned length)
 {
   mlk_keccak_f1600_x1_state_xor_bytes_asm(state, data, offset, length);
 }
@@ -32,7 +33,8 @@ void mlk_keccak_f1600_x1_state_xor_bytes_impl(
 int mlk_keccak_f1600_x1_native_impl(uint64_t *state)
 {
   /* Run the permutation */
-  mlk_keccak_f1600_x1_armv7m_asm((void*)state, mlk_keccakf1600_round_constants);
+  mlk_keccak_f1600_x1_armv7m_asm((void *)state,
+                                 mlk_keccakf1600_round_constants);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 

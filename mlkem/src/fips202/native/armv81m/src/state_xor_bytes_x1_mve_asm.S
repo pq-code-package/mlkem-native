@@ -22,41 +22,30 @@
 // -----------------------------------------------------------------------------
 // Interleave macros
 // -----------------------------------------------------------------------------
-// interleave_odds: in-place SWAR bit permutation that compacts odd-numbered
-// bits of each byte/halfword/word in \t toward the upper half, preparing the
-// odd bit-plane. Uses vshl + vsri insertion per the semantics above.
-.macro interleave_odds t, u
-    vshl.u8     \u, \t, #2       // u = t[5..0],00
-    vsri.u8     \t, \u, #1       // t = t[7],u[6..0]  => t = t[7],t[5..0],0
-    vshl.u8     \u, \t, #3       // u = t[3..0],0000
-    vsri.u8     \t, \u, #2       // t = t[7..6],u[5..0] => t = t[7],t[5],t[3..0],00
-    vshl.u8     \u, \t, #4       // u = t[1..0],000000
-    vsri.u8     \t, \u, #3       // t = t[7],t[5],t[3],u[4..0] => t = t[7],t[5],t[3],t[1..0],000
-                                 // t16 = t[15],t[13],t[11],t[9..8],000,t[7],t[5],t[3],t[1..0],000
-    vshl.u16    \u, \t, #8       // u16 = t[7],t[5],t[3],t[1..0],000
-    vsri.u8     \t, \u, #4       // t16 = t[15,13,11,9,7,5,3,1]
-    vshl.u32    \u, \t, #16      // u32 = t[15,13,11,9,7,5,3,1]
-    vsri.u16    \t, \u, #8       // u16 = t[31,29,27,25,23,21,19,17,15,13,11,9,7,5,3,1]
-.endm
 
 // interleave_evens: in-place SWAR bit permutation that compacts even-numbered
 // bits of each byte/halfword/word in \t toward the lower half, preparing the
 // even bit-plane. Comments show the equivalent masks after each stage.
-.macro interleave_evens t, u
-    vshr.u8     \u, \t, #2       // stage 1 within bytes
+.macro interleave_evens t, u, const8, const16, const32, const128, const32768
+    //vshr.u8     \u, \t, #2       // stage 1 within bytes
+    vqdmulh.s8  \u, \t, \const32   // shift right 2 = shift left 5+1, shift right 8; 1<<5 = 32
     vsli.u8     \t, \u, #1       // t = ((t >> 1) & 0x7E7E7E7E) | (t & 0x01010101)
-    vshr.u8     \u, \t, #3       // stage 2 within nibbles
+    //vshr.u8     \u, \t, #3       // stage 2 within nibbles
+    vqdmulh.s8    \u, \t, \const16     // shift right 3 = shift left 5, shift right 8; 1<<5 = 32
     vsli.u8     \t, \u, #2       // t = ((t >> 2) & 0x1C1C1C1C) | (t & 0x03030303)
-    vshr.u8     \u, \t, #4       // stage 3 across bytes
+    //vshr.u8     \u, \t, #4       // stage 3 across bytes
+    vqdmulh.s8    \u, \t, \const8     // shift right 4 = shift left 4, shift right 8; 1<<4 = 16
     vsli.u8     \t, \u, #3       // t = ((t >> 3) & 0x08080808) | (t & 0x07070707)
-    vshr.u16    \u, \t, #8       // widen within halfwords
+    //vshr.u16    \u, \t, #8       // widen within halfwords
+    vqdmulh.s16   \u, \t, \const128 // shift right by 8 = shift left 7+1, shift right 16; 1<<7 = 128
     vsli.u8     \t, \u, #4       // t = ((t >> 4) & 0x00F000F0) | (t & 0x000F000F)
-    vshr.u32    \u, \t, #16      // widen within words
+    //vshr.u32    \u, \t, #16      // widen within words
+    vqdmulh.s32   \u, \t, \const32768   // shift right by 16 = shift left 15+1, shift right 32; 1<<15 = 32768
     vsli.u16    \t, \u, #8       // t = ((t >> 8) & 0x0000FF00) | (t & 0x000000FF)
 .endm
 
 .balign 8
-.macro to_bit_interleaving_x1 tmp
+.macro to_bit_interleaving_x1 tmp, const8, const16, const32, const128, const32768
     // NOTE: This macro clobbers r0, q0, q1, q2, q3
     // Inputs on entry:
     //   q0 = [d0l, d0h, d1l, d1h] (Two complete 64-bit lanes in 32-bit chunks)
@@ -64,13 +53,15 @@
     //   q0 = Even bit-plane packed (e0, o0, e1, o1)
     // Vectors:                ||           q0          ||           q1          ||           q2          ||           q3          ||
     // Elements:               || d0l | d0h | d1l | d1h ||  X  |  X  |  X  |  X  ||  X  |  X  |  X  |  X  ||  X  |  X  |  X  |  X  ||
-    vshl.u32 q1, q0, #0     // || d0l | d0h | d1l | d1h || d0l | d0h | d1l | d1h ||  X  |  X  |  X  |  X  ||  X  |  X  |  X  |  X  ||
-    interleave_evens q1, q2 // || d0l | d0h | d1l | d1h || e0l | e0h | e1l | e1h ||  X  |  X  |  X  |  X  ||  X  |  X  |  X  |  X  ||
+    vshl.u32 q1, q0, #1     // || d0l | d0h | d1l | d1h || d0l | d0h | d1l | d1h ||  X  |  X  |  X  |  X  ||  X  |  X  |  X  |  X  ||
+    interleave_evens q1, q2, \const8, \const16, \const32, \const128, \const32768
+                            // || d0l | d0h | d1l | d1h || e0l | e0h | e1l | e1h ||  X  |  X  |  X  |  X  ||  X  |  X  |  X  |  X  ||
     vrev64.u32 q2, q1       // || d0l | d0h | d1l | d1h || e0l | e0h | e1l | e1h || e0h | e0l | e1h | e1l ||  X  |  X  |  X  |  X  ||
     vsli.u32   q1, q2, #16  // || d0l | d0h | d1l | d1h || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l ||  X  |  X  |  X  |  X  ||
-    interleave_odds  q0, q3 // || o0l | o0h | o1l | o1h || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l ||  X  |  X  |  X  |  X  ||
+    interleave_evens q0, q3,  \const8, \const16, \const32, \const128, \const32768
+                            // || o0l | o0h | o1l | o1h || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l ||  X  |  X  |  X  |  X  ||
     vrev64.u32 q3, q0       // || o0l | o0h | o1l | o1h || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l || o0h | o0l | o1h | o1l ||
-    vsri.u32   q0, q3, #16  // ||  X  | o0  |  X  | o1  || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l || o0h | o0l | o1h | o1l ||
+    vsli.u32   q0, q3, #16  // ||  X  | o0  |  X  | o1  || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l || o0h | o0l | o1h | o1l ||
     mov \tmp, #0x0F0F
     vmsr p0, \tmp
     vpsel q0, q1, q0        // || e0  | o0  | e1  | o1  || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l || o0h | o0l | o1h | o1l ||
@@ -99,13 +90,21 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x1_state_xor_bytes_asm)
     tmp                 .req r4
     off                 .req r5
     lane_offset_bytes   .req r6
-    mask                .req r7
+    const8                 .req r8
+    const16                .req r9
+    const32                .req r10
+    const128               .req r11
+    const32768             .req r12
     nB                  .req lr
     // ---- Vector naming ----
     qd                  .req q0
     qs                  .req q1
 
-
+    mov     const8, #8
+    mov     const16, #16
+    mov     const32, #32
+    mov     const128, #128
+    mov     const32768, #32768
 
     cmp     length,  #0             // if len==0 done
     beq     keccak_f1600_x1_state_xor_bytes_asm_exit
@@ -136,17 +135,17 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x1_state_xor_bytes_asm)
     // left-shift to align the active bytes within the 8-byte lane, and write
     // it back to p0 to predicate the subsequent byte gathers.
     vctp.8 nB
-    vmrs mask, p0
+    vmrs tmp, p0
     // mask << offset
-    lsl mask, mask, off
-    vmsr p0, mask
+    lsl tmp, tmp, off
+    vmsr p0, tmp
     // now load the partial lanes
     vpst
     vldrbt.u8 qd, [dp], #16
 
     // Bit interleave
     // NOTE: q2,q3,q4 are dead here and not preserved.
-    to_bit_interleaving_x1 tmp
+    to_bit_interleaving_x1 tmp, const8, const16, const32, const128, const32768
 
     vldrw.u32 qs, [state]
     veor      qs, qs, qd
@@ -169,7 +168,7 @@ keccak_f1600_x1_state_xor_bytes_asm_main_loop_start:
     vldrw.u32 qd, [dp], #16
     // Bit interleave
     // NOTE: q2,q3,q4 are dead here and not preserved.
-    to_bit_interleaving_x1 tmp
+    to_bit_interleaving_x1 tmp, const8, const16, const32, const128, const32768
 
     // XOR into state (stores post-increment state by 16)
     vldrw.u32 qs, [state]
@@ -196,7 +195,7 @@ keccak_f1600_x1_state_xor_bytes_asm_main_loop_end:
 
     // Bit interleave
     // NOTE: q2,q3,q4 are dead here and not preserved.
-    to_bit_interleaving_x1 tmp
+    to_bit_interleaving_x1 tmp, const8, const16, const32, const128, const32768
 
     vldrw.u32 qs, [state]
     veor      qs, qs, qd
@@ -205,6 +204,23 @@ keccak_f1600_x1_state_xor_bytes_asm_main_loop_end:
 keccak_f1600_x1_state_xor_bytes_asm_exit:
     @ vpop    {d8-d15}
     pop     {r4-r12, pc}
+
+/****************** REGISTER DEALLOCATIONS *******************/
+    .unreq state
+    .unreq dp
+    .unreq off_full
+    .unreq length
+    .unreq tmp
+    .unreq off
+    .unreq lane_offset_bytes
+    .unreq nB
+    .unreq qd
+    .unreq qs
+    .unreq const8
+    .unreq const16
+    .unreq const32
+    .unreq const128
+    .unreq const32768
 
 /* simpasm: footer-start */
 #endif /* MLK_FIPS202_ARMV81M_NEED_X4 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
