@@ -1666,3 +1666,45 @@ let MLKEM_BASEMUL_K3_SUBROUTINE_CORRECT = prove(
               (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
                MAYCHANGE [memory :> bytes(dst, 512)])`,
   MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_BASEMUL_K3_NOIBT_SUBROUTINE_CORRECT));;
+
+(* ------------------------------------------------------------------------- *)
+(* Constant-time and memory safety proof.                                    *)
+(* ------------------------------------------------------------------------- *)
+
+needs "x86/proofs/consttime.ml";;
+needs "x86_64/proofs/subroutine_signatures.ml";;
+needs "common/consttime_utils.ml";;
+
+let full_spec,public_vars = mk_safety_spec
+    ~keep_maychanges:false
+    (assoc "mlkem_basemul_k3" subroutine_signatures)
+    MLKEM_BASEMUL_K3_CORRECT
+    mlkem_basemul_k3_tmc_EXEC;;
+
+let MLKEM_BASEMUL_K3_SAFE = time prove
+ (`exists f_events.
+       forall e src1 src2 src2t dst pc.
+           aligned 32 src1 /\
+           aligned 32 src2 /\
+           aligned 32 src2t /\
+           aligned 32 dst /\
+           ALL (nonoverlapping (dst,512)) [src1,1536; src2,1536; src2t,768] /\
+           nonoverlapping (dst,512) (word pc,3852)
+           ==> ensures x86
+               (\s.
+                    bytes_loaded s (word pc)
+                      (BUTLAST mlkem_basemul_k3_tmc) /\
+                    read RIP s = word pc /\
+                    C_ARGUMENTS [dst; src1; src2; src2t] s /\
+                    read events s = e)
+               (\s.
+                    read RIP s = word (pc + 3852) /\
+                    (exists e2.
+                         read events s = APPEND e2 e /\
+                         e2 = f_events src1 src2 src2t dst pc /\
+                         memaccess_inbounds e2
+                           [src1,1536; src2,1536; src2t,768; dst,512]
+                           [dst,512]))
+               (\s s'. T)`,
+  ASSERT_CONCL_TAC full_spec THEN
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars mlkem_basemul_k3_tmc_EXEC);;
