@@ -173,6 +173,8 @@ MLK_ASM_FN_SYMBOL(poly_decompress_d4_avx2)
         retq
         .cfi_endproc
 
+MLK_ASM_FN_SIZE(poly_decompress_d4_avx2)
+
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
           && (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == \
           3) */
