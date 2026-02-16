@@ -758,6 +758,8 @@ let full_spec,public_vars = mk_safety_spec
     (assoc "mlkem_intt" subroutine_signatures)
     MLKEM_INTT_SUBROUTINE_CORRECT
     MLKEM_INTT_EXEC;;
+(* Remove duplicates from memaccess_inbounds lists (s2n-bignum#350) *)
+let full_spec = ONCE_DEPTH_CONV MEMACCESS_INBOUNDS_DEDUP_CONV full_spec |> concl |> rhs;;
 
 let MLKEM_INTT_SUBROUTINE_SAFE = time prove
  (`exists f_events.
@@ -784,7 +786,7 @@ let MLKEM_INTT_SUBROUTINE_SAFE = time prove
                         (word_sub stackpointer (word 64))
                         returnaddress /\
                         memaccess_inbounds e2
-                        [a,512; z_12345,160; z_67,768; a,512;
+                        [a,512; z_12345,160; z_67,768;
                          word_sub stackpointer (word 64),64]
                         [a,512; word_sub stackpointer (word 64),64])
                (\s s'. true)`,
