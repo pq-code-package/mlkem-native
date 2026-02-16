@@ -1489,8 +1489,10 @@ let KECCAK_F1600_X4_V8A_SCALAR_SUBROUTINE_CORRECT = prove
 (* Constant-time and memory safety proof.                                    *)
 (* ------------------------------------------------------------------------- *)
 
-needs "aarch64/proofs/mlkem_utils.ml";;
+needs "arm/proofs/consttime.ml";;
 needs "aarch64/proofs/subroutine_signatures.ml";;
+
+needs "common/consttime_utils.ml";;
 
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:false
