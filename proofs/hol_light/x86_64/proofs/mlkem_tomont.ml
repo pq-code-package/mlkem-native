@@ -11,6 +11,7 @@
 needs "x86/proofs/base.ml";;
 
 needs "common/mlkem_specs.ml";;
+needs "common/consttime_utils.ml";;
 
 (* print_literal_from_elf "x86_64/mlkem/mlkem_tomont.o";; *)
 
@@ -230,7 +231,7 @@ let MLKEM_TOMONT_CORRECT = prove(
   MAP_EVERY (fun n -> X86_STEPS_TAC mlkem_tomont_TMC_EXEC [n] THEN
                       SIMD_SIMPLIFY_TAC[ntt_montmul])
             (1--105) THEN
-  
+
   ENSURES_FINAL_STATE_TAC THEN
   REPEAT CONJ_TAC THEN
   ASM_REWRITE_TAC[] THEN
@@ -308,7 +309,7 @@ let MLKEM_TOMONT_NOIBT_SUBROUTINE_CORRECT = prove(
                         (ival z_i == (tomont_3329 (ival o x)) i) (mod &3329) /\
                         abs(ival z_i) <= &3328)
              (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
-              MAYCHANGE [memory :> bytes(a,512)])`, 
+              MAYCHANGE [memory :> bytes(a,512)])`,
   X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_tomont_tmc MLKEM_TOMONT_CORRECT);;
 
 (* NOTE: This must be kept in sync with the CBMC specification
@@ -336,15 +337,17 @@ let MLKEM_TOMONT_SUBROUTINE_CORRECT = prove(
                         (ival z_i == (tomont_3329 (ival o x)) i) (mod &3329) /\
                         abs(ival z_i) <= &3328)
              (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
-              MAYCHANGE [memory :> bytes(a,512)])`, 
+              MAYCHANGE [memory :> bytes(a,512)])`,
   MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_TOMONT_NOIBT_SUBROUTINE_CORRECT));;
 
 (* ------------------------------------------------------------------------- *)
 (* Constant-time and memory safety proof.                                    *)
 (* ------------------------------------------------------------------------- *)
 
-needs "x86_64/proofs/mlkem_utils.ml";;
+needs "x86/proofs/consttime.ml";;
 needs "x86_64/proofs/subroutine_signatures.ml";;
+
+needs "common/consttime_utils.ml";;
 
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:false
