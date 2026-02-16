@@ -25,21 +25,21 @@
 
 // deinterleave_even: inverse of the even-bit compaction. Inflates the even
 // bit-plane stored in \e back into byte positions (odd bits garbage).
-.macro deinterleave_even e, tmp
+.macro deinterleave_even e, tmp, const4, const16
                                 // | e[31:24] | e[23:16] | e[15:8] | e[7:0] |
     vsli.u32    \e, \e, #8      // | e[23:16] | e[15:8]  | e[7:0]  | e[7:0] |
     vsli.u16    \e, \e, #4      // | e[19:12] | e[11:8,11:8]  | e[3:0,7:4]  | e[3:0,3:0] |
     vsli.u8     \e, \e, #1      // | e[18:12,12] | e[10:8,11:8,8]  | e[2:0,7:4,4]  | e[2:0,3:0,0] |
-    vshr.u8     \tmp, \e, #3
+    vqdmulh.s8  \tmp, \e, \const16
     vsli.u8     \e, \tmp, #4    // | e[17:14,14:12,12] | e[9:8,11:10,10:8,8]  | e[1:0,7:6,6:4,4]  | e[1:0,3:2,2:0,0] |
-    vshr.u8     \tmp, \e, #5
+    vqdmulh.s8  \tmp, \e, \const4
     vsli.u8     \e, \tmp, #6    // | e[16:15,15:14,14:12,12] | e[8,11,11:10,10:8,8]  | e[0,7,7:6,6:4,4]  | e[0,3,3:2,2:0,0] |
                                 // after 0x55 mask
                                 // | e[15,14,13,12] | e[11,10,9,8]  | e[7,6,5,4]  | e[3,2,1,0] |
 .endm
 
 .balign 8
-.macro from_bit_interleaving_x1 tmp
+.macro from_bit_interleaving_x1 tmp, const4, const16
     // Input:  q0 = [e0, o0, e1, o1]
     // Output: q0 = [d0l, d0h, d1l, d1h]
     // Clobbers: r0, q1, q2, q3, q4
@@ -55,8 +55,8 @@
     // construct an o vector
     vpsel       q1, q3, q1    // q0.u16: [o0l, o0h, o0h, o0l, o1l, o1h, o1l, o1h] 
     // expand vectors
-    deinterleave_even q0, q2
-    deinterleave_even q1, q2
+    deinterleave_even q0, q2, \const4, \const16
+    deinterleave_even q1, q2, \const4, \const16
     // Zero garbage bits
     mov         \tmp, #0x55
     vdup.u8     q2, \tmp
@@ -90,11 +90,16 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x1_state_extract_bytes_asm)
     tmp                 .req r4
     nB                  .req lr
     off                 .req r5
+    const4              .req r6
+    const16             .req r7
     lane_offset_bytes   .req r9
     mask                .req r11
     // ---- Vector naming ----
     qd                  .req q0
     qs                  .req q1
+
+    mov     const4, #4
+    mov     const16, #16
 
     cmp     length,  #0             // if len==0 done
     beq     keccak_f1600_x1_state_extract_bytes_asm_exit
@@ -123,7 +128,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x1_state_extract_bytes_asm)
     // Load state for the partial lane
     vldrw.u32 qd, [state], #16
     // Deinterleave to bytes
-    from_bit_interleaving_x1 tmp
+    from_bit_interleaving_x1 tmp, const4, const16
     // Predicated byte store of up to 16 bytes
     // calculate the predicates
     // mask = (1 << nB) - 1 over 8-bit lanes, then shift by 'off'.
@@ -154,7 +159,7 @@ keccak_f1600_x1_state_extract_bytes_asm_main_loop_start:
     // Load 16B (two lanes) from state and bump pointer
     vldrw.u32 qd, [state], #16
     // Deinterleave to bytes
-    from_bit_interleaving_x1 tmp
+    from_bit_interleaving_x1 tmp, const4, const16
     // Store 16B of output bytes (post-increment by 16)
     vstrw.u32 qd, [dp], #16
 
@@ -172,7 +177,7 @@ keccak_f1600_x1_state_extract_bytes_asm_main_loop_end:
 
     // Load next state lane, deinterleave, store tail
     vldrw.u32 qd, [state], #16
-    from_bit_interleaving_x1 tmp
+    from_bit_interleaving_x1 tmp, const4, const16
     // Tail via predicated byte stores like prologue, but off=0 (no base adjust)
     vctp.8  length
     vpst
