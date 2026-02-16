@@ -437,3 +437,44 @@ let MLKEM_POLY_DECOMPRESS_D4_SUBROUTINE_CORRECT = prove(
             MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
             MAYCHANGE [memory :> bytes(r, 512)])`,
   MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_POLY_DECOMPRESS_D4_NOIBT_SUBROUTINE_CORRECT));;
+
+(* ------------------------------------------------------------------------- *)
+(* Constant-time and memory safety proof.                                    *)
+(* ------------------------------------------------------------------------- *)
+
+needs "x86_64/proofs/mlkem_utils.ml";;
+needs "x86_64/proofs/subroutine_signatures.ml";;
+
+let full_spec,public_vars = mk_safety_spec
+    ~keep_maychanges:false
+    (assoc "mlkem_poly_decompress_d4" subroutine_signatures)
+    MLKEM_POLY_DECOMPRESS_D4_CORRECT
+    MLKEM_POLY_DECOMPRESS_D4_TMC_EXEC;;
+
+let MLKEM_POLY_DECOMPRESS_D4_SAFE = time prove
+ (`exists f_events.
+       forall e r a data (inlist:(4 word) list) pc.
+           LENGTH inlist = 256 /\
+           aligned 32 r /\
+           aligned 32 data /\
+           ALL (nonoverlapping (r,512))
+           [word pc,LENGTH mlkem_poly_decompress_d4_tmc; a,128; data,32]
+           ==> ensures x86
+               (\s.
+                    bytes_loaded s (word pc)
+                      (BUTLAST mlkem_poly_decompress_d4_tmc) /\
+                    read RIP s = word pc /\
+                    C_ARGUMENTS [r; a; data] s /\
+                    read events s = e)
+               (\s.
+                    read RIP s = word (pc + 624) /\
+                    (exists e2.
+                         read events s = APPEND e2 e /\
+                         e2 = f_events a data r pc /\
+                         memaccess_inbounds e2
+                           [a,128; data,32; r,512] [r,512]))
+               (\s s'. T)`,
+  ASSERT_CONCL_TAC full_spec THEN
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars
+    MLKEM_POLY_DECOMPRESS_D4_TMC_EXEC);;
