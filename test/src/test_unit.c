@@ -44,9 +44,9 @@ void mlk_polyvec_basemul_acc_montgomery_cached_c(
 void mlk_poly_mulcache_compute_c(mlk_poly_mulcache *x, const mlk_poly *a);
 void mlk_keccakf1600_permute_c(uint64_t *state);
 void mlk_keccakf1600_xor_bytes_c(uint64_t *state, const unsigned char *data,
-                               unsigned offset, unsigned length);
+                                 unsigned offset, unsigned length);
 void mlk_keccakf1600_extract_bytes_c(uint64_t *state, unsigned char *data,
-                                   unsigned offset, unsigned length);
+                                     unsigned offset, unsigned length);
 #define CHECK(x)                                              \
   do                                                          \
   {                                                           \
@@ -654,8 +654,8 @@ static int test_keccakf1600_xor_permute_extract(void)
 
   for (i = 0; i < NUM_RANDOM_TESTS; i++)
   {
-    randombytes(&xor_offset,1);
-    randombytes(&xor_length,1);
+    randombytes(&xor_offset, 1);
+    randombytes(&xor_length, 1);
     xor_offset = xor_offset % MAX_RATE;
     xor_length = (uint8_t)(1 + (xor_length % (MAX_RATE - xor_offset)));
     randombytes(&ext_offset, 1);
@@ -667,15 +667,19 @@ static int test_keccakf1600_xor_permute_extract(void)
     memset(state_native, 0, sizeof(state_native));
     memset(output_native, 0, sizeof(output_native));
 
-    mlk_keccakf1600_xor_bytes(state_native, (uint8_t *)input, xor_offset, xor_length);
+    mlk_keccakf1600_xor_bytes(state_native, (uint8_t *)input, xor_offset,
+                              xor_length);
     mlk_keccakf1600_permute(state_native);
-    mlk_keccakf1600_extract_bytes(state_native, (uint8_t *)output_native, ext_offset, ext_length);
+    mlk_keccakf1600_extract_bytes(state_native, (uint8_t *)output_native,
+                                  ext_offset, ext_length);
 
     memset(state_c, 0, sizeof(state_c));
     memset(output_c, 0, sizeof(output_c));
-    mlk_keccakf1600_xor_bytes_c(state_c, (uint8_t *)input, xor_offset, xor_length);
+    mlk_keccakf1600_xor_bytes_c(state_c, (uint8_t *)input, xor_offset,
+                                xor_length);
     mlk_keccakf1600_permute_c(state_c);
-    mlk_keccakf1600_extract_bytes_c(state_c, (uint8_t *)output_c, ext_offset, ext_length);
+    mlk_keccakf1600_extract_bytes_c(state_c, (uint8_t *)output_c, ext_offset,
+                                    ext_length);
 
     CHECK(compare_u64_arrays(output_native, output_c, MLK_KECCAK_LANES,
                              "keccakf1600_permute"));
