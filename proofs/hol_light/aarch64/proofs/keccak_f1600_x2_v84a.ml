@@ -382,6 +382,7 @@ let KECCAK_F1600_X2_V84A_SUBROUTINE_CORRECT = prove
 (* Constant-time and memory safety proof.                                    *)
 (* ------------------------------------------------------------------------- *)
 
+needs "aarch64/proofs/mlkem_utils.ml";;
 needs "aarch64/proofs/subroutine_signatures.ml";;
 
 let full_spec,public_vars = mk_safety_spec
@@ -389,6 +390,8 @@ let full_spec,public_vars = mk_safety_spec
     (assoc "sha3_keccak2_f1600" subroutine_signatures)
     KECCAK_F1600_X2_V84A_SUBROUTINE_CORRECT
     KECCAK_F1600_X2_V84A_EXEC;;
+(* Remove duplicates from memaccess_inbounds lists (s2n-bignum#350) *)
+let full_spec = ONCE_DEPTH_CONV MEMACCESS_INBOUNDS_DEDUP_CONV full_spec |> concl |> rhs;;
 
 let KECCAK_F1600_X2_V84A_SUBROUTINE_SAFE = time prove
  (`exists f_events.
@@ -414,7 +417,7 @@ let KECCAK_F1600_X2_V84A_SUBROUTINE_SAFE = time prove
                         f_events rc a pc (word_sub stackpointer (word 64))
                         returnaddress /\
                         memaccess_inbounds e2
-                        [a,400; rc,192; a,400;
+                        [a,400; rc,192;
                          word_sub stackpointer (word 64),64]
                         [a,400; word_sub stackpointer (word 64),64])
                (\s s'. true)`,
