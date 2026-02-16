@@ -1256,3 +1256,44 @@ let MLKEM_NTT_SUBROUTINE_CORRECT  = prove
   CONV_TAC TWEAK_CONV THEN
   MATCH_ACCEPT_TAC(ADD_IBT_RULE
   (CONV_RULE TWEAK_CONV MLKEM_NTT_NOIBT_SUBROUTINE_CORRECT)));;
+
+(* ------------------------------------------------------------------------- *)
+(* Constant-time and memory safety proof.                                    *)
+(* ------------------------------------------------------------------------- *)
+
+needs "x86/proofs/consttime.ml";;
+needs "x86_64/proofs/subroutine_signatures.ml";;
+needs "common/consttime_utils.ml";;
+
+let full_spec,public_vars = mk_safety_spec
+    ~keep_maychanges:false
+    (assoc "mlkem_ntt" subroutine_signatures)
+    MLKEM_NTT_CORRECT
+    MLKEM_NTT_TMC_EXEC;;
+(* Remove duplicates from memaccess_inbounds lists (s2n-bignum#350) *)
+let full_spec = ONCE_DEPTH_CONV MEMACCESS_INBOUNDS_DEDUP_CONV full_spec |> concl |> rhs;;
+
+let MLKEM_NTT_SAFE = time prove
+ (`exists f_events.
+       forall e a zetas pc.
+           aligned 32 a /\
+           aligned 32 zetas /\
+           nonoverlapping (word pc,3069) (a,512) /\
+           nonoverlapping (word pc,3069) (zetas,1248) /\
+           nonoverlapping (a,512) (zetas,1248)
+           ==> ensures x86
+               (\s.
+                    bytes_loaded s (word pc) (BUTLAST mlkem_ntt_tmc) /\
+                    read RIP s = word pc /\
+                    C_ARGUMENTS [a; zetas] s /\
+                    read events s = e)
+               (\s.
+                    read RIP s = word (pc + 3069) /\
+                    (exists e2.
+                         read events s = APPEND e2 e /\
+                         e2 = f_events zetas a pc /\
+                         memaccess_inbounds e2
+                           [a,512; zetas,1248] [a,512]))
+               (\s s'. T)`,
+  ASSERT_CONCL_TAC full_spec THEN
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLKEM_NTT_TMC_EXEC);;
