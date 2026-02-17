@@ -1,0 +1,103 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: Compiler functional tests
+description: Run functional tests across C standard versions
+
+inputs:
+  cflags:
+    description: Base CFLAGS (e.g. -O0, -Os, -O3)
+    required: true
+  opt:
+    description: Whether to build opt/non-opt binaries or all (all | opt | no_opt)
+    default: "all"
+  examples:
+    description: Determine whether to run examples or not
+    default: "true"
+  c17:
+    description: Whether compiler supports C17
+    default: "true"
+  c23:
+    description: Whether compiler supports C23
+    default: "false"
+  gh_token:
+    description: Github access token to use
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: functest (${{ inputs.cflags }})
+      uses: ./.github/actions/multi-functest
+      with:
+        nix-shell: ""
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        func: true
+        kat: false
+        acvp: false
+        examples: ${{ inputs.examples }}
+        opt: ${{ inputs.opt }}
+        cflags: "${{ inputs.cflags }} -DNTESTS_FUNC=10 -DNUM_RANDOM_TESTS=10 -DNUM_RANDOM_TESTS_REJ_UNIFORM=10"
+    - name: functest (${{ inputs.cflags }}, C90)
+      uses: ./.github/actions/multi-functest
+      with:
+        nix-shell: ""
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        func: true
+        kat: false
+        acvp: false
+        examples: ${{ inputs.examples }}
+        opt: ${{ inputs.opt }}
+        cflags: "-std=c90 ${{ inputs.cflags }} -DNTESTS_FUNC=10 -DNUM_RANDOM_TESTS=10 -DNUM_RANDOM_TESTS_REJ_UNIFORM=10"
+    - name: functest (${{ inputs.cflags }}, C99)
+      uses: ./.github/actions/multi-functest
+      with:
+        nix-shell: ""
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        func: true
+        kat: false
+        acvp: false
+        examples: ${{ inputs.examples }}
+        opt: ${{ inputs.opt }}
+        cflags: "-std=c99 ${{ inputs.cflags }} -DNTESTS_FUNC=10 -DNUM_RANDOM_TESTS=10 -DNUM_RANDOM_TESTS_REJ_UNIFORM=10"
+    - name: functest (${{ inputs.cflags }}, C11)
+      uses: ./.github/actions/multi-functest
+      with:
+        nix-shell: ""
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        func: true
+        kat: false
+        acvp: false
+        examples: ${{ inputs.examples }}
+        opt: ${{ inputs.opt }}
+        cflags: "-std=c11 ${{ inputs.cflags }} -DNTESTS_FUNC=10 -DNUM_RANDOM_TESTS=10 -DNUM_RANDOM_TESTS_REJ_UNIFORM=10"
+    - name: functest (${{ inputs.cflags }}, C17)
+      if: ${{ inputs.c17 == 'true' }}
+      uses: ./.github/actions/multi-functest
+      with:
+        nix-shell: ""
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        func: true
+        kat: false
+        acvp: false
+        examples: ${{ inputs.examples }}
+        opt: ${{ inputs.opt }}
+        cflags: "-std=c17 ${{ inputs.cflags }} -DNTESTS_FUNC=10 -DNUM_RANDOM_TESTS=10 -DNUM_RANDOM_TESTS_REJ_UNIFORM=10"
+    - name: functest (${{ inputs.cflags }}, C23)
+      if: ${{ inputs.c23 == 'true' }}
+      uses: ./.github/actions/multi-functest
+      with:
+        nix-shell: ""
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        func: true
+        kat: false
+        acvp: false
+        examples: ${{ inputs.examples }}
+        opt: ${{ inputs.opt }}
+        cflags: "-std=c23 ${{ inputs.cflags }} -DNTESTS_FUNC=10 -DNUM_RANDOM_TESTS=10 -DNUM_RANDOM_TESTS_REJ_UNIFORM=10"

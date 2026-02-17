@@ -1,0 +1,196 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: Compiler tests
+permissions:
+  contents: read
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  compiler_tests:
+    name: Compiler tests (${{ matrix.compiler.name }}, ${{ matrix.target.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+         - runner: ubuntu-24.04-arm
+           name: 'aarch64'
+         - runner: ubuntu-latest
+           name: 'x86_64'
+         - runner: macos-latest
+           name: 'macos'
+        compiler:
+         # GCC compilers
+         # Linux: installed via ubuntu-toolchain-r PPA
+         # macOS: installed via Homebrew
+         - name: gcc-9
+           type: gcc
+           version: '9'
+           c17: true
+           c23: false
+           opt: all
+           examples: true
+           macos: false
+         - name: gcc-10
+           type: gcc
+           version: '10'
+           c17: true
+           c23: false
+           opt: all
+           examples: true
+           macos: false
+         - name: gcc-11
+           type: gcc
+           version: '11'
+           c17: true
+           c23: false
+           opt: all
+           examples: true
+           macos: true
+         - name: gcc-12
+           type: gcc
+           version: '12'
+           c17: true
+           c23: false
+           opt: all
+           examples: true
+           macos: true
+         - name: gcc-13
+           type: gcc
+           version: '13'
+           c17: true
+           c23: false
+           opt: all
+           examples: true
+           macos: true
+         - name: gcc-14
+           type: gcc
+           version: '14'
+           c17: true
+           c23: true
+           opt: all
+           examples: true
+           macos: true
+         # Clang compilers (installed via install-llvm-action)
+         - name: clang-14
+           type: clang
+           version: '14'
+           c17: true
+           c23: false
+           opt: all
+           examples: true
+           macos: true
+         - name: clang-15
+           type: clang
+           version: '15'
+           c17: true
+           c23: false
+           opt: all
+           examples: true
+           macos: true
+         - name: clang-16
+           type: clang
+           version: '16'
+           c17: true
+           c23: false
+           opt: all
+           examples: true
+           macos: true
+         - name: clang-17
+           type: clang
+           version: '17'
+           c17: true
+           c23: false
+           opt: all
+           examples: true
+           macos: true
+         - name: clang-18
+           type: clang
+           version: '18'
+           c17: true
+           c23: true
+           opt: all
+           examples: true
+           macos: true
+         - name: clang-19
+           type: clang
+           version: '19'
+           c17: true
+           c23: true
+           opt: all
+           examples: true
+           macos: true
+         - name: clang-20
+           type: clang
+           version: '20'
+           c17: true
+           c23: true
+           opt: all
+           examples: true
+           macos: true
+         - name: clang-21
+           type: clang
+           version: '21'
+           c17: true
+           c23: true
+           opt: all
+           examples: true
+           macos: true
+        exclude:
+         - target: { name: 'macos' }
+           compiler: { macos: false }
+    runs-on: ${{ matrix.target.runner }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Setup GCC (Linux)
+        if: ${{ matrix.compiler.type == 'gcc' && runner.os == 'Linux' }}
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y gcc-${{ matrix.compiler.version }}
+          echo "CC=gcc-${{ matrix.compiler.version }}" >> $GITHUB_ENV
+      - name: Setup GCC (macOS)
+        if: ${{ matrix.compiler.type == 'gcc' && runner.os == 'macOS' }}
+        run: |
+          brew install gcc@${{ matrix.compiler.version }}
+          echo "CC=gcc-${{ matrix.compiler.version }}" >> $GITHUB_ENV
+      - name: Setup Clang dependencies
+        if: ${{ matrix.compiler.type == 'clang' && runner.os == 'Linux' }}
+        run: sudo apt-get install -y libtinfo5
+      - name: Install Clang
+        if: ${{ matrix.compiler.type == 'clang' }}
+        uses: KyleMayes/install-llvm-action@v2
+        with:
+          version: ${{ matrix.compiler.version }}
+          env: true
+      - name: Compiler info
+        run: ${{ env.CC }} --version
+      - name: Tests (-O0)
+        uses: ./.github/actions/compiler-functest
+        with:
+          cflags: "-O0"
+          opt: ${{ matrix.compiler.opt }}
+          examples: ${{ matrix.compiler.examples }}
+          c17: ${{ matrix.compiler.c17 }}
+          c23: ${{ matrix.compiler.c23 }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Tests (-Os)
+        uses: ./.github/actions/compiler-functest
+        with:
+          cflags: "-Os"
+          opt: ${{ matrix.compiler.opt }}
+          examples: ${{ matrix.compiler.examples }}
+          c17: ${{ matrix.compiler.c17 }}
+          c23: ${{ matrix.compiler.c23 }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Tests (-O3)
+        uses: ./.github/actions/compiler-functest
+        with:
+          cflags: "-O3"
+          opt: ${{ matrix.compiler.opt }}
+          examples: ${{ matrix.compiler.examples }}
+          c17: ${{ matrix.compiler.c17 }}
+          c23: ${{ matrix.compiler.c23 }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
