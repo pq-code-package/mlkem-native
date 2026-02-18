@@ -410,7 +410,7 @@ __contract__(
 #endif
 }
 
-/* Reference: `poly_getnoise_eta1()` in the reference implementation @[REF].
+/* Reference: `poly_getnoise_eta2()` in the reference implementation @[REF].
  *            - We include buffer zeroization. */
 MLK_INTERNAL_API
 void mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
@@ -425,7 +425,7 @@ void mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
 
   mlk_poly_cbd_eta2(r, buf);
 
-  mlk_assert_abs_bound(r, MLKEM_N, MLKEM_ETA1 + 1);
+  mlk_assert_abs_bound(r, MLKEM_N, MLKEM_ETA2 + 1);
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
@@ -437,7 +437,7 @@ void mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
 #if MLKEM_K == 2
 /* Reference: Does not exist in the reference implementation @[REF].
  *            - This implements a x4-batched version of `poly_getnoise_eta1()`
- *              and `poly_getnoise_eta1()` from the reference implementation,
+ *              and `poly_getnoise_eta2()` from the reference implementation,
  *              leveraging batched Keccak-f1600.
  *            - If a x4-batched Keccak-f1600 is available, we squeeze
  *              more random data than needed for the eta2 calls, to be
