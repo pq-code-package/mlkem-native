@@ -60,14 +60,14 @@ csubq 7
 csubq 8
 csubq 9
 
-vmovdqa	%ymm2, (\offset +   0)(%rdi)
-vmovdqa	%ymm3, (\offset +  32)(%rdi)
-vmovdqa	%ymm4, (\offset +  64)(%rdi)
-vmovdqa	%ymm5, (\offset +  96)(%rdi)
-vmovdqa	%ymm6, (\offset + 128)(%rdi)
-vmovdqa	%ymm7, (\offset + 160)(%rdi)
-vmovdqa	%ymm8, (\offset + 192)(%rdi)
-vmovdqa	%ymm9, (\offset + 224)(%rdi)
+vmovdqa %ymm2, (\offset +   0)(%rdi)
+vmovdqa %ymm3, (\offset +  32)(%rdi)
+vmovdqa %ymm4, (\offset +  64)(%rdi)
+vmovdqa %ymm5, (\offset +  96)(%rdi)
+vmovdqa %ymm6, (\offset + 128)(%rdi)
+vmovdqa %ymm7, (\offset + 160)(%rdi)
+vmovdqa %ymm8, (\offset + 192)(%rdi)
+vmovdqa %ymm9, (\offset + 224)(%rdi)
 .endm
 
 .text
