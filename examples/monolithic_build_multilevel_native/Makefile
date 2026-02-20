@@ -1,7 +1,7 @@
 # Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-.PHONY: build run clean
+.PHONY: all build run clean
 .DEFAULT_GOAL := all
 
 CC  ?= gcc
