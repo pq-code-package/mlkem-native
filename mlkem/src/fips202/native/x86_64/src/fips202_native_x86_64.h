@@ -1,0 +1,33 @@
+/*
+ * Copyright (c) The mlkem-native project authors
+ * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+ */
+
+#ifndef MLK_FIPS202_NATIVE_X86_64_SRC_FIPS202_NATIVE_X86_64_H
+#define MLK_FIPS202_NATIVE_X86_64_SRC_FIPS202_NATIVE_X86_64_H
+
+#include "../../../../cbmc.h"
+#include "../../../../common.h"
+
+#define mlk_keccakf1600_round_constants \
+  MLK_NAMESPACE(keccakf1600_round_constants)
+extern const uint64_t mlk_keccakf1600_round_constants[];
+
+#define mlk_keccak_rho8 MLK_NAMESPACE(keccak_rho8)
+extern const uint64_t mlk_keccak_rho8[];
+
+#define mlk_keccak_rho56 MLK_NAMESPACE(keccak_rho56)
+extern const uint64_t mlk_keccak_rho56[];
+
+#define mlk_keccak_f1600_x4_avx2 MLK_NAMESPACE(keccak_f1600_x4_avx2)
+void mlk_keccak_f1600_x4_avx2(uint64_t states[100], const uint64_t rc[24],
+                              const uint64_t rho8[4], const uint64_t rho56[4])
+__contract__(
+  requires(memory_no_alias(states, sizeof(uint64_t) * 25 * 4))
+  requires(rc == mlk_keccakf1600_round_constants)
+  requires(rho8 == mlk_keccak_rho8)
+  requires(rho56 == mlk_keccak_rho56)
+  assigns(memory_slice(states, sizeof(uint64_t) * 25 * 4))
+);
+
+#endif /* !MLK_FIPS202_NATIVE_X86_64_SRC_FIPS202_NATIVE_X86_64_H */

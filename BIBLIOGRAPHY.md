@@ -263,6 +263,7 @@ source code and documentation.
   - [mlkem/src/native/x86_64/src/nttunpack.S](mlkem/src/native/x86_64/src/nttunpack.S)
   - [mlkem/src/native/x86_64/src/reduce.S](mlkem/src/native/x86_64/src/reduce.S)
   - [mlkem/src/native/x86_64/src/tomont.S](mlkem/src/native/x86_64/src/tomont.S)
+  - [proofs/hol_light/x86_64/mlkem/keccak_f1600_x4_avx2.S](proofs/hol_light/x86_64/mlkem/keccak_f1600_x4_avx2.S)
   - [proofs/hol_light/x86_64/mlkem/mlkem_frombytes.S](proofs/hol_light/x86_64/mlkem/mlkem_frombytes.S)
   - [proofs/hol_light/x86_64/mlkem/mlkem_intt.S](proofs/hol_light/x86_64/mlkem/mlkem_intt.S)
   - [proofs/hol_light/x86_64/mlkem/mlkem_ntt.S](proofs/hol_light/x86_64/mlkem/mlkem_ntt.S)

@@ -2,12 +2,12 @@
 { stdenv, fetchFromGitHub, writeText, ... }:
 stdenv.mkDerivation rec {
   pname = "s2n_bignum";
-  version = "2e7d839720869abdff49e2da7fa6f46718e2c3b0";
+  version = "3048e5dac5cbbcc7fba0787db14cf12c04568c05";
   src = fetchFromGitHub {
-    owner = "awslabs";
-    repo = "s2n-bignum";
+    owner = "manastasova";
+    repo = "s2n-bignum-dev";
     rev = "${version}";
-    hash = "sha256-odZSU/B2nFataxD1zzp1bi5J3lhQNOLWv38Ri2jO0AE=";
+    hash = "sha256-C2wXja65r7s3oN35fykbNbmG1RxDy6LIvkwid3uoGOs=";
   };
   setupHook = writeText "setup-hook.sh" ''
     export S2N_BIGNUM_DIR="$1"
