@@ -123,7 +123,7 @@ proofs: run_proofs ; $(SRC)/tools/count-proofs.sh .
 dump_bytecode: proofs/dump_bytecode.native
 	cd .. ; ./x86_64/$<
 
-.PHONY: proofs build_proofs run_proofs sematest clean dump_bytecode
+.PHONY: proofs build_proofs run_proofs sematest clean dump_bytecode FORCE
 
 # Always run sematest regardless of dependency check
 FORCE: ;
