@@ -32,33 +32,33 @@
 
 .macro tomont_128_coefficients offset
 #load
-vmovdqa	(\offset +  0)(%rdi), %ymm3
-vmovdqa	(\offset + 32)(%rdi), %ymm4
-vmovdqa	(\offset + 64)(%rdi), %ymm5
-vmovdqa	(\offset + 96)(%rdi), %ymm6
-vmovdqa	(\offset +128)(%rdi), %ymm7
-vmovdqa	(\offset +160)(%rdi), %ymm8
-vmovdqa	(\offset +192)(%rdi), %ymm9
-vmovdqa	(\offset +224)(%rdi), %ymm10
+vmovdqa (\offset +  0)(%rdi), %ymm3
+vmovdqa (\offset + 32)(%rdi), %ymm4
+vmovdqa (\offset + 64)(%rdi), %ymm5
+vmovdqa (\offset + 96)(%rdi), %ymm6
+vmovdqa (\offset +128)(%rdi), %ymm7
+vmovdqa (\offset +160)(%rdi), %ymm8
+vmovdqa (\offset +192)(%rdi), %ymm9
+vmovdqa (\offset +224)(%rdi), %ymm10
 
-fqmulprecomp	1,2,3,11
-fqmulprecomp	1,2,4,12
-fqmulprecomp	1,2,5,13
-fqmulprecomp	1,2,6,14
-fqmulprecomp	1,2,7,15
-fqmulprecomp	1,2,8,11
-fqmulprecomp	1,2,9,12
-fqmulprecomp	1,2,10,13
+fqmulprecomp 1,2,3,11
+fqmulprecomp 1,2,4,12
+fqmulprecomp 1,2,5,13
+fqmulprecomp 1,2,6,14
+fqmulprecomp 1,2,7,15
+fqmulprecomp 1,2,8,11
+fqmulprecomp 1,2,9,12
+fqmulprecomp 1,2,10,13
 
 #store
-vmovdqa	%ymm3,  (\offset +  0)(%rdi)
-vmovdqa	%ymm4,  (\offset + 32)(%rdi)
-vmovdqa	%ymm5,  (\offset + 64)(%rdi)
-vmovdqa	%ymm6,  (\offset + 96)(%rdi)
-vmovdqa	%ymm7,  (\offset +128)(%rdi)
-vmovdqa	%ymm8,  (\offset +160)(%rdi)
-vmovdqa	%ymm9,  (\offset +192)(%rdi)
-vmovdqa	%ymm10, (\offset +224)(%rdi)
+vmovdqa %ymm3,  (\offset +  0)(%rdi)
+vmovdqa %ymm4,  (\offset + 32)(%rdi)
+vmovdqa %ymm5,  (\offset + 64)(%rdi)
+vmovdqa %ymm6,  (\offset + 96)(%rdi)
+vmovdqa %ymm7,  (\offset +128)(%rdi)
+vmovdqa %ymm8,  (\offset +160)(%rdi)
+vmovdqa %ymm9,  (\offset +192)(%rdi)
+vmovdqa %ymm10, (\offset +224)(%rdi)
 .endm
 
 .text
