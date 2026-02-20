@@ -190,6 +190,19 @@ gh_group_start "Checking eol"
 checkerr "Check eol" "$(check-eol-dry-run)"
 gh_group_end
 
+check-tabs()
+{
+  for file in $(git ls-files -- ":/" ":/!:Makefile" ":/!:**/Makefile" ":/!:**/Makefile.*" ":/!:Makefile.*" ":/!:*.mk" ":/!:*.patch" ":/!:*.S" ":/!:*.inc" ":/!:nix/valgrind/*.txt"); do
+    if [[ ! -L $file ]] && grep -Pq '\t' "$file"; then
+      l=$(grep -Pn '\t' "$file" | head -1 | cut -d: -f1)
+      echo "$file $l"
+    fi
+  done
+}
+gh_group_start "Checking for tabs"
+checkerr "Check tabs" "$(check-tabs)"
+gh_group_end
+
 check-spdx()
 {
   local success=true
