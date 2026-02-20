@@ -65,7 +65,7 @@ def patchup_disasm(asm, cfify=False):
                 raise Exception(
                     f'The following does not seem to be an assembly line of the expected format `ADDRESS: BYTECODE INSTRUCTION`:\n"{l}"'
                 )
-            yield " " * indentation + d.group("inst")
+            yield " " * indentation + d.group("inst").expandtabs(1)
 
     return list(gen(asm))
 
