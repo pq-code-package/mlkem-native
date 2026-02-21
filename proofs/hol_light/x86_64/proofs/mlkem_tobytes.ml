@@ -273,6 +273,22 @@ let mlkem_tobytes_mc =
 let mlkem_tobytes_tmc = define_trimmed "mlkem_tobytes_tmc" mlkem_tobytes_mc;;
 let mlkem_tobytes_TMC_EXEC = X86_MK_CORE_EXEC_RULE mlkem_tobytes_tmc;;
 
+let LENGTH_MLKEM_TOBYTES_TMC =
+  REWRITE_CONV[mlkem_tobytes_tmc] `LENGTH mlkem_tobytes_tmc`
+  |> CONV_RULE(RAND_CONV LENGTH_CONV);;
+
+let MLKEM_TOBYTES_POSTAMBLE_LENGTH = new_definition
+  `MLKEM_TOBYTES_POSTAMBLE_LENGTH = 1`;;
+
+let MLKEM_TOBYTES_CORE_END = new_definition
+  `MLKEM_TOBYTES_CORE_END = LENGTH mlkem_tobytes_tmc - MLKEM_TOBYTES_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLKEM_TOBYTES_TMC;
+              MLKEM_TOBYTES_CORE_END;
+              MLKEM_TOBYTES_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
+
 let avx_order = new_definition
   `avx_order i = 
     let half = i DIV 128 in
@@ -289,15 +305,15 @@ let MLKEM_TOBYTES_CORRECT = prove(
   `!r a (l:int16 list) pc.
         aligned 32 a /\
         aligned 32 r /\
-        nonoverlapping (word pc, 764) (a, 512) /\
-        nonoverlapping (word pc, 764) (r, 384) /\
+        nonoverlapping (word pc, LENGTH mlkem_tobytes_tmc) (a, 512) /\
+        nonoverlapping (word pc, LENGTH mlkem_tobytes_tmc) (r, 384) /\
         nonoverlapping (a, 512) (r, 384)
         ==> ensures x86
              (\s. bytes_loaded s (word pc) (BUTLAST mlkem_tobytes_tmc) /\
                   read RIP s = word pc /\
                   C_ARGUMENTS [r; a] s /\
                   read (memory :> bytes(a, 512)) s = num_of_wordlist l)
-             (\s. read RIP s = word (pc + 764) /\
+             (\s. read RIP s = word (pc + MLKEM_TOBYTES_CORE_END) /\
                   (LENGTH l = 256
                    ==> (!i. i < LENGTH l ==> val(EL i l) < 3329)
                    ==> read(memory :> bytes(r, 384)) s =
@@ -308,6 +324,7 @@ let MLKEM_TOBYTES_CORRECT = prove(
               MAYCHANGE [ZMM0; ZMM1; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
                          ZMM8; ZMM9; ZMM10; ZMM11; ZMM12])`,
 
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC [`r:int64`; `a:int64`; `l:int16 list`; `pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
               NONOVERLAPPING_CLAUSES] THEN
@@ -402,7 +419,9 @@ let MLKEM_TOBYTES_NOIBT_SUBROUTINE_CORRECT = prove
                        num_of_wordlist (MAP word_zx (permute_list l):(12 word)list)))
              (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
                MAYCHANGE [memory :> bytes(r, 384)])`,
-  X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_tobytes_tmc MLKEM_TOBYTES_CORRECT);;
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
+  X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_tobytes_tmc
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_TOBYTES_CORRECT));;
 
 (* NOTE: This must be kept in sync with the CBMC specification
  * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
@@ -450,8 +469,8 @@ let MLKEM_TOBYTES_SAFE = time prove
        forall e r a pc.
            aligned 32 a /\
            aligned 32 r /\
-           nonoverlapping (word pc,764) (a,512) /\
-           nonoverlapping (word pc,764) (r,384) /\
+           nonoverlapping (word pc,LENGTH mlkem_tobytes_tmc) (a,512) /\
+           nonoverlapping (word pc,LENGTH mlkem_tobytes_tmc) (r,384) /\
            nonoverlapping (a,512) (r,384)
            ==> ensures x86
                (\s.
@@ -460,11 +479,12 @@ let MLKEM_TOBYTES_SAFE = time prove
                     C_ARGUMENTS [r; a] s /\
                     read events s = e)
                (\s.
-                    read RIP s = word (pc + 764) /\
+                    read RIP s = word (pc + MLKEM_TOBYTES_CORE_END) /\
                     (exists e2.
                          read events s = APPEND e2 e /\
                          e2 = f_events a r pc /\
                          memaccess_inbounds e2 [a,512; r,384] [r,384]))
                (\s s'. T)`,
-  ASSERT_CONCL_TAC full_spec THEN
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
+  ASSERT_CONCL_TAC (rhs(concl(LENGTH_SIMPLIFY_CONV full_spec))) THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars mlkem_tobytes_TMC_EXEC);;

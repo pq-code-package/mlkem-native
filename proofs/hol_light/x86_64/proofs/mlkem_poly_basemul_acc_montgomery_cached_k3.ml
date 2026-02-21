@@ -1218,6 +1218,22 @@ let mlkem_basemul_k3_mc =
 let mlkem_basemul_k3_tmc = define_trimmed "mlkem_basemul_k3_tmc" mlkem_basemul_k3_mc;;
 let mlkem_basemul_k3_tmc_EXEC = X86_MK_CORE_EXEC_RULE mlkem_basemul_k3_tmc;;
 
+let LENGTH_MLKEM_BASEMUL_K3_TMC =
+  REWRITE_CONV[mlkem_basemul_k3_tmc] `LENGTH mlkem_basemul_k3_tmc`
+  |> CONV_RULE(RAND_CONV LENGTH_CONV);;
+
+let MLKEM_BASEMUL_K3_POSTAMBLE_LENGTH = new_definition
+  `MLKEM_BASEMUL_K3_POSTAMBLE_LENGTH = 1`;;
+
+let MLKEM_BASEMUL_K3_CORE_END = new_definition
+  `MLKEM_BASEMUL_K3_CORE_END = LENGTH mlkem_basemul_k3_tmc - MLKEM_BASEMUL_K3_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLKEM_BASEMUL_K3_TMC;
+              MLKEM_BASEMUL_K3_CORE_END;
+              MLKEM_BASEMUL_K3_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
+
 (* Enable simplification of word_subwords by default.
    Nedded to prevent the symbolic simulation to explode
    as we add more instructions. *)
@@ -1279,7 +1295,7 @@ let MLKEM_BASEMUL_K3_CORRECT = prove(
         aligned 32 src2t /\
         aligned 32 dst /\
         ALL (nonoverlapping (dst, 512)) [(src1, 1536); (src2, 1536); (src2t, 768)] /\
-        nonoverlapping (dst, 512) (word pc, 3852)
+        nonoverlapping (dst, 512) (word pc, LENGTH mlkem_basemul_k3_tmc)
         ==> ensures x86
               (\s. bytes_loaded s (word pc) (BUTLAST mlkem_basemul_k3_tmc) /\
                    read RIP s = word pc /\
@@ -1331,7 +1347,7 @@ let MLKEM_BASEMUL_K3_CORRECT = prove(
                    (!i. i < 16 ==> !j. j < 8
                         ==> read(memory :> bytes16
                              (word_add src2t (word (512 + 32*j + 2*i)))) s = dz2 i j))
-              (\s. read RIP s = word (pc + 3852) /\
+              (\s. read RIP s = word (pc + MLKEM_BASEMUL_K3_CORE_END) /\
                    (!i. i < 16 ==> !j. j < 4
                         ==> (let j' = 2*j in
                               (abs(ival(a0 i j')) <= &2 pow 12  /\
@@ -1383,6 +1399,7 @@ let MLKEM_BASEMUL_K3_CORRECT = prove(
                           ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14] ,,
                MAYCHANGE [memory :> bytes(dst, 512)])`,
 
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   REWRITE_TAC [MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI;
     NONOVERLAPPING_CLAUSES; ALL; C_ARGUMENTS; fst mlkem_basemul_k3_tmc_EXEC] THEN
   REPEAT STRIP_TAC THEN
@@ -1549,7 +1566,9 @@ let MLKEM_BASEMUL_K3_NOIBT_SUBROUTINE_CORRECT = prove(
                             ) (mod &3329)))
               (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
                MAYCHANGE [memory :> bytes(dst, 512)])`,
-  X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_basemul_k3_tmc MLKEM_BASEMUL_K3_CORRECT);;
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
+  X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_basemul_k3_tmc
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_BASEMUL_K3_CORRECT));;
 
 (* NOTE: This must be kept in sync with the CBMC specification
  * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
@@ -1689,7 +1708,7 @@ let MLKEM_BASEMUL_K3_SAFE = time prove
            aligned 32 src2t /\
            aligned 32 dst /\
            ALL (nonoverlapping (dst,512)) [src1,1536; src2,1536; src2t,768] /\
-           nonoverlapping (dst,512) (word pc,3852)
+           nonoverlapping (dst,512) (word pc,LENGTH mlkem_basemul_k3_tmc)
            ==> ensures x86
                (\s.
                     bytes_loaded s (word pc)
@@ -1698,7 +1717,7 @@ let MLKEM_BASEMUL_K3_SAFE = time prove
                     C_ARGUMENTS [dst; src1; src2; src2t] s /\
                     read events s = e)
                (\s.
-                    read RIP s = word (pc + 3852) /\
+                    read RIP s = word (pc + MLKEM_BASEMUL_K3_CORE_END) /\
                     (exists e2.
                          read events s = APPEND e2 e /\
                          e2 = f_events src1 src2 src2t dst pc /\
@@ -1706,5 +1725,6 @@ let MLKEM_BASEMUL_K3_SAFE = time prove
                            [src1,1536; src2,1536; src2t,768; dst,512]
                            [dst,512]))
                (\s s'. T)`,
-  ASSERT_CONCL_TAC full_spec THEN
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
+  ASSERT_CONCL_TAC (rhs(concl(LENGTH_SIMPLIFY_CONV full_spec))) THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars mlkem_basemul_k3_tmc_EXEC);;

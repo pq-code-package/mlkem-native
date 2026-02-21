@@ -268,6 +268,22 @@ let mlkem_unpack_mc =
 let mlkem_unpack_tmc = define_trimmed "mlkem_unpack_tmc" mlkem_unpack_mc;;
 let mlkem_unpack_TMC_EXEC = X86_MK_CORE_EXEC_RULE mlkem_unpack_tmc;;
 
+let LENGTH_MLKEM_UNPACK_TMC =
+  REWRITE_CONV[mlkem_unpack_tmc] `LENGTH mlkem_unpack_tmc`
+  |> CONV_RULE(RAND_CONV LENGTH_CONV);;
+
+let MLKEM_UNPACK_POSTAMBLE_LENGTH = new_definition
+  `MLKEM_UNPACK_POSTAMBLE_LENGTH = 1`;;
+
+let MLKEM_UNPACK_CORE_END = new_definition
+  `MLKEM_UNPACK_CORE_END = LENGTH mlkem_unpack_tmc - MLKEM_UNPACK_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLKEM_UNPACK_TMC;
+              MLKEM_UNPACK_CORE_END;
+              MLKEM_UNPACK_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
+
 let avx_order = new_definition
   `avx_order i = 
     let half = i DIV 128 in
@@ -289,13 +305,13 @@ let unpermute_list = new_definition
 let MLKEM_UNPACK_CORRECT = prove(
     `!a (l:int16 list) pc.
         aligned 32 a /\
-        nonoverlapping (word pc, 754) (a, 512)
+        nonoverlapping (word pc, LENGTH mlkem_unpack_tmc) (a, 512)
         ==> ensures x86
              (\s. bytes_loaded s (word pc) (BUTLAST mlkem_unpack_tmc) /\
                   read RIP s = word pc /\
                   C_ARGUMENTS [a] s /\
                   read (memory :> bytes(a, 512)) s = num_of_wordlist l)
-             (\s. read RIP s = word (pc + 754) /\
+             (\s. read RIP s = word (pc + MLKEM_UNPACK_CORE_END) /\
                   (LENGTH l = 256
                    ==> read(memory :> bytes(a, 512)) s =
                        num_of_wordlist (unpermute_list l)))
@@ -304,6 +320,7 @@ let MLKEM_UNPACK_CORRECT = prove(
               MAYCHANGE [RIP] ,, MAYCHANGE [RAX] ,,
               MAYCHANGE [ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8; ZMM9; ZMM10; ZMM11])`,
 
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC [`a:int64`; `l:int16 list`; `pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
               NONOVERLAPPING_CLAUSES] THEN
@@ -382,7 +399,9 @@ let MLKEM_UNPACK_NOIBT_SUBROUTINE_CORRECT = prove(
                        num_of_wordlist (unpermute_list l)))
              (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(a, 512)])`, 
-  X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_unpack_tmc MLKEM_UNPACK_CORRECT);;
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
+  X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_unpack_tmc
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_UNPACK_CORRECT));;
 
 (* NOTE: This must be kept in sync with the CBMC specification
  * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
@@ -428,7 +447,7 @@ let full_spec = ONCE_DEPTH_CONV MEMACCESS_INBOUNDS_DEDUP_CONV full_spec |> concl
 let MLKEM_UNPACK_SAFE = time prove
  (`exists f_events.
        forall e a pc.
-           aligned 32 a /\ nonoverlapping (word pc,754) (a,512)
+           aligned 32 a /\ nonoverlapping (word pc,LENGTH mlkem_unpack_tmc) (a,512)
            ==> ensures x86
                (\s.
                     bytes_loaded s (word pc) (BUTLAST mlkem_unpack_tmc) /\
@@ -436,11 +455,12 @@ let MLKEM_UNPACK_SAFE = time prove
                     C_ARGUMENTS [a] s /\
                     read events s = e)
                (\s.
-                    read RIP s = word (pc + 754) /\
+                    read RIP s = word (pc + MLKEM_UNPACK_CORE_END) /\
                     (exists e2.
                          read events s = APPEND e2 e /\
                          e2 = f_events a pc /\
                          memaccess_inbounds e2 [a,512] [a,512]))
                (\s s'. T)`,
-  ASSERT_CONCL_TAC full_spec THEN
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
+  ASSERT_CONCL_TAC (rhs(concl(LENGTH_SIMPLIFY_CONV full_spec))) THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars mlkem_unpack_TMC_EXEC);;
