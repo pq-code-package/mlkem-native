@@ -48,18 +48,18 @@
     //   q0 = Even bit-plane packed (e0, o0, e1, o1)
     // Vectors:                ||           q0          ||           q1          ||           q2          ||           q3          ||
     // Elements:               || d0l | d0h | d1l | d1h ||  X  |  X  |  X  |  X  ||  X  |  X  |  X  |  X  ||  X  |  X  |  X  |  X  ||
-    vshl.u32 q1, q0, #1     // || d0l | d0h | d1l | d1h || d0l | d0h | d1l | d1h ||  X  |  X  |  X  |  X  ||  X  |  X  |  X  |  X  ||
+    vshr.u32 q1, q0, #1     // || d0l | d0h | d1l | d1h || d0l | d0h | d1l | d1h ||  X  |  X  |  X  |  X  ||  X  |  X  |  X  |  X  ||
     interleave_evens q1, q2, \const8, \const16, \const32, \const128, \const32768
-                            // || d0l | d0h | d1l | d1h || e0l | e0h | e1l | e1h ||  X  |  X  |  X  |  X  ||  X  |  X  |  X  |  X  ||
-    vrev64.u32 q2, q1       // || d0l | d0h | d1l | d1h || e0l | e0h | e1l | e1h || e0h | e0l | e1h | e1l ||  X  |  X  |  X  |  X  ||
-    vsli.u32   q1, q2, #16  // || d0l | d0h | d1l | d1h || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l ||  X  |  X  |  X  |  X  ||
+                            // || d0l | d0h | d1l | d1h || o0l | o0h | o1l | o1h ||  X  |  X  |  X  |  X  ||  X  |  X  |  X  |  X  ||
+    vrev64.u32 q2, q1       // || d0l | d0h | d1l | d1h || o0l | o0h | o1l | o1h || o0h | o0l | o1h | o1l ||  X  |  X  |  X  |  X  ||
+    vsli.u32   q2, q1, #16  // || d0l | d0h | d1l | d1h || o0l | o0h | o1l | o1h ||  X  | o0  |  X  | o1  ||  X  |  X  |  X  |  X  ||
     interleave_evens q0, q3,  \const8, \const16, \const32, \const128, \const32768
-                            // || o0l | o0h | o1l | o1h || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l ||  X  |  X  |  X  |  X  ||
-    vrev64.u32 q3, q0       // || o0l | o0h | o1l | o1h || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l || o0h | o0l | o1h | o1l ||
-    vsli.u32   q0, q3, #16  // ||  X  | o0  |  X  | o1  || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l || o0h | o0l | o1h | o1l ||
+                            // || e0l | e0h | e1l | e1h || o0l | o0h | o1l | o1h ||  X  | o0  |  X  | o1  ||  X  |  X  |  X  |  X  ||
+    vrev64.u32 q3, q0       // || e0l | e0h | e1l | e1h || o0l | o0h | o1l | o1h ||  X  | o0  |  X  | o1  || e0h | e0l | e1h | e1l ||
+    vsli.u32   q0, q3, #16  // || e0  |  X  | e1  |  X  || o0l | o0h | o1l | o1h ||  X  | o0  |  X  | o1  || e0h | e0l | e1h | e1l ||
     mov \tmp, #0x0F0F
     vmsr p0, \tmp
-    vpsel q0, q1, q0        // || e0  | o0  | e1  | o1  || e0  |  X  | e1  |  X  || e0h | e0l | e1h | e1l || o0h | o0l | o1h | o1l ||
+    vpsel q0, q0, q2        // || e0  | o0  | e1  | o1  || o0l | o0h | o1l | o1h ||  X  | o0  |  X  | o1  || e0h | e0l | e1h | e1l ||
 .endm
 
 @ -----------------------------------------------------------------------------
