@@ -102,9 +102,11 @@
 #if defined(MLK_SYS_ARMV81M_MVE)
 #include "src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m.S"
 #include "src/fips202/native/armv81m/src/keccak_f1600_x4_mve.S"
+#include "src/fips202/native/armv81m/src/state_extract_bytes_x1_mve_asm.S"
 #include "src/fips202/native/armv81m/src/state_extract_bytes_x4_mve.S"
+#include "src/fips202/native/armv81m/src/state_xor_bytes_x1_mve_asm.S"
 #include "src/fips202/native/armv81m/src/state_xor_bytes_x4_mve.S"
-#endif
+#endif /* MLK_SYS_ARMV81M_MVE */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 
 
@@ -507,17 +509,23 @@
 #undef MLK_FIPS202_ARMV81M_NEED_X4
 #undef MLK_FIPS202_NATIVE_ARMV81M
 #undef MLK_FIPS202_NATIVE_ARMV81M_MVE_H
+#undef MLK_USE_FIPS202_X1_EXTRACT_BYTES_NATIVE
 #undef MLK_USE_FIPS202_X1_NATIVE
+#undef MLK_USE_FIPS202_X1_XOR_BYTES_NATIVE
 #undef MLK_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE
 #undef MLK_USE_FIPS202_X4_NATIVE
 #undef MLK_USE_FIPS202_X4_XOR_BYTES_NATIVE
 #undef mlk_keccak_f1600_x1_native_impl
+#undef mlk_keccak_f1600_x1_state_extract_bytes_impl
+#undef mlk_keccak_f1600_x1_state_xor_bytes_impl
 #undef mlk_keccak_f1600_x4_native_impl
 #undef mlk_keccak_f1600_x4_state_extract_bytes
 #undef mlk_keccak_f1600_x4_state_xor_bytes
 /* mlkem/src/fips202/native/armv81m/src/fips202_native_armv81m.h */
 #undef MLK_FIPS202_NATIVE_ARMV81M_SRC_FIPS202_NATIVE_ARMV81M_H
 #undef mlk_keccak_f1600_x1_armv7m_asm
+#undef mlk_keccak_f1600_x1_state_extract_bytes_asm
+#undef mlk_keccak_f1600_x1_state_xor_bytes_asm
 #undef mlk_keccak_f1600_x4_mve_asm
 #undef mlk_keccak_f1600_x4_state_extract_bytes_asm
 #undef mlk_keccak_f1600_x4_state_xor_bytes_asm
