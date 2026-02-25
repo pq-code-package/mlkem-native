@@ -152,7 +152,7 @@
           devShells.cross-arm-embedded = util.mkShell {
             packages = builtins.attrValues
               {
-                inherit (util) m55-an547;
+                inherit (util) pqmx;
                 inherit (config.packages) linters;
                 inherit (pkgs) gcc-arm-embedded qemu coreutils python3 git;
               };
