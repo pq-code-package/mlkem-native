@@ -1045,13 +1045,34 @@ let mlkem_ntt_mc = define_assert_from_elf "mlkem_ntt_mc" "x86_64/mlkem/mlkem_ntt
 let mlkem_ntt_tmc = define_trimmed "mlkem_ntt_tmc" mlkem_ntt_mc;;
 let MLKEM_NTT_TMC_EXEC = X86_MK_CORE_EXEC_RULE mlkem_ntt_tmc;;
 
+let LENGTH_MLKEM_NTT_TMC =
+  REWRITE_CONV[mlkem_ntt_tmc] `LENGTH mlkem_ntt_tmc`
+  |> CONV_RULE(RAND_CONV LENGTH_CONV);;
+
+let LENGTH_QDATA_FULL =
+  REWRITE_CONV[qdata_full] `LENGTH qdata_full`
+  |> CONV_RULE(RAND_CONV LENGTH_CONV);;
+
+let MLKEM_NTT_POSTAMBLE_LENGTH = new_definition
+  `MLKEM_NTT_POSTAMBLE_LENGTH = 1`;;
+
+let MLKEM_NTT_CORE_END = new_definition
+  `MLKEM_NTT_CORE_END = LENGTH mlkem_ntt_tmc - MLKEM_NTT_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLKEM_NTT_TMC;
+              LENGTH_QDATA_FULL;
+              MLKEM_NTT_CORE_END;
+              MLKEM_NTT_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
+
 let MLKEM_NTT_CORRECT = prove
   (`!a zetas (zetas_list:int16 list) x pc.
     aligned 32 a /\
     aligned 32 zetas /\
-    nonoverlapping (word pc, 3069) (a, 512) /\
-    nonoverlapping (word pc, 3069) (zetas, 1248) /\
-    nonoverlapping (a, 512) (zetas, 1248)
+    nonoverlapping (word pc, LENGTH mlkem_ntt_tmc) (a, 512) /\
+    nonoverlapping (word pc, LENGTH mlkem_ntt_tmc) (zetas, LENGTH qdata_full * 2) /\
+    nonoverlapping (a, 512) (zetas, LENGTH qdata_full * 2)
     ==> ensures x86
           (\s. bytes_loaded s (word pc) (BUTLAST mlkem_ntt_tmc) /\
               read RIP s = word pc /\
@@ -1059,21 +1080,23 @@ let MLKEM_NTT_CORRECT = prove
               wordlist_from_memory(zetas, 624) s = MAP (iword: int -> 16 word) qdata_full /\
               (!i. i < 256 ==> abs(ival(x i)) <= &8191) /\
               (!i. i < 256 ==> read(memory :> bytes16(word_add a (word(2 * i)))) s = x i))
-          (\s. read RIP s = word(pc + 3069) /\
+          (\s. read RIP s = word(pc + MLKEM_NTT_CORE_END) /\
               (!i. i < 256
                         ==> let zi =
                       read(memory :> bytes16(word_add a (word(2 * i)))) s in
                       (ival zi == avx2_forward_ntt (ival o x) i) (mod &3329) /\
                       abs(ival zi) <= &23594))
-          (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI  ,,
-           MAYCHANGE [ZMM0; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8;
-                      ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
-           MAYCHANGE [RAX] ,, MAYCHANGE SOME_FLAGS ,,
+          (MAYCHANGE [events] ,,
+           MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                      ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14;
+                      ZMM15] ,,
+           MAYCHANGE [RIP] ,, MAYCHANGE [RAX] ,,
            MAYCHANGE [memory :> bytes(a, 512)])`,
 
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC
-   [`a:int64`; `zetas:int64`; `zetas_list:int16 list`; `x:num->int16`; `pc:num`] THEN
-  REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
+   [`a:int64`; `zetas:int64`; `x:num->int16`; `pc:num`] THEN
+  REWRITE_TAC[C_ARGUMENTS;
               NONOVERLAPPING_CLAUSES; ALL] THEN
 
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
@@ -1196,10 +1219,10 @@ let MLKEM_NTT_NOIBT_SUBROUTINE_CORRECT  = prove
     aligned 32 a /\
     aligned 32 zetas /\
     nonoverlapping (word pc, LENGTH mlkem_ntt_tmc) (a, 512) /\
-    nonoverlapping (word pc, LENGTH mlkem_ntt_tmc) (zetas, 1248) /\
-    nonoverlapping (a, 512) (zetas, 1248) /\
+    nonoverlapping (word pc, LENGTH mlkem_ntt_tmc) (zetas, LENGTH qdata_full * 2) /\
+    nonoverlapping (a, 512) (zetas, LENGTH qdata_full * 2) /\
     nonoverlapping (a, 512) (stackpointer, 8) /\
-    nonoverlapping (zetas, 1248) (stackpointer, 8)
+    nonoverlapping (zetas, LENGTH qdata_full * 2) (stackpointer, 8)
     ==> ensures x86
           (\s. bytes_loaded s (word pc) mlkem_ntt_tmc /\
               read RIP s = word pc /\
@@ -1218,9 +1241,11 @@ let MLKEM_NTT_NOIBT_SUBROUTINE_CORRECT  = prove
                       abs(ival zi) <= &23594))
           (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
            MAYCHANGE [memory :> bytes(a, 512)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   let TWEAK_CONV = ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV in
   CONV_TAC TWEAK_CONV THEN
-  X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_ntt_tmc (CONV_RULE TWEAK_CONV MLKEM_NTT_CORRECT));;
+  X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_ntt_tmc
+    (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_NTT_CORRECT)));;
 
 (* NOTE: This must be kept in sync with the CBMC specification
  * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
@@ -1230,10 +1255,10 @@ let MLKEM_NTT_SUBROUTINE_CORRECT  = prove
     aligned 32 a /\
     aligned 32 zetas /\
     nonoverlapping (word pc, LENGTH mlkem_ntt_mc) (a, 512) /\
-    nonoverlapping (word pc, LENGTH mlkem_ntt_mc) (zetas, 1248) /\
-    nonoverlapping (a, 512) (zetas, 1248) /\
+    nonoverlapping (word pc, LENGTH mlkem_ntt_mc) (zetas, LENGTH qdata_full * 2) /\
+    nonoverlapping (a, 512) (zetas, LENGTH qdata_full * 2) /\
     nonoverlapping (a, 512) (stackpointer, 8) /\
-    nonoverlapping (zetas, 1248) (stackpointer, 8)
+    nonoverlapping (zetas, LENGTH qdata_full * 2) (stackpointer, 8)
     ==> ensures x86
           (\s. bytes_loaded s (word pc) mlkem_ntt_mc /\
               read RIP s = word pc /\
@@ -1256,3 +1281,125 @@ let MLKEM_NTT_SUBROUTINE_CORRECT  = prove
   CONV_TAC TWEAK_CONV THEN
   MATCH_ACCEPT_TAC(ADD_IBT_RULE
   (CONV_RULE TWEAK_CONV MLKEM_NTT_NOIBT_SUBROUTINE_CORRECT)));;
+
+(* ------------------------------------------------------------------------- *)
+(* Constant-time and memory safety proof.                                    *)
+(* ------------------------------------------------------------------------- *)
+
+needs "x86/proofs/consttime.ml";;
+needs "x86_64/proofs/subroutine_signatures.ml";;
+needs "common/consttime_utils.ml";;
+
+let full_spec,public_vars = mk_safety_spec
+    ~keep_maychanges:true
+    (assoc "mlkem_ntt" subroutine_signatures)
+    MLKEM_NTT_CORRECT
+    MLKEM_NTT_TMC_EXEC;;
+(* Remove duplicates from memaccess_inbounds lists (s2n-bignum#350).
+   full_spec mixes numeric and symbolic buffer sizes: mk_safety_spec computes
+   624*2=1248 from the subroutine signature for memaccess_inbounds, but copies
+   `LENGTH qdata_full * 2` verbatim from the correctness theorem's nonoverlapping
+   preconditions. Normalize to numeric form so ASSERT_CONCL_TAC matches the
+   hand-written goal after LENGTH_SIMPLIFY_CONV. *)
+let full_spec = ONCE_DEPTH_CONV MEMACCESS_INBOUNDS_DEDUP_CONV full_spec |> concl |> rhs;;
+let full_spec = LENGTH_SIMPLIFY_CONV full_spec |> concl |> rhs;;
+
+let MLKEM_NTT_SAFE = time prove
+ (`exists f_events.
+       forall e a zetas pc.
+           aligned 32 a /\
+           aligned 32 zetas /\
+           nonoverlapping (word pc,LENGTH mlkem_ntt_tmc) (a,512) /\
+           nonoverlapping (word pc,LENGTH mlkem_ntt_tmc)
+                          (zetas,LENGTH qdata_full * 2) /\
+           nonoverlapping (a,512) (zetas,LENGTH qdata_full * 2)
+           ==> ensures x86
+               (\s.
+                    bytes_loaded s (word pc) (BUTLAST mlkem_ntt_tmc) /\
+                    read RIP s = word pc /\
+                    C_ARGUMENTS [a; zetas] s /\
+                    read events s = e)
+               (\s.
+                    read RIP s = word (pc + MLKEM_NTT_CORE_END) /\
+                    (exists e2.
+                         read events s = APPEND e2 e /\
+                         e2 = f_events zetas a pc /\
+                         memaccess_inbounds e2
+                           [a,512; zetas,LENGTH qdata_full * 2]
+                           [a,512]))
+               (MAYCHANGE [events] ,,
+                MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                           ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14;
+                           ZMM15] ,,
+                MAYCHANGE [RIP] ,, MAYCHANGE [RAX] ,,
+                MAYCHANGE [memory :> bytes(a,512)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
+  ASSERT_CONCL_TAC full_spec THEN
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLKEM_NTT_TMC_EXEC);;
+
+let MLKEM_NTT_NOIBT_SUBROUTINE_SAFE = time prove
+ (`exists f_events.
+       forall e a zetas pc stackpointer returnaddress.
+          aligned 32 a /\
+          aligned 32 zetas /\
+          nonoverlapping (word pc,LENGTH mlkem_ntt_tmc) (a,512) /\
+          nonoverlapping (word pc,LENGTH mlkem_ntt_tmc)
+                         (zetas,LENGTH qdata_full * 2) /\
+          nonoverlapping (a,512) (zetas,LENGTH qdata_full * 2) /\
+          nonoverlapping (stackpointer, 8) (a, 512)
+          ==> ensures x86
+               (\s.
+                    bytes_loaded s (word pc) mlkem_ntt_tmc /\
+                    read RIP s = word pc /\
+                    read RSP s = stackpointer /\
+                    read (memory :> bytes64 stackpointer) s = returnaddress /\
+                    C_ARGUMENTS [a; zetas] s /\
+                    read events s = e)
+               (\s. read RIP s = returnaddress /\
+                    read RSP s = word_add stackpointer (word 8) /\
+                    (exists e2.
+                         read events s = APPEND e2 e /\
+                         e2 = f_events zetas a pc stackpointer returnaddress /\
+                         memaccess_inbounds e2
+                           [a,512; zetas,LENGTH qdata_full * 2;
+                            stackpointer,8]
+                           [a,512; stackpointer,8]))
+               (\s s'. true)`,
+  X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_ntt_tmc
+    (CONV_RULE
+      (REWRITE_CONV[LENGTH_MLKEM_NTT_TMC;
+                    MLKEM_NTT_CORE_END;
+                    MLKEM_NTT_POSTAMBLE_LENGTH] THENC
+       NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0])
+      MLKEM_NTT_SAFE) THEN
+  DISCHARGE_SAFETY_PROPERTY_TAC);;
+
+let MLKEM_NTT_SUBROUTINE_SAFE = time prove
+ (`exists f_events.
+       forall e a zetas pc stackpointer returnaddress.
+          aligned 32 a /\
+          aligned 32 zetas /\
+          nonoverlapping (word pc,LENGTH mlkem_ntt_mc) (a,512) /\
+          nonoverlapping (word pc,LENGTH mlkem_ntt_mc)
+                         (zetas,LENGTH qdata_full * 2) /\
+          nonoverlapping (a,512) (zetas,LENGTH qdata_full * 2) /\
+          nonoverlapping (stackpointer, 8) (a, 512)
+          ==> ensures x86
+               (\s.
+                    bytes_loaded s (word pc) mlkem_ntt_mc /\
+                    read RIP s = word pc /\
+                    read RSP s = stackpointer /\
+                    read (memory :> bytes64 stackpointer) s = returnaddress /\
+                    C_ARGUMENTS [a; zetas] s /\
+                    read events s = e)
+               (\s. read RIP s = returnaddress /\
+                    read RSP s = word_add stackpointer (word 8) /\
+                    (exists e2.
+                         read events s = APPEND e2 e /\
+                         e2 = f_events zetas a pc stackpointer returnaddress /\
+                         memaccess_inbounds e2
+                           [a,512; zetas,LENGTH qdata_full * 2;
+                            stackpointer,8]
+                           [a,512; stackpointer,8]))
+               (\s s'. true)`,
+  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_NTT_NOIBT_SUBROUTINE_SAFE));;
