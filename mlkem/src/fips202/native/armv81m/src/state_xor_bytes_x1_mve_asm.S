@@ -52,7 +52,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x1_state_xor_bytes_asm)
         vmsr	p0, r4
         vpst	
         vldrbt.u8	q0, [r1], #16
-        vshl.i32	q1, q0, #0x1
+        vshr.u32	q1, q0, #0x1
         vqdmulh.s8	q2, q1, r10
         vsli.8	q1, q2, #0x1
         vqdmulh.s8	q2, q1, r9
@@ -64,7 +64,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x1_state_xor_bytes_asm)
         vqdmulh.s32	q2, q1, r12
         vsli.16	q1, q2, #0x8
         vrev64.32	q2, q1
-        vsli.32	q1, q2, #0x10
+        vsli.32	q2, q1, #0x10
         vqdmulh.s8	q3, q0, r10
         vsli.8	q0, q3, #0x1
         vqdmulh.s8	q3, q0, r9
@@ -79,7 +79,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x1_state_xor_bytes_asm)
         vsli.32	q0, q3, #0x10
         movw	r4, #0xf0f
         vmsr	p0, r4
-        vpsel	q0, q1, q0
+        vpsel	q0, q0, q2
         vldrw.u32	q1, [r0]
         veor	q1, q1, q0
         vstrw.32	q1, [r0], #16
@@ -92,7 +92,7 @@ keccak_f1600_x1_state_xor_bytes_asm_pre_main:
 
 keccak_f1600_x1_state_xor_bytes_asm_main_loop_start:
         vldrw.u32	q0, [r1], #16
-        vshl.i32	q1, q0, #0x1
+        vshr.u32	q1, q0, #0x1
         vqdmulh.s8	q2, q1, r10
         vsli.8	q1, q2, #0x1
         vqdmulh.s8	q2, q1, r9
@@ -104,7 +104,7 @@ keccak_f1600_x1_state_xor_bytes_asm_main_loop_start:
         vqdmulh.s32	q2, q1, r12
         vsli.16	q1, q2, #0x8
         vrev64.32	q2, q1
-        vsli.32	q1, q2, #0x10
+        vsli.32	q2, q1, #0x10
         vqdmulh.s8	q3, q0, r10
         vsli.8	q0, q3, #0x1
         vqdmulh.s8	q3, q0, r9
@@ -119,7 +119,7 @@ keccak_f1600_x1_state_xor_bytes_asm_main_loop_start:
         vsli.32	q0, q3, #0x10
         movw	r4, #0xf0f
         vmsr	p0, r4
-        vpsel	q0, q1, q0
+        vpsel	q0, q0, q2
         vldrw.u32	q1, [r0]
         veor	q1, q1, q0
         vstrw.32	q1, [r0], #16
@@ -132,7 +132,7 @@ keccak_f1600_x1_state_xor_bytes_asm_main_loop_end:
         vctp.8	r3
         vpst	
         vldrbt.u8	q0, [r1], #16
-        vshl.i32	q1, q0, #0x1
+        vshr.u32	q1, q0, #0x1
         vqdmulh.s8	q2, q1, r10
         vsli.8	q1, q2, #0x1
         vqdmulh.s8	q2, q1, r9
@@ -144,7 +144,7 @@ keccak_f1600_x1_state_xor_bytes_asm_main_loop_end:
         vqdmulh.s32	q2, q1, r12
         vsli.16	q1, q2, #0x8
         vrev64.32	q2, q1
-        vsli.32	q1, q2, #0x10
+        vsli.32	q2, q1, #0x10
         vqdmulh.s8	q3, q0, r10
         vsli.8	q0, q3, #0x1
         vqdmulh.s8	q3, q0, r9
@@ -159,7 +159,7 @@ keccak_f1600_x1_state_xor_bytes_asm_main_loop_end:
         vsli.32	q0, q3, #0x10
         movw	r4, #0xf0f
         vmsr	p0, r4
-        vpsel	q0, q1, q0
+        vpsel	q0, q0, q2
         vldrw.u32	q1, [r0]
         veor	q1, q1, q0
         vstrw.32	q1, [r0], #16
