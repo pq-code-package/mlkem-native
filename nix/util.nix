@@ -101,7 +101,7 @@ rec {
   hol_server = pkgs.callPackage ./hol_light/hol_server.nix { inherit hol_light'; };
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
   slothy = pkgs.callPackage ./slothy { python3 = python3-for-slothy; };
-  m55-an547 = pkgs.callPackage ./m55-an547-arm-none-eabi { };
+  pqmx = pkgs.callPackage ./pqmx { };
   avr-toolchain = pkgs.callPackage ./avr { };
 
   # Helper function to build individual cross toolchains
