@@ -449,6 +449,7 @@ LLkeccak_f1600_x4_avx2:
         vmovq	%xmm15, 0x250(%rdi)
         vmovhpd	%xmm15, 0x318(%rdi)
         movq	%r11, %rsp
+        vzeroupper
         retq
         .cfi_endproc
 

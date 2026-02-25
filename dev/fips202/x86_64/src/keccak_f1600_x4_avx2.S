@@ -628,6 +628,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2)
    mov	%r11, %rsp
    .cfi_same_value %r11
    .cfi_same_value %rsp
+   vzeroupper
    ret
    .cfi_endproc
 
