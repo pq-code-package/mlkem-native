@@ -65,7 +65,7 @@ void mlk_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
   {
     return;
   }
-#endif
+#endif /* MLK_USE_FIPS202_X1_EXTRACT_BYTES_NATIVE */
   mlk_keccakf1600_extract_bytes_c(state, data, offset, length);
 }
 
@@ -101,7 +101,7 @@ void mlk_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
   {
     return;
   }
-#endif
+#endif /* MLK_USE_FIPS202_X1_XOR_BYTES_NATIVE */
   mlk_keccakf1600_xor_bytes_c(state, data, offset, length);
 }
 

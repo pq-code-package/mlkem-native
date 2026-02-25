@@ -1579,4 +1579,6 @@ slothy_end:
         pop.w	{r4, r5, r6, r7, r8, r9, r10, r11, r12, pc}
         nop
 
+MLK_ASM_FN_SIZE(keccak_f1600_x1_armv7m_asm)
+
 #endif /* MLK_FIPS202_ARMV81M_NEED_X1 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
