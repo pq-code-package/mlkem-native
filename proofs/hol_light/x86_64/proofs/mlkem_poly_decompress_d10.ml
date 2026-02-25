@@ -360,9 +360,18 @@ let LENGTH_MLKEM_POLY_DECOMPRESS_D10_TMC =
   REWRITE_CONV[mlkem_poly_decompress_d10_tmc] `LENGTH mlkem_poly_decompress_d10_tmc`
   |> CONV_RULE (RAND_CONV LENGTH_CONV);;
 
+let MLKEM_POLY_DECOMPRESS_D10_POSTAMBLE_LENGTH = new_definition
+  `MLKEM_POLY_DECOMPRESS_D10_POSTAMBLE_LENGTH = 1`;;
+
+let MLKEM_POLY_DECOMPRESS_D10_CORE_END = new_definition
+  `MLKEM_POLY_DECOMPRESS_D10_CORE_END =
+   LENGTH mlkem_poly_decompress_d10_tmc - MLKEM_POLY_DECOMPRESS_D10_POSTAMBLE_LENGTH`;;
+
 let LENGTH_SIMPLIFY_CONV =
   REWRITE_CONV[LENGTH_MLKEM_POLY_DECOMPRESS_D10_MC;
-               LENGTH_MLKEM_POLY_DECOMPRESS_D10_TMC] THENC
+               LENGTH_MLKEM_POLY_DECOMPRESS_D10_TMC;
+               MLKEM_POLY_DECOMPRESS_D10_CORE_END;
+               MLKEM_POLY_DECOMPRESS_D10_POSTAMBLE_LENGTH] THENC
   NUM_REDUCE_CONV THENC REWRITE_CONV[ADD_0];;
 
 (* ------------------------------------------------------------------------- *)
@@ -480,7 +489,7 @@ let MLKEM_POLY_DECOMPRESS_D10_CORRECT = prove(
                 read (memory :> bytes(data, 32)) s =
                   num_of_wordlist ((MAP iword decompress_d10_data): (8 word) list) /\
                 read (memory :> bytes(a, 320)) s = num_of_wordlist inlist)
-           (\s. read RIP s = word (pc + 954) /\
+           (\s. read RIP s = word (pc + MLKEM_POLY_DECOMPRESS_D10_CORE_END) /\
                 read (memory :> bytes(r, 512)) s = num_of_wordlist (MAP decompress_d10 inlist))
            (MAYCHANGE [events] ,,
             MAYCHANGE [memory :> bytes(r, 512)] ,,
@@ -578,8 +587,9 @@ let MLKEM_POLY_DECOMPRESS_D10_NOIBT_SUBROUTINE_CORRECT = prove(
            (MAYCHANGE [RSP] ,,
             MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
             MAYCHANGE [memory :> bytes(r, 512)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_poly_decompress_d10_tmc
-    MLKEM_POLY_DECOMPRESS_D10_CORRECT THEN
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_POLY_DECOMPRESS_D10_CORRECT) THEN
   (* Prove bounds *)
   REPEAT STRIP_TAC THEN ASM_SIMP_TAC [EL_MAP; ARITH; IVAL_DECOMPRESS_D10_BOUND]);;
 
@@ -620,7 +630,7 @@ needs "x86_64/proofs/mlkem_utils.ml";;
 needs "x86_64/proofs/subroutine_signatures.ml";;
 
 let full_spec,public_vars = mk_safety_spec
-    ~keep_maychanges:false
+    ~keep_maychanges:true
     (assoc "mlkem_poly_decompress_d10" subroutine_signatures)
     MLKEM_POLY_DECOMPRESS_D10_CORRECT
     MLKEM_POLY_DECOMPRESS_D10_TMC_EXEC;;
@@ -641,14 +651,77 @@ let MLKEM_POLY_DECOMPRESS_D10_SAFE = time prove
                     C_ARGUMENTS [r; a; data] s /\
                     read events s = e)
                (\s.
-                    read RIP s = word (pc + 954) /\
+                    read RIP s =
+                      word (pc + MLKEM_POLY_DECOMPRESS_D10_CORE_END) /\
                     (exists e2.
                          read events s = APPEND e2 e /\
                          e2 = f_events a data r pc /\
                          memaccess_inbounds e2
                            [a,320; data,32; r,512] [r,512]))
-               (\s s'. T)`,
+               (MAYCHANGE [events] ,,
+              MAYCHANGE [memory :> bytes (r,512)] ,,
+              MAYCHANGE [RIP] ,,
+              MAYCHANGE [RAX] ,,
+              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5])`,
   ASSERT_CONCL_TAC full_spec THEN
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars
     MLKEM_POLY_DECOMPRESS_D10_TMC_EXEC);;
+
+let MLKEM_POLY_DECOMPRESS_D10_NOIBT_SUBROUTINE_SAFE = time prove
+ (`exists f_events.
+       forall e r a data (inlist:(10 word) list) pc stackpointer returnaddress.
+          LENGTH inlist = 256 /\
+          aligned 32 r /\
+          aligned 32 data /\
+          ALL (nonoverlapping (r,512))
+          [word pc,LENGTH mlkem_poly_decompress_d10_tmc; a,320; data,32;
+           stackpointer,8]
+          ==> ensures x86
+               (\s.
+                    bytes_loaded s (word pc) mlkem_poly_decompress_d10_tmc /\
+                    read RIP s = word pc /\
+                    read RSP s = stackpointer /\
+                    read (memory :> bytes64 stackpointer) s = returnaddress /\
+                    C_ARGUMENTS [r; a; data] s /\
+                    read events s = e)
+               (\s. read RIP s = returnaddress /\
+                    read RSP s = word_add stackpointer (word 8) /\
+                    (exists e2.
+                         read events s = APPEND e2 e /\
+                         e2 = f_events a data r pc stackpointer returnaddress /\
+                         memaccess_inbounds e2
+                           [a,320; data,32; r,512; stackpointer,8]
+                           [r,512; stackpointer,8]))
+               (\s s'. true)`,
+  X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_poly_decompress_d10_tmc
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_POLY_DECOMPRESS_D10_SAFE) THEN
+  DISCHARGE_SAFETY_PROPERTY_TAC);;
+
+let MLKEM_POLY_DECOMPRESS_D10_SUBROUTINE_SAFE = time prove
+ (`exists f_events.
+       forall e r a data (inlist:(10 word) list) pc stackpointer returnaddress.
+          LENGTH inlist = 256 /\
+          aligned 32 r /\
+          aligned 32 data /\
+          ALL (nonoverlapping (r,512))
+          [word pc,LENGTH mlkem_poly_decompress_d10_mc; a,320; data,32;
+           stackpointer,8]
+          ==> ensures x86
+               (\s.
+                    bytes_loaded s (word pc) mlkem_poly_decompress_d10_mc /\
+                    read RIP s = word pc /\
+                    read RSP s = stackpointer /\
+                    read (memory :> bytes64 stackpointer) s = returnaddress /\
+                    C_ARGUMENTS [r; a; data] s /\
+                    read events s = e)
+               (\s. read RIP s = returnaddress /\
+                    read RSP s = word_add stackpointer (word 8) /\
+                    (exists e2.
+                         read events s = APPEND e2 e /\
+                         e2 = f_events a data r pc stackpointer returnaddress /\
+                         memaccess_inbounds e2
+                           [a,320; data,32; r,512; stackpointer,8]
+                           [r,512; stackpointer,8]))
+               (\s s'. true)`,
+  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_POLY_DECOMPRESS_D10_NOIBT_SUBROUTINE_SAFE));;
