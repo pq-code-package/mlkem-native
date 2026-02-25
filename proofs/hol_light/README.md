@@ -131,6 +131,7 @@ All x86_64 assembly routines used in mlkem-native are covered:
   * x86_64 conversion to Montgomery form: [mlkem_tomont.S](x86_64/mlkem/mlkem_tomont.S)
   * x86_64 polynomial unpacking: [mlkem_unpack.S](x86_64/mlkem/mlkem_unpack.S)
   * x86_64 'multiplication cache' computation: [mlkem_mulcache_compute.S](x86_64/mlkem/mlkem_mulcache_compute.S)
+  * x86_64 polynomial decompression: [mlkem_poly_decompress_d4.S](x86_64/mlkem/mlkem_poly_decompress_d4.S) [mlkem_poly_decompress_d5.S](x86_64/mlkem/mlkem_poly_decompress_d5.S) [mlkem_poly_decompress_d10.S](x86_64/mlkem/mlkem_poly_decompress_d10.S) [mlkem_poly_decompress_d11.S](x86_64/mlkem/mlkem_poly_decompress_d11.S)
 
 Note again, though, that parts of the x86_64 backend are still in intrinsics; see [above](#intrinsics).
 
