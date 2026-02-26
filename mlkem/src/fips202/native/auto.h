@@ -15,8 +15,8 @@
 #include "aarch64/auto.h"
 #endif
 
-#if defined(MLK_SYS_X86_64) && defined(MLK_SYS_X86_64_AVX2)
-#include "x86_64/keccak_f1600_x4_avx2.h"
+#if defined(MLK_SYS_X86_64)
+#include "x86_64/auto.h"
 #endif
 
 /* We do not yet include the FIPS202 backend for Armv8.1-M+MVE by default

@@ -4,7 +4,8 @@
  */
 
 #include "../../../../common.h"
-#if defined(MLK_FIPS202_X86_64_XKCP) && \
+#if (defined(MLK_FIPS202_X86_64_X4_AVX2) ||    \
+     defined(MLK_FIPS202_X86_64_X1_SCALAR)) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <stdint.h>
@@ -26,6 +27,7 @@ MLK_ALIGN const uint64_t mlk_keccakf1600_round_constants[] = {
     0x8000000000008080, 0x0000000080000001, 0x8000000080008008,
 };
 
+#if defined(MLK_FIPS202_X86_64_X4_AVX2)
 MLK_ALIGN const uint64_t mlk_keccak_rho8[] = {
     0x0605040302010007,
     0x0E0D0C0B0A09080F,
@@ -39,9 +41,12 @@ MLK_ALIGN const uint64_t mlk_keccak_rho56[] = {
     0x1017161514131211,
     0x181F1E1D1C1B1A19,
 };
+#endif /* MLK_FIPS202_X86_64_X4_AVX2 */
 
-#else /* MLK_FIPS202_X86_64_XKCP && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#else /* (MLK_FIPS202_X86_64_X4_AVX2 || MLK_FIPS202_X86_64_X1_SCALAR) && \
+         !MLK_CONFIG_MULTILEVEL_NO_SHARED */
 
 MLK_EMPTY_CU(fips202_x86_64_constants)
 
-#endif /* !(MLK_FIPS202_X86_64_XKCP && !MLK_CONFIG_MULTILEVEL_NO_SHARED) */
+#endif /* !((MLK_FIPS202_X86_64_X4_AVX2 || MLK_FIPS202_X86_64_X1_SCALAR) && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED) */

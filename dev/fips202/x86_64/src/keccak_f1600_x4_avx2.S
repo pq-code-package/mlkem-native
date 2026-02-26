@@ -8,7 +8,7 @@
 .section .note.GNU-stack,"",@progbits
 #endif
 
-#if defined(MLK_FIPS202_X86_64_XKCP) && \
+#if defined(MLK_FIPS202_X86_64_X4_AVX2) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
@@ -174,7 +174,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2)
    // Initialize the loop counter
    mov $0, %r10
 
-   Lkeccak_f1600_x4_avx2:
+   kecca_loopk_f1600_x4_avx2:
 
    // =====================================================================
    // Theta Step
@@ -505,7 +505,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2)
    add $8, %rsi
    add $1, %r10
    cmp $0x18, %r10
-   jne Lkeccak_f1600_x4_avx2
+   jne kecca_loopk_f1600_x4_avx2
 
    // Load, De-interleave, and Store 32 bytes to each of the 4 states (A(0-3))
    vmovdqu 0x0(%rsp), %ymm4 // Load A(0) from stack
@@ -632,4 +632,4 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2)
    .cfi_endproc
 
 /* simpasm: footer-start */
-#endif /* MLK_FIPS202_X86_64_XKCP && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_FIPS202_X86_64_X4_AVX2 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

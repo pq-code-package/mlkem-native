@@ -19,6 +19,14 @@ extern const uint64_t mlk_keccak_rho8[];
 #define mlk_keccak_rho56 MLK_NAMESPACE(keccak_rho56)
 extern const uint64_t mlk_keccak_rho56[];
 
+#define mlk_keccak_f1600_x1_scalar MLK_NAMESPACE(keccak_f1600_x1_scalar)
+void mlk_keccak_f1600_x1_scalar(uint64_t state[25], const uint64_t rc[24])
+__contract__(
+  requires(memory_no_alias(state, sizeof(uint64_t) * 25))
+  requires(rc == mlk_keccakf1600_round_constants)
+  assigns(memory_slice(state, sizeof(uint64_t) * 25))
+);
+
 #define mlk_keccak_f1600_x4_avx2 MLK_NAMESPACE(keccak_f1600_x4_avx2)
 void mlk_keccak_f1600_x4_avx2(uint64_t states[100], const uint64_t rc[24],
                               const uint64_t rho8[4], const uint64_t rho56[4])
