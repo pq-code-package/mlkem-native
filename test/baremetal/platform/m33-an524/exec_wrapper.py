@@ -51,5 +51,11 @@ if result.returncode != 0:
     err(result.stderr)
     exit(1)
 
+# Always print stderr for debugging
+if result.stderr:
+    err("=== STDERR ===")
+    err(result.stderr)
+    err("=== END STDERR ===")
+
 for line in result.stdout.splitlines():
     print(line)
