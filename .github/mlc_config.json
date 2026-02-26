@@ -8,6 +8,9 @@
       "pattern": "^https://kyberslash\\.cr\\.yp\\.to"
     },
     {
+      "pattern": "^https://holtrace\\.cr\\.yp\\.to"
+    },
+    {
       "pattern": "^https://lib\\.mceliece\\.org"
     }
   ]
