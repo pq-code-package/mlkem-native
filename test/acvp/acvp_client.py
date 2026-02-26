@@ -224,6 +224,9 @@ def run_keyGen_test(tg, tc):
         exit(1)
     # Extract results
     for l in result.stdout.splitlines():
+        if "=" not in l:
+            err(f"WARNING: Unexpected output line (no '='): {repr(l)}")
+            continue
         (k, v) = l.split("=")
         results[k] = v
     info("done")
