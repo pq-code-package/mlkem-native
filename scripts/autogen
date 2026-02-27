@@ -3818,12 +3818,8 @@ def update_hol_light_bytecode_for_arch(arch, force_cross=False):
         ["make", "-C", "proofs/hol_light/" + arch, "dump_bytecode"],
         capture_output=True,
         text=True,
+        check=True,
     )
-    if result.returncode != 0:
-        print(f"make dump_bytecode failed for {arch}", file=sys.stderr)
-        print(f"stdout:\n{result.stdout}", file=sys.stderr)
-        print(f"stderr:\n{result.stderr}", file=sys.stderr)
-        result.check_returncode()
     output_text = result.stdout
 
     # Extract bytecode
