@@ -10,7 +10,7 @@
 (* Load base theories for x86_64 from s2n-bignum *)
 needs "x86/proofs/base.ml";;
 
-needs "common/mlkem_specs.ml";;
+needs "x86_64/proofs/mlkem_compress_common.ml";;
 needs "x86_64/proofs/mlkem_compress_consts.ml";;
 
 (** print_literal_from_elf "x86_64/mlkem/mlkem_poly_decompress_d5.o";; *)
@@ -287,83 +287,6 @@ let LENGTH_SIMPLIFY_CONV =
                MLKEM_POLY_DECOMPRESS_D5_POSTAMBLE_LENGTH] THENC
   NUM_REDUCE_CONV THENC REWRITE_CONV[ADD_0];;
 
-let NUM_OF_WORDLIST_SPLIT_5_256 = prove(
-  `!(l: (5 word) list). LENGTH l = 256 ==> 
-       num_of_wordlist l = num_of_wordlist (MAP ((word:num->80 word) o num_of_wordlist)
-          (list_of_seq (\i. SUB_LIST (16 * i, 16) l) 16)
-       )`,
-  REPEAT STRIP_TAC THEN
-  (* Rewrite LHS l using SUBLIST_PARTITION *)
-  UNDISCH_THEN `LENGTH (l : (5 word) list) = 256` (fun th -> 
-     GEN_REWRITE_TAC (LAND_CONV o ONCE_DEPTH_CONV) [MATCH_MP (CONV_RULE NUM_REDUCE_CONV (ISPECL [`16`; `16`; `l:'a list`] SUBLIST_PARTITION)) th] THEN ASSUME_TAC th) THEN
-  IMP_REWRITE_TAC [CONV_RULE (ONCE_DEPTH_CONV DIMINDEX_CONV THENC NUM_REDUCE_CONV) (ISPECL [`ll: ((5 word) list) list`; `16`] (INST_TYPE [`:5`, `:N`; `:80`, `:M`] NUM_OF_WORDLIST_FLATTEN))] THEN
-  CONV_TAC(ONCE_DEPTH_CONV LIST_OF_SEQ_CONV) THEN
-  ASM_REWRITE_TAC[ALL; LENGTH_SUB_LIST] THEN
-  ARITH_TAC);;
-
-let READ_BYTES_SPLIT_64_16 = prove(`read (bytes (a,10)) (s : 64 word -> 8 word) = t <=>
-     read (bytes (a,8)) s = t MOD 2 EXP 64 /\
-     read (bytes (word_add a (word 8),2)) s = t DIV 2 EXP 64`, 
-  REWRITE_TAC [REWRITE_RULE [ARITH_RULE `8 + 2 = 10`; ARITH_RULE `8 * 8 = 64`]
-  (INST [`8`,`k:num`; `2`,`l:num`] READ_BYTES_SPLIT_ANY)]);;
-
-let DIMINDEX_80 = DIMINDEX_CONV `dimindex (:80)`
-
-let READ_WBYTES_SPLIT_64_16 = prove(`read (wbytes a) s = (t : 80 word) <=>
-     read (bytes64 a) s = word (val t MOD 2 EXP 64) /\
-     read (bytes16 (word_add a (word 8))) s = word (val t DIV 2 EXP 64)`,
-  let VAL_WORD_80_MOD_64 = prove(`val (word (val (t : 80 word) MOD 2 EXP 64) : 64 word) = val t MOD 2 EXP 64`,
-    SIMP_TAC[VAL_WORD; DIMINDEX_64; MOD_MOD_EXP_MIN; ARITH_RULE `MIN 64 64 = 64`]) in
-  let VAL_WORD_80_DIV_64 = prove (`val (word (val (t : 80 word) DIV 2 EXP 64) : 16 word) = val t DIV 2 EXP 64`,
-    REWRITE_TAC[VAL_WORD; DIMINDEX_16] THEN MATCH_MP_TAC MOD_LT THEN
-    MP_TAC(ISPEC `t:80 word` VAL_BOUND) THEN REWRITE_TAC[DIMINDEX_80] THEN ARITH_TAC) in
-  REWRITE_TAC[BYTES64_WBYTES; BYTES16_WBYTES; GSYM VAL_EQ; VAL_READ_WBYTES; DIMINDEX_80; ARITH_RULE `80 DIV 8 = 10`;
-    READ_BYTES_SPLIT_64_16; DIMINDEX_64; DIMINDEX_16; DIMINDEX_80; ARITH_RULE `64 DIV 8 = 8`; ARITH_RULE `16 DIV 8 = 2`; 
-    VAL_WORD_80_MOD_64; VAL_WORD_80_DIV_64]);;
-
-let READ_WBYTES_SPLIT_64_16' = prove(`t < 2 EXP 80 ==> (read (wbytes a) s = (word t : 80 word) <=>
-     read (bytes64 a) s = word (t MOD 2 EXP 64) /\
-     read (bytes16 (word_add a (word 8))) s = word (t DIV 2 EXP 64))`,
-  STRIP_TAC THEN REWRITE_TAC [READ_WBYTES_SPLIT_64_16] THEN IMP_REWRITE_TAC [VAL_WORD_EXACT; DIMINDEX_80]);;
-
-let READ_MEMORY_WBYTES_SPLIT_64_16 = prove(`t < 2 EXP 80 ==> (read (memory :> wbytes a) s = (word t : 80 word) <=>
-     read (memory :> bytes64 a) s = word (t MOD 2 EXP 64) /\
-     read (memory :> bytes16 (word_add a (word 8))) s = word (t DIV 2 EXP 64))`,
-  STRIP_TAC THEN REWRITE_TAC [READ_COMPONENT_COMPOSE] THEN IMP_REWRITE_TAC [READ_WBYTES_SPLIT_64_16']);;
-  
-let MOD_2_64_AS_SUBWORD = CONV_RULE NUM_REDUCE_CONV (prove(`word (t MOD 2 EXP 64) : 64 word = word_subword (word t : 80 word) (0, 64)`, 
-    REWRITE_TAC[GSYM VAL_EQ; VAL_WORD_SUBWORD; VAL_WORD; DIMINDEX_64] THEN
-    REWRITE_TAC[EXP; DIV_1; MOD_MOD_REFL; MIN] THEN CONV_TAC NUM_REDUCE_CONV THEN
-    SIMP_TAC[DIMINDEX_CONV `dimindex(:80)`] THEN
-    MP_TAC (SPECL [`t:num`; `2`; `80`; `64`] MOD_MOD_EXP_MIN) THEN
-    CONV_TAC NUM_REDUCE_CONV THEN DISCH_THEN (SUBST1_TAC o SYM) THEN REFL_TAC));;
-
-let DIV_2_64_AS_SUBWORD = CONV_RULE NUM_REDUCE_CONV (prove(`word (t DIV 2 EXP 64) : 16 word = word_subword (word t : 80 word) (64, 16)`,
-    REWRITE_TAC[GSYM VAL_EQ; VAL_WORD_SUBWORD; VAL_WORD; DIMINDEX_16] THEN
-    SIMP_TAC[DIMINDEX_CONV `dimindex(:80)`] THEN
-    CONV_TAC NUM_REDUCE_CONV THEN
-    REWRITE_TAC[DIV_MOD] THEN CONV_TAC NUM_REDUCE_CONV THEN
-    REWRITE_TAC[MOD_MOD_EXP_MIN] THEN CONV_TAC NUM_REDUCE_CONV THEN
-    REWRITE_TAC[MOD_MOD_REFL]));;
-
-let BASE_SIMPS = [MOD_2_64_AS_SUBWORD; DIV_2_64_AS_SUBWORD];;
-
-let WORD_SUBWORD_NUM_OF_WORDLIST_16_5 = prove(`!ls:(5 word)list k.
-    LENGTH ls = 16 /\ k < 16
-    ==> word_subword (word (num_of_wordlist ls) : 80 word) (5*k,5) : 5 word = EL k ls`,
-  let th = INST_TYPE [`:80`,`:KL`; `:5`,`:L`] WORD_SUBWORD_NUM_OF_WORDLIST in
-  let th = CONV_RULE(DEPTH_CONV DIMINDEX_CONV) th in
-  REWRITE_TAC [REWRITE_RULE[ARITH_RULE `80 = 5 * n <=> n = 16`; MESON[] `n = 16 /\ k < n <=> n = 16 /\ k < 16`] th]);;
-
-let WORD_SUBWORD_NUM_OF_WORDLIST_CASES_D5 =
-  let base = WORD_SUBWORD_NUM_OF_WORDLIST_16_5 in
-  let mk k =
-    let th = SPEC (mk_small_numeral k) (SPEC `ls:(5 word)list` base) in
-    CONV_RULE NUM_REDUCE_CONV (REWRITE_RULE[ARITH] th) in
-  map mk (0--15);;
-  
-let DIMINDEX_5 = DIMINDEX_CONV `dimindex (:5)`
-
 let DECOMPRESS_D5_CORRECT = prove(
   `word_subword (word_add (word_ushr
      (word_mul (word_shl (word_zx (x : 5 word) : 32 word) 10) (word 3329 : 32 word))
@@ -445,7 +368,7 @@ let MLKEM_POLY_DECOMPRESS_D5_CORRECT = prove(
     THENL [ASM_REWRITE_TAC [LENGTH_SUB_LIST] THEN NUM_REDUCE_TAC; ALL_TAC]) (0 -- 15) THEN
 
   (*** Symbolic execution ***)
-  MAP_EVERY (fun n -> X86_STEPS_TAC MLKEM_POLY_DECOMPRESS_D5_TMC_EXEC [n] THEN SIMD_SIMPLIFY_TAC (map GSYM (BASE_SIMPS @ WORD_MUL_2EXP @ WORD_MUL_2EXP_3329))
+  MAP_EVERY (fun n -> X86_STEPS_TAC MLKEM_POLY_DECOMPRESS_D5_TMC_EXEC [n] THEN SIMD_SIMPLIFY_TAC (map GSYM (BASE_SIMPS_D5 @ WORD_MUL_2EXP @ WORD_MUL_2EXP_3329))
                       THEN SIMP_DECOMPRESS_D5_TAC) (1--134) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 

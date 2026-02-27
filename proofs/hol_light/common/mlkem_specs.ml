@@ -399,118 +399,173 @@ let ntt_montmul_sub = prove
   REWRITE_TAC[ntt_montmul] THEN CONV_TAC WORD_RULE);;
 
 (* ------------------------------------------------------------------------- *)
-(* Decompression routines                                                    *)
+(* Compression and decompression spec definitions (FIPS 203)                 *)
 (* ------------------------------------------------------------------------- *)
 
-let IVAL_EQ_VAL = prove
- (`!w:N word. val w < 2 EXP (dimindex(:N) - 1) ==> ival w = &(val w)`,
-  GEN_TAC THEN REWRITE_TAC[IVAL_VAL; MSB_VAL; GSYM NOT_LE] THEN
-  SIMP_TAC[BITVAL_CLAUSES] THEN REWRITE_TAC[INT_MUL_RZERO; INT_SUB_RZERO]);;
+(* compress_d computes round(2^d * u / 3329)                                 *)
+(* which equals (u * 2^d + 1664) DIV 3329 for u in 0..3328.                  *)
+(* This is Compress_d from FIPS 203, Eq (4.7).                               *)
 
-(* ------------------------------------------------------------------------- *)
-(* decompress_d4 computes round(u * 3329 / 16)                               *)
-(* which equals (u * 3329 + 8) >> 4 for u in 0..15.                          *)
-(* This is Decompress_4 from FIPS 203, Eq (4.8).                             *)
-(* ------------------------------------------------------------------------- *)
+let compress_d4 = new_definition
+  `compress_d4 (x:16 word) : 4 word =
+   word((val x * 16 + 1664) DIV 3329)`;;
+
+let compress_d5 = new_definition
+  `compress_d5 (x:16 word) : 5 word =
+   word((val x * 32 + 1664) DIV 3329)`;;
+
+let compress_d10 = new_definition
+  `compress_d10 (x:16 word) : 10 word =
+   word((val x * 1024 + 1664) DIV 3329)`;;
+
+let compress_d11 = new_definition
+  `compress_d11 (x:16 word) : 11 word =
+   word((val x * 2048 + 1664) DIV 3329)`;;
+
+(* decompress_d computes round(3329 * u / 2^d)                               *)
+(* which equals (u * 3329 + 2^(d-1)) DIV 2^d.                                *)
+(* This is Decompress_d from FIPS 203, Eq (4.8).                             *)
 
 let decompress_d4 = new_definition
   `decompress_d4 (x:4 word) : 16 word =
    word((val x * 3329 + 8) DIV 16)`;;
 
-let IVAL_DECOMPRESS_D4_BOUND = prove
- (`!x:4 word. &0 <= ival(decompress_d4 x) /\ ival(decompress_d4 x) < &3329`,
-  GEN_TAC THEN
-  SUBGOAL_THEN `val(decompress_d4 (x:4 word)) < 2 EXP 15` ASSUME_TAC THENL
-  [REWRITE_TAC[decompress_d4; VAL_WORD; DIMINDEX_16] THEN
-   MP_TAC(ISPEC `x:4 word` VAL_BOUND) THEN REWRITE_TAC[DIMINDEX_4] THEN ARITH_TAC;
-   ALL_TAC] THEN
-  SUBGOAL_THEN `val(decompress_d4 (x:4 word)) < 3329` ASSUME_TAC THENL
-  [REWRITE_TAC[decompress_d4; VAL_WORD; DIMINDEX_16] THEN
-   MP_TAC(ISPEC `x:4 word` VAL_BOUND) THEN REWRITE_TAC[DIMINDEX_4] THEN ARITH_TAC;
-   ALL_TAC] THEN
-  MP_TAC(ISPEC `decompress_d4 (x:4 word):16 word` IVAL_EQ_VAL) THEN
-  REWRITE_TAC[DIMINDEX_16; ARITH] THEN ASM_REWRITE_TAC[] THEN
-  ANTS_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
-  DISCH_THEN SUBST1_TAC THEN
-  REWRITE_TAC[INT_OF_NUM_LE; INT_OF_NUM_LT; LE_0] THEN ASM_ARITH_TAC);;
-
-(* ------------------------------------------------------------------------- *)
-(* decompress_d5 computes round(u * 3329 / 32)                               *)
-(* which equals (u * 3329 + 16) >> 5 for u in 0..31.                         *)
-(* This is Decompress_5 from FIPS 203, Eq (4.8).                             *)
-(* ------------------------------------------------------------------------- *)
 let decompress_d5 = new_definition
   `decompress_d5 (x:5 word) : 16 word =
    word((val x * 3329 + 16) DIV 32)`;;
 
-let IVAL_DECOMPRESS_D5_BOUND = prove
- (`!x:5 word. &0 <= ival(decompress_d5 x) /\ ival(decompress_d5 x) < &3329`,
-  GEN_TAC THEN
-  SUBGOAL_THEN `val(decompress_d5 (x:5 word)) < 2 EXP 15` ASSUME_TAC THENL
-  [REWRITE_TAC[decompress_d5; VAL_WORD; DIMINDEX_16] THEN
-   MP_TAC(ISPEC `x:5 word` VAL_BOUND) THEN CONV_TAC(DEPTH_CONV DIMINDEX_CONV) THEN ARITH_TAC;
-   ALL_TAC] THEN
-  SUBGOAL_THEN `val(decompress_d5 (x:5 word)) < 3329` ASSUME_TAC THENL
-  [REWRITE_TAC[decompress_d5; VAL_WORD; DIMINDEX_16] THEN
-   MP_TAC(ISPEC `x:5 word` VAL_BOUND) THEN CONV_TAC(DEPTH_CONV DIMINDEX_CONV) THEN ARITH_TAC;
-   ALL_TAC] THEN
-  MP_TAC(ISPEC `decompress_d5 (x:5 word):16 word` IVAL_EQ_VAL) THEN
-  REWRITE_TAC[DIMINDEX_16; ARITH] THEN ASM_REWRITE_TAC[] THEN
-  ANTS_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
-  DISCH_THEN SUBST1_TAC THEN
-  REWRITE_TAC[INT_OF_NUM_LE; INT_OF_NUM_LT; LE_0] THEN ASM_ARITH_TAC);;
-
-(* ------------------------------------------------------------------------- *)
-(* decompress_d10 computes round(u * 3329 / 1024)                            *)
-(* which equals (u * 3329 + 512) >> 10 for u in 0..1023.                     *)
-(* This is Decompress_10 from FIPS 203, Eq (4.8).                            *)
-(* ------------------------------------------------------------------------- *)
 let decompress_d10 = new_definition
   `decompress_d10 (x:10 word) : 16 word =
    word((val x * 3329 + 512) DIV 1024)`;;
 
-let IVAL_DECOMPRESS_D10_BOUND = prove
- (`!x:10 word. &0 <= ival(decompress_d10 x) /\ ival(decompress_d10 x) < &3329`,
-  GEN_TAC THEN
-  SUBGOAL_THEN `val(decompress_d10 (x:10 word)) < 2 EXP 15` ASSUME_TAC THENL
-  [REWRITE_TAC[decompress_d10; VAL_WORD; DIMINDEX_16] THEN
-   MP_TAC(ISPEC `x:10 word` VAL_BOUND) THEN CONV_TAC(DEPTH_CONV DIMINDEX_CONV) THEN ARITH_TAC;
-   ALL_TAC] THEN
-  SUBGOAL_THEN `val(decompress_d10 (x:10 word)) < 3329` ASSUME_TAC THENL
-  [REWRITE_TAC[decompress_d10; VAL_WORD; DIMINDEX_16] THEN
-   MP_TAC(ISPEC `x:10 word` VAL_BOUND) THEN CONV_TAC(DEPTH_CONV DIMINDEX_CONV) THEN ARITH_TAC;
-   ALL_TAC] THEN
-  MP_TAC(ISPEC `decompress_d10 (x:10 word):16 word` IVAL_EQ_VAL) THEN
-  REWRITE_TAC[DIMINDEX_16; ARITH] THEN ASM_REWRITE_TAC[] THEN
-  ANTS_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
-  DISCH_THEN SUBST1_TAC THEN
-  REWRITE_TAC[INT_OF_NUM_LE; INT_OF_NUM_LT; LE_0] THEN ASM_ARITH_TAC);;
-
-(* ------------------------------------------------------------------------- *)
-(* decompress_d11 computes round(u * 3329 / 2048)                            *)
-(* which equals (u * 3329 + 1024) >> 11 for u in 0..2047.                    *)
-(* This is Decompress_11 from FIPS 203, Eq (4.8).                            *)
-(* ------------------------------------------------------------------------- *)
 let decompress_d11 = new_definition
   `decompress_d11 (x:11 word) : 16 word =
    word((val x * 3329 + 1024) DIV 2048)`;;
 
-let IVAL_DECOMPRESS_D11_BOUND = prove
- (`!x:11 word. &0 <= ival(decompress_d11 x) /\ ival(decompress_d11 x) < &3329`,
-  GEN_TAC THEN
-  SUBGOAL_THEN `val(decompress_d11 (x:11 word)) < 2 EXP 15` ASSUME_TAC THENL
-  [REWRITE_TAC[decompress_d11; VAL_WORD; DIMINDEX_16] THEN
-   MP_TAC(ISPEC `x:11 word` VAL_BOUND) THEN CONV_TAC(DEPTH_CONV DIMINDEX_CONV) THEN ARITH_TAC;
-   ALL_TAC] THEN
-  SUBGOAL_THEN `val(decompress_d11 (x:11 word)) < 3329` ASSUME_TAC THENL
-  [REWRITE_TAC[decompress_d11; VAL_WORD; DIMINDEX_16] THEN
-   MP_TAC(ISPEC `x:11 word` VAL_BOUND) THEN CONV_TAC(DEPTH_CONV DIMINDEX_CONV) THEN ARITH_TAC;
-   ALL_TAC] THEN
-  MP_TAC(ISPEC `decompress_d11 (x:11 word):16 word` IVAL_EQ_VAL) THEN
-  REWRITE_TAC[DIMINDEX_16; ARITH] THEN ASM_REWRITE_TAC[] THEN
-  ANTS_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
-  DISCH_THEN SUBST1_TAC THEN
-  REWRITE_TAC[INT_OF_NUM_LE; INT_OF_NUM_LT; LE_0] THEN ASM_ARITH_TAC);;
+(* ------------------------------------------------------------------------- *)
+(* Helper lemmas for word lists                                              *)
+
+let EL_SUB_LIST = prove(
+ `!l:'a list. !i k n. i < n /\ k + n <= LENGTH l
+   ==> EL i (SUB_LIST (k, n) l) = EL (k + i) l`,
+  LIST_INDUCT_TAC THENL [
+    REWRITE_TAC[LENGTH; LE; ADD_EQ_0] THEN ARITH_TAC;
+    REWRITE_TAC[LENGTH] THEN REPEAT GEN_TAC THEN
+    STRUCT_CASES_TAC (SPEC `k:num` num_CASES) THEN
+    STRUCT_CASES_TAC (SPEC `n:num` num_CASES) THEN
+    REWRITE_TAC[LT; SUB_LIST_CLAUSES; ADD_CLAUSES] THENL [
+      STRUCT_CASES_TAC (SPEC `i:num` num_CASES) THEN
+      REWRITE_TAC[EL; HD; TL; ADD_CLAUSES] THEN STRIP_TAC THEN
+      FIRST_X_ASSUM (MP_TAC o SPECL [`n:num`; `0`; `n':num`]) THEN
+      REWRITE_TAC[ADD_CLAUSES] THEN DISCH_THEN MATCH_MP_TAC THEN ASM_ARITH_TAC;
+      REWRITE_TAC[EL; TL] THEN STRIP_TAC THEN
+      FIRST_X_ASSUM (MP_TAC o SPECL [`i:num`; `n':num`; `SUC n''`]) THEN
+      ASM_REWRITE_TAC[LT_SUC] THEN DISCH_THEN MATCH_MP_TAC THEN ASM_ARITH_TAC]]);;
+
+(* EL_SUB_LIST_CONV: Rewrites EL i (SUB_LIST (base,len) ls) to EL (base+i) ls
+   Takes a LENGTH ls = n theorem and checks i < len before applying. *)
+let EL_SUB_LIST_CONV len_thm tm =
+  (* Parse EL i (SUB_LIST (base,len) ls) *)
+  let i_tm,sublist_tm = dest_comb tm in
+  let el_const,i = dest_comb i_tm in
+  let sublist_pair,ls = dest_comb sublist_tm in
+  let sublist_const,pair_tm = dest_comb sublist_pair in
+  let base,len = dest_pair pair_tm in
+  (* Check i < len *)
+  let i_num = dest_numeral i and
+      len_num = dest_numeral len in
+  if i_num >= len_num then failwith "EL_SUB_LIST_CONV: index out of bounds" else
+  (* Apply EL_SUB_LIST theorem and simplify *)
+  let th1 = ISPECL [ls; i; base; len] EL_SUB_LIST in
+  let th2 = REWRITE_RULE[len_thm] th1 in
+  let th3 = MP th2 (EQT_ELIM(NUM_REDUCE_CONV (fst(dest_imp(concl th2))))) in
+  (* Evaluate base + i *)
+  CONV_RULE (RAND_CONV (LAND_CONV NUM_ADD_CONV)) th3;;
+
+(* Derived from LENGTH_SUB_LIST *)
+let LENGTH_SUB_LIST_0 = prove
+ (`!n (l:'a list). n <= LENGTH l ==> LENGTH (SUB_LIST (0, n) l) = n`,
+  REPEAT STRIP_TAC THEN REWRITE_TAC[LENGTH_SUB_LIST; SUB_0] THEN ASM_ARITH_TAC);;
+
+let SUB_LIST_SUB_LIST_0 = prove(
+ `!k n m (l:'a list). k + n <= m /\ m <= LENGTH l
+   ==> SUB_LIST (k, n) (SUB_LIST (0, m) l) = SUB_LIST (k, n) l`,
+  REPEAT STRIP_TAC THEN REWRITE_TAC[LIST_EQ; LENGTH_SUB_LIST; SUB_0] THEN
+  CONJ_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN REPEAT STRIP_TAC THEN
+  SUBGOAL_THEN `n' < n` ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
+  MP_TAC (ISPECL [`SUB_LIST (0,m) l:'a list`; `n':num`; `k:num`; `n:num`] EL_SUB_LIST) THEN
+  MP_TAC (ISPECL [`l:'a list`; `n':num`; `k:num`; `n:num`] EL_SUB_LIST) THEN
+  ASM_REWRITE_TAC[LENGTH_SUB_LIST; SUB_0] THEN
+  SUBGOAL_THEN `k + n <= LENGTH (l:'a list)` ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
+  SUBGOAL_THEN `k + n <= MIN m (LENGTH (l:'a list))` ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
+  ASM_SIMP_TAC[] THEN REPEAT DISCH_TAC THEN
+  MP_TAC (ISPECL [`l:'a list`; `k + n':num`; `0`; `m:num`] EL_SUB_LIST) THEN
+  ASM_REWRITE_TAC[ADD_CLAUSES] THEN DISCH_THEN MATCH_MP_TAC THEN ASM_ARITH_TAC);;
+
+(* Variant of SUB_LIST_TOPSPLIT with equality hypothesis *)
+let SUB_LIST_SPLIT_EQ = prove
+ (`!n r (l:'a list). n + r = LENGTH l
+   ==> APPEND (SUB_LIST (0, n) l) (SUB_LIST (n, r) l) = l`,
+  REPEAT STRIP_TAC THEN
+  MP_TAC (ISPECL [`l:'a list`; `n:num`] SUB_LIST_TOPSPLIT) THEN
+  FIRST_X_ASSUM (SUBST1_TAC o SYM) THEN REWRITE_TAC[ADD_SUB2]);;
+
+let APPEND_ITLIST_APPEND_NIL = prove
+ (`!(l:('a list) list) (x:'a list). APPEND (ITLIST APPEND l []) x = ITLIST APPEND l x`,
+  LIST_INDUCT_TAC THEN REWRITE_TAC[ITLIST; APPEND] THEN
+  GEN_TAC THEN REWRITE_TAC[GSYM APPEND_ASSOC] THEN ASM_REWRITE_TAC[]);;
+
+let LIST_OF_SEQ_EQ = prove
+ (`!(f:num->'a) g n. (!i. i < n ==> f i = g i) ==> list_of_seq f n = list_of_seq g n`,
+  GEN_TAC THEN GEN_TAC THEN INDUCT_TAC THEN REWRITE_TAC[list_of_seq] THEN
+  DISCH_TAC THEN BINOP_TAC THENL [
+    FIRST_X_ASSUM MATCH_MP_TAC THEN GEN_TAC THEN DISCH_TAC THEN
+    FIRST_X_ASSUM MATCH_MP_TAC THEN ASM_ARITH_TAC;
+    REWRITE_TAC[CONS_11] THEN FIRST_X_ASSUM MATCH_MP_TAC THEN ARITH_TAC
+  ]);;
+
+let SUBLIST_PARTITION = prove
+ (`!r s (l:'a list). LENGTH l = r * s ==>
+       l = ITLIST APPEND (list_of_seq (\i. SUB_LIST (r * i, r) l) s) []`,
+  GEN_TAC THEN INDUCT_TAC THENL [
+    REWRITE_TAC[MULT_CLAUSES; list_of_seq; ITLIST; LENGTH_EQ_NIL];
+
+    REWRITE_TAC[list_of_seq; ITLIST_EXTRA; APPEND_NIL] THEN
+    GEN_TAC THEN DISCH_TAC THEN
+    SUBGOAL_THEN
+      `SUB_LIST (0, r * s) l =
+       ITLIST APPEND (list_of_seq (\i. SUB_LIST (r * i, r) (SUB_LIST (0, r * s) l)) s) []:'a list`
+      ASSUME_TAC THENL [
+      FIRST_X_ASSUM MATCH_MP_TAC THEN
+      MATCH_MP_TAC LENGTH_SUB_LIST_0 THEN ASM_ARITH_TAC;
+      ALL_TAC
+    ] THEN
+    SUBGOAL_THEN
+      `list_of_seq (\i. SUB_LIST (r * i, r) (SUB_LIST (0, r * s) l):'a list) s =
+       list_of_seq (\i. SUB_LIST (r * i, r) l) s`
+      ASSUME_TAC THENL [
+      MATCH_MP_TAC LIST_OF_SEQ_EQ THEN REPEAT STRIP_TAC THEN REWRITE_TAC[] THEN
+      MATCH_MP_TAC SUB_LIST_SUB_LIST_0 THEN CONJ_TAC THENL [
+        REWRITE_TAC[ARITH_RULE `r * i + r = r * (i + 1)`] THEN
+        REWRITE_TAC[LE_MULT_LCANCEL] THEN ASM_ARITH_TAC;
+        ASM_ARITH_TAC
+      ];
+      ALL_TAC
+    ] THEN
+    SUBGOAL_THEN
+      `APPEND (SUB_LIST (0, r * s) l) (SUB_LIST (r * s, r) l) = l:'a list`
+      ASSUME_TAC THENL [
+      MATCH_MP_TAC SUB_LIST_SPLIT_EQ THEN ASM_REWRITE_TAC[MULT_SUC] THEN ARITH_TAC;
+      ALL_TAC
+    ] THEN
+    SUBGOAL_THEN
+      `SUB_LIST (0, r * s) l =
+       ITLIST APPEND (list_of_seq (\i. SUB_LIST (r * i, r) l) s) []:'a list`
+      ASSUME_TAC THENL [ASM_MESON_TAC[]; ALL_TAC] THEN
+    UNDISCH_TAC `APPEND (SUB_LIST (0,r * s) l) (SUB_LIST (r * s,r) l) = l:'a list` THEN
+    UNDISCH_TAC `SUB_LIST (0,r * s) l = ITLIST APPEND (list_of_seq (\i. SUB_LIST (r * i,r) l) s) []:'a list` THEN
+    SIMP_TAC[APPEND_ITLIST_APPEND_NIL]
+  ]);;
 
 (* ------------------------------------------------------------------------- *)
 (* From |- (x == y) (mod m) /\ P   to   |- (x == y) (mod n) /\ P             *)
@@ -1200,26 +1255,144 @@ let SIMD_SIMPLIFY_ABBREV_TAC =
   TRY(FIRST_X_ASSUM(ttac o check (simdable o concl)));;
 
 (* ------------------------------------------------------------------------- *)
+(* Prove a bound quantified formula case-by-case                             *)
+(* ------------------------------------------------------------------------- *)
+
+let PEEL_LEMMA = prove(
+  `!P n. (!i. i < SUC n ==> P i) <=> (!i. i < n ==> P i) /\ P n`,
+  REPEAT GEN_TAC THEN EQ_TAC THENL [
+    DISCH_TAC THEN CONJ_TAC THENL [
+      REPEAT STRIP_TAC THEN FIRST_X_ASSUM MATCH_MP_TAC THEN ASM_ARITH_TAC;
+      FIRST_X_ASSUM MATCH_MP_TAC THEN ARITH_TAC];
+    STRIP_TAC THEN GEN_TAC THEN DISCH_TAC THEN
+    ASM_CASES_TAC `i:num = n` THENL [ASM_MESON_TAC[]; ALL_TAC] THEN
+    FIRST_X_ASSUM MATCH_MP_TAC THEN ASM_ARITH_TAC]);;
+
+let BRUTE_FORCE_WITH tac =
+  let rec go (asl, w as gl) =
+    let (i, body) = dest_forall w in
+    let (ant, _) = dest_imp body in
+    let n_tm = rand ant in
+    let n = dest_small_numeral n_tm in
+    if n = 0 then (GEN_TAC THEN SIMP_TAC[LT]) gl
+    else
+      let suc_eq = num_CONV n_tm in
+      (CONV_TAC(BINDER_CONV(LAND_CONV(RAND_CONV(REWR_CONV suc_eq)))) THEN
+       GEN_REWRITE_TAC I [PEEL_LEMMA] THEN
+       CONJ_TAC THENL [ALL_TAC; 
+         (fun gl2 -> try let r = tac gl2 in
+           Printf.printf "Case %d proved\n%!" (n-1); r
+          with e -> Printf.printf "Failed to prove case %d\n%!" (n-1); raise e)
+       ] THEN
+       go) gl
+  in go;;
+
+(* ------------------------------------------------------------------------- *)
 (* Some word lemmas, likely of more general use                              *)
 (* ------------------------------------------------------------------------- *)
 
+let COND_REWRITE_CONV solve thm : conv = fun tm ->
+  let thm' = PART_MATCH (lhand o snd o dest_imp) thm tm in
+  let precond = fst(dest_imp(concl thm')) in
+  MP thm' (solve precond);;
+
+let WORD_64_SUB_8_8_JOIN_16 = WORD_BLAST `!(x : 64 word).
+         word_join (word_subword x (8,8) : 8 word) (word_subword x (0,8) : 8 word) =
+         word_subword x (0,16) : 16 word`;;
+
+let WORD_JOIN_AND_TYBIT0 = prove(
+  `word_and (word_join (a:N word) (b:N word) : (N tybit0) word) (word_join (c:N word) (d:N word)) =
+   word_join (word_and a c) (word_and b d)`,
+  REWRITE_TAC[WORD_EQ_BITS_ALT; BIT_WORD_AND; BIT_WORD_JOIN; DIMINDEX_TYBIT0] THEN
+  X_GEN_TAC `i:num` THEN
+  ASM_CASES_TAC `i < 2 * dimindex(:N)` THEN ASM_REWRITE_TAC[] THEN
+  ASM_CASES_TAC `i < dimindex(:N)` THEN ASM_REWRITE_TAC[] THEN
+  MATCH_MP_TAC(TAUT `p ==> (q <=> p /\ q)`) THEN ASM_ARITH_TAC);;
+
+let WORD_JOIN_NOT_TYBIT0 = prove(
+  `word_not (word_join (a:N word) (b:N word) : (N tybit0) word) =
+   word_join (word_not a) (word_not b)`,
+  REWRITE_TAC[WORD_EQ_BITS_ALT; BIT_WORD_NOT; BIT_WORD_JOIN; DIMINDEX_TYBIT0] THEN
+  X_GEN_TAC `i:num` THEN
+  ASM_CASES_TAC `i < 2 * dimindex(:N)` THEN ASM_REWRITE_TAC[] THEN
+  ASM_CASES_TAC `i < dimindex(:N)` THEN ASM_REWRITE_TAC[] THEN
+  MATCH_MP_TAC(TAUT `p ==> (~q <=> p /\ ~q)`) THEN ASM_ARITH_TAC);;
+
+let WORD_SUBWORD_USHR_JOIN = prove(
+  `word_subword (word_ushr (x:(N tybit0) word) (dimindex(:N))) (0,dimindex(:N)) : N word =
+   word_subword x (dimindex(:N), dimindex(:N))`,
+  REWRITE_TAC[WORD_EQ_BITS_ALT] THEN
+  SIMP_TAC[BIT_WORD_SUBWORD; BIT_WORD_USHR; DIMINDEX_TYBIT0] THEN
+  GEN_TAC THEN DISCH_TAC THEN REWRITE_TAC[ADD_CLAUSES; ADD_SYM]);;
+
+let WORD_SUBWORD_USHR_64 = REWRITE_RULE[DIMINDEX_CONV `dimindex(:64)`]
+  (INST_TYPE [`:64`,`:N`] WORD_SUBWORD_USHR_JOIN);;  
+  
+let WORD_SUBWORD_USHR_HIGH = prove(
+  `word_subword (word_ushr (x:(N tybit0) word) (dimindex(:N))) (dimindex(:N),dimindex(:N)) : N word = word 0`,
+  REWRITE_TAC[WORD_EQ_BITS_ALT] THEN
+  SIMP_TAC[BIT_WORD_SUBWORD; BIT_WORD_USHR; BIT_WORD_0; DIMINDEX_TYBIT0] THEN
+  GEN_TAC THEN DISCH_TAC THEN REWRITE_TAC[DE_MORGAN_THM] THEN DISJ2_TAC THEN
+  MATCH_MP_TAC(REWRITE_RULE[IMP_IMP] (INST_TYPE [`:N tybit0`,`:N`] BIT_TRIVIAL)) THEN
+  REWRITE_TAC[DIMINDEX_TYBIT0] THEN ASM_ARITH_TAC);;
+
+(* Commutativity of multiplication and shift *)
 let WORD_MUL_SHL = prove(`!x y n. word_mul (word_shl y n) x = word_shl (word_mul x y) n`,
   REPEAT GEN_TAC THEN REWRITE_TAC[GSYM VAL_EQ; VAL_WORD_MUL; VAL_WORD_SHL; EXP_2] THEN
   CONV_TAC MOD_DOWN_CONV THEN REWRITE_TAC[MULT_AC]);;
 
+(* Exact multiplication when no overflow *)
 let VAL_WORD_MUL_EXACT = prove(
   `!x y. val x * val y < 2 EXP dimindex(:N)
          ==> val(word_mul x y : N word) = val x * val y`,
   REWRITE_TAC[VAL_WORD_MUL] THEN SIMP_TAC[MOD_LT]);;
 
+(* Exact word construction when no overflow *)
 let VAL_WORD_EXACT = prove(
   `!n. n < 2 EXP dimindex(:N) ==> val(word n : N word) = n`,
   REWRITE_TAC[VAL_WORD] THEN SIMP_TAC[MOD_LT]);;
 
+(* Exact zero-extension when target is large enough *)
 let VAL_WORD_ZX_EXACT = prove(
   `!(x:M word). val x < 2 EXP dimindex(:N) ==> val(word_zx x : N word) = val x`,
   REWRITE_TAC[VAL_WORD_ZX_GEN] THEN SIMP_TAC[MOD_LT]);;
 
+(* Double zero-extension is identity *)
+let WORD_ZX_128_256_128 = prove(
+  `!(x : 128 word). word_zx (word_zx x : 256 word) = x`,
+  GEN_TAC THEN REWRITE_TAC[word_zx; VAL_WORD; DIMINDEX_128; DIMINDEX_256] THEN
+  SUBGOAL_THEN `val (x:128 word) < 2 EXP 256` ASSUME_TAC THENL
+  [MP_TAC(ISPEC `x:128 word` VAL_BOUND) THEN REWRITE_TAC[DIMINDEX_128] THEN
+   CONV_TAC NUM_REDUCE_CONV THEN ARITH_TAC;
+   ASM_SIMP_TAC[MOD_LT; WORD_VAL]]);;
+
+(* Word equality via subword comparison *)
+let WORD_PACKED_EQ = prove(
+ `!(x:N word) (y:N word).
+    dimindex(:N) = l * k /\ 0 < l /\ l <= dimindex(:M)
+    ==> (x = y <=>
+         !i. i < k
+             ==> word_subword x (l*i, l) : (M) word =
+                 word_subword y (l*i, l))`,
+  REPEAT GEN_TAC THEN STRIP_TAC THEN EQ_TAC THENL
+  [DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[];
+   DISCH_TAC THEN
+   GEN_REWRITE_TAC I [WORD_EQ_BITS_ALT] THEN
+   X_GEN_TAC `j:num` THEN DISCH_TAC THEN
+   FIRST_X_ASSUM(MP_TAC o SPEC `j DIV l`) THEN
+   ANTS_TAC THENL
+   [UNDISCH_TAC `j < dimindex(:N)` THEN ASM_REWRITE_TAC[] THEN
+    ASM_SIMP_TAC[RDIV_LT_EQ; ARITH_RULE `0 < l ==> ~(l = 0)`; MULT_SYM];
+    DISCH_THEN(fun th ->
+      MP_TAC(AP_TERM `\(w:M word). bit (j MOD l) w` th)) THEN
+    REWRITE_TAC[BIT_WORD_SUBWORD] THEN
+    SUBGOAL_THEN `j MOD l < MIN l (dimindex(:M))`
+      (fun th -> REWRITE_TAC[th]) THENL
+    [ASM_SIMP_TAC[ARITH_RULE `l <= m ==> MIN l m = l`;
+                   MOD_LT_EQ; ARITH_RULE `0 < l ==> ~(l = 0)`];
+     ASM_SIMP_TAC[DIVISION_SIMP; ARITH_RULE `0 < l ==> ~(l = 0)`]]]]);;
+
+(* Extract k-th element from packed wordlist *)
 let WORD_SUBWORD_NUM_OF_WORDLIST = prove
  (`!(ls:(L word)list) k.
     dimindex(:KL) = dimindex(:L) * LENGTH ls /\
@@ -1236,11 +1409,170 @@ let WORD_SUBWORD_NUM_OF_WORDLIST = prove
    MP_TAC(ISPECL [`ls:(L word)list`; `k:num`] NUM_OF_WORDLIST_EL) THEN
    ASM_REWRITE_TAC[]]);;
 
-(* ------------------------------------------------------------------------- *)
-(* Some list lemmas, likely of more general use                              *)
-(* ------------------------------------------------------------------------- *)
+(* Convert byte sequence to hierarchical word_join structure *)
+let BYTES128_JOIN = prove(
+  `!(b0:8 word) (b1:8 word) (b2:8 word) (b3:8 word)
+    (b4:8 word) (b5:8 word) (b6:8 word) (b7:8 word)
+    (b8:8 word) (b9:8 word) (b10:8 word) (b11:8 word)
+    (b12:8 word) (b13:8 word) (b14:8 word) (b15:8 word).
+    (word_zx:256 word->128 word)
+    ((word_zx:128 word->256 word)
+   (word(val b0 * 2 EXP (8 * 0) +
+          val b1 * 2 EXP (8 * 1) +
+          val b2 * 2 EXP (8 * 2) +
+          val b3 * 2 EXP (8 * 3) +
+          val b4 * 2 EXP (8 * 4) +
+          val b5 * 2 EXP (8 * 5) +
+          val b6 * 2 EXP (8 * 6) +
+          val b7 * 2 EXP (8 * 7) +
+          val b8 * 2 EXP (8 * 8) +
+          val b9 * 2 EXP (8 * 9) +
+          val b10 * 2 EXP (8 * 10) +
+          val b11 * 2 EXP (8 * 11) +
+          val b12 * 2 EXP (8 * 12) +
+          val b13 * 2 EXP (8 * 13) +
+          val b14 * 2 EXP (8 * 14) +
+          val b15 * 2 EXP (8 * 15)) :128 word)) =
+    word_join
+      (word_join (word_join b15 b14 :16 word) (word_join b13 b12 :16 word) :32 word)
+      (word_join
+        (word_join (word_join b11 b10 :16 word) (word_join b9 b8 :16 word) :32 word)
+        (word_join
+          (word_join (word_join b7 b6 :16 word) (word_join b5 b4 :16 word) :32 word)
+          (word_join (word_join b3 b2 :16 word) (word_join b1 b0 :16 word) :32 word)
+          :64 word) :96 word) :128 word`,
+  REPEAT GEN_TAC THEN
+  SIMP_TAC[WORD_ZX_128_256_128; DIMINDEX_128; DIMINDEX_256] THEN
+  SUBGOAL_THEN `val (b0 : 8 word) * 2 EXP (8 * 0) +
+                val (b1 : 8 word) * 2 EXP (8 * 1) +
+                val (b2 : 8 word) * 2 EXP (8 * 2) +
+                val (b3 : 8 word) * 2 EXP (8 * 3) +
+                val (b4 : 8 word) * 2 EXP (8 * 4) +
+                val (b5 : 8 word) * 2 EXP (8 * 5) +
+                val (b6 : 8 word) * 2 EXP (8 * 6) +
+                val (b7 : 8 word) * 2 EXP (8 * 7) +
+                val (b8 : 8 word) * 2 EXP (8 * 8) +
+                val (b9 : 8 word) * 2 EXP (8 * 9) +
+                val (b10 : 8 word) * 2 EXP (8 * 10) +
+                val (b11 : 8 word) * 2 EXP (8 * 11) +
+                val (b12 : 8 word) * 2 EXP (8 * 12) +
+                val (b13 : 8 word) * 2 EXP (8 * 13) +
+                val (b14 : 8 word) * 2 EXP (8 * 14) +
+                val (b15 : 8 word) * 2 EXP (8 * 15) = num_of_wordlist [b0; b1; b2; b3; b4; b5; b6; b7; b8; b9; b10; b11; b12; b13; b14; b15]`
+    SUBST1_TAC THENL [REWRITE_TAC [num_of_wordlist; LEFT_ADD_DISTRIB; GSYM EXP_ADD; DIMINDEX_CONV `dimindex(:8)`] THEN ARITH_TAC; ALL_TAC] THEN
+    REPLICATE_TAC 4 (GEN_REWRITE_TAC (LAND_CONV o ONCE_DEPTH_CONV)
+                     [GSYM NUM_OF_PAIR_WORDLIST]) THEN
+    REWRITE_TAC[pair_wordlist] THEN
+    REWRITE_TAC [num_of_wordlist] THEN
+    CONV_TAC (ONCE_DEPTH_CONV DIMINDEX_CONV THENC NUM_REDUCE_CONV) THEN
+    BITBLAST_TAC);;
 
-(* Flatten a list of lists *)
+
+let BYTES256_JOIN = prove(
+  `!(b0:8 word) (b1:8 word) (b2:8 word) (b3:8 word)
+    (b4:8 word) (b5:8 word) (b6:8 word) (b7:8 word)
+    (b8:8 word) (b9:8 word) (b10:8 word) (b11:8 word)
+    (b12:8 word) (b13:8 word) (b14:8 word) (b15:8 word)
+    (b16:8 word) (b17:8 word) (b18:8 word) (b19:8 word)
+    (b20:8 word) (b21:8 word) (b22:8 word) (b23:8 word)
+    (b24:8 word) (b25:8 word) (b26:8 word) (b27:8 word)
+    (b28:8 word) (b29:8 word) (b30:8 word) (b31:8 word).
+    word(val b0 * 2 EXP (8 * 0) +
+         val b1 * 2 EXP (8 * 1) +
+         val b2 * 2 EXP (8 * 2) +
+         val b3 * 2 EXP (8 * 3) +
+         val b4 * 2 EXP (8 * 4) +
+         val b5 * 2 EXP (8 * 5) +
+         val b6 * 2 EXP (8 * 6) +
+         val b7 * 2 EXP (8 * 7) +
+         val b8 * 2 EXP (8 * 8) +
+         val b9 * 2 EXP (8 * 9) +
+         val b10 * 2 EXP (8 * 10) +
+         val b11 * 2 EXP (8 * 11) +
+         val b12 * 2 EXP (8 * 12) +
+         val b13 * 2 EXP (8 * 13) +
+         val b14 * 2 EXP (8 * 14) +
+         val b15 * 2 EXP (8 * 15) +
+         val b16 * 2 EXP (8 * 16) +
+         val b17 * 2 EXP (8 * 17) +
+         val b18 * 2 EXP (8 * 18) +
+         val b19 * 2 EXP (8 * 19) +
+         val b20 * 2 EXP (8 * 20) +
+         val b21 * 2 EXP (8 * 21) +
+         val b22 * 2 EXP (8 * 22) +
+         val b23 * 2 EXP (8 * 23) +
+         val b24 * 2 EXP (8 * 24) +
+         val b25 * 2 EXP (8 * 25) +
+         val b26 * 2 EXP (8 * 26) +
+         val b27 * 2 EXP (8 * 27) +
+         val b28 * 2 EXP (8 * 28) +
+         val b29 * 2 EXP (8 * 29) +
+         val b30 * 2 EXP (8 * 30) +
+         val b31 * 2 EXP (8 * 31)) :256 word =
+    word_join
+      (word_join
+        (word_join (word_join b31 b30 :16 word) (word_join b29 b28 :16 word) :32 word)
+        (word_join (word_join b27 b26 :16 word) (word_join b25 b24 :16 word) :32 word)
+        :64 word)
+      (word_join
+        (word_join
+          (word_join (word_join b23 b22 :16 word) (word_join b21 b20 :16 word) :32 word)
+          (word_join (word_join b19 b18 :16 word) (word_join b17 b16 :16 word) :32 word)
+          :64 word)
+        (word_join
+          (word_join
+            (word_join (word_join b15 b14 :16 word) (word_join b13 b12 :16 word) :32 word)
+            (word_join (word_join b11 b10 :16 word) (word_join b9 b8 :16 word) :32 word)
+            :64 word)
+          (word_join
+            (word_join (word_join b7 b6 :16 word) (word_join b5 b4 :16 word) :32 word)
+            (word_join (word_join b3 b2 :16 word) (word_join b1 b0 :16 word) :32 word)
+            :64 word)
+          :128 word)
+        :192 word)
+      :256 word`,
+  REPEAT GEN_TAC THEN
+  SUBGOAL_THEN `val (b0 : 8 word) * 2 EXP (8 * 0) +
+                val (b1 : 8 word) * 2 EXP (8 * 1) +
+                val (b2 : 8 word) * 2 EXP (8 * 2) +
+                val (b3 : 8 word) * 2 EXP (8 * 3) +
+                val (b4 : 8 word) * 2 EXP (8 * 4) +
+                val (b5 : 8 word) * 2 EXP (8 * 5) +
+                val (b6 : 8 word) * 2 EXP (8 * 6) +
+                val (b7 : 8 word) * 2 EXP (8 * 7) +
+                val (b8 : 8 word) * 2 EXP (8 * 8) +
+                val (b9 : 8 word) * 2 EXP (8 * 9) +
+                val (b10 : 8 word) * 2 EXP (8 * 10) +
+                val (b11 : 8 word) * 2 EXP (8 * 11) +
+                val (b12 : 8 word) * 2 EXP (8 * 12) +
+                val (b13 : 8 word) * 2 EXP (8 * 13) +
+                val (b14 : 8 word) * 2 EXP (8 * 14) +
+                val (b15 : 8 word) * 2 EXP (8 * 15) +
+                val (b16 : 8 word) * 2 EXP (8 * 16) +
+                val (b17 : 8 word) * 2 EXP (8 * 17) +
+                val (b18 : 8 word) * 2 EXP (8 * 18) +
+                val (b19 : 8 word) * 2 EXP (8 * 19) +
+                val (b20 : 8 word) * 2 EXP (8 * 20) +
+                val (b21 : 8 word) * 2 EXP (8 * 21) +
+                val (b22 : 8 word) * 2 EXP (8 * 22) +
+                val (b23 : 8 word) * 2 EXP (8 * 23) +
+                val (b24 : 8 word) * 2 EXP (8 * 24) +
+                val (b25 : 8 word) * 2 EXP (8 * 25) +
+                val (b26 : 8 word) * 2 EXP (8 * 26) +
+                val (b27 : 8 word) * 2 EXP (8 * 27) +
+                val (b28 : 8 word) * 2 EXP (8 * 28) +
+                val (b29 : 8 word) * 2 EXP (8 * 29) +
+                val (b30 : 8 word) * 2 EXP (8 * 30) +
+                val (b31 : 8 word) * 2 EXP (8 * 31) = num_of_wordlist [b0; b1; b2; b3; b4; b5; b6; b7; b8; b9; b10; b11; b12; b13; b14; b15; b16; b17; b18; b19; b20; b21; b22; b23; b24; b25; b26; b27; b28; b29; b30; b31]`
+    SUBST1_TAC THENL [REWRITE_TAC [num_of_wordlist; LEFT_ADD_DISTRIB; GSYM EXP_ADD; DIMINDEX_CONV `dimindex(:8)`] THEN ARITH_TAC; ALL_TAC] THEN
+    REPLICATE_TAC 5 (GEN_REWRITE_TAC (LAND_CONV o ONCE_DEPTH_CONV)
+                     [GSYM NUM_OF_PAIR_WORDLIST]) THEN
+    REWRITE_TAC[pair_wordlist] THEN
+    REWRITE_TAC [num_of_wordlist] THEN
+    CONV_TAC (ONCE_DEPTH_CONV DIMINDEX_CONV THENC NUM_REDUCE_CONV) THEN
+    BITBLAST_TAC);;
+
+(* Flatten nested wordlists for hierarchical packing *)
 let NUM_OF_WORDLIST_FLATTEN = prove
  (`!(ll:((N word) list) list) k.
      ALL (\l. LENGTH l = k) ll /\
@@ -1259,232 +1591,3 @@ let NUM_OF_WORDLIST_FLATTEN = prove
   REWRITE_TAC[NUM_OF_WORDLIST_BOUND_LENGTH] THEN
   ASM_REWRITE_TAC[LE_REFL]);;
 
-let EL_SUB_LIST = prove(
- `!l:'a list. !i k n. i < n /\ k + n <= LENGTH l
-   ==> EL i (SUB_LIST (k, n) l) = EL (k + i) l`,
-  LIST_INDUCT_TAC THENL [
-    REWRITE_TAC[LENGTH; LE; ADD_EQ_0] THEN ARITH_TAC;
-    REWRITE_TAC[LENGTH] THEN REPEAT GEN_TAC THEN
-    STRUCT_CASES_TAC (SPEC `k:num` num_CASES) THEN
-    STRUCT_CASES_TAC (SPEC `n:num` num_CASES) THEN
-    REWRITE_TAC[LT; SUB_LIST_CLAUSES; ADD_CLAUSES] THENL [
-      STRUCT_CASES_TAC (SPEC `i:num` num_CASES) THEN
-      REWRITE_TAC[EL; HD; TL; ADD_CLAUSES] THEN STRIP_TAC THEN
-      FIRST_X_ASSUM (MP_TAC o SPECL [`n:num`; `0`; `n':num`]) THEN
-      REWRITE_TAC[ADD_CLAUSES] THEN DISCH_THEN MATCH_MP_TAC THEN ASM_ARITH_TAC;
-      REWRITE_TAC[EL; TL] THEN STRIP_TAC THEN
-      FIRST_X_ASSUM (MP_TAC o SPECL [`i:num`; `n':num`; `SUC n''`]) THEN
-      ASM_REWRITE_TAC[LT_SUC] THEN DISCH_THEN MATCH_MP_TAC THEN ASM_ARITH_TAC]]);;
-
-(* EL_SUB_LIST_CONV: Rewrites EL i (SUB_LIST (base,len) ls) to EL (base+i) ls
-   Takes a LENGTH ls = n theorem and checks i < len before applying. *)
-let EL_SUB_LIST_CONV len_thm tm =
-  (* Parse EL i (SUB_LIST (base,len) ls) *)
-  let i_tm,sublist_tm = dest_comb tm in
-  let el_const,i = dest_comb i_tm in
-  let sublist_pair,ls = dest_comb sublist_tm in
-  let sublist_const,pair_tm = dest_comb sublist_pair in
-  let base,len = dest_pair pair_tm in
-  (* Check i < len *)
-  let i_num = dest_numeral i and
-      len_num = dest_numeral len in
-  if i_num >= len_num then failwith "EL_SUB_LIST_CONV: index out of bounds" else
-  (* Apply EL_SUB_LIST theorem and simplify *)
-  let th1 = ISPECL [ls; i; base; len] EL_SUB_LIST in
-  let th2 = REWRITE_RULE[len_thm] th1 in
-  let th3 = MP th2 (EQT_ELIM(NUM_REDUCE_CONV (fst(dest_imp(concl th2))))) in
-  (* Evaluate base + i *)
-  CONV_RULE (RAND_CONV (LAND_CONV NUM_ADD_CONV)) th3;;
-
-(* Derived from LENGTH_SUB_LIST *)
-let LENGTH_SUB_LIST_0 = prove
- (`!n (l:'a list). n <= LENGTH l ==> LENGTH (SUB_LIST (0, n) l) = n`,
-  REPEAT STRIP_TAC THEN REWRITE_TAC[LENGTH_SUB_LIST; SUB_0] THEN ASM_ARITH_TAC);;
-
-let SUB_LIST_SUB_LIST_0 = prove(
- `!k n m (l:'a list). k + n <= m /\ m <= LENGTH l
-   ==> SUB_LIST (k, n) (SUB_LIST (0, m) l) = SUB_LIST (k, n) l`,
-  REPEAT STRIP_TAC THEN REWRITE_TAC[LIST_EQ; LENGTH_SUB_LIST; SUB_0] THEN
-  CONJ_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN REPEAT STRIP_TAC THEN
-  SUBGOAL_THEN `n' < n` ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
-  MP_TAC (ISPECL [`SUB_LIST (0,m) l:'a list`; `n':num`; `k:num`; `n:num`] EL_SUB_LIST) THEN
-  MP_TAC (ISPECL [`l:'a list`; `n':num`; `k:num`; `n:num`] EL_SUB_LIST) THEN
-  ASM_REWRITE_TAC[LENGTH_SUB_LIST; SUB_0] THEN
-  SUBGOAL_THEN `k + n <= LENGTH (l:'a list)` ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
-  SUBGOAL_THEN `k + n <= MIN m (LENGTH (l:'a list))` ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
-  ASM_SIMP_TAC[] THEN REPEAT DISCH_TAC THEN
-  MP_TAC (ISPECL [`l:'a list`; `k + n':num`; `0`; `m:num`] EL_SUB_LIST) THEN
-  ASM_REWRITE_TAC[ADD_CLAUSES] THEN DISCH_THEN MATCH_MP_TAC THEN ASM_ARITH_TAC);;  
-
-(* Variant of SUB_LIST_TOPSPLIT with equality hypothesis *)
-let SUB_LIST_SPLIT_EQ = prove
- (`!n r (l:'a list). n + r = LENGTH l
-   ==> APPEND (SUB_LIST (0, n) l) (SUB_LIST (n, r) l) = l`,
-  REPEAT STRIP_TAC THEN
-  MP_TAC (ISPECL [`l:'a list`; `n:num`] SUB_LIST_TOPSPLIT) THEN
-  FIRST_X_ASSUM (SUBST1_TAC o SYM) THEN REWRITE_TAC[ADD_SUB2]);;
-
-let APPEND_ITLIST_APPEND_NIL = prove
- (`!(l:('a list) list) (x:'a list). APPEND (ITLIST APPEND l []) x = ITLIST APPEND l x`,
-  LIST_INDUCT_TAC THEN REWRITE_TAC[ITLIST; APPEND] THEN
-  GEN_TAC THEN REWRITE_TAC[GSYM APPEND_ASSOC] THEN ASM_REWRITE_TAC[]);;
-
-let LIST_OF_SEQ_EQ = prove
- (`!(f:num->'a) g n. (!i. i < n ==> f i = g i) ==> list_of_seq f n = list_of_seq g n`,
-  GEN_TAC THEN GEN_TAC THEN INDUCT_TAC THEN REWRITE_TAC[list_of_seq] THEN
-  DISCH_TAC THEN BINOP_TAC THENL [
-    FIRST_X_ASSUM MATCH_MP_TAC THEN GEN_TAC THEN DISCH_TAC THEN
-    FIRST_X_ASSUM MATCH_MP_TAC THEN ASM_ARITH_TAC;
-    REWRITE_TAC[CONS_11] THEN FIRST_X_ASSUM MATCH_MP_TAC THEN ARITH_TAC
-  ]);;
-
-let SUBLIST_PARTITION = prove
- (`!r s (l:'a list). LENGTH l = r * s ==>
-       l = ITLIST APPEND (list_of_seq (\i. SUB_LIST (r * i, r) l) s) []`,
-  GEN_TAC THEN INDUCT_TAC THENL [
-    REWRITE_TAC[MULT_CLAUSES; list_of_seq; ITLIST; LENGTH_EQ_NIL];
-
-    REWRITE_TAC[list_of_seq; ITLIST_EXTRA; APPEND_NIL] THEN
-    GEN_TAC THEN DISCH_TAC THEN
-    SUBGOAL_THEN
-      `SUB_LIST (0, r * s) l =
-       ITLIST APPEND (list_of_seq (\i. SUB_LIST (r * i, r) (SUB_LIST (0, r * s) l)) s) []:'a list`
-      ASSUME_TAC THENL [
-      FIRST_X_ASSUM MATCH_MP_TAC THEN
-      MATCH_MP_TAC LENGTH_SUB_LIST_0 THEN ASM_ARITH_TAC;
-      ALL_TAC
-    ] THEN
-    SUBGOAL_THEN
-      `list_of_seq (\i. SUB_LIST (r * i, r) (SUB_LIST (0, r * s) l):'a list) s =
-       list_of_seq (\i. SUB_LIST (r * i, r) l) s`
-      ASSUME_TAC THENL [
-      MATCH_MP_TAC LIST_OF_SEQ_EQ THEN REPEAT STRIP_TAC THEN REWRITE_TAC[] THEN
-      MATCH_MP_TAC SUB_LIST_SUB_LIST_0 THEN CONJ_TAC THENL [
-        REWRITE_TAC[ARITH_RULE `r * i + r = r * (i + 1)`] THEN
-        REWRITE_TAC[LE_MULT_LCANCEL] THEN ASM_ARITH_TAC;
-        ASM_ARITH_TAC
-      ];
-      ALL_TAC
-    ] THEN
-    SUBGOAL_THEN
-      `APPEND (SUB_LIST (0, r * s) l) (SUB_LIST (r * s, r) l) = l:'a list`
-      ASSUME_TAC THENL [
-      MATCH_MP_TAC SUB_LIST_SPLIT_EQ THEN ASM_REWRITE_TAC[MULT_SUC] THEN ARITH_TAC;
-      ALL_TAC
-    ] THEN
-    SUBGOAL_THEN
-      `SUB_LIST (0, r * s) l =
-       ITLIST APPEND (list_of_seq (\i. SUB_LIST (r * i, r) l) s) []:'a list`
-      ASSUME_TAC THENL [ASM_MESON_TAC[]; ALL_TAC] THEN
-    UNDISCH_TAC `APPEND (SUB_LIST (0,r * s) l) (SUB_LIST (r * s,r) l) = l:'a list` THEN
-    UNDISCH_TAC `SUB_LIST (0,r * s) l = ITLIST APPEND (list_of_seq (\i. SUB_LIST (r * i,r) l) s) []:'a list` THEN
-    SIMP_TAC[APPEND_ITLIST_APPEND_NIL]
-  ]);;
-
-let NUM_BIT_DECOMPOSE_UNIQ = prove(`!a b t k. a < 2 EXP k ==> (a + 2 EXP k * b = t <=> (a = t MOD 2 EXP k /\ b = t DIV 2 EXP k))`,
-    REPEAT STRIP_TAC THEN EQ_TAC THENL [
-      DISCH_THEN (SUBST1_TAC o SYM) THEN
-      SIMP_TAC[MOD_MULT_ADD; DIV_MULT_ADD; EXP_EQ_0; ARITH_EQ] THEN
-      ASM_SIMP_TAC[MOD_LT; DIV_LT; ADD_CLAUSES];
-      STRIP_TAC THEN
-      MP_TAC (SPECL [`t:num`; `2 EXP k`] DIVISION) THEN
-      SIMP_TAC[EXP_EQ_0; ARITH_EQ] THEN ASM_REWRITE_TAC[] THEN ARITH_TAC]);;  
-
-let READ_BYTES_SPLIT_ANY =  prove(`read (bytes(a : int64,k+l)) s = t <=> 
-         read (bytes(a,k)) s = t MOD 2 EXP (8*k) /\ read (bytes(word_add a (word k), l)) s = t DIV 2 EXP (8*k)`,
-      let bound = prove(`read (bytes (a : int64,k)) s < 2 EXP (8*k)`, REWRITE_TAC[READ_BYTES_BOUND]) in
-      REWRITE_TAC[GSYM VAL_EQ; VAL_READ_WBYTES; READ_COMPONENT_COMPOSE] THEN         
-      REWRITE_TAC [READ_BYTES_COMBINE] THEN
-      REWRITE_TAC [MATCH_MP NUM_BIT_DECOMPOSE_UNIQ bound]
-  );;
-
-(* Applies a conversion under an n-fold recursive application of a binary operator.
- * In our case, we are interested in applying a conversion to each of the 2^n 'lanes'
- * in an n-fold application of `word_join`; those naturally arise as word representations
- * of SIMD registers. *)
-let BINOP_CONV_N n cv =
-  let rec go depth i tm =
-    if depth <= 0 then cv i tm
-    else
-      let half = 1 lsl (depth - 1) in
-      COMB2_CONV (RAND_CONV (go (depth-1) (half + i))) (go (depth-1) i) tm in
-  go n 0;;
-
-(* Apply a conversion inside the expression computing a `x |-> round(x * 3329 / 2^15)`
- * used in the AVX2 decompression routines. *)
-let ROUNDING_MUL_3329_CONV cv tm =
-  let pat = `word_subword (word_add (word_ushr (word_mul (XXX:32 word) (word 3329 : 32 word)) 14) (word 1)) (1, 16) : 16 word` in
-  let _ = term_match [] pat tm in
-  (LAND_CONV (LAND_CONV (LAND_CONV (LAND_CONV cv)))) tm;;
-
-(* Checks if a type is the type of words of the specified bitwidth. *)
-let is_word_type_n n ty =
-  is_type ty &&
-  let name, args = dest_type ty in
-  name = "word" && length args = 1 &&
-  Num.int_of_num (dest_finty (hd args)) = n;;
-
-(* Looks for a word subterm of the specified bitwidth, and returns it upon success. Returns None otherwise.
- * We use this to locate `word (num_of_wordlist ls)` word subterms of bitwidth 16*b, which stand out for 
- * their large bitwidth and represent the 16-nibble input to an iteration in the decompression loop. *)
-let rec find_word_subterm_n n tm =
-  if is_word_type_n n (type_of tm) then Some tm
-  else if is_comb tm then
-    match find_word_subterm_n n (rator tm) with
-    | Some t -> Some t
-    | None -> find_word_subterm_n n (rand tm)
-  else if is_abs tm then find_word_subterm_n n (body tm)
-  else None;;
-
-(* DECOMPRESS_LANE_CONV: This conversion takes an index i=0,..,15
- * and assumes to be given a word expression involving
- * - A unique 16*b subword,
- * - Only bit-blastable operations, like join, subword, shift.
- * It then asserts via WORD_BLAST that the expression -- however complex it may be --
- * is equivalent to the extraction of the i-th b-bit nibble from the
- * 16*b subword, zero-extended and potentially with some shift applied.
- *
- * This is the workhorse conversion relating the very complex 8/16/32/64-bit granular
- * word expression encountered during the decompression routines to the underlying
- * b-bit nibbles in the input data. Instead of replicating the precise bit extraction
- * logic here, we just check via bitblasting that the result is what we want. *)
-let DECOMPRESS_LANE_CONV l b i tm =
-  let word_bits = 16 * b in
-  match find_word_subterm_n word_bits tm with
-    | Some t_var ->
-        let b_ty = mk_finty (Num.num_of_int b) in
-        let t_ty = mk_finty (Num.num_of_int word_bits) in
-        let goal = mk_eq(tm,
-          subst [mk_small_numeral l, `l:num`; mk_small_numeral (b*i), `pos:num`;
-                 mk_small_numeral b, `b:num`; t_var, mk_var("t", mk_type("word",[t_ty]))]
-            (inst [b_ty, `:B`; t_ty, `:T`]
-              `word_shl (word_zx (word_subword (t : T word) (pos,b) : B word) : 32 word) l`)) in
-        (* For debugging: *)
-        (* let _ = print_term goal in *)
-        WORD_BLAST goal
-    | None -> failwith ("no " ^ string_of_int word_bits ^ "-bit word found")
-
-(* A dummy definition allowing us to mark terms which have already been processed, to prevent
- * further processing. *)    
-let WRAP = new_definition `WRAP (x : bool) : bool = x`;;
-
-(* DECOMPRESS_256_CONV: Rewrites 16 lanes in a 256-bit word_join tree, then wraps them. *)
-let DECOMPRESS_256_CONV l b = RAND_CONV (BINOP_CONV_N 4 (ROUNDING_MUL_3329_CONV o (DECOMPRESS_LANE_CONV l b))) THENC (ONCE_REWRITE_CONV [GSYM WRAP]);;
-
-(* Rewrite multiplications by 2-powers as shifts *)
-let WORD_MUL_2EXP = map (fun i -> WORD_BLAST (subst [mk_small_numeral (1 lsl i), `n:num`; mk_small_numeral i, `l:num`] 
-  `word_mul (x : 16 word) (word n) = word_shl x l`)) (0--12);;
-
-(* Rewrite multiplications by 2-power multiples of 3329 as combinations of shift and mul. *)
-let WORD_MUL_2EXP_3329 = map (fun i -> WORD_BLAST (subst [mk_small_numeral (3329 * (1 lsl i)), `n:num`; mk_small_numeral i, `l:num`] 
-  `word_mul (x : 32 word) (word n) = word_mul (word_shl x l) (word 3329)`)) (1--4);;
-
-let is_bytes256_read tm =
-  try let f,_ = dest_eq tm in
-      let r,_ = dest_comb f in
-      let rd,c = dest_comb r in
-      name_of rd = "read" &&
-      let _,b = dest_binary ":>" c in
-      let op,_ = dest_comb b in
-      fst(dest_const op) = "bytes256"
-  with Failure _ -> false;;
