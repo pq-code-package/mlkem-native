@@ -11,6 +11,14 @@
 
 (* Compression/decompression constants for AVX2 implementations. *)
 
+(* permdidx *)
+let compress_d4_data = define `compress_d4_data:int list = [
+  &0; &0; &0; &0; &4; &0; &0; &0;
+  &1; &0; &0; &0; &5; &0; &0; &0;
+  &2; &0; &0; &0; &6; &0; &0; &0;
+  &3; &0; &0; &0; &7; &0; &0; &0
+]`;;
+
 (* shufbidx *)
 let decompress_d4_data = define `decompress_d4_data:int list = [
   &0; &0; &0; &0; &1; &1; &1; &1;
@@ -20,11 +28,27 @@ let decompress_d4_data = define `decompress_d4_data:int list = [
 ]`;;
 
 (* shufbidx *)
+let compress_d10_data = define `compress_d10_data:int list = [
+  &0; &1; &2; &3; &4; &8; &9; &10;
+  &11; &12; &255; &255; &255; &255; &255; &255;
+  &9; &10; &11; &12; &255; &255; &255; &255;
+  &255; &255; &0; &1; &2; &3; &4; &8
+]`;;
+
+(* shufbidx *)
 let decompress_d10_data = define `decompress_d10_data:int list = [
   &0; &1; &1; &2; &2; &3; &3; &4;
   &5; &6; &6; &7; &7; &8; &8; &9;
   &2; &3; &3; &4; &4; &5; &5; &6;
   &7; &8; &8; &9; &9; &10; &10; &11
+]`;;
+
+(* shufbidx *)
+let compress_d5_data = define `compress_d5_data:int list = [
+  &0; &1; &2; &3; &4; &255; &255; &255;
+  &255; &255; &8; &9; &10; &11; &12; &255;
+  &9; &10; &11; &12; &255; &0; &1; &2;
+  &3; &4; &255; &255; &255; &255; &255; &8
 ]`;;
 
 (* shufbidx, mask, shift *)
@@ -41,6 +65,18 @@ let decompress_d5_data = define `decompress_d5_data:int list = [
   &64; &0; &0; &2; &16; &0; &128; &0;
   &0; &4; &32; &0; &0; &1; &8; &0;
   &64; &0; &0; &2; &16; &0; &128; &0
+]`;;
+
+(* srlvqidx, shufbidx *)
+let compress_d11_data = define `compress_d11_data:int list = [
+  &10; &0; &0; &0; &0; &0; &0; &0;
+  &30; &0; &0; &0; &0; &0; &0; &0;
+  &10; &0; &0; &0; &0; &0; &0; &0;
+  &30; &0; &0; &0; &0; &0; &0; &0;
+  &0; &1; &2; &3; &4; &5; &6; &7;
+  &8; &9; &10; &255; &255; &255; &255; &255;
+  &5; &6; &7; &8; &9; &10; &255; &255;
+  &255; &255; &0; &0; &1; &2; &3; &4
 ]`;;
 
 (* shufbidx, srlvdidx, srlvqidx, shift *)
