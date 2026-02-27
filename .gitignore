@@ -7,3 +7,5 @@ test/build
 __pycache__/
 # Downloaded ACVP test data
 test/acvp/.acvp-data/
+# Downloaded Wycheproof test data
+test/wycheproof/.wycheproof-data/

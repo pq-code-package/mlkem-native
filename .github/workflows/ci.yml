@@ -351,6 +351,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -364,6 +365,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -377,6 +379,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -390,6 +393,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -404,6 +408,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -418,6 +423,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -452,6 +458,7 @@ jobs:
           func: false
           kat: false
           acvp: false
+          wycheproof: false
           examples: false
           stack: true
           check_namespace: false

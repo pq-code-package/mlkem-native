@@ -213,6 +213,7 @@ class TEST_TYPES(Enum):
     UNIT = 19
     ALLOC = 20
     RNG_FAIL = 21
+    WYCHEPROOF = 22
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -259,6 +260,8 @@ class TEST_TYPES(Enum):
             return "Kat Test"
         if self == TEST_TYPES.ACVP:
             return "ACVP Test"
+        if self == TEST_TYPES.WYCHEPROOF:
+            return "Wycheproof Test"
         if self == TEST_TYPES.STACK:
             return "Stack Usage Test"
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
@@ -328,6 +331,8 @@ class TEST_TYPES(Enum):
             return "kat"
         if self == TEST_TYPES.ACVP:
             return "acvp"
+        if self == TEST_TYPES.WYCHEPROOF:
+            return "wycheproof"
         if self == TEST_TYPES.STACK:
             return "stack"
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
@@ -698,6 +703,19 @@ class Tests:
 
         self.check_fail()
 
+    def wycheproof(self):
+        def _wycheproof(opt):
+            self._compile_schemes(TEST_TYPES.WYCHEPROOF, opt)
+            if self.args.run:
+                self._run_scheme(TEST_TYPES.WYCHEPROOF, opt, None)
+
+        if self.do_no_opt():
+            _wycheproof(False)
+        if self.do_opt():
+            _wycheproof(True)
+
+        self.check_fail()
+
     def examples(self):
         if self.args.l is None:
             l = TEST_TYPES.examples()
@@ -816,6 +834,7 @@ class Tests:
         func = self.args.func
         kat = self.args.kat
         acvp = self.args.acvp
+        wycheproof = self.args.wycheproof
         examples = self.args.examples
         stack = self.args.stack
         unit = self.args.unit
@@ -829,6 +848,8 @@ class Tests:
                 self._compile_schemes(TEST_TYPES.KAT, opt)
             if acvp is True:
                 self._compile_schemes(TEST_TYPES.ACVP, opt)
+            if wycheproof is True:
+                self._compile_schemes(TEST_TYPES.WYCHEPROOF, opt)
             if stack is True:
                 self._compile_schemes(TEST_TYPES.STACK, opt)
             if unit is True:
@@ -856,6 +877,8 @@ class Tests:
                 self._run_schemes(TEST_TYPES.KAT, opt)
             if acvp is True:
                 self._run_scheme(TEST_TYPES.ACVP, opt, None)
+            if wycheproof is True:
+                self._run_scheme(TEST_TYPES.WYCHEPROOF, opt, None)
             if stack is True:
                 self._run_schemes(TEST_TYPES.STACK, opt, suppress_output=False)
             if unit is True:
@@ -1182,6 +1205,21 @@ def cli():
         "--no-acvp", action="store_false", dest="acvp", help="Do not run acvp test"
     )
 
+    wycheproof_group = all_parser.add_mutually_exclusive_group()
+    wycheproof_group.add_argument(
+        "--wycheproof",
+        action="store_true",
+        dest="wycheproof",
+        help="Run wycheproof test",
+        default=True,
+    )
+    wycheproof_group.add_argument(
+        "--no-wycheproof",
+        action="store_false",
+        dest="wycheproof",
+        help="Do not run wycheproof test",
+    )
+
     unit_group = all_parser.add_mutually_exclusive_group()
     unit_group.add_argument(
         "--unit", action="store_true", dest="unit", help="Run unit test", default=True
@@ -1278,6 +1316,11 @@ def cli():
         "--version",
         default="v1.1.0.41",
         help="ACVP test vector version (default: v1.1.0.41)",
+    )
+
+    # wycheproof arguments
+    wycheproof_parser = cmd_subparsers.add_parser(
+        "wycheproof", help="Run Wycheproof client", parents=[common_parser]
     )
 
     # examples arguments
@@ -1511,6 +1554,8 @@ def cli():
         Tests(args).examples()
     elif args.cmd == "acvp":
         Tests(args).acvp()
+    elif args.cmd == "wycheproof":
+        Tests(args).wycheproof()
     elif args.cmd == "bench":
         Tests(args).bench()
     elif args.cmd == "cbmc":
