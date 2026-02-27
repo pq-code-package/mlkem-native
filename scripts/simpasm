@@ -72,21 +72,41 @@ def patchup_disasm(asm, cfify=False):
             # order that differs from the original, causing a byte mismatch
             # on re-assembly. Fix up by using the bytecode to determine the
             # original operand order: REX.B in the prefix means the r/m
-            # field (second operand in AT&T) encodes the extended register.
-            m_xchg = re.match(r"xchgq?\s+(%\w+),\s*(%\w+)$", inst.strip())
+            # field encodes the extended register. The r/m field corresponds
+            # to the second operand in AT&T syntax, but the first operand
+            # in Intel syntax.
+            m_xchg = re.match(r"xchgq?\s+(%?\w+),\s*(%?\w+)$", inst.strip())
             if m_xchg:
                 first_byte = int(d.group("bytes").split()[0], 16)
                 if 0x40 <= first_byte <= 0x4F:
                     rex_b = first_byte & 0x01
                     op1, op2 = m_xchg.group(1), m_xchg.group(2)
+                    is_intel = not op1.startswith("%")
                     ext_regs = {
-                        "%r8", "%r9", "%r10", "%r11",
-                        "%r12", "%r13", "%r14", "%r15",
+                        "%r8",
+                        "%r9",
+                        "%r10",
+                        "%r11",
+                        "%r12",
+                        "%r13",
+                        "%r14",
+                        "%r15",
+                        "r8",
+                        "r9",
+                        "r10",
+                        "r11",
+                        "r12",
+                        "r13",
+                        "r14",
+                        "r15",
                     }
-                    if rex_b and op2 not in ext_regs:
-                        inst = f"xchgq\t{op2}, {op1}"
-                    elif not rex_b and op2 in ext_regs:
-                        inst = f"xchgq\t{op2}, {op1}"
+                    # r/m operand is op2 in AT&T, op1 in Intel
+                    rm_op = op1 if is_intel else op2
+                    mnemonic = "xchg" if is_intel else "xchgq"
+                    if rex_b and rm_op not in ext_regs:
+                        inst = f"{mnemonic}\t{op2}, {op1}"
+                    elif not rex_b and rm_op in ext_regs:
+                        inst = f"{mnemonic}\t{op2}, {op1}"
             yield " " * indentation + inst
 
     return list(gen(asm))

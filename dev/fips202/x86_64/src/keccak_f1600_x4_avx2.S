@@ -174,7 +174,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2)
    // Initialize the loop counter
    mov $0, %r10
 
-   kecca_loopk_f1600_x4_avx2:
+   keccak_loop_f1600_x4_avx2:
 
    // =====================================================================
    // Theta Step
@@ -505,7 +505,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2)
    add $8, %rsi
    add $1, %r10
    cmp $0x18, %r10
-   jne kecca_loopk_f1600_x4_avx2
+   jne keccak_loop_f1600_x4_avx2
 
    // Load, De-interleave, and Store 32 bytes to each of the 4 states (A(0-3))
    vmovdqu 0x0(%rsp), %ymm4 // Load A(0) from stack
