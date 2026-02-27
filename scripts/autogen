@@ -1326,6 +1326,58 @@ def gen_decompress_d4_shufbidx():
             yield byte_idx
 
 
+def gen_compress_d4_permdidx():
+    # Permutation index for poly_compress_d4_avx2 (vpermd).
+    # Corresponds to _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0),
+    # which in memory order (low to high dword) is: 0, 4, 1, 5, 2, 6, 3, 7.
+    # Stored as bytes in little-endian order.
+    for dword in [0, 4, 1, 5, 2, 6, 3, 7]:
+        yield from dword.to_bytes(4, "little")
+
+
+def gen_compress_d5_shufbidx():
+    # Shuffle index for poly_compress_d5_avx2.
+    # 5-bit compression: 8 coefficients -> 5 bytes (40 bits).
+    # Also used as vpblendvb mask (high bit selects source).
+    # 255 (0xFF) means "zero this byte" in vpshufb / "select src2" in vpblendvb.
+    yield from [0, 1, 2, 3, 4, 255, 255, 255, 255, 255, 8, 9, 10, 11, 12, 255]
+    yield from [9, 10, 11, 12, 255, 0, 1, 2, 3, 4, 255, 255, 255, 255, 255, 8]
+
+
+def gen_compress_d10_shufbidx():
+    # Shuffle index for poly_compress_d10_avx2.
+    # 10-bit compression: 4 coefficients -> 5 bytes (40 bits).
+    # Lane 0: extract bytes 0-4 and 8-12, Lane 1: wrap-around for blending
+    # 255 (0xFF) means "zero this byte" in vpshufb
+    yield from [0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 255, 255, 255, 255, 255, 255]
+    yield from [9, 10, 11, 12, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 8]
+
+
+def gen_compress_d11_srlvqidx():
+    # Variable qword right shift counts for poly_compress_d11_avx2.
+    # From _mm256_set_epi64x(30, 10, 30, 10)
+    for v in [10, 30, 10, 30]:
+        yield v & 0xFF
+        yield (v >> 8) & 0xFF
+        yield (v >> 16) & 0xFF
+        yield (v >> 24) & 0xFF
+        yield 0
+        yield 0
+        yield 0
+        yield 0
+
+
+def gen_compress_d11_shufbidx():
+    # Shuffle index for poly_compress_d11_avx2.
+    # 11-bit compression: 8 coefficients -> 11 bytes (88 bits).
+    # Also used as vpblendvb mask (high bit selects source).
+    # 255 (0xFF) means "zero this byte" in vpshufb / "select src2" in vpblendvb.
+    # From _mm256_set_epi8(4,3,2,1,0,0,-1,-1,-1,-1,10,9,8,7,6,5,
+    #                      -1,-1,-1,-1,-1,10,9,8,7,6,5,4,3,2,1,0)
+    yield from [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 255, 255, 255, 255, 255]
+    yield from [5, 6, 7, 8, 9, 10, 255, 255, 255, 255, 0, 0, 1, 2, 3, 4]
+
+
 def gen_decompress_d10_shufbidx():
     # Shuffle index for poly_decompress_d10_avx2.
     # 10-bit decompression: coefficient i uses byte floor(10*i/8).
@@ -1420,8 +1472,20 @@ def gen_avx2_compress_consts():
     # Returns dict of {name: (sections, dtype, layout_comment, level)}
     # where sections is a list of (section_name, values) tuples.
     return {
+        "compress_d4_data": (
+            [("permdidx", list(gen_compress_d4_permdidx()))],
+            "uint8_t",
+            "permdidx",
+            "d4_d10",
+        ),
         "decompress_d4_data": (
             [("shufbidx", list(gen_decompress_d4_shufbidx()))],
+            "uint8_t",
+            "shufbidx",
+            "d4_d10",
+        ),
+        "compress_d10_data": (
+            [("shufbidx", list(gen_compress_d10_shufbidx()))],
             "uint8_t",
             "shufbidx",
             "d4_d10",
@@ -1432,6 +1496,12 @@ def gen_avx2_compress_consts():
             "shufbidx",
             "d4_d10",
         ),
+        "compress_d5_data": (
+            [("shufbidx", list(gen_compress_d5_shufbidx()))],
+            "uint8_t",
+            "shufbidx",
+            "d5_d11",
+        ),
         "decompress_d5_data": (
             [
                 ("shufbidx", list(gen_decompress_d5_shufbidx())),
@@ -1440,6 +1510,15 @@ def gen_avx2_compress_consts():
             ],
             "uint8_t",
             "shufbidx, mask, shift",
+            "d5_d11",
+        ),
+        "compress_d11_data": (
+            [
+                ("srlvqidx", list(gen_compress_d11_srlvqidx())),
+                ("shufbidx", list(gen_compress_d11_shufbidx())),
+            ],
+            "uint8_t",
+            "srlvqidx, shufbidx",
             "d5_d11",
         ),
         "decompress_d11_data": (
@@ -2854,8 +2933,22 @@ def gen_hol_light_asm():
             "x86_64",
         ),
         (
+            "poly_compress_d4.S",
+            "mlkem_poly_compress_d4.S",
+            "dev/x86_64/src",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
+        ),
+        (
             "poly_decompress_d4.S",
             "mlkem_poly_decompress_d4.S",
+            "dev/x86_64/src",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
+        ),
+        (
+            "poly_compress_d5.S",
+            "mlkem_poly_compress_d5.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
@@ -2868,8 +2961,22 @@ def gen_hol_light_asm():
             "x86_64",
         ),
         (
+            "poly_compress_d10.S",
+            "mlkem_poly_compress_d10.S",
+            "dev/x86_64/src",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
+        ),
+        (
             "poly_decompress_d10.S",
             "mlkem_poly_decompress_d10.S",
+            "dev/x86_64/src",
+            f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
+            "x86_64",
+        ),
+        (
+            "poly_compress_d11.S",
+            "mlkem_poly_compress_d11.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",

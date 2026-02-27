@@ -78,6 +78,10 @@
 #include "src/native/x86_64/src/nttfrombytes.S"
 #include "src/native/x86_64/src/ntttobytes.S"
 #include "src/native/x86_64/src/nttunpack.S"
+#include "src/native/x86_64/src/poly_compress_d10.S"
+#include "src/native/x86_64/src/poly_compress_d11.S"
+#include "src/native/x86_64/src/poly_compress_d4.S"
+#include "src/native/x86_64/src/poly_compress_d5.S"
 #include "src/native/x86_64/src/poly_decompress_d10.S"
 #include "src/native/x86_64/src/poly_decompress_d11.S"
 #include "src/native/x86_64/src/poly_decompress_d4.S"
@@ -618,6 +622,10 @@
 #undef mlk_tomont_avx2
 /* mlkem/src/native/x86_64/src/compress_consts.h */
 #undef MLK_NATIVE_X86_64_SRC_COMPRESS_CONSTS_H
+#undef mlk_compress_d10_data
+#undef mlk_compress_d11_data
+#undef mlk_compress_d4_data
+#undef mlk_compress_d5_data
 #undef mlk_decompress_d10_data
 #undef mlk_decompress_d11_data
 #undef mlk_decompress_d4_data
