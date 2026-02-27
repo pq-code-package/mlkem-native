@@ -44,6 +44,9 @@ inputs:
   acvp:
     description: Determine whether to run acvp test or not
     default: "true"
+  wycheproof:
+    description: Determine whether to run wycheproof test or not
+    default: "true"
   examples:
     description: Determine whether to run examples or not
     default: "true"
@@ -80,6 +83,7 @@ runs:
           echo KAT="${{ inputs.kat == 'true' && 'kat' || 'no-kat' }}" >> $GITHUB_ENV
           echo UNIT="${{ inputs.unit == 'true' && 'unit' || 'no-unit' }}" >> $GITHUB_ENV
           echo ACVP="${{ inputs.acvp == 'true' && 'acvp' || 'no-acvp' }}" >> $GITHUB_ENV
+          echo WYCHEPROOF="${{ inputs.wycheproof == 'true' && 'wycheproof' || 'no-wycheproof' }}" >> $GITHUB_ENV
           echo EXAMPLES="${{ inputs.examples == 'true' && 'examples' || 'no-examples' }}" >> $GITHUB_ENV
           echo STACK="${{ inputs.stack == 'true' && 'stack' || 'no-stack' }}" >> $GITHUB_ENV
           echo ALLOC="${{ inputs.alloc == 'true' && 'alloc' || 'no-alloc' }}" >> $GITHUB_ENV
@@ -118,7 +122,7 @@ runs:
         shell: ${{ env.SHELL }}
         run: |
           make clean
-          ${{ inputs.extra_env }} ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --ldflags="${{ inputs.ldflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.EXAMPLES }} --${{ env.STACK }} --${{ env.UNIT }} --${{ env.ALLOC }} --${{ env.RNGFAIL }} -v ${{ inputs.extra_args }}
+          ${{ inputs.extra_env }} ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --ldflags="${{ inputs.ldflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.WYCHEPROOF }} --${{ env.EXAMPLES }} --${{ env.STACK }} --${{ env.UNIT }} --${{ env.ALLOC }} --${{ env.RNGFAIL }} -v ${{ inputs.extra_args }}
       - name: Post ${{ env.MODE }} Tests
         shell: ${{ env.SHELL }}
         if: success() || failure()

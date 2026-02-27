@@ -23,6 +23,7 @@ jobs:
            func: true
            kat: true
            acvp: true
+           wycheproof: false
            alloc: true
            bench: true
            opt: all
@@ -33,6 +34,7 @@ jobs:
            func: true
            kat: true
            acvp: true
+           wycheproof: false
            alloc: false
            bench: false
            opt: no_opt
@@ -50,6 +52,7 @@ jobs:
           func: ${{ matrix.target.func }}
           kat: ${{ matrix.target.kat }}
           acvp: ${{ matrix.target.acvp }}
+          wycheproof: ${{ matrix.target.wycheproof }}
           examples: false
           stack: false
           alloc: ${{ matrix.target.alloc }}

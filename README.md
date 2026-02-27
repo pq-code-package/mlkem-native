@@ -104,9 +104,12 @@ Our AArch64 assembly is developed using the [SLOTHY](https://github.com/slothy-o
 We write 'clean' assembly by hand and automate micro-optimizations (e.g. see the [clean](dev/aarch64_clean/src/ntt.S) vs [optimized](dev/aarch64_opt/src/ntt.S) AArch64 NTT).
 See [dev/README.md](dev/README.md) for more details.
 
-## ACVP Testing
+## Test Vectors
 
-mlkem-native is tested against all official ACVP ML-KEM test vectors[^ACVP].
+mlkem-native is tested against all official ACVP ML-KEM test vectors[^ACVP] and the
+[Wycheproof](https://github.com/C2SP/wycheproof) ML-KEM test vectors.
+
+### ACVP
 
 You can run ACVP tests using the [`tests`](./scripts/tests) script or the [ACVP client](./test/acvp/acvp_client.py) directly:
 
@@ -126,6 +129,18 @@ python3 ./test/acvp/acvp_client.py --version v1.1.0.41
 python3 ./test/acvp/acvp_client.py \
   -p ./test/acvp/.acvp-data/v1.1.0.41/files/ML-KEM-keyGen-FIPS203/prompt.json \
   -e ./test/acvp/.acvp-data/v1.1.0.41/files/ML-KEM-keyGen-FIPS203/expectedResults.json
+```
+
+### Wycheproof
+
+You can run Wycheproof tests using the [`tests`](./scripts/tests) script or the [Wycheproof client](./test/wycheproof/wycheproof_client.py) directly:
+
+```bash
+# Using the tests script
+./scripts/tests wycheproof
+
+# Using the Wycheproof client directly
+python3 ./test/wycheproof/wycheproof_client.py
 ```
 
 ## Benchmarking
