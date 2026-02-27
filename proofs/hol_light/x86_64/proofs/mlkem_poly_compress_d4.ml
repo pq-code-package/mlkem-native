@@ -478,3 +478,105 @@ let MLKEM_POLY_COMPRESS_D4_SUBROUTINE_CORRECT = prove(
             MAYCHANGE [memory :> bytes(r, 128)])`,
   MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_POLY_COMPRESS_D4_NOIBT_SUBROUTINE_CORRECT));;
 
+(* ------------------------------------------------------------------------- *)
+(* Constant-time and memory safety proof.                                    *)
+(* ------------------------------------------------------------------------- *)
+
+needs "x86_64/proofs/mlkem_utils.ml";;
+needs "x86_64/proofs/subroutine_signatures.ml";;
+
+let full_spec,public_vars = mk_safety_spec
+    ~keep_maychanges:true
+    (assoc "mlkem_poly_compress_d4" subroutine_signatures)
+    MLKEM_POLY_COMPRESS_D4_CORRECT
+    MLKEM_POLY_COMPRESS_D4_TMC_EXEC;;
+
+let MLKEM_POLY_COMPRESS_D4_SAFE = time prove
+ (`exists f_events.
+       forall e r a data (inlist:(16 word) list) pc.
+           LENGTH inlist = 256 /\
+           aligned 32 a /\
+           aligned 32 data /\
+           ALL (nonoverlapping (r,128))
+           [word pc,LENGTH mlkem_poly_compress_d4_tmc; a,512; data,32]
+           ==> ensures x86
+               (\s.
+                    bytes_loaded s (word pc)
+                      (BUTLAST mlkem_poly_compress_d4_tmc) /\
+                    read RIP s = word pc /\
+                    C_ARGUMENTS [r; a; data] s /\
+                    read events s = e)
+               (\s.
+                    read RIP s = word (pc + MLKEM_POLY_COMPRESS_D4_CORE_END) /\
+                    (exists e2.
+                         read events s = APPEND e2 e /\
+                         e2 = f_events a data r pc /\
+                         memaccess_inbounds e2
+                           [a,512; data,32; r,128] [r,128]))
+               (MAYCHANGE [events] ,,
+              MAYCHANGE [memory :> bytes (r,128)] ,,
+              MAYCHANGE [RIP] ,,
+              MAYCHANGE [RAX] ,,
+              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8])`,
+  ASSERT_CONCL_TAC full_spec THEN
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars
+    MLKEM_POLY_COMPRESS_D4_TMC_EXEC);;
+
+let MLKEM_POLY_COMPRESS_D4_NOIBT_SUBROUTINE_SAFE = time prove
+ (`exists f_events.
+       forall e r a data (inlist:(16 word) list) pc stackpointer returnaddress.
+           LENGTH inlist = 256 /\
+           aligned 32 a /\
+           aligned 32 data /\
+           ALL (nonoverlapping (r,128))
+           [word pc,LENGTH mlkem_poly_compress_d4_tmc; a,512; data,32;
+            stackpointer,8]
+           ==> ensures x86
+               (\s.
+                    bytes_loaded s (word pc) mlkem_poly_compress_d4_tmc /\
+                    read RIP s = word pc /\
+                    read RSP s = stackpointer /\
+                    read (memory :> bytes64 stackpointer) s = returnaddress /\
+                    C_ARGUMENTS [r; a; data] s /\
+                    read events s = e)
+               (\s. read RIP s = returnaddress /\
+                    read RSP s = word_add stackpointer (word 8) /\
+                    (exists e2.
+                         read events s = APPEND e2 e /\
+                         e2 = f_events a data r pc stackpointer returnaddress /\
+                         memaccess_inbounds e2
+                           [a,512; data,32; r,128; stackpointer,8]
+                           [r,128; stackpointer,8]))
+               (\s s'. true)`,
+  X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_poly_compress_d4_tmc
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_POLY_COMPRESS_D4_SAFE) THEN
+  DISCHARGE_SAFETY_PROPERTY_TAC);;
+
+let MLKEM_POLY_COMPRESS_D4_SUBROUTINE_SAFE = time prove
+ (`exists f_events.
+       forall e r a data (inlist:(16 word) list) pc stackpointer returnaddress.
+           LENGTH inlist = 256 /\
+           aligned 32 a /\
+           aligned 32 data /\
+           ALL (nonoverlapping (r,128))
+           [word pc,LENGTH mlkem_poly_compress_d4_mc; a,512; data,32;
+            stackpointer,8]
+           ==> ensures x86
+               (\s.
+                    bytes_loaded s (word pc) mlkem_poly_compress_d4_mc /\
+                    read RIP s = word pc /\
+                    read RSP s = stackpointer /\
+                    read (memory :> bytes64 stackpointer) s = returnaddress /\
+                    C_ARGUMENTS [r; a; data] s /\
+                    read events s = e)
+               (\s. read RIP s = returnaddress /\
+                    read RSP s = word_add stackpointer (word 8) /\
+                    (exists e2.
+                         read events s = APPEND e2 e /\
+                         e2 = f_events a data r pc stackpointer returnaddress /\
+                         memaccess_inbounds e2
+                           [a,512; data,32; r,128; stackpointer,8]
+                           [r,128; stackpointer,8]))
+               (\s s'. true)`,
+  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_POLY_COMPRESS_D4_NOIBT_SUBROUTINE_SAFE));;
