@@ -39,11 +39,15 @@ jobs:
         with:
           mode: start
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
-          ec2-image-id: ${{ env.AMI_UBUNTU_22_04_X86_64 }}
           ec2-instance-type: c7i.2xlarge
           ec2-volume-size: 32
-          subnet-id: subnet-07b2729e5e065962f
-          security-group-id: sg-0ab2e297196c8c381
+          availability-zones-config: >-
+            [{"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-07b2729e5e065962f","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-0c7739cbd02c2c1d2","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-0d69987f97f50fc1d","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-0d077bf47a0eef46e","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-0019f164593f6df43","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-0f0d1e7667a264a0e","securityGroupId":"sg-0ab2e297196c8c381"}]
 
   opentitan_test:
     name: OpenTitan ML-KEM Test (verilator)

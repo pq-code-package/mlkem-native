@@ -115,10 +115,14 @@ jobs:
         with:
           mode: start
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
-          ec2-image-id: ${{ steps.det_ami_id.outputs.AMI_ID }}
           ec2-instance-type: ${{ inputs.ec2_instance_type }}
-          subnet-id: subnet-07b2729e5e065962f
-          security-group-id: sg-0ab2e297196c8c381
+          availability-zones-config: >-
+            [{"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-07b2729e5e065962f","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-0c7739cbd02c2c1d2","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-0d69987f97f50fc1d","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-0d077bf47a0eef46e","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-0019f164593f6df43","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-0f0d1e7667a264a0e","securityGroupId":"sg-0ab2e297196c8c381"}]
   bench_nix:
     name: Bench (nix)
     permissions:
