@@ -211,11 +211,19 @@ jobs:
             needs: ["mlkem_specs.ml"]
           - name: mlkem_mulcache_compute
             needs: ["mlkem_specs.ml", "mlkem_zetas.ml"]
+          - name: mlkem_poly_compress_d4
+            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
           - name: mlkem_poly_decompress_d4
+            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
+          - name: mlkem_poly_compress_d5
             needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
           - name: mlkem_poly_decompress_d5
             needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
+          - name: mlkem_poly_compress_d10
+            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
           - name: mlkem_poly_decompress_d10
+            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
+          - name: mlkem_poly_compress_d11
             needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
           - name: mlkem_poly_decompress_d11
             needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]

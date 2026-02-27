@@ -288,4 +288,77 @@ let subroutine_signatures = [
    ])
 );
 
+
+("mlkem_poly_compress_d4",
+  ([(*args*)
+     ("r", "uint8_t[static 128]", (*is const?*)"false");
+     ("a", "int16_t[static 256]", (*is const?*)"true");
+     ("data", "uint8_t[static 32]", (*is const?*)"true");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a", "256"(* num elems *), 2(* elem bytesize *));
+    ("data", "32"(* num elems *), 1(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("r", "128"(* num elems *), 1(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
+
+("mlkem_poly_compress_d5",
+  ([(*args*)
+     ("r", "uint8_t[static 160]", (*is const?*)"false");
+     ("a", "int16_t[static 256]", (*is const?*)"true");
+     ("data", "uint8_t[static 32]", (*is const?*)"true");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a", "256"(* num elems *), 2(* elem bytesize *));
+    ("data", "32"(* num elems *), 1(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("r", "160"(* num elems *), 1(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
+
+("mlkem_poly_compress_d10",
+  ([(*args*)
+     ("r", "uint8_t[static 320]", (*is const?*)"false");
+     ("a", "int16_t[static 256]", (*is const?*)"true");
+     ("data", "uint8_t[static 32]", (*is const?*)"true");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a", "256"(* num elems *), 2(* elem bytesize *));
+    ("data", "32"(* num elems *), 1(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("r", "320"(* num elems *), 1(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
+
+("mlkem_poly_compress_d11",
+  ([(*args*)
+     ("r", "uint8_t[static 352]", (*is const?*)"false");
+     ("a", "int16_t[static 256]", (*is const?*)"true");
+     ("data", "uint8_t[static 64]", (*is const?*)"true");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a", "256"(* num elems *), 2(* elem bytesize *));
+    ("data", "64"(* num elems *), 1(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("r", "352"(* num elems *), 1(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
+
 ];;

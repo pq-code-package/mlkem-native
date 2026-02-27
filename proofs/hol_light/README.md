@@ -2,7 +2,7 @@
 
 # HOL Light functional correctness proofs
 
-This directory contains functional correctness proofs for all of the AArch64 and x86_64 assembly in mlkem-native.
+This directory contains functional correctness proofs for all AArch64 assembly and all x86_64 ML-KEM arithmetic assembly in mlkem-native.
 They are written in the [HOL Light](https://hol-light.github.io/) theorem prover, utilizing the assembly verification
 infrastructure from [s2n-bignum](https://github.com/awslabs/s2n-bignum).
 
@@ -11,8 +11,7 @@ contains the byte code being verified, as well as the specification that is bein
 
 ## Intrinsics
 
-The x86_64 backend still includes some native code written in C intrinsics. This code is **not** covered by proof, currently.
-We are working on rewriting all intrinsics code in assembly and verifying it in HOL-Light/s2n-bignum.
+The x86_64 FIPS-202 (Keccak) backend is still in C intrinsics and not yet covered by proof.
 
 ## Primer
 
@@ -99,7 +98,9 @@ echo '1+1;;' | nc -w 5 127.0.0.1 2012
 
 ## What is covered?
 
-All AArch64 assembly routines used in mlkem-native are covered. Those are:
+All AArch64 assembly routines and all x86_64 ML-KEM arithmetic assembly routines used in mlkem-native are covered. The x86_64 FIPS-202 (Keccak) backend is still in C intrinsics and not yet covered; see [above](#intrinsics).
+
+### AArch64
 
 - ML-KEM Arithmetic:
   * AArch64 forward NTT: [mlkem_ntt.S](aarch64/mlkem/mlkem_ntt.S)
@@ -119,21 +120,19 @@ All AArch64 assembly routines used in mlkem-native are covered. Those are:
 
 The NTT and invNTT functions are super-optimized using [SLOTHY](https://github.com/slothy-optimizer/slothy/).
 
-All x86_64 assembly routines used in mlkem-native are covered:
+### x86_64
 - ML-KEM Arithmetic:
   * x86_64 forward NTT: [mlkem_ntt.S](x86_64/mlkem/mlkem_ntt.S)
   * x86_64 inverse NTT: [mlkem_intt.S](x86_64/mlkem/mlkem_intt.S)
   * x86_64 base multiplications: [mlkem_poly_basemul_acc_montgomery_cached_k2.S](x86_64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.S) [mlkem_poly_basemul_acc_montgomery_cached_k3.S](x86_64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.S) [mlkem_poly_basemul_acc_montgomery_cached_k4.S](x86_64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.S)
   * x86_64 modular reduction: [mlkem_reduce.S](x86_64/mlkem/mlkem_reduce.S)
-  * x86_64 polynomial compression: [mlkem_tobytes.S](x86_64/mlkem/mlkem_tobytes.S)
+  * x86_64 polynomial compression: [mlkem_tobytes.S](x86_64/mlkem/mlkem_tobytes.S) [mlkem_poly_compress_d4.S](x86_64/mlkem/mlkem_poly_compress_d4.S) [mlkem_poly_compress_d5.S](x86_64/mlkem/mlkem_poly_compress_d5.S) [mlkem_poly_compress_d10.S](x86_64/mlkem/mlkem_poly_compress_d10.S) [mlkem_poly_compress_d11.S](x86_64/mlkem/mlkem_poly_compress_d11.S)
   * x86_64 rejection sampling: [mlkem_rej_uniform.S](x86_64/mlkem/mlkem_rej_uniform.S)
   * x86_64 polynomial deserialization: [mlkem_frombytes.S](x86_64/mlkem/mlkem_frombytes.S)
   * x86_64 conversion to Montgomery form: [mlkem_tomont.S](x86_64/mlkem/mlkem_tomont.S)
   * x86_64 polynomial unpacking: [mlkem_unpack.S](x86_64/mlkem/mlkem_unpack.S)
   * x86_64 'multiplication cache' computation: [mlkem_mulcache_compute.S](x86_64/mlkem/mlkem_mulcache_compute.S)
   * x86_64 polynomial decompression: [mlkem_poly_decompress_d4.S](x86_64/mlkem/mlkem_poly_decompress_d4.S) [mlkem_poly_decompress_d5.S](x86_64/mlkem/mlkem_poly_decompress_d5.S) [mlkem_poly_decompress_d10.S](x86_64/mlkem/mlkem_poly_decompress_d10.S) [mlkem_poly_decompress_d11.S](x86_64/mlkem/mlkem_poly_decompress_d11.S)
-
-Note again, though, that parts of the x86_64 backend are still in intrinsics; see [above](#intrinsics).
 
 <!--- bibliography --->
 [^HYBRID]: Becker, Kannwischer: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64, [https://eprint.iacr.org/2022/1243](https://eprint.iacr.org/2022/1243)

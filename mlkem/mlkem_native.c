@@ -80,11 +80,10 @@
 #include "src/native/aarch64/src/rej_uniform_table.c"
 #endif
 #if defined(MLK_SYS_X86_64)
-#include "src/native/x86_64/src/compress_avx2.c"
 #include "src/native/x86_64/src/compress_consts.c"
 #include "src/native/x86_64/src/consts.c"
 #include "src/native/x86_64/src/rej_uniform_table.c"
-#endif /* MLK_SYS_X86_64 */
+#endif
 #if defined(MLK_SYS_RISCV64)
 #include "src/native/riscv64/src/rv64v_debug.c"
 #include "src/native/riscv64/src/rv64v_poly.c"
@@ -613,6 +612,10 @@
 #undef mlk_tomont_avx2
 /* mlkem/src/native/x86_64/src/compress_consts.h */
 #undef MLK_NATIVE_X86_64_SRC_COMPRESS_CONSTS_H
+#undef mlk_compress_d10_data
+#undef mlk_compress_d11_data
+#undef mlk_compress_d4_data
+#undef mlk_compress_d5_data
 #undef mlk_decompress_d10_data
 #undef mlk_decompress_d11_data
 #undef mlk_decompress_d4_data
