@@ -4,13 +4,13 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = poly_compress_du_harness
+HARNESS_FILE = poly_compress_d11_native_x86_64_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = mlk_poly_compress_du
+PROOF_UID = poly_compress_d11_native_x86_64
 
-DEFINES +=
+DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLK_CONFIG_ARITH_BACKEND_FILE="\"$(SRCDIR)/mlkem/src/native/x86_64/meta.h\"" -DMLK_CHECK_APIS
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
@@ -19,14 +19,14 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/compress.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_poly_compress_du
-# For K = 2 or 3, MLKEM_DU = 10; for K = 4, MLKEM_DU = 11
 ifeq ($(MLKEM_K),4)
-USE_FUNCTION_CONTRACTS=mlk_poly_compress_d11
+CHECK_FUNCTION_CONTRACTS=mlk_poly_compress_d11_native
+USE_FUNCTION_CONTRACTS = mlk_poly_compress_d11_avx2
+USE_FUNCTION_CONTRACTS += mlk_sys_check_capability
 else
-USE_FUNCTION_CONTRACTS=mlk_poly_compress_d10
+CHECK_FUNCTION_CONTRACTS=
+USE_FUNCTION_CONTRACTS=
 endif
-
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -34,8 +34,15 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = mlk_poly_compress_du
+FUNCTION_NAME = poly_compress_d11_native_x86_64
 
+# If this proof is found to consume huge amounts of RAM, you can set the
+# EXPENSIVE variable. With new enough versions of the proof tools, this will
+# restrict the number of EXPENSIVE CBMC jobs running at once. See the
+# documentation in Makefile.common under the "Job Pools" heading for details.
+# EXPENSIVE = true
+
+# This function is large enough to need...
 CBMC_OBJECT_BITS = 8
 
 # If you require access to a file-local ("static") function or object to conduct

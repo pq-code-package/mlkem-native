@@ -35,6 +35,12 @@
  *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
 MLK_STATIC_TESTABLE void mlk_poly_compress_d4_c(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D4))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D4))
+)
 {
   unsigned i;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
@@ -63,6 +69,12 @@ MLK_STATIC_TESTABLE void mlk_poly_compress_d4_c(
 MLK_INTERNAL_API
 void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
                           const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D4))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D4))
+)
 {
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D4)
   int ret;
@@ -85,6 +97,12 @@ void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
  *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
 MLK_STATIC_TESTABLE void mlk_poly_compress_d10_c(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D10))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D10))
+)
 {
   unsigned j;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
@@ -116,6 +134,12 @@ MLK_STATIC_TESTABLE void mlk_poly_compress_d10_c(
 MLK_INTERNAL_API
 void mlk_poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
                            const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D10))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D10))
+)
 {
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D10)
   int ret;
@@ -248,6 +272,12 @@ __contract__(
  *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
 MLK_STATIC_TESTABLE void mlk_poly_compress_d5_c(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D5))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D5))
+)
 {
   unsigned i;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
@@ -276,6 +306,12 @@ MLK_STATIC_TESTABLE void mlk_poly_compress_d5_c(
 MLK_INTERNAL_API
 void mlk_poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
                           const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D5))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D5))
+)
 {
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D5)
   int ret;
@@ -298,6 +334,12 @@ void mlk_poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
  *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
 MLK_STATIC_TESTABLE void mlk_poly_compress_d11_c(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D11))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D11))
+)
 {
   unsigned j;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
@@ -336,6 +378,12 @@ MLK_STATIC_TESTABLE void mlk_poly_compress_d11_c(
 MLK_INTERNAL_API
 void mlk_poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
                            const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D11))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D11))
+)
 {
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D11)
   int ret;
