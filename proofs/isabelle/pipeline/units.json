@@ -1,0 +1,80 @@
+{
+  "units": [
+    {
+      "name": "poly",
+      "source": "mlkem/src/poly.c",
+      "parameter_set": 512,
+      "theory_name": "MLKEM_Poly_Definitions",
+      "output_c": "generated/c/poly.pre.c",
+      "output_theory": "MLKEM_Poly_Definitions.thy",
+      "addr_ty": "'addr",
+      "gv_ty": "'gv",
+      "cpp_overrides": [
+        "-Iproofs/isabelle/pipeline/config",
+        "-DMLK_CONFIG_FILE=\"proof_config.h\"",
+        "-D__attribute__(x)=",
+        "-D__extension__=",
+        "-D__asm__(x)="
+      ],
+      "extract": {
+        "mode": "function_subset",
+        "functions": [
+          "mlk_barrett_reduce",
+          "mlk_poly_add",
+          "mlk_poly_sub"
+        ],
+        "preamble": [
+          "typedef short int16_t;",
+          "typedef int int32_t;",
+          "",
+          "typedef struct mlk_poly",
+          "{",
+          "  int16_t coeffs[256];",
+          "} mlk_poly;",
+          ""
+        ]
+      },
+      "manifest": {
+        "output": "generated/manifests/poly.functions.manifest",
+        "functions": [
+          "mlk_barrett_reduce",
+          "mlk_poly_add",
+          "mlk_poly_sub"
+        ]
+      },
+      "type_manifest": {
+        "output": "generated/manifests/poly.types.manifest",
+        "functions": [
+          "__mlkem_pipeline_no_functions__"
+        ],
+        "types": [
+          "mlk_poly",
+          "int16_t",
+          "int32_t"
+        ]
+      },
+      "isabelle_prelude": [
+        "context c_mlk_machine_model",
+        "begin"
+      ],
+      "isabelle_postlude": [
+        "end"
+      ]
+    },
+    {
+      "name": "verify",
+      "source": "mlkem/src/verify.c",
+      "parameter_set": 512,
+      "theory_name": "MLKEM_Verify_Definitions",
+      "output_c": "generated/c/verify.pre.c",
+      "output_theory": "MLKEM_Verify_Definitions.thy",
+      "cpp_overrides": [
+        "-Iproofs/isabelle/pipeline/config",
+        "-DMLK_CONFIG_FILE=\"proof_config.h\"",
+        "-D__attribute__(x)=",
+        "-D__extension__=",
+        "-D__asm__(x)="
+      ]
+    }
+  ]
+}
