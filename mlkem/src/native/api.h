@@ -446,7 +446,13 @@ __contract__(
  **************************************************/
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_compress_d4_native(
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const int16_t a[MLKEM_N]);
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const int16_t a[MLKEM_N])
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D4))
+  requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_N))
+  requires(array_bound(a, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D4))
+  ensures(return_value == MLK_NATIVE_FUNC_SUCCESS || return_value == MLK_NATIVE_FUNC_FALLBACK));
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D4 */
 
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D10)
@@ -464,7 +470,13 @@ static MLK_INLINE int mlk_poly_compress_d4_native(
  **************************************************/
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_compress_d10_native(
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const int16_t a[MLKEM_N]);
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const int16_t a[MLKEM_N])
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D10))
+  requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_N))
+  requires(array_bound(a, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D10))
+  ensures(return_value == MLK_NATIVE_FUNC_SUCCESS || return_value == MLK_NATIVE_FUNC_FALLBACK));
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D10 */
 
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D4)
@@ -536,7 +548,13 @@ __contract__(
  **************************************************/
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_compress_d5_native(
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const int16_t a[MLKEM_N]);
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const int16_t a[MLKEM_N])
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D5))
+  requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_N))
+  requires(array_bound(a, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D5))
+  ensures(return_value == MLK_NATIVE_FUNC_SUCCESS || return_value == MLK_NATIVE_FUNC_FALLBACK));
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D5 */
 
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D11)
@@ -554,7 +572,13 @@ static MLK_INLINE int mlk_poly_compress_d5_native(
  **************************************************/
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_compress_d11_native(
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const int16_t a[MLKEM_N]);
+    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const int16_t a[MLKEM_N])
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D11))
+  requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_N))
+  requires(array_bound(a, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D11))
+  ensures(return_value == MLK_NATIVE_FUNC_SUCCESS || return_value == MLK_NATIVE_FUNC_FALLBACK));
 #endif /* MLK_USE_NATIVE_POLY_COMPRESS_D11 */
 
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D5)
