@@ -71,6 +71,8 @@ relevant parts of the Arm and x86 architectures). See [proofs/hol_light](proofs/
 **NOTE:** Formal Verification is never absolute. See [SOUNDNESS.md](SOUNDNESS.md) for a detailed analysis of the scope, assumptions and risks of the formal verification
 efforts around mlkem-native.
 
+Selected C/functional components are also verified in [Isabelle/HOL](https://isabelle.in.tum.de/) using AutoCorrode. See [proofs/isabelle](proofs/isabelle).
+
 ## Security
 
 All AArch64 and x86_64 assembly in mlkem-native is formally proved in [HOL Light](https://github.com/jrh13/hol-light) to be free of secret-dependent control flow,

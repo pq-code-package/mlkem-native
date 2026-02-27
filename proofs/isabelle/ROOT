@@ -1,0 +1,14 @@
+session MLKEM_Native_AutoCorrode = HOL +
+  options [document = false]
+  sessions
+    "HOL-Library"
+    Micro_C_Examples
+    Micro_Rust_Runtime
+    Byte_Level_Encoding
+  theories
+    Common
+    MLKEM_Machine_Model
+    MLKEM_Machine_Model_Instance
+    MLKEM_Poly_Definitions
+    MLKEM_Poly_Functional_Correctness
+    MLKEM_Functional_Correctness
