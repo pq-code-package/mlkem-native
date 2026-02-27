@@ -1,11 +1,11 @@
 # Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-.PHONY: func kat acvp stack alloc rng_fail \
-	func_512 kat_512 acvp_512 stack_512 alloc_512 rng_fail_512 \
-	func_768 kat_768 acvp_768 stack_768 alloc_768 rng_fail_768 \
-	func_1024 kat_1024 acvp_1024 stack_1024 alloc_1024 rng_fail_1024 \
-	run_func run_kat run_acvp run_stack run_alloc run_rng_fail \
+.PHONY: func kat acvp wycheproof stack alloc rng_fail \
+	func_512 kat_512 acvp_512 wycheproof_512 stack_512 alloc_512 rng_fail_512 \
+	func_768 kat_768 acvp_768 wycheproof_768 stack_768 alloc_768 rng_fail_768 \
+	func_1024 kat_1024 acvp_1024 wycheproof_1024 stack_1024 alloc_1024 rng_fail_1024 \
+	run_func run_kat run_acvp run_wycheproof run_stack run_alloc run_rng_fail \
 	run_func_512 run_kat_512 run_stack_512 run_alloc_512 run_rng_fail_512 \
 	run_func_768 run_kat_768 run_stack_768 run_alloc_768 run_rng_fail_768 \
 	run_func_1024 run_kat_1024 run_stack_1024 run_alloc_1024 run_rng_fail_1024 \
@@ -43,10 +43,10 @@ endif
 
 quickcheck: test
 
-build: func kat acvp
+build: func kat acvp wycheproof
 	$(Q)echo "  Everything builds fine!"
 
-test: run_kat run_func run_acvp run_unit run_alloc run_rng_fail
+test: run_kat run_func run_acvp run_wycheproof run_unit run_alloc run_rng_fail
 	$(Q)echo "  Everything checks fine!"
 
 # Detect available SHA256 command
@@ -113,6 +113,17 @@ acvp_768:  $(MLKEM768_DIR)/bin/acvp_mlkem768
 acvp_1024: $(MLKEM1024_DIR)/bin/acvp_mlkem1024
 	$(Q)echo "  ACVP       ML-KEM-1024:  $^"
 acvp: acvp_512 acvp_768 acvp_1024
+
+wycheproof_512:  $(MLKEM512_DIR)/bin/wycheproof_mlkem512
+	$(Q)echo "  WYCHEPROOF ML-KEM-512:   $^"
+wycheproof_768:  $(MLKEM768_DIR)/bin/wycheproof_mlkem768
+	$(Q)echo "  WYCHEPROOF ML-KEM-768:   $^"
+wycheproof_1024: $(MLKEM1024_DIR)/bin/wycheproof_mlkem1024
+	$(Q)echo "  WYCHEPROOF ML-KEM-1024:  $^"
+wycheproof: wycheproof_512 wycheproof_768 wycheproof_1024
+
+run_wycheproof: wycheproof
+	EXEC_WRAPPER="$(EXEC_WRAPPER)" python3 ./test/wycheproof/wycheproof_client.py
 
 ifeq ($(HOST_PLATFORM),Linux-aarch64)
 # valgrind does not work with the AArch64 SHA3 extension
