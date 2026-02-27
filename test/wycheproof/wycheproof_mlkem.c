@@ -16,8 +16,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../../mlkem/src/common.h"
 #include "../../mlkem/mlkem_native.h"
+#include "../../mlkem/src/common.h"
 
 #define CHECK(x)                                              \
   do                                                          \
@@ -34,13 +34,21 @@
 static unsigned char decode_hex_char(char hex)
 {
   if (hex >= '0' && hex <= '9')
+  {
     return (unsigned char)(hex - '0');
+  }
   else if (hex >= 'A' && hex <= 'F')
+  {
     return (unsigned char)(10 + (unsigned char)(hex - 'A'));
+  }
   else if (hex >= 'a' && hex <= 'f')
+  {
     return (unsigned char)(10 + (unsigned char)(hex - 'a'));
+  }
   else
+  {
     return 0xFF;
+  }
 }
 
 static int decode_hex(const char *prefix, unsigned char *out, size_t out_len,
@@ -52,20 +60,26 @@ static int decode_hex(const char *prefix, unsigned char *out, size_t out_len,
 
   if (hex_len < prefix_len + 1 || memcmp(prefix, hex, prefix_len) != 0 ||
       hex[prefix_len] != '=')
+  {
     return 1;
+  }
 
   hex += prefix_len + 1;
   hex_len -= prefix_len + 1;
 
   if (hex_len != 2 * out_len)
+  {
     return 1;
+  }
 
   for (i = 0; i < out_len; i++, hex += 2, out++)
   {
     unsigned hex0 = decode_hex_char(hex[0]);
     unsigned hex1 = decode_hex_char(hex[1]);
     if (hex0 == 0xFF || hex1 == 0xFF)
+    {
       return 1;
+    }
     *out = (unsigned char)((hex0 << 4) | hex1);
   }
   return 0;
@@ -74,16 +88,22 @@ static int decode_hex(const char *prefix, unsigned char *out, size_t out_len,
 static void print_hex(const char *name, const unsigned char *raw, size_t len)
 {
   if (name != NULL)
+  {
     printf("%s=", name);
+  }
   for (; len > 0; len--, raw++)
+  {
     printf("%02X", *raw);
+  }
   printf("\n");
 }
 
 int main(int argc, char *argv[])
 {
   if (argc < 2)
+  {
     goto usage;
+  }
 
   if (strcmp(argv[1], "keygen_seed") == 0)
   {
@@ -93,7 +113,9 @@ int main(int argc, char *argv[])
     unsigned char dk[CRYPTO_SECRETKEYBYTES];
 
     if (argc != 3)
+    {
       goto usage;
+    }
 
     if (decode_hex("seed", seed, sizeof(seed), argv[2]) != 0)
     {
@@ -114,7 +136,9 @@ int main(int argc, char *argv[])
     unsigned char ss[CRYPTO_BYTES];
 
     if (argc != 4)
+    {
       goto usage;
+    }
 
     if (decode_hex("ek", ek, sizeof(ek), argv[2]) != 0 ||
         decode_hex("m", m, sizeof(m), argv[3]) != 0)
@@ -135,7 +159,9 @@ int main(int argc, char *argv[])
     unsigned char ss[CRYPTO_BYTES];
 
     if (argc != 4)
+    {
       goto usage;
+    }
 
     if (decode_hex("dk", dk, sizeof(dk), argv[2]) != 0)
     {
