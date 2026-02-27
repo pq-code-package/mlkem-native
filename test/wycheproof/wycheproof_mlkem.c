@@ -16,8 +16,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../../mlkem/mlkem_native.h"
 #include "../../mlkem/src/common.h"
+
+#include "../../mlkem/mlkem_native.h"
+
 
 #define CHECK(x)                                              \
   do                                                          \
