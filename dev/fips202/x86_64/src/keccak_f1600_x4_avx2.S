@@ -13,8 +13,6 @@
 .global MLK_ASM_NAMESPACE(keccak_f1600_x4_avx2)
 MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2)
 
-   .cfi_startproc
-
    // **** Bitstates Allocation Map **** //
    // 0x0(%rsp)     A0    (state0[0), state1[0], state2[0], state3[0]]     Input (%rdi) offsets: 0x00, 0xC8, 0x190, 0x258
    // 0x20(%rsp)    A1    (state0[1), state1[1], state2[1], state3[1]]     Input (%rdi) offsets: 0x08, 0xD0, 0x198, 0x260
@@ -619,7 +617,6 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2)
    vmovhpd %xmm15, 0x318(%rdi)
    addq   $0x300, %rsp
    ret
-   .cfi_endproc
 
 /* simpasm: footer-start */
 #endif /* MLK_FIPS202_X86_64_XKCP && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
