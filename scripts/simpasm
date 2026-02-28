@@ -57,15 +57,57 @@ def patchup_disasm(asm, cfify=False):
                 l = re.sub(
                     r"(0x)?[0-9a-fA-F]+\s+<(?P<label>[a-zA-Z0-9_]+)>", r"\g<label>", l
                 )
-            # Drop address and byte code from line
+            # Drop address and byte code from line, but keep bytecode for fixups
             d = re.search(
-                r"^\s*[0-9a-fA-F]+:\s+([0-9a-fA-F][0-9a-fA-F][ ]*)+\s+(?P<inst>.*)$", l
+                r"^\s*[0-9a-fA-F]+:\s+(?P<bytes>([0-9a-fA-F][0-9a-fA-F][ ]*)+)\s+(?P<inst>.*)$",
+                l,
             )
             if d is None:
                 raise Exception(
                     f'The following does not seem to be an assembly line of the expected format `ADDRESS: BYTECODE INSTRUCTION`:\n"{l}"'
                 )
-            yield " " * indentation + d.group("inst")
+            inst = d.group("inst")
+            # xchg is commutative but the two operand orderings produce
+            # different encodings. The disassembler may output an operand
+            # order that differs from the original, causing a byte mismatch
+            # on re-assembly. Fix up by using the bytecode to determine the
+            # original operand order: REX.B in the prefix means the r/m
+            # field encodes the extended register. The r/m field corresponds
+            # to the second operand in AT&T syntax, but the first operand
+            # in Intel syntax.
+            m_xchg = re.match(r"xchgq?\s+(%?\w+),\s*(%?\w+)$", inst.strip())
+            if m_xchg:
+                first_byte = int(d.group("bytes").split()[0], 16)
+                if 0x40 <= first_byte <= 0x4F:
+                    rex_b = first_byte & 0x01
+                    op1, op2 = m_xchg.group(1), m_xchg.group(2)
+                    is_intel = not op1.startswith("%")
+                    ext_regs = {
+                        "%r8",
+                        "%r9",
+                        "%r10",
+                        "%r11",
+                        "%r12",
+                        "%r13",
+                        "%r14",
+                        "%r15",
+                        "r8",
+                        "r9",
+                        "r10",
+                        "r11",
+                        "r12",
+                        "r13",
+                        "r14",
+                        "r15",
+                    }
+                    # r/m operand is op2 in AT&T, op1 in Intel
+                    rm_op = op1 if is_intel else op2
+                    mnemonic = "xchg" if is_intel else "xchgq"
+                    if rex_b and rm_op not in ext_regs:
+                        inst = f"{mnemonic}\t{op2}, {op1}"
+                    elif not rex_b and rm_op in ext_regs:
+                        inst = f"{mnemonic}\t{op2}, {op1}"
+            yield " " * indentation + inst
 
     return list(gen(asm))
 

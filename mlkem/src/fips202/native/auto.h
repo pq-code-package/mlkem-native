@@ -15,8 +15,11 @@
 #include "aarch64/auto.h"
 #endif
 
-#if defined(MLK_SYS_X86_64) && defined(MLK_SYS_X86_64_AVX2)
-#include "x86_64/xkcp.h"
+/* The x86_64 native backends use System V AMD64 ABI and GAS syntax,
+ * which are not compatible with Windows. Skip on Windows and fall
+ * back to the C implementation. */
+#if defined(MLK_SYS_X86_64) && !defined(MLK_SYS_WINDOWS)
+#include "x86_64/auto.h"
 #endif
 
 /* We do not yet include the FIPS202 backend for Armv8.1-M+MVE by default
