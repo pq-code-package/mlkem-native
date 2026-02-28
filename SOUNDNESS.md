@@ -2,24 +2,26 @@
 
 # Formal Verification in mlkem-native: Scope, Assumptions, Risks
 
+This document describes the scope, assumptions and risks of the formal verification
+efforts around mlkem-native.
+
+The parts of the analysis pertaining to HOL Light and s2n-bignum are largely shared with
+the corresponding [^s2n-bignum-soundness].
+
+## Overview
+
 Formal verification is never absolute. Every verification effort links formal objects --
 specifications and models -- to informal, real-world requirements and systems. This document
 maps out what is proved about mlkem-native, what is assumed, and where the gaps and risks lie.
 
-The parts of the analysis pertaining to HOL Light and s2n-bignum are largely shared with
-the corresponding [HOL Light / s2n-bignum Soundness
-Document](https://github.com/awslabs/s2n-bignum/blob/main/doc/s2n_bignum_soundness.md).
-
-## Overview
-
 Our goal is to provide evidence rooted in formal reasoning for the statement that
-"mlkem-native implements the FIPS 203 standard and does not leak secrets through timing variations".
+"mlkem-native implements the [^FIPS203] standard and does not leak secrets through timing variations".
 
-The narrative for such argument is typically the following:
+The narrative for the argument is the following, which is common in formal verification:
 - [Informal] Here is the real physical system, in all its complexity.
 - [Formal] Here is a formal model of the real system which we believe approximates its behavior.
-- [Formal] Here is how we can formally specify the behavior of mlkem-native w.r.t. this formal model.
-- [Formal] Here is how we formally prove mlkem-native's formal specification.
+- [Formal] Here is how we can formally specify the behavior of this formal model.
+- [Formal] Here is how we formally prove the formal specification.
 - [Informal] Here is why we think this approximates the desired properties of the real system.
 
 Diagrammatically, this can be depicted as follows:
@@ -65,9 +67,8 @@ This methodology introduces three fundamental soundness gaps:
 For mlkem-native, this structure is instantiated twice -- once for each verification
 stack.
 
-- **CBMC** for the C code: memory safety, type safety, and absence of undefined behavior.
-- **HOL Light** (via the [s2n-bignum](https://github.com/awslabs/s2n-bignum) infrastructure)
-  for the assembly backends: functional correctness, memory safety, and secret-independent
+- **[^CBMC]** for the C code: memory safety, type safety, and absence of undefined behavior.
+- **[^HOL-Light] + [^s2n-bignum]** for the assembly backends: functional correctness, memory safety, and secret-independent
   execution.
 
 ```
@@ -76,7 +77,7 @@ stack.
   │                     │          │                          │
   │  ML-KEM spec        │          │  CBMC          HOL Light │
   │  (FIPS 203),        │          │  contracts     specs     │
-  │  constant-time      │   Gap A  │  (C funcs)    (ASM)      │
+  │  constant-time      │   Gap A  │  (C funcs)      (ASM)    │
   │  requirements,      │<· · · · >│     :             :      │
   │  ABI, ...           │          │     :             :      │
   │                     │          │     :             :      │
@@ -99,8 +100,6 @@ stack.
   └─────────────────────┘          └─────────────────────────┘
 ```
 
-The remainder of this document discusses each gap in detail.
-
 ---
 
 ## Gap A: Do the formal specifications match actual requirements?
@@ -110,7 +109,7 @@ It has multiple facets, including: Whether all system components are covered by 
 whether the specifications are strong enough (depth), whether they faithfully capture the informal requirements
 (faithfulness), and whether they compose to a claim about the whole system (consistency).
 
-### A0. Coverage: Breadth
+### A1. Coverage: Breadth
 
 Which components of the system are captured by formal specification? The primary risk is
 that our coverage claims are wrong -- that a C or assembly function slips through without
@@ -120,7 +119,7 @@ a specification, or that an unspecified component is incorrect.
 
 - All C code in the core library has CBMC contracts.
 - All AArch64 assembly routines have HOL Light specifications.
-- All x86_64 assembly routines have HOL Light proofs.
+- All x86_64 assembly routines have HOL Light specifications.
 
 **What is NOT covered.**
 
@@ -134,13 +133,13 @@ correctness empirically across all platforms and configurations, but there is cu
 no automatic check that every C function has a CBMC contract or that every assembly
 routine has a HOL Light proof. A function could slip through without specification.
 
-**Future work.**
+**Potential improvements.**
 - Add automatic proof coverage check to CI. (TODO: Ref tracking issue)
 - Replace all intrinsics-based code with pure assembly, bringing it into the scope of
   HOL Light verification. (TODO: Ref tracking issue)
 - Extend assembly verification to all backends. (TODO: Ref tracking issue)
 
-### A1. Coverage: Depth
+### A2. Coverage: Depth
 
 Do the specifications have the desired depth? The risk is that undesired behavior occurs
 which is outside the scope of specification.
@@ -148,7 +147,7 @@ which is outside the scope of specification.
 Currently, we aim for mlkem-native to be **functionally correct** (the code computes the
 right answer as per FIPS 203) and **constant-time** (no secret-dependent timing variation).
 
-**Assembly (HOL Light).** With a single exception, the ASM specifications capture functional
+**Assembly (HOL Light).** With one exception, the ASM specifications capture functional
 correctness, memory safety, and secret-independent execution. The one exception remaining is
 rejection sampling: the native implementations for this function only have functional
 correctness specifications, but no specifications of memory safety (the functions are safely
@@ -180,12 +179,12 @@ are tested empirically using valgrind with a variable-latency patch across many 
 (GCC 4.8–15, Clang 14–21) and optimization levels (-O0 through -Ofast), and the C code
 uses value barriers to prevent harmful compiler optimizations.
 
-**Future work.**
+**Potential improvements.**
 - Add memory-safety proof for rejection sampling routines. (TODO: Ref tracking issue)
 - Introduce additional verification tooling that allows us to express functional correctness
   and constant-time properties for the C code. (TODO: Ref tracking issue)
 
-### A2. Specification faithfulness
+### A3. Specification faithfulness
 
 For the specifications that do exist, does their formal meaning capture their intent? The
 risk is that a specification does not express what we informally intend it to express.
@@ -203,6 +202,20 @@ mathematical functions in the standard.
 leak secrets through timing side channels. Since we only capture constant-time properties
 at the assembly level, faithfulness requires that the HOL Light constant-time specification
 style faithfully captures constant-time execution.
+
+The s2n-bignum formal model approximates constant-time'ness as follows: It introduces the
+notion of *microarchitectural events* that flag uses of instructions with potentially
+data-dependent timing (e.g., integer division). The constant-time proofs then establish
+that (a) the sequence of instructions executed and all memory addresses accessed are independent
+of secret inputs, and that (b) no variable-timing microarchitectural events occur.
+
+The formal notion of constant-time'ness used in s2n-bignum does not and cannot guarantee
+that the hardware executes those instructions in constant time: microarchitectural effects
+(variable-latency instructions, Hertzbleed-style frequency scaling) could still leak
+information. Some hardwaren provides opt-in guarantees for a listed set of instructions -- ARM's DIT (Data Independent
+Timing, Armv8.4-A onwards) and Intel's DOITM (Data Operand Independent Timing Mode, Ice Lake onwards) -- but even with
+these enabled, coverage is limited to specific instruction sets, and power- or frequency-based side channels remain
+outside scope. See [^s2n-bignum-soundness] for full details.
 
 **Safety.** For the bulk of the CBMC specifications which do not capture
 functional correctness, memory- and type-safety are implicit in the CBMC configuration
@@ -229,13 +242,13 @@ of CBMC could cause the implicit expectation of memory- and type-safety being in
 the CBMC specifications not to hold; or a CBMC proof could incorrectly disable a safety
 check.
 
-**Future work.**
+**Potential improvements.**
 - Derive the CBMC configuration from a machine- and human-readable source documenting
   the desired configuration options and their meaning. (TODO: Add issue)
 - Provide a document which explains the specification style for correctness and constant-time
   properties in HOL Light. (TODO: Ref tracking issue)
 
-### A3. Specification consistency
+### A4. Specification consistency
 
 Do the individual specifications compose to a coherent claim about the whole system? The
 risks are that a contract assumed during proof differs from the contract that is proved,
@@ -304,7 +317,7 @@ from the actual register/stack layout used by the assembly. And a semantic gap b
 CBMC contract language and HOL Light's logic -- for example, differing signed vs. unsigned
 interpretation of bounds -- could cause the bridge to be unsound.
 
-**Future work.**
+**Potential improvements.**
 - Establish a machine-checked link between the HOL Light specifications and the CBMC
   contracts. (TODO: Ref tracking issue)
 
@@ -322,9 +335,9 @@ references, misunderstandings, or transcription mistakes could silently invalida
 (`simulator.ml` + `simulator.c`) that repeatedly picks random instruction encodings and
 random register/flag states, decodes them, executes them both symbolically through the
 formal model and natively on real hardware, and compares results. This exercises both the
-ISA semantics and the decoder. It runs for 30 minutes on 8 cores per CI run and covers
-all register-to-register instruction forms with randomized operands, as well as
-memory-accessing instructions via dedicated harnesses for various addressing modes.
+ISA semantics and the decoder. It in CI and covers all register-to-register instruction
+forms with randomized operands, as well as memory-accessing instructions via dedicated
+harnesses for various addressing modes.
 
 Where instructions have genuinely underspecified behavior -- for example, `IMUL` sets flags
 differently on different x86 microarchitectures -- the s2n-bignum model reflects this
@@ -336,8 +349,7 @@ s2n-bignum (via the shared HOL Light infrastructure), this is appropriate -- but
 that mlkem-native's assurance for ISA model fidelity is inherited, not independently
 established.
 
-See [s2n-bignum soundness, B1](https://github.com/awslabs/s2n-bignum/blob/main/doc/s2n_bignum_soundness.md#b1-isa-model-fidelity)
-for full details.
+See [^s2n-bignum-soundness] for full details.
 
 ### B2. Object code verification and reassembly (assembly)
 
@@ -352,17 +364,17 @@ the proof, so loader errors would typically cause proof failure rather than a si
 wrong proof. Additionally, function-level random testing compares assembly outputs against
 C reference implementations, catching gross mismatches.
 
-See [s2n-bignum soundness, B2](https://github.com/awslabs/s2n-bignum/blob/main/doc/s2n_bignum_soundness.md#b2-elf-object-code-loader)
-for further details on the ELF loader.
+See [^s2n-bignum-soundness] for further details on the ELF loader.
 
 **Reassembly risk.** When mlkem-native's `.S` files are assembled on a different system --
 whether by mlkem-native's own build, by a downstream consumer such as AWS-LC, or by a
 cross-compilation toolchain -- there is currently no systematic check that the resulting
 object code matches the bytes the proofs were verified against.
 Assembler bugs, version differences, or different assembler dialects can and
-do produce different object code. This has been observed in practice.
+do produce different object code (for example, it has been observed that some x86
+compilers swap operands of AVX2 `VPADD` instruction to reduce code size).
 
-**Future work.**
+**Potential improvements.**
 - Provide a tool to consumers for checking that assembly/compilation results contain
   the expected byte code for all native functions covered by HOL Light proofs.  (TODO: Ref tracking issue)
 
@@ -384,8 +396,7 @@ The formal HOL Light ISA model is a sequential, user-mode, single-core model. It
 These omissions are standard for this class of verification and are not expected to affect
 functional correctness of sequential user-mode code.
 
-See [s2n-bignum soundness, B3](https://github.com/awslabs/s2n-bignum/blob/main/doc/s2n_bignum_soundness.md#b3-what-the-model-omits)
-for further discussion.
+See [^s2n-bignum-soundness] for further discussion.
 
 ### B4. Hardware not implementing the ISA
 
@@ -420,68 +431,41 @@ verification: the proofs reason about an idealized machine, not the physical dev
 high-assurance deployments in physically hostile environments, additional countermeasures
 at the hardware or protocol level would be needed.
 
-### B5. C semantics model fidelity (CBMC)
+### B5. C semantics model fidelity
 
-CBMC translates C source code into an internal representation and then into SMT formulas.
-This translation must faithfully model the semantics of C as approximated by the collective
-interpretation of C by common compilers. Bugs in CBMC's C-to-SMT translation could cause it
-to miss real undefined behavior and to accept incorrect code.
+CBMC gives meaning to C by translating C source into an internal representation and then into SMT formulas. Bugs in
+CBMC's C-to-SMT translation could cause it to miss undefined behavior and to accept incorrect code; this has happened in
+the past. However, CBMC is a mature, widely-used tool with an active community and extensive test suite, and
+mlkem-native uses the latest CBMC version.
 
-**Mitigations.**
-- CBMC is a mature, widely-used tool with an active community and extensive
-  test suite.
-- mlkem-native's CBMC proofs are run on every CI commit, providing continuous regression
-  testing.
-- The full functional test suite (KAT, ACVP, unit tests) exercises the same code paths,
-  providing complementary validation.
+Also, the C language has many conformant implementations. For example, the width of pointer types could be
+8/16/32/64-bit (or even larger on capability based architectures). CBMC models types and other implementation-defined
+behavior (such as struct padding) following the host system's C compiler. At present, mlkem-native's CBMC proofs are
+only run on 64-bit systems, and hence do not transfer to 16-bit or 32-bit systems. To mitigate this, the full functional
+test suite (KAT, ACVP, unit tests) is run on a large variety of platforms and C compilers, covering 16-bit, 32-bit, and
+64-bit C implementations. Moreover, mlkem-native uses fixed-width integer types (e.g. uint16_t) to reduce the risk of
+semantic differences across compilers, and targets the initial C90 revision of C, which is expected to have more mature
+compiler support and be less prone to modeling errors than newer language features.
 
-**Residual risks.**
+Also, CBMC's memory model uses a flat, object-based representation with practically infinite space for local variables,
+that is strictly more abstract than the target platform's memory layout. Concretely, for example, C imposes no limit on
+the stack size (there is not even a notion of stack in C), but real systems do -- stack overflows are out of scope of
+mlkem-native's CBMC proofs. To address this, mlkem-native's header provides constants for its memory usage that are
+tested in CI to be accurate, reducing the risk of out-of-memory conditions such as stack overflows.
 
-- **Compiler gap.** CBMC models C source semantics, not the semantics of compiled code.
-  The compiler is free to transform the program in ways that introduce behavior not present
-  in the source. For mlkem-native, this is particularly relevant in two areas:
-  - **Zeroization.** FIPS 203 requires zeroization of sensitive stack buffers. A compiler
-    may eliminate stores to buffers that are not subsequently read (dead store elimination).
-    mlkem-native uses platform-specific zeroization primitives to prevent this, but CBMC
-    cannot verify that the compiled code actually performs the zeroization.
-  - **Value barriers.** mlkem-native's C code uses value barriers (`mlk_value_barrier_u32`
-    etc.) to prevent the compiler from introducing secret-dependent branches or
-    variable-time instructions. These barriers rely on inline assembly or volatile
-    semantics to defeat compiler optimization. CBMC sees the source-level semantics
-    (where the barrier is an identity function) and cannot verify that the compiled code
-    preserves the constant-time property.
-- **Memory model.** CBMC's memory model uses a flat, object-based representation that may
-  not match the target platform's memory layout. In particular, CBMC does not model
-  platform-specific alignment requirements, padding, or struct layout beyond what the C
-  standard requires. For mlkem-native this is low-risk since the code avoids
-  platform-dependent memory tricks, but it is a gap in principle.
+Finally, a compiler bug could lead to wrong object code being generated from correct C code, and proofs on outdated C
+code could undermine the formal model. To guard against this, mlkem-native's CBMC proofs are run on every CI commit,
+providing continuous regression testing and preventing proofs from getting out of date.
 
-### B6. Execution-environment assumptions
-
-Both the HOL Light ISA model and CBMC's C semantics model make assumptions about
-the execution environment. If these assumptions are violated at runtime, the proofs'
-guarantees do not hold.
-
-- **64-bit mode.** The assembly proofs and ISA models assume 64-bit x86 or AArch64.
-  Running on a 32-bit platform is currently outside of the scope of the proofs.
-- **Little-endian byte order.** The x86 ISA is unconditionally little-endian. On ARM,
-  the proofs assume `CPSR.E = 0` (little-endian). All current deployment targets
-  (AWS-LC, libOQS, rustls, OpenTitan) use little-endian mode.
-- **Mapped memory.** All memory buffers passed by the caller must be readable and writable
-  as appropriate without causing access violations. The formal models use a flat address
-  space with no notion of page permissions or unmapped memory; it is the caller's
-  responsibility to ensure that the relevant address ranges are backed by accessible pages.
-- **Standard C execution model.** CBMC assumes a hosted C environment with standard
-  integer widths (`int` is 32 bits, `long` is at least 32 bits). mlkem-native targets
-  C90/C99 and avoids implementation-defined behavior, but exotic platforms with
-  non-standard type widths could violate CBMC's assumptions.
-
-**Future work:**
-- Extend CBMC proofs to 32-bit C implementations.
+**Potential improvements.**
+- Run CBMC proofs against 16-bit and 32-bit C compilers.
 
 ---
 
 ## Gap C: Is the proof infrastructure sound?
+
+There is risk that the formal statements made about the formal model are proved,
+yet not true, because of an unsoundness in the underlying proof infrastructure.
 
 ### C1. HOL Light kernel and OCaml runtime
 
@@ -489,13 +473,11 @@ HOL Light has a small trusted kernel (~400 lines of OCaml) implementing 10 primi
 inference rules and 3 axioms. All theorems must be constructed through this kernel (the
 LCF architecture). No soundness bugs have been found since 2003.
 
-Independent reassurance is provided by Candle (a formally verified prover for the same
-logic) and HOLTrace (independent proof trace checking).
+Independent reassurance is provided by [^Candle][Candle] and [^HOLTrace].
 
-See [s2n-bignum soundness, C1](https://github.com/awslabs/s2n-bignum/blob/main/doc/s2n_bignum_soundness.md#c1-trusted-computing-base-hol-light-kernel-and-ocaml-runtime)
-for full details.
+See [^s2n-bignum-soundness] for full details.
 
-### C2. CBMC and SMT solver trusted computing base
+### C2. CBMC & SMT solver trusted computing base
 
 The CBMC trusted computing base is substantially larger than HOL Light's:
 
@@ -512,7 +494,7 @@ The CBMC trusted computing base is substantially larger than HOL Light's:
 
 **Mitigations.**
 
-- CBMC has been in development since 2001 and is widely used in industry (including
+- CBMC has been in development for more than 20 years and is widely used in industry (including
   at Amazon for AWS-LC and other projects).
 - The SMT solvers are independently developed and extensively tested.
 - mlkem-native's proofs are run continuously in CI, providing regression testing.
@@ -521,26 +503,15 @@ The CBMC trusted computing base is substantially larger than HOL Light's:
 no independent proof-checking mechanism analogous to Candle or HOLTrace. The soundness
 guarantee for the C proofs is therefore fundamentally weaker than for the assembly proofs.
 
-**Future work**:
+**Potential improvements**:
 - Systematically introduce redundancy by employing more than one SMT solver backend
   for CBMC functions.
 
-## Summary of risks
-
-| # | Risk | Primary mitigation |
-|---|------|--------------------|
-| A0 | Not all code has formal specs | Intrinsics and non-x86/AArch64 backends: testing only; *planned replacement with assembly* |
-| A1 | Specs not deep enough (C) | Type-safety catches arithmetic overflows; extensive functional and CT testing |
-| A2 | Wrong functional spec (ASM) | Simple mathematical style; KAT/ACVP conformance tests |
-| A2 | Wrong CBMC contracts (C) | Modular proof consistency; test suite validation |
-| A2 | Precondition mismatch (ASM) | Explicit in formal statements; bridge to CBMC contracts |
-| A3 | CBMC contract assumed but not proved | Structural: single contract at declaration site; all proofs run in CI |
-| A3 | C-to-ASM bridge inconsistency | Manual "keep in sync" comments; test suite; *planned machine-checked link* |
-| B1 | Wrong ISA model | Co-simulation testing against real hardware |
-| B2 | Reassembly produces different code | *No systematic mitigation; planned hash checking* |
-| B3 | Model omissions (caches, speculation) | Standard for sequential user-mode verification |
-| B4 | Hardware not implementing ISA | Co-simulation (partial); no fault countermeasures |
-| B5 | CBMC C semantics bugs | CBMC maturity; continuous CI; complementary testing |
-| B6 | Execution-environment assumptions violated | Assumptions documented; standard for target platforms |
-| C1 | HOL Light kernel bug | LCF architecture; 20+ year track record; Candle/HOLTrace |
-| C2 | CBMC/solver TCB bug | Tool maturity; solver diversity; CI regression testing; no independent checker |
+<!--- bibliography --->
+[^CBMC]: Amazon Web Services Diffblue: C Bounded Model Checker, [https://github.com/diffblue/cbmc](https://github.com/diffblue/cbmc)
+[^Candle]: Oskar Abrahamsson, Magnus O. Myreen, Ramana Kumar, Thomas Sewell: Candle: Formally Verified clone of HOL-Light, [https://cakeml.org/candle/](https://cakeml.org/candle/)
+[^FIPS203]: National Institute of Standards and Technology: FIPS 203 Module-Lattice-Based Key-Encapsulation Mechanism Standard, [https://csrc.nist.gov/pubs/fips/203/final](https://csrc.nist.gov/pubs/fips/203/final)
+[^HOL-Light]: John Harrison: HOL-Light Theorem Prover, [https://hol-light.github.io/](https://hol-light.github.io/)
+[^HOLTrace]: Daniel J. Bernstein: HOLTrace: A collection of tools for processing traces of a HOL Light session, [https://holtrace.cr.yp.to/](https://holtrace.cr.yp.to/)
+[^s2n-bignum]: Amazon Web Services: s2n-bignum: Library of formally assembly kernels verified in HOL-Light, [https://github.com/awslabs/s2n-bignum/](https://github.com/awslabs/s2n-bignum/)
+[^s2n-bignum-soundness]: Amazon Web Services: s2n-bignum soundness documentation, [https://github.com/awslabs/s2n-bignum/blob/main/doc/s2n_bignum_soundness.md](https://github.com/awslabs/s2n-bignum/blob/main/doc/s2n_bignum_soundness.md)
