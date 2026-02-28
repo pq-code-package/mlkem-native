@@ -752,10 +752,32 @@ let keccak_f1600_x4_avx2_tmc = define_trimmed "keccak_f1600_x4_avx2_tmc" keccak_
 
 let KECCAK_F1600_X4_AVX2_EXEC = X86_MK_CORE_EXEC_RULE keccak_f1600_x4_avx2_tmc;;
 
+let LENGTH_KECCAK_F1600_X4_AVX2_TMC =
+  REWRITE_CONV[keccak_f1600_x4_avx2_tmc] `LENGTH keccak_f1600_x4_avx2_tmc`
+  |> CONV_RULE(RAND_CONV LENGTH_CONV);;
+
+(* Preamble: SUB RSP, 768 (7 bytes) *)
+let KECCAK_F1600_X4_AVX2_PREAMBLE_LENGTH = new_definition
+  `KECCAK_F1600_X4_AVX2_PREAMBLE_LENGTH = 7`;;
+
+(* Postamble: ADD RSP, 768 (7 bytes) + RET (1 byte) *)
+let KECCAK_F1600_X4_AVX2_POSTAMBLE_LENGTH = new_definition
+  `KECCAK_F1600_X4_AVX2_POSTAMBLE_LENGTH = 8`;;
+
+let KECCAK_F1600_X4_AVX2_CORE_END = new_definition
+  `KECCAK_F1600_X4_AVX2_CORE_END = LENGTH keccak_f1600_x4_avx2_tmc - KECCAK_F1600_X4_AVX2_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_KECCAK_F1600_X4_AVX2_TMC;
+              KECCAK_F1600_X4_AVX2_CORE_END;
+              KECCAK_F1600_X4_AVX2_PREAMBLE_LENGTH;
+              KECCAK_F1600_X4_AVX2_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
+
 let KECCAK_F1600_X4_AVX2_CORRECT = prove
   (`!rc_pointer:int64 bitstate_in:int64 rho8_ptr:int64 rho56_ptr:int64 A1 A2 A3 A4 pc:num stackpointer:int64.
   PAIRWISE nonoverlapping
-  [(word pc, 0x9d5);
+  [(word pc, LENGTH keccak_f1600_x4_avx2_tmc);
    (stackpointer, 0x300);
    (bitstate_in, 800);
    (rc_pointer, 192);
@@ -763,7 +785,7 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
    (rho56_ptr, 32)]
   ==> ensures x86
          (\s. bytes_loaded s (word pc) (BUTLAST keccak_f1600_x4_avx2_tmc) /\
-              read RIP s = word (pc + 0x7) /\
+              read RIP s = word (pc + KECCAK_F1600_X4_AVX2_PREAMBLE_LENGTH) /\
               read RSP s = stackpointer /\
               read RDI s = bitstate_in /\
               C_ARGUMENTS [bitstate_in; rc_pointer; rho8_ptr; rho56_ptr] s /\
@@ -774,7 +796,7 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
               wordlist_from_memory(word_add bitstate_in (word 200),25) s = A2 /\
               wordlist_from_memory(word_add bitstate_in (word 400),25) s = A3 /\
               wordlist_from_memory(word_add bitstate_in (word 600),25) s = A4)
-             (\s. read RIP s = word(pc + 0x9ce) /\
+             (\s. read RIP s = word(pc + KECCAK_F1600_X4_AVX2_CORE_END) /\
                   wordlist_from_memory(bitstate_in,25) s = keccak 24 A1 /\
                   wordlist_from_memory(word_add bitstate_in (word 200),25) s = keccak 24 A2 /\
                   wordlist_from_memory(word_add bitstate_in (word 400),25) s = keccak 24 A3 /\
@@ -784,6 +806,7 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
             MAYCHANGE SOME_FLAGS ,, MAYCHANGE [events] ,,
             MAYCHANGE [memory :> bytes (stackpointer, 0x300)],,
             MAYCHANGE [memory :> bytes (bitstate_in, 800)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   REWRITE_TAC[SOME_FLAGS] THEN
   MAP_EVERY X_GEN_TAC [`rc_pointer:int64`;`bitstate_in:int64`;`rho8_ptr:int64`;`rho56_ptr:int64`;`A1:int64 list`;`A2:int64 list`;`A3:int64 list`;`A4:int64 list`] THEN
   MAP_EVERY X_GEN_TAC [`pc:num`;`stackpointer:int64`] THEN
@@ -1040,7 +1063,9 @@ let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_CORRECT = prove
   CONV_TAC(ONCE_DEPTH_CONV EXPAND_PAIRWISE_CONV) THEN
   CONV_TAC TWEAK_CONV THEN
   X86_PROMOTE_RETURN_STACK_TAC keccak_f1600_x4_avx2_tmc
-    (CONV_RULE TWEAK_CONV (EXPAND_PAIRWISE KECCAK_F1600_X4_AVX2_CORRECT))
+    (CONV_RULE TWEAK_CONV
+      (EXPAND_PAIRWISE
+        (CONV_RULE LENGTH_SIMPLIFY_CONV KECCAK_F1600_X4_AVX2_CORRECT)))
     `[]` 768);;
 
 let KECCAK_F1600_X4_AVX2_SUBROUTINE_CORRECT = prove
