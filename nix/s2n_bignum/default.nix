@@ -7,7 +7,7 @@ stdenv.mkDerivation rec {
     owner = "awslabs";
     repo = "s2n-bignum";
     rev = "${version}";
-    hash = "sha256-UpC0pvrXHNUyDY1lhji1OQfHZK755VvSQFtODFX3VQ8";
+    hash = "sha256-UpC0pvrXHNUyDY1lhji1OQfHZK755VvSQFtODFX3VQ8=";
   };
   setupHook = writeText "setup-hook.sh" ''
     export S2N_BIGNUM_DIR="$1"
