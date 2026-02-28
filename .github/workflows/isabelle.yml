@@ -1,0 +1,35 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: Isabelle
+permissions:
+  contents: read
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  isabelle-proofs:
+    name: proofs/isabelle
+    runs-on: ubuntu-latest
+    container:
+      image: makarius/isabelle:Isabelle2025-2
+      options: --user root
+
+    steps:
+      - name: Checkout mlkem-native
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          submodules: recursive
+
+      - name: Checkout AFP mirror
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: isabelle-prover/mirror-afp-2025-1
+          path: AutoCorrode/dependencies/afp
+
+      - name: Install build tooling
+        run: apt-get update -qq && apt-get install -y -qq make > /dev/null
+
+      - name: Build Isabelle proofs
+        run: make -C proofs/isabelle build ISABELLE_HOME=/home/isabelle/Isabelle/bin

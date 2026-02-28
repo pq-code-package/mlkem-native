@@ -102,3 +102,24 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions on how to setup and use 
 ### Running the HOL-Light proofs
 
 Once you are in the `nix` shell or have all tools setup by hand, use `./scripts/tests hol_light` (or just `tests hol_light` in the `nix` shell) to re-check the HOL-Light proofs. Note that depending on the function, they will take a long time. See `tests hol_light --help` for details on the command line options, and [proofs/hol_light](proofs/hol_light) for more details on the HOL-Light proofs in general.
+
+## Isabelle (AutoCorrode)
+
+### Prerequisites
+
+To run the Isabelle proofs in [`proofs/isabelle`](proofs/isabelle), you need Isabelle2025-2 and the AFP mirror used by AutoCorrode (containing `Word_Lib` and `Isabelle_C`).
+
+### Running the Isabelle proofs
+
+From the repository root:
+
+```bash
+make -C proofs/isabelle setup-afp   # optional helper to clone mirror-afp-2025-1
+make -C proofs/isabelle build
+```
+
+To open jEdit with all required session directories configured:
+
+```bash
+make -C proofs/isabelle jedit
+```
