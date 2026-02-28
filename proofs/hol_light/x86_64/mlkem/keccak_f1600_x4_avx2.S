@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
-.section .note.GNU-stack,"",@progbits
-
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file

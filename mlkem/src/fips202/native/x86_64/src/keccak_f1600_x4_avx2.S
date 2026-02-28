@@ -4,10 +4,6 @@
  */
 #include "../../../../common.h"
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 #if defined(MLK_FIPS202_X86_64_XKCP) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
