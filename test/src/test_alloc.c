@@ -70,7 +70,9 @@ typedef struct
 } alloc_info_t;
 
 #define MLK_MAX_IN_FLIGHT_ALLOCS 100
+#ifndef MLK_BUMP_ALLOC_SIZE
 #define MLK_BUMP_ALLOC_SIZE (24 * 1024) /* 24KB buffer */
+#endif
 
 struct test_ctx_t
 {
