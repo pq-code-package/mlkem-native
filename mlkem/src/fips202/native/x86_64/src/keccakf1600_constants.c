@@ -3,6 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
+/*
+ * WARNING: This file is auto-generated from scripts/autogen
+ *          in the mlkem-native repository.
+ *          Do not modify it directly.
+ */
+
 #include "../../../../common.h"
 #if defined(MLK_FIPS202_X86_64_XKCP) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
@@ -28,16 +34,16 @@ MLK_ALIGN const uint64_t mlk_keccakf1600_round_constants[] = {
 
 MLK_ALIGN const uint64_t mlk_keccak_rho8[] = {
     0x0605040302010007,
-    0x0E0D0C0B0A09080F,
+    0x0e0d0c0b0a09080f,
     0x1615141312111017,
-    0x1E1D1C1B1A19181F,
+    0x1e1d1c1b1a19181f,
 };
 
 MLK_ALIGN const uint64_t mlk_keccak_rho56[] = {
     0x0007060504030201,
-    0x080F0E0D0C0B0A09,
+    0x080f0e0d0c0b0a09,
     0x1017161514131211,
-    0x181F1E1D1C1B1A19,
+    0x181f1e1d1c1b1a19,
 };
 
 #else /* MLK_FIPS202_X86_64_XKCP && !MLK_CONFIG_MULTILEVEL_NO_SHARED */

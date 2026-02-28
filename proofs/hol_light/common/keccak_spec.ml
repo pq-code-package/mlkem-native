@@ -8,6 +8,7 @@
 (* ========================================================================= *)
 
 needs "Library/words.ml";;
+needs "common/keccak_constants.ml";;
 
 (*** Some abbreviations on top of the word library ***)
 
@@ -19,35 +20,6 @@ parse_as_infix("||",(13,"right"));;
 override_interface("^^",`word_xor:N word->N word->N word`);;
 parse_as_infix("^^",(13,"right"));;
 override_interface("||",`word_or:N word->N word->N word`);;
-
-(*** Keccak round constants RC[i] for i = 0..23 ***)
-
-let round_constants = define
- `round_constants:int64 list =
-   [word 0x0000000000000001;
-    word 0x0000000000008082;
-    word 0x800000000000808a;
-    word 0x8000000080008000;
-    word 0x000000000000808b;
-    word 0x0000000080000001;
-    word 0x8000000080008081;
-    word 0x8000000000008009;
-    word 0x000000000000008a;
-    word 0x0000000000000088;
-    word 0x0000000080008009;
-    word 0x000000008000000a;
-    word 0x000000008000808b;
-    word 0x800000000000008b;
-    word 0x8000000000008089;
-    word 0x8000000000008003;
-    word 0x8000000000008002;
-    word 0x8000000000000080;
-    word 0x000000000000800a;
-    word 0x800000008000000a;
-    word 0x8000000080008081;
-    word 0x8000000000008080;
-    word 0x0000000080000001;
-    word 0x8000000080008008]`;;
 
 (*** An individual round, with input and output lists in row-major order ***)
 
