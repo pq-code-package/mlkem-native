@@ -1736,6 +1736,48 @@ def print_c_uint64_array(name, values, entries_per_line=1):
     yield "};"
 
 
+def gen_aarch64_keccak_constants_c_file():
+    def gen_c():
+        yield from gen_header()
+        yield '#include "../../../../common.h"'
+        yield ""
+        yield "#if (defined(MLK_FIPS202_AARCH64_NEED_X1_SCALAR) ||                  \\"
+        yield "     defined(MLK_FIPS202_AARCH64_NEED_X1_V84A) ||                    \\"
+        yield "     defined(MLK_FIPS202_AARCH64_NEED_X2_V84A) ||                    \\"
+        yield "     defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID) ||       \\"
+        yield "     defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID)) && \\"
+        yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
+        yield ""
+        yield '#include "fips202_native_aarch64.h"'
+        yield ""
+        yield from print_c_uint64_array(
+            "mlk_keccakf1600_round_constants",
+            gen_keccak_round_constants(),
+            entries_per_line=3,
+        )
+        yield ""
+        yield "#else /* (MLK_FIPS202_AARCH64_NEED_X1_SCALAR ||                               \\"
+        yield "         MLK_FIPS202_AARCH64_NEED_X1_V84A || MLK_FIPS202_AARCH64_NEED_X2_V84A \\"
+        yield "         || MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID ||                  \\"
+        yield "         MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID) &&               \\"
+        yield "         !MLK_CONFIG_MULTILEVEL_NO_SHARED */"
+        yield ""
+        yield "MLK_EMPTY_CU(fips202_aarch64_round_constants)"
+        yield ""
+        yield "#endif /* !((MLK_FIPS202_AARCH64_NEED_X1_SCALAR ||                             \\"
+        yield "          MLK_FIPS202_AARCH64_NEED_X1_V84A || MLK_FIPS202_AARCH64_NEED_X2_V84A \\"
+        yield "          || MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID ||                  \\"
+        yield "          MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID) &&               \\"
+        yield "          !MLK_CONFIG_MULTILEVEL_NO_SHARED) */"
+        yield ""
+
+    update_file(
+        "dev/fips202/aarch64/src/keccakf1600_round_constants.c",
+        "\n".join(gen_c()),
+        force_format=True,
+    )
+
+
 def gen_avx2_keccak_constants_c_file():
     def gen_c():
         yield from gen_header()
@@ -4207,6 +4249,7 @@ def _main():
         gen_avx2_hol_light_compress_consts_file()
         gen_avx2_rej_uniform_table()
         gen_hol_light_keccak_constants_file()
+        gen_aarch64_keccak_constants_c_file()
         gen_avx2_keccak_constants_c_file()
         gen_avx2_keccak_hol_light_constants_file()
         gen_riscv64_zeta_files()
