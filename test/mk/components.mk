@@ -14,11 +14,12 @@ endif
 
 BASIC_TESTS = test_mlkem gen_KAT test_stack
 ACVP_TESTS = acvp_mlkem
+WYCHEPROOF_TESTS = wycheproof_mlkem
 BENCH_TESTS = bench_mlkem bench_components_mlkem
 UNIT_TESTS = test_unit
 ALLOC_TESTS = test_alloc
 RNG_FAIL_TESTS = test_rng_fail
-ALL_TESTS = $(BASIC_TESTS) $(ACVP_TESTS) $(BENCH_TESTS) $(UNIT_TESTS) $(ALLOC_TESTS) $(RNG_FAIL_TESTS)
+ALL_TESTS = $(BASIC_TESTS) $(ACVP_TESTS) $(WYCHEPROOF_TESTS) $(BENCH_TESTS) $(UNIT_TESTS) $(ALLOC_TESTS) $(RNG_FAIL_TESTS)
 
 MLKEM512_DIR = $(BUILD_DIR)/mlkem512
 MLKEM768_DIR = $(BUILD_DIR)/mlkem768
@@ -121,6 +122,9 @@ endef
 $(foreach scheme,mlkem512 mlkem768 mlkem1024, \
 	$(foreach test,$(ACVP_TESTS), \
 		$(eval $(call ADD_SOURCE,$(scheme),$(test),acvp)) \
+	) \
+	$(foreach test,$(WYCHEPROOF_TESTS), \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),wycheproof)) \
 	) \
 	$(foreach test,$(BENCH_TESTS), \
 		$(eval $(call ADD_SOURCE,$(scheme),$(test),bench)) \
