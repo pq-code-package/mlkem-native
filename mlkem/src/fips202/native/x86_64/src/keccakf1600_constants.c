@@ -10,7 +10,7 @@
  */
 
 #include "../../../../common.h"
-#if defined(MLK_FIPS202_X86_64_XKCP) && \
+#if defined(MLK_FIPS202_X86_64_NEED_X4_AVX2) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <stdint.h>
@@ -42,8 +42,10 @@ MLK_ALIGN const uint64_t mlk_keccak_rho56[] = {
     0x181f1e1d1c1b1a19,
 };
 
-#else /* MLK_FIPS202_X86_64_XKCP && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#else /* MLK_FIPS202_X86_64_NEED_X4_AVX2 && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
+       */
 
 MLK_EMPTY_CU(fips202_x86_64_constants)
 
-#endif /* !(MLK_FIPS202_X86_64_XKCP && !MLK_CONFIG_MULTILEVEL_NO_SHARED) */
+#endif /* !(MLK_FIPS202_X86_64_NEED_X4_AVX2 && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED) */

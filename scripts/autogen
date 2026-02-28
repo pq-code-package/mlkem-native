@@ -1782,7 +1782,7 @@ def gen_avx2_keccak_constants_c_file():
     def gen_c():
         yield from gen_header()
         yield '#include "../../../../common.h"'
-        yield "#if defined(MLK_FIPS202_X86_64_XKCP) && \\"
+        yield "#if defined(MLK_FIPS202_X86_64_NEED_X4_AVX2) && \\"
         yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
         yield ""
         yield "#include <stdint.h>"
@@ -1799,11 +1799,11 @@ def gen_avx2_keccak_constants_c_file():
         yield ""
         yield from print_c_uint64_array("mlk_keccak_rho56", gen_keccak_rho56())
         yield ""
-        yield "#else /* MLK_FIPS202_X86_64_XKCP && !MLK_CONFIG_MULTILEVEL_NO_SHARED */"
+        yield "#else /* MLK_FIPS202_X86_64_NEED_X4_AVX2 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */"
         yield ""
         yield "MLK_EMPTY_CU(fips202_x86_64_constants)"
         yield ""
-        yield "#endif /* !(MLK_FIPS202_X86_64_XKCP && !MLK_CONFIG_MULTILEVEL_NO_SHARED) */"
+        yield "#endif /* !(MLK_FIPS202_X86_64_NEED_X4_AVX2 && !MLK_CONFIG_MULTILEVEL_NO_SHARED) */"
         yield ""
 
     update_file(

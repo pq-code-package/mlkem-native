@@ -8,7 +8,7 @@
 
 #include "../../../common.h"
 
-#define MLK_FIPS202_X86_64_XKCP
+#define MLK_FIPS202_X86_64_NEED_X4_AVX2
 
 /* Part of backend API */
 #define MLK_USE_FIPS202_X4_NATIVE
