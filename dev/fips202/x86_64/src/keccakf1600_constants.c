@@ -17,10 +17,6 @@
 
 #include "fips202_native_x86_64.h"
 
-#ifndef MLK_SYS_LITTLE_ENDIAN
-#error Expecting a little-endian platform
-#endif
-
 MLK_ALIGN const uint64_t mlk_keccakf1600_round_constants[] = {
     0x0000000000000001, 0x0000000000008082, 0x800000000000808a,
     0x8000000080008000, 0x000000000000808b, 0x0000000080000001,

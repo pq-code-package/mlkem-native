@@ -12,10 +12,9 @@
 
 let keccak_f1600_x4_avx2_mc = define_assert_from_elf
   "keccak_f1600_x4_avx2_mc" "x86_64/mlkem/keccak_f1600_x4_avx2.o"
+(*** BYTECODE START ***)
 [
   0xf3; 0x0f; 0x1e; 0xfa;  (* ENDBR64 *)
-  0x49; 0x89; 0xe3;        (* MOV (% r11) (% rsp) *)
-  0x48; 0x83; 0xe4; 0xe0;  (* AND (% rsp) (Imm8 (word 224)) *)
   0x48; 0x81; 0xec; 0x00; 0x03; 0x00; 0x00;
                            (* SUB (% rsp) (Imm32 (word 768)) *)
   0xc5; 0xfe; 0x6f; 0x07;  (* VMOVDQU (%_% ymm0) (Memop Word256 (%% (rdi,0))) *)
@@ -743,9 +742,11 @@ let keccak_f1600_x4_avx2_mc = define_assert_from_elf
                            (* VMOVQ (Memop Quadword (%% (rdi,592))) (%_% xmm15) *)
   0xc5; 0x79; 0x17; 0xbf; 0x18; 0x03; 0x00; 0x00;
                            (* VMOVHPD (Memop Quadword (%% (rdi,792))) (%_% xmm15) *)
-  0x4c; 0x89; 0xdc;        (* MOV (% rsp) (% r11) *)
+  0x48; 0x81; 0xc4; 0x00; 0x03; 0x00; 0x00;
+                           (* ADD (% rsp) (Imm32 (word 768)) *)
   0xc3                     (* RET *)
 ];;
+(*** BYTECODE END ***)
 
 let keccak_f1600_x4_avx2_tmc = define_trimmed "keccak_f1600_x4_avx2_tmc" keccak_f1600_x4_avx2_mc;;
 
@@ -753,16 +754,16 @@ let KECCAK_F1600_X4_AVX2_EXEC = X86_MK_CORE_EXEC_RULE keccak_f1600_x4_avx2_tmc;;
 
 let KECCAK_F1600_X4_AVX2_CORRECT = prove
   (`!rc_pointer:int64 bitstate_in:int64 rho8_ptr:int64 rho56_ptr:int64 A1 A2 A3 A4 pc:num stackpointer:int64.
-  PAIRWISE (nonoverlapping_modulo (2 EXP 64))
-  [(pc, 0x9d9);
-   (val stackpointer, 0x300);
-   (val bitstate_in, 800);
-   (val rc_pointer, 192);
-   (val rho8_ptr, 32);
-   (val rho56_ptr, 32)]
+  PAIRWISE nonoverlapping
+  [(word pc, 0x9d5);
+   (stackpointer, 0x300);
+   (bitstate_in, 800);
+   (rc_pointer, 192);
+   (rho8_ptr, 32);
+   (rho56_ptr, 32)]
   ==> ensures x86
          (\s. bytes_loaded s (word pc) (BUTLAST keccak_f1600_x4_avx2_tmc) /\
-              read RIP s = word (pc + 0xe) /\
+              read RIP s = word (pc + 0x7) /\
               read RSP s = stackpointer /\
               read RDI s = bitstate_in /\
               C_ARGUMENTS [bitstate_in; rc_pointer; rho8_ptr; rho56_ptr] s /\
@@ -773,13 +774,13 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
               wordlist_from_memory(word_add bitstate_in (word 200),25) s = A2 /\
               wordlist_from_memory(word_add bitstate_in (word 400),25) s = A3 /\
               wordlist_from_memory(word_add bitstate_in (word 600),25) s = A4)
-             (\s. read RIP s = word(pc + 0x9d5) /\
+             (\s. read RIP s = word(pc + 0x9ce) /\
                   wordlist_from_memory(bitstate_in,25) s = keccak 24 A1 /\
                   wordlist_from_memory(word_add bitstate_in (word 200),25) s = keccak 24 A2 /\
                   wordlist_from_memory(word_add bitstate_in (word 400),25) s = keccak 24 A3 /\
                   wordlist_from_memory(word_add bitstate_in (word 600),25) s = keccak 24 A4)
-           (MAYCHANGE [RIP; R10; RSI] ,, 
-            MAYCHANGE[ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,, 
+           (MAYCHANGE [RIP; R10; RSI] ,,
+            MAYCHANGE[ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
             MAYCHANGE SOME_FLAGS ,, MAYCHANGE [events] ,,
             MAYCHANGE [memory :> bytes (stackpointer, 0x300)],,
             MAYCHANGE [memory :> bytes (bitstate_in, 800)])`,
@@ -788,15 +789,14 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
   MAP_EVERY X_GEN_TAC [`pc:num`;`stackpointer:int64`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI] THEN
   REWRITE_TAC[PAIRWISE; C_ARGUMENTS; ALL] THEN
-  REWRITE_TAC[NONOVERLAPPING_CLAUSES] THEN
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
 
-   ASM_CASES_TAC `LENGTH(A1:int64 list) = 25 /\ 
+   ASM_CASES_TAC `LENGTH(A1:int64 list) = 25 /\
    LENGTH(A2:int64 list) = 25 /\
    LENGTH(A3:int64 list) = 25 /\
    LENGTH(A4:int64 list) = 25` THENL
    [ALL_TAC;
-    ENSURES_INIT_TAC "s0" THEN 
+    ENSURES_INIT_TAC "s0" THEN
     MATCH_MP_TAC(TAUT `F ==> p`) THEN
     REPEAT(FIRST_X_ASSUM(MP_TAC o AP_TERM `LENGTH:int64 list->num`)) THEN
     CONV_TAC(ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV) THEN
@@ -804,7 +804,7 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
 
   (*** Set up the loop invariant ***)
 
-  ENSURES_WHILE_PAUP_TAC `0` `24` `pc + 0x26f` `pc + 0x76b`
+  ENSURES_WHILE_PAUP_TAC `0` `24` `pc + 0x268` `pc + 0x764`
   `\i s.
       (read R10 s = word i /\
        read RDI s = bitstate_in /\
@@ -834,7 +834,7 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
        (MAP2 word_join ((MAP2 word_join (keccak (i) A4) (keccak (i) A3)):int128 list)
                 ((MAP2 word_join (keccak (i) A2) (keccak (i) A1)):int128 list)):int256 list) /\
        (read ZF s <=> i = 24)` THEN
-  REPEAT CONJ_TAC THENL 
+  REPEAT CONJ_TAC THENL
     [ARITH_TAC;
 
     (*** Initial holding of the invariant ***)
@@ -855,11 +855,11 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
     MEMORY_256_FROM_64_TAC "bitstate_in" 600 25 THEN
     MEMORY_256_FROM_64_TAC "rho8_ptr" 0 4 THEN
     MEMORY_256_FROM_64_TAC "rho56_ptr" 0 4 THEN
-    ASM_REWRITE_TAC[WORD_ADD_0] THEN 
+    ASM_REWRITE_TAC[WORD_ADD_0] THEN
     REPEAT STRIP_TAC THEN
     X86_STEPS_TAC KECCAK_F1600_X4_AVX2_EXEC (1--96) THEN
     ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-    REPEAT CONJ_TAC THENL 
+    REPEAT CONJ_TAC THENL
     [PURE_ONCE_REWRITE_TAC[ARITH_RULE `8 * 0 = 0`] THEN
         REWRITE_TAC[WORD_ADD_0];
         ASM_REWRITE_TAC [WORD_SUBWORD_JOIN_EXTRACT_64] THEN
@@ -868,7 +868,7 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
         EXPAND_TAC "A2" THEN
         EXPAND_TAC "A3" THEN
         EXPAND_TAC "A4" THEN
-        REWRITE_TAC[keccak] THEN 
+        REWRITE_TAC[keccak] THEN
         REWRITE_TAC[MAP2] THEN
         REWRITE_TAC[CONS_11] THEN
         CONV_TAC WORD_BLAST];
@@ -901,9 +901,9 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
       CONV_TAC EXPAND_CASES_CONV THEN
       CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV) THEN
       ASM_REWRITE_TAC[round_constants; WORD_ADD_0] THEN
-      CONV_TAC(ONCE_DEPTH_CONV EL_CONV) THEN REWRITE_TAC[]; 
+      CONV_TAC(ONCE_DEPTH_CONV EL_CONV) THEN REWRITE_TAC[];
       ALL_TAC] THEN
-    
+
     ASM_REWRITE_TAC [WORD_SUBWORD_JOIN_EXTRACT_64] THEN
     ASM_REWRITE_TAC [WORD_SUBWORD_JOIN_EXTRACT_128] THEN
     BIGNUM_DIGITIZE_TAC "A_" `read (memory :> bytes (bitstate_in,8 * 100)) s0` THEN
@@ -923,19 +923,19 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
       REPEAT(CONJ_TAC THENL [CONV_TAC WORD_RULE]) THEN
       REWRITE_TAC[keccak; keccak_round] THEN
       CONV_TAC(ONCE_DEPTH_CONV EL_CONV) THEN
-      CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN 
+      CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
       REWRITE_TAC[MAP2; CONS_11] THEN
        CONV_TAC(ONCE_DEPTH_CONV EL_CONV) THEN
       ASM_REWRITE_TAC[] THEN
       REPEAT CONJ_TAC THEN BITBLAST_TAC;
 
-      REWRITE_TAC [WORD_BLAST `word_add x (word 18446744073709551593):int64 = 
+      REWRITE_TAC [WORD_BLAST `word_add x (word 18446744073709551593):int64 =
               word_sub x (word 23)`] THEN
-      REWRITE_TAC[VAL_WORD_SUB_EQ_0] THEN 
+      REWRITE_TAC[VAL_WORD_SUB_EQ_0] THEN
       REWRITE_TAC[VAL_WORD;DIMINDEX_64] THEN
       IMP_REWRITE_TAC[MOD_LT; ARITH_RULE `23 < 2 EXP 64`] THEN
-      CONJ_TAC THENL 
-        [UNDISCH_TAC `i < 24` THEN ARITH_TAC; 
+      CONJ_TAC THENL
+        [UNDISCH_TAC `i < 24` THEN ARITH_TAC;
         ARITH_TAC]];
 
     (*** The trivial loop-back goal ***)
@@ -953,7 +953,7 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
     MP_TAC(ISPECL [`A2:int64 list`; `i:num`] LENGTH_KECCAK) THEN
     MP_TAC(ISPECL [`A3:int64 list`; `i:num`] LENGTH_KECCAK) THEN
     MP_TAC(ISPECL [`A4:int64 list`; `i:num`] LENGTH_KECCAK) THEN
-    ASM_REWRITE_TAC[IMP_IMP] THEN 
+    ASM_REWRITE_TAC[IMP_IMP] THEN
     REWRITE_TAC[LENGTH_EQ_25] THEN
     DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN SUBST1_TAC) THEN
     REWRITE_TAC[MAP2; CONS_11; GSYM CONJ_ASSOC] THEN
@@ -968,7 +968,7 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
     MEMORY_256_FROM_64_TAC "rho56_ptr" 0 4 THEN
     ASM_REWRITE_TAC[WORD_ADD_0] THEN REPEAT STRIP_TAC THEN
     X86_STEPS_TAC KECCAK_F1600_X4_AVX2_EXEC (1--1) THEN
-    ENSURES_FINAL_STATE_TAC THEN 
+    ENSURES_FINAL_STATE_TAC THEN
     ASM_REWRITE_TAC[];
 
     (*** The tail of logical not operation and writeback ***)
@@ -986,7 +986,7 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
     MP_TAC(ISPECL [`A4:int64 list`; `24:num`] LENGTH_KECCAK) THEN
     ASM_REWRITE_TAC[IMP_IMP] THEN REWRITE_TAC[LENGTH_EQ_25] THEN
     DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN SUBST1_TAC) THEN
-    REWRITE_TAC[MAP2; CONS_11; GSYM CONJ_ASSOC] THEN 
+    REWRITE_TAC[MAP2; CONS_11; GSYM CONJ_ASSOC] THEN
     CONV_TAC NUM_REDUCE_CONV THEN
     REWRITE_TAC [keccak; keccak_round] THEN
     ENSURES_INIT_TAC "s0" THEN
@@ -1004,16 +1004,14 @@ let KECCAK_F1600_X4_AVX2_FULL_EXEC = X86_MK_EXEC_RULE keccak_f1600_x4_avx2_tmc;;
 
 let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_CORRECT = prove
  (`!rc_pointer:int64 bitstate_in:int64 rho8_ptr:int64 rho56_ptr:int64 A1 A2 A3 A4 pc:num stackpointer:int64 returnaddress.
-  PAIRWISE (nonoverlapping_modulo (2 EXP 64))
-    [(pc, LENGTH keccak_f1600_x4_avx2_tmc);
-    (val (word_sub stackpointer (word 0x31f)), 0x31f);
-    (val bitstate_in, 800);
-    (val rc_pointer, 192);
-    (val rho8_ptr, 32);
-    (val rho56_ptr, 32)] /\
-  nonoverlapping_modulo (2 EXP 64)
-    (val bitstate_in, 800)
-    (val (word_sub stackpointer (word 0x31f)), 0x31f + 8)
+  PAIRWISE nonoverlapping
+  [(word pc, LENGTH keccak_f1600_x4_avx2_tmc);
+   (word_sub stackpointer (word 0x300), 0x300);
+   (bitstate_in, 800);
+   (rc_pointer, 192);
+   (rho8_ptr, 32);
+   (rho56_ptr, 32)] /\
+  nonoverlapping (bitstate_in, 800) (word_sub stackpointer (word 0x300), 0x308)
   ==> ensures x86
          (\s. bytes_loaded s (word pc) keccak_f1600_x4_avx2_tmc /\
               read RIP s = word pc /\
@@ -1035,62 +1033,26 @@ let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_CORRECT = prove
               wordlist_from_memory(word_add bitstate_in (word 600), 25) s = keccak 24 A4)
          (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
           MAYCHANGE [memory :> bytes (bitstate_in, 800);
-                     memory :> bytes(word_sub stackpointer (word 0x31f), 0x31f)])`,
-  REPLICATE_TAC 9 GEN_TAC THEN CONV_TAC(ONCE_DEPTH_CONV NUM_ADD_CONV) THEN
-  WORD_FORALL_OFFSET_TAC 0x31f THEN
-  REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI] THEN
-  REWRITE_TAC[PAIRWISE; ALL; C_ARGUMENTS] THEN
-  REWRITE_TAC[fst KECCAK_F1600_X4_AVX2_FULL_EXEC] THEN
-  REWRITE_TAC[WORDLIST_FROM_MEMORY] THEN
-  CONV_TAC(ONCE_DEPTH_CONV NUM_MULT_CONV) THEN
-  REPEAT STRIP_TAC THEN
-
-  ENSURES_INIT_TAC "s0" THEN
-  X86_STEPS_TAC KECCAK_F1600_X4_AVX2_FULL_EXEC (1--3) THEN
-  ABBREV_TAC
-   `delta =
-    val(word_sub (word 31)
-                 (word_and (word_add stackpointer (word 0x31f)) (word 31)):int64)` THEN
-  SUBGOAL_THEN `delta <= 31` ASSUME_TAC THENL
-   [EXPAND_TAC "delta" THEN CONV_TAC BITBLAST_RULE; ALL_TAC] THEN
-  SUBGOAL_THEN
-   `word_sub (word_and (word_add stackpointer (word 0x31f)) (word 0xffffffffffffffe0))
-            (word 0x300):int64 =
-    word_add stackpointer (word delta)`
-  SUBST_ALL_TAC THENL
-    [EXPAND_TAC "delta" THEN CONV_TAC BITBLAST_RULE; ALL_TAC] THEN
- 
-  MP_TAC(SPECL
-   [`rc_pointer:int64`; `bitstate_in:int64`; `rho8_ptr:int64`; `rho56_ptr:int64`;
-    `A1:int64 list`; `A2:int64 list`; `A3:int64 list`; `A4:int64 list`;
-    `pc:num`; `word_add stackpointer (word delta):int64`]
-   KECCAK_F1600_X4_AVX2_CORRECT) THEN
-  ANTS_TAC THENL [REPEAT(FIRST_X_ASSUM(MP_TAC o check (is_imp o concl))) THEN REWRITE_TAC[PAIRWISE; ALL; C_ARGUMENTS] THEN REPEAT NONOVERLAPPING_TAC; ALL_TAC] THEN
-
-  REPEAT CONJ_TAC THEN
-  ASM_REWRITE_TAC[] THEN
-
-  REWRITE_TAC[C_ARGUMENTS; SOME_FLAGS] THEN
-  REWRITE_TAC[WORDLIST_FROM_MEMORY] THEN
-  CONV_TAC(ONCE_DEPTH_CONV NUM_MULT_CONV) THEN
-  X86_BIGSTEP_TAC KECCAK_F1600_X4_AVX2_FULL_EXEC "s4" THENL
-   [MATCH_MP_TAC BYTES_LOADED_BUTLAST THEN ASM_REWRITE_TAC[];
-    ALL_TAC] THEN
-  X86_STEPS_TAC KECCAK_F1600_X4_AVX2_FULL_EXEC (5--6) THEN
-  ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[]);;
+                     memory :> bytes(word_sub stackpointer (word 0x300), 0x300)])`,
+  let TWEAK_CONV = ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV in
+  let EXPAND_PAIRWISE_CONV = REWRITE_CONV[PAIRWISE; ALL; NONOVERLAPPING_CLAUSES] in
+  let EXPAND_PAIRWISE = REWRITE_RULE[PAIRWISE; ALL; NONOVERLAPPING_CLAUSES] in
+  CONV_TAC(ONCE_DEPTH_CONV EXPAND_PAIRWISE_CONV) THEN
+  CONV_TAC TWEAK_CONV THEN
+  X86_PROMOTE_RETURN_STACK_TAC keccak_f1600_x4_avx2_tmc
+    (CONV_RULE TWEAK_CONV (EXPAND_PAIRWISE KECCAK_F1600_X4_AVX2_CORRECT))
+    `[]` 768);;
 
 let KECCAK_F1600_X4_AVX2_SUBROUTINE_CORRECT = prove
  (`!rc_pointer:int64 bitstate_in:int64 rho8_ptr:int64 rho56_ptr:int64 A1 A2 A3 A4 pc:num stackpointer:int64 returnaddress.
-  PAIRWISE (nonoverlapping_modulo (2 EXP 64))
-    [(pc, LENGTH keccak_f1600_x4_avx2_mc);
-    (val (word_sub stackpointer (word 0x31f)), 0x31f);
-    (val bitstate_in, 800);
-    (val rc_pointer, 192);
-    (val rho8_ptr, 32);
-    (val rho56_ptr, 32)] /\
-  nonoverlapping_modulo (2 EXP 64)
-    (val bitstate_in, 800)
-    (val (word_sub stackpointer (word 0x31f)), 0x31f + 8)
+  PAIRWISE nonoverlapping
+  [(word pc, LENGTH keccak_f1600_x4_avx2_mc);
+   (word_sub stackpointer (word 0x300), 0x300);
+   (bitstate_in, 800);
+   (rc_pointer, 192);
+   (rho8_ptr, 32);
+   (rho56_ptr, 32)] /\
+  nonoverlapping (bitstate_in, 800) (word_sub stackpointer (word 0x300), 0x308)
   ==> ensures x86
          (\s. bytes_loaded s (word pc) keccak_f1600_x4_avx2_mc /\
               read RIP s = word pc /\
@@ -1112,10 +1074,12 @@ let KECCAK_F1600_X4_AVX2_SUBROUTINE_CORRECT = prove
               wordlist_from_memory(word_add bitstate_in (word 600), 25) s = keccak 24 A4)
          (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
           MAYCHANGE [memory :> bytes (bitstate_in, 800);
-                     memory :> bytes(word_sub stackpointer (word 0x31f), 0x31f)])`,
-  let TWEAK_CONV = ONCE_DEPTH_CONV NUM_ADD_CONV THENC
-                   ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV THENC
-                   REWRITE_CONV[PAIRWISE; ALL] in
+                     memory :> bytes(word_sub stackpointer (word 0x300), 0x300)])`,
+  let TWEAK_CONV = ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV in
+  let EXPAND_PAIRWISE_CONV = REWRITE_CONV[PAIRWISE; ALL; NONOVERLAPPING_CLAUSES] in
+  CONV_TAC(ONCE_DEPTH_CONV EXPAND_PAIRWISE_CONV) THEN
   CONV_TAC TWEAK_CONV THEN
   MATCH_ACCEPT_TAC(ADD_IBT_RULE
-    (CONV_RULE TWEAK_CONV KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_CORRECT)));;
+    (CONV_RULE TWEAK_CONV
+      (REWRITE_RULE[PAIRWISE; ALL; NONOVERLAPPING_CLAUSES]
+        KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_CORRECT))));;
