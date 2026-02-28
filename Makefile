@@ -13,7 +13,7 @@
 	run_bench_512 run_bench_768 run_bench_1024 run_bench \
 	bench_components_512 bench_components_768 bench_components_1024 bench_components \
 	run_bench_components_512 run_bench_components_768 run_bench_components_1024 run_bench_components \
-	build test all \
+	build test all unit lib \
 	clean quickcheck check-defined-CYCLES \
 	size_512 size_768 size_1024 size \
 	run_size_512 run_size_768 run_size_1024 run_size \
