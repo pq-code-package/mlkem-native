@@ -1069,6 +1069,9 @@ let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_CORRECT = prove
         (CONV_RULE LENGTH_SIMPLIFY_CONV KECCAK_F1600_X4_AVX2_CORRECT)))
     `[]` 768);;
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in dev/fips202/x86_64/src/fips202_native_x86_64.h *)
+
 let KECCAK_F1600_X4_AVX2_SUBROUTINE_CORRECT = prove
  (`!rc_pointer:int64 bitstate_in:int64 rho8_ptr:int64 rho56_ptr:int64 A1 A2 A3 A4 pc:num stackpointer:int64 returnaddress.
   PAIRWISE nonoverlapping
