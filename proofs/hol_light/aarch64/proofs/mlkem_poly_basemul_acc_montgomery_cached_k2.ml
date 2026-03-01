@@ -409,7 +409,7 @@ let poly_basemul_acc_montgomery_cached_k2_SPEC = prove(poly_basemul_acc_montgome
 );;
 
 (* NOTE: This needs to be kept in sync with the CBMC spec in
- * mlkem/native/aarch64/src/arith_native_aarch64.h *)
+ * mlkem/src/native/aarch64/src/arith_native_aarch64.h *)
 let MLKEM_BASEMUL_K2_SUBROUTINE_CORRECT = prove(
    `forall srcA srcB srcBt dst x0 y0 y0t x1 y1 y1t pc stackpointer returnaddress.
       aligned 16 stackpointer /\

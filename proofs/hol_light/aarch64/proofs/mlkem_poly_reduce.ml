@@ -242,7 +242,7 @@ let MLKEM_POLY_REDUCE_CORRECT = prove
   REWRITE_TAC[GSYM barred; overall_lemma]);;
 
 (* NOTE: This must be kept in sync with the CBMC specification
- * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
+ * in mlkem/src/native/aarch64/src/arith_native_aarch64.h *)
 
 let MLKEM_POLY_REDUCE_SUBROUTINE_CORRECT = prove
  (`!a x pc returnaddress.

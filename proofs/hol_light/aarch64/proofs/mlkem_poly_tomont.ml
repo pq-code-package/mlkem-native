@@ -104,9 +104,6 @@ let LENGTH_SIMPLIFY_CONV =
 (* Specification                                                             *)
 (* ------------------------------------------------------------------------- *)
 
-(* NOTE: This must be kept in sync with the CBMC specification
- * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
-
 let POLY_TOMONT_GOAL = `!ptr x pc.
     nonoverlapping (word pc, LENGTH poly_tomont_asm_mc) (ptr, 512)
     ==>
@@ -216,6 +213,9 @@ let MLKEM_TOMONT_CORRECT = prove(POLY_TOMONT_GOAL,
     ])
 );;
 
+
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/src/native/aarch64/src/arith_native_aarch64.h *)
 
 let MLKEM_TOMONT_SUBROUTINE_CORRECT = prove
  (`!ptr x pc returnaddress.
