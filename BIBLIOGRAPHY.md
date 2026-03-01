@@ -30,6 +30,27 @@ source code and documentation.
   - [proofs/hol_light/x86_64/mlkem/mlkem_intt.S](proofs/hol_light/x86_64/mlkem/mlkem_intt.S)
   - [proofs/hol_light/x86_64/mlkem/mlkem_ntt.S](proofs/hol_light/x86_64/mlkem/mlkem_ntt.S)
 
+### `CBMC`
+
+* C Bounded Model Checker
+* Author(s):
+  - Amazon Web Services Diffblue
+* URL: https://github.com/diffblue/cbmc
+* Referenced from:
+  - [SOUNDNESS.md](SOUNDNESS.md)
+
+### `Candle`
+
+* Candle: Formally Verified clone of HOL-Light
+* Author(s):
+  - Oskar Abrahamsson
+  - Magnus O. Myreen
+  - Ramana Kumar
+  - Thomas Sewell
+* URL: https://cakeml.org/candle/
+* Referenced from:
+  - [SOUNDNESS.md](SOUNDNESS.md)
+
 ### `FIPS140_3_IG`
 
 * Implementation Guidance for FIPS 140-3 and the Cryptographic Module Validation Program
@@ -86,6 +107,7 @@ source code and documentation.
 * URL: https://csrc.nist.gov/pubs/fips/203/final
 * Referenced from:
   - [README.md](README.md)
+  - [SOUNDNESS.md](SOUNDNESS.md)
   - [examples/basic_deterministic/mlkem_native/mlkem_native_config.h](examples/basic_deterministic/mlkem_native/mlkem_native_config.h)
   - [examples/bring_your_own_fips202/mlkem_native/mlkem_native_config.h](examples/bring_your_own_fips202/mlkem_native/mlkem_native_config.h)
   - [examples/bring_your_own_fips202_static/mlkem_native/mlkem_native_config.h](examples/bring_your_own_fips202_static/mlkem_native/mlkem_native_config.h)
@@ -128,6 +150,24 @@ source code and documentation.
   - [test/configs/no_asm_config.h](test/configs/no_asm_config.h)
   - [test/configs/serial_fips202_config.h](test/configs/serial_fips202_config.h)
   - [test/configs/test_alloc_config.h](test/configs/test_alloc_config.h)
+
+### `HOL-Light`
+
+* HOL-Light Theorem Prover
+* Author(s):
+  - John Harrison
+* URL: https://hol-light.github.io/
+* Referenced from:
+  - [SOUNDNESS.md](SOUNDNESS.md)
+
+### `HOLTrace`
+
+* HOLTrace: A collection of tools for processing traces of a HOL Light session
+* Author(s):
+  - Daniel J. Bernstein
+* URL: https://holtrace.cr.yp.to/
+* Referenced from:
+  - [SOUNDNESS.md](SOUNDNESS.md)
 
 ### `HYBRID`
 
@@ -380,6 +420,24 @@ source code and documentation.
 * URL: https://groups.google.com/a/list.nist.gov/g/pqc-forum/c/hqbtIGFKIpU/m/H14H0wOlBgAJ
 * Referenced from:
   - [mlkem/src/verify.h](mlkem/src/verify.h)
+
+### `s2n-bignum`
+
+* s2n-bignum: Library of formally assembly kernels verified in HOL-Light
+* Author(s):
+  - Amazon Web Services
+* URL: https://github.com/awslabs/s2n-bignum/
+* Referenced from:
+  - [SOUNDNESS.md](SOUNDNESS.md)
+
+### `s2n-bignum-soundness`
+
+* s2n-bignum soundness documentation
+* Author(s):
+  - Amazon Web Services
+* URL: https://github.com/awslabs/s2n-bignum/blob/main/doc/s2n_bignum_soundness.md
+* Referenced from:
+  - [SOUNDNESS.md](SOUNDNESS.md)
 
 ### `supercop`
 

@@ -42,8 +42,8 @@ montgomery_factor = pow(2, 16, modulus)
 
 # Compiled regex patterns
 _RE_DEFINED = re.compile(r"defined\(([^)]+)\)")
-_RE_MARKDOWN_CITE = re.compile(r"\[\^(?P<id>\w+)\]")
-_RE_C_CITE = re.compile(r"@\[(?P<id>\w+)")
+_RE_MARKDOWN_CITE = re.compile(r"\[\^(?P<id>[\w-]+)\]")
+_RE_C_CITE = re.compile(r"@\[(?P<id>[\w-]+)")
 _RE_BYTECODE_START = re.compile(
     r"=== bytecode start: (?:aarch64|x86_64)/mlkem/([^/\s]+?)\.o"
 )

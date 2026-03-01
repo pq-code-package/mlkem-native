@@ -66,6 +66,9 @@ interactive theorem prover and the [s2n-bignum](https://github.com/awslabs/s2n-b
 relevant parts of the Arm and x86 architectures). See [proofs/hol_light](proofs/hol_light) for details.
 The x86_64 FIPS-202 (Keccak) backend is still in C intrinsics and not yet covered by proof.
 
+**NOTE:** Formal Verification is never absolute. See [SOUNDNESS.md](SOUNDNESS.md) for a detailed analysis of the scope, assumptions and risks of the formal verification
+efforts around mlkem-native.
+
 ## Security
 
 All assembly in mlkem-native is constant-time in the sense that it is free of secret-dependent control flow, memory access,

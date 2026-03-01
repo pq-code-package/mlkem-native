@@ -1,10 +1,44 @@
 # Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
+- id: Candle
+  name: "Candle: Formally Verified clone of HOL-Light"
+  author:
+  - Oskar Abrahamsson
+  - Magnus O. Myreen
+  - Ramana Kumar
+  - Thomas Sewell
+  url: https://cakeml.org/candle/
+
+- id: HOLTrace
+  name: "HOLTrace: A collection of tools for processing traces of a HOL Light session"
+  author: Daniel J. Bernstein
+  url: https://holtrace.cr.yp.to/
+
 - id: ACVP
   name: Automated Cryptographic Validation Protocol (ACVP) Server
   author: National Institute of Standards and Technology
   url: https://github.com/usnistgov/ACVP-Server
+
+- id: s2n-bignum
+  name: "s2n-bignum: Library of formally assembly kernels verified in HOL-Light"
+  author: Amazon Web Services
+  url: https://github.com/awslabs/s2n-bignum/
+
+- id: s2n-bignum-soundness
+  name: s2n-bignum soundness documentation
+  author: Amazon Web Services
+  url: https://github.com/awslabs/s2n-bignum/blob/main/doc/s2n_bignum_soundness.md
+
+- id: HOL-Light
+  name: HOL-Light Theorem Prover
+  author: John Harrison
+  url: https://hol-light.github.io/
+
+- id: CBMC
+  name: C Bounded Model Checker
+  author: Diffblue, Amazon Web Services
+  url: https://github.com/diffblue/cbmc
 
 - id: FIPS203
   short: FIPS 203
@@ -117,11 +151,11 @@
   url: https://eprint.iacr.org/2018/039
 
 - id: mupq
-  author: 
-  - Kannwischer, Matthias J. 
+  author:
+  - Kannwischer, Matthias J.
   - Petri, Richard
   - Rijneveld, Joost
-  - Schwabe, Peter 
+  - Schwabe, Peter
   - Stoffelen, Ko
   name: Common files for pqm4, pqm3, pqriscv
   url: https://github.com/mupq/mupq
