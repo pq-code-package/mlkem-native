@@ -485,6 +485,9 @@ let KECCAK_F1600_X1_SCALAR_CORRECT = prove
     REWRITE_TAC[deferred_rotates; MAP2; CONS_11] THEN
     REPEAT CONJ_TAC THEN BITBLAST_TAC]);;
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/src/fips202/native/aarch64/src/fips202_native_aarch64.h *)
+
 let KECCAK_F1600_X1_SCALAR_SUBROUTINE_CORRECT = prove
  (`!a rc A pc stackpointer returnaddress.
       aligned 16 stackpointer /\

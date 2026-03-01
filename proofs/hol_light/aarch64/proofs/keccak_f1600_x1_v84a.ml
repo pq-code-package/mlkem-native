@@ -270,6 +270,9 @@ let KECCAK_F1600_X1_V84A_CORRECT = prove
     CONV_TAC(LAND_CONV WORDLIST_FROM_MEMORY_CONV) THEN
     ASM_REWRITE_TAC[]]);;
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/src/fips202/native/aarch64/src/fips202_native_aarch64.h *)
+
 let KECCAK_F1600_X1_V84A_SUBROUTINE_CORRECT = prove
 (`!a rc A pc stackpointer returnaddress.
         aligned 16 stackpointer /\

@@ -345,6 +345,9 @@ let KECCAK_F1600_X2_V84A_CORRECT = prove
     ASM_REWRITE_TAC[] THEN
     REWRITE_TAC[CONS_11] THEN REPEAT CONJ_TAC THEN CONV_TAC WORD_BLAST]);;
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/src/fips202/native/aarch64/src/fips202_native_aarch64.h *)
+
 let KECCAK_F1600_X2_V84A_SUBROUTINE_CORRECT = prove
 (`!a rc A A' pc stackpointer returnaddress.
         aligned 16 stackpointer /\
