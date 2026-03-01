@@ -17,8 +17,8 @@ mlkem-native is a secure, fast, and portable C90[^C90] implementation of ML-KEM[
 It is a fork of the ML-KEM reference implementation[^REF].
 
 All C code in [mlkem/src/*](mlkem) and [mlkem/src/fips202/*](mlkem/src/fips202) is proved memory-safe (no memory overflow) and type-safe (no integer overflow)
-using [CBMC](https://github.com/diffblue/cbmc). All AArch64 assembly and all x86_64 ML-KEM arithmetic assembly is proved functionally correct at the object code level using
-[HOL-Light](https://github.com/jrh13/hol-light). The x86_64 FIPS-202 (Keccak) backend is still in C intrinsics and not yet covered by proof.
+using [CBMC](https://github.com/diffblue/cbmc). All AArch64 and x86_64 assembly is proved functionally correct at the object code level using
+[HOL-Light](https://github.com/jrh13/hol-light).
 
 mlkem-native includes native backends for Arm (64-bit, Neon), Intel/AMD (64-bit, AVX2), and RISC-V (64-bit, RVV). See [benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/) for performance data.
 
@@ -61,10 +61,9 @@ All C code in [mlkem/src/*](mlkem) and [mlkem/src/fips202/*](mlkem/src/fips202) 
 This uses the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) and builds on function contracts and loop invariant annotations
 in the source code. See [proofs/cbmc](proofs/cbmc) for details.
 
-All AArch64 assembly and all x86_64 ML-KEM arithmetic assembly is proved functionally correct at the object-code level. This uses the [HOL-Light](https://github.com/jrh13/hol-light)
+All AArch64 and x86_64 assembly is proved functionally correct at the object-code level. This uses the [HOL-Light](https://github.com/jrh13/hol-light)
 interactive theorem prover and the [s2n-bignum](https://github.com/awslabs/s2n-bignum/) verification infrastructure (which includes models of the
 relevant parts of the Arm and x86 architectures). See [proofs/hol_light](proofs/hol_light) for details.
-The x86_64 FIPS-202 (Keccak) backend is still in C intrinsics and not yet covered by proof.
 
 ## Security
 
