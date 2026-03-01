@@ -43,7 +43,10 @@ void mlk_polyvec_basemul_acc_montgomery_cached_c(
     const mlk_polyvec_mulcache *b_cache);
 void mlk_poly_mulcache_compute_c(mlk_poly_mulcache *x, const mlk_poly *a);
 void mlk_keccakf1600_permute_c(uint64_t *state);
-
+void mlk_keccakf1600_xor_bytes_c(uint64_t *state, const unsigned char *data,
+                                 unsigned offset, unsigned length);
+void mlk_keccakf1600_extract_bytes_c(uint64_t *state, unsigned char *data,
+                                     unsigned offset, unsigned length);
 #define CHECK(x)                                              \
   do                                                          \
   {                                                           \
@@ -638,21 +641,47 @@ static int test_native_polyvec_basemul(void)
 #endif /* MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
 #ifdef MLK_USE_FIPS202_X1_NATIVE
-static int test_keccakf1600_permute(void)
+#define MAX_RATE 136
+static int test_keccakf1600_xor_permute_extract(void)
 {
-  uint64_t state[MLK_KECCAK_LANES];
-  uint64_t state_ref[MLK_KECCAK_LANES];
+  uint64_t input[MLK_KECCAK_LANES];
+  uint64_t state_native[MLK_KECCAK_LANES];
+  uint64_t state_c[MLK_KECCAK_LANES];
+  uint64_t output_native[MLK_KECCAK_LANES];
+  uint64_t output_c[MLK_KECCAK_LANES];
+  uint8_t xor_offset, xor_length, ext_offset, ext_length;
   int i;
 
   for (i = 0; i < NUM_RANDOM_TESTS; i++)
   {
-    randombytes((uint8_t *)state, sizeof(state));
-    memcpy(state_ref, state, sizeof(state));
+    randombytes(&xor_offset, 1);
+    randombytes(&xor_length, 1);
+    xor_offset = xor_offset % MAX_RATE;
+    xor_length = (uint8_t)(1 + (xor_length % (MAX_RATE - xor_offset)));
+    randombytes(&ext_offset, 1);
+    randombytes(&ext_length, 1);
+    ext_offset = ext_offset % MAX_RATE;
+    ext_length = (uint8_t)(1 + (ext_length % (MAX_RATE - ext_offset)));
 
-    mlk_keccakf1600_permute(state);
-    mlk_keccakf1600_permute_c(state_ref);
+    randombytes((uint8_t *)input, xor_length);
+    memset(state_native, 0, sizeof(state_native));
+    memset(output_native, 0, sizeof(output_native));
 
-    CHECK(compare_u64_arrays(state, state_ref, MLK_KECCAK_LANES,
+    mlk_keccakf1600_xor_bytes(state_native, (uint8_t *)input, xor_offset,
+                              xor_length);
+    mlk_keccakf1600_permute(state_native);
+    mlk_keccakf1600_extract_bytes(state_native, (uint8_t *)output_native,
+                                  ext_offset, ext_length);
+
+    memset(state_c, 0, sizeof(state_c));
+    memset(output_c, 0, sizeof(output_c));
+    mlk_keccakf1600_xor_bytes_c(state_c, (uint8_t *)input, xor_offset,
+                                xor_length);
+    mlk_keccakf1600_permute_c(state_c);
+    mlk_keccakf1600_extract_bytes_c(state_c, (uint8_t *)output_c, ext_offset,
+                                    ext_length);
+
+    CHECK(compare_u64_arrays(output_native, output_c, MLK_KECCAK_LANES,
                              "keccakf1600_permute"));
   }
 
@@ -759,7 +788,7 @@ static int test_backend_units(void)
 #endif
 
 #ifdef MLK_USE_FIPS202_X1_NATIVE
-  CHECK(test_keccakf1600_permute() == 0);
+  CHECK(test_keccakf1600_xor_permute_extract() == 0);
 #endif
 
 #ifdef MLK_USE_FIPS202_X4_NATIVE

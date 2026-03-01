@@ -98,6 +98,7 @@
 #include "src/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.c"
 #endif
 #if defined(MLK_SYS_ARMV81M_MVE)
+#include "src/fips202/native/armv81m/src/keccak_f1600_x1_armv81m.c"
 #include "src/fips202/native/armv81m/src/keccak_f1600_x4_mve.c"
 #include "src/fips202/native/armv81m/src/keccakf1600_round_constants.c"
 #endif
@@ -490,17 +491,27 @@
  * Undefine macros from native code (FIPS202, Armv8.1-M)
  */
 /* mlkem/src/fips202/native/armv81m/mve.h */
+#undef MLK_FIPS202_ARMV81M_NEED_X1
 #undef MLK_FIPS202_ARMV81M_NEED_X4
 #undef MLK_FIPS202_NATIVE_ARMV81M
 #undef MLK_FIPS202_NATIVE_ARMV81M_MVE_H
+#undef MLK_USE_FIPS202_X1_EXTRACT_BYTES_NATIVE
+#undef MLK_USE_FIPS202_X1_NATIVE
+#undef MLK_USE_FIPS202_X1_XOR_BYTES_NATIVE
 #undef MLK_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE
 #undef MLK_USE_FIPS202_X4_NATIVE
 #undef MLK_USE_FIPS202_X4_XOR_BYTES_NATIVE
+#undef mlk_keccak_f1600_x1_native_impl
+#undef mlk_keccak_f1600_x1_state_extract_bytes_impl
+#undef mlk_keccak_f1600_x1_state_xor_bytes_impl
 #undef mlk_keccak_f1600_x4_native_impl
 #undef mlk_keccak_f1600_x4_state_extract_bytes
 #undef mlk_keccak_f1600_x4_state_xor_bytes
 /* mlkem/src/fips202/native/armv81m/src/fips202_native_armv81m.h */
 #undef MLK_FIPS202_NATIVE_ARMV81M_SRC_FIPS202_NATIVE_ARMV81M_H
+#undef mlk_keccak_f1600_x1_armv7m_asm
+#undef mlk_keccak_f1600_x1_state_extract_bytes_asm
+#undef mlk_keccak_f1600_x1_state_xor_bytes_asm
 #undef mlk_keccak_f1600_x4_mve_asm
 #undef mlk_keccak_f1600_x4_state_extract_bytes_asm
 #undef mlk_keccak_f1600_x4_state_xor_bytes_asm
