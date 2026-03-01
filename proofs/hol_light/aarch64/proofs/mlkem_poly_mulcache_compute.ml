@@ -125,9 +125,6 @@ let have_mulcache_zetas = define
                          iword (EL i mulcache_zetas_twisted))
  `;;
 
-(* NOTE: This must be kept in sync with the CBMC specification
- * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
-
 let poly_mulcache_compute_GOAL = `!dst src zetas zetas_twisted x pc.
     ALL (nonoverlapping (dst, 256))
         [(word pc, LENGTH poly_mulcache_compute_mc); (src, 512); (zetas, 256); (zetas_twisted, 256)]
@@ -239,6 +236,9 @@ let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(poly_mulcache_compute_GOAL,
          ==> l <= x /\ x <= u ==> l' <= x /\ x <= u'`) THEN
       CONV_TAC INT_REDUCE_CONV])
 );;
+
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/src/native/aarch64/src/arith_native_aarch64.h *)
 
 let MLKEM_MULCACHE_COMPUTE_SUBROUTINE_CORRECT = prove
  (`!dst src zetas zetas_twisted x pc returnaddress.

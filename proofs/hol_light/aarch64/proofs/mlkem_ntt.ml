@@ -639,7 +639,7 @@ let MLKEM_NTT_CORRECT = prove
 (*** Subroutine form, somewhat messy elaboration of the usual wrapper ***)
 
 (* NOTE: This must be kept in sync with the CBMC specification
- * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
+ * in mlkem/src/native/aarch64/src/arith_native_aarch64.h *)
 
 let MLKEM_NTT_SUBROUTINE_CORRECT = prove
  (`!a z_12345 z_67 x pc stackpointer returnaddress.

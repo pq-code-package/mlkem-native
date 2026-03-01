@@ -1632,7 +1632,7 @@ let MLKEM_REJ_UNIFORM_CORRECT = prove
   CONV_TAC WORD_RULE);;
 
 (* NOTE: This must be kept in sync with the CBMC specification
- * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
+ * in mlkem/src/native/aarch64/src/arith_native_aarch64.h *)
 
 let MLKEM_REJ_UNIFORM_SUBROUTINE_CORRECT = prove
  (`!res buf buflen table (inlist:(12 word)list) pc stackpointer returnaddress.

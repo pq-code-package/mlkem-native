@@ -249,7 +249,7 @@ let MLKEM_POLY_TOBYTES_CORRECT = prove
   ABBREV_TAC `twae = &2:real` THEN REAL_ARITH_TAC);;
 
 (* NOTE: This must be kept in sync with the CBMC specification
- * in mlkem/native/aarch64/src/arith_native_aarch64.h *)
+ * in mlkem/src/native/aarch64/src/arith_native_aarch64.h *)
 
 let MLKEM_POLY_TOBYTES_SUBROUTINE_CORRECT = prove
  (`!r a (l:int16 list) pc returnaddress.

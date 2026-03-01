@@ -473,7 +473,7 @@ let basemul3_odd = define
   );;
 
  (* NOTE: This needs to be kept in sync with the CBMC spec in
-  * mlkem/native/aarch64/src/arith_native_aarch64.h *)
+  * mlkem/src/native/aarch64/src/arith_native_aarch64.h *)
  let MLKEM_BASEMUL_K3_SUBROUTINE_CORRECT = prove(
     `forall srcA srcB srcBt dst x0 y0 y0t x1 y1 y1t x2 y2 y2t pc stackpointer returnaddress.
        aligned 16 stackpointer /\
