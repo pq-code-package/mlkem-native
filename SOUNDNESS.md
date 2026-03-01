@@ -134,10 +134,10 @@ no automatic coverage check for CBMC or HOL Light. A function or configuration c
 through without being covered by specification.
 
 **Potential improvements.**
-- Add automatic proof coverage check to CI. (TODO: Ref tracking issue)
+- Add automatic proof coverage check to CI. ([#1423](https://github.com/pq-code-package/mlkem-native/issues/1423), [#1594](https://github.com/pq-code-package/mlkem-native/issues/1594))
 - Replace all intrinsics-based code with pure assembly, bringing it into the scope of
-  HOL Light verification. (TODO: Ref tracking issue)
-- Extend assembly verification to all backends. (TODO: Ref tracking issue)
+  HOL Light verification.
+- Extend assembly verification to all backends. ([#1595](https://github.com/pq-code-package/mlkem-native/issues/1595))
 
 ### A2. Coverage: Depth
 
@@ -182,10 +182,10 @@ the corresponding [CI job](.github/workflows/ct-tests.yml) for
 the full list), and the C code uses value barriers to prevent harmful compiler optimizations.
 
 **Potential improvements.**
-- Add memory-safety proof for rejection sampling routines. (TODO: Ref tracking issue)
+- Add memory-safety proof for rejection sampling routines. ([#1596](https://github.com/pq-code-package/mlkem-native/issues/1596))
 - Add automatic extraction of compiler coverage documentation from CI. (TODO: Ref tracking issue)
 - Introduce additional verification tooling that allows us to express functional correctness
-  and constant-time properties for the C code. (TODO: Ref tracking issue)
+  and constant-time properties for the C code. ([#1597](https://github.com/pq-code-package/mlkem-native/issues/1597), [#1598](https://github.com/pq-code-package/mlkem-native/issues/1598))
 
 ### A3. Specification faithfulness
 
@@ -247,9 +247,9 @@ check.
 
 **Potential improvements.**
 - Derive the CBMC configuration from a machine- and human-readable source documenting
-  the desired configuration options and their meaning. (TODO: Add issue)
+  the desired configuration options and their meaning. ([#1599](https://github.com/pq-code-package/mlkem-native/issues/1599))
 - Provide a document which explains the specification style for correctness and constant-time
-  properties in HOL Light. (TODO: Ref tracking issue)
+  properties in HOL Light. ([#1600](https://github.com/pq-code-package/mlkem-native/issues/1600))
 
 ### A4. Specification consistency
 
@@ -322,7 +322,7 @@ interpretation of bounds -- could cause the bridge to be unsound.
 
 **Potential improvements.**
 - Establish a machine-checked link between the HOL Light specifications and the CBMC
-  contracts. (TODO: Ref tracking issue)
+  contracts. ([#1601](https://github.com/pq-code-package/mlkem-native/issues/1601))
 
 ---
 
@@ -379,7 +379,7 @@ assemblers swap operands of AVX2 `VPADD` instruction to reduce code size).
 
 **Potential improvements.**
 - Provide a tool to consumers for checking that assembly/compilation results contain
-  the expected byte code for all native functions covered by HOL Light proofs.  (TODO: Ref tracking issue)
+  the expected byte code for all native functions covered by HOL Light proofs.  ([#1602](https://github.com/pq-code-package/mlkem-native/issues/1602))
 
 ### B3. Model omissions (assembly)
 
@@ -461,7 +461,7 @@ code could undermine the formal model. To guard against this, mlkem-native's CBM
 providing continuous regression testing and preventing proofs from getting out of date.
 
 **Potential improvements.**
-- Run CBMC proofs against 16-bit and 32-bit C compilers.
+- Run CBMC proofs against 16-bit and 32-bit C compilers. ([#1192](https://github.com/pq-code-package/mlkem-native/issues/1192))
 
 ---
 
@@ -511,7 +511,7 @@ guarantee for the C proofs is therefore fundamentally weaker than for the assemb
 
 **Potential improvements**:
 - Systematically introduce redundancy by employing more than one SMT solver backend
-  for CBMC functions.
+  for CBMC functions. ([#1603](https://github.com/pq-code-package/mlkem-native/issues/1603))
 
 <!--- bibliography --->
 [^CBMC]: Amazon Web Services Diffblue: C Bounded Model Checker, [https://github.com/diffblue/cbmc](https://github.com/diffblue/cbmc)
