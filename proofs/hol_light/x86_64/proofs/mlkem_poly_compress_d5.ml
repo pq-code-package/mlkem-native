@@ -726,6 +726,9 @@ let MLKEM_POLY_COMPRESS_D5_NOIBT_SUBROUTINE_CORRECT = prove(
   X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_poly_compress_d5_tmc
     (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_POLY_COMPRESS_D5_CORRECT));;
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
+
 let MLKEM_POLY_COMPRESS_D5_SUBROUTINE_CORRECT = prove(
   `!r a data (inlist:(16 word) list) pc stackpointer returnaddress.
       LENGTH inlist = 256 /\

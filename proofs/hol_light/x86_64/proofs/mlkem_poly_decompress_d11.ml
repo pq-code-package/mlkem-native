@@ -600,6 +600,9 @@ let MLKEM_POLY_DECOMPRESS_D11_NOIBT_SUBROUTINE_CORRECT = prove(
   (* Prove bounds *)
   REPEAT STRIP_TAC THEN ASM_SIMP_TAC [EL_MAP; ARITH; IVAL_DECOMPRESS_D11_BOUND]);;
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
+
 let MLKEM_POLY_DECOMPRESS_D11_SUBROUTINE_CORRECT = prove(
   `!r a data (inlist:(11 word) list) pc stackpointer returnaddress.
       LENGTH inlist = 256 /\
