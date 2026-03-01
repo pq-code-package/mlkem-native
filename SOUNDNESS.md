@@ -125,13 +125,13 @@ a specification, or that an unspecified component is incorrect.
 
 - **x86_64 intrinsics-based C code.** The native Keccak-F1600 implementations for
   x86_64 are written in intrinsics and not covered by any specification.
-- **Other backends** (RISC-V RVV, experimental Armv8.1-M MVE, PowerPC):
-  these are not covered by specification.
+- **Backends for platforms other than AArch64 and x86_64** (e.g. RISC-V RVV, Armv8.1-M MVE, PowerPC):
+  Where present, these are not yet covered by specification.
 
 The full test suite (functional tests, KAT, ACVP, unit tests) validates functional
 correctness empirically across all platforms and configurations, but there is currently
-no automatic check that every C function has a CBMC contract or that every assembly
-routine has a HOL Light proof. A function could slip through without specification.
+no automatic coverage check for CBMC or HOL Light. A function or configuration could slip
+through without being covered by specification.
 
 **Potential improvements.**
 - Add automatic proof coverage check to CI. (TODO: Ref tracking issue)
@@ -144,8 +144,10 @@ routine has a HOL Light proof. A function could slip through without specificati
 Do the specifications have the desired depth? The risk is that undesired behavior occurs
 which is outside the scope of specification.
 
-Currently, we aim for mlkem-native to be **functionally correct** (the code computes the
-right answer as per FIPS 203) and **constant-time** (no secret-dependent timing variation).
+We aim for mlkem-native to be **functionally correct** (the code computes the
+right answer as per FIPS 203), **memory-safe** (it only accesses memory within
+the bounds of what is provided or allocated) and **constant-time** (no
+secret-dependent timing variation).
 
 **Assembly (HOL Light).** With one exception, the ASM specifications capture functional
 correctness, memory safety, and secret-independent execution. The one exception remaining is
@@ -175,12 +177,13 @@ implementations are rare overflows in the optimized polynomial arithmetic -- pre
 kind of bug that the type-safety and integer-overflow proofs are designed to catch: the CBMC
 contracts track coefficient bounds through the arithmetic pipeline, and overflow in
 intermediate computations would be flagged as undefined behavior. Constant-time properties
-are tested empirically using valgrind with a variable-latency patch across many compilers
-(GCC 4.8–15, Clang 14–21) and optimization levels (-O0 through -Ofast), and the C code
-uses value barriers to prevent harmful compiler optimizations.
+are tested empirically using valgrind across many compilers and optimization levels (see
+the corresponding [CI job](.github/workflows/ct-tests.yml) for
+the full list), and the C code uses value barriers to prevent harmful compiler optimizations.
 
 **Potential improvements.**
 - Add memory-safety proof for rejection sampling routines. (TODO: Ref tracking issue)
+- Add automatic extraction of compiler coverage documentation from CI. (TODO: Ref tracking issue)
 - Introduce additional verification tooling that allows us to express functional correctness
   and constant-time properties for the C code. (TODO: Ref tracking issue)
 
@@ -211,9 +214,9 @@ of secret inputs, and that (b) no variable-timing microarchitectural events occu
 
 The formal notion of constant-time'ness used in s2n-bignum does not and cannot guarantee
 that the hardware executes those instructions in constant time: microarchitectural effects
-(variable-latency instructions, Hertzbleed-style frequency scaling) could still leak
-information. Some hardwaren provides opt-in guarantees for a listed set of instructions -- ARM's DIT (Data Independent
-Timing, Armv8.4-A onwards) and Intel's DOITM (Data Operand Independent Timing Mode, Ice Lake onwards) -- but even with
+(variable-latency instructions, speculative execution, Hertzbleed-style frequency scaling) could still leak
+information. Some hardware provides opt-in guarantees for a listed set of instructions -- Arm's DIT (Data Independent
+Timing, Armv8.4-A onwards) and Intel's DOIT (Data Operand Independent Timing, Ice Lake onwards) -- but even with
 these enabled, coverage is limited to specific instruction sets, and power- or frequency-based side channels remain
 outside scope. See [^s2n-bignum-soundness] for full details.
 
@@ -229,12 +232,12 @@ each function contract.
 
 All specifications are written in a high-level mathematical style (HOL Light) or a simple
 declarative style using auditable macros (CBMC), both far simpler than the implementations.
-The Hoare-style correctness specifications in HOL Light have been carefully audited and are
-extensively used for numerous other assembly kernels in s2n-bignum, without infidelities
-being detected. For CBMC, modular proof means that a wrong specification on a callee will
-typically cause the caller's proof to fail. Top-level CBMC specifications don't use magic
-constants; all buffer length values are defined in [params.h](mlkem/src/params.h) and
-easily auditable to align with FIPS 203.
+The approach to Hoare-style correctness specifications in HOL Light has been carefully audited
+and is extensively used for numerous other assembly kernels in s2n-bignum, without infidelities
+being detected. For CBMC, modular proof means that an insufficient specification on a callee will
+cause the caller's proof to fail. Top-level CBMC specifications are straightforward as their inputs
+and outputs are merely byte buffers of standardized lengths; all these buffer length values are
+defined in [params.h](mlkem/src/params.h) and easily auditable to align with FIPS 203.
 
 Residual risks remain: the constant-time specification style in HOL Light/s2n-bignum could
 fail to detect a practically relevant class of variable-time execution; a misconfiguration
@@ -267,7 +270,7 @@ mechanism by which the "assumed" and "proved" versions can diverge.
 This structural guarantee is reinforced by the
 [check-contracts](scripts/check-contracts) script, which looks for CBMC functions with a
 contract but no proof. Additionally, bounds assertions in CBMC specifications are mirrored
-by executable checks at the beginning and end of the respective function, so that if a
+by runtime debug assertions at the beginning and end of the respective function, so that if a
 function is not covered by CBMC -- erroneously or deliberately -- tests in debug mode can
 still catch gross mismatches between what the caller provides/assumes and what the callee
 assumes/provides.
@@ -294,8 +297,8 @@ Both the HOL Light proofs and the CBMC contracts contain comments of the form
 
 **Example.** For the AArch64 NTT:
 
-- HOL Light proves: if input coefficients satisfy `abs(ival(x i)) <= 8191`, then output
-  satisfies `abs(ival zi) <= 23594` and `ival zi ≡ forward_ntt(ival ∘ x)(i) (mod 3329)`.
+- HOL Light proves: if input coefficients satisfy `abs(ival(x i)) <= &8191`, then output
+  satisfies `abs(ival zi) <= &23594` and `(ival zi == forward_ntt (ival o x) i) (mod &3329)`.
   We provide an exact description of the mathematical function being computed by the
   AArch64 NTT assembly kernel.
 - The CBMC contract on `mlk_ntt_asm` simplifies this to bounds assertions
@@ -335,8 +338,8 @@ references, misunderstandings, or transcription mistakes could silently invalida
 (`simulator.ml` + `simulator.c`) that repeatedly picks random instruction encodings and
 random register/flag states, decodes them, executes them both symbolically through the
 formal model and natively on real hardware, and compares results. This exercises both the
-ISA semantics and the decoder. It in CI and covers all register-to-register instruction
-forms with randomized operands, as well as memory-accessing instructions via dedicated
+ISA semantics and the decoder. It covers all register-to-register instruction forms with
+randomized operands, as well as memory-accessing instructions via dedicated
 harnesses for various addressing modes.
 
 Where instructions have genuinely underspecified behavior -- for example, `IMUL` sets flags
@@ -359,7 +362,7 @@ This takes the assembler out of the TCB of the proof. However, two risks remain.
 **ELF loader.** An OCaml ELF loader extracts the `.text` section (and, where applicable,
 the `.rodata` section) from each object file for verification. If it extracts the wrong
 bytes, the proof applies to different code than what runs in production. This risk is
-mitigated by the fact that the proof engineer must know the exact byte sequence to write
+mitigated by the fact that the proof engineer must provide the exact byte sequence to write
 the proof, so loader errors would typically cause proof failure rather than a silently
 wrong proof. Additionally, function-level random testing compares assembly outputs against
 C reference implementations, catching gross mismatches.
@@ -372,7 +375,7 @@ cross-compilation toolchain -- there is currently no systematic check that the r
 object code matches the bytes the proofs were verified against.
 Assembler bugs, version differences, or different assembler dialects can and
 do produce different object code (for example, it has been observed that some x86
-compilers swap operands of AVX2 `VPADD` instruction to reduce code size).
+assemblers swap operands of AVX2 `VPADD` instruction to reduce code size).
 
 **Potential improvements.**
 - Provide a tool to consumers for checking that assembly/compilation results contain
@@ -469,13 +472,16 @@ yet not true, because of an unsoundness in the underlying proof infrastructure.
 
 ### C1. HOL Light kernel and OCaml runtime
 
-HOL Light has a small trusted kernel (~400 lines of OCaml) implementing 10 primitive
-inference rules and 3 axioms. All theorems must be constructed through this kernel (the
-LCF architecture). No soundness bugs have been found since 2003.
+HOL Light has a small trusted kernel (~400 lines of OCaml) implementing 10 primitive inference rules and 3 axioms. All
+proofs are ultimately constructed through this kernel. Higher level infrastructure such as proof automation cannot
+compromise soundness as it is built atop the kernel. This is a fundamental design property of the LCF architecture.
+No soundness bugs in the kernel have been found since 2003.
 
-Independent reassurance is provided by [^Candle][Candle] and [^HOLTrace].
+HOL Light runs on OCaml, so the OCaml compiler and runtime are also part of the trusted computing base. A compiler or
+runtime bug could in principle allow construction of a spurious theorem. This is mitigated by OCaml's maturity and
+widespread use.
 
-See [^s2n-bignum-soundness] for full details.
+Independent reassurance is provided by [^Candle] and [^HOLTrace]. See [^s2n-bignum-soundness] for full details.
 
 ### C2. CBMC & SMT solver trusted computing base
 
