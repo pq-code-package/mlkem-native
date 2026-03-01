@@ -3,6 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
+/*
+ * WARNING: This file is auto-generated from scripts/autogen
+ *          in the mlkem-native repository.
+ *          Do not modify it directly.
+ */
+
 #include "../../../../common.h"
 
 #if (defined(MLK_FIPS202_AARCH64_NEED_X1_SCALAR) ||                  \

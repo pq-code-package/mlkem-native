@@ -1651,6 +1651,206 @@ def gen_avx2_hol_light_compress_consts_file():
     )
 
 
+def gen_keccak_round_constants():
+    """Generate the 24 Keccak-f[1600] round constants (RC values).
+
+    Yields uint64 values computed via the LFSR-based algorithm
+    from the Keccak specification.
+    """
+    rc = [0] * 24
+    lfsr = 1
+    for round_idx in range(24):
+        rc_val = 0
+        for j in range(7):
+            if lfsr & 1:
+                rc_val ^= 1 << ((1 << j) - 1)
+            # x^8 + x^6 + x^5 + x^4 + 1 feedback polynomial
+            lfsr = (lfsr << 1) ^ (0x71 if lfsr & 0x80 else 0)
+            lfsr &= 0xFF
+        rc[round_idx] = rc_val
+    yield from rc
+
+
+def gen_keccak_rho_shuffle(offset):
+    """Generate a vpshufb shuffle mask for byte rotation within each qword.
+
+    The Keccak rho step requires 64-bit rotations. Some rotation amounts
+    (8 and 56 bits) are multiples of 8 and can be implemented as byte
+    shuffles via vpshufb, which is faster than a general-purpose rotation.
+
+    A vpshufb mask for a 256-bit register (YMM) has 32 bytes: 4 groups of 8,
+    one per 64-bit lane. Within each lane, byte[i] of the output is sourced
+    from byte[src] where src = (i + offset) % 8, shifted to the lane's base.
+
+    offset=-1: each output byte[i] reads from byte[i-1], rotating the qword
+               right by 8 bits (equivalently, left by 56 bits).
+    offset=+1: each output byte[i] reads from byte[i+1], rotating the qword
+               right by 56 bits (equivalently, left by 8 bits).
+    """
+    for lane in range(4):
+        base = lane * 8
+        val = 0
+        for byte_pos in range(8):
+            src = (byte_pos + offset) % 8 + base
+            val |= src << (byte_pos * 8)
+        yield val
+
+
+def gen_keccak_rho8():
+    """Generate the vpshufb shuffle mask for 8-bit rotation of each qword."""
+    yield from gen_keccak_rho_shuffle(-1)
+
+
+def gen_keccak_rho56():
+    """Generate the vpshufb shuffle mask for 56-bit rotation of each qword."""
+    yield from gen_keccak_rho_shuffle(+1)
+
+
+def print_hol_light_word64_list(g, entries_per_line=4):
+    """Format a list of uint64 values as a HOL Light int64 word list.
+
+    Analogous to print_hol_light_array but for int64 word lists.
+    Yields lines with leading indent, semicolon-separated.
+    """
+    l = [f"word 0x{v:016X}" for v in g]
+
+    for i in range(0, len(l), entries_per_line):
+        row = l[i : i + entries_per_line]
+        is_last = i + entries_per_line >= len(l)
+        line = "; ".join(row)
+        if not is_last:
+            line += ";"
+        yield "  " + line
+
+
+def print_c_uint64_array(name, values, entries_per_line=1):
+    """Format a C uint64_t array definition with MLK_ALIGN.
+
+    Yields lines for a complete array definition including braces.
+    """
+    yield f"MLK_ALIGN const uint64_t {name}[] = {{"
+    vals = list(values)
+    for i in range(0, len(vals), entries_per_line):
+        row = vals[i : i + entries_per_line]
+        yield "    " + ", ".join(f"0x{v:016x}" for v in row) + ","
+    yield "};"
+
+
+def gen_aarch64_keccak_constants_c_file():
+    def gen_c():
+        yield from gen_header()
+        yield '#include "../../../../common.h"'
+        yield ""
+        yield "#if (defined(MLK_FIPS202_AARCH64_NEED_X1_SCALAR) ||                  \\"
+        yield "     defined(MLK_FIPS202_AARCH64_NEED_X1_V84A) ||                    \\"
+        yield "     defined(MLK_FIPS202_AARCH64_NEED_X2_V84A) ||                    \\"
+        yield "     defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID) ||       \\"
+        yield "     defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID)) && \\"
+        yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
+        yield ""
+        yield '#include "fips202_native_aarch64.h"'
+        yield ""
+        yield from print_c_uint64_array(
+            "mlk_keccakf1600_round_constants",
+            gen_keccak_round_constants(),
+            entries_per_line=3,
+        )
+        yield ""
+        yield "#else /* (MLK_FIPS202_AARCH64_NEED_X1_SCALAR ||                               \\"
+        yield "         MLK_FIPS202_AARCH64_NEED_X1_V84A || MLK_FIPS202_AARCH64_NEED_X2_V84A \\"
+        yield "         || MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID ||                  \\"
+        yield "         MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID) &&               \\"
+        yield "         !MLK_CONFIG_MULTILEVEL_NO_SHARED */"
+        yield ""
+        yield "MLK_EMPTY_CU(fips202_aarch64_round_constants)"
+        yield ""
+        yield "#endif /* !((MLK_FIPS202_AARCH64_NEED_X1_SCALAR ||                             \\"
+        yield "          MLK_FIPS202_AARCH64_NEED_X1_V84A || MLK_FIPS202_AARCH64_NEED_X2_V84A \\"
+        yield "          || MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID ||                  \\"
+        yield "          MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID) &&               \\"
+        yield "          !MLK_CONFIG_MULTILEVEL_NO_SHARED) */"
+        yield ""
+
+    update_file(
+        "dev/fips202/aarch64/src/keccakf1600_round_constants.c",
+        "\n".join(gen_c()),
+        force_format=True,
+    )
+
+
+def gen_avx2_keccak_constants_c_file():
+    def gen_c():
+        yield from gen_header()
+        yield '#include "../../../../common.h"'
+        yield "#if defined(MLK_FIPS202_X86_64_NEED_X4_AVX2) && \\"
+        yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
+        yield ""
+        yield "#include <stdint.h>"
+        yield ""
+        yield '#include "fips202_native_x86_64.h"'
+        yield ""
+        yield from print_c_uint64_array(
+            "mlk_keccakf1600_round_constants",
+            gen_keccak_round_constants(),
+            entries_per_line=3,
+        )
+        yield ""
+        yield from print_c_uint64_array("mlk_keccak_rho8", gen_keccak_rho8())
+        yield ""
+        yield from print_c_uint64_array("mlk_keccak_rho56", gen_keccak_rho56())
+        yield ""
+        yield "#else /* MLK_FIPS202_X86_64_NEED_X4_AVX2 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */"
+        yield ""
+        yield "MLK_EMPTY_CU(fips202_x86_64_constants)"
+        yield ""
+        yield "#endif /* !(MLK_FIPS202_X86_64_NEED_X4_AVX2 && !MLK_CONFIG_MULTILEVEL_NO_SHARED) */"
+        yield ""
+
+    update_file(
+        "dev/fips202/x86_64/src/keccakf1600_constants.c",
+        "\n".join(gen_c()),
+        force_format=True,
+    )
+
+
+def gen_hol_light_keccak_constants_file():
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(* Keccak-f[1600] round constants RC[i] for i = 0..23. *)"
+        yield ""
+        yield "let round_constants = define `round_constants:int64 list = ["
+        yield from print_hol_light_word64_list(
+            gen_keccak_round_constants(), entries_per_line=1
+        )
+        yield "]`;;"
+        yield ""
+
+    update_file(
+        "proofs/hol_light/common/keccak_constants.ml",
+        "\n".join(gen()),
+    )
+
+
+def gen_avx2_keccak_hol_light_constants_file():
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(* Keccak constants for x86_64 AVX2 implementations. *)"
+        yield ""
+        yield "let rho8_constant = define `rho8_constant:int64 list = ["
+        yield from print_hol_light_word64_list(gen_keccak_rho8(), entries_per_line=1)
+        yield "]`;;"
+        yield ""
+        yield "let rho56_constant = define `rho56_constant:int64 list = ["
+        yield from print_hol_light_word64_list(gen_keccak_rho56(), entries_per_line=1)
+        yield "]`;;"
+        yield ""
+
+    update_file(
+        "proofs/hol_light/x86_64/proofs/keccak_f1600_x4_avx2_constants.ml",
+        "\n".join(gen()),
+    )
+
+
 def gen_avx2_zeta_file():
     constants, offsets = gen_avx2_zetas_qdata()
 
@@ -2988,6 +3188,13 @@ def gen_hol_light_asm():
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
+        (
+            "keccak_f1600_x4_avx2.S",
+            "keccak_f1600_x4_avx2.S",
+            "dev/fips202/x86_64/src",
+            f"-Idev/fips202/x86_64/src -Imlkem/src/fips202/native/x86_64/src {x86_64_flags}",
+            "x86_64",
+        ),
     ]
 
     joblist = joblist_aarch64 + joblist_x86_64
@@ -3161,6 +3368,31 @@ def synchronize_backends(
         force_cross=force_cross,
         no_simplify=no_simplify,
         cflags="-Idev/fips202/armv81m -Imlkem/src/fips202/native/armv81m -march=armv8.1-m.main+mve -mthumb",
+    )
+    synchronize_backend(
+        "dev/fips202/x86_64/src",
+        "mlkem/src/fips202/native/x86_64/src",
+        delete=delete,
+        force_cross=force_cross,
+        no_simplify=no_simplify,
+        x86_64_syntax=x86_64_syntax,
+        # Turn off control-flow protection (CET) explicitly. Newer versions of
+        # clang turn it on by default and insert endbr64 instructions at every
+        # global symbol.
+        # We insert endbr64 instruction manually via the MLK_ASM_FN_SYMBOL
+        # macro.
+        # This leads to duplicate endbr64 instructions causing a failure when
+        # comparing the object code before and after simplification.
+        cflags="-Idev/fips202/x86_64/src -Imlkem/src/fips202/native/x86_64/src -mavx2 -mbmi2 -msse4 -fcf-protection=none",
+    )
+    synchronize_backend(
+        "dev/fips202/x86_64",
+        "mlkem/src/fips202/native/x86_64",
+        delete=delete,
+        force_cross=force_cross,
+        no_simplify=no_simplify,
+        x86_64_syntax=x86_64_syntax,
+        cflags="-Idev/fips202/x86_64 -Imlkem/src/fips202/native/x86_64 -mavx2 -mbmi2 -msse4 -fcf-protection=none",
     )
 
 
@@ -4016,6 +4248,10 @@ def _main():
         gen_avx2_compress_consts_file()
         gen_avx2_hol_light_compress_consts_file()
         gen_avx2_rej_uniform_table()
+        gen_hol_light_keccak_constants_file()
+        gen_aarch64_keccak_constants_c_file()
+        gen_avx2_keccak_constants_c_file()
+        gen_avx2_keccak_hol_light_constants_file()
         gen_riscv64_zeta_files()
 
     def gen_monolithic():
