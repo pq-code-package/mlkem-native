@@ -8,6 +8,11 @@ efforts around mlkem-native.
 The parts of the analysis pertaining to HOL Light and s2n-bignum are largely shared with
 the corresponding s2n-bignum soundness document[^s2n-bignum-soundness].
 
+We see this as a living document. If you have suggestions for improvements, such as soundness risks
+missing from or insufficiently covered in this document, please reach out to us or open an issue.
+However, if you find a potential security vulnerability in mlkem-native, do **not** open
+a public GitHub issue, but instead use [private vulnerability reporting](https://github.com/pq-code-package/mlkem-native/security).
+
 ## Overview
 
 Formal verification is never absolute. Every verification effort links formal objects --
