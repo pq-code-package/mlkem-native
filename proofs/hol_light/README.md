@@ -2,16 +2,12 @@
 
 # HOL Light functional correctness proofs
 
-This directory contains functional correctness proofs for all AArch64 assembly and all x86_64 ML-KEM arithmetic assembly in mlkem-native.
+This directory contains functional correctness proofs for all AArch64 and x86_64 assembly in mlkem-native.
 They are written in the [HOL Light](https://hol-light.github.io/) theorem prover, utilizing the assembly verification
 infrastructure from [s2n-bignum](https://github.com/awslabs/s2n-bignum).
 
 Each function is proved in a separate `.ml` file in [aarch64/proofs/](aarch64/proofs) and [x86_64/proofs/](x86_64/proofs). Each file
 contains the byte code being verified, as well as the specification that is being proved.
-
-## Intrinsics
-
-The x86_64 FIPS-202 (Keccak) backend is still in C intrinsics and not yet covered by proof.
 
 ## Primer
 
@@ -98,7 +94,7 @@ echo '1+1;;' | nc -w 5 127.0.0.1 2012
 
 ## What is covered?
 
-All AArch64 assembly routines and all x86_64 ML-KEM arithmetic assembly routines used in mlkem-native are covered. The x86_64 FIPS-202 (Keccak) backend is still in C intrinsics and not yet covered; see [above](#intrinsics).
+All AArch64 and x86_64 assembly routines used in mlkem-native are covered.
 
 ### AArch64
 
@@ -133,6 +129,8 @@ The NTT and invNTT functions are super-optimized using [SLOTHY](https://github.c
   * x86_64 polynomial unpacking: [mlkem_unpack.S](x86_64/mlkem/mlkem_unpack.S)
   * x86_64 'multiplication cache' computation: [mlkem_mulcache_compute.S](x86_64/mlkem/mlkem_mulcache_compute.S)
   * x86_64 polynomial decompression: [mlkem_poly_decompress_d4.S](x86_64/mlkem/mlkem_poly_decompress_d4.S) [mlkem_poly_decompress_d5.S](x86_64/mlkem/mlkem_poly_decompress_d5.S) [mlkem_poly_decompress_d10.S](x86_64/mlkem/mlkem_poly_decompress_d10.S) [mlkem_poly_decompress_d11.S](x86_64/mlkem/mlkem_poly_decompress_d11.S)
+- FIPS202:
+  * 4-fold Keccak-F1600 using AVX2: [keccak_f1600_x4_avx2.S](x86_64/mlkem/keccak_f1600_x4_avx2.S)
 
 <!--- bibliography --->
 [^HYBRID]: Becker, Kannwischer: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64, [https://eprint.iacr.org/2022/1243](https://eprint.iacr.org/2022/1243)
