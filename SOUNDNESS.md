@@ -6,7 +6,7 @@ This document describes the scope, assumptions and risks of the formal verificat
 efforts around mlkem-native.
 
 The parts of the analysis pertaining to HOL Light and s2n-bignum are largely shared with
-the corresponding [^s2n-bignum-soundness].
+the corresponding s2n-bignum soundness document[^s2n-bignum-soundness].
 
 ## Overview
 
@@ -368,7 +368,7 @@ s2n-bignum (via the shared HOL Light infrastructure), this is appropriate -- but
 that mlkem-native's assurance for ISA model fidelity is inherited, not independently
 established.
 
-See [^s2n-bignum-soundness] for full details.
+See the s2n-bignum soundness doc [^s2n-bignum-soundness] for full details.
 
 ### B2. Object code verification and reassembly (assembly)
 
@@ -383,7 +383,7 @@ the proof, so loader errors would typically cause proof failure rather than a si
 wrong proof. Additionally, function-level random testing compares assembly outputs against
 C reference implementations, catching gross mismatches.
 
-See [^s2n-bignum-soundness] for further details on the ELF loader.
+See the s2n-bignum soundness doc[^s2n-bignum-soundness] for further details on the ELF loader.
 
 **Reassembly risk.** When mlkem-native's `.S` files are assembled on a different system --
 whether by mlkem-native's own build, by a downstream consumer such as AWS-LC, or by a
@@ -415,7 +415,7 @@ The formal HOL Light ISA model is a sequential, user-mode, single-core model. It
 These omissions are standard for this class of verification and are not expected to affect
 functional correctness of sequential user-mode code.
 
-See [^s2n-bignum-soundness] for further discussion.
+See the s2n-bignum soundness doc [^s2n-bignum-soundness] for further discussion.
 
 ### B4. Hardware not implementing the ISA
 
@@ -497,7 +497,7 @@ HOL Light runs on OCaml, so the OCaml compiler and runtime are also part of the 
 runtime bug could in principle allow construction of a spurious theorem. This is mitigated by OCaml's maturity and
 widespread use.
 
-Independent reassurance is provided by [^Candle] and [^HOLTrace]. See [^s2n-bignum-soundness] for full details.
+Independent reassurance can be provided by Candle[^Candle] and HOLTrace [^HOLTrace]. See the s2n-bignum soundness doc[^s2n-bignum-soundness] for full details.
 
 ### C2. CBMC & SMT solver trusted computing base
 
