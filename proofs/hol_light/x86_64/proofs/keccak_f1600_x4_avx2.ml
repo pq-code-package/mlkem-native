@@ -5,7 +5,7 @@
 
  needs "x86/proofs/base.ml";;
 
- needs "common/keccak_spec.ml";;
+ needs "x86_64/proofs/keccak_utils.ml";;
 
 (**** print_literal_from_elf "x86/sha3/keccak_f1600_x4_avx2.o";;
 ****)
