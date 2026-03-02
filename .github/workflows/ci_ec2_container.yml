@@ -100,7 +100,7 @@ jobs:
       - name: Start EC2 runner
         id: start-ec2-runner-first
         continue-on-error: true
-        uses: machulav/ec2-github-runner@a6dbcefcf8a31a861f5e078bb153ed332130c512 # v2.4.3
+        uses: machulav/ec2-github-runner@a00f575a87f3a96ec6de9413d16eeb828a3cc0a8 # v2.5.2
         with:
           mode: start
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
@@ -121,7 +121,7 @@ jobs:
       - name: Start EC2 runner (retry)
         id: start-ec2-runner-second
         if: steps.start-ec2-runner-first.outcome == 'failure'
-        uses: machulav/ec2-github-runner@a6dbcefcf8a31a861f5e078bb153ed332130c512 # v2.4.3
+        uses: machulav/ec2-github-runner@a00f575a87f3a96ec6de9413d16eeb828a3cc0a8 # v2.5.2
         with:
           mode: start
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
@@ -208,7 +208,7 @@ jobs:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
       - name: Stop EC2 runner
-        uses: machulav/ec2-github-runner@a6dbcefcf8a31a861f5e078bb153ed332130c512 # v2.4.3
+        uses: machulav/ec2-github-runner@a00f575a87f3a96ec6de9413d16eeb828a3cc0a8 # v2.5.2
         with:
           mode: stop
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
