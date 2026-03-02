@@ -4,7 +4,7 @@
  */
 #include "../../../../common.h"
 
-#if defined(MLK_FIPS202_X86_64_XKCP) && \
+#if defined(MLK_FIPS202_X86_64_NEED_X4_AVX2) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 /*
@@ -448,4 +448,4 @@ LLkeccak_f1600_x4_avx2:
 
 MLK_ASM_FN_SIZE(keccak_f1600_x4_avx2)
 
-#endif /* MLK_FIPS202_X86_64_XKCP && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_FIPS202_X86_64_NEED_X4_AVX2 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
