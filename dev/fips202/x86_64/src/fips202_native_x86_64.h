@@ -9,6 +9,12 @@
 #include "../../../../cbmc.h"
 #include "../../../../common.h"
 
+/* TODO: Reconsider whether this check is needed -- x86_64 is always
+ * little-endian, so the backend selection already implies this. */
+#ifndef MLK_SYS_LITTLE_ENDIAN
+#error Expecting a little-endian platform
+#endif
+
 #define mlk_keccakf1600_round_constants \
   MLK_NAMESPACE(keccakf1600_round_constants)
 extern const uint64_t mlk_keccakf1600_round_constants[];

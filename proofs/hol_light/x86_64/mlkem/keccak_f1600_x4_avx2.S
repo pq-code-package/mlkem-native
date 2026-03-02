@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
-.section .note.GNU-stack,"",@progbits
-
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
@@ -27,9 +25,6 @@ PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_avx2:
 
         .cfi_startproc
         endbr64
-        endbr64
-        movq	%rsp, %r11
-        andq	$-0x20, %rsp
         subq	$0x300, %rsp            # imm = 0x300
         .cfi_adjust_cfa_offset 0x300
         vmovdqu	(%rdi), %ymm0
@@ -449,6 +444,7 @@ LLkeccak_f1600_x4_avx2:
         vmovhpd	%xmm3, 0x188(%rdi)
         vmovq	%xmm15, 0x250(%rdi)
         vmovhpd	%xmm15, 0x318(%rdi)
-        movq	%r11, %rsp
+        addq	$0x300, %rsp            # imm = 0x300
+        .cfi_adjust_cfa_offset -0x300
         retq
         .cfi_endproc
