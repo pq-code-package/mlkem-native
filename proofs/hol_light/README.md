@@ -1,10 +1,21 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
-# HOL Light functional correctness proofs
+# HOL Light proofs
 
-This directory contains functional correctness proofs for all AArch64 and x86_64 assembly in mlkem-native.
+This directory contains proofs for all AArch64 and x86_64 assembly in mlkem-native.
 They are written in the [HOL Light](https://hol-light.github.io/) theorem prover, utilizing the assembly verification
 infrastructure from [s2n-bignum](https://github.com/awslabs/s2n-bignum).
+
+The proofs cover three properties:
+- **Functional correctness:** The assembly computes the right answer.
+- **Memory safety:** The assembly only accesses memory within the bounds of what is provided or allocated.
+- **Secret-independent timing (constant-time):** The assembly is free of secret-dependent control flow, memory access patterns, and variable-latency instructions.
+
+The one exception is rejection sampling (`mlkem_rej_uniform`), which only has a functional correctness specification.
+Rejection sampling is safely variable-time, so no constant-time proof is needed. Memory safety proofs for rejection
+sampling are not yet available ([#1596](https://github.com/pq-code-package/mlkem-native/issues/1596)).
+
+See [SOUNDNESS.md](../../SOUNDNESS.md) for a detailed analysis of the scope, assumptions and risks of the formal verification efforts.
 
 Each function is proved in a separate `.ml` file in [aarch64/proofs/](aarch64/proofs) and [x86_64/proofs/](x86_64/proofs). Each file
 contains the byte code being verified, as well as the specification that is being proved.
@@ -51,6 +62,21 @@ be the code under verification as part of the precondition. For example, the fol
       (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
        MAYCHANGE [memory :> bytes(a,512)])`
 ```
+
+## Secret-independent timing
+
+The s2n-bignum formal model introduces the notion of *microarchitectural events* — flagging instructions that are
+known to exhibit variable timing or influence timing otherwise (e.g., through caches). Examples are branches,
+load/store instructions, or variable-time instructions such as divisions. The constant-time specifications then
+posit that the trace of microarchitectural events emitted by a program can be expressed as a function of public
+variables such as input/output pointers or pointers to constant tables. Conversely, and somewhat implicitly, the
+absence of the (possibly secret) _data_ behind those pointers as a parameter to the event-generating function
+implies that there are no secret-dependent branches, load/stores, etc.
+
+This formal notion does not and cannot guarantee that the hardware executes instructions in constant time:
+unmodeled microarchitectural effects such as speculative execution or Hertzbleed-style frequency scaling can still
+leak information. See [SOUNDNESS.md](../../SOUNDNESS.md) for a full discussion of the scope, assumptions, and
+limitations.
 
 ## Reproducing the proofs
 
