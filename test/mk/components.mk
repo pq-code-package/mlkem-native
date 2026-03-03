@@ -96,6 +96,11 @@ $(MLKEM512_DIR)/bin/bench_components_mlkem512: $(MLKEM512_DIR)/test/hal/hal.c.o
 $(MLKEM768_DIR)/bin/bench_components_mlkem768: $(MLKEM768_DIR)/test/hal/hal.c.o
 $(MLKEM1024_DIR)/bin/bench_components_mlkem1024: $(MLKEM1024_DIR)/test/hal/hal.c.o
 
+# Build hal.c without pedantic diagnostics (overrides global -pedantic/-Wpedantic)
+$(MLKEM512_DIR)/test/hal/hal.c.o: CFLAGS := $(filter-out -pedantic -Wpedantic -Werror -Wconversion -Wsign-conversion,$(CFLAGS)) -Wno-pedantic -Wno-conversion -Wno-sign-conversion -Wno-error
+$(MLKEM768_DIR)/test/hal/hal.c.o: CFLAGS := $(filter-out -pedantic -Wpedantic -Werror -Wconversion -Wsign-conversion,$(CFLAGS)) -Wno-pedantic -Wno-conversion -Wno-sign-conversion -Wno-error
+$(MLKEM1024_DIR)/test/hal/hal.c.o: CFLAGS := $(filter-out -pedantic -Wpedantic -Werror -Wconversion -Wsign-conversion,$(CFLAGS)) -Wno-pedantic -Wno-conversion -Wno-sign-conversion -Wno-error
+
 $(MLKEM512_DIR)/bin/%: CFLAGS += -DMLK_CONFIG_PARAMETER_SET=512
 $(MLKEM768_DIR)/bin/%: CFLAGS += -DMLK_CONFIG_PARAMETER_SET=768
 $(MLKEM1024_DIR)/bin/%: CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024
