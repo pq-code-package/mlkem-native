@@ -175,6 +175,10 @@ static const uint64_t mlk_KeccakF_RoundConstants[MLK_KECCAK_NROUNDS] = {
 
 MLK_STATIC_TESTABLE
 void mlk_keccakf1600_permute_c(uint64_t *state)
+__contract__(
+    requires(memory_no_alias(state, sizeof(uint64_t) * MLK_KECCAK_LANES))
+    assigns(memory_slice(state, sizeof(uint64_t) * MLK_KECCAK_LANES))
+)
 {
   unsigned round;
 
