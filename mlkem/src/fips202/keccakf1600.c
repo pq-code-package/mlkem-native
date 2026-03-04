@@ -129,6 +129,20 @@ static void mlk_keccakf1600x4_xor_bytes_c(uint64_t *state,
                                           const unsigned char *data2,
                                           const unsigned char *data3,
                                           unsigned offset, unsigned length)
+__contract__(
+    requires(0 <= offset && offset <= MLK_KECCAK_LANES * sizeof(uint64_t) &&
+	     0 <= length && length <= MLK_KECCAK_LANES * sizeof(uint64_t) - offset)
+    requires(memory_no_alias(state, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY))
+    requires(memory_no_alias(data0, length))
+    /* Case 1: all input buffers are distinct; Case 2: All input buffers are the same */
+    requires((data0 == data1 &&
+              data0 == data2 &&
+              data0 == data3) ||
+	     (memory_no_alias(data1, length) &&
+              memory_no_alias(data2, length) &&
+              memory_no_alias(data3, length)))
+    assigns(memory_slice(state, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY))
+)
 {
   mlk_keccakf1600_xor_bytes(state + MLK_KECCAK_LANES * 0, data0, offset,
                             length);
