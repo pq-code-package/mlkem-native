@@ -131,7 +131,7 @@ a specification, or that an unspecified component is incorrect.
 - **Backends for platforms other than AArch64 and x86_64** (e.g. RISC-V RVV, Armv8.1-M MVE, PowerPC):
   Where present, these are not yet covered by specification.
 
-The full test suite (functional tests, KAT, ACVP, unit tests) validates functional
+The full test suite (functional tests, KAT, ACVP, Wycheproof, unit tests) validates functional
 correctness empirically across all platforms and configurations, but there is currently
 no automatic coverage check for CBMC or HOL Light. A function or configuration could slip
 through without being covered by specification.
@@ -172,7 +172,7 @@ The CBMC proofs do **not** currently cover:
   proved.
 
 These gaps are mitigated in complementary ways. The full test suite (functional tests, KAT,
-ACVP, unit tests) validates functional correctness empirically across all platforms and
+ACVP, Wycheproof, unit tests) validates functional correctness empirically across all platforms and
 configurations. For arithmetic correctness specifically, the most subtle bugs in ML-KEM
 implementations are rare overflows in the optimized polynomial arithmetic -- precisely the
 kind of bug that the type-safety and integer-overflow proofs are designed to catch: the CBMC
@@ -466,7 +466,7 @@ Also, the C language has many conformant implementations. For example, the width
 8/16/32/64-bit (or even larger on capability based architectures). CBMC models types and other implementation-defined
 behavior (such as struct padding) following the host system's C compiler. At present, mlkem-native's CBMC proofs are
 only run on 64-bit systems, and hence do not transfer to 16-bit or 32-bit systems. To mitigate this, the full functional
-test suite (KAT, ACVP, unit tests) is run on a large variety of platforms and C compilers, covering 16-bit, 32-bit, and
+test suite (functional tests, KAT, ACVP, Wycheproof, unit tests) is run on a large variety of platforms and C compilers, covering 16-bit, 32-bit, and
 64-bit C implementations. Moreover, mlkem-native uses fixed-width integer types (e.g. uint16_t) to reduce the risk of
 semantic differences across compilers, and targets the initial C90 revision of C, which is expected to have more mature
 compiler support and be less prone to modeling errors than newer language features.
