@@ -19,16 +19,24 @@ buildEnv {
   paths =
     builtins.attrValues {
       cbmc = cbmc.overrideAttrs (old: rec {
-        version = "6.8.0";
+        version = "6.8.0"; # tautschnig/smt2-output-stability
         src = fetchFromGitHub {
-          owner = "diffblue";
+          owner = "tautschnig";
           repo = "cbmc";
-          hash = "sha256-PT6AYiwkplCeyMREZnGZA0BKl4ZESRC02/9ibKg7mYU=";
-          tag = "cbmc-6.8.0";
+          rev = "37f2da4d6e2e2646fdd3190949bb68c28612e6d3";
+          hash = "sha256-VV33r1owrA4T8oZBfhI8F95HCtl7UAP2gXH4PBrZoQA=";
+        };
+        srccadical = cadical.src; # 3.0.0 from nixpkgs-unstable
+        patches = [
+          (builtins.elemAt old.patches 0) # cudd patch from nixpkgs
+          ./0002-Do-not-download-sources-in-cmake.patch # cadical 3.0.0
+        ];
+        env = old.env // {
+          NIX_CFLAGS_COMPILE = (old.env.NIX_CFLAGS_COMPILE or "") + " -Wno-error=switch-enum";
         };
       });
       litani = callPackage ./litani.nix { }; # 1.29.0
-      cbmc-viewer = callPackage ./cbmc-viewer.nix { }; # 3.11
+      cbmc-viewer = callPackage ./cbmc-viewer.nix { }; # 3.12
       z3 = z3.overrideAttrs (old: rec {
         version = "4.15.3";
         src = fetchFromGitHub {
@@ -40,7 +48,7 @@ buildEnv {
       });
 
       inherit
-        cadical# 2.2.0
+        cadical# 3.0.0
         bitwuzla# 0.8.2
         ninja; # 1.13.2
     };

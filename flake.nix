@@ -25,7 +25,8 @@
           pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
           pkgs-2405 = inputs.nixpkgs-2405.legacyPackages.${system};
           util = pkgs.callPackage ./nix/util.nix {
-            inherit (pkgs) cbmc bitwuzla z3;
+            inherit (pkgs-unstable) cbmc cadical;
+            inherit (pkgs) bitwuzla z3;
             # TODO: switch back to stable python3 for slothy once ortools is fixed in 25.11
             python3-for-slothy = pkgs-unstable.python3;
           };
@@ -219,7 +220,8 @@
             pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
             util = pkgs.callPackage ./nix/util.nix {
               inherit pkgs;
-              inherit (pkgs) cbmc bitwuzla z3;
+              inherit (pkgs-unstable) cbmc cadical;
+              inherit (pkgs) bitwuzla z3;
               # TODO: switch back to stable python3 for slothy once ortools is fixed in 25.11
               python3-for-slothy = pkgs-unstable.python3;
             };
