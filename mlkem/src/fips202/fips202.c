@@ -59,6 +59,7 @@ static void mlk_keccak_absorb_once(uint64_t *s, unsigned r, const uint8_t *m,
                                    size_t mlen, uint8_t p)
 __contract__(
     requires(mlen <= MLK_MAX_BUFFER_SIZE)
+    requires(r > 0)
     requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)
     requires(memory_no_alias(s, sizeof(uint64_t) * MLK_KECCAK_LANES))
     requires(memory_no_alias(m, mlen))
@@ -67,7 +68,8 @@ __contract__(
   /* Initialize state */
   size_t i;
   for (i = 0; i < 25; ++i)
-  __loop__(invariant(i <= 25))
+  __loop__(invariant(i <= 25)
+           decreases(25 - i))
   {
     s[i] = 0;
   }
@@ -76,7 +78,8 @@ __contract__(
   __loop__(
     assigns(mlen, m, memory_slice(s, sizeof(uint64_t) * MLK_KECCAK_LANES))
     invariant(mlen <= loop_entry(mlen))
-    invariant(m == loop_entry(m) + (loop_entry(mlen) - mlen)))
+    invariant(m == loop_entry(m) + (loop_entry(mlen) - mlen))
+    decreases(mlen))
   {
     mlk_keccakf1600_xor_bytes(s, m, 0, r);
     mlk_keccakf1600_permute(s);
@@ -130,7 +133,8 @@ __contract__(
       memory_slice(s, sizeof(uint64_t) * MLK_KECCAK_LANES),
       memory_slice(h, nblocks * r))
     invariant(nblocks <= loop_entry(nblocks) &&
-      h == loop_entry(h) + r * (loop_entry(nblocks) - nblocks)))
+      h == loop_entry(h) + r * (loop_entry(nblocks) - nblocks))
+    decreases(nblocks))
   {
     mlk_keccakf1600_permute(s);
     mlk_keccakf1600_extract_bytes(s, h, 0, r);
@@ -155,6 +159,7 @@ static void mlk_keccak_squeeze_once(uint8_t *h, size_t outlen, uint64_t *s,
                                     unsigned r)
 __contract__(
     requires(outlen <= MLK_MAX_BUFFER_SIZE)
+    requires(r > 0)
     requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)
     requires(memory_no_alias(s, sizeof(uint64_t) * MLK_KECCAK_LANES))
     requires(memory_no_alias(h, outlen))
@@ -168,7 +173,8 @@ __contract__(
       memory_slice(s, sizeof(uint64_t) * MLK_KECCAK_LANES),
       memory_slice(h, outlen))
     invariant(outlen <= loop_entry(outlen) &&
-      h == loop_entry(h) + (loop_entry(outlen) - outlen)))
+      h == loop_entry(h) + (loop_entry(outlen) - outlen))
+    decreases(outlen))
   {
     mlk_keccakf1600_permute(s);
 
