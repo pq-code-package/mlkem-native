@@ -40,14 +40,16 @@ void mlk_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
 #if defined(MLK_SYS_LITTLE_ENDIAN)
   uint8_t *state_ptr = (uint8_t *)state + offset;
   for (i = 0; i < length; i++)
-  __loop__(invariant(i <= length))
+  __loop__(invariant(i <= length)
+           decreases(length - i))
   {
     data[i] = state_ptr[i];
   }
 #else  /* MLK_SYS_LITTLE_ENDIAN */
   /* Portable version */
   for (i = 0; i < length; i++)
-  __loop__(invariant(i <= length))
+  __loop__(invariant(i <= length)
+           decreases(length - i))
   {
     data[i] = (state[(offset + i) >> 3] >> (8 * ((offset + i) & 0x07))) & 0xFF;
   }
@@ -61,14 +63,16 @@ void mlk_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
 #if defined(MLK_SYS_LITTLE_ENDIAN)
   uint8_t *state_ptr = (uint8_t *)state + offset;
   for (i = 0; i < length; i++)
-  __loop__(invariant(i <= length))
+  __loop__(invariant(i <= length)
+           decreases(length - i))
   {
     state_ptr[i] ^= data[i];
   }
 #else  /* MLK_SYS_LITTLE_ENDIAN */
   /* Portable version */
   for (i = 0; i < length; i++)
-  __loop__(invariant(i <= length))
+  __loop__(invariant(i <= length)
+           decreases(length - i))
   {
     state[(offset + i) >> 3] ^= (uint64_t)data[i]
                                 << (8 * ((offset + i) & 0x07));
@@ -219,7 +223,8 @@ void mlk_keccakf1600_permute_c(uint64_t *state)
   Asu = state[24];
 
   for (round = 0; round < MLK_KECCAK_NROUNDS; round += 2)
-  __loop__(invariant(round <= MLK_KECCAK_NROUNDS && round % 2 == 0))
+  __loop__(invariant(round <= MLK_KECCAK_NROUNDS && round % 2 == 0)
+           decreases(MLK_KECCAK_NROUNDS - round))
   {
     /* prepareTheta */
     BCa = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
