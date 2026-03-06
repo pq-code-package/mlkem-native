@@ -201,7 +201,8 @@ __contract__(
      assigns(i, memory_slice(v, sizeof(mlk_polyvec)))
      invariant(i <= MLKEM_K)
      invariant(forall(x, 0, MLKEM_K,
-       array_bound(v->vec[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
+       array_bound(v->vec[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
+     decreases(MLKEM_K - i))
   {
     mlk_poly_permute_bitrev_to_custom(v->vec[i].coeffs);
   }
@@ -228,7 +229,8 @@ __contract__(
      assigns(i, memory_slice(a, sizeof(mlk_polymat)))
      invariant(i <= MLKEM_K)
      invariant(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
-       array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))))
+       array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
+     decreases(MLKEM_K - i))
   {
     mlk_polyvec_permute_bitrev_to_custom(&a->vec[i]);
   }
@@ -356,7 +358,8 @@ __contract__(
   for (i = 0; i < MLKEM_K; i++)
   __loop__(
     assigns(i, memory_slice(out, sizeof(mlk_polyvec)))
-    invariant(i <= MLKEM_K))
+    invariant(i <= MLKEM_K)
+    decreases(MLKEM_K - i))
   {
     mlk_polyvec_basemul_acc_montgomery_cached(&out->vec[i], &a->vec[i], v, vc);
   }

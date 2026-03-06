@@ -53,7 +53,8 @@ __contract__(
   while (ctr < target && pos + 3 <= buflen)
   __loop__(
     invariant(offset <= ctr && ctr <= target && pos <= buflen)
-    invariant(array_bound(r, 0, ctr, 0, MLKEM_Q)))
+    invariant(array_bound(r, 0, ctr, 0, MLKEM_Q))
+    decreases(buflen - pos))
   {
     val0 = ((buf[pos + 0] >> 0) | (buf[pos + 1] << 8)) & 0xFFF;
     val1 = ((buf[pos + 1] >> 4) | (buf[pos + 2] << 4)) & 0xFFF;
@@ -279,7 +280,8 @@ void mlk_poly_cbd2(mlk_poly *r, const uint8_t buf[2 * MLKEM_N / 4])
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(
     invariant(i <= MLKEM_N / 8)
-    invariant(array_abs_bound(r->coeffs, 0, 8 * i, 3)))
+    invariant(array_abs_bound(r->coeffs, 0, 8 * i, 3))
+    decreases(MLKEM_N / 8 - i))
   {
     unsigned j;
     uint32_t t = mlk_load32_littleendian(buf + 4 * i);
@@ -289,7 +291,8 @@ void mlk_poly_cbd2(mlk_poly *r, const uint8_t buf[2 * MLKEM_N / 4])
     for (j = 0; j < 8; j++)
     __loop__(
       invariant(i <= MLKEM_N / 8 && j <= 8)
-      invariant(array_abs_bound(r->coeffs, 0, 8 * i + j, 3)))
+      invariant(array_abs_bound(r->coeffs, 0, 8 * i + j, 3))
+      decreases(8 - j))
     {
       const int16_t a = (d >> (4 * j + 0)) & 0x3;
       const int16_t b = (d >> (4 * j + 2)) & 0x3;
@@ -330,7 +333,8 @@ void mlk_poly_cbd3(mlk_poly *r, const uint8_t buf[3 * MLKEM_N / 4])
   for (i = 0; i < MLKEM_N / 4; i++)
   __loop__(
     invariant(i <= MLKEM_N / 4)
-    invariant(array_abs_bound(r->coeffs, 0, 4 * i, 4)))
+    invariant(array_abs_bound(r->coeffs, 0, 4 * i, 4))
+    decreases(MLKEM_N / 4 - i))
   {
     unsigned j;
     const uint32_t t = mlk_load24_littleendian(buf + 3 * i);
@@ -341,7 +345,8 @@ void mlk_poly_cbd3(mlk_poly *r, const uint8_t buf[3 * MLKEM_N / 4])
     for (j = 0; j < 4; j++)
     __loop__(
       invariant(i <= MLKEM_N / 4 && j <= 4)
-      invariant(array_abs_bound(r->coeffs, 0, 4 * i + j, 4)))
+      invariant(array_abs_bound(r->coeffs, 0, 4 * i + j, 4))
+      decreases(4 - j))
     {
       const int16_t a = (d >> (6 * j + 0)) & 0x7;
       const int16_t b = (d >> (6 * j + 3)) & 0x7;

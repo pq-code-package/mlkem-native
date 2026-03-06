@@ -85,6 +85,7 @@ void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
   __loop__(
     assigns(i, memory_slice(r, MLKEM_POLYVECBYTES))
     invariant(i <= MLKEM_K)
+    decreases(MLKEM_K - i)
   )
   {
     mlk_poly_tobytes(&r[i * MLKEM_POLYBYTES], &a->vec[i]);
@@ -162,7 +163,8 @@ __contract__(
   mlk_assert_bound_2d(a->vec, MLKEM_K, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
 
   for (i = 0; i < MLKEM_N / 2; i++)
-  __loop__(invariant(i <= MLKEM_N / 2))
+  __loop__(invariant(i <= MLKEM_N / 2)
+           decreases(MLKEM_N / 2 - i))
   {
     unsigned k;
     int32_t t[2] = {0};
@@ -172,7 +174,8 @@ __contract__(
          t[0] <=    (int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768  &&
          t[0] >= - ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768) &&
          t[1] <=   ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768) &&
-         t[1] >= - ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768)))
+         t[1] >= - ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768))
+      decreases(MLKEM_K - k))
     {
       t[0] += (int32_t)a->vec[k].coeffs[2 * i + 1] * b_cache->vec[k].coeffs[i];
       t[0] += (int32_t)a->vec[k].coeffs[2 * i] * b->vec[k].coeffs[2 * i];
@@ -268,6 +271,7 @@ void mlk_polyvec_add(mlk_polyvec *r, const mlk_polyvec *b)
                 forall(k2, 0, MLKEM_N,
                        (r->vec[j2].coeffs[k2] <= INT16_MAX) &&
                        (r->vec[j2].coeffs[k2] >= INT16_MIN))))
+    decreases(MLKEM_K - i)
   )
   {
     mlk_poly_add(&r->vec[i], &b->vec[i]);

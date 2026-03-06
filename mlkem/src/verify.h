@@ -362,7 +362,8 @@ __contract__(
   for (i = 0; i < len; i++)
   __loop__(
     invariant(i <= len)
-    invariant((r == 0) == (forall(k, 0, i, (a[k] == b[k])))))
+    invariant((r == 0) == (forall(k, 0, i, (a[k] == b[k]))))
+    decreases(len - i))
   {
     r |= a[i] ^ b[i];
     /* s is useless, but prevents the loop from being aborted once r=0xff. */
@@ -414,7 +415,8 @@ __contract__(
   for (i = 0; i < len; i++)
   __loop__(
     invariant(i <= len)
-    invariant(forall(k, 0, i, r[k] == (b == 0 ? x[k] : loop_entry(r)[k]))))
+    invariant(forall(k, 0, i, r[k] == (b == 0 ? x[k] : loop_entry(r)[k])))
+    decreases(len - i))
   {
     r[i] = mlk_ct_sel_uint8(r[i], x[i], b);
   }
