@@ -58,7 +58,7 @@
 //    - We exit early if we find the required number of good values,
 //    - We use the stack as a temporary storage and copy to the actual
 //      output buffer only in the end. This is because the algorithm
-//      can overwrite up to 14 bytes (we use 16B for alignment), 
+//      can overwrite up to 14 bytes (we use 16B for alignment),
 //    - The implementation uses x86 SSE and BMI2 extensions.
 
 #define STACK_SIZE (2*MLKEM_N + 16)
@@ -98,7 +98,8 @@ MLK_ASM_FN_SYMBOL(rej_uniform_asm)
 rej_uniform_asm_loop_start:
   // 1. Split 96 bits into eight 12-bit integers where each integer.
   //    We explain the algorithm by considering the lowest 64 bits of vals.
-  movdqu  (in, pos), vals
+  movq    (in, pos), vals        // Load low 8 bytes into bits [63:0] of vals
+  pinsrd  $2, 8(in, pos), vals   // Insert 4 bytes into bits [95:64] of vals
   //    vals: [ 63..48 | 47..32 | 31..16 | 15..0 ]
   pshufb  shuffle_in_mask, vals
   //    vals: [ 47..32 | 39..24 | 23..8 | 15..0 ]
