@@ -58,7 +58,8 @@ MLK_ASM_FN_SYMBOL(rej_uniform_asm)
         movq	$0x5555, %r9            # imm = 0x5555
 
 Lrej_uniform_asm_loop_start:
-        movdqu	(%rsi,%r8), %xmm2
+        movq	(%rsi,%r8), %xmm2
+        pinsrd	$0x2, 0x8(%rsi,%r8), %xmm2
         pshufb	%xmm4, %xmm2
         movdqa	%xmm2, %xmm3
         psrlw	$0x4, %xmm3
