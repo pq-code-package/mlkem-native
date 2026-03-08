@@ -17,9 +17,8 @@ mlkem-native is a secure, fast, and portable C90[^C90] implementation of ML-KEM[
 It is a fork of the ML-KEM reference implementation[^REF].
 
 All C code in [mlkem/src/*](mlkem) and [mlkem/src/fips202/*](mlkem/src/fips202) is proved memory-safe (no memory overflow) and type-safe (no integer overflow)
-using [CBMC](https://github.com/diffblue/cbmc). All AArch64 and x86_64 assembly is proved functionally correct, and — with the exception
-of rejection sampling — memory-safe and to have secret-independent timing (constant-time), at the object code level using
-[HOL-Light](https://github.com/jrh13/hol-light).
+using CBMC[^CBMC]. All AArch64 and x86_64 assembly is proved to be functionally correct,
+memory-safe, and of secret-independent timing (constant-time), using HOL-Light[^HOL-Light].
 
 mlkem-native includes native backends for Arm (64-bit, Neon), Intel/AMD (64-bit, AVX2), and RISC-V (64-bit, RVV). See [benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/) for performance data.
 
@@ -62,9 +61,8 @@ All C code in [mlkem/src/*](mlkem) and [mlkem/src/fips202/*](mlkem/src/fips202) 
 This uses the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) and builds on function contracts and loop invariant annotations
 in the source code. See [proofs/cbmc](proofs/cbmc) for details.
 
-All AArch64 and x86_64 assembly is proved functionally correct, and — with the exception of rejection sampling —
-memory-safe and to have secret-independent timing (constant-time), at the object-code level. This uses the
-[HOL-Light](https://github.com/jrh13/hol-light) interactive theorem prover and the
+All AArch64 and x86_64 assembly is proved functionally correct, memory-safe, and to have secret-independent timing
+(constant-time), at the object-code level. This uses the [HOL-Light](https://github.com/jrh13/hol-light) interactive theorem prover and the
 [s2n-bignum](https://github.com/awslabs/s2n-bignum/) verification infrastructure (which includes models of the
 relevant parts of the Arm and x86 architectures). See [proofs/hol_light](proofs/hol_light) for details.
 
@@ -212,8 +210,10 @@ through the [PQCA Discord](https://discord.com/invite/xyVnwzfg5R). See also [CON
 
 <!--- bibliography --->
 [^ACVP]: National Institute of Standards and Technology: Automated Cryptographic Validation Protocol (ACVP) Server, [https://github.com/usnistgov/ACVP-Server](https://github.com/usnistgov/ACVP-Server)
+[^CBMC]: Diffblue, Amazon Web Services: C Bounded Model Checker, [https://github.com/diffblue/cbmc](https://github.com/diffblue/cbmc)
 [^FIPS202]: National Institute of Standards and Technology: FIPS202 SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions, [https://csrc.nist.gov/pubs/fips/202/final](https://csrc.nist.gov/pubs/fips/202/final)
 [^FIPS203]: National Institute of Standards and Technology: FIPS 203 Module-Lattice-Based Key-Encapsulation Mechanism Standard, [https://csrc.nist.gov/pubs/fips/203/final](https://csrc.nist.gov/pubs/fips/203/final)
+[^HOL-Light]: John Harrison: HOL-Light Theorem Prover, [https://hol-light.github.io/](https://hol-light.github.io/)
 [^HYBRID]: Becker, Kannwischer: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64, [https://eprint.iacr.org/2022/1243](https://eprint.iacr.org/2022/1243)
 [^KyberSlash]: Bernstein, Bhargavan, Bhasin, Chattopadhyay, Chia, Kannwischer, Kiefer, Paiva, Ravi, Tamvada: KyberSlash: Exploiting secret-dependent division timings in Kyber implementations, [https://kyberslash.cr.yp.to/papers.html](https://kyberslash.cr.yp.to/papers.html)
 [^REF]: Bos, Ducas, Kiltz, Lepoint, Lyubashevsky, Schanck, Schwabe, Seiler, Stehlé: CRYSTALS-Kyber C reference implementation, [https://github.com/pq-crystals/kyber/tree/main/ref](https://github.com/pq-crystals/kyber/tree/main/ref)
