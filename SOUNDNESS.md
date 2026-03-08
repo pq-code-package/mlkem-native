@@ -150,11 +150,10 @@ right answer as per FIPS 203), **memory-safe** (it only accesses memory within
 the bounds of what is provided or allocated) and **constant-time** (no
 secret-dependent timing variation).
 
-**Assembly (HOL Light).** With one exception, the ASM specifications capture functional
-correctness, memory safety, and secret-independent execution. The one exception remaining is
-rejection sampling: the native implementations for this function only have functional
-correctness specifications, but no specifications of memory safety (the functions are safely
-variable-time, so no constant-time proofs are needed).
+**Assembly (HOL Light).** All ASM specification capture functional correctness, memory safety,
+and secret-independent execution. A special case is rejection sampling: Its assembly implementations
+are safely variable-time as they operate on public data only, so they only require correctness
+and safety specifications.
 
 **C code (CBMC).** Our use of CBMC focuses on **memory safety and type safety** -- absence
 of undefined behavior including out-of-bounds access, integer overflow, null pointer
@@ -183,7 +182,6 @@ the corresponding [CI job](.github/workflows/ct-tests.yml) for
 the full list), and the C code uses value barriers to prevent harmful compiler optimizations.
 
 **Potential improvements.**
-- Add memory-safety proof for rejection sampling routines. ([#1596](https://github.com/pq-code-package/mlkem-native/issues/1596))
 - Add automatic extraction of compiler coverage documentation from CI. ([#1608](https://github.com/pq-code-package/mlkem-native/issues/1608))
 - Introduce additional verification tooling that allows us to express functional correctness
   and constant-time properties for the C code. ([#1597](https://github.com/pq-code-package/mlkem-native/issues/1597), [#1598](https://github.com/pq-code-package/mlkem-native/issues/1598))

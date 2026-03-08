@@ -38,6 +38,7 @@ source code and documentation.
   - Amazon Web Services
 * URL: https://github.com/diffblue/cbmc
 * Referenced from:
+  - [README.md](README.md)
   - [SOUNDNESS.md](SOUNDNESS.md)
 
 ### `Candle`
@@ -159,6 +160,7 @@ source code and documentation.
   - John Harrison
 * URL: https://hol-light.github.io/
 * Referenced from:
+  - [README.md](README.md)
   - [SOUNDNESS.md](SOUNDNESS.md)
 
 ### `HOLTrace`
