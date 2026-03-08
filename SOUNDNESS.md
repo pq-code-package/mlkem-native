@@ -131,7 +131,7 @@ a specification, or that an unspecified component is incorrect.
 - **Backends for platforms other than AArch64 and x86_64** (e.g. RISC-V RVV, Armv8.1-M MVE, PowerPC):
   Where present, these are not yet covered by specification.
 
-The full test suite (functional tests, KAT, ACVP, Wycheproof, unit tests) validates functional
+The full test suite (functional tests, KAT, ACVP, Wycheproof[^wycheproof], unit tests) validates functional
 correctness empirically across all platforms and configurations, but there is currently
 no automatic coverage check for CBMC or HOL Light. A function or configuration could slip
 through without being covered by specification.
@@ -542,3 +542,4 @@ guarantee for the C proofs is therefore fundamentally weaker than for the assemb
 [^HOLTrace]: Daniel J. Bernstein: HOLTrace: A collection of tools for processing traces of a HOL Light session, [https://holtrace.cr.yp.to/](https://holtrace.cr.yp.to/)
 [^s2n-bignum]: Amazon Web Services: s2n-bignum: Library of formally assembly kernels verified in HOL-Light, [https://github.com/awslabs/s2n-bignum/](https://github.com/awslabs/s2n-bignum/)
 [^s2n-bignum-soundness]: Amazon Web Services: s2n-bignum soundness documentation, [https://github.com/awslabs/s2n-bignum/blob/main/doc/s2n_bignum_soundness.md](https://github.com/awslabs/s2n-bignum/blob/main/doc/s2n_bignum_soundness.md)
+[^wycheproof]: Community Cryptography Specification Project: Project Wycheproof, [https://github.com/C2SP/wycheproof](https://github.com/C2SP/wycheproof)

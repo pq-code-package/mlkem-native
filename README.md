@@ -107,7 +107,7 @@ See [dev/README.md](dev/README.md) for more details.
 ## Test Vectors
 
 mlkem-native is tested against all official ACVP ML-KEM test vectors[^ACVP] and the
-[Wycheproof](https://github.com/C2SP/wycheproof) ML-KEM test vectors.
+Wycheproof[^wycheproof] ML-KEM test vectors.
 
 ### ACVP
 
@@ -133,7 +133,7 @@ python3 ./test/acvp/acvp_client.py \
 
 ### Wycheproof
 
-You can run Wycheproof tests using the [`tests`](./scripts/tests) script or the [Wycheproof client](./test/wycheproof/wycheproof_client.py) directly:
+You can run Wycheproof[^wycheproof] tests using the [`tests`](./scripts/tests) script or the [Wycheproof client](./test/wycheproof/wycheproof_client.py) directly:
 
 ```bash
 # Using the tests script
@@ -220,3 +220,4 @@ through the [PQCA Discord](https://discord.com/invite/xyVnwzfg5R). See also [CON
 [^SLOTHY_Paper]: Abdulrahman, Becker, Kannwischer, Klein: Fast and Clean: Auditable high-performance assembly via constraint solving, [https://eprint.iacr.org/2022/1303](https://eprint.iacr.org/2022/1303)
 [^clangover]: Antoon Purnal: clangover, [https://github.com/antoonpurnal/clangover](https://github.com/antoonpurnal/clangover)
 [^tiny_sha3]: Markku-Juhani O. Saarinen: tiny_sha3, [https://github.com/mjosaarinen/tiny_sha3](https://github.com/mjosaarinen/tiny_sha3)
+[^wycheproof]: Community Cryptography Specification Project: Project Wycheproof, [https://github.com/C2SP/wycheproof](https://github.com/C2SP/wycheproof)

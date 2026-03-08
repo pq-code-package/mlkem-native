@@ -1,6 +1,11 @@
 # Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
+- id: wycheproof
+  name: Project Wycheproof
+  author: Community Cryptography Specification Project
+  url: https://github.com/C2SP/wycheproof
+
 - id: Candle
   name: "Candle: Formally Verified clone of HOL-Light"
   author:

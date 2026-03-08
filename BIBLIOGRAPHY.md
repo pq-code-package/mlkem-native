@@ -485,3 +485,13 @@ source code and documentation.
 * Referenced from:
   - [mlkem/src/fips202/fips202.c](mlkem/src/fips202/fips202.c)
   - [mlkem/src/fips202/keccakf1600.c](mlkem/src/fips202/keccakf1600.c)
+
+### `wycheproof`
+
+* Project Wycheproof
+* Author(s):
+  - Community Cryptography Specification Project
+* URL: https://github.com/C2SP/wycheproof
+* Referenced from:
+  - [README.md](README.md)
+  - [SOUNDNESS.md](SOUNDNESS.md)
