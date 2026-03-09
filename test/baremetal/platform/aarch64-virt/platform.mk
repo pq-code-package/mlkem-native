@@ -8,7 +8,7 @@ CROSS_PREFIX=aarch64-none-elf-
 CC=gcc
 
 # Reduce iterations -- bare-metal semihosting I/O is slow
-CFLAGS += -DNTESTS=3 -DMLK_TEST_NO_UNALIGNED
+CFLAGS += -DNTESTS=3
 
 CFLAGS += \
 	-O3 \
