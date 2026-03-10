@@ -28,8 +28,8 @@
       c_parameter: const uint32_t *rc
       description: Keccak round constants in bit-interleaved form (24 pairs of 32-bit words)
   Stack:
-    bytes: 236
-    description: register preservation (44) + SIMD registers (64) + temporary storage (128)
+    bytes: 228
+    description: register preservation (36) + SIMD registers (64) + temporary storage (128)
 */
 
 // ---------------------------------------------------------------------------
@@ -79,9 +79,30 @@
 .global MLK_ASM_NAMESPACE(keccak_f1600_x4_mve_asm)
 MLK_ASM_FN_SYMBOL(keccak_f1600_x4_mve_asm)
 
-        push.w	{r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, lr}
+        .cfi_startproc
+        push.w	{r4, r5, r6, r7, r8, r9, r10, r11, lr}
+        .cfi_adjust_cfa_offset 0x24
+        .cfi_rel_offset r4, 0x0
+        .cfi_rel_offset r5, 0x4
+        .cfi_rel_offset r6, 0x8
+        .cfi_rel_offset r7, 0xc
+        .cfi_rel_offset r8, 0x10
+        .cfi_rel_offset r9, 0x14
+        .cfi_rel_offset r10, 0x18
+        .cfi_rel_offset r11, 0x1c
+        .cfi_rel_offset lr, 0x20
         vpush	{d8, d9, d10, d11, d12, d13, d14, d15}
+        .cfi_adjust_cfa_offset 0x40
+        .cfi_rel_offset d8, 0x0
+        .cfi_rel_offset d9, 0x8
+        .cfi_rel_offset d10, 0x10
+        .cfi_rel_offset d11, 0x18
+        .cfi_rel_offset d12, 0x20
+        .cfi_rel_offset d13, 0x28
+        .cfi_rel_offset d14, 0x30
+        .cfi_rel_offset d15, 0x38
         sub	sp, #0x80
+        .cfi_adjust_cfa_offset 0x80
         mov	r6, r2
         mov.w	lr, #0x18
         mov	r2, r0
@@ -90,9 +111,9 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_mve_asm)
         vldrw.u32	q0, [r3]
         vldrw.u32	q1, [r2]
         vldrw.u32	q2, [r2, #32]
-        wls	lr, lr, keccak_f1600_x4_mve_asm_roundend @ imm = #0x8c0
+        wls	lr, lr, Lkeccak_f1600_x4_mve_asm_roundend @ imm = #0x8c0
 
-keccak_f1600_x4_mve_asm_roundstart:
+Lkeccak_f1600_x4_mve_asm_roundstart:
         vldrw.u32	q6, [r2, #112]
         veor	q7, q6, q2
         vldrw.u32	q2, [r2, #80]
@@ -653,13 +674,34 @@ keccak_f1600_x4_mve_asm_roundstart:
         veor	q0, q4, q6
         vstrw.32	q0, [r5]
 
-keccak_f1600_x4_mve_asm_roundend_pre:
-        le	lr, keccak_f1600_x4_mve_asm_roundstart @ imm = #-0x8c0
+Lkeccak_f1600_x4_mve_asm_roundend_pre:
+        le	lr, Lkeccak_f1600_x4_mve_asm_roundstart @ imm = #-0x8c0
 
-keccak_f1600_x4_mve_asm_roundend:
+Lkeccak_f1600_x4_mve_asm_roundend:
         add	sp, #0x80
+        .cfi_adjust_cfa_offset -0x80
         vpop	{d8, d9, d10, d11, d12, d13, d14, d15}
-        pop.w	{r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, pc}
+        .cfi_restore d8
+        .cfi_restore d9
+        .cfi_restore d10
+        .cfi_restore d11
+        .cfi_restore d12
+        .cfi_restore d13
+        .cfi_restore d14
+        .cfi_restore d15
+        .cfi_adjust_cfa_offset -0x40
+        pop.w	{r4, r5, r6, r7, r8, r9, r10, r11, pc}
+        .cfi_restore r4
+        .cfi_restore r5
+        .cfi_restore r6
+        .cfi_restore r7
+        .cfi_restore r8
+        .cfi_restore r9
+        .cfi_restore r10
+        .cfi_restore r11
+        .cfi_restore lr
+        .cfi_adjust_cfa_offset -0x24
+        .cfi_endproc
         nop
 
 MLK_ASM_FN_SIZE(keccak_f1600_x4_mve_asm)
