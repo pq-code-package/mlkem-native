@@ -201,6 +201,12 @@
   (arg0, arg1, arg2, context)
 #define MLK_CONTEXT_PARAMETERS_4(arg0, arg1, arg2, arg3, context) \
   (arg0, arg1, arg2, arg3, context)
+#define MLK_CONTEXT_PARAMETERS_5(arg0, arg1, arg2, arg3, arg4, context) \
+  (arg0, arg1, arg2, arg3, arg4, context)
+#define MLK_CONTEXT_PARAMETERS_6(a0, a1, a2, a3, a4, a5, context) \
+  (a0, a1, a2, a3, a4, a5, context)
+#define MLK_CONTEXT_PARAMETERS_7(a0, a1, a2, a3, a4, a5, a6, context) \
+  (a0, a1, a2, a3, a4, a5, a6, context)
 #else /* MLK_CONFIG_CONTEXT_PARAMETER */
 #define MLK_CONTEXT_PARAMETERS_0(context) ()
 #define MLK_CONTEXT_PARAMETERS_1(arg0, context) (arg0)
@@ -208,6 +214,12 @@
 #define MLK_CONTEXT_PARAMETERS_3(arg0, arg1, arg2, context) (arg0, arg1, arg2)
 #define MLK_CONTEXT_PARAMETERS_4(arg0, arg1, arg2, arg3, context) \
   (arg0, arg1, arg2, arg3)
+#define MLK_CONTEXT_PARAMETERS_5(arg0, arg1, arg2, arg3, arg4, context) \
+  (arg0, arg1, arg2, arg3, arg4)
+#define MLK_CONTEXT_PARAMETERS_6(a0, a1, a2, a3, a4, a5, context) \
+  (a0, a1, a2, a3, a4, a5)
+#define MLK_CONTEXT_PARAMETERS_7(a0, a1, a2, a3, a4, a5, a6, context) \
+  (a0, a1, a2, a3, a4, a5, a6)
 #endif /* !MLK_CONFIG_CONTEXT_PARAMETER */
 
 #if defined(MLK_CONFIG_CONTEXT_PARAMETER_TYPE) != \
