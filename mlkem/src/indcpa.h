@@ -121,6 +121,73 @@ __contract__(
           return_value == MLK_ERR_OUT_OF_MEMORY)
 );
 
+#define mlk_indcpa_enc_u MLK_NAMESPACE_K(indcpa_enc_u) MLK_CONTEXT_PARAMETERS_5
+/*************************************************
+ * Name:        mlk_indcpa_enc_u
+ *
+ * Description: Computes the u-component of a K-PKE ciphertext
+ *              (first phase of incremental K-PKE.Encrypt).
+ *
+ *              Produces ct_u = Compress_du(A^T * r + e1) and outputs
+ *              the intermediate state (sp, epp) needed by
+ *              mlk_indcpa_enc_v to complete the encryption.
+ *
+ * Arguments:   - uint8_t *ct_u: pointer to output ct_u
+ *                               (of length MLKEM_POLYVECCOMPRESSEDBYTES_DU)
+ *              - mlk_polyvec *sp: pointer to output r vector in NTT domain
+ *              - mlk_poly *epp: pointer to output e2 noise polynomial
+ *              - const uint8_t *seed: pointer to input public seed rho
+ *                                     (of length MLKEM_SYMBYTES)
+ *              - const uint8_t *coins: pointer to input random coins
+ *                 (of length MLKEM_SYMBYTES) to deterministically generate
+ *                 all randomness
+ *
+ * Specification: Partially implements
+ *                @[FIPS203, Algorithm 14 (K-PKE.Encrypt), L1-19]
+ *
+ **************************************************/
+MLK_INTERNAL_API
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_indcpa_enc_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
+                     mlk_polyvec *sp, mlk_poly *epp,
+                     const uint8_t seed[MLKEM_SYMBYTES],
+                     const uint8_t coins[MLKEM_SYMBYTES],
+                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+/* TODO: Add CBMC contracts */;
+
+#define mlk_indcpa_enc_v MLK_NAMESPACE_K(indcpa_enc_v) MLK_CONTEXT_PARAMETERS_5
+/*************************************************
+ * Name:        mlk_indcpa_enc_v
+ *
+ * Description: Computes the v-component of a K-PKE ciphertext
+ *              (second phase of incremental K-PKE.Encrypt).
+ *
+ *              Produces ct_v = Compress_dv(t^T * r + e2 + msg) using
+ *              intermediate state (sp, epp) from mlk_indcpa_enc_u.
+ *
+ * Arguments:   - uint8_t *ct_v: pointer to output ct_v
+ *                               (of length MLKEM_POLYCOMPRESSEDBYTES_DV)
+ *              - const mlk_polyvec *sp: pointer to input r vector
+ *                                       in NTT domain
+ *              - const mlk_poly *epp: pointer to input e2 noise polynomial
+ *              - const uint8_t *m: pointer to input message
+ *                                  (of length MLKEM_INDCPA_MSGBYTES)
+ *              - const uint8_t *ek_vector: pointer to input encoded public
+ *                  key vector t_hat (of length MLKEM_POLYVECBYTES)
+ *
+ * Specification: Partially implements
+ *                @[FIPS203, Algorithm 14 (K-PKE.Encrypt), L2-3, L20-23]
+ *
+ **************************************************/
+MLK_INTERNAL_API
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_indcpa_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
+                     const mlk_polyvec *sp, const mlk_poly *epp,
+                     const uint8_t m[MLKEM_INDCPA_MSGBYTES],
+                     const uint8_t ek_vector[MLKEM_POLYVECBYTES],
+                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+/* TODO: Add CBMC contracts */;
+
 #define mlk_indcpa_dec MLK_NAMESPACE_K(indcpa_dec) MLK_CONTEXT_PARAMETERS_3
 /*************************************************
  * Name:        mlk_indcpa_dec

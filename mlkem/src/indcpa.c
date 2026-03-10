@@ -563,6 +563,122 @@ cleanup:
   return ret;
 }
 
+MLK_INTERNAL_API
+int mlk_indcpa_enc_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
+                     mlk_polyvec *sp, mlk_poly *epp,
+                     const uint8_t seed[MLKEM_SYMBYTES],
+                     const uint8_t coins[MLKEM_SYMBYTES],
+                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+{
+  int ret = 0;
+  MLK_ALLOC(at, mlk_polymat, 1, context);
+  MLK_ALLOC(ep, mlk_polyvec, 1, context);
+  MLK_ALLOC(b, mlk_polyvec, 1, context);
+  MLK_ALLOC(sp_cache, mlk_polyvec_mulcache, 1, context);
+
+  if (at == NULL || ep == NULL || b == NULL || sp_cache == NULL)
+  {
+    ret = MLK_ERR_OUT_OF_MEMORY;
+    goto cleanup;
+  }
+
+  /*
+   * Declassify the public seed.
+   * Required to use it in conditional-branches in rejection sampling.
+   * This is needed because in re-encryption the publicseed originated from sk
+   * which is marked undefined.
+   */
+  MLK_CT_TESTING_DECLASSIFY(seed, MLKEM_SYMBYTES);
+
+  mlk_gen_matrix(at, seed, 1 /* transpose */);
+
+#if MLKEM_K == 2
+  mlk_poly_getnoise_eta1122_4x(&sp->vec[0], &sp->vec[1], &ep->vec[0],
+                               &ep->vec[1], coins, 0, 1, 2, 3);
+  mlk_poly_getnoise_eta2(epp, coins, 4);
+#elif MLKEM_K == 3
+  /*
+   * In this call, only the first three output buffers are needed.
+   * The last parameter is a dummy that's overwritten later.
+   */
+  mlk_poly_getnoise_eta1_4x(&sp->vec[0], &sp->vec[1], &sp->vec[2], NULL, coins,
+                            0, 1, 2, 0xFF /* irrelevant */);
+  /* The fourth output buffer in this call _is_ used. */
+  mlk_poly_getnoise_eta2_4x(&ep->vec[0], &ep->vec[1], &ep->vec[2], epp, coins,
+                            3, 4, 5, 6);
+#elif MLKEM_K == 4
+  mlk_poly_getnoise_eta1_4x(&sp->vec[0], &sp->vec[1], &sp->vec[2], &sp->vec[3],
+                            coins, 0, 1, 2, 3);
+  mlk_poly_getnoise_eta2_4x(&ep->vec[0], &ep->vec[1], &ep->vec[2], &ep->vec[3],
+                            coins, 4, 5, 6, 7);
+  mlk_poly_getnoise_eta2(epp, coins, 8);
+#endif /* MLKEM_K == 4 */
+
+  mlk_polyvec_ntt(sp);
+
+  mlk_polyvec_mulcache_compute(sp_cache, sp);
+  mlk_matvec_mul(b, at, sp, sp_cache);
+
+  mlk_polyvec_invntt_tomont(b);
+
+  mlk_polyvec_add(b, ep);
+  mlk_polyvec_reduce(b);
+
+  mlk_polyvec_compress_du(ct_u, b);
+
+cleanup:
+  /* Specification: Partially implements
+   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
+  MLK_FREE(sp_cache, mlk_polyvec_mulcache, 1, context);
+  MLK_FREE(b, mlk_polyvec, 1, context);
+  MLK_FREE(ep, mlk_polyvec, 1, context);
+  MLK_FREE(at, mlk_polymat, 1, context);
+  return ret;
+}
+
+MLK_INTERNAL_API
+int mlk_indcpa_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
+                     const mlk_polyvec *sp, const mlk_poly *epp,
+                     const uint8_t m[MLKEM_INDCPA_MSGBYTES],
+                     const uint8_t ek_vector[MLKEM_POLYVECBYTES],
+                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+{
+  int ret = 0;
+  MLK_ALLOC(pkpv, mlk_polyvec, 1, context);
+  MLK_ALLOC(v, mlk_poly, 1, context);
+  MLK_ALLOC(k, mlk_poly, 1, context);
+  MLK_ALLOC(sp_cache, mlk_polyvec_mulcache, 1, context);
+
+  if (pkpv == NULL || v == NULL || k == NULL || sp_cache == NULL)
+  {
+    ret = MLK_ERR_OUT_OF_MEMORY;
+    goto cleanup;
+  }
+
+  mlk_polyvec_frombytes(pkpv, ek_vector);
+  mlk_poly_frommsg(k, m);
+
+  mlk_polyvec_mulcache_compute(sp_cache, sp);
+  mlk_polyvec_basemul_acc_montgomery_cached(v, pkpv, sp, sp_cache);
+
+  mlk_poly_invntt_tomont(v);
+
+  mlk_poly_add(v, epp);
+  mlk_poly_add(v, k);
+  mlk_poly_reduce(v);
+
+  mlk_poly_compress_dv(ct_v, v);
+
+cleanup:
+  /* Specification: Partially implements
+   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
+  MLK_FREE(sp_cache, mlk_polyvec_mulcache, 1, context);
+  MLK_FREE(k, mlk_poly, 1, context);
+  MLK_FREE(v, mlk_poly, 1, context);
+  MLK_FREE(pkpv, mlk_polyvec, 1, context);
+  return ret;
+}
+
 /* Reference: `indcpa_dec()` in the reference implementation @[REF].
  *            - We use a mulcache for the scalar product.
  *            - We include buffer zeroization. */
