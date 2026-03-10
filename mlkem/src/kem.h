@@ -22,7 +22,6 @@
 
 #include "cbmc.h"
 #include "common.h"
-#include "poly_k.h"
 #include "sys.h"
 
 #if defined(MLK_CHECK_APIS)
@@ -269,11 +268,17 @@ __contract__(
           return_value == MLK_ERR_RNG_FAIL)
 );
 
+/* Size of a polynomial serialized via 16-bit little-endian encoding
+ * (2 bytes per coefficient). Used for the intermediate state in
+ * incremental encapsulation. */
+#define MLKEM_POLY16_BYTES (MLKEM_N * 2)
+#define MLKEM_POLYVEC16_BYTES (MLKEM_K * MLKEM_POLY16_BYTES)
+
 /**
  * First phase of incremental ML-KEM encapsulation.
  *
  * Computes the u-component of the ciphertext and the shared secret, and
- * outputs intermediate state (sp, epp) needed by mlk_kem_enc_v.
+ * outputs serialized intermediate state needed by mlk_kem_enc_v.
  *
  * Only requires the public seed (ek_seed) and the hash of the full public
  * key (hpk), not the full public key.
@@ -281,22 +286,25 @@ __contract__(
  * @spec{Partially implements @[FIPS203, Algorithm 17, ML-KEM.Encaps_Internal,
  * L1-4] combined with the u-phase of K-PKE.Encrypt.}
  *
- * @param[out] ct_u    Output u-component of ciphertext (an already allocated
- *                     array of MLKEM_POLYVECCOMPRESSEDBYTES_DU bytes).
- * @param[out] ss      Output shared secret (an already allocated array of
- *                     MLKEM_SSBYTES bytes).
- * @param[out] sp      Output intermediate r vector (in NTT domain, needed by
- *                     mlk_kem_enc_v).
- * @param[out] epp     Output intermediate e2 polynomial (needed by
- *                     mlk_kem_enc_v).
- * @param[in]  seed    Input public seed rho (an already allocated array of
- *                     MLKEM_SYMBYTES bytes, from pk[MLKEM_POLYVECBYTES:]).
- * @param[in]  hpk     Input H(pk) (an already allocated array of
- *                     MLKEM_SYMBYTES bytes).
- * @param[in]  coins   Input randomness (an already allocated array of
- *                     MLKEM_SYMBYTES bytes).
- * @param      context Application context (build-configurable; see
- *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param[out] ct_u       Output u-component of ciphertext (an already
+ *                        allocated array of MLKEM_POLYVECCOMPRESSEDBYTES_DU
+ *                        bytes).
+ * @param[out] ss         Output shared secret (an already allocated array of
+ *                        MLKEM_SSBYTES bytes).
+ * @param[out] sp_serial  Output serialized r vector in NTT domain (an already
+ *                        allocated array of MLKEM_POLYVEC16_BYTES bytes,
+ *                        needed by mlk_kem_enc_v).
+ * @param[out] epp_serial Output serialized e2 noise polynomial (an already
+ *                        allocated array of MLKEM_POLY16_BYTES bytes, needed
+ *                        by mlk_kem_enc_v).
+ * @param[in]  seed       Input public seed rho (an already allocated array of
+ *                        MLKEM_SYMBYTES bytes, from pk[MLKEM_POLYVECBYTES:]).
+ * @param[in]  hpk        Input H(pk) (an already allocated array of
+ *                        MLKEM_SYMBYTES bytes).
+ * @param[in]  coins      Input randomness (an already allocated array of
+ *                        MLKEM_SYMBYTES bytes).
+ * @param      context    Application context (build-configurable; see
+ *                        MLK_CONFIG_CONTEXT_PARAMETER_TYPE).
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
@@ -305,8 +313,9 @@ __contract__(
 MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
-                          uint8_t ss[MLKEM_SSBYTES], mlk_polyvec *sp,
-                          mlk_poly *epp,
+                          uint8_t ss[MLKEM_SSBYTES],
+                          uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
+                          uint8_t epp_serial[MLKEM_POLY16_BYTES],
                           const uint8_t seed[MLKEM_SYMBYTES],
                           const uint8_t hpk[MLKEM_SYMBYTES],
                           const uint8_t coins[MLKEM_SYMBYTES],
@@ -316,8 +325,8 @@ int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
 /**
  * Second phase of incremental ML-KEM encapsulation.
  *
- * Computes the v-component of the ciphertext using intermediate state
- * (sp, epp) from mlk_kem_enc_derand_u.
+ * Deserializes the intermediate state from mlk_kem_enc_derand_u and
+ * computes the v-component of the ciphertext.
  *
  * Performs the modulus check on ek_vector.
  *
@@ -325,20 +334,23 @@ int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
  * combined with the v-phase of K-PKE.Encrypt, and @[FIPS203, Section 7.2,
  * modulus check].}
  *
- * @param[out] ct_v      Output v-component of ciphertext (an already allocated
- *                       array of MLKEM_POLYCOMPRESSEDBYTES_DV bytes).
- * @param[in]  sp        Input intermediate r vector (in NTT domain, from
- *                       mlk_kem_enc_derand_u).
- * @param[in]  epp       Input intermediate e2 polynomial (from
- *                       mlk_kem_enc_derand_u).
- * @param[in]  coins     Input randomness (an already allocated array of
- *                       MLKEM_SYMBYTES bytes, same as passed to
- *                       mlk_kem_enc_derand_u).
- * @param[in]  ek_vector Input encoded public key vector t_hat (an already
- *                       allocated array of MLKEM_POLYVECBYTES bytes, from
- *                       pk[0:MLKEM_POLYVECBYTES]).
- * @param      context   Application context (build-configurable; see
- *                       MLK_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param[out] ct_v       Output v-component of ciphertext (an already
+ *                        allocated array of MLKEM_POLYCOMPRESSEDBYTES_DV
+ *                        bytes).
+ * @param[in]  sp_serial  Input serialized r vector in NTT domain (an already
+ *                        allocated array of MLKEM_POLYVEC16_BYTES bytes,
+ *                        from mlk_kem_enc_derand_u).
+ * @param[in]  epp_serial Input serialized e2 noise polynomial (an already
+ *                        allocated array of MLKEM_POLY16_BYTES bytes, from
+ *                        mlk_kem_enc_derand_u).
+ * @param[in]  coins      Input randomness (an already allocated array of
+ *                        MLKEM_SYMBYTES bytes, same as passed to
+ *                        mlk_kem_enc_derand_u).
+ * @param[in]  ek_vector  Input encoded public key vector t_hat (an already
+ *                        allocated array of MLKEM_POLYVECBYTES bytes, from
+ *                        pk[0:MLKEM_POLYVECBYTES]).
+ * @param      context    Application context (build-configurable; see
+ *                        MLK_CONFIG_CONTEXT_PARAMETER_TYPE).
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_FAIL          The modulus check on ek_vector failed.
@@ -348,7 +360,8 @@ int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
 MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
-                   const mlk_polyvec *sp, const mlk_poly *epp,
+                   const uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
+                   const uint8_t epp_serial[MLKEM_POLY16_BYTES],
                    const uint8_t coins[MLKEM_SYMBYTES],
                    const uint8_t ek_vector[MLKEM_POLYVECBYTES],
                    MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)

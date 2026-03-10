@@ -35,6 +35,11 @@
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
 #define mlk_check_pct MLK_ADD_PARAM_SET(mlk_check_pct) MLK_CONTEXT_PARAMETERS_2
+#define mlk_serialize_poly_16le MLK_ADD_PARAM_SET(mlk_serialize_poly_16le)
+#define mlk_deserialize_poly_16le MLK_ADD_PARAM_SET(mlk_deserialize_poly_16le)
+#define mlk_serialize_polyvec_16le MLK_ADD_PARAM_SET(mlk_serialize_polyvec_16le)
+#define mlk_deserialize_polyvec_16le \
+  MLK_ADD_PARAM_SET(mlk_deserialize_polyvec_16le)
 /* End of parameter set namespacing */
 
 /* Reference: Not implemented in the reference implementation @[REF]. */
@@ -284,8 +289,10 @@ cleanup:
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
 /* Reference: `crypto_kem_enc_derand()` in the reference implementation @[REF]
- *            - We include public key check
- *            - We include stack buffer zeroization */
+ *            - We include public key check (via mlk_kem_enc_v)
+ *            - We include stack buffer zeroization
+ * Implemented via mlk_kem_enc_derand_u + mlk_kem_enc_v to share
+ * a single code path with the incremental API. */
 MLK_EXTERNAL_API
 int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                        uint8_t ss[MLKEM_SSBYTES],
@@ -294,42 +301,36 @@ int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                        MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   int ret = 0;
-  MLK_ALLOC(buf, uint8_t, 2 * MLKEM_SYMBYTES, context);
-  MLK_ALLOC(kr, uint8_t, 2 * MLKEM_SYMBYTES, context);
+  MLK_ALLOC(hpk, uint8_t, MLKEM_SYMBYTES, context);
+  MLK_ALLOC(sp_serial, uint8_t, MLKEM_POLYVEC16_BYTES, context);
+  MLK_ALLOC(epp_serial, uint8_t, MLKEM_POLY16_BYTES, context);
 
-  if (buf == NULL || kr == NULL)
+  if (hpk == NULL || sp_serial == NULL || epp_serial == NULL)
   {
     ret = MLK_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
 
-  /* Specification: Implements @[FIPS203, Section 7.2, Modulus check] */
-  ret = mlk_kem_check_pk(pk, context);
+  mlk_hash_h(hpk, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
+
+  ret = mlk_kem_enc_derand_u(ct, ss, sp_serial, epp_serial,
+                              pk + MLKEM_POLYVECBYTES, hpk, coins, context);
   if (ret != 0)
   {
     goto cleanup;
   }
 
-  mlk_memcpy(buf, coins, MLKEM_SYMBYTES);
-
-  /* Multitarget countermeasure for coins + contributory KEM */
-  mlk_hash_h(buf + MLKEM_SYMBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
-  mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
-
-  /* coins are in kr+MLKEM_SYMBYTES */
-  ret = mlk_indcpa_enc(ct, buf, pk, kr + MLKEM_SYMBYTES, context);
-  if (ret != 0)
-  {
-    goto cleanup;
-  }
-
-  mlk_memcpy(ss, kr, MLKEM_SYMBYTES);
+  /* Specification: Modulus check @[FIPS203, Section 7.2] is
+   * performed inside mlk_kem_enc_v on pk (= ek_vector). */
+  ret = mlk_kem_enc_v(ct + MLKEM_POLYVECCOMPRESSEDBYTES_DU, sp_serial,
+                       epp_serial, coins, pk, context);
 
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(kr, uint8_t, 2 * MLKEM_SYMBYTES, context);
-  MLK_FREE(buf, uint8_t, 2 * MLKEM_SYMBYTES, context);
+  MLK_FREE(epp_serial, uint8_t, MLKEM_POLY16_BYTES, context);
+  MLK_FREE(sp_serial, uint8_t, MLKEM_POLYVEC16_BYTES, context);
+  MLK_FREE(hpk, uint8_t, MLKEM_SYMBYTES, context);
   return ret;
 }
 
@@ -369,10 +370,56 @@ cleanup:
 }
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
+/* 16-bit little-endian serialization for intermediate state.
+ * Stores each int16_t coefficient as 2 bytes in LE order. */
+static void mlk_serialize_poly_16le(uint8_t out[MLKEM_POLY16_BYTES],
+                                     const mlk_poly *p)
+{
+  unsigned j;
+  for (j = 0; j < MLKEM_N; j++)
+  {
+    uint16_t c = (uint16_t)p->coeffs[j];
+    out[2 * j] = (uint8_t)(c & 0xFF);
+    out[2 * j + 1] = (uint8_t)(c >> 8);
+  }
+}
+
+static void mlk_deserialize_poly_16le(mlk_poly *p,
+                                       const uint8_t in[MLKEM_POLY16_BYTES])
+{
+  unsigned j;
+  for (j = 0; j < MLKEM_N; j++)
+  {
+    p->coeffs[j] =
+        (int16_t)((uint16_t)in[2 * j] | ((uint16_t)in[2 * j + 1] << 8));
+  }
+}
+
+static void mlk_serialize_polyvec_16le(uint8_t out[MLKEM_POLYVEC16_BYTES],
+                                        const mlk_polyvec *v)
+{
+  unsigned i;
+  for (i = 0; i < MLKEM_K; i++)
+  {
+    mlk_serialize_poly_16le(out + i * MLKEM_POLY16_BYTES, &v->vec[i]);
+  }
+}
+
+static void mlk_deserialize_polyvec_16le(mlk_polyvec *v,
+                                          const uint8_t in[MLKEM_POLYVEC16_BYTES])
+{
+  unsigned i;
+  for (i = 0; i < MLKEM_K; i++)
+  {
+    mlk_deserialize_poly_16le(&v->vec[i], in + i * MLKEM_POLY16_BYTES);
+  }
+}
+
 MLK_INTERNAL_API
 int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
-                          uint8_t ss[MLKEM_SSBYTES], mlk_polyvec *sp,
-                          mlk_poly *epp,
+                          uint8_t ss[MLKEM_SSBYTES],
+                          uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
+                          uint8_t epp_serial[MLKEM_POLY16_BYTES],
                           const uint8_t seed[MLKEM_SYMBYTES],
                           const uint8_t hpk[MLKEM_SYMBYTES],
                           const uint8_t coins[MLKEM_SYMBYTES],
@@ -381,8 +428,10 @@ int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
   int ret = 0;
   MLK_ALLOC(buf, uint8_t, 2 * MLKEM_SYMBYTES, context);
   MLK_ALLOC(kr, uint8_t, 2 * MLKEM_SYMBYTES, context);
+  MLK_ALLOC(sp, mlk_polyvec, 1, context);
+  MLK_ALLOC(epp, mlk_poly, 1, context);
 
-  if (buf == NULL || kr == NULL)
+  if (buf == NULL || kr == NULL || sp == NULL || epp == NULL)
   {
     ret = MLK_ERR_OUT_OF_MEMORY;
     goto cleanup;
@@ -400,12 +449,18 @@ int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
     goto cleanup;
   }
 
+  /* Serialize intermediate state (little endian) */
+  mlk_serialize_polyvec_16le(sp_serial, sp);
+  mlk_serialize_poly_16le(epp_serial, epp);
+
   /* Shared secret K = first MLKEM_SYMBYTES bytes of G output */
   mlk_memcpy(ss, kr, MLKEM_SYMBYTES);
 
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
+  MLK_FREE(epp, mlk_poly, 1, context);
+  MLK_FREE(sp, mlk_polyvec, 1, context);
   MLK_FREE(kr, uint8_t, 2 * MLKEM_SYMBYTES, context);
   MLK_FREE(buf, uint8_t, 2 * MLKEM_SYMBYTES, context);
   return ret;
@@ -413,16 +468,19 @@ cleanup:
 
 MLK_INTERNAL_API
 int mlk_kem_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
-                   const mlk_polyvec *sp, const mlk_poly *epp,
+                   const uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
+                   const uint8_t epp_serial[MLKEM_POLY16_BYTES],
                    const uint8_t coins[MLKEM_SYMBYTES],
                    const uint8_t ek_vector[MLKEM_POLYVECBYTES],
                    MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   int ret = 0;
+  MLK_ALLOC(sp, mlk_polyvec, 1, context);
+  MLK_ALLOC(epp, mlk_poly, 1, context);
   MLK_ALLOC(p, mlk_polyvec, 1, context);
   MLK_ALLOC(p_reencoded, uint8_t, MLKEM_POLYVECBYTES, context);
 
-  if (p == NULL || p_reencoded == NULL)
+  if (sp == NULL || epp == NULL || p == NULL || p_reencoded == NULL)
   {
     ret = MLK_ERR_OUT_OF_MEMORY;
     goto cleanup;
@@ -441,6 +499,10 @@ int mlk_kem_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
     goto cleanup;
   }
 
+  /* Deserialize intermediate state via 16-bit LE encoding */
+  mlk_deserialize_polyvec_16le(sp, sp_serial);
+  mlk_deserialize_poly_16le(epp, epp_serial);
+
   ret = mlk_indcpa_enc_v(ct_v, sp, epp, coins, ek_vector, context);
 
 cleanup:
@@ -448,6 +510,8 @@ cleanup:
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   MLK_FREE(p_reencoded, uint8_t, MLKEM_POLYVECBYTES, context);
   MLK_FREE(p, mlk_polyvec, 1, context);
+  MLK_FREE(epp, mlk_poly, 1, context);
+  MLK_FREE(sp, mlk_polyvec, 1, context);
   return ret;
 }
 
@@ -526,3 +590,7 @@ cleanup:
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
 #undef mlk_check_pct
+#undef mlk_serialize_poly_16le
+#undef mlk_deserialize_poly_16le
+#undef mlk_serialize_polyvec_16le
+#undef mlk_deserialize_polyvec_16le

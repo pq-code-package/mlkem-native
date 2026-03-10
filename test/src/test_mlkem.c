@@ -175,8 +175,8 @@ static int test_incremental_enc(void)
   uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU];
   uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV];
   uint8_t ss[CRYPTO_BYTES];
-  MLK_ALIGN mlk_polyvec sp;
-  MLK_ALIGN mlk_poly epp;
+  uint8_t sp_serial[MLKEM_POLYVEC16_BYTES];
+  uint8_t epp_serial[MLKEM_POLY16_BYTES];
 
   uint8_t hpk[MLKEM_SYMBYTES];
   const uint8_t *ek_vector;
@@ -198,9 +198,10 @@ static int test_incremental_enc(void)
   mlk_hash_h(hpk, pk, CRYPTO_PUBLICKEYBYTES);
 
   /* Incremental encapsulation via KEM-level API */
-  CHECK(mlk_kem_enc_derand_u(ct_u, ss, &sp, &epp, ek_seed, hpk, enc_coins,
-                             0) == 0);
-  CHECK(mlk_kem_enc_v(ct_v, &sp, &epp, enc_coins, ek_vector, 0) == 0);
+  CHECK(mlk_kem_enc_derand_u(ct_u, ss, sp_serial, epp_serial, ek_seed, hpk,
+                             enc_coins, 0) == 0);
+  CHECK(mlk_kem_enc_v(ct_v, sp_serial, epp_serial, enc_coins, ek_vector,
+                      0) == 0);
 
   /* Verify ct_u || ct_v matches reference ciphertext */
   MLK_CT_TESTING_DECLASSIFY(ct_u, MLKEM_POLYVECCOMPRESSEDBYTES_DU);
