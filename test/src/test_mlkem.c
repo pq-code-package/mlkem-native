@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "../../mlkem/src/compress.h"
+#include "../../mlkem/src/kem.h"
+#include "../../mlkem/src/symmetric.h"
 
 #include "../../mlkem/mlkem_native.h"
 #include "../notrandombytes/notrandombytes.h"
@@ -160,6 +162,75 @@ static int test_invalid_ciphertext(void)
   return 0;
 }
 
+static int test_incremental_enc(void)
+{
+  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t ct_ref[CRYPTO_CIPHERTEXTBYTES];
+  uint8_t ss_ref[CRYPTO_BYTES];
+  uint8_t keygen_coins[2 * MLKEM_SYMBYTES];
+  uint8_t enc_coins[MLKEM_SYMBYTES];
+
+  /* Incremental outputs */
+  uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU];
+  uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV];
+  uint8_t ss[CRYPTO_BYTES];
+  MLK_ALIGN mlk_polyvec sp;
+  MLK_ALIGN mlk_poly epp;
+
+  uint8_t hpk[MLKEM_SYMBYTES];
+  const uint8_t *ek_vector;
+  const uint8_t *ek_seed;
+
+  /* Generate deterministic coins */
+  CHECK(randombytes(keygen_coins, 2 * MLKEM_SYMBYTES) == 0);
+  CHECK(randombytes(enc_coins, MLKEM_SYMBYTES) == 0);
+
+  /* Standard keygen + encaps (reference) */
+  CHECK(crypto_kem_keypair_derand(pk, sk, keygen_coins) == 0);
+  CHECK(crypto_kem_enc_derand(ct_ref, ss_ref, pk, enc_coins) == 0);
+
+  /* Split pk: pk = ek_vector || ek_seed */
+  ek_vector = pk;
+  ek_seed = pk + MLKEM_POLYVECBYTES;
+
+  /* Compute H(pk) for incremental API */
+  mlk_hash_h(hpk, pk, CRYPTO_PUBLICKEYBYTES);
+
+  /* Incremental encapsulation via KEM-level API */
+  CHECK(mlk_kem_enc_derand_u(ct_u, ss, &sp, &epp, ek_seed, hpk, enc_coins,
+                             0) == 0);
+  CHECK(mlk_kem_enc_v(ct_v, &sp, &epp, enc_coins, ek_vector, 0) == 0);
+
+  /* Verify ct_u || ct_v matches reference ciphertext */
+  MLK_CT_TESTING_DECLASSIFY(ct_u, MLKEM_POLYVECCOMPRESSEDBYTES_DU);
+  MLK_CT_TESTING_DECLASSIFY(ct_v, MLKEM_POLYCOMPRESSEDBYTES_DV);
+  MLK_CT_TESTING_DECLASSIFY(ct_ref, CRYPTO_CIPHERTEXTBYTES);
+
+  CHECK(memcmp(ct_u, ct_ref, MLKEM_POLYVECCOMPRESSEDBYTES_DU) == 0);
+  CHECK(memcmp(ct_v, ct_ref + MLKEM_POLYVECCOMPRESSEDBYTES_DU,
+               MLKEM_POLYCOMPRESSEDBYTES_DV) == 0);
+
+  /* Verify shared secret matches */
+  MLK_CT_TESTING_DECLASSIFY(ss, CRYPTO_BYTES);
+  MLK_CT_TESTING_DECLASSIFY(ss_ref, CRYPTO_BYTES);
+  CHECK(memcmp(ss, ss_ref, CRYPTO_BYTES) == 0);
+
+  /* Verify decaps works with reassembled ciphertext */
+  {
+    uint8_t ct_combined[CRYPTO_CIPHERTEXTBYTES];
+    uint8_t ss_dec[CRYPTO_BYTES];
+    memcpy(ct_combined, ct_u, MLKEM_POLYVECCOMPRESSEDBYTES_DU);
+    memcpy(ct_combined + MLKEM_POLYVECCOMPRESSEDBYTES_DU, ct_v,
+           MLKEM_POLYCOMPRESSEDBYTES_DV);
+    CHECK(crypto_kem_dec(ss_dec, ct_combined, sk) == 0);
+    MLK_CT_TESTING_DECLASSIFY(ss_dec, CRYPTO_BYTES);
+    CHECK(memcmp(ss_dec, ss, CRYPTO_BYTES) == 0);
+  }
+
+  return 0;
+}
+
 int main(void)
 {
   unsigned i;
@@ -176,6 +247,7 @@ int main(void)
     CHECK(test_invalid_sk_a() == 0);
     CHECK(test_invalid_sk_b() == 0);
     CHECK(test_invalid_ciphertext() == 0);
+    CHECK(test_incremental_enc() == 0);
   }
 
   printf("CRYPTO_SECRETKEYBYTES:  %d\n", CRYPTO_SECRETKEYBYTES);

@@ -369,6 +369,88 @@ cleanup:
 }
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
+MLK_INTERNAL_API
+int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
+                          uint8_t ss[MLKEM_SSBYTES], mlk_polyvec *sp,
+                          mlk_poly *epp,
+                          const uint8_t seed[MLKEM_SYMBYTES],
+                          const uint8_t hpk[MLKEM_SYMBYTES],
+                          const uint8_t coins[MLKEM_SYMBYTES],
+                          MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+{
+  int ret = 0;
+  MLK_ALLOC(buf, uint8_t, 2 * MLKEM_SYMBYTES, context);
+  MLK_ALLOC(kr, uint8_t, 2 * MLKEM_SYMBYTES, context);
+
+  if (buf == NULL || kr == NULL)
+  {
+    ret = MLK_ERR_OUT_OF_MEMORY;
+    goto cleanup;
+  }
+
+  /* FO transform: (K, r) = G(coins || H(pk)) */
+  mlk_memcpy(buf, coins, MLKEM_SYMBYTES);
+  mlk_memcpy(buf + MLKEM_SYMBYTES, hpk, MLKEM_SYMBYTES);
+  mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
+
+  /* Compute ct_u using derived randomness r */
+  ret = mlk_indcpa_enc_u(ct_u, sp, epp, seed, kr + MLKEM_SYMBYTES, context);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
+
+  /* Shared secret K = first MLKEM_SYMBYTES bytes of G output */
+  mlk_memcpy(ss, kr, MLKEM_SYMBYTES);
+
+cleanup:
+  /* Specification: Partially implements
+   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
+  MLK_FREE(kr, uint8_t, 2 * MLKEM_SYMBYTES, context);
+  MLK_FREE(buf, uint8_t, 2 * MLKEM_SYMBYTES, context);
+  return ret;
+}
+
+MLK_INTERNAL_API
+int mlk_kem_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
+                   const mlk_polyvec *sp, const mlk_poly *epp,
+                   const uint8_t coins[MLKEM_SYMBYTES],
+                   const uint8_t ek_vector[MLKEM_POLYVECBYTES],
+                   MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+{
+  int ret = 0;
+  MLK_ALLOC(p, mlk_polyvec, 1, context);
+  MLK_ALLOC(p_reencoded, uint8_t, MLKEM_POLYVECBYTES, context);
+
+  if (p == NULL || p_reencoded == NULL)
+  {
+    ret = MLK_ERR_OUT_OF_MEMORY;
+    goto cleanup;
+  }
+
+  /* Specification: Implements @[FIPS203, Section 7.2, Modulus check]
+   * on the public key vector ek_vector */
+  mlk_polyvec_frombytes(p, ek_vector);
+  mlk_polyvec_reduce(p);
+  mlk_polyvec_tobytes(p_reencoded, p);
+  ret =
+      mlk_ct_memcmp(ek_vector, p_reencoded, MLKEM_POLYVECBYTES) ? MLK_ERR_FAIL
+                                                                 : 0;
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
+
+  ret = mlk_indcpa_enc_v(ct_v, sp, epp, coins, ek_vector, context);
+
+cleanup:
+  /* Specification: Partially implements
+   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
+  MLK_FREE(p_reencoded, uint8_t, MLKEM_POLYVECBYTES, context);
+  MLK_FREE(p, mlk_polyvec, 1, context);
+  return ret;
+}
+
 /* Reference: `crypto_kem_dec()` in the reference implementation @[REF]
  *            - We include secret key check
  *            - We include stack buffer zeroization */

@@ -22,6 +22,7 @@
 
 #include "cbmc.h"
 #include "common.h"
+#include "poly_k.h"
 #include "sys.h"
 
 #if defined(MLK_CHECK_APIS)
@@ -52,6 +53,9 @@
 #define mlk_kem_enc_derand MLK_NAMESPACE_K(enc_derand) MLK_CONTEXT_PARAMETERS_4
 #define mlk_kem_enc MLK_NAMESPACE_K(enc) MLK_CONTEXT_PARAMETERS_3
 #define mlk_kem_dec MLK_NAMESPACE_K(dec) MLK_CONTEXT_PARAMETERS_3
+#define mlk_kem_enc_derand_u \
+  MLK_NAMESPACE_K(enc_derand_u) MLK_CONTEXT_PARAMETERS_7
+#define mlk_kem_enc_v MLK_NAMESPACE_K(enc_v) MLK_CONTEXT_PARAMETERS_5
 #define mlk_kem_check_pk MLK_NAMESPACE_K(check_pk) MLK_CONTEXT_PARAMETERS_1
 #define mlk_kem_check_sk MLK_NAMESPACE_K(check_sk) MLK_CONTEXT_PARAMETERS_1
 
@@ -264,6 +268,91 @@ __contract__(
           return_value == MLK_ERR_OUT_OF_MEMORY ||
           return_value == MLK_ERR_RNG_FAIL)
 );
+
+/**
+ * First phase of incremental ML-KEM encapsulation.
+ *
+ * Computes the u-component of the ciphertext and the shared secret, and
+ * outputs intermediate state (sp, epp) needed by mlk_kem_enc_v.
+ *
+ * Only requires the public seed (ek_seed) and the hash of the full public
+ * key (hpk), not the full public key.
+ *
+ * @spec{Partially implements @[FIPS203, Algorithm 17, ML-KEM.Encaps_Internal,
+ * L1-4] combined with the u-phase of K-PKE.Encrypt.}
+ *
+ * @param[out] ct_u    Output u-component of ciphertext (an already allocated
+ *                     array of MLKEM_POLYVECCOMPRESSEDBYTES_DU bytes).
+ * @param[out] ss      Output shared secret (an already allocated array of
+ *                     MLKEM_SSBYTES bytes).
+ * @param[out] sp      Output intermediate r vector (in NTT domain, needed by
+ *                     mlk_kem_enc_v).
+ * @param[out] epp     Output intermediate e2 polynomial (needed by
+ *                     mlk_kem_enc_v).
+ * @param[in]  seed    Input public seed rho (an already allocated array of
+ *                     MLKEM_SYMBYTES bytes, from pk[MLKEM_POLYVECBYTES:]).
+ * @param[in]  hpk     Input H(pk) (an already allocated array of
+ *                     MLKEM_SYMBYTES bytes).
+ * @param[in]  coins   Input randomness (an already allocated array of
+ *                     MLKEM_SYMBYTES bytes).
+ * @param      context Application context (build-configurable; see
+ *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE).
+ *
+ * @retval 0                     Success.
+ * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
+ *                               MLK_CUSTOM_ALLOC returned NULL.
+ */
+MLK_INTERNAL_API
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
+                          uint8_t ss[MLKEM_SSBYTES], mlk_polyvec *sp,
+                          mlk_poly *epp,
+                          const uint8_t seed[MLKEM_SYMBYTES],
+                          const uint8_t hpk[MLKEM_SYMBYTES],
+                          const uint8_t coins[MLKEM_SYMBYTES],
+                          MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+/* TODO: Add CBMC contracts */;
+
+/**
+ * Second phase of incremental ML-KEM encapsulation.
+ *
+ * Computes the v-component of the ciphertext using intermediate state
+ * (sp, epp) from mlk_kem_enc_derand_u.
+ *
+ * Performs the modulus check on ek_vector.
+ *
+ * @spec{Partially implements @[FIPS203, Algorithm 17, ML-KEM.Encaps_Internal]
+ * combined with the v-phase of K-PKE.Encrypt, and @[FIPS203, Section 7.2,
+ * modulus check].}
+ *
+ * @param[out] ct_v      Output v-component of ciphertext (an already allocated
+ *                       array of MLKEM_POLYCOMPRESSEDBYTES_DV bytes).
+ * @param[in]  sp        Input intermediate r vector (in NTT domain, from
+ *                       mlk_kem_enc_derand_u).
+ * @param[in]  epp       Input intermediate e2 polynomial (from
+ *                       mlk_kem_enc_derand_u).
+ * @param[in]  coins     Input randomness (an already allocated array of
+ *                       MLKEM_SYMBYTES bytes, same as passed to
+ *                       mlk_kem_enc_derand_u).
+ * @param[in]  ek_vector Input encoded public key vector t_hat (an already
+ *                       allocated array of MLKEM_POLYVECBYTES bytes, from
+ *                       pk[0:MLKEM_POLYVECBYTES]).
+ * @param      context   Application context (build-configurable; see
+ *                       MLK_CONFIG_CONTEXT_PARAMETER_TYPE).
+ *
+ * @retval 0                     Success.
+ * @retval MLK_ERR_FAIL          The modulus check on ek_vector failed.
+ * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
+ *                               MLK_CUSTOM_ALLOC returned NULL.
+ */
+MLK_INTERNAL_API
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_kem_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
+                   const mlk_polyvec *sp, const mlk_poly *epp,
+                   const uint8_t coins[MLKEM_SYMBYTES],
+                   const uint8_t ek_vector[MLKEM_POLYVECBYTES],
+                   MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+/* TODO: Add CBMC contracts */;
 
 /**
  * Generate shared secret for a given ciphertext and private key.
