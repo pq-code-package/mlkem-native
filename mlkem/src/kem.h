@@ -52,6 +52,9 @@
 #define mlk_kem_enc_derand MLK_NAMESPACE_K(enc_derand) MLK_CONTEXT_PARAMETERS_4
 #define mlk_kem_enc MLK_NAMESPACE_K(enc) MLK_CONTEXT_PARAMETERS_3
 #define mlk_kem_dec MLK_NAMESPACE_K(dec) MLK_CONTEXT_PARAMETERS_3
+#define mlk_kem_enc_derand_u \
+  MLK_NAMESPACE_K(enc_derand_u) MLK_CONTEXT_PARAMETERS_5
+#define mlk_kem_enc_v MLK_NAMESPACE_K(enc_v) MLK_CONTEXT_PARAMETERS_4
 #define mlk_kem_check_pk MLK_NAMESPACE_K(check_pk) MLK_CONTEXT_PARAMETERS_1
 #define mlk_kem_check_sk MLK_NAMESPACE_K(check_sk) MLK_CONTEXT_PARAMETERS_1
 
@@ -283,6 +286,90 @@ __contract__(
           return_value == MLK_ERR_OUT_OF_MEMORY ||
           return_value == MLK_ERR_RNG_FAIL)
 );
+
+/*************************************************
+ * Name:        mlk_kem_enc_derand_u
+ *
+ * Description: First phase of incremental ML-KEM encapsulation
+ *              (coins-only variant).
+ *              Computes the u-component of the ciphertext and the
+ *              shared secret.
+ *
+ *              Only requires the public seed (ek_seed) and the hash of
+ *              the full public key (hpk), not the full public key.
+ *              No intermediate polynomial state is output; enc_v
+ *              re-derives the noise from coins.
+ *
+ * Arguments:   - uint8_t *ct_u: pointer to output u-component of ciphertext
+ *                (of length MLKEM_POLYVECCOMPRESSEDBYTES_DU bytes)
+ *              - uint8_t *ss: pointer to output shared secret
+ *                (of length MLKEM_SSBYTES bytes)
+ *              - const uint8_t *seed: pointer to input public seed rho
+ *                (of length MLKEM_SYMBYTES bytes, from pk[MLKEM_POLYVECBYTES:])
+ *              - const uint8_t *hpk: pointer to input H(pk)
+ *                (of length MLKEM_SYMBYTES bytes)
+ *              - const uint8_t *coins: pointer to input randomness
+ *                (of length MLKEM_SYMBYTES bytes)
+ *
+ * Returns: - 0 on success
+ *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
+ *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
+ *
+ * Specification: Partially implements
+ *                @[FIPS203, Algorithm 17, ML-KEM.Encaps_Internal, L1-4]
+ *                combined with the u-phase of K-PKE.Encrypt.
+ *
+ **************************************************/
+MLK_INTERNAL_API
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
+                          uint8_t ss[MLKEM_SSBYTES],
+                          const uint8_t seed[MLKEM_SYMBYTES],
+                          const uint8_t hpk[MLKEM_SYMBYTES],
+                          const uint8_t coins[MLKEM_SYMBYTES],
+                          MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+/* TODO: Add CBMC contracts */;
+
+/*************************************************
+ * Name:        mlk_kem_enc_v
+ *
+ * Description: Second phase of incremental ML-KEM encapsulation
+ *              (coins-only variant).
+ *              Re-derives the noise from coins and computes the
+ *              v-component of the ciphertext.
+ *
+ *              Performs the modulus check on ek_vector.
+ *
+ * Arguments:   - uint8_t *ct_v: pointer to output v-component of ciphertext
+ *                (of length MLKEM_POLYCOMPRESSEDBYTES_DV bytes)
+ *              - const uint8_t *ek_vector: pointer to input encoded public key
+ *                vector t_hat (of length MLKEM_POLYVECBYTES bytes,
+ *                from pk[0:MLKEM_POLYVECBYTES])
+ *              - const uint8_t *hpk: pointer to input H(pk)
+ *                (of length MLKEM_SYMBYTES bytes)
+ *              - const uint8_t *coins: pointer to input randomness
+ *                (of length MLKEM_SYMBYTES bytes, same as passed to
+ *                 mlk_kem_enc_derand_u)
+ *
+ * Returns: - 0 on success
+ *          - MLK_ERR_FAIL: If the modulus check on ek_vector fails.
+ *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
+ *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
+ *
+ * Specification: Partially implements
+ *                @[FIPS203, Algorithm 17, ML-KEM.Encaps_Internal]
+ *                combined with the v-phase of K-PKE.Encrypt, and
+ *                @[FIPS203, Section 7.2, modulus check].
+ *
+ **************************************************/
+MLK_INTERNAL_API
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_kem_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
+                   const uint8_t ek_vector[MLKEM_POLYVECBYTES],
+                   const uint8_t hpk[MLKEM_SYMBYTES],
+                   const uint8_t coins[MLKEM_SYMBYTES],
+                   MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+/* TODO: Add CBMC contracts */;
 
 /*************************************************
  * Name:        mlk_kem_dec

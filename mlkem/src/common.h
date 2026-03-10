@@ -201,6 +201,8 @@
   (arg0, arg1, arg2, context)
 #define MLK_CONTEXT_PARAMETERS_4(arg0, arg1, arg2, arg3, context) \
   (arg0, arg1, arg2, arg3, context)
+#define MLK_CONTEXT_PARAMETERS_5(arg0, arg1, arg2, arg3, arg4, context) \
+  (arg0, arg1, arg2, arg3, arg4, context)
 #else /* MLK_CONFIG_CONTEXT_PARAMETER */
 #define MLK_CONTEXT_PARAMETERS_0(context) ()
 #define MLK_CONTEXT_PARAMETERS_1(arg0, context) (arg0)
@@ -208,6 +210,8 @@
 #define MLK_CONTEXT_PARAMETERS_3(arg0, arg1, arg2, context) (arg0, arg1, arg2)
 #define MLK_CONTEXT_PARAMETERS_4(arg0, arg1, arg2, arg3, context) \
   (arg0, arg1, arg2, arg3)
+#define MLK_CONTEXT_PARAMETERS_5(arg0, arg1, arg2, arg3, arg4, context) \
+  (arg0, arg1, arg2, arg3, arg4)
 #endif /* !MLK_CONFIG_CONTEXT_PARAMETER */
 
 #if defined(MLK_CONFIG_CONTEXT_PARAMETER_TYPE) != \
