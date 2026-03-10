@@ -22,7 +22,6 @@
 
 #include "cbmc.h"
 #include "common.h"
-#include "poly_k.h"
 #include "sys.h"
 
 #if defined(MLK_CHECK_APIS)
@@ -288,13 +287,19 @@ __contract__(
           return_value == MLK_ERR_RNG_FAIL)
 );
 
+/* Size of a polynomial serialized via 16-bit little-endian encoding
+ * (2 bytes per coefficient). Used for the intermediate state in
+ * incremental encapsulation. */
+#define MLKEM_POLY16_BYTES (MLKEM_N * 2)
+#define MLKEM_POLYVEC16_BYTES (MLKEM_K * MLKEM_POLY16_BYTES)
+
 /*************************************************
  * Name:        mlk_kem_enc_derand_u
  *
  * Description: First phase of incremental ML-KEM encapsulation.
  *              Computes the u-component of the ciphertext and the
- *              shared secret, and outputs intermediate state (sp, epp)
- *              needed by mlk_kem_enc_v.
+ *              shared secret, and outputs serialized intermediate
+ *              state needed by mlk_kem_enc_v.
  *
  *              Only requires the public seed (ek_seed) and the hash of
  *              the full public key (hpk), not the full public key.
@@ -303,10 +308,12 @@ __contract__(
  *                (of length MLKEM_POLYVECCOMPRESSEDBYTES_DU bytes)
  *              - uint8_t *ss: pointer to output shared secret
  *                (of length MLKEM_SSBYTES bytes)
- *              - mlk_polyvec *sp: pointer to output intermediate r vector
- *                (in NTT domain, needed by mlk_kem_enc_v)
- *              - mlk_poly *epp: pointer to output intermediate e2 polynomial
- *                (needed by mlk_kem_enc_v)
+ *              - uint8_t *sp_serial: pointer to output serialized r vector
+ *                in NTT domain (of length MLKEM_POLYVEC16_BYTES bytes,
+ *                needed by mlk_kem_enc_v)
+ *              - uint8_t *epp_serial: pointer to output serialized e2
+ *                noise polynomial (of length MLKEM_POLY16_BYTES bytes,
+ *                needed by mlk_kem_enc_v)
  *              - const uint8_t *seed: pointer to input public seed rho
  *                (of length MLKEM_SYMBYTES bytes, from pk[MLKEM_POLYVECBYTES:])
  *              - const uint8_t *hpk: pointer to input H(pk)
@@ -326,8 +333,9 @@ __contract__(
 MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
-                          uint8_t ss[MLKEM_SSBYTES], mlk_polyvec *sp,
-                          mlk_poly *epp,
+                          uint8_t ss[MLKEM_SSBYTES],
+                          uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
+                          uint8_t epp_serial[MLKEM_POLY16_BYTES],
                           const uint8_t seed[MLKEM_SYMBYTES],
                           const uint8_t hpk[MLKEM_SYMBYTES],
                           const uint8_t coins[MLKEM_SYMBYTES],
@@ -338,17 +346,20 @@ int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
  * Name:        mlk_kem_enc_v
  *
  * Description: Second phase of incremental ML-KEM encapsulation.
- *              Computes the v-component of the ciphertext using
- *              intermediate state (sp, epp) from mlk_kem_enc_derand_u.
+ *              Deserializes the intermediate state from
+ *              mlk_kem_enc_derand_u and computes the v-component
+ *              of the ciphertext.
  *
  *              Performs the modulus check on ek_vector.
  *
  * Arguments:   - uint8_t *ct_v: pointer to output v-component of ciphertext
  *                (of length MLKEM_POLYCOMPRESSEDBYTES_DV bytes)
- *              - const mlk_polyvec *sp: pointer to input intermediate r vector
- *                (in NTT domain, from mlk_kem_enc_derand_u)
- *              - const mlk_poly *epp: pointer to input intermediate e2
- *                polynomial (from mlk_kem_enc_derand_u)
+ *              - const uint8_t *sp_serial: pointer to input serialized r
+ *                vector in NTT domain (of length MLKEM_POLYVEC16_BYTES bytes,
+ *                from mlk_kem_enc_derand_u)
+ *              - const uint8_t *epp_serial: pointer to input serialized e2
+ *                noise polynomial (of length MLKEM_POLY16_BYTES bytes,
+ *                from mlk_kem_enc_derand_u)
  *              - const uint8_t *coins: pointer to input randomness
  *                (of length MLKEM_SYMBYTES bytes, same as passed to
  *                 mlk_kem_enc_derand_u)
@@ -370,7 +381,8 @@ int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
 MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
-                   const mlk_polyvec *sp, const mlk_poly *epp,
+                   const uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
+                   const uint8_t epp_serial[MLKEM_POLY16_BYTES],
                    const uint8_t coins[MLKEM_SYMBYTES],
                    const uint8_t ek_vector[MLKEM_POLYVECBYTES],
                    MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
