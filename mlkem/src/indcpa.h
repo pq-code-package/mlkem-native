@@ -153,7 +153,19 @@ int mlk_indcpa_enc_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                      const uint8_t seed[MLKEM_SYMBYTES],
                      const uint8_t coins[MLKEM_SYMBYTES],
                      MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
-/* TODO: Add CBMC contracts */;
+__contract__(
+  requires(memory_no_alias(ct_u, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
+  requires(memory_no_alias(sp, sizeof(mlk_polyvec)))
+  requires(memory_no_alias(epp, sizeof(mlk_poly)))
+  requires(memory_no_alias(seed, MLKEM_SYMBYTES))
+  requires(memory_no_alias(coins, MLKEM_SYMBYTES))
+  assigns(memory_slice(ct_u, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
+  assigns(memory_slice(sp, sizeof(mlk_polyvec)))
+  assigns(memory_slice(epp, sizeof(mlk_poly)))
+  ensures(return_value == 0 || return_value == MLK_ERR_OUT_OF_MEMORY)
+  ensures(return_value == 0 ==>
+    array_abs_bound(epp->coeffs, 0, MLKEM_N, MLKEM_ETA2 + 1))
+);
 
 #define mlk_indcpa_enc_v MLK_NAMESPACE_K(indcpa_enc_v) MLK_CONTEXT_PARAMETERS_5
 /*************************************************
@@ -186,7 +198,16 @@ int mlk_indcpa_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
                      const uint8_t m[MLKEM_INDCPA_MSGBYTES],
                      const uint8_t ek_vector[MLKEM_POLYVECBYTES],
                      MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
-/* TODO: Add CBMC contracts */;
+__contract__(
+  requires(memory_no_alias(ct_v, MLKEM_POLYCOMPRESSEDBYTES_DV))
+  requires(memory_no_alias(sp, sizeof(mlk_polyvec)))
+  requires(memory_no_alias(epp, sizeof(mlk_poly)))
+  requires(array_abs_bound(epp->coeffs, 0, MLKEM_N, 16))
+  requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES))
+  requires(memory_no_alias(ek_vector, MLKEM_POLYVECBYTES))
+  assigns(memory_slice(ct_v, MLKEM_POLYCOMPRESSEDBYTES_DV))
+  ensures(return_value == 0 || return_value == MLK_ERR_OUT_OF_MEMORY)
+);
 
 #define mlk_indcpa_dec MLK_NAMESPACE_K(indcpa_dec) MLK_CONTEXT_PARAMETERS_3
 /*************************************************
