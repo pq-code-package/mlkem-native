@@ -391,8 +391,7 @@ static void mlk_serialize_epp(uint8_t out[MLKEM_EPP_BYTES], const mlk_poly *p)
   }
 }
 
-static void mlk_deserialize_epp(mlk_poly *p,
-                                 const uint8_t in[MLKEM_EPP_BYTES])
+static void mlk_deserialize_epp(mlk_poly *p, const uint8_t in[MLKEM_EPP_BYTES])
 {
   unsigned j;
   for (j = 0; j < MLKEM_N / 2; j++)
@@ -410,7 +409,7 @@ static void mlk_deserialize_epp(mlk_poly *p,
  * Stores each int16_t coefficient as 2 bytes in LE order.
  * Coefficients must be non-negative (e.g., after reduce). */
 static void mlk_serialize_polyvec_16le(uint8_t out[MLKEM_POLYVEC16_BYTES],
-                                        const mlk_polyvec *v)
+                                       const mlk_polyvec *v)
 {
   unsigned i, j;
   for (i = 0; i < MLKEM_K; i++)
@@ -430,8 +429,8 @@ static void mlk_serialize_polyvec_16le(uint8_t out[MLKEM_POLYVEC16_BYTES],
   }
 }
 
-static void mlk_deserialize_polyvec_16le(mlk_polyvec *v,
-                                          const uint8_t in[MLKEM_POLYVEC16_BYTES])
+static void mlk_deserialize_polyvec_16le(
+    mlk_polyvec *v, const uint8_t in[MLKEM_POLYVEC16_BYTES])
 {
   unsigned i, j;
   for (i = 0; i < MLKEM_K; i++)
@@ -444,22 +443,22 @@ static void mlk_deserialize_polyvec_16le(mlk_polyvec *v,
       assigns(j, memory_slice(v, sizeof(mlk_polyvec)))
       invariant(j <= MLKEM_N))
     {
-      v->vec[i].coeffs[j] = mlk_cast_uint16_to_int16((uint16_t)(
-          (unsigned)in[i * MLKEM_POLY16_BYTES + 2 * j] |
-          ((unsigned)in[i * MLKEM_POLY16_BYTES + 2 * j + 1] << 8)));
+      v->vec[i].coeffs[j] = mlk_cast_uint16_to_int16(
+          (uint16_t)((unsigned)in[i * MLKEM_POLY16_BYTES + 2 * j] |
+                     ((unsigned)in[i * MLKEM_POLY16_BYTES + 2 * j + 1] << 8)));
     }
   }
 }
 
 MLK_INTERNAL_API
 int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
-                          uint8_t ss[MLKEM_SSBYTES],
-                          uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
-                          uint8_t epp_serial[MLKEM_EPP_BYTES],
-                          const uint8_t seed[MLKEM_SYMBYTES],
-                          const uint8_t hpk[MLKEM_SYMBYTES],
-                          const uint8_t coins[MLKEM_SYMBYTES],
-                          MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+                         uint8_t ss[MLKEM_SSBYTES],
+                         uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
+                         uint8_t epp_serial[MLKEM_EPP_BYTES],
+                         const uint8_t seed[MLKEM_SYMBYTES],
+                         const uint8_t hpk[MLKEM_SYMBYTES],
+                         const uint8_t coins[MLKEM_SYMBYTES],
+                         MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   int ret = 0;
   MLK_ALLOC(buf, uint8_t, 2 * MLKEM_SYMBYTES, context);
@@ -507,11 +506,11 @@ cleanup:
 
 MLK_INTERNAL_API
 int mlk_kem_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
-                   const uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
-                   const uint8_t epp_serial[MLKEM_EPP_BYTES],
-                   const uint8_t coins[MLKEM_SYMBYTES],
-                   const uint8_t ek_vector[MLKEM_POLYVECBYTES],
-                   MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+                  const uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
+                  const uint8_t epp_serial[MLKEM_EPP_BYTES],
+                  const uint8_t coins[MLKEM_SYMBYTES],
+                  const uint8_t ek_vector[MLKEM_POLYVECBYTES],
+                  MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   int ret = 0;
   MLK_ALLOC(sp, mlk_polyvec, 1, context);
@@ -530,9 +529,8 @@ int mlk_kem_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
   mlk_polyvec_frombytes(p, ek_vector);
   mlk_polyvec_reduce(p);
   mlk_polyvec_tobytes(p_reencoded, p);
-  ret =
-      mlk_ct_memcmp(ek_vector, p_reencoded, MLKEM_POLYVECBYTES) ? MLK_ERR_FAIL
-                                                                 : 0;
+  ret = mlk_ct_memcmp(ek_vector, p_reencoded, MLKEM_POLYVECBYTES) ? MLK_ERR_FAIL
+                                                                  : 0;
   if (ret != 0)
   {
     goto cleanup;

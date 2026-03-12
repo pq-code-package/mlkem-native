@@ -200,8 +200,8 @@ static int test_incremental_enc(void)
   /* Incremental encapsulation via KEM-level API */
   CHECK(mlk_kem_enc_derand_u(ct_u, ss, sp_serial, epp_serial, ek_seed, hpk,
                              enc_coins, 0) == 0);
-  CHECK(mlk_kem_enc_v(ct_v, sp_serial, epp_serial, enc_coins, ek_vector,
-                      0) == 0);
+  CHECK(mlk_kem_enc_v(ct_v, sp_serial, epp_serial, enc_coins, ek_vector, 0) ==
+        0);
 
   /* Verify ct_u || ct_v matches reference ciphertext */
   MLK_CT_TESTING_DECLASSIFY(ct_u, MLKEM_POLYVECCOMPRESSEDBYTES_DU);
