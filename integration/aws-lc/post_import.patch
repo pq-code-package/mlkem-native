@@ -1,17 +1,22 @@
-From dc1fb278d8d15bf931a805faf1298403c9c49c99 Mon Sep 17 00:00:00 2001
-From: Andreas Hatziiliou <andreas.hatziiliou@savoirfairelinux.com>
-Date: Mon, 12 Jan 2026 09:51:43 -0500
-Subject: [PATCH] post_import
-
----
- crypto/fipsmodule/ml_kem/mlkem_native_config.h | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
-
 diff --git a/crypto/fipsmodule/ml_kem/mlkem_native_config.h b/crypto/fipsmodule/ml_kem/mlkem_native_config.h
-index 8b1ce254b..7b5a2228a 100644
 --- a/crypto/fipsmodule/ml_kem/mlkem_native_config.h
 +++ b/crypto/fipsmodule/ml_kem/mlkem_native_config.h
-@@ -78,8 +78,9 @@ static MLK_INLINE void mlk_zeroize(void *ptr, size_t len) {
+@@ -20,8 +20,14 @@
+
+ // Everything is built in a single CU, so both internal and external
+ // mlkem-native API can have internal linkage.
++// Mark as unused to suppress warnings for functions not used by AWS-LC
++#if defined(__GNUC__) || defined(__clang__)
++#define MLK_CONFIG_INTERNAL_API_QUALIFIER static __attribute__((unused))
++#define MLK_CONFIG_EXTERNAL_API_QUALIFIER static __attribute__((unused))
++#else
+ #define MLK_CONFIG_INTERNAL_API_QUALIFIER static
+ #define MLK_CONFIG_EXTERNAL_API_QUALIFIER static
++#endif
+
+ // Enable PCT if and only if AWS-LC is built in FIPS-mode.
+ #if defined(AWSLC_FIPS)
+@@ -78,8 +84,9 @@ static MLK_INLINE void mlk_zeroize(void *ptr, size_t len) {
  #include <stdint.h>
  #include "mlkem/sys.h"
  #include <openssl/rand.h>
@@ -22,7 +27,3 @@ index 8b1ce254b..7b5a2228a 100644
 +  return 0;
  }
  #endif // !__ASSEMBLER__
- 
--- 
-2.52.0
-
