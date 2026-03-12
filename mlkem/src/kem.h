@@ -315,7 +315,7 @@ __contract__(
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
  *                               MLK_CUSTOM_ALLOC returned NULL.
  */
-MLK_INTERNAL_API
+MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                          uint8_t ss[MLKEM_SSBYTES],
@@ -375,7 +375,7 @@ __contract__(
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
  *                               MLK_CUSTOM_ALLOC returned NULL.
  */
-MLK_INTERNAL_API
+MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
                   const uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],

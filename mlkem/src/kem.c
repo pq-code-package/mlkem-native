@@ -450,7 +450,7 @@ static void mlk_deserialize_polyvec_16le(
   }
 }
 
-MLK_INTERNAL_API
+MLK_EXTERNAL_API
 int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                          uint8_t ss[MLKEM_SSBYTES],
                          uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
@@ -504,7 +504,7 @@ cleanup:
   return ret;
 }
 
-MLK_INTERNAL_API
+MLK_EXTERNAL_API
 int mlk_kem_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
                   const uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
                   const uint8_t epp_serial[MLKEM_EPP_BYTES],
