@@ -225,6 +225,9 @@
 #undef MLK_CONTEXT_PARAMETERS_2
 #undef MLK_CONTEXT_PARAMETERS_3
 #undef MLK_CONTEXT_PARAMETERS_4
+#undef MLK_CONTEXT_PARAMETERS_5
+#undef MLK_CONTEXT_PARAMETERS_6
+#undef MLK_CONTEXT_PARAMETERS_7
 #undef MLK_EMPTY_CU
 #undef MLK_ERR_FAIL
 #undef MLK_ERR_OUT_OF_MEMORY
@@ -245,14 +248,21 @@
 #undef mlk_gen_matrix
 #undef mlk_indcpa_dec
 #undef mlk_indcpa_enc
+#undef mlk_indcpa_enc_u
+#undef mlk_indcpa_enc_v
 #undef mlk_indcpa_keypair_derand
 /* mlkem/src/kem.h */
+#undef MLKEM_EPP_BYTES
+#undef MLKEM_POLY16_BYTES
+#undef MLKEM_POLYVEC16_BYTES
 #undef MLK_KEM_H
 #undef mlk_kem_check_pk
 #undef mlk_kem_check_sk
 #undef mlk_kem_dec
 #undef mlk_kem_enc
 #undef mlk_kem_enc_derand
+#undef mlk_kem_enc_derand_u
+#undef mlk_kem_enc_v
 #undef mlk_kem_keypair
 #undef mlk_kem_keypair_derand
 /* mlkem/src/params.h */

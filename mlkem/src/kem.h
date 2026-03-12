@@ -338,13 +338,13 @@ __contract__(
 MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
-                          uint8_t ss[MLKEM_SSBYTES],
-                          uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
-                          uint8_t epp_serial[MLKEM_EPP_BYTES],
-                          const uint8_t seed[MLKEM_SYMBYTES],
-                          const uint8_t hpk[MLKEM_SYMBYTES],
-                          const uint8_t coins[MLKEM_SYMBYTES],
-                          MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+                         uint8_t ss[MLKEM_SSBYTES],
+                         uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
+                         uint8_t epp_serial[MLKEM_EPP_BYTES],
+                         const uint8_t seed[MLKEM_SYMBYTES],
+                         const uint8_t hpk[MLKEM_SYMBYTES],
+                         const uint8_t coins[MLKEM_SYMBYTES],
+                         MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(ct_u, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(ss, MLKEM_SSBYTES))
@@ -399,11 +399,11 @@ __contract__(
 MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
-                   const uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
-                   const uint8_t epp_serial[MLKEM_EPP_BYTES],
-                   const uint8_t coins[MLKEM_SYMBYTES],
-                   const uint8_t ek_vector[MLKEM_POLYVECBYTES],
-                   MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+                  const uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
+                  const uint8_t epp_serial[MLKEM_EPP_BYTES],
+                  const uint8_t coins[MLKEM_SYMBYTES],
+                  const uint8_t ek_vector[MLKEM_POLYVECBYTES],
+                  MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(ct_v, MLKEM_POLYCOMPRESSEDBYTES_DV))
   requires(memory_no_alias(sp_serial, MLKEM_POLYVEC16_BYTES))
