@@ -387,7 +387,7 @@ static void mlk_serialize_epp(uint8_t out[MLKEM_EPP_BYTES], const mlk_poly *p)
   {
     uint8_t lo = (uint8_t)(MLKEM_ETA2 - p->coeffs[2 * j]);
     uint8_t hi = (uint8_t)(MLKEM_ETA2 - p->coeffs[2 * j + 1]);
-    out[j] = (lo & 0xF) | (uint8_t)(hi << 4);
+    out[j] = (uint8_t)((lo & 0xF) | (uint8_t)(hi << 4));
   }
 }
 
@@ -400,8 +400,9 @@ static void mlk_deserialize_epp(mlk_poly *p, const uint8_t in[MLKEM_EPP_BYTES])
     invariant(j <= MLKEM_N / 2)
     invariant(array_abs_bound(p->coeffs, 0, 2 * j, 16)))
   {
-    p->coeffs[2 * j] = (int16_t)MLKEM_ETA2 - (int16_t)(in[j] & 0xF);
-    p->coeffs[2 * j + 1] = (int16_t)MLKEM_ETA2 - (int16_t)(in[j] >> 4);
+    p->coeffs[2 * j] = (int16_t)((int16_t)MLKEM_ETA2 - (int16_t)(in[j] & 0xF));
+    p->coeffs[2 * j + 1] =
+        (int16_t)((int16_t)MLKEM_ETA2 - (int16_t)(in[j] >> 4));
   }
 }
 
