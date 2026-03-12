@@ -274,6 +274,11 @@ __contract__(
 #define MLKEM_POLY16_BYTES (MLKEM_N * 2)
 #define MLKEM_POLYVEC16_BYTES (MLKEM_K * MLKEM_POLY16_BYTES)
 
+/* Size of noise polynomial e2 packed as 4-bit nibbles (2 coefficients per
+ * byte). Coefficients in [-ETA2, ETA2] are stored as (ETA2 - x), fitting
+ * in 4 bits. */
+#define MLKEM_EPP_BYTES (MLKEM_N / 2)
+
 /**
  * First phase of incremental ML-KEM encapsulation.
  *
@@ -294,9 +299,9 @@ __contract__(
  * @param[out] sp_serial  Output serialized r vector in NTT domain (an already
  *                        allocated array of MLKEM_POLYVEC16_BYTES bytes,
  *                        needed by mlk_kem_enc_v).
- * @param[out] epp_serial Output serialized e2 noise polynomial (an already
- *                        allocated array of MLKEM_POLY16_BYTES bytes, needed
- *                        by mlk_kem_enc_v).
+ * @param[out] epp_serial Output serialized e2 noise polynomial as 4-bit
+ *                        nibbles (an already allocated array of
+ *                        MLKEM_EPP_BYTES bytes, needed by mlk_kem_enc_v).
  * @param[in]  seed       Input public seed rho (an already allocated array of
  *                        MLKEM_SYMBYTES bytes, from pk[MLKEM_POLYVECBYTES:]).
  * @param[in]  hpk        Input H(pk) (an already allocated array of
@@ -315,12 +320,25 @@ MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                           uint8_t ss[MLKEM_SSBYTES],
                           uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
-                          uint8_t epp_serial[MLKEM_POLY16_BYTES],
+                          uint8_t epp_serial[MLKEM_EPP_BYTES],
                           const uint8_t seed[MLKEM_SYMBYTES],
                           const uint8_t hpk[MLKEM_SYMBYTES],
                           const uint8_t coins[MLKEM_SYMBYTES],
                           MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
-/* TODO: Add CBMC contracts */;
+__contract__(
+  requires(memory_no_alias(ct_u, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
+  requires(memory_no_alias(ss, MLKEM_SSBYTES))
+  requires(memory_no_alias(sp_serial, MLKEM_POLYVEC16_BYTES))
+  requires(memory_no_alias(epp_serial, MLKEM_EPP_BYTES))
+  requires(memory_no_alias(seed, MLKEM_SYMBYTES))
+  requires(memory_no_alias(hpk, MLKEM_SYMBYTES))
+  requires(memory_no_alias(coins, MLKEM_SYMBYTES))
+  assigns(memory_slice(ct_u, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
+  assigns(memory_slice(ss, MLKEM_SSBYTES))
+  assigns(memory_slice(sp_serial, MLKEM_POLYVEC16_BYTES))
+  assigns(memory_slice(epp_serial, MLKEM_EPP_BYTES))
+  ensures(return_value == 0 || return_value == MLK_ERR_OUT_OF_MEMORY)
+);
 
 /**
  * Second phase of incremental ML-KEM encapsulation.
@@ -340,9 +358,9 @@ int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
  * @param[in]  sp_serial  Input serialized r vector in NTT domain (an already
  *                        allocated array of MLKEM_POLYVEC16_BYTES bytes,
  *                        from mlk_kem_enc_derand_u).
- * @param[in]  epp_serial Input serialized e2 noise polynomial (an already
- *                        allocated array of MLKEM_POLY16_BYTES bytes, from
- *                        mlk_kem_enc_derand_u).
+ * @param[in]  epp_serial Input serialized e2 noise polynomial as 4-bit
+ *                        nibbles (an already allocated array of
+ *                        MLKEM_EPP_BYTES bytes, from mlk_kem_enc_derand_u).
  * @param[in]  coins      Input randomness (an already allocated array of
  *                        MLKEM_SYMBYTES bytes, same as passed to
  *                        mlk_kem_enc_derand_u).
@@ -361,11 +379,20 @@ MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
                    const uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
-                   const uint8_t epp_serial[MLKEM_POLY16_BYTES],
+                   const uint8_t epp_serial[MLKEM_EPP_BYTES],
                    const uint8_t coins[MLKEM_SYMBYTES],
                    const uint8_t ek_vector[MLKEM_POLYVECBYTES],
                    MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
-/* TODO: Add CBMC contracts */;
+__contract__(
+  requires(memory_no_alias(ct_v, MLKEM_POLYCOMPRESSEDBYTES_DV))
+  requires(memory_no_alias(sp_serial, MLKEM_POLYVEC16_BYTES))
+  requires(memory_no_alias(epp_serial, MLKEM_EPP_BYTES))
+  requires(memory_no_alias(coins, MLKEM_SYMBYTES))
+  requires(memory_no_alias(ek_vector, MLKEM_POLYVECBYTES))
+  assigns(memory_slice(ct_v, MLKEM_POLYCOMPRESSEDBYTES_DV))
+  ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
+          return_value == MLK_ERR_OUT_OF_MEMORY)
+);
 
 /**
  * Generate shared secret for a given ciphertext and private key.
