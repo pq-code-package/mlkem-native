@@ -335,7 +335,7 @@ __contract__(
  *                combined with the u-phase of K-PKE.Encrypt.
  *
  **************************************************/
-MLK_INTERNAL_API
+MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                          uint8_t ss[MLKEM_SSBYTES],
@@ -396,7 +396,7 @@ __contract__(
  *                @[FIPS203, Section 7.2, modulus check].
  *
  **************************************************/
-MLK_INTERNAL_API
+MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
                   const uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
