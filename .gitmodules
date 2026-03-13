@@ -1,0 +1,3 @@
+[submodule "AutoCorrode"]
+	path = AutoCorrode
+	url = https://github.com/awslabs/AutoCorrode
