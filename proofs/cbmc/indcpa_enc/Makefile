@@ -20,38 +20,15 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_indcpa_enc
-USE_FUNCTION_CONTRACTS = mlk_poly_frommsg
-USE_FUNCTION_CONTRACTS += mlk_gen_matrix
-ifeq ($(MLKEM_K),2)
-USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta1122_4x
-USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta2
-else ifeq ($(MLKEM_K),3)
-USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta1_4x
-else ifeq ($(MLKEM_K),4)
-USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta1_4x
-USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta2
-endif
-
-USE_FUNCTION_CONTRACTS += mlk_polyvec_ntt
-USE_FUNCTION_CONTRACTS += mlk_polyvec_mulcache_compute
-USE_FUNCTION_CONTRACTS += mlk_polyvec_basemul_acc_montgomery_cached
-USE_FUNCTION_CONTRACTS += mlk_polyvec_invntt_tomont
-USE_FUNCTION_CONTRACTS += mlk_poly_invntt_tomont
-USE_FUNCTION_CONTRACTS += mlk_polyvec_add
-USE_FUNCTION_CONTRACTS += mlk_poly_add
-USE_FUNCTION_CONTRACTS += mlk_polyvec_reduce
-USE_FUNCTION_CONTRACTS += mlk_poly_reduce
-USE_FUNCTION_CONTRACTS += mlk_polyvec_compress_du
-USE_FUNCTION_CONTRACTS += mlk_poly_compress_dv
-USE_FUNCTION_CONTRACTS += mlk_polyvec_frombytes
-USE_FUNCTION_CONTRACTS += mlk_matvec_mul
+USE_FUNCTION_CONTRACTS = mlk_indcpa_enc_u
+USE_FUNCTION_CONTRACTS += mlk_indcpa_enc_v
 USE_FUNCTION_CONTRACTS += mlk_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2
+CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_smt_only --z3
 
 FUNCTION_NAME = mlk_indcpa_enc
 
