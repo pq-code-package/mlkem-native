@@ -222,8 +222,19 @@ def run_keyGen_test(tg, tc):
         err(f"{acvp_call} failed with error code {result.returncode}")
         err(result.stderr)
         exit(1)
+
+    # Debug: Always show stdout and stderr
+    err(f"=== DEBUG STDOUT ===")
+    err(repr(result.stdout))
+    err(f"=== DEBUG STDERR ===")
+    err(repr(result.stderr))
+    err(f"=== END DEBUG ===")
+
     # Extract results
     for l in result.stdout.splitlines():
+        if "=" not in l:
+            err(f"WARNING: Unexpected output line (no '='): {repr(l)}")
+            continue
         (k, v) = l.split("=")
         results[k] = v
     info("done")
