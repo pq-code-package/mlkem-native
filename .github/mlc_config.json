@@ -12,6 +12,9 @@
     },
     {
       "pattern": "^https://lib\\.mceliece\\.org"
+    },
+    {
+      "pattern": "^https://github\\.com/pq-code-package/mlkem-native/compare/.*\\.\\.\\.v"
     }
   ]
 }
