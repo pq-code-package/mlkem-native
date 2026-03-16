@@ -385,7 +385,8 @@ static void mlk_serialize_epp(uint8_t out[MLKEM_EPP_BYTES], const mlk_poly *p)
   for (j = 0; j < MLKEM_N / 2; j++)
   __loop__(
     assigns(j, memory_slice(out, MLKEM_EPP_BYTES))
-    invariant(j <= MLKEM_N / 2))
+    invariant(j <= MLKEM_N / 2)
+    decreases(MLKEM_N / 2 - j))
   {
     uint8_t lo = (uint8_t)(MLKEM_ETA2 - p->coeffs[2 * j]);
     uint8_t hi = (uint8_t)(MLKEM_ETA2 - p->coeffs[2 * j + 1]);
@@ -400,7 +401,8 @@ static void mlk_deserialize_epp(mlk_poly *p, const uint8_t in[MLKEM_EPP_BYTES])
   __loop__(
     assigns(j, memory_slice(p, sizeof(mlk_poly)))
     invariant(j <= MLKEM_N / 2)
-    invariant(array_abs_bound(p->coeffs, 0, 2 * j, 16)))
+    invariant(array_abs_bound(p->coeffs, 0, 2 * j, 16))
+    decreases(MLKEM_N / 2 - j))
   {
     p->coeffs[2 * j] = (int16_t)((int16_t)MLKEM_ETA2 - (int16_t)(in[j] & 0xF));
     p->coeffs[2 * j + 1] =
@@ -418,12 +420,14 @@ static void mlk_serialize_polyvec_16le(uint8_t out[MLKEM_POLYVEC16_BYTES],
   for (i = 0; i < MLKEM_K; i++)
   __loop__(
     assigns(i, j, memory_slice(out, MLKEM_POLYVEC16_BYTES))
-    invariant(i <= MLKEM_K))
+    invariant(i <= MLKEM_K)
+    decreases(MLKEM_K - i))
   {
     for (j = 0; j < MLKEM_N; j++)
     __loop__(
       assigns(j, memory_slice(out, MLKEM_POLYVEC16_BYTES))
-      invariant(j <= MLKEM_N))
+      invariant(j <= MLKEM_N)
+      decreases(MLKEM_K - j))
     {
       uint16_t c = (uint16_t)v->vec[i].coeffs[j];
       out[i * MLKEM_POLY16_BYTES + 2 * j] = (uint8_t)(c & 0xFF);
@@ -439,12 +443,14 @@ static void mlk_deserialize_polyvec_16le(
   for (i = 0; i < MLKEM_K; i++)
   __loop__(
     assigns(i, j, memory_slice(v, sizeof(mlk_polyvec)))
-    invariant(i <= MLKEM_K))
+    invariant(i <= MLKEM_K)
+    decreases(MLKEM_K - i))
   {
     for (j = 0; j < MLKEM_N; j++)
     __loop__(
       assigns(j, memory_slice(v, sizeof(mlk_polyvec)))
-      invariant(j <= MLKEM_N))
+      invariant(j <= MLKEM_N)
+      decreases(MLKEM_K - j))
     {
       v->vec[i].coeffs[j] = mlk_cast_uint16_to_int16(
           (uint16_t)((unsigned)in[i * MLKEM_POLY16_BYTES + 2 * j] |
