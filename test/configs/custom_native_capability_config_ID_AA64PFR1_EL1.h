@@ -171,6 +171,16 @@
 /* #define MLK_CONFIG_CONSTANTS_ONLY */
 
 /******************************************************************************
+ * Name:        MLK_CONFIG_ENABLE_MLKEM_BRAID
+ *
+ * Description: If this option is set, mlkem-native exposes the incremental
+ *              encapsulation API (mlk_kem_enc_derand_u, mlk_kem_enc_v)
+ *              needed for the ML-KEM Braid protocol.
+ *
+ *****************************************************************************/
+/* #define MLK_CONFIG_ENABLE_MLKEM_BRAID */
+
+/******************************************************************************
  *
  * Build-only configuration options
  *

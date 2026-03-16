@@ -122,6 +122,10 @@ __contract__(
 );
 
 #define mlk_indcpa_enc_u MLK_NAMESPACE_K(indcpa_enc_u) MLK_CONTEXT_PARAMETERS_5
+
+#define mlk_indcpa_enc_v MLK_NAMESPACE_K(indcpa_enc_v) MLK_CONTEXT_PARAMETERS_5
+
+#if defined(MLK_CONFIG_ENABLE_MLKEM_BRAID)
 /*************************************************
  * Name:        mlk_indcpa_enc_u
  *
@@ -167,7 +171,6 @@ __contract__(
     array_abs_bound(epp->coeffs, 0, MLKEM_N, MLKEM_ETA2 + 1))
 );
 
-#define mlk_indcpa_enc_v MLK_NAMESPACE_K(indcpa_enc_v) MLK_CONTEXT_PARAMETERS_5
 /*************************************************
  * Name:        mlk_indcpa_enc_v
  *
@@ -208,6 +211,8 @@ __contract__(
   assigns(memory_slice(ct_v, MLKEM_POLYCOMPRESSEDBYTES_DV))
   ensures(return_value == 0 || return_value == MLK_ERR_OUT_OF_MEMORY)
 );
+
+#endif /* MLK_CONFIG_ENABLE_MLKEM_BRAID */
 
 #define mlk_indcpa_dec MLK_NAMESPACE_K(indcpa_dec) MLK_CONTEXT_PARAMETERS_3
 /*************************************************

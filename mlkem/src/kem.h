@@ -52,11 +52,14 @@
 #define mlk_kem_enc_derand MLK_NAMESPACE_K(enc_derand) MLK_CONTEXT_PARAMETERS_4
 #define mlk_kem_enc MLK_NAMESPACE_K(enc) MLK_CONTEXT_PARAMETERS_3
 #define mlk_kem_dec MLK_NAMESPACE_K(dec) MLK_CONTEXT_PARAMETERS_3
+#define mlk_kem_check_pk MLK_NAMESPACE_K(check_pk) MLK_CONTEXT_PARAMETERS_1
+#define mlk_kem_check_sk MLK_NAMESPACE_K(check_sk) MLK_CONTEXT_PARAMETERS_1
+
+#if defined(MLK_CONFIG_ENABLE_MLKEM_BRAID)
 #define mlk_kem_enc_derand_u \
   MLK_NAMESPACE_K(enc_derand_u) MLK_CONTEXT_PARAMETERS_7
 #define mlk_kem_enc_v MLK_NAMESPACE_K(enc_v) MLK_CONTEXT_PARAMETERS_5
-#define mlk_kem_check_pk MLK_NAMESPACE_K(check_pk) MLK_CONTEXT_PARAMETERS_1
-#define mlk_kem_check_sk MLK_NAMESPACE_K(check_sk) MLK_CONTEXT_PARAMETERS_1
+#endif
 
 /*************************************************
  * Name:        mlk_kem_check_pk
@@ -287,6 +290,8 @@ __contract__(
           return_value == MLK_ERR_RNG_FAIL)
 );
 
+#if defined(MLK_CONFIG_ENABLE_MLKEM_BRAID)
+
 /* Size of a polynomial serialized via 16-bit little-endian encoding
  * (2 bytes per coefficient). Used for the intermediate state in
  * incremental encapsulation. */
@@ -414,6 +419,8 @@ __contract__(
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
           return_value == MLK_ERR_OUT_OF_MEMORY)
 );
+
+#endif /* MLK_CONFIG_ENABLE_MLKEM_BRAID */
 
 /*************************************************
  * Name:        mlk_kem_dec

@@ -440,47 +440,11 @@ cleanup:
   return ret;
 }
 
-/* Reference: `indcpa_enc()` in the reference implementation @[REF].
- *            Implemented as a composition of mlk_indcpa_enc_u and
- *            mlk_indcpa_enc_v.
- */
+#if defined(MLK_CONFIG_ENABLE_MLKEM_BRAID)
 MLK_INTERNAL_API
-int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
-                   const uint8_t m[MLKEM_INDCPA_MSGBYTES],
-                   const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                   const uint8_t coins[MLKEM_SYMBYTES],
-                   MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
-{
-  int ret = 0;
-  MLK_ALLOC(sp, mlk_polyvec, 1, context);
-  MLK_ALLOC(epp, mlk_poly, 1, context);
-
-  if (sp == NULL || epp == NULL)
-  {
-    ret = MLK_ERR_OUT_OF_MEMORY;
-    goto cleanup;
-  }
-
-  /* Phase 1: compute ct_u and intermediate state (sp, epp) */
-  ret = mlk_indcpa_enc_u(c, sp, epp, pk + MLKEM_POLYVECBYTES, coins, context);
-  if (ret != 0)
-  {
-    goto cleanup;
-  }
-
-  /* Phase 2: compute ct_v using intermediate state */
-  ret = mlk_indcpa_enc_v(c + MLKEM_POLYVECCOMPRESSEDBYTES_DU, sp, epp, m, pk,
-                         context);
-
-cleanup:
-  /* Specification: Partially implements
-   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(epp, mlk_poly, 1, context);
-  MLK_FREE(sp, mlk_polyvec, 1, context);
-  return ret;
-}
-
-MLK_INTERNAL_API
+#else
+static MLK_ALWAYS_INLINE
+#endif
 int mlk_indcpa_enc_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                      mlk_polyvec *sp, mlk_poly *epp,
                      const uint8_t seed[MLKEM_SYMBYTES],
@@ -553,7 +517,11 @@ cleanup:
   return ret;
 }
 
+#if defined(MLK_CONFIG_ENABLE_MLKEM_BRAID)
 MLK_INTERNAL_API
+#else
+static MLK_ALWAYS_INLINE
+#endif
 int mlk_indcpa_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
                      const mlk_polyvec *sp, const mlk_poly *epp,
                      const uint8_t m[MLKEM_INDCPA_MSGBYTES],
@@ -593,6 +561,46 @@ cleanup:
   MLK_FREE(k, mlk_poly, 1, context);
   MLK_FREE(v, mlk_poly, 1, context);
   MLK_FREE(pkpv, mlk_polyvec, 1, context);
+  return ret;
+}
+
+/* Reference: `indcpa_enc()` in the reference implementation @[REF].
+ *            Implemented as a composition of mlk_indcpa_enc_u and
+ *            mlk_indcpa_enc_v.
+ */
+MLK_INTERNAL_API
+int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
+                   const uint8_t m[MLKEM_INDCPA_MSGBYTES],
+                   const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
+                   const uint8_t coins[MLKEM_SYMBYTES],
+                   MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+{
+  int ret = 0;
+  MLK_ALLOC(sp, mlk_polyvec, 1, context);
+  MLK_ALLOC(epp, mlk_poly, 1, context);
+
+  if (sp == NULL || epp == NULL)
+  {
+    ret = MLK_ERR_OUT_OF_MEMORY;
+    goto cleanup;
+  }
+
+  /* Phase 1: compute ct_u and intermediate state (sp, epp) */
+  ret = mlk_indcpa_enc_u(c, sp, epp, pk + MLKEM_POLYVECBYTES, coins, context);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
+
+  /* Phase 2: compute ct_v using intermediate state */
+  ret = mlk_indcpa_enc_v(c + MLKEM_POLYVECCOMPRESSEDBYTES_DU, sp, epp, m, pk,
+                         context);
+
+cleanup:
+  /* Specification: Partially implements
+   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
+  MLK_FREE(epp, mlk_poly, 1, context);
+  MLK_FREE(sp, mlk_polyvec, 1, context);
   return ret;
 }
 

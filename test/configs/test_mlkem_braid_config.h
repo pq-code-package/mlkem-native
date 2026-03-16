@@ -25,13 +25,12 @@
  */
 
 /*
- * Test configuration: Configuration for custom FIPS202 implementation
+ * Test configuration: Enable ML-KEM Braid API
  *
  * This configuration differs from the default mlkem/mlkem_native_config.h in
  * the following places:
  *   - MLK_CONFIG_NAMESPACE_PREFIX
- *   - MLK_CONFIG_FIPS202_CUSTOM_HEADER
- *   - MLK_CONFIG_FIPS202X4_CUSTOM_HEADER
+ *   - MLK_CONFIG_ENABLE_MLKEM_BRAID
  */
 
 
@@ -89,7 +88,7 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLK_CONFIG_NAMESPACE_PREFIX mlkem
+#define MLK_CONFIG_NAMESPACE_PREFIX mlk
 
 /******************************************************************************
  * Name:        MLK_CONFIG_MULTILEVEL_BUILD
@@ -178,7 +177,7 @@
  *              needed for the ML-KEM Braid protocol.
  *
  *****************************************************************************/
-/* #define MLK_CONFIG_ENABLE_MLKEM_BRAID */
+#define MLK_CONFIG_ENABLE_MLKEM_BRAID
 
 /******************************************************************************
  *
@@ -353,7 +352,7 @@
  *              the same API (see FIPS202.md).
  *
  *****************************************************************************/
-#define MLK_CONFIG_FIPS202_CUSTOM_HEADER "../custom_fips202/fips202.h"
+/* #define MLK_CONFIG_FIPS202_CUSTOM_HEADER "SOME_FILE.h" */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_FIPS202X4_CUSTOM_HEADER
@@ -369,7 +368,7 @@
  *              the same API (see FIPS202.md).
  *
  *****************************************************************************/
-#define MLK_CONFIG_FIPS202X4_CUSTOM_HEADER "../custom_fips202/fips202x4.h"
+/* #define MLK_CONFIG_FIPS202X4_CUSTOM_HEADER "SOME_FILE.h" */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_CUSTOM_ZEROIZE
