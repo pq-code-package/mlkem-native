@@ -4,48 +4,42 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = indcpa_enc_harness
+HARNESS_FILE = enc_getnoise_eta1_eta2_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = mlk_indcpa_enc
+PROOF_UID = mlk_enc_getnoise_eta1_eta2
 
 DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_indcpa_enc
-USE_FUNCTION_CONTRACTS = mlk_poly_frommsg
-USE_FUNCTION_CONTRACTS += mlk_gen_matrix
-USE_FUNCTION_CONTRACTS += mlk_enc_getnoise_eta1_eta2
+CHECK_FUNCTION_CONTRACTS=mlk_enc_getnoise_eta1_eta2
 
-USE_FUNCTION_CONTRACTS += mlk_polyvec_ntt
-USE_FUNCTION_CONTRACTS += mlk_polyvec_mulcache_compute
-USE_FUNCTION_CONTRACTS += mlk_polyvec_basemul_acc_montgomery_cached
-USE_FUNCTION_CONTRACTS += mlk_polyvec_invntt_tomont
-USE_FUNCTION_CONTRACTS += mlk_poly_invntt_tomont
-USE_FUNCTION_CONTRACTS += mlk_polyvec_add
-USE_FUNCTION_CONTRACTS += mlk_poly_add
-USE_FUNCTION_CONTRACTS += mlk_polyvec_reduce
-USE_FUNCTION_CONTRACTS += mlk_poly_reduce
-USE_FUNCTION_CONTRACTS += mlk_polyvec_compress_du
-USE_FUNCTION_CONTRACTS += mlk_poly_compress_dv
-USE_FUNCTION_CONTRACTS += mlk_polyvec_frombytes
-USE_FUNCTION_CONTRACTS += mlk_matvec_mul
-USE_FUNCTION_CONTRACTS += mlk_zeroize
+# Note that the called function mlk_poly_getnoise_eta2_4x() is actually
+# just #define'd to be mlk_poly_getnoise_eta1_4x()
+ifeq ($(MLKEM_K),2)
+USE_FUNCTION_CONTRACTS = mlk_poly_getnoise_eta1122_4x
+USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta2
+else ifeq ($(MLKEM_K),3)
+USE_FUNCTION_CONTRACTS = mlk_poly_getnoise_eta1_4x
+else # MLKEM_K must be 4
+USE_FUNCTION_CONTRACTS = mlk_poly_getnoise_eta1_4x
+USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta2
+endif
+
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2
+CBMCFLAGS=--smt2 --slice-formula
 
-FUNCTION_NAME = mlk_indcpa_enc
+FUNCTION_NAME = mlk_enc_getnoise_eta1_eta2
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
