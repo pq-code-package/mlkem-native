@@ -3,7 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 #
-# Looks for CBMC contracts without proof
+# Looks for CBMC contracts without proof, and for loop annotations
+# missing a decreases clause (needed for termination proofs).
 #
 
 import re
@@ -11,20 +12,25 @@ import sys
 import subprocess
 import pathlib
 
+
 def get_c_source_files():
     return get_files("mlkem/**/*.c")
+
 
 def get_header_files():
     return get_files("mlkem/**/*.h")
 
+
 def get_files(pattern):
     return list(map(str, pathlib.Path().glob(pattern)))
 
+
 def gen_proofs():
-     cmd_str = ["./proofs/cbmc/list_proofs.sh"]
-     p = subprocess.run(cmd_str, capture_output=True, universal_newlines=False)
-     proofs = filter(lambda s: s.strip() != "", p.stdout.decode().split("\n"))
-     return proofs
+    cmd_str = ["./proofs/cbmc/list_proofs.sh"]
+    p = subprocess.run(cmd_str, capture_output=True, universal_newlines=False)
+    proofs = filter(lambda s: s.strip() != "", p.stdout.decode().split("\n"))
+    return proofs
+
 
 def gen_contracts():
     files = get_c_source_files() + get_header_files()
@@ -33,19 +39,24 @@ def gen_contracts():
         with open(filename, "r") as f:
             content = f.read()
 
-        contract_pattern = r'(\w+)\s*\([^)]*\)\s*\n?\s*__contract__'
+        contract_pattern = r"(\w+)\s*\([^)]*\)\s*\n?\s*__contract__"
         matches = re.finditer(contract_pattern, content)
         for m in matches:
-            line = content.count('\n', 0, m.start())
+            line = content.count("\n", 0, m.start())
             yield (filename, line, m.group(1).removeprefix("mlk_"))
+
 
 def is_exception(funcname):
     # The functions passing this filter are known not to have a proof
 
-    if funcname == 'poly_permute_bitrev_to_custom':
+    if funcname == "poly_permute_bitrev_to_custom":
         return True
 
-    if funcname.endswith("_native") or funcname.endswith("_asm") or funcname.endswith("avx2"):
+    if (
+        funcname.endswith("_native")
+        or funcname.endswith("_asm")
+        or funcname.endswith("avx2")
+    ):
         # CBMC proofs are axiomatized against contracts of the backends
         return True
 
@@ -63,6 +74,7 @@ def is_exception(funcname):
 
     return False
 
+
 def check_contracts():
     contracts = set(gen_contracts())
     proofs = set(gen_proofs())
@@ -70,24 +82,107 @@ def check_contracts():
     bad = []
 
     # Print contracts without proofs
-    for (filename, line, funcname) in contracts:
+    for filename, line, funcname in contracts:
         if funcname in proofs:
             continue
 
         if is_exception(funcname):
-            print(f"{filename}:{line}:{funcname} has contract but no proof, "
-                  "but is listed as exception")
+            print(
+                f"{filename}:{line}:{funcname} has contract but no proof, "
+                "but is listed as exception"
+            )
             continue
 
-        print(f"{filename}:{line}:{funcname}: has contract but no proof. FAIL",
-              file=sys.stderr)
+        print(
+            f"{filename}:{line}:{funcname}: has contract but no proof. FAIL",
+            file=sys.stderr,
+        )
         bad.append(funcname)
 
     return len(bad) == 0
 
+
+# Loops that only terminate probabilistically (rejection sampling)
+# and therefore cannot have a decreases clause.
+DECREASES_EXCEPTIONS = [
+    ("mlkem/src/sampling.c", "mlk_poly_rej_uniform_x4"),
+    ("mlkem/src/sampling.c", "mlk_poly_rej_uniform"),
+]
+
+
+def find_enclosing_function(content, pos):
+    """Find the name of the function enclosing the given position."""
+    prefix = content[:pos]
+    # Match function definitions: look for 'name(' at the start of a line
+    # or after a type, followed eventually by '{' on its own line
+    matches = list(re.finditer(r"\n\w+\s+(\w+)\s*\(", prefix))
+    if matches:
+        return matches[-1].group(1)
+    return None
+
+
+def check_decreases():
+    files = get_c_source_files() + get_header_files()
+    bad = []
+
+    for filename in files:
+        with open(filename, "r") as f:
+            content = f.read()
+
+        # Find __loop__( that are actual loop annotations (not macro defs)
+        for m in re.finditer(r"__loop__\(", content):
+            start = m.start()
+            line = content.count("\n", 0, start) + 1
+
+            # Skip macro definitions like #define __loop__(x)
+            line_start = content.rfind("\n", 0, start) + 1
+            line_text = content[line_start : content.find("\n", start)]
+            if "#define" in line_text:
+                continue
+
+            # Extract the full __loop__(...) content by matching parentheses
+            depth = 0
+            i = m.end() - 1
+            for i in range(m.end() - 1, len(content)):
+                if content[i] == "(":
+                    depth += 1
+                elif content[i] == ")":
+                    depth -= 1
+                    if depth == 0:
+                        break
+            loop_body = content[m.start() : i + 1]
+
+            if "decreases(" in loop_body:
+                continue
+
+            func = find_enclosing_function(content, start)
+
+            if (filename, func) in DECREASES_EXCEPTIONS:
+                print(
+                    f"{filename}:{line}: __loop__ without decreases in "
+                    f"{func}(), but is listed as exception"
+                )
+                continue
+
+            print(
+                f"{filename}:{line}: __loop__ without decreases clause "
+                f"in {func}(). FAIL",
+                file=sys.stderr,
+            )
+            bad.append((filename, line))
+
+    return len(bad) == 0
+
+
 def _main():
-    if check_contracts() != True:
+    ok = True
+    if not check_contracts():
+        ok = False
+    if not check_decreases():
+        ok = False
+    if not ok:
         sys.exit(1)
+
 
 if __name__ == "__main__":
     _main()
