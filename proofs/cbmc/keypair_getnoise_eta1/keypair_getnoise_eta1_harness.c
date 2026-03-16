@@ -4,9 +4,9 @@
 
 #include <indcpa.h>
 
-#define mlk_keypair_getnoise MLK_NAMESPACE(keypair_getnoise)
-void mlk_keypair_getnoise(mlk_polyvec *pv, mlk_polyvec *e,
-                          const uint8_t seed[MLKEM_SYMBYTES]);
+#define mlk_keypair_getnoise_eta1 MLK_NAMESPACE(keypair_getnoise_eta1)
+void mlk_keypair_getnoise_eta1(mlk_polyvec *pv, mlk_polyvec *e,
+                               const uint8_t seed[MLKEM_SYMBYTES]);
 
 void harness(void)
 {
@@ -18,5 +18,5 @@ void harness(void)
     free(NULL);
   }
 
-  mlk_keypair_getnoise(a, b, seed);
+  mlk_keypair_getnoise_eta1(a, b, seed);
 }
