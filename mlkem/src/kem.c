@@ -374,6 +374,8 @@ cleanup:
 }
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
+#if defined(MLK_CONFIG_ENABLE_MLKEM_BRAID)
+
 /* 4-bit packing for noise polynomial e2.
  * Coefficients in [-ETA2, ETA2] are stored as (ETA2 - x), fitting in 4 bits.
  * Two coefficients per byte (low nibble first). */
@@ -552,6 +554,8 @@ cleanup:
   MLK_FREE(sp, mlk_polyvec, 1, context);
   return ret;
 }
+
+#endif /* MLK_CONFIG_ENABLE_MLKEM_BRAID */
 
 /* Reference: `crypto_kem_dec()` in the reference implementation @[REF]
  *            - We include secret key check

@@ -161,6 +161,7 @@ static int test_invalid_ciphertext(void)
   return 0;
 }
 
+#if defined(MLK_CONFIG_ENABLE_MLKEM_BRAID)
 static int test_incremental_enc(void)
 {
   uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES];
@@ -230,6 +231,7 @@ static int test_incremental_enc(void)
 
   return 0;
 }
+#endif /* MLK_CONFIG_ENABLE_MLKEM_BRAID */
 
 int main(void)
 {
@@ -247,7 +249,9 @@ int main(void)
     CHECK(test_invalid_sk_a() == 0);
     CHECK(test_invalid_sk_b() == 0);
     CHECK(test_invalid_ciphertext() == 0);
+#if defined(MLK_CONFIG_ENABLE_MLKEM_BRAID)
     CHECK(test_incremental_enc() == 0);
+#endif
   }
 
   printf("MLKEM_INDCCA_SECRETKEYBYTES:  %d\n", MLKEM_INDCCA_SECRETKEYBYTES);
