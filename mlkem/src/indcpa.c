@@ -39,7 +39,7 @@
   MLK_ADD_PARAM_SET(mlk_polyvec_permute_bitrev_to_custom)
 #define mlk_polymat_permute_bitrev_to_custom \
   MLK_ADD_PARAM_SET(mlk_polymat_permute_bitrev_to_custom)
-#define mlk_keypair_getnoise MLK_ADD_PARAM_SET(mlk_keypair_getnoise)
+#define mlk_keypair_getnoise_eta1 MLK_ADD_PARAM_SET(mlk_keypair_getnoise_eta1)
 /* End of parameter set namespacing */
 
 /*************************************************
@@ -367,10 +367,12 @@ __contract__(
 }
 
 /*************************************************
- * Name:        mlk_keypair_getnoise
+ * Name:        mlk_keypair_getnoise_eta1
  *
  * Description: Computes and fills the pv and e polyvec
- *              structures needed by mlk_keypair_derand()
+ *              structures needed by mlk_keypair_derand().
+ *              Uses x4-batched versions of `poly_getnoise` to leverage
+ *              batched x4-batched Keccak-f1600.
  *
  * Arguments:   - pv: Pointer to output polynomial vector
  *              - e:  Pointer to output polynomial vector
@@ -379,8 +381,8 @@ __contract__(
  * Specification: Implements @[FIPS203, Algorithm 13 (K-PKE.KeyGen)].
  *                steps 8 - 15
  **************************************************/
-static void mlk_keypair_getnoise(mlk_polyvec *pv, mlk_polyvec *e,
-                                 const uint8_t seed[MLKEM_SYMBYTES])
+static void mlk_keypair_getnoise_eta1(mlk_polyvec *pv, mlk_polyvec *e,
+                                      const uint8_t seed[MLKEM_SYMBYTES])
 __contract__(
   requires(memory_no_alias(pv, sizeof(mlk_polyvec)))
   requires(memory_no_alias(e, sizeof(mlk_polyvec)))
@@ -392,17 +394,19 @@ __contract__(
 )
 {
 #if MLKEM_K == 2
-  mlk_poly_getnoise_eta1_4x(&pv->vec[0], &pv->vec[1], &e->vec[0], &e->vec[1],
+  mlk_poly_getnoise_eta1_4x(&pv->vec[0], &pv->vec[1], /* Fill elements of pv */
+                            &e->vec[0], &e->vec[1], /* and two elements of e */
                             seed, 0, 1, 2, 3);
 #elif MLKEM_K == 3
   /*
-   * Only the first three output buffers are needed.
+   * Only the first three output buffers are needed, so we pass NULL as
+   * the fourth parameter, and 0xFF as its dummy nonce.
    */
   mlk_poly_getnoise_eta1_4x(&pv->vec[0], &pv->vec[1], &pv->vec[2], NULL, seed,
-                            0, 1, 2, 0xFF /* irrelevant */);
+                            0, 1, 2, 0xFF);
   /* Same here */
   mlk_poly_getnoise_eta1_4x(&e->vec[0], &e->vec[1], &e->vec[2], NULL, seed, 3,
-                            4, 5, 0xFF /* irrelevant */);
+                            4, 5, 0xFF);
 #elif MLKEM_K == 4
   mlk_poly_getnoise_eta1_4x(&pv->vec[0], &pv->vec[1], &pv->vec[2], &pv->vec[3],
                             seed, 0, 1, 2, 3);
@@ -413,8 +417,6 @@ __contract__(
 
 
 /* Reference: `indcpa_keypair_derand()` in the reference implementation @[REF].
- *            - We use x4-batched versions of `poly_getnoise` to leverage
- *              batched x4-batched Keccak-f1600.
  *            - We use a different implementation of `gen_matrix()` which
  *              uses x4-batched Keccak-f1600 (see `mlk_gen_matrix()` above).
  *            - We use a mulcache to speed up matrix-vector multiplication.
@@ -463,7 +465,7 @@ int mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
 
   mlk_gen_matrix(a, publicseed, 0 /* no transpose */);
 
-  mlk_keypair_getnoise(skpv, e, noiseseed);
+  mlk_keypair_getnoise_eta1(skpv, e, noiseseed);
 
   mlk_polyvec_ntt(skpv);
   mlk_polyvec_ntt(e);
@@ -652,4 +654,4 @@ cleanup:
 #undef mlk_matvec_mul
 #undef mlk_polyvec_permute_bitrev_to_custom
 #undef mlk_polymat_permute_bitrev_to_custom
-#undef mlk_keypair_getnoise
+#undef mlk_keypair_getnoise_eta1
