@@ -4,11 +4,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = keypair_getnoise_harness
+HARNESS_FILE = keypair_getnoise_eta1_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = mlk_keypair_getnoise
+PROOF_UID = mlk_keypair_getnoise_eta1
 
 DEFINES +=
 INCLUDES +=
@@ -18,7 +18,7 @@ REMOVE_FUNCTION_BODY +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
 
-CHECK_FUNCTION_CONTRACTS=mlk_keypair_getnoise
+CHECK_FUNCTION_CONTRACTS=mlk_keypair_getnoise_eta1
 USE_FUNCTION_CONTRACTS=mlk_poly_getnoise_eta1_4x
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
@@ -27,7 +27,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2 --slice-formula
 
-FUNCTION_NAME = mlk_keypair_getnoise
+FUNCTION_NAME = mlk_keypair_getnoise_eta1
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
