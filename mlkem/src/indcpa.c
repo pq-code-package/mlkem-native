@@ -443,7 +443,7 @@ cleanup:
 #if defined(MLK_CONFIG_ENABLE_MLKEM_BRAID)
 MLK_INTERNAL_API
 #else
-static MLK_ALWAYS_INLINE
+static MLK_NOINLINE
 #endif
 int mlk_indcpa_enc_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                      mlk_polyvec *sp, mlk_poly *epp,
@@ -519,7 +519,7 @@ cleanup:
 #if defined(MLK_CONFIG_ENABLE_MLKEM_BRAID)
 MLK_INTERNAL_API
 #else
-static MLK_ALWAYS_INLINE
+static MLK_NOINLINE
 #endif
 int mlk_indcpa_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
                      const mlk_polyvec *sp, const mlk_poly *epp,
