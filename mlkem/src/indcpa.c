@@ -447,6 +447,7 @@ static MLK_ALWAYS_INLINE
 #endif
 int mlk_indcpa_enc_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                      mlk_polyvec *sp, mlk_poly *epp,
+                     mlk_polyvec_mulcache *sp_cache,
                      const uint8_t seed[MLKEM_SYMBYTES],
                      const uint8_t coins[MLKEM_SYMBYTES],
                      MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
@@ -455,9 +456,8 @@ int mlk_indcpa_enc_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
   MLK_ALLOC(at, mlk_polymat, 1, context);
   MLK_ALLOC(ep, mlk_polyvec, 1, context);
   MLK_ALLOC(b, mlk_polyvec, 1, context);
-  MLK_ALLOC(sp_cache, mlk_polyvec_mulcache, 1, context);
 
-  if (at == NULL || ep == NULL || b == NULL || sp_cache == NULL)
+  if (at == NULL || ep == NULL || b == NULL)
   {
     ret = MLK_ERR_OUT_OF_MEMORY;
     goto cleanup;
@@ -510,7 +510,6 @@ int mlk_indcpa_enc_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(sp_cache, mlk_polyvec_mulcache, 1, context);
   MLK_FREE(b, mlk_polyvec, 1, context);
   MLK_FREE(ep, mlk_polyvec, 1, context);
   MLK_FREE(at, mlk_polymat, 1, context);
@@ -524,6 +523,7 @@ static MLK_ALWAYS_INLINE
 #endif
 int mlk_indcpa_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
                      const mlk_polyvec *sp, const mlk_poly *epp,
+                     const mlk_polyvec_mulcache *sp_cache,
                      const uint8_t m[MLKEM_INDCPA_MSGBYTES],
                      const uint8_t ek_vector[MLKEM_POLYVECBYTES],
                      MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
@@ -532,9 +532,8 @@ int mlk_indcpa_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
   MLK_ALLOC(pkpv, mlk_polyvec, 1, context);
   MLK_ALLOC(v, mlk_poly, 1, context);
   MLK_ALLOC(k, mlk_poly, 1, context);
-  MLK_ALLOC(sp_cache, mlk_polyvec_mulcache, 1, context);
 
-  if (pkpv == NULL || v == NULL || k == NULL || sp_cache == NULL)
+  if (pkpv == NULL || v == NULL || k == NULL)
   {
     ret = MLK_ERR_OUT_OF_MEMORY;
     goto cleanup;
@@ -543,7 +542,6 @@ int mlk_indcpa_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
   mlk_polyvec_frombytes(pkpv, ek_vector);
   mlk_poly_frommsg(k, m);
 
-  mlk_polyvec_mulcache_compute(sp_cache, sp);
   mlk_polyvec_basemul_acc_montgomery_cached(v, pkpv, sp, sp_cache);
 
   mlk_poly_invntt_tomont(v);
@@ -557,7 +555,6 @@ int mlk_indcpa_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  MLK_FREE(sp_cache, mlk_polyvec_mulcache, 1, context);
   MLK_FREE(k, mlk_poly, 1, context);
   MLK_FREE(v, mlk_poly, 1, context);
   MLK_FREE(pkpv, mlk_polyvec, 1, context);
@@ -578,27 +575,30 @@ int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
   int ret = 0;
   MLK_ALLOC(sp, mlk_polyvec, 1, context);
   MLK_ALLOC(epp, mlk_poly, 1, context);
+  MLK_ALLOC(sp_cache, mlk_polyvec_mulcache, 1, context);
 
-  if (sp == NULL || epp == NULL)
+  if (sp == NULL || epp == NULL || sp_cache == NULL)
   {
     ret = MLK_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
 
-  /* Phase 1: compute ct_u and intermediate state (sp, epp) */
-  ret = mlk_indcpa_enc_u(c, sp, epp, pk + MLKEM_POLYVECBYTES, coins, context);
+  /* Phase 1: compute ct_u and intermediate state (sp, epp, sp_cache) */
+  ret = mlk_indcpa_enc_u(c, sp, epp, sp_cache, pk + MLKEM_POLYVECBYTES, coins,
+                         context);
   if (ret != 0)
   {
     goto cleanup;
   }
 
   /* Phase 2: compute ct_v using intermediate state */
-  ret = mlk_indcpa_enc_v(c + MLKEM_POLYVECCOMPRESSEDBYTES_DU, sp, epp, m, pk,
-                         context);
+  ret = mlk_indcpa_enc_v(c + MLKEM_POLYVECCOMPRESSEDBYTES_DU, sp, epp, sp_cache,
+                         m, pk, context);
 
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
+  MLK_FREE(sp_cache, mlk_polyvec_mulcache, 1, context);
   MLK_FREE(epp, mlk_poly, 1, context);
   MLK_FREE(sp, mlk_polyvec, 1, context);
   return ret;

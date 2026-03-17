@@ -474,8 +474,10 @@ int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
   MLK_ALLOC(kr, uint8_t, 2 * MLKEM_SYMBYTES, context);
   MLK_ALLOC(sp, mlk_polyvec, 1, context);
   MLK_ALLOC(epp, mlk_poly, 1, context);
+  MLK_ALLOC(sp_cache, mlk_polyvec_mulcache, 1, context);
 
-  if (buf == NULL || kr == NULL || sp == NULL || epp == NULL)
+  if (buf == NULL || kr == NULL || sp == NULL || epp == NULL ||
+      sp_cache == NULL)
   {
     ret = MLK_ERR_OUT_OF_MEMORY;
     goto cleanup;
@@ -487,7 +489,8 @@ int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
   mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
 
   /* Compute ct_u using derived randomness r */
-  ret = mlk_indcpa_enc_u(ct_u, sp, epp, seed, kr + MLKEM_SYMBYTES, context);
+  ret = mlk_indcpa_enc_u(ct_u, sp, epp, sp_cache, seed, kr + MLKEM_SYMBYTES,
+                         context);
   if (ret != 0)
   {
     goto cleanup;
@@ -506,6 +509,7 @@ int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
+  MLK_FREE(sp_cache, mlk_polyvec_mulcache, 1, context);
   MLK_FREE(epp, mlk_poly, 1, context);
   MLK_FREE(sp, mlk_polyvec, 1, context);
   MLK_FREE(kr, uint8_t, 2 * MLKEM_SYMBYTES, context);
@@ -524,10 +528,12 @@ int mlk_kem_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
   int ret = 0;
   MLK_ALLOC(sp, mlk_polyvec, 1, context);
   MLK_ALLOC(epp, mlk_poly, 1, context);
+  MLK_ALLOC(sp_cache, mlk_polyvec_mulcache, 1, context);
   MLK_ALLOC(p, mlk_polyvec, 1, context);
   MLK_ALLOC(p_reencoded, uint8_t, MLKEM_POLYVECBYTES, context);
 
-  if (sp == NULL || epp == NULL || p == NULL || p_reencoded == NULL)
+  if (sp == NULL || epp == NULL || sp_cache == NULL || p == NULL ||
+      p_reencoded == NULL)
   {
     ret = MLK_ERR_OUT_OF_MEMORY;
     goto cleanup;
@@ -549,13 +555,17 @@ int mlk_kem_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
   mlk_deserialize_polyvec_16le(sp, sp_serial);
   mlk_deserialize_epp(epp, epp_serial);
 
-  ret = mlk_indcpa_enc_v(ct_v, sp, epp, coins, ek_vector, context);
+  /* Compute mulcache for deserialized sp */
+  mlk_polyvec_mulcache_compute(sp_cache, sp);
+
+  ret = mlk_indcpa_enc_v(ct_v, sp, epp, sp_cache, coins, ek_vector, context);
 
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   MLK_FREE(p_reencoded, uint8_t, MLKEM_POLYVECBYTES, context);
   MLK_FREE(p, mlk_polyvec, 1, context);
+  MLK_FREE(sp_cache, mlk_polyvec_mulcache, 1, context);
   MLK_FREE(epp, mlk_poly, 1, context);
   MLK_FREE(sp, mlk_polyvec, 1, context);
   return ret;

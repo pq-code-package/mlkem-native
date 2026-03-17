@@ -121,9 +121,9 @@ __contract__(
           return_value == MLK_ERR_OUT_OF_MEMORY)
 );
 
-#define mlk_indcpa_enc_u MLK_NAMESPACE_K(indcpa_enc_u) MLK_CONTEXT_PARAMETERS_5
+#define mlk_indcpa_enc_u MLK_NAMESPACE_K(indcpa_enc_u) MLK_CONTEXT_PARAMETERS_6
 
-#define mlk_indcpa_enc_v MLK_NAMESPACE_K(indcpa_enc_v) MLK_CONTEXT_PARAMETERS_5
+#define mlk_indcpa_enc_v MLK_NAMESPACE_K(indcpa_enc_v) MLK_CONTEXT_PARAMETERS_6
 
 #if defined(MLK_CONFIG_ENABLE_MLKEM_BRAID)
 /*************************************************
@@ -154,6 +154,7 @@ MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_indcpa_enc_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                      mlk_polyvec *sp, mlk_poly *epp,
+                     mlk_polyvec_mulcache *sp_cache,
                      const uint8_t seed[MLKEM_SYMBYTES],
                      const uint8_t coins[MLKEM_SYMBYTES],
                      MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
@@ -161,11 +162,13 @@ __contract__(
   requires(memory_no_alias(ct_u, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
   requires(memory_no_alias(sp, sizeof(mlk_polyvec)))
   requires(memory_no_alias(epp, sizeof(mlk_poly)))
+  requires(memory_no_alias(sp_cache, sizeof(mlk_polyvec_mulcache)))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
   requires(memory_no_alias(coins, MLKEM_SYMBYTES))
   assigns(memory_slice(ct_u, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
   assigns(memory_slice(sp, sizeof(mlk_polyvec)))
   assigns(memory_slice(epp, sizeof(mlk_poly)))
+  assigns(memory_slice(sp_cache, sizeof(mlk_polyvec_mulcache)))
   ensures(return_value == 0 || return_value == MLK_ERR_OUT_OF_MEMORY)
   ensures(return_value == 0 ==>
     array_abs_bound(epp->coeffs, 0, MLKEM_N, MLKEM_ETA2 + 1))
@@ -198,6 +201,7 @@ MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_indcpa_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
                      const mlk_polyvec *sp, const mlk_poly *epp,
+                     const mlk_polyvec_mulcache *sp_cache,
                      const uint8_t m[MLKEM_INDCPA_MSGBYTES],
                      const uint8_t ek_vector[MLKEM_POLYVECBYTES],
                      MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
@@ -205,6 +209,7 @@ __contract__(
   requires(memory_no_alias(ct_v, MLKEM_POLYCOMPRESSEDBYTES_DV))
   requires(memory_no_alias(sp, sizeof(mlk_polyvec)))
   requires(memory_no_alias(epp, sizeof(mlk_poly)))
+  requires(memory_no_alias(sp_cache, sizeof(mlk_polyvec_mulcache)))
   requires(array_abs_bound(epp->coeffs, 0, MLKEM_N, 16))
   requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES))
   requires(memory_no_alias(ek_vector, MLKEM_POLYVECBYTES))
