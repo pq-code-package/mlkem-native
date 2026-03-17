@@ -22,15 +22,7 @@ PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
 CHECK_FUNCTION_CONTRACTS=mlk_indcpa_enc
 USE_FUNCTION_CONTRACTS = mlk_poly_frommsg
 USE_FUNCTION_CONTRACTS += mlk_gen_matrix
-ifeq ($(MLKEM_K),2)
-USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta1122_4x
-USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta2
-else ifeq ($(MLKEM_K),3)
-USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta1_4x
-else ifeq ($(MLKEM_K),4)
-USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta1_4x
-USE_FUNCTION_CONTRACTS += mlk_poly_getnoise_eta2
-endif
+USE_FUNCTION_CONTRACTS += mlk_enc_getnoise_eta1_eta2
 
 USE_FUNCTION_CONTRACTS += mlk_polyvec_ntt
 USE_FUNCTION_CONTRACTS += mlk_polyvec_mulcache_compute
