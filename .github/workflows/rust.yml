@@ -1,0 +1,37 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: Rust
+permissions:
+  contents: read
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  rust:
+    name: Rust bindings (${{ matrix.target.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - runner: ubuntu-latest
+            name: 'x86_64'
+          - runner: ubuntu-24.04-arm
+            name: 'aarch64'
+          - runner: macos-latest
+            name: 'macos (aarch64)'
+          - runner: macos-15-intel
+            name: 'macos (x86_64)'
+    runs-on: ${{ matrix.target.runner }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/setup-shell
+        with:
+          nix-shell: rust
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            cargo build --workspace
+            cargo test --workspace
+            cargo publish --dry-run
+            cargo publish --dry-run --manifest-path bindings/rust/mlkem-native/Cargo.toml

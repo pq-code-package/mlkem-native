@@ -101,3 +101,9 @@ jobs:
     needs: [ base ]
     uses: ./.github/workflows/baremetal.yml
     secrets: inherit
+  rust:
+    name: Rust
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    uses: ./.github/workflows/rust.yml
