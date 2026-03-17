@@ -128,7 +128,7 @@ jobs:
             ldflags: "-flto"
             perf: PERF
           - name: AMD EPYC 4th gen (c7a)
-            ec2_instance_type: c7a.medium
+            ec2_instance_type: c7a.8xlarge
             ec2_ami: ubuntu-latest (x86_64)
             archflags: -mavx2 -mbmi2 -mpopcnt -march=znver4
             cflags: "-flto -DMLK_FORCE_X86_64"
