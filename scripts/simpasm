@@ -284,7 +284,10 @@ def simplify(logger, args, asm_input, asm_output=None):
         if args.arch == "armv81m":
             autogen_header += [".thumb", ".syntax unified", ""]
 
-        autogen_header += [".text", ".balign 4"]
+        if args.arch == "x86_64":
+            autogen_header += [".text", ".balign 64"]
+        else:
+            autogen_header += [".text", ".balign 4"]
 
         # Add syntax specifier for Intel syntax
         if args.syntax and args.syntax.lower() == "intel":

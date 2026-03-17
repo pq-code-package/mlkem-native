@@ -17,7 +17,7 @@
 #endif
 
 .text
-.balign 4
+.balign 64
 .global MLK_ASM_NAMESPACE(keccak_f1600_x4_avx2)
 MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2)
 

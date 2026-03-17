@@ -94,7 +94,7 @@ vmovdqa %ymm1,  (\offset_out +224)(%rdi)
 
 .text
 .global MLK_ASM_NAMESPACE(nttfrombytes_avx2)
-.balign 4
+.balign 64
 MLK_ASM_FN_SYMBOL(nttfrombytes_avx2)
 
 // Broadcast 0xFFF to all elements of ymm0

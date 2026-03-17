@@ -36,7 +36,7 @@
 
 .text
 .global MLK_ASM_NAMESPACE(poly_decompress_d10_avx2)
-.balign 4
+.balign 64
 MLK_ASM_FN_SYMBOL(poly_decompress_d10_avx2)
 
 // Broadcast q = (MLKEM_Q << 16) + 4 * MLKEM_Q = 0x0D013404 to ymm0

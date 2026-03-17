@@ -38,7 +38,7 @@
 
 .text
 .global MLK_ASM_NAMESPACE(poly_decompress_d11_avx2)
-.balign 4
+.balign 64
 MLK_ASM_FN_SYMBOL(poly_decompress_d11_avx2)
 
 // Broadcast q = 3329 (0x0D01) to all 16-bit elements of ymm0

@@ -14,7 +14,7 @@
 #endif
 
 .text
-.balign 4
+.balign 64
 #ifdef __APPLE__
 .global _PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_asm_k3
 _PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_asm_k3:

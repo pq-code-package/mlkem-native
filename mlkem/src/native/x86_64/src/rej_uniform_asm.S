@@ -33,7 +33,7 @@
 #endif
 
 .text
-.balign 4
+.balign 64
 .global MLK_ASM_NAMESPACE(rej_uniform_asm)
 MLK_ASM_FN_SYMBOL(rej_uniform_asm)
 

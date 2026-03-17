@@ -30,7 +30,7 @@
 #endif
 
 .text
-.balign 4
+.balign 64
 #ifdef __APPLE__
 .global _PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_asm
 _PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_asm:

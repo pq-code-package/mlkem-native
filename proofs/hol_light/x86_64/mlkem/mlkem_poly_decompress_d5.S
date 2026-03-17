@@ -40,7 +40,7 @@
 #endif
 
 .text
-.balign 4
+.balign 64
 #ifdef __APPLE__
 .global _PQCP_MLKEM_NATIVE_MLKEM768_poly_decompress_d5_avx2
 _PQCP_MLKEM_NATIVE_MLKEM768_poly_decompress_d5_avx2:

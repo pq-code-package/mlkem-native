@@ -32,7 +32,7 @@
 #endif
 
 .text
-.balign 4
+.balign 64
 .global MLK_ASM_NAMESPACE(nttunpack_avx2)
 MLK_ASM_FN_SYMBOL(nttunpack_avx2)
 
