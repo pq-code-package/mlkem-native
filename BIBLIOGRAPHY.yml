@@ -33,7 +33,7 @@
 - id: s2n-bignum-soundness
   name: s2n-bignum soundness documentation
   author: Amazon Web Services
-  url: https://github.com/awslabs/s2n-bignum/blob/main/doc/s2n_bignum_soundness.md
+  url: https://github.com/awslabs/s2n-bignum/blob/main/SOUNDNESS.md
 
 - id: HOL-Light
   name: HOL-Light Theorem Prover

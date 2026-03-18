@@ -438,7 +438,7 @@ source code and documentation.
 * s2n-bignum soundness documentation
 * Author(s):
   - Amazon Web Services
-* URL: https://github.com/awslabs/s2n-bignum/blob/main/doc/s2n_bignum_soundness.md
+* URL: https://github.com/awslabs/s2n-bignum/blob/main/SOUNDNESS.md
 * Referenced from:
   - [SOUNDNESS.md](SOUNDNESS.md)
 
