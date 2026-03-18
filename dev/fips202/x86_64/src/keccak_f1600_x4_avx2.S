@@ -40,6 +40,8 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2)
    // 0x1e0(%rsp)   A23   (state0[23), state1[23], state2[23], state3[23]] Input (%rdi) offsets: 0xB8, 0x180, 0x248, 0x310
    // %ymm2         A24   (state0[24), state1[24], state2[24], state3[24]] Input (%rdi) offsets: 0xC0, 0x188, 0x250, 0x318
 
+   movq   %rsp, %r11
+   andq   $0xffffffffffffffe0, %rsp
    subq   $0x300, %rsp
 
    // Load 32 bytes from each of the 4 states (A(0-3))
@@ -615,7 +617,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2)
    vmovhpd %xmm3, 0x188(%rdi)
    vmovq %xmm15, 0x250(%rdi)
    vmovhpd %xmm15, 0x318(%rdi)
-   addq   $0x300, %rsp
+   movq %r11, %rsp
    ret
 
 /* simpasm: footer-start */
