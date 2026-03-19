@@ -43,6 +43,24 @@ void mlk_polyvec_basemul_acc_montgomery_cached_c(
     const mlk_polyvec_mulcache *b_cache);
 void mlk_poly_mulcache_compute_c(mlk_poly_mulcache *x, const mlk_poly *a);
 void mlk_keccakf1600_permute_c(uint64_t *state);
+unsigned mlk_rej_uniform_c(int16_t *r, unsigned target, unsigned offset,
+                           const uint8_t *buf, unsigned buflen);
+void mlk_poly_compress_d4_c(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
+                            const mlk_poly *a);
+void mlk_poly_decompress_d4_c(mlk_poly *r,
+                              const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4]);
+void mlk_poly_compress_d5_c(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
+                            const mlk_poly *a);
+void mlk_poly_decompress_d5_c(mlk_poly *r,
+                              const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5]);
+void mlk_poly_compress_d10_c(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
+                             const mlk_poly *a);
+void mlk_poly_decompress_d10_c(mlk_poly *r,
+                               const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10]);
+void mlk_poly_compress_d11_c(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
+                             const mlk_poly *a);
+void mlk_poly_decompress_d11_c(mlk_poly *r,
+                               const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]);
 
 #define CHECK(x)                                              \
   do                                                          \
@@ -118,7 +136,15 @@ static int compare_u64_arrays(const uint64_t *a, const uint64_t *b,
     defined(MLK_USE_NATIVE_POLY_TOMONT) || defined(MLK_USE_NATIVE_NTT) ||   \
     defined(MLK_USE_NATIVE_INTT) || defined(MLK_USE_NATIVE_POLY_TOBYTES) || \
     defined(MLK_USE_NATIVE_POLY_FROMBYTES) ||                               \
-    defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED)
+    defined(MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED) ||        \
+    defined(MLK_USE_NATIVE_POLY_COMPRESS_D4) ||                             \
+    defined(MLK_USE_NATIVE_POLY_COMPRESS_D5) ||                             \
+    defined(MLK_USE_NATIVE_POLY_COMPRESS_D10) ||                            \
+    defined(MLK_USE_NATIVE_POLY_COMPRESS_D11) ||                            \
+    defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D4) ||                           \
+    defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D5) ||                           \
+    defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D10) ||                          \
+    defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D11)
 static void print_i16_array(const char *label, const int16_t *array, size_t len)
 {
   size_t i;
@@ -184,12 +210,23 @@ static void generate_i16_array_ranged(int16_t *data, size_t len, int min_incl,
                         ((unsigned)data[i] % (unsigned)(max_excl - min_incl)));
   }
 }
-#endif /* MLK_USE_NATIVE_POLY_REDUCE || MLK_USE_NATIVE_POLY_TOMONT ||     \
-          MLK_USE_NATIVE_NTT || MLK_USE_NATIVE_INTT ||                    \
-          MLK_USE_NATIVE_POLY_TOBYTES || MLK_USE_NATIVE_POLY_FROMBYTES || \
-          MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
+#endif /* MLK_USE_NATIVE_POLY_REDUCE || MLK_USE_NATIVE_POLY_TOMONT ||        \
+          MLK_USE_NATIVE_NTT || MLK_USE_NATIVE_INTT ||                       \
+          MLK_USE_NATIVE_POLY_TOBYTES || MLK_USE_NATIVE_POLY_FROMBYTES ||    \
+          MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED ||            \
+          MLK_USE_NATIVE_POLY_COMPRESS_D4 || MLK_USE_NATIVE_POLY_COMPRESS_D5 \
+          || MLK_USE_NATIVE_POLY_COMPRESS_D10 ||                             \
+          MLK_USE_NATIVE_POLY_COMPRESS_D11 ||                                \
+          MLK_USE_NATIVE_POLY_DECOMPRESS_D4 ||                               \
+          MLK_USE_NATIVE_POLY_DECOMPRESS_D5 ||                               \
+          MLK_USE_NATIVE_POLY_DECOMPRESS_D10 ||                              \
+          MLK_USE_NATIVE_POLY_DECOMPRESS_D11 */
 
-#if defined(MLK_USE_NATIVE_POLY_TOBYTES)
+#if defined(MLK_USE_NATIVE_POLY_TOBYTES) ||      \
+    defined(MLK_USE_NATIVE_POLY_COMPRESS_D4) ||  \
+    defined(MLK_USE_NATIVE_POLY_COMPRESS_D5) ||  \
+    defined(MLK_USE_NATIVE_POLY_COMPRESS_D10) || \
+    defined(MLK_USE_NATIVE_POLY_COMPRESS_D11)
 static void print_u8_array(const char *label, const uint8_t *array, size_t len)
 {
   size_t i;
@@ -235,7 +272,9 @@ static int compare_u8_arrays(const uint8_t *a, const uint8_t *b, unsigned len,
   }
   return 1;
 }
-#endif /* MLK_USE_NATIVE_POLY_TOBYTES */
+#endif /* MLK_USE_NATIVE_POLY_TOBYTES || MLK_USE_NATIVE_POLY_COMPRESS_D4 ||   \
+          MLK_USE_NATIVE_POLY_COMPRESS_D5 || MLK_USE_NATIVE_POLY_COMPRESS_D10 \
+          || MLK_USE_NATIVE_POLY_COMPRESS_D11 */
 
 #if defined(MLK_USE_NATIVE_POLY_REDUCE) ||                                  \
     defined(MLK_USE_NATIVE_POLY_TOMONT) || defined(MLK_USE_NATIVE_NTT) ||   \
@@ -876,6 +915,165 @@ cleanup:
 #undef MAX_RATE
 #endif /* MLK_USE_FIPS202_X4_NATIVE */
 
+#ifdef MLK_USE_NATIVE_REJ_UNIFORM
+#define REJ_UNIFORM_BUFLEN 504 /* 3 * 168, divisible by 3 */
+static int test_native_rej_uniform(void)
+{
+  int ret = 1;
+  int i;
+  MLK_ALLOC(r_test, int16_t, MLKEM_N, NULL);
+  MLK_ALLOC(r_ref, int16_t, MLKEM_N, NULL);
+  MLK_ALLOC(buf, uint8_t, REJ_UNIFORM_BUFLEN, NULL);
+
+  if (r_test == NULL || r_ref == NULL || buf == NULL)
+  {
+    goto cleanup;
+  }
+
+  for (i = 0; i < NUM_RANDOM_TESTS; i++)
+  {
+    int native_ret;
+    unsigned c_ret;
+    randombytes(buf, REJ_UNIFORM_BUFLEN);
+
+    native_ret =
+        mlk_rej_uniform_native(r_test, MLKEM_N, buf, REJ_UNIFORM_BUFLEN);
+    if (native_ret == MLK_NATIVE_FUNC_FALLBACK)
+    {
+      ret = 0;
+      goto cleanup;
+    }
+
+    c_ret = mlk_rej_uniform_c(r_ref, MLKEM_N, 0, buf, REJ_UNIFORM_BUFLEN);
+
+    CHECK((unsigned)native_ret == c_ret);
+    CHECK(compare_i16_arrays(r_test, r_ref, (unsigned)native_ret, "rej_uniform",
+                             NULL));
+  }
+
+  ret = 0;
+
+cleanup:
+  MLK_FREE(buf, uint8_t, REJ_UNIFORM_BUFLEN, NULL);
+  MLK_FREE(r_ref, int16_t, MLKEM_N, NULL);
+  MLK_FREE(r_test, int16_t, MLKEM_N, NULL);
+  return ret;
+}
+#undef REJ_UNIFORM_BUFLEN
+#endif /* MLK_USE_NATIVE_REJ_UNIFORM */
+
+/* Backend unit tests for poly compress/decompress native implementations.
+ * For each variant, we compare the native output against the C reference. */
+
+#define DEFINE_COMPRESS_TEST(D, BYTES)                                      \
+  static int test_native_poly_compress_d##D(void)                           \
+  {                                                                         \
+    int ret = 1;                                                            \
+    int i;                                                                  \
+    MLK_ALLOC(r_test, uint8_t, BYTES, NULL);                                \
+    MLK_ALLOC(r_ref, uint8_t, BYTES, NULL);                                 \
+    MLK_ALLOC(a, mlk_poly, 1, NULL);                                        \
+                                                                            \
+    if (r_test == NULL || r_ref == NULL || a == NULL)                       \
+    {                                                                       \
+      goto cleanup;                                                         \
+    }                                                                       \
+                                                                            \
+    for (i = 0; i < NUM_RANDOM_TESTS; i++)                                  \
+    {                                                                       \
+      int native_ret;                                                       \
+      generate_i16_array_ranged(a->coeffs, MLKEM_N, 0, MLKEM_Q);            \
+                                                                            \
+      native_ret = mlk_poly_compress_d##D##_native(r_test, a->coeffs);      \
+      if (native_ret == MLK_NATIVE_FUNC_FALLBACK)                           \
+      {                                                                     \
+        ret = 0;                                                            \
+        goto cleanup;                                                       \
+      }                                                                     \
+                                                                            \
+      mlk_poly_compress_d##D##_c(r_ref, a);                                 \
+      CHECK(compare_u8_arrays(r_test, r_ref, BYTES, "poly_compress_d" #D)); \
+    }                                                                       \
+                                                                            \
+    ret = 0;                                                                \
+                                                                            \
+  cleanup:                                                                  \
+    MLK_FREE(a, mlk_poly, 1, NULL);                                         \
+    MLK_FREE(r_ref, uint8_t, BYTES, NULL);                                  \
+    MLK_FREE(r_test, uint8_t, BYTES, NULL);                                 \
+    return ret;                                                             \
+  }
+
+#define DEFINE_DECOMPRESS_TEST(D, BYTES)                                 \
+  static int test_native_poly_decompress_d##D(void)                      \
+  {                                                                      \
+    int ret = 1;                                                         \
+    int i;                                                               \
+    MLK_ALLOC(r_test, mlk_poly, 1, NULL);                                \
+    MLK_ALLOC(r_ref, mlk_poly, 1, NULL);                                 \
+    MLK_ALLOC(a, uint8_t, BYTES, NULL);                                  \
+                                                                         \
+    if (r_test == NULL || r_ref == NULL || a == NULL)                    \
+    {                                                                    \
+      goto cleanup;                                                      \
+    }                                                                    \
+                                                                         \
+    for (i = 0; i < NUM_RANDOM_TESTS; i++)                               \
+    {                                                                    \
+      int native_ret;                                                    \
+      randombytes(a, BYTES);                                             \
+                                                                         \
+      native_ret = mlk_poly_decompress_d##D##_native(r_test->coeffs, a); \
+      if (native_ret == MLK_NATIVE_FUNC_FALLBACK)                        \
+      {                                                                  \
+        ret = 0;                                                         \
+        goto cleanup;                                                    \
+      }                                                                  \
+                                                                         \
+      mlk_poly_decompress_d##D##_c(r_ref, a);                            \
+      CHECK(compare_i16_arrays(r_test->coeffs, r_ref->coeffs, MLKEM_N,   \
+                               "poly_decompress_d" #D, NULL));           \
+    }                                                                    \
+                                                                         \
+    ret = 0;                                                             \
+                                                                         \
+  cleanup:                                                               \
+    MLK_FREE(a, uint8_t, BYTES, NULL);                                   \
+    MLK_FREE(r_ref, mlk_poly, 1, NULL);                                  \
+    MLK_FREE(r_test, mlk_poly, 1, NULL);                                 \
+    return ret;                                                          \
+  }
+
+#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
+#ifdef MLK_USE_NATIVE_POLY_COMPRESS_D4
+DEFINE_COMPRESS_TEST(4, MLKEM_POLYCOMPRESSEDBYTES_D4)
+#endif
+#ifdef MLK_USE_NATIVE_POLY_DECOMPRESS_D4
+DEFINE_DECOMPRESS_TEST(4, MLKEM_POLYCOMPRESSEDBYTES_D4)
+#endif
+#ifdef MLK_USE_NATIVE_POLY_COMPRESS_D10
+DEFINE_COMPRESS_TEST(10, MLKEM_POLYCOMPRESSEDBYTES_D10)
+#endif
+#ifdef MLK_USE_NATIVE_POLY_DECOMPRESS_D10
+DEFINE_DECOMPRESS_TEST(10, MLKEM_POLYCOMPRESSEDBYTES_D10)
+#endif
+#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
+
+#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4
+#ifdef MLK_USE_NATIVE_POLY_COMPRESS_D5
+DEFINE_COMPRESS_TEST(5, MLKEM_POLYCOMPRESSEDBYTES_D5)
+#endif
+#ifdef MLK_USE_NATIVE_POLY_DECOMPRESS_D5
+DEFINE_DECOMPRESS_TEST(5, MLKEM_POLYCOMPRESSEDBYTES_D5)
+#endif
+#ifdef MLK_USE_NATIVE_POLY_COMPRESS_D11
+DEFINE_COMPRESS_TEST(11, MLKEM_POLYCOMPRESSEDBYTES_D11)
+#endif
+#ifdef MLK_USE_NATIVE_POLY_DECOMPRESS_D11
+DEFINE_DECOMPRESS_TEST(11, MLKEM_POLYCOMPRESSEDBYTES_D11)
+#endif
+#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
+
 static int test_backend_units(void)
 {
   /* Set fixed seed for reproducible tests */
@@ -917,6 +1115,40 @@ static int test_backend_units(void)
   CHECK(test_keccakf1600x4_xor_permute_extract() == 0);
 #endif
 
+#ifdef MLK_USE_NATIVE_REJ_UNIFORM
+  CHECK(test_native_rej_uniform() == 0);
+#endif
+
+#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
+#ifdef MLK_USE_NATIVE_POLY_COMPRESS_D4
+  CHECK(test_native_poly_compress_d4() == 0);
+#endif
+#ifdef MLK_USE_NATIVE_POLY_DECOMPRESS_D4
+  CHECK(test_native_poly_decompress_d4() == 0);
+#endif
+#ifdef MLK_USE_NATIVE_POLY_COMPRESS_D10
+  CHECK(test_native_poly_compress_d10() == 0);
+#endif
+#ifdef MLK_USE_NATIVE_POLY_DECOMPRESS_D10
+  CHECK(test_native_poly_decompress_d10() == 0);
+#endif
+#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
+
+#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4
+#ifdef MLK_USE_NATIVE_POLY_COMPRESS_D5
+  CHECK(test_native_poly_compress_d5() == 0);
+#endif
+#ifdef MLK_USE_NATIVE_POLY_DECOMPRESS_D5
+  CHECK(test_native_poly_decompress_d5() == 0);
+#endif
+#ifdef MLK_USE_NATIVE_POLY_COMPRESS_D11
+  CHECK(test_native_poly_compress_d11() == 0);
+#endif
+#ifdef MLK_USE_NATIVE_POLY_DECOMPRESS_D11
+  CHECK(test_native_poly_decompress_d11() == 0);
+#endif
+#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
+
   return 0;
 }
 
@@ -925,141 +1157,6 @@ static int test_backend_units(void)
           MLK_USE_NATIVE_POLY_TOBYTES || MLK_USE_NATIVE_POLY_FROMBYTES || \
           MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED ||         \
           MLK_USE_FIPS202_X1_NATIVE || MLK_USE_FIPS202_X4_NATIVE */
-
-
-/* This test invokes the polynomial (de)compression routines
- * with minimally sized buffers. When run under valgrind or with address
- * sanitization, this ensures that no buffer overflow is happening. This is of
- * interest because the compressed buffers sometimes have unaligned lengths and
- * are therefore at risk of being overflowed by vectorized code. */
-static int test_poly_compress_no_overflow(void)
-{
-#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
-  {
-    MLK_ALLOC(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D4, NULL);
-    MLK_ALLOC(s, mlk_poly, 1, NULL);
-    if (r == NULL || s == NULL)
-    {
-      MLK_FREE(s, mlk_poly, 1, NULL);
-      MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D4, NULL);
-      return 1;
-    }
-    memset((uint8_t *)s, 0, sizeof(mlk_poly));
-    mlk_poly_compress_d4(r, s);
-    MLK_FREE(s, mlk_poly, 1, NULL);
-    MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D4, NULL);
-  }
-
-  {
-    MLK_ALLOC(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D4, NULL);
-    MLK_ALLOC(s, mlk_poly, 1, NULL);
-    if (r == NULL || s == NULL)
-    {
-      MLK_FREE(s, mlk_poly, 1, NULL);
-      MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D4, NULL);
-      return 1;
-    }
-    memset(r, 0, MLKEM_POLYCOMPRESSEDBYTES_D4);
-    mlk_poly_decompress_d4(s, r);
-    MLK_FREE(s, mlk_poly, 1, NULL);
-    MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D4, NULL);
-  }
-
-  {
-    MLK_ALLOC(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D10, NULL);
-    MLK_ALLOC(s, mlk_poly, 1, NULL);
-    if (r == NULL || s == NULL)
-    {
-      MLK_FREE(s, mlk_poly, 1, NULL);
-      MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D10, NULL);
-      return 1;
-    }
-    memset((uint8_t *)s, 0, sizeof(mlk_poly));
-    mlk_poly_compress_d10(r, s);
-    MLK_FREE(s, mlk_poly, 1, NULL);
-    MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D10, NULL);
-  }
-
-  {
-    MLK_ALLOC(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D10, NULL);
-    MLK_ALLOC(s, mlk_poly, 1, NULL);
-    if (r == NULL || s == NULL)
-    {
-      MLK_FREE(s, mlk_poly, 1, NULL);
-      MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D10, NULL);
-      return 1;
-    }
-    memset(r, 0, MLKEM_POLYCOMPRESSEDBYTES_D10);
-    mlk_poly_decompress_d10(s, r);
-    MLK_FREE(s, mlk_poly, 1, NULL);
-    MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D10, NULL);
-  }
-#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
-
-#if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4
-  {
-    MLK_ALLOC(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D5, NULL);
-    MLK_ALLOC(s, mlk_poly, 1, NULL);
-    if (r == NULL || s == NULL)
-    {
-      MLK_FREE(s, mlk_poly, 1, NULL);
-      MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D5, NULL);
-      return 1;
-    }
-    memset((uint8_t *)s, 0, sizeof(mlk_poly));
-    mlk_poly_compress_d5(r, s);
-    MLK_FREE(s, mlk_poly, 1, NULL);
-    MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D5, NULL);
-  }
-
-  {
-    MLK_ALLOC(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D5, NULL);
-    MLK_ALLOC(s, mlk_poly, 1, NULL);
-    if (r == NULL || s == NULL)
-    {
-      MLK_FREE(s, mlk_poly, 1, NULL);
-      MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D5, NULL);
-      return 1;
-    }
-    memset(r, 0, MLKEM_POLYCOMPRESSEDBYTES_D5);
-    mlk_poly_decompress_d5(s, r);
-    MLK_FREE(s, mlk_poly, 1, NULL);
-    MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D5, NULL);
-  }
-
-  {
-    MLK_ALLOC(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D11, NULL);
-    MLK_ALLOC(s, mlk_poly, 1, NULL);
-    if (r == NULL || s == NULL)
-    {
-      MLK_FREE(s, mlk_poly, 1, NULL);
-      MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D11, NULL);
-      return 1;
-    }
-    memset((uint8_t *)s, 0, sizeof(mlk_poly));
-    mlk_poly_compress_d11(r, s);
-    MLK_FREE(s, mlk_poly, 1, NULL);
-    MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D11, NULL);
-  }
-
-  {
-    MLK_ALLOC(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D11, NULL);
-    MLK_ALLOC(s, mlk_poly, 1, NULL);
-    if (r == NULL || s == NULL)
-    {
-      MLK_FREE(s, mlk_poly, 1, NULL);
-      MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D11, NULL);
-      return 1;
-    }
-    memset(r, 0, MLKEM_POLYCOMPRESSEDBYTES_D11);
-    mlk_poly_decompress_d11(s, r);
-    MLK_FREE(s, mlk_poly, 1, NULL);
-    MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D11, NULL);
-  }
-#endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
-
-  return 0;
-}
 
 /* poly_rej_uniform and poly_rej_uniform_4x implement the same
  * functionality with different degrees of batching. This unit
@@ -1138,9 +1235,6 @@ int main(void)
           MLK_USE_NATIVE_POLY_TOBYTES || MLK_USE_NATIVE_POLY_FROMBYTES || \
           MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED ||         \
           MLK_USE_FIPS202_X1_NATIVE || MLK_USE_FIPS202_X4_NATIVE */
-
-  /* Test poly compress no overflow */
-  CHECK(test_poly_compress_no_overflow() == 0);
 
 #if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
   CHECK(test_poly_rej_uniform_consistency() == 0);
