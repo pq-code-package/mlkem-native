@@ -159,3 +159,65 @@ $(call MAKE_OBJS, $(MLKEM512_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_
 $(call MAKE_OBJS, $(MLKEM768_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_CFLAGS)
 $(call MAKE_OBJS, $(MLKEM1024_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_CFLAGS)
 endif
+
+# ABI checker
+ABICHECK_DIR = $(BUILD_DIR)/abicheck
+
+ABICHECK_SOURCES = test/abicheck/abicheck.c test/abicheck/abicheckutil.c
+ABICHECK_SOURCES += test/abicheck/aarch64_callstub.S test/abicheck/x86_64_callstub.S
+ABICHECK_SOURCES += $(wildcard test/abicheck/check_*.c)
+ABICHECK_SOURCES += $(wildcard test/notrandombytes/*.c)
+
+# The assembly under test is exported in standalone, guard-free form into
+# test/abicheck/asm/<arch>/ by scripts/autogen. These files have no #include
+# and no preprocessor guards, so we must only add the kernels for the target
+# architecture.
+ABICHECK_ASM_SOURCES = $(wildcard test/abicheck/asm/$(ARCH)/*.S)
+
+# The exported assembly is guard-free, so the SHA3-dependent AArch64 Keccak
+# variants (v84a) carry their eor3/rax1/... instructions unconditionally. When
+# both the compiler and host support SHA3, build them and add -march=...+sha3 so
+# they assemble (independently of AUTO, which only governs the library's own
+# CFLAGS). Otherwise drop them: without -march they would not assemble, and on a
+# host without SHA3 they would fault at runtime.
+ifeq ($(ARCH),aarch64)
+ifneq ($(MK_COMPILER_SUPPORTS_SHA3)$(MK_HOST_SUPPORTS_SHA3),11)
+# filter-out allows only a single % wildcard, so 'v84a' appearing mid-name is
+# matched with foreach/findstring instead.
+ABICHECK_ASM_SOURCES := $(foreach f,$(ABICHECK_ASM_SOURCES),$(if $(findstring v84a,$(f)),,$(f)))
+endif
+endif
+
+ABICHECK_ALL_SOURCES = $(ABICHECK_SOURCES) $(ABICHECK_ASM_SOURCES)
+ABICHECK_OBJS = $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_ALL_SOURCES))
+
+# The ABI checker is self-contained: the C sources include only sys.h (not
+# common.h), and the assembly under test is the standalone, namespace-
+# concretized export. It therefore needs none of the library configuration
+# (namespace prefix, parameter set, backend selection) on its CFLAGS.
+
+ifeq ($(ARCH),x86_64)
+$(ABICHECK_OBJS): CFLAGS += -mavx2 -mbmi2
+endif
+
+# See above: when the v84a kernels are built, they need SHA3 enabled to
+# assemble. This is added by the ABI checker itself rather than relying on
+# auto.mk, which only sets it under AUTO=1.
+ifeq ($(ARCH),aarch64)
+ifeq ($(MK_COMPILER_SUPPORTS_SHA3)$(MK_HOST_SUPPORTS_SHA3),11)
+$(ABICHECK_OBJS): CFLAGS += -march=armv8.4-a+sha3
+endif
+endif
+
+# Platform support objects (e.g. the bare-metal startup providing _start and the
+# semihosting runtime). EXTRA_SOURCES is set by a platform makefile (see
+# test/baremetal/platform/*/platform.mk via EXTRA_MAKEFILE); empty for native
+# builds. Like the other test binaries, the ABI checker must link these or it has
+# no entry point on bare metal. The platform's LDSCRIPT is already applied via
+# LDFLAGS in the link rule.
+ABICHECK_EXTRA_OBJS = $(call MAKE_OBJS,$(ABICHECK_DIR),$(EXTRA_SOURCES))
+ifneq ($(EXTRA_SOURCES),)
+$(ABICHECK_EXTRA_OBJS): CFLAGS += $(EXTRA_SOURCES_CFLAGS)
+endif
+
+$(ABICHECK_DIR)/bin/abicheck: $(ABICHECK_OBJS) $(ABICHECK_EXTRA_OBJS)

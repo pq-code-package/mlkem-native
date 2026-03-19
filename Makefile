@@ -17,7 +17,7 @@
 	clean quickcheck check-defined-CYCLES \
 	size_512 size_768 size_1024 size \
 	run_size_512 run_size_768 run_size_1024 run_size \
-	host_info
+	host_info abicheck run_abicheck
 
 SHELL := /usr/bin/env bash
 .DEFAULT_GOAL := build
@@ -46,7 +46,7 @@ quickcheck: test
 build: func kat acvp wycheproof
 	$(Q)echo "  Everything builds fine!"
 
-test: run_kat run_func run_acvp run_wycheproof run_unit run_alloc run_rng_fail
+test: run_kat run_func run_acvp run_wycheproof run_unit run_alloc run_rng_fail run_abicheck
 	$(Q)echo "  Everything checks fine!"
 
 # Detect available SHA256 command
@@ -250,6 +250,30 @@ run_size: \
 	run_size_512 \
 	run_size_768 \
 	run_size_1024
+
+# The ABI checker only has checks for architectures with assembly backends whose
+# calling convention it knows how to verify. On any other target (e.g. the
+# Armv8.1-M / AVR bare-metal platforms) it has no checks, so building and running
+# it there is pointless - and would require wiring up that target's startup and
+# C library. It is also not supported on Windows (calling convention mismatch).
+MK_ABICHECK_SUPPORTED :=
+ifeq ($(OPT),1)
+ifeq ($(findstring MINGW,$(HOST_PLATFORM))$(findstring Windows,$(HOST_PLATFORM)),)
+ifneq ($(filter $(ARCH),aarch64 x86_64),)
+MK_ABICHECK_SUPPORTED := 1
+endif
+endif
+endif
+
+ifeq ($(MK_ABICHECK_SUPPORTED),1)
+abicheck: $(ABICHECK_DIR)/bin/abicheck
+
+run_abicheck: abicheck
+	$(W) $(ABICHECK_DIR)/bin/abicheck
+else
+abicheck:
+run_abicheck:
+endif
 
 # Display host and compiler feature detection information
 # Shows which architectural features are supported by both the compiler and host CPU
