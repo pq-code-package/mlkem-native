@@ -6,6 +6,31 @@
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+/*yaml
+  Name: poly_mulcache_compute_avx2
+  Description: x86_64 AVX2 mulcache computation
+  Signature: void mlk_poly_mulcache_compute_avx2(int16_t *out, const int16_t *in, const int16_t *qdata)
+  ABI:
+    rdi:
+      type: buffer
+      size_bytes: 256
+      permissions: write-only
+      c_parameter: int16_t *out
+      description: Output mulcache (128 x int16_t)
+    rsi:
+      type: buffer
+      size_bytes: 512
+      permissions: read-only
+      c_parameter: const int16_t *in
+      description: Input polynomial (256 x int16_t)
+    rdx:
+      type: buffer
+      size_bytes: 1248
+      permissions: read-only
+      c_parameter: const int16_t *qdata
+      description: Precomputed constants (624 x int16_t)
+*/
+
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file

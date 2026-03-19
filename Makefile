@@ -17,7 +17,7 @@
 	clean quickcheck check-defined-CYCLES \
 	size_512 size_768 size_1024 size \
 	run_size_512 run_size_768 run_size_1024 run_size \
-	host_info
+	host_info abicheck run_abicheck
 
 SHELL := /usr/bin/env bash
 .DEFAULT_GOAL := build
@@ -46,7 +46,7 @@ quickcheck: test
 build: func kat acvp wycheproof
 	$(Q)echo "  Everything builds fine!"
 
-test: run_kat run_func run_acvp run_wycheproof run_unit run_alloc run_rng_fail
+test: run_kat run_func run_acvp run_wycheproof run_unit run_alloc run_rng_fail run_abicheck
 	$(Q)echo "  Everything checks fine!"
 
 # Detect available SHA256 command
@@ -250,6 +250,22 @@ run_size: \
 	run_size_512 \
 	run_size_768 \
 	run_size_1024
+
+ifeq ($(OPT),1)
+# ABI checker is not supported on Windows (calling convention mismatch)
+ifeq ($(findstring MINGW,$(HOST_PLATFORM))$(findstring Windows,$(HOST_PLATFORM)),)
+abicheck: $(ABICHECK_DIR)/bin/abicheck
+
+run_abicheck: abicheck
+	$(W) $(ABICHECK_DIR)/bin/abicheck
+else
+abicheck:
+run_abicheck:
+endif
+else
+abicheck:
+run_abicheck:
+endif
 
 # Display host and compiler feature detection information
 # Shows which architectural features are supported by both the compiler and host CPU

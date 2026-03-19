@@ -22,6 +22,36 @@
 
 #if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+/*yaml
+  Name: rej_uniform_asm
+  Description: x86_64 AVX2 rejection sampling
+  Signature: uint64_t mlk_rej_uniform_asm(int16_t *r, const uint8_t *buf, unsigned buflen, const uint8_t *table)
+  ABI:
+    rdi:
+      type: buffer
+      size_bytes: 512
+      permissions: write-only
+      c_parameter: int16_t *r
+      description: Output buffer (256 x int16_t)
+    rsi:
+      type: buffer
+      size_bytes: rdx
+      permissions: read-only
+      c_parameter: const uint8_t *buf
+      description: Input buffer
+    rdx:
+      type: scalar
+      c_parameter: unsigned buflen
+      description: Length of input buffer (must be multiple of 12)
+      test_with: 504
+    rcx:
+      type: buffer
+      size_bytes: 4096
+      permissions: read-only
+      c_parameter: const uint8_t *table
+      description: Lookup table
+*/
+
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file

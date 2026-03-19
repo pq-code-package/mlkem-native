@@ -25,6 +25,19 @@
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+/*yaml
+  Name: tomont_avx2
+  Description: x86_64 AVX2 Montgomery conversion
+  Signature: void mlk_tomont_avx2(int16_t *r)
+  ABI:
+    rdi:
+      type: buffer
+      size_bytes: 512
+      permissions: read/write
+      c_parameter: int16_t *r
+      description: Input/output polynomial (256 x int16_t)
+*/
+
 /* simpasm: header-end */
 
 #include "consts.h"

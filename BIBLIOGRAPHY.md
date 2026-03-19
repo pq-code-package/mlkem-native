@@ -191,6 +191,8 @@ source code and documentation.
   - [proofs/hol_light/README.md](proofs/hol_light/README.md)
   - [proofs/hol_light/aarch64/mlkem/keccak_f1600_x1_v84a_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/keccak_f1600_x1_v84a_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mlkem/keccak_f1600_x2_v84a_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/keccak_f1600_x2_v84a_aarch64_asm.S)
+  - [test/abicheck/asm/aarch64/keccak_f1600_x1_v84a_aarch64_asm.S](test/abicheck/asm/aarch64/keccak_f1600_x1_v84a_aarch64_asm.S)
+  - [test/abicheck/asm/aarch64/keccak_f1600_x2_v84a_aarch64_asm.S](test/abicheck/asm/aarch64/keccak_f1600_x2_v84a_aarch64_asm.S)
 
 ### `KyberSlash`
 
@@ -247,6 +249,11 @@ source code and documentation.
   - [proofs/hol_light/aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S)
+  - [test/abicheck/asm/aarch64/intt_aarch64_asm.S](test/abicheck/asm/aarch64/intt_aarch64_asm.S)
+  - [test/abicheck/asm/aarch64/ntt_aarch64_asm.S](test/abicheck/asm/aarch64/ntt_aarch64_asm.S)
+  - [test/abicheck/asm/aarch64/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S](test/abicheck/asm/aarch64/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S)
+  - [test/abicheck/asm/aarch64/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S](test/abicheck/asm/aarch64/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S)
+  - [test/abicheck/asm/aarch64/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S](test/abicheck/asm/aarch64/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S)
 
 ### `REF`
 
@@ -373,6 +380,8 @@ source code and documentation.
   - [mlkem/src/native/aarch64/src/ntt_aarch64_asm.S](mlkem/src/native/aarch64/src/ntt_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mlkem/intt_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/intt_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mlkem/ntt_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/ntt_aarch64_asm.S)
+  - [test/abicheck/asm/aarch64/intt_aarch64_asm.S](test/abicheck/asm/aarch64/intt_aarch64_asm.S)
+  - [test/abicheck/asm/aarch64/ntt_aarch64_asm.S](test/abicheck/asm/aarch64/ntt_aarch64_asm.S)
 
 ### `clangover`
 

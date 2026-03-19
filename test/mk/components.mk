@@ -159,3 +159,50 @@ $(call MAKE_OBJS, $(MLKEM512_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_
 $(call MAKE_OBJS, $(MLKEM768_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_CFLAGS)
 $(call MAKE_OBJS, $(MLKEM1024_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_CFLAGS)
 endif
+
+# ABI checker
+ABICHECK_DIR = $(BUILD_DIR)/abicheck
+
+ABICHECK_SOURCES = test/abicheck/abicheck.c test/abicheck/abicheckutil.c
+ABICHECK_SOURCES += test/abicheck/aarch64_callstub.S test/abicheck/x86_64_callstub.S
+ABICHECK_SOURCES += $(wildcard test/abicheck/check_*.c)
+ABICHECK_SOURCES += $(wildcard test/notrandombytes/*.c)
+
+# The assembly under test is exported in standalone, guard-free form into
+# test/abicheck/asm/<arch>/ by scripts/autogen. These files have no #include
+# and no preprocessor guards, and their global symbols are already namespaced
+# to mlk_*, so the ABI checker assembles them directly - no backends.h shim, no
+# backend-selection defines, no constant-data C files.
+ABICHECK_ASM_SOURCES = $(wildcard test/abicheck/asm/$(ARCH)/*.S)
+
+# Because the exported assembly is guard-free, the SHA3-dependent AArch64 Keccak
+# variants (v84a) now carry their eor3/rax1/... instructions unconditionally,
+# whereas the dev sources gate them behind __ARM_FEATURE_SHA3. The generated
+# check_*.c files keep that same #if defined(__ARM_FEATURE_SHA3) guard, so a
+# check references its assembly symbol exactly when the compiler has SHA3 in
+# effect. Gate the assembly inclusion on the very same predefine - tested under
+# the actual CFLAGS the checks are compiled with - so the two never disagree
+# (auto.mk adds -march=...+sha3 to CFLAGS when supported, and some compilers,
+# e.g. Apple clang on Apple silicon, predefine __ARM_FEATURE_SHA3 regardless).
+ifeq ($(ARCH),aarch64)
+MK_ABICHECK_FEATURE_SHA3 := $(shell echo | $(CC) $(CFLAGS) -dM -E -x c - 2>/dev/null | grep -c __ARM_FEATURE_SHA3)
+ifeq ($(MK_ABICHECK_FEATURE_SHA3),0)
+# filter-out allows only a single % wildcard, so 'v84a' appearing mid-name is
+# matched with foreach/findstring instead.
+ABICHECK_ASM_SOURCES := $(foreach f,$(ABICHECK_ASM_SOURCES),$(if $(findstring v84a,$(f)),,$(f)))
+endif
+endif
+
+ABICHECK_ALL_SOURCES = $(ABICHECK_SOURCES) $(ABICHECK_ASM_SOURCES)
+ABICHECK_OBJS = $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_ALL_SOURCES))
+
+# The driver and check C files include mlkem/src/sys.h and common.h, which need
+# a namespace prefix and parameter set. The exported assembly needs neither.
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlk
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
+
+ifeq ($(ARCH),x86_64)
+$(ABICHECK_OBJS): CFLAGS += -mavx2 -mbmi2
+endif
+
+$(ABICHECK_DIR)/bin/abicheck: $(ABICHECK_OBJS)
