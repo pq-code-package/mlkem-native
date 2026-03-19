@@ -4159,6 +4159,237 @@ def gen_test_configs():
         gen_test_config(config_spec["path"], config_spec, default_config)
 
 
+def extract_yaml_from_assembly(assembly_file):
+    """Extract YAML metadata from assembly file."""
+    with open(assembly_file, "r") as f:
+        content = f.read()
+
+    yaml_match = re.search(r"/\*yaml\s*\n(.*?)\n\*/", content, re.DOTALL)
+    if not yaml_match:
+        raise ValueError(f"No YAML metadata found in {assembly_file}")
+
+    return yaml.safe_load(yaml_match.group(1))
+
+
+def extract_arch_flags_from_assembly(assembly_file):
+    """Extract architecture-specific preprocessor flags from assembly file."""
+    with open(assembly_file, "r") as f:
+        content = f.read()
+
+    arch_flags = []
+    if re.search(r"#if\s+defined\(__ARM_FEATURE_SHA3\)", content):
+        arch_flags.append("__ARM_FEATURE_SHA3")
+    return arch_flags
+
+
+def resolve_buffer_size(reg_info, abi_data):
+    """Resolve buffer size from register info, handling cross-references."""
+    size = reg_info.get("size_bytes")
+    if isinstance(size, str):
+        if size in abi_data:
+            ref_reg = abi_data[size]
+            if ref_reg.get("type") == "scalar" and "test_with" in ref_reg:
+                return ref_reg["test_with"]
+            raise ValueError(
+                f"Buffer {reg_info} references non-scalar register {size}"
+            )
+        return int(size)
+    elif isinstance(size, int):
+        return size
+    raise ValueError(f"Cannot resolve buffer size from {reg_info}")
+
+
+def gen_abicheck():
+    """Generate ABI checker tests for all aarch64 assembly functions."""
+
+    base_path = pathlib.Path(".")
+    patterns = [
+        "mlkem/src/fips202/native/aarch64/src/*.S",
+        "mlkem/src/native/aarch64/src/*.S",
+    ]
+
+    aarch64_asm_files = []
+    for pattern in patterns:
+        aarch64_asm_files.extend(base_path.glob(pattern))
+
+    if not aarch64_asm_files:
+        return
+
+    aarch64_asm_files = sorted(str(f) for f in aarch64_asm_files)
+    generated_functions = []
+
+    for assembly_file in aarch64_asm_files:
+        yaml_data = extract_yaml_from_assembly(assembly_file)
+        arch_flags = extract_arch_flags_from_assembly(assembly_file)
+
+        function_name = yaml_data.get("Name")
+        c_function_name = "mlk_" + function_name
+
+        def gen_c_test(function_name=function_name, c_function_name=c_function_name,
+                       yaml_data=yaml_data, arch_flags=arch_flags):
+            yield from gen_header()
+            yield '#include "../../mlkem/src/sys.h"'
+            yield ""
+            yield "#if defined(MLK_SYS_AARCH64)"
+            yield ""
+
+            for flag in arch_flags:
+                yield f"#if defined({flag})"
+                yield ""
+
+            yield "#include <stdio.h>"
+            yield "#include <string.h>"
+            yield ""
+            yield '#include "../notrandombytes/notrandombytes.h"'
+            yield '#include "abicheckutil.h"'
+            yield '#include "checks_all.h"'
+            yield ""
+            yield "typedef struct register_state register_state;"
+            yield ""
+            yield "#define NUM_TESTS 3"
+            yield ""
+            yield yaml_data.get("Signature") + ";"
+            yield ""
+            yield f"int check_{function_name}(void)"
+            yield "{"
+
+            yield "  int test_iter;"
+            yield "  register_state input_state, output_state;"
+            yield "  int violations;"
+
+            abi_data = yaml_data.get("ABI", {})
+            sorted_registers = sorted(abi_data.items())
+
+            buffer_info = []
+            for reg_name, reg_info in sorted_registers:
+                if reg_info.get("type") == "buffer":
+                    size_bytes = resolve_buffer_size(reg_info, abi_data)
+                    buffer_name = f"buf_{reg_name}"
+                    description = reg_info.get("description", "")
+                    yield f"  MLK_ALIGN uint8_t {buffer_name}[{size_bytes}]; /* {description} */"
+                    buffer_info.append((reg_name, buffer_name, size_bytes))
+
+            yield ""
+            yield "  for (test_iter = 0; test_iter < NUM_TESTS; test_iter++)"
+            yield "  {"
+            yield "    /* Initialize random register state */"
+            yield "    init_random_register_state(&input_state);"
+            yield ""
+
+            for reg_name, buffer_name, size_bytes in buffer_info:
+                yield f"    /* Initialize buffer for {reg_name} */"
+                yield f"    randombytes({buffer_name}, {size_bytes});"
+
+            yield ""
+            yield "    /* Set up register state for function arguments */"
+
+            for reg_name, reg_info in sorted_registers:
+                reg_num = int(reg_name[1:])
+                if reg_info.get("type") == "buffer":
+                    yield f"    input_state.gpr[{reg_num}] = (uint64_t){f'buf_{reg_name}'};"
+                elif reg_info.get("type") == "scalar":
+                    test_with = reg_info.get("test_with")
+                    if test_with:
+                        yield f"    input_state.gpr[{reg_num}] = {test_with};"
+
+            yield ""
+            yield "    /* Call function through ABI test stub */"
+            yield f"    asm_call_stub(&input_state, &output_state, (void (*)(void)){c_function_name});"
+            yield ""
+            yield "    /* Check ABI compliance */"
+            yield "    violations = check_aarch64_aapcs_compliance(&input_state, &output_state);"
+            yield "    if (violations > 0) {"
+            yield f'      fprintf(stderr, "ABI test FAILED for {function_name} (iteration %d): %d violations\\n",'
+            yield "             test_iter + 1, violations);"
+            yield "      return 1;"
+            yield "    }"
+            yield "  }"
+            yield ""
+            yield "  return 0;"
+            yield "}"
+            yield ""
+
+            for flag in reversed(arch_flags):
+                yield f"#else /* !{flag} */"
+                yield ""
+                yield '#include "../../mlkem/src/common.h"'
+                yield f"MLK_EMPTY_CU(check_{function_name})"
+                yield ""
+                yield f"#endif /* {flag} */"
+                yield ""
+
+            yield "#else /* !MLK_SYS_AARCH64 */"
+            yield ""
+            yield '#include "../../mlkem/src/common.h"'
+            yield f"MLK_EMPTY_CU(check_{function_name})"
+            yield ""
+            yield "#endif /* MLK_SYS_AARCH64 */"
+            yield ""
+
+        output_file = f"test/abicheck/check_{function_name}.c"
+        update_file(output_file, "\n".join(gen_c_test()), force_format=True)
+        generated_functions.append((function_name, arch_flags))
+
+    # Generate checks_all.h
+    def gen_checks_all_header():
+        yield from gen_header()
+        yield ""
+        yield "#ifndef CHECKS_ALL_H"
+        yield "#define CHECKS_ALL_H"
+        yield ""
+        yield "#include <stddef.h>"
+        yield '#include "../../mlkem/src/sys.h"'
+        yield ""
+        yield "/* Array of all check functions */"
+        yield "typedef struct"
+        yield "{"
+        yield "  const char *name;"
+        yield "  int (*check_func)(void);"
+        yield "} abicheck_entry_t;"
+        yield ""
+        yield "#if defined(MLK_SYS_AARCH64)"
+        yield ""
+        yield "/* Function prototypes for all ABI checks (only on AArch64) */"
+
+        for func_name, arch_flags in generated_functions:
+            for flag in arch_flags:
+                yield f"#if defined({flag})"
+            yield f"int check_{func_name}(void);"
+            for flag in reversed(arch_flags):
+                yield f"#endif"
+
+        yield ""
+        yield "static const abicheck_entry_t all_checks[] = {"
+
+        for func_name, arch_flags in generated_functions:
+            for flag in arch_flags:
+                yield f"#if defined({flag})"
+            yield f'    {{"{func_name}", check_{func_name}}},'
+            for flag in reversed(arch_flags):
+                yield f"#endif"
+
+        yield "    {NULL, NULL} /* Sentinel */"
+        yield "};"
+        yield ""
+        yield "#else /* !MLK_SYS_AARCH64 */"
+        yield ""
+        yield "/* Empty array for non-AArch64 platforms */"
+        yield "static const abicheck_entry_t all_checks[] = {"
+        yield "    {NULL, NULL} /* Sentinel */"
+        yield "};"
+        yield ""
+        yield "#endif /* MLK_SYS_AARCH64 */"
+        yield ""
+        yield "#endif /* CHECKS_ALL_H */"
+        yield ""
+
+    update_file(
+        "test/abicheck/checks_all.h",
+        "\n".join(gen_checks_all_header()),
+        force_format=True,
+    )
+
+
 def _main():
     slothy_choices = [
         "ntt",
@@ -4277,6 +4508,7 @@ def _main():
         ("Generate undefs", gen_undefs),
         ("Generate test configs", gen_test_configs),
         ("Check macro typos", check_macro_typos),
+        ("Generate ABI checker tests", gen_abicheck),
         ("Generate preprocessor comments", gen_preprocessor_comments),
         # Formatting should be the last step
         ("Format files", lambda: format_files(args.dry_run)),
