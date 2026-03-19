@@ -27,6 +27,7 @@
 #include "debug.h"
 #include "sampling.h"
 #include "symmetric.h"
+#include "stdio.h"
 
 /* Parameter set namespacing
  * This is to facilitate building multiple instances
@@ -112,6 +113,7 @@ void mlk_polyvec_ntt(mlk_polyvec *r)
   unsigned i;
   for (i = 0; i < MLKEM_K; i++)
   {
+    printf("DEBUG: %s:%d in %s()\n", __FILE__, __LINE__, __func__);
     mlk_poly_ntt(&r->vec[i]);
   }
 
