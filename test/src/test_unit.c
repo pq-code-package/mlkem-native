@@ -273,17 +273,29 @@ static int compare_i16_arrays(const int16_t *a, const int16_t *b, unsigned len,
 #ifdef MLK_USE_NATIVE_POLY_REDUCE
 static int test_poly_reduce_core(const int16_t *input, const char *test_name)
 {
-  mlk_poly test_poly, ref_poly;
+  int ret = 1;
+  MLK_ALLOC(test_poly, mlk_poly, 1, NULL);
+  MLK_ALLOC(ref_poly, mlk_poly, 1, NULL);
 
-  memcpy(test_poly.coeffs, input, MLKEM_N * sizeof(int16_t));
-  memcpy(ref_poly.coeffs, input, MLKEM_N * sizeof(int16_t));
+  if (test_poly == NULL || ref_poly == NULL)
+  {
+    goto cleanup;
+  }
 
-  mlk_poly_reduce(&test_poly);
-  mlk_poly_reduce_c(&ref_poly);
+  memcpy(test_poly->coeffs, input, MLKEM_N * sizeof(int16_t));
+  memcpy(ref_poly->coeffs, input, MLKEM_N * sizeof(int16_t));
 
-  CHECK(compare_i16_arrays(test_poly.coeffs, ref_poly.coeffs, MLKEM_N,
+  mlk_poly_reduce(test_poly);
+  mlk_poly_reduce_c(ref_poly);
+
+  CHECK(compare_i16_arrays(test_poly->coeffs, ref_poly->coeffs, MLKEM_N,
                            test_name, NULL));
-  return 0;
+  ret = 0;
+
+cleanup:
+  MLK_FREE(ref_poly, mlk_poly, 1, NULL);
+  MLK_FREE(test_poly, mlk_poly, 1, NULL);
+  return ret;
 }
 
 static int test_native_poly_reduce(void)
@@ -313,21 +325,33 @@ static int test_native_poly_reduce(void)
 #ifdef MLK_USE_NATIVE_POLY_TOMONT
 static int test_poly_tomont_core(const int16_t *input, const char *test_name)
 {
-  mlk_poly test_poly, ref_poly;
+  int ret = 1;
+  MLK_ALLOC(test_poly, mlk_poly, 1, NULL);
+  MLK_ALLOC(ref_poly, mlk_poly, 1, NULL);
 
-  memcpy(test_poly.coeffs, input, MLKEM_N * sizeof(int16_t));
-  memcpy(ref_poly.coeffs, input, MLKEM_N * sizeof(int16_t));
+  if (test_poly == NULL || ref_poly == NULL)
+  {
+    goto cleanup;
+  }
 
-  mlk_poly_tomont(&test_poly);
-  mlk_poly_tomont_c(&ref_poly);
+  memcpy(test_poly->coeffs, input, MLKEM_N * sizeof(int16_t));
+  memcpy(ref_poly->coeffs, input, MLKEM_N * sizeof(int16_t));
+
+  mlk_poly_tomont(test_poly);
+  mlk_poly_tomont_c(ref_poly);
 
   /* Normalize */
-  mlk_poly_reduce_c(&ref_poly);
-  mlk_poly_reduce_c(&test_poly);
+  mlk_poly_reduce_c(ref_poly);
+  mlk_poly_reduce_c(test_poly);
 
-  CHECK(compare_i16_arrays(test_poly.coeffs, ref_poly.coeffs, MLKEM_N,
+  CHECK(compare_i16_arrays(test_poly->coeffs, ref_poly->coeffs, MLKEM_N,
                            test_name, NULL));
-  return 0;
+  ret = 0;
+
+cleanup:
+  MLK_FREE(ref_poly, mlk_poly, 1, NULL);
+  MLK_FREE(test_poly, mlk_poly, 1, NULL);
+  return ret;
 }
 
 static int test_native_poly_tomont(void)
@@ -357,25 +381,37 @@ static int test_native_poly_tomont(void)
 #ifdef MLK_USE_NATIVE_NTT
 static int test_ntt_core(const int16_t *input, const char *test_name)
 {
-  mlk_poly test_poly, ref_poly;
+  int ret = 1;
+  MLK_ALLOC(test_poly, mlk_poly, 1, NULL);
+  MLK_ALLOC(ref_poly, mlk_poly, 1, NULL);
 
-  memcpy(test_poly.coeffs, input, MLKEM_N * sizeof(int16_t));
-  memcpy(ref_poly.coeffs, input, MLKEM_N * sizeof(int16_t));
+  if (test_poly == NULL || ref_poly == NULL)
+  {
+    goto cleanup;
+  }
 
-  mlk_poly_ntt(&test_poly);
-  mlk_poly_ntt_c(&ref_poly);
+  memcpy(test_poly->coeffs, input, MLKEM_N * sizeof(int16_t));
+  memcpy(ref_poly->coeffs, input, MLKEM_N * sizeof(int16_t));
+
+  mlk_poly_ntt(test_poly);
+  mlk_poly_ntt_c(ref_poly);
 
 #ifdef MLK_USE_NATIVE_NTT_CUSTOM_ORDER
-  mlk_poly_permute_bitrev_to_custom(ref_poly.coeffs);
+  mlk_poly_permute_bitrev_to_custom(ref_poly->coeffs);
 #endif
 
   /* Normalize */
-  mlk_poly_reduce_c(&ref_poly);
-  mlk_poly_reduce_c(&test_poly);
+  mlk_poly_reduce_c(ref_poly);
+  mlk_poly_reduce_c(test_poly);
 
-  CHECK(compare_i16_arrays(test_poly.coeffs, ref_poly.coeffs, MLKEM_N,
+  CHECK(compare_i16_arrays(test_poly->coeffs, ref_poly->coeffs, MLKEM_N,
                            test_name, input));
-  return 0;
+  ret = 0;
+
+cleanup:
+  MLK_FREE(ref_poly, mlk_poly, 1, NULL);
+  MLK_FREE(test_poly, mlk_poly, 1, NULL);
+  return ret;
 }
 
 static int test_native_ntt(void)
@@ -405,25 +441,37 @@ static int test_native_ntt(void)
 #ifdef MLK_USE_NATIVE_INTT
 static int test_intt_core(const int16_t *input, const char *test_name)
 {
-  mlk_poly test_poly, ref_poly;
+  int ret = 1;
+  MLK_ALLOC(test_poly, mlk_poly, 1, NULL);
+  MLK_ALLOC(ref_poly, mlk_poly, 1, NULL);
 
-  memcpy(test_poly.coeffs, input, MLKEM_N * sizeof(int16_t));
-  memcpy(ref_poly.coeffs, input, MLKEM_N * sizeof(int16_t));
+  if (test_poly == NULL || ref_poly == NULL)
+  {
+    goto cleanup;
+  }
+
+  memcpy(test_poly->coeffs, input, MLKEM_N * sizeof(int16_t));
+  memcpy(ref_poly->coeffs, input, MLKEM_N * sizeof(int16_t));
 
 #ifdef MLK_USE_NATIVE_NTT_CUSTOM_ORDER
-  mlk_poly_permute_bitrev_to_custom(test_poly.coeffs);
+  mlk_poly_permute_bitrev_to_custom(test_poly->coeffs);
 #endif
 
-  mlk_poly_invntt_tomont(&test_poly);
-  mlk_poly_invntt_tomont_c(&ref_poly);
+  mlk_poly_invntt_tomont(test_poly);
+  mlk_poly_invntt_tomont_c(ref_poly);
 
   /* Normalize */
-  mlk_poly_reduce_c(&ref_poly);
-  mlk_poly_reduce_c(&test_poly);
+  mlk_poly_reduce_c(ref_poly);
+  mlk_poly_reduce_c(test_poly);
 
-  CHECK(compare_i16_arrays(test_poly.coeffs, ref_poly.coeffs, MLKEM_N,
+  CHECK(compare_i16_arrays(test_poly->coeffs, ref_poly->coeffs, MLKEM_N,
                            test_name, input));
-  return 0;
+  ret = 0;
+
+cleanup:
+  MLK_FREE(ref_poly, mlk_poly, 1, NULL);
+  MLK_FREE(test_poly, mlk_poly, 1, NULL);
+  return ret;
 }
 
 static int test_native_intt(void)
@@ -480,21 +528,37 @@ static int test_native_intt(void)
 #ifdef MLK_USE_NATIVE_POLY_TOBYTES
 static int test_poly_tobytes_core(const int16_t *input, const char *test_name)
 {
-  uint8_t test_result[MLKEM_POLYBYTES], ref_result[MLKEM_POLYBYTES];
-  mlk_poly test_poly, ref_poly;
+  int ret = 1;
+  MLK_ALLOC(test_result, uint8_t, MLKEM_POLYBYTES, NULL);
+  MLK_ALLOC(ref_result, uint8_t, MLKEM_POLYBYTES, NULL);
+  MLK_ALLOC(test_poly, mlk_poly, 1, NULL);
+  MLK_ALLOC(ref_poly, mlk_poly, 1, NULL);
 
-  memcpy(test_poly.coeffs, input, MLKEM_N * sizeof(int16_t));
-  memcpy(ref_poly.coeffs, input, MLKEM_N * sizeof(int16_t));
+  if (test_result == NULL || ref_result == NULL || test_poly == NULL ||
+      ref_poly == NULL)
+  {
+    goto cleanup;
+  }
+
+  memcpy(test_poly->coeffs, input, MLKEM_N * sizeof(int16_t));
+  memcpy(ref_poly->coeffs, input, MLKEM_N * sizeof(int16_t));
 
 #ifdef MLK_USE_NATIVE_NTT_CUSTOM_ORDER
-  mlk_poly_permute_bitrev_to_custom(test_poly.coeffs);
+  mlk_poly_permute_bitrev_to_custom(test_poly->coeffs);
 #endif
 
-  mlk_poly_tobytes(test_result, &test_poly);
-  mlk_poly_tobytes_c(ref_result, &ref_poly);
+  mlk_poly_tobytes(test_result, test_poly);
+  mlk_poly_tobytes_c(ref_result, ref_poly);
 
   CHECK(compare_u8_arrays(test_result, ref_result, MLKEM_POLYBYTES, test_name));
-  return 1;
+  ret = 0;
+
+cleanup:
+  MLK_FREE(ref_poly, mlk_poly, 1, NULL);
+  MLK_FREE(test_poly, mlk_poly, 1, NULL);
+  MLK_FREE(ref_result, uint8_t, MLKEM_POLYBYTES, NULL);
+  MLK_FREE(test_result, uint8_t, MLKEM_POLYBYTES, NULL);
+  return ret;
 }
 
 static int test_native_poly_tobytes(void)
@@ -503,18 +567,18 @@ static int test_native_poly_tobytes(void)
   int pos, i;
 
   generate_i16_array_zeros(test_data, MLKEM_N);
-  CHECK(test_poly_tobytes_core(test_data, "poly_tobytes_zeros") == 1);
+  CHECK(test_poly_tobytes_core(test_data, "poly_tobytes_zeros") == 0);
 
   for (pos = 0; pos < MLKEM_N; pos += MLKEM_N / 8)
   {
     generate_i16_array_single(test_data, MLKEM_N, (size_t)pos, 1);
-    CHECK(test_poly_tobytes_core(test_data, "poly_tobytes_single") == 1);
+    CHECK(test_poly_tobytes_core(test_data, "poly_tobytes_single") == 0);
   }
 
   for (i = 0; i < NUM_RANDOM_TESTS; i++)
   {
     generate_i16_array_ranged(test_data, MLKEM_N, 0, MLKEM_Q);
-    CHECK(test_poly_tobytes_core(test_data, "poly_tobytes_random") == 1);
+    CHECK(test_poly_tobytes_core(test_data, "poly_tobytes_random") == 0);
   }
 
   return 0;
@@ -525,18 +589,30 @@ static int test_native_poly_tobytes(void)
 static int test_poly_frombytes_core(const uint8_t *input_bytes,
                                     const char *test_name)
 {
-  mlk_poly test_poly, ref_poly;
+  int ret = 1;
+  MLK_ALLOC(test_poly, mlk_poly, 1, NULL);
+  MLK_ALLOC(ref_poly, mlk_poly, 1, NULL);
 
-  mlk_poly_frombytes(&test_poly, input_bytes);
-  mlk_poly_frombytes_c(&ref_poly, input_bytes);
+  if (test_poly == NULL || ref_poly == NULL)
+  {
+    goto cleanup;
+  }
+
+  mlk_poly_frombytes(test_poly, input_bytes);
+  mlk_poly_frombytes_c(ref_poly, input_bytes);
 
 #ifdef MLK_USE_NATIVE_NTT_CUSTOM_ORDER
-  mlk_poly_permute_bitrev_to_custom(ref_poly.coeffs);
+  mlk_poly_permute_bitrev_to_custom(ref_poly->coeffs);
 #endif
 
-  CHECK(compare_i16_arrays(test_poly.coeffs, ref_poly.coeffs, MLKEM_N,
+  CHECK(compare_i16_arrays(test_poly->coeffs, ref_poly->coeffs, MLKEM_N,
                            test_name, NULL));
-  return 0;
+  ret = 0;
+
+cleanup:
+  MLK_FREE(ref_poly, mlk_poly, 1, NULL);
+  MLK_FREE(test_poly, mlk_poly, 1, NULL);
+  return ret;
 }
 
 static int test_native_poly_frombytes(void)
@@ -574,44 +650,68 @@ static int test_native_poly_frombytes(void)
 static int test_polyvec_basemul_core(const int16_t *a, const int16_t *b,
                                      const char *test_name)
 {
-  mlk_poly test_result, ref_result;
-  mlk_polyvec test_a, test_b, ref_a, ref_b;
-  mlk_polyvec_mulcache test_cache, ref_cache;
+  int ret = 1;
   int i;
+  MLK_ALLOC(test_result, mlk_poly, 1, NULL);
+  MLK_ALLOC(ref_result, mlk_poly, 1, NULL);
+  MLK_ALLOC(test_a, mlk_polyvec, 1, NULL);
+  MLK_ALLOC(test_b, mlk_polyvec, 1, NULL);
+  MLK_ALLOC(ref_a, mlk_polyvec, 1, NULL);
+  MLK_ALLOC(ref_b, mlk_polyvec, 1, NULL);
+  MLK_ALLOC(test_cache, mlk_polyvec_mulcache, 1, NULL);
+  MLK_ALLOC(ref_cache, mlk_polyvec_mulcache, 1, NULL);
+
+  if (test_result == NULL || ref_result == NULL || test_a == NULL ||
+      test_b == NULL || ref_a == NULL || ref_b == NULL || test_cache == NULL ||
+      ref_cache == NULL)
+  {
+    goto cleanup;
+  }
 
   /* Copy test data to structures */
   for (i = 0; i < MLKEM_K; i++)
   {
-    memcpy(test_a.vec[i].coeffs, &a[i * MLKEM_N], MLKEM_N * sizeof(int16_t));
-    memcpy(test_b.vec[i].coeffs, &b[i * MLKEM_N], MLKEM_N * sizeof(int16_t));
-    memcpy(ref_a.vec[i].coeffs, &a[i * MLKEM_N], MLKEM_N * sizeof(int16_t));
-    memcpy(ref_b.vec[i].coeffs, &b[i * MLKEM_N], MLKEM_N * sizeof(int16_t));
+    memcpy(test_a->vec[i].coeffs, &a[i * MLKEM_N], MLKEM_N * sizeof(int16_t));
+    memcpy(test_b->vec[i].coeffs, &b[i * MLKEM_N], MLKEM_N * sizeof(int16_t));
+    memcpy(ref_a->vec[i].coeffs, &a[i * MLKEM_N], MLKEM_N * sizeof(int16_t));
+    memcpy(ref_b->vec[i].coeffs, &b[i * MLKEM_N], MLKEM_N * sizeof(int16_t));
 
 #ifdef MLK_USE_NATIVE_NTT_CUSTOM_ORDER
-    mlk_poly_permute_bitrev_to_custom(test_a.vec[i].coeffs);
-    mlk_poly_permute_bitrev_to_custom(test_b.vec[i].coeffs);
+    mlk_poly_permute_bitrev_to_custom(test_a->vec[i].coeffs);
+    mlk_poly_permute_bitrev_to_custom(test_b->vec[i].coeffs);
 #endif
 
-    mlk_poly_mulcache_compute_c(&ref_cache.vec[i], &ref_b.vec[i]);
-    mlk_poly_mulcache_compute(&test_cache.vec[i], &test_b.vec[i]);
+    mlk_poly_mulcache_compute_c(&ref_cache->vec[i], &ref_b->vec[i]);
+    mlk_poly_mulcache_compute(&test_cache->vec[i], &test_b->vec[i]);
   }
 
-  mlk_polyvec_basemul_acc_montgomery_cached(&test_result, &test_a, &test_b,
-                                            &test_cache);
-  mlk_polyvec_basemul_acc_montgomery_cached_c(&ref_result, &ref_a, &ref_b,
-                                              &ref_cache);
+  mlk_polyvec_basemul_acc_montgomery_cached(test_result, test_a, test_b,
+                                            test_cache);
+  mlk_polyvec_basemul_acc_montgomery_cached_c(ref_result, ref_a, ref_b,
+                                              ref_cache);
 
 #ifdef MLK_USE_NATIVE_NTT_CUSTOM_ORDER
-  mlk_poly_permute_bitrev_to_custom(ref_result.coeffs);
+  mlk_poly_permute_bitrev_to_custom(ref_result->coeffs);
 #endif
 
   /* Normalize */
-  mlk_poly_reduce_c(&ref_result);
-  mlk_poly_reduce_c(&test_result);
+  mlk_poly_reduce_c(ref_result);
+  mlk_poly_reduce_c(test_result);
 
-  CHECK(compare_i16_arrays(test_result.coeffs, ref_result.coeffs, MLKEM_N,
+  CHECK(compare_i16_arrays(test_result->coeffs, ref_result->coeffs, MLKEM_N,
                            test_name, NULL));
-  return 0;
+  ret = 0;
+
+cleanup:
+  MLK_FREE(ref_cache, mlk_polyvec_mulcache, 1, NULL);
+  MLK_FREE(test_cache, mlk_polyvec_mulcache, 1, NULL);
+  MLK_FREE(ref_b, mlk_polyvec, 1, NULL);
+  MLK_FREE(ref_a, mlk_polyvec, 1, NULL);
+  MLK_FREE(test_b, mlk_polyvec, 1, NULL);
+  MLK_FREE(test_a, mlk_polyvec, 1, NULL);
+  MLK_FREE(ref_result, mlk_poly, 1, NULL);
+  MLK_FREE(test_result, mlk_poly, 1, NULL);
+  return ret;
 }
 
 static int test_native_polyvec_basemul(void)
@@ -640,14 +740,20 @@ static int test_native_polyvec_basemul(void)
 #ifdef MLK_USE_FIPS202_X1_NATIVE
 static int test_keccakf1600_permute(void)
 {
-  uint64_t state[MLK_KECCAK_LANES];
-  uint64_t state_ref[MLK_KECCAK_LANES];
+  int ret = 1;
   int i;
+  MLK_ALLOC(state, uint64_t, MLK_KECCAK_LANES, NULL);
+  MLK_ALLOC(state_ref, uint64_t, MLK_KECCAK_LANES, NULL);
+
+  if (state == NULL || state_ref == NULL)
+  {
+    goto cleanup;
+  }
 
   for (i = 0; i < NUM_RANDOM_TESTS; i++)
   {
-    randombytes((uint8_t *)state, sizeof(state));
-    memcpy(state_ref, state, sizeof(state));
+    randombytes((uint8_t *)state, MLK_KECCAK_LANES * sizeof(uint64_t));
+    memcpy(state_ref, state, MLK_KECCAK_LANES * sizeof(uint64_t));
 
     mlk_keccakf1600_permute(state);
     mlk_keccakf1600_permute_c(state_ref);
@@ -656,7 +762,12 @@ static int test_keccakf1600_permute(void)
                              "keccakf1600_permute"));
   }
 
-  return 0;
+  ret = 0;
+
+cleanup:
+  MLK_FREE(state_ref, uint64_t, MLK_KECCAK_LANES, NULL);
+  MLK_FREE(state, uint64_t, MLK_KECCAK_LANES, NULL);
+  return ret;
 }
 #endif /* MLK_USE_FIPS202_X1_NATIVE */
 
@@ -669,13 +780,32 @@ static int test_keccakf1600_permute(void)
 
 static int test_keccakf1600x4_xor_permute_extract(void)
 {
-  uint64_t state_x4[MLK_KECCAK_LANES * MLK_KECCAK_WAY];
-  uint64_t state_x1[MLK_KECCAK_LANES];
-  unsigned char output_x4[MLK_KECCAK_WAY][MAX_RATE];
-  unsigned char output_x1[MAX_RATE];
-  unsigned char input[MLK_KECCAK_WAY][MAX_RATE];
-  uint8_t xor_offset, xor_length, ext_offset, ext_length;
+  int ret = 1;
   int i, j;
+  uint8_t xor_offset, xor_length, ext_offset, ext_length;
+  MLK_ALLOC(state_x4, uint64_t, MLK_KECCAK_LANES *MLK_KECCAK_WAY, NULL);
+  MLK_ALLOC(state_x1, uint64_t, MLK_KECCAK_LANES, NULL);
+  MLK_ALLOC(output_x1, unsigned char, MAX_RATE, NULL);
+  MLK_ALLOC(output_x4_0, unsigned char, MAX_RATE, NULL);
+  MLK_ALLOC(output_x4_1, unsigned char, MAX_RATE, NULL);
+  MLK_ALLOC(output_x4_2, unsigned char, MAX_RATE, NULL);
+  MLK_ALLOC(output_x4_3, unsigned char, MAX_RATE, NULL);
+  MLK_ALLOC(input_0, unsigned char, MAX_RATE, NULL);
+  MLK_ALLOC(input_1, unsigned char, MAX_RATE, NULL);
+  MLK_ALLOC(input_2, unsigned char, MAX_RATE, NULL);
+  MLK_ALLOC(input_3, unsigned char, MAX_RATE, NULL);
+
+  unsigned char *output_x4[MLK_KECCAK_WAY] = {output_x4_0, output_x4_1,
+                                              output_x4_2, output_x4_3};
+  unsigned char *input[MLK_KECCAK_WAY] = {input_0, input_1, input_2, input_3};
+
+  if (state_x4 == NULL || state_x1 == NULL || output_x1 == NULL ||
+      output_x4_0 == NULL || output_x4_1 == NULL || output_x4_2 == NULL ||
+      output_x4_3 == NULL || input_0 == NULL || input_1 == NULL ||
+      input_2 == NULL || input_3 == NULL)
+  {
+    goto cleanup;
+  }
 
   for (i = 0; i < NUM_RANDOM_TESTS; i++)
   {
@@ -698,7 +828,7 @@ static int test_keccakf1600x4_xor_permute_extract(void)
     }
 
     /* Run x4 implementation */
-    memset(state_x4, 0, sizeof(state_x4));
+    memset(state_x4, 0, MLK_KECCAK_LANES * MLK_KECCAK_WAY * sizeof(uint64_t));
     mlk_keccakf1600x4_xor_bytes(state_x4, input[0], input[1], input[2],
                                 input[3], xor_offset, xor_length);
     mlk_keccakf1600x4_permute(state_x4);
@@ -709,7 +839,7 @@ static int test_keccakf1600x4_xor_permute_extract(void)
     /* Compare each lane against x1 C reference */
     for (j = 0; j < MLK_KECCAK_WAY; j++)
     {
-      memset(state_x1, 0, sizeof(state_x1));
+      memset(state_x1, 0, MLK_KECCAK_LANES * sizeof(uint64_t));
       mlk_keccakf1600_xor_bytes(state_x1, input[j], xor_offset, xor_length);
       mlk_keccakf1600_permute_c(state_x1);
       mlk_keccakf1600_extract_bytes(state_x1, output_x1, ext_offset,
@@ -719,7 +849,21 @@ static int test_keccakf1600x4_xor_permute_extract(void)
     }
   }
 
-  return 0;
+  ret = 0;
+
+cleanup:
+  MLK_FREE(input_3, unsigned char, MAX_RATE, NULL);
+  MLK_FREE(input_2, unsigned char, MAX_RATE, NULL);
+  MLK_FREE(input_1, unsigned char, MAX_RATE, NULL);
+  MLK_FREE(input_0, unsigned char, MAX_RATE, NULL);
+  MLK_FREE(output_x4_3, unsigned char, MAX_RATE, NULL);
+  MLK_FREE(output_x4_2, unsigned char, MAX_RATE, NULL);
+  MLK_FREE(output_x4_1, unsigned char, MAX_RATE, NULL);
+  MLK_FREE(output_x4_0, unsigned char, MAX_RATE, NULL);
+  MLK_FREE(output_x1, unsigned char, MAX_RATE, NULL);
+  MLK_FREE(state_x1, uint64_t, MLK_KECCAK_LANES, NULL);
+  MLK_FREE(state_x4, uint64_t, MLK_KECCAK_LANES *MLK_KECCAK_WAY, NULL);
+  return ret;
 }
 
 #undef MAX_RATE
@@ -777,69 +921,133 @@ static int test_backend_units(void)
 
 
 /* This test invokes the polynomial (de)compression routines
- * with minimally sized buffers. When run with address sanitization,
- * this ensures that no buffer overflow is happening. This is of interest
- * because the compressed buffers sometimes have unaligned lengths and
+ * with minimally sized buffers. When run under valgrind or with address
+ * sanitization, this ensures that no buffer overflow is happening. This is of
+ * interest because the compressed buffers sometimes have unaligned lengths and
  * are therefore at risk of being overflowed by vectorized code. */
 static int test_poly_compress_no_overflow(void)
 {
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || (MLKEM_K == 2 || MLKEM_K == 3)
   {
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4];
-    mlk_poly s;
-    memset((uint8_t *)&s, 0, sizeof(s));
-    mlk_poly_compress_d4(r, &s);
+    MLK_ALLOC(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D4, NULL);
+    MLK_ALLOC(s, mlk_poly, 1, NULL);
+    if (r == NULL || s == NULL)
+    {
+      MLK_FREE(s, mlk_poly, 1, NULL);
+      MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D4, NULL);
+      return 1;
+    }
+    memset((uint8_t *)s, 0, sizeof(mlk_poly));
+    mlk_poly_compress_d4(r, s);
+    MLK_FREE(s, mlk_poly, 1, NULL);
+    MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D4, NULL);
   }
 
   {
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4];
-    mlk_poly s;
-    memset(r, 0, sizeof(r));
-    mlk_poly_decompress_d4(&s, r);
+    MLK_ALLOC(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D4, NULL);
+    MLK_ALLOC(s, mlk_poly, 1, NULL);
+    if (r == NULL || s == NULL)
+    {
+      MLK_FREE(s, mlk_poly, 1, NULL);
+      MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D4, NULL);
+      return 1;
+    }
+    memset(r, 0, MLKEM_POLYCOMPRESSEDBYTES_D4);
+    mlk_poly_decompress_d4(s, r);
+    MLK_FREE(s, mlk_poly, 1, NULL);
+    MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D4, NULL);
   }
 
   {
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10];
-    mlk_poly s;
-    memset((uint8_t *)&s, 0, sizeof(s));
-    mlk_poly_compress_d10(r, &s);
+    MLK_ALLOC(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D10, NULL);
+    MLK_ALLOC(s, mlk_poly, 1, NULL);
+    if (r == NULL || s == NULL)
+    {
+      MLK_FREE(s, mlk_poly, 1, NULL);
+      MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D10, NULL);
+      return 1;
+    }
+    memset((uint8_t *)s, 0, sizeof(mlk_poly));
+    mlk_poly_compress_d10(r, s);
+    MLK_FREE(s, mlk_poly, 1, NULL);
+    MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D10, NULL);
   }
 
   {
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10];
-    mlk_poly s;
-    memset(r, 0, sizeof(r));
-    mlk_poly_decompress_d10(&s, r);
+    MLK_ALLOC(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D10, NULL);
+    MLK_ALLOC(s, mlk_poly, 1, NULL);
+    if (r == NULL || s == NULL)
+    {
+      MLK_FREE(s, mlk_poly, 1, NULL);
+      MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D10, NULL);
+      return 1;
+    }
+    memset(r, 0, MLKEM_POLYCOMPRESSEDBYTES_D10);
+    mlk_poly_decompress_d10(s, r);
+    MLK_FREE(s, mlk_poly, 1, NULL);
+    MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D10, NULL);
   }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 3 */
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4
   {
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5];
-    mlk_poly s;
-    memset((uint8_t *)&s, 0, sizeof(s));
-    mlk_poly_compress_d5(r, &s);
+    MLK_ALLOC(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D5, NULL);
+    MLK_ALLOC(s, mlk_poly, 1, NULL);
+    if (r == NULL || s == NULL)
+    {
+      MLK_FREE(s, mlk_poly, 1, NULL);
+      MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D5, NULL);
+      return 1;
+    }
+    memset((uint8_t *)s, 0, sizeof(mlk_poly));
+    mlk_poly_compress_d5(r, s);
+    MLK_FREE(s, mlk_poly, 1, NULL);
+    MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D5, NULL);
   }
 
   {
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5];
-    mlk_poly s;
-    memset(r, 0, sizeof(r));
-    mlk_poly_decompress_d5(&s, r);
+    MLK_ALLOC(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D5, NULL);
+    MLK_ALLOC(s, mlk_poly, 1, NULL);
+    if (r == NULL || s == NULL)
+    {
+      MLK_FREE(s, mlk_poly, 1, NULL);
+      MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D5, NULL);
+      return 1;
+    }
+    memset(r, 0, MLKEM_POLYCOMPRESSEDBYTES_D5);
+    mlk_poly_decompress_d5(s, r);
+    MLK_FREE(s, mlk_poly, 1, NULL);
+    MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D5, NULL);
   }
 
   {
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11];
-    mlk_poly s;
-    memset((uint8_t *)&s, 0, sizeof(s));
-    mlk_poly_compress_d11(r, &s);
+    MLK_ALLOC(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D11, NULL);
+    MLK_ALLOC(s, mlk_poly, 1, NULL);
+    if (r == NULL || s == NULL)
+    {
+      MLK_FREE(s, mlk_poly, 1, NULL);
+      MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D11, NULL);
+      return 1;
+    }
+    memset((uint8_t *)s, 0, sizeof(mlk_poly));
+    mlk_poly_compress_d11(r, s);
+    MLK_FREE(s, mlk_poly, 1, NULL);
+    MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D11, NULL);
   }
 
   {
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11];
-    mlk_poly s;
-    memset(r, 0, sizeof(r));
-    mlk_poly_decompress_d11(&s, r);
+    MLK_ALLOC(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D11, NULL);
+    MLK_ALLOC(s, mlk_poly, 1, NULL);
+    if (r == NULL || s == NULL)
+    {
+      MLK_FREE(s, mlk_poly, 1, NULL);
+      MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D11, NULL);
+      return 1;
+    }
+    memset(r, 0, MLKEM_POLYCOMPRESSEDBYTES_D11);
+    mlk_poly_decompress_d11(s, r);
+    MLK_FREE(s, mlk_poly, 1, NULL);
+    MLK_FREE(r, uint8_t, MLKEM_POLYCOMPRESSEDBYTES_D11, NULL);
   }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
 
@@ -853,26 +1061,35 @@ static int test_poly_compress_no_overflow(void)
 #if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
 static int test_poly_rej_uniform_consistency(void)
 {
-  mlk_poly vec_x4[4], vec_x1[4];
-  MLK_ALIGN uint8_t seed[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)];
+  int ret = 1;
   int i, j;
+  MLK_ALLOC(vec_x4, mlk_poly, 4, NULL);
+  MLK_ALLOC(vec_x1, mlk_poly, 4, NULL);
+  MLK_ALLOC(seed, uint8_t, 4 * MLK_ALIGN_UP(MLKEM_SYMBYTES + 2), NULL);
 
+  if (vec_x4 == NULL || vec_x1 == NULL || seed == NULL)
+  {
+    goto cleanup;
+  }
 
   for (i = 0; i < NUM_RANDOM_TESTS_REJ_UNIFORM; i++)
   {
     for (j = 0; j < 4; j++)
     {
-      randombytes(seed[j], MLKEM_SYMBYTES + 2);
+      randombytes(seed + j * MLK_ALIGN_UP(MLKEM_SYMBYTES + 2),
+                  MLKEM_SYMBYTES + 2);
     }
 
     /* Test x4 version */
     mlk_poly_rej_uniform_x4(&vec_x4[0], &vec_x4[1], &vec_x4[2], &vec_x4[3],
-                            seed);
+                            (uint8_t (*)[MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)])
+                                seed);
 
     /* Test x1 version with same seeds */
     for (j = 0; j < 4; j++)
     {
-      mlk_poly_rej_uniform(&vec_x1[j], seed[j]);
+      mlk_poly_rej_uniform(&vec_x1[j],
+                           seed + j * MLK_ALIGN_UP(MLKEM_SYMBYTES + 2));
     }
 
     /* Compare results */
@@ -883,7 +1100,13 @@ static int test_poly_rej_uniform_consistency(void)
     }
   }
 
-  return 0;
+  ret = 0;
+
+cleanup:
+  MLK_FREE(seed, uint8_t, 4 * MLK_ALIGN_UP(MLKEM_SYMBYTES + 2), NULL);
+  MLK_FREE(vec_x1, mlk_poly, 4, NULL);
+  MLK_FREE(vec_x4, mlk_poly, 4, NULL);
+  return ret;
 }
 #endif /* !MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
