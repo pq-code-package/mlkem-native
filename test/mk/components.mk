@@ -32,9 +32,8 @@ $(MLKEM768_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=768
 MLKEM1024_OBJS = $(call MAKE_OBJS,$(MLKEM1024_DIR),$(SOURCES) $(FIPS202_SRCS))
 $(MLKEM1024_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024
 
-# Unit test object files - same sources but with MLK_STATIC_TESTABLE= and custom heap alloc config
-UNIT_CFLAGS = -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes \
-  -DMLK_CONFIG_FILE=\"../test/configs/custom_heap_alloc_config.h\" -std=c11 -D_GNU_SOURCE
+# Unit test object files - same sources but with MLK_STATIC_TESTABLE=
+UNIT_CFLAGS = -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
 
 MLKEM512_UNIT_OBJS = $(call MAKE_OBJS,$(MLKEM512_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
 $(MLKEM512_UNIT_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=512 $(UNIT_CFLAGS)
