@@ -10,7 +10,7 @@
 
 int main(void)
 {
-#ifdef MLK_SYS_AARCH64
+#if defined(MLK_SYS_AARCH64) || defined(MLK_SYS_X86_64)
   int result;
   int failed_tests = 0;
   const abicheck_entry_t *entry;
@@ -40,11 +40,9 @@ int main(void)
   {
     return 0;
   }
-#else  /* MLK_SYS_AARCH64 */
-  printf(
-      "ABI check is not yet implemented for architectures other than "
-      "AArch64\n");
+#else  /* MLK_SYS_AARCH64 || MLK_SYS_X86_64 */
+  printf("ABI check is not yet implemented for this architecture\n");
   printf("Skipping ABI check...\n");
   return 0;
-#endif /* !MLK_SYS_AARCH64 */
+#endif /* !(MLK_SYS_AARCH64 || MLK_SYS_X86_64) */
 }

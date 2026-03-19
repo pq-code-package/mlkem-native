@@ -6,6 +6,10 @@
 #include "../../mlkem/src/sys.h"
 #if defined(MLK_SYS_AARCH64)
 
+#if defined(__ELF__)
+.section .note.GNU-stack,"",@progbits
+#endif
+
 /*
  * Function: asm_call_stub
  * Description: AArch64 ABI compliance testing stub that captures register state

@@ -11,50 +11,49 @@
 
 #include "../../mlkem/src/sys.h"
 
-#if defined(MLK_SYS_AARCH64)
+#if defined(MLK_SYS_X86_64)
 
 #include <stdio.h>
-#include <string.h>
 
 #include "../notrandombytes/notrandombytes.h"
 #include "abicheckutil.h"
 #include "checks_all.h"
 
-typedef struct register_state register_state;
+typedef struct x86_64_register_state reg_state;
 
 #define NUM_TESTS 3
 
-void mlk_poly_tomont_asm(int16_t p[256]);
+void mlk_nttunpack_avx2(int16_t *r);
 
-int check_poly_tomont_asm(void)
+int check_nttunpack_avx2_x86_64(void)
 {
   int test_iter;
-  register_state input_state, output_state;
+  reg_state input_state, output_state;
   int violations;
-  MLK_ALIGN uint8_t buf_x0[512]; /* Input/output polynomial */
+  MLK_ALIGN uint8_t buf_rdi[512]; /* Input/output polynomial (256 x int16_t) */
 
   for (test_iter = 0; test_iter < NUM_TESTS; test_iter++)
   {
     /* Initialize random register state */
-    init_random_register_state(&input_state);
+    init_x86_64_register_state(&input_state);
 
-    /* Initialize buffer for x0 */
-    randombytes(buf_x0, 512);
+    /* Initialize buffer for rdi */
+    randombytes(buf_rdi, 512);
 
     /* Set up register state for function arguments */
-    input_state.gpr[0] = (uint64_t)buf_x0;
+    input_state.rdi = (uint64_t)buf_rdi;
 
     /* Call function through ABI test stub */
-    asm_call_stub(&input_state, &output_state,
-                  (void (*)(void))mlk_poly_tomont_asm);
+    asm_call_stub_x86_64(&input_state, &output_state,
+                         (void (*)(void))mlk_nttunpack_avx2);
 
     /* Check ABI compliance */
-    violations = check_aarch64_aapcs_compliance(&input_state, &output_state);
+    violations = check_x86_64_sysv_compliance(&input_state, &output_state);
     if (violations > 0)
     {
       fprintf(
           stderr,
-          "ABI test FAILED for poly_tomont_asm (iteration %d): %d violations\n",
+          "ABI test FAILED for nttunpack_avx2 (iteration %d): %d violations\n",
           test_iter + 1, violations);
       return 1;
     }
@@ -63,9 +62,9 @@ int check_poly_tomont_asm(void)
   return 0;
 }
 
-#else /* MLK_SYS_AARCH64 */
+#else /* MLK_SYS_X86_64 */
 
 #include "../../mlkem/src/common.h"
-MLK_EMPTY_CU(check_poly_tomont_asm)
+MLK_EMPTY_CU(check_nttunpack_avx2_x86_64)
 
-#endif /* !MLK_SYS_AARCH64 */
+#endif /* !MLK_SYS_X86_64 */
