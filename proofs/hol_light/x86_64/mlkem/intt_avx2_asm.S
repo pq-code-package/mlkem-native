@@ -28,6 +28,25 @@
  *   reasoning of non-overflow
  */
 
+/*yaml
+  Name: invntt_avx2
+  Description: x86_64 AVX2 inverse NTT
+  Signature: void mlk_invntt_avx2(int16_t *r, const int16_t *qdata)
+  ABI:
+    rdi:
+      type: buffer
+      size_bytes: 512
+      permissions: read/write
+      c_parameter: int16_t *r
+      description: Input/output polynomial (256 x int16_t)
+    rsi:
+      type: buffer
+      size_bytes: 1248
+      permissions: read-only
+      c_parameter: const int16_t *qdata
+      description: Precomputed constants (624 x int16_t)
+*/
+
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file

@@ -252,10 +252,16 @@ run_size: \
 	run_size_1024
 
 ifeq ($(OPT),1)
+# ABI checker is not supported on Windows (calling convention mismatch)
+ifeq ($(findstring MINGW,$(HOST_PLATFORM))$(findstring Windows,$(HOST_PLATFORM)),)
 abicheck: $(ABICHECK_DIR)/bin/abicheck
 
 run_abicheck: abicheck
 	$(W) $(ABICHECK_DIR)/bin/abicheck
+else
+abicheck:
+run_abicheck:
+endif
 else
 abicheck:
 run_abicheck:

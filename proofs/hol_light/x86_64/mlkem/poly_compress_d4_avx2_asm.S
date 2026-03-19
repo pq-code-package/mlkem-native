@@ -28,6 +28,31 @@
  *              - const uint8_t *data: pointer to permdidx constant
  **************************************************/
 
+/*yaml
+  Name: poly_compress_d4_avx2
+  Description: x86_64 AVX2 polynomial compression (d=4)
+  Signature: void mlk_poly_compress_d4_avx2(uint8_t *r, const int16_t *a, const uint8_t *data)
+  ABI:
+    rdi:
+      type: buffer
+      size_bytes: 128
+      permissions: write-only
+      c_parameter: uint8_t *r
+      description: Output compressed polynomial
+    rsi:
+      type: buffer
+      size_bytes: 512
+      permissions: read-only
+      c_parameter: const int16_t *a
+      description: Input polynomial (256 x int16_t)
+    rdx:
+      type: buffer
+      size_bytes: 32
+      permissions: read-only
+      c_parameter: const uint8_t *data
+      description: Precomputed compression constants
+*/
+
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file

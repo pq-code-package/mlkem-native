@@ -18,6 +18,25 @@
  */
 
 
+/*yaml
+  Name: ntttobytes_avx2
+  Description: x86_64 AVX2 polynomial serialization in NTT domain
+  Signature: void mlk_ntttobytes_avx2(uint8_t *r, const int16_t *a)
+  ABI:
+    rdi:
+      type: buffer
+      size_bytes: 384
+      permissions: write-only
+      c_parameter: uint8_t *r
+      description: Output byte array (MLKEM_POLYBYTES = 384)
+    rsi:
+      type: buffer
+      size_bytes: 512
+      permissions: read-only
+      c_parameter: const int16_t *a
+      description: Input polynomial (256 x int16_t)
+*/
+
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file

@@ -2,9 +2,12 @@
 
 # ABI Checker
 
-This directory contains an ABI compliance checker for all AArch64 assembly in mlkem-native. Its purpose is to verify that every assembly function obeys the [AAPCS64](https://github.com/ARM-software/abi-aa/blob/main/aapcs64/aapcs64.rst) calling convention — specifically, that callee-saved registers (x19–x28, x29/FP, d8–d15) are preserved across calls.
+This directory contains an ABI compliance checker for all AArch64 and x86_64 assembly in mlkem-native. Its purpose is to verify that every assembly function obeys the platform calling convention — specifically:
 
-Failure to obey the AAPCS can lead to rare but fatal bugs depending on the exact compiler and compilation settings, since the compiler assumes callee-saved registers are untouched after a function call.
+- **AArch64 (AAPCS64)**: x19–x28, x29/FP, and d8–d15 must be preserved across calls.
+- **x86_64 (System V)**: rbx, rbp, and r12–r15 must be preserved across calls. No SIMD registers are callee-saved.
+
+Failure to obey the calling convention can lead to rare but fatal bugs depending on the exact compiler and compilation settings, since the compiler assumes callee-saved registers are untouched after a function call.
 
 ## Usage
 
@@ -24,69 +27,78 @@ The ABI checker is only meaningful when native backends are enabled (`OPT=1`). W
 
 ## How it works
 
-### Assembly call stub
+### Assembly call stubs
 
-The core mechanism is an assembly call stub (`aarch64_callstub.S`):
+The core mechanism is an architecture-specific assembly call stub:
 
 ```c
+// AArch64
 void asm_call_stub(struct register_state *input,
                    struct register_state *output,
                    void (*function_ptr)(void));
+
+// x86_64
+void asm_call_stub_x86_64(struct x86_64_register_state *input,
+                           struct x86_64_register_state *output,
+                           void (*function_ptr)(void));
 ```
 
-This stub:
+Each stub:
 1. Saves its own callee-saved registers to the stack.
-2. Loads *all* GPRs (x0–x29) and NEON registers (q0–q31) from the `input` struct.
-3. Calls `function_ptr` via `blr`.
+2. Loads all GPRs (and NEON registers on AArch64) from the `input` struct.
+3. Calls `function_ptr`.
 4. Captures the full register state into the `output` struct.
 5. Restores its own callee-saved registers and returns.
 
-Crucially, the stub does *not* assume `function_ptr` obeys the AAPCS — that is what we are testing.
+Crucially, the stub does *not* assume `function_ptr` obeys the calling convention — that is what we are testing.
 
 ### Per-function checks
 
-Each per-function check (`check_*.c`) does the following for each test iteration:
-1. Initializes a `register_state` with known values for all registers.
-2. For pointer arguments (identified from YAML metadata), allocates aligned buffers of the correct size and places their addresses in the corresponding GPR slots.
-3. Calls the function under test through `asm_call_stub`.
-4. Compares the callee-saved registers (x18–x29, d8–d15) between input and output states.
+Each per-function check (`check_*_<arch>.c`) does the following for each test iteration:
+1. Initializes a register state with known sentinel values for callee-saved registers.
+2. For pointer arguments (identified from YAML metadata), allocates aligned buffers of the correct size and places their addresses in the corresponding register slots.
+3. Calls the function under test through the call stub.
+4. Compares the callee-saved registers between input and output states.
 
 ### Code generation via autogen
 
 The per-function check files and the `checks_all.h` registry are **auto-generated** by `scripts/autogen` (function `gen_abicheck()`). The generation works as follows:
 
-1. **Discovery**: `autogen` globs for all `.S` files under `mlkem/src/native/aarch64/src/` and `mlkem/src/fips202/native/aarch64/src/`.
+1. **Discovery**: `autogen` globs for all `.S` files under the native backend directories for each architecture.
 
 2. **YAML parsing**: Each assembly file contains a `/*yaml ... */` metadata block specifying the function name, C signature, and ABI — which registers are buffers (with sizes) vs. scalars. For example:
 
    ```yaml
    /*yaml
-     Name: ntt_asm
-     Signature: void mlk_ntt_asm(int16_t p[256], ...)
+     Name: ntt_avx2
+     Signature: void mlk_ntt_avx2(int16_t *r, const int16_t *qdata)
      ABI:
-       x0:
+       rdi:
          type: buffer
          size_bytes: 512
-       x1:
+       rsi:
          type: buffer
-         size_bytes: 160
+         size_bytes: 1248
    */
    ```
 
-3. **Check generation**: For each function, `autogen` emits a `test/abicheck/check_<name>.c` file that declares the function, allocates `MLK_ALIGN`-ed buffers for each `buffer`-typed register, and wires up the `asm_call_stub` call and compliance check.
+3. **Check generation**: For each function, `autogen` emits a `test/abicheck/check_<name>_<arch>.c` file that declares the function, allocates `MLK_ALIGN`-ed buffers for each `buffer`-typed register, and wires up the call stub and compliance check.
 
-4. **Architecture guards**: `autogen` detects `#if defined(__ARM_FEATURE_SHA3)` guards in the assembly source and wraps the corresponding check in matching `#if`/`#endif`.
+4. **Architecture guards**: `autogen` detects preprocessor guards (e.g. `__ARM_FEATURE_SHA3`) in the assembly source and wraps the corresponding check in matching `#if`/`#endif`.
 
-5. **Registry**: `autogen` generates `checks_all.h` containing an array of `{name, function_pointer}` entries for all checks, used by the driver `abicheck.c`.
+5. **Registry**: `autogen` generates `checks_all.h` containing an array of `{name, function_pointer}` entries for all checks on the current architecture, used by the driver `abicheck.c`.
 
 ### Handwritten files
 
 | File | Purpose |
 |------|---------|
-| `aarch64_callstub.S` | Assembly stub to call functions with controlled register state |
+| `aarch64_callstub.S` | AArch64 call stub — captures GPRs and NEON registers |
+| `x86_64_callstub.S` | x86_64 call stub — captures GPRs only (no callee-saved SIMD) |
 | `abicheck.c` | Test driver — iterates over all checks and reports results |
-| `abicheckutil.c/h` | AAPCS compliance check and register state initialization |
+| `abicheckutil.c/h` | Compliance check and register state initialization per architecture |
 
 ### Build integration
 
-The ABI checker has its own build directory (`test/build/abicheck/`) and compiles the assembly files under test directly — bypassing the normal backend selection by explicitly defining the preprocessor guards (`MLK_ARITH_BACKEND_AARCH64`, `MLK_FIPS202_AARCH64_NEED_*`, etc.). See `test/mk/components.mk` for details.
+The ABI checker has its own build directory (`test/build/abicheck/`) and compiles the assembly files under test directly — bypassing the normal backend selection by explicitly defining the preprocessor guards (`MLK_ARITH_BACKEND_AARCH64`, `MLK_ARITH_BACKEND_X86_64_DEFAULT`, etc.). See `test/mk/components.mk` for details.
+
+For x86_64, the build also includes C files providing constant data needed by the assembly (`consts.c`, `compress_consts.c`, `rej_uniform_table.c`, `keccakf1600_constants.c`).
