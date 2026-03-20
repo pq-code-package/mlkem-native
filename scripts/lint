@@ -411,6 +411,82 @@ gh_group_start "Linting Doxygen comments"
 check-doxygen
 gh_group_end
 
+# Derive the theorem-name prefix from a proof routine's basename:
+#   - strip the platform suffix (_aarch64_asm or _avx2_asm)
+#   - uppercase
+#   - prepend MLKEM_ unless the routine is a keccak proof
+theorem-prefix()
+{
+  local routine="$1"
+  local platform_suffix="$2"
+  local base="${routine%${platform_suffix}}"
+  base=$(echo "$base" | tr '[:lower:]' '[:upper:]')
+  [[ $base == KECCAK_* ]] || base="MLKEM_${base}"
+  echo "$base"
+}
+
+check-theorems()
+{
+  local success=true
+  for arch in aarch64 x86_64; do
+    local proofs_dir="$ROOT/proofs/hol_light/$arch/proofs"
+    local platform_suffix="_aarch64_asm"
+    [[ $arch == "x86_64" ]] && platform_suffix="_avx2_asm"
+    local proofs
+    proofs=$("$ROOT/proofs/hol_light/$arch/list_proofs.sh")
+
+    for routine in $proofs; do
+      local file="$proofs_dir/${routine}.ml"
+      local prefix
+      local theorems
+      prefix=$(theorem-prefix "$routine" "$platform_suffix")
+      theorems=$("$ROOT/proofs/hol_light/$arch/list_thms.sh" "$file")
+
+      # rej_uniform uses MEMSAFE in place of SAFE because no constant-time proof exists
+      local safe="SAFE"
+      [[ ${routine} == rej_uniform_* ]] && safe="MEMSAFE"
+
+      local expected=(
+        "${prefix}_CORRECT"
+        "${prefix}_SUBROUTINE_CORRECT"
+        "${prefix}_SUBROUTINE_${safe}"
+      )
+      if [[ $arch == "x86_64" ]]; then
+        expected+=(
+          "${prefix}_${safe}"
+          "${prefix}_NOIBT_SUBROUTINE_CORRECT"
+          "${prefix}_NOIBT_SUBROUTINE_${safe}"
+        )
+      fi
+
+      for theorem in "${expected[@]}"; do
+        if ! grep -qx "$theorem" <<<"$theorems"; then
+          gh_error "$file" "" "Missing theorem" "${file}: ${theorem} not found"
+          success=false
+        fi
+      done
+
+      if grep -q "CHEAT_TAC" "$file"; then
+        gh_error "$file" "" "CHEAT_TAC detected" "${file}: uses CHEAT_TAC"
+        success=false
+      fi
+    done
+  done
+
+  if $success; then
+    info "Check HOL-Light theorems"
+    gh_summary_success "Check HOL-Light theorems"
+  else
+    error "Check HOL-Light theorems"
+    SUCCESS=false
+    gh_summary_failure "Check HOL-Light theorems"
+  fi
+}
+
+gh_group_start "Check HOL-Light theorems"
+check-theorems
+gh_group_end
+
 if ! $SUCCESS; then
   if $IN_GITHUB_CONTEXT; then
     printf "%b%s%b\n" "${RED}" "The following checks failed, expand each for more details." "${NORMAL}"
