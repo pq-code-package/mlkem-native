@@ -272,16 +272,16 @@ let LENGTH_MLKEM_UNPACK_TMC =
   REWRITE_CONV[mlkem_unpack_tmc] `LENGTH mlkem_unpack_tmc`
   |> CONV_RULE(RAND_CONV LENGTH_CONV);;
 
-let MLKEM_UNPACK_POSTAMBLE_LENGTH = new_definition
-  `MLKEM_UNPACK_POSTAMBLE_LENGTH = 1`;;
+let MLKEM_NTTUNPACK_POSTAMBLE_LENGTH = new_definition
+  `MLKEM_NTTUNPACK_POSTAMBLE_LENGTH = 1`;;
 
-let MLKEM_UNPACK_CORE_END = new_definition
-  `MLKEM_UNPACK_CORE_END = LENGTH mlkem_unpack_tmc - MLKEM_UNPACK_POSTAMBLE_LENGTH`;;
+let MLKEM_NTTUNPACK_CORE_END = new_definition
+  `MLKEM_NTTUNPACK_CORE_END = LENGTH mlkem_unpack_tmc - MLKEM_NTTUNPACK_POSTAMBLE_LENGTH`;;
 
 let LENGTH_SIMPLIFY_CONV =
   REWRITE_CONV[LENGTH_MLKEM_UNPACK_TMC;
-              MLKEM_UNPACK_CORE_END;
-              MLKEM_UNPACK_POSTAMBLE_LENGTH] THENC
+              MLKEM_NTTUNPACK_CORE_END;
+              MLKEM_NTTUNPACK_POSTAMBLE_LENGTH] THENC
   NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
 let avx_order = new_definition
@@ -302,7 +302,7 @@ let avx_unorder = new_definition
 let unpermute_list = new_definition
   `unpermute_list l = list_of_seq (\i. EL (avx_unorder i) l) 256`;;
 
-let MLKEM_UNPACK_CORRECT = prove(
+let MLKEM_NTTUNPACK_CORRECT = prove(
     `!a (l:int16 list) pc.
         aligned 32 a /\
         nonoverlapping (word pc, LENGTH mlkem_unpack_tmc) (a, 512)
@@ -311,7 +311,7 @@ let MLKEM_UNPACK_CORRECT = prove(
                   read RIP s = word pc /\
                   C_ARGUMENTS [a] s /\
                   read (memory :> bytes(a, 512)) s = num_of_wordlist l)
-             (\s. read RIP s = word (pc + MLKEM_UNPACK_CORE_END) /\
+             (\s. read RIP s = word (pc + MLKEM_NTTUNPACK_CORE_END) /\
                   (LENGTH l = 256
                    ==> read(memory :> bytes(a, 512)) s =
                        num_of_wordlist (unpermute_list l)))
@@ -380,7 +380,7 @@ let MLKEM_UNPACK_CORRECT = prove(
   ABBREV_TAC `twae = &2:real` THEN REAL_ARITH_TAC);;
 
 
-let MLKEM_UNPACK_NOIBT_SUBROUTINE_CORRECT = prove(
+let MLKEM_NTTUNPACK_NOIBT_SUBROUTINE_CORRECT = prove(
     `!a (l:int16 list) pc.
         aligned 32 a /\
         nonoverlapping (word pc, LENGTH mlkem_unpack_tmc) (a, 512) /\
@@ -401,12 +401,12 @@ let MLKEM_UNPACK_NOIBT_SUBROUTINE_CORRECT = prove(
               MAYCHANGE [memory :> bytes(a, 512)])`, 
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_unpack_tmc
-    (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_UNPACK_CORRECT));;
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_NTTUNPACK_CORRECT));;
 
 (* NOTE: This must be kept in sync with the CBMC specification
  * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
 
-let MLKEM_UNPACK_SUBROUTINE_CORRECT = prove(
+let MLKEM_NTTUNPACK_SUBROUTINE_CORRECT = prove(
     `!a (l:int16 list) pc.
         aligned 32 a /\
         nonoverlapping (word pc, LENGTH mlkem_unpack_mc) (a, 512) /\
@@ -425,7 +425,7 @@ let MLKEM_UNPACK_SUBROUTINE_CORRECT = prove(
                        num_of_wordlist (unpermute_list l)))
              (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(a, 512)])`, 
-  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_UNPACK_NOIBT_SUBROUTINE_CORRECT));;
+  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_NTTUNPACK_NOIBT_SUBROUTINE_CORRECT));;
 
 (* ------------------------------------------------------------------------- *)
 (* Constant-time and memory safety proof.                                    *)
@@ -437,10 +437,10 @@ needs "mlkem_native/x86_64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true
     (assoc "mlkem_unpack" subroutine_signatures)
-    MLKEM_UNPACK_CORRECT
+    MLKEM_NTTUNPACK_CORRECT
     mlkem_unpack_TMC_EXEC;;
 
-let MLKEM_UNPACK_SAFE = time prove
+let MLKEM_NTTUNPACK_SAFE = time prove
  (`exists f_events.
        forall e a pc.
            aligned 32 a /\ nonoverlapping (word pc,LENGTH mlkem_unpack_tmc) (a,512)
@@ -451,7 +451,7 @@ let MLKEM_UNPACK_SAFE = time prove
                     C_ARGUMENTS [a] s /\
                     read events s = e)
                (\s.
-                    read RIP s = word (pc + MLKEM_UNPACK_CORE_END) /\
+                    read RIP s = word (pc + MLKEM_NTTUNPACK_CORE_END) /\
                     (exists e2.
                          read events s = APPEND e2 e /\
                          e2 = f_events a pc /\
@@ -466,7 +466,7 @@ let MLKEM_UNPACK_SAFE = time prove
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars mlkem_unpack_TMC_EXEC);;
 
-let MLKEM_UNPACK_NOIBT_SUBROUTINE_SAFE = time prove
+let MLKEM_NTTUNPACK_NOIBT_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e a pc stackpointer returnaddress.
           aligned 32 a /\
@@ -489,10 +489,10 @@ let MLKEM_UNPACK_NOIBT_SUBROUTINE_SAFE = time prove
                                                [a,512; stackpointer,8]))
                (\s s'. true)`,
   X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_unpack_tmc
-    (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_UNPACK_SAFE) THEN
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_NTTUNPACK_SAFE) THEN
   DISCHARGE_SAFETY_PROPERTY_TAC);;
 
-let MLKEM_UNPACK_SUBROUTINE_SAFE = time prove
+let MLKEM_NTTUNPACK_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e a pc stackpointer returnaddress.
           aligned 32 a /\
@@ -514,4 +514,4 @@ let MLKEM_UNPACK_SUBROUTINE_SAFE = time prove
                          memaccess_inbounds e2 [a,512; stackpointer,8]
                                                [a,512; stackpointer,8]))
                (\s s'. true)`,
-  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_UNPACK_NOIBT_SUBROUTINE_SAFE));;
+  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_NTTUNPACK_NOIBT_SUBROUTINE_SAFE));;

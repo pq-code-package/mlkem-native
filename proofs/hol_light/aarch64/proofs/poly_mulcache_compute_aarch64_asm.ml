@@ -155,7 +155,7 @@ let poly_mulcache_compute_GOAL = `!dst src zetas zetas_twisted x pc.
 (* Proof                                                                     *)
 (* ------------------------------------------------------------------------- *)
 
-let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(poly_mulcache_compute_GOAL,
+let MLKEM_POLY_MULCACHE_COMPUTE_CORRECT = prove(poly_mulcache_compute_GOAL,
     CONV_TAC LENGTH_SIMPLIFY_CONV THEN
     REWRITE_TAC [MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI;
       NONOVERLAPPING_CLAUSES; ALL; C_ARGUMENTS; fst poly_mulcache_compute_EXEC;
@@ -240,7 +240,7 @@ let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(poly_mulcache_compute_GOAL,
 (* NOTE: This must be kept in sync with the CBMC specification
  * in mlkem/src/native/aarch64/src/arith_native_aarch64.h *)
 
-let MLKEM_MULCACHE_COMPUTE_SUBROUTINE_CORRECT = prove
+let MLKEM_POLY_MULCACHE_COMPUTE_SUBROUTINE_CORRECT = prove
  (`!dst src zetas zetas_twisted x pc returnaddress.
     ALL (nonoverlapping (dst, 256))
         [(word pc, LENGTH poly_mulcache_compute_mc);
@@ -279,7 +279,7 @@ let MLKEM_MULCACHE_COMPUTE_SUBROUTINE_CORRECT = prove
     PURE_REWRITE_CONV [WORD_ADD_0] in
   CONV_TAC TWEAK_CONV THEN
   ARM_ADD_RETURN_NOSTACK_TAC poly_mulcache_compute_EXEC
-   (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_MULCACHE_COMPUTE_CORRECT)));;
+   (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_POLY_MULCACHE_COMPUTE_CORRECT)));;
 
 
 (* ------------------------------------------------------------------------- *)
@@ -291,10 +291,10 @@ needs "mlkem_native/aarch64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:false
     (assoc "mlkem_mulcache_compute" subroutine_signatures)
-    MLKEM_MULCACHE_COMPUTE_SUBROUTINE_CORRECT
+    MLKEM_POLY_MULCACHE_COMPUTE_SUBROUTINE_CORRECT
     poly_mulcache_compute_EXEC;;
 
-let MLKEM_MULCACHE_COMPUTE_SUBROUTINE_SAFE = time prove
+let MLKEM_POLY_MULCACHE_COMPUTE_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e dst src zetas zetas_twisted pc returnaddress.
            ALL (nonoverlapping (dst,256))
