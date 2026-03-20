@@ -808,16 +808,16 @@ let LENGTH_MLKEM_BASEMUL_K2_TMC =
   REWRITE_CONV[mlkem_basemul_k2_tmc] `LENGTH mlkem_basemul_k2_tmc`
   |> CONV_RULE(RAND_CONV LENGTH_CONV);;
 
-let MLKEM_BASEMUL_K2_POSTAMBLE_LENGTH = new_definition
-  `MLKEM_BASEMUL_K2_POSTAMBLE_LENGTH = 1`;;
+let MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_POSTAMBLE_LENGTH = new_definition
+  `MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_POSTAMBLE_LENGTH = 1`;;
 
-let MLKEM_BASEMUL_K2_CORE_END = new_definition
-  `MLKEM_BASEMUL_K2_CORE_END = LENGTH mlkem_basemul_k2_tmc - MLKEM_BASEMUL_K2_POSTAMBLE_LENGTH`;;
+let MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORE_END = new_definition
+  `MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORE_END = LENGTH mlkem_basemul_k2_tmc - MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_POSTAMBLE_LENGTH`;;
 
 let LENGTH_SIMPLIFY_CONV =
   REWRITE_CONV[LENGTH_MLKEM_BASEMUL_K2_TMC;
-              MLKEM_BASEMUL_K2_CORE_END;
-              MLKEM_BASEMUL_K2_POSTAMBLE_LENGTH] THENC
+              MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORE_END;
+              MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_POSTAMBLE_LENGTH] THENC
   NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
 (* Enable simplification of word_subwords by default.
@@ -868,7 +868,7 @@ let pmulaccred1 = define
                (a1: int) (b1 : int) (c1 : int) (d1 : int) (dz1 : int) =
      (&(inverse_mod 3329 65536) * pmulacc1 a0 b0 c0 d0 dz0 a1 b1 c1 d1 dz1) rem &3329`;;
 
-let MLKEM_BASEMUL_K2_CORRECT = prove(
+let MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORRECT = prove(
   `!src1 src2 src2t dst a0 b0 c0 d0 dz0 a1 b1 c1 d1 dz1 pc.
         aligned 32 src1 /\
         aligned 32 src2 /\
@@ -911,7 +911,7 @@ let MLKEM_BASEMUL_K2_CORRECT = prove(
                    (!i. i < 16 ==> !j. j < 8
                         ==> read(memory :> bytes16
                              (word_add src2t (word (256 + 32*j + 2*i)))) s = dz1 i j))
-              (\s. read RIP s = word (pc + MLKEM_BASEMUL_K2_CORE_END) /\
+              (\s. read RIP s = word (pc + MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORE_END) /\
                    (!i. i < 16 ==> !j. j < 4
                         ==> (let j' = 2*j in
                               (abs(ival(a0 i j')) <= &2 pow 12  /\
@@ -1010,7 +1010,7 @@ let MLKEM_BASEMUL_K2_CORRECT = prove(
   CONV_TAC INT_RING
 );;
 
-let MLKEM_BASEMUL_K2_NOIBT_SUBROUTINE_CORRECT = prove(
+let MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_NOIBT_SUBROUTINE_CORRECT = prove(
   `!src1 src2 src2t dst a0 b0 c0 d0 dz0 a1 b1 c1 d1 dz1 pc stackpointer returnaddress.
         aligned 32 src1 /\
         aligned 32 src2 /\
@@ -1098,12 +1098,12 @@ let MLKEM_BASEMUL_K2_NOIBT_SUBROUTINE_CORRECT = prove(
                MAYCHANGE [memory :> bytes(dst, 512)])`,
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_basemul_k2_tmc
-    (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_BASEMUL_K2_CORRECT));;
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORRECT));;
 
 (* NOTE: This must be kept in sync with the CBMC specification
  * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
 
-let MLKEM_BASEMUL_K2_SUBROUTINE_CORRECT = prove(
+let MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_SUBROUTINE_CORRECT = prove(
   `!src1 src2 src2t dst a0 b0 c0 d0 dz0 a1 b1 c1 d1 dz1 pc stackpointer returnaddress.
         aligned 32 src1 /\
         aligned 32 src2 /\
@@ -1189,7 +1189,7 @@ let MLKEM_BASEMUL_K2_SUBROUTINE_CORRECT = prove(
                             ) (mod &3329)))
               (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
                MAYCHANGE [memory :> bytes(dst, 512)])`,
-  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_BASEMUL_K2_NOIBT_SUBROUTINE_CORRECT));;
+  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_NOIBT_SUBROUTINE_CORRECT));;
 
 (* ------------------------------------------------------------------------- *)
 (* Constant-time and memory safety proof.                                    *)
@@ -1201,10 +1201,10 @@ needs "mlkem_native/x86_64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true
     (assoc "mlkem_basemul_k2" subroutine_signatures)
-    MLKEM_BASEMUL_K2_CORRECT
+    MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORRECT
     mlkem_basemul_k2_tmc_EXEC;;
 
-let MLKEM_BASEMUL_K2_SAFE = time prove
+let MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_SAFE = time prove
  (`exists f_events.
        forall e src1 src2 src2t dst pc.
            aligned 32 src1 /\
@@ -1221,7 +1221,7 @@ let MLKEM_BASEMUL_K2_SAFE = time prove
                     C_ARGUMENTS [dst; src1; src2; src2t] s /\
                     read events s = e)
                (\s.
-                    read RIP s = word (pc + MLKEM_BASEMUL_K2_CORE_END) /\
+                    read RIP s = word (pc + MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORE_END) /\
                     (exists e2.
                          read events s = APPEND e2 e /\
                          e2 = f_events src1 src2 src2t dst pc /\
@@ -1239,7 +1239,7 @@ let MLKEM_BASEMUL_K2_SAFE = time prove
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars mlkem_basemul_k2_tmc_EXEC);;
 
-let MLKEM_BASEMUL_K2_NOIBT_SUBROUTINE_SAFE = time prove
+let MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_NOIBT_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e src1 src2 src2t dst pc stackpointer returnaddress.
           aligned 32 src1 /\
@@ -1269,10 +1269,10 @@ let MLKEM_BASEMUL_K2_NOIBT_SUBROUTINE_SAFE = time prove
                            [dst,512; stackpointer,8]))
                (\s s'. true)`,
   X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_basemul_k2_tmc
-    (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_BASEMUL_K2_SAFE) THEN
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_SAFE) THEN
   DISCHARGE_SAFETY_PROPERTY_TAC);;
 
-let MLKEM_BASEMUL_K2_SUBROUTINE_SAFE = time prove
+let MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e src1 src2 src2t dst pc stackpointer returnaddress.
           aligned 32 src1 /\
@@ -1301,4 +1301,4 @@ let MLKEM_BASEMUL_K2_SUBROUTINE_SAFE = time prove
                             dst,512; stackpointer,8]
                            [dst,512; stackpointer,8]))
                (\s s'. true)`,
-  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_BASEMUL_K2_NOIBT_SUBROUTINE_SAFE));;
+  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_NOIBT_SUBROUTINE_SAFE));;
