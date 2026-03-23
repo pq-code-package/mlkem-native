@@ -22,6 +22,9 @@ GREEN="\033[32m"
 RED="\033[31m"
 NORMAL="\033[0m"
 
+# Global error info
+ERROR_LOG=""
+
 info()
 {
   printf "%b %b\n" "${GREEN}✓" "${NORMAL}${*}"
@@ -86,6 +89,7 @@ gh_summary_failure()
 {
   if $IN_GITHUB_CONTEXT; then
     echo ":x: $1" >>"$GITHUB_STEP_SUMMARY"
+    ERROR_LOG+=" - $1"$'\n'
   fi
 }
 
@@ -236,6 +240,7 @@ check-spdx()
     error "Check SPDX + Copyright"
     SUCCESS=false
     gh_summary_failure "Check SPDX + Copyright"
+
   fi
 }
 gh_group_start "Checking SPDX + Copyright headers"
@@ -274,10 +279,6 @@ gh_group_start "Check magic constants"
 check-magic
 gh_group_end
 
-if ! $SUCCESS; then
-  exit 1
-fi
-
 check-contracts()
 {
   if python3 "$ROOT"/scripts/check-contracts >/dev/null; then
@@ -295,5 +296,9 @@ check-contracts
 gh_group_end
 
 if ! $SUCCESS; then
+  if $IN_GITHUB_CONTEXT; then
+    printf "%b%s%b\n" "${RED}" "The following checks failed, expand each for more details." "${NORMAL}"
+    echo "$ERROR_LOG"
+  fi
   exit 1
 fi
