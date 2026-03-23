@@ -38,10 +38,6 @@
  *   dev/x86_64/src/poly_compress_d5.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(poly_compress_d5_avx2)
@@ -218,3 +214,7 @@ MLK_ASM_FN_SIZE(poly_compress_d5_avx2)
 
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
           && (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4) */
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

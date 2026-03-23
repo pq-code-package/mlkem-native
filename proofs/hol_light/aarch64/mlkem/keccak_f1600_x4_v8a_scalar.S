@@ -36,10 +36,6 @@
  *   dev/fips202/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 #ifdef __APPLE__
@@ -1071,3 +1067,7 @@ Lkeccak_f1600_x4_v8a_scalar_hybrid_done:
         .cfi_adjust_cfa_offset -0xe0
         ret
         .cfi_endproc
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

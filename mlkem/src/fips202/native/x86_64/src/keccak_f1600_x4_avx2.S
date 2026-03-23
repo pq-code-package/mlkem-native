@@ -12,10 +12,6 @@
  *   dev/fips202/x86_64/src/keccak_f1600_x4_avx2.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(keccak_f1600_x4_avx2)
@@ -449,3 +445,7 @@ LLkeccak_f1600_x4_avx2:
 MLK_ASM_FN_SIZE(keccak_f1600_x4_avx2)
 
 #endif /* MLK_FIPS202_X86_64_NEED_X4_AVX2 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

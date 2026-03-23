@@ -54,10 +54,6 @@
  *   dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 #ifdef __APPLE__
@@ -364,3 +360,7 @@ Lpolyvec_basemul_acc_montgomery_cached_k4_loop_start:
         .cfi_adjust_cfa_offset -0x40
         ret
         .cfi_endproc
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

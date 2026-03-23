@@ -13,10 +13,6 @@
  *   dev/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2)
@@ -500,3 +496,7 @@ MLK_ASM_FN_SIZE(polyvec_basemul_acc_montgomery_cached_asm_k2)
 
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
           && (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2) */
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

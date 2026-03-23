@@ -27,10 +27,6 @@
  *   dev/x86_64/src/nttunpack.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(nttunpack_avx2)
@@ -172,3 +168,7 @@ MLK_ASM_FN_SIZE(nttunpack_avx2)
 
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

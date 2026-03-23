@@ -24,10 +24,6 @@
  *   dev/aarch64_opt/src/poly_reduce_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 #ifdef __APPLE__
@@ -147,3 +143,7 @@ Lpoly_reduce_loop_start:
         stur q25, [x0, #-0x30]
         ret
         .cfi_endproc
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif
