@@ -281,6 +281,13 @@ PROVER_NAME=cvc5
 SMT_FORMAT := --cvc5
 endif
 
+# For cvc5 benchmarking, we _always_ add --slice-formula, regardless of whether a particular
+# Makefile for a specific function sets it or not...
+ifeq ($(findstring --slice-formula,$(CBMCFLAGS)),--slice-formula) # If user has chosen --slice-formulaa
+CBMCFLAGS := $(subst --slice-formula,,$(CBMCFLAGS)) # Remove it
+endif
+CBMCFLAGS += --slice-formula
+
 # CBMC flags used for property checking and coverage checking
 
 CBMCFLAGS += $(CBMC_FLAG_FLUSH)
@@ -977,7 +984,25 @@ $(HARNESS_GOTO).smtc: $(HARNESS_GOTO).goto
 	  --pipeline-name "$(PROOF_UID)" \
 	  --tags "stats-group:safety checks" \
 	  --stderr-file $(LOGDIR)/smtc-err-log.txt \
-	  --description "$(PROOF_UID): checking safety properties (SMT for cvc5 only)"
+	  --description "$(PROOF_UID): generating SMT for cvc5 only"
+
+# Remove all "get-value" lines to sanitize the SMT file
+$(HARNESS_GOTO).smtcp: $(HARNESS_GOTO).smtc
+	$(LITANI) add-job \
+	  $(POOL) \
+	  --command \
+	    'grep -v get-value $< | grep -v produce-models >$@' \
+	  --inputs $^ \
+	  --outputs $@ \
+	  --ci-stage test \
+	  --stdout-file $(LOGDIR)/smtcp-log.txt \
+	  $(MEMORY_PROFILING) \
+	  --ignore-returns 10 \
+	  --timeout $(CBMC_TIMEOUT) \
+	  --pipeline-name "$(PROOF_UID)" \
+	  --tags "stats-group:sanitize SMT" \
+	  --stderr-file $(LOGDIR)/smtcp-err-log.txt \
+	  --description "$(PROOF_UID): Sanitizing SMT file for CVC5"
 
 $(LOGDIR)/property.xml: $(HARNESS_GOTO).goto
 	$(LITANI) add-job \
@@ -1100,6 +1125,16 @@ smtc:
 	@ echo Running 'litani build'
 	$(LITANI) run-build
 	@ echo Generated SMT file for cvc5 in $(HARNESS_GOTO).smtc
+
+_smtcp: $(HARNESS_GOTO).smtcp
+smtcp:
+	@ echo Running 'litani init'
+	$(LITANI) init $(INIT_POOLS) --project $(PROJECT_NAME)
+	@ echo Running 'litani add-job'
+	$(MAKE) -B _smtcp
+	@ echo Running 'litani build'
+	$(LITANI) run-build
+	@ echo Generated sanitized SMT file for cvc5 in $(HARNESS_GOTO).smtcp
 
 _smtall: $(HARNESS_GOTO).smtz $(HARNESS_GOTO).smtb $(HARNESS_GOTO).smtc
 smtall:
