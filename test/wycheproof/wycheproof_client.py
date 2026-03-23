@@ -103,17 +103,17 @@ def run_keygen_seed_test(data_file):
         for tc in tg["tests"]:
             info(f"  tcId={tc['tcId']} ... ", end="")
             out = run_binary([binary, "keygen_seed", f"seed={tc['seed']}"])
-            if "_error" in out or "decode_error" in out:
-                assert (
-                    tc["result"] == "invalid"
-                ), f"binary error on non-invalid tcId={tc['tcId']}"
-            elif tc["result"] in ("valid", "acceptable"):
+            if tc["result"] == "valid":
                 assert (
                     out["ek"].upper() == tc["ek"].upper()
                 ), f"ek mismatch tcId={tc['tcId']}"
                 assert (
                     out["dk"].upper() == tc["dk"].upper()
                 ), f"dk mismatch tcId={tc['tcId']}"
+            else:
+                assert (
+                    False
+                ), f"Unexpected result '{tc['result']}' for tcId={tc['tcId']}"
             info("ok")
             count += 1
     info(f"  {count} keygen_seed tests passed")
@@ -132,21 +132,21 @@ def run_encaps_test(data_file):
         for tc in tg["tests"]:
             info(f"  tcId={tc['tcId']} ... ", end="")
             out = run_binary([binary, "encaps", f"ek={tc['ek']}", f"m={tc['m']}"])
-            if "_error" in out or "decode_error" in out:
+            if tc["result"] == "invalid":
                 assert (
-                    tc["result"] == "invalid"
-                ), f"binary error on non-invalid tcId={tc['tcId']}"
-            elif tc["result"] in ("valid", "acceptable"):
+                    "_error" in out or "decode_error" in out
+                ), f"binary success on invalid tcId={tc['tcId']}"
+            elif tc["result"] == "valid":
                 assert (
                     out["c"].upper() == tc["c"].upper()
                 ), f"c mismatch tcId={tc['tcId']}"
                 assert (
                     out["K"].upper() == tc["K"].upper()
                 ), f"K mismatch tcId={tc['tcId']}"
-            elif tc["result"] == "invalid":
+            else:
                 assert (
-                    out["K"].upper() != tc["K"].upper()
-                ), f"K should not match for invalid tcId={tc['tcId']}"
+                    False
+                ), f"Unexpected result '{tc['result']}' for tcId={tc['tcId']}"
             info("ok")
             count += 1
     info(f"  {count} encaps tests passed")
@@ -165,9 +165,16 @@ def run_semi_expanded_decaps_test(data_file):
         for tc in tg["tests"]:
             info(f"  tcId={tc['tcId']} ... ", end="")
             out = run_binary([binary, "decaps", f"dk={tc['dk']}", f"c={tc['c']}"])
-            # For errors (wrong length dk/c, or runtime failure), just check it didn't crash unexpectedly
-            if "_error" not in out and "decode_error" not in out:
+            if tc["result"] == "invalid":
+                assert (
+                    "_error" in out or "decode_error" in out
+                ), f"binary success on invalid tcId={tc['tcId']}"
+            elif tc["result"] == "valid":
                 assert "K" in out, f"missing K in output tcId={tc['tcId']}"
+            else:
+                assert (
+                    False
+                ), f"Unexpected result '{tc['result']}' for tcId={tc['tcId']}"
             info("ok")
             count += 1
     info(f"  {count} semi_expanded_decaps tests passed")
@@ -187,33 +194,33 @@ def run_combined_test(data_file):
             info(f"  tcId={tc['tcId']} ... ", end="")
             # Generate keypair from seed
             keygen_out = run_binary([binary, "keygen_seed", f"seed={tc['seed']}"])
-            if "_error" in keygen_out or "decode_error" in keygen_out:
+            if "decode_error" in keygen_out:
                 assert (
                     tc["result"] == "invalid"
-                ), f"keygen error on non-invalid tcId={tc['tcId']}"
+                ), f"keygen decode error on valid tcId={tc['tcId']}"
                 info("ok")
                 count += 1
                 continue
-            # Check ek matches if present
-            if "ek" in tc and tc["result"] in ("valid", "acceptable"):
-                assert (
-                    keygen_out["ek"].upper() == tc["ek"].upper()
-                ), f"ek mismatch tcId={tc['tcId']}"
+            # Keygen succeeded — check ek
+            assert "ek" in tc, f"missing ek in test vector tcId={tc['tcId']}"
+            assert (
+                keygen_out["ek"].upper() == tc["ek"].upper()
+            ), f"ek mismatch tcId={tc['tcId']}"
             # Decapsulate
             dk = keygen_out["dk"]
             decaps_out = run_binary([binary, "decaps", f"dk={dk}", f"c={tc['c']}"])
-            if "_error" in decaps_out or "decode_error" in decaps_out:
+            if tc["result"] == "invalid":
                 assert (
-                    tc["result"] == "invalid"
-                ), f"decaps error on non-invalid tcId={tc['tcId']}"
-            elif tc["result"] in ("valid", "acceptable"):
+                    "_error" in decaps_out or "decode_error" in decaps_out
+                ), f"binary success on invalid tcId={tc['tcId']}"
+            elif tc["result"] == "valid":
                 assert (
                     decaps_out["K"].upper() == tc["K"].upper()
                 ), f"K mismatch tcId={tc['tcId']}"
-            elif tc["result"] == "invalid":
+            else:
                 assert (
-                    decaps_out["K"].upper() != tc["K"].upper()
-                ), f"K should not match for invalid tcId={tc['tcId']}"
+                    False
+                ), f"Unexpected result '{tc['result']}' for tcId={tc['tcId']}"
             info("ok")
             count += 1
     info(f"  {count} combined tests passed")
