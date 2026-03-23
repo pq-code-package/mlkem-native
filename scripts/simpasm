@@ -262,6 +262,16 @@ def simplify(logger, args, asm_input, asm_output=None):
         logger.debug("Patching up disassembly ...")
         simplified = patchup_disasm(disasm, cfify=args.cfify)
 
+        # Mark stack as non-executable for ELF targets.
+        # This must be outside any preprocessor guards to ensure the
+        # .note.GNU-stack section is always emitted.
+        elf_stack_section = [
+            "#if defined(__ELF__)",
+            '.section .note.GNU-stack,"",%progbits',
+            "#endif",
+            "",
+        ]
+
         autogen_header = [
             "",
             "/*",
@@ -270,15 +280,6 @@ def simplify(logger, args, asm_input, asm_output=None):
             " */",
             "",
         ]
-
-        # Add ELF section for non-baremetal targets
-        if args.arch != "armv81m":
-            autogen_header += [
-                "#if defined(__ELF__)",
-                '.section .note.GNU-stack,"",@progbits',
-                "#endif",
-                "",
-            ]
 
         # Add Thumb directives for Armv8.1-M
         if args.arch == "armv81m":
@@ -327,7 +328,11 @@ def simplify(logger, args, asm_input, asm_output=None):
 
         # Write simplified assembly file
         full_simplified = (
-            simplified_header + autogen_header + simplified + simplified_footer
+            simplified_header
+            + autogen_header
+            + simplified
+            + simplified_footer
+            + elf_stack_section
         )
 
         logger.debug(f"Writing simplified assembly to {asm_output} ...")
@@ -345,6 +350,7 @@ def simplify(logger, args, asm_input, asm_output=None):
             + autogen_header
             + simplified
             + simplified_footer
+            + elf_stack_section
         )
 
         logger.debug(f"Assembling simplified assembly ...")

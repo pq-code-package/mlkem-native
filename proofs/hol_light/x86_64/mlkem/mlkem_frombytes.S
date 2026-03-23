@@ -24,10 +24,6 @@
  *   dev/x86_64/src/nttfrombytes.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 #ifdef __APPLE__
@@ -189,3 +185,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_nttfrombytes_avx2:
         vmovdqa %ymm1, 0x1e0(%rdi)
         retq
         .cfi_endproc
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

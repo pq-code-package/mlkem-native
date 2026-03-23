@@ -26,10 +26,6 @@
  *   dev/aarch64_opt/src/poly_tomont_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 .global MLK_ASM_NAMESPACE(poly_tomont_asm)
@@ -96,3 +92,7 @@ Lpoly_tomont_loop:
 MLK_ASM_FN_SIZE(poly_tomont_asm)
 
 #endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

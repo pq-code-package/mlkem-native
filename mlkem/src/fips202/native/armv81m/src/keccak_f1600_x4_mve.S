@@ -665,3 +665,7 @@ keccak_f1600_x4_mve_asm_roundend:
 MLK_ASM_FN_SIZE(keccak_f1600_x4_mve_asm)
 
 #endif /* MLK_FIPS202_ARMV81M_NEED_X4 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

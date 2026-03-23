@@ -9,10 +9,6 @@
  *   dev/fips202/x86_64/src/keccak_f1600_x4_avx2.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 #ifdef __APPLE__
@@ -448,3 +444,7 @@ LLkeccak_f1600_x4_avx2:
         .cfi_adjust_cfa_offset -0x300
         retq
         .cfi_endproc
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

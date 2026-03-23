@@ -9,10 +9,6 @@
  *   dev/x86_64/src/mulcache_compute.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 #ifdef __APPLE__
@@ -86,3 +82,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_mulcache_compute_avx2:
         vmovdqa %ymm8, 0xe0(%rdi)
         retq
         .cfi_endproc
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

@@ -30,10 +30,6 @@
  *   dev/aarch64_opt/src/poly_tobytes_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 #ifdef __APPLE__
@@ -114,3 +110,7 @@ Lpoly_tobytes_loop_start:
         st3 { v2.8b, v3.8b, v4.8b }, [x0], #24
         ret
         .cfi_endproc
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

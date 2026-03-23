@@ -36,10 +36,6 @@
  *   dev/x86_64/src/poly_compress_d11.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 #ifdef __APPLE__
@@ -443,3 +439,7 @@ PQCP_MLKEM_NATIVE_MLKEM768_poly_compress_d11_avx2:
         vpextrw $0x2, %xmm10, 0x15e(%rdi)
         retq
         .cfi_endproc
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif
