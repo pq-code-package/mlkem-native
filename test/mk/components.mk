@@ -32,13 +32,16 @@ $(MLKEM768_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=768
 MLKEM1024_OBJS = $(call MAKE_OBJS,$(MLKEM1024_DIR),$(SOURCES) $(FIPS202_SRCS))
 $(MLKEM1024_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024
 
-# Unit test object files - same sources but with MLK_STATIC_TESTABLE=
+# Unit test object files - same sources but with MLK_STATIC_TESTABLE= and custom heap alloc config
+UNIT_CFLAGS = -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes \
+  -DMLK_CONFIG_FILE=\"../test/configs/custom_heap_alloc_config.h\" -std=c11 -D_GNU_SOURCE
+
 MLKEM512_UNIT_OBJS = $(call MAKE_OBJS,$(MLKEM512_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
-$(MLKEM512_UNIT_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=512 -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
+$(MLKEM512_UNIT_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=512 $(UNIT_CFLAGS)
 MLKEM768_UNIT_OBJS = $(call MAKE_OBJS,$(MLKEM768_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
-$(MLKEM768_UNIT_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
+$(MLKEM768_UNIT_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=768 $(UNIT_CFLAGS)
 MLKEM1024_UNIT_OBJS = $(call MAKE_OBJS,$(MLKEM1024_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
-$(MLKEM1024_UNIT_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024 -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
+$(MLKEM1024_UNIT_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024 $(UNIT_CFLAGS)
 
 # Alloc test object files - same sources but with custom alloc config
 MLKEM512_ALLOC_OBJS = $(call MAKE_OBJS,$(MLKEM512_DIR)/alloc,$(SOURCES) $(FIPS202_SRCS))
@@ -81,9 +84,13 @@ $(MLKEM512_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/c
 $(MLKEM768_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 $(MLKEM1024_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 
-$(MLKEM512_DIR)/bin/test_unit512: CFLAGS += -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
-$(MLKEM768_DIR)/bin/test_unit768: CFLAGS += -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
-$(MLKEM1024_DIR)/bin/test_unit1024: CFLAGS += -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
+$(MLKEM512_DIR)/test/src/test_unit.c.o: CFLAGS += $(UNIT_CFLAGS)
+$(MLKEM768_DIR)/test/src/test_unit.c.o: CFLAGS += $(UNIT_CFLAGS)
+$(MLKEM1024_DIR)/test/src/test_unit.c.o: CFLAGS += $(UNIT_CFLAGS)
+
+$(MLKEM512_DIR)/bin/test_unit512: CFLAGS += $(UNIT_CFLAGS)
+$(MLKEM768_DIR)/bin/test_unit768: CFLAGS += $(UNIT_CFLAGS)
+$(MLKEM1024_DIR)/bin/test_unit1024: CFLAGS += $(UNIT_CFLAGS)
 
 # Unit library object files compiled with MLK_STATIC_TESTABLE=
 $(MLKEM512_DIR)/unit_%: CFLAGS += -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
