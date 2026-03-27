@@ -29,10 +29,8 @@
  * of mlkem-native (e.g. with varying parameter sets)
  * within a single compilation unit. */
 #define mlk_pack_pk MLK_ADD_PARAM_SET(mlk_pack_pk)
-#define mlk_unpack_pk MLK_ADD_PARAM_SET(mlk_unpack_pk)
 #define mlk_pack_sk MLK_ADD_PARAM_SET(mlk_pack_sk)
 #define mlk_unpack_sk MLK_ADD_PARAM_SET(mlk_unpack_sk)
-#define mlk_pack_ciphertext MLK_ADD_PARAM_SET(mlk_pack_ciphertext)
 #define mlk_unpack_ciphertext MLK_ADD_PARAM_SET(mlk_unpack_ciphertext)
 #define mlk_matvec_mul MLK_ADD_PARAM_SET(mlk_matvec_mul)
 #define mlk_polyvec_permute_bitrev_to_custom \
@@ -65,34 +63,6 @@ static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES],
   mlk_assert_bound_2d(pk->vec, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
   mlk_polyvec_tobytes(r, pk);
   mlk_memcpy(r + MLKEM_POLYVECBYTES, seed, MLKEM_SYMBYTES);
-}
-
-/*************************************************
- * Name:        mlk_unpack_pk
- *
- * Description: De-serialize public key from a byte array;
- *              approximate inverse of mlk_pack_pk
- *
- * Arguments:   - mlk_polyvec pk: pointer to output public-key polynomial
- *                vector Coefficients will be normalized to [0,..,q-1].
- *              - uint8_t *seed: pointer to output seed to generate matrix A
- *              - const uint8_t *packedpk: pointer to input serialized public
- *                  key.
- *
- * Specification:
- * Implements @[FIPS203, Algorithm 14 (K-PKE.Encrypt), L2-3]
- *
- **************************************************/
-static void mlk_unpack_pk(mlk_polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
-                          const uint8_t packedpk[MLKEM_INDCPA_PUBLICKEYBYTES])
-{
-  mlk_polyvec_frombytes(pk, packedpk);
-  mlk_memcpy(seed, packedpk + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
-
-  /* NOTE: If a modulus check was conducted on the PK, we know at this
-   * point that the coefficients of `pk` are unsigned canonical. The
-   * specifications and proofs, however, do _not_ assume this, and instead
-   * work with the easily provable bound by MLKEM_UINT12_LIMIT. */
 }
 
 /*************************************************
@@ -133,28 +103,6 @@ static void mlk_unpack_sk(mlk_polyvec *sk,
                           const uint8_t packedsk[MLKEM_INDCPA_SECRETKEYBYTES])
 {
   mlk_polyvec_frombytes(sk, packedsk);
-}
-
-/*************************************************
- * Name:        mlk_pack_ciphertext
- *
- * Description: Serialize the ciphertext as concatenation of the
- *              compressed and serialized vector of polynomials b
- *              and the compressed and serialized polynomial v
- *
- * Arguments:   uint8_t *r: pointer to the output serialized ciphertext
- *              mlk_poly *pk: pointer to the input vector of polynomials b
- *              mlk_poly *v: pointer to the input polynomial v
- *
- * Specification:
- * Implements @[FIPS203, Algorithm 14 (K-PKE.Encrypt), L22-23]
- *
- **************************************************/
-static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES],
-                                const mlk_polyvec *b, mlk_poly *v)
-{
-  mlk_polyvec_compress_du(r, b);
-  mlk_poly_compress_dv(r + MLKEM_POLYVECCOMPRESSEDBYTES_DU, v);
 }
 
 /*************************************************
@@ -494,42 +442,28 @@ cleanup:
   return ret;
 }
 
-/* Reference: `indcpa_enc()` in the reference implementation @[REF].
- *            - We use x4-batched versions of `poly_getnoise` to leverage
- *              batched x4-batched Keccak-f1600.
- *            - We use a different implementation of `gen_matrix()` which
- *              uses x4-batched Keccak-f1600 (see `mlk_gen_matrix()` above).
- *            - We use a mulcache to speed up matrix-vector multiplication.
- *            - We include buffer zeroization.
- */
+#if defined(MLK_CONFIG_ENABLE_MLKEM_BRAID)
 MLK_INTERNAL_API
-int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
-                   const uint8_t m[MLKEM_INDCPA_MSGBYTES],
-                   const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                   const uint8_t coins[MLKEM_SYMBYTES],
-                   MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+#else
+static MLK_NOINLINE
+#endif
+int mlk_indcpa_enc_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
+                     mlk_polyvec *sp, mlk_poly *epp,
+                     mlk_polyvec_mulcache *sp_cache,
+                     const uint8_t seed[MLKEM_SYMBYTES],
+                     const uint8_t coins[MLKEM_SYMBYTES],
+                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   int ret = 0;
-  MLK_ALLOC(seed, uint8_t, MLKEM_SYMBYTES, context);
   MLK_ALLOC(at, mlk_polymat, 1, context);
-  MLK_ALLOC(sp, mlk_polyvec, 1, context);
-  MLK_ALLOC(pkpv, mlk_polyvec, 1, context);
   MLK_ALLOC(ep, mlk_polyvec, 1, context);
   MLK_ALLOC(b, mlk_polyvec, 1, context);
-  MLK_ALLOC(v, mlk_poly, 1, context);
-  MLK_ALLOC(k, mlk_poly, 1, context);
-  MLK_ALLOC(epp, mlk_poly, 1, context);
-  MLK_ALLOC(sp_cache, mlk_polyvec_mulcache, 1, context);
 
-  if (seed == NULL || at == NULL || sp == NULL || pkpv == NULL || ep == NULL ||
-      b == NULL || v == NULL || k == NULL || epp == NULL || sp_cache == NULL)
+  if (at == NULL || ep == NULL || b == NULL)
   {
     ret = MLK_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
-
-  mlk_unpack_pk(pkpv, seed, pk);
-  mlk_poly_frommsg(k, m);
 
   /*
    * Declassify the public seed.
@@ -567,33 +501,108 @@ int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
 
   mlk_polyvec_mulcache_compute(sp_cache, sp);
   mlk_matvec_mul(b, at, sp, sp_cache);
-  mlk_polyvec_basemul_acc_montgomery_cached(v, pkpv, sp, sp_cache);
 
   mlk_polyvec_invntt_tomont(b);
-  mlk_poly_invntt_tomont(v);
 
   mlk_polyvec_add(b, ep);
+  mlk_polyvec_reduce(b);
+
+  mlk_polyvec_compress_du(ct_u, b);
+
+cleanup:
+  /* Specification: Partially implements
+   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
+  MLK_FREE(b, mlk_polyvec, 1, context);
+  MLK_FREE(ep, mlk_polyvec, 1, context);
+  MLK_FREE(at, mlk_polymat, 1, context);
+  return ret;
+}
+
+#if defined(MLK_CONFIG_ENABLE_MLKEM_BRAID)
+MLK_INTERNAL_API
+#else
+static MLK_NOINLINE
+#endif
+int mlk_indcpa_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
+                     const mlk_polyvec *sp, const mlk_poly *epp,
+                     const mlk_polyvec_mulcache *sp_cache,
+                     const uint8_t m[MLKEM_INDCPA_MSGBYTES],
+                     const uint8_t ek_vector[MLKEM_POLYVECBYTES],
+                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+{
+  int ret = 0;
+  MLK_ALLOC(pkpv, mlk_polyvec, 1, context);
+  MLK_ALLOC(v, mlk_poly, 1, context);
+  MLK_ALLOC(k, mlk_poly, 1, context);
+
+  if (pkpv == NULL || v == NULL || k == NULL)
+  {
+    ret = MLK_ERR_OUT_OF_MEMORY;
+    goto cleanup;
+  }
+
+  mlk_polyvec_frombytes(pkpv, ek_vector);
+  mlk_poly_frommsg(k, m);
+
+  mlk_polyvec_basemul_acc_montgomery_cached(v, pkpv, sp, sp_cache);
+
+  mlk_poly_invntt_tomont(v);
+
   mlk_poly_add(v, epp);
   mlk_poly_add(v, k);
-
-  mlk_polyvec_reduce(b);
   mlk_poly_reduce(v);
 
-  mlk_pack_ciphertext(c, b, v);
+  mlk_poly_compress_dv(ct_v, v);
+
+cleanup:
+  /* Specification: Partially implements
+   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
+  MLK_FREE(k, mlk_poly, 1, context);
+  MLK_FREE(v, mlk_poly, 1, context);
+  MLK_FREE(pkpv, mlk_polyvec, 1, context);
+  return ret;
+}
+
+/* Reference: `indcpa_enc()` in the reference implementation @[REF].
+ *            Implemented as a composition of mlk_indcpa_enc_u and
+ *            mlk_indcpa_enc_v.
+ */
+MLK_INTERNAL_API
+int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
+                   const uint8_t m[MLKEM_INDCPA_MSGBYTES],
+                   const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
+                   const uint8_t coins[MLKEM_SYMBYTES],
+                   MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+{
+  int ret = 0;
+  MLK_ALLOC(sp, mlk_polyvec, 1, context);
+  MLK_ALLOC(epp, mlk_poly, 1, context);
+  MLK_ALLOC(sp_cache, mlk_polyvec_mulcache, 1, context);
+
+  if (sp == NULL || epp == NULL || sp_cache == NULL)
+  {
+    ret = MLK_ERR_OUT_OF_MEMORY;
+    goto cleanup;
+  }
+
+  /* Phase 1: compute ct_u and intermediate state (sp, epp, sp_cache) */
+  ret = mlk_indcpa_enc_u(c, sp, epp, sp_cache, pk + MLKEM_POLYVECBYTES, coins,
+                         context);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
+
+  /* Phase 2: compute ct_v using intermediate state */
+  ret = mlk_indcpa_enc_v(c + MLKEM_POLYVECCOMPRESSEDBYTES_DU, sp, epp, sp_cache,
+                         m, pk, context);
 
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   MLK_FREE(sp_cache, mlk_polyvec_mulcache, 1, context);
   MLK_FREE(epp, mlk_poly, 1, context);
-  MLK_FREE(k, mlk_poly, 1, context);
-  MLK_FREE(v, mlk_poly, 1, context);
-  MLK_FREE(b, mlk_polyvec, 1, context);
-  MLK_FREE(ep, mlk_polyvec, 1, context);
-  MLK_FREE(pkpv, mlk_polyvec, 1, context);
   MLK_FREE(sp, mlk_polyvec, 1, context);
-  MLK_FREE(at, mlk_polymat, 1, context);
-  MLK_FREE(seed, uint8_t, MLKEM_SYMBYTES, context);
   return ret;
 }
 
@@ -646,10 +655,8 @@ cleanup:
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
 #undef mlk_pack_pk
-#undef mlk_unpack_pk
 #undef mlk_pack_sk
 #undef mlk_unpack_sk
-#undef mlk_pack_ciphertext
 #undef mlk_unpack_ciphertext
 #undef mlk_matvec_mul
 #undef mlk_polyvec_permute_bitrev_to_custom

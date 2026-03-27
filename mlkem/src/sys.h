@@ -146,6 +146,22 @@
 #endif
 #endif /* !MLK_ALWAYS_INLINE */
 
+/*
+ * MLK_NOINLINE: Prevent inlining.
+ * - GCC/Clang: __attribute__((noinline))
+ * - MSVC: __declspec(noinline)
+ * - Other: (no annotation)
+ */
+#if !defined(MLK_NOINLINE)
+#if defined(_MSC_VER)
+#define MLK_NOINLINE __declspec(noinline)
+#elif defined(__GNUC__) || defined(__clang__)
+#define MLK_NOINLINE __attribute__((noinline))
+#else
+#define MLK_NOINLINE
+#endif
+#endif /* !MLK_NOINLINE */
+
 #ifndef MLK_STATIC_TESTABLE
 #define MLK_STATIC_TESTABLE static
 #endif

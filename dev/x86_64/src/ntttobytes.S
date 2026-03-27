@@ -89,7 +89,7 @@ vmovdqu %ymm9, (\offset_out +160)(%rdi)
 
 .text
 .global MLK_ASM_NAMESPACE(ntttobytes_avx2)
-.balign 4
+.balign 64
 MLK_ASM_FN_SYMBOL(ntttobytes_avx2)
 
 // Broadcast 3329 (0x0D01) to all elements of ymm0

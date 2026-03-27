@@ -450,3 +450,10 @@ configs:
       MLK_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
+  - path: test/configs/test_mlkem_braid_config.h
+    description: "Enable ML-KEM Braid API"
+    defines:
+      MLK_CONFIG_NAMESPACE_PREFIX: mlk
+      MLK_CONFIG_ENABLE_MLKEM_BRAID: true
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"

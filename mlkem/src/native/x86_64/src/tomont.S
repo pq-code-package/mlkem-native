@@ -32,7 +32,7 @@
  */
 
 .text
-.balign 4
+.balign 64
 .global MLK_ASM_NAMESPACE(tomont_avx2)
 MLK_ASM_FN_SYMBOL(tomont_avx2)
 

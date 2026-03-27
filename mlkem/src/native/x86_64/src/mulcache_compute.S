@@ -13,7 +13,7 @@
  */
 
 .text
-.balign 4
+.balign 64
 .global MLK_ASM_NAMESPACE(poly_mulcache_compute_avx2)
 MLK_ASM_FN_SYMBOL(poly_mulcache_compute_avx2)
 

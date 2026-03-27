@@ -78,6 +78,11 @@ jobs:
           echo "=== Patched extensions.bzl ==="
           cat third_party/mlkem_native/extensions.bzl
 
+      - name: Update work buffer sizes
+        run: |
+          cd "$EXPO_DIR"
+          git apply "$GITHUB_WORKSPACE/integration/opentitan/update-alloc-sizes.patch"
+
       - name: Patch functest to only test deterministic API
         run: |
           cd "$EXPO_DIR"

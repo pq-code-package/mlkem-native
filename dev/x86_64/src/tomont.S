@@ -63,7 +63,7 @@ vmovdqa %ymm10, (\offset +224)(%rdi)
 
 .text
 .global MLK_ASM_NAMESPACE(tomont_avx2)
-.balign 4
+.balign 64
 MLK_ASM_FN_SYMBOL(tomont_avx2)
 
 // Broadcast 3329 (0x0D01) to all elements of ymm0

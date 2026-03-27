@@ -71,7 +71,7 @@ vmovdqa %ymm11, (\offset +224)(%rdi)
 
 .text
 .global MLK_ASM_NAMESPACE(nttunpack_avx2)
-.balign 4
+.balign 64
 MLK_ASM_FN_SYMBOL(nttunpack_avx2)
 
 nttunpack_128_coefficients 0

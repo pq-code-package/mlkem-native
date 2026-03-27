@@ -225,7 +225,7 @@ vmovdqa %ymm11,(128*\off+112)*2(%rdi)
 
 .text
 .global MLK_ASM_NAMESPACE(ntt_avx2)
-.balign 4
+.balign 64
 MLK_ASM_FN_SYMBOL(ntt_avx2)
 
 // Broadcast 3329 (0x0D01) to all elements of ymm0

@@ -65,7 +65,7 @@
 
 .text
 .global MLK_ASM_NAMESPACE(rej_uniform_asm)
-.balign 4
+.balign 64
 MLK_ASM_FN_SYMBOL(rej_uniform_asm)
   subq $STACK_SIZE, %rsp
 

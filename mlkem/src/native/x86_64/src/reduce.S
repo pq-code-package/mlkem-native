@@ -34,7 +34,7 @@
  */
 
 .text
-.balign 4
+.balign 64
 .global MLK_ASM_NAMESPACE(reduce_avx2)
 MLK_ASM_FN_SYMBOL(reduce_avx2)
 

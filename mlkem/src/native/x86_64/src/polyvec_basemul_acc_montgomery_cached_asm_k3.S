@@ -14,7 +14,7 @@
  */
 
 .text
-.balign 4
+.balign 64
 .global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k3)
 MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k3)
 

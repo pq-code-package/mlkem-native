@@ -13,7 +13,7 @@
 #include "poly_basemul.inc"
 
 .global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2)
-.balign 4
+.balign 64
 MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_asm_k2)
 
 polyvec_basemul 2
