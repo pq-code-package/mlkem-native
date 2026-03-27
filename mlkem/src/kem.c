@@ -28,6 +28,7 @@
 #include "indcpa.h"
 #include "randombytes.h"
 #include "symmetric.h"
+#include "stdio.h"
 #include "verify.h"
 
 /* Parameter set namespacing
@@ -213,7 +214,7 @@ int mlk_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                            MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   int ret;
-
+  printf("DEBUG: %s:%d in %s()\n", __FILE__, __LINE__, __func__);
   ret = mlk_indcpa_keypair_derand(pk, sk, coins, context);
   if (ret != 0)
   {
@@ -229,7 +230,6 @@ int mlk_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 
   /* Declassify public key */
   MLK_CT_TESTING_DECLASSIFY(pk, MLKEM_INDCCA_PUBLICKEYBYTES);
-
   /* Pairwise Consistency Test (PCT) @[FIPS140_3_IG, p.87] */
   ret = mlk_check_pct(pk, sk, context);
   if (ret != 0)
