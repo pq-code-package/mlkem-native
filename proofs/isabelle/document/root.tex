@@ -1,0 +1,70 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage{microtype}
+\usepackage{a4wide}
+\usepackage{tgpagella}
+\usepackage[euler-digits]{eulervm}
+\usepackage{mdwlist}
+\usepackage[T1]{fontenc}
+\usepackage{isabelle,isabellesym}
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{eurosym}
+\usepackage[only,bigsqcap,bigparallel,fatsemi,interleave,sslash]{stmaryrd}
+\usepackage{eufrak}
+\usepackage{textcomp}
+\usepackage{wasysym}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+
+\usepackage{xcolor}
+\definecolor{mlkblue}{HTML}{2563EB}
+\definecolor{mlklightblue}{HTML}{DBEAFE}
+
+% this should be the last package used
+\usepackage{pdfsetup}
+
+% urls in roman style, theory text in math-similar italics
+\urlstyle{rm}
+\isabellestyle{it}
+
+% for uniform font size
+\renewcommand{\isastyle}{\isastyleminor}
+
+% suppress proof bodies, keep theorem statements
+\isadroptag{proof}
+
+\renewcommand{\isasymlonglonglongrightarrow}{\longlonglongrightarrow}
+
+\begin{document}
+
+\title{ML-KEM Functional Correctness in Isabelle/HOL}
+\author{mlkem-native contributors}
+\maketitle
+
+\begin{abstract}
+Machine-checked functional correctness proofs for the polynomial
+arithmetic routines in \texttt{mlkem-native}, an ML-KEM (FIPS~203)
+implementation in portable C\@.  The C code is automatically translated
+to Isabelle/HOL via \emph{AutoCorrode}, and each function is verified
+against an abstract integer-level specification.  The Number Theoretic
+Transform (NTT) and its inverse are further shown to be two-sided
+inverses modulo~$q$.
+\end{abstract}
+
+\tableofcontents
+
+% sane default for proof documents
+\parindent 0pt\parskip 0.5ex
+
+% generated text of all theories
+\input{session}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
