@@ -1214,7 +1214,7 @@ let MLKEM_NTT_CORRECT = prove
      CONV_TAC INT_REDUCE_CONV]))
 );;
 
-let MLKEM_NTT_NOIBT_SUBROUTINE_CORRECT  = prove
+let MLKEM_NTT_NOIBT_SUBROUTINE_CORRECT = prove
   (`!a zetas (zetas_list:int16 list) x pc stackpointer returnaddress.
     aligned 32 a /\
     aligned 32 zetas /\
@@ -1250,7 +1250,7 @@ let MLKEM_NTT_NOIBT_SUBROUTINE_CORRECT  = prove
 (* NOTE: This must be kept in sync with the CBMC specification
  * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
 
-let MLKEM_NTT_SUBROUTINE_CORRECT  = prove
+let MLKEM_NTT_SUBROUTINE_CORRECT = prove
   (`!a zetas (zetas_list:int16 list) x pc stackpointer returnaddress.
     aligned 32 a /\
     aligned 32 zetas /\

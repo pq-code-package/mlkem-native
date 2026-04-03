@@ -259,7 +259,7 @@ let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(
     CONV_TAC INT_REDUCE_CONV])
 );;
 
-let MLKEM_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_CORRECT  = prove(
+let MLKEM_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_CORRECT = prove(
  `!r a zetas (zetas_list:int16 list) x pc stackpointer returnaddress.
     aligned 32 r /\
     aligned 32 a /\

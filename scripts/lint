@@ -295,6 +295,51 @@ gh_group_start "Check contracts"
 check-contracts
 gh_group_end
 
+check-theorems()
+{
+  local success=true
+  for arch in aarch64 x86_64; do
+    local proofs_dir="$ROOT/proofs/hol_light/$arch/proofs"
+    local proofs
+    proofs=$("$ROOT/proofs/hol_light/$arch/list_proofs.sh")
+
+    for routine in $proofs; do
+      local suffixes=("CORRECT" "SAFE" "SUBROUTINE_SAFE")
+      if [[ $arch == "x86_64" && ${routine} == "mlkem_rej_uniform" ]]; then
+        suffixes=("CORRECT")
+      elif [[ $arch == "x86_64" ]]; then
+        suffixes+=("SUBROUTINE_CORRECT" "NOIBT_SUBROUTINE_CORRECT" "NOIBT_SUBROUTINE_SAFE")
+      fi
+
+      for sfx in "${suffixes[@]}"; do
+        if ! grep -qE "_${sfx} = (time )?prove" "$proofs_dir/${routine}.ml"; then
+          gh_error "${routine}" "" "Missing theorem" "${routine}_${sfx} not found in ${routine}.ml for arch ${arch}"
+          success=false
+        fi
+      done
+
+      # Check for CHEAT_TAC usage (bypasses actual proving)
+      if grep -q "CHEAT_TAC" "$proofs_dir/${routine}.ml"; then
+        gh_error "${routine}" "" "CHEAT_TAC detected" "${routine}.ml uses CHEAT_TAC"
+        success=false
+      fi
+    done
+  done
+
+  if $success; then
+    info "Check HOL-Light theorems"
+    gh_summary_success "Check HOL-Light theorems"
+  else
+    error "Check HOL-Light theorems"
+    SUCCESS=false
+    gh_summary_failure "Check HOL-Light theorems"
+  fi
+}
+
+gh_group_start "Check HOL-Light theorems"
+check-theorems
+gh_group_end
+
 if ! $SUCCESS; then
   if $IN_GITHUB_CONTEXT; then
     printf "%b%s%b\n" "${RED}" "The following checks failed, expand each for more details." "${NORMAL}"
