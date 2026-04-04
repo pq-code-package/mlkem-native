@@ -28,6 +28,7 @@ jobs:
           - valgrind-varlat_clang19
           - valgrind-varlat_clang20
           - valgrind-varlat_clang21
+          - valgrind-varlat_clang22
           - valgrind-varlat_gcc48
           - valgrind-varlat_gcc49
           - valgrind-varlat_gcc7
@@ -64,7 +65,7 @@ jobs:
           valgrind_flags: --variable-latency-errors=yes
       - name:  Build and run test (-Ofast)
         # -Ofast got deprecated in clang19; -O3 -ffast-math should be used instead
-        if: ${{ matrix.nix-shell != 'valgrind-varlat_clang19' &&  matrix.nix-shell !=  'valgrind-varlat_clang20' && matrix.nix-shell !=  'valgrind-varlat_clang21'}}
+        if: ${{ matrix.nix-shell != 'valgrind-varlat_clang19' &&  matrix.nix-shell !=  'valgrind-varlat_clang20' && matrix.nix-shell !=  'valgrind-varlat_clang21' && matrix.nix-shell !=  'valgrind-varlat_clang22'}}
         uses: ./.github/actions/ct-test
         with:
           cflags: -Ofast -DMLK_CONFIG_KEYGEN_PCT
