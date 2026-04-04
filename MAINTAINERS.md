@@ -4,7 +4,7 @@
 
 ## Active Maintainers
 
-| Name                    | GitHub                                    | Chat           | Affiliation
-|-------------------------|-------------------------------------------|----------------|----------------------
-| Hanno Becker            | [hanno-becker](https://github.com/hanno-becker) |              | AWS                  |
-| Matthias J. Kannwischer | [mkannwischer](https://github.com/mkannwischer) | matthiaskannwischer | Chelpis Quantum Corp |
+| Name                    | GitHub                                          |
+|-------------------------|-------------------------------------------------|
+| Hanno Becker            | [hanno-becker](https://github.com/hanno-becker) |
+| Matthias J. Kannwischer | [mkannwischer](https://github.com/mkannwischer) |
