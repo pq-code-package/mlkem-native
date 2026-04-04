@@ -52,6 +52,8 @@
             inherit system;
             overlays = [
               (_:_: {
+                clang_22 = pkgs-unstable.clang_22;
+
                 # From 24.05 (dropped in 25.11)
                 gcc48 = pkgs-2405.gcc48;
                 gcc49 = pkgs-2405.gcc49;
@@ -179,6 +181,7 @@
           devShells.clang19 = util.mkShellWithCC' pkgs.clang_19;
           devShells.clang20 = util.mkShellWithCC' pkgs.clang_20;
           devShells.clang21 = util.mkShellWithCC' pkgs.clang_21;
+          devShells.clang22 = util.mkShellWithCC' pkgs.clang_22;
 
           devShells.zig0_12 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_12);
           devShells.zig0_13 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_13);
@@ -203,6 +206,7 @@
           devShells.valgrind-varlat_clang19 = util.mkShellWithCC_valgrind' pkgs.clang_19;
           devShells.valgrind-varlat_clang20 = util.mkShellWithCC_valgrind' pkgs.clang_20;
           devShells.valgrind-varlat_clang21 = util.mkShellWithCC_valgrind' pkgs.clang_21;
+          devShells.valgrind-varlat_clang22 = util.mkShellWithCC_valgrind' pkgs.clang_22;
           devShells.valgrind-varlat_gcc48 = util.mkShellWithCC_valgrind' pkgs.gcc48;
           devShells.valgrind-varlat_gcc49 = util.mkShellWithCC_valgrind' pkgs.gcc49;
           devShells.valgrind-varlat_gcc7 = util.mkShellWithCC_valgrind' pkgs.gcc7;
