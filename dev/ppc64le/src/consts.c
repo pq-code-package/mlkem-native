@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
+<<<<<<< main
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,6 +12,11 @@
 #include "../../../common.h"
 
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
+=======
+#include "../../../common.h"
+
+#if defined(MLK_ARITH_BACKEND_PPC64LE) && \
+>>>>>>> ppc64le_backend
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include "consts.h"
@@ -78,5 +84,10 @@ MLK_ALIGN const int16_t mlk_ppc_qdata[] = {
 /* zetas for invNTT */
 #include "consts_intt.inc"
 };
+<<<<<<< main
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
           !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+=======
+
+#endif /* MLK_ARITH_BACKEND_PPC64LE && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+>>>>>>> ppc64le_backend

@@ -5,25 +5,40 @@
 
 
 /*
+<<<<<<< main
  * Copyright IBM Corp. 2025, 2026
+=======
+ * Copyright 2025- IBM Corp.
+>>>>>>> ppc64le_backend
  *
  *===================================================================================
  * Written by Danny Tsen <dtsen@us.ibm.com>
  *
  */
 #include "../../../common.h"
+<<<<<<< main
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
+=======
+#if defined(MLK_ARITH_BACKEND_PPC64LE) && \
+>>>>>>> ppc64le_backend
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
 #include "consts.h"
 
+<<<<<<< main
 /*
  * poly_reduce: Applies Barrett reduction to all coefficients of a polynomial
  *              for details of the Barrett reduction
  *
  * Arguments: *r: pointer to input/output polynomial
  */
+=======
+// poly_reduce: Applies Barrett reduction to all coefficients of a polynomial
+//              for details of the Barrett reduction
+//
+// Arguments: *r: pointer to input/output polynomial
+>>>>>>> ppc64le_backend
 
 // Barrett reduce constatnts
 #define V20159  0
@@ -31,9 +46,12 @@
 #define V_26    2
 #define V_MKQ   3
 
+<<<<<<< main
 .machine "any"
 .text
 
+=======
+>>>>>>> ppc64le_backend
 .macro BREDUCE_4X _v0 _v1 _v2 _v3
         lxvd2x  32+8, 0, 3
         lxvd2x  32+12, 14, 3
@@ -97,9 +115,15 @@
         stxvd2x 32+17, 11, 3
 .endm
 
+<<<<<<< main
 /*
  * Conditional addition to get unsigned canonical representative
  */
+=======
+//
+// Conditional addition to get unsigned canonical representative
+//
+>>>>>>> ppc64le_backend
 .macro To_unsigned_16
         lxvd2x    32+12, 0, 3
         lxvd2x    32+13, 14, 3
@@ -128,6 +152,10 @@
         stxvd2x 32+0, 9, 3
 .endm
 
+<<<<<<< main
+=======
+.text
+>>>>>>> ppc64le_backend
 .global MLK_ASM_NAMESPACE(reduce_ppc)
 .balign 16
 MLK_ASM_FN_SYMBOL(reduce_ppc)
@@ -232,5 +260,9 @@ MLK_ASM_FN_SYMBOL(reduce_ppc)
 #undef V_MKQ
 
 /* simpasm: footer-start */
+<<<<<<< main
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */
+=======
+#endif /* MLK_ARITH_BACKEND_PPC64LE && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+>>>>>>> ppc64le_backend

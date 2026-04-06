@@ -4,6 +4,7 @@
  */
 
 /*
+<<<<<<< main
  * Copyright IBM Corp. 2025, 2026
  *
  * ===================================================================================
@@ -12,6 +13,17 @@
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
+=======
+ * Copyright 2025- IBM Corp.
+ *
+ *===================================================================================
+ * Written by Danny Tsen <dtsen@us.ibm.com>
+ *
+ */
+
+#include "../../../common.h"
+#if defined(MLK_ARITH_BACKEND_PPC64LE) && \
+>>>>>>> ppc64le_backend
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 /*
@@ -66,6 +78,7 @@ MLK_ASM_FN_SYMBOL(intt_ppc)
         xxlxor 35, 35, 35
         vspltish 4, 1
         xxlor 2, 34, 34
+<<<<<<< main
         xxlor 3, 35, 35
         xxlor 4, 36, 36
         li 10, 32
@@ -1277,10 +1290,37 @@ Lintt_ppc__Loopf:
         stxvd2x 41, 3, 16
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
+=======
+        xxlor 3, 35, 35
+        xxlor 4, 36, 36
+        li 10, 32
+        li 11, 48
+        lxvx 6, 10, 4
+        lxvx 32, 11, 4
+        vspltisw 8, 13
+        vadduwm 8, 8, 8
+        xxlor 8, 40, 40
+        vspltisw 9, 1
+        vsubuwm 10, 8, 9
+        vslw 9, 9, 10
+        xxlor 7, 41, 41
+        li 10, 16
+        li 11, 32
+        li 12, 48
+        li 15, 64
+        li 16, 80
+        li 17, 96
+        li 18, 112
+        addi 14, 4, 64
+        lvx 10, 0, 14
+        li 8, 4
+        mtctr 8
+>>>>>>> ppc64le_backend
         xxlor 37, 0, 0
         xxlor 34, 2, 2
         xxlor 35, 3, 3
         xxlor 36, 4, 4
+<<<<<<< main
         li 8, 16
         li 11, 32
         li 12, 48
@@ -1296,6 +1336,47 @@ Lintt_ppc__Loopf:
         vmhraddshs 14, 25, 7, 3
         vmhraddshs 19, 26, 8, 3
         vmhraddshs 24, 30, 9, 3
+=======
+
+Lintt_ppc__Loopf:
+        lxvd2x 57, 0, 3
+        lxvd2x 58, 10, 3
+        lxvd2x 62, 11, 3
+        lxvd2x 63, 12, 3
+        addi 3, 3, 64
+        vmladduhm 15, 25, 10, 3
+        vmladduhm 20, 26, 10, 3
+        vmladduhm 27, 30, 10, 3
+        vmladduhm 28, 31, 10, 3
+        vmhraddshs 14, 25, 10, 3
+        vmhraddshs 19, 26, 10, 3
+        vmhraddshs 24, 30, 10, 3
+        vmhraddshs 29, 31, 10, 3
+        vmladduhm 15, 15, 2, 3
+        vmladduhm 20, 20, 2, 3
+        vmladduhm 25, 27, 2, 3
+        vmladduhm 30, 28, 2, 3
+        vmhraddshs 15, 15, 5, 14
+        vmhraddshs 20, 20, 5, 19
+        vmhraddshs 25, 25, 5, 24
+        vmhraddshs 30, 30, 5, 29
+        vsrah 6, 15, 4
+        vsrah 7, 20, 4
+        vsrah 8, 25, 4
+        vsrah 9, 30, 4
+        lxvd2x 57, 0, 3
+        lxvd2x 58, 10, 3
+        lxvd2x 62, 11, 3
+        lxvd2x 63, 12, 3
+        addi 3, 3, 64
+        vmladduhm 15, 25, 10, 3
+        vmladduhm 20, 26, 10, 3
+        vmladduhm 27, 30, 10, 3
+        vmladduhm 28, 31, 10, 3
+        vmhraddshs 14, 25, 10, 3
+        vmhraddshs 19, 26, 10, 3
+        vmhraddshs 24, 30, 10, 3
+>>>>>>> ppc64le_backend
         vmhraddshs 29, 31, 10, 3
         vmladduhm 15, 15, 2, 3
         vmladduhm 20, 20, 2, 3
@@ -1309,6 +1390,7 @@ Lintt_ppc__Loopf:
         vsrah 18, 20, 4
         vsrah 23, 25, 4
         vsrah 28, 30, 4
+<<<<<<< main
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
@@ -1329,6 +1411,45 @@ Lintt_ppc__Loopf:
         lxvd2x 54, 3, 16
         lxvd2x 55, 3, 18
         lxvd2x 56, 3, 20
+=======
+        addi 3, 3, -128
+        stxvd2x 38, 0, 3
+        stxvd2x 39, 10, 3
+        stxvd2x 40, 11, 3
+        stxvd2x 41, 12, 3
+        stxvd2x 45, 15, 3
+        stxvd2x 50, 16, 3
+        stxvd2x 55, 17, 3
+        stxvd2x 60, 18, 3
+        addi 3, 3, 128
+        bdnz Lintt_ppc__Loopf
+        addi 3, 3, -512
+        nop
+        ori 2, 2, 0
+        addi 14, 4, 1104
+        li 7, 4
+        li 8, 4
+        mtctr 8
+        mr	5, 3
+
+Lintt_ppc__Loop2:
+        lxvd2x 57, 0, 5
+        lxvd2x 58, 10, 5
+        vmrgew 8, 25, 26
+        vmrgow 21, 25, 26
+        lxvd2x 57, 11, 5
+        lxvd2x 58, 12, 5
+        vmrgew 12, 25, 26
+        vmrgow 22, 25, 26
+        lxvd2x 57, 15, 5
+        lxvd2x 58, 16, 5
+        vmrgew 16, 25, 26
+        vmrgow 23, 25, 26
+        lxvd2x 57, 17, 5
+        lxvd2x 58, 18, 5
+        vmrgew 20, 25, 26
+        vmrgow 24, 25, 26
+>>>>>>> ppc64le_backend
         vsubuhm 25, 8, 21
         vsubuhm 26, 12, 22
         vsubuhm 30, 16, 23
@@ -1385,10 +1506,17 @@ Lintt_ppc__Loopf:
         vmladduhm 9, 9, 3, 12
         vmladduhm 13, 13, 3, 16
         vmladduhm 17, 17, 3, 20
+<<<<<<< main
         stxvd2x 36, 3, 9
         stxvd2x 41, 3, 16
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
+=======
+        xxlor 10, 36, 36
+        xxlor 11, 41, 41
+        xxlor 12, 45, 45
+        xxlor 13, 49, 49
+>>>>>>> ppc64le_backend
         xxlor 37, 0, 0
         xxlor 34, 2, 2
         xxlor 35, 3, 3
@@ -1421,6 +1549,7 @@ Lintt_ppc__Loopf:
         vsrah 18, 20, 4
         vsrah 23, 25, 4
         vsrah 28, 30, 4
+<<<<<<< main
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
@@ -1441,6 +1570,53 @@ Lintt_ppc__Loopf:
         lxvd2x 54, 3, 16
         lxvd2x 55, 3, 18
         lxvd2x 56, 3, 20
+=======
+        xxlor 46, 10, 10
+        xxlor 51, 11, 11
+        xxlor 56, 12, 12
+        xxlor 61, 13, 13
+        vmrgew 10, 13, 14
+        vmrgow 11, 13, 14
+        vmrgew 12, 18, 19
+        vmrgow 13, 18, 19
+        vmrgew 14, 23, 24
+        vmrgow 15, 23, 24
+        vmrgew 16, 28, 29
+        vmrgow 17, 28, 29
+        stxvd2x 42, 0, 5
+        stxvd2x 43, 10, 5
+        stxvd2x 44, 11, 5
+        stxvd2x 45, 12, 5
+        stxvd2x 46, 15, 5
+        stxvd2x 47, 16, 5
+        stxvd2x 48, 17, 5
+        stxvd2x 49, 18, 5
+        addi 5, 5, 128
+        bdnz Lintt_ppc__Loop2
+        ori 2, 2, 0
+        mr	5, 3
+        li 7, 8
+        li 8, 4
+        mtctr 8
+
+Lintt_ppc__Loop4:
+        lxvd2x 10, 0, 5
+        lxvd2x 11, 10, 5
+        xxmrgld	40, 11, 10
+        xxmrghd	53, 11, 10
+        lxvd2x 10, 11, 5
+        lxvd2x 11, 12, 5
+        xxmrgld	44, 11, 10
+        xxmrghd	54, 11, 10
+        lxvd2x 10, 15, 5
+        lxvd2x 11, 16, 5
+        xxmrgld	48, 11, 10
+        xxmrghd	55, 11, 10
+        lxvd2x 10, 17, 5
+        lxvd2x 11, 18, 5
+        xxmrgld	52, 11, 10
+        xxmrghd	56, 11, 10
+>>>>>>> ppc64le_backend
         vsubuhm 25, 8, 21
         vsubuhm 26, 12, 22
         vsubuhm 30, 16, 23
@@ -1497,10 +1673,17 @@ Lintt_ppc__Loopf:
         vmladduhm 9, 9, 3, 12
         vmladduhm 13, 13, 3, 16
         vmladduhm 17, 17, 3, 20
+<<<<<<< main
         stxvd2x 36, 3, 9
         stxvd2x 41, 3, 16
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
+=======
+        xxlor 10, 36, 36
+        xxlor 11, 41, 41
+        xxlor 12, 45, 45
+        xxlor 13, 49, 49
+>>>>>>> ppc64le_backend
         xxlor 37, 0, 0
         xxlor 34, 2, 2
         xxlor 35, 3, 3
@@ -1513,6 +1696,13 @@ Lintt_ppc__Loopf:
         lxvd2x 41, 11, 14
         lxvd2x 42, 12, 14
         addi 14, 14, 64
+<<<<<<< main
+=======
+        xxswapd	39, 39
+        xxswapd	40, 40
+        xxswapd	41, 41
+        xxswapd	42, 42
+>>>>>>> ppc64le_backend
         vmladduhm 15, 25, 7, 3
         vmladduhm 20, 26, 8, 3
         vmladduhm 27, 30, 9, 3
@@ -1533,11 +1723,45 @@ Lintt_ppc__Loopf:
         vsrah 18, 20, 4
         vsrah 23, 25, 4
         vsrah 28, 30, 4
+<<<<<<< main
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
         li 9, 384
+=======
+        xxlor 46, 10, 10
+        xxlor 51, 11, 11
+        xxlor 56, 12, 12
+        xxlor 61, 13, 13
+        xxmrgld	42, 46, 45
+        xxmrghd	43, 46, 45
+        xxmrgld	44, 51, 50
+        xxmrghd	45, 51, 50
+        xxmrgld	46, 56, 55
+        xxmrghd	47, 56, 55
+        xxmrgld	48, 61, 60
+        xxmrghd	49, 61, 60
+        stxvd2x 42, 0, 5
+        stxvd2x 43, 10, 5
+        stxvd2x 44, 11, 5
+        stxvd2x 45, 12, 5
+        stxvd2x 46, 15, 5
+        stxvd2x 47, 16, 5
+        stxvd2x 48, 17, 5
+        stxvd2x 49, 18, 5
+        addi 5, 5, 128
+        bdnz Lintt_ppc__Loop4
+        nop
+        ori 2, 2, 0
+        li 7, 16
+        li 5, 0
+        li 15, 4
+        mtctr 15
+
+Lintt_ppc__Loop8:
+        mr	9, 5
+>>>>>>> ppc64le_backend
         add 10, 7, 9
         addi 16, 9, 32
         addi 17, 10, 32
@@ -1649,11 +1873,21 @@ Lintt_ppc__Loopf:
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
+<<<<<<< main
         nop
         nop
         nop
         li 7, 32
         li 9, 0
+=======
+        addi 5, 5, 128
+        bdnz Lintt_ppc__Loop8
+        nop
+        ori 2, 2, 0
+        li 5, 0
+        li 7, 32
+        mr	9, 5
+>>>>>>> ppc64le_backend
         add 10, 7, 9
         addi 16, 9, 64
         addi 17, 10, 64
@@ -1765,8 +1999,14 @@ Lintt_ppc__Loopf:
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
+<<<<<<< main
         addi 14, 14, -64
         li 9, 16
+=======
+        li 5, 16
+        addi 14, 14, -64
+        mr	9, 5
+>>>>>>> ppc64le_backend
         add 10, 7, 9
         addi 16, 9, 64
         addi 17, 10, 64
@@ -1878,7 +2118,12 @@ Lintt_ppc__Loopf:
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
+<<<<<<< main
         li 9, 256
+=======
+        li 5, 256
+        mr	9, 5
+>>>>>>> ppc64le_backend
         add 10, 7, 9
         addi 16, 9, 64
         addi 17, 10, 64
@@ -1990,8 +2235,14 @@ Lintt_ppc__Loopf:
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
+<<<<<<< main
         addi 14, 14, -64
         li 9, 272
+=======
+        li 5, 272
+        addi 14, 14, -64
+        mr	9, 5
+>>>>>>> ppc64le_backend
         add 10, 7, 9
         addi 16, 9, 64
         addi 17, 10, 64
@@ -2103,9 +2354,16 @@ Lintt_ppc__Loopf:
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
+<<<<<<< main
         nop
         li 7, 64
         li 9, 0
+=======
+        ori 2, 2, 0
+        li 5, 0
+        li 7, 64
+        mr	9, 5
+>>>>>>> ppc64le_backend
         add 10, 7, 9
         addi 16, 9, 16
         addi 17, 10, 16
@@ -2186,6 +2444,10 @@ Lintt_ppc__Loopf:
         xxlor 35, 3, 3
         xxlor 36, 4, 4
         lvx 10, 0, 14
+<<<<<<< main
+=======
+        addi 14, 14, 16
+>>>>>>> ppc64le_backend
         vmladduhm 15, 25, 10, 3
         vmladduhm 20, 26, 10, 3
         vmladduhm 27, 30, 10, 3
@@ -2210,8 +2472,13 @@ Lintt_ppc__Loopf:
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
+<<<<<<< main
         addi 14, 14, 16
         li 9, 128
+=======
+        li 5, 128
+        mr	9, 5
+>>>>>>> ppc64le_backend
         add 10, 7, 9
         addi 16, 9, 16
         addi 17, 10, 16
@@ -2292,6 +2559,10 @@ Lintt_ppc__Loopf:
         xxlor 35, 3, 3
         xxlor 36, 4, 4
         lvx 10, 0, 14
+<<<<<<< main
+=======
+        addi 14, 14, 16
+>>>>>>> ppc64le_backend
         vmladduhm 15, 25, 10, 3
         vmladduhm 20, 26, 10, 3
         vmladduhm 27, 30, 10, 3
@@ -2316,8 +2587,13 @@ Lintt_ppc__Loopf:
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
+<<<<<<< main
         addi 14, 14, 16
         li 9, 256
+=======
+        li 5, 256
+        mr	9, 5
+>>>>>>> ppc64le_backend
         add 10, 7, 9
         addi 16, 9, 16
         addi 17, 10, 16
@@ -2398,6 +2674,10 @@ Lintt_ppc__Loopf:
         xxlor 35, 3, 3
         xxlor 36, 4, 4
         lvx 10, 0, 14
+<<<<<<< main
+=======
+        addi 14, 14, 16
+>>>>>>> ppc64le_backend
         vmladduhm 15, 25, 10, 3
         vmladduhm 20, 26, 10, 3
         vmladduhm 27, 30, 10, 3
@@ -2422,8 +2702,13 @@ Lintt_ppc__Loopf:
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
+<<<<<<< main
         addi 14, 14, 16
         li 9, 384
+=======
+        li 5, 384
+        mr	9, 5
+>>>>>>> ppc64le_backend
         add 10, 7, 9
         addi 16, 9, 16
         addi 17, 10, 16
@@ -2504,6 +2789,10 @@ Lintt_ppc__Loopf:
         xxlor 35, 3, 3
         xxlor 36, 4, 4
         lvx 10, 0, 14
+<<<<<<< main
+=======
+        addi 14, 14, 16
+>>>>>>> ppc64le_backend
         vmladduhm 15, 25, 10, 3
         vmladduhm 20, 26, 10, 3
         vmladduhm 27, 30, 10, 3
@@ -2528,12 +2817,21 @@ Lintt_ppc__Loopf:
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
+<<<<<<< main
         addi 14, 14, 16
         nop
         nop
         nop
         li 7, 128
         li 9, 0
+=======
+        nop
+        nop
+        ori 2, 2, 0
+        li 5, 0
+        li 7, 128
+        mr	9, 5
+>>>>>>> ppc64le_backend
         add 10, 7, 9
         addi 16, 9, 16
         addi 17, 10, 16
@@ -2638,7 +2936,12 @@ Lintt_ppc__Loopf:
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
+<<<<<<< main
         li 9, 64
+=======
+        li 5, 64
+        mr	9, 5
+>>>>>>> ppc64le_backend
         add 10, 7, 9
         addi 16, 9, 16
         addi 17, 10, 16
@@ -2719,6 +3022,10 @@ Lintt_ppc__Loopf:
         xxlor 35, 3, 3
         xxlor 36, 4, 4
         lvx 10, 0, 14
+<<<<<<< main
+=======
+        addi 14, 14, 16
+>>>>>>> ppc64le_backend
         vmladduhm 15, 25, 10, 3
         vmladduhm 20, 26, 10, 3
         vmladduhm 27, 30, 10, 3
@@ -2743,8 +3050,13 @@ Lintt_ppc__Loopf:
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
+<<<<<<< main
         addi 14, 14, 16
         li 9, 256
+=======
+        li 5, 256
+        mr	9, 5
+>>>>>>> ppc64le_backend
         add 10, 7, 9
         addi 16, 9, 16
         addi 17, 10, 16
@@ -2849,7 +3161,12 @@ Lintt_ppc__Loopf:
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
+<<<<<<< main
         li 9, 320
+=======
+        li 5, 320
+        mr	9, 5
+>>>>>>> ppc64le_backend
         add 10, 7, 9
         addi 16, 9, 16
         addi 17, 10, 16
@@ -2930,6 +3247,10 @@ Lintt_ppc__Loopf:
         xxlor 35, 3, 3
         xxlor 36, 4, 4
         lvx 10, 0, 14
+<<<<<<< main
+=======
+        addi 14, 14, 16
+>>>>>>> ppc64le_backend
         vmladduhm 15, 25, 10, 3
         vmladduhm 20, 26, 10, 3
         vmladduhm 27, 30, 10, 3
@@ -2954,10 +3275,17 @@ Lintt_ppc__Loopf:
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
+<<<<<<< main
         addi 14, 14, 16
         nop
         li 7, 256
         li 9, 0
+=======
+        ori 2, 2, 0
+        li 5, 0
+        li 7, 256
+        mr	9, 5
+>>>>>>> ppc64le_backend
         add 10, 7, 9
         addi 16, 9, 16
         addi 17, 10, 16
@@ -3038,6 +3366,10 @@ Lintt_ppc__Loopf:
         xxlor 35, 3, 3
         xxlor 36, 4, 4
         lvx 10, 0, 14
+<<<<<<< main
+=======
+        xxlor 9, 42, 42
+>>>>>>> ppc64le_backend
         vmladduhm 15, 25, 10, 3
         vmladduhm 20, 26, 10, 3
         vmladduhm 27, 30, 10, 3
@@ -3062,7 +3394,12 @@ Lintt_ppc__Loopf:
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
+<<<<<<< main
         li 9, 64
+=======
+        li 5, 64
+        mr	9, 5
+>>>>>>> ppc64le_backend
         add 10, 7, 9
         addi 16, 9, 16
         addi 17, 10, 16
@@ -3142,7 +3479,11 @@ Lintt_ppc__Loopf:
         xxlor 34, 2, 2
         xxlor 35, 3, 3
         xxlor 36, 4, 4
+<<<<<<< main
         lvx 10, 0, 14
+=======
+        xxlor 42, 9, 9
+>>>>>>> ppc64le_backend
         vmladduhm 15, 25, 10, 3
         vmladduhm 20, 26, 10, 3
         vmladduhm 27, 30, 10, 3
@@ -3167,7 +3508,12 @@ Lintt_ppc__Loopf:
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
+<<<<<<< main
         li 9, 128
+=======
+        li 5, 128
+        mr	9, 5
+>>>>>>> ppc64le_backend
         add 10, 7, 9
         addi 16, 9, 16
         addi 17, 10, 16
@@ -3247,7 +3593,11 @@ Lintt_ppc__Loopf:
         xxlor 34, 2, 2
         xxlor 35, 3, 3
         xxlor 36, 4, 4
+<<<<<<< main
         lvx 10, 0, 14
+=======
+        xxlor 42, 9, 9
+>>>>>>> ppc64le_backend
         vmladduhm 15, 25, 10, 3
         vmladduhm 20, 26, 10, 3
         vmladduhm 27, 30, 10, 3
@@ -3272,7 +3622,12 @@ Lintt_ppc__Loopf:
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
+<<<<<<< main
         li 9, 192
+=======
+        li 5, 192
+        mr	9, 5
+>>>>>>> ppc64le_backend
         add 10, 7, 9
         addi 16, 9, 16
         addi 17, 10, 16
@@ -3352,7 +3707,11 @@ Lintt_ppc__Loopf:
         xxlor 34, 2, 2
         xxlor 35, 3, 3
         xxlor 36, 4, 4
+<<<<<<< main
         lvx 10, 0, 14
+=======
+        xxlor 42, 9, 9
+>>>>>>> ppc64le_backend
         vmladduhm 15, 25, 10, 3
         vmladduhm 20, 26, 10, 3
         vmladduhm 27, 30, 10, 3
@@ -3414,5 +3773,9 @@ Lintt_ppc__Loopf:
         blr
         .cfi_endproc
 
+<<<<<<< main
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */
+=======
+#endif /* MLK_ARITH_BACKEND_PPC64LE && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+>>>>>>> ppc64le_backend

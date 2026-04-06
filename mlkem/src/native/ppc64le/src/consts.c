@@ -78,5 +78,10 @@ MLK_ALIGN const int16_t mlk_ppc_qdata[] = {
 /* zetas for invNTT */
 #include "consts_intt.inc"
 };
+<<<<<<< main
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
           !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+=======
+
+#endif /* MLK_ARITH_BACKEND_PPC64LE && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+>>>>>>> ppc64le_backend

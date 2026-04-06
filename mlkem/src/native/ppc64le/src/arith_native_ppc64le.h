@@ -1,5 +1,9 @@
 /*
+<<<<<<< main
  * Copyright (c) 2024-2025 The mlkem-native project authors
+=======
+ * Copyright (c) The mlkem-native project authors
+>>>>>>> ppc64le_backend
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 #ifndef MLK_NATIVE_PPC64LE_SRC_ARITH_NATIVE_PPC64LE_H
