@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright 2025- IBM Corp.
+ * Copyright IBM Corp. 2025, 2026
  *
  * ===================================================================================
  * Written by Danny Tsen <dtsen@us.ibm.com>
@@ -170,7 +170,7 @@
 .endm
 
 /*
- * Init_Coeffs_offset: initial offset setup for the coeeficient array.
+ * Init_Coeffs_offset: initial offset setup for the coefficient array.
  *
  * start: beginning of the offset to the coefficient array.
  * next: Next offset.
@@ -417,17 +417,6 @@
         addi    zeta_inp, zeta_inp, 64
 .endm
 
-/*
- * Re-ordering of the 4-4 layout zetas.
- * Swap double-words.
- */
-.macro Perm_4zetas
-        xxpermdi 32+V_Z0, 32+V_Z0, 32+V_Z0, 2
-        xxpermdi 32+V_Z1, 32+V_Z1, 32+V_Z1, 2
-        xxpermdi 32+V_Z2, 32+V_Z2, 32+V_Z2, 2
-        xxpermdi 32+V_Z3, 32+V_Z3, 32+V_Z3, 2
-.endm
-
 .macro Write_B4C _vs0 _vs1 _vs2 _vs3
         stxvd2x \_vs0, rinp, a1_offset
         stxvd2x \_vs1, rinp, a2_offset
@@ -518,7 +507,7 @@
 .endm
 
 /*
- * INTT layer Len=2.
+ * INTT layer 1, Len=2.
  */
 .macro INTT_REDUCE_L24
         Load_L24Coeffs
@@ -535,7 +524,7 @@
 .endm
 
 /*
- * INTT layer Len=4.
+ * INTT layer 2, Len=4.
  */
 .macro INTT_REDUCE_L44
         Load_L44Coeffs
@@ -547,13 +536,12 @@
         xxlor   13, 32+vresult_brt4, 32+vresult_brt4
         Set_mont_consts
         Load_next_4zetas
-        Perm_4zetas
         MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, vresult_mont1, vresult_mont2, vresult_mont3, vresult_mont4
         PermWriteL44
 .endm
 
 /*
- * INTT layer Len=8 and 16.
+ * INTT layer 3 and 4, Len=8 and 16.
  */
 .macro INTT_REDUCE_4X start next
         Load_4Coeffs \start, \next
@@ -566,7 +554,7 @@
 .endm
 
 /*
- * INTT layer Len=32, 64 and 128.
+ * INTT layer 5, 6 and 7, Len=32, 64 and 128.
  */
 .macro INTT_REDUCE_L567 start next
         Load_4Coeffs \start, \next
@@ -574,7 +562,6 @@
         Write_B4C 32+vresult_brt1, 32+vresult_brt2, 32+vresult_brt3, 32+vresult_brt4
         Set_mont_consts
         lvx     V_ZETA, 0, 14
-        //addi    14, 14, 16
         MREDUCE_4X V_ZETA, V_ZETA, V_ZETA, V_ZETA, vresult_mont1, vresult_mont2, vresult_mont3, vresult_mont4
         Write_M4C 32+vresult_mont1, 32+vresult_mont2, 32+vresult_mont3, 32+vresult_mont4
 .endm
@@ -584,7 +571,7 @@
  *   Compute inverse NTT based on the following 7 layers -
  *     len = 2, 4, 8, 16, 32, 64, 128
  *
- *   Each layer compute the coeffients on 2 legs, start and start + len*2 offsets.
+ *   Each layer compute the coefficients on 2 legs, start and start + len*2 offsets.
  *
  *   leg 1                        leg 2
  *   -----                        -----
@@ -603,8 +590,8 @@
  *
  *   Each vector has the same corresponding zeta except len=4 and len=2.
  *
- *   len=4 has 4-4 layout which means every 4 16-bit coeffients has the same zeta.
- *   and len=2 has 2-2-2-2 layout which means every 2 16-bit coeffients has the same zeta.
+ *   len=4 has 4-4 layout which means every 4 16-bit coefficients has the same zeta.
+ *   and len=2 has 2-2-2-2 layout which means every 2 16-bit coefficients has the same zeta.
  *   e.g.
  *         coeff vector    a1   a2   a3  a4  a5  a6  a7  a8
  *         zeta  vector    z1   z1   z2  z2  z3  z3  z4  z4
@@ -675,18 +662,12 @@ intt_ppc__Loopf:
 
 .align 4
         /*
-         * 1. len = 2, start = 0, 4, 8, 12,...244, 248, 252
+         * Layer 1. len = 2
+         *     leg1 offset - 0, 32, 64, 96
+         *     leg2 offset - 16, 48, 80, 112
+         *
          *    Update zetas vectors, each vector has 2 zetas
          *    Load zeta vectors in 2-2-2-2 layout
-         *
-         *    Compute coefficients of the NTT based on the following sequences,
-         *      0, 1, 2, 3, 4, 5, 6, 7
-         *      8, 9, 10, 11, 12, 13, 14, 15
-         *            ...
-         *      240, 241, 242, 243, 244, 245, 246, 247
-         *      248, 249, 250, 251, 252, 253, 254, 255
-         *
-         *     These are indexes to the 16 bits array.  Each loads 4 vectors.
          */
         addi    zeta_inp, qinp, ZETA_INTT_OFFSET
         li      len_2, 4        /* len * 2 */
@@ -703,17 +684,11 @@ intt_ppc__Loopf:
 
 .align 4
         /*
-         * 2. len = 4, start = 0, 8, 16, 24,...232, 240, 248
+         * Layer 2. len = 4
+         *     leg1 offset - 0, 32, 64, 96
+         *     leg2 offset - 16, 48, 80, 112
+         *
          *    Load zeta vectors in 4-4 layout
-         *
-         *    Compute coefficients of the NTT based on the following sequences,
-         *      0, 1, 2, 3, 4, 5, 6, 7
-         *      8, 9, 10, 11, 12, 13, 14, 15
-         *            ...
-         *      240, 241, 242, 243, 244, 245, 246, 247
-         *      248, 249, 250, 251, 252, 253, 254, 255
-         *
-         *     These are indexes to the 16 bits array.  Each loads 4 vectors.
          */
         mr      dup_rinp, rinp
         li      len_2, 8
@@ -729,15 +704,7 @@ intt_ppc__Loopf:
 
 .align 4
         /*
-         * 3. len = 8, start = 0, 16, 32, 48,...208, 224, 240
-         *
-         *    Compute coefficients of the NTT based on 2 legs,
-         *      0        -        8
-         *       64        -       72
-         *         128        -      136
-         *            192        -     200
-         *
-         *     These are indexes to the 16 bits array
+         * Layer 3. len = 8, start = 0, 128, 256, 384
          */
         li      len_2, 16
 
@@ -748,15 +715,7 @@ intt_ppc__Loopf:
 
 .align 4
         /*
-         * 4. len = 16, start = 0, 32, 64,,...160, 192, 224
-         *
-         *    Compute coefficients of the NTT based on 2 legs,
-         *      0        -        16
-         *        8        -       24
-         *          128        -     144
-         *            136        -    152
-         *
-         *     These are indexes to the 16 bits array
+         * Layer 4. len = 16, start = 0, 16, 256, 272
          */
         li      len_2, 32
 
@@ -772,15 +731,7 @@ intt_ppc__Loopf:
 
 .align 4
         /*
-         * 5. len = 32, start = 0, 64, 128, 192
-         *
-         *    Compute coefficients of the NTT based on 2 legs,
-         *      0        -        32
-         *        64        -       96
-         *          128        -      160
-         *            192        -      224
-         *
-         *     These are indexes to the 16 bits array
+         * Layer 5. len = 32, start = 0, 128, 256, 384
          */
         li      len_2, 64
 
@@ -795,15 +746,7 @@ intt_ppc__Loopf:
 
 .align 4
         /*
-         * 6. len = 64, start = 0, 128
-         *
-         *    Compute coefficients of the NTT based on 2 legs,
-         *      0        -        64
-         *        32        -       96
-         *          128        -      192
-         *            160        -      224
-         *
-         *     These are indexes to the 16 bits array
+         * Layer 6. len = 64, start = 0, 64, 256, 320
          */
         li      len_2, 128
 
@@ -816,15 +759,7 @@ intt_ppc__Loopf:
 
 .align 4
         /*
-         * 7. len = 128, start = 0
-         *
-         *    Compute coefficients of the NTT based on 2 legs,
-         *      0        -        128
-         *        32        -        160
-         *          64        -        192
-         *            96        -        224
-         *
-         *     These are indexes to the 16 bits array
+         * Layer 7. len = 128, start = 0, 64, 128, 192
          */
         li      len_2, 256          /* len*2 */
 
@@ -839,6 +774,7 @@ intt_ppc__Loopf:
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
 #undef V20159
+#undef V2pw25
 #undef V_26
 #undef V_MKQ
 #undef V_QINV
@@ -849,7 +785,44 @@ intt_ppc__Loopf:
 #undef V_Z3
 #undef V_ZETA
 #undef V1441
+#undef vdata_a1
+#undef vdata_a2
+#undef vdata_a3
+#undef vdata_a4
+#undef vdata_b1
+#undef vdata_b2
+#undef vdata_b3
+#undef vdata_b4
+#undef vdata_brt1
+#undef vdata_brt2
+#undef vdata_brt3
+#undef vdata_brt4
+#undef vdata_mont1
+#undef vdata_mont2
+#undef vdata_mont3
+#undef vdata_mont4
+#undef vresult_brt1
+#undef vresult_brt2
+#undef vresult_brt3
+#undef vresult_brt4
+#undef vresult_mont1
+#undef vresult_mont2
+#undef vresult_mont3
+#undef vresult_mont4
+#undef rinp
+#undef dup_rinp
+#undef qinp
+#undef len_2
+#undef zeta_inp
+#undef a1_offset
+#undef a2_offset
+#undef a3_offset
+#undef a4_offset
+#undef b1_offset
+#undef b2_offset
+#undef b3_offset
+#undef b4_offset
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
-          !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
+        */

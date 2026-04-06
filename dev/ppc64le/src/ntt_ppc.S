@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright 2025- IBM Corp.
+ * Copyright IBM Corp. 2025, 2026
  *
  * ===================================================================================
  * Written by Danny Tsen <dtsen@us.ibm.com>
@@ -136,7 +136,7 @@
 .endm
 
 /*
- * Init_Coeffs_offset: initial offset setup for the coeeficient array.
+ * Init_Coeffs_offset: initial offset setup for the coefficient array.
  *
  * start: beginning of the offset to the coefficient array.
  * next: Next offset.
@@ -402,18 +402,7 @@
 .endm
 
 /*
- * Re-ordering of the 4-4 layout zetas.
- * Swap double-words.
- */
-.macro Perm_4zetas
-        xxpermdi 32+V_Z0, 32+V_Z0, 32+V_Z0, 2
-        xxpermdi 32+V_Z1, 32+V_Z1, 32+V_Z1, 2
-        xxpermdi 32+V_Z2, 32+V_Z2, 32+V_Z2, 2
-        xxpermdi 32+V_Z3, 32+V_Z3, 32+V_Z3, 2
-.endm
-
-/*
- * NTT layer Len=2.
+ * NTT layer 7, Len=2.
  */
 .macro NTT_REDUCE_L24
         Load_next_4zetas
@@ -424,11 +413,10 @@
 .endm
 
 /*
- * NTT layer Len=4.
+ * NTT layer 6, Len=4.
  */
 .macro NTT_REDUCE_L44
         Load_next_4zetas
-        Perm_4zetas
         Load_L44Coeffs
         MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3
         PermWriteL44
@@ -436,7 +424,7 @@
 .endm
 
 /*
- * NTT other layers.
+ * NTT other layers, 1, 2, 3, 4, 5.
  */
 .macro NTT_MREDUCE_4X start next _vz0 _vz1 _vz2 _vz3
         Load_4Coeffs \start, \next
@@ -451,7 +439,7 @@
  *   Compute forward NTT based on the following 7 layers -
  *     len = 128, 64, 32, 16, 8, 4, 2.
  *
- *   Each layer compute the coeffients on 2 legs, start and start + len*2 offsets.
+ *   Each layer compute the coefficients on 2 legs, start and start + len*2 offsets.
  *
  *   leg 1                        leg 2
  *   -----                        -----
@@ -470,8 +458,8 @@
  *
  *   Each vector has the same corresponding zeta except len=4 and len=2.
  *
- *   len=4 has 4-4 layout which means every 4 16-bit coeffients has the same zeta.
- *   and len=2 has 2-2-2-2 layout which means every 2 16-bit coeffients has the same zeta.
+ *   len=4 has 4-4 layout which means every 4 16-bit coefficients has the same zeta.
+ *   and len=2 has 2-2-2-2 layout which means every 2 16-bit coefficients has the same zeta.
  *   e.g.
  *         coeff vector    a1   a2   a3  a4  a5  a6  a7  a8
  *         zeta  vector    z1   z1   z2  z2  z3  z3  z4  z4
@@ -501,15 +489,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
 
 .align 4
         /*
-         * 1. len = 128, start = 0
-         *
-         *    Compute coefficients of the NTT based on 2 legs,
-         *      0        -        128
-         *        32        -        160
-         *          64        -        192
-         *            96        -        224
-         *
-         *     These are indexes to the 16 bits array
+         * Layer 1. len = 128, start= 0, 64, 128, 192
          */
         li      len_2, 256          /* len * 2 */
         lvx     V_ZETA, 0, zeta_inp
@@ -522,15 +502,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
 
 .align 4
         /*
-         * 2. len = 64, start = 0, 128
-         *
-         *    Compute coefficients of the NTT based on 2 legs,
-         *      0        -        64
-         *        32        -       96
-         *          128        -      192
-         *            160        -      224
-         *
-         *     These are indexes to the 16 bits array
+         * Layer 2. len = 64, start= 0, 64, 256, 320
          */
         li      len_2, 128
         lvx     V_ZETA, 0, zeta_inp
@@ -545,15 +517,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
 
 .align 4
         /*
-         * 3. len = 32, start = 0, 64, 128, 192
-         *
-         *    Compute coefficients of the NTT based on 2 legs,
-         *      0        -        32
-         *        64        -       96
-         *          128        -      160
-         *            192        -      224
-         *
-         *     These are indexes to the 16 bits array
+         * Layer 3. len = 32, start = 0, 128, 256, 384
          */
         li      len_2, 64
         lvx     V_ZETA, 0, zeta_inp
@@ -574,15 +538,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
 
 .align 4
         /*
-         * 4. len = 16, start = 0, 8, 128, 136
-         *
-         *    Compute coefficients of the NTT based on 2 legs,
-         *      0        -        16
-         *        8        -       24
-         *          128        -     144
-         *            136        -    152
-         *
-         *     These are indexes to the 16 bits array
+         * Layer 4. len = 16, start = 0, 16, 256, 272
          */
         li      len_2, 32
         Load_next_4zetas
@@ -595,15 +551,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
 
 .align 4
         /*
-         * 5. len = 8, start = 0, 64, 128, 192
-         *
-         *    Compute coefficients of the NTT based on 2 legs,
-         *      0        -        8
-         *       64        -       72
-         *         128        -      136
-         *            192        -     200
-         *
-         *     These are indexes to the 16 bits array
+         * Layer 5. len = 8, start= 0, 128, 256, 384
          */
         li      len_2, 16
         Load_next_4zetas
@@ -619,17 +567,11 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
         NTT_MREDUCE_4X 384, 32, V_Z0, V_Z1, V_Z2, V_Z3
 
         /*
-         * 6. len = 4, start = 0, 8, 16, 24,...232, 240, 248
+         * Layer 6. len = 4,
+         *     leg1 offset - 0, 32, 64, 96
+         *     leg2 offset - 16, 48, 80, 112
+         *
          *    Load zeta vectors in 4-4 layout
-         *
-         *    Compute coefficients of the NTT based on the following sequences,
-         *      0, 1, 2, 3, 4, 5, 6, 7
-         *      8, 9, 10, 11, 12, 13, 14, 15
-         *            ...
-         *      240, 241, 242, 243, 244, 245, 246, 247
-         *      248, 249, 250, 251, 252, 253, 254, 255
-         *
-         *     These are indexes to the 16 bits array.  Each loads 4 vectors.
          */
         mr      dup_rinp, rinp                 /* Let r5 points to coefficient array */
         li      len_2, 8
@@ -649,17 +591,11 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
         NTT_REDUCE_L44
 
         /*
-         * 7. len = 2, start = 0, 4, 8, 12,...244, 248, 252
+         * Layer 7. len = 2
+         *     leg1 offset - 0, 32, 64, 96
+         *     leg2 offset - 16, 48, 80, 112
+         *
          *    Load zeta vectors in 2-2-2-2 layout
-         *
-         *    Compute coefficients of the NTT based on the following sequences,
-         *      0, 1, 2, 3, 4, 5, 6, 7
-         *      8, 9, 10, 11, 12, 13, 14, 15
-         *            ...
-         *      240, 241, 242, 243, 244, 245, 246, 247
-         *      248, 249, 250, 251, 252, 253, 254, 255
-         *
-         *     These are indexes to the 16 bits array.  Each loads 4 vectors.
          */
         mr      dup_rinp, rinp                  /* Let r5 points to coefficient array */
         li      len_2, 4
@@ -677,8 +613,41 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
 #undef V_QINV
 #undef V_NMKQ
+#undef V_Z0
+#undef V_Z1
+#undef V_Z2
+#undef V_Z3
 #undef V_ZETA
+#undef vdata_a1
+#undef vdata_a2
+#undef vdata_a3
+#undef vdata_a4
+#undef vdata_b1
+#undef vdata_b2
+#undef vdata_b3
+#undef vdata_b4
+#undef vresult_a1
+#undef vresult_b1
+#undef vresult_a2
+#undef vresult_b2
+#undef vresult_a3
+#undef vresult_b3
+#undef vresult_a4
+#undef vresult_b4
+#undef rinp
+#undef dup_rinp
+#undef qinp
+#undef len_2
+#undef zeta_inp
+#undef a1_offset
+#undef a2_offset
+#undef a3_offset
+#undef a4_offset
+#undef b1_offset
+#undef b2_offset
+#undef b3_offset
+#undef b4_offset
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
-          !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
+        */

@@ -22,8 +22,4 @@
 #include "ppc64le/meta.h"
 #endif
 
-#if defined(MLK_SYS_RISCV64_RVV)
-#include "riscv64/meta.h"
-#endif
-
 #endif /* !MLK_NATIVE_META_H */

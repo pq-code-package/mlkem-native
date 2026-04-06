@@ -7,6 +7,8 @@
 #define MLK_NATIVE_PPC64LE_SRC_CONSTS_H
 #include "../../../common.h"
 
+/* Offsets into the constant table */
+/* check-magic: off */
 #define NQ_OFFSET 0
 #define QINV_OFFSET 16
 #define Q_OFFSET 32
@@ -15,6 +17,7 @@
 #define C1353_OFFSET 80
 #define ZETA_NTT_OFFSET 96
 #define ZETA_INTT_OFFSET 1104
+/* check-magic: on */
 
 #ifndef __ASSEMBLER__
 #define mlk_ppc_qdata MLK_NAMESPACE(ppc_qdata)
