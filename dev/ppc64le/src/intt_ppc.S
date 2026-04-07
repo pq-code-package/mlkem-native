@@ -453,7 +453,7 @@
 .endm
 
 /*
- * Transpose the final coefficients of 4-4 layout to the orginal
+ * Transpose the final coefficients of 4-4 layout to the original
  * coefficient array order.
  */
 .macro PermWriteL44
@@ -480,7 +480,7 @@
 .endm
 
 /*
- * Transpose the final coefficients of 2-2-2-2 layout to the orginal
+ * Transpose the final coefficients of 2-2-2-2 layout to the original
  * coefficient array order.
  */
 .macro PermWriteL24
@@ -586,7 +586,7 @@
  *
  *   -> leg1 = leg1 + t, leg2 = leg1 - t
  *
- *   The resulting coeffients then store back to each leg's offset.
+ *   The resulting coefficients then store back to each leg's offset.
  *
  *   Each vector has the same corresponding zeta except len=4 and len=2.
  *
