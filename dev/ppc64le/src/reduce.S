@@ -25,7 +25,7 @@
  * Arguments: *r: pointer to input/output polynomial
  */
 
-// Barrett reduce constatnts
+/* Barrett reduce constants */
 #define V20159  0
 #define V_25    1
 #define V_26    2
@@ -190,9 +190,9 @@ MLK_ASM_FN_SYMBOL(reduce_ppc)
         Write_8X
 
 .align 4
-        //
-        // To unsigned canonical
-        //
+        /*
+         * To unsigned canonical
+         */
         addi    3, 3, -512
         vxor    9, 9, 9
         vspltish 10, 15
