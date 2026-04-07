@@ -190,7 +190,7 @@
  * R21: offset to r'3 = r'2 + step
  *
  */
-.macro Init_Coeffs_offset start next
+.macro Init_Coeffs_offset start, next
         li      a1_offset, \start               /* first offset to j */
         add     b1_offset, len_2, a1_offset     /* J + len*2 */
         addi    a2_offset, a1_offset, \next
@@ -226,8 +226,8 @@
  * following order,
  *  rjlen0, rjlen1, rjlen2, rjlen3, rjlen4, rjlen5, rjlen6, rjlen7
  */
-.macro Load_4Coeffs start next
-        Init_Coeffs_offset \start \next
+.macro Load_4Coeffs start, next
+        Init_Coeffs_offset \start, \next
         Load_4Rjp
         Compute_4Coeffs
 .endm
@@ -302,7 +302,7 @@
         xxpermdi 32+vdata_a4, 11, 10, 0
 .endm
 
-.macro BREDUCE_4X _v0 _v1 _v2 _v3
+.macro BREDUCE_4X _v0, _v1, _v2, _v3
         /* Restore constant vectors
            V_MKQ, V2pw25 and V_26 */
         vxor    7, 7, 7
@@ -365,7 +365,7 @@
  * -----------------------------------
  * MREDUCE_4X(_vz0, _vz1, _vz2, _vz3, _vo0, _vo1, _vo2, _vo3)
  */
-.macro MREDUCE_4X _vz0 _vz1 _vz2 _vz3 _vo0 _vo1 _vo2 _vo3
+.macro MREDUCE_4X _vz0, _vz1, _vz2, _vz3, _vo0, _vo1, _vo2, _vo3
         /* Modular multification bond by 2^16 * q in abs value */
         vmladduhm 15, vdata_mont1, \_vz0, rinp
         vmladduhm 20, vdata_mont2, \_vz1, rinp
@@ -417,14 +417,14 @@
         addi    zeta_inp, zeta_inp, 64
 .endm
 
-.macro Write_B4C _vs0 _vs1 _vs2 _vs3
+.macro Write_B4C _vs0, _vs1, _vs2, _vs3
         stxvd2x \_vs0, rinp, a1_offset
         stxvd2x \_vs1, rinp, a2_offset
         stxvd2x \_vs2, rinp, a3_offset
         stxvd2x \_vs3, rinp, a4_offset
 .endm
 
-.macro Write_M4C _vs0 _vs1 _vs2 _vs3
+.macro Write_M4C _vs0, _vs1, _vs2, _vs3
         stxvd2x \_vs0, rinp, b1_offset
         stxvd2x \_vs1, rinp, b2_offset
         stxvd2x \_vs2, rinp, b3_offset
@@ -439,7 +439,7 @@
         addi    rinp, rinp, 64
 .endm
 
-.macro MWrite_8X _vs0 _vs1 _vs2 _vs3 _vs4 _vs5 _vs6 _vs7
+.macro MWrite_8X _vs0, _vs1, _vs2, _vs3, _vs4, _vs5, _vs6, _vs7
         addi    rinp, rinp, -128
         stxvd2x \_vs0, 0, rinp
         stxvd2x \_vs1, 10, rinp
@@ -543,7 +543,7 @@
 /*
  * INTT layer 3 and 4, Len=8 and 16.
  */
-.macro INTT_REDUCE_4X start next
+.macro INTT_REDUCE_4X start, next
         Load_4Coeffs \start, \next
         BREDUCE_4X vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
         Write_B4C 32+vresult_brt1, 32+vresult_brt2, 32+vresult_brt3, 32+vresult_brt4
@@ -556,7 +556,7 @@
 /*
  * INTT layer 5, 6 and 7, Len=32, 64 and 128.
  */
-.macro INTT_REDUCE_L567 start next
+.macro INTT_REDUCE_L567 start, next
         Load_4Coeffs \start, \next
         BREDUCE_4X vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
         Write_B4C 32+vresult_brt1, 32+vresult_brt2, 32+vresult_brt3, 32+vresult_brt4
@@ -824,5 +824,5 @@ intt_ppc__Loopf:
 #undef b4_offset
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
-          !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
+        */
