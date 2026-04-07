@@ -156,7 +156,7 @@
  * R21: offset to r'3 = r'2 + step
  *
  */
-.macro Init_Coeffs_offset start next
+.macro Init_Coeffs_offset start, next
         li      a1_offset, \start               /* first offset to j */
         add     b1_offset, len_2, a1_offset     /* J + len*2 */
         addi    a2_offset, a1_offset, \next
@@ -183,8 +183,8 @@
  * following order,
  *  rjlen0, rjlen1, rjlen2, rjlen3, rjlen4, rjlen5, rjlen6, rjlen7
  */
-.macro Load_4Coeffs start next
-        Init_Coeffs_offset \start \next
+.macro Load_4Coeffs start, next
+        Init_Coeffs_offset \start, \next
         Load_4Rjp
 .endm
 
@@ -266,7 +266,7 @@
  * -----------------------------------
  * MREDUCE_4X(_vz0, _vz1, _vz2, _vz3)
  */
-.macro MREDUCE_4X _vz0 _vz1 _vz2 _vz3
+.macro MREDUCE_4X _vz0, _vz1, _vz2, _vz3
         /* fqmul = zeta * coefficient
            Modular multification bond by 2^16 * q in abs value */
         vmladduhm 15, vdata_b1, \_vz0, rinp
@@ -426,7 +426,7 @@
 /*
  * NTT other layers, 1, 2, 3, 4, 5.
  */
-.macro NTT_MREDUCE_4X start next _vz0 _vz1 _vz2 _vz3
+.macro NTT_MREDUCE_4X start, next, _vz0, _vz1, _vz2, _vz3
         Load_4Coeffs \start, \next
         MREDUCE_4x \_vz0, \_vz1, \_vz2, \_vz3
         Load_4Rj
@@ -649,5 +649,5 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
 #undef b4_offset
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
-          !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
+        */

@@ -709,5 +709,5 @@ MLK_ASM_FN_SYMBOL(reduce_ppc)
         blr
         .cfi_endproc
 
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
-          !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
+        */

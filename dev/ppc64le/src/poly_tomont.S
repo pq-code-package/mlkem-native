@@ -41,7 +41,7 @@
  * MREDUCE_4X(_v0, _v1, _v2, _v3)
  */
 
-.macro MREDUCE_4X _v0 _v1 _v2 _v3
+.macro MREDUCE_4X _v0, _v1, _v2, _v3
         lxvd2x  32+13, 0, 3
         addi    3, 3, 16
         lxvd2x  32+18, 0, 3
@@ -185,5 +185,5 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc)
 #undef V_NMKQ
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
-          !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
+        */

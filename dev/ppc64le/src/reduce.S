@@ -34,7 +34,7 @@
 .machine "any"
 .text
 
-.macro BREDUCE_4X _v0 _v1 _v2 _v3
+.macro BREDUCE_4X _v0, _v1, _v2, _v3
         lxvd2x  32+8, 0, 3
         lxvd2x  32+12, 14, 3
         lxvd2x  32+16, 15, 3
@@ -232,5 +232,5 @@ MLK_ASM_FN_SYMBOL(reduce_ppc)
 #undef V_MKQ
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
-          !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
+        */
