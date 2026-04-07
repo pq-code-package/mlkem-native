@@ -20,6 +20,7 @@
 #include "common.h"
 #include "debug.h"
 #include "verify.h"
+#include "stdio.h"
 
 /* Absolute exclusive upper bound for the output of the inverse NTT */
 #define MLK_INVNTT_BOUND (8 * MLKEM_Q)
@@ -84,9 +85,9 @@ __contract__(
 
   mlk_assert(a < +(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)) &&
              a > -(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)));
-
+  printf("DEBUG: %s:%d in %s()\n", __FILE__, __LINE__, __func__);
   r = a - ((int32_t)t * MLKEM_Q);
-
+  printf("DEBUG: %s:%d in %s()\n", __FILE__, __LINE__, __func__);
   /*
    * PORTABILITY: Right-shift on a signed integer is, strictly-speaking,
    * implementation-defined for negative left argument. Here,

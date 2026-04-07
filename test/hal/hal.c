@@ -95,6 +95,25 @@ uint64_t get_cyclecounter(void)
 }
 
 #elif defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8_1M_MAIN__)
+/* ARMv8-M cycle counting support */
+#if defined(ARMCM33)
+/* Cortex-M33: Use DWT cycle counter (no dedicated PMU) */
+#include <ARMCM33.h>
+#include <system_ARMCM33.h>
+
+void enable_cyclecounter(void)
+{
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+  DWT->CYCCNT = 0;
+  DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+}
+
+void disable_cyclecounter(void) { DWT->CTRL &= ~DWT_CTRL_CYCCNTENA_Msk; }
+
+uint64_t get_cyclecounter(void) { return DWT->CYCCNT; }
+
+#elif defined(ARMCM55)
+/* Cortex-M55: Use dedicated PMU */
 #include <ARMCM55.h>
 #include <system_ARMCM55.h>
 #include "pmu_armv8.h"
@@ -114,6 +133,10 @@ void disable_cyclecounter(void)
 }
 
 uint64_t get_cyclecounter(void) { return ARM_PMU_Get_CCNTR(); }
+
+#else /* !ARMCM33 && ARMCM55 */
+#error "PMU_CYCLES on ARMv8-M requires ARMCM33 or ARMCM55 to be defined"
+#endif /* !ARMCM33 && !ARMCM55 */
 
 #elif defined(__riscv)
 

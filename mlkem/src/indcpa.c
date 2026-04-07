@@ -23,6 +23,8 @@
 #include "randombytes.h"
 #include "sampling.h"
 #include "symmetric.h"
+#include "stdio.h"
+
 
 /* Parameter set namespacing
  * This is to facilitate building multiple instances
@@ -428,16 +430,39 @@ int mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
                               const uint8_t coins[MLKEM_SYMBYTES],
                               MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
+  printf("DEBUG: %s:%d in %s()\n", __FILE__, __LINE__, __func__);
+
   int ret = 0;
   const uint8_t *publicseed;
   const uint8_t *noiseseed;
+  
+  register uint32_t *sp_start __asm__("sp");
+  printf("Stack pointer at function entry: 0x%08lx\n", (unsigned long)sp_start);
+  printf("Valid stack range: 0x20008000 - 0x2001FFFF\n");
+  
   MLK_ALLOC(buf, uint8_t, 2 * MLKEM_SYMBYTES, context);
+  printf("After buf alloc, SP: 0x%08lx\n", (unsigned long)({register uint32_t *sp __asm__("sp"); sp;}));
+  
   MLK_ALLOC(coins_with_domain_separator, uint8_t, MLKEM_SYMBYTES + 1, context);
+  printf("After coins alloc, SP: 0x%08lx\n", (unsigned long)({register uint32_t *sp __asm__("sp"); sp;}));
+  
   MLK_ALLOC(a, mlk_polymat, 1, context);
+  printf("After polymat alloc (2KB), SP: 0x%08lx\n", (unsigned long)({register uint32_t *sp __asm__("sp"); sp;}));
+  printf("Address of 'a': 0x%08lx\n", (unsigned long)a);
+  printf("Size of mlk_polymat: %lu bytes\n", (unsigned long)sizeof(mlk_polymat));
+  
   MLK_ALLOC(e, mlk_polyvec, 1, context);
+  printf("After e alloc, SP: 0x%08lx, addr: 0x%08lx\n", (unsigned long)({register uint32_t *sp __asm__("sp"); sp;}), (unsigned long)e);
+  
   MLK_ALLOC(pkpv, mlk_polyvec, 1, context);
+  printf("After pkpv alloc, SP: 0x%08lx, addr: 0x%08lx\n", (unsigned long)({register uint32_t *sp __asm__("sp"); sp;}), (unsigned long)pkpv);
+  
   MLK_ALLOC(skpv, mlk_polyvec, 1, context);
+  printf("After skpv alloc, SP: 0x%08lx, addr: 0x%08lx\n", (unsigned long)({register uint32_t *sp __asm__("sp"); sp;}), (unsigned long)skpv);
+  
   MLK_ALLOC(skpv_cache, mlk_polyvec_mulcache, 1, context);
+  printf("After skpv_cache alloc, SP: 0x%08lx, addr: 0x%08lx\n", (unsigned long)({register uint32_t *sp __asm__("sp"); sp;}), (unsigned long)skpv_cache);
+  printf("Total allocated: ~%lu bytes\n", (unsigned long)(sizeof(mlk_polymat) + 3*sizeof(mlk_polyvec) + sizeof(mlk_polyvec_mulcache)));
 
   if (buf == NULL || coins_with_domain_separator == NULL || a == NULL ||
       e == NULL || pkpv == NULL || skpv == NULL || skpv_cache == NULL)
@@ -467,6 +492,7 @@ int mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
 
   mlk_keypair_getnoise_eta1(skpv, e, noiseseed);
 
+  printf("DEBUG: %s:%d in %s()\n", __FILE__, __LINE__, __func__);
   mlk_polyvec_ntt(skpv);
   mlk_polyvec_ntt(e);
 

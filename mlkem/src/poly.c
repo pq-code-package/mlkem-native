@@ -26,6 +26,7 @@
 #include "poly.h"
 #include "sampling.h"
 #include "symmetric.h"
+#include "stdio.h"
 #include "verify.h"
 
 /*************************************************
@@ -52,7 +53,7 @@ __contract__(
 {
   int16_t res;
   mlk_assert_abs_bound(&b, 1, MLKEM_Q_HALF);
-
+  printf("DEBUG: %s:%d in %s()\n", __FILE__, __LINE__, __func__);
   res = mlk_montgomery_reduce((int32_t)a * (int32_t)b);
   /* Bounds:
    * |res| <= ceil(|a| * |b| / 2^16) + (MLKEM_Q + 1) / 2
@@ -380,6 +381,7 @@ __contract__(
     decreases(start + len - j))
   {
     int16_t t;
+    printf("DEBUG: %s:%d in %s()\n", __FILE__, __LINE__, __func__);
     t = mlk_fqmul(r[j + len], zeta);
     /* The precondition implies that the arithmetic does not overflow. */
     r[j + len] = (int16_t)(r[j] - t);
@@ -416,6 +418,7 @@ __contract__(
     decreases(MLKEM_N - start))
   {
     int16_t zeta = mlk_zetas[k++];
+    printf("DEBUG: %s:%d in %s()\n", __FILE__, __LINE__, __func__);
     mlk_ntt_butterfly_block(r, zeta, start, len, layer * MLKEM_Q);
   }
 }
@@ -453,6 +456,7 @@ __contract__(
     invariant(array_abs_bound(r, 0, MLKEM_N, layer * MLKEM_Q))
     decreases(8 - layer))
   {
+    printf("DEBUG: %s:%d in %s()\n", __FILE__, __LINE__, __func__);
     mlk_ntt_layer(r, layer);
   }
 
@@ -474,6 +478,7 @@ void mlk_poly_ntt(mlk_poly *p)
   }
 #endif /* MLK_USE_NATIVE_NTT */
 
+  printf("DEBUG: %s:%d in %s()\n", __FILE__, __LINE__, __func__);
   mlk_poly_ntt_c(p);
 }
 
