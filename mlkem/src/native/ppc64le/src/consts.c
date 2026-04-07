@@ -3,11 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "../../../common.h"
 
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \

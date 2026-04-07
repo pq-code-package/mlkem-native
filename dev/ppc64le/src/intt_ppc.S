@@ -20,13 +20,13 @@
 .machine "any"
 .text
 
-/* Barrett reduce constatnts */
+/* Barrett reduce constants */
 #define V20159  0
 #define V2pw25  1
 #define V_26    2
 #define V_MKQ   3
 
-/* Montgomery reduce constatnts */
+/* Montgomery reduce constants */
 #define V_QINV  2
 #define V_NMKQ  5
 #define V_Z0    7

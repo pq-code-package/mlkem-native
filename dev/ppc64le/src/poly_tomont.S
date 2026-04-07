@@ -71,10 +71,10 @@
         vmhraddshs 25, 25, V_NMKQ, 24
         vmhraddshs 9, 9, V_NMKQ, 8
 
-        vsrah \_v0, 15, 4               // >> 1
-        vsrah \_v1, 20, 4               // >> 1
-        vsrah \_v2, 25, 4               // >> 1
-        vsrah \_v3, 9, 4                // >> 1
+        vsrah \_v0, 15, 4
+        vsrah \_v1, 20, 4
+        vsrah \_v2, 25, 4
+        vsrah \_v3, 9, 4
 .endm
 
 .macro Write_8X
