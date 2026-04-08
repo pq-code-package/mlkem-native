@@ -88,6 +88,9 @@
 #include "src/native/riscv64/src/rv64v_debug.c"
 #include "src/native/riscv64/src/rv64v_poly.c"
 #endif
+#if defined(MLK_SYS_PPC64LE)
+#include "src/native/ppc64le/src/consts.c"
+#endif
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
