@@ -95,8 +95,12 @@ uint64_t get_cyclecounter(void)
 }
 
 #elif defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8_1M_MAIN__)
-#include <ARMCM55.h>
-#include <system_ARMCM55.h>
+#if defined(STM32N657xx)
+  #include "stm32n6xx.h"
+#else
+  #include <ARMCM55.h>
+  #include <system_ARMCM55.h>
+#endif
 #include "pmu_armv8.h"
 
 void enable_cyclecounter(void)
