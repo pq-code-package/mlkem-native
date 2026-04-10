@@ -2186,6 +2186,10 @@ def riscv64(c):
     return "/riscv64/" in c
 
 
+def ppc64le(c):
+    return "/ppc64le/" in c
+
+
 def armv81m(c):
     return "/armv81m/" in c
 
@@ -2231,12 +2235,17 @@ def native_arith_riscv64(c):
     return native_arith(c) and riscv64(c)
 
 
+def native_arith_ppc64le(c):
+    return native_arith(c) and ppc64le(c)
+
+
 def native_arith_core(c):
     return (
         native_arith(c)
         and not native_arith_x86_64(c)
         and not native_arith_aarch64(c)
         and not native_arith_riscv64(c)
+        and not native_arith_ppc64le(c)
     )
 
 
@@ -2345,6 +2354,11 @@ def gen_macro_undefs(extra_notes=None):
         filt=native_arith_riscv64, desc="native code (Arith, RISC-V 64)"
     )
     yield "#endif"
+    yield "#if defined(MLK_SYS_PPC64LE)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_arith_ppc64le, desc="native code (Arith, PPC64LE)"
+    )
+    yield "#endif"
     yield "#endif"
     yield "#endif"
     yield ""
@@ -2425,6 +2439,10 @@ def gen_monolithic_source_file():
         yield "#endif"
         yield "#if defined(MLK_SYS_RISCV64)"
         for c in filter(native_arith_riscv64, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLK_SYS_PPC64LE)"
+        for c in filter(native_arith_ppc64le, c_sources):
             yield f'#include "{c}"'
         yield "#endif"
         yield "#endif"
@@ -2513,6 +2531,10 @@ def gen_monolithic_asm_file():
         yield "#endif"
         yield "#if defined(MLK_SYS_RISCV64)"
         for c in filter(native_arith_riscv64, asm_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLK_SYS_PPC64LE)"
+        for c in filter(native_arith_ppc64le, asm_sources):
             yield f'#include "{c}"'
         yield "#endif"
         yield "#endif"
