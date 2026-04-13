@@ -16,13 +16,13 @@ jobs:
       matrix:
         target:
           - runner: ubuntu-latest
-            name: 'x86_64'
+            name: "x86_64"
           - runner: ubuntu-24.04-arm
-            name: 'aarch64'
+            name: "aarch64"
           - runner: macos-latest
-            name: 'macos (aarch64)'
+            name: "macos (aarch64)"
           - runner: macos-15-intel
-            name: 'macos (x86_64)'
+            name: "macos (x86_64)"
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -32,6 +32,18 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             cargo build --workspace
+            RUSTFLAGS="-C target-feature=+avx2" cargo build --workspace
             cargo test --workspace
-            cargo publish --dry-run
-            cargo publish --dry-run --manifest-path bindings/rust/mlkem-native/Cargo.toml
+            cargo publish --dry-run -p mlkem-native
+      - uses: ./.github/actions/setup-shell
+        name: ACVP test
+        with:
+          nix-shell: rust
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            cargo build --release --bin acvp_mlkem
+            for version in v1.1.0.39 v1.1.0.40 v1.1.0.41; do
+              python3 test/acvp/acvp_client.py \
+                --binary ./target/release/acvp_mlkem \
+                --version $version
+            done

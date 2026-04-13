@@ -1,26 +1,5 @@
 [workspace]
-members = ["bindings/rust/mlkem-native"]
-resolver = "2"
-
-[package]
-name = "mlkem-native-sys"
-version = "0.1.0"
-edition = "2021"
-description = "Raw FFI bindings to mlkem-native, a C90 implementation of ML-KEM (FIPS 203)"
-repository = "https://github.com/pq-code-package/mlkem-native"
-license = "Apache-2.0 OR ISC OR MIT"
-links = "mlkem-native"
-build = "bindings/rust/mlkem-native-sys/build.rs"
-include = [
-    "Cargo.toml",
-    "bindings/rust/mlkem-native-sys/src/**",
-    "bindings/rust/mlkem-native-sys/build.rs",
-    "mlkem/**",
+members = [
+    "bindings/rust/mlkem-native",
 ]
-
-[lib]
-path = "bindings/rust/mlkem-native-sys/src/lib.rs"
-
-[build-dependencies]
-bindgen = "0.71"
-cc = "1"
+resolver = "2"
