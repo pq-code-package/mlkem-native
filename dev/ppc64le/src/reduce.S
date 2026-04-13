@@ -31,7 +31,6 @@
 #define V_26    2
 #define V_MKQ   3
 
-.machine "any"
 .text
 
 .macro BREDUCE_4X _v0, _v1, _v2, _v3

@@ -17,7 +17,6 @@
 
 #include "consts.h"
 
-.machine "any"
 .text
 
 /* Barrett reduce constants */
