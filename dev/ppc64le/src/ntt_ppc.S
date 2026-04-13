@@ -57,7 +57,6 @@
 #define b3_offset 19
 #define b4_offset 21
 
-.machine "any"
 .text
 
 .macro SAVE_REGS

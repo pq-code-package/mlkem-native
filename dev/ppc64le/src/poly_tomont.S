@@ -29,7 +29,6 @@
 #define V_QINV  2
 #define V_NMKQ  5
 
-.machine "any"
 .text
 
 /*

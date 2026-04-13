@@ -44,7 +44,7 @@ static int mlkem_ppc_check_cap()
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_ntt_native(int16_t data[MLKEM_N])
 {
-  if (!mlkem_ppc_check_cap(PPC_FEATURE2_ARCH_2_07))
+  if (!mlkem_ppc_check_cap())
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
@@ -55,7 +55,7 @@ static MLK_INLINE int mlk_ntt_native(int16_t data[MLKEM_N])
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
 {
-  if (!mlkem_ppc_check_cap(PPC_FEATURE2_ARCH_2_07))
+  if (!mlkem_ppc_check_cap())
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
@@ -66,7 +66,7 @@ static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])
 {
-  if (!mlkem_ppc_check_cap(PPC_FEATURE2_ARCH_2_07))
+  if (!mlkem_ppc_check_cap())
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
@@ -77,7 +77,7 @@ static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_tomont_native(int16_t data[MLKEM_N])
 {
-  if (!mlkem_ppc_check_cap(PPC_FEATURE2_ARCH_2_07))
+  if (!mlkem_ppc_check_cap())
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
