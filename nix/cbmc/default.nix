@@ -19,12 +19,20 @@ buildEnv {
   paths =
     builtins.attrValues {
       cbmc = cbmc.overrideAttrs (old: rec {
-        version = "6.8.0";
+        version = "6.9.0";
         src = fetchFromGitHub {
           owner = "diffblue";
           repo = "cbmc";
-          hash = "sha256-PT6AYiwkplCeyMREZnGZA0BKl4ZESRC02/9ibKg7mYU=";
-          tag = "cbmc-6.8.0";
+          hash = "sha256-SMJBnzoyTwcwJa9L2X1iX2W4Z/Mwoirf8EXfoyG0dRI=";
+          tag = "cbmc-6.9.0";
+        };
+        srccadical = cadical.src;
+        patches = [
+          (builtins.elemAt old.patches 0) # cudd patch from nixpkgs
+          ./0002-Do-not-download-sources-in-cmake.patch
+        ];
+        env = old.env // {
+          NIX_CFLAGS_COMPILE = (old.env.NIX_CFLAGS_COMPILE or "") + " -Wno-error=switch-enum";
         };
       });
       litani = callPackage ./litani.nix { }; # 1.29.0
@@ -40,7 +48,7 @@ buildEnv {
       });
 
       inherit
-        cadical# 2.2.0
+        cadical# 3.0.0
         bitwuzla# 0.8.2
         ninja; # 1.13.2
     };
