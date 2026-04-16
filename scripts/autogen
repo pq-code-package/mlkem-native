@@ -2638,6 +2638,10 @@ def check_macro_typos():
             if filename.endswith(".ml"):
                 return True
 
+        # Exclude Rust source files
+        if filename.endswith(".rs"):
+            return True
+
         # Exclude regexp patterns in `autogen`
         if is_autogen:
             if rest.startswith("\\") or m in ["MLK_XXX", "MLK_SOURCE_XXX"]:
