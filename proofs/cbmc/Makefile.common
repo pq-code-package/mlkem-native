@@ -281,10 +281,6 @@ PROVER_NAME=cvc5
 SMT_FORMAT := --cvc5
 endif
 
-# CBMC flags used for property checking and coverage checking
-
-CBMCFLAGS += $(CBMC_FLAG_FLUSH)
-
 # CBMC 6.0.0 enables all standard checks by default, which can make coverage analysis
 # very slow. See https://github.com/diffblue/cbmc/issues/8389
 # For now, we disable these checks when generating coverage info.
@@ -543,10 +539,14 @@ SPACE :=$() $()
 COMMA :=,
 
 ################################################################
-# Set C compiler defines
-
+# CBMC flags common to all proofs
+CBMCFLAGS += $(CBMC_FLAG_FLUSH)
 CBMCFLAGS += --object-bits $(CBMC_OBJECT_BITS)
+CBMCFLAGS += --slice-formula
 
+
+################################################################
+# Set C compiler defines
 DEFINES += -DCBMC=1
 DEFINES += -DCBMC_OBJECT_BITS=$(CBMC_OBJECT_BITS)
 DEFINES += -DCBMC_MAX_OBJECT_SIZE="(SIZE_MAX>>(CBMC_OBJECT_BITS+1))"
