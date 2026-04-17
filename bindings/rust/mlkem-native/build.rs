@@ -16,9 +16,6 @@ fn main() {
         .parent()
         .unwrap();
     let mlkem_dir = repo_root.join("mlkem");
-    let header = mlkem_dir.join("mlkem_native.h");
-    let header_str = header.to_str().unwrap();
-    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
     println!("cargo:rerun-if-changed={}", mlkem_dir.display());
 
@@ -64,26 +61,5 @@ fn main() {
                 .flag("-mavx2")
                 .compile(&format!("mlkem_native_asm_{}", level));
         }
-
-        let bindings = bindgen::Builder::default()
-            .header(header_str)
-            .clang_arg(format!("-I{}", mlkem_dir.display()))
-            .clang_arg(format!("-DMLK_CONFIG_PARAMETER_SET={}", level))
-            // Suppress SUPERCOP crypto_kem_* aliases — use namespaced names only.
-            .clang_arg("-DMLK_CONFIG_API_NO_SUPERCOP")
-            // Must match the compiled library.
-            .clang_arg("-DMLK_CONFIG_NO_RANDOMIZED_API")
-            .allowlist_function(format!("PQCP_MLKEM_NATIVE_MLKEM{}_.*", level))
-            .allowlist_var(format!("MLKEM{}_.*", level))
-            .allowlist_var("MLKEM_BYTES")
-            .allowlist_var("MLKEM_SYMBYTES")
-            .allowlist_var("MLK_ERR_.*")
-            .use_core()
-            .generate()
-            .unwrap_or_else(|_| panic!("Unable to generate bindings for MLKEM-{}", level));
-
-        bindings
-            .write_to_file(out_dir.join(format!("bindings_{}.rs", level)))
-            .unwrap_or_else(|_| panic!("Couldn't write bindings for MLKEM-{}", level));
     }
 }

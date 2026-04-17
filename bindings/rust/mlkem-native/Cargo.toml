@@ -16,5 +16,4 @@ kem = { version = "0.3.0-rc.6", features = ["getrandom"] }
 rand_core = "0.10"
 
 [build-dependencies]
-bindgen = "0.72.1"
 cc = "1.2.60"
