@@ -6,16 +6,10 @@ use std::path::PathBuf;
 
 fn main() {
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
-    // The mlkem C sources live at the repository root, three directories above
-    // this crate (bindings/rust/mlkem-native/ → repo root).
-    let repo_root = manifest_dir
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap();
-    let mlkem_dir = repo_root.join("mlkem");
+    // The mlkem C sources are bundled alongside this crate in the `mlkem/`
+    // directory (a symlink to the repository root's mlkem/ in the source tree,
+    // and the resolved files in published packages).
+    let mlkem_dir = manifest_dir.join("mlkem");
 
     println!("cargo:rerun-if-changed={}", mlkem_dir.display());
 

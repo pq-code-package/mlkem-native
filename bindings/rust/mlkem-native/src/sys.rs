@@ -1,7 +1,12 @@
 // Copyright (c) The mlkem-native project authors
 // SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-#![allow(non_upper_case_globals, non_camel_case_types, non_snake_case, dead_code)]
+#![allow(
+    non_upper_case_globals,
+    non_camel_case_types,
+    non_snake_case,
+    dead_code
+)]
 
 pub mod mlkem512 {
     pub const MLKEM512_SECRETKEYBYTES: usize = 1632;
@@ -17,7 +22,7 @@ pub mod mlkem512 {
     pub const MLK_ERR_OUT_OF_MEMORY: i32 = -2;
     pub const MLK_ERR_RNG_FAIL: i32 = -3;
 
-    extern "C" {
+    unsafe extern "C" {
         pub fn PQCP_MLKEM_NATIVE_MLKEM512_keypair_derand(
             pk: *mut u8,
             sk: *mut u8,
@@ -31,11 +36,7 @@ pub mod mlkem512 {
             coins: *const u8,
         ) -> i32;
 
-        pub fn PQCP_MLKEM_NATIVE_MLKEM512_dec(
-            ss: *mut u8,
-            ct: *const u8,
-            sk: *const u8,
-        ) -> i32;
+        pub fn PQCP_MLKEM_NATIVE_MLKEM512_dec(ss: *mut u8, ct: *const u8, sk: *const u8) -> i32;
 
         pub fn PQCP_MLKEM_NATIVE_MLKEM512_check_pk(pk: *const u8) -> i32;
 
@@ -57,7 +58,7 @@ pub mod mlkem768 {
     pub const MLK_ERR_OUT_OF_MEMORY: i32 = -2;
     pub const MLK_ERR_RNG_FAIL: i32 = -3;
 
-    extern "C" {
+    unsafe extern "C" {
         pub fn PQCP_MLKEM_NATIVE_MLKEM768_keypair_derand(
             pk: *mut u8,
             sk: *mut u8,
@@ -71,11 +72,7 @@ pub mod mlkem768 {
             coins: *const u8,
         ) -> i32;
 
-        pub fn PQCP_MLKEM_NATIVE_MLKEM768_dec(
-            ss: *mut u8,
-            ct: *const u8,
-            sk: *const u8,
-        ) -> i32;
+        pub fn PQCP_MLKEM_NATIVE_MLKEM768_dec(ss: *mut u8, ct: *const u8, sk: *const u8) -> i32;
 
         pub fn PQCP_MLKEM_NATIVE_MLKEM768_check_pk(pk: *const u8) -> i32;
 
@@ -97,7 +94,7 @@ pub mod mlkem1024 {
     pub const MLK_ERR_OUT_OF_MEMORY: i32 = -2;
     pub const MLK_ERR_RNG_FAIL: i32 = -3;
 
-    extern "C" {
+    unsafe extern "C" {
         pub fn PQCP_MLKEM_NATIVE_MLKEM1024_keypair_derand(
             pk: *mut u8,
             sk: *mut u8,
@@ -111,11 +108,7 @@ pub mod mlkem1024 {
             coins: *const u8,
         ) -> i32;
 
-        pub fn PQCP_MLKEM_NATIVE_MLKEM1024_dec(
-            ss: *mut u8,
-            ct: *const u8,
-            sk: *const u8,
-        ) -> i32;
+        pub fn PQCP_MLKEM_NATIVE_MLKEM1024_dec(ss: *mut u8, ct: *const u8, sk: *const u8) -> i32;
 
         pub fn PQCP_MLKEM_NATIVE_MLKEM1024_check_pk(pk: *const u8) -> i32;
 
