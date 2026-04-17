@@ -206,7 +206,7 @@ gh_group_end
 check-spdx()
 {
   local success=true
-  for file in $(git ls-files -- ":/" ":/!:*.json" ":/!:*.png" ":/!:*.patch" ":/!:*LICENSE*" ":/!:.git*" ":/!:flake.lock"); do
+  for file in $(git ls-files -- ":/" ":/!:*.json" ":/!:*.png" ":/!:*.patch" ":/!:*LICENSE*" ":/!:.git*" ":/!:flake.lock" ":/!:Cargo.lock"); do
     # Ignore symlinks
     if [[ ! -L $file && $(grep "SPDX-License-Identifier:" "$file" | wc -l) == 0 ]]; then
       gh_error "$file" "${line:-1}" "Missing license header error" "$file is missing SPDX License header"

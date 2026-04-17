@@ -94,7 +94,7 @@
                   nix-direnv
                   zig_0_13;
               } ++ rustPackages
-                ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ config.packages.valgrind_varlat ];
+            ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ config.packages.valgrind_varlat ];
           }).overrideAttrs (_: rustEnv);
 
           packages.hol_server = util.hol_server.hol_server_start;
