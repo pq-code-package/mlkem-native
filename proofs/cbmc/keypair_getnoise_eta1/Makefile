@@ -25,7 +25,7 @@ USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2 --slice-formula
+CBMCFLAGS=--smt2
 
 FUNCTION_NAME = mlk_keypair_getnoise_eta1
 

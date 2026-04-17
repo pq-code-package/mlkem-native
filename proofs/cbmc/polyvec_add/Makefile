@@ -36,7 +36,6 @@ CBMCFLAGS=--smt2
 # For functions that use large and multi-dimensional arrays, this yields
 # a substantial improvement in proof performance.
 CBMCFLAGS += --no-array-field-sensitivity
-CBMCFLAGS += --slice-formula
 
 FUNCTION_NAME = mlk_polyvec_add
 
