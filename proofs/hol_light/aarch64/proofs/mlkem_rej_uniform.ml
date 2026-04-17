@@ -1755,7 +1755,7 @@ let STRIP_EXISTS_ASSUM_TAC =
 (* The main memory safety theorem.                                           *)
 (* ========================================================================= *)
 
-let MLKEM_REJ_UNIFORM_MEMSAFE = prove
+let MLKEM_REJ_UNIFORM_SAFE = prove
  (`!res buf buflen table (inlist:(12 word)list) pc e stackpointer.
       24 divides val buflen /\
       8 * val buflen = 12 * LENGTH inlist /\
@@ -3086,7 +3086,7 @@ let MLKEM_REJ_UNIFORM_MEMSAFE = prove
 (* Memory safety of the subroutine version.                                  *)
 (* ------------------------------------------------------------------------- *)
 
-let MLKEM_REJ_UNIFORM_SUBROUTINE_MEMSAFE = time prove
+let MLKEM_REJ_UNIFORM_SUBROUTINE_SAFE = time prove
  (`!res buf buflen table (inlist:(12 word)list) pc e stackpointer returnaddress.
       24 divides val buflen /\
       8 * val buflen = 12 * LENGTH inlist /\
@@ -3119,6 +3119,6 @@ let MLKEM_REJ_UNIFORM_SUBROUTINE_MEMSAFE = time prove
     REWRITE_CONV[wordlist_from_memory] in
   CONV_TAC TWEAK_CONV THEN
   ARM_ADD_RETURN_STACK_TAC MLKEM_REJ_UNIFORM_EXEC
-   (CONV_RULE TWEAK_CONV MLKEM_REJ_UNIFORM_MEMSAFE)
+   (CONV_RULE TWEAK_CONV MLKEM_REJ_UNIFORM_SAFE)
     `[]:int64 list` 576 THEN
   DISCHARGE_MEMSAFE_TAC);;

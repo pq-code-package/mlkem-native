@@ -1017,7 +1017,9 @@ class Tests:
 
     def hol_light(self):
 
-        if platform.machine().lower() in ["arm64", "aarch64"]:
+        if self.args.arch:
+            arch = self.args.arch
+        elif platform.machine().lower() in ["arm64", "aarch64"]:
             arch = "aarch64"
         elif platform.machine().lower() in ["x86_64"]:
             arch = "x86_64"
@@ -1050,12 +1052,14 @@ class Tests:
                     os.remove(os.path.join(proof_dir, proof_target))
                 except FileNotFoundError:
                     pass
+
+                make_cmd = [
+                    "make",
+                    f"mlkem/{func}.correct",
+                ]
+
                 p = subprocess.run(
-                    [
-                        "make",
-                        f"mlkem/{func}.correct",
-                    ]
-                    + self.make_j(),
+                    make_cmd,
                     cwd="proofs/hol_light/" + arch,
                     env=os.environ.copy(),
                     capture_output=(self.args.verbose is False),
@@ -1479,6 +1483,14 @@ def cli():
         help="Don't run any proofs, but list all functions for which HOL_LIGHT proofs are available",
         action="store_true",
         default=False,
+    )
+
+    hol_light_parser.add_argument(
+        "-a",
+        "--arch",
+        help="Architecture for which to list/run HOL_LIGHT proofs (aarch64 or x86_64).",
+        choices=["aarch64", "x86_64"],
+        default=None,
     )
 
     # func arguments
