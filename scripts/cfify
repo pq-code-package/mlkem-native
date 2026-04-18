@@ -2,9 +2,168 @@
 # Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
+"""Rewrite simplified assembly to include CFI (Call Frame Information)
+directives for stack unwinding.
+
+Reads assembly from stdin (or --input) and emits the same assembly with
+architecture-appropriate `.cfi_*` directives inserted at prologue and
+epilogue boundaries. Supports aarch64, x86_64, and armv81m targets.
+
+Invoked by scripts/simpasm when --cfify is passed; see that script for
+the round-trip validation that guards correctness."""
+
 import sys
 import re
 import argparse
+
+
+# -----------------------------------------------------------------------------
+# aarch64 module-scope constants
+# -----------------------------------------------------------------------------
+AARCH64_SIMD_PAIRS = ((8, 9), (10, 11), (12, 13), (14, 15))
+AARCH64_GPR_PAIRS = (
+    (19, 20),
+    (21, 22),
+    (23, 24),
+    (25, 26),
+    (27, 28),
+    (29, 30),
+)
+
+AARCH64_SIMD_SAVE_PATTERN = re.compile(
+    r"(\s*)stp\s+d8,\s*d9,\s*\[sp(?:,\s*#([^]]+))?\]\s*\n"
+    r"\s*stp\s+d10,\s*d11,\s*\[sp(?:,\s*#([^]]+))?\]\s*\n"
+    r"\s*stp\s+d12,\s*d13,\s*\[sp(?:,\s*#([^]]+))?\]\s*\n"
+    r"\s*stp\s+d14,\s*d15,\s*\[sp(?:,\s*#([^]]+))?\]",
+    re.IGNORECASE,
+)
+AARCH64_SIMD_RESTORE_PATTERN = re.compile(
+    r"(\s*)ldp\s+d8,\s*d9,\s*\[sp(?:,\s*#[^]]+)?\]\s*\n"
+    r"\s*ldp\s+d10,\s*d11,\s*\[sp(?:,\s*#[^]]+)?\]\s*\n"
+    r"\s*ldp\s+d12,\s*d13,\s*\[sp(?:,\s*#[^]]+)?\]\s*\n"
+    r"\s*ldp\s+d14,\s*d15,\s*\[sp(?:,\s*#[^]]+)?\]",
+    re.IGNORECASE,
+)
+AARCH64_GPR_SAVE_PATTERN = re.compile(
+    r"(\s*)stp\s+x19,\s*x20,\s*\[sp(?:,\s*#([^]]+))?\]\s*\n"
+    r"\s*stp\s+x21,\s*x22,\s*\[sp(?:,\s*#([^]]+))?\]\s*\n"
+    r"\s*stp\s+x23,\s*x24,\s*\[sp(?:,\s*#([^]]+))?\]\s*\n"
+    r"\s*stp\s+x25,\s*x26,\s*\[sp(?:,\s*#([^]]+))?\]\s*\n"
+    r"\s*stp\s+x27,\s*x28,\s*\[sp(?:,\s*#([^]]+))?\]\s*\n"
+    r"\s*stp\s+x29,\s*x30,\s*\[sp(?:,\s*#([^]]+))?\]",
+    re.IGNORECASE,
+)
+AARCH64_GPR_RESTORE_PATTERN = re.compile(
+    r"(\s*)ldp\s+x19,\s*x20,\s*\[sp(?:,\s*#[^]]+)?\]\s*\n"
+    r"\s*ldp\s+x21,\s*x22,\s*\[sp(?:,\s*#[^]]+)?\]\s*\n"
+    r"\s*ldp\s+x23,\s*x24,\s*\[sp(?:,\s*#[^]]+)?\]\s*\n"
+    r"\s*ldp\s+x25,\s*x26,\s*\[sp(?:,\s*#[^]]+)?\]\s*\n"
+    r"\s*ldp\s+x27,\s*x28,\s*\[sp(?:,\s*#[^]]+)?\]\s*\n"
+    r"\s*ldp\s+x29,\s*x30,\s*\[sp(?:,\s*#[^]]+)?\]",
+    re.IGNORECASE,
+)
+AARCH64_ADD_SP_PATTERN = re.compile(
+    r"(\s*)add\s+sp,\s*sp,\s*#(0x[0-9a-fA-F]+|\d+)", re.IGNORECASE
+)
+AARCH64_SUB_SP_PATTERN = re.compile(
+    r"(\s*)sub\s+sp,\s*sp,\s*#(0x[0-9a-fA-F]+|\d+)", re.IGNORECASE
+)
+AARCH64_RET_PATTERN = re.compile(r"(\s*)ret\s*$", re.IGNORECASE)
+
+
+# -----------------------------------------------------------------------------
+# x86_64 module-scope constants
+# -----------------------------------------------------------------------------
+X86_64_LABEL_PATTERN = re.compile(r"^([a-zA-Z_][a-zA-Z0-9_]*):$")
+X86_64_SUBQ_PATTERN = re.compile(
+    r"(\s*)subq\s+\$(0x[0-9a-fA-F]+|\d+),\s*%rsp", re.IGNORECASE
+)
+X86_64_ADDQ_PATTERN = re.compile(
+    r"(\s*)addq\s+\$(0x[0-9a-fA-F]+|\d+),\s*%rsp", re.IGNORECASE
+)
+X86_64_RET_PATTERN = re.compile(r"(\s*)retq?\s*$", re.IGNORECASE)
+
+
+# -----------------------------------------------------------------------------
+# armv81m module-scope constants and helpers
+# -----------------------------------------------------------------------------
+ARMV81M_CALLEE_SAVED_GPRS = {
+    "r4",
+    "r5",
+    "r6",
+    "r7",
+    "r8",
+    "r9",
+    "r10",
+    "r11",
+    "lr",
+}
+ARMV81M_CALLEE_SAVED_DREGS = {
+    "d8",
+    "d9",
+    "d10",
+    "d11",
+    "d12",
+    "d13",
+    "d14",
+    "d15",
+}
+# Register aliases: numeric form -> canonical name
+ARMV81M_GPR_ALIASES = {"r14": "lr", "r15": "pc", "r13": "sp"}
+
+ARMV81M_REG_NAME_PATTERN = re.compile(r"([a-z]+)(\d+)$")
+ARMV81M_REG_RANGE_PATTERN = re.compile(r"^\s*([a-z]+)(\d+)\s*-\s*([a-z]+)(\d+)\s*$")
+
+ARMV81M_PUSH_PATTERN = re.compile(r"(\s*)push(?:\.w)?\s*\{([^}]+)\}", re.IGNORECASE)
+ARMV81M_VPUSH_PATTERN = re.compile(r"(\s*)vpush\s*\{([^}]+)\}", re.IGNORECASE)
+ARMV81M_VPOP_PATTERN = re.compile(r"(\s*)vpop\s*\{([^}]+)\}", re.IGNORECASE)
+ARMV81M_POP_PATTERN = re.compile(r"(\s*)pop(?:\.w)?\s*\{([^}]+)\}", re.IGNORECASE)
+ARMV81M_SUB_SP_PATTERN = re.compile(
+    r"(\s*)sub(?:\.w)?\s+sp,\s*(?:sp,\s*)?#(0x[0-9a-fA-F]+|\d+)", re.IGNORECASE
+)
+ARMV81M_ADD_SP_PATTERN = re.compile(
+    r"(\s*)add(?:\.w)?\s+sp,\s*(?:sp,\s*)?#(0x[0-9a-fA-F]+|\d+)", re.IGNORECASE
+)
+ARMV81M_BX_LR_PATTERN = re.compile(r"(\s*)bx\s+lr\s*$", re.IGNORECASE)
+
+
+def armv81m_parse_reg(s):
+    """Parse a single register token, returning its canonical name
+    (e.g. 'r14' -> 'lr'). Raises ValueError on unrecognised input."""
+    s = s.strip().lower()
+    # Named aliases
+    if s in ("lr", "pc", "sp"):
+        return s
+    if not ARMV81M_REG_NAME_PATTERN.match(s):
+        raise ValueError(f"Cannot parse register: {s}")
+    return ARMV81M_GPR_ALIASES.get(s, s)
+
+
+def armv81m_expand_reg_range(token):
+    """Expand 'r4-r11' or 'd8-d15' into a list. Single regs returned as-is."""
+    m = ARMV81M_REG_RANGE_PATTERN.match(token)
+    if m:
+        prefix1, lo, prefix2, hi = (
+            m.group(1),
+            int(m.group(2)),
+            m.group(3),
+            int(m.group(4)),
+        )
+        if prefix1 != prefix2:
+            raise ValueError(f"Mismatched register prefixes in range: {token}")
+        return [
+            ARMV81M_GPR_ALIASES.get(f"{prefix1}{n}", f"{prefix1}{n}")
+            for n in range(lo, hi + 1)
+        ]
+    return [armv81m_parse_reg(token)]
+
+
+def armv81m_parse_reglist(reglist_str):
+    """Parse a register list string, expanding ranges and normalizing aliases."""
+    regs = []
+    for token in reglist_str.split(","):
+        regs.extend(armv81m_expand_reg_range(token))
+    return regs
 
 
 def add_cfi_directives(text, arch):
@@ -19,19 +178,11 @@ def add_cfi_directives(text, arch):
             # Check for SIMD save pattern: stp d8,d9; stp d10,d11; stp d12,d13; stp d14,d15
             if i + 3 < len(lines):
                 pattern_text = "\n".join(lines[i : i + 4])
-                simd_save_pattern = (
-                    r"(\s*)stp\s+d8,\s*d9,\s*\[sp(?:,\s*#([^]]+))?\]\s*\n"
-                    r"\s*stp\s+d10,\s*d11,\s*\[sp(?:,\s*#([^]]+))?\]\s*\n"
-                    r"\s*stp\s+d12,\s*d13,\s*\[sp(?:,\s*#([^]]+))?\]\s*\n"
-                    r"\s*stp\s+d14,\s*d15,\s*\[sp(?:,\s*#([^]]+))?\]"
-                )
-                match = re.match(simd_save_pattern, pattern_text, re.IGNORECASE)
+                match = AARCH64_SIMD_SAVE_PATTERN.match(pattern_text)
                 if match:
                     indent = match.group(1)
                     offsets = [match.group(j + 2) or "0" for j in range(4)]
-                    for j, reg_pair in enumerate(
-                        [(8, 9), (10, 11), (12, 13), (14, 15)]
-                    ):
+                    for j, reg_pair in enumerate(AARCH64_SIMD_PAIRS):
                         result.append(lines[i + j].rstrip())
                         try:
                             offset_val = int(offsets[j], 0)
@@ -54,18 +205,10 @@ def add_cfi_directives(text, arch):
             # Check for SIMD restore pattern: ldp d8,d9; ldp d10,d11; ldp d12,d13; ldp d14,d15
             if i + 3 < len(lines):
                 pattern_text = "\n".join(lines[i : i + 4])
-                simd_restore_pattern = (
-                    r"(\s*)ldp\s+d8,\s*d9,\s*\[sp(?:,\s*#[^]]+)?\]\s*\n"
-                    r"\s*ldp\s+d10,\s*d11,\s*\[sp(?:,\s*#[^]]+)?\]\s*\n"
-                    r"\s*ldp\s+d12,\s*d13,\s*\[sp(?:,\s*#[^]]+)?\]\s*\n"
-                    r"\s*ldp\s+d14,\s*d15,\s*\[sp(?:,\s*#[^]]+)?\]"
-                )
-                match = re.match(simd_restore_pattern, pattern_text, re.IGNORECASE)
+                match = AARCH64_SIMD_RESTORE_PATTERN.match(pattern_text)
                 if match:
                     indent = match.group(1)
-                    for j, reg_pair in enumerate(
-                        [(8, 9), (10, 11), (12, 13), (14, 15)]
-                    ):
+                    for j, reg_pair in enumerate(AARCH64_SIMD_PAIRS):
                         result.append(lines[i + j].rstrip())
                         result.append(f"{indent}.cfi_restore d{reg_pair[0]}")
                         result.append(f"{indent}.cfi_restore d{reg_pair[1]}")
@@ -75,21 +218,11 @@ def add_cfi_directives(text, arch):
             # Check for GPR save pattern: stp x19,x20 through stp x29,x30
             if i + 5 < len(lines):
                 pattern_text = "\n".join(lines[i : i + 6])
-                gpr_save_pattern = (
-                    r"(\s*)stp\s+x19,\s*x20,\s*\[sp(?:,\s*#([^]]+))?\]\s*\n"
-                    r"\s*stp\s+x21,\s*x22,\s*\[sp(?:,\s*#([^]]+))?\]\s*\n"
-                    r"\s*stp\s+x23,\s*x24,\s*\[sp(?:,\s*#([^]]+))?\]\s*\n"
-                    r"\s*stp\s+x25,\s*x26,\s*\[sp(?:,\s*#([^]]+))?\]\s*\n"
-                    r"\s*stp\s+x27,\s*x28,\s*\[sp(?:,\s*#([^]]+))?\]\s*\n"
-                    r"\s*stp\s+x29,\s*x30,\s*\[sp(?:,\s*#([^]]+))?\]"
-                )
-                match = re.match(gpr_save_pattern, pattern_text, re.IGNORECASE)
+                match = AARCH64_GPR_SAVE_PATTERN.match(pattern_text)
                 if match:
                     indent = match.group(1)
                     offsets = [match.group(j + 2) or "0" for j in range(6)]
-                    for j, reg_pair in enumerate(
-                        [(19, 20), (21, 22), (23, 24), (25, 26), (27, 28), (29, 30)]
-                    ):
+                    for j, reg_pair in enumerate(AARCH64_GPR_PAIRS):
                         result.append(lines[i + j].rstrip())
                         try:
                             offset_val = int(offsets[j], 0)
@@ -112,20 +245,10 @@ def add_cfi_directives(text, arch):
             # Check for GPR restore pattern: ldp x19,x20 through ldp x29,x30
             if i + 5 < len(lines):
                 pattern_text = "\n".join(lines[i : i + 6])
-                gpr_restore_pattern = (
-                    r"(\s*)ldp\s+x19,\s*x20,\s*\[sp(?:,\s*#[^]]+)?\]\s*\n"
-                    r"\s*ldp\s+x21,\s*x22,\s*\[sp(?:,\s*#[^]]+)?\]\s*\n"
-                    r"\s*ldp\s+x23,\s*x24,\s*\[sp(?:,\s*#[^]]+)?\]\s*\n"
-                    r"\s*ldp\s+x25,\s*x26,\s*\[sp(?:,\s*#[^]]+)?\]\s*\n"
-                    r"\s*ldp\s+x27,\s*x28,\s*\[sp(?:,\s*#[^]]+)?\]\s*\n"
-                    r"\s*ldp\s+x29,\s*x30,\s*\[sp(?:,\s*#[^]]+)?\]"
-                )
-                match = re.match(gpr_restore_pattern, pattern_text, re.IGNORECASE)
+                match = AARCH64_GPR_RESTORE_PATTERN.match(pattern_text)
                 if match:
                     indent = match.group(1)
-                    for j, reg_pair in enumerate(
-                        [(19, 20), (21, 22), (23, 24), (25, 26), (27, 28), (29, 30)]
-                    ):
+                    for j, reg_pair in enumerate(AARCH64_GPR_PAIRS):
                         result.append(lines[i + j].rstrip())
                         result.append(f"{indent}.cfi_restore x{reg_pair[0]}")
                         result.append(f"{indent}.cfi_restore x{reg_pair[1]}")
@@ -133,9 +256,7 @@ def add_cfi_directives(text, arch):
                     continue
 
             # Rule 7: add sp, sp, #offset -> .cfi_adjust_cfa_offset (-(offset))
-            match = re.match(
-                r"(\s*)add\s+sp,\s*sp,\s*#(0x[0-9a-fA-F]+|\d+)", line, re.IGNORECASE
-            )
+            match = AARCH64_ADD_SP_PATTERN.match(line)
             if match:
                 indent, offset_str = match.groups()
                 offset = (
@@ -149,9 +270,7 @@ def add_cfi_directives(text, arch):
                 continue
 
             # Rule 8: sub sp, sp, #offset -> .cfi_adjust_cfa_offset (offset)
-            match = re.match(
-                r"(\s*)sub\s+sp,\s*sp,\s*#(0x[0-9a-fA-F]+|\d+)", line, re.IGNORECASE
-            )
+            match = AARCH64_SUB_SP_PATTERN.match(line)
             if match:
                 indent, offset_str = match.groups()
                 offset = (
@@ -165,7 +284,7 @@ def add_cfi_directives(text, arch):
                 continue
 
             # Rule 2: ret -> .cfi_endproc after ret
-            match = re.match(r"(\s*)ret\s*$", line, re.IGNORECASE)
+            match = AARCH64_RET_PATTERN.match(line)
             if match:
                 indent = match.group(1)
                 result.append(line)
@@ -175,7 +294,7 @@ def add_cfi_directives(text, arch):
 
         elif arch == "x86_64":
             # Check for labels and see if there's a corresponding callq
-            label_match = re.match(r"^([a-zA-Z_][a-zA-Z0-9_]*):$", line)
+            label_match = X86_64_LABEL_PATTERN.match(line)
             if label_match:
                 label = label_match.group(1)
                 # Check if this label is called anywhere in the text
@@ -186,9 +305,7 @@ def add_cfi_directives(text, arch):
                     continue
 
             # x86_64: subq $OFFSET, %rsp -> .cfi_adjust_cfa_offset OFFSET (stack alloc)
-            match = re.match(
-                r"(\s*)subq\s+\$(0x[0-9a-fA-F]+|\d+),\s*%rsp", line, re.IGNORECASE
-            )
+            match = X86_64_SUBQ_PATTERN.match(line)
             if match:
                 indent, offset_str = match.groups()
                 offset = (
@@ -202,9 +319,7 @@ def add_cfi_directives(text, arch):
                 continue
 
             # x86_64: addq $OFFSET, %rsp -> .cfi_adjust_cfa_offset -OFFSET (stack free)
-            match = re.match(
-                r"(\s*)addq\s+\$(0x[0-9a-fA-F]+|\d+),\s*%rsp", line, re.IGNORECASE
-            )
+            match = X86_64_ADDQ_PATTERN.match(line)
             if match:
                 indent, offset_str = match.groups()
                 offset = (
@@ -218,7 +333,7 @@ def add_cfi_directives(text, arch):
                 continue
 
             # x86_64: ret/retq -> .cfi_endproc after ret
-            match = re.match(r"(\s*)retq?\s*$", line, re.IGNORECASE)
+            match = X86_64_RET_PATTERN.match(line)
             if match:
                 indent = match.group(1)
                 result.append(line)
@@ -227,123 +342,60 @@ def add_cfi_directives(text, arch):
                 continue
 
         elif arch == "armv81m":
-            # Armv8.1-M callee-saved registers
-            armv81m_callee_saved_gprs = {
-                "r4",
-                "r5",
-                "r6",
-                "r7",
-                "r8",
-                "r9",
-                "r10",
-                "r11",
-                "lr",
-            }
-            armv81m_callee_saved_dregs = {
-                "d8",
-                "d9",
-                "d10",
-                "d11",
-                "d12",
-                "d13",
-                "d14",
-                "d15",
-            }
-            # Register aliases: numeric form -> canonical name
-            gpr_aliases = {"r14": "lr", "r15": "pc", "r13": "sp"}
-
-            def parse_reg(s):
-                """Parse a single register, returning (prefix, number) or None."""
-                s = s.strip().lower()
-                # Named aliases
-                if s in ("lr", "pc", "sp"):
-                    return s
-                m = re.match(r"([a-z]+)(\d+)$", s)
-                if not m:
-                    raise ValueError(f"Cannot parse register: {s}")
-                return gpr_aliases.get(s, s)
-
-            def expand_reg_range(token):
-                """Expand 'r4-r11' or 'd8-d15' into a list. Single regs returned as-is."""
-                m = re.match(r"^\s*([a-z]+)(\d+)\s*-\s*([a-z]+)(\d+)\s*$", token)
-                if m:
-                    prefix1, lo, prefix2, hi = (
-                        m.group(1),
-                        int(m.group(2)),
-                        m.group(3),
-                        int(m.group(4)),
-                    )
-                    if prefix1 != prefix2:
-                        raise ValueError(
-                            f"Mismatched register prefixes in range: {token}"
-                        )
-                    return [
-                        gpr_aliases.get(f"{prefix1}{n}", f"{prefix1}{n}")
-                        for n in range(lo, hi + 1)
-                    ]
-                return [parse_reg(token)]
-
-            def parse_reglist(reglist_str):
-                """Parse a register list string, expanding ranges and normalizing aliases."""
-                result = []
-                for token in reglist_str.split(","):
-                    result.extend(expand_reg_range(token))
-                return result
-
             # push.w {reglist} / push {reglist}
-            match = re.match(r"(\s*)push(?:\.w)?\s*\{([^}]+)\}", line, re.IGNORECASE)
+            match = ARMV81M_PUSH_PATTERN.match(line)
             if match:
                 indent = match.group(1)
-                regs = parse_reglist(match.group(2))
+                regs = armv81m_parse_reglist(match.group(2))
                 total_size = 4 * len(regs)
                 result.append(line)
                 result.append(f"{indent}.cfi_adjust_cfa_offset {total_size:#x}")
                 for idx, reg in enumerate(regs):
-                    if reg in armv81m_callee_saved_gprs:
+                    if reg in ARMV81M_CALLEE_SAVED_GPRS:
                         offset = 4 * idx
                         result.append(f"{indent}.cfi_rel_offset {reg}, {offset:#x}")
                 i += 1
                 continue
 
             # vpush {d-regs}
-            match = re.match(r"(\s*)vpush\s*\{([^}]+)\}", line, re.IGNORECASE)
+            match = ARMV81M_VPUSH_PATTERN.match(line)
             if match:
                 indent = match.group(1)
-                regs = parse_reglist(match.group(2))
+                regs = armv81m_parse_reglist(match.group(2))
                 total_size = 8 * len(regs)
                 result.append(line)
                 result.append(f"{indent}.cfi_adjust_cfa_offset {total_size:#x}")
                 for idx, reg in enumerate(regs):
-                    if reg in armv81m_callee_saved_dregs:
+                    if reg in ARMV81M_CALLEE_SAVED_DREGS:
                         offset = 8 * idx
                         result.append(f"{indent}.cfi_rel_offset {reg}, {offset:#x}")
                 i += 1
                 continue
 
             # vpop {d-regs}
-            match = re.match(r"(\s*)vpop\s*\{([^}]+)\}", line, re.IGNORECASE)
+            match = ARMV81M_VPOP_PATTERN.match(line)
             if match:
                 indent = match.group(1)
-                regs = parse_reglist(match.group(2))
+                regs = armv81m_parse_reglist(match.group(2))
                 total_size = 8 * len(regs)
                 result.append(line)
                 for reg in regs:
-                    if reg in armv81m_callee_saved_dregs:
+                    if reg in ARMV81M_CALLEE_SAVED_DREGS:
                         result.append(f"{indent}.cfi_restore {reg}")
                 result.append(f"{indent}.cfi_adjust_cfa_offset -{total_size:#x}")
                 i += 1
                 continue
 
             # pop.w {reglist} / pop {reglist}
-            match = re.match(r"(\s*)pop(?:\.w)?\s*\{([^}]+)\}", line, re.IGNORECASE)
+            match = ARMV81M_POP_PATTERN.match(line)
             if match:
                 indent = match.group(1)
-                regs = parse_reglist(match.group(2))
+                regs = armv81m_parse_reglist(match.group(2))
                 total_size = 4 * len(regs)
                 has_pc = "pc" in regs
                 result.append(line)
                 for reg in regs:
-                    if reg in armv81m_callee_saved_gprs:
+                    if reg in ARMV81M_CALLEE_SAVED_GPRS:
                         result.append(f"{indent}.cfi_restore {reg}")
                     elif reg == "pc":
                         # pop into pc restores lr
@@ -355,11 +407,7 @@ def add_cfi_directives(text, arch):
                 continue
 
             # sub.w sp, #imm / sub sp, #imm / sub sp, sp, #imm
-            match = re.match(
-                r"(\s*)sub(?:\.w)?\s+sp,\s*(?:sp,\s*)?#(0x[0-9a-fA-F]+|\d+)",
-                line,
-                re.IGNORECASE,
-            )
+            match = ARMV81M_SUB_SP_PATTERN.match(line)
             if match:
                 indent, offset_str = match.groups()
                 offset = (
@@ -373,11 +421,7 @@ def add_cfi_directives(text, arch):
                 continue
 
             # add.w sp, #imm / add sp, #imm / add sp, sp, #imm
-            match = re.match(
-                r"(\s*)add(?:\.w)?\s+sp,\s*(?:sp,\s*)?#(0x[0-9a-fA-F]+|\d+)",
-                line,
-                re.IGNORECASE,
-            )
+            match = ARMV81M_ADD_SP_PATTERN.match(line)
             if match:
                 indent, offset_str = match.groups()
                 offset = (
@@ -391,7 +435,7 @@ def add_cfi_directives(text, arch):
                 continue
 
             # bx lr — function return
-            match = re.match(r"(\s*)bx\s+lr\s*$", line, re.IGNORECASE)
+            match = ARMV81M_BX_LR_PATTERN.match(line)
             if match:
                 indent = match.group(1)
                 result.append(line)
