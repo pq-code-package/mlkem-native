@@ -153,3 +153,57 @@ $(call MAKE_OBJS, $(MLKEM512_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_
 $(call MAKE_OBJS, $(MLKEM768_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_CFLAGS)
 $(call MAKE_OBJS, $(MLKEM1024_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_CFLAGS)
 endif
+
+# ABI checker
+ABICHECK_DIR = $(BUILD_DIR)/abicheck
+
+ABICHECK_SOURCES = test/abicheck/abicheck.c test/abicheck/abicheckutil.c
+ABICHECK_SOURCES += test/abicheck/aarch64_callstub.S test/abicheck/x86_64_callstub.S
+ABICHECK_SOURCES += $(wildcard test/abicheck/check_*.c)
+ABICHECK_SOURCES += $(wildcard test/notrandombytes/*.c)
+
+ABICHECK_EXTRA_SOURCES =
+
+ABICHECK_ASM_SOURCES =
+ifeq ($(ARCH),aarch64)
+	ABICHECK_ASM_SOURCES += $(wildcard mlkem/src/fips202/native/aarch64/src/*.S)
+	ABICHECK_ASM_SOURCES += $(wildcard mlkem/src/native/aarch64/src/*.S)
+else ifeq ($(ARCH),x86_64)
+	ABICHECK_ASM_SOURCES += $(wildcard mlkem/src/fips202/native/x86_64/src/*.S)
+	ABICHECK_ASM_SOURCES += $(wildcard mlkem/src/native/x86_64/src/*.S)
+	# C files providing constant data needed by the x86_64 assembly
+	ABICHECK_EXTRA_SOURCES += mlkem/src/native/x86_64/src/consts.c
+	ABICHECK_EXTRA_SOURCES += mlkem/src/native/x86_64/src/compress_consts.c
+	ABICHECK_EXTRA_SOURCES += mlkem/src/native/x86_64/src/rej_uniform_table.c
+	ABICHECK_EXTRA_SOURCES += mlkem/src/fips202/native/x86_64/src/keccakf1600_constants.c
+endif
+
+ABICHECK_ALL_SOURCES = $(ABICHECK_SOURCES) $(ABICHECK_ASM_SOURCES) $(ABICHECK_EXTRA_SOURCES)
+ABICHECK_OBJS = $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_ALL_SOURCES))
+
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlk
+$(ABICHECK_OBJS): CFLAGS += -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -UMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
+
+# Work around preprocessor guards in ASM files: enable all assembly
+# without going through the normal backend selection.
+ifeq ($(ARCH),aarch64)
+$(ABICHECK_DIR)/mlkem/src/native/aarch64/%.S.o: CFLAGS += -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
+$(ABICHECK_DIR)/mlkem/src/native/aarch64/%.S.o: CFLAGS += -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH
+$(ABICHECK_DIR)/mlkem/src/native/aarch64/%.S.o: CFLAGS += -DMLK_ARITH_BACKEND_AARCH64
+$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -UMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
+$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X1_SCALAR
+$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X1_V84A
+$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X2_V84A
+$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID
+$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID
+else ifeq ($(ARCH),x86_64)
+$(ABICHECK_DIR)/mlkem/src/native/x86_64/%.o: CFLAGS += -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
+$(ABICHECK_DIR)/mlkem/src/native/x86_64/%.o: CFLAGS += -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH
+$(ABICHECK_DIR)/mlkem/src/native/x86_64/%.o: CFLAGS += -DMLK_ARITH_BACKEND_X86_64_DEFAULT
+$(ABICHECK_DIR)/mlkem/src/native/x86_64/%.o: CFLAGS += -mavx2 -mbmi2
+$(ABICHECK_DIR)/mlkem/src/fips202/native/x86_64/%.o: CFLAGS += -UMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
+$(ABICHECK_DIR)/mlkem/src/fips202/native/x86_64/%.o: CFLAGS += -DMLK_FIPS202_X86_64_NEED_X4_AVX2
+$(ABICHECK_DIR)/mlkem/src/fips202/native/x86_64/%.o: CFLAGS += -mavx2
+endif
+
+$(ABICHECK_DIR)/bin/abicheck: $(ABICHECK_OBJS)

@@ -6,6 +6,37 @@
 
 #if defined(MLK_FIPS202_X86_64_NEED_X4_AVX2) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+/*yaml
+  Name: keccak_f1600_x4_avx2
+  Description: x86_64 AVX2 Keccak-f[1600] permutation for four states
+  Signature: void mlk_keccak_f1600_x4_avx2(uint64_t states[100], const uint64_t rc[24], const uint64_t rho8[4], const uint64_t rho56[4])
+  ABI:
+    rdi:
+      type: buffer
+      size_bytes: 800
+      permissions: read/write
+      c_parameter: uint64_t states[100]
+      description: Four sequential Keccak states (4 x 25 x uint64_t)
+    rsi:
+      type: buffer
+      size_bytes: 192
+      permissions: read-only
+      c_parameter: const uint64_t rc[24]
+      description: Round constants (24 x uint64_t)
+    rdx:
+      type: buffer
+      size_bytes: 32
+      permissions: read-only
+      c_parameter: const uint64_t rho8[4]
+      description: Rotation constant rho8 (4 x uint64_t)
+    rcx:
+      type: buffer
+      size_bytes: 32
+      permissions: read-only
+      c_parameter: const uint64_t rho56[4]
+      description: Rotation constant rho56 (4 x uint64_t)
+*/
+
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
