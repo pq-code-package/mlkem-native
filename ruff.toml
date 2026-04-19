@@ -20,6 +20,5 @@ ignore = [
     "E731", # lambda assignment
     "E741", # ambiguous variable name
     "F541", # f-string without any placeholders
-    "F821", # undefined name
     "F841", # unused variable
 ]

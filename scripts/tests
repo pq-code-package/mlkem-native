@@ -957,6 +957,7 @@ class Tests:
                     log.info(f"   SUCCESS (after {dur}s)")
 
         def run_cbmc(mlkem_k):
+            log = logger("CBMC", SCHEME.from_k(mlkem_k), None, None)
             all_proofs = list_proofs()
             proofs = all_proofs
             if self.args.start_with is not None:
@@ -965,7 +966,7 @@ class Tests:
                     proofs = proofs[idx:]
                 except ValueError:
                     log.error(
-                        "Could not find function {self.args.start_with}. Running all proofs"
+                        f"Could not find function {self.args.start_with}. Running all proofs"
                     )
             if self.args.proof is not None:
                 proofs = []
