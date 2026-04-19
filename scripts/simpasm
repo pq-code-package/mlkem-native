@@ -274,7 +274,7 @@ def simplify(logger, args, asm_input, asm_output=None):
         autogen_header = [
             "",
             "/*",
-            f" * WARNING: This file is auto-derived from the mlkem-native source file",
+            " * WARNING: This file is auto-derived from the mlkem-native source file",
             f" *   {asm_input} using scripts/simpasm. Do not modify it directly.",
             " */",
             "",
@@ -352,7 +352,7 @@ def simplify(logger, args, asm_input, asm_output=None):
             + elf_stack_section
         )
 
-        logger.debug(f"Assembling simplified assembly ...")
+        logger.debug("Assembling simplified assembly ...")
         logger.debug(new_asm)
         logger.debug(f"Command: {' '.join(cmd)}")
         run_cmd(cmd, input=new_asm)

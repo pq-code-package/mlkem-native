@@ -18,6 +18,4 @@ ignore = [
     "E713", # `not in` rather than `not X in Y`
     "E731", # lambda assignment
     "E741", # ambiguous variable name
-    "F541", # f-string without any placeholders
-    "F841", # unused variable
 ]

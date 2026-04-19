@@ -137,7 +137,6 @@ def export_result_json(output_path, run_file):
 
     failures, runtimes = [], []
     for name, status, duration_str in proof_table[1:]:  # skip header
-        is_timeout = duration_str == "TIMEOUT"
         is_success = status == "Success"
 
         if not is_success:

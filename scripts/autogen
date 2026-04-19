@@ -2592,7 +2592,6 @@ def get_syscaps():
 
 def check_macro_typos():
     files = get_all_files()
-    configs = get_config_options()
     syscaps = get_syscaps()
 
     macros = set(map(lambda t: t[1], get_defines(all=True)))
@@ -2713,7 +2712,6 @@ def check_asm_loop_labels_for_file(filename):
     content = read_file(filename)
 
     # Find function symbol name
-    func_pattern = r"MLK_ASM_FN_SYMBOL\((.*)\)"
     res = _RE_FUNC_SYMBOL.search(content)
     if res is None:
         raise Exception(f"Could not find function symbol in assembly file {filename}")
@@ -2894,7 +2892,7 @@ def update_via_simpasm(
             # Add syntax option for x86_64
             if arch == "x86_64" and x86_64_syntax != "att":
                 cmd += ["--syntax", x86_64_syntax]
-            r = subprocess.run(
+            subprocess.run(
                 cmd,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE,
@@ -3290,7 +3288,7 @@ def synchronize_backends(
         )
 
         update_via_copy(
-            f"dev/x86_64/meta.h",
+            "dev/x86_64/meta.h",
             "mlkem/src/native/x86_64/meta.h",
             transform=lambda c: adjust_header_guard_for_filename(
                 c, "mlkem/src/native/x86_64/meta.h"
@@ -3404,7 +3402,7 @@ def adjust_header_guard_for_filename(content, header_file):
         yield f"#define {guard_name}"
 
     def gen_footer():
-        yield f"#endif"
+        yield "#endif"
         yield ""
 
     guard = list(gen_guard())
@@ -3714,7 +3712,7 @@ def gen_c_citations_for(filename, bibliography):
             raise Exception(
                 f"Could not find bibliography entry {cite_id} referenced in {filename}"
             )
-        references.append(f" *")
+        references.append(" *")
         references.append(f" * - [{cite_id}]")
         prefix = " *   "
         # Wrap long lines at 80 chars
@@ -3799,11 +3797,11 @@ def gen_bib_file(bibliography):
         content.append(f"### `{cite_id}`")
         content.append("")
         content.append(f"* {entry.name}")
-        content.append(f"* Author(s):")
+        content.append("* Author(s):")
         for author in entry.authors:
             content.append(f"  - {author}")
         content.append(f"* URL: {entry.url}")
-        content.append(f"* Referenced from:")
+        content.append("* Referenced from:")
         # Usages are pairs of (filename, line_count)
         # Ignore line_count for now, as it would require `autogen` after
         # a change to source files.

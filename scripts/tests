@@ -1317,7 +1317,7 @@ def cli():
     )
 
     # wycheproof arguments
-    wycheproof_parser = cmd_subparsers.add_parser(
+    cmd_subparsers.add_parser(
         "wycheproof", help="Run Wycheproof client", parents=[common_parser]
     )
 
@@ -1377,7 +1377,7 @@ def cli():
         action="store_true",
         default=False,
     )
-    size_parser = cmd_subparsers.add_parser(
+    cmd_subparsers.add_parser(
         "size",
         help="Run the code size measurement for all object file",
         parents=[common_parser],
@@ -1493,12 +1493,12 @@ def cli():
     )
 
     # kat arguments
-    kat_parser = cmd_subparsers.add_parser(
+    cmd_subparsers.add_parser(
         "kat", help="Run the kat tests for all parameter sets", parents=[common_parser]
     )
 
     # unit arguments
-    unit_parser = cmd_subparsers.add_parser(
+    cmd_subparsers.add_parser(
         "unit",
         help="Run the unit tests for all parameter sets",
         parents=[common_parser],
@@ -1524,14 +1524,14 @@ def cli():
     )
 
     # alloc arguments
-    alloc_parser = cmd_subparsers.add_parser(
+    cmd_subparsers.add_parser(
         "alloc",
         help="Run the alloc tests for all parameter sets",
         parents=[common_parser],
     )
 
     # rng_fail arguments
-    rng_fail_parser = cmd_subparsers.add_parser(
+    cmd_subparsers.add_parser(
         "rng_fail",
         help="Run the RNG failure tests for all parameter sets",
         parents=[common_parser],
