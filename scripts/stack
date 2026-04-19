@@ -138,7 +138,7 @@ def run_valgrind_massif_per_api(stack_test_binary, dump_massif=False):
 
         return (
             True,
-            f"API-specific stack usage (measured with valgrind massif):\n"
+            "API-specific stack usage (measured with valgrind massif):\n"
             + "\n".join(result_lines),
         )
 
