@@ -87,10 +87,11 @@ rec {
         nixpkgs-fmt
         shfmt
         shellcheck
-        actionlint;
+        actionlint
+        ruff;
 
       inherit (pkgs.python3Packages)
-        mpmath sympy black pyparsing pyyaml rich;
+        mpmath sympy pyparsing pyyaml rich;
     };
   };
 

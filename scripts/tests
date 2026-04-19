@@ -808,7 +808,6 @@ class Tests:
         self.check_fail()
 
     def size(self):
-
         test_type = TEST_TYPES.SIZE
 
         resultss = None
@@ -899,7 +898,6 @@ class Tests:
         self.check_fail()
 
     def cbmc(self):
-
         def list_proofs():
             cmd_str = ["./proofs/cbmc/list_proofs.sh"]
             p = subprocess.run(cmd_str, capture_output=True, universal_newlines=False)
@@ -916,7 +914,7 @@ class Tests:
             scheme = SCHEME.from_k(mlkem_k)
             num_proofs = len(proofs)
             for i, func in enumerate(proofs):
-                log = logger(f"CBMC ({i+1}/{num_proofs})", scheme, None, None)
+                log = logger(f"CBMC ({i + 1}/{num_proofs})", scheme, None, None)
                 log.info(f"Starting CBMC proof for {func}")
                 start = time.time()
                 try:
@@ -1016,7 +1014,6 @@ class Tests:
         self.check_fail()
 
     def hol_light(self):
-
         if platform.machine().lower() in ["arm64", "aarch64"]:
             arch = "aarch64"
         elif platform.machine().lower() in ["x86_64"]:
@@ -1038,7 +1035,7 @@ class Tests:
         def run_hol_light_single_step(proofs, arch):
             num_proofs = len(proofs)
             for i, func in enumerate(proofs):
-                log = logger(f"HOL_LIGHT ({i+1}/{num_proofs})", None, None, None)
+                log = logger(f"HOL_LIGHT ({i + 1}/{num_proofs})", None, None, None)
                 log.info(f"Starting HOL-Light proof for {func}")
                 start = time.time()
                 proof_bin = f"mlkem/{func}.native"

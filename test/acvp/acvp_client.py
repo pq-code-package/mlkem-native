@@ -75,7 +75,6 @@ def loadAcvpData(prompt, expectedResults):
 
 
 def loadDefaultAcvpData(version):
-
     data_dir = f"test/acvp/.acvp-data/{version}/files"
     acvp_jsons_for_version = [
         (
@@ -308,13 +307,13 @@ def runTest(data, output):
 
 
 def test(prompt, expected, output, version):
-    assert (
-        prompt is not None or output is None
-    ), "cannot produce output if there is no input"
+    assert prompt is not None or output is None, (
+        "cannot produce output if there is no input"
+    )
 
-    assert prompt is None or (
-        output is not None or expected is not None
-    ), "if there is a prompt, either output or expectedResult required"
+    assert prompt is None or (output is not None or expected is not None), (
+        "if there is a prompt, either output or expectedResult required"
+    )
 
     # if prompt is passed, use it
     if prompt is not None:

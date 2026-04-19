@@ -155,15 +155,29 @@ else
 fi
 gh_group_end
 
-gh_group_start "Linting python scripts with black"
-if ! diff=$(black --check --diff -q --include "(scripts/tests|scripts/simpasm|scripts/cfify|scripts/autogen|scripts/check-namespace|\.py$)" "$ROOT"); then
+gh_group_start "Linting python scripts with ruff (format)"
+if ! diff=$(ruff format --check --diff "$ROOT" 2>&1); then
+  echo "$diff"
   gh_error_simple "Format error" "$diff"
-  error "Lint python"
+  error "Lint Python (ruff format)"
   SUCCESS=false
-  gh_summary_failure "Lint python"
+  gh_summary_failure "Lint Python (ruff format)"
 else
-  info "Lint Python"
-  gh_summary_success "Lint Python"
+  info "Lint Python (ruff format)"
+  gh_summary_success "Lint Python (ruff format)"
+fi
+gh_group_end
+
+gh_group_start "Linting python scripts with ruff (check)"
+if ! out=$(ruff check "$ROOT" 2>&1); then
+  echo "$out"
+  gh_error_simple "Lint error" "$out"
+  error "Lint Python (ruff check)"
+  SUCCESS=false
+  gh_summary_failure "Lint Python (ruff check)"
+else
+  info "Lint Python (ruff check)"
+  gh_summary_success "Lint Python (ruff check)"
 fi
 gh_group_end
 
