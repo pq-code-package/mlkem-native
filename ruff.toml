@@ -16,7 +16,6 @@ select = ["E", "F", "W"]
 ignore = [
     "E501", # line too long
     "E713", # `not in` rather than `not X in Y`
-    "E722", # bare except
     "E731", # lambda assignment
     "E741", # ambiguous variable name
     "F541", # f-string without any placeholders

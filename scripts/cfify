@@ -192,7 +192,7 @@ def add_cfi_directives(text, arch):
                             result.append(
                                 f"{indent}.cfi_rel_offset d{reg_pair[1]}, 0x{offset_val + 8:x}"
                             )
-                        except:
+                        except ValueError:
                             result.append(
                                 f"{indent}.cfi_rel_offset d{reg_pair[0]}, {offsets[j]}"
                             )
@@ -232,7 +232,7 @@ def add_cfi_directives(text, arch):
                             result.append(
                                 f"{indent}.cfi_rel_offset x{reg_pair[1]}, 0x{offset_val + 8:x}"
                             )
-                        except:
+                        except ValueError:
                             result.append(
                                 f"{indent}.cfi_rel_offset x{reg_pair[0]}, {offsets[j]}"
                             )
