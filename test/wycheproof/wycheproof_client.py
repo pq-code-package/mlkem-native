@@ -104,16 +104,16 @@ def run_keygen_seed_test(data_file):
             info(f"  tcId={tc['tcId']} ... ", end="")
             out = run_binary([binary, "keygen_seed", f"seed={tc['seed']}"])
             if tc["result"] == "valid":
-                assert (
-                    out["ek"].upper() == tc["ek"].upper()
-                ), f"ek mismatch tcId={tc['tcId']}"
-                assert (
-                    out["dk"].upper() == tc["dk"].upper()
-                ), f"dk mismatch tcId={tc['tcId']}"
+                assert out["ek"].upper() == tc["ek"].upper(), (
+                    f"ek mismatch tcId={tc['tcId']}"
+                )
+                assert out["dk"].upper() == tc["dk"].upper(), (
+                    f"dk mismatch tcId={tc['tcId']}"
+                )
             else:
-                assert (
-                    False
-                ), f"Unexpected result '{tc['result']}' for tcId={tc['tcId']}"
+                assert False, (
+                    f"Unexpected result '{tc['result']}' for tcId={tc['tcId']}"
+                )
             info("ok")
             count += 1
     info(f"  {count} keygen_seed tests passed")
@@ -134,20 +134,20 @@ def run_encaps_test(data_file):
             out = run_binary([binary, "encaps", f"ek={tc['ek']}", f"m={tc['m']}"])
             if tc["result"] == "invalid":
                 # _error: non-zero exit code; decode_error: explicit validation failure
-                assert (
-                    "_error" in out or "decode_error" in out
-                ), f"binary success on invalid tcId={tc['tcId']}"
+                assert "_error" in out or "decode_error" in out, (
+                    f"binary success on invalid tcId={tc['tcId']}"
+                )
             elif tc["result"] == "valid":
-                assert (
-                    out["c"].upper() == tc["c"].upper()
-                ), f"c mismatch tcId={tc['tcId']}"
-                assert (
-                    out["K"].upper() == tc["K"].upper()
-                ), f"K mismatch tcId={tc['tcId']}"
+                assert out["c"].upper() == tc["c"].upper(), (
+                    f"c mismatch tcId={tc['tcId']}"
+                )
+                assert out["K"].upper() == tc["K"].upper(), (
+                    f"K mismatch tcId={tc['tcId']}"
+                )
             else:
-                assert (
-                    False
-                ), f"Unsupported test result '{tc['result']}' for tcId={tc['tcId']}"
+                assert False, (
+                    f"Unsupported test result '{tc['result']}' for tcId={tc['tcId']}"
+                )
             info("ok")
             count += 1
     info(f"  {count} encaps tests passed")
@@ -168,15 +168,15 @@ def run_semi_expanded_decaps_test(data_file):
             out = run_binary([binary, "decaps", f"dk={tc['dk']}", f"c={tc['c']}"])
             if tc["result"] == "invalid":
                 # _error: non-zero exit code; decode_error: explicit validation failure
-                assert (
-                    "_error" in out or "decode_error" in out
-                ), f"binary success on invalid tcId={tc['tcId']}"
+                assert "_error" in out or "decode_error" in out, (
+                    f"binary success on invalid tcId={tc['tcId']}"
+                )
             elif tc["result"] == "valid":
                 assert "K" in out, f"missing K in output tcId={tc['tcId']}"
             else:
-                assert (
-                    False
-                ), f"Unsupported test result '{tc['result']}' for tcId={tc['tcId']}"
+                assert False, (
+                    f"Unsupported test result '{tc['result']}' for tcId={tc['tcId']}"
+                )
             info("ok")
             count += 1
     info(f"  {count} semi_expanded_decaps tests passed")
@@ -197,33 +197,33 @@ def run_combined_test(data_file):
             # Generate keypair from seed
             keygen_out = run_binary([binary, "keygen_seed", f"seed={tc['seed']}"])
             if "decode_error" in keygen_out:
-                assert (
-                    tc["result"] == "invalid"
-                ), f"keygen decode error on valid tcId={tc['tcId']}"
+                assert tc["result"] == "invalid", (
+                    f"keygen decode error on valid tcId={tc['tcId']}"
+                )
                 info("ok")
                 count += 1
                 continue
             # Keygen succeeded — check ek
             assert "ek" in tc, f"missing ek in test vector tcId={tc['tcId']}"
-            assert (
-                keygen_out["ek"].upper() == tc["ek"].upper()
-            ), f"ek mismatch tcId={tc['tcId']}"
+            assert keygen_out["ek"].upper() == tc["ek"].upper(), (
+                f"ek mismatch tcId={tc['tcId']}"
+            )
             # Decapsulate
             dk = keygen_out["dk"]
             decaps_out = run_binary([binary, "decaps", f"dk={dk}", f"c={tc['c']}"])
             if tc["result"] == "invalid":
                 # _error: non-zero exit code; decode_error: explicit validation failure
-                assert (
-                    "_error" in decaps_out or "decode_error" in decaps_out
-                ), f"binary success on invalid tcId={tc['tcId']}"
+                assert "_error" in decaps_out or "decode_error" in decaps_out, (
+                    f"binary success on invalid tcId={tc['tcId']}"
+                )
             elif tc["result"] == "valid":
-                assert (
-                    decaps_out["K"].upper() == tc["K"].upper()
-                ), f"K mismatch tcId={tc['tcId']}"
+                assert decaps_out["K"].upper() == tc["K"].upper(), (
+                    f"K mismatch tcId={tc['tcId']}"
+                )
             else:
-                assert (
-                    False
-                ), f"Unsupported test result '{tc['result']}' for tcId={tc['tcId']}"
+                assert False, (
+                    f"Unsupported test result '{tc['result']}' for tcId={tc['tcId']}"
+                )
             info("ok")
             count += 1
     info(f"  {count} combined tests passed")

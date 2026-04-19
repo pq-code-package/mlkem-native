@@ -190,7 +190,7 @@ def add_cfi_directives(text, arch):
                                 f"{indent}.cfi_rel_offset d{reg_pair[0]}, 0x{offset_val:x}"
                             )
                             result.append(
-                                f"{indent}.cfi_rel_offset d{reg_pair[1]}, 0x{offset_val+8:x}"
+                                f"{indent}.cfi_rel_offset d{reg_pair[1]}, 0x{offset_val + 8:x}"
                             )
                         except:
                             result.append(
@@ -230,7 +230,7 @@ def add_cfi_directives(text, arch):
                                 f"{indent}.cfi_rel_offset x{reg_pair[0]}, 0x{offset_val:x}"
                             )
                             result.append(
-                                f"{indent}.cfi_rel_offset x{reg_pair[1]}, 0x{offset_val+8:x}"
+                                f"{indent}.cfi_rel_offset x{reg_pair[1]}, 0x{offset_val + 8:x}"
                             )
                         except:
                             result.append(
@@ -450,7 +450,6 @@ def add_cfi_directives(text, arch):
 
 
 def main():
-
     parser = argparse.ArgumentParser(
         description="Add CFI directives to AArch64 assembly"
     )

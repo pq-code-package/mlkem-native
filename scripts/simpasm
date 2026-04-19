@@ -151,7 +151,6 @@ def drop_preprocessor_directives(header):
 
 
 def simplify(logger, args, asm_input, asm_output=None):
-
     def run_cmd(cmd, input=None):
         logger.debug(f"Running command: {' '.join(cmd)}")
         try:
@@ -189,10 +188,10 @@ def simplify(logger, args, asm_input, asm_output=None):
         cflags = []
 
     # Create temporary object files for byte code before/after simplification
-    with tempfile.NamedTemporaryFile(
-        suffix=".o", delete=False
-    ) as tmp0, tempfile.NamedTemporaryFile(suffix=".o", delete=False) as tmp1:
-
+    with (
+        tempfile.NamedTemporaryFile(suffix=".o", delete=False) as tmp0,
+        tempfile.NamedTemporaryFile(suffix=".o", delete=False) as tmp1,
+    ):
         tmp_objfile0 = tmp0.name
         tmp_objfile1 = tmp1.name
 

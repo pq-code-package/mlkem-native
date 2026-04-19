@@ -23,7 +23,7 @@ arg0_offset = cmdline_offset + 4 + len(args) * 4
 arg_offsets = [sum(map(len, args[:i])) + i + arg0_offset for i in range(len(args))]
 
 binargs = st.pack(
-    f"<{1+len(args)}I" + "".join(f"{len(a)+1}s" for a in args),
+    f"<{1 + len(args)}I" + "".join(f"{len(a) + 1}s" for a in args),
     len(args),
     *arg_offsets,
     *map(lambda x: x.encode("utf-8"), args),

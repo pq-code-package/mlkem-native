@@ -932,7 +932,6 @@ def gen_aarch64_mulcache_twiddles_twisted():
 
 
 def print_hol_light_array(g, as_int=True, entries_per_line=8, pad=0):
-
     # Format of integer list entries, including `;` separator:
     # - Positive numbers: &42;
     # - Negative numbers: -- &42;
@@ -1189,7 +1188,6 @@ def gen_avx2_root_of_unity_for_block(layer, block, inv=False):
 
 
 def gen_avx2_fwd_ntt_zetas():
-
     def gen_twiddles(layer, block, repeat):
         """Generates twisted twiddle, then twiddle, for given layer and block.
         Repeat both the given number of times."""
@@ -2144,7 +2142,6 @@ def get_checked_defines():
 
 
 def gen_monolithic_undef_all_core(filt=None, desc=""):
-
     if filt is None:
         filt = lambda c: True
 
@@ -2351,7 +2348,6 @@ def gen_macro_undefs(extra_notes=None):
 
 
 def gen_monolithic_source_file():
-
     def gen():
         c_sources = get_c_source_files(main_only=True, strip_mlkem=True)
         yield from gen_header()
@@ -2450,7 +2446,6 @@ def gen_monolithic_source_file():
 
 
 def gen_monolithic_asm_file():
-
     def gen():
         asm_sources = get_asm_source_files(main_only=True, strip_mlkem=True)
         yield from gen_header()
@@ -2825,7 +2820,6 @@ def update_via_simpasm(
     force_cross=False,
     x86_64_syntax="att",
 ):
-
     _, infile = os.path.split(infile_full)
     if outfile is None:
         outfile = infile
@@ -2930,7 +2924,6 @@ def gen_hol_light_asm_file(job):
 
 
 def gen_hol_light_asm():
-
     joblist_aarch64 = [
         (
             "ntt.S",
@@ -3195,7 +3188,6 @@ def gen_hol_light_asm():
 
 
 def update_via_copy(infile_full, outfile_full, transform=None):
-
     content = read_file(infile_full)
 
     if transform is not None:
@@ -3213,7 +3205,6 @@ SYNCHRONIZED_EXTENSIONS = (".c", ".h", ".i", ".inc", ".S")
 
 
 def synchronize_file(f, in_dir, out_dir, delete=False, no_simplify=False, **kwargs):
-
     if not f.endswith(SYNCHRONIZED_EXTENSIONS):
         return None
 
@@ -3390,7 +3381,6 @@ def synchronize_backends(
 
 
 def adjust_header_guard_for_filename(content, header_file):
-
     content = content.split("\n")
     exceptions = {
         "mlkem/mlkem_native.h": "MLK_H",
@@ -3467,7 +3457,6 @@ def gen_header_guards():
 
 
 def gen_source_undefs(source_file):
-
     # Get list of #define's clauses in this source file (ignore filename)
     undef_list = list(map(lambda c: c[1], get_defines_from_file(source_file)))
     if not undef_list:
@@ -3547,7 +3536,6 @@ def gen_slothy(funcs):
     targets = list(map(lambda s: s + ".S", funcs))
 
     for t in targets:
-
         if t.startswith("keccak"):
             base = "dev/fips202/aarch64/src"
         else:
@@ -3625,7 +3613,6 @@ class BibliographyEntry:
 
 
 def gen_markdown_citations_for(filename, bibliography):
-
     # Skip BIBLIOGRAPHY.md
     if filename == "BIBLIOGRAPHY.md":
         return
@@ -3687,7 +3674,6 @@ def gen_markdown_citations_for(filename, bibliography):
 
 
 def gen_c_citations_for(filename, bibliography):
-
     content = read_file(filename)
 
     if not _RE_C_CITE.search(content):
@@ -3793,7 +3779,6 @@ def gen_citations_for(filename, bibliography):
 
 
 def gen_bib_file(bibliography):
-
     content = [
         "[//]: # (SPDX-License-Identifier: CC-BY-4.0)",
         "[//]: # (This file is auto-generated from BIBLIOGRAPHY.yml)",
