@@ -68,11 +68,11 @@ def github_summary(title, test_label, results):
             )
         ]
 
-    def find_last_consecutive_match(l, s):
-        for i, v in enumerate(l[s + 1 :]):
+    def find_last_consecutive_match(lines, s):
+        for i, v in enumerate(lines[s + 1 :]):
             if not v.startswith("|") or not v.endswith("|"):
                 return i + 1
-        return len(l)
+        return len(lines)
 
     def add_summaries(fn, title, summaries):
         summary_title = "| Tests |"
@@ -469,7 +469,7 @@ class Tests:
         # Add FIPS202 backend selection if specified and this is an OPT build
         if self.args.fips202_aarch64_backend != "auto" and opt is True:
             # Make sure we're forcing AArch64 architecture
-            if not " -DMLK_FORCE_AARCH64" in cflags:
+            if " -DMLK_FORCE_AARCH64" not in cflags:
                 cflags += " -DMLK_FORCE_AARCH64"
 
             # Enable native backend for FIPS202
@@ -718,16 +718,16 @@ class Tests:
 
     def examples(self):
         if self.args.l is None:
-            l = TEST_TYPES.examples()
+            items = TEST_TYPES.examples()
         else:
-            l = list(map(TEST_TYPES.from_string, self.args.l))
+            items = list(map(TEST_TYPES.from_string, self.args.l))
 
         # Filter out excluded examples
         if hasattr(self.args, "exclude_example") and self.args.exclude_example:
             excluded = [TEST_TYPES.from_string(ex) for ex in self.args.exclude_example]
-            l = [e for e in l if e not in excluded]
+            items = [e for e in items if e not in excluded]
 
-        for e in l:
+        for e in items:
             self._compile_schemes(e, None)
             self._run_scheme(e, None, None)
 
@@ -777,7 +777,7 @@ class Tests:
 
                 lines = [line for line in r.splitlines() if "=" in line]
 
-                d = {k.strip(): int(v) for k, v in (l.split("=") for l in lines)}
+                d = {k.strip(): int(v) for k, v in (ln.split("=") for ln in lines)}
                 for primitive in ["keypair", "encaps", "decaps"]:
                     v.append(
                         {

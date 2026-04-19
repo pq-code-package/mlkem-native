@@ -15,7 +15,4 @@ extend-include = [
 select = ["E", "F", "W"]
 ignore = [
     "E501", # line too long
-    "E713", # `not in` rather than `not X in Y`
-    "E731", # lambda assignment
-    "E741", # ambiguous variable name
 ]
