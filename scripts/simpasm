@@ -29,41 +29,46 @@ def patchup_disasm(asm, cfify=False):
         return lbl + ":"
 
     # Find first label
-    for i, l in enumerate(asm):
-        if decode_label(l) is not None:
+    for i, line in enumerate(asm):
+        if decode_label(line) is not None:
             break
 
     asm = asm[i + 1 :]
 
     def gen(asm):
-        for l in asm:
-            if l.strip() == "":
+        for line in asm:
+            if line.strip() == "":
                 yield ""
                 continue
-            lbl = decode_label(l)
+            lbl = decode_label(line)
             # Re-format labels as assembly labels
             if lbl is not None:
                 yield make_label(lbl)
                 continue
             # Drop comments
-            l = l.split(";")[0]
+            line = line.split(";")[0]
             # Re-format references to labels
             # Those are assumed to have the form `0xDEADBEEF <label>`
             if cfify:
-                l = re.sub(
-                    r"(0x)?[0-9a-fA-F]+\s+<(?P<label>[a-zA-Z0-9_]+)>", r"L\g<label>", l
+                line = re.sub(
+                    r"(0x)?[0-9a-fA-F]+\s+<(?P<label>[a-zA-Z0-9_]+)>",
+                    r"L\g<label>",
+                    line,
                 )
             else:
-                l = re.sub(
-                    r"(0x)?[0-9a-fA-F]+\s+<(?P<label>[a-zA-Z0-9_]+)>", r"\g<label>", l
+                line = re.sub(
+                    r"(0x)?[0-9a-fA-F]+\s+<(?P<label>[a-zA-Z0-9_]+)>",
+                    r"\g<label>",
+                    line,
                 )
             # Drop address and byte code from line
             d = re.search(
-                r"^\s*[0-9a-fA-F]+:\s+([0-9a-fA-F][0-9a-fA-F][ ]*)+\s+(?P<inst>.*)$", l
+                r"^\s*[0-9a-fA-F]+:\s+([0-9a-fA-F][0-9a-fA-F][ ]*)+\s+(?P<inst>.*)$",
+                line,
             )
             if d is None:
                 raise Exception(
-                    f'The following does not seem to be an assembly line of the expected format `ADDRESS: BYTECODE INSTRUCTION`:\n"{l}"'
+                    f'The following does not seem to be an assembly line of the expected format `ADDRESS: BYTECODE INSTRUCTION`:\n"{line}"'
                 )
             yield " " * indentation + d.group("inst").expandtabs(1)
 
@@ -76,8 +81,8 @@ def find_header_footer(asm, filename):
 
     # Extract header
     header_end = None
-    for i, l in enumerate(asm):
-        if header_end_marker in l:
+    for i, line in enumerate(asm):
+        if header_end_marker in line:
             header_end = i
             break
     if header_end is None:
@@ -88,8 +93,8 @@ def find_header_footer(asm, filename):
 
     # Extract footer
     footer_start = None
-    for i, l in enumerate(asm):
-        if footer_start_marker in l:
+    for i, line in enumerate(asm):
+        if footer_start_marker in line:
             footer_start = i
             break
     if footer_start is None:
@@ -105,8 +110,8 @@ def find_header_footer(asm, filename):
 
 def find_globals(asm):
     global_symbols = []
-    for l in asm:
-        r = re.search(r"^\s*\.global\s+(.*)$", l)
+    for line in asm:
+        r = re.search(r"^\s*\.global\s+(.*)$", line)
         if r is None:
             continue
         global_symbols.append(r.group(1))
@@ -121,9 +126,9 @@ def drop_if_from_header(header):
     header_new = []
     i = 0
     while i < len(header):
-        l = header[i]
-        if not l.strip().startswith("#if"):
-            header_new.append(l)
+        line = header[i]
+        if not line.strip().startswith("#if"):
+            header_new.append(line)
             i += 1
             continue
         header_new.append("#if 1")
@@ -138,9 +143,9 @@ def drop_preprocessor_directives(header):
     header_new = []
     i = 0
     while i < len(header):
-        l = header[i]
-        if not l.strip().startswith("#"):
-            header_new.append(l)
+        line = header[i]
+        if not line.strip().startswith("#"):
+            header_new.append(line)
             i += 1
             continue
         while i < len(header) and header[i].endswith("\\"):

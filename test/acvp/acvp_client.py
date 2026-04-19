@@ -134,8 +134,8 @@ def run_encapDecap_test(tg, tc):
             err(result.stderr)
             exit(1)
         # Extract results
-        for l in result.stdout.splitlines():
-            (k, v) = l.split("=")
+        for line in result.stdout.splitlines():
+            (k, v) = line.split("=")
             results[k] = v
     elif tg["function"] == "decapsulation":
         acvp_bin = get_acvp_binary(tg)
@@ -157,8 +157,8 @@ def run_encapDecap_test(tg, tc):
             err(result.stderr)
             exit(1)
         # Extract results
-        for l in result.stdout.splitlines():
-            (k, v) = l.split("=")
+        for line in result.stdout.splitlines():
+            (k, v) = line.split("=")
             results[k] = v
     elif tg["function"] == "encapsulationKeyCheck":
         acvp_bin = get_acvp_binary(tg)
@@ -176,8 +176,8 @@ def run_encapDecap_test(tg, tc):
             err(result.stderr)
             exit(1)
         # Extract results
-        for l in result.stdout.splitlines():
-            (k, v) = l.split("=")
+        for line in result.stdout.splitlines():
+            (k, v) = line.split("=")
             results[k] = v == "1"
 
     elif tg["function"] == "decapsulationKeyCheck":
@@ -196,8 +196,8 @@ def run_encapDecap_test(tg, tc):
             err(result.stderr)
             exit(1)
         # Extract results
-        for l in result.stdout.splitlines():
-            (k, v) = l.split("=")
+        for line in result.stdout.splitlines():
+            (k, v) = line.split("=")
             results[k] = v == "1"
     info("done")
     return results
@@ -222,8 +222,8 @@ def run_keyGen_test(tg, tc):
         err(result.stderr)
         exit(1)
     # Extract results
-    for l in result.stdout.splitlines():
-        (k, v) = l.split("=")
+    for line in result.stdout.splitlines():
+        (k, v) = line.split("=")
         results[k] = v
     info("done")
     return results

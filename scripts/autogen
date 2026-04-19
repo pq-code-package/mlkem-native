@@ -556,23 +556,23 @@ def adjust_preprocessor_comments_for_filename(
     # - `force_print` indicates if a comment should be omitted
     if_stack = []
 
-    def merge_escaped_lines(l, i):
-        while l.endswith("\\"):
-            l = l.removesuffix("\\").rstrip() + content[i + 1].lstrip()
+    def merge_escaped_lines(line, i):
+        while line.endswith("\\"):
+            line = line.removesuffix("\\").rstrip() + content[i + 1].lstrip()
             i = i + 1
-        return (l, i)
+        return (line, i)
 
-    def merge_commented_lines(l, i):
+    def merge_commented_lines(line, i):
         # Not very robust, but good enough
-        if not "/*" in l or "*/" in l:
-            return (l, i)
+        if "/*" not in line or "*/" in line:
+            return (line, i)
         i += 1
         while "*/" not in content[i]:
-            l += content[i]
+            line += content[i]
             i += 1
 
-        l += content[i]
-        return (l, i)
+        line += content[i]
+        return (line, i)
 
     def should_print(cur_line_no, conds, line_no, force_print):
         line_threshold = 5
@@ -631,26 +631,26 @@ def adjust_preprocessor_comments_for_filename(
 
     i = 0
     while i < len(content):
-        l = content[i].strip()
+        line = content[i].strip()
         # Replace #ifdef by #if defined(...)
-        if l.startswith("#ifdef "):
-            l = "#if defined(" + l.removeprefix("#ifdef").strip() + ")"
-        if l.startswith("#ifndef "):
-            l = "#if !defined(" + l.removeprefix("#ifndef").strip() + ")"
-        if l.startswith("#if"):
-            l, _ = merge_escaped_lines(l, i)
-            cond = l.removeprefix("#if")
+        if line.startswith("#ifdef "):
+            line = "#if defined(" + line.removeprefix("#ifdef").strip() + ")"
+        if line.startswith("#ifndef "):
+            line = "#if !defined(" + line.removeprefix("#ifndef").strip() + ")"
+        if line.startswith("#if"):
+            line, _ = merge_escaped_lines(line, i)
+            cond = line.removeprefix("#if")
             if_stack.append(([cond], i, True, False))
             new_content.append(content[i])
-        elif l.startswith("#elif"):
+        elif line.startswith("#elif"):
             conds, _, _, force_print = if_stack.pop()
-            l, _ = merge_escaped_lines(l, i)
-            conds.append(l.removeprefix("#elif"))
+            line, _ = merge_escaped_lines(line, i)
+            conds.append(line.removeprefix("#elif"))
             if_stack.append((conds, i, True, force_print))
             new_content.append(content[i])
-        elif l.startswith("#else"):
-            l, i = merge_escaped_lines(l, i)
-            _, i = merge_commented_lines(l, i)
+        elif line.startswith("#else"):
+            line, i = merge_escaped_lines(line, i)
+            _, i = merge_commented_lines(line, i)
             conds, j, branch, force_print = if_stack.pop()
             assert branch is True
             print_else = should_print(i, cond, j, force_print)
@@ -660,9 +660,9 @@ def adjust_preprocessor_comments_for_filename(
                 new_content.append(adhoc_format("#else", cond))
             else:
                 new_content.append("#else")
-        elif l.startswith("#endif"):
-            l, i = merge_escaped_lines(l, i)
-            _, i = merge_commented_lines(l, i)
+        elif line.startswith("#endif"):
+            line, i = merge_escaped_lines(line, i)
+            _, i = merge_commented_lines(line, i)
             conds, j, branch, force_print = if_stack.pop()
             print_endif = should_print(i, conds, j, force_print)
             if print_endif is False:
@@ -675,7 +675,7 @@ def adjust_preprocessor_comments_for_filename(
             # handle `#if ...` inside documentation as this would
             # lead to nested `/* ... */`.
             i_old = i
-            _, i = merge_commented_lines(l, i_old)
+            _, i = merge_commented_lines(line, i_old)
             new_content += content[i_old : i + 1]
         i += 1
 
@@ -944,12 +944,12 @@ def print_hol_light_array(g, as_int=True, entries_per_line=8, pad=0):
         c = "&" if as_int is True else ""
         return f"{prefix}{c}{n:>{pad}};"
 
-    l = list(map(format_hol_light_int, g))
+    items = list(map(format_hol_light_int, g))
     # Remove `;` from end of last entry
-    l[-1] = l[-1][:-1]
+    items[-1] = items[-1][:-1]
 
-    for i in range(0, len(l), entries_per_line):
-        yield "  " + " ".join(l[i : i + entries_per_line])
+    for i in range(0, len(items), entries_per_line):
+        yield "  " + " ".join(items[i : i + entries_per_line])
 
 
 def gen_aarch64_hol_light_zeta_file():
@@ -1200,8 +1200,8 @@ def gen_avx2_fwd_ntt_zetas():
         root_pairs = list(
             map(lambda x: gen_twiddles(layer, block_base + x, repeat), block_offsets)
         )
-        yield from (r for l in root_pairs for r in l[1])
-        yield from (r for l in root_pairs for r in l[0])
+        yield from (r for pair in root_pairs for r in pair[1])
+        yield from (r for pair in root_pairs for r in pair[0])
 
     # Layers 1 twiddle
     yield from gen_twiddles_many(0, 0, range(1), 4)
@@ -1710,11 +1710,11 @@ def print_hol_light_word64_list(g, entries_per_line=4):
     Analogous to print_hol_light_array but for int64 word lists.
     Yields lines with leading indent, semicolon-separated.
     """
-    l = [f"word 0x{v:016X}" for v in g]
+    items = [f"word 0x{v:016X}" for v in g]
 
-    for i in range(0, len(l), entries_per_line):
-        row = l[i : i + entries_per_line]
-        is_last = i + entries_per_line >= len(l)
+    for i in range(0, len(items), entries_per_line):
+        row = items[i : i + entries_per_line]
+        is_last = i + entries_per_line >= len(items)
         line = "; ".join(row)
         if not is_last:
             line += ";"
@@ -2105,8 +2105,8 @@ def get_all_files():
 
 
 def get_defines_from_file(c):
-    for l in read_file(c).split("\n"):
-        m = _RE_DEFINE.match(l)
+    for line in read_file(c).split("\n"):
+        m = _RE_DEFINE.match(line)
         if m:
             yield (c, m.group(1))
 
@@ -2143,7 +2143,9 @@ def get_checked_defines():
 
 def gen_monolithic_undef_all_core(filt=None, desc=""):
     if filt is None:
-        filt = lambda c: True
+
+        def filt(c):
+            return True
 
     if desc != "":
         yield "/*"
@@ -2655,22 +2657,22 @@ def check_macro_typos():
 def check_asm_register_aliases_for_file(filename):
     """Checks that `filename` has no mismatching or dangling register aliases"""
 
-    def get_alias_def(l):
-        s = list(filter(lambda s: s != "", l.strip().split(" ")))
+    def get_alias_def(line):
+        s = list(filter(lambda s: s != "", line.strip().split(" ")))
         if len(s) < 3 or s[1] != ".req":
             return None
         return s[0]
 
-    def get_alias_undef(l):
-        if l.strip().startswith(".unreq") is False:
+    def get_alias_undef(line):
+        if line.strip().startswith(".unreq") is False:
             return None
-        return list(filter(lambda s: s != "", l.strip().split(" ")))[1]
+        return list(filter(lambda s: s != "", line.strip().split(" ")))[1]
 
     content = read_file(filename)
     aliases = {}
-    for i, l in enumerate(content.split("\n")):
-        alias_def = get_alias_def(l)
-        alias_undef = get_alias_undef(l)
+    for i, line in enumerate(content.split("\n")):
+        alias_def = get_alias_def(line)
+        alias_undef = get_alias_undef(line)
         if alias_def is not None:
             if alias_def in aliases.keys():
                 raise Exception(
@@ -3225,7 +3227,9 @@ def synchronize_file(f, in_dir, out_dir, delete=False, no_simplify=False, **kwar
         # don't do it here, the dry-run would fail because of a
         # mismatching intermediate file
         if f.endswith(".h"):
-            transform = lambda c: adjust_header_guard_for_filename(c, outfile_full)
+
+            def transform(c):
+                return adjust_header_guard_for_filename(c, outfile_full)
         else:
             transform = None
         update_via_copy(f, outfile_full, transform=transform)
@@ -3410,8 +3414,8 @@ def adjust_header_guard_for_filename(content, header_file):
 
     # Skip over initial commentary
     insert_at = None
-    for i, l in enumerate(content):
-        if l.strip() == "" or l.startswith(("/*", " *")):
+    for i, line in enumerate(content):
+        if line.strip() == "" or line.startswith(("/*", " *")):
             continue
         insert_at = i
         break
@@ -3623,8 +3627,8 @@ def gen_markdown_citations_for(filename, bibliography):
 
     # Lookup all citations in style `[^ID]`
     citations = {}
-    for i, l in enumerate(content):
-        for m in _RE_MARKDOWN_CITE.finditer(l):
+    for i, line in enumerate(content):
+        for m in _RE_MARKDOWN_CITE.finditer(line):
             cite_id = m.group("id")
             uses = citations.get(cite_id, [])
             uses.append((filename, i))
@@ -3641,8 +3645,8 @@ def gen_markdown_citations_for(filename, bibliography):
     # Find explicit footnote definitions outside the bibliography block
     # These are lines matching `[^ID]: ...` and should be excluded from autogeneration
     explicit_footnotes = set()
-    for l in content:
-        m = re.match(r"^\[\^(\w+)\]:", l)
+    for line in content:
+        m = re.match(r"^\[\^(\w+)\]:", line)
         if m:
             explicit_footnotes.add(m.group(1))
 
@@ -3691,8 +3695,8 @@ def gen_c_citations_for(filename, bibliography):
 
     # Lookup all citations in style `@[ID]`
     citations = {}
-    for i, l in enumerate(content):
-        for m in _RE_C_CITE.finditer(l):
+    for i, line in enumerate(content):
+        for m in _RE_C_CITE.finditer(line):
             cite_id = m.group("id")
             uses = citations.get(cite_id, [])
             # Remember usage. +1 because line counting starts at 1
@@ -3742,8 +3746,8 @@ def gen_c_citations_for(filename, bibliography):
         # Add references to file after initial header section
         # Skip over copyright
         insert_at = None
-        for i, l in enumerate(content):
-            if l.startswith(("/*", " *")):
+        for i, line in enumerate(content):
+            if line.startswith(("/*", " *")):
                 continue
             insert_at = i
             break
