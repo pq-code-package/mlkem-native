@@ -6,8 +6,11 @@
 extend-include = [
     "scripts/autogen",
     "scripts/cfify",
+    "scripts/check-contracts",
+    "scripts/check-magic",
     "scripts/check-namespace",
     "scripts/simpasm",
+    "scripts/stack",
     "scripts/tests",
 ]
 
