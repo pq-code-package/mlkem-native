@@ -29,16 +29,6 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-# For this proof we tell CBMC to
-#  - not decompose arrays into their individual cells
-#  - to slice constraints that are not in the cone of influence of the proof obligations
-# These options simplify them modelling of arrays and produce much more compact
-# SMT files, leaving all array-type reasoning to the SMT solver.
-#
-# For functions that use large and multi-dimensional arrays, this yields
-# a substantial improvement in proof performance.
-CBMCFLAGS += --no-array-field-sensitivity
-
 FUNCTION_NAME = mlk_keccak_squeezeblocks
 
 # If this proof is found to consume huge amounts of RAM, you can set the
