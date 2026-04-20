@@ -542,7 +542,7 @@ COMMA :=,
 # CBMC team recommend that --no-array-field-sensitivity should never be used
 # with CBMC 6.9.0 and above when --slice-formula has been specified
 ifeq ($(findstring --no-array-field-sensitivity,$(CBMCFLAGS)),--no-array-field-sensitivity)
-$(error CBMC option --no-array-field-sensitivity must not be used with CBMC 6.9.0 and above)
+$(error CBMC option --no-array-field-sensitivity is believed to be detrimental to performance in CBMC v6.9.0 and has been removed from the CBMC Makefiles -- do you really want this?)
 endif
 
 ################################################################
