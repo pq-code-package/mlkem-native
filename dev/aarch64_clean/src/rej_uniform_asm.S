@@ -6,7 +6,7 @@
 /*yaml
   Name: rej_uniform_asm
   Description: Run rejection sampling on uniform random bytes to generate uniform random integers mod q
-  Signature: uint64_t mlk_rej_uniform_asm(int16_t r[256], const uint8_t *buf, unsigned buflen, const uint8_t table[2048])
+  Signature: uint64_t mlk_rej_uniform_asm(int16_t r[256], const uint8_t *buf, unsigned buflen, const uint8_t table[4096])
   ABI:
     x0:
       type: buffer
@@ -27,9 +27,9 @@
       test_with: 504  # MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE
     x3:
       type: buffer
-      size_bytes: 2048
+      size_bytes: 4096
       permissions: read-only
-      c_parameter: const uint8_t table[2048]
+      c_parameter: const uint8_t table[4096]
       description: Lookup table
   Stack:
     bytes: 576
