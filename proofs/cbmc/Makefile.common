@@ -539,11 +539,24 @@ SPACE :=$() $()
 COMMA :=,
 
 ################################################################
+# CBMC team recommend that --no-array-field-sensitivity should never be used
+# with CBMC 6.9.0 and above when --slice-formula has been specified
+ifeq ($(findstring --no-array-field-sensitivity,$(CBMCFLAGS)),--no-array-field-sensitivity)
+$(error CBMC option --no-array-field-sensitivity must not be used with CBMC 6.9.0 and above)
+endif
+
+################################################################
+# CBMC team recommend that --slice-formula should _always_ be used
+# so we reject it here if it is already specified in a per-function Makefile
+ifeq ($(findstring --slice-formula,$(CBMCFLAGS)),--slice-formula)
+$(error CBMC option --slice-formula is set by default in Makefile.common, so should not be specified in a function-specific Makefile)
+endif
+
+################################################################
 # CBMC flags common to all proofs
 CBMCFLAGS += $(CBMC_FLAG_FLUSH)
 CBMCFLAGS += --object-bits $(CBMC_OBJECT_BITS)
 CBMCFLAGS += --slice-formula
-
 
 ################################################################
 # Set C compiler defines
