@@ -1278,20 +1278,16 @@ let MLKEM_INTT_SUBROUTINE_CORRECT  = prove
 
 needs "x86/proofs/consttime.ml";;
 needs "x86_64/proofs/subroutine_signatures.ml";;
-needs "common/consttime_utils.ml";;
-
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true
     (assoc "mlkem_intt" subroutine_signatures)
     MLKEM_INTT_CORRECT
     MLKEM_INTT_TMC_EXEC;;
-(* Remove duplicates from memaccess_inbounds lists (s2n-bignum#350).
-   full_spec mixes numeric and symbolic buffer sizes: mk_safety_spec computes
+(* full_spec mixes numeric and symbolic buffer sizes: mk_safety_spec computes
    624*2=1248 from the subroutine signature for memaccess_inbounds, but copies
    `LENGTH qdata_full * 2` verbatim from the correctness theorem's nonoverlapping
    preconditions. Normalize to numeric form so ASSERT_CONCL_TAC matches the
    hand-written goal after LENGTH_SIMPLIFY_CONV. *)
-let full_spec = ONCE_DEPTH_CONV MEMACCESS_INBOUNDS_DEDUP_CONV full_spec |> concl |> rhs;;
 let full_spec = LENGTH_SIMPLIFY_CONV full_spec |> concl |> rhs;;
 
 let MLKEM_INTT_SAFE = time prove

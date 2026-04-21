@@ -1400,15 +1400,11 @@ let KECCAK_F1600_X4_V8A_V84A_SCALAR_SUBROUTINE_CORRECT = prove
 needs "arm/proofs/consttime.ml";;
 needs "aarch64/proofs/subroutine_signatures.ml";;
 
-needs "common/consttime_utils.ml";;
-
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:false
     (assoc "sha3_keccak4_f1600_alt" subroutine_signatures)
     KECCAK_F1600_X4_V8A_V84A_SCALAR_SUBROUTINE_CORRECT
     KECCAK_F1600_X4_V8A_V84A_SCALAR_EXEC;;
-(* Remove duplicates from memaccess_inbounds lists (s2n-bignum#350) *)
-let full_spec = ONCE_DEPTH_CONV MEMACCESS_INBOUNDS_DEDUP_CONV full_spec |> concl |> rhs;;
 
 let KECCAK_F1600_X4_V8A_V84A_SCALAR_SUBROUTINE_SAFE = time prove
  (`exists f_events.

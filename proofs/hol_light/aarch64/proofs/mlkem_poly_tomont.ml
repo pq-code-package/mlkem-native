@@ -265,15 +265,11 @@ let MLKEM_TOMONT_SUBROUTINE_CORRECT = prove
 needs "arm/proofs/consttime.ml";;
 needs "aarch64/proofs/subroutine_signatures.ml";;
 
-needs "common/consttime_utils.ml";;
-
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:false
     (assoc "mlkem_tomont" subroutine_signatures)
     MLKEM_TOMONT_SUBROUTINE_CORRECT
     POLY_TOMONT_EXEC;;
-(* Remove duplicates from memaccess_inbounds lists (s2n-bignum#350) *)
-let full_spec = ONCE_DEPTH_CONV MEMACCESS_INBOUNDS_DEDUP_CONV full_spec |> concl |> rhs;;
 
 let MLKEM_TOMONT_SUBROUTINE_SAFE = time prove
  (`exists f_events.

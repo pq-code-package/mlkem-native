@@ -1682,7 +1682,6 @@ let MLKEM_REJ_UNIFORM_SUBROUTINE_CORRECT = prove
 (* ========================================================================= *)
 
 needs "arm/proofs/consttime.ml";;
-needs "common/consttime_utils.ml";;
 
 (* Helper: discharge the memsafe postcondition
      exists e2. read events s = APPEND e2 e /\ memaccess_inbounds e2 R W
