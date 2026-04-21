@@ -1119,7 +1119,6 @@ let KECCAK_F1600_X4_AVX2_SUBROUTINE_CORRECT = prove
 
 needs "x86/proofs/consttime.ml";;
 needs "x86_64/proofs/subroutine_signatures.ml";;
-needs "common/consttime_utils.ml";;
 
 
 let full_spec,public_vars = mk_safety_spec
@@ -1127,10 +1126,6 @@ let full_spec,public_vars = mk_safety_spec
     (assoc "keccak_f1600_x4_avx2" subroutine_signatures)
     (CONV_RULE LENGTH_SIMPLIFY_CONV KECCAK_F1600_X4_AVX2_CORRECT)
     KECCAK_F1600_X4_AVX2_EXEC;;
-
-(* Remove duplicates from memaccess_inbounds lists (s2n-bignum#350) *)
-let full_spec = ONCE_DEPTH_CONV MEMACCESS_INBOUNDS_DEDUP_CONV full_spec
-  |> concl |> rhs;;
 
 let KECCAK_F1600_X4_AVX2_SAFE = time prove
  (`exists f_events.

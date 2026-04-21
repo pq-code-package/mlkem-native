@@ -1197,7 +1197,6 @@ let MLKEM_BASEMUL_K2_SUBROUTINE_CORRECT = prove(
 
 needs "x86/proofs/consttime.ml";;
 needs "x86_64/proofs/subroutine_signatures.ml";;
-needs "common/consttime_utils.ml";;
 
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true

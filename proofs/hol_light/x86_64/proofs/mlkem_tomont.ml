@@ -11,7 +11,6 @@
 needs "x86/proofs/base.ml";;
 
 needs "common/mlkem_specs.ml";;
-needs "common/consttime_utils.ml";;
 
 (* print_literal_from_elf "x86_64/mlkem/mlkem_tomont.o";; *)
 
@@ -366,15 +365,11 @@ let MLKEM_TOMONT_SUBROUTINE_CORRECT = prove(
 needs "x86/proofs/consttime.ml";;
 needs "x86_64/proofs/subroutine_signatures.ml";;
 
-needs "common/consttime_utils.ml";;
-
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true
     (assoc "mlkem_tomont" subroutine_signatures)
     MLKEM_TOMONT_CORRECT
     mlkem_tomont_TMC_EXEC;;
-(* Remove duplicates from memaccess_inbounds lists (s2n-bignum#350) *)
-let full_spec = ONCE_DEPTH_CONV MEMACCESS_INBOUNDS_DEDUP_CONV full_spec |> concl |> rhs;;
 
 let MLKEM_TOMONT_SAFE = time prove
  (`exists f_events.

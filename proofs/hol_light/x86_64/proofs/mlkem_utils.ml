@@ -8,4 +8,3 @@
 (* ========================================================================= *)
 
 needs "x86/proofs/consttime.ml";;
-needs "common/consttime_utils.ml";;
