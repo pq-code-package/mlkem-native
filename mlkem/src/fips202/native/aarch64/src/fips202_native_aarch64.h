@@ -10,7 +10,8 @@
 
 #define mlk_keccakf1600_round_constants \
   MLK_NAMESPACE(keccakf1600_round_constants)
-extern const uint64_t mlk_keccakf1600_round_constants[];
+MLK_INTERNAL_DATA_DECLARATION const uint64_t
+    mlk_keccakf1600_round_constants[24];
 
 #define mlk_keccak_f1600_x1_scalar_asm MLK_NAMESPACE(keccak_f1600_x1_scalar_asm)
 void mlk_keccak_f1600_x1_scalar_asm(uint64_t state[25], const uint64_t rc[24])

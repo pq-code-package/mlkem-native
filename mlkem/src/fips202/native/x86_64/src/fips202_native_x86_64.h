@@ -17,13 +17,14 @@
 
 #define mlk_keccakf1600_round_constants \
   MLK_NAMESPACE(keccakf1600_round_constants)
-extern const uint64_t mlk_keccakf1600_round_constants[];
+MLK_INTERNAL_DATA_DECLARATION const uint64_t
+    mlk_keccakf1600_round_constants[24];
 
 #define mlk_keccak_rho8 MLK_NAMESPACE(keccak_rho8)
-extern const uint64_t mlk_keccak_rho8[];
+MLK_INTERNAL_DATA_DECLARATION const uint64_t mlk_keccak_rho8[4];
 
 #define mlk_keccak_rho56 MLK_NAMESPACE(keccak_rho56)
-extern const uint64_t mlk_keccak_rho56[];
+MLK_INTERNAL_DATA_DECLARATION const uint64_t mlk_keccak_rho56[4];
 
 #define mlk_keccak_f1600_x4_avx2 MLK_NAMESPACE(keccak_f1600_x4_avx2)
 void mlk_keccak_f1600_x4_avx2(uint64_t states[100], const uint64_t rc[24],

@@ -21,13 +21,18 @@
   MLK_NAMESPACE(aarch64_zetas_mulcache_twisted_native)
 #define mlk_rej_uniform_table MLK_NAMESPACE(rej_uniform_table)
 
-extern const int16_t mlk_aarch64_ntt_zetas_layer12345[];
-extern const int16_t mlk_aarch64_ntt_zetas_layer67[];
-extern const int16_t mlk_aarch64_invntt_zetas_layer12345[];
-extern const int16_t mlk_aarch64_invntt_zetas_layer67[];
-extern const int16_t mlk_aarch64_zetas_mulcache_native[];
-extern const int16_t mlk_aarch64_zetas_mulcache_twisted_native[];
-extern const uint8_t mlk_rej_uniform_table[];
+MLK_INTERNAL_DATA_DECLARATION const int16_t
+    mlk_aarch64_ntt_zetas_layer12345[80];
+MLK_INTERNAL_DATA_DECLARATION const int16_t mlk_aarch64_ntt_zetas_layer67[384];
+MLK_INTERNAL_DATA_DECLARATION const int16_t
+    mlk_aarch64_invntt_zetas_layer12345[80];
+MLK_INTERNAL_DATA_DECLARATION const int16_t
+    mlk_aarch64_invntt_zetas_layer67[384];
+MLK_INTERNAL_DATA_DECLARATION const int16_t
+    mlk_aarch64_zetas_mulcache_native[128];
+MLK_INTERNAL_DATA_DECLARATION const int16_t
+    mlk_aarch64_zetas_mulcache_twisted_native[128];
+MLK_INTERNAL_DATA_DECLARATION const uint8_t mlk_rej_uniform_table[4096];
 
 #define mlk_ntt_asm MLK_NAMESPACE(ntt_asm)
 void mlk_ntt_asm(int16_t p[256], const int16_t twiddles12345[80],
