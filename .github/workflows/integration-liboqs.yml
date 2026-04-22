@@ -40,7 +40,7 @@ jobs:
           packages: 'cmake python3-jinja2 python3-tabulate python3-git python3-pytest valgrind'
       - uses: ./.github/actions/setup-oqs
         with:
-          commit: '97f6b86b1b6d109cfd43cf276ae39c2e776aed80' # v0.15.0
+          commit: 'd8509387febc9e32466c86aab544d225d60c8e3c' # main (2026-04-21)
           gh_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Apply patch
         run: |
