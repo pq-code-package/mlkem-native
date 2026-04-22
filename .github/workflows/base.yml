@@ -76,7 +76,7 @@ jobs:
          # via https://riseproject-dev.github.io/riscv-runner/
          # - runner: ubuntu-24.04-riscv
          #   name: 'riscv'
-        acvp-version: [v1.1.0.39, v1.1.0.40, v1.1.0.41]
+        acvp-version: [v1.1.0.40, v1.1.0.41, v1.1.0.42]
         exclude:
           - {external: true,
              target: {

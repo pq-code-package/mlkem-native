@@ -139,15 +139,12 @@ def run_encapDecap_test(tg, tc):
             results[k] = v
     elif tg["function"] == "decapsulation":
         acvp_bin = get_acvp_binary(tg)
-        # TODO: Remove this fallback workaround. v.1.1.0.40 moved the dk from the
-        # tg to the tc. This can be removed when v1.1.0.39 is removed.
-        dk_value = tc.get("dk", tg.get("dk"))
         acvp_call = exec_prefix + [
             acvp_bin,
             "encapDecap",
             "VAL",
             "decapsulation",
-            f"dk={dk_value}",
+            f"dk={tc['dk']}",
             f"c={tc['c']}",
         ]
         result = subprocess.run(acvp_call, encoding="utf-8", capture_output=True)
