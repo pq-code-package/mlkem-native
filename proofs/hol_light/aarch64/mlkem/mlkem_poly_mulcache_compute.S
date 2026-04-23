@@ -4,9 +4,9 @@
  */
 
 /*yaml
-  Name: poly_mulcache_compute_asm
+  Name: poly_mulcache_compute_aarch64_asm
   Description: Compute multiplication cache for polynomial
-  Signature: void mlk_poly_mulcache_compute_asm(int16_t cache[128], const int16_t mlk_poly[256], const int16_t zetas[128], const int16_t zetas_twisted[128])
+  Signature: void mlk_poly_mulcache_compute_aarch64_asm(int16_t cache[128], const int16_t mlk_poly[256], const int16_t zetas[128], const int16_t zetas_twisted[128])
   ABI:
     x0:
       type: buffer
@@ -39,17 +39,17 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/aarch64_opt/src/poly_mulcache_compute_asm.S using scripts/simpasm. Do not modify it directly.
+ *   dev/aarch64_opt/src/poly_mulcache_compute_aarch64_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_poly_mulcache_compute_asm
-_PQCP_MLKEM_NATIVE_MLKEM768_poly_mulcache_compute_asm:
+.global _PQCP_MLKEM_NATIVE_MLKEM768_poly_mulcache_compute_aarch64_asm
+_PQCP_MLKEM_NATIVE_MLKEM768_poly_mulcache_compute_aarch64_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_poly_mulcache_compute_asm
-PQCP_MLKEM_NATIVE_MLKEM768_poly_mulcache_compute_asm:
+.global PQCP_MLKEM_NATIVE_MLKEM768_poly_mulcache_compute_aarch64_asm
+PQCP_MLKEM_NATIVE_MLKEM768_poly_mulcache_compute_aarch64_asm:
 #endif
 
         .cfi_startproc

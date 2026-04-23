@@ -99,7 +99,7 @@ mlkem-native currently offers the following backends:
 If you'd like contribute new backends, please reach out or just open a PR.
 
 Our AArch64 assembly is developed using the [SLOTHY](https://github.com/slothy-optimizer/slothy) superoptimizer, following the approach described in the SLOTHY paper[^SLOTHY_Paper]:
-We write 'clean' assembly by hand and automate micro-optimizations (e.g. see the [clean](dev/aarch64_clean/src/ntt.S) vs [optimized](dev/aarch64_opt/src/ntt.S) AArch64 NTT).
+We write 'clean' assembly by hand and automate micro-optimizations (e.g. see the [clean](dev/aarch64_clean/src/ntt_aarch64_asm.S) vs [optimized](dev/aarch64_opt/src/ntt_aarch64_asm.S) AArch64 NTT).
 See [dev/README.md](dev/README.md) for more details.
 
 ## Test Vectors

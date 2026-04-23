@@ -6,17 +6,17 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S using scripts/simpasm. Do not modify it directly.
+ *   dev/x86_64/src/polyvec_basemul_acc_montgomery_cached_k4_avx2_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_asm_k4
-_PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_asm_k4:
+.global _PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_k4_avx2_asm
+_PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_k4_avx2_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_asm_k4
-PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_asm_k4:
+.global PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_k4_avx2_asm
+PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_k4_avx2_asm:
 #endif
 
         .cfi_startproc

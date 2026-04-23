@@ -4,7 +4,7 @@
  */
 
 /*************************************************
- * Name:        mlk_rej_uniform_asm
+ * Name:        mlk_rej_uniform_avx2_asm
  *
  * Description: Run rejection sampling on uniform random bytes to generate
  *              uniform random integers mod q
@@ -22,17 +22,17 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/x86_64/src/rej_uniform_asm.S using scripts/simpasm. Do not modify it directly.
+ *   dev/x86_64/src/rej_uniform_avx2_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_asm
-_PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_asm:
+.global _PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_avx2_asm
+_PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_avx2_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_asm
-PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_asm:
+.global PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_avx2_asm
+PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_avx2_asm:
 #endif
 
         .cfi_startproc

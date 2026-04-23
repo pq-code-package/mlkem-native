@@ -4,9 +4,9 @@
  */
 
 /*yaml
-  Name: poly_tobytes_asm
+  Name: poly_tobytes_aarch64_asm
   Description: Convert polynomial to byte representation
-  Signature: void mlk_poly_tobytes_asm(uint8_t r[384], const int16_t a[256])
+  Signature: void mlk_poly_tobytes_aarch64_asm(uint8_t r[384], const int16_t a[256])
   ABI:
     x0:
       type: buffer
@@ -27,17 +27,17 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/aarch64_opt/src/poly_tobytes_asm.S using scripts/simpasm. Do not modify it directly.
+ *   dev/aarch64_opt/src/poly_tobytes_aarch64_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_poly_tobytes_asm
-_PQCP_MLKEM_NATIVE_MLKEM768_poly_tobytes_asm:
+.global _PQCP_MLKEM_NATIVE_MLKEM768_poly_tobytes_aarch64_asm
+_PQCP_MLKEM_NATIVE_MLKEM768_poly_tobytes_aarch64_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_poly_tobytes_asm
-PQCP_MLKEM_NATIVE_MLKEM768_poly_tobytes_asm:
+.global PQCP_MLKEM_NATIVE_MLKEM768_poly_tobytes_aarch64_asm
+PQCP_MLKEM_NATIVE_MLKEM768_poly_tobytes_aarch64_asm:
 #endif
 
         .cfi_startproc

@@ -20,9 +20,9 @@
  */
 
 /*yaml
-  Name: ntt_asm
+  Name: ntt_aarch64_asm
   Description: AArch64 ML-KEM forward NTT following @[NeonNTT] and @[SLOTHY_Paper]
-  Signature: void mlk_ntt_asm(int16_t p[256], const int16_t twiddles12345[80], const int16_t twiddles56[384])
+  Signature: void mlk_ntt_aarch64_asm(int16_t p[256], const int16_t twiddles12345[80], const int16_t twiddles56[384])
   ABI:
     x0:
       type: buffer
@@ -50,17 +50,17 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/aarch64_opt/src/ntt.S using scripts/simpasm. Do not modify it directly.
+ *   dev/aarch64_opt/src/ntt_aarch64_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_ntt_asm
-_PQCP_MLKEM_NATIVE_MLKEM768_ntt_asm:
+.global _PQCP_MLKEM_NATIVE_MLKEM768_ntt_aarch64_asm
+_PQCP_MLKEM_NATIVE_MLKEM768_ntt_aarch64_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_ntt_asm
-PQCP_MLKEM_NATIVE_MLKEM768_ntt_asm:
+.global PQCP_MLKEM_NATIVE_MLKEM768_ntt_aarch64_asm
+PQCP_MLKEM_NATIVE_MLKEM768_ntt_aarch64_asm:
 #endif
 
         .cfi_startproc

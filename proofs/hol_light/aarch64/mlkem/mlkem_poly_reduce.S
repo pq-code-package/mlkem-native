@@ -4,9 +4,9 @@
  */
 
 /*yaml
-  Name: poly_reduce_asm
+  Name: poly_reduce_aarch64_asm
   Description: Barrett reduction of polynomial coefficients
-  Signature: void mlk_poly_reduce_asm(int16_t p[256])
+  Signature: void mlk_poly_reduce_aarch64_asm(int16_t p[256])
   ABI:
     x0:
       type: buffer
@@ -21,17 +21,17 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/aarch64_opt/src/poly_reduce_asm.S using scripts/simpasm. Do not modify it directly.
+ *   dev/aarch64_opt/src/poly_reduce_aarch64_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_poly_reduce_asm
-_PQCP_MLKEM_NATIVE_MLKEM768_poly_reduce_asm:
+.global _PQCP_MLKEM_NATIVE_MLKEM768_poly_reduce_aarch64_asm
+_PQCP_MLKEM_NATIVE_MLKEM768_poly_reduce_aarch64_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_poly_reduce_asm
-PQCP_MLKEM_NATIVE_MLKEM768_poly_reduce_asm:
+.global PQCP_MLKEM_NATIVE_MLKEM768_poly_reduce_aarch64_asm
+PQCP_MLKEM_NATIVE_MLKEM768_poly_reduce_aarch64_asm:
 #endif
 
         .cfi_startproc
