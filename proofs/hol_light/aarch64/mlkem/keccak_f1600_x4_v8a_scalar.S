@@ -9,9 +9,9 @@
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
 
 /*yaml
-  Name: keccak_f1600_x4_v8a_scalar_hybrid_asm
+  Name: keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm
   Description: AArch64 hybrid scalar/vector implementation of Keccak-f[1600] permutation for four sequential states
-  Signature: void mlk_keccak_f1600_x4_v8a_scalar_hybrid_asm(uint64_t state[100], const uint64_t rc[24])
+  Signature: void mlk_keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm(uint64_t state[100], const uint64_t rc[24])
   ABI:
     x0:
       type: buffer
@@ -33,17 +33,17 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/fips202/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_asm.S using scripts/simpasm. Do not modify it directly.
+ *   dev/fips202/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_v8a_scalar_hybrid_asm
-_PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_v8a_scalar_hybrid_asm:
+.global _PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm
+_PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_v8a_scalar_hybrid_asm
-PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_v8a_scalar_hybrid_asm:
+.global PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm
+PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm:
 #endif
 
         .cfi_startproc

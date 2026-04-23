@@ -13,9 +13,9 @@
  */
 
 /*yaml
-  Name: polyvec_basemul_acc_montgomery_cached_asm_k4
+  Name: polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm
   Description: Re-implementation of asymmetric base multiplication following @[NeonNTT] for k=4
-  Signature: void mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(int16_t r[256], const int16_t a[1024], const int16_t b[1024], const int16_t b_cache[512])
+  Signature: void mlk_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm(int16_t r[256], const int16_t a[1024], const int16_t b[1024], const int16_t b_cache[512])
   ABI:
     x0:
       type: buffer
@@ -51,17 +51,17 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S using scripts/simpasm. Do not modify it directly.
+ *   dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_asm_k4
-_PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_asm_k4:
+.global _PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm
+_PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_asm_k4
-PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_asm_k4:
+.global PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm
+PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm:
 #endif
 
         .cfi_startproc

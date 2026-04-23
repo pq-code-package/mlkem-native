@@ -34,9 +34,9 @@ MLK_INTERNAL_DATA_DECLARATION const int16_t
     mlk_aarch64_zetas_mulcache_twisted_native[128];
 MLK_INTERNAL_DATA_DECLARATION const uint8_t mlk_rej_uniform_table[4096];
 
-#define mlk_ntt_asm MLK_NAMESPACE(ntt_asm)
-void mlk_ntt_asm(int16_t p[256], const int16_t twiddles12345[80],
-                 const int16_t twiddles56[384])
+#define mlk_ntt_aarch64_asm MLK_NAMESPACE(ntt_aarch64_asm)
+void mlk_ntt_aarch64_asm(int16_t p[256], const int16_t twiddles12345[80],
+                         const int16_t twiddles56[384])
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/mlkem_ntt.ml */
 __contract__(
@@ -50,9 +50,9 @@ __contract__(
   /* check-magic: on */
 );
 
-#define mlk_intt_asm MLK_NAMESPACE(intt_asm)
-void mlk_intt_asm(int16_t p[256], const int16_t twiddles12345[80],
-                  const int16_t twiddles56[384])
+#define mlk_intt_aarch64_asm MLK_NAMESPACE(intt_aarch64_asm)
+void mlk_intt_aarch64_asm(int16_t p[256], const int16_t twiddles12345[80],
+                          const int16_t twiddles56[384])
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/mlkem_intt.ml */
 __contract__(
@@ -65,8 +65,8 @@ __contract__(
   /* check-magic: on */
 );
 
-#define mlk_poly_reduce_asm MLK_NAMESPACE(poly_reduce_asm)
-void mlk_poly_reduce_asm(int16_t p[256])
+#define mlk_poly_reduce_aarch64_asm MLK_NAMESPACE(poly_reduce_aarch64_asm)
+void mlk_poly_reduce_aarch64_asm(int16_t p[256])
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/mlkem_poly_reduce.ml */
 __contract__(
@@ -75,8 +75,8 @@ __contract__(
   ensures(array_bound(p, 0, MLKEM_N, 0, MLKEM_Q))
 );
 
-#define mlk_poly_tomont_asm MLK_NAMESPACE(poly_tomont_asm)
-void mlk_poly_tomont_asm(int16_t p[256])
+#define mlk_poly_tomont_aarch64_asm MLK_NAMESPACE(poly_tomont_aarch64_asm)
+void mlk_poly_tomont_aarch64_asm(int16_t p[256])
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/mlkem_poly_tomont.ml */
 __contract__(
@@ -85,11 +85,12 @@ __contract__(
   ensures(array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
 );
 
-#define mlk_poly_mulcache_compute_asm MLK_NAMESPACE(poly_mulcache_compute_asm)
-void mlk_poly_mulcache_compute_asm(int16_t cache[128],
-                                   const int16_t mlk_poly[256],
-                                   const int16_t zetas[128],
-                                   const int16_t zetas_twisted[128])
+#define mlk_poly_mulcache_compute_aarch64_asm \
+  MLK_NAMESPACE(poly_mulcache_compute_aarch64_asm)
+void mlk_poly_mulcache_compute_aarch64_asm(int16_t cache[128],
+                                           const int16_t mlk_poly[256],
+                                           const int16_t zetas[128],
+                                           const int16_t zetas_twisted[128])
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/mlkem_poly_mulcache_compute.ml */
 __contract__(
@@ -101,8 +102,8 @@ __contract__(
   ensures(array_abs_bound(cache, 0, MLKEM_N/2, MLKEM_Q))
 );
 
-#define mlk_poly_tobytes_asm MLK_NAMESPACE(poly_tobytes_asm)
-void mlk_poly_tobytes_asm(uint8_t r[384], const int16_t a[256])
+#define mlk_poly_tobytes_aarch64_asm MLK_NAMESPACE(poly_tobytes_aarch64_asm)
+void mlk_poly_tobytes_aarch64_asm(uint8_t r[384], const int16_t a[256])
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/mlkem_poly_tobytes.ml */
 __contract__(
@@ -112,9 +113,9 @@ __contract__(
   assigns(memory_slice(r, MLKEM_POLYBYTES))
 );
 
-#define mlk_polyvec_basemul_acc_montgomery_cached_asm_k2 \
-  MLK_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k2)
-void mlk_polyvec_basemul_acc_montgomery_cached_asm_k2(
+#define mlk_polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm \
+  MLK_NAMESPACE(polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm)
+void mlk_polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm(
     int16_t r[256], const int16_t a[512], const int16_t b[512],
     const int16_t b_cache[256])
 /* This must be kept in sync with the HOL-Light specification in
@@ -129,9 +130,9 @@ __contract__(
     assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
 );
 
-#define mlk_polyvec_basemul_acc_montgomery_cached_asm_k3 \
-  MLK_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k3)
-void mlk_polyvec_basemul_acc_montgomery_cached_asm_k3(
+#define mlk_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm \
+  MLK_NAMESPACE(polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm)
+void mlk_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm(
     int16_t r[256], const int16_t a[768], const int16_t b[768],
     const int16_t b_cache[384])
 /* This must be kept in sync with the HOL-Light specification in
@@ -146,9 +147,9 @@ __contract__(
     assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
 );
 
-#define mlk_polyvec_basemul_acc_montgomery_cached_asm_k4 \
-  MLK_NAMESPACE(polyvec_basemul_acc_montgomery_cached_asm_k4)
-void mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(
+#define mlk_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm \
+  MLK_NAMESPACE(polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm)
+void mlk_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm(
     int16_t r[256], const int16_t a[1024], const int16_t b[1024],
     const int16_t b_cache[512])
 /* This must be kept in sync with the HOL-Light specification in
@@ -163,10 +164,10 @@ __contract__(
     assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
 );
 
-#define mlk_rej_uniform_asm MLK_NAMESPACE(rej_uniform_asm)
+#define mlk_rej_uniform_aarch64_asm MLK_NAMESPACE(rej_uniform_aarch64_asm)
 MLK_MUST_CHECK_RETURN_VALUE
-uint64_t mlk_rej_uniform_asm(int16_t r[256], const uint8_t *buf,
-                             unsigned buflen, const uint8_t table[4096])
+uint64_t mlk_rej_uniform_aarch64_asm(int16_t r[256], const uint8_t *buf,
+                                     unsigned buflen, const uint8_t table[4096])
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/mlkem_rej_uniform.ml. */
 __contract__(

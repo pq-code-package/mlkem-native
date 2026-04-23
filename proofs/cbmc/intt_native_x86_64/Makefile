@@ -22,7 +22,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c $(SRCDIR)/mlkem/src/native/x86_64/src/consts.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_intt_native
-USE_FUNCTION_CONTRACTS=mlk_invntt_avx2 mlk_sys_check_capability
+USE_FUNCTION_CONTRACTS=mlk_invntt_avx2_asm mlk_sys_check_capability
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

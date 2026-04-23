@@ -4,9 +4,9 @@
  */
 
 /*yaml
-  Name: rej_uniform_asm
+  Name: rej_uniform_aarch64_asm
   Description: Run rejection sampling on uniform random bytes to generate uniform random integers mod q
-  Signature: uint64_t mlk_rej_uniform_asm(int16_t r[256], const uint8_t *buf, unsigned buflen, const uint8_t table[4096])
+  Signature: uint64_t mlk_rej_uniform_aarch64_asm(int16_t r[256], const uint8_t *buf, unsigned buflen, const uint8_t table[4096])
   ABI:
     x0:
       type: buffer
@@ -39,17 +39,17 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/aarch64_opt/src/rej_uniform_asm.S using scripts/simpasm. Do not modify it directly.
+ *   dev/aarch64_opt/src/rej_uniform_aarch64_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_asm
-_PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_asm:
+.global _PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_aarch64_asm
+_PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_aarch64_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_asm
-PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_asm:
+.global PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_aarch64_asm
+PQCP_MLKEM_NATIVE_MLKEM768_rej_uniform_aarch64_asm:
 #endif
 
         .cfi_startproc

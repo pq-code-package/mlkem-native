@@ -27,17 +27,17 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/x86_64/src/reduce.S using scripts/simpasm. Do not modify it directly.
+ *   dev/x86_64/src/reduce_avx2_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_reduce_avx2
-_PQCP_MLKEM_NATIVE_MLKEM768_reduce_avx2:
+.global _PQCP_MLKEM_NATIVE_MLKEM768_reduce_avx2_asm
+_PQCP_MLKEM_NATIVE_MLKEM768_reduce_avx2_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_reduce_avx2
-PQCP_MLKEM_NATIVE_MLKEM768_reduce_avx2:
+.global PQCP_MLKEM_NATIVE_MLKEM768_reduce_avx2_asm
+PQCP_MLKEM_NATIVE_MLKEM768_reduce_avx2_asm:
 #endif
 
         .cfi_startproc

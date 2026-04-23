@@ -26,9 +26,10 @@ MLK_INTERNAL_DATA_DECLARATION const uint64_t mlk_keccak_rho8[4];
 #define mlk_keccak_rho56 MLK_NAMESPACE(keccak_rho56)
 MLK_INTERNAL_DATA_DECLARATION const uint64_t mlk_keccak_rho56[4];
 
-#define mlk_keccak_f1600_x4_avx2 MLK_NAMESPACE(keccak_f1600_x4_avx2)
-void mlk_keccak_f1600_x4_avx2(uint64_t states[100], const uint64_t rc[24],
-                              const uint64_t rho8[4], const uint64_t rho56[4])
+#define mlk_keccak_f1600_x4_avx2_asm MLK_NAMESPACE(keccak_f1600_x4_avx2_asm)
+void mlk_keccak_f1600_x4_avx2_asm(uint64_t states[100], const uint64_t rc[24],
+                                  const uint64_t rho8[4],
+                                  const uint64_t rho56[4])
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/keccak_f1600_x4_avx2.ml */
 __contract__(

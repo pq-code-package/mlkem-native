@@ -13,7 +13,7 @@
 /*yaml
   Name: keccak_f1600_x1_scalar_symbolic
   Description: AArch64 scalar symbolic implementation of Keccak-f[1600] permutation for single state (clean version for optimization)
-  Signature: void mlk_keccak_f1600_x1_scalar_asm(uint64_t state[25], const uint64_t rc[24])
+  Signature: void mlk_keccak_f1600_x1_scalar_aarch64_asm(uint64_t state[25], const uint64_t rc[24])
   ABI:
     x0:
       type: buffer
@@ -408,9 +408,9 @@
 #define KECCAK_F1600_ROUNDS 24
 
     .text
-    .global MLK_ASM_NAMESPACE(keccak_f1600_x1_scalar_asm)
+    .global MLK_ASM_NAMESPACE(keccak_f1600_x1_scalar_aarch64_asm)
     .balign 4
-MLK_ASM_FN_SYMBOL(keccak_f1600_x1_scalar_asm)
+MLK_ASM_FN_SYMBOL(keccak_f1600_x1_scalar_aarch64_asm)
     alloc_stack
     save_gprs
 
