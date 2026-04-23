@@ -18,7 +18,7 @@ MLK_INTERNAL_DATA_DECLARATION const uint64_t
 void mlk_keccak_f1600_x1_scalar_aarch64_asm(uint64_t state[25],
                                             const uint64_t rc[24])
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/aarch64/proofs/keccak_f1600_x1_scalar.ml */
+ * in proofs/hol_light/aarch64/proofs/keccak_f1600_x1_scalar_aarch64_asm.ml */
 __contract__(
   requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 1))
   requires(rc == mlk_keccakf1600_round_constants)
@@ -30,7 +30,7 @@ __contract__(
 void mlk_keccak_f1600_x1_v84a_aarch64_asm(uint64_t state[25],
                                           const uint64_t rc[24])
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/aarch64/proofs/keccak_f1600_x1_v84a.ml */
+ * in proofs/hol_light/aarch64/proofs/keccak_f1600_x1_v84a_aarch64_asm.ml */
 __contract__(
   requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 1))
   requires(rc == mlk_keccakf1600_round_constants)
@@ -42,7 +42,7 @@ __contract__(
 void mlk_keccak_f1600_x2_v84a_aarch64_asm(uint64_t state[50],
                                           const uint64_t rc[24])
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/aarch64/proofs/keccak_f1600_x2_v84a.ml */
+ * in proofs/hol_light/aarch64/proofs/keccak_f1600_x2_v84a_aarch64_asm.ml */
 __contract__(
   requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 2))
   requires(rc == mlk_keccakf1600_round_constants)
@@ -54,7 +54,9 @@ __contract__(
 void mlk_keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm(uint64_t state[100],
                                                        const uint64_t rc[24])
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/aarch64/proofs/keccak_f1600_x4_v8a_scalar.ml */
+ * in
+ * proofs/hol_light/aarch64/proofs/keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.ml
+ */
 __contract__(
   requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 4))
   requires(rc == mlk_keccakf1600_round_constants)
@@ -66,7 +68,9 @@ __contract__(
 void mlk_keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm(
     uint64_t state[100], const uint64_t rc[24])
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/aarch64/proofs/keccak_f1600_x4_v8a_v84a_scalar.ml */
+ * in
+ * proofs/hol_light/aarch64/proofs/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.ml
+ */
 __contract__(
   requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 4))
   requires(rc == mlk_keccakf1600_round_constants)

@@ -11,7 +11,7 @@ The proofs cover three properties:
 - **Memory safety:** The assembly only accesses memory within the bounds of what is provided or allocated.
 - **Secret-independent timing (constant-time):** The assembly is free of secret-dependent control flow, memory access patterns, and variable-latency instructions.
 
-The one exception is rejection sampling (`mlkem_rej_uniform`), which only has a functional correctness specification.
+The one exception is rejection sampling (`rej_uniform_aarch64_asm`), which only has a functional correctness specification.
 Rejection sampling is safely variable-time, so no constant-time proof is needed. Memory safety proofs for rejection
 sampling are not yet available ([#1596](https://github.com/pq-code-package/mlkem-native/issues/1596)).
 
@@ -125,38 +125,38 @@ All AArch64 and x86_64 assembly routines used in mlkem-native are covered.
 ### AArch64
 
 - ML-KEM Arithmetic:
-  * AArch64 forward NTT: [mlkem_ntt.S](aarch64/mlkem/mlkem_ntt.S)
-  * AArch64 inverse NTT: [mlkem_intt.S](aarch64/mlkem/mlkem_intt.S)
-  * AArch64 base multiplications: [mlkem_poly_basemul_acc_montgomery_cached_k2.S](aarch64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.S) [mlkem_poly_basemul_acc_montgomery_cached_k3.S](aarch64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.S) [mlkem_poly_basemul_acc_montgomery_cached_k4.S](aarch64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.S)
-  * AArch64 conversion to Montgomery form: [mlkem_poly_tomont.S](aarch64/mlkem/mlkem_poly_tomont.S)
-  * AArch64 modular reduction: [mlkem_poly_reduce.S](aarch64/mlkem/mlkem_poly_reduce.S)
-  * AArch64 'multiplication cache' computation: [mlkem_poly_mulcache_compute.S](aarch64/mlkem/mlkem_poly_mulcache_compute.S)
-  * AArch64 rejection sampling: [mlkem_rej_uniform.S](aarch64/mlkem/mlkem_rej_uniform.S)
-  * AArch64 polynomial compression: [mlkem_poly_tobytes.S](aarch64/mlkem/mlkem_poly_tobytes.S)
+  * AArch64 forward NTT: [ntt_aarch64_asm.S](aarch64/mlkem/ntt_aarch64_asm.S)
+  * AArch64 inverse NTT: [intt_aarch64_asm.S](aarch64/mlkem/intt_aarch64_asm.S)
+  * AArch64 base multiplications: [polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S](aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S) [polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S](aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S) [polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S](aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S)
+  * AArch64 conversion to Montgomery form: [poly_tomont_aarch64_asm.S](aarch64/mlkem/poly_tomont_aarch64_asm.S)
+  * AArch64 modular reduction: [poly_reduce_aarch64_asm.S](aarch64/mlkem/poly_reduce_aarch64_asm.S)
+  * AArch64 'multiplication cache' computation: [poly_mulcache_compute_aarch64_asm.S](aarch64/mlkem/poly_mulcache_compute_aarch64_asm.S)
+  * AArch64 rejection sampling: [rej_uniform_aarch64_asm.S](aarch64/mlkem/rej_uniform_aarch64_asm.S)
+  * AArch64 polynomial compression: [poly_tobytes_aarch64_asm.S](aarch64/mlkem/poly_tobytes_aarch64_asm.S)
 - FIPS202:
-  * Keccak-F1600 using lazy rotations[^HYBRID]: [keccak_f1600_x1_scalar.S](aarch64/mlkem/keccak_f1600_x1_scalar.S)
-  * Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x1_v84a.S](aarch64/mlkem/keccak_f1600_x1_v84a.S)
-  * 2-fold Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x2_v84a.S](aarch64/mlkem/keccak_f1600_x2_v84a.S)
-  * 'Hybrid' 4-fold Keccak-F1600 using scalar and v8-A Neon instructions: [keccak_f1600_x4_v8a_scalar.S](aarch64/mlkem/keccak_f1600_x4_v8a_scalar.S)
-  * 'Triple hybrid' 4-fold Keccak-F1600 using scalar, v8-A Neon and v8.4-A+SHA3 Neon instructions:[keccak_f1600_x4_v8a_v84a_scalar.S](aarch64/mlkem/keccak_f1600_x4_v8a_v84a_scalar.S)
+  * Keccak-F1600 using lazy rotations[^HYBRID]: [keccak_f1600_x1_scalar_aarch64_asm.S](aarch64/mlkem/keccak_f1600_x1_scalar_aarch64_asm.S)
+  * Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x1_v84a_aarch64_asm.S](aarch64/mlkem/keccak_f1600_x1_v84a_aarch64_asm.S)
+  * 2-fold Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x2_v84a_aarch64_asm.S](aarch64/mlkem/keccak_f1600_x2_v84a_aarch64_asm.S)
+  * 'Hybrid' 4-fold Keccak-F1600 using scalar and v8-A Neon instructions: [keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S](aarch64/mlkem/keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S)
+  * 'Triple hybrid' 4-fold Keccak-F1600 using scalar, v8-A Neon and v8.4-A+SHA3 Neon instructions:[keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S](aarch64/mlkem/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S)
 
 The NTT and invNTT functions are super-optimized using [SLOTHY](https://github.com/slothy-optimizer/slothy/).
 
 ### x86_64
 - ML-KEM Arithmetic:
-  * x86_64 forward NTT: [mlkem_ntt.S](x86_64/mlkem/mlkem_ntt.S)
-  * x86_64 inverse NTT: [mlkem_intt.S](x86_64/mlkem/mlkem_intt.S)
-  * x86_64 base multiplications: [mlkem_poly_basemul_acc_montgomery_cached_k2.S](x86_64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.S) [mlkem_poly_basemul_acc_montgomery_cached_k3.S](x86_64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.S) [mlkem_poly_basemul_acc_montgomery_cached_k4.S](x86_64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.S)
-  * x86_64 modular reduction: [mlkem_reduce.S](x86_64/mlkem/mlkem_reduce.S)
-  * x86_64 polynomial compression: [mlkem_tobytes.S](x86_64/mlkem/mlkem_tobytes.S) [mlkem_poly_compress_d4.S](x86_64/mlkem/mlkem_poly_compress_d4.S) [mlkem_poly_compress_d5.S](x86_64/mlkem/mlkem_poly_compress_d5.S) [mlkem_poly_compress_d10.S](x86_64/mlkem/mlkem_poly_compress_d10.S) [mlkem_poly_compress_d11.S](x86_64/mlkem/mlkem_poly_compress_d11.S)
-  * x86_64 rejection sampling: [mlkem_rej_uniform.S](x86_64/mlkem/mlkem_rej_uniform.S)
-  * x86_64 polynomial deserialization: [mlkem_frombytes.S](x86_64/mlkem/mlkem_frombytes.S)
-  * x86_64 conversion to Montgomery form: [mlkem_tomont.S](x86_64/mlkem/mlkem_tomont.S)
-  * x86_64 polynomial unpacking: [mlkem_unpack.S](x86_64/mlkem/mlkem_unpack.S)
-  * x86_64 'multiplication cache' computation: [mlkem_mulcache_compute.S](x86_64/mlkem/mlkem_mulcache_compute.S)
-  * x86_64 polynomial decompression: [mlkem_poly_decompress_d4.S](x86_64/mlkem/mlkem_poly_decompress_d4.S) [mlkem_poly_decompress_d5.S](x86_64/mlkem/mlkem_poly_decompress_d5.S) [mlkem_poly_decompress_d10.S](x86_64/mlkem/mlkem_poly_decompress_d10.S) [mlkem_poly_decompress_d11.S](x86_64/mlkem/mlkem_poly_decompress_d11.S)
+  * x86_64 forward NTT: [ntt_avx2_asm.S](x86_64/mlkem/ntt_avx2_asm.S)
+  * x86_64 inverse NTT: [intt_avx2_asm.S](x86_64/mlkem/intt_avx2_asm.S)
+  * x86_64 base multiplications: [polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.S](x86_64/mlkem/polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.S) [polyvec_basemul_acc_montgomery_cached_k3_avx2_asm.S](x86_64/mlkem/polyvec_basemul_acc_montgomery_cached_k3_avx2_asm.S) [polyvec_basemul_acc_montgomery_cached_k4_avx2_asm.S](x86_64/mlkem/polyvec_basemul_acc_montgomery_cached_k4_avx2_asm.S)
+  * x86_64 modular reduction: [reduce_avx2_asm.S](x86_64/mlkem/reduce_avx2_asm.S)
+  * x86_64 polynomial compression: [ntttobytes_avx2_asm.S](x86_64/mlkem/ntttobytes_avx2_asm.S) [poly_compress_d4_avx2_asm.S](x86_64/mlkem/poly_compress_d4_avx2_asm.S) [poly_compress_d5_avx2_asm.S](x86_64/mlkem/poly_compress_d5_avx2_asm.S) [poly_compress_d10_avx2_asm.S](x86_64/mlkem/poly_compress_d10_avx2_asm.S) [poly_compress_d11_avx2_asm.S](x86_64/mlkem/poly_compress_d11_avx2_asm.S)
+  * x86_64 rejection sampling: [rej_uniform_avx2_asm.S](x86_64/mlkem/rej_uniform_avx2_asm.S)
+  * x86_64 polynomial deserialization: [nttfrombytes_avx2_asm.S](x86_64/mlkem/nttfrombytes_avx2_asm.S)
+  * x86_64 conversion to Montgomery form: [tomont_avx2_asm.S](x86_64/mlkem/tomont_avx2_asm.S)
+  * x86_64 polynomial unpacking: [nttunpack_avx2_asm.S](x86_64/mlkem/nttunpack_avx2_asm.S)
+  * x86_64 'multiplication cache' computation: [poly_mulcache_compute_avx2_asm.S](x86_64/mlkem/poly_mulcache_compute_avx2_asm.S)
+  * x86_64 polynomial decompression: [poly_decompress_d4_avx2_asm.S](x86_64/mlkem/poly_decompress_d4_avx2_asm.S) [poly_decompress_d5_avx2_asm.S](x86_64/mlkem/poly_decompress_d5_avx2_asm.S) [poly_decompress_d10_avx2_asm.S](x86_64/mlkem/poly_decompress_d10_avx2_asm.S) [poly_decompress_d11_avx2_asm.S](x86_64/mlkem/poly_decompress_d11_avx2_asm.S)
 - FIPS202:
-  * 4-fold Keccak-F1600 using AVX2: [keccak_f1600_x4_avx2.S](x86_64/mlkem/keccak_f1600_x4_avx2.S)
+  * 4-fold Keccak-F1600 using AVX2: [keccak_f1600_x4_avx2_asm.S](x86_64/mlkem/keccak_f1600_x4_avx2_asm.S)
 
 <!--- bibliography --->
 [^HYBRID]: Becker, Kannwischer: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64, [https://eprint.iacr.org/2022/1243](https://eprint.iacr.org/2022/1243)
