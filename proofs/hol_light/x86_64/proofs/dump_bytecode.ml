@@ -6,86 +6,86 @@
 (* Load base theories for x86_64 from s2n-bignum *)
 needs "x86/proofs/base.ml";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_ntt.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_ntt.o";;
+print_string "=== bytecode start: x86_64/mlkem/ntt_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/ntt_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_intt.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_intt.o";;
+print_string "=== bytecode start: x86_64/mlkem/intt_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/intt_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o";;
+print_string "=== bytecode start: x86_64/mlkem/polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.o";;
+print_string "=== bytecode start: x86_64/mlkem/polyvec_basemul_acc_montgomery_cached_k3_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/polyvec_basemul_acc_montgomery_cached_k3_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.o";;
+print_string "=== bytecode start: x86_64/mlkem/polyvec_basemul_acc_montgomery_cached_k4_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/polyvec_basemul_acc_montgomery_cached_k4_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_reduce.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_reduce.o";;
+print_string "=== bytecode start: x86_64/mlkem/reduce_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/reduce_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_tobytes.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_tobytes.o";;
+print_string "=== bytecode start: x86_64/mlkem/ntttobytes_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/ntttobytes_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_rej_uniform.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_rej_uniform.o";;
+print_string "=== bytecode start: x86_64/mlkem/rej_uniform_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/rej_uniform_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_frombytes.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_frombytes.o";;
+print_string "=== bytecode start: x86_64/mlkem/nttfrombytes_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/nttfrombytes_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_unpack.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_unpack.o";;
+print_string "=== bytecode start: x86_64/mlkem/nttunpack_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/nttunpack_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_mulcache_compute.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_mulcache_compute.o";;
+print_string "=== bytecode start: x86_64/mlkem/poly_mulcache_compute_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/poly_mulcache_compute_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_tomont.o ========\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_tomont.o";;
+print_string "=== bytecode start: x86_64/mlkem/tomont_avx2_asm.o ========\n";;
+print_literal_from_elf "x86_64/mlkem/tomont_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_poly_compress_d4.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_poly_compress_d4.o";;
+print_string "=== bytecode start: x86_64/mlkem/poly_compress_d4_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/poly_compress_d4_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_poly_decompress_d4.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_poly_decompress_d4.o";;
+print_string "=== bytecode start: x86_64/mlkem/poly_decompress_d4_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/poly_decompress_d4_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_poly_compress_d5.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_poly_compress_d5.o";;
+print_string "=== bytecode start: x86_64/mlkem/poly_compress_d5_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/poly_compress_d5_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_poly_decompress_d5.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_poly_decompress_d5.o";;
+print_string "=== bytecode start: x86_64/mlkem/poly_decompress_d5_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/poly_decompress_d5_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_poly_compress_d10.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_poly_compress_d10.o";;
+print_string "=== bytecode start: x86_64/mlkem/poly_compress_d10_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/poly_compress_d10_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_poly_decompress_d10.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_poly_decompress_d10.o";;
+print_string "=== bytecode start: x86_64/mlkem/poly_decompress_d10_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/poly_decompress_d10_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_poly_compress_d11.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_poly_compress_d11.o";;
+print_string "=== bytecode start: x86_64/mlkem/poly_compress_d11_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/poly_compress_d11_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/mlkem_poly_decompress_d11.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/mlkem_poly_decompress_d11.o";;
+print_string "=== bytecode start: x86_64/mlkem/poly_decompress_d11_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/poly_decompress_d11_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
-print_string "=== bytecode start: x86_64/mlkem/keccak_f1600_x4_avx2.o ===\n";;
-print_literal_from_elf "x86_64/mlkem/keccak_f1600_x4_avx2.o";;
+print_string "=== bytecode start: x86_64/mlkem/keccak_f1600_x4_avx2_asm.o ===\n";;
+print_literal_from_elf "x86_64/mlkem/keccak_f1600_x4_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
