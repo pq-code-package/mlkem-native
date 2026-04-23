@@ -18,8 +18,6 @@ let poly_tomont_asm_mc = define_assert_from_elf
 [
   0x5281a022;       (* arm_MOV W2 (rvalue (word 3329)) *)
   0x4e020c44;       (* arm_DUP_GEN Q4 X2 16 128 *)
-  0x5289d7e2;       (* arm_MOV W2 (rvalue (word 20159)) *)
-  0x4e020c45;       (* arm_DUP_GEN Q5 X2 16 128 *)
   0x12808262;       (* arm_MOVN W2 (word 1043) 0 *)
   0x4e020c42;       (* arm_DUP_GEN Q2 X2 16 128 *)
   0x12850462;       (* arm_MOVN W2 (word 10275) 0 *)

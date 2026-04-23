@@ -34,8 +34,6 @@ MLK_ASM_FN_SYMBOL(poly_tomont_asm)
         .cfi_startproc
         mov w2, #0xd01              // =3329
         dup v4.8h, w2
-        mov w2, #0x4ebf             // =20159
-        dup v5.8h, w2
         mov w2, #-0x414             // =-1044
         dup v2.8h, w2
         mov w2, #-0x2824            // =-10276

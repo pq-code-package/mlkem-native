@@ -42,7 +42,6 @@
         factor            .req v2
         factor_t          .req v3
         modulus           .req v4
-        modulus_twisted   .req v5
 
         tmp0              .req v6
 
@@ -53,9 +52,6 @@ MLK_ASM_FN_SYMBOL(poly_tomont_asm)
 
         mov wtmp, #3329 // ML-KEM modulus
         dup modulus.8h, wtmp
-
-        mov wtmp, #20159 // Barrett twist of 1 wrt 2^27
-        dup modulus_twisted.8h, wtmp
 
         mov wtmp, #-1044 // 2^16 % 3329
         dup factor.8h, wtmp
@@ -217,7 +213,6 @@ poly_tomont_loop:
         .unreq factor
         .unreq factor_t
         .unreq modulus
-        .unreq modulus_twisted
 
         .unreq tmp0
 
