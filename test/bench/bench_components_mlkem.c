@@ -213,31 +213,37 @@ static int bench(void)
   printf("---AArch64 native backend components---\n");
 
   BENCH("ntt-native",
-        mlk_ntt_asm((int16_t *)data0, (int16_t *)data1, (int16_t *)data2));
+        CHECK(mlk_ntt_native((int16_t *)data0) == MLK_NATIVE_FUNC_SUCCESS));
   BENCH("intt-native",
-        mlk_intt_asm((int16_t *)data0, (int16_t *)data1, (int16_t *)data2));
-  BENCH("mlk_poly-reduce-native", mlk_poly_reduce_asm((int16_t *)data0));
-  BENCH("mlk_poly-tomont-native", mlk_poly_tomont_asm((int16_t *)data0));
+        CHECK(mlk_intt_native((int16_t *)data0) == MLK_NATIVE_FUNC_SUCCESS));
+  BENCH("mlk_poly-reduce-native",
+        CHECK(mlk_poly_reduce_native((int16_t *)data0) ==
+              MLK_NATIVE_FUNC_SUCCESS));
+  BENCH("mlk_poly-tomont-native",
+        CHECK(mlk_poly_tomont_native((int16_t *)data0) ==
+              MLK_NATIVE_FUNC_SUCCESS));
   BENCH("mlk_poly-tobytes-native",
-        mlk_poly_tobytes_asm((uint8_t *)data0, (int16_t *)data1));
+        CHECK(mlk_poly_tobytes_native((uint8_t *)data0, (int16_t *)data1) ==
+              MLK_NATIVE_FUNC_SUCCESS));
   BENCH("mlk_poly-mulcache-compute-native",
-        mlk_poly_mulcache_compute_asm((int16_t *)data0, (int16_t *)data1,
-                                      (int16_t *)data2, (int16_t *)data3));
+        CHECK(mlk_poly_mulcache_compute_native((int16_t *)data0,
+                                               (int16_t *)data1) ==
+              MLK_NATIVE_FUNC_SUCCESS));
 #if MLKEM_K == 2
-  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-k2-native",
-        mlk_polyvec_basemul_acc_montgomery_cached_asm_k2(
-            (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
-            (int16_t *)data3));
+  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-k2-native",
+        CHECK(mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
+                  (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
+                  (int16_t *)data3) == MLK_NATIVE_FUNC_SUCCESS));
 #elif MLKEM_K == 3
-  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-k3-native",
-        mlk_polyvec_basemul_acc_montgomery_cached_asm_k3(
-            (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
-            (int16_t *)data3));
+  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-k3-native",
+        CHECK(mlk_polyvec_basemul_acc_montgomery_cached_k3_native(
+                  (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
+                  (int16_t *)data3) == MLK_NATIVE_FUNC_SUCCESS));
 #elif MLKEM_K == 4
-  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-asm-k4-native",
-        mlk_polyvec_basemul_acc_montgomery_cached_asm_k4(
-            (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
-            (int16_t *)data3));
+  BENCH("mlk_polyvec-basemul-acc-montgomery-cached-k4-native",
+        CHECK(mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
+                  (int16_t *)data0, (int16_t *)data1, (int16_t *)data2,
+                  (int16_t *)data3) == MLK_NATIVE_FUNC_SUCCESS));
 #endif /* MLKEM_K == 4 */
 
 #endif /* MLK_ARITH_BACKEND_AARCH64 */
