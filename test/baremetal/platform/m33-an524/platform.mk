@@ -36,7 +36,7 @@ CFLAGS += \
 	-DCMDLINE_BASE_ADDR=0x20007000
 
 ARCH_FLAGS += \
-	-mcpu=cortex-m33 \
+	-mcpu=cortex-m33+nodsp \
 	-mthumb \
 	-mfloat-abi=soft
 
