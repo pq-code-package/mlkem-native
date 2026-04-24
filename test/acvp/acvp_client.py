@@ -101,16 +101,24 @@ def info(msg, **kwargs):
 
 
 def get_acvp_binary(tg):
-    """Convert JSON dict for ACVP test group to suitable ACVP binary."""
+    """Return the command prefix (list) for the binary handling this test group.
+
+    Without --binary: one-element list with the level-specific C binary path.
+    With --binary:    two-element list [binary, level] for a combined binary
+                      such as the Rust acvp_mlkem that takes the level as its
+                      first argument.
+    """
     parameterSetToLevel = {
         "ML-KEM-512": 512,
         "ML-KEM-768": 768,
         "ML-KEM-1024": 1024,
     }
     level = parameterSetToLevel[tg["parameterSet"]]
+    if custom_binary is not None:
+        return [custom_binary, str(level)]
     basedir = f"./test/build/mlkem{level}/bin"
     acvp_bin = f"acvp_mlkem{level}"
-    return f"{basedir}/{acvp_bin}"
+    return [f"{basedir}/{acvp_bin}"]
 
 
 def run_encapDecap_test(tg, tc):
@@ -119,8 +127,7 @@ def run_encapDecap_test(tg, tc):
     results = {"tcId": tc["tcId"]}
     if tg["function"] == "encapsulation":
         acvp_bin = get_acvp_binary(tg)
-        acvp_call = exec_prefix + [
-            acvp_bin,
+        acvp_call = exec_prefix + acvp_bin + [
             "encapDecap",
             "AFT",
             "encapsulation",
@@ -142,8 +149,7 @@ def run_encapDecap_test(tg, tc):
         # TODO: Remove this fallback workaround. v.1.1.0.40 moved the dk from the
         # tg to the tc. This can be removed when v1.1.0.39 is removed.
         dk_value = tc.get("dk", tg.get("dk"))
-        acvp_call = exec_prefix + [
-            acvp_bin,
+        acvp_call = exec_prefix + acvp_bin + [
             "encapDecap",
             "VAL",
             "decapsulation",
@@ -162,8 +168,7 @@ def run_encapDecap_test(tg, tc):
             results[k] = v
     elif tg["function"] == "encapsulationKeyCheck":
         acvp_bin = get_acvp_binary(tg)
-        acvp_call = exec_prefix + [
-            acvp_bin,
+        acvp_call = exec_prefix + acvp_bin + [
             "encapDecap",
             "VAL",
             "encapsulationKeyCheck",
@@ -182,8 +187,7 @@ def run_encapDecap_test(tg, tc):
 
     elif tg["function"] == "decapsulationKeyCheck":
         acvp_bin = get_acvp_binary(tg)
-        acvp_call = exec_prefix + [
-            acvp_bin,
+        acvp_call = exec_prefix + acvp_bin + [
             "encapDecap",
             "VAL",
             "decapsulationKeyCheck",
@@ -208,8 +212,7 @@ def run_keyGen_test(tg, tc):
     results = {"tcId": tc["tcId"]}
 
     acvp_bin = get_acvp_binary(tg)
-    acvp_call = exec_prefix + [
-        acvp_bin,
+    acvp_call = exec_prefix + acvp_bin + [
         "keyGen",
         "AFT",
         f"z={tc['z']}",
@@ -344,7 +347,20 @@ parser.add_argument(
     default="v1.1.0.41",
     help="ACVP test vector version (default: v1.1.0.41)",
 )
+parser.add_argument(
+    "--binary",
+    "-b",
+    default=None,
+    help=(
+        "Path to a combined ACVP binary that accepts the security level "
+        "(512, 768, or 1024) as its first argument, e.g. the Rust acvp_mlkem "
+        "binary. When omitted, the default per-level C binaries are used."
+    ),
+)
 args = parser.parse_args()
+
+# Set by --binary; read by get_acvp_binary().
+custom_binary = args.binary
 
 if args.prompt is None:
     print(f"Using ACVP test vectors version {args.version}", file=sys.stderr)

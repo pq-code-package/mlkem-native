@@ -1,0 +1,45 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+[package]
+name = "mlkem-native"
+version = "1.1.0-rc.1"
+edition = "2024"
+description = "ML-KEM (FIPS 203) via mlkem-native"
+categories = ["cryptography"]
+keywords = ["cryptography", "post-quantum", "security", "mlkem", "ml-kem"]
+repository = "https://github.com/pq-code-package/mlkem-native"
+readme = "README.md"
+license = "Apache-2.0 OR ISC OR MIT"
+build = "bindings/rust/mlkem-native/build.rs"
+include = [
+    "bindings/rust/mlkem-native/build.rs",
+    "bindings/rust/mlkem-native/src/lib.rs",
+    "bindings/rust/mlkem-native/src/sys.rs",
+    "bindings/rust/mlkem-native/examples/kem.rs",
+    "bindings/rust/mlkem-native/examples/serialization.rs",
+    "mlkem/**",
+]
+
+[lib]
+path = "bindings/rust/mlkem-native/src/lib.rs"
+
+[[example]]
+name = "kem"
+path = "bindings/rust/mlkem-native/examples/kem.rs"
+
+[[example]]
+name = "serialization"
+path = "bindings/rust/mlkem-native/examples/serialization.rs"
+
+[dependencies]
+kem = "0.3.0-rc.6"
+hybrid-array = { version = "0.4", features = ["extra-sizes"] }
+rand_core = { version = "0.10", default-features = false }
+
+[dev-dependencies]
+kem = { version = "0.3.0-rc.6", features = ["getrandom"] }
+rand_core = "0.10"
+
+[build-dependencies]
+cc = "1.2.60"
