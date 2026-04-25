@@ -34,10 +34,9 @@ jobs:
            name: 'aarch64'
          - runner: ubuntu-latest
            name: 'x86_64'
-         # TODO: RISE riscv runner currently fails during apt install — re-enable once fixed.
          # via https://riseproject-dev.github.io/riscv-runner/
-         # - runner: ubuntu-24.04-riscv
-         #   name: 'riscv'
+         - runner: ubuntu-24.04-riscv
+           name: 'riscv'
          - runner: macos-latest
            name: 'macos (aarch64)'
          - runner: macos-15-intel
@@ -72,10 +71,9 @@ jobs:
            name: 'aarch64'
          - runner: ubuntu-latest
            name: 'x86_64'
-         # TODO: RISE riscv runner currently fails during apt install — re-enable once fixed.
          # via https://riseproject-dev.github.io/riscv-runner/
-         # - runner: ubuntu-24.04-riscv
-         #   name: 'riscv'
+         - runner: ubuntu-24.04-riscv
+           name: 'riscv'
         acvp-version: [v1.1.0.40, v1.1.0.41, v1.1.0.42]
         exclude:
           - {external: true,
