@@ -7,18 +7,14 @@
 , callPackage
 , bitwuzla
 , ninja
-, cadical
 , z3
-, cudd
-, replaceVars
-, fetchpatch
 }:
 
 buildEnv {
   name = "pqcp-cbmc";
   paths =
     builtins.attrValues {
-      cbmc = cbmc.overrideAttrs (old: rec {
+      cbmc = cbmc.overrideAttrs (_: {
         version = "6.9.0";
         src = fetchFromGitHub {
           owner = "diffblue";
@@ -26,18 +22,10 @@ buildEnv {
           hash = "sha256-SMJBnzoyTwcwJa9L2X1iX2W4Z/Mwoirf8EXfoyG0dRI=";
           tag = "cbmc-6.9.0";
         };
-        srccadical = cadical.src;
-        patches = [
-          (builtins.elemAt old.patches 0) # cudd patch from nixpkgs
-          ./0002-Do-not-download-sources-in-cmake.patch
-        ];
-        env = old.env // {
-          NIX_CFLAGS_COMPILE = (old.env.NIX_CFLAGS_COMPILE or "") + " -Wno-error=switch-enum";
-        };
       });
       litani = callPackage ./litani.nix { }; # 1.29.0
       cbmc-viewer = callPackage ./cbmc-viewer.nix { }; # 3.12
-      z3 = z3.overrideAttrs (old: rec {
+      z3 = z3.overrideAttrs (_: {
         version = "4.15.3";
         src = fetchFromGitHub {
           owner = "Z3Prover";
@@ -48,7 +36,6 @@ buildEnv {
       });
 
       inherit
-        cadical# 3.0.0
         bitwuzla# 0.8.2
         ninja; # 1.13.2
     };
