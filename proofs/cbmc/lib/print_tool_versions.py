@@ -11,7 +11,6 @@ import subprocess
 
 
 _TOOLS = [
-    "cadical",
     "cbmc",
     "cbmc-viewer",
     "litani",
