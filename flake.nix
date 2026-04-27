@@ -54,6 +54,7 @@
             overlays = [
               (_:_: {
                 clang_22 = pkgs-unstable.clang_22;
+                zig_0_16 = pkgs-unstable.zig;
 
                 # From 24.05 (dropped in 25.11)
                 gcc48 = pkgs-2405.gcc48;
@@ -188,6 +189,7 @@
           devShells.zig0_13 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_13);
           devShells.zig0_14 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_14);
           devShells.zig0_15 = util.mkShellWithCC' (zigWrapCC pkgs.zig);
+          devShells.zig0_16 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_16);
 
           devShells.gcc48 = util.mkShellWithCC' pkgs.gcc48;
           devShells.gcc49 = util.mkShellWithCC' pkgs.gcc49;

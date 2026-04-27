@@ -318,6 +318,9 @@ jobs:
          #
          # We omit all examples since there is currently no way to run
          # only those examples not involving native code.
+         #
+         # zig 0.16 still appears affected on Linux (CPU-feature
+         # predefines look to be dropped in assembler-with-cpp mode).
          - name: zig-0.12
            shell: zig0_12
            darwin: True
@@ -341,6 +344,13 @@ jobs:
            opt: no_opt
          - name: zig-0.15
            shell: zig0_15
+           darwin: True
+           c17: True
+           c23: True
+           examples: False
+           opt: no_opt
+         - name: zig-0.16
+           shell: zig0_16
            darwin: True
            c17: True
            c23: True
