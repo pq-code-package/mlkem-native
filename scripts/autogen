@@ -2607,9 +2607,10 @@ def gen_monolithic_asm_file():
 
 def get_config_options():
     content = read_file("mlkem/mlkem_native_config.h")
-    config_pattern = r"Name:\s*(MLK_CONFIG_\w+)"
+    # Match `#define X`, `/* #define X */`, `#ifndef X`, `#ifdef X` lines.
+    config_pattern = r"(?m)^\s*(?:/\*\s*)?#\s*(?:define|ifn?def)\s+(MLK_CONFIG_\w+)\b"
 
-    configs = re.findall(config_pattern, content)
+    configs = list(set(re.findall(config_pattern, content)))
 
     configs += [
         "MLK_FORCE_AARCH64",
@@ -4090,27 +4091,43 @@ def gen_test_config(config_path, config_spec, default_config_content):
 
     def locate_config_option(lines, opt_name):
         """Locate configuration option in lines. Returns (start, end) line indices"""
-        i = 0
-        while i < len(lines):
-            if re.search(rf"\* Name:\s+{re.escape(opt_name)}\b", lines[i]):
-                # Skip to the end of this comment block (find the closing */)
-                while i < len(lines) and not lines[i].strip().endswith("*/"):
-                    i += 1
-                i += 1  # Skip the closing */
+        # Find the line that defines (or comments out) opt_name, e.g.
+        #   #define <opt>
+        #   #ifndef <opt> / #ifdef <opt>
+        #   /* #define <opt> ... */
+        define_re = re.compile(
+            rf"^\s*(/\*\s*)?#\s*(define|ifn?def)\s+{re.escape(opt_name)}\b"
+        )
+        impl_line = None
+        for i, line in enumerate(lines):
+            if define_re.search(line):
+                impl_line = i
+                break
+        if impl_line is None:
+            raise Exception(
+                f"Could not find config option {opt_name} in default config"
+            )
 
-                start = i
-                # Find the next config option (starts with /*****)
-                while i < len(lines):
-                    if lines[i].strip().startswith("/****"):
-                        # Back up to exclude empty line before next option
-                        while i > start and lines[i - 1].strip() == "":
-                            i -= 1
-                        return (start, i)
-                    i += 1
-                # If no next option found, go to end
-                return (start, len(lines))
+        # Walk back to the closing */ of the preceding /** ... */ doxygen block.
+        j = impl_line - 1
+        while j >= 0 and not lines[j].strip().endswith("*/"):
+            j -= 1
+        if j < 0:
+            raise Exception(
+                f"Could not find doxygen block before config option {opt_name}"
+            )
+
+        start = j + 1  # Replacement starts right after */
+
+        # Replacement ends at the next /** block (option or section divider).
+        i = start
+        while i < len(lines):
+            if lines[i].strip().startswith("/**"):
+                while i > start and lines[i - 1].strip() == "":
+                    i -= 1
+                return (start, i)
             i += 1
-        raise Exception(f"Could not find config option {opt_name} in default config")
+        return (start, len(lines))
 
     def replace_config_option(lines, opt_name, opt_value):
         """Replace config option with new value"""
