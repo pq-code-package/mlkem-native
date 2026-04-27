@@ -143,16 +143,12 @@ static vuint16m2_t bitswap_perm(unsigned a, unsigned b, size_t vl)
   return xa;
 }
 
-/*************************************************
- * Name:        poly_ntt
+/**
+ * Compute negacyclic number-theoretic transform (NTT) of a polynomial in
+ * place; input assumed to be in normal order, output in bitreversed order.
  *
- * Description: Computes negacyclic number-theoretic transform (NTT) of
- *              a polynomial in place;
- *              inputs assumed to be in normal order, output in
- *              bitreversed order
- *
- * Arguments:   - uint16_t *r: pointer to in/output polynomial
- **************************************************/
+ * @param[in,out] r In/output polynomial.
+ */
 
 /* Forward / Cooley-Tukey butterfly operation */
 
@@ -330,16 +326,13 @@ void mlk_rv64v_poly_ntt(int16_t *r)
       &r[0xe0], mlk_rv64v_ntt2(__riscv_vcreate_v_i16m1_i16m2(ve, vf), ze), vl2);
 }
 
-/*************************************************
- * Name:        poly_invntt_tomont
+/**
+ * Compute the inverse negacyclic number-theoretic transform (NTT) of a
+ * polynomial in place; input assumed to be in bitreversed order, output in
+ * normal order.
  *
- * Description: Computes inverse of negacyclic number-theoretic transform (NTT)
- *              of a polynomial in place;
- *              inputs assumed to be in bitreversed order,
- *              output in normal order
- *
- * Arguments:   - uint16_t *r: pointer to in/output polynomial
- **************************************************/
+ * @param[in,out] r In/output polynomial.
+ */
 
 /* Reverse / Gentleman-Sande butterfly operation */
 
@@ -692,14 +685,12 @@ void mlk_rv64v_poly_basemul_mont_add_k4(int16_t *r, const int16_t *a,
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
 
-/*************************************************
- * Name:        poly_tomont
+/**
+ * In-place conversion of all coefficients of a polynomial from the normal
+ * domain to the Montgomery domain.
  *
- * Description: Inplace conversion of all coefficients of a polynomial
- *              from normal domain to Montgomery domain
- *
- * Arguments:   - int16_t *r: pointer to input/output polynomial
- **************************************************/
+ * @param[in,out] r Input/output polynomial.
+ */
 void mlk_rv64v_poly_tomont(int16_t *r)
 {
   size_t vl = __riscv_vsetvl_e16m1(MLKEM_N);
@@ -712,15 +703,12 @@ void mlk_rv64v_poly_tomont(int16_t *r)
   }
 }
 
-/*************************************************
- * Name:        poly_reduce
+/**
+ * Apply Barrett reduction to all coefficients of a polynomial. For details
+ * of the Barrett reduction see the comments in poly.c.
  *
- * Description: Applies Barrett reduction to all coefficients of a polynomial
- *              for details of the Barrett reduction see
- *              comments in poly.c
- *
- * Arguments:   - int16_t *r: pointer to input/output polynomial
- **************************************************/
+ * @param[in,out] r Input/output polynomial.
+ */
 void mlk_rv64v_poly_reduce(int16_t *r)
 {
   size_t vl = __riscv_vsetvl_e16m1(MLKEM_N);

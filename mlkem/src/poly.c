@@ -28,22 +28,18 @@
 #include "symmetric.h"
 #include "verify.h"
 
-/*************************************************
- * Name:        mlk_fqmul
+/**
+ * Montgomery multiplication modulo MLKEM_Q.
  *
- * Description: Montgomery multiplication modulo MLKEM_Q
+ * @reference{`fqmul()` in the reference implementation @[REF].}
  *
- * Arguments:   - int16_t a: first factor
- *                  Can be any int16_t.
- *              - int16_t b: second factor.
- *                  Must be signed canonical (abs value <(MLKEM_Q+1)/2)
+ * @param a First factor. Can be any int16_t.
+ * @param b Second factor. Must be signed canonical
+ *          (abs value < (MLKEM_Q+1)/2).
  *
- * Returns 16-bit integer congruent to a*b*R^{-1} mod MLKEM_Q, and
- * smaller than MLKEM_Q in absolute value.
- *
- **************************************************/
-
-/* Reference: `fqmul()` in the reference implementation @[REF]. */
+ * @return 16-bit integer congruent to a*b*R^{-1} mod MLKEM_Q, and
+ *         smaller than MLKEM_Q in absolute value.
+ */
 static MLK_INLINE int16_t mlk_fqmul(int16_t a, int16_t b)
 __contract__(
   requires(b > -MLKEM_Q_HALF && b < MLKEM_Q_HALF)
@@ -65,20 +61,16 @@ __contract__(
   return res;
 }
 
-/*************************************************
- * Name:        mlk_barrett_reduce
+/**
+ * Barrett reduction; given a 16-bit integer a, computes the centered
+ * representative congruent to a mod q in {-(q-1)/2,...,(q-1)/2}.
  *
- * Description: Barrett reduction; given a 16-bit integer a, computes
- *              centered representative congruent to a mod q in
- *              {-(q-1)/2,...,(q-1)/2}
+ * @reference{`barrett_reduce()` in the reference implementation @[REF].}
  *
- * Arguments:   - int16_t a: input integer to be reduced
+ * @param a Input integer to be reduced.
  *
- * Returns:     integer in {-(q-1)/2,...,(q-1)/2} congruent to a modulo q.
- *
- **************************************************/
-
-/* Reference: `barrett_reduce()` in the reference implementation @[REF]. */
+ * @return Integer in {-(q-1)/2,...,(q-1)/2} congruent to @p a modulo q.
+ */
 static MLK_INLINE int16_t mlk_barrett_reduce(int16_t a)
 __contract__(
   ensures(return_value > -MLKEM_Q_HALF && return_value < MLKEM_Q_HALF)
@@ -150,21 +142,20 @@ void mlk_poly_tomont(mlk_poly *r)
   mlk_poly_tomont_c(r);
 }
 
-/************************************************************
- * Name: mlk_scalar_signed_to_unsigned_q
+/**
+ * Constant-time conversion of signed representatives modulo MLKEM_Q within
+ * range (-(MLKEM_Q-1) .. (MLKEM_Q-1)) into unsigned representatives within
+ * range (0..(MLKEM_Q-1)).
  *
- * Description: Constant-time conversion of signed representatives
- *              modulo MLKEM_Q within range (-(MLKEM_Q-1) .. (MLKEM_Q-1))
- *              into unsigned representatives within range (0..(MLKEM_Q-1)).
+ * @reference{Not present in the reference implementation @[REF]. Used here
+ * to implement different semantics of `poly_reduce()`; see below. In the
+ * reference implementation @[REF] this logic is part of all compression
+ * functions (see `compress.c`).}
  *
- * Arguments: c: signed coefficient to be converted
+ * @param c Signed coefficient to be converted.
  *
- ************************************************************/
-
-/* Reference: Not present in the reference implementation @[REF].
- *            - Used here to implement different semantics of `poly_reduce()`;
- *              see below. in the reference implementation @[REF], this logic is
- *              part of all compression functions (see `compress.c`). */
+ * @return Unsigned representative in [0, MLKEM_Q).
+ */
 static MLK_INLINE int16_t mlk_scalar_signed_to_unsigned_q(int16_t c)
 __contract__(
   requires(c > -MLKEM_Q && c < MLKEM_Q)

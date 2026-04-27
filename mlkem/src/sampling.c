@@ -74,42 +74,36 @@ __contract__(
   return ctr;
 }
 
-/*************************************************
- * Name:        mlk_rej_uniform
+/**
+ * Run rejection sampling on uniform random bytes to generate uniform random
+ * integers mod q.
  *
- * Description: Run rejection sampling on uniform random bytes to generate
- *              uniform random integers mod q
+ * @reference{`rej_uniform()` in the reference implementation @[REF]. Our
+ * signature differs from the reference in that it adds the offset and always
+ * expects the base of the target buffer; this avoids shifting the buffer
+ * base in the caller, which is tricky to reason about. Has an optional
+ * fallback to a native implementation.}
  *
- * Arguments:   - int16_t *r:          pointer to output buffer
- *              - unsigned target:     requested number of 16-bit integers
- *                                     (uniform mod q).
- *                                     Must be <= 4096.
- *              - unsigned offset:     number of 16-bit integers that have
- *                                     already been sampled.
- *                                     Must be <= target.
- *              - const uint8_t *buf:  pointer to input buffer
- *                                     (assumed to be uniform random bytes)
- *              - unsigned buflen:     length of input buffer in bytes
- *                                     Must be <= 4096.
- *                                     Must be a multiple of 3.
+ * @param[out] r      Output buffer.
+ * @param      target Requested number of 16-bit integers (uniform mod q).
+ *                    Must be <= 4096.
+ * @param      offset Number of 16-bit integers that have already been
+ *                    sampled. Must be <= @p target.
+ * @param[in]  buf    Input buffer (assumed to be uniform random bytes).
+ * @param      buflen Length of input buffer in bytes. Must be <= 4096 and a
+ *                    multiple of 3.
  *
- * Note: Strictly speaking, only a few values of buflen near UINT_MAX need
- * excluding. The limit of 4096 is somewhat arbitrary but sufficient for all
- * uses of this function. Similarly, the actual limit for target is UINT_MAX/2.
+ * @note Strictly speaking, only a few values of @p buflen near UINT_MAX need
+ *       excluding. The limit of 4096 is somewhat arbitrary but sufficient
+ *       for all uses of this function. Similarly, the actual limit for
+ *       @p target is UINT_MAX/2.
  *
- * Returns the new offset of sampled 16-bit integers, at most target,
- * and at least the initial offset.
- * If the new offset is strictly less than len, all of the input buffers
- * is guaranteed to have been consumed. If it is equal to len, no information
- * is provided on how many bytes of the input buffer have been consumed.
- **************************************************/
-
-/* Reference: `rej_uniform()` in the reference implementation @[REF].
- *            - Our signature differs from the reference implementation
- *              in that it adds the offset and always expects the base of the
- *              target buffer. This avoids shifting the buffer base in the
- *              caller, which appears tricky to reason about.
- *            - Optional fallback to native implementation. */
+ * @return New offset of sampled 16-bit integers, at most @p target and at
+ *         least the initial @p offset. If the new offset is strictly less
+ *         than @p target, the entire input buffer is guaranteed to have been
+ *         consumed; otherwise no information is provided on how many bytes
+ *         of the input buffer have been consumed.
+ */
 static unsigned mlk_rej_uniform(int16_t *r, unsigned target, unsigned offset,
                                 const uint8_t *buf, unsigned buflen)
 __contract__(
@@ -249,19 +243,15 @@ void mlk_poly_rej_uniform(mlk_poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
   mlk_zeroize(buf, sizeof(buf));
 }
 
-/*************************************************
- * Name:        mlk_load32_littleendian
+/**
+ * Load 4 bytes into a 32-bit integer in little-endian order.
  *
- * Description: load 4 bytes into a 32-bit integer
- *              in little-endian order
+ * @reference{`load32_littleendian()` in the reference implementation @[REF].}
  *
- * Arguments:   - const uint8_t *x: pointer to input byte array
+ * @param[in] x Input byte array.
  *
- * Returns 32-bit unsigned integer loaded from x
- *
- **************************************************/
-
-/* Reference: `load32_littleendian()` in the reference implementation @[REF]. */
+ * @return 32-bit unsigned integer loaded from @p x.
+ */
 static uint32_t mlk_load32_littleendian(const uint8_t x[4])
 {
   uint32_t r;
@@ -302,20 +292,18 @@ void mlk_poly_cbd2(mlk_poly *r, const uint8_t buf[2 * MLKEM_N / 4])
 }
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_ETA1 == 3
-/*************************************************
- * Name:        mlk_load24_littleendian
+/**
+ * Load 3 bytes into a 32-bit integer in little-endian order.
  *
- * Description: load 3 bytes into a 32-bit integer
- *              in little-endian order.
- *              This function is only needed for ML-KEM-512
+ * This function is only needed for ML-KEM-512.
  *
- * Arguments:   - const uint8_t *x: pointer to input byte array
+ * @reference{`load24_littleendian()` in the reference implementation @[REF].}
  *
- * Returns 32-bit unsigned integer loaded from x (most significant byte is zero)
+ * @param[in] x Input byte array.
  *
- **************************************************/
-
-/* Reference: `load24_littleendian()` in the reference implementation @[REF]. */
+ * @return 32-bit unsigned integer loaded from @p x (most significant byte
+ *         is zero).
+ */
 static uint32_t mlk_load24_littleendian(const uint8_t x[3])
 {
   uint32_t r;

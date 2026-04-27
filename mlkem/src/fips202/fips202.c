@@ -39,22 +39,18 @@
 #include "fips202.h"
 #include "keccakf1600.h"
 
-/*************************************************
- * Name:        mlk_keccak_absorb_once
+/**
+ * Absorb step of Keccak; non-incremental, starts by zeroeing the state.
  *
- * Description: Absorb step of Keccak;
- *              non-incremental, starts by zeroeing the state.
+ * WARNING: Must only be called once.
  *
- *              WARNING: Must only be called once.
- *
- * Arguments:   - uint64_t *s:       pointer to (uninitialized) output Keccak
- *                                   state
- *              - unsigned r:        rate in bytes (e.g., 168 for SHAKE128)
- *              - const uint8_t *m:  pointer to input to be absorbed into s
- *              - size_t mlen:       length of input in bytes
- *              - uint8_t p:         domain-separation byte for different
- *                                   Keccak-derived functions
- **************************************************/
+ * @param[out] s    Pointer to (uninitialized) output Keccak state.
+ * @param      r    Rate in bytes (e.g., 168 for SHAKE128).
+ * @param[in]  m    Input to be absorbed into @p s.
+ * @param      mlen Length of input in bytes.
+ * @param      p    Domain-separation byte for different Keccak-derived
+ *                  functions.
+ */
 static void mlk_keccak_absorb_once(uint64_t *s, unsigned r, const uint8_t *m,
                                    size_t mlen, uint8_t p)
 __contract__(
@@ -107,16 +103,14 @@ __contract__(
   }
 }
 
-/*************************************************
- * Name:        mlk_keccak_squeezeblocks
+/**
+ * Block-level Keccak squeeze.
  *
- * Description: block-level Keccak squeeze
- *
- * Arguments:   - uint8_t *h: pointer to output bytes
- *              - size_t nblocks: number of blocks to be squeezed
- *              - uint64_t *s_inc: pointer to input/output state
- *              - unsigned r: rate in bytes (e.g., 168 for SHAKE128)
- **************************************************/
+ * @param[out]    h       Output bytes.
+ * @param         nblocks Number of blocks to be squeezed.
+ * @param[in,out] s       Input/output state.
+ * @param         r       Rate in bytes (e.g., 168 for SHAKE128).
+ */
 static void mlk_keccak_squeezeblocks(uint8_t *h, size_t nblocks, uint64_t *s,
                                      unsigned r)
 __contract__(
@@ -143,18 +137,16 @@ __contract__(
   }
 }
 
-/*************************************************
- * Name:        mlk_keccak_squeeze_once
+/**
+ * Keccak squeeze; can be called on byte-level.
  *
- * Description: Keccak squeeze; can be called on byte-level
+ * WARNING: Must only be called once.
  *
- *              WARNING: This must only be called once.
- *
- * Arguments:   - uint8_t *h: pointer to output bytes
- *              - size_t outlen: number of bytes to be squeezed
- *              - uint64_t *s_inc: pointer to Keccak state
- *              - unsigned r: rate in bytes (e.g., 168 for SHAKE128)
- **************************************************/
+ * @param[out]    h      Output bytes.
+ * @param         outlen Number of bytes to be squeezed.
+ * @param[in,out] s      Keccak state.
+ * @param         r      Rate in bytes (e.g., 168 for SHAKE128).
+ */
 static void mlk_keccak_squeeze_once(uint8_t *h, size_t outlen, uint64_t *s,
                                     unsigned r)
 __contract__(

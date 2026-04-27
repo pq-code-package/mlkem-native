@@ -292,23 +292,20 @@ void mlk_polyvec_tomont(mlk_polyvec *r)
 }
 
 
-/*************************************************
- * Name:        mlk_poly_cbd_eta1
+/**
+ * Given an array of uniformly random bytes, compute polynomial with
+ * coefficients distributed according to a centered binomial distribution
+ * with parameter MLKEM_ETA1.
  *
- * Description: Given an array of uniformly random bytes, compute
- *              polynomial with coefficients distributed according to
- *              a centered binomial distribution with parameter MLKEM_ETA1.
+ * @spec{Implements @[FIPS203, Algorithm 8, SamplePolyCBD_eta1], where eta1
+ * is specified per parameter set in @[FIPS203, Table 2] and represented as
+ * MLKEM_ETA1 here.}
  *
- * Arguments:   - mlk_poly *r: pointer to output polynomial
- *              - const uint8_t *buf: pointer to input byte array
+ * @reference{`poly_cbd_eta1` in the reference implementation @[REF].}
  *
- * Specification: Implements @[FIPS203, Algorithm 8, SamplePolyCBD_eta1], where
- *                eta1 is specified per parameter set in @[FIPS203, Table 2]
- *                and represented as MLKEM_ETA1 here.
- *
- **************************************************/
-
-/* Reference: `poly_cbd_eta1` in the reference implementation @[REF]. */
+ * @param[out] r   Output polynomial.
+ * @param[in]  buf Input byte array.
+ */
 static MLK_INLINE void mlk_poly_cbd_eta1(
     mlk_poly *r, const uint8_t buf[MLKEM_ETA1 * MLKEM_N / 4])
 __contract__(
@@ -382,23 +379,20 @@ void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
 }
 
 #if MLKEM_K == 2 || MLKEM_K == 4
-/*************************************************
- * Name:        mlk_poly_cbd_eta2
+/**
+ * Given an array of uniformly random bytes, compute polynomial with
+ * coefficients distributed according to a centered binomial distribution
+ * with parameter MLKEM_ETA2.
  *
- * Description: Given an array of uniformly random bytes, compute
- *              polynomial with coefficients distributed according to
- *              a centered binomial distribution with parameter MLKEM_ETA2.
+ * @spec{Implements @[FIPS203, Algorithm 8, SamplePolyCBD_eta2], where eta2
+ * is specified per parameter set in @[FIPS203, Table 2] and represented as
+ * MLKEM_ETA2 here.}
  *
- * Arguments:   - mlk_poly *r: pointer to output polynomial
- *              - const uint8_t *buf: pointer to input byte array
+ * @reference{`poly_cbd_eta2` in the reference implementation @[REF].}
  *
- * Specification: Implements @[FIPS203, Algorithm 8, SamplePolyCBD_eta2], where
- *                eta2 is specified per parameter set in @[FIPS203, Table 2]
- *                and represented as MLKEM_ETA2 here.
- *
- **************************************************/
-
-/* Reference: `poly_cbd_eta2` in the reference implementation @[REF]. */
+ * @param[out] r   Output polynomial.
+ * @param[in]  buf Input byte array.
+ */
 static MLK_INLINE void mlk_poly_cbd_eta2(
     mlk_poly *r, const uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4])
 __contract__(
