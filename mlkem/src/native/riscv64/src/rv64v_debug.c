@@ -18,15 +18,20 @@
 
 #define MLK_DEBUG_ERROR_HEADER "[ERROR:%s:%04d] "
 
-/*************************************************
- * Name:        mlk_debug_check_bounds_int16m1
+/**
+ * Check whether values in a vint16m1_t vector are within specified bounds.
  *
- * Description: Check whether values in a vint16m1_t vector
- *              are within specified bounds.
+ * Implementation:
+ * Extract vector elements to a temporary array and reuse existing array
+ * bounds checking.
  *
- * Implementation: Extract vector elements to a temporary array
- *                and reuse existing array bounds checking.
- **************************************************/
+ * @param[in] file                  Filename.
+ * @param     line                  Line number.
+ * @param     vec                   RISC-V vector to be checked.
+ * @param     vl                    Vector length (number of active elements).
+ * @param     lower_bound_exclusive Exclusive lower bound.
+ * @param     upper_bound_exclusive Exclusive upper bound.
+ */
 void mlk_debug_check_bounds_int16m1(const char *file, int line, vint16m1_t vec,
                                     size_t vl, int lower_bound_exclusive,
                                     int upper_bound_exclusive)
@@ -43,15 +48,20 @@ void mlk_debug_check_bounds_int16m1(const char *file, int line, vint16m1_t vec,
                          lower_bound_exclusive, upper_bound_exclusive);
 }
 
-/*************************************************
- * Name:        mlk_debug_check_bounds_int16m2
+/**
+ * Check whether values in a vint16m2_t vector are within specified bounds.
  *
- * Description: Check whether values in a vint16m2_t vector
- *              are within specified bounds.
+ * Implementation:
+ * Extract vector elements to a temporary array and reuse existing array
+ * bounds checking.
  *
- * Implementation: Extract vector elements to a temporary array
- *                and reuse existing array bounds checking.
- **************************************************/
+ * @param[in] file                  Filename.
+ * @param     line                  Line number.
+ * @param     vec                   RISC-V vector to be checked.
+ * @param     vl                    Vector length (active elements per m1 half).
+ * @param     lower_bound_exclusive Exclusive lower bound.
+ * @param     upper_bound_exclusive Exclusive upper bound.
+ */
 void mlk_debug_check_bounds_int16m2(const char *file, int line, vint16m2_t vec,
                                     size_t vl, int lower_bound_exclusive,
                                     int upper_bound_exclusive)
