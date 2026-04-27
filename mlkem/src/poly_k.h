@@ -28,19 +28,22 @@
 #define mlk_polyvec_mulcache MLK_ADD_PARAM_SET(mlk_polyvec_mulcache)
 /* End of parameter set namespacing */
 
+/** Vector of MLKEM_K polynomials. */
 typedef struct
 {
-  mlk_poly vec[MLKEM_K];
+  mlk_poly vec[MLKEM_K]; /**< Component polynomials. */
 } MLK_ALIGN mlk_polyvec;
 
+/** MLKEM_K x MLKEM_K matrix of polynomials. */
 typedef struct
 {
-  mlk_polyvec vec[MLKEM_K];
+  mlk_polyvec vec[MLKEM_K]; /**< Rows of the matrix. */
 } MLK_ALIGN mlk_polymat;
 
+/** Vector of MLKEM_K mlk_poly_mulcache entries. */
 typedef struct
 {
-  mlk_poly_mulcache vec[MLKEM_K];
+  mlk_poly_mulcache vec[MLKEM_K]; /**< Per-component caches. */
 } MLK_ALIGN mlk_polyvec_mulcache;
 
 #define mlk_poly_compress_du MLK_NAMESPACE_K(poly_compress_du)
