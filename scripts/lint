@@ -309,6 +309,34 @@ gh_group_start "Check contracts"
 check-contracts
 gh_group_end
 
+check-doxygen()
+{
+  if ! command -v doxygen >/dev/null; then
+    gh_error_simple "doxygen missing" "doxygen is not installed"
+    error "Lint Doxygen comments"
+    SUCCESS=false
+    gh_summary_failure "Lint Doxygen comments"
+    return 0
+  fi
+
+  local out
+  if out=$(cd "$ROOT" && doxygen scripts/Doxyfile.lint 2>&1) && [[ -z $out ]]; then
+    info "Lint Doxygen comments"
+    gh_summary_success "Lint Doxygen comments"
+  else
+    echo "$out"
+    gh_error_simple "Doxygen lint error" "$out"
+    error "Lint Doxygen comments"
+    SUCCESS=false
+    gh_summary_failure "Lint Doxygen comments"
+  fi
+  rm -rf "$ROOT"/.doxylint-xml
+}
+
+gh_group_start "Linting Doxygen comments"
+check-doxygen
+gh_group_end
+
 if ! $SUCCESS; then
   if $IN_GITHUB_CONTEXT; then
     printf "%b%s%b\n" "${RED}" "The following checks failed, expand each for more details." "${NORMAL}"
