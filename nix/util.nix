@@ -88,6 +88,7 @@ rec {
         shfmt
         shellcheck
         actionlint
+        doxygen
         ruff;
 
       inherit (pkgs.python3Packages)
