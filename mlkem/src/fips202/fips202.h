@@ -14,10 +14,10 @@
 #define SHA3_384_RATE 104
 #define SHA3_512_RATE 72
 
-/* Context for non-incremental API */
+/** Context for the non-incremental SHAKE128 API. */
 typedef struct
 {
-  uint64_t ctx[25];
+  uint64_t ctx[25]; /**< Keccak state. */
 } MLK_ALIGN mlk_shake128ctx;
 
 #define mlk_shake128_absorb_once MLK_NAMESPACE(shake128_absorb_once)
