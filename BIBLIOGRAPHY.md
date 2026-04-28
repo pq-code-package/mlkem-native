@@ -130,6 +130,7 @@ source code and documentation.
   - [mlkem/src/indcpa.h](mlkem/src/indcpa.h)
   - [mlkem/src/kem.c](mlkem/src/kem.c)
   - [mlkem/src/kem.h](mlkem/src/kem.h)
+  - [mlkem/src/native/api.h](mlkem/src/native/api.h)
   - [mlkem/src/poly.h](mlkem/src/poly.h)
   - [mlkem/src/poly_k.c](mlkem/src/poly_k.c)
   - [mlkem/src/poly_k.h](mlkem/src/poly_k.h)

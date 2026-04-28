@@ -227,7 +227,7 @@
  *
  * Determines whether a native arithmetic backend should be used.
  *
- * The arithmetic backend covers performance critical functions such as the
+ * The arithmetic backend covers performance-critical functions such as the
  * number-theoretic transform (NTT).
  *
  * If this option is unset, the C backend will be used.
@@ -369,7 +369,7 @@ static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
  * If this option is not set, mlkem-native expects a function
  * int randombytes(uint8_t *out, size_t outlen). It is expected to return
  * zero on success, and non-zero on failure. In case of failure, the
- * top-level APIs will return a MLK_ERR_RNG_FAIL error code.
+ * top-level APIs will return an MLK_ERR_RNG_FAIL error code.
  *
  * Set this option and define `mlk_randombytes` (with the same signature
  * and behaviour) if you want to use a custom method to sample randombytes

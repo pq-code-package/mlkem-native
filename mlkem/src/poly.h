@@ -47,12 +47,12 @@ typedef struct
 
 /**
  * Generic Montgomery reduction; given a 32-bit integer a, computes a 16-bit
- * integer congruent to a * R^-1 mod q, where R=2^16.
+ * integer congruent to a * R^-1 mod MLKEM_Q, where R=2^16.
  *
  * @param a Input integer to be reduced, of absolute value smaller or equal
  *          to INT32_MAX - 2^15 * MLKEM_Q.
  *
- * @return Integer congruent to a * R^-1 modulo q, with absolute value
+ * @return Integer congruent to a * R^-1 modulo MLKEM_Q, with absolute value
  *         <= ceil(|a| / 2^16) + (MLKEM_Q + 1)/2.
  */
 static MLK_ALWAYS_INLINE int16_t mlk_montgomery_reduce(int32_t a)
@@ -104,7 +104,7 @@ __contract__(
  * In-place conversion of all coefficients of a polynomial from the normal
  * domain to the Montgomery domain.
  *
- * Bounds: output < q in absolute value.
+ * Bounds: output < MLKEM_Q in absolute value.
  *
  * @spec{Internal normalization required in `mlk_indcpa_keypair_derand` as
  * part of matrix-vector multiplication @[FIPS203, Algorithm 13, K-PKE.KeyGen,
@@ -156,7 +156,7 @@ __contract__(
  * Convert a polynomial to unsigned canonical representatives.
  *
  * The input coefficients can be arbitrary integers in int16_t. The output
- * coefficients are in [0,1,...,MLKEM_Q-1].
+ * coefficients are in [0,1,..,MLKEM_Q-1].
  *
  * @spec{Normalizes on unsigned canonical representatives ahead of calling
  * @[FIPS203, Compress_d, Eq (4.7)]. This is not made explicit in FIPS 203.}
@@ -240,7 +240,8 @@ __contract__(
  * The input is assumed to be in normal order and coefficient-wise bound by
  * MLKEM_Q in absolute value.
  *
- * The output polynomial is in bitreversed order, and coefficient-wise bound
+ * The output polynomial is in bitreversed order, or of a custom order if
+ * MLK_USE_NATIVE_NTT_CUSTOM_ORDER is set, and coefficient-wise bound
  * by MLK_NTT_BOUND in absolute value.
  *
  * (NOTE: Sometimes the input to the NTT is actually smaller, which gives
@@ -248,7 +249,7 @@ __contract__(
  *
  * @spec{Implements @[FIPS203, Algorithm 9, NTT].}
  *
- * @param[in,out] r In/output polynomial.
+ * @param[in,out] r Input/output polynomial.
  */
 MLK_INTERNAL_API
 void mlk_poly_ntt(mlk_poly *r)
@@ -265,7 +266,8 @@ __contract__(
  * polynomial in place; input assumed to be in bitreversed order, output in
  * normal order.
  *
- * The input is assumed to be in bitreversed order, and can have arbitrary
+ * The input is assumed to be in bitreversed order, or of a custom order if
+ * MLK_USE_NATIVE_NTT_CUSTOM_ORDER is set, and can have arbitrary
  * coefficients in int16_t.
  *
  * The output polynomial is in normal order, and coefficient-wise bound by
@@ -275,7 +277,7 @@ __contract__(
  * elementwise modular multiplication with a suitable Montgomery factor
  * introduced during the base multiplication.}
  *
- * @param[in,out] r In/output polynomial.
+ * @param[in,out] r Input/output polynomial.
  */
 MLK_INTERNAL_API
 void mlk_poly_invntt_tomont(mlk_poly *r)

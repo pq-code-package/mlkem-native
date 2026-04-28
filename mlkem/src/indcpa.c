@@ -44,14 +44,14 @@
 /* End of parameter set namespacing */
 
 /**
- * Serialize the public key as concatenation of the serialized vector of
+ * Serialize the public key as the concatenation of the serialized vector of
  * polynomials pk and the public seed used to generate the matrix A.
  *
  * @spec{Implements @[FIPS203, Algorithm 13 (K-PKE.KeyGen), L19].}
  *
  * @param[out] r    Output serialized public key.
  * @param[in]  pk   Input public-key polyvec. Must have coefficients within
- *                  [0,..,q-1].
+ *                  [0,..,MLKEM_Q-1].
  * @param[in]  seed Input public seed.
  */
 static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES],
@@ -70,7 +70,7 @@ static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES],
  * @spec{Implements @[FIPS203, Algorithm 14 (K-PKE.Encrypt), L2-3].}
  *
  * @param[out] pk       Output public-key polynomial vector. Coefficients
- *                      will be normalized to [0,..,q-1].
+ *                      will be normalized to [0,1,..,MLKEM_Q-1].
  * @param[out] seed     Output seed to generate matrix A.
  * @param[in]  packedpk Input serialized public key.
  */
@@ -116,8 +116,9 @@ static void mlk_unpack_sk(mlk_polyvec *sk,
 }
 
 /**
- * Serialize the ciphertext as concatenation of the compressed and serialized
- * vector of polynomials b and the compressed and serialized polynomial v.
+ * Serialize the ciphertext as the concatenation of the compressed and
+ * serialized vector of polynomials b and the compressed and serialized
+ * polynomial v.
  *
  * @spec{Implements @[FIPS203, Algorithm 14 (K-PKE.Encrypt), L22-23].}
  *

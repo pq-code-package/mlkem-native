@@ -113,8 +113,7 @@ __contract__(
 );
 
 /**
- * Generate public and private key for CCA-secure ML-KEM key encapsulation
- * mechanism.
+ * Generate a public/private keypair for the ML-KEM key encapsulation mechanism.
  *
  * @spec{Implements @[FIPS203, Algorithm 16, ML-KEM.KeyGen_Internal].}
  *
@@ -150,8 +149,7 @@ __contract__(
 );
 
 /**
- * Generate public and private key for CCA-secure ML-KEM key encapsulation
- * mechanism.
+ * Generate a public/private keypair for the ML-KEM key encapsulation mechanism.
  *
  * @spec{Implements @[FIPS203, Algorithm 19, ML-KEM.KeyGen].}
  *
@@ -184,11 +182,11 @@ __contract__(
 );
 
 /**
- * Generate cipher text and shared secret for given public key.
+ * Generate ciphertext and shared secret for a given public key.
  *
  * @spec{Implements @[FIPS203, Algorithm 17, ML-KEM.Encaps_Internal].}
  *
- * @param[out] ct      Output cipher text (an already allocated array of
+ * @param[out] ct      Output ciphertext (an already allocated array of
  *                     MLKEM_INDCCA_CIPHERTEXTBYTES bytes).
  * @param[out] ss      Output shared secret (an already allocated array of
  *                     MLKEM_SSBYTES bytes).
@@ -224,11 +222,11 @@ __contract__(
 );
 
 /**
- * Generate cipher text and shared secret for given public key.
+ * Generate ciphertext and shared secret for a given public key.
  *
  * @spec{Implements @[FIPS203, Algorithm 20, ML-KEM.Encaps].}
  *
- * @param[out] ct      Output cipher text (an already allocated array of
+ * @param[out] ct      Output ciphertext (an already allocated array of
  *                     MLKEM_INDCCA_CIPHERTEXTBYTES bytes).
  * @param[out] ss      Output shared secret (an already allocated array of
  *                     MLKEM_SSBYTES bytes).
@@ -262,13 +260,13 @@ __contract__(
 );
 
 /**
- * Generate shared secret for given cipher text and private key.
+ * Generate shared secret for a given ciphertext and private key.
  *
  * @spec{Implements @[FIPS203, Algorithm 21, ML-KEM.Decaps].}
  *
  * @param[out] ss      Output shared secret (an already allocated array of
  *                     MLKEM_SSBYTES bytes).
- * @param[in]  ct      Input cipher text (an already allocated array of
+ * @param[in]  ct      Input ciphertext (an already allocated array of
  *                     MLKEM_INDCCA_CIPHERTEXTBYTES bytes).
  * @param[in]  sk      Input private key (an already allocated array of
  *                     MLKEM_INDCCA_SECRETKEYBYTES bytes).

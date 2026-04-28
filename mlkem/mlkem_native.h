@@ -192,8 +192,7 @@ extern "C"
 #endif
 
 /**
- * Generate public and private key for CCA-secure ML-KEM key encapsulation
- * mechanism.
+ * Generate a public/private keypair for the ML-KEM key encapsulation mechanism.
  *
  * @spec{Implements @[FIPS203, Algorithm 16, ML-KEM.KeyGen_Internal].}
  *
@@ -224,8 +223,7 @@ int MLK_API_NAMESPACE(keypair_derand)(
 
 #if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 /**
- * Generate public and private key for CCA-secure ML-KEM key encapsulation
- * mechanism.
+ * Generate a public/private keypair for the ML-KEM key encapsulation mechanism.
  *
  * @spec{Implements @[FIPS203, Algorithm 19, ML-KEM.KeyGen].}
  *
@@ -253,11 +251,11 @@ int MLK_API_NAMESPACE(keypair)(
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
 /**
- * Generate cipher text and shared secret for given public key.
+ * Generate ciphertext and shared secret for a given public key.
  *
  * @spec{Implements @[FIPS203, Algorithm 17, ML-KEM.Encaps_Internal].}
  *
- * @param[out] ct    Output cipher text, an array of
+ * @param[out] ct    Output ciphertext, an array of
  *                   MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
  * @param[out] ss    Output shared secret, an array of MLKEM_BYTES bytes.
  * @param[in]  pk    Input public key, an array of
@@ -285,11 +283,11 @@ int MLK_API_NAMESPACE(enc_derand)(
 
 #if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 /**
- * Generate cipher text and shared secret for given public key.
+ * Generate ciphertext and shared secret for a given public key.
  *
  * @spec{Implements @[FIPS203, Algorithm 20, ML-KEM.Encaps].}
  *
- * @param[out] ct Output cipher text, an array of
+ * @param[out] ct Output ciphertext, an array of
  *                MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
  * @param[out] ss Output shared secret, an array of MLKEM_BYTES bytes.
  * @param[in]  pk Input public key, an array of
@@ -316,12 +314,12 @@ int MLK_API_NAMESPACE(enc)(
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
 /**
- * Generate shared secret for given cipher text and private key.
+ * Generate shared secret for a given ciphertext and private key.
  *
  * @spec{Implements @[FIPS203, Algorithm 21, ML-KEM.Decaps].}
  *
  * @param[out] ss Output shared secret, an array of MLKEM_BYTES bytes.
- * @param[in]  ct Input cipher text, an array of
+ * @param[in]  ct Input ciphertext, an array of
  *                MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
  * @param[in]  sk Input private key, an array of
  *                MLKEM{512,768,1024}_SECRETKEYBYTES bytes.

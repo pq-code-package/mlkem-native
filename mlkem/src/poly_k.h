@@ -207,7 +207,7 @@ __contract__(
  * @[FIPS203, Table 2], and given by MLKEM_DU here.}
  *
  * @param[out] r Output vector of polynomials. Coefficients are normalized
- *               to [0,..,q-1].
+ *               to [0,1,..,MLKEM_Q-1].
  * @param[in]  a Input byte array (of length MLKEM_POLYVECCOMPRESSEDBYTES_DU
  *               bytes).
  */
@@ -232,7 +232,7 @@ __contract__(
  *
  * @param[out] r Output byte array (needs space for MLKEM_POLYVECBYTES bytes).
  * @param[in]  a Input vector of polynomials. Each polynomial must have
- *               coefficients in [0,..,q-1].
+ *               coefficients in [0,1,..,MLKEM_Q-1].
  */
 MLK_INTERNAL_API
 void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
@@ -253,7 +253,7 @@ __contract__(
  * @[FIPS203, 2.4.6, Matrices and Vectors].}
  *
  * @param[out] r Output vector of polynomials. Coefficients will be
- *               normalized in [0..4095].
+ *               normalized in [0,1,..,4095].
  * @param[in]  a Input byte array (of length MLKEM_POLYVECBYTES bytes).
  */
 MLK_INTERNAL_API
@@ -279,7 +279,7 @@ __contract__(
  * @spec{Implements @[FIPS203, Algorithm 9, NTT]. Extended to vectors as per
  * @[FIPS203, 2.4.6, Matrices and Vectors].}
  *
- * @param[in,out] r In/output vector of polynomials.
+ * @param[in,out] r Input/output vector of polynomials.
  */
 MLK_INTERNAL_API
 void mlk_polyvec_ntt(mlk_polyvec *r)
@@ -306,7 +306,7 @@ __contract__(
  * @spec{Implements @[FIPS203, Algorithm 10, NTT^{-1}]. Extended to vectors
  * as per @[FIPS203, 2.4.6, Matrices and Vectors].}
  *
- * @param[in,out] r In/output vector of polynomials.
+ * @param[in,out] r Input/output vector of polynomials.
  */
 MLK_INTERNAL_API
 void mlk_polyvec_invntt_tomont(mlk_polyvec *r)
@@ -323,7 +323,7 @@ __contract__(
  * Scalar product of two vectors of polynomials in NTT domain, using
  * mulcache for the second operand.
  *
- * Bounds: every coefficient of @p a is assumed to be in [0..4095]. No
+ * Bounds: every coefficient of @p a is assumed to be in [0,1,..,4095]. No
  * bounds guarantees for the coefficients in the result.
  *
  * @spec{Implements @[FIPS203, Section 2.4.7, Eq (2.14)], @[FIPS203,
@@ -447,7 +447,7 @@ __contract__(
  * In-place conversion of all coefficients of a polynomial vector from the
  * normal domain to the Montgomery domain.
  *
- * Bounds: output < q in absolute value.
+ * Bounds: output < MLKEM_Q in absolute value.
  *
  * @spec{Internal normalization required in `mlk_indcpa_keypair_derand` as
  * part of matrix-vector multiplication @[FIPS203, Algorithm 13, K-PKE.KeyGen,
