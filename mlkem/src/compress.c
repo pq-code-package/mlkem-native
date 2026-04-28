@@ -32,7 +32,7 @@
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
- *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
+ *              in the range [-(MLKEM_Q-1), MLKEM_Q-1]. */
 MLK_STATIC_TESTABLE void mlk_poly_compress_d4_c(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const mlk_poly *a)
 __contract__(
@@ -96,7 +96,7 @@ __contract__(
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
- *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
+ *              in the range [-(MLKEM_Q-1), MLKEM_Q-1]. */
 MLK_STATIC_TESTABLE void mlk_poly_compress_d10_c(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const mlk_poly *a)
 __contract__(
@@ -276,7 +276,7 @@ __contract__(
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
- *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
+ *              in the range [-(MLKEM_Q-1), MLKEM_Q-1]. */
 MLK_STATIC_TESTABLE void mlk_poly_compress_d5_c(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const mlk_poly *a)
 __contract__(
@@ -340,7 +340,7 @@ __contract__(
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
- *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
+ *              in the range [-(MLKEM_Q-1), MLKEM_Q-1]. */
 MLK_STATIC_TESTABLE void mlk_poly_compress_d11_c(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const mlk_poly *a)
 __contract__(
@@ -560,7 +560,7 @@ __contract__(
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
- *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
+ *              in the range [-(MLKEM_Q-1), MLKEM_Q-1]. */
 MLK_STATIC_TESTABLE void mlk_poly_tobytes_c(uint8_t r[MLKEM_POLYBYTES],
                                             const mlk_poly *a)
 __contract__(
@@ -706,7 +706,7 @@ void mlk_poly_frommsg(mlk_poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
- *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1).
+ *              in the range [-(MLKEM_Q-1), MLKEM_Q-1].
  */
 MLK_INTERNAL_API
 void mlk_poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const mlk_poly *a)

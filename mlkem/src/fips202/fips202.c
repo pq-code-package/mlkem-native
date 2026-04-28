@@ -42,7 +42,7 @@
 /**
  * Absorb step of Keccak; non-incremental, starts by zeroeing the state.
  *
- * WARNING: Must only be called once.
+ * @warning Must only be called once.
  *
  * @param[out] s    Pointer to (uninitialized) output Keccak state.
  * @param      r    Rate in bytes (e.g., 168 for SHAKE128).
@@ -140,7 +140,7 @@ __contract__(
 /**
  * Keccak squeeze; can be called on byte-level.
  *
- * WARNING: Must only be called once.
+ * @warning Must only be called once.
  *
  * @param[out]    h      Output bytes.
  * @param         outlen Number of bytes to be squeezed.

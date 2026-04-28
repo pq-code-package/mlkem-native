@@ -42,7 +42,7 @@
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
- *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
+ *              in the range [-(MLKEM_Q-1), MLKEM_Q-1]. */
 MLK_INTERNAL_API
 void mlk_polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                              const mlk_polyvec *a)
@@ -74,7 +74,7 @@ void mlk_polyvec_decompress_du(mlk_polyvec *r,
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
- *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
+ *              in the range [-(MLKEM_Q-1), MLKEM_Q-1]. */
 MLK_INTERNAL_API
 void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
 {
@@ -293,7 +293,7 @@ void mlk_polyvec_tomont(mlk_polyvec *r)
 
 
 /**
- * Given an array of uniformly random bytes, compute polynomial with
+ * Given an array of uniformly random bytes, compute a polynomial with
  * coefficients distributed according to a centered binomial distribution
  * with parameter MLKEM_ETA1.
  *
@@ -380,7 +380,7 @@ void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
 
 #if MLKEM_K == 2 || MLKEM_K == 4
 /**
- * Given an array of uniformly random bytes, compute polynomial with
+ * Given an array of uniformly random bytes, compute a polynomial with
  * coefficients distributed according to a centered binomial distribution
  * with parameter MLKEM_ETA2.
  *

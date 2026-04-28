@@ -21,7 +21,7 @@
 
 #define mlk_poly_cbd2 MLK_NAMESPACE(poly_cbd2)
 /**
- * Given an array of uniformly random bytes, compute polynomial with
+ * Given an array of uniformly random bytes, compute a polynomial with
  * coefficients distributed according to a centered binomial distribution
  * with parameter eta=2.
  *
@@ -36,7 +36,7 @@ void mlk_poly_cbd2(mlk_poly *r, const uint8_t buf[2 * MLKEM_N / 4]);
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_ETA1 == 3
 #define mlk_poly_cbd3 MLK_NAMESPACE(poly_cbd3)
 /**
- * Given an array of uniformly random bytes, compute polynomial with
+ * Given an array of uniformly random bytes, compute a polynomial with
  * coefficients distributed according to a centered binomial distribution
  * with parameter eta=3.
  *

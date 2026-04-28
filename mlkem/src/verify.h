@@ -370,7 +370,7 @@ __contract__(
  *
  * @param[out] r   Output byte array.
  * @param[in]  x   Input byte array.
- * @param      len Amount of bytes to be copied.
+ * @param      len Number of bytes to be copied.
  * @param      b   Condition value.
  */
 static MLK_INLINE void mlk_ct_cmov_zero(uint8_t *r, const uint8_t *x,
@@ -402,7 +402,7 @@ __contract__(
  * @reference{Not present in the reference implementation @[REF].}
  *
  * @param[out] ptr Buffer to be zeroed.
- * @param      len Amount of bytes to be zeroed.
+ * @param      len Number of bytes to be zeroed.
  */
 #if !defined(MLK_CONFIG_CUSTOM_ZEROIZE)
 #if defined(MLK_SYS_WINDOWS)

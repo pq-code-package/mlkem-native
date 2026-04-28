@@ -21,10 +21,6 @@
 /**
  * Check whether values in a vint16m1_t vector are within specified bounds.
  *
- * Implementation:
- * Extract vector elements to a temporary array and reuse existing array
- * bounds checking.
- *
  * @param[in] file                  Filename.
  * @param     line                  Line number.
  * @param     vec                   RISC-V vector to be checked.
@@ -50,10 +46,6 @@ void mlk_debug_check_bounds_int16m1(const char *file, int line, vint16m1_t vec,
 
 /**
  * Check whether values in a vint16m2_t vector are within specified bounds.
- *
- * Implementation:
- * Extract vector elements to a temporary array and reuse existing array
- * bounds checking.
  *
  * @param[in] file                  Filename.
  * @param     line                  Line number.

@@ -87,7 +87,7 @@ __contract__(
 #define mlk_indcpa_enc MLK_NAMESPACE_K(indcpa_enc) MLK_CONTEXT_PARAMETERS_4
 /**
  * Encryption function of the CPA-secure public-key encryption scheme
- * underlying Kyber.
+ * underlying ML-KEM.
  *
  * @spec{Implements @[FIPS203, Algorithm 14 (K-PKE.Encrypt)].}
  *
@@ -125,7 +125,7 @@ __contract__(
 #define mlk_indcpa_dec MLK_NAMESPACE_K(indcpa_dec) MLK_CONTEXT_PARAMETERS_3
 /**
  * Decryption function of the CPA-secure public-key encryption scheme
- * underlying Kyber.
+ * underlying ML-KEM.
  *
  * @spec{Implements @[FIPS203, Algorithm 15 (K-PKE.Decrypt)].}
  *

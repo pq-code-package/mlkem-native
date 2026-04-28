@@ -63,13 +63,14 @@ __contract__(
 
 /**
  * Barrett reduction; given a 16-bit integer a, computes the centered
- * representative congruent to a mod q in {-(q-1)/2,...,(q-1)/2}.
+ * representative congruent to a mod MLKEM_Q in [-(MLKEM_Q-1)/2, (MLKEM_Q-1)/2].
  *
  * @reference{`barrett_reduce()` in the reference implementation @[REF].}
  *
  * @param a Input integer to be reduced.
  *
- * @return Integer in {-(q-1)/2,...,(q-1)/2} congruent to @p a modulo q.
+ * @return Integer in [-(MLKEM_Q-1)/2, (MLKEM_Q-1)/2] congruent to @p a modulo
+ *         MLKEM_Q.
  */
 static MLK_INLINE int16_t mlk_barrett_reduce(int16_t a)
 __contract__(
@@ -144,8 +145,8 @@ void mlk_poly_tomont(mlk_poly *r)
 
 /**
  * Constant-time conversion of signed representatives modulo MLKEM_Q within
- * range (-(MLKEM_Q-1) .. (MLKEM_Q-1)) into unsigned representatives within
- * range (0..(MLKEM_Q-1)).
+ * range [-(MLKEM_Q-1), MLKEM_Q-1] into unsigned representatives within
+ * range [0, MLKEM_Q-1].
  *
  * @reference{Not present in the reference implementation @[REF]. Used here
  * to implement different semantics of `poly_reduce()`; see below. In the

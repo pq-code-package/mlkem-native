@@ -147,7 +147,7 @@ static vuint16m2_t bitswap_perm(unsigned a, unsigned b, size_t vl)
  * Compute negacyclic number-theoretic transform (NTT) of a polynomial in
  * place; input assumed to be in normal order, output in bitreversed order.
  *
- * @param[in,out] r In/output polynomial.
+ * @param[in,out] r Input/output polynomial.
  */
 
 /* Forward / Cooley-Tukey butterfly operation */
@@ -326,14 +326,6 @@ void mlk_rv64v_poly_ntt(int16_t *r)
       &r[0xe0], mlk_rv64v_ntt2(__riscv_vcreate_v_i16m1_i16m2(ve, vf), ze), vl2);
 }
 
-/**
- * Compute the inverse negacyclic number-theoretic transform (NTT) of a
- * polynomial in place; input assumed to be in bitreversed order, output in
- * normal order.
- *
- * @param[in,out] r In/output polynomial.
- */
-
 /* Reverse / Gentleman-Sande butterfly operation */
 
 #define MLK_RVV_GS_BFLY_RX(u0, u1, ut, uc, vl) \
@@ -454,6 +446,13 @@ static vint16m2_t mlk_rv64v_intt2(vint16m2_t vp, vint16m1_t cz)
   } while (0)
 
 
+/**
+ * Compute the inverse negacyclic number-theoretic transform (NTT) of a
+ * polynomial in place; input assumed to be in bitreversed order, output in
+ * normal order.
+ *
+ * @param[in,out] r Input/output polynomial.
+ */
 /* Only for VLEN=256 for now */
 void mlk_rv64v_poly_invntt_tomont(int16_t *r)
 {

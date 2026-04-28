@@ -76,7 +76,7 @@ __contract__(
 
 /**
  * Run rejection sampling on uniform random bytes to generate uniform random
- * integers mod q.
+ * integers mod MLKEM_Q.
  *
  * @reference{`rej_uniform()` in the reference implementation @[REF]. Our
  * signature differs from the reference in that it adds the offset and always
@@ -85,7 +85,7 @@ __contract__(
  * fallback to a native implementation.}
  *
  * @param[out] r      Output buffer.
- * @param      target Requested number of 16-bit integers (uniform mod q).
+ * @param      target Requested number of 16-bit integers (uniform mod MLKEM_Q).
  *                    Must be <= 4096.
  * @param      offset Number of 16-bit integers that have already been
  *                    sampled. Must be <= @p target.

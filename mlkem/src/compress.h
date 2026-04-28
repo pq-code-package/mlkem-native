@@ -37,13 +37,13 @@
 #endif
 
 /**
- * Compute round(u * 2 / q).
+ * Compute round(u * 2 / MLKEM_Q).
  *
  * @spec{Compress_1 from @[FIPS203, Eq (4.7)].}
  *
  * @reference{Part of poly_tomsg() in the reference implementation @[REF].}
  *
- * @param u Unsigned canonical modulus modulo q to be compressed.
+ * @param u Unsigned canonical modulus modulo MLKEM_Q to be compressed.
  *
  * @return Compressed value.
  */
@@ -79,14 +79,14 @@ __contract__(
 #endif
 
 /**
- * Compute round(u * 16 / q) % 16.
+ * Compute round(u * 16 / MLKEM_Q) % 16.
  *
  * @spec{Compress_4 from @[FIPS203, Eq (4.7)].}
  *
  * @reference{Embedded into `poly_compress()` in the reference
  * implementation @[REF].}
  *
- * @param u Unsigned canonical modulus modulo q to be compressed.
+ * @param u Unsigned canonical modulus modulo MLKEM_Q to be compressed.
  *
  * @return Compressed value.
  */
@@ -113,7 +113,7 @@ __contract__(
 #endif
 
 /**
- * Compute round(u * q / 16).
+ * Compute round(u * MLKEM_Q / 16).
  *
  * @spec{Decompress_4 from @[FIPS203, Eq (4.8)].}
  *
@@ -145,14 +145,14 @@ __contract__(
 #endif
 
 /**
- * Compute round(u * 32 / q) % 32.
+ * Compute round(u * 32 / MLKEM_Q) % 32.
  *
  * @spec{Compress_5 from @[FIPS203, Eq (4.7)].}
  *
  * @reference{Embedded into `poly_compress()` in the reference
  * implementation @[REF].}
  *
- * @param u Unsigned canonical modulus modulo q to be compressed.
+ * @param u Unsigned canonical modulus modulo MLKEM_Q to be compressed.
  *
  * @return Compressed value.
  */
@@ -179,7 +179,7 @@ __contract__(
 #endif
 
 /**
- * Compute round(u * q / 32).
+ * Compute round(u * MLKEM_Q / 32).
  *
  * @spec{Decompress_5 from @[FIPS203, Eq (4.8)].}
  *
@@ -211,14 +211,14 @@ __contract__(
 #endif
 
 /**
- * Compute round(u * 2**10 / q) % 2**10.
+ * Compute round(u * 2**10 / MLKEM_Q) % 2**10.
  *
  * @spec{Compress_10 from @[FIPS203, Eq (4.7)].}
  *
  * @reference{Embedded into `polyvec_compress()` in the reference
  * implementation @[REF].}
  *
- * @param u Unsigned canonical modulus modulo q to be compressed.
+ * @param u Unsigned canonical modulus modulo MLKEM_Q to be compressed.
  *
  * @return Compressed value.
  */
@@ -245,7 +245,7 @@ __contract__(
 #endif
 
 /**
- * Compute round(u * q / 1024).
+ * Compute round(u * MLKEM_Q / 1024).
  *
  * @spec{Decompress_10 from @[FIPS203, Eq (4.8)].}
  *
@@ -277,14 +277,14 @@ __contract__(
 #endif
 
 /**
- * Compute round(u * 2**11 / q) % 2**11.
+ * Compute round(u * 2**11 / MLKEM_Q) % 2**11.
  *
  * @spec{Compress_11 from @[FIPS203, Eq (4.7)].}
  *
  * @reference{Embedded into `polyvec_compress()` in the reference
  * implementation @[REF].}
  *
- * @param u Unsigned canonical modulus modulo q to be compressed.
+ * @param u Unsigned canonical modulus modulo MLKEM_Q to be compressed.
  *
  * @return Compressed value.
  */
@@ -311,7 +311,7 @@ __contract__(
 #endif
 
 /**
- * Compute round(u * q / 2048).
+ * Compute round(u * MLKEM_Q / 2048).
  *
  * @spec{Decompress_11 from @[FIPS203, Eq (4.8)].}
  *
@@ -519,7 +519,7 @@ void mlk_poly_decompress_d11(mlk_poly *r,
  *
  * @param[out] r Output byte array (of MLKEM_POLYBYTES bytes).
  * @param[in]  a Input polynomial, with each coefficient in the range
- *               [0,1,..,Q-1].
+ *               [0,1,..,MLKEM_Q-1].
  */
 MLK_INTERNAL_API
 void mlk_poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
