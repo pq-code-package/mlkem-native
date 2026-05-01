@@ -8,9 +8,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define NUCLEO_STDOUT_CAPTURE_SIZE 32768U
+#define NUCLEO_STDOUT_CAPTURE_SIZE (1536U * 1024U)
 
-__attribute__((used, section(".bss.nucleo_stdout_capture")))
+__attribute__((aligned(32), used, section(".stdout_capture")))
 volatile uint8_t nucleo_stdout_capture[NUCLEO_STDOUT_CAPTURE_SIZE];
 
 __attribute__((used))

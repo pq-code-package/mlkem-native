@@ -69,6 +69,9 @@ static void semihosting_exit_with_rc(int rc) {
     printf("[[MLKEM-EXIT:1]]\n");
   }
   fflush(stdout);
+  SCB_CleanDCache();
+  __DSB();
+  __ISB();
   __BKPT(0);
   while (1) {
     __WFI();

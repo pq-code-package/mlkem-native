@@ -107,7 +107,9 @@ The GDB command sequence intentionally loads the argv blob after C startup reach
 `linker/ram_secure.ld` is used by tests after FLEXMEM reset has applied:
 
 - vector table and executable sections: expanded 256 KiB ITCM at `0x00000000`
-- `.data`, `.bss`, argv block: expanded 256 KiB DTCM at `0x30000000`
+- `.data`, `.bss`: expanded 256 KiB DTCM at `0x30000000`
+- argv block: expanded 256 KiB ITCM at `0x00000000`
+- stdout capture: AXI SRAM at `0x34080000`
 - stack: top 192 KiB of DTCM, with `_estack = 0x30040000` and `__StackLimit = 0x30010000`
 - no flash memory regions or flash LMAs
 

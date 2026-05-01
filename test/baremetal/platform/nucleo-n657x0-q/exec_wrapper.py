@@ -277,7 +277,7 @@ def main():
     stdout_capture_addr = _resolve_symbol_addr(elf, "nucleo_stdout_capture")
     stdout_capture_len_addr = _resolve_symbol_addr(elf, "nucleo_stdout_capture_len")
     stdout_capture_truncated_addr = _resolve_symbol_addr(elf, "nucleo_stdout_capture_truncated")
-    stdout_capture_size = int(os.environ.get("NUCLEO_STDOUT_CAPTURE_SIZE", "32768"))
+    stdout_capture_size = int(os.environ.get("NUCLEO_STDOUT_CAPTURE_SIZE", str(1536 * 1024)))
     # Allow override of base address via env (hex string)
     arg_block_addr_env = os.environ.get("ARG_BLOCK_ADDR")
     base_addr = None
@@ -437,7 +437,7 @@ def main():
             semihost_stop = threading.Event()
             semihost_thr = None
             semihost_exit = threading.Event()
-            shared = {"exit_code": None}
+            shared = {"exit_code": None, "stdout_streamed": False}
 
             def _semihost_reader(sock: socket.socket):
                 buf = b""
@@ -468,11 +468,12 @@ def main():
                                     if VERBOSE:
                                         LOG.debug("[semi] %s", text)
                                 else:
-                                    # Log semihost lines; prefix only in verbose mode.
                                     if VERBOSE:
                                         LOG.debug("[semi] %s", text)
                                     else:
-                                        LOG.info("%s", text)
+                                        sys.stdout.buffer.write(line + b"\n")
+                                        sys.stdout.buffer.flush()
+                                        shared["stdout_streamed"] = True
                         except socket.timeout:
                             continue
                 finally:
@@ -530,7 +531,13 @@ def main():
                 f"jump {reset_handler_jump}",
                 (f"restore {argv_bin} binary {arg_block_addr}" if arg_block_addr else f"restore {argv_bin} binary &{arg_block_sym}"),
                 "break HardFault_Handler",
+                "commands",
+                "  echo [[NUCLEO-HARDFAULT]]\\n",
+                "end",
                 "break nucleo_layout_fail",
+                "commands",
+                "  echo [[NUCLEO-LAYOUT-FAIL]]\\n",
+                "end",
                 "continue",
             ]
             if stdout_capture_addr and stdout_capture_len_addr:
@@ -641,7 +648,7 @@ def main():
                         captured = capture_file.read()
                     captured_text = captured.decode("utf-8", errors="replace")
                     captured_lines = []
-                    for capture_line in captured_text.splitlines():
+                    for capture_line in captured_text.splitlines(keepends=True):
                         stripped_line = capture_line.strip()
                         if stripped_line.startswith("[[MLKEM-EXIT:") and stripped_line.endswith("]]"):
                             try:
@@ -650,8 +657,9 @@ def main():
                                 shared["exit_code"] = 1
                             continue
                         captured_lines.append(capture_line)
-                    if captured_lines:
-                        log_output("\n".join(captured_lines), logging.INFO)
+                    if captured_lines and not shared.get("stdout_streamed"):
+                        sys.stdout.write("".join(captured_lines))
+                        sys.stdout.flush()
                 except Exception as exc:
                     info(f"[exec_wrapper] failed to read stdout capture: {exc}")
 
@@ -661,12 +669,12 @@ def main():
             if shared.get("exit_code") is not None:
                 return int(shared["exit_code"]) if isinstance(shared["exit_code"], int) else 1
 
-            if "nucleo_layout_fail" in gdb_text:
+            if "[[NUCLEO-LAYOUT-FAIL]]" in gdb_text:
                 err("FAIL!")
                 err("FLEXMEM layout check failed on target")
                 return 1
 
-            if "HardFault_Handler" in gdb_text:
+            if "[[NUCLEO-HARDFAULT]]" in gdb_text:
                 err("FAIL!")
                 err("Target entered HardFault_Handler")
                 return 1

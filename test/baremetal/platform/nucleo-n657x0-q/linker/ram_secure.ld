@@ -14,6 +14,7 @@ MEMORY
 {
   ITCM (rwx) : ORIGIN = 0x00000000, LENGTH = 256K
   DTCM (rwx) : ORIGIN = 0x30000000, LENGTH = 256K
+  AXISRAM (rwx) : ORIGIN = 0x34080000, LENGTH = 1536K
 }
 
 __itcm_start__ = ORIGIN(ITCM);
@@ -158,6 +159,16 @@ SECTIONS
     _ebss = .;
   } > DTCM
 
+  .stdout_capture (NOLOAD) :
+  {
+    . = ALIGN(32);
+    __stdout_capture_start__ = .;
+    KEEP(*(.stdout_capture))
+    KEEP(*(.stdout_capture.*))
+    . = ALIGN(32);
+    __stdout_capture_end__ = .;
+  } > AXISRAM
+
   .heap (NOLOAD) :
   {
     . = ALIGN(8);
@@ -188,4 +199,5 @@ SECTIONS
 ASSERT(SIZEOF(.vectors) <= 0x400, "Vector table exceeds 0x400 bytes")
 ASSERT(__StackLimit >= __HeapBase, "DTCM overflow: data/bss/heap collide with stack")
 ASSERT(__itcm_end__ <= ORIGIN(ITCM) + LENGTH(ITCM), "ITCM overflow")
+ASSERT(__stdout_capture_end__ <= ORIGIN(AXISRAM) + LENGTH(AXISRAM), "AXISRAM overflow")
 ASSERT(__StackTop == ORIGIN(DTCM) + LENGTH(DTCM), "Bad stack top")
