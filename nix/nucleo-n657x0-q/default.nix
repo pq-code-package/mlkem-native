@@ -67,6 +67,15 @@ stdenvNoCC.mkDerivation {
       if [ -f "$start_src" ]; then
         # Normalize to canonical name searched by platform.mk
         cp -v "$start_src" "$outp/gcc/startup_stm32n657xx.S"
+        # Replace the Cube FSBL startup's fixed SRAM initial SP with the
+        # linker-provided stack top so RAM-only tests can use the DTCM stack
+        # selected by their linker script.
+        sed -i.bak -E 's@[.]word[[:space:]]+0x34110000@.word _estack@' "$outp/gcc/startup_stm32n657xx.S"
+        # Disable interrupts immediately on entry to Reset_Handler. The RAM
+        # test image starts after debugger-controlled load/jump, so this keeps
+        # stale board/debug state from delivering an interrupt before C startup
+        # has initialized the test image.
+        sed -i.bak -E '/^Reset_Handler:/a\  cpsid i' "$outp/gcc/startup_stm32n657xx.S"
       fi
       if [ -f "$ld_src" ]; then
         cp -v "$ld_src" "$outp/gcc/linker/STM32N657XX_LRUN.ld"
@@ -250,7 +259,7 @@ stdenvNoCC.mkDerivation {
       echo "WARNING: FSBL main.c not found at $fsbl_main_c; skipping clock_config generation" >&2
     fi
 
-    # No linker script stack-size patch: MSP/MSPLIM relocation handled in Reset_Handler (reset_dtcm_init.S)
+    # The repository linker scripts define RAM-only config/test layouts explicitly.
   '';
 
   setupHook = writeText "setup-hook.sh" ''

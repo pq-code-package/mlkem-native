@@ -7,141 +7,122 @@ SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 # NUCLEO-N657X0-Q Baremetal Platform
 
-This platform runs ML-KEM tests on the ST NUCLEO‑N657X0‑Q board using STM32Cube Command Line Tools (CLT) and ST‑LINK gdbserver. The `exec_wrapper.py` launches the gdbserver, injects argv into target memory, streams semihost output, and runs a batch `gdb` session against the board.
+This platform runs ML-KEM tests on the ST NUCLEO-N657X0-Q board with STM32Cube Command Line Tools and ST-LINK GDB server. The board is never flashed: both the FLEXMEM config binary and test binaries are loaded into RAM with GDB `load`.
+
+## Required Flow
+
+STM32N657X0 starts with 64 KiB ITCM and 128 KiB DTCM. Tests require 256 KiB ITCM and 256 KiB DTCM, so CI uses a deterministic two-binary sequence:
+
+1. Load `flexmem_config.elf` into default-reset RAM.
+2. Run it until `SYSCFG->CM55TCMCR` reports the expected FLEXMEM layout, then print `FLEXMEM configuration complete; reset target and load test binary.` on the host.
+3. Stop the GDB server session.
+4. Reset/reconnect the target.
+5. Load the test ELF into the expanded ITCM/DTCM RAM layout.
+6. Run the test, dump the target stdout capture buffer at the final breakpoint, and use `[[MLKEM-EXIT:<rc>]]` as the exit sentinel.
+
+RAM is wiped by reset; the test ELF is loaded only after the config binary has completed and the target has been reset.
 
 ## Prerequisites
-- Install STM32Cube CLT (includes ST‑LINK gdbserver and STM32CubeProgrammer):
-  - Download: https://www.st.com/en/development-tools/stm32cubeclt.html
-  - Verify tools are present on your PATH (example macOS install path):
-    - `/opt/ST/STM32CubeCLT_<ver>/STLink-gdb-server/bin/ST-LINK_gdbserver`
-    - `/opt/ST/STM32CubeCLT_<ver>/STM32CubeProgrammer/bin/STM32_Programmer_CLI`
-- Hardware: NUCLEO‑N657X0‑Q connected over USB. Update ST‑LINK firmware if prompted:
-  - macOS app: `<CLT>/STM32CubeProgrammer/stlink/STLinkUpgrade.app`
-  - CLI: `<CLT>/STM32CubeProgrammer/stlink/STLinkUpgrade`
 
-## DevShell (required)
-Run gdb, make and exec_wrapper.py commands in this README from within the project’s Nix devshell for this board:
+- STM32Cube CLT with `ST-LINK_gdbserver`, `STM32_Programmer_CLI`, and `arm-none-eabi-gdb`.
+- A NUCLEO-N657X0-Q connected over USB.
+- Run all commands from the board devshell:
 
 ```
 nix develop .#nucleo-n657x0-q
 ```
 
-Then, in that shell, run the Make targets and Python scripts below.
+Useful environment variables:
 
-## Environment Variables (exec_wrapper.py)
-- `GDB` (default: `arm-none-eabi-gdb`) – gdb binary.
-- `GDB_PORT` (default: `3333`) – gdbserver port.
-- `ST_CUBE_CLT_ROOT` – CLT root; helps auto‑locate gdbserver and CLI.
-- `ST_CUBE_PROG_PATH` – path to `STM32_Programmer_CLI` bin dir; passed via `-cp`.
-- `ST_GDBSERVER_CMD` – optional template to override gdbserver command.
-- `STLINK_SPEED` (default: `200`) – SWD speed in kHz (e.g. `50` for reliability).
-- `STLINK_SERIAL` – ST‑LINK serial string (strongly recommended when multiple probes).
-- `STLINK_APID` (default: `1`) – Access Port/core selection.
-- `STLINK_TRANSPORT` (default: `SWD`) – debug transport.
-- `STLINK_CONNECT_MODE` (default: `under-reset`) – connection mode hint.
-- `ST_DEVICE` (default: `STM32N657X0HxQ`) – device name hint (not always used).
-- `STLINK_PEND_HALT_TIMEOUT` (default: `8000`) – pending halt timeout (ms).
-- `STLINK_SEMIHOST_PORT` (default: auto) – semihost console TCP port.
-- `STLINK_SEMIHOST_LEVEL` (default: `all`) – semihosting level (gdbserver).
-
-## Recommended ST‑LINK gdbserver template
-- Default baseline (auto‑selected when available; expanded by the wrapper):
-```
-ST-LINK_gdbserver -p {port} -l 1 -d -s --frequency {speed} {serial_flag} {apid_flag} {cubeprog_flag}   -g --semihost-console-port {semi_port} --semihosting {semi_level}   --initialize-reset --halt --pend-halt-timeout {pend}
-```
-- Placeholders:
-  - `{serial_flag}` → `-i <serial>` if `STLINK_SERIAL` set; else empty
-  - `{apid_flag}` → `-m <apid>` if `STLINK_APID` set; else `-m 1`
-  - `{cubeprog_flag}` → `-cp <path>` if `ST_CUBE_PROG_PATH` or auto‑located
-  - `{port}`, `{speed}`, `{semi_port}`, `{semi_level}`, `{pend}` – from env/defaults
-
-Alternative (STM32_Programmer_CLI gdbserver):
-```
-STM32_Programmer_CLI -c port={transport} freq={speed} {serial_prog} -gdbserver port={port}
-```
-- `{serial_prog}` → `sn=<serial>` if `STLINK_SERIAL` set
-
-## Semihost output and verbosity
-- The wrapper enables semihosting in the gdbserver and connects a TCP listener before GDB attaches.
-- Each semihost line is prefixed with `[semi] `; only semihost lines print by default.
-- Add `--verbose` (or `-v`) to print wrapper diagnostics, gdbserver output, and gdb chatter.
-
-## Argv injection
-- Tests receive arguments via a reserved BSS block symbol `mlk_cmdline_block`.
-- The wrapper resolves the numeric base address via `arm-none-eabi-nm` (fallback: `readelf -s`);
-  override with `ARG_BLOCK_ADDR` (hex) or choose a different symbol with `ARG_BLOCK_SYMBOL`.
-
-### Argv blob layout (authoritative)
-- 4 bytes: `u32 argc` (little-endian).
-- `argc` × 4 bytes: `u32 argv_ptrs[i]` (absolute addresses): `base + string_offset[i]`.
-- NUL-terminated UTF-8 strings placed sequentially after the pointer table.
-- Alignment: strings start at offset `4 + 4*argc` (4-byte aligned).
-- Helper: `test/baremetal/platform/nucleo-n657x0-q/make_argv_bin.py` can generate `argv.bin` manually.
-
-- The wrapper packs argv into a temporary `argv.bin` and restores it via GDB:
-  - Resolves the symbol’s numeric address using `arm-none-eabi-nm` (fallback: `readelf -s`).
-  - Uses `restore <argv.bin> binary <addr>` in the GDB batch.
-- Manual generator: `test/baremetal/platform/nucleo-n657x0-q/make_argv_bin.py`
-  - Example: `python3 .../make_argv_bin.py /tmp/argv.bin <arg0> [arg1 ...]`
-
-## Quick start
-1) Set environment (adjust paths/serial):
 ```
 export ST_CUBE_CLT_ROOT=/opt/ST/STM32CubeCLT_1.20.0
 export ST_CUBE_PROG_PATH=/opt/ST/STM32CubeCLT_1.20.0/STM32CubeProgrammer/bin
-export STLINK_SERIAL=<your-serial>
-export STLINK_SPEED=50
-export GDB_PORT=61234
-```
-2) Run a single test binary directly:
-```
-python3 test/baremetal/platform/nucleo-n657x0-q/exec_wrapper.py --verbose   test/build/mlkem512/bin/test_mlkem512
-```
-3) Or via Makefile targets (from repo root):
-```
-make run_func_512 EXTRA_MAKEFILE=test/baremetal/platform/nucleo-n657x0-q/platform.mk -j1 V=1
+export STLINK_SERIAL=<your-stlink-serial>
+export STLINK_SPEED=200
+export GDB_PORT=3333
 ```
 
-## Manual GDB session (advanced)
-```
-# In a terminal, start gdbserver manually (example):
-ST-LINK_gdbserver -p 61234 -l 1 -d -s -cp "$ST_CUBE_PROG_PATH" -m 1   --semihost-console-port 7185 --semihosting all --initialize-reset --halt --pend-halt-timeout 8000
+The wrappers also accept `ST_GDBSERVER_CMD`, `STLINK_APID`, `STLINK_SEMIHOST_PORT`, `STLINK_SEMIHOST_LEVEL`, `STLINK_PEND_HALT_TIMEOUT`, `GDB`, `NM`, and `READELF`.
 
-# In another terminal (gdb):
-(gdb) file <ELF>
-(gdb) target remote :61234
-(gdb) monitor reset
-(gdb) load
-(gdb) tbreak __wrap_main
-(gdb) continue
-(gdb) restore /tmp/argv.bin binary &mlk_cmdline_block     # or numeric address
-(gdb) continue
+## Build
+
+Build the FLEXMEM config binary and one RAM-only test binary:
+
+```
+make flexmem_config func_512 EXTRA_MAKEFILE=test/baremetal/platform/nucleo-n657x0-q/platform.mk -j1 V=1
 ```
 
-## Troubleshooting
-- USB/Probe: If you see `DEV_USB_COMM_ERR` or timeouts, unplug/replug, try a different USB port, and update ST‑LINK firmware.
-- Probe selection: set `STLINK_SERIAL=<serial>` to disambiguate.
-- Speed: reduce `STLINK_SPEED` (e.g., `50`) for stability.
-- Tools not found: set `ST_CUBE_CLT_ROOT` and/or `ST_CUBE_PROG_PATH` so the wrapper can find `ST-LINK_gdbserver` and `STM32_Programmer_CLI`.
-- Semihost port: if the listener can’t connect in time, the wrapper proceeds; try a fixed `STLINK_SEMIHOST_PORT`.
+The config binary is:
+
+```
+test/build/nucleo-n657x0-q/flexmem_config.elf
+```
+
+An example test binary is:
+
+```
+test/build/mlkem512/bin/test_mlkem512
+```
+
+## Run in CI
+
+Run the full deterministic sequence for `test_mlkem512`:
+
+```
+make run_flexmem_test EXTRA_MAKEFILE=test/baremetal/platform/nucleo-n657x0-q/platform.mk -j1 V=1
+```
+
+Or run each stage explicitly:
+
+```
+python3 test/baremetal/platform/nucleo-n657x0-q/flexmem_configure.py \
+  test/build/nucleo-n657x0-q/flexmem_config.elf
+
+python3 test/baremetal/platform/nucleo-n657x0-q/run_test_after_flexmem.py \
+  test/build/mlkem512/bin/test_mlkem512
+```
+
+`run_test_after_flexmem.py` delegates to `exec_wrapper.py`, which starts ST-LINK GDB server, loads the ELF into RAM, injects argv into `mlk_cmdline_block`, runs from `Reset_Handler`, dumps the target stdout capture buffer, and returns the `[[MLKEM-EXIT:<rc>]]` code.
+
+## Argv Blob Loading
+
+Target arguments are passed through a RAM blob rather than through semihosting or debugger command-line support. The test image links `cmdline_region.c`, which reserves the 64 KiB `mlk_cmdline_block` symbol in ITCM. `exec_wrapper.py` resolves that symbol with `arm-none-eabi-nm`, falling back to `readelf -s`; `ARG_BLOCK_SYMBOL` can select a different symbol and `ARG_BLOCK_ADDR` can override the resolved address.
+
+The wrapper packs its target argv into a temporary binary file with this little-endian layout:
+
+- `uint32_t argc`
+- `uint32_t argv[argc]`, where each entry is an absolute target address inside the same blob
+- NUL-terminated UTF-8 argument strings immediately after the pointer table
+
+The GDB command sequence intentionally loads the argv blob after C startup reaches `__wrap_main`: first `load` writes the ELF sections into RAM, then `jump Reset_Handler|1` runs normal startup and zeroes `.bss`, then a temporary breakpoint stops at `__wrap_main`, and only then GDB executes `restore <argv.bin> binary <mlk_cmdline_block address>`. Loading the blob at this point prevents startup `.bss` initialization from erasing it. `__wrap_main` casts `mlk_cmdline_block` to the command-line structure and calls the real ML-KEM test `main(argc, argv)`.
+
+## Memory Layout
+
+`linker/flexmem_config_default.ld` is used only by the config binary:
+
+- vector/code: SRAM available in the default reset layout
+- data/stack: default 128 KiB DTCM
+- no flash memory regions or flash LMAs
+
+`linker/ram_secure.ld` is used by tests after FLEXMEM reset has applied:
+
+- vector table and executable sections: expanded 256 KiB ITCM at `0x00000000`
+- `.data`, `.bss`, argv block: expanded 256 KiB DTCM at `0x30000000`
+- stack: top 192 KiB of DTCM, with `_estack = 0x30040000` and `__StackLimit = 0x30010000`
+- no flash memory regions or flash LMAs
+
+## Layout Validation
+
+Each test binary links `flexmem_layout_check.c` and calls it before ML-KEM tests. It fails with a breakpoint if either expanded region is unavailable:
+
+- executes `nucleo_itcm_above_default_probe()` from `.itcm_probe` placed beyond the default 64 KiB ITCM boundary
+- writes and reads address `0x30020000`, beyond the default 128 KiB DTCM boundary
+
+This proves the CI flow loaded the test after FLEXMEM configuration and reset. Actual pass/fail execution remains hardware-dependent on the connected board, ST-LINK firmware, and CLT version.
 
 ## Notes
-- ST‑LINK gdbserver does not implement the QEMU semihost `SYS_EXIT_EXTENDED`. A sentinel‑based exit workaround is planned in the proposal.
-- This platform uses FSBL‑LRUN startup/system/linker from the Cube template.
-- D‑TCM stack: a startup bootstrap (`src/reset_dtcm_init.S`) checks `SYSCFG_CM55TCMCR` and, if needed, writes `0x99` then resets via AIRCR to apply D‑TCM sizing. Otherwise it sets `MSP=0x30040000` and `MSPLIM=0x30000000` so the runtime stack resides entirely in D‑TCM (256 KiB). A one‑time reset occurs the first time sizing is applied. Compatible with GDB resets.
 
-- Clock configuration: `SystemClock_Config()` is generated from the STM32CubeN6 FSBL template (`Projects/NUCLEO-N657X0-Q/Templates/Template_FSBL_LRUN/FSBL/Src/main.c`) into `${NUCLEO_N657X0_Q_PATH}/clock_config.c` by `nix/nucleo-n657x0-q/default.nix`. The devshell build also ensures `${NUCLEO_N657X0_Q_PATH}/Inc/main.h` declares `void SystemClock_Config(void);` and `void Error_Handler(void);`. Do not edit the generated file directly; update the Cube template or the extraction logic if adjustments are needed.
-
-## HW‑testing
-- Run from inside the Nix devshell: `nix develop .#nucleo-n657x0-q`.
-- Hardware runs are opt‑in. Include this platform’s Makefile to target the NUCLEO‑N657X0‑Q board:
-
-```
-make test EXTRA_MAKEFILE=test/baremetal/platform/nucleo-n657x0-q/platform.mk -j1 V=1
-```
-
-- Examples:
-  - Single test: `make run_func_512 EXTRA_MAKEFILE=test/baremetal/platform/nucleo-n657x0-q/platform.mk -j1 V=1`
-  - Direct wrapper: `python3 test/baremetal/platform/nucleo-n657x0-q/exec_wrapper.py test/build/mlkem512/bin/test_mlkem512`
-
-- Without `EXTRA_MAKEFILE`, tests run on the host (no hardware).
+- Do not use debugger GUI flows; CI uses ST-LINK GDB server plus `arm-none-eabi-gdb` only.
+- Do not run the test binary directly on a freshly reset board; it links into expanded ITCM/DTCM that does not exist until after `flexmem_config.elf` and reset.
+- Do not reintroduce runtime probing or linker wrapping of `SystemInit`; FLEXMEM configuration is deterministic and reset-applied.
+- Keep target output on normal libc/newlib `printf` and file-I/O paths linked with `--specs=rdimon.specs -lc -lrdimon`; the platform `_write` captures stdout/stderr in RAM for GDB to harvest because raw semihosting `bkpt 0xab` syscalls are not reliable on this board.

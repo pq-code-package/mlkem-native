@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 PLATFORM_PATH:=test/baremetal/platform/nucleo-n657x0-q
+BUILD_DIR ?= test/build
 
 CROSS_PREFIX=arm-none-eabi-
 CC=gcc
@@ -20,6 +21,7 @@ CFLAGS += \
 	--sysroot=$(SYSROOT) \
 	-DDEVICE=nucleo-n657x0-q \
 	-DSTM32N657xx \
+	-DNTESTS_FUNC=1 \
 	-I$(NUCLEO_N657X0_Q_PATH) \
 	-I$(NUCLEO_N657X0_Q_PATH)/Inc \
 	-I$(NUCLEO_N657X0_Q_PATH)/Drivers/STM32N6xx_HAL_Driver/Inc \
@@ -40,9 +42,10 @@ ARCH_FLAGS += \
 # TODO(GAP): If the Cube template (or GCC/newlib build) expects softfp, use:
 #   -mfloat-abi=softfp  (and keep -mfpu)
 
+SEMIHOST_SPECS := --specs=rdimon.specs
+
 CFLAGS += \
-    $(ARCH_FLAGS) \
-    --specs=rdimon.specs
+    $(ARCH_FLAGS)
 
 CFLAGS += $(CFLAGS_EXTRA)
 
@@ -70,16 +73,19 @@ LDFLAGS += \
 	-L.
 
 LDFLAGS += \
-	--specs=rdimon.specs \
+	$(SEMIHOST_SPECS) \
 	-Wl,--wrap=main \
 	-ffreestanding \
 	-T$(LDSCRIPT) \
 	$(ARCH_FLAGS)
 
+LDLIBS += -lc -lrdimon
+
 # Extra sources to be included in test binaries
 EXTRA_SOURCES = \
     $(PLATFORM_PATH)/src/cmdline.c \
     $(PLATFORM_PATH)/src/cmdline_region.c \
+    $(PLATFORM_PATH)/src/flexmem_layout_check.c \
     $(PLATFORM_PATH)/src/semihosting_syscall.c \
     $(NUCLEO_N657X0_Q_PATH)/clock_config.c \
     $(NUCLEO_N657X0_Q_PATH)/system_stm32n6xx.c \
@@ -102,3 +108,31 @@ EXTRA_SOURCES_CFLAGS = -Wno-error -Wno-conversion -Wno-sign-conversion -Wno-unus
 EXTRA_SOURCES := $(filter-out %/integration_argv.c,$(EXTRA_SOURCES))
 
 EXEC_WRAPPER := $(realpath $(PLATFORM_PATH)/exec_wrapper.py)
+
+FLEXMEM_CONFIG_ELF ?= $(BUILD_DIR)/nucleo-n657x0-q/flexmem_config.elf
+FLEXMEM_CONFIG_LDSCRIPT := $(PLATFORM_PATH)/linker/flexmem_config_default.ld
+FLEXMEM_CONFIG_SOURCES := \
+    $(PLATFORM_PATH)/src/flexmem_config.c \
+    $(NUCLEO_N657X0_Q_PATH)/system_stm32n6xx.c \
+    $(STARTUP)
+
+.PHONY: flexmem_config run_flexmem_config run_flexmem_test
+
+flexmem_config: $(FLEXMEM_CONFIG_ELF)
+
+$(FLEXMEM_CONFIG_ELF): $(FLEXMEM_CONFIG_SOURCES) $(FLEXMEM_CONFIG_LDSCRIPT)
+	$(Q)echo "  LD      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) $(CFLAGS) $(EXTRA_SOURCES_CFLAGS) \
+		-ffreestanding \
+		-Wl,--gc-sections -Wl,--no-warn-rwx-segments \
+		$(SEMIHOST_SPECS) \
+		-T$(FLEXMEM_CONFIG_LDSCRIPT) $(ARCH_FLAGS) \
+		-o $@ $(FLEXMEM_CONFIG_SOURCES) -lc -lrdimon
+
+run_flexmem_config: flexmem_config
+	$(Q)python3 $(PLATFORM_PATH)/flexmem_configure.py $(FLEXMEM_CONFIG_ELF)
+
+run_flexmem_test: flexmem_config func_512
+	$(Q)python3 $(PLATFORM_PATH)/flexmem_configure.py $(FLEXMEM_CONFIG_ELF)
+	$(Q)python3 $(PLATFORM_PATH)/run_test_after_flexmem.py $(MLKEM512_DIR)/bin/test_mlkem512

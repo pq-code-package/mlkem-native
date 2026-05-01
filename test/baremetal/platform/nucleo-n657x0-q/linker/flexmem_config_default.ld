@@ -4,30 +4,28 @@
  */
 
 /* Cortex-M55 GCC linker script:
- * ITCM: 256 KiB @ 0x00000000
- * DTCM: 256 KiB @ 0x30000000
+ * SRAM: 64 KiB  @ 0x00000000
+ * DTCM: 128 KiB @ 0x30000000
  */
 
 ENTRY(Reset_Handler)
 
 MEMORY
 {
-  ITCM (rwx) : ORIGIN = 0x00000000, LENGTH = 256K
-  DTCM (rwx) : ORIGIN = 0x30000000, LENGTH = 256K
+  SRAM (rx)  : ORIGIN = 0x34064000, LENGTH = 64K
+  DTCM (rwx) : ORIGIN = 0x30000000, LENGTH = 128K
 }
 
-__itcm_start__ = ORIGIN(ITCM);
-__itcm_size__  = LENGTH(ITCM);
+__sram_start__ = ORIGIN(SRAM);
+__sram_size__  = LENGTH(SRAM);
 __dtcm_start__ = ORIGIN(DTCM);
 __dtcm_size__  = LENGTH(DTCM);
 
-__stack_size__ = 192K;
+__stack_size__ = 64K;
 __heap_size__  = 0;
 
 __StackTop   = ORIGIN(DTCM) + LENGTH(DTCM);
 __StackLimit = __StackTop - __stack_size__;
-__HeapBase   = ORIGIN(DTCM);
-__HeapLimit  = __StackLimit;
 
 PROVIDE(__stack = __StackTop);
 PROVIDE(_estack = __StackTop);
@@ -36,12 +34,12 @@ PROVIDE(_sstack = __StackLimit);
 
 SECTIONS
 {
-  .vectors ORIGIN(ITCM) :
+  .vectors ORIGIN(SRAM) :
   {
     KEEP(*(.isr_vector))
     KEEP(*(.vectors))
-    . = ORIGIN(ITCM) + 0x400;
-  } > ITCM
+    . = ORIGIN(SRAM) + 0x400;
+  } > SRAM
 
   .text :
   {
@@ -70,7 +68,7 @@ SECTIONS
 
     . = ALIGN(4);
     __text_end__ = .;
-  } > ITCM
+  } > SRAM
 
   .gnu.sgstubs :
   {
@@ -78,14 +76,14 @@ SECTIONS
     KEEP(*(.gnu.sgstubs))
     KEEP(*(.gnu.sgstubs.*))
     . = ALIGN(32);
-  } > ITCM
+  } > SRAM
 
   .preinit_array :
   {
     PROVIDE_HIDDEN(__preinit_array_start = .);
     KEEP(*(.preinit_array*))
     PROVIDE_HIDDEN(__preinit_array_end = .);
-  } > ITCM
+  } > SRAM
 
   .init_array :
   {
@@ -93,7 +91,7 @@ SECTIONS
     KEEP(*(SORT(.init_array.*)))
     KEEP(*(.init_array*))
     PROVIDE_HIDDEN(__init_array_end = .);
-  } > ITCM
+  } > SRAM
 
   .fini_array :
   {
@@ -101,25 +99,7 @@ SECTIONS
     KEEP(*(SORT(.fini_array.*)))
     KEEP(*(.fini_array*))
     PROVIDE_HIDDEN(__fini_array_end = .);
-  } > ITCM
-  
-  .itcm_probe :
-  {
-    . = MAX(., ORIGIN(ITCM) + 0x00010000);
-    . = ALIGN(32);
-    KEEP(*(.itcm_probe))
-    KEEP(*(.itcm_probe.*))
-    . = ALIGN(32);
-  } > ITCM
-
-  .cmdline (NOLOAD) :
-  {
-    . = ALIGN(8);
-    KEEP(*(.cmdline))
-    KEEP(*(.cmdline.*))
-    . = ALIGN(8);
-    __itcm_end__ = .;
-  } > ITCM
+  } > SRAM
 
   __etext = ALIGN(4);
   _etext  = __etext;
@@ -187,5 +167,5 @@ SECTIONS
 
 ASSERT(SIZEOF(.vectors) <= 0x400, "Vector table exceeds 0x400 bytes")
 ASSERT(__StackLimit >= __HeapBase, "DTCM overflow: data/bss/heap collide with stack")
-ASSERT(__itcm_end__ <= ORIGIN(ITCM) + LENGTH(ITCM), "ITCM overflow")
+ASSERT(__text_end__ <= ORIGIN(SRAM) + LENGTH(SRAM), "SRAM overflow")
 ASSERT(__StackTop == ORIGIN(DTCM) + LENGTH(DTCM), "Bad stack top")

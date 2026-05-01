@@ -11,6 +11,7 @@
 #include "stm32n6xx_hal.h"
 #include "stm32n6xx_it.h"
 #include "main.h"
+#include "semihosting_syscall.h"
 
 typedef struct cmdline_s {
   int argc;
@@ -24,24 +25,55 @@ typedef struct cmdline_s {
 
 /* Provided by cmdline_region.c */
 extern unsigned char mlk_cmdline_block[];
+void nucleo_flexmem_layout_check(void);
+
+
+extern unsigned char _ebss[];
+extern unsigned char __StackLimit[];
+extern unsigned char _estack[];
+
+__attribute__((noinline))
+static void nucleo_init_dtcm_ecc(void) {
+  uintptr_t sp;
+  __asm__ volatile("mov %0, sp" : "=r"(sp));
+  sp = (sp - 64U) & ~(uintptr_t)31U;
+  uintptr_t heap_start = ((uintptr_t)_ebss + 31U) & ~(uintptr_t)31U;
+  uintptr_t heap_end = (uintptr_t)__StackLimit & ~(uintptr_t)31U;
+  if (heap_start < heap_end) {
+    for (volatile uint32_t *ptr = (volatile uint32_t *)heap_start;
+         (uintptr_t)ptr < heap_end; ptr++) {
+      *ptr = 0;
+    }
+  }
+
+  uintptr_t stack_start = ((uintptr_t)__StackLimit + 31U) & ~(uintptr_t)31U;
+  uintptr_t stack_end = sp;
+  if (stack_end > (uintptr_t)_estack) {
+    stack_end = (uintptr_t)_estack;
+  }
+  for (volatile uint32_t *ptr = (volatile uint32_t *)stack_start;
+       (uintptr_t)ptr < stack_end; ptr++) {
+    *ptr = 0;
+  }
+  __DSB();
+}
 
 /* Provide a prototype for the real main that the C library expects. */
 extern int __real_main(int argc, char *argv[]);
 int __wrap_main(int unused_argc, char *unused_argv[]);
 
-#ifdef SEMIHOSTING
-#include "semihosting_syscall.h"
 static void semihosting_exit_with_rc(int rc) {
-  // Print sentinel for the exec_wrapper to detect and propagate exit code
-  printf("[[MLKEM-EXIT:%d]]\n",rc);
+  if (rc == 0) {
+    printf("[[MLKEM-EXIT:0]]\n");
+  } else {
+    printf("[[MLKEM-EXIT:1]]\n");
+  }
   fflush(stdout);
-  // Try basic semihost exit (ST-LINK may or may not support it). If unsupported,
-  // gdbserver may report an error; wrapper already captured the code.
-  while(1) ;
+  __BKPT(0);
+  while (1) {
+    __WFI();
+  }
 }
-#else
-static void semihosting_exit_with_rc(int rc) { (void)rc; }
-#endif
 
 void Error_Handler(void) {
   HardFault_Handler();
@@ -50,14 +82,16 @@ void Error_Handler(void) {
 /* Wrap main: build argc/argv from cmdline and forward to __real_main. */
 int __wrap_main(int unused_argc, char *unused_argv[]) {
   (void)unused_argc; (void)unused_argv;
+  nucleo_init_dtcm_ecc();
+  nucleo_stdio_init();
   SCB_EnableICache();
   SCB_EnableDCache();
   HAL_Init();
   SystemClock_Config();
+  nucleo_flexmem_layout_check();
 
   cmdline_t *cmdline = (cmdline_t *)&mlk_cmdline_block;
   int rc = __real_main(cmdline->argc, cmdline->argv);
   semihosting_exit_with_rc(rc);
   return rc;
 }
-

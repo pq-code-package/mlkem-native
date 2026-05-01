@@ -4,24 +4,50 @@
  * Copyright (c) Arm Ltd.
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
-#include <stdio.h>
+#include <errno.h>
 #include <stdint.h>
-/* Public semihosting API */
-#include "semihosting_syscall.h"
-__attribute__((always_inline)) static inline void __semihosting_call(int32_t opnr, int32_t param) {
-  register int32_t r0 __asm__("r0") = opnr;
-  register int32_t r1 __asm__("r1") = param;
-  __asm__ __volatile__("bkpt 0xAB" : "+r"(r0) : "r"(r1) : "memory");
-}
-void semihosting_syscall(int32_t opnr, int32_t param) {
-  __semihosting_call(opnr, param);
+#include <stdio.h>
+
+#define NUCLEO_STDOUT_CAPTURE_SIZE 32768U
+
+__attribute__((used, section(".bss.nucleo_stdout_capture")))
+volatile uint8_t nucleo_stdout_capture[NUCLEO_STDOUT_CAPTURE_SIZE];
+
+__attribute__((used))
+volatile uint32_t nucleo_stdout_capture_len;
+
+__attribute__((used))
+volatile uint32_t nucleo_stdout_capture_truncated;
+
+int _write(int fd, char *src, int length) {
+  (void)fd;
+
+  if (src == NULL || length < 0) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  uint32_t offset = nucleo_stdout_capture_len;
+  if (offset < NUCLEO_STDOUT_CAPTURE_SIZE) {
+    uint32_t available = NUCLEO_STDOUT_CAPTURE_SIZE - offset;
+    uint32_t written = (uint32_t)length;
+    if (written > available) {
+      written = available;
+      nucleo_stdout_capture_truncated = 1;
+    }
+
+    for (uint32_t idx = 0; idx < written; idx++) {
+      nucleo_stdout_capture[offset + idx] = (uint8_t)src[idx];
+    }
+    nucleo_stdout_capture_len = offset + written;
+  } else if (length > 0) {
+    nucleo_stdout_capture_truncated = 1;
+  }
+
+  return length;
 }
 
-// Provided by --specs=rdimon.specs
-extern void initialise_monitor_handles(void);
-
-__attribute__((constructor))
-static void mlkem_semihost_init(void) {
-  initialise_monitor_handles();
-  fflush(stdout);
+void nucleo_stdio_init(void) {
+  setvbuf(stdout, NULL, _IONBF, 0);
+  setvbuf(stderr, NULL, _IONBF, 0);
 }

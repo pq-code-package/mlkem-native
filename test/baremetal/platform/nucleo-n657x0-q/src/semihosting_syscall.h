@@ -7,9 +7,6 @@
 #ifndef MLKEM_NATIVE_SEMIHOSTING_SYSCALL_H
 #define MLKEM_NATIVE_SEMIHOSTING_SYSCALL_H
 
-#include <stdint.h>
-
-void semihosting_syscall(int32_t opnr, int32_t param);
+void nucleo_stdio_init(void);
 
 #endif /* MLKEM_NATIVE_SEMIHOSTING_SYSCALL_H */
-

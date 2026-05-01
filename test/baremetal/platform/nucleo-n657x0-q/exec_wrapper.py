@@ -4,6 +4,7 @@
 # Copyright (c) Arm Ltd.
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
+import logging
 import os
 import shlex
 import shutil
@@ -18,16 +19,31 @@ import threading
 
 
 VERBOSE = False
+LOG = logging.getLogger(__name__)
+
+
+def configure_logging():
+    level = logging.DEBUG if VERBOSE else logging.INFO
+    logging.basicConfig(level=level, format="%(message)s")
+
+
+def log_output(output, level=logging.INFO, prefix=None):
+    if not output:
+        return
+    for line in str(output).rstrip().splitlines():
+        if prefix:
+            line = f"{prefix}{line}"
+        LOG.log(level, "%s", line)
 
 
 def err(msg, **kwargs):
-    # Always print errors
-    print(msg, file=sys.stderr, **kwargs)
+    # Always report errors, including multiline subprocess diagnostics.
+    log_output(msg, logging.ERROR)
 
 
 def info(msg, **kwargs):
     if VERBOSE:
-        print(msg, file=sys.stderr, **kwargs)
+        LOG.debug("%s", msg)
 
 
 def pack_cmdline(args, base_addr):
@@ -79,6 +95,71 @@ def _wait_for_port(host: str, port: int, timeout_s: float) -> bool:
     return False
 
 
+def _stm32_programmer_cli(cp_path: str):
+    # Accept either a direct CLI path or the containing CubeProgrammer directory.
+    if not cp_path:
+        return None
+    candidates = []
+    if os.path.isdir(cp_path):
+        candidates += [
+            os.path.join(cp_path, "STM32_Programmer_CLI"),
+            os.path.join(cp_path, "bin", "STM32_Programmer_CLI"),
+        ]
+    else:
+        candidates.append(cp_path)
+    for candidate in candidates:
+        if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+            return candidate
+    return None
+
+
+def _cubeprogrammer_cli(st_cubeprog: str, st_clt_root: str):
+    # Prefer explicit paths from the environment before falling back to PATH.
+    candidates = [st_cubeprog]
+    if st_clt_root:
+        candidates.append(os.path.join(st_clt_root, "STM32CubeProgrammer"))
+    cli = None
+    for candidate in candidates:
+        cli = _stm32_programmer_cli(candidate)
+        if cli:
+            break
+    if cli is None:
+        cli = shutil.which("STM32_Programmer_CLI")
+    return cli
+
+
+def _cubeprogrammer_connect_args(st_speed: str, st_serial: str, st_apid: str):
+    # Keep reset/readback commands aligned with the selected probe speed and AP.
+    args = ["-c", "port=SWD", f"freq={st_speed}"]
+    connect_mode = os.environ.get("STLINK_CONNECT_MODE")
+    if connect_mode:
+        args.append(f"mode={connect_mode}")
+    if st_serial:
+        args.append(f"sn={st_serial}")
+    if st_apid:
+        args.append(f"ap={st_apid}")
+    return args
+
+
+def _run_cubeprogrammer(cli: str, connect_args, commands, verbose: bool = False) -> bool:
+    # CubeProgrammer diagnostics are noisy, so log them only on failure or request.
+    cmd = [cli] + connect_args + commands
+    cp = run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    if verbose or cp.returncode != 0:
+        output = cp.stdout or ""
+        if output:
+            log_output(output, logging.DEBUG if verbose else logging.ERROR)
+    return cp.returncode == 0
+
+
+def _reset_target(st_cubeprog: str, st_clt_root: str, st_speed: str, st_serial: str, st_apid: str) -> bool:
+    # Reset through CubeProgrammer when available; callers can still proceed if absent.
+    cli = _cubeprogrammer_cli(st_cubeprog, st_clt_root)
+    if cli is None:
+        return False
+    return _run_cubeprogrammer(cli, _cubeprogrammer_connect_args(st_speed, st_serial, st_apid), ["-rst"])
+
+
 def main():
     global VERBOSE
 
@@ -90,6 +171,8 @@ def main():
     if "-v" in argv:
         VERBOSE = True
         argv.remove("-v")
+
+    configure_logging()
 
     if len(argv) < 1:
         err("Usage: exec_wrapper.py [--verbose] <ELF> [args...]")
@@ -127,6 +210,7 @@ def main():
     st_clt_root = os.environ.get("ST_CUBE_CLT_ROOT", "")  # Root of STM32CubeCLT
     st_pend = os.environ.get("STLINK_PEND_HALT_TIMEOUT", "8000")
     st_apid = os.environ.get("STLINK_APID", "")
+    gdb_run_timeout = float(os.environ.get("GDB_RUN_TIMEOUT", "180"))
     # Semihosting configuration (enabled by default)
     st_semihost_port_env = os.environ.get("STLINK_SEMIHOST_PORT", "")
     try:
@@ -175,6 +259,25 @@ def main():
             arg_block_sym = cand
             arg_block_addr = addr
             break
+
+    # Numeric breakpoints avoid GDB symbol lookup surprises after loading RAM ELFs.
+    wrap_main_addr = _resolve_symbol_addr(elf, "__wrap_main")
+    wrap_main_break = "__wrap_main"
+    if wrap_main_addr is not None:
+        wrap_main_break = f"*{wrap_main_addr}"
+    reset_handler_addr = _resolve_symbol_addr(elf, "Reset_Handler")
+    reset_handler_jump = "Reset_Handler"
+    if reset_handler_addr is not None:
+        reset_handler_jump = f"*{hex(int(reset_handler_addr, 16) | 1)}"
+    if reset_handler_addr is None:
+        err("Failed to resolve Reset_Handler in ELF.")
+        return 2
+
+    # Resolve the RAM stdout buffer so GDB can dump target output after execution.
+    stdout_capture_addr = _resolve_symbol_addr(elf, "nucleo_stdout_capture")
+    stdout_capture_len_addr = _resolve_symbol_addr(elf, "nucleo_stdout_capture_len")
+    stdout_capture_truncated_addr = _resolve_symbol_addr(elf, "nucleo_stdout_capture_truncated")
+    stdout_capture_size = int(os.environ.get("NUCLEO_STDOUT_CAPTURE_SIZE", "32768"))
     # Allow override of base address via env (hex string)
     arg_block_addr_env = os.environ.get("ARG_BLOCK_ADDR")
     base_addr = None
@@ -200,7 +303,8 @@ def main():
         argv_bin = os.path.join(td, "argv.bin")
         with open(argv_bin, "wb") as f:
             f.write(blob)
-
+        # GDB writes target stdout here after the run; Python logs it below.
+        stdout_capture_bin = os.path.join(td, "stdout-capture.bin")
         # Build ST gdbserver command
         # Discover ST-LINK_gdbserver
         stlink_bin = shutil.which("ST-LINK_gdbserver")
@@ -221,7 +325,7 @@ def main():
         # Auto-detect a default template if not provided
         if not st_gdbserver_cmd_tpl and stlink_bin:
             st_gdbserver_cmd_tpl = (
-                f"{shlex.quote(stlink_bin)} -p {{port}} -l 1 -d -s --frequency {{speed}} {{serial_flag}} {{apid_flag}} {{cubeprog_flag}} -g --semihost-console-port {{semi_port}} --semihosting {{semi_level}} --initialize-reset --halt --pend-halt-timeout {{pend}}"
+                f"{shlex.quote(stlink_bin)} -p {{port}} -l 1 -d -s --frequency {{speed}} {{serial_flag}} {{apid_flag}} {{cubeprog_flag}} --semihost-console-port {{semi_port}} --semihosting {{semi_level}} -g --halt --pend-halt-timeout {{pend}}"
             )
 
         if st_gdbserver_cmd_tpl:
@@ -248,8 +352,8 @@ def main():
                     cp_path = os.path.dirname(cli2)
             # If still None, try relative to ST-LINK gdbserver location
             if cp_path is None and 'stlink_bin' in locals() and stlink_bin:
-                # stlink_bin .../STLink-gdb-server/bin/ST-LINK_gdbserver -> root is two parents up
-                root = os.path.dirname(os.path.dirname(os.path.abspath(stlink_bin)))
+                # stlink_bin .../STLink-gdb-server/bin/ST-LINK_gdbserver -> CLT root is three parents up
+                root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(stlink_bin))))
                 cli2 = os.path.join(root, "STM32CubeProgrammer", "bin", "STM32_Programmer_CLI")
                 if os.path.isfile(cli2) and os.access(cli2, os.X_OK):
                     cp_path = os.path.dirname(cli2)
@@ -295,7 +399,7 @@ def main():
                 "  Download: https://www.st.com/en/development-tools/stm32cubeclt.html\n"
                 "- Set ST_GDBSERVER_CMD to a working gdbserver command template, or ensure ST-LINK_gdbserver is on PATH.\n"
                 "  Examples:\n"
-                "    ST-LINK_gdbserver:  'ST-LINK_gdbserver -p {port} -d --frequency {speed} {serial_flag} --initialize-reset {cubeprog_flag}'\n"
+                "    ST-LINK_gdbserver:  'ST-LINK_gdbserver -p {port} -d --frequency {speed} {serial_flag} -g --halt {cubeprog_flag}'\n"
                 "    STM32_Programmer_CLI: 'STM32_Programmer_CLI -c port={transport},{serial_prog} -s {speed} -gdbserver port={port}'\n"
                 "  Tip: If ST-LINK_gdbserver errors about STM32CubeProgrammer, set ST_CUBE_PROG_PATH to its installation path,\n"
                 "       or export ST_CUBE_CLT_ROOT to the CubeCLT root so the wrapper can auto-locate ST-LINK_gdbserver.\n"
@@ -307,6 +411,8 @@ def main():
                 msg += "  Note: ST-LINK_gdbserver not found on PATH.\n"
             err(msg)
             return 2
+
+        info("[exec_wrapper] assuming FLEXMEM was configured by flexmem_configure.py; no runtime TCM probing")
 
         info(f"[exec_wrapper] starting ST gdbserver on port {port}...")
         info(f"[exec_wrapper] {' '.join(gdbserver_cmd)}")
@@ -358,15 +464,15 @@ def main():
                                     except Exception:
                                         shared["exit_code"] = 1
                                     semihost_exit.set()
-                                    # Do not print the sentinel unless verbose
+                                    # Do not log the sentinel unless verbose.
                                     if VERBOSE:
-                                        print(f"[semi] {text}")
+                                        LOG.debug("[semi] %s", text)
                                 else:
-                                    # Print semihost line; prefix only in verbose mode
+                                    # Log semihost lines; prefix only in verbose mode.
                                     if VERBOSE:
-                                        print(f"[semi] {text}")
+                                        LOG.debug("[semi] %s", text)
                                     else:
-                                        print(text)
+                                        LOG.info("%s", text)
                         except socket.timeout:
                             continue
                 finally:
@@ -391,7 +497,7 @@ def main():
                 # Server exited early – surface a helpful message
                 out_rem = stp.stdout.read() if stp.stdout else ""
                 if out_rem and VERBOSE:
-                    print(out_rem, end="")
+                    log_output(out_rem, logging.DEBUG)
                 merged = out_rem
                 low = merged.lower()
                 if "firmware upgrade" in low or "upgrade required" in low:
@@ -411,33 +517,49 @@ def main():
                                 err(f"[exec_wrapper] STLinkUpgrade candidate: {h}")
                 return 2
 
-            # Optionally prepend LRUN DTCM GDB script (env gate)
-            lrun_gdb_path = os.path.join(os.path.dirname(__file__), "gdb", "lrun_dtcm_stack.gdb")
             gdb_lines = [
                 "set pagination off",
                 "set confirm off",
                 f"target remote localhost:{port}",
-                "monitor reset",
             ]
-            if os.path.isfile(lrun_gdb_path):
-                with open(lrun_gdb_path) as fd:
-                    gdb_lines += map(lambda x: x.strip(),fd.readlines())
-                # gdb_lines.append(f"source {lrun_gdb_path}")
             # Write GDB commands to a temp script and run with -x
             gdb_lines += [
                 # semihosting enable is handled by gdbserver; keep gdb quiet
                 "load",
-                "set $pc=(&Reset_Handler)|1",
-                "tbreak __wrap_main",
-                "continue",
+                f"tbreak {wrap_main_break}",
+                f"jump {reset_handler_jump}",
                 (f"restore {argv_bin} binary {arg_block_addr}" if arg_block_addr else f"restore {argv_bin} binary &{arg_block_sym}"),
+                "break HardFault_Handler",
+                "break nucleo_layout_fail",
                 "continue",
+            ]
+            if stdout_capture_addr and stdout_capture_len_addr:
+                # Clamp the dump length to the compile-time capture buffer size.
+                gdb_lines += [
+                    f"set $nucleo_stdout_len = *(unsigned int *){stdout_capture_len_addr}",
+                    "if $nucleo_stdout_len > 0",
+                    f"  if $nucleo_stdout_len > {stdout_capture_size}",
+                    f"    set $nucleo_stdout_len = {stdout_capture_size}",
+                    "  end",
+                    f"  dump binary memory {stdout_capture_bin} {stdout_capture_addr} {stdout_capture_addr} + $nucleo_stdout_len",
+                    "end",
+                ]
+            if stdout_capture_truncated_addr:
+                gdb_lines += [
+                    f"set $nucleo_stdout_truncated = *(unsigned int *){stdout_capture_truncated_addr}",
+                    "p/x $nucleo_stdout_truncated",
+                ]
+            gdb_lines += [
+                "info registers",
+                "x/4wx $sp",
+                "x/4wx 0xE000ED28",
+                "x/wx 0xE000ED38",
             ]
 
             if VERBOSE:
-                print('============ GDB SCRIPT ============')
-                print('\n'.join(gdb_lines))
-                print('====================================')
+                LOG.debug("============ GDB SCRIPT ============")
+                log_output('\n'.join(gdb_lines), logging.DEBUG)
+                LOG.debug("====================================")
 
             with tempfile.NamedTemporaryFile("w", delete=False, suffix=".gdb") as gs:
                 for line in gdb_lines:
@@ -449,6 +571,7 @@ def main():
             # Run GDB while streaming gdbserver output (which will include semihost output).
             info("[exec_wrapper] running gdb batch (program will continue; semihost output follows)...")
             gdbp = popen(gdb_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            gdb_deadline = time.time() + gdb_run_timeout if gdb_run_timeout > 0 else None
 
             # Stream gdbserver output until gdb finishes without blocking on readline()
             while True:
@@ -471,25 +594,86 @@ def main():
                         if r:
                             line = stp.stdout.readline()
                             if line:
-                                # gdbserver stdout (printed only in verbose mode)
+                                # gdbserver stdout is logged only in verbose mode.
                                 if VERBOSE:
-                                    print(line, end="")
+                                    log_output(line, logging.DEBUG)
                     except Exception:
                         # If select/readline fails, avoid blocking the loop
                         pass
                 # Check if gdb has completed
                 if gdbp.poll() is not None:
                     break
+                if gdb_deadline is not None and time.time() > gdb_deadline:
+                    err("FAIL!")
+                    err(f"gdb batch timed out after {gdb_run_timeout:.0f}s")
+                    try:
+                        gdbp.terminate()
+                        gdbp.wait(timeout=1.0)
+                    except Exception:
+                        try:
+                            gdbp.kill()
+                        except Exception:
+                            pass
+                    try:
+                        out, errout = gdbp.communicate(timeout=1.0)
+                        if out:
+                            log_output(out, logging.ERROR)
+                        if errout:
+                            err(errout, end="")
+                    except Exception:
+                        pass
+                    return 124
 
             out, errout = gdbp.communicate()
             if out and VERBOSE:
-                print(out, end="")
+                log_output(out, logging.DEBUG)
             if errout and VERBOSE:
                 # gdb chatter / errors (verbose only)
                 err(errout, end="")
 
+            gdb_text = f"{out}\n{errout}"
+
+            captured_text = ""
+            if os.path.exists(stdout_capture_bin):
+                try:
+                    # Parse the same exit sentinel from dumped RAM output as from semihosting.
+                    with open(stdout_capture_bin, "rb") as capture_file:
+                        captured = capture_file.read()
+                    captured_text = captured.decode("utf-8", errors="replace")
+                    captured_lines = []
+                    for capture_line in captured_text.splitlines():
+                        stripped_line = capture_line.strip()
+                        if stripped_line.startswith("[[MLKEM-EXIT:") and stripped_line.endswith("]]"):
+                            try:
+                                shared["exit_code"] = int(stripped_line[len("[[MLKEM-EXIT:"):-2])
+                            except Exception:
+                                shared["exit_code"] = 1
+                            continue
+                        captured_lines.append(capture_line)
+                    if captured_lines:
+                        log_output("\n".join(captured_lines), logging.INFO)
+                except Exception as exc:
+                    info(f"[exec_wrapper] failed to read stdout capture: {exc}")
+
+            if "$nucleo_stdout_truncated = 0x1" in gdb_text:
+                err("WARNING: target stdout capture truncated")
+
             if shared.get("exit_code") is not None:
                 return int(shared["exit_code"]) if isinstance(shared["exit_code"], int) else 1
+
+            if "nucleo_layout_fail" in gdb_text:
+                err("FAIL!")
+                err("FLEXMEM layout check failed on target")
+                return 1
+
+            if "HardFault_Handler" in gdb_text:
+                err("FAIL!")
+                err("Target entered HardFault_Handler")
+                return 1
+
+            if "Program received signal SIGTRAP" in gdb_text:
+                info("[exec_wrapper] completion trap observed without exit sentinel")
+                return 0
 
             if gdbp.returncode != 0:
                 err("FAIL!")
