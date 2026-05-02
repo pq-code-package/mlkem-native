@@ -15,6 +15,9 @@
     },
     {
       "pattern": "^https://github\\.com/pq-code-package/mlkem-native/compare/.*\\.\\.\\.v"
+    },
+    {
+      "pattern": "^http://nvlpubs\\.nist\\.gov"
     }
   ]
 }
