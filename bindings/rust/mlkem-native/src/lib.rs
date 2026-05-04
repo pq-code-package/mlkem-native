@@ -57,10 +57,11 @@ macro_rules! define_mlkem {
             use crate::sys::$sys_mod::{$check_pk, $check_sk, $dec, $enc_derand, $keypair_derand};
             use hybrid_array::Array;
             use kem::{
-                common::{Generate, InvalidKey, KeyExport, KeySizeUser, TryKeyInit},
                 Ciphertext, Decapsulate, Encapsulate, Kem, SharedKey,
+                common::{Generate, InvalidKey, KeyExport, KeySizeUser, TryKeyInit},
             };
             use rand_core::{CryptoRng, TryCryptoRng};
+            use zeroize::Zeroize;
 
             /// Marker struct for this ML-KEM parameter set; implements [`Kem`].
             #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord)]
@@ -114,6 +115,11 @@ macro_rules! define_mlkem {
                     let mut ss = SharedKey::<MlKem>::default();
                     let mut coins = [0u8; 32]; // MLKEM_SYMBYTES
                     rng.fill_bytes(&mut coins);
+                    // SAFETY: All pointers are derived from correctly-sized,
+                    // initialized arrays (`ct` = $ct_size bytes, `ss` = 32
+                    // bytes, `self.0` = $pk_len bytes, `coins` = 32 bytes).
+                    // None of the buffers overlap, and the C function only
+                    // reads/writes within the advertised sizes.
                     let ret = unsafe {
                         $enc_derand(
                             ct.as_mut_slice().as_mut_ptr(),
@@ -134,6 +140,12 @@ macro_rules! define_mlkem {
             pub struct DecapsulationKey {
                 sk: [u8; $sk_len],
                 ek: EncapsulationKey,
+            }
+
+            impl Drop for DecapsulationKey {
+                fn drop(&mut self) {
+                    self.sk.zeroize();
+                }
             }
 
             impl DecapsulationKey {
@@ -159,10 +171,11 @@ macro_rules! define_mlkem {
             impl Decapsulate for DecapsulationKey {
                 fn decapsulate(&self, ct: &Ciphertext<MlKem>) -> SharedKey<MlKem> {
                     let mut ss = SharedKey::<MlKem>::default();
-                    // ML-KEM decapsulation always produces a value (implicit rejection
-                    // for invalid ciphertexts per FIPS 203 §8.3); non-zero only if the
-                    // hash check on the secret key fails, which is guarded against on
-                    // construction.
+                    // SAFETY: All pointers are derived from correctly-sized,
+                    // initialized arrays (`ss` = 32 bytes, `ct` = $ct_size
+                    // bytes, `self.sk` = $sk_len bytes). None of the buffers
+                    // overlap, and the C function only reads/writes within
+                    // the advertised sizes.
                     let ret = unsafe {
                         $dec(
                             ss.as_mut_slice().as_mut_ptr(),
@@ -170,6 +183,10 @@ macro_rules! define_mlkem {
                             self.sk.as_ptr(),
                         )
                     };
+                    // ML-KEM decapsulation always produces a value (implicit rejection
+                    // for invalid ciphertexts per FIPS 203 §8.3); non-zero only if the
+                    // hash check on the secret key fails, which is guarded against on
+                    // construction.
                     assert_eq!(ret, 0, "dec failed — key may have been corrupted");
                     ss
                 }
@@ -183,6 +200,11 @@ macro_rules! define_mlkem {
                     let mut sk = [0u8; $sk_len];
                     let mut coins = [0u8; 64]; // 2 × MLKEM_SYMBYTES
                     rng.try_fill_bytes(&mut coins)?;
+                    // SAFETY: All pointers are derived from correctly-sized,
+                    // initialized arrays (`pk` = $pk_len bytes, `sk` = $sk_len
+                    // bytes, `coins` = 64 bytes). None of the buffers overlap,
+                    // and the C function only reads/writes within the
+                    // advertised sizes.
                     let ret = unsafe {
                         $keypair_derand(pk.as_mut_ptr(), sk.as_mut_ptr(), coins.as_ptr())
                     };
@@ -199,6 +221,8 @@ macro_rules! define_mlkem {
 
                 fn try_from(bytes: &[u8]) -> Result<Self, InvalidKey> {
                     let arr: [u8; $sk_len] = bytes.try_into().map_err(|_| InvalidKey)?;
+                    // SAFETY: `arr` is a correctly-sized [$sk_len-byte] array;
+                    // the C function reads exactly $sk_len bytes from the pointer.
                     if unsafe { $check_sk(arr.as_ptr()) } != 0 {
                         return Err(InvalidKey);
                     }
@@ -217,6 +241,8 @@ macro_rules! define_mlkem {
                 fn try_from(bytes: &[u8]) -> Result<Self, InvalidKey> {
                     let arr: [u8; $pk_len] = bytes.try_into().map_err(|_| InvalidKey)?;
                     let key = Self(arr);
+                    // SAFETY: `key.0` is a correctly-sized [$pk_len-byte] array;
+                    // the C function reads exactly $pk_len bytes from the pointer.
                     if unsafe { $check_pk(key.0.as_ptr()) } != 0 {
                         return Err(InvalidKey);
                     }

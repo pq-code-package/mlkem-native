@@ -32,10 +32,15 @@ path = "bindings/rust/mlkem-native/examples/kem.rs"
 name = "serialization"
 path = "bindings/rust/mlkem-native/examples/serialization.rs"
 
+[[bin]]
+name = "acvp_mlkem"
+path = "bindings/rust/mlkem-native/src/bin/acvp_mlkem.rs"
+
 [dependencies]
 kem = "0.3.0-rc.6"
 hybrid-array = { version = "0.4", features = ["extra-sizes"] }
 rand_core = { version = "0.10", default-features = false }
+zeroize = { version = "1.8.2" }
 
 [dev-dependencies]
 kem = { version = "0.3.0-rc.6", features = ["getrandom"] }
