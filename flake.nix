@@ -174,6 +174,21 @@
               ++ rustPackages;
           }).overrideAttrs (_: rustEnv);
 
+          devShells.cross-rust-aarch64 = (util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) toolchain_aarch64; }
+              ++ rustPackages;
+          }).overrideAttrs (_: rustEnv);
+
+          devShells.cross-rust-riscv64 = (util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) toolchain_riscv64; }
+              ++ rustPackages;
+          }).overrideAttrs (_: rustEnv);
+
+          devShells.cross-rust-ppc64le = (util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) toolchain_ppc64le; }
+              ++ rustPackages;
+          }).overrideAttrs (_: rustEnv);
+
           devShells.cross-avr = util.mkShell (import ./nix/avr { inherit pkgs; });
 
           devShells.linter = util.mkShellNoCC {
