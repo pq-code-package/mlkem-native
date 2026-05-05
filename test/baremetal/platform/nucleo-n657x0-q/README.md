@@ -84,7 +84,9 @@ python3 test/baremetal/platform/nucleo-n657x0-q/run_test_after_flexmem.py \
 
 `run_test_after_flexmem.py` delegates to `exec_wrapper.py`, which starts ST-LINK GDB server, loads the ELF into RAM, injects argv into `mlk_cmdline_block`, runs from `Reset_Handler`, dumps the target stdout capture buffer, and returns the `[[MLKEM-EXIT:<rc>]]` code.
 
-The KAT and ACVP run targets depend on `run_flexmem_config`, so `make run_kat` and `make run_acvp` restore the expanded FLEXMEM layout before loading the RAM-resident images. `exec_wrapper.py` retries once after pre-output GDB transport failures; set `GDB_RUN_ATTEMPTS=<n>` to adjust this. If the target enters `HardFault_Handler`, the wrapper re-runs the FLEXMEM config binary and retries once; set `GDB_HARDFAULT_RECOVERY_ATTEMPTS=<n>` to adjust this.
+The KAT and ACVP run targets depend on `run_flexmem_config`, so `make run_kat` and `make run_acvp` restore the expanded FLEXMEM layout before loading the RAM-resident images. `exec_wrapper.py` retries once after pre-output GDB transport failures; set `GDB_RUN_ATTEMPTS=<n>` to adjust this. If the initial GDB `load` command reports `load failed` before target output starts, the wrapper re-runs `flexmem_configure.py` and retries the same ELF once; set `GDB_LOAD_FAILURE_RECOVERY_ATTEMPTS=<n>` to adjust or disable this. If the target enters `HardFault_Handler`, the wrapper re-runs the FLEXMEM config binary and retries once; set `GDB_HARDFAULT_RECOVERY_ATTEMPTS=<n>` to adjust this.
+
+Manual hardware validation for load-failure recovery can force the retry path by resetting the board to its default FLEXMEM layout, building `flexmem_config` and a test ELF, then running `python3 test/baremetal/platform/nucleo-n657x0-q/run_test_after_flexmem.py test/build/mlkem512/bin/test_mlkem512` without a prior `run_flexmem_config` step.
 
 ## Argv Blob Loading
 

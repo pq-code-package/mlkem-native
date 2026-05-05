@@ -3,38 +3,16 @@
 # Copyright (c) Arm Ltd.
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
+"""Build a standalone packed argv blob for debugger or fixture use."""
+
 import os
-import struct as st
 import sys
 
-ARGV_BLOCK_SIZE = 64 * 1024
-
-
-def pack_cmdline(args, base_addr):
-    """
-    Pack argv for the STM32 baremetal target:
-      u32 argc
-      u32 argv_ptrs[argc]   (absolute addresses: base_addr + string offsets)
-      NUL-terminated strings
-    All fields are little-endian 32-bit.
-    """
-    argc = len(args)
-    header_sz = 4 + 4 * argc
-    ptrs = []
-    strings = b""
-    cur = 0
-    for s in args:
-        b = s.encode("utf-8") + b"\x00"
-        ptrs.append(base_addr + header_sz + cur)
-        strings += b
-        cur += len(b)
-    blob = st.pack("<I", argc) + b"".join(st.pack("<I", p) for p in ptrs) + strings
-    if len(blob) > ARGV_BLOCK_SIZE:
-        raise ValueError(f"argv blob is {len(blob)} bytes, exceeds {ARGV_BLOCK_SIZE}-byte block")
-    return blob + bytes(ARGV_BLOCK_SIZE - len(blob))
+from nucleo_host.argv_blob import pack_cmdline
 
 
 def main(argv):
+    """Parse CLI arguments, write the argv blob, and return a process code."""
     if len(argv) < 4:
         print("Usage: make_argv_bin.py <output.bin> <base_addr_hex> <arg0> [arg1 ...]", file=sys.stderr)
         return 2
@@ -46,6 +24,8 @@ def main(argv):
         print(f"Invalid base address hex: {base_hex}", file=sys.stderr)
         return 2
     args = argv[3:]
+    # The output format is shared with exec_wrapper.py and consumed directly by
+    # the target ``mlk_cmdline_block`` memory reservation.
     blob = pack_cmdline(args, base_addr)
     with open(out, "wb") as f:
         f.write(blob)

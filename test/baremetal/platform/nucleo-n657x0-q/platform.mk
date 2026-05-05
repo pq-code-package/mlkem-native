@@ -131,7 +131,7 @@ FLEXMEM_CONFIG_SOURCES := \
 
 .PHONY: flexmem_config run_flexmem_config run_flexmem_test
 
-run_kat_512 run_kat_768 run_kat_1024 run_acvp: run_flexmem_config
+run_kat run_acvp run_bench run_func run_unit run_alloc: run_flexmem_config
 
 flexmem_config: $(FLEXMEM_CONFIG_ELF)
 
