@@ -118,14 +118,15 @@ let LENGTH_SIMPLIFY_CONV =
 (* ------------------------------------------------------------------------- *)
 
 let have_mulcache_zetas = define
- `have_mulcache_zetas zetas zetas_twisted s <=>
+ `have_mulcache_zetas zetas zetas_twisted zetas_content zetas_twisted_content s <=>
      (!i. i < 128 ==> read(memory :> bytes16(word_add zetas (word (2*i)))) s =
-                         iword (EL i mulcache_zetas)) /\
+                         zetas_content i) /\
      (!i. i < 128 ==> read(memory :> bytes16(word_add zetas_twisted (word (2*i)))) s =
-                         iword (EL i mulcache_zetas_twisted))
+                         zetas_twisted_content i)
  `;;
 
-let poly_mulcache_compute_GOAL = `!dst src zetas zetas_twisted x pc.
+let poly_mulcache_compute_GOAL = `!dst src zetas zetas_twisted
+      (zetas_content:num->int16) (zetas_twisted_content:num->int16) x pc.
     ALL (nonoverlapping (dst, 256))
         [(word pc, LENGTH poly_mulcache_compute_mc); (src, 512); (zetas, 256); (zetas_twisted, 256)]
     ==>
@@ -137,13 +138,15 @@ let poly_mulcache_compute_GOAL = `!dst src zetas zetas_twisted x pc.
            // Give name to 16-bit coefficients stored at src to be
            // able to refer to them in the post-condition
            (!i. i < 256 ==> read(memory :> bytes16(word_add src (word (2 * i)))) s = x i) /\
-           // Assert that zetas are correct
-           have_mulcache_zetas zetas zetas_twisted s
+           // Assert that zetas memory is readable
+           have_mulcache_zetas zetas zetas_twisted zetas_content zetas_twisted_content s
       )
       (\s. // We have reached the LR
            read PC s = word(pc + MLKEM_POLY_MULCACHE_COMPUTE_CORE_END) /\
            // Odd coefficients have been multiplied with respective root of unity
-           (!i. i < 128 ==> let z_i = read(memory :> bytes16(word_add dst (word (2 * i)))) s
+           ((!i. i < 128 ==> zetas_content i = iword(EL i mulcache_zetas)) /\
+            (!i. i < 128 ==> zetas_twisted_content i = iword(EL i mulcache_zetas_twisted))
+            ==> !i. i < 128 ==> let z_i = read(memory :> bytes16(word_add dst (word (2 * i)))) s
                             in (ival z_i == (mulcache (ival o x)) i) (mod &3329) /\
                                 abs(ival z_i) <= &3328))
       // Register and memory footprint
@@ -188,6 +191,7 @@ let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(poly_mulcache_compute_GOAL,
     ENSURES_FINAL_STATE_TAC THEN
     REPEAT CONJ_TAC THEN
     ASM_REWRITE_TAC [] THEN
+    DISCH_THEN(CONJUNCTS_THEN(fun th -> RULE_ASSUM_TAC(REWRITE_RULE[th]))) THEN
 
     (* Reverse restructuring *)
     REPEAT(FIRST_X_ASSUM(STRIP_ASSUME_TAC o
@@ -241,7 +245,8 @@ let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(poly_mulcache_compute_GOAL,
  * in mlkem/src/native/aarch64/src/arith_native_aarch64.h *)
 
 let MLKEM_MULCACHE_COMPUTE_SUBROUTINE_CORRECT = prove
- (`!dst src zetas zetas_twisted x pc returnaddress.
+ (`!dst src zetas zetas_twisted
+      (zetas_content:num->int16) (zetas_twisted_content:num->int16) x pc returnaddress.
     ALL (nonoverlapping (dst, 256))
         [(word pc, LENGTH poly_mulcache_compute_mc);
          (src, 512); (zetas, 256); (zetas_twisted, 256)]
@@ -258,17 +263,19 @@ let MLKEM_MULCACHE_COMPUTE_SUBROUTINE_CORRECT = prove
            (!i. i < 256
                 ==> read(memory :> bytes16(word_add src (word (2 * i)))) s =
                     x i) /\
-           // Assert that zetas are correct
-           have_mulcache_zetas zetas zetas_twisted s)
+           // Assert that zetas memory is readable
+           have_mulcache_zetas zetas zetas_twisted zetas_content zetas_twisted_content s)
       (\s. // We have reached the LR
            read PC s = returnaddress /\
            // Odd coefficients have been multiplied with
            // respective root of unity
-           !i. i < 128
+           ((!i. i < 128 ==> zetas_content i = iword(EL i mulcache_zetas)) /\
+            (!i. i < 128 ==> zetas_twisted_content i = iword(EL i mulcache_zetas_twisted))
+            ==> !i. i < 128
                ==> let z_i = read(memory :> bytes16
                                 (word_add dst (word (2 * i)))) s in
                    (ival z_i == (mulcache (ival o x)) i) (mod &3329) /\
-                   (abs(ival z_i) <= &3328))
+                   (abs(ival z_i) <= &3328)))
       (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
        MAYCHANGE [memory :> bytes(dst, 256)])`,
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN

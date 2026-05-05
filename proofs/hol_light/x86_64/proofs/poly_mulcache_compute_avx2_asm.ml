@@ -144,7 +144,7 @@ let LENGTH_SIMPLIFY_CONV =
   NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
 let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(
- `!r a zetas (zetas_list:int16 list) x pc.
+ `!r a zetas (zetas_content:int16 list) x pc.
     aligned 32 r /\
     aligned 32 a /\
     aligned 32 zetas /\
@@ -155,14 +155,15 @@ let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(
           (\s. bytes_loaded s (word pc) (BUTLAST mlkem_mulcache_compute_tmc) /\
               read RIP s = word pc /\
               C_ARGUMENTS [r; a; zetas] s /\
-              wordlist_from_memory(zetas, 624) s = MAP (iword: int -> 16 word) qdata_full /\
+              wordlist_from_memory(zetas, 624) s = zetas_content /\
               (!i. i < 256 ==> read(memory :> bytes16(word_add a (word(2 * i)))) s = x i))
           (\s. read RIP s = word(pc + MLKEM_MULCACHE_COMPUTE_CORE_END) /\
-               !i. i < 128
+               (zetas_content = MAP (iword: int -> 16 word) qdata_full
+                ==> !i. i < 128
                    ==> let zi =
                       read(memory :> bytes16(word_add r (word(2 * i)))) s in
                       (ival zi == avx2_mulcache (ival o x) i) (mod &3329) /\
-                      (abs(ival zi) <= &3328))
+                      (abs(ival zi) <= &3328)))
           (MAYCHANGE [events] ,,
            MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8; ZMM9; ZMM10] ,,
            MAYCHANGE [RIP] ,, MAYCHANGE [RAX] ,,
@@ -170,7 +171,8 @@ let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(
 
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC
-   [`r:int64`; `a:int64`; `zetas:int64`; `x:num->int16`; `pc:num`] THEN
+   [`r:int64`; `a:int64`; `zetas:int64`; `zetas_content:int16 list`;
+    `x:num->int16`; `pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
               NONOVERLAPPING_CLAUSES; ALL] THEN
 
@@ -192,7 +194,6 @@ let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(
   CONV_TAC(LAND_CONV WORD_REDUCE_CONV) THEN STRIP_TAC THEN
 
   FIRST_X_ASSUM(MP_TAC o CONV_RULE (LAND_CONV WORDLIST_FROM_MEMORY_CONV)) THEN
-  REWRITE_TAC[qdata_full; MAP; CONS_11] THEN
   STRIP_TAC THEN
 
   MP_TAC(end_itlist CONJ (map (fun n -> READ_MEMORY_MERGE_CONV 4
@@ -207,6 +208,7 @@ let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(
                       SIMD_SIMPLIFY_TAC[ntt_montmul_alt])
         (1--59) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
+  DISCH_THEN SUBST_ALL_TAC THEN
 
   (* Reverse restructuring *)
   REPEAT(FIRST_X_ASSUM(STRIP_ASSUME_TAC o
@@ -260,7 +262,7 @@ let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(
 );;
 
 let MLKEM_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_CORRECT  = prove(
- `!r a zetas (zetas_list:int16 list) x pc stackpointer returnaddress.
+ `!r a zetas (zetas_content:int16 list) x pc stackpointer returnaddress.
     aligned 32 r /\
     aligned 32 a /\
     aligned 32 zetas /\
@@ -274,15 +276,16 @@ let MLKEM_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_CORRECT  = prove(
                read RSP s = stackpointer /\
                read (memory :> bytes64 stackpointer) s = returnaddress /\
                C_ARGUMENTS [r; a; zetas] s /\
-               wordlist_from_memory(zetas, 624) s = MAP (iword: int -> 16 word) qdata_full /\
+               wordlist_from_memory(zetas, 624) s = zetas_content /\
                (!i. i < 256 ==> read(memory :> bytes16(word_add a (word(2 * i)))) s = x i))
           (\s. read RIP s = returnaddress /\
                read RSP s = word_add stackpointer (word 8) /\
-               !i. i < 128
+               (zetas_content = MAP (iword: int -> 16 word) qdata_full
+                ==> !i. i < 128
                    ==> let zi =
                       read(memory :> bytes16(word_add r (word(2 * i)))) s in
                       (ival zi == avx2_mulcache (ival o x) i) (mod &3329) /\
-                      (abs(ival zi) <= &3328))
+                      (abs(ival zi) <= &3328)))
           (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
            MAYCHANGE [memory :> bytes(r, 256)])`,
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
@@ -295,7 +298,7 @@ let MLKEM_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_CORRECT  = prove(
  * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
 
 let MLKEM_MULCACHE_COMPUTE_SUBROUTINE_CORRECT = prove(
- `!r a zetas (zetas_list:int16 list) x pc stackpointer returnaddress.
+ `!r a zetas (zetas_content:int16 list) x pc stackpointer returnaddress.
     aligned 32 r /\
     aligned 32 a /\
     aligned 32 zetas /\
@@ -309,15 +312,16 @@ let MLKEM_MULCACHE_COMPUTE_SUBROUTINE_CORRECT = prove(
                read RSP s = stackpointer /\
                read (memory :> bytes64 stackpointer) s = returnaddress /\
                C_ARGUMENTS [r; a; zetas] s /\
-               wordlist_from_memory(zetas, 624) s = MAP (iword: int -> 16 word) qdata_full /\
+               wordlist_from_memory(zetas, 624) s = zetas_content /\
                (!i. i < 256 ==> read(memory :> bytes16(word_add a (word(2 * i)))) s = x i))
           (\s. read RIP s = returnaddress /\
                read RSP s = word_add stackpointer (word 8) /\
-               !i. i < 128
+               (zetas_content = MAP (iword: int -> 16 word) qdata_full
+                ==> !i. i < 128
                    ==> let zi =
                       read(memory :> bytes16(word_add r (word(2 * i)))) s in
                       (ival zi == avx2_mulcache (ival o x) i) (mod &3329) /\
-                      (abs(ival zi) <= &3328))
+                      (abs(ival zi) <= &3328)))
           (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
            MAYCHANGE [memory :> bytes(r, 256)])`,
   let TWEAK_CONV = ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV in

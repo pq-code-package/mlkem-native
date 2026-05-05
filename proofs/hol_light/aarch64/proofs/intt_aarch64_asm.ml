@@ -587,13 +587,13 @@ let LENGTH_SIMPLIFY_CONV =
   NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
 let intt_constants = define
- `intt_constants z_12345 z_67 s <=>
+ `intt_constants z_12345 z_67 z12345_content z67_content s <=>
         (!i. i < 80
              ==> read(memory :> bytes16(word_add z_12345 (word(2 * i)))) s =
-                 iword(EL i intt_zetas_layer12345)) /\
+                 z12345_content i) /\
         (!i. i < 384
              ==> read(memory :> bytes16(word_add z_67 (word(2 * i)))) s =
-                 iword(EL i intt_zetas_layer67))`;;
+                 z67_content i)`;;
 
 (* ------------------------------------------------------------------------- *)
 (* Correctness proof.                                                        *)
@@ -601,29 +601,33 @@ let intt_constants = define
 
 
 let MLKEM_INTT_CORRECT = prove
- (`!a z_12345 z_67 x pc.
+ (`!a z_12345 z_67 z12345_content z67_content x pc.
       ALL (nonoverlapping (a,512))
           [(word pc,LENGTH mlkem_intt_mc); (z_12345,160); (z_67,768)]
       ==> ensures arm
            (\s. aligned_bytes_loaded s (word pc) mlkem_intt_mc /\
                 read PC s = word (pc + MLKEM_INTT_CORE_START) /\
                 C_ARGUMENTS [a; z_12345; z_67] s /\
-                intt_constants z_12345 z_67 s /\
+                intt_constants z_12345 z_67 z12345_content z67_content s /\
                 !i. i < 256
                     ==> read(memory :> bytes16(word_add a (word(2 * i)))) s =
                         x i)
            (\s. read PC s = word(pc + MLKEM_INTT_CORE_END) /\
-                !i. i < 256
+                ((!i. i < 80 ==> z12345_content i = iword(EL i intt_zetas_layer12345)) /\
+                 (!i. i < 384 ==> z67_content i = iword(EL i intt_zetas_layer67))
+                 ==> !i. i < 256
                     ==> let zi =
                          read(memory :> bytes16(word_add a (word(2 * i)))) s in
                         (ival zi == inverse_ntt (ival o x) i) (mod &3329) /\
-                        abs(ival zi) <= &26624)
+                        abs(ival zi) <= &26624))
            (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
             MAYCHANGE [Q8; Q9; Q10; Q11; Q12; Q13; Q14; Q15] ,,
             MAYCHANGE [memory :> bytes(a,512)])`,
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC
-   [`a:int64`; `z_12345:int64`; `z_67:int64`; `x:num->int16`; `pc:num`] THEN
+   [`a:int64`; `z_12345:int64`; `z_67:int64`;
+    `z12345_content:num->int16`; `z67_content:num->int16`;
+    `x:num->int16`; `pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
               NONOVERLAPPING_CLAUSES; ALL] THEN
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
@@ -633,9 +637,7 @@ let MLKEM_INTT_CORRECT = prove
   REWRITE_TAC[intt_constants] THEN
   CONV_TAC(RATOR_CONV(LAND_CONV(ONCE_DEPTH_CONV
    (EXPAND_CASES_CONV THENC ONCE_DEPTH_CONV NUM_MULT_CONV)))) THEN
-  REWRITE_TAC[intt_zetas_layer12345; intt_zetas_layer67] THEN
-  CONV_TAC(ONCE_DEPTH_CONV EL_CONV) THEN
-  CONV_TAC(ONCE_DEPTH_CONV WORD_IWORD_CONV) THEN REWRITE_TAC[WORD_ADD_0] THEN
+  REWRITE_TAC[WORD_ADD_0] THEN
   ENSURES_INIT_TAC "s0" THEN
 
   (*** Manually restructure to match the 128-bit loads. It would be nicer
@@ -669,6 +671,10 @@ let MLKEM_INTT_CORRECT = prove
 
   (*** Expand and substitute in the conclusion we want to prove ***)
 
+  DISCH_THEN(CONJUNCTS_THEN(fun th -> RULE_ASSUM_TAC(REWRITE_RULE[th]))) THEN
+  RULE_ASSUM_TAC(REWRITE_RULE[intt_zetas_layer12345; intt_zetas_layer67]) THEN
+  RULE_ASSUM_TAC(CONV_RULE(ONCE_DEPTH_CONV EL_CONV)) THEN
+  RULE_ASSUM_TAC(CONV_RULE(ONCE_DEPTH_CONV WORD_IWORD_CONV)) THEN
   CONV_TAC(ONCE_DEPTH_CONV let_CONV) THEN REWRITE_TAC[INT_ABS_BOUNDS] THEN
   GEN_REWRITE_TAC (BINDER_CONV o RAND_CONV) [GSYM I_THM] THEN
   CONV_TAC(EXPAND_CASES_CONV THENC ONCE_DEPTH_CONV NUM_MULT_CONV) THEN
@@ -707,7 +713,7 @@ let MLKEM_INTT_CORRECT = prove
  * in mlkem/src/native/aarch64/src/arith_native_aarch64.h *)
 
 let MLKEM_INTT_SUBROUTINE_CORRECT = prove
- (`!a z_12345 z_67 x pc stackpointer returnaddress.
+ (`!a z_12345 z_67 z12345_content z67_content x pc stackpointer returnaddress.
       aligned 16 stackpointer /\
       ALLPAIRS nonoverlapping
        [(a,512); (word_sub stackpointer (word 64),64)]
@@ -719,16 +725,18 @@ let MLKEM_INTT_SUBROUTINE_CORRECT = prove
                 read SP s = stackpointer /\
                 read X30 s = returnaddress /\
                 C_ARGUMENTS [a; z_12345; z_67] s /\
-                intt_constants z_12345 z_67 s /\
+                intt_constants z_12345 z_67 z12345_content z67_content s /\
                 !i. i < 256
                     ==> read(memory :> bytes16(word_add a (word(2 * i)))) s =
                         x i)
            (\s. read PC s = returnaddress /\
-                !i. i < 256
+                ((!i. i < 80 ==> z12345_content i = iword(EL i intt_zetas_layer12345)) /\
+                 (!i. i < 384 ==> z67_content i = iword(EL i intt_zetas_layer67))
+                 ==> !i. i < 256
                     ==> let zi =
                          read(memory :> bytes16(word_add a (word(2 * i)))) s in
                         (ival zi == inverse_ntt (ival o x) i) (mod &3329) /\
-                        abs(ival zi) <= &26624)
+                        abs(ival zi) <= &26624))
            (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
             MAYCHANGE [memory :> bytes(a,512);
                        memory :> bytes(word_sub stackpointer (word 64),64)])`,

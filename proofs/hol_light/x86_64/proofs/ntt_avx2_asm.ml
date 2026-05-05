@@ -1067,7 +1067,7 @@ let LENGTH_SIMPLIFY_CONV =
   NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
 let MLKEM_NTT_CORRECT = prove
-  (`!a zetas (zetas_list:int16 list) x pc.
+  (`!a zetas (zetas_content:int16 list) x pc.
     aligned 32 a /\
     aligned 32 zetas /\
     nonoverlapping (word pc, LENGTH mlkem_ntt_tmc) (a, 512) /\
@@ -1077,11 +1077,12 @@ let MLKEM_NTT_CORRECT = prove
           (\s. bytes_loaded s (word pc) (BUTLAST mlkem_ntt_tmc) /\
               read RIP s = word pc /\
               C_ARGUMENTS [a; zetas] s /\
-              wordlist_from_memory(zetas, 624) s = MAP (iword: int -> 16 word) qdata_full /\
-              (!i. i < 256 ==> abs(ival(x i)) <= &8191) /\
+              wordlist_from_memory(zetas, 624) s = zetas_content /\
               (!i. i < 256 ==> read(memory :> bytes16(word_add a (word(2 * i)))) s = x i))
           (\s. read RIP s = word(pc + MLKEM_NTT_CORE_END) /\
-              (!i. i < 256
+              (zetas_content = MAP (iword: int -> 16 word) qdata_full /\
+               (!i. i < 256 ==> abs(ival(x i)) <= &8191)
+               ==> !i. i < 256
                         ==> let zi =
                       read(memory :> bytes16(word_add a (word(2 * i)))) s in
                       (ival zi == avx2_forward_ntt (ival o x) i) (mod &3329) /\
@@ -1095,7 +1096,8 @@ let MLKEM_NTT_CORRECT = prove
 
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC
-   [`a:int64`; `zetas:int64`; `x:num->int16`; `pc:num`] THEN
+   [`a:int64`; `zetas:int64`; `zetas_content:int16 list`;
+    `x:num->int16`; `pc:num`] THEN
   REWRITE_TAC[C_ARGUMENTS;
               NONOVERLAPPING_CLAUSES; ALL] THEN
 
@@ -1122,7 +1124,6 @@ let MLKEM_NTT_CORRECT = prove
 
 
   FIRST_X_ASSUM(MP_TAC o CONV_RULE (LAND_CONV WORDLIST_FROM_MEMORY_CONV)) THEN
-  REWRITE_TAC[qdata_full; MAP; CONS_11] THEN
   STRIP_TAC THEN
 
   MP_TAC(end_itlist CONJ (map (fun n -> READ_MEMORY_MERGE_CONV 4
@@ -1142,6 +1143,7 @@ let MLKEM_NTT_CORRECT = prove
                       SIMD_SIMPLIFY_ABBREV_TAC[ntt_montmul] [ntt_montmul_add; ntt_montmul_sub])
         (1--587) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
+  DISCH_THEN(CONJUNCTS_THEN2 SUBST_ALL_TAC ASSUME_TAC) THEN
 
   REPEAT(FIRST_X_ASSUM(STRIP_ASSUME_TAC o
   CONV_RULE(SIMD_SIMPLIFY_CONV[]) o
@@ -1215,7 +1217,7 @@ let MLKEM_NTT_CORRECT = prove
 );;
 
 let MLKEM_NTT_NOIBT_SUBROUTINE_CORRECT  = prove
-  (`!a zetas (zetas_list:int16 list) x pc stackpointer returnaddress.
+  (`!a zetas (zetas_content:int16 list) x pc stackpointer returnaddress.
     aligned 32 a /\
     aligned 32 zetas /\
     nonoverlapping (word pc, LENGTH mlkem_ntt_tmc) (a, 512) /\
@@ -1229,12 +1231,13 @@ let MLKEM_NTT_NOIBT_SUBROUTINE_CORRECT  = prove
               read RSP s = stackpointer /\
               read (memory :> bytes64 stackpointer) s = returnaddress /\
               C_ARGUMENTS [a; zetas] s /\
-              wordlist_from_memory(zetas, 624) s = MAP (iword: int -> 16 word) qdata_full /\
-              (!i. i < 256 ==> abs(ival(x i)) <= &8191) /\
+              wordlist_from_memory(zetas, 624) s = zetas_content /\
               (!i. i < 256 ==> read(memory :> bytes16(word_add a (word(2 * i)))) s = x i))
           (\s. read RIP s = returnaddress /\
                read RSP s = word_add stackpointer (word 8) /\
-              (!i. i < 256
+              (zetas_content = MAP (iword: int -> 16 word) qdata_full /\
+               (!i. i < 256 ==> abs(ival(x i)) <= &8191)
+               ==> !i. i < 256
                         ==> let zi =
                       read(memory :> bytes16(word_add a (word(2 * i)))) s in
                       (ival zi == avx2_forward_ntt (ival o x) i) (mod &3329) /\
@@ -1251,7 +1254,7 @@ let MLKEM_NTT_NOIBT_SUBROUTINE_CORRECT  = prove
  * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
 
 let MLKEM_NTT_SUBROUTINE_CORRECT  = prove
-  (`!a zetas (zetas_list:int16 list) x pc stackpointer returnaddress.
+  (`!a zetas (zetas_content:int16 list) x pc stackpointer returnaddress.
     aligned 32 a /\
     aligned 32 zetas /\
     nonoverlapping (word pc, LENGTH mlkem_ntt_mc) (a, 512) /\
@@ -1265,12 +1268,13 @@ let MLKEM_NTT_SUBROUTINE_CORRECT  = prove
               read RSP s = stackpointer /\
               read (memory :> bytes64 stackpointer) s = returnaddress /\
               C_ARGUMENTS [a; zetas] s /\
-              wordlist_from_memory(zetas, 624) s = MAP (iword: int -> 16 word) qdata_full /\
-              (!i. i < 256 ==> abs(ival(x i)) <= &8191) /\
+              wordlist_from_memory(zetas, 624) s = zetas_content /\
               (!i. i < 256 ==> read(memory :> bytes16(word_add a (word(2 * i)))) s = x i))
           (\s. read RIP s = returnaddress /\
                read RSP s = word_add stackpointer (word 8) /\
-              (!i. i < 256
+              (zetas_content = MAP (iword: int -> 16 word) qdata_full /\
+               (!i. i < 256 ==> abs(ival(x i)) <= &8191)
+               ==> !i. i < 256
                         ==> let zi =
                       read(memory :> bytes16(word_add a (word(2 * i)))) s in
                       (ival zi == avx2_forward_ntt (ival o x) i) (mod &3329) /\
