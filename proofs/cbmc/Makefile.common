@@ -281,10 +281,6 @@ PROVER_NAME=cvc5
 SMT_FORMAT := --cvc5
 endif
 
-# CBMC flags used for property checking and coverage checking
-
-CBMCFLAGS += $(CBMC_FLAG_FLUSH)
-
 # CBMC 6.0.0 enables all standard checks by default, which can make coverage analysis
 # very slow. See https://github.com/diffblue/cbmc/issues/8389
 # For now, we disable these checks when generating coverage info.
@@ -543,10 +539,27 @@ SPACE :=$() $()
 COMMA :=,
 
 ################################################################
-# Set C compiler defines
+# CBMC team recommend that --no-array-field-sensitivity should never be used
+# with CBMC 6.9.0 and above when --slice-formula has been specified
+ifeq ($(findstring --no-array-field-sensitivity,$(CBMCFLAGS)),--no-array-field-sensitivity)
+$(error CBMC option --no-array-field-sensitivity is believed to be detrimental to performance in CBMC v6.9.0 and has been removed from the CBMC Makefiles -- do you really want this?)
+endif
 
+################################################################
+# CBMC team recommend that --slice-formula should _always_ be used
+# so we reject it here if it is already specified in a per-function Makefile
+ifeq ($(findstring --slice-formula,$(CBMCFLAGS)),--slice-formula)
+$(error CBMC option --slice-formula is set by default in Makefile.common, so should not be specified in a function-specific Makefile)
+endif
+
+################################################################
+# CBMC flags common to all proofs
+CBMCFLAGS += $(CBMC_FLAG_FLUSH)
 CBMCFLAGS += --object-bits $(CBMC_OBJECT_BITS)
+CBMCFLAGS += --slice-formula
 
+################################################################
+# Set C compiler defines
 DEFINES += -DCBMC=1
 DEFINES += -DCBMC_OBJECT_BITS=$(CBMC_OBJECT_BITS)
 DEFINES += -DCBMC_MAX_OBJECT_SIZE="(SIZE_MAX>>(CBMC_OBJECT_BITS+1))"

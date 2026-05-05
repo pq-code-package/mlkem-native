@@ -95,28 +95,24 @@ __contract__(
     assigns(memory_slice(out2, nblocks * r))
     assigns(memory_slice(out3, nblocks * r)))
 {
+  size_t current_offset = 0;
   while (nblocks > 0)
   __loop__(
-    assigns(out0, out1, out2, out3, nblocks,
+    assigns(nblocks, current_offset,
             memory_slice(s, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY),
             memory_slice(out0, nblocks * r),
             memory_slice(out1, nblocks * r),
             memory_slice(out2, nblocks * r),
             memory_slice(out3, nblocks * r))
-    invariant(nblocks <= loop_entry(nblocks) &&
-      out0 == loop_entry(out0) + r * (loop_entry(nblocks) - nblocks) &&
-      out1 == loop_entry(out1) + r * (loop_entry(nblocks) - nblocks) &&
-      out2 == loop_entry(out2) + r * (loop_entry(nblocks) - nblocks) &&
-      out3 == loop_entry(out3) + r * (loop_entry(nblocks) - nblocks))
+    invariant(nblocks <= loop_entry(nblocks))
+    invariant(current_offset == (loop_entry(nblocks) - nblocks) * r)
     decreases(nblocks))
   {
     mlk_keccakf1600x4_permute(s);
-    mlk_keccakf1600x4_extract_bytes(s, out0, out1, out2, out3, 0, r);
-
-    out0 += r;
-    out1 += r;
-    out2 += r;
-    out3 += r;
+    mlk_keccakf1600x4_extract_bytes(
+        s, &out0[current_offset], &out1[current_offset], &out2[current_offset],
+        &out3[current_offset], 0, r);
+    current_offset += r;
     nblocks--;
   }
 }

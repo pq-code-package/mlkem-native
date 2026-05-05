@@ -75,7 +75,6 @@ def loadAcvpData(prompt, expectedResults):
 
 
 def loadDefaultAcvpData(version):
-
     data_dir = f"test/acvp/.acvp-data/{version}/files"
     acvp_jsons_for_version = [
         (
@@ -142,19 +141,16 @@ def run_encapDecap_test(tg, tc):
             err(result.stderr)
             exit(1)
         # Extract results
-        for l in result.stdout.splitlines():
-            (k, v) = l.split("=")
+        for line in result.stdout.splitlines():
+            (k, v) = line.split("=")
             results[k] = v
     elif tg["function"] == "decapsulation":
         acvp_bin = get_acvp_binary(tg)
-        # TODO: Remove this fallback workaround. v.1.1.0.40 moved the dk from the
-        # tg to the tc. This can be removed when v1.1.0.39 is removed.
-        dk_value = tc.get("dk", tg.get("dk"))
         acvp_call = exec_prefix + acvp_bin + [
             "encapDecap",
             "VAL",
             "decapsulation",
-            f"dk={dk_value}",
+            f"dk={tc['dk']}",
             f"c={tc['c']}",
         ]
         result = subprocess.run(acvp_call, encoding="utf-8", capture_output=True)
@@ -164,8 +160,8 @@ def run_encapDecap_test(tg, tc):
             err(result.stderr)
             exit(1)
         # Extract results
-        for l in result.stdout.splitlines():
-            (k, v) = l.split("=")
+        for line in result.stdout.splitlines():
+            (k, v) = line.split("=")
             results[k] = v
     elif tg["function"] == "encapsulationKeyCheck":
         acvp_bin = get_acvp_binary(tg)
@@ -182,8 +178,8 @@ def run_encapDecap_test(tg, tc):
             err(result.stderr)
             exit(1)
         # Extract results
-        for l in result.stdout.splitlines():
-            (k, v) = l.split("=")
+        for line in result.stdout.splitlines():
+            (k, v) = line.split("=")
             results[k] = v == "1"
 
     elif tg["function"] == "decapsulationKeyCheck":
@@ -201,8 +197,8 @@ def run_encapDecap_test(tg, tc):
             err(result.stderr)
             exit(1)
         # Extract results
-        for l in result.stdout.splitlines():
-            (k, v) = l.split("=")
+        for line in result.stdout.splitlines():
+            (k, v) = line.split("=")
             results[k] = v == "1"
     info("done")
     return results
@@ -226,8 +222,8 @@ def run_keyGen_test(tg, tc):
         err(result.stderr)
         exit(1)
     # Extract results
-    for l in result.stdout.splitlines():
-        (k, v) = l.split("=")
+    for line in result.stdout.splitlines():
+        (k, v) = line.split("=")
         results[k] = v
     info("done")
     return results
@@ -311,13 +307,13 @@ def runTest(data, output):
 
 
 def test(prompt, expected, output, version):
-    assert (
-        prompt is not None or output is None
-    ), "cannot produce output if there is no input"
+    assert prompt is not None or output is None, (
+        "cannot produce output if there is no input"
+    )
 
-    assert prompt is None or (
-        output is not None or expected is not None
-    ), "if there is a prompt, either output or expectedResult required"
+    assert prompt is None or (output is not None or expected is not None), (
+        "if there is a prompt, either output or expectedResult required"
+    )
 
     # if prompt is passed, use it
     if prompt is not None:

@@ -24,8 +24,8 @@ static MLK_INLINE int mlk_keccak_f1600_x4_native(uint64_t *state)
     return MLK_NATIVE_FUNC_FALLBACK;
   }
 
-  mlk_keccak_f1600_x4_avx2(state, mlk_keccakf1600_round_constants,
-                           mlk_keccak_rho8, mlk_keccak_rho56);
+  mlk_keccak_f1600_x4_avx2_asm(state, mlk_keccakf1600_round_constants,
+                               mlk_keccak_rho8, mlk_keccak_rho56);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* !__ASSEMBLER__ */

@@ -46,7 +46,6 @@ runs:
               - $(nix --version)
               - $(cbmc --version)
               - litani Version $(litani --version)
-              - Cadical Version $(cadical --version)
               - $(bash --version | grep -m1 "")
             EOF
       - name: Run CBMC proofs (MLKEM_K=${{ inputs.mlkem_k }})

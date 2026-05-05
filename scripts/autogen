@@ -556,23 +556,23 @@ def adjust_preprocessor_comments_for_filename(
     # - `force_print` indicates if a comment should be omitted
     if_stack = []
 
-    def merge_escaped_lines(l, i):
-        while l.endswith("\\"):
-            l = l.removesuffix("\\").rstrip() + content[i + 1].lstrip()
+    def merge_escaped_lines(line, i):
+        while line.endswith("\\"):
+            line = line.removesuffix("\\").rstrip() + content[i + 1].lstrip()
             i = i + 1
-        return (l, i)
+        return (line, i)
 
-    def merge_commented_lines(l, i):
+    def merge_commented_lines(line, i):
         # Not very robust, but good enough
-        if not "/*" in l or "*/" in l:
-            return (l, i)
+        if "/*" not in line or "*/" in line:
+            return (line, i)
         i += 1
         while "*/" not in content[i]:
-            l += content[i]
+            line += content[i]
             i += 1
 
-        l += content[i]
-        return (l, i)
+        line += content[i]
+        return (line, i)
 
     def should_print(cur_line_no, conds, line_no, force_print):
         line_threshold = 5
@@ -631,26 +631,26 @@ def adjust_preprocessor_comments_for_filename(
 
     i = 0
     while i < len(content):
-        l = content[i].strip()
+        line = content[i].strip()
         # Replace #ifdef by #if defined(...)
-        if l.startswith("#ifdef "):
-            l = "#if defined(" + l.removeprefix("#ifdef").strip() + ")"
-        if l.startswith("#ifndef "):
-            l = "#if !defined(" + l.removeprefix("#ifndef").strip() + ")"
-        if l.startswith("#if"):
-            l, _ = merge_escaped_lines(l, i)
-            cond = l.removeprefix("#if")
+        if line.startswith("#ifdef "):
+            line = "#if defined(" + line.removeprefix("#ifdef").strip() + ")"
+        if line.startswith("#ifndef "):
+            line = "#if !defined(" + line.removeprefix("#ifndef").strip() + ")"
+        if line.startswith("#if"):
+            line, _ = merge_escaped_lines(line, i)
+            cond = line.removeprefix("#if")
             if_stack.append(([cond], i, True, False))
             new_content.append(content[i])
-        elif l.startswith("#elif"):
+        elif line.startswith("#elif"):
             conds, _, _, force_print = if_stack.pop()
-            l, _ = merge_escaped_lines(l, i)
-            conds.append(l.removeprefix("#elif"))
+            line, _ = merge_escaped_lines(line, i)
+            conds.append(line.removeprefix("#elif"))
             if_stack.append((conds, i, True, force_print))
             new_content.append(content[i])
-        elif l.startswith("#else"):
-            l, i = merge_escaped_lines(l, i)
-            _, i = merge_commented_lines(l, i)
+        elif line.startswith("#else"):
+            line, i = merge_escaped_lines(line, i)
+            _, i = merge_commented_lines(line, i)
             conds, j, branch, force_print = if_stack.pop()
             assert branch is True
             print_else = should_print(i, cond, j, force_print)
@@ -660,9 +660,9 @@ def adjust_preprocessor_comments_for_filename(
                 new_content.append(adhoc_format("#else", cond))
             else:
                 new_content.append("#else")
-        elif l.startswith("#endif"):
-            l, i = merge_escaped_lines(l, i)
-            _, i = merge_commented_lines(l, i)
+        elif line.startswith("#endif"):
+            line, i = merge_escaped_lines(line, i)
+            _, i = merge_commented_lines(line, i)
             conds, j, branch, force_print = if_stack.pop()
             print_endif = should_print(i, conds, j, force_print)
             if print_endif is False:
@@ -675,7 +675,7 @@ def adjust_preprocessor_comments_for_filename(
             # handle `#if ...` inside documentation as this would
             # lead to nested `/* ... */`.
             i_old = i
-            _, i = merge_commented_lines(l, i_old)
+            _, i = merge_commented_lines(line, i_old)
             new_content += content[i_old : i + 1]
         i += 1
 
@@ -932,7 +932,6 @@ def gen_aarch64_mulcache_twiddles_twisted():
 
 
 def print_hol_light_array(g, as_int=True, entries_per_line=8, pad=0):
-
     # Format of integer list entries, including `;` separator:
     # - Positive numbers: &42;
     # - Negative numbers: -- &42;
@@ -945,12 +944,51 @@ def print_hol_light_array(g, as_int=True, entries_per_line=8, pad=0):
         c = "&" if as_int is True else ""
         return f"{prefix}{c}{n:>{pad}};"
 
-    l = list(map(format_hol_light_int, g))
+    items = list(map(format_hol_light_int, g))
     # Remove `;` from end of last entry
-    l[-1] = l[-1][:-1]
+    items[-1] = items[-1][:-1]
 
-    for i in range(0, len(l), entries_per_line):
-        yield "  " + " ".join(l[i : i + entries_per_line])
+    for i in range(0, len(items), entries_per_line):
+        yield "  " + " ".join(items[i : i + entries_per_line])
+
+
+def emit_c_array(type_str, name, data, formatter=None, suffix=""):
+    """Emit a C array definition with explicit size.
+
+    Yields lines for:
+        MLK_ALIGN MLK_INTERNAL_DATA_DEFINITION <type>
+            <name>[<count>]<suffix> = { <body> };
+
+    data: elements (list or generator; materialized internally).
+          If elements are lists/tuples (row-oriented data), count is the
+          total number of scalar elements across all rows.
+    formatter: callable(data) -> iterable of body lines.
+              Default: one "element," per line.
+    suffix: extra array dimensions (e.g., "[8]" for 2D arrays).
+    """
+    data = list(data)
+    if data and isinstance(data[0], (list, tuple)):
+        count = sum(len(row) for row in data)
+    else:
+        count = len(data)
+    yield f"MLK_ALIGN MLK_INTERNAL_DATA_DEFINITION {type_str}"
+    yield f"    {name}[{count}]{suffix} = {{"
+    if formatter is not None:
+        yield from formatter(data)
+    else:
+        yield from (f"{elem}," for elem in data)
+    yield "};"
+
+
+def emit_c_array_decl(type_str, name, count, suffix=""):
+    """Return a C array forward declaration with explicit size."""
+    return f"MLK_INTERNAL_DATA_DECLARATION {type_str} {name}[{count}]{suffix};"
+
+
+def _fmt_indexed_rows(data):
+    """Format rows of data with index comments."""
+    for i, row in enumerate(data):
+        yield ",".join(map(str, row)) + f" /* {i} */,"
 
 
 def gen_aarch64_hol_light_zeta_file():
@@ -1004,29 +1042,41 @@ def gen_aarch64_zeta_file():
         yield " * Table of zeta values used in the AArch64 forward NTT"
         yield " * See autogen for details."
         yield " */"
-        yield "MLK_ALIGN const int16_t mlk_aarch64_ntt_zetas_layer12345[] = {"
-        yield from map(lambda t: str(t) + ",", gen_aarch64_fwd_ntt_zetas_layer12345())
-        yield "};"
+        yield from emit_c_array(
+            "const int16_t",
+            "mlk_aarch64_ntt_zetas_layer12345",
+            gen_aarch64_fwd_ntt_zetas_layer12345(),
+        )
         yield ""
-        yield "MLK_ALIGN const int16_t mlk_aarch64_ntt_zetas_layer67[] = {"
-        yield from map(lambda t: str(t) + ",", gen_aarch64_fwd_ntt_zetas_layer67())
-        yield "};"
+        yield from emit_c_array(
+            "const int16_t",
+            "mlk_aarch64_ntt_zetas_layer67",
+            gen_aarch64_fwd_ntt_zetas_layer67(),
+        )
         yield ""
-        yield "MLK_ALIGN const int16_t mlk_aarch64_invntt_zetas_layer12345[] = {"
-        yield from map(lambda t: str(t) + ",", gen_aarch64_inv_ntt_zetas_layer12345())
-        yield "};"
+        yield from emit_c_array(
+            "const int16_t",
+            "mlk_aarch64_invntt_zetas_layer12345",
+            gen_aarch64_inv_ntt_zetas_layer12345(),
+        )
         yield ""
-        yield "MLK_ALIGN const int16_t mlk_aarch64_invntt_zetas_layer67[] = {"
-        yield from map(lambda t: str(t) + ",", gen_aarch64_inv_ntt_zetas_layer67())
-        yield "};"
+        yield from emit_c_array(
+            "const int16_t",
+            "mlk_aarch64_invntt_zetas_layer67",
+            gen_aarch64_inv_ntt_zetas_layer67(),
+        )
         yield ""
-        yield "MLK_ALIGN const int16_t mlk_aarch64_zetas_mulcache_native[] = {"
-        yield from map(lambda t: str(t) + ",", gen_aarch64_mulcache_twiddles())
-        yield "};"
+        yield from emit_c_array(
+            "const int16_t",
+            "mlk_aarch64_zetas_mulcache_native",
+            gen_aarch64_mulcache_twiddles(),
+        )
         yield ""
-        yield "MLK_ALIGN const int16_t mlk_aarch64_zetas_mulcache_twisted_native[] = {"
-        yield from map(lambda t: str(t) + ",", gen_aarch64_mulcache_twiddles_twisted())
-        yield "};"
+        yield from emit_c_array(
+            "const int16_t",
+            "mlk_aarch64_zetas_mulcache_twisted_native",
+            gen_aarch64_mulcache_twiddles_twisted(),
+        )
         yield ""
         yield "#else"
         yield ""
@@ -1093,10 +1143,12 @@ def gen_aarch64_rej_uniform_table():
         yield " * Lookup table used by rejection sampling of the public matrix."
         yield " * See autogen for details."
         yield " */"
-        yield "MLK_ALIGN const uint8_t mlk_rej_uniform_table[] = {"
-        for i, idxs in enumerate(gen_rej_uniform_table_rows()):
-            yield ",".join(map(str, idxs)) + f" /* {i} */,"
-        yield "};"
+        yield from emit_c_array(
+            "const uint8_t",
+            "mlk_rej_uniform_table",
+            gen_rej_uniform_table_rows(),
+            formatter=_fmt_indexed_rows,
+        )
         yield ""
         yield "#else"
         yield ""
@@ -1144,10 +1196,12 @@ def gen_avx2_rej_uniform_table():
         yield " * Lookup table used by rejection sampling of the public matrix."
         yield " * See autogen for details."
         yield " */"
-        yield "MLK_ALIGN const uint8_t mlk_rej_uniform_table[] = {"
-        for i, idxs in enumerate(gen_rej_uniform_table_rows()):
-            yield ",".join(map(str, idxs)) + f" /* {i} */,"
-        yield "};"
+        yield from emit_c_array(
+            "const uint8_t",
+            "mlk_rej_uniform_table",
+            gen_rej_uniform_table_rows(),
+            formatter=_fmt_indexed_rows,
+        )
         yield ""
         yield "#else"
         yield ""
@@ -1189,7 +1243,6 @@ def gen_avx2_root_of_unity_for_block(layer, block, inv=False):
 
 
 def gen_avx2_fwd_ntt_zetas():
-
     def gen_twiddles(layer, block, repeat):
         """Generates twisted twiddle, then twiddle, for given layer and block.
         Repeat both the given number of times."""
@@ -1202,8 +1255,8 @@ def gen_avx2_fwd_ntt_zetas():
         root_pairs = list(
             map(lambda x: gen_twiddles(layer, block_base + x, repeat), block_offsets)
         )
-        yield from (r for l in root_pairs for r in l[1])
-        yield from (r for l in root_pairs for r in l[0])
+        yield from (r for pair in root_pairs for r in pair[1])
+        yield from (r for pair in root_pairs for r in pair[0])
 
     # Layers 1 twiddle
     yield from gen_twiddles_many(0, 0, range(1), 4)
@@ -1540,8 +1593,6 @@ def gen_avx2_compress_consts_file():
 
     def gen_const_def(name, sections, dtype, layout):
         """Generate a merged constant array definition."""
-        # Calculate total size
-        total_size = sum(len(vals) for _, vals in sections)
         # Generate layout comment for multi-section arrays
         if len(sections) > 1:
             offset = 0
@@ -1550,18 +1601,21 @@ def gen_avx2_compress_consts_file():
                 parts.append(f"{sec_name}[{offset}:{offset + len(vals)}]")
                 offset += len(vals)
             yield f"/* {', '.join(parts)} */"
-        yield f"MLK_ALIGN const {dtype} mlk_{name}[{total_size}] = {{"
-        for sec_name, vals in sections:
-            for i in range(0, len(vals), 8):
-                row = vals[i : i + 8]
-                is_last_row = i + 8 >= len(vals)
-                row_str = ", ".join(f"{v:>3}" for v in row) + ","
-                # Add section comment at end of last row to anchor formatting
-                if is_last_row:
-                    yield f"    {row_str} /* {sec_name} */"
-                else:
-                    yield f"    {row_str}"
-        yield "};"
+
+        def fmt(_data):
+            for sec_name, vals in sections:
+                for i in range(0, len(vals), 8):
+                    row = vals[i : i + 8]
+                    is_last_row = i + 8 >= len(vals)
+                    row_str = ", ".join(f"{v:>3}" for v in row) + ","
+                    # Add section comment at end of last row to anchor formatting
+                    if is_last_row:
+                        yield f"    {row_str} /* {sec_name} */"
+                    else:
+                        yield f"    {row_str}"
+
+        flat = [v for _, vals in sections for v in vals]
+        yield from emit_c_array(f"const {dtype}", f"mlk_{name}", flat, formatter=fmt)
 
     def gen_c():
         yield from gen_header()
@@ -1615,7 +1669,7 @@ def gen_avx2_compress_consts_file():
         for name, (sections, dtype, layout, level) in consts.items():
             total_size = sum(len(vals) for _, vals in sections)
             yield f"#define mlk_{name} MLK_NAMESPACE({name})"
-            yield f"extern const {dtype} mlk_{name}[{total_size}];"
+            yield emit_c_array_decl(f"const {dtype}", f"mlk_{name}", total_size)
             yield ""
 
         yield "#endif /* !__ASSEMBLER__ */"
@@ -1712,11 +1766,11 @@ def print_hol_light_word64_list(g, entries_per_line=4):
     Analogous to print_hol_light_array but for int64 word lists.
     Yields lines with leading indent, semicolon-separated.
     """
-    l = [f"word 0x{v:016X}" for v in g]
+    items = [f"word 0x{v:016X}" for v in g]
 
-    for i in range(0, len(l), entries_per_line):
-        row = l[i : i + entries_per_line]
-        is_last = i + entries_per_line >= len(l)
+    for i in range(0, len(items), entries_per_line):
+        row = items[i : i + entries_per_line]
+        is_last = i + entries_per_line >= len(items)
         line = "; ".join(row)
         if not is_last:
             line += ";"
@@ -1728,12 +1782,14 @@ def print_c_uint64_array(name, values, entries_per_line=1):
 
     Yields lines for a complete array definition including braces.
     """
-    yield f"MLK_ALIGN const uint64_t {name}[] = {{"
     vals = list(values)
-    for i in range(0, len(vals), entries_per_line):
-        row = vals[i : i + entries_per_line]
-        yield "    " + ", ".join(f"0x{v:016x}" for v in row) + ","
-    yield "};"
+
+    def fmt(_data):
+        for i in range(0, len(vals), entries_per_line):
+            row = vals[i : i + entries_per_line]
+            yield "    " + ", ".join(f"0x{v:016x}" for v in row) + ","
+
+    yield from emit_c_array("const uint64_t", name, vals, formatter=fmt)
 
 
 def gen_aarch64_keccak_constants_c_file():
@@ -1867,9 +1923,7 @@ def gen_avx2_zeta_file():
         yield " * Table of zeta values used in the AVX2 NTTs"
         yield " * See autogen for details."
         yield " */"
-        yield f"MLK_ALIGN const int16_t mlk_qdata[{len(constants)}] = {{"
-        yield from map(lambda t: str(t) + ",", constants)
-        yield "};"
+        yield from emit_c_array("const int16_t", "mlk_qdata", constants)
         yield ""
         yield "#else"
         yield ""
@@ -1890,7 +1944,7 @@ def gen_avx2_zeta_file():
         yield ""
         yield "#ifndef __ASSEMBLER__"
         yield "#define mlk_qdata MLK_NAMESPACE(qdata)"
-        yield f"extern const int16_t mlk_qdata[{len(constants)}];"
+        yield emit_c_array_decl("const int16_t", "mlk_qdata", len(constants))
         yield "#endif"
         yield ""
         yield "#endif"
@@ -2107,8 +2161,8 @@ def get_all_files():
 
 
 def get_defines_from_file(c):
-    for l in read_file(c).split("\n"):
-        m = _RE_DEFINE.match(l)
+    for line in read_file(c).split("\n"):
+        m = _RE_DEFINE.match(line)
         if m:
             yield (c, m.group(1))
 
@@ -2144,9 +2198,10 @@ def get_checked_defines():
 
 
 def gen_monolithic_undef_all_core(filt=None, desc=""):
-
     if filt is None:
-        filt = lambda c: True
+
+        def filt(c):
+            return True
 
     if desc != "":
         yield "/*"
@@ -2351,7 +2406,6 @@ def gen_macro_undefs(extra_notes=None):
 
 
 def gen_monolithic_source_file():
-
     def gen():
         c_sources = get_c_source_files(main_only=True, strip_mlkem=True)
         yield from gen_header()
@@ -2450,7 +2504,6 @@ def gen_monolithic_source_file():
 
 
 def gen_monolithic_asm_file():
-
     def gen():
         asm_sources = get_asm_source_files(main_only=True, strip_mlkem=True)
         yield from gen_header()
@@ -2554,9 +2607,10 @@ def gen_monolithic_asm_file():
 
 def get_config_options():
     content = read_file("mlkem/mlkem_native_config.h")
-    config_pattern = r"Name:\s*(MLK_CONFIG_\w+)"
+    # Match `#define X`, `/* #define X */`, `#ifndef X`, `#ifdef X` lines.
+    config_pattern = r"(?m)^\s*(?:/\*\s*)?#\s*(?:define|ifn?def)\s+(MLK_CONFIG_\w+)\b"
 
-    configs = re.findall(config_pattern, content)
+    configs = list(set(re.findall(config_pattern, content)))
 
     configs += [
         "MLK_FORCE_AARCH64",
@@ -2597,7 +2651,6 @@ def get_syscaps():
 
 def check_macro_typos():
     files = get_all_files()
-    configs = get_config_options()
     syscaps = get_syscaps()
 
     macros = set(map(lambda t: t[1], get_defines(all=True)))
@@ -2661,22 +2714,22 @@ def check_macro_typos():
 def check_asm_register_aliases_for_file(filename):
     """Checks that `filename` has no mismatching or dangling register aliases"""
 
-    def get_alias_def(l):
-        s = list(filter(lambda s: s != "", l.strip().split(" ")))
+    def get_alias_def(line):
+        s = list(filter(lambda s: s != "", line.strip().split(" ")))
         if len(s) < 3 or s[1] != ".req":
             return None
         return s[0]
 
-    def get_alias_undef(l):
-        if l.strip().startswith(".unreq") is False:
+    def get_alias_undef(line):
+        if line.strip().startswith(".unreq") is False:
             return None
-        return list(filter(lambda s: s != "", l.strip().split(" ")))[1]
+        return list(filter(lambda s: s != "", line.strip().split(" ")))[1]
 
     content = read_file(filename)
     aliases = {}
-    for i, l in enumerate(content.split("\n")):
-        alias_def = get_alias_def(l)
-        alias_undef = get_alias_undef(l)
+    for i, line in enumerate(content.split("\n")):
+        alias_def = get_alias_def(line)
+        alias_undef = get_alias_undef(line)
         if alias_def is not None:
             if alias_def in aliases.keys():
                 raise Exception(
@@ -2718,12 +2771,11 @@ def check_asm_loop_labels_for_file(filename):
     content = read_file(filename)
 
     # Find function symbol name
-    func_pattern = r"MLK_ASM_FN_SYMBOL\((.*)\)"
     res = _RE_FUNC_SYMBOL.search(content)
     if res is None:
         raise Exception(f"Could not find function symbol in assembly file {filename}")
     funcname = res.group(1)
-    lbl_prefix = funcname.replace("_asm", "") + "_"
+    lbl_prefix = re.sub(r"(_(aarch64|avx2|mve))?_asm$", "", funcname) + "_"
     lbl_pattern = r"^(\w+):"
     for m in re.finditer(lbl_pattern, content, flags=re.M):
         lbl = m.group(1)
@@ -2825,7 +2877,6 @@ def update_via_simpasm(
     force_cross=False,
     x86_64_syntax="att",
 ):
-
     _, infile = os.path.split(infile_full)
     if outfile is None:
         outfile = infile
@@ -2888,9 +2939,7 @@ def update_via_simpasm(
                 "-o",
                 tmp.name,
             ]
-            # TODO: Support CFI for Armv8.1-M
-            if arch != "armv81m":
-                cmd += ["--cfify"]
+            cmd += ["--cfify"]
             if cross_prefix is not None:
                 # Stick with llvm-objdump for disassembly
                 cmd += ["--cc", cross_prefix + "gcc"]
@@ -2902,7 +2951,7 @@ def update_via_simpasm(
             # Add syntax option for x86_64
             if arch == "x86_64" and x86_64_syntax != "att":
                 cmd += ["--syntax", x86_64_syntax]
-            r = subprocess.run(
+            subprocess.run(
                 cmd,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE,
@@ -2921,120 +2970,103 @@ def update_via_simpasm(
 
 
 def gen_hol_light_asm_file(job):
-    infile, outfile, indir, cflags, arch = job
+    infile, indir, cflags, arch = job
     update_via_simpasm(
         f"{indir}/{infile}",
         "proofs/hol_light/" + arch + "/mlkem",
-        outfile=outfile,
         cflags=cflags + " -Imlkem",
         preserve_header=False,
     )
 
 
 def gen_hol_light_asm():
-
     joblist_aarch64 = [
         (
-            "ntt.S",
-            "mlkem_ntt.S",
+            "ntt_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "intt.S",
-            "mlkem_intt.S",
+            "intt_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "poly_tomont_asm.S",
-            "mlkem_poly_tomont.S",
+            "poly_tomont_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "poly_tobytes_asm.S",
-            "mlkem_poly_tobytes.S",
+            "poly_tobytes_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "poly_reduce_asm.S",
-            "mlkem_poly_reduce.S",
+            "poly_reduce_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "poly_mulcache_compute_asm.S",
-            "mlkem_poly_mulcache_compute.S",
+            "poly_mulcache_compute_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "polyvec_basemul_acc_montgomery_cached_asm_k2.S",
-            "mlkem_poly_basemul_acc_montgomery_cached_k2.S",
+            "polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "polyvec_basemul_acc_montgomery_cached_asm_k3.S",
-            "mlkem_poly_basemul_acc_montgomery_cached_k3.S",
+            "polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "polyvec_basemul_acc_montgomery_cached_asm_k4.S",
-            "mlkem_poly_basemul_acc_montgomery_cached_k4.S",
+            "polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "rej_uniform_asm.S",
-            "mlkem_rej_uniform.S",
+            "rej_uniform_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "keccak_f1600_x1_scalar_asm.S",
-            "keccak_f1600_x1_scalar.S",
+            "keccak_f1600_x1_scalar_aarch64_asm.S",
             "dev/fips202/aarch64/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
             "aarch64",
         ),
         (
-            "keccak_f1600_x1_v84a_asm.S",
-            "keccak_f1600_x1_v84a.S",
+            "keccak_f1600_x1_v84a_aarch64_asm.S",
             "dev/fips202/aarch64/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
             "aarch64",
         ),
         (
-            "keccak_f1600_x2_v84a_asm.S",
-            "keccak_f1600_x2_v84a.S",
+            "keccak_f1600_x2_v84a_aarch64_asm.S",
             "dev/fips202/aarch64/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
             "aarch64",
         ),
         (
-            "keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S",
-            "keccak_f1600_x4_v8a_v84a_scalar.S",
+            "keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S",
             "dev/fips202/aarch64/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
             "aarch64",
         ),
         (
-            "keccak_f1600_x4_v8a_scalar_hybrid_asm.S",
-            "keccak_f1600_x4_v8a_scalar.S",
+            "keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S",
             "dev/fips202/aarch64/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/fips202/native/aarch64/src/",
             "aarch64",
@@ -3044,148 +3076,127 @@ def gen_hol_light_asm():
     x86_64_flags = "-mavx2 -mbmi2 -msse4 -fcf-protection=full"
     joblist_x86_64 = [
         (
-            "polyvec_basemul_acc_montgomery_cached_asm_k2.S",
-            "mlkem_poly_basemul_acc_montgomery_cached_k2.S",
+            "polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "polyvec_basemul_acc_montgomery_cached_asm_k3.S",
-            "mlkem_poly_basemul_acc_montgomery_cached_k3.S",
+            "polyvec_basemul_acc_montgomery_cached_k3_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "polyvec_basemul_acc_montgomery_cached_asm_k4.S",
-            "mlkem_poly_basemul_acc_montgomery_cached_k4.S",
+            "polyvec_basemul_acc_montgomery_cached_k4_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "ntt.S",
-            "mlkem_ntt.S",
+            "ntt_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "intt.S",
-            "mlkem_intt.S",
+            "intt_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "reduce.S",
-            "mlkem_reduce.S",
+            "reduce_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "ntttobytes.S",
-            "mlkem_tobytes.S",
+            "ntttobytes_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "rej_uniform_asm.S",
-            "mlkem_rej_uniform.S",
+            "rej_uniform_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "nttfrombytes.S",
-            "mlkem_frombytes.S",
+            "nttfrombytes_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "tomont.S",
-            "mlkem_tomont.S",
+            "tomont_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "nttunpack.S",
-            "mlkem_unpack.S",
+            "nttunpack_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "mulcache_compute.S",
-            "mlkem_mulcache_compute.S",
+            "poly_mulcache_compute_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_compress_d4.S",
-            "mlkem_poly_compress_d4.S",
+            "poly_compress_d4_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_decompress_d4.S",
-            "mlkem_poly_decompress_d4.S",
+            "poly_decompress_d4_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_compress_d5.S",
-            "mlkem_poly_compress_d5.S",
+            "poly_compress_d5_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_decompress_d5.S",
-            "mlkem_poly_decompress_d5.S",
+            "poly_decompress_d5_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_compress_d10.S",
-            "mlkem_poly_compress_d10.S",
+            "poly_compress_d10_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_decompress_d10.S",
-            "mlkem_poly_decompress_d10.S",
+            "poly_decompress_d10_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_compress_d11.S",
-            "mlkem_poly_compress_d11.S",
+            "poly_compress_d11_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_decompress_d11.S",
-            "mlkem_poly_decompress_d11.S",
+            "poly_decompress_d11_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "keccak_f1600_x4_avx2.S",
-            "keccak_f1600_x4_avx2.S",
+            "keccak_f1600_x4_avx2_asm.S",
             "dev/fips202/x86_64/src",
             f"-Idev/fips202/x86_64/src -Imlkem/src/fips202/native/x86_64/src {x86_64_flags}",
             "x86_64",
@@ -3197,7 +3208,6 @@ def gen_hol_light_asm():
 
 
 def update_via_copy(infile_full, outfile_full, transform=None):
-
     content = read_file(infile_full)
 
     if transform is not None:
@@ -3215,7 +3225,6 @@ SYNCHRONIZED_EXTENSIONS = (".c", ".h", ".i", ".inc", ".S")
 
 
 def synchronize_file(f, in_dir, out_dir, delete=False, no_simplify=False, **kwargs):
-
     if not f.endswith(SYNCHRONIZED_EXTENSIONS):
         return None
 
@@ -3238,7 +3247,9 @@ def synchronize_file(f, in_dir, out_dir, delete=False, no_simplify=False, **kwar
         # don't do it here, the dry-run would fail because of a
         # mismatching intermediate file
         if f.endswith(".h"):
-            transform = lambda c: adjust_header_guard_for_filename(c, outfile_full)
+
+            def transform(c):
+                return adjust_header_guard_for_filename(c, outfile_full)
         else:
             transform = None
         update_via_copy(f, outfile_full, transform=transform)
@@ -3301,7 +3312,7 @@ def synchronize_backends(
         )
 
         update_via_copy(
-            f"dev/x86_64/meta.h",
+            "dev/x86_64/meta.h",
             "mlkem/src/native/x86_64/meta.h",
             transform=lambda c: adjust_header_guard_for_filename(
                 c, "mlkem/src/native/x86_64/meta.h"
@@ -3392,7 +3403,6 @@ def synchronize_backends(
 
 
 def adjust_header_guard_for_filename(content, header_file):
-
     content = content.split("\n")
     exceptions = {
         "mlkem/mlkem_native.h": "MLK_H",
@@ -3416,7 +3426,7 @@ def adjust_header_guard_for_filename(content, header_file):
         yield f"#define {guard_name}"
 
     def gen_footer():
-        yield f"#endif"
+        yield "#endif"
         yield ""
 
     guard = list(gen_guard())
@@ -3424,8 +3434,8 @@ def adjust_header_guard_for_filename(content, header_file):
 
     # Skip over initial commentary
     insert_at = None
-    for i, l in enumerate(content):
-        if l.strip() == "" or l.startswith(("/*", " *")):
+    for i, line in enumerate(content):
+        if line.strip() == "" or line.startswith(("/*", " *")):
             continue
         insert_at = i
         break
@@ -3469,7 +3479,6 @@ def gen_header_guards():
 
 
 def gen_source_undefs(source_file):
-
     # Get list of #define's clauses in this source file (ignore filename)
     undef_list = list(map(lambda c: c[1], get_defines_from_file(source_file)))
     if not undef_list:
@@ -3549,7 +3558,6 @@ def gen_slothy(funcs):
     targets = list(map(lambda s: s + ".S", funcs))
 
     for t in targets:
-
         if t.startswith("keccak"):
             base = "dev/fips202/aarch64/src"
         else:
@@ -3627,7 +3635,6 @@ class BibliographyEntry:
 
 
 def gen_markdown_citations_for(filename, bibliography):
-
     # Skip BIBLIOGRAPHY.md
     if filename == "BIBLIOGRAPHY.md":
         return
@@ -3640,8 +3647,8 @@ def gen_markdown_citations_for(filename, bibliography):
 
     # Lookup all citations in style `[^ID]`
     citations = {}
-    for i, l in enumerate(content):
-        for m in _RE_MARKDOWN_CITE.finditer(l):
+    for i, line in enumerate(content):
+        for m in _RE_MARKDOWN_CITE.finditer(line):
             cite_id = m.group("id")
             uses = citations.get(cite_id, [])
             uses.append((filename, i))
@@ -3658,8 +3665,8 @@ def gen_markdown_citations_for(filename, bibliography):
     # Find explicit footnote definitions outside the bibliography block
     # These are lines matching `[^ID]: ...` and should be excluded from autogeneration
     explicit_footnotes = set()
-    for l in content:
-        m = re.match(r"^\[\^(\w+)\]:", l)
+    for line in content:
+        m = re.match(r"^\[\^(\w+)\]:", line)
         if m:
             explicit_footnotes.add(m.group(1))
 
@@ -3689,7 +3696,6 @@ def gen_markdown_citations_for(filename, bibliography):
 
 
 def gen_c_citations_for(filename, bibliography):
-
     content = read_file(filename)
 
     if not _RE_C_CITE.search(content):
@@ -3709,8 +3715,8 @@ def gen_c_citations_for(filename, bibliography):
 
     # Lookup all citations in style `@[ID]`
     citations = {}
-    for i, l in enumerate(content):
-        for m in _RE_C_CITE.finditer(l):
+    for i, line in enumerate(content):
+        for m in _RE_C_CITE.finditer(line):
             cite_id = m.group("id")
             uses = citations.get(cite_id, [])
             # Remember usage. +1 because line counting starts at 1
@@ -3730,7 +3736,7 @@ def gen_c_citations_for(filename, bibliography):
             raise Exception(
                 f"Could not find bibliography entry {cite_id} referenced in {filename}"
             )
-        references.append(f" *")
+        references.append(" *")
         references.append(f" * - [{cite_id}]")
         prefix = " *   "
         # Wrap long lines at 80 chars
@@ -3760,8 +3766,8 @@ def gen_c_citations_for(filename, bibliography):
         # Add references to file after initial header section
         # Skip over copyright
         insert_at = None
-        for i, l in enumerate(content):
-            if l.startswith(("/*", " *")):
+        for i, line in enumerate(content):
+            if line.startswith(("/*", " *")):
                 continue
             insert_at = i
             break
@@ -3795,7 +3801,6 @@ def gen_citations_for(filename, bibliography):
 
 
 def gen_bib_file(bibliography):
-
     content = [
         "[//]: # (SPDX-License-Identifier: CC-BY-4.0)",
         "[//]: # (This file is auto-generated from BIBLIOGRAPHY.yml)",
@@ -3816,11 +3821,11 @@ def gen_bib_file(bibliography):
         content.append(f"### `{cite_id}`")
         content.append("")
         content.append(f"* {entry.name}")
-        content.append(f"* Author(s):")
+        content.append("* Author(s):")
         for author in entry.authors:
             content.append(f"  - {author}")
         content.append(f"* URL: {entry.url}")
-        content.append(f"* Referenced from:")
+        content.append("* Referenced from:")
         # Usages are pairs of (filename, line_count)
         # Ignore line_count for now, as it would require `autogen` after
         # a change to source files.
@@ -4086,27 +4091,43 @@ def gen_test_config(config_path, config_spec, default_config_content):
 
     def locate_config_option(lines, opt_name):
         """Locate configuration option in lines. Returns (start, end) line indices"""
-        i = 0
-        while i < len(lines):
-            if re.search(rf"\* Name:\s+{re.escape(opt_name)}\b", lines[i]):
-                # Skip to the end of this comment block (find the closing */)
-                while i < len(lines) and not lines[i].strip().endswith("*/"):
-                    i += 1
-                i += 1  # Skip the closing */
+        # Find the line that defines (or comments out) opt_name, e.g.
+        #   #define <opt>
+        #   #ifndef <opt> / #ifdef <opt>
+        #   /* #define <opt> ... */
+        define_re = re.compile(
+            rf"^\s*(/\*\s*)?#\s*(define|ifn?def)\s+{re.escape(opt_name)}\b"
+        )
+        impl_line = None
+        for i, line in enumerate(lines):
+            if define_re.search(line):
+                impl_line = i
+                break
+        if impl_line is None:
+            raise Exception(
+                f"Could not find config option {opt_name} in default config"
+            )
 
-                start = i
-                # Find the next config option (starts with /*****)
-                while i < len(lines):
-                    if lines[i].strip().startswith("/****"):
-                        # Back up to exclude empty line before next option
-                        while i > start and lines[i - 1].strip() == "":
-                            i -= 1
-                        return (start, i)
-                    i += 1
-                # If no next option found, go to end
-                return (start, len(lines))
+        # Walk back to the closing */ of the preceding /** ... */ doxygen block.
+        j = impl_line - 1
+        while j >= 0 and not lines[j].strip().endswith("*/"):
+            j -= 1
+        if j < 0:
+            raise Exception(
+                f"Could not find doxygen block before config option {opt_name}"
+            )
+
+        start = j + 1  # Replacement starts right after */
+
+        # Replacement ends at the next /** block (option or section divider).
+        i = start
+        while i < len(lines):
+            if lines[i].strip().startswith("/**"):
+                while i > start and lines[i - 1].strip() == "":
+                    i -= 1
+                return (start, i)
             i += 1
-        raise Exception(f"Could not find config option {opt_name} in default config")
+        return (start, len(lines))
 
     def replace_config_option(lines, opt_name, opt_value):
         """Replace config option with new value"""
@@ -4161,19 +4182,19 @@ def gen_test_configs():
 
 def _main():
     slothy_choices = [
-        "ntt",
-        "intt",
-        "poly_tobytes_asm",
-        "poly_tomont_asm",
-        "poly_reduce_asm",
-        "poly_mulcache_compute_asm",
-        "polyvec_basemul_acc_montgomery_cached_asm_k2",
-        "polyvec_basemul_acc_montgomery_cached_asm_k3",
-        "polyvec_basemul_acc_montgomery_cached_asm_k4",
-        "rej_uniform_asm",
-        "keccak_f1600_x1_scalar_asm",
-        "keccak_f1600_x4_v8a_scalar_hybrid_asm",
-        "keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm",
+        "ntt_aarch64_asm",
+        "intt_aarch64_asm",
+        "poly_tobytes_aarch64_asm",
+        "poly_tomont_aarch64_asm",
+        "poly_reduce_aarch64_asm",
+        "poly_mulcache_compute_aarch64_asm",
+        "polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm",
+        "polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm",
+        "polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm",
+        "rej_uniform_aarch64_asm",
+        "keccak_f1600_x1_scalar_aarch64_asm",
+        "keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm",
+        "keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm",
     ]
 
     parser = argparse.ArgumentParser(

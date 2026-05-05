@@ -44,12 +44,12 @@ fi
 SHELL_SCRIPTS=$(git grep -l '' :/ | xargs printf "'%s' " | xargs -L 1 shfmt -f)
 echo $SHELL_SCRIPTS | xargs -L 1 shfmt -s -w -l -i 2 -ci -fn
 
-info "Formatting python scripts"
-if ! command -v black >/dev/null 2>&1; then
-  error "black not found. Are you running in a nix shell? See CONTRIBUTING.md."
+info "Formatting python scripts with ruff"
+if ! command -v ruff >/dev/null 2>&1; then
+  error "ruff not found. Are you running in a nix shell? See CONTRIBUTING.md."
   exit 1
 fi
-black --include "(scripts/tests|scripts/simpasm|scripts/cfify|scripts/autogen|scripts/check-namespace|\.py$)" "$ROOT"
+ruff format "$ROOT"
 
 info "Formatting c files"
 if ! command -v clang-format >/dev/null 2>&1; then

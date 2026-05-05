@@ -1,20 +1,52 @@
 diff --git a/crypto/fipsmodule/ml_kem/importer.sh b/crypto/fipsmodule/ml_kem/importer.sh
-index 24832ab..b81348a 100644
 --- a/crypto/fipsmodule/ml_kem/importer.sh
 +++ b/crypto/fipsmodule/ml_kem/importer.sh
-@@ -151,12 +151,14 @@ for file in $SRC/native/aarch64/src/*.S $SRC/native/x86_64/src/*.S; do
-   mv "$tmp_file" "$file"
- 
-   # Replace common.h include and assembly macros
--  sed "${SED_I[@]}" 's/#include "\.\.\/\.\.\/\.\.\/common\.h"/#include "_internal_s2n_bignum.h"/' "$file"
-+  s2n_header=$(if [[ "$file" == *"aarch64"* ]]; then echo "_internal_s2n_bignum_arm.h"; else echo "_internal_s2n_bignum_x86_att.h"; fi)
-+  sed "${SED_I[@]}" "s/#include \"\.\.\/\.\.\/\.\.\/common\.h\"/#include \"$s2n_header\"/" "$file"
- 
-   func_name=$(grep -o '\.global MLK_ASM_NAMESPACE(\([^)]*\))' "$file" | sed 's/\.global MLK_ASM_NAMESPACE(\([^)]*\))/\1/')
-   if [ -n "$func_name" ]; then
-     sed "${SED_I[@]}" "s/\.global MLK_ASM_NAMESPACE($func_name)/        S2N_BN_SYM_VISIBILITY_DIRECTIVE(mlkem_$func_name)\n        S2N_BN_SYM_PRIVACY_DIRECTIVE(mlkem_$func_name)/" "$file"
-     sed "${SED_I[@]}" "s/MLK_ASM_FN_SYMBOL($func_name)/S2N_BN_SYMBOL(mlkem_$func_name):/" "$file"
-+    sed "${SED_I[@]}" "s/MLK_ASM_FN_SIZE($func_name)/S2N_BN_SIZE_DIRECTIVE(mlkem_$func_name)/" "$file"
+@@ -151,6 +151,48 @@
    fi
  done
+ 
++# Rewrite asm filenames in AWS-LC's crypto/fipsmodule/CMakeLists.txt to match the names exported by the imported mlkem-native tree. Remove once AWS-LC lists the post-unification filenames directly.
++CMAKE=../CMakeLists.txt
++if [ -f "$CMAKE" ] && grep -q 'aarch64/src/ntt\.S' "$CMAKE"; then
++    CMAKE_RENAMES=(
++        'aarch64/src/intt\.S|aarch64/src/intt_aarch64_asm.S'
++        'aarch64/src/ntt\.S|aarch64/src/ntt_aarch64_asm.S'
++        'aarch64/src/poly_mulcache_compute_asm\.S|aarch64/src/poly_mulcache_compute_aarch64_asm.S'
++        'aarch64/src/poly_reduce_asm\.S|aarch64/src/poly_reduce_aarch64_asm.S'
++        'aarch64/src/poly_tobytes_asm\.S|aarch64/src/poly_tobytes_aarch64_asm.S'
++        'aarch64/src/poly_tomont_asm\.S|aarch64/src/poly_tomont_aarch64_asm.S'
++        'aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k2\.S|aarch64/src/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S'
++        'aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k3\.S|aarch64/src/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S'
++        'aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k4\.S|aarch64/src/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S'
++        'aarch64/src/rej_uniform_asm\.S|aarch64/src/rej_uniform_aarch64_asm.S'
++        'x86_64/src/intt\.S|x86_64/src/intt_avx2_asm.S'
++        'x86_64/src/ntt\.S|x86_64/src/ntt_avx2_asm.S'
++        'x86_64/src/mulcache_compute\.S|x86_64/src/poly_mulcache_compute_avx2_asm.S'
++        'x86_64/src/nttfrombytes\.S|x86_64/src/nttfrombytes_avx2_asm.S'
++        'x86_64/src/ntttobytes\.S|x86_64/src/ntttobytes_avx2_asm.S'
++        'x86_64/src/nttunpack\.S|x86_64/src/nttunpack_avx2_asm.S'
++        'x86_64/src/reduce\.S|x86_64/src/reduce_avx2_asm.S'
++        'x86_64/src/tomont\.S|x86_64/src/tomont_avx2_asm.S'
++        'x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k2\.S|x86_64/src/polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.S'
++        'x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k3\.S|x86_64/src/polyvec_basemul_acc_montgomery_cached_k3_avx2_asm.S'
++        'x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k4\.S|x86_64/src/polyvec_basemul_acc_montgomery_cached_k4_avx2_asm.S'
++        'x86_64/src/rej_uniform_asm\.S|x86_64/src/rej_uniform_avx2_asm.S'
++        'x86_64/src/poly_compress_d4\.S|x86_64/src/poly_compress_d4_avx2_asm.S'
++        'x86_64/src/poly_compress_d5\.S|x86_64/src/poly_compress_d5_avx2_asm.S'
++        'x86_64/src/poly_compress_d10\.S|x86_64/src/poly_compress_d10_avx2_asm.S'
++        'x86_64/src/poly_compress_d11\.S|x86_64/src/poly_compress_d11_avx2_asm.S'
++        'x86_64/src/poly_decompress_d4\.S|x86_64/src/poly_decompress_d4_avx2_asm.S'
++        'x86_64/src/poly_decompress_d5\.S|x86_64/src/poly_decompress_d5_avx2_asm.S'
++        'x86_64/src/poly_decompress_d10\.S|x86_64/src/poly_decompress_d10_avx2_asm.S'
++        'x86_64/src/poly_decompress_d11\.S|x86_64/src/poly_decompress_d11_avx2_asm.S'
++    )
++    for pair in "${CMAKE_RENAMES[@]}"; do
++        old="${pair%|*}"
++        new="${pair#*|}"
++        sed "${SED_I[@]}" -E "s|${old}|${new}|g" "$CMAKE"
++    done
++fi
++
+ echo "Remove temporary artifacts ..."
+ rm -rf $TMP
  
