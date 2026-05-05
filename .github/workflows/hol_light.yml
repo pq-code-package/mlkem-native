@@ -71,7 +71,7 @@ jobs:
           nix-shell: 'hol_light'
           script: |
             make -C proofs/hol_light/aarch64 mlkem/poly_tobytes_aarch64_asm.o
-            echo 'needs "aarch64/proofs/poly_tobytes_aarch64_asm.ml";;' | hol.sh
+            echo 'needs "mlkem_native/aarch64/proofs/poly_tobytes_aarch64_asm.ml";;' | hol.sh
   hol_light_proofs:
     needs: [ hol_light_bytecode ]
     strategy:
@@ -179,7 +179,7 @@ jobs:
           nix-shell: 'hol_light'
           script: |
             make -C proofs/hol_light/x86_64 mlkem/polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.o
-            echo 'needs "x86_64/proofs/polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.ml";;' | hol.sh
+            echo 'needs "mlkem_native/x86_64/proofs/polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.ml";;' | hol.sh
   hol_light_proofs_x86_64:
     needs: [ hol_light_bytecode_x86_64 ]
     strategy:

@@ -4,10 +4,10 @@
  *)
 
 (* Load base theories for AArch64 from s2n-bignum *)
-needs "arm/proofs/base.ml";;
+needs "s2n_bignum/arm/proofs/base.ml";;
 
-needs "common/mlkem_specs.ml";;
-needs "aarch64/proofs/mlkem_utils.ml";;
+needs "mlkem_native/common/mlkem_specs.ml";;
+needs "mlkem_native/aarch64/proofs/mlkem_utils.ml";;
 
 (**** print_literal_from_elf "aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.o";;
  ****)
@@ -460,8 +460,8 @@ let MLKEM_BASEMUL_K2_SUBROUTINE_CORRECT = prove(
 (* Constant-time and memory safety proof.                                    *)
 (* ------------------------------------------------------------------------- *)
 
-needs "arm/proofs/consttime.ml";;
-needs "aarch64/proofs/subroutine_signatures.ml";;
+needs "s2n_bignum/arm/proofs/consttime.ml";;
+needs "mlkem_native/aarch64/proofs/subroutine_signatures.ml";;
 
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:false

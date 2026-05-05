@@ -7,7 +7,7 @@
 (* Keccak utilities for AArch64 proofs.                                      *)
 (* ========================================================================= *)
 
-needs "common/keccak_spec.ml";;
+needs "mlkem_native/common/keccak_spec.ml";;
 
 (* ------------------------------------------------------------------------- *)
 (* Some custom normalization for logical equivalence and conjunction, which  *)

@@ -8,10 +8,10 @@
 (* ========================================================================= *)
 
 (* Load base theories for x86_64 from s2n-bignum *)
-needs "x86/proofs/base.ml";;
+needs "s2n_bignum/x86/proofs/base.ml";;
 
-needs "x86_64/proofs/mlkem_compress_common.ml";;
-needs "x86_64/proofs/mlkem_compress_consts.ml";;
+needs "mlkem_native/x86_64/proofs/mlkem_compress_common.ml";;
+needs "mlkem_native/x86_64/proofs/mlkem_compress_consts.ml";;
 
 (* print_literal_from_elf "x86_64/mlkem/poly_decompress_d4_avx2_asm.o";; *)
 
@@ -452,8 +452,8 @@ let MLKEM_POLY_DECOMPRESS_D4_SUBROUTINE_CORRECT = prove(
 (* Constant-time and memory safety proof.                                    *)
 (* ------------------------------------------------------------------------- *)
 
-needs "x86_64/proofs/mlkem_utils.ml";;
-needs "x86_64/proofs/subroutine_signatures.ml";;
+needs "mlkem_native/x86_64/proofs/mlkem_utils.ml";;
+needs "mlkem_native/x86_64/proofs/subroutine_signatures.ml";;
 
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true

@@ -8,9 +8,9 @@
 (* ========================================================================= *)
 
 (* Load base theories for x86_64 from s2n-bignum *)
-needs "x86/proofs/base.ml";;
+needs "s2n_bignum/x86/proofs/base.ml";;
 
-needs "common/mlkem_specs.ml";;
+needs "mlkem_native/common/mlkem_specs.ml";;
 
 let mlkem_basemul_k3_mc =
   define_assert_from_elf "mlkem_basemul_k3_mc" "x86_64/mlkem/polyvec_basemul_acc_montgomery_cached_k3_avx2_asm.o"
@@ -1690,8 +1690,8 @@ let MLKEM_BASEMUL_K3_SUBROUTINE_CORRECT = prove(
 (* Constant-time and memory safety proof.                                    *)
 (* ------------------------------------------------------------------------- *)
 
-needs "x86/proofs/consttime.ml";;
-needs "x86_64/proofs/subroutine_signatures.ml";;
+needs "s2n_bignum/x86/proofs/consttime.ml";;
+needs "mlkem_native/x86_64/proofs/subroutine_signatures.ml";;
 
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true

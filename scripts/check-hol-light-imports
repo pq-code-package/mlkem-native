@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+"""Lint HOL-Light import directives.
+
+Every `needs`, `loadt`, or `loads` directive in proofs/hol_light/**/*.ml
+must have a namespace-prefixed target:
+
+  - `mlkem_native/...`   for local files
+  - `s2n_bignum/...`     for s2n-bignum files (must also be on the allowlist)
+  - `Library/...`        for HOL-Light standard library
+
+This guarantees that every cross-repository import is declared explicitly
+at the call site and that no s2n-bignum file can silently shadow a local
+file through load-path ordering (the namespace prefixes are disjoint).
+"""
+
+import pathlib
+import re
+import sys
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+PROOF_ROOT = ROOT / "proofs" / "hol_light"
+ALLOWLIST = PROOF_ROOT / "s2n_bignum_allowlist.txt"
+
+DIRECTIVE = re.compile(r'^\s*(needs|loadt|loads)\s+"([^"]+)"')
+
+
+def load_allowlist():
+    if not ALLOWLIST.exists():
+        return set()
+    entries = set()
+    for raw in ALLOWLIST.read_text().splitlines():
+        line = raw.split("#", 1)[0].strip()
+        if line:
+            entries.add(line)
+    return entries
+
+
+def main():
+    allowlist = load_allowlist()
+    violations = []
+
+    for path in sorted(PROOF_ROOT.rglob("*.ml")):
+        rel = path.relative_to(ROOT)
+        for lineno, line in enumerate(path.read_text().splitlines(), start=1):
+            m = DIRECTIVE.match(line)
+            if not m:
+                continue
+            target = m.group(2)
+            if target.startswith("mlkem_native/") or target.startswith("Library/"):
+                continue
+            if target.startswith("s2n_bignum/"):
+                rest = target[len("s2n_bignum/") :]
+                if rest not in allowlist:
+                    violations.append(
+                        (
+                            rel,
+                            lineno,
+                            f"s2n-bignum import '{target}' is not on the allowlist "
+                            f"({ALLOWLIST.relative_to(ROOT)})",
+                        )
+                    )
+                continue
+            violations.append(
+                (
+                    rel,
+                    lineno,
+                    f"unqualified import '{target}' -- expected prefix "
+                    "'mlkem_native/', 's2n_bignum/', or 'Library/'",
+                )
+            )
+
+    for rel, lineno, msg in violations:
+        print(f"{rel}:{lineno}: {msg}", file=sys.stderr)
+
+    if violations:
+        print(f"\n{len(violations)} violation(s)", file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
