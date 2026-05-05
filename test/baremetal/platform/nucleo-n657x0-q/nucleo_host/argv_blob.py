@@ -30,11 +30,7 @@ def pack_cmdline(args, base_addr, block_size=ARGV_BLOCK_SIZE):
         ptrs.append(base_addr + header_sz + cur)
         strings += encoded
         cur += len(encoded)
-    blob = (
-        st.pack("<I", argc)
-        + b"".join(st.pack("<I", ptr) for ptr in ptrs)
-        + strings
-    )
+    blob = st.pack("<I", argc) + b"".join(st.pack("<I", ptr) for ptr in ptrs) + strings
     if len(blob) > block_size:
         raise ValueError(
             f"argv blob is {len(blob)} bytes, exceeds {block_size}-byte block"

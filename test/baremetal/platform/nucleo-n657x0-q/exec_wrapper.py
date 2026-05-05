@@ -115,9 +115,7 @@ def _wait_for_port(host: str, port: int, timeout_s: float) -> bool:
 def _default_flexmem_config_elf() -> str:
     """Return the default build path for the FLEXMEM configuration ELF."""
     platform_dir = os.path.dirname(os.path.abspath(__file__))
-    repo_root = os.path.abspath(
-        os.path.join(platform_dir, "..", "..", "..", "..")
-    )
+    repo_root = os.path.abspath(os.path.join(platform_dir, "..", "..", "..", ".."))
     return os.path.join(
         repo_root, "test", "build", "nucleo-n657x0-q", "flexmem_config.elf"
     )
@@ -127,9 +125,7 @@ def _recover_flexmem(reason: str, failure_message: str) -> bool:
     """Re-run FLEXMEM after a retryable setup or target failure."""
     platform_dir = os.path.dirname(os.path.abspath(__file__))
     configure_script = os.path.join(platform_dir, "flexmem_configure.py")
-    config_elf = os.environ.get(
-        "FLEXMEM_CONFIG_ELF", _default_flexmem_config_elf()
-    )
+    config_elf = os.environ.get("FLEXMEM_CONFIG_ELF", _default_flexmem_config_elf())
 
     if not os.path.exists(configure_script):
         err(f"FLEXMEM configure script not found: {configure_script}")
@@ -231,12 +227,8 @@ def _run_once():
     st_transport = os.environ.get("STLINK_TRANSPORT", "SWD")
     st_device = os.environ.get("ST_DEVICE", "STM32N657X0HxQ")
     st_connect = os.environ.get("STLINK_CONNECT_MODE", "under-reset")
-    st_cubeprog = os.environ.get(
-        "ST_CUBE_PROG_PATH", ""
-    )  # Path to STM32CubeProgrammer
-    st_clt_root = os.environ.get(
-        "ST_CUBE_CLT_ROOT", ""
-    )  # Root of STM32CubeCLT
+    st_cubeprog = os.environ.get("ST_CUBE_PROG_PATH", "")  # Path to STM32CubeProgrammer
+    st_clt_root = os.environ.get("ST_CUBE_CLT_ROOT", "")  # Root of STM32CubeCLT
     st_pend = os.environ.get("STLINK_PEND_HALT_TIMEOUT", "8000")
     st_apid = os.environ.get("STLINK_APID", "")
     gdb_run_timeout = float(os.environ.get("GDB_RUN_TIMEOUT", "180"))
@@ -244,9 +236,7 @@ def _run_once():
     st_semihost_port_env = os.environ.get("STLINK_SEMIHOST_PORT", "")
     try:
         st_semihost_port = (
-            int(st_semihost_port_env)
-            if st_semihost_port_env
-            else _pick_free_port()
+            int(st_semihost_port_env) if st_semihost_port_env else _pick_free_port()
         )
     except Exception:
         st_semihost_port = _pick_free_port()
@@ -286,9 +276,7 @@ def _run_once():
     # Resolve the RAM stdout buffer so GDB can dump target output after
     # execution.
     stdout_capture_addr = _resolve_symbol_addr(elf, "nucleo_stdout_capture")
-    stdout_capture_len_addr = _resolve_symbol_addr(
-        elf, "nucleo_stdout_capture_len"
-    )
+    stdout_capture_len_addr = _resolve_symbol_addr(elf, "nucleo_stdout_capture_len")
     stdout_capture_truncated_addr = _resolve_symbol_addr(
         elf, "nucleo_stdout_capture_truncated"
     )
@@ -359,9 +347,7 @@ def _run_once():
 
         if st_gdbserver_cmd_tpl:
             # Determine best '-cp' path for STM32CubeProgrammer CLI
-            cp_path = cubeprogrammer_cp_path(
-                st_cubeprog, st_clt_root, stlink_bin
-            )
+            cp_path = cubeprogrammer_cp_path(st_cubeprog, st_clt_root, stlink_bin)
 
             # Provide a flexible set of placeholders for various CLT tools.
             # - {serial}       -> raw serial value (e.g. 303030303030)
@@ -388,11 +374,7 @@ def _run_once():
                 "cubeprog_flag": (
                     f"-cp {shlex.quote(cp_path)}"
                     if cp_path
-                    else (
-                        f"-cp {shlex.quote(st_cubeprog)}"
-                        if st_cubeprog
-                        else ""
-                    )
+                    else (f"-cp {shlex.quote(st_cubeprog)}" if st_cubeprog else "")
                 ),
                 "pend": st_pend,
                 "apid_flag": (f"-m {st_apid}" if st_apid else "-m 1"),
@@ -454,9 +436,7 @@ def _run_once():
             # First, ensure the process is alive
             time.sleep(0.2)
             # Then wait for the semihost port to accept connections.
-            if not _wait_for_port(
-                "127.0.0.1", st_semihost_port, timeout_s=10.0
-            ):
+            if not _wait_for_port("127.0.0.1", st_semihost_port, timeout_s=10.0):
                 info(
                     "[exec_wrapper] semihost port not ready within timeout; "
                     "continuing anyway"
@@ -483,15 +463,11 @@ def _run_once():
                             while b"\n" in buf:
                                 line, buf = buf.split(b"\n", 1)
                                 try:
-                                    text = line.decode(
-                                        "utf-8", errors="replace"
-                                    )
+                                    text = line.decode("utf-8", errors="replace")
                                 except Exception:
                                     text = line.decode(errors="replace")
                                 # Detect exit sentinel first
-                                is_exit, parsed_exit_code = (
-                                    parse_exit_sentinel(text)
-                                )
+                                is_exit, parsed_exit_code = parse_exit_sentinel(text)
                                 if is_exit:
                                     shared["exit_code"] = parsed_exit_code
                                     semihost_exit.set()
@@ -542,9 +518,7 @@ def _run_once():
                 # Server exited early – surface a helpful message
                 out_rem = stp.stdout.read() if stp.stdout else ""
                 if out_rem and not SUPPRESS_RETRYABLE_DIAGNOSTICS:
-                    log_output(
-                        out_rem, logging.DEBUG if VERBOSE else logging.ERROR
-                    )
+                    log_output(out_rem, logging.DEBUG if VERBOSE else logging.ERROR)
                 merged = out_rem
                 low = merged.lower()
                 if "firmware upgrade" in low or "upgrade required" in low:
@@ -575,10 +549,7 @@ def _run_once():
                         )
                         if hints:
                             for h in hints:
-                                err(
-                                    "[exec_wrapper] STLinkUpgrade candidate: "
-                                    + h
-                                )
+                                err("[exec_wrapper] STLinkUpgrade candidate: " + h)
                 return 2
 
             gdb_lines = build_run_script(
@@ -600,9 +571,7 @@ def _run_once():
                 log_output("\n".join(gdb_lines), logging.DEBUG)
                 LOG.debug("====================================")
 
-            with tempfile.NamedTemporaryFile(
-                "w", delete=False, suffix=".gdb"
-            ) as gs:
+            with tempfile.NamedTemporaryFile("w", delete=False, suffix=".gdb") as gs:
                 for line in gdb_lines:
                     gs.write(line + "\n")
                 gdb_script_path = gs.name
@@ -611,9 +580,7 @@ def _run_once():
 
             # Run GDB while streaming gdbserver output, including semihost
             # output.
-            info(
-                "[exec_wrapper] running gdb batch; semihost output follows"
-            )
+            info("[exec_wrapper] running gdb batch; semihost output follows")
             gdbp = popen(
                 gdb_cmd,
                 stdout=subprocess.PIPE,
@@ -662,9 +629,7 @@ def _run_once():
                 if gdb_deadline is not None and time.time() > gdb_deadline:
                     if not SUPPRESS_RETRYABLE_DIAGNOSTICS:
                         err("FAIL!")
-                        err(
-                            f"gdb batch timed out after {gdb_run_timeout:.0f}s"
-                        )
+                        err(f"gdb batch timed out after {gdb_run_timeout:.0f}s")
                     try:
                         gdbp.terminate()
                         gdbp.wait(timeout=1.0)
@@ -701,9 +666,7 @@ def _run_once():
                     # from semihosting.
                     with open(stdout_capture_bin, "rb") as capture_file:
                         captured = capture_file.read()
-                    captured_output, captured_exit_code = split_stdout_capture(
-                        captured
-                    )
+                    captured_output, captured_exit_code = split_stdout_capture(captured)
                     if captured_exit_code is not None:
                         shared["exit_code"] = captured_exit_code
                     if (
@@ -713,13 +676,9 @@ def _run_once():
                     ):
                         sys.stdout.write(captured_output)
                         sys.stdout.flush()
-                        STDOUT_BYTES_EMITTED += len(
-                            captured_output.encode("utf-8")
-                        )
+                        STDOUT_BYTES_EMITTED += len(captured_output.encode("utf-8"))
                 except Exception as exc:
-                    info(
-                        f"[exec_wrapper] failed to read stdout capture: {exc}"
-                    )
+                    info(f"[exec_wrapper] failed to read stdout capture: {exc}")
 
             if "$nucleo_stdout_truncated = 0x1" in gdb_text:
                 err("WARNING: target stdout capture truncated")
@@ -751,16 +710,12 @@ def _run_once():
                 return 1
 
             if "Program received signal SIGTRAP" in gdb_text:
-                info(
-                    "[exec_wrapper] completion trap observed without exit "
-                    "sentinel"
-                )
+                info("[exec_wrapper] completion trap observed without exit sentinel")
                 return 0
 
             if gdbp.returncode != 0:
                 target_output_observed = (
-                    bool(shared.get("stdout_streamed"))
-                    or STDOUT_BYTES_EMITTED != 0
+                    bool(shared.get("stdout_streamed")) or STDOUT_BYTES_EMITTED != 0
                 )
                 exit_code_observed = shared.get("exit_code") is not None
                 if gdb_load_failed_before_target_output(
@@ -831,12 +786,8 @@ def main():
     while True:
         can_retry_transport = transport_retries < attempts - 1
         can_retry_hardfault = hardfault_recoveries < hardfault_attempts
-        can_retry_load_failure = (
-            load_failure_recoveries < load_failure_attempts
-        )
-        SUPPRESS_RETRYABLE_DIAGNOSTICS = (
-            can_retry_transport or can_retry_hardfault
-        )
+        can_retry_load_failure = load_failure_recoveries < load_failure_attempts
+        SUPPRESS_RETRYABLE_DIAGNOSTICS = can_retry_transport or can_retry_hardfault
         last_rc = _run_once()
         if last_rc == 0:
             return 0
@@ -878,11 +829,7 @@ def main():
                 err("HardFault diagnostics from failed run:")
                 err(LAST_FAULT_DIAGNOSTICS)
             return last_rc
-        if (
-            TARGET_FAILURE
-            or STDOUT_BYTES_EMITTED != 0
-            or not can_retry_transport
-        ):
+        if TARGET_FAILURE or STDOUT_BYTES_EMITTED != 0 or not can_retry_transport:
             return last_rc
         transport_retries += 1
         if VERBOSE:

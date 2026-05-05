@@ -142,9 +142,7 @@ def fault_info_from_gdb(gdb_text: str) -> str:
     )
     if stacked:
         stack_lines = [
-            line.strip()
-            for line in stacked.group(1).splitlines()
-            if line.strip()
+            line.strip() for line in stacked.group(1).splitlines() if line.strip()
         ]
         if stack_lines:
             lines.append("  stacked frame dump:")
@@ -157,6 +155,5 @@ def gdb_observed_hardfault(gdb_text: str) -> bool:
     """Return whether GDB output shows the target entered HardFault_Handler."""
     return (
         HARDFAULT_SENTINEL in gdb_text
-        or re.search(r"^HardFault_Handler \(\)", gdb_text, re.MULTILINE)
-        is not None
+        or re.search(r"^HardFault_Handler \(\)", gdb_text, re.MULTILINE) is not None
     )

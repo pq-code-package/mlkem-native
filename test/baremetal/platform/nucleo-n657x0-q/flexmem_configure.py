@@ -39,9 +39,7 @@ LOG = logging.getLogger(__name__)
 
 def configure_logging():
     """Configure logging, using ``FLEXMEM_VERBOSE`` as the debug switch."""
-    level = (
-        logging.DEBUG if os.environ.get("FLEXMEM_VERBOSE") else logging.INFO
-    )
+    level = logging.DEBUG if os.environ.get("FLEXMEM_VERBOSE") else logging.INFO
     logging.basicConfig(level=level, format="%(message)s")
 
 
@@ -60,19 +58,14 @@ def err(msg):
 
 def find_cubeprogrammer_cli(cp_path):
     """Find ``STM32_Programmer_CLI`` using platform environment defaults."""
-    return st_find_cubeprogrammer_cli(
-        cp_path, os.environ.get("ST_CUBE_CLT_ROOT", "")
-    )
+    return st_find_cubeprogrammer_cli(cp_path, os.environ.get("ST_CUBE_CLT_ROOT", ""))
 
 
 def cubeprogrammer_cli():
     """Return the CubeProgrammer CLI path, or report a helpful error."""
     cli = find_cubeprogrammer_cli(os.environ.get("ST_CUBE_PROG_PATH", ""))
     if cli is None:
-        err(
-            "STM32_Programmer_CLI not found; set ST_CUBE_PROG_PATH or "
-            "ST_CUBE_CLT_ROOT"
-        )
+        err("STM32_Programmer_CLI not found; set ST_CUBE_PROG_PATH or ST_CUBE_CLT_ROOT")
     return cli
 
 
@@ -83,9 +76,7 @@ def connect_args(mode=None):
         speed=os.environ.get("STLINK_SPEED", "200"),
         serial=os.environ.get("STLINK_SERIAL", ""),
         apid=os.environ.get("STLINK_APID", ""),
-        mode=(
-            mode if mode is not None else os.environ.get("STLINK_CONNECT_MODE")
-        ),
+        mode=(mode if mode is not None else os.environ.get("STLINK_CONNECT_MODE")),
     )
 
 
@@ -113,9 +104,7 @@ def read_flexmem_value(cli):
     """Read the FLEXMEM TCM configuration register via SWD HOTPLUG mode."""
     # HOTPLUG reads avoid resetting the core while the config ELF is parked at
     # BKPT.
-    cp = run_quiet(
-        [cli] + connect_args("HOTPLUG") + ["-r32", CM55TCMCR_ADDR, "1"]
-    )
+    cp = run_quiet([cli] + connect_args("HOTPLUG") + ["-r32", CM55TCMCR_ADDR, "1"])
     if os.environ.get("FLEXMEM_VERBOSE"):
         log_output(cp.stdout, logging.DEBUG)
     if cp.returncode != 0:
@@ -188,9 +177,7 @@ def main():
     )
     cp = run_quiet(cmd)
     if os.environ.get("FLEXMEM_VERBOSE") or cp.returncode != 0:
-        log_output(
-            cp.stdout, logging.DEBUG if cp.returncode == 0 else logging.ERROR
-        )
+        log_output(cp.stdout, logging.DEBUG if cp.returncode == 0 else logging.ERROR)
     if cp.returncode != 0:
         err("FLEXMEM config RAM download/start failed")
         return cp.returncode

@@ -35,11 +35,7 @@ def find_cubeprogrammer_cli(cp_path="", st_clt_root=""):
     if path_candidate:
         candidates.append(path_candidate)
     for candidate in candidates:
-        if (
-            candidate
-            and os.path.isfile(candidate)
-            and os.access(candidate, os.X_OK)
-        ):
+        if candidate and os.path.isfile(candidate) and os.access(candidate, os.X_OK):
             return candidate
     return None
 
@@ -115,9 +111,7 @@ def cubeprogrammer_cp_path(st_cubeprog="", st_clt_root="", stlink_bin=""):
         root = os.path.dirname(
             os.path.dirname(os.path.dirname(os.path.abspath(stlink_bin)))
         )
-        cli2 = os.path.join(
-            root, "STM32CubeProgrammer", "bin", "STM32_Programmer_CLI"
-        )
+        cli2 = os.path.join(root, "STM32CubeProgrammer", "bin", "STM32_Programmer_CLI")
         if os.path.isfile(cli2) and os.access(cli2, os.X_OK):
             cp_path = os.path.dirname(cli2)
 

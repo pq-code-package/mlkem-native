@@ -14,30 +14,34 @@
 #define NUCLEO_USE_SEMIHOSTING_WRITE 0
 #endif
 
-__attribute__((aligned(32), used, section(".stdout_capture")))
-volatile uint8_t nucleo_stdout_capture[NUCLEO_STDOUT_CAPTURE_SIZE];
+__attribute__((aligned(32), used, section(".stdout_capture"))) volatile uint8_t
+    nucleo_stdout_capture[NUCLEO_STDOUT_CAPTURE_SIZE];
 
-__attribute__((used))
-volatile uint32_t nucleo_stdout_capture_len;
+__attribute__((used)) volatile uint32_t nucleo_stdout_capture_len;
 
-__attribute__((used))
-volatile uint32_t nucleo_stdout_capture_truncated;
+__attribute__((used)) volatile uint32_t nucleo_stdout_capture_truncated;
 
-static void capture_write(const char *src, int length) {
+static void capture_write(const char *src, int length)
+{
   uint32_t offset = nucleo_stdout_capture_len;
-  if (offset < NUCLEO_STDOUT_CAPTURE_SIZE) {
+  if (offset < NUCLEO_STDOUT_CAPTURE_SIZE)
+  {
     uint32_t available = NUCLEO_STDOUT_CAPTURE_SIZE - offset;
     uint32_t written = (uint32_t)length;
-    if (written > available) {
+    if (written > available)
+    {
       written = available;
       nucleo_stdout_capture_truncated = 1;
     }
 
-    for (uint32_t idx = 0; idx < written; idx++) {
+    for (uint32_t idx = 0; idx < written; idx++)
+    {
       nucleo_stdout_capture[offset + idx] = (uint8_t)src[idx];
     }
     nucleo_stdout_capture_len = offset + written;
-  } else if (length > 0) {
+  }
+  else if (length > 0)
+  {
     nucleo_stdout_capture_truncated = 1;
   }
 }
@@ -45,7 +49,8 @@ static void capture_write(const char *src, int length) {
 #if NUCLEO_USE_SEMIHOSTING_WRITE
 #define SEMIHOST_SYS_WRITE 0x05U
 
-static int semihost_write(int fd, const char *src, int length) {
+static int semihost_write(int fd, const char *src, int length)
+{
   uintptr_t params[3];
   int unwritten;
 
@@ -53,20 +58,23 @@ static int semihost_write(int fd, const char *src, int length) {
   params[1] = (uintptr_t)src;
   params[2] = (uintptr_t)length;
 
-  __asm__ volatile("mov r0, %1\n"
-                   "mov r1, %2\n"
-                   "bkpt 0xab\n"
-                   "mov %0, r0\n"
-                   : "=r"(unwritten)
-                   : "r"(SEMIHOST_SYS_WRITE), "r"(params)
-                   : "r0", "r1", "memory");
+  __asm__ volatile(
+      "mov r0, %1\n"
+      "mov r1, %2\n"
+      "bkpt 0xab\n"
+      "mov %0, r0\n"
+      : "=r"(unwritten)
+      : "r"(SEMIHOST_SYS_WRITE), "r"(params)
+      : "r0", "r1", "memory");
 
   return length - unwritten;
 }
-#endif
+#endif /* NUCLEO_USE_SEMIHOSTING_WRITE */
 
-int _write(int fd, char *src, int length) {
-  if (src == NULL || length < 0) {
+int _write(int fd, char *src, int length)
+{
+  if (src == NULL || length < 0)
+  {
     errno = EINVAL;
     return -1;
   }
@@ -81,7 +89,8 @@ int _write(int fd, char *src, int length) {
 #endif
 }
 
-void nucleo_stdio_init(void) {
+void nucleo_stdio_init(void)
+{
   setvbuf(stdout, NULL, _IONBF, 0);
   setvbuf(stderr, NULL, _IONBF, 0);
 }

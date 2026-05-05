@@ -29,9 +29,8 @@ int main(void)
   RCC->APB4ENSR2 = RCC_APB4ENSR2_SYSCFGENS;
   (void)RCC->APB4ENR2;
 
-  SYSCFG->CM55TCMCR = (SYSCFG->CM55TCMCR &
-                       ~(SYSCFG_CM55TCMCR_CFGITCMSZ_Msk |
-                         SYSCFG_CM55TCMCR_CFGDTCMSZ_Msk)) |
+  SYSCFG->CM55TCMCR = (SYSCFG->CM55TCMCR & ~(SYSCFG_CM55TCMCR_CFGITCMSZ_Msk |
+                                             SYSCFG_CM55TCMCR_CFGDTCMSZ_Msk)) |
                       flexmem_value;
   (void)SYSCFG->CM55TCMCR;
 
@@ -44,7 +43,8 @@ int main(void)
   __ISB();
 
   __BKPT(0);
-  for (;;) {
+  for (;;)
+  {
     __WFI();
   }
 }

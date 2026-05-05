@@ -6,5 +6,5 @@
  */
 #include <stdint.h>
 /* Argv block in I-TCM; populated by GDB after C startup reaches __wrap_main. */
-__attribute__((aligned(8), used, section(".cmdline")))
-unsigned char mlk_cmdline_block[64 * 1024];
+__attribute__((aligned(8), used,
+               section(".cmdline"))) unsigned char mlk_cmdline_block[64 * 1024];

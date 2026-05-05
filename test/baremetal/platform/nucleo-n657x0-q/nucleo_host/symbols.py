@@ -10,23 +10,15 @@ import subprocess
 
 def default_readelf():
     """Return the preferred readelf executable name available on this host."""
-    return (
-        shutil.which("arm-none-eabi-readelf")
-        or shutil.which("readelf")
-        or "readelf"
-    )
+    return shutil.which("arm-none-eabi-readelf") or shutil.which("readelf") or "readelf"
 
 
-def resolve_symbol(
-    elf_path: str, symbol: str, nm="arm-none-eabi-nm", readelf=None
-):
+def resolve_symbol(elf_path: str, symbol: str, nm="arm-none-eabi-nm", readelf=None):
     """Resolve ``symbol`` to a hex address."""
     addr = resolve_symbol_with_nm(elf_path, symbol, nm)
     if addr is not None:
         return addr
-    return resolve_symbol_with_readelf(
-        elf_path, symbol, readelf or default_readelf()
-    )
+    return resolve_symbol_with_readelf(elf_path, symbol, readelf or default_readelf())
 
 
 def resolve_symbol_with_nm(elf_path: str, symbol: str, nm="arm-none-eabi-nm"):

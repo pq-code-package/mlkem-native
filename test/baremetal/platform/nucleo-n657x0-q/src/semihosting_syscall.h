@@ -9,4 +9,4 @@
 
 void nucleo_stdio_init(void);
 
-#endif /* MLKEM_NATIVE_SEMIHOSTING_SYSCALL_H */
+#endif /* !MLKEM_NATIVE_SEMIHOSTING_SYSCALL_H */
