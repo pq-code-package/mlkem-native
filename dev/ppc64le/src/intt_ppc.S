@@ -657,7 +657,7 @@ intt_ppc_asm_Loopf:
 
         addi    rinp, rinp, -512
 
-.align 16
+.balign 16
         /*
          * Layer 1. len = 2
          *     leg1 offset - 0, 32, 64, 96
