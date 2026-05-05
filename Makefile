@@ -49,18 +49,12 @@ build: func kat acvp wycheproof
 test: run_kat run_func run_acvp run_wycheproof run_unit run_alloc run_rng_fail
 	$(Q)echo "  Everything checks fine!"
 
-# Detect available SHA256 command
-SHA256SUM := $(shell command -v shasum >/dev/null 2>&1 && echo "shasum -a 256" || (command -v sha256sum >/dev/null 2>&1 && echo "sha256sum" || echo ""))
-ifeq ($(SHA256SUM),)
-$(error Neither 'shasum' nor 'sha256sum' found. Please install one of these tools.)
-endif
-
 run_kat_512: kat_512
-	set -o pipefail; $(W) $(MLKEM512_DIR)/bin/gen_KAT512 | $(SHA256SUM) | cut -d " " -f 1 | xargs ./META.sh ML-KEM-512 kat-sha256
+	EXEC_WRAPPER="$(EXEC_WRAPPER)" python3 test/src/kat_client.py --scheme 512
 run_kat_768: kat_768
-	set -o pipefail; $(W) $(MLKEM768_DIR)/bin/gen_KAT768 | $(SHA256SUM) | cut -d " " -f 1 | xargs ./META.sh ML-KEM-768  kat-sha256
+	EXEC_WRAPPER="$(EXEC_WRAPPER)" python3 test/src/kat_client.py --scheme 768
 run_kat_1024: kat_1024
-	set -o pipefail; $(W) $(MLKEM1024_DIR)/bin/gen_KAT1024 | $(SHA256SUM) | cut -d " " -f 1 | xargs ./META.sh ML-KEM-1024  kat-sha256
+	EXEC_WRAPPER="$(EXEC_WRAPPER)" python3 test/src/kat_client.py --scheme 1024
 run_kat: run_kat_512 run_kat_768 run_kat_1024
 
 run_func_512: func_512
