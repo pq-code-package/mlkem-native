@@ -8,9 +8,9 @@
 (* ========================================================================= *)
 
 (* Load base theories for x86_64 from s2n-bignum *)
-needs "x86/proofs/base.ml";;
+needs "s2n_bignum/x86/proofs/base.ml";;
 
-needs "common/mlkem_specs.ml";;
+needs "mlkem_native/common/mlkem_specs.ml";;
 
 (* print_literal_from_elf "x86_64/mlkem/ntttobytes_avx2_asm.o";; *)
 
@@ -455,8 +455,8 @@ let MLKEM_TOBYTES_SUBROUTINE_CORRECT = prove
 (* Constant-time and memory safety proof.                                    *)
 (* ------------------------------------------------------------------------- *)
 
-needs "x86/proofs/consttime.ml";;
-needs "x86_64/proofs/subroutine_signatures.ml";;
+needs "s2n_bignum/x86/proofs/consttime.ml";;
+needs "mlkem_native/x86_64/proofs/subroutine_signatures.ml";;
 
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true

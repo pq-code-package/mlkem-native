@@ -309,6 +309,22 @@ gh_group_start "Check contracts"
 check-contracts
 gh_group_end
 
+check-hol-light-imports()
+{
+  if python3 "$ROOT"/scripts/check-hol-light-imports; then
+    info "Check HOL-Light imports"
+    gh_summary_success "Check HOL-Light imports"
+  else
+    error "Check HOL-Light imports"
+    gh_summary_failure "Check HOL-Light imports"
+    SUCCESS=false
+  fi
+}
+
+gh_group_start "Check HOL-Light imports"
+check-hol-light-imports
+gh_group_end
+
 check-doxygen()
 {
   if ! command -v doxygen >/dev/null; then

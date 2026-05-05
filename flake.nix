@@ -46,6 +46,12 @@
           holLightShellHook = ''
             export PATH=$PWD/scripts:$PATH
             export PROOF_DIR="$PWD/proofs/hol_light"
+            # Namespaced imports root for HOL-Light proofs.
+            # See scripts/check-hol-light-imports for the enforced rule.
+            export IMPORTS_DIR="$PROOF_DIR/.imports"
+            mkdir -p "$IMPORTS_DIR"
+            ln -sfn "$S2N_BIGNUM_DIR" "$IMPORTS_DIR/s2n_bignum"
+            ln -sfn "$PROOF_DIR"      "$IMPORTS_DIR/mlkem_native"
           '';
         in
         {
@@ -87,7 +93,7 @@
           packages.toolchain_aarch64_be = util.toolchain_aarch64_be;
           packages.gcc-arm-embedded = pkgs.gcc-arm-embedded;
 
-          devShells.default = util.mkShell {
+          devShells.default = (util.mkShell {
             packages = builtins.attrValues
               {
                 inherit (config.packages) linters cbmc hol_light s2n_bignum slothy toolchains_native hol_server;
@@ -96,7 +102,7 @@
                   nix-direnv
                   zig_0_13;
               } ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ config.packages.valgrind_varlat ];
-          };
+          }).overrideAttrs (old: { shellHook = holLightShellHook; });
 
           packages.hol_server = util.hol_server.hol_server_start;
           devShells.hol_light = (util.mkShell {

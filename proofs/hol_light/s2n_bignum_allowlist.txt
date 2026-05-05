@@ -1,0 +1,19 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# Allowlist of s2n-bignum files that mlkem-native HOL-Light proofs may import.
+#
+# Each entry is the path *inside* s2n-bignum; in proof files it appears as
+# `needs "s2n_bignum/<entry>"`. Adding a new cross-repository dependency
+# requires adding the file here (surfacing the decision in code review).
+#
+# Keep the list limited to generic verification infrastructure: ELF loading,
+# relational reasoning, ARM/x86 base semantics, and the constant-time
+# framework. Do NOT add mlkem-specific proofs or specs from s2n-bignum --
+# those must live in proofs/hol_light/common/ so that mlkem-native remains
+# standalone-reproducible.
+
+arm/proofs/base.ml
+arm/proofs/consttime.ml
+x86/proofs/base.ml
+x86/proofs/consttime.ml

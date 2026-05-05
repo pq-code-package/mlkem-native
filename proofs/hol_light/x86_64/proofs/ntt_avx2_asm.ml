@@ -4,10 +4,10 @@
  *)
 
 (* Load base theories for x86_64 from s2n-bignum *)
-needs "x86/proofs/base.ml";;
+needs "s2n_bignum/x86/proofs/base.ml";;
 
-needs "common/mlkem_specs.ml";;
-needs "x86_64/proofs/mlkem_zetas.ml";;
+needs "mlkem_native/common/mlkem_specs.ml";;
+needs "mlkem_native/x86_64/proofs/mlkem_zetas.ml";;
 
 (* print_literal_from_elf "x86_64/mlkem/ntt_avx2_asm.o";; *)
 
@@ -1286,8 +1286,8 @@ let MLKEM_NTT_SUBROUTINE_CORRECT  = prove
 (* Constant-time and memory safety proof.                                    *)
 (* ------------------------------------------------------------------------- *)
 
-needs "x86/proofs/consttime.ml";;
-needs "x86_64/proofs/subroutine_signatures.ml";;
+needs "s2n_bignum/x86/proofs/consttime.ml";;
+needs "mlkem_native/x86_64/proofs/subroutine_signatures.ml";;
 
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true

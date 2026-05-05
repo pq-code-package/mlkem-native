@@ -4,7 +4,7 @@
  *)
 
 (* Load base theories for x86_64 from s2n-bignum *)
-needs "x86/proofs/base.ml";;
+needs "s2n_bignum/x86/proofs/base.ml";;
 
 print_string "=== bytecode start: x86_64/mlkem/ntt_avx2_asm.o ===\n";;
 print_literal_from_elf "x86_64/mlkem/ntt_avx2_asm.o";;
