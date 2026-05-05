@@ -47,6 +47,8 @@
             export PATH=$PWD/scripts:$PATH
             export PROOF_DIR="$PWD/proofs/hol_light"
           '';
+          rustPackages = [ pkgs.rustup pkgs.llvmPackages.libclang ];
+          rustEnv = { LIBCLANG_PATH = "${pkgs.llvmPackages.libclang.lib}/lib"; };
         in
         {
           _module.args.pkgs = import inputs.nixpkgs {
@@ -87,7 +89,7 @@
           packages.toolchain_aarch64_be = util.toolchain_aarch64_be;
           packages.gcc-arm-embedded = pkgs.gcc-arm-embedded;
 
-          devShells.default = util.mkShell {
+          devShells.default = (util.mkShell {
             packages = builtins.attrValues
               {
                 inherit (config.packages) linters cbmc hol_light s2n_bignum slothy toolchains_native hol_server;
@@ -95,8 +97,9 @@
                   direnv
                   nix-direnv
                   zig_0_13;
-              } ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ config.packages.valgrind_varlat ];
-          };
+              } ++ rustPackages
+            ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ config.packages.valgrind_varlat ];
+          }).overrideAttrs (_: rustEnv);
 
           packages.hol_server = util.hol_server.hol_server_start;
           devShells.hol_light = (util.mkShell {
@@ -169,6 +172,26 @@
               pkgs-unstable.pkgsCross.aarch64-embedded.stdenv.cc
             ];
           };
+
+          devShells.rust = (util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) toolchains_native; }
+              ++ rustPackages;
+          }).overrideAttrs (_: rustEnv);
+
+          devShells.cross-rust-aarch64 = (util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) toolchain_aarch64; }
+              ++ rustPackages;
+          }).overrideAttrs (_: rustEnv);
+
+          devShells.cross-rust-riscv64 = (util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) toolchain_riscv64; }
+              ++ rustPackages;
+          }).overrideAttrs (_: rustEnv);
+
+          devShells.cross-rust-ppc64le = (util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) toolchain_ppc64le; }
+              ++ rustPackages;
+          }).overrideAttrs (_: rustEnv);
 
           devShells.cross-avr = util.mkShell (import ./nix/avr { inherit pkgs; });
 

@@ -1,0 +1,146 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: Rust
+permissions:
+  contents: read
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  rust:
+    name: Rust bindings (${{ matrix.target.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - runner: ubuntu-latest
+            name: "x86_64"
+          - runner: ubuntu-24.04-arm
+            name: "aarch64"
+          - runner: macos-latest
+            name: "macos (aarch64)"
+          - runner: macos-15-intel
+            name: "macos (x86_64)"
+    runs-on: ${{ matrix.target.runner }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/setup-shell
+        with:
+          nix-shell: rust
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            cargo build --workspace
+            cargo test --workspace
+            cargo publish --dry-run -p mlkem-native
+      - name: Vector extension tests
+        uses: ./.github/actions/setup-shell
+        with:
+          nix-shell: rust
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            ARCH=$(uname -m)
+            OS=$(uname -s)
+            if [ "$ARCH" = "x86_64" ]; then
+              RUSTFLAGS="-C target-feature=+avx2" cargo build --workspace
+              RUSTFLAGS="-C target-feature=+avx2" cargo test --workspace
+            elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+              # Test generic backend (explicitly disable NEON)
+              RUSTFLAGS="-C target-feature=-neon" cargo build --workspace
+              RUSTFLAGS="-C target-feature=-neon" cargo test --workspace
+              # Test SHA3 backend; Apple Silicon (Darwin arm64) guarantees ARMv8.4-A+SHA3
+              if [ "$OS" = "Darwin" ]; then
+                RUSTFLAGS="-C target-feature=+sha3" cargo build --workspace
+                RUSTFLAGS="-C target-feature=+sha3" cargo test --workspace
+              fi
+            fi
+      - uses: ./.github/actions/setup-shell
+        name: ACVP test
+        with:
+          nix-shell: rust
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            cargo build --release --bin acvp_mlkem
+            for version in v1.1.0.40 v1.1.0.41; do
+              python3 test/acvp/acvp_client.py \
+                --binary ./target/release/acvp_mlkem \
+                --version $version
+            done
+
+  rust_cross:
+    name: Rust cross-compilation (${{ matrix.target.name }})
+    # Mirror the C CI: skip cross jobs on fork PRs to avoid long queue times.
+    if: github.repository_owner == 'pq-code-package' || !github.event.pull_request.head.repo.fork
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          # Run riscv64 and ppc64le from the aarch64 runner
+          - name: "riscv64"
+            runner: ubuntu-24.04-arm
+            nix_shell: cross-rust-riscv64
+            rust_target: riscv64gc-unknown-linux-gnu
+            cargo_runner_var: CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_RUNNER
+            qemu_bin: qemu-riscv64
+          - name: "ppc64le"
+            runner: ubuntu-24.04-arm
+            nix_shell: cross-rust-ppc64le
+            rust_target: powerpc64le-unknown-linux-gnu
+            cargo_runner_var: CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_GNU_RUNNER
+            qemu_bin: qemu-ppc64le
+          # Run aarch64 cross-compilation from the x86_64 runner
+          - name: "aarch64"
+            runner: ubuntu-latest
+            nix_shell: cross-rust-aarch64
+            rust_target: aarch64-unknown-linux-gnu
+            cargo_runner_var: CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUNNER
+            qemu_bin: qemu-aarch64
+    runs-on: ${{ matrix.target.runner }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/setup-shell
+        with:
+          nix-shell: ${{ matrix.target.nix_shell }}
+          nix-cache: true
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            rustup target add ${{ matrix.target.rust_target }}
+
+            # Build first to extract the nix-store sysroot from the ELF interpreter.
+            # Nix cross-toolchains don't expose a usable --sysroot; the target glibc
+            # lives at a hash-addressed path in the nix store that is only visible in
+            # the .interp section of a compiled binary.
+            cargo build --workspace --target ${{ matrix.target.rust_target }}
+            SAMPLE_BIN=$(find target/${{ matrix.target.rust_target }}/debug -maxdepth 2 -executable -type f -name 'acvp_mlkem' | head -1)
+            SYSROOT=$(readelf -l "$SAMPLE_BIN" | grep -oP '(?<=\[)[^\]]+' | grep -E 'ld-linux|ld-musl|ld64|ld\.so' | sed 's|/lib[^/]*/ld.*||')
+
+            # Helper: sets the QEMU runner env var and runs cargo test.
+            # $1 = extra qemu flags (empty for none), $2 = RUSTFLAGS (empty for none).
+            run_tests() {
+              export ${{ matrix.target.cargo_runner_var }}="${{ matrix.target.qemu_bin }}${1:+ $1} -L $SYSROOT"
+              RUSTFLAGS="$2" cargo test --workspace --target ${{ matrix.target.rust_target }}
+            }
+
+            case ${{ matrix.target.rust_target }} in
+              riscv64gc-unknown-linux-gnu)
+                # Generic backend (no RVV), then RVV backend at each VLEN.
+                # VLENs match the C CI (multi-functest uses 128/256/512/1024).
+                run_tests "" ""
+                for vlen in 128 256 512 1024; do
+                  run_tests "-cpu rv64,v=true,vlen=$vlen" "-C target-feature=+v"
+                done
+                ;;
+              powerpc64le-unknown-linux-gnu)
+                # Generic backend only (no vector backend for ppc64le yet).
+                run_tests "" ""
+                ;;
+              aarch64-unknown-linux-gnu)
+                # Generic backend (NEON disabled), analogous to C CI no_opt.
+                run_tests "" "-C target-feature=-neon"
+                # NEON backend (default on aarch64), analogous to C CI opt.
+                run_tests "" ""
+                # SHA3 backend (ARMv8.4-A); qemu-aarch64 -cpu max emulates it.
+                run_tests "-cpu max" "-C target-feature=+sha3"
+                ;;
+            esac
