@@ -1,10 +1,7 @@
 /*
  * Copyright (c) The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
- */
-
-
-/*
+ *
  * Copyright IBM Corp. 2025, 2026
  *
  *===================================================================================
@@ -127,9 +124,9 @@
         stxvd2x 32+0, 9, 3
 .endm
 
-.global MLK_ASM_NAMESPACE(reduce_ppc)
+.global MLK_ASM_NAMESPACE(reduce_ppc_asm)
 .balign 16
-MLK_ASM_FN_SYMBOL(reduce_ppc)
+MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
         stdu    1, -224(1)
         mflr    0
         std     14, 96(1)
@@ -148,8 +145,8 @@ MLK_ASM_FN_SYMBOL(reduce_ppc)
 
         vxor    7, 7, 7
 
-        li      6, Q_OFFSET
-        li      7, C20159_OFFSET
+        li      6, MLK_PPC_Q_OFFSET
+        li      7, MLK_PPC_C20159_OFFSET
         lxvx    32+V_MKQ, 6, 4
         lxvx    32+V20159, 7, 4
 
@@ -188,7 +185,7 @@ MLK_ASM_FN_SYMBOL(reduce_ppc)
         BREDUCE_4X 4, 9, 13, 17
         Write_8X
 
-.align 4
+.balign 16
         /*
          * To unsigned canonical
          */

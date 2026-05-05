@@ -1,9 +1,7 @@
 /*
  * Copyright (c) The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
- */
-
-/*
+ *
  * Copyright IBM Corp. 2025, 2026
  *
  * ===================================================================================
@@ -267,7 +265,7 @@
  */
 .macro MREDUCE_4X _vz0, _vz1, _vz2, _vz3
         /* fqmul = zeta * coefficient
-           Modular multification bond by 2^16 * q in abs value */
+           Modular multiplication bound by 2^16 * q in abs value */
         vmladduhm 15, vdata_b1, \_vz0, rinp
         vmladduhm 20, vdata_b2, \_vz1, rinp
         vmladduhm 25, vdata_b3, \_vz2, rinp
@@ -434,7 +432,7 @@
 .endm
 
 /*
- * mlk_ntt_ppc(int16_t *r, int16_t *qdata)
+ * mlk_ntt_ppc_asm(int16_t *r, int16_t *qdata)
  *   Compute forward NTT based on the following 7 layers -
  *     len = 128, 64, 32, 16, 8, 4, 2.
  *
@@ -468,25 +466,25 @@
  *   to transpose back to its original 4-4 or 2-2-2-2 layout. 
  *
  */
-.global MLK_ASM_NAMESPACE(ntt_ppc)
-.align 4
-MLK_ASM_FN_SYMBOL(ntt_ppc)
+.global MLK_ASM_NAMESPACE(ntt_ppc_asm)
+.balign 16
+MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
 
         SAVE_REGS
 
-        /* load MLKEM_Q */
+        /* load -MLKEM_Q */
         lvx     V_NMKQ,0,qinp
 
         /* Register 14 as pointer to zetas array */
-        addi    zeta_inp, qinp, ZETA_NTT_OFFSET
+        addi    zeta_inp, qinp, MLK_PPC_ZETA_NTT_OFFSET
 
         vxor    3, 3, 3
         vspltish 4, 1
 
-        li      10, QINV_OFFSET
+        li      10, MLK_PPC_QINV_OFFSET
         lvx     V_QINV, 10, qinp
 
-.align 4
+.balign 16
         /*
          * Layer 1. len = 128, start= 0, 64, 128, 192
          */
@@ -499,7 +497,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
         NTT_MREDUCE_4X 128, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
         NTT_MREDUCE_4X 192, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
-.align 4
+.balign 16
         /*
          * Layer 2. len = 64, start= 0, 64, 256, 320
          */
@@ -514,7 +512,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
         NTT_MREDUCE_4X 256, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
         NTT_MREDUCE_4X 320, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
-.align 4
+.balign 16
         /*
          * Layer 3. len = 32, start = 0, 128, 256, 384
          */
@@ -535,7 +533,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
         addi    zeta_inp, zeta_inp, 16
         NTT_MREDUCE_4X 384, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
-.align 4
+.balign 16
         /*
          * Layer 4. len = 16, start = 0, 16, 256, 272
          */
@@ -548,7 +546,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
         NTT_MREDUCE_4X 256, 64, V_Z0, V_Z1, V_Z2, V_Z3
         NTT_MREDUCE_4X  272, 64, V_Z0, V_Z1, V_Z2, V_Z3
 
-.align 4
+.balign 16
         /*
          * Layer 5. len = 8, start= 0, 128, 256, 384
          */
@@ -583,7 +581,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
         li      17, 96
         li      18, 112
 
-.align 4
+.balign 16
         NTT_REDUCE_L44
         NTT_REDUCE_L44
         NTT_REDUCE_L44
@@ -599,7 +597,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc)
         mr      dup_rinp, rinp                  /* Let r5 points to coefficient array */
         li      len_2, 4
 
-.align 4
+.balign 16
         NTT_REDUCE_L24
         NTT_REDUCE_L24
         NTT_REDUCE_L24

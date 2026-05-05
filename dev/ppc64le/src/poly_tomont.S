@@ -1,9 +1,7 @@
 /*
  * Copyright (c) The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
- */
-
-/*
+ *
  * Copyright IBM Corp. 2025, 2026
  *
  *===================================================================================
@@ -87,9 +85,9 @@
         stxvd2x 32+7, 11, 3
 .endm
 
-.global MLK_ASM_NAMESPACE(poly_tomont_ppc)
+.global MLK_ASM_NAMESPACE(poly_tomont_ppc_asm)
 .balign 16
-MLK_ASM_FN_SYMBOL(poly_tomont_ppc)
+MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
         stdu    1, -320(1)
         mflr    0
 
@@ -116,9 +114,9 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc)
         stxvx   32+29, 8, 1
         stxvx   32+30, 9, 1
 
-        li      6, NQ_OFFSET
-        li      7, QINV_OFFSET
-        li      8, C1353_OFFSET
+        li      6, MLK_PPC_NQ_OFFSET
+        li      7, MLK_PPC_QINV_OFFSET
+        li      8, MLK_PPC_C1353_OFFSET
         lxvx    32+V_NMKQ, 6, 4
         lxvx    32+V_QINV, 7, 4
         lxvx    32+V1353, 8, 4

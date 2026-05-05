@@ -22,8 +22,8 @@
 
 .text
 .balign 16
-.global MLK_ASM_NAMESPACE(ntt_ppc)
-MLK_ASM_FN_SYMBOL(ntt_ppc)
+.global MLK_ASM_NAMESPACE(ntt_ppc_asm)
+MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
 
         .cfi_startproc
         stdu 1, -352(1)

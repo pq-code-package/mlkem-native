@@ -1,9 +1,7 @@
 /*
  * Copyright (c) The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
- */
-
-/*
+ *
  * Copyright IBM Corp. 2025, 2026
  *
  * ===================================================================================
@@ -177,7 +175,7 @@
  *
  * r7: len * 2, each coefficient component is 2 bytes.
  *
- * register used for offset to coefficients, r[j] and r[j+len]
+ * registers used for offsets to coefficients, r[j] and r[j+len]
  * R9: offset to r0 = j
  * R16: offset to r1 = r0 + next
  * R18: offset to r2 = r1 + next
@@ -335,7 +333,7 @@
         vadduwm 17, 17, V2pw25
         vadduwm 18, 18, V2pw25
         /* Right shift and pack lower halfword,
-           results bond to 2^16 in abs value */
+           results bound by 2^16 in abs value */
         vsraw   4, 4, V_26
         vsraw   5, 5, V_26
         vsraw   9, 9, V_26
@@ -352,8 +350,8 @@
         vsubuhm 13, 7, 13
         vpkuwum 17, 18, 17
         vsubuhm 17, 7, 17
-        /* Modulo multify-Low unsigned halfword;
-           results bond to 2^16 * q in abs value. */
+        /* Modulo multiply-Low unsigned halfword;
+           results bound by 2^16 * q in abs value. */
         vmladduhm \_v0, 4, V_MKQ, 8
         vmladduhm \_v1, 9, V_MKQ, 12
         vmladduhm \_v2, 13, V_MKQ, 16
@@ -365,7 +363,7 @@
  * MREDUCE_4X(_vz0, _vz1, _vz2, _vz3, _vo0, _vo1, _vo2, _vo3)
  */
 .macro MREDUCE_4X _vz0, _vz1, _vz2, _vz3, _vo0, _vo1, _vo2, _vo3
-        /* Modular multification bond by 2^16 * q in abs value */
+        /* Modular multiplication bound by 2^16 * q in abs value */
         vmladduhm 15, vdata_mont1, \_vz0, rinp
         vmladduhm 20, vdata_mont2, \_vz1, rinp
         vmladduhm 27, vdata_mont3, \_vz2, rinp
@@ -566,7 +564,7 @@
 .endm
 
 /*
- * mlk_intt_ppc(int16_t *r, int16_t *qdata)
+ * mlk_intt_ppc_asm(int16_t *r, int16_t *qdata)
  *   Compute inverse NTT based on the following 7 layers -
  *     len = 2, 4, 8, 16, 32, 64, 128
  *
@@ -599,9 +597,9 @@
  *   pre-arranged for the leg1 and leg2.  After the computation, each vector needs
  *   to transpose back to its original 4-4 or 2-2-2-2 layout.
  */
-.global MLK_ASM_NAMESPACE(intt_ppc)
-.align 4
-MLK_ASM_FN_SYMBOL(intt_ppc)
+.global MLK_ASM_NAMESPACE(intt_ppc_asm)
+.balign 16
+MLK_ASM_FN_SYMBOL(intt_ppc_asm)
 
         SAVE_REGS
 
@@ -609,7 +607,7 @@ MLK_ASM_FN_SYMBOL(intt_ppc)
            Setup for Montgomery reduce */
         lxvx    0, 0, qinp
 
-        li      10, QINV_OFFSET
+        li      10, MLK_PPC_QINV_OFFSET
         lxvx    32+V_QINV, 10, qinp
         xxlxor  32+3, 32+3, 32+3
         vspltish 4, 1
@@ -618,8 +616,8 @@ MLK_ASM_FN_SYMBOL(intt_ppc)
         xxlor   4, 32+4, 32+4        /* 1 vector */
 
         /*  Setup for Barrett reduce */
-        li      10, Q_OFFSET
-        li      11, C20159_OFFSET
+        li      10, MLK_PPC_Q_OFFSET
+        li      11, MLK_PPC_C20159_OFFSET
         lxvx    6, 10, qinp             /* V_MKQ */
         lxvx    32+V20159, 11, qinp     /* V20159 */
 
@@ -643,23 +641,23 @@ MLK_ASM_FN_SYMBOL(intt_ppc)
         /*
          * Montgomery reduce loops with constant 1441
          */
-        addi    zeta_inp, qinp, C1441_OFFSET
+        addi    zeta_inp, qinp, MLK_PPC_C1441_OFFSET
         lvx     V1441, 0, zeta_inp
         li      8, 4
         mtctr   8
 
         Set_mont_consts
-intt_ppc__Loopf:
+intt_ppc_asm_Loopf:
         Reload_4coeffs
         MREDUCE_4X V1441, V1441, V1441, V1441, 6, 7, 8, 9
         Reload_4coeffs
         MREDUCE_4X V1441, V1441, V1441, V1441, 13, 18, 23, 28
         MWrite_8X 32+6, 32+7, 32+8, 32+9, 32+13, 32+18, 32+23, 32+28
-        bdnz    intt_ppc__Loopf
+        bdnz    intt_ppc_asm_Loopf
 
         addi    rinp, rinp, -512
 
-.align 4
+.align 16
         /*
          * Layer 1. len = 2
          *     leg1 offset - 0, 32, 64, 96
@@ -668,7 +666,7 @@ intt_ppc__Loopf:
          *    Update zetas vectors, each vector has 2 zetas
          *    Load zeta vectors in 2-2-2-2 layout
          */
-        addi    zeta_inp, qinp, ZETA_INTT_OFFSET
+        addi    zeta_inp, qinp, MLK_PPC_ZETA_INTT_OFFSET
         li      len_2, 4        /* len * 2 */
         mr      dup_rinp, rinp
 
@@ -681,7 +679,7 @@ intt_ppc__Loopf:
         INTT_REDUCE_L24
         addi    dup_rinp, dup_rinp, 128
 
-.align 4
+.balign 16
         /*
          * Layer 2. len = 4
          *     leg1 offset - 0, 32, 64, 96
@@ -701,7 +699,7 @@ intt_ppc__Loopf:
         INTT_REDUCE_L44
         addi    dup_rinp, dup_rinp, 128
 
-.align 4
+.balign 16
         /*
          * Layer 3. len = 8, start = 0, 128, 256, 384
          */
@@ -712,7 +710,7 @@ intt_ppc__Loopf:
         INTT_REDUCE_4X 256, 32
         INTT_REDUCE_4X 384, 32
 
-.align 4
+.balign 16
         /*
          * Layer 4. len = 16, start = 0, 16, 256, 272
          */
@@ -728,7 +726,7 @@ intt_ppc__Loopf:
         addi    zeta_inp, zeta_inp, -64
         INTT_REDUCE_4X 272, 64
 
-.align 4
+.balign 16
         /*
          * Layer 5. len = 32, start = 0, 128, 256, 384
          */
@@ -743,7 +741,7 @@ intt_ppc__Loopf:
         INTT_REDUCE_L567 384, 16
         addi    zeta_inp, zeta_inp, 16
 
-.align 4
+.balign 16
         /*
          * Layer 6. len = 64, start = 0, 64, 256, 320
          */
@@ -756,7 +754,7 @@ intt_ppc__Loopf:
         INTT_REDUCE_L567 320, 16
         addi    zeta_inp, zeta_inp, 16
 
-.align 4
+.balign 16
         /*
          * Layer 7. len = 128, start = 0, 64, 128, 192
          */

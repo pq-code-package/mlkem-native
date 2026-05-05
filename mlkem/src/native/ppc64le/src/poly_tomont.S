@@ -30,8 +30,8 @@
 
 .text
 .balign 16
-.global MLK_ASM_NAMESPACE(poly_tomont_ppc)
-MLK_ASM_FN_SYMBOL(poly_tomont_ppc)
+.global MLK_ASM_NAMESPACE(poly_tomont_ppc_asm)
+MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
 
         .cfi_startproc
         stdu 1, -320(1)

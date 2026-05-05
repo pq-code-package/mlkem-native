@@ -23,8 +23,8 @@
 
 .text
 .balign 16
-.global MLK_ASM_NAMESPACE(reduce_ppc)
-MLK_ASM_FN_SYMBOL(reduce_ppc)
+.global MLK_ASM_NAMESPACE(reduce_ppc_asm)
+MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
 
         .cfi_startproc
         stdu 1, -224(1)

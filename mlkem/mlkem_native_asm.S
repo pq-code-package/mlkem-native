@@ -697,20 +697,20 @@
 #undef MLK_USE_NATIVE_POLY_TOMONT
 /* mlkem/src/native/ppc64le/src/arith_native_ppc64le.h */
 #undef MLK_NATIVE_PPC64LE_SRC_ARITH_NATIVE_PPC64LE_H
-#undef mlk_intt_ppc
-#undef mlk_ntt_ppc
-#undef mlk_poly_tomont_ppc
-#undef mlk_reduce_ppc
+#undef mlk_intt_ppc_asm
+#undef mlk_ntt_ppc_asm
+#undef mlk_poly_tomont_ppc_asm
+#undef mlk_reduce_ppc_asm
 /* mlkem/src/native/ppc64le/src/consts.h */
-#undef C1353_OFFSET
-#undef C1441_OFFSET
-#undef C20159_OFFSET
 #undef MLK_NATIVE_PPC64LE_SRC_CONSTS_H
-#undef NQ_OFFSET
-#undef QINV_OFFSET
-#undef Q_OFFSET
-#undef ZETA_INTT_OFFSET
-#undef ZETA_NTT_OFFSET
+#undef MLK_PPC_C1353_OFFSET
+#undef MLK_PPC_C1441_OFFSET
+#undef MLK_PPC_C20159_OFFSET
+#undef MLK_PPC_NQ_OFFSET
+#undef MLK_PPC_QINV_OFFSET
+#undef MLK_PPC_Q_OFFSET
+#undef MLK_PPC_ZETA_INTT_OFFSET
+#undef MLK_PPC_ZETA_NTT_OFFSET
 #undef mlk_ppc_qdata
 #endif /* MLK_SYS_PPC64LE */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */

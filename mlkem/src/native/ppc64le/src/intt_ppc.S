@@ -22,8 +22,8 @@
 
 .text
 .balign 16
-.global MLK_ASM_NAMESPACE(intt_ppc)
-MLK_ASM_FN_SYMBOL(intt_ppc)
+.global MLK_ASM_NAMESPACE(intt_ppc_asm)
+MLK_ASM_FN_SYMBOL(intt_ppc_asm)
 
         .cfi_startproc
         stdu 1, -352(1)
@@ -95,7 +95,7 @@ MLK_ASM_FN_SYMBOL(intt_ppc)
         xxlor 35, 3, 3
         xxlor 36, 4, 4
 
-Lintt_ppc__Loopf:
+Lintt_ppc_asm_Loopf:
         lxvd2x 57, 0, 3
         lxvd2x 58, 10, 3
         lxvd2x 62, 11, 3
@@ -156,7 +156,7 @@ Lintt_ppc__Loopf:
         stxvd2x 55, 17, 3
         stxvd2x 60, 18, 3
         addi 3, 3, 128
-        bdnz Lintt_ppc__Loopf
+        bdnz Lintt_ppc_asm_Loopf
         addi 3, 3, -512
         nop
         nop

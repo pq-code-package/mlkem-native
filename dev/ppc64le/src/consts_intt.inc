@@ -4,7 +4,7 @@
  */
 
     /*
-     * For intt Len=2, offset IZETA_NTT_OFFSET127
+     * For intt Len=2,
      * reorder zeta array, (1, 2, 3, 4) -> (3, 1, 4, 2)
      * Transpose z[0], z[1], z[2], z[3]
      *    -> z[3], z[3], z[1], z[1], z[4], z[4], z[2], z[2]
