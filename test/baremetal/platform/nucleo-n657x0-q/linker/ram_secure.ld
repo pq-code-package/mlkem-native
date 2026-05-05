@@ -22,7 +22,7 @@ __itcm_size__  = LENGTH(ITCM);
 __dtcm_start__ = ORIGIN(DTCM);
 __dtcm_size__  = LENGTH(DTCM);
 
-__stack_size__ = 192K;
+__stack_size__ = 240K;
 __heap_size__  = 0;
 
 __StackTop   = ORIGIN(DTCM) + LENGTH(DTCM);

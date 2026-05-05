@@ -84,6 +84,8 @@ python3 test/baremetal/platform/nucleo-n657x0-q/run_test_after_flexmem.py \
 
 `run_test_after_flexmem.py` delegates to `exec_wrapper.py`, which starts ST-LINK GDB server, loads the ELF into RAM, injects argv into `mlk_cmdline_block`, runs from `Reset_Handler`, dumps the target stdout capture buffer, and returns the `[[MLKEM-EXIT:<rc>]]` code.
 
+The KAT and ACVP run targets depend on `run_flexmem_config`, so `make run_kat` and `make run_acvp` restore the expanded FLEXMEM layout before loading the RAM-resident images. `exec_wrapper.py` retries once after pre-output GDB transport failures; set `GDB_RUN_ATTEMPTS=<n>` to adjust this. If the target enters `HardFault_Handler`, the wrapper re-runs the FLEXMEM config binary and retries once; set `GDB_HARDFAULT_RECOVERY_ATTEMPTS=<n>` to adjust this.
+
 ## Argv Blob Loading
 
 Target arguments are passed through a RAM blob rather than through semihosting or debugger command-line support. The test image links `cmdline_region.c`, which reserves the 64 KiB `mlk_cmdline_block` symbol in ITCM. `exec_wrapper.py` resolves that symbol with `arm-none-eabi-nm`, falling back to `readelf -s`; `ARG_BLOCK_SYMBOL` can select a different symbol and `ARG_BLOCK_ADDR` can override the resolved address.

@@ -9,6 +9,19 @@ BUILD_DIR ?= test/build
 CROSS_PREFIX=arm-none-eabi-
 CC=gcc
 
+# Use PMU cycle counting by default
+CYCLES ?= PMU
+
+# Short benchmark runs for testing
+MLK_BENCHMARK_NWARMUP ?= 1
+MLK_BENCHMARK_NITERATIONS ?= 1
+MLK_BENCHMARK_NTESTS ?= 1
+
+CFLAGS += \
+	-DMLK_BENCHMARK_NWARMUP=$(MLK_BENCHMARK_NWARMUP) \
+	-DMLK_BENCHMARK_NITERATIONS=$(MLK_BENCHMARK_NITERATIONS) \
+	-DMLK_BENCHMARK_NTESTS=$(MLK_BENCHMARK_NTESTS)
+
 CFLAGS += \
 	-O3 -g \
 	-Wall -Wextra -Wshadow \
@@ -117,6 +130,8 @@ FLEXMEM_CONFIG_SOURCES := \
     $(STARTUP)
 
 .PHONY: flexmem_config run_flexmem_config run_flexmem_test
+
+run_kat_512 run_kat_768 run_kat_1024 run_acvp: run_flexmem_config
 
 flexmem_config: $(FLEXMEM_CONFIG_ELF)
 

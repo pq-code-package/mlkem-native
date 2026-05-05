@@ -7,6 +7,8 @@ import os
 import struct as st
 import sys
 
+ARGV_BLOCK_SIZE = 64 * 1024
+
 
 def pack_cmdline(args, base_addr):
     """
@@ -26,7 +28,10 @@ def pack_cmdline(args, base_addr):
         ptrs.append(base_addr + header_sz + cur)
         strings += b
         cur += len(b)
-    return st.pack("<I", argc) + b"".join(st.pack("<I", p) for p in ptrs) + strings
+    blob = st.pack("<I", argc) + b"".join(st.pack("<I", p) for p in ptrs) + strings
+    if len(blob) > ARGV_BLOCK_SIZE:
+        raise ValueError(f"argv blob is {len(blob)} bytes, exceeds {ARGV_BLOCK_SIZE}-byte block")
+    return blob + bytes(ARGV_BLOCK_SIZE - len(blob))
 
 
 def main(argv):

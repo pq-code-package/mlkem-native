@@ -6,6 +6,7 @@
 
 import logging
 import os
+import re
 import shlex
 import shutil
 import struct as st
@@ -19,7 +20,13 @@ import threading
 
 
 VERBOSE = False
+STDOUT_BYTES_EMITTED = 0
+TARGET_FAILURE = False
+TARGET_FAILURE_KIND = ""
+SUPPRESS_RETRYABLE_DIAGNOSTICS = False
+LAST_FAULT_DIAGNOSTICS = ""
 LOG = logging.getLogger(__name__)
+ARGV_BLOCK_SIZE = 64 * 1024
 
 
 def configure_logging():
@@ -46,6 +53,72 @@ def info(msg, **kwargs):
         LOG.debug("%s", msg)
 
 
+def _decode_cfsr(cfsr: int):
+    bits = [
+        (0, "IACCVIOL"),
+        (1, "DACCVIOL"),
+        (3, "MUNSTKERR"),
+        (4, "MSTKERR"),
+        (5, "MLSPERR"),
+        (7, "MMARVALID"),
+        (8, "IBUSERR"),
+        (9, "PRECISERR"),
+        (10, "IMPRECISERR"),
+        (11, "UNSTKERR"),
+        (12, "STKERR"),
+        (13, "LSPERR"),
+        (15, "BFARVALID"),
+        (16, "UNDEFINSTR"),
+        (17, "INVSTATE"),
+        (18, "INVPC"),
+        (19, "NOCP"),
+        (24, "UNALIGNED"),
+        (25, "DIVBYZERO"),
+    ]
+    return [name for bit, name in bits if cfsr & (1 << bit)]
+
+
+def _decode_hfsr(hfsr: int):
+    bits = [(1, "VECTTBL"), (30, "FORCED"), (31, "DEBUGEVT")]
+    return [name for bit, name in bits if hfsr & (1 << bit)]
+
+
+def _fault_info_from_gdb(gdb_text: str) -> str:
+    values = {}
+    for name, value in re.findall(r"^(CFSR|HFSR|DFSR|MMFAR|BFAR|AFSR|SHCSR|CCR|MSP|PSP|LR|PC)=0x([0-9a-fA-F]+)$", gdb_text, re.MULTILINE):
+        values[name] = int(value, 16)
+
+    if not values:
+        return ""
+
+    lines = ["Fault registers:"]
+    for name in ("CFSR", "HFSR", "DFSR", "MMFAR", "BFAR", "AFSR", "SHCSR", "CCR", "MSP", "PSP", "LR", "PC"):
+        if name in values:
+            lines.append(f"  {name}=0x{values[name]:08x}")
+
+    cfsr_bits = _decode_cfsr(values.get("CFSR", 0))
+    hfsr_bits = _decode_hfsr(values.get("HFSR", 0))
+    if cfsr_bits:
+        lines.append("  CFSR bits: " + ", ".join(cfsr_bits))
+    if hfsr_bits:
+        lines.append("  HFSR bits: " + ", ".join(hfsr_bits))
+
+    stacked = re.search(r"^STACKED_R0_R1_R2_R3_R12_LR_PC_XPSR:\s*\n((?:0x[0-9a-fA-F]+:\s+.*\n?)?)", gdb_text, re.MULTILINE)
+    if stacked:
+        stack_lines = [line.strip() for line in stacked.group(1).splitlines() if line.strip()]
+        if stack_lines:
+            lines.append("  stacked frame dump:")
+            lines.extend(f"    {line}" for line in stack_lines)
+
+    return "\n".join(lines)
+
+
+def _gdb_observed_hardfault(gdb_text: str) -> bool:
+    return "[[NUCLEO-HARDFAULT]]" in gdb_text or re.search(
+        r"^HardFault_Handler \(\)", gdb_text, re.MULTILINE
+    ) is not None
+
+
 def pack_cmdline(args, base_addr):
     """
     Pack argv for the STM32 baremetal target:
@@ -64,7 +137,10 @@ def pack_cmdline(args, base_addr):
         ptrs.append(base_addr + header_sz + cur)
         strings += b
         cur += len(b)
-    return st.pack("<I", argc) + b"".join(st.pack("<I", p) for p in ptrs) + strings
+    blob = st.pack("<I", argc) + b"".join(st.pack("<I", p) for p in ptrs) + strings
+    if len(blob) > ARGV_BLOCK_SIZE:
+        raise ValueError(f"argv blob is {len(blob)} bytes, exceeds {ARGV_BLOCK_SIZE}-byte block")
+    return blob + bytes(ARGV_BLOCK_SIZE - len(blob))
 
 
 def run(cmd, **kwargs):
@@ -160,8 +236,55 @@ def _reset_target(st_cubeprog: str, st_clt_root: str, st_speed: str, st_serial: 
     return _run_cubeprogrammer(cli, _cubeprogrammer_connect_args(st_speed, st_serial, st_apid), ["-rst"])
 
 
-def main():
+def _default_flexmem_config_elf() -> str:
+    platform_dir = os.path.dirname(os.path.abspath(__file__))
+    repo_root = os.path.abspath(os.path.join(platform_dir, "..", "..", "..", ".."))
+    return os.path.join(repo_root, "test", "build", "nucleo-n657x0-q", "flexmem_config.elf")
+
+
+def _recover_after_hardfault() -> bool:
+    platform_dir = os.path.dirname(os.path.abspath(__file__))
+    configure_script = os.path.join(platform_dir, "flexmem_configure.py")
+    config_elf = os.environ.get("FLEXMEM_CONFIG_ELF", _default_flexmem_config_elf())
+
+    if not os.path.exists(configure_script):
+        err(f"FLEXMEM configure script not found: {configure_script}")
+        return False
+    if not os.path.exists(config_elf):
+        err(f"FLEXMEM config ELF not found: {config_elf}")
+        return False
+
+    info("[exec_wrapper] recovering from HardFault: re-running FLEXMEM config")
+    recovery_env = os.environ.copy()
+    recovery_env.setdefault("STLINK_CONNECT_MODE", "UR")
+    cp = run(
+        [sys.executable, configure_script, config_elf],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        env=recovery_env,
+    )
+    if cp.returncode != 0:
+        err("FLEXMEM reconfiguration after HardFault failed")
+        log_output(cp.stdout, logging.ERROR)
+        return False
+    if VERBOSE:
+        log_output(cp.stdout, logging.DEBUG)
+    return True
+
+
+def _run_once():
     global VERBOSE
+    global STDOUT_BYTES_EMITTED
+    global TARGET_FAILURE
+    global TARGET_FAILURE_KIND
+    global SUPPRESS_RETRYABLE_DIAGNOSTICS
+    global LAST_FAULT_DIAGNOSTICS
+
+    STDOUT_BYTES_EMITTED = 0
+    TARGET_FAILURE = False
+    TARGET_FAILURE_KIND = ""
+    LAST_FAULT_DIAGNOSTICS = ""
 
     argv = sys.argv[1:]
     # Minimal flag parsing for wrapper flags (remove them from argv)
@@ -297,7 +420,11 @@ def main():
         err("- Ensure symbols are present in ELF, or set ARG_BLOCK_ADDR to the base address (hex).")
         return 2
 
-    blob = pack_cmdline(args, base_addr)
+    try:
+        blob = pack_cmdline(args, base_addr)
+    except ValueError as exc:
+        err(str(exc))
+        return 2
 
     with tempfile.TemporaryDirectory() as td:
         argv_bin = os.path.join(td, "argv.bin")
@@ -440,6 +567,8 @@ def main():
             shared = {"exit_code": None, "stdout_streamed": False}
 
             def _semihost_reader(sock: socket.socket):
+                global STDOUT_BYTES_EMITTED
+
                 buf = b""
                 try:
                     while not semihost_stop.is_set():
@@ -473,9 +602,12 @@ def main():
                                     else:
                                         sys.stdout.buffer.write(line + b"\n")
                                         sys.stdout.buffer.flush()
+                                        STDOUT_BYTES_EMITTED += len(line) + 1
                                         shared["stdout_streamed"] = True
                         except socket.timeout:
                             continue
+                        except OSError:
+                            break
                 finally:
                     try:
                         sock.close()
@@ -497,8 +629,8 @@ def main():
             if stp.poll() is not None:
                 # Server exited early – surface a helpful message
                 out_rem = stp.stdout.read() if stp.stdout else ""
-                if out_rem and VERBOSE:
-                    log_output(out_rem, logging.DEBUG)
+                if out_rem and not SUPPRESS_RETRYABLE_DIAGNOSTICS:
+                    log_output(out_rem, logging.DEBUG if VERBOSE else logging.ERROR)
                 merged = out_rem
                 low = merged.lower()
                 if "firmware upgrade" in low or "upgrade required" in low:
@@ -559,6 +691,48 @@ def main():
             gdb_lines += [
                 "info registers",
                 "x/4wx $sp",
+                "echo CFSR=",
+                "output/x *(unsigned int *)0xE000ED28",
+                "echo \\n",
+                "echo HFSR=",
+                "output/x *(unsigned int *)0xE000ED2C",
+                "echo \\n",
+                "echo DFSR=",
+                "output/x *(unsigned int *)0xE000ED30",
+                "echo \\n",
+                "echo MMFAR=",
+                "output/x *(unsigned int *)0xE000ED34",
+                "echo \\n",
+                "echo BFAR=",
+                "output/x *(unsigned int *)0xE000ED38",
+                "echo \\n",
+                "echo AFSR=",
+                "output/x *(unsigned int *)0xE000ED3C",
+                "echo \\n",
+                "echo SHCSR=",
+                "output/x *(unsigned int *)0xE000ED24",
+                "echo \\n",
+                "echo CCR=",
+                "output/x *(unsigned int *)0xE000ED14",
+                "echo \\n",
+                "echo MSP=",
+                "output/x $msp",
+                "echo \\n",
+                "echo PSP=",
+                "output/x $psp",
+                "echo \\n",
+                "echo LR=",
+                "output/x $lr",
+                "echo \\n",
+                "echo PC=",
+                "output/x $pc",
+                "echo \\n",
+                "echo STACKED_R0_R1_R2_R3_R12_LR_PC_XPSR:\\n",
+                "if ($lr & 4)",
+                "  x/8wx $psp",
+                "else",
+                "  x/8wx $msp",
+                "end",
                 "x/4wx 0xE000ED28",
                 "x/wx 0xE000ED38",
             ]
@@ -611,8 +785,9 @@ def main():
                 if gdbp.poll() is not None:
                     break
                 if gdb_deadline is not None and time.time() > gdb_deadline:
-                    err("FAIL!")
-                    err(f"gdb batch timed out after {gdb_run_timeout:.0f}s")
+                    if not SUPPRESS_RETRYABLE_DIAGNOSTICS:
+                        err("FAIL!")
+                        err(f"gdb batch timed out after {gdb_run_timeout:.0f}s")
                     try:
                         gdbp.terminate()
                         gdbp.wait(timeout=1.0)
@@ -623,9 +798,9 @@ def main():
                             pass
                     try:
                         out, errout = gdbp.communicate(timeout=1.0)
-                        if out:
+                        if out and not SUPPRESS_RETRYABLE_DIAGNOSTICS:
                             log_output(out, logging.ERROR)
-                        if errout:
+                        if errout and not SUPPRESS_RETRYABLE_DIAGNOSTICS:
                             err(errout, end="")
                     except Exception:
                         pass
@@ -639,6 +814,9 @@ def main():
                 err(errout, end="")
 
             gdb_text = f"{out}\n{errout}"
+            layout_failed = "[[NUCLEO-LAYOUT-FAIL]]" in gdb_text
+            hardfaulted = _gdb_observed_hardfault(gdb_text)
+            target_failed = layout_failed or hardfaulted
 
             captured_text = ""
             if os.path.exists(stdout_capture_bin):
@@ -657,9 +835,11 @@ def main():
                                 shared["exit_code"] = 1
                             continue
                         captured_lines.append(capture_line)
-                    if captured_lines and not shared.get("stdout_streamed"):
-                        sys.stdout.write("".join(captured_lines))
+                    if captured_lines and not shared.get("stdout_streamed") and not target_failed:
+                        captured_output = "".join(captured_lines)
+                        sys.stdout.write(captured_output)
                         sys.stdout.flush()
+                        STDOUT_BYTES_EMITTED += len(captured_output.encode("utf-8"))
                 except Exception as exc:
                     info(f"[exec_wrapper] failed to read stdout capture: {exc}")
 
@@ -669,14 +849,23 @@ def main():
             if shared.get("exit_code") is not None:
                 return int(shared["exit_code"]) if isinstance(shared["exit_code"], int) else 1
 
-            if "[[NUCLEO-LAYOUT-FAIL]]" in gdb_text:
+            if layout_failed:
+                TARGET_FAILURE = True
+                TARGET_FAILURE_KIND = "layout"
                 err("FAIL!")
                 err("FLEXMEM layout check failed on target")
                 return 1
 
-            if "[[NUCLEO-HARDFAULT]]" in gdb_text:
-                err("FAIL!")
-                err("Target entered HardFault_Handler")
+            if hardfaulted:
+                TARGET_FAILURE = True
+                TARGET_FAILURE_KIND = "hardfault"
+                fault_info = _fault_info_from_gdb(gdb_text)
+                LAST_FAULT_DIAGNOSTICS = fault_info
+                if not SUPPRESS_RETRYABLE_DIAGNOSTICS:
+                    err("FAIL!")
+                    err("Target entered HardFault_Handler")
+                    if fault_info:
+                        err(fault_info)
                 return 1
 
             if "Program received signal SIGTRAP" in gdb_text:
@@ -684,8 +873,13 @@ def main():
                 return 0
 
             if gdbp.returncode != 0:
-                err("FAIL!")
-                err(f"gdb batch failed with code {gdbp.returncode}")
+                if not SUPPRESS_RETRYABLE_DIAGNOSTICS:
+                    err("FAIL!")
+                    err(f"gdb batch failed with code {gdbp.returncode}")
+                if out and not SUPPRESS_RETRYABLE_DIAGNOSTICS:
+                    log_output(out, logging.ERROR)
+                if errout and not SUPPRESS_RETRYABLE_DIAGNOSTICS:
+                    log_output(errout, logging.ERROR)
                 return gdbp.returncode
 
             return 0
@@ -716,6 +910,42 @@ def main():
                     os.unlink(gdb_script_path)
             except Exception:
                 pass
+
+
+def main():
+    global SUPPRESS_RETRYABLE_DIAGNOSTICS
+    global LAST_FAULT_DIAGNOSTICS
+
+    attempts = max(1, int(os.environ.get("GDB_RUN_ATTEMPTS", "2")))
+    hardfault_attempts = max(0, int(os.environ.get("GDB_HARDFAULT_RECOVERY_ATTEMPTS", "1")))
+    transport_retries = 0
+    hardfault_recoveries = 0
+    last_rc = 1
+
+    while True:
+        can_retry_transport = transport_retries < attempts - 1
+        can_retry_hardfault = hardfault_recoveries < hardfault_attempts
+        SUPPRESS_RETRYABLE_DIAGNOSTICS = can_retry_transport or can_retry_hardfault
+        last_rc = _run_once()
+        if last_rc == 0:
+            return 0
+        if TARGET_FAILURE_KIND == "hardfault" and can_retry_hardfault:
+            hardfault_recoveries += 1
+            if _recover_after_hardfault():
+                if VERBOSE:
+                    err(f"[exec_wrapper] retrying after recovered HardFault ({hardfault_recoveries}/{hardfault_attempts})")
+                time.sleep(0.5)
+                continue
+            if LAST_FAULT_DIAGNOSTICS:
+                err("HardFault diagnostics from failed run:")
+                err(LAST_FAULT_DIAGNOSTICS)
+            return last_rc
+        if TARGET_FAILURE or STDOUT_BYTES_EMITTED != 0 or not can_retry_transport:
+            return last_rc
+        transport_retries += 1
+        if VERBOSE:
+            err(f"[exec_wrapper] retrying after transport failure ({transport_retries}/{attempts - 1})")
+        time.sleep(0.5)
 
 
 if __name__ == "__main__":
