@@ -6,7 +6,6 @@
 
 import struct as st
 
-
 ARGV_BLOCK_SIZE = 64 * 1024
 
 
@@ -26,12 +25,18 @@ def pack_cmdline(args, base_addr, block_size=ARGV_BLOCK_SIZE):
     cur = 0
     for arg in args:
         encoded = arg.encode("utf-8") + b"\x00"
-        # GDB writes the blob at ``base_addr``; the C side expects argv pointers
-        # to be valid target addresses rather than offsets into the blob.
+        # GDB writes the blob at ``base_addr``; the C side expects argv
+        # pointers to be valid target addresses rather than blob offsets.
         ptrs.append(base_addr + header_sz + cur)
         strings += encoded
         cur += len(encoded)
-    blob = st.pack("<I", argc) + b"".join(st.pack("<I", ptr) for ptr in ptrs) + strings
+    blob = (
+        st.pack("<I", argc)
+        + b"".join(st.pack("<I", ptr) for ptr in ptrs)
+        + strings
+    )
     if len(blob) > block_size:
-        raise ValueError(f"argv blob is {len(blob)} bytes, exceeds {block_size}-byte block")
+        raise ValueError(
+            f"argv blob is {len(blob)} bytes, exceeds {block_size}-byte block"
+        )
     return blob + bytes(block_size - len(blob))

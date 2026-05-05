@@ -22,10 +22,10 @@ def build_run_script(
     """
     Build the full GDB command list for one test-image run.
 
-    The order is part of the platform contract: load the RAM ELF, run normal C
-    startup until ``__wrap_main``, restore argv after ``.bss`` has been cleared,
-    install target-failure breakpoints, continue, then harvest stdout and fault
-    diagnostics after execution stops.
+    The order is part of the platform contract: load the RAM ELF, run normal
+    C startup until ``__wrap_main``, restore argv after ``.bss`` has been
+    cleared, install target-failure breakpoints, continue, then harvest stdout
+    and fault diagnostics after execution stops.
     """
     gdb_lines = [
         "set pagination off",
@@ -56,7 +56,8 @@ def build_run_script(
         )
     if stdout_capture_truncated_addr:
         gdb_lines += [
-            f"set $nucleo_stdout_truncated = *(unsigned int *){stdout_capture_truncated_addr}",
+            "set $nucleo_stdout_truncated = *(unsigned int *)"
+            f"{stdout_capture_truncated_addr}",
             "p/x $nucleo_stdout_truncated",
         ]
     gdb_lines += fault_diagnostic_commands()
@@ -72,23 +73,30 @@ def restore_argv_command(argv_bin, arg_block_addr, arg_block_sym):
     return f"restore {argv_bin} binary &{arg_block_sym}"
 
 
-def stdout_capture_dump_commands(*, stdout_capture_addr, stdout_capture_len_addr, stdout_capture_size, stdout_capture_bin):
+def stdout_capture_dump_commands(
+    *,
+    stdout_capture_addr,
+    stdout_capture_len_addr,
+    stdout_capture_size,
+    stdout_capture_bin,
+):
     """Return commands that dump the target stdout capture buffer to a file."""
     return [
         f"set $nucleo_stdout_len = *(unsigned int *){stdout_capture_len_addr}",
         "if $nucleo_stdout_len > 0",
-        # Clamp to the compile-time buffer size before using the target-provided
-        # length as a host file dump bound.
+        # Clamp to the compile-time buffer size before using the
+        # target-provided length as a host file dump bound.
         f"  if $nucleo_stdout_len > {stdout_capture_size}",
         f"    set $nucleo_stdout_len = {stdout_capture_size}",
         "  end",
-        f"  dump binary memory {stdout_capture_bin} {stdout_capture_addr} {stdout_capture_addr} + $nucleo_stdout_len",
+        f"  dump binary memory {stdout_capture_bin} {stdout_capture_addr} "
+        f"{stdout_capture_addr} + $nucleo_stdout_len",
         "end",
     ]
 
 
 def fault_diagnostic_commands():
-    """Return commands that print Cortex-M fault registers and stack context."""
+    """Return commands that print Cortex-M fault diagnostics."""
     return [
         "info registers",
         "x/4wx $sp",

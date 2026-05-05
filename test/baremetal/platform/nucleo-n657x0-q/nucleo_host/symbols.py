@@ -10,21 +10,34 @@ import subprocess
 
 def default_readelf():
     """Return the preferred readelf executable name available on this host."""
-    return shutil.which("arm-none-eabi-readelf") or shutil.which("readelf") or "readelf"
+    return (
+        shutil.which("arm-none-eabi-readelf")
+        or shutil.which("readelf")
+        or "readelf"
+    )
 
 
-def resolve_symbol(elf_path: str, symbol: str, nm="arm-none-eabi-nm", readelf=None):
-    """Resolve ``symbol`` to a hex address, trying ``nm`` before ``readelf``."""
+def resolve_symbol(
+    elf_path: str, symbol: str, nm="arm-none-eabi-nm", readelf=None
+):
+    """Resolve ``symbol`` to a hex address."""
     addr = resolve_symbol_with_nm(elf_path, symbol, nm)
     if addr is not None:
         return addr
-    return resolve_symbol_with_readelf(elf_path, symbol, readelf or default_readelf())
+    return resolve_symbol_with_readelf(
+        elf_path, symbol, readelf or default_readelf()
+    )
 
 
 def resolve_symbol_with_nm(elf_path: str, symbol: str, nm="arm-none-eabi-nm"):
     """Resolve ``symbol`` with ``nm -n`` and return ``None`` on any failure."""
     try:
-        cp = subprocess.run([nm, "-n", elf_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        cp = subprocess.run(
+            [nm, "-n", elf_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
     except OSError:
         return None
     if cp.returncode != 0:
@@ -45,9 +58,14 @@ def parse_nm_symbol(output: str, symbol: str):
 
 
 def resolve_symbol_with_readelf(elf_path: str, symbol: str, readelf=None):
-    """Resolve ``symbol`` with ``readelf -s`` and return ``None`` on failure."""
+    """Resolve ``symbol`` with ``readelf -s``."""
     try:
-        cp = subprocess.run([readelf or default_readelf(), "-s", elf_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        cp = subprocess.run(
+            [readelf or default_readelf(), "-s", elf_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
     except OSError:
         return None
     if cp.returncode != 0:

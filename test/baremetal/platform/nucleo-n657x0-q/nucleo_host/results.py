@@ -6,7 +6,6 @@
 
 import re
 
-
 EXIT_SENTINEL_PREFIX = "[[MLKEM-EXIT:"
 EXIT_SENTINEL_SUFFIX = "]]"
 LAYOUT_FAIL_SENTINEL = "[[NUCLEO-LAYOUT-FAIL]]"
@@ -26,7 +25,12 @@ def gdb_load_failed_before_target_output(
 ) -> bool:
     """Return whether a GDB load failure is safe to recover with FLEXMEM."""
     exit_sentinel_in_gdb = EXIT_SENTINEL_PREFIX in gdb_text
-    return gdb_load_failed(gdb_text) and not target_output_observed and not exit_code_observed and not exit_sentinel_in_gdb
+    return (
+        gdb_load_failed(gdb_text)
+        and not target_output_observed
+        and not exit_code_observed
+        and not exit_sentinel_in_gdb
+    )
 
 
 def decode_cfsr(cfsr: int):
@@ -64,10 +68,14 @@ def decode_hfsr(hfsr: int):
 def parse_exit_sentinel(line: str):
     """Parse a ``[[MLKEM-EXIT:<rc>]]`` line into ``(matched, rc)``."""
     stripped = line.strip()
-    if not stripped.startswith(EXIT_SENTINEL_PREFIX) or not stripped.endswith(EXIT_SENTINEL_SUFFIX):
+    if not stripped.startswith(EXIT_SENTINEL_PREFIX) or not stripped.endswith(
+        EXIT_SENTINEL_SUFFIX
+    ):
         return False, None
     try:
-        return True, int(stripped[len(EXIT_SENTINEL_PREFIX):-len(EXIT_SENTINEL_SUFFIX)])
+        return True, int(
+            stripped[len(EXIT_SENTINEL_PREFIX) : -len(EXIT_SENTINEL_SUFFIX)]
+        )
     except Exception:
         return True, 1
 
@@ -89,7 +97,10 @@ def split_stdout_capture(captured: bytes):
 def fault_info_from_gdb(gdb_text: str) -> str:
     """Format fault registers emitted by the GDB script into readable text."""
     values = {}
-    register_pattern = r"^(CFSR|HFSR|DFSR|MMFAR|BFAR|AFSR|SHCSR|CCR|MSP|PSP|LR|PC)=0x([0-9a-fA-F]+)$"
+    register_pattern = (
+        r"^(CFSR|HFSR|DFSR|MMFAR|BFAR|AFSR|SHCSR|CCR|MSP|PSP|LR|PC)"
+        r"=0x([0-9a-fA-F]+)$"
+    )
     for name, value in re.findall(register_pattern, gdb_text, re.MULTILINE):
         values[name] = int(value, 16)
 
@@ -97,7 +108,20 @@ def fault_info_from_gdb(gdb_text: str) -> str:
         return ""
 
     lines = ["Fault registers:"]
-    for name in ("CFSR", "HFSR", "DFSR", "MMFAR", "BFAR", "AFSR", "SHCSR", "CCR", "MSP", "PSP", "LR", "PC"):
+    for name in (
+        "CFSR",
+        "HFSR",
+        "DFSR",
+        "MMFAR",
+        "BFAR",
+        "AFSR",
+        "SHCSR",
+        "CCR",
+        "MSP",
+        "PSP",
+        "LR",
+        "PC",
+    ):
         if name in values:
             lines.append(f"  {name}=0x{values[name]:08x}")
 
@@ -111,12 +135,17 @@ def fault_info_from_gdb(gdb_text: str) -> str:
     # The stack dump follows a marker printed by the GDB script.  Keep parsing
     # permissive because GDB may format the memory rows differently by version.
     stacked = re.search(
-        r"^STACKED_R0_R1_R2_R3_R12_LR_PC_XPSR:\s*\n((?:0x[0-9a-fA-F]+:\s+.*\n?)?)",
+        r"^STACKED_R0_R1_R2_R3_R12_LR_PC_XPSR:\s*\n"
+        r"((?:0x[0-9a-fA-F]+:\s+.*\n?)?)",
         gdb_text,
         re.MULTILINE,
     )
     if stacked:
-        stack_lines = [line.strip() for line in stacked.group(1).splitlines() if line.strip()]
+        stack_lines = [
+            line.strip()
+            for line in stacked.group(1).splitlines()
+            if line.strip()
+        ]
         if stack_lines:
             lines.append("  stacked frame dump:")
             lines.extend(f"    {line}" for line in stack_lines)
@@ -126,6 +155,8 @@ def fault_info_from_gdb(gdb_text: str) -> str:
 
 def gdb_observed_hardfault(gdb_text: str) -> bool:
     """Return whether GDB output shows the target entered HardFault_Handler."""
-    return HARDFAULT_SENTINEL in gdb_text or re.search(
-        r"^HardFault_Handler \(\)", gdb_text, re.MULTILINE
-    ) is not None
+    return (
+        HARDFAULT_SENTINEL in gdb_text
+        or re.search(r"^HardFault_Handler \(\)", gdb_text, re.MULTILINE)
+        is not None
+    )

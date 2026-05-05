@@ -14,7 +14,11 @@ from nucleo_host.argv_blob import pack_cmdline
 def main(argv):
     """Parse CLI arguments, write the argv blob, and return a process code."""
     if len(argv) < 4:
-        print("Usage: make_argv_bin.py <output.bin> <base_addr_hex> <arg0> [arg1 ...]", file=sys.stderr)
+        usage = (
+            "Usage: make_argv_bin.py <output.bin> <base_addr_hex> "
+            "<arg0> [arg1 ...]"
+        )
+        print(usage, file=sys.stderr)
         return 2
     out = argv[1]
     base_hex = argv[2]
