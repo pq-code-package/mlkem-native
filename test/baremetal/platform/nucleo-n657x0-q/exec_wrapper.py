@@ -28,6 +28,7 @@ import socket
 import threading
 
 from nucleo_host.argv_blob import pack_cmdline
+from nucleo_host.flexmem import flexmem_config_build_instructions
 from nucleo_host.gdb_script import build_run_script
 from nucleo_host.results import LAYOUT_FAIL_SENTINEL
 from nucleo_host.results import fault_info_from_gdb
@@ -130,6 +131,7 @@ def _recover_flexmem(reason: str, failure_message: str) -> bool:
         return False
     if not os.path.exists(config_elf):
         err(f"FLEXMEM config ELF not found: {config_elf}")
+        err(flexmem_config_build_instructions(config_elf))
         return False
 
     info(f"[exec_wrapper] recovering from {reason}: re-running FLEXMEM config")

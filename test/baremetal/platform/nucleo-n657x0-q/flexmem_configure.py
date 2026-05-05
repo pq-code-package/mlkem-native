@@ -21,6 +21,7 @@ import time
 from nucleo_host.st_tools import connect_args as st_connect_args
 from nucleo_host.st_tools import find_cubeprogrammer_cli as st_find_cubeprogrammer_cli
 from nucleo_host.st_tools import run_quiet
+from nucleo_host.flexmem import flexmem_config_build_instructions
 from nucleo_host.symbols import resolve_symbol_with_nm
 
 DONE = "FLEXMEM configuration complete; reset target and load test binary."
@@ -130,6 +131,7 @@ def main():
     elf = os.path.abspath(sys.argv[1])
     if not os.path.exists(elf):
         err(f"Config ELF not found: {elf}")
+        err(flexmem_config_build_instructions(elf))
         return 2
 
     cli = cubeprogrammer_cli()

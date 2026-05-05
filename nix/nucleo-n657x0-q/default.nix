@@ -49,18 +49,16 @@ stdenvNoCC.mkDerivation {
     fi
     cp -r "Drivers/CMSIS/Device/ST"     "$outp/Drivers/CMSIS/Device/"
 
-    # Copy startup + system + linker script
+    # Copy startup + system files
     # Prefer board-specific FSBL-LRUN files explicitly when available.
     fsbl_tpl="Projects/NUCLEO-N657X0-Q/Templates/Template_FSBL_LRUN"
-    mkdir -p "$outp/gcc" "$outp/gcc/linker"
+    mkdir -p "$outp/gcc"
     if [ -d "$fsbl_tpl" ]; then
       # Explicitly select:
       #  - Startup: STM32CubeIDE/Boot/Startup/startup_stm32n657xx_fsbl.s
-      #  - Linker:  STM32CubeIDE/AppS/STM32N657XX_LRUN.ld
       #  - System:  FSBL/Src/system_stm32n6xx_fsbl.c
       #  - IT/MSP:  FSBL/Src/stm32n6xx_it.c, stm32n6xx_hal_msp.c
       start_src="$fsbl_tpl/STM32CubeIDE/Boot/Startup/startup_stm32n657xx_fsbl.s"
-      ld_src="$fsbl_tpl/STM32CubeIDE/AppS/STM32N657XX_LRUN.ld"
       sys_src="$fsbl_tpl/FSBL/Src/system_stm32n6xx_fsbl.c"
       it_src="$fsbl_tpl/FSBL/Src/stm32n6xx_it.c"
       msp_src="$fsbl_tpl/FSBL/Src/stm32n6xx_hal_msp.c"
@@ -76,31 +74,6 @@ stdenvNoCC.mkDerivation {
         # stale board/debug state from delivering an interrupt before C startup
         # has initialized the test image.
         sed -i.bak -E '/^Reset_Handler:/a\  cpsid i' "$outp/gcc/startup_stm32n657xx.S"
-      fi
-      if [ -f "$ld_src" ]; then
-        cp -v "$ld_src" "$outp/gcc/linker/STM32N657XX_LRUN.ld"
-        # Patch LRUN linker script to set initial stack pointer into D-TCM (256 KiB window)
-        ld_file="$outp/gcc/linker/STM32N657XX_LRUN.ld"
-        if [ -f "$ld_file" ]; then
-          echo "Patching LRUN linker script for D-TCM stack (MSP/MSPLIM in 0x30000000-0x30040000)"
-          # Common patterns: direct assignments or PROVIDE() wrappers; handle both if present
-          sed -i.bak -E 's@PROVIDE\(\s*_estack\s*=\s*[^;]+\);@PROVIDE(_estack = 0x30040000);@' "$ld_file" || true
-          sed -i.bak -E 's@PROVIDE\(\s*__StackTop\s*=\s*[^;]+\);@PROVIDE(__StackTop = 0x30040000);@' "$ld_file" || true
-          sed -i.bak -E 's@PROVIDE\(\s*__initial_sp\s*=\s*[^;]+\);@PROVIDE(__initial_sp = 0x30040000);@' "$ld_file" || true
-          sed -i.bak -E 's@PROVIDE\(\s*__StackLimit\s*=\s*[^;]+\);@PROVIDE(__StackLimit = 0x30000000);@' "$ld_file" || true
-          sed -i.bak -E 's@(^|[^A-Za-z_])(_estack)\s*=\s*0x[0-9A-Fa-f]+@\1\2 = 0x30040000@g' "$ld_file" || true
-          sed -i.bak -E 's@(^|[^A-Za-z_])(__StackTop)\s*=\s*0x[0-9A-Fa-f]+@\1\2 = 0x30040000@g' "$ld_file" || true
-          sed -i.bak -E 's@(^|[^A-Za-z_])( __initial_sp|__initial_sp)\s*=\s*0x[0-9A-Fa-f]+@\1__initial_sp = 0x30040000@g' "$ld_file" || true
-          sed -i.bak -E 's@(^|[^A-Za-z_])( __StackLimit|__StackLimit)\s*=\s*0x[0-9A-Fa-f]+@\1__StackLimit = 0x30000000@g' "$ld_file" || true
-          # Append fallback PROVIDE definitions (won't override explicit definitions)
-          if ! grep -q "__StackTop" "$ld_file"; then
-            printf '\n/* D-TCM stack placement for LRUN */\n' >> "$ld_file"
-            printf 'PROVIDE(_estack = 0x30040000);\n' >> "$ld_file"
-            printf 'PROVIDE(__StackTop = _estack);\n' >> "$ld_file"
-            printf 'PROVIDE(__initial_sp = _estack);\n' >> "$ld_file"
-            printf 'PROVIDE(__StackLimit = 0x30000000);\n' >> "$ld_file"
-          fi
-        fi
       fi
       if [ -f "$sys_src" ]; then
         cp -v "$sys_src" "$outp/system_stm32n6xx.c"

@@ -10,7 +10,9 @@ import unittest
 from unittest import mock
 
 import exec_wrapper
+import flexmem_configure
 from nucleo_host.argv_blob import ARGV_BLOCK_SIZE, pack_cmdline
+from nucleo_host.flexmem import PLATFORM_MK, flexmem_config_build_instructions
 from nucleo_host.gdb_script import build_run_script, restore_argv_command
 from nucleo_host.results import fault_info_from_gdb
 from nucleo_host.results import gdb_load_failed
@@ -92,6 +94,43 @@ class NucleoHostTest(unittest.TestCase):
         self.assertFalse(gdb_load_failed_before_target_output(gdb_text, target_output_observed=True))
         self.assertFalse(gdb_load_failed_before_target_output(gdb_text, exit_code_observed=True))
         self.assertFalse(gdb_load_failed_before_target_output("Load failed\n[[MLKEM-EXIT:0]]\n"))
+
+    def test_flexmem_config_build_instructions_show_make_command(self):
+        """Missing config diagnostics explain how to build the helper ELF."""
+        instructions = flexmem_config_build_instructions("/tmp/flexmem_config.elf")
+
+        self.assertIn(f"make flexmem_config EXTRA_MAKEFILE={PLATFORM_MK}", instructions)
+        self.assertIn(f"make run_flexmem_config EXTRA_MAKEFILE={PLATFORM_MK}", instructions)
+        self.assertIn("/tmp/flexmem_config.elf", instructions)
+
+    def test_load_failure_recovery_reports_build_hint_when_config_missing(self):
+        """The wrapper points users at flexmem_config when recovery cannot start."""
+        messages = []
+        env = {"FLEXMEM_CONFIG_ELF": "/tmp/missing_flexmem_config.elf"}
+
+        def fake_exists(path):
+            return path.endswith("flexmem_configure.py")
+
+        with mock.patch.dict(os.environ, env), \
+             mock.patch.object(exec_wrapper.os.path, "exists", side_effect=fake_exists), \
+             mock.patch.object(exec_wrapper, "err", side_effect=messages.append):
+            self.assertFalse(exec_wrapper._recover_after_load_failure())
+
+        self.assertIn("FLEXMEM config ELF not found: /tmp/missing_flexmem_config.elf", messages)
+        self.assertTrue(any("make flexmem_config" in message for message in messages))
+
+    def test_flexmem_configure_reports_build_hint_when_config_missing(self):
+        """Direct configure invocations also report the build command."""
+        messages = []
+        argv = ["flexmem_configure.py", "/tmp/missing_flexmem_config.elf"]
+
+        with mock.patch.object(flexmem_configure.sys, "argv", argv), \
+             mock.patch.object(flexmem_configure.os.path, "exists", return_value=False), \
+             mock.patch.object(flexmem_configure, "err", side_effect=messages.append):
+            self.assertEqual(flexmem_configure.main(), 2)
+
+        self.assertIn("Config ELF not found: /tmp/missing_flexmem_config.elf", messages)
+        self.assertTrue(any("make flexmem_config" in message for message in messages))
 
     def test_main_recovers_once_after_load_failure(self):
         """The wrapper invokes FLEXMEM configuration once before retrying."""
