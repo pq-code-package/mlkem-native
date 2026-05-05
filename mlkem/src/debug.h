@@ -7,39 +7,31 @@
 #include "common.h"
 
 #if defined(MLKEM_DEBUG)
-#include <stdint.h>
 
-/*************************************************
- * Name:        mlk_assert
+/**
+ * Check debug assertion.
  *
- * Description: Check debug assertion
+ * Prints an error message to stderr and calls exit(1) on failure.
  *
- *              Prints an error message to stderr and calls
- *              exit(1) if not.
- *
- * Arguments:   - file: filename
- *              - line: line number
- *              - val: Value asserted to be non-zero
- **************************************************/
+ * @param[in] file Filename.
+ * @param     line Line number.
+ * @param     val  Value asserted to be non-zero.
+ */
 #define mlk_debug_check_assert MLK_NAMESPACE(mlkem_debug_assert)
 void mlk_debug_check_assert(const char *file, int line, const int val);
 
-/*************************************************
- * Name:        mlk_debug_check_bounds
+/**
+ * Check whether values in an array of int16_t are within specified bounds.
  *
- * Description: Check whether values in an array of int16_t
- *              are within specified bounds.
+ * Prints an error message to stderr and calls exit(1) on failure.
  *
- *              Prints an error message to stderr and calls
- *              exit(1) if not.
- *
- * Arguments:   - file: filename
- *              - line: line number
- *              - ptr: Base of array to be checked
- *              - len: Number of int16_t in ptr
- *              - lower_bound_exclusive: Exclusive lower bound
- *              - upper_bound_exclusive: Exclusive upper bound
- **************************************************/
+ * @param[in] file                  Filename.
+ * @param     line                  Line number.
+ * @param[in] ptr                   Base of array to be checked.
+ * @param     len                   Number of int16_t in @p ptr.
+ * @param     lower_bound_exclusive Exclusive lower bound.
+ * @param     upper_bound_exclusive Exclusive upper bound.
+ */
 #define mlk_debug_check_bounds MLK_NAMESPACE(mlkem_debug_check_bounds)
 void mlk_debug_check_bounds(const char *file, int line, const int16_t *ptr,
                             unsigned len, int lower_bound_exclusive,
@@ -89,14 +81,14 @@ void mlk_debug_check_bounds(const char *file, int line, const int16_t *ptr,
 
 /* Because of https://github.com/diffblue/cbmc/issues/8570, we can't
  * just use a single flattened array_bound(...) here. */
-#define mlk_assert_bound_2d(ptr, M, N, value_lb, value_ub)             \
-  cassert(forall(kN, 0, (M),                                           \
-                 array_bound(&((int16_t(*)[(N)])(ptr))[kN][0], 0, (N), \
+#define mlk_assert_bound_2d(ptr, M, N, value_lb, value_ub)              \
+  cassert(forall(kN, 0, (M),                                            \
+                 array_bound(&((int16_t (*)[(N)])(ptr))[kN][0], 0, (N), \
                              (value_lb), (value_ub))))
 
-#define mlk_assert_abs_bound_2d(ptr, M, N, value_abs_bd)                   \
-  cassert(forall(kN, 0, (M),                                               \
-                 array_abs_bound(&((int16_t(*)[(N)])(ptr))[kN][0], 0, (N), \
+#define mlk_assert_abs_bound_2d(ptr, M, N, value_abs_bd)                    \
+  cassert(forall(kN, 0, (M),                                                \
+                 array_abs_bound(&((int16_t (*)[(N)])(ptr))[kN][0], 0, (N), \
                                  (value_abs_bd))))
 
 #else /* !MLKEM_DEBUG && CBMC */

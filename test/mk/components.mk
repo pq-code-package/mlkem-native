@@ -3,7 +3,7 @@
 
 FIPS202_SRCS = $(wildcard mlkem/src/fips202/*.c)
 ifeq ($(OPT),1)
-	FIPS202_SRCS += $(wildcard mlkem/src/fips202/native/aarch64/src/*.S) $(wildcard mlkem/src/fips202/native/aarch64/src/*.c) $(wildcard mlkem/src/fips202/native/x86_64/src/*.c) $(wildcard mlkem/src/fips202/native/armv81m/src/*.[csS])
+	FIPS202_SRCS += $(wildcard mlkem/src/fips202/native/aarch64/src/*.S) $(wildcard mlkem/src/fips202/native/aarch64/src/*.c) $(wildcard mlkem/src/fips202/native/x86_64/src/*.c) $(wildcard mlkem/src/fips202/native/x86_64/src/*.S) $(wildcard mlkem/src/fips202/native/armv81m/src/*.[csS])
 endif
 
 SOURCES += $(wildcard mlkem/src/*.c)
@@ -14,11 +14,12 @@ endif
 
 BASIC_TESTS = test_mlkem gen_KAT test_stack
 ACVP_TESTS = acvp_mlkem
+WYCHEPROOF_TESTS = wycheproof_mlkem
 BENCH_TESTS = bench_mlkem bench_components_mlkem
 UNIT_TESTS = test_unit
 ALLOC_TESTS = test_alloc
 RNG_FAIL_TESTS = test_rng_fail
-ALL_TESTS = $(BASIC_TESTS) $(ACVP_TESTS) $(BENCH_TESTS) $(UNIT_TESTS) $(ALLOC_TESTS) $(RNG_FAIL_TESTS)
+ALL_TESTS = $(BASIC_TESTS) $(ACVP_TESTS) $(WYCHEPROOF_TESTS) $(BENCH_TESTS) $(UNIT_TESTS) $(ALLOC_TESTS) $(RNG_FAIL_TESTS)
 
 MLKEM512_DIR = $(BUILD_DIR)/mlkem512
 MLKEM768_DIR = $(BUILD_DIR)/mlkem768
@@ -32,12 +33,14 @@ MLKEM1024_OBJS = $(call MAKE_OBJS,$(MLKEM1024_DIR),$(SOURCES) $(FIPS202_SRCS))
 $(MLKEM1024_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024
 
 # Unit test object files - same sources but with MLK_STATIC_TESTABLE=
+UNIT_CFLAGS = -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
+
 MLKEM512_UNIT_OBJS = $(call MAKE_OBJS,$(MLKEM512_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
-$(MLKEM512_UNIT_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=512 -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
+$(MLKEM512_UNIT_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=512 $(UNIT_CFLAGS)
 MLKEM768_UNIT_OBJS = $(call MAKE_OBJS,$(MLKEM768_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
-$(MLKEM768_UNIT_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
+$(MLKEM768_UNIT_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=768 $(UNIT_CFLAGS)
 MLKEM1024_UNIT_OBJS = $(call MAKE_OBJS,$(MLKEM1024_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
-$(MLKEM1024_UNIT_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024 -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
+$(MLKEM1024_UNIT_OBJS): CFLAGS += -DMLK_CONFIG_PARAMETER_SET=1024 $(UNIT_CFLAGS)
 
 # Alloc test object files - same sources but with custom alloc config
 MLKEM512_ALLOC_OBJS = $(call MAKE_OBJS,$(MLKEM512_DIR)/alloc,$(SOURCES) $(FIPS202_SRCS))
@@ -80,9 +83,13 @@ $(MLKEM512_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/c
 $(MLKEM768_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 $(MLKEM1024_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 
-$(MLKEM512_DIR)/bin/test_unit512: CFLAGS += -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
-$(MLKEM768_DIR)/bin/test_unit768: CFLAGS += -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
-$(MLKEM1024_DIR)/bin/test_unit1024: CFLAGS += -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
+$(MLKEM512_DIR)/test/src/test_unit.c.o: CFLAGS += $(UNIT_CFLAGS)
+$(MLKEM768_DIR)/test/src/test_unit.c.o: CFLAGS += $(UNIT_CFLAGS)
+$(MLKEM1024_DIR)/test/src/test_unit.c.o: CFLAGS += $(UNIT_CFLAGS)
+
+$(MLKEM512_DIR)/bin/test_unit512: CFLAGS += $(UNIT_CFLAGS)
+$(MLKEM768_DIR)/bin/test_unit768: CFLAGS += $(UNIT_CFLAGS)
+$(MLKEM1024_DIR)/bin/test_unit1024: CFLAGS += $(UNIT_CFLAGS)
 
 # Unit library object files compiled with MLK_STATIC_TESTABLE=
 $(MLKEM512_DIR)/unit_%: CFLAGS += -DMLK_STATIC_TESTABLE= -Wno-missing-prototypes
@@ -126,6 +133,9 @@ endef
 $(foreach scheme,mlkem512 mlkem768 mlkem1024, \
 	$(foreach test,$(ACVP_TESTS), \
 		$(eval $(call ADD_SOURCE,$(scheme),$(test),acvp)) \
+	) \
+	$(foreach test,$(WYCHEPROOF_TESTS), \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),wycheproof)) \
 	) \
 	$(foreach test,$(BENCH_TESTS), \
 		$(eval $(call ADD_SOURCE,$(scheme),$(test),bench)) \

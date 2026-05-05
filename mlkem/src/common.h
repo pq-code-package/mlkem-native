@@ -5,6 +5,10 @@
 #ifndef MLK_COMMON_H
 #define MLK_COMMON_H
 
+#ifndef __ASSEMBLER__
+#include <stdint.h>
+#endif
+
 #define MLK_BUILD_INTERNAL
 
 #if defined(MLK_CONFIG_FILE)
@@ -20,8 +24,12 @@
  * this can be overwritten by the user, e.g. for single-CU builds. */
 #if !defined(MLK_CONFIG_INTERNAL_API_QUALIFIER)
 #define MLK_INTERNAL_API
+#define MLK_INTERNAL_DATA_DECLARATION extern
+#define MLK_INTERNAL_DATA_DEFINITION
 #else
 #define MLK_INTERNAL_API MLK_CONFIG_INTERNAL_API_QUALIFIER
+#define MLK_INTERNAL_DATA_DECLARATION MLK_CONFIG_INTERNAL_API_QUALIFIER
+#define MLK_INTERNAL_DATA_DEFINITION MLK_CONFIG_INTERNAL_API_QUALIFIER
 #endif
 
 #if !defined(MLK_CONFIG_EXTERNAL_API_QUALIFIER)
@@ -71,8 +79,24 @@
  */
 #if defined(MLK_SYS_X86_64)
 #define MLK_ASM_FN_SYMBOL(sym) MLK_ASM_NAMESPACE(sym) : MLK_CET_ENDBR
-#else
+#elif defined(MLK_SYS_ARMV81M_MVE)
+/* clang-format off */
+#define MLK_ASM_FN_SYMBOL(sym) \
+  .type MLK_ASM_NAMESPACE(sym), %function; \
+  MLK_ASM_NAMESPACE(sym) :
+/* clang-format on */
+#else /* !MLK_SYS_X86_64 && MLK_SYS_ARMV81M_MVE */
 #define MLK_ASM_FN_SYMBOL(sym) MLK_ASM_NAMESPACE(sym) :
+#endif /* !MLK_SYS_X86_64 && !MLK_SYS_ARMV81M_MVE */
+
+/*
+ * Output the size of an assembly function.
+ */
+#if defined(__ELF__)
+#define MLK_ASM_FN_SIZE(sym) \
+  .size MLK_ASM_NAMESPACE(sym), .- MLK_ASM_NAMESPACE(sym)
+#else
+#define MLK_ASM_FN_SIZE(sym)
 #endif
 
 /* We aim to simplify the user's life by supporting builds where

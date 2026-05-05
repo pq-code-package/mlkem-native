@@ -20,32 +20,23 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/compress.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_poly_compress_dv
-USE_FUNCTION_CONTRACTS=
+# For K = 2 or 3, MLKEM_DV = 4; for K = 4, MLKEM_DV = 5
+ifeq ($(MLKEM_K),4)
+USE_FUNCTION_CONTRACTS=mlk_poly_compress_d5
+else
+USE_FUNCTION_CONTRACTS=mlk_poly_compress_d4
+endif
 
-# TODO: We should be calling scalar_decompress_xxx by contract here,
-# but it does not seem to work yet because they are marked as static inline.
-# ifeq ($(MLKEM_K),4)
-# USE_FUNCTION_CONTRACTS=mlk_scalar_compress_d5
-# else
-# USE_FUNCTION_CONTRACTS=mlk_scalar_compress_d4
-# endif
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2
+CBMCFLAGS=--bitwuzla
 
 FUNCTION_NAME = mlk_poly_compress_dv
 
-# If this proof is found to consume huge amounts of RAM, you can set the
-# EXPENSIVE variable. With new enough versions of the proof tools, this will
-# restrict the number of EXPENSIVE CBMC jobs running at once. See the
-# documentation in Makefile.common under the "Job Pools" heading for details.
-# EXPENSIVE = true
-
-# This function is large enough to need...
-CBMC_OBJECT_BITS = 10
+CBMC_OBJECT_BITS = 8
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

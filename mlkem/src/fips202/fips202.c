@@ -34,32 +34,28 @@
 #include "../common.h"
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
-#include <stdint.h>
 
 #include "../verify.h"
 #include "fips202.h"
 #include "keccakf1600.h"
 
-/*************************************************
- * Name:        mlk_keccak_absorb_once
+/**
+ * Absorb step of Keccak; non-incremental, starts by zeroeing the state.
  *
- * Description: Absorb step of Keccak;
- *              non-incremental, starts by zeroeing the state.
+ * @warning Must only be called once.
  *
- *              WARNING: Must only be called once.
- *
- * Arguments:   - uint64_t *s:       pointer to (uninitialized) output Keccak
- *                                   state
- *              - unsigned r:        rate in bytes (e.g., 168 for SHAKE128)
- *              - const uint8_t *m:  pointer to input to be absorbed into s
- *              - size_t mlen:       length of input in bytes
- *              - uint8_t p:         domain-separation byte for different
- *                                   Keccak-derived functions
- **************************************************/
+ * @param[out] s    Pointer to (uninitialized) output Keccak state.
+ * @param      r    Rate in bytes (e.g., 168 for SHAKE128).
+ * @param[in]  m    Input to be absorbed into @p s.
+ * @param      mlen Length of input in bytes.
+ * @param      p    Domain-separation byte for different Keccak-derived
+ *                  functions.
+ */
 static void mlk_keccak_absorb_once(uint64_t *s, unsigned r, const uint8_t *m,
                                    size_t mlen, uint8_t p)
 __contract__(
     requires(mlen <= MLK_MAX_BUFFER_SIZE)
+    requires(r > 0)
     requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)
     requires(memory_no_alias(s, sizeof(uint64_t) * MLK_KECCAK_LANES))
     requires(memory_no_alias(m, mlen))
@@ -68,7 +64,8 @@ __contract__(
   /* Initialize state */
   size_t i;
   for (i = 0; i < 25; ++i)
-  __loop__(invariant(i <= 25))
+  __loop__(invariant(i <= 25)
+           decreases(25 - i))
   {
     s[i] = 0;
   }
@@ -77,7 +74,8 @@ __contract__(
   __loop__(
     assigns(mlen, m, memory_slice(s, sizeof(uint64_t) * MLK_KECCAK_LANES))
     invariant(mlen <= loop_entry(mlen))
-    invariant(m == loop_entry(m) + (loop_entry(mlen) - mlen)))
+    invariant(m == loop_entry(m) + (loop_entry(mlen) - mlen))
+    decreases(mlen))
   {
     mlk_keccakf1600_xor_bytes(s, m, 0, r);
     mlk_keccakf1600_permute(s);
@@ -105,16 +103,14 @@ __contract__(
   }
 }
 
-/*************************************************
- * Name:        mlk_keccak_squeezeblocks
+/**
+ * Block-level Keccak squeeze.
  *
- * Description: block-level Keccak squeeze
- *
- * Arguments:   - uint8_t *h: pointer to output bytes
- *              - size_t nblocks: number of blocks to be squeezed
- *              - uint64_t *s_inc: pointer to input/output state
- *              - unsigned r: rate in bytes (e.g., 168 for SHAKE128)
- **************************************************/
+ * @param[out]    h       Output bytes.
+ * @param         nblocks Number of blocks to be squeezed.
+ * @param[in,out] s       Input/output state.
+ * @param         r       Rate in bytes (e.g., 168 for SHAKE128).
+ */
 static void mlk_keccak_squeezeblocks(uint8_t *h, size_t nblocks, uint64_t *s,
                                      unsigned r)
 __contract__(
@@ -131,7 +127,8 @@ __contract__(
       memory_slice(s, sizeof(uint64_t) * MLK_KECCAK_LANES),
       memory_slice(h, nblocks * r))
     invariant(nblocks <= loop_entry(nblocks) &&
-      h == loop_entry(h) + r * (loop_entry(nblocks) - nblocks)))
+      h == loop_entry(h) + r * (loop_entry(nblocks) - nblocks))
+    decreases(nblocks))
   {
     mlk_keccakf1600_permute(s);
     mlk_keccakf1600_extract_bytes(s, h, 0, r);
@@ -140,22 +137,21 @@ __contract__(
   }
 }
 
-/*************************************************
- * Name:        mlk_keccak_squeeze_once
+/**
+ * Keccak squeeze; can be called on byte-level.
  *
- * Description: Keccak squeeze; can be called on byte-level
+ * @warning Must only be called once.
  *
- *              WARNING: This must only be called once.
- *
- * Arguments:   - uint8_t *h: pointer to output bytes
- *              - size_t outlen: number of bytes to be squeezed
- *              - uint64_t *s_inc: pointer to Keccak state
- *              - unsigned r: rate in bytes (e.g., 168 for SHAKE128)
- **************************************************/
+ * @param[out]    h      Output bytes.
+ * @param         outlen Number of bytes to be squeezed.
+ * @param[in,out] s      Keccak state.
+ * @param         r      Rate in bytes (e.g., 168 for SHAKE128).
+ */
 static void mlk_keccak_squeeze_once(uint8_t *h, size_t outlen, uint64_t *s,
                                     unsigned r)
 __contract__(
     requires(outlen <= MLK_MAX_BUFFER_SIZE)
+    requires(r > 0)
     requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)
     requires(memory_no_alias(s, sizeof(uint64_t) * MLK_KECCAK_LANES))
     requires(memory_no_alias(h, outlen))
@@ -169,7 +165,8 @@ __contract__(
       memory_slice(s, sizeof(uint64_t) * MLK_KECCAK_LANES),
       memory_slice(h, outlen))
     invariant(outlen <= loop_entry(outlen) &&
-      h == loop_entry(h) + (loop_entry(outlen) - outlen)))
+      h == loop_entry(h) + (loop_entry(outlen) - outlen))
+    decreases(outlen))
   {
     mlk_keccakf1600_permute(s);
 

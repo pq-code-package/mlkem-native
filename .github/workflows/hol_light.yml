@@ -47,7 +47,7 @@ jobs:
     runs-on: pqcp-arm64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup-shell
@@ -62,7 +62,7 @@ jobs:
     needs: [ hol_light_bytecode ]
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup-shell
@@ -70,8 +70,8 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: 'hol_light'
           script: |
-            make -C proofs/hol_light/aarch64 mlkem/mlkem_poly_tobytes.o
-            echo 'needs "aarch64/proofs/mlkem_poly_tobytes.ml";;' | hol.sh
+            make -C proofs/hol_light/aarch64 mlkem/poly_tobytes_aarch64_asm.o
+            echo 'needs "aarch64/proofs/poly_tobytes_aarch64_asm.ml";;' | hol.sh
   hol_light_proofs:
     needs: [ hol_light_bytecode ]
     strategy:
@@ -79,46 +79,46 @@ jobs:
       matrix:
         proof:
           # Dependencies on {name}.{S,ml} are implicit
-          - name: mlkem_ntt
+          - name: ntt_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml", "mlkem_zetas.ml"]
-          - name: mlkem_intt
+          - name: intt_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml", "mlkem_zetas.ml"]
-          - name: mlkem_poly_tomont
+          - name: poly_tomont_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
-          - name: mlkem_poly_mulcache_compute
+          - name: poly_mulcache_compute_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml", "mlkem_zetas.ml"]
-          - name: mlkem_poly_reduce
+          - name: poly_reduce_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
-          - name: mlkem_poly_basemul_acc_montgomery_cached_k2
+          - name: polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
-          - name: mlkem_poly_basemul_acc_montgomery_cached_k3
+          - name: polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
-          - name: mlkem_poly_basemul_acc_montgomery_cached_k4
+          - name: polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
-          - name: mlkem_poly_tobytes
+          - name: poly_tobytes_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml" ]
-          - name: mlkem_rej_uniform
+          - name: rej_uniform_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml", "mlkem_rej_uniform_table.ml"]
-          - name: keccak_f1600_x1_scalar
+          - name: keccak_f1600_x1_scalar_aarch64_asm
             needs: ["keccak_specs.ml"]
-          - name: keccak_f1600_x1_v84a
+          - name: keccak_f1600_x1_v84a_aarch64_asm
             needs: ["keccak_specs.ml"]
-          - name: keccak_f1600_x2_v84a
+          - name: keccak_f1600_x2_v84a_aarch64_asm
             needs: ["keccak_specs.ml"]
-          - name: keccak_f1600_x4_v8a_v84a_scalar
+          - name: keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm
             needs: ["keccak_specs.ml"]
-          - name: keccak_f1600_x4_v8a_scalar
+          - name: keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm
             needs: ["keccak_specs.ml"]
     name: AArch64 HOL Light proof for ${{ matrix.proof.name }}.S
     runs-on: pqcp-arm64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@e0021407031f5be11a464abee9a0776171c79891 # v47.0.1
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
       - name: Check if dependencies changed
         id: check_run
         shell: bash
@@ -139,7 +139,7 @@ jobs:
             run_needed=1
           fi
 
-          echo "run_needed=${run_needed}" >> $GITHUB_OUTPUT
+          echo "run_needed=${run_needed}" >> "$GITHUB_OUTPUT"
       - uses: ./.github/actions/setup-shell
         if: |
           steps.check_run.outputs.run_needed == '1'
@@ -155,7 +155,7 @@ jobs:
     runs-on: pqcp-x64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup-shell
@@ -170,7 +170,7 @@ jobs:
     needs: [ hol_light_bytecode_x86_64 ]
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup-shell
@@ -178,8 +178,8 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: 'hol_light'
           script: |
-            make -C proofs/hol_light/x86_64 mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o
-            echo 'needs "x86_64/proofs/mlkem_poly_basemul_acc_montgomery_cached_k2.ml";;' | hol.sh
+            make -C proofs/hol_light/x86_64 mlkem/polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.o
+            echo 'needs "x86_64/proofs/polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.ml";;' | hol.sh
   hol_light_proofs_x86_64:
     needs: [ hol_light_bytecode_x86_64 ]
     strategy:
@@ -187,40 +187,58 @@ jobs:
       matrix:
         proof:
           # Dependencies on {name}.{S,ml} are implicit
-          - name: mlkem_ntt
+          - name: ntt_avx2_asm
             needs: ["mlkem_specs.ml", "mlkem_zetas.ml"]
-          - name: mlkem_intt
+          - name: intt_avx2_asm
             needs: ["mlkem_specs.ml", "mlkem_zetas.ml"]
-          - name: mlkem_poly_basemul_acc_montgomery_cached_k2
+          - name: polyvec_basemul_acc_montgomery_cached_k2_avx2_asm
             needs: ["mlkem_specs.ml"]
-          - name: mlkem_poly_basemul_acc_montgomery_cached_k3
+          - name: polyvec_basemul_acc_montgomery_cached_k3_avx2_asm
             needs: ["mlkem_specs.ml"]
-          - name: mlkem_poly_basemul_acc_montgomery_cached_k4
+          - name: polyvec_basemul_acc_montgomery_cached_k4_avx2_asm
             needs: ["mlkem_specs.ml"]
-          - name: mlkem_reduce
+          - name: reduce_avx2_asm
             needs: ["mlkem_specs.ml"]
-          - name: mlkem_tobytes
+          - name: ntttobytes_avx2_asm
             needs: ["mlkem_specs.ml"]
-          - name: mlkem_rej_uniform
+          - name: rej_uniform_avx2_asm
             needs: ["mlkem_specs.ml", "mlkem_rej_uniform_table.ml"]
-          - name: mlkem_frombytes
+          - name: nttfrombytes_avx2_asm
             needs: ["mlkem_specs.ml"]
-          - name: mlkem_tomont
+          - name: tomont_avx2_asm
             needs: ["mlkem_specs.ml"]
-          - name: mlkem_unpack
+          - name: nttunpack_avx2_asm
             needs: ["mlkem_specs.ml"]
-          - name: mlkem_mulcache_compute
+          - name: poly_mulcache_compute_avx2_asm
             needs: ["mlkem_specs.ml", "mlkem_zetas.ml"]
+          - name: poly_compress_d4_avx2_asm
+            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
+          - name: poly_decompress_d4_avx2_asm
+            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
+          - name: poly_compress_d5_avx2_asm
+            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
+          - name: poly_decompress_d5_avx2_asm
+            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
+          - name: poly_compress_d10_avx2_asm
+            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
+          - name: poly_decompress_d10_avx2_asm
+            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
+          - name: poly_compress_d11_avx2_asm
+            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
+          - name: poly_decompress_d11_avx2_asm
+            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
+          - name: keccak_f1600_x4_avx2_asm
+            needs: ["keccak_utils.ml", "keccak_spec.ml", "keccak_f1600_x4_avx2_constants.ml", "keccak_constants.ml"]
     name: x86_64 HOL Light proof for ${{ matrix.proof.name }}.S
     runs-on: pqcp-x64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@e0021407031f5be11a464abee9a0776171c79891 # v47.0.1
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
       - name: Check if dependencies changed
         id: check_run
         shell: bash
@@ -241,7 +259,7 @@ jobs:
             run_needed=1
           fi
 
-          echo "run_needed=${run_needed}" >> $GITHUB_OUTPUT
+          echo "run_needed=${run_needed}" >> "$GITHUB_OUTPUT"
       - uses: ./.github/actions/setup-shell
         if: |
           steps.check_run.outputs.run_needed == '1'

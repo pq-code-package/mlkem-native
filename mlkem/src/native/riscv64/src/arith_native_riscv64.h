@@ -5,7 +5,6 @@
 #ifndef MLK_NATIVE_RISCV64_SRC_ARITH_NATIVE_RISCV64_H
 #define MLK_NATIVE_RISCV64_SRC_ARITH_NATIVE_RISCV64_H
 
-#include <stdint.h>
 #include "../../../common.h"
 
 #define mlk_rv64v_poly_ntt MLK_NAMESPACE(ntt_riscv64)

@@ -23,9 +23,20 @@ jobs:
            func: true
            kat: true
            acvp: true
+           wycheproof: false
            alloc: true
            bench: true
            opt: all
+         - runner: ubuntu-latest
+           name: 'M33-AN524'
+           makefile: test/baremetal/platform/m33-an524/platform.mk
+           nix-shell: cross-arm-embedded
+           func: true
+           kat: true
+           acvp: true
+           alloc: true
+           bench: true
+           opt: no_opt
          - runner: ubuntu-latest
            name: 'AVR ATmega128RFR2 (modified for 32K RAM)'
            makefile: test/baremetal/platform/avr/platform.mk
@@ -33,12 +44,13 @@ jobs:
            func: true
            kat: true
            acvp: true
+           wycheproof: false
            alloc: false
            bench: false
            opt: no_opt
     runs-on: ${{ matrix.target.runner }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: baremetal build + test
         uses: ./.github/actions/functest
         env:
@@ -50,6 +62,7 @@ jobs:
           func: ${{ matrix.target.func }}
           kat: ${{ matrix.target.kat }}
           acvp: ${{ matrix.target.acvp }}
+          wycheproof: ${{ matrix.target.wycheproof }}
           examples: false
           stack: false
           alloc: ${{ matrix.target.alloc }}
@@ -66,3 +79,34 @@ jobs:
           perf: PMU
           opt: true
           store_results: false
+
+  baremetal_aarch64_virt:
+    name: AArch64-virt no-MMU (${{ matrix.fips202_backend }})
+    strategy:
+      fail-fast: false
+      matrix:
+        fips202_backend:
+          - x1_scalar
+          - x1_v84a
+          - x2_v84a
+          - x4_v8a_scalar
+          - x4_v8a_v84a_scalar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: baremetal build + test
+        uses: ./.github/actions/functest
+        env:
+          EXTRA_MAKEFILE: test/baremetal/platform/aarch64-virt/platform.mk
+        with:
+          nix-shell: cross-aarch64-embedded
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          opt: opt
+          func: true
+          kat: true
+          acvp: true
+          examples: false
+          stack: false
+          alloc: false
+          rng_fail: true
+          extra_args: '--fips202-aarch64-backend=${{ matrix.fips202_backend }}'

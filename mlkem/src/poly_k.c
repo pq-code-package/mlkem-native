@@ -22,11 +22,9 @@
  *   https://github.com/pq-crystals/kyber/tree/main/ref
  */
 
-#include <stdint.h>
-
-#include "compress.h"
-#include "debug.h"
 #include "poly_k.h"
+
+#include "debug.h"
 #include "sampling.h"
 #include "symmetric.h"
 
@@ -44,7 +42,7 @@
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
- *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
+ *              in the range [-(MLKEM_Q-1), MLKEM_Q-1]. */
 MLK_INTERNAL_API
 void mlk_polyvec_compress_du(uint8_t r[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
                              const mlk_polyvec *a)
@@ -76,7 +74,7 @@ void mlk_polyvec_decompress_du(mlk_polyvec *r,
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
- *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
+ *              in the range [-(MLKEM_Q-1), MLKEM_Q-1]. */
 MLK_INTERNAL_API
 void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
 {
@@ -87,6 +85,7 @@ void mlk_polyvec_tobytes(uint8_t r[MLKEM_POLYVECBYTES], const mlk_polyvec *a)
   __loop__(
     assigns(i, memory_slice(r, MLKEM_POLYVECBYTES))
     invariant(i <= MLKEM_K)
+    decreases(MLKEM_K - i)
   )
   {
     mlk_poly_tobytes(&r[i * MLKEM_POLYBYTES], &a->vec[i]);
@@ -164,7 +163,8 @@ __contract__(
   mlk_assert_bound_2d(a->vec, MLKEM_K, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
 
   for (i = 0; i < MLKEM_N / 2; i++)
-  __loop__(invariant(i <= MLKEM_N / 2))
+  __loop__(invariant(i <= MLKEM_N / 2)
+           decreases(MLKEM_N / 2 - i))
   {
     unsigned k;
     int32_t t[2] = {0};
@@ -174,7 +174,8 @@ __contract__(
          t[0] <=    (int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768  &&
          t[0] >= - ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768) &&
          t[1] <=   ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768) &&
-         t[1] >= - ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768)))
+         t[1] >= - ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768))
+      decreases(MLKEM_K - k))
     {
       t[0] += (int32_t)a->vec[k].coeffs[2 * i + 1] * b_cache->vec[k].coeffs[i];
       t[0] += (int32_t)a->vec[k].coeffs[2 * i] * b->vec[k].coeffs[2 * i];
@@ -270,6 +271,7 @@ void mlk_polyvec_add(mlk_polyvec *r, const mlk_polyvec *b)
                 forall(k2, 0, MLKEM_N,
                        (r->vec[j2].coeffs[k2] <= INT16_MAX) &&
                        (r->vec[j2].coeffs[k2] >= INT16_MIN))))
+    decreases(MLKEM_K - i)
   )
   {
     mlk_poly_add(&r->vec[i], &b->vec[i]);
@@ -290,23 +292,20 @@ void mlk_polyvec_tomont(mlk_polyvec *r)
 }
 
 
-/*************************************************
- * Name:        mlk_poly_cbd_eta1
+/**
+ * Given an array of uniformly random bytes, compute a polynomial with
+ * coefficients distributed according to a centered binomial distribution
+ * with parameter MLKEM_ETA1.
  *
- * Description: Given an array of uniformly random bytes, compute
- *              polynomial with coefficients distributed according to
- *              a centered binomial distribution with parameter MLKEM_ETA1.
+ * @spec{Implements @[FIPS203, Algorithm 8, SamplePolyCBD_eta1], where eta1
+ * is specified per parameter set in @[FIPS203, Table 2] and represented as
+ * MLKEM_ETA1 here.}
  *
- * Arguments:   - mlk_poly *r: pointer to output polynomial
- *              - const uint8_t *buf: pointer to input byte array
+ * @reference{`poly_cbd_eta1` in the reference implementation @[REF].}
  *
- * Specification: Implements @[FIPS203, Algorithm 8, SamplePolyCBD_eta1], where
- *                eta1 is specified per parameter set in @[FIPS203, Table 2]
- *                and represented as MLKEM_ETA1 here.
- *
- **************************************************/
-
-/* Reference: `poly_cbd_eta1` in the reference implementation @[REF]. */
+ * @param[out] r   Output polynomial.
+ * @param[in]  buf Input byte array.
+ */
 static MLK_INLINE void mlk_poly_cbd_eta1(
     mlk_poly *r, const uint8_t buf[MLKEM_ETA1 * MLKEM_N / 4])
 __contract__(
@@ -380,23 +379,20 @@ void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
 }
 
 #if MLKEM_K == 2 || MLKEM_K == 4
-/*************************************************
- * Name:        mlk_poly_cbd_eta2
+/**
+ * Given an array of uniformly random bytes, compute a polynomial with
+ * coefficients distributed according to a centered binomial distribution
+ * with parameter MLKEM_ETA2.
  *
- * Description: Given an array of uniformly random bytes, compute
- *              polynomial with coefficients distributed according to
- *              a centered binomial distribution with parameter MLKEM_ETA2.
+ * @spec{Implements @[FIPS203, Algorithm 8, SamplePolyCBD_eta2], where eta2
+ * is specified per parameter set in @[FIPS203, Table 2] and represented as
+ * MLKEM_ETA2 here.}
  *
- * Arguments:   - mlk_poly *r: pointer to output polynomial
- *              - const uint8_t *buf: pointer to input byte array
+ * @reference{`poly_cbd_eta2` in the reference implementation @[REF].}
  *
- * Specification: Implements @[FIPS203, Algorithm 8, SamplePolyCBD_eta2], where
- *                eta2 is specified per parameter set in @[FIPS203, Table 2]
- *                and represented as MLKEM_ETA2 here.
- *
- **************************************************/
-
-/* Reference: `poly_cbd_eta2` in the reference implementation @[REF]. */
+ * @param[out] r   Output polynomial.
+ * @param[in]  buf Input byte array.
+ */
 static MLK_INLINE void mlk_poly_cbd_eta2(
     mlk_poly *r, const uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4])
 __contract__(
@@ -412,7 +408,7 @@ __contract__(
 #endif
 }
 
-/* Reference: `poly_getnoise_eta1()` in the reference implementation @[REF].
+/* Reference: `poly_getnoise_eta2()` in the reference implementation @[REF].
  *            - We include buffer zeroization. */
 MLK_INTERNAL_API
 void mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
@@ -427,7 +423,7 @@ void mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
 
   mlk_poly_cbd_eta2(r, buf);
 
-  mlk_assert_abs_bound(r, MLKEM_N, MLKEM_ETA1 + 1);
+  mlk_assert_abs_bound(r, MLKEM_N, MLKEM_ETA2 + 1);
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
@@ -439,7 +435,7 @@ void mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
 #if MLKEM_K == 2
 /* Reference: Does not exist in the reference implementation @[REF].
  *            - This implements a x4-batched version of `poly_getnoise_eta1()`
- *              and `poly_getnoise_eta1()` from the reference implementation,
+ *              and `poly_getnoise_eta2()` from the reference implementation,
  *              leveraging batched Keccak-f1600.
  *            - If a x4-batched Keccak-f1600 is available, we squeeze
  *              more random data than needed for the eta2 calls, to be

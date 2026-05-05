@@ -10,8 +10,9 @@ CC=gcc
 # Use PMU cycle counting by default
 CYCLES ?= PMU
 
-# Reduce iterations for benchmarking
+# Reduce iterations for benchmarking and functional tests
 CFLAGS += -DMLK_BENCHMARK_NTESTS=10 -DMLK_BENCHMARK_NITERATIONS=10 -DMLK_BENCHMARK_NWARMUP=10
+CFLAGS += -DNTESTS_FUNC=100
 
 # Explicitly include experimental Armv8.1-M + MVE backend
 # Remove this once backend is finalized and enabled by default.

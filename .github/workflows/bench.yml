@@ -44,6 +44,7 @@ jobs:
           ldflags: "-flto"
           bench_extra_args: ""
           nix_shell: bench
+          cross_prefix: ""
         - system: a55
           name: Arm Cortex-A55 (Snapdragon 888) benchmarks
           bench_pmu: PERF
@@ -77,10 +78,11 @@ jobs:
           ldflags: "-flto"
           bench_extra_args: "-r"
           nix_shell: ''
+          cross_prefix: ""
     if: github.repository_owner == 'pq-code-package' && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
     runs-on: self-hosted-${{ matrix.target.system }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: ./.github/actions/bench
         with:
           name: ${{ matrix.target.name }}
@@ -95,7 +97,7 @@ jobs:
           cross_prefix: ${{ matrix.target.cross_prefix }}
 
   ec2_all:
-    name: ${{ matrix.target.name }} ${{ matrix.opt.name }}
+    name: ${{ matrix.target.name }}
     permissions:
       contents: write
       pull-requests: write

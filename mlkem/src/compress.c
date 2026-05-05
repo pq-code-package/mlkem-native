@@ -20,7 +20,6 @@
 #include "common.h"
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
-#include <stdint.h>
 
 #include "cbmc.h"
 #include "compress.h"
@@ -33,22 +32,30 @@
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
- *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
+ *              in the range [-(MLKEM_Q-1), MLKEM_Q-1]. */
 MLK_STATIC_TESTABLE void mlk_poly_compress_d4_c(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D4))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D4))
+)
 {
   unsigned i;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_N / 8; i++)
-  __loop__(invariant(i <= MLKEM_N / 8))
+  __loop__(invariant(i <= MLKEM_N / 8)
+           decreases(MLKEM_N / 8 - i))
   {
     unsigned j;
     uint8_t t[8] = {0};
     for (j = 0; j < 8; j++)
     __loop__(
       invariant(i <= MLKEM_N / 8 && j <= 8)
-      invariant(array_bound(t, 0, j, 0, 16)))
+      invariant(array_bound(t, 0, j, 0, 16))
+      decreases(8 - j))
     {
       t[j] = mlk_scalar_compress_d4(a->coeffs[8 * i + j]);
     }
@@ -64,6 +71,12 @@ MLK_STATIC_TESTABLE void mlk_poly_compress_d4_c(
 MLK_INTERNAL_API
 void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
                           const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D4))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D4))
+)
 {
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D4)
   int ret;
@@ -83,21 +96,29 @@ void mlk_poly_compress_d4(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4],
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
- *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
+ *              in the range [-(MLKEM_Q-1), MLKEM_Q-1]. */
 MLK_STATIC_TESTABLE void mlk_poly_compress_d10_c(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D10))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D10))
+)
 {
   unsigned j;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
   for (j = 0; j < MLKEM_N / 4; j++)
-  __loop__(invariant(j <= MLKEM_N / 4))
+  __loop__(invariant(j <= MLKEM_N / 4)
+           decreases(MLKEM_N / 4 - j))
   {
     unsigned k;
     uint16_t t[4];
     for (k = 0; k < 4; k++)
     __loop__(
       invariant(k <= 4)
-      invariant(forall(r, 0, k, t[r] < (1u << 10))))
+      invariant(forall(r, 0, k, t[r] < (1u << 10)))
+      decreases(4 - k))
     {
       t[k] = mlk_scalar_compress_d10(a->coeffs[4 * j + k]);
     }
@@ -117,6 +138,12 @@ MLK_STATIC_TESTABLE void mlk_poly_compress_d10_c(
 MLK_INTERNAL_API
 void mlk_poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
                            const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D10))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D10))
+)
 {
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D10)
   int ret;
@@ -135,12 +162,19 @@ void mlk_poly_compress_d10(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10],
  *            for ML-KEM-{512,768}. */
 MLK_STATIC_TESTABLE void mlk_poly_decompress_d4_c(
     mlk_poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_D4))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+)
 {
   unsigned i;
   for (i = 0; i < MLKEM_N / 2; i++)
   __loop__(
     invariant(i <= MLKEM_N / 2)
-    invariant(array_bound(r->coeffs, 0, 2 * i, 0, MLKEM_Q)))
+    invariant(array_bound(r->coeffs, 0, 2 * i, 0, MLKEM_Q))
+    decreases(MLKEM_N / 2 - i))
   {
     r->coeffs[2 * i + 0] = mlk_scalar_decompress_d4((a[i] >> 0) & 0xF);
     r->coeffs[2 * i + 1] = mlk_scalar_decompress_d4((a[i] >> 4) & 0xF);
@@ -152,6 +186,12 @@ MLK_STATIC_TESTABLE void mlk_poly_decompress_d4_c(
 MLK_INTERNAL_API
 void mlk_poly_decompress_d4(mlk_poly *r,
                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_D4))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+)
 {
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D4)
   int ret;
@@ -170,12 +210,19 @@ void mlk_poly_decompress_d4(mlk_poly *r,
  *            reference implementation, for ML-KEM-{512,768}. */
 MLK_STATIC_TESTABLE void mlk_poly_decompress_d10_c(
     mlk_poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_D10))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+)
 {
   unsigned j;
   for (j = 0; j < MLKEM_N / 4; j++)
   __loop__(
     invariant(j <= MLKEM_N / 4)
-    invariant(array_bound(r->coeffs, 0, 4 * j, 0, MLKEM_Q)))
+    invariant(array_bound(r->coeffs, 0, 4 * j, 0, MLKEM_Q))
+    decreases(MLKEM_N / 4 - j))
   {
     unsigned k;
     uint16_t t[4];
@@ -189,7 +236,8 @@ MLK_STATIC_TESTABLE void mlk_poly_decompress_d10_c(
     for (k = 0; k < 4; k++)
     __loop__(
       invariant(k <= 4)
-      invariant(array_bound(r->coeffs, 0, 4 * j + k, 0, MLKEM_Q)))
+      invariant(array_bound(r->coeffs, 0, 4 * j + k, 0, MLKEM_Q))
+      decreases(4 - k))
     {
       r->coeffs[4 * j + k] = mlk_scalar_decompress_d10(t[k]);
     }
@@ -201,6 +249,12 @@ MLK_STATIC_TESTABLE void mlk_poly_decompress_d10_c(
 MLK_INTERNAL_API
 void mlk_poly_decompress_d10(mlk_poly *r,
                              const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_D10))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+)
 {
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D10)
   int ret;
@@ -222,22 +276,30 @@ void mlk_poly_decompress_d10(mlk_poly *r,
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
- *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
+ *              in the range [-(MLKEM_Q-1), MLKEM_Q-1]. */
 MLK_STATIC_TESTABLE void mlk_poly_compress_d5_c(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D5))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D5))
+)
 {
   unsigned i;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_N / 8; i++)
-  __loop__(invariant(i <= MLKEM_N / 8))
+  __loop__(invariant(i <= MLKEM_N / 8)
+           decreases(MLKEM_N / 8 - i))
   {
     unsigned j;
     uint8_t t[8] = {0};
     for (j = 0; j < 8; j++)
     __loop__(
       invariant(i <= MLKEM_N / 8 && j <= 8)
-      invariant(array_bound(t, 0, j, 0, 32)))
+      invariant(array_bound(t, 0, j, 0, 32))
+      decreases(8 - j))
     {
       t[j] = mlk_scalar_compress_d5(a->coeffs[8 * i + j]);
     }
@@ -253,6 +315,12 @@ MLK_STATIC_TESTABLE void mlk_poly_compress_d5_c(
 MLK_INTERNAL_API
 void mlk_poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
                           const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D5))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D5))
+)
 {
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D5)
   int ret;
@@ -272,22 +340,30 @@ void mlk_poly_compress_d5(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5],
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
- *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
+ *              in the range [-(MLKEM_Q-1), MLKEM_Q-1]. */
 MLK_STATIC_TESTABLE void mlk_poly_compress_d11_c(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D11))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D11))
+)
 {
   unsigned j;
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
   for (j = 0; j < MLKEM_N / 8; j++)
-  __loop__(invariant(j <= MLKEM_N / 8))
+  __loop__(invariant(j <= MLKEM_N / 8)
+           decreases(MLKEM_N / 8 - j))
   {
     unsigned k;
     uint16_t t[8];
     for (k = 0; k < 8; k++)
     __loop__(
       invariant(k <= 8)
-      invariant(forall(r, 0, k, t[r] < (1u << 11))))
+      invariant(forall(r, 0, k, t[r] < (1u << 11)))
+      decreases(8 - k))
     {
       t[k] = mlk_scalar_compress_d11(a->coeffs[8 * j + k]);
     }
@@ -313,6 +389,12 @@ MLK_STATIC_TESTABLE void mlk_poly_compress_d11_c(
 MLK_INTERNAL_API
 void mlk_poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
                            const mlk_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D11))
+  requires(memory_no_alias(a, sizeof(mlk_poly)))
+  requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_D11))
+)
 {
 #if defined(MLK_USE_NATIVE_POLY_COMPRESS_D11)
   int ret;
@@ -331,12 +413,19 @@ void mlk_poly_compress_d11(uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11],
  *            for ML-KEM-1024. */
 MLK_STATIC_TESTABLE void mlk_poly_decompress_d5_c(
     mlk_poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_D5))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+)
 {
   unsigned i;
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(
     invariant(i <= MLKEM_N / 8)
-    invariant(array_bound(r->coeffs, 0, 8 * i, 0, MLKEM_Q)))
+    invariant(array_bound(r->coeffs, 0, 8 * i, 0, MLKEM_Q))
+    decreases(MLKEM_N / 8 - i))
   {
     unsigned j;
     uint8_t t[8];
@@ -364,7 +453,8 @@ MLK_STATIC_TESTABLE void mlk_poly_decompress_d5_c(
     for (j = 0; j < 8; j++)
     __loop__(
       invariant(j <= 8 && i <= MLKEM_N / 8)
-      invariant(array_bound(r->coeffs, 0, 8 * i + j, 0, MLKEM_Q)))
+      invariant(array_bound(r->coeffs, 0, 8 * i + j, 0, MLKEM_Q))
+      decreases(8 - j))
     {
       r->coeffs[8 * i + j] = mlk_scalar_decompress_d5(t[j]);
     }
@@ -376,6 +466,12 @@ MLK_STATIC_TESTABLE void mlk_poly_decompress_d5_c(
 MLK_INTERNAL_API
 void mlk_poly_decompress_d5(mlk_poly *r,
                             const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_D5))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+)
 {
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D5)
   int ret;
@@ -394,12 +490,19 @@ void mlk_poly_decompress_d5(mlk_poly *r,
  *            reference implementation, for ML-KEM-1024. */
 MLK_STATIC_TESTABLE void mlk_poly_decompress_d11_c(
     mlk_poly *r, const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_D11))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+)
 {
   unsigned j;
   for (j = 0; j < MLKEM_N / 8; j++)
   __loop__(
     invariant(j <= MLKEM_N / 8)
-    invariant(array_bound(r->coeffs, 0, 8 * j, 0, MLKEM_Q)))
+    invariant(array_bound(r->coeffs, 0, 8 * j, 0, MLKEM_Q))
+    decreases(MLKEM_N / 8 - j))
   {
     unsigned k;
     uint16_t t[8];
@@ -418,7 +521,8 @@ MLK_STATIC_TESTABLE void mlk_poly_decompress_d11_c(
     for (k = 0; k < 8; k++)
     __loop__(
       invariant(k <= 8)
-      invariant(array_bound(r->coeffs, 0, 8 * j + k, 0, MLKEM_Q)))
+      invariant(array_bound(r->coeffs, 0, 8 * j + k, 0, MLKEM_Q))
+      decreases(8 - k))
     {
       r->coeffs[8 * j + k] = mlk_scalar_decompress_d11(t[k]);
     }
@@ -430,6 +534,12 @@ MLK_STATIC_TESTABLE void mlk_poly_decompress_d11_c(
 MLK_INTERNAL_API
 void mlk_poly_decompress_d11(mlk_poly *r,
                              const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_poly)))
+  requires(memory_no_alias(a, MLKEM_POLYCOMPRESSEDBYTES_D11))
+  assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+)
 {
 #if defined(MLK_USE_NATIVE_POLY_DECOMPRESS_D11)
   int ret;
@@ -450,7 +560,7 @@ void mlk_poly_decompress_d11(mlk_poly *r,
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
- *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1). */
+ *              in the range [-(MLKEM_Q-1), MLKEM_Q-1]. */
 MLK_STATIC_TESTABLE void mlk_poly_tobytes_c(uint8_t r[MLKEM_POLYBYTES],
                                             const mlk_poly *a)
 __contract__(
@@ -464,7 +574,8 @@ __contract__(
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_N / 2; i++)
-  __loop__(invariant(i <= MLKEM_N / 2))
+  __loop__(invariant(i <= MLKEM_N / 2)
+           decreases(MLKEM_N / 2 - i))
   {
     /* The conversion to uint16_t is safe since we assume that
      * the coefficients of `a` are non-negative. */
@@ -524,7 +635,8 @@ __contract__(
   for (i = 0; i < MLKEM_N / 2; i++)
   __loop__(
     invariant(i <= MLKEM_N / 2)
-    invariant(array_bound(r->coeffs, 0, 2 * i, 0, MLKEM_UINT12_LIMIT)))
+    invariant(array_bound(r->coeffs, 0, 2 * i, 0, MLKEM_UINT12_LIMIT))
+    decreases(MLKEM_N / 2 - i))
   {
     const uint8_t t0 = a[3 * i + 0];
     const uint8_t t1 = a[3 * i + 1];
@@ -569,13 +681,15 @@ void mlk_poly_frommsg(mlk_poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(
     invariant(i <= MLKEM_N / 8)
-    invariant(array_bound(r->coeffs, 0, 8 * i, 0, MLKEM_Q)))
+    invariant(array_bound(r->coeffs, 0, 8 * i, 0, MLKEM_Q))
+    decreases(MLKEM_N / 8 - i))
   {
     unsigned j;
     for (j = 0; j < 8; j++)
     __loop__(
       invariant(i <  MLKEM_N / 8 && j <= 8)
-      invariant(array_bound(r->coeffs, 0, 8 * i + j, 0, MLKEM_Q)))
+      invariant(array_bound(r->coeffs, 0, 8 * i + j, 0, MLKEM_Q))
+      decreases(8 - j))
     {
       /* mlk_ct_sel_int16(MLKEM_Q_HALF, 0, b) is `Decompress_1(b != 0)`
        * as per @[FIPS203, Eq (4.8)]. */
@@ -592,7 +706,7 @@ void mlk_poly_frommsg(mlk_poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
  *            - In contrast to the reference implementation, we assume
  *              unsigned canonical coefficients here.
  *              The reference implementation works with coefficients
- *              in the range (-MLKEM_Q+1,...,MLKEM_Q-1).
+ *              in the range [-(MLKEM_Q-1), MLKEM_Q-1].
  */
 MLK_INTERNAL_API
 void mlk_poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const mlk_poly *a)
@@ -601,13 +715,15 @@ void mlk_poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const mlk_poly *a)
   mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_N / 8; i++)
-  __loop__(invariant(i <= MLKEM_N / 8))
+  __loop__(invariant(i <= MLKEM_N / 8)
+           decreases(MLKEM_N / 8 - i))
   {
     unsigned j;
     msg[i] = 0;
     for (j = 0; j < 8; j++)
     __loop__(
-      invariant(i <= MLKEM_N / 8 && j <= 8))
+      invariant(i <= MLKEM_N / 8 && j <= 8)
+      decreases(8 - j))
     {
       uint32_t t = mlk_scalar_compress_d1(a->coeffs[8 * i + j]);
       msg[i] |= (uint8_t)(t << j);

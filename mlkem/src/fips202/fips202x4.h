@@ -5,7 +5,6 @@
 #ifndef MLK_FIPS202_FIPS202X4_H
 #define MLK_FIPS202_FIPS202X4_H
 
-#include <stdint.h>
 
 #include "../cbmc.h"
 #include "../common.h"
@@ -13,10 +12,11 @@
 #include "fips202.h"
 #include "keccakf1600.h"
 
-/* Context for non-incremental API */
+/** Context for the non-incremental 4-way SHAKE128 API. */
 typedef struct
 {
-  uint64_t ctx[MLK_KECCAK_LANES * MLK_KECCAK_WAY];
+  uint64_t ctx[MLK_KECCAK_LANES *
+               MLK_KECCAK_WAY]; /**< 4-way Keccak state, stored sequentially. */
 } MLK_ALIGN mlk_shake128x4ctx;
 
 #define mlk_shake128x4_absorb_once MLK_NAMESPACE(shake128x4_absorb_once)

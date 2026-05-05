@@ -1,0 +1,21 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+# In addition to ruff's default (*.py, *.pyi), format and lint the
+# extension-less python scripts under scripts/.
+extend-include = [
+    "scripts/autogen",
+    "scripts/cfify",
+    "scripts/check-contracts",
+    "scripts/check-magic",
+    "scripts/check-namespace",
+    "scripts/simpasm",
+    "scripts/stack",
+    "scripts/tests",
+]
+
+[lint]
+select = ["E", "F", "W"]
+ignore = [
+    "E501", # line too long
+]

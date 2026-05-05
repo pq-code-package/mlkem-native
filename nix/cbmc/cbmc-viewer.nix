@@ -5,10 +5,10 @@
 
 python3Packages.buildPythonApplication rec {
   pname = "cbmc-viewer";
-  version = "3.11";
+  version = "3.12";
   src = fetchurl {
     url = "https://github.com/model-checking/${pname}/releases/download/viewer-${version}/cbmc_viewer-${version}-py3-none-any.whl";
-    hash = "sha256-Oy51I64KMbtE8lG8xuFXdK4RvXFvWt4zYKBlcXqwILg=";
+    hash = "sha256-zlme9udeOyxGPC5YNyhP1e0/zX6kJwwx3vZwcQbILTM=";
   };
   format = "wheel";
   dontUseSetuptoolsCheck = true;

@@ -107,8 +107,7 @@ def get_args():
         {
             "flags": ["--fail-on-proof-failure"],
             "action": "store_true",
-            "help": "exit with return code `10' if any proof failed"
-            " (default: exit 0)",
+            "help": "exit with return code `10' if any proof failed (default: exit 0)",
         },
         {
             "flags": ["--no-standalone"],
@@ -131,9 +130,7 @@ def get_args():
             "flags": ["--marker-file"],
             "metavar": "FILE",
             "default": "Makefile",
-            "help": (
-                "name of file that marks proof directories. Default: " "%(default)s"
-            ),
+            "help": ("name of file that marks proof directories. Default: %(default)s"),
         },
         {
             "flags": ["--no-memory-profile"],
@@ -217,8 +214,9 @@ def task_pool_size():
 def print_counter(counter):
     # pylint: disable=consider-using-f-string
     print(
-        "\rConfiguring CBMC proofs: "
-        "{complete:{width}} / {total:{width}}".format(**counter),
+        "\rConfiguring CBMC proofs: {complete:{width}} / {total:{width}}".format(
+            **counter
+        ),
         end="",
         file=sys.stderr,
     )

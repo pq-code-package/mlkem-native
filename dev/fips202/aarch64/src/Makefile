@@ -4,7 +4,7 @@
 .PHONY: all purge
 .DEFAULT_GOAL := all
 
-keccak_f1600_x1_scalar_asm.S: ../../aarch64_symbolic/keccak_f1600_x1_scalar_symbolic.S
+keccak_f1600_x1_scalar_aarch64_asm.S: ../../aarch64_symbolic/keccak_f1600_x1_scalar_symbolic.S
         # The last two configuration options are for fast testing (incl. CI).
         # Remove when building a production version.
 
@@ -35,7 +35,7 @@ keccak_f1600_x1_scalar_asm.S: ../../aarch64_symbolic/keccak_f1600_x1_scalar_symb
 	   -c constraints.functional_only \
 	   -c objective_lower_bound=24
 
-keccak_f1600_x4_v8a_scalar_hybrid_asm.S: ../../aarch64_symbolic/keccak_f1600_x4_v8a_scalar_hybrid_clean.S
+keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S: ../../aarch64_symbolic/keccak_f1600_x4_v8a_scalar_hybrid_clean.S
 	slothy-cli Arm_AArch64 Arm_Cortex_A55 \
 	   $^ -o $@                           \
 	   -c reserved_regs="[x18,sp]"        \
@@ -68,7 +68,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_asm.S: ../../aarch64_symbolic/keccak_f1600_x4_
            -s keccak_f1600_x4_v8a_scalar_hybrid_loop \
            -e keccak_f1600_x4_v8a_scalar_hybrid_loop_end
 
-keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S: ../../aarch64_symbolic/keccak_f1600_x4_v8a_v84a_scalar_hybrid_clean.S
+keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S: ../../aarch64_symbolic/keccak_f1600_x4_v8a_v84a_scalar_hybrid_clean.S
 	slothy-cli Arm_AArch64 Arm_Cortex_A55 \
 	   $^ -o $@                           \
 	   -c reserved_regs="[x18,sp]"        \
@@ -101,9 +101,9 @@ keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S: ../../aarch64_symbolic/keccak_f160
            -s keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop \
            -e keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop_end
 
-ALL=keccak_f1600_x1_scalar_asm.S                \
-  keccak_f1600_x4_v8a_scalar_hybrid_asm.S       \
-  keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S
+ALL=keccak_f1600_x1_scalar_aarch64_asm.S                \
+  keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S       \
+  keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S
 
 all: $(ALL)
 

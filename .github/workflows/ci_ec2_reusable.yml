@@ -89,7 +89,7 @@ jobs:
       label: ${{ steps.remember-runner.outputs.label }}
       ec2-instance-id: ${{ steps.remember-runner.outputs.ec2-instance-id }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Determine AMI ID
         id: det_ami_id
         run: |
@@ -101,24 +101,28 @@ jobs:
             AMI_ID=${{ inputs.ec2_ami_id }}
           fi
           echo "Using AMI ID: $AMI_ID"
-          echo "AMI_ID=$AMI_ID" >> $GITHUB_OUTPUT
+          echo "AMI_ID=$AMI_ID" >> "$GITHUB_OUTPUT"
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@00943011d9042930efac3dcd3a170e4273319bc8 # v5.1.0
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
       - name: Start EC2 runner
         id: start-ec2-runner-first
         continue-on-error: true
-        uses: machulav/ec2-github-runner@a6dbcefcf8a31a861f5e078bb153ed332130c512 # v2.4.3
+        uses: machulav/ec2-github-runner@343a1b2ae682e681c3cec9a235d882da17ff04ef # v2.6.1
         with:
           mode: start
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
-          ec2-image-id: ${{ steps.det_ami_id.outputs.AMI_ID }}
-          ec2-volume-size: ${{ inputs.ec2_volume_size }}
           ec2-instance-type: ${{ inputs.ec2_instance_type }}
-          subnet-id: subnet-07b2729e5e065962f
-          security-group-id: sg-0ab2e297196c8c381
+          ec2-volume-size: ${{ inputs.ec2_volume_size }}
+          availability-zones-config: >-
+            [{"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-07b2729e5e065962f","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-0c7739cbd02c2c1d2","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-0d69987f97f50fc1d","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-0d077bf47a0eef46e","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-0019f164593f6df43","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-0f0d1e7667a264a0e","securityGroupId":"sg-0ab2e297196c8c381"}]
       - name: Start EC2c runner (wait before retry)
         if: steps.start-ec2-runner-first.outcome == 'failure'
         shell: bash
@@ -128,15 +132,19 @@ jobs:
       - name: Start EC2 runner (retry)
         id: start-ec2-runner-second
         if: steps.start-ec2-runner-first.outcome == 'failure'
-        uses: machulav/ec2-github-runner@a6dbcefcf8a31a861f5e078bb153ed332130c512 # v2.4.3
+        uses: machulav/ec2-github-runner@343a1b2ae682e681c3cec9a235d882da17ff04ef # v2.6.1
         with:
           mode: start
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
-          ec2-image-id: ${{ steps.det_ami_id.outputs.AMI_ID }}
-          ec2-volume-size: ${{ inputs.ec2_volume_size }}
           ec2-instance-type: ${{ inputs.ec2_instance_type }}
-          subnet-id: subnet-07b2729e5e065962f
-          security-group-id: sg-0ab2e297196c8c381
+          ec2-volume-size: ${{ inputs.ec2_volume_size }}
+          availability-zones-config: >-
+            [{"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-07b2729e5e065962f","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-0c7739cbd02c2c1d2","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-0d69987f97f50fc1d","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-0d077bf47a0eef46e","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-0019f164593f6df43","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ steps.det_ami_id.outputs.AMI_ID }}","subnetId":"subnet-0f0d1e7667a264a0e","securityGroupId":"sg-0ab2e297196c8c381"}]
       - name: Remember runner
         id: remember-runner
         shell: bash
@@ -154,7 +162,7 @@ jobs:
     needs: start-ec2-runner
     runs-on: ${{ needs.start-ec2-runner.outputs.label }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Linting
         if: ${{ inputs.lint }}
         uses: ./.github/actions/lint
@@ -221,12 +229,12 @@ jobs:
     if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@00943011d9042930efac3dcd3a170e4273319bc8 # v5.1.0
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
       - name: Stop EC2 runner
-        uses: machulav/ec2-github-runner@a6dbcefcf8a31a861f5e078bb153ed332130c512 # v2.4.3
+        uses: machulav/ec2-github-runner@343a1b2ae682e681c3cec9a235d882da17ff04ef # v2.6.1
         with:
           mode: stop
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}

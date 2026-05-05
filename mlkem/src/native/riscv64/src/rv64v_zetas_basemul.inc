@@ -9,7 +9,6 @@
  *          Do not modify it directly.
  */
 
-#include <stdint.h>
 #include "arith_native_riscv64.h"
 
 const int16_t roots[] = {

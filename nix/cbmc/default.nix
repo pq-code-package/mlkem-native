@@ -7,29 +7,25 @@
 , callPackage
 , bitwuzla
 , ninja
-, cadical
 , z3
-, cudd
-, replaceVars
-, fetchpatch
 }:
 
 buildEnv {
   name = "pqcp-cbmc";
   paths =
     builtins.attrValues {
-      cbmc = cbmc.overrideAttrs (old: rec {
-        version = "6.8.0";
+      cbmc = cbmc.overrideAttrs (_: {
+        version = "6.9.0";
         src = fetchFromGitHub {
           owner = "diffblue";
           repo = "cbmc";
-          hash = "sha256-PT6AYiwkplCeyMREZnGZA0BKl4ZESRC02/9ibKg7mYU=";
-          tag = "cbmc-6.8.0";
+          hash = "sha256-SMJBnzoyTwcwJa9L2X1iX2W4Z/Mwoirf8EXfoyG0dRI=";
+          tag = "cbmc-6.9.0";
         };
       });
       litani = callPackage ./litani.nix { }; # 1.29.0
-      cbmc-viewer = callPackage ./cbmc-viewer.nix { }; # 3.11
-      z3 = z3.overrideAttrs (old: rec {
+      cbmc-viewer = callPackage ./cbmc-viewer.nix { }; # 3.12
+      z3 = z3.overrideAttrs (_: {
         version = "4.15.3";
         src = fetchFromGitHub {
           owner = "Z3Prover";
@@ -40,8 +36,7 @@ buildEnv {
       });
 
       inherit
-        cadical#2.1.3
         bitwuzla# 0.8.2
-        ninja; # 1.12.1
+        ninja; # 1.13.2
     };
 }

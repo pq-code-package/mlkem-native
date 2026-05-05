@@ -2,7 +2,7 @@
 diff --git a/sw/device/tests/crypto/mlkem_functest.c b/sw/device/tests/crypto/mlkem_functest.c
 --- a/sw/device/tests/crypto/mlkem_functest.c
 +++ b/sw/device/tests/crypto/mlkem_functest.c
-@@ -280,182 +280,9 @@ static void test_mlkem1024_derand(void) {
+@@ -302,188 +302,8 @@ static void test_mlkem1024_derand(void) {
    CHECK_ARRAYS_EQ(key_a_blob, key_b_blob, ARRAYSIZE(key_a_blob));
    CHECK_ARRAYS_EQ((unsigned char *)key_a_blob, expected_key,
                    kOtcryptoMlkem1024SharedSecretBytes);
@@ -10,29 +10,29 @@ diff --git a/sw/device/tests/crypto/mlkem_functest.c b/sw/device/tests/crypto/ml
 -
 -static void test_mlkem512_randomized(void) {
 -  uint64_t t0;
--  uint32_t pk[ceil_div(kOtcryptoMlkem512PublicKeyBytes, sizeof(uint32_t))];
--  uint8_t ct[kOtcryptoMlkem512CiphertextBytes];
 -
 -  otcrypto_unblinded_key_t pk_buf = {
 -      .key_mode = kOtcryptoKeyModeMlkem512,
--      .key_length = sizeof(pk),
--      .key = pk,
+-      .key_length = kOtcryptoMlkem512PublicKeyBytes,
+-      .key = pk_buf_data,
 -  };
 -  pk_buf.checksum = integrity_unblinded_checksum(&pk_buf);
--  uint32_t
--      sk_blob[ceil_div(kOtcryptoMlkem512SecretKeyBytes, sizeof(uint32_t)) * 2];
--  memset(sk_blob, 0, sizeof(sk_blob));
+-  size_t sk_blob_words =
+-      ceil_div(kOtcryptoMlkem512SecretKeyBytes, sizeof(uint32_t)) * 2;
+-  memset(sk_blob_data, 0, sk_blob_words * sizeof(uint32_t));
 -  otcrypto_blinded_key_t sk_buf = {
 -      .config = kMlkem512SecretKeyConfig,
--      .keyblob_length = sizeof(sk_blob),
--      .keyblob = sk_blob,
+-      .keyblob_length = sk_blob_words * sizeof(uint32_t),
+-      .keyblob = sk_blob_data,
 -  };
 -  sk_buf.checksum = integrity_blinded_checksum(&sk_buf);
 -  t0 = profile_start();
--  CHECK_STATUS_OK(otcrypto_mlkem512_keygen(&pk_buf, &sk_buf));
+-  CHECK_STATUS_OK(
+-      otcrypto_mlkem512_keygen(&pk_buf, &sk_buf, mlkem_work_buffer));
 -  profile_end_and_print(t0, "otcrypto_mlkem512_keygen");
 -
--  otcrypto_byte_buf_t ct_buf = {.data = ct, .len = sizeof(ct)};
+-  otcrypto_byte_buf_t ct_buf = {.data = ct_buf_data,
+-                                .len = kOtcryptoMlkem512CiphertextBytes};
 -  uint32_t key_b_blob[ceil_div(kOtcryptoMlkem512SharedSecretBytes,
 -                               sizeof(uint32_t)) *
 -                      2];
@@ -44,10 +44,12 @@ diff --git a/sw/device/tests/crypto/mlkem_functest.c b/sw/device/tests/crypto/ml
 -  };
 -  key_b_buf.checksum = integrity_blinded_checksum(&key_b_buf);
 -  t0 = profile_start();
--  CHECK_STATUS_OK(otcrypto_mlkem512_encapsulate(&pk_buf, ct_buf, &key_b_buf));
+-  CHECK_STATUS_OK(otcrypto_mlkem512_encapsulate(&pk_buf, ct_buf, &key_b_buf,
+-                                                mlkem_work_buffer));
 -  profile_end_and_print(t0, "otcrypto_mlkem512_encapsulate");
 -
--  otcrypto_const_byte_buf_t ct_const_buf = {.data = ct, .len = sizeof(ct)};
+-  otcrypto_const_byte_buf_t ct_const_buf = {
+-      .data = ct_buf_data, .len = kOtcryptoMlkem512CiphertextBytes};
 -  uint32_t key_a_blob[ceil_div(kOtcryptoMlkem512SharedSecretBytes,
 -                               sizeof(uint32_t)) *
 -                      2];
@@ -59,38 +61,38 @@ diff --git a/sw/device/tests/crypto/mlkem_functest.c b/sw/device/tests/crypto/ml
 -  };
 -  key_a_buf.checksum = integrity_blinded_checksum(&key_a_buf);
 -  t0 = profile_start();
--  CHECK_STATUS_OK(
--      otcrypto_mlkem512_decapsulate(&sk_buf, ct_const_buf, &key_a_buf));
+-  CHECK_STATUS_OK(otcrypto_mlkem512_decapsulate(&sk_buf, ct_const_buf,
+-                                                &key_a_buf, mlkem_work_buffer));
 -  profile_end_and_print(t0, "otcrypto_mlkem512_decapsulate");
 -
 -  CHECK_ARRAYS_EQ(key_a_blob, key_b_blob, ARRAYSIZE(key_a_blob));
--}
--
+ }
+
 -static void test_mlkem768_randomized(void) {
 -  uint64_t t0;
--  uint32_t pk[ceil_div(kOtcryptoMlkem768PublicKeyBytes, sizeof(uint32_t))];
--  uint8_t ct[kOtcryptoMlkem768CiphertextBytes];
 -
 -  otcrypto_unblinded_key_t pk_buf = {
 -      .key_mode = kOtcryptoKeyModeMlkem768,
--      .key_length = sizeof(pk),
--      .key = pk,
+-      .key_length = kOtcryptoMlkem768PublicKeyBytes,
+-      .key = pk_buf_data,
 -  };
 -  pk_buf.checksum = integrity_unblinded_checksum(&pk_buf);
--  uint32_t
--      sk_blob[ceil_div(kOtcryptoMlkem768SecretKeyBytes, sizeof(uint32_t)) * 2];
--  memset(sk_blob, 0, sizeof(sk_blob));
+-  size_t sk_blob_words =
+-      ceil_div(kOtcryptoMlkem768SecretKeyBytes, sizeof(uint32_t)) * 2;
+-  memset(sk_blob_data, 0, sk_blob_words * sizeof(uint32_t));
 -  otcrypto_blinded_key_t sk_buf = {
 -      .config = kMlkem768SecretKeyConfig,
--      .keyblob_length = sizeof(sk_blob),
--      .keyblob = sk_blob,
+-      .keyblob_length = sk_blob_words * sizeof(uint32_t),
+-      .keyblob = sk_blob_data,
 -  };
 -  sk_buf.checksum = integrity_blinded_checksum(&sk_buf);
 -  t0 = profile_start();
--  CHECK_STATUS_OK(otcrypto_mlkem768_keygen(&pk_buf, &sk_buf));
+-  CHECK_STATUS_OK(
+-      otcrypto_mlkem768_keygen(&pk_buf, &sk_buf, mlkem_work_buffer));
 -  profile_end_and_print(t0, "otcrypto_mlkem768_keygen");
 -
--  otcrypto_byte_buf_t ct_buf = {.data = ct, .len = sizeof(ct)};
+-  otcrypto_byte_buf_t ct_buf = {.data = ct_buf_data,
+-                                .len = kOtcryptoMlkem768CiphertextBytes};
 -  uint32_t key_b_blob[ceil_div(kOtcryptoMlkem768SharedSecretBytes,
 -                               sizeof(uint32_t)) *
 -                      2];
@@ -102,10 +104,12 @@ diff --git a/sw/device/tests/crypto/mlkem_functest.c b/sw/device/tests/crypto/ml
 -  };
 -  key_b_buf.checksum = integrity_blinded_checksum(&key_b_buf);
 -  t0 = profile_start();
--  CHECK_STATUS_OK(otcrypto_mlkem768_encapsulate(&pk_buf, ct_buf, &key_b_buf));
+-  CHECK_STATUS_OK(otcrypto_mlkem768_encapsulate(&pk_buf, ct_buf, &key_b_buf,
+-                                                mlkem_work_buffer));
 -  profile_end_and_print(t0, "otcrypto_mlkem768_encapsulate");
 -
--  otcrypto_const_byte_buf_t ct_const_buf = {.data = ct, .len = sizeof(ct)};
+-  otcrypto_const_byte_buf_t ct_const_buf = {
+-      .data = ct_buf_data, .len = kOtcryptoMlkem768CiphertextBytes};
 -  uint32_t key_a_blob[ceil_div(kOtcryptoMlkem768SharedSecretBytes,
 -                               sizeof(uint32_t)) *
 -                      2];
@@ -117,38 +121,38 @@ diff --git a/sw/device/tests/crypto/mlkem_functest.c b/sw/device/tests/crypto/ml
 -  };
 -  key_a_buf.checksum = integrity_blinded_checksum(&key_a_buf);
 -  t0 = profile_start();
--  CHECK_STATUS_OK(
--      otcrypto_mlkem768_decapsulate(&sk_buf, ct_const_buf, &key_a_buf));
+-  CHECK_STATUS_OK(otcrypto_mlkem768_decapsulate(&sk_buf, ct_const_buf,
+-                                                &key_a_buf, mlkem_work_buffer));
 -  profile_end_and_print(t0, "otcrypto_mlkem768_decapsulate");
 -
 -  CHECK_ARRAYS_EQ(key_a_blob, key_b_blob, ARRAYSIZE(key_a_blob));
- }
-
+-}
+-
 -static void test_mlkem1024_randomized(void) {
 -  uint64_t t0;
--  uint32_t pk[ceil_div(kOtcryptoMlkem1024PublicKeyBytes, sizeof(uint32_t))];
--  uint8_t ct[kOtcryptoMlkem1024CiphertextBytes];
-
+-
 -  otcrypto_unblinded_key_t pk_buf = {
 -      .key_mode = kOtcryptoKeyModeMlkem1024,
--      .key_length = sizeof(pk),
--      .key = pk,
+-      .key_length = kOtcryptoMlkem1024PublicKeyBytes,
+-      .key = pk_buf_data,
 -  };
 -  pk_buf.checksum = integrity_unblinded_checksum(&pk_buf);
--  uint32_t
--      sk_blob[ceil_div(kOtcryptoMlkem1024SecretKeyBytes, sizeof(uint32_t)) * 2];
--  memset(sk_blob, 0, sizeof(sk_blob));
+-  size_t sk_blob_words =
+-      ceil_div(kOtcryptoMlkem1024SecretKeyBytes, sizeof(uint32_t)) * 2;
+-  memset(sk_blob_data, 0, sk_blob_words * sizeof(uint32_t));
 -  otcrypto_blinded_key_t sk_buf = {
 -      .config = kMlkem1024SecretKeyConfig,
--      .keyblob_length = sizeof(sk_blob),
--      .keyblob = sk_blob,
+-      .keyblob_length = sk_blob_words * sizeof(uint32_t),
+-      .keyblob = sk_blob_data,
 -  };
 -  sk_buf.checksum = integrity_blinded_checksum(&sk_buf);
 -  t0 = profile_start();
--  CHECK_STATUS_OK(otcrypto_mlkem1024_keygen(&pk_buf, &sk_buf));
+-  CHECK_STATUS_OK(
+-      otcrypto_mlkem1024_keygen(&pk_buf, &sk_buf, mlkem_work_buffer));
 -  profile_end_and_print(t0, "otcrypto_mlkem1024_keygen");
 -
--  otcrypto_byte_buf_t ct_buf = {.data = ct, .len = sizeof(ct)};
+-  otcrypto_byte_buf_t ct_buf = {.data = ct_buf_data,
+-                                .len = kOtcryptoMlkem1024CiphertextBytes};
 -  uint32_t key_b_blob[ceil_div(kOtcryptoMlkem1024SharedSecretBytes,
 -                               sizeof(uint32_t)) *
 -                      2];
@@ -160,10 +164,12 @@ diff --git a/sw/device/tests/crypto/mlkem_functest.c b/sw/device/tests/crypto/ml
 -  };
 -  key_b_buf.checksum = integrity_blinded_checksum(&key_b_buf);
 -  t0 = profile_start();
--  CHECK_STATUS_OK(otcrypto_mlkem1024_encapsulate(&pk_buf, ct_buf, &key_b_buf));
+-  CHECK_STATUS_OK(otcrypto_mlkem1024_encapsulate(&pk_buf, ct_buf, &key_b_buf,
+-                                                 mlkem_work_buffer));
 -  profile_end_and_print(t0, "otcrypto_mlkem1024_encapsulate");
 -
--  otcrypto_const_byte_buf_t ct_const_buf = {.data = ct, .len = sizeof(ct)};
+-  otcrypto_const_byte_buf_t ct_const_buf = {
+-      .data = ct_buf_data, .len = kOtcryptoMlkem1024CiphertextBytes};
 -  uint32_t key_a_blob[ceil_div(kOtcryptoMlkem1024SharedSecretBytes,
 -                               sizeof(uint32_t)) *
 -                      2];
@@ -175,8 +181,8 @@ diff --git a/sw/device/tests/crypto/mlkem_functest.c b/sw/device/tests/crypto/ml
 -  };
 -  key_a_buf.checksum = integrity_blinded_checksum(&key_a_buf);
 -  t0 = profile_start();
--  CHECK_STATUS_OK(
--      otcrypto_mlkem1024_decapsulate(&sk_buf, ct_const_buf, &key_a_buf));
+-  CHECK_STATUS_OK(otcrypto_mlkem1024_decapsulate(
+-      &sk_buf, ct_const_buf, &key_a_buf, mlkem_work_buffer));
 -  profile_end_and_print(t0, "otcrypto_mlkem1024_decapsulate");
 -
 -  CHECK_ARRAYS_EQ(key_a_blob, key_b_blob, ARRAYSIZE(key_a_blob));
@@ -185,7 +191,7 @@ diff --git a/sw/device/tests/crypto/mlkem_functest.c b/sw/device/tests/crypto/ml
  bool test_main(void) {
    CHECK_STATUS_OK(entropy_testutils_auto_mode_init());
 
-@@ -464,10 +291,5 @@ bool test_main(void) {
+@@ -492,10 +312,5 @@ bool test_main(void) {
    test_mlkem768_derand();
    test_mlkem1024_derand();
 

@@ -23,12 +23,35 @@ source code and documentation.
   - Gregor Seiler
 * URL: https://eprint.iacr.org/2018/039
 * Referenced from:
-  - [dev/x86_64/src/intt.S](dev/x86_64/src/intt.S)
-  - [dev/x86_64/src/ntt.S](dev/x86_64/src/ntt.S)
-  - [mlkem/src/native/x86_64/src/intt.S](mlkem/src/native/x86_64/src/intt.S)
-  - [mlkem/src/native/x86_64/src/ntt.S](mlkem/src/native/x86_64/src/ntt.S)
-  - [proofs/hol_light/x86_64/mlkem/mlkem_intt.S](proofs/hol_light/x86_64/mlkem/mlkem_intt.S)
-  - [proofs/hol_light/x86_64/mlkem/mlkem_ntt.S](proofs/hol_light/x86_64/mlkem/mlkem_ntt.S)
+  - [dev/x86_64/src/intt_avx2_asm.S](dev/x86_64/src/intt_avx2_asm.S)
+  - [dev/x86_64/src/ntt_avx2_asm.S](dev/x86_64/src/ntt_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/intt_avx2_asm.S](mlkem/src/native/x86_64/src/intt_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/ntt_avx2_asm.S](mlkem/src/native/x86_64/src/ntt_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/intt_avx2_asm.S](proofs/hol_light/x86_64/mlkem/intt_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/ntt_avx2_asm.S](proofs/hol_light/x86_64/mlkem/ntt_avx2_asm.S)
+
+### `CBMC`
+
+* C Bounded Model Checker
+* Author(s):
+  - Diffblue
+  - Amazon Web Services
+* URL: https://github.com/diffblue/cbmc
+* Referenced from:
+  - [README.md](README.md)
+  - [SOUNDNESS.md](SOUNDNESS.md)
+
+### `Candle`
+
+* Candle: Formally Verified clone of HOL-Light
+* Author(s):
+  - Oskar Abrahamsson
+  - Magnus O. Myreen
+  - Ramana Kumar
+  - Thomas Sewell
+* URL: https://cakeml.org/candle/
+* Referenced from:
+  - [SOUNDNESS.md](SOUNDNESS.md)
 
 ### `FIPS140_3_IG`
 
@@ -86,6 +109,7 @@ source code and documentation.
 * URL: https://csrc.nist.gov/pubs/fips/203/final
 * Referenced from:
   - [README.md](README.md)
+  - [SOUNDNESS.md](SOUNDNESS.md)
   - [examples/basic_deterministic/mlkem_native/mlkem_native_config.h](examples/basic_deterministic/mlkem_native/mlkem_native_config.h)
   - [examples/bring_your_own_fips202/mlkem_native/mlkem_native_config.h](examples/bring_your_own_fips202/mlkem_native/mlkem_native_config.h)
   - [examples/bring_your_own_fips202_static/mlkem_native/mlkem_native_config.h](examples/bring_your_own_fips202_static/mlkem_native/mlkem_native_config.h)
@@ -106,6 +130,7 @@ source code and documentation.
   - [mlkem/src/indcpa.h](mlkem/src/indcpa.h)
   - [mlkem/src/kem.c](mlkem/src/kem.c)
   - [mlkem/src/kem.h](mlkem/src/kem.h)
+  - [mlkem/src/native/api.h](mlkem/src/native/api.h)
   - [mlkem/src/poly.h](mlkem/src/poly.h)
   - [mlkem/src/poly_k.c](mlkem/src/poly_k.c)
   - [mlkem/src/poly_k.h](mlkem/src/poly_k.h)
@@ -129,6 +154,25 @@ source code and documentation.
   - [test/configs/serial_fips202_config.h](test/configs/serial_fips202_config.h)
   - [test/configs/test_alloc_config.h](test/configs/test_alloc_config.h)
 
+### `HOL-Light`
+
+* HOL-Light Theorem Prover
+* Author(s):
+  - John Harrison
+* URL: https://hol-light.github.io/
+* Referenced from:
+  - [README.md](README.md)
+  - [SOUNDNESS.md](SOUNDNESS.md)
+
+### `HOLTrace`
+
+* HOLTrace: A collection of tools for processing traces of a HOL Light session
+* Author(s):
+  - Daniel J. Bernstein
+* URL: https://holtrace.cr.yp.to/
+* Referenced from:
+  - [SOUNDNESS.md](SOUNDNESS.md)
+
 ### `HYBRID`
 
 * Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64
@@ -139,14 +183,14 @@ source code and documentation.
 * Referenced from:
   - [README.md](README.md)
   - [dev/fips202/aarch64/auto.h](dev/fips202/aarch64/auto.h)
-  - [dev/fips202/aarch64/src/keccak_f1600_x1_v84a_asm.S](dev/fips202/aarch64/src/keccak_f1600_x1_v84a_asm.S)
-  - [dev/fips202/aarch64/src/keccak_f1600_x2_v84a_asm.S](dev/fips202/aarch64/src/keccak_f1600_x2_v84a_asm.S)
+  - [dev/fips202/aarch64/src/keccak_f1600_x1_v84a_aarch64_asm.S](dev/fips202/aarch64/src/keccak_f1600_x1_v84a_aarch64_asm.S)
+  - [dev/fips202/aarch64/src/keccak_f1600_x2_v84a_aarch64_asm.S](dev/fips202/aarch64/src/keccak_f1600_x2_v84a_aarch64_asm.S)
   - [mlkem/src/fips202/native/aarch64/auto.h](mlkem/src/fips202/native/aarch64/auto.h)
-  - [mlkem/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S](mlkem/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S)
-  - [mlkem/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S](mlkem/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S)
+  - [mlkem/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_aarch64_asm.S](mlkem/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_aarch64_asm.S)
+  - [mlkem/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_aarch64_asm.S](mlkem/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_aarch64_asm.S)
   - [proofs/hol_light/README.md](proofs/hol_light/README.md)
-  - [proofs/hol_light/aarch64/mlkem/keccak_f1600_x1_v84a.S](proofs/hol_light/aarch64/mlkem/keccak_f1600_x1_v84a.S)
-  - [proofs/hol_light/aarch64/mlkem/keccak_f1600_x2_v84a.S](proofs/hol_light/aarch64/mlkem/keccak_f1600_x2_v84a.S)
+  - [proofs/hol_light/aarch64/mlkem/keccak_f1600_x1_v84a_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/keccak_f1600_x1_v84a_aarch64_asm.S)
+  - [proofs/hol_light/aarch64/mlkem/keccak_f1600_x2_v84a_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/keccak_f1600_x2_v84a_aarch64_asm.S)
 
 ### `KyberSlash`
 
@@ -179,30 +223,30 @@ source code and documentation.
 * URL: https://eprint.iacr.org/2021/986
 * Referenced from:
   - [dev/aarch64_clean/README.md](dev/aarch64_clean/README.md)
-  - [dev/aarch64_clean/src/intt.S](dev/aarch64_clean/src/intt.S)
-  - [dev/aarch64_clean/src/ntt.S](dev/aarch64_clean/src/ntt.S)
-  - [dev/aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S](dev/aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S)
-  - [dev/aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S](dev/aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S)
-  - [dev/aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S](dev/aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S)
+  - [dev/aarch64_clean/src/intt_aarch64_asm.S](dev/aarch64_clean/src/intt_aarch64_asm.S)
+  - [dev/aarch64_clean/src/ntt_aarch64_asm.S](dev/aarch64_clean/src/ntt_aarch64_asm.S)
+  - [dev/aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S](dev/aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S)
+  - [dev/aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S](dev/aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S)
+  - [dev/aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S](dev/aarch64_clean/src/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S)
   - [dev/aarch64_opt/README.md](dev/aarch64_opt/README.md)
-  - [dev/aarch64_opt/src/intt.S](dev/aarch64_opt/src/intt.S)
-  - [dev/aarch64_opt/src/ntt.S](dev/aarch64_opt/src/ntt.S)
-  - [dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S](dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S)
-  - [dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S](dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S)
-  - [dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S](dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S)
+  - [dev/aarch64_opt/src/intt_aarch64_asm.S](dev/aarch64_opt/src/intt_aarch64_asm.S)
+  - [dev/aarch64_opt/src/ntt_aarch64_asm.S](dev/aarch64_opt/src/ntt_aarch64_asm.S)
+  - [dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S](dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S)
+  - [dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S](dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S)
+  - [dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S](dev/aarch64_opt/src/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S)
   - [mlkem/src/native/aarch64/README.md](mlkem/src/native/aarch64/README.md)
-  - [mlkem/src/native/aarch64/src/intt.S](mlkem/src/native/aarch64/src/intt.S)
-  - [mlkem/src/native/aarch64/src/ntt.S](mlkem/src/native/aarch64/src/ntt.S)
-  - [mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S](mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S)
-  - [mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S](mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S)
-  - [mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S](mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S)
+  - [mlkem/src/native/aarch64/src/intt_aarch64_asm.S](mlkem/src/native/aarch64/src/intt_aarch64_asm.S)
+  - [mlkem/src/native/aarch64/src/ntt_aarch64_asm.S](mlkem/src/native/aarch64/src/ntt_aarch64_asm.S)
+  - [mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S](mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S)
+  - [mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S](mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S)
+  - [mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S](mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S)
   - [mlkem/src/poly.c](mlkem/src/poly.c)
   - [mlkem/src/poly_k.c](mlkem/src/poly_k.c)
-  - [proofs/hol_light/aarch64/mlkem/mlkem_intt.S](proofs/hol_light/aarch64/mlkem/mlkem_intt.S)
-  - [proofs/hol_light/aarch64/mlkem/mlkem_ntt.S](proofs/hol_light/aarch64/mlkem/mlkem_ntt.S)
-  - [proofs/hol_light/aarch64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.S](proofs/hol_light/aarch64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.S)
-  - [proofs/hol_light/aarch64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.S](proofs/hol_light/aarch64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.S)
-  - [proofs/hol_light/aarch64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.S](proofs/hol_light/aarch64/mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.S)
+  - [proofs/hol_light/aarch64/mlkem/intt_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/intt_aarch64_asm.S)
+  - [proofs/hol_light/aarch64/mlkem/ntt_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/ntt_aarch64_asm.S)
+  - [proofs/hol_light/aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S)
+  - [proofs/hol_light/aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S)
+  - [proofs/hol_light/aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S)
 
 ### `REF`
 
@@ -247,29 +291,51 @@ source code and documentation.
 * URL: https://github.com/pq-crystals/kyber/tree/main/avx2
 * Referenced from:
   - [dev/x86_64/README.md](dev/x86_64/README.md)
-  - [dev/x86_64/src/compress_avx2.c](dev/x86_64/src/compress_avx2.c)
-  - [dev/x86_64/src/intt.S](dev/x86_64/src/intt.S)
-  - [dev/x86_64/src/ntt.S](dev/x86_64/src/ntt.S)
-  - [dev/x86_64/src/nttfrombytes.S](dev/x86_64/src/nttfrombytes.S)
-  - [dev/x86_64/src/ntttobytes.S](dev/x86_64/src/ntttobytes.S)
-  - [dev/x86_64/src/nttunpack.S](dev/x86_64/src/nttunpack.S)
-  - [dev/x86_64/src/reduce.S](dev/x86_64/src/reduce.S)
-  - [dev/x86_64/src/tomont.S](dev/x86_64/src/tomont.S)
-  - [mlkem/src/native/x86_64/src/compress_avx2.c](mlkem/src/native/x86_64/src/compress_avx2.c)
-  - [mlkem/src/native/x86_64/src/intt.S](mlkem/src/native/x86_64/src/intt.S)
-  - [mlkem/src/native/x86_64/src/ntt.S](mlkem/src/native/x86_64/src/ntt.S)
-  - [mlkem/src/native/x86_64/src/nttfrombytes.S](mlkem/src/native/x86_64/src/nttfrombytes.S)
-  - [mlkem/src/native/x86_64/src/ntttobytes.S](mlkem/src/native/x86_64/src/ntttobytes.S)
-  - [mlkem/src/native/x86_64/src/nttunpack.S](mlkem/src/native/x86_64/src/nttunpack.S)
-  - [mlkem/src/native/x86_64/src/reduce.S](mlkem/src/native/x86_64/src/reduce.S)
-  - [mlkem/src/native/x86_64/src/tomont.S](mlkem/src/native/x86_64/src/tomont.S)
-  - [proofs/hol_light/x86_64/mlkem/mlkem_frombytes.S](proofs/hol_light/x86_64/mlkem/mlkem_frombytes.S)
-  - [proofs/hol_light/x86_64/mlkem/mlkem_intt.S](proofs/hol_light/x86_64/mlkem/mlkem_intt.S)
-  - [proofs/hol_light/x86_64/mlkem/mlkem_ntt.S](proofs/hol_light/x86_64/mlkem/mlkem_ntt.S)
-  - [proofs/hol_light/x86_64/mlkem/mlkem_reduce.S](proofs/hol_light/x86_64/mlkem/mlkem_reduce.S)
-  - [proofs/hol_light/x86_64/mlkem/mlkem_tobytes.S](proofs/hol_light/x86_64/mlkem/mlkem_tobytes.S)
-  - [proofs/hol_light/x86_64/mlkem/mlkem_tomont.S](proofs/hol_light/x86_64/mlkem/mlkem_tomont.S)
-  - [proofs/hol_light/x86_64/mlkem/mlkem_unpack.S](proofs/hol_light/x86_64/mlkem/mlkem_unpack.S)
+  - [dev/x86_64/src/intt_avx2_asm.S](dev/x86_64/src/intt_avx2_asm.S)
+  - [dev/x86_64/src/ntt_avx2_asm.S](dev/x86_64/src/ntt_avx2_asm.S)
+  - [dev/x86_64/src/nttfrombytes_avx2_asm.S](dev/x86_64/src/nttfrombytes_avx2_asm.S)
+  - [dev/x86_64/src/ntttobytes_avx2_asm.S](dev/x86_64/src/ntttobytes_avx2_asm.S)
+  - [dev/x86_64/src/nttunpack_avx2_asm.S](dev/x86_64/src/nttunpack_avx2_asm.S)
+  - [dev/x86_64/src/poly_compress_d10_avx2_asm.S](dev/x86_64/src/poly_compress_d10_avx2_asm.S)
+  - [dev/x86_64/src/poly_compress_d11_avx2_asm.S](dev/x86_64/src/poly_compress_d11_avx2_asm.S)
+  - [dev/x86_64/src/poly_compress_d4_avx2_asm.S](dev/x86_64/src/poly_compress_d4_avx2_asm.S)
+  - [dev/x86_64/src/poly_compress_d5_avx2_asm.S](dev/x86_64/src/poly_compress_d5_avx2_asm.S)
+  - [dev/x86_64/src/poly_decompress_d10_avx2_asm.S](dev/x86_64/src/poly_decompress_d10_avx2_asm.S)
+  - [dev/x86_64/src/poly_decompress_d11_avx2_asm.S](dev/x86_64/src/poly_decompress_d11_avx2_asm.S)
+  - [dev/x86_64/src/poly_decompress_d4_avx2_asm.S](dev/x86_64/src/poly_decompress_d4_avx2_asm.S)
+  - [dev/x86_64/src/poly_decompress_d5_avx2_asm.S](dev/x86_64/src/poly_decompress_d5_avx2_asm.S)
+  - [dev/x86_64/src/reduce_avx2_asm.S](dev/x86_64/src/reduce_avx2_asm.S)
+  - [dev/x86_64/src/tomont_avx2_asm.S](dev/x86_64/src/tomont_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/intt_avx2_asm.S](mlkem/src/native/x86_64/src/intt_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/ntt_avx2_asm.S](mlkem/src/native/x86_64/src/ntt_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/nttfrombytes_avx2_asm.S](mlkem/src/native/x86_64/src/nttfrombytes_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/ntttobytes_avx2_asm.S](mlkem/src/native/x86_64/src/ntttobytes_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/nttunpack_avx2_asm.S](mlkem/src/native/x86_64/src/nttunpack_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/poly_compress_d10_avx2_asm.S](mlkem/src/native/x86_64/src/poly_compress_d10_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/poly_compress_d11_avx2_asm.S](mlkem/src/native/x86_64/src/poly_compress_d11_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/poly_compress_d4_avx2_asm.S](mlkem/src/native/x86_64/src/poly_compress_d4_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/poly_compress_d5_avx2_asm.S](mlkem/src/native/x86_64/src/poly_compress_d5_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/poly_decompress_d10_avx2_asm.S](mlkem/src/native/x86_64/src/poly_decompress_d10_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/poly_decompress_d11_avx2_asm.S](mlkem/src/native/x86_64/src/poly_decompress_d11_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/poly_decompress_d4_avx2_asm.S](mlkem/src/native/x86_64/src/poly_decompress_d4_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/poly_decompress_d5_avx2_asm.S](mlkem/src/native/x86_64/src/poly_decompress_d5_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/reduce_avx2_asm.S](mlkem/src/native/x86_64/src/reduce_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/tomont_avx2_asm.S](mlkem/src/native/x86_64/src/tomont_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/intt_avx2_asm.S](proofs/hol_light/x86_64/mlkem/intt_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/ntt_avx2_asm.S](proofs/hol_light/x86_64/mlkem/ntt_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/nttfrombytes_avx2_asm.S](proofs/hol_light/x86_64/mlkem/nttfrombytes_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/ntttobytes_avx2_asm.S](proofs/hol_light/x86_64/mlkem/ntttobytes_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/nttunpack_avx2_asm.S](proofs/hol_light/x86_64/mlkem/nttunpack_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/poly_compress_d10_avx2_asm.S](proofs/hol_light/x86_64/mlkem/poly_compress_d10_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/poly_compress_d11_avx2_asm.S](proofs/hol_light/x86_64/mlkem/poly_compress_d11_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/poly_compress_d4_avx2_asm.S](proofs/hol_light/x86_64/mlkem/poly_compress_d4_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/poly_compress_d5_avx2_asm.S](proofs/hol_light/x86_64/mlkem/poly_compress_d5_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/poly_decompress_d10_avx2_asm.S](proofs/hol_light/x86_64/mlkem/poly_decompress_d10_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/poly_decompress_d11_avx2_asm.S](proofs/hol_light/x86_64/mlkem/poly_decompress_d11_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/poly_decompress_d4_avx2_asm.S](proofs/hol_light/x86_64/mlkem/poly_decompress_d4_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/poly_decompress_d5_avx2_asm.S](proofs/hol_light/x86_64/mlkem/poly_decompress_d5_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/reduce_avx2_asm.S](proofs/hol_light/x86_64/mlkem/reduce_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/tomont_avx2_asm.S](proofs/hol_light/x86_64/mlkem/tomont_avx2_asm.S)
 
 ### `SLOTHY`
 
@@ -297,16 +363,16 @@ source code and documentation.
   - [README.md](README.md)
   - [dev/README.md](dev/README.md)
   - [dev/aarch64_clean/README.md](dev/aarch64_clean/README.md)
-  - [dev/aarch64_clean/src/intt.S](dev/aarch64_clean/src/intt.S)
-  - [dev/aarch64_clean/src/ntt.S](dev/aarch64_clean/src/ntt.S)
+  - [dev/aarch64_clean/src/intt_aarch64_asm.S](dev/aarch64_clean/src/intt_aarch64_asm.S)
+  - [dev/aarch64_clean/src/ntt_aarch64_asm.S](dev/aarch64_clean/src/ntt_aarch64_asm.S)
   - [dev/aarch64_opt/README.md](dev/aarch64_opt/README.md)
-  - [dev/aarch64_opt/src/intt.S](dev/aarch64_opt/src/intt.S)
-  - [dev/aarch64_opt/src/ntt.S](dev/aarch64_opt/src/ntt.S)
+  - [dev/aarch64_opt/src/intt_aarch64_asm.S](dev/aarch64_opt/src/intt_aarch64_asm.S)
+  - [dev/aarch64_opt/src/ntt_aarch64_asm.S](dev/aarch64_opt/src/ntt_aarch64_asm.S)
   - [mlkem/src/native/aarch64/README.md](mlkem/src/native/aarch64/README.md)
-  - [mlkem/src/native/aarch64/src/intt.S](mlkem/src/native/aarch64/src/intt.S)
-  - [mlkem/src/native/aarch64/src/ntt.S](mlkem/src/native/aarch64/src/ntt.S)
-  - [proofs/hol_light/aarch64/mlkem/mlkem_intt.S](proofs/hol_light/aarch64/mlkem/mlkem_intt.S)
-  - [proofs/hol_light/aarch64/mlkem/mlkem_ntt.S](proofs/hol_light/aarch64/mlkem/mlkem_ntt.S)
+  - [mlkem/src/native/aarch64/src/intt_aarch64_asm.S](mlkem/src/native/aarch64/src/intt_aarch64_asm.S)
+  - [mlkem/src/native/aarch64/src/ntt_aarch64_asm.S](mlkem/src/native/aarch64/src/ntt_aarch64_asm.S)
+  - [proofs/hol_light/aarch64/mlkem/intt_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/intt_aarch64_asm.S)
+  - [proofs/hol_light/aarch64/mlkem/ntt_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/ntt_aarch64_asm.S)
 
 ### `clangover`
 
@@ -359,6 +425,24 @@ source code and documentation.
 * Referenced from:
   - [mlkem/src/verify.h](mlkem/src/verify.h)
 
+### `s2n-bignum`
+
+* s2n-bignum: Library of formally assembly kernels verified in HOL-Light
+* Author(s):
+  - Amazon Web Services
+* URL: https://github.com/awslabs/s2n-bignum/
+* Referenced from:
+  - [SOUNDNESS.md](SOUNDNESS.md)
+
+### `s2n-bignum-soundness`
+
+* s2n-bignum soundness documentation
+* Author(s):
+  - Amazon Web Services
+* URL: https://github.com/awslabs/s2n-bignum/blob/main/SOUNDNESS.md
+* Referenced from:
+  - [SOUNDNESS.md](SOUNDNESS.md)
+
 ### `supercop`
 
 * SUPERCOP benchmarking framework
@@ -404,3 +488,13 @@ source code and documentation.
 * Referenced from:
   - [mlkem/src/fips202/fips202.c](mlkem/src/fips202/fips202.c)
   - [mlkem/src/fips202/keccakf1600.c](mlkem/src/fips202/keccakf1600.c)
+
+### `wycheproof`
+
+* Project Wycheproof
+* Author(s):
+  - Community Cryptography Specification Project
+* URL: https://github.com/C2SP/wycheproof
+* Referenced from:
+  - [README.md](README.md)
+  - [SOUNDNESS.md](SOUNDNESS.md)

@@ -85,7 +85,7 @@ def test_random(f, num_tests=10000000, bound=2 * R):
     print(f"Randomly checking Barrett<->Montgomery relation ({num_tests} tests)...")
     for i in range(num_tests):
         if i % 100000 == 0:
-            print(f"... run {i} tests ({((i * 1000) // num_tests)/10}%)")
+            print(f"... run {i} tests ({((i * 1000) // num_tests) / 10}%)")
         a = random.randrange(-bound, bound)
         b = random.randrange(-bound, bound)
         f(a, b)
@@ -107,7 +107,7 @@ def barmul_test(a, b):
     r0 = barmul(a, b)
     r1 = montmul_neg(a, bp)
     if r0 != r1:
-        print(f"barmul test failure for {a,b}!")
+        print(f"barmul test failure for {a, b}!")
         print(f"Barrett multiplication: {r0}")
         print(f"Montgomery multiplication: {r1} (factor {bp})")
         assert False
@@ -140,9 +140,9 @@ def bar_bound_test(a, b, max_scale=[]):
     scale = (Cp - 1 / 2) / C
     if len(max_scale) == 0 or scale > max_scale[-1]:
         max_scale.append(scale)
-        print(f"New scale bound for {(a,b)}: {scale}")
+        print(f"New scale bound for {(a, b)}: {scale}")
     if Cp >= scale_bound * C + 1 / 2:
-        print(f"bar bound test failure for (a,b)={(a,b)}")
+        print(f"bar bound test failure for (a,b)={(a, b)}")
         print(f"barmul(a,b): {ab}")
         print(f"C  (=a/q): {C}")
         print(f"Cp (=barmul(a,b)/q): {Cp}")

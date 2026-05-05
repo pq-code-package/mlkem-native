@@ -13,12 +13,12 @@
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-mlkem-native is a secure, fast, and portable C90 implementation of ML-KEM[^FIPS203].
+mlkem-native is a secure, fast, and portable C90[^C90] implementation of ML-KEM[^FIPS203].
 It is a fork of the ML-KEM reference implementation[^REF].
 
 All C code in [mlkem/src/*](mlkem) and [mlkem/src/fips202/*](mlkem/src/fips202) is proved memory-safe (no memory overflow) and type-safe (no integer overflow)
-using [CBMC](https://github.com/diffblue/cbmc). All AArch64 assembly is proved functionally correct at the object code level using
-[HOL-Light](https://github.com/jrh13/hol-light).
+using CBMC[^CBMC]. All AArch64 and x86_64 assembly is proved to be functionally correct,
+memory-safe, and of secret-independent timing (constant-time), using HOL-Light[^HOL-Light].
 
 mlkem-native includes native backends for Arm (64-bit, Neon), Intel/AMD (64-bit, AVX2), and RISC-V (64-bit, RVV). See [benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/) for performance data.
 
@@ -61,15 +61,20 @@ All C code in [mlkem/src/*](mlkem) and [mlkem/src/fips202/*](mlkem/src/fips202) 
 This uses the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) and builds on function contracts and loop invariant annotations
 in the source code. See [proofs/cbmc](proofs/cbmc) for details.
 
-All AArch64 assembly is proved functionally correct at the object-code level. This uses the [HOL-Light](https://github.com/jrh13/hol-light)
-interactive theorem prover and the [s2n-bignum](https://github.com/awslabs/s2n-bignum/) verification infrastructure (which includes a model of the
-relevant parts of the Arm architecture). See [proofs/hol_light/aarch64](proofs/hol_light/aarch64) for details.
+All AArch64 and x86_64 assembly is proved functionally correct, memory-safe, and to have secret-independent timing
+(constant-time), at the object-code level. This uses the [HOL-Light](https://github.com/jrh13/hol-light) interactive theorem prover and the
+[s2n-bignum](https://github.com/awslabs/s2n-bignum/) verification infrastructure (which includes models of the
+relevant parts of the Arm and x86 architectures). See [proofs/hol_light](proofs/hol_light) for details.
+
+**NOTE:** Formal Verification is never absolute. See [SOUNDNESS.md](SOUNDNESS.md) for a detailed analysis of the scope, assumptions and risks of the formal verification
+efforts around mlkem-native.
 
 ## Security
 
-All assembly in mlkem-native is constant-time in the sense that it is free of secret-dependent control flow, memory access,
-and instructions that are commonly variable-time, thwarting most timing side channels. C code is hardened against compiler-introduced
-timing side channels (such as KyberSlash[^KyberSlash] or clangover[^clangover])
+All AArch64 and x86_64 assembly in mlkem-native is formally proved in [HOL Light](https://github.com/jrh13/hol-light) to be free of secret-dependent control flow,
+memory access patterns, and variable-latency instructions, thwarting most timing side channels
+(see [proofs/hol_light](proofs/hol_light) for details). C code is hardened against
+compiler-introduced timing side channels (such as KyberSlash[^KyberSlash] or clangover[^clangover])
 through suitable barriers and constant-time patterns.
 
 Absence of secret-dependent branches, memory-access patterns and variable-latency instructions is also tested using `valgrind`
@@ -94,12 +99,15 @@ mlkem-native currently offers the following backends:
 If you'd like contribute new backends, please reach out or just open a PR.
 
 Our AArch64 assembly is developed using the [SLOTHY](https://github.com/slothy-optimizer/slothy) superoptimizer, following the approach described in the SLOTHY paper[^SLOTHY_Paper]:
-We write 'clean' assembly by hand and automate micro-optimizations (e.g. see the [clean](dev/aarch64_clean/src/ntt.S) vs [optimized](dev/aarch64_opt/src/ntt.S) AArch64 NTT).
+We write 'clean' assembly by hand and automate micro-optimizations (e.g. see the [clean](dev/aarch64_clean/src/ntt_aarch64_asm.S) vs [optimized](dev/aarch64_opt/src/ntt_aarch64_asm.S) AArch64 NTT).
 See [dev/README.md](dev/README.md) for more details.
 
-## ACVP Testing
+## Test Vectors
 
-mlkem-native is tested against all official ACVP ML-KEM test vectors[^ACVP].
+mlkem-native is tested against all official ACVP ML-KEM test vectors[^ACVP] and the
+Wycheproof[^wycheproof] ML-KEM test vectors.
+
+### ACVP
 
 You can run ACVP tests using the [`tests`](./scripts/tests) script or the [ACVP client](./test/acvp/acvp_client.py) directly:
 
@@ -119,6 +127,18 @@ python3 ./test/acvp/acvp_client.py --version v1.1.0.41
 python3 ./test/acvp/acvp_client.py \
   -p ./test/acvp/.acvp-data/v1.1.0.41/files/ML-KEM-keyGen-FIPS203/prompt.json \
   -e ./test/acvp/.acvp-data/v1.1.0.41/files/ML-KEM-keyGen-FIPS203/expectedResults.json
+```
+
+### Wycheproof
+
+You can run Wycheproof[^wycheproof] tests using the [`tests`](./scripts/tests) script or the [Wycheproof client](./test/wycheproof/wycheproof_client.py) directly:
+
+```bash
+# Using the tests script
+./scripts/tests wycheproof
+
+# Using the Wycheproof client directly
+python3 ./test/wycheproof/wycheproof_client.py
 ```
 
 ## Benchmarking
@@ -186,13 +206,18 @@ If you have any other question / non-security related issue / feature request, p
 If you want to help us build mlkem-native, please reach out. You can contact the mlkem-native team
 through the [PQCA Discord](https://discord.com/invite/xyVnwzfg5R). See also [CONTRIBUTING.md](CONTRIBUTING.md).
 
+[^C90]: Strictly speaking, we rely on C90 + `stdint.h` + 64-bit `unsigned long long`.
+
 <!--- bibliography --->
 [^ACVP]: National Institute of Standards and Technology: Automated Cryptographic Validation Protocol (ACVP) Server, [https://github.com/usnistgov/ACVP-Server](https://github.com/usnistgov/ACVP-Server)
+[^CBMC]: Diffblue, Amazon Web Services: C Bounded Model Checker, [https://github.com/diffblue/cbmc](https://github.com/diffblue/cbmc)
 [^FIPS202]: National Institute of Standards and Technology: FIPS202 SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions, [https://csrc.nist.gov/pubs/fips/202/final](https://csrc.nist.gov/pubs/fips/202/final)
 [^FIPS203]: National Institute of Standards and Technology: FIPS 203 Module-Lattice-Based Key-Encapsulation Mechanism Standard, [https://csrc.nist.gov/pubs/fips/203/final](https://csrc.nist.gov/pubs/fips/203/final)
+[^HOL-Light]: John Harrison: HOL-Light Theorem Prover, [https://hol-light.github.io/](https://hol-light.github.io/)
 [^HYBRID]: Becker, Kannwischer: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64, [https://eprint.iacr.org/2022/1243](https://eprint.iacr.org/2022/1243)
 [^KyberSlash]: Bernstein, Bhargavan, Bhasin, Chattopadhyay, Chia, Kannwischer, Kiefer, Paiva, Ravi, Tamvada: KyberSlash: Exploiting secret-dependent division timings in Kyber implementations, [https://kyberslash.cr.yp.to/papers.html](https://kyberslash.cr.yp.to/papers.html)
 [^REF]: Bos, Ducas, Kiltz, Lepoint, Lyubashevsky, Schanck, Schwabe, Seiler, Stehlé: CRYSTALS-Kyber C reference implementation, [https://github.com/pq-crystals/kyber/tree/main/ref](https://github.com/pq-crystals/kyber/tree/main/ref)
 [^SLOTHY_Paper]: Abdulrahman, Becker, Kannwischer, Klein: Fast and Clean: Auditable high-performance assembly via constraint solving, [https://eprint.iacr.org/2022/1303](https://eprint.iacr.org/2022/1303)
 [^clangover]: Antoon Purnal: clangover, [https://github.com/antoonpurnal/clangover](https://github.com/antoonpurnal/clangover)
 [^tiny_sha3]: Markku-Juhani O. Saarinen: tiny_sha3, [https://github.com/mjosaarinen/tiny_sha3](https://github.com/mjosaarinen/tiny_sha3)
+[^wycheproof]: Community Cryptography Specification Project: Project Wycheproof, [https://github.com/C2SP/wycheproof](https://github.com/C2SP/wycheproof)

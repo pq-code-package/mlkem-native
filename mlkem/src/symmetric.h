@@ -15,7 +15,6 @@
 #ifndef MLK_SYMMETRIC_H
 #define MLK_SYMMETRIC_H
 
-#include <stdint.h>
 
 #include "cbmc.h"
 #include "common.h"

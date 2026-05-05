@@ -88,3 +88,5 @@ let MAP_UNTIL_TARGET_PC f n = fun (asl, w) ->
     (TARGET_PC_REACHED_TAC target_pc ORELSE (f n THEN core (n + 1))) (asl, w)
   in
     core n (asl, w);;
+
+needs "arm/proofs/consttime.ml";;

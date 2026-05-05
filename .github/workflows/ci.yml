@@ -134,7 +134,7 @@ jobs:
     name: Functional tests (${{ matrix.target.arch }}${{ matrix.target.mode != 'native' && ', cross' || ''}})
     runs-on: ${{ matrix.target.runner }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: build + test (no-opt)
         uses: ./.github/actions/multi-functest
         with:
@@ -178,16 +178,18 @@ jobs:
     name: Functional tests (ppc64le/POWER10, native)
     runs-on: pqcp-ppc64
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: build + test
         uses: ./.github/actions/multi-functest
         with:
           nix-shell: ''
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
           cflags: "-DMLK_FORCE_PPC64LE"
       - name: build + test (+debug)
         uses: ./.github/actions/multi-functest
         with:
           nix-shell: ''
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
           cflags: "-DMLKEM_DEBUG -DMLK_FORCE_PPC64LE"
   backend_tests:
     name: AArch64 FIPS202 backends (${{ matrix.backend }})
@@ -197,7 +199,7 @@ jobs:
         backend: [x1_scalar, x1_v84a, x2_v84a, x4_v8a_scalar, x4_v8a_v84a_scalar]
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: build + test
         uses: ./.github/actions/multi-functest
         with:
@@ -255,7 +257,8 @@ jobs:
            examples: true
          - name: gcc-13
            shell: gcc13
-           darwin: True
+           # TODO: gcc13 broken on macOS in nixpkgs 25.11
+           darwin: False
            c17: True
            c23: False
            opt: all
@@ -302,12 +305,22 @@ jobs:
            c23: True
            opt: all
            examples: true
+         - name: clang-22
+           shell: clang22
+           darwin: True
+           c17: True
+           c23: True
+           opt: all
+           examples: true
          # CPU flags are not correctly passed to the zig assembler
          # https://github.com/ziglang/zig/issues/23576
          # We therefore only test the C backend
          #
          # We omit all examples since there is currently no way to run
          # only those examples not involving native code.
+         #
+         # zig 0.16 still appears affected on Linux (CPU-feature
+         # predefines look to be dropped in assembler-with-cpp mode).
          - name: zig-0.12
            shell: zig0_12
            darwin: True
@@ -336,9 +349,16 @@ jobs:
            c23: True
            examples: False
            opt: no_opt
+         - name: zig-0.16
+           shell: zig0_16
+           darwin: True
+           c17: True
+           c23: True
+           examples: False
+           opt: no_opt
     runs-on: ${{ matrix.target.runner }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: native build+functest (default)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
         uses: ./.github/actions/multi-functest
@@ -348,6 +368,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -361,6 +382,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -374,6 +396,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -387,6 +410,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -401,6 +425,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -415,6 +440,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -436,7 +462,7 @@ jobs:
           - external: true
     runs-on: ${{ matrix.target.runner }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Stack analysis
         uses: ./.github/actions/multi-functest
         with:
@@ -449,9 +475,49 @@ jobs:
           func: false
           kat: false
           acvp: false
+          wycheproof: false
           examples: false
           stack: true
           check_namespace: false
+  unit_valgrind:
+    name: Unit tests + valgrind (${{ matrix.target.name }}, ${{ matrix.cflags }})
+    strategy:
+      fail-fast: false
+      matrix:
+        external:
+         - ${{ github.repository_owner != 'pq-code-package' }}
+        target:
+          - runner: ubuntu-latest
+            name: x86_64
+          - runner: ubuntu-24.04-arm
+            name: aarch64
+        cflags: ['-O3', '-Os']
+        exclude:
+          - external: true
+    runs-on: ${{ matrix.target.runner }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Unit tests under valgrind
+        uses: ./.github/actions/functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          nix-shell: valgrind-varlat_gcc15
+          nix-cache: false
+          opt: opt
+          cflags: "${{ matrix.cflags }} -std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../test/configs/custom_heap_alloc_config.h\\\\\\\""
+          func: false
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: false
+          stack: false
+          unit: true
+          alloc: false
+          rng_fail: false
+          check_namespace: false
+          # Disable AArch64 SHA3 extension: valgrind cannot emulate it
+          extra_env: "MK_COMPILER_SUPPORTS_SHA3=0"
+          exec_wrapper: "valgrind --error-exitcode=1"
   config_variations:
     name: Non-standard configurations
     strategy:
@@ -477,7 +543,7 @@ jobs:
              }}
     runs-on: ${{ matrix.target.runner }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: "Config Variations"
         uses: ./.github/actions/config-variations
         with:
@@ -497,7 +563,7 @@ jobs:
     # On AArch64 -fcf-protection is not supported anyway
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Test control-flow protections
         uses: ./.github/actions/multi-functest
         with:
@@ -529,7 +595,7 @@ jobs:
     name: Check API consistency
     runs-on: ${{ matrix.target.runner }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: make quickcheck
         run: |
           OPT=0 CFLAGS="-Imlkem -DMLK_CHECK_APIS -Wno-redundant-decls" make quickcheck
@@ -582,7 +648,6 @@ jobs:
       name: ${{ matrix.target.name }}
       ec2_instance_type: ${{ matrix.target.ec2_instance_type }}
       ec2_ami: ${{ matrix.target.ec2_ami }}
-      ec2_ami_id: ${{ matrix.target.ec2_ami_id }}
       compile_mode: ${{ matrix.target.compile_mode }}
       opt: ${{ matrix.target.opt }}
       config_variations: ${{ matrix.target.config_variations || '' }}
@@ -599,9 +664,15 @@ jobs:
       matrix:
         container:
           - id: debian:bullseye
+            nix_shell: ''
           - id: debian:bookworm
-          - id: nixos/nix:latest
-            nix_shell: 'nix-shell -p python3 gcc gnumake perl'
+            nix_shell: ''
+          # TODO: Re-enable once containerd fixes /etc/group symlink handling.
+          # Docker Engine 29.1.5 (API 1.52, containerd v2.2.0) rejects NixOS
+          # /etc/group symlink into /nix/store/ as "path escapes from parent".
+          # https://github.com/containerd/containerd/issues/12683
+          # - id: nixos/nix:latest
+          #   nix_shell: 'nix-shell -p python3 gcc gnumake perl'
     name: Compatibility tests (${{ matrix.container.id }})
     runs-on: ubuntu-latest
     container:
@@ -622,10 +693,10 @@ jobs:
              apt install git -y
           fi
 
-          git config --global --add safe.directory $GITHUB_WORKSPACE
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git init
-          git remote add origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
-          git fetch origin --depth 1 $GITHUB_SHA
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          git fetch origin --depth 1 "$GITHUB_SHA"
           git checkout FETCH_HEAD
       - uses: ./.github/actions/setup-os
         with:
@@ -716,7 +787,7 @@ jobs:
     runs-on: ${{ matrix.target.system }}
     name: Check autogenerated files
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: ./.github/actions/setup-shell
         with:
           nix-shell: ${{ matrix.target.nix_shell }}
@@ -748,7 +819,7 @@ jobs:
     runs-on: ${{ matrix.target.system }}
     name: Check object code in HOL-Light proofs
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: ./.github/actions/setup-shell
         with:
           nix-shell: ${{ matrix.target.nix_shell }}

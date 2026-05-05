@@ -19,14 +19,14 @@ jobs:
     outputs:
       run_needed: ${{ steps.check_run.outputs.run_needed }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         if: github.event_name != 'workflow_dispatch'
         with:
           fetch-depth: 0
       - name: Get changed files
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
-        uses: tj-actions/changed-files@e0021407031f5be11a464abee9a0776171c79891 # v47.0.1
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
       - name: Check if dependencies changed
         id: check_run
         shell: bash
@@ -45,7 +45,7 @@ jobs:
               done
             done
           fi
-          echo "run_needed=${run_needed}" >> $GITHUB_OUTPUT
+          echo "run_needed=${run_needed}" >> "$GITHUB_OUTPUT"
 
   build_nix_cache:
     needs: [ check_modified_files ]
@@ -60,7 +60,7 @@ jobs:
     name: build nix cache (${{ matrix.runner }})
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: ./.github/actions/setup-nix
         with:
           cache: true
@@ -118,7 +118,7 @@ jobs:
       - name: Install git
         shell: bash
         run: |
-          if ! which git 2>&1 >/dev/null; then
+          if ! which git >/dev/null 2>&1; then
             ${{ matrix.target.container == '' && 'sudo' || '' }} apt update
             ${{ matrix.target.container == '' && 'sudo' || '' }} apt install git -y
           fi
@@ -126,9 +126,9 @@ jobs:
         shell: bash
         run: |
           git init
-          git config --global --add safe.directory $GITHUB_WORKSPACE
-          git remote add origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
-          git fetch origin --depth 1 $GITHUB_SHA
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          git fetch origin --depth 1 "$GITHUB_SHA"
           git checkout FETCH_HEAD
       - uses: ./.github/actions/setup-nix
         if: ${{ matrix.target.container == '' }}

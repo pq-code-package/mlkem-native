@@ -16,7 +16,7 @@ Use this approach when:
 
 1. Source tree [mlkem_native/*](mlkem_native), including top-level compilation unit
    [mlkem_native.c](mlkem_native/mlkem_native.c) (gathering all C sources),
-   [mlkem_native.S](mlkem_native/mlkem_native.S) (gathering all assembly sources),
+   [mlkem_native_asm.S](mlkem_native/mlkem_native_asm.S) (gathering all assembly sources),
    and the mlkem-native API [mlkem_native.h](mlkem_native/mlkem_native.h).
 2. Manually provided wrapper file [mlkem_native_all.c](mlkem_native_all.c),
    including `mlkem_native.c` three times (in this example, we don't use a
@@ -66,7 +66,7 @@ The application [main.c](main.c) embeds the wrapper and imports constants:
 
 ## Notes
 
-- Both `mlkem_native_all.c` and `mlkem_native.S` must be compiled and linked
+- Both `mlkem_native_all.c` and `mlkem_native_asm.S` must be compiled and linked
 - `MLK_CONFIG_MULTILEVEL_WITH_SHARED` must be set for exactly ONE level
 - `MLK_CONFIG_CONSTANTS_ONLY` imports size constants without function declarations
 - Native backends are auto-selected based on target architecture

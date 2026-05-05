@@ -22,6 +22,9 @@ GREEN="\033[32m"
 RED="\033[31m"
 NORMAL="\033[0m"
 
+# Global error info
+ERROR_LOG=""
+
 info()
 {
   printf "%b %b\n" "${GREEN}✓" "${NORMAL}${*}"
@@ -86,6 +89,7 @@ gh_summary_failure()
 {
   if $IN_GITHUB_CONTEXT; then
     echo ":x: $1" >>"$GITHUB_STEP_SUMMARY"
+    ERROR_LOG+=" - $1"$'\n'
   fi
 }
 
@@ -135,15 +139,45 @@ gh_group_start "Linting shell scripts with shellcheck"
 run-shellcheck
 gh_group_end
 
-gh_group_start "Linting python scripts with black"
-if ! diff=$(black --check --diff -q --include "(scripts/tests|scripts/simpasm|scripts/cfify|scripts/autogen|scripts/check-namespace|\.py$)" "$ROOT"); then
-  gh_error_simple "Format error" "$diff"
-  error "Lint python"
+gh_group_start "Linting GitHub Actions workflows with actionlint"
+if ! command -v actionlint >/dev/null; then
+  gh_error_simple "actionlint missing" "actionlint is not installed"
+  error "Lint GitHub Actions"
   SUCCESS=false
-  gh_summary_failure "Lint python"
+  gh_summary_failure "Lint GitHub Actions"
+elif ! actionlint; then
+  error "Lint GitHub Actions"
+  SUCCESS=false
+  gh_summary_failure "Lint GitHub Actions"
 else
-  info "Lint Python"
-  gh_summary_success "Lint Python"
+  info "Lint GitHub Actions"
+  gh_summary_success "Lint GitHub Actions"
+fi
+gh_group_end
+
+gh_group_start "Linting python scripts with ruff (format)"
+if ! diff=$(ruff format --check --diff "$ROOT" 2>&1); then
+  echo "$diff"
+  gh_error_simple "Format error" "$diff"
+  error "Lint Python (ruff format)"
+  SUCCESS=false
+  gh_summary_failure "Lint Python (ruff format)"
+else
+  info "Lint Python (ruff format)"
+  gh_summary_success "Lint Python (ruff format)"
+fi
+gh_group_end
+
+gh_group_start "Linting python scripts with ruff (check)"
+if ! out=$(ruff check "$ROOT" 2>&1); then
+  echo "$out"
+  gh_error_simple "Lint error" "$out"
+  error "Lint Python (ruff check)"
+  SUCCESS=false
+  gh_summary_failure "Lint Python (ruff check)"
+else
+  info "Lint Python (ruff check)"
+  gh_summary_success "Lint Python (ruff check)"
 fi
 gh_group_end
 
@@ -172,6 +206,19 @@ check-eol-dry-run()
 }
 gh_group_start "Checking eol"
 checkerr "Check eol" "$(check-eol-dry-run)"
+gh_group_end
+
+check-tabs()
+{
+  for file in $(git ls-files -- ":/" ":/!:Makefile" ":/!:**/Makefile" ":/!:**/Makefile.*" ":/!:Makefile.*" ":/!:*.mk" ":/!:*.patch" ":/!:*.S" ":/!:*.inc" ":/!:nix/valgrind/*.txt"); do
+    if [[ ! -L $file ]] && grep -Pq '\t' "$file"; then
+      l=$(grep -Pn '\t' "$file" | head -1 | cut -d: -f1)
+      echo "$file $l"
+    fi
+  done
+}
+gh_group_start "Checking for tabs"
+checkerr "Check tabs" "$(check-tabs)"
 gh_group_end
 
 check-spdx()
@@ -207,6 +254,7 @@ check-spdx()
     error "Check SPDX + Copyright"
     SUCCESS=false
     gh_summary_failure "Check SPDX + Copyright"
+
   fi
 }
 gh_group_start "Checking SPDX + Copyright headers"
@@ -245,10 +293,6 @@ gh_group_start "Check magic constants"
 check-magic
 gh_group_end
 
-if ! $SUCCESS; then
-  exit 1
-fi
-
 check-contracts()
 {
   if python3 "$ROOT"/scripts/check-contracts >/dev/null; then
@@ -265,6 +309,38 @@ gh_group_start "Check contracts"
 check-contracts
 gh_group_end
 
+check-doxygen()
+{
+  if ! command -v doxygen >/dev/null; then
+    gh_error_simple "doxygen missing" "doxygen is not installed"
+    error "Lint Doxygen comments"
+    SUCCESS=false
+    gh_summary_failure "Lint Doxygen comments"
+    return 0
+  fi
+
+  local out
+  if out=$(cd "$ROOT" && doxygen scripts/Doxyfile.lint 2>&1) && [[ -z $out ]]; then
+    info "Lint Doxygen comments"
+    gh_summary_success "Lint Doxygen comments"
+  else
+    echo "$out"
+    gh_error_simple "Doxygen lint error" "$out"
+    error "Lint Doxygen comments"
+    SUCCESS=false
+    gh_summary_failure "Lint Doxygen comments"
+  fi
+  rm -rf "$ROOT"/.doxylint-xml
+}
+
+gh_group_start "Linting Doxygen comments"
+check-doxygen
+gh_group_end
+
 if ! $SUCCESS; then
+  if $IN_GITHUB_CONTEXT; then
+    printf "%b%s%b\n" "${RED}" "The following checks failed, expand each for more details." "${NORMAL}"
+    echo "$ERROR_LOG"
+  fi
   exit 1
 fi

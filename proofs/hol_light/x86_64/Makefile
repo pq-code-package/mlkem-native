@@ -50,18 +50,27 @@ endif
 
 SPLIT=tr ';' '\n'
 
-OBJ = mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o \
-      mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.o \
-      mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.o \
-      mlkem/mlkem_ntt.o \
-      mlkem/mlkem_intt.o \
-      mlkem/mlkem_reduce.o \
-      mlkem/mlkem_tobytes.o \
-      mlkem/mlkem_rej_uniform.o \
-      mlkem/mlkem_frombytes.o \
-      mlkem/mlkem_tomont.o \
-      mlkem/mlkem_unpack.o \
-      mlkem/mlkem_mulcache_compute.o
+OBJ = mlkem/polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.o \
+      mlkem/polyvec_basemul_acc_montgomery_cached_k3_avx2_asm.o \
+      mlkem/polyvec_basemul_acc_montgomery_cached_k4_avx2_asm.o \
+      mlkem/ntt_avx2_asm.o \
+      mlkem/intt_avx2_asm.o \
+      mlkem/reduce_avx2_asm.o \
+      mlkem/ntttobytes_avx2_asm.o \
+      mlkem/rej_uniform_avx2_asm.o \
+      mlkem/nttfrombytes_avx2_asm.o \
+      mlkem/tomont_avx2_asm.o \
+      mlkem/nttunpack_avx2_asm.o \
+      mlkem/poly_mulcache_compute_avx2_asm.o \
+      mlkem/poly_compress_d4_avx2_asm.o \
+      mlkem/poly_decompress_d4_avx2_asm.o \
+      mlkem/poly_compress_d5_avx2_asm.o \
+      mlkem/poly_decompress_d5_avx2_asm.o \
+      mlkem/poly_compress_d10_avx2_asm.o \
+      mlkem/poly_decompress_d10_avx2_asm.o \
+      mlkem/poly_compress_d11_avx2_asm.o \
+      mlkem/poly_decompress_d11_avx2_asm.o \
+      mlkem/keccak_f1600_x4_avx2_asm.o
 
 # Build object files from assembly sources
 $(OBJ): %.o : %.S
@@ -123,7 +132,7 @@ proofs: run_proofs ; $(SRC)/tools/count-proofs.sh .
 dump_bytecode: proofs/dump_bytecode.native
 	cd .. ; ./x86_64/$<
 
-.PHONY: proofs build_proofs run_proofs sematest clean dump_bytecode
+.PHONY: proofs build_proofs run_proofs sematest clean dump_bytecode FORCE
 
 # Always run sematest regardless of dependency check
 FORCE: ;

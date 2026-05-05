@@ -1,0 +1,34 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# Doxygen lint config for mlkem-native.
+
+PROJECT_NAME           = "mlkem-native lint"
+INPUT                  = mlkem
+RECURSIVE              = YES
+FILE_PATTERNS          = *.h *.c
+OPTIMIZE_OUTPUT_FOR_C  = YES
+JAVADOC_AUTOBRIEF      = YES
+
+# Doxygen requires at least one GENERATE_* to be enabled.
+GENERATE_HTML          = NO
+GENERATE_LATEX         = NO
+GENERATE_XML           = YES
+XML_OUTPUT             = .doxylint-xml
+
+QUIET                  = YES
+
+ALIASES                = "spec{1}=@par Specification^^\1" \
+                         "reference{1}=@par Reference^^\1"
+
+WARN_IF_DOC_ERROR      = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_NO_PARAMDOC       = YES
+STRICT_PROTO_MATCHING  = YES
+WARN_AS_ERROR          = FAIL_ON_WARNINGS
+
+# Suppress false positives from project macros
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = YES
+PREDEFINED             = MLK_ALIGN= \
+                         __contract__(x)=

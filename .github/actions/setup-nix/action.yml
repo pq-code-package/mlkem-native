@@ -62,8 +62,10 @@ runs:
       shell: bash
       run: |
         if [[ -f /.dockerenv ]]; then
+          apt update
           apt install nix -y
         else
+          sudo apt update
           sudo apt install nix -y
         fi
         mkdir -p ~/.config/nix
