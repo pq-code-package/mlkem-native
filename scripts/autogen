@@ -497,7 +497,7 @@ class CondParser:
 
     def parse_condition(self, exp, simplify=True):
         try:
-            exp = self.parser.parseString(exp, parseAll=True).as_list()[0]
+            exp = self.parser.parse_string(exp, parse_all=True).as_list()[0]
         except pp.ParseException:
             print(f"WARNING: Ignoring condition '{exp}' I cannot parse")
             return exp
@@ -2029,6 +2029,109 @@ def gen_riscv64_zeta_files():
     )
 
 
+# The PPC64LE backend stores its twiddle factors in two include files,
+# `consts_ntt.inc` and `consts_intt.inc`, which are concatenated into the
+# `mlk_ppc_qdata` table in `consts.c`. The values are the canonical Montgomery
+# zetas (matching `mlk_zetas` in `mlkem/src/zetas.inc`), arranged per layer to
+# match the order in which the assembly consumes them.
+#
+# NTT layout (in order):
+#   - Layers Len=128, 64, 32, 16, 8: 31 zetas, each broadcast 8 times,
+#     in canonical order (`mlk_zetas[1..31]`).
+#   - Layer Len=4: 32 zetas, each broadcast 4 times, with adjacent pairs
+#     swapped (`mlk_zetas[32 + (i^1)]`).
+#   - Layer Len=2: 64 zetas (`mlk_zetas[64..127]`), grouped in 16 quadruples;
+#     each quadruple is permuted by (1,2,3,4) -> (3,1,4,2) and each entry
+#     duplicated to fill an 8-halfword vector.
+#
+# Inverse NTT layout (in order):
+#   - Layer Len=2: same permutation/duplication as the NTT, but applied to
+#     `mlk_zetas[127..64]` grouped in quadruples of decreasing index.
+#   - Layer Len=4: 32 zetas, each broadcast 4 times, in reverse canonical
+#     order with adjacent pairs swapped (`mlk_zetas[63 - (i^1)]`).
+#   - Layers Len=8, 16, 32, 64, 128: 31 zetas, each broadcast 8 times,
+#     in reverse canonical order (`mlk_zetas[31..1]`).
+_PPC64LE_LEN2_PERM = [2, 0, 3, 1]
+
+
+def gen_ppc64le_ntt_zetas():
+    z = list(gen_c_zetas())
+
+    # Layers Len=128, 64, 32, 16, 8: broadcast x 8.
+    for i in range(1, 32):
+        yield from [z[i]] * 8
+
+    # Layer Len=4: broadcast x 4, adjacent pairs swapped.
+    for i in range(32):
+        yield from [z[32 + (i ^ 1)]] * 4
+
+    # Layer Len=2: per group of 4 zetas, permute (3,1,4,2) and duplicate each.
+    for g in range(16):
+        src = z[64 + g * 4 : 64 + (g + 1) * 4]
+        for p in _PPC64LE_LEN2_PERM:
+            yield from [src[p]] * 2
+
+
+def gen_ppc64le_intt_zetas():
+    z = list(gen_c_zetas())
+
+    # Layer Len=2: per group of 4 reverse-ordered zetas, same permutation
+    # and duplication as the NTT.
+    for g in range(16):
+        src = [z[127 - g * 4 - i] for i in range(4)]
+        for p in _PPC64LE_LEN2_PERM:
+            yield from [src[p]] * 2
+
+    # Layer Len=4: broadcast x 4, reverse canonical order, adjacent pairs
+    # swapped.
+    for i in range(32):
+        yield from [z[63 - (i ^ 1)]] * 4
+
+    # Layers Len=8, 16, 32, 64, 128: broadcast x 8, reverse canonical order.
+    for i in range(31):
+        yield from [z[31 - i]] * 8
+
+
+def gen_ppc64le_zeta_files():
+    """Generate PPC64LE zeta include files."""
+
+    def gen_inc(zetas, leading_comment, entries_per_line=8):
+        yield from gen_header()
+        yield leading_comment
+        zetas = list(zetas)
+        for i in range(0, len(zetas), entries_per_line):
+            chunk = zetas[i : i + entries_per_line]
+            yield "    " + ", ".join(str(t) for t in chunk) + ","
+        yield ""
+
+    ntt_content = "\n".join(
+        gen_inc(
+            gen_ppc64le_ntt_zetas(),
+            "/* Twiddle factors for the PPC64LE forward NTT.\n * See autogen for details.\n */",
+        )
+    )
+    intt_content = "\n".join(
+        gen_inc(
+            gen_ppc64le_intt_zetas(),
+            "/* Twiddle factors for the PPC64LE inverse NTT.\n * See autogen for details.\n */",
+        )
+    )
+
+    # The .inc files are #include'd by `consts.c` (not by an .S file), so they
+    # are not inlined via simpasm; we therefore write them directly into both
+    # the developer tree and the mlkem mirror.
+    for path in (
+        "dev/ppc64le/src/consts_ntt.inc",
+        "mlkem/src/native/ppc64le/src/consts_ntt.inc",
+    ):
+        update_file(path, ntt_content)
+    for path in (
+        "dev/ppc64le/src/consts_intt.inc",
+        "mlkem/src/native/ppc64le/src/consts_intt.inc",
+    ):
+        update_file(path, intt_content)
+
+
 def get_c_source_files(main_only=False, core_only=False, strip_mlkem=False):
     if main_only is True:
         return get_files("mlkem/src/**/*.c", strip_mlkem=strip_mlkem)
@@ -2864,6 +2967,8 @@ def update_via_simpasm(
         source_arch = "x86_64"
     elif "armv81m" in infile_full:
         source_arch = "armv81m"
+    elif "ppc64le" in infile_full:
+        source_arch = "ppc64le"
     else:
         raise Exception(f"Could not detect architecture of source file {infile_full}.")
     # Check native architecture
@@ -2881,13 +2986,21 @@ def update_via_simpasm(
                 return
             raise Exception(f"Could not find cross toolchain {cross_prefix}")
     elif native_arch != source_arch:
-        cross_prefix = f"{source_arch}-unknown-linux-gnu-"
+        # PPC64LE uses "powerpc64le" in the GNU triple, not the bare "ppc64le".
+        arch_triple = "powerpc64le" if source_arch == "ppc64le" else source_arch
+        cross_prefix = f"{arch_triple}-unknown-linux-gnu-"
         cross_gcc = cross_prefix + "gcc"
         # Check if cross-compiler is present
         if shutil.which(cross_gcc) is None:
-            if force_cross is False:
+            if "--target=" in (cflags or ""):
+                # No cross-gcc, but an explicit target triple is already in
+                # cflags (e.g. via --cflags on macOS). Let simpasm
+                # use its default cc/nm (e.g. clang + llvm-nm on Darwin).
+                cross_prefix = None
+            elif force_cross is False:
                 return
-            raise Exception(f"Could not find cross toolchain {cross_prefix}")
+            else:
+                raise Exception(f"Could not find cross toolchain {cross_prefix}")
     else:
         cross_prefix = None
 
@@ -2898,6 +3011,8 @@ def update_via_simpasm(
                 arch = "aarch64"
             elif "armv81m" in infile_full:
                 arch = "armv81m"
+            elif "ppc64le" in infile_full:
+                arch = "ppc64le"
             else:
                 arch = "x86_64"
 
@@ -2910,8 +3025,8 @@ def update_via_simpasm(
                 "-o",
                 tmp.name,
             ]
-            # TODO: Support CFI for Armv8.1-M
-            if arch != "armv81m":
+            # TODO: Support CFI for Armv8.1-M and ppc64le
+            if arch not in ("armv81m", "ppc64le"):
                 cmd += ["--cfify"]
             if cross_prefix is not None:
                 # Stick with llvm-objdump for disassembly
@@ -3306,6 +3421,7 @@ def synchronize_backends(
     delete=False,
     no_simplify=False,
     x86_64_syntax="att",
+    extra_cflags=None,
 ):
     if clean is False:
         ty = "opt"
@@ -3410,6 +3526,14 @@ def synchronize_backends(
         no_simplify=no_simplify,
         x86_64_syntax=x86_64_syntax,
         cflags="-Idev/fips202/x86_64 -Imlkem/src/fips202/native/x86_64 -mavx2 -mbmi2 -msse4 -fcf-protection=none",
+    )
+    synchronize_backend(
+        "dev/ppc64le/src",
+        "mlkem/src/native/ppc64le/src",
+        delete=delete,
+        force_cross=force_cross,
+        no_simplify=no_simplify,
+        cflags=" ".join(filter(None, [extra_cflags, "-Idev/ppc64le/src -Imlkem/src/native/ppc64le/src -mcpu=power8"])),
     )
 
 
@@ -4216,6 +4340,13 @@ def _main():
         default="att",
         help="Assembly syntax for x86_64 disassembly output (att or intel)",
     )
+    parser.add_argument(
+        "--cflags",
+        type=str,
+        default=None,
+        metavar="FLAGS",
+        help="Extra CFLAGS prepended to ppc64le simpasm invocations",
+    )
 
     args = parser.parse_args()
 
@@ -4230,6 +4361,7 @@ def _main():
             no_simplify=args.no_simplify,
             force_cross=args.force_cross,
             x86_64_syntax=args.x86_64_syntax,
+            extra_cflags=args.cflags,
         )
 
     def sync_backends_final():
@@ -4239,6 +4371,7 @@ def _main():
             force_cross=args.force_cross,
             no_simplify=args.no_simplify,
             x86_64_syntax=args.x86_64_syntax,
+            extra_cflags=args.cflags,
         )
 
     # Build step list: (description, function, enabled)
@@ -4270,6 +4403,7 @@ def _main():
         gen_avx2_keccak_constants_c_file()
         gen_avx2_keccak_hol_light_constants_file()
         gen_riscv64_zeta_files()
+        gen_ppc64le_zeta_files()
 
     def gen_monolithic():
         gen_monolithic_source_file()

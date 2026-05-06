@@ -69,7 +69,6 @@ MLK_ALIGN const int16_t mlk_ppc_qdata[] = {
     1353,
 /* zetas for NTT */
 #include "consts_ntt.inc"
-    ,
 /* zetas for invNTT */
 #include "consts_intt.inc"
 };
