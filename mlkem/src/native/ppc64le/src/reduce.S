@@ -1,10 +1,7 @@
 /*
  * Copyright (c) The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
- */
-
-
-/*
+ *
  * Copyright IBM Corp. 2025, 2026
  *
  *===================================================================================
@@ -20,13 +17,11 @@
  *   dev/ppc64le/src/reduce.S using scripts/simpasm. Do not modify it directly.
  */
 
-
 .text
-.balign 16
+.balign 4
 .global MLK_ASM_NAMESPACE(reduce_ppc_asm)
 MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
 
-        .cfi_startproc
         stdu 1, -224(1)
         mflr 0
         std 14, 96(1)
@@ -490,7 +485,7 @@ MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
         addi 3, 3, -512
         vxor 9, 9, 9
         vspltish 10, 15
-        vmr	11, 3
+        vmr 11, 3
         lxvd2x 44, 0, 3
         lxvd2x 45, 14, 3
         lxvd2x 46, 15, 3
@@ -707,7 +702,12 @@ MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
         mtlr 0
         addi 1, 1, 224
         blr
-        .cfi_endproc
+
+MLK_ASM_FN_SIZE(reduce_ppc_asm)
 
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif
