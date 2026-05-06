@@ -1,9 +1,7 @@
 /*
  * Copyright (c) The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
- */
-
-/*
+ *
  * Copyright IBM Corp. 2025, 2026
  *
  * ===================================================================================
@@ -19,13 +17,11 @@
  *   dev/ppc64le/src/ntt_ppc.S using scripts/simpasm. Do not modify it directly.
  */
 
-
 .text
-.balign 16
+.balign 4
 .global MLK_ASM_NAMESPACE(ntt_ppc_asm)
 MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
 
-        .cfi_startproc
         stdu 1, -352(1)
         mflr 0
         std 14, 56(1)
@@ -1183,7 +1179,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         stxvd2x 58, 3, 19
         stxvd2x 62, 3, 20
         stxvd2x 63, 3, 21
-        mr	5, 3
+        mr 5, 3
         li 7, 8
         li 10, 16
         li 11, 32
@@ -1204,20 +1200,20 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         addi 14, 14, 64
         lxvd2x 1, 0, 5
         lxvd2x 2, 10, 5
-        xxmrgld	45, 2, 1
-        xxmrghd	44, 2, 1
+        xxmrgld 45, 2, 1
+        xxmrghd 44, 2, 1
         lxvd2x 3, 11, 5
         lxvd2x 4, 12, 5
-        xxmrgld	50, 4, 3
-        xxmrghd	49, 4, 3
+        xxmrgld 50, 4, 3
+        xxmrghd 49, 4, 3
         lxvd2x 1, 15, 5
         lxvd2x 2, 16, 5
-        xxmrgld	55, 2, 1
-        xxmrghd	54, 2, 1
+        xxmrgld 55, 2, 1
+        xxmrghd 54, 2, 1
         lxvd2x 3, 17, 5
         lxvd2x 4, 18, 5
-        xxmrgld	60, 4, 3
-        xxmrghd	59, 4, 3
+        xxmrgld 60, 4, 3
+        xxmrghd 59, 4, 3
         vmladduhm 15, 13, 7, 3
         vmladduhm 20, 18, 8, 3
         vmladduhm 25, 23, 9, 3
@@ -1246,14 +1242,14 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         vadduhm 25, 23, 22
         vsubuhm 31, 27, 28
         vadduhm 30, 28, 27
-        xxmrgld	0, 47, 48
-        xxmrghd	1, 47, 48
-        xxmrgld	2, 52, 53
-        xxmrghd	3, 52, 53
-        xxmrgld	4, 57, 58
-        xxmrghd	5, 57, 58
-        xxmrgld	6, 62, 63
-        xxmrghd	7, 62, 63
+        xxmrgld 0, 47, 48
+        xxmrghd 1, 47, 48
+        xxmrgld 2, 52, 53
+        xxmrghd 3, 52, 53
+        xxmrgld 4, 57, 58
+        xxmrghd 5, 57, 58
+        xxmrgld 6, 62, 63
+        xxmrghd 7, 62, 63
         stxvd2x 0, 0, 5
         stxvd2x 1, 10, 5
         stxvd2x 2, 11, 5
@@ -1273,20 +1269,20 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         addi 14, 14, 64
         lxvd2x 1, 0, 5
         lxvd2x 2, 10, 5
-        xxmrgld	45, 2, 1
-        xxmrghd	44, 2, 1
+        xxmrgld 45, 2, 1
+        xxmrghd 44, 2, 1
         lxvd2x 3, 11, 5
         lxvd2x 4, 12, 5
-        xxmrgld	50, 4, 3
-        xxmrghd	49, 4, 3
+        xxmrgld 50, 4, 3
+        xxmrghd 49, 4, 3
         lxvd2x 1, 15, 5
         lxvd2x 2, 16, 5
-        xxmrgld	55, 2, 1
-        xxmrghd	54, 2, 1
+        xxmrgld 55, 2, 1
+        xxmrghd 54, 2, 1
         lxvd2x 3, 17, 5
         lxvd2x 4, 18, 5
-        xxmrgld	60, 4, 3
-        xxmrghd	59, 4, 3
+        xxmrgld 60, 4, 3
+        xxmrghd 59, 4, 3
         vmladduhm 15, 13, 7, 3
         vmladduhm 20, 18, 8, 3
         vmladduhm 25, 23, 9, 3
@@ -1315,14 +1311,14 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         vadduhm 25, 23, 22
         vsubuhm 31, 27, 28
         vadduhm 30, 28, 27
-        xxmrgld	0, 47, 48
-        xxmrghd	1, 47, 48
-        xxmrgld	2, 52, 53
-        xxmrghd	3, 52, 53
-        xxmrgld	4, 57, 58
-        xxmrghd	5, 57, 58
-        xxmrgld	6, 62, 63
-        xxmrghd	7, 62, 63
+        xxmrgld 0, 47, 48
+        xxmrghd 1, 47, 48
+        xxmrgld 2, 52, 53
+        xxmrghd 3, 52, 53
+        xxmrgld 4, 57, 58
+        xxmrghd 5, 57, 58
+        xxmrgld 6, 62, 63
+        xxmrghd 7, 62, 63
         stxvd2x 0, 0, 5
         stxvd2x 1, 10, 5
         stxvd2x 2, 11, 5
@@ -1342,20 +1338,20 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         addi 14, 14, 64
         lxvd2x 1, 0, 5
         lxvd2x 2, 10, 5
-        xxmrgld	45, 2, 1
-        xxmrghd	44, 2, 1
+        xxmrgld 45, 2, 1
+        xxmrghd 44, 2, 1
         lxvd2x 3, 11, 5
         lxvd2x 4, 12, 5
-        xxmrgld	50, 4, 3
-        xxmrghd	49, 4, 3
+        xxmrgld 50, 4, 3
+        xxmrghd 49, 4, 3
         lxvd2x 1, 15, 5
         lxvd2x 2, 16, 5
-        xxmrgld	55, 2, 1
-        xxmrghd	54, 2, 1
+        xxmrgld 55, 2, 1
+        xxmrghd 54, 2, 1
         lxvd2x 3, 17, 5
         lxvd2x 4, 18, 5
-        xxmrgld	60, 4, 3
-        xxmrghd	59, 4, 3
+        xxmrgld 60, 4, 3
+        xxmrghd 59, 4, 3
         vmladduhm 15, 13, 7, 3
         vmladduhm 20, 18, 8, 3
         vmladduhm 25, 23, 9, 3
@@ -1384,14 +1380,14 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         vadduhm 25, 23, 22
         vsubuhm 31, 27, 28
         vadduhm 30, 28, 27
-        xxmrgld	0, 47, 48
-        xxmrghd	1, 47, 48
-        xxmrgld	2, 52, 53
-        xxmrghd	3, 52, 53
-        xxmrgld	4, 57, 58
-        xxmrghd	5, 57, 58
-        xxmrgld	6, 62, 63
-        xxmrghd	7, 62, 63
+        xxmrgld 0, 47, 48
+        xxmrghd 1, 47, 48
+        xxmrgld 2, 52, 53
+        xxmrghd 3, 52, 53
+        xxmrgld 4, 57, 58
+        xxmrghd 5, 57, 58
+        xxmrgld 6, 62, 63
+        xxmrghd 7, 62, 63
         stxvd2x 0, 0, 5
         stxvd2x 1, 10, 5
         stxvd2x 2, 11, 5
@@ -1411,20 +1407,20 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         addi 14, 14, 64
         lxvd2x 1, 0, 5
         lxvd2x 2, 10, 5
-        xxmrgld	45, 2, 1
-        xxmrghd	44, 2, 1
+        xxmrgld 45, 2, 1
+        xxmrghd 44, 2, 1
         lxvd2x 3, 11, 5
         lxvd2x 4, 12, 5
-        xxmrgld	50, 4, 3
-        xxmrghd	49, 4, 3
+        xxmrgld 50, 4, 3
+        xxmrghd 49, 4, 3
         lxvd2x 1, 15, 5
         lxvd2x 2, 16, 5
-        xxmrgld	55, 2, 1
-        xxmrghd	54, 2, 1
+        xxmrgld 55, 2, 1
+        xxmrghd 54, 2, 1
         lxvd2x 3, 17, 5
         lxvd2x 4, 18, 5
-        xxmrgld	60, 4, 3
-        xxmrghd	59, 4, 3
+        xxmrgld 60, 4, 3
+        xxmrghd 59, 4, 3
         vmladduhm 15, 13, 7, 3
         vmladduhm 20, 18, 8, 3
         vmladduhm 25, 23, 9, 3
@@ -1453,14 +1449,14 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         vadduhm 25, 23, 22
         vsubuhm 31, 27, 28
         vadduhm 30, 28, 27
-        xxmrgld	0, 47, 48
-        xxmrghd	1, 47, 48
-        xxmrgld	2, 52, 53
-        xxmrghd	3, 52, 53
-        xxmrgld	4, 57, 58
-        xxmrghd	5, 57, 58
-        xxmrgld	6, 62, 63
-        xxmrghd	7, 62, 63
+        xxmrgld 0, 47, 48
+        xxmrghd 1, 47, 48
+        xxmrgld 2, 52, 53
+        xxmrghd 3, 52, 53
+        xxmrgld 4, 57, 58
+        xxmrghd 5, 57, 58
+        xxmrgld 6, 62, 63
+        xxmrghd 7, 62, 63
         stxvd2x 0, 0, 5
         stxvd2x 1, 10, 5
         stxvd2x 2, 11, 5
@@ -1470,7 +1466,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         stxvd2x 6, 17, 5
         stxvd2x 7, 18, 5
         addi 5, 5, 128
-        mr	5, 3
+        mr 5, 3
         li 7, 4
         nop
         nop
@@ -1785,7 +1781,12 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         mtlr 0
         addi 1, 1, 352
         blr
-        .cfi_endproc
+
+MLK_ASM_FN_SIZE(ntt_ppc_asm)
 
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

@@ -1,9 +1,7 @@
 /*
  * Copyright (c) The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
- */
-
-/*
+ *
  * Copyright IBM Corp. 2025, 2026
  *
  *===================================================================================
@@ -27,13 +25,11 @@
  *   dev/ppc64le/src/poly_tomont.S using scripts/simpasm. Do not modify it directly.
  */
 
-
 .text
-.balign 16
+.balign 4
 .global MLK_ASM_NAMESPACE(poly_tomont_ppc_asm)
 MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
 
-        .cfi_startproc
         stdu 1, -320(1)
         mflr 0
         li 6, 128
@@ -355,7 +351,12 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
         mtlr 0
         addi 1, 1, 320
         blr
-        .cfi_endproc
+
+MLK_ASM_FN_SIZE(poly_tomont_ppc_asm)
 
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

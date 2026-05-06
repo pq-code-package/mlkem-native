@@ -1,9 +1,7 @@
 /*
  * Copyright (c) The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
- */
-
-/*
+ *
  * Copyright IBM Corp. 2025, 2026
  *
  * ===================================================================================
@@ -19,13 +17,11 @@
  *   dev/ppc64le/src/intt_ppc.S using scripts/simpasm. Do not modify it directly.
  */
 
-
 .text
-.balign 16
+.balign 4
 .global MLK_ASM_NAMESPACE(intt_ppc_asm)
 MLK_ASM_FN_SYMBOL(intt_ppc_asm)
 
-        .cfi_startproc
         stdu 1, -352(1)
         mflr 0
         std 14, 56(1)
@@ -95,7 +91,7 @@ MLK_ASM_FN_SYMBOL(intt_ppc_asm)
         xxlor 35, 3, 3
         xxlor 36, 4, 4
 
-Lintt_ppc_asm_Loopf:
+intt_ppc_asm_Loopf:
         lxvd2x 57, 0, 3
         lxvd2x 58, 10, 3
         lxvd2x 62, 11, 3
@@ -156,13 +152,13 @@ Lintt_ppc_asm_Loopf:
         stxvd2x 55, 17, 3
         stxvd2x 60, 18, 3
         addi 3, 3, 128
-        bdnz Lintt_ppc_asm_Loopf
+        bdnz intt_ppc_asm_Loopf
         addi 3, 3, -512
         nop
         nop
         addi 14, 4, 1104
         li 7, 4
-        mr	5, 3
+        mr 5, 3
         lxvd2x 57, 0, 5
         lxvd2x 58, 10, 5
         vmrgew 8, 25, 26
@@ -680,24 +676,24 @@ Lintt_ppc_asm_Loopf:
         stxvd2x 49, 18, 5
         addi 5, 5, 128
         nop
-        mr	5, 3
+        mr 5, 3
         li 7, 8
         lxvd2x 10, 0, 5
         lxvd2x 11, 10, 5
-        xxmrgld	40, 11, 10
-        xxmrghd	53, 11, 10
+        xxmrgld 40, 11, 10
+        xxmrghd 53, 11, 10
         lxvd2x 10, 11, 5
         lxvd2x 11, 12, 5
-        xxmrgld	44, 11, 10
-        xxmrghd	54, 11, 10
+        xxmrgld 44, 11, 10
+        xxmrghd 54, 11, 10
         lxvd2x 10, 15, 5
         lxvd2x 11, 16, 5
-        xxmrgld	48, 11, 10
-        xxmrghd	55, 11, 10
+        xxmrgld 48, 11, 10
+        xxmrghd 55, 11, 10
         lxvd2x 10, 17, 5
         lxvd2x 11, 18, 5
-        xxmrgld	52, 11, 10
-        xxmrghd	56, 11, 10
+        xxmrgld 52, 11, 10
+        xxmrghd 56, 11, 10
         vsubuhm 25, 8, 21
         vsubuhm 26, 12, 22
         vsubuhm 30, 16, 23
@@ -794,14 +790,14 @@ Lintt_ppc_asm_Loopf:
         xxlor 51, 11, 11
         xxlor 56, 12, 12
         xxlor 61, 13, 13
-        xxmrgld	42, 46, 45
-        xxmrghd	43, 46, 45
-        xxmrgld	44, 51, 50
-        xxmrghd	45, 51, 50
-        xxmrgld	46, 56, 55
-        xxmrghd	47, 56, 55
-        xxmrgld	48, 61, 60
-        xxmrghd	49, 61, 60
+        xxmrgld 42, 46, 45
+        xxmrghd 43, 46, 45
+        xxmrgld 44, 51, 50
+        xxmrghd 45, 51, 50
+        xxmrgld 46, 56, 55
+        xxmrghd 47, 56, 55
+        xxmrgld 48, 61, 60
+        xxmrghd 49, 61, 60
         stxvd2x 42, 0, 5
         stxvd2x 43, 10, 5
         stxvd2x 44, 11, 5
@@ -813,20 +809,20 @@ Lintt_ppc_asm_Loopf:
         addi 5, 5, 128
         lxvd2x 10, 0, 5
         lxvd2x 11, 10, 5
-        xxmrgld	40, 11, 10
-        xxmrghd	53, 11, 10
+        xxmrgld 40, 11, 10
+        xxmrghd 53, 11, 10
         lxvd2x 10, 11, 5
         lxvd2x 11, 12, 5
-        xxmrgld	44, 11, 10
-        xxmrghd	54, 11, 10
+        xxmrgld 44, 11, 10
+        xxmrghd 54, 11, 10
         lxvd2x 10, 15, 5
         lxvd2x 11, 16, 5
-        xxmrgld	48, 11, 10
-        xxmrghd	55, 11, 10
+        xxmrgld 48, 11, 10
+        xxmrghd 55, 11, 10
         lxvd2x 10, 17, 5
         lxvd2x 11, 18, 5
-        xxmrgld	52, 11, 10
-        xxmrghd	56, 11, 10
+        xxmrgld 52, 11, 10
+        xxmrghd 56, 11, 10
         vsubuhm 25, 8, 21
         vsubuhm 26, 12, 22
         vsubuhm 30, 16, 23
@@ -923,14 +919,14 @@ Lintt_ppc_asm_Loopf:
         xxlor 51, 11, 11
         xxlor 56, 12, 12
         xxlor 61, 13, 13
-        xxmrgld	42, 46, 45
-        xxmrghd	43, 46, 45
-        xxmrgld	44, 51, 50
-        xxmrghd	45, 51, 50
-        xxmrgld	46, 56, 55
-        xxmrghd	47, 56, 55
-        xxmrgld	48, 61, 60
-        xxmrghd	49, 61, 60
+        xxmrgld 42, 46, 45
+        xxmrghd 43, 46, 45
+        xxmrgld 44, 51, 50
+        xxmrghd 45, 51, 50
+        xxmrgld 46, 56, 55
+        xxmrghd 47, 56, 55
+        xxmrgld 48, 61, 60
+        xxmrghd 49, 61, 60
         stxvd2x 42, 0, 5
         stxvd2x 43, 10, 5
         stxvd2x 44, 11, 5
@@ -942,20 +938,20 @@ Lintt_ppc_asm_Loopf:
         addi 5, 5, 128
         lxvd2x 10, 0, 5
         lxvd2x 11, 10, 5
-        xxmrgld	40, 11, 10
-        xxmrghd	53, 11, 10
+        xxmrgld 40, 11, 10
+        xxmrghd 53, 11, 10
         lxvd2x 10, 11, 5
         lxvd2x 11, 12, 5
-        xxmrgld	44, 11, 10
-        xxmrghd	54, 11, 10
+        xxmrgld 44, 11, 10
+        xxmrghd 54, 11, 10
         lxvd2x 10, 15, 5
         lxvd2x 11, 16, 5
-        xxmrgld	48, 11, 10
-        xxmrghd	55, 11, 10
+        xxmrgld 48, 11, 10
+        xxmrghd 55, 11, 10
         lxvd2x 10, 17, 5
         lxvd2x 11, 18, 5
-        xxmrgld	52, 11, 10
-        xxmrghd	56, 11, 10
+        xxmrgld 52, 11, 10
+        xxmrghd 56, 11, 10
         vsubuhm 25, 8, 21
         vsubuhm 26, 12, 22
         vsubuhm 30, 16, 23
@@ -1052,14 +1048,14 @@ Lintt_ppc_asm_Loopf:
         xxlor 51, 11, 11
         xxlor 56, 12, 12
         xxlor 61, 13, 13
-        xxmrgld	42, 46, 45
-        xxmrghd	43, 46, 45
-        xxmrgld	44, 51, 50
-        xxmrghd	45, 51, 50
-        xxmrgld	46, 56, 55
-        xxmrghd	47, 56, 55
-        xxmrgld	48, 61, 60
-        xxmrghd	49, 61, 60
+        xxmrgld 42, 46, 45
+        xxmrghd 43, 46, 45
+        xxmrgld 44, 51, 50
+        xxmrghd 45, 51, 50
+        xxmrgld 46, 56, 55
+        xxmrghd 47, 56, 55
+        xxmrgld 48, 61, 60
+        xxmrghd 49, 61, 60
         stxvd2x 42, 0, 5
         stxvd2x 43, 10, 5
         stxvd2x 44, 11, 5
@@ -1071,20 +1067,20 @@ Lintt_ppc_asm_Loopf:
         addi 5, 5, 128
         lxvd2x 10, 0, 5
         lxvd2x 11, 10, 5
-        xxmrgld	40, 11, 10
-        xxmrghd	53, 11, 10
+        xxmrgld 40, 11, 10
+        xxmrghd 53, 11, 10
         lxvd2x 10, 11, 5
         lxvd2x 11, 12, 5
-        xxmrgld	44, 11, 10
-        xxmrghd	54, 11, 10
+        xxmrgld 44, 11, 10
+        xxmrghd 54, 11, 10
         lxvd2x 10, 15, 5
         lxvd2x 11, 16, 5
-        xxmrgld	48, 11, 10
-        xxmrghd	55, 11, 10
+        xxmrgld 48, 11, 10
+        xxmrghd 55, 11, 10
         lxvd2x 10, 17, 5
         lxvd2x 11, 18, 5
-        xxmrgld	52, 11, 10
-        xxmrghd	56, 11, 10
+        xxmrgld 52, 11, 10
+        xxmrghd 56, 11, 10
         vsubuhm 25, 8, 21
         vsubuhm 26, 12, 22
         vsubuhm 30, 16, 23
@@ -1181,14 +1177,14 @@ Lintt_ppc_asm_Loopf:
         xxlor 51, 11, 11
         xxlor 56, 12, 12
         xxlor 61, 13, 13
-        xxmrgld	42, 46, 45
-        xxmrghd	43, 46, 45
-        xxmrgld	44, 51, 50
-        xxmrghd	45, 51, 50
-        xxmrgld	46, 56, 55
-        xxmrghd	47, 56, 55
-        xxmrgld	48, 61, 60
-        xxmrghd	49, 61, 60
+        xxmrgld 42, 46, 45
+        xxmrghd 43, 46, 45
+        xxmrgld 44, 51, 50
+        xxmrghd 45, 51, 50
+        xxmrgld 46, 56, 55
+        xxmrghd 47, 56, 55
+        xxmrgld 48, 61, 60
+        xxmrghd 49, 61, 60
         stxvd2x 42, 0, 5
         stxvd2x 43, 10, 5
         stxvd2x 44, 11, 5
@@ -3412,7 +3408,12 @@ Lintt_ppc_asm_Loopf:
         mtlr 0
         addi 1, 1, 352
         blr
-        .cfi_endproc
+
+MLK_ASM_FN_SIZE(intt_ppc_asm)
 
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
         */
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif
