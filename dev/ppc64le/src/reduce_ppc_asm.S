@@ -10,7 +10,7 @@
  */
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__)
 /* simpasm: header-end */
 
 #include "consts.h"
@@ -30,7 +30,7 @@
 
 .text
 
-.macro BREDUCE_4X _v0, _v1, _v2, _v3
+.macro barrett_reduce_4x _v0, _v1, _v2, _v3
         lxvd2x  32+8, 0, 3
         lxvd2x  32+12, 14, 3
         lxvd2x  32+16, 15, 3
@@ -169,20 +169,20 @@ MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
         li      15, 32
         li      16, 48
 
-        BREDUCE_4X 21, 22, 23, 24
-        BREDUCE_4X 4, 9, 13, 17
+        barrett_reduce_4x 21, 22, 23, 24
+        barrett_reduce_4x 4, 9, 13, 17
         Write_8X
 
-        BREDUCE_4X 21, 22, 23, 24
-        BREDUCE_4X 4, 9, 13, 17
+        barrett_reduce_4x 21, 22, 23, 24
+        barrett_reduce_4x 4, 9, 13, 17
         Write_8X
 
-        BREDUCE_4X 21, 22, 23, 24
-        BREDUCE_4X 4, 9, 13, 17
+        barrett_reduce_4x 21, 22, 23, 24
+        barrett_reduce_4x 4, 9, 13, 17
         Write_8X
 
-        BREDUCE_4X 21, 22, 23, 24
-        BREDUCE_4X 4, 9, 13, 17
+        barrett_reduce_4x 21, 22, 23, 24
+        barrett_reduce_4x 4, 9, 13, 17
         Write_8X
 
 .balign 16
@@ -228,5 +228,5 @@ MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
 #undef V_MKQ
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
+#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED && __POWER8_VECTOR__ \
         */

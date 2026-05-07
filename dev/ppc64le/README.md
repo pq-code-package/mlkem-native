@@ -3,5 +3,5 @@
 # ppc64le backend (little endian)
 
 This directory contains a native backend for little endian POWER 9 (ppc64le) and above systems.
-Or, Power systems supports ISA 2.07 and above.
+Or, Power systems supporting ISA 2.07 and above.
 

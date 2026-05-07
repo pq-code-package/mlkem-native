@@ -18,7 +18,7 @@
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__)
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
@@ -354,7 +354,7 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
 
 MLK_ASM_FN_SIZE(poly_tomont_ppc_asm)
 
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
+#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED && __POWER8_VECTOR__ \
         */
 
 #if defined(__ELF__)

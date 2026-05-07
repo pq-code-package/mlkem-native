@@ -10,7 +10,7 @@
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__)
 /* simpasm: header-end */
 
 #include "consts.h"
@@ -299,7 +299,7 @@
         xxpermdi 32+vdata_a4, 11, 10, 0
 .endm
 
-.macro BREDUCE_4X _v0, _v1, _v2, _v3
+.macro barrett_reduce_4x _v0, _v1, _v2, _v3
         /* Restore constant vectors
            V_MKQ, V2pw25 and V_26 */
         vxor    7, 7, 7
@@ -360,9 +360,9 @@
 
 /*
  * -----------------------------------
- * MREDUCE_4X(_vz0, _vz1, _vz2, _vz3, _vo0, _vo1, _vo2, _vo3)
+ * mont_reduce_4x(_vz0, _vz1, _vz2, _vz3, _vo0, _vo1, _vo2, _vo3)
  */
-.macro MREDUCE_4X _vz0, _vz1, _vz2, _vz3, _vo0, _vo1, _vo2, _vo3
+.macro mont_reduce_4x _vz0, _vz1, _vz2, _vz3, _vo0, _vo1, _vo2, _vo3
         /* Modular multiplication bound by 2^16 * q in abs value */
         vmladduhm 15, vdata_mont1, \_vz0, rinp
         vmladduhm 20, vdata_mont2, \_vz1, rinp
@@ -506,60 +506,60 @@
 /*
  * INTT layer 1, Len=2.
  */
-.macro INTT_REDUCE_L24
+.macro intt_layer1
         Load_L24Coeffs
         Compute_4Coeffs
-        BREDUCE_4X vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
+        barrett_reduce_4x vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
         xxlor   10, 32+vresult_brt1, 32+vresult_brt1
         xxlor   11, 32+vresult_brt2, 32+vresult_brt2
         xxlor   12, 32+vresult_brt3, 32+vresult_brt3
         xxlor   13, 32+vresult_brt4, 32+vresult_brt4
         Set_mont_consts
         Load_next_4zetas
-        MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, vresult_mont1, vresult_mont2, vresult_mont3, vresult_mont4
+        mont_reduce_4x V_Z0, V_Z1, V_Z2, V_Z3, vresult_mont1, vresult_mont2, vresult_mont3, vresult_mont4
         PermWriteL24
 .endm
 
 /*
  * INTT layer 2, Len=4.
  */
-.macro INTT_REDUCE_L44
+.macro intt_layer2
         Load_L44Coeffs
         Compute_4Coeffs
-        BREDUCE_4X vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
+        barrett_reduce_4x vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
         xxlor   10, 32+vresult_brt1, 32+vresult_brt1
         xxlor   11, 32+vresult_brt2, 32+vresult_brt2
         xxlor   12, 32+vresult_brt3, 32+vresult_brt3
         xxlor   13, 32+vresult_brt4, 32+vresult_brt4
         Set_mont_consts
         Load_next_4zetas
-        MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, vresult_mont1, vresult_mont2, vresult_mont3, vresult_mont4
+        mont_reduce_4x V_Z0, V_Z1, V_Z2, V_Z3, vresult_mont1, vresult_mont2, vresult_mont3, vresult_mont4
         PermWriteL44
 .endm
 
 /*
  * INTT layer 3 and 4, Len=8 and 16.
  */
-.macro INTT_REDUCE_4X start, next
+.macro intt_layer34 start, next
         Load_4Coeffs \start, \next
-        BREDUCE_4X vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
+        barrett_reduce_4x vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
         Write_B4C 32+vresult_brt1, 32+vresult_brt2, 32+vresult_brt3, 32+vresult_brt4
         Set_mont_consts
         Load_next_4zetas
-        MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3, vresult_mont1, vresult_mont2, vresult_mont3, vresult_mont4
+        mont_reduce_4x V_Z0, V_Z1, V_Z2, V_Z3, vresult_mont1, vresult_mont2, vresult_mont3, vresult_mont4
         Write_M4C 32+vresult_mont1, 32+vresult_mont2, 32+vresult_mont3, 32+vresult_mont4
 .endm
 
 /*
  * INTT layer 5, 6 and 7, Len=32, 64 and 128.
  */
-.macro INTT_REDUCE_L567 start, next
+.macro intt_layer567 start, next
         Load_4Coeffs \start, \next
-        BREDUCE_4X vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
+        barrett_reduce_4x vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
         Write_B4C 32+vresult_brt1, 32+vresult_brt2, 32+vresult_brt3, 32+vresult_brt4
         Set_mont_consts
         lvx     V_ZETA, 0, 14
-        MREDUCE_4X V_ZETA, V_ZETA, V_ZETA, V_ZETA, vresult_mont1, vresult_mont2, vresult_mont3, vresult_mont4
+        mont_reduce_4x V_ZETA, V_ZETA, V_ZETA, V_ZETA, vresult_mont1, vresult_mont2, vresult_mont3, vresult_mont4
         Write_M4C 32+vresult_mont1, 32+vresult_mont2, 32+vresult_mont3, 32+vresult_mont4
 .endm
 
@@ -649,9 +649,9 @@ MLK_ASM_FN_SYMBOL(intt_ppc_asm)
         Set_mont_consts
 intt_ppc_asm_Loopf:
         Reload_4coeffs
-        MREDUCE_4X V1441, V1441, V1441, V1441, 6, 7, 8, 9
+        mont_reduce_4x V1441, V1441, V1441, V1441, 6, 7, 8, 9
         Reload_4coeffs
-        MREDUCE_4X V1441, V1441, V1441, V1441, 13, 18, 23, 28
+        mont_reduce_4x V1441, V1441, V1441, V1441, 13, 18, 23, 28
         MWrite_8X 32+6, 32+7, 32+8, 32+9, 32+13, 32+18, 32+23, 32+28
         bdnz    intt_ppc_asm_Loopf
 
@@ -670,13 +670,13 @@ intt_ppc_asm_Loopf:
         li      len_2, 4        /* len * 2 */
         mr      dup_rinp, rinp
 
-        INTT_REDUCE_L24
+        intt_layer1
         addi    dup_rinp, dup_rinp, 128
-        INTT_REDUCE_L24
+        intt_layer1
         addi    dup_rinp, dup_rinp, 128
-        INTT_REDUCE_L24
+        intt_layer1
         addi    dup_rinp, dup_rinp, 128
-        INTT_REDUCE_L24
+        intt_layer1
         addi    dup_rinp, dup_rinp, 128
 
 .balign 16
@@ -690,13 +690,13 @@ intt_ppc_asm_Loopf:
         mr      dup_rinp, rinp
         li      len_2, 8
 
-        INTT_REDUCE_L44
+        intt_layer2
         addi    dup_rinp, dup_rinp, 128
-        INTT_REDUCE_L44
+        intt_layer2
         addi    dup_rinp, dup_rinp, 128
-        INTT_REDUCE_L44
+        intt_layer2
         addi    dup_rinp, dup_rinp, 128
-        INTT_REDUCE_L44
+        intt_layer2
         addi    dup_rinp, dup_rinp, 128
 
 .balign 16
@@ -705,10 +705,10 @@ intt_ppc_asm_Loopf:
          */
         li      len_2, 16
 
-        INTT_REDUCE_4X 0, 32
-        INTT_REDUCE_4X 128, 32
-        INTT_REDUCE_4X 256, 32
-        INTT_REDUCE_4X 384, 32
+        intt_layer34 0, 32
+        intt_layer34 128, 32
+        intt_layer34 256, 32
+        intt_layer34 384, 32
 
 .balign 16
         /*
@@ -716,15 +716,15 @@ intt_ppc_asm_Loopf:
          */
         li      len_2, 32
 
-        INTT_REDUCE_4X 0, 64
+        intt_layer34 0, 64
 
         addi    zeta_inp, zeta_inp, -64
-        INTT_REDUCE_4X 16, 64
+        intt_layer34 16, 64
 
-        INTT_REDUCE_4X 256, 64
+        intt_layer34 256, 64
 
         addi    zeta_inp, zeta_inp, -64
-        INTT_REDUCE_4X 272, 64
+        intt_layer34 272, 64
 
 .balign 16
         /*
@@ -732,13 +732,13 @@ intt_ppc_asm_Loopf:
          */
         li      len_2, 64
 
-        INTT_REDUCE_L567 0, 16
+        intt_layer567 0, 16
         addi    zeta_inp, zeta_inp, 16
-        INTT_REDUCE_L567 128, 16
+        intt_layer567 128, 16
         addi    zeta_inp, zeta_inp, 16
-        INTT_REDUCE_L567 256, 16
+        intt_layer567 256, 16
         addi    zeta_inp, zeta_inp, 16
-        INTT_REDUCE_L567 384, 16
+        intt_layer567 384, 16
         addi    zeta_inp, zeta_inp, 16
 
 .balign 16
@@ -747,11 +747,11 @@ intt_ppc_asm_Loopf:
          */
         li      len_2, 128
 
-        INTT_REDUCE_L567 0, 16
-        INTT_REDUCE_L567 64, 16
+        intt_layer567 0, 16
+        intt_layer567 64, 16
         addi    zeta_inp, zeta_inp, 16
-        INTT_REDUCE_L567 256, 16
-        INTT_REDUCE_L567 320, 16
+        intt_layer567 256, 16
+        intt_layer567 320, 16
         addi    zeta_inp, zeta_inp, 16
 
 .balign 16
@@ -760,10 +760,10 @@ intt_ppc_asm_Loopf:
          */
         li      len_2, 256          /* len*2 */
 
-        INTT_REDUCE_L567 0, 16
-        INTT_REDUCE_L567 64, 16
-        INTT_REDUCE_L567 128, 16
-        INTT_REDUCE_L567 192, 16
+        intt_layer567 0, 16
+        intt_layer567 64, 16
+        intt_layer567 128, 16
+        intt_layer567 192, 16
 
         RESTORE_REGS
         blr
@@ -821,5 +821,5 @@ intt_ppc_asm_Loopf:
 #undef b4_offset
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
+#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED && __POWER8_VECTOR__ \
         */

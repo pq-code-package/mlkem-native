@@ -10,7 +10,7 @@
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__)
 /* simpasm: header-end */
 
 #include "consts.h"
@@ -261,9 +261,9 @@
  * t = (a - (int32_t)t*_MLKEM_Q) >> 16
  *
  * -----------------------------------
- * MREDUCE_4X(_vz0, _vz1, _vz2, _vz3)
+ * mont_reduce_4x(_vz0, _vz1, _vz2, _vz3)
  */
-.macro MREDUCE_4X _vz0, _vz1, _vz2, _vz3
+.macro mont_reduce_4x _vz0, _vz1, _vz2, _vz3
         /* fqmul = zeta * coefficient
            Modular multiplication bound by 2^16 * q in abs value */
         vmladduhm 15, vdata_b1, \_vz0, rinp
@@ -401,10 +401,10 @@
 /*
  * NTT layer 7, Len=2.
  */
-.macro NTT_REDUCE_L24
+.macro ntt_layer7
         Load_next_4zetas
         Load_L24Coeffs
-        MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3
+        mont_reduce_4x V_Z0, V_Z1, V_Z2, V_Z3
         PermWriteL24
         addi    dup_rinp, dup_rinp, 128
 .endm
@@ -412,10 +412,10 @@
 /*
  * NTT layer 6, Len=4.
  */
-.macro NTT_REDUCE_L44
+.macro ntt_layer6
         Load_next_4zetas
         Load_L44Coeffs
-        MREDUCE_4X V_Z0, V_Z1, V_Z2, V_Z3
+        mont_reduce_4x V_Z0, V_Z1, V_Z2, V_Z3
         PermWriteL44
         addi    dup_rinp, dup_rinp, 128
 .endm
@@ -423,9 +423,9 @@
 /*
  * NTT other layers, 1, 2, 3, 4, 5.
  */
-.macro NTT_MREDUCE_4X start, next, _vz0, _vz1, _vz2, _vz3
+.macro ntt_layer12345 start, next, _vz0, _vz1, _vz2, _vz3
         Load_4Coeffs \start, \next
-        MREDUCE_4x \_vz0, \_vz1, \_vz2, \_vz3
+        mont_reduce_4x \_vz0, \_vz1, \_vz2, \_vz3
         Load_4Rj
         Compute_4Coeffs
         Write_One
@@ -492,10 +492,10 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         lvx     V_ZETA, 0, zeta_inp
         addi    zeta_inp, zeta_inp, 16
 
-        NTT_MREDUCE_4X 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
-        NTT_MREDUCE_4X 64, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
-        NTT_MREDUCE_4X 128, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
-        NTT_MREDUCE_4X 192, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        ntt_layer12345 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        ntt_layer12345 64, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        ntt_layer12345 128, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        ntt_layer12345 192, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
 .balign 16
         /*
@@ -504,13 +504,13 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         li      len_2, 128
         lvx     V_ZETA, 0, zeta_inp
         addi    zeta_inp, zeta_inp, 16
-        NTT_MREDUCE_4X 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
-        NTT_MREDUCE_4X 64, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        ntt_layer12345 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        ntt_layer12345 64, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
         lvx     V_ZETA, 0, zeta_inp
         addi    zeta_inp, zeta_inp, 16
-        NTT_MREDUCE_4X 256, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
-        NTT_MREDUCE_4X 320, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        ntt_layer12345 256, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        ntt_layer12345 320, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
 .balign 16
         /*
@@ -519,19 +519,19 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         li      len_2, 64
         lvx     V_ZETA, 0, zeta_inp
         addi    zeta_inp, zeta_inp, 16
-        NTT_MREDUCE_4X 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        ntt_layer12345 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
         lvx     V_ZETA, 0, zeta_inp
         addi    zeta_inp, zeta_inp, 16
-        NTT_MREDUCE_4X 128, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        ntt_layer12345 128, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
         lvx     V_ZETA, 0, zeta_inp
         addi    zeta_inp, zeta_inp, 16
-        NTT_MREDUCE_4X 256, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        ntt_layer12345 256, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
         lvx     V_ZETA, 0, zeta_inp
         addi    zeta_inp, zeta_inp, 16
-        NTT_MREDUCE_4X 384, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        ntt_layer12345 384, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
 
 .balign 16
         /*
@@ -539,12 +539,12 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
          */
         li      len_2, 32
         Load_next_4zetas
-        NTT_MREDUCE_4X 0, 64, V_Z0, V_Z1, V_Z2, V_Z3
-        NTT_MREDUCE_4X 16, 64, V_Z0, V_Z1, V_Z2, V_Z3
+        ntt_layer12345 0, 64, V_Z0, V_Z1, V_Z2, V_Z3
+        ntt_layer12345 16, 64, V_Z0, V_Z1, V_Z2, V_Z3
 
         Load_next_4zetas
-        NTT_MREDUCE_4X 256, 64, V_Z0, V_Z1, V_Z2, V_Z3
-        NTT_MREDUCE_4X  272, 64, V_Z0, V_Z1, V_Z2, V_Z3
+        ntt_layer12345 256, 64, V_Z0, V_Z1, V_Z2, V_Z3
+        ntt_layer12345  272, 64, V_Z0, V_Z1, V_Z2, V_Z3
 
 .balign 16
         /*
@@ -552,16 +552,16 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
          */
         li      len_2, 16
         Load_next_4zetas
-        NTT_MREDUCE_4X 0, 32, V_Z0, V_Z1, V_Z2, V_Z3
+        ntt_layer12345 0, 32, V_Z0, V_Z1, V_Z2, V_Z3
 
         Load_next_4zetas
-        NTT_MREDUCE_4X 128, 32, V_Z0, V_Z1, V_Z2, V_Z3
+        ntt_layer12345 128, 32, V_Z0, V_Z1, V_Z2, V_Z3
 
         Load_next_4zetas
-        NTT_MREDUCE_4X 256, 32, V_Z0, V_Z1, V_Z2, V_Z3
+        ntt_layer12345 256, 32, V_Z0, V_Z1, V_Z2, V_Z3
 
         Load_next_4zetas
-        NTT_MREDUCE_4X 384, 32, V_Z0, V_Z1, V_Z2, V_Z3
+        ntt_layer12345 384, 32, V_Z0, V_Z1, V_Z2, V_Z3
 
         /*
          * Layer 6. len = 4,
@@ -582,10 +582,10 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         li      18, 112
 
 .balign 16
-        NTT_REDUCE_L44
-        NTT_REDUCE_L44
-        NTT_REDUCE_L44
-        NTT_REDUCE_L44
+        ntt_layer6
+        ntt_layer6
+        ntt_layer6
+        ntt_layer6
 
         /*
          * Layer 7. len = 2
@@ -598,10 +598,10 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         li      len_2, 4
 
 .balign 16
-        NTT_REDUCE_L24
-        NTT_REDUCE_L24
-        NTT_REDUCE_L24
-        NTT_REDUCE_L24
+        ntt_layer7
+        ntt_layer7
+        ntt_layer7
+        ntt_layer7
 
         RESTORE_REGS
         blr
@@ -646,5 +646,5 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
 #undef b4_offset
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
+#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED && __POWER8_VECTOR__ \
         */

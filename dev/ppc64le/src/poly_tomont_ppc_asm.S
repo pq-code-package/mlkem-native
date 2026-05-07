@@ -18,7 +18,7 @@
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__)
 /* simpasm: header-end */
 
 #include "consts.h"
@@ -35,10 +35,10 @@
  * t = (a - (int32_t)t*_MLKEM_Q) >> 16
  *
  *-----------------------------------
- * MREDUCE_4X(_v0, _v1, _v2, _v3)
+ * mont_reduce_4x(_v0, _v1, _v2, _v3)
  */
 
-.macro MREDUCE_4X _v0, _v1, _v2, _v3
+.macro mont_reduce_4x _v0, _v1, _v2, _v3
         lxvd2x  32+13, 0, 3
         addi    3, 3, 16
         lxvd2x  32+18, 0, 3
@@ -133,20 +133,20 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
         li      10, -32
         li      11, -16
 
-        MREDUCE_4X 27, 28, 29, 30
-        MREDUCE_4X 13, 18, 23, 7
+        mont_reduce_4x 27, 28, 29, 30
+        mont_reduce_4x 13, 18, 23, 7
         Write_8X
 
-        MREDUCE_4X 27, 28, 29, 30
-        MREDUCE_4X 13, 18, 23, 7
+        mont_reduce_4x 27, 28, 29, 30
+        mont_reduce_4x 13, 18, 23, 7
         Write_8X
 
-        MREDUCE_4X 27, 28, 29, 30
-        MREDUCE_4X 13, 18, 23, 7
+        mont_reduce_4x 27, 28, 29, 30
+        mont_reduce_4x 13, 18, 23, 7
         Write_8X
 
-        MREDUCE_4X 27, 28, 29, 30
-        MREDUCE_4X 13, 18, 23, 7
+        mont_reduce_4x 27, 28, 29, 30
+        mont_reduce_4x 13, 18, 23, 7
         Write_8X
 
         li      6, 128
@@ -182,5 +182,5 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
 #undef V_NMKQ
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
+#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED && __POWER8_VECTOR__ \
         */

@@ -92,7 +92,7 @@ implementations:
 - name: ppc64le
   version: FIPS203
   folder_name: .
-  compile_opts: -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE="....//integration/liboqs/config_ppc64le.h"
+  compile_opts: -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE="../../integration/liboqs/config_ppc64le.h"
   signature_keypair: PQCP_MLKEM_NATIVE_MLKEM768_PPC64LE_keypair
   signature_keypair_derand: PQCP_MLKEM_NATIVE_MLKEM768_PPC64LE_keypair_derand
   signature_enc: PQCP_MLKEM_NATIVE_MLKEM768_PPC64LE_enc
