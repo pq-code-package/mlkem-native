@@ -120,7 +120,7 @@
           devShells.ci = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains_native; };
           };
-          devShells.bench = util.mkShell {
+          devShells.bench = util.mkShellWithCC pkgs.gcc15 {
             packages = builtins.attrValues { inherit (config.packages) toolchains_native; };
           };
           devShells.cbmc = util.mkShell {
