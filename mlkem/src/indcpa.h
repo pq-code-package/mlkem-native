@@ -58,8 +58,9 @@ __contract__(
  * @param[out] sk      Output private key
  *                     (length MLKEM_INDCPA_SECRETKEYBYTES bytes).
  * @param[in]  coins   Input randomness (length MLKEM_SYMBYTES bytes).
- * @param      context Application context (build-configurable; see
- *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context Application context. Only present when
+ *                     MLK_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_FAIL          MLK_CONFIG_KEYGEN_PCT enabled and PCT failed.
@@ -97,8 +98,9 @@ __contract__(
  *                     (length MLKEM_INDCPA_PUBLICKEYBYTES bytes).
  * @param[in]  coins   Input random coins used as seed (length MLKEM_SYMBYTES
  *                     bytes) to deterministically generate all randomness.
- * @param      context Application context (build-configurable; see
- *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context Application context. Only present when
+ *                     MLK_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_FAIL          Operation failed.
@@ -134,8 +136,9 @@ __contract__(
  * @param[in]  c       Input ciphertext (length MLKEM_INDCPA_BYTES bytes).
  * @param[in]  sk      Input secret key
  *                     (length MLKEM_INDCPA_SECRETKEYBYTES bytes).
- * @param      context Application context (build-configurable; see
- *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context Application context. Only present when
+ *                     MLK_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_FAIL          Operation failed.
