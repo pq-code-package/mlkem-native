@@ -30,6 +30,9 @@ import threading
 from nucleo_host.argv_blob import pack_cmdline
 from nucleo_host.flexmem import flexmem_config_build_instructions
 from nucleo_host.gdb_script import build_run_script
+from nucleo_host.openocd_tools import find_openocd
+from nucleo_host.openocd_tools import runtime_gdbserver_cmd
+from nucleo_host.openocd_tools import speed_khz_from_env
 from nucleo_host.results import LAYOUT_FAIL_SENTINEL
 from nucleo_host.results import fault_info_from_gdb
 from nucleo_host.results import gdb_load_failed_before_target_output
@@ -211,6 +214,7 @@ def _run_once():
     nm = os.environ.get("NM", "arm-none-eabi-nm")
     readelf = os.environ.get("READELF", default_readelf())
     port = int(os.environ.get("GDB_PORT", "3333"))
+    backend = os.environ.get("NUCLEO_DEBUG_BACKEND", "stlink").strip().lower()
     # STM32Cube Command Line Tools integration
     # Users must install STM32CubeCLT and provide a gdbserver command.
     # Preferred: set ST_GDBSERVER_CMD as a template using Python format keys:
@@ -320,98 +324,119 @@ def _run_once():
             f.write(blob)
         # GDB writes target stdout here after the run; Python logs it below.
         stdout_capture_bin = os.path.join(td, "stdout-capture.bin")
-        # Allow deriving CLT root from CubeProgrammer path if not provided
-        if not st_clt_root and st_cubeprog:
-            st_clt_root = derive_clt_root(st_cubeprog)
-        stlink_bin, candidate = find_stlink_gdbserver(st_clt_root)
-
-        # Auto-detect a default template if not provided
-        if not st_gdbserver_cmd_tpl and stlink_bin:
-            stlink_parts = [
-                shlex.quote(stlink_bin),
-                "-p {port}",
-                "-l 1",
-                "-d",
-                "-s",
-                "--frequency {speed}",
-                "{serial_flag}",
-                "{apid_flag}",
-                "{cubeprog_flag}",
-                "--semihost-console-port {semi_port}",
-                "--semihosting {semi_level}",
-                "-g",
-                "--halt",
-                "--pend-halt-timeout {pend}",
-            ]
-            st_gdbserver_cmd_tpl = " ".join(stlink_parts)
-
-        if st_gdbserver_cmd_tpl:
-            # Determine best '-cp' path for STM32CubeProgrammer CLI
-            cp_path = cubeprogrammer_cp_path(st_cubeprog, st_clt_root, stlink_bin)
-
-            # Provide a flexible set of placeholders for various CLT tools.
-            # - {serial}       -> raw serial value (e.g. 303030303030)
-            # - {serial_flag}  -> '-i <serial>' (ST-LINK_gdbserver)
-            # - {serial_prog}  -> 'sn=<serial>' (STM32_Programmer_CLI)
-            # - {serial_sn}    -> ',sn=<serial>' (combined CLI arg)
-            # - {speed}        -> kHz value (e.g. 500)
-            # - {port}         -> GDB server port (e.g. 3333)
-            # - {transport}    -> SWD/JTAG (usually SWD)
-            # - {device}       -> device name (e.g. STM32N657X0HxQ)
-            # - {connect}      -> connection mode hint (e.g. under-reset)
-            # - {cubeprog_flag}-> '-cp <path>' if resolved
-            fmt = {
-                "port": port,
-                "speed": st_speed,
-                "serial": st_serial,
-                "serial_flag": (f"-i {st_serial}" if st_serial else ""),
-                "serial_prog": (f"sn={st_serial}" if st_serial else ""),
-                "serial_sn": (f",sn={st_serial}" if st_serial else ""),
-                "transport": st_transport,
-                "device": st_device,
-                "connect": st_connect,
-                "cubeprog": cp_path or st_cubeprog,
-                "cubeprog_flag": (
-                    f"-cp {shlex.quote(cp_path)}"
-                    if cp_path
-                    else (f"-cp {shlex.quote(st_cubeprog)}" if st_cubeprog else "")
-                ),
-                "pend": st_pend,
-                "apid_flag": (f"-m {st_apid}" if st_apid else "-m 1"),
-                "semi_port": st_semihost_port,
-                "semi_level": st_semihost_level,
-            }
-            try:
-                formatted = st_gdbserver_cmd_tpl.format(**fmt)
-            except KeyError as e:
-                err(f"Missing format key in ST_GDBSERVER_CMD: {e}")
+        semihost_listener_enabled = True
+        server_label = "ST-LINK GDB server"
+        if backend == "openocd":
+            openocd = find_openocd(os.environ.get("OPENOCD", ""))
+            if openocd is None:
+                err("OpenOCD not found; set OPENOCD or ensure openocd is on PATH")
                 return 2
-            gdbserver_cmd = shlex.split(formatted)
-        else:
-            msg = (
-                "STM32Cube Command Line Tools required.\n"
-                "- Install STM32CubeCLT (Linux/macOS).\n"
-                "  Download: "
-                "https://www.st.com/en/development-tools/stm32cubeclt.html\n"
-                "- Set ST_GDBSERVER_CMD to a working gdbserver template, "
-                "or ensure ST-LINK_gdbserver is on PATH.\n"
-                "  Examples:\n"
-                "    ST-LINK_gdbserver: 'ST-LINK_gdbserver -p {port} "
-                "-d --frequency {speed} ...'\n"
-                "    STM32_Programmer_CLI: 'STM32_Programmer_CLI "
-                "-c port={transport},{serial_prog} ...'\n"
-                "  Tip: If ST-LINK_gdbserver errors about "
-                "STM32CubeProgrammer, "
-                "set ST_CUBE_PROG_PATH to its installation path,\n"
-                "       or export ST_CUBE_CLT_ROOT to the CubeCLT root so the "
-                "wrapper can auto-locate ST-LINK_gdbserver.\n"
+            gdbserver_cmd = runtime_gdbserver_cmd(
+                openocd=openocd,
+                port=port,
+                speed=speed_khz_from_env(),
+                serial=st_serial,
+                transport=st_transport.lower(),
             )
-            # Append small diagnostics if we attempted a candidate path
-            if candidate:
-                msg += f"  Searched for ST-LINK_gdbserver at: {candidate}\n"
-            if stlink_bin is None:
-                msg += "  Note: ST-LINK_gdbserver not found on PATH.\n"
-            err(msg)
+            semihost_listener_enabled = False
+            server_label = "OpenOCD"
+        elif backend in ("stlink", "stm32cube", "cube"):
+            # Allow deriving CLT root from CubeProgrammer path if not provided
+            if not st_clt_root and st_cubeprog:
+                st_clt_root = derive_clt_root(st_cubeprog)
+            stlink_bin, candidate = find_stlink_gdbserver(st_clt_root)
+
+            # Auto-detect a default template if not provided
+            if not st_gdbserver_cmd_tpl and stlink_bin:
+                stlink_parts = [
+                    shlex.quote(stlink_bin),
+                    "-p {port}",
+                    "-l 1",
+                    "-d",
+                    "-s",
+                    "--frequency {speed}",
+                    "{serial_flag}",
+                    "{apid_flag}",
+                    "{cubeprog_flag}",
+                    "--semihost-console-port {semi_port}",
+                    "--semihosting {semi_level}",
+                    "-g",
+                    "--halt",
+                    "--pend-halt-timeout {pend}",
+                ]
+                st_gdbserver_cmd_tpl = " ".join(stlink_parts)
+
+            if st_gdbserver_cmd_tpl:
+                # Determine best '-cp' path for STM32CubeProgrammer CLI
+                cp_path = cubeprogrammer_cp_path(st_cubeprog, st_clt_root, stlink_bin)
+
+                # Provide a flexible set of placeholders for various CLT tools.
+                # - {serial}       -> raw serial value (e.g. 303030303030)
+                # - {serial_flag}  -> '-i <serial>' (ST-LINK_gdbserver)
+                # - {serial_prog}  -> 'sn=<serial>' (STM32_Programmer_CLI)
+                # - {serial_sn}    -> ',sn=<serial>' (combined CLI arg)
+                # - {speed}        -> kHz value (e.g. 500)
+                # - {port}         -> GDB server port (e.g. 3333)
+                # - {transport}    -> SWD/JTAG (usually SWD)
+                # - {device}       -> device name (e.g. STM32N657X0HxQ)
+                # - {connect}      -> connection mode hint (e.g. under-reset)
+                # - {cubeprog_flag}-> '-cp <path>' if resolved
+                fmt = {
+                    "port": port,
+                    "speed": st_speed,
+                    "serial": st_serial,
+                    "serial_flag": (f"-i {st_serial}" if st_serial else ""),
+                    "serial_prog": (f"sn={st_serial}" if st_serial else ""),
+                    "serial_sn": (f",sn={st_serial}" if st_serial else ""),
+                    "transport": st_transport,
+                    "device": st_device,
+                    "connect": st_connect,
+                    "cubeprog": cp_path or st_cubeprog,
+                    "cubeprog_flag": (
+                        f"-cp {shlex.quote(cp_path)}"
+                        if cp_path
+                        else (f"-cp {shlex.quote(st_cubeprog)}" if st_cubeprog else "")
+                    ),
+                    "pend": st_pend,
+                    "apid_flag": (f"-m {st_apid}" if st_apid else "-m 1"),
+                    "semi_port": st_semihost_port,
+                    "semi_level": st_semihost_level,
+                }
+                try:
+                    formatted = st_gdbserver_cmd_tpl.format(**fmt)
+                except KeyError as e:
+                    err(f"Missing format key in ST_GDBSERVER_CMD: {e}")
+                    return 2
+                gdbserver_cmd = shlex.split(formatted)
+            else:
+                msg = (
+                    "STM32Cube Command Line Tools required.\n"
+                    "- Install STM32CubeCLT (Linux/macOS).\n"
+                    "  Download: "
+                    "https://www.st.com/en/development-tools/stm32cubeclt.html\n"
+                    "- Set ST_GDBSERVER_CMD to a working gdbserver template, "
+                    "or ensure ST-LINK_gdbserver is on PATH.\n"
+                    "  Examples:\n"
+                    "    ST-LINK_gdbserver: 'ST-LINK_gdbserver -p {port} "
+                    "-d --frequency {speed} ...'\n"
+                    "    STM32_Programmer_CLI: 'STM32_Programmer_CLI "
+                    "-c port={transport},{serial_prog} ...'\n"
+                    "  Tip: If ST-LINK_gdbserver errors about "
+                    "STM32CubeProgrammer, "
+                    "set ST_CUBE_PROG_PATH to its installation path,\n"
+                    "       or export ST_CUBE_CLT_ROOT to the CubeCLT root so the "
+                    "wrapper can auto-locate ST-LINK_gdbserver.\n"
+                    "  Or set NUCLEO_DEBUG_BACKEND=openocd to use OpenOCD.\n"
+                )
+                # Append small diagnostics if we attempted a candidate path
+                if candidate:
+                    msg += f"  Searched for ST-LINK_gdbserver at: {candidate}\n"
+                if stlink_bin is None:
+                    msg += "  Note: ST-LINK_gdbserver not found on PATH.\n"
+                err(msg)
+                return 2
+        else:
+            err(f"Unsupported NUCLEO_DEBUG_BACKEND: {backend}")
             return 2
 
         info(
@@ -419,7 +444,7 @@ def _run_once():
             "flexmem_configure.py; no runtime TCM probing"
         )
 
-        info(f"[exec_wrapper] starting ST gdbserver on port {port}...")
+        info(f"[exec_wrapper] starting {server_label} on port {port}...")
         info(f"[exec_wrapper] {' '.join(gdbserver_cmd)}")
         stp = popen(
             gdbserver_cmd,
@@ -431,17 +456,6 @@ def _run_once():
         )
 
         try:
-            # Wait for semihost console to become available and connect before
-            # attaching GDB.
-            # First, ensure the process is alive
-            time.sleep(0.2)
-            # Then wait for the semihost port to accept connections.
-            if not _wait_for_port("127.0.0.1", st_semihost_port, timeout_s=10.0):
-                info(
-                    "[exec_wrapper] semihost port not ready within timeout; "
-                    "continuing anyway"
-                )
-
             semihost_sock = None
             semihost_stop = threading.Event()
             semihost_thr = None
@@ -492,28 +506,41 @@ def _run_once():
                     except Exception:
                         pass
 
-            # Attempt to connect the listener (non-blocking retries)
-            try:
-                semihost_sock = socket.create_connection(
-                    ("127.0.0.1", st_semihost_port), timeout=1.0
-                )
-                semihost_sock.settimeout(0.5)
-                semihost_thr = threading.Thread(
-                    target=_semihost_reader, args=(semihost_sock,), daemon=True
-                )
-                semihost_thr.start()
-                info(
-                    "[exec_wrapper] semihost listener connected on port "
-                    f"{st_semihost_port}"
-                )
-            except OSError:
-                info(
-                    "[exec_wrapper] semihost listener not connected "
-                    f"(port {st_semihost_port}); proceeding"
-                )
+            if semihost_listener_enabled:
+                # Wait for semihost console to become available and connect
+                # before attaching GDB. OpenOCD runs use the RAM stdout capture
+                # path and skip this ST-LINK-specific listener.
+                time.sleep(0.2)
+                if not _wait_for_port("127.0.0.1", st_semihost_port, timeout_s=10.0):
+                    info(
+                        "[exec_wrapper] semihost port not ready within timeout; "
+                        "continuing anyway"
+                    )
+
+                try:
+                    semihost_sock = socket.create_connection(
+                        ("127.0.0.1", st_semihost_port), timeout=1.0
+                    )
+                    semihost_sock.settimeout(0.5)
+                    semihost_thr = threading.Thread(
+                        target=_semihost_reader, args=(semihost_sock,), daemon=True
+                    )
+                    semihost_thr.start()
+                    info(
+                        "[exec_wrapper] semihost listener connected on port "
+                        f"{st_semihost_port}"
+                    )
+                except OSError:
+                    info(
+                        "[exec_wrapper] semihost listener not connected "
+                        f"(port {st_semihost_port}); proceeding"
+                    )
+            else:
+                time.sleep(0.8)
 
             # Give the server a brief moment, then check for early exit
-            time.sleep(0.8)
+            if semihost_listener_enabled:
+                time.sleep(0.8)
             if stp.poll() is not None:
                 # Server exited early – surface a helpful message
                 out_rem = stp.stdout.read() if stp.stdout else ""

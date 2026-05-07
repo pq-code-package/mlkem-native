@@ -102,6 +102,7 @@
           # arm-none-eabi-gcc + platform files from pqmx
           packages.m55-an547 = util.m55-an547;
           packages.avr-toolchain = util.avr-toolchain;
+          packages.st-openocd = util.st-openocd;
           devShells.arm-embedded = util.mkShell {
             packages = builtins.attrValues
               {
@@ -112,7 +113,7 @@
           packages.nucleo-n657x0-q = util.nucleo-n657x0-q;
           devShells.nucleo-n657x0-q = util.mkShell {
             packages = builtins.attrValues ({
-              inherit (config.packages) nucleo-n657x0-q;
+              inherit (config.packages) nucleo-n657x0-q st-openocd;
               inherit (pkgs) gcc-arm-embedded coreutils git libffi pkg-config;
             });
           };

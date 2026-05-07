@@ -17,6 +17,7 @@ import re
 import logging
 import sys
 import time
+import tempfile
 
 from nucleo_host.st_tools import connect_args as st_connect_args
 from nucleo_host.st_tools import (
@@ -24,6 +25,10 @@ from nucleo_host.st_tools import (
 )
 from nucleo_host.st_tools import run_quiet
 from nucleo_host.flexmem import flexmem_config_build_instructions
+from nucleo_host.openocd_tools import find_openocd
+from nucleo_host.openocd_tools import flexmem_script_lines
+from nucleo_host.openocd_tools import openocd_base_args
+from nucleo_host.openocd_tools import speed_khz_from_env
 from nucleo_host.symbols import resolve_symbol_with_nm
 
 DONE = "FLEXMEM configuration complete; reset target and load test binary."
@@ -132,6 +137,59 @@ def wait_for_flexmem(cli, timeout_s):
     return False
 
 
+def selected_backend():
+    """Return the configured debug backend name."""
+    return os.environ.get("NUCLEO_DEBUG_BACKEND", "stlink").strip().lower()
+
+
+def openocd_cli():
+    """Return the OpenOCD executable path, or report a helpful error."""
+    openocd = find_openocd(os.environ.get("OPENOCD", ""))
+    if openocd is None:
+        err("OpenOCD not found; set OPENOCD or ensure openocd is on PATH")
+    return openocd
+
+
+def run_openocd_config(elf, main_thumb, estack_addr, timeout_s):
+    """Download and run the config ELF using OpenOCD."""
+    openocd = openocd_cli()
+    if openocd is None:
+        return 2
+
+    script_lines = flexmem_script_lines(
+        elf=elf,
+        main_thumb=main_thumb,
+        estack_addr=estack_addr,
+        timeout_ms=int(timeout_s * 1000),
+        flexmem_addr=CM55TCMCR_ADDR,
+        expected_mask=CM55TCMCR_EXPECTED_MASK,
+        expected_value=CM55TCMCR_EXPECTED_VALUE,
+    )
+    with tempfile.NamedTemporaryFile("w", delete=False, suffix=".cfg") as script:
+        script.write("\n".join(script_lines))
+        script.write("\n")
+        script_path = script.name
+
+    cmd = openocd_base_args(
+        openocd=openocd,
+        speed=speed_khz_from_env(),
+        serial=os.environ.get("STLINK_SERIAL", ""),
+        transport=os.environ.get("STLINK_TRANSPORT", "swd"),
+    ) + ["-f", script_path]
+    try:
+        cp = run_quiet(cmd)
+    finally:
+        try:
+            os.unlink(script_path)
+        except OSError:
+            pass
+    if os.environ.get("FLEXMEM_VERBOSE") or cp.returncode != 0:
+        log_output(cp.stdout, logging.DEBUG if cp.returncode == 0 else logging.ERROR)
+    if cp.returncode != 0:
+        err("OpenOCD FLEXMEM config RAM download/start failed")
+    return cp.returncode
+
+
 def main():
     """Download and run the config ELF, then verify the latched layout."""
     configure_logging()
@@ -146,10 +204,6 @@ def main():
         err(flexmem_config_build_instructions(elf))
         return 2
 
-    cli = cubeprogrammer_cli()
-    if cli is None:
-        return 2
-
     main_addr = resolve_symbol(elf, "main")
     estack_addr = resolve_symbol(elf, "_estack")
     if main_addr is None or estack_addr is None:
@@ -158,6 +212,18 @@ def main():
     main_thumb = hex(int(main_addr, 16) | 1)
 
     timeout_s = float(os.environ.get("FLEXMEM_CONFIG_TIMEOUT", "30"))
+
+    backend = selected_backend()
+    if backend == "openocd":
+        return run_openocd_config(elf, main_thumb, estack_addr, timeout_s)
+    if backend not in ("stlink", "stm32cube", "cube"):
+        err(f"Unsupported NUCLEO_DEBUG_BACKEND: {backend}")
+        return 2
+
+    cli = cubeprogrammer_cli()
+    if cli is None:
+        return 2
+
     reset_target(cli)
 
     # Load the RAM-only config image and seed MSP/PC explicitly because no
