@@ -31,8 +31,7 @@ def build_run_script(
         "set pagination off",
         "set confirm off",
         f"target remote localhost:{port}",
-        # Semihosting is configured on the ST-LINK GDB server command line; the
-        # GDB script stays focused on target state and RAM transfers.
+        # Keep the GDB script focused on target state and RAM transfers.
         "load",
         f"tbreak {wrap_main_break}",
         f"jump {reset_handler_jump}",

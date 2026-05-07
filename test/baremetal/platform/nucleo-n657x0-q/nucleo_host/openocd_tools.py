@@ -6,6 +6,7 @@
 
 import os
 import shutil
+import subprocess
 
 
 DEFAULT_INTERFACE = "interface/stlink.cfg"
@@ -27,8 +28,25 @@ def find_openocd(openocd=""):
 
 
 def speed_khz_from_env(default="200"):
-    """Return adapter speed in kHz using the platform's existing variable."""
-    return os.environ.get("OPENOCD_SPEED", os.environ.get("STLINK_SPEED", default))
+    """Return adapter speed in kHz."""
+    return os.environ.get("OPENOCD_SPEED", default)
+
+
+def serial_from_env(default=""):
+    """Return the optional OpenOCD adapter serial selector."""
+    return os.environ.get("OPENOCD_SERIAL", default)
+
+
+def transport_from_env(default="swd"):
+    """Return the OpenOCD transport name."""
+    return os.environ.get("OPENOCD_TRANSPORT", default).strip().lower()
+
+
+def run_quiet(cmd):
+    """Run a command with stdout and stderr merged for delayed diagnostics."""
+    return subprocess.run(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+    )
 
 
 def openocd_base_args(
@@ -40,7 +58,7 @@ def openocd_base_args(
     serial="",
     transport="swd",
 ):
-    """Return common OpenOCD arguments for the NUCLEO ST-LINK connection."""
+    """Return common OpenOCD arguments for the NUCLEO debug connection."""
     args = [
         openocd,
         "-f",
@@ -114,7 +132,7 @@ def flexmem_script_lines(
         f"    if {{($value & 0x{expected_mask:x}) == 0x{expected_value:x}}} {{ return }}",
         "    sleep 200",
         "  }",
-        f"  error \"FLEXMEM configuration register did not reach expected 0x{expected_value:x} value\"",
+        f'  error "FLEXMEM configuration register did not reach expected 0x{expected_value:x} value"',
         "}",
         "wait_flexmem_configured",
         "reset run",

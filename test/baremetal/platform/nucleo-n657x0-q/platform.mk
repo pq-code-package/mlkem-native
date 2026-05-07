@@ -34,6 +34,7 @@ CFLAGS += \
 	--sysroot=$(SYSROOT) \
 	-DDEVICE=nucleo-n657x0-q \
 	-DSTM32N657xx \
+	-DARMCM55 \
 	-DNTESTS_FUNC=1 \
 	-I$(NUCLEO_N657X0_Q_PATH) \
 	-I$(NUCLEO_N657X0_Q_PATH)/Inc \

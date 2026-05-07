@@ -237,11 +237,11 @@ stdenvNoCC.mkDerivation {
 
   setupHook = writeText "setup-hook.sh" ''
     export NUCLEO_N657X0_Q_PATH="$1/platform/nucleo-n657x0-q/src/platform/"
-    # Platform sources only; runtime debug server provided by STM32CubeCLT on host.
+    # Platform sources only; the devshell provides the OpenOCD runtime backend.
   '';
 
   meta = {
-    description = "Platform files for STM32 NUCLEO-N657X0-Q (use STM32Cube Command Line Tools gdbserver)";
+    description = "Platform files for STM32 NUCLEO-N657X0-Q RAM-only OpenOCD tests";
     homepage = "https://github.com/STMicroelectronics/STM32CubeN6";
   };
 }

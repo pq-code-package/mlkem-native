@@ -221,17 +221,22 @@ class NucleoHostTest(unittest.TestCase):
         completed = mock.Mock(returncode=0, stdout="")
         messages = []
         env = {
-            "NUCLEO_DEBUG_BACKEND": "openocd",
             "OPENOCD": "/usr/bin/openocd",
-            "STLINK_SPEED": "123",
-            "STLINK_SERIAL": "SERIAL",
+            "OPENOCD_SPEED": "123",
+            "OPENOCD_SERIAL": "SERIAL",
         }
 
         with (
             mock.patch.dict(os.environ, env),
-            mock.patch.object(flexmem_configure, "find_openocd", return_value="/usr/bin/openocd"),
-            mock.patch.object(flexmem_configure, "run_quiet", return_value=completed) as run,
-            mock.patch.object(flexmem_configure, "log_output", side_effect=messages.append),
+            mock.patch.object(
+                flexmem_configure, "find_openocd", return_value="/usr/bin/openocd"
+            ),
+            mock.patch.object(
+                flexmem_configure, "run_quiet", return_value=completed
+            ) as run,
+            mock.patch.object(
+                flexmem_configure, "log_output", side_effect=messages.append
+            ),
         ):
             rc = flexmem_configure.run_openocd_config(
                 "/tmp/flexmem_config.elf", "0x34064001", "0x30020000", 30
@@ -280,11 +285,9 @@ class NucleoHostTest(unittest.TestCase):
             return FakeProcess(returncode=0)
 
         env = {
-            "NUCLEO_DEBUG_BACKEND": "openocd",
             "OPENOCD": "/usr/bin/openocd",
             "GDB_PORT": "4567",
             "GDB_RUN_TIMEOUT": "0",
-            "STLINK_SEMIHOST_PORT": "4568",
         }
         symbol_values = {
             "mlkem_cmdline_block": None,
@@ -298,12 +301,19 @@ class NucleoHostTest(unittest.TestCase):
 
         with (
             mock.patch.dict(os.environ, env),
-            mock.patch.object(exec_wrapper.sys, "argv", ["exec_wrapper.py", "/tmp/test.elf"]),
+            mock.patch.object(
+                exec_wrapper.sys, "argv", ["exec_wrapper.py", "/tmp/test.elf"]
+            ),
             mock.patch.object(exec_wrapper.os.path, "exists", return_value=True),
-            mock.patch.object(exec_wrapper, "find_openocd", return_value="/usr/bin/openocd"),
-            mock.patch.object(exec_wrapper, "resolve_symbol", side_effect=lambda _elf, sym, **_kw: symbol_values[sym]),
+            mock.patch.object(
+                exec_wrapper, "find_openocd", return_value="/usr/bin/openocd"
+            ),
+            mock.patch.object(
+                exec_wrapper,
+                "resolve_symbol",
+                side_effect=lambda _elf, sym, **_kw: symbol_values[sym],
+            ),
             mock.patch.object(exec_wrapper, "popen", side_effect=fake_popen),
-            mock.patch.object(exec_wrapper, "_wait_for_port") as wait_for_port,
             mock.patch.object(exec_wrapper.time, "sleep"),
             mock.patch.object(exec_wrapper.select, "select", return_value=([], [], [])),
         ):
@@ -313,7 +323,6 @@ class NucleoHostTest(unittest.TestCase):
         self.assertIn("gdb_port 4567", popen_calls[0])
         self.assertNotIn("connect_assert_srst", "\n".join(popen_calls[0]))
         self.assertEqual(popen_calls[1][0], "arm-none-eabi-gdb")
-        wait_for_port.assert_not_called()
 
     def test_main_recovers_once_after_load_failure(self):
         """The wrapper invokes FLEXMEM configuration once before retrying."""
@@ -353,7 +362,7 @@ class NucleoHostTest(unittest.TestCase):
         env = {"FLEXMEM_CONFIG_ELF": "/tmp/flexmem_config.elf"}
 
         with (
-            mock.patch.dict(os.environ, env),
+            mock.patch.dict(os.environ, env, clear=True),
             mock.patch.object(exec_wrapper.os.path, "exists", return_value=True),
             mock.patch.object(exec_wrapper, "run", return_value=completed) as run,
         ):
@@ -363,7 +372,10 @@ class NucleoHostTest(unittest.TestCase):
         self.assertEqual(cmd[0], exec_wrapper.sys.executable)
         self.assertTrue(cmd[1].endswith("flexmem_configure.py"))
         self.assertEqual(cmd[2], "/tmp/flexmem_config.elf")
-        self.assertEqual(run.call_args.kwargs["env"]["STLINK_CONNECT_MODE"], "UR")
+        self.assertEqual(
+            run.call_args.kwargs["env"],
+            {"FLEXMEM_CONFIG_ELF": "/tmp/flexmem_config.elf"},
+        )
 
     def test_main_reports_diagnostics_when_load_recovery_fails(self):
         """Load-failure diagnostics survive a failed FLEXMEM recovery."""

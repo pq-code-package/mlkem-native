@@ -5,43 +5,38 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 """
-Run one RAM-resident NUCLEO-N657X0-Q test ELF through ST-LINK GDB server.
+Run one RAM-resident NUCLEO-N657X0-Q test ELF through OpenOCD.
 
 The wrapper expects ``flexmem_configure.py`` to have expanded ITCM/DTCM before
 normal runs. If the initial GDB ``load`` reports that loading failed before
 target output starts, the wrapper can re-run FLEXMEM configuration and retry
 the same ELF. Successful runs load the ELF into RAM, let C startup clear
-memory, restore a packed argv blob at ``__wrap_main``, stream or dump target
-stdout, and map target sentinels to the process exit status expected by the
-baremetal test harness.
+memory, restore a packed argv blob at ``__wrap_main``, dump target stdout from
+the RAM capture buffer, and map target sentinels to the process exit status
+expected by the baremetal test harness.
 """
 
 import logging
 import os
-import shlex
 import subprocess
 import sys
 import tempfile
 import time
 import select
-import socket
-import threading
 
 from nucleo_host.argv_blob import pack_cmdline
 from nucleo_host.flexmem import flexmem_config_build_instructions
 from nucleo_host.gdb_script import build_run_script
 from nucleo_host.openocd_tools import find_openocd
 from nucleo_host.openocd_tools import runtime_gdbserver_cmd
+from nucleo_host.openocd_tools import serial_from_env
 from nucleo_host.openocd_tools import speed_khz_from_env
+from nucleo_host.openocd_tools import transport_from_env
 from nucleo_host.results import LAYOUT_FAIL_SENTINEL
 from nucleo_host.results import fault_info_from_gdb
 from nucleo_host.results import gdb_load_failed_before_target_output
 from nucleo_host.results import gdb_observed_hardfault
-from nucleo_host.results import parse_exit_sentinel
 from nucleo_host.results import split_stdout_capture
-from nucleo_host.st_tools import cubeprogrammer_cp_path
-from nucleo_host.st_tools import derive_clt_root
-from nucleo_host.st_tools import find_stlink_gdbserver
 from nucleo_host.symbols import default_readelf
 from nucleo_host.symbols import resolve_symbol
 
@@ -93,28 +88,6 @@ def popen(cmd, **kwargs):
     return subprocess.Popen(cmd, **kwargs)
 
 
-def _pick_free_port() -> int:
-    """Ask the OS for an available localhost TCP port."""
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        s.bind(("127.0.0.1", 0))
-        return s.getsockname()[1]
-    finally:
-        s.close()
-
-
-def _wait_for_port(host: str, port: int, timeout_s: float) -> bool:
-    """Wait until a local TCP port accepts connections or timeout expires."""
-    deadline = time.time() + timeout_s
-    while time.time() < deadline:
-        try:
-            with socket.create_connection((host, port), timeout=0.3):
-                return True
-        except OSError:
-            time.sleep(0.1)
-    return False
-
-
 def _default_flexmem_config_elf() -> str:
     """Return the default build path for the FLEXMEM configuration ELF."""
     platform_dir = os.path.dirname(os.path.abspath(__file__))
@@ -140,7 +113,6 @@ def _recover_flexmem(reason: str, failure_message: str) -> bool:
 
     info(f"[exec_wrapper] recovering from {reason}: re-running FLEXMEM config")
     recovery_env = os.environ.copy()
-    recovery_env.setdefault("STLINK_CONNECT_MODE", "UR")
     cp = run(
         [sys.executable, configure_script, config_elf],
         stdout=subprocess.PIPE,
@@ -214,37 +186,7 @@ def _run_once():
     nm = os.environ.get("NM", "arm-none-eabi-nm")
     readelf = os.environ.get("READELF", default_readelf())
     port = int(os.environ.get("GDB_PORT", "3333"))
-    backend = os.environ.get("NUCLEO_DEBUG_BACKEND", "stlink").strip().lower()
-    # STM32Cube Command Line Tools integration
-    # Users must install STM32CubeCLT and provide a gdbserver command.
-    # Preferred: set ST_GDBSERVER_CMD as a template using Python format keys:
-    #   {port} {speed} {serial} {transport} {device} {connect}
-    # Example (ST-LINK_gdbserver):
-    #   export ST_GDBSERVER_CMD='ST-LINK_gdbserver -p {port} ...'
-    # Example (STM32_Programmer_CLI):
-    #   export ST_GDBSERVER_CMD='STM32_Programmer_CLI ...'
-    st_gdbserver_cmd_tpl = os.environ.get("ST_GDBSERVER_CMD")
-    st_speed = os.environ.get(
-        "STLINK_SPEED", "200"
-    )  # kHz (lower default for reliability)
-    st_serial = os.environ.get("STLINK_SERIAL", "")  # optional, raw value
-    st_transport = os.environ.get("STLINK_TRANSPORT", "SWD")
-    st_device = os.environ.get("ST_DEVICE", "STM32N657X0HxQ")
-    st_connect = os.environ.get("STLINK_CONNECT_MODE", "under-reset")
-    st_cubeprog = os.environ.get("ST_CUBE_PROG_PATH", "")  # Path to STM32CubeProgrammer
-    st_clt_root = os.environ.get("ST_CUBE_CLT_ROOT", "")  # Root of STM32CubeCLT
-    st_pend = os.environ.get("STLINK_PEND_HALT_TIMEOUT", "8000")
-    st_apid = os.environ.get("STLINK_APID", "")
     gdb_run_timeout = float(os.environ.get("GDB_RUN_TIMEOUT", "180"))
-    # Semihosting configuration (enabled by default)
-    st_semihost_port_env = os.environ.get("STLINK_SEMIHOST_PORT", "")
-    try:
-        st_semihost_port = (
-            int(st_semihost_port_env) if st_semihost_port_env else _pick_free_port()
-        )
-    except Exception:
-        st_semihost_port = _pick_free_port()
-    st_semihost_level = os.environ.get("STLINK_SEMIHOST_LEVEL", "all")
 
     # Address extraction for argv block symbol. Numeric addresses avoid
     # debugger symbol issues.
@@ -324,120 +266,18 @@ def _run_once():
             f.write(blob)
         # GDB writes target stdout here after the run; Python logs it below.
         stdout_capture_bin = os.path.join(td, "stdout-capture.bin")
-        semihost_listener_enabled = True
-        server_label = "ST-LINK GDB server"
-        if backend == "openocd":
-            openocd = find_openocd(os.environ.get("OPENOCD", ""))
-            if openocd is None:
-                err("OpenOCD not found; set OPENOCD or ensure openocd is on PATH")
-                return 2
-            gdbserver_cmd = runtime_gdbserver_cmd(
-                openocd=openocd,
-                port=port,
-                speed=speed_khz_from_env(),
-                serial=st_serial,
-                transport=st_transport.lower(),
-            )
-            semihost_listener_enabled = False
-            server_label = "OpenOCD"
-        elif backend in ("stlink", "stm32cube", "cube"):
-            # Allow deriving CLT root from CubeProgrammer path if not provided
-            if not st_clt_root and st_cubeprog:
-                st_clt_root = derive_clt_root(st_cubeprog)
-            stlink_bin, candidate = find_stlink_gdbserver(st_clt_root)
-
-            # Auto-detect a default template if not provided
-            if not st_gdbserver_cmd_tpl and stlink_bin:
-                stlink_parts = [
-                    shlex.quote(stlink_bin),
-                    "-p {port}",
-                    "-l 1",
-                    "-d",
-                    "-s",
-                    "--frequency {speed}",
-                    "{serial_flag}",
-                    "{apid_flag}",
-                    "{cubeprog_flag}",
-                    "--semihost-console-port {semi_port}",
-                    "--semihosting {semi_level}",
-                    "-g",
-                    "--halt",
-                    "--pend-halt-timeout {pend}",
-                ]
-                st_gdbserver_cmd_tpl = " ".join(stlink_parts)
-
-            if st_gdbserver_cmd_tpl:
-                # Determine best '-cp' path for STM32CubeProgrammer CLI
-                cp_path = cubeprogrammer_cp_path(st_cubeprog, st_clt_root, stlink_bin)
-
-                # Provide a flexible set of placeholders for various CLT tools.
-                # - {serial}       -> raw serial value (e.g. 303030303030)
-                # - {serial_flag}  -> '-i <serial>' (ST-LINK_gdbserver)
-                # - {serial_prog}  -> 'sn=<serial>' (STM32_Programmer_CLI)
-                # - {serial_sn}    -> ',sn=<serial>' (combined CLI arg)
-                # - {speed}        -> kHz value (e.g. 500)
-                # - {port}         -> GDB server port (e.g. 3333)
-                # - {transport}    -> SWD/JTAG (usually SWD)
-                # - {device}       -> device name (e.g. STM32N657X0HxQ)
-                # - {connect}      -> connection mode hint (e.g. under-reset)
-                # - {cubeprog_flag}-> '-cp <path>' if resolved
-                fmt = {
-                    "port": port,
-                    "speed": st_speed,
-                    "serial": st_serial,
-                    "serial_flag": (f"-i {st_serial}" if st_serial else ""),
-                    "serial_prog": (f"sn={st_serial}" if st_serial else ""),
-                    "serial_sn": (f",sn={st_serial}" if st_serial else ""),
-                    "transport": st_transport,
-                    "device": st_device,
-                    "connect": st_connect,
-                    "cubeprog": cp_path or st_cubeprog,
-                    "cubeprog_flag": (
-                        f"-cp {shlex.quote(cp_path)}"
-                        if cp_path
-                        else (f"-cp {shlex.quote(st_cubeprog)}" if st_cubeprog else "")
-                    ),
-                    "pend": st_pend,
-                    "apid_flag": (f"-m {st_apid}" if st_apid else "-m 1"),
-                    "semi_port": st_semihost_port,
-                    "semi_level": st_semihost_level,
-                }
-                try:
-                    formatted = st_gdbserver_cmd_tpl.format(**fmt)
-                except KeyError as e:
-                    err(f"Missing format key in ST_GDBSERVER_CMD: {e}")
-                    return 2
-                gdbserver_cmd = shlex.split(formatted)
-            else:
-                msg = (
-                    "STM32Cube Command Line Tools required.\n"
-                    "- Install STM32CubeCLT (Linux/macOS).\n"
-                    "  Download: "
-                    "https://www.st.com/en/development-tools/stm32cubeclt.html\n"
-                    "- Set ST_GDBSERVER_CMD to a working gdbserver template, "
-                    "or ensure ST-LINK_gdbserver is on PATH.\n"
-                    "  Examples:\n"
-                    "    ST-LINK_gdbserver: 'ST-LINK_gdbserver -p {port} "
-                    "-d --frequency {speed} ...'\n"
-                    "    STM32_Programmer_CLI: 'STM32_Programmer_CLI "
-                    "-c port={transport},{serial_prog} ...'\n"
-                    "  Tip: If ST-LINK_gdbserver errors about "
-                    "STM32CubeProgrammer, "
-                    "set ST_CUBE_PROG_PATH to its installation path,\n"
-                    "       or export ST_CUBE_CLT_ROOT to the CubeCLT root so the "
-                    "wrapper can auto-locate ST-LINK_gdbserver.\n"
-                    "  Or set NUCLEO_DEBUG_BACKEND=openocd to use OpenOCD.\n"
-                )
-                # Append small diagnostics if we attempted a candidate path
-                if candidate:
-                    msg += f"  Searched for ST-LINK_gdbserver at: {candidate}\n"
-                if stlink_bin is None:
-                    msg += "  Note: ST-LINK_gdbserver not found on PATH.\n"
-                err(msg)
-                return 2
-        else:
-            err(f"Unsupported NUCLEO_DEBUG_BACKEND: {backend}")
+        openocd = find_openocd(os.environ.get("OPENOCD", ""))
+        if openocd is None:
+            err("OpenOCD not found; set OPENOCD or ensure openocd is on PATH")
             return 2
+        gdbserver_cmd = runtime_gdbserver_cmd(
+            openocd=openocd,
+            port=port,
+            speed=speed_khz_from_env(),
+            serial=serial_from_env(),
+            transport=transport_from_env(),
+        )
+        server_label = "OpenOCD"
 
         info(
             "[exec_wrapper] assuming FLEXMEM was configured by "
@@ -456,127 +296,15 @@ def _run_once():
         )
 
         try:
-            semihost_sock = None
-            semihost_stop = threading.Event()
-            semihost_thr = None
-            semihost_exit = threading.Event()
-            shared = {"exit_code": None, "stdout_streamed": False}
-
-            def _semihost_reader(sock: socket.socket):
-                """Stream semihost output and detect the exit sentinel."""
-                global STDOUT_BYTES_EMITTED
-
-                buf = b""
-                try:
-                    while not semihost_stop.is_set():
-                        try:
-                            data = sock.recv(4096)
-                            if not data:
-                                break
-                            buf += data
-                            while b"\n" in buf:
-                                line, buf = buf.split(b"\n", 1)
-                                try:
-                                    text = line.decode("utf-8", errors="replace")
-                                except Exception:
-                                    text = line.decode(errors="replace")
-                                # Detect exit sentinel first
-                                is_exit, parsed_exit_code = parse_exit_sentinel(text)
-                                if is_exit:
-                                    shared["exit_code"] = parsed_exit_code
-                                    semihost_exit.set()
-                                    # Do not log the sentinel unless verbose.
-                                    if VERBOSE:
-                                        LOG.debug("[semi] %s", text)
-                                else:
-                                    shared["stdout_streamed"] = True
-                                    if VERBOSE:
-                                        LOG.debug("[semi] %s", text)
-                                    else:
-                                        sys.stdout.buffer.write(line + b"\n")
-                                        sys.stdout.buffer.flush()
-                                        STDOUT_BYTES_EMITTED += len(line) + 1
-                        except socket.timeout:
-                            continue
-                        except OSError:
-                            break
-                finally:
-                    try:
-                        sock.close()
-                    except Exception:
-                        pass
-
-            if semihost_listener_enabled:
-                # Wait for semihost console to become available and connect
-                # before attaching GDB. OpenOCD runs use the RAM stdout capture
-                # path and skip this ST-LINK-specific listener.
-                time.sleep(0.2)
-                if not _wait_for_port("127.0.0.1", st_semihost_port, timeout_s=10.0):
-                    info(
-                        "[exec_wrapper] semihost port not ready within timeout; "
-                        "continuing anyway"
-                    )
-
-                try:
-                    semihost_sock = socket.create_connection(
-                        ("127.0.0.1", st_semihost_port), timeout=1.0
-                    )
-                    semihost_sock.settimeout(0.5)
-                    semihost_thr = threading.Thread(
-                        target=_semihost_reader, args=(semihost_sock,), daemon=True
-                    )
-                    semihost_thr.start()
-                    info(
-                        "[exec_wrapper] semihost listener connected on port "
-                        f"{st_semihost_port}"
-                    )
-                except OSError:
-                    info(
-                        "[exec_wrapper] semihost listener not connected "
-                        f"(port {st_semihost_port}); proceeding"
-                    )
-            else:
-                time.sleep(0.8)
+            exit_code = None
+            time.sleep(0.8)
 
             # Give the server a brief moment, then check for early exit
-            if semihost_listener_enabled:
-                time.sleep(0.8)
             if stp.poll() is not None:
-                # Server exited early – surface a helpful message
+                # Server exited early: surface its output as the setup failure.
                 out_rem = stp.stdout.read() if stp.stdout else ""
                 if out_rem and not SUPPRESS_RETRYABLE_DIAGNOSTICS:
                     log_output(out_rem, logging.DEBUG if VERBOSE else logging.ERROR)
-                merged = out_rem
-                low = merged.lower()
-                if "firmware upgrade" in low or "upgrade required" in low:
-                    # Try to suggest STLinkUpgrade locations
-                    hints = []
-                    if st_clt_root:
-                        app1 = os.path.join(
-                            st_clt_root,
-                            "STM32CubeProgrammer",
-                            "stlink",
-                            "STLinkUpgrade",
-                        )
-                        app2 = os.path.join(
-                            st_clt_root,
-                            "STM32CubeProgrammer",
-                            "stlink",
-                            "STLinkUpgrade.app",
-                        )
-                        if os.path.exists(app1):
-                            hints.append(app1)
-                        if os.path.exists(app2):
-                            hints.append(app2)
-                    if VERBOSE:
-                        err(
-                            "[exec_wrapper] ST-LINK firmware upgrade "
-                            "required. "
-                            "Please run the STLinkUpgrade tool."
-                        )
-                        if hints:
-                            for h in hints:
-                                err("[exec_wrapper] STLinkUpgrade candidate: " + h)
                 return 2
 
             gdb_lines = build_run_script(
@@ -605,9 +333,9 @@ def _run_once():
 
             gdb_cmd = [gdb, "--batch", "-x", gdb_script_path, elf]
 
-            # Run GDB while streaming gdbserver output, including semihost
-            # output.
-            info("[exec_wrapper] running gdb batch; semihost output follows")
+            # Run GDB while draining OpenOCD output so probe diagnostics are
+            # available in verbose mode without blocking the wrapper.
+            info("[exec_wrapper] running gdb batch")
             gdbp = popen(
                 gdb_cmd,
                 stdout=subprocess.PIPE,
@@ -618,32 +346,16 @@ def _run_once():
                 time.time() + gdb_run_timeout if gdb_run_timeout > 0 else None
             )
 
-            # Stream gdbserver output until gdb finishes without blocking on
+            # Stream OpenOCD output until gdb finishes without blocking on
             # readline().
             while True:
-                # Early shutdown if exit sentinel observed
-                if semihost_exit.is_set():
-                    info(
-                        "[exec_wrapper] exit sentinel detected; shutting "
-                        "down gdb and gdbserver..."
-                    )
-                    try:
-                        if gdbp.poll() is None:
-                            gdbp.terminate()
-                            try:
-                                gdbp.wait(timeout=1.0)
-                            except Exception:
-                                gdbp.kill()
-                    except Exception:
-                        pass
-                    break
                 if stp.stdout is not None:
                     try:
                         r, _, _ = select.select([stp.stdout], [], [], 0.1)
                         if r:
                             line = stp.stdout.readline()
                             if line:
-                                # gdbserver stdout is logged only in verbose
+                                # OpenOCD stdout is logged only in verbose
                                 # mode.
                                 if VERBOSE:
                                     log_output(line, logging.DEBUG)
@@ -690,17 +402,13 @@ def _run_once():
             if os.path.exists(stdout_capture_bin):
                 try:
                     # Parse the same exit sentinel from dumped RAM output as
-                    # from semihosting.
+                    # the target prints before stopping at the completion trap.
                     with open(stdout_capture_bin, "rb") as capture_file:
                         captured = capture_file.read()
                     captured_output, captured_exit_code = split_stdout_capture(captured)
                     if captured_exit_code is not None:
-                        shared["exit_code"] = captured_exit_code
-                    if (
-                        captured_output
-                        and not shared.get("stdout_streamed")
-                        and not target_failed
-                    ):
+                        exit_code = captured_exit_code
+                    if captured_output and not target_failed:
                         sys.stdout.write(captured_output)
                         sys.stdout.flush()
                         STDOUT_BYTES_EMITTED += len(captured_output.encode("utf-8"))
@@ -710,12 +418,8 @@ def _run_once():
             if "$nucleo_stdout_truncated = 0x1" in gdb_text:
                 err("WARNING: target stdout capture truncated")
 
-            if shared.get("exit_code") is not None:
-                return (
-                    int(shared["exit_code"])
-                    if isinstance(shared["exit_code"], int)
-                    else 1
-                )
+            if exit_code is not None:
+                return int(exit_code) if isinstance(exit_code, int) else 1
 
             if layout_failed:
                 TARGET_FAILURE = True
@@ -741,10 +445,8 @@ def _run_once():
                 return 0
 
             if gdbp.returncode != 0:
-                target_output_observed = (
-                    bool(shared.get("stdout_streamed")) or STDOUT_BYTES_EMITTED != 0
-                )
-                exit_code_observed = shared.get("exit_code") is not None
+                target_output_observed = STDOUT_BYTES_EMITTED != 0
+                exit_code_observed = exit_code is not None
                 if gdb_load_failed_before_target_output(
                     gdb_text,
                     target_output_observed=target_output_observed,
@@ -766,7 +468,7 @@ def _run_once():
             return 0
 
         finally:
-            # Terminate ST gdbserver
+            # Terminate OpenOCD.
             try:
                 stp.terminate()
                 stp.wait(timeout=1.5)
@@ -775,16 +477,6 @@ def _run_once():
                     stp.kill()
                 except Exception:
                     pass
-            # Stop semihost listener
-            try:
-                if "semihost_stop" in locals():
-                    semihost_stop.set()
-                if "semihost_sock" in locals() and semihost_sock:
-                    semihost_sock.close()
-                if "semihost_thr" in locals() and semihost_thr:
-                    semihost_thr.join(timeout=0.5)
-            except Exception:
-                pass
             # Remove the temp gdb script
             try:
                 if "gdb_script_path" in locals():
