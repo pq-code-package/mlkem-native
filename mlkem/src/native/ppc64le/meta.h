@@ -28,29 +28,45 @@
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_ntt_native(int16_t data[MLKEM_N])
 {
+#if defined(__POWER8_VECTOR__)
   mlk_ntt_ppc_asm(data, mlk_ppc_qdata);
   return MLK_NATIVE_FUNC_SUCCESS;
+#else
+  return MLK_NATIVE_FUNC_FALLBACK;
+#endif
 }
 
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
 {
+#if defined(__POWER8_VECTOR__)
   mlk_intt_ppc_asm(data, mlk_ppc_qdata);
   return MLK_NATIVE_FUNC_SUCCESS;
+#else
+  return MLK_NATIVE_FUNC_FALLBACK;
+#endif
 }
 
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])
 {
+#if defined(__POWER8_VECTOR__)
   mlk_reduce_ppc_asm(data, mlk_ppc_qdata);
   return MLK_NATIVE_FUNC_SUCCESS;
+#else
+  return MLK_NATIVE_FUNC_FALLBACK;
+#endif
 }
 
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_tomont_native(int16_t data[MLKEM_N])
 {
+#if defined(__POWER8_VECTOR__)
   mlk_poly_tomont_ppc_asm(data, mlk_ppc_qdata);
   return MLK_NATIVE_FUNC_SUCCESS;
+#else
+  return MLK_NATIVE_FUNC_FALLBACK;
+#endif
 }
 #endif /* !__ASSEMBLER__ */
 
