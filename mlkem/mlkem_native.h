@@ -196,12 +196,15 @@ extern "C"
  *
  * @spec{Implements @[FIPS203, Algorithm 16, ML-KEM.KeyGen_Internal].}
  *
- * @param[out] pk    Output public key, an array of
- *                   MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
- * @param[out] sk    Output private key, an array of
- *                   MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
- * @param[in]  coins Input randomness, an array of 2*MLKEM_SYMBYTES uniformly
- *                   random bytes.
+ * @param[out] pk      Output public key, an array of
+ *                     MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
+ * @param[out] sk      Output private key, an array of
+ *                     MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
+ * @param[in]  coins   Input randomness, an array of 2*MLKEM_SYMBYTES uniformly
+ *                     random bytes.
+ * @param      context Application context. Only present when
+ *                     MLK_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_FAIL          MLK_CONFIG_KEYGEN_PCT enabled and PCT failed.
@@ -227,10 +230,13 @@ int MLK_API_NAMESPACE(keypair_derand)(
  *
  * @spec{Implements @[FIPS203, Algorithm 19, ML-KEM.KeyGen].}
  *
- * @param[out] pk Output public key, an array of
- *                MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
- * @param[out] sk Output private key, an array of
- *                MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
+ * @param[out] pk      Output public key, an array of
+ *                     MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
+ * @param[out] sk      Output private key, an array of
+ *                     MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
+ * @param      context Application context. Only present when
+ *                     MLK_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_FAIL          MLK_CONFIG_KEYGEN_PCT enabled and PCT failed.
@@ -255,12 +261,15 @@ int MLK_API_NAMESPACE(keypair)(
  *
  * @spec{Implements @[FIPS203, Algorithm 17, ML-KEM.Encaps_Internal].}
  *
- * @param[out] ct    Output ciphertext, an array of
- *                   MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
- * @param[out] ss    Output shared secret, an array of MLKEM_BYTES bytes.
- * @param[in]  pk    Input public key, an array of
- *                   MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
- * @param[in]  coins Input randomness, an array of MLKEM_SYMBYTES bytes.
+ * @param[out] ct      Output ciphertext, an array of
+ *                     MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
+ * @param[out] ss      Output shared secret, an array of MLKEM_BYTES bytes.
+ * @param[in]  pk      Input public key, an array of
+ *                     MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
+ * @param[in]  coins   Input randomness, an array of MLKEM_SYMBYTES bytes.
+ * @param      context Application context. Only present when
+ *                     MLK_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_FAIL          The 'modulus check' @[FIPS203, Section 7.2]
@@ -287,11 +296,14 @@ int MLK_API_NAMESPACE(enc_derand)(
  *
  * @spec{Implements @[FIPS203, Algorithm 20, ML-KEM.Encaps].}
  *
- * @param[out] ct Output ciphertext, an array of
- *                MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
- * @param[out] ss Output shared secret, an array of MLKEM_BYTES bytes.
- * @param[in]  pk Input public key, an array of
- *                MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
+ * @param[out] ct      Output ciphertext, an array of
+ *                     MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
+ * @param[out] ss      Output shared secret, an array of MLKEM_BYTES bytes.
+ * @param[in]  pk      Input public key, an array of
+ *                     MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
+ * @param      context Application context. Only present when
+ *                     MLK_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_FAIL          The 'modulus check' @[FIPS203, Section 7.2]
@@ -318,11 +330,14 @@ int MLK_API_NAMESPACE(enc)(
  *
  * @spec{Implements @[FIPS203, Algorithm 21, ML-KEM.Decaps].}
  *
- * @param[out] ss Output shared secret, an array of MLKEM_BYTES bytes.
- * @param[in]  ct Input ciphertext, an array of
- *                MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
- * @param[in]  sk Input private key, an array of
- *                MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
+ * @param[out] ss      Output shared secret, an array of MLKEM_BYTES bytes.
+ * @param[in]  ct      Input ciphertext, an array of
+ *                     MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
+ * @param[in]  sk      Input private key, an array of
+ *                     MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
+ * @param      context Application context. Only present when
+ *                     MLK_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_FAIL          The 'hash check' @[FIPS203, Section 7.3]
@@ -349,8 +364,11 @@ int MLK_API_NAMESPACE(dec)(
  *
  * @spec{Implements @[FIPS203, Section 7.2, 'modulus check'].}
  *
- * @param[in] pk Input public key, an array of
- *               MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
+ * @param[in] pk      Input public key, an array of
+ *                    MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
+ * @param     context Application context. Only present when
+ *                    MLK_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                    MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_FAIL          Modulus check failed.
@@ -373,8 +391,11 @@ int MLK_API_NAMESPACE(check_pk)(
  *
  * @spec{Implements @[FIPS203, Section 7.3, 'hash check'].}
  *
- * @param[in] sk Input private key, an array of
- *               MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
+ * @param[in] sk      Input private key, an array of
+ *                    MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
+ * @param     context Application context. Only present when
+ *                    MLK_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                    MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_FAIL          Public key hash check failed.

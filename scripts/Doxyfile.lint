@@ -31,4 +31,6 @@ WARN_AS_ERROR          = FAIL_ON_WARNINGS
 MACRO_EXPANSION        = YES
 EXPAND_ONLY_PREDEF     = YES
 PREDEFINED             = MLK_ALIGN= \
-                         __contract__(x)=
+                         __contract__(x)= \
+                         MLK_CONFIG_CONTEXT_PARAMETER \
+                         MLK_CONFIG_CONTEXT_PARAMETER_TYPE=void*
