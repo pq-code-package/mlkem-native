@@ -224,7 +224,7 @@ void mlk_polyvec_basemul_acc_montgomery_cached(
     }
     else
     {
-      cassert(ret == MLK_NATIVE_FUNC_FALLBACK);
+      mlk_assert(ret == MLK_NATIVE_FUNC_FALLBACK);
       mlk_polyvec_basemul_acc_montgomery_cached_c(r, a, b, b_cache);
     }
   }
