@@ -919,6 +919,90 @@ def gen_aarch64_inv_ntt_zetas_layer67():
             )
 
 
+def gen_ppc_root_of_unity_for_block(layer, block):
+    """PPC zetas. Layer is 1-indexed (layer 1 = len 128, layer 7 = len 2)."""
+    log = bitreverse(pow(2, layer - 1) + block, 7)
+    return prepare_root_for_barrett(pow(root_of_unity, log, modulus))
+
+
+def _ppc_ntt_zetas(which):
+    """Yield NTT zetas in the PPC layout. `which` is 'root' or 'twist'.
+
+    Layers 1-5 are per-layer: each zeta broadcast 8 times.
+    Layer 6 is 4-4 packed: per vector [z_{i+1} x4, z_i x4] (reversed pair).
+    Layer 7 is 2-2-2-2 packed with (1,2,3,4) -> (3,1,4,2) reorder per group.
+    """
+    sel = 0 if which == "root" else 1
+
+    for layer in range(1, 6):
+        for block in range(pow(2, layer - 1)):
+            yield from (gen_ppc_root_of_unity_for_block(layer, block)[sel],) * 8
+
+    for pair in range(0, 32, 2):
+        for j in (1, 0):
+            yield from (gen_ppc_root_of_unity_for_block(6, pair + j)[sel],) * 4
+
+    for group in range(0, 64, 4):
+        z = [gen_ppc_root_of_unity_for_block(7, group + j)[sel] for j in range(4)]
+        for k in (2, 0, 3, 1):
+            yield from (z[k],) * 2
+
+
+def _ppc_ntt_zetas_layer67_packed():
+    """Zetas for the merged 4-5-6-7 pass, post-transpose layout.
+
+    Per outer iter (8 total): 6 vectors = 48 halfwords. Each vector is a
+    layer-6 or layer-7 zeta vector (or its twisted companion) in
+    [a,a,b,b,c,c,d,d] form, matching the per-lane coefficient groupings
+    after transpose4. Mirrors aarch64's mlk_aarch64_ntt_zetas_layer67.
+    """
+    for block in range(8):
+        def double_ith(t, i):
+            yield from (t[i], t[i])
+        # root0, root0_tw: layer 6 zetas for blocks 4*block + 0..3
+        for i in range(2):
+            for j in range(4):
+                yield from double_ith(
+                    gen_ppc_root_of_unity_for_block(6, 4 * block + j), i)
+        # root1, root1_tw: layer 7 zetas for blocks 8*block + 0,2,4,6
+        for i in range(2):
+            for j in (0, 2, 4, 6):
+                yield from double_ith(
+                    gen_ppc_root_of_unity_for_block(7, 8 * block + j), i)
+        # root2, root2_tw: layer 7 zetas for blocks 8*block + 1,3,5,7
+        for i in range(2):
+            for j in (1, 3, 5, 7):
+                yield from double_ith(
+                    gen_ppc_root_of_unity_for_block(7, 8 * block + j), i)
+
+
+def gen_ppc_zeta_file():
+    def gen(values):
+        yield "/*"
+        yield " * Copyright (c) The mlkem-native project authors"
+        yield " * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT"
+        yield " */"
+        yield ""
+        line = "    "
+        for i, v in enumerate(values):
+            sep = "," if i + 1 < len(values) else ""
+            chunk = f"{v}{sep} "
+            if len(line) + len(chunk) > 78:
+                yield line.rstrip()
+                line = "    "
+            line += chunk
+        if line.strip():
+            yield line.rstrip()
+
+    roots = list(_ppc_ntt_zetas("root"))
+    twists = list(_ppc_ntt_zetas("twist"))
+    layer67 = list(_ppc_ntt_zetas_layer67_packed())
+    update_file("dev/ppc64le/src/consts_ntt.inc", "\n".join(gen(roots)))
+    update_file("dev/ppc64le/src/consts_ntt_tw.inc", "\n".join(gen(twists)))
+    update_file("dev/ppc64le/src/consts_ntt_layer67_packed.inc",
+                "\n".join(gen(layer67)))
+
+
 def gen_aarch64_mulcache_twiddles():
     for idx in range(0, 128):
         root = pow(root_of_unity, 2 * bitreverse(idx, 7) + 1, modulus)
@@ -2864,6 +2948,8 @@ def update_via_simpasm(
         source_arch = "x86_64"
     elif "armv81m" in infile_full:
         source_arch = "armv81m"
+    elif "ppc64le" in infile_full:
+        source_arch = "ppc64le"
     else:
         raise Exception(f"Could not detect architecture of source file {infile_full}.")
     # Check native architecture
@@ -2875,6 +2961,13 @@ def update_via_simpasm(
     # Armv8.1-M is always cross-compiled
     if source_arch == "armv81m":
         cross_prefix = "arm-none-eabi-"
+        cross_gcc = cross_prefix + "gcc"
+        if shutil.which(cross_gcc) is None:
+            if force_cross is False:
+                return
+            raise Exception(f"Could not find cross toolchain {cross_prefix}")
+    elif source_arch == "ppc64le":
+        cross_prefix = "powerpc64le-unknown-linux-gnu-"
         cross_gcc = cross_prefix + "gcc"
         if shutil.which(cross_gcc) is None:
             if force_cross is False:
@@ -2898,6 +2991,8 @@ def update_via_simpasm(
                 arch = "aarch64"
             elif "armv81m" in infile_full:
                 arch = "armv81m"
+            elif "ppc64le" in infile_full:
+                arch = "ppc64le"
             else:
                 arch = "x86_64"
 
@@ -2910,8 +3005,8 @@ def update_via_simpasm(
                 "-o",
                 tmp.name,
             ]
-            # TODO: Support CFI for Armv8.1-M
-            if arch != "armv81m":
+            # TODO: Support CFI for Armv8.1-M and ppc64le
+            if arch not in ("armv81m", "ppc64le"):
                 cmd += ["--cfify"]
             if cross_prefix is not None:
                 # Stick with llvm-objdump for disassembly
@@ -3246,8 +3341,9 @@ def synchronize_file(f, in_dir, out_dir, delete=False, no_simplify=False, **kwar
     if delete is True:
         return basename
 
-    # Skip .inc files when simplification is enabled (they get inlined by simpasm)
-    if no_simplify is False and f.endswith(".inc"):
+    # Skip .inc files when simplification is enabled (they get inlined by simpasm).
+    # ppc64le includes .inc files from .c sources, so we must keep them.
+    if no_simplify is False and f.endswith(".inc") and "/ppc64le/" not in f:
         return None
 
     if no_simplify is False and f.endswith(".S"):
@@ -3353,6 +3449,14 @@ def synchronize_backends(
         force_cross=force_cross,
         no_simplify=no_simplify,
         cflags="-Idev/fips202/aarch64 -Imlkem/src/fips202/native/aarch64 -march=armv8.4-a+sha3",
+    )
+    synchronize_backend(
+        "dev/ppc64le/src",
+        "mlkem/src/native/ppc64le/src",
+        delete=delete,
+        force_cross=force_cross,
+        no_simplify=no_simplify,
+        cflags="-Idev/ppc64le/src -Imlkem/src/native/ppc64le/src -mcpu=power8",
     )
     synchronize_backend(
         "dev/x86_64/src",
@@ -4258,6 +4362,7 @@ def _main():
         gen_aarch64_hol_light_zeta_file()
         gen_aarch64_hol_light_rej_uniform_table()
         gen_aarch64_zeta_file()
+        gen_ppc_zeta_file()
         gen_aarch64_rej_uniform_table()
         gen_avx2_hol_light_zeta_file()
         gen_avx2_hol_light_rej_uniform_table()

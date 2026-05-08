@@ -72,6 +72,12 @@ MLK_ALIGN const int16_t mlk_ppc_qdata[] = {
     ,
 /* zetas for invNTT */
 #include "consts_intt.inc"
+    ,
+/* twisted zetas for NTT (Barrett-style fqmul: z_tw = round(z*2^16/q)/2) */
+#include "consts_ntt_tw.inc"
+    ,
+/* packed (zeta, twisted) zetas for layer 6+7 in the merged 4-5-6-7 pass */
+#include "consts_ntt_layer67_packed.inc"
 };
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
           !MLK_CONFIG_MULTILEVEL_NO_SHARED */

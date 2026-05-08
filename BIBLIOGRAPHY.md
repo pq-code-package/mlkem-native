@@ -240,6 +240,7 @@ source code and documentation.
   - [mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S](mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S)
   - [mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S](mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S)
   - [mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S](mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S)
+  - [mlkem/src/native/ppc64le/src/ntt_ppc_asm.S](mlkem/src/native/ppc64le/src/ntt_ppc_asm.S)
   - [mlkem/src/poly.c](mlkem/src/poly.c)
   - [mlkem/src/poly_k.c](mlkem/src/poly_k.c)
   - [proofs/hol_light/aarch64/mlkem/mlkem_intt.S](proofs/hol_light/aarch64/mlkem/mlkem_intt.S)

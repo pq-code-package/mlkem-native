@@ -364,8 +364,8 @@ def simplify(logger, args, asm_input, asm_output=None):
 
         logger.debug("Checking that byte-code is unchanged ...")
 
-        # When CFI is enabled or for Armv8.1-M, compare only the __text section content
-        if args.cfify or args.arch == "armv81m":
+        # When CFI is enabled or for Armv8.1-M / ppc64le, compare only the __text section content
+        if args.cfify or args.arch in ("armv81m", "ppc64le"):
             logger.debug("Comparing __text section content for CFI comparison...")
 
             # Extract __text section from both files
