@@ -74,12 +74,8 @@ def openocd_cli():
     return openocd
 
 
-def run_openocd_config(elf, main_thumb, estack_addr, timeout_s):
-    """Download and run the config ELF using OpenOCD."""
-    openocd = openocd_cli()
-    if openocd is None:
-        return 2
-
+def _openocd_config_cmd(openocd, elf, main_thumb, estack_addr, timeout_s, under_reset):
+    """Build the OpenOCD command for one FLEXMEM configuration attempt."""
     script_lines = flexmem_script_lines(
         elf=elf,
         main_thumb=main_thumb,
@@ -88,6 +84,7 @@ def run_openocd_config(elf, main_thumb, estack_addr, timeout_s):
         flexmem_addr=CM55TCMCR_ADDR,
         expected_mask=CM55TCMCR_EXPECTED_MASK,
         expected_value=CM55TCMCR_EXPECTED_VALUE,
+        connect_under_reset=under_reset,
     )
     with tempfile.NamedTemporaryFile("w", delete=False, suffix=".cfg") as script:
         script.write("\n".join(script_lines))
@@ -100,6 +97,22 @@ def run_openocd_config(elf, main_thumb, estack_addr, timeout_s):
         serial=serial_from_env(),
         transport=transport_from_env(),
     ) + ["-f", script_path]
+    return cmd, script_path
+
+
+def _openocd_init_failed(output):
+    """Return whether OpenOCD failed before it could attach to the target."""
+    lower = (output or "").lower()
+    return "init mode failed" in lower or "unable to connect to the target" in lower
+
+
+def _run_openocd_config_once(
+    openocd, elf, main_thumb, estack_addr, timeout_s, under_reset
+):
+    """Run one OpenOCD FLEXMEM configuration attempt."""
+    cmd, script_path = _openocd_config_cmd(
+        openocd, elf, main_thumb, estack_addr, timeout_s, under_reset
+    )
     try:
         cp = run_quiet(cmd)
     finally:
@@ -107,6 +120,28 @@ def run_openocd_config(elf, main_thumb, estack_addr, timeout_s):
             os.unlink(script_path)
         except OSError:
             pass
+    return cp
+
+
+def run_openocd_config(elf, main_thumb, estack_addr, timeout_s):
+    """Download and run the config ELF using OpenOCD."""
+    openocd = openocd_cli()
+    if openocd is None:
+        return 2
+
+    cp = _run_openocd_config_once(
+        openocd, elf, main_thumb, estack_addr, timeout_s, under_reset=True
+    )
+    if cp.returncode != 0 and _openocd_init_failed(cp.stdout):
+        if os.environ.get("FLEXMEM_VERBOSE"):
+            log_output(cp.stdout, logging.DEBUG)
+            LOG.debug(
+                "OpenOCD connect-under-reset attach failed; retrying FLEXMEM "
+                "configuration without connect_assert_srst"
+            )
+        cp = _run_openocd_config_once(
+            openocd, elf, main_thumb, estack_addr, timeout_s, under_reset=False
+        )
     if os.environ.get("FLEXMEM_VERBOSE") or cp.returncode != 0:
         log_output(cp.stdout, logging.DEBUG if cp.returncode == 0 else logging.ERROR)
     if cp.returncode != 0:

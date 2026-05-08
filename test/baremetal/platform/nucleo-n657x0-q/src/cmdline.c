@@ -67,7 +67,7 @@ __attribute__((noinline)) static void nucleo_init_dtcm_ecc(void)
 extern int __real_main(int argc, char *argv[]);
 int __wrap_main(int unused_argc, char *unused_argv[]);
 
-static void semihosting_exit_with_rc(int rc)
+__attribute__((noreturn)) static void semihosting_exit_with_rc(int rc)
 {
   if (rc == 0)
   {
@@ -87,6 +87,8 @@ static void semihosting_exit_with_rc(int rc)
     __WFI();
   }
 }
+
+void _exit(int status) { semihosting_exit_with_rc(status); }
 
 void Error_Handler(void) { HardFault_Handler(); }
 

@@ -243,9 +243,7 @@ class TEST_TYPES(Enum):
             if str.lower(e.name) == str.lower(s):
                 return e
         raise Exception(
-            f"Could not find example {s}. Examples: {
-                list(map(lambda e: str.lower(e.name), TEST_TYPES.examples()))
-            }"
+            f"Could not find example {s}. Examples: {list(map(lambda e: str.lower(e.name), TEST_TYPES.examples()))}"
         )
 
     def __str__(self):

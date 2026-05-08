@@ -27,7 +27,7 @@ def find_openocd(openocd=""):
     return None
 
 
-def speed_khz_from_env(default="200"):
+def speed_khz_from_env(default="8000"):
     """Return adapter speed in kHz."""
     return os.environ.get("OPENOCD_SPEED", default)
 
@@ -54,7 +54,7 @@ def openocd_base_args(
     openocd="openocd",
     interface=None,
     target=None,
-    speed="200",
+    speed="8000",
     serial="",
     transport="swd",
 ):
@@ -79,7 +79,7 @@ def runtime_gdbserver_cmd(
     *,
     openocd="openocd",
     port=3333,
-    speed="200",
+    speed="8000",
     serial="",
     transport="swd",
 ):
@@ -114,11 +114,15 @@ def flexmem_script_lines(
     flexmem_addr="0x56008008",
     expected_mask=0xFF,
     expected_value=0x99,
+    connect_under_reset=True,
 ):
     """Return an OpenOCD TCL script for RAM-loading the FLEXMEM helper."""
     quoted_elf = "{" + elf.replace("\\", "\\\\").replace("}", "\\}") + "}"
+    reset_config = "reset_config srst_only srst_nogate"
+    if connect_under_reset:
+        reset_config += " connect_assert_srst"
     return [
-        "reset_config srst_only srst_nogate connect_assert_srst",
+        reset_config,
         "init",
         "reset halt",
         f"load_image {quoted_elf}",
@@ -135,6 +139,7 @@ def flexmem_script_lines(
         f'  error "FLEXMEM configuration register did not reach expected 0x{expected_value:x} value"',
         "}",
         "wait_flexmem_configured",
+        "reset_config none",
         "reset run",
         "shutdown",
     ]

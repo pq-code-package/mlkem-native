@@ -441,6 +441,13 @@ def _run_once():
                 return 1
 
             if "Program received signal SIGTRAP" in gdb_text:
+                if stdout_capture_addr and stdout_capture_len_addr:
+                    TARGET_FAILURE = True
+                    TARGET_FAILURE_KIND = "missing-exit-sentinel"
+                    if not SUPPRESS_RETRYABLE_DIAGNOSTICS:
+                        err("FAIL!")
+                        err("target stopped at SIGTRAP without ML-KEM exit sentinel")
+                    return 1
                 info("[exec_wrapper] completion trap observed without exit sentinel")
                 return 0
 
@@ -506,13 +513,20 @@ def main():
         can_retry_transport = transport_retries < attempts - 1
         can_retry_hardfault = hardfault_recoveries < hardfault_attempts
         can_retry_load_failure = load_failure_recoveries < load_failure_attempts
-        SUPPRESS_RETRYABLE_DIAGNOSTICS = can_retry_transport or can_retry_hardfault
+        SUPPRESS_RETRYABLE_DIAGNOSTICS = (
+            can_retry_transport or can_retry_hardfault or can_retry_load_failure
+        )
         last_rc = _run_once()
         if last_rc == 0:
             return 0
         if TARGET_FAILURE_KIND == "load-failed":
             if can_retry_load_failure:
                 load_failure_recoveries += 1
+                if not VERBOSE:
+                    err(
+                        "[exec_wrapper] GDB load failed before target output; "
+                        "re-running FLEXMEM config"
+                    )
                 if _recover_after_load_failure():
                     if VERBOSE:
                         err(
@@ -528,6 +542,10 @@ def main():
                     err(LAST_LOAD_FAILURE_DIAGNOSTICS)
                 return last_rc
             err("FAIL!")
+            err(
+                "GDB load failed before target output and FLEXMEM recovery "
+                "attempts are exhausted"
+            )
             err(f"gdb batch failed with code {last_rc}")
             if LAST_LOAD_FAILURE_DIAGNOSTICS:
                 log_output(LAST_LOAD_FAILURE_DIAGNOSTICS, logging.ERROR)

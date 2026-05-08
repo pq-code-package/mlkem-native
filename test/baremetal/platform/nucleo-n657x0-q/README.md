@@ -31,20 +31,19 @@ binaries are loaded into RAM; nothing is written to flash.
 6. The wrapper continues execution, dumps the RAM stdout capture buffer, and
    uses `[[MLKEM-EXIT:<rc>]]` as the exit sentinel.
 
-The reset distinction is critical. The FLEXMEM config stage must use
-connect-under-reset for recovery, while the runtime test stage must not request
-connect-under-reset because that can lose the just-latched FLEXMEM layout.
+The FLEXMEM config stage uses connect-under-reset. The runtime test stage does
+not request connect-under-reset.
 
 ## Connection
 
 The host tools connect to the NUCLEO-N657X0-Q through the on-board debug probe
 using SWD. OpenOCD uses `interface/stlink.cfg`, `target/stm32n6x.cfg`,
-`transport select swd`, and `adapter speed ${OPENOCD_SPEED:-200}` by default.
+`transport select swd`, and `adapter speed ${OPENOCD_SPEED:-8000}` by default.
 
 Useful environment variables:
 
 ```
-export OPENOCD_SPEED=200
+export OPENOCD_SPEED=8000
 export OPENOCD_SERIAL=<optional-probe-serial>
 export GDB_PORT=3333
 ```
@@ -52,6 +51,10 @@ export GDB_PORT=3333
 `OPENOCD`, `OPENOCD_INTERFACE`, `OPENOCD_TARGET`, and `OPENOCD_TRANSPORT` can
 override the executable, script names, and transport when needed. `GDB`, `NM`,
 and `READELF` can override the binary utilities.
+
+The 8 MHz SWD default matches the ST tools' successful recovery connection for
+this board. Very low SWD speeds can leave OpenOCD waiting on the SWD DP in
+some post-test states.
 
 ## FLEXMEM Expansion and Reboot
 
@@ -67,8 +70,9 @@ test is loaded:
 4. Seed `MSP=<_estack>` and `PC=<main|1>`, then `resume` the config binary
    directly from RAM.
 5. Poll `SYSCFG->CM55TCMCR` at `0x56008008` until `(value & 0xff) == 0x99`.
-6. Run `reset run` so the new FLEXMEM layout is applied before the test ELF is
-   loaded, then shut down OpenOCD.
+6. Switch OpenOCD reset handling back to a Cortex-M system reset with
+   `reset_config none`, then run `reset run` so the new FLEXMEM layout is
+   applied before the test ELF is loaded.
 
 The reset after configuration is required: FLEXMEM register writes are latched
 for the next boot, and the reset also clears the RAM contents used by the config
@@ -78,8 +82,9 @@ helper.
 
 After FLEXMEM expansion and reset, `run_test_after_flexmem.py` delegates to
 `exec_wrapper.py`. The runtime OpenOCD server uses
-`reset_config srst_only srst_nogate` and does not request
-`connect_assert_srst`. The wrapper creates a temporary GDB script and runs:
+`reset_config srst_only srst_nogate` and halts without requesting another
+reset. The wrapper
+creates a temporary GDB script and runs:
 
 ```
 arm-none-eabi-gdb --batch -x <generated-script.gdb> <test-elf>
@@ -99,6 +104,8 @@ The generated GDB script follows this order:
    then `continue` runs the test.
 7. At completion, GDB dumps the RAM stdout capture buffer and fault diagnostics
    if needed.
+8. GDB asks OpenOCD to switch to `reset_config none` and `reset run` after
+   harvesting output so the next FLEXMEM setup starts from a fresh boot state.
 
 The wrapper terminates OpenOCD after each run. If `load` fails before target
 output, or if the target enters `HardFault_Handler`, the wrapper can re-run

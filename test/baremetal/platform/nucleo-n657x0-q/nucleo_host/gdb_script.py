@@ -60,6 +60,9 @@ def build_run_script(
             "p/x $nucleo_stdout_truncated",
         ]
     gdb_lines += fault_diagnostic_commands()
+    # Leave the board in a fresh boot state for the next FLEXMEM setup. This
+    # runs after stdout/fault harvesting and does not affect the current test.
+    gdb_lines += ["monitor reset_config none", "monitor reset run"]
     return gdb_lines
 
 

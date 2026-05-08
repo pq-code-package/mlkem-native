@@ -17,6 +17,7 @@ from nucleo_host.gdb_script import build_run_script, restore_argv_command
 from nucleo_host.openocd_tools import flexmem_script_lines
 from nucleo_host.openocd_tools import openocd_base_args
 from nucleo_host.openocd_tools import runtime_gdbserver_cmd
+from nucleo_host.openocd_tools import speed_khz_from_env
 from nucleo_host.results import fault_info_from_gdb
 from nucleo_host.results import gdb_load_failed
 from nucleo_host.results import gdb_load_failed_before_target_output
@@ -178,6 +179,11 @@ class NucleoHostTest(unittest.TestCase):
             args.index("transport select swd"), args.index("target/stm32n6x.cfg")
         )
 
+    def test_openocd_default_speed_matches_st_recovery_speed(self):
+        """The platform default uses the robust ST-LINK recovery speed."""
+        with mock.patch.dict(os.environ, {}, clear=True):
+            self.assertEqual(speed_khz_from_env(), "8000")
+
     def test_openocd_runtime_cmd_avoids_under_reset(self):
         """Runtime OpenOCD server does not request connect-under-reset."""
         cmd = runtime_gdbserver_cmd(
@@ -192,6 +198,7 @@ class NucleoHostTest(unittest.TestCase):
         self.assertIn("gdb_port 4444", cmd)
         self.assertIn("reset_config srst_only srst_nogate", cmd)
         self.assertIn("halt", cmd)
+        self.assertNotIn("reset halt", joined)
         self.assertNotIn("connect_assert_srst", joined)
 
     def test_openocd_flexmem_script_uses_under_reset_and_polls_register(self):
@@ -214,7 +221,23 @@ class NucleoHostTest(unittest.TestCase):
         self.assertIn("reg pc 0x34064001", lines)
         self.assertIn("read_memory 0x56008008 32 1", joined)
         self.assertIn("== 0x99", joined)
+        self.assertLess(lines.index("reset_config none"), lines.index("reset run"))
         self.assertIn("reset run", lines)
+
+    def test_openocd_flexmem_script_can_skip_under_reset(self):
+        """The fallback FLEXMEM script can attach without connect-under-reset."""
+        lines = flexmem_script_lines(
+            elf="/tmp/flexmem_config.elf",
+            main_thumb="0x34064001",
+            estack_addr="0x30020000",
+            timeout_ms=30000,
+            connect_under_reset=False,
+        )
+        joined = "\n".join(lines)
+
+        self.assertIn("reset_config srst_only srst_nogate", lines)
+        self.assertNotIn("connect_assert_srst", joined)
+        self.assertIn("reset halt", lines)
 
     def test_openocd_flexmem_configure_runs_openocd_script(self):
         """OpenOCD FLEXMEM backend writes and runs an OpenOCD script."""
@@ -251,6 +274,39 @@ class NucleoHostTest(unittest.TestCase):
         self.assertIn("adapter serial SERIAL", cmd)
         script_path = cmd[-1]
         self.assertFalse(os.path.exists(script_path))
+
+    def test_openocd_flexmem_configure_retries_without_under_reset_after_init_failure(
+        self,
+    ):
+        """OpenOCD FLEXMEM retries a normal attach if under-reset init fails."""
+        failed = mock.Mock(
+            returncode=1,
+            stdout="Error: init mode failed (unable to connect to the target)",
+        )
+        completed = mock.Mock(returncode=0, stdout="")
+        env = {
+            "OPENOCD": "/usr/bin/openocd",
+        }
+
+        with (
+            mock.patch.dict(os.environ, env),
+            mock.patch.object(
+                flexmem_configure, "find_openocd", return_value="/usr/bin/openocd"
+            ),
+            mock.patch.object(
+                flexmem_configure, "run_quiet", side_effect=[failed, completed]
+            ) as run,
+        ):
+            rc = flexmem_configure.run_openocd_config(
+                "/tmp/flexmem_config.elf", "0x34064001", "0x30020000", 30
+            )
+
+        self.assertEqual(rc, 0)
+        self.assertEqual(run.call_count, 2)
+        first_script = run.call_args_list[0].args[0][-1]
+        second_script = run.call_args_list[1].args[0][-1]
+        self.assertFalse(os.path.exists(first_script))
+        self.assertFalse(os.path.exists(second_script))
 
     def test_exec_wrapper_openocd_backend_builds_runtime_server(self):
         """The OpenOCD backend starts OpenOCD without semihost TCP setup."""
@@ -324,6 +380,83 @@ class NucleoHostTest(unittest.TestCase):
         self.assertNotIn("connect_assert_srst", "\n".join(popen_calls[0]))
         self.assertEqual(popen_calls[1][0], "arm-none-eabi-gdb")
 
+    def test_exec_wrapper_rejects_sigtrap_without_exit_sentinel(self):
+        """A bare semihosting SIGTRAP is not a successful target exit."""
+        popen_calls = []
+        messages = []
+
+        class FakeProcess:
+            def __init__(self, returncode=None, communicate_text=("", "")):
+                self.returncode = returncode
+                self.communicate_text = communicate_text
+                self.stdout = mock.Mock()
+                self.stdout.read.return_value = ""
+                self.stdout.readline.return_value = ""
+
+            def poll(self):
+                return self.returncode
+
+            def wait(self, timeout=None):
+                return self.returncode
+
+            def terminate(self):
+                self.returncode = 0
+
+            def kill(self):
+                self.returncode = -9
+
+            def communicate(self, timeout=None):
+                return self.communicate_text
+
+        def fake_popen(cmd, **kwargs):
+            popen_calls.append(cmd)
+            if len(popen_calls) == 1:
+                return FakeProcess(returncode=None)
+            return FakeProcess(
+                returncode=0,
+                communicate_text=("Program received signal SIGTRAP\n", ""),
+            )
+
+        env = {
+            "OPENOCD": "/usr/bin/openocd",
+            "GDB_RUN_TIMEOUT": "0",
+        }
+        symbol_values = {
+            "mlkem_cmdline_block": "0x10000",
+            "mlk_cmdline_block": None,
+            "__wrap_main": "0x200",
+            "Reset_Handler": "0x4",
+            "nucleo_stdout_capture": "0x34080000",
+            "nucleo_stdout_capture_len": "0x30000100",
+            "nucleo_stdout_capture_truncated": None,
+        }
+
+        with (
+            mock.patch.dict(os.environ, env),
+            mock.patch.object(
+                exec_wrapper.sys, "argv", ["exec_wrapper.py", "/tmp/test.elf"]
+            ),
+            mock.patch.object(exec_wrapper.os.path, "exists", return_value=True),
+            mock.patch.object(
+                exec_wrapper, "find_openocd", return_value="/usr/bin/openocd"
+            ),
+            mock.patch.object(
+                exec_wrapper,
+                "resolve_symbol",
+                side_effect=lambda _elf, sym, **_kw: symbol_values[sym],
+            ),
+            mock.patch.object(exec_wrapper, "popen", side_effect=fake_popen),
+            mock.patch.object(exec_wrapper.time, "sleep"),
+            mock.patch.object(exec_wrapper.select, "select", return_value=([], [], [])),
+            mock.patch.object(exec_wrapper, "err", side_effect=messages.append),
+        ):
+            self.assertEqual(exec_wrapper._run_once(), 1)
+
+        self.assertIn("FAIL!", messages)
+        self.assertIn(
+            "target stopped at SIGTRAP without ML-KEM exit sentinel", messages
+        )
+
     def test_main_recovers_once_after_load_failure(self):
         """The wrapper invokes FLEXMEM configuration once before retrying."""
         run_results = iter([23, 0])
@@ -350,6 +483,7 @@ class NucleoHostTest(unittest.TestCase):
             mock.patch.object(
                 exec_wrapper, "_recover_after_load_failure", return_value=True
             ) as recover,
+            mock.patch.object(exec_wrapper, "err"),
             mock.patch.object(exec_wrapper.time, "sleep"),
         ):
             self.assertEqual(exec_wrapper.main(), 0)
@@ -438,6 +572,10 @@ class NucleoHostTest(unittest.TestCase):
 
         recover.assert_not_called()
         self.assertIn("FAIL!", messages)
+        self.assertIn(
+            "GDB load failed before target output and FLEXMEM recovery attempts are exhausted",
+            messages,
+        )
         self.assertIn("gdb batch failed with code 23", messages)
         self.assertIn("Load failed\n", messages)
 
@@ -488,6 +626,9 @@ class NucleoHostTest(unittest.TestCase):
         self.assertIn(expected_dump, gdb_lines)
         self.assertIn("p/x $nucleo_stdout_truncated", gdb_lines)
         self.assertIn("echo CFSR=", gdb_lines)
+        self.assertEqual(
+            gdb_lines[-2:], ["monitor reset_config none", "monitor reset run"]
+        )
 
 
 if __name__ == "__main__":
