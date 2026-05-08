@@ -34,7 +34,11 @@
 MLK_ASM_FN_SYMBOL(rej_uniform_avx2_asm)
 
         .cfi_startproc
-        subq $0x210, %rsp            # imm = 0x210
+        pushq %rbp
+        .cfi_adjust_cfa_offset 8
+        movq %rsp, %rbp
+        subq $0x210, %rsp
+        andq $-32, %rsp
         .cfi_adjust_cfa_offset 0x210
         xorl %eax, %eax
         testq %rdx, %rdx
@@ -88,8 +92,10 @@ Lrej_uniform_asm_final_copy:
         rep  movsb (%rsi), %es:(%rdi)
 
 Lrej_uniform_asm_end:
-        addq $0x210, %rsp            # imm = 0x210
+        movq %rbp, %rsp
         .cfi_adjust_cfa_offset -0x210
+        popq %rbp
+        .cfi_adjust_cfa_offset -8
         retq
         .cfi_endproc
 
