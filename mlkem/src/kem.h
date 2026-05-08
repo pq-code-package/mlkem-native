@@ -65,8 +65,9 @@
  *
  * @param[in] pk      Input public key (an already allocated array of
  *                    MLKEM_INDCCA_PUBLICKEYBYTES bytes).
- * @param     context Application context (build-configurable; see
- *                    MLK_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param     context Application context. Only present when
+ *                    MLK_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                    MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_FAIL          Modulus check failed.
@@ -94,8 +95,9 @@ __contract__(
  *
  * @param[in] sk      Input private key (an already allocated array of
  *                    MLKEM_INDCCA_SECRETKEYBYTES bytes).
- * @param     context Application context (build-configurable; see
- *                    MLK_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param     context Application context. Only present when
+ *                    MLK_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                    MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_FAIL          Public key hash check failed.
@@ -123,8 +125,9 @@ __contract__(
  *                     MLKEM_INDCCA_SECRETKEYBYTES bytes).
  * @param[in]  coins   Input randomness (an already allocated array filled
  *                     with 2*MLKEM_SYMBYTES random bytes).
- * @param      context Application context (build-configurable; see
- *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context Application context. Only present when
+ *                     MLK_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_FAIL          MLK_CONFIG_KEYGEN_PCT enabled and PCT failed.
@@ -157,8 +160,9 @@ __contract__(
  *                     MLKEM_INDCCA_PUBLICKEYBYTES bytes).
  * @param[out] sk      Output private key (an already allocated array of
  *                     MLKEM_INDCCA_SECRETKEYBYTES bytes).
- * @param      context Application context (build-configurable; see
- *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context Application context. Only present when
+ *                     MLK_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
@@ -194,8 +198,9 @@ __contract__(
  *                     MLKEM_INDCCA_PUBLICKEYBYTES bytes).
  * @param[in]  coins   Input randomness (an already allocated array filled
  *                     with MLKEM_SYMBYTES random bytes).
- * @param      context Application context (build-configurable; see
- *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context Application context. Only present when
+ *                     MLK_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_FAIL          The 'modulus check' @[FIPS203, Section 7.2]
@@ -232,8 +237,9 @@ __contract__(
  *                     MLKEM_SSBYTES bytes).
  * @param[in]  pk      Input public key (an already allocated array of
  *                     MLKEM_INDCCA_PUBLICKEYBYTES bytes).
- * @param      context Application context (build-configurable; see
- *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context Application context. Only present when
+ *                     MLK_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
@@ -270,8 +276,9 @@ __contract__(
  *                     MLKEM_INDCCA_CIPHERTEXTBYTES bytes).
  * @param[in]  sk      Input private key (an already allocated array of
  *                     MLKEM_INDCCA_SECRETKEYBYTES bytes).
- * @param      context Application context (build-configurable; see
- *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context Application context. Only present when
+ *                     MLK_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                     Success.
  * @retval MLK_ERR_FAIL          The 'hash check' @[FIPS203, Section 7.3]

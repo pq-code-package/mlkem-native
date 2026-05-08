@@ -8,11 +8,11 @@
 (* ========================================================================= *)
 
 (* Load base theories for AArch64 from s2n-bignum *)
-needs "arm/proofs/base.ml";;
+needs "s2n_bignum/arm/proofs/base.ml";;
 
-needs "common/mlkem_specs.ml";;
-needs "aarch64/proofs/mlkem_utils.ml";;
-needs "aarch64/proofs/mlkem_rej_uniform_table.ml";;
+needs "mlkem_native/common/mlkem_specs.ml";;
+needs "mlkem_native/aarch64/proofs/mlkem_utils.ml";;
+needs "mlkem_native/aarch64/proofs/mlkem_rej_uniform_table.ml";;
 
 (**** print_literal_from_elf "aarch64/mlkem/rej_uniform_aarch64_asm.o";;
  ****)
@@ -1681,7 +1681,7 @@ let MLKEM_REJ_UNIFORM_SUBROUTINE_CORRECT = prove
 (* data (which buffer elements pass the < 3329 filter).                      *)
 (* ========================================================================= *)
 
-needs "arm/proofs/consttime.ml";;
+needs "s2n_bignum/arm/proofs/consttime.ml";;
 
 (* Helper: discharge the memsafe postcondition
      exists e2. read events s = APPEND e2 e /\ memaccess_inbounds e2 R W

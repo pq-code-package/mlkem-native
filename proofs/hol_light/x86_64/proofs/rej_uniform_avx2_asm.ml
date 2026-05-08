@@ -8,10 +8,10 @@
 (* ========================================================================= *)
 
 (* Load base theories for x86_64 from s2n-bignum *)
-needs "x86/proofs/base.ml";;
+needs "s2n_bignum/x86/proofs/base.ml";;
 
-needs "common/mlkem_specs.ml";;
-needs "x86_64/proofs/mlkem_rej_uniform_table.ml";;
+needs "mlkem_native/common/mlkem_specs.ml";;
+needs "mlkem_native/x86_64/proofs/mlkem_rej_uniform_table.ml";;
 
 (**** print_literal_from_elf "x86_64/mlkem/rej_uniform_avx2_asm.o";;
  ****)
@@ -868,7 +868,7 @@ let MLKEM_REJ_UNIFORM_SUBROUTINE_CORRECT = prove
 (* data (which buffer elements pass the < 3329 filter).                      *)
 (* ========================================================================= *)
 
-needs "x86_64/proofs/mlkem_utils.ml";;
+needs "mlkem_native/x86_64/proofs/mlkem_utils.ml";;
 
 (* Helper: discharge the memsafe postcondition
      exists e2. read events s = APPEND e2 e /\ memaccess_inbounds e2 R W

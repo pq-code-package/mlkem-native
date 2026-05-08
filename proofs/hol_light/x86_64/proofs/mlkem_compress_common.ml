@@ -7,7 +7,7 @@
 (* Shared definitions and lemmas for compression/decompression proofs.       *)
 (* ========================================================================= *)
 
-needs "common/mlkem_specs.ml";;
+needs "mlkem_native/common/mlkem_specs.ml";;
 
 (* ------------------------------------------------------------------------- *)
 (* Bound lemmas for decompression (definitions in common/mlkem_specs.ml)     *)

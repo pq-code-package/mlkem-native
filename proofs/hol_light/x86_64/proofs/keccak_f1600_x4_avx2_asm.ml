@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT-0
  *)
 
- needs "x86/proofs/base.ml";;
+ needs "s2n_bignum/x86/proofs/base.ml";;
 
- needs "x86_64/proofs/keccak_utils.ml";;
+ needs "mlkem_native/x86_64/proofs/keccak_utils.ml";;
 
 (**** print_literal_from_elf "x86/sha3/keccak_f1600_x4_avx2_asm.o";;
 ****)
@@ -1117,8 +1117,8 @@ let KECCAK_F1600_X4_AVX2_SUBROUTINE_CORRECT = prove
 (* Constant-time and memory safety proof.                                    *)
 (* ========================================================================= *)
 
-needs "x86/proofs/consttime.ml";;
-needs "x86_64/proofs/subroutine_signatures.ml";;
+needs "s2n_bignum/x86/proofs/consttime.ml";;
+needs "mlkem_native/x86_64/proofs/subroutine_signatures.ml";;
 
 
 let full_spec,public_vars = mk_safety_spec

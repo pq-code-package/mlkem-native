@@ -9,9 +9,9 @@
 (* ========================================================================= *)
 
 (* Load base theories for AArch64 from s2n-bignum *)
-needs "arm/proofs/base.ml";;
+needs "s2n_bignum/arm/proofs/base.ml";;
 
-needs "aarch64/proofs/keccak_utils.ml";;
+needs "mlkem_native/aarch64/proofs/keccak_utils.ml";;
 
 (**** print_literal_from_elf "aarch64/mlkem/keccak_f1600_x2_v84a_aarch64_asm.o";;
  ****)
@@ -385,8 +385,8 @@ let KECCAK_F1600_X2_V84A_SUBROUTINE_CORRECT = prove
 (* Constant-time and memory safety proof.                                    *)
 (* ------------------------------------------------------------------------- *)
 
-needs "arm/proofs/consttime.ml";;
-needs "aarch64/proofs/subroutine_signatures.ml";;
+needs "s2n_bignum/arm/proofs/consttime.ml";;
+needs "mlkem_native/aarch64/proofs/subroutine_signatures.ml";;
 
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:false

@@ -4,7 +4,7 @@
  *)
 
 (* Load base theories for AArch64 from s2n-bignum *)
-needs "arm/proofs/base.ml";;
+needs "s2n_bignum/arm/proofs/base.ml";;
 
 print_string "=== bytecode start: aarch64/mlkem/keccak_f1600_x1_v84a_aarch64_asm.o ===\n";;
 print_literal_from_elf "aarch64/mlkem/keccak_f1600_x1_v84a_aarch64_asm.o";;
