@@ -270,6 +270,9 @@ ifeq ($(ARCH),x86_64)
 else ifeq ($(ARCH),aarch64)
 	@echo "=== AArch64 Feature Support ==="
 	@echo "SHA3: Host $(if $(filter 1,$(MK_HOST_SUPPORTS_SHA3)),✅,❌) Compiler $(if $(filter 1,$(MK_COMPILER_SUPPORTS_SHA3)),✅,❌)"
+else ifeq ($(ARCH),riscv64)
+	@echo "=== RISC-V 64-bit Feature Support ==="
+	@echo "RVV: Host $(if $(filter 1,$(MK_HOST_SUPPORTS_RVV)),✅,❌) Compiler $(if $(filter 1,$(MK_COMPILER_SUPPORTS_RVV)),✅,❌)"
 else
 	@echo "=== Architecture Not Supported ==="
 	@echo "No specific feature detection available for $(ARCH)"

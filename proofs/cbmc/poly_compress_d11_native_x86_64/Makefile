@@ -21,7 +21,7 @@ PROJECT_SOURCES += $(SRCDIR)/mlkem/src/compress.c
 
 ifeq ($(MLKEM_K),4)
 CHECK_FUNCTION_CONTRACTS=mlk_poly_compress_d11_native
-USE_FUNCTION_CONTRACTS = mlk_poly_compress_d11_avx2
+USE_FUNCTION_CONTRACTS = mlk_poly_compress_d11_avx2_asm
 USE_FUNCTION_CONTRACTS += mlk_sys_check_capability
 else
 CHECK_FUNCTION_CONTRACTS=

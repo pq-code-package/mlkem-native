@@ -22,38 +22,33 @@
 
 #if defined(MLKEM_DEBUG)
 
-/*************************************************
- * Name:        mlk_debug_check_bounds_int16m1
+/**
+ * Check whether values in a vint16m1_t vector are within specified bounds.
  *
- * Description: Check whether values in a vint16m1_t vector
- *              are within specified bounds.
- *
- * Arguments:   - file: filename
- *              - line: line number
- *              - vec: RISC-V vector to be checked
- *              - vl: vector length (number of active elements)
- *              - lower_bound_exclusive: Exclusive lower bound
- *              - upper_bound_exclusive: Exclusive upper bound
- **************************************************/
+ * @param[in] file                  Filename.
+ * @param     line                  Line number.
+ * @param     vec                   RISC-V vector to be checked.
+ * @param     vl                    Vector length (number of active elements).
+ * @param     lower_bound_exclusive Exclusive lower bound.
+ * @param     upper_bound_exclusive Exclusive upper bound.
+ */
 #define mlk_debug_check_bounds_int16m1 \
   MLK_NAMESPACE(mlkem_debug_check_bounds_int16m1)
 void mlk_debug_check_bounds_int16m1(const char *file, int line, vint16m1_t vec,
                                     size_t vl, int lower_bound_exclusive,
                                     int upper_bound_exclusive);
 
-/*************************************************
- * Name:        mlk_debug_check_bounds_int16m2
+/**
+ * Check whether values in a vint16m2_t vector are within specified bounds
+ * by splitting into m1 vectors.
  *
- * Description: Check whether values in a vint16m2_t vector
- *              are within specified bounds by splitting into m1 vectors.
- *
- * Arguments:   - file: filename
- *              - line: line number
- *              - vec: RISC-V vector to be checked
- *              - vl: vector length (number of active elements per m1 half)
- *              - lower_bound_exclusive: Exclusive lower bound
- *              - upper_bound_exclusive: Exclusive upper bound
- **************************************************/
+ * @param[in] file                  Filename.
+ * @param     line                  Line number.
+ * @param     vec                   RISC-V vector to be checked.
+ * @param     vl                    Vector length (active elements per m1 half).
+ * @param     lower_bound_exclusive Exclusive lower bound.
+ * @param     upper_bound_exclusive Exclusive upper bound.
+ */
 #define mlk_debug_check_bounds_int16m2 \
   MLK_NAMESPACE(mlkem_debug_check_bounds_int16m2)
 void mlk_debug_check_bounds_int16m2(const char *file, int line, vint16m2_t vec,

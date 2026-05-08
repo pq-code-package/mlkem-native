@@ -7,8 +7,8 @@
 (* Keccak utilities for x86_64 proofs.                                       *)
 (* ========================================================================= *)
 
-needs "common/keccak_spec.ml";;
-needs "x86_64/proofs/keccak_f1600_x4_avx2_constants.ml";;
+needs "mlkem_native/common/keccak_spec.ml";;
+needs "mlkem_native/x86_64/proofs/keccak_f1600_x4_avx2_constants.ml";;
 
 (* ------------------------------------------------------------------------- *)
 (* Some custom normalization for logical equivalence and conjunction, which  *)

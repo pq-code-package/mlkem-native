@@ -89,5 +89,4 @@ let MAP_UNTIL_TARGET_PC f n = fun (asl, w) ->
   in
     core n (asl, w);;
 
-needs "arm/proofs/consttime.ml";;
-needs "common/consttime_utils.ml";;
+needs "s2n_bignum/arm/proofs/consttime.ml";;

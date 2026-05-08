@@ -67,6 +67,14 @@ MK_COMPILER_SUPPORTS_SHA3 ?= $(shell echo 'int main() { __asm__("eor3 v0.16b, v1
 
 endif # aarch64 compiler detection
 
+# RISC-V 64-bit compiler feature detection
+ifeq ($(ARCH),riscv64)
+
+# Test RVV support using C with inline assembly
+MK_COMPILER_SUPPORTS_RVV ?= $(shell echo 'int main() { __asm__("vadd.vv v0, v1, v2"); return 0; }' | $(CC) -march=rv64gcv -x c - -c -o /dev/null 2>/dev/null && echo 1 || echo 0)
+
+endif # riscv64 compiler detection
+
 # Define HOST_PLATFORM if not already defined
 HOST_PLATFORM ?= $(shell uname -s)-$(shell uname -m)
 
@@ -124,6 +132,25 @@ endif # HOST_PLATFORM aarch64
 
 endif # aarch64
 
+# RISC-V 64-bit architecture detection
+ifeq ($(ARCH),riscv64)
+
+# Host CPU feature detection for RISC-V 64-bit
+ifeq ($(HOST_PLATFORM),Linux-riscv64)
+# Linux: Parse ISA string from /proc/cpuinfo
+# Format: rv64imafdcv_sscofpmf_... -- extract single-letter extensions
+# (before first '_') and check for 'v'
+MK_HOST_SUPPORTS_RVV := $(shell sed -n '/^isa/{s/.*rv64//;s/_.*//;p;q}' /proc/cpuinfo 2>/dev/null | grep -q v && echo 1 || echo 0)
+else ifneq ($(CROSS_PREFIX),)
+# Cross-compilation: assume all features are supported
+MK_HOST_SUPPORTS_RVV := 1
+else
+# Other platforms: assume no support
+MK_HOST_SUPPORTS_RVV := 0
+endif # HOST_PLATFORM riscv64
+
+endif # riscv64
+
 # Only apply CFLAGS modifications if AUTO=1
 ifeq ($(AUTO),1)
 
@@ -159,7 +186,11 @@ endif # aarch64_be
 # RISC-V 64-bit CFLAGS configuration
 ifeq ($(ARCH),riscv64)
 CFLAGS += -DMLK_FORCE_RISCV64
+
+# Add RVV flags only if both compiler and host support it
+ifeq ($(MK_COMPILER_SUPPORTS_RVV)$(MK_HOST_SUPPORTS_RVV),11)
 CFLAGS += -march=rv64gcv
+endif
 endif # riscv64
 
 # RISC-V 32-bit CFLAGS configuration

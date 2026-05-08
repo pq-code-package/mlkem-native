@@ -7,5 +7,4 @@
 (* Utility definitions for ML-KEM x86_64 proofs.                            *)
 (* ========================================================================= *)
 
-needs "x86/proofs/consttime.ml";;
-needs "common/consttime_utils.ml";;
+needs "s2n_bignum/x86/proofs/consttime.ml";;
