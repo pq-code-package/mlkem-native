@@ -14,7 +14,7 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/ppc64le/src/reduce.S using scripts/simpasm. Do not modify it directly.
+ *   dev/ppc64le/src/reduce_ppc_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 .text
@@ -705,8 +705,8 @@ MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
 
 MLK_ASM_FN_SIZE(reduce_ppc_asm)
 
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED && __POWER8_VECTOR__ \
-        */
+#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
+          && __POWER8_VECTOR__ */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits

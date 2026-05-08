@@ -96,10 +96,10 @@
 #if defined(MLK_SYS_RISCV64)
 #endif
 #if defined(MLK_SYS_PPC64LE)
-#include "src/native/ppc64le/src/intt_ppc.S"
-#include "src/native/ppc64le/src/ntt_ppc.S"
-#include "src/native/ppc64le/src/poly_tomont.S"
-#include "src/native/ppc64le/src/reduce.S"
+#include "src/native/ppc64le/src/intt_ppc_asm.S"
+#include "src/native/ppc64le/src/ntt_ppc_asm.S"
+#include "src/native/ppc64le/src/poly_tomont_ppc_asm.S"
+#include "src/native/ppc64le/src/reduce_ppc_asm.S"
 #endif /* MLK_SYS_PPC64LE */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 

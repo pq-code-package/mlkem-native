@@ -182,5 +182,5 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
 #undef V_NMKQ
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED && __POWER8_VECTOR__ \
-        */
+#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
+          && __POWER8_VECTOR__ */

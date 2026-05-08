@@ -14,7 +14,7 @@
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
- *   dev/ppc64le/src/intt_ppc.S using scripts/simpasm. Do not modify it directly.
+ *   dev/ppc64le/src/intt_ppc_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 .text
@@ -3411,8 +3411,8 @@ intt_ppc_asm_Loopf:
 
 MLK_ASM_FN_SIZE(intt_ppc_asm)
 
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED && __POWER8_VECTOR__ \
-        */
+#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
+          && __POWER8_VECTOR__ */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits
