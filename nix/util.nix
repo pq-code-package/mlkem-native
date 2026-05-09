@@ -2,7 +2,7 @@
 # Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-{ pkgs, cbmc, bitwuzla, z3, python3-for-slothy }:
+{ pkgs, cbmc, bitwuzla, z3 }:
 rec {
   glibc-join = p: p.buildPackages.symlinkJoin {
     name = "glibc-join";
@@ -102,7 +102,6 @@ rec {
   hol_light' = pkgs.callPackage ./hol_light { };
   hol_server = pkgs.callPackage ./hol_light/hol_server.nix { inherit hol_light'; };
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
-  slothy = pkgs.callPackage ./slothy { python3 = python3-for-slothy; };
   pqmx = pkgs.callPackage ./pqmx { };
   avr-toolchain = pkgs.callPackage ./avr { };
 
