@@ -129,16 +129,48 @@
         addi    1, 1, 352
 .endm
 
-.macro mulmod dst, src, z, zt
-        vmhraddshs 15, \src, \zt, rinp
-        vmladduhm  \dst, \src, \z, rinp
-        vmladduhm  \dst, 15, V_NMKQ, \dst
+.macro mulmod_2x dst0, dst1, src0, src1, z0, zt0, z1, zt1, t0, t1
+        vmhraddshs \t0, \src0, \zt0, rinp
+        vmhraddshs \t1, \src1, \zt1, rinp
+        vmladduhm  \dst0, \src0, \z0,  rinp
+        vmladduhm  \dst1, \src1, \z1,  rinp
+        vmladduhm  \dst0, \t0, V_NMKQ, \dst0
+        vmladduhm  \dst1, \t1, V_NMKQ, \dst1
 .endm
 
-.macro ct_butterfly a, b, z, zt
-        mulmod 16, \b, \z, \zt
-        vsubuhm \b, \a, 16
-        vadduhm \a, \a, 16
+.macro ct_butterfly_2x a0, b0, a1, b1, z0, zt0, z1, zt1, m0, m1, t0, t1
+        mulmod_2x \m0, \m1, \b0, \b1, \z0, \zt0, \z1, \zt1, \t0, \t1
+        vsubuhm \b0, \a0, \m0
+        vsubuhm \b1, \a1, \m1
+        vadduhm \a0, \a0, \m0
+        vadduhm \a1, \a1, \m1
+.endm
+
+.macro mulmod_4x dst0, dst1, dst2, dst3, src0, src1, src2, src3, z0, zt0, z1, zt1, z2, zt2, z3, zt3, t0, t1, t2, t3
+        vmhraddshs \t0, \src0, \zt0, rinp
+        vmhraddshs \t1, \src1, \zt1, rinp
+        vmhraddshs \t2, \src2, \zt2, rinp
+        vmhraddshs \t3, \src3, \zt3, rinp
+        vmladduhm  \dst0, \src0, \z0,  rinp
+        vmladduhm  \dst1, \src1, \z1,  rinp
+        vmladduhm  \dst2, \src2, \z2,  rinp
+        vmladduhm  \dst3, \src3, \z3,  rinp
+        vmladduhm  \dst0, \t0, V_NMKQ, \dst0
+        vmladduhm  \dst1, \t1, V_NMKQ, \dst1
+        vmladduhm  \dst2, \t2, V_NMKQ, \dst2
+        vmladduhm  \dst3, \t3, V_NMKQ, \dst3
+.endm
+
+.macro ct_butterfly_4x a0, b0, a1, b1, a2, b2, a3, b3, z0, zt0, z1, zt1, z2, zt2, z3, zt3, m0, m1, m2, m3, t0, t1, t2, t3
+        mulmod_4x \m0, \m1, \m2, \m3, \b0, \b1, \b2, \b3, \z0, \zt0, \z1, \zt1, \z2, \zt2, \z3, \zt3, \t0, \t1, \t2, \t3
+        vsubuhm \b0, \a0, \m0
+        vsubuhm \b1, \a1, \m1
+        vsubuhm \b2, \a2, \m2
+        vsubuhm \b3, \a3, \m3
+        vadduhm \a0, \a0, \m0
+        vadduhm \a1, \a1, \m1
+        vadduhm \a2, \a2, \m2
+        vadduhm \a3, \a3, \m3
 .endm
 
 .macro transpose4 data0, data1, data2, data3, t0, t1, t2, t3
@@ -211,20 +243,17 @@ ntt_ppc_layer123_start:
         lxvd2x  32+d6, 18, rinp
         lxvd2x  32+d7, 19, rinp
 
-        ct_butterfly d0, d4, V_ZL1, V_ZL1t
-        ct_butterfly d1, d5, V_ZL1, V_ZL1t
-        ct_butterfly d2, d6, V_ZL1, V_ZL1t
-        ct_butterfly d3, d7, V_ZL1, V_ZL1t
+        ct_butterfly_4x d0, d4, d1, d5, d2, d6, d3, d7, \
+                        V_ZL1, V_ZL1t, V_ZL1, V_ZL1t, V_ZL1, V_ZL1t, V_ZL1, V_ZL1t, \
+                        21, 26, 30, 31, 15, 16, 20, 25
 
-        ct_butterfly d0, d2, V_ZL2a, V_ZL2at
-        ct_butterfly d1, d3, V_ZL2a, V_ZL2at
-        ct_butterfly d4, d6, V_ZL2b, V_ZL2bt
-        ct_butterfly d5, d7, V_ZL2b, V_ZL2bt
+        ct_butterfly_4x d0, d2, d1, d3, d4, d6, d5, d7, \
+                        V_ZL2a, V_ZL2at, V_ZL2a, V_ZL2at, V_ZL2b, V_ZL2bt, V_ZL2b, V_ZL2bt, \
+                        21, 26, 30, 31, 15, 16, 20, 25
 
-        ct_butterfly d0, d1, V_ZL3a, V_ZL3at
-        ct_butterfly d2, d3, V_ZL3b, V_ZL3bt
-        ct_butterfly d4, d5, V_ZL3c, V_ZL3ct
-        ct_butterfly d6, d7, V_ZL3d, V_ZL3dt
+        ct_butterfly_4x d0, d1, d2, d3, d4, d5, d6, d7, \
+                        V_ZL3a, V_ZL3at, V_ZL3b, V_ZL3bt, V_ZL3c, V_ZL3ct, V_ZL3d, V_ZL3dt, \
+                        21, 26, 30, 31, 15, 16, 20, 25
 
         stxvd2x 32+d0, 9,  rinp
         stxvd2x 32+d1, 10, rinp
@@ -253,64 +282,127 @@ ntt_ppc_layer123_start:
         li      11, 32
         li      12, 48
 
-        li      16, 8
-        mtctr   16
+#define off96  5
+#define off112 7
+        li      off96,  4
+        mtctr   off96
 
         li      16, 64
         li      17, 80
+        li      off96,  96
+        li      off112, 112
+
+#define z4a   0
+#define z4at  1
+#define z4b   2
+#define z4bt  4
+#define z5a   7
+#define z5at  8
+#define z5b   9
+#define z5bt  10
+#define z5c   11
+#define z5ct  14
+#define z5d   19
+#define z5dt  24
 
 ntt_ppc_layer4567_start:
-        lvx     d0, 9,  rinp
-        lvx     d1, 10, rinp
-        lvx     d2, 11, rinp
-        lvx     d3, 12, rinp
+        lvx     d0, 9,   rinp
+        lvx     d1, 10,  rinp
+        lvx     d2, 11,  rinp
+        lvx     d3, 12,  rinp
+        lvx     d4, 16,  rinp
+        lvx     d5, 17,  rinp
+        lvx     d6, off96,  rinp
+        lvx     d7, off112, rinp
 
-        lvx     V_ZL4,   0,  zeta_inp
-        lvx     V_ZL4t,  0,  zeta_tw_inp
-        lvx     V_ZL5a,  0,  zeta_l5_ptr
-        lvx     V_ZL5at, 0,  zeta_l5_tw_ptr
-        lvx     V_ZL5b,  10, zeta_l5_ptr
-        lvx     V_ZL5bt, 10, zeta_l5_tw_ptr
+        // Layer 4: 4 butterflies with 2 broadcast zetas (block A and block B)
+        lvx     z4a,  0,  zeta_inp
+        lvx     z4at, 0,  zeta_tw_inp
+        lvx     z4b,  10, zeta_inp
+        lvx     z4bt, 10, zeta_tw_inp
+        addi    zeta_inp,    zeta_inp,    32
+        addi    zeta_tw_inp, zeta_tw_inp, 32
 
-        addi    zeta_inp,       zeta_inp,       16
-        addi    zeta_tw_inp,    zeta_tw_inp,    16
-        addi    zeta_l5_ptr,    zeta_l5_ptr,    32
-        addi    zeta_l5_tw_ptr, zeta_l5_tw_ptr, 32
+        ct_butterfly_4x d0, d2, d1, d3, d4, d6, d5, d7, \
+                        z4a, z4at, z4a, z4at, z4b, z4bt, z4b, z4bt, \
+                        21, 26, 30, 31, 15, 16, 20, 25
 
-        ct_butterfly d0, d2, V_ZL4, V_ZL4t
-        ct_butterfly d1, d3, V_ZL4, V_ZL4t
+        // Layer 5: 4 butterflies, 4 distinct broadcast zetas
+        lvx     z5a,  0,  zeta_l5_ptr
+        lvx     z5at, 0,  zeta_l5_tw_ptr
+        lvx     z5b,  10, zeta_l5_ptr
+        lvx     z5bt, 10, zeta_l5_tw_ptr
+        lvx     z5c,  11, zeta_l5_ptr
+        lvx     z5ct, 11, zeta_l5_tw_ptr
+        lvx     z5d,  12, zeta_l5_ptr
+        lvx     z5dt, 12, zeta_l5_tw_ptr
+        addi    zeta_l5_ptr,    zeta_l5_ptr,    64
+        addi    zeta_l5_tw_ptr, zeta_l5_tw_ptr, 64
 
-        ct_butterfly d0, d1, V_ZL5a, V_ZL5at
-        ct_butterfly d2, d3, V_ZL5b, V_ZL5bt
+        ct_butterfly_4x d0, d1, d2, d3, d4, d5, d6, d7, \
+                        z5a, z5at, z5b, z5bt, z5c, z5ct, z5d, z5dt, \
+                        21, 26, 30, 31, 15, 16, 20, 25
 
-        transpose4 d0, d1, d2, d3, 22, 23, 27, 28
+        // transpose4 each 4-vec block independently
+        transpose4 d0, d1, d2, d3, z4a, z4at, z4b, z4bt
+        transpose4 d4, d5, d6, d7, z5a, z5at, z5b, z5bt
 
-        lvx     V_ZL4,   0,  zeta_l67_ptr
-        lvx     V_ZL4t,  10, zeta_l67_ptr
-        lvx     V_ZL5a,  11, zeta_l67_ptr
-        lvx     V_ZL5at, 12, zeta_l67_ptr
-        lvx     V_ZL5b,  16, zeta_l67_ptr
-        lvx     V_ZL5bt, 17, zeta_l67_ptr
+        // Layer 6: 4 butterflies, 2 root0 vectors (one per block)
+        lvx     z4a,  0,  zeta_l67_ptr      // root0 block A
+        lvx     z4at, 10, zeta_l67_ptr      // root0_tw block A
+        lvx     z4b,  off96, zeta_l67_ptr   // root0 block B (offset 96 = block-B start)
+        lvx     z4bt, off112, zeta_l67_ptr  // root0_tw block B
+        ct_butterfly_4x d0, d2, d1, d3, d4, d6, d5, d7, \
+                        z4a, z4at, z4a, z4at, z4b, z4bt, z4b, z4bt, \
+                        21, 26, 30, 31, 15, 16, 20, 25
 
+        // Layer 7: 4 butterflies, 4 distinct root vectors (root1/2 for each block)
+        lvx     z5a,  11, zeta_l67_ptr   // root1 block A (offset 32)
+        lvx     z5at, 12, zeta_l67_ptr   // root1_tw block A (offset 48)
+        lvx     z5b,  16, zeta_l67_ptr   // root2 block A (offset 64)
+        lvx     z5bt, 17, zeta_l67_ptr   // root2_tw block A (offset 80)
+        addi    zeta_l67_ptr, zeta_l67_ptr, 96
+        lvx     z5c,  11, zeta_l67_ptr   // root1 block B
+        lvx     z5ct, 12, zeta_l67_ptr   // root1_tw block B
+        lvx     z5d,  16, zeta_l67_ptr   // root2 block B
+        lvx     z5dt, 17, zeta_l67_ptr   // root2_tw block B
         addi    zeta_l67_ptr, zeta_l67_ptr, 96
 
-        ct_butterfly d0, d2, V_ZL4,  V_ZL4t
-        ct_butterfly d1, d3, V_ZL4,  V_ZL4t
+        ct_butterfly_4x d0, d1, d2, d3, d4, d5, d6, d7, \
+                        z5a, z5at, z5b, z5bt, z5c, z5ct, z5d, z5dt, \
+                        21, 26, 30, 31, 15, 16, 20, 25
 
-        ct_butterfly d0, d1, V_ZL5a, V_ZL5at
-        ct_butterfly d2, d3, V_ZL5b, V_ZL5bt
+        transpose4 d0, d1, d2, d3, z4a, z4at, z4b, z4bt
+        transpose4 d4, d5, d6, d7, z5a, z5at, z5b, z5bt
 
-        transpose4 d0, d1, d2, d3, 22, 23, 27, 28
+        stvx    d0, 9,   rinp
+        stvx    d1, 10,  rinp
+        stvx    d2, 11,  rinp
+        stvx    d3, 12,  rinp
+        stvx    d4, 16,  rinp
+        stvx    d5, 17,  rinp
+        stvx    d6, off96,  rinp
+        stvx    d7, off112, rinp
 
-        stvx    d0, 9,  rinp
-        stvx    d1, 10, rinp
-        stvx    d2, 11, rinp
-        stvx    d3, 12, rinp
-
-        addi    rinp, rinp, 64
+        addi    rinp, rinp, 128
         bdnz    ntt_ppc_layer4567_start
 
         addi    rinp, rinp, -512
+
+#undef off96
+#undef off112
+#undef z4a
+#undef z4at
+#undef z4b
+#undef z4bt
+#undef z5a
+#undef z5at
+#undef z5b
+#undef z5bt
+#undef z5c
+#undef z5ct
+#undef z5d
+#undef z5dt
 
 #undef zeta_l5_ptr
 #undef zeta_l5_tw_ptr
@@ -357,6 +449,20 @@ ntt_ppc_layer4567_start:
 #undef zeta_l5_ptr
 #undef zeta_l5_tw_ptr
 #undef zeta_l67_ptr
+#undef off96
+#undef off112
+#undef z4a
+#undef z4at
+#undef z4b
+#undef z4bt
+#undef z5a
+#undef z5at
+#undef z5b
+#undef z5bt
+#undef z5c
+#undef z5ct
+#undef z5d
+#undef z5dt
 
 /* simpasm: footer-start */
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
