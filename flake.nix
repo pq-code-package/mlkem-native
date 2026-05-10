@@ -44,8 +44,13 @@
             ];
           };
           holLightShellHook = ''
-            export PATH=$PWD/scripts:$PATH
-            export PROOF_DIR="$PWD/proofs/hol_light"
+            # Resolve the repo root independently of the directory from which
+            # `nix develop` was invoked, so that PROOF_DIR / IMPORTS_DIR always
+            # point at the real proofs/hol_light tree (and .imports is not
+            # created in a spurious subdirectory-nested path).
+            REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
+            export PATH="$REPO_ROOT/scripts:$PATH"
+            export PROOF_DIR="$REPO_ROOT/proofs/hol_light"
             # Namespaced imports root for HOL-Light proofs.
             # See scripts/check-hol-light-imports for the enforced rule.
             export IMPORTS_DIR="$PROOF_DIR/.imports"
