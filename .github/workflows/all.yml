@@ -42,6 +42,14 @@ jobs:
     needs: [ base, nix ]
     uses: ./.github/workflows/ci.yml
     secrets: inherit
+  legacy-compilers:
+    name: Legacy compilers
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/legacy_compilers.yml
+    secrets: inherit
   cbmc:
     name: CBMC
     permissions:
