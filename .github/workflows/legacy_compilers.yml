@@ -258,3 +258,238 @@ jobs:
           examples: true
           opt: all
           cflags: "-std=c23 ${{ matrix.cflags }}"
+  linux-clang:
+    name: Linux clang-${{ matrix.clang.version }} (${{ matrix.target.arch }}, ${{ matrix.cflags }})
+    strategy:
+      fail-fast: false
+      matrix:
+        clang:
+          - { version: '5',  c17: false, c23: false }
+          - { version: '6',  c17: true,  c23: false }
+          - { version: '7',  c17: true,  c23: false }
+          - { version: '8',  c17: true,  c23: false }
+          - { version: '9',  c17: true,  c23: false }
+          - { version: '10', c17: true,  c23: false }
+          - { version: '11', c17: true,  c23: false }
+          - { version: '12', c17: true,  c23: false }
+          - { version: '13', c17: true,  c23: false }
+          - { version: '14', c17: true,  c23: false }
+          - { version: '15', c17: true,  c23: false }
+          - { version: '16', c17: true,  c23: false }
+          - { version: '17', c17: true,  c23: false }
+          - { version: '18', c17: true,  c23: true  }
+          - { version: '19', c17: true,  c23: true  }
+          - { version: '20', c17: true,  c23: true  }
+          - { version: '21', c17: true,  c23: true  }
+        cflags: ['-O0', '-Os', '-O3']
+        target:
+          - runner: ubuntu-latest
+            arch: x86_64
+          - runner: ubuntu-24.04-arm
+            arch: aarch64
+    runs-on: ${{ matrix.target.runner }}
+    container:
+      image: silkeh/clang:${{ matrix.clang.version }}
+    env:
+      CC: clang
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: build + test (default)
+        uses: ./.github/actions/multi-functest
+        with:
+          nix-shell: ""
+          custom_shell: bash
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: true
+          opt: all
+          cflags: "${{ matrix.cflags }}"
+      - name: build + test (C90)
+        uses: ./.github/actions/multi-functest
+        with:
+          nix-shell: ""
+          custom_shell: bash
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: true
+          opt: all
+          cflags: "-std=c90 ${{ matrix.cflags }}"
+      - name: build + test (C99)
+        uses: ./.github/actions/multi-functest
+        with:
+          nix-shell: ""
+          custom_shell: bash
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: true
+          opt: all
+          cflags: "-std=c99 ${{ matrix.cflags }}"
+      - name: build + test (C11)
+        uses: ./.github/actions/multi-functest
+        with:
+          nix-shell: ""
+          custom_shell: bash
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: true
+          opt: all
+          cflags: "-std=c11 ${{ matrix.cflags }}"
+      - name: build + test (C17)
+        if: ${{ matrix.clang.c17 }}
+        uses: ./.github/actions/multi-functest
+        with:
+          nix-shell: ""
+          custom_shell: bash
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: true
+          opt: all
+          cflags: "-std=c17 ${{ matrix.cflags }}"
+      - name: build + test (C23)
+        if: ${{ matrix.clang.c23 }}
+        uses: ./.github/actions/multi-functest
+        with:
+          nix-shell: ""
+          custom_shell: bash
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: true
+          opt: all
+          cflags: "-std=c23 ${{ matrix.cflags }}"
+  macos-clang:
+    name: macOS clang-${{ matrix.clang.version }} (${{ matrix.target.arch }}, ${{ matrix.cflags }})
+    strategy:
+      fail-fast: false
+      matrix:
+        clang:
+          - { version: '14', c23: false }
+          - { version: '15', c23: false }
+          - { version: '16', c23: false }
+          - { version: '17', c23: false }
+          - { version: '18', c23: true  }
+          - { version: '19', c23: true  }
+          - { version: '20', c23: true  }
+          - { version: '21', c23: true  }
+        cflags: ['-O0', '-Os', '-O3']
+        target:
+          - { runner: macos-latest,   arch: aarch64 }
+          - { runner: macos-15-intel, arch: x86_64  }
+    runs-on: ${{ matrix.target.runner }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install llvm@${{ matrix.clang.version }}
+        uses: ./.github/actions/setup-brew
+        with:
+          packages: llvm@${{ matrix.clang.version }}
+      - name: Set CC
+        # llvm@N is keg-only; binaries are not symlinked into PATH.
+        run: echo "CC=$(brew --prefix llvm@${{ matrix.clang.version }})/bin/clang" >> $GITHUB_ENV
+      - name: build + test (default)
+        uses: ./.github/actions/multi-functest
+        with:
+          nix-shell: ""
+          custom_shell: bash
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: true
+          opt: all
+          cflags: "${{ matrix.cflags }}"
+      - name: build + test (C90)
+        uses: ./.github/actions/multi-functest
+        with:
+          nix-shell: ""
+          custom_shell: bash
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: true
+          opt: all
+          cflags: "-std=c90 ${{ matrix.cflags }}"
+      - name: build + test (C99)
+        uses: ./.github/actions/multi-functest
+        with:
+          nix-shell: ""
+          custom_shell: bash
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: true
+          opt: all
+          cflags: "-std=c99 ${{ matrix.cflags }}"
+      - name: build + test (C11)
+        uses: ./.github/actions/multi-functest
+        with:
+          nix-shell: ""
+          custom_shell: bash
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: true
+          opt: all
+          cflags: "-std=c11 ${{ matrix.cflags }}"
+      - name: build + test (C17)
+        uses: ./.github/actions/multi-functest
+        with:
+          nix-shell: ""
+          custom_shell: bash
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: true
+          opt: all
+          cflags: "-std=c17 ${{ matrix.cflags }}"
+      - name: build + test (C23)
+        if: ${{ matrix.clang.c23 }}
+        uses: ./.github/actions/multi-functest
+        with:
+          nix-shell: ""
+          custom_shell: bash
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: true
+          opt: all
+          cflags: "-std=c23 ${{ matrix.cflags }}"
