@@ -18,7 +18,11 @@
 MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2_asm)
 
         .cfi_startproc
-        subq $0x300, %rsp            # imm = 0x300
+        pushq %rbp
+        .cfi_adjust_cfa_offset 8
+        movq %rsp, %rbp
+        subq $0x300, %rsp
+        andq $-32, %rsp
         .cfi_adjust_cfa_offset 0x300
         vmovdqu (%rdi), %ymm0
         vmovdqu 0xc8(%rdi), %ymm3
@@ -437,8 +441,10 @@ LLkeccak_f1600_x4_avx2:
         vmovhpd %xmm3, 0x188(%rdi)
         vmovq %xmm15, 0x250(%rdi)
         vmovhpd %xmm15, 0x318(%rdi)
-        addq $0x300, %rsp            # imm = 0x300
+        movq %rbp, %rsp
         .cfi_adjust_cfa_offset -0x300
+        popq %rbp
+        .cfi_adjust_cfa_offset -8
         retq
         .cfi_endproc
 
