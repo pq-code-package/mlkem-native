@@ -42,7 +42,38 @@
 
 #include "hal.h"
 
-#if defined(PMU_CYCLES)
+#if defined(CYCCNT_CYCLES)
+
+#if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8_1M_MAIN__)
+
+#if defined(STM32N657xx)
+#include <stm32n6xx.h>
+#elif defined(ARMCM55)
+#include <ARMCM55.h>
+#include <system_ARMCM55.h>
+#elif defined(ARMCM33)
+#include <ARMCM33.h>
+#include <system_ARMCM33.h>
+#else
+#error "CYCCNT_CYCLES on Arm M-profile requires a CMSIS device header"
+#endif
+
+void enable_cyclecounter(void)
+{
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+  DWT->CYCCNT = 0;
+  DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+}
+
+void disable_cyclecounter(void) { DWT->CTRL &= ~DWT_CTRL_CYCCNTENA_Msk; }
+
+uint64_t get_cyclecounter(void) { return DWT->CYCCNT; }
+
+#else /* !(__ARM_ARCH_8M_MAIN__ || __ARM_ARCH_8_1M_MAIN__) */
+#error CYCCNT_CYCLES option only supported on Arm M-profile
+#endif /* !(__ARM_ARCH_8M_MAIN__ || __ARM_ARCH_8_1M_MAIN__) */
+
+#elif defined(PMU_CYCLES)
 
 #if defined(__x86_64__)
 

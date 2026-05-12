@@ -9,8 +9,8 @@ BUILD_DIR ?= test/build
 CROSS_PREFIX=arm-none-eabi-
 CC=gcc
 
-# Use PMU cycle counting by default
-CYCLES ?= PMU
+# Use the Cortex-M DWT cycle counter by default
+CYCLES ?= CYCCNT
 
 # Short benchmark runs for testing
 MLK_BENCHMARK_NWARMUP ?= 1

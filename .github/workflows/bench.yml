@@ -81,7 +81,7 @@ jobs:
           cross_prefix: ""
         - system: nucleo-n657x0
           name: Arm Cortex-M55 (NUCLEO-N657X0-Q) benchmarks
-          bench_pmu: PMU
+          bench_pmu: CYCCNT
           archflags: ""
           cflags: ""
           ldflags: ""
