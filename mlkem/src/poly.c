@@ -17,6 +17,7 @@
  *   https://github.com/pq-crystals/kyber/tree/main/ref
  */
 
+#include "backends.h"
 #include "common.h"
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 

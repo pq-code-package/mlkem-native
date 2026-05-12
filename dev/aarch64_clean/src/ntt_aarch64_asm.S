@@ -48,6 +48,7 @@
 */
 
 #include "../../../common.h"
+#include "../../../backends.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */

@@ -49,6 +49,7 @@
 /* Re-implementation of asymmetric base multiplication following @[NeonNTT] */
 
 #include "../../../common.h"
+#include "../../../backends.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64) &&  !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) &&  (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 2)
 /* simpasm: header-end */
 

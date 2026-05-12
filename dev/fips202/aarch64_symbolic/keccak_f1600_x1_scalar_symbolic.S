@@ -33,6 +33,7 @@
 */
 
 #include "../../../../common.h"
+#include "../../../../backends.h"
 #if defined(MLK_FIPS202_AARCH64_NEED_X1_SCALAR) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */

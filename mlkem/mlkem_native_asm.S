@@ -315,6 +315,8 @@
 /*
  * Undefine macros from MLK_CONFIG_PARAMETER_SET-generic files
  */
+/* mlkem/src/backends.h */
+#undef MLK_BACKENDS_H
 /* mlkem/src/compress.h */
 #undef MLK_COMPRESS_H
 #undef mlk_poly_compress_d10
