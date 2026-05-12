@@ -317,8 +317,7 @@ __contract__(ensures(return_value == (cond ? a : b)))
  *
  * @param[in] a   First byte array.
  * @param[in] b   Second byte array.
- * @param     len Length of the byte arrays, upper-bounded to UINT16_MAX to
- *                control proof complexity only.
+ * @param     len Length of the byte arrays.
  *
  * @retval 0    The byte arrays are equal.
  * @retval 0xFF The byte arrays are not equal.
@@ -326,7 +325,7 @@ __contract__(ensures(return_value == (cond ? a : b)))
 static MLK_INLINE uint8_t mlk_ct_memcmp(const uint8_t *a, const uint8_t *b,
                                         const size_t len)
 __contract__(
-  requires(len <= UINT16_MAX)
+  requires(len <= MLK_MAX_BUFFER_SIZE)
   requires(memory_no_alias(a, len))
   requires(memory_no_alias(b, len))
   ensures((return_value == 0) || (return_value == 0xFF))
