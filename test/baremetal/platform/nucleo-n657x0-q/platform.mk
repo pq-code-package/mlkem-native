@@ -132,7 +132,18 @@ FLEXMEM_CONFIG_SOURCES := \
 
 .PHONY: flexmem_config run_flexmem_config run_flexmem_test
 
-run_kat run_acvp run_bench run_func run_unit run_alloc: run_flexmem_config
+NUCLEO_N657X0_Q_RUN_TARGETS := \
+	run_func run_func_512 run_func_768 run_func_1024 \
+	run_kat run_kat_512 run_kat_768 run_kat_1024 \
+	run_acvp \
+	run_bench run_bench_512 run_bench_768 run_bench_1024 \
+	run_bench_components run_bench_components_512 run_bench_components_768 run_bench_components_1024 \
+	run_unit run_unit_512 run_unit_768 run_unit_1024 \
+	run_alloc run_alloc_512 run_alloc_768 run_alloc_1024 \
+	run_rng_fail run_rng_fail_512 run_rng_fail_768 run_rng_fail_1024 \
+	run_wycheproof
+
+$(NUCLEO_N657X0_Q_RUN_TARGETS): run_flexmem_config
 
 flexmem_config: $(FLEXMEM_CONFIG_ELF)
 

@@ -79,11 +79,22 @@ jobs:
           bench_extra_args: "-r"
           nix_shell: ''
           cross_prefix: ""
+        - system: nucleo-n657x0
+          name: Arm Cortex-M55 (NUCLEO-N657X0-Q) benchmarks
+          bench_pmu: PMU
+          archflags: ""
+          cflags: ""
+          ldflags: ""
+          bench_extra_args: ""
+          nix_shell: nucleo-n657x0-q
+          cross_prefix: ""
     if: github.repository_owner == 'pq-code-package' && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
     runs-on: self-hosted-${{ matrix.target.system }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: ./.github/actions/bench
+        env:
+          EXTRA_MAKEFILE: ${{ matrix.target.system == 'nucleo-n657x0' && 'test/baremetal/platform/nucleo-n657x0-q/platform.mk' || '' }}
         with:
           name: ${{ matrix.target.name }}
           cflags: ${{ matrix.target.cflags }}
