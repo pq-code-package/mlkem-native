@@ -96,7 +96,7 @@
 #define exists(qvar, qvar_lb, qvar_ub, predicate)               \
   __CPROVER_exists                                              \
   {                                                             \
-    size_t qvar;                                                  \
+    size_t qvar;                                                \
     ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) && (predicate)  \
   }
 /* clang-format on */
