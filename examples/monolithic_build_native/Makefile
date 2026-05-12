@@ -25,6 +25,7 @@ CFLAGS := \
 	-Wno-unused-command-line-argument \
 	-O3 \
 	-fomit-frame-pointer \
+	-mstackrealign \
 	-std=c99 \
 	-pedantic \
 	-MMD \
