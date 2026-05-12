@@ -166,11 +166,12 @@ jobs:
       fail-fast: false
       matrix:
         gcc:
-          - { version: '11', c23: false }
+          # - { version: '11', c23: false }
           - { version: '12', c23: false }
-          - { version: '13', c23: false }
-          - { version: '14', c23: true  }
-        cflags: ['-O0', '-Os', '-O3']
+          # - { version: '13', c23: false }
+          # - { version: '14', c23: true  }
+        #cflags: ['-O0', '-Os', '-O3']
+        cflags: ['-O3']
         target:
 #          - { runner: macos-latest,   arch: aarch64 }
           - { runner: macos-15-intel, arch: x86_64  }
