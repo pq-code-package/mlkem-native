@@ -28,7 +28,7 @@ USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2
+CBMCFLAGS=--cvc5 --refine-arrays
 
 FUNCTION_NAME = nttunpack_native_x86_64
 

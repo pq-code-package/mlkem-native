@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 { buildEnv
 , cbmc
+, cvc5
 , fetchFromGitHub
 , callPackage
 , bitwuzla
@@ -37,6 +38,7 @@ buildEnv {
 
       inherit
         bitwuzla# 0.8.2
+        cvc5# 1.3.2
         ninja; # 1.13.2
     };
 }
