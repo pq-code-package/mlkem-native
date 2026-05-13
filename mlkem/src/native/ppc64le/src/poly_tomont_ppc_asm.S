@@ -56,7 +56,7 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
         stxvx 62, 9, 1
         li 6, 0
         li 7, 16
-        li 8, 80
+        li 8, 96
         lxvx 37, 6, 4
         lxvx 34, 7, 4
         lxvx 32, 8, 4

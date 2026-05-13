@@ -32,6 +32,7 @@ MLK_ASM_FN_SYMBOL(intt_ppc_asm)
         std 19, 96(1)
         std 20, 104(1)
         std 21, 112(1)
+        std 22, 120(1)
         li 10, 128
         li 11, 144
         li 12, 160
@@ -57,13 +58,8 @@ MLK_ASM_FN_SYMBOL(intt_ppc_asm)
         stxvx 62, 15, 1
         stxvx 63, 16, 1
         lxvx 0, 0, 4
-        li 10, 16
-        lxvx 34, 10, 4
         xxlxor 35, 35, 35
-        vspltish 4, 1
-        xxlor 2, 34, 34
         xxlor 3, 35, 35
-        xxlor 4, 36, 36
         li 10, 32
         li 11, 48
         lxvx 6, 10, 4
@@ -84,12 +80,11 @@ MLK_ASM_FN_SYMBOL(intt_ppc_asm)
         li 18, 112
         addi 14, 4, 64
         lvx 10, 0, 14
+        addi 14, 4, 80
+        lvx 11, 0, 14
         li 8, 4
         mtctr 8
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
-        xxlor 35, 3, 3
-        xxlor 36, 4, 4
 
 intt_ppc_asm_Loopf:
         lxvd2x 57, 0, 3
@@ -97,51 +92,35 @@ intt_ppc_asm_Loopf:
         lxvd2x 62, 11, 3
         lxvd2x 63, 12, 3
         addi 3, 3, 64
-        vmladduhm 15, 25, 10, 3
-        vmladduhm 20, 26, 10, 3
-        vmladduhm 27, 30, 10, 3
-        vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 10, 3
-        vmhraddshs 19, 26, 10, 3
-        vmhraddshs 24, 30, 10, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 6, 15, 4
-        vsrah 7, 20, 4
-        vsrah 8, 25, 4
-        vsrah 9, 30, 4
+        vmhraddshs 14, 25, 11, 3
+        vmhraddshs 19, 26, 11, 3
+        vmhraddshs 24, 30, 11, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 6, 25, 10, 3
+        vmladduhm 7, 26, 10, 3
+        vmladduhm 8, 30, 10, 3
+        vmladduhm 9, 31, 10, 3
+        vmladduhm 6, 14, 5, 6
+        vmladduhm 7, 19, 5, 7
+        vmladduhm 8, 24, 5, 8
+        vmladduhm 9, 29, 5, 9
         lxvd2x 57, 0, 3
         lxvd2x 58, 10, 3
         lxvd2x 62, 11, 3
         lxvd2x 63, 12, 3
         addi 3, 3, 64
-        vmladduhm 15, 25, 10, 3
-        vmladduhm 20, 26, 10, 3
-        vmladduhm 27, 30, 10, 3
+        vmhraddshs 14, 25, 11, 3
+        vmhraddshs 19, 26, 11, 3
+        vmhraddshs 24, 30, 11, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 13, 25, 10, 3
+        vmladduhm 18, 26, 10, 3
+        vmladduhm 23, 30, 10, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 10, 3
-        vmhraddshs 19, 26, 10, 3
-        vmhraddshs 24, 30, 10, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         addi 3, 3, -128
         stxvd2x 38, 0, 3
         stxvd2x 39, 10, 3
@@ -156,7 +135,9 @@ intt_ppc_asm_Loopf:
         addi 3, 3, -512
         nop
         nop
-        addi 14, 4, 1104
+        nop
+        addi 14, 4, 1120
+        addi 22, 4, 3136
         li 7, 4
         mr 5, 3
         lxvd2x 57, 0, 5
@@ -236,9 +217,7 @@ intt_ppc_asm_Loopf:
         xxlor 12, 45, 45
         xxlor 13, 49, 49
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         li 8, 16
         li 11, 32
         li 12, 48
@@ -246,27 +225,24 @@ intt_ppc_asm_Loopf:
         lxvd2x 40, 8, 14
         lxvd2x 41, 11, 14
         lxvd2x 42, 12, 14
+        lxvd2x 44, 0, 22
+        lxvd2x 52, 8, 22
+        lxvd2x 38, 11, 22
+        lxvd2x 43, 12, 22
         addi 14, 14, 64
-        vmladduhm 15, 25, 7, 3
-        vmladduhm 20, 26, 8, 3
-        vmladduhm 27, 30, 9, 3
+        addi 22, 22, 64
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 20, 3
+        vmhraddshs 24, 30, 6, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 13, 25, 7, 3
+        vmladduhm 18, 26, 8, 3
+        vmladduhm 23, 30, 9, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 7, 3
-        vmhraddshs 19, 26, 8, 3
-        vmhraddshs 24, 30, 9, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         xxlor 46, 10, 10
         xxlor 51, 11, 11
         xxlor 56, 12, 12
@@ -365,9 +341,7 @@ intt_ppc_asm_Loopf:
         xxlor 12, 45, 45
         xxlor 13, 49, 49
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         li 8, 16
         li 11, 32
         li 12, 48
@@ -375,27 +349,24 @@ intt_ppc_asm_Loopf:
         lxvd2x 40, 8, 14
         lxvd2x 41, 11, 14
         lxvd2x 42, 12, 14
+        lxvd2x 44, 0, 22
+        lxvd2x 52, 8, 22
+        lxvd2x 38, 11, 22
+        lxvd2x 43, 12, 22
         addi 14, 14, 64
-        vmladduhm 15, 25, 7, 3
-        vmladduhm 20, 26, 8, 3
-        vmladduhm 27, 30, 9, 3
+        addi 22, 22, 64
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 20, 3
+        vmhraddshs 24, 30, 6, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 13, 25, 7, 3
+        vmladduhm 18, 26, 8, 3
+        vmladduhm 23, 30, 9, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 7, 3
-        vmhraddshs 19, 26, 8, 3
-        vmhraddshs 24, 30, 9, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         xxlor 46, 10, 10
         xxlor 51, 11, 11
         xxlor 56, 12, 12
@@ -494,9 +465,7 @@ intt_ppc_asm_Loopf:
         xxlor 12, 45, 45
         xxlor 13, 49, 49
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         li 8, 16
         li 11, 32
         li 12, 48
@@ -504,27 +473,24 @@ intt_ppc_asm_Loopf:
         lxvd2x 40, 8, 14
         lxvd2x 41, 11, 14
         lxvd2x 42, 12, 14
+        lxvd2x 44, 0, 22
+        lxvd2x 52, 8, 22
+        lxvd2x 38, 11, 22
+        lxvd2x 43, 12, 22
         addi 14, 14, 64
-        vmladduhm 15, 25, 7, 3
-        vmladduhm 20, 26, 8, 3
-        vmladduhm 27, 30, 9, 3
+        addi 22, 22, 64
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 20, 3
+        vmhraddshs 24, 30, 6, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 13, 25, 7, 3
+        vmladduhm 18, 26, 8, 3
+        vmladduhm 23, 30, 9, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 7, 3
-        vmhraddshs 19, 26, 8, 3
-        vmhraddshs 24, 30, 9, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         xxlor 46, 10, 10
         xxlor 51, 11, 11
         xxlor 56, 12, 12
@@ -623,9 +589,7 @@ intt_ppc_asm_Loopf:
         xxlor 12, 45, 45
         xxlor 13, 49, 49
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         li 8, 16
         li 11, 32
         li 12, 48
@@ -633,27 +597,24 @@ intt_ppc_asm_Loopf:
         lxvd2x 40, 8, 14
         lxvd2x 41, 11, 14
         lxvd2x 42, 12, 14
+        lxvd2x 44, 0, 22
+        lxvd2x 52, 8, 22
+        lxvd2x 38, 11, 22
+        lxvd2x 43, 12, 22
         addi 14, 14, 64
-        vmladduhm 15, 25, 7, 3
-        vmladduhm 20, 26, 8, 3
-        vmladduhm 27, 30, 9, 3
+        addi 22, 22, 64
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 20, 3
+        vmhraddshs 24, 30, 6, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 13, 25, 7, 3
+        vmladduhm 18, 26, 8, 3
+        vmladduhm 23, 30, 9, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 7, 3
-        vmhraddshs 19, 26, 8, 3
-        vmhraddshs 24, 30, 9, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         xxlor 46, 10, 10
         xxlor 51, 11, 11
         xxlor 56, 12, 12
@@ -675,7 +636,6 @@ intt_ppc_asm_Loopf:
         stxvd2x 48, 17, 5
         stxvd2x 49, 18, 5
         addi 5, 5, 128
-        nop
         mr 5, 3
         li 7, 8
         lxvd2x 10, 0, 5
@@ -755,9 +715,7 @@ intt_ppc_asm_Loopf:
         xxlor 12, 45, 45
         xxlor 13, 49, 49
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         li 8, 16
         li 11, 32
         li 12, 48
@@ -765,27 +723,24 @@ intt_ppc_asm_Loopf:
         lxvd2x 40, 8, 14
         lxvd2x 41, 11, 14
         lxvd2x 42, 12, 14
+        lxvd2x 44, 0, 22
+        lxvd2x 52, 8, 22
+        lxvd2x 38, 11, 22
+        lxvd2x 43, 12, 22
         addi 14, 14, 64
-        vmladduhm 15, 25, 7, 3
-        vmladduhm 20, 26, 8, 3
-        vmladduhm 27, 30, 9, 3
+        addi 22, 22, 64
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 20, 3
+        vmhraddshs 24, 30, 6, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 13, 25, 7, 3
+        vmladduhm 18, 26, 8, 3
+        vmladduhm 23, 30, 9, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 7, 3
-        vmhraddshs 19, 26, 8, 3
-        vmhraddshs 24, 30, 9, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         xxlor 46, 10, 10
         xxlor 51, 11, 11
         xxlor 56, 12, 12
@@ -884,9 +839,7 @@ intt_ppc_asm_Loopf:
         xxlor 12, 45, 45
         xxlor 13, 49, 49
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         li 8, 16
         li 11, 32
         li 12, 48
@@ -894,27 +847,24 @@ intt_ppc_asm_Loopf:
         lxvd2x 40, 8, 14
         lxvd2x 41, 11, 14
         lxvd2x 42, 12, 14
+        lxvd2x 44, 0, 22
+        lxvd2x 52, 8, 22
+        lxvd2x 38, 11, 22
+        lxvd2x 43, 12, 22
         addi 14, 14, 64
-        vmladduhm 15, 25, 7, 3
-        vmladduhm 20, 26, 8, 3
-        vmladduhm 27, 30, 9, 3
+        addi 22, 22, 64
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 20, 3
+        vmhraddshs 24, 30, 6, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 13, 25, 7, 3
+        vmladduhm 18, 26, 8, 3
+        vmladduhm 23, 30, 9, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 7, 3
-        vmhraddshs 19, 26, 8, 3
-        vmhraddshs 24, 30, 9, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         xxlor 46, 10, 10
         xxlor 51, 11, 11
         xxlor 56, 12, 12
@@ -1013,9 +963,7 @@ intt_ppc_asm_Loopf:
         xxlor 12, 45, 45
         xxlor 13, 49, 49
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         li 8, 16
         li 11, 32
         li 12, 48
@@ -1023,27 +971,24 @@ intt_ppc_asm_Loopf:
         lxvd2x 40, 8, 14
         lxvd2x 41, 11, 14
         lxvd2x 42, 12, 14
+        lxvd2x 44, 0, 22
+        lxvd2x 52, 8, 22
+        lxvd2x 38, 11, 22
+        lxvd2x 43, 12, 22
         addi 14, 14, 64
-        vmladduhm 15, 25, 7, 3
-        vmladduhm 20, 26, 8, 3
-        vmladduhm 27, 30, 9, 3
+        addi 22, 22, 64
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 20, 3
+        vmhraddshs 24, 30, 6, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 13, 25, 7, 3
+        vmladduhm 18, 26, 8, 3
+        vmladduhm 23, 30, 9, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 7, 3
-        vmhraddshs 19, 26, 8, 3
-        vmhraddshs 24, 30, 9, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         xxlor 46, 10, 10
         xxlor 51, 11, 11
         xxlor 56, 12, 12
@@ -1142,9 +1087,7 @@ intt_ppc_asm_Loopf:
         xxlor 12, 45, 45
         xxlor 13, 49, 49
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         li 8, 16
         li 11, 32
         li 12, 48
@@ -1152,27 +1095,24 @@ intt_ppc_asm_Loopf:
         lxvd2x 40, 8, 14
         lxvd2x 41, 11, 14
         lxvd2x 42, 12, 14
+        lxvd2x 44, 0, 22
+        lxvd2x 52, 8, 22
+        lxvd2x 38, 11, 22
+        lxvd2x 43, 12, 22
         addi 14, 14, 64
-        vmladduhm 15, 25, 7, 3
-        vmladduhm 20, 26, 8, 3
-        vmladduhm 27, 30, 9, 3
+        addi 22, 22, 64
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 20, 3
+        vmhraddshs 24, 30, 6, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 13, 25, 7, 3
+        vmladduhm 18, 26, 8, 3
+        vmladduhm 23, 30, 9, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 7, 3
-        vmhraddshs 19, 26, 8, 3
-        vmhraddshs 24, 30, 9, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         xxlor 46, 10, 10
         xxlor 51, 11, 11
         xxlor 56, 12, 12
@@ -1274,9 +1214,7 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         li 8, 16
         li 11, 32
         li 12, 48
@@ -1284,27 +1222,24 @@ intt_ppc_asm_Loopf:
         lxvd2x 40, 8, 14
         lxvd2x 41, 11, 14
         lxvd2x 42, 12, 14
+        lxvd2x 44, 0, 22
+        lxvd2x 52, 8, 22
+        lxvd2x 38, 11, 22
+        lxvd2x 43, 12, 22
         addi 14, 14, 64
-        vmladduhm 15, 25, 7, 3
-        vmladduhm 20, 26, 8, 3
-        vmladduhm 27, 30, 9, 3
+        addi 22, 22, 64
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 20, 3
+        vmhraddshs 24, 30, 6, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 13, 25, 7, 3
+        vmladduhm 18, 26, 8, 3
+        vmladduhm 23, 30, 9, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 7, 3
-        vmhraddshs 19, 26, 8, 3
-        vmhraddshs 24, 30, 9, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
@@ -1386,9 +1321,7 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         li 8, 16
         li 11, 32
         li 12, 48
@@ -1396,27 +1329,24 @@ intt_ppc_asm_Loopf:
         lxvd2x 40, 8, 14
         lxvd2x 41, 11, 14
         lxvd2x 42, 12, 14
+        lxvd2x 44, 0, 22
+        lxvd2x 52, 8, 22
+        lxvd2x 38, 11, 22
+        lxvd2x 43, 12, 22
         addi 14, 14, 64
-        vmladduhm 15, 25, 7, 3
-        vmladduhm 20, 26, 8, 3
-        vmladduhm 27, 30, 9, 3
+        addi 22, 22, 64
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 20, 3
+        vmhraddshs 24, 30, 6, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 13, 25, 7, 3
+        vmladduhm 18, 26, 8, 3
+        vmladduhm 23, 30, 9, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 7, 3
-        vmhraddshs 19, 26, 8, 3
-        vmhraddshs 24, 30, 9, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
@@ -1498,9 +1428,7 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         li 8, 16
         li 11, 32
         li 12, 48
@@ -1508,27 +1436,24 @@ intt_ppc_asm_Loopf:
         lxvd2x 40, 8, 14
         lxvd2x 41, 11, 14
         lxvd2x 42, 12, 14
+        lxvd2x 44, 0, 22
+        lxvd2x 52, 8, 22
+        lxvd2x 38, 11, 22
+        lxvd2x 43, 12, 22
         addi 14, 14, 64
-        vmladduhm 15, 25, 7, 3
-        vmladduhm 20, 26, 8, 3
-        vmladduhm 27, 30, 9, 3
+        addi 22, 22, 64
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 20, 3
+        vmhraddshs 24, 30, 6, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 13, 25, 7, 3
+        vmladduhm 18, 26, 8, 3
+        vmladduhm 23, 30, 9, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 7, 3
-        vmhraddshs 19, 26, 8, 3
-        vmhraddshs 24, 30, 9, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
@@ -1610,9 +1535,7 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         li 8, 16
         li 11, 32
         li 12, 48
@@ -1620,27 +1543,24 @@ intt_ppc_asm_Loopf:
         lxvd2x 40, 8, 14
         lxvd2x 41, 11, 14
         lxvd2x 42, 12, 14
+        lxvd2x 44, 0, 22
+        lxvd2x 52, 8, 22
+        lxvd2x 38, 11, 22
+        lxvd2x 43, 12, 22
         addi 14, 14, 64
-        vmladduhm 15, 25, 7, 3
-        vmladduhm 20, 26, 8, 3
-        vmladduhm 27, 30, 9, 3
+        addi 22, 22, 64
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 20, 3
+        vmhraddshs 24, 30, 6, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 13, 25, 7, 3
+        vmladduhm 18, 26, 8, 3
+        vmladduhm 23, 30, 9, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 7, 3
-        vmhraddshs 19, 26, 8, 3
-        vmhraddshs 24, 30, 9, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
@@ -1726,9 +1646,7 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         li 8, 16
         li 11, 32
         li 12, 48
@@ -1736,32 +1654,30 @@ intt_ppc_asm_Loopf:
         lxvd2x 40, 8, 14
         lxvd2x 41, 11, 14
         lxvd2x 42, 12, 14
+        lxvd2x 44, 0, 22
+        lxvd2x 52, 8, 22
+        lxvd2x 38, 11, 22
+        lxvd2x 43, 12, 22
         addi 14, 14, 64
-        vmladduhm 15, 25, 7, 3
-        vmladduhm 20, 26, 8, 3
-        vmladduhm 27, 30, 9, 3
+        addi 22, 22, 64
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 20, 3
+        vmhraddshs 24, 30, 6, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 13, 25, 7, 3
+        vmladduhm 18, 26, 8, 3
+        vmladduhm 23, 30, 9, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 7, 3
-        vmhraddshs 19, 26, 8, 3
-        vmhraddshs 24, 30, 9, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
         addi 14, 14, -64
+        addi 22, 22, -64
         li 9, 16
         add 10, 7, 9
         addi 16, 9, 64
@@ -1839,9 +1755,7 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         li 8, 16
         li 11, 32
         li 12, 48
@@ -1849,27 +1763,24 @@ intt_ppc_asm_Loopf:
         lxvd2x 40, 8, 14
         lxvd2x 41, 11, 14
         lxvd2x 42, 12, 14
+        lxvd2x 44, 0, 22
+        lxvd2x 52, 8, 22
+        lxvd2x 38, 11, 22
+        lxvd2x 43, 12, 22
         addi 14, 14, 64
-        vmladduhm 15, 25, 7, 3
-        vmladduhm 20, 26, 8, 3
-        vmladduhm 27, 30, 9, 3
+        addi 22, 22, 64
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 20, 3
+        vmhraddshs 24, 30, 6, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 13, 25, 7, 3
+        vmladduhm 18, 26, 8, 3
+        vmladduhm 23, 30, 9, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 7, 3
-        vmhraddshs 19, 26, 8, 3
-        vmhraddshs 24, 30, 9, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
@@ -1951,9 +1862,7 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         li 8, 16
         li 11, 32
         li 12, 48
@@ -1961,32 +1870,30 @@ intt_ppc_asm_Loopf:
         lxvd2x 40, 8, 14
         lxvd2x 41, 11, 14
         lxvd2x 42, 12, 14
+        lxvd2x 44, 0, 22
+        lxvd2x 52, 8, 22
+        lxvd2x 38, 11, 22
+        lxvd2x 43, 12, 22
         addi 14, 14, 64
-        vmladduhm 15, 25, 7, 3
-        vmladduhm 20, 26, 8, 3
-        vmladduhm 27, 30, 9, 3
+        addi 22, 22, 64
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 20, 3
+        vmhraddshs 24, 30, 6, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 13, 25, 7, 3
+        vmladduhm 18, 26, 8, 3
+        vmladduhm 23, 30, 9, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 7, 3
-        vmhraddshs 19, 26, 8, 3
-        vmhraddshs 24, 30, 9, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
         addi 14, 14, -64
+        addi 22, 22, -64
         li 9, 272
         add 10, 7, 9
         addi 16, 9, 64
@@ -2064,9 +1971,7 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         li 8, 16
         li 11, 32
         li 12, 48
@@ -2074,31 +1979,30 @@ intt_ppc_asm_Loopf:
         lxvd2x 40, 8, 14
         lxvd2x 41, 11, 14
         lxvd2x 42, 12, 14
+        lxvd2x 44, 0, 22
+        lxvd2x 52, 8, 22
+        lxvd2x 38, 11, 22
+        lxvd2x 43, 12, 22
         addi 14, 14, 64
-        vmladduhm 15, 25, 7, 3
-        vmladduhm 20, 26, 8, 3
-        vmladduhm 27, 30, 9, 3
+        addi 22, 22, 64
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 20, 3
+        vmhraddshs 24, 30, 6, 3
+        vmhraddshs 29, 31, 11, 3
+        vmladduhm 13, 25, 7, 3
+        vmladduhm 18, 26, 8, 3
+        vmladduhm 23, 30, 9, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 7, 3
-        vmhraddshs 19, 26, 8, 3
-        vmhraddshs 24, 30, 9, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
+        nop
+        nop
         nop
         li 7, 64
         li 9, 0
@@ -2178,35 +2082,27 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         lvx 10, 0, 14
-        vmladduhm 15, 25, 10, 3
-        vmladduhm 20, 26, 10, 3
-        vmladduhm 27, 30, 10, 3
+        lvx 12, 0, 22
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 12, 3
+        vmhraddshs 24, 30, 12, 3
+        vmhraddshs 29, 31, 12, 3
+        vmladduhm 13, 25, 10, 3
+        vmladduhm 18, 26, 10, 3
+        vmladduhm 23, 30, 10, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 10, 3
-        vmhraddshs 19, 26, 10, 3
-        vmhraddshs 24, 30, 10, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
         addi 14, 14, 16
+        addi 22, 22, 16
         li 9, 128
         add 10, 7, 9
         addi 16, 9, 16
@@ -2284,35 +2180,27 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         lvx 10, 0, 14
-        vmladduhm 15, 25, 10, 3
-        vmladduhm 20, 26, 10, 3
-        vmladduhm 27, 30, 10, 3
+        lvx 12, 0, 22
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 12, 3
+        vmhraddshs 24, 30, 12, 3
+        vmhraddshs 29, 31, 12, 3
+        vmladduhm 13, 25, 10, 3
+        vmladduhm 18, 26, 10, 3
+        vmladduhm 23, 30, 10, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 10, 3
-        vmhraddshs 19, 26, 10, 3
-        vmhraddshs 24, 30, 10, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
         addi 14, 14, 16
+        addi 22, 22, 16
         li 9, 256
         add 10, 7, 9
         addi 16, 9, 16
@@ -2390,35 +2278,27 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         lvx 10, 0, 14
-        vmladduhm 15, 25, 10, 3
-        vmladduhm 20, 26, 10, 3
-        vmladduhm 27, 30, 10, 3
+        lvx 12, 0, 22
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 12, 3
+        vmhraddshs 24, 30, 12, 3
+        vmhraddshs 29, 31, 12, 3
+        vmladduhm 13, 25, 10, 3
+        vmladduhm 18, 26, 10, 3
+        vmladduhm 23, 30, 10, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 10, 3
-        vmhraddshs 19, 26, 10, 3
-        vmhraddshs 24, 30, 10, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
         addi 14, 14, 16
+        addi 22, 22, 16
         li 9, 384
         add 10, 7, 9
         addi 16, 9, 16
@@ -2496,35 +2376,27 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         lvx 10, 0, 14
-        vmladduhm 15, 25, 10, 3
-        vmladduhm 20, 26, 10, 3
-        vmladduhm 27, 30, 10, 3
+        lvx 12, 0, 22
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 12, 3
+        vmhraddshs 24, 30, 12, 3
+        vmhraddshs 29, 31, 12, 3
+        vmladduhm 13, 25, 10, 3
+        vmladduhm 18, 26, 10, 3
+        vmladduhm 23, 30, 10, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 10, 3
-        vmhraddshs 19, 26, 10, 3
-        vmhraddshs 24, 30, 10, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
         addi 14, 14, 16
+        addi 22, 22, 16
         nop
         nop
         nop
@@ -2606,30 +2478,21 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         lvx 10, 0, 14
-        vmladduhm 15, 25, 10, 3
-        vmladduhm 20, 26, 10, 3
-        vmladduhm 27, 30, 10, 3
+        lvx 12, 0, 22
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 12, 3
+        vmhraddshs 24, 30, 12, 3
+        vmhraddshs 29, 31, 12, 3
+        vmladduhm 13, 25, 10, 3
+        vmladduhm 18, 26, 10, 3
+        vmladduhm 23, 30, 10, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 10, 3
-        vmhraddshs 19, 26, 10, 3
-        vmhraddshs 24, 30, 10, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
@@ -2711,35 +2574,27 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         lvx 10, 0, 14
-        vmladduhm 15, 25, 10, 3
-        vmladduhm 20, 26, 10, 3
-        vmladduhm 27, 30, 10, 3
+        lvx 12, 0, 22
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 12, 3
+        vmhraddshs 24, 30, 12, 3
+        vmhraddshs 29, 31, 12, 3
+        vmladduhm 13, 25, 10, 3
+        vmladduhm 18, 26, 10, 3
+        vmladduhm 23, 30, 10, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 10, 3
-        vmhraddshs 19, 26, 10, 3
-        vmhraddshs 24, 30, 10, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
         addi 14, 14, 16
+        addi 22, 22, 16
         li 9, 256
         add 10, 7, 9
         addi 16, 9, 16
@@ -2817,30 +2672,21 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         lvx 10, 0, 14
-        vmladduhm 15, 25, 10, 3
-        vmladduhm 20, 26, 10, 3
-        vmladduhm 27, 30, 10, 3
+        lvx 12, 0, 22
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 12, 3
+        vmhraddshs 24, 30, 12, 3
+        vmhraddshs 29, 31, 12, 3
+        vmladduhm 13, 25, 10, 3
+        vmladduhm 18, 26, 10, 3
+        vmladduhm 23, 30, 10, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 10, 3
-        vmhraddshs 19, 26, 10, 3
-        vmhraddshs 24, 30, 10, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
@@ -2922,35 +2768,29 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         lvx 10, 0, 14
-        vmladduhm 15, 25, 10, 3
-        vmladduhm 20, 26, 10, 3
-        vmladduhm 27, 30, 10, 3
+        lvx 12, 0, 22
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 12, 3
+        vmhraddshs 24, 30, 12, 3
+        vmhraddshs 29, 31, 12, 3
+        vmladduhm 13, 25, 10, 3
+        vmladduhm 18, 26, 10, 3
+        vmladduhm 23, 30, 10, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 10, 3
-        vmhraddshs 19, 26, 10, 3
-        vmhraddshs 24, 30, 10, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
         stxvd2x 60, 3, 21
         addi 14, 14, 16
+        addi 22, 22, 16
+        nop
+        nop
         nop
         li 7, 256
         li 9, 0
@@ -3030,30 +2870,21 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         lvx 10, 0, 14
-        vmladduhm 15, 25, 10, 3
-        vmladduhm 20, 26, 10, 3
-        vmladduhm 27, 30, 10, 3
+        lvx 12, 0, 22
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 12, 3
+        vmhraddshs 24, 30, 12, 3
+        vmhraddshs 29, 31, 12, 3
+        vmladduhm 13, 25, 10, 3
+        vmladduhm 18, 26, 10, 3
+        vmladduhm 23, 30, 10, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 10, 3
-        vmhraddshs 19, 26, 10, 3
-        vmhraddshs 24, 30, 10, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
@@ -3135,30 +2966,21 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         lvx 10, 0, 14
-        vmladduhm 15, 25, 10, 3
-        vmladduhm 20, 26, 10, 3
-        vmladduhm 27, 30, 10, 3
+        lvx 12, 0, 22
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 12, 3
+        vmhraddshs 24, 30, 12, 3
+        vmhraddshs 29, 31, 12, 3
+        vmladduhm 13, 25, 10, 3
+        vmladduhm 18, 26, 10, 3
+        vmladduhm 23, 30, 10, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 10, 3
-        vmhraddshs 19, 26, 10, 3
-        vmhraddshs 24, 30, 10, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
@@ -3240,30 +3062,21 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         lvx 10, 0, 14
-        vmladduhm 15, 25, 10, 3
-        vmladduhm 20, 26, 10, 3
-        vmladduhm 27, 30, 10, 3
+        lvx 12, 0, 22
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 12, 3
+        vmhraddshs 24, 30, 12, 3
+        vmhraddshs 29, 31, 12, 3
+        vmladduhm 13, 25, 10, 3
+        vmladduhm 18, 26, 10, 3
+        vmladduhm 23, 30, 10, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 10, 3
-        vmhraddshs 19, 26, 10, 3
-        vmhraddshs 24, 30, 10, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
@@ -3345,30 +3158,21 @@ intt_ppc_asm_Loopf:
         stxvd2x 45, 3, 18
         stxvd2x 49, 3, 20
         xxlor 37, 0, 0
-        xxlor 34, 2, 2
         xxlor 35, 3, 3
-        xxlor 36, 4, 4
         lvx 10, 0, 14
-        vmladduhm 15, 25, 10, 3
-        vmladduhm 20, 26, 10, 3
-        vmladduhm 27, 30, 10, 3
+        lvx 12, 0, 22
+        vmhraddshs 14, 25, 12, 3
+        vmhraddshs 19, 26, 12, 3
+        vmhraddshs 24, 30, 12, 3
+        vmhraddshs 29, 31, 12, 3
+        vmladduhm 13, 25, 10, 3
+        vmladduhm 18, 26, 10, 3
+        vmladduhm 23, 30, 10, 3
         vmladduhm 28, 31, 10, 3
-        vmhraddshs 14, 25, 10, 3
-        vmhraddshs 19, 26, 10, 3
-        vmhraddshs 24, 30, 10, 3
-        vmhraddshs 29, 31, 10, 3
-        vmladduhm 15, 15, 2, 3
-        vmladduhm 20, 20, 2, 3
-        vmladduhm 25, 27, 2, 3
-        vmladduhm 30, 28, 2, 3
-        vmhraddshs 15, 15, 5, 14
-        vmhraddshs 20, 20, 5, 19
-        vmhraddshs 25, 25, 5, 24
-        vmhraddshs 30, 30, 5, 29
-        vsrah 13, 15, 4
-        vsrah 18, 20, 4
-        vsrah 23, 25, 4
-        vsrah 28, 30, 4
+        vmladduhm 13, 14, 5, 13
+        vmladduhm 18, 19, 5, 18
+        vmladduhm 23, 24, 5, 23
+        vmladduhm 28, 29, 5, 28
         stxvd2x 45, 3, 10
         stxvd2x 50, 3, 17
         stxvd2x 55, 3, 19
@@ -3405,6 +3209,7 @@ intt_ppc_asm_Loopf:
         ld 19, 96(1)
         ld 20, 104(1)
         ld 21, 112(1)
+        ld 22, 120(1)
         mtlr 0
         addi 1, 1, 352
         blr

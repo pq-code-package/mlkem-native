@@ -49,15 +49,28 @@ MLK_ALIGN const int16_t mlk_ppc_qdata[] = {
     20159,
     20159,
     20159,
-    /* check-magic: 1441 == pow(2,32-7,MLKEM_Q) */
-    1441,
-    1441,
-    1441,
-    1441,
-    1441,
-    1441,
-    1441,
-    1441,
+    /* N^-1 in Montgomery form: pow(128,-1,MLKEM_Q) * 2^16 mod MLKEM_Q = 512.
+     * Multiplying by this via Barrett-fqmul scales INTT output by N^-1 and
+     * leaves it in Montgomery form (mlk_poly_invntt_tomont contract). */
+    512,
+    512,
+    512,
+    512,
+    512,
+    512,
+    512,
+    512,
+    /* check-magic: 5040 == round((512 * 2**16 + MLKEM_Q) / MLKEM_Q) // 2 */
+    /* Barrett twist of N^-1*R = round_to_even(N_INV_MONT * 2^16 / MLKEM_Q) / 2
+     */
+    5040,
+    5040,
+    5040,
+    5040,
+    5040,
+    5040,
+    5040,
+    5040,
     /* check-magic: 1353 == pow(2, 32, MLKEM_Q) */
     1353,
     1353,
@@ -71,6 +84,10 @@ MLK_ALIGN const int16_t mlk_ppc_qdata[] = {
 #include "consts_ntt.inc"
 /* zetas for invNTT */
 #include "consts_intt.inc"
+/* twisted zetas for NTT (Barrett high-mul) */
+#include "consts_ntt_tw.inc"
+/* twisted zetas for invNTT (Barrett high-mul) */
+#include "consts_intt_tw.inc"
 };
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
           !MLK_CONFIG_MULTILEVEL_NO_SHARED */

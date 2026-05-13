@@ -15,13 +15,18 @@
 
 #include "consts.h"
 
-#define V_QINV  2
-#define V_NMKQ  5
-#define V_Z0    7
-#define V_Z1    8
-#define V_Z2    9
-#define V_Z3    10
-#define V_ZETA  10
+#define V_ZERO   3
+#define V_NMKQ   5
+#define V_Z0     7
+#define V_Z1     8
+#define V_Z2     9
+#define V_Z3     10
+#define V_ZETA   10
+#define V_ZT0    0
+#define V_ZT1    1
+#define V_ZT2    6
+#define V_ZT3    11
+#define V_ZETATW 2
 
 #define vdata_a1 12
 #define vdata_a2 17
@@ -45,7 +50,8 @@
 #define dup_rinp  5
 #define qinp      4
 #define len_2     7
-#define zeta_inp  14
+#define zeta_inp     14
+#define zeta_tw_inp  22
 #define a1_offset 9
 #define a2_offset 16
 #define a3_offset 18
@@ -68,6 +74,7 @@
         std     19, 96(1)
         std     20, 104(1)
         std     21, 112(1)
+        std     22, 120(1)
         li      10, 128
         li      11, 144
         li      12, 160
@@ -127,6 +134,7 @@
         ld      19, 96(1)
         ld      20, 104(1)
         ld      21, 112(1)
+        ld      22, 120(1)
 
         mtlr    0
         addi    1, 1, 352
@@ -256,42 +264,30 @@
 .endm
 
 /*
- * montgomery_reduce
- * t = a * QINV
- * t = (a - (int32_t)t*_MLKEM_Q) >> 16
+ * Barrett multiplication (4 lanes).
+ *   For each lane (b in vdata_b_i, z in _vz_i, zt in _vzt_i):
+ *     t    = vmhraddshs(b, zt, 0)    = round(b*zt / 2^15)
+ *     b_lo = vmladduhm(b, z, 0)      = (b*z) mod 2^16
+ *     vdata_b_i = vmladduhm(t, -q, b_lo)  = b*z - t*q (mod 2^16)
  *
- * -----------------------------------
- * mont_reduce_4x(_vz0, _vz1, _vz2, _vz3)
+ *   Yields the signed canonical representative of (b*z) mod q,
+ *   bounded by q/2.
  */
-.macro mont_reduce_4x _vz0, _vz1, _vz2, _vz3
-        /* fqmul = zeta * coefficient
-           Modular multiplication bound by 2^16 * q in abs value */
-        vmladduhm 15, vdata_b1, \_vz0, rinp
-        vmladduhm 20, vdata_b2, \_vz1, rinp
-        vmladduhm 25, vdata_b3, \_vz2, rinp
-        vmladduhm 30, vdata_b4, \_vz3, rinp
+.macro barrett_fqmul_4x _vz0, _vz1, _vz2, _vz3, _vzt0, _vzt1, _vzt2, _vzt3
+        vmhraddshs vresult_a1, vdata_b1, \_vzt0, V_ZERO
+        vmhraddshs vresult_a2, vdata_b2, \_vzt1, V_ZERO
+        vmhraddshs vresult_a3, vdata_b3, \_vzt2, V_ZERO
+        vmhraddshs vresult_a4, vdata_b4, \_vzt3, V_ZERO
 
-        /* Signed multiply-high-round; outputs are bound by 2^15 * q in abs value */
-        vmhraddshs 14, vdata_b1, \_vz0, rinp
-        vmhraddshs 19, vdata_b2, \_vz1, rinp
-        vmhraddshs 24, vdata_b3, \_vz2, rinp
-        vmhraddshs 29, vdata_b4, \_vz3, rinp
+        vmladduhm vdata_b1, vdata_b1, \_vz0, V_ZERO
+        vmladduhm vdata_b2, vdata_b2, \_vz1, V_ZERO
+        vmladduhm vdata_b3, vdata_b3, \_vz2, V_ZERO
+        vmladduhm vdata_b4, vdata_b4, \_vz3, V_ZERO
 
-        vmladduhm 15, 15, V_QINV, rinp
-        vmladduhm 20, 20, V_QINV, rinp
-        vmladduhm 25, 25, V_QINV, rinp
-        vmladduhm 30, 30, V_QINV, rinp
-
-        vmhraddshs 15, 15, V_NMKQ, 14
-        vmhraddshs 20, 20, V_NMKQ, 19
-        vmhraddshs 25, 25, V_NMKQ, 24
-        vmhraddshs 30, 30, V_NMKQ, 29
-
-        /* Shift right 1 bit */
-        vsrah vdata_b1, 15, 4
-        vsrah vdata_b2, 20, 4
-        vsrah vdata_b3, 25, 4
-        vsrah vdata_b4, 30, 4
+        vmladduhm vdata_b1, vresult_a1, V_NMKQ, vdata_b1
+        vmladduhm vdata_b2, vresult_a2, V_NMKQ, vdata_b2
+        vmladduhm vdata_b3, vresult_a3, V_NMKQ, vdata_b3
+        vmladduhm vdata_b4, vresult_a4, V_NMKQ, vdata_b4
 .endm
 
 /*
@@ -312,8 +308,8 @@
  *  final r[j]: V15, V20, V25, V30
  */
 .macro Compute_4Coeffs
-        /* Since the result of the Montgomery multiplication is bounded
-           by q in absolute value.
+        /* Since the result of the Barrett multiplication is bounded
+           by q/2 in absolute value.
            Finally to complete the final update of the results with add/sub
            r[j] = r[j] + t.
            r[j+len] = r[j] - t
@@ -395,7 +391,12 @@
         lxvd2x  32+V_Z1, 10, zeta_inp
         lxvd2x  32+V_Z2, 11, zeta_inp
         lxvd2x  32+V_Z3, 12, zeta_inp
+        lxvd2x  32+V_ZT0, 0, zeta_tw_inp
+        lxvd2x  32+V_ZT1, 10, zeta_tw_inp
+        lxvd2x  32+V_ZT2, 11, zeta_tw_inp
+        lxvd2x  32+V_ZT3, 12, zeta_tw_inp
         addi    zeta_inp, zeta_inp, 64
+        addi    zeta_tw_inp, zeta_tw_inp, 64
 .endm
 
 /*
@@ -404,7 +405,7 @@
 .macro ntt_layer7
         Load_next_4zetas
         Load_L24Coeffs
-        mont_reduce_4x V_Z0, V_Z1, V_Z2, V_Z3
+        barrett_fqmul_4x V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
         PermWriteL24
         addi    dup_rinp, dup_rinp, 128
 .endm
@@ -415,7 +416,7 @@
 .macro ntt_layer6
         Load_next_4zetas
         Load_L44Coeffs
-        mont_reduce_4x V_Z0, V_Z1, V_Z2, V_Z3
+        barrett_fqmul_4x V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
         PermWriteL44
         addi    dup_rinp, dup_rinp, 128
 .endm
@@ -423,9 +424,9 @@
 /*
  * NTT other layers, 1, 2, 3, 4, 5.
  */
-.macro ntt_layer12345 start, next, _vz0, _vz1, _vz2, _vz3
+.macro ntt_layer12345 start, next, _vz0, _vz1, _vz2, _vz3, _vzt0, _vzt1, _vzt2, _vzt3
         Load_4Coeffs \start, \next
-        mont_reduce_4x \_vz0, \_vz1, \_vz2, \_vz3
+        barrett_fqmul_4x \_vz0, \_vz1, \_vz2, \_vz3, \_vzt0, \_vzt1, \_vzt2, \_vzt3
         Load_4Rj
         Compute_4Coeffs
         Write_One
@@ -475,14 +476,11 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         /* load -MLKEM_Q */
         lvx     V_NMKQ,0,qinp
 
-        /* Register 14 as pointer to zetas array */
+        /* zeta_inp: regular Barrett roots; zeta_tw_inp: twisted roots */
         addi    zeta_inp, qinp, MLK_PPC_ZETA_NTT_OFFSET
+        addi    zeta_tw_inp, qinp, MLK_PPC_ZETA_NTT_TW_OFFSET
 
-        vxor    3, 3, 3
-        vspltish 4, 1
-
-        li      10, MLK_PPC_QINV_OFFSET
-        lvx     V_QINV, 10, qinp
+        vxor    V_ZERO, V_ZERO, V_ZERO
 
 .balign 16
         /*
@@ -490,12 +488,14 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
          */
         li      len_2, 256          /* len * 2 */
         lvx     V_ZETA, 0, zeta_inp
+        lvx     V_ZETATW, 0, zeta_tw_inp
         addi    zeta_inp, zeta_inp, 16
+        addi    zeta_tw_inp, zeta_tw_inp, 16
 
-        ntt_layer12345 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
-        ntt_layer12345 64, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
-        ntt_layer12345 128, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
-        ntt_layer12345 192, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        ntt_layer12345 0, 16,   V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
+        ntt_layer12345 64, 16,  V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
+        ntt_layer12345 128, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
+        ntt_layer12345 192, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
 
 .balign 16
         /*
@@ -503,14 +503,18 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
          */
         li      len_2, 128
         lvx     V_ZETA, 0, zeta_inp
+        lvx     V_ZETATW, 0, zeta_tw_inp
         addi    zeta_inp, zeta_inp, 16
-        ntt_layer12345 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
-        ntt_layer12345 64, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        addi    zeta_tw_inp, zeta_tw_inp, 16
+        ntt_layer12345 0, 16,  V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
+        ntt_layer12345 64, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
 
         lvx     V_ZETA, 0, zeta_inp
+        lvx     V_ZETATW, 0, zeta_tw_inp
         addi    zeta_inp, zeta_inp, 16
-        ntt_layer12345 256, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
-        ntt_layer12345 320, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        addi    zeta_tw_inp, zeta_tw_inp, 16
+        ntt_layer12345 256, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
+        ntt_layer12345 320, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
 
 .balign 16
         /*
@@ -518,20 +522,28 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
          */
         li      len_2, 64
         lvx     V_ZETA, 0, zeta_inp
+        lvx     V_ZETATW, 0, zeta_tw_inp
         addi    zeta_inp, zeta_inp, 16
-        ntt_layer12345 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        addi    zeta_tw_inp, zeta_tw_inp, 16
+        ntt_layer12345 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
 
         lvx     V_ZETA, 0, zeta_inp
+        lvx     V_ZETATW, 0, zeta_tw_inp
         addi    zeta_inp, zeta_inp, 16
-        ntt_layer12345 128, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        addi    zeta_tw_inp, zeta_tw_inp, 16
+        ntt_layer12345 128, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
 
         lvx     V_ZETA, 0, zeta_inp
+        lvx     V_ZETATW, 0, zeta_tw_inp
         addi    zeta_inp, zeta_inp, 16
-        ntt_layer12345 256, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        addi    zeta_tw_inp, zeta_tw_inp, 16
+        ntt_layer12345 256, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
 
         lvx     V_ZETA, 0, zeta_inp
+        lvx     V_ZETATW, 0, zeta_tw_inp
         addi    zeta_inp, zeta_inp, 16
-        ntt_layer12345 384, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA
+        addi    zeta_tw_inp, zeta_tw_inp, 16
+        ntt_layer12345 384, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
 
 .balign 16
         /*
@@ -539,12 +551,12 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
          */
         li      len_2, 32
         Load_next_4zetas
-        ntt_layer12345 0, 64, V_Z0, V_Z1, V_Z2, V_Z3
-        ntt_layer12345 16, 64, V_Z0, V_Z1, V_Z2, V_Z3
+        ntt_layer12345 0, 64,  V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
+        ntt_layer12345 16, 64, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
 
         Load_next_4zetas
-        ntt_layer12345 256, 64, V_Z0, V_Z1, V_Z2, V_Z3
-        ntt_layer12345  272, 64, V_Z0, V_Z1, V_Z2, V_Z3
+        ntt_layer12345 256, 64, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
+        ntt_layer12345 272, 64, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
 
 .balign 16
         /*
@@ -552,16 +564,16 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
          */
         li      len_2, 16
         Load_next_4zetas
-        ntt_layer12345 0, 32, V_Z0, V_Z1, V_Z2, V_Z3
+        ntt_layer12345 0, 32, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
 
         Load_next_4zetas
-        ntt_layer12345 128, 32, V_Z0, V_Z1, V_Z2, V_Z3
+        ntt_layer12345 128, 32, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
 
         Load_next_4zetas
-        ntt_layer12345 256, 32, V_Z0, V_Z1, V_Z2, V_Z3
+        ntt_layer12345 256, 32, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
 
         Load_next_4zetas
-        ntt_layer12345 384, 32, V_Z0, V_Z1, V_Z2, V_Z3
+        ntt_layer12345 384, 32, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
 
         /*
          * Layer 6. len = 4,
@@ -608,13 +620,18 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
-#undef V_QINV
+#undef V_ZERO
 #undef V_NMKQ
 #undef V_Z0
 #undef V_Z1
 #undef V_Z2
 #undef V_Z3
 #undef V_ZETA
+#undef V_ZT0
+#undef V_ZT1
+#undef V_ZT2
+#undef V_ZT3
+#undef V_ZETATW
 #undef vdata_a1
 #undef vdata_a2
 #undef vdata_a3
@@ -636,6 +653,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
 #undef qinp
 #undef len_2
 #undef zeta_inp
+#undef zeta_tw_inp
 #undef a1_offset
 #undef a2_offset
 #undef a3_offset

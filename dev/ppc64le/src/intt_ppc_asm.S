@@ -17,21 +17,35 @@
 
 .text
 
-/* Barrett reduce constants */
+/* Barrett-Q-reduce constants */
 #define V20159  0
 #define V2pw25  1
 #define V_26    2
 #define V_MKQ   3
 
-/* Montgomery reduce constants */
-#define V_QINV  2
+/* Shared zero vector (aliases V_MKQ; V_MKQ is only live during
+ * barrett_reduce_4x, where V_ZERO/zero is reloaded from vs3 anyway). */
+#define V_ZERO  3
+
+/* Barrett-multiply constants */
 #define V_NMKQ  5
 #define V_Z0    7
 #define V_Z1    8
 #define V_Z2    9
 #define V_Z3    10
 #define V_ZETA  10
-#define V1441   10
+#define V_NINV    10
+#define V_NINV_TW 11
+
+/* Barrett twisted zetas: zt = round_to_even(z * 2^16 / q) / 2.
+ * Placed in vdata_b slots (free by the time Load_next_4zetas runs) to
+ * avoid the V20159/V2pw25/V_26/V_MKQ/V_Z0..3 constants required by the
+ * next Barrett-Q-reduce. V_ZETATW aliases V_ZT0 (broadcast layer 5-7). */
+#define V_ZT0     12
+#define V_ZT1     20
+#define V_ZT2     6
+#define V_ZT3     11
+#define V_ZETATW  12
 
 #define vdata_a1 21
 #define vdata_a2 22
@@ -47,25 +61,26 @@
 #define vdata_brt3 16
 #define vdata_brt4 20
 
-#define vdata_mont1 25
-#define vdata_mont2 26
-#define vdata_mont3 30
-#define vdata_mont4 31
+#define vdata_t1 25
+#define vdata_t2 26
+#define vdata_t3 30
+#define vdata_t4 31
 
 #define vresult_brt1 4
 #define vresult_brt2 9
 #define vresult_brt3 13
 #define vresult_brt4 17
-#define vresult_mont1 13
-#define vresult_mont2 18
-#define vresult_mont3 23
-#define vresult_mont4 28
+#define vresult_t1 13
+#define vresult_t2 18
+#define vresult_t3 23
+#define vresult_t4 28
 
 #define rinp      3
 #define dup_rinp  5
 #define qinp      4
 #define len_2     7
-#define zeta_inp  14
+#define zeta_inp     14
+#define zeta_tw_inp  22
 #define a1_offset 9
 #define a2_offset 16
 #define a3_offset 18
@@ -86,6 +101,7 @@
         std     19, 96(1)
         std     20, 104(1)
         std     21, 112(1)
+        std     22, 120(1)
         li      10, 128
         li      11, 144
         li      12, 160
@@ -145,6 +161,7 @@
         ld      19, 96(1)
         ld      20, 104(1)
         ld      21, 112(1)
+        ld      22, 120(1)
 
         mtlr    0
         addi    1, 1, 352
@@ -152,14 +169,14 @@
 
 /*
  * Compute r[j] and r[j+len] from computed coefficients
- *  r[j] + r[j+len] : V8, V12, V16, V20 (data for Barett reduce)
- *  r[j+len] - r[j]: V25, V26, V30, V31 (data for Montgomery reduce)
+ *  r[j] + r[j+len] : V8, V12, V16, V20 (data for Barrett Q-reduce)
+ *  r[j+len] - r[j]: V25, V26, V30, V31 (data for Barrett fqmul)
  */
 .macro Compute_4Coeffs
-        vsubuhm vdata_mont1, vdata_b1, vdata_a1
-        vsubuhm vdata_mont2, vdata_b2, vdata_a2
-        vsubuhm vdata_mont3, vdata_b3, vdata_a3
-        vsubuhm vdata_mont4, vdata_b4, vdata_a4
+        vsubuhm vdata_t1, vdata_b1, vdata_a1
+        vsubuhm vdata_t2, vdata_b2, vdata_a2
+        vsubuhm vdata_t3, vdata_b3, vdata_a3
+        vsubuhm vdata_t4, vdata_b4, vdata_a4
         vadduhm vdata_brt1, vdata_b1, vdata_a1
         vadduhm vdata_brt2, vdata_b2, vdata_a2
         vadduhm vdata_brt3, vdata_b3, vdata_a3
@@ -359,48 +376,30 @@
 .endm
 
 /*
- * -----------------------------------
- * mont_reduce_4x(_vz0, _vz1, _vz2, _vz3, _vo0, _vo1, _vo2, _vo3)
+ * Barrett multiplication for the per-layer fqmul (4 lanes).
+ *   For each lane (b in vdata_t_i, z in _vz_i, zt in _vzt_i):
+ *     t    = vmhraddshs(b, zt, 0)    = round(b*zt / 2^15)
+ *     b_lo = vmladduhm(b, z, 0)      = (b*z) mod 2^16
+ *     vo   = vmladduhm(t, -q, b_lo)  = b*z - t*q (mod 2^16)
+ *
+ *   Yields the signed canonical representative of (b*z) mod q,
+ *   bounded by q/2. V_ZERO is the zero vector set at function entry.
  */
-.macro mont_reduce_4x _vz0, _vz1, _vz2, _vz3, _vo0, _vo1, _vo2, _vo3
-        /* Modular multiplication bound by 2^16 * q in abs value */
-        vmladduhm 15, vdata_mont1, \_vz0, rinp
-        vmladduhm 20, vdata_mont2, \_vz1, rinp
-        vmladduhm 27, vdata_mont3, \_vz2, rinp
-        vmladduhm 28, vdata_mont4, \_vz3, rinp
+.macro barrett_fqmul_4x _vz0, _vz1, _vz2, _vz3, _vzt0, _vzt1, _vzt2, _vzt3, _vo0, _vo1, _vo2, _vo3
+        vmhraddshs 14, vdata_t1, \_vzt0, V_ZERO
+        vmhraddshs 19, vdata_t2, \_vzt1, V_ZERO
+        vmhraddshs 24, vdata_t3, \_vzt2, V_ZERO
+        vmhraddshs 29, vdata_t4, \_vzt3, V_ZERO
 
-        /* Signed multiply-high-round; outputs are bound by 2^15 * q in abs value */
-        vmhraddshs 14, vdata_mont1, \_vz0, rinp
-        vmhraddshs 19, vdata_mont2, \_vz1, rinp
-        vmhraddshs 24, vdata_mont3, \_vz2, rinp
-        vmhraddshs 29, vdata_mont4, \_vz3, rinp
+        vmladduhm \_vo0, vdata_t1, \_vz0, V_ZERO
+        vmladduhm \_vo1, vdata_t2, \_vz1, V_ZERO
+        vmladduhm \_vo2, vdata_t3, \_vz2, V_ZERO
+        vmladduhm \_vo3, vdata_t4, \_vz3, V_ZERO
 
-        vmladduhm 15, 15, V_QINV, 3
-        vmladduhm 20, 20, V_QINV, 3
-        vmladduhm 25, 27, V_QINV, 3
-        vmladduhm 30, 28, V_QINV, 3
-
-        vmhraddshs 15, 15, V_NMKQ, 14
-        vmhraddshs 20, 20, V_NMKQ, 19
-        vmhraddshs 25, 25, V_NMKQ, 24
-        vmhraddshs 30, 30, V_NMKQ, 29
-
-        /* Shift right 1 bit */
-        vsrah \_vo0, 15, 4
-        vsrah \_vo1, 20, 4
-        vsrah \_vo2, 25, 4
-        vsrah \_vo3, 30, 4
-.endm
-
-/*
- * setup constant vectors for Montgmery multiplication
- * V_NMKQ, V_QINV, Zero vector, One vector
- */
-.macro Set_mont_consts
-        xxlor   32+5, 0, 0    /* V_NMKQ */
-        xxlor   32+2, 2, 2    /* V_QINV */
-        xxlor   32+3, 3, 3    /* all 0 */
-        xxlor   32+4, 4, 4    /* all 1 */
+        vmladduhm \_vo0, 14, V_NMKQ, \_vo0
+        vmladduhm \_vo1, 19, V_NMKQ, \_vo1
+        vmladduhm \_vo2, 24, V_NMKQ, \_vo2
+        vmladduhm \_vo3, 29, V_NMKQ, \_vo3
 .endm
 
 .macro Load_next_4zetas
@@ -411,7 +410,12 @@
         lxvd2x    32+V_Z1, 8, zeta_inp
         lxvd2x    32+V_Z2, 11, zeta_inp
         lxvd2x    32+V_Z3, 12, zeta_inp
+        lxvd2x    32+V_ZT0, 0, zeta_tw_inp
+        lxvd2x    32+V_ZT1, 8, zeta_tw_inp
+        lxvd2x    32+V_ZT2, 11, zeta_tw_inp
+        lxvd2x    32+V_ZT3, 12, zeta_tw_inp
         addi    zeta_inp, zeta_inp, 64
+        addi    zeta_tw_inp, zeta_tw_inp, 64
 .endm
 
 .macro Write_B4C _vs0, _vs1, _vs2, _vs3
@@ -429,10 +433,10 @@
 .endm
 
 .macro Reload_4coeffs
-        lxvd2x  32+vdata_mont1, 0, rinp
-        lxvd2x  32+vdata_mont2, 10, rinp
-        lxvd2x  32+vdata_mont3, 11, rinp
-        lxvd2x  32+vdata_mont4, 12, rinp
+        lxvd2x  32+vdata_t1, 0, rinp
+        lxvd2x  32+vdata_t2, 10, rinp
+        lxvd2x  32+vdata_t3, 11, rinp
+        lxvd2x  32+vdata_t4, 12, rinp
         addi    rinp, rinp, 64
 .endm
 
@@ -458,14 +462,14 @@
         xxlor   32+19, 11, 11
         xxlor   32+24, 12, 12
         xxlor   32+29, 13, 13
-        xxpermdi 32+10, 32+14, 32+vresult_mont1, 3
-        xxpermdi 32+11, 32+14, 32+vresult_mont1, 0
-        xxpermdi 32+12, 32+19, 32+vresult_mont2, 3
-        xxpermdi 32+13, 32+19, 32+vresult_mont2, 0
-        xxpermdi 32+14, 32+24, 32+vresult_mont3, 3
-        xxpermdi 32+15, 32+24, 32+vresult_mont3, 0
-        xxpermdi 32+16, 32+29, 32+vresult_mont4, 3
-        xxpermdi 32+17, 32+29, 32+vresult_mont4, 0
+        xxpermdi 32+10, 32+14, 32+vresult_t1, 3
+        xxpermdi 32+11, 32+14, 32+vresult_t1, 0
+        xxpermdi 32+12, 32+19, 32+vresult_t2, 3
+        xxpermdi 32+13, 32+19, 32+vresult_t2, 0
+        xxpermdi 32+14, 32+24, 32+vresult_t3, 3
+        xxpermdi 32+15, 32+24, 32+vresult_t3, 0
+        xxpermdi 32+16, 32+29, 32+vresult_t4, 3
+        xxpermdi 32+17, 32+29, 32+vresult_t4, 0
         stxvd2x    32+10, 0, dup_rinp
         stxvd2x    32+11, 10, dup_rinp
         stxvd2x    32+12, 11, dup_rinp
@@ -485,14 +489,14 @@
         xxlor   32+19, 11, 11
         xxlor   32+24, 12, 12
         xxlor   32+29, 13, 13
-        vmrgew 10, vresult_mont1, 14
-        vmrgow 11, vresult_mont1, 14
-        vmrgew 12, vresult_mont2, 19
-        vmrgow 13, vresult_mont2, 19
-        vmrgew 14, vresult_mont3, 24
-        vmrgow 15, vresult_mont3, 24
-        vmrgew 16, vresult_mont4, 29
-        vmrgow 17, vresult_mont4, 29
+        vmrgew 10, vresult_t1, 14
+        vmrgow 11, vresult_t1, 14
+        vmrgew 12, vresult_t2, 19
+        vmrgow 13, vresult_t2, 19
+        vmrgew 14, vresult_t3, 24
+        vmrgow 15, vresult_t3, 24
+        vmrgew 16, vresult_t4, 29
+        vmrgow 17, vresult_t4, 29
         stxvd2x    32+10, 0, dup_rinp
         stxvd2x    32+11, 10, dup_rinp
         stxvd2x    32+12, 11, dup_rinp
@@ -514,9 +518,10 @@
         xxlor   11, 32+vresult_brt2, 32+vresult_brt2
         xxlor   12, 32+vresult_brt3, 32+vresult_brt3
         xxlor   13, 32+vresult_brt4, 32+vresult_brt4
-        Set_mont_consts
+        xxlor   32+V_NMKQ, 0, 0  /* restore V_NMKQ */
+        xxlor   32+V_ZERO, 3, 3   /* restore V_ZERO from vs3 */
         Load_next_4zetas
-        mont_reduce_4x V_Z0, V_Z1, V_Z2, V_Z3, vresult_mont1, vresult_mont2, vresult_mont3, vresult_mont4
+        barrett_fqmul_4x V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3, vresult_t1, vresult_t2, vresult_t3, vresult_t4
         PermWriteL24
 .endm
 
@@ -531,9 +536,10 @@
         xxlor   11, 32+vresult_brt2, 32+vresult_brt2
         xxlor   12, 32+vresult_brt3, 32+vresult_brt3
         xxlor   13, 32+vresult_brt4, 32+vresult_brt4
-        Set_mont_consts
+        xxlor   32+V_NMKQ, 0, 0  /* restore V_NMKQ */
+        xxlor   32+V_ZERO, 3, 3   /* restore V_ZERO from vs3 */
         Load_next_4zetas
-        mont_reduce_4x V_Z0, V_Z1, V_Z2, V_Z3, vresult_mont1, vresult_mont2, vresult_mont3, vresult_mont4
+        barrett_fqmul_4x V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3, vresult_t1, vresult_t2, vresult_t3, vresult_t4
         PermWriteL44
 .endm
 
@@ -544,10 +550,11 @@
         Load_4Coeffs \start, \next
         barrett_reduce_4x vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
         Write_B4C 32+vresult_brt1, 32+vresult_brt2, 32+vresult_brt3, 32+vresult_brt4
-        Set_mont_consts
+        xxlor   32+V_NMKQ, 0, 0  /* restore V_NMKQ */
+        xxlor   32+V_ZERO, 3, 3   /* restore V_ZERO from vs3 */
         Load_next_4zetas
-        mont_reduce_4x V_Z0, V_Z1, V_Z2, V_Z3, vresult_mont1, vresult_mont2, vresult_mont3, vresult_mont4
-        Write_M4C 32+vresult_mont1, 32+vresult_mont2, 32+vresult_mont3, 32+vresult_mont4
+        barrett_fqmul_4x V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3, vresult_t1, vresult_t2, vresult_t3, vresult_t4
+        Write_M4C 32+vresult_t1, 32+vresult_t2, 32+vresult_t3, 32+vresult_t4
 .endm
 
 /*
@@ -557,10 +564,12 @@
         Load_4Coeffs \start, \next
         barrett_reduce_4x vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
         Write_B4C 32+vresult_brt1, 32+vresult_brt2, 32+vresult_brt3, 32+vresult_brt4
-        Set_mont_consts
-        lvx     V_ZETA, 0, 14
-        mont_reduce_4x V_ZETA, V_ZETA, V_ZETA, V_ZETA, vresult_mont1, vresult_mont2, vresult_mont3, vresult_mont4
-        Write_M4C 32+vresult_mont1, 32+vresult_mont2, 32+vresult_mont3, 32+vresult_mont4
+        xxlor   32+V_NMKQ, 0, 0  /* restore V_NMKQ */
+        xxlor   32+V_ZERO, 3, 3   /* restore V_ZERO from vs3 */
+        lvx     V_ZETA, 0, zeta_inp
+        lvx     V_ZETATW, 0, zeta_tw_inp
+        barrett_fqmul_4x V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW, vresult_t1, vresult_t2, vresult_t3, vresult_t4
+        Write_M4C 32+vresult_t1, 32+vresult_t2, 32+vresult_t3, 32+vresult_t4
 .endm
 
 /*
@@ -603,17 +612,11 @@ MLK_ASM_FN_SYMBOL(intt_ppc_asm)
 
         SAVE_REGS
 
-        /* init vectors and constants
-           Setup for Montgomery reduce */
-        lxvx    0, 0, qinp
+        /* init vectors and constants */
+        lxvx    0, 0, qinp                  /* -Q */
 
-        li      10, MLK_PPC_QINV_OFFSET
-        lxvx    32+V_QINV, 10, qinp
-        xxlxor  32+3, 32+3, 32+3
-        vspltish 4, 1
-        xxlor   2, 32+2, 32+2        /* QINV */
-        xxlor   3, 32+3, 32+3        /* 0 vector */
-        xxlor   4, 32+4, 32+4        /* 1 vector */
+        xxlxor  32+V_ZERO, 32+V_ZERO, 32+V_ZERO
+        xxlor   3, 32+V_ZERO, 32+V_ZERO     /* save zero vector to vs3 */
 
         /*  Setup for Barrett reduce */
         li      10, MLK_PPC_Q_OFFSET
@@ -639,19 +642,21 @@ MLK_ASM_FN_SYMBOL(intt_ppc_asm)
         li      18, 112
 
         /*
-         * Montgomery reduce loops with constant 1441
+         * Scale every coefficient by N^-1 via Barrett multiplication.
          */
-        addi    zeta_inp, qinp, MLK_PPC_C1441_OFFSET
-        lvx     V1441, 0, zeta_inp
+        addi    zeta_inp, qinp, MLK_PPC_N_INV_OFFSET
+        lvx     V_NINV, 0, zeta_inp
+        addi    zeta_inp, qinp, MLK_PPC_N_INV_TW_OFFSET
+        lvx     V_NINV_TW, 0, zeta_inp
         li      8, 4
         mtctr   8
 
-        Set_mont_consts
+        xxlor   32+V_NMKQ, 0, 0      /* V_NMKQ = -Q */
 intt_ppc_asm_Loopf:
         Reload_4coeffs
-        mont_reduce_4x V1441, V1441, V1441, V1441, 6, 7, 8, 9
+        barrett_fqmul_4x V_NINV, V_NINV, V_NINV, V_NINV, V_NINV_TW, V_NINV_TW, V_NINV_TW, V_NINV_TW, 6, 7, 8, 9
         Reload_4coeffs
-        mont_reduce_4x V1441, V1441, V1441, V1441, 13, 18, 23, 28
+        barrett_fqmul_4x V_NINV, V_NINV, V_NINV, V_NINV, V_NINV_TW, V_NINV_TW, V_NINV_TW, V_NINV_TW, 13, 18, 23, 28
         MWrite_8X 32+6, 32+7, 32+8, 32+9, 32+13, 32+18, 32+23, 32+28
         bdnz    intt_ppc_asm_Loopf
 
@@ -667,6 +672,7 @@ intt_ppc_asm_Loopf:
          *    Load zeta vectors in 2-2-2-2 layout
          */
         addi    zeta_inp, qinp, MLK_PPC_ZETA_INTT_OFFSET
+        addi    zeta_tw_inp, qinp, MLK_PPC_ZETA_INTT_TW_OFFSET
         li      len_2, 4        /* len * 2 */
         mr      dup_rinp, rinp
 
@@ -719,11 +725,13 @@ intt_ppc_asm_Loopf:
         intt_layer34 0, 64
 
         addi    zeta_inp, zeta_inp, -64
+        addi    zeta_tw_inp, zeta_tw_inp, -64
         intt_layer34 16, 64
 
         intt_layer34 256, 64
 
         addi    zeta_inp, zeta_inp, -64
+        addi    zeta_tw_inp, zeta_tw_inp, -64
         intt_layer34 272, 64
 
 .balign 16
@@ -734,12 +742,16 @@ intt_ppc_asm_Loopf:
 
         intt_layer567 0, 16
         addi    zeta_inp, zeta_inp, 16
+        addi    zeta_tw_inp, zeta_tw_inp, 16
         intt_layer567 128, 16
         addi    zeta_inp, zeta_inp, 16
+        addi    zeta_tw_inp, zeta_tw_inp, 16
         intt_layer567 256, 16
         addi    zeta_inp, zeta_inp, 16
+        addi    zeta_tw_inp, zeta_tw_inp, 16
         intt_layer567 384, 16
         addi    zeta_inp, zeta_inp, 16
+        addi    zeta_tw_inp, zeta_tw_inp, 16
 
 .balign 16
         /*
@@ -750,9 +762,11 @@ intt_ppc_asm_Loopf:
         intt_layer567 0, 16
         intt_layer567 64, 16
         addi    zeta_inp, zeta_inp, 16
+        addi    zeta_tw_inp, zeta_tw_inp, 16
         intt_layer567 256, 16
         intt_layer567 320, 16
         addi    zeta_inp, zeta_inp, 16
+        addi    zeta_tw_inp, zeta_tw_inp, 16
 
 .balign 16
         /*
@@ -774,14 +788,20 @@ intt_ppc_asm_Loopf:
 #undef V2pw25
 #undef V_26
 #undef V_MKQ
-#undef V_QINV
+#undef V_ZERO
 #undef V_NMKQ
 #undef V_Z0
 #undef V_Z1
 #undef V_Z2
 #undef V_Z3
 #undef V_ZETA
-#undef V1441
+#undef V_NINV
+#undef V_NINV_TW
+#undef V_ZT0
+#undef V_ZT1
+#undef V_ZT2
+#undef V_ZT3
+#undef V_ZETATW
 #undef vdata_a1
 #undef vdata_a2
 #undef vdata_a3
@@ -794,23 +814,24 @@ intt_ppc_asm_Loopf:
 #undef vdata_brt2
 #undef vdata_brt3
 #undef vdata_brt4
-#undef vdata_mont1
-#undef vdata_mont2
-#undef vdata_mont3
-#undef vdata_mont4
+#undef vdata_t1
+#undef vdata_t2
+#undef vdata_t3
+#undef vdata_t4
 #undef vresult_brt1
 #undef vresult_brt2
 #undef vresult_brt3
 #undef vresult_brt4
-#undef vresult_mont1
-#undef vresult_mont2
-#undef vresult_mont3
-#undef vresult_mont4
+#undef vresult_t1
+#undef vresult_t2
+#undef vresult_t3
+#undef vresult_t4
 #undef rinp
 #undef dup_rinp
 #undef qinp
 #undef len_2
 #undef zeta_inp
+#undef zeta_tw_inp
 #undef a1_offset
 #undef a2_offset
 #undef a3_offset

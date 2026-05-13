@@ -2054,8 +2054,15 @@ def gen_riscv64_zeta_files():
 _PPC64LE_LEN2_PERM = [2, 0, 3, 1]
 
 
-def gen_ppc64le_ntt_zetas():
-    z = list(gen_c_zetas())
+def gen_c_real_zetas():
+    # Same bit-reversed ordering as `gen_c_zetas`, but without the
+    # Montgomery factor (raw `z = root^idx mod q`).
+    zeta = [signed_reduce(pow(root_of_unity, i, modulus)) for i in range(128)]
+    yield from (zeta[bitreverse(i, 7)] for i in range(128))
+
+
+def _gen_ppc64le_ntt_zeta_layout(transform):
+    z = [transform(t) for t in gen_c_real_zetas()]
 
     # Layers Len=128, 64, 32, 16, 8: broadcast x 8.
     for i in range(1, 32):
@@ -2072,8 +2079,8 @@ def gen_ppc64le_ntt_zetas():
             yield from [src[p]] * 2
 
 
-def gen_ppc64le_intt_zetas():
-    z = list(gen_c_zetas())
+def _gen_ppc64le_intt_zeta_layout(transform):
+    z = [transform(t) for t in gen_c_real_zetas()]
 
     # Layer Len=2: per group of 4 reverse-ordered zetas, same permutation
     # and duplication as the NTT.
@@ -2090,6 +2097,30 @@ def gen_ppc64le_intt_zetas():
     # Layers Len=8, 16, 32, 64, 128: broadcast x 8, reverse canonical order.
     for i in range(31):
         yield from [z[31 - i]] * 8
+
+
+def _ppc64le_zeta_id(z):
+    return signed_reduce(z)
+
+
+def _ppc64le_zeta_twist(z):
+    return prepare_root_for_barrett(z)[1]
+
+
+def gen_ppc64le_ntt_zetas():
+    yield from _gen_ppc64le_ntt_zeta_layout(_ppc64le_zeta_id)
+
+
+def gen_ppc64le_intt_zetas():
+    yield from _gen_ppc64le_intt_zeta_layout(_ppc64le_zeta_id)
+
+
+def gen_ppc64le_ntt_twist_zetas():
+    yield from _gen_ppc64le_ntt_zeta_layout(_ppc64le_zeta_twist)
+
+
+def gen_ppc64le_intt_twist_zetas():
+    yield from _gen_ppc64le_intt_zeta_layout(_ppc64le_zeta_twist)
 
 
 def gen_ppc64le_zeta_files():
@@ -2116,20 +2147,30 @@ def gen_ppc64le_zeta_files():
             "/* Twiddle factors for the PPC64LE inverse NTT.\n * See autogen for details.\n */",
         )
     )
+    ntt_tw_content = "\n".join(
+        gen_inc(
+            gen_ppc64le_ntt_twist_zetas(),
+            "/* Twisted twiddle factors for the PPC64LE forward NTT.\n * See autogen for details.\n */",
+        )
+    )
+    intt_tw_content = "\n".join(
+        gen_inc(
+            gen_ppc64le_intt_twist_zetas(),
+            "/* Twisted twiddle factors for the PPC64LE inverse NTT.\n * See autogen for details.\n */",
+        )
+    )
 
     # The .inc files are #include'd by `consts.c` (not by an .S file), so they
     # are not inlined via simpasm; we therefore write them directly into both
     # the developer tree and the mlkem mirror.
-    for path in (
-        "dev/ppc64le/src/consts_ntt.inc",
-        "mlkem/src/native/ppc64le/src/consts_ntt.inc",
+    for filename, content in (
+        ("consts_ntt.inc", ntt_content),
+        ("consts_intt.inc", intt_content),
+        ("consts_ntt_tw.inc", ntt_tw_content),
+        ("consts_intt_tw.inc", intt_tw_content),
     ):
-        update_file(path, ntt_content)
-    for path in (
-        "dev/ppc64le/src/consts_intt.inc",
-        "mlkem/src/native/ppc64le/src/consts_intt.inc",
-    ):
-        update_file(path, intt_content)
+        for tree in ("dev/ppc64le/src", "mlkem/src/native/ppc64le/src"):
+            update_file(f"{tree}/{filename}", content)
 
 
 def get_c_source_files(main_only=False, core_only=False, strip_mlkem=False):
