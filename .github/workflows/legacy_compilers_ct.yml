@@ -1,0 +1,252 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+# Constant-time tests using a patched valgrind (KyberSlash paper patch,
+# adds --variable-latency-errors=yes). Builds valgrind once per arch in an
+# old base image for forward-compatible glibc, then fans out across the
+# compiler matrix.
+#
+# Initial matrix is intentionally narrow (gcc 14, clang 18). Widen to the
+# full gcc 7-16 / clang 7-21 range once the build/cache/artifact plumbing
+# is proven green. See CT_TESTS_PLAN.md.
+
+name: Legacy compilers CT
+permissions:
+  contents: read
+on:
+  workflow_call:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-valgrind-varlat:
+    name: Build patched valgrind (${{ matrix.target.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - { runner: ubuntu-latest,    arch: x86_64  }
+          - { runner: ubuntu-24.04-arm, arch: aarch64 }
+    runs-on: ${{ matrix.target.runner }}
+    container:
+      image: gcc:7
+    env:
+      # TODO: bump to 3.27.0 once the EXTRA_DIST hunk in
+      # memcheck/tests/Makefile.am is refreshed in
+      # nix/valgrind/valgrind-varlat-patch-20240808.txt. On 3.27.0 that one
+      # hunk fails; all source-code hunks still apply.
+      VALGRIND_VERSION: 3.26.0
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Cache patched valgrind
+        id: cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: valgrind-install
+          key: valgrind-varlat-${{ matrix.target.arch }}-${{ env.VALGRIND_VERSION }}-${{ hashFiles('nix/valgrind/valgrind-varlat-patch-20240808.txt') }}
+      - name: Fix Debian buster archive sources
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          # buster is past EOL; the regular mirrors no longer serve it.
+          sed -i \
+            -e 's|deb.debian.org|archive.debian.org|g' \
+            -e 's|security.debian.org|archive.debian.org|g' \
+            -e '/buster-updates/d' \
+            /etc/apt/sources.list
+      - name: Install build deps
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            autoconf automake libtool patch wget bzip2 pkg-config ca-certificates
+      - name: Build patched valgrind
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          wget -q "https://sourceware.org/pub/valgrind/valgrind-${VALGRIND_VERSION}.tar.bz2"
+          tar -xjf "valgrind-${VALGRIND_VERSION}.tar.bz2"
+          cd "valgrind-${VALGRIND_VERSION}"
+          patch -p1 < "${GITHUB_WORKSPACE}/nix/valgrind/valgrind-varlat-patch-20240808.txt"
+          ./autogen.sh
+          ./configure --prefix="${GITHUB_WORKSPACE}/valgrind-install"
+          make -j"$(nproc)"
+          make install
+      - name: Upload valgrind artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: valgrind-varlat-${{ matrix.target.arch }}
+          path: valgrind-install
+          retention-days: 7
+
+  linux-gcc-ct:
+    name: Linux gcc-${{ matrix.gcc.version }} CT (${{ matrix.target.arch }})
+    needs: build-valgrind-varlat
+    strategy:
+      fail-fast: false
+      matrix:
+        gcc:
+          - { version: '14' }
+        target:
+          - { runner: ubuntu-latest,    arch: x86_64  }
+          - { runner: ubuntu-24.04-arm, arch: aarch64 }
+    runs-on: ${{ matrix.target.runner }}
+    container:
+      image: gcc:${{ matrix.gcc.version }}
+    env:
+      CC: gcc
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Download patched valgrind
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: valgrind-varlat-${{ matrix.target.arch }}
+          path: valgrind-install
+      - name: Restore executable bits and put valgrind on PATH
+        run: |
+          chmod -R +x valgrind-install/bin valgrind-install/libexec || true
+          echo "${GITHUB_WORKSPACE}/valgrind-install/bin" >> "$GITHUB_PATH"
+      - name: Set bash shell
+        uses: ./.github/actions/setup-shell
+        with:
+          nix-shell: ""
+          custom_shell: bash
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Show valgrind version
+        run: valgrind --version
+      - name: CT test (-O0)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -O0 -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: CT test (-O1)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -O1 -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: CT test (-O2)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -O2 -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: CT test (-O3)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -O3 -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: CT test (-Os)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -Os -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: CT test (-Oz)
+        # -Oz was introduced in gcc 12 (we run gcc 14 here).
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -Oz -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: CT test (-Ofast)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -Ofast -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: CT test (-O3 -ffast-math)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -O3 -ffast-math -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+
+  linux-clang-ct:
+    name: Linux clang-${{ matrix.clang.version }} CT (${{ matrix.target.arch }})
+    needs: build-valgrind-varlat
+    strategy:
+      fail-fast: false
+      matrix:
+        clang:
+          - { version: '18' }
+        target:
+          - { runner: ubuntu-latest,    arch: x86_64  }
+          - { runner: ubuntu-24.04-arm, arch: aarch64 }
+    runs-on: ${{ matrix.target.runner }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install libtinfo5
+        # Older LLVM tarballs require libtinfo.so.5 (with NCURSES_TINFO_5
+        # versioned symbols), which Ubuntu 24.04 no longer ships.
+        # Pull it from jammy without contaminating noble's package set.
+        run: |
+          arch=$(dpkg --print-architecture)
+          case "$arch" in
+            amd64) base=http://archive.ubuntu.com/ubuntu ;;
+            arm64) base=http://ports.ubuntu.com/ubuntu-ports ;;
+          esac
+          echo "deb $base jammy universe" | sudo tee /etc/apt/sources.list.d/jammy.list
+          sudo apt-get update -o Dir::Etc::sourcelist=sources.list.d/jammy.list \
+                              -o Dir::Etc::sourceparts=- \
+                              -o APT::Get::List-Cleanup=0
+          sudo apt-get install -y --no-install-recommends libtinfo5
+          sudo rm /etc/apt/sources.list.d/jammy.list
+      - name: Install clang-${{ matrix.clang.version }}
+        uses: KyleMayes/install-llvm-action@ebc0426251bc40c7cd31162802432c68818ab8f0 # v2.0.9
+        with:
+          version: "${{ matrix.clang.version }}"
+          env: true
+      - name: Download patched valgrind
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: valgrind-varlat-${{ matrix.target.arch }}
+          path: valgrind-install
+      - name: Restore executable bits and put valgrind on PATH
+        run: |
+          chmod -R +x valgrind-install/bin valgrind-install/libexec || true
+          echo "${GITHUB_WORKSPACE}/valgrind-install/bin" >> "$GITHUB_PATH"
+      - name: Set bash shell
+        uses: ./.github/actions/setup-shell
+        with:
+          nix-shell: ""
+          custom_shell: bash
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Show valgrind version
+        run: valgrind --version
+      - name: CT test (-O0)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -O0 -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: CT test (-O1)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -O1 -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: CT test (-O2)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -O2 -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: CT test (-O3)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -O3 -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: CT test (-Os)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -Os -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: CT test (-Oz)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -Oz -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: CT test (-Ofast)
+        # -Ofast deprecated in clang 19; skipped on clang >= 19 (we run clang 18 here).
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -Ofast -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: CT test (-O3 -ffast-math)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -O3 -ffast-math -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
