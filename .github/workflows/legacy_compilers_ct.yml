@@ -87,7 +87,16 @@ jobs:
       fail-fast: false
       matrix:
         gcc:
+          - { version: '7'  }
+          - { version: '8'  }
+          - { version: '9'  }
+          - { version: '10' }
+          - { version: '11' }
+          - { version: '12' }
+          - { version: '13' }
           - { version: '14' }
+          - { version: '15' }
+          - { version: '16' }
         target:
           - { runner: ubuntu-latest,    arch: x86_64  }
           - { runner: ubuntu-24.04-arm, arch: aarch64 }
@@ -98,6 +107,15 @@ jobs:
       CC: gcc
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Fix Debian buster archive sources
+        # gcc:7-10 are buster-based; buster is past EOL so its mirrors are gone.
+        if: ${{ fromJSON(matrix.gcc.version) <= 10 }}
+        run: |
+          sed -i \
+            -e 's|deb.debian.org|archive.debian.org|g' \
+            -e 's|security.debian.org|archive.debian.org|g' \
+            -e '/buster-updates/d' \
+            /etc/apt/sources.list
       - name: Install glibc debug symbols
         # valgrind needs libc6-dbg to redirect strlen() in the dynamic linker.
         run: |
@@ -154,7 +172,8 @@ jobs:
           cflags: -Os -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
       - name: CT test (-Oz)
-        # -Oz was introduced in gcc 12 (we run gcc 14 here).
+        # -Oz was introduced in gcc 12.
+        if: ${{ fromJSON(matrix.gcc.version) >= 12 }}
         uses: ./.github/actions/ct-test
         with:
           cflags: -Oz -DMLK_CONFIG_KEYGEN_PCT
@@ -177,7 +196,21 @@ jobs:
       fail-fast: false
       matrix:
         clang:
+          - { version: '7'  }
+          - { version: '8'  }
+          - { version: '9'  }
+          - { version: '10' }
+          - { version: '11' }
+          - { version: '12' }
+          - { version: '13' }
+          - { version: '14' }
+          - { version: '15' }
+          - { version: '16' }
+          - { version: '17' }
           - { version: '18' }
+          - { version: '19' }
+          - { version: '20' }
+          - { version: '21' }
         target:
           - { runner: ubuntu-latest,    arch: x86_64  }
           - { runner: ubuntu-24.04-arm, arch: aarch64 }
@@ -264,7 +297,8 @@ jobs:
           cflags: -Oz -DMLK_CONFIG_KEYGEN_PCT
           valgrind_flags: --variable-latency-errors=yes
       - name: CT test (-Ofast)
-        # -Ofast deprecated in clang 19; skipped on clang >= 19 (we run clang 18 here).
+        # -Ofast was deprecated in clang 19; use -O3 -ffast-math instead.
+        if: ${{ fromJSON(matrix.clang.version) <= 18 }}
         uses: ./.github/actions/ct-test
         with:
           cflags: -Ofast -DMLK_CONFIG_KEYGEN_PCT
