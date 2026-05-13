@@ -98,6 +98,11 @@ jobs:
       CC: gcc
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install glibc debug symbols
+        # valgrind needs libc6-dbg to redirect strlen() in the dynamic linker.
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends libc6-dbg
       - name: Download patched valgrind
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
@@ -198,6 +203,9 @@ jobs:
         with:
           version: "${{ matrix.clang.version }}"
           env: true
+      - name: Install glibc debug symbols
+        # valgrind needs libc6-dbg to redirect strlen() in the dynamic linker.
+        run: sudo apt-get install -y --no-install-recommends libc6-dbg
       - name: Download patched valgrind
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
