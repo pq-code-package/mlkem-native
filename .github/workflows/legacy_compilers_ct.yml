@@ -108,16 +108,18 @@ jobs:
         with:
           name: valgrind-varlat-${{ matrix.target.arch }}
           path: valgrind-install
-      - name: Restore executable bits and configure PATH / VALGRIND_LIB
+      - name: Restore executable bits and configure PATH / VALGRIND_LIB / CPATH
         # The artifact was built in a different container with a different
         # $GITHUB_WORKSPACE prefix, so valgrind's baked-in tool path is wrong.
         # VALGRIND_LIB tells it where to look at runtime.
         # scripts/ holds the `tests` wrapper that the ct-test action invokes.
+        # CPATH lets gcc/clang find <valgrind/memcheck.h> at compile time.
         run: |
           chmod -R +x valgrind-install/bin valgrind-install/libexec || true
           echo "${GITHUB_WORKSPACE}/valgrind-install/bin" >> "$GITHUB_PATH"
           echo "${GITHUB_WORKSPACE}/scripts" >> "$GITHUB_PATH"
           echo "VALGRIND_LIB=${GITHUB_WORKSPACE}/valgrind-install/libexec/valgrind" >> "$GITHUB_ENV"
+          echo "CPATH=${GITHUB_WORKSPACE}/valgrind-install/include" >> "$GITHUB_ENV"
       - name: Set bash shell
         uses: ./.github/actions/setup-shell
         with:
@@ -211,16 +213,18 @@ jobs:
         with:
           name: valgrind-varlat-${{ matrix.target.arch }}
           path: valgrind-install
-      - name: Restore executable bits and configure PATH / VALGRIND_LIB
+      - name: Restore executable bits and configure PATH / VALGRIND_LIB / CPATH
         # The artifact was built in a different container with a different
         # $GITHUB_WORKSPACE prefix, so valgrind's baked-in tool path is wrong.
         # VALGRIND_LIB tells it where to look at runtime.
         # scripts/ holds the `tests` wrapper that the ct-test action invokes.
+        # CPATH lets gcc/clang find <valgrind/memcheck.h> at compile time.
         run: |
           chmod -R +x valgrind-install/bin valgrind-install/libexec || true
           echo "${GITHUB_WORKSPACE}/valgrind-install/bin" >> "$GITHUB_PATH"
           echo "${GITHUB_WORKSPACE}/scripts" >> "$GITHUB_PATH"
           echo "VALGRIND_LIB=${GITHUB_WORKSPACE}/valgrind-install/libexec/valgrind" >> "$GITHUB_ENV"
+          echo "CPATH=${GITHUB_WORKSPACE}/valgrind-install/include" >> "$GITHUB_ENV"
       - name: Set bash shell
         uses: ./.github/actions/setup-shell
         with:
