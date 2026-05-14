@@ -147,11 +147,12 @@ uint64_t get_cyclecounter(void) { return DWT->CYCCNT; }
 /* Cortex-M55: Use dedicated PMU */
 #if defined(STM32N657xx)
 #include <stm32n6xx.h>
+#include <m-profile/armv8m_pmu.h>
 #else
 #include <ARMCM55.h>
 #include <system_ARMCM55.h>
+#include <pmu_armv8.h>
 #endif
-#include "pmu_armv8.h"
 
 void enable_cyclecounter(void)
 {
