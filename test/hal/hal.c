@@ -69,7 +69,7 @@ void disable_cyclecounter(void) { DWT->CTRL &= ~DWT_CTRL_CYCCNTENA_Msk; }
 
 uint64_t get_cyclecounter(void) { return DWT->CYCCNT; }
 
-#else /* !(__ARM_ARCH_8M_MAIN__ || __ARM_ARCH_8_1M_MAIN__) */
+#else /* __ARM_ARCH_8M_MAIN__ || __ARM_ARCH_8_1M_MAIN__ */
 #error CYCCNT_CYCLES option only supported on Arm M-profile
 #endif /* !(__ARM_ARCH_8M_MAIN__ || __ARM_ARCH_8_1M_MAIN__) */
 
@@ -403,10 +403,10 @@ uint64_t get_cyclecounter(void)
   return g_counters[2];
 }
 
-#else /* !PMU_CYCLES && !PERF_CYCLES && MAC_CYCLES */
+#else /* !CYCCNT_CYCLES && !PMU_CYCLES && !PERF_CYCLES && MAC_CYCLES */
 
 void enable_cyclecounter(void) { return; }
 void disable_cyclecounter(void) { return; }
 uint64_t get_cyclecounter(void) { return (0); }
 
-#endif /* !PMU_CYCLES && !PERF_CYCLES && !MAC_CYCLES */
+#endif /* !CYCCNT_CYCLES && !PMU_CYCLES && !PERF_CYCLES && !MAC_CYCLES */

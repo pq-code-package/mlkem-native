@@ -119,7 +119,7 @@
           packages.nucleo-n657x0-q = util.nucleo-n657x0-q;
           devShells.nucleo-n657x0-q = util.mkShell {
             packages = builtins.attrValues ({
-              inherit (config.packages) nucleo-n657x0-q st-openocd;
+              inherit (config.packages) linters nucleo-n657x0-q st-openocd;
               inherit (pkgs) gcc-arm-embedded coreutils git libffi pkg-config;
             });
           };
