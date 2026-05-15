@@ -376,7 +376,7 @@ __contract__(
 static MLK_INLINE void mlk_ct_cmov_zero(uint8_t *r, const uint8_t *x,
                                         size_t len, uint8_t b)
 __contract__(
-  requires(len <= MLK_MAX_BUFFER_SIZE)
+  requires(len <= UINT32_MAX)
   requires(memory_no_alias(r, len))
   requires(memory_no_alias(x, len))
   assigns(memory_slice(r, len))
