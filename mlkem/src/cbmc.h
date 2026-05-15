@@ -89,14 +89,14 @@
 #define forall(qvar, qvar_lb, qvar_ub, predicate)                 \
   __CPROVER_forall                                                \
   {                                                               \
-    unsigned qvar;                                                \
+    size_t qvar;                                                  \
     ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) ==> (predicate)   \
   }
 
 #define exists(qvar, qvar_lb, qvar_ub, predicate)               \
   __CPROVER_exists                                              \
   {                                                             \
-    unsigned qvar;                                              \
+    size_t qvar;                                                \
     ((qvar_lb) <= (qvar) && (qvar) < (qvar_ub)) && (predicate)  \
   }
 /* clang-format on */
