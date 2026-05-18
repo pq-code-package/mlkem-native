@@ -18,9 +18,17 @@
 #include "../../mlkem/src/poly.h"
 #include "../../mlkem/src/poly_k.h"
 
-#define NWARMUP 50
-#define NITERATIONS 300
-#define NTESTS 20
+#ifndef MLK_BENCHMARK_NWARMUP
+#define MLK_BENCHMARK_NWARMUP 50
+#endif
+
+#ifndef MLK_BENCHMARK_NITERATIONS
+#define MLK_BENCHMARK_NITERATIONS 300
+#endif
+
+#ifndef MLK_BENCHMARK_NTESTS
+#define MLK_BENCHMARK_NTESTS 20
+#endif
 
 static int cmp_uint64_t(const void *a, const void *b)
 {
@@ -40,29 +48,30 @@ static int cmp_uint64_t(const void *a, const void *b)
   } while (0)
 
 
-#define BENCH(txt, code)                                      \
-  for (i = 0; i < NTESTS; i++)                                \
-  {                                                           \
-    CHECK(randombytes((uint8_t *)data0, sizeof(data0)) == 0); \
-    CHECK(randombytes((uint8_t *)data1, sizeof(data1)) == 0); \
-    CHECK(randombytes((uint8_t *)data2, sizeof(data2)) == 0); \
-    CHECK(randombytes((uint8_t *)data3, sizeof(data3)) == 0); \
-    CHECK(randombytes((uint8_t *)data4, sizeof(data4)) == 0); \
-    for (j = 0; j < NWARMUP; j++)                             \
-    {                                                         \
-      code;                                                   \
-    }                                                         \
-                                                              \
-    t0 = get_cyclecounter();                                  \
-    for (j = 0; j < NITERATIONS; j++)                         \
-    {                                                         \
-      code;                                                   \
-    }                                                         \
-    t1 = get_cyclecounter();                                  \
-    (cyc)[i] = t1 - t0;                                       \
-  }                                                           \
-  qsort((cyc), NTESTS, sizeof(uint64_t), cmp_uint64_t);       \
-  printf(txt " cycles=%" PRIu64 "\n", (cyc)[NTESTS >> 1] / NITERATIONS);
+#define BENCH(txt, code)                                              \
+  for (i = 0; i < MLK_BENCHMARK_NTESTS; i++)                          \
+  {                                                                   \
+    CHECK(randombytes((uint8_t *)data0, sizeof(data0)) == 0);         \
+    CHECK(randombytes((uint8_t *)data1, sizeof(data1)) == 0);         \
+    CHECK(randombytes((uint8_t *)data2, sizeof(data2)) == 0);         \
+    CHECK(randombytes((uint8_t *)data3, sizeof(data3)) == 0);         \
+    CHECK(randombytes((uint8_t *)data4, sizeof(data4)) == 0);         \
+    for (j = 0; j < MLK_BENCHMARK_NWARMUP; j++)                       \
+    {                                                                 \
+      code;                                                           \
+    }                                                                 \
+                                                                      \
+    t0 = get_cyclecounter();                                          \
+    for (j = 0; j < MLK_BENCHMARK_NITERATIONS; j++)                   \
+    {                                                                 \
+      code;                                                           \
+    }                                                                 \
+    t1 = get_cyclecounter();                                          \
+    (cyc)[i] = t1 - t0;                                               \
+  }                                                                   \
+  qsort((cyc), MLK_BENCHMARK_NTESTS, sizeof(uint64_t), cmp_uint64_t); \
+  printf(txt " cycles=%" PRIu64 "\n",                                 \
+         (cyc)[MLK_BENCHMARK_NTESTS >> 1] / MLK_BENCHMARK_NITERATIONS);
 
 #define BENCH_NATIVE_OK(txt, call) \
   BENCH(txt, CHECK((call) != MLK_NATIVE_FUNC_FALLBACK))
@@ -75,7 +84,7 @@ static int bench(void)
   MLK_ALIGN uint64_t data3[1024];
   MLK_ALIGN uint64_t data4[1024];
   uint8_t nonce0 = 0, nonce1 = 1, nonce2 = 2, nonce3 = 3;
-  uint64_t cyc[NTESTS];
+  uint64_t cyc[MLK_BENCHMARK_NTESTS];
 
   unsigned i, j;
   uint64_t t0, t1;
