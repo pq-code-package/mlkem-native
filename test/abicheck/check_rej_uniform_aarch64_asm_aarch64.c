@@ -23,14 +23,18 @@ typedef struct register_state reg_state;
 
 #define NUM_TESTS 3
 
-void mlk_poly_tomont_asm(int16_t p[256]);
+uint64_t mlk_rej_uniform_aarch64_asm(int16_t r[256], const uint8_t *buf,
+                                     unsigned buflen,
+                                     const uint8_t table[4096]);
 
-int check_poly_tomont_asm_aarch64(void)
+int check_rej_uniform_aarch64_asm_aarch64(void)
 {
   int test_iter;
   reg_state input_state, output_state;
   int violations;
-  MLK_ALIGN uint8_t buf_x0[512]; /* Input/output polynomial */
+  MLK_ALIGN uint8_t buf_x0[512];  /* Output buffer */
+  MLK_ALIGN uint8_t buf_x1[504];  /* Input buffer */
+  MLK_ALIGN uint8_t buf_x3[4096]; /* Lookup table */
 
   for (test_iter = 0; test_iter < NUM_TESTS; test_iter++)
   {
@@ -39,22 +43,29 @@ int check_poly_tomont_asm_aarch64(void)
 
     /* Initialize buffer for x0 */
     randombytes(buf_x0, 512);
+    /* Initialize buffer for x1 */
+    randombytes(buf_x1, 504);
+    /* Initialize buffer for x3 */
+    randombytes(buf_x3, 4096);
 
     /* Set up register state for function arguments */
     input_state.gpr[0] = (uint64_t)buf_x0;
+    input_state.gpr[1] = (uint64_t)buf_x1;
+    input_state.gpr[2] = 504;
+    input_state.gpr[3] = (uint64_t)buf_x3;
 
     /* Call function through ABI test stub */
     asm_call_stub(&input_state, &output_state,
-                  (void (*)(void))mlk_poly_tomont_asm);
+                  (void (*)(void))mlk_rej_uniform_aarch64_asm);
 
     /* Check ABI compliance */
     violations = check_aarch64_aapcs_compliance(&input_state, &output_state);
     if (violations > 0)
     {
-      fprintf(
-          stderr,
-          "ABI test FAILED for poly_tomont_asm (iteration %d): %d violations\n",
-          test_iter + 1, violations);
+      fprintf(stderr,
+              "ABI test FAILED for rej_uniform_aarch64_asm (iteration %d): %d "
+              "violations\n",
+              test_iter + 1, violations);
       return 1;
     }
   }
@@ -65,6 +76,6 @@ int check_poly_tomont_asm_aarch64(void)
 #else /* MLK_SYS_AARCH64 */
 
 #include "../../mlkem/src/common.h"
-MLK_EMPTY_CU(check_poly_tomont_asm_aarch64)
+MLK_EMPTY_CU(check_rej_uniform_aarch64_asm_aarch64)
 
 #endif /* !MLK_SYS_AARCH64 */

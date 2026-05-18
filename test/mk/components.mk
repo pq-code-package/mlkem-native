@@ -188,28 +188,26 @@ ABICHECK_ALL_SOURCES = $(ABICHECK_SOURCES) $(ABICHECK_ASM_SOURCES) $(ABICHECK_EX
 ABICHECK_OBJS = $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_ALL_SOURCES))
 
 $(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlk
-$(ABICHECK_OBJS): CFLAGS += -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH -UMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
 
-# Work around preprocessor guards in ASM files: enable all assembly
-# without going through the normal backend selection.
+# Drive backend selection through the standard backends.h shim, using
+# ABI-checker-specific metadata headers. These enable every gated asm
+# variant without pulling in the inline dispatch glue that would
+# normally require compiling indcpa.c / poly.c / etc.
+#
+# Paths are resolved by the C preprocessor relative to the file doing
+# the #include - i.e. mlkem/src/backends.h - hence the ../../ prefix.
 ifeq ($(ARCH),aarch64)
-$(ABICHECK_DIR)/mlkem/src/native/aarch64/%.S.o: CFLAGS += -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
-$(ABICHECK_DIR)/mlkem/src/native/aarch64/%.S.o: CFLAGS += -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH
-$(ABICHECK_DIR)/mlkem/src/native/aarch64/%.S.o: CFLAGS += -DMLK_ARITH_BACKEND_AARCH64
-$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -UMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
-$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X1_SCALAR
-$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X1_V84A
-$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X2_V84A
-$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID
-$(ABICHECK_DIR)/mlkem/src/fips202/native/aarch64/%.S.o: CFLAGS += -DMLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_ARITH_BACKEND_FILE=\"../../test/abicheck/abicheck_arith_aarch64.h\"
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_FIPS202_BACKEND_FILE=\"../../test/abicheck/abicheck_fips202_aarch64.h\"
 else ifeq ($(ARCH),x86_64)
-$(ABICHECK_DIR)/mlkem/src/native/x86_64/%.o: CFLAGS += -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
-$(ABICHECK_DIR)/mlkem/src/native/x86_64/%.o: CFLAGS += -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH
-$(ABICHECK_DIR)/mlkem/src/native/x86_64/%.o: CFLAGS += -DMLK_ARITH_BACKEND_X86_64_DEFAULT
-$(ABICHECK_DIR)/mlkem/src/native/x86_64/%.o: CFLAGS += -mavx2 -mbmi2
-$(ABICHECK_DIR)/mlkem/src/fips202/native/x86_64/%.o: CFLAGS += -UMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
-$(ABICHECK_DIR)/mlkem/src/fips202/native/x86_64/%.o: CFLAGS += -DMLK_FIPS202_X86_64_NEED_X4_AVX2
-$(ABICHECK_DIR)/mlkem/src/fips202/native/x86_64/%.o: CFLAGS += -mavx2
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_ARITH_BACKEND_FILE=\"../../test/abicheck/abicheck_arith_x86_64.h\"
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_FIPS202_BACKEND_FILE=\"../../test/abicheck/abicheck_fips202_x86_64.h\"
+$(ABICHECK_OBJS): CFLAGS += -mavx2 -mbmi2
 endif
 
 $(ABICHECK_DIR)/bin/abicheck: $(ABICHECK_OBJS)

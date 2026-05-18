@@ -13,6 +13,8 @@
 
 #if defined(MLK_SYS_AARCH64)
 
+#if defined(__ARM_FEATURE_SHA3)
+
 #include <stdio.h>
 
 #include "../notrandombytes/notrandombytes.h"
@@ -23,17 +25,17 @@ typedef struct register_state reg_state;
 
 #define NUM_TESTS 3
 
-uint64_t mlk_rej_uniform_asm(int16_t r[256], const uint8_t *buf,
-                             unsigned buflen, const uint8_t table[2048]);
+void mlk_keccak_f1600_x2_v84a_aarch64_asm(uint64_t state[50],
+                                          const uint64_t rc[24]);
 
-int check_rej_uniform_asm_aarch64(void)
+int check_keccak_f1600_x2_v84a_aarch64_asm_aarch64(void)
 {
   int test_iter;
   reg_state input_state, output_state;
   int violations;
-  MLK_ALIGN uint8_t buf_x0[512];  /* Output buffer */
-  MLK_ALIGN uint8_t buf_x1[504];  /* Input buffer */
-  MLK_ALIGN uint8_t buf_x3[2048]; /* Lookup table */
+  MLK_ALIGN uint8_t
+      buf_x0[400]; /* Two sequential Keccak states (state0[25], state1[25]) */
+  MLK_ALIGN uint8_t buf_x1[192]; /* Round constants (24 x uint64_t) */
 
   for (test_iter = 0; test_iter < NUM_TESTS; test_iter++)
   {
@@ -41,30 +43,26 @@ int check_rej_uniform_asm_aarch64(void)
     init_register_state(&input_state);
 
     /* Initialize buffer for x0 */
-    randombytes(buf_x0, 512);
+    randombytes(buf_x0, 400);
     /* Initialize buffer for x1 */
-    randombytes(buf_x1, 504);
-    /* Initialize buffer for x3 */
-    randombytes(buf_x3, 2048);
+    randombytes(buf_x1, 192);
 
     /* Set up register state for function arguments */
     input_state.gpr[0] = (uint64_t)buf_x0;
     input_state.gpr[1] = (uint64_t)buf_x1;
-    input_state.gpr[2] = 504;
-    input_state.gpr[3] = (uint64_t)buf_x3;
 
     /* Call function through ABI test stub */
     asm_call_stub(&input_state, &output_state,
-                  (void (*)(void))mlk_rej_uniform_asm);
+                  (void (*)(void))mlk_keccak_f1600_x2_v84a_aarch64_asm);
 
     /* Check ABI compliance */
     violations = check_aarch64_aapcs_compliance(&input_state, &output_state);
     if (violations > 0)
     {
-      fprintf(
-          stderr,
-          "ABI test FAILED for rej_uniform_asm (iteration %d): %d violations\n",
-          test_iter + 1, violations);
+      fprintf(stderr,
+              "ABI test FAILED for keccak_f1600_x2_v84a_aarch64_asm (iteration "
+              "%d): %d violations\n",
+              test_iter + 1, violations);
       return 1;
     }
   }
@@ -72,9 +70,16 @@ int check_rej_uniform_asm_aarch64(void)
   return 0;
 }
 
+#else /* __ARM_FEATURE_SHA3 */
+
+#include "../../mlkem/src/common.h"
+MLK_EMPTY_CU(check_keccak_f1600_x2_v84a_aarch64_asm_aarch64)
+
+#endif /* !__ARM_FEATURE_SHA3 */
+
 #else /* MLK_SYS_AARCH64 */
 
 #include "../../mlkem/src/common.h"
-MLK_EMPTY_CU(check_rej_uniform_asm_aarch64)
+MLK_EMPTY_CU(check_keccak_f1600_x2_v84a_aarch64_asm_aarch64)
 
 #endif /* !MLK_SYS_AARCH64 */
