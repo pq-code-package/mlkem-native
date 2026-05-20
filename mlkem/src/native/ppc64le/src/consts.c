@@ -10,7 +10,7 @@
 
 #include "consts.h"
 
-MLK_ALIGN const int16_t mlk_ppc_qdata[] = {
+MLK_ALIGN MLK_INTERNAL_DATA_DEFINITION const int16_t mlk_ppc_qdata[2072] = {
     /* -Q */
     /* check-magic: -3329 == -1 * MLKEM_Q */
     -3329,

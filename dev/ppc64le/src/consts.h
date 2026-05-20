@@ -24,7 +24,7 @@
 
 #ifndef __ASSEMBLER__
 #define mlk_ppc_qdata MLK_NAMESPACE(ppc_qdata)
-extern const int16_t mlk_ppc_qdata[];
+MLK_INTERNAL_DATA_DECLARATION const int16_t mlk_ppc_qdata[2072];
 #endif
 
 #endif /* !MLK_DEV_PPC64LE_SRC_CONSTS_H */
