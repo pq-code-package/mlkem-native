@@ -1,0 +1,562 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: Legacy compilers
+permissions:
+  contents: read
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  pull_request:
+    branches: ["main"]
+    types: [opened, synchronize, reopened, labeled]
+  workflow_dispatch:
+
+jobs:
+  compiler_tests_linux:
+    name: Compiler tests (${{ matrix.compiler.family }}-${{ matrix.compiler.version }}, ${{ matrix.target.name }}, ${{ matrix.cflags }})
+    if: >-
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+       contains(github.event.pull_request.labels.*.name, 'legacy-compiler-tests'))
+    strategy:
+      fail-fast: false
+      matrix:
+        cflags: [ "-O0", "-Os", "-O3" ]
+        target:
+         - runner: ubuntu-24.04-arm
+           name: 'aarch64'
+         - runner: ubuntu-latest
+           name: 'x86_64'
+        # All available compiler versions are tested here, including those also
+        # covered by ci.yml on every PR.
+        # C17 support starts at gcc 8, clang 7, all zig; C23 at gcc 14, clang 18,
+        # zig 0.14 (encoded in the C17/C23 step conditions below).
+        compiler:
+         - family: gcc
+           version: "4.8"
+           shell: gcc48
+           opt: all
+           examples: true
+         - family: gcc
+           version: "4.9"
+           shell: gcc49
+           opt: all
+           examples: true
+         - family: gcc
+           version: "6"
+           shell: gcc6
+           opt: all
+           examples: true
+         - family: gcc
+           version: "7"
+           shell: gcc7
+           opt: all
+           examples: true
+         - family: gcc
+           version: "8"
+           shell: gcc8
+           opt: all
+           examples: true
+         - family: gcc
+           version: "9"
+           shell: gcc9
+           opt: all
+           examples: true
+         - family: gcc
+           version: "10"
+           shell: gcc10
+           opt: all
+           examples: true
+         - family: gcc
+           version: "11"
+           shell: gcc11
+           opt: all
+           examples: true
+         - family: gcc
+           version: "12"
+           shell: gcc12
+           opt: all
+           examples: true
+         - family: gcc
+           version: "13"
+           shell: gcc13
+           opt: all
+           examples: true
+         - family: gcc
+           version: "14"
+           shell: gcc14
+           opt: all
+           examples: true
+         - family: gcc
+           version: "15"
+           shell: gcc15
+           opt: all
+           examples: true
+         - family: clang
+           version: "6"
+           shell: clang6
+           opt: all
+           examples: true
+         - family: clang
+           version: "7"
+           shell: clang7
+           opt: all
+           examples: true
+         - family: clang
+           version: "8"
+           shell: clang8
+           opt: all
+           examples: true
+         - family: clang
+           version: "9"
+           shell: clang9
+           opt: all
+           examples: true
+         - family: clang
+           version: "10"
+           shell: clang10
+           opt: all
+           examples: true
+         - family: clang
+           version: "11"
+           shell: clang11
+           opt: all
+           examples: true
+         - family: clang
+           version: "12"
+           shell: clang12
+           opt: all
+           examples: true
+         - family: clang
+           version: "13"
+           shell: clang13
+           opt: all
+           examples: true
+         - family: clang
+           version: "14"
+           shell: clang14
+           opt: all
+           examples: true
+         - family: clang
+           version: "15"
+           shell: clang15
+           opt: all
+           examples: true
+         - family: clang
+           version: "16"
+           shell: clang16
+           opt: all
+           examples: true
+         - family: clang
+           version: "17"
+           shell: clang17
+           opt: all
+           examples: true
+         - family: clang
+           version: "18"
+           shell: clang18
+           opt: all
+           examples: true
+         - family: clang
+           version: "19"
+           shell: clang19
+           opt: all
+           examples: true
+         - family: clang
+           version: "20"
+           shell: clang20
+           opt: all
+           examples: true
+         - family: clang
+           version: "21"
+           shell: clang21
+           opt: all
+           examples: true
+         - family: clang
+           version: "22"
+           shell: clang22
+           opt: all
+           examples: true
+         # CPU flags are not correctly passed to the zig assembler
+         # https://github.com/ziglang/zig/issues/23576
+         # We therefore only test the C backend, which is why opt is set to
+         # no_opt and examples are omitted (there is currently no way to run
+         # only those examples not involving native code).
+         - family: zig
+           version: "0.10"
+           shell: zig0_10
+           opt: no_opt
+           examples: False
+         - family: zig
+           version: "0.11"
+           shell: zig0_11
+           opt: no_opt
+           examples: False
+         - family: zig
+           version: "0.12"
+           shell: zig0_12
+           opt: no_opt
+           examples: False
+         - family: zig
+           version: "0.13"
+           shell: zig0_13
+           opt: no_opt
+           examples: False
+         - family: zig
+           version: "0.14"
+           shell: zig0_14
+           opt: no_opt
+           examples: False
+         - family: zig
+           version: "0.15"
+           shell: zig0_15
+           opt: no_opt
+           examples: False
+         - family: zig
+           version: "0.16"
+           shell: zig0_16
+           opt: no_opt
+           examples: False
+    runs-on: ${{ matrix.target.runner }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: native build+functest (default)
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
+          nix-shell: ${{ matrix.compiler.shell }}
+          cflags: "${{ matrix.cflags }}"
+      - name: native build+functest (C90)
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
+          nix-shell: ${{ matrix.compiler.shell }}
+          cflags: "-std=c90 ${{ matrix.cflags }}"
+      - name: native build+functest (C99)
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
+          nix-shell: ${{ matrix.compiler.shell }}
+          cflags: "-std=c99 ${{ matrix.cflags }}"
+      - name: native build+functest (C11)
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
+          nix-shell: ${{ matrix.compiler.shell }}
+          cflags: "-std=c11 ${{ matrix.cflags }}"
+      - name: native build+functest (C17)
+        if: ${{ matrix.compiler.family == 'zig' || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 8) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 7) }}
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
+          nix-shell: ${{ matrix.compiler.shell }}
+          cflags: "-std=c17 ${{ matrix.cflags }}"
+      - name: native build+functest (C23)
+        if: ${{ (matrix.compiler.family == 'zig' && matrix.compiler.version >= 0.14) || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 14) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 18) }}
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
+          nix-shell: ${{ matrix.compiler.shell }}
+          cflags: "-std=c23 ${{ matrix.cflags }}"
+
+  compiler_tests_macos:
+    name: Compiler tests (${{ matrix.compiler.family }}-${{ matrix.compiler.version }}, macos, ${{ matrix.cflags }})
+    if: >-
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+       contains(github.event.pull_request.labels.*.name, 'legacy-compiler-tests'))
+    strategy:
+      fail-fast: false
+      matrix:
+        cflags: [ "-O0", "-Os", "-O3" ]
+        # Subset of compiler_tests_linux known to build on aarch64-darwin.
+        compiler:
+         - family: gcc
+           version: "11"
+           shell: gcc11
+           opt: all
+           examples: true
+         - family: gcc
+           version: "14"
+           shell: gcc14
+           opt: all
+           examples: true
+         - family: gcc
+           version: "15"
+           shell: gcc15
+           opt: all
+           examples: true
+         - family: clang
+           version: "18"
+           shell: clang18
+           opt: all
+           examples: true
+         - family: clang
+           version: "19"
+           shell: clang19
+           opt: all
+           examples: true
+         - family: clang
+           version: "20"
+           shell: clang20
+           opt: all
+           examples: true
+         - family: clang
+           version: "21"
+           shell: clang21
+           opt: all
+           examples: true
+         - family: clang
+           version: "22"
+           shell: clang22
+           opt: all
+           examples: true
+         - family: zig
+           version: "0.12"
+           shell: zig0_12
+           opt: no_opt
+           examples: False
+         - family: zig
+           version: "0.13"
+           shell: zig0_13
+           opt: no_opt
+           examples: False
+         - family: zig
+           version: "0.14"
+           shell: zig0_14
+           opt: no_opt
+           examples: False
+         - family: zig
+           version: "0.15"
+           shell: zig0_15
+           opt: no_opt
+           examples: False
+         - family: zig
+           version: "0.16"
+           shell: zig0_16
+           opt: no_opt
+           examples: False
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: native build+functest (default)
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
+          nix-shell: ${{ matrix.compiler.shell }}
+          cflags: "${{ matrix.cflags }}"
+      - name: native build+functest (C90)
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
+          nix-shell: ${{ matrix.compiler.shell }}
+          cflags: "-std=c90 ${{ matrix.cflags }}"
+      - name: native build+functest (C99)
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
+          nix-shell: ${{ matrix.compiler.shell }}
+          cflags: "-std=c99 ${{ matrix.cflags }}"
+      - name: native build+functest (C11)
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
+          nix-shell: ${{ matrix.compiler.shell }}
+          cflags: "-std=c11 ${{ matrix.cflags }}"
+      - name: native build+functest (C17)
+        if: ${{ matrix.compiler.family == 'zig' || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 8) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 7) }}
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
+          nix-shell: ${{ matrix.compiler.shell }}
+          cflags: "-std=c17 ${{ matrix.cflags }}"
+      - name: native build+functest (C23)
+        if: ${{ (matrix.compiler.family == 'zig' && matrix.compiler.version >= 0.14) || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 14) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 18) }}
+        uses: ./.github/actions/multi-functest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: native
+          func: true
+          kat: false
+          acvp: false
+          wycheproof: false
+          examples: ${{ matrix.compiler.examples }}
+          opt: ${{ matrix.compiler.opt }}
+          nix-shell: ${{ matrix.compiler.shell }}
+          cflags: "-std=c23 ${{ matrix.cflags }}"
+
+  check-ct-varlat-legacy:
+    name: Constant-time test ${{ matrix.compiler.family }}-${{ matrix.compiler.version }} ${{ matrix.system }}
+    if: >-
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+       contains(github.event.pull_request.labels.*.name, 'legacy-compiler-tests'))
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        system: [ubuntu-latest, ubuntu-24.04-arm]
+        compiler:
+          - { family: gcc,   version: "4.8", shell: gcc48 }
+          - { family: gcc,   version: "4.9", shell: gcc49 }
+          - { family: gcc,   version: "6",   shell: gcc6 }
+          - { family: gcc,   version: "7",   shell: gcc7 }
+          - { family: gcc,   version: "8",   shell: gcc8 }
+          - { family: gcc,   version: "9",   shell: gcc9 }
+          - { family: gcc,   version: "10",  shell: gcc10 }
+          - { family: gcc,   version: "11",  shell: gcc11 }
+          - { family: gcc,   version: "12",  shell: gcc12 }
+          - { family: gcc,   version: "13",  shell: gcc13 }
+          - { family: gcc,   version: "14",  shell: gcc14 }
+          - { family: gcc,   version: "15",  shell: gcc15 }
+          - { family: clang, version: "6",   shell: clang6 }
+          - { family: clang, version: "7",   shell: clang7 }
+          - { family: clang, version: "8",   shell: clang8 }
+          - { family: clang, version: "9",   shell: clang9 }
+          - { family: clang, version: "10",  shell: clang10 }
+          - { family: clang, version: "11",  shell: clang11 }
+          - { family: clang, version: "12",  shell: clang12 }
+          - { family: clang, version: "13",  shell: clang13 }
+          - { family: clang, version: "14",  shell: clang14 }
+          - { family: clang, version: "15",  shell: clang15 }
+          - { family: clang, version: "16",  shell: clang16 }
+          - { family: clang, version: "17",  shell: clang17 }
+          - { family: clang, version: "18",  shell: clang18 }
+          - { family: clang, version: "19",  shell: clang19 }
+          - { family: clang, version: "20",  shell: clang20 }
+          - { family: clang, version: "21",  shell: clang21 }
+          - { family: clang, version: "22",  shell: clang22 }
+    runs-on: ${{ matrix.system }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Setup nix
+        uses: ./.github/actions/setup-shell
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          nix-shell: "valgrind-varlat_${{ matrix.compiler.shell }}"
+          nix-cache: true
+      - name: Build and run test (-Oz)
+        # -Oz got introduced in gcc12
+        if: ${{ matrix.compiler.family != 'gcc' || matrix.compiler.version >= 12 }}
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -Oz -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: Build and run test (-Os)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -Os -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: Build and run test (-O3)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -O3 -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: Build and run test (-Ofast)
+        # -Ofast got deprecated in clang19; -O3 -ffast-math should be used instead
+        if: ${{ !(matrix.compiler.family == 'clang' && matrix.compiler.version >= 19) }}
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -Ofast -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: Build and run test (-O3 -ffast-math)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -O3 -ffast-math -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: Build and run test (-O2)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -O2 -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: Build and run test (-O1)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -O1 -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes
+      - name: Build and run test (-O0)
+        uses: ./.github/actions/ct-test
+        with:
+          cflags: -O0 -DMLK_CONFIG_KEYGEN_PCT
+          valgrind_flags: --variable-latency-errors=yes

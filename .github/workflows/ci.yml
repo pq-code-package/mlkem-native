@@ -214,7 +214,7 @@ jobs:
           check_namespace: 'false'
           extra_args: "--fips202-aarch64-backend ${{ matrix.backend }}"
   compiler_tests:
-    name: Compiler tests  (${{ matrix.compiler.name }}, ${{ matrix.target.name }}, ${{ matrix.cflags }})
+    name: Compiler tests  (${{ matrix.compiler.family }}-${{ matrix.compiler.version }}, ${{ matrix.target.name }}, ${{ matrix.cflags }})
     strategy:
       fail-fast: false
       matrix:
@@ -226,90 +226,55 @@ jobs:
            name: 'x86_64'
          - runner: macos-latest
            name: 'macos'
+        # Oldest available + 3 latest per family; intermediate versions run in legacy-compilers.
         compiler:
-         - name: gcc-4.8
+         - family: gcc
+           version: "4.8"
            shell: gcc48
            darwin: False
-           c17: False
-           c23: False
            opt: all
            examples: true
-         - name: gcc-4.9
-           shell: gcc49
-           darwin: False
-           c17: False
-           c23: False
-           opt: all
-           examples: true
-         - name: gcc-7
-           shell: gcc7
-           darwin: False
-           c17: False
-           c23: False
-           opt: all
-           examples: true
-         - name: gcc-11
-           shell: gcc11
-           darwin: True
-           c17: True
-           c23: False
-           opt: all
-           examples: true
-         - name: gcc-13
+         - family: gcc
+           version: "13"
            shell: gcc13
            # TODO: gcc13 broken on macOS in nixpkgs 25.11
            darwin: False
-           c17: True
-           c23: False
            opt: all
            examples: true
-         - name: gcc-14
+         - family: gcc
+           version: "14"
            shell: gcc14
            darwin: True
-           c17: True
-           c23: True
            opt: all
            examples: true
-         - name: gcc-15
+         - family: gcc
+           version: "15"
            shell: gcc15
            darwin: True
-           c17: True
-           c23: True
            opt: all
            examples: true
-         - name: clang-18
-           shell: clang18
-           darwin: True
-           c17: True
-           c23: True
+         - family: clang
+           version: "6"
+           shell: clang6
+           darwin: False
            opt: all
            examples: true
-         - name: clang-19
-           shell: clang19
-           darwin: True
-           c17: True
-           c23: True
-           opt: all
-           examples: true
-         - name: clang-20
+         - family: clang
+           version: "20"
            shell: clang20
            darwin: True
-           c17: True
-           c23: True
            opt: all
            examples: true
-         - name: clang-21
+         - family: clang
+           version: "21"
            shell: clang21
            darwin: True
-           c17: True
-           c23: True
            opt: all
            examples: true
-         - name: clang-22
+         - family: clang
+           version: "22"
            shell: clang22
            darwin: True
-           c17: True
-           c23: True
            opt: all
            examples: true
          # CPU flags are not correctly passed to the zig assembler
@@ -321,41 +286,30 @@ jobs:
          #
          # zig 0.16 still appears affected on Linux (CPU-feature
          # predefines look to be dropped in assembler-with-cpp mode).
-         - name: zig-0.12
-           shell: zig0_12
-           darwin: True
-           c17: True
-           c23: False
-           examples: False
+         - family: zig
+           version: "0.10"
+           shell: zig0_10
+           darwin: False
            opt: no_opt
-         - name: zig-0.13
-           shell: zig0_13
-           darwin: True
-           c17: True
-           c23: False
            examples: False
-           opt: no_opt
-         - name: zig-0.14
+         - family: zig
+           version: "0.14"
            shell: zig0_14
            darwin: True
-           c17: True
-           c23: True
-           examples: False
            opt: no_opt
-         - name: zig-0.15
+           examples: False
+         - family: zig
+           version: "0.15"
            shell: zig0_15
            darwin: True
-           c17: True
-           c23: True
-           examples: False
            opt: no_opt
-         - name: zig-0.16
+           examples: False
+         - family: zig
+           version: "0.16"
            shell: zig0_16
            darwin: True
-           c17: True
-           c23: True
-           examples: False
            opt: no_opt
+           examples: False
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -417,7 +371,7 @@ jobs:
           cflags: "-std=c11 ${{ matrix.cflags }}"
       - name: native build+functest (C17)
         if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
-                matrix.compiler.c17 }}
+                (matrix.compiler.family == 'zig' || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 8) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 7)) }}
         uses: ./.github/actions/multi-functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -432,7 +386,7 @@ jobs:
           cflags: "-std=c17 ${{ matrix.cflags }}"
       - name: native build+functest (C23)
         if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
-                matrix.compiler.c23 }}
+                ((matrix.compiler.family == 'zig' && matrix.compiler.version >= 0.14) || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 14) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 18)) }}
         uses: ./.github/actions/multi-functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
