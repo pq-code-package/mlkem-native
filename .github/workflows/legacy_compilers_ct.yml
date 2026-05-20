@@ -47,14 +47,16 @@ jobs:
         with:
           path: valgrind-install
           key: valgrind-varlat-${{ matrix.target.arch }}-${{ env.VALGRIND_VERSION }}-${{ hashFiles('nix/valgrind/valgrind-varlat-patch-20240808.txt') }}
-      - name: Fix Debian buster archive sources
+      - name: Fix Debian archive sources for EOL releases
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          # buster is past EOL; the regular mirrors no longer serve it.
+          # gcc:7 is buster; buster is past EOL so its mirrors are gone.
+          # Same shape as the matrix job step below, kept aligned.
           sed -i \
             -e 's|deb.debian.org|archive.debian.org|g' \
             -e 's|security.debian.org|archive.debian.org|g' \
-            -e '/buster-updates/d' \
+            -e '/-updates/d' \
+            -e '/-security/d' \
             /etc/apt/sources.list
       - name: Install build deps
         if: steps.cache.outputs.cache-hit != 'true'
@@ -107,14 +109,17 @@ jobs:
       CC: gcc
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Fix Debian buster archive sources
-        # gcc:7-10 are buster-based; buster is past EOL so its mirrors are gone.
+      - name: Fix Debian archive sources for EOL releases
+        # gcc:7-8 are buster, gcc:9-10 are bullseye; both are past EOL so the
+        # default mirrors are gone. Rewrite to archive.debian.org and drop the
+        # -updates / -security suites which archive.debian.org doesn't serve.
         if: ${{ fromJSON(matrix.gcc.version) <= 10 }}
         run: |
           sed -i \
             -e 's|deb.debian.org|archive.debian.org|g' \
             -e 's|security.debian.org|archive.debian.org|g' \
-            -e '/buster-updates/d' \
+            -e '/-updates/d' \
+            -e '/-security/d' \
             /etc/apt/sources.list
       - name: Install glibc debug symbols
         # valgrind needs libc6-dbg to redirect strlen() in the dynamic linker.
