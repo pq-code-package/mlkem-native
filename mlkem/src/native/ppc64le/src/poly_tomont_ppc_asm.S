@@ -1,12 +1,9 @@
 /*
  * Copyright (c) The mlkem-native project authors
+ * Copyright (c) IBM Corp. 2025, 2026
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  *
- * Copyright IBM Corp. 2025, 2026
- *
- *===================================================================================
  * Written by Danny Tsen <dtsen@us.ibm.com>
- *
  */
 
 /*
@@ -39,27 +36,27 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
         li 10, 192
         li 11, 208
         li 12, 224
-        stxvx 52, 6, 1
-        stxvx 53, 7, 1
-        stxvx 54, 8, 1
-        stxvx 55, 9, 1
-        stxvx 56, 10, 1
-        stxvx 57, 11, 1
-        stxvx 58, 12, 1
+        stxvd2x 52, 6, 1
+        stxvd2x 53, 7, 1
+        stxvd2x 54, 8, 1
+        stxvd2x 55, 9, 1
+        stxvd2x 56, 10, 1
+        stxvd2x 57, 11, 1
+        stxvd2x 58, 12, 1
         li 6, 240
         li 7, 256
         li 8, 272
         li 9, 288
-        stxvx 59, 6, 1
-        stxvx 60, 7, 1
-        stxvx 61, 8, 1
-        stxvx 62, 9, 1
+        stxvd2x 59, 6, 1
+        stxvd2x 60, 7, 1
+        stxvd2x 61, 8, 1
+        stxvd2x 62, 9, 1
         li 6, 0
         li 7, 16
         li 8, 96
-        lxvx 37, 6, 4
-        lxvx 34, 7, 4
-        lxvx 32, 8, 4
+        lxvd2x 37, 6, 4
+        lxvd2x 34, 7, 4
+        lxvd2x 32, 8, 4
         vxor 3, 3, 3
         vspltish 4, 1
         li 4, -128
@@ -333,21 +330,21 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
         li 10, 192
         li 11, 208
         li 12, 224
-        lxvx 52, 6, 1
-        lxvx 53, 7, 1
-        lxvx 54, 8, 1
-        lxvx 55, 9, 1
-        lxvx 56, 10, 1
-        lxvx 57, 11, 1
-        lxvx 58, 12, 1
+        lxvd2x 52, 6, 1
+        lxvd2x 53, 7, 1
+        lxvd2x 54, 8, 1
+        lxvd2x 55, 9, 1
+        lxvd2x 56, 10, 1
+        lxvd2x 57, 11, 1
+        lxvd2x 58, 12, 1
         li 6, 240
         li 7, 256
         li 8, 272
         li 9, 288
-        lxvx 59, 6, 1
-        lxvx 60, 7, 1
-        lxvx 61, 8, 1
-        lxvx 62, 9, 1
+        lxvd2x 59, 6, 1
+        lxvd2x 60, 7, 1
+        lxvd2x 61, 8, 1
+        lxvd2x 62, 9, 1
         mtlr 0
         addi 1, 1, 320
         blr

@@ -1,10 +1,8 @@
 /*
  * Copyright (c) The mlkem-native project authors
+ * Copyright (c) IBM Corp. 2025, 2026
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  *
- * Copyright IBM Corp. 2025, 2026
- *
- * ===================================================================================
  * Written by Danny Tsen <dtsen@us.ibm.com>
  */
 
@@ -39,29 +37,29 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         li 14, 176
         li 15, 192
         li 16, 208
-        stxvx 52, 10, 1
-        stxvx 53, 11, 1
-        stxvx 54, 12, 1
-        stxvx 55, 14, 1
-        stxvx 56, 15, 1
-        stxvx 57, 16, 1
+        stxvd2x 52, 10, 1
+        stxvd2x 53, 11, 1
+        stxvd2x 54, 12, 1
+        stxvd2x 55, 14, 1
+        stxvd2x 56, 15, 1
+        stxvd2x 57, 16, 1
         li 10, 224
         li 11, 240
         li 12, 256
         li 14, 272
         li 15, 288
         li 16, 304
-        stxvx 58, 10, 1
-        stxvx 59, 11, 1
-        stxvx 60, 12, 1
-        stxvx 61, 14, 1
-        stxvx 62, 15, 1
-        stxvx 63, 16, 1
+        stxvd2x 58, 10, 1
+        stxvd2x 59, 11, 1
+        stxvd2x 60, 12, 1
+        stxvd2x 61, 14, 1
+        stxvd2x 62, 15, 1
+        stxvd2x 63, 16, 1
         lvx 5, 0, 4
         addi 14, 4, 112
         addi 22, 4, 2128
         vxor 3, 3, 3
-        nop
+        ori 2, 2, 0
         li 7, 256
         lvx 10, 0, 14
         lvx 2, 0, 22
@@ -245,7 +243,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         stxvd2x 63, 3, 21
         nop
         nop
-        nop
+        ori 2, 2, 0
         li 7, 128
         lvx 10, 0, 14
         lvx 2, 0, 22
@@ -433,7 +431,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         stxvd2x 63, 3, 21
         nop
         nop
-        nop
+        ori 2, 2, 0
         li 7, 64
         lvx 10, 0, 14
         lvx 2, 0, 22
@@ -629,7 +627,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         stxvd2x 63, 3, 21
         nop
         nop
-        nop
+        ori 2, 2, 0
         li 7, 32
         li 10, 16
         li 11, 32
@@ -833,7 +831,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         stxvd2x 58, 3, 19
         stxvd2x 62, 3, 20
         stxvd2x 63, 3, 21
-        nop
+        ori 2, 2, 0
         li 7, 16
         li 10, 16
         li 11, 32
@@ -1073,7 +1071,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         li 17, 96
         li 18, 112
         nop
-        nop
+        ori 2, 2, 0
         li 10, 16
         li 11, 32
         li 12, 48
@@ -1341,7 +1339,7 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         mr 5, 3
         li 7, 4
         nop
-        nop
+        ori 2, 2, 0
         li 10, 16
         li 11, 32
         li 12, 48
@@ -1612,24 +1610,24 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         li 14, 176
         li 15, 192
         li 16, 208
-        lxvx 52, 10, 1
-        lxvx 53, 11, 1
-        lxvx 54, 12, 1
-        lxvx 55, 14, 1
-        lxvx 56, 15, 1
-        lxvx 57, 16, 1
+        lxvd2x 52, 10, 1
+        lxvd2x 53, 11, 1
+        lxvd2x 54, 12, 1
+        lxvd2x 55, 14, 1
+        lxvd2x 56, 15, 1
+        lxvd2x 57, 16, 1
         li 10, 224
         li 11, 240
         li 12, 256
         li 14, 272
         li 15, 288
         li 16, 304
-        lxvx 58, 10, 1
-        lxvx 59, 11, 1
-        lxvx 60, 12, 1
-        lxvx 61, 14, 1
-        lxvx 62, 15, 1
-        lxvx 63, 16, 1
+        lxvd2x 58, 10, 1
+        lxvd2x 59, 11, 1
+        lxvd2x 60, 12, 1
+        lxvd2x 61, 14, 1
+        lxvd2x 62, 15, 1
+        lxvd2x 63, 16, 1
         ld 14, 56(1)
         ld 15, 64(1)
         ld 16, 72(1)

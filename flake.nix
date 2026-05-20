@@ -145,7 +145,7 @@
 
           # autogen shell with cross compiler for the "other" architecture
           devShells.cross-autogen = util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters; inherit (pkgs) gcc-arm-embedded; }
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_ppc64le; inherit (pkgs) gcc-arm-embedded; }
               ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isx86_64 [ config.packages.toolchain_aarch64 ]
               ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isAarch64 [ config.packages.toolchain_x86_64 ];
           };

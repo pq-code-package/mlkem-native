@@ -6,7 +6,7 @@
 #include "../../../common.h"
 
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__)
 
 #include "consts.h"
 
@@ -90,4 +90,4 @@ MLK_ALIGN const int16_t mlk_ppc_qdata[] = {
 #include "consts_intt_tw.inc"
 };
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
-          !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED && __POWER8_VECTOR__ */

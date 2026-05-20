@@ -147,7 +147,7 @@ runs:
           rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
-      - name: Cross ppc64le Tests
+      - name: Cross ppc64le Tests (POWER8)
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-ppc64le') && (success() || failure()) }}
         uses: ./.github/actions/functest
         with:
@@ -156,10 +156,35 @@ runs:
           nix-verbose: ${{ inputs.nix-verbose }}
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
-          cflags: "${{ inputs.cflags }} -DMLK_FORCE_PPC64LE"
+          cflags: "${{ inputs.cflags }} -DMLK_FORCE_PPC64LE -mcpu=power8"
           ldflags: ${{ inputs.ldflags }}
           cross_prefix: powerpc64le-unknown-linux-gnu-
-          exec_wrapper: qemu-ppc64le
+          exec_wrapper: "qemu-ppc64le -cpu power8"
+          opt: ${{ inputs.opt }}
+          func: ${{ inputs.func }}
+          kat: ${{ inputs.kat }}
+          unit: ${{ inputs.unit }}
+          acvp: ${{ inputs.acvp }}
+          wycheproof: ${{ inputs.wycheproof }}
+          examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
+          stack: ${{ inputs.stack }}
+          alloc: ${{ inputs.alloc }}
+          rng_fail: ${{ inputs.rng_fail }}
+          extra_args: ${{ inputs.extra_args }}
+      - name: Cross ppc64le Tests (POWER7)
+        if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-ppc64le') && (success() || failure()) }}
+        uses: ./.github/actions/functest
+        with:
+          nix-shell: ${{ inputs.nix-shell }}
+          nix-cache: ${{ inputs.nix-cache }}
+          nix-verbose: ${{ inputs.nix-verbose }}
+          gh_token: ${{ inputs.gh_token }}
+          custom_shell: ${{ inputs.custom_shell }}
+          cflags: "${{ inputs.cflags }} -DMLK_FORCE_PPC64LE -mcpu=power7"
+          ldflags: ${{ inputs.ldflags }}
+          cross_prefix: powerpc64le-unknown-linux-gnu-
+          exec_wrapper: "qemu-ppc64le -cpu power7"
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
