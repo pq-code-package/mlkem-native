@@ -1,12 +1,9 @@
 /*
  * Copyright (c) The mlkem-native project authors
+ * Copyright (c) IBM Corp. 2025, 2026
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  *
- * Copyright IBM Corp. 2025, 2026
- *
- *===================================================================================
  * Written by Danny Tsen <dtsen@us.ibm.com>
- *
  */
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
@@ -32,16 +29,16 @@ MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
         li 8, 160
         li 9, 176
         li 10, 192
-        stxvx 52, 6, 1
-        stxvx 53, 7, 1
-        stxvx 54, 8, 1
-        stxvx 55, 9, 1
-        stxvx 56, 10, 1
+        stxvd2x 52, 6, 1
+        stxvd2x 53, 7, 1
+        stxvd2x 54, 8, 1
+        stxvd2x 55, 9, 1
+        stxvd2x 56, 10, 1
         vxor 7, 7, 7
         li 6, 32
         li 7, 48
-        lxvx 35, 6, 4
-        lxvx 32, 7, 4
+        lxvd2x 35, 6, 4
+        lxvd2x 32, 7, 4
         vspltisw 2, 13
         vadduwm 2, 2, 2
         vspltisw 4, 1
@@ -694,11 +691,11 @@ MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
         li 8, 160
         li 9, 176
         li 10, 192
-        lxvx 52, 6, 1
-        lxvx 53, 7, 1
-        lxvx 54, 8, 1
-        lxvx 55, 9, 1
-        lxvx 56, 10, 1
+        lxvd2x 52, 6, 1
+        lxvd2x 53, 7, 1
+        lxvd2x 54, 8, 1
+        lxvd2x 55, 9, 1
+        lxvd2x 56, 10, 1
         mtlr 0
         addi 1, 1, 224
         blr

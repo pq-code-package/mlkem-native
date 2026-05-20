@@ -1,10 +1,8 @@
 /*
  * Copyright (c) The mlkem-native project authors
+ * Copyright (c) IBM Corp. 2025, 2026
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  *
- * Copyright IBM Corp. 2025, 2026
- *
- * ===================================================================================
  * Written by Danny Tsen <dtsen@us.ibm.com>
  */
 
@@ -270,8 +268,8 @@
  *     b_lo = vmladduhm(b, z, 0)      = (b*z) mod 2^16
  *     vdata_b_i = vmladduhm(t, -q, b_lo)  = b*z - t*q (mod 2^16)
  *
- *   Yields the signed canonical representative of (b*z) mod q,
- *   bounded by q/2.
+ *   Computes (b*z) mod q in signed representation; the output
+ *   is in the range (-q, q).
  */
 .macro barrett_fqmul_4x _vz0, _vz1, _vz2, _vz3, _vzt0, _vzt1, _vzt2, _vzt3
         vmhraddshs vresult_a1, vdata_b1, \_vzt0, V_ZERO

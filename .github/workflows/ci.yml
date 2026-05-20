@@ -154,8 +154,8 @@ jobs:
           check_namespace: 'false'
       - name: build + test (cross, opt)
         uses: ./.github/actions/multi-functest
-        # There is no native code yet on PPC64LE, riscv32 or AArch64_be, so no point running opt tests
-        if: ${{ matrix.target.mode != 'native' && (matrix.target.arch != 'ppc64le' && matrix.target.arch != 'riscv32' && matrix.target.arch != 'aarch64_be') }}
+        # There is no native code yet on riscv32 or AArch64_be, so no point running opt tests
+        if: ${{ matrix.target.mode != 'native' && (matrix.target.arch != 'riscv32' && matrix.target.arch != 'aarch64_be') }}
         with:
           nix-shell: ${{ matrix.target.nix_shell }}
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
@@ -164,8 +164,8 @@ jobs:
           opt: 'opt'
       - name: build + test (cross, opt, +debug)
         uses: ./.github/actions/multi-functest
-        # There is no native code yet on PPC64LE, riscv32 or AArch64_be, so no point running opt tests
-        if: ${{ matrix.target.mode != 'native' && (matrix.target.arch != 'ppc64le' && matrix.target.arch != 'riscv32' && matrix.target.arch != 'aarch64_be') }}
+        # There is no native code yet on riscv32 or AArch64_be, so no point running opt tests
+        if: ${{ matrix.target.mode != 'native' && (matrix.target.arch != 'riscv32' && matrix.target.arch != 'aarch64_be') }}
         with:
           nix-shell: ${{ matrix.target.nix_shell }}
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}

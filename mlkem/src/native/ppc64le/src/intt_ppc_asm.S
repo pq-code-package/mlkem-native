@@ -1,10 +1,8 @@
 /*
  * Copyright (c) The mlkem-native project authors
+ * Copyright (c) IBM Corp. 2025, 2026
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  *
- * Copyright IBM Corp. 2025, 2026
- *
- * ===================================================================================
  * Written by Danny Tsen <dtsen@us.ibm.com>
  */
 
@@ -39,31 +37,31 @@ MLK_ASM_FN_SYMBOL(intt_ppc_asm)
         li 14, 176
         li 15, 192
         li 16, 208
-        stxvx 52, 10, 1
-        stxvx 53, 11, 1
-        stxvx 54, 12, 1
-        stxvx 55, 14, 1
-        stxvx 56, 15, 1
-        stxvx 57, 16, 1
+        stxvd2x 52, 10, 1
+        stxvd2x 53, 11, 1
+        stxvd2x 54, 12, 1
+        stxvd2x 55, 14, 1
+        stxvd2x 56, 15, 1
+        stxvd2x 57, 16, 1
         li 10, 224
         li 11, 240
         li 12, 256
         li 14, 272
         li 15, 288
         li 16, 304
-        stxvx 58, 10, 1
-        stxvx 59, 11, 1
-        stxvx 60, 12, 1
-        stxvx 61, 14, 1
-        stxvx 62, 15, 1
-        stxvx 63, 16, 1
-        lxvx 0, 0, 4
+        stxvd2x 58, 10, 1
+        stxvd2x 59, 11, 1
+        stxvd2x 60, 12, 1
+        stxvd2x 61, 14, 1
+        stxvd2x 62, 15, 1
+        stxvd2x 63, 16, 1
+        lxvd2x 0, 0, 4
         xxlxor 35, 35, 35
         xxlor 3, 35, 35
         li 10, 32
         li 11, 48
-        lxvx 6, 10, 4
-        lxvx 32, 11, 4
+        lxvd2x 6, 10, 4
+        lxvd2x 32, 11, 4
         vspltisw 8, 13
         vadduwm 8, 8, 8
         xxlor 8, 40, 40
@@ -135,7 +133,7 @@ intt_ppc_asm_Loopf:
         addi 3, 3, -512
         nop
         nop
-        nop
+        ori 2, 2, 0
         addi 14, 4, 1120
         addi 22, 4, 3136
         li 7, 4
@@ -1135,7 +1133,7 @@ intt_ppc_asm_Loopf:
         stxvd2x 49, 18, 5
         addi 5, 5, 128
         nop
-        nop
+        ori 2, 2, 0
         li 7, 16
         li 9, 0
         add 10, 7, 9
@@ -1567,7 +1565,7 @@ intt_ppc_asm_Loopf:
         stxvd2x 60, 3, 21
         nop
         nop
-        nop
+        ori 2, 2, 0
         li 7, 32
         li 9, 0
         add 10, 7, 9
@@ -2003,7 +2001,7 @@ intt_ppc_asm_Loopf:
         stxvd2x 60, 3, 21
         nop
         nop
-        nop
+        ori 2, 2, 0
         li 7, 64
         li 9, 0
         add 10, 7, 9
@@ -2399,7 +2397,7 @@ intt_ppc_asm_Loopf:
         addi 22, 22, 16
         nop
         nop
-        nop
+        ori 2, 2, 0
         li 7, 128
         li 9, 0
         add 10, 7, 9
@@ -2791,7 +2789,7 @@ intt_ppc_asm_Loopf:
         addi 22, 22, 16
         nop
         nop
-        nop
+        ori 2, 2, 0
         li 7, 256
         li 9, 0
         add 10, 7, 9
@@ -3183,24 +3181,24 @@ intt_ppc_asm_Loopf:
         li 14, 176
         li 15, 192
         li 16, 208
-        lxvx 52, 10, 1
-        lxvx 53, 11, 1
-        lxvx 54, 12, 1
-        lxvx 55, 14, 1
-        lxvx 56, 15, 1
-        lxvx 57, 16, 1
+        lxvd2x 52, 10, 1
+        lxvd2x 53, 11, 1
+        lxvd2x 54, 12, 1
+        lxvd2x 55, 14, 1
+        lxvd2x 56, 15, 1
+        lxvd2x 57, 16, 1
         li 10, 224
         li 11, 240
         li 12, 256
         li 14, 272
         li 15, 288
         li 16, 304
-        lxvx 58, 10, 1
-        lxvx 59, 11, 1
-        lxvx 60, 12, 1
-        lxvx 61, 14, 1
-        lxvx 62, 15, 1
-        lxvx 63, 16, 1
+        lxvd2x 58, 10, 1
+        lxvd2x 59, 11, 1
+        lxvd2x 60, 12, 1
+        lxvd2x 61, 14, 1
+        lxvd2x 62, 15, 1
+        lxvd2x 63, 16, 1
         ld 14, 56(1)
         ld 15, 64(1)
         ld 16, 72(1)
