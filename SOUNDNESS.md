@@ -310,7 +310,7 @@ arithmetic bounds, and constant tables.
   satisfies `abs(ival zi) <= &23594` and `(ival zi == forward_ntt (ival o x) i) (mod &3329)`.
   In other words, we provide a description of the underlying modular arithmetic function (here, the NTT),
   plus a bound on the concrete being computed.
-- The CBMC contract on `mlk_ntt_asm` simplifies this to the mere bounds assertions
+- The CBMC contract on `mlk_ntt_aarch64_asm` simplifies this to the mere bounds assertions
   `requires(array_abs_bound(p, 0, MLKEM_N, 8192))`
   and `ensures(array_abs_bound(p, 0, MLKEM_N, 23595))`, omitting the description of the
   functional behavior.

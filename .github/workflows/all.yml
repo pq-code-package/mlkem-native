@@ -75,7 +75,7 @@ jobs:
     needs: [ base ]
     uses: ./.github/workflows/integration-awslc.yml
     with:
-      commit: a75e930cecced7221631220475f2589335d4d67f # main (2026-04-03)
+      commit: v1.72.0
     secrets: inherit
   ct-test:
     name: Constant-time

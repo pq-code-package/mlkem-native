@@ -155,15 +155,29 @@ else
 fi
 gh_group_end
 
-gh_group_start "Linting python scripts with black"
-if ! diff=$(black --check --diff -q --include "(scripts/tests|scripts/simpasm|scripts/cfify|scripts/autogen|scripts/check-namespace|\.py$)" "$ROOT"); then
+gh_group_start "Linting python scripts with ruff (format)"
+if ! diff=$(ruff format --check --diff "$ROOT" 2>&1); then
+  echo "$diff"
   gh_error_simple "Format error" "$diff"
-  error "Lint python"
+  error "Lint Python (ruff format)"
   SUCCESS=false
-  gh_summary_failure "Lint python"
+  gh_summary_failure "Lint Python (ruff format)"
 else
-  info "Lint Python"
-  gh_summary_success "Lint Python"
+  info "Lint Python (ruff format)"
+  gh_summary_success "Lint Python (ruff format)"
+fi
+gh_group_end
+
+gh_group_start "Linting python scripts with ruff (check)"
+if ! out=$(ruff check "$ROOT" 2>&1); then
+  echo "$out"
+  gh_error_simple "Lint error" "$out"
+  error "Lint Python (ruff check)"
+  SUCCESS=false
+  gh_summary_failure "Lint Python (ruff check)"
+else
+  info "Lint Python (ruff check)"
+  gh_summary_success "Lint Python (ruff check)"
 fi
 gh_group_end
 
@@ -293,6 +307,50 @@ check-contracts()
 
 gh_group_start "Check contracts"
 check-contracts
+gh_group_end
+
+check-hol-light-imports()
+{
+  if python3 "$ROOT"/scripts/check-hol-light-imports; then
+    info "Check HOL-Light imports"
+    gh_summary_success "Check HOL-Light imports"
+  else
+    error "Check HOL-Light imports"
+    gh_summary_failure "Check HOL-Light imports"
+    SUCCESS=false
+  fi
+}
+
+gh_group_start "Check HOL-Light imports"
+check-hol-light-imports
+gh_group_end
+
+check-doxygen()
+{
+  if ! command -v doxygen >/dev/null; then
+    gh_error_simple "doxygen missing" "doxygen is not installed"
+    error "Lint Doxygen comments"
+    SUCCESS=false
+    gh_summary_failure "Lint Doxygen comments"
+    return 0
+  fi
+
+  local out
+  if out=$(cd "$ROOT" && doxygen scripts/Doxyfile.lint 2>&1) && [[ -z $out ]]; then
+    info "Lint Doxygen comments"
+    gh_summary_success "Lint Doxygen comments"
+  else
+    echo "$out"
+    gh_error_simple "Doxygen lint error" "$out"
+    error "Lint Doxygen comments"
+    SUCCESS=false
+    gh_summary_failure "Lint Doxygen comments"
+  fi
+  rm -rf "$ROOT"/.doxylint-xml
+}
+
+gh_group_start "Linting Doxygen comments"
+check-doxygen
 gh_group_end
 
 if ! $SUCCESS; then

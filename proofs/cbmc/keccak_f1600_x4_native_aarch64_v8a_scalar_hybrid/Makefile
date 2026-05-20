@@ -20,7 +20,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/fips202/native/aarch64/src/keccakf1600_round_constants.c 
 
 CHECK_FUNCTION_CONTRACTS=mlk_keccak_f1600_x4_native
-USE_FUNCTION_CONTRACTS=mlk_keccak_f1600_x4_v8a_scalar_hybrid_asm
+USE_FUNCTION_CONTRACTS=mlk_keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

@@ -25,7 +25,8 @@
           pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
           pkgs-2405 = inputs.nixpkgs-2405.legacyPackages.${system};
           util = pkgs.callPackage ./nix/util.nix {
-            inherit (pkgs) cbmc bitwuzla z3;
+            inherit (pkgs) bitwuzla z3;
+            inherit (pkgs-unstable) cbmc;
             # TODO: switch back to stable python3 for slothy once ortools is fixed in 25.11
             python3-for-slothy = pkgs-unstable.python3;
           };
@@ -43,8 +44,19 @@
             ];
           };
           holLightShellHook = ''
-            export PATH=$PWD/scripts:$PATH
-            export PROOF_DIR="$PWD/proofs/hol_light"
+            # Resolve the repo root independently of the directory from which
+            # `nix develop` was invoked, so that PROOF_DIR / IMPORTS_DIR always
+            # point at the real proofs/hol_light tree (and .imports is not
+            # created in a spurious subdirectory-nested path).
+            REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
+            export PATH="$REPO_ROOT/scripts:$PATH"
+            export PROOF_DIR="$REPO_ROOT/proofs/hol_light"
+            # Namespaced imports root for HOL-Light proofs.
+            # See scripts/check-hol-light-imports for the enforced rule.
+            export IMPORTS_DIR="$PROOF_DIR/.imports"
+            mkdir -p "$IMPORTS_DIR"
+            ln -sfn "$S2N_BIGNUM_DIR" "$IMPORTS_DIR/s2n_bignum"
+            ln -sfn "$PROOF_DIR"      "$IMPORTS_DIR/mlkem_native"
           '';
         in
         {
@@ -53,6 +65,7 @@
             overlays = [
               (_:_: {
                 clang_22 = pkgs-unstable.clang_22;
+                zig_0_16 = pkgs-unstable.zig;
 
                 # From 24.05 (dropped in 25.11)
                 gcc48 = pkgs-2405.gcc48;
@@ -85,7 +98,7 @@
           packages.toolchain_aarch64_be = util.toolchain_aarch64_be;
           packages.gcc-arm-embedded = pkgs.gcc-arm-embedded;
 
-          devShells.default = util.mkShell {
+          devShells.default = (util.mkShell {
             packages = builtins.attrValues
               {
                 inherit (config.packages) linters cbmc hol_light s2n_bignum slothy toolchains_native hol_server;
@@ -94,7 +107,7 @@
                   nix-direnv
                   zig_0_13;
               } ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ config.packages.valgrind_varlat ];
-          };
+          }).overrideAttrs (old: { shellHook = holLightShellHook; });
 
           packages.hol_server = util.hol_server.hol_server_start;
           devShells.hol_light = (util.mkShell {
@@ -154,7 +167,7 @@
           devShells.cross-arm-embedded = util.mkShell {
             packages = builtins.attrValues
               {
-                inherit (util) m55-an547;
+                inherit (util) pqmx;
                 inherit (config.packages) linters;
                 inherit (pkgs) gcc-arm-embedded qemu coreutils python3 git;
               };
@@ -187,6 +200,7 @@
           devShells.zig0_13 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_13);
           devShells.zig0_14 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_14);
           devShells.zig0_15 = util.mkShellWithCC' (zigWrapCC pkgs.zig);
+          devShells.zig0_16 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_16);
 
           devShells.gcc48 = util.mkShellWithCC' pkgs.gcc48;
           devShells.gcc49 = util.mkShellWithCC' pkgs.gcc49;
@@ -223,7 +237,8 @@
             pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
             util = pkgs.callPackage ./nix/util.nix {
               inherit pkgs;
-              inherit (pkgs) cbmc bitwuzla z3;
+              inherit (pkgs) bitwuzla z3;
+              inherit (pkgs-unstable) cbmc;
               # TODO: switch back to stable python3 for slothy once ortools is fixed in 25.11
               python3-for-slothy = pkgs-unstable.python3;
             };

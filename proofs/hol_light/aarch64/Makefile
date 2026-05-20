@@ -52,21 +52,21 @@ endif
 
 SPLIT=tr ';' '\n'
 
-OBJ = mlkem/mlkem_ntt.o                                   \
-      mlkem/mlkem_intt.o                                  \
-      mlkem/mlkem_poly_tomont.o                           \
-      mlkem/mlkem_poly_mulcache_compute.o                 \
-      mlkem/mlkem_poly_reduce.o                           \
-      mlkem/mlkem_poly_tobytes.o                          \
-      mlkem/mlkem_poly_basemul_acc_montgomery_cached_k2.o \
-      mlkem/mlkem_poly_basemul_acc_montgomery_cached_k3.o \
-      mlkem/mlkem_poly_basemul_acc_montgomery_cached_k4.o \
-      mlkem/mlkem_rej_uniform.o				  \
-      mlkem/keccak_f1600_x1_scalar.o                      \
-      mlkem/keccak_f1600_x1_v84a.o                        \
-      mlkem/keccak_f1600_x2_v84a.o                        \
-      mlkem/keccak_f1600_x4_v8a_v84a_scalar.o             \
-      mlkem/keccak_f1600_x4_v8a_scalar.o
+OBJ = mlkem/ntt_aarch64_asm.o \
+      mlkem/intt_aarch64_asm.o \
+      mlkem/poly_tomont_aarch64_asm.o \
+      mlkem/poly_mulcache_compute_aarch64_asm.o \
+      mlkem/poly_reduce_aarch64_asm.o \
+      mlkem/poly_tobytes_aarch64_asm.o \
+      mlkem/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.o \
+      mlkem/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.o \
+      mlkem/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.o \
+      mlkem/rej_uniform_aarch64_asm.o \
+      mlkem/keccak_f1600_x1_scalar_aarch64_asm.o \
+      mlkem/keccak_f1600_x1_v84a_aarch64_asm.o \
+      mlkem/keccak_f1600_x2_v84a_aarch64_asm.o \
+      mlkem/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.o \
+      mlkem/keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.o
 
 # According to
 # https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms,

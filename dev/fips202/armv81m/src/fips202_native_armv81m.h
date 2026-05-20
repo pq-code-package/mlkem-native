@@ -10,7 +10,8 @@
 /* Keccak round constants in bit-interleaved form */
 #define mlk_keccakf1600_round_constants \
   MLK_NAMESPACE(keccakf1600_round_constants)
-extern const uint32_t mlk_keccakf1600_round_constants[48];
+MLK_INTERNAL_DATA_DECLARATION const uint32_t
+    mlk_keccakf1600_round_constants[48];
 
 #define mlk_keccak_f1600_x4_mve_asm MLK_NAMESPACE(keccak_f1600_x4_mve_asm)
 void mlk_keccak_f1600_x4_mve_asm(uint64_t state[100], uint64_t tmpstate[100],
