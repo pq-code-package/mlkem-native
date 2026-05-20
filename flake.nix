@@ -6,7 +6,6 @@
   description = "mlkem-native";
 
   inputs = {
-    nixpkgs-2405.url = "github:NixOS/nixpkgs/nixos-24.05";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
@@ -18,12 +17,11 @@
 
   outputs = inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
-      imports = [ ];
+      imports = [ ./nix/legacy/module.nix ];
       systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
       perSystem = { config, pkgs, system, ... }:
         let
           pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
-          pkgs-2405 = inputs.nixpkgs-2405.legacyPackages.${system};
           util = pkgs.callPackage ./nix/util.nix {
             inherit (pkgs) bitwuzla z3;
             inherit (pkgs-unstable) cbmc;
@@ -66,21 +64,11 @@
               (_:_: {
                 clang_22 = pkgs-unstable.clang_22;
                 zig_0_16 = pkgs-unstable.zig;
-
-                # From 24.05 (dropped in 25.11)
-                gcc48 = pkgs-2405.gcc48;
-                gcc49 = pkgs-2405.gcc49;
-                gcc7 = pkgs-2405.gcc7;
-                gcc11 = pkgs-2405.gcc11;
-                gcc12 = pkgs-2405.gcc12;
-                clang_14 = pkgs-2405.clang_14;
-                clang_15 = pkgs-2405.clang_15;
-                clang_16 = pkgs-2405.clang_16;
-                clang_17 = pkgs-2405.clang_17;
-                zig_0_12 = pkgs-2405.zig_0_12;
               })
             ];
           };
+          _module.args.util = util;
+          _module.args.zigWrapCC = zigWrapCC;
 
           packages.linters = util.linters;
           packages.cbmc = util.cbmc_pkgs;
@@ -186,46 +174,27 @@
           devShells.linter = util.mkShellNoCC {
             packages = builtins.attrValues { inherit (config.packages) linters; };
           };
-          devShells.clang14 = util.mkShellWithCC' pkgs.clang_14;
-          devShells.clang15 = util.mkShellWithCC' pkgs.clang_15;
-          devShells.clang16 = util.mkShellWithCC' pkgs.clang_16;
-          devShells.clang17 = util.mkShellWithCC' pkgs.clang_17;
           devShells.clang18 = util.mkShellWithCC' pkgs.clang_18;
           devShells.clang19 = util.mkShellWithCC' pkgs.clang_19;
           devShells.clang20 = util.mkShellWithCC' pkgs.clang_20;
           devShells.clang21 = util.mkShellWithCC' pkgs.clang_21;
           devShells.clang22 = util.mkShellWithCC' pkgs.clang_22;
 
-          devShells.zig0_12 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_12);
           devShells.zig0_13 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_13);
           devShells.zig0_14 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_14);
           devShells.zig0_15 = util.mkShellWithCC' (zigWrapCC pkgs.zig);
           devShells.zig0_16 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_16);
 
-          devShells.gcc48 = util.mkShellWithCC' pkgs.gcc48;
-          devShells.gcc49 = util.mkShellWithCC' pkgs.gcc49;
-          devShells.gcc7 = util.mkShellWithCC' pkgs.gcc7;
-          devShells.gcc11 = util.mkShellWithCC' pkgs.gcc11;
-          devShells.gcc12 = util.mkShellWithCC' pkgs.gcc12;
           devShells.gcc13 = util.mkShellWithCC' pkgs.gcc13;
           devShells.gcc14 = util.mkShellWithCC' pkgs.gcc14;
           devShells.gcc15 = util.mkShellWithCC' pkgs.gcc15;
 
           # valgrind with a patch for detecting variable-latency instructions
-          devShells.valgrind-varlat_clang14 = util.mkShellWithCC_valgrind' pkgs.clang_14;
-          devShells.valgrind-varlat_clang15 = util.mkShellWithCC_valgrind' pkgs.clang_15;
-          devShells.valgrind-varlat_clang16 = util.mkShellWithCC_valgrind' pkgs.clang_16;
-          devShells.valgrind-varlat_clang17 = util.mkShellWithCC_valgrind' pkgs.clang_17;
           devShells.valgrind-varlat_clang18 = util.mkShellWithCC_valgrind' pkgs.clang_18;
           devShells.valgrind-varlat_clang19 = util.mkShellWithCC_valgrind' pkgs.clang_19;
           devShells.valgrind-varlat_clang20 = util.mkShellWithCC_valgrind' pkgs.clang_20;
           devShells.valgrind-varlat_clang21 = util.mkShellWithCC_valgrind' pkgs.clang_21;
           devShells.valgrind-varlat_clang22 = util.mkShellWithCC_valgrind' pkgs.clang_22;
-          devShells.valgrind-varlat_gcc48 = util.mkShellWithCC_valgrind' pkgs.gcc48;
-          devShells.valgrind-varlat_gcc49 = util.mkShellWithCC_valgrind' pkgs.gcc49;
-          devShells.valgrind-varlat_gcc7 = util.mkShellWithCC_valgrind' pkgs.gcc7;
-          devShells.valgrind-varlat_gcc11 = util.mkShellWithCC_valgrind' pkgs.gcc11;
-          devShells.valgrind-varlat_gcc12 = util.mkShellWithCC_valgrind' pkgs.gcc12;
           devShells.valgrind-varlat_gcc13 = util.mkShellWithCC_valgrind' pkgs.gcc13;
           devShells.valgrind-varlat_gcc14 = util.mkShellWithCC_valgrind' pkgs.gcc14;
           devShells.valgrind-varlat_gcc15 = util.mkShellWithCC_valgrind' pkgs.gcc15;

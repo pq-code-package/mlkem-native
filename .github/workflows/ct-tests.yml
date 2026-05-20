@@ -19,21 +19,13 @@ jobs:
       max-parallel: 10
       matrix:
         system: [ubuntu-latest, ubuntu-24.04-arm]
+        # Oldest available + 3 latest per family; intermediate versions run in legacy-compilers.
         nix-shell:
-          - valgrind-varlat_clang14
-          - valgrind-varlat_clang15
-          - valgrind-varlat_clang16
-          - valgrind-varlat_clang17
-          - valgrind-varlat_clang18
-          - valgrind-varlat_clang19
+          - valgrind-varlat_clang6
           - valgrind-varlat_clang20
           - valgrind-varlat_clang21
           - valgrind-varlat_clang22
           - valgrind-varlat_gcc48
-          - valgrind-varlat_gcc49
-          - valgrind-varlat_gcc7
-          - valgrind-varlat_gcc11
-          - valgrind-varlat_gcc12
           - valgrind-varlat_gcc13
           - valgrind-varlat_gcc14
           - valgrind-varlat_gcc15
@@ -48,7 +40,7 @@ jobs:
           nix-cache: true
       - name:  Build and run test (-Oz)
         # -Oz got introduced in gcc12
-        if: ${{ matrix.nix-shell !=  'valgrind-varlat_gcc48' && matrix.nix-shell !=  'valgrind-varlat_gcc49' && matrix.nix-shell !=  'valgrind-varlat_gcc7' && matrix.nix-shell !=  'valgrind-varlat_gcc11'}}
+        if: ${{ matrix.nix-shell != 'valgrind-varlat_gcc48' }}
         uses: ./.github/actions/ct-test
         with:
           cflags: -Oz -DMLK_CONFIG_KEYGEN_PCT
