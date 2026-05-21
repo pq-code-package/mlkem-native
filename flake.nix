@@ -114,13 +114,13 @@
             packages = builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum hol_server; };
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchains hol_light s2n_bignum gcc-arm-embedded hol_server; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchains toolchain_ppc64le hol_light s2n_bignum gcc-arm-embedded hol_server; };
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross-aarch64 = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 hol_light s2n_bignum gcc-arm-embedded hol_server; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 toolchain_ppc64le hol_light s2n_bignum gcc-arm-embedded hol_server; };
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross-x86_64 = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum gcc-arm-embedded hol_server; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 toolchain_ppc64le hol_light s2n_bignum gcc-arm-embedded hol_server; };
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.ci = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains_native; };
