@@ -93,7 +93,7 @@ vmovdqa %ymm1,  (\offset_out +224)(%rdi)
 .endm
 
 .text
-.global MLK_ASM_NAMESPACE(nttfrombytes_avx2_asm)
+MLK_ASM_FN_GLOBAL(nttfrombytes_avx2_asm)
 .balign 4
 MLK_ASM_FN_SYMBOL(nttfrombytes_avx2_asm)
 

@@ -32,7 +32,7 @@ vmovdqa %ymm8, (32*\i+16)*2(%rdi)
 .endm
 
 .text
-.global MLK_ASM_NAMESPACE(poly_mulcache_compute_avx2_asm)
+MLK_ASM_FN_GLOBAL(poly_mulcache_compute_avx2_asm)
 .balign 4
 MLK_ASM_FN_SYMBOL(poly_mulcache_compute_avx2_asm)
 

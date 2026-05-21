@@ -39,7 +39,7 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(invntt_avx2_asm)
+MLK_ASM_FN_GLOBAL(invntt_avx2_asm)
 MLK_ASM_FN_SYMBOL(invntt_avx2_asm)
 
         .cfi_startproc

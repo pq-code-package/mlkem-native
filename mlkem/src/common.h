@@ -65,11 +65,30 @@
 
 /* On Apple platforms, we need to emit leading underscore
  * in front of assembly symbols. We thus introducee a separate
- * namespace wrapper for ASM symbols. */
+ * namespace wrapper for ASM symbols.
+ *
+ * Each of MLK_ASM_NAMESPACE / MLK_ASM_FN_GLOBAL / MLK_ASM_FN_SYMBOL /
+ * MLK_ASM_FN_SIZE may be overridden by the integrator (e.g. through
+ * MLK_CONFIG_FILE) to adapt mlkem-native's assembly to a host project's
+ * symbol naming/visibility/CFI conventions. Any macro that the integrator
+ * does not redefine falls back to the defaults below. */
+#if !defined(MLK_ASM_NAMESPACE)
 #if !defined(__APPLE__)
 #define MLK_ASM_NAMESPACE(sym) MLK_NAMESPACE(sym)
 #else
 #define MLK_ASM_NAMESPACE(sym) MLK_CONCAT(_, MLK_NAMESPACE(sym))
+#endif
+#endif /* !MLK_ASM_NAMESPACE */
+
+/*
+ * Emit the global-symbol declaration for an assembly function.
+ *
+ * Default expansion is `.global MLK_ASM_NAMESPACE(sym)`. Override this
+ * if your toolchain requires a different visibility/privacy directive
+ * (e.g. s2n-bignum's S2N_BN_SYM_VISIBILITY_DIRECTIVE).
+ */
+#if !defined(MLK_ASM_FN_GLOBAL)
+#define MLK_ASM_FN_GLOBAL(sym) .global MLK_ASM_NAMESPACE(sym)
 #endif
 
 /*
@@ -77,6 +96,7 @@
  * -fcf-protection=), we add an endbr64 instruction at every global function
  * label.  See sys.h for more details
  */
+#if !defined(MLK_ASM_FN_SYMBOL)
 #if defined(MLK_SYS_X86_64)
 #define MLK_ASM_FN_SYMBOL(sym) MLK_ASM_NAMESPACE(sym) : MLK_CET_ENDBR
 #elif defined(MLK_SYS_ARMV81M_MVE)
@@ -88,16 +108,19 @@
 #else /* !MLK_SYS_X86_64 && MLK_SYS_ARMV81M_MVE */
 #define MLK_ASM_FN_SYMBOL(sym) MLK_ASM_NAMESPACE(sym) :
 #endif /* !MLK_SYS_X86_64 && !MLK_SYS_ARMV81M_MVE */
+#endif /* !MLK_ASM_FN_SYMBOL */
 
 /*
  * Output the size of an assembly function.
  */
+#if !defined(MLK_ASM_FN_SIZE)
 #if defined(__ELF__)
 #define MLK_ASM_FN_SIZE(sym) \
   .size MLK_ASM_NAMESPACE(sym), .- MLK_ASM_NAMESPACE(sym)
 #else
 #define MLK_ASM_FN_SIZE(sym)
 #endif
+#endif /* !MLK_ASM_FN_SIZE */
 
 /* We aim to simplify the user's life by supporting builds where
  * all source files are included, even those that are not needed.

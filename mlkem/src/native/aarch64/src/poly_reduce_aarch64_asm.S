@@ -28,7 +28,7 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(poly_reduce_aarch64_asm)
+MLK_ASM_FN_GLOBAL(poly_reduce_aarch64_asm)
 MLK_ASM_FN_SYMBOL(poly_reduce_aarch64_asm)
 
         .cfi_startproc

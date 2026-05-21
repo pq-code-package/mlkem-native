@@ -180,7 +180,7 @@
         t0   .req v28
 
         .text
-        .global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm)
+        MLK_ASM_FN_GLOBAL(polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm)
         .balign 4
 MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm)
         push_stack

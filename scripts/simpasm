@@ -111,10 +111,12 @@ def find_header_footer(asm, filename):
 def find_globals(asm):
     global_symbols = []
     for line in asm:
-        r = re.search(r"^\s*\.global\s+(.*)$", line)
+        r = re.search(r"^\s*MLK_ASM_FN_GLOBAL\((.*)\)\s*$", line)
         if r is None:
             continue
-        global_symbols.append(r.group(1))
+        # Normalize to the MLK_ASM_NAMESPACE(sym) form expected by the
+        # rest of the script.
+        global_symbols.append(f"MLK_ASM_NAMESPACE({r.group(1)})")
     return global_symbols
 
 
@@ -312,7 +314,7 @@ def simplify(logger, args, asm_input, asm_output=None):
             simplified_footer = []
         else:
             autogen_header += [
-                f".global {sym}",
+                f"{sym.replace('MLK_ASM_NAMESPACE', 'MLK_ASM_FN_GLOBAL')}",
                 f"{sym.replace('MLK_ASM_NAMESPACE', 'MLK_ASM_FN_SYMBOL')}",
                 "",
             ]

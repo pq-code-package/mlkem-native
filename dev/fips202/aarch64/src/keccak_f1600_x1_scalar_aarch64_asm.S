@@ -167,7 +167,7 @@
 #define KECCAK_F1600_ROUNDS 24
 
     .text
-    .global MLK_ASM_NAMESPACE(keccak_f1600_x1_scalar_aarch64_asm)
+    MLK_ASM_FN_GLOBAL(keccak_f1600_x1_scalar_aarch64_asm)
     .balign 4
 MLK_ASM_FN_SYMBOL(keccak_f1600_x1_scalar_aarch64_asm)
     alloc_stack

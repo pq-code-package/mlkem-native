@@ -35,7 +35,7 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(ntt_avx2_asm)
+MLK_ASM_FN_GLOBAL(ntt_avx2_asm)
 MLK_ASM_FN_SYMBOL(ntt_avx2_asm)
 
         .cfi_startproc

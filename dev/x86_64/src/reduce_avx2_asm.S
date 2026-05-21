@@ -71,7 +71,7 @@ vmovdqa %ymm9, (\offset + 224)(%rdi)
 .endm
 
 .text
-.global MLK_ASM_NAMESPACE(reduce_avx2_asm)
+MLK_ASM_FN_GLOBAL(reduce_avx2_asm)
 .balign 4
 MLK_ASM_FN_SYMBOL(reduce_avx2_asm)
 

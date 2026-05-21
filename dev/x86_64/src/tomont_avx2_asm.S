@@ -62,7 +62,7 @@ vmovdqa %ymm10, (\offset +224)(%rdi)
 .endm
 
 .text
-.global MLK_ASM_NAMESPACE(tomont_avx2_asm)
+MLK_ASM_FN_GLOBAL(tomont_avx2_asm)
 .balign 4
 MLK_ASM_FN_SYMBOL(tomont_avx2_asm)
 

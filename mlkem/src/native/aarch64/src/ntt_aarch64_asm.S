@@ -57,7 +57,7 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(ntt_aarch64_asm)
+MLK_ASM_FN_GLOBAL(ntt_aarch64_asm)
 MLK_ASM_FN_SYMBOL(ntt_aarch64_asm)
 
         .cfi_startproc

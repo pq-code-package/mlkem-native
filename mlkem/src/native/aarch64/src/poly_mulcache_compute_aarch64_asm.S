@@ -46,7 +46,7 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(poly_mulcache_compute_aarch64_asm)
+MLK_ASM_FN_GLOBAL(poly_mulcache_compute_aarch64_asm)
 MLK_ASM_FN_SYMBOL(poly_mulcache_compute_aarch64_asm)
 
         .cfi_startproc

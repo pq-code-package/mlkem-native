@@ -40,7 +40,7 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(poly_compress_d10_avx2_asm)
+MLK_ASM_FN_GLOBAL(poly_compress_d10_avx2_asm)
 MLK_ASM_FN_SYMBOL(poly_compress_d10_avx2_asm)
 
         .cfi_startproc

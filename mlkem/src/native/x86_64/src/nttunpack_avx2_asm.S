@@ -29,7 +29,7 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(nttunpack_avx2_asm)
+MLK_ASM_FN_GLOBAL(nttunpack_avx2_asm)
 MLK_ASM_FN_SYMBOL(nttunpack_avx2_asm)
 
         .cfi_startproc

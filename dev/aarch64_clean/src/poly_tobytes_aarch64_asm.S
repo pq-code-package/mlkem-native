@@ -51,7 +51,7 @@
         count .req x2
 
         .text
-        .global MLK_ASM_NAMESPACE(poly_tobytes_aarch64_asm)
+        MLK_ASM_FN_GLOBAL(poly_tobytes_aarch64_asm)
         .balign 4
 MLK_ASM_FN_SYMBOL(poly_tobytes_aarch64_asm)
 

@@ -53,7 +53,7 @@
         modulus_twisted   .req v4
 
         .text
-        .global MLK_ASM_NAMESPACE(poly_reduce_aarch64_asm)
+        MLK_ASM_FN_GLOBAL(poly_reduce_aarch64_asm)
         .balign 4
 MLK_ASM_FN_SYMBOL(poly_reduce_aarch64_asm)
 

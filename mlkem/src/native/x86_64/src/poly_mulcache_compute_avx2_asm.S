@@ -14,7 +14,7 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(poly_mulcache_compute_avx2_asm)
+MLK_ASM_FN_GLOBAL(poly_mulcache_compute_avx2_asm)
 MLK_ASM_FN_SYMBOL(poly_mulcache_compute_avx2_asm)
 
         .cfi_startproc

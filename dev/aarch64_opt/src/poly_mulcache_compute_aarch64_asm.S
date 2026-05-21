@@ -71,7 +71,7 @@
         modulus           .req v6
         modulus_twisted   .req v7
 
-        .global MLK_ASM_NAMESPACE(poly_mulcache_compute_aarch64_asm)
+        MLK_ASM_FN_GLOBAL(poly_mulcache_compute_aarch64_asm)
         .text
         .balign 4
 MLK_ASM_FN_SYMBOL(poly_mulcache_compute_aarch64_asm)

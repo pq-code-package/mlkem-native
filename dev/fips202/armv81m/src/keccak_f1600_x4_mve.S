@@ -457,7 +457,7 @@ qA20_l .req q2
 .text
 .balign 4
 .type MLK_ASM_NAMESPACE(keccak_f1600_x4_mve_asm), %function
-.global MLK_ASM_NAMESPACE(keccak_f1600_x4_mve_asm)
+MLK_ASM_FN_GLOBAL(keccak_f1600_x4_mve_asm)
 MLK_ASM_FN_SYMBOL(keccak_f1600_x4_mve_asm)
 
     push {r4,r5,r6,r7,r8,r9,r10,r11,lr}

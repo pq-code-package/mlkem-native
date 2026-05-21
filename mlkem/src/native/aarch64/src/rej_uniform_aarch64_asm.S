@@ -47,7 +47,7 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(rej_uniform_aarch64_asm)
+MLK_ASM_FN_GLOBAL(rej_uniform_aarch64_asm)
 MLK_ASM_FN_SYMBOL(rej_uniform_aarch64_asm)
 
         .cfi_startproc

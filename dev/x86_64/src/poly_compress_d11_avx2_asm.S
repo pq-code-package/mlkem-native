@@ -37,7 +37,7 @@
 /* simpasm: header-end */
 
 .text
-.global MLK_ASM_NAMESPACE(poly_compress_d11_avx2_asm)
+MLK_ASM_FN_GLOBAL(poly_compress_d11_avx2_asm)
 .balign 4
 MLK_ASM_FN_SYMBOL(poly_compress_d11_avx2_asm)
 

@@ -15,7 +15,7 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(polyvec_basemul_acc_montgomery_cached_k3_avx2_asm)
+MLK_ASM_FN_GLOBAL(polyvec_basemul_acc_montgomery_cached_k3_avx2_asm)
 MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k3_avx2_asm)
 
         .cfi_startproc

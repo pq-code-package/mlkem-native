@@ -46,7 +46,7 @@
         tmp0              .req v6
 
         .text
-        .global MLK_ASM_NAMESPACE(poly_tomont_aarch64_asm)
+        MLK_ASM_FN_GLOBAL(poly_tomont_aarch64_asm)
         .balign 4
 MLK_ASM_FN_SYMBOL(poly_tomont_aarch64_asm)
 

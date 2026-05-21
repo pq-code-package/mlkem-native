@@ -43,7 +43,7 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm)
+MLK_ASM_FN_GLOBAL(keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm)
 MLK_ASM_FN_SYMBOL(keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm)
 
         .cfi_startproc

@@ -64,7 +64,7 @@
 #define STACK_SIZE (2*MLKEM_N + 16)
 
 .text
-.global MLK_ASM_NAMESPACE(rej_uniform_avx2_asm)
+MLK_ASM_FN_GLOBAL(rej_uniform_avx2_asm)
 .balign 4
 MLK_ASM_FN_SYMBOL(rej_uniform_avx2_asm)
   subq $STACK_SIZE, %rsp

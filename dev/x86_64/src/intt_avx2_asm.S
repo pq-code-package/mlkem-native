@@ -271,7 +271,7 @@ vmovdqa %ymm11,(64*\off+176)*2(%rdi)
 .endm
 
 .text
-.global MLK_ASM_NAMESPACE(invntt_avx2_asm)
+MLK_ASM_FN_GLOBAL(invntt_avx2_asm)
 .balign 4
 MLK_ASM_FN_SYMBOL(invntt_avx2_asm)
 

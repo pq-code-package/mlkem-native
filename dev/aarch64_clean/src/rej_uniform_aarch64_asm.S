@@ -142,7 +142,7 @@
     bits                        .req v31
 
     .text
-    .global MLK_ASM_NAMESPACE(rej_uniform_aarch64_asm)
+    MLK_ASM_FN_GLOBAL(rej_uniform_aarch64_asm)
     .balign 4
 MLK_ASM_FN_SYMBOL(rej_uniform_aarch64_asm)
     push_stack

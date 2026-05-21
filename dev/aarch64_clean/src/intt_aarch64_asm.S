@@ -217,7 +217,7 @@
         ninv_tw          .req v30
 
         .text
-        .global MLK_ASM_NAMESPACE(intt_aarch64_asm)
+        MLK_ASM_FN_GLOBAL(intt_aarch64_asm)
         .balign 4
 MLK_ASM_FN_SYMBOL(intt_aarch64_asm)
         push_stack
