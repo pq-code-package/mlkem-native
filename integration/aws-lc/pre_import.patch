@@ -1,52 +1,127 @@
+diff --git a/crypto/fipsmodule/CMakeLists.txt b/crypto/fipsmodule/CMakeLists.txt
+index 07859817d..3d7b68145 100644
+--- a/crypto/fipsmodule/CMakeLists.txt
++++ b/crypto/fipsmodule/CMakeLists.txt
+@@ -358,6 +358,15 @@ if((ARCH STREQUAL "aarch64") AND UNIX)
+     ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/rej_uniform_asm.S
+   )
+ 
++  # The mlkem-native asm sources include ../../../common.h, which in turn
++  # includes mlkem_native_config.h. Our config file lives one directory
++  # above mlkem/, so point MLK_CONFIG_FILE at it from the assembler. This
++  # mirrors the define already used in ml_kem.c for the C side.
++  set_source_files_properties(
++    ${MLKEM_NATIVE_AARCH64_ASM_SOURCES}
++    PROPERTIES COMPILE_FLAGS "-DMLK_CONFIG_FILE=\\\"../mlkem_native_config.h\\\""
++  )
++
+   list(APPEND BCM_ASM_SOURCES ${MLKEM_NATIVE_AARCH64_ASM_SOURCES})
+ 
+ endif()
+@@ -391,6 +400,15 @@ if((ARCH STREQUAL "x86_64") AND UNIX AND NOT MY_ASSEMBLER_IS_TOO_OLD_FOR_AVX)
+     ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_decompress_d5.S
+   )
+ 
++  # The mlkem-native asm sources include ../../../common.h, which in turn
++  # includes mlkem_native_config.h. Our config file lives one directory
++  # above mlkem/, so point MLK_CONFIG_FILE at it from the assembler. This
++  # mirrors the define already used in ml_kem.c for the C side.
++  set_source_files_properties(
++    ${MLKEM_NATIVE_X86_64_ASM_SOURCES}
++    PROPERTIES COMPILE_FLAGS "-DMLK_CONFIG_FILE=\\\"../mlkem_native_config.h\\\""
++  )
++
+   list(APPEND BCM_ASM_SOURCES ${MLKEM_NATIVE_X86_64_ASM_SOURCES})
+ 
+   set(S2N_BIGNUM_INCLUDE_DIR "${AWSLC_SOURCE_DIR}/third_party/s2n-bignum/s2n-bignum-imported/include")
 diff --git a/crypto/fipsmodule/ml_kem/importer.sh b/crypto/fipsmodule/ml_kem/importer.sh
+index 8624bfdda..1deb796dc 100755
 --- a/crypto/fipsmodule/ml_kem/importer.sh
 +++ b/crypto/fipsmodule/ml_kem/importer.sh
-@@ -151,6 +151,48 @@
-   fi
- done
+@@ -127,29 +127,13 @@ cp $TMP/mlkem/mlkem_native.h $SRC
+ echo "Fixup include paths"
+ sed "${SED_I[@]}" 's/#include "src\/\([^"]*\)"/#include "\1"/' $SRC/mlkem_native_bcm.c
  
-+# Rewrite asm filenames in AWS-LC's crypto/fipsmodule/CMakeLists.txt to match the names exported by the imported mlkem-native tree. Remove once AWS-LC lists the post-unification filenames directly.
-+CMAKE=../CMakeLists.txt
-+if [ -f "$CMAKE" ] && grep -q 'aarch64/src/ntt\.S' "$CMAKE"; then
-+    CMAKE_RENAMES=(
-+        'aarch64/src/intt\.S|aarch64/src/intt_aarch64_asm.S'
-+        'aarch64/src/ntt\.S|aarch64/src/ntt_aarch64_asm.S'
-+        'aarch64/src/poly_mulcache_compute_asm\.S|aarch64/src/poly_mulcache_compute_aarch64_asm.S'
-+        'aarch64/src/poly_reduce_asm\.S|aarch64/src/poly_reduce_aarch64_asm.S'
-+        'aarch64/src/poly_tobytes_asm\.S|aarch64/src/poly_tobytes_aarch64_asm.S'
-+        'aarch64/src/poly_tomont_asm\.S|aarch64/src/poly_tomont_aarch64_asm.S'
-+        'aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k2\.S|aarch64/src/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S'
-+        'aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k3\.S|aarch64/src/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S'
-+        'aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k4\.S|aarch64/src/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S'
-+        'aarch64/src/rej_uniform_asm\.S|aarch64/src/rej_uniform_aarch64_asm.S'
-+        'x86_64/src/intt\.S|x86_64/src/intt_avx2_asm.S'
-+        'x86_64/src/ntt\.S|x86_64/src/ntt_avx2_asm.S'
-+        'x86_64/src/mulcache_compute\.S|x86_64/src/poly_mulcache_compute_avx2_asm.S'
-+        'x86_64/src/nttfrombytes\.S|x86_64/src/nttfrombytes_avx2_asm.S'
-+        'x86_64/src/ntttobytes\.S|x86_64/src/ntttobytes_avx2_asm.S'
-+        'x86_64/src/nttunpack\.S|x86_64/src/nttunpack_avx2_asm.S'
-+        'x86_64/src/reduce\.S|x86_64/src/reduce_avx2_asm.S'
-+        'x86_64/src/tomont\.S|x86_64/src/tomont_avx2_asm.S'
-+        'x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k2\.S|x86_64/src/polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.S'
-+        'x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k3\.S|x86_64/src/polyvec_basemul_acc_montgomery_cached_k3_avx2_asm.S'
-+        'x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k4\.S|x86_64/src/polyvec_basemul_acc_montgomery_cached_k4_avx2_asm.S'
-+        'x86_64/src/rej_uniform_asm\.S|x86_64/src/rej_uniform_avx2_asm.S'
-+        'x86_64/src/poly_compress_d4\.S|x86_64/src/poly_compress_d4_avx2_asm.S'
-+        'x86_64/src/poly_compress_d5\.S|x86_64/src/poly_compress_d5_avx2_asm.S'
-+        'x86_64/src/poly_compress_d10\.S|x86_64/src/poly_compress_d10_avx2_asm.S'
-+        'x86_64/src/poly_compress_d11\.S|x86_64/src/poly_compress_d11_avx2_asm.S'
-+        'x86_64/src/poly_decompress_d4\.S|x86_64/src/poly_decompress_d4_avx2_asm.S'
-+        'x86_64/src/poly_decompress_d5\.S|x86_64/src/poly_decompress_d5_avx2_asm.S'
-+        'x86_64/src/poly_decompress_d10\.S|x86_64/src/poly_decompress_d10_avx2_asm.S'
-+        'x86_64/src/poly_decompress_d11\.S|x86_64/src/poly_decompress_d11_avx2_asm.S'
-+    )
-+    for pair in "${CMAKE_RENAMES[@]}"; do
-+        old="${pair%|*}"
-+        new="${pair#*|}"
-+        sed "${SED_I[@]}" -E "s|${old}|${new}|g" "$CMAKE"
-+    done
-+fi
-+
+-echo "Fixup AArch64 and x86_64 assembly backend to use s2n-bignum macros"
+-for file in $SRC/native/aarch64/src/*.S $SRC/native/x86_64/src/*.S; do
+-  echo "Processing $file"
+-  tmp_file=$(mktemp)
+-
+-  backend_define=$(if [[ "$file" == *"aarch64"* ]]; then echo "MLK_ARITH_BACKEND_AARCH64"; else echo "MLK_ARITH_BACKEND_X86_64_DEFAULT"; fi)
+-
+-  # Flatten multiline preprocessor directives, then process with unifdef
+-  sed -e ':a' -e 'N' -e '$!ba' -e 's/\\\n/ /g' "$file" | \
+-    unifdef -D$backend_define -UMLK_CONFIG_MULTILEVEL_NO_SHARED -DMLK_CONFIG_MULTILEVEL_WITH_SHARED > "$tmp_file"
+-  mv "$tmp_file" "$file"
+-
+-  # Replace common.h include and assembly macros
+-  s2n_header=$(if [[ "$file" == *"aarch64"* ]]; then echo "_internal_s2n_bignum_arm.h"; else echo "_internal_s2n_bignum_x86_att.h"; fi)
+-  sed "${SED_I[@]}" "s/#include \"\.\.\/\.\.\/\.\.\/common\.h\"/#include \"$s2n_header\"/" "$file"
+-
+-  func_name=$(grep -o '\.global MLK_ASM_NAMESPACE(\([^)]*\))' "$file" | sed 's/\.global MLK_ASM_NAMESPACE(\([^)]*\))/\1/')
+-  if [ -n "$func_name" ]; then
+-    sed "${SED_I[@]}" "s/\.global MLK_ASM_NAMESPACE($func_name)/        S2N_BN_SYM_VISIBILITY_DIRECTIVE(mlkem_$func_name)\n        S2N_BN_SYM_PRIVACY_DIRECTIVE(mlkem_$func_name)/" "$file"
+-    sed "${SED_I[@]}" "s/MLK_ASM_FN_SYMBOL($func_name)/S2N_BN_SYMBOL(mlkem_$func_name):/" "$file"
+-    sed "${SED_I[@]}" "s/MLK_ASM_FN_SIZE($func_name)/S2N_BN_SIZE_DIRECTIVE(mlkem_$func_name)/" "$file"
+-  fi
+-done
++# Note: the per-.S rewriting that previously bridged mlkem-native's
++# MLK_ASM_NAMESPACE / MLK_ASM_FN_SYMBOL / MLK_ASM_FN_SIZE macros to
++# s2n-bignum's S2N_BN_* directives, swapped out the asm-side common.h
++# include, and unifdef'ed the asm sources is no longer required.
++# The bridging now happens at preprocessor time via overrides installed
++# in mlkem_native_config.h, which the asm sources reach through their
++# `#include "../../../common.h"` chain.
+ 
  echo "Remove temporary artifacts ..."
  rm -rf $TMP
+diff --git a/crypto/fipsmodule/ml_kem/mlkem_native_config.h b/crypto/fipsmodule/ml_kem/mlkem_native_config.h
+index 6df118024..648838af2 100644
+--- a/crypto/fipsmodule/ml_kem/mlkem_native_config.h
++++ b/crypto/fipsmodule/ml_kem/mlkem_native_config.h
+@@ -109,6 +109,45 @@ static MLK_INLINE void *mlk_memset(void *s, int c, size_t n) {
+ #define MLK_CONFIG_NO_ASM
+ #endif
  
++// ---------------------------------------------------------------------------
++// Bridge mlkem-native's assembly-declaration macros to s2n-bignum's
++// symbol / visibility / privacy / size directives.
++//
++// mlkem-native (>= the version with overridable MLK_ASM_* macros) leaves
++// each of these undefined when the integrator provides their own. Defining
++// them here in the integrator config replaces the per-.S sed rewrites the
++// importer used to perform.
++//
++// Visible to both C compilation (via mlkem_native.h / common.h) and the
++// assembler (via the .S files' `#include "../../../common.h"` ->
++// common.h -> MLK_CONFIG_FILE -> this file).
++// ---------------------------------------------------------------------------
++
++#if defined(__ASSEMBLER__)
++#if defined(__aarch64__) || defined(_M_ARM64)
++#include "_internal_s2n_bignum_arm.h"
++#elif defined(__x86_64__) || defined(_M_X64)
++#include "_internal_s2n_bignum_x86_att.h"
++#endif
++#endif // __ASSEMBLER__
++
++// Suppress mlkem-native's Apple leading-underscore handling. S2N_BN_SYMBOL
++// already takes care of platform-specific symbol decoration, so the
++// namespaced form is just `mlkem_<sym>` on every target.
++#define MLK_ASM_NAMESPACE(sym) mlkem_##sym
++
++// `.global mlkem_<sym>` (plus optional privacy directive). The trailing
++// semicolon separates from any directive emitted on the same logical line.
++#define MLK_ASM_FN_GLOBAL(sym)                                \
++  S2N_BN_SYM_VISIBILITY_DIRECTIVE(MLK_ASM_NAMESPACE(sym));    \
++  S2N_BN_SYM_PRIVACY_DIRECTIVE(MLK_ASM_NAMESPACE(sym))
++
++// Function label, with platform-correct decoration.
++#define MLK_ASM_FN_SYMBOL(sym) S2N_BN_SYMBOL(MLK_ASM_NAMESPACE(sym)):
++
++// Function size directive (no-op on Mach-O).
++#define MLK_ASM_FN_SIZE(sym) S2N_BN_SIZE_DIRECTIVE(MLK_ASM_NAMESPACE(sym))
++
+ // Enable AArch64 arithmetic backend and set path
+ #define MLK_CONFIG_USE_NATIVE_BACKEND_ARITH
+ #define MLK_CONFIG_ARITH_BACKEND_FILE "../mlkem_native_backend.h"

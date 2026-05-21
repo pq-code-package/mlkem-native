@@ -2696,8 +2696,10 @@ def check_macro_typos():
             if rest.startswith("\\") or m in ["MLK_XXX", "MLK_SOURCE_XXX"]:
                 return True
 
-        # AWS-LC importer patch
-        if is_autogen or filename == "integration/awslc/awslc.patch":
+        # AWS-LC integration patches reference AWS-LC-side identifiers
+        # (e.g. MLKEM_NATIVE_AARCH64_ASM_SOURCES) that are not defined in
+        # this repo.
+        if is_autogen or filename.startswith("integration/aws-lc/"):
             return True
 
         if is_autogen or filename == "mlkem/src/common.h":

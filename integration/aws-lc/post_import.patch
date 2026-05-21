@@ -1,0 +1,78 @@
+diff --git a/crypto/fipsmodule/CMakeLists.txt b/crypto/fipsmodule/CMakeLists.txt
+index 3d7b68145..b1136646d 100644
+--- a/crypto/fipsmodule/CMakeLists.txt
++++ b/crypto/fipsmodule/CMakeLists.txt
+@@ -346,16 +346,16 @@ if((ARCH STREQUAL "aarch64") AND UNIX)
+ 
+   set(MLKEM_NATIVE_AARCH64_ASM_SOURCES
+ 
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/intt.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/ntt.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/poly_mulcache_compute_asm.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/poly_reduce_asm.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/poly_tobytes_asm.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/poly_tomont_asm.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/rej_uniform_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/intt_aarch64_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/ntt_aarch64_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/poly_mulcache_compute_aarch64_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/poly_reduce_aarch64_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/poly_tobytes_aarch64_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/poly_tomont_aarch64_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/aarch64/src/rej_uniform_aarch64_asm.S
+   )
+ 
+   # The mlkem-native asm sources include ../../../common.h, which in turn
+@@ -378,26 +378,26 @@ if((ARCH STREQUAL "x86_64") AND UNIX AND NOT MY_ASSEMBLER_IS_TOO_OLD_FOR_AVX)
+ 
+   set(MLKEM_NATIVE_X86_64_ASM_SOURCES
+ 
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/intt.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/ntt.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/mulcache_compute.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/nttfrombytes.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/ntttobytes.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/nttunpack.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/reduce.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/tomont.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k2.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k3.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_asm_k4.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/rej_uniform_asm.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_compress_d10.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_compress_d11.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_compress_d4.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_compress_d5.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_decompress_d10.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_decompress_d11.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_decompress_d4.S
+-    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_decompress_d5.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/intt_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/ntt_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_mulcache_compute_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/nttfrombytes_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/ntttobytes_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/nttunpack_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/reduce_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/tomont_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_k3_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_k4_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/rej_uniform_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_compress_d10_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_compress_d11_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_compress_d4_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_compress_d5_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_decompress_d10_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_decompress_d11_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_decompress_d4_avx2_asm.S
++    ${MLKEM_NATIVE_DIR}/mlkem/native/x86_64/src/poly_decompress_d5_avx2_asm.S
+   )
+ 
+   # The mlkem-native asm sources include ../../../common.h, which in turn
