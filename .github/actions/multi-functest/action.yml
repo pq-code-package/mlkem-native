@@ -172,7 +172,7 @@ runs:
           alloc: ${{ inputs.alloc }}
           rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
-      - name: Cross ppc64le Tests (POWER7)
+      - name: Cross ppc64le Tests (POWER7 fallback path)
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-ppc64le') && (success() || failure()) }}
         uses: ./.github/actions/functest
         with:
@@ -184,7 +184,7 @@ runs:
           cflags: "${{ inputs.cflags }} -DMLK_FORCE_PPC64LE -mcpu=power7"
           ldflags: ${{ inputs.ldflags }}
           cross_prefix: powerpc64le-unknown-linux-gnu-
-          exec_wrapper: "qemu-ppc64le -cpu power7"
+          exec_wrapper: "qemu-ppc64le -cpu power8"
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
