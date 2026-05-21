@@ -24,7 +24,9 @@
 
 #ifndef __ASSEMBLER__
 #define mlk_ppc_qdata MLK_NAMESPACE(ppc_qdata)
+/* 7 groups of 8 base constants + 4 twiddle tables * 63 rows * 8 values */
+/* check-magic: 2072 == 7 * 8 + 4 * 63 * 8 */
 MLK_INTERNAL_DATA_DECLARATION const int16_t mlk_ppc_qdata[2072];
-#endif
+#endif /* !__ASSEMBLER__ */
 
 #endif /* !MLK_DEV_PPC64LE_SRC_CONSTS_H */

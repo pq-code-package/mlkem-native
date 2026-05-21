@@ -3587,7 +3587,15 @@ def synchronize_backends(
         delete=delete,
         force_cross=force_cross,
         no_simplify=no_simplify,
-        cflags=" ".join(filter(None, [extra_cflags, "-Idev/ppc64le/src -Imlkem/src/native/ppc64le/src -mcpu=power8"])),
+        cflags=" ".join(
+            filter(
+                None,
+                [
+                    extra_cflags,
+                    "-Idev/ppc64le/src -Imlkem/src/native/ppc64le/src -mcpu=power8",
+                ],
+            )
+        ),
     )
 
 

@@ -10,6 +10,8 @@
 
 #include "consts.h"
 
+/* 7 groups of 8 base constants + 4 twiddle tables * 63 rows * 8 values */
+/* check-magic: 2072 == 7 * 8 + 4 * 63 * 8 */
 MLK_ALIGN MLK_INTERNAL_DATA_DEFINITION const int16_t mlk_ppc_qdata[2072] = {
     /* -Q */
     /* check-magic: -3329 == -1 * MLKEM_Q */
