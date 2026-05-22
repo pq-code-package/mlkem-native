@@ -15,6 +15,8 @@ let keccak_f1600_x4_avx2_mc = define_assert_from_elf
 (*** BYTECODE START ***)
 [
   0xf3; 0x0f; 0x1e; 0xfa;  (* ENDBR64 *)
+  0x49; 0x89; 0xe3;        (* MOV (% r11) (% rsp) *)
+  0x48; 0x83; 0xe4; 0xe0;  (* AND (% rsp) (Imm8 (word 224)) *)
   0x48; 0x81; 0xec; 0x00; 0x03; 0x00; 0x00;
                            (* SUB (% rsp) (Imm32 (word 768)) *)
   0xc5; 0xfe; 0x6f; 0x07;  (* VMOVDQU (%_% ymm0) (Memop Word256 (%% (rdi,0))) *)
@@ -742,8 +744,7 @@ let keccak_f1600_x4_avx2_mc = define_assert_from_elf
                            (* VMOVQ (Memop Quadword (%% (rdi,592))) (%_% xmm15) *)
   0xc5; 0x79; 0x17; 0xbf; 0x18; 0x03; 0x00; 0x00;
                            (* VMOVHPD (Memop Quadword (%% (rdi,792))) (%_% xmm15) *)
-  0x48; 0x81; 0xc4; 0x00; 0x03; 0x00; 0x00;
-                           (* ADD (% rsp) (Imm32 (word 768)) *)
+  0x4c; 0x89; 0xdc;        (* MOV (% rsp) (% r11) *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -757,13 +758,13 @@ let LENGTH_KECCAK_F1600_X4_AVX2_TMC =
   REWRITE_CONV[keccak_f1600_x4_avx2_tmc] `LENGTH keccak_f1600_x4_avx2_tmc`
   |> CONV_RULE(RAND_CONV LENGTH_CONV);;
 
-(* Preamble: SUB RSP, 768 (7 bytes) *)
+(* Preamble: MOV r11, rsp (3) + AND rsp, -32 (4) + SUB rsp, 768 (7) = 14 bytes *)
 let KECCAK_F1600_X4_AVX2_PREAMBLE_LENGTH = new_definition
-  `KECCAK_F1600_X4_AVX2_PREAMBLE_LENGTH = 7`;;
+  `KECCAK_F1600_X4_AVX2_PREAMBLE_LENGTH = 14`;;
 
-(* Postamble: ADD RSP, 768 (7 bytes) + RET (1 byte) *)
+(* Postamble: MOV rsp, r11 (3 bytes) + RET (1 byte) = 4 bytes *)
 let KECCAK_F1600_X4_AVX2_POSTAMBLE_LENGTH = new_definition
-  `KECCAK_F1600_X4_AVX2_POSTAMBLE_LENGTH = 8`;;
+  `KECCAK_F1600_X4_AVX2_POSTAMBLE_LENGTH = 4`;;
 
 let KECCAK_F1600_X4_AVX2_CORE_END = new_definition
   `KECCAK_F1600_X4_AVX2_CORE_END = LENGTH keccak_f1600_x4_avx2_tmc - KECCAK_F1600_X4_AVX2_POSTAMBLE_LENGTH`;;
@@ -828,7 +829,7 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
 
   (*** Set up the loop invariant ***)
 
-  ENSURES_WHILE_PAUP_TAC `0` `24` `pc + 0x268` `pc + 0x764`
+  ENSURES_WHILE_PAUP_TAC `0` `24` `pc + 0x26f` `pc + 0x76b`
   `\i s.
       (read R10 s = word i /\
        read RDI s = bitstate_in /\
@@ -1030,7 +1031,7 @@ let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_CORRECT = prove
  (`!rc_pointer:int64 bitstate_in:int64 rho8_ptr:int64 rho56_ptr:int64 A1 A2 A3 A4 pc:num stackpointer:int64 returnaddress.
   PAIRWISE nonoverlapping
   [(word pc, LENGTH keccak_f1600_x4_avx2_tmc);
-   (word_sub stackpointer (word 0x300), 0x300);
+   (word_sub stackpointer (word 0x31f), 0x31f);
    (bitstate_in, 800);
    (rc_pointer, 192);
    (rho8_ptr, 32);
@@ -1057,17 +1058,65 @@ let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_CORRECT = prove
               wordlist_from_memory(word_add bitstate_in (word 600), 25) s = keccak 24 A4)
          (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
           MAYCHANGE [memory :> bytes (bitstate_in, 800);
-                     memory :> bytes(word_sub stackpointer (word 0x300), 0x300)])`,
-  let TWEAK_CONV = ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV in
-  let EXPAND_PAIRWISE_CONV = REWRITE_CONV[PAIRWISE; ALL; NONOVERLAPPING_CLAUSES] in
-  let EXPAND_PAIRWISE = REWRITE_RULE[PAIRWISE; ALL; NONOVERLAPPING_CLAUSES] in
-  CONV_TAC(ONCE_DEPTH_CONV EXPAND_PAIRWISE_CONV) THEN
-  CONV_TAC TWEAK_CONV THEN
-  X86_PROMOTE_RETURN_STACK_TAC keccak_f1600_x4_avx2_tmc
-    (CONV_RULE TWEAK_CONV
-      (EXPAND_PAIRWISE
-        (CONV_RULE LENGTH_SIMPLIFY_CONV KECCAK_F1600_X4_AVX2_CORRECT)))
-    `[]` 768);;
+                     memory :> bytes(word_sub stackpointer (word 0x31f), 0x31f)])`,
+  (* Bridge the alignment preamble (mov r11,rsp; and rsp,-32; sub rsp,0x300)
+     by hand: step through the three preamble instructions, abbreviate the
+     data-dependent slack as `delta <= 31`, then apply the kernel CORRECT
+     spec at the resulting aligned stack pointer
+     `word_add stackpointer (word delta)`, BIGSTEP through the body, then
+     step the postamble (mov rsp,r11; ret). *)
+  REPLICATE_TAC 9 GEN_TAC THEN
+  WORD_FORALL_OFFSET_TAC 0x31f THEN
+  REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI] THEN
+  REWRITE_TAC[PAIRWISE; ALL; C_ARGUMENTS; NONOVERLAPPING_CLAUSES] THEN
+  REWRITE_TAC[fst KECCAK_F1600_X4_AVX2_FULL_EXEC] THEN
+  REWRITE_TAC[WORDLIST_FROM_MEMORY] THEN
+  CONV_TAC(ONCE_DEPTH_CONV NUM_MULT_CONV) THEN
+  REPEAT STRIP_TAC THEN
+
+  (* Step through the three preamble instructions. *)
+  ENSURES_INIT_TAC "s0" THEN
+  X86_STEPS_TAC KECCAK_F1600_X4_AVX2_FULL_EXEC (1--3) THEN
+
+  (* Abbreviate the data-dependent slack introduced by `and rsp, -32`.
+     `delta` is the number of bytes (0..31) the alignment shaved off rsp;
+     equivalently, the post-alignment frame base equals
+     `word_add stackpointer (word delta) - 0x300`. *)
+  ABBREV_TAC
+   `delta =
+    val(word_sub (word 31)
+                 (word_and (word_add stackpointer (word 0x31f)) (word 31)):int64)` THEN
+  SUBGOAL_THEN `delta <= 31` ASSUME_TAC THENL
+   [EXPAND_TAC "delta" THEN CONV_TAC BITBLAST_RULE; ALL_TAC] THEN
+  SUBGOAL_THEN
+   `word_sub (word_and (word_add stackpointer (word 0x31f)) (word 0xffffffffffffffe0))
+            (word 0x300):int64 =
+    word_add stackpointer (word delta)`
+  SUBST_ALL_TAC THENL
+    [EXPAND_TAC "delta" THEN CONV_TAC BITBLAST_RULE; ALL_TAC] THEN
+
+  (* Apply the kernel CORRECT spec at the aligned stack pointer. *)
+  MP_TAC(SPECL
+   [`rc_pointer:int64`; `bitstate_in:int64`;
+    `rho8_ptr:int64`; `rho56_ptr:int64`;
+    `A1:int64 list`; `A2:int64 list`; `A3:int64 list`; `A4:int64 list`;
+    `pc:num`; `word_add stackpointer (word delta):int64`]
+   (CONV_RULE LENGTH_SIMPLIFY_CONV KECCAK_F1600_X4_AVX2_CORRECT)) THEN
+  ANTS_TAC THENL
+   [REPEAT(FIRST_X_ASSUM(MP_TAC o check (is_imp o concl))) THEN
+    REWRITE_TAC[PAIRWISE; ALL; C_ARGUMENTS; NONOVERLAPPING_CLAUSES] THEN
+    REPEAT NONOVERLAPPING_TAC;
+    ALL_TAC] THEN
+
+  (* BIGSTEP through the body, then step the postamble (mov rsp,r11; ret). *)
+  REWRITE_TAC[C_ARGUMENTS; SOME_FLAGS] THEN
+  REWRITE_TAC[WORDLIST_FROM_MEMORY] THEN
+  CONV_TAC(ONCE_DEPTH_CONV NUM_MULT_CONV) THEN
+  X86_BIGSTEP_TAC KECCAK_F1600_X4_AVX2_FULL_EXEC "s4" THENL
+   [MATCH_MP_TAC BYTES_LOADED_BUTLAST THEN ASM_REWRITE_TAC[];
+    ALL_TAC] THEN
+  X86_STEPS_TAC KECCAK_F1600_X4_AVX2_FULL_EXEC (5--6) THEN
+  ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[]);;
 
 (* NOTE: This must be kept in sync with the CBMC specification
  * in dev/fips202/x86_64/src/fips202_native_x86_64.h *)
@@ -1076,7 +1125,7 @@ let KECCAK_F1600_X4_AVX2_SUBROUTINE_CORRECT = prove
  (`!rc_pointer:int64 bitstate_in:int64 rho8_ptr:int64 rho56_ptr:int64 A1 A2 A3 A4 pc:num stackpointer:int64 returnaddress.
   PAIRWISE nonoverlapping
   [(word pc, LENGTH keccak_f1600_x4_avx2_mc);
-   (word_sub stackpointer (word 0x300), 0x300);
+   (word_sub stackpointer (word 0x31f), 0x31f);
    (bitstate_in, 800);
    (rc_pointer, 192);
    (rho8_ptr, 32);
@@ -1103,7 +1152,7 @@ let KECCAK_F1600_X4_AVX2_SUBROUTINE_CORRECT = prove
               wordlist_from_memory(word_add bitstate_in (word 600), 25) s = keccak 24 A4)
          (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
           MAYCHANGE [memory :> bytes (bitstate_in, 800);
-                     memory :> bytes(word_sub stackpointer (word 0x300), 0x300)])`,
+                     memory :> bytes(word_sub stackpointer (word 0x31f), 0x31f)])`,
   let TWEAK_CONV = ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV in
   let EXPAND_PAIRWISE_CONV = REWRITE_CONV[PAIRWISE; ALL; NONOVERLAPPING_CLAUSES] in
   CONV_TAC(ONCE_DEPTH_CONV EXPAND_PAIRWISE_CONV) THEN
@@ -1164,6 +1213,7 @@ let KECCAK_F1600_X4_AVX2_SAFE = time prove
   REWRITE_TAC[PAIRWISE; ALL; NONOVERLAPPING_CLAUSES] THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars KECCAK_F1600_X4_AVX2_EXEC);;
 
+
 (* ========================================================================= *)
 (* Workaround for s2n-bignum's GEN_X86_ADD_RETURN_STACK_TAC and              *)
 (* DISCHARGE_SAFETY_PROPERTY_TAC not supporting empty callee-saved register  *)
@@ -1180,67 +1230,36 @@ let WORD_FORALL_OFFSET_64_TAC =
   fun n -> MATCH_MP_TAC lemma THEN EXISTS_TAC (mk_small_numeral n) THEN
            CONV_TAC(ONCE_DEPTH_CONV NORMALIZE_ADD_SUBTRACT_WORD_CONV);;
 
-let DISCHARGE_SAFETY_PROPERTY_STACKOFFSET_TAC stack_offset =
-  REWRITE_TAC[APPEND] THEN
-  ABBREV_TAC (mk_eq(mk_var("rsp_orig",`:int64`),
-    mk_comb(mk_comb(`word_add:int64->int64->int64`,`stackpointer:int64`),
-            mk_comb(`word:num->int64`,mk_small_numeral stack_offset)))) THEN
-  SUBGOAL_THEN
-    (mk_eq(`stackpointer:int64`,
-           mk_comb(mk_comb(`word_sub:int64->int64->int64`,mk_var("rsp_orig",`:int64`)),
-                   mk_comb(`word:num->int64`,mk_small_numeral stack_offset))))
-    SUBST_ALL_TAC THENL
-    [EXPAND_TAC "rsp_orig" THEN CONV_TAC WORD_RULE; ALL_TAC] THEN
-  DISCHARGE_SAFETY_PROPERTY_TAC;;
+(* Trivial reflexivity: every region contains itself. *)
+let CONTAINED_REFL = prove
+ (`!a:int64 n. contained (a,n) (a,n)`,
+  REWRITE_TAC[contained; CONTAINED_MODULO_REFL] THEN ARITH_TAC);;
 
-let X86_PROMOTE_RETURN_STACK_SAFE_TAC execname coreth reglist stack_offset =
-  let n0 = length(dest_list(parse_term reglist)) in
-  let n = n0 + (if stack_offset > 0 then 1 else 0) in
-  let m = (if stack_offset > 0 then 1 else 0) + n0 + 1 in
-  let execth = X86_MK_EXEC_RULE execname in
-  let coreth = X86_CORE_PROMOTE coreth in
-  ASSUME_CALLEE_SAFETY_TAC coreth "" THEN
-  META_EXISTS_TAC THEN
-  check_forallvars_tac THEN
-  FIRST_X_ASSUM (fun th -> MP_TAC (ONCE_REWRITE_RULE[append_lemma]th)) THEN
-  REPEAT(CONV_TAC (LAND_CONV (ONCE_REWRITE_CONV[swap_forall])) THEN
-         MATCH_MP_TAC mono3lemma THEN GEN_TAC) THEN
-  CONV_TAC (LAND_CONV (ONCE_REWRITE_CONV[swap_forall])) THEN
-  REWRITE_TAC[fst execth] THEN
-  REWRITE_TAC [MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI;
-               WINDOWS_MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI] THEN
-  (if stack_offset > 0 then
-    DISCH_THEN(fun th -> WORD_FORALL_OFFSET_64_TAC stack_offset THEN MP_TAC th) THEN
-    MATCH_MP_TAC MONO_FORALL THEN GEN_TAC
-  else
-    ALL_TAC) THEN
-  REWRITE_TAC[NONOVERLAPPING_CLAUSES; ALLPAIRS; ALL] THEN
-  REWRITE_TAC[C_ARGUMENTS; C_RETURN; SOME_FLAGS] THEN
-  REWRITE_TAC[WINDOWS_C_ARGUMENTS; WINDOWS_C_RETURN] THEN
-  DISCH_THEN(fun th ->
-    REPEAT GEN_TAC THEN
-    TRY(DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC)) THEN
-    MP_TAC th) THEN
-  ASM_REWRITE_TAC[] THEN
-  ONCE_REWRITE_TAC[GSYM LEFT_EXISTS_IMP_THM] THEN
-  META_EXISTS_TAC THEN
-  DISCH_THEN(fun th ->
-    ENSURES_INIT_TAC "s0" THEN
-    X86_STEPS_TAC execth (1--n) THEN
-    MP_TAC th) THEN
-  X86_BIGSTEP_TAC execth ("s" ^ string_of_int (n + 1)) THEN
-  TRY(GEN_REWRITE_TAC LAND_CONV [GSYM(CONJUNCT1 APPEND)] THEN
-      BINOP_TAC THENL [UNIFY_REFL_TAC; REFL_TAC] THEN NO_TAC) THEN
-  REWRITE_TAC(!simulation_precanon_thms) THEN
-  X86_STEPS_TAC execth ((n+2)--(n+1+m)) THEN
-  ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[];;
+(* The aligned 768-byte frame the kernel proof reasons about sits
+   entirely inside the 0x31f-byte stack region the SUBROUTINE spec
+   exposes: the alignment shifts the frame base by `delta <= 31`
+   bytes, and 768 + 31 = 0x31f. Used by the SAFE-lift to widen the
+   inner memaccess_inbounds claim to the wrapper's footprint. *)
+let FRAME_CONTAINED = prove
+ (`!stackpointer:int64 delta.
+       delta <= 31
+       ==> contained
+            (word_add (word_sub stackpointer (word 0x31f)) (word delta), 768)
+            (word_sub stackpointer (word 0x31f), 0x31f)`,
+  REPEAT STRIP_TAC THEN
+  REWRITE_TAC[contained; contained_modulo; DIMINDEX_64] THEN
+  REPEAT STRIP_TAC THEN
+  EXISTS_TAC `delta + i:num` THEN
+  ASM_SIMP_TAC[ARITH_RULE `i < 768 /\ delta <= 31 ==> delta + i < 0x31f`] THEN
+  REWRITE_TAC[VAL_WORD_ADD; VAL_WORD; DIMINDEX_64; CONG] THEN
+  CONV_TAC MOD_DOWN_CONV THEN AP_THM_TAC THEN AP_TERM_TAC THEN ARITH_TAC);;
 
 let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e rc_pointer bitstate_in rho8_ptr rho56_ptr pc stackpointer returnaddress.
           PAIRWISE nonoverlapping
           [(word pc, LENGTH keccak_f1600_x4_avx2_tmc);
-           (word_sub stackpointer (word 0x300), 0x300);
+           (word_sub stackpointer (word 0x31f), 0x31f);
            (bitstate_in, 800);
            (rc_pointer, 192);
            (rho8_ptr, 32);
@@ -1262,26 +1281,126 @@ let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_SAFE = time prove
                                 returnaddress /\
                          memaccess_inbounds e2
                            [bitstate_in,800; rc_pointer,192; rho8_ptr,32; rho56_ptr,32;
-                            word_sub stackpointer (word 768),768;
+                            word_sub stackpointer (word 0x31f),0x31f;
                             stackpointer,8]
                            [bitstate_in,800;
-                            word_sub stackpointer (word 768),768;
+                            word_sub stackpointer (word 0x31f),0x31f;
                             stackpointer,8]))
                (\s s'. true)`,
   let EXPAND_PAIRWISE_CONV = REWRITE_CONV[PAIRWISE; ALL; NONOVERLAPPING_CLAUSES] in
-  let EXPAND_PAIRWISE = REWRITE_RULE[PAIRWISE; ALL; NONOVERLAPPING_CLAUSES] in
+  let inner_safe = CONV_RULE LENGTH_SIMPLIFY_CONV KECCAK_F1600_X4_AVX2_SAFE in
+  let execth = X86_MK_EXEC_RULE keccak_f1600_x4_avx2_tmc in
   CONV_TAC(ONCE_DEPTH_CONV EXPAND_PAIRWISE_CONV) THEN
-  X86_PROMOTE_RETURN_STACK_SAFE_TAC keccak_f1600_x4_avx2_tmc
-    (EXPAND_PAIRWISE (CONV_RULE LENGTH_SIMPLIFY_CONV KECCAK_F1600_X4_AVX2_SAFE))
-    "[]" 768 THEN
-  DISCHARGE_SAFETY_PROPERTY_STACKOFFSET_TAC 768);;
+  (* Skolemize the inner SAFE's existential f_events into a free term
+     `inner_f_events` we can refer to in the witness for the wrapper
+     spec's f_events. *)
+  X_CHOOSE_THEN
+    `inner_f_events:int64->int64->int64->int64->num->int64->uarch_event list`
+    (LABEL_TAC "INNER_SAFE") inner_safe THEN
+  (* Witness for the wrapper f_events: the kernel's events sandwiched
+     between the postamble's `mov rsp,r11; ret` events (an EventLoad of
+     the return-address slot and an EventJump to it). The kernel's
+     stackpointer arg is the aligned frame base, expressed as a
+     function of the wrapper's (unaligned) `stackpointer` parameter. *)
+  EXISTS_TAC
+   `\(rc_pointer:int64) (rho8_ptr:int64) (rho56_ptr:int64)
+     (bitstate_in:int64) (pc:num) (stackpointer:int64) (returnaddress:int64).
+       CONS (EventJump (word(pc + LENGTH keccak_f1600_x4_avx2_tmc):int64, returnaddress))
+         (CONS (EventLoad (stackpointer, 8))
+            (inner_f_events rc_pointer rho8_ptr rho56_ptr bitstate_in pc
+               (word_sub
+                  (word_and stackpointer (word 0xffffffffffffffe0))
+                  (word 0x300)))):uarch_event list` THEN
+  REWRITE_TAC[LENGTH_KECCAK_F1600_X4_AVX2_TMC] THEN
+  REPEAT GEN_TAC THEN
+  REWRITE_TAC[NONOVERLAPPING_CLAUSES; ALL; PAIRWISE; C_ARGUMENTS] THEN
+  REWRITE_TAC[fst execth] THEN
+  STRIP_TAC THEN
+  (* Step through the three preamble instructions, then re-express the
+     resulting frame base as `stackpointer - 0x31f + delta` for some
+     `delta <= 31`. This puts the goal in the form expected by the
+     kernel SAFE spec (which quantifies over an arbitrary aligned base). *)
+  ENSURES_INIT_TAC "s0" THEN
+  X86_STEPS_TAC execth (1--3) THEN
+  SUBGOAL_THEN
+   `?delta. delta <= 31 /\
+            word_sub (word_and stackpointer (word 0xffffffffffffffe0))
+                     (word 0x300):int64 =
+            word_add (word_sub stackpointer (word 0x31f)) (word delta)`
+   STRIP_ASSUME_TAC THENL
+   [EXISTS_TAC `val(word_sub (word 31) (word_and stackpointer (word 31)):int64)` THEN
+    CONJ_TAC THENL [CONV_TAC BITBLAST_RULE; CONV_TAC BITBLAST_RULE];
+    ALL_TAC] THEN
+  FIRST_ASSUM SUBST_ALL_TAC THEN
+  (* Apply the kernel SAFE spec at the aligned frame base. *)
+  USE_THEN "INNER_SAFE" (fun th ->
+    MP_TAC (SPECL
+     [`e:uarch_event list`;
+      `rc_pointer:int64`; `bitstate_in:int64`;
+      `rho8_ptr:int64`; `rho56_ptr:int64`;
+      `pc:num`;
+      `word_add (word_sub stackpointer (word 0x31f)) (word delta):int64`] th)) THEN
+  ANTS_TAC THENL
+   [REWRITE_TAC[PAIRWISE; ALL; NONOVERLAPPING_CLAUSES] THEN
+    REPEAT CONJ_TAC THEN NONOVERLAPPING_TAC;
+    ALL_TAC] THEN
+  (* Substitute `read events s3 = e` so BIGSTEP carries `e` directly
+     into the s4 event-trace assumption (DISCARD_OLDSTATE_TAC would
+     otherwise drop the s3-referencing equation). *)
+  FIRST_ASSUM (fun th ->
+    if (try fst (dest_eq (concl th)) = `read events s3:uarch_event list`
+        with _ -> false)
+    then SUBST1_TAC th else NO_TAC) THEN
+  REWRITE_TAC[C_ARGUMENTS; SOME_FLAGS] THEN
+  (* BIGSTEP through the inner kernel, then step the postamble
+     (mov rsp,r11; ret). *)
+  X86_BIGSTEP_TAC execth "s4" THENL
+   [REWRITE_TAC[C_ARGUMENTS] THEN ASM_REWRITE_TAC[] THEN
+    MATCH_MP_TAC BYTES_LOADED_BUTLAST THEN ASM_REWRITE_TAC[];
+    ALL_TAC] THEN
+  X86_STEPS_TAC execth (5--6) THEN
+  ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
+  (* Witness for the post-condition's `e2` matches the wrapper f_events
+     specialized at the concrete arguments. *)
+  EXISTS_TAC
+   `CONS (EventJump (word(pc + LENGTH keccak_f1600_x4_avx2_tmc):int64, returnaddress:int64))
+      (CONS (EventLoad (stackpointer:int64, 8))
+         ((inner_f_events:int64->int64->int64->int64->num->int64->uarch_event list)
+            rc_pointer rho8_ptr rho56_ptr bitstate_in pc
+            (word_add (word_sub stackpointer (word 0x31f)) (word delta))))` THEN
+  REWRITE_TAC[LENGTH_KECCAK_F1600_X4_AVX2_TMC] THEN
+  REWRITE_TAC[APPEND] THEN
+  REWRITE_TAC[memaccess_inbounds; ALL] THEN
+  (* The two postamble events are trivially in bounds: EventJump is
+     ignored by memaccess_inbounds, and EventLoad (stackpointer, 8)
+     hits the explicit `(stackpointer, 8)` slot in the readable list. *)
+  CONJ_TAC THENL
+   [REWRITE_TAC[EX] THEN MESON_TAC[CONTAINED_MODULO_REFL; LE_REFL];
+    ALL_TAC] THEN
+  (* Widen the inner kernel's memaccess_inbounds claim (which mentions
+     the aligned 768-byte frame) to the wrapper's footprint (which
+     mentions the 0x31f-byte unaligned frame) using FRAME_CONTAINED. *)
+  REWRITE_TAC[GSYM memaccess_inbounds] THEN
+  FIRST_X_ASSUM (fun th ->
+    if (try fst (dest_eq (concl th)) = `e2:uarch_event list`
+        with _ -> false)
+    then SUBST_ALL_TAC th else NO_TAC) THEN
+  MATCH_MP_TAC (REWRITE_RULE[GSYM IMP_CONJ_ALT] MEMACCESS_INBOUNDS_CONTAINED) THEN
+  MAP_EVERY EXISTS_TAC
+   [`[bitstate_in:int64,800; rc_pointer,192; rho8_ptr,32; rho56_ptr,32;
+      word_add (word_sub stackpointer (word 0x31f)) (word delta),768]`;
+    `[bitstate_in:int64,800;
+      word_add (word_sub stackpointer (word 0x31f)) (word delta),768]`] THEN
+  ASM_REWRITE_TAC[ALL] THEN
+  REWRITE_TAC[EX] THEN
+  ASM_MESON_TAC[CONTAINED_REFL; FRAME_CONTAINED]);;
 
 let KECCAK_F1600_X4_AVX2_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e rc_pointer bitstate_in rho8_ptr rho56_ptr pc stackpointer returnaddress.
           PAIRWISE nonoverlapping
           [(word pc, LENGTH keccak_f1600_x4_avx2_mc);
-           (word_sub stackpointer (word 0x300), 0x300);
+           (word_sub stackpointer (word 0x31f), 0x31f);
            (bitstate_in, 800);
            (rc_pointer, 192);
            (rho8_ptr, 32);
@@ -1303,10 +1422,10 @@ let KECCAK_F1600_X4_AVX2_SUBROUTINE_SAFE = time prove
                                 returnaddress /\
                          memaccess_inbounds e2
                            [bitstate_in,800; rc_pointer,192; rho8_ptr,32; rho56_ptr,32;
-                            word_sub stackpointer (word 768),768;
+                            word_sub stackpointer (word 0x31f),0x31f;
                             stackpointer,8]
                            [bitstate_in,800;
-                            word_sub stackpointer (word 768),768;
+                            word_sub stackpointer (word 0x31f),0x31f;
                             stackpointer,8]))
                (\s s'. true)`,
   let EXPAND_PAIRWISE_CONV = REWRITE_CONV[PAIRWISE; ALL; NONOVERLAPPING_CLAUSES] in
