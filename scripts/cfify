@@ -75,13 +75,46 @@ AARCH64_RET_PATTERN = re.compile(r"(\s*)ret\s*$", re.IGNORECASE)
 # x86_64 module-scope constants
 # -----------------------------------------------------------------------------
 X86_64_LABEL_PATTERN = re.compile(r"^([a-zA-Z_][a-zA-Z0-9_]*):$")
+# Generic stack-pointer-style adjust: any `subq $N, %REG` or `addq $N, %REG`.
+# The CFA-tracking variable selects which register we care about per line.
 X86_64_SUBQ_PATTERN = re.compile(
-    r"(\s*)subq\s+\$(0x[0-9a-fA-F]+|\d+),\s*%rsp", re.IGNORECASE
+    r"(\s*)subq\s+\$(0x[0-9a-fA-F]+|\d+),\s*%([a-z0-9]+)", re.IGNORECASE
 )
 X86_64_ADDQ_PATTERN = re.compile(
-    r"(\s*)addq\s+\$(0x[0-9a-fA-F]+|\d+),\s*%rsp", re.IGNORECASE
+    r"(\s*)addq\s+\$(0x[0-9a-fA-F]+|\d+),\s*%([a-z0-9]+)", re.IGNORECASE
 )
 X86_64_RET_PATTERN = re.compile(r"(\s*)retq?\s*$", re.IGNORECASE)
+
+# Stack-alignment anchor save/restore. The pair `movq %rsp, %REG` ...
+# `movq %REG, %rsp` brackets a region in which rsp moves by an
+# unpredictable, data-dependent amount (e.g. `andq $-32, %rsp`). While
+# inside that region we re-anchor the CFA on REG so unwinding remains
+# valid regardless of how rsp shifts. A stray `mov rsp, %REG` used as a
+# scratch base pointer is filtered out by requiring a matching restore
+# in the same function body.
+X86_64_MOV_RSP_TO_REG_PATTERN = re.compile(
+    r"(\s*)movq\s+%rsp,\s*%([a-z0-9]+)\s*$", re.IGNORECASE
+)
+X86_64_MOV_REG_TO_RSP_PATTERN = re.compile(
+    r"(\s*)movq\s+%([a-z0-9]+),\s*%rsp\s*$", re.IGNORECASE
+)
+
+
+def _x86_64_has_matching_rsp_restore(lines, start, reg):
+    """Return True if a `movq %REG, %rsp` appears before the next ret in `lines`.
+
+    Used to distinguish an alignment anchor save from a scratch base-pointer
+    copy: only the former has a matching restore in the function body.
+    """
+    reg_lower = reg.lower()
+    for j in range(start, len(lines)):
+        candidate = lines[j].rstrip()
+        m = X86_64_MOV_REG_TO_RSP_PATTERN.match(candidate)
+        if m and m.group(2).lower() == reg_lower:
+            return True
+        if X86_64_RET_PATTERN.match(candidate):
+            return False
+    return False
 
 
 # -----------------------------------------------------------------------------
@@ -170,6 +203,12 @@ def add_cfi_directives(text, arch):
     lines = text.split("\n")
     result = []
     i = 0
+    # x86_64: register that the CFA is currently expressed in terms of.
+    # Defaults to rsp; flipped to the alignment anchor register on a
+    # `mov rsp, %REG` save and back to rsp on `mov %REG, %rsp`.
+    # subq/addq adjustments are reflected in CFI only when applied to
+    # the current CFA register.
+    x86_64_cfa_reg = "rsp"
 
     while i < len(lines):
         line = lines[i].rstrip()
@@ -304,31 +343,73 @@ def add_cfi_directives(text, arch):
                     i += 1
                     continue
 
-            # x86_64: subq $OFFSET, %rsp -> .cfi_adjust_cfa_offset OFFSET (stack alloc)
-            match = X86_64_SUBQ_PATTERN.match(line)
-            if match:
-                indent, offset_str = match.groups()
-                offset = (
-                    int(offset_str, 16)
-                    if offset_str.lower().startswith("0x")
-                    else int(offset_str)
-                )
+            # x86_64: stack-alignment anchor save. Re-anchor the CFA on
+            # the destination register so unwinding survives any
+            # data-dependent rsp move (e.g. `andq $-32, %rsp`) that may
+            # follow. Only fires while the CFA is still on rsp - a
+            # nested re-anchor would indicate malformed input.
+            #
+            # A `movq %rsp, %REG` may also be a scratch base-pointer
+            # copy (e.g. `rep movsb` source setup) with no intent to
+            # re-anchor. Distinguish by requiring a matching restore
+            # `movq %REG, %rsp` later in the same function body
+            # (bounded by the next ret/retq, after which cfify emits
+            # `.cfi_endproc`). Without a restore, we leave the line
+            # alone and keep the CFA on rsp.
+            match = X86_64_MOV_RSP_TO_REG_PATTERN.match(line)
+            if match and x86_64_cfa_reg == "rsp":
+                indent, reg = match.group(1), match.group(2)
+                if _x86_64_has_matching_rsp_restore(lines, i + 1, reg):
+                    result.append(line)
+                    result.append(f"{indent}.cfi_def_cfa_register %{reg}")
+                    x86_64_cfa_reg = reg.lower()
+                    i += 1
+                    continue
+
+            # x86_64: stack-alignment anchor restore. The CFA goes back
+            # to being computed from rsp. Only fires if the source
+            # register matches the current CFA anchor; an unrelated
+            # `mov %rax, %rsp` is left alone.
+            match = X86_64_MOV_REG_TO_RSP_PATTERN.match(line)
+            if match and match.group(2).lower() == x86_64_cfa_reg:
+                indent = match.group(1)
                 result.append(line)
-                result.append(f"{indent}.cfi_adjust_cfa_offset {offset:#x}")
+                result.append(f"{indent}.cfi_def_cfa_register %rsp")
+                x86_64_cfa_reg = "rsp"
                 i += 1
                 continue
 
-            # x86_64: addq $OFFSET, %rsp -> .cfi_adjust_cfa_offset -OFFSET (stack free)
-            match = X86_64_ADDQ_PATTERN.match(line)
+            # x86_64: subq $OFFSET, %REG -> .cfi_adjust_cfa_offset OFFSET
+            # only when REG is the current CFA register. Adjustments to
+            # other registers (or to rsp while the CFA is anchored on
+            # the alignment register) are invisible to the unwinder and
+            # need no CFI.
+            match = X86_64_SUBQ_PATTERN.match(line)
             if match:
-                indent, offset_str = match.groups()
+                indent, offset_str, reg = match.groups()
                 offset = (
                     int(offset_str, 16)
                     if offset_str.lower().startswith("0x")
                     else int(offset_str)
                 )
                 result.append(line)
-                result.append(f"{indent}.cfi_adjust_cfa_offset -{offset:#x}")
+                if reg.lower() == x86_64_cfa_reg:
+                    result.append(f"{indent}.cfi_adjust_cfa_offset {offset:#x}")
+                i += 1
+                continue
+
+            # x86_64: addq $OFFSET, %REG -> .cfi_adjust_cfa_offset -OFFSET
+            match = X86_64_ADDQ_PATTERN.match(line)
+            if match:
+                indent, offset_str, reg = match.groups()
+                offset = (
+                    int(offset_str, 16)
+                    if offset_str.lower().startswith("0x")
+                    else int(offset_str)
+                )
+                result.append(line)
+                if reg.lower() == x86_64_cfa_reg:
+                    result.append(f"{indent}.cfi_adjust_cfa_offset -{offset:#x}")
                 i += 1
                 continue
 
