@@ -9,6 +9,7 @@
  *          Do not modify it directly.
  */
 
+#include "../../../../backends.h"
 #include "../../../../common.h"
 
 #if (defined(MLK_FIPS202_AARCH64_NEED_X1_SCALAR) ||                  \

@@ -56,6 +56,7 @@
 //   Tail     -- absorb remaining <8 bytes via predicated byte loads.
 
 #include "../../../../common.h"
+#include "../../../../backends.h"
 #if defined(MLK_FIPS202_ARMV81M_NEED_X4) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 

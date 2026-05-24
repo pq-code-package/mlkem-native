@@ -79,6 +79,11 @@ jobs:
           echo "=== Patched extensions.bzl ==="
           cat third_party/mlkem_native/extensions.bzl
 
+      - name: Patch expo BUILD to include backends.h
+        run: |
+          cd "$EXPO_DIR"
+          git apply "$GITHUB_WORKSPACE/integration/opentitan/build-bazel-backends.patch"
+
       - name: Patch functest to only test deterministic API
         run: |
           cd "$EXPO_DIR"

@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+# Add mlkem-native's backends.h shim to the expo BUILD file.
+# Drop once expo lists backends.h itself.
+diff --git a/third_party/mlkem_native/BUILD.mlkem_native.bazel b/third_party/mlkem_native/BUILD.mlkem_native.bazel
+--- a/third_party/mlkem_native/BUILD.mlkem_native.bazel
++++ b/third_party/mlkem_native/BUILD.mlkem_native.bazel
+@@ -12,6 +12,7 @@ cc_library(
+         "mlkem/src/cbmc.h",
+         "mlkem/src/common.h",
+         "mlkem/src/randombytes.h",
++        "mlkem/src/backends.h",
+         "mlkem/src/debug.h",
+         "mlkem/src/debug.c",
+         "mlkem/src/compress.h",

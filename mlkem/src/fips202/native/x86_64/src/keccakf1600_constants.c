@@ -9,6 +9,7 @@
  *          Do not modify it directly.
  */
 
+#include "../../../../backends.h"
 #include "../../../../common.h"
 #if defined(MLK_FIPS202_X86_64_NEED_X4_AVX2) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)

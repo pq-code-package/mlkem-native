@@ -9,6 +9,7 @@
  *          Do not modify it directly.
  */
 
+#include "../../../backends.h"
 #include "../../../common.h"
 
 #if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT)

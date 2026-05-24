@@ -159,3 +159,55 @@ $(call MAKE_OBJS, $(MLKEM512_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_
 $(call MAKE_OBJS, $(MLKEM768_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_CFLAGS)
 $(call MAKE_OBJS, $(MLKEM1024_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_CFLAGS)
 endif
+
+# ABI checker
+ABICHECK_DIR = $(BUILD_DIR)/abicheck
+
+ABICHECK_SOURCES = test/abicheck/abicheck.c test/abicheck/abicheckutil.c
+ABICHECK_SOURCES += test/abicheck/aarch64_callstub.S test/abicheck/x86_64_callstub.S
+ABICHECK_SOURCES += $(wildcard test/abicheck/check_*.c)
+ABICHECK_SOURCES += $(wildcard test/notrandombytes/*.c)
+
+ABICHECK_EXTRA_SOURCES =
+
+ABICHECK_ASM_SOURCES =
+ifeq ($(ARCH),aarch64)
+	ABICHECK_ASM_SOURCES += $(wildcard mlkem/src/fips202/native/aarch64/src/*.S)
+	ABICHECK_ASM_SOURCES += $(wildcard mlkem/src/native/aarch64/src/*.S)
+else ifeq ($(ARCH),x86_64)
+	ABICHECK_ASM_SOURCES += $(wildcard mlkem/src/fips202/native/x86_64/src/*.S)
+	ABICHECK_ASM_SOURCES += $(wildcard mlkem/src/native/x86_64/src/*.S)
+	# C files providing constant data needed by the x86_64 assembly
+	ABICHECK_EXTRA_SOURCES += mlkem/src/native/x86_64/src/consts.c
+	ABICHECK_EXTRA_SOURCES += mlkem/src/native/x86_64/src/compress_consts.c
+	ABICHECK_EXTRA_SOURCES += mlkem/src/native/x86_64/src/rej_uniform_table.c
+	ABICHECK_EXTRA_SOURCES += mlkem/src/fips202/native/x86_64/src/keccakf1600_constants.c
+endif
+
+ABICHECK_ALL_SOURCES = $(ABICHECK_SOURCES) $(ABICHECK_ASM_SOURCES) $(ABICHECK_EXTRA_SOURCES)
+ABICHECK_OBJS = $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_ALL_SOURCES))
+
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_NAMESPACE_PREFIX=mlk
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
+
+# Drive backend selection through the standard backends.h shim, using
+# ABI-checker-specific metadata headers. These enable every gated asm
+# variant without pulling in the inline dispatch glue that would
+# normally require compiling indcpa.c / poly.c / etc.
+#
+# Paths are resolved by the C preprocessor relative to the file doing
+# the #include - i.e. mlkem/src/backends.h - hence the ../../ prefix.
+ifeq ($(ARCH),aarch64)
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_ARITH_BACKEND_FILE=\"../../test/abicheck/abicheck_arith_aarch64.h\"
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_FIPS202_BACKEND_FILE=\"../../test/abicheck/abicheck_fips202_aarch64.h\"
+else ifeq ($(ARCH),x86_64)
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_ARITH_BACKEND_FILE=\"../../test/abicheck/abicheck_arith_x86_64.h\"
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
+$(ABICHECK_OBJS): CFLAGS += -DMLK_CONFIG_FIPS202_BACKEND_FILE=\"../../test/abicheck/abicheck_fips202_x86_64.h\"
+$(ABICHECK_OBJS): CFLAGS += -mavx2 -mbmi2
+endif
+
+$(ABICHECK_DIR)/bin/abicheck: $(ABICHECK_OBJS)

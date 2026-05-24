@@ -31,6 +31,7 @@
 */
 
 #include "../../../../common.h"
+#include "../../../../backends.h"
 #if defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 

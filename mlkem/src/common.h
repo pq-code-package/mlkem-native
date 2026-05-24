@@ -125,30 +125,6 @@
 #error Bad configuration: MLK_CONFIG_NO_RANDOMIZED_API is incompatible with MLK_CONFIG_KEYGEN_PCT as the current PCT implementation requires crypto_kem_enc()
 #endif
 
-#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
-#include MLK_CONFIG_ARITH_BACKEND_FILE
-/* Include to enforce consistency of API and implementation,
- * and conduct sanity checks on the backend.
- *
- * Keep this _after_ the inclusion of the backend; otherwise,
- * the sanity checks won't have an effect. */
-#if defined(MLK_CHECK_APIS) && !defined(__ASSEMBLER__)
-#include "native/api.h"
-#endif
-#endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
-
-#if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
-#include MLK_CONFIG_FIPS202_BACKEND_FILE
-/* Include to enforce consistency of API and implementation,
- * and conduct sanity checks on the backend.
- *
- * Keep this _after_ the inclusion of the backend; otherwise,
- * the sanity checks won't have an effect. */
-#if defined(MLK_CHECK_APIS) && !defined(__ASSEMBLER__)
-#include "fips202/native/api.h"
-#endif
-#endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
-
 #if !defined(MLK_CONFIG_FIPS202_CUSTOM_HEADER)
 #define MLK_FIPS202_HEADER_FILE "fips202/fips202.h"
 #else

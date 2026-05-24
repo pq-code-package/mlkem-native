@@ -26,6 +26,7 @@
  * implementation @[supercop, crypto_hash/keccakc512/simple/]
  * by Ronny Van Keer, and the public domain @[tweetfips] implementation. */
 
+#include "../backends.h"
 
 #include "keccakf1600.h"
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)

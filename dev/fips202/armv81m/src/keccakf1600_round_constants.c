@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
+#include "../../../../backends.h"
 #include "../../../../common.h"
 
 #if defined(MLK_FIPS202_ARMV81M_NEED_X4) && \

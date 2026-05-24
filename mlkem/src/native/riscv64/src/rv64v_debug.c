@@ -5,6 +5,7 @@
 
 /* NOTE: You can remove this file unless you compile with MLKEM_DEBUG. */
 
+#include "../../../backends.h"
 #include "../../../common.h"
 
 #if defined(MLK_ARITH_BACKEND_RISCV64) && \
