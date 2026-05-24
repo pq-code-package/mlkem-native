@@ -35,6 +35,11 @@
  * of mlkem-native (e.g. with varying security levels)
  * within a single compilation unit. */
 #define mlk_check_pct MLK_ADD_PARAM_SET(mlk_check_pct) MLK_CONTEXT_PARAMETERS_2
+#define mlk_serialize_epp MLK_ADD_PARAM_SET(mlk_serialize_epp)
+#define mlk_deserialize_epp MLK_ADD_PARAM_SET(mlk_deserialize_epp)
+#define mlk_serialize_polyvec_16le MLK_ADD_PARAM_SET(mlk_serialize_polyvec_16le)
+#define mlk_deserialize_polyvec_16le \
+  MLK_ADD_PARAM_SET(mlk_deserialize_polyvec_16le)
 /* End of parameter set namespacing */
 
 /* Reference: Not implemented in the reference implementation @[REF]. */
@@ -369,6 +374,205 @@ cleanup:
 }
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
+#if defined(MLK_CONFIG_ENABLE_MLKEM_BRAID)
+
+/* 4-bit packing for noise polynomial e2.
+ * Coefficients in [-ETA2, ETA2] are stored as (ETA2 - x), fitting in 4 bits.
+ * Two coefficients per byte (low nibble first). */
+static void mlk_serialize_epp(uint8_t out[MLKEM_EPP_BYTES], const mlk_poly *p)
+{
+  unsigned j;
+  for (j = 0; j < MLKEM_N / 2; j++)
+  __loop__(
+    assigns(j, memory_slice(out, MLKEM_EPP_BYTES))
+    invariant(j <= MLKEM_N / 2)
+    decreases(MLKEM_N / 2 - j))
+  {
+    uint8_t lo = (uint8_t)(MLKEM_ETA2 - p->coeffs[2 * j]);
+    uint8_t hi = (uint8_t)(MLKEM_ETA2 - p->coeffs[2 * j + 1]);
+    out[j] = (uint8_t)((lo & 0xF) | (uint8_t)(hi << 4));
+  }
+}
+
+static void mlk_deserialize_epp(mlk_poly *p, const uint8_t in[MLKEM_EPP_BYTES])
+{
+  unsigned j;
+  for (j = 0; j < MLKEM_N / 2; j++)
+  __loop__(
+    assigns(j, memory_slice(p, sizeof(mlk_poly)))
+    invariant(j <= MLKEM_N / 2)
+    invariant(array_abs_bound(p->coeffs, 0, 2 * j, 16))
+    decreases(MLKEM_N / 2 - j))
+  {
+    p->coeffs[2 * j] = (int16_t)((int16_t)MLKEM_ETA2 - (int16_t)(in[j] & 0xF));
+    p->coeffs[2 * j + 1] =
+        (int16_t)((int16_t)MLKEM_ETA2 - (int16_t)(in[j] >> 4));
+  }
+}
+
+/* 16-bit little-endian serialization for intermediate polyvec state.
+ * Stores each int16_t coefficient as 2 bytes in LE order.
+ * Coefficients must be non-negative (e.g., after reduce). */
+static void mlk_serialize_polyvec_16le(uint8_t out[MLKEM_POLYVEC16_BYTES],
+                                       const mlk_polyvec *v)
+{
+  unsigned i, j;
+  for (i = 0; i < MLKEM_K; i++)
+  __loop__(
+    assigns(i, j, memory_slice(out, MLKEM_POLYVEC16_BYTES))
+    invariant(i <= MLKEM_K)
+    decreases(MLKEM_K - i))
+  {
+    for (j = 0; j < MLKEM_N; j++)
+    __loop__(
+      assigns(j, memory_slice(out, MLKEM_POLYVEC16_BYTES))
+      invariant(j <= MLKEM_N)
+      decreases(MLKEM_K - j))
+    {
+      uint16_t c = (uint16_t)v->vec[i].coeffs[j];
+      out[i * MLKEM_POLY16_BYTES + 2 * j] = (uint8_t)(c & 0xFF);
+      out[i * MLKEM_POLY16_BYTES + 2 * j + 1] = (uint8_t)(c >> 8);
+    }
+  }
+}
+
+static void mlk_deserialize_polyvec_16le(
+    mlk_polyvec *v, const uint8_t in[MLKEM_POLYVEC16_BYTES])
+{
+  unsigned i, j;
+  for (i = 0; i < MLKEM_K; i++)
+  __loop__(
+    assigns(i, j, memory_slice(v, sizeof(mlk_polyvec)))
+    invariant(i <= MLKEM_K)
+    decreases(MLKEM_K - i))
+  {
+    for (j = 0; j < MLKEM_N; j++)
+    __loop__(
+      assigns(j, memory_slice(v, sizeof(mlk_polyvec)))
+      invariant(j <= MLKEM_N)
+      decreases(MLKEM_K - j))
+    {
+      v->vec[i].coeffs[j] = mlk_cast_uint16_to_int16(
+          (uint16_t)((unsigned)in[i * MLKEM_POLY16_BYTES + 2 * j] |
+                     ((unsigned)in[i * MLKEM_POLY16_BYTES + 2 * j + 1] << 8)));
+    }
+  }
+}
+
+MLK_EXTERNAL_API
+int mlk_kem_enc_derand_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
+                         uint8_t ss[MLKEM_SSBYTES],
+                         uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
+                         uint8_t epp_serial[MLKEM_EPP_BYTES],
+                         const uint8_t seed[MLKEM_SYMBYTES],
+                         const uint8_t hpk[MLKEM_SYMBYTES],
+                         const uint8_t coins[MLKEM_SYMBYTES],
+                         MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+{
+  int ret = 0;
+  MLK_ALLOC(buf, uint8_t, 2 * MLKEM_SYMBYTES, context);
+  MLK_ALLOC(kr, uint8_t, 2 * MLKEM_SYMBYTES, context);
+  MLK_ALLOC(sp, mlk_polyvec, 1, context);
+  MLK_ALLOC(epp, mlk_poly, 1, context);
+  MLK_ALLOC(sp_cache, mlk_polyvec_mulcache, 1, context);
+
+  if (buf == NULL || kr == NULL || sp == NULL || epp == NULL ||
+      sp_cache == NULL)
+  {
+    ret = MLK_ERR_OUT_OF_MEMORY;
+    goto cleanup;
+  }
+
+  /* FO transform: (K, r) = G(coins || H(pk)) */
+  mlk_memcpy(buf, coins, MLKEM_SYMBYTES);
+  mlk_memcpy(buf + MLKEM_SYMBYTES, hpk, MLKEM_SYMBYTES);
+  mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
+
+  /* Compute ct_u using derived randomness r */
+  ret = mlk_indcpa_enc_u(ct_u, sp, epp, sp_cache, seed, kr + MLKEM_SYMBYTES,
+                         context);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
+
+  /* Reduce sp to unsigned canonical form before serialization */
+  mlk_polyvec_reduce(sp);
+
+  /* Serialize intermediate state */
+  mlk_serialize_polyvec_16le(sp_serial, sp);
+  mlk_serialize_epp(epp_serial, epp);
+
+  /* Shared secret K = first MLKEM_SYMBYTES bytes of G output */
+  mlk_memcpy(ss, kr, MLKEM_SYMBYTES);
+
+cleanup:
+  /* Specification: Partially implements
+   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
+  MLK_FREE(sp_cache, mlk_polyvec_mulcache, 1, context);
+  MLK_FREE(epp, mlk_poly, 1, context);
+  MLK_FREE(sp, mlk_polyvec, 1, context);
+  MLK_FREE(kr, uint8_t, 2 * MLKEM_SYMBYTES, context);
+  MLK_FREE(buf, uint8_t, 2 * MLKEM_SYMBYTES, context);
+  return ret;
+}
+
+MLK_EXTERNAL_API
+int mlk_kem_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
+                  const uint8_t sp_serial[MLKEM_POLYVEC16_BYTES],
+                  const uint8_t epp_serial[MLKEM_EPP_BYTES],
+                  const uint8_t coins[MLKEM_SYMBYTES],
+                  const uint8_t ek_vector[MLKEM_POLYVECBYTES],
+                  MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+{
+  int ret = 0;
+  MLK_ALLOC(sp, mlk_polyvec, 1, context);
+  MLK_ALLOC(epp, mlk_poly, 1, context);
+  MLK_ALLOC(sp_cache, mlk_polyvec_mulcache, 1, context);
+  MLK_ALLOC(p, mlk_polyvec, 1, context);
+  MLK_ALLOC(p_reencoded, uint8_t, MLKEM_POLYVECBYTES, context);
+
+  if (sp == NULL || epp == NULL || sp_cache == NULL || p == NULL ||
+      p_reencoded == NULL)
+  {
+    ret = MLK_ERR_OUT_OF_MEMORY;
+    goto cleanup;
+  }
+
+  /* Specification: Implements @[FIPS203, Section 7.2, Modulus check]
+   * on the public key vector ek_vector */
+  mlk_polyvec_frombytes(p, ek_vector);
+  mlk_polyvec_reduce(p);
+  mlk_polyvec_tobytes(p_reencoded, p);
+  ret = mlk_ct_memcmp(ek_vector, p_reencoded, MLKEM_POLYVECBYTES) ? MLK_ERR_FAIL
+                                                                  : 0;
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
+
+  /* Deserialize intermediate state */
+  mlk_deserialize_polyvec_16le(sp, sp_serial);
+  mlk_deserialize_epp(epp, epp_serial);
+
+  /* Compute mulcache for deserialized sp */
+  mlk_polyvec_mulcache_compute(sp_cache, sp);
+
+  ret = mlk_indcpa_enc_v(ct_v, sp, epp, sp_cache, coins, ek_vector, context);
+
+cleanup:
+  /* Specification: Partially implements
+   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
+  MLK_FREE(p_reencoded, uint8_t, MLKEM_POLYVECBYTES, context);
+  MLK_FREE(p, mlk_polyvec, 1, context);
+  MLK_FREE(sp_cache, mlk_polyvec_mulcache, 1, context);
+  MLK_FREE(epp, mlk_poly, 1, context);
+  MLK_FREE(sp, mlk_polyvec, 1, context);
+  return ret;
+}
+
+#endif /* MLK_CONFIG_ENABLE_MLKEM_BRAID */
+
 /* Reference: `crypto_kem_dec()` in the reference implementation @[REF]
  *            - We include secret key check
  *            - We include stack buffer zeroization */
@@ -444,3 +648,7 @@ cleanup:
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
 #undef mlk_check_pct
+#undef mlk_serialize_epp
+#undef mlk_deserialize_epp
+#undef mlk_serialize_polyvec_16le
+#undef mlk_deserialize_polyvec_16le

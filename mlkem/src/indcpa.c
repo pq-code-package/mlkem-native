@@ -29,10 +29,8 @@
  * of mlkem-native (e.g. with varying parameter sets)
  * within a single compilation unit. */
 #define mlk_pack_pk MLK_ADD_PARAM_SET(mlk_pack_pk)
-#define mlk_unpack_pk MLK_ADD_PARAM_SET(mlk_unpack_pk)
 #define mlk_pack_sk MLK_ADD_PARAM_SET(mlk_pack_sk)
 #define mlk_unpack_sk MLK_ADD_PARAM_SET(mlk_unpack_sk)
-#define mlk_pack_ciphertext MLK_ADD_PARAM_SET(mlk_pack_ciphertext)
 #define mlk_unpack_ciphertext MLK_ADD_PARAM_SET(mlk_unpack_ciphertext)
 #define mlk_matvec_mul MLK_ADD_PARAM_SET(mlk_matvec_mul)
 #define mlk_polyvec_permute_bitrev_to_custom \
@@ -40,7 +38,6 @@
 #define mlk_polymat_permute_bitrev_to_custom \
   MLK_ADD_PARAM_SET(mlk_polymat_permute_bitrev_to_custom)
 #define mlk_keypair_getnoise_eta1 MLK_ADD_PARAM_SET(mlk_keypair_getnoise_eta1)
-#define mlk_enc_getnoise_eta1_eta2 MLK_ADD_PARAM_SET(mlk_enc_getnoise_eta1_eta2)
 /* End of parameter set namespacing */
 
 /**
@@ -61,29 +58,6 @@ static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES],
   mlk_assert_bound_2d(pk->vec, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
   mlk_polyvec_tobytes(r, pk);
   mlk_memcpy(r + MLKEM_POLYVECBYTES, seed, MLKEM_SYMBYTES);
-}
-
-/**
- * De-serialize public key from a byte array; approximate inverse of
- * mlk_pack_pk.
- *
- * @spec{Implements @[FIPS203, Algorithm 14 (K-PKE.Encrypt), L2-3].}
- *
- * @param[out] pk       Output public-key polynomial vector. Coefficients
- *                      will be normalized to [0,1,..,MLKEM_Q-1].
- * @param[out] seed     Output seed to generate matrix A.
- * @param[in]  packedpk Input serialized public key.
- */
-static void mlk_unpack_pk(mlk_polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
-                          const uint8_t packedpk[MLKEM_INDCPA_PUBLICKEYBYTES])
-{
-  mlk_polyvec_frombytes(pk, packedpk);
-  mlk_memcpy(seed, packedpk + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
-
-  /* NOTE: If a modulus check was conducted on the PK, we know at this
-   * point that the coefficients of `pk` are unsigned canonical. The
-   * specifications and proofs, however, do _not_ assume this, and instead
-   * work with the easily provable bound by MLKEM_UINT12_LIMIT. */
 }
 
 /**
@@ -113,24 +87,6 @@ static void mlk_unpack_sk(mlk_polyvec *sk,
                           const uint8_t packedsk[MLKEM_INDCPA_SECRETKEYBYTES])
 {
   mlk_polyvec_frombytes(sk, packedsk);
-}
-
-/**
- * Serialize the ciphertext as the concatenation of the compressed and
- * serialized vector of polynomials b and the compressed and serialized
- * polynomial v.
- *
- * @spec{Implements @[FIPS203, Algorithm 14 (K-PKE.Encrypt), L22-23].}
- *
- * @param[out] r Output serialized ciphertext.
- * @param[in]  b Input vector of polynomials b.
- * @param[in]  v Input polynomial v.
- */
-static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES],
-                                const mlk_polyvec *b, mlk_poly *v)
-{
-  mlk_polyvec_compress_du(r, b);
-  mlk_poly_compress_dv(r + MLKEM_POLYVECCOMPRESSEDBYTES_DU, v);
 }
 
 /**
@@ -378,58 +334,6 @@ __contract__(
 #endif /* MLKEM_K == 4 */
 }
 
-/**
- * Compute and fill the sp, ep, and epp polynomial structures needed by
- * mlk_indcpa_enc(). Uses x4-batched versions of `poly_getnoise` to leverage
- * batched Keccak-f1600.
- *
- * @spec{Implements @[FIPS203, Algorithm 14 (K-PKE.Encrypt)] steps 9-16.}
- *
- * @param[out] sp    Output polynomial vector.
- * @param[out] ep    Output polynomial vector.
- * @param[out] epp   Output polynomial.
- * @param[in]  coins Seed bytes for sampling.
- */
-static void mlk_enc_getnoise_eta1_eta2(mlk_polyvec *sp, mlk_polyvec *ep,
-                                       mlk_poly *epp,
-                                       const uint8_t coins[MLKEM_SYMBYTES])
-__contract__(
-  requires(memory_no_alias(sp, sizeof(mlk_polyvec)))
-  requires(memory_no_alias(ep, sizeof(mlk_polyvec)))
-  requires(memory_no_alias(epp, sizeof(mlk_poly)))
-  requires(memory_no_alias(coins, MLKEM_SYMBYTES))
-  assigns(memory_slice(sp, sizeof(mlk_polyvec)))
-  assigns(memory_slice(ep, sizeof(mlk_polyvec)))
-  assigns(memory_slice(epp, sizeof(mlk_poly)))
-  ensures(forall(k0, 0, MLKEM_K, array_abs_bound(sp->vec[k0].coeffs, 0, MLKEM_N, MLKEM_ETA1 + 1)))
-  ensures(forall(k1, 0, MLKEM_K, array_abs_bound(ep->vec[k1].coeffs, 0, MLKEM_N, MLKEM_ETA2 + 1)))
-  ensures(array_abs_bound(epp->coeffs, 0, MLKEM_N, MLKEM_ETA2 + 1))
-)
-{
-#if MLKEM_K == 2
-  mlk_poly_getnoise_eta1122_4x(&sp->vec[0], &sp->vec[1], &ep->vec[0],
-                               &ep->vec[1], coins, 0, 1, 2, 3);
-  mlk_poly_getnoise_eta2(epp, coins, 4);
-#elif MLKEM_K == 3
-  /*
-   * In this call, only the first three output buffers are needed.
-   * The last parameter is a dummy that's overwritten later.
-   */
-  mlk_poly_getnoise_eta1_4x(&sp->vec[0], &sp->vec[1], &sp->vec[2], NULL, coins,
-                            0, 1, 2, 0xFF /* irrelevant */);
-  /* The fourth output buffer in this call _is_ used. */
-  mlk_poly_getnoise_eta2_4x(&ep->vec[0], &ep->vec[1], &ep->vec[2], epp, coins,
-                            3, 4, 5, 6);
-#elif MLKEM_K == 4
-  mlk_poly_getnoise_eta1_4x(&sp->vec[0], &sp->vec[1], &sp->vec[2], &sp->vec[3],
-                            coins, 0, 1, 2, 3);
-  mlk_poly_getnoise_eta2_4x(&ep->vec[0], &ep->vec[1], &ep->vec[2], &ep->vec[3],
-                            coins, 4, 5, 6, 7);
-  mlk_poly_getnoise_eta2(epp, coins, 8);
-#endif /* MLKEM_K == 4 */
-}
-
-
 /* Reference: `indcpa_keypair_derand()` in the reference implementation @[REF].
  *            - We use a different implementation of `gen_matrix()` which
  *              uses x4-batched Keccak-f1600 (see `mlk_gen_matrix()` above).
@@ -508,42 +412,28 @@ cleanup:
   return ret;
 }
 
-/* Reference: `indcpa_enc()` in the reference implementation @[REF].
- *            - We use x4-batched versions of `poly_getnoise` to leverage
- *              batched x4-batched Keccak-f1600.
- *            - We use a different implementation of `gen_matrix()` which
- *              uses x4-batched Keccak-f1600 (see `mlk_gen_matrix()` above).
- *            - We use a mulcache to speed up matrix-vector multiplication.
- *            - We include buffer zeroization.
- */
+#if defined(MLK_CONFIG_ENABLE_MLKEM_BRAID)
 MLK_INTERNAL_API
-int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
-                   const uint8_t m[MLKEM_INDCPA_MSGBYTES],
-                   const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                   const uint8_t coins[MLKEM_SYMBYTES],
-                   MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+#else
+static MLK_ALWAYS_INLINE
+#endif
+int mlk_indcpa_enc_u(uint8_t ct_u[MLKEM_POLYVECCOMPRESSEDBYTES_DU],
+                     mlk_polyvec *sp, mlk_poly *epp,
+                     mlk_polyvec_mulcache *sp_cache,
+                     const uint8_t seed[MLKEM_SYMBYTES],
+                     const uint8_t coins[MLKEM_SYMBYTES],
+                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   int ret = 0;
-  MLK_ALLOC(seed, uint8_t, MLKEM_SYMBYTES, context);
   MLK_ALLOC(at, mlk_polymat, 1, context);
-  MLK_ALLOC(sp, mlk_polyvec, 1, context);
-  MLK_ALLOC(pkpv, mlk_polyvec, 1, context);
   MLK_ALLOC(ep, mlk_polyvec, 1, context);
   MLK_ALLOC(b, mlk_polyvec, 1, context);
-  MLK_ALLOC(v, mlk_poly, 1, context);
-  MLK_ALLOC(k, mlk_poly, 1, context);
-  MLK_ALLOC(epp, mlk_poly, 1, context);
-  MLK_ALLOC(sp_cache, mlk_polyvec_mulcache, 1, context);
 
-  if (seed == NULL || at == NULL || sp == NULL || pkpv == NULL || ep == NULL ||
-      b == NULL || v == NULL || k == NULL || epp == NULL || sp_cache == NULL)
+  if (at == NULL || ep == NULL || b == NULL)
   {
     ret = MLK_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
-
-  mlk_unpack_pk(pkpv, seed, pk);
-  mlk_poly_frommsg(k, m);
 
   /*
    * Declassify the public seed.
@@ -555,39 +445,134 @@ int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
 
   mlk_gen_matrix(at, seed, 1 /* transpose */);
 
-  mlk_enc_getnoise_eta1_eta2(sp, ep, epp, coins);
+#if MLKEM_K == 2
+  mlk_poly_getnoise_eta1122_4x(&sp->vec[0], &sp->vec[1], &ep->vec[0],
+                               &ep->vec[1], coins, 0, 1, 2, 3);
+  mlk_poly_getnoise_eta2(epp, coins, 4);
+#elif MLKEM_K == 3
+  /*
+   * In this call, only the first three output buffers are needed.
+   * The last parameter is a dummy that's overwritten later.
+   */
+  mlk_poly_getnoise_eta1_4x(&sp->vec[0], &sp->vec[1], &sp->vec[2], NULL, coins,
+                            0, 1, 2, 0xFF /* irrelevant */);
+  /* The fourth output buffer in this call _is_ used. */
+  mlk_poly_getnoise_eta2_4x(&ep->vec[0], &ep->vec[1], &ep->vec[2], epp, coins,
+                            3, 4, 5, 6);
+#elif MLKEM_K == 4
+  mlk_poly_getnoise_eta1_4x(&sp->vec[0], &sp->vec[1], &sp->vec[2], &sp->vec[3],
+                            coins, 0, 1, 2, 3);
+  mlk_poly_getnoise_eta2_4x(&ep->vec[0], &ep->vec[1], &ep->vec[2], &ep->vec[3],
+                            coins, 4, 5, 6, 7);
+  mlk_poly_getnoise_eta2(epp, coins, 8);
+#endif /* MLKEM_K == 4 */
 
   mlk_polyvec_ntt(sp);
 
   mlk_polyvec_mulcache_compute(sp_cache, sp);
   mlk_matvec_mul(b, at, sp, sp_cache);
-  mlk_polyvec_basemul_acc_montgomery_cached(v, pkpv, sp, sp_cache);
 
   mlk_polyvec_invntt_tomont(b);
-  mlk_poly_invntt_tomont(v);
 
   mlk_polyvec_add(b, ep);
+  mlk_polyvec_reduce(b);
+
+  mlk_polyvec_compress_du(ct_u, b);
+
+cleanup:
+  /* Specification: Partially implements
+   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
+  MLK_FREE(b, mlk_polyvec, 1, context);
+  MLK_FREE(ep, mlk_polyvec, 1, context);
+  MLK_FREE(at, mlk_polymat, 1, context);
+  return ret;
+}
+
+#if defined(MLK_CONFIG_ENABLE_MLKEM_BRAID)
+MLK_INTERNAL_API
+#else
+static MLK_ALWAYS_INLINE
+#endif
+int mlk_indcpa_enc_v(uint8_t ct_v[MLKEM_POLYCOMPRESSEDBYTES_DV],
+                     const mlk_polyvec *sp, const mlk_poly *epp,
+                     const mlk_polyvec_mulcache *sp_cache,
+                     const uint8_t m[MLKEM_INDCPA_MSGBYTES],
+                     const uint8_t ek_vector[MLKEM_POLYVECBYTES],
+                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+{
+  int ret = 0;
+  MLK_ALLOC(pkpv, mlk_polyvec, 1, context);
+  MLK_ALLOC(v, mlk_poly, 1, context);
+  MLK_ALLOC(k, mlk_poly, 1, context);
+
+  if (pkpv == NULL || v == NULL || k == NULL)
+  {
+    ret = MLK_ERR_OUT_OF_MEMORY;
+    goto cleanup;
+  }
+
+  mlk_polyvec_frombytes(pkpv, ek_vector);
+  mlk_poly_frommsg(k, m);
+
+  mlk_polyvec_basemul_acc_montgomery_cached(v, pkpv, sp, sp_cache);
+
+  mlk_poly_invntt_tomont(v);
+
   mlk_poly_add(v, epp);
   mlk_poly_add(v, k);
-
-  mlk_polyvec_reduce(b);
   mlk_poly_reduce(v);
 
-  mlk_pack_ciphertext(c, b, v);
+  mlk_poly_compress_dv(ct_v, v);
+
+cleanup:
+  /* Specification: Partially implements
+   * @[FIPS203, Section 3.3, Destruction of intermediate values] */
+  MLK_FREE(k, mlk_poly, 1, context);
+  MLK_FREE(v, mlk_poly, 1, context);
+  MLK_FREE(pkpv, mlk_polyvec, 1, context);
+  return ret;
+}
+
+/* Reference: `indcpa_enc()` in the reference implementation @[REF].
+ *            Implemented as a composition of mlk_indcpa_enc_u and
+ *            mlk_indcpa_enc_v.
+ */
+MLK_INTERNAL_API
+int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
+                   const uint8_t m[MLKEM_INDCPA_MSGBYTES],
+                   const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
+                   const uint8_t coins[MLKEM_SYMBYTES],
+                   MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+{
+  int ret = 0;
+  MLK_ALLOC(sp, mlk_polyvec, 1, context);
+  MLK_ALLOC(epp, mlk_poly, 1, context);
+  MLK_ALLOC(sp_cache, mlk_polyvec_mulcache, 1, context);
+
+  if (sp == NULL || epp == NULL || sp_cache == NULL)
+  {
+    ret = MLK_ERR_OUT_OF_MEMORY;
+    goto cleanup;
+  }
+
+  /* Phase 1: compute ct_u and intermediate state (sp, epp, sp_cache) */
+  ret = mlk_indcpa_enc_u(c, sp, epp, sp_cache, pk + MLKEM_POLYVECBYTES, coins,
+                         context);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
+
+  /* Phase 2: compute ct_v using intermediate state */
+  ret = mlk_indcpa_enc_v(c + MLKEM_POLYVECCOMPRESSEDBYTES_DU, sp, epp, sp_cache,
+                         m, pk, context);
 
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   MLK_FREE(sp_cache, mlk_polyvec_mulcache, 1, context);
   MLK_FREE(epp, mlk_poly, 1, context);
-  MLK_FREE(k, mlk_poly, 1, context);
-  MLK_FREE(v, mlk_poly, 1, context);
-  MLK_FREE(b, mlk_polyvec, 1, context);
-  MLK_FREE(ep, mlk_polyvec, 1, context);
-  MLK_FREE(pkpv, mlk_polyvec, 1, context);
   MLK_FREE(sp, mlk_polyvec, 1, context);
-  MLK_FREE(at, mlk_polymat, 1, context);
-  MLK_FREE(seed, uint8_t, MLKEM_SYMBYTES, context);
   return ret;
 }
 
@@ -640,13 +625,10 @@ cleanup:
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
 #undef mlk_pack_pk
-#undef mlk_unpack_pk
 #undef mlk_pack_sk
 #undef mlk_unpack_sk
-#undef mlk_pack_ciphertext
 #undef mlk_unpack_ciphertext
 #undef mlk_matvec_mul
 #undef mlk_polyvec_permute_bitrev_to_custom
 #undef mlk_polymat_permute_bitrev_to_custom
 #undef mlk_keypair_getnoise_eta1
-#undef mlk_enc_getnoise_eta1_eta2

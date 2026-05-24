@@ -1,0 +1,27 @@
+diff --git a/sw/device/lib/crypto/include/mlkem.h b/sw/device/lib/crypto/include/mlkem.h
+index ee8c531..00f0887 100644
+--- a/sw/device/lib/crypto/include/mlkem.h
++++ b/sw/device/lib/crypto/include/mlkem.h
+@@ -33,16 +33,16 @@ enum {
+ 
+   // Work buffer sizes in 32-bit words
+   kOtcryptoMlkem512WorkBufferKeypairWords = 5824 / sizeof(uint32_t),
+-  kOtcryptoMlkem512WorkBufferEncapsWords = 8384 / sizeof(uint32_t),
+-  kOtcryptoMlkem512WorkBufferDecapsWords = 9152 / sizeof(uint32_t),
++  kOtcryptoMlkem512WorkBufferEncapsWords = 6304 / sizeof(uint32_t),
++  kOtcryptoMlkem512WorkBufferDecapsWords = 7072 / sizeof(uint32_t),
+ 
+   kOtcryptoMlkem768WorkBufferKeypairWords = 10176 / sizeof(uint32_t),
+-  kOtcryptoMlkem768WorkBufferEncapsWords = 13248 / sizeof(uint32_t),
+-  kOtcryptoMlkem768WorkBufferDecapsWords = 14336 / sizeof(uint32_t),
++  kOtcryptoMlkem768WorkBufferEncapsWords = 10656 / sizeof(uint32_t),
++  kOtcryptoMlkem768WorkBufferDecapsWords = 11744 / sizeof(uint32_t),
+ 
+   kOtcryptoMlkem1024WorkBufferKeypairWords = 15552 / sizeof(uint32_t),
+-  kOtcryptoMlkem1024WorkBufferEncapsWords = 19136 / sizeof(uint32_t),
+-  kOtcryptoMlkem1024WorkBufferDecapsWords = 20704 / sizeof(uint32_t),
++  kOtcryptoMlkem1024WorkBufferEncapsWords = 16032 / sizeof(uint32_t),
++  kOtcryptoMlkem1024WorkBufferDecapsWords = 17600 / sizeof(uint32_t),
+ };
+ 
+ /**

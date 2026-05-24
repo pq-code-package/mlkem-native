@@ -25,11 +25,12 @@
  */
 
 /*
- * Test configuration: Test configuration with heap-based allocation
+ * Test configuration: Enable ML-KEM Braid API
  *
  * This configuration differs from the default mlkem/mlkem_native_config.h in
  * the following places:
- *   - MLK_CONFIG_CUSTOM_ALLOC_FREE
+ *   - MLK_CONFIG_NAMESPACE_PREFIX
+ *   - MLK_CONFIG_ENABLE_MLKEM_BRAID
  */
 
 
@@ -67,6 +68,7 @@
  * mlkem-native headers. For example, it can be set by passing
  * `-DMLK_CONFIG_FILE="..."` on the command line.
  */
+/* No need to set this -- we _are_ already in a custom config */
 /* #define MLK_CONFIG_FILE "mlkem_native_config.h" */
 
 /**
@@ -77,9 +79,7 @@
  *
  * This can also be set using CFLAGS.
  */
-#if !defined(MLK_CONFIG_NAMESPACE_PREFIX)
-#define MLK_CONFIG_NAMESPACE_PREFIX MLK_DEFAULT_NAMESPACE_PREFIX
-#endif
+#define MLK_CONFIG_NAMESPACE_PREFIX mlk
 
 /**
  * MLK_CONFIG_MULTILEVEL_BUILD
@@ -159,7 +159,7 @@
  *              needed for the ML-KEM Braid protocol.
  *
  *****************************************************************************/
-/* #define MLK_CONFIG_ENABLE_MLKEM_BRAID */
+#define MLK_CONFIG_ENABLE_MLKEM_BRAID
 
 /******************************************************************************
  *
@@ -459,33 +459,15 @@
  *       simply be set to NULL. The calling code will handle this case and
  *       invoke MLK_CUSTOM_FREE.
  */
-/* In practice, one could just use aligned_alloc here. However, this
- * requires aligning up the size to a multiple of the alignment, which
- * weakens some of the memory-safety tests we run using this config. */
-#define MLK_CONFIG_CUSTOM_ALLOC_FREE
-#if !defined(__ASSEMBLER__)
-#if defined(_WIN32)
-#include <malloc.h>
-#define MLK_CUSTOM_ALLOC(v, T, N) \
-  T *v = (T *)_aligned_malloc(sizeof(T) * (N), MLK_DEFAULT_ALIGN)
-#define MLK_CUSTOM_FREE(v, T, N) _aligned_free(v)
-#else /* _WIN32 */
-#include <stdlib.h>
-static inline void *mlk_posix_memalign(size_t align, size_t sz)
-{
-  void *ptr = NULL;
-  if (posix_memalign(&ptr, align, sz) != 0)
-  {
-    return NULL;
-  }
-  return ptr;
-}
-#define MLK_CUSTOM_ALLOC(v, T, N) \
-  T *v = (T *)mlk_posix_memalign(MLK_DEFAULT_ALIGN, sizeof(T) * (N))
-#define MLK_CUSTOM_FREE(v, T, N) free(v)
-#endif /* !_WIN32 */
-#endif /* !__ASSEMBLER__ */
-
+/* #define MLK_CONFIG_CUSTOM_ALLOC_FREE
+   #if !defined(__ASSEMBLER__)
+   #include <stdlib.h>
+   #define MLK_CUSTOM_ALLOC(v, T, N)                              \
+     T* (v) = (T *)aligned_alloc(MLK_DEFAULT_ALIGN,               \
+                                 MLK_ALIGN_UP(sizeof(T) * (N)))
+   #define MLK_CUSTOM_FREE(v, T, N) free(v)
+   #endif
+*/
 
 /**
  * MLK_CONFIG_CUSTOM_MEMCPY
