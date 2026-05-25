@@ -26,12 +26,12 @@ buildEnv {
       litani = callPackage ./litani.nix { }; # 1.29.0
       cbmc-viewer = callPackage ./cbmc-viewer.nix { }; # 3.12
       z3 = z3.overrideAttrs (_: {
-        version = "4.15.3";
+        version = "4.16.0";
         src = fetchFromGitHub {
           owner = "Z3Prover";
           repo = "z3";
-          rev = "z3-4.15.3";
-          hash = "sha256-Lw037Z0t0ySxkgMXkbjNW5CB4QQLRrrSEBsLJqiomZ4=";
+          rev = "z3-4.16.0";
+          hash = "sha256-DnhX3kxggnFmyYwXEPBsBA1rh4oor1oIJR5TMJk/jvc=";
         };
       });
 
