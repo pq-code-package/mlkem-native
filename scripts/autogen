@@ -1032,6 +1032,7 @@ def gen_aarch64_zeta_file():
     def gen():
         yield from gen_header()
         yield '#include "../../../common.h"'
+        yield '#include "../../../backends.h"'
         yield ""
         yield "#if defined(MLK_ARITH_BACKEND_AARCH64) && \\"
         yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
@@ -1133,6 +1134,7 @@ def gen_aarch64_rej_uniform_table():
     def gen():
         yield from gen_header()
         yield '#include "../../../common.h"'
+        yield '#include "../../../backends.h"'
         yield ""
         yield "#if defined(MLK_ARITH_BACKEND_AARCH64) && \\"
         yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
@@ -1186,6 +1188,7 @@ def gen_avx2_rej_uniform_table():
     def gen():
         yield from gen_header()
         yield '#include "../../../common.h"'
+        yield '#include "../../../backends.h"'
         yield ""
         yield "#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \\"
         yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
@@ -1620,6 +1623,7 @@ def gen_avx2_compress_consts_file():
     def gen_c():
         yield from gen_header()
         yield '#include "../../../common.h"'
+        yield '#include "../../../backends.h"'
         yield ""
         yield "#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT)"
         yield ""
@@ -1796,6 +1800,7 @@ def gen_aarch64_keccak_constants_c_file():
     def gen_c():
         yield from gen_header()
         yield '#include "../../../../common.h"'
+        yield '#include "../../../../backends.h"'
         yield ""
         yield "#if (defined(MLK_FIPS202_AARCH64_NEED_X1_SCALAR) ||                  \\"
         yield "     defined(MLK_FIPS202_AARCH64_NEED_X1_V84A) ||                    \\"
@@ -1838,6 +1843,7 @@ def gen_avx2_keccak_constants_c_file():
     def gen_c():
         yield from gen_header()
         yield '#include "../../../../common.h"'
+        yield '#include "../../../../backends.h"'
         yield "#if defined(MLK_FIPS202_X86_64_NEED_X4_AVX2) && \\"
         yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
         yield ""
@@ -1913,6 +1919,7 @@ def gen_avx2_zeta_file():
     def gen_c():
         yield from gen_header()
         yield '#include "../../../common.h"'
+        yield '#include "../../../backends.h"'
         yield ""
         yield "#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \\"
         yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
@@ -2667,6 +2674,7 @@ def check_macro_typos():
             return True
 
         is_autogen = filename == "scripts/autogen"
+        is_lint = filename == "scripts/lint"
 
         # Exclude system capabilities, which are enum values
         if m in syscaps:
@@ -2675,6 +2683,11 @@ def check_macro_typos():
         #
         # Register some file-specific exceptions
         #
+
+        # Lint refers to MLK_USE_NATIVE_XXX in the backend header include check
+        if is_lint:
+            if m.startswith("MLK_USE_"):
+                return True
 
         # Makefiles use MLK_SOURCE_XXX to list source files
         if is_autogen or filename.endswith("/Makefile"):
@@ -2697,7 +2710,10 @@ def check_macro_typos():
                 return True
 
         # AWS-LC importer patch
-        if is_autogen or filename == "integration/awslc/awslc.patch":
+        if is_autogen or filename in [
+            "integration/aws-lc/pre_import.patch",
+            "integration/aws-lc/post_import.patch",
+        ]:
             return True
 
         if is_autogen or filename == "mlkem/src/common.h":

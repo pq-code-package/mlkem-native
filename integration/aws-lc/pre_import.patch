@@ -1,10 +1,25 @@
 diff --git a/crypto/fipsmodule/ml_kem/importer.sh b/crypto/fipsmodule/ml_kem/importer.sh
 --- a/crypto/fipsmodule/ml_kem/importer.sh
 +++ b/crypto/fipsmodule/ml_kem/importer.sh
-@@ -151,6 +151,48 @@
+@@ -143,6 +143,14 @@ for file in $SRC/native/aarch64/src/*.S $SRC/native/x86_64/src/*.S; do
+   s2n_header=$(if [[ "$file" == *"aarch64"* ]]; then echo "_internal_s2n_bignum_arm.h"; else echo "_internal_s2n_bignum_x86_att.h"; fi)
+   sed "${SED_I[@]}" "s/#include \"\.\.\/\.\.\/\.\.\/common\.h\"/#include \"$s2n_header\"/" "$file"
+
++  # Drop the backends.h include. In mlkem-native it surfaces the
++  # MLK_ARITH_BACKEND_* gate macro to the asm sources, but unifdef above
++  # has already statically resolved that gate, so the include has nothing
++  # left to provide here. Leaving it in would also break the build, since
++  # the relative path (../../../backends.h) does not resolve in the
++  # AWS-LC vendored layout.
++  sed "${SED_I[@]}" '/^#include "\.\.\/\.\.\/\.\.\/backends\.h"$/d' "$file"
++
+   func_name=$(grep -o '\.global MLK_ASM_NAMESPACE(\([^)]*\))' "$file" | sed 's/\.global MLK_ASM_NAMESPACE(\([^)]*\))/\1/')
+   if [ -n "$func_name" ]; then
+     sed "${SED_I[@]}" "s/\.global MLK_ASM_NAMESPACE($func_name)/        S2N_BN_SYM_VISIBILITY_DIRECTIVE(mlkem_$func_name)\n        S2N_BN_SYM_PRIVACY_DIRECTIVE(mlkem_$func_name)/" "$file"
+@@ -151,6 +159,48 @@ for file in $SRC/native/aarch64/src/*.S $SRC/native/x86_64/src/*.S; do
    fi
  done
- 
+
 +# Rewrite asm filenames in AWS-LC's crypto/fipsmodule/CMakeLists.txt to match the names exported by the imported mlkem-native tree. Remove once AWS-LC lists the post-unification filenames directly.
 +CMAKE=../CMakeLists.txt
 +if [ -f "$CMAKE" ] && grep -q 'aarch64/src/ntt\.S' "$CMAKE"; then
@@ -49,4 +64,4 @@ diff --git a/crypto/fipsmodule/ml_kem/importer.sh b/crypto/fipsmodule/ml_kem/imp
 +
  echo "Remove temporary artifacts ..."
  rm -rf $TMP
- 
+

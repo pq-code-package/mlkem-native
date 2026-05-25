@@ -24,6 +24,7 @@
 
 #include "poly_k.h"
 
+#include "backends.h"
 #include "debug.h"
 #include "sampling.h"
 #include "symmetric.h"

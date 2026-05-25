@@ -5,6 +5,7 @@
 
 /* === ML-KEM NTT using RISC-V Vector intrinstics */
 
+#include "../../../backends.h"
 #include "../../../common.h"
 
 #if defined(MLK_ARITH_BACKEND_RISCV64) && \
