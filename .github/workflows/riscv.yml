@@ -1,0 +1,38 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: RISC-V
+permissions:
+  contents: read
+on:
+  workflow_call:
+  workflow_dispatch:
+jobs:
+  quickcheck:
+    name: Quickcheck (riscv)
+    # via https://riseproject-dev.github.io/riscv-runner/
+    runs-on: ubuntu-24.04-riscv
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: make quickcheck
+        run: |
+          OPT=0 make quickcheck
+          make clean >/dev/null
+          OPT=1 make quickcheck
+      - uses: ./.github/actions/setup-os
+      - name: tests func
+        run: |
+          ./scripts/tests func --check-namespace
+  quickcheck-acvp:
+    name: Quickcheck ACVP (riscv, ${{ matrix.acvp-version }})
+    strategy:
+      fail-fast: false
+      matrix:
+        acvp-version: [v1.1.0.40, v1.1.0.41, v1.1.0.42]
+    # via https://riseproject-dev.github.io/riscv-runner/
+    runs-on: ubuntu-24.04-riscv
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Run ACVP test
+        run: |
+          ./scripts/tests acvp --version ${{ matrix.acvp-version }}
