@@ -1,7 +1,7 @@
 # Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-name: OpenTitan
+name: Pavona
 permissions:
   contents: read
 on:
@@ -11,7 +11,7 @@ on:
 env:
   AWS_ROLE: arn:aws:iam::559050233797:role/mlkem-c-aarch64-gh-action
   AWS_REGION: us-east-1
-  AMI_UBUNTU_22_04_X86_64: ami-0bbdd8c17ed981ef9
+  AMI_UBUNTU_X86_64: ami-05cf1e9f73fbad2e2 # Ubuntu 24.04 LTS (2026-04-24)
 
 jobs:
   start-ec2-runner:
@@ -42,28 +42,28 @@ jobs:
           ec2-instance-type: c7i.2xlarge
           ec2-volume-size: 32
           availability-zones-config: >-
-            [{"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-07b2729e5e065962f","securityGroupId":"sg-0ab2e297196c8c381"},
-             {"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-0c7739cbd02c2c1d2","securityGroupId":"sg-0ab2e297196c8c381"},
-             {"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-0d69987f97f50fc1d","securityGroupId":"sg-0ab2e297196c8c381"},
-             {"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-0d077bf47a0eef46e","securityGroupId":"sg-0ab2e297196c8c381"},
-             {"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-0019f164593f6df43","securityGroupId":"sg-0ab2e297196c8c381"},
-             {"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-0f0d1e7667a264a0e","securityGroupId":"sg-0ab2e297196c8c381"}]
+            [{"imageId":"${{ env.AMI_UBUNTU_X86_64 }}","subnetId":"subnet-07b2729e5e065962f","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ env.AMI_UBUNTU_X86_64 }}","subnetId":"subnet-0c7739cbd02c2c1d2","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ env.AMI_UBUNTU_X86_64 }}","subnetId":"subnet-0d69987f97f50fc1d","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ env.AMI_UBUNTU_X86_64 }}","subnetId":"subnet-0d077bf47a0eef46e","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ env.AMI_UBUNTU_X86_64 }}","subnetId":"subnet-0019f164593f6df43","securityGroupId":"sg-0ab2e297196c8c381"},
+             {"imageId":"${{ env.AMI_UBUNTU_X86_64 }}","subnetId":"subnet-0f0d1e7667a264a0e","securityGroupId":"sg-0ab2e297196c8c381"}]
 
-  opentitan_test:
-    name: OpenTitan ML-KEM Test (verilator)
+  pavona_test:
+    name: Pavona ML-KEM Test (verilator)
     needs: start-ec2-runner
     if: ${{ github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }}
     runs-on: ${{ needs.start-ec2-runner.outputs.label }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: ./.github/actions/setup-opentitan
+      - uses: ./.github/actions/setup-pavona
         with:
-          expo-repository: https://github.com/zerorisc/expo
-          expo-commit: 53619a73e64cb96ee6e61a4b4b992f7250ab7477
+          pavona-repository: https://github.com/pavona/pavona
+          pavona-commit: release/2026.05.p0
 
       - name: Patch mlkem-native dependency
         run: |
-          cd "$EXPO_DIR"
+          cd "$PAVONA_DIR"
 
           # Calculate sha256 of mlkem-native at the new commit
           SHA256=$(curl -sL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | sha256sum | cut -d' ' -f1)
@@ -81,13 +81,13 @@ jobs:
 
       - name: Patch functest to only test deterministic API
         run: |
-          cd "$EXPO_DIR"
+          cd "$PAVONA_DIR"
           # speed-up tests in CI by only running deterministic tests
-          git apply "$GITHUB_WORKSPACE/integration/opentitan/derand-only.patch"
+          git apply "$GITHUB_WORKSPACE/integration/pavona/derand-only.patch"
 
       - name: Run mlkem functest
         run: |
-          cd "$EXPO_DIR"
+          cd "$PAVONA_DIR"
           # Run the test
           ./bazelisk.sh test \
             --test_output=streamed \
@@ -102,7 +102,7 @@ jobs:
       id-token: 'write'
     needs:
       - start-ec2-runner
-      - opentitan_test # required to wait when the main job is done
+      - pavona_test # required to wait when the main job is done
     runs-on: ubuntu-latest
     if: ${{ always() && github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }} # required to stop the runner even if errors occur
     steps:
