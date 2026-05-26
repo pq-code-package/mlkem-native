@@ -29,33 +29,61 @@
 #include "verify.h"
 
 /**
- * Montgomery multiplication modulo MLKEM_Q.
+ * Montgomery multiplication modulo MLKEM_Q with precomputed twist.
  *
  * @reference{`fqmul()` in the reference implementation @[REF].}
  *
- * @param a First factor. Can be any int16_t.
- * @param b Second factor. Must be signed canonical
- *          (abs value < (MLKEM_Q+1)/2).
+ * @param a         First factor. Can be any int16_t.
+ * @param b         Second factor. Must be signed canonical
+ *                  (abs value < (MLKEM_Q+1)/2).
+ * @param b_twisted Precomputed `b * MLKEM_Q^{-1} mod 2^16` (signed canonical).
  *
  * @return 16-bit integer congruent to a*b*R^{-1} mod MLKEM_Q, and
  *         smaller than MLKEM_Q in absolute value.
  */
-static MLK_INLINE int16_t mlk_fqmul(int16_t a, int16_t b)
+static MLK_INLINE int16_t mlk_fqmul(int16_t a, int16_t b, int16_t b_twisted)
 __contract__(
   requires(b > -MLKEM_Q_HALF && b < MLKEM_Q_HALF)
   ensures(return_value > -MLKEM_Q && return_value < MLKEM_Q)
 )
 {
-  int16_t res;
+  uint16_t lo0;
+  int16_t res, hi, lo, correction;
   mlk_assert_abs_bound(&b, 1, MLKEM_Q_HALF);
 
-  res = mlk_montgomery_reduce((int32_t)a * (int32_t)b);
+  /* High 16 bits of the signed product a * b. */
+  hi = (int16_t)(((int32_t)a * b) >> 16);
+  /* Low 16 bits of a * b_twisted (== a * b * MLKEM_Q^{-1} mod 2^16).
+   * This is just a 16x16->16 bit low multiplication, but we express
+   * it as a 16x16->32 widening multiplication with an explicit truncation
+   * to avoid unsigned overflow errors from CBMC. The compiler will be smart
+   * enough to realize to optimize this away. */
+  lo0 = (uint16_t)(((uint32_t)mlk_cast_int16_to_uint16(a) *
+                    mlk_cast_int16_to_uint16(b_twisted)) &
+                   UINT16_MAX);
+  /* Lift low product to signed (!) 16-bit integer */
+  lo = mlk_cast_uint16_to_int16(lo0);
+
+  /* 16x16->16 bit high multiplication
+   *
+   * PORTABILITY: Right-shift on a signed integer is, strictly-speaking,
+   * implementation-defined for negative left argument. Here,
+   * we assume it's sign-preserving "arithmetic" shift right. (C99 6.5.7 (5))
+   *
+   * Bounds: |correction| <= ceil(2^15 * MLKEM_Q / 2^16) = (MLKEM_Q + 1)/2
+   *
+   * Safety: The bounds argument above demonstrates that the truncation is safe.
+   */
+  correction = (int16_t)(((int32_t)lo * MLKEM_Q) >> 16);
+
   /* Bounds:
-   * |res| <= ceil(|a| * |b| / 2^16) + (MLKEM_Q + 1) / 2
+   * |res| <= |hi| + |correction|
+   *       <= ceil(|a| * |b| / 2^16) + (MLKEM_Q + 1) / 2
    *       <= ceil(2^15 * ((MLKEM_Q - 1)/2) / 2^16) + (MLKEM_Q + 1) / 2
    *       <= ceil((MLKEM_Q - 1) / 4) + (MLKEM_Q + 1) / 2
    *        < MLKEM_Q
    */
+  res = (int16_t)(hi - correction);
 
   mlk_assert_abs_bound(&res, 1, MLKEM_Q);
   return res;
@@ -115,13 +143,16 @@ __contract__(
 {
   unsigned i;
   const int16_t f = 1353; /* check-magic: 1353 == signed_mod(2^32, MLKEM_Q) */
+  /* check-magic:
+       20553 == signed_mod(1353 * pow(MLKEM_Q, -1, 2^16), 2^16) */
+  const int16_t f_twisted = 20553;
   for (i = 0; i < MLKEM_N; i++)
   __loop__(
     invariant(i <= MLKEM_N)
     invariant(array_abs_bound(r->coeffs, 0, i, MLKEM_Q))
     decreases(MLKEM_N - i))
   {
-    r->coeffs[i] = mlk_fqmul(r->coeffs[i], f);
+    r->coeffs[i] = mlk_fqmul(r->coeffs[i], f, f_twisted);
   }
 
   mlk_assert_abs_bound(r, MLKEM_N, MLKEM_Q);
@@ -281,11 +312,13 @@ __contract__(
     invariant(array_abs_bound(x->coeffs, 0, 2 * i, MLKEM_Q))
     decreases(MLKEM_N / 4 - i))
   {
-    x->coeffs[2 * i + 0] = mlk_fqmul(a->coeffs[4 * i + 1], mlk_zetas[64 + i]);
+    const int16_t z = mlk_zetas[64 + i][0];
+    const int16_t z_t = mlk_zetas[64 + i][1];
+    x->coeffs[2 * i + 0] = mlk_fqmul(a->coeffs[4 * i + 1], z, z_t);
     /* The values in zeta table are <= MLKEM_Q in absolute value,
      * so the negation in int16_t is safe. */
     x->coeffs[2 * i + 1] =
-        mlk_fqmul(a->coeffs[4 * i + 3], (int16_t)(-mlk_zetas[64 + i]));
+        mlk_fqmul(a->coeffs[4 * i + 3], (int16_t)(-z), (int16_t)(-z_t));
   }
 
   /*
@@ -312,37 +345,133 @@ void mlk_poly_mulcache_compute(mlk_poly_mulcache *x, const mlk_poly *a)
   mlk_poly_mulcache_compute_c(x, a);
 }
 
+/* Cooley-Tukey butterfly */
+static MLK_INLINE void mlk_ct_butterfly(int16_t r[MLKEM_N], unsigned i,
+                                        unsigned j, int16_t z, int16_t zt)
+{
+  const int16_t t = mlk_fqmul(r[j], z, zt);
+  r[j] = (int16_t)(r[i] - t);
+  r[i] = (int16_t)(r[i] + t);
+}
+
+/* Gentleman-Sande butterfly without reduction.
+ *
+ * The twiddles `z`, `zt` are implicitly negated: we compute `b - a` instead
+ * of `a - b`, which is equivalent to multiplying by `-z`.
+ */
+static MLK_INLINE void mlk_gs_butterfly(int16_t r[MLKEM_N], unsigned i,
+                                        unsigned j, int16_t z, int16_t zt)
+{
+  const int16_t a = r[i];
+  const int16_t b = r[j];
+  r[i] = (int16_t)(a + b);
+  r[j] = mlk_fqmul((int16_t)(b - a), z, zt);
+}
+
 /*
- * Computes a block CT butterflies with a fixed twiddle factor,
- * using Montgomery multiplication.
- * Parameters:
- * - r: Pointer to base of polynomial (_not_ the base of butterfly block)
- * - root: Twiddle factor to use for the butterfly. This must be in
- *         Montgomery form and signed canonical.
- * - start: Offset to the beginning of the butterfly block
- * - len: Index difference between coefficients subject to a butterfly
- * - bound: Ghost variable describing coefficient bound: Prior to `start`,
- *          coefficients must be bound by `bound + MLKEM_Q`. Post `start`,
- *          they must be bound by `bound`.
- * When this function returns, output coefficients in the index range
- * [start, start+2*len) have bound bumped to `bound + MLKEM_Q`.
- * Example:
- * - start=8, len=4
- *   This would compute the following four butterflies
- *          8     --    12
- *             9    --     13
- *                10   --     14
- *                   11   --     15
- * - start=4, len=2
- *   This would compute the following two butterflies
- *          4 -- 6
- *             5 -- 7
+ * Two merged forward-NTT layers, applied to one outer block.
+ */
+static MLK_INLINE void mlk_ntt_2_layers_block(
+    int16_t r[MLKEM_N], unsigned start, unsigned len, int16_t z0, int16_t z0t,
+    int16_t z1, int16_t z1t, int16_t z2, int16_t z2t, const int16_t bound)
+__contract__(
+  requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
+  requires(0 < bound && bound < INT16_MAX - 2 * MLKEM_Q)
+  requires(1 <= len && len <= MLKEM_N / 4)
+  requires(start <= MLKEM_N - 4 * len)
+  requires(z0 > -MLKEM_Q_HALF && z0 < MLKEM_Q_HALF)
+  requires(z1 > -MLKEM_Q_HALF && z1 < MLKEM_Q_HALF)
+  requires(z2 > -MLKEM_Q_HALF && z2 < MLKEM_Q_HALF)
+  requires(array_abs_bound(r, start, MLKEM_N, bound))
+  requires(array_abs_bound(r, 0, start, bound + 2 * MLKEM_Q))
+  assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(r, start + 4 * len, MLKEM_N, bound))
+  ensures(array_abs_bound(r, 0, start + 4 * len, bound + 2 * MLKEM_Q))
+)
+{
+  unsigned j = 0;
+  /* `bound` is a ghost variable referenced only in the CBMC contract. */
+  ((void)bound);
+  for (j = 0; j < len; j++)
+  __loop__(
+    assigns(j, memory_slice(r, sizeof(int16_t) * MLKEM_N))
+    invariant(j <= len)
+    /* Static bounds */
+    invariant(array_abs_bound(r, 0, start, bound + 2 * MLKEM_Q))
+    invariant(array_abs_bound(r, start + 4 * len, MLKEM_N, bound))
+    /* Dynamic bounds */
+    invariant(array_abs_bound(r, start + 0 * len,     start + 0 * len + j, bound + 2 * MLKEM_Q))
+    invariant(array_abs_bound(r, start + 1 * len,     start + 1 * len + j, bound + 2 * MLKEM_Q))
+    invariant(array_abs_bound(r, start + 2 * len,     start + 2 * len + j, bound + 2 * MLKEM_Q))
+    invariant(array_abs_bound(r, start + 3 * len,     start + 3 * len + j, bound + 2 * MLKEM_Q))
+    invariant(array_abs_bound(r, start + 0 * len + j, start + 1 * len,     bound))
+    invariant(array_abs_bound(r, start + 1 * len + j, start + 2 * len,     bound))
+    invariant(array_abs_bound(r, start + 2 * len + j, start + 3 * len,     bound))
+    invariant(array_abs_bound(r, start + 3 * len + j, start + 4 * len,     bound))
+    decreases(len - j))
+  {
+    const unsigned i0 = start + j;
+    const unsigned i1 = i0 + 1 * len;
+    const unsigned i2 = i0 + 2 * len;
+    const unsigned i3 = i0 + 3 * len;
+
+    mlk_ct_butterfly(r, i0, i2, z0, z0t);
+    mlk_ct_butterfly(r, i1, i3, z0, z0t);
+    mlk_ct_butterfly(r, i0, i1, z1, z1t);
+    mlk_ct_butterfly(r, i2, i3, z2, z2t);
+  }
+}
+
+/*
+ * Two merged forward-NTT layers.
+ */
+static MLK_INLINE void mlk_ntt_2_layers(int16_t r[MLKEM_N],
+                                        const unsigned layer)
+__contract__(
+  requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
+  requires(layer == 1 || layer == 3 || layer == 5)
+  requires(array_abs_bound(r, 0, MLKEM_N, layer * MLKEM_Q))
+  assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(r, 0, MLKEM_N, (layer + 2) * MLKEM_Q)))
+{
+  const unsigned len_outer = (unsigned)MLKEM_N >> layer;
+  const unsigned len = len_outer >> 1;
+  unsigned start, k;
+  k = 1u << (layer - 1);
+  for (start = 0; start < MLKEM_N; start += 2 * len_outer)
+  __loop__(
+    invariant(start <= MLKEM_N)
+    invariant((1u << (layer - 1)) <= k && k <= (1u << layer))
+    invariant(2 * len_outer * k == start + MLKEM_N)
+    invariant(array_abs_bound(r, 0, start, (layer + 2) * MLKEM_Q))
+    invariant(array_abs_bound(r, start, MLKEM_N, layer * MLKEM_Q))
+    decreases(MLKEM_N - start))
+  {
+    /* Negation of the zetas is embedded in
+     * mlk_ntt_2_layers_blocks -> mlk_gs_butterfly */
+    const int16_t z0 = mlk_zetas[k][0];
+    const int16_t z1 = mlk_zetas[2 * k][0];
+    const int16_t z2 = mlk_zetas[2 * k + 1][0];
+
+    const int16_t z0t = mlk_zetas[k][1];
+    const int16_t z1t = mlk_zetas[2 * k][1];
+    const int16_t z2t = mlk_zetas[2 * k + 1][1];
+
+    k++;
+    mlk_ntt_2_layers_block(r, start, len, z0, z0t, z1, z1t, z2, z2t,
+                           (int16_t)(layer * MLKEM_Q));
+  }
+}
+
+/*
+ * Single-layer forward NTT, used for the leftover layer 7 (len=2) after the
+ * three merged 2-layer calls.
  */
 
 /* Reference: Embedded in `ntt()` in the reference implementation @[REF]. */
 static void mlk_ntt_butterfly_block(int16_t r[MLKEM_N], int16_t zeta,
-                                    unsigned start, unsigned len,
-                                    unsigned bound)
+                                    int16_t zeta_t, unsigned start,
+                                    unsigned len, unsigned bound)
 __contract__(
   requires(start < MLKEM_N)
   requires(1 <= len && len <= MLKEM_N / 2 && start + 2 * len <= MLKEM_N)
@@ -372,19 +501,12 @@ __contract__(
     decreases(start + len - j))
   {
     int16_t t;
-    t = mlk_fqmul(r[j + len], zeta);
+    t = mlk_fqmul(r[j + len], zeta, zeta_t);
     /* The precondition implies that the arithmetic does not overflow. */
     r[j + len] = (int16_t)(r[j] - t);
     r[j] = (int16_t)(r[j] + t);
   }
 }
-
-/*
- * Compute one layer of forward NTT
- * Parameters:
- * - r: Pointer to base of polynomial
- * - layer: Variable indicating which layer is being applied.
- */
 
 /* Reference: Embedded in `ntt()` in the reference implementation @[REF]. */
 static void mlk_ntt_layer(int16_t r[MLKEM_N], unsigned layer)
@@ -407,8 +529,10 @@ __contract__(
     invariant(array_abs_bound(r, start, MLKEM_N, layer * MLKEM_Q))
     decreases(MLKEM_N - start))
   {
-    int16_t zeta = mlk_zetas[k++];
-    mlk_ntt_butterfly_block(r, zeta, start, len, layer * MLKEM_Q);
+    const int16_t zeta = mlk_zetas[k][0];
+    const int16_t zeta_t = mlk_zetas[k][1];
+    k++;
+    mlk_ntt_butterfly_block(r, zeta, zeta_t, start, len, layer * MLKEM_Q);
   }
 }
 
@@ -432,21 +556,17 @@ __contract__(
   ensures(array_abs_bound(p->coeffs, 0, MLKEM_N, MLK_NTT_BOUND))
 )
 {
-  unsigned layer;
   int16_t *r;
 
   mlk_assert_abs_bound(p, MLKEM_N, MLKEM_Q);
-
   r = p->coeffs;
 
-  for (layer = 1; layer <= 7; layer++)
-  __loop__(
-    invariant(1 <= layer && layer <= 8)
-    invariant(array_abs_bound(r, 0, MLKEM_N, layer * MLKEM_Q))
-    decreases(8 - layer))
-  {
-    mlk_ntt_layer(r, layer);
-  }
+  mlk_ntt_2_layers(r, 1);
+  mlk_ntt_2_layers(r, 3);
+  mlk_ntt_2_layers(r, 5);
+  /* Layer 7 is left as a single layer because the 2-layer merge only covers
+   * an even number of layers (ML-KEM has 7). */
+  mlk_ntt_layer(r, 7);
 
   /* Check the stronger bound */
   mlk_assert_abs_bound(p, MLKEM_N, MLK_NTT_BOUND);
@@ -470,7 +590,96 @@ void mlk_poly_ntt(mlk_poly *p)
 }
 
 
-/* Compute one layer of inverse NTT */
+/*
+ * Two merged inverse-NTT layers, applied to one outer block.
+ *
+ * Bound discipline (int16_t): on entry every coefficient is <MLKEM_Q. After
+ * the first pair of GS butterflies the additive outputs are <2*MLKEM_Q; the
+ * second pair leaves the multiplicative outputs <MLKEM_Q via fqmul, and we
+ * Barrett-reduce the additive outputs explicitly so all four coefficients are
+ * again <MLKEM_Q.
+ */
+static MLK_INLINE void mlk_invntt_2_layers_block(int16_t r[MLKEM_N],
+                                                 unsigned start, unsigned len,
+                                                 int16_t z0, int16_t z0t,
+                                                 int16_t z1, int16_t z1t,
+                                                 int16_t z2, int16_t z2t)
+__contract__(
+  requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
+  requires(1 <= len && len <= MLKEM_N / 4)
+  requires(start <= MLKEM_N - 4 * len)
+  requires(z0 > -MLKEM_Q_HALF && z0 < MLKEM_Q_HALF)
+  requires(z1 > -MLKEM_Q_HALF && z1 < MLKEM_Q_HALF)
+  requires(z2 > -MLKEM_Q_HALF && z2 < MLKEM_Q_HALF)
+  requires(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q))
+  assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q))
+)
+{
+  unsigned j = 0;
+  for (j = 0; j < len; j++)
+  __loop__(
+    assigns(j, memory_slice(r, sizeof(int16_t) * MLKEM_N))
+    invariant(j <= len)
+    invariant(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q))
+    decreases(len - j))
+  {
+    const unsigned i0 = start + j;
+    const unsigned i1 = i0 + 1 * len;
+    const unsigned i2 = i0 + 2 * len;
+    const unsigned i3 = i0 + 3 * len;
+    /* Bounds: MLKEM_Q */
+    mlk_gs_butterfly(r, i0, i1, z1, z1t);
+    mlk_gs_butterfly(r, i2, i3, z2, z2t);
+    /* Bounds: 2 * MLKEM_Q */
+    mlk_gs_butterfly(r, i0, i2, z0, z0t);
+    mlk_gs_butterfly(r, i1, i3, z0, z0t);
+    /* Barrett-reduce the additive outputs back to <MLKEM_Q. */
+    r[i0] = mlk_barrett_reduce(r[i0]);
+    r[i1] = mlk_barrett_reduce(r[i1]);
+  }
+}
+
+/*
+ * Two merged inverse-NTT layers.
+ */
+static MLK_INLINE void mlk_invntt_2_layers(int16_t r[MLKEM_N],
+                                           const unsigned layer)
+__contract__(
+  requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
+  requires(layer == 2 || layer == 4 || layer == 6)
+  requires(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q))
+  assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+  ensures(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q)))
+{
+  const unsigned len = (unsigned)MLKEM_N >> layer;
+  const unsigned len_outer = len << 1;
+  unsigned start, k;
+  k = (1u << (layer - 1)) - 1u;
+  for (start = 0; start < MLKEM_N; start += 2 * len_outer)
+  __loop__(
+    invariant(start <= MLKEM_N)
+    invariant(k < (1u << (layer - 1)))
+    invariant(2 * len_outer * k + 2 * len_outer == 2 * MLKEM_N - start)
+    invariant(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q))
+    decreases(MLKEM_N - start))
+  {
+    /* Zetas are passed un-negated; mlk_gs_butterfly absorbs the negation. */
+    const int16_t z0 = mlk_zetas[k][0];
+    const int16_t z1 = mlk_zetas[2 * k + 1][0];
+    const int16_t z2 = mlk_zetas[2 * k][0];
+
+    const int16_t z0t = mlk_zetas[k][1];
+    const int16_t z1t = mlk_zetas[2 * k + 1][1];
+    const int16_t z2t = mlk_zetas[2 * k][1];
+
+    k--;
+    mlk_invntt_2_layers_block(r, start, len, z0, z0t, z1, z1t, z2, z2t);
+  }
+}
+
+/* Single-layer inverse NTT, used for the leftover layer 7 (len=1) before
+ * the three merged 2-layer calls. */
 
 /* Reference: Embedded into `invntt()` in the reference implementation @[REF] */
 static void mlk_invntt_layer(int16_t *r, unsigned layer)
@@ -493,7 +702,9 @@ __contract__(
     decreases(MLKEM_N - start))
   {
     unsigned j;
-    int16_t zeta = mlk_zetas[k--];
+    const int16_t zeta = mlk_zetas[k][0];
+    const int16_t zeta_t = mlk_zetas[k][1];
+    k--;
     for (j = start; j < start + len; j++)
     __loop__(
       invariant(start <= j && j <= start + len)
@@ -505,7 +716,7 @@ __contract__(
       /* The preconditions imply that the arithmetic does not overflow. */
       r[j] = mlk_barrett_reduce((int16_t)(t + r[j + len]));
       r[j + len] = (int16_t)(r[j + len] - t);
-      r[j + len] = mlk_fqmul(r[j + len], zeta);
+      r[j + len] = mlk_fqmul(r[j + len], zeta, zeta_t);
     }
   }
 }
@@ -522,8 +733,11 @@ __contract__(
   ensures(array_abs_bound(p->coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND))
 )
 {
-  unsigned j, layer;
+  unsigned j;
   const int16_t f = 1441; /* check-magic: 1441 == pow(2,32 - 7,MLKEM_Q) */
+  /* check-magic:
+       -10079 == signed_mod(1441 * pow(MLKEM_Q, -1, 2^16), 2^16) */
+  const int16_t f_twisted = -10079;
   int16_t *r = p->coeffs;
 
   /*
@@ -537,18 +751,15 @@ __contract__(
     invariant(array_abs_bound(r, 0, j, MLKEM_Q))
     decreases(MLKEM_N - j))
   {
-    r[j] = mlk_fqmul(r[j], f);
+    r[j] = mlk_fqmul(r[j], f, f_twisted);
   }
 
-  /* Run the invNTT layers */
-  for (layer = 7; layer > 0; layer--)
-  __loop__(
-    invariant(0 <= layer && layer < 8)
-    invariant(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q))
-    decreases(layer))
-  {
-    mlk_invntt_layer(r, layer);
-  }
+  /* Layer 7 is left as a single layer because the 2-layer merge only covers
+   * an even number of layers (ML-KEM has 7). */
+  mlk_invntt_layer(r, 7);
+  mlk_invntt_2_layers(r, 6);
+  mlk_invntt_2_layers(r, 4);
+  mlk_invntt_2_layers(r, 2);
 
   mlk_assert_abs_bound(p, MLKEM_N, MLK_INVNTT_BOUND);
 }

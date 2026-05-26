@@ -6,11 +6,11 @@
 #include "common.h"
 
 
-int16_t mlk_fqmul(int16_t a, int16_t b);
+int16_t mlk_fqmul(int16_t a, int16_t b, int16_t b_twisted);
 
 void harness(void)
 {
-  int16_t a, b, r;
+  int16_t a, b, b_twisted, r;
 
-  r = mlk_fqmul(a, b);
+  r = mlk_fqmul(a, b, b_twisted);
 }

@@ -37,6 +37,37 @@ FAIL = f"{RED}✗{NORMAL}"
 REMEMBERED = f"{BLUE}⊢{NORMAL}"
 
 
+def join_block_comments(lines):
+    """Collapse multi-line C block comments onto their opening line.
+
+    Each continuation line is replaced with an empty placeholder so the
+    overall line count - and therefore line numbers in diagnostics - is
+    unchanged. Only handles block comments that start and end with the
+    standard /* ... */ delimiters; line comments and strings are left
+    alone, which is sufficient for this script's input.
+    """
+    out = list(lines)
+    i = 0
+    n = len(out)
+    while i < n:
+        line = out[i]
+        if "/*" in line and "*/" not in line:
+            j = i + 1
+            merged = line
+            while j < n and "*/" not in out[j]:
+                merged += " " + out[j].strip()
+                out[j] = ""
+                j += 1
+            if j < n:
+                merged += " " + out[j].strip()
+                out[j] = ""
+                out[i] = merged
+                i = j + 1
+                continue
+        i += 1
+    return out
+
+
 def check_magic_numbers():
     mlkem_q = 3329
     exceptions = [
@@ -129,6 +160,11 @@ def check_magic_numbers():
         if autogen_marker in content:
             continue
         content = content.split("\n")
+        # Pre-pass: collapse multi-line block comments onto their opening
+        # line so wrapped check-magic annotations are recognized. Consumed
+        # continuation lines are replaced with empty placeholders to preserve
+        # line numbers in diagnostics.
+        content = join_block_comments(content)
         # Use negative lookbefore and lookahead to exclude numbers
         # that occur as part of identifiers (e.g. layer12345 or 199901L)
         pattern = r"(?<![0-9a-zA-Z/_-])([-]?\d{4,})(?![0-9a-zA-Z_-])"
