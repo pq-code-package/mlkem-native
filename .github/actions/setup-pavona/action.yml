@@ -1,0 +1,56 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: Setup Pavona
+description: Setup Pavona for testing
+
+inputs:
+  pavona-repository:
+    description: 'Pavona repository to clone'
+    required: false
+    default: 'https://github.com/pavona/pavona'
+  pavona-commit:
+    description: 'Pavona commit to checkout'
+    required: false
+    default: 'main'
+
+runs:
+  using: composite
+  steps:
+    - name: Fetch pavona repository
+      shell: bash
+      run: |
+        # Ensure HOME is set for self-hosted runners
+        echo "HOME=${HOME:-/home/runner}" >> $GITHUB_ENV
+
+        git clone ${{ inputs.pavona-repository }}
+        cd pavona
+        git checkout ${{ inputs.pavona-commit }}
+
+        # Remember pavona directory
+        echo PAVONA_DIR="$GITHUB_WORKSPACE/pavona" >> $GITHUB_ENV
+
+    - name: Install Pavona dependencies
+      shell: bash
+      run: |
+        sudo apt update
+        cd pavona
+        sed '/^#/d' apt-requirements.txt | xargs sudo apt install -y
+
+    - name: Set Bazel cache directory and mirror
+      shell: bash
+      run: |
+        echo "BAZEL_CACHE_DIR=/home/runner/bazel_cache" >> $GITHUB_ENV
+        # Use GitHub mirror for Bazel binaries to avoid certificate issues with releases.bazel.build
+        echo "BAZELISK_BASE_URL=https://github.com/bazelbuild/bazel/releases/download" >> $GITHUB_ENV
+
+    - name: Test Verilator setup and build cache
+      shell: bash
+      run: |
+        cd $PAVONA_DIR
+        # Run UART smoketest to verify setup
+        ./bazelisk.sh test \
+          --test_output=streamed \
+          --disk_cache=$BAZEL_CACHE_DIR \
+          --registry=https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main/ \
+          //sw/device/tests:uart_smoketest_sim_verilator

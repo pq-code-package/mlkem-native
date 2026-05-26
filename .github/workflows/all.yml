@@ -59,13 +59,13 @@ jobs:
     needs: [ base ]
     uses: ./.github/workflows/integration-liboqs.yml
     secrets: inherit
-  opentitan_integration:
-    name: OpenTitan
+  pavona_integration:
+    name: Pavona
     permissions:
       contents: 'read'
       id-token: 'write'
     needs: [ base ]
-    uses: ./.github/workflows/integration-opentitan.yml
+    uses: ./.github/workflows/integration-pavona.yml
     secrets: inherit
   awslc_integration:
     name: AWS-LC
