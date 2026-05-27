@@ -132,7 +132,7 @@ let POLY_TOMONT_GOAL = `!ptr x pc.
 (* Proof                                                                     *)
 (* ------------------------------------------------------------------------- *)
 
-let MLKEM_TOMONT_CORRECT = prove(POLY_TOMONT_GOAL,
+let MLKEM_POLY_TOMONT_CORRECT = prove(POLY_TOMONT_GOAL,
     CONV_TAC LENGTH_SIMPLIFY_CONV THEN
     REWRITE_TAC [MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI;
       NONOVERLAPPING_CLAUSES; C_ARGUMENTS; fst POLY_TOMONT_EXEC] THEN
@@ -215,7 +215,7 @@ let MLKEM_TOMONT_CORRECT = prove(POLY_TOMONT_GOAL,
 (* NOTE: This must be kept in sync with the CBMC specification
  * in mlkem/src/native/aarch64/src/arith_native_aarch64.h *)
 
-let MLKEM_TOMONT_SUBROUTINE_CORRECT = prove
+let MLKEM_POLY_TOMONT_SUBROUTINE_CORRECT = prove
  (`!ptr x pc returnaddress.
     nonoverlapping (word pc, LENGTH poly_tomont_asm_mc) (ptr, 512)
     ==>
@@ -254,7 +254,7 @@ let MLKEM_TOMONT_SUBROUTINE_CORRECT = prove
     PURE_REWRITE_CONV [WORD_ADD_0] in
   CONV_TAC TWEAK_CONV THEN
   ARM_ADD_RETURN_NOSTACK_TAC POLY_TOMONT_EXEC
-   (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_TOMONT_CORRECT)));;
+   (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_POLY_TOMONT_CORRECT)));;
 
 (* ------------------------------------------------------------------------- *)
 (* Constant-time and memory safety proof.                                    *)
@@ -266,10 +266,10 @@ needs "mlkem_native/aarch64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:false
     (assoc "mlkem_tomont" subroutine_signatures)
-    MLKEM_TOMONT_SUBROUTINE_CORRECT
+    MLKEM_POLY_TOMONT_SUBROUTINE_CORRECT
     POLY_TOMONT_EXEC;;
 
-let MLKEM_TOMONT_SUBROUTINE_SAFE = time prove
+let MLKEM_POLY_TOMONT_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e ptr pc returnaddress.
            nonoverlapping (word pc,LENGTH poly_tomont_asm_mc) (ptr,512)
