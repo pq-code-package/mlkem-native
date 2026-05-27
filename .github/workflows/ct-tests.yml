@@ -26,9 +26,9 @@ jobs:
           - valgrind-varlat_clang21
           - valgrind-varlat_clang22
           - valgrind-varlat_gcc48
-          - valgrind-varlat_gcc13
           - valgrind-varlat_gcc14
           - valgrind-varlat_gcc15
+          - valgrind-varlat_gcc16
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

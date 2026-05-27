@@ -235,13 +235,6 @@ jobs:
            opt: all
            examples: true
          - family: gcc
-           version: "13"
-           shell: gcc13
-           # TODO: gcc13 broken on macOS in nixpkgs 25.11
-           darwin: False
-           opt: all
-           examples: true
-         - family: gcc
            version: "14"
            shell: gcc14
            darwin: True
@@ -251,6 +244,13 @@ jobs:
            version: "15"
            shell: gcc15
            darwin: True
+           opt: all
+           examples: true
+         - family: gcc
+           version: "16"
+           shell: gcc16
+           # TODO: re-add once gcc16 is no longer broken in nixpkgs-unstable
+           darwin: False
            opt: all
            examples: true
          - family: clang

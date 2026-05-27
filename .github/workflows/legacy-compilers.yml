@@ -94,6 +94,11 @@ jobs:
            shell: gcc15
            opt: all
            examples: true
+         - family: gcc
+           version: "16"
+           shell: gcc16
+           opt: all
+           examples: true
          - family: clang
            version: "6"
            shell: clang6
@@ -331,6 +336,12 @@ jobs:
            shell: gcc15
            opt: all
            examples: true
+         # TODO: re-add once gcc16 is no longer broken in nixpkgs-unstable
+         # - family: gcc
+         #   version: "16"
+         #   shell: gcc16
+         #   opt: all
+         #   examples: true
          - family: clang
            version: "18"
            shell: clang18
@@ -490,6 +501,7 @@ jobs:
           - { family: gcc,   version: "13",  shell: gcc13 }
           - { family: gcc,   version: "14",  shell: gcc14 }
           - { family: gcc,   version: "15",  shell: gcc15 }
+          - { family: gcc,   version: "16",  shell: gcc16 }
           - { family: clang, version: "6",   shell: clang6 }
           - { family: clang, version: "7",   shell: clang7 }
           - { family: clang, version: "8",   shell: clang8 }
