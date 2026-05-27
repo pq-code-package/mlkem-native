@@ -63,6 +63,7 @@
             overlays = [
               (_:_: {
                 clang_22 = pkgs-unstable.clang_22;
+                gcc16 = pkgs-unstable.gcc16;
                 zig_0_16 = pkgs-unstable.zig;
               })
             ];
@@ -188,6 +189,7 @@
           devShells.gcc13 = util.mkShellWithCC' pkgs.gcc13;
           devShells.gcc14 = util.mkShellWithCC' pkgs.gcc14;
           devShells.gcc15 = util.mkShellWithCC' pkgs.gcc15;
+          devShells.gcc16 = util.mkShellWithCC' pkgs.gcc16;
 
           # valgrind with a patch for detecting variable-latency instructions
           devShells.valgrind-varlat_clang18 = util.mkShellWithCC_valgrind' pkgs.clang_18;
@@ -198,6 +200,7 @@
           devShells.valgrind-varlat_gcc13 = util.mkShellWithCC_valgrind' pkgs.gcc13;
           devShells.valgrind-varlat_gcc14 = util.mkShellWithCC_valgrind' pkgs.gcc14;
           devShells.valgrind-varlat_gcc15 = util.mkShellWithCC_valgrind' pkgs.gcc15;
+          devShells.valgrind-varlat_gcc16 = util.mkShellWithCC_valgrind' pkgs.gcc16;
         };
       flake = {
         devShell.x86_64-linux =
