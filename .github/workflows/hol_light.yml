@@ -44,7 +44,7 @@ jobs:
   # if the byte code needs updating.
   hol_light_bytecode:
     name: AArch64 HOL-Light bytecode check
-    runs-on: pqcp-arm64
+    runs-on: ubuntu-24.04-arm
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -58,7 +58,7 @@ jobs:
             autogen --update-hol-light-bytecode --dry-run
   hol_light_interactive:
     name: AArch64 HOL-Light interactive shell test
-    runs-on: pqcp-arm64
+    runs-on: ubuntu-24.04-arm
     needs: [ hol_light_bytecode ]
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
@@ -110,7 +110,7 @@ jobs:
           - name: keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm
             needs: ["keccak_specs.ml"]
     name: AArch64 HOL Light proof for ${{ matrix.proof.name }}.S
-    runs-on: pqcp-arm64
+    runs-on: ubuntu-24.04-arm
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -152,7 +152,7 @@ jobs:
   # x86_64 proofs
   hol_light_bytecode_x86_64:
     name: x86_64 HOL-Light bytecode check
-    runs-on: pqcp-x64
+    runs-on: ubuntu-latest
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -166,7 +166,7 @@ jobs:
             autogen --update-hol-light-bytecode --dry-run
   hol_light_interactive_x86_64:
     name: x86_64 HOL-Light interactive shell test
-    runs-on: pqcp-x64
+    runs-on: ubuntu-latest
     needs: [ hol_light_bytecode_x86_64 ]
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
@@ -230,7 +230,7 @@ jobs:
           - name: keccak_f1600_x4_avx2_asm
             needs: ["keccak_utils.ml", "keccak_spec.ml", "keccak_f1600_x4_avx2_constants.ml", "keccak_constants.ml"]
     name: x86_64 HOL Light proof for ${{ matrix.proof.name }}.S
-    runs-on: pqcp-x64
+    runs-on: ubuntu-latest
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
