@@ -95,6 +95,12 @@
 #endif /* MLK_SYS_X86_64 */
 #if defined(MLK_SYS_RISCV64)
 #endif
+#if defined(MLK_SYS_PPC64LE)
+#include "src/native/ppc64le/src/intt_ppc_asm.S"
+#include "src/native/ppc64le/src/ntt_ppc_asm.S"
+#include "src/native/ppc64le/src/poly_tomont_ppc_asm.S"
+#include "src/native/ppc64le/src/reduce_ppc_asm.S"
+#endif /* MLK_SYS_PPC64LE */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
@@ -679,5 +685,38 @@
 #undef mlk_debug_check_bounds_int16m1
 #undef mlk_debug_check_bounds_int16m2
 #endif /* MLK_SYS_RISCV64 */
+#if defined(MLK_SYS_PPC64LE)
+/*
+ * Undefine macros from native code (Arith, PPC64LE)
+ */
+/* mlkem/src/native/ppc64le/meta.h */
+#undef MLK_ARITH_BACKEND_NAME
+#undef MLK_ARITH_BACKEND_PPC64LE_DEFAULT
+#undef MLK_NATIVE_PPC64LE_META_H
+#undef MLK_USE_NATIVE_INTT
+#undef MLK_USE_NATIVE_NTT
+#undef MLK_USE_NATIVE_POLY_REDUCE
+#undef MLK_USE_NATIVE_POLY_TOMONT
+/* mlkem/src/native/ppc64le/src/arith_native_ppc64le.h */
+#undef MLK_NATIVE_PPC64LE_SRC_ARITH_NATIVE_PPC64LE_H
+#undef mlk_intt_ppc_asm
+#undef mlk_ntt_ppc_asm
+#undef mlk_poly_tomont_ppc_asm
+#undef mlk_reduce_ppc_asm
+/* mlkem/src/native/ppc64le/src/consts.h */
+#undef MLK_NATIVE_PPC64LE_SRC_CONSTS_H
+#undef MLK_PPC_C1353_OFFSET
+#undef MLK_PPC_C20159_OFFSET
+#undef MLK_PPC_NQ_OFFSET
+#undef MLK_PPC_N_INV_OFFSET
+#undef MLK_PPC_N_INV_TW_OFFSET
+#undef MLK_PPC_QINV_OFFSET
+#undef MLK_PPC_Q_OFFSET
+#undef MLK_PPC_ZETA_INTT_OFFSET
+#undef MLK_PPC_ZETA_INTT_TW_OFFSET
+#undef MLK_PPC_ZETA_NTT_OFFSET
+#undef MLK_PPC_ZETA_NTT_TW_OFFSET
+#undef mlk_ppc_qdata
+#endif /* MLK_SYS_PPC64LE */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 #endif /* !MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS */

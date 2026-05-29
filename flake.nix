@@ -103,13 +103,13 @@
             packages = builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum hol_server; };
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchains hol_light s2n_bignum gcc-arm-embedded hol_server; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchains toolchain_ppc64le hol_light s2n_bignum gcc-arm-embedded hol_server; };
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross-aarch64 = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 hol_light s2n_bignum gcc-arm-embedded hol_server; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 toolchain_ppc64le hol_light s2n_bignum gcc-arm-embedded hol_server; };
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross-x86_64 = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum gcc-arm-embedded hol_server; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 toolchain_ppc64le hol_light s2n_bignum gcc-arm-embedded hol_server; };
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.ci = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains_native; };
@@ -147,7 +147,7 @@
 
           # autogen shell with cross compiler for the "other" architecture
           devShells.cross-autogen = util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters; inherit (pkgs) gcc-arm-embedded; }
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_ppc64le; inherit (pkgs) gcc-arm-embedded; }
               ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isx86_64 [ config.packages.toolchain_aarch64 ]
               ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isAarch64 [ config.packages.toolchain_x86_64 ];
           };
