@@ -10,3 +10,4 @@ self-hosted-runner:
     - pqcp-arm64
     - pqcp-ppc64
     - pqcp-x64
+    - self-hosted-nucleo-n657x0
