@@ -2,7 +2,7 @@
 # Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-{ pkgs, cbmc, bitwuzla, z3, python3-for-slothy }:
+{ pkgs, cbmc, bitwuzla, z3, hol_light }:
 rec {
   glibc-join = p: p.buildPackages.symlinkJoin {
     name = "glibc-join";
@@ -21,6 +21,14 @@ rec {
     if pkgs.stdenv.isDarwin
     then pkgs.clang
     else wrap-gcc pkgs;
+
+  pythonEnv = pkgs.python3.withPackages (ps: with ps; [
+    mpmath
+    sympy
+    pyparsing
+    pyyaml
+    rich
+  ]);
 
   # cross is for determining whether to install the cross toolchain dependencies or not
   _toolchains = { cross ? true }:
@@ -46,11 +54,10 @@ rec {
     # git is not available in the nix shell on Darwin. As a workaround we add git as a dependency here.
     # Initially, we expected this to be fixed by https://github.com/NixOS/nixpkgs/pull/353893, but that does not seem to be the case.
     ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [ pkgs.git ]
+    ++ [ pythonEnv ]
     ++ builtins.attrValues {
-      inherit (pkgs.python3Packages) sympy pyyaml;
       inherit (pkgs)
-        gnumake
-        python3;
+        gnumake;
     };
 
   # NOTE: idiomatic nix way of properly setting the $CC in a nix shell
@@ -78,31 +85,29 @@ rec {
   # some customized packages
   linters = pkgs.symlinkJoin {
     name = "pqcp-linters";
-    paths = builtins.attrValues {
-      inherit (pkgs.llvmPackages)
-        clang-tools
-        bintools;
+    paths = builtins.attrValues
+      {
+        inherit (pkgs.llvmPackages)
+          clang-tools
+          bintools;
 
-      inherit (pkgs)
-        nixpkgs-fmt
-        shfmt
-        shellcheck
-        actionlint
-        doxygen
-        ruff;
-
-      inherit (pkgs.python3Packages)
-        mpmath sympy pyparsing pyyaml rich;
-    };
+        inherit (pkgs)
+          nixpkgs-fmt
+          shfmt
+          shellcheck
+          actionlint
+          doxygen
+          ruff;
+      } ++ [ pythonEnv ];
   };
 
   cbmc_pkgs = pkgs.callPackage ./cbmc { inherit cbmc bitwuzla z3; };
 
   valgrind_varlat = pkgs.callPackage ./valgrind { };
-  hol_light' = pkgs.callPackage ./hol_light { };
+  hol_light' = hol_light;
   hol_server = pkgs.callPackage ./hol_light/hol_server.nix { inherit hol_light'; };
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
-  slothy = pkgs.callPackage ./slothy { python3 = python3-for-slothy; };
+  slothy = pkgs.callPackage ./slothy { };
   pqmx = pkgs.callPackage ./pqmx { };
   avr-toolchain = pkgs.callPackage ./avr { };
 
@@ -111,12 +116,11 @@ rec {
     let
       common_deps = builtins.attrValues
         {
-          inherit (pkgs.python3Packages) sympy pyyaml;
           inherit (pkgs)
             gnumake
-            python3
             qemu;
-        } ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [ pkgs.git ];
+        } ++ [ pythonEnv ]
+      ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [ pkgs.git ];
     in
     pkgs.symlinkJoin {
       name = "toolchain-${name}";

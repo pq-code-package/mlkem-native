@@ -6,8 +6,8 @@
   description = "mlkem-native";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    nixpkgs-unstable.url = "github:mkannwischer/nixpkgs/7579aa29421e7fb5d2ed7da97040ed9448d1e10a";
 
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
@@ -24,9 +24,11 @@
           pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
           util = pkgs.callPackage ./nix/util.nix {
             inherit (pkgs) bitwuzla z3;
-            inherit (pkgs-unstable) cbmc;
-            # TODO: switch back to stable python3 for slothy once ortools is fixed in 25.11
-            python3-for-slothy = pkgs-unstable.python3;
+            inherit (pkgs-unstable) cbmc hol_light;
+          };
+          holLightToolchain = builtins.attrValues {
+            inherit (pkgs-unstable) ocaml ledit;
+            inherit (pkgs-unstable.ocamlPackages) findlib camlp5 zarith;
           };
           zigWrapCC = zig: pkgs.symlinkJoin {
             name = "zig-wrappers";
@@ -55,6 +57,8 @@
             mkdir -p "$IMPORTS_DIR"
             ln -sfn "$S2N_BIGNUM_DIR" "$IMPORTS_DIR/s2n_bignum"
             ln -sfn "$PROOF_DIR"      "$IMPORTS_DIR/mlkem_native"
+            export HOLLIGHT_LOAD_PATH="$IMPORTS_DIR:$S2N_BIGNUM_DIR''${HOLLIGHT_LOAD_PATH:+:$HOLLIGHT_LOAD_PATH}"
+            export HOLDIR="$HOLLIGHT_DIR"
           '';
         in
         {
@@ -62,9 +66,7 @@
             inherit system;
             overlays = [
               (_:_: {
-                clang_22 = pkgs-unstable.clang_22;
-                gcc16 = pkgs-unstable.gcc16;
-                zig_0_16 = pkgs-unstable.zig;
+                # Add pkgs-unstable overlays here when needed
               })
             ];
           };
@@ -95,21 +97,22 @@
                   direnv
                   nix-direnv
                   zig_0_13;
-              } ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ config.packages.valgrind_varlat ];
+              } ++ holLightToolchain
+            ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ config.packages.valgrind_varlat ];
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
 
           packages.hol_server = util.hol_server.hol_server_start;
           devShells.hol_light = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum hol_server; };
+            packages = builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum hol_server; } ++ holLightToolchain;
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchains hol_light s2n_bignum gcc-arm-embedded hol_server; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchains hol_light s2n_bignum gcc-arm-embedded hol_server; } ++ holLightToolchain;
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross-aarch64 = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 hol_light s2n_bignum gcc-arm-embedded hol_server; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 hol_light s2n_bignum gcc-arm-embedded hol_server; } ++ holLightToolchain;
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross-x86_64 = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum gcc-arm-embedded hol_server; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum gcc-arm-embedded hol_server; } ++ holLightToolchain;
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.ci = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains_native; };
@@ -158,14 +161,15 @@
               {
                 inherit (util) pqmx;
                 inherit (config.packages) linters;
-                inherit (pkgs) gcc-arm-embedded qemu coreutils python3 git;
+                inherit (pkgs) gcc-arm-embedded qemu coreutils git;
               };
           };
           devShells.cross-aarch64-embedded = util.mkShell {
             packages = builtins.attrValues
               {
-                inherit (pkgs) qemu coreutils python3 git;
+                inherit (pkgs) qemu coreutils git;
               } ++ [
+              util.pythonEnv
               pkgs-unstable.pkgsCross.aarch64-embedded.stdenv.cc
             ];
           };
@@ -175,7 +179,6 @@
           devShells.linter = util.mkShellNoCC {
             packages = builtins.attrValues { inherit (config.packages) linters; };
           };
-          devShells.clang18 = util.mkShellWithCC' pkgs.clang_18;
           devShells.clang19 = util.mkShellWithCC' pkgs.clang_19;
           devShells.clang20 = util.mkShellWithCC' pkgs.clang_20;
           devShells.clang21 = util.mkShellWithCC' pkgs.clang_21;
@@ -183,7 +186,7 @@
 
           devShells.zig0_13 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_13);
           devShells.zig0_14 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_14);
-          devShells.zig0_15 = util.mkShellWithCC' (zigWrapCC pkgs.zig);
+          devShells.zig0_15 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_15);
           devShells.zig0_16 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_16);
 
           devShells.gcc13 = util.mkShellWithCC' pkgs.gcc13;
@@ -192,7 +195,6 @@
           devShells.gcc16 = util.mkShellWithCC' pkgs.gcc16;
 
           # valgrind with a patch for detecting variable-latency instructions
-          devShells.valgrind-varlat_clang18 = util.mkShellWithCC_valgrind' pkgs.clang_18;
           devShells.valgrind-varlat_clang19 = util.mkShellWithCC_valgrind' pkgs.clang_19;
           devShells.valgrind-varlat_clang20 = util.mkShellWithCC_valgrind' pkgs.clang_20;
           devShells.valgrind-varlat_clang21 = util.mkShellWithCC_valgrind' pkgs.clang_21;
@@ -210,9 +212,7 @@
             util = pkgs.callPackage ./nix/util.nix {
               inherit pkgs;
               inherit (pkgs) bitwuzla z3;
-              inherit (pkgs-unstable) cbmc;
-              # TODO: switch back to stable python3 for slothy once ortools is fixed in 25.11
-              python3-for-slothy = pkgs-unstable.python3;
+              inherit (pkgs-unstable) cbmc hol_light;
             };
           in
           util.mkShell {
@@ -225,6 +225,10 @@
                 util.toolchains_native
                 pkgs.zig_0_13
               ]
+              ++ builtins.attrValues {
+                inherit (pkgs-unstable) ocaml ledit;
+                inherit (pkgs-unstable.ocamlPackages) findlib camlp5 zarith;
+              }
               ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ util.valgrind_varlat ];
           };
         # The usual flake attributes can be defined here, including system-
