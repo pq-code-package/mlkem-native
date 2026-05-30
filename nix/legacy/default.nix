@@ -41,6 +41,7 @@ in
     clang15 = pkgs-2405.clang_15;
     clang16 = pkgs-2405.clang_16;
     clang17 = pkgs-2405.clang_17;
+    clang18 = pkgs-2405.clang_18;
   };
 
   zigs = {
