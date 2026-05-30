@@ -6,7 +6,7 @@
   description = "mlkem-native";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     flake-parts = {
@@ -25,8 +25,6 @@
           util = pkgs.callPackage ./nix/util.nix {
             inherit (pkgs) bitwuzla z3;
             inherit (pkgs-unstable) cbmc;
-            # TODO: switch back to stable python3 for slothy once ortools is fixed in 25.11
-            python3-for-slothy = pkgs-unstable.python3;
           };
           zigWrapCC = zig: pkgs.symlinkJoin {
             name = "zig-wrappers";
@@ -62,9 +60,7 @@
             inherit system;
             overlays = [
               (_:_: {
-                clang_22 = pkgs-unstable.clang_22;
-                gcc16 = pkgs-unstable.gcc16;
-                zig_0_16 = pkgs-unstable.zig;
+                # Add pkgs-unstable overlays here when needed
               })
             ];
           };
@@ -158,14 +154,15 @@
               {
                 inherit (util) pqmx;
                 inherit (config.packages) linters;
-                inherit (pkgs) gcc-arm-embedded qemu coreutils python3 git;
+                inherit (pkgs) gcc-arm-embedded qemu coreutils git;
               };
           };
           devShells.cross-aarch64-embedded = util.mkShell {
             packages = builtins.attrValues
               {
-                inherit (pkgs) qemu coreutils python3 git;
+                inherit (pkgs) qemu coreutils git;
               } ++ [
+              util.pythonEnv
               pkgs-unstable.pkgsCross.aarch64-embedded.stdenv.cc
             ];
           };
@@ -175,7 +172,6 @@
           devShells.linter = util.mkShellNoCC {
             packages = builtins.attrValues { inherit (config.packages) linters; };
           };
-          devShells.clang18 = util.mkShellWithCC' pkgs.clang_18;
           devShells.clang19 = util.mkShellWithCC' pkgs.clang_19;
           devShells.clang20 = util.mkShellWithCC' pkgs.clang_20;
           devShells.clang21 = util.mkShellWithCC' pkgs.clang_21;
@@ -183,7 +179,7 @@
 
           devShells.zig0_13 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_13);
           devShells.zig0_14 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_14);
-          devShells.zig0_15 = util.mkShellWithCC' (zigWrapCC pkgs.zig);
+          devShells.zig0_15 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_15);
           devShells.zig0_16 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_16);
 
           devShells.gcc13 = util.mkShellWithCC' pkgs.gcc13;
@@ -192,7 +188,6 @@
           devShells.gcc16 = util.mkShellWithCC' pkgs.gcc16;
 
           # valgrind with a patch for detecting variable-latency instructions
-          devShells.valgrind-varlat_clang18 = util.mkShellWithCC_valgrind' pkgs.clang_18;
           devShells.valgrind-varlat_clang19 = util.mkShellWithCC_valgrind' pkgs.clang_19;
           devShells.valgrind-varlat_clang20 = util.mkShellWithCC_valgrind' pkgs.clang_20;
           devShells.valgrind-varlat_clang21 = util.mkShellWithCC_valgrind' pkgs.clang_21;
@@ -211,8 +206,6 @@
               inherit pkgs;
               inherit (pkgs) bitwuzla z3;
               inherit (pkgs-unstable) cbmc;
-              # TODO: switch back to stable python3 for slothy once ortools is fixed in 25.11
-              python3-for-slothy = pkgs-unstable.python3;
             };
           in
           util.mkShell {
