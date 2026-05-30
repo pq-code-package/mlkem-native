@@ -2,7 +2,7 @@
 # Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-{ pkgs, cbmc, bitwuzla, z3 }:
+{ pkgs, cbmc, bitwuzla, z3, hol_light }:
 rec {
   glibc-join = p: p.buildPackages.symlinkJoin {
     name = "glibc-join";
@@ -104,16 +104,7 @@ rec {
   cbmc_pkgs = pkgs.callPackage ./cbmc { inherit cbmc bitwuzla z3; };
 
   valgrind_varlat = pkgs.callPackage ./valgrind { };
-  # Build against the cached default OCaml 5.4 set, not nixpkgs' non-default
-  # 5.3 pin. nixpkgs downgrades camlp5 to 8.03.2 (broken on 5.4) for the old
-  # hol_light src; undo that to get the cached default camlp5 (8.05.01).
-  # TODO: upstream the 5.4 bump to nixpkgs and drop this override.
-  hol_light' = pkgs.callPackage ./hol_light {
-    hol_light = pkgs.ocaml-ng.ocamlPackages_5_4.hol_light.override {
-      camlp5 = pkgs.ocaml-ng.ocamlPackages_5_4.camlp5;
-    };
-    ocamlPackages = pkgs.ocaml-ng.ocamlPackages_5_4;
-  };
+  hol_light' = hol_light;
   hol_server = pkgs.callPackage ./hol_light/hol_server.nix { inherit hol_light'; };
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
   slothy = pkgs.callPackage ./slothy { };

@@ -7,7 +7,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-unstable.url = "github:mkannwischer/nixpkgs/7579aa29421e7fb5d2ed7da97040ed9448d1e10a";
 
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
@@ -24,7 +24,11 @@
           pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
           util = pkgs.callPackage ./nix/util.nix {
             inherit (pkgs) bitwuzla z3;
-            inherit (pkgs-unstable) cbmc;
+            inherit (pkgs-unstable) cbmc hol_light;
+          };
+          holLightToolchain = builtins.attrValues {
+            inherit (pkgs-unstable) ocaml ledit;
+            inherit (pkgs-unstable.ocamlPackages) findlib camlp5 zarith;
           };
           zigWrapCC = zig: pkgs.symlinkJoin {
             name = "zig-wrappers";
@@ -53,6 +57,8 @@
             mkdir -p "$IMPORTS_DIR"
             ln -sfn "$S2N_BIGNUM_DIR" "$IMPORTS_DIR/s2n_bignum"
             ln -sfn "$PROOF_DIR"      "$IMPORTS_DIR/mlkem_native"
+            export HOLLIGHT_LOAD_PATH="$IMPORTS_DIR:$S2N_BIGNUM_DIR''${HOLLIGHT_LOAD_PATH:+:$HOLLIGHT_LOAD_PATH}"
+            export HOLDIR="$HOLLIGHT_DIR"
           '';
         in
         {
@@ -91,21 +97,22 @@
                   direnv
                   nix-direnv
                   zig_0_13;
-              } ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ config.packages.valgrind_varlat ];
+              } ++ holLightToolchain
+            ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ config.packages.valgrind_varlat ];
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
 
           packages.hol_server = util.hol_server.hol_server_start;
           devShells.hol_light = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum hol_server; };
+            packages = builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum hol_server; } ++ holLightToolchain;
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchains hol_light s2n_bignum gcc-arm-embedded hol_server; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchains hol_light s2n_bignum gcc-arm-embedded hol_server; } ++ holLightToolchain;
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross-aarch64 = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 hol_light s2n_bignum gcc-arm-embedded hol_server; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 hol_light s2n_bignum gcc-arm-embedded hol_server; } ++ holLightToolchain;
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.hol_light-cross-x86_64 = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum gcc-arm-embedded hol_server; };
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum gcc-arm-embedded hol_server; } ++ holLightToolchain;
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.ci = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains_native; };
@@ -205,7 +212,7 @@
             util = pkgs.callPackage ./nix/util.nix {
               inherit pkgs;
               inherit (pkgs) bitwuzla z3;
-              inherit (pkgs-unstable) cbmc;
+              inherit (pkgs-unstable) cbmc hol_light;
             };
           in
           util.mkShell {
@@ -218,6 +225,10 @@
                 util.toolchains_native
                 pkgs.zig_0_13
               ]
+              ++ builtins.attrValues {
+                inherit (pkgs-unstable) ocaml ledit;
+                inherit (pkgs-unstable.ocamlPackages) findlib camlp5 zarith;
+              }
               ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ util.valgrind_varlat ];
           };
         # The usual flake attributes can be defined here, including system-
