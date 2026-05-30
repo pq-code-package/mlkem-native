@@ -567,14 +567,14 @@ jobs:
           - name: AMD EPYC 4th gen (t3a)
             ec2_instance_type: t3a.small
             ec2_ami: ubuntu-latest (x86_64)
-            ec2_volume_size: 20
+            ec2_volume_size: 30
             compile_mode: native
             opt: all
             config_variations: 'native-cap-CPUID_AVX2'
           - name: Intel Xeon 4th gen (t3)
             ec2_instance_type: t3.small
             ec2_ami: ubuntu-latest (x86_64)
-            ec2_volume_size: 20
+            ec2_volume_size: 30
             compile_mode: native
             opt: all
             config_variations: 'native-cap-CPUID_AVX2'
@@ -602,6 +602,7 @@ jobs:
       name: ${{ matrix.target.name }}
       ec2_instance_type: ${{ matrix.target.ec2_instance_type }}
       ec2_ami: ${{ matrix.target.ec2_ami }}
+      ec2_volume_size: ${{ matrix.target.ec2_volume_size }}
       compile_mode: ${{ matrix.target.compile_mode }}
       opt: ${{ matrix.target.opt }}
       config_variations: ${{ matrix.target.config_variations || '' }}
