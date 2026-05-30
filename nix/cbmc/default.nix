@@ -36,7 +36,7 @@ buildEnv {
       });
 
       inherit
-        bitwuzla# 0.8.2
+        bitwuzla# 0.9.0
         ninja; # 1.13.2
     };
 }
