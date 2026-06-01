@@ -26,6 +26,11 @@
 #define V_ZT3    11
 #define V_ZETATW 2
 
+/*
+ * The vector register indices below carry no special meaning. Those 
+ * in v20-v31 are callee-saved, hence preserved by SAVE_REGS. 
+ * Otherwise arbitrary.
+ */
 #define vdata_a1 12
 #define vdata_a2 17
 #define vdata_a3 22
@@ -61,6 +66,11 @@
 
 .text
 
+/*
+ * PowerPC ELF v2 ABI: r3 = int16_t *r, r4 = int16_t *qdata.
+ *   callee-saved registers: r14-r31; v20-v31
+ * The callee-saved registers used here (r14-r22, v20-v31) are saved/restored.
+ */
 .macro SAVE_REGS
         stdu    1, -352(1)
         mflr    0
@@ -148,15 +158,15 @@
  * r7: len * 2, each coefficient component is 2 bytes.
  *
  * registers used for offset to coefficients, r[j] and r[j+len]
- * R9: offset to r0 = j
- * R16: offset to r1 = r0 + next
- * R18: offset to r2 = r1 + next
- * R20: offset to r3 = r2 + next
+ * a1_offset: offset to r0 = j
+ * a2_offset: offset to r1 = r0 + next
+ * a3_offset: offset to r2 = r1 + next
+ * a4_offset: offset to r3 = r2 + next
  *
- * R10: offset to r'0 = r0 + len*2
- * R17: offset to r'1 = r'0 + step
- * R19: offset to r'2 = r'1 + step
- * R21: offset to r'3 = r'2 + step
+ * b1_offset: offset to r'0 = r0 + len*2
+ * b2_offset: offset to r'1 = r'0 + next
+ * b3_offset: offset to r'2 = r'1 + next
+ * b4_offset: offset to r'3 = r'2 + next
  *
  */
 .macro Init_Coeffs_offset start, next
@@ -171,24 +181,15 @@
 .endm
 
 /*
- * Load coefficient in r[j+len] (r') vectors from offset, R10, R17, R19 and R21
- *  r[j+len]: V13, V18, V23, V28
+ * load_high: load the r[j+len] coefficient vectors (the "high" operands, which
+ * are scaled by zeta in the CT butterfly) from b1_offset..b4_offset into
+ * vdata_b1..vdata_b4.
  */
-.macro Load_4Rjp
-        lxvd2x  32+vdata_b1, rinp, b1_offset    /* V13: vector r'0 */
-        lxvd2x  32+vdata_b2, rinp, b2_offset    /* V18: vector for r'1 */
-        lxvd2x  32+vdata_b3, rinp, b3_offset    /* V23: vector for r'2 */
-        lxvd2x  32+vdata_b4, rinp, b4_offset    /* V28: vector for r'3 */
-.endm
-
-/*
- * Load Coefficients and setup vectors for 8 coefficients in the
- * following order,
- *  rjlen0, rjlen1, rjlen2, rjlen3, rjlen4, rjlen5, rjlen6, rjlen7
- */
-.macro Load_4Coeffs start, next
-        Init_Coeffs_offset \start, \next
-        Load_4Rjp
+.macro load_high
+        lxvd2x  32+vdata_b1, rinp, b1_offset    /* vector r'0 */
+        lxvd2x  32+vdata_b2, rinp, b2_offset    /* vector for r'1 */
+        lxvd2x  32+vdata_b3, rinp, b3_offset    /* vector for r'2 */
+        lxvd2x  32+vdata_b4, rinp, b4_offset    /* vector for r'3 */
 .endm
 
 /*
@@ -196,14 +197,14 @@
  *
  * Load Coefficients and setup vectors for 8 coefficients in the
  * following order,
- *    rj0, rj1, rjlen2, rjlen3, rj4, rj5, rjlen6, arlen7
+ *    rj0, rj1, rjlen2, rjlen3, rj4, rj5, rjlen6, rjlen7
  *    rj8, rj9, rjlen10, rjlen11, rj12, rj13, rjlen14, rjlen15
  *  Each vmrgew and vmrgow will transpose vectors as,
  *  r[j]=      rj0, rj1, rj8, rj9, rj4, rj5, rj12, rj13
- *  r[j+len]=  rjlen2, rjlen3, rjlen10, rjlen11, rjlen6, arlen7, rjlen14, rjlen15
+ *  r[j+len]=  rjlen2, rjlen3, rjlen10, rjlen11, rjlen6, rjlen7, rjlen14, rjlen15
  *
- *  r[j+len]: V13, V18, V23, V28
- *  r[j]: V12, V17, V22, V27
+ *  r[j+len]: vdata_b1, vdata_b2, vdata_b3, vdata_b4
+ *  r[j]: vdata_a1, vdata_a2, vdata_a3, vdata_a4
  *
  * In order to do the coefficients computation, zeta vector will arrange
  * in the proper order to match the multiplication.
@@ -289,29 +290,23 @@
 .endm
 
 /*
- * Load 4 r[j] (r) coefficient vectors:
- *   Load coefficient in vectors from offset, R9, R16, R18 and R20
- *  r[j]: V12, V17, V22, V27
+ * load_low: load the r[j] coefficient vectors (the "low" operands, which are
+ * not scaled by zeta in the CT butterfly) from a1_offset..a4_offset into
+ * vdata_a1..vdata_a4.
  */
-.macro Load_4Rj
-        lxvd2x  32+vdata_a1, rinp, a1_offset     /* V12: vector r0 */
-        lxvd2x  32+vdata_a2, rinp, a2_offset    /* V17: vector r1 */
-        lxvd2x  32+vdata_a3, rinp, a3_offset    /* V22: vector r2 */
-        lxvd2x  32+vdata_a4, rinp, a4_offset    /* V27: vector r3 */
+.macro load_low
+        lxvd2x  32+vdata_a1, rinp, a1_offset     /* vector r0 */
+        lxvd2x  32+vdata_a2, rinp, a2_offset    /* vector r1 */
+        lxvd2x  32+vdata_a3, rinp, a3_offset    /* vector r2 */
+        lxvd2x  32+vdata_a4, rinp, a4_offset    /* vector r3 */
 .endm
 
 /*
- * Compute final final r[j] and r[j+len]
- *  final r[j+len]: V16, V21, V26, V31
- *  final r[j]: V15, V20, V25, V30
+ * Compute the final r[j] and r[j+len]
+ *  final r[j+len]: vresult_b1, vresult_b2, vresult_b3, vresult_b4
+ *  final r[j]:     vresult_a1, vresult_a2, vresult_a3, vresult_a4
  */
-.macro Compute_4Coeffs
-        /* Since the result of the Barrett multiplication is bounded
-           by q/2 in absolute value.
-           Finally to complete the final update of the results with add/sub
-           r[j] = r[j] + t.
-           r[j+len] = r[j] - t
-         */
+.macro AddSub_4x
         vsubuhm vresult_b1, vdata_a1, vdata_b1
         vadduhm vresult_a1, vdata_b1, vdata_a1
         vsubuhm vresult_b2, vdata_a2, vdata_b2
@@ -338,7 +333,7 @@
  * coefficient array order.
  */
 .macro PermWriteL44
-        Compute_4Coeffs
+        AddSub_4x
         xxpermdi 0, 32+vresult_a1, 32+vresult_b1, 3
         xxpermdi 1, 32+vresult_a1, 32+vresult_b1, 0
         xxpermdi 2, 32+vresult_a2, 32+vresult_b2, 3
@@ -362,7 +357,7 @@
  * coefficient array order.
  */
 .macro PermWriteL24
-        Compute_4Coeffs
+        AddSub_4x
         vmrgew 10, vresult_b1, vresult_a1
         vmrgow 11, vresult_b1, vresult_a1
         vmrgew 12, vresult_b2, vresult_a2
@@ -420,13 +415,14 @@
 .endm
 
 /*
- * NTT other layers, 1, 2, 3, 4, 5.
+ * A group of 4 CT butterflies, used by NTT layers 1, 2, 3, 4, 5.
  */
-.macro ntt_layer12345 start, next, _vz0, _vz1, _vz2, _vz3, _vzt0, _vzt1, _vzt2, _vzt3
-        Load_4Coeffs \start, \next
+.macro CT_Butterfly_4x start, next, _vz0, _vz1, _vz2, _vz3, _vzt0, _vzt1, _vzt2, _vzt3
+        Init_Coeffs_offset \start, \next
+        load_high
         barrett_fqmul_4x \_vz0, \_vz1, \_vz2, \_vz3, \_vzt0, \_vzt1, \_vzt2, \_vzt3
-        Load_4Rj
-        Compute_4Coeffs
+        load_low
+        AddSub_4x
         Write_One
 .endm
 
@@ -435,9 +431,12 @@
  *   Compute forward NTT based on the following 7 layers -
  *     len = 128, 64, 32, 16, 8, 4, 2.
  *
- *   Each layer compute the coefficients on 2 legs, start and start + len*2 offsets.
+ *   Each layer pairs a low coefficient r[j] (leg 1) with a high coefficient
+ *   r[j+len] (leg 2). Offsets below are byte offsets into r; as each coefficient
+ *   is an int16_t (2 bytes), an index distance len is a byte distance len*2, so
+ *   leg 2 sits at byte offset start + len*2.
  *
- *   leg 1                        leg 2
+ *   leg 1 (low, r[j])            leg 2 (high, r[j+len])
  *   -----                        -----
  *   start                        start+len*2
  *   start+next                   start+len*2+next
@@ -490,10 +489,10 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         addi    zeta_inp, zeta_inp, 16
         addi    zeta_tw_inp, zeta_tw_inp, 16
 
-        ntt_layer12345 0, 16,   V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
-        ntt_layer12345 64, 16,  V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
-        ntt_layer12345 128, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
-        ntt_layer12345 192, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
+        CT_Butterfly_4x 0, 16,   V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
+        CT_Butterfly_4x 64, 16,  V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
+        CT_Butterfly_4x 128, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
+        CT_Butterfly_4x 192, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
 
 .balign 16
         /*
@@ -504,15 +503,15 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         lvx     V_ZETATW, 0, zeta_tw_inp
         addi    zeta_inp, zeta_inp, 16
         addi    zeta_tw_inp, zeta_tw_inp, 16
-        ntt_layer12345 0, 16,  V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
-        ntt_layer12345 64, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
+        CT_Butterfly_4x 0, 16,  V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
+        CT_Butterfly_4x 64, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
 
         lvx     V_ZETA, 0, zeta_inp
         lvx     V_ZETATW, 0, zeta_tw_inp
         addi    zeta_inp, zeta_inp, 16
         addi    zeta_tw_inp, zeta_tw_inp, 16
-        ntt_layer12345 256, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
-        ntt_layer12345 320, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
+        CT_Butterfly_4x 256, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
+        CT_Butterfly_4x 320, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
 
 .balign 16
         /*
@@ -523,25 +522,25 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         lvx     V_ZETATW, 0, zeta_tw_inp
         addi    zeta_inp, zeta_inp, 16
         addi    zeta_tw_inp, zeta_tw_inp, 16
-        ntt_layer12345 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
+        CT_Butterfly_4x 0, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
 
         lvx     V_ZETA, 0, zeta_inp
         lvx     V_ZETATW, 0, zeta_tw_inp
         addi    zeta_inp, zeta_inp, 16
         addi    zeta_tw_inp, zeta_tw_inp, 16
-        ntt_layer12345 128, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
+        CT_Butterfly_4x 128, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
 
         lvx     V_ZETA, 0, zeta_inp
         lvx     V_ZETATW, 0, zeta_tw_inp
         addi    zeta_inp, zeta_inp, 16
         addi    zeta_tw_inp, zeta_tw_inp, 16
-        ntt_layer12345 256, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
+        CT_Butterfly_4x 256, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
 
         lvx     V_ZETA, 0, zeta_inp
         lvx     V_ZETATW, 0, zeta_tw_inp
         addi    zeta_inp, zeta_inp, 16
         addi    zeta_tw_inp, zeta_tw_inp, 16
-        ntt_layer12345 384, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
+        CT_Butterfly_4x 384, 16, V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW
 
 .balign 16
         /*
@@ -549,12 +548,12 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
          */
         li      len_2, 32
         Load_next_4zetas
-        ntt_layer12345 0, 64,  V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
-        ntt_layer12345 16, 64, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
+        CT_Butterfly_4x 0, 64,  V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
+        CT_Butterfly_4x 16, 64, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
 
         Load_next_4zetas
-        ntt_layer12345 256, 64, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
-        ntt_layer12345 272, 64, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
+        CT_Butterfly_4x 256, 64, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
+        CT_Butterfly_4x 272, 64, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
 
 .balign 16
         /*
@@ -562,16 +561,16 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
          */
         li      len_2, 16
         Load_next_4zetas
-        ntt_layer12345 0, 32, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
+        CT_Butterfly_4x 0, 32, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
 
         Load_next_4zetas
-        ntt_layer12345 128, 32, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
+        CT_Butterfly_4x 128, 32, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
 
         Load_next_4zetas
-        ntt_layer12345 256, 32, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
+        CT_Butterfly_4x 256, 32, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
 
         Load_next_4zetas
-        ntt_layer12345 384, 32, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
+        CT_Butterfly_4x 384, 32, V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3
 
         /*
          * Layer 6. len = 4,
@@ -583,6 +582,10 @@ MLK_ASM_FN_SYMBOL(ntt_ppc_asm)
         mr      dup_rinp, rinp                 /* Let r5 points to coefficient array */
         li      len_2, 8
 
+        /* Raw coefficient byte-offsets for the 4-4 / 2-2-2-2 loads,
+         * held in scratch regs r10-r12 and r15-r18. r10/r16/r17/r18 happen to
+         * alias b1/a2/b2/a3_offset, but those layer-1-5 roles do not apply
+         * here - the values are unrelated. */
         li      10, 16
         li      11, 32
         li      12, 48

@@ -13,8 +13,6 @@
 
 #include "consts.h"
 
-.text
-
 /* Barrett-Q-reduce constants */
 #define V20159  0
 #define V2pw25  1
@@ -88,6 +86,15 @@
 #define b3_offset 19
 #define b4_offset 21
 
+.text
+
+/*
+ * PowerPC ELF v2 ABI: r3 = int16_t *r, r4 = int16_t *qdata.
+ *   caller-saved (volatile):     r0, r3-r12; v0-v19; f0-f13
+ *   callee-saved (non-volatile): r14-r31; v20-v31; f14-f31
+ * The callee-saved registers used here (r14-r22, v20-v31) are saved/restored
+ * in a 352-byte frame.
+ */
 .macro SAVE_REGS
         stdu    1, -352(1)
         mflr    0
@@ -166,11 +173,11 @@
 .endm
 
 /*
- * Compute r[j] and r[j+len] from computed coefficients
- *  r[j] + r[j+len] : V8, V12, V16, V20 (data for Barrett Q-reduce)
- *  r[j+len] - r[j]: V25, V26, V30, V31 (data for Barrett fqmul)
+ * Compute r[j]+r[j+len] and r[j+len]-r[j] (Gentleman-Sande)
+ *  r[j]+r[j+len]: vdata_brt1, vdata_brt2, vdata_brt3, vdata_brt4
+ *  r[j+len]-r[j]: vdata_t1, vdata_t2, vdata_t3, vdata_t4
  */
-.macro Compute_4Coeffs
+.macro AddSub_4x
         vsubuhm vdata_t1, vdata_b1, vdata_a1
         vsubuhm vdata_t2, vdata_b2, vdata_a2
         vsubuhm vdata_t3, vdata_b3, vdata_a3
@@ -190,16 +197,16 @@
  *
  * r7: len * 2, each coefficient component is 2 bytes.
  *
- * registers used for offsets to coefficients, r[j] and r[j+len]
- * R9: offset to r0 = j
- * R16: offset to r1 = r0 + next
- * R18: offset to r2 = r1 + next
- * R20: offset to r3 = r2 + next
+ * registers used for offset to coefficients, r[j] and r[j+len]
+ * a1_offset: offset to r0 = j
+ * a2_offset: offset to r1 = r0 + next
+ * a3_offset: offset to r2 = r1 + next
+ * a4_offset: offset to r3 = r2 + next
  *
- * R10: offset to r'0 = r0 + len*2
- * R17: offset to r'1 = r'0 + step
- * R19: offset to r'2 = r'1 + step
- * R21: offset to r'3 = r'2 + step
+ * b1_offset: offset to r'0 = r0 + len*2
+ * b2_offset: offset to r'1 = r'0 + next
+ * b3_offset: offset to r'2 = r'1 + next
+ * b4_offset: offset to r'3 = r'2 + next
  *
  */
 .macro Init_Coeffs_offset start, next
@@ -214,34 +221,30 @@
 .endm
 
 /*
- * Load coefficient vectors for r[j] (r) and r[j+len] (r'):
- *   Load coefficient in r' vectors from offset, R10, R17, R19 and R21
- *   Load coefficient in r vectors from offset, R9, R16, R18 and R20
- *
- *  r[j+len]: V8, V12, V16, V20
- *  r[j]: V21, V22, V23, V24
+ * Load both coefficient vectors of each butterfly:
+ *   r[j+len] (r') from offsets b1_offset..b4_offset into vdata_b1..vdata_b4
+ *   r[j]     (r)  from offsets a1_offset..a4_offset into vdata_a1..vdata_a4
  */
 .macro Load_4Rjp
-        lxvd2x  32+vdata_b1, rinp, b1_offset    /* V8: vector r'0 */
-        lxvd2x  32+vdata_b2, rinp, b2_offset    /* V12: vector for r'1 */
-        lxvd2x  32+vdata_b3, rinp, b3_offset    /* V16: vector for r'2 */
-        lxvd2x  32+vdata_b4, rinp, b4_offset    /* V20: vector for r'3 */
+        lxvd2x  32+vdata_b1, rinp, b1_offset    /* vector r'0 */
+        lxvd2x  32+vdata_b2, rinp, b2_offset    /* vector for r'1 */
+        lxvd2x  32+vdata_b3, rinp, b3_offset    /* vector for r'2 */
+        lxvd2x  32+vdata_b4, rinp, b4_offset    /* vector for r'3 */
 
-        lxvd2x  32+vdata_a1, rinp, a1_offset     /* V21: vector r0 */
-        lxvd2x  32+vdata_a2, rinp, a2_offset    /* V22: vector r1 */
-        lxvd2x  32+vdata_a3, rinp, a3_offset    /* V23: vector r2 */
-        lxvd2x  32+vdata_a4, rinp, a4_offset    /* V24: vector r3 */
+        lxvd2x  32+vdata_a1, rinp, a1_offset    /* vector r0 */
+        lxvd2x  32+vdata_a2, rinp, a2_offset    /* vector r1 */
+        lxvd2x  32+vdata_a3, rinp, a3_offset    /* vector r2 */
+        lxvd2x  32+vdata_a4, rinp, a4_offset    /* vector r3 */
 .endm
 
 /*
- * Load Coefficients and setup vectors for 8 coefficients in the
- * following order,
- *  rjlen0, rjlen1, rjlen2, rjlen3, rjlen4, rjlen5, rjlen6, rjlen7
+ * Set up the offsets, load r[j] and r[j+len], and form the GS sum/difference
+ * (vdata_brt* = r[j]+r[j+len], vdata_t* = r[j+len]-r[j]).
  */
 .macro Load_4Coeffs start, next
         Init_Coeffs_offset \start, \next
         Load_4Rjp
-        Compute_4Coeffs
+        AddSub_4x
 .endm
 
 /*
@@ -249,14 +252,14 @@
  *
  * Load Coefficients and setup vectors for 8 coefficients in the
  * following order,
- *    rj0, rj1, rjlen2, rjlen3, rj4, rj5, rjlen6, arlen7
+ *    rj0, rj1, rjlen2, rjlen3, rj4, rj5, rjlen6, rjlen7
  *    rj8, rj9, rjlen10, rjlen11, rj12, rj13, rjlen14, rjlen15
  *  Each vmrgew and vmrgow will transpose vectors as,
  *  r[j]=      rj0, rj1, rj8, rj9, rj4, rj5, rj12, rj13
- *  r[j+len]=  rjlen2, rjlen3, rjlen10, rjlen11, rjlen6, arlen7, rjlen14, rjlen15
+ *  r[j+len]=  rjlen2, rjlen3, rjlen10, rjlen11, rjlen6, rjlen7, rjlen14, rjlen15
  *
- *  r[j+len]: V8, V12, V16, V20
- *  r[j]: V21, V22, V23, V24
+ *  r[j+len]: vdata_b1, vdata_b2, vdata_b3, vdata_b4
+ *  r[j]: vdata_a1, vdata_a2, vdata_a3, vdata_a4
  *
  * In order to do the coefficient computation, zeta vector will arrange
  * in the proper order to match the multiplication.
@@ -321,7 +324,7 @@
         xxlor   32+3, 6, 6
         xxlor   32+1, 7, 7
         xxlor   32+2, 8, 8
-        /* Multify Odd/Even signed halfword;
+        /* Multiply Odd/Even signed halfword;
            Results word bound by 2^32 in abs value. */
         vmulosh 6, vdata_brt1, V20159
         vmulesh 5, vdata_brt1, V20159
@@ -380,8 +383,8 @@
  *     b_lo = vmladduhm(b, z, 0)      = (b*z) mod 2^16
  *     vo   = vmladduhm(t, -q, b_lo)  = b*z - t*q (mod 2^16)
  *
- *   Yields the signed canonical representative of (b*z) mod q,
- *   bounded by q/2. V_ZERO is the zero vector set at function entry.
+ *   Computes (b*z) mod q in signed representation; the output is in the
+ *   range (-q, q). V_ZERO is the zero vector set at function entry.
  */
 .macro barrett_fqmul_4x _vz0, _vz1, _vz2, _vz3, _vzt0, _vzt1, _vzt2, _vzt3, _vo0, _vo1, _vo2, _vo3
         vmhraddshs 14, vdata_t1, \_vzt0, V_ZERO
@@ -510,7 +513,7 @@
  */
 .macro intt_layer1
         Load_L24Coeffs
-        Compute_4Coeffs
+        AddSub_4x
         barrett_reduce_4x vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
         xxlor   10, 32+vresult_brt1, 32+vresult_brt1
         xxlor   11, 32+vresult_brt2, 32+vresult_brt2
@@ -528,7 +531,7 @@
  */
 .macro intt_layer2
         Load_L44Coeffs
-        Compute_4Coeffs
+        AddSub_4x
         barrett_reduce_4x vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
         xxlor   10, 32+vresult_brt1, 32+vresult_brt1
         xxlor   11, 32+vresult_brt2, 32+vresult_brt2
@@ -575,20 +578,25 @@
  *   Compute inverse NTT based on the following 7 layers -
  *     len = 2, 4, 8, 16, 32, 64, 128
  *
- *   Each layer compute the coefficients on 2 legs, start and start + len*2 offsets.
+ *   Every coefficient is first scaled by N^-1 (in Montgomery form) via Barrett
+ *   multiplication, then the 7 Gentleman-Sande layers below are applied.
  *
- *   leg 1                        leg 2
+ *   Each layer pairs a low coefficient r[j] (leg 1) with a high coefficient
+ *   r[j+len] (leg 2). Offsets below are byte offsets into r; as each coefficient
+ *   is an int16_t (2 bytes), an index distance len is a byte distance len*2, so
+ *   leg 2 sits at byte offset start + len*2.
+ *
+ *   leg 1 (low, r[j])            leg 2 (high, r[j+len])
  *   -----                        -----
  *   start                        start+len*2
  *   start+next                   start+len*2+next
  *   start+next+next              start+len*2+next+next
  *   start+next+next+next         start+len*2+next+next+next
  *
- *   Each computation loads 8 vectors, 4 for each leg.
- *   The final coefficient (t) from each vector of leg1 and leg2 then do the
- *   add/sub operations to obtain the final results.
+ *   Each computation loads 8 vectors, 4 for each leg, then does the
+ *   Gentleman-Sande add/sub and zeta-multiply to obtain the final results.
  *
- *   -> leg1 = leg1 + t, leg2 = leg1 - t
+ *   -> leg1 = leg1 + leg2 (Barrett-reduced), leg2 = (leg2 - leg1) * zeta
  *
  *   The resulting coefficients then store back to each leg's offset.
  *

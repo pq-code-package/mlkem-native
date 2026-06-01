@@ -2177,54 +2177,148 @@ def gen_ppc64le_intt_twist_zetas():
     yield from _gen_ppc64le_intt_zeta_layout(_ppc64le_zeta_twist)
 
 
-def gen_ppc64le_zeta_files():
-    """Generate PPC64LE zeta include files."""
+def gen_ppc64le_base_constants():
+    """The 7 scalar constants prepended to the PPC64LE twiddle tables; each is
+    broadcast across an 8-halfword vector. Returns a list of
+    (offset_suffix, comment, value)."""
+    Q = modulus
+    n_inv = pow(128, -1, Q) * 2**16 % Q
+    return [
+        ("NQ", "-Q", -Q),
+        ("QINV", "QINV", signed_reduce_u16(pow(Q, -1, 2**16))),
+        ("Q", "Q", Q),
+        (
+            "C20159",
+            "round(2^26 / MLKEM_Q), Barrett reduction constant",
+            round(2**26 / Q),
+        ),
+        ("N_INV", "N^-1 in Montgomery form", n_inv),
+        ("N_INV_TW", "Barrett twist of N^-1", prepare_root_for_barrett(n_inv)[1]),
+        ("C1353", "2^32 mod MLKEM_Q", pow(2, 32, Q)),
+    ]
 
-    def gen_inc(zetas, leading_comment, entries_per_line=8):
+
+def gen_ppc64le_zeta_files():
+    """Generate the PPC64LE constant table (consts.c) and its offsets (consts.h).
+
+    Both copies are rendered from the same data: the dev copy keeps per-region
+    annotations, the mlkem copy is the inlined, unannotated array (like the
+    x86_64 backend). synchronize skips consts.c (see SYNC_SKIP_FILES)."""
+
+    LANES = 8  # halfwords per broadcast vector
+
+    base = gen_ppc64le_base_constants()
+
+    # Twiddle tables, in the order they appear in mlk_ppc_qdata.
+    zeta_tables = [
+        (
+            "ZETA_NTT",
+            "Twiddle factors for the forward NTT",
+            list(gen_ppc64le_ntt_zetas()),
+        ),
+        (
+            "ZETA_INTT",
+            "Twiddle factors for the inverse NTT",
+            list(gen_ppc64le_intt_zetas()),
+        ),
+        (
+            "ZETA_NTT_TW",
+            "Twisted twiddle factors for the forward NTT",
+            list(gen_ppc64le_ntt_twist_zetas()),
+        ),
+        (
+            "ZETA_INTT_TW",
+            "Twisted twiddle factors for the inverse NTT",
+            list(gen_ppc64le_intt_twist_zetas()),
+        ),
+    ]
+
+    # Build the flat table and record the byte offset of each region (each
+    # int16_t entry is 2 bytes).
+    constants = []
+    offsets = []
+    for suffix, _comment, value in base:
+        offsets.append((suffix, len(constants) * 2))
+        constants += [value] * LANES
+    for suffix, _comment, values in zeta_tables:
+        offsets.append((suffix, len(constants) * 2))
+        constants += values
+    total = len(constants)
+
+    def gen_c_prologue():
         yield from gen_header()
-        yield leading_comment
-        zetas = list(zetas)
-        for i in range(0, len(zetas), entries_per_line):
-            chunk = zetas[i : i + entries_per_line]
-            yield "    " + ", ".join(str(t) for t in chunk) + ","
+        yield '#include "../../../common.h"'
+        yield ""
+        yield "#if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \\"
+        yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__)"
+        yield ""
+        yield '#include "consts.h"'
+        yield ""
+        yield "/*"
+        yield " * Constant table for the PPC64LE NTT/invNTT."
+        yield " * For the layout, see the offset macros in consts.h."
+        yield " */"
+
+    def gen_c_epilogue():
+        yield ""
+        yield "#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \\"
+        yield "          !MLK_CONFIG_MULTILEVEL_NO_SHARED && __POWER8_VECTOR__ */"
         yield ""
 
-    ntt_content = "\n".join(
-        gen_inc(
-            gen_ppc64le_ntt_zetas(),
-            "/* Twiddle factors for the PPC64LE forward NTT.\n * See autogen for details.\n */",
-        )
-    )
-    intt_content = "\n".join(
-        gen_inc(
-            gen_ppc64le_intt_zetas(),
-            "/* Twiddle factors for the PPC64LE inverse NTT.\n * See autogen for details.\n */",
-        )
-    )
-    ntt_tw_content = "\n".join(
-        gen_inc(
-            gen_ppc64le_ntt_twist_zetas(),
-            "/* Twisted twiddle factors for the PPC64LE forward NTT.\n * See autogen for details.\n */",
-        )
-    )
-    intt_tw_content = "\n".join(
-        gen_inc(
-            gen_ppc64le_intt_twist_zetas(),
-            "/* Twisted twiddle factors for the PPC64LE inverse NTT.\n * See autogen for details.\n */",
-        )
-    )
+    # dev copy: one array, annotated per region, LANES values per line.
+    def emit_rows(values):
+        for i in range(0, len(values), LANES):
+            yield "    " + ", ".join(str(v) for v in values[i : i + LANES]) + ","
 
-    # The .inc files are #include'd by `consts.c` (not by an .S file), so they
-    # are not inlined via simpasm; we therefore write them directly into both
-    # the developer tree and the mlkem mirror.
-    for filename, content in (
-        ("consts_ntt.inc", ntt_content),
-        ("consts_intt.inc", intt_content),
-        ("consts_ntt_tw.inc", ntt_tw_content),
-        ("consts_intt_tw.inc", intt_tw_content),
-    ):
-        for tree in ("dev/ppc64le/src", "mlkem/src/native/ppc64le/src"):
-            update_file(f"{tree}/{filename}", content)
+    def gen_c_dev():
+        yield from gen_c_prologue()
+        # Fence the table so clang-format keeps the LANES-per-line layout
+        # (it would otherwise break each element onto its own line because of
+        # the per-region comments).
+        yield "/* clang-format off */"
+        yield (
+            f"MLK_ALIGN MLK_INTERNAL_DATA_DEFINITION const int16_t "
+            f"mlk_ppc_qdata[{total}] = {{"
+        )
+        for _suffix, comment, value in base:
+            yield f"    /* {comment} */"
+            yield from emit_rows([value] * LANES)
+        for _suffix, comment, values in zeta_tables:
+            yield f"    /* {comment} */"
+            yield from emit_rows(values)
+        yield "};"
+        yield "/* clang-format on */"
+        yield from gen_c_epilogue()
+
+    # mlkem copy: inlined, unannotated array.
+    def gen_c_mlkem():
+        yield from gen_c_prologue()
+        yield from emit_c_array("const int16_t", "mlk_ppc_qdata", constants)
+        yield from gen_c_epilogue()
+
+    def gen_h():
+        yield from gen_header()
+        yield "#ifndef MLK_DEV_PPC64LE_SRC_CONSTS_H"
+        yield "#define MLK_DEV_PPC64LE_SRC_CONSTS_H"
+        yield '#include "../../../common.h"'
+        yield ""
+        yield "/* Byte offsets into the constant table */"
+        for suffix, byte_off in offsets:
+            yield f"#define MLK_PPC_{suffix}_OFFSET {byte_off}"
+        yield ""
+        yield "#ifndef __ASSEMBLER__"
+        yield "#define mlk_ppc_qdata MLK_NAMESPACE(ppc_qdata)"
+        yield emit_c_array_decl("const int16_t", "mlk_ppc_qdata", total)
+        yield "#endif /* !__ASSEMBLER__ */"
+        yield ""
+        yield "#endif /* !MLK_DEV_PPC64LE_SRC_CONSTS_H */"
+        yield ""
+
+    # consts.c is written to both trees here (synchronize skips it); consts.h
+    # is written to dev only and mirrored by synchronize (with guard rewrite).
+    update_file("dev/ppc64le/src/consts.c", "\n".join(gen_c_dev()))
+    update_file("mlkem/src/native/ppc64le/src/consts.c", "\n".join(gen_c_mlkem()))
+    update_file("dev/ppc64le/src/consts.h", "\n".join(gen_h()))
 
 
 def get_c_source_files(main_only=False, core_only=False, strip_mlkem=False):
