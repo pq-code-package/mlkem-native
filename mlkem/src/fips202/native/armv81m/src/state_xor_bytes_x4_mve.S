@@ -98,13 +98,13 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
         ldr.w r10, [sp, #0x6c]
         ldr r6, [sp, #0x70]
         cmp r6, #0x0
-        beq.w Lkeccak_f1600_x4_state_xor_bytes_asm_exit @ imm = #0x34c
+        beq.w Lkeccak_f1600_x4_state_xor_bytes_asm_exit @ imm = #0x346
         and r5, r10, #0x7
         bic r9, r10, #0x7
         add.w r8, r0, r9, lsl #1
         add.w r7, r8, #0x190
         cmp r5, #0x0
-        beq.w Lkeccak_f1600_x4_state_xor_bytes_asm_pre_main @ imm = #0x132
+        beq.w Lkeccak_f1600_x4_state_xor_bytes_asm_pre_main @ imm = #0x12c
         subs r1, r1, r5
         subs r2, r2, r5
         subs r3, r3, r5
@@ -183,8 +183,6 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
         vstrw.32 q5, [r7], #16
         vmov q7[2], q7[0], r1, r3
         vmov q7[3], q7[1], r2, r4
-        cmp r6, #0x0
-        beq.w Lkeccak_f1600_x4_state_xor_bytes_asm_exit @ imm = #0x206
         b Lkeccak_f1600_x4_state_xor_bytes_asm_main_body @ imm = #0xe
 
 Lkeccak_f1600_x4_state_xor_bytes_asm_pre_main:
@@ -347,7 +345,6 @@ Lkeccak_f1600_x4_state_xor_bytes_asm_exit:
         .cfi_restore lr
         .cfi_adjust_cfa_offset -0x28
         .cfi_endproc
-        nop
 
 MLK_ASM_FN_SIZE(keccak_f1600_x4_state_xor_bytes_asm)
 

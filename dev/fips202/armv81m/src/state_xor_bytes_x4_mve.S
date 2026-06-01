@@ -68,42 +68,102 @@
 // Interleave macros
 // ---------------------------------------------------------------------------
 
-// interleave_odds: in-place SWAR bit permutation that compacts odd-numbered
-// bits of each byte/halfword/word in \t toward the upper half, preparing the
-// odd half of the bit-interleaved representation.
-// Inputs:  \t (data)
-// Outputs: \t (odd bits compacted; per 32b lane: lo16=bytes 0..3, hi16=4..7)
+// ---------------------------------------------------------------------------
+// interleave_odds (SIMD-within-a-register (SWAR); operates independently on
+//                  each 32-bit lane of a Q register):
+//
+//   Compact the 16 bits at odd positions of each 32-bit lane into 16
+//   contiguous bits in the upper half of the output.  Even-position input
+//   bits are discarded; the lower 16 output bits contain garbage.
+//   Companion to `interleave_evens`, which packs the even-position bits
+//   into the lower 16 bits of the output.
+//
+// Per 32-bit lane, with '-' for garbage bits:
+//
+//   Input  bits[31:0]:  VUTSRQPO  NMLKJIHG  FEDCBA98  76543210
+//   Output bits[31:0]:  VTRPNLJH  FDB97531  --------  --------
+//
+// Inputs:   \t   (vector with 32-bit lanes)
+// Outputs:  \t   (bits [31:16] of each 32-bit lane = compacted odd-position
+//                 input bits; bits [15:0] of each 32-bit lane = garbage)
 // Clobbers: \u
+// ---------------------------------------------------------------------------
 .macro interleave_odds t, u
-    vshl.u8     \u, \t, #2       // u = t[5..0],00
-    vsri.u8     \t, \u, #1       // t = t[7],u[6..0]  => t = t[7],t[5..0],0
-    vshl.u8     \u, \t, #3       // stage 2 across nibbles
-    vsri.u8     \t, \u, #2
-    vshl.u8     \u, \t, #4       // stage 3 across bytes
-    vsri.u8     \t, \u, #3
-    vshl.u16    \u, \t, #8       // widen within halfwords
+    // Per-byte compaction: pack the 4 odd-position bits of
+    // each byte into that byte's top nibble.
+    //
+    //                               t: | 76543210 |   u: | -------- |
+    vshl.u8     \u, \t, #2       //  t: | 76543210 |   u: | 543210-- |
+    vsri.u8     \t, \u, #1       //  t: | 7543210- |   u: | 543210-- |
+    vshl.u8     \u, \t, #3       //  t: | 7543210- |   u: | 3210---- |
+    vsri.u8     \t, \u, #2       //  t: | 753210-- |   u: | 3210---- |
+    vshl.u8     \u, \t, #4       //  t: | 753210-- |   u: | 10------ |
+    vsri.u8     \t, \u, #3       //  t: | 75310--- |   u: | 10------ |
+    //
+    // The straggling bit 0 at position 3 and the three
+    // zero bits below it are discarded by the next two stages.
+    //
+    // Cross-byte fold: within each halfword, fold byte 0's top nibble
+    // into byte 1's bottom nibble so byte 1 holds the 8 packed odd bits
+    // from the halfword's two input bytes.
+    vshl.u16    \u, \t, #8       //  u's byte 1 (per halfword) = t's byte 0
     vsri.u8     \t, \u, #4
-    vshl.u32    \u, \t, #16      // widen within words
+    //
+    // Cross-halfword fold: within each word, fold halfword 0's top byte
+    // into halfword 1's bottom byte so halfword 1 holds all 16 packed
+    // odd bits from the word (bits 31, 29, ..., 3, 1 of the input, in
+    // that order).  Halfword 0 = garbage.
+    vshl.u32    \u, \t, #16      //  u's halfword 1 (per word) = t's halfword 0
     vsri.u16    \t, \u, #8
 .endm
 
-// interleave_evens: in-place SWAR bit permutation that compacts even-numbered
-// bits of each byte/halfword/word in \t toward the lower half, preparing the
-// even half of the bit-interleaved representation.
-// Inputs:  \t (data)
-// Outputs: \t (even bits compacted; per 32b lane: lo16=bytes 0..3, hi16=4..7)
+// ---------------------------------------------------------------------------
+// interleave_evens (SIMD-within-a-register (SWAR); operates independently on
+//                   each 32-bit lane of a Q register):
+//
+//   Compact the 16 bits at even positions of each 32-bit lane into 16
+//   contiguous bits in the lower half of the output.  Odd-position input
+//   bits are discarded; the upper 16 output bits contain garbage.
+//   Companion to `interleave_odds`, which packs the odd-position bits
+//   into the upper 16 bits of the output.
+//
+// Per 32-bit lane, with '-' for garbage bits:
+//
+//   Input  bits[31:0]:  VUTSRQPO  NMLKJIHG  FEDCBA98  76543210
+//   Output bits[31:0]:  --------  --------  USQOMKIG  ECA86420
+//
+// Inputs:   \t   (vector with 32-bit lanes)
+// Outputs:  \t   (bits [15:0] of each 32-bit lane = compacted even-position
+//                 input bits; bits [31:16] of each 32-bit lane = garbage)
 // Clobbers: \u
+// ---------------------------------------------------------------------------
 .macro interleave_evens t, u
-    vshr.u8     \u, \t, #2       // stage 1 within bytes
-    vsli.u8     \t, \u, #1       // t = ((t >> 1) & 0x7E7E7E7E) | (t & 0x01010101)
-    vshr.u8     \u, \t, #3       // stage 2 within nibbles
-    vsli.u8     \t, \u, #2       // t = ((t >> 2) & 0x1C1C1C1C) | (t & 0x03030303)
-    vshr.u8     \u, \t, #4       // stage 3 across bytes
-    vsli.u8     \t, \u, #3       // t = ((t >> 3) & 0x08080808) | (t & 0x07070707)
-    vshr.u16    \u, \t, #8       // widen within halfwords
-    vsli.u8     \t, \u, #4       // t = ((t >> 4) & 0x00F000F0) | (t & 0x000F000F)
-    vshr.u32    \u, \t, #16      // widen within words
-    vsli.u16    \t, \u, #8       // t = ((t >> 8) & 0x0000FF00) | (t & 0x000000FF)
+    // Per-byte compaction: pack the 4 even-position bits of
+    // each byte into that byte's bottom nibble.
+    //
+    //                               t: | 76543210 |   u: | -------- |
+    vshr.u8     \u, \t, #2       //  t: | 76543210 |   u: | --765432 |
+    vsli.u8     \t, \u, #1       //  t: | -7654320 |   u: | --765432 |
+    vshr.u8     \u, \t, #3       //  t: | -7654320 |   u: | ----7654 |
+    vsli.u8     \t, \u, #2       //  t: | --765420 |   u: | ----7654 |
+    vshr.u8     \u, \t, #4       //  t: | --765420 |   u: | ------76 |
+    vsli.u8     \t, \u, #3       //  t: | ---76420 |   u: | ------76 |
+    //
+    // The straggling bit 7 at position 4 and the three zero bits above it
+    // are discarded by the next two stages.
+    //
+    // Cross-byte fold: within each halfword, fold byte 1's bottom nibble
+    // into byte 0's top nibble so byte 0 holds the 8 packed even bits
+    // from the halfword's two input bytes.
+    vshr.u16    \u, \t, #8       //  u's byte 0 (per halfword) = t's byte 1
+    vsli.u8     \t, \u, #4
+    //
+    // Cross-halfword fold: within each word, fold halfword 1's bottom byte
+    // into halfword 0's top byte so halfword 0 holds all 16 packed
+    // even bits from the word (bits 30, 28, ..., 2, 0 of the input, in
+    // that order).  Halfword 1 = garbage.
+    vshr.u32    \u, \t, #16      //  u's halfword 0 (per word) = t's halfword 1
+    vsli.u16    \t, \u, #8
 .endm
 
 // ---------------------------------------------------------------------------
@@ -243,7 +303,8 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
     lsl mask, mask, off
     vmsr p0, mask
 
-    // Predicated byte loads (4 bytes per instance, post-increment by 4)
+    // Predicated byte loads of nB bytes per instance; post-increment of 4
+    // positions qP for the main loop's [qP, #4]! loads.
     vpstttt
     vldrbt.u8 qd0, [dp0], #4
     vldrbt.u8 qd1, [dp1], #4
@@ -262,8 +323,6 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
     // Build qP = {d0,d1,d2,d3} as u32 lanes for gather loads
     vmov    qP[2], qP[0],  dp0, dp2
     vmov    qP[3], qP[1],  dp1, dp3
-    cmp     length, #0
-    beq     keccak_f1600_x4_state_xor_bytes_asm_exit
     b       keccak_f1600_x4_state_xor_bytes_asm_main_body
 
 keccak_f1600_x4_state_xor_bytes_asm_pre_main:
