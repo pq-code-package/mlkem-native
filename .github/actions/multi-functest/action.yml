@@ -172,6 +172,7 @@ runs:
           alloc: ${{ inputs.alloc }}
           rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
+          extra_env: ${{ inputs.extra_env }}
       - name: Cross ppc64le Tests (POWER7 fallback path)
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-ppc64le') && (success() || failure()) }}
         uses: ./.github/actions/functest
