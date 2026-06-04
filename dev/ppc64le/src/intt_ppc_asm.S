@@ -13,9 +13,44 @@
 
 #include "consts.h"
 
+/*
+ * VSX register naming
+ * ===================
+ *
+ * POWER has two separate 32-entry SIMD/FP register files: f0..f31 (FPRs,
+ * scalar FP) and v0..v31 (VRs, 128-bit Altivec/VMX vectors). They are
+ * physically distinct -- writing v3 does not touch f3.
+ *
+ * VSX (Power ISA 2.06, POWER7+) added a single 64-entry 128-bit-wide VSR
+ * namespace covering both legacy files via a non-overlapping mapping:
+ *
+ *   FPR f<i>  -- LOW 64 bits of vs<i>           (i in 0..31)
+ *                upper 64 bits of vs<i> are new VSX state, ignored by
+ *                legacy FP instructions
+ *   VR  v<i>  -- ALL 128 bits of vs<32+i>       (i in 0..31)
+ *
+ * So vs0..vs31 are the FPR-anchored slots (scalar-FP at the low half),
+ * and vs32..vs63 are exactly the VR file. v3 and f3 live in different
+ * VSR slots (vs35 and vs3) and never alias each other.
+ *
+ * VSX-form instructions (xxlor / lxvx / stxvx / xxpermdi / ...) take 6-bit
+ * operands and can address any of the 64 VSRs; Altivec instructions take
+ * 5-bit operands and can only address v0..v31. To name VR `V_FOO` from a
+ * VSX instruction, we write `32+V_FOO` (= the VSR number of that VR).
+ *
+ * Several Barrett-Q-reduce constants (-Q, +Q, zero, 2^25, 26) are
+ * precomputed at function entry and parked in the FPR-anchored VSRs
+ * vs0/3/6/7/8 -- free 128-bit scratch slots, since this routine does
+ * no scalar-FP work. They are reloaded into VRs via xxlor as needed.
+ */
+
+/*
+ * TODO: lazy reduction and layer merging, as in the aarch64 inverse NTT.
+ */
+
 /* Barrett-Q-reduce constants */
 #define V20159  0
-#define V2pw25  1
+#define V_25    1
 #define V_26    2
 #define V_MKQ   3
 
@@ -35,7 +70,7 @@
 
 /* Barrett twisted zetas: zt = round_to_even(z * 2^16 / q) / 2.
  * Placed in vdata_b slots (free by the time Load_next_4zetas runs) to
- * avoid the V20159/V2pw25/V_26/V_MKQ/V_Z0..3 constants required by the
+ * avoid the V20159/V_25/V_26/V_MKQ/V_Z0..3 constants required by the
  * next Barrett-Q-reduce. V_ZETATW aliases V_ZT0 (broadcast layer 5-7). */
 #define V_ZT0     12
 #define V_ZT1     20
@@ -86,12 +121,34 @@
 #define b3_offset 19
 #define b4_offset 21
 
+/* VSR slot indices for the long-term constant stash documented in the
+ * file-header comment. Used as the literal VSR operand in xxlor (low
+ * half of vsX, alias fX, dead in this routine). */
+#define VS_NMKQ_STASH   0
+#define VS_ZERO_STASH   3
+#define VS_MKQ_STASH    6
+#define VS_25_STASH     7
+#define VS_26_STASH     8
+
 .text
 
 /*
  * PowerPC ELF v2 ABI: r3 = int16_t *r, r4 = int16_t *qdata.
  *   callee-saved registers: r14-r31; v20-v31
  * The callee-saved registers used here (r14-r22, v20-v31) are saved/restored.
+ *
+ * SAVE_REGS allocates a 352-byte stack frame and spills the callee-saved
+ * registers actually used by this function (r14-r22 and v20-v31). The
+ * function is a leaf, so LR is held in r0 across the body rather than
+ * spilled to memory.
+ *
+ * Frame layout (offsets relative to SP after `stdu 1, -352(1)`):
+ *
+ *     [   0,   8)  -- caller's SP (back chain, set atomically by stdu)
+ *     [  56, 128)  -- r14..r22  (9 x 8 bytes)
+ *     [ 128, 320)  -- v20..v31  (12 x 16 bytes)
+ *
+ * The remaining slots (8-55, 320-351) are unused.
  */
 .macro SAVE_REGS
         stdu    1, -352(1)
@@ -187,25 +244,27 @@
 .endm
 
 /*
- * Init_Coeffs_offset: initial offset setup for the coefficient array.
+ * Init_Coeffs_offset: compute the 8 byte offsets used by the load/store
+ * macros for one GS_Butterfly_4x call.
  *
- * start: beginning of the offset to the coefficient array.
- * next: Next offset.
- * len: Index difference between coefficients.
+ * Args:
+ *   start: byte offset of the first low coefficient (leg 1) within the
+ *          polynomial buffer.
+ *   next:  byte stride between successive butterfly groups.
  *
- * r7: len * 2, each coefficient component is 2 bytes.
+ * Reads:
+ *   len_2 (r7): 2*len, the byte distance from a low coefficient to its
+ *               paired high coefficient.
  *
- * registers used for offset to coefficients, r[j] and r[j+len]
- * a1_offset: offset to r0 = j
- * a2_offset: offset to r1 = r0 + next
- * a3_offset: offset to r2 = r1 + next
- * a4_offset: offset to r3 = r2 + next
- *
- * b1_offset: offset to r'0 = r0 + len*2
- * b2_offset: offset to r'1 = r'0 + next
- * b3_offset: offset to r'2 = r'1 + next
- * b4_offset: offset to r'3 = r'2 + next
- *
+ * Writes (all byte offsets relative to rinp):
+ *   a1_offset = start                a*: low  legs (r[j])
+ *   a2_offset = start + next
+ *   a3_offset = start + 2*next
+ *   a4_offset = start + 3*next
+ *   b1_offset = start + len_2        b*: high legs (r[j+len])
+ *   b2_offset = start + len_2 + next
+ *   b3_offset = start + len_2 + 2*next
+ *   b4_offset = start + len_2 + 3*next
  */
 .macro Init_Coeffs_offset start, next
         li      a1_offset, \start               /* first offset to j */
@@ -223,7 +282,7 @@
  *   r[j+len] (r') from offsets b1_offset..b4_offset into vdata_b1..vdata_b4
  *   r[j]     (r)  from offsets a1_offset..a4_offset into vdata_a1..vdata_a4
  */
-.macro Load_4Rjp
+.macro Load_4Both
         lxvd2x  32+vdata_b1, rinp, b1_offset    /* vector r'0 */
         lxvd2x  32+vdata_b2, rinp, b2_offset    /* vector for r'1 */
         lxvd2x  32+vdata_b3, rinp, b3_offset    /* vector for r'2 */
@@ -241,7 +300,7 @@
  */
 .macro Load_4Coeffs start, next
         Init_Coeffs_offset \start, \next
-        Load_4Rjp
+        Load_4Both
         AddSub_4x
 .endm
 
@@ -262,7 +321,7 @@
  * In order to do the coefficient computation, zeta vector will arrange
  * in the proper order to match the multiplication.
  */
-.macro Load_L24Coeffs
+.macro LoadPermL24
         lxvd2x     32+25, 0, dup_rinp
         lxvd2x     32+26, 10, dup_rinp
         vmrgew vdata_b1, 25, 26
@@ -296,7 +355,7 @@
  * In order to do the coefficients computation, zeta vector will arrange
  * in the proper order to match the multiplication.
  */
-.macro Load_L44Coeffs
+.macro LoadPermL44
         lxvd2x     10, 0, dup_rinp
         lxvd2x     11, 10, dup_rinp
         xxpermdi 32+vdata_b1, 11, 10, 3
@@ -316,12 +375,14 @@
 .endm
 
 .macro barrett_reduce_4x _v0, _v1, _v2, _v3
-        /* Restore constant vectors
-           V_MKQ, V2pw25 and V_26 */
+        /* Materialize VR copies of V_MKQ (v3), V_25 (v1), V_26 (v2)
+           from their long-term VSR stash slots. The caller does not
+           keep these VR-resident between barrett_reduce_4x calls.
+           Also zero v7 (scratch). */
         vxor    7, 7, 7
-        xxlor   32+3, 6, 6
-        xxlor   32+1, 7, 7
-        xxlor   32+2, 8, 8
+        xxlor   32+V_MKQ,   VS_MKQ_STASH,   VS_MKQ_STASH
+        xxlor   32+V_25,    VS_25_STASH,    VS_25_STASH
+        xxlor   32+V_26,    VS_26_STASH,    VS_26_STASH
         /* Multiply Odd/Even signed halfword;
            Results word bound by 2^32 in abs value. */
         vmulosh 6, vdata_brt1, V20159
@@ -340,14 +401,14 @@
         xxmrghw 32+14, 32+14, 32+15
         xxmrglw 32+17, 32+18, 32+19
         xxmrghw 32+18, 32+18, 32+19
-        vadduwm 4, 4, V2pw25
-        vadduwm 5, 5, V2pw25
-        vadduwm 9, 9, V2pw25
-        vadduwm 10, 10, V2pw25
-        vadduwm 13, 13, V2pw25
-        vadduwm 14, 14, V2pw25
-        vadduwm 17, 17, V2pw25
-        vadduwm 18, 18, V2pw25
+        vadduwm 4, 4, V_25
+        vadduwm 5, 5, V_25
+        vadduwm 9, 9, V_25
+        vadduwm 10, 10, V_25
+        vadduwm 13, 13, V_25
+        vadduwm 14, 14, V_25
+        vadduwm 17, 17, V_25
+        vadduwm 18, 18, V_25
         /* Right shift and pack lower halfword,
            results bound by 2^16 in abs value */
         vsraw   4, 4, V_26
@@ -375,14 +436,19 @@
 .endm
 
 /*
- * Barrett multiplication for the per-layer fqmul (4 lanes).
+ * Barrett multiplication (4 lanes), with explicit output operands _vo*.
  *   For each lane (b in vdata_t_i, z in _vz_i, zt in _vzt_i):
  *     t    = vmhraddshs(b, zt, 0)    = round(b*zt / 2^15)
  *     b_lo = vmladduhm(b, z, 0)      = (b*z) mod 2^16
- *     vo   = vmladduhm(t, -q, b_lo)  = b*z - t*q (mod 2^16)
+ *     _vo  = vmladduhm(t, -q, b_lo)  = b*z - t*q (mod 2^16)
  *
- *   Computes (b*z) mod q in signed representation; the output is in the
- *   range (-q, q). V_ZERO is the zero vector set at function entry.
+ *   Computes (b*z) mod MLKEM_Q in signed representation; the output is
+ *   in the range (-MLKEM_Q, MLKEM_Q). V_ZERO is the zero vector set at
+ *   function entry.
+ *
+ *   Note: this INTT variant writes to explicit output operands and does
+ *   not overwrite vdata_t_i. The NTT variant in ntt_ppc_asm.S is in-place
+ *   over its vdata_b_i input.
  */
 .macro barrett_fqmul_4x _vz0, _vz1, _vz2, _vz3, _vzt0, _vzt1, _vzt2, _vzt3, _vo0, _vo1, _vo2, _vo3
         vmhraddshs 14, vdata_t1, \_vzt0, V_ZERO
@@ -417,14 +483,14 @@
         addi    zeta_tw_inp, zeta_tw_inp, 64
 .endm
 
-.macro Write_B4C _vs0, _vs1, _vs2, _vs3
+.macro Write_4_Low _vs0, _vs1, _vs2, _vs3
         stxvd2x \_vs0, rinp, a1_offset
         stxvd2x \_vs1, rinp, a2_offset
         stxvd2x \_vs2, rinp, a3_offset
         stxvd2x \_vs3, rinp, a4_offset
 .endm
 
-.macro Write_M4C _vs0, _vs1, _vs2, _vs3
+.macro Write_4_High _vs0, _vs1, _vs2, _vs3
         stxvd2x \_vs0, rinp, b1_offset
         stxvd2x \_vs1, rinp, b2_offset
         stxvd2x \_vs2, rinp, b3_offset
@@ -456,11 +522,7 @@
  * Transpose the final coefficients of 4-4 layout to the original
  * coefficient array order.
  */
-.macro PermWriteL44
-        xxlor   32+14, 10, 10
-        xxlor   32+19, 11, 11
-        xxlor   32+24, 12, 12
-        xxlor   32+29, 13, 13
+.macro PermStoreL44
         xxpermdi 32+10, 32+14, 32+vresult_t1, 3
         xxpermdi 32+11, 32+14, 32+vresult_t1, 0
         xxpermdi 32+12, 32+19, 32+vresult_t2, 3
@@ -483,11 +545,7 @@
  * Transpose the final coefficients of 2-2-2-2 layout to the original
  * coefficient array order.
  */
-.macro PermWriteL24
-        xxlor   32+14, 10, 10
-        xxlor   32+19, 11, 11
-        xxlor   32+24, 12, 12
-        xxlor   32+29, 13, 13
+.macro PermStoreL24
         vmrgew 10, vresult_t1, 14
         vmrgow 11, vresult_t1, 14
         vmrgew 12, vresult_t2, 19
@@ -507,77 +565,121 @@
 .endm
 
 /*
- * INTT layer 1, Len=2.
+ * Park vresult_brt1..brt4 (the GS sums = future leg1 values, output of
+ * barrett_reduce_4x) in the FPR-anchored VSR scratch slots vs10..vs13,
+ * before the upcoming Load_next_4zetas + barrett_fqmul_4x sequence
+ * clobbers them. Specifically vresult_brt3 = v13 collides with
+ * vresult_t1 = v13 written by barrett_fqmul_4x.
+ *
+ * Pairs with RecoverLow (called from the wrapper after barrett_fqmul_4x).
+ *
+ * Future work: this save/recover pair only exists because of the v13
+ * collision in the chosen register allocation. A future re-allocation
+ * that picks non-overlapping VRs for vresult_brt* and vresult_t* could
+ * eliminate both helpers.
  */
-.macro intt_layer1
-        Load_L24Coeffs
-        AddSub_4x
-        barrett_reduce_4x vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
+.macro SaveLow
         xxlor   10, 32+vresult_brt1, 32+vresult_brt1
         xxlor   11, 32+vresult_brt2, 32+vresult_brt2
         xxlor   12, 32+vresult_brt3, 32+vresult_brt3
         xxlor   13, 32+vresult_brt4, 32+vresult_brt4
-        xxlor   32+V_NMKQ, 0, 0  /* restore V_NMKQ */
-        xxlor   32+V_ZERO, 3, 3   /* restore V_ZERO from vs3 */
-        Load_next_4zetas
-        barrett_fqmul_4x V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3, vresult_t1, vresult_t2, vresult_t3, vresult_t4
-        PermWriteL24
 .endm
 
 /*
- * INTT layer 2, Len=4.
+ * Pull the parked low/sum results back from vs10..vs13 into VRs 14, 19,
+ * 24, 29 (chosen so they don't collide with vresult_t1..t4 = v13, v18,
+ * v23, v28 left by barrett_fqmul_4x). These are the brt operands that
+ * PermStoreL{44,24} interleaves with the multiplied-diff vectors.
  */
-.macro intt_layer2
-        Load_L44Coeffs
+.macro RecoverLow
+        xxlor   32+14, 10, 10
+        xxlor   32+19, 11, 11
+        xxlor   32+24, 12, 12
+        xxlor   32+29, 13, 13
+.endm
+
+/*
+ * Restore the VR copies of long-term constants V_NMKQ (v5) and V_ZERO
+ * (v3) from their VSR stashes (vs0 and vs3). barrett_reduce_4x clobbers
+ * v5 (used as a multiply-even scratch destination) and v3 (used to hold
+ * V_MKQ for its own body, since V_MKQ and V_ZERO share v3).
+ */
+.macro RestoreGlobals
+        xxlor   32+V_NMKQ, VS_NMKQ_STASH, VS_NMKQ_STASH
+        xxlor   32+V_ZERO, VS_ZERO_STASH, VS_ZERO_STASH
+.endm
+
+/*
+ * Gentleman-Sande 4-batched butterfly, len=2 (2-2-2-2 layout).
+ * Used by layer 1 of the inverse NTT.
+ */
+.macro GS_Butterfly_4x_len2
+        LoadPermL24
         AddSub_4x
         barrett_reduce_4x vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
-        xxlor   10, 32+vresult_brt1, 32+vresult_brt1
-        xxlor   11, 32+vresult_brt2, 32+vresult_brt2
-        xxlor   12, 32+vresult_brt3, 32+vresult_brt3
-        xxlor   13, 32+vresult_brt4, 32+vresult_brt4
-        xxlor   32+V_NMKQ, 0, 0  /* restore V_NMKQ */
-        xxlor   32+V_ZERO, 3, 3   /* restore V_ZERO from vs3 */
+        SaveLow
+        RestoreGlobals
         Load_next_4zetas
         barrett_fqmul_4x V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3, vresult_t1, vresult_t2, vresult_t3, vresult_t4
-        PermWriteL44
+        RecoverLow
+        PermStoreL24
 .endm
 
 /*
- * INTT layer 3 and 4, Len=8 and 16.
+ * Gentleman-Sande 4-batched butterfly, len=4 (4-4 layout).
+ * Used by layer 2 of the inverse NTT.
  */
-.macro intt_layer34 start, next
-        Load_4Coeffs \start, \next
+.macro GS_Butterfly_4x_len4
+        LoadPermL44
+        AddSub_4x
         barrett_reduce_4x vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
-        Write_B4C 32+vresult_brt1, 32+vresult_brt2, 32+vresult_brt3, 32+vresult_brt4
-        xxlor   32+V_NMKQ, 0, 0  /* restore V_NMKQ */
-        xxlor   32+V_ZERO, 3, 3   /* restore V_ZERO from vs3 */
+        SaveLow
+        RestoreGlobals
         Load_next_4zetas
         barrett_fqmul_4x V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3, vresult_t1, vresult_t2, vresult_t3, vresult_t4
-        Write_M4C 32+vresult_t1, 32+vresult_t2, 32+vresult_t3, 32+vresult_t4
+        RecoverLow
+        PermStoreL44
 .endm
 
 /*
- * INTT layer 5, 6 and 7, Len=32, 64 and 128.
+ * Gentleman-Sande 4-batched butterfly with 4 packed zetas per call.
+ * Used by layers 3 and 4 of the inverse NTT (len=8 and 16).
  */
-.macro intt_layer567 start, next
+.macro GS_Butterfly_4x start, next
         Load_4Coeffs \start, \next
         barrett_reduce_4x vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
-        Write_B4C 32+vresult_brt1, 32+vresult_brt2, 32+vresult_brt3, 32+vresult_brt4
-        xxlor   32+V_NMKQ, 0, 0  /* restore V_NMKQ */
-        xxlor   32+V_ZERO, 3, 3   /* restore V_ZERO from vs3 */
+        Write_4_Low 32+vresult_brt1, 32+vresult_brt2, 32+vresult_brt3, 32+vresult_brt4
+        RestoreGlobals
+        Load_next_4zetas
+        barrett_fqmul_4x V_Z0, V_Z1, V_Z2, V_Z3, V_ZT0, V_ZT1, V_ZT2, V_ZT3, vresult_t1, vresult_t2, vresult_t3, vresult_t4
+        Write_4_High 32+vresult_t1, 32+vresult_t2, 32+vresult_t3, 32+vresult_t4
+.endm
+
+/*
+ * Gentleman-Sande 4-batched butterfly with a single zeta broadcast
+ * across all 4 lanes. Used by layers 5, 6 and 7 of the inverse NTT
+ * (len=32, 64 and 128).
+ */
+.macro GS_Butterfly_Broadcast_4x start, next
+        Load_4Coeffs \start, \next
+        barrett_reduce_4x vresult_brt1, vresult_brt2, vresult_brt3, vresult_brt4
+        Write_4_Low 32+vresult_brt1, 32+vresult_brt2, 32+vresult_brt3, 32+vresult_brt4
+        RestoreGlobals
         lvx     V_ZETA, 0, zeta_inp
         lvx     V_ZETATW, 0, zeta_tw_inp
         barrett_fqmul_4x V_ZETA, V_ZETA, V_ZETA, V_ZETA, V_ZETATW, V_ZETATW, V_ZETATW, V_ZETATW, vresult_t1, vresult_t2, vresult_t3, vresult_t4
-        Write_M4C 32+vresult_t1, 32+vresult_t2, 32+vresult_t3, 32+vresult_t4
+        Write_4_High 32+vresult_t1, 32+vresult_t2, 32+vresult_t3, 32+vresult_t4
 .endm
 
 /*
  * mlk_intt_ppc_asm(int16_t *r, int16_t *qdata)
- *   Compute inverse NTT based on the following 7 layers -
- *     len = 2, 4, 8, 16, 32, 64, 128
+ *   Compute the 7-layer inverse NTT in place. Each layer is a Gentleman-Sande
+ *   butterfly stage with stride `len` (the index distance between paired
+ *   coefficients). Layers 1..7 use len = 2, 4, 8, 16, 32, 64, 128 -- the
+ *   reverse of the forward NTT layer ordering.
  *
- *   Every coefficient is first scaled by N^-1 (in Montgomery form) via Barrett
- *   multiplication, then the 7 Gentleman-Sande layers below are applied.
+ *   Before the layered butterflies, every coefficient is first scaled by
+ *   N^-1 (in Montgomery form) via Barrett multiplication.
  *
  *   Each layer pairs a low coefficient r[j] (leg 1) with a high coefficient
  *   r[j+len] (leg 2). Offsets below are byte offsets into r; as each coefficient
@@ -591,24 +693,34 @@
  *   start+next+next              start+len*2+next+next
  *   start+next+next+next         start+len*2+next+next+next
  *
- *   Each computation loads 8 vectors, 4 for each leg, then does the
- *   Gentleman-Sande add/sub and zeta-multiply to obtain the final results.
+ *   Each computation loads 8 vectors, 4 for each leg, and applies the
+ *   Gentleman-Sande butterfly in place:
  *
- *   -> leg1 = leg1 + leg2 (Barrett-reduced), leg2 = (leg2 - leg1) * zeta
+ *      leg1_new = (leg1 + leg2)         (then Barrett-reduced into (-MLKEM_Q, MLKEM_Q))
+ *      leg2_new = (leg2 - leg1) * zeta  (mod MLKEM_Q, via Barrett multiplication)
  *
- *   The resulting coefficients then store back to each leg's offset.
+ *   Layers 3-7 have len >= 8, so each loaded 8-lane vector lies entirely
+ *   within one leg and pairs with a single zeta replicated across all 8 lanes.
  *
- *   Each vector has the same corresponding zeta except len=4 and len=2.
+ *   Layers 1 (len=2) and 2 (len=4) have stride smaller than the vector width,
+ *   so each loaded vector straddles both legs in memory:
  *
- *   len=4 has 4-4 layout which means every 4 16-bit coefficients has the same zeta.
- *   and len=2 has 2-2-2-2 layout which means every 2 16-bit coefficients has the same zeta.
- *   e.g.
- *         coeff vector    a1   a2   a3  a4  a5  a6  a7  a8
- *         zeta  vector    z1   z1   z2  z2  z3  z3  z4  z4
+ *     len=4, "4-4 layout":     vector = [ leg1 x 4, leg2 x 4 ]
+ *                              -> 1 butterfly group per vector,
+ *                                 1 distinct zeta replicated 4-wise
  *
- *   For len=4 and len=2, each vector will get permuted to leg1 and leg2. Zeta is
- *   pre-arranged for the leg1 and leg2.  After the computation, each vector needs
- *   to transpose back to its original 4-4 or 2-2-2-2 layout.
+ *     len=2, "2-2-2-2 layout": vector = [ leg1 x 2, leg2 x 2,
+ *                                         leg1 x 2, leg2 x 2 ]
+ *                              -> 2 butterfly groups per vector,
+ *                                 2 distinct zetas, each replicated 2-wise
+ *
+ *   For these layers, each loaded vector is permuted into separate leg1/leg2
+ *   vectors before the butterfly, and the result is permuted back to the
+ *   original in-memory order on store. The zeta vectors are pre-arranged in
+ *   the constant table to match the permuted lane order, e.g. for len=2:
+ *
+ *         leg1 / leg2 vector    a1   a2   a3   a4   a5   a6   a7   a8
+ *         zeta vector           z1   z1   z2   z2   z3   z3   z4   z4
  */
 .global MLK_ASM_NAMESPACE(intt_ppc_asm)
 .balign 16
@@ -617,25 +729,25 @@ MLK_ASM_FN_SYMBOL(intt_ppc_asm)
         SAVE_REGS
 
         /* init vectors and constants */
-        lxvx    0, 0, qinp                  /* -Q */
+        lxvx    VS_NMKQ_STASH, 0, qinp                  /* -Q */
 
         xxlxor  32+V_ZERO, 32+V_ZERO, 32+V_ZERO
-        xxlor   3, 32+V_ZERO, 32+V_ZERO     /* save zero vector to vs3 */
+        xxlor   VS_ZERO_STASH, 32+V_ZERO, 32+V_ZERO
 
         /*  Setup for Barrett reduce */
         li      10, MLK_PPC_Q_OFFSET
         li      11, MLK_PPC_C20159_OFFSET
-        lxvx    6, 10, qinp             /* V_MKQ */
-        lxvx    32+V20159, 11, qinp     /* V20159 */
+        lxvx    VS_MKQ_STASH, 10, qinp                  /* V_MKQ */
+        lxvx    32+V20159, 11, qinp                     /* V20159 */
 
         vspltisw 8, 13
         vadduwm  8, 8, 8
-        xxlor   8, 32+8, 32+8   /* V_26 store at vs8 */
+        xxlor   VS_26_STASH, 32+8, 32+8
 
         vspltisw 9, 1
-        vsubuwm 10, 8, 9        /* value 25 */
+        vsubuwm 10, 8, 9                                /* value 25 */
         vslw    9, 9, 10
-        xxlor   7, 32+9, 32+9   /* V2pw25 store at vs7 */
+        xxlor   VS_25_STASH, 32+9, 32+9
 
         li      10, 16
         li      11, 32
@@ -655,7 +767,7 @@ MLK_ASM_FN_SYMBOL(intt_ppc_asm)
         li      8, 4
         mtctr   8
 
-        xxlor   32+V_NMKQ, 0, 0      /* V_NMKQ = -Q */
+        xxlor   32+V_NMKQ, VS_NMKQ_STASH, VS_NMKQ_STASH      /* V_NMKQ = -Q */
 intt_ppc_asm_Loopf:
         Reload_4coeffs
         barrett_fqmul_4x V_NINV, V_NINV, V_NINV, V_NINV, V_NINV_TW, V_NINV_TW, V_NINV_TW, V_NINV_TW, 6, 7, 8, 9
@@ -674,19 +786,24 @@ intt_ppc_asm_Loopf:
          *
          *    Update zetas vectors, each vector has 2 zetas
          *    Load zeta vectors in 2-2-2-2 layout
+         *
+         * For all INTT layers below: `start` and `next` are byte offsets
+         * into the polynomial buffer (the GS_Butterfly_*'s first two args).
+         * Coefficients are int16, so an index distance of L corresponds
+         * to a byte distance of 2*L.
          */
         addi    zeta_inp, qinp, MLK_PPC_ZETA_INTT_OFFSET
         addi    zeta_tw_inp, qinp, MLK_PPC_ZETA_INTT_TW_OFFSET
         li      len_2, 4        /* len * 2 */
         mr      dup_rinp, rinp
 
-        intt_layer1
+        GS_Butterfly_4x_len2
         addi    dup_rinp, dup_rinp, 128
-        intt_layer1
+        GS_Butterfly_4x_len2
         addi    dup_rinp, dup_rinp, 128
-        intt_layer1
+        GS_Butterfly_4x_len2
         addi    dup_rinp, dup_rinp, 128
-        intt_layer1
+        GS_Butterfly_4x_len2
         addi    dup_rinp, dup_rinp, 128
 
 .balign 16
@@ -700,13 +817,13 @@ intt_ppc_asm_Loopf:
         mr      dup_rinp, rinp
         li      len_2, 8
 
-        intt_layer2
+        GS_Butterfly_4x_len4
         addi    dup_rinp, dup_rinp, 128
-        intt_layer2
+        GS_Butterfly_4x_len4
         addi    dup_rinp, dup_rinp, 128
-        intt_layer2
+        GS_Butterfly_4x_len4
         addi    dup_rinp, dup_rinp, 128
-        intt_layer2
+        GS_Butterfly_4x_len4
         addi    dup_rinp, dup_rinp, 128
 
 .balign 16
@@ -715,28 +832,40 @@ intt_ppc_asm_Loopf:
          */
         li      len_2, 16
 
-        intt_layer34 0, 32
-        intt_layer34 128, 32
-        intt_layer34 256, 32
-        intt_layer34 384, 32
+        GS_Butterfly_4x 0, 32
+        GS_Butterfly_4x 128, 32
+        GS_Butterfly_4x 256, 32
+        GS_Butterfly_4x 384, 32
 
 .balign 16
         /*
          * Layer 4. len = 16, start = 0, 16, 256, 272
+         *
+         * The 4 calls share zeta blocks pairwise: starts 0 and 16 hit the
+         * same 4 j-groups (with different sub-indices within each), and
+         * likewise 256 and 272. Each pair therefore needs the same 4-zeta
+         * block, but `GS_Butterfly_4x` calls `Load_next_4zetas` internally
+         * which auto-advances `zeta_inp`/`zeta_tw_inp` by 64 bytes, so we
+         * rewind by 64 before the second call of each pair to re-load the
+         * same block.
+         *
+         * (NTT layer 4 sidesteps this by passing zeta registers explicitly
+         * to `CT_Butterfly_4x` and lifting `Load_next_4zetas` to the layer
+         * level. Worth aligning if this gets revisited.)
          */
         li      len_2, 32
 
-        intt_layer34 0, 64
+        GS_Butterfly_4x 0, 64
 
         addi    zeta_inp, zeta_inp, -64
         addi    zeta_tw_inp, zeta_tw_inp, -64
-        intt_layer34 16, 64
+        GS_Butterfly_4x 16, 64
 
-        intt_layer34 256, 64
+        GS_Butterfly_4x 256, 64
 
         addi    zeta_inp, zeta_inp, -64
         addi    zeta_tw_inp, zeta_tw_inp, -64
-        intt_layer34 272, 64
+        GS_Butterfly_4x 272, 64
 
 .balign 16
         /*
@@ -744,16 +873,16 @@ intt_ppc_asm_Loopf:
          */
         li      len_2, 64
 
-        intt_layer567 0, 16
+        GS_Butterfly_Broadcast_4x 0, 16
         addi    zeta_inp, zeta_inp, 16
         addi    zeta_tw_inp, zeta_tw_inp, 16
-        intt_layer567 128, 16
+        GS_Butterfly_Broadcast_4x 128, 16
         addi    zeta_inp, zeta_inp, 16
         addi    zeta_tw_inp, zeta_tw_inp, 16
-        intt_layer567 256, 16
+        GS_Butterfly_Broadcast_4x 256, 16
         addi    zeta_inp, zeta_inp, 16
         addi    zeta_tw_inp, zeta_tw_inp, 16
-        intt_layer567 384, 16
+        GS_Butterfly_Broadcast_4x 384, 16
         addi    zeta_inp, zeta_inp, 16
         addi    zeta_tw_inp, zeta_tw_inp, 16
 
@@ -763,12 +892,12 @@ intt_ppc_asm_Loopf:
          */
         li      len_2, 128
 
-        intt_layer567 0, 16
-        intt_layer567 64, 16
+        GS_Butterfly_Broadcast_4x 0, 16
+        GS_Butterfly_Broadcast_4x 64, 16
         addi    zeta_inp, zeta_inp, 16
         addi    zeta_tw_inp, zeta_tw_inp, 16
-        intt_layer567 256, 16
-        intt_layer567 320, 16
+        GS_Butterfly_Broadcast_4x 256, 16
+        GS_Butterfly_Broadcast_4x 320, 16
         addi    zeta_inp, zeta_inp, 16
         addi    zeta_tw_inp, zeta_tw_inp, 16
 
@@ -778,10 +907,10 @@ intt_ppc_asm_Loopf:
          */
         li      len_2, 256          /* len*2 */
 
-        intt_layer567 0, 16
-        intt_layer567 64, 16
-        intt_layer567 128, 16
-        intt_layer567 192, 16
+        GS_Butterfly_Broadcast_4x 0, 16
+        GS_Butterfly_Broadcast_4x 64, 16
+        GS_Butterfly_Broadcast_4x 128, 16
+        GS_Butterfly_Broadcast_4x 192, 16
 
         RESTORE_REGS
         blr
@@ -789,7 +918,7 @@ intt_ppc_asm_Loopf:
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
 #undef V20159
-#undef V2pw25
+#undef V_25
 #undef V_26
 #undef V_MKQ
 #undef V_ZERO
@@ -844,6 +973,11 @@ intt_ppc_asm_Loopf:
 #undef b2_offset
 #undef b3_offset
 #undef b4_offset
+#undef VS_NMKQ_STASH
+#undef VS_ZERO_STASH
+#undef VS_MKQ_STASH
+#undef VS_25_STASH
+#undef VS_26_STASH
 
 /* simpasm: footer-start */
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \

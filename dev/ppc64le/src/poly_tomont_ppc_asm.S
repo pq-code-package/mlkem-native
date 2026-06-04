@@ -20,6 +20,13 @@
 
 #include "consts.h"
 
+/*
+ * For the VSX register-naming convention (FPR/VR vs. the unified VSR
+ * namespace, and the `32+V_FOO` syntax used to name a VR from a VSX-form
+ * instruction), see the primer at the top of ntt_ppc_asm.S /
+ * intt_ppc_asm.S.
+ */
+
 #define rinp 3   /* input/output polynomial pointer */
 
 #define V_FACTOR     0
@@ -99,6 +106,15 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
         stdu    1, -320(1)
         mflr    0
 
+        /*
+         * TODO: this saves/restores v20-v30, but the body only touches
+         * v23 (vdata3), v24 (vtmp3) and v27-v30 (vresult1..4) in the
+         * callee-saved range. v20, v21, v22, v25, v26 are spilled and
+         * reloaded but never used -- 5 dead stxvx/lxvx pairs plus 80
+         * bytes of frame. Trim the save set (and frame size) to the
+         * registers actually clobbered. Separate change from the doc
+         * pass, since it alters emitted code.
+         */
         li      6, 128
         li      7, 144
         li      8, 160

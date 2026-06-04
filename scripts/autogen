@@ -2083,10 +2083,12 @@ def gen_riscv64_zeta_files():
     )
 
 
-# The PPC64LE backend stores its twiddle factors in two include files,
-# `consts_ntt.inc` and `consts_intt.inc`, which are concatenated into the
-# `mlk_ppc_qdata` table in `consts.c`. The values are the canonical Montgomery
-# zetas (matching `mlk_zetas` in `mlkem/src/zetas.inc`), arranged per layer to
+# The PPC64LE backend stores its twiddle factors in the `mlk_ppc_qdata`
+# table in `consts.c`. Unlike the reference `mlk_zetas` (which are in
+# Montgomery form), these are the reduced zetas `z = root^idx mod q`:
+# the backend multiplies by a zeta via Barrett, not Montgomery,
+# multiplication, so each zeta is stored alongside its Barrett twist
+# (the *_twist_zetas tables below). The values are arranged per layer to
 # match the order in which the assembly consumes them.
 #
 # NTT layout (in order):

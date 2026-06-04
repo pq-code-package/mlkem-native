@@ -20,7 +20,7 @@ All C code in [mlkem/src/*](mlkem) and [mlkem/src/fips202/*](mlkem/src/fips202) 
 using CBMC[^CBMC]. All AArch64 and x86_64 assembly is proved to be functionally correct,
 memory-safe, and of secret-independent timing (constant-time), using HOL-Light[^HOL-Light].
 
-mlkem-native includes native backends for Arm (64-bit, Neon), Intel/AMD (64-bit, AVX2), and RISC-V (64-bit, RVV). See [benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/) for performance data.
+mlkem-native includes native backends for Arm (64-bit, Neon), Intel/AMD (64-bit, AVX2), RISC-V (64-bit, RVV), and POWER (ppc64le, VSX). See [benchmarks](https://pq-code-package.github.io/mlkem-native/dev/bench/) for performance data.
 
 mlkem-native is supported by the [Post-Quantum Cryptography Alliance](https://pqca.org/) as part of the [Linux Foundation](https://linuxfoundation.org/).
 
@@ -96,6 +96,7 @@ mlkem-native currently offers the following backends:
 * 64-bit Arm backend (using Neon)
 * 64-bit Intel/AMD backend (using AVX2)
 * 64-bit RISC-V backend (using RVV)
+* 64-bit POWER backend (ppc64le, using VSX; supports POWER8 and above)
 * 32-bit Armv8.1-M backend (using Helium/MVE) -- see [#1501](https://github.com/pq-code-package/mlkem-native/issues/1501). This is still experimental and disabled by default.
 
 If you'd like contribute new backends, please reach out or just open a PR.
