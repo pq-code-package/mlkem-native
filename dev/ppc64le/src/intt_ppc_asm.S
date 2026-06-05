@@ -90,10 +90,8 @@
 
 /*
  * PowerPC ELF v2 ABI: r3 = int16_t *r, r4 = int16_t *qdata.
- *   caller-saved (volatile):     r0, r3-r12; v0-v19; f0-f13
- *   callee-saved (non-volatile): r14-r31; v20-v31; f14-f31
- * The callee-saved registers used here (r14-r22, v20-v31) are saved/restored
- * in a 352-byte frame.
+ *   callee-saved registers: r14-r31; v20-v31
+ * The callee-saved registers used here (r14-r22, v20-v31) are saved/restored.
  */
 .macro SAVE_REGS
         stdu    1, -352(1)

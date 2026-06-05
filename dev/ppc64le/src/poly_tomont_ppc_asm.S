@@ -20,66 +20,77 @@
 
 #include "consts.h"
 
-#define V1353   0
-#define V_QINV  2
-#define V_NMKQ  5
+#define rinp 3   /* input/output polynomial pointer */
+
+#define V_FACTOR     0
+#define V_FACTOR_TW  2
+#define V_ZERO       3
+#define V_NMKQ       5
+
+#define vdata1 13
+#define vdata2 18
+#define vdata3 23
+#define vdata4 7
+
+#define vtmp1  14
+#define vtmp2  19
+#define vtmp3  24
+#define vtmp4  8
+
+#define vresult1  27
+#define vresult2  28
+#define vresult3  29
+#define vresult4  30
 
 .text
 
 /*
- * montgomery_reduce
- * t = a * QINV
- * t = (a - (int32_t)t*_MLKEM_Q) >> 16
- *
- *-----------------------------------
- * mont_reduce_4x(_v0, _v1, _v2, _v3)
+ * Barrett multiplication by R = 2^16 mod q, 
+ * mapping each coefficient to the Montgomery domain.
+ *   For each lane (a in vdata1..4):
+ *     t      = vmhraddshs(a, V_FACTOR_TW, 0) = round(a*factor_tw / 2^15)
+ *     a_lo   = vmladduhm(a, V_FACTOR, 0)     = (a*factor) mod 2^16
+ *     result = vmladduhm(t, -q, a_lo)        = a*factor - t*q (mod 2^16)
+ *   Loads 4 consecutive 16-byte vectors from rinp and advances rinp by 64;
+ *   results in _v0.._v3.
  */
+.macro barrett_tomont_4x _v0, _v1, _v2, _v3
+        lxvd2x  32+vdata1, 0, rinp
+        addi    rinp, rinp, 16
+        lxvd2x  32+vdata2, 0, rinp
+        addi    rinp, rinp, 16
+        lxvd2x  32+vdata3, 0, rinp
+        addi    rinp, rinp, 16
+        lxvd2x  32+vdata4, 0, rinp
+        addi    rinp, rinp, 16
 
-.macro mont_reduce_4x _v0, _v1, _v2, _v3
-        lxvd2x  32+13, 0, 3
-        addi    3, 3, 16
-        lxvd2x  32+18, 0, 3
-        addi    3, 3, 16
-        lxvd2x  32+23, 0, 3
-        addi    3, 3, 16
-        lxvd2x  32+7, 0, 3
-        addi    3, 3, 16
+        vmhraddshs vtmp1, vdata1, V_FACTOR_TW, V_ZERO
+        vmhraddshs vtmp2, vdata2, V_FACTOR_TW, V_ZERO
+        vmhraddshs vtmp3, vdata3, V_FACTOR_TW, V_ZERO
+        vmhraddshs vtmp4, vdata4, V_FACTOR_TW, V_ZERO
 
-        vmladduhm 15, 13, V1353, 3
-        vmladduhm 20, 18, V1353, 3
-        vmladduhm 25, 23, V1353, 3
-        vmladduhm 9, 7, V1353, 3
+        vmladduhm vdata1, vdata1, V_FACTOR, V_ZERO
+        vmladduhm vdata2, vdata2, V_FACTOR, V_ZERO
+        vmladduhm vdata3, vdata3, V_FACTOR, V_ZERO
+        vmladduhm vdata4, vdata4, V_FACTOR, V_ZERO
 
-        vmhraddshs 14, 13, V1353, 3
-        vmhraddshs 19, 18, V1353, 3
-        vmhraddshs 24, 23, V1353, 3
-        vmhraddshs 8, 7, V1353, 3
-
-        vmladduhm 15, 15, V_QINV, 3
-        vmladduhm 20, 20, V_QINV, 3
-        vmladduhm 25, 25, V_QINV, 3
-        vmladduhm 9, 9, V_QINV, 3
-
-        vmhraddshs 15, 15, V_NMKQ, 14
-        vmhraddshs 20, 20, V_NMKQ, 19
-        vmhraddshs 25, 25, V_NMKQ, 24
-        vmhraddshs 9, 9, V_NMKQ, 8
-
-        vsrah \_v0, 15, 4
-        vsrah \_v1, 20, 4
-        vsrah \_v2, 25, 4
-        vsrah \_v3, 9, 4
+        vmladduhm \_v0, vtmp1, V_NMKQ, vdata1
+        vmladduhm \_v1, vtmp2, V_NMKQ, vdata2
+        vmladduhm \_v2, vtmp3, V_NMKQ, vdata3
+        vmladduhm \_v3, vtmp4, V_NMKQ, vdata4
 .endm
 
+/* Store the 8 result vectors of one iteration. The index registers r4..r11
+ * hold the byte offsets -128..-16 relative to the (already advanced) rinp. */
 .macro Write_8X
-        stxvd2x 32+27, 4, 3
-        stxvd2x 32+28, 5, 3
-        stxvd2x 32+29, 6, 3
-        stxvd2x 32+30, 7, 3
-        stxvd2x 32+13, 8, 3
-        stxvd2x 32+18, 9, 3
-        stxvd2x 32+23, 10, 3
-        stxvd2x 32+7, 11, 3
+        stxvd2x 32+vresult1, 4, rinp
+        stxvd2x 32+vresult2, 5, rinp
+        stxvd2x 32+vresult3, 6, rinp
+        stxvd2x 32+vresult4, 7, rinp
+        stxvd2x 32+vdata1, 8, rinp
+        stxvd2x 32+vdata2, 9, rinp
+        stxvd2x 32+vdata3, 10, rinp
+        stxvd2x 32+vdata4, 11, rinp
 .endm
 
 .global MLK_ASM_NAMESPACE(poly_tomont_ppc_asm)
@@ -112,14 +123,13 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
         stxvx   32+30, 9, 1
 
         li      6, MLK_PPC_NQ_OFFSET
-        li      7, MLK_PPC_QINV_OFFSET
-        li      8, MLK_PPC_C1353_OFFSET
+        li      7, MLK_PPC_TOMONT_OFFSET
+        li      8, MLK_PPC_TOMONT_TW_OFFSET
         lxvx    32+V_NMKQ, 6, 4
-        lxvx    32+V_QINV, 7, 4
-        lxvx    32+V1353, 8, 4
+        lxvx    32+V_FACTOR, 7, 4
+        lxvx    32+V_FACTOR_TW, 8, 4
 
-        vxor    3, 3, 3
-        vspltish 4, 1
+        vxor    V_ZERO, V_ZERO, V_ZERO
 
         li      4, -128
         li      5, -112
@@ -130,20 +140,20 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
         li      10, -32
         li      11, -16
 
-        mont_reduce_4x 27, 28, 29, 30
-        mont_reduce_4x 13, 18, 23, 7
+        barrett_tomont_4x vresult1, vresult2, vresult3, vresult4
+        barrett_tomont_4x vdata1, vdata2, vdata3, vdata4
         Write_8X
 
-        mont_reduce_4x 27, 28, 29, 30
-        mont_reduce_4x 13, 18, 23, 7
+        barrett_tomont_4x vresult1, vresult2, vresult3, vresult4
+        barrett_tomont_4x vdata1, vdata2, vdata3, vdata4
         Write_8X
 
-        mont_reduce_4x 27, 28, 29, 30
-        mont_reduce_4x 13, 18, 23, 7
+        barrett_tomont_4x vresult1, vresult2, vresult3, vresult4
+        barrett_tomont_4x vdata1, vdata2, vdata3, vdata4
         Write_8X
 
-        mont_reduce_4x 27, 28, 29, 30
-        mont_reduce_4x 13, 18, 23, 7
+        barrett_tomont_4x vresult1, vresult2, vresult3, vresult4
+        barrett_tomont_4x vdata1, vdata2, vdata3, vdata4
         Write_8X
 
         li      6, 128
@@ -174,9 +184,23 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
-#undef V1353
-#undef V_QINV
+#undef rinp
+#undef V_FACTOR
+#undef V_FACTOR_TW
+#undef V_ZERO
 #undef V_NMKQ
+#undef vdata1
+#undef vdata2
+#undef vdata3
+#undef vdata4
+#undef vtmp1
+#undef vtmp2
+#undef vtmp3
+#undef vtmp4
+#undef vresult1
+#undef vresult2
+#undef vresult3
+#undef vresult4
 
 /* simpasm: footer-start */
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \

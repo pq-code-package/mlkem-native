@@ -24,8 +24,6 @@
 MLK_ALIGN MLK_INTERNAL_DATA_DEFINITION const int16_t mlk_ppc_qdata[2072] = {
     /* -Q */
     -3329, -3329, -3329, -3329, -3329, -3329, -3329, -3329,
-    /* QINV */
-    -3327, -3327, -3327, -3327, -3327, -3327, -3327, -3327,
     /* Q */
     3329, 3329, 3329, 3329, 3329, 3329, 3329, 3329,
     /* round(2^26 / MLKEM_Q), Barrett reduction constant */
@@ -34,8 +32,10 @@ MLK_ALIGN MLK_INTERNAL_DATA_DEFINITION const int16_t mlk_ppc_qdata[2072] = {
     512, 512, 512, 512, 512, 512, 512, 512,
     /* Barrett twist of N^-1 */
     5040, 5040, 5040, 5040, 5040, 5040, 5040, 5040,
-    /* 2^32 mod MLKEM_Q */
-    1353, 1353, 1353, 1353, 1353, 1353, 1353, 1353,
+    /* 2^16 mod MLKEM_Q (R), Barrett tomont factor */
+    -1044, -1044, -1044, -1044, -1044, -1044, -1044, -1044,
+    /* Barrett twist of R for poly_tomont */
+    -10276, -10276, -10276, -10276, -10276, -10276, -10276, -10276,
     /* Twiddle factors for the forward NTT */
     -1600, -1600, -1600, -1600, -1600, -1600, -1600, -1600,
     -749, -749, -749, -749, -749, -749, -749, -749,

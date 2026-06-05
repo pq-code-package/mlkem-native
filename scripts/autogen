@@ -2183,9 +2183,9 @@ def gen_ppc64le_base_constants():
     (offset_suffix, comment, value)."""
     Q = modulus
     n_inv = pow(128, -1, Q) * 2**16 % Q
+    tomont, tomont_tw = prepare_root_for_barrett(pow(2, 16, Q))
     return [
         ("NQ", "-Q", -Q),
-        ("QINV", "QINV", signed_reduce_u16(pow(Q, -1, 2**16))),
         ("Q", "Q", Q),
         (
             "C20159",
@@ -2194,7 +2194,8 @@ def gen_ppc64le_base_constants():
         ),
         ("N_INV", "N^-1 in Montgomery form", n_inv),
         ("N_INV_TW", "Barrett twist of N^-1", prepare_root_for_barrett(n_inv)[1]),
-        ("C1353", "2^32 mod MLKEM_Q", pow(2, 32, Q)),
+        ("TOMONT", "2^16 mod MLKEM_Q (R), Barrett tomont factor", tomont),
+        ("TOMONT_TW", "Barrett twist of R for poly_tomont", tomont_tw),
     ]
 
 
