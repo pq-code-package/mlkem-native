@@ -71,25 +71,23 @@ static inline vint16m1_t fq_barrett(vint16m1_t a, size_t vl)
   return t;
 }
 
-/* Conditionally add Q (if negative) */
+/* Conditionally add Q (if negative).
+ *
+ * Constant-time note: We deliberately avoid a `vmslt` + masked `vadd_mu`
+ * here. RVV 1.0 does not mandate mask-population-independent latency for
+ * masked ops, and Zvkt's DIEL guarantee does not cover the v0 mask
+ * register. Using an arithmetic-shift sign mask keeps all operands in the
+ * Zvkt-covered set and matches the idiom used in the portable C
+ * (mlk_ct_cmask_neg_i16, verify.h) and AArch64 (poly_reduce_aarch64_asm.S)
+ * implementations. */
 
 static inline vint16m1_t fq_cadd(vint16m1_t rx, size_t vl)
 {
-  vbool16_t bn;
+  vint16m1_t m;
 
-  bn = __riscv_vmslt_vx_i16m1_b16(rx, 0, vl);             /*   if x < 0:   */
-  rx = __riscv_vadd_vx_i16m1_mu(bn, rx, rx, MLKEM_Q, vl); /*     x += Q    */
-  return rx;
-}
-
-/* Conditionally subtract Q (if Q or above) */
-
-static inline vint16m1_t fq_csub(vint16m1_t rx, size_t vl)
-{
-  vbool16_t bn;
-
-  bn = __riscv_vmsge_vx_i16m1_b16(rx, MLKEM_Q, vl);       /*   if x >= Q:  */
-  rx = __riscv_vsub_vx_i16m1_mu(bn, rx, rx, MLKEM_Q, vl); /*     x -= Q    */
+  m = __riscv_vsra_vx_i16m1(rx, 15, vl);     /* m = (x < 0) ? -1 : 0 */
+  m = __riscv_vand_vx_i16m1(m, MLKEM_Q, vl); /* m = (x < 0) ?  Q : 0 */
+  rx = __riscv_vadd_vv_i16m1(rx, m, vl);     /* x += m               */
   return rx;
 }
 
