@@ -41,11 +41,13 @@ LDFLAGS += \
 	-Wl,--gc-sections \
 	-Wl,--relax \
 	-Wl,--defsym=__stack=0x81FF \
+	-Wl,--undefined=_simavr_command_register \
+	-Wl,--section-start=.mmcu=0x910000 \
 	-lprintf_min
 
 # Add minimal AVR runtime
 EXTRA_SOURCES = $(PLATFORM_PATH)/avr_wrapper.c $(PLATFORM_PATH)/init7.S
-EXTRA_SOURCES_CFLAGS =
+EXTRA_SOURCES_CFLAGS = -I$(realpath $(dir $(shell which simavr))../include)
 
 # Use simavr for execution
 EXEC_WRAPPER := $(realpath $(PLATFORM_PATH)/exec_wrapper.py)
