@@ -66,4 +66,5 @@ jobs:
       store_results: false
       bench_extra_args: ${{ inputs.bench_extra_args }}
       compiler: ${{ inputs.compiler }}
-    secrets: inherit
+    secrets:
+      AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}
