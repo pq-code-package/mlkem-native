@@ -38,7 +38,6 @@ rec {
       riscv64-gcc = wrap-gcc pkgs.pkgsCross.riscv64;
       riscv32-gcc = wrap-gcc pkgs.pkgsCross.riscv32;
       ppc64le-gcc = wrap-gcc pkgs.pkgsCross.powernv;
-      arm-embedded-gcc = wrap-gcc pkgs.armToolchain;
       aarch64_be-gcc = (pkgs.callPackage ./aarch64_be-none-linux-gnu-gcc.nix { });
     in
     # NOTE:
