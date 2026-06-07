@@ -194,6 +194,64 @@ lint-c-files()
 checkerr "Lint C" "$(lint-c-files)"
 gh_group_end
 
+lint-clang-tidy()
+{
+  if ! command -v clang-tidy >/dev/null; then
+    gh_error_simple "clang-tidy missing" "clang-tidy is not installed"
+    error "Lint clang-tidy"
+    SUCCESS=false
+    gh_summary_failure "Lint clang-tidy"
+    return 0
+  fi
+
+  # Files to analyse, by language. Add directories here to widen coverage;
+  # native backends are deliberately excluded (they need per-arch flags).
+  # Pathspecs use :(glob) so '*' does not cross '/' (top-level of each dir).
+  local c_files=(":(glob)mlkem/src/*.c" ":(glob)mlkem/src/fips202/*.c")
+  local h_files=(":(glob)mlkem/src/*.h" ":(glob)mlkem/src/fips202/*.h")
+
+  local nproc success=true
+  nproc=$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
+
+  # Run clang-tidy over a set of files. $1 is a label for diagnostics, $2 is a
+  # space-separated list of git pathspecs, and the rest are passed verbatim to
+  # clang-tidy's compiler invocation (after `--`). Note: not invoked via a pipe
+  # so that `success=false` propagates to the enclosing function.
+  run-clang-tidy()
+  {
+    local label="$1" pathspecs="$2" out
+    shift 2
+    if ! out=$(git ls-files -- $pathspecs |
+      xargs -P "$nproc" -I {} \
+        clang-tidy --quiet {} -- -I"$ROOT"/mlkem -std=c90 "$@" 2>&1); then
+      echo "$out"
+      gh_error_simple "clang-tidy error" "clang-tidy reported findings ($label)"
+      success=false
+    fi
+  }
+
+  for params in 512 768 1024; do
+    # Headers are passed with `-x c` so clang-tidy treats them as C, not C++.
+    run-clang-tidy "ML-KEM-$params .c" "${c_files[*]}" \
+      -DMLK_CONFIG_PARAMETER_SET="$params"
+    run-clang-tidy "ML-KEM-$params .h" "${h_files[*]}" \
+      -x c -DMLK_CONFIG_PARAMETER_SET="$params"
+  done
+
+  if $success; then
+    info "Lint clang-tidy"
+    gh_summary_success "Lint clang-tidy"
+  else
+    error "Lint clang-tidy"
+    SUCCESS=false
+    gh_summary_failure "Lint clang-tidy"
+  fi
+}
+
+gh_group_start "Static analysis with clang-tidy"
+lint-clang-tidy
+gh_group_end
+
 check-eol-dry-run()
 {
   for file in $(git ls-files -- ":/" ":/!:*.png"); do

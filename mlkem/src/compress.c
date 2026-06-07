@@ -714,10 +714,10 @@ void mlk_poly_frommsg(mlk_poly *r, const uint8_t msg[MLKEM_INDCPA_MSGBYTES])
  *              in the range [-(MLKEM_Q-1), MLKEM_Q-1].
  */
 MLK_INTERNAL_API
-void mlk_poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const mlk_poly *a)
+void mlk_poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const mlk_poly *r)
 {
   unsigned i;
-  mlk_assert_bound(a, MLKEM_N, 0, MLKEM_Q);
+  mlk_assert_bound(r, MLKEM_N, 0, MLKEM_Q);
 
   for (i = 0; i < MLKEM_N / 8; i++)
   __loop__(invariant(i <= MLKEM_N / 8)
@@ -730,7 +730,7 @@ void mlk_poly_tomsg(uint8_t msg[MLKEM_INDCPA_MSGBYTES], const mlk_poly *a)
       invariant(i <= MLKEM_N / 8 && j <= 8)
       decreases(8 - j))
     {
-      uint32_t t = mlk_scalar_compress_d1(a->coeffs[8 * i + j]);
+      uint32_t t = mlk_scalar_compress_d1(r->coeffs[8 * i + j]);
       msg[i] |= (uint8_t)(t << j);
     }
   }

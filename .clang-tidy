@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# clang-tidy configuration for mlkem-native
+#
+# We enable whole C-relevant families and disable individual checks with
+# rationale provided inline below.
+Checks:
+  - bugprone-*
+  - cert-*
+  - clang-analyzer-*
+  - concurrency-*
+  - misc-*
+  - performance-*
+  - portability-*
+  - readability-*
+  # Spec/maths use 1-letter names (a, b, r, f, t, k).
+  - -readability-identifier-length
+  # Spec constants; already vetted by scripts/check-magic.
+  - -readability-magic-numbers
+  # Multi-var decls (e.g. `unsigned i, j;`) are deliberate; style only.
+  - -readability-isolate-declaration
+  # Repo uniformly uses lowercase suffixes (1u); this check wants uppercase (1U).
+  - -readability-uppercase-literal-suffix
+  # Repo uses `#if defined(X)` uniformly for composability.
+  - -readability-use-concise-preprocessor-directives
+  # Public symbols are namespaced by macro; the check can't see through it.
+  - -readability-identifier-naming
+  # Only index/bit-packing maths (r[11*j+0]); precedence is the intended reading.
+  - -readability-math-missing-parentheses
+  # 13 sites, all spec/API-fixed signatures (adjacent same-/convertible-type args).
+  - -bugprone-easily-swappable-parameters
+  # 37 sites, all spec-bounded const/index offsets; no real overflow.
+  - -bugprone-implicit-widening-of-multiplication-result
+  # Relies on transitive includes via common.h and single-CU builds.
+  - -misc-include-cleaner
+
+# Report diagnostics in our own headers (under mlkem/src), but never in
+# system or third-party headers.
+HeaderFilterRegex: 'mlkem/src/.*'
+
+# Be strict where we run at all: every enabled check that fires is an error.
+# The CI job is blocking, so this keeps local runs honest with CI.
+WarningsAsErrors: '*'
+
+FormatStyle: file

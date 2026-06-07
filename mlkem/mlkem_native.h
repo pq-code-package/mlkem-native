@@ -112,13 +112,13 @@
 /****************************** Error codes ***********************************/
 
 /* Generic failure condition */
-#define MLK_ERR_FAIL -1
+#define MLK_ERR_FAIL (-1)
 /* An allocation failed. This can only happen if MLK_CONFIG_CUSTOM_ALLOC_FREE
  * is defined and the provided MLK_CUSTOM_ALLOC can fail. */
-#define MLK_ERR_OUT_OF_MEMORY -2
+#define MLK_ERR_OUT_OF_MEMORY (-2)
 /* An rng failure occured. Might be due to insufficient entropy or
  * system misconfiguration. */
-#define MLK_ERR_RNG_FAIL -3
+#define MLK_ERR_RNG_FAIL (-3)
 
 /****************************** Function API **********************************/
 

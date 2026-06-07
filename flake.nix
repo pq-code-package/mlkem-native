@@ -173,9 +173,6 @@
 
           devShells.cross-avr = util.mkShell (import ./nix/avr { inherit pkgs; });
 
-          devShells.linter = util.mkShellNoCC {
-            packages = builtins.attrValues { inherit (config.packages) linters; };
-          };
           devShells.clang19 = util.mkShellWithCC' pkgs.clang_19;
           devShells.clang20 = util.mkShellWithCC' pkgs.clang_20;
           devShells.clang21 = util.mkShellWithCC' pkgs.clang_21;
