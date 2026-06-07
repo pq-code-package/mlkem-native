@@ -3130,13 +3130,37 @@ def normalize_asm_macro_syntax():
     run_parallel(files, normalize_asm_macro_syntax_for_file)
 
 
+# Architectures autogen knows how to (cross-)compile assembly for. Used to
+# expand a bare `--force-cross` (no value) into "force all architectures".
+FORCE_CROSS_ALL_ARCHES = {"aarch64", "x86_64", "armv81m", "ppc64le"}
+
+
+def resolve_force_cross(value):
+    """Normalize the --force-cross CLI value into a set of architectures.
+
+    Cross-compilation always happens for an architecture when its cross
+    toolchain is found; `force_cross` only controls what happens when the
+    toolchain is *missing*: architectures in the set raise an error, the
+    rest are silently skipped.
+
+    - None (flag absent)          -> skip all missing toolchains
+    - []   (flag without a value) -> require all architectures
+    - [a, b] (explicit list)      -> require exactly those architectures
+    """
+    if value is None:
+        return set()
+    if value == []:
+        return set(FORCE_CROSS_ALL_ARCHES)
+    return set(value)
+
+
 def update_via_simpasm(
     infile_full,
     outdir,
     outfile=None,
     cflags=None,
     preserve_header=True,
-    force_cross=False,
+    force_cross=(),
     x86_64_syntax="att",
 ):
     _, infile = os.path.split(infile_full)
@@ -3170,7 +3194,7 @@ def update_via_simpasm(
         cross_prefix = "arm-none-eabi-"
         cross_gcc = cross_prefix + "gcc"
         if shutil.which(cross_gcc) is None:
-            if force_cross is False:
+            if source_arch not in force_cross:
                 return
             raise Exception(f"Could not find cross toolchain {cross_prefix}")
     elif native_arch != source_arch:
@@ -3185,7 +3209,7 @@ def update_via_simpasm(
                 # cflags (e.g. via --cflags on macOS). Let simpasm
                 # use its default cc/nm (e.g. clang + llvm-nm on Darwin).
                 cross_prefix = None
-            elif force_cross is False:
+            elif source_arch not in force_cross:
                 return
             else:
                 raise Exception(f"Could not find cross toolchain {cross_prefix}")
@@ -3591,7 +3615,7 @@ def synchronize_backend(in_dir, out_dir, delete=False, no_simplify=False, **kwar
 
 def synchronize_backends(
     *,
-    force_cross=False,
+    force_cross=(),
     clean=False,
     delete=False,
     no_simplify=False,
@@ -4315,7 +4339,7 @@ def update_bytecode_in_proof_script(filepath, bytecode):
     update_file(filepath, updated_content)
 
 
-def update_hol_light_bytecode_for_arch(arch, force_cross=False):
+def update_hol_light_bytecode_for_arch(arch, force_cross=()):
     source_arch = arch
     if platform.machine().lower() in ["arm64", "aarch64"]:
         native_arch = "aarch64"
@@ -4327,7 +4351,7 @@ def update_hol_light_bytecode_for_arch(arch, force_cross=False):
         cross_gcc = cross_prefix + "gcc"
         # Check if cross-compiler is present
         if shutil.which(cross_gcc) is None:
-            if force_cross is False:
+            if source_arch not in force_cross:
                 return
             raise Exception(f"Could not find cross toolchain {cross_prefix}")
 
@@ -4349,7 +4373,7 @@ def update_hol_light_bytecode_for_arch(arch, force_cross=False):
         update_bytecode_in_proof_script(ml_file, bytecode)
 
 
-def update_hol_light_bytecode(force_cross=False):
+def update_hol_light_bytecode(force_cross=()):
     """Update HOL Light proof files with bytecode from make dump_bytecode."""
     update_hol_light_bytecode_for_arch("aarch64", force_cross=force_cross)
     update_hol_light_bytecode_for_arch("x86_64", force_cross=force_cross)
@@ -4525,7 +4549,18 @@ def _main():
     parser.add_argument("--slothy", nargs="*", default=None, choices=slothy_choices)
     parser.add_argument("--aarch64-clean", default=False, action="store_true")
     parser.add_argument("--no-simplify", default=False, action="store_true")
-    parser.add_argument("--force-cross", default=False, action="store_true")
+    parser.add_argument(
+        "--force-cross",
+        nargs="*",
+        default=None,
+        choices=sorted(FORCE_CROSS_ALL_ARCHES),
+        metavar="ARCH",
+        help="Treat a missing cross toolchain as an error instead of silently "
+        "skipping. Without a value, requires all architectures "
+        f"({', '.join(sorted(FORCE_CROSS_ALL_ARCHES))}); or pass a "
+        "space-separated list to require only those, "
+        "e.g. --force-cross aarch64 x86_64.",
+    )
     parser.add_argument(
         "--x86-64-syntax",
         type=str,
@@ -4548,11 +4583,13 @@ def _main():
     if args.slothy == []:
         args.slothy = slothy_choices
 
+    force_cross = resolve_force_cross(args.force_cross)
+
     def sync_backends():
         synchronize_backends(
             clean=args.aarch64_clean,
             no_simplify=args.no_simplify,
-            force_cross=args.force_cross,
+            force_cross=force_cross,
             x86_64_syntax=args.x86_64_syntax,
             extra_cflags=args.cflags,
         )
@@ -4561,7 +4598,7 @@ def _main():
         synchronize_backends(
             clean=args.aarch64_clean,
             delete=True,
-            force_cross=args.force_cross,
+            force_cross=force_cross,
             no_simplify=args.no_simplify,
             x86_64_syntax=args.x86_64_syntax,
             extra_cflags=args.cflags,
@@ -4623,7 +4660,7 @@ def _main():
         ("Complete final backend synchronization", sync_backends_final),
         (
             "Update HOL Light bytecode",
-            lambda: update_hol_light_bytecode(args.force_cross),
+            lambda: update_hol_light_bytecode(force_cross),
             args.update_hol_light_bytecode,
         ),
         ("Generate monolithic source files", gen_monolithic),
