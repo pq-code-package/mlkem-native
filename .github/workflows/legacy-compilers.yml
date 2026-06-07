@@ -510,6 +510,11 @@ jobs:
           CC=gcc OPT=0 make quickcheck
           CC=gcc make clean >/dev/null
           CC=gcc OPT=1 make quickcheck
+      - name: make quickcheck (AVX2)
+        shell: bash
+        run: |
+          CC=gcc make clean >/dev/null
+          CC=gcc CFLAGS="-mavx2 -mbmi2" make quickcheck
 
   check-ct-varlat-legacy:
     name: Constant-time test ${{ matrix.compiler.family }}-${{ matrix.compiler.version }} ${{ matrix.system }}

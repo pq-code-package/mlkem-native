@@ -27,6 +27,7 @@ MLK_INTERNAL_DATA_DECLARATION const uint64_t mlk_keccak_rho8[4];
 MLK_INTERNAL_DATA_DECLARATION const uint64_t mlk_keccak_rho56[4];
 
 #define mlk_keccak_f1600_x4_avx2_asm MLK_NAMESPACE(keccak_f1600_x4_avx2_asm)
+MLK_SYSV_ABI
 void mlk_keccak_f1600_x4_avx2_asm(uint64_t states[100], const uint64_t rc[24],
                                   const uint64_t rho8[4],
                                   const uint64_t rho56[4])
