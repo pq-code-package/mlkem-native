@@ -68,6 +68,10 @@ on:
         type: string
         description: "Set alert threshold in percentage for benchmark result"
         default: "103%"
+    secrets:
+      AWS_GITHUB_TOKEN:
+        description: GitHub token used for storing benchmark results
+        required: true
 env:
   AWS_ROLE: arn:aws:iam::559050233797:role/mlkem-c-aarch64-gh-action
   AMI_UBUNTU_LATEST_X86_64: ami-0e86e20dae9224db8
