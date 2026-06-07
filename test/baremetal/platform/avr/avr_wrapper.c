@@ -9,6 +9,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <simavr/avr/avr_mcu_section.h>
+
+/* Register for sending commands (e.g. exit codes) to simavr */
+AVR_MCU_SIMAVR_COMMAND(&GPIOR0);
+
 #define RAM_BASE 0x2000
 
 static int uart_putchar(char c, FILE *stream)
@@ -38,12 +43,16 @@ void setup_stdout(void) __attribute__((naked, section(".init7"), used));
  * "ERROR (file,line)" lines would never reach simavr. */
 void setup_stdout(void) { stdout = stderr = &mystdout; }
 
-/* The above sequence makes simavr stop. */
-void program_exit(void) __attribute__((section(".fini1"), used));
-void program_exit(void)
+/* Override avr-libc exit(): pass the exit code to simavr. Called with the
+ * return value of main() after main() returns. */
+void exit(int code)
 {
   cli();
+  GPIOR0 = (code == 0) ? SIMAVR_CMD_EXIT_CODE_0 : SIMAVR_CMD_EXIT_CODE_1;
+  /* Fallback in case the exit-code command is not supported */
   sleep_cpu();
+  for (;;)
+    ;
 }
 
 /* Called on UBSan traps (-fsanitize-trap). The avr-libc default would
@@ -51,8 +60,5 @@ void program_exit(void)
 void abort(void)
 {
   printf("ERROR: abort() called (e.g. UBSan trap)\n");
-  cli();
-  sleep_cpu();
-  for (;;)
-    ;
+  exit(1);
 }

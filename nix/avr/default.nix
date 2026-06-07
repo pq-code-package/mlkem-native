@@ -10,6 +10,11 @@ let
       ./simavr-32kb-ram.patch
       ./simavr-uart-output-fix.patch
       ./simavr-16k-eeprom.patch
+      # Exit-code commands (SIMAVR_CMD_EXIT_CODE_*), not yet in a release
+      (pkgs.fetchpatch {
+        url = "https://github.com/buserror/simavr/commit/c9354b32e057e409c2fbc9454e26db3b3103c26a.patch";
+        hash = "sha256-JKIjBmvlIrUe/0lJ2ngVgN3sCB0UJYWtv2dNp0wcPEY=";
+      })
     ];
   });
 in
