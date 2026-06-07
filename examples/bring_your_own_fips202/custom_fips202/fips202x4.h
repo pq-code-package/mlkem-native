@@ -76,8 +76,9 @@ static MLK_INLINE void mlk_shake128x4_release(mlk_shake128x4ctx *state)
 #define mlk_shake256x4 MLK_NAMESPACE(shake256x4)
 static MLK_INLINE void mlk_shake256x4(uint8_t *out0, uint8_t *out1,
                                       uint8_t *out2, uint8_t *out3,
-                                      size_t outlen, uint8_t *in0, uint8_t *in1,
-                                      uint8_t *in2, uint8_t *in3, size_t inlen)
+                                      size_t outlen, const uint8_t *in0,
+                                      const uint8_t *in1, const uint8_t *in2,
+                                      const uint8_t *in3, size_t inlen)
 {
   mlk_shake256(out0, outlen, in0, inlen);
   mlk_shake256(out1, outlen, in1, inlen);

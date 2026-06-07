@@ -10,6 +10,7 @@ on:
 jobs:
   quickcheck:
     name: Quickcheck (riscv)
+    if: ${{ github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }}
     # via https://riseproject-dev.github.io/riscv-runner/
     runs-on: ubuntu-24.04-riscv
     steps:
