@@ -23,6 +23,7 @@
 #include "debug.h"
 #include "sampling.h"
 #include "symmetric.h"
+#include "verify.h"
 
 /* Reference: `rej_uniform()` in the reference implementation @[REF].
  *            - Our signature differs from the reference implementation
@@ -62,8 +63,9 @@ __contract__(
      * - The conversion to int16_t is safe due to the explicit 0xFFF
      *   truncation.
      */
-    val0 = ((buf[pos + 0] >> 0) | ((uint16_t)buf[pos + 1] << 8)) & 0xFFF;
-    val1 = ((buf[pos + 1] >> 4) | (buf[pos + 2] << 4)) & 0xFFF;
+    val0 = (int16_t)(((buf[pos + 0] >> 0) | ((uint16_t)buf[pos + 1] << 8)) &
+                     0xFFF);
+    val1 = (int16_t)(((buf[pos + 1] >> 4) | (buf[pos + 2] << 4)) & 0xFFF);
     pos += 3;
 
     if (val0 < MLKEM_Q)
@@ -290,8 +292,10 @@ void mlk_poly_cbd2(mlk_poly *r, const uint8_t buf[2 * MLKEM_N / 4])
       invariant(array_abs_bound(r->coeffs, 0, 8 * i + j, 3))
       decreases(8 - j))
     {
-      const int16_t a = (d >> (4 * j + 0)) & 0x3;
-      const int16_t b = (d >> (4 * j + 2)) & 0x3;
+      /* Safety: The & 0x3 masks each value to 2 bits (range [0, 3]), so the
+       * truncation and subsequent subtraction in int16_t is lossless. */
+      const int16_t a = (int16_t)((d >> (4 * j + 0)) & 0x3);
+      const int16_t b = (int16_t)((d >> (4 * j + 2)) & 0x3);
       r->coeffs[8 * i + j] = (int16_t)(a - b);
     }
   }
@@ -342,8 +346,10 @@ void mlk_poly_cbd3(mlk_poly *r, const uint8_t buf[3 * MLKEM_N / 4])
       invariant(array_abs_bound(r->coeffs, 0, 4 * i + j, 4))
       decreases(4 - j))
     {
-      const int16_t a = (d >> (6 * j + 0)) & 0x7;
-      const int16_t b = (d >> (6 * j + 3)) & 0x7;
+      /* Safety: The & 0x7 masks each value to 3 bits (range [0, 7]), so the
+       * truncation and subsequent subtraction in int16_t is lossless. */
+      const int16_t a = (int16_t)((d >> (6 * j + 0)) & 0x7);
+      const int16_t b = (int16_t)((d >> (6 * j + 3)) & 0x7);
       r->coeffs[4 * i + j] = (int16_t)(a - b);
     }
   }

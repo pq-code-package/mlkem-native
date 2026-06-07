@@ -23,6 +23,7 @@
 #include "randombytes.h"
 #include "sampling.h"
 #include "symmetric.h"
+#include "verify.h"
 
 /* Parameter set namespacing
  * This is to facilitate building multiple instances

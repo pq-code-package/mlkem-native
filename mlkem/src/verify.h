@@ -183,7 +183,7 @@ static MLK_ALWAYS_INLINE uint16_t mlk_cast_int32_to_uint16(int32_t x)
  */
 static MLK_ALWAYS_INLINE uint16_t mlk_cast_int16_to_uint16(int32_t x)
 {
-  return mlk_cast_int32_to_uint16((int32_t)x);
+  return mlk_cast_int32_to_uint16(x);
 }
 
 /**
