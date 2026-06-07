@@ -112,6 +112,7 @@ def main():
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
 
         # Somehow, the output ends up on stderr
+        output = ""
         if result.stderr:
             import re
 
@@ -123,8 +124,21 @@ def main():
                     # Remove ANSI color codes
                     clean_line = re.sub(r"\x1b\[[0-9;]*m", "", line)
                     filtered_lines.append(clean_line)
-            print("\n".join(filtered_lines), end="")
+            output = "\n".join(filtered_lines)
 
+        # simavr does not propagate the guest exit code (returncode is always
+        # 0), so a guest-side failure would otherwise be reported as success.
+        # As a stopgap until simavr's exit-code mechanism is backported (#1728),
+        # scan the output for "ERROR" and fail instead. This catches both
+        # the UBSan-trap abort() in avr_wrapper.c and the CHECK(...) macros in
+        # the tests, which print "ERROR (file,line)" on failure.
+        #
+        # On failure, write to stderr, otherwise stdout.
+        if "ERROR" in output:
+            print(output, end="", file=sys.stderr)
+            sys.exit(1)
+
+        print(output, end="")
         sys.exit(result.returncode)
 
     except subprocess.TimeoutExpired:
