@@ -79,7 +79,7 @@ jobs:
           bench_extra_args: "-r"
           nix_shell: ''
           cross_prefix: ""
-    if: github.repository_owner == 'pq-code-package' && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
+    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
     runs-on: self-hosted-${{ matrix.target.system }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -156,7 +156,7 @@ jobs:
             ldflags: "-flto"
             perf: PMU
     uses: ./.github/workflows/bench_ec2_reusable.yml
-    if: github.repository_owner == 'pq-code-package' && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
+    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
     with:
       ec2_instance_type: ${{ matrix.target.ec2_instance_type }}
       ec2_ami: ${{ matrix.target.ec2_ami }}
