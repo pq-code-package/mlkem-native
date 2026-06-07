@@ -56,7 +56,13 @@ __contract__(
     invariant(array_bound(r, 0, ctr, 0, MLKEM_Q))
     decreases(buflen - pos))
   {
-    val0 = ((buf[pos + 0] >> 0) | (buf[pos + 1] << 8)) & 0xFFF;
+    /* Safety:
+     * - The explicit cast to uint16_t ensures that << 8 does
+     *   not signed-overflow even on a 16-bit system.
+     * - The conversion to int16_t is safe due to the explicit 0xFFF
+     *   truncation.
+     */
+    val0 = ((buf[pos + 0] >> 0) | ((uint16_t)buf[pos + 1] << 8)) & 0xFFF;
     val1 = ((buf[pos + 1] >> 4) | (buf[pos + 2] << 4)) & 0xFFF;
     pos += 3;
 

@@ -641,7 +641,12 @@ __contract__(
     const uint8_t t0 = a[3 * i + 0];
     const uint8_t t1 = a[3 * i + 1];
     const uint8_t t2 = a[3 * i + 2];
-    r->coeffs[2 * i + 0] = (int16_t)(t0 | ((t1 << 8) & 0xFFF));
+    /* Safety:
+     * - The explicit cast to uint16_t ensures that << 8 does
+     *   not signed-overflow even on a 16-bit system.
+     * - The cast to int16_t is safe due to the explicit 0xFFF truncation.
+     */
+    r->coeffs[2 * i + 0] = (int16_t)(t0 | (((uint16_t)t1 << 8) & 0xFFF));
     r->coeffs[2 * i + 1] = (int16_t)((t1 >> 4) | (t2 << 4));
   }
 
