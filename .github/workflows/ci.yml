@@ -754,7 +754,7 @@ jobs:
           - system: macos-latest
             nix_cache: 'true'
             nix_shell: 'hol_light-cross-x86_64'
-            extra_args: '--force-cross'
+            extra_args: '--force-cross aarch64 x86_64'
           # TODO: autogen does not yet work on macos15-intel (#1304)
           # - system: macos-15-intel
           #   nix_cache: 'false'
@@ -762,11 +762,11 @@ jobs:
           - system: ubuntu-latest
             nix_shell: 'hol_light-cross-aarch64'
             nix_cache: 'true'
-            extra_args: '--force-cross'
+            extra_args: '--force-cross aarch64 x86_64'
           - system: ubuntu-24.04-arm
             nix_shell: 'hol_light-cross-x86_64'
             nix_cache: 'true'
-            extra_args: '--force-cross'
+            extra_args: '--force-cross aarch64 x86_64'
     runs-on: ${{ matrix.target.system }}
     name: Check object code in HOL-Light proofs
     steps:
