@@ -30,8 +30,8 @@ CFLAGS += \
 # On UB, abort() in avr_wrapper.c is called.
 CFLAGS += \
 	-fno-wrapv \
-	-fsanitize=shift \
-	-fsanitize-trap=shift
+	-fsanitize=undefined \
+	-fsanitize-trap=undefined
 
 CFLAGS += $(CFLAGS_EXTRA)
 
