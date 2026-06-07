@@ -90,10 +90,7 @@
             packages = builtins.attrValues
               {
                 inherit (config.packages) linters cbmc hol_light s2n_bignum slothy toolchains_native hol_server;
-                inherit (pkgs)
-                  direnv
-                  nix-direnv
-                  zig_0_13;
+                inherit (pkgs) zig_0_13;
               } ++ holLightToolchain;
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
 
