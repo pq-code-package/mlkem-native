@@ -197,33 +197,5 @@
           devShells.valgrind-varlat_gcc15 = util.mkShellWithCC_valgrind' pkgs.gcc15;
           devShells.valgrind-varlat_gcc16 = util.mkShellWithCC_valgrind' pkgs.gcc16;
         };
-      flake = {
-        devShell.x86_64-linux =
-          let
-            pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
-            pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
-            util = pkgs.callPackage ./nix/util.nix { };
-          in
-          util.mkShell {
-            packages =
-              [
-                util.linters
-                util.cbmc_pkgs
-                util.hol_light'
-                util.s2n_bignum
-                util.toolchains_native
-                pkgs.zig_0_13
-              ]
-              ++ builtins.attrValues {
-                inherit (pkgs) ocaml ledit;
-                inherit (pkgs.ocamlPackages) findlib camlp5 zarith;
-              }
-              ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ util.valgrind_varlat ];
-          };
-        # The usual flake attributes can be defined here, including system-
-        # agnostic ones like nixosModule and system-enumerating ones, although
-        # those are more easily expressed in perSystem.
-
-      };
     };
 }
