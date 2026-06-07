@@ -94,8 +94,7 @@
                   direnv
                   nix-direnv
                   zig_0_13;
-              } ++ holLightToolchain
-            ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ config.packages.valgrind_varlat ];
+              } ++ holLightToolchain;
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
 
           packages.hol_server = util.hol_server.hol_server_start;
