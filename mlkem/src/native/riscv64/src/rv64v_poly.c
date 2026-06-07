@@ -722,7 +722,8 @@ void mlk_rv64v_poly_reduce(int16_t *r)
   }
 }
 
-/* Run rejection sampling to get uniform random integers mod q  */
+/* Run rejection sampling to get uniform random integers mod q.
+ * buflen must be a multiple of 12. */
 
 unsigned int mlk_rv64v_rej_uniform(int16_t *r, unsigned int len,
                                    const uint8_t *buf, unsigned int buflen)

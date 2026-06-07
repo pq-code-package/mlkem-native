@@ -65,6 +65,11 @@ static MLK_INLINE int mlk_rej_uniform_native(int16_t *r, unsigned len,
                                              const uint8_t *buf,
                                              unsigned buflen)
 {
+  /* mlk_rv64v_rej_uniform requires buflen to be a multiple of 12 */
+  if (buflen % 12 != 0)
+  {
+    return MLK_NATIVE_FUNC_FALLBACK;
+  }
   /* The cast from unsigned to signed integer is safe
    * because the return value is <= len, which we asssume
    * to be bound by 4096 and hence <= INT_MAX. */
