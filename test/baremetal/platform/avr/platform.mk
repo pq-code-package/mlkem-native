@@ -26,6 +26,13 @@ CFLAGS += \
 	-fno-fat-lto-objects \
 	-DNTESTS_FUNC=10
 
+# Trap on signed-shift UB; needs -fno-wrapv as avr-gcc defaults to -fwrapv.
+# On UB, abort() in avr_wrapper.c is called.
+CFLAGS += \
+	-fno-wrapv \
+	-fsanitize=shift \
+	-fsanitize-trap=shift
+
 CFLAGS += $(CFLAGS_EXTRA)
 
 # Non-standard stack end: 0x81FF = 0x200 + 8K instead of default 0x41FF

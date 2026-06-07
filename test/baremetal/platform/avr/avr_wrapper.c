@@ -6,6 +6,7 @@
 #include <avr/io.h>
 #include <avr/sleep.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define RAM_BASE 0x2000
@@ -40,4 +41,15 @@ void program_exit(void)
 {
   cli();
   sleep_cpu();
+}
+
+/* Called on UBSan traps (-fsanitize-trap). The avr-libc default would
+ * stop simavr without any output, hiding the failure. */
+void abort(void)
+{
+  printf("ERROR: abort() called (e.g. UBSan trap)\n");
+  cli();
+  sleep_cpu();
+  for (;;)
+    ;
 }
