@@ -412,8 +412,8 @@ __contract__(
   mlk_poly_getnoise_eta2(epp, coins, 4);
 #elif MLKEM_K == 3
   /*
-   * In this call, only the first three output buffers are needed.
-   * The last parameter is a dummy that's overwritten later.
+   * In this call, only the first three output buffers are needed,
+   * so we pass NULL as the fourth parameter, and 0xFF as its dummy nonce.
    */
   mlk_poly_getnoise_eta1_4x(&sp->vec[0], &sp->vec[1], &sp->vec[2], NULL, coins,
                             0, 1, 2, 0xFF /* irrelevant */);

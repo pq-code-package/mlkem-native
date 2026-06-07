@@ -31,7 +31,7 @@
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #define MLK_KECCAK_NROUNDS 24
-#define MLK_KECCAK_ROL(a, offset) ((a << offset) ^ (a >> (64 - offset)))
+#define MLK_KECCAK_ROL(a, offset) (((a) << (offset)) ^ ((a) >> (64 - (offset))))
 
 void mlk_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
                                    unsigned offset, unsigned length)
