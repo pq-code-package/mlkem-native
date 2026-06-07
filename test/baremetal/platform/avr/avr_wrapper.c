@@ -33,7 +33,10 @@ void setup_args(void)
  * but before calling `main`. We mark it as naked but don't provide a return
  * instruction, so it is effectively inlined into the startup code. */
 void setup_stdout(void) __attribute__((naked, section(".init7"), used));
-void setup_stdout(void) { stdout = &mystdout; }
+/* Wire both stdout and stderr to the UART. The tests' CHECK(...) macros report
+ * failures via fprintf(stderr, ...); without this, stderr is NULL and those
+ * "ERROR (file,line)" lines would never reach simavr. */
+void setup_stdout(void) { stdout = stderr = &mystdout; }
 
 /* The above sequence makes simavr stop. */
 void program_exit(void) __attribute__((section(".fini1"), used));
