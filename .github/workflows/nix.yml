@@ -30,14 +30,15 @@ jobs:
       - name: Check if dependencies changed
         id: check_run
         shell: bash
+        env:
+          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: |
           if [[ ${{ (github.event_name == 'workflow_dispatch' && '1') || '0' }} == "1" ]]; then
             run_needed=1
           else
             run_needed=0
-            changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
             dependencies="flake.lock flake.nix nix/"
-            for changed in $changed_files; do
+            for changed in $CHANGED_FILES; do
               for needs in $dependencies; do
                  if [[ "$changed" == "$needs"* ]]; then
                    run_needed=1

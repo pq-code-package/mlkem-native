@@ -122,11 +122,12 @@ jobs:
       - name: Check if dependencies changed
         id: check_run
         shell: bash
+        env:
+          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: |
           run_needed=0
-          changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
           dependencies="${{ join(matrix.proof.needs, ' ') }} ${{ format('{0}.S {0}.ml', matrix.proof.name) }}"
-          for changed in $changed_files; do
+          for changed in $CHANGED_FILES; do
             for needs in $dependencies; do
                if [[ "$changed" == *"$needs" ]]; then
                  run_needed=1
@@ -135,7 +136,7 @@ jobs:
           done
 
           # Always re-run upon change to nix files for HOL-Light
-          if [[ "$changed_files" == *"nix/"* ]] || [[ "$changed_files" == *"hol_light.yml"* ]] || [[ "$changed_files" == *"flake"* ]] || [[ "$changed_files" == *"proofs/hol_light/aarch64/Makefile"* ]]; then
+          if [[ "$CHANGED_FILES" == *"nix/"* ]] || [[ "$CHANGED_FILES" == *"hol_light.yml"* ]] || [[ "$CHANGED_FILES" == *"flake"* ]] || [[ "$CHANGED_FILES" == *"proofs/hol_light/aarch64/Makefile"* ]]; then
             run_needed=1
           fi
 
@@ -242,11 +243,12 @@ jobs:
       - name: Check if dependencies changed
         id: check_run
         shell: bash
+        env:
+          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: |
           run_needed=0
-          changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
           dependencies="${{ join(matrix.proof.needs, ' ') }} ${{ format('{0}.S {0}.ml', matrix.proof.name) }}"
-          for changed in $changed_files; do
+          for changed in $CHANGED_FILES; do
             for needs in $dependencies; do
                if [[ "$changed" == *"$needs" ]]; then
                  run_needed=1
@@ -255,7 +257,7 @@ jobs:
           done
 
           # Always re-run upon change to nix files for HOL-Light
-          if [[ "$changed_files" == *"nix/"* ]] || [[ "$changed_files" == *"hol_light.yml"* ]] || [[ "$changed_files" == *"flake"* ]] || [[ "$changed_files" == *"proofs/hol_light/x86_64/Makefile"* ]]; then
+          if [[ "$CHANGED_FILES" == *"nix/"* ]] || [[ "$CHANGED_FILES" == *"hol_light.yml"* ]] || [[ "$CHANGED_FILES" == *"flake"* ]] || [[ "$CHANGED_FILES" == *"proofs/hol_light/x86_64/Makefile"* ]]; then
             run_needed=1
           fi
 
