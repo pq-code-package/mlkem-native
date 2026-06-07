@@ -132,7 +132,10 @@ static void print_hex(const char *name, const unsigned char *raw, size_t len)
   printf("\n");
 }
 
-static void acvp_mlkem_encapDecp_AFT_encapsulation(
+/* The test-case handlers below are MLK_NOINLINE so their large key buffers
+ * stay in short-lived frames. This can reduce stack usage in some
+ * environments, e.g. AVR. */
+static MLK_NOINLINE void acvp_mlkem_encapDecp_AFT_encapsulation(
     unsigned char const ek[CRYPTO_PUBLICKEYBYTES],
     unsigned char const m[MLKEM_SYMBYTES])
 {
@@ -145,7 +148,7 @@ static void acvp_mlkem_encapDecp_AFT_encapsulation(
   print_hex("k", ss, sizeof(ss));
 }
 
-static void acvp_mlkem_encapDecp_VAL_decapsulation(
+static MLK_NOINLINE void acvp_mlkem_encapDecp_VAL_decapsulation(
     unsigned char const dk[CRYPTO_SECRETKEYBYTES],
     unsigned char const c[CRYPTO_CIPHERTEXTBYTES])
 {
@@ -156,7 +159,7 @@ static void acvp_mlkem_encapDecp_VAL_decapsulation(
   print_hex("k", ss, sizeof(ss));
 }
 
-static void acvp_mlkem_encapDecp_VAL_encapsulationKeyCheck(
+static MLK_NOINLINE void acvp_mlkem_encapDecp_VAL_encapsulationKeyCheck(
     unsigned char const ek[CRYPTO_PUBLICKEYBYTES])
 {
   int rc = 0;
@@ -164,7 +167,7 @@ static void acvp_mlkem_encapDecp_VAL_encapsulationKeyCheck(
   printf("testPassed=%d\n", rc);
 }
 
-static void acvp_mlkem_encapDecp_VAL_decapsulationKeyCheck(
+static MLK_NOINLINE void acvp_mlkem_encapDecp_VAL_decapsulationKeyCheck(
     unsigned char const dk[CRYPTO_SECRETKEYBYTES])
 {
   int rc = 0;
@@ -172,8 +175,9 @@ static void acvp_mlkem_encapDecp_VAL_decapsulationKeyCheck(
   printf("testPassed=%d\n", rc);
 }
 
-static void acvp_mlkem_keyGen_AFT(unsigned char const z[MLKEM_SYMBYTES],
-                                  unsigned char const d[MLKEM_SYMBYTES])
+static MLK_NOINLINE void acvp_mlkem_keyGen_AFT(
+    unsigned char const z[MLKEM_SYMBYTES],
+    unsigned char const d[MLKEM_SYMBYTES])
 {
   unsigned char ek[CRYPTO_PUBLICKEYBYTES];
   unsigned char dk[CRYPTO_SECRETKEYBYTES];
