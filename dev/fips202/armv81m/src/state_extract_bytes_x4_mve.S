@@ -66,16 +66,28 @@
 .text
 
 // ---------------------------------------------------------------------------
-// deinterleave_even: inverse of the even-bit compaction.  Inflates the even
-// half stored in \e back into byte positions.
-// Inputs:  \e (compacted even bits)
-// Outputs: \e (even bits expanded to byte positions, odd bits are garbage)
+// deinterleave_even
+//
+//   Expand the 16 bits in the low half of each 32-bit lane into 32 bits,
+//   placing each input bit at an even bit position of the output.  Odd
+//   output bit positions contain garbage.  The upper 16 bits of the input
+//   are ignored.
+//
+//   Inverse of the even-bit compaction in `interleave_evens`.
+//
+// Per 32-bit lane, with '-' for ignored / garbage bits:
+//
+//   Input  bits[31:0]:  --------  --------  FEDCBA98  76543210
+//   Output bits[31:0]:  -F-E-D-C  -B-A-9-8  -7-6-5-4  -3-2-1-0
+//
+// Inputs:   \e   (bits [15:0] of each 32-bit lane = data; bits [31:16] ignored)
+// Outputs:  \e   (even bits of each 32-bit lane = data; odd bits = garbage)
 // Clobbers: \tmp
 // ---------------------------------------------------------------------------
 .macro deinterleave_even e, tmp
     // Inflate e                              +------+-----------+-----------+-----------+
-    // Single-element annotation follows.  e: |   X  |     X     | l[0],l[1] | l[2],l[3] |
-    vsli.u32    \e, \e, #8              // e: |   X  | l[0],l[1] | l[2],l[3] | l[2],l[3] |
+    // Single-element annotation follows.  e: |   X  |     X     | l[1],l[0] | l[3],l[2] |
+    vsli.u32    \e, \e, #8              // e: |   X  | l[1],l[0] | l[3],l[2] | l[3],l[2] |
     vsli.u16    \e, \e, #4              // e: | l[0] | l[1],l[1] | l[3],l[2] | l[3],l[3] |
     //                                        +------+-----------+-----------+-----------+
     // Now, expand the lower bits  e: | XXXX3210 | tmp: | XXXXXXXX |
@@ -223,13 +235,21 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_extract_bytes_asm)
     it      ls
     movls   nB, length
 
-    // Build predicate: nB active bytes shifted left by 'off'
+    // Align the predicate window to the caller's buffer.
+    //
+    // After the transpose, qdN holds lane bytes 0..7 in vector byte lanes 0..7.
+    // We want to write bytes [off, off+nB) contiguously starting at dpN.  MVE
+    // has no variable cross-lane byte shift (no VEXT/VTBL, no 64-bit vector
+    // shift), so instead of shifting the data we shift the access pattern:
+    //   - pre-bias dpN by -off, so vstrbt (which writes lane k to ptr+k) sends
+    //     lane 'off' to dpN+0, lane 'off+1' to dpN+1, etc.
+    //   - shift the predicate left by off, masking lanes [0, off) so the
+    //     would-be out-of-bounds stores to [dpN-off, dpN) are suppressed.
     vctp.8 nB
     vmrs mask, p0
     lsl mask, mask, off
     vmsr p0, mask
 
-    // Subtract offset from data pointers so predicate window aligns
     subs dp0, dp0, off
     subs dp1, dp1, off
     subs dp2, dp2, off
