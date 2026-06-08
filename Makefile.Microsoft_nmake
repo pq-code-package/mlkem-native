@@ -125,9 +125,29 @@ gen_KAT1024: $(OBJ_FILES_1024) $(MLKEM1024_BUILD_DIR)\test\gen_KAT.obj $(BUILD_D
     @if NOT EXIST $(MLKEM1024_BUILD_DIR)\bin mkdir $(MLKEM1024_BUILD_DIR)\bin
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /Fe$(MLKEM1024_BUILD_DIR)\bin\gen_KAT1024 $** /link
 
+# compile RNG fail test for mlkem512
+test_rng_fail512: $(OBJ_FILES_512) $(MLKEM512_BUILD_DIR)\test\test_rng_fail.obj
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\bin mkdir $(MLKEM512_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /Fe$(MLKEM512_BUILD_DIR)\bin\test_rng_fail512 $** /link    
+
+# compile RNG fail test for mlkem768
+test_rng_fail768: $(OBJ_FILES_768) $(MLKEM768_BUILD_DIR)\test\test_rng_fail.obj
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\bin mkdir $(MLKEM768_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /Fe$(MLKEM768_BUILD_DIR)\bin\test_rng_fail768 $** /link
+
+# compile RNG fail test for mlkem1024
+test_rng_fail1024: $(OBJ_FILES_1024) $(MLKEM1024_BUILD_DIR)\test\test_rng_fail.obj
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\bin mkdir $(MLKEM1024_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /Fe$(MLKEM1024_BUILD_DIR)\bin\test_rng_fail1024 $** /link
+
 acvp: acvp_mlkem512 acvp_mlkem768 acvp_mlkem1024
 
 gen_KAT: gen_KAT512 gen_KAT768 gen_KAT1024
+
+run_rng_fail: test_rng_fail512 test_rng_fail768 test_rng_fail1024
+    $(MLKEM512_BUILD_DIR)\bin\test_rng_fail512.exe
+    $(MLKEM768_BUILD_DIR)\bin\test_rng_fail768.exe
+    $(MLKEM1024_BUILD_DIR)\bin\test_rng_fail1024.exe
 
 run_kat: gen_KAT
     python test/src/kat_client.py
@@ -140,7 +160,7 @@ run_func: test_mlkem512 test_mlkem768 test_mlkem1024
     $(MLKEM768_BUILD_DIR)\bin\test_mlkem768.exe
     $(MLKEM1024_BUILD_DIR)\bin\test_mlkem1024.exe
 
-test: run_func run_acvp run_kat
+test: run_func run_acvp run_kat run_rng_fail
     @echo   Everything checks fine!
 
 quickcheck: test
