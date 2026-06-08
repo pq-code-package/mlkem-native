@@ -189,6 +189,17 @@ jobs:
           exec_wrapper: ${{ matrix.target.vlen && format('qemu-riscv64 -cpu rv64,v=true,vlen={0}', matrix.target.vlen) || '' }}
           cflags: "-DMLKEM_DEBUG"
           opt: 'opt'
+      - name: build + test (cross, opt, C90)
+        uses: ./.github/actions/multi-functest
+        if: ${{ matrix.target.arch == 'riscv64' }}
+        with:
+          nix-shell: ${{ matrix.target.nix_shell }}
+          nix-cache: 'true'
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: ${{ matrix.target.mode }}
+          exec_wrapper: ${{ matrix.target.vlen && format('qemu-riscv64 -cpu rv64,v=true,vlen={0}', matrix.target.vlen) || '' }}
+          cflags: "-std=c90"
+          opt: 'opt'
   ppc64le_tests:
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     name: Functional tests (ppc64le/POWER10, native)
