@@ -41,6 +41,25 @@ jobs:
            arch: riscv64
            mode: cross-riscv64
            nix_shell: cross-riscv64
+           vlen: 128
+         - runner: ubuntu-24.04-arm
+           name: 'ubuntu-latest (aarch64)'
+           arch: riscv64
+           mode: cross-riscv64
+           nix_shell: cross-riscv64
+           vlen: 256
+         - runner: ubuntu-24.04-arm
+           name: 'ubuntu-latest (aarch64)'
+           arch: riscv64
+           mode: cross-riscv64
+           nix_shell: cross-riscv64
+           vlen: 512
+         - runner: ubuntu-24.04-arm
+           name: 'ubuntu-latest (aarch64)'
+           arch: riscv64
+           mode: cross-riscv64
+           nix_shell: cross-riscv64
+           vlen: 1024
          - runner: ubuntu-24.04-arm
            name: 'ubuntu-latest (aarch64)'
            arch: riscv32
@@ -87,14 +106,6 @@ jobs:
              target: {
                runner: ubuntu-24.04-arm,
                name: 'ubuntu-latest (aarch64)',
-               arch: riscv64,
-               mode: cross-riscv64,
-               nix_shell: cross-riscv64
-             }}
-          - {external: true,
-             target: {
-               runner: ubuntu-24.04-arm,
-               name: 'ubuntu-latest (aarch64)',
                arch: riscv32,
                mode: cross-riscv32,
                nix_shell: cross-riscv32
@@ -131,17 +142,20 @@ jobs:
                mode: cross-aarch64_be,
                nix_shell: cross-aarch64_be
              }}
-    name: Functional tests (${{ matrix.target.arch }}${{ matrix.target.mode != 'native' && ', cross' || ''}})
+    name: Functional tests (${{ matrix.target.arch }}${{ matrix.target.mode != 'native' && ', cross' || ''}}${{ matrix.target.vlen && format(', VLEN={0}', matrix.target.vlen) || '' }})
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: build + test (no-opt)
         uses: ./.github/actions/multi-functest
+        # no-opt exercises only the C fallback, so RVV VLEN is irrelevant; run once for riscv64
+        if: ${{ matrix.target.arch != 'riscv64' || matrix.target.vlen == 128 }}
         with:
           nix-shell: ${{ matrix.target.nix_shell }}
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: ${{ matrix.target.mode }}
+          exec_wrapper: ${{ matrix.target.vlen && format('qemu-riscv64 -cpu rv64,v=true,vlen={0}', matrix.target.vlen) || '' }}
           opt: 'no_opt'
       - name: build + test (+debug+memsan+ubsan, native)
         uses: ./.github/actions/multi-functest
@@ -161,6 +175,7 @@ jobs:
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: ${{ matrix.target.mode }}
+          exec_wrapper: ${{ matrix.target.vlen && format('qemu-riscv64 -cpu rv64,v=true,vlen={0}', matrix.target.vlen) || '' }}
           opt: 'opt'
       - name: build + test (cross, opt, +debug)
         uses: ./.github/actions/multi-functest
@@ -171,6 +186,7 @@ jobs:
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: ${{ matrix.target.mode }}
+          exec_wrapper: ${{ matrix.target.vlen && format('qemu-riscv64 -cpu rv64,v=true,vlen={0}', matrix.target.vlen) || '' }}
           cflags: "-DMLKEM_DEBUG"
           opt: 'opt'
   ppc64le_tests:
