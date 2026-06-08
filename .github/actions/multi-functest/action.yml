@@ -29,6 +29,9 @@ inputs:
   compile_mode:
     description: all | native | cross-x86_64 | cross-aarch64 | cross-riscv64 | cross-riscv32
     default: "native"
+  exec_wrapper:
+    description: QEMU exec wrapper override for cross runs (per-platform default when empty)
+    default: ""
   opt:
     description: all | opt | no_opt
     default: "all"
@@ -107,7 +110,7 @@ runs:
           cflags: "${{ inputs.cflags }} -DMLK_FORCE_X86_64"
           ldflags: ${{ inputs.ldflags }}
           cross_prefix: x86_64-unknown-linux-gnu-
-          exec_wrapper: qemu-x86_64
+          exec_wrapper: "${{ inputs.exec_wrapper != '' && inputs.exec_wrapper || 'qemu-x86_64' }}"
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
@@ -133,7 +136,7 @@ runs:
           cflags: "${{ inputs.cflags }} -DMLK_FORCE_AARCH64"
           ldflags: ${{ inputs.ldflags }}
           cross_prefix: aarch64-unknown-linux-gnu-
-          exec_wrapper: qemu-aarch64
+          exec_wrapper: "${{ inputs.exec_wrapper != '' && inputs.exec_wrapper || 'qemu-aarch64' }}"
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
@@ -159,7 +162,7 @@ runs:
           cflags: "${{ inputs.cflags }} -DMLK_FORCE_PPC64LE -mcpu=power8"
           ldflags: ${{ inputs.ldflags }}
           cross_prefix: powerpc64le-unknown-linux-gnu-
-          exec_wrapper: "qemu-ppc64le -cpu power8"
+          exec_wrapper: "${{ inputs.exec_wrapper != '' && inputs.exec_wrapper || 'qemu-ppc64le -cpu power8' }}"
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
@@ -185,7 +188,7 @@ runs:
           cflags: "${{ inputs.cflags }} -DMLK_FORCE_PPC64LE -mcpu=power7"
           ldflags: ${{ inputs.ldflags }}
           cross_prefix: powerpc64le-unknown-linux-gnu-
-          exec_wrapper: "qemu-ppc64le -cpu power8"
+          exec_wrapper: "${{ inputs.exec_wrapper != '' && inputs.exec_wrapper || 'qemu-ppc64le -cpu power8' }}"
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
@@ -211,7 +214,7 @@ runs:
           cflags: "${{ inputs.cflags }} -static  -DMLK_FORCE_AARCH64_EB"
           ldflags: "${{ inputs.ldflags }} -static"
           cross_prefix: aarch64_be-none-linux-gnu-
-          exec_wrapper: qemu-aarch64_be
+          exec_wrapper: "${{ inputs.exec_wrapper != '' && inputs.exec_wrapper || 'qemu-aarch64_be' }}"
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
@@ -225,7 +228,7 @@ runs:
           rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
-      - name: Cross riscv64 Tests (RVV, VLEN=128)
+      - name: Cross riscv64 Tests (RVV)
         if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-riscv64') && (success() || failure()) }}
         uses: ./.github/actions/functest
         with:
@@ -237,82 +240,7 @@ runs:
           cflags: "${{ inputs.cflags }} -DMLK_FORCE_RISCV64"
           ldflags: ${{ inputs.ldflags }}
           cross_prefix: riscv64-unknown-linux-gnu-
-          exec_wrapper: "qemu-riscv64 -cpu rv64,v=true,vlen=128"
-          opt: ${{ inputs.opt }}
-          func: ${{ inputs.func }}
-          kat: ${{ inputs.kat }}
-          unit: ${{ inputs.unit }}
-          acvp: ${{ inputs.acvp }}
-          wycheproof: ${{ inputs.wycheproof }}
-          examples: ${{ inputs.examples }}
-          check_namespace: ${{ inputs.check_namespace }}
-          stack: ${{ inputs.stack }}
-          alloc: ${{ inputs.alloc }}
-          rng_fail: ${{ inputs.rng_fail }}
-          extra_args: ${{ inputs.extra_args }}
-          extra_env: ${{ inputs.extra_env }}
-      - name: Cross riscv64 Tests (RVV, VLEN=256)
-        if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-riscv64') && (success() || failure()) }}
-        uses: ./.github/actions/functest
-        with:
-          nix-shell: ${{ inputs.nix-shell }}
-          nix-cache: ${{ inputs.nix-cache }}
-          nix-verbose: ${{ inputs.nix-verbose }}
-          gh_token: ${{ inputs.gh_token }}
-          custom_shell: ${{ inputs.custom_shell }}
-          cflags: "${{ inputs.cflags }} -DMLK_FORCE_RISCV64"
-          cross_prefix: riscv64-unknown-linux-gnu-
-          exec_wrapper: "qemu-riscv64 -cpu rv64,v=true,vlen=256"
-          opt: ${{ inputs.opt }}
-          func: ${{ inputs.func }}
-          kat: ${{ inputs.kat }}
-          unit: ${{ inputs.unit }}
-          acvp: ${{ inputs.acvp }}
-          wycheproof: ${{ inputs.wycheproof }}
-          examples: ${{ inputs.examples }}
-          check_namespace: ${{ inputs.check_namespace }}
-          stack: ${{ inputs.stack }}
-          alloc: ${{ inputs.alloc }}
-          rng_fail: ${{ inputs.rng_fail }}
-          extra_args: ${{ inputs.extra_args }}
-          extra_env: ${{ inputs.extra_env }}
-      - name: Cross riscv64 Tests (RVV, VLEN=512)
-        if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-riscv64') && (success() || failure()) }}
-        uses: ./.github/actions/functest
-        with:
-          nix-shell: ${{ inputs.nix-shell }}
-          nix-cache: ${{ inputs.nix-cache }}
-          nix-verbose: ${{ inputs.nix-verbose }}
-          gh_token: ${{ inputs.gh_token }}
-          custom_shell: ${{ inputs.custom_shell }}
-          cflags: "${{ inputs.cflags }} -DMLK_FORCE_RISCV64"
-          cross_prefix: riscv64-unknown-linux-gnu-
-          exec_wrapper: "qemu-riscv64 -cpu rv64,v=true,vlen=512"
-          opt: ${{ inputs.opt }}
-          func: ${{ inputs.func }}
-          kat: ${{ inputs.kat }}
-          unit: ${{ inputs.unit }}
-          acvp: ${{ inputs.acvp }}
-          wycheproof: ${{ inputs.wycheproof }}
-          examples: ${{ inputs.examples }}
-          check_namespace: ${{ inputs.check_namespace }}
-          stack: ${{ inputs.stack }}
-          alloc: ${{ inputs.alloc }}
-          rng_fail: ${{ inputs.rng_fail }}
-          extra_args: ${{ inputs.extra_args }}
-          extra_env: ${{ inputs.extra_env }}
-      - name: Cross riscv64 Tests (RVV, VLEN=1024)
-        if: ${{ (inputs.compile_mode == 'all' || inputs.compile_mode == 'cross-riscv64') && (success() || failure()) }}
-        uses: ./.github/actions/functest
-        with:
-          nix-shell: ${{ inputs.nix-shell }}
-          nix-cache: ${{ inputs.nix-cache }}
-          nix-verbose: ${{ inputs.nix-verbose }}
-          gh_token: ${{ inputs.gh_token }}
-          custom_shell: ${{ inputs.custom_shell }}
-          cflags: "${{ inputs.cflags }} -DMLK_FORCE_RISCV64"
-          cross_prefix: riscv64-unknown-linux-gnu-
-          exec_wrapper: "qemu-riscv64 -cpu rv64,v=true,vlen=1024"
+          exec_wrapper: "${{ inputs.exec_wrapper != '' && inputs.exec_wrapper || 'qemu-riscv64 -cpu rv64,v=true,vlen=128' }}"
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
@@ -338,7 +266,7 @@ runs:
           cflags: "${{ inputs.cflags }} -DMLK_FORCE_RISCV32"
           ldflags: ${{ inputs.ldflags }}
           cross_prefix: riscv32-unknown-linux-gnu-
-          exec_wrapper: qemu-riscv32
+          exec_wrapper: "${{ inputs.exec_wrapper != '' && inputs.exec_wrapper || 'qemu-riscv32' }}"
           opt: ${{ inputs.opt }}
           func: ${{ inputs.func }}
           kat: ${{ inputs.kat }}
