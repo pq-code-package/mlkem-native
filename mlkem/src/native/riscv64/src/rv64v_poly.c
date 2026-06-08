@@ -28,7 +28,7 @@
 /* check-magic: 1441 == pow(2,32-7,MLKEM_Q) */
 #define MLK_RVV_MONT_NR 1441
 
-static inline vint16m1_t fq_redc(vint16m1_t rh, vint16m1_t rl, size_t vl)
+static MLK_INLINE vint16m1_t fq_redc(vint16m1_t rh, vint16m1_t rl, size_t vl)
 {
   vint16m1_t t;
 
@@ -41,7 +41,7 @@ static inline vint16m1_t fq_redc(vint16m1_t rh, vint16m1_t rl, size_t vl)
 
 /* Narrowing reduction */
 
-static inline vint16m1_t fq_redc2(vint32m2_t z, size_t vl)
+static MLK_INLINE vint16m1_t fq_redc2(vint32m2_t z, size_t vl)
 {
   vint16m1_t t;
 
@@ -56,7 +56,7 @@ static inline vint16m1_t fq_redc2(vint32m2_t z, size_t vl)
 
 /* Narrowing Barrett */
 
-static inline vint16m1_t fq_barrett(vint16m1_t a, size_t vl)
+static MLK_INLINE vint16m1_t fq_barrett(vint16m1_t a, size_t vl)
 {
   vint16m1_t t;
   const int16_t v = ((1 << 26) + MLKEM_Q / 2) / MLKEM_Q;
@@ -81,7 +81,7 @@ static inline vint16m1_t fq_barrett(vint16m1_t a, size_t vl)
  * (mlk_ct_cmask_neg_i16, verify.h) and AArch64 (poly_reduce_aarch64_asm.S)
  * implementations. */
 
-static inline vint16m1_t fq_cadd(vint16m1_t rx, size_t vl)
+static MLK_INLINE vint16m1_t fq_cadd(vint16m1_t rx, size_t vl)
 {
   vint16m1_t m;
 
@@ -93,7 +93,7 @@ static inline vint16m1_t fq_cadd(vint16m1_t rx, size_t vl)
 
 /* Montgomery multiply: vector-vector  */
 
-static inline vint16m1_t fq_mul_vv(vint16m1_t rx, vint16m1_t ry, size_t vl)
+static MLK_INLINE vint16m1_t fq_mul_vv(vint16m1_t rx, vint16m1_t ry, size_t vl)
 {
   vint16m1_t rl, rh;
 
@@ -104,7 +104,7 @@ static inline vint16m1_t fq_mul_vv(vint16m1_t rx, vint16m1_t ry, size_t vl)
 
 /* Montgomery multiply: vector-scalar  */
 
-static inline vint16m1_t fq_mul_vx(vint16m1_t rx, int16_t ry, size_t vl)
+static MLK_INLINE vint16m1_t fq_mul_vx(vint16m1_t rx, int16_t ry, size_t vl)
 {
   vint16m1_t rl, rh;
 
@@ -115,7 +115,7 @@ static inline vint16m1_t fq_mul_vx(vint16m1_t rx, int16_t ry, size_t vl)
 
 /* full normalization  */
 
-static inline vint16m1_t fq_mulq_vx(vint16m1_t rx, int16_t ry, size_t vl)
+static MLK_INLINE vint16m1_t fq_mulq_vx(vint16m1_t rx, int16_t ry, size_t vl)
 {
   vint16m1_t result;
 
@@ -607,10 +607,10 @@ void mlk_rv64v_poly_invntt_tomont(int16_t *r)
 
 /* ML-KEM's middle field GF(3329)[X]/(X^2) multiplication */
 
-static inline void mlk_rv64v_poly_basemul_mont_add_k(int16_t *r,
-                                                     const int16_t *a,
-                                                     const int16_t *b,
-                                                     unsigned kn)
+static MLK_INLINE void mlk_rv64v_poly_basemul_mont_add_k(int16_t *r,
+                                                         const int16_t *a,
+                                                         const int16_t *b,
+                                                         unsigned kn)
 {
 #include "rv64v_zetas_basemul.inc"
 
@@ -691,8 +691,9 @@ void mlk_rv64v_poly_basemul_mont_add_k4(int16_t *r, const int16_t *a,
 void mlk_rv64v_poly_tomont(int16_t *r)
 {
   size_t vl = __riscv_vsetvl_e16m1(MLKEM_N);
+  size_t i;
 
-  for (size_t i = 0; i < MLKEM_N; i += vl)
+  for (i = 0; i < MLKEM_N; i += vl)
   {
     vint16m1_t vec = __riscv_vle16_v_i16m1(&r[i], vl);
     vec = fq_mul_vx(vec, MLK_RVV_MONT_R2, vl);
@@ -710,8 +711,9 @@ void mlk_rv64v_poly_reduce(int16_t *r)
 {
   size_t vl = __riscv_vsetvl_e16m1(MLKEM_N);
   vint16m1_t vt;
+  size_t i;
 
-  for (size_t i = 0; i < MLKEM_N; i += vl)
+  for (i = 0; i < MLKEM_N; i += vl)
   {
     vt = __riscv_vle16_v_i16m1(&r[i], vl);
     vt = fq_barrett(vt, vl);
