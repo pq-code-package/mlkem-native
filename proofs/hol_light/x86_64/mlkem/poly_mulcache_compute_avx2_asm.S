@@ -12,11 +12,11 @@
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_poly_mulcache_compute_avx2_asm
-_PQCP_MLKEM_NATIVE_MLKEM768_poly_mulcache_compute_avx2_asm:
+.global _mlk_poly_mulcache_compute_avx2_asm
+_mlk_poly_mulcache_compute_avx2_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_poly_mulcache_compute_avx2_asm
-PQCP_MLKEM_NATIVE_MLKEM768_poly_mulcache_compute_avx2_asm:
+.global mlk_poly_mulcache_compute_avx2_asm
+mlk_poly_mulcache_compute_avx2_asm:
 #endif
 
         .cfi_startproc
