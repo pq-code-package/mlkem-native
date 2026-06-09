@@ -28,7 +28,7 @@ extern void asm_call_stub(struct register_state *input,
                           struct register_state *output,
                           void (*function_ptr)(void));
 
-#elif defined(MLK_SYS_X86_64)
+#elif defined(MLK_SYS_X86_64) && defined(MLK_SYSV_ABI_SUPPORTED)
 
 /* x86_64 System V ABI register state
  * Layout must match x86_64_callstub.S */
@@ -54,10 +54,42 @@ int check_x86_64_sysv_compliance(struct x86_64_register_state *before,
                                  struct x86_64_register_state *after);
 void init_x86_64_register_state(struct x86_64_register_state *state);
 
-extern void asm_call_stub_x86_64(struct x86_64_register_state *input,
-                                 struct x86_64_register_state *output,
-                                 void (*function_ptr)(void));
+extern MLK_SYSV_ABI
+void asm_call_stub_x86_64(struct x86_64_register_state *input,
+                          struct x86_64_register_state *output,
+                          void (*function_ptr)(void));
 
-#endif /* !MLK_SYS_AARCH64 && MLK_SYS_X86_64 */
+#elif defined(MLK_SYS_PPC64LE)
+
+/* PowerPC64 ELF v2 ABI register state.
+ *
+ * Layout must match ppc64le_callstub.S. Covers the full set of callee-saved
+ * (non-volatile) registers the ABI requires a function to preserve:
+ *   - GPRs r14-r31
+ *   - FPRs f14-f31
+ *   - VRs  v20-v31 (128-bit each)
+ *   - condition register fields CR2, CR3, CR4
+ * plus the volatile argument registers r3-r10 used to set up the call.
+ *
+ * Aligned so the stub's 128-bit vector loads/stores (lvx/stvx) are aligned. */
+struct MLK_ALIGN ppc64le_register_state
+{
+  uint64_t gpr_arg[8]; /* r3-r10 (argument/volatile, for call setup) */
+  uint64_t gpr_nv[18]; /* r14-r31 (non-volatile) */
+  uint64_t fpr[18];    /* f14-f31 (non-volatile, low 64 bits) */
+  uint64_t vr[12][2];  /* v20-v31 (non-volatile, full 128-bit) */
+  uint64_t cr;         /* condition register (CR2-CR4 fields checked) */
+};
+
+int check_ppc64le_elfv2_compliance(struct ppc64le_register_state *before,
+                                   struct ppc64le_register_state *after);
+void init_ppc64le_register_state(struct ppc64le_register_state *state);
+
+extern void asm_call_stub_ppc64le(struct ppc64le_register_state *input,
+                                  struct ppc64le_register_state *output,
+                                  void (*function_ptr)(void));
+
+#endif /* !MLK_SYS_AARCH64 && !(MLK_SYS_X86_64 && MLK_SYSV_ABI_SUPPORTED) && \
+          MLK_SYS_PPC64LE */
 
 #endif /* !ABICHECKUTIL_H */

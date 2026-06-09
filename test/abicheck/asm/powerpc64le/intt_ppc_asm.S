@@ -6,9 +6,6 @@
  * Written by Danny Tsen <dtsen@us.ibm.com>
  */
 
-#include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__)
 /*yaml
   Name: intt_ppc_asm
   Description: PowerPC64 VSX inverse NTT
@@ -35,8 +32,13 @@
 
 .text
 .balign 4
-.global MLK_ASM_NAMESPACE(intt_ppc_asm)
-MLK_ASM_FN_SYMBOL(intt_ppc_asm)
+#ifdef __APPLE__
+.global _mlk_intt_ppc_asm
+_mlk_intt_ppc_asm:
+#else
+.global mlk_intt_ppc_asm
+mlk_intt_ppc_asm:
+#endif
 
         stdu 1, -352(1)
         mflr 0
@@ -3229,11 +3231,6 @@ intt_ppc_asm_Loopf:
         mtlr 0
         addi 1, 1, 352
         blr
-
-MLK_ASM_FN_SIZE(intt_ppc_asm)
-
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
-          && __POWER8_VECTOR__ */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits

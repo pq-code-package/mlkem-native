@@ -59,6 +59,10 @@ int check_polyvec_basemul_acc_montgomery_cached_k4_avx2_asm_x86_64(void);
 int check_reduce_avx2_asm_x86_64(void);
 int check_rej_uniform_avx2_asm_x86_64(void);
 int check_tomont_avx2_asm_x86_64(void);
+int check_intt_ppc_asm_powerpc64le(void);
+int check_ntt_ppc_asm_powerpc64le(void);
+int check_poly_tomont_ppc_asm_powerpc64le(void);
+int check_reduce_ppc_asm_powerpc64le(void);
 
 #if defined(MLK_SYS_AARCH64)
 
@@ -99,7 +103,7 @@ static const abicheck_entry_t all_checks[] = {
 
 #endif /* MLK_SYS_AARCH64 */
 
-#if defined(MLK_SYS_X86_64)
+#if defined(MLK_SYS_X86_64) && defined(MLK_SYSV_ABI_SUPPORTED)
 
 static const abicheck_entry_t all_checks[] = {
     {"invntt_avx2_asm_x86_64", check_invntt_avx2_asm_x86_64},
@@ -138,9 +142,23 @@ static const abicheck_entry_t all_checks[] = {
     {NULL, NULL} /* Sentinel */
 };
 
-#endif /* MLK_SYS_X86_64 */
+#endif /* MLK_SYS_X86_64 && MLK_SYSV_ABI_SUPPORTED */
 
-#if !defined(MLK_SYS_AARCH64) && !defined(MLK_SYS_X86_64)
+#if defined(MLK_SYS_PPC64LE)
+
+static const abicheck_entry_t all_checks[] = {
+    {"intt_ppc_asm_powerpc64le", check_intt_ppc_asm_powerpc64le},
+    {"ntt_ppc_asm_powerpc64le", check_ntt_ppc_asm_powerpc64le},
+    {"poly_tomont_ppc_asm_powerpc64le", check_poly_tomont_ppc_asm_powerpc64le},
+    {"reduce_ppc_asm_powerpc64le", check_reduce_ppc_asm_powerpc64le},
+    {NULL, NULL} /* Sentinel */
+};
+
+#endif /* MLK_SYS_PPC64LE */
+
+#if !(defined(MLK_SYS_AARCH64)) &&                                   \
+    !(defined(MLK_SYS_X86_64) && defined(MLK_SYSV_ABI_SUPPORTED)) && \
+    !(defined(MLK_SYS_PPC64LE))
 static const abicheck_entry_t all_checks[] = {
     {NULL, NULL} /* Sentinel */
 };

@@ -4,7 +4,7 @@
  */
 
 #include "../../mlkem/src/sys.h"
-#if defined(MLK_SYS_X86_64)
+#if defined(MLK_SYS_X86_64) && defined(MLK_SYSV_ABI_SUPPORTED)
 
 /*
  * Function: asm_call_stub_x86_64
@@ -125,4 +125,4 @@ asm_call_stub_x86_64:
         ret
         .cfi_endproc
 
-#endif /* MLK_SYS_X86_64 */
+#endif /* MLK_SYS_X86_64 && MLK_SYSV_ABI_SUPPORTED */

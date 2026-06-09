@@ -251,21 +251,14 @@ run_size: \
 	run_size_768 \
 	run_size_1024
 
-# The ABI checker only has checks for architectures with assembly backends whose
-# calling convention it knows how to verify. On any other target (e.g. the
-# Armv8.1-M / AVR bare-metal platforms) it has no checks, so building and running
-# it there is pointless - and would require wiring up that target's startup and
-# C library. It is also not supported on Windows (calling convention mismatch).
-MK_ABICHECK_SUPPORTED :=
+# The ABI checker only exercises the native assembly backends, which are only
+# built with OPT=1. For OPT=0 it is a no-op. Architecture selection is handled
+# in the sources themselves: each per-function check and the registry in
+# checks_all.h is guarded by the relevant architecture macro (and, for x86_64,
+# by SysV calling-convention support, as the call stub is hand-written System V
+# assembly). On an unsupported target the registry is empty and the driver
+# simply exits successfully, so no architecture allowlist is needed here.
 ifeq ($(OPT),1)
-ifeq ($(findstring MINGW,$(HOST_PLATFORM))$(findstring Windows,$(HOST_PLATFORM)),)
-ifneq ($(filter $(ARCH),aarch64 x86_64),)
-MK_ABICHECK_SUPPORTED := 1
-endif
-endif
-endif
-
-ifeq ($(MK_ABICHECK_SUPPORTED),1)
 abicheck: $(ABICHECK_DIR)/bin/abicheck
 
 run_abicheck: abicheck

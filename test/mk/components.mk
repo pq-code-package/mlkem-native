@@ -165,6 +165,7 @@ ABICHECK_DIR = $(BUILD_DIR)/abicheck
 
 ABICHECK_SOURCES = test/abicheck/abicheck.c test/abicheck/abicheckutil.c
 ABICHECK_SOURCES += test/abicheck/aarch64_callstub.S test/abicheck/x86_64_callstub.S
+ABICHECK_SOURCES += test/abicheck/ppc64le_callstub.S
 ABICHECK_SOURCES += $(wildcard test/abicheck/check_*.c)
 ABICHECK_SOURCES += $(wildcard test/notrandombytes/*.c)
 
@@ -207,6 +208,12 @@ ifeq ($(ARCH),aarch64)
 ifeq ($(MK_COMPILER_SUPPORTS_SHA3)$(MK_HOST_SUPPORTS_SHA3),11)
 $(ABICHECK_OBJS): CFLAGS += -march=armv8.4-a+sha3
 endif
+endif
+
+# The ppc64le kernels and call stub use VSX/Altivec, which the exported
+# (guard-free) assembly carries unconditionally; enable them so it assembles.
+ifeq ($(ARCH),powerpc64le)
+$(ABICHECK_OBJS): CFLAGS += -mcpu=power8 -maltivec -mvsx
 endif
 
 # Platform support objects (e.g. the bare-metal startup providing _start and the

@@ -3536,6 +3536,28 @@ def hol_light_asm_joblist():
     return joblist_aarch64 + joblist_x86_64
 
 
+def abicheck_extra_asm_joblist():
+    """simpasm export jobs for architectures the ABI checker covers but that have
+    no HOL-Light proofs (and so are not in hol_light_asm_joblist). Same job shape
+    as hol_light_asm_joblist: (basename, dev_dir, cflags, arch)."""
+    ppc64le_flags = "-mcpu=power8 -maltivec -mvsx"
+    joblist_ppc64le = [
+        (
+            f"{name}.S",
+            "dev/ppc64le/src",
+            f"-Idev/ppc64le/src -Imlkem/src/native/ppc64le/src {ppc64le_flags}",
+            "powerpc64le",
+        )
+        for name in (
+            "ntt_ppc_asm",
+            "intt_ppc_asm",
+            "reduce_ppc_asm",
+            "poly_tomont_ppc_asm",
+        )
+    ]
+    return joblist_ppc64le
+
+
 def gen_hol_light_asm():
     run_parallel(hol_light_asm_joblist(), gen_hol_light_asm_file)
 
@@ -4604,17 +4626,23 @@ def gen_abicheck():
     name mlk_<Name>.
     """
 
-    joblist = hol_light_asm_joblist()
+    joblist = hol_light_asm_joblist() + abicheck_extra_asm_joblist()
     joblist_aarch64 = [j for j in joblist if j[3] == "aarch64"]
     joblist_x86_64 = [j for j in joblist if j[3] == "x86_64"]
+    joblist_ppc64le = [j for j in joblist if j[3] == "powerpc64le"]
 
     # Architecture configurations. "jobs" are simpasm export jobs of the form
     # (asm_basename, dev_src_dir, cflags, arch); the dev source file is the
     # authoritative source of YAML metadata and preprocessor guards (the
     # exported asm is guard-free and so cannot be inspected for guards).
+    # "guard" is the architecture-selection macro. "guard_flags" lists extra
+    # macros that must also be defined for the architecture's checks to be built
+    # and registered (e.g. x86_64 requires SysV calling-convention support, since
+    # its call stub is hand-written SysV assembly).
     arch_configs = [
         {
             "guard": "MLK_SYS_AARCH64",
+            "guard_flags": [],
             "suffix": "aarch64",
             "jobs": joblist_aarch64,
             "state_type": "struct register_state",
@@ -4625,6 +4653,7 @@ def gen_abicheck():
         },
         {
             "guard": "MLK_SYS_X86_64",
+            "guard_flags": ["MLK_SYSV_ABI_SUPPORTED"],
             "suffix": "x86_64",
             "jobs": joblist_x86_64,
             "state_type": "struct x86_64_register_state",
@@ -4632,6 +4661,18 @@ def gen_abicheck():
             "stub_func": "asm_call_stub_x86_64",
             "check_func": "check_x86_64_sysv_compliance",
             "reg_to_field": lambda reg: reg,
+        },
+        {
+            "guard": "MLK_SYS_PPC64LE",
+            "guard_flags": [],
+            "suffix": "powerpc64le",
+            "jobs": joblist_ppc64le,
+            "state_type": "struct ppc64le_register_state",
+            "init_func": "init_ppc64le_register_state",
+            "stub_func": "asm_call_stub_ppc64le",
+            "check_func": "check_ppc64le_elfv2_compliance",
+            # Argument registers r3-r10 map to gpr_arg[0..7].
+            "reg_to_field": lambda reg: f"gpr_arg[{int(reg[1:]) - 3}]",
         },
     ]
 
@@ -4681,9 +4722,11 @@ def gen_abicheck():
                 yield '#include "checks_all.h"'
                 yield ""
 
-                conds = [f"defined({guard})"] + [
-                    f"defined({flag})" for flag in arch_flags
-                ]
+                conds = (
+                    [f"defined({guard})"]
+                    + [f"defined({gf})" for gf in arch["guard_flags"]]
+                    + [f"defined({flag})" for flag in arch_flags]
+                )
                 cond = " && ".join(conds)
 
                 yield f"#if {cond}"
@@ -4770,7 +4813,9 @@ def gen_abicheck():
             update_file(output_file, "\n".join(gen_c_test()), force_format=True)
             generated_functions.append((check_name, arch_flags))
 
-        all_arch_functions.append((arch["guard"], generated_functions))
+        all_arch_functions.append(
+            (arch["guard"], arch["guard_flags"], generated_functions)
+        )
 
     # Generate checks_all.h
     def gen_checks_all_header():
@@ -4791,22 +4836,31 @@ def gen_abicheck():
         yield "  int (*check_func)(void);"
         yield "} abicheck_entry_t;"
 
+        # The full preprocessor condition selecting an architecture: its
+        # selection macro plus any extra guard flags (e.g. MLK_SYSV_ABI_SUPPORTED
+        # for x86_64).
+        def arch_cond(guard, guard_flags):
+            return " && ".join(
+                [f"defined({guard})"] + [f"defined({gf})" for gf in guard_flags]
+            )
+
         # Every check function is defined unconditionally (see gen_c_test), so
         # declare them all unconditionally too - this keeps the prototype in
         # scope and satisfies -Wmissing-prototypes regardless of architecture.
         yield ""
-        for guard, functions in all_arch_functions:
+        for guard, guard_flags, functions in all_arch_functions:
             for func_name, _arch_flags in functions:
                 yield f"int check_{func_name}(void);"
 
         # The registry, however, only lists the checks for the architecture
         # actually being built, so inapplicable checks are never run. Their
         # feature guards (e.g. __ARM_FEATURE_SHA3) still gate registration.
-        for guard, functions in all_arch_functions:
+        for guard, guard_flags, functions in all_arch_functions:
             if not functions:
                 continue
+            cond = arch_cond(guard, guard_flags)
             yield ""
-            yield f"#if defined({guard})"
+            yield f"#if {cond}"
             yield ""
             yield "static const abicheck_entry_t all_checks[] = {"
 
@@ -4820,12 +4874,12 @@ def gen_abicheck():
             yield "    {NULL, NULL} /* Sentinel */"
             yield "};"
             yield ""
-            yield f"#endif /* {guard} */"
+            yield f"#endif /* {cond} */"
 
-        # Fallback for unsupported architectures
-        guards = [g for g, f in all_arch_functions if f]
-        if guards:
-            cond = " && ".join(f"!defined({g})" for g in guards)
+        # Fallback for architectures with no registered checks.
+        arches = [(g, gf) for g, gf, f in all_arch_functions if f]
+        if arches:
+            cond = " && ".join(f"!({arch_cond(g, gf)})" for g, gf in arches)
             yield ""
             yield f"#if {cond}"
             yield "static const abicheck_entry_t all_checks[] = {"

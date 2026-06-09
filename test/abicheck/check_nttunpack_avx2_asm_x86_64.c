@@ -16,7 +16,7 @@
 #include "abicheckutil.h"
 #include "checks_all.h"
 
-#if defined(MLK_SYS_X86_64)
+#if defined(MLK_SYS_X86_64) && defined(MLK_SYSV_ABI_SUPPORTED)
 
 #include "../notrandombytes/notrandombytes.h"
 
@@ -63,7 +63,7 @@ int check_nttunpack_avx2_asm_x86_64(void)
   return 0;
 }
 
-#else /* MLK_SYS_X86_64 */
+#else /* MLK_SYS_X86_64 && MLK_SYSV_ABI_SUPPORTED */
 
 int check_nttunpack_avx2_asm_x86_64(void)
 {
@@ -72,4 +72,4 @@ int check_nttunpack_avx2_asm_x86_64(void)
   return 1;
 }
 
-#endif /* !MLK_SYS_X86_64 */
+#endif /* !(MLK_SYS_X86_64 && MLK_SYSV_ABI_SUPPORTED) */
