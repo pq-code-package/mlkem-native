@@ -55,11 +55,11 @@
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x2_v84a_aarch64_asm
-_PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x2_v84a_aarch64_asm:
+.global _mlk_keccak_f1600_x2_v84a_aarch64_asm
+_mlk_keccak_f1600_x2_v84a_aarch64_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x2_v84a_aarch64_asm
-PQCP_MLKEM_NATIVE_MLKEM768_keccak_f1600_x2_v84a_aarch64_asm:
+.global mlk_keccak_f1600_x2_v84a_aarch64_asm
+mlk_keccak_f1600_x2_v84a_aarch64_asm:
 #endif
 
         .cfi_startproc

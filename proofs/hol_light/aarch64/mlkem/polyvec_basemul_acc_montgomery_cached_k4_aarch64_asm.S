@@ -57,11 +57,11 @@
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm
-_PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm:
+.global _mlk_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm
+_mlk_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm
-PQCP_MLKEM_NATIVE_MLKEM768_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm:
+.global mlk_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm
+mlk_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm:
 #endif
 
         .cfi_startproc

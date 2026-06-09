@@ -27,11 +27,11 @@
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLKEM_NATIVE_MLKEM768_poly_reduce_aarch64_asm
-_PQCP_MLKEM_NATIVE_MLKEM768_poly_reduce_aarch64_asm:
+.global _mlk_poly_reduce_aarch64_asm
+_mlk_poly_reduce_aarch64_asm:
 #else
-.global PQCP_MLKEM_NATIVE_MLKEM768_poly_reduce_aarch64_asm
-PQCP_MLKEM_NATIVE_MLKEM768_poly_reduce_aarch64_asm:
+.global mlk_poly_reduce_aarch64_asm
+mlk_poly_reduce_aarch64_asm:
 #endif
 
         .cfi_startproc

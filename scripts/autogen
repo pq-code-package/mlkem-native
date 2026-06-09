@@ -3271,10 +3271,14 @@ def update_via_simpasm(
 
 def gen_hol_light_asm_file(job):
     infile, indir, cflags, arch = job
+    # Override the default namespace (PQCP_MLKEM_NATIVE_MLKEM768) with a short
+    # `mlk_` prefix in the proofs/hol_light/ assembly drops. The exported symbol
+    # is determined by MLK_ASM_NAMESPACE() at preprocessing time, which expands
+    # via MLK_CONFIG_NAMESPACE_PREFIX with a trailing underscore appended.
     update_via_simpasm(
         f"{indir}/{infile}",
         "proofs/hol_light/" + arch + "/mlkem",
-        cflags=cflags + " -Imlkem",
+        cflags=cflags + " -Imlkem -DMLK_CONFIG_NAMESPACE_PREFIX=mlk",
         preserve_header=False,
     )
 
