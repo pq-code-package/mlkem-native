@@ -155,6 +155,9 @@ $(call MAKE_OBJS, $(MLKEM1024_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES
 endif
 else
 $(ALL_BINS): $$(TEST_SRCS) $(LIB_SRCS)
+# Extra per-binary prerequisites a custom-build platform needs (e.g. Zephyr's
+# app inputs and active-target marker, set in test/zephyr/platform.mk).
+$(ALL_BINS): $(CUSTOM_BUILD_DEPS)
 endif
 
 # ABI checker

@@ -15,8 +15,9 @@ PLATFORM_PATH := test/zephyr
 # define it here too so CUSTOM_BUILD below expands to the right path.
 BUILD_DIR ?= test/build
 
-# ZEPHYR_TARGET=<key> selects a target. Each key maps to a Zephyr board and the
-# QEMU machine emulating it; add a board with a row below.
+# ZEPHYR_TARGET=<key> selects a target. QEMU targets map to both a Zephyr board
+# and the QEMU machine emulating it; hardware targets map to a Zephyr board and
+# provide their own execution wrapper. Add a target with a row below.
 ZEPHYR_TARGET ?= mps3-an547
 
 ZEPHYR_BOARD_mps2-an385 := mps2/an385
@@ -29,13 +30,21 @@ ZEPHYR_BOARD_mps2-an521 := mps2/an521/cpu0
 ZEPHYR_QEMU_mps2-an521  := mps2-an521                    # Cortex-M33
 ZEPHYR_BOARD_mps3-an547 := mps3/corstone300/an547
 ZEPHYR_QEMU_mps3-an547  := mps3-an547                    # Cortex-M55
+ZEPHYR_BOARD_nucleo-n657x0-q := nucleo_n657x0_q          # Cortex-M55 (hardware)
 
 ZEPHYR_FIPS202_BACKEND_mps3-an547 := fips202/native/armv81m/mve.h
+ZEPHYR_FIPS202_BACKEND_nucleo-n657x0-q := fips202/native/armv81m/mve.h
 
-ZEPHYR_TARGETS := mps2-an385 mps2-an386 mps2-an500 mps2-an521 mps3-an547
+ZEPHYR_TARGETS := mps2-an385 mps2-an386 mps2-an500 mps2-an521 mps3-an547 nucleo-n657x0-q
 
 ZEPHYR_BOARD := $(ZEPHYR_BOARD_$(ZEPHYR_TARGET))
 export QEMU_MACHINE := $(strip $(ZEPHYR_QEMU_$(ZEPHYR_TARGET)))
+ZEPHYR_IS_NUCLEO_N657X0_Q := $(filter nucleo-n657x0-q,$(ZEPHYR_TARGET))
+
+ifneq ($(ZEPHYR_IS_NUCLEO_N657X0_Q),)
+CROSS_PREFIX ?= arm-none-eabi-
+CC = gcc
+endif
 
 ifeq ($(ZEPHYR_BOARD),)
 $(error Unknown ZEPHYR_TARGET '$(ZEPHYR_TARGET)'. Supported: $(ZEPHYR_TARGETS))
@@ -50,6 +59,29 @@ ZEPHYR_FIPS202_BACKEND := $(if $(filter 1,$(OPT)),$(strip $(ZEPHYR_FIPS202_BACKE
 
 ZEPHYR_APP := $(PLATFORM_PATH)/app
 ZEPHYR_BUILD_DIR := $(BUILD_DIR)/zephyr/$(ZEPHYR_TARGET)
+ZEPHYR_ACTIVE_TARGET := $(BUILD_DIR)/zephyr/.active-target
+ZEPHYR_APP_INPUTS := \
+	$(ZEPHYR_APP)/CMakeLists.txt \
+	$(ZEPHYR_APP)/Kconfig \
+	$(ZEPHYR_APP)/prj.conf \
+	$(ZEPHYR_APP)/nucleo_n657x0_q.conf \
+	$(ZEPHYR_APP)/shim.c \
+	$(ZEPHYR_APP)/shim_nucleo_n657x0_q.c \
+	$(ZEPHYR_APP)/nucleo_n657x0_q.overlay
+ZEPHYR_NUCLEO_PLATFORM_PATH := $(PLATFORM_PATH)/nucleo_n657x0_q
+ZEPHYR_NUCLEO_OVERLAY := $(abspath $(ZEPHYR_APP)/nucleo_n657x0_q.overlay)
+ZEPHYR_NUCLEO_CONF := $(abspath $(ZEPHYR_APP)/nucleo_n657x0_q.conf)
+ZEPHYR_TARGET_CMAKE_ARGS := $(if $(ZEPHYR_IS_NUCLEO_N657X0_Q),\
+	-DZEPHYR_NUCLEO_N657X0_Q=ON \
+	-DEXTRA_CONF_FILE=$(ZEPHYR_NUCLEO_CONF) \
+	-DDTC_OVERLAY_FILE=$(ZEPHYR_NUCLEO_OVERLAY))
+
+.PHONY: zephyr_target_marker_force
+$(ZEPHYR_ACTIVE_TARGET): zephyr_target_marker_force
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)if [ ! -f $@ ] || [ "$$(cat $@)" != "$(ZEPHYR_TARGET)" ]; then \
+		echo "$(ZEPHYR_TARGET)" > $@; \
+	fi
 
 # Per-binary CMake build dir, keyed on $(notdir $@) so binaries build in
 # parallel. Recipe-expanded, so $@ is the specific bin being built.
@@ -83,9 +115,21 @@ CUSTOM_BUILD = \
 		-DZEPHYR_TEST_CFLAGS="$(ZEPHYR_TEST_CFLAGS)" \
 		-DZEPHYR_FIPS202_BACKEND=$(ZEPHYR_FIPS202_BACKEND) \
 		$(if $(ZEPHYR_FIPS202_BACKEND),-DCONFIG_FIPS202_MVE_BACKEND=y) \
+		$(ZEPHYR_TARGET_CMAKE_ARGS) \
 		-DUSER_CACHE_DIR=$(abspath $(ZEPHYR_OUT)/.cache) \
 		>/dev/null && \
 	cmake --build $(ZEPHYR_OUT) >/dev/null && \
 	cp $(ZEPHYR_OUT)/zephyr/zephyr.elf $@
 
+# A custom build links the test sources directly rather than from objects, so
+# nothing otherwise makes the bins depend on the Zephyr app inputs or the
+# active-target marker. components.mk attaches CUSTOM_BUILD_DEPS to every test
+# binary (in its CUSTOM_BUILD branch), so a CMakeLists/shim/overlay edit or a
+# target switch forces a rebuild. Set here (before components.mk is included).
+CUSTOM_BUILD_DEPS := $(ZEPHYR_ACTIVE_TARGET) $(ZEPHYR_APP_INPUTS)
+
+ifeq ($(ZEPHYR_IS_NUCLEO_N657X0_Q),)
 EXEC_WRAPPER := $(abspath $(PLATFORM_PATH)/exec_wrapper.py)
+else
+EXEC_WRAPPER := $(abspath $(ZEPHYR_NUCLEO_PLATFORM_PATH)/exec_wrapper.py)
+endif

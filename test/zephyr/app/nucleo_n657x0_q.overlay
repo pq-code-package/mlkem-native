@@ -1,0 +1,11 @@
+/ {
+	mlk_axisram: memory@34080000 {
+		compatible = "zephyr,memory-region", "mmio-sram";
+		reg = <0x34080000 0x00030000>;
+		zephyr,memory-region = "MLK_AXISRAM";
+	};
+
+	chosen {
+		zephyr,sram = &mlk_axisram;
+	};
+};

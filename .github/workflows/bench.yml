@@ -36,6 +36,8 @@ jobs:
           ldflags: "-flto"
           bench_extra_args: ""
           nix_shell: bench
+          extra_makefile: ""
+          zephyr_target: ""
         - system: rpi5
           name: Arm Cortex-A76 (Raspberry Pi 5) benchmarks
           bench_pmu: PERF
@@ -45,6 +47,8 @@ jobs:
           bench_extra_args: ""
           nix_shell: bench
           cross_prefix: ""
+          extra_makefile: ""
+          zephyr_target: ""
         - system: a55
           name: Arm Cortex-A55 (Snapdragon 888) benchmarks
           bench_pmu: PERF
@@ -53,6 +57,8 @@ jobs:
           ldflags: "-flto -static"
           bench_extra_args: -w exec-on-a55
           nix_shell: bench
+          extra_makefile: ""
+          zephyr_target: ""
         - system: bpi
           name: SpacemiT K1 8 (Banana Pi F3) benchmarks
           bench_pmu: PERF
@@ -62,6 +68,8 @@ jobs:
           bench_extra_args: -w exec-on-bpi
           cross_prefix: riscv64-unknown-linux-gnu-
           nix_shell: cross-riscv64
+          extra_makefile: ""
+          zephyr_target: ""
         - system: m1-mac-mini
           name: Mac Mini (M1, 2020) benchmarks
           bench_pmu: MAC
@@ -70,6 +78,8 @@ jobs:
           ldflags: "-flto"
           bench_extra_args: "-r"
           nix_shell: bench
+          extra_makefile: ""
+          zephyr_target: ""
         - system: pqcp-ppc64
           name:  ppc64le (POWER10) benchmarks
           bench_pmu: PERF
@@ -79,11 +89,27 @@ jobs:
           bench_extra_args: "-r"
           nix_shell: ''
           cross_prefix: ""
+          extra_makefile: ""
+          zephyr_target: ""
+        - system: nucleo-n657x0
+          name: Arm Cortex-M55 (NUCLEO-N657X0-Q) benchmarks
+          bench_pmu: NO
+          archflags: ""
+          cflags: ""
+          ldflags: ""
+          bench_extra_args: ""
+          nix_shell: zephyr
+          cross_prefix: ""
+          extra_makefile: test/zephyr/platform.mk
+          zephyr_target: nucleo-n657x0-q
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
     runs-on: self-hosted-${{ matrix.target.system }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - uses: ./.github/actions/bench
+        env:
+          EXTRA_MAKEFILE: ${{ matrix.target.extra_makefile }}
+          ZEPHYR_TARGET: ${{ matrix.target.zephyr_target }}
         with:
           name: ${{ matrix.target.name }}
           cflags: ${{ matrix.target.cflags }}

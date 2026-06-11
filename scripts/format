@@ -69,7 +69,7 @@ info "Expanding tabs"
 expand-tabs()
 {
   git ls-files -- ":/" ":/!:Makefile" ":/!:**/Makefile" ":/!:**/Makefile.*" ":/!:Makefile.*" ":/!:*.mk" ":/!:*.patch" ":/!:*.S" ":/!:*.inc" ":/!:nix/valgrind/*.txt" | xargs -P "$nproc" -I {} sh -c '
-    if [ ! -L {} ] && grep -Pq '"'"'\t'"'"' "{}"; then
+    if [ ! -L {} ] && grep -q "$(printf '"'"'\t'"'"')" "{}"; then
       tmp=$(mktemp)
       expand -t 4 "{}" > "$tmp" && mv "$tmp" "{}"
       echo "{}"

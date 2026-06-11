@@ -45,13 +45,13 @@ jobs:
           # Zephyr's CMake selects the target arch; disable the host-arch
           # auto-detection that would otherwise leak into the forwarded CFLAGS.
           extra_args: --no-auto
-      # Smoke only: QEMU doesn't model cycle counts (real numbers come from the
-      # FPGA); this just exercises the bench build + run.
+      # Smoke only: QEMU doesn't model useful cycle counts; Zephyr bench builds
+      # use k_cycle_get_32(), so no generic PMU/CYCCNT backend is selected.
       - name: bench (smoke)
         env:
           EXTRA_MAKEFILE: test/zephyr/platform.mk
           ZEPHYR_TARGET: ${{ matrix.target.board }}
         run: |
           opt=${{ matrix.target.opt == 'all' && 'opt' || 'no_opt' }}
-          nix develop .#zephyr --command ./scripts/tests bench --no-auto -c PMU --opt=$opt
-          nix develop .#zephyr --command ./scripts/tests bench --no-auto --components -c PMU --opt=$opt
+          nix develop .#zephyr --command ./scripts/tests bench --no-auto -c NO --opt=$opt
+          nix develop .#zephyr --command ./scripts/tests bench --no-auto --components -c NO --opt=$opt

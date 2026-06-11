@@ -20,7 +20,6 @@ list(TRANSFORM _test_srcs PREPEND ${R}/)
 target_sources(app PRIVATE
   ${R}/mlkem/mlkem_native.c
   ${_test_srcs}
-  ${CMAKE_CURRENT_SOURCE_DIR}/shim.c
 )
 
 target_include_directories(app PRIVATE
@@ -28,6 +27,32 @@ target_include_directories(app PRIVATE
   ${R}/test/notrandombytes
   ${R}/test/hal
 )
+
+# The Zephyr shim owns main() (see below). On QEMU targets shim.c stops the
+# emulator with the test's exit code; the NUCLEO-N657X0-Q hardware target needs
+# its own shim plus libc wrappers that route stdio over semihosting.
+if(ZEPHYR_NUCLEO_N657X0_Q)
+  target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/shim_nucleo_n657x0_q.c)
+  target_compile_definitions(app PRIVATE
+    MLK_ZEPHYR_NUCLEO_N657X0_Q
+    printf=__wrap_printf
+    fprintf=__wrap_fprintf
+    puts=__wrap_puts
+    putchar=__wrap_putchar
+    fflush=__wrap_fflush
+    exit=__wrap_exit
+  )
+  target_link_options(app PRIVATE
+    -Wl,--wrap=printf
+    -Wl,--wrap=fprintf
+    -Wl,--wrap=puts
+    -Wl,--wrap=putchar
+    -Wl,--wrap=fflush
+    -Wl,--wrap=exit
+  )
+else()
+  target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/shim.c)
+endif()
 
 # The test binary's CFLAGS, forwarded from the build (test/zephyr/platform.mk
 # assembles and escapes them) and applied to the mlkem amalgamation and the test
