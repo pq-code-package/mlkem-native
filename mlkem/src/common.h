@@ -77,7 +77,10 @@
  * -fcf-protection=), we add an endbr64 instruction at every global function
  * label.  See sys.h for more details
  */
-#if defined(MLK_SYS_X86_64)
+#if defined(MLK_ASM_ARMASM)
+/* armasm64 labels are colon-free */
+#define MLK_ASM_FN_SYMBOL(sym) MLK_ASM_NAMESPACE(sym)
+#elif defined(MLK_SYS_X86_64)
 #define MLK_ASM_FN_SYMBOL(sym) MLK_ASM_NAMESPACE(sym) : MLK_CET_ENDBR
 #elif defined(MLK_SYS_ARMV81M_MVE)
 /* clang-format off */
