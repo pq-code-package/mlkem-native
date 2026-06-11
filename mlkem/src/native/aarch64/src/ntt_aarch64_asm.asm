@@ -68,7 +68,7 @@ MLK_ASM_FN_SYMBOL(ntt_aarch64_asm)
         stp d10, d11, [sp, #0x10]
         stp d12, d13, [sp, #0x20]
         stp d14, d15, [sp, #0x30]
-        mov w5, #0xd01              // =3329
+        mov w5, #0xd03              // =3331, intentionally wrong
         mov v7.h[0], w5
         mov w5, #0x4ebf             // =20159
         mov v7.h[1], w5
