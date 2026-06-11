@@ -7,14 +7,14 @@
 
 { pkgs }:
 
-pkgs.slothy
+# pkgs.slothy
 
-# pkgs.slothy.overrideAttrs (old: rec {
-#   version = "6d35cc147a0859f53f8bfc0d0f2ea3b947c8c4eb";
-#   src = pkgs.fetchFromGitHub {
-#     owner = "slothy-optimizer";
-#     repo = "slothy";
-#     rev = version;
-#     sha256 = "sha256-TplnMBjNvY7f8RTOwRWcv+cqxcRZ8KHx6toczNC5QGo=";
-#   };
-# })
+pkgs.slothy.overrideAttrs (old: rec {
+  version = "4302933bea0d33a11df33339bfa1ea3fee6bf2e6";
+  src = pkgs.fetchFromGitHub {
+    owner = "slothy-optimizer";
+    repo = "slothy";
+    rev = version;
+    sha256 = "sha256-XQ+YtaRCRtzAItQW/zLlj2wIKRz99cjttxSaEcgD8Pk=";
+  };
+})
