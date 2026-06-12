@@ -20,8 +20,14 @@
  *     withouth any performance degradation. This also made it possible to
  *     avoid using the stack because we managed to fit the implemention
  *     into 16 available ymm registers,
- *  3) we use named variables instead of ymm registers directly.
+ *  3) we use named variables instead of ymm registers directly,
+ *  4) we Barrett-reduce all output coefficients after the schoolbook
+ *     accumulation. Without this, the output magnitude would grow
+ *     linearly in k (up to 8*Q for k=4), exceeding INT16_MAX/2.
+ *     Barrett reduction caps every output to abs <= (Q+1)/2 = 1665.
  */
+
+#include "fq.inc"
 
 #define _q %ymm0
 #define _qx %xmm0
@@ -124,6 +130,40 @@ schoolbook 6, \k
 schoolbook 7, \k
 .endm
 
+/* Barrett-reduce a contiguous block of 128 output coefficients in dst,
+ * starting at byte offset \offset. Uses red16 from fq.inc, which expects
+ * ymm0 = q = 3329 and ymm1 = 20159 (Barrett magic), and clobbers ymm12.
+ * After reduction, every coefficient satisfies abs <= 1664.
+ */
+.macro barrett_reduce_128_dst offset
+  vmovdqa (\offset +   0)(%rdi), %ymm2
+  vmovdqa (\offset +  32)(%rdi), %ymm3
+  vmovdqa (\offset +  64)(%rdi), %ymm4
+  vmovdqa (\offset +  96)(%rdi), %ymm5
+  vmovdqa (\offset + 128)(%rdi), %ymm6
+  vmovdqa (\offset + 160)(%rdi), %ymm7
+  vmovdqa (\offset + 192)(%rdi), %ymm8
+  vmovdqa (\offset + 224)(%rdi), %ymm9
+
+  red16 2
+  red16 3
+  red16 4
+  red16 5
+  red16 6
+  red16 7
+  red16 8
+  red16 9
+
+  vmovdqa %ymm2, (\offset +   0)(%rdi)
+  vmovdqa %ymm3, (\offset +  32)(%rdi)
+  vmovdqa %ymm4, (\offset +  64)(%rdi)
+  vmovdqa %ymm5, (\offset +  96)(%rdi)
+  vmovdqa %ymm6, (\offset + 128)(%rdi)
+  vmovdqa %ymm7, (\offset + 160)(%rdi)
+  vmovdqa %ymm8, (\offset + 192)(%rdi)
+  vmovdqa %ymm9, (\offset + 224)(%rdi)
+.endm
+
 .macro polyvec_basemul k
   // Broadcast 3329 (0x0D01) to all elements of ymm0
   movl $0x0D010D01, %eax
@@ -147,6 +187,15 @@ schoolbook 7, \k
   .if \k > 3
     poly_basemul 3
   .endif
+
+  /* Final Barrett reduction over all 256 output coefficients.
+   * Reload ymm1 with the Barrett magic 20159 (was qinv = -3327).
+   * After this sweep every output is bounded by abs <= 1664. */
+  movl $0x4ebf4ebf, %eax
+  vmovd %eax, _qinvx
+  vpbroadcastd _qinvx, _qinv
+  barrett_reduce_128_dst   0
+  barrett_reduce_128_dst 256
 .endm
 
 #undef _q
