@@ -7,6 +7,26 @@
 This file lists the citations made throughout the mlkem-native 
 source code and documentation.
 
+### `AAPCS32`
+
+* Procedure Call Standard for the Arm Architecture (AAPCS32)
+* Author(s):
+  - Arm Limited
+* URL: https://github.com/ARM-software/abi-aa/blob/main/aapcs32/aapcs32.rst
+* Referenced from:
+  - [test/abicheck/README.md](test/abicheck/README.md)
+  - [test/abicheck/armv81m/abicheck_armv81m.c](test/abicheck/armv81m/abicheck_armv81m.c)
+
+### `AAPCS64`
+
+* Procedure Call Standard for the Arm 64-bit Architecture (AAPCS64)
+* Author(s):
+  - Arm Limited
+* URL: https://github.com/ARM-software/abi-aa/blob/main/aapcs64/aapcs64.rst
+* Referenced from:
+  - [test/abicheck/README.md](test/abicheck/README.md)
+  - [test/abicheck/aarch64/abicheck_aarch64.c](test/abicheck/aarch64/abicheck_aarch64.c)
+
 ### `ACVP`
 
 * Automated Cryptographic Validation Protocol (ACVP) Server
@@ -29,6 +49,16 @@ source code and documentation.
   - [mlkem/src/native/x86_64/src/ntt_avx2_asm.S](mlkem/src/native/x86_64/src/ntt_avx2_asm.S)
   - [proofs/hol_light/x86_64/mlkem/intt_avx2_asm.S](proofs/hol_light/x86_64/mlkem/intt_avx2_asm.S)
   - [proofs/hol_light/x86_64/mlkem/ntt_avx2_asm.S](proofs/hol_light/x86_64/mlkem/ntt_avx2_asm.S)
+
+### `ArmARMv8M`
+
+* Armv8-M Architecture Reference Manual (DDI 0553)
+* Author(s):
+  - Arm Limited
+* URL: https://developer.arm.com/documentation/ddi0553/latest/
+* Referenced from:
+  - [test/abicheck/README.md](test/abicheck/README.md)
+  - [test/abicheck/armv81m/abicheck_armv81m.c](test/abicheck/armv81m/abicheck_armv81m.c)
 
 ### `CBMC`
 
@@ -249,6 +279,16 @@ source code and documentation.
   - [proofs/hol_light/aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S)
 
+### `PPC64ELFv2`
+
+* 64-Bit ELFv2 ABI Specification — Power Architecture
+* Author(s):
+  - OpenPOWER Foundation
+* URL: https://openpowerfoundation.org/specifications/64bitelfabi/
+* Referenced from:
+  - [test/abicheck/README.md](test/abicheck/README.md)
+  - [test/abicheck/ppc64le/abicheck_ppc64le.c](test/abicheck/ppc64le/abicheck_ppc64le.c)
+
 ### `REF`
 
 * CRYSTALS-Kyber C reference implementation
@@ -374,6 +414,19 @@ source code and documentation.
   - [mlkem/src/native/aarch64/src/ntt_aarch64_asm.S](mlkem/src/native/aarch64/src/ntt_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mlkem/intt_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/intt_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mlkem/ntt_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/ntt_aarch64_asm.S)
+
+### `SysVAMD64`
+
+* System V Application Binary Interface — AMD64 Architecture Processor Supplement
+* Author(s):
+  - Michael Matz
+  - Jan Hubička
+  - Andreas Jaeger
+  - Mark Mitchell
+* URL: https://gitlab.com/x86-psABIs/x86-64-ABI
+* Referenced from:
+  - [test/abicheck/README.md](test/abicheck/README.md)
+  - [test/abicheck/x86_64/abicheck_x86_64.c](test/abicheck/x86_64/abicheck_x86_64.c)
 
 ### `clangover`
 

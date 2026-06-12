@@ -17,6 +17,8 @@
   Description: Re-implementation of asymmetric base multiplication following @[NeonNTT] for k=3
   Signature: void mlk_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm(int16_t r[256], const int16_t a[768], const int16_t b[768], const int16_t b_cache[384])
   ABI:
+    Architecture: aarch64
+    CallingConvention: AAPCS64
     x0:
       type: buffer
       size_bytes: 512

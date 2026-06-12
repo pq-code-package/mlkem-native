@@ -2908,7 +2908,12 @@ def check_macro_typos_in_file(filename, macro_check):
 
 
 def get_syscaps():
-    return ["MLK_SYS_CAP_AVX2", "MLK_SYS_CAP_SHA3", "MLK_SYS_CAP_DUMMY"]
+    return [
+        "MLK_SYS_CAP_AVX2",
+        "MLK_SYS_CAP_SHA3",
+        "MLK_SYS_CAP_MVE",
+        "MLK_SYS_CAP_DUMMY",
+    ]
 
 
 def check_macro_typos():
@@ -3283,7 +3288,34 @@ def gen_hol_light_asm_file(job):
     )
 
 
+# Map a joblist dev/ source directory to the corresponding shipped upstream
+# directory under mlkem/. The ABI checker assembles the shipped sources
+# directly (no per-arch test/abicheck/<arch>/asm/ copies anymore).
+def upstream_src_dir_for_dev_dir(dev_dir):
+    if dev_dir.startswith("dev/fips202/"):
+        # dev/fips202/<arch>/src -> mlkem/src/fips202/native/<arch>/src
+        arch = dev_dir.split("/")[2]
+        return f"mlkem/src/fips202/native/{arch}/src"
+    if dev_dir.startswith("dev/aarch64_"):
+        # dev/aarch64_opt/src and dev/aarch64_clean/src both map to the same
+        # shipped tree.
+        return "mlkem/src/native/aarch64/src"
+    if dev_dir.startswith("dev/x86_64/"):
+        return "mlkem/src/native/x86_64/src"
+    if dev_dir.startswith("dev/ppc64le/"):
+        return "mlkem/src/native/ppc64le/src"
+    raise ValueError(
+        f"Unrecognised dev/ source directory {dev_dir!r}; "
+        "extend upstream_src_dir_for_dev_dir() to map it to mlkem/src/..."
+    )
+
+
 def hol_light_asm_joblist():
+    """Return the list of simpasm export jobs, each (basename, dev_dir, cflags,
+    arch). Consumed by the HOL-Light assembly copies (gen_hol_light_asm) and, as
+    a base set, by the ABI checker (gen_abicheck), which extends it with the
+    sources it covers that aren't HOL-Light-exported (see joblist_abicheck_extra
+    for ppc64le and armv81m)."""
     joblist_aarch64 = [
         (
             "ntt_aarch64_asm.S",
@@ -3918,6 +3950,22 @@ def gen_slothy(funcs):
             print(f"Failed to run SLOTHY on {t}!")
             exit(1)
 
+        # Rename `name` field in YAML block
+        out_path = f"{base}/{t}"
+        out_name = t.removesuffix(".S")
+        with open(out_path, "r") as f:
+            content = f.read()
+        new_content = re.sub(
+            r"^(\s*Name:\s*).*$",
+            lambda m: m.group(1) + out_name,
+            content,
+            count=1,
+            flags=re.MULTILINE,
+        )
+        if new_content != content:
+            with open(out_path, "w") as f:
+                f.write(new_content)
+
 
 class BibliographyEntry:
     def __init__(self, raw_dict):
@@ -4526,6 +4574,648 @@ def gen_test_configs():
         gen_test_config(config_spec["path"], config_spec, default_config)
 
 
+def extract_yaml_from_assembly(assembly_file):
+    """Extract YAML metadata from assembly file."""
+    with open(assembly_file, "r") as f:
+        content = f.read()
+
+    yaml_match = re.search(r"/\*yaml\s*\n(.*?)\n\*/", content, re.DOTALL)
+    if not yaml_match:
+        raise ValueError(f"No YAML metadata found in {assembly_file}")
+
+    return yaml.safe_load(yaml_match.group(1))
+
+
+# ABI checker capability table.
+#
+# Maps each `ABI.Features:` tag from the kernel YAMLs to:
+#   - 'asm_subdir':  the arch this cap belongs to; selects the per-arch
+#                    test/abicheck/<asm_subdir>/abicheck_<asm_subdir>.mk it is
+#                    emitted into.
+#   - 'guard':       if non-None, wrap the generated check in #if defined(...).
+#   - 'syscap':      runtime capability; check skips if the host lacks it.
+#   - 'cflags':      for the autogeneration of the per-arch abicheck_<arch>.mk.
+#   - 'description': shown when a check is skipped.
+#   - 'aux_files':   extra .S files needing these CFLAGS though not generated
+#                    kernel exports (hand-written abicheck stubs/selftests, and
+#                    shipped sources whose YAML doesn't list them as ABI-tested
+#                    kernels but still need the per-cap toolchain flags).
+ABI_CAPS = {
+    "AVX2": {
+        "asm_subdir": "x86_64",
+        "guard": "__AVX2__",
+        "syscap": "MLK_SYS_CAP_AVX2",
+        "description": "AVX2",
+        "cflags": ["-mavx2", "-mbmi2"],
+        "aux_files": [],
+    },
+    "SHA3": {
+        "asm_subdir": "aarch64",
+        "guard": "__ARM_FEATURE_SHA3",
+        "syscap": "MLK_SYS_CAP_SHA3",
+        "description": "Armv8.4-A SHA3 (eor3, rax1, xar, bcax)",
+        "cflags": ["-march=armv8.4-a+sha3"],
+        "aux_files": [],
+    },
+    "MVE": {
+        "asm_subdir": "armv81m",
+        "guard": "__ARM_FEATURE_MVE",
+        "syscap": "MLK_SYS_CAP_MVE",
+        "description": "Armv8.1-M MVE",
+        "cflags": ["-march=armv8.1-m.main+mve", "-mthumb"],
+        "aux_files": [
+            "test/abicheck/armv81m/callstub_armv81m.S",
+            "test/abicheck/armv81m/selftest_armv81m.S",
+            # Shipped MVE helpers pulled in by the abicheck wildcard but
+            # not registered as ABI-tested kernels - they still need MVE
+            # CFLAGS to assemble.
+            "mlkem/src/fips202/native/armv81m/src/state_extract_bytes_x4_mve.S",
+            "mlkem/src/fips202/native/armv81m/src/state_xor_bytes_x4_mve.S",
+        ],
+    },
+    # VSX is build-time only: every ppc64le kernel requires it, the call
+    # stub saves vr20-vr31 unconditionally, and we never run the binary on
+    # a non-VSX host. No #if guard, no syscap.
+    "VSX": {
+        "asm_subdir": "ppc64le",
+        "guard": None,
+        "syscap": None,
+        "description": "PPC64 VSX/Altivec (POWER8)",
+        "cflags": ["-mcpu=power8", "-maltivec", "-mvsx"],
+        "aux_files": [
+            "test/abicheck/ppc64le/callstub_ppc64le.S",
+            "test/abicheck/ppc64le/selftest_ppc64le.S",
+        ],
+    },
+}
+
+
+# ABI checker config, keyed by the (ABI.Architecture, ABI.CallingConvention)
+# pair each kernel YAML declares.
+ARCH_CALLINGS = {
+    ("aarch64", "AAPCS64"): {
+        "arch_guard": "MLK_SYS_AARCH64",
+        "extra_guards": [],
+        "asm_subdir": "aarch64",
+        "state_type": "struct aarch64_register_state",
+        # GPR-slot integer type. Used to cast pointer-arg buffers into the
+        # input state without introducing an intermediate type (avoiding
+        # uintptr_t / size_t which we don't use elsewhere in mlkem-native).
+        "gpr_int_type": "uint64_t",
+        "fn_qualifier": "",
+        "init_func": "init_aarch64_register_state",
+        "stub_func": "asm_call_stub_aarch64",
+        "check_func": "check_aarch64_aapcs_compliance",
+        # YAML register xN maps to gpr[N].
+        "reg_to_field": lambda reg: f"gpr[{int(reg[1:])}]",
+    },
+    ("x86_64", "SysV"): {
+        "arch_guard": "MLK_SYS_X86_64",
+        "extra_guards": ["MLK_SYSV_ABI_SUPPORTED"],
+        "asm_subdir": "x86_64",
+        "state_type": "struct x86_64_register_state",
+        "gpr_int_type": "uint64_t",
+        # MLK_SYSV_ABI is `__attribute__((sysv_abi))` on Windows-MinGW
+        # (where Microsoft x64 is the default convention) and empty on
+        # ELF/Mach-O x86_64. Matches the library's own kernel decls in
+        # mlkem/src/native/x86_64/src/arith_native_x86_64.h.
+        "fn_qualifier": "MLK_SYSV_ABI",
+        "init_func": "init_x86_64_register_state",
+        "stub_func": "asm_call_stub_x86_64_sysv",
+        "check_func": "check_x86_64_sysv_compliance",
+        "reg_to_field": lambda reg: reg,
+    },
+    ("powerpc64le", "ELFv2"): {
+        "arch_guard": "MLK_SYS_PPC64LE",
+        "extra_guards": [],
+        # Per-arch subdir under test/abicheck/. We use ppc64le (matching the
+        # C symbol naming - asm_call_stub_ppc64le, struct ppc64le_register_state,
+        # check_ppc64le_elfv2_compliance) rather than the joblist-side
+        # "powerpc64le" name.
+        "asm_subdir": "ppc64le",
+        "state_type": "struct ppc64le_register_state",
+        "gpr_int_type": "uint64_t",
+        "fn_qualifier": "",
+        "init_func": "init_ppc64le_register_state",
+        "stub_func": "asm_call_stub_ppc64le",
+        "check_func": "check_ppc64le_elfv2_compliance",
+        # Argument registers r3-r10 map to gpr_arg[0..7].
+        "reg_to_field": lambda reg: f"gpr_arg[{int(reg[1:]) - 3}]",
+    },
+    ("armv81m", "AAPCS32"): {
+        "arch_guard": "MLK_SYS_ARMV81M_MVE",
+        "extra_guards": [],
+        "asm_subdir": "armv81m",
+        "state_type": "struct armv81m_register_state",
+        "gpr_int_type": "uint32_t",
+        "fn_qualifier": "",
+        "init_func": "init_armv81m_register_state",
+        "stub_func": "asm_call_stub_armv81m",
+        "check_func": "check_armv81m_aapcs32_compliance",
+        # AAPCS32 GPRs r0-r12 map directly to gpr[0..12].
+        "reg_to_field": lambda reg: f"gpr[{int(reg[1:])}]",
+    },
+}
+
+
+def _abi_block(yaml_data, dev_source):
+    """Return the YAML 'ABI:' block, raising on missing/wrong type."""
+    abi = yaml_data.get("ABI")
+    if abi is None:
+        raise ValueError(f"{dev_source}: YAML missing 'ABI:' block")
+    if not isinstance(abi, dict):
+        raise ValueError(
+            f"{dev_source}: YAML 'ABI:' must be a mapping, got {type(abi).__name__}"
+        )
+    return abi
+
+
+def kernel_arch_calling(yaml_data, dev_source):
+    """Return the (arch, calling) pair from a kernel's YAML; both are required
+    and must form a key in ARCH_CALLINGS."""
+    abi = _abi_block(yaml_data, dev_source)
+    arch = abi.get("Architecture")
+    calling = abi.get("CallingConvention")
+    if arch is None or calling is None:
+        raise ValueError(
+            f"{dev_source}: YAML 'ABI:' must set both 'Architecture:' and "
+            f"'CallingConvention:' (got Architecture={arch!r}, "
+            f"CallingConvention={calling!r})"
+        )
+    if (arch, calling) not in ARCH_CALLINGS:
+        known = ", ".join(f"({a},{c})" for (a, c) in sorted(ARCH_CALLINGS))
+        raise ValueError(
+            f"{dev_source}: unknown (Architecture, CallingConvention) pair "
+            f"({arch!r}, {calling!r}); expected one of: {known}. "
+            f"Add it to ARCH_CALLINGS in scripts/autogen."
+        )
+    return (arch, calling)
+
+
+def kernel_features(yaml_data, dev_source):
+    """Return the 'ABI.Features:' list (capability tags, keys of ABI_CAPS);
+    missing/empty means no requirement, unknown tags raise."""
+    abi = _abi_block(yaml_data, dev_source)
+    feats = abi.get("Features") or []
+    if not isinstance(feats, list):
+        raise ValueError(
+            f"{dev_source}: YAML 'ABI.Features:' must be a list, "
+            f"got {type(feats).__name__}"
+        )
+    for r in feats:
+        if r not in ABI_CAPS:
+            known = ", ".join(sorted(ABI_CAPS.keys()))
+            raise ValueError(
+                f"{dev_source}: unknown feature {r!r} in 'ABI.Features:'; "
+                f"expected one of: {known}. Add it to ABI_CAPS in scripts/autogen."
+            )
+    return feats
+
+
+def kernel_registers(yaml_data, dev_source):
+    """Return the per-register entries in the kernel's 'ABI:' block: the direct
+    children carrying a `type:` field (e.g. `x0:`, `rdi:`), skipping the scalar
+    metadata keys."""
+    abi = _abi_block(yaml_data, dev_source)
+    abi_metadata_keys = {"Architecture", "CallingConvention", "Features"}
+    regs = {}
+    for key, value in abi.items():
+        if key in abi_metadata_keys:
+            continue
+        if not isinstance(value, dict) or "type" not in value:
+            raise ValueError(
+                f"{dev_source}: unexpected key {key!r} in 'ABI:' block; "
+                f"expected one of {sorted(abi_metadata_keys)} or a register "
+                f"entry with a 'type:' field"
+            )
+        regs[key] = value
+    return regs
+
+
+def resolve_buffer_size(reg_info, abi_data):
+    """Resolve buffer size from register info, handling cross-references."""
+    size = reg_info.get("size_bytes")
+    if isinstance(size, str):
+        if size in abi_data:
+            ref_reg = abi_data[size]
+            if ref_reg.get("type") == "scalar" and "test_with" in ref_reg:
+                return ref_reg["test_with"]
+            raise ValueError(f"Buffer {reg_info} references non-scalar register {size}")
+        return int(size)
+    elif isinstance(size, int):
+        return size
+    raise ValueError(f"Cannot resolve buffer size from {reg_info}")
+
+
+def gen_abicheck():
+    """Generate ABI checker tests for every (architecture, calling-convention)
+    pair declared in the kernel YAMLs (see ARCH_CALLINGS).
+
+    Tests run against the *shipped* assembly under mlkem/src/.../*.S. Generates
+    the per-kernel check_*.c files, the per-arch checks_<arch>_all.h registries,
+    and the per-cap abicheck_<arch>.mk. A kernel's YAML Architecture/
+    CallingConvention selects its ARCH_CALLINGS row, and Features its ABI_CAPS
+    entries.
+    """
+
+    # Sources the ABI checker covers in addition to those exported for
+    # HOL-Light proofs (ppc64le, armv81m). Shape matches hol_light_asm_joblist
+    # (basename, dev_dir, _cflags, arch); the cflags slot is unused here.
+    joblist_abicheck_extra = [
+        (f"{name}.S", "dev/ppc64le/src", "", "powerpc64le")
+        for name in (
+            "ntt_ppc_asm",
+            "intt_ppc_asm",
+            "reduce_ppc_asm",
+            "poly_tomont_ppc_asm",
+        )
+    ] + [
+        ("keccak_f1600_x4_mve.S", "dev/fips202/armv81m/src", "", "armv81m"),
+    ]
+    joblist = hol_light_asm_joblist() + joblist_abicheck_extra
+
+    # Bucket joblist entries by their YAML-declared (arch, calling) pair so a
+    # single dev source file is fully self-describing.
+    jobs_by_arch_calling = {key: [] for key in ARCH_CALLINGS}
+    # Map cap -> sorted list of *shipped* .S files that require it. Drives the
+    # generated per-arch abicheck_<arch>.mk at the end of this function.
+    cap_to_files = {cap: [] for cap in ABI_CAPS}
+
+    for entry in sorted(joblist, key=lambda j: j[0]):
+        assembly_basename, dev_src_dir, _cflags, joblist_arch = entry
+        dev_source = f"{dev_src_dir}/{assembly_basename}"
+        yaml_data = extract_yaml_from_assembly(dev_source)
+        arch_calling = kernel_arch_calling(yaml_data, dev_source)
+        # Sanity: the joblist directory architecture should match the YAML.
+        if arch_calling[0] != joblist_arch:
+            raise ValueError(
+                f"{dev_source}: YAML 'ABI.Architecture: {arch_calling[0]}' "
+                f"disagrees with joblist arch {joblist_arch!r}"
+            )
+        upstream_src_dir = upstream_src_dir_for_dev_dir(dev_src_dir)
+        for cap in kernel_features(yaml_data, dev_source):
+            cap_to_files[cap].append(f"{upstream_src_dir}/{assembly_basename}")
+        jobs_by_arch_calling[arch_calling].append((entry, yaml_data))
+
+    # Per-(arch, calling) generated metadata used to assemble checks_all.h:
+    # list of (check_name, arch_flags, extra_guards) tuples plus the
+    # arch_guard / extra_guards keying.
+    all_groups = []  # list of (arch_calling, arch_guard, extra_guards, [(name, arch_flags)])
+
+    # Per-arch-subdir set of check_*.c basenames just generated. Used after the
+    # main loop to delete stale check_*.c left over from a renamed/removed
+    # kernel (mirrors synchronize_backend's delete= path).
+    generated_basenames_by_subdir = {}
+
+    for arch_calling, jobs in jobs_by_arch_calling.items():
+        config = ARCH_CALLINGS[arch_calling]
+        arch_guard = config["arch_guard"]
+        extra_guards = config["extra_guards"]
+        generated_functions = []
+        generated_basenames_by_subdir.setdefault(config["asm_subdir"], set())
+
+        for (assembly_basename, dev_src_dir, _cflags, _joblist_arch), yaml_data in jobs:
+            dev_source = f"{dev_src_dir}/{assembly_basename}"
+            features = kernel_features(yaml_data, dev_source)
+            registers = kernel_registers(yaml_data, dev_source)
+            # Compile-time guards derived from Features. Each capability with a
+            # 'guard' (e.g. __AVX2__ for AVX2, __ARM_FEATURE_SHA3 for SHA3)
+            # contributes a #if term mirroring the shipped backend's own
+            # compile-time gate; runtime gating via mlk_sys_check_capability is
+            # additional, not a replacement.
+            feature_guards = [
+                ABI_CAPS[f]["guard"] for f in features if ABI_CAPS[f]["guard"]
+            ]
+
+            function_name = yaml_data.get("Name")
+            c_function_name = "mlk_" + function_name
+            # The YAML Name already encodes the architecture (e.g.
+            # ntt_aarch64_asm, ntt_avx2_asm, ntt_ppc_asm), so use it directly
+            # rather than appending the architecture suffix again.
+            check_name = function_name
+
+            def gen_c_test(
+                function_name=function_name,
+                check_name=check_name,
+                c_function_name=c_function_name,
+                yaml_data=yaml_data,
+                features=features,
+                registers=registers,
+                feature_guards=feature_guards,
+                config=config,
+                arch_guard=arch_guard,
+                extra_guards=extra_guards,
+            ):
+                yield from gen_header()
+                yield "#include <stdio.h>"
+                yield ""
+                yield f'#include "../abicheck_{config["asm_subdir"]}.h"'
+                yield f'#include "../checks_{config["asm_subdir"]}_all.h"'
+                yield ""
+
+                # Full guard set: architecture macro, then any calling-
+                # convention-specific guards (e.g. MLK_SYSV_ABI_SUPPORTED for
+                # x86_64 SysV), then any feature-derived guards (e.g.
+                # __ARM_FEATURE_SHA3 for SHA3 kernels).
+                conds = (
+                    [f"defined({arch_guard})"]
+                    + [f"defined({g})" for g in extra_guards]
+                    + [f"defined({g})" for g in feature_guards]
+                )
+                cond = " && ".join(conds)
+
+                yield f"#if {cond}"
+                yield ""
+                yield '#include "../../../notrandombytes/notrandombytes.h"'
+                yield ""
+                yield f"typedef {config['state_type']} reg_state;"
+                yield ""
+                qualifier = config["fn_qualifier"]
+                yield f"{qualifier} {yaml_data.get('Signature')};"
+                yield ""
+                yield f"int check_{check_name}(void)"
+                yield "{"
+
+                yield "  int test_iter;"
+                yield "  reg_state input_state, output_state;"
+                yield "  int violations;"
+
+                sorted_registers = sorted(registers.items())
+
+                buffer_info = []
+                for reg_name, reg_info in sorted_registers:
+                    if reg_info.get("type") == "buffer":
+                        size_bytes = resolve_buffer_size(reg_info, registers)
+                        buffer_name = f"buf_{reg_name}"
+                        description = reg_info.get("description", "")
+                        yield f"  MLK_ALIGN uint8_t {buffer_name}[{size_bytes}]; /* {description} */"
+                        buffer_info.append((reg_name, buffer_name, size_bytes))
+
+                # Emit a runtime mlk_sys_check_capability() skip (returning
+                # MLK_ABICHECK_SKIPPED) per Features cap that has a syscap; caps
+                # without a syscap (build-time-only, e.g. PPC64 VSX) are no-ops here.
+                # Emitted after the buffer decls to keep C90 mixed-decl-and-code happy.
+                for cap in features:
+                    cap_enum = ABI_CAPS[cap]["syscap"]
+                    if cap_enum is None:
+                        continue
+                    cap_desc = ABI_CAPS[cap]["description"]
+                    yield ""
+                    yield f"  if (!mlk_sys_check_capability({cap_enum}))"
+                    yield "  {"
+                    yield (
+                        f'    fprintf(stderr, "ABI check {check_name}: '
+                        f'host lacks {cap_desc}, skipping\\n");'
+                    )
+                    yield "    return MLK_ABICHECK_SKIPPED;"
+                    yield "  }"
+
+                yield ""
+                yield "  for (test_iter = 0; test_iter < MLK_ABICHECK_NUM_TESTS; test_iter++)"
+                yield "  {"
+                yield "    /* Initialize random register state */"
+                yield f"    {config['init_func']}(&input_state);"
+                yield ""
+
+                for reg_name, buffer_name, size_bytes in buffer_info:
+                    yield f"    randombytes({buffer_name}, {size_bytes});"
+
+                yield ""
+                yield "    /* Set up register state for function arguments */"
+
+                reg_to_field = config["reg_to_field"]
+                for reg_name, reg_info in sorted_registers:
+                    field = reg_to_field(reg_name)
+                    if reg_info.get("type") == "buffer":
+                        # Cast pointer to gpr_int_type (uint64_t / uint32_t on
+                        # armv81m) so the conversion lands at the slot width.
+                        yield f"    input_state.{field} = ({config['gpr_int_type']}){f'buf_{reg_name}'};"
+                    elif reg_info.get("type") == "scalar":
+                        test_with = reg_info.get("test_with")
+                        if test_with:
+                            yield f"    input_state.{field} = {test_with};"
+
+                yield ""
+                yield "    /* Call function through ABI test stub */"
+                yield (
+                    f"    {config['stub_func']}(&input_state, &output_state, "
+                    f"({qualifier} void (*)(void)){c_function_name});"
+                )
+                yield ""
+                yield "    /* Check ABI compliance */"
+                yield (
+                    f"    violations = {config['check_func']}("
+                    f"&input_state, &output_state, MLK_ABICHECK_VERBOSE);"
+                )
+                yield "    if (violations > 0) {"
+                yield f'      fprintf(stderr, "ABI test FAILED for {function_name} (iteration %d): %d violations\\n",'
+                yield "             test_iter + 1, violations);"
+                yield "      return MLK_ABICHECK_FAILED;"
+                yield "    }"
+                yield "  }"
+                yield ""
+                yield "  return MLK_ABICHECK_PASSED;"
+                yield "}"
+                yield ""
+                # No #else: components.mk only globs check_*.c from the
+                # active arch's checks/ directory, and the forward decl in
+                # checks_<arch>_all.h is gated on the same `cond`, so an
+                # inactive-arch fallback would be unreachable.
+                yield f"#endif /* {cond} */"
+                yield ""
+
+            output_file = (
+                f"test/abicheck/{config['asm_subdir']}/checks/check_{check_name}.c"
+            )
+            update_file(output_file, "\n".join(gen_c_test()), force_format=True)
+            generated_functions.append((check_name, feature_guards))
+            generated_basenames_by_subdir[config["asm_subdir"]].add(
+                f"check_{check_name}.c"
+            )
+
+        all_groups.append((arch_calling, arch_guard, extra_guards, generated_functions))
+
+    # Prune stale check_*.c left from a renamed/removed kernel. components.mk
+    # globs check_*.c into the abicheck build, so a stale file would silently
+    # compile and link against an out-of-date YAML signature. Mirrors the
+    # delete= path in synchronize_backend.
+    for asm_subdir, generated_basenames in generated_basenames_by_subdir.items():
+        subdir = f"test/abicheck/{asm_subdir}/checks"
+        for f in get_files(f"{subdir}/check_*.c"):
+            if os.path.basename(f) not in generated_basenames:
+                update_via_remove(f)
+
+    # Generate per-arch checks_<arch>_all.h headers, one per arch_guard. Each
+    # header lives at test/abicheck/<asm_subdir>/checks_<asm_subdir>_all.h (one
+    # level above that arch's check_*.c sources in checks/) and is selected
+    # from abicheck.c via a single #if-chain on the arch guards.
+    #
+    # Group the per-(arch, calling) rows by arch_guard, so kernels for the
+    # same architecture but different calling conventions share one
+    # all_checks[] array on that arch (gated per-entry on the calling
+    # convention's extra_guards). Today each arch has only one calling
+    # convention, but this keeps the door open to e.g. x86_64 + SysV plus
+    # x86_64 + MSx64 coexisting in the same build.
+    groups_by_arch = {}
+    asm_subdir_by_arch = {}
+    for arch_calling, arch_guard, extra_guards, functions in all_groups:
+        groups_by_arch.setdefault(arch_guard, []).append(
+            (arch_calling, extra_guards, functions)
+        )
+        asm_subdir_by_arch[arch_guard] = ARCH_CALLINGS[arch_calling]["asm_subdir"]
+
+    def gen_checks_arch_header(arch_guard, groups, asm_subdir):
+        guard_macro = f"MLK_TEST_ABICHECK_CHECKS_{asm_subdir.upper()}_ALL_H"
+        yield from gen_header()
+        yield ""
+        yield f"#ifndef {guard_macro}"
+        yield f"#define {guard_macro}"
+        yield ""
+        yield "#include <stddef.h>"
+        yield '#include "../abicheck_common.h"'
+        yield ""
+
+        # Wrap the whole body in the arch guard so accidental inclusion on a
+        # foreign architecture is harmless (this header is selected by an
+        # #if-chain in abicheck.c, but defense in depth).
+        yield f"#if defined({arch_guard})"
+        yield ""
+
+        # Emit one row per function, consolidating consecutive functions that
+        # share the same feature_guards into a single #if/#endif block (rather
+        # than one block per function). This collapses a uniform-feature group
+        # (e.g. x86_64, where every kernel is gated on __AVX2__) into a single
+        # block, while still splitting where guards differ (e.g. aarch64, where
+        # SHA3 and non-SHA3 kernels are interleaved).
+        def emit_feature_grouped(functions, render):
+            i = 0
+            while i < len(functions):
+                guards = functions[i][1]
+                j = i
+                while j < len(functions) and functions[j][1] == guards:
+                    j += 1
+                for g in guards:
+                    yield f"#if defined({g})"
+                for func_name, _ in functions[i:j]:
+                    yield render(func_name)
+                for _ in guards:
+                    yield "#endif"
+                i = j
+
+        # Forward-declare each check_<kernel>(void) for kernels in THIS arch.
+        # Gate on the same extra+feature guards as the registry entry below;
+        # this matches the #if guarding the function definition in
+        # check_<kernel>.c, so the inactive-arch fallback can be omitted there.
+        for _arch_calling, extra_guards, functions in groups:
+            if extra_guards:
+                inner = " && ".join(f"defined({g})" for g in extra_guards)
+                yield f"#if {inner}"
+            yield from emit_feature_grouped(
+                functions, lambda fn: f"int check_{fn}(void);"
+            )
+            if extra_guards:
+                yield f"#endif /* {inner} */"
+
+        if any(functions for _, _, functions in groups):
+            yield ""
+            yield "static const abicheck_entry_t all_checks[] = {"
+
+            for _arch_calling, extra_guards, functions in groups:
+                if not functions:
+                    continue
+                if extra_guards:
+                    inner = " && ".join(f"defined({g})" for g in extra_guards)
+                    yield f"#if {inner}"
+                yield from emit_feature_grouped(
+                    functions, lambda fn: f'    {{"{fn}", check_{fn}}},'
+                )
+                if extra_guards:
+                    yield f"#endif /* {inner} */"
+
+            yield "    {NULL, NULL} /* Sentinel */"
+            yield "};"
+
+        yield ""
+        yield f"#endif /* defined({arch_guard}) */"
+        yield ""
+        yield f"#endif /* !{guard_macro} */"
+        yield ""
+
+    for arch_guard, groups in groups_by_arch.items():
+        asm_subdir = asm_subdir_by_arch[arch_guard]
+        update_file(
+            f"test/abicheck/{asm_subdir}/checks_{asm_subdir}_all.h",
+            "\n".join(gen_checks_arch_header(arch_guard, groups, asm_subdir)),
+            force_format=True,
+        )
+
+    # Emit per-capability CFLAGS injection for the build, split per arch:
+    # one test/abicheck/<arch>/abicheck_<arch>.mk per arch with caps, plus a
+    # top-level test/abicheck/abicheck.mk that includes them all. Single source
+    # of truth alongside the C-time guard (arch_flags) and runtime cap check.
+    caps_by_subdir = {}
+    for cap in sorted(ABI_CAPS):
+        caps_by_subdir.setdefault(ABI_CAPS[cap]["asm_subdir"], []).append(cap)
+
+    def gen_features_mk(asm_subdir, caps):
+        yield from gen_yaml_header()
+        yield "# WARNING: This file is auto-generated by scripts/autogen."
+        yield "# Do not edit it directly. Instead, edit the YAML 'ABI.Features:'"
+        yield "# list in dev/<arch>/src/<kernel>.S and run scripts/autogen."
+        yield "#"
+        yield "# For each capability declared by some kernel's ABI.Features list,"
+        yield "# this file appends the capability's CFLAGS to that kernel's"
+        yield "# (shipped, in-tree) .S object under mlkem/src/."
+        yield ""
+        yield "# Default each cap's file list to empty so unconditional appends"
+        yield "# below are safe even when a cap has no kernels on this arch."
+        for cap in caps:
+            yield f"ABICHECK_REQ_{cap}_FILES :="
+        for cap in caps:
+            # Files needing this cap's CFLAGS are: the kernel exports declared
+            # by YAML, plus any always-on auxiliary files (callstub/selftest)
+            # listed in ABI_CAPS[cap]['aux_files'].
+            files = sorted(
+                set(cap_to_files[cap]) | set(ABI_CAPS[cap].get("aux_files", []))
+            )
+            if not files:
+                continue
+            cflags = " ".join(ABI_CAPS[cap]["cflags"])
+            yield ""
+            yield f"# {cap}: {ABI_CAPS[cap]['description']}"
+            yield f"ABICHECK_REQ_{cap}_FILES := \\"
+            for i, f in enumerate(files):
+                sep = " \\" if i + 1 < len(files) else ""
+                yield f"  {f}{sep}"
+            yield (
+                f"ABICHECK_REQ_{cap}_OBJS := "
+                f"$(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_REQ_{cap}_FILES))"
+            )
+            yield f"$(ABICHECK_REQ_{cap}_OBJS): CFLAGS += {cflags}"
+        yield ""
+
+    for asm_subdir, caps in caps_by_subdir.items():
+        update_file(
+            f"test/abicheck/{asm_subdir}/abicheck_{asm_subdir}.mk",
+            "\n".join(gen_features_mk(asm_subdir, caps)),
+        )
+
+    def gen_abicheck_mk():
+        yield from gen_yaml_header()
+        yield "# WARNING: This file is auto-generated by scripts/autogen."
+        yield "# Do not edit it directly. Instead, edit the YAML 'ABI.Features:'"
+        yield "# list in dev/<arch>/src/<kernel>.S and run scripts/autogen."
+        yield "#"
+        yield "# Includes the per-arch abicheck_<arch>.mk, each of which appends"
+        yield "# its capabilities' CFLAGS to the matching shipped .S objects."
+        yield ""
+        for asm_subdir in sorted(caps_by_subdir):
+            yield f"include test/abicheck/{asm_subdir}/abicheck_{asm_subdir}.mk"
+        yield ""
+
+    update_file("test/abicheck/abicheck.mk", "\n".join(gen_abicheck_mk()))
+
+
 def _main():
     slothy_choices = [
         "ntt_aarch64_asm",
@@ -4671,6 +5361,7 @@ def _main():
         ("Generate undefs", gen_undefs),
         ("Generate test configs", gen_test_configs),
         ("Check macro typos", check_macro_typos),
+        ("Generate ABI checker tests", gen_abicheck),
         ("Generate preprocessor comments", gen_preprocessor_comments),
         # Formatting should be the last step
         ("Format files", lambda: format_files(args.dry_run)),

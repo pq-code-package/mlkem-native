@@ -9,6 +9,27 @@
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__)
+/*yaml
+  Name: intt_ppc_asm
+  Description: PowerPC64 VSX inverse NTT
+  Signature: void mlk_intt_ppc_asm(int16_t *r, const int16_t *qdata)
+  ABI:
+    Architecture: powerpc64le
+    CallingConvention: ELFv2
+    Features: [VSX]
+    r3:
+      type: buffer
+      size_bytes: 512
+      permissions: read/write
+      c_parameter: int16_t *r
+      description: Input/output polynomial (256 x int16_t)
+    r4:
+      type: buffer
+      size_bytes: 4144
+      permissions: read-only
+      c_parameter: const int16_t *qdata
+      description: Precomputed constants (2072 x int16_t)
+*/
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file

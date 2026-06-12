@@ -28,6 +28,34 @@
  *              - const uint8_t *data: pointer to shufbidx constant
  **************************************************/
 
+/*yaml
+  Name: poly_decompress_d10_avx2_asm
+  Description: x86_64 AVX2 polynomial decompression (d=10)
+  Signature: void mlk_poly_decompress_d10_avx2_asm(int16_t *r, const uint8_t *a, const uint8_t *data)
+  ABI:
+    Architecture: x86_64
+    CallingConvention: SysV
+    Features: [AVX2]
+    rdi:
+      type: buffer
+      size_bytes: 512
+      permissions: write-only
+      c_parameter: int16_t *r
+      description: Output polynomial (256 x int16_t)
+    rsi:
+      type: buffer
+      size_bytes: 320
+      permissions: read-only
+      c_parameter: const uint8_t *a
+      description: Input compressed polynomial
+    rdx:
+      type: buffer
+      size_bytes: 32
+      permissions: read-only
+      c_parameter: const uint8_t *data
+      description: Precomputed decompression constants
+*/
+
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file

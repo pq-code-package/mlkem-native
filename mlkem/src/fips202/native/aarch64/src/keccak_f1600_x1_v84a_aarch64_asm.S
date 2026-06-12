@@ -19,6 +19,9 @@
   Description: AArch64 ARMv8.4-A implementation of Keccak-f[1600] permutation for single state
   Signature: void mlk_keccak_f1600_x1_v84a_aarch64_asm(uint64_t state[25], const uint64_t rc[24])
   ABI:
+    Architecture: aarch64
+    CallingConvention: AAPCS64
+    Features: [SHA3]
     x0:
       type: buffer
       size_bytes: 200

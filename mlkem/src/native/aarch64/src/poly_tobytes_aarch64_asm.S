@@ -8,6 +8,8 @@
   Description: Convert polynomial to byte representation
   Signature: void mlk_poly_tobytes_aarch64_asm(uint8_t r[384], const int16_t a[256])
   ABI:
+    Architecture: aarch64
+    CallingConvention: AAPCS64
     x0:
       type: buffer
       size_bytes: 384
