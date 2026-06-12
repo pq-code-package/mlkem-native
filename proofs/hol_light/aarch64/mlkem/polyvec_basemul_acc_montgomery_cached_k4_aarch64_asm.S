@@ -17,6 +17,8 @@
   Description: Re-implementation of asymmetric base multiplication following @[NeonNTT] for k=4
   Signature: void mlk_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm(int16_t r[256], const int16_t a[1024], const int16_t b[1024], const int16_t b_cache[512])
   ABI:
+    Architecture: aarch64
+    CallingConvention: AAPCS64
     x0:
       type: buffer
       size_bytes: 512

@@ -24,6 +24,22 @@
  */
 
 
+/*yaml
+  Name: reduce_avx2_asm
+  Description: x86_64 AVX2 modular reduction
+  Signature: void mlk_reduce_avx2_asm(int16_t *r)
+  ABI:
+    Architecture: x86_64
+    CallingConvention: SysV
+    Features: [AVX2]
+    rdi:
+      type: buffer
+      size_bytes: 512
+      permissions: read/write
+      c_parameter: int16_t *r
+      description: Input/output polynomial (256 x int16_t)
+*/
+
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file

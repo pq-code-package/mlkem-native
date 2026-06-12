@@ -18,6 +18,14 @@
     },
     {
       "pattern": "^http://nvlpubs\\.nist\\.gov"
+    },
+    {
+      "_comment": "Armv8-M Architecture Reference Manual; the Arm developer site rate-limits / 403s automated link-checks.",
+      "pattern": "^https://developer\\.arm\\.com"
+    },
+    {
+      "_comment": "IACR ePrint rate-limits / 403s automated link-checks.",
+      "pattern": "^https://eprint\\.iacr\\.org"
     }
   ]
 }

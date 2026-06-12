@@ -24,6 +24,8 @@
   Description: AArch64 ML-KEM forward NTT following @[NeonNTT] and @[SLOTHY_Paper]
   Signature: void mlk_ntt_aarch64_asm(int16_t p[256], const int16_t twiddles12345[80], const int16_t twiddles56[384])
   ABI:
+    Architecture: aarch64
+    CallingConvention: AAPCS64
     x0:
       type: buffer
       size_bytes: 512

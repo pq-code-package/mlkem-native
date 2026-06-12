@@ -22,6 +22,9 @@ ARCH := $(shell uname -m)
 ifeq ($(ARCH),arm64)
 ARCH := aarch64
 endif
+ifeq ($(ARCH),ppc64le)
+ARCH := powerpc64le
+endif
 else # CROSS_PREFIX
 ifneq ($(findstring x86_64, $(CROSS_PREFIX)),)
 ARCH := x86_64
