@@ -127,7 +127,12 @@ __contract__(
     requires(memory_no_alias(b, sizeof(int16_t) * 2 * MLKEM_N))
     requires(memory_no_alias(b_cache, sizeof(int16_t) * 2 * (MLKEM_N / 2)))
     requires(array_abs_bound(a, 0, 2 * MLKEM_N, MLKEM_UINT12_LIMIT + 1))
+    requires(array_abs_bound(b, 0, 2 * MLKEM_N, 8 * MLKEM_Q))
+    requires(array_abs_bound(b_cache, 0, 2 * (MLKEM_N / 2), MLKEM_Q))
     assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+    /* check-magic: off */
+    ensures(array_abs_bound(r, 0, MLKEM_N, 8323))
+    /* check-magic: on */
 );
 
 #define mlk_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm \
@@ -144,7 +149,12 @@ __contract__(
     requires(memory_no_alias(b, sizeof(int16_t) * 3 * MLKEM_N))
     requires(memory_no_alias(b_cache, sizeof(int16_t) * 3 * (MLKEM_N / 2)))
     requires(array_abs_bound(a, 0, 3 * MLKEM_N, MLKEM_UINT12_LIMIT + 1))
+    requires(array_abs_bound(b, 0, 3 * MLKEM_N, 8 * MLKEM_Q))
+    requires(array_abs_bound(b_cache, 0, 3 * (MLKEM_N / 2), MLKEM_Q))
     assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+    /* check-magic: off */
+    ensures(array_abs_bound(r, 0, MLKEM_N, 11652))
+    /* check-magic: on */
 );
 
 #define mlk_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm \
@@ -161,7 +171,12 @@ __contract__(
     requires(memory_no_alias(b, sizeof(int16_t) * 4 * MLKEM_N))
     requires(memory_no_alias(b_cache, sizeof(int16_t) * 4 * (MLKEM_N / 2)))
     requires(array_abs_bound(a, 0, 4 * MLKEM_N, MLKEM_UINT12_LIMIT + 1))
+    requires(array_abs_bound(b, 0, 4 * MLKEM_N, 8 * MLKEM_Q))
+    requires(array_abs_bound(b_cache, 0, 4 * (MLKEM_N / 2), MLKEM_Q))
     assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+    /* check-magic: off */
+    ensures(array_abs_bound(r, 0, MLKEM_N, 14981))
+    /* check-magic: on */
 );
 
 #define mlk_rej_uniform_aarch64_asm MLK_NAMESPACE(rej_uniform_aarch64_asm)

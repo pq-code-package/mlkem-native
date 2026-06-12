@@ -797,6 +797,169 @@ let mlkem_basemul_k2_mc =
                            (* VMOVDQA (Memop Word256 (%% (rdi,448))) (%_% ymm7) *)
   0xc5; 0x7d; 0x7f; 0x8f; 0xe0; 0x01; 0x00; 0x00;
                            (* VMOVDQA (Memop Word256 (%% (rdi,480))) (%_% ymm9) *)
+  0xb8; 0xbf; 0x4e; 0xbf; 0x4e;
+                           (* MOV (% eax) (Imm32 (word 1321160383)) *)
+  0xc5; 0xf9; 0x6e; 0xc8;  (* VMOVD (%_% xmm1) (% eax) *)
+  0xc4; 0xe2; 0x7d; 0x58; 0xc9;
+                           (* VPBROADCASTD (%_% ymm1) (%_% xmm1) *)
+  0xc5; 0xfd; 0x6f; 0x17;  (* VMOVDQA (%_% ymm2) (Memop Word256 (%% (rdi,0))) *)
+  0xc5; 0xfd; 0x6f; 0x5f; 0x20;
+                           (* VMOVDQA (%_% ymm3) (Memop Word256 (%% (rdi,32))) *)
+  0xc5; 0xfd; 0x6f; 0x67; 0x40;
+                           (* VMOVDQA (%_% ymm4) (Memop Word256 (%% (rdi,64))) *)
+  0xc5; 0xfd; 0x6f; 0x6f; 0x60;
+                           (* VMOVDQA (%_% ymm5) (Memop Word256 (%% (rdi,96))) *)
+  0xc5; 0xfd; 0x6f; 0xb7; 0x80; 0x00; 0x00; 0x00;
+                           (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rdi,128))) *)
+  0xc5; 0xfd; 0x6f; 0xbf; 0xa0; 0x00; 0x00; 0x00;
+                           (* VMOVDQA (%_% ymm7) (Memop Word256 (%% (rdi,160))) *)
+  0xc5; 0x7d; 0x6f; 0x87; 0xc0; 0x00; 0x00; 0x00;
+                           (* VMOVDQA (%_% ymm8) (Memop Word256 (%% (rdi,192))) *)
+  0xc5; 0x7d; 0x6f; 0x8f; 0xe0; 0x00; 0x00; 0x00;
+                           (* VMOVDQA (%_% ymm9) (Memop Word256 (%% (rdi,224))) *)
+  0xc5; 0x6d; 0xe5; 0xe1;  (* VPMULHW (%_% ymm12) (%_% ymm2) (%_% ymm1) *)
+  0xc4; 0xc1; 0x1d; 0x71; 0xe4; 0x0a;
+                           (* VPSRAW (%_% ymm12) (%_% ymm12) (Imm8 (word 10)) *)
+  0xc5; 0x1d; 0xd5; 0xe0;  (* VPMULLW (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
+  0xc4; 0xc1; 0x6d; 0xf9; 0xd4;
+                           (* VPSUBW (%_% ymm2) (%_% ymm2) (%_% ymm12) *)
+  0xc5; 0x65; 0xe5; 0xe1;  (* VPMULHW (%_% ymm12) (%_% ymm3) (%_% ymm1) *)
+  0xc4; 0xc1; 0x1d; 0x71; 0xe4; 0x0a;
+                           (* VPSRAW (%_% ymm12) (%_% ymm12) (Imm8 (word 10)) *)
+  0xc5; 0x1d; 0xd5; 0xe0;  (* VPMULLW (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
+  0xc4; 0xc1; 0x65; 0xf9; 0xdc;
+                           (* VPSUBW (%_% ymm3) (%_% ymm3) (%_% ymm12) *)
+  0xc5; 0x5d; 0xe5; 0xe1;  (* VPMULHW (%_% ymm12) (%_% ymm4) (%_% ymm1) *)
+  0xc4; 0xc1; 0x1d; 0x71; 0xe4; 0x0a;
+                           (* VPSRAW (%_% ymm12) (%_% ymm12) (Imm8 (word 10)) *)
+  0xc5; 0x1d; 0xd5; 0xe0;  (* VPMULLW (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
+  0xc4; 0xc1; 0x5d; 0xf9; 0xe4;
+                           (* VPSUBW (%_% ymm4) (%_% ymm4) (%_% ymm12) *)
+  0xc5; 0x55; 0xe5; 0xe1;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm1) *)
+  0xc4; 0xc1; 0x1d; 0x71; 0xe4; 0x0a;
+                           (* VPSRAW (%_% ymm12) (%_% ymm12) (Imm8 (word 10)) *)
+  0xc5; 0x1d; 0xd5; 0xe0;  (* VPMULLW (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
+  0xc4; 0xc1; 0x55; 0xf9; 0xec;
+                           (* VPSUBW (%_% ymm5) (%_% ymm5) (%_% ymm12) *)
+  0xc5; 0x4d; 0xe5; 0xe1;  (* VPMULHW (%_% ymm12) (%_% ymm6) (%_% ymm1) *)
+  0xc4; 0xc1; 0x1d; 0x71; 0xe4; 0x0a;
+                           (* VPSRAW (%_% ymm12) (%_% ymm12) (Imm8 (word 10)) *)
+  0xc5; 0x1d; 0xd5; 0xe0;  (* VPMULLW (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
+  0xc4; 0xc1; 0x4d; 0xf9; 0xf4;
+                           (* VPSUBW (%_% ymm6) (%_% ymm6) (%_% ymm12) *)
+  0xc5; 0x45; 0xe5; 0xe1;  (* VPMULHW (%_% ymm12) (%_% ymm7) (%_% ymm1) *)
+  0xc4; 0xc1; 0x1d; 0x71; 0xe4; 0x0a;
+                           (* VPSRAW (%_% ymm12) (%_% ymm12) (Imm8 (word 10)) *)
+  0xc5; 0x1d; 0xd5; 0xe0;  (* VPMULLW (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
+  0xc4; 0xc1; 0x45; 0xf9; 0xfc;
+                           (* VPSUBW (%_% ymm7) (%_% ymm7) (%_% ymm12) *)
+  0xc5; 0x3d; 0xe5; 0xe1;  (* VPMULHW (%_% ymm12) (%_% ymm8) (%_% ymm1) *)
+  0xc4; 0xc1; 0x1d; 0x71; 0xe4; 0x0a;
+                           (* VPSRAW (%_% ymm12) (%_% ymm12) (Imm8 (word 10)) *)
+  0xc5; 0x1d; 0xd5; 0xe0;  (* VPMULLW (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
+  0xc4; 0x41; 0x3d; 0xf9; 0xc4;
+                           (* VPSUBW (%_% ymm8) (%_% ymm8) (%_% ymm12) *)
+  0xc5; 0x35; 0xe5; 0xe1;  (* VPMULHW (%_% ymm12) (%_% ymm9) (%_% ymm1) *)
+  0xc4; 0xc1; 0x1d; 0x71; 0xe4; 0x0a;
+                           (* VPSRAW (%_% ymm12) (%_% ymm12) (Imm8 (word 10)) *)
+  0xc5; 0x1d; 0xd5; 0xe0;  (* VPMULLW (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
+  0xc4; 0x41; 0x35; 0xf9; 0xcc;
+                           (* VPSUBW (%_% ymm9) (%_% ymm9) (%_% ymm12) *)
+  0xc5; 0xfd; 0x7f; 0x17;  (* VMOVDQA (Memop Word256 (%% (rdi,0))) (%_% ymm2) *)
+  0xc5; 0xfd; 0x7f; 0x5f; 0x20;
+                           (* VMOVDQA (Memop Word256 (%% (rdi,32))) (%_% ymm3) *)
+  0xc5; 0xfd; 0x7f; 0x67; 0x40;
+                           (* VMOVDQA (Memop Word256 (%% (rdi,64))) (%_% ymm4) *)
+  0xc5; 0xfd; 0x7f; 0x6f; 0x60;
+                           (* VMOVDQA (Memop Word256 (%% (rdi,96))) (%_% ymm5) *)
+  0xc5; 0xfd; 0x7f; 0xb7; 0x80; 0x00; 0x00; 0x00;
+                           (* VMOVDQA (Memop Word256 (%% (rdi,128))) (%_% ymm6) *)
+  0xc5; 0xfd; 0x7f; 0xbf; 0xa0; 0x00; 0x00; 0x00;
+                           (* VMOVDQA (Memop Word256 (%% (rdi,160))) (%_% ymm7) *)
+  0xc5; 0x7d; 0x7f; 0x87; 0xc0; 0x00; 0x00; 0x00;
+                           (* VMOVDQA (Memop Word256 (%% (rdi,192))) (%_% ymm8) *)
+  0xc5; 0x7d; 0x7f; 0x8f; 0xe0; 0x00; 0x00; 0x00;
+                           (* VMOVDQA (Memop Word256 (%% (rdi,224))) (%_% ymm9) *)
+  0xc5; 0xfd; 0x6f; 0x97; 0x00; 0x01; 0x00; 0x00;
+                           (* VMOVDQA (%_% ymm2) (Memop Word256 (%% (rdi,256))) *)
+  0xc5; 0xfd; 0x6f; 0x9f; 0x20; 0x01; 0x00; 0x00;
+                           (* VMOVDQA (%_% ymm3) (Memop Word256 (%% (rdi,288))) *)
+  0xc5; 0xfd; 0x6f; 0xa7; 0x40; 0x01; 0x00; 0x00;
+                           (* VMOVDQA (%_% ymm4) (Memop Word256 (%% (rdi,320))) *)
+  0xc5; 0xfd; 0x6f; 0xaf; 0x60; 0x01; 0x00; 0x00;
+                           (* VMOVDQA (%_% ymm5) (Memop Word256 (%% (rdi,352))) *)
+  0xc5; 0xfd; 0x6f; 0xb7; 0x80; 0x01; 0x00; 0x00;
+                           (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rdi,384))) *)
+  0xc5; 0xfd; 0x6f; 0xbf; 0xa0; 0x01; 0x00; 0x00;
+                           (* VMOVDQA (%_% ymm7) (Memop Word256 (%% (rdi,416))) *)
+  0xc5; 0x7d; 0x6f; 0x87; 0xc0; 0x01; 0x00; 0x00;
+                           (* VMOVDQA (%_% ymm8) (Memop Word256 (%% (rdi,448))) *)
+  0xc5; 0x7d; 0x6f; 0x8f; 0xe0; 0x01; 0x00; 0x00;
+                           (* VMOVDQA (%_% ymm9) (Memop Word256 (%% (rdi,480))) *)
+  0xc5; 0x6d; 0xe5; 0xe1;  (* VPMULHW (%_% ymm12) (%_% ymm2) (%_% ymm1) *)
+  0xc4; 0xc1; 0x1d; 0x71; 0xe4; 0x0a;
+                           (* VPSRAW (%_% ymm12) (%_% ymm12) (Imm8 (word 10)) *)
+  0xc5; 0x1d; 0xd5; 0xe0;  (* VPMULLW (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
+  0xc4; 0xc1; 0x6d; 0xf9; 0xd4;
+                           (* VPSUBW (%_% ymm2) (%_% ymm2) (%_% ymm12) *)
+  0xc5; 0x65; 0xe5; 0xe1;  (* VPMULHW (%_% ymm12) (%_% ymm3) (%_% ymm1) *)
+  0xc4; 0xc1; 0x1d; 0x71; 0xe4; 0x0a;
+                           (* VPSRAW (%_% ymm12) (%_% ymm12) (Imm8 (word 10)) *)
+  0xc5; 0x1d; 0xd5; 0xe0;  (* VPMULLW (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
+  0xc4; 0xc1; 0x65; 0xf9; 0xdc;
+                           (* VPSUBW (%_% ymm3) (%_% ymm3) (%_% ymm12) *)
+  0xc5; 0x5d; 0xe5; 0xe1;  (* VPMULHW (%_% ymm12) (%_% ymm4) (%_% ymm1) *)
+  0xc4; 0xc1; 0x1d; 0x71; 0xe4; 0x0a;
+                           (* VPSRAW (%_% ymm12) (%_% ymm12) (Imm8 (word 10)) *)
+  0xc5; 0x1d; 0xd5; 0xe0;  (* VPMULLW (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
+  0xc4; 0xc1; 0x5d; 0xf9; 0xe4;
+                           (* VPSUBW (%_% ymm4) (%_% ymm4) (%_% ymm12) *)
+  0xc5; 0x55; 0xe5; 0xe1;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm1) *)
+  0xc4; 0xc1; 0x1d; 0x71; 0xe4; 0x0a;
+                           (* VPSRAW (%_% ymm12) (%_% ymm12) (Imm8 (word 10)) *)
+  0xc5; 0x1d; 0xd5; 0xe0;  (* VPMULLW (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
+  0xc4; 0xc1; 0x55; 0xf9; 0xec;
+                           (* VPSUBW (%_% ymm5) (%_% ymm5) (%_% ymm12) *)
+  0xc5; 0x4d; 0xe5; 0xe1;  (* VPMULHW (%_% ymm12) (%_% ymm6) (%_% ymm1) *)
+  0xc4; 0xc1; 0x1d; 0x71; 0xe4; 0x0a;
+                           (* VPSRAW (%_% ymm12) (%_% ymm12) (Imm8 (word 10)) *)
+  0xc5; 0x1d; 0xd5; 0xe0;  (* VPMULLW (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
+  0xc4; 0xc1; 0x4d; 0xf9; 0xf4;
+                           (* VPSUBW (%_% ymm6) (%_% ymm6) (%_% ymm12) *)
+  0xc5; 0x45; 0xe5; 0xe1;  (* VPMULHW (%_% ymm12) (%_% ymm7) (%_% ymm1) *)
+  0xc4; 0xc1; 0x1d; 0x71; 0xe4; 0x0a;
+                           (* VPSRAW (%_% ymm12) (%_% ymm12) (Imm8 (word 10)) *)
+  0xc5; 0x1d; 0xd5; 0xe0;  (* VPMULLW (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
+  0xc4; 0xc1; 0x45; 0xf9; 0xfc;
+                           (* VPSUBW (%_% ymm7) (%_% ymm7) (%_% ymm12) *)
+  0xc5; 0x3d; 0xe5; 0xe1;  (* VPMULHW (%_% ymm12) (%_% ymm8) (%_% ymm1) *)
+  0xc4; 0xc1; 0x1d; 0x71; 0xe4; 0x0a;
+                           (* VPSRAW (%_% ymm12) (%_% ymm12) (Imm8 (word 10)) *)
+  0xc5; 0x1d; 0xd5; 0xe0;  (* VPMULLW (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
+  0xc4; 0x41; 0x3d; 0xf9; 0xc4;
+                           (* VPSUBW (%_% ymm8) (%_% ymm8) (%_% ymm12) *)
+  0xc5; 0x35; 0xe5; 0xe1;  (* VPMULHW (%_% ymm12) (%_% ymm9) (%_% ymm1) *)
+  0xc4; 0xc1; 0x1d; 0x71; 0xe4; 0x0a;
+                           (* VPSRAW (%_% ymm12) (%_% ymm12) (Imm8 (word 10)) *)
+  0xc5; 0x1d; 0xd5; 0xe0;  (* VPMULLW (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
+  0xc4; 0x41; 0x35; 0xf9; 0xcc;
+                           (* VPSUBW (%_% ymm9) (%_% ymm9) (%_% ymm12) *)
+  0xc5; 0xfd; 0x7f; 0x97; 0x00; 0x01; 0x00; 0x00;
+                           (* VMOVDQA (Memop Word256 (%% (rdi,256))) (%_% ymm2) *)
+  0xc5; 0xfd; 0x7f; 0x9f; 0x20; 0x01; 0x00; 0x00;
+                           (* VMOVDQA (Memop Word256 (%% (rdi,288))) (%_% ymm3) *)
+  0xc5; 0xfd; 0x7f; 0xa7; 0x40; 0x01; 0x00; 0x00;
+                           (* VMOVDQA (Memop Word256 (%% (rdi,320))) (%_% ymm4) *)
+  0xc5; 0xfd; 0x7f; 0xaf; 0x60; 0x01; 0x00; 0x00;
+                           (* VMOVDQA (Memop Word256 (%% (rdi,352))) (%_% ymm5) *)
+  0xc5; 0xfd; 0x7f; 0xb7; 0x80; 0x01; 0x00; 0x00;
+                           (* VMOVDQA (Memop Word256 (%% (rdi,384))) (%_% ymm6) *)
+  0xc5; 0xfd; 0x7f; 0xbf; 0xa0; 0x01; 0x00; 0x00;
+                           (* VMOVDQA (Memop Word256 (%% (rdi,416))) (%_% ymm7) *)
+  0xc5; 0x7d; 0x7f; 0x87; 0xc0; 0x01; 0x00; 0x00;
+                           (* VMOVDQA (Memop Word256 (%% (rdi,448))) (%_% ymm8) *)
+  0xc5; 0x7d; 0x7f; 0x8f; 0xe0; 0x01; 0x00; 0x00;
+                           (* VMOVDQA (Memop Word256 (%% (rdi,480))) (%_% ymm9) *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -912,42 +1075,41 @@ let MLKEM_BASEMUL_K2_CORRECT = prove(
                         ==> read(memory :> bytes16
                              (word_add src2t (word (256 + 32*j + 2*i)))) s = dz1 i j))
               (\s. read RIP s = word (pc + MLKEM_BASEMUL_K2_CORE_END) /\
-                   (!i. i < 16 ==> !j. j < 4
-                        ==> (let j' = 2*j in
-                              (abs(ival(a0 i j')) <= &2 pow 12  /\
-                               abs(ival(b0 i j')) <= &2 pow 12  /\
-                               abs(ival(a1 i j')) <= &2 pow 12  /\
-                               abs(ival(b1 i j')) <= &2 pow 12
-                               ==>
-                               (ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)
-                                ==
-                                pmulaccred0 (ival (a0 i j')) (ival (b0 i j')) (ival (c0 i j')) (ival (d0 i j')) (ival (dz0 i j'))
-                                            (ival (a1 i j')) (ival (b1 i j')) (ival (c1 i j')) (ival (d1 i j')) (ival (dz1 i j'))
-                               ) (mod &3329)))) /\
-
-                   (!i. i < 16 ==> !j. j < 4
-                        ==> (let j' = 2*j+1 in
-                              (abs(ival(a0 i j')) <= &2 pow 12  /\
-                               abs(ival(b0 i j')) <= &2 pow 12  /\
-                               abs(ival(a1 i j')) <= &2 pow 12  /\
-                               abs(ival(b1 i j')) <= &2 pow 12
-                               ==>
-                               (ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)
-                                ==
-                                pmulaccred0_odd (ival (a0 i j')) (ival (b0 i j')) (ival (c0 i j')) (ival (d0 i j')) (ival (dz0 i j'))
-                                            (ival (a1 i j')) (ival (b1 i j')) (ival (c1 i j')) (ival (d1 i j')) (ival (dz1 i j'))
-                               ) (mod &3329)))) /\
-
-                   (!i. i < 16 ==> !j. j < 8
+                   ((!i. i < 16 ==> !j. j < 8
                         ==> abs(ival(a0 i j)) <= &2 pow 12  /\
                             abs(ival(b0 i j)) <= &2 pow 12  /\
                             abs(ival(a1 i j)) <= &2 pow 12  /\
-                            abs(ival(b1 i j)) <= &2 pow 12
-                        ==> (ival (read(memory :> bytes16 (word_add dst (word (64*j + 32 + 2*i)))) s)
-                             ==
-                             pmulaccred1 (ival (a0 i j)) (ival (b0 i j)) (ival (c0 i j)) (ival (d0 i j)) (ival (dz0 i j))
-                                         (ival (a1 i j)) (ival (b1 i j)) (ival (c1 i j)) (ival (d1 i j)) (ival (dz1 i j))
-                            ) (mod &3329)))
+                            abs(ival(b1 i j)) <= &2 pow 12  /\
+                            abs(ival(c0 i j)) <= &8 * &3329 /\
+                            abs(ival(d0 i j)) <= &8 * &3329 /\
+                            abs(ival(c1 i j)) <= &8 * &3329 /\
+                            abs(ival(d1 i j)) <= &8 * &3329 /\
+                            abs(ival(dz0 i j)) <= &3329 /\
+                            abs(ival(dz1 i j)) <= &3329)
+                    ==>
+                    (!i. i < 16 ==> !j. j < 4
+                          ==> (let j' = 2*j in
+                                (ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)
+                                 ==
+                                 pmulaccred0 (ival (a0 i j')) (ival (b0 i j')) (ival (c0 i j')) (ival (d0 i j')) (ival (dz0 i j'))
+                                             (ival (a1 i j')) (ival (b1 i j')) (ival (c1 i j')) (ival (d1 i j')) (ival (dz1 i j'))
+                                ) (mod &3329) /\
+                                abs(ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)) <= &6657)) /\
+                    (!i. i < 16 ==> !j. j < 4
+                          ==> (let j' = 2*j+1 in
+                                (ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)
+                                 ==
+                                 pmulaccred0_odd (ival (a0 i j')) (ival (b0 i j')) (ival (c0 i j')) (ival (d0 i j')) (ival (dz0 i j'))
+                                                 (ival (a1 i j')) (ival (b1 i j')) (ival (c1 i j')) (ival (d1 i j')) (ival (dz1 i j'))
+                                ) (mod &3329) /\
+                                abs(ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)) <= &6657)) /\
+                    (!i. i < 16 ==> !j. j < 8
+                          ==> (ival (read(memory :> bytes16 (word_add dst (word (64*j + 32 + 2*i)))) s)
+                               ==
+                               pmulaccred1 (ival (a0 i j)) (ival (b0 i j)) (ival (c0 i j)) (ival (d0 i j)) (ival (dz0 i j))
+                                           (ival (a1 i j)) (ival (b1 i j)) (ival (c1 i j)) (ival (d1 i j)) (ival (dz1 i j))
+                              ) (mod &3329) /\
+                              abs(ival (read(memory :> bytes16 (word_add dst (word (64*j + 32 + 2*i)))) s)) <= &6657)))
               (MAYCHANGE [events] ,,
                MAYCHANGE [RIP] ,, MAYCHANGE [RAX] ,,
                MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
@@ -978,7 +1140,7 @@ let MLKEM_BASEMUL_K2_CORRECT = prove(
 
   MAP_EVERY (fun n -> X86_STEPS_TAC mlkem_basemul_k2_tmc_EXEC [n] THEN
                       SIMD_SIMPLIFY_TAC [montmul_x86; montmul_odd_x86])
-            (1--470) THEN
+            (1--569) THEN
 
   ENSURES_FINAL_STATE_TAC THEN
   ASM_REWRITE_TAC[] THEN
@@ -997,17 +1159,36 @@ let MLKEM_BASEMUL_K2_CORRECT = prove(
            DEPTH_CONV let_CONV) THEN
   ASM_REWRITE_TAC[WORD_ADD_0] THEN
 
-  DISCARD_STATE_TAC "s470" THEN
+  DISCARD_STATE_TAC "s569" THEN
+
+  (* Introduce the global bound assumptions once. The post-condition was
+     already case-expanded above, so STRIP_ASSUME_TAC splits the resulting
+     conjunction of abs(ival …) ≤ … bounds into atomic assumptions where
+     GEN_CONGBOUND_RULE can find them below. *)
+  DISCH_THEN STRIP_ASSUME_TAC THEN
 
   REPEAT CONJ_TAC THEN
   REWRITE_TAC[pmulaccred0; pmulacc0; pmul0; pmulaccred0_odd;
               pmulacc0_odd; pmul0_odd; pmulaccred1; pmulacc1; pmul1] THEN
-  STRIP_TAC THEN
-  ASSUM_LIST((fun ths -> W(MP_TAC o CONJUNCT1 o GEN_CONGBOUND_RULE ths o
-    rand o lhand o rator o snd))) THEN
-  REWRITE_TAC[GSYM INT_REM_EQ] THEN CONV_TAC INT_REM_DOWN_CONV THEN
-  MATCH_MP_TAC EQ_IMP THEN AP_TERM_TAC THEN AP_THM_TAC THEN AP_TERM_TAC THEN
-  CONV_TAC INT_RING
+  (* Fold the final Barrett reduction (emitted as raw word operations by the
+     symbolic execution) back into barred_x86 so GEN_CONGBOUND_RULE can apply
+     CONGBOUND_BARRED_X86 instead of recursing through word_ishr/word_subword. *)
+  REWRITE_TAC[GSYM barred_x86] THEN
+  (* Each subgoal is either a (mod &3329) congruence on the output coefficient
+     or an abs(...) <= &6657 bound on the same coefficient.  GEN_CONGBOUND_RULE
+     (via CONGBOUND_BARRED_X86) returns a conjunction containing both, so we
+     pick the appropriate conjunct per goal shape. *)
+  ASSUM_LIST (fun ths -> W (fun (_, w) ->
+    let is_bound = can (term_match [] `abs (ival (x:N word)) <= y:int`) w in
+    let coeff_tm =
+      if is_bound then rand (rand (lhand w)) else rand (lhand (rator w)) in
+    let full = GEN_CONGBOUND_RULE ths coeff_tm in
+    if is_bound
+    then MP_TAC (CONJUNCT2 full) THEN INT_ARITH_TAC
+    else MP_TAC (CONJUNCT1 full) THEN
+         REWRITE_TAC[GSYM INT_REM_EQ] THEN CONV_TAC INT_REM_DOWN_CONV THEN
+         MATCH_MP_TAC EQ_IMP THEN AP_TERM_TAC THEN AP_THM_TAC THEN
+         AP_TERM_TAC THEN CONV_TAC INT_RING))
 );;
 
 let MLKEM_BASEMUL_K2_NOIBT_SUBROUTINE_CORRECT = prove(
@@ -1058,42 +1239,41 @@ let MLKEM_BASEMUL_K2_NOIBT_SUBROUTINE_CORRECT = prove(
                              (word_add src2t (word (256 + 32*j + 2*i)))) s = dz1 i j))
               (\s. read RIP s = returnaddress /\
                    read RSP s = word_add stackpointer (word 8) /\
-                   (!i. i < 16 ==> !j. j < 4
-                        ==> (let j' = 2*j in
-                              (abs(ival(a0 i j')) <= &2 pow 12  /\
-                               abs(ival(b0 i j')) <= &2 pow 12  /\
-                               abs(ival(a1 i j')) <= &2 pow 12  /\
-                               abs(ival(b1 i j')) <= &2 pow 12
-                               ==>
-                               (ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)
-                                ==
-                                pmulaccred0 (ival (a0 i j')) (ival (b0 i j')) (ival (c0 i j')) (ival (d0 i j')) (ival (dz0 i j'))
-                                            (ival (a1 i j')) (ival (b1 i j')) (ival (c1 i j')) (ival (d1 i j')) (ival (dz1 i j'))
-                               ) (mod &3329)))) /\
-
-                   (!i. i < 16 ==> !j. j < 4
-                        ==> (let j' = 2*j+1 in
-                              (abs(ival(a0 i j')) <= &2 pow 12  /\
-                               abs(ival(b0 i j')) <= &2 pow 12  /\
-                               abs(ival(a1 i j')) <= &2 pow 12  /\
-                               abs(ival(b1 i j')) <= &2 pow 12
-                               ==>
-                               (ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)
-                                ==
-                                pmulaccred0_odd (ival (a0 i j')) (ival (b0 i j')) (ival (c0 i j')) (ival (d0 i j')) (ival (dz0 i j'))
-                                            (ival (a1 i j')) (ival (b1 i j')) (ival (c1 i j')) (ival (d1 i j')) (ival (dz1 i j'))
-                               ) (mod &3329)))) /\
-
-                   (!i. i < 16 ==> !j. j < 8
+                   ((!i. i < 16 ==> !j. j < 8
                         ==> abs(ival(a0 i j)) <= &2 pow 12  /\
                             abs(ival(b0 i j)) <= &2 pow 12  /\
                             abs(ival(a1 i j)) <= &2 pow 12  /\
-                            abs(ival(b1 i j)) <= &2 pow 12
-                        ==> (ival (read(memory :> bytes16 (word_add dst (word (64*j + 32 + 2*i)))) s)
-                             ==
-                             pmulaccred1 (ival (a0 i j)) (ival (b0 i j)) (ival (c0 i j)) (ival (d0 i j)) (ival (dz0 i j))
-                                         (ival (a1 i j)) (ival (b1 i j)) (ival (c1 i j)) (ival (d1 i j)) (ival (dz1 i j))
-                            ) (mod &3329)))
+                            abs(ival(b1 i j)) <= &2 pow 12  /\
+                            abs(ival(c0 i j)) <= &8 * &3329 /\
+                            abs(ival(d0 i j)) <= &8 * &3329 /\
+                            abs(ival(c1 i j)) <= &8 * &3329 /\
+                            abs(ival(d1 i j)) <= &8 * &3329 /\
+                            abs(ival(dz0 i j)) <= &3329 /\
+                            abs(ival(dz1 i j)) <= &3329)
+                    ==>
+                    (!i. i < 16 ==> !j. j < 4
+                          ==> (let j' = 2*j in
+                                (ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)
+                                 ==
+                                 pmulaccred0 (ival (a0 i j')) (ival (b0 i j')) (ival (c0 i j')) (ival (d0 i j')) (ival (dz0 i j'))
+                                             (ival (a1 i j')) (ival (b1 i j')) (ival (c1 i j')) (ival (d1 i j')) (ival (dz1 i j'))
+                                ) (mod &3329) /\
+                                abs(ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)) <= &6657)) /\
+                    (!i. i < 16 ==> !j. j < 4
+                          ==> (let j' = 2*j+1 in
+                                (ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)
+                                 ==
+                                 pmulaccred0_odd (ival (a0 i j')) (ival (b0 i j')) (ival (c0 i j')) (ival (d0 i j')) (ival (dz0 i j'))
+                                                 (ival (a1 i j')) (ival (b1 i j')) (ival (c1 i j')) (ival (d1 i j')) (ival (dz1 i j'))
+                                ) (mod &3329) /\
+                                abs(ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)) <= &6657)) /\
+                    (!i. i < 16 ==> !j. j < 8
+                          ==> (ival (read(memory :> bytes16 (word_add dst (word (64*j + 32 + 2*i)))) s)
+                               ==
+                               pmulaccred1 (ival (a0 i j)) (ival (b0 i j)) (ival (c0 i j)) (ival (d0 i j)) (ival (dz0 i j))
+                                           (ival (a1 i j)) (ival (b1 i j)) (ival (c1 i j)) (ival (d1 i j)) (ival (dz1 i j))
+                              ) (mod &3329) /\
+                              abs(ival (read(memory :> bytes16 (word_add dst (word (64*j + 32 + 2*i)))) s)) <= &6657)))
               (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
                MAYCHANGE [memory :> bytes(dst, 512)])`,
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
@@ -1151,42 +1331,41 @@ let MLKEM_BASEMUL_K2_SUBROUTINE_CORRECT = prove(
                              (word_add src2t (word (256 + 32*j + 2*i)))) s = dz1 i j))
               (\s. read RIP s = returnaddress /\
                    read RSP s = word_add stackpointer (word 8) /\
-                   (!i. i < 16 ==> !j. j < 4
-                        ==> (let j' = 2*j in
-                              (abs(ival(a0 i j')) <= &2 pow 12  /\
-                               abs(ival(b0 i j')) <= &2 pow 12  /\
-                               abs(ival(a1 i j')) <= &2 pow 12  /\
-                               abs(ival(b1 i j')) <= &2 pow 12
-                               ==>
-                               (ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)
-                                ==
-                                pmulaccred0 (ival (a0 i j')) (ival (b0 i j')) (ival (c0 i j')) (ival (d0 i j')) (ival (dz0 i j'))
-                                            (ival (a1 i j')) (ival (b1 i j')) (ival (c1 i j')) (ival (d1 i j')) (ival (dz1 i j'))
-                               ) (mod &3329)))) /\
-
-                   (!i. i < 16 ==> !j. j < 4
-                        ==> (let j' = 2*j+1 in
-                              (abs(ival(a0 i j')) <= &2 pow 12  /\
-                               abs(ival(b0 i j')) <= &2 pow 12  /\
-                               abs(ival(a1 i j')) <= &2 pow 12  /\
-                               abs(ival(b1 i j')) <= &2 pow 12
-                               ==>
-                               (ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)
-                                ==
-                                pmulaccred0_odd (ival (a0 i j')) (ival (b0 i j')) (ival (c0 i j')) (ival (d0 i j')) (ival (dz0 i j'))
-                                            (ival (a1 i j')) (ival (b1 i j')) (ival (c1 i j')) (ival (d1 i j')) (ival (dz1 i j'))
-                               ) (mod &3329)))) /\
-
-                   (!i. i < 16 ==> !j. j < 8
+                   ((!i. i < 16 ==> !j. j < 8
                         ==> abs(ival(a0 i j)) <= &2 pow 12  /\
                             abs(ival(b0 i j)) <= &2 pow 12  /\
                             abs(ival(a1 i j)) <= &2 pow 12  /\
-                            abs(ival(b1 i j)) <= &2 pow 12
-                        ==> (ival (read(memory :> bytes16 (word_add dst (word (64*j + 32 + 2*i)))) s)
-                             ==
-                             pmulaccred1 (ival (a0 i j)) (ival (b0 i j)) (ival (c0 i j)) (ival (d0 i j)) (ival (dz0 i j))
-                                         (ival (a1 i j)) (ival (b1 i j)) (ival (c1 i j)) (ival (d1 i j)) (ival (dz1 i j))
-                            ) (mod &3329)))
+                            abs(ival(b1 i j)) <= &2 pow 12  /\
+                            abs(ival(c0 i j)) <= &8 * &3329 /\
+                            abs(ival(d0 i j)) <= &8 * &3329 /\
+                            abs(ival(c1 i j)) <= &8 * &3329 /\
+                            abs(ival(d1 i j)) <= &8 * &3329 /\
+                            abs(ival(dz0 i j)) <= &3329 /\
+                            abs(ival(dz1 i j)) <= &3329)
+                    ==>
+                    (!i. i < 16 ==> !j. j < 4
+                          ==> (let j' = 2*j in
+                                (ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)
+                                 ==
+                                 pmulaccred0 (ival (a0 i j')) (ival (b0 i j')) (ival (c0 i j')) (ival (d0 i j')) (ival (dz0 i j'))
+                                             (ival (a1 i j')) (ival (b1 i j')) (ival (c1 i j')) (ival (d1 i j')) (ival (dz1 i j'))
+                                ) (mod &3329) /\
+                                abs(ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)) <= &6657)) /\
+                    (!i. i < 16 ==> !j. j < 4
+                          ==> (let j' = 2*j+1 in
+                                (ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)
+                                 ==
+                                 pmulaccred0_odd (ival (a0 i j')) (ival (b0 i j')) (ival (c0 i j')) (ival (d0 i j')) (ival (dz0 i j'))
+                                                 (ival (a1 i j')) (ival (b1 i j')) (ival (c1 i j')) (ival (d1 i j')) (ival (dz1 i j'))
+                                ) (mod &3329) /\
+                                abs(ival (read(memory :> bytes16 (word_add dst (word (64*j' + 2*i)))) s)) <= &6657)) /\
+                    (!i. i < 16 ==> !j. j < 8
+                          ==> (ival (read(memory :> bytes16 (word_add dst (word (64*j + 32 + 2*i)))) s)
+                               ==
+                               pmulaccred1 (ival (a0 i j)) (ival (b0 i j)) (ival (c0 i j)) (ival (d0 i j)) (ival (dz0 i j))
+                                           (ival (a1 i j)) (ival (b1 i j)) (ival (c1 i j)) (ival (d1 i j)) (ival (dz1 i j))
+                              ) (mod &3329) /\
+                              abs(ival (read(memory :> bytes16 (word_add dst (word (64*j + 32 + 2*i)))) s)) <= &6657)))
               (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
                MAYCHANGE [memory :> bytes(dst, 512)])`,
   MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_BASEMUL_K2_NOIBT_SUBROUTINE_CORRECT));;
