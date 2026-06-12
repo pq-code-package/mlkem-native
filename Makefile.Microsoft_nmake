@@ -1,14 +1,43 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-CFLAGS = /nologo /O2 /Imlkem /Imlkem/src /Imlkem/src/fips202 /Imlkem/src/fips202/native /Imlkem/src/sys /Imlkem/src/native
-
-OBJ_FILES = .\mlkem\*.obj \
-            .\mlkem\fips202\*.obj
+CFLAGS_BASE = /nologo /O2 /Imlkem /Imlkem/src /Imlkem/src/fips202 /Imlkem/src/fips202/native /Imlkem/src/sys /Imlkem/src/native
 
 BUILD_DIR = test\build
 MLKEM512_BUILD_DIR = $(BUILD_DIR)\mlkem512
 MLKEM768_BUILD_DIR = $(BUILD_DIR)\mlkem768
 MLKEM1024_BUILD_DIR = $(BUILD_DIR)\mlkem1024
+
+# OPT=1 enables the native AArch64 backend: .asm sources are preprocessed
+# with cl /EP and assembled with armasm64. Only supported when targeting
+# ARM64.
+!IFNDEF OPT
+OPT = 0
+!ENDIF
+
+!IF "$(OPT)" == "1"
+CFLAGS = $(CFLAGS_BASE) /DMLK_CONFIG_USE_NATIVE_BACKEND_ARITH /DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
+ASM_PP_FLAGS = /D__ASSEMBLER__ /DMLK_ASM_ARMASM /EP /TC
+NATIVE_OBJ_512 = $(MLKEM512_BUILD_DIR)\mlkem\native\*.obj $(MLKEM512_BUILD_DIR)\mlkem\fips202\native\*.obj
+NATIVE_OBJ_768 = $(MLKEM768_BUILD_DIR)\mlkem\native\*.obj $(MLKEM768_BUILD_DIR)\mlkem\fips202\native\*.obj
+NATIVE_OBJ_1024 = $(MLKEM1024_BUILD_DIR)\mlkem\native\*.obj $(MLKEM1024_BUILD_DIR)\mlkem\fips202\native\*.obj
+NATIVE_ASM_OBJ_512 = $(MLKEM512_BUILD_DIR)\mlkem\native_asm\*.obj
+NATIVE_ASM_OBJ_768 = $(MLKEM768_BUILD_DIR)\mlkem\native_asm\*.obj
+NATIVE_ASM_OBJ_1024 = $(MLKEM1024_BUILD_DIR)\mlkem\native_asm\*.obj
+NATIVE_DEPS_512 = $(NATIVE_OBJ_512) native_asm_512
+NATIVE_DEPS_768 = $(NATIVE_OBJ_768) native_asm_768
+NATIVE_DEPS_1024 = $(NATIVE_OBJ_1024) native_asm_1024
+!ELSE
+CFLAGS = $(CFLAGS_BASE)
+NATIVE_OBJ_512 =
+NATIVE_OBJ_768 =
+NATIVE_OBJ_1024 =
+NATIVE_ASM_OBJ_512 =
+NATIVE_ASM_OBJ_768 =
+NATIVE_ASM_OBJ_1024 =
+NATIVE_DEPS_512 =
+NATIVE_DEPS_768 =
+NATIVE_DEPS_1024 =
+!ENDIF
 
 OBJ_FILES_512 = $(MLKEM512_BUILD_DIR)\mlkem\*.obj \
                 $(MLKEM512_BUILD_DIR)\mlkem\fips202\*.obj
@@ -16,11 +45,6 @@ OBJ_FILES_768 = $(MLKEM768_BUILD_DIR)\mlkem\*.obj \
                 $(MLKEM768_BUILD_DIR)\mlkem\fips202\*.obj
 OBJ_FILES_1024 = $(MLKEM1024_BUILD_DIR)\mlkem\*.obj \
                  $(MLKEM1024_BUILD_DIR)\mlkem\fips202\*.obj
-
-# NOTE: We currently only build code for non-opt code, as we haven't yet made the assembly compatible on Windows
-!IFNDEF OPT
-OPT = 0
-!ENDIF
 
 {test/notrandombytes}.c{$(BUILD_DIR)\randombytes}.obj::
 	@if NOT EXIST $(BUILD_DIR)\randombytes mkdir $(BUILD_DIR)\randombytes
@@ -35,6 +59,18 @@ OPT = 0
     @if NOT EXIST $(MLKEM512_BUILD_DIR)\mlkem\fips202 mkdir $(MLKEM512_BUILD_DIR)\mlkem\fips202
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\mlkem\fips202\ $<
 
+{mlkem\src\native\aarch64\src}.c{$(MLKEM512_BUILD_DIR)\mlkem\native}.obj::
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\mlkem\native mkdir $(MLKEM512_BUILD_DIR)\mlkem\native
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\mlkem\native\ $<
+
+{mlkem\src\fips202\native\aarch64\src}.c{$(MLKEM512_BUILD_DIR)\mlkem\fips202\native}.obj::
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\mlkem\fips202\native mkdir $(MLKEM512_BUILD_DIR)\mlkem\fips202\native
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\mlkem\fips202\native\ $<
+
+native_asm_512:
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\mlkem\native_asm mkdir $(MLKEM512_BUILD_DIR)\mlkem\native_asm
+    for %f in (mlkem\src\native\aarch64\src\*.asm mlkem\src\fips202\native\aarch64\src\*.asm) do @( $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 $(ASM_PP_FLAGS) %f > $(MLKEM512_BUILD_DIR)\mlkem\native_asm\%~nf.i && armasm64 -nologo $(MLKEM512_BUILD_DIR)\mlkem\native_asm\%~nf.i -o $(MLKEM512_BUILD_DIR)\mlkem\native_asm\%~nf.obj )
+
 {test\src}.c{$(MLKEM512_BUILD_DIR)\test}.obj::
     @if NOT EXIST $(MLKEM512_BUILD_DIR)\test mkdir $(MLKEM512_BUILD_DIR)\test
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\test\ $<
@@ -48,6 +84,18 @@ OPT = 0
     @if NOT EXIST $(MLKEM768_BUILD_DIR)\mlkem\fips202 mkdir $(MLKEM768_BUILD_DIR)\mlkem\fips202
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\mlkem\fips202\ $<
 
+{mlkem\src\native\aarch64\src}.c{$(MLKEM768_BUILD_DIR)\mlkem\native}.obj::
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\mlkem\native mkdir $(MLKEM768_BUILD_DIR)\mlkem\native
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\mlkem\native\ $<
+
+{mlkem\src\fips202\native\aarch64\src}.c{$(MLKEM768_BUILD_DIR)\mlkem\fips202\native}.obj::
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\mlkem\fips202\native mkdir $(MLKEM768_BUILD_DIR)\mlkem\fips202\native
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\mlkem\fips202\native\ $<
+
+native_asm_768:
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\mlkem\native_asm mkdir $(MLKEM768_BUILD_DIR)\mlkem\native_asm
+    for %f in (mlkem\src\native\aarch64\src\*.asm mlkem\src\fips202\native\aarch64\src\*.asm) do @( $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 $(ASM_PP_FLAGS) %f > $(MLKEM768_BUILD_DIR)\mlkem\native_asm\%~nf.i && armasm64 -nologo $(MLKEM768_BUILD_DIR)\mlkem\native_asm\%~nf.i -o $(MLKEM768_BUILD_DIR)\mlkem\native_asm\%~nf.obj )
+
 {test\src}.c{$(MLKEM768_BUILD_DIR)\test}.obj::
     @if NOT EXIST $(MLKEM768_BUILD_DIR)\test mkdir $(MLKEM768_BUILD_DIR)\test
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\test\ $<
@@ -60,6 +108,18 @@ OPT = 0
 {mlkem\src\fips202}.c{$(MLKEM1024_BUILD_DIR)\mlkem\fips202}.obj::
     @if NOT EXIST $(MLKEM1024_BUILD_DIR)\mlkem\fips202 mkdir $(MLKEM1024_BUILD_DIR)\mlkem\fips202
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\mlkem\fips202\ $<
+
+{mlkem\src\native\aarch64\src}.c{$(MLKEM1024_BUILD_DIR)\mlkem\native}.obj::
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\mlkem\native mkdir $(MLKEM1024_BUILD_DIR)\mlkem\native
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\mlkem\native\ $<
+
+{mlkem\src\fips202\native\aarch64\src}.c{$(MLKEM1024_BUILD_DIR)\mlkem\fips202\native}.obj::
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\mlkem\fips202\native mkdir $(MLKEM1024_BUILD_DIR)\mlkem\fips202\native
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\mlkem\fips202\native\ $<
+
+native_asm_1024:
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\mlkem\native_asm mkdir $(MLKEM1024_BUILD_DIR)\mlkem\native_asm
+    for %f in (mlkem\src\native\aarch64\src\*.asm mlkem\src\fips202\native\aarch64\src\*.asm) do @( $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 $(ASM_PP_FLAGS) %f > $(MLKEM1024_BUILD_DIR)\mlkem\native_asm\%~nf.i && armasm64 -nologo $(MLKEM1024_BUILD_DIR)\mlkem\native_asm\%~nf.i -o $(MLKEM1024_BUILD_DIR)\mlkem\native_asm\%~nf.obj )
 
 {test\src}.c{$(MLKEM1024_BUILD_DIR)\test}.obj::
     @if NOT EXIST $(MLKEM1024_BUILD_DIR)\test mkdir $(MLKEM1024_BUILD_DIR)\test
@@ -81,34 +141,34 @@ OPT = 0
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\test\acvp\ $<
 
 # compile functional test for mlkem512
-test_mlkem512: $(OBJ_FILES_512) $(MLKEM512_BUILD_DIR)\test\test_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+test_mlkem512: $(OBJ_FILES_512) $(NATIVE_DEPS_512) $(MLKEM512_BUILD_DIR)\test\test_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
     @if NOT EXIST $(MLKEM512_BUILD_DIR)\bin mkdir $(MLKEM512_BUILD_DIR)\bin
-    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /Fe$(MLKEM512_BUILD_DIR)\bin\test_mlkem512 $** /link
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /Fe$(MLKEM512_BUILD_DIR)\bin\test_mlkem512 $(OBJ_FILES_512) $(NATIVE_OBJ_512) $(NATIVE_ASM_OBJ_512) $(MLKEM512_BUILD_DIR)\test\test_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj /link
 
 # compile functional test for mlkem768
-test_mlkem768: $(OBJ_FILES_768) $(MLKEM768_BUILD_DIR)\test\test_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+test_mlkem768: $(OBJ_FILES_768) $(NATIVE_DEPS_768) $(MLKEM768_BUILD_DIR)\test\test_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
     @if NOT EXIST $(MLKEM768_BUILD_DIR)\bin mkdir $(MLKEM768_BUILD_DIR)\bin
-    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /Fe$(MLKEM768_BUILD_DIR)\bin\test_mlkem768 $** /link
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /Fe$(MLKEM768_BUILD_DIR)\bin\test_mlkem768 $(OBJ_FILES_768) $(NATIVE_OBJ_768) $(NATIVE_ASM_OBJ_768) $(MLKEM768_BUILD_DIR)\test\test_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj /link
 
 # compile functional test for mlkem1024
-test_mlkem1024: $(OBJ_FILES_1024) $(MLKEM1024_BUILD_DIR)\test\test_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+test_mlkem1024: $(OBJ_FILES_1024) $(NATIVE_DEPS_1024) $(MLKEM1024_BUILD_DIR)\test\test_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
     @if NOT EXIST $(MLKEM1024_BUILD_DIR)\bin mkdir $(MLKEM1024_BUILD_DIR)\bin
-    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /Fe$(MLKEM1024_BUILD_DIR)\bin\test_mlkem1024 $** /link
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /Fe$(MLKEM1024_BUILD_DIR)\bin\test_mlkem1024 $(OBJ_FILES_1024) $(NATIVE_OBJ_1024) $(NATIVE_ASM_OBJ_1024) $(MLKEM1024_BUILD_DIR)\test\test_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj /link
 
 # compile acvp test for mlkem512
-acvp_mlkem512: $(OBJ_FILES_512) $(MLKEM512_BUILD_DIR)\test\acvp\acvp_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+acvp_mlkem512: $(OBJ_FILES_512) $(NATIVE_DEPS_512) $(MLKEM512_BUILD_DIR)\test\acvp\acvp_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
     @if NOT EXIST $(MLKEM512_BUILD_DIR)\bin mkdir $(MLKEM512_BUILD_DIR)\bin
-    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /Fe$(MLKEM512_BUILD_DIR)\bin\acvp_mlkem512 $** /link
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /Fe$(MLKEM512_BUILD_DIR)\bin\acvp_mlkem512 $(OBJ_FILES_512) $(NATIVE_OBJ_512) $(NATIVE_ASM_OBJ_512) $(MLKEM512_BUILD_DIR)\test\acvp\acvp_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj /link
 
 # compile acvp test for mlkem768
-acvp_mlkem768: $(OBJ_FILES_768) $(MLKEM768_BUILD_DIR)\test\acvp\acvp_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+acvp_mlkem768: $(OBJ_FILES_768) $(NATIVE_DEPS_768) $(MLKEM768_BUILD_DIR)\test\acvp\acvp_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
     @if NOT EXIST $(MLKEM768_BUILD_DIR)\bin mkdir $(MLKEM768_BUILD_DIR)\bin
-    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /Fe$(MLKEM768_BUILD_DIR)\bin\acvp_mlkem768 $** /link
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /Fe$(MLKEM768_BUILD_DIR)\bin\acvp_mlkem768 $(OBJ_FILES_768) $(NATIVE_OBJ_768) $(NATIVE_ASM_OBJ_768) $(MLKEM768_BUILD_DIR)\test\acvp\acvp_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj /link
 
 # compile acvp test for mlkem1024
-acvp_mlkem1024: $(OBJ_FILES_1024) $(MLKEM1024_BUILD_DIR)\test\acvp\acvp_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+acvp_mlkem1024: $(OBJ_FILES_1024) $(NATIVE_DEPS_1024) $(MLKEM1024_BUILD_DIR)\test\acvp\acvp_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
     @if NOT EXIST $(MLKEM1024_BUILD_DIR)\bin mkdir $(MLKEM1024_BUILD_DIR)\bin
-    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /Fe$(MLKEM1024_BUILD_DIR)\bin\acvp_mlkem1024 $** /link
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /Fe$(MLKEM1024_BUILD_DIR)\bin\acvp_mlkem1024 $(OBJ_FILES_1024) $(NATIVE_OBJ_1024) $(NATIVE_ASM_OBJ_1024) $(MLKEM1024_BUILD_DIR)\test\acvp\acvp_mlkem.obj $(BUILD_DIR)\randombytes\notrandombytes.obj /link
 
 acvp: acvp_mlkem512 acvp_mlkem768 acvp_mlkem1024
 

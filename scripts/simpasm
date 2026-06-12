@@ -75,6 +75,48 @@ def patchup_disasm(asm, cfify=False):
     return list(gen(asm))
 
 
+# Translates a simplified (flat) GAS assembly file as produced by simplify()
+# into armasm64 syntax for use with the MSVC toolchain (cl /EP + armasm64).
+# Labels must be in column 0 without a trailing colon; directives must be
+# indented. Preprocessor directives and C comments are kept; they are
+# resolved by `cl /EP` before the file reaches armasm64.
+def translate_armasm(asm, asm_input):
+    indentation = 8
+
+    def gen(asm):
+        yield "/*"
+        yield " * WARNING: This file is auto-derived from the mlkem-native source file"
+        yield f" *   {asm_input} using scripts/simpasm --translate-armasm. Do not modify it directly."
+        yield " */"
+        for line in asm:
+            stripped = line.strip()
+            # Drop CFI directives; armasm64 has no DWARF CFI support
+            if stripped.startswith(".cfi_"):
+                continue
+            # Drop the ELF non-executable stack marker
+            if stripped.startswith(".section"):
+                continue
+            if stripped == ".text":
+                yield " " * indentation + "AREA |.text|,CODE,READONLY,ALIGN=2"
+                continue
+            # Section start alignment is covered by the AREA attributes
+            if stripped.startswith(".balign"):
+                continue
+            r = re.search(r"^\s*\.global\s+(.*)$", line)
+            if r is not None:
+                yield " " * indentation + "EXPORT " + r.group(1)
+                continue
+            # Re-format `label:` as colon-free label in column 0
+            r = re.search(r"^([a-zA-Z0-9_]+):\s*$", line)
+            if r is not None:
+                yield r.group(1)
+                continue
+            yield line
+        yield " " * indentation + "END"
+
+    return list(gen(asm))
+
+
 def find_header_footer(asm, filename):
     header_end_marker = "simpasm: header-end"
     footer_start_marker = "simpasm: footer-start"
@@ -443,6 +485,11 @@ def _main():
     parser.add_argument("--objdump", type=str, default="objdump")
     parser.add_argument("--strip", type=str, default="llvm-strip")
     parser.add_argument("--cflags", type=str)
+    parser.add_argument(
+        "--translate-armasm",
+        action="store_true",
+        help="Translate simplified assembly into armasm64 syntax (.asm)",
+    )
     parser.add_argument("--cfify", action="store_true", help="Apply CFI directives")
     parser.add_argument(
         "--arch",
@@ -476,6 +523,25 @@ def _main():
         logger.setLevel(logging.DEBUG)
     else:
         logger.setLevel(logging.INFO)
+
+    if args.translate_armasm is True:
+
+        def translate_file(asm_input, asm_output):
+            if asm_output is None:
+                asm_output = str(pathlib.Path(asm_input).with_suffix(".asm"))
+            with open(asm_input, "r") as f:
+                asm = f.read().split("\n")
+            translated = translate_armasm(asm, asm_input)
+            with open(asm_output, "w+") as f:
+                f.write("\n".join(translated) + "\n")
+            logger.info(f"Translated {asm_input} -> {asm_output} (armasm64)")
+
+        if args.input is not None:
+            translate_file(args.input, args.output)
+        if args.directory is not None:
+            for f in pathlib.Path(args.directory).glob("*.S"):
+                translate_file(f, None)
+        return
 
     if args.input is not None:
         simplify(logger, args, args.input, args.output)
