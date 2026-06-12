@@ -340,7 +340,7 @@ let poly_basemul_acc_montgomery_cached_k2_GOAL = `forall srcA srcB srcBt dst x0 
  (* Proof                                                                     *)
  (* ------------------------------------------------------------------------- *)
 
-let poly_basemul_acc_montgomery_cached_k2_SPEC = prove(poly_basemul_acc_montgomery_cached_k2_GOAL,
+let MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORRECT = prove(poly_basemul_acc_montgomery_cached_k2_GOAL,
      CONV_TAC LENGTH_SIMPLIFY_CONV THEN
      REWRITE_TAC [MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI;
        MODIFIABLE_SIMD_REGS;
@@ -410,7 +410,7 @@ let poly_basemul_acc_montgomery_cached_k2_SPEC = prove(poly_basemul_acc_montgome
 
 (* NOTE: This needs to be kept in sync with the CBMC spec in
  * mlkem/src/native/aarch64/src/arith_native_aarch64.h *)
-let MLKEM_BASEMUL_K2_SUBROUTINE_CORRECT = prove(
+let MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_SUBROUTINE_CORRECT = prove(
    `forall srcA srcB srcBt dst x0 y0 y0t x1 y1 y1t pc stackpointer returnaddress.
       aligned 16 stackpointer /\
       ALLPAIRS nonoverlapping
@@ -450,7 +450,7 @@ let MLKEM_BASEMUL_K2_SUBROUTINE_CORRECT = prove(
   REWRITE_TAC[fst poly_basemul_acc_montgomery_cached_k2_EXEC] THEN
   CONV_TAC TWEAK_CONV THEN
   ARM_ADD_RETURN_STACK_TAC ~pre_post_nsteps:(5,5) poly_basemul_acc_montgomery_cached_k2_EXEC
-     (REWRITE_RULE[fst poly_basemul_acc_montgomery_cached_k2_EXEC] (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV poly_basemul_acc_montgomery_cached_k2_SPEC)))
+     (REWRITE_RULE[fst poly_basemul_acc_montgomery_cached_k2_EXEC] (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORRECT)))
       `[D8; D9; D10; D11; D12; D13; D14; D15]` 64  THEN
    WORD_ARITH_TAC)
 ;;
@@ -466,10 +466,10 @@ needs "mlkem_native/aarch64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:false
     (assoc "mlkem_basemul_k2" subroutine_signatures)
-    MLKEM_BASEMUL_K2_SUBROUTINE_CORRECT
+    MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_SUBROUTINE_CORRECT
     poly_basemul_acc_montgomery_cached_k2_EXEC;;
 
-let MLKEM_BASEMUL_K2_SUBROUTINE_SAFE = time prove
+let MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e srcA srcB srcBt dst pc stackpointer returnaddress.
            aligned 16 stackpointer /\
