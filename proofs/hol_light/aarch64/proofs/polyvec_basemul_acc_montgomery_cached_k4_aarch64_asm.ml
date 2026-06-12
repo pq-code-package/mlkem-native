@@ -445,20 +445,29 @@ let basemul4_odd = define
               (!i. i < 128 ==> read(memory :> bytes16(word_add srcBt (word (768  + 2 * i)))) s = y3t i)
          )
          (\s. read PC s = word (pc + POLY_BASEMUL_ACC_MONTGOMERY_CACHED_K4_CORE_END) /\
-             ((!i. i < 256 ==> abs(ival(x0 i)) <= &2 pow 12 /\ abs(ival(x1 i)) <= &2 pow 12
-                                                            /\ abs(ival(x2 i)) <= &2 pow 12
-                                                            /\ abs(ival(x3 i)) <= &2 pow 12)
+             (((!i. i < 256 ==> abs(ival(x0 i)) <= &2 pow 12 /\ abs(ival(x1 i)) <= &2 pow 12
+                                                             /\ abs(ival(x2 i)) <= &2 pow 12
+                                                             /\ abs(ival(x3 i)) <= &2 pow 12
+                                                             /\ abs(ival(y0 i)) <= &8 * &3329
+                                                             /\ abs(ival(y1 i)) <= &8 * &3329
+                                                             /\ abs(ival(y2 i)) <= &8 * &3329
+                                                             /\ abs(ival(y3 i)) <= &8 * &3329) /\
+               (!i. i < 128 ==> abs(ival(y0t i)) <= &3329 /\ abs(ival(y1t i)) <= &3329
+                                                          /\ abs(ival(y2t i)) <= &3329
+                                                          /\ abs(ival(y3t i)) <= &3329))
                ==>
                (!i. i < 128 ==> (ival(read(memory :> bytes16(word_add dst (word (4 * i)))) s) ==
                                    basemul4_even (ival o x0) (ival o y0) (ival o y0t)
                                                  (ival o x1) (ival o y1) (ival o y1t)
                                                  (ival o x2) (ival o y2) (ival o y2t)
                                                  (ival o x3) (ival o y3) (ival o y3t) i) (mod &3329) /\
+                              abs(ival(read(memory :> bytes16(word_add dst (word (4 * i)))) s)) < BASEMUL_ACC_K4_BOUND /\
                               (ival(read(memory :> bytes16(word_add dst (word (4 * i + 2)))) s) ==
                                    basemul4_odd (ival o x0) (ival o y0)
                                                 (ival o x1) (ival o y1)
                                                 (ival o x2) (ival o y2)
-                                                (ival o x3) (ival o y3) i) (mod &3329))))
+                                                (ival o x3) (ival o y3) i) (mod &3329) /\
+                              abs(ival(read(memory :> bytes16(word_add dst (word (4 * i + 2)))) s)) < BASEMUL_ACC_K4_BOUND)))
          // Register and memory footprint
          (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
           MAYCHANGE [Q8; Q9; Q10; Q11; Q12; Q13; Q14; Q15] ,,
@@ -468,6 +477,24 @@ let basemul4_odd = define
    (* ------------------------------------------------------------------------- *)
    (* Proof                                                                     *)
    (* ------------------------------------------------------------------------- *)
+
+(* Dispatch on whether the current subgoal is a (mod &3329) congruence
+   or an abs(...) < BASEMUL_ACC_K4_BOUND bound; in either case the corresponding conjunct
+   from GEN_CONGBOUND_RULE supplies the proof. *)
+let DISCHARGE_CONGBOUND_OR_BOUND_TAC : tactic =
+  ASSUM_LIST (fun ths -> W (fun (_, w) ->
+    let bound_pat = `abs (ival (x:N word)) < y:int` in
+    let is_bound = can (term_match [] bound_pat) w in
+    let coeff_tm =
+      if is_bound then rand (rand (lhand w))
+      else rand (lhand (rator w)) in
+    let full = GEN_CONGBOUND_RULE ths coeff_tm in
+    if is_bound
+    then MP_TAC (CONJUNCT2 full) THEN REWRITE_TAC[BASEMUL_ACC_K4_BOUND] THEN INT_ARITH_TAC
+    else MP_TAC (CONJUNCT1 full) THEN
+         REWRITE_TAC [GSYM INT_REM_EQ] THEN CONV_TAC INT_REM_DOWN_CONV THEN
+         MATCH_MP_TAC EQ_IMP THEN AP_TERM_TAC THEN AP_THM_TAC THEN
+         AP_TERM_TAC THEN CONV_TAC INT_RING));;
 
   let poly_basemul_acc_montgomery_cached_k4_SPEC = prove(poly_basemul_acc_montgomery_cached_k4_GOAL,
         CONV_TAC LENGTH_SIMPLIFY_CONV THEN
@@ -530,11 +557,11 @@ let basemul4_odd = define
 
      (* Solve the congruence goals *)
 
-    ASSUM_LIST((fun ths -> W(MP_TAC o CONJUNCT1 o GEN_CONGBOUND_RULE ths o
-      rand o lhand o rator o snd))) THEN
-    REWRITE_TAC[GSYM INT_REM_EQ] THEN CONV_TAC INT_REM_DOWN_CONV THEN
-    MATCH_MP_TAC EQ_IMP THEN AP_TERM_TAC THEN AP_THM_TAC THEN AP_TERM_TAC THEN
-    CONV_TAC INT_RING
+    (* Each subgoal is either a (mod &3329) congruence on the output coefficient
+       or an abs(...) < BASEMUL_ACC_K4_BOUND bound on the same coefficient.
+       GEN_CONGBOUND_RULE returns a conjunction containing both, so we pick the
+       appropriate conjunct per goal shape. *)
+    DISCHARGE_CONGBOUND_OR_BOUND_TAC
    );;
 
   (* NOTE: This needs to be kept in sync with the CBMC spec in
@@ -570,20 +597,29 @@ let basemul4_odd = define
           (!i. i < 128 ==> read(memory :> bytes16(word_add srcBt (word (768  + 2 * i)))) s = y3t i)
         )
         (\s. read PC s = returnaddress /\
-             ((!i. i < 256 ==> abs(ival(x0 i)) <= &2 pow 12 /\ abs(ival(x1 i)) <= &2 pow 12
-                                                            /\ abs(ival(x2 i)) <= &2 pow 12
-                                                            /\ abs(ival(x3 i)) <= &2 pow 12)
+             (((!i. i < 256 ==> abs(ival(x0 i)) <= &2 pow 12 /\ abs(ival(x1 i)) <= &2 pow 12
+                                                             /\ abs(ival(x2 i)) <= &2 pow 12
+                                                             /\ abs(ival(x3 i)) <= &2 pow 12
+                                                             /\ abs(ival(y0 i)) <= &8 * &3329
+                                                             /\ abs(ival(y1 i)) <= &8 * &3329
+                                                             /\ abs(ival(y2 i)) <= &8 * &3329
+                                                             /\ abs(ival(y3 i)) <= &8 * &3329) /\
+               (!i. i < 128 ==> abs(ival(y0t i)) <= &3329 /\ abs(ival(y1t i)) <= &3329
+                                                          /\ abs(ival(y2t i)) <= &3329
+                                                          /\ abs(ival(y3t i)) <= &3329))
                ==>
                (!i. i < 128 ==> (ival(read(memory :> bytes16(word_add dst (word (4 * i)))) s) ==
                                    basemul4_even (ival o x0) (ival o y0) (ival o y0t)
                                                  (ival o x1) (ival o y1) (ival o y1t)
                                                  (ival o x2) (ival o y2) (ival o y2t)
                                                  (ival o x3) (ival o y3) (ival o y3t) i) (mod &3329) /\
+                              abs(ival(read(memory :> bytes16(word_add dst (word (4 * i)))) s)) < BASEMUL_ACC_K4_BOUND /\
                               (ival(read(memory :> bytes16(word_add dst (word (4 * i + 2)))) s) ==
                                    basemul4_odd (ival o x0) (ival o y0)
                                                 (ival o x1) (ival o y1)
                                                 (ival o x2) (ival o y2)
-                                                (ival o x3) (ival o y3) i) (mod &3329)))
+                                                (ival o x3) (ival o y3) i) (mod &3329) /\
+                              abs(ival(read(memory :> bytes16(word_add dst (word (4 * i + 2)))) s)) < BASEMUL_ACC_K4_BOUND))
         )
         // Register and memory footprint
         (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,

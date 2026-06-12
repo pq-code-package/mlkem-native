@@ -113,6 +113,19 @@ __contract__(
   assigns(memory_slice(r, MLKEM_POLYBYTES))
 );
 
+/* Output bounds for the basemul-accumulate routines.
+ *
+ * The AArch64 backend leaves the schoolbook accumulator unreduced, so the
+ * output bound grows with k.  Each value is an *exclusive* bound matching
+ * the array_abs_bound() convention (abs(r) < BOUND) and the same-named
+ * constant in the HOL Light specification, where the proof establishes
+ * abs(r) <= BOUND-1. */
+/* check-magic: off */
+#define MLK_BASEMUL_ACC_K2_BOUND 8324
+#define MLK_BASEMUL_ACC_K3_BOUND 11653
+#define MLK_BASEMUL_ACC_K4_BOUND 14982
+/* check-magic: on */
+
 #define mlk_polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm \
   MLK_NAMESPACE(polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm)
 void mlk_polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm(
@@ -127,7 +140,10 @@ __contract__(
     requires(memory_no_alias(b, sizeof(int16_t) * 2 * MLKEM_N))
     requires(memory_no_alias(b_cache, sizeof(int16_t) * 2 * (MLKEM_N / 2)))
     requires(array_abs_bound(a, 0, 2 * MLKEM_N, MLKEM_UINT12_LIMIT + 1))
+    requires(array_abs_bound(b, 0, 2 * MLKEM_N, 8 * MLKEM_Q))
+    requires(array_abs_bound(b_cache, 0, 2 * (MLKEM_N / 2), MLKEM_Q))
     assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+    ensures(array_abs_bound(r, 0, MLKEM_N, MLK_BASEMUL_ACC_K2_BOUND))
 );
 
 #define mlk_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm \
@@ -144,7 +160,10 @@ __contract__(
     requires(memory_no_alias(b, sizeof(int16_t) * 3 * MLKEM_N))
     requires(memory_no_alias(b_cache, sizeof(int16_t) * 3 * (MLKEM_N / 2)))
     requires(array_abs_bound(a, 0, 3 * MLKEM_N, MLKEM_UINT12_LIMIT + 1))
+    requires(array_abs_bound(b, 0, 3 * MLKEM_N, 8 * MLKEM_Q))
+    requires(array_abs_bound(b_cache, 0, 3 * (MLKEM_N / 2), MLKEM_Q))
     assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+    ensures(array_abs_bound(r, 0, MLKEM_N, MLK_BASEMUL_ACC_K3_BOUND))
 );
 
 #define mlk_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm \
@@ -161,7 +180,10 @@ __contract__(
     requires(memory_no_alias(b, sizeof(int16_t) * 4 * MLKEM_N))
     requires(memory_no_alias(b_cache, sizeof(int16_t) * 4 * (MLKEM_N / 2)))
     requires(array_abs_bound(a, 0, 4 * MLKEM_N, MLKEM_UINT12_LIMIT + 1))
+    requires(array_abs_bound(b, 0, 4 * MLKEM_N, 8 * MLKEM_Q))
+    requires(array_abs_bound(b_cache, 0, 4 * (MLKEM_N / 2), MLKEM_Q))
     assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
+    ensures(array_abs_bound(r, 0, MLKEM_N, MLK_BASEMUL_ACC_K4_BOUND))
 );
 
 #define mlk_rej_uniform_aarch64_asm MLK_NAMESPACE(rej_uniform_aarch64_asm)

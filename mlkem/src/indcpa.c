@@ -321,14 +321,23 @@ __contract__(
   requires(forall(k0, 0, MLKEM_K,
     forall(k1, 0, MLKEM_K,
       array_bound(a->vec[k0].vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT))))
-  assigns(memory_slice(out, sizeof(mlk_polyvec))))
+  requires(forall(k1, 0, MLKEM_K,
+     array_abs_bound(v->vec[k1].coeffs, 0, MLKEM_N, MLK_NTT_BOUND)))
+  requires(forall(k2, 0, MLKEM_K,
+     array_abs_bound(vc->vec[k2].coeffs, 0, MLKEM_N/2, MLKEM_Q)))
+  assigns(object_whole(out))
+  ensures(forall(k3, 0, MLKEM_K,
+    array_abs_bound(out->vec[k3].coeffs, 0, MLKEM_N, INT16_MAX/2))))
 {
   unsigned i;
   for (i = 0; i < MLKEM_K; i++)
   __loop__(
     assigns(i, memory_slice(out, sizeof(mlk_polyvec)))
     invariant(i <= MLKEM_K)
-    decreases(MLKEM_K - i))
+    invariant(forall(k, 0, i,
+                     array_abs_bound(out->vec[k].coeffs, 0, MLKEM_N, INT16_MAX/2)))
+    decreases(MLKEM_K - i)
+  )
   {
     mlk_polyvec_basemul_acc_montgomery_cached(&out->vec[i], &a->vec[i], v, vc);
   }

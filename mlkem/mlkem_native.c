@@ -543,6 +543,9 @@
 #undef MLK_USE_NATIVE_POLY_TOMONT
 #undef MLK_USE_NATIVE_REJ_UNIFORM
 /* mlkem/src/native/aarch64/src/arith_native_aarch64.h */
+#undef MLK_BASEMUL_ACC_K2_BOUND
+#undef MLK_BASEMUL_ACC_K3_BOUND
+#undef MLK_BASEMUL_ACC_K4_BOUND
 #undef MLK_NATIVE_AARCH64_SRC_ARITH_NATIVE_AARCH64_H
 #undef mlk_aarch64_invntt_zetas_layer12345
 #undef mlk_aarch64_invntt_zetas_layer67
