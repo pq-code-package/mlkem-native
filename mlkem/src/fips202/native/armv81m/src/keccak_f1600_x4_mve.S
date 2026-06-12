@@ -9,6 +9,9 @@
   Description: Armv8.1-M MVE implementation of batched (x4) Keccak-f[1600] permutation using bit-interleaved state
   Signature: void mlk_keccak_f1600_x4_mve_asm(void *state, void *tmpstate, const uint32_t *rc)
   ABI:
+    Architecture: armv81m
+    CallingConvention: AAPCS32
+    Features: [MVE]
     r0:
       type: buffer
       size_bytes: 800

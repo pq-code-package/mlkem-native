@@ -8,6 +8,8 @@
   Description: Run rejection sampling on uniform random bytes to generate uniform random integers mod q
   Signature: uint64_t mlk_rej_uniform_aarch64_asm(int16_t r[256], const uint8_t *buf, unsigned buflen, const uint8_t table[4096])
   ABI:
+    Architecture: aarch64
+    CallingConvention: AAPCS64
     x0:
       type: buffer
       size_bytes: 512
