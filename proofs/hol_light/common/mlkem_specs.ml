@@ -399,6 +399,26 @@ let ntt_montmul_sub = prove
   REWRITE_TAC[ntt_montmul] THEN CONV_TAC WORD_RULE);;
 
 (* ------------------------------------------------------------------------- *)
+(* Output bounds for the polyvec_basemul_acc_montgomery_cached routines.      *)
+(*                                                                            *)
+(* Each is an *exclusive* bound: an output coefficient r is proven to satisfy *)
+(*   abs(ival r) < BOUND                                                      *)
+(* which matches the CBMC array_abs_bound(r, .., BOUND) convention used in    *)
+(* the C contracts (array_abs_bound's bound argument is exclusive, see        *)
+(* mlkem/src/cbmc.h).  The same named constant therefore appears verbatim in  *)
+(* the C declaration of each routine.                                         *)
+(*                                                                            *)
+(* The x86 (AVX2) backend Barrett-reduces every output, giving a uniform      *)
+(* bound of 2*Q for all k.  The AArch64 backend leaves the schoolbook         *)
+(* accumulator unreduced, so its bound grows with k.                          *)
+
+let TWO_Q = new_definition `TWO_Q:int = &2 * &3329`;;             (* = 6658 *)
+
+let BASEMUL_ACC_K2_BOUND = new_definition `BASEMUL_ACC_K2_BOUND:int = &8324`;;
+let BASEMUL_ACC_K3_BOUND = new_definition `BASEMUL_ACC_K3_BOUND:int = &11653`;;
+let BASEMUL_ACC_K4_BOUND = new_definition `BASEMUL_ACC_K4_BOUND:int = &14982`;;
+
+(* ------------------------------------------------------------------------- *)
 (* Compression and decompression spec definitions (FIPS 203)                 *)
 (* ------------------------------------------------------------------------- *)
 

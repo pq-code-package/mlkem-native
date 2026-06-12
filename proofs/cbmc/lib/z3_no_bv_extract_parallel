@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+z3 rewriter.bv_le2extract=false parallel.enable=true "$@"
