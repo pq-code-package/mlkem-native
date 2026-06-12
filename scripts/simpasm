@@ -298,16 +298,42 @@ def simplify(logger, args, asm_input, asm_output=None):
         if args.preserve_preprocessor_directives is False:
             if platform.system() == "Darwin" and sym[0] == "_":
                 sym = sym[1:]
-            autogen_header += [
-                "#ifdef __APPLE__",
-                f".global _{sym}",
-                f"_{sym}:",
-                "#else",
-                f".global {sym}",
-                f"{sym}:",
-                "#endif",
-                "",
-            ]
+            # Apple platforms exist only on AArch64 and x86_64; on those
+            # arches Mach-O wants the symbol with a leading underscore, so
+            # we wrap the label in #ifdef __APPLE__. On ppc64le and
+            # armv81m there is no Apple platform, so the ELF form is
+            # unconditional - matches the dev-side MLK_ASM_FN_SYMBOL
+            # behaviour and keeps the standalone exports lean.
+            #
+            # On Armv8.1-M (Thumb-2) the ELF linker also needs `.type sym,
+            # %function` before the label so it can set the LSB of branch
+            # relocations from C callers; without it ld emits "Unknown
+            # destination type (ARM/Thumb)" / "dangerous relocation". The
+            # other architectures' MLK_ASM_FN_SYMBOL macro (mlkem/src/
+            # common.h) intentionally does not emit .type, so we mirror
+            # that and only emit it on armv81m.
+            apple_capable = args.arch in ("aarch64", "x86_64")
+            type_elf = []
+            if args.arch == "armv81m":
+                type_elf = [f".type {sym}, %function"]
+            if apple_capable:
+                autogen_header += [
+                    "#ifdef __APPLE__",
+                    f".global _{sym}",
+                    f"_{sym}:",
+                    "#else",
+                    f".global {sym}",
+                    f"{sym}:",
+                    "#endif",
+                    "",
+                ]
+            else:
+                autogen_header += [
+                    f".global {sym}",
+                    *type_elf,
+                    f"{sym}:",
+                    "",
+                ]
             simplified_header = drop_preprocessor_directives(header)
             simplified_footer = []
         else:

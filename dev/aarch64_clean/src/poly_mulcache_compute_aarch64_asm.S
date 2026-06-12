@@ -8,6 +8,8 @@
   Description: Compute multiplication cache for polynomial
   Signature: void mlk_poly_mulcache_compute_aarch64_asm(int16_t cache[128], const int16_t mlk_poly[256], const int16_t zetas[128], const int16_t zetas_twisted[128])
   ABI:
+    Architecture: aarch64
+    CallingConvention: AAPCS64
     x0:
       type: buffer
       size_bytes: 256

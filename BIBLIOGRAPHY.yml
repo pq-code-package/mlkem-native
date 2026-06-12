@@ -206,3 +206,37 @@
   name: tiny_sha3
   author: Saarinen, Markku-Juhani O.
   url: https://github.com/mjosaarinen/tiny_sha3
+
+- id: AAPCS64
+  short: AAPCS64
+  name: "Procedure Call Standard for the Arm 64-bit Architecture (AAPCS64)"
+  author: Arm Limited
+  url: https://github.com/ARM-software/abi-aa/blob/main/aapcs64/aapcs64.rst
+
+- id: AAPCS32
+  short: AAPCS32
+  name: "Procedure Call Standard for the Arm Architecture (AAPCS32)"
+  author: Arm Limited
+  url: https://github.com/ARM-software/abi-aa/blob/main/aapcs32/aapcs32.rst
+
+- id: SysVAMD64
+  short: System V AMD64 psABI
+  name: "System V Application Binary Interface — AMD64 Architecture Processor Supplement"
+  author:
+  - Matz, Michael
+  - Hubička, Jan
+  - Jaeger, Andreas
+  - Mitchell, Mark
+  url: https://gitlab.com/x86-psABIs/x86-64-ABI
+
+- id: PPC64ELFv2
+  short: PPC64 ELFv2
+  name: "64-Bit ELFv2 ABI Specification — Power Architecture"
+  author: OpenPOWER Foundation
+  url: https://openpowerfoundation.org/specifications/64bitelfabi/
+
+- id: ArmARMv8M
+  short: Armv8-M ARM
+  name: "Armv8-M Architecture Reference Manual (DDI 0553)"
+  author: Arm Limited
+  url: https://developer.arm.com/documentation/ddi0553/latest/

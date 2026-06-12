@@ -17,7 +17,7 @@
 	clean quickcheck check-defined-CYCLES \
 	size_512 size_768 size_1024 size \
 	run_size_512 run_size_768 run_size_1024 run_size \
-	host_info
+	host_info abicheck run_abicheck
 
 SHELL := /usr/bin/env bash
 .DEFAULT_GOAL := build
@@ -46,7 +46,7 @@ quickcheck: test
 build: func kat acvp wycheproof
 	$(Q)echo "  Everything builds fine!"
 
-test: run_kat run_func run_acvp run_wycheproof run_unit run_alloc run_rng_fail
+test: run_kat run_func run_acvp run_wycheproof run_unit run_alloc run_rng_fail run_abicheck
 	$(Q)echo "  Everything checks fine!"
 
 # Detect available SHA256 command
@@ -250,6 +250,26 @@ run_size: \
 	run_size_512 \
 	run_size_768 \
 	run_size_1024
+
+# OPT=0: no-op (native asm only built with OPT=1).
+# Per-arch gating lives in the sources; x86_64 is also gated on
+# MLK_SYSV_ABI_SUPPORTED because the call stub is hand-written SysV asm.
+ABICHECK_SUPPORTED_ARCHS := aarch64 x86_64 ppc64le armv81m
+ifeq ($(OPT),1)
+ifeq ($(filter $(ABICHECK_ARCH),$(ABICHECK_SUPPORTED_ARCHS)),)
+abicheck:
+	$(error abicheck not supported on ARCH=$(ARCH) (ABICHECK_ARCH=$(ABICHECK_ARCH)); supported: $(ABICHECK_SUPPORTED_ARCHS))
+run_abicheck: abicheck
+else
+abicheck: $(ABICHECK_DIR)/bin/abicheck
+
+run_abicheck: abicheck
+	$(W) $(ABICHECK_DIR)/bin/abicheck
+endif
+else
+abicheck:
+run_abicheck:
+endif
 
 # Display host and compiler feature detection information
 # Shows which architectural features are supported by both the compiler and host CPU
