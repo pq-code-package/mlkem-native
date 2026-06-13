@@ -18,6 +18,9 @@
     },
     {
       "pattern": "^http://nvlpubs\\.nist\\.gov"
+    },
+    {
+      "pattern": "^https://eprint\\.iacr\\.org"
     }
   ]
 }
