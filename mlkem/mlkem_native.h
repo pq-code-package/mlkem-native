@@ -170,7 +170,7 @@
 #define MLK_API_NAMESPACE(sym) \
   MLK_API_CONCAT_UNDERSCORE(MLK_CONFIG_API_NAMESPACE_PREFIX, sym)
 
-#if defined(__GNUC__) || defined(clang)
+#if defined(__GNUC__) || defined(__clang__)
 #define MLK_API_MUST_CHECK_RETURN_VALUE __attribute__((warn_unused_result))
 #else
 #define MLK_API_MUST_CHECK_RETURN_VALUE
