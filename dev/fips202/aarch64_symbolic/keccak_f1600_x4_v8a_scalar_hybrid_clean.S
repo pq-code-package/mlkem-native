@@ -13,6 +13,8 @@
   Description: AArch64 hybrid scalar/vector clean implementation of Keccak-f[1600] permutation for four sequential states (clean version for optimization)
   Signature: void mlk_keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm(uint64_t state[100], const uint64_t rc[24])
   ABI:
+    Architecture: aarch64
+    CallingConvention: AAPCS64
     x0:
       type: buffer
       size_bytes: 800

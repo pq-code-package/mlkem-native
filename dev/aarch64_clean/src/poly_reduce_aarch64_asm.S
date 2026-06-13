@@ -8,6 +8,8 @@
   Description: Barrett reduction of polynomial coefficients
   Signature: void mlk_poly_reduce_aarch64_asm(int16_t p[256])
   ABI:
+    Architecture: aarch64
+    CallingConvention: AAPCS64
     x0:
       type: buffer
       size_bytes: 512
