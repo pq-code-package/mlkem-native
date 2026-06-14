@@ -20,17 +20,28 @@
 .global MLK_ASM_NAMESPACE(intt_ppc_asm)
 MLK_ASM_FN_SYMBOL(intt_ppc_asm)
 
+        .cfi_startproc
         stdu 1, -352(1)
+        .cfi_def_cfa 1, 352
         mflr 0
         std 14, 56(1)
+        .cfi_offset 14, -296
         std 15, 64(1)
+        .cfi_offset 15, -288
         std 16, 72(1)
+        .cfi_offset 16, -280
         std 17, 80(1)
+        .cfi_offset 17, -272
         std 18, 88(1)
+        .cfi_offset 18, -264
         std 19, 96(1)
+        .cfi_offset 19, -256
         std 20, 104(1)
+        .cfi_offset 20, -248
         std 21, 112(1)
+        .cfi_offset 21, -240
         std 22, 120(1)
+        .cfi_offset 22, -232
         li 10, 128
         li 11, 144
         li 12, 160
@@ -38,11 +49,17 @@ MLK_ASM_FN_SYMBOL(intt_ppc_asm)
         li 15, 192
         li 16, 208
         stxvd2x 52, 10, 1
+        .cfi_offset 1144, -224
         stxvd2x 53, 11, 1
+        .cfi_offset 1145, -208
         stxvd2x 54, 12, 1
+        .cfi_offset 1146, -192
         stxvd2x 55, 14, 1
+        .cfi_offset 1147, -176
         stxvd2x 56, 15, 1
+        .cfi_offset 1148, -160
         stxvd2x 57, 16, 1
+        .cfi_offset 1149, -144
         li 10, 224
         li 11, 240
         li 12, 256
@@ -50,11 +67,17 @@ MLK_ASM_FN_SYMBOL(intt_ppc_asm)
         li 15, 288
         li 16, 304
         stxvd2x 58, 10, 1
+        .cfi_offset 1150, -128
         stxvd2x 59, 11, 1
+        .cfi_offset 1151, -112
         stxvd2x 60, 12, 1
+        .cfi_offset 1152, -96
         stxvd2x 61, 14, 1
+        .cfi_offset 1153, -80
         stxvd2x 62, 15, 1
+        .cfi_offset 1154, -64
         stxvd2x 63, 16, 1
+        .cfi_offset 1155, -48
         lxvd2x 0, 0, 4
         xxlxor 35, 35, 35
         xxlor 3, 35, 35
@@ -84,7 +107,7 @@ MLK_ASM_FN_SYMBOL(intt_ppc_asm)
         mtctr 8
         xxlor 37, 0, 0
 
-intt_ppc_asm_Loopf:
+Lintt_ppc_asm_Loopf:
         lxvd2x 57, 0, 3
         lxvd2x 58, 10, 3
         lxvd2x 62, 11, 3
@@ -129,7 +152,7 @@ intt_ppc_asm_Loopf:
         stxvd2x 55, 17, 3
         stxvd2x 60, 18, 3
         addi 3, 3, 128
-        bdnz intt_ppc_asm_Loopf
+        bdnz Lintt_ppc_asm_Loopf
         addi 3, 3, -512
         nop
         nop
@@ -3182,11 +3205,17 @@ intt_ppc_asm_Loopf:
         li 15, 192
         li 16, 208
         lxvd2x 52, 10, 1
+        .cfi_restore 1144
         lxvd2x 53, 11, 1
+        .cfi_restore 1145
         lxvd2x 54, 12, 1
+        .cfi_restore 1146
         lxvd2x 55, 14, 1
+        .cfi_restore 1147
         lxvd2x 56, 15, 1
+        .cfi_restore 1148
         lxvd2x 57, 16, 1
+        .cfi_restore 1149
         li 10, 224
         li 11, 240
         li 12, 256
@@ -3194,23 +3223,40 @@ intt_ppc_asm_Loopf:
         li 15, 288
         li 16, 304
         lxvd2x 58, 10, 1
+        .cfi_restore 1150
         lxvd2x 59, 11, 1
+        .cfi_restore 1151
         lxvd2x 60, 12, 1
+        .cfi_restore 1152
         lxvd2x 61, 14, 1
+        .cfi_restore 1153
         lxvd2x 62, 15, 1
+        .cfi_restore 1154
         lxvd2x 63, 16, 1
+        .cfi_restore 1155
         ld 14, 56(1)
+        .cfi_restore 14
         ld 15, 64(1)
+        .cfi_restore 15
         ld 16, 72(1)
+        .cfi_restore 16
         ld 17, 80(1)
+        .cfi_restore 17
         ld 18, 88(1)
+        .cfi_restore 18
         ld 19, 96(1)
+        .cfi_restore 19
         ld 20, 104(1)
+        .cfi_restore 20
         ld 21, 112(1)
+        .cfi_restore 21
         ld 22, 120(1)
+        .cfi_restore 22
         mtlr 0
         addi 1, 1, 352
+        .cfi_def_cfa 1, 0
         blr
+        .cfi_endproc
 
 MLK_ASM_FN_SIZE(intt_ppc_asm)
 

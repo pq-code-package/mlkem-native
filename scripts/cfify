@@ -7,7 +7,7 @@ directives for stack unwinding.
 
 Reads assembly from stdin (or --input) and emits the same assembly with
 architecture-appropriate `.cfi_*` directives inserted at prologue and
-epilogue boundaries. Supports aarch64, x86_64, and armv81m targets.
+epilogue boundaries. Supports aarch64, x86_64, armv81m, and ppc64le targets.
 
 Invoked by scripts/simpasm when --cfify is passed; see that script for
 the round-trip validation that guards correctness."""
@@ -199,6 +199,45 @@ def armv81m_parse_reglist(reglist_str):
     return regs
 
 
+# -----------------------------------------------------------------------------
+# ppc64le module-scope constants and helpers
+# -----------------------------------------------------------------------------
+# PPC64 ELFv2: the NTT/INTT/reduce/tomont routines are leaf functions that
+# allocate a frame with `stdu 1, -N(1)`, hold LR in r0 across the body (no
+# call, so the return address stays in its default LR location and needs no
+# CFI), and spill a contiguous prefix of the callee-saved GPRs (r14-r31) plus
+# the callee-saved Altivec vectors (v20-v31). The vector spills use indexed
+# `stxvd2x VS, RA, 1` addressing, so the byte offset lives in the RA register
+# set by a preceding `li`; we track those immediates to recover the offset.
+PPC64LE_STDU_PATTERN = re.compile(r"(\s*)stdu\s+1,\s*-(\d+)\(1\)", re.IGNORECASE)
+PPC64LE_ADDI_SP_PATTERN = re.compile(r"(\s*)addi\s+1,\s*1,\s*(\d+)\s*$", re.IGNORECASE)
+PPC64LE_STD_PATTERN = re.compile(r"(\s*)std\s+(\d+),\s*(\d+)\(1\)", re.IGNORECASE)
+PPC64LE_LD_PATTERN = re.compile(r"(\s*)ld\s+(\d+),\s*(\d+)\(1\)", re.IGNORECASE)
+PPC64LE_LI_PATTERN = re.compile(r"(\s*)li\s+(\d+),\s*(-?\d+)\s*$", re.IGNORECASE)
+PPC64LE_STXVD2X_PATTERN = re.compile(
+    r"(\s*)stxvd2x\s+(\d+),\s*(\d+),\s*1\s*$", re.IGNORECASE
+)
+PPC64LE_LXVD2X_PATTERN = re.compile(
+    r"(\s*)lxvd2x\s+(\d+),\s*(\d+),\s*1\s*$", re.IGNORECASE
+)
+PPC64LE_BLR_PATTERN = re.compile(r"(\s*)blr\s*$", re.IGNORECASE)
+
+# DWARF register numbers: GPRs map to 0-31 directly; Altivec v0-v31 are
+# 1124-1155. A VSX register number 32-63 (as named by stxvd2x/lxvd2x) aliases
+# the Altivec register VR(n-32).
+PPC64LE_VR_DWARF_BASE = 1124
+PPC64LE_CALLEE_SAVED_GPR_LO = 14
+PPC64LE_CALLEE_SAVED_GPR_HI = 31
+
+
+def ppc64le_vsr_to_vr_dwarf(vsr):
+    """DWARF number of the Altivec VR aliased by VSX register `vsr`, or None
+    if `vsr` is not in the VR-aliased range (32-63)."""
+    if 32 <= vsr <= 63:
+        return PPC64LE_VR_DWARF_BASE + (vsr - 32)
+    return None
+
+
 def add_cfi_directives(text, arch):
     lines = text.split("\n")
     result = []
@@ -209,6 +248,11 @@ def add_cfi_directives(text, arch):
     # subq/addq adjustments are reflected in CFI only when applied to
     # the current CFA register.
     x86_64_cfa_reg = "rsp"
+
+    # ppc64le: frame size from `stdu 1, -N(1)` (CFA = r1 + N), and the most
+    # recent `li REG, IMM` immediates used to resolve indexed vector spills.
+    ppc64le_frame_size = 0
+    ppc64le_li_values = {}
 
     while i < len(lines):
         line = lines[i].rstrip()
@@ -524,6 +568,90 @@ def add_cfi_directives(text, arch):
                 i += 1
                 continue
 
+        elif arch == "ppc64le":
+            # Frame allocation: stdu 1, -N(1) sets CFA = r1 + N.
+            match = PPC64LE_STDU_PATTERN.match(line)
+            if match:
+                indent, size_str = match.groups()
+                ppc64le_frame_size = int(size_str)
+                result.append(line)
+                result.append(f"{indent}.cfi_def_cfa 1, {ppc64le_frame_size}")
+                i += 1
+                continue
+
+            # Track li REG, IMM to resolve the byte offsets of indexed vector
+            # spills (stxvd2x/lxvd2x use base+index addressing).
+            match = PPC64LE_LI_PATTERN.match(line)
+            if match:
+                ppc64le_li_values[match.group(2)] = int(match.group(3))
+                result.append(line)
+                i += 1
+                continue
+
+            # Callee-saved GPR spill: std RR, OFF(1).
+            match = PPC64LE_STD_PATTERN.match(line)
+            if match:
+                indent, reg_str, off_str = match.groups()
+                reg = int(reg_str)
+                result.append(line)
+                if PPC64LE_CALLEE_SAVED_GPR_LO <= reg <= PPC64LE_CALLEE_SAVED_GPR_HI:
+                    cfa_off = int(off_str) - ppc64le_frame_size
+                    result.append(f"{indent}.cfi_offset {reg}, {cfa_off}")
+                i += 1
+                continue
+
+            # Callee-saved GPR restore: ld RR, OFF(1).
+            match = PPC64LE_LD_PATTERN.match(line)
+            if match:
+                indent, reg_str, _ = match.groups()
+                reg = int(reg_str)
+                result.append(line)
+                if PPC64LE_CALLEE_SAVED_GPR_LO <= reg <= PPC64LE_CALLEE_SAVED_GPR_HI:
+                    result.append(f"{indent}.cfi_restore {reg}")
+                i += 1
+                continue
+
+            # Callee-saved vector spill: stxvd2x VS, RA, 1 (base = sp).
+            match = PPC64LE_STXVD2X_PATTERN.match(line)
+            if match:
+                indent, vsr_str, idx_reg = match.groups()
+                result.append(line)
+                dwarf = ppc64le_vsr_to_vr_dwarf(int(vsr_str))
+                if dwarf is not None and idx_reg in ppc64le_li_values:
+                    cfa_off = ppc64le_li_values[idx_reg] - ppc64le_frame_size
+                    result.append(f"{indent}.cfi_offset {dwarf}, {cfa_off}")
+                i += 1
+                continue
+
+            # Callee-saved vector restore: lxvd2x VS, RA, 1 (base = sp).
+            match = PPC64LE_LXVD2X_PATTERN.match(line)
+            if match:
+                indent, vsr_str, idx_reg = match.groups()
+                result.append(line)
+                dwarf = ppc64le_vsr_to_vr_dwarf(int(vsr_str))
+                if dwarf is not None and idx_reg in ppc64le_li_values:
+                    result.append(f"{indent}.cfi_restore {dwarf}")
+                i += 1
+                continue
+
+            # Frame deallocation: addi 1, 1, N restores CFA = r1 + 0.
+            match = PPC64LE_ADDI_SP_PATTERN.match(line)
+            if match:
+                indent = match.group(1)
+                result.append(line)
+                result.append(f"{indent}.cfi_def_cfa 1, 0")
+                i += 1
+                continue
+
+            # Function return: blr.
+            match = PPC64LE_BLR_PATTERN.match(line)
+            if match:
+                indent = match.group(1)
+                result.append(line)
+                result.append(f"{indent}.cfi_endproc")
+                i += 1
+                continue
+
         result.append(line)
         i += 1
 
@@ -543,7 +671,7 @@ def main():
     )
     parser.add_argument(
         "--arch",
-        choices=["aarch64", "x86_64", "armv81m"],
+        choices=["aarch64", "x86_64", "armv81m", "ppc64le"],
         default="aarch64",
         help="Target architecture (default: aarch64)",
     )

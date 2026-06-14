@@ -27,7 +27,9 @@
 .global MLK_ASM_NAMESPACE(poly_tomont_ppc_asm)
 MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
 
+        .cfi_startproc
         stdu 1, -320(1)
+        .cfi_def_cfa 1, 320
         mflr 0
         li 6, 128
         li 7, 144
@@ -37,20 +39,31 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
         li 11, 208
         li 12, 224
         stxvd2x 52, 6, 1
+        .cfi_offset 1144, -192
         stxvd2x 53, 7, 1
+        .cfi_offset 1145, -176
         stxvd2x 54, 8, 1
+        .cfi_offset 1146, -160
         stxvd2x 55, 9, 1
+        .cfi_offset 1147, -144
         stxvd2x 56, 10, 1
+        .cfi_offset 1148, -128
         stxvd2x 57, 11, 1
+        .cfi_offset 1149, -112
         stxvd2x 58, 12, 1
+        .cfi_offset 1150, -96
         li 6, 240
         li 7, 256
         li 8, 272
         li 9, 288
         stxvd2x 59, 6, 1
+        .cfi_offset 1151, -80
         stxvd2x 60, 7, 1
+        .cfi_offset 1152, -64
         stxvd2x 61, 8, 1
+        .cfi_offset 1153, -48
         stxvd2x 62, 9, 1
+        .cfi_offset 1154, -32
         li 6, 0
         li 7, 80
         li 8, 96
@@ -266,23 +279,36 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
         li 11, 208
         li 12, 224
         lxvd2x 52, 6, 1
+        .cfi_restore 1144
         lxvd2x 53, 7, 1
+        .cfi_restore 1145
         lxvd2x 54, 8, 1
+        .cfi_restore 1146
         lxvd2x 55, 9, 1
+        .cfi_restore 1147
         lxvd2x 56, 10, 1
+        .cfi_restore 1148
         lxvd2x 57, 11, 1
+        .cfi_restore 1149
         lxvd2x 58, 12, 1
+        .cfi_restore 1150
         li 6, 240
         li 7, 256
         li 8, 272
         li 9, 288
         lxvd2x 59, 6, 1
+        .cfi_restore 1151
         lxvd2x 60, 7, 1
+        .cfi_restore 1152
         lxvd2x 61, 8, 1
+        .cfi_restore 1153
         lxvd2x 62, 9, 1
+        .cfi_restore 1154
         mtlr 0
         addi 1, 1, 320
+        .cfi_def_cfa 1, 0
         blr
+        .cfi_endproc
 
 MLK_ASM_FN_SIZE(poly_tomont_ppc_asm)
 
