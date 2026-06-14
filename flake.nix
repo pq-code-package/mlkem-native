@@ -7,7 +7,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # TODO: revert to "github:NixOS/nixpkgs/nixos-unstable" once openocd-unstable
+    # is merged upstream (https://github.com/NixOS/nixpkgs). Points at the fork
+    # branch that adds the openocd-unstable package for the NUCLEO-N657X0-Q flow.
+    nixpkgs-unstable.url = "github:mkannwischer/nixpkgs/openocd-unstable";
 
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
@@ -98,7 +101,7 @@
           # arm-none-eabi-gcc + platform files from pqmx
           packages.m55-an547 = util.m55-an547;
           packages.avr-toolchain = util.avr-toolchain;
-          packages.st-openocd = util.st-openocd;
+          packages.openocd-unstable = pkgs-unstable.openocd-unstable;
           devShells.arm-embedded = util.mkShell {
             packages = builtins.attrValues
               {
@@ -109,7 +112,7 @@
           packages.nucleo-n657x0-q = util.nucleo-n657x0-q;
           devShells.nucleo-n657x0-q = util.mkShell {
             packages = builtins.attrValues ({
-              inherit (config.packages) linters nucleo-n657x0-q st-openocd;
+              inherit (config.packages) linters nucleo-n657x0-q openocd-unstable;
               inherit (pkgs) gcc-arm-embedded coreutils git libffi pkg-config;
             });
           };

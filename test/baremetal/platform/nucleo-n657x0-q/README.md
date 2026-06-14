@@ -115,16 +115,16 @@ documented below.
 ## Prerequisites
 
 - A NUCLEO-N657X0-Q connected over USB.
-- The board devshell, which provides `arm-none-eabi-gdb` and the pinned
-  `.#st-openocd` package:
+- The board devshell, which provides `arm-none-eabi-gdb` and the
+  `.#openocd-unstable` package:
 
 ```
 nix develop .#nucleo-n657x0-q
 ```
 
-The `.#st-openocd` package pins an upstream OpenOCD snapshot with native debug
-probe support and `target/stm32n6x.cfg`. Stock OpenOCD 0.12.0 is not sufficient
-for this board flow.
+The `.#openocd-unstable` package (nixpkgs' OpenOCD git snapshot) provides native
+debug probe support and `target/stm32n6x.cfg`. Stock OpenOCD 0.12.0 is not
+sufficient for this board flow.
 
 ## Build
 
