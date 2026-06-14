@@ -1,4 +1,26 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
+
+mlkem-native v1.2.0
+===================
+
+Release notes
+-------------
+
+mlkem-native v1.2.0 adds a new **PowerPC (ppc64le)** assembly backend and broadens portability of the existing
+backends: the x86_64 backend can now be used on Windows, the RISC-V backend compiles under C90, and a new
+Cortex-M33 baremetal target is tested. It also fixes a signed-shift undefined behavior on 16-bit-`int` targets
+and hardens the RISC-V backend against secret-dependent timing. Finally, the CBMC proofs are extended to
+establish loop termination for all functions except rejection sampling.
+
+What's New
+----------
+
+- **PowerPC (ppc64le) backend**: New VSX arithmetic backend (NTT, inverse NTT, `poly_reduce`, `poly_tomont`) for POWER8 and above, with automatic fallback to C on older targets. Thanks to IBM, and in particular Danny Tsen (@dannytsen) and Basil Hess (@bhess), for this contribution! ([#1677](https://github.com/pq-code-package/mlkem-native/pull/1677))
+- **Assurance**: CBMC now proves loop termination for all functions except rejection sampling. Thanks to Nicky Mouha (@nmouha) for making us aware of the absence of termination proofs. ([#1625](https://github.com/pq-code-package/mlkem-native/pull/1625))
+- **Verification tooling**: Bump CBMC to a development build that works around a Z3 soundness issue ([Z3#9550](https://github.com/Z3Prover/z3/issues/9550)) affecting the SMT solver used by the CBMC proofs. ([#1745](https://github.com/pq-code-package/mlkem-native/pull/1745))
+- **Portability**: the x86_64 assembly backend can now be used on Windows with compilers that support the SysV calling convention per function (GCC and Clang, via `__attribute__((sysv_abi))`) ([#1730](https://github.com/pq-code-package/mlkem-native/pull/1730)), the RISC-V backend compiles under C90 ([#1732](https://github.com/pq-code-package/mlkem-native/pull/1732)), and a new Cortex-M33 baremetal target is tested ([#1579](https://github.com/pq-code-package/mlkem-native/pull/1579)).
+- **Correctness / CT**: Fix signed-shift undefined behavior on 16-bit-`int` targets ([#1727](https://github.com/pq-code-package/mlkem-native/pull/1727)) and harden the RISC-V backend against secret-dependent timing ([#1732](https://github.com/pq-code-package/mlkem-native/pull/1732)).
+
 mlkem-native v1.1.0
 ====================
 
