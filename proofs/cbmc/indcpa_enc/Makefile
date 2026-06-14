@@ -10,7 +10,7 @@ HARNESS_FILE = indcpa_enc_harness
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
 PROOF_UID = mlk_indcpa_enc
 
-DEFINES +=
+DEFINES += -DMLK_CONFIG_ENABLE_MLKEM_BRAID
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
@@ -20,24 +20,14 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_indcpa_enc
-USE_FUNCTION_CONTRACTS = mlk_poly_frommsg
-USE_FUNCTION_CONTRACTS += mlk_gen_matrix
-USE_FUNCTION_CONTRACTS += mlk_enc_getnoise_eta1_eta2
-
-USE_FUNCTION_CONTRACTS += mlk_polyvec_ntt
-USE_FUNCTION_CONTRACTS += mlk_polyvec_mulcache_compute
-USE_FUNCTION_CONTRACTS += mlk_polyvec_basemul_acc_montgomery_cached
-USE_FUNCTION_CONTRACTS += mlk_polyvec_invntt_tomont
-USE_FUNCTION_CONTRACTS += mlk_poly_invntt_tomont
-USE_FUNCTION_CONTRACTS += mlk_polyvec_add
-USE_FUNCTION_CONTRACTS += mlk_poly_add
-USE_FUNCTION_CONTRACTS += mlk_polyvec_reduce
-USE_FUNCTION_CONTRACTS += mlk_poly_reduce
-USE_FUNCTION_CONTRACTS += mlk_polyvec_compress_du
-USE_FUNCTION_CONTRACTS += mlk_poly_compress_dv
-USE_FUNCTION_CONTRACTS += mlk_polyvec_frombytes
-USE_FUNCTION_CONTRACTS += mlk_matvec_mul
+USE_FUNCTION_CONTRACTS = mlk_indcpa_enc_u
+USE_FUNCTION_CONTRACTS += mlk_indcpa_enc_v
 USE_FUNCTION_CONTRACTS += mlk_zeroize
+
+# Suppress spurious warning for gen_matrix() not having loop contracts
+# by making it appear to be call-by-contract
+USE_FUNCTION_CONTRACTS += mlk_gen_matrix
+
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

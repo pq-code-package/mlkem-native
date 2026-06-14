@@ -79,6 +79,11 @@ jobs:
           echo "=== Patched extensions.bzl ==="
           cat third_party/mlkem_native/extensions.bzl
 
+      - name: Update work buffer sizes
+        run: |
+          cd "$PAVONA_DIR"
+          git apply "$GITHUB_WORKSPACE/integration/pavona/update-alloc-sizes.patch"
+
       - name: Patch functest to only test deterministic API
         run: |
           cd "$PAVONA_DIR"
