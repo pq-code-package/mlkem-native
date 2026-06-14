@@ -12,6 +12,7 @@ import argparse
 import os
 import re
 import sys
+import shutil
 import time
 import logging
 import subprocess
@@ -30,6 +31,127 @@ def dict2str(dict):
     for k, v in dict.items():
         s += f"{k}={v} "
     return s
+
+
+#
+# Cross-compilation presets.
+#
+# Each entry mirrors the per-arch settings hardcoded in
+# .github/actions/multi-functest/action.yml so that
+# `./scripts/tests <cmd> --cross <ARCH>` reproduces CI exactly.
+#
+# `cross_prefix` is load-bearing: test/mk/auto.mk derives ARCH and most per-arch
+# CFLAGS (e.g. -mavx2, -march=armv8.4-a+sha3, -march=rv64gcv) from it when AUTO=1
+# (the default). The cflags/ldflags/exec_wrapper entries below are only what CI
+# adds on top of that auto-detection (the -DMLK_FORCE_* defines for parity, plus
+# the bits auto.mk does not add, e.g. aarch64_be -static and ppc64le -mcpu=power8).
+#
+# The matching toolchain + QEMU come from the nix dev shell
+# `nix develop .#cross-<ARCH>`; this flag does not enter that shell for you.
+#
+# TODO: once proven, CI could consume this table via `--cross <arch>` to make
+# scripts/tests the single source of truth for these values.
+#
+CROSS_TARGETS = {
+    "x86_64": {
+        "cross_prefix": "x86_64-unknown-linux-gnu-",
+        "cflags": "-DMLK_FORCE_X86_64",
+        "ldflags": "",
+        "exec_wrapper": "qemu-x86_64",
+    },
+    "aarch64": {
+        "cross_prefix": "aarch64-unknown-linux-gnu-",
+        "cflags": "-DMLK_FORCE_AARCH64",
+        "ldflags": "",
+        "exec_wrapper": "qemu-aarch64",
+    },
+    "aarch64_be": {
+        "cross_prefix": "aarch64_be-none-linux-gnu-",
+        "cflags": "-static -DMLK_FORCE_AARCH64_EB",
+        "ldflags": "-static",
+        "exec_wrapper": "qemu-aarch64_be",
+    },
+    "ppc64le": {
+        "cross_prefix": "powerpc64le-unknown-linux-gnu-",
+        "cflags": "-DMLK_FORCE_PPC64LE -mcpu=power8",
+        "ldflags": "",
+        "exec_wrapper": "qemu-ppc64le -cpu power8",
+    },
+    "riscv64": {
+        "cross_prefix": "riscv64-unknown-linux-gnu-",
+        "cflags": "-DMLK_FORCE_RISCV64",
+        "ldflags": "",
+        "exec_wrapper": "qemu-riscv64 -cpu rv64,v=true,vlen=128",
+    },
+    "riscv32": {
+        "cross_prefix": "riscv32-unknown-linux-gnu-",
+        "cflags": "-DMLK_FORCE_RISCV32",
+        "ldflags": "",
+        "exec_wrapper": "qemu-riscv32",
+    },
+}
+
+
+def apply_cross_preset(args):
+    """Expand --cross <ARCH> into cross-prefix / cflags / ldflags / exec-wrapper.
+
+    Explicit flags win: cflags/ldflags from the preset are appended after the
+    user's value (matching the ordering in multi-functest/action.yml); cross-prefix
+    and exec-wrapper are only set when the user did not pass them.
+    """
+    # `--cross` lives on common_parser, so every subparser has it; guard anyway,
+    # mirroring the existing defensive defaults around parse_args().
+    arch = getattr(args, "cross", None)
+    if arch is None:
+        return
+
+    preset = CROSS_TARGETS[arch]
+
+    # cross-prefix is load-bearing (auto.mk derives ARCH from it), so error on a
+    # real conflict rather than silently building for the wrong target.
+    if args.cross_prefix not in ("", preset["cross_prefix"]):
+        sys.exit(
+            f"error: --cross {arch} sets --cross-prefix='{preset['cross_prefix']}', "
+            f"which conflicts with the explicit --cross-prefix='{args.cross_prefix}'. "
+            f"Drop one of them."
+        )
+    args.cross_prefix = preset["cross_prefix"]
+
+    # Merge cflags/ldflags: user value first, preset appended (CI ordering). This
+    # also lets a trailing user override win, e.g. --cflags=-mcpu=power7 after the
+    # preset's -mcpu=power8 (gcc honors the last -mcpu).
+    def _merge(user, extra):
+        parts = [p for p in (user or "", extra or "") if p != ""]
+        return " ".join(parts) if parts else None
+
+    args.cflags = _merge(args.cflags, preset["cflags"])
+    args.ldflags = _merge(args.ldflags, preset["ldflags"])
+
+    # exec-wrapper: only set when the user didn't pass one.
+    if args.exec_wrapper is None or args.exec_wrapper == "":
+        args.exec_wrapper = preset["exec_wrapper"]
+
+    # ISA feature flags (-mavx2 / -march=armv8.4-a+sha3 / -march=rv64gcv) come from
+    # test/mk/auto.mk when AUTO=1 (the default), matching CI. With --no-auto they are
+    # lost, so the OPT build for these arches may fail to assemble.
+    if not args.auto and arch in ("x86_64", "aarch64", "riscv64"):
+        print(
+            f"warning: --cross {arch} with --no-auto: arch ISA feature flags "
+            f"(e.g. -mavx2 / -march=...) are NOT added, so the OPT build may fail to "
+            f"assemble. Pass them via --cflags, or drop --no-auto.",
+            file=sys.stderr,
+        )
+
+    # Best-effort, non-fatal toolchain hint: the nix cross shells expose
+    # {prefix}gcc on PATH (config.mk resolves CC := $(CROSS_PREFIX)gcc).
+    cc = preset["cross_prefix"] + "gcc"
+    if shutil.which(cc) is None:
+        print(
+            f"warning: cross toolchain '{cc}' not found on PATH.\n"
+            f"         Enter the toolchain shell first, e.g.: "
+            f"nix develop .#cross-{arch}",
+            file=sys.stderr,
+        )
 
 
 def github_log(msg):
@@ -1093,6 +1215,17 @@ def cli():
         "-cp", "--cross-prefix", help="Cross prefix for compilation", default=""
     )
     common_parser.add_argument(
+        "--cross",
+        help=(
+            "Cross-compilation preset: sets --cross-prefix, --cflags, --ldflags and "
+            "--exec-wrapper to match CI for the chosen target. Enter the matching "
+            "toolchain shell first, e.g. `nix develop .#cross-aarch64`. Explicit flags "
+            "override the preset."
+        ),
+        choices=sorted(CROSS_TARGETS.keys()),
+        default=None,
+    )
+    common_parser.add_argument(
         "--cflags", help="Extra cflags to passed in (e.g. '-mcpu=cortex-a72')"
     )
     common_parser.add_argument(
@@ -1543,6 +1676,8 @@ def cli():
         args.mac_taskpolicy = None
     if not hasattr(args, "l"):
         args.l = None
+
+    apply_cross_preset(args)
 
     os.chdir(os.path.join(os.path.dirname(__file__), ".."))
 
