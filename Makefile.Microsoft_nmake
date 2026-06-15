@@ -2,6 +2,10 @@
 
 CFLAGS = /nologo /O2 /Imlkem /Imlkem/src /Imlkem/src/fips202 /Imlkem/src/fips202/native /Imlkem/src/sys /Imlkem/src/native
 
+ALLOC_CFLAGS = \
+    $(CFLAGS) \
+    /D MLK_CONFIG_FILE="\"../test/configs/test_alloc_config.h\""
+
 OBJ_FILES = .\mlkem\*.obj \
             .\mlkem\fips202\*.obj
 
@@ -16,6 +20,13 @@ OBJ_FILES_768 = $(MLKEM768_BUILD_DIR)\mlkem\*.obj \
                 $(MLKEM768_BUILD_DIR)\mlkem\fips202\*.obj
 OBJ_FILES_1024 = $(MLKEM1024_BUILD_DIR)\mlkem\*.obj \
                  $(MLKEM1024_BUILD_DIR)\mlkem\fips202\*.obj
+
+OBJ_FILES_512_ALLOC = $(MLKEM512_BUILD_DIR)\alloc\mlkem\*.obj \
+                      $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\*.obj
+OBJ_FILES_768_ALLOC = $(MLKEM768_BUILD_DIR)\alloc\mlkem\*.obj \
+                      $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\*.obj
+OBJ_FILES_1024_ALLOC = $(MLKEM1024_BUILD_DIR)\alloc\mlkem\*.obj \
+                       $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\*.obj
 
 # NOTE: We currently only build code for non-opt code, as we haven't yet made the assembly compatible on Windows
 !IFNDEF OPT
@@ -64,6 +75,45 @@ OPT = 0
 {test\src}.c{$(MLKEM1024_BUILD_DIR)\test}.obj::
     @if NOT EXIST $(MLKEM1024_BUILD_DIR)\test mkdir $(MLKEM1024_BUILD_DIR)\test
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\test\ $<
+
+# compilation for mlkem512 alloc test
+{mlkem\src}.c{$(MLKEM512_BUILD_DIR)\alloc\mlkem}.obj::
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\alloc\mlkem mkdir $(MLKEM512_BUILD_DIR)\alloc\mlkem
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\alloc\mlkem\ $<
+
+{mlkem\src\fips202}.c{$(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202}.obj::
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202 mkdir $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\ $<
+
+{test\src}.c{$(MLKEM512_BUILD_DIR)\test\alloc}.obj::
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\test\alloc mkdir $(MLKEM512_BUILD_DIR)\test\alloc
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\test\alloc\ $<
+
+# compilation for mlkem768 alloc test
+{mlkem\src}.c{$(MLKEM768_BUILD_DIR)\alloc\mlkem}.obj::
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\alloc\mlkem mkdir $(MLKEM768_BUILD_DIR)\alloc\mlkem
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\alloc\mlkem\ $<
+
+{mlkem\src\fips202}.c{$(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202}.obj::
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202 mkdir $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\ $<
+
+{test\src}.c{$(MLKEM768_BUILD_DIR)\test\alloc}.obj::
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\test\alloc mkdir $(MLKEM768_BUILD_DIR)\test\alloc
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\test\alloc\ $<
+
+# compilation for mlkem1024 alloc test
+{mlkem\src}.c{$(MLKEM1024_BUILD_DIR)\alloc\mlkem}.obj::
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\alloc\mlkem mkdir $(MLKEM1024_BUILD_DIR)\alloc\mlkem
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\alloc\mlkem\ $<
+
+{mlkem\src\fips202}.c{$(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202}.obj::
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202 mkdir $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\ $<
+
+{test\src}.c{$(MLKEM1024_BUILD_DIR)\test\alloc}.obj::
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\test\alloc mkdir $(MLKEM1024_BUILD_DIR)\test\alloc
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\test\alloc\ $<
 
 # compilation of acvp test for mlkem512
 {test\acvp}.c{$(MLKEM512_BUILD_DIR)\test\acvp}.obj::
@@ -140,6 +190,21 @@ test_rng_fail1024: $(OBJ_FILES_1024) $(MLKEM1024_BUILD_DIR)\test\test_rng_fail.o
     @if NOT EXIST $(MLKEM1024_BUILD_DIR)\bin mkdir $(MLKEM1024_BUILD_DIR)\bin
     $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /Fe$(MLKEM1024_BUILD_DIR)\bin\test_rng_fail1024 $** /link
 
+# compile alloc test for mlkem512
+test_alloc512: $(OBJ_FILES_512_ALLOC) $(MLKEM512_BUILD_DIR)\test\alloc\test_alloc.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\bin mkdir $(MLKEM512_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /Fe$(MLKEM512_BUILD_DIR)\bin\test_alloc512 $** /link
+
+# compile alloc test for mlkem768
+test_alloc768: $(OBJ_FILES_768_ALLOC) $(MLKEM768_BUILD_DIR)\test\alloc\test_alloc.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\bin mkdir $(MLKEM768_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /Fe$(MLKEM768_BUILD_DIR)\bin\test_alloc768 $** /link
+
+# compile alloc test for mlkem1024
+test_alloc1024: $(OBJ_FILES_1024_ALLOC) $(MLKEM1024_BUILD_DIR)\test\alloc\test_alloc.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\bin mkdir $(MLKEM1024_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /Fe$(MLKEM1024_BUILD_DIR)\bin\test_alloc1024 $** /link
+
 acvp: acvp_mlkem512 acvp_mlkem768 acvp_mlkem1024
 
 gen_KAT: gen_KAT512 gen_KAT768 gen_KAT1024
@@ -162,7 +227,12 @@ run_rng_fail: test_rng_fail512 test_rng_fail768 test_rng_fail1024
     $(MLKEM768_BUILD_DIR)\bin\test_rng_fail768.exe
     $(MLKEM1024_BUILD_DIR)\bin\test_rng_fail1024.exe
 
-test: run_func run_rng_fail run_acvp run_kat
+run_alloc: test_alloc512 test_alloc768 test_alloc1024
+    $(MLKEM512_BUILD_DIR)\bin\test_alloc512.exe
+    $(MLKEM768_BUILD_DIR)\bin\test_alloc768.exe
+    $(MLKEM1024_BUILD_DIR)\bin\test_alloc1024.exe
+
+test: run_func run_rng_fail run_alloc run_acvp run_kat
     @echo   Everything checks fine!
 
 quickcheck: test
