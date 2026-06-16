@@ -130,7 +130,9 @@ acvp: acvp_mlkem512 acvp_mlkem768 acvp_mlkem1024
 gen_KAT: gen_KAT512 gen_KAT768 gen_KAT1024
 
 run_kat: gen_KAT
-    python test/src/kat_client.py
+    $(MLKEM512_BUILD_DIR)\bin\gen_KAT512.exe | python META.py --scheme 512
+    $(MLKEM768_BUILD_DIR)\bin\gen_KAT768.exe | python META.py --scheme 768
+    $(MLKEM1024_BUILD_DIR)\bin\gen_KAT1024.exe | python META.py --scheme 1024
 
 run_acvp: acvp
     python test/acvp/acvp_client.py

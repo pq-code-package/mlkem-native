@@ -50,11 +50,11 @@ test: run_kat run_func run_acvp run_wycheproof run_unit run_alloc run_rng_fail
 	$(Q)echo "  Everything checks fine!"
 
 run_kat_512: kat_512
-	EXEC_WRAPPER="$(EXEC_WRAPPER)" python3 test/src/kat_client.py --scheme 512
+	$(W) $(MLKEM512_DIR)/bin/gen_KAT512 | python3 META.py --scheme 512
 run_kat_768: kat_768
-	EXEC_WRAPPER="$(EXEC_WRAPPER)" python3 test/src/kat_client.py --scheme 768
+	$(W) $(MLKEM768_DIR)/bin/gen_KAT768 | python3 META.py --scheme 768
 run_kat_1024: kat_1024
-	EXEC_WRAPPER="$(EXEC_WRAPPER)" python3 test/src/kat_client.py --scheme 1024
+	$(W) $(MLKEM1024_DIR)/bin/gen_KAT1024 | python3 META.py --scheme 1024
 run_kat: run_kat_512 run_kat_768 run_kat_1024
 
 run_func_512: func_512
