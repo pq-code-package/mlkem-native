@@ -2,17 +2,15 @@
 # Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
+# Checks the KAT output of a gen_KAT binary against META.yml.
+#
+# Reads the KAT bytes from stdin (the Makefile pipes a gen_KAT binary into
+# this script), hashes them with SHA-256, and compares against the
+# kat-sha256 field for the given scheme in META.yml.
+
 import hashlib
-import os
-import subprocess
 import sys
 import argparse
-from pathlib import Path
-
-
-# Check if we need to use a wrapper for execution (e.g. QEMU)
-exec_prefix = os.environ.get("EXEC_WRAPPER", "")
-exec_prefix = exec_prefix.split(" ") if exec_prefix != "" else []
 
 
 def err(msg, **kwargs):
@@ -36,64 +34,31 @@ def read_meta_hashes():
     return hashes
 
 
-def get_kat_binary(level):
-    suffix = ".exe" if sys.platform == "win32" else ""
-    return Path("test/build") / f"mlkem{level}" / "bin" / f"gen_KAT{level}{suffix}"
-
-
-def run_kat_single(level, ref_hash):
-    scheme_name = f"ML-KEM-{level}"
-    binary = get_kat_binary(level)
-
-    if not binary.exists():
-        err(f"Binary not found: {binary}")
-        return False
-
-    cmd = exec_prefix + [str(binary)]
-    result = subprocess.run(cmd, capture_output=True)
-
-    if result.returncode != 0:
-        err("FAIL!")
-        err(f"{cmd} failed with error code {result.returncode}")
-        err(result.stderr.decode("utf-8", errors="replace"))
-        return False
-
-    computed = hashlib.sha256(result.stdout).hexdigest()
-
-    if computed == ref_hash:
-        info(f"META.yml {scheme_name} kat-sha256: OK")
-        return True
-    else:
-        err(f"META.yml {scheme_name} kat-sha256: FAIL ({ref_hash} != {computed})")
-        return False
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--scheme",
         choices=["512", "768", "1024"],
-        help="Run KAT for only one parameter set (default: all)",
+        required=True,
+        help="Parameter set whose KAT output is being checked",
     )
     args = parser.parse_args()
 
-    levels = [int(args.scheme)] if args.scheme else [512, 768, 1024]
-    ref_hashes = read_meta_hashes()
-
-    failed = False
-    for level in levels:
-        scheme_name = f"ML-KEM-{level}"
-        ref = ref_hashes.get(scheme_name)
-        if ref is None:
-            err(f"META.yml: no kat-sha256 entry for {scheme_name}")
-            failed = True
-            continue
-        if not run_kat_single(level, ref):
-            failed = True
-
-    if failed:
+    scheme_name = f"ML-KEM-{args.scheme}"
+    ref = read_meta_hashes().get(scheme_name)
+    if ref is None:
+        err(f"META.yml: no kat-sha256 entry for {scheme_name}")
         sys.exit(1)
-    info("ALL GOOD!")
+
+    # Hash the raw bytes piped in from gen_KAT on stdin. Read in binary mode so
+    # that no newline translation occurs on Windows.
+    computed = hashlib.sha256(sys.stdin.buffer.read()).hexdigest()
+
+    if computed == ref:
+        info(f"META.yml {scheme_name} kat-sha256: OK")
+    else:
+        err(f"META.yml {scheme_name} kat-sha256: FAIL ({ref} != {computed})")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
