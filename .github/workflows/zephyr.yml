@@ -1,0 +1,44 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: Zephyr
+permissions:
+  contents: read
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  zephyr_tests:
+    name: Zephyr tests (${{ matrix.target.board }}, ${{ matrix.target.cpu }})
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - { board: mps2-an385, cpu: Cortex-M3 }
+          - { board: mps2-an386, cpu: Cortex-M4 }
+          - { board: mps2-an500, cpu: Cortex-M7 }
+          - { board: mps2-an521, cpu: Cortex-M33 }
+          - { board: mps3-an547, cpu: Cortex-M55 }
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - name: zephyr build + test
+        uses: ./.github/actions/functest
+        env:
+          EXTRA_MAKEFILE: test/zephyr/platform.mk
+          ZEPHYR_TARGET: ${{ matrix.target.board }}
+        with:
+          nix-shell: zephyr
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          opt: no_opt
+          func: true
+          kat: true
+          acvp: true
+          wycheproof: true
+          examples: false
+          bench: true
+          stack: false
+          alloc: true
+          rng_fail: false
+          check_namespace: false

@@ -108,3 +108,9 @@ jobs:
     needs: [ base ]
     uses: ./.github/workflows/baremetal.yml
     secrets: inherit
+  zephyr:
+    name: Zephyr
+    permissions:
+      contents: 'read'
+    needs: [ base ]
+    uses: ./.github/workflows/zephyr.yml
