@@ -268,7 +268,7 @@ gh_group_end
 
 check-tabs()
 {
-  for file in $(git ls-files -- ":/" ":/!:Makefile" ":/!:**/Makefile" ":/!:**/Makefile.*" ":/!:Makefile.*" ":/!:*.mk" ":/!:*.patch" ":/!:*.S" ":/!:*.inc" ":/!:nix/valgrind/*.txt"); do
+  for file in $(git ls-files -- ":/" ":/!:Makefile" ":/!:**/Makefile" ":/!:**/Makefile.*" ":/!:Makefile.*" ":/!:**/Kconfig" ":/!:*.mk" ":/!:*.patch" ":/!:*.S" ":/!:*.inc" ":/!:nix/valgrind/*.txt"); do
     if [[ ! -L $file ]] && grep -Pq '\t' "$file"; then
       l=$(grep -Pn '\t' "$file" | head -1 | cut -d: -f1)
       echo "$file $l"
