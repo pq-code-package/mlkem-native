@@ -1,0 +1,14 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+# Corstone-300's Zephyr SoC doesn't advertise MVE, but its Cortex-M55 (and
+# QEMU's mps3-an547) has it. Force-select it to build the Armv8.1-M MVE FIPS202
+# backend. Enabled per target by platform.mk.
+config FIPS202_MVE_BACKEND
+	bool "Build with the Armv8.1-M MVE FIPS202 backend"
+	select FPU
+	select ARMV8_M_DSP
+	select ARMV8_1_M_MVEI
+	select ARMV8_1_M_MVEF
+
+source "Kconfig.zephyr"
