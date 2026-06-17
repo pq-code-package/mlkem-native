@@ -107,7 +107,6 @@ rec {
   hol_server = pkgs.callPackage ./hol_light/hol_server.nix { inherit hol_light'; };
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
   slothy = pkgs.callPackage ./slothy { };
-  pqmx = pkgs.callPackage ./pqmx { };
   zephyr = pkgs.callPackage ./zephyr { };
   zephyrPythonEnv = pkgs.python3.withPackages (ps: with ps; [
     pyelftools
