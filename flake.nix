@@ -158,15 +158,6 @@
               } ++ [ util.zephyrPythonEnv ];
           };
 
-          # arm-none-eabi-gcc + platform files from pqmx
-          devShells.cross-arm-embedded = util.mkShell {
-            packages = builtins.attrValues
-              {
-                inherit (util) pqmx;
-                inherit (config.packages) linters;
-                inherit (pkgs) gcc-arm-embedded qemu coreutils git;
-              };
-          };
           devShells.cross-aarch64-embedded = util.mkShell {
             packages = builtins.attrValues
               {

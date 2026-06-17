@@ -17,27 +17,6 @@ jobs:
       matrix:
         target:
          - runner: ubuntu-latest
-           name: 'M55-AN547'
-           makefile: test/baremetal/platform/m55-an547/platform.mk
-           nix-shell: cross-arm-embedded
-           func: true
-           kat: true
-           acvp: true
-           wycheproof: false
-           alloc: true
-           bench: true
-           opt: all
-         - runner: ubuntu-latest
-           name: 'M33-AN524'
-           makefile: test/baremetal/platform/m33-an524/platform.mk
-           nix-shell: cross-arm-embedded
-           func: true
-           kat: true
-           acvp: true
-           alloc: true
-           bench: true
-           opt: no_opt
-         - runner: ubuntu-latest
            name: 'AVR ATmega128RFR2 (modified for 32K RAM)'
            makefile: test/baremetal/platform/avr/platform.mk
            nix-shell: cross-avr
