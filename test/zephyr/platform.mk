@@ -9,8 +9,8 @@ BUILD_DIR ?= test/build
 
 # Pick a target with ZEPHYR_TARGET=<key> (default below). Each key maps to a
 # Zephyr board and the QEMU machine that emulates it; adding a board is one
-# row here, no new build logic. These are the QEMU-emulated Arm MPS boards
-# supported by the pinned Zephyr tree.
+# row here, no new build logic. Most targets are QEMU-emulated Arm MPS boards
+# supported by the pinned Zephyr tree; rpi-pico2 is a RISC-V (Hazard3) target.
 ZEPHYR_TARGET ?= mps3-an547
 
 ZEPHYR_BOARD_mps2-an385 := mps2/an385
@@ -24,7 +24,15 @@ ZEPHYR_QEMU_mps2-an521  := mps2-an521                                # Cortex-M3
 ZEPHYR_BOARD_mps3-an547 := mps3/corstone300/an547
 ZEPHYR_QEMU_mps3-an547  := mps3-an547                                # Cortex-M55
 
-ZEPHYR_TARGETS := mps2-an385 mps2-an386 mps2-an500 mps2-an521 mps3-an547
+# Raspberry Pi Pico 2 (RP2350A) with the Hazard3 RISC-V cores (RV32IMAC).
+# This is not a QEMU MPS Arm board: it builds with the bare-metal rv32imac /
+# ilp32 GCC provided by the .#zephyr dev shell (see ZEPHYR_TOOLCHAIN below).
+# No upstream QEMU machine emulates it, so MLK_QEMU_MACHINE is left empty and
+# only the build is wired up here (running is out of scope).
+ZEPHYR_BOARD_rpi-pico2 := rpi_pico2/rp2350a/hazard3
+ZEPHYR_QEMU_rpi-pico2  :=                                            # Hazard3 (RV32IMAC)
+
+ZEPHYR_TARGETS := mps2-an385 mps2-an386 mps2-an500 mps2-an521 mps3-an547 rpi-pico2
 
 ZEPHYR_BOARD := $(ZEPHYR_BOARD_$(ZEPHYR_TARGET))
 export MLK_QEMU_MACHINE := $(strip $(ZEPHYR_QEMU_$(ZEPHYR_TARGET)))
@@ -32,6 +40,17 @@ export MLK_QEMU_MACHINE := $(strip $(ZEPHYR_QEMU_$(ZEPHYR_TARGET)))
 ifeq ($(ZEPHYR_BOARD),)
 $(error Unknown ZEPHYR_TARGET '$(ZEPHYR_TARGET)'. Supported: $(ZEPHYR_TARGETS))
 endif
+
+# Toolchain selection. The dev shell defaults to arm-none-eabi (gnuarmemb) via
+# ZEPHYR_TOOLCHAIN_VARIANT/GNUARMEMB_TOOLCHAIN_PATH in its setup hook, which
+# suits every Arm MPS board. The Hazard3 cores are RISC-V, so that target
+# instead points Zephyr at the bare-metal rv32imac/ilp32 GCC the shell exposes
+# via MLK_ZEPHYR_RISCV32_CROSS_COMPILE, using Zephyr's generic "cross-compile"
+# toolchain variant. These -D flags override the shell's env defaults.
+ZEPHYR_TOOLCHAIN_rpi-pico2 := \
+	-DZEPHYR_TOOLCHAIN_VARIANT=cross-compile \
+	-DCROSS_COMPILE=$(MLK_ZEPHYR_RISCV32_CROSS_COMPILE)
+ZEPHYR_TOOLCHAIN := $(ZEPHYR_TOOLCHAIN_$(ZEPHYR_TARGET))
 
 # The test binaries are built by Zephyr's CMake (which uses its own arm
 # toolchain via the .#zephyr dev shell), not the generic Make rules. The
@@ -52,6 +71,7 @@ $(BUILD_DIR)/mlkem$(1)/bin/$(2):
 	$$(Q)echo "  ZEPHYR  $(ZEPHYR_TARGET) ML-KEM-$(1): $(3)"
 	$$(Q)cmake -GNinja -S $(ZEPHYR_APP) -B $(ZEPHYR_BUILD_DIR)/$(2) \
 		-DBOARD=$(ZEPHYR_BOARD) \
+		$(ZEPHYR_TOOLCHAIN) \
 		-DMLKEM_NATIVE_ROOT=$(CURDIR) \
 		-DMLK_LEVEL=$(1) \
 		-DMLK_TEST_SRC=$(3) \

@@ -108,7 +108,23 @@ rec {
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
   slothy = pkgs.callPackage ./slothy { };
   pqmx = pkgs.callPackage ./pqmx { };
-  zephyr = pkgs.callPackage ./zephyr { };
+
+  # Bare-metal RISC-V 32-bit toolchain for the Zephyr Hazard3 (RP2350) target.
+  # nixpkgs' `riscv32-embedded` defaults to rv32imafdc/ilp32d (hard-float) and
+  # ships no soft-float multilib, so it cannot link the soft-float ilp32 ABI
+  # that Zephyr selects for Hazard3. Re-import nixpkgs with an explicit
+  # arch/abi so the bundled libgcc/newlib match what the board needs.
+  zephyrRiscv32Pkgs = import pkgs.path {
+    inherit (pkgs.stdenv.hostPlatform) system;
+    crossSystem = {
+      config = "riscv32-none-elf";
+      libc = "newlib";
+      gcc = { arch = "rv32imac"; abi = "ilp32"; };
+    };
+  };
+  zephyrRiscv32Toolchain = zephyrRiscv32Pkgs.buildPackages.gcc;
+
+  zephyr = pkgs.callPackage ./zephyr { riscv32-toolchain = zephyrRiscv32Toolchain; };
   zephyrPythonEnv = pkgs.python3.withPackages (ps: with ps; [
     pyelftools
     pyyaml
