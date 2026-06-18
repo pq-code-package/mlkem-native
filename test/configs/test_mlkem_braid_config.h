@@ -29,7 +29,6 @@
  *
  * This configuration differs from the default mlkem/mlkem_native_config.h in
  * the following places:
- *   - MLK_CONFIG_NAMESPACE_PREFIX
  *   - MLK_CONFIG_ENABLE_MLKEM_BRAID
  */
 
@@ -79,7 +78,9 @@
  *
  * This can also be set using CFLAGS.
  */
-#define MLK_CONFIG_NAMESPACE_PREFIX mlk
+#if !defined(MLK_CONFIG_NAMESPACE_PREFIX)
+#define MLK_CONFIG_NAMESPACE_PREFIX MLK_DEFAULT_NAMESPACE_PREFIX
+#endif
 
 /**
  * MLK_CONFIG_MULTILEVEL_BUILD
