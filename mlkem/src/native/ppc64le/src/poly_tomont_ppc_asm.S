@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  *
  * Written by Danny Tsen <dtsen@us.ibm.com>
+ * poly_tomont frame trim (#1722) by Scott Boudreaux.
  */
 
 /*
@@ -27,7 +28,7 @@
 .global MLK_ASM_NAMESPACE(poly_tomont_ppc_asm)
 MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
 
-        stdu 1, -320(1)
+        stdu 1, -224(1)
         mflr 0
         li 6, 128
         li 7, 144
@@ -35,22 +36,12 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
         li 9, 176
         li 10, 192
         li 11, 208
-        li 12, 224
-        stxvd2x 52, 6, 1
-        stxvd2x 53, 7, 1
-        stxvd2x 54, 8, 1
-        stxvd2x 55, 9, 1
-        stxvd2x 56, 10, 1
-        stxvd2x 57, 11, 1
-        stxvd2x 58, 12, 1
-        li 6, 240
-        li 7, 256
-        li 8, 272
-        li 9, 288
-        stxvd2x 59, 6, 1
-        stxvd2x 60, 7, 1
-        stxvd2x 61, 8, 1
-        stxvd2x 62, 9, 1
+        stxvd2x 55, 6, 1
+        stxvd2x 56, 7, 1
+        stxvd2x 59, 8, 1
+        stxvd2x 60, 9, 1
+        stxvd2x 61, 10, 1
+        stxvd2x 62, 11, 1
         li 6, 0
         li 7, 80
         li 8, 96
@@ -264,24 +255,14 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
         li 9, 176
         li 10, 192
         li 11, 208
-        li 12, 224
-        lxvd2x 52, 6, 1
-        lxvd2x 53, 7, 1
-        lxvd2x 54, 8, 1
-        lxvd2x 55, 9, 1
-        lxvd2x 56, 10, 1
-        lxvd2x 57, 11, 1
-        lxvd2x 58, 12, 1
-        li 6, 240
-        li 7, 256
-        li 8, 272
-        li 9, 288
-        lxvd2x 59, 6, 1
-        lxvd2x 60, 7, 1
-        lxvd2x 61, 8, 1
-        lxvd2x 62, 9, 1
+        lxvd2x 55, 6, 1
+        lxvd2x 56, 7, 1
+        lxvd2x 59, 8, 1
+        lxvd2x 60, 9, 1
+        lxvd2x 61, 10, 1
+        lxvd2x 62, 11, 1
         mtlr 0
-        addi 1, 1, 320
+        addi 1, 1, 224
         blr
 
 MLK_ASM_FN_SIZE(poly_tomont_ppc_asm)
