@@ -48,14 +48,13 @@
  * TODO: lazy reduction and layer merging, as in the aarch64 inverse NTT.
  */
 
-/* Barrett-Q-reduce constants */
+/* Barrett-Q-reduce constants (halfword high-multiply scheme) */
 #define V20159  0
-#define V_25    1
-#define V_26    2
-#define V_MKQ   3
+#define V_1024  1   /* 2^10, rounding bias for the >> 11 stage */
+#define V_11    2   /* shift amount 11 (vsrah) */
 
-/* Shared zero vector (aliases V_MKQ; V_MKQ is only live during
- * barrett_reduce_4x, where V_ZERO/zero is reloaded from vs3 anyway). */
+/* Shared zero vector (v3; no longer aliased by a Barrett +Q constant
+ * now that barrett_reduce_4x uses -Q via V_NMKQ). */
 #define V_ZERO  3
 
 /* Barrett-multiply constants */
@@ -126,9 +125,8 @@
  * half of vsX, alias fX, dead in this routine). */
 #define VS_NMKQ_STASH   0
 #define VS_ZERO_STASH   3
-#define VS_MKQ_STASH    6
-#define VS_25_STASH     7
-#define VS_26_STASH     8
+#define VS_1024_STASH   7
+#define VS_11_STASH     8
 
 .text
 
@@ -375,64 +373,27 @@
 .endm
 
 .macro barrett_reduce_4x _v0, _v1, _v2, _v3
-        /* Materialize VR copies of V_MKQ (v3), V_25 (v1), V_26 (v2)
-           from their long-term VSR stash slots. The caller does not
-           keep these VR-resident between barrett_reduce_4x calls.
-           Also zero v7 (scratch). */
-        vxor    7, 7, 7
-        xxlor   32+V_MKQ,   VS_MKQ_STASH,   VS_MKQ_STASH
-        xxlor   32+V_25,    VS_25_STASH,    VS_25_STASH
-        xxlor   32+V_26,    VS_26_STASH,    VS_26_STASH
-        /* Multiply Odd/Even signed halfword;
-           Results word bound by 2^32 in abs value. */
-        vmulosh 6, vdata_brt1, V20159
-        vmulesh 5, vdata_brt1, V20159
-        vmulosh 11, vdata_brt2, V20159
-        vmulesh 10, vdata_brt2, V20159
-        vmulosh 15, vdata_brt3, V20159
-        vmulesh 14, vdata_brt3, V20159
-        vmulosh 19, vdata_brt4, V20159
-        vmulesh 18, vdata_brt4, V20159
-        xxmrglw 32+4, 32+5, 32+6
-        xxmrghw 32+5, 32+5, 32+6
-        xxmrglw 32+9, 32+10, 32+11
-        xxmrghw 32+10, 32+10, 32+11
-        xxmrglw 32+13, 32+14, 32+15
-        xxmrghw 32+14, 32+14, 32+15
-        xxmrglw 32+17, 32+18, 32+19
-        xxmrghw 32+18, 32+18, 32+19
-        vadduwm 4, 4, V_25
-        vadduwm 5, 5, V_25
-        vadduwm 9, 9, V_25
-        vadduwm 10, 10, V_25
-        vadduwm 13, 13, V_25
-        vadduwm 14, 14, V_25
-        vadduwm 17, 17, V_25
-        vadduwm 18, 18, V_25
-        /* Right shift and pack lower halfword,
-           results bound by 2^16 in abs value */
-        vsraw   4, 4, V_26
-        vsraw   5, 5, V_26
-        vsraw   9, 9, V_26
-        vsraw   10, 10, V_26
-        vsraw   13, 13, V_26
-        vsraw   14, 14, V_26
-        vsraw   17, 17, V_26
-        vsraw   18, 18, V_26
-        vpkuwum 4, 5, 4
-        vsubuhm 4, 7, 4
-        vpkuwum 9, 10, 9
-        vsubuhm 9, 7, 9
-        vpkuwum 13, 14, 13
-        vsubuhm 13, 7, 13
-        vpkuwum 17, 18, 17
-        vsubuhm 17, 7, 17
-        /* Modulo multiply-Low unsigned halfword;
-           results bound by 2^16 * q in abs value. */
-        vmladduhm \_v0, 4, V_MKQ, 8
-        vmladduhm \_v1, 9, V_MKQ, 12
-        vmladduhm \_v2, 13, V_MKQ, 16
-        vmladduhm \_v3, 17, V_MKQ, 20
+        /* Halfword high-multiply Barrett (lockstep with reduce_ppc_asm.S).
+           Materialize V_1024 (v1) and V_11 (v2) from their VSR stash slots;
+           V20159 and V_NMKQ (-Q) are already resident across the calls. */
+        xxlor   32+V_1024,  VS_1024_STASH,  VS_1024_STASH
+        xxlor   32+V_11,    VS_11_STASH,    VS_11_STASH
+        /* t = ((a*20159) >> 15 + 2^10) >> 11 == round(a*20159 / 2^26).
+           vmhaddshs gives the non-rounding high product plus the round bias;
+           no saturation (|(a*20159)>>15| <= 20159, +1024 < 2^15). */
+        vmhaddshs 4, vdata_brt1, V20159, V_1024
+        vmhaddshs 9, vdata_brt2, V20159, V_1024
+        vmhaddshs 13, vdata_brt3, V20159, V_1024
+        vmhaddshs 17, vdata_brt4, V20159, V_1024
+        vsrah   4, 4, V_11
+        vsrah   9, 9, V_11
+        vsrah   13, 13, V_11
+        vsrah   17, 17, V_11
+        /* a + t*(-Q) = a - t*MLKEM_Q (one FMA, no negate/pack). */
+        vmladduhm \_v0, 4, V_NMKQ, 8
+        vmladduhm \_v1, 9, V_NMKQ, 12
+        vmladduhm \_v2, 13, V_NMKQ, 16
+        vmladduhm \_v3, 17, V_NMKQ, 20
 .endm
 
 /*
@@ -734,20 +695,17 @@ MLK_ASM_FN_SYMBOL(intt_ppc_asm)
         xxlxor  32+V_ZERO, 32+V_ZERO, 32+V_ZERO
         xxlor   VS_ZERO_STASH, 32+V_ZERO, 32+V_ZERO
 
-        /*  Setup for Barrett reduce */
-        li      10, MLK_PPC_Q_OFFSET
+        /*  Setup for Barrett reduce (halfword high-multiply scheme) */
         li      11, MLK_PPC_C20159_OFFSET
-        lxvx    VS_MKQ_STASH, 10, qinp                  /* V_MKQ */
         lxvx    32+V20159, 11, qinp                     /* V20159 */
 
-        vspltisw 8, 13
-        vadduwm  8, 8, 8
-        xxlor   VS_26_STASH, 32+8, 32+8
+        vspltish 8, 11                                  /* V_11 = shift 11 */
+        xxlor   VS_11_STASH, 32+8, 32+8
 
-        vspltisw 9, 1
-        vsubuwm 10, 8, 9                                /* value 25 */
-        vslw    9, 9, 10
-        xxlor   VS_25_STASH, 32+9, 32+9
+        vspltish 9, 1
+        vspltish 10, 10
+        vslh    9, 9, 10                                /* V_1024 = 1 << 10 = 2^10 */
+        xxlor   VS_1024_STASH, 32+9, 32+9
 
         li      10, 16
         li      11, 32
@@ -918,9 +876,8 @@ intt_ppc_asm_Loopf:
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
 #undef V20159
-#undef V_25
-#undef V_26
-#undef V_MKQ
+#undef V_1024
+#undef V_11
 #undef V_ZERO
 #undef V_NMKQ
 #undef V_Z0
@@ -975,9 +932,8 @@ intt_ppc_asm_Loopf:
 #undef b4_offset
 #undef VS_NMKQ_STASH
 #undef VS_ZERO_STASH
-#undef VS_MKQ_STASH
-#undef VS_25_STASH
-#undef VS_26_STASH
+#undef VS_1024_STASH
+#undef VS_11_STASH
 
 /* simpasm: footer-start */
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
