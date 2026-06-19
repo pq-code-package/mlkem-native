@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  *
  * Written by Danny Tsen <dtsen@us.ibm.com>
+ * poly_reduce optimization (#1724) by Scott Boudreaux.
  */
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
@@ -34,16 +35,16 @@ MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
         stxvd2x 54, 8, 1
         stxvd2x 55, 9, 1
         stxvd2x 56, 10, 1
-        vxor 7, 7, 7
-        li 6, 16
-        li 7, 32
-        lxvd2x 35, 6, 4
-        lxvd2x 32, 7, 4
-        vspltisw 2, 13
-        vadduwm 2, 2, 2
-        vspltisw 4, 1
-        vsubuwm 5, 2, 4
-        vslw 1, 4, 5
+        li 6, 32
+        li 7, 0
+        li 8, 16
+        lxvd2x 32, 6, 4
+        lxvd2x 33, 7, 4
+        lxvd2x 39, 8, 4
+        vspltish 3, 11
+        vspltish 2, 1
+        vspltish 4, 10
+        vslh 2, 2, 4
         li 4, -128
         li 5, -112
         li 6, -96
@@ -60,99 +61,35 @@ MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
         lxvd2x 48, 15, 3
         lxvd2x 52, 16, 3
         addi 3, 3, 64
-        vmulosh 6, 8, 0
-        vmulesh 5, 8, 0
-        vmulosh 11, 12, 0
-        vmulesh 10, 12, 0
-        vmulosh 15, 16, 0
-        vmulesh 14, 16, 0
-        vmulosh 19, 20, 0
-        vmulesh 18, 20, 0
-        xxmrglw 36, 37, 38
-        xxmrghw 37, 37, 38
-        xxmrglw 41, 42, 43
-        xxmrghw 42, 42, 43
-        xxmrglw 45, 46, 47
-        xxmrghw 46, 46, 47
-        xxmrglw 49, 50, 51
-        xxmrghw 50, 50, 51
-        vadduwm 4, 4, 1
-        vadduwm 5, 5, 1
-        vadduwm 9, 9, 1
-        vadduwm 10, 10, 1
-        vadduwm 13, 13, 1
-        vadduwm 14, 14, 1
-        vadduwm 17, 17, 1
-        vadduwm 18, 18, 1
-        vsraw 4, 4, 2
-        vsraw 5, 5, 2
-        vsraw 9, 9, 2
-        vsraw 10, 10, 2
-        vsraw 13, 13, 2
-        vsraw 14, 14, 2
-        vsraw 17, 17, 2
-        vsraw 18, 18, 2
-        vpkuwum 4, 5, 4
-        vsubuhm 4, 7, 4
-        vpkuwum 9, 10, 9
-        vsubuhm 9, 7, 9
-        vpkuwum 13, 14, 13
-        vsubuhm 13, 7, 13
-        vpkuwum 17, 18, 17
-        vsubuhm 17, 7, 17
-        vmladduhm 21, 4, 3, 8
-        vmladduhm 22, 9, 3, 12
-        vmladduhm 23, 13, 3, 16
-        vmladduhm 24, 17, 3, 20
+        vmhaddshs 5, 8, 0, 2
+        vmhaddshs 6, 12, 0, 2
+        vmhaddshs 10, 16, 0, 2
+        vmhaddshs 11, 20, 0, 2
+        vsrah 5, 5, 3
+        vsrah 6, 6, 3
+        vsrah 10, 10, 3
+        vsrah 11, 11, 3
+        vmladduhm 21, 5, 1, 8
+        vmladduhm 22, 6, 1, 12
+        vmladduhm 23, 10, 1, 16
+        vmladduhm 24, 11, 1, 20
         lxvd2x 40, 0, 3
         lxvd2x 44, 14, 3
         lxvd2x 48, 15, 3
         lxvd2x 52, 16, 3
         addi 3, 3, 64
-        vmulosh 6, 8, 0
-        vmulesh 5, 8, 0
-        vmulosh 11, 12, 0
-        vmulesh 10, 12, 0
-        vmulosh 15, 16, 0
-        vmulesh 14, 16, 0
-        vmulosh 19, 20, 0
-        vmulesh 18, 20, 0
-        xxmrglw 36, 37, 38
-        xxmrghw 37, 37, 38
-        xxmrglw 41, 42, 43
-        xxmrghw 42, 42, 43
-        xxmrglw 45, 46, 47
-        xxmrghw 46, 46, 47
-        xxmrglw 49, 50, 51
-        xxmrghw 50, 50, 51
-        vadduwm 4, 4, 1
-        vadduwm 5, 5, 1
-        vadduwm 9, 9, 1
-        vadduwm 10, 10, 1
-        vadduwm 13, 13, 1
-        vadduwm 14, 14, 1
-        vadduwm 17, 17, 1
-        vadduwm 18, 18, 1
-        vsraw 4, 4, 2
-        vsraw 5, 5, 2
-        vsraw 9, 9, 2
-        vsraw 10, 10, 2
-        vsraw 13, 13, 2
-        vsraw 14, 14, 2
-        vsraw 17, 17, 2
-        vsraw 18, 18, 2
-        vpkuwum 4, 5, 4
-        vsubuhm 4, 7, 4
-        vpkuwum 9, 10, 9
-        vsubuhm 9, 7, 9
-        vpkuwum 13, 14, 13
-        vsubuhm 13, 7, 13
-        vpkuwum 17, 18, 17
-        vsubuhm 17, 7, 17
-        vmladduhm 4, 4, 3, 8
-        vmladduhm 9, 9, 3, 12
-        vmladduhm 13, 13, 3, 16
-        vmladduhm 17, 17, 3, 20
+        vmhaddshs 5, 8, 0, 2
+        vmhaddshs 6, 12, 0, 2
+        vmhaddshs 10, 16, 0, 2
+        vmhaddshs 11, 20, 0, 2
+        vsrah 5, 5, 3
+        vsrah 6, 6, 3
+        vsrah 10, 10, 3
+        vsrah 11, 11, 3
+        vmladduhm 4, 5, 1, 8
+        vmladduhm 9, 6, 1, 12
+        vmladduhm 13, 10, 1, 16
+        vmladduhm 17, 11, 1, 20
         stxvd2x 53, 4, 3
         stxvd2x 54, 5, 3
         stxvd2x 55, 6, 3
@@ -166,99 +103,35 @@ MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
         lxvd2x 48, 15, 3
         lxvd2x 52, 16, 3
         addi 3, 3, 64
-        vmulosh 6, 8, 0
-        vmulesh 5, 8, 0
-        vmulosh 11, 12, 0
-        vmulesh 10, 12, 0
-        vmulosh 15, 16, 0
-        vmulesh 14, 16, 0
-        vmulosh 19, 20, 0
-        vmulesh 18, 20, 0
-        xxmrglw 36, 37, 38
-        xxmrghw 37, 37, 38
-        xxmrglw 41, 42, 43
-        xxmrghw 42, 42, 43
-        xxmrglw 45, 46, 47
-        xxmrghw 46, 46, 47
-        xxmrglw 49, 50, 51
-        xxmrghw 50, 50, 51
-        vadduwm 4, 4, 1
-        vadduwm 5, 5, 1
-        vadduwm 9, 9, 1
-        vadduwm 10, 10, 1
-        vadduwm 13, 13, 1
-        vadduwm 14, 14, 1
-        vadduwm 17, 17, 1
-        vadduwm 18, 18, 1
-        vsraw 4, 4, 2
-        vsraw 5, 5, 2
-        vsraw 9, 9, 2
-        vsraw 10, 10, 2
-        vsraw 13, 13, 2
-        vsraw 14, 14, 2
-        vsraw 17, 17, 2
-        vsraw 18, 18, 2
-        vpkuwum 4, 5, 4
-        vsubuhm 4, 7, 4
-        vpkuwum 9, 10, 9
-        vsubuhm 9, 7, 9
-        vpkuwum 13, 14, 13
-        vsubuhm 13, 7, 13
-        vpkuwum 17, 18, 17
-        vsubuhm 17, 7, 17
-        vmladduhm 21, 4, 3, 8
-        vmladduhm 22, 9, 3, 12
-        vmladduhm 23, 13, 3, 16
-        vmladduhm 24, 17, 3, 20
+        vmhaddshs 5, 8, 0, 2
+        vmhaddshs 6, 12, 0, 2
+        vmhaddshs 10, 16, 0, 2
+        vmhaddshs 11, 20, 0, 2
+        vsrah 5, 5, 3
+        vsrah 6, 6, 3
+        vsrah 10, 10, 3
+        vsrah 11, 11, 3
+        vmladduhm 21, 5, 1, 8
+        vmladduhm 22, 6, 1, 12
+        vmladduhm 23, 10, 1, 16
+        vmladduhm 24, 11, 1, 20
         lxvd2x 40, 0, 3
         lxvd2x 44, 14, 3
         lxvd2x 48, 15, 3
         lxvd2x 52, 16, 3
         addi 3, 3, 64
-        vmulosh 6, 8, 0
-        vmulesh 5, 8, 0
-        vmulosh 11, 12, 0
-        vmulesh 10, 12, 0
-        vmulosh 15, 16, 0
-        vmulesh 14, 16, 0
-        vmulosh 19, 20, 0
-        vmulesh 18, 20, 0
-        xxmrglw 36, 37, 38
-        xxmrghw 37, 37, 38
-        xxmrglw 41, 42, 43
-        xxmrghw 42, 42, 43
-        xxmrglw 45, 46, 47
-        xxmrghw 46, 46, 47
-        xxmrglw 49, 50, 51
-        xxmrghw 50, 50, 51
-        vadduwm 4, 4, 1
-        vadduwm 5, 5, 1
-        vadduwm 9, 9, 1
-        vadduwm 10, 10, 1
-        vadduwm 13, 13, 1
-        vadduwm 14, 14, 1
-        vadduwm 17, 17, 1
-        vadduwm 18, 18, 1
-        vsraw 4, 4, 2
-        vsraw 5, 5, 2
-        vsraw 9, 9, 2
-        vsraw 10, 10, 2
-        vsraw 13, 13, 2
-        vsraw 14, 14, 2
-        vsraw 17, 17, 2
-        vsraw 18, 18, 2
-        vpkuwum 4, 5, 4
-        vsubuhm 4, 7, 4
-        vpkuwum 9, 10, 9
-        vsubuhm 9, 7, 9
-        vpkuwum 13, 14, 13
-        vsubuhm 13, 7, 13
-        vpkuwum 17, 18, 17
-        vsubuhm 17, 7, 17
-        vmladduhm 4, 4, 3, 8
-        vmladduhm 9, 9, 3, 12
-        vmladduhm 13, 13, 3, 16
-        vmladduhm 17, 17, 3, 20
+        vmhaddshs 5, 8, 0, 2
+        vmhaddshs 6, 12, 0, 2
+        vmhaddshs 10, 16, 0, 2
+        vmhaddshs 11, 20, 0, 2
+        vsrah 5, 5, 3
+        vsrah 6, 6, 3
+        vsrah 10, 10, 3
+        vsrah 11, 11, 3
+        vmladduhm 4, 5, 1, 8
+        vmladduhm 9, 6, 1, 12
+        vmladduhm 13, 10, 1, 16
+        vmladduhm 17, 11, 1, 20
         stxvd2x 53, 4, 3
         stxvd2x 54, 5, 3
         stxvd2x 55, 6, 3
@@ -272,99 +145,35 @@ MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
         lxvd2x 48, 15, 3
         lxvd2x 52, 16, 3
         addi 3, 3, 64
-        vmulosh 6, 8, 0
-        vmulesh 5, 8, 0
-        vmulosh 11, 12, 0
-        vmulesh 10, 12, 0
-        vmulosh 15, 16, 0
-        vmulesh 14, 16, 0
-        vmulosh 19, 20, 0
-        vmulesh 18, 20, 0
-        xxmrglw 36, 37, 38
-        xxmrghw 37, 37, 38
-        xxmrglw 41, 42, 43
-        xxmrghw 42, 42, 43
-        xxmrglw 45, 46, 47
-        xxmrghw 46, 46, 47
-        xxmrglw 49, 50, 51
-        xxmrghw 50, 50, 51
-        vadduwm 4, 4, 1
-        vadduwm 5, 5, 1
-        vadduwm 9, 9, 1
-        vadduwm 10, 10, 1
-        vadduwm 13, 13, 1
-        vadduwm 14, 14, 1
-        vadduwm 17, 17, 1
-        vadduwm 18, 18, 1
-        vsraw 4, 4, 2
-        vsraw 5, 5, 2
-        vsraw 9, 9, 2
-        vsraw 10, 10, 2
-        vsraw 13, 13, 2
-        vsraw 14, 14, 2
-        vsraw 17, 17, 2
-        vsraw 18, 18, 2
-        vpkuwum 4, 5, 4
-        vsubuhm 4, 7, 4
-        vpkuwum 9, 10, 9
-        vsubuhm 9, 7, 9
-        vpkuwum 13, 14, 13
-        vsubuhm 13, 7, 13
-        vpkuwum 17, 18, 17
-        vsubuhm 17, 7, 17
-        vmladduhm 21, 4, 3, 8
-        vmladduhm 22, 9, 3, 12
-        vmladduhm 23, 13, 3, 16
-        vmladduhm 24, 17, 3, 20
+        vmhaddshs 5, 8, 0, 2
+        vmhaddshs 6, 12, 0, 2
+        vmhaddshs 10, 16, 0, 2
+        vmhaddshs 11, 20, 0, 2
+        vsrah 5, 5, 3
+        vsrah 6, 6, 3
+        vsrah 10, 10, 3
+        vsrah 11, 11, 3
+        vmladduhm 21, 5, 1, 8
+        vmladduhm 22, 6, 1, 12
+        vmladduhm 23, 10, 1, 16
+        vmladduhm 24, 11, 1, 20
         lxvd2x 40, 0, 3
         lxvd2x 44, 14, 3
         lxvd2x 48, 15, 3
         lxvd2x 52, 16, 3
         addi 3, 3, 64
-        vmulosh 6, 8, 0
-        vmulesh 5, 8, 0
-        vmulosh 11, 12, 0
-        vmulesh 10, 12, 0
-        vmulosh 15, 16, 0
-        vmulesh 14, 16, 0
-        vmulosh 19, 20, 0
-        vmulesh 18, 20, 0
-        xxmrglw 36, 37, 38
-        xxmrghw 37, 37, 38
-        xxmrglw 41, 42, 43
-        xxmrghw 42, 42, 43
-        xxmrglw 45, 46, 47
-        xxmrghw 46, 46, 47
-        xxmrglw 49, 50, 51
-        xxmrghw 50, 50, 51
-        vadduwm 4, 4, 1
-        vadduwm 5, 5, 1
-        vadduwm 9, 9, 1
-        vadduwm 10, 10, 1
-        vadduwm 13, 13, 1
-        vadduwm 14, 14, 1
-        vadduwm 17, 17, 1
-        vadduwm 18, 18, 1
-        vsraw 4, 4, 2
-        vsraw 5, 5, 2
-        vsraw 9, 9, 2
-        vsraw 10, 10, 2
-        vsraw 13, 13, 2
-        vsraw 14, 14, 2
-        vsraw 17, 17, 2
-        vsraw 18, 18, 2
-        vpkuwum 4, 5, 4
-        vsubuhm 4, 7, 4
-        vpkuwum 9, 10, 9
-        vsubuhm 9, 7, 9
-        vpkuwum 13, 14, 13
-        vsubuhm 13, 7, 13
-        vpkuwum 17, 18, 17
-        vsubuhm 17, 7, 17
-        vmladduhm 4, 4, 3, 8
-        vmladduhm 9, 9, 3, 12
-        vmladduhm 13, 13, 3, 16
-        vmladduhm 17, 17, 3, 20
+        vmhaddshs 5, 8, 0, 2
+        vmhaddshs 6, 12, 0, 2
+        vmhaddshs 10, 16, 0, 2
+        vmhaddshs 11, 20, 0, 2
+        vsrah 5, 5, 3
+        vsrah 6, 6, 3
+        vsrah 10, 10, 3
+        vsrah 11, 11, 3
+        vmladduhm 4, 5, 1, 8
+        vmladduhm 9, 6, 1, 12
+        vmladduhm 13, 10, 1, 16
+        vmladduhm 17, 11, 1, 20
         stxvd2x 53, 4, 3
         stxvd2x 54, 5, 3
         stxvd2x 55, 6, 3
@@ -378,99 +187,35 @@ MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
         lxvd2x 48, 15, 3
         lxvd2x 52, 16, 3
         addi 3, 3, 64
-        vmulosh 6, 8, 0
-        vmulesh 5, 8, 0
-        vmulosh 11, 12, 0
-        vmulesh 10, 12, 0
-        vmulosh 15, 16, 0
-        vmulesh 14, 16, 0
-        vmulosh 19, 20, 0
-        vmulesh 18, 20, 0
-        xxmrglw 36, 37, 38
-        xxmrghw 37, 37, 38
-        xxmrglw 41, 42, 43
-        xxmrghw 42, 42, 43
-        xxmrglw 45, 46, 47
-        xxmrghw 46, 46, 47
-        xxmrglw 49, 50, 51
-        xxmrghw 50, 50, 51
-        vadduwm 4, 4, 1
-        vadduwm 5, 5, 1
-        vadduwm 9, 9, 1
-        vadduwm 10, 10, 1
-        vadduwm 13, 13, 1
-        vadduwm 14, 14, 1
-        vadduwm 17, 17, 1
-        vadduwm 18, 18, 1
-        vsraw 4, 4, 2
-        vsraw 5, 5, 2
-        vsraw 9, 9, 2
-        vsraw 10, 10, 2
-        vsraw 13, 13, 2
-        vsraw 14, 14, 2
-        vsraw 17, 17, 2
-        vsraw 18, 18, 2
-        vpkuwum 4, 5, 4
-        vsubuhm 4, 7, 4
-        vpkuwum 9, 10, 9
-        vsubuhm 9, 7, 9
-        vpkuwum 13, 14, 13
-        vsubuhm 13, 7, 13
-        vpkuwum 17, 18, 17
-        vsubuhm 17, 7, 17
-        vmladduhm 21, 4, 3, 8
-        vmladduhm 22, 9, 3, 12
-        vmladduhm 23, 13, 3, 16
-        vmladduhm 24, 17, 3, 20
+        vmhaddshs 5, 8, 0, 2
+        vmhaddshs 6, 12, 0, 2
+        vmhaddshs 10, 16, 0, 2
+        vmhaddshs 11, 20, 0, 2
+        vsrah 5, 5, 3
+        vsrah 6, 6, 3
+        vsrah 10, 10, 3
+        vsrah 11, 11, 3
+        vmladduhm 21, 5, 1, 8
+        vmladduhm 22, 6, 1, 12
+        vmladduhm 23, 10, 1, 16
+        vmladduhm 24, 11, 1, 20
         lxvd2x 40, 0, 3
         lxvd2x 44, 14, 3
         lxvd2x 48, 15, 3
         lxvd2x 52, 16, 3
         addi 3, 3, 64
-        vmulosh 6, 8, 0
-        vmulesh 5, 8, 0
-        vmulosh 11, 12, 0
-        vmulesh 10, 12, 0
-        vmulosh 15, 16, 0
-        vmulesh 14, 16, 0
-        vmulosh 19, 20, 0
-        vmulesh 18, 20, 0
-        xxmrglw 36, 37, 38
-        xxmrghw 37, 37, 38
-        xxmrglw 41, 42, 43
-        xxmrghw 42, 42, 43
-        xxmrglw 45, 46, 47
-        xxmrghw 46, 46, 47
-        xxmrglw 49, 50, 51
-        xxmrghw 50, 50, 51
-        vadduwm 4, 4, 1
-        vadduwm 5, 5, 1
-        vadduwm 9, 9, 1
-        vadduwm 10, 10, 1
-        vadduwm 13, 13, 1
-        vadduwm 14, 14, 1
-        vadduwm 17, 17, 1
-        vadduwm 18, 18, 1
-        vsraw 4, 4, 2
-        vsraw 5, 5, 2
-        vsraw 9, 9, 2
-        vsraw 10, 10, 2
-        vsraw 13, 13, 2
-        vsraw 14, 14, 2
-        vsraw 17, 17, 2
-        vsraw 18, 18, 2
-        vpkuwum 4, 5, 4
-        vsubuhm 4, 7, 4
-        vpkuwum 9, 10, 9
-        vsubuhm 9, 7, 9
-        vpkuwum 13, 14, 13
-        vsubuhm 13, 7, 13
-        vpkuwum 17, 18, 17
-        vsubuhm 17, 7, 17
-        vmladduhm 4, 4, 3, 8
-        vmladduhm 9, 9, 3, 12
-        vmladduhm 13, 13, 3, 16
-        vmladduhm 17, 17, 3, 20
+        vmhaddshs 5, 8, 0, 2
+        vmhaddshs 6, 12, 0, 2
+        vmhaddshs 10, 16, 0, 2
+        vmhaddshs 11, 20, 0, 2
+        vsrah 5, 5, 3
+        vsrah 6, 6, 3
+        vsrah 10, 10, 3
+        vsrah 11, 11, 3
+        vmladduhm 4, 5, 1, 8
+        vmladduhm 9, 6, 1, 12
+        vmladduhm 13, 10, 1, 16
+        vmladduhm 17, 11, 1, 20
         stxvd2x 53, 4, 3
         stxvd2x 54, 5, 3
         stxvd2x 55, 6, 3
@@ -482,7 +227,7 @@ MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
         addi 3, 3, -512
         vxor 9, 9, 9
         vspltish 10, 15
-        vmr 11, 3
+        vmr 11, 7
         lxvd2x 44, 0, 3
         lxvd2x 45, 14, 3
         lxvd2x 46, 15, 3
