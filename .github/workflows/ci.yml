@@ -13,136 +13,88 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        external:
-         - ${{ github.repository_owner != 'pq-code-package' }}
         target:
          - runner: macos-latest
-           name: 'MacOS (aarch64)'
+           name: 'macOS (aarch64)'
            arch: mac
            mode: native
            nix_shell: ci
          - runner: macos-15-intel
-           name: 'MacOS (x86_64)'
+           name: 'macOS (x86_64)'
            arch: mac
            mode: native
            nix_shell: ci
          - runner: ubuntu-24.04-arm
-           name: 'ubuntu-latest (aarch64)'
+           name: 'aarch64'
            arch: aarch64
            mode: native
            nix_shell: ci
          - runner: ubuntu-24.04-arm
-           name: 'ubuntu-latest (aarch64)'
+           name: 'x86_64, cross'
            arch: x86_64
            mode: cross-x86_64
            nix_shell: cross-x86_64
          - runner: ubuntu-24.04-arm
-           name: 'ubuntu-latest (aarch64)'
+           name: 'x86_64, cross, no AVX2'
+           arch: x86_64
+           mode: cross-x86_64
+           nix_shell: cross-x86_64
+           exec_wrapper: 'qemu-x86_64 -cpu Snowridge'
+           extra_args: '--no-auto'
+         - runner: ubuntu-24.04-arm
+           name: 'riscv64, cross, VLEN=128'
            arch: riscv64
            mode: cross-riscv64
            nix_shell: cross-riscv64
            vlen: 128
+           exec_wrapper: 'qemu-riscv64 -cpu rv64,v=true,vlen=128'
          - runner: ubuntu-24.04-arm
-           name: 'ubuntu-latest (aarch64)'
+           name: 'riscv64, cross, VLEN=256'
            arch: riscv64
            mode: cross-riscv64
            nix_shell: cross-riscv64
            vlen: 256
+           exec_wrapper: 'qemu-riscv64 -cpu rv64,v=true,vlen=256'
          - runner: ubuntu-24.04-arm
-           name: 'ubuntu-latest (aarch64)'
+           name: 'riscv64, cross, VLEN=512'
            arch: riscv64
            mode: cross-riscv64
            nix_shell: cross-riscv64
            vlen: 512
+           exec_wrapper: 'qemu-riscv64 -cpu rv64,v=true,vlen=512'
          - runner: ubuntu-24.04-arm
-           name: 'ubuntu-latest (aarch64)'
+           name: 'riscv64, cross, VLEN=1024'
            arch: riscv64
            mode: cross-riscv64
            nix_shell: cross-riscv64
            vlen: 1024
+           exec_wrapper: 'qemu-riscv64 -cpu rv64,v=true,vlen=1024'
          - runner: ubuntu-24.04-arm
-           name: 'ubuntu-latest (aarch64)'
+           name: 'riscv32, cross'
            arch: riscv32
            mode: cross-riscv32
            nix_shell: cross-riscv32
          - runner: ubuntu-24.04-arm
-           name: 'ubuntu-latest (ppc64le)'
+           name: 'ppc64le, cross'
            arch: ppc64le
            mode: cross-ppc64le
            nix_shell: cross-ppc64le
          - runner: ubuntu-latest
-           name: 'ubuntu-latest (x86_64)'
+           name: 'x86_64'
            arch: x86_64
            mode: native
            nix_shell: ci
          - runner: ubuntu-latest
-           name: 'ubuntu-latest (x86_64)'
+           name: 'aarch64, cross'
            arch: aarch64
            mode: cross-aarch64
            nix_shell: cross-aarch64
          - runner: ubuntu-latest
-           name: 'ubuntu-latest (x86_64)'
+           name: 'aarch64_be, cross'
            arch: aarch64_be
            mode: cross-aarch64_be
            nix_shell: cross-aarch64_be
-        exclude:
-          - {external: true,
-             target: {
-               runner: ubuntu-24.04-arm,
-               name: 'ubuntu-latest (aarch64)',
-               arch: aarch64,
-               mode: native,
-               nix_shell: ci
-             }}
-          - {external: true,
-             target: {
-               runner: ubuntu-24.04-arm,
-               name: 'ubuntu-latest (aarch64)',
-               arch: x86_64,
-               mode: cross-x86_64,
-               nix_shell: cross-x86_64
-             }}
-          - {external: true,
-             target: {
-               runner: ubuntu-24.04-arm,
-               name: 'ubuntu-latest (aarch64)',
-               arch: riscv32,
-               mode: cross-riscv32,
-               nix_shell: cross-riscv32
-             }}
-          - {external: true,
-             target: {
-               runner: ubuntu-24.04-arm,
-               name: 'ubuntu-latest (ppc64le)',
-               arch: ppc64le,
-               mode: cross-ppc64le,
-               nix_shell: cross-ppc64le
-             }}
-          - {external: true,
-             target: {
-               runner: ubuntu-latest,
-               name: 'ubuntu-latest (x86_64)',
-               arch: x86_64,
-               mode: native,
-               nix_shell: ci
-             }}
-          - {external: true,
-             target: {
-               runner: ubuntu-latest,
-               name: 'ubuntu-latest (x86_64)',
-               arch: aarch64,
-               mode: cross-aarch64,
-               nix_shell: cross-aarch64
-             }}
-          - {external: true,
-             target: {
-               runner: ubuntu-latest,
-               name: 'ubuntu-latest (x86_64)',
-               arch: aarch64_be,
-               mode: cross-aarch64_be,
-               nix_shell: cross-aarch64_be
-             }}
-    name: Functional tests (${{ matrix.target.arch }}${{ matrix.target.mode != 'native' && ', cross' || ''}}${{ matrix.target.vlen && format(', VLEN={0}', matrix.target.vlen) || '' }})
+    name: Functional tests (${{ matrix.target.name }})
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -155,7 +107,8 @@ jobs:
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: ${{ matrix.target.mode }}
-          exec_wrapper: ${{ matrix.target.vlen && format('qemu-riscv64 -cpu rv64,v=true,vlen={0}', matrix.target.vlen) || '' }}
+          extra_args: ${{ matrix.target.extra_args || '' }}
+          exec_wrapper: ${{ matrix.target.exec_wrapper || '' }}
           opt: 'no_opt'
       - name: build + test (+debug+memsan+ubsan, native)
         uses: ./.github/actions/multi-functest
@@ -175,7 +128,8 @@ jobs:
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: ${{ matrix.target.mode }}
-          exec_wrapper: ${{ matrix.target.vlen && format('qemu-riscv64 -cpu rv64,v=true,vlen={0}', matrix.target.vlen) || '' }}
+          extra_args: ${{ matrix.target.extra_args || '' }}
+          exec_wrapper: ${{ matrix.target.exec_wrapper || '' }}
           opt: 'opt'
       - name: build + test (cross, opt, +debug)
         uses: ./.github/actions/multi-functest
@@ -186,7 +140,8 @@ jobs:
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: ${{ matrix.target.mode }}
-          exec_wrapper: ${{ matrix.target.vlen && format('qemu-riscv64 -cpu rv64,v=true,vlen={0}', matrix.target.vlen) || '' }}
+          extra_args: ${{ matrix.target.extra_args || '' }}
+          exec_wrapper: ${{ matrix.target.exec_wrapper || '' }}
           cflags: "-DMLKEM_DEBUG"
           opt: 'opt'
       - name: build + test (cross, opt, C90)
@@ -197,7 +152,8 @@ jobs:
           nix-cache: 'true'
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: ${{ matrix.target.mode }}
-          exec_wrapper: ${{ matrix.target.vlen && format('qemu-riscv64 -cpu rv64,v=true,vlen={0}', matrix.target.vlen) || '' }}
+          extra_args: ${{ matrix.target.extra_args || '' }}
+          exec_wrapper: ${{ matrix.target.exec_wrapper || '' }}
           cflags: "-std=c90"
           opt: 'opt'
   ppc64le_tests:
