@@ -298,7 +298,7 @@ Lintt_layer4567_start:
         sqrdmulh v31.8h, v8.8h, v11.h[5]
         sub v14.8h, v21.8h, v10.8h
         stur q0, [x3, #-0x30]
-        subs x4, x4, #0x1
+        sub x4, x4, #0x1
         cbnz x4, Lintt_layer4567_start
         mul v15.8h, v6.8h, v15.8h
         sub v22.8h, v20.8h, v25.8h
@@ -524,7 +524,7 @@ Lintt_layer123_start:
         sqrdmulh v9.8h, v13.8h, v0.h[1]
         str q17, [x0, #0x130]
         mul v17.8h, v19.8h, v0.h[0]
-        subs x4, x4, #0x1
+        sub x4, x4, #0x1
         cbnz x4, Lintt_layer123_start
         mls v23.8h, v10.8h, v7.h[0]
         ldr q11, [x0, #0x190]

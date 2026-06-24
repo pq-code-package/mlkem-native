@@ -299,7 +299,7 @@ intt_layer4567_start:
         str q_data2, [inp, #(-64 + 16*2)]
         str q_data3, [inp, #(-64 + 16*3)]
 
-        subs count, count, #1
+        sub count, count, #1
         cbnz count, intt_layer4567_start
 
         // ---------------------------------------------------------------------
@@ -347,7 +347,7 @@ intt_layer123_start:
         str q_data2, [in, #(-16 + 2*(512/8))]
         str q_data3, [in, #(-16 + 3*(512/8))]
 
-        subs count, count, #1
+        sub count, count, #1
         cbnz count, intt_layer123_start
 
         pop_stack

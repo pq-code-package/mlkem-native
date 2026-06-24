@@ -255,7 +255,7 @@ ntt_layer123_start:
         str q_data6, [in, #(-16 + 6*(512/8))]
         str q_data7, [in, #(-16 + 7*(512/8))]
 
-        subs count, count, #1
+        sub count, count, #1
         cbnz count, ntt_layer123_start
 
         mov in, inp
@@ -291,7 +291,7 @@ ntt_layer4567_start:
         str q_data2, [in, #(-16*2)]
         str q_data3, [in, #(-16*1)]
 
-        subs count, count, #1
+        sub count, count, #1
         cbnz count, ntt_layer4567_start
 
         pop_stack
