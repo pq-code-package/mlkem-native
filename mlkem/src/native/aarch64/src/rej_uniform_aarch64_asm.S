@@ -159,7 +159,6 @@ Lrej_uniform_loop48_end:
         b.hs Lrej_uniform_memory_copy
         cmp x2, #0x18
         b.lo Lrej_uniform_memory_copy
-        sub x2, x2, #0x18
         ld3 { v0.8b, v1.8b, v2.8b }, [x1], #24
         zip1 v4.16b, v0.16b, v1.16b
         zip1 v5.16b, v1.16b, v2.16b
@@ -188,7 +187,6 @@ Lrej_uniform_loop48_end:
         st1 { v16.8h }, [x7]
         add x7, x7, x12, lsl #1
         st1 { v17.8h }, [x7]
-        add x7, x7, x13, lsl #1
         add x9, x9, x12
         add x9, x9, x13
 
@@ -211,7 +209,6 @@ Lrej_uniform_final_copy:
         cmp x11, #0x100
         b.lt Lrej_uniform_final_copy
         mov x0, x9
-        b Lrej_uniform_return
 
 Lrej_uniform_return:
         add sp, sp, #0x240
