@@ -313,7 +313,6 @@ rej_uniform_loop48_end:
     cmp buflen, #24
     b.lo rej_uniform_memory_copy
 
-        sub     buflen, buflen, #24
         ld3     {buf0.8b, buf1.8b, buf2.8b}, [buf], #24
 
         zip1    tmp0.16b, buf0.16b, buf1.16b
@@ -356,7 +355,6 @@ rej_uniform_loop48_end:
         add     output_tmp, output_tmp, ctr0, lsl #1
 
         st1     {val1.8h}, [output_tmp]
-        add     output_tmp, output_tmp, ctr1, lsl #1
 
         add     count, count, ctr0
         add     count, count, ctr1
@@ -385,7 +383,6 @@ rej_uniform_final_copy:
         b.lt rej_uniform_final_copy
 
     mov x0, count
-    b rej_uniform_return
 
 rej_uniform_return:
     pop_stack
