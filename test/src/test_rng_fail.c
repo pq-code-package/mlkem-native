@@ -4,6 +4,7 @@
  */
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 
 /* Expose internal functions */
 #define MLK_BUILD_INTERNAL
@@ -109,12 +110,44 @@ int randombytes(uint8_t *buf, size_t len)
         test_name, num_randombytes_calls);                             \
   } while (0)
 
+static int all_zero(const uint8_t *buf, size_t len)
+{
+  size_t i;
+  for (i = 0; i < len; i++)
+  {
+    if (buf[i] != 0)
+    {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
 static int test_keygen_rng_failure(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
 
   TEST_RNG_FAILURE("crypto_kem_keypair", crypto_kem_keypair(pk, sk));
+
+  memset(pk, 0xA5, sizeof(pk));
+  memset(sk, 0x5A, sizeof(sk));
+  reset_all();
+  randombytes_fail_on_counter = 0;
+  if (crypto_kem_keypair(pk, sk) != MLK_ERR_RNG_FAIL)
+  {
+    fprintf(stderr, "ERROR: crypto_kem_keypair did not fail on RNG failure\n");
+    return 1;
+  }
+  if (!all_zero(pk, sizeof(pk)) || !all_zero(sk, sizeof(sk)))
+  {
+    fprintf(stderr,
+            "ERROR: crypto_kem_keypair did not clear outputs on RNG "
+            "failure\n");
+    return 1;
+  }
+
   return 0;
 }
 
@@ -134,6 +167,23 @@ static int test_enc_rng_failure(void)
   }
 
   TEST_RNG_FAILURE("crypto_kem_enc", crypto_kem_enc(ct, ss, pk));
+
+  memset(ct, 0xA5, sizeof(ct));
+  memset(ss, 0x5A, sizeof(ss));
+  reset_all();
+  randombytes_fail_on_counter = 0;
+  if (crypto_kem_enc(ct, ss, pk) != MLK_ERR_RNG_FAIL)
+  {
+    fprintf(stderr, "ERROR: crypto_kem_enc did not fail on RNG failure\n");
+    return 1;
+  }
+  if (!all_zero(ct, sizeof(ct)) || !all_zero(ss, sizeof(ss)))
+  {
+    fprintf(stderr,
+            "ERROR: crypto_kem_enc did not clear outputs on RNG failure\n");
+    return 1;
+  }
+
   return 0;
 }
 

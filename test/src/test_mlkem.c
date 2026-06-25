@@ -68,6 +68,20 @@ static int test_keys_unaligned(void)
   return test_keys_core(pk + 1, sk + 1, ct + 1, key_a + 1, key_b + 1);
 }
 
+static int all_zero(const uint8_t *buf, size_t len)
+{
+  size_t i;
+  for (i = 0; i < len; i++)
+  {
+    if (buf[i] != 0)
+    {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
 static int test_invalid_pk(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -82,7 +96,11 @@ static int test_invalid_pk(void)
   pk[0] = 0xFF;
   pk[1] |= 0x0F;
   /* Bob derives a secret key and creates a response */
+  memset(ct, 0xA5, sizeof(ct));
+  memset(key_b, 0x5A, sizeof(key_b));
   CHECK(crypto_kem_enc(ct, key_b, pk) != 0);
+  CHECK(all_zero(ct, sizeof(ct)));
+  CHECK(all_zero(key_b, sizeof(key_b)));
   return 0;
 }
 
@@ -125,7 +143,9 @@ static int test_invalid_sk_b(void)
   CHECK(randombytes(sk + CRYPTO_SECRETKEYBYTES - 64, 32) == 0);
   /* Alice uses Bobs response to get her shared key
    * This should fail due to the input validation */
+  memset(key_a, 0xA5, sizeof(key_a));
   CHECK(crypto_kem_dec(key_a, ct, sk) != 0);
+  CHECK(all_zero(key_a, sizeof(key_a)));
   return 0;
 }
 

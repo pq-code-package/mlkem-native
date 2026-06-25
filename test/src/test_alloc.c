@@ -192,6 +192,20 @@ static void reset_all(test_ctx_t *ctx)
   ctx->fail_on_counter = -1;
 }
 
+static int all_zero(const uint8_t *buf, size_t len)
+{
+  size_t i;
+  for (i = 0; i < len; i++)
+  {
+    if (buf[i] != 0)
+    {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
 void *custom_alloc(test_ctx_t *ctx, size_t sz, const char *file, int line,
                    const char *var, const char *type)
 {
@@ -329,6 +343,49 @@ void custom_free(test_ctx_t *ctx, void *p, size_t sz, const char *file,
     }                                                                          \
   } while (0)
 
+#define TEST_ALLOC_FAILURE_CLEARS_OUTPUTS(test_name, setup_outputs, call,    \
+                                          outputs_are_clear)                 \
+  do                                                                         \
+  {                                                                          \
+    int num_allocs, i, rc;                                                   \
+    reset_all(ctx);                                                          \
+    rc = call;                                                               \
+    if (rc != 0)                                                             \
+    {                                                                        \
+      fprintf(stderr, "ERROR: %s failed with %d in cleanup counting pass\n", \
+              test_name, rc);                                                \
+      return 1;                                                              \
+    }                                                                        \
+    num_allocs = ctx->alloc_counter;                                         \
+    for (i = 0; i < num_allocs; i++)                                         \
+    {                                                                        \
+      reset_all(ctx);                                                        \
+      setup_outputs;                                                         \
+      ctx->fail_on_counter = i;                                              \
+      rc = call;                                                             \
+      if (rc != MLK_ERR_OUT_OF_MEMORY)                                       \
+      {                                                                      \
+        fprintf(stderr,                                                      \
+                "ERROR: %s returned %d instead of %d when allocation %d/%d " \
+                "was instrumented to fail\n",                                \
+                test_name, rc, MLK_ERR_OUT_OF_MEMORY, i + 1, num_allocs);    \
+        return 1;                                                            \
+      }                                                                      \
+      if (!(outputs_are_clear))                                              \
+      {                                                                      \
+        fprintf(stderr,                                                      \
+                "ERROR: %s left stale caller output after allocation %d/%d " \
+                "failed\n",                                                  \
+                test_name, i + 1, num_allocs);                               \
+        return 1;                                                            \
+      }                                                                      \
+    }                                                                        \
+    printf(                                                                  \
+        "Allocation output cleanup test for %s PASSED.\n"                    \
+        "  Checked %d allocation failure point(s)\n",                        \
+        test_name, num_allocs);                                              \
+  } while (0)
+
 static int test_keygen_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -336,6 +393,14 @@ static int test_keygen_alloc_failure(test_ctx_t *ctx)
 
   TEST_ALLOC_FAILURE("crypto_kem_keypair", crypto_kem_keypair(pk, sk, ctx),
                      MLK_TOTAL_ALLOC_KEYPAIR, &ctx->global_high_mark_keypair);
+  TEST_ALLOC_FAILURE_CLEARS_OUTPUTS(
+      "crypto_kem_keypair",
+      {
+        memset(pk, 0xA5, sizeof(pk));
+        memset(sk, 0x5A, sizeof(sk));
+      },
+      crypto_kem_keypair(pk, sk, ctx),
+      all_zero(pk, sizeof(pk)) && all_zero(sk, sizeof(sk)));
   return 0;
 }
 
@@ -356,6 +421,14 @@ static int test_enc_alloc_failure(test_ctx_t *ctx)
 
   TEST_ALLOC_FAILURE("crypto_kem_enc", crypto_kem_enc(ct, key, pk, ctx),
                      MLK_TOTAL_ALLOC_ENCAPS, &ctx->global_high_mark_encaps);
+  TEST_ALLOC_FAILURE_CLEARS_OUTPUTS(
+      "crypto_kem_enc",
+      {
+        memset(ct, 0xA5, sizeof(ct));
+        memset(key, 0x5A, sizeof(key));
+      },
+      crypto_kem_enc(ct, key, pk, ctx),
+      all_zero(ct, sizeof(ct)) && all_zero(key, sizeof(key)));
   return 0;
 }
 
@@ -383,6 +456,9 @@ static int test_dec_alloc_failure(test_ctx_t *ctx)
 
   TEST_ALLOC_FAILURE("crypto_kem_dec", crypto_kem_dec(key_dec, ct, sk, ctx),
                      MLK_TOTAL_ALLOC_DECAPS, &ctx->global_high_mark_decaps);
+  TEST_ALLOC_FAILURE_CLEARS_OUTPUTS(
+      "crypto_kem_dec", memset(key_dec, 0xA5, sizeof(key_dec)),
+      crypto_kem_dec(key_dec, ct, sk, ctx), all_zero(key_dec, sizeof(key_dec)));
   return 0;
 }
 
