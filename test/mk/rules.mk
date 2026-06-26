@@ -1,20 +1,23 @@
 # Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
+# Link step for a test binary. By default links the prerequisite objects; a
+# platform may override it via CUSTOM_BUILD (e.g. Zephyr builds a firmware image
+# from the sources -- see test/zephyr/platform.mk). Expanded in the recipe, so
+# it can use $@ and target-specific variables like TEST_SRCS.
+LINK = $(if $(strip $(CUSTOM_BUILD)),$(CUSTOM_BUILD),echo "  LD      $@" && $(LD) $(LDFLAGS) -o $@ $(filter %.o,$^) $(LDLIBS))
+
 $(BUILD_DIR)/mlkem512/bin/%: $(CONFIG)
-	$(Q)echo "  LD      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(LD) $(LDFLAGS) -o $@ $(filter %.o,$^) $(LDLIBS)
+	$(Q)$(LINK)
 
 $(BUILD_DIR)/mlkem768/bin/%: $(CONFIG)
-	$(Q)echo "  LD      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(LD) $(LDFLAGS) -o $@ $(filter %.o,$^) $(LDLIBS)
+	$(Q)$(LINK)
 
 $(BUILD_DIR)/mlkem1024/bin/%: $(CONFIG)
-	$(Q)echo "  LD      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(LD) $(LDFLAGS) -o $@ $(filter %.o,$^) $(LDLIBS)
+	$(Q)$(LINK)
 
 $(BUILD_DIR)/%.a: $(CONFIG)
 	$(Q)echo "  AR      $@"
