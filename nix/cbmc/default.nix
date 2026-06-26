@@ -15,19 +15,13 @@ buildEnv {
   paths =
     builtins.attrValues {
       cbmc = cbmc.overrideAttrs (_: {
-        # We pin an unstable CBMC develop snapshot rather than the 6.9.0
-        # release to pick up the workaround for the z3 soundness issue
-        # (https://github.com/pq-code-package/mlkem-native/issues/1744,
-        # https://github.com/diffblue/cbmc/pull/9011).
-        # TODO: switch back to a tagged release once one ships with the fix.
-        version = "6.9.0-unstable-2026-06-13";
+        version = "6.10.0";
         src = fetchFromGitHub {
           owner = "diffblue";
           repo = "cbmc";
-          hash = "sha256-2RcLAttkORSv3DqwIb1pj73aeYYY6r1RGpytTIW5NAc=";
-          rev = "7750282a89dc57bb1a8e5a1ec544e8584be0cee4";
+          hash = "sha256-GCagpb2TFhOEH+lzMth+PWiJxlEw0L+H1DYUEQoMF3g=";
+          tag = "cbmc-6.10.0";
         };
-        doInstallCheck = false;
       });
       litani = callPackage ./litani.nix { }; # 1.29.0
       cbmc-viewer = callPackage ./cbmc-viewer.nix { }; # 3.12
