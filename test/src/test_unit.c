@@ -30,6 +30,13 @@
 #endif
 #endif /* !NUM_RANDOM_TESTS_REJ_UNIFORM */
 
+/* Largest absolute constant-coefficient value the invNTT overflow test sweeps.
+ * Defaults to a full INT16 sweep; an emulated target (e.g. QEMU) can lower it
+ * to keep the run within its time budget. */
+#ifndef MAX_INTT_CONSTANT_COEFF
+#define MAX_INTT_CONSTANT_COEFF INT16_MAX
+#endif
+
 /* Declarations for _c functions exposed by MLK_STATIC_TESTABLE= */
 
 void mlk_poly_reduce_c(mlk_poly *r);
@@ -540,7 +547,7 @@ static int test_native_intt(void)
    *
    * Gradually increase absolute value to find smallest failure first.
    */
-  for (coeff = 0; coeff <= INT16_MAX; coeff++)
+  for (coeff = 0; coeff <= MAX_INTT_CONSTANT_COEFF; coeff++)
   {
     generate_i16_array_constant(test_data, MLKEM_N, (int16_t)coeff);
     CHECK(test_intt_core(test_data, "intt_constant") == 0);
@@ -1216,6 +1223,10 @@ cleanup:
 
 
 
+/* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
+#if defined(main)
+int main(void);
+#endif
 int main(void)
 {
   /* WARNING: Test-only
