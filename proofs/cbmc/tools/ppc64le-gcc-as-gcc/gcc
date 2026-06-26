@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+exec powerpc64le-unknown-linux-gnu-gcc "$@"

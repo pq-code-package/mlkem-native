@@ -80,6 +80,7 @@
           packages.toolchains = util.toolchains;
           packages.toolchains_native = util.toolchains_native;
           packages.toolchain_x86_64 = util.toolchain_x86_64;
+          packages.toolchain_i686 = util.toolchain_i686;
           packages.toolchain_aarch64 = util.toolchain_aarch64;
           packages.toolchain_riscv64 = util.toolchain_riscv64;
           packages.toolchain_riscv32 = util.toolchain_riscv32;
@@ -129,6 +130,17 @@
           };
           devShells.cbmc = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) cbmc toolchains_native; } ++ [ pkgs.gh ];
+          };
+          devShells.cbmc32 = util.mkShell {
+            packages = builtins.attrValues {
+              inherit (config.packages)
+                cbmc
+                toolchain_i686
+                toolchain_x86_64
+                toolchain_aarch64
+                toolchain_riscv64
+                toolchain_ppc64le;
+            } ++ [ pkgs.gh ];
           };
           devShells.slothy = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) slothy linters toolchains_native; };
