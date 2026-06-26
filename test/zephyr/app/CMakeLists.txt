@@ -7,29 +7,44 @@ project(mlkem_native_zephyr)
 
 # Parameters supplied via -D from platform.mk:
 #   ZEPHYR_NATIVE_ROOT - mlkem-native checkout the test is built from
-#   ZEPHYR_LEVEL       - ML-KEM parameter set: 512 | 768 | 1024
-#   ZEPHYR_TEST_SRC    - test entrypoint, relative to ZEPHYR_NATIVE_ROOT
-#   ZEPHYR_TEST_DEFS   - optional extra -D defines (space separated)
+#   ZEPHYR_TEST_SRCS   - test sources (entrypoint + support, e.g. notrandombytes
+#                        and -- for bench -- the HAL), relative to
+#                        ZEPHYR_NATIVE_ROOT, space separated
+#   ZEPHYR_TEST_CFLAGS - the test binary's CFLAGS (see below); includes the
+#                        parameter set (-DMLK_CONFIG_PARAMETER_SET=...)
 set(R ${ZEPHYR_NATIVE_ROOT})
+
+separate_arguments(_test_srcs UNIX_COMMAND "${ZEPHYR_TEST_SRCS}")
+list(TRANSFORM _test_srcs PREPEND ${R}/)
 
 target_sources(app PRIVATE
   ${R}/mlkem/mlkem_native.c
-  ${R}/${ZEPHYR_TEST_SRC}
-  ${R}/test/notrandombytes/notrandombytes.c
+  ${_test_srcs}
   ${CMAKE_CURRENT_SOURCE_DIR}/shim.c
 )
 
 target_include_directories(app PRIVATE
   ${R}/mlkem
   ${R}/test/notrandombytes
+  ${R}/test/hal
 )
 
-target_compile_definitions(app PRIVATE MLK_CONFIG_PARAMETER_SET=${ZEPHYR_LEVEL})
-
-if(ZEPHYR_TEST_DEFS)
-  separate_arguments(_defs UNIX_COMMAND "${ZEPHYR_TEST_DEFS}")
-  target_compile_definitions(app PRIVATE ${_defs})
+# The test binary's CFLAGS, forwarded from the build (test/zephyr/platform.mk
+# assembles and escapes them) and applied to the mlkem amalgamation and the test
+# sources alike, so both honour the project's own warning/opt/std policy and
+# per-test feature defines rather than a divergent Zephyr default.
+if(ZEPHYR_TEST_CFLAGS)
+  separate_arguments(_cflags UNIX_COMMAND "${ZEPHYR_TEST_CFLAGS}")
+  target_compile_options(app PRIVATE ${_cflags})
 endif()
+
+# The benchmark HAL is the only test source that pulls in Zephyr SDK headers
+# (<zephyr/kernel.h> for the cycle counter). Those headers are not clean under
+# the project's strict, -Werror'd warning set forwarded above (e.g.
+# -Wconversion, -Wsign-conversion, -pedantic), so drop -Werror just for this
+# file -- our own sources stay strict.
+set_source_files_properties(${R}/test/hal/hal.c
+  PROPERTIES COMPILE_OPTIONS "-Wno-error")
 
 # Optional native FIPS202 backend (e.g. Armv8.1-M MVE on Cortex-M55). The
 # monolithic mlkem_native.c already includes the backend C sources; its
@@ -41,13 +56,9 @@ if(ZEPHYR_FIPS202_BACKEND)
     "MLK_CONFIG_FIPS202_BACKEND_FILE=\"${ZEPHYR_FIPS202_BACKEND}\"")
 endif()
 
-# The bench tests need the cycle-counting HAL.
-if(ZEPHYR_TEST_HAL)
-  target_sources(app PRIVATE ${R}/test/hal/hal.c)
-  target_include_directories(app PRIVATE ${R}/test/hal)
-endif()
-
 # Each test brings its own int main(void); rename it so the Zephyr shim
-# (shim.c) owns main() and can stop QEMU with the test's exit code.
-set_source_files_properties(${R}/${ZEPHYR_TEST_SRC}
+# (shim.c) owns main() and can stop QEMU with the test's exit code. Only the
+# test entrypoint in ZEPHYR_TEST_SRCS defines main(); the support sources
+# (notrandombytes, hal) don't, so applying the define to all is harmless.
+set_source_files_properties(${_test_srcs}
   PROPERTIES COMPILE_DEFINITIONS "main=mlk_test_main")
