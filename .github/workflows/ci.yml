@@ -18,7 +18,11 @@ jobs:
            name: 'macOS (aarch64)'
            arch: mac
            mode: native
-           nix_shell: ci
+           # macos-latest is now the macOS 26 (Tahoe) image, whose clang 21
+           # ASan runtime deadlocks at process startup (see backend_tests).
+           # Build this target with clang 22, which carries the compiler-rt
+           # fix (llvm/llvm-project#191039, backport #192082).
+           nix_shell: clang22
          - runner: macos-15-intel
            name: 'macOS (x86_64)'
            arch: mac
@@ -114,6 +118,7 @@ jobs:
         uses: ./.github/actions/multi-functest
         if: ${{ matrix.target.mode == 'native' }}
         with:
+          nix-shell: ${{ matrix.target.nix_shell }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
           cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
@@ -186,7 +191,12 @@ jobs:
       - name: build + test
         uses: ./.github/actions/multi-functest
         with:
-          nix-shell: 'ci'
+          # clang 22 shell: the default `ci` shell's clang 21 ASan runtime
+          # deadlocks at process startup on the macos-latest / macOS 26 (Tahoe)
+          # image (compiler-rt shadow-memory init; same symptom as
+          # python/cpython#145199), fixed in LLVM >= 22 by
+          # llvm/llvm-project#191039 (backport #192082).
+          nix-shell: 'clang22'
           nix-cache: 'false'
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: 'native'
