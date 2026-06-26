@@ -414,7 +414,7 @@ class Tests:
         return res
 
     def make_j(self):
-        if self.args.j is None or int(self.args.j) == 1:
+        if self.args.j is None:
             return []
         return [f"-j{self.args.j}"]
 
@@ -930,8 +930,14 @@ class Tests:
                 print(p)
             exit(0)
 
-        def run_cbmc_single_step(mlkem_k, proofs):
+        def cbmc_envvars(mlkem_k):
             envvars = {"MLKEM_K": mlkem_k}
+            if self.args.cbmc_target is not None:
+                envvars["CBMC_TARGET"] = self.args.cbmc_target
+            return envvars
+
+        def run_cbmc_single_step(mlkem_k, proofs):
+            envvars = cbmc_envvars(mlkem_k)
             scheme = SCHEME.from_k(mlkem_k)
             num_proofs = len(proofs)
             for i, func in enumerate(proofs):
@@ -1000,7 +1006,7 @@ class Tests:
             if self.args.single_step:
                 run_cbmc_single_step(mlkem_k, proofs)
                 return
-            envvars = {"MLKEM_K": mlkem_k}
+            envvars = cbmc_envvars(mlkem_k)
             cmd = (
                 [
                     "python3",
@@ -1496,6 +1502,19 @@ def cli():
     cbmc_parser.add_argument(
         "--output-result-json",
         help="Path to export result JSON",
+        default=None,
+    )
+
+    cbmc_parser.add_argument(
+        "--cbmc-target",
+        help="CBMC target platform; omit to use the default host model",
+        choices=[
+            "i386-linux",
+            "x86_64-linux",
+            "aarch64-linux",
+            "riscv64-linux",
+            "ppc64le-linux",
+        ],
         default=None,
     )
 
