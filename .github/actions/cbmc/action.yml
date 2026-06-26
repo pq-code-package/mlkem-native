@@ -20,6 +20,24 @@ inputs:
   mlkem_k:
     description: "Security level for ML-KEM (2,3,4)"
     default: "2"
+  cbmc-target:
+    description: "CBMC target platform; empty uses the default host model"
+    default: ""
+  proofs:
+    description: "Space-separated proof patterns to run; empty runs all proofs"
+    default: ""
+  single-step:
+    description: "Run proofs one at a time"
+    default: "false"
+  timeout:
+    description: "Timeout for individual CBMC proofs, in seconds"
+    default: "3600"
+  per-proof-timeout:
+    description: "Timeout passed to run-cbmc-proofs.py for each proof"
+    default: "1800"
+  report:
+    description: "Publish CBMC runtime regression report"
+    default: "true"
   gh_token:
     description: Github access token to use
     required: true
@@ -53,14 +71,44 @@ runs:
         env:
           GH_TOKEN: ${{ inputs.gh_token }}
         run: |
-          echo "::group::cbmc_${{ inputs.mlkem_k }}"
-          tests cbmc --mlkem-parameter-set ${{ inputs.mlkem_k }} --per-proof-timeout 1800 --output-result-json ${{ github.workspace }}/cbmc_result_k${{ inputs.mlkem_k }}.json || cbmc_failed=true
+          cbmc_failed=false
+          cbmc_target="${{ inputs.cbmc-target }}"
+          group_name="cbmc_${{ inputs.mlkem_k }}"
+          result_suffix=""
+          if [ -n "$cbmc_target" ]; then
+            group_name="${group_name}_${cbmc_target}"
+            result_suffix="_${cbmc_target//[^A-Za-z0-9_.-]/_}"
+          fi
+          result_json="${{ github.workspace }}/cbmc_result_k${{ inputs.mlkem_k }}${result_suffix}.json"
+          cbmc_args=(
+            --mlkem-parameter-set "${{ inputs.mlkem_k }}"
+            --timeout "${{ inputs.timeout }}"
+            --per-proof-timeout "${{ inputs.per-proof-timeout }}"
+          )
+          if [ -n "$cbmc_target" ]; then
+            cbmc_args+=(--cbmc-target "$cbmc_target")
+          fi
+          proofs="${{ inputs.proofs }}"
+          if [ -n "$proofs" ]; then
+            read -r -a proof_args <<< "$proofs"
+            cbmc_args+=(-p "${proof_args[@]}")
+          fi
+          if [ "${{ inputs.single-step }}" = "true" ]; then
+            cbmc_args+=(--single-step --fail-upon-error)
+          fi
+          if [ "${{ inputs.report }}" = "true" ]; then
+            cbmc_args+=(--output-result-json "$result_json")
+          fi
+          echo "::group::$group_name"
+          tests cbmc "${cbmc_args[@]}" || cbmc_failed=true
           echo "::endgroup::"
-          python3 ${{ github.action_path }}/report.py \
-            --results-json "${{ github.workspace }}/cbmc_result_k${{ inputs.mlkem_k }}.json" \
-            --mlkem-k "${{ inputs.mlkem_k }}" \
-            --min-runtime 20 \
-            --regression-threshold 1.5 \
-            --gh-pages-branch gh-pages \
-            --data-dir dev/cbmc
+          if [ "${{ inputs.report }}" = "true" ]; then
+            python3 ${{ github.action_path }}/report.py \
+              --results-json "$result_json" \
+              --mlkem-k "${{ inputs.mlkem_k }}" \
+              --min-runtime 20 \
+              --regression-threshold 1.5 \
+              --gh-pages-branch gh-pages \
+              --data-dir dev/cbmc
+          fi
           if [ "$cbmc_failed" = "true" ]; then exit 1; fi

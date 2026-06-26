@@ -1,2 +1,5 @@
 #!/usr/bin/env sh
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
 exec i686-unknown-linux-gnu-gcc "$@"
