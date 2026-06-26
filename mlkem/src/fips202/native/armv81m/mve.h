@@ -17,6 +17,7 @@
 
 #if !defined(__ASSEMBLER__)
 #include "../api.h"
+#include "src/fips202_native_armv81m.h"
 
 /*
  * Native x4 permutation
@@ -35,42 +36,27 @@ static MLK_INLINE int mlk_keccak_f1600_x4_native(uint64_t *state)
 /*
  * Native x4 XOR bytes (with on-the-fly bit interleaving)
  */
-#define mlk_keccak_f1600_x4_state_xor_bytes \
-  MLK_NAMESPACE(keccak_f1600_x4_state_xor_bytes_asm)
-void mlk_keccak_f1600_x4_state_xor_bytes(void *state, const uint8_t *data0,
-                                         const uint8_t *data1,
-                                         const uint8_t *data2,
-                                         const uint8_t *data3, unsigned offset,
-                                         unsigned length);
-
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_keccakf1600_xor_bytes_x4_native(
     uint64_t *state, const uint8_t *data0, const uint8_t *data1,
     const uint8_t *data2, const uint8_t *data3, unsigned offset,
     unsigned length)
 {
-  mlk_keccak_f1600_x4_state_xor_bytes(state, data0, data1, data2, data3, offset,
-                                      length);
+  mlk_keccak_f1600_x4_state_xor_bytes_asm(state, data0, data1, data2, data3,
+                                          offset, length);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
 /*
  * Native x4 extract bytes (with on-the-fly bit de-interleaving)
  */
-#define mlk_keccak_f1600_x4_state_extract_bytes \
-  MLK_NAMESPACE(keccak_f1600_x4_state_extract_bytes_asm)
-void mlk_keccak_f1600_x4_state_extract_bytes(void *state, uint8_t *data0,
-                                             uint8_t *data1, uint8_t *data2,
-                                             uint8_t *data3, unsigned offset,
-                                             unsigned length);
-
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_keccakf1600_extract_bytes_x4_native(
     uint64_t *state, uint8_t *data0, uint8_t *data1, uint8_t *data2,
     uint8_t *data3, unsigned offset, unsigned length)
 {
-  mlk_keccak_f1600_x4_state_extract_bytes(state, data0, data1, data2, data3,
-                                          offset, length);
+  mlk_keccak_f1600_x4_state_extract_bytes_asm(state, data0, data1, data2, data3,
+                                              offset, length);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
