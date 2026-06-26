@@ -100,6 +100,10 @@ static void print_hex(const char *name, const unsigned char *raw, size_t len)
   printf("\n");
 }
 
+/* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
+#if defined(main)
+int main(int argc, char *argv[]);
+#endif
 int main(int argc, char *argv[])
 {
   if (argc < 2)

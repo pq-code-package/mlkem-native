@@ -160,6 +160,10 @@ static int test_invalid_ciphertext(void)
   return 0;
 }
 
+/* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
+#if defined(main)
+int main(void);
+#endif
 int main(void)
 {
   unsigned i;

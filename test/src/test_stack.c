@@ -43,6 +43,10 @@ static void test_decaps_only(void)
   (void)ret; /* Ignore return value - we only care about stack measurement */
 }
 
+/* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
+#if defined(main)
+int main(int argc, char *argv[]);
+#endif
 int main(int argc, char *argv[])
 {
   if (argc != 2)

@@ -199,6 +199,10 @@ static int test_check_sk_rng_failure(void)
   return 0;
 }
 
+/* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
+#if defined(main)
+int main(void);
+#endif
 int main(void)
 {
   if (test_keygen_rng_failure() != 0)
