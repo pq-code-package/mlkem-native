@@ -118,15 +118,16 @@
             packages = builtins.attrValues { inherit (config.packages) cbmc toolchains_native; } ++ [ pkgs.gh ];
           };
           devShells.cbmc32 = util.mkShell {
-            packages = builtins.attrValues {
-              inherit (config.packages)
-                cbmc
-                toolchain_i686
-                toolchain_x86_64
-                toolchain_aarch64
-                toolchain_riscv64
-                toolchain_ppc64le;
-            } ++ [ pkgs.gh ];
+            packages = builtins.attrValues
+              {
+                inherit (config.packages)
+                  cbmc
+                  toolchain_i686
+                  toolchain_x86_64
+                  toolchain_aarch64
+                  toolchain_riscv64
+                  toolchain_ppc64le;
+              } ++ [ pkgs.gh ];
           };
           devShells.slothy = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) slothy linters toolchains_native; };
