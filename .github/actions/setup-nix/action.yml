@@ -98,7 +98,10 @@ runs:
           sudo chown -R $USER:nixbld /nix
         fi
 
-        nix profile install nixpkgs/nixos-24.11#sqlite
+        # sqlite3 is needed by cache-nix-action to merge the Nix store database.
+        if ! command -v sqlite3 >/dev/null 2>&1; then
+          sudo apt-get update && sudo apt-get install -y sqlite3
+        fi
         nix config show
         echo "::endgroup::"
     - uses: nix-community/cache-nix-action@dab0514428ae3988852b7787a6d86a6fc571cc9d #v6.0.0
