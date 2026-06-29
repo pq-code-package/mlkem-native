@@ -51,8 +51,9 @@
 // ---------------------------------------------------------------------------
 //   Prologue -- if offset is not 8-byte aligned, absorb
 //               min(length, 8-(offset%8)) bytes via predicated byte loads.
-//   Main     -- process full 8-byte groups via word-level gather loads,
-//               bit-interleave, then VEOR into even/odd state halves.
+//   Main     -- process full 8-byte groups via vldrw.u32 gather loads when
+//               32-bit aligned, otherwise byte loads; bit-interleave, then
+//               VEOR into even/odd state halves.
 //   Tail     -- absorb remaining <8 bytes via predicated byte loads.
 
 #include "../../../../common.h"
@@ -303,13 +304,13 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
     lsl mask, mask, off
     vmsr p0, mask
 
-    // Predicated byte loads of nB bytes per instance; post-increment of 4
-    // positions qP for the main loop's [qP, #4]! loads.
+    // Predicated byte loads of nB bytes per instance; post-increment to the
+    // next lane start.
     vpstttt
-    vldrbt.u8 qd0, [dp0], #4
-    vldrbt.u8 qd1, [dp1], #4
-    vldrbt.u8 qd2, [dp2], #4
-    vldrbt.u8 qd3, [dp3], #4
+    vldrbt.u8 qd0, [dp0], #8
+    vldrbt.u8 qd1, [dp1], #8
+    vldrbt.u8 qd2, [dp2], #8
+    vldrbt.u8 qd3, [dp3], #8
 
     // Transpose from per-instance layout to per-lane layout
     transpose_streams_to_lanes
@@ -320,12 +321,14 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
     // XOR into state (post-increments rSE/rSO by 16)
     xor_lane_and_store_postinc q0, q1, qS0, qS1, rSE, rSO
 
-    // Build qP = {d0,d1,d2,d3} as u32 lanes for gather loads
-    vmov    qP[2], qP[0],  dp0, dp2
-    vmov    qP[3], qP[1],  dp1, dp3
-    b       keccak_f1600_x4_state_xor_bytes_asm_main_body
-
 keccak_f1600_x4_state_xor_bytes_asm_pre_main:
+    // dpN points at the next lane start; vldrw requires 32-bit alignment.
+    orr     tmp, dp0, dp1
+    orr     tmp, tmp, dp2
+    orr     tmp, tmp, dp3
+    tst     tmp, #3
+    bne     keccak_f1600_x4_state_xor_bytes_asm_main_body_byte
+
     vmov    qP[2], qP[0],  dp0, dp2
     vmov    qP[3], qP[1],  dp1, dp3
     mov     tmp, #4
@@ -333,7 +336,7 @@ keccak_f1600_x4_state_xor_bytes_asm_pre_main:
 
 keccak_f1600_x4_state_xor_bytes_asm_main_body:
     // -----------------------------------------------------------------------
-    // MAIN: process full 8-byte lanes
+    // MAIN: process full 8-byte lanes with aligned gather-word loads
     // -----------------------------------------------------------------------
     lsr     lr, length, #3
     wls     lr, lr, keccak_f1600_x4_state_xor_bytes_asm_main_loop_end
@@ -351,9 +354,6 @@ keccak_f1600_x4_state_xor_bytes_asm_main_loop_start:
     le      lr, keccak_f1600_x4_state_xor_bytes_asm_main_loop_start
 keccak_f1600_x4_state_xor_bytes_asm_main_loop_end:
 
-    // -----------------------------------------------------------------------
-    // TAIL: absorb <8 remaining bytes at lane offset 0
-    // -----------------------------------------------------------------------
     ands    length, length, #7
     beq     keccak_f1600_x4_state_xor_bytes_asm_exit
 
@@ -363,12 +363,25 @@ keccak_f1600_x4_state_xor_bytes_asm_main_loop_end:
     vmov    dp0, dp2, qP[2], qP[0]
     vmov    dp1, dp3, qP[3], qP[1]
 
-    vctp.8  length
+keccak_f1600_x4_state_xor_bytes_asm_main_body_byte:
+    // -----------------------------------------------------------------------
+    // MAIN/TAIL: process remaining lanes using predicated byte loads
+    // -----------------------------------------------------------------------
+    cmp     length, #0
+    beq     keccak_f1600_x4_state_xor_bytes_asm_exit
+keccak_f1600_x4_state_xor_bytes_asm_main_loop_byte_start:
+    // Predicate with min(length, 8): a plain MVE byte vector load would
+    // over-read the Keccak lane, and the last iteration may be a partial tail.
+    mov     nB, #8
+    cmp     length, #8
+    it      lo
+    movlo   nB, length
+    vctp.8  nB
     vpstttt
-    vldrbt.u8   qd0, [dp0]
-    vldrbt.u8   qd1, [dp1]
-    vldrbt.u8   qd2, [dp2]
-    vldrbt.u8   qd3, [dp3]
+    vldrbt.u8 qd0, [dp0], #8
+    vldrbt.u8 qd1, [dp1], #8
+    vldrbt.u8 qd2, [dp2], #8
+    vldrbt.u8 qd3, [dp3], #8
 
     // Transpose from per-instance layout to per-lane layout
     transpose_streams_to_lanes
@@ -377,7 +390,10 @@ keccak_f1600_x4_state_xor_bytes_asm_main_loop_end:
     to_bit_interleaving_4x q0, q1, q2, q3, q4
 
     // XOR into state (post-increments rSE/rSO by 16)
-    xor_lane_and_store_postinc qd0, qd1, qS0, qS1, rSE, rSO
+    xor_lane_and_store_postinc q0, q1, qS0, qS1, rSE, rSO
+
+    subs    length, length, nB
+    bne     keccak_f1600_x4_state_xor_bytes_asm_main_loop_byte_start
 
 keccak_f1600_x4_state_xor_bytes_asm_exit:
     vpop    {d8-d15}

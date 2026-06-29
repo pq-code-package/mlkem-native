@@ -836,10 +836,10 @@ static int test_keccakf1600x4_xor_permute_extract(void)
   MLK_ALLOC(output_x4_1, unsigned char, MAX_RATE, NULL);
   MLK_ALLOC(output_x4_2, unsigned char, MAX_RATE, NULL);
   MLK_ALLOC(output_x4_3, unsigned char, MAX_RATE, NULL);
-  MLK_ALLOC(input_0, unsigned char, MAX_RATE, NULL);
-  MLK_ALLOC(input_1, unsigned char, MAX_RATE, NULL);
-  MLK_ALLOC(input_2, unsigned char, MAX_RATE, NULL);
-  MLK_ALLOC(input_3, unsigned char, MAX_RATE, NULL);
+  MLK_ALLOC(input_0, unsigned char, MAX_RATE + 3, NULL);
+  MLK_ALLOC(input_1, unsigned char, MAX_RATE + 3, NULL);
+  MLK_ALLOC(input_2, unsigned char, MAX_RATE + 3, NULL);
+  MLK_ALLOC(input_3, unsigned char, MAX_RATE + 3, NULL);
 
   unsigned char *output_x4[MLK_KECCAK_WAY];
   unsigned char *input[MLK_KECCAK_WAY];
@@ -875,6 +875,10 @@ static int test_keccakf1600x4_xor_permute_extract(void)
     ext_length = (uint8_t)(1 + (ext_length % (MAX_RATE - ext_offset)));
 
     /* Generate different random input for each lane */
+    input[0] = input_0 + (((unsigned)i + 0u) & 3u);
+    input[1] = input_1 + (((unsigned)i + 1u) & 3u);
+    input[2] = input_2 + (((unsigned)i + 2u) & 3u);
+    input[3] = input_3 + (((unsigned)i + 3u) & 3u);
     for (j = 0; j < MLK_KECCAK_WAY; j++)
     {
       randombytes(input[j], xor_length);
@@ -905,10 +909,10 @@ static int test_keccakf1600x4_xor_permute_extract(void)
   ret = 0;
 
 cleanup:
-  MLK_FREE(input_3, unsigned char, MAX_RATE, NULL);
-  MLK_FREE(input_2, unsigned char, MAX_RATE, NULL);
-  MLK_FREE(input_1, unsigned char, MAX_RATE, NULL);
-  MLK_FREE(input_0, unsigned char, MAX_RATE, NULL);
+  MLK_FREE(input_3, unsigned char, MAX_RATE + 3, NULL);
+  MLK_FREE(input_2, unsigned char, MAX_RATE + 3, NULL);
+  MLK_FREE(input_1, unsigned char, MAX_RATE + 3, NULL);
+  MLK_FREE(input_0, unsigned char, MAX_RATE + 3, NULL);
   MLK_FREE(output_x4_3, unsigned char, MAX_RATE, NULL);
   MLK_FREE(output_x4_2, unsigned char, MAX_RATE, NULL);
   MLK_FREE(output_x4_1, unsigned char, MAX_RATE, NULL);
