@@ -651,6 +651,14 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2_asm)
    vmovhpd %xmm3, 0x188(%rdi)
    vmovq %xmm15, 0x250(%rdi)
    vmovhpd %xmm15, 0x318(%rdi)
+
+   // Clear the scratch frame before releasing it.
+   vpxor %ymm0, %ymm0, %ymm0
+   .set .Lclear_stack_offset, 0
+   .rept 24
+   vmovdqu %ymm0, .Lclear_stack_offset(%rsp)
+   .set .Lclear_stack_offset, .Lclear_stack_offset + 32
+   .endr
    movq   %r11, %rsp
    ret
 

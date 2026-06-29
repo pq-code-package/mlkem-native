@@ -1626,6 +1626,14 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_mve_asm)
 
     le lr, keccak_f1600_x4_mve_asm_roundstart
 keccak_f1600_x4_mve_asm_roundend:
+    // Clear the 0x80-byte scratch frame before releasing it.
+    movs r0, #0
+    vdup.32 q0, r0
+    .set .Lclear_stack_offset, 0
+    .rept 8
+    vstrw.32 q0, [r13, #.Lclear_stack_offset]
+    .set .Lclear_stack_offset, .Lclear_stack_offset + 16
+    .endr
     add sp, #8*16
 
     vpop {d8-d15}
