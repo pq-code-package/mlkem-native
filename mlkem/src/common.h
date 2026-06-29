@@ -188,36 +188,11 @@
 #error Bad configuration: MLK_CONFIG_CUSTOM_ALLOC_FREE must be set together with MLK_CUSTOM_ALLOC and MLK_CUSTOM_FREE
 #endif
 
-/*
- * If the integration wants to provide a context parameter for use in
- * platform-specific hooks, then it should define this parameter.
- *
- * The MLK_CONTEXT_PARAMETERS_n macros are intended to be used with macros
- * defining the function names and expand to either pass or discard the context
- * argument as required by the current build.  If there is no context parameter
- * requested then these are removed from the prototypes and from all calls.
- */
-#ifdef MLK_CONFIG_CONTEXT_PARAMETER
-#define MLK_CONTEXT_PARAMETERS_0(context) (context)
-#define MLK_CONTEXT_PARAMETERS_1(arg0, context) (arg0, context)
-#define MLK_CONTEXT_PARAMETERS_2(arg0, arg1, context) (arg0, arg1, context)
-#define MLK_CONTEXT_PARAMETERS_3(arg0, arg1, arg2, context) \
-  (arg0, arg1, arg2, context)
-#define MLK_CONTEXT_PARAMETERS_4(arg0, arg1, arg2, arg3, context) \
-  (arg0, arg1, arg2, arg3, context)
-#else /* MLK_CONFIG_CONTEXT_PARAMETER */
-#define MLK_CONTEXT_PARAMETERS_0(context) ()
-#define MLK_CONTEXT_PARAMETERS_1(arg0, context) (arg0)
-#define MLK_CONTEXT_PARAMETERS_2(arg0, arg1, context) (arg0, arg1)
-#define MLK_CONTEXT_PARAMETERS_3(arg0, arg1, arg2, context) (arg0, arg1, arg2)
-#define MLK_CONTEXT_PARAMETERS_4(arg0, arg1, arg2, arg3, context) \
-  (arg0, arg1, arg2, arg3)
-#endif /* !MLK_CONFIG_CONTEXT_PARAMETER */
-
-#if defined(MLK_CONFIG_CONTEXT_PARAMETER_TYPE) != \
-    defined(MLK_CONFIG_CONTEXT_PARAMETER)
-#error MLK_CONFIG_CONTEXT_PARAMETER_TYPE must be defined if and only if MLK_CONFIG_CONTEXT_PARAMETER is defined
-#endif
+/* Context-parameter machinery (MLK_CONTEXT_PARAMETERS_n and related config
+ * checks). Kept in a separate, level-generic header for readability; included
+ * here so it is available to the allocation macros below and to all consumers
+ * of common.h. */
+#include "context.h"
 
 #if !defined(MLK_CONFIG_CUSTOM_ALLOC_FREE)
 /* Default: stack allocation */
