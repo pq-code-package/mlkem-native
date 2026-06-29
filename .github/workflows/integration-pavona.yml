@@ -79,11 +79,15 @@ jobs:
           echo "=== Patched extensions.bzl ==="
           cat third_party/mlkem_native/extensions.bzl
 
-      - name: Patch functest to only test deterministic API
+      - name: Apply integration patches
         run: |
           cd "$PAVONA_DIR"
-          # speed-up tests in CI by only running deterministic tests
-          git apply "$GITHUB_WORKSPACE/integration/pavona/derand-only.patch"
+          for patch in "$GITHUB_WORKSPACE"/integration/pavona/*.patch; do
+            if [ -f "$patch" ]; then
+              echo "Applying $patch"
+              git apply "$patch"
+            fi
+          done
 
       - name: Run mlkem functest
         run: |
