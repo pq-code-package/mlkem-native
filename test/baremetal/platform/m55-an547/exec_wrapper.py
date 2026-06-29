@@ -38,10 +38,16 @@ try:
     result = subprocess.run(qemu_cmd, encoding="utf-8", capture_output=True)
 finally:
     os.unlink(args_file)
+
+output = result.stdout + result.stderr
 if result.returncode != 0:
     err("FAIL!")
     err(f"{qemu_cmd} failed with error code {result.returncode}")
     err(result.stderr)
+    exit(1)
+
+if "ERROR" in output or "FAIL:" in output or "FAILED" in output:
+    err(output, end="")
     exit(1)
 
 for line in result.stdout.splitlines():

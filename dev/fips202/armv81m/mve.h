@@ -49,6 +49,30 @@ static MLK_INLINE int mlk_keccakf1600_xor_bytes_x4_native(
     const uint8_t *data2, const uint8_t *data3, unsigned offset,
     unsigned length)
 {
+  unsigned offset_mod8 = offset & 7u;
+  unsigned byte_prefix = 0;
+  unsigned main_length;
+
+  if (offset_mod8 != 0u)
+  {
+    byte_prefix = 8u - offset_mod8;
+    if (byte_prefix > length)
+    {
+      byte_prefix = length;
+    }
+  }
+
+  main_length = length - byte_prefix;
+  if (main_length >= 8u &&
+      ((((uintptr_t)data0 + byte_prefix) |
+        ((uintptr_t)data1 + byte_prefix) |
+        ((uintptr_t)data2 + byte_prefix) |
+        ((uintptr_t)data3 + byte_prefix)) &
+       3u) != 0u)
+  {
+    return MLK_NATIVE_FUNC_FALLBACK;
+  }
+
   mlk_keccak_f1600_x4_state_xor_bytes(state, data0, data1, data2, data3, offset,
                                       length);
   return MLK_NATIVE_FUNC_SUCCESS;
