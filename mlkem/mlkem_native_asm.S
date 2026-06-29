@@ -226,11 +226,6 @@
 #undef MLK_COMMON_H
 #undef MLK_CONCAT
 #undef MLK_CONCAT_
-#undef MLK_CONTEXT_PARAMETERS_0
-#undef MLK_CONTEXT_PARAMETERS_1
-#undef MLK_CONTEXT_PARAMETERS_2
-#undef MLK_CONTEXT_PARAMETERS_3
-#undef MLK_CONTEXT_PARAMETERS_4
 #undef MLK_EMPTY_CU
 #undef MLK_ERR_FAIL
 #undef MLK_ERR_OUT_OF_MEMORY
@@ -335,6 +330,13 @@
 #undef mlk_poly_frommsg
 #undef mlk_poly_tobytes
 #undef mlk_poly_tomsg
+/* mlkem/src/context.h */
+#undef MLK_CONTEXT_H
+#undef MLK_CONTEXT_PARAMETERS_0
+#undef MLK_CONTEXT_PARAMETERS_1
+#undef MLK_CONTEXT_PARAMETERS_2
+#undef MLK_CONTEXT_PARAMETERS_3
+#undef MLK_CONTEXT_PARAMETERS_4
 /* mlkem/src/debug.h */
 #undef MLK_DEBUG_H
 #undef mlk_assert

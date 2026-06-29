@@ -2974,7 +2974,11 @@ def check_macro_typos():
         if is_autogen or filename == "integration/awslc/awslc.patch":
             return True
 
-        if is_autogen or filename == "mlkem/src/common.h":
+        if (
+            is_autogen
+            or filename == "mlkem/src/common.h"
+            or filename == "mlkem/src/context.h"
+        ):
             if m == "MLK_CONTEXT_PARAMETERS_n":
                 return True
 
