@@ -32,7 +32,7 @@ int check_keccak_f1600_x2_v84a_aarch64_asm(void)
       buf_x0[400]; /* Two sequential Keccak states (state0[25], state1[25]) */
   MLK_ALIGN uint8_t buf_x1[192]; /* Round constants (24 x uint64_t) */
 
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_SHA3))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_SHA3))
   {
     fprintf(stderr,
             "ABI check keccak_f1600_x2_v84a_aarch64_asm: host lacks Armv8.4-A "

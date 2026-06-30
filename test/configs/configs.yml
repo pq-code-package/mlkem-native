@@ -214,7 +214,7 @@ configs:
 
           static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
           {
-            if (cap == MLK_SYS_CAP_AVX2)
+            if (cap == MLK_SYS_CAP_X86_64_AVX2)
             {
               uint32_t eax, ebx, ecx, edx;
 
@@ -261,7 +261,7 @@ configs:
 
           static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
           {
-            if (cap == MLK_SYS_CAP_SHA3)
+            if (cap == MLK_SYS_CAP_AARCH64_SHA3)
             {
               uint64_t id_aa64pfr1_el1;
 

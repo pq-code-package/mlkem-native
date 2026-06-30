@@ -2909,10 +2909,9 @@ def check_macro_typos_in_file(filename, macro_check):
 
 def get_syscaps():
     return [
-        "MLK_SYS_CAP_AVX2",
-        "MLK_SYS_CAP_SHA3",
-        "MLK_SYS_CAP_MVE",
-        "MLK_SYS_CAP_DUMMY",
+        "MLK_SYS_CAP_X86_64_AVX2",
+        "MLK_SYS_CAP_AARCH64_SHA3",
+        "MLK_SYS_CAP_ARMV81M_MVE",
     ]
 
 
@@ -2963,8 +2962,8 @@ def check_macro_typos():
             if rest.startswith("\\") or m in ["MLK_XXX", "MLK_SOURCE_XXX"]:
                 return True
 
-        # AWS-LC importer patch
-        if is_autogen or filename == "integration/awslc/awslc.patch":
+        # AWS-LC post-import patch
+        if is_autogen or filename == "integration/aws-lc/post_import.patch":
             return True
 
         if is_autogen or filename == "mlkem/src/common.h":
@@ -4604,7 +4603,7 @@ ABI_CAPS = {
     "AVX2": {
         "asm_subdir": "x86_64",
         "guard": "__AVX2__",
-        "syscap": "MLK_SYS_CAP_AVX2",
+        "syscap": "MLK_SYS_CAP_X86_64_AVX2",
         "description": "AVX2",
         "cflags": ["-mavx2", "-mbmi2"],
         "aux_files": [],
@@ -4612,7 +4611,7 @@ ABI_CAPS = {
     "SHA3": {
         "asm_subdir": "aarch64",
         "guard": "__ARM_FEATURE_SHA3",
-        "syscap": "MLK_SYS_CAP_SHA3",
+        "syscap": "MLK_SYS_CAP_AARCH64_SHA3",
         "description": "Armv8.4-A SHA3 (eor3, rax1, xar, bcax)",
         "cflags": ["-march=armv8.4-a+sha3"],
         "aux_files": [],
@@ -4620,7 +4619,7 @@ ABI_CAPS = {
     "MVE": {
         "asm_subdir": "armv81m",
         "guard": "__ARM_FEATURE_MVE",
-        "syscap": "MLK_SYS_CAP_MVE",
+        "syscap": "MLK_SYS_CAP_ARMV81M_MVE",
         "description": "Armv8.1-M MVE",
         "cflags": ["-march=armv8.1-m.main+mve", "-mthumb"],
         "aux_files": [
@@ -5360,8 +5359,8 @@ def _main():
         ("Generate monolithic source files", gen_monolithic),
         ("Generate undefs", gen_undefs),
         ("Generate test configs", gen_test_configs),
-        ("Check macro typos", check_macro_typos),
         ("Generate ABI checker tests", gen_abicheck),
+        ("Check macro typos", check_macro_typos),
         ("Generate preprocessor comments", gen_preprocessor_comments),
         # Formatting should be the last step
         ("Format files", lambda: format_files(args.dry_run)),

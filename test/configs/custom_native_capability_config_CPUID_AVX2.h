@@ -419,7 +419,7 @@
 
 static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
 {
-  if (cap == MLK_SYS_CAP_AVX2)
+  if (cap == MLK_SYS_CAP_X86_64_AVX2)
   {
     uint32_t eax, ebx, ecx, edx;
 

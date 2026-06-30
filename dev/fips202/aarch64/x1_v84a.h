@@ -21,7 +21,7 @@
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_keccak_f1600_x1_native(uint64_t *state)
 {
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_SHA3))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_SHA3))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
