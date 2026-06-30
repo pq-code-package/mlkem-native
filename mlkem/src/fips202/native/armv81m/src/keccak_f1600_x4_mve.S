@@ -683,11 +683,14 @@ Lkeccak_f1600_x4_mve_asm_roundend_pre:
 Lkeccak_f1600_x4_mve_asm_roundend:
         movs r0, #0x0
         vdup.32 q0, r0
-        .set .Lkeccak_f1600_x4_mve_clear_stack_offset, 0
-        .rept 8
-        vstrw.32 q0, [sp, #.Lkeccak_f1600_x4_mve_clear_stack_offset]
-        .set .Lkeccak_f1600_x4_mve_clear_stack_offset, .Lkeccak_f1600_x4_mve_clear_stack_offset + 16
-        .endr
+        vstrw.32 q0, [sp]
+        vstrw.32 q0, [sp, #16]
+        vstrw.32 q0, [sp, #32]
+        vstrw.32 q0, [sp, #48]
+        vstrw.32 q0, [sp, #64]
+        vstrw.32 q0, [sp, #80]
+        vstrw.32 q0, [sp, #96]
+        vstrw.32 q0, [sp, #112]
         add sp, #0x80
         .cfi_adjust_cfa_offset -0x80
         vpop {d8, d9, d10, d11, d12, d13, d14, d15}
