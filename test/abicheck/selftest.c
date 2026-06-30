@@ -340,7 +340,7 @@ int abicheck_selftest(void)
   /* The NEON corrupters only exist when vector instructions were compiled in,
    * and must only run when the host supports them. */
 #if defined(MLK_SYS_AARCH64_NEON)
-  if (mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     SELFTEST_RUN_ARCH("aarch64", struct aarch64_register_state,
                       init_aarch64_register_state, call_stub_aarch64,
