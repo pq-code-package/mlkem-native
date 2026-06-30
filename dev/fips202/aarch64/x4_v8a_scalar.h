@@ -17,7 +17,7 @@
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_keccak_f1600_x4_native(uint64_t *state)
 {
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }

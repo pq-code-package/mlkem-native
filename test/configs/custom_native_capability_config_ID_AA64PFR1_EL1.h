@@ -418,7 +418,7 @@
 
 static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
 {
-  if (cap == MLK_SYS_CAP_NEON)
+  if (cap == MLK_SYS_CAP_AARCH64_NEON)
   {
     uint64_t id_aa64pfr0_el1;
 
@@ -431,7 +431,7 @@ static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
     return (advsimd_field != 0xF) ? 1 : 0;
   }
 
-  if (cap == MLK_SYS_CAP_SHA3)
+  if (cap == MLK_SYS_CAP_AARCH64_SHA3)
   {
     uint64_t id_aa64pfr1_el1;
 

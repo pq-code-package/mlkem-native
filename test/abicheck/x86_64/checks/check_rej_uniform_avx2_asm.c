@@ -34,7 +34,7 @@ int check_rej_uniform_avx2_asm(void)
   MLK_ALIGN uint8_t buf_rdi[512];  /* Output buffer (256 x int16_t) */
   MLK_ALIGN uint8_t buf_rsi[504];  /* Input buffer */
 
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_X86_64_AVX2))
   {
     fprintf(stderr,
             "ABI check rej_uniform_avx2_asm: host lacks AVX2, skipping\n");

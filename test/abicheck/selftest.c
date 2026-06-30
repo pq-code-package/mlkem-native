@@ -335,7 +335,7 @@ int abicheck_selftest(void)
 
   /* The NEON corrupters execute vector instructions, so running them on a
    * host without NEON would fault instead of testing the ABI checker. */
-  if (mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     SELFTEST_RUN_ARCH("aarch64", struct aarch64_register_state,
                       init_aarch64_register_state, call_stub_aarch64,
