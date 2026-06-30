@@ -436,6 +436,10 @@ static int test_check_sk_alloc_failure(test_ctx_t *ctx)
     }                                                                        \
   } while (0)
 
+/* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
+#if defined(main)
+int main(void);
+#endif
 int main(void)
 {
   MLK_ALIGN uint8_t bump_buffer[MLK_BUMP_ALLOC_SIZE];

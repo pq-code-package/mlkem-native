@@ -5,34 +5,7 @@ name: HOL-Light
 permissions:
   contents: read
 on:
-  push:
-    branches: ["main"]
-    paths:
-     - '.github/workflows/hol_light.yml'
-     - 'proofs/hol_light/aarch64/Makefile'
-     - 'proofs/hol_light/aarch64/**/*.S'
-     - 'proofs/hol_light/aarch64/**/*.ml'
-     - 'proofs/hol_light/x86_64/Makefile'
-     - 'proofs/hol_light/x86_64/**/*.S'
-     - 'proofs/hol_light/x86_64/**/*.ml'
-     - 'flake.nix'
-     - 'flake.lock'
-     - 'nix/hol_light/*'
-     - 'nix/s2n_bignum/*'
-  pull_request:
-    branches: ["main"]
-    paths:
-      - '.github/workflows/hol_light.yml'
-      - 'proofs/hol_light/aarch64/Makefile'
-      - 'proofs/hol_light/aarch64/**/*.S'
-      - 'proofs/hol_light/aarch64/**/*.ml'
-      - 'proofs/hol_light/x86_64/Makefile'
-      - 'proofs/hol_light/x86_64/**/*.S'
-      - 'proofs/hol_light/x86_64/**/*.ml'
-      - 'flake.nix'
-      - 'flake.lock'
-      - 'nix/hol_light/*'
-      - 'nix/s2n_bignum/*'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

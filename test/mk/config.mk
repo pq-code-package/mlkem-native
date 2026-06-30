@@ -67,6 +67,10 @@ ifeq ($(CYCLES),PMU)
 	CFLAGS += -DPMU_CYCLES
 endif
 
+ifeq ($(CYCLES),CYCCNT)
+	CFLAGS += -DCYCCNT_CYCLES
+endif
+
 ifeq ($(CYCLES),PERF)
 	CFLAGS += -DPERF_CYCLES
 endif

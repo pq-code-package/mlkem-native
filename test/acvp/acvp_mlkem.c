@@ -192,6 +192,10 @@ static MLK_NOINLINE void acvp_mlkem_keyGen_AFT(
   print_hex("dk", dk, sizeof(dk));
 }
 
+/* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
+#if defined(main)
+int main(int argc, char *argv[]);
+#endif
 int main(int argc, char *argv[])
 {
   acvp_mode mode;

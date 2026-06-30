@@ -57,6 +57,7 @@
             export HOLLIGHT_LOAD_PATH="$IMPORTS_DIR:$S2N_BIGNUM_DIR''${HOLLIGHT_LOAD_PATH:+:$HOLLIGHT_LOAD_PATH}"
             export HOLDIR="$HOLLIGHT_DIR"
           '';
+
         in
         {
           _module.args.pkgs = import inputs.nixpkgs {
@@ -94,6 +95,19 @@
               } ++ holLightToolchain;
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
 
+          # arm-none-eabi-gcc + platform files from pqmx
+          packages.m55-an547 = util.m55-an547;
+          packages.avr-toolchain = util.avr-toolchain;
+          packages.openocd = util.openocd;
+          devShells.arm-embedded = util.mkShell {
+            packages = builtins.attrValues
+              {
+                inherit (config.packages) m55-an547;
+                inherit (pkgs) gcc-arm-embedded qemu coreutils python3 git;
+              };
+          };
+
+          devShells.avr = util.mkShell (import ./nix/avr { inherit pkgs; });
           packages.hol_server = util.hol_server.hol_server_start;
           devShells.hol_light = (util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum hol_server; } ++ holLightToolchain;
@@ -148,15 +162,17 @@
               ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isAarch64 [ config.packages.toolchain_x86_64 ];
           };
 
-          # arm-none-eabi-gcc + platform files from pqmx
-          devShells.cross-arm-embedded = util.mkShell {
+          # Zephyr build environment (board chosen at make time via EXTRA_MAKEFILE)
+          packages.zephyr = util.zephyr;
+          devShells.zephyr = util.mkShell {
             packages = builtins.attrValues
               {
-                inherit (util) pqmx;
-                inherit (config.packages) linters;
-                inherit (pkgs) gcc-arm-embedded qemu coreutils git;
-              };
+                inherit (config.packages) openocd;
+                inherit (util) zephyr;
+                inherit (pkgs) gcc-arm-embedded qemu cmake ninja dtc gperf coreutils git;
+              } ++ [ util.zephyrPythonEnv ];
           };
+
           devShells.cross-aarch64-embedded = util.mkShell {
             packages = builtins.attrValues
               {

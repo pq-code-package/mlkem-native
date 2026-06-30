@@ -12,3 +12,4 @@ self-hosted-runner:
     - pqcp-x64
     # RISE RISC-V runner
     - ubuntu-24.04-riscv
+    - self-hosted-nucleo-n657x0
