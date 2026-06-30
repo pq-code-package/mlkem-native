@@ -30,7 +30,7 @@ int check_poly_tobytes_aarch64_asm(void)
   MLK_ALIGN uint8_t buf_x0[384]; /* Output byte array */
   MLK_ALIGN uint8_t buf_x1[512]; /* Input polynomial */
 
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     fprintf(stderr,
             "ABI check poly_tobytes_aarch64_asm: host lacks AArch64 NEON, "

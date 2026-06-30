@@ -34,7 +34,7 @@ int check_keccak_f1600_x4_mve_asm(void)
   MLK_ALIGN uint8_t buf_r2[192]; /* Keccak round constants in bit-interleaved
                                     form (24 pairs of 32-bit words) */
 
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_MVE))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_ARMV81M_MVE))
   {
     fprintf(stderr,
             "ABI check keccak_f1600_x4_mve_asm: host lacks Armv8.1-M MVE, "

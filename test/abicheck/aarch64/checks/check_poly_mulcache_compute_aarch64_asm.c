@@ -35,7 +35,7 @@ int check_poly_mulcache_compute_aarch64_asm(void)
   MLK_ALIGN uint8_t buf_x2[256]; /* Zeta values */
   MLK_ALIGN uint8_t buf_x3[256]; /* Twisted zeta values */
 
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     fprintf(stderr,
             "ABI check poly_mulcache_compute_aarch64_asm: host lacks AArch64 "

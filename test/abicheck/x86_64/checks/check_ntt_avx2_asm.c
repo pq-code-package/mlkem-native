@@ -32,7 +32,7 @@ int check_ntt_avx2_asm(void)
   MLK_ALIGN uint8_t buf_rdi[512];  /* Input/output polynomial (256 x int16_t) */
   MLK_ALIGN uint8_t buf_rsi[1248]; /* Precomputed constants (624 x int16_t) */
 
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_X86_64_AVX2))
   {
     fprintf(stderr, "ABI check ntt_avx2_asm: host lacks AVX2, skipping\n");
     return MLK_ABICHECK_SKIPPED;

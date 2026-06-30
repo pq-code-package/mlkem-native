@@ -32,7 +32,7 @@ int check_keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm(void)
                                     state1[25], state2[25], state3[25]) */
   MLK_ALIGN uint8_t buf_x1[192]; /* Round constants (24 x uint64_t) */
 
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     fprintf(stderr,
             "ABI check keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm: host "

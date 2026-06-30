@@ -28,7 +28,7 @@
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_ntt_native(int16_t data[MLKEM_N])
 {
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
@@ -41,7 +41,7 @@ static MLK_INLINE int mlk_ntt_native(int16_t data[MLKEM_N])
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
 {
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
@@ -54,7 +54,7 @@ static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])
 {
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
@@ -66,7 +66,7 @@ static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_tomont_native(int16_t data[MLKEM_N])
 {
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
@@ -79,7 +79,7 @@ MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_mulcache_compute_native(int16_t x[MLKEM_N / 2],
                                                        const int16_t y[MLKEM_N])
 {
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
@@ -95,7 +95,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
     int16_t r[MLKEM_N], const int16_t a[2 * MLKEM_N],
     const int16_t b[2 * MLKEM_N], const int16_t b_cache[2 * (MLKEM_N / 2)])
 {
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
@@ -110,7 +110,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k3_native(
     int16_t r[MLKEM_N], const int16_t a[3 * MLKEM_N],
     const int16_t b[3 * MLKEM_N], const int16_t b_cache[3 * (MLKEM_N / 2)])
 {
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
@@ -125,7 +125,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
     int16_t r[MLKEM_N], const int16_t a[4 * MLKEM_N],
     const int16_t b[4 * MLKEM_N], const int16_t b_cache[4 * (MLKEM_N / 2)])
 {
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
@@ -139,7 +139,7 @@ MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
                                               const int16_t a[MLKEM_N])
 {
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     return MLK_NATIVE_FUNC_FALLBACK;
   }
@@ -153,7 +153,7 @@ static MLK_INLINE int mlk_rej_uniform_native(int16_t *r, unsigned len,
                                              const uint8_t *buf,
                                              unsigned buflen)
 {
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON) || len != MLKEM_N ||
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON) || len != MLKEM_N ||
       buflen % 24 != 0)
   {
     return MLK_NATIVE_FUNC_FALLBACK;
