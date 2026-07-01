@@ -34,7 +34,7 @@ int check_poly_compress_d11_avx2_asm(void)
   MLK_ALIGN uint8_t buf_rdx[64];  /* Precomputed compression constants */
   MLK_ALIGN uint8_t buf_rsi[512]; /* Input polynomial (256 x int16_t) */
 
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_X86_64_AVX2))
   {
     fprintf(
         stderr,

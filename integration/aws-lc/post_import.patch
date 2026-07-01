@@ -1,0 +1,14 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+diff --git a/crypto/fipsmodule/ml_kem/mlkem_native_config.h b/crypto/fipsmodule/ml_kem/mlkem_native_config.h
+--- a/crypto/fipsmodule/ml_kem/mlkem_native_config.h
++++ b/crypto/fipsmodule/ml_kem/mlkem_native_config.h
+@@ -36,7 +36,7 @@
+ static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
+ {
+ #if defined(MLK_SYS_X86_64)
+-  if (cap == MLK_SYS_CAP_AVX2)
++  if (cap == MLK_SYS_CAP_X86_64_AVX2)
+   {
+     return CRYPTO_is_AVX2_capable();
+   }

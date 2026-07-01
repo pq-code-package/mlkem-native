@@ -35,7 +35,7 @@ int check_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm(void)
   MLK_ALIGN uint8_t buf_rdx[1024]; /* Input polyvec b (2 x 256 x int16_t) */
   MLK_ALIGN uint8_t buf_rsi[1024]; /* Input polyvec a (2 x 256 x int16_t) */
 
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_X86_64_AVX2))
   {
     fprintf(stderr,
             "ABI check polyvec_basemul_acc_montgomery_cached_k2_avx2_asm: host "
