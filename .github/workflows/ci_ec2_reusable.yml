@@ -67,9 +67,30 @@ on:
       slothy:
         type: boolean
         default: false
+      cbmc_nix_shell:
+        type: string
+        default: cbmc
       cbmc_mlkem_k:
         type: string
         default: 2
+      cbmc_target:
+        type: string
+        default: ''
+      cbmc_proofs:
+        type: string
+        default: ''
+      cbmc_single_step:
+        type: boolean
+        default: false
+      cbmc_report:
+        type: boolean
+        default: true
+      cbmc_timeout:
+        type: string
+        default: '3600'
+      cbmc_per_proof_timeout:
+        type: string
+        default: '1800'
 env:
   AWS_ROLE: arn:aws:iam::559050233797:role/mlkem-c-aarch64-gh-action
   AWS_REGION: us-east-1
@@ -194,9 +215,15 @@ jobs:
         if: ${{ inputs.cbmc && (success() || failure()) }}
         uses: ./.github/actions/cbmc
         with:
-          nix-shell: cbmc
+          nix-shell: ${{ inputs.cbmc_nix_shell }}
           nix-verbose: ${{ inputs.verbose }}
           mlkem_k: ${{ inputs.cbmc_mlkem_k }}
+          cbmc-target: ${{ inputs.cbmc_target }}
+          proofs: ${{ inputs.cbmc_proofs }}
+          single-step: ${{ inputs.cbmc_single_step }}
+          report: ${{ inputs.cbmc_report }}
+          timeout: ${{ inputs.cbmc_timeout }}
+          per-proof-timeout: ${{ inputs.cbmc_per_proof_timeout }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
       - name: SLOTHY
         if: ${{ inputs.slothy }}

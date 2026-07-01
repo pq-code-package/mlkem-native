@@ -325,9 +325,91 @@ CHECKFLAGS += $(CBMC_FLAG_UNSIGNED_OVERFLOW_CHECK)
 # initialized with unconstrained values.
 NONDET_STATIC ?=
 
+# Target platform for CBMC/goto-cc. Leave unset to preserve the historic
+# host-default model.
+CBMC_TARGET ?=
+CBMC_TARGET_CC ?=
+CBMC_TARGET_GOTO_FLAGS ?=
+CBMC_TARGET_CBMC_FLAGS ?=
+CBMC_TARGET_INSTRUMENT_ENV ?=
+CBMC_TARGET_GCC_AS_GCC_DIR ?=
+CBMC_TARGET_HOST_PATH ?= $(shell printf '%s' "$$PATH")
+CBMC_TARGET_POINTER_BYTES ?= 8
+CBMC_TARGET_SIZE_T_BYTES ?= 8
+CBMC_TARGET_LONG_BYTES ?= 8
+
+ifeq ($(strip $(CBMC_TARGET)),)
+  ifeq ($(strip $(CBMC_TARGET_CC)),)
+    CBMC_TARGET_CC = $(CC)
+  endif
+else ifeq ($(CBMC_TARGET),i386-linux)
+  ifeq ($(strip $(CBMC_TARGET_CC)),)
+    CBMC_TARGET_CC = i686-unknown-linux-gnu-gcc
+  endif
+  CBMC_TARGET_GOTO_FLAGS = --i386-linux
+  CBMC_TARGET_CBMC_FLAGS = --i386-linux
+  ifeq ($(strip $(CBMC_TARGET_GCC_AS_GCC_DIR)),)
+    CBMC_TARGET_GCC_AS_GCC_DIR = $(PROOF_ROOT)/tools/i686-gcc-as-gcc
+  endif
+  CBMC_TARGET_INSTRUMENT_ENV = PATH=$(CBMC_TARGET_GCC_AS_GCC_DIR):$(CBMC_TARGET_HOST_PATH) CC=$(CBMC_TARGET_CC) GCC=$(CBMC_TARGET_CC)
+  CBMC_TARGET_POINTER_BYTES = 4
+  CBMC_TARGET_SIZE_T_BYTES = 4
+  CBMC_TARGET_LONG_BYTES = 4
+else ifeq ($(CBMC_TARGET),x86_64-linux)
+  ifeq ($(strip $(CBMC_TARGET_CC)),)
+    CBMC_TARGET_CC = x86_64-unknown-linux-gnu-gcc
+  endif
+  CBMC_TARGET_CBMC_FLAGS = --arch x86_64 --os linux --LP64
+  ifeq ($(strip $(CBMC_TARGET_GCC_AS_GCC_DIR)),)
+    CBMC_TARGET_GCC_AS_GCC_DIR = $(PROOF_ROOT)/tools/x86_64-gcc-as-gcc
+  endif
+  CBMC_TARGET_INSTRUMENT_ENV = PATH=$(CBMC_TARGET_GCC_AS_GCC_DIR):$(CBMC_TARGET_HOST_PATH) CC=$(CBMC_TARGET_CC) GCC=$(CBMC_TARGET_CC)
+  CBMC_TARGET_POINTER_BYTES = 8
+  CBMC_TARGET_SIZE_T_BYTES = 8
+  CBMC_TARGET_LONG_BYTES = 8
+else ifeq ($(CBMC_TARGET),aarch64-linux)
+  ifeq ($(strip $(CBMC_TARGET_CC)),)
+    CBMC_TARGET_CC = aarch64-unknown-linux-gnu-gcc
+  endif
+  CBMC_TARGET_CBMC_FLAGS = --arch arm64 --os linux --LP64
+  ifeq ($(strip $(CBMC_TARGET_GCC_AS_GCC_DIR)),)
+    CBMC_TARGET_GCC_AS_GCC_DIR = $(PROOF_ROOT)/tools/aarch64-gcc-as-gcc
+  endif
+  CBMC_TARGET_INSTRUMENT_ENV = PATH=$(CBMC_TARGET_GCC_AS_GCC_DIR):$(CBMC_TARGET_HOST_PATH) CC=$(CBMC_TARGET_CC) GCC=$(CBMC_TARGET_CC)
+  CBMC_TARGET_POINTER_BYTES = 8
+  CBMC_TARGET_SIZE_T_BYTES = 8
+  CBMC_TARGET_LONG_BYTES = 8
+else ifeq ($(CBMC_TARGET),riscv64-linux)
+  ifeq ($(strip $(CBMC_TARGET_CC)),)
+    CBMC_TARGET_CC = riscv64-unknown-linux-gnu-gcc
+  endif
+  CBMC_TARGET_CBMC_FLAGS = --arch riscv64 --os linux --LP64
+  ifeq ($(strip $(CBMC_TARGET_GCC_AS_GCC_DIR)),)
+    CBMC_TARGET_GCC_AS_GCC_DIR = $(PROOF_ROOT)/tools/riscv64-gcc-as-gcc
+  endif
+  CBMC_TARGET_INSTRUMENT_ENV = PATH=$(CBMC_TARGET_GCC_AS_GCC_DIR):$(CBMC_TARGET_HOST_PATH) CC=$(CBMC_TARGET_CC) GCC=$(CBMC_TARGET_CC)
+  CBMC_TARGET_POINTER_BYTES = 8
+  CBMC_TARGET_SIZE_T_BYTES = 8
+  CBMC_TARGET_LONG_BYTES = 8
+else ifeq ($(CBMC_TARGET),ppc64le-linux)
+  ifeq ($(strip $(CBMC_TARGET_CC)),)
+    CBMC_TARGET_CC = powerpc64le-unknown-linux-gnu-gcc
+  endif
+  CBMC_TARGET_CBMC_FLAGS = --arch ppc64le --os linux --LP64
+  ifeq ($(strip $(CBMC_TARGET_GCC_AS_GCC_DIR)),)
+    CBMC_TARGET_GCC_AS_GCC_DIR = $(PROOF_ROOT)/tools/ppc64le-gcc-as-gcc
+  endif
+  CBMC_TARGET_INSTRUMENT_ENV = PATH=$(CBMC_TARGET_GCC_AS_GCC_DIR):$(CBMC_TARGET_HOST_PATH) CC=$(CBMC_TARGET_CC) GCC=$(CBMC_TARGET_CC)
+  CBMC_TARGET_POINTER_BYTES = 8
+  CBMC_TARGET_SIZE_T_BYTES = 8
+  CBMC_TARGET_LONG_BYTES = 8
+else
+  $(error Unsupported CBMC_TARGET '$(CBMC_TARGET)'; expected i386-linux, x86_64-linux, aarch64-linux, riscv64-linux, ppc64le-linux, or unset)
+endif
+
 # Flags to pass to goto-cc for compilation and linking
-COMPILE_FLAGS ?= -Wall -Werror --native-compiler $(CC)
-LINK_FLAGS ?= -Wall -Werror
+COMPILE_FLAGS ?= -Wall -Werror $(CBMC_TARGET_GOTO_FLAGS) --native-compiler $(CBMC_TARGET_CC)
+LINK_FLAGS ?= -Wall -Werror $(CBMC_TARGET_GOTO_FLAGS)
 EXPORT_FILE_LOCAL_SYMBOLS ?= --export-file-local-symbols
 
 # During instrumentation, it adds models of C library functions
@@ -555,6 +637,7 @@ endif
 ################################################################
 # CBMC flags common to all proofs
 CBMCFLAGS += $(CBMC_FLAG_FLUSH)
+CBMCFLAGS += $(CBMC_TARGET_CBMC_FLAGS)
 CBMCFLAGS += --object-bits $(CBMC_OBJECT_BITS)
 CBMCFLAGS += --slice-formula
 
@@ -563,6 +646,9 @@ CBMCFLAGS += --slice-formula
 DEFINES += -DCBMC=1
 DEFINES += -DCBMC_OBJECT_BITS=$(CBMC_OBJECT_BITS)
 DEFINES += -DCBMC_MAX_OBJECT_SIZE="(SIZE_MAX>>(CBMC_OBJECT_BITS+1))"
+DEFINES += -DCBMC_TARGET_POINTER_BYTES=$(CBMC_TARGET_POINTER_BYTES)
+DEFINES += -DCBMC_TARGET_SIZE_T_BYTES=$(CBMC_TARGET_SIZE_T_BYTES)
+DEFINES += -DCBMC_TARGET_LONG_BYTES=$(CBMC_TARGET_LONG_BYTES)
 
 
 ifndef MLKEM_K
@@ -719,7 +805,7 @@ $(PROOF_GOTO)0100.goto: $(PROOF_SOURCES)
 $(PROJECT_GOTO)0200.goto: $(PROJECT_GOTO)0100.goto
 	$(LITANI) add-job \
 	  --command \
-	    '$(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) $(CBMC_REMOVE_FUNCTION_BODY) $^ $@' \
+	    '$(CBMC_TARGET_INSTRUMENT_ENV) $(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) $(CBMC_REMOVE_FUNCTION_BODY) $^ $@' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/remove_function_body-log.txt \
@@ -742,7 +828,7 @@ $(HARNESS_GOTO)0100.goto: $(PROOF_GOTO)0100.goto $(PROJECT_GOTO)0200.goto
 $(HARNESS_GOTO)0200.goto: $(HARNESS_GOTO)0100.goto
 	$(LITANI) add-job \
 	  --command \
-	    '$(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) $(CBMC_RESTRICT_FUNCTION_POINTER) --remove-function-pointers $^ $@' \
+	    '$(CBMC_TARGET_INSTRUMENT_ENV) $(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) $(CBMC_RESTRICT_FUNCTION_POINTER) --remove-function-pointers $^ $@' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/restrict_function_pointer-log.txt \
@@ -764,7 +850,7 @@ ifneq ($(strip $(CODE_CONTRACTS)),)
 else
 	$(LITANI) add-job \
 	  --command \
-	    '$(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) $(NONDET_STATIC) $^ $@' \
+	    '$(CBMC_TARGET_INSTRUMENT_ENV) $(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) $(NONDET_STATIC) $^ $@' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/nondet_static-log.txt \
@@ -778,7 +864,7 @@ $(HARNESS_GOTO)0400.goto: $(HARNESS_GOTO)0300.goto
 ifneq ($(strip $(USE_DYNAMIC_FRAMES)),)
 	$(LITANI) add-job \
 	  --command \
-	    '$(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) $(ADD_LIBRARY_FLAG) $(CBMC_OPT_CONFIG_LIBRARY) $^ $@' \
+	    '$(CBMC_TARGET_INSTRUMENT_ENV) $(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) $(ADD_LIBRARY_FLAG) $(CBMC_OPT_CONFIG_LIBRARY) $^ $@' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/linking-library-models-log.txt \
@@ -801,7 +887,7 @@ $(HARNESS_GOTO)0500.goto: $(HARNESS_GOTO)0400.goto
 ifneq ($(strip $(USE_DYNAMIC_FRAMES)),)
 	$(LITANI) add-job \
 	  --command \
-	    '$(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) $(UNWIND_0500_FLAGS) $^ $@' \
+	    '$(CBMC_TARGET_INSTRUMENT_ENV) $(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) $(UNWIND_0500_FLAGS) $^ $@' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/unwind_loops-log.txt \
@@ -811,7 +897,7 @@ ifneq ($(strip $(USE_DYNAMIC_FRAMES)),)
 else ifneq ($(strip $(CODE_CONTRACTS)),)
 	$(LITANI) add-job \
 	  --command \
-		'$(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) $(CBMC_UNWINDSET) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $^ $@' \
+		'$(CBMC_TARGET_INSTRUMENT_ENV) $(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) $(CBMC_UNWINDSET) $(CBMC_FLAG_UNWINDING_ASSERTIONS) $^ $@' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/unwind_loops-log.txt \
@@ -833,7 +919,7 @@ endif
 $(HARNESS_GOTO)0600.goto: $(HARNESS_GOTO)0500.goto
 	$(LITANI) add-job \
 	  --command \
-	    '$(GOTO_INSTRUMENT) $(CBMC_USE_DYNAMIC_FRAMES) $(NONDET_STATIC) $(CBMC_VERBOSITY) $(CBMC_CHECK_FUNCTION_CONTRACTS) $(CBMC_USE_FUNCTION_CONTRACTS) $(CBMC_APPLY_LOOP_CONTRACTS) $^ $@' \
+	    '$(CBMC_TARGET_INSTRUMENT_ENV) $(GOTO_INSTRUMENT) $(CBMC_USE_DYNAMIC_FRAMES) $(NONDET_STATIC) $(CBMC_VERBOSITY) $(CBMC_CHECK_FUNCTION_CONTRACTS) $(CBMC_USE_FUNCTION_CONTRACTS) $(CBMC_APPLY_LOOP_CONTRACTS) $^ $@' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/check_function_contracts-log.txt \
@@ -845,7 +931,7 @@ $(HARNESS_GOTO)0600.goto: $(HARNESS_GOTO)0500.goto
 $(HARNESS_GOTO)0700.goto: $(HARNESS_GOTO)0600.goto
 	$(LITANI) add-job \
 	  --command \
-	    '$(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) --slice-global-inits $^ $@' \
+	    '$(CBMC_TARGET_INSTRUMENT_ENV) $(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) --slice-global-inits $^ $@' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/slice_global_inits-log.txt \
@@ -857,7 +943,7 @@ $(HARNESS_GOTO)0700.goto: $(HARNESS_GOTO)0600.goto
 $(HARNESS_GOTO)0800.goto: $(HARNESS_GOTO)0700.goto
 	$(LITANI) add-job \
 	  --command \
-	    '$(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) --drop-unused-functions $^ $@' \
+	    '$(CBMC_TARGET_INSTRUMENT_ENV) $(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) --drop-unused-functions $^ $@' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/drop_unused_functions-log.txt \
