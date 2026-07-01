@@ -157,26 +157,35 @@ __contract__(
   requires(memory_no_alias(b_cache, sizeof(mlk_polyvec_mulcache)))
   requires(forall(k1, 0, MLKEM_K,
      array_bound(a->vec[k1].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
+  requires(forall(k2, 0, MLKEM_K,
+     array_abs_bound(b->vec[k2].coeffs, 0, MLKEM_N, MLK_NTT_BOUND)))
+  requires(forall(k3, 0, MLKEM_K,
+     array_abs_bound(b_cache->vec[k3].coeffs, 0, MLKEM_N/2, MLKEM_Q)))
   assigns(memory_slice(r, sizeof(mlk_poly)))
+  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, INT16_MAX/2))
 )
 {
   unsigned i;
   mlk_assert_bound_2d(a->vec, MLKEM_K, MLKEM_N, 0, MLKEM_UINT12_LIMIT);
 
+  mlk_assert_abs_bound_2d(b, MLKEM_K, MLKEM_N, MLK_NTT_BOUND);
+  mlk_assert_abs_bound_2d(b_cache, MLKEM_K, MLKEM_N / 2, MLKEM_Q);
+
   for (i = 0; i < MLKEM_N / 2; i++)
-  __loop__(invariant(i <= MLKEM_N / 2)
-           decreases(MLKEM_N / 2 - i))
+  __loop__(
+    invariant(i <= MLKEM_N / 2)
+    invariant(array_abs_bound(r->coeffs, 0, 2 * i, INT16_MAX/2))
+    decreases(MLKEM_N / 2 - i)
+  )
   {
     unsigned k;
     int32_t t[2] = {0};
     for (k = 0; k < MLKEM_K; k++)
     __loop__(
-      invariant(k <= MLKEM_K &&
-         t[0] <=    (int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768  &&
-         t[0] >= - ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768) &&
-         t[1] <=   ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768) &&
-         t[1] >= - ((int32_t) k * 2 * MLKEM_UINT12_LIMIT * 32768))
-      decreases(MLKEM_K - k))
+      invariant(k <= MLKEM_K && i <= MLKEM_N / 2)
+      invariant(array_abs_bound(t, 0, 2, k * 2 * MLKEM_UINT12_LIMIT * MLK_NTT_BOUND + 1))
+      decreases(MLKEM_K - k)
+    )
     {
       t[0] += (int32_t)a->vec[k].coeffs[2 * i + 1] * b_cache->vec[k].coeffs[i];
       t[0] += (int32_t)a->vec[k].coeffs[2 * i] * b->vec[k].coeffs[2 * i];
@@ -207,17 +216,24 @@ void mlk_polyvec_basemul_acc_montgomery_cached(
         (const int16_t *)b_cache);
 #elif MLKEM_K == 4
     ret = mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
-        r->coeffs, (const int16_t *)a, (const int16_t *)b,
-        (const int16_t *)b_cache);
+        r->coeffs, (const int16_t *const)a, (const int16_t *const)b,
+        (const int16_t *const)b_cache);
 #endif
     if (ret == MLK_NATIVE_FUNC_SUCCESS)
     {
       return;
     }
+    else
+    {
+      mlk_assert(ret == MLK_NATIVE_FUNC_FALLBACK);
+      mlk_polyvec_basemul_acc_montgomery_cached_c(r, a, b, b_cache);
+    }
   }
-#endif /* MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 
+#else  /* MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
+  /* No native backend, so fall back to C */
   mlk_polyvec_basemul_acc_montgomery_cached_c(r, a, b, b_cache);
+#endif /* !MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED */
 }
 
 /* Reference: Does not exist in the reference implementation @[REF].
