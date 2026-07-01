@@ -7,7 +7,7 @@
 #define MLK_FIPS202_NATIVE_AARCH64_X4_V8A_SCALAR_H
 
 /* Part of backend API */
-#define MLK_USE_FIPS202_X4_NATIVE
+#define MLK_USE_NATIVE_FIPS202_X4
 /* Guard for assembly file */
 #define MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID
 
