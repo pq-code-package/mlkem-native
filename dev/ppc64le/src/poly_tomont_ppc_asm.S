@@ -73,7 +73,7 @@
 .text
 
 /*
- * Barrett multiplication by R = 2^16 mod q, 
+ * Barrett multiplication by R = 2^16 mod q,
  * mapping each coefficient to the Montgomery domain.
  *   For each lane (a in vdata1..4):
  *     t      = vmhraddshs(a, V_FACTOR_TW, 0) = round(a*factor_tw / 2^15)
@@ -124,17 +124,13 @@
 .global MLK_ASM_NAMESPACE(poly_tomont_ppc_asm)
 .balign 16
 MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
-        stdu    1, -320(1)
+        stdu    1, -224(1)
         mflr    0
 
         /*
-         * TODO: this saves/restores v20-v30, but the body only touches
-         * v23 (vdata3), v24 (vtmp3) and v27-v30 (vresult1..4) in the
-         * callee-saved range. v20, v21, v22, v25, v26 are spilled and
-         * reloaded but never used -- 5 dead stxvx/lxvx pairs plus 80
-         * bytes of frame. Trim the save set (and frame size) to the
-         * registers actually clobbered. Separate change from the doc
-         * pass, since it alters emitted code.
+         * Save/restore only the callee-saved VRs the body clobbers:
+         * v23, v24, v27-v30. v20-v22, v25, v26 were spilled but never
+         * used. Frame trimmed from 320 to 224 bytes.
          */
         li      6, 128
         li      7, 144
@@ -142,22 +138,12 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
         li      9, 176
         li      10, 192
         li      11, 208
-        li      12, 224
-        stxvx   32+20, 6, 1
-        stxvx   32+21, 7, 1
-        stxvx   32+22, 8, 1
-        stxvx   32+23, 9, 1
-        stxvx   32+24, 10, 1
-        stxvx   32+25, 11, 1
-        stxvx   32+26, 12, 1
-        li      6, 240
-        li      7, 256
-        li      8, 272
-        li      9, 288
-        stxvx   32+27, 6, 1
-        stxvx   32+28, 7, 1
-        stxvx   32+29, 8, 1
-        stxvx   32+30, 9, 1
+        stxvx   32+23, 6, 1
+        stxvx   32+24, 7, 1
+        stxvx   32+27, 8, 1
+        stxvx   32+28, 9, 1
+        stxvx   32+29, 10, 1
+        stxvx   32+30, 11, 1
 
         li      6, MLK_PPC_NQ_OFFSET
         li      7, MLK_PPC_TOMONT_OFFSET
@@ -199,24 +185,14 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
         li      9, 176
         li      10, 192
         li      11, 208
-        li      12, 224
-        lxvx    32+20, 6, 1
-        lxvx    32+21, 7, 1
-        lxvx    32+22, 8, 1
-        lxvx    32+23, 9, 1
-        lxvx    32+24, 10, 1
-        lxvx    32+25, 11, 1
-        lxvx    32+26, 12, 1
-        li      6, 240
-        li      7, 256
-        li      8, 272
-        li      9, 288
-        lxvx    32+27, 6, 1
-        lxvx    32+28, 7, 1
-        lxvx    32+29, 8, 1
-        lxvx    32+30, 9, 1
+        lxvx    32+23, 6, 1
+        lxvx    32+24, 7, 1
+        lxvx    32+27, 8, 1
+        lxvx    32+28, 9, 1
+        lxvx    32+29, 10, 1
+        lxvx    32+30, 11, 1
         mtlr    0
-        addi    1, 1, 320
+        addi    1, 1, 224
         blr
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
