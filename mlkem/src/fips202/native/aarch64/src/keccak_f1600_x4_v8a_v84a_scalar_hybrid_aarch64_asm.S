@@ -972,6 +972,21 @@ Lkeccak_f1600_x4_v8a_v84a_scalar_hybrid_done:
         ldp x29, x30, [sp, #0x80]
         .cfi_restore x29
         .cfi_restore x30
+        eor v0.16b, v0.16b, v0.16b
+        str q0, [sp]
+        str q0, [sp, #0x10]
+        str q0, [sp, #0x20]
+        str q0, [sp, #0x30]
+        str q0, [sp, #0x40]
+        str q0, [sp, #0x50]
+        str q0, [sp, #0x60]
+        str q0, [sp, #0x70]
+        str q0, [sp, #0x80]
+        str q0, [sp, #0x90]
+        str q0, [sp, #0xa0]
+        str q0, [sp, #0xb0]
+        str q0, [sp, #0xc0]
+        str q0, [sp, #0xd0]
         add sp, sp, #0xe0
         .cfi_adjust_cfa_offset -0xe0
         ret

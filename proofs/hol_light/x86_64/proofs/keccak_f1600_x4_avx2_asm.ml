@@ -744,6 +744,55 @@ let keccak_f1600_x4_avx2_mc = define_assert_from_elf
                            (* VMOVQ (Memop Quadword (%% (rdi,592))) (%_% xmm15) *)
   0xc5; 0x79; 0x17; 0xbf; 0x18; 0x03; 0x00; 0x00;
                            (* VMOVHPD (Memop Quadword (%% (rdi,792))) (%_% xmm15) *)
+  0xc5; 0xfd; 0xef; 0xc0;  (* VPXOR (%_% ymm0) (%_% ymm0) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x04; 0x24;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,0))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x44; 0x24; 0x20;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,32))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x44; 0x24; 0x40;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,64))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x44; 0x24; 0x60;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,96))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x80; 0x00; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,128))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xa0; 0x00; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,160))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xc0; 0x00; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,192))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xe0; 0x00; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,224))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x00; 0x01; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,256))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x20; 0x01; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,288))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x40; 0x01; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,320))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x60; 0x01; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,352))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x80; 0x01; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,384))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xa0; 0x01; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,416))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xc0; 0x01; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,448))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xe0; 0x01; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,480))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x00; 0x02; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,512))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x20; 0x02; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,544))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x40; 0x02; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,576))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x60; 0x02; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,608))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x80; 0x02; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,640))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xa0; 0x02; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,672))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xc0; 0x02; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,704))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xe0; 0x02; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,736))) (%_% ymm0) *)
   0x4c; 0x89; 0xdc;        (* MOV (% rsp) (% r11) *)
   0xc3                     (* RET *)
 ];;
@@ -762,7 +811,8 @@ let LENGTH_KECCAK_F1600_X4_AVX2_TMC =
 let KECCAK_F1600_X4_AVX2_PREAMBLE_LENGTH = new_definition
   `KECCAK_F1600_X4_AVX2_PREAMBLE_LENGTH = 14`;;
 
-(* Postamble: MOV rsp, r11 (3 bytes) + RET (1 byte) = 4 bytes *)
+(* Postamble: MOV rsp, r11 (3 bytes) + RET (1 byte) = 4 bytes.
+   The scratch wipe before this is part of the verified core body. *)
 let KECCAK_F1600_X4_AVX2_POSTAMBLE_LENGTH = new_definition
   `KECCAK_F1600_X4_AVX2_POSTAMBLE_LENGTH = 4`;;
 
@@ -1015,7 +1065,7 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
     CONV_TAC NUM_REDUCE_CONV THEN
     REWRITE_TAC [keccak; keccak_round] THEN
     ENSURES_INIT_TAC "s0" THEN
-    X86_STEPS_TAC KECCAK_F1600_X4_AVX2_EXEC (1--96) THEN
+    X86_STEPS_TAC KECCAK_F1600_X4_AVX2_EXEC (1--121) THEN
     REPEAT(FIRST_X_ASSUM(STRIP_ASSUME_TAC o
       CONV_RULE(READ_MEMORY_SPLIT_CONV 2) o
       check (can (term_match [] `read qqq s:int256 = xxx`) o concl))) THEN
@@ -1057,6 +1107,7 @@ let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_CORRECT = prove
               wordlist_from_memory(word_add bitstate_in (word 400), 25) s = keccak 24 A3 /\
               wordlist_from_memory(word_add bitstate_in (word 600), 25) s = keccak 24 A4)
          (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+          MAYCHANGE [events] ,,
           MAYCHANGE [memory :> bytes (bitstate_in, 800);
                      memory :> bytes(word_sub stackpointer (word 0x31f), 0x31f)])`,
   (* Bridge the alignment preamble (mov r11,rsp; and rsp,-32; sub rsp,0x300)
@@ -1151,6 +1202,7 @@ let KECCAK_F1600_X4_AVX2_SUBROUTINE_CORRECT = prove
               wordlist_from_memory(word_add bitstate_in (word 400), 25) s = keccak 24 A3 /\
               wordlist_from_memory(word_add bitstate_in (word 600), 25) s = keccak 24 A4)
          (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+          MAYCHANGE [events] ,,
           MAYCHANGE [memory :> bytes (bitstate_in, 800);
                      memory :> bytes(word_sub stackpointer (word 0x31f), 0x31f)])`,
   let TWEAK_CONV = ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV in
@@ -1298,7 +1350,7 @@ let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_SAFE = time prove
     `inner_f_events:int64->int64->int64->int64->num->int64->uarch_event list`
     (LABEL_TAC "INNER_SAFE") inner_safe THEN
   (* Witness for the wrapper f_events: the kernel's events sandwiched
-     between the postamble's `mov rsp,r11; ret` events (an EventLoad of
+     before the postamble's final `mov rsp,r11; ret` events (an EventLoad of
      the return-address slot and an EventJump to it). The kernel's
      stackpointer arg is the aligned frame base, expressed as a
      function of the wrapper's (unaligned) `stackpointer` parameter. *)
@@ -1370,30 +1422,14 @@ let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_SAFE = time prove
             (word_add (word_sub stackpointer (word 0x31f)) (word delta))))` THEN
   REWRITE_TAC[LENGTH_KECCAK_F1600_X4_AVX2_TMC] THEN
   REWRITE_TAC[APPEND] THEN
-  REWRITE_TAC[memaccess_inbounds; ALL] THEN
-  (* The two postamble events are trivially in bounds: EventJump is
-     ignored by memaccess_inbounds, and EventLoad (stackpointer, 8)
-     hits the explicit `(stackpointer, 8)` slot in the readable list. *)
-  CONJ_TAC THENL
-   [REWRITE_TAC[EX] THEN MESON_TAC[CONTAINED_MODULO_REFL; LE_REFL];
-    ALL_TAC] THEN
   (* Widen the inner kernel's memaccess_inbounds claim (which mentions
      the aligned 768-byte frame) to the wrapper's footprint (which
      mentions the 0x31f-byte unaligned frame) using FRAME_CONTAINED. *)
-  REWRITE_TAC[GSYM memaccess_inbounds] THEN
   FIRST_X_ASSUM (fun th ->
     if (try fst (dest_eq (concl th)) = `e2:uarch_event list`
         with _ -> false)
     then SUBST_ALL_TAC th else NO_TAC) THEN
-  MATCH_MP_TAC (REWRITE_RULE[GSYM IMP_CONJ_ALT] MEMACCESS_INBOUNDS_CONTAINED) THEN
-  MAP_EVERY EXISTS_TAC
-   [`[bitstate_in:int64,800; rc_pointer,192; rho8_ptr,32; rho56_ptr,32;
-      word_add (word_sub stackpointer (word 0x31f)) (word delta),768]`;
-    `[bitstate_in:int64,800;
-      word_add (word_sub stackpointer (word 0x31f)) (word delta),768]`] THEN
-  ASM_REWRITE_TAC[ALL] THEN
-  REWRITE_TAC[EX] THEN
-  ASM_MESON_TAC[CONTAINED_REFL; FRAME_CONTAINED]);;
+  DISCHARGE_MEMACCESS_INBOUNDS_TAC);;
 
 let KECCAK_F1600_X4_AVX2_SUBROUTINE_SAFE = time prove
  (`exists f_events.

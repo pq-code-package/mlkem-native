@@ -335,6 +335,15 @@
     add sp, sp, #(STACK_SIZE)
 .endm
 
+.macro clear_stack
+    eor v0.16b, v0.16b, v0.16b
+    .set .Lclear_stack_offset, 0
+    .rept STACK_SIZE / 16
+    str q0, [sp, #.Lclear_stack_offset]
+    .set .Lclear_stack_offset, .Lclear_stack_offset + 16
+    .endr
+.endm
+
 .macro eor5 dst, src0, src1, src2, src3, src4
     eor \dst, \src0, \src1
     eor \dst, \dst,  \src2
@@ -2453,6 +2462,7 @@ keccak_f1600_x4_v8a_scalar_hybrid_done:
 
     restore_vregs
     restore_gprs
+    clear_stack
     free_stack
     ret
 
