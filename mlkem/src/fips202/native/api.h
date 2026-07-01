@@ -29,13 +29,13 @@
  * A _backend_ is a specific implementation of parts of this interface.
  *
  * You can replace 1-fold or 4-fold batched Keccak-F1600.
- * To enable, set MLK_USE_FIPS202_X1_NATIVE or MLK_USE_FIPS202_X4_NATIVE
+ * To enable, set MLK_USE_NATIVE_FIPS202_X1 or MLK_USE_NATIVE_FIPS202_X4
  * in your backend, and define the inline wrappers mlk_keccak_f1600_x1_native()
  * and/or mlk_keccak_f1600_x4_native(), respectively, to forward to your
  * implementation.
  */
 
-#if defined(MLK_USE_FIPS202_X1_NATIVE)
+#if defined(MLK_USE_NATIVE_FIPS202_X1)
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_keccak_f1600_x1_native(uint64_t *state)
 __contract__(
@@ -43,8 +43,8 @@ __contract__(
   assigns(memory_slice(state, sizeof(uint64_t) * 25 * 1))
   ensures(return_value == MLK_NATIVE_FUNC_FALLBACK || return_value == MLK_NATIVE_FUNC_SUCCESS)
   ensures((return_value == MLK_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 1)));
-#endif /* MLK_USE_FIPS202_X1_NATIVE */
-#if defined(MLK_USE_FIPS202_X4_NATIVE)
+#endif /* MLK_USE_NATIVE_FIPS202_X1 */
+#if defined(MLK_USE_NATIVE_FIPS202_X4)
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_keccak_f1600_x4_native(uint64_t *state)
 __contract__(
@@ -52,7 +52,7 @@ __contract__(
   assigns(memory_slice(state, sizeof(uint64_t) * 25 * 4))
   ensures(return_value == MLK_NATIVE_FUNC_FALLBACK || return_value == MLK_NATIVE_FUNC_SUCCESS)
   ensures((return_value == MLK_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 4)));
-#endif /* MLK_USE_FIPS202_X4_NATIVE */
+#endif /* MLK_USE_NATIVE_FIPS202_X4 */
 
 /*
  * Native x4 XOR bytes and extract bytes interface.
@@ -66,12 +66,12 @@ __contract__(
  * NOTE: We assume that the custom representation of the zero state is the
  * all-zero state.
  *
- * MLK_USE_FIPS202_X4_XOR_BYTES_NATIVE: Backend provides native XOR bytes
- * MLK_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE: Backend provides native extract
+ * MLK_USE_NATIVE_FIPS202_X4_XOR_BYTES: Backend provides native XOR bytes
+ * MLK_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES: Backend provides native extract
  * bytes
  */
 
-#if defined(MLK_USE_FIPS202_X4_XOR_BYTES_NATIVE)
+#if defined(MLK_USE_NATIVE_FIPS202_X4_XOR_BYTES)
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_keccakf1600_xor_bytes_x4_native(
     uint64_t *state, const unsigned char *data0, const unsigned char *data1,
@@ -91,9 +91,9 @@ __contract__(
   assigns(memory_slice(state, sizeof(uint64_t) * 25 * 4))
   ensures(return_value == MLK_NATIVE_FUNC_FALLBACK || return_value == MLK_NATIVE_FUNC_SUCCESS)
   ensures((return_value == MLK_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 4)));
-#endif /* MLK_USE_FIPS202_X4_XOR_BYTES_NATIVE */
+#endif /* MLK_USE_NATIVE_FIPS202_X4_XOR_BYTES */
 
-#if defined(MLK_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE)
+#if defined(MLK_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES)
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_keccakf1600_extract_bytes_x4_native(
     uint64_t *state, unsigned char *data0, unsigned char *data1,
@@ -112,6 +112,6 @@ __contract__(
   assigns(memory_slice(data2, length))
   assigns(memory_slice(data3, length))
   ensures(return_value == MLK_NATIVE_FUNC_FALLBACK || return_value == MLK_NATIVE_FUNC_SUCCESS));
-#endif /* MLK_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE */
+#endif /* MLK_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES */
 
 #endif /* !MLK_FIPS202_NATIVE_API_H */
