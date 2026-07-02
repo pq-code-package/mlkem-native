@@ -751,32 +751,32 @@ let keccak_f1600_x4_avx2_mc = define_assert_from_elf
 
 let keccak_f1600_x4_avx2_tmc = define_trimmed "keccak_f1600_x4_avx2_tmc" keccak_f1600_x4_avx2_mc;;
 
-let KECCAK_F1600_X4_AVX2_EXEC = X86_MK_CORE_EXEC_RULE keccak_f1600_x4_avx2_tmc;;
-let keccak_f1600_x4_avx2_TMC_EXEC = KECCAK_F1600_X4_AVX2_EXEC;;
+let KECCAK_F1600_X4_EXEC = X86_MK_CORE_EXEC_RULE keccak_f1600_x4_avx2_tmc;;
+let keccak_f1600_x4_avx2_TMC_EXEC = KECCAK_F1600_X4_EXEC;;
 
-let LENGTH_KECCAK_F1600_X4_AVX2_TMC =
+let LENGTH_KECCAK_F1600_X4_TMC =
   REWRITE_CONV[keccak_f1600_x4_avx2_tmc] `LENGTH keccak_f1600_x4_avx2_tmc`
   |> CONV_RULE(RAND_CONV LENGTH_CONV);;
 
 (* Preamble: MOV r11, rsp (3) + AND rsp, -32 (4) + SUB rsp, 768 (7) = 14 bytes *)
-let KECCAK_F1600_X4_AVX2_PREAMBLE_LENGTH = new_definition
-  `KECCAK_F1600_X4_AVX2_PREAMBLE_LENGTH = 14`;;
+let KECCAK_F1600_X4_PREAMBLE_LENGTH = new_definition
+  `KECCAK_F1600_X4_PREAMBLE_LENGTH = 14`;;
 
 (* Postamble: MOV rsp, r11 (3 bytes) + RET (1 byte) = 4 bytes *)
-let KECCAK_F1600_X4_AVX2_POSTAMBLE_LENGTH = new_definition
-  `KECCAK_F1600_X4_AVX2_POSTAMBLE_LENGTH = 4`;;
+let KECCAK_F1600_X4_POSTAMBLE_LENGTH = new_definition
+  `KECCAK_F1600_X4_POSTAMBLE_LENGTH = 4`;;
 
-let KECCAK_F1600_X4_AVX2_CORE_END = new_definition
-  `KECCAK_F1600_X4_AVX2_CORE_END = LENGTH keccak_f1600_x4_avx2_tmc - KECCAK_F1600_X4_AVX2_POSTAMBLE_LENGTH`;;
+let KECCAK_F1600_X4_CORE_END = new_definition
+  `KECCAK_F1600_X4_CORE_END = LENGTH keccak_f1600_x4_avx2_tmc - KECCAK_F1600_X4_POSTAMBLE_LENGTH`;;
 
 let LENGTH_SIMPLIFY_CONV =
-  REWRITE_CONV[LENGTH_KECCAK_F1600_X4_AVX2_TMC;
-              KECCAK_F1600_X4_AVX2_CORE_END;
-              KECCAK_F1600_X4_AVX2_PREAMBLE_LENGTH;
-              KECCAK_F1600_X4_AVX2_POSTAMBLE_LENGTH] THENC
+  REWRITE_CONV[LENGTH_KECCAK_F1600_X4_TMC;
+              KECCAK_F1600_X4_CORE_END;
+              KECCAK_F1600_X4_PREAMBLE_LENGTH;
+              KECCAK_F1600_X4_POSTAMBLE_LENGTH] THENC
   NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
-let KECCAK_F1600_X4_AVX2_CORRECT = prove
+let KECCAK_F1600_X4_CORRECT = prove
   (`!rc_pointer:int64 bitstate_in:int64 rho8_ptr:int64 rho56_ptr:int64 A1 A2 A3 A4 pc:num stackpointer:int64.
   PAIRWISE nonoverlapping
   [(word pc, LENGTH keccak_f1600_x4_avx2_tmc);
@@ -787,7 +787,7 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
    (rho56_ptr, 32)]
   ==> ensures x86
          (\s. bytes_loaded s (word pc) (BUTLAST keccak_f1600_x4_avx2_tmc) /\
-              read RIP s = word (pc + KECCAK_F1600_X4_AVX2_PREAMBLE_LENGTH) /\
+              read RIP s = word (pc + KECCAK_F1600_X4_PREAMBLE_LENGTH) /\
               read RSP s = stackpointer /\
               read RDI s = bitstate_in /\
               C_ARGUMENTS [bitstate_in; rc_pointer; rho8_ptr; rho56_ptr] s /\
@@ -798,7 +798,7 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
               wordlist_from_memory(word_add bitstate_in (word 200),25) s = A2 /\
               wordlist_from_memory(word_add bitstate_in (word 400),25) s = A3 /\
               wordlist_from_memory(word_add bitstate_in (word 600),25) s = A4)
-             (\s. read RIP s = word(pc + KECCAK_F1600_X4_AVX2_CORE_END) /\
+             (\s. read RIP s = word(pc + KECCAK_F1600_X4_CORE_END) /\
                   wordlist_from_memory(bitstate_in,25) s = keccak 24 A1 /\
                   wordlist_from_memory(word_add bitstate_in (word 200),25) s = keccak 24 A2 /\
                   wordlist_from_memory(word_add bitstate_in (word 400),25) s = keccak 24 A3 /\
@@ -882,7 +882,7 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
     MEMORY_256_FROM_64_TAC "rho56_ptr" 0 4 THEN
     ASM_REWRITE_TAC[WORD_ADD_0] THEN
     REPEAT STRIP_TAC THEN
-    X86_STEPS_TAC KECCAK_F1600_X4_AVX2_EXEC (1--96) THEN
+    X86_STEPS_TAC KECCAK_F1600_X4_EXEC (1--96) THEN
     ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
     REPEAT CONJ_TAC THENL
     [PURE_ONCE_REWRITE_TAC[ARITH_RULE `8 * 0 = 0`] THEN
@@ -940,7 +940,7 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
     MEMORY_256_FROM_64_TAC "rho8_ptr" 0 4 THEN
     MEMORY_256_FROM_64_TAC "rho56_ptr" 0 4 THEN
     ASM_REWRITE_TAC[WORD_ADD_0] THEN REPEAT STRIP_TAC THEN
-    X86_STEPS_TAC KECCAK_F1600_X4_AVX2_EXEC (1--223) THEN
+    X86_STEPS_TAC KECCAK_F1600_X4_EXEC (1--223) THEN
     ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
     REPEAT CONJ_TAC THENL
       [REWRITE_TAC[WORD_ADD];
@@ -992,7 +992,7 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
     MEMORY_256_FROM_64_TAC "rho8_ptr" 0 4 THEN
     MEMORY_256_FROM_64_TAC "rho56_ptr" 0 4 THEN
     ASM_REWRITE_TAC[WORD_ADD_0] THEN REPEAT STRIP_TAC THEN
-    X86_STEPS_TAC KECCAK_F1600_X4_AVX2_EXEC (1--1) THEN
+    X86_STEPS_TAC KECCAK_F1600_X4_EXEC (1--1) THEN
     ENSURES_FINAL_STATE_TAC THEN
     ASM_REWRITE_TAC[];
 
@@ -1015,7 +1015,7 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
     CONV_TAC NUM_REDUCE_CONV THEN
     REWRITE_TAC [keccak; keccak_round] THEN
     ENSURES_INIT_TAC "s0" THEN
-    X86_STEPS_TAC KECCAK_F1600_X4_AVX2_EXEC (1--96) THEN
+    X86_STEPS_TAC KECCAK_F1600_X4_EXEC (1--96) THEN
     REPEAT(FIRST_X_ASSUM(STRIP_ASSUME_TAC o
       CONV_RULE(READ_MEMORY_SPLIT_CONV 2) o
       check (can (term_match [] `read qqq s:int256 = xxx`) o concl))) THEN
@@ -1025,9 +1025,9 @@ let KECCAK_F1600_X4_AVX2_CORRECT = prove
     BITBLAST_TAC]);;
 
 
-let KECCAK_F1600_X4_AVX2_FULL_EXEC = X86_MK_EXEC_RULE keccak_f1600_x4_avx2_tmc;;
+let KECCAK_F1600_X4_FULL_EXEC = X86_MK_EXEC_RULE keccak_f1600_x4_avx2_tmc;;
 
-let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_CORRECT = prove
+let KECCAK_F1600_X4_NOIBT_SUBROUTINE_CORRECT = prove
  (`!rc_pointer:int64 bitstate_in:int64 rho8_ptr:int64 rho56_ptr:int64 A1 A2 A3 A4 pc:num stackpointer:int64 returnaddress.
   PAIRWISE nonoverlapping
   [(word pc, LENGTH keccak_f1600_x4_avx2_tmc);
@@ -1069,14 +1069,14 @@ let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_CORRECT = prove
   WORD_FORALL_OFFSET_TAC 0x31f THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI] THEN
   REWRITE_TAC[PAIRWISE; ALL; C_ARGUMENTS; NONOVERLAPPING_CLAUSES] THEN
-  REWRITE_TAC[fst KECCAK_F1600_X4_AVX2_FULL_EXEC] THEN
+  REWRITE_TAC[fst KECCAK_F1600_X4_FULL_EXEC] THEN
   REWRITE_TAC[WORDLIST_FROM_MEMORY] THEN
   CONV_TAC(ONCE_DEPTH_CONV NUM_MULT_CONV) THEN
   REPEAT STRIP_TAC THEN
 
   (* Step through the three preamble instructions. *)
   ENSURES_INIT_TAC "s0" THEN
-  X86_STEPS_TAC KECCAK_F1600_X4_AVX2_FULL_EXEC (1--3) THEN
+  X86_STEPS_TAC KECCAK_F1600_X4_FULL_EXEC (1--3) THEN
 
   (* Abbreviate the data-dependent slack introduced by `and rsp, -32`.
      `delta` is the number of bytes (0..31) the alignment shaved off rsp;
@@ -1101,7 +1101,7 @@ let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_CORRECT = prove
     `rho8_ptr:int64`; `rho56_ptr:int64`;
     `A1:int64 list`; `A2:int64 list`; `A3:int64 list`; `A4:int64 list`;
     `pc:num`; `word_add stackpointer (word delta):int64`]
-   (CONV_RULE LENGTH_SIMPLIFY_CONV KECCAK_F1600_X4_AVX2_CORRECT)) THEN
+   (CONV_RULE LENGTH_SIMPLIFY_CONV KECCAK_F1600_X4_CORRECT)) THEN
   ANTS_TAC THENL
    [REPEAT(FIRST_X_ASSUM(MP_TAC o check (is_imp o concl))) THEN
     REWRITE_TAC[PAIRWISE; ALL; C_ARGUMENTS; NONOVERLAPPING_CLAUSES] THEN
@@ -1112,16 +1112,16 @@ let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_CORRECT = prove
   REWRITE_TAC[C_ARGUMENTS; SOME_FLAGS] THEN
   REWRITE_TAC[WORDLIST_FROM_MEMORY] THEN
   CONV_TAC(ONCE_DEPTH_CONV NUM_MULT_CONV) THEN
-  X86_BIGSTEP_TAC KECCAK_F1600_X4_AVX2_FULL_EXEC "s4" THENL
+  X86_BIGSTEP_TAC KECCAK_F1600_X4_FULL_EXEC "s4" THENL
    [MATCH_MP_TAC BYTES_LOADED_BUTLAST THEN ASM_REWRITE_TAC[];
     ALL_TAC] THEN
-  X86_STEPS_TAC KECCAK_F1600_X4_AVX2_FULL_EXEC (5--6) THEN
+  X86_STEPS_TAC KECCAK_F1600_X4_FULL_EXEC (5--6) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[]);;
 
 (* NOTE: This must be kept in sync with the CBMC specification
  * in dev/fips202/x86_64/src/fips202_native_x86_64.h *)
 
-let KECCAK_F1600_X4_AVX2_SUBROUTINE_CORRECT = prove
+let KECCAK_F1600_X4_SUBROUTINE_CORRECT = prove
  (`!rc_pointer:int64 bitstate_in:int64 rho8_ptr:int64 rho56_ptr:int64 A1 A2 A3 A4 pc:num stackpointer:int64 returnaddress.
   PAIRWISE nonoverlapping
   [(word pc, LENGTH keccak_f1600_x4_avx2_mc);
@@ -1160,7 +1160,7 @@ let KECCAK_F1600_X4_AVX2_SUBROUTINE_CORRECT = prove
   MATCH_ACCEPT_TAC(ADD_IBT_RULE
     (CONV_RULE TWEAK_CONV
       (REWRITE_RULE[PAIRWISE; ALL; NONOVERLAPPING_CLAUSES]
-        KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_CORRECT))));;
+        KECCAK_F1600_X4_NOIBT_SUBROUTINE_CORRECT))));;
 
 (* ========================================================================= *)
 (* Constant-time and memory safety proof.                                    *)
@@ -1173,10 +1173,10 @@ needs "mlkem_native/x86_64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true
     (assoc "keccak_f1600_x4_avx2" subroutine_signatures)
-    (CONV_RULE LENGTH_SIMPLIFY_CONV KECCAK_F1600_X4_AVX2_CORRECT)
-    KECCAK_F1600_X4_AVX2_EXEC;;
+    (CONV_RULE LENGTH_SIMPLIFY_CONV KECCAK_F1600_X4_CORRECT)
+    KECCAK_F1600_X4_EXEC;;
 
-let KECCAK_F1600_X4_AVX2_SAFE = time prove
+let KECCAK_F1600_X4_SAFE = time prove
  (`exists f_events.
        forall e rc_pointer bitstate_in rho8_ptr rho56_ptr pc stackpointer.
            PAIRWISE nonoverlapping
@@ -1187,12 +1187,12 @@ let KECCAK_F1600_X4_AVX2_SAFE = time prove
                (\s.
                     bytes_loaded s (word pc)
                     (BUTLAST keccak_f1600_x4_avx2_tmc) /\
-                    read RIP s = word (pc + KECCAK_F1600_X4_AVX2_PREAMBLE_LENGTH) /\
+                    read RIP s = word (pc + KECCAK_F1600_X4_PREAMBLE_LENGTH) /\
                     read RSP s = stackpointer /\
                     C_ARGUMENTS [bitstate_in; rc_pointer; rho8_ptr; rho56_ptr] s /\
                     read events s = e)
                (\s.
-                    read RIP s = word (pc + KECCAK_F1600_X4_AVX2_CORE_END) /\
+                    read RIP s = word (pc + KECCAK_F1600_X4_CORE_END) /\
                     (exists e2.
                          read events s = APPEND e2 e /\
                          e2 = f_events rc_pointer rho8_ptr rho56_ptr bitstate_in pc stackpointer /\
@@ -1211,7 +1211,7 @@ let KECCAK_F1600_X4_AVX2_SAFE = time prove
   CONV_TAC(ONCE_DEPTH_CONV LENGTH_SIMPLIFY_CONV) THEN
   ASSERT_CONCL_TAC full_spec THEN
   REWRITE_TAC[PAIRWISE; ALL; NONOVERLAPPING_CLAUSES] THEN
-  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars KECCAK_F1600_X4_AVX2_EXEC);;
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars KECCAK_F1600_X4_EXEC);;
 
 
 (* ========================================================================= *)
@@ -1254,7 +1254,7 @@ let FRAME_CONTAINED = prove
   REWRITE_TAC[VAL_WORD_ADD; VAL_WORD; DIMINDEX_64; CONG] THEN
   CONV_TAC MOD_DOWN_CONV THEN AP_THM_TAC THEN AP_TERM_TAC THEN ARITH_TAC);;
 
-let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_SAFE = time prove
+let KECCAK_F1600_X4_NOIBT_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e rc_pointer bitstate_in rho8_ptr rho56_ptr pc stackpointer returnaddress.
           PAIRWISE nonoverlapping
@@ -1288,7 +1288,7 @@ let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_SAFE = time prove
                             stackpointer,8]))
                (\s s'. true)`,
   let EXPAND_PAIRWISE_CONV = REWRITE_CONV[PAIRWISE; ALL; NONOVERLAPPING_CLAUSES] in
-  let inner_safe = CONV_RULE LENGTH_SIMPLIFY_CONV KECCAK_F1600_X4_AVX2_SAFE in
+  let inner_safe = CONV_RULE LENGTH_SIMPLIFY_CONV KECCAK_F1600_X4_SAFE in
   let execth = X86_MK_EXEC_RULE keccak_f1600_x4_avx2_tmc in
   CONV_TAC(ONCE_DEPTH_CONV EXPAND_PAIRWISE_CONV) THEN
   (* Skolemize the inner SAFE's existential f_events into a free term
@@ -1311,7 +1311,7 @@ let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_SAFE = time prove
                (word_sub
                   (word_and stackpointer (word 0xffffffffffffffe0))
                   (word 0x300)))):uarch_event list` THEN
-  REWRITE_TAC[LENGTH_KECCAK_F1600_X4_AVX2_TMC] THEN
+  REWRITE_TAC[LENGTH_KECCAK_F1600_X4_TMC] THEN
   REPEAT GEN_TAC THEN
   REWRITE_TAC[NONOVERLAPPING_CLAUSES; ALL; PAIRWISE; C_ARGUMENTS] THEN
   REWRITE_TAC[fst execth] THEN
@@ -1368,7 +1368,7 @@ let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_SAFE = time prove
          ((inner_f_events:int64->int64->int64->int64->num->int64->uarch_event list)
             rc_pointer rho8_ptr rho56_ptr bitstate_in pc
             (word_add (word_sub stackpointer (word 0x31f)) (word delta))))` THEN
-  REWRITE_TAC[LENGTH_KECCAK_F1600_X4_AVX2_TMC] THEN
+  REWRITE_TAC[LENGTH_KECCAK_F1600_X4_TMC] THEN
   REWRITE_TAC[APPEND] THEN
   REWRITE_TAC[memaccess_inbounds; ALL] THEN
   (* The two postamble events are trivially in bounds: EventJump is
@@ -1395,7 +1395,7 @@ let KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_SAFE = time prove
   REWRITE_TAC[EX] THEN
   ASM_MESON_TAC[CONTAINED_REFL; FRAME_CONTAINED]);;
 
-let KECCAK_F1600_X4_AVX2_SUBROUTINE_SAFE = time prove
+let KECCAK_F1600_X4_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e rc_pointer bitstate_in rho8_ptr rho56_ptr pc stackpointer returnaddress.
           PAIRWISE nonoverlapping
@@ -1432,4 +1432,4 @@ let KECCAK_F1600_X4_AVX2_SUBROUTINE_SAFE = time prove
   CONV_TAC(ONCE_DEPTH_CONV EXPAND_PAIRWISE_CONV) THEN
   MATCH_ACCEPT_TAC(ADD_IBT_RULE
     (REWRITE_RULE[PAIRWISE; ALL; NONOVERLAPPING_CLAUSES]
-      KECCAK_F1600_X4_AVX2_NOIBT_SUBROUTINE_SAFE)));;
+      KECCAK_F1600_X4_NOIBT_SUBROUTINE_SAFE)));;

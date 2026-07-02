@@ -112,7 +112,7 @@ let mlkem_mulcache_compute_mc = define_assert_from_elf "mlkem_mulcache_compute_m
 (*** BYTECODE END ***)
 
 let mlkem_mulcache_compute_tmc = define_trimmed "mlkem_mulcache_compute_tmc" mlkem_mulcache_compute_mc;;
-let MLKEM_MULCACHE_COMPUTE_TMC_EXEC = X86_MK_CORE_EXEC_RULE mlkem_mulcache_compute_tmc;;
+let MLKEM_POLY_MULCACHE_COMPUTE_TMC_EXEC = X86_MK_CORE_EXEC_RULE mlkem_mulcache_compute_tmc;;
 
 let avx2_mulcache = define
  `avx2_mulcache f k =
@@ -130,20 +130,20 @@ let LENGTH_QDATA_FULL =
   REWRITE_CONV[qdata_full] `LENGTH qdata_full`
   |> CONV_RULE(RAND_CONV LENGTH_CONV);;
 
-let MLKEM_MULCACHE_COMPUTE_POSTAMBLE_LENGTH = new_definition
-  `MLKEM_MULCACHE_COMPUTE_POSTAMBLE_LENGTH = 1`;;
+let MLKEM_POLY_MULCACHE_COMPUTE_POSTAMBLE_LENGTH = new_definition
+  `MLKEM_POLY_MULCACHE_COMPUTE_POSTAMBLE_LENGTH = 1`;;
 
-let MLKEM_MULCACHE_COMPUTE_CORE_END = new_definition
-  `MLKEM_MULCACHE_COMPUTE_CORE_END = LENGTH mlkem_mulcache_compute_tmc - MLKEM_MULCACHE_COMPUTE_POSTAMBLE_LENGTH`;;
+let MLKEM_POLY_MULCACHE_COMPUTE_CORE_END = new_definition
+  `MLKEM_POLY_MULCACHE_COMPUTE_CORE_END = LENGTH mlkem_mulcache_compute_tmc - MLKEM_POLY_MULCACHE_COMPUTE_POSTAMBLE_LENGTH`;;
 
 let LENGTH_SIMPLIFY_CONV =
   REWRITE_CONV[LENGTH_MLKEM_MULCACHE_COMPUTE_TMC;
               LENGTH_QDATA_FULL;
-              MLKEM_MULCACHE_COMPUTE_CORE_END;
-              MLKEM_MULCACHE_COMPUTE_POSTAMBLE_LENGTH] THENC
+              MLKEM_POLY_MULCACHE_COMPUTE_CORE_END;
+              MLKEM_POLY_MULCACHE_COMPUTE_POSTAMBLE_LENGTH] THENC
   NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
-let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(
+let MLKEM_POLY_MULCACHE_COMPUTE_CORRECT = prove(
  `!r a zetas (zetas_list:int16 list) x pc.
     aligned 32 r /\
     aligned 32 a /\
@@ -157,7 +157,7 @@ let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(
               C_ARGUMENTS [r; a; zetas] s /\
               wordlist_from_memory(zetas, 624) s = MAP (iword: int -> 16 word) qdata_full /\
               (!i. i < 256 ==> read(memory :> bytes16(word_add a (word(2 * i)))) s = x i))
-          (\s. read RIP s = word(pc + MLKEM_MULCACHE_COMPUTE_CORE_END) /\
+          (\s. read RIP s = word(pc + MLKEM_POLY_MULCACHE_COMPUTE_CORE_END) /\
                !i. i < 128
                    ==> let zi =
                       read(memory :> bytes16(word_add r (word(2 * i)))) s in
@@ -180,7 +180,7 @@ let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(
   CONV_TAC NUM_REDUCE_CONV THEN
   REPEAT STRIP_TAC THEN
 
-  REWRITE_TAC [SOME_FLAGS; fst MLKEM_MULCACHE_COMPUTE_TMC_EXEC] THEN
+  REWRITE_TAC [SOME_FLAGS; fst MLKEM_POLY_MULCACHE_COMPUTE_TMC_EXEC] THEN
 
   GHOST_INTRO_TAC `init_ymm0:int256` `read YMM0` THEN
 
@@ -203,7 +203,7 @@ let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(
   DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes16 a) s = x`] THEN
   CONV_TAC(LAND_CONV WORD_REDUCE_CONV) THEN STRIP_TAC THEN
 
-  MAP_EVERY (fun n -> X86_STEPS_TAC MLKEM_MULCACHE_COMPUTE_TMC_EXEC [n] THEN
+  MAP_EVERY (fun n -> X86_STEPS_TAC MLKEM_POLY_MULCACHE_COMPUTE_TMC_EXEC [n] THEN
                       SIMD_SIMPLIFY_TAC[ntt_montmul_alt])
         (1--59) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
@@ -259,7 +259,7 @@ let MLKEM_MULCACHE_COMPUTE_CORRECT = prove(
     CONV_TAC INT_REDUCE_CONV])
 );;
 
-let MLKEM_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_CORRECT  = prove(
+let MLKEM_POLY_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_CORRECT  = prove(
  `!r a zetas (zetas_list:int16 list) x pc stackpointer returnaddress.
     aligned 32 r /\
     aligned 32 a /\
@@ -289,12 +289,12 @@ let MLKEM_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_CORRECT  = prove(
   let TWEAK_CONV = ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV in
   CONV_TAC TWEAK_CONV THEN
   X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_mulcache_compute_tmc
-    (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_MULCACHE_COMPUTE_CORRECT)));;
+    (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_POLY_MULCACHE_COMPUTE_CORRECT)));;
 
 (* NOTE: This must be kept in sync with the CBMC specification
  * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
 
-let MLKEM_MULCACHE_COMPUTE_SUBROUTINE_CORRECT = prove(
+let MLKEM_POLY_MULCACHE_COMPUTE_SUBROUTINE_CORRECT = prove(
  `!r a zetas (zetas_list:int16 list) x pc stackpointer returnaddress.
     aligned 32 r /\
     aligned 32 a /\
@@ -323,7 +323,7 @@ let MLKEM_MULCACHE_COMPUTE_SUBROUTINE_CORRECT = prove(
   let TWEAK_CONV = ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV in
   CONV_TAC TWEAK_CONV THEN
   MATCH_ACCEPT_TAC(ADD_IBT_RULE
-  (CONV_RULE TWEAK_CONV MLKEM_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_CORRECT)));;
+  (CONV_RULE TWEAK_CONV MLKEM_POLY_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_CORRECT)));;
 
 (* ------------------------------------------------------------------------- *)
 (* Constant-time and memory safety proof.                                    *)
@@ -335,8 +335,8 @@ needs "mlkem_native/x86_64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true
     (assoc "mlkem_mulcache_compute" subroutine_signatures)
-    MLKEM_MULCACHE_COMPUTE_CORRECT
-    MLKEM_MULCACHE_COMPUTE_TMC_EXEC;;
+    MLKEM_POLY_MULCACHE_COMPUTE_CORRECT
+    MLKEM_POLY_MULCACHE_COMPUTE_TMC_EXEC;;
 (* full_spec mixes numeric and symbolic buffer sizes: mk_safety_spec computes
    624*2=1248 from the subroutine signature for memaccess_inbounds, but copies
    `LENGTH qdata_full * 2` verbatim from the correctness theorem's nonoverlapping
@@ -344,7 +344,7 @@ let full_spec,public_vars = mk_safety_spec
    hand-written goal after LENGTH_SIMPLIFY_CONV. *)
 let full_spec = LENGTH_SIMPLIFY_CONV full_spec |> concl |> rhs;;
 
-let MLKEM_MULCACHE_COMPUTE_SAFE = time prove
+let MLKEM_POLY_MULCACHE_COMPUTE_SAFE = time prove
  (`exists f_events.
        forall e r a zetas pc.
            aligned 32 r /\
@@ -361,7 +361,7 @@ let MLKEM_MULCACHE_COMPUTE_SAFE = time prove
                     C_ARGUMENTS [r; a; zetas] s /\
                     read events s = e)
                (\s.
-                    read RIP s = word (pc + MLKEM_MULCACHE_COMPUTE_CORE_END) /\
+                    read RIP s = word (pc + MLKEM_POLY_MULCACHE_COMPUTE_CORE_END) /\
                     (exists e2.
                          read events s = APPEND e2 e /\
                          e2 = f_events a zetas r pc /\
@@ -376,9 +376,9 @@ let MLKEM_MULCACHE_COMPUTE_SAFE = time prove
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   ASSERT_CONCL_TAC full_spec THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars
-    MLKEM_MULCACHE_COMPUTE_TMC_EXEC);;
+    MLKEM_POLY_MULCACHE_COMPUTE_TMC_EXEC);;
 
-let MLKEM_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_SAFE = time prove
+let MLKEM_POLY_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e r a zetas pc stackpointer returnaddress.
           aligned 32 r /\
@@ -409,13 +409,13 @@ let MLKEM_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_SAFE = time prove
   X86_PROMOTE_RETURN_NOSTACK_TAC mlkem_mulcache_compute_tmc
     (CONV_RULE
       (REWRITE_CONV[LENGTH_MLKEM_MULCACHE_COMPUTE_TMC;
-                    MLKEM_MULCACHE_COMPUTE_CORE_END;
-                    MLKEM_MULCACHE_COMPUTE_POSTAMBLE_LENGTH] THENC
+                    MLKEM_POLY_MULCACHE_COMPUTE_CORE_END;
+                    MLKEM_POLY_MULCACHE_COMPUTE_POSTAMBLE_LENGTH] THENC
        NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0])
-      MLKEM_MULCACHE_COMPUTE_SAFE) THEN
+      MLKEM_POLY_MULCACHE_COMPUTE_SAFE) THEN
   DISCHARGE_SAFETY_PROPERTY_TAC);;
 
-let MLKEM_MULCACHE_COMPUTE_SUBROUTINE_SAFE = time prove
+let MLKEM_POLY_MULCACHE_COMPUTE_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e r a zetas pc stackpointer returnaddress.
           aligned 32 r /\
@@ -443,4 +443,4 @@ let MLKEM_MULCACHE_COMPUTE_SUBROUTINE_SAFE = time prove
                             r,256; stackpointer,8]
                            [r,256; stackpointer,8]))
                (\s s'. true)`,
-  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_SAFE));;
+  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLKEM_POLY_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_SAFE));;
