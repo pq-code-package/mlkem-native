@@ -63,7 +63,7 @@
             inherit system;
             overlays = [
               (_:_: {
-                # Add pkgs-unstable overlays here when needed
+                inherit (pkgs-unstable) cbmc;
               })
             ];
           };
