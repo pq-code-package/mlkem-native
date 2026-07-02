@@ -104,7 +104,7 @@ runs:
         fi
         nix config show
         echo "::endgroup::"
-    - uses: nix-community/cache-nix-action@dab0514428ae3988852b7787a6d86a6fc571cc9d #v6.0.0
+    - uses: nix-community/cache-nix-action@7df957e333c1e5da7721f60227dbba6d06080569 # v7.0.2
       id: cache
       if: ${{ env.NIX_CACHE_ENABLED != 1 && inputs.cache == 'true' }}
       continue-on-error: true
