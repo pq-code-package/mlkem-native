@@ -49,7 +49,16 @@ rec {
       # - On some machines, `native-gcc` needed to be evaluated lastly (placed as the last element of the toolchain list), or else would result in environment variables (CC, AR, ...) overriding issue.
     pkgs.lib.optionals cross [ pkgs.qemu pkgs.gcc-arm-embedded x86_64-gcc aarch64-gcc riscv64-gcc riscv32-gcc ppc64le-gcc ]
     ++ pkgs.lib.optionals (cross && pkgs.stdenv.isLinux && pkgs.stdenv.isx86_64) [ aarch64_be-gcc ]
-    ++ pkgs.lib.optionals cross [ native-gcc ]
+    # On Darwin, install GCC in addition to Clang. We reuse the exact same
+    # `pkgs.gcc` attribute that the Linux native toolchain wraps (`native-gcc`
+    # = `wrap-gcc pkgs`, whose compiler is `pkgs.gcc.cc`). Because both sides
+    # reference the same package from the flake-locked nixpkgs, the Darwin GCC
+    # version is always identical to the Linux one (do NOT pin a hardcoded
+    # `gccNN` here, or the two platforms could drift apart on a nixpkgs bump).
+    # `pkgs.gcc` is listed *before* `native-gcc` (clang on Darwin) so that
+    # clang's cc-wrapper setup hook runs last and CC remains "clang".
+    ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [ pkgs.gcc ]
+    ++ pkgs.lib.optionals (cross || pkgs.stdenv.isDarwin) [ native-gcc ]
     # git is not available in the nix shell on Darwin. As a workaround we add git as a dependency here.
     # Initially, we expected this to be fixed by https://github.com/NixOS/nixpkgs/pull/353893, but that does not seem to be the case.
     ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [ pkgs.git ]
