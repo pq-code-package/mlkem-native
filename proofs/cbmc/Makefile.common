@@ -326,7 +326,12 @@ CHECKFLAGS += $(CBMC_FLAG_UNSIGNED_OVERFLOW_CHECK)
 NONDET_STATIC ?=
 
 # Flags to pass to goto-cc for compilation and linking
-COMPILE_FLAGS ?= -Wall -Werror --native-compiler $(CC)
+#
+# Note that we always use gcc for pre-processing with goto-cc
+# in order to get consistent header files on all platforms,
+# rather than using $(CC) (which might be preferred for compilation
+# on some platforms such as macOS/Darwin)
+COMPILE_FLAGS ?= -Wall -Werror --native-compiler gcc
 LINK_FLAGS ?= -Wall -Werror
 EXPORT_FILE_LOCAL_SYMBOLS ?= --export-file-local-symbols
 
