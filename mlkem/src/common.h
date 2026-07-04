@@ -22,6 +22,7 @@
 #define MLK_COMMON_H
 
 #ifndef __ASSEMBLER__
+#include <stddef.h>
 #include <stdint.h>
 #endif
 
