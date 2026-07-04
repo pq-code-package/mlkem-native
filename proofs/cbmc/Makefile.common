@@ -146,7 +146,7 @@ PROOF_ROOT = $(dir $(filter %/Makefile.common,$(MAKEFILE_PATHS)))
 
 CBMC_ROOT = $(shell dirname $(PROOF_ROOT))
 PROOF_SOURCE = $(CBMC_ROOT)/sources
-PROOF_INCLUDE = $(CBMC_ROOT)/include
+PROOF_INCLUDE = $(CBMC_ROOT)/cbmc/include/LP64
 PROOF_STUB = $(CBMC_ROOT)/stubs
 
 # Flag to pass to goto-cc to make all static symbols globally visible. Leave it
@@ -326,7 +326,11 @@ CHECKFLAGS += $(CBMC_FLAG_UNSIGNED_OVERFLOW_CHECK)
 NONDET_STATIC ?=
 
 # Flags to pass to goto-cc for compilation and linking
-COMPILE_FLAGS ?= -Wall -Werror --native-compiler $(CC)
+# Note that we _always use gcc for pre-processing with goto-cc
+# in order to get consistent header files on all platforms,
+# rather than using $(CC) (whight might be preferred for _compilation_
+# on some platforms such as macOS/Darwin)
+COMPILE_FLAGS ?= -Wall -Werror --native-compiler gcc -nostdinc -I$(PROOF_INCLUDE)
 LINK_FLAGS ?= -Wall -Werror
 EXPORT_FILE_LOCAL_SYMBOLS ?= --export-file-local-symbols
 
