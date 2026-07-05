@@ -6,10 +6,10 @@
 #ifndef _STDDEF_H
 #define _STDDEF_H 1
 
-/* "LP64" stands for "Long and Pointer are 64-bit", so
- *  size_t is "unsigned long" which has the same size as a "pointer"
+/* "ILP32" stands for "Int, Long, and Pointer are 32-bit", so
+ *  size_t is "unsigned int" which has the same size as a "pointer"
  */
-typedef unsigned long size_t;
+typedef unsigned int size_t;
 
 #define NULL (0)
 
