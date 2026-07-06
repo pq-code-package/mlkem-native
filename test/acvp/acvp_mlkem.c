@@ -135,6 +135,7 @@ static void print_hex(const char *name, const unsigned char *raw, size_t len)
 /* The test-case handlers below are MLK_NOINLINE so their large key buffers
  * stay in short-lived frames. This can reduce stack usage in some
  * environments, e.g. AVR. */
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
 static MLK_NOINLINE void acvp_mlkem_encapDecp_AFT_encapsulation(
     unsigned char const ek[CRYPTO_PUBLICKEYBYTES],
     unsigned char const m[MLKEM_SYMBYTES])
@@ -148,6 +149,16 @@ static MLK_NOINLINE void acvp_mlkem_encapDecp_AFT_encapsulation(
   print_hex("k", ss, sizeof(ss));
 }
 
+static MLK_NOINLINE void acvp_mlkem_encapDecp_VAL_encapsulationKeyCheck(
+    unsigned char const ek[CRYPTO_PUBLICKEYBYTES])
+{
+  int rc = 0;
+  rc = (crypto_kem_check_pk(ek) == 0) ? 1 : 0;
+  printf("testPassed=%d\n", rc);
+}
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
+
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
 static MLK_NOINLINE void acvp_mlkem_encapDecp_VAL_decapsulation(
     unsigned char const dk[CRYPTO_SECRETKEYBYTES],
     unsigned char const c[CRYPTO_CIPHERTEXTBYTES])
@@ -159,14 +170,6 @@ static MLK_NOINLINE void acvp_mlkem_encapDecp_VAL_decapsulation(
   print_hex("k", ss, sizeof(ss));
 }
 
-static MLK_NOINLINE void acvp_mlkem_encapDecp_VAL_encapsulationKeyCheck(
-    unsigned char const ek[CRYPTO_PUBLICKEYBYTES])
-{
-  int rc = 0;
-  rc = (crypto_kem_check_pk(ek) == 0) ? 1 : 0;
-  printf("testPassed=%d\n", rc);
-}
-
 static MLK_NOINLINE void acvp_mlkem_encapDecp_VAL_decapsulationKeyCheck(
     unsigned char const dk[CRYPTO_SECRETKEYBYTES])
 {
@@ -174,7 +177,9 @@ static MLK_NOINLINE void acvp_mlkem_encapDecp_VAL_decapsulationKeyCheck(
   rc = (crypto_kem_check_sk(dk) == 0) ? 1 : 0;
   printf("testPassed=%d\n", rc);
 }
+#endif /* !MLK_CONFIG_NO_DECAPS_API */
 
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 static MLK_NOINLINE void acvp_mlkem_keyGen_AFT(
     unsigned char const z[MLKEM_SYMBYTES],
     unsigned char const d[MLKEM_SYMBYTES])
@@ -190,6 +195,27 @@ static MLK_NOINLINE void acvp_mlkem_keyGen_AFT(
 
   print_hex("ek", ek, sizeof(ek));
   print_hex("dk", dk, sizeof(dk));
+}
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
+
+/* Print supported ACVP modes and functions and exit (used by acvp_client.py).
+ * ML-KEM's ACVP schema bundles encapsulation and decapsulation into the
+ * "encapDecap" mode; individual test functions (encapsulation vs
+ * decapsulation, plus the *KeyCheck helpers) may still be disabled
+ * independently. We advertise each function that is compiled in. */
+static void print_info(void)
+{
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
+  printf("keyGen\n");
+#endif
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
+  printf("encapsulation\n");
+  printf("encapsulationKeyCheck\n");
+#endif
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
+  printf("decapsulation\n");
+  printf("decapsulationKeyCheck\n");
+#endif
 }
 
 /* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
@@ -207,10 +233,16 @@ int main(int argc, char *argv[])
   }
   argc--, argv++;
 
-  /* Parse mode: "encapDecap" or "keyGen" */
+  /* Parse mode: "encapDecap" or "keyGen" or "--info" */
   if (argc == 0)
   {
     goto usage;
+  }
+
+  if (strcmp(*argv, "--info") == 0)
+  {
+    print_info();
+    return 0;
   }
 
   if (strcmp(*argv, "encapDecap") == 0)
@@ -283,6 +315,7 @@ int main(int argc, char *argv[])
 
       switch (encapDecap_function)
       {
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
         case encapsulation:
         {
           unsigned char ek[CRYPTO_PUBLICKEYBYTES];
@@ -311,6 +344,8 @@ int main(int argc, char *argv[])
           acvp_mlkem_encapDecp_AFT_encapsulation(ek, m);
           break;
         }
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
         case decapsulation:
         {
           unsigned char dk[CRYPTO_SECRETKEYBYTES];
@@ -339,6 +374,8 @@ int main(int argc, char *argv[])
           acvp_mlkem_encapDecp_VAL_decapsulation(dk, c);
           break;
         }
+#endif /* !MLK_CONFIG_NO_DECAPS_API */
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
         case encapsulationKeyCheck:
         {
           unsigned char ek[CRYPTO_PUBLICKEYBYTES];
@@ -365,6 +402,8 @@ int main(int argc, char *argv[])
           acvp_mlkem_encapDecp_VAL_encapsulationKeyCheck(ek);
           break;
         }
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
         case decapsulationKeyCheck:
         {
           unsigned char dk[CRYPTO_SECRETKEYBYTES];
@@ -391,9 +430,13 @@ int main(int argc, char *argv[])
           acvp_mlkem_encapDecp_VAL_decapsulationKeyCheck(dk);
           break;
         }
+#endif /* !MLK_CONFIG_NO_DECAPS_API */
+        default:
+          goto usage;
       }
       break;
     }
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
     case keyGen:
     {
       unsigned char z[MLKEM_SYMBYTES];
@@ -422,6 +465,9 @@ int main(int argc, char *argv[])
       acvp_mlkem_keyGen_AFT(z, d);
       break;
     }
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
+    default:
+      goto usage;
   }
 
   ((void)type);
@@ -432,23 +478,29 @@ usage:
   fprintf(stderr, USAGE "\n");
   return (1);
 
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
 encaps_usage:
   fprintf(stderr, ENCAPS_USAGE "\n");
-  return (1);
-
-decaps_usage:
-  fprintf(stderr, DECAPS_USAGE "\n");
-  return (1);
-
-keygen_usage:
-  fprintf(stderr, KEYGEN_USAGE "\n");
   return (1);
 
 encapsulationKeyCheck_usage:
   fprintf(stderr, ENCAPS_KEY_CHECK_USAGE "\n");
   return (1);
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
+
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
+decaps_usage:
+  fprintf(stderr, DECAPS_USAGE "\n");
+  return (1);
 
 decapsulationKeyCheck_usage:
   fprintf(stderr, DECAPS_KEY_CHECK_USAGE "\n");
   return (1);
+#endif /* !MLK_CONFIG_NO_DECAPS_API */
+
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
+keygen_usage:
+  fprintf(stderr, KEYGEN_USAGE "\n");
+  return (1);
+#endif
 }

@@ -191,6 +191,7 @@ extern "C"
 {
 #endif
 
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 /**
  * Generate a public/private keypair for the ML-KEM key encapsulation mechanism.
  *
@@ -255,7 +256,9 @@ int MLK_API_NAMESPACE(keypair)(
 #endif
 );
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
 /**
  * Generate ciphertext and shared secret for a given public key.
  *
@@ -324,7 +327,9 @@ int MLK_API_NAMESPACE(enc)(
 #endif
 );
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
 
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
 /**
  * Generate shared secret for a given ciphertext and private key.
  *
@@ -356,6 +361,7 @@ int MLK_API_NAMESPACE(dec)(
     MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
 #endif
 );
+#endif /* !MLK_CONFIG_NO_DECAPS_API */
 
 
 /**
@@ -375,6 +381,7 @@ int MLK_API_NAMESPACE(dec)(
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
  *                               MLK_CUSTOM_ALLOC returned NULL.
  */
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
 MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(check_pk)(
@@ -384,6 +391,7 @@ int MLK_API_NAMESPACE(check_pk)(
     MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
 #endif
 );
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
 
 /**
  * Implements public key hash check mandated by FIPS 203, i.e., ensures that
@@ -402,6 +410,7 @@ int MLK_API_NAMESPACE(check_pk)(
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
  *                               MLK_CUSTOM_ALLOC returned NULL.
  */
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
 MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
 int MLK_API_NAMESPACE(check_sk)(
@@ -411,6 +420,7 @@ int MLK_API_NAMESPACE(check_sk)(
     MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
 #endif
 );
+#endif /* !MLK_CONFIG_NO_DECAPS_API */
 
 #ifdef __cplusplus
 }
@@ -427,13 +437,23 @@ int MLK_API_NAMESPACE(check_sk)(
 #define CRYPTO_SYMBYTES MLKEM_SYMBYTES
 #define CRYPTO_BYTES MLKEM_BYTES
 
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 #define crypto_kem_keypair_derand MLK_API_NAMESPACE(keypair_derand)
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 #define crypto_kem_keypair MLK_API_NAMESPACE(keypair)
+#endif
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
 #define crypto_kem_enc_derand MLK_API_NAMESPACE(enc_derand)
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 #define crypto_kem_enc MLK_API_NAMESPACE(enc)
-#define crypto_kem_dec MLK_API_NAMESPACE(dec)
+#endif
 #define crypto_kem_check_pk MLK_API_NAMESPACE(check_pk)
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
+#define crypto_kem_dec MLK_API_NAMESPACE(dec)
 #define crypto_kem_check_sk MLK_API_NAMESPACE(check_sk)
+#endif /* !MLK_CONFIG_NO_DECAPS_API */
 
 #else /* !MLK_CONFIG_API_NO_SUPERCOP */
 

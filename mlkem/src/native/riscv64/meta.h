@@ -40,6 +40,7 @@ static MLK_INLINE int mlk_ntt_native(int16_t data[MLKEM_N])
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
+#if !defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API)
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
 {
@@ -52,13 +53,16 @@ static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
   mlk_rv64v_poly_invntt_tomont(data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
+#endif /* !MLK_CONFIG_NO_ENCAPS_API || !MLK_CONFIG_NO_DECAPS_API */
 
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_tomont_native(int16_t data[MLKEM_N])
 {
   mlk_rv64v_poly_tomont(data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
 
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_rej_uniform_native(int16_t *r, unsigned len,

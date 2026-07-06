@@ -8,6 +8,22 @@
 
 #include "mlkem_native.h"
 
+static void print_info(void)
+{
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API) && \
+    !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+  printf("keygen\n");
+#endif
+#if !defined(MLK_CONFIG_NO_ENCAPS_API) && !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+  printf("encaps\n");
+#endif
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
+  printf("decaps\n");
+#endif
+}
+
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API) && \
+    !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 static void test_keygen_only(void)
 {
   unsigned char pk[CRYPTO_PUBLICKEYBYTES];
@@ -18,7 +34,9 @@ static void test_keygen_only(void)
   int ret = crypto_kem_keypair(pk, sk);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 }
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API && !MLK_CONFIG_NO_RANDOMIZED_API */
 
+#if !defined(MLK_CONFIG_NO_ENCAPS_API) && !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 static void test_encaps_only(void)
 {
   unsigned char pk[CRYPTO_PUBLICKEYBYTES] = {0};
@@ -30,7 +48,9 @@ static void test_encaps_only(void)
   int ret = crypto_kem_enc(ct, ss, pk);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 }
+#endif /* !MLK_CONFIG_NO_ENCAPS_API && !MLK_CONFIG_NO_RANDOMIZED_API */
 
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
 static void test_decaps_only(void)
 {
   unsigned char sk[CRYPTO_SECRETKEYBYTES] = {0};
@@ -42,6 +62,7 @@ static void test_decaps_only(void)
   int ret = crypto_kem_dec(ss, ct, sk);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 }
+#endif /* !MLK_CONFIG_NO_DECAPS_API */
 
 /* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
 #if defined(main)
@@ -51,21 +72,38 @@ int main(int argc, char *argv[])
 {
   if (argc != 2)
   {
-    fprintf(stderr, "Usage: %s <keygen|encaps|decaps>\n", argv[0]);
+    fprintf(stderr, "Usage: %s <--info|keygen|encaps|decaps>\n", argv[0]);
     return 1;
   }
 
-  if (strcmp(argv[1], "keygen") == 0)
+  if (strcmp(argv[1], "--info") == 0)
   {
+    print_info();
+  }
+  else if (strcmp(argv[1], "keygen") == 0)
+  {
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API) && \
+    !defined(MLK_CONFIG_NO_RANDOMIZED_API)
     test_keygen_only();
+#else
+    printf("SKIPPED (keygen API disabled)\n");
+#endif
   }
   else if (strcmp(argv[1], "encaps") == 0)
   {
+#if !defined(MLK_CONFIG_NO_ENCAPS_API) && !defined(MLK_CONFIG_NO_RANDOMIZED_API)
     test_encaps_only();
+#else
+    printf("SKIPPED (encaps API disabled)\n");
+#endif
   }
   else if (strcmp(argv[1], "decaps") == 0)
   {
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
     test_decaps_only();
+#else
+    printf("SKIPPED (decaps API disabled)\n");
+#endif
   }
   else
   {

@@ -243,6 +243,14 @@ ABICHECK_ASM_CFLAGS := \
 ABICHECK_ASM_OBJS = $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_ASM_SOURCES))
 $(ABICHECK_ASM_OBJS): CFLAGS += $(ABICHECK_ASM_CFLAGS)
 
+# Force the full ML-KEM API surface for the ABI check, regardless of any
+# reduced-API config the caller passes in.
+ABICHECK_FULL_API_CFLAGS := \
+  -UMLK_CONFIG_NO_KEYPAIR_API \
+  -UMLK_CONFIG_NO_ENCAPS_API \
+  -UMLK_CONFIG_NO_DECAPS_API
+$(ABICHECK_OBJS): CFLAGS += $(ABICHECK_FULL_API_CFLAGS)
+
 # Platform support objects (e.g. the bare-metal startup providing _start and the
 # semihosting runtime). EXTRA_SOURCES is set by a platform makefile (see
 # test/baremetal/platform/*/platform.mk via EXTRA_MAKEFILE); empty for native

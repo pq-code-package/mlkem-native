@@ -42,6 +42,11 @@ custom FIPS-202 backend.
 See [monolithic_build](monolithic_build) for an example of how to build mlkem-native (with C backend) from a single
 auto-generated compilation unit.
 
+## Monobuild (with native code)
+
+See [monolithic_build_native](monolithic_build_native) for an example of how to build mlkem-native from a single
+auto-generated compilation unit, while also linking in assembly from the native backends.
+
 ## Multi-level monobuild (C only)
 
 See [monolithic_build_multilevel](monolithic_build_multilevel) for an example of how to build all security levels of

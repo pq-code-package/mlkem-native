@@ -37,6 +37,7 @@ static MLK_INLINE int mlk_ntt_native(int16_t data[MLKEM_N])
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
+#if !defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API)
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
 {
@@ -48,6 +49,7 @@ static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
                        mlk_aarch64_invntt_zetas_layer67);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
+#endif /* !MLK_CONFIG_NO_ENCAPS_API || !MLK_CONFIG_NO_DECAPS_API */
 
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])
@@ -60,6 +62,7 @@ static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_tomont_native(int16_t data[MLKEM_N])
 {
@@ -70,6 +73,7 @@ static MLK_INLINE int mlk_poly_tomont_native(int16_t data[MLKEM_N])
   mlk_poly_tomont_aarch64_asm(data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
 
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_mulcache_compute_native(int16_t x[MLKEM_N / 2],
@@ -130,6 +134,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */
 
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API) || !defined(MLK_CONFIG_NO_ENCAPS_API)
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
                                               const int16_t a[MLKEM_N])
@@ -141,6 +146,7 @@ static MLK_INLINE int mlk_poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
   mlk_poly_tobytes_aarch64_asm(r, a);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API || !MLK_CONFIG_NO_ENCAPS_API */
 
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_rej_uniform_native(int16_t *r, unsigned len,

@@ -15,7 +15,8 @@
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__) && \
+    !defined(MLK_CONFIG_NO_KEYPAIR_API)
 /*yaml
   Name: poly_tomont_ppc_asm
   Description: PowerPC64 VSX conversion to Montgomery form
@@ -308,7 +309,7 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
 MLK_ASM_FN_SIZE(poly_tomont_ppc_asm)
 
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
-          && __POWER8_VECTOR__ */
+          && __POWER8_VECTOR__ && !MLK_CONFIG_NO_KEYPAIR_API */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits
