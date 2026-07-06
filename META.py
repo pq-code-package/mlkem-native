@@ -5,7 +5,9 @@
 # Checks the KAT output of a gen_KAT binary against META.yml.
 #
 # Reads the KAT bytes from stdin, hashes them with SHA-256, and compares
-# against the kat-sha256 field for the given scheme in META.yml.
+# against the kat-sha256 field for the given scheme in META.yml. If stdin is
+# "SKIPPED" (emitted by gen_KAT for reduced-API builds), the check is reported
+# as skipped.
 #
 # To run manually, pipe a gen_KAT binary into it, e.g.:
 #
@@ -53,9 +55,16 @@ def main():
         err(f"META.yml: no kat-sha256 entry for {scheme_name}")
         sys.exit(1)
 
-    # Hash the raw bytes piped in from gen_KAT on stdin. Read in binary mode so
+    # Read the raw bytes piped in from gen_KAT on stdin. Read in binary mode so
     # that no newline translation occurs on Windows.
-    computed = hashlib.sha256(sys.stdin.buffer.read()).hexdigest()
+    data = sys.stdin.buffer.read()
+
+    # Reduced-API builds emit "SKIPPED" instead of KAT bytes; report as skipped.
+    if data.startswith(b"SKIPPED"):
+        info(f"META.yml {scheme_name} kat-sha256: SKIPPED")
+        sys.exit(0)
+
+    computed = hashlib.sha256(data).hexdigest()
 
     if computed == ref:
         info(f"META.yml {scheme_name} kat-sha256: OK")

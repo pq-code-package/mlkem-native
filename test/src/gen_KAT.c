@@ -9,6 +9,16 @@
 
 #include "../../mlkem/mlkem_native.h"
 
+#if defined(MLK_CONFIG_NO_KEYPAIR_API) || defined(MLK_CONFIG_NO_ENCAPS_API) || \
+    defined(MLK_CONFIG_NO_DECAPS_API)
+int main(void)
+{
+  printf("SKIPPED (KAT requires full API)\n");
+  return 0;
+}
+#else /* MLK_CONFIG_NO_KEYPAIR_API || MLK_CONFIG_NO_ENCAPS_API || \
+         MLK_CONFIG_NO_DECAPS_API */
+
 #if defined(_WIN64) || defined(_WIN32)
 #include <fcntl.h>
 #include <io.h>
@@ -90,3 +100,5 @@ int main(void)
 
   return 0;
 }
+#endif /* !(MLK_CONFIG_NO_KEYPAIR_API || MLK_CONFIG_NO_ENCAPS_API || \
+          MLK_CONFIG_NO_DECAPS_API) */

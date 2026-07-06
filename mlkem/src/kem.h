@@ -46,14 +46,24 @@
 
 #endif /* MLK_CHECK_APIS */
 
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 #define mlk_kem_keypair_derand \
   MLK_NAMESPACE_K(keypair_derand) MLK_CONTEXT_PARAMETERS_3
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 #define mlk_kem_keypair MLK_NAMESPACE_K(keypair) MLK_CONTEXT_PARAMETERS_2
+#endif
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
 #define mlk_kem_enc_derand MLK_NAMESPACE_K(enc_derand) MLK_CONTEXT_PARAMETERS_4
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 #define mlk_kem_enc MLK_NAMESPACE_K(enc) MLK_CONTEXT_PARAMETERS_3
-#define mlk_kem_dec MLK_NAMESPACE_K(dec) MLK_CONTEXT_PARAMETERS_3
+#endif
 #define mlk_kem_check_pk MLK_NAMESPACE_K(check_pk) MLK_CONTEXT_PARAMETERS_1
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
+#define mlk_kem_dec MLK_NAMESPACE_K(dec) MLK_CONTEXT_PARAMETERS_3
 #define mlk_kem_check_sk MLK_NAMESPACE_K(check_sk) MLK_CONTEXT_PARAMETERS_1
+#endif
 
 /**
  * Implements modulus check mandated by FIPS 203, i.e., ensures that
@@ -74,6 +84,7 @@
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
  *                               MLK_CUSTOM_ALLOC returned NULL.
  */
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
@@ -83,6 +94,7 @@ __contract__(
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
           return_value == MLK_ERR_OUT_OF_MEMORY)
 );
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
 
 
 /**
@@ -104,6 +116,7 @@ __contract__(
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
  *                               MLK_CUSTOM_ALLOC returned NULL.
  */
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
@@ -113,7 +126,9 @@ __contract__(
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
           return_value == MLK_ERR_OUT_OF_MEMORY)
 );
+#endif /* !MLK_CONFIG_NO_DECAPS_API */
 
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 /**
  * Generate a public/private keypair for the ML-KEM key encapsulation mechanism.
  *
@@ -151,6 +166,7 @@ __contract__(
           return_value == MLK_ERR_RNG_FAIL)
 );
 
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 /**
  * Generate a public/private keypair for the ML-KEM key encapsulation mechanism.
  *
@@ -184,6 +200,8 @@ __contract__(
           return_value == MLK_ERR_OUT_OF_MEMORY ||
           return_value == MLK_ERR_RNG_FAIL)
 );
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
 
 /**
  * Generate ciphertext and shared secret for a given public key.
@@ -208,6 +226,7 @@ __contract__(
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
  *                               MLK_CUSTOM_ALLOC returned NULL.
  */
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
@@ -226,6 +245,7 @@ __contract__(
           return_value == MLK_ERR_OUT_OF_MEMORY)
 );
 
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 /**
  * Generate ciphertext and shared secret for a given public key.
  *
@@ -264,6 +284,8 @@ __contract__(
           return_value == MLK_ERR_OUT_OF_MEMORY ||
           return_value == MLK_ERR_RNG_FAIL)
 );
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
 
 /**
  * Generate shared secret for a given ciphertext and private key.
@@ -286,6 +308,7 @@ __contract__(
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
  *                               MLK_CUSTOM_ALLOC returned NULL.
  */
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_dec(uint8_t ss[MLKEM_SSBYTES],
@@ -300,5 +323,6 @@ __contract__(
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
           return_value == MLK_ERR_OUT_OF_MEMORY)
 );
+#endif /* !MLK_CONFIG_NO_DECAPS_API */
 
 #endif /* !MLK_KEM_H */

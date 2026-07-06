@@ -10,6 +10,8 @@ import subprocess
 import sys
 import tempfile
 
+API_NAMES = ["keygen", "encaps", "decaps"]
+
 
 def parse_su_files(build_dir):
     """Parse GCC stack usage (.su) files"""
@@ -52,7 +54,27 @@ def parse_su_files(build_dir):
     return stack_usage
 
 
-def run_valgrind_massif_per_api(stack_test_binary, dump_massif=False):
+def detect_supported_apis(stack_test_binary):
+    """Ask the stack test binary which API modes are compiled in."""
+    result = subprocess.run(
+        [stack_test_binary, "--info"], capture_output=True, text=True, timeout=30
+    )
+    if result.returncode != 0:
+        return (
+            False,
+            f"Failed to query supported APIs (return code {result.returncode}): "
+            f"{result.stderr}",
+        )
+
+    reported = {line.strip() for line in result.stdout.splitlines() if line.strip()}
+    unknown = reported - set(API_NAMES)
+    if unknown:
+        return False, f"Stack test binary reported unknown API modes: {sorted(unknown)}"
+
+    return True, [api_name for api_name in API_NAMES if api_name in reported]
+
+
+def run_valgrind_massif_per_api(stack_test_binary, supported_apis, dump_massif=False):
     """Run valgrind massif with API-level stack analysis using dedicated test binary"""
     # Determine parameter set from binary path
     if "test_stack512" in stack_test_binary:
@@ -68,17 +90,16 @@ def run_valgrind_massif_per_api(stack_test_binary, dump_massif=False):
         )
 
     api_results = {}
-    api_names = ["keygen", "encaps", "decaps"]
-    api_display_names = [
-        f"ML-KEM{param_set}-KeyGen",
-        f"ML-KEM{param_set}-Encaps",
-        f"ML-KEM{param_set}-Decaps",
-    ]
+    api_display_names = {
+        "keygen": f"ML-KEM{param_set}-KeyGen",
+        "encaps": f"ML-KEM{param_set}-Encaps",
+        "decaps": f"ML-KEM{param_set}-Decaps",
+    }
 
     with tempfile.NamedTemporaryFile(mode="w+", suffix=".massif") as temp_file:
         massif_output = temp_file.name
 
-        for api_name in api_names:
+        for api_name in supported_apis:
             cmd = [
                 "valgrind",
                 "--tool=massif",
@@ -123,9 +144,9 @@ def run_valgrind_massif_per_api(stack_test_binary, dump_massif=False):
 
         # Format results
         result_lines = []
-        for i, api_name in enumerate(api_names):
+        for api_name in supported_apis:
             stack_usage = api_results[api_name]
-            display_name = api_display_names[i]
+            display_name = api_display_names[api_name]
             if stack_usage > 0:
                 result_lines.append(f"  {display_name:20}: {stack_usage:,} bytes")
             else:
@@ -145,13 +166,24 @@ def run_valgrind_massif_per_api(stack_test_binary, dump_massif=False):
 
 def run_runtime_analysis(binary_path, dump_massif=False):
     """Run runtime stack analysis"""
+    success, supported_apis = detect_supported_apis(binary_path)
+    if not success:
+        return False, supported_apis
+
+    if not supported_apis:
+        return True, "No stack-test APIs are enabled in this build"
+
     try:
-        # Test the stack test binary with keygen argument
-        test_result = subprocess.run(
-            [binary_path, "keygen"], capture_output=True, text=True, timeout=30
-        )
-        if test_result.returncode != 0:
-            return False, f"Stack test binary execution failed: {test_result.stderr}"
+        for api_name in supported_apis:
+            test_result = subprocess.run(
+                [binary_path, api_name], capture_output=True, text=True, timeout=30
+            )
+            if test_result.returncode != 0:
+                return (
+                    False,
+                    f"Stack test binary execution failed for {api_name}: "
+                    f"{test_result.stderr}",
+                )
     except subprocess.TimeoutExpired:
         return False, "Binary execution timeout"
     except Exception as e:
@@ -161,16 +193,20 @@ def run_runtime_analysis(binary_path, dump_massif=False):
     if platform.system() == "Linux":
         try:
             subprocess.run(["valgrind", "--version"], capture_output=True, check=True)
-            return run_valgrind_massif_per_api(binary_path, dump_massif)
+            return run_valgrind_massif_per_api(binary_path, supported_apis, dump_massif)
         except (subprocess.CalledProcessError, FileNotFoundError):
             return (
                 True,
-                "Binary executed successfully (valgrind not available for runtime analysis)",
+                "Enabled APIs executed successfully "
+                f"({', '.join(supported_apis)}); "
+                "valgrind not available for runtime analysis",
             )
     else:
         return (
             True,
-            "Binary executed successfully (detailed runtime stack analysis requires valgrind on Linux)",
+            "Enabled APIs executed successfully "
+            f"({', '.join(supported_apis)}); "
+            "detailed runtime stack analysis requires valgrind on Linux",
         )
 
 

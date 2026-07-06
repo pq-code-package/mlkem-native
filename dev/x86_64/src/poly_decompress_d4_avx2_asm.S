@@ -31,6 +31,7 @@
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
+    !defined(MLK_CONFIG_NO_DECAPS_API) && \
     (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 2 || MLKEM_K == 3)
 /*yaml
   Name: poly_decompress_d4_avx2_asm
@@ -118,5 +119,5 @@ ret
 
 /* simpasm: footer-start */
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
-          && (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == \
-          3) */
+          && !MLK_CONFIG_NO_DECAPS_API && (MLK_CONFIG_MULTILEVEL_WITH_SHARED || \
+          MLKEM_K == 2 || MLKEM_K == 3) */

@@ -7,8 +7,10 @@
 
 /* Expose internal functions */
 #define MLK_BUILD_INTERNAL
+#include <string.h>
 #include "../../mlkem/mlkem_native.h"
 #include "../../mlkem/src/common.h"
+#include "../test_vectors/expected_test_vectors.h"
 
 /*
  * This test checks that we handle randombytes failures correctly by:
@@ -109,7 +111,23 @@ int randombytes(uint8_t *buf, size_t len)
         test_name, num_randombytes_calls);                             \
   } while (0)
 
-static int test_keygen_rng_failure(void)
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
+static int test_keypair_derand_rng_failure(void)
+{
+  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t coins[2 * MLKEM_SYMBYTES];
+
+  memcpy(coins, test_vector_d, MLKEM_SYMBYTES);
+  memcpy(coins + MLKEM_SYMBYTES, test_vector_z, MLKEM_SYMBYTES);
+
+  TEST_RNG_FAILURE("crypto_kem_keypair_derand",
+                   crypto_kem_keypair_derand(pk, sk, coins));
+  return 0;
+}
+
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+static int test_keypair_rng_failure(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
@@ -117,87 +135,55 @@ static int test_keygen_rng_failure(void)
   TEST_RNG_FAILURE("crypto_kem_keypair", crypto_kem_keypair(pk, sk));
   return 0;
 }
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
 
-static int test_enc_rng_failure(void)
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
+static int test_enc_derand_rng_failure(void)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
   uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
   uint8_t ss[CRYPTO_BYTES];
 
-  /* Generate valid keypair first */
-  reset_all();
-  if (crypto_kem_keypair(pk, sk) != 0)
-  {
-    fprintf(stderr, "ERROR: crypto_kem_keypair failed in enc test setup\n");
-    return 1;
-  }
-
-  TEST_RNG_FAILURE("crypto_kem_enc", crypto_kem_enc(ct, ss, pk));
+  TEST_RNG_FAILURE(
+      "crypto_kem_enc_derand",
+      crypto_kem_enc_derand(ct, ss, test_vector_pk, test_vector_m));
   return 0;
 }
 
-static int test_dec_rng_failure(void)
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+static int test_enc_rng_failure(void)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
   uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
-  uint8_t ss_enc[CRYPTO_BYTES];
-  uint8_t ss_dec[CRYPTO_BYTES];
+  uint8_t ss[CRYPTO_BYTES];
 
-  /* Generate valid keypair and ciphertext first */
-  reset_all();
-  if (crypto_kem_keypair(pk, sk) != 0)
-  {
-    fprintf(stderr, "ERROR: crypto_kem_keypair failed in dec test setup\n");
-    return 1;
-  }
-
-  if (crypto_kem_enc(ct, ss_enc, pk) != 0)
-  {
-    fprintf(stderr, "ERROR: crypto_kem_enc failed in dec test setup\n");
-    return 1;
-  }
-
-  TEST_RNG_FAILURE("crypto_kem_dec", crypto_kem_dec(ss_dec, ct, sk));
+  TEST_RNG_FAILURE("crypto_kem_enc", crypto_kem_enc(ct, ss, test_vector_pk));
   return 0;
 }
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
 static int test_check_pk_rng_failure(void)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  TEST_RNG_FAILURE("crypto_kem_check_pk", crypto_kem_check_pk(test_vector_pk));
+  return 0;
+}
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
 
-  /* Generate valid keypair first */
-  reset_all();
-  if (crypto_kem_keypair(pk, sk) != 0)
-  {
-    fprintf(stderr,
-            "ERROR: crypto_kem_keypair failed in check_pk test setup\n");
-    return 1;
-  }
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
+static int test_dec_rng_failure(void)
+{
+  uint8_t ss[CRYPTO_BYTES];
 
-  TEST_RNG_FAILURE("crypto_kem_check_pk", crypto_kem_check_pk(pk));
+  TEST_RNG_FAILURE("crypto_kem_dec",
+                   crypto_kem_dec(ss, test_vector_ct, test_vector_sk));
   return 0;
 }
 
 static int test_check_sk_rng_failure(void)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-
-  /* Generate valid keypair first */
-  reset_all();
-  if (crypto_kem_keypair(pk, sk) != 0)
-  {
-    fprintf(stderr,
-            "ERROR: crypto_kem_keypair failed in check_sk test setup\n");
-    return 1;
-  }
-
-  TEST_RNG_FAILURE("crypto_kem_check_sk", crypto_kem_check_sk(sk));
+  TEST_RNG_FAILURE("crypto_kem_check_sk", crypto_kem_check_sk(test_vector_sk));
   return 0;
 }
+#endif /* !MLK_CONFIG_NO_DECAPS_API */
 
 /* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
 #if defined(main)
@@ -205,27 +191,29 @@ int main(void);
 #endif
 int main(void)
 {
-  if (test_keygen_rng_failure() != 0)
-  {
-    return 1;
-  }
+  int r = 0;
 
-  if (test_enc_rng_failure() != 0)
-  {
-    return 1;
-  }
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
+  r |= test_keypair_derand_rng_failure();
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+  r |= test_keypair_rng_failure();
+#endif
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
 
-  if (test_dec_rng_failure() != 0)
-  {
-    return 1;
-  }
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
+  r |= test_enc_derand_rng_failure();
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+  r |= test_enc_rng_failure();
+#endif
+  r |= test_check_pk_rng_failure();
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
 
-  if (test_check_pk_rng_failure() != 0)
-  {
-    return 1;
-  }
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
+  r |= test_dec_rng_failure();
+  r |= test_check_sk_rng_failure();
+#endif
 
-  if (test_check_sk_rng_failure() != 0)
+  if (r != 0)
   {
     return 1;
   }

@@ -11,6 +11,7 @@
 #include "../../mlkem/mlkem_native.h"
 #include "../../mlkem/src/common.h"
 #include "../notrandombytes/notrandombytes.h"
+#include "../test_vectors/expected_test_vectors.h"
 
 /*
  * Level-dependent allocation limit macros.
@@ -329,7 +330,24 @@ void custom_free(test_ctx_t *ctx, void *p, size_t sz, const char *file,
     }                                                                          \
   } while (0)
 
-static int test_keygen_alloc_failure(test_ctx_t *ctx)
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
+static int test_keypair_derand_alloc_failure(test_ctx_t *ctx)
+{
+  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t coins[2 * MLKEM_SYMBYTES];
+
+  memcpy(coins, test_vector_d, MLKEM_SYMBYTES);
+  memcpy(coins + MLKEM_SYMBYTES, test_vector_z, MLKEM_SYMBYTES);
+
+  TEST_ALLOC_FAILURE("crypto_kem_keypair_derand",
+                     crypto_kem_keypair_derand(pk, sk, coins, ctx),
+                     MLK_TOTAL_ALLOC_KEYPAIR, &ctx->global_high_mark_keypair);
+  return 0;
+}
+
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+static int test_keypair_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
@@ -338,89 +356,63 @@ static int test_keygen_alloc_failure(test_ctx_t *ctx)
                      MLK_TOTAL_ALLOC_KEYPAIR, &ctx->global_high_mark_keypair);
   return 0;
 }
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
+static int test_enc_derand_alloc_failure(test_ctx_t *ctx)
+{
+  uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
+  uint8_t ss[CRYPTO_BYTES];
+
+  TEST_ALLOC_FAILURE(
+      "crypto_kem_enc_derand",
+      crypto_kem_enc_derand(ct, ss, test_vector_pk, test_vector_m, ctx),
+      MLK_TOTAL_ALLOC_ENCAPS, &ctx->global_high_mark_encaps);
+  return 0;
+}
+
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 static int test_enc_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
   uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
-  uint8_t key[CRYPTO_BYTES];
+  uint8_t ss[CRYPTO_BYTES];
 
-  /* Generate valid keypair first */
-  reset_all(ctx);
-  if (crypto_kem_keypair(pk, sk, ctx) != 0)
-  {
-    fprintf(stderr, "ERROR: crypto_kem_keypair failed in enc test setup\n");
-    return 1;
-  }
-
-  TEST_ALLOC_FAILURE("crypto_kem_enc", crypto_kem_enc(ct, key, pk, ctx),
+  TEST_ALLOC_FAILURE("crypto_kem_enc",
+                     crypto_kem_enc(ct, ss, test_vector_pk, ctx),
                      MLK_TOTAL_ALLOC_ENCAPS, &ctx->global_high_mark_encaps);
   return 0;
 }
-
-static int test_dec_alloc_failure(test_ctx_t *ctx)
-{
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
-  uint8_t key_enc[CRYPTO_BYTES];
-  uint8_t key_dec[CRYPTO_BYTES];
-
-  /* Generate valid keypair and ciphertext first */
-  reset_all(ctx);
-  if (crypto_kem_keypair(pk, sk, ctx) != 0)
-  {
-    fprintf(stderr, "ERROR: crypto_kem_keypair failed in dec test setup\n");
-    return 1;
-  }
-
-  if (crypto_kem_enc(ct, key_enc, pk, ctx) != 0)
-  {
-    fprintf(stderr, "ERROR: crypto_kem_enc failed in dec test setup\n");
-    return 1;
-  }
-
-  TEST_ALLOC_FAILURE("crypto_kem_dec", crypto_kem_dec(key_dec, ct, sk, ctx),
-                     MLK_TOTAL_ALLOC_DECAPS, &ctx->global_high_mark_decaps);
-  return 0;
-}
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
 static int test_check_pk_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-
-  reset_all(ctx);
-  if (crypto_kem_keypair(pk, sk, ctx) != 0)
-  {
-    fprintf(stderr,
-            "ERROR: crypto_kem_keypair failed in check_pk test setup\n");
-    return 1;
-  }
-
-  TEST_ALLOC_FAILURE("crypto_kem_check_pk", crypto_kem_check_pk(pk, ctx),
+  TEST_ALLOC_FAILURE("crypto_kem_check_pk",
+                     crypto_kem_check_pk(test_vector_pk, ctx),
                      MLK_TOTAL_ALLOC_KEYPAIR, &ctx->global_high_mark_keypair);
+  return 0;
+}
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
+
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
+static int test_dec_alloc_failure(test_ctx_t *ctx)
+{
+  uint8_t ss[CRYPTO_BYTES];
+
+  TEST_ALLOC_FAILURE("crypto_kem_dec",
+                     crypto_kem_dec(ss, test_vector_ct, test_vector_sk, ctx),
+                     MLK_TOTAL_ALLOC_DECAPS, &ctx->global_high_mark_decaps);
   return 0;
 }
 
 static int test_check_sk_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-
-  reset_all(ctx);
-  if (crypto_kem_keypair(pk, sk, ctx) != 0)
-  {
-    fprintf(stderr,
-            "ERROR: crypto_kem_keypair failed in check_sk test setup\n");
-    return 1;
-  }
-
-  TEST_ALLOC_FAILURE("crypto_kem_check_sk", crypto_kem_check_sk(sk, ctx),
+  TEST_ALLOC_FAILURE("crypto_kem_check_sk",
+                     crypto_kem_check_sk(test_vector_sk, ctx),
                      MLK_TOTAL_ALLOC_KEYPAIR, &ctx->global_high_mark_keypair);
   return 0;
 }
+#endif /* !MLK_CONFIG_NO_DECAPS_API */
 
 /*
  * Helper macro to check allocation high watermark matches expected limit.
@@ -442,6 +434,7 @@ int main(void);
 #endif
 int main(void)
 {
+  int r = 0;
   MLK_ALIGN uint8_t bump_buffer[MLK_BUMP_ALLOC_SIZE];
   /* Initialize test context with default settings */
   test_ctx_t ctx = {
@@ -460,36 +453,46 @@ int main(void)
   };
   ctx.buffer = bump_buffer;
 
-  if (test_keygen_alloc_failure(&ctx) != 0)
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
+  r |= test_keypair_derand_alloc_failure(&ctx);
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+  r |= test_keypair_alloc_failure(&ctx);
+#endif
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
+
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
+  r |= test_enc_derand_alloc_failure(&ctx);
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+  r |= test_enc_alloc_failure(&ctx);
+#endif
+  r |= test_check_pk_alloc_failure(&ctx);
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
+
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
+  r |= test_dec_alloc_failure(&ctx);
+  r |= test_check_sk_alloc_failure(&ctx);
+#endif
+
+  if (r != 0)
   {
     return 1;
   }
 
-  if (test_enc_alloc_failure(&ctx) != 0)
-  {
-    return 1;
-  }
-
-  if (test_dec_alloc_failure(&ctx) != 0)
-  {
-    return 1;
-  }
-
-  if (test_check_pk_alloc_failure(&ctx) != 0)
-  {
-    return 1;
-  }
-
-  if (test_check_sk_alloc_failure(&ctx) != 0)
-  {
-    return 1;
-  }
-
-  /* Check per-operation high watermarks match the declared limits */
+  /* Check per-operation high watermarks match the declared limits.
+   * Only enforce for enabled APIs. */
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
   CHECK_ALLOC_MATCH(ctx.global_high_mark_keypair, MLK_TOTAL_ALLOC_KEYPAIR);
+#endif
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
   CHECK_ALLOC_MATCH(ctx.global_high_mark_encaps, MLK_TOTAL_ALLOC_ENCAPS);
+#endif
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
   CHECK_ALLOC_MATCH(ctx.global_high_mark_decaps, MLK_TOTAL_ALLOC_DECAPS);
+#endif
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API) && \
+    !defined(MLK_CONFIG_NO_ENCAPS_API) && !defined(MLK_CONFIG_NO_DECAPS_API)
   CHECK_ALLOC_MATCH(ctx.global_high_mark, MLK_TOTAL_ALLOC);
+#endif
 
   return 0;
 }

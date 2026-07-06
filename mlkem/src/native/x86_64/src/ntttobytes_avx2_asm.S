@@ -20,7 +20,9 @@
 #include "../../../common.h"
 
 #if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
+    (!defined(MLK_CONFIG_NO_KEYPAIR_API) || \
+     !defined(MLK_CONFIG_NO_ENCAPS_API))
 /*yaml
   Name: ntttobytes_avx2_asm
   Description: x86_64 AVX2 polynomial serialization in NTT domain
@@ -196,7 +198,7 @@ MLK_ASM_FN_SYMBOL(ntttobytes_avx2_asm)
 MLK_ASM_FN_SIZE(ntttobytes_avx2_asm)
 
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
-        */
+          && (!MLK_CONFIG_NO_KEYPAIR_API || !MLK_CONFIG_NO_ENCAPS_API) */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits

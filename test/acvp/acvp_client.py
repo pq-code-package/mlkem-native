@@ -74,20 +74,74 @@ def loadAcvpData(prompt, expectedResults):
     return (prompt, promptData, expectedResults, expectedResultsData)
 
 
-def loadDefaultAcvpData(version):
+ALL_ACVP_FUNCTIONS = {
+    "keyGen",
+    "encapsulation",
+    "encapsulationKeyCheck",
+    "decapsulation",
+    "decapsulationKeyCheck",
+}
+
+
+def detect_supported_functions():
+    """Run acvp_mlkem512 --info to detect which ACVP functions are supported."""
+    acvp_bin = "./test/build/mlkem512/bin/acvp_mlkem512"
+    acvp_call = exec_prefix + [acvp_bin, "--info"]
+    try:
+        result = subprocess.run(acvp_call, encoding="utf-8", capture_output=True)
+        if result.returncode != 0:
+            err(
+                f"Warning: {acvp_call} failed (rc={result.returncode}), assuming all functions supported"
+            )
+            return set(ALL_ACVP_FUNCTIONS)
+        functions = set()
+        for line in result.stdout.splitlines():
+            line = line.strip()
+            if line in ALL_ACVP_FUNCTIONS:
+                functions.add(line)
+        return functions
+    except FileNotFoundError:
+        err(f"Warning: {acvp_bin} not found, assuming all functions supported")
+        return set(ALL_ACVP_FUNCTIONS)
+
+
+def loadDefaultAcvpData(version, supported_functions=None):
+    if supported_functions is None:
+        supported_functions = set(ALL_ACVP_FUNCTIONS)
+
+    # The ACVP encapDecap file bundles encapsulation, decapsulation, and both
+    # *KeyCheck helpers. To keep result comparison byte-identical against the
+    # published expectedResults.json, we only load the file if all four
+    # sub-functions are compiled in.
+    encapDecap_functions = {
+        "encapsulation",
+        "encapsulationKeyCheck",
+        "decapsulation",
+        "decapsulationKeyCheck",
+    }
+    encapDecap_supported = encapDecap_functions.issubset(supported_functions)
+    keyGen_supported = "keyGen" in supported_functions
+
     data_dir = f"test/acvp/.acvp-data/{version}/files"
     acvp_jsons_for_version = [
         (
+            "keyGen",
+            keyGen_supported,
             f"{data_dir}/ML-KEM-keyGen-FIPS203/prompt.json",
             f"{data_dir}/ML-KEM-keyGen-FIPS203/expectedResults.json",
         ),
         (
+            "encapDecap",
+            encapDecap_supported,
             f"{data_dir}/ML-KEM-encapDecap-FIPS203/prompt.json",
             f"{data_dir}/ML-KEM-encapDecap-FIPS203/expectedResults.json",
         ),
     ]
     acvp_data = []
-    for prompt, expectedResults in acvp_jsons_for_version:
+    for mode, is_supported, prompt, expectedResults in acvp_jsons_for_version:
+        if not is_supported:
+            info(f"Skipping {mode} tests (mode not supported in this build)")
+            continue
         acvp_data.append(loadAcvpData(prompt, expectedResults))
     return acvp_data
 
@@ -303,7 +357,7 @@ def runTest(data, output):
     info("ALL GOOD!")
 
 
-def test(prompt, expected, output, version):
+def test(prompt, expected, output, version, supported_functions=None):
     assert prompt is not None or output is None, (
         "cannot produce output if there is no input"
     )
@@ -317,7 +371,12 @@ def test(prompt, expected, output, version):
         data = [loadAcvpData(prompt, expected)]
     else:
         # load data from downloaded files
-        data = loadDefaultAcvpData(version)
+        data = loadDefaultAcvpData(version, supported_functions)
+
+    if not data:
+        info("No ACVP tests supported by this build")
+        info("ALL GOOD!")
+        return
 
     runTest(data, output)
 
@@ -351,4 +410,7 @@ if args.prompt is None:
         print("Failed to download ACVP test files", file=sys.stderr)
         sys.exit(1)
 
-test(args.prompt, args.expected, args.output, args.version)
+supported_functions = detect_supported_functions()
+info(f"Auto-detected supported ACVP functions: {sorted(supported_functions)}")
+
+test(args.prompt, args.expected, args.output, args.version, supported_functions)
