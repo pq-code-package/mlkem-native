@@ -127,6 +127,13 @@ jobs:
             cflags: "-flto -DMLK_FORCE_AARCH64"
             ldflags: "-flto"
             perf: PERF
+          - name: Graviton5
+            ec2_instance_type: c9g.medium
+            ec2_ami: ubuntu-latest (aarch64)
+            archflags: -march=armv9-a+sha3
+            cflags: "-flto -DMLK_FORCE_AARCH64"
+            ldflags: "-flto"
+            perf: PERF
           - name: AMD EPYC 4th gen (c7a)
             ec2_instance_type: c7a.medium
             ec2_ami: ubuntu-latest (x86_64)
