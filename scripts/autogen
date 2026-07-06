@@ -2882,6 +2882,7 @@ def get_config_options():
         "MLK_FORCE_RISCV64",
         "MLK_FORCE_RISCV32",
         "MLK_SYS_AARCH64_SLOW_BARREL_SHIFTER",
+        "MLK_SYS_AARCH64_FAST_SHA3",
         "MLKEM_DEBUG",  # TODO: Rename?
         "MLK_BREAK_PCT",  # Use in PCT breakage test]
         "MLK_CHECK_APIS",

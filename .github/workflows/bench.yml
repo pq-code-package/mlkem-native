@@ -130,7 +130,7 @@ jobs:
           - name: Graviton5
             ec2_instance_type: c9g.medium
             ec2_ami: ubuntu-latest (aarch64)
-            archflags: -march=armv9-a+sha3
+            archflags: -march=armv9-a+sha3 -DMLK_SYS_AARCH64_FAST_SHA3
             cflags: "-flto -DMLK_FORCE_AARCH64"
             ldflags: "-flto"
             perf: PERF
