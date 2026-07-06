@@ -11,7 +11,7 @@ inputs:
     description: 'List of tests to run (space-separated IDs) or "all" for all tests. Available IDs: pct-enabled,
     pct-enabled-broken, custom-alloc-heap, custom-zeroize, native-cap-ON, native-cap-OFF, native-cap-ID_AA64PFR1_EL1,
     native-cap-CPUID_AVX2, no-asm, serial-fips202, custom-randombytes, custom-memcpy, custom-memset, custom-stdlib,
-    nblocks-1, nblocks-2, nblocks-4'
+    nblocks-1, nblocks-2, nblocks-4, keygen-only, encaps-only, decaps-only, keygen-encaps, keygen-decaps, encaps-decaps'
     required: false
     default: 'all'
   opt:
@@ -276,3 +276,93 @@ runs:
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
         rng_fail: true
+    - name: "Keygen-only API"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'keygen-only') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        cflags: "-DMLK_CONFIG_NO_ENCAPS_API -DMLK_CONFIG_NO_DECAPS_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        stack: true
+        rng_fail: true
+        opt: ${{ inputs.opt }}
+        examples: true
+    - name: "Encaps-only API"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'encaps-only') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        cflags: "-DMLK_CONFIG_NO_KEYPAIR_API -DMLK_CONFIG_NO_DECAPS_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        stack: true
+        rng_fail: true
+        opt: ${{ inputs.opt }}
+        examples: true
+    - name: "Decaps-only API"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'decaps-only') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        cflags: "-DMLK_CONFIG_NO_KEYPAIR_API -DMLK_CONFIG_NO_ENCAPS_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        stack: true
+        rng_fail: true
+        opt: ${{ inputs.opt }}
+        examples: true
+    - name: "Keygen+Encaps API (no decaps)"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'keygen-encaps') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        cflags: "-DMLK_CONFIG_NO_DECAPS_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        stack: true
+        rng_fail: true
+        opt: ${{ inputs.opt }}
+        examples: true
+    - name: "Keygen+Decaps API (no encaps)"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'keygen-decaps') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        cflags: "-DMLK_CONFIG_NO_ENCAPS_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        stack: true
+        rng_fail: true
+        opt: ${{ inputs.opt }}
+        examples: true
+    - name: "Encaps+Decaps API (no keygen)"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'encaps-decaps') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        cflags: "-DMLK_CONFIG_NO_KEYPAIR_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        stack: true
+        rng_fail: true
+        opt: ${{ inputs.opt }}
+        examples: true

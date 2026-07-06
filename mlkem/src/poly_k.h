@@ -173,6 +173,7 @@ __contract__(
 #endif
 }
 
+#if !defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API)
 #define mlk_polyvec_compress_du MLK_NAMESPACE_K(polyvec_compress_du)
 /**
  * Compress and serialize a vector of polynomials.
@@ -196,7 +197,9 @@ __contract__(
          array_bound(a->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
   assigns(memory_slice(r, MLKEM_POLYVECCOMPRESSEDBYTES_DU))
 );
+#endif /* !MLK_CONFIG_NO_ENCAPS_API || !MLK_CONFIG_NO_DECAPS_API */
 
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
 #define mlk_polyvec_decompress_du MLK_NAMESPACE_K(polyvec_decompress_du)
 /**
  * De-serialize and decompress a vector of polynomials; approximate inverse
@@ -221,7 +224,9 @@ __contract__(
   ensures(forall(k0, 0, MLKEM_K,
          array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 );
+#endif /* !MLK_CONFIG_NO_DECAPS_API */
 
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API) || !defined(MLK_CONFIG_NO_ENCAPS_API)
 #define mlk_polyvec_tobytes MLK_NAMESPACE_K(polyvec_tobytes)
 /**
  * Serialize a vector of polynomials.
@@ -243,7 +248,9 @@ __contract__(
          array_bound(a->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
   assigns(memory_slice(r, MLKEM_POLYVECBYTES))
 );
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API || !MLK_CONFIG_NO_ENCAPS_API */
 
+#if !defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API)
 #define mlk_polyvec_frombytes MLK_NAMESPACE_K(polyvec_frombytes)
 /**
  * De-serialize a vector of polynomials; inverse of mlk_polyvec_tobytes.
@@ -265,6 +272,7 @@ __contract__(
   ensures(forall(k0, 0, MLKEM_K,
         array_bound(r->vec[k0].coeffs, 0, MLKEM_N, 0, MLKEM_UINT12_LIMIT)))
 );
+#endif /* !MLK_CONFIG_NO_ENCAPS_API || !MLK_CONFIG_NO_DECAPS_API */
 
 #define mlk_polyvec_ntt MLK_NAMESPACE_K(polyvec_ntt)
 /**
@@ -292,6 +300,7 @@ __contract__(
   array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLK_NTT_BOUND)))
 );
 
+#if !defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API)
 #define mlk_polyvec_invntt_tomont MLK_NAMESPACE_K(polyvec_invntt_tomont)
 /**
  * Apply inverse NTT to all elements of a vector of polynomials and multiply
@@ -316,6 +325,7 @@ __contract__(
   ensures(forall(j, 0, MLKEM_K,
   array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND)))
 );
+#endif /* !MLK_CONFIG_NO_ENCAPS_API || !MLK_CONFIG_NO_DECAPS_API */
 
 #define mlk_polyvec_basemul_acc_montgomery_cached \
   MLK_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached)
@@ -442,6 +452,7 @@ __contract__(
   assigns(memory_slice(r, sizeof(mlk_polyvec)))
 );
 
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 #define mlk_polyvec_tomont MLK_NAMESPACE_K(polyvec_tomont)
 /**
  * In-place conversion of all coefficients of a polynomial vector from the
@@ -463,7 +474,11 @@ __contract__(
   ensures(forall(j, 0, MLKEM_K,
     array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLKEM_Q)))
 );
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API) ||                              \
+    (MLKEM_ETA1 == MLKEM_ETA2 && (!defined(MLK_CONFIG_NO_ENCAPS_API) || \
+                                  !defined(MLK_CONFIG_NO_DECAPS_API)))
 #define mlk_poly_getnoise_eta1_4x MLK_NAMESPACE_K(poly_getnoise_eta1_4x)
 /**
  * Batch sample four polynomials deterministically from a seed and nonces,
@@ -515,8 +530,11 @@ __contract__(
  */
 #define mlk_poly_getnoise_eta2_4x mlk_poly_getnoise_eta1_4x
 #endif /* MLKEM_ETA1 == MLKEM_ETA2 */
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API || (MLKEM_ETA1 == MLKEM_ETA2 && \
+          (!MLK_CONFIG_NO_ENCAPS_API || !MLK_CONFIG_NO_DECAPS_API)) */
 
-#if MLKEM_K == 2 || MLKEM_K == 4
+#if (MLKEM_K == 2 || MLKEM_K == 4) && \
+    (!defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API))
 #define mlk_poly_getnoise_eta2 MLK_NAMESPACE_K(poly_getnoise_eta2)
 /**
  * Sample a polynomial deterministically from a seed and a nonce, with
@@ -541,9 +559,11 @@ __contract__(
   assigns(memory_slice(r, sizeof(mlk_poly)))
   ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_ETA2 + 1))
 );
-#endif /* MLKEM_K == 2 || MLKEM_K == 4 */
+#endif /* (MLKEM_K == 2 || MLKEM_K == 4) && (!MLK_CONFIG_NO_ENCAPS_API || \
+          !MLK_CONFIG_NO_DECAPS_API) */
 
-#if MLKEM_K == 2
+#if MLKEM_K == 2 && \
+    (!defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API))
 #define mlk_poly_getnoise_eta1122_4x MLK_NAMESPACE_K(poly_getnoise_eta1122_4x)
 /**
  * Batch sample four polynomials deterministically from a seed and nonces,
@@ -588,6 +608,7 @@ __contract__(
        && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA2 + 1)
        && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA2 + 1))
 );
-#endif /* MLKEM_K == 2 */
+#endif /* MLKEM_K == 2 && (!MLK_CONFIG_NO_ENCAPS_API || \
+          !MLK_CONFIG_NO_DECAPS_API) */
 
 #endif /* !MLK_POLY_K_H */

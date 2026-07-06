@@ -45,6 +45,7 @@ __contract__(
   array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
 );
 
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 #define mlk_indcpa_keypair_derand \
   MLK_NAMESPACE_K(indcpa_keypair_derand) MLK_CONTEXT_PARAMETERS_3
 /**
@@ -84,7 +85,9 @@ __contract__(
           return_value == MLK_ERR_OUT_OF_MEMORY ||
           return_value == MLK_ERR_RNG_FAIL)
 );
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API)
 #define mlk_indcpa_enc MLK_NAMESPACE_K(indcpa_enc) MLK_CONTEXT_PARAMETERS_4
 /**
  * Encryption function of the CPA-secure public-key encryption scheme
@@ -123,7 +126,9 @@ __contract__(
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
           return_value == MLK_ERR_OUT_OF_MEMORY)
 );
+#endif /* !MLK_CONFIG_NO_ENCAPS_API || !MLK_CONFIG_NO_DECAPS_API */
 
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
 #define mlk_indcpa_dec MLK_NAMESPACE_K(indcpa_dec) MLK_CONTEXT_PARAMETERS_3
 /**
  * Decryption function of the CPA-secure public-key encryption scheme
@@ -159,5 +164,6 @@ __contract__(
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
           return_value == MLK_ERR_OUT_OF_MEMORY)
 );
+#endif /* !MLK_CONFIG_NO_DECAPS_API */
 
 #endif /* !MLK_INDCPA_H */

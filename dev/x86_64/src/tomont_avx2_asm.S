@@ -24,7 +24,8 @@
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
+    !defined(MLK_CONFIG_NO_KEYPAIR_API)
 /*yaml
   Name: tomont_avx2_asm
   Description: x86_64 AVX2 Montgomery conversion
@@ -104,4 +105,4 @@ ret
 
 /* simpasm: footer-start */
 #endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
-        */
+          && !MLK_CONFIG_NO_KEYPAIR_API */

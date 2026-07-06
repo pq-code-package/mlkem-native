@@ -52,7 +52,9 @@
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
+    (!defined(MLK_CONFIG_NO_ENCAPS_API) || \
+     !defined(MLK_CONFIG_NO_DECAPS_API))
 /* simpasm: header-end */
 
 // Bounds:
@@ -400,4 +402,5 @@ intt_layer123_start:
     .unreq ninv_tw
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED && \
+          (!MLK_CONFIG_NO_ENCAPS_API || !MLK_CONFIG_NO_DECAPS_API) */

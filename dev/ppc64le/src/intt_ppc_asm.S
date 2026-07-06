@@ -8,7 +8,9 @@
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__) && \
+    (!defined(MLK_CONFIG_NO_ENCAPS_API) || \
+     !defined(MLK_CONFIG_NO_DECAPS_API))
 /*yaml
   Name: intt_ppc_asm
   Description: PowerPC64 VSX inverse NTT
@@ -1002,4 +1004,5 @@ intt_ppc_asm_Loopf:
 
 /* simpasm: footer-start */
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
-          && __POWER8_VECTOR__ */
+          && __POWER8_VECTOR__ && (!MLK_CONFIG_NO_ENCAPS_API || \
+          !MLK_CONFIG_NO_DECAPS_API) */

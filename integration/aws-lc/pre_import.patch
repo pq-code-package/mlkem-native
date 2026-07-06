@@ -1,7 +1,25 @@
 diff --git a/crypto/fipsmodule/ml_kem/importer.sh b/crypto/fipsmodule/ml_kem/importer.sh
 --- a/crypto/fipsmodule/ml_kem/importer.sh
 +++ b/crypto/fipsmodule/ml_kem/importer.sh
-@@ -151,6 +151,48 @@
+@@ -134,9 +134,15 @@
+ 
+   backend_define=$(if [[ "$file" == *"aarch64"* ]]; then echo "MLK_ARITH_BACKEND_AARCH64"; else echo "MLK_ARITH_BACKEND_X86_64_DEFAULT"; fi)
+ 
+-  # Flatten multiline preprocessor directives, then process with unifdef
++  # Flatten multiline preprocessor directives, then process with unifdef.
++  # The reduced-API macros (MLK_CONFIG_NO_{KEYPAIR,ENCAPS,DECAPS}_API) are
++  # never set in the AWS-LC import, so mark them undefined; otherwise unifdef
++  # leaves the enclosing MLK_ARITH_BACKEND_AARCH64 guard in place, which then
++  # evaluates to false (the include is rewritten to s2n-bignum, so the backend
++  # macro is undefined at build time) and drops the assembly symbol.
+   sed -e ':a' -e 'N' -e '$!ba' -e 's/\\\n/ /g' "$file" | \
+-    unifdef -D$backend_define -UMLK_CONFIG_MULTILEVEL_NO_SHARED -DMLK_CONFIG_MULTILEVEL_WITH_SHARED > "$tmp_file"
++    unifdef -D$backend_define -UMLK_CONFIG_MULTILEVEL_NO_SHARED -DMLK_CONFIG_MULTILEVEL_WITH_SHARED \
++            -UMLK_CONFIG_NO_KEYPAIR_API -UMLK_CONFIG_NO_ENCAPS_API -UMLK_CONFIG_NO_DECAPS_API > "$tmp_file"
+   mv "$tmp_file" "$file"
+ 
+   # Replace common.h include and assembly macros
+@@ -151,6 +157,48 @@
    fi
  done
  

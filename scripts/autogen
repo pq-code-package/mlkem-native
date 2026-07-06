@@ -1060,6 +1060,8 @@ def gen_aarch64_zeta_file():
             gen_aarch64_fwd_ntt_zetas_layer67(),
         )
         yield ""
+        yield "#if !defined(MLK_CONFIG_NO_ENCAPS_API) || \\"
+        yield "    !defined(MLK_CONFIG_NO_DECAPS_API)"
         yield from emit_c_array(
             "const int16_t",
             "mlk_aarch64_invntt_zetas_layer12345",
@@ -1071,6 +1073,7 @@ def gen_aarch64_zeta_file():
             "mlk_aarch64_invntt_zetas_layer67",
             gen_aarch64_inv_ntt_zetas_layer67(),
         )
+        yield "#endif"
         yield ""
         yield from emit_c_array(
             "const int16_t",
@@ -1627,7 +1630,9 @@ def gen_avx2_compress_consts_file():
         yield from gen_header()
         yield '#include "../../../common.h"'
         yield ""
-        yield "#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT)"
+        yield "#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \\"
+        yield "    (!defined(MLK_CONFIG_NO_ENCAPS_API) || \\"
+        yield "     !defined(MLK_CONFIG_NO_DECAPS_API))"
         yield ""
         yield '#include "compress_consts.h"'
         yield ""
@@ -1638,7 +1643,11 @@ def gen_avx2_compress_consts_file():
         yield ""
         for name, (sections, dtype, layout, level) in consts.items():
             if level == "d4_d10":
+                if name.startswith("decompress_"):
+                    yield "#if !defined(MLK_CONFIG_NO_DECAPS_API)"
                 yield from gen_const_def(name, sections, dtype, layout)
+                if name.startswith("decompress_"):
+                    yield "#endif"
                 yield ""
         yield "#endif /* d4/d10 constants */"
         yield ""
@@ -1649,7 +1658,11 @@ def gen_avx2_compress_consts_file():
         yield ""
         for name, (sections, dtype, layout, level) in consts.items():
             if level == "d5_d11":
+                if name.startswith("decompress_"):
+                    yield "#if !defined(MLK_CONFIG_NO_DECAPS_API)"
                 yield from gen_const_def(name, sections, dtype, layout)
+                if name.startswith("decompress_"):
+                    yield "#endif"
                 yield ""
         yield "#endif /* d5/d11 constants */"
         yield ""
@@ -1674,8 +1687,12 @@ def gen_avx2_compress_consts_file():
         # Declare all constants
         for name, (sections, dtype, layout, level) in consts.items():
             total_size = sum(len(vals) for _, vals in sections)
+            if name.startswith("decompress_"):
+                yield "#if !defined(MLK_CONFIG_NO_DECAPS_API)"
             yield f"#define mlk_{name} MLK_NAMESPACE({name})"
             yield emit_c_array_decl(f"const {dtype}", f"mlk_{name}", total_size)
+            if name.startswith("decompress_"):
+                yield "#endif"
             yield ""
 
         yield "#endif /* !__ASSEMBLER__ */"
@@ -4570,6 +4587,209 @@ def gen_test_config(config_path, config_spec, default_config_content):
     update_file(config_path, content)
 
 
+def gen_test_vectors():
+    """Generate expected test vectors using ACVP binaries and notrandombytes.
+
+    Randomness for keygen (z, d) and encapsulation (m) is drawn from
+    notrandombytes (using the default pi-based seed) so that the vectors
+    are reproducible from a Python-only invocation.
+    """
+    nrb_script = os.path.join(os.path.dirname(__file__), "notrandombytes")
+
+    def notrandombytes(num_bytes):
+        result = subprocess.run(
+            [sys.executable, nrb_script, str(num_bytes)],
+            capture_output=True,
+            encoding="utf-8",
+        )
+        if result.returncode != 0:
+            raise RuntimeError(f"notrandombytes failed: {result.stderr}")
+        return result.stdout.strip().upper()
+
+    def run_acvp(lvl, *args):
+        acvp_bin = f"./test/build/mlkem{lvl}/bin/acvp_mlkem{lvl}"
+        if not os.path.isfile(acvp_bin):
+            console.print(
+                f"[red]Error:[/] ACVP binary not found: {acvp_bin}\n"
+                f"Build it first: [bold]make acvp OPT=0[/]"
+            )
+            sys.exit(1)
+        result = subprocess.run(
+            [acvp_bin, *args],
+            capture_output=True,
+            encoding="utf-8",
+        )
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"acvp_mlkem{lvl} {' '.join(args)} failed: {result.stderr}"
+            )
+        out = {}
+        for line in result.stdout.splitlines():
+            k, v = line.split("=", 1)
+            out[k] = v
+        return out
+
+    levels = [512, 768, 1024]
+
+    # Each API is exercised independently: the example resets the PRNG
+    # before invoking each API, so `d, z` are the first 64 bytes of a fresh
+    # notrandombytes stream (as consumed by crypto_kem_keypair) and `m` is
+    # the first 32 bytes of a fresh stream (as consumed by crypto_kem_enc).
+    #
+    # Order within the keypair pair matters: crypto_kem_keypair reads
+    # randombytes into `coins[64]` which is then interpreted as `d || z` by
+    # crypto_kem_keypair_derand, so `d` must be the first 32 bytes.
+    keygen_rnd = notrandombytes(64)
+    d = keygen_rnd[:64]
+    z = keygen_rnd[64:128]
+    m = notrandombytes(32)
+
+    results = {}
+    for lvl in levels:
+        keygen_out = run_acvp(lvl, "keyGen", "AFT", f"z={z}", f"d={d}")
+
+        encap_out = run_acvp(
+            lvl,
+            "encapDecap",
+            "AFT",
+            "encapsulation",
+            f"ek={keygen_out['ek']}",
+            f"m={m}",
+        )
+
+        results[lvl] = {
+            "pk": keygen_out["ek"],
+            "sk": keygen_out["dk"],
+            "ct": encap_out["c"],
+            "ss": encap_out["k"],
+        }
+
+    def hex_to_c_array(hex_str, indent="    "):
+        """Convert hex string to C array initializer with 12 bytes per line."""
+        raw = bytes.fromhex(hex_str)
+        lines = []
+        for i in range(0, len(raw), 12):
+            chunk = raw[i : i + 12]
+            elems = ", ".join(f"0x{b:02x}" for b in chunk)
+            lines.append(f"{indent}{elems},")
+        # Remove trailing comma from last line
+        if lines:
+            lines[-1] = lines[-1].rstrip(",")
+        return "\n".join(lines)
+
+    def hex_len(hex_str):
+        return len(hex_str) // 2
+
+    def gen_seed_defines():
+        yield "/* keygen d (first 32 bytes of a fresh notrandombytes stream) */"
+        yield f"static const uint8_t test_vector_d[{hex_len(d)}] = {{"
+        yield hex_to_c_array(d)
+        yield "};"
+        yield "/* keygen z (next 32 bytes of the same stream) */"
+        yield f"static const uint8_t test_vector_z[{hex_len(z)}] = {{"
+        yield hex_to_c_array(z)
+        yield "};"
+        yield "/* encaps m (first 32 bytes of a fresh notrandombytes stream) */"
+        yield f"static const uint8_t test_vector_m[{hex_len(m)}] = {{"
+        yield hex_to_c_array(m)
+        yield "};"
+
+    def gen_description():
+        yield "/*"
+        yield " * Generated with:"
+        yield " *   d, z: consecutive 32-byte draws from a fresh notrandombytes"
+        yield " *         stream (as consumed by crypto_kem_keypair)."
+        yield " *   m:    first 32-byte draw from a second, fresh"
+        yield " *         notrandombytes stream (as consumed by crypto_kem_enc"
+        yield " *         after randombytes_reset())."
+        yield " */"
+
+    # Generate expected_test_vectors.h (single-level, with #if guards)
+    def gen_single():
+        yield from gen_header()
+        yield from gen_description()
+        yield ""
+        yield "#ifndef EXPECTED_TEST_VECTORS_H"
+        yield "#define EXPECTED_TEST_VECTORS_H"
+        yield ""
+        yield "#include <stdint.h>"
+        yield ""
+        yield from gen_seed_defines()
+        yield ""
+
+        first = True
+        for lvl in levels:
+            r = results[lvl]
+            directive = "#if" if first else "#elif"
+            yield f"{directive} MLK_CONFIG_PARAMETER_SET == {lvl}"
+            yield f"static const uint8_t test_vector_pk[{hex_len(r['pk'])}] = {{"
+            yield hex_to_c_array(r["pk"])
+            yield "};"
+            yield f"static const uint8_t test_vector_sk[{hex_len(r['sk'])}] = {{"
+            yield hex_to_c_array(r["sk"])
+            yield "};"
+            yield f"static const uint8_t test_vector_ct[{hex_len(r['ct'])}] = {{"
+            yield hex_to_c_array(r["ct"])
+            yield "};"
+            yield f"static const uint8_t test_vector_ss[{hex_len(r['ss'])}] = {{"
+            yield hex_to_c_array(r["ss"])
+            yield "};"
+            first = False
+
+        yield f"#endif /* MLK_CONFIG_PARAMETER_SET == {levels[-1]} */"
+        yield ""
+        yield "#endif /* !EXPECTED_TEST_VECTORS_H */"
+        yield ""
+
+    update_file(
+        "test/test_vectors/expected_test_vectors.h",
+        "\n".join(gen_single()),
+    )
+
+    # Generate expected_test_vectors_multilevel.h (all levels, suffixed names)
+    def gen_multi():
+        yield from gen_header()
+        yield "/*"
+        yield " * Expected test vectors for multilevel builds."
+        yield " * Generated with per-level array names."
+        yield " */"
+        yield ""
+        yield from gen_description()
+        yield ""
+        yield "#ifndef EXPECTED_TEST_VECTORS_MULTILEVEL_H"
+        yield "#define EXPECTED_TEST_VECTORS_MULTILEVEL_H"
+        yield ""
+        yield "#include <stdint.h>"
+        yield ""
+        yield from gen_seed_defines()
+        yield ""
+
+        for lvl in levels:
+            r = results[lvl]
+            yield f"/* ML-KEM-{lvl} */"
+            yield f"static const uint8_t test_vector_pk_{lvl}[{hex_len(r['pk'])}] = {{"
+            yield hex_to_c_array(r["pk"])
+            yield "};"
+            yield f"static const uint8_t test_vector_sk_{lvl}[{hex_len(r['sk'])}] = {{"
+            yield hex_to_c_array(r["sk"])
+            yield "};"
+            yield f"static const uint8_t test_vector_ct_{lvl}[{hex_len(r['ct'])}] = {{"
+            yield hex_to_c_array(r["ct"])
+            yield "};"
+            yield f"static const uint8_t test_vector_ss_{lvl}[{hex_len(r['ss'])}] = {{"
+            yield hex_to_c_array(r["ss"])
+            yield "};"
+            yield ""
+
+        yield "#endif /* !EXPECTED_TEST_VECTORS_MULTILEVEL_H */"
+        yield ""
+
+    update_file(
+        "test/test_vectors/expected_test_vectors_multilevel.h",
+        "\n".join(gen_multi()),
+    )
+
+
 def gen_test_configs():
     """Generate all test configuration files from metadata."""
     # Load metadata
@@ -5278,6 +5498,15 @@ def _main():
         metavar="FLAGS",
         help="Extra CFLAGS prepended to ppc64le simpasm invocations",
     )
+    parser.add_argument(
+        "--test-vectors",
+        default=False,
+        action="store_true",
+        help="Regenerate test/test_vectors/expected_test_vectors*.h "
+        "using ACVP binaries and scripts/notrandombytes. "
+        "Requires ACVP binaries to be built first "
+        "(e.g. `make acvp OPT=0`).",
+    )
 
     args = parser.parse_args()
 
@@ -5372,9 +5601,24 @@ def _main():
         ("Check macro typos", check_macro_typos),
         ("Generate ABI checker tests", gen_abicheck),
         ("Generate preprocessor comments", gen_preprocessor_comments),
+        (
+            "Generate expected test vectors",
+            gen_test_vectors,
+            args.test_vectors,
+        ),
         # Formatting should be the last step
         ("Format files", lambda: format_files(args.dry_run)),
     ]
+
+    # When --test-vectors is set, only run test vector generation + formatting
+    if args.test_vectors:
+        steps = [
+            (
+                "Generate expected test vectors",
+                gen_test_vectors,
+            ),
+            ("Format files", lambda: format_files(args.dry_run)),
+        ]
 
     global _progress, _main_task
     with Progress(

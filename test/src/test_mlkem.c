@@ -9,6 +9,7 @@
 
 #include "../../mlkem/mlkem_native.h"
 #include "../notrandombytes/notrandombytes.h"
+#include "../test_vectors/expected_test_vectors.h"
 
 #ifndef NTESTS_FUNC
 #define NTESTS_FUNC 1000
@@ -27,11 +28,16 @@
   } while (0)
 
 
-static int test_keys_core(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
-                          uint8_t sk[CRYPTO_SECRETKEYBYTES],
-                          uint8_t ct[CRYPTO_CIPHERTEXTBYTES],
-                          uint8_t key_a[CRYPTO_BYTES],
-                          uint8_t key_b[CRYPTO_BYTES])
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API) && \
+    !defined(MLK_CONFIG_NO_ENCAPS_API) && !defined(MLK_CONFIG_NO_DECAPS_API)
+/* Force out-of-line so the ~6.4KB of stack buffers below stay in short-lived
+ * frames and don't stack up in main() -- crucial on memory-constrained
+ * targets such as AVR (32K RAM). */
+static MLK_NOINLINE int test_keys_core(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
+                                       uint8_t sk[CRYPTO_SECRETKEYBYTES],
+                                       uint8_t ct[CRYPTO_CIPHERTEXTBYTES],
+                                       uint8_t key_a[CRYPTO_BYTES],
+                                       uint8_t key_b[CRYPTO_BYTES])
 {
   /* Alice generates a public key */
   CHECK(crypto_kem_keypair(pk, sk) == 0);
@@ -48,7 +54,7 @@ static int test_keys_core(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
   return 0;
 }
 
-static int test_keys(void)
+static MLK_NOINLINE int test_keys(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
@@ -58,7 +64,7 @@ static int test_keys(void)
   return test_keys_core(pk, sk, ct, key_a, key_b);
 }
 
-static int test_keys_unaligned(void)
+static MLK_NOINLINE int test_keys_unaligned(void)
 {
   MLK_ALIGN uint8_t pk[CRYPTO_PUBLICKEYBYTES + 1];
   MLK_ALIGN uint8_t sk[CRYPTO_SECRETKEYBYTES + 1];
@@ -68,7 +74,7 @@ static int test_keys_unaligned(void)
   return test_keys_core(pk + 1, sk + 1, ct + 1, key_a + 1, key_b + 1);
 }
 
-static int test_invalid_pk(void)
+static MLK_NOINLINE int test_invalid_pk(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
@@ -86,7 +92,7 @@ static int test_invalid_pk(void)
   return 0;
 }
 
-static int test_invalid_sk_a(void)
+static MLK_NOINLINE int test_invalid_sk_a(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
@@ -110,7 +116,7 @@ static int test_invalid_sk_a(void)
   return 0;
 }
 
-static int test_invalid_sk_b(void)
+static MLK_NOINLINE int test_invalid_sk_b(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
@@ -129,7 +135,7 @@ static int test_invalid_sk_b(void)
   return 0;
 }
 
-static int test_invalid_ciphertext(void)
+static MLK_NOINLINE int test_invalid_ciphertext(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
@@ -159,6 +165,94 @@ static int test_invalid_ciphertext(void)
   CHECK(memcmp(key_a, key_b, CRYPTO_BYTES) != 0);
   return 0;
 }
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API && !MLK_CONFIG_NO_ENCAPS_API && \
+          !MLK_CONFIG_NO_DECAPS_API */
+
+/*
+ * Test each API operation independently against pre-computed test vectors.
+ * Compatible with reduced-API configurations. Each API's test is a
+ * MLK_NOINLINE function so that its large key buffers stay in short-lived
+ * frames -- this reduces peak stack usage on memory-constrained targets
+ * such as AVR.
+ */
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
+static MLK_NOINLINE int test_kem_expected_keygen(void)
+{
+  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t coins[2 * MLKEM_SYMBYTES];
+  uint8_t test_vector_sk_copy[CRYPTO_SECRETKEYBYTES];
+
+  memcpy(coins, test_vector_d, MLKEM_SYMBYTES);
+  memcpy(coins + MLKEM_SYMBYTES, test_vector_z, MLKEM_SYMBYTES);
+
+  CHECK(crypto_kem_keypair_derand(pk, sk, coins) == 0);
+
+  /* Declassify the generated sk and a copy of test_vector_sk so we can
+   * memcmp them; the underlying test_vector_sk stays SECRET so it can
+   * still be used as a CT-sensitive input in the decaps block. */
+  MLK_CT_TESTING_DECLASSIFY(sk, CRYPTO_SECRETKEYBYTES);
+  memcpy(test_vector_sk_copy, test_vector_sk, CRYPTO_SECRETKEYBYTES);
+  MLK_CT_TESTING_DECLASSIFY(test_vector_sk_copy, CRYPTO_SECRETKEYBYTES);
+
+  CHECK(memcmp(pk, test_vector_pk, CRYPTO_PUBLICKEYBYTES) == 0);
+  CHECK(memcmp(sk, test_vector_sk_copy, CRYPTO_SECRETKEYBYTES) == 0);
+  return 0;
+}
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
+
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
+static MLK_NOINLINE int test_kem_expected_encaps(void)
+{
+  uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
+  uint8_t ss[CRYPTO_BYTES];
+
+  CHECK(crypto_kem_enc_derand(ct, ss, test_vector_pk, test_vector_m) == 0);
+
+  MLK_CT_TESTING_DECLASSIFY(ct, CRYPTO_CIPHERTEXTBYTES);
+  MLK_CT_TESTING_DECLASSIFY(ss, CRYPTO_BYTES);
+
+  CHECK(memcmp(ct, test_vector_ct, CRYPTO_CIPHERTEXTBYTES) == 0);
+  CHECK(memcmp(ss, test_vector_ss, CRYPTO_BYTES) == 0);
+  return 0;
+}
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
+
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
+static MLK_NOINLINE int test_kem_expected_decaps(void)
+{
+  uint8_t ss[CRYPTO_BYTES];
+
+  CHECK(crypto_kem_dec(ss, test_vector_ct, test_vector_sk) == 0);
+
+  MLK_CT_TESTING_DECLASSIFY(ss, CRYPTO_BYTES);
+  CHECK(memcmp(ss, test_vector_ss, CRYPTO_BYTES) == 0);
+  return 0;
+}
+#endif /* !MLK_CONFIG_NO_DECAPS_API */
+
+static int test_kem_expected(void)
+{
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
+  if (test_kem_expected_keygen() != 0)
+  {
+    return 1;
+  }
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
+  if (test_kem_expected_encaps() != 0)
+  {
+    return 1;
+  }
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
+  if (test_kem_expected_decaps() != 0)
+  {
+    return 1;
+  }
+#endif /* !MLK_CONFIG_NO_DECAPS_API */
+  return 0;
+}
 
 /* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
 #if defined(main)
@@ -167,6 +261,20 @@ int main(void);
 int main(void)
 {
   unsigned i;
+  int r;
+
+  /* Fixed test-vector smoke test: exercises whichever of keygen/encaps/decaps
+   * are enabled against pre-computed vectors. Mark public test vectors
+   * DECLASSIFIED and the secret key test vector SECRET so valgrind CT
+   * testing sees the same taint model as production usage. */
+  MLK_CT_TESTING_DECLASSIFY(test_vector_pk, CRYPTO_PUBLICKEYBYTES);
+  MLK_CT_TESTING_DECLASSIFY(test_vector_ct, CRYPTO_CIPHERTEXTBYTES);
+  MLK_CT_TESTING_SECRET(test_vector_sk, CRYPTO_SECRETKEYBYTES);
+
+  if (test_kem_expected() != 0)
+  {
+    return 1;
+  }
 
   /* WARNING: Test-only
    * Normally, you would want to seed a PRNG with trustworthy entropy here. */
@@ -174,12 +282,21 @@ int main(void)
 
   for (i = 0; i < NTESTS_FUNC; i++)
   {
-    CHECK(test_keys() == 0);
-    CHECK(test_keys_unaligned() == 0);
-    CHECK(test_invalid_pk() == 0);
-    CHECK(test_invalid_sk_a() == 0);
-    CHECK(test_invalid_sk_b() == 0);
-    CHECK(test_invalid_ciphertext() == 0);
+    r = 0;
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API) && \
+    !defined(MLK_CONFIG_NO_ENCAPS_API) && !defined(MLK_CONFIG_NO_DECAPS_API)
+    r |= test_keys();
+    r |= test_keys_unaligned();
+    r |= test_invalid_pk();
+    r |= test_invalid_sk_a();
+    r |= test_invalid_sk_b();
+    r |= test_invalid_ciphertext();
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API && !MLK_CONFIG_NO_ENCAPS_API && \
+          !MLK_CONFIG_NO_DECAPS_API */
+    if (r)
+    {
+      return 1;
+    }
   }
 
   printf("CRYPTO_SECRETKEYBYTES:  %d\n", CRYPTO_SECRETKEYBYTES);

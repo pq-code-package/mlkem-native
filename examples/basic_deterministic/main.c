@@ -6,11 +6,8 @@
 #include <stdio.h>
 #include <string.h>
 
-/* Import public mlkem-native API
- *
- * This requires specifying the parameter set and namespace prefix
- * used for the build.
- */
+/* Import public mlkem-native API */
+#include "expected_test_vectors.h"
 #include "mlkem_native/mlkem_native.h"
 
 /* No randombytes needed for deterministic API */
@@ -27,81 +24,77 @@
     }                                                         \
   } while (0)
 
-int main(void)
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
+static int example_keygen(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
-  uint8_t key_a[CRYPTO_BYTES];
-  uint8_t key_b[CRYPTO_BYTES];
-  uint8_t alice_en[2 * MLKEM_SYMBYTES] = {0};
-  uint8_t bob_en[MLKEM_SYMBYTES] = {1};
+  uint8_t coins[2 * MLKEM_SYMBYTES];
 
+  memcpy(coins, test_vector_d, MLKEM_SYMBYTES);
+  memcpy(coins + MLKEM_SYMBYTES, test_vector_z, MLKEM_SYMBYTES);
 
-  /* The PCT modifies the PRNG state, so the KAT tests don't work.
-   * We run KAT tests only for disabled PCT.
-   * Expected keys are generated using deterministic entropy:
-   * keypair uses all-zero entropy {0}, enc uses all-one entropy {1} */
-#if !defined(MLK_CONFIG_KEYGEN_PCT)
-#if MLK_CONFIG_PARAMETER_SET == 512
-  const uint8_t expected_key[] = {
-      0x5f, 0x5f, 0x8c, 0xf5, 0x7c, 0x34, 0xd4, 0x68, 0x06, 0xa2, 0xe9,
-      0xc9, 0x28, 0xba, 0x10, 0x5a, 0x46, 0xf2, 0x67, 0x1a, 0xc7, 0x81,
-      0xdf, 0xf1, 0x4a, 0xbb, 0x27, 0xea, 0x46, 0x06, 0x46, 0x3c};
-#elif MLK_CONFIG_PARAMETER_SET == 768
-  const uint8_t expected_key[] = {
-      0x85, 0x21, 0xab, 0xc8, 0x14, 0xc7, 0x67, 0x70, 0x4f, 0xa6, 0x25,
-      0xd9, 0x35, 0x95, 0xd0, 0x03, 0x79, 0xa8, 0xb3, 0x70, 0x35, 0x2c,
-      0xa4, 0xba, 0xb3, 0xa6, 0x82, 0x46, 0x63, 0x0d, 0xb0, 0x8b};
-#elif MLK_CONFIG_PARAMETER_SET == 1024
-  const uint8_t expected_key[] = {
-      0x30, 0x4d, 0xbe, 0x54, 0xd6, 0x6f, 0x80, 0x66, 0xc6, 0xa8, 0x1c,
-      0x6b, 0x36, 0xc4, 0x48, 0x9b, 0xf9, 0xe6, 0x05, 0x79, 0x83, 0x3c,
-      0x4e, 0xdc, 0x8a, 0xc7, 0x92, 0xe5, 0x73, 0x0d, 0xdd, 0x85};
-#endif /* MLK_CONFIG_PARAMETER_SET == 1024 */
-#endif /* !MLK_CONFIG_KEYGEN_PCT */
-
-  /* No randombytes_reset() needed for deterministic API */
-
-  printf("Generating keypair ... ");
-
-  /* Alice generates a public key using deterministic API with all-zero entropy
-   */
-  CHECK(crypto_kem_keypair_derand(pk, sk, alice_en) == 0);
-
+  printf("Generating keypair (deterministic)... ");
+  CHECK(crypto_kem_keypair_derand(pk, sk, coins) == 0);
+  CHECK(memcmp(pk, test_vector_pk, CRYPTO_PUBLICKEYBYTES) == 0);
+  CHECK(memcmp(sk, test_vector_sk, CRYPTO_SECRETKEYBYTES) == 0);
   printf("DONE\n");
-  printf("Encaps... ");
-
-  /* Bob derives a secret key and creates a response using deterministic API
-   * with all-one entropy */
-  CHECK(crypto_kem_enc_derand(ct, key_b, pk, bob_en) == 0);
-
-  printf("DONE\n");
-  printf("Decaps... ");
-
-  /* Alice uses Bobs response to get her shared key */
-  CHECK(crypto_kem_dec(key_a, ct, sk) == 0);
-
-  printf("DONE\n");
-  printf("Compare... ");
-
-  CHECK(memcmp(key_a, key_b, CRYPTO_BYTES) == 0);
-
-  printf("Shared secret: ");
-  {
-    size_t i;
-    for (i = 0; i < sizeof(key_a); i++)
-    {
-      printf("%02x", key_a[i]);
-    }
-  }
-  printf("\n");
-
-  /* Check against hardcoded result to make sure that
-   * we integrated custom FIPS202 correctly */
-  CHECK(memcmp(key_a, expected_key, CRYPTO_BYTES) == 0);
-
-
-  printf("OK\n");
   return 0;
+}
+#else  /* !MLK_CONFIG_NO_KEYPAIR_API */
+static int example_keygen(void)
+{
+  printf(
+      "Generating keypair (deterministic)... SKIPPED (keygen API disabled)\n");
+  return 0;
+}
+#endif /* MLK_CONFIG_NO_KEYPAIR_API */
+
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
+static int example_encaps(void)
+{
+  uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
+  uint8_t ss[CRYPTO_BYTES];
+
+  printf("Encaps (deterministic)... ");
+  CHECK(crypto_kem_enc_derand(ct, ss, test_vector_pk, test_vector_m) == 0);
+  CHECK(memcmp(ct, test_vector_ct, CRYPTO_CIPHERTEXTBYTES) == 0);
+  CHECK(memcmp(ss, test_vector_ss, CRYPTO_BYTES) == 0);
+  printf("DONE\n");
+  return 0;
+}
+#else  /* !MLK_CONFIG_NO_ENCAPS_API */
+static int example_encaps(void)
+{
+  printf("Encaps (deterministic)... SKIPPED (encaps API disabled)\n");
+  return 0;
+}
+#endif /* MLK_CONFIG_NO_ENCAPS_API */
+
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
+static int example_decaps(void)
+{
+  uint8_t ss[CRYPTO_BYTES];
+
+  printf("Decaps... ");
+  CHECK(crypto_kem_dec(ss, test_vector_ct, test_vector_sk) == 0);
+  CHECK(memcmp(ss, test_vector_ss, CRYPTO_BYTES) == 0);
+  printf("DONE\n");
+  return 0;
+}
+#else  /* !MLK_CONFIG_NO_DECAPS_API */
+static int example_decaps(void)
+{
+  printf("Decaps... SKIPPED (decaps API disabled)\n");
+  return 0;
+}
+#endif /* MLK_CONFIG_NO_DECAPS_API */
+
+int main(void)
+{
+  int r = 0;
+  r |= example_keygen();
+  r |= example_encaps();
+  r |= example_decaps();
+  return r;
 }
