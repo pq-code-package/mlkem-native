@@ -118,6 +118,7 @@ rec {
     intelhex
     colorama
   ]);
+  openocd = pkgs.callPackage ./openocd { };
   avr-toolchain = pkgs.callPackage ./avr { };
 
   # Helper function to build individual cross toolchains

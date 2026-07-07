@@ -4,8 +4,9 @@
 
 This is a test platform that builds the mlkem-native test applications as
 [Zephyr](https://www.zephyrproject.org/) applications, so they can run on
-QEMU-emulated Arm MPS boards. It covers Cortex-M3/M4/M7/M33/M55 through a
-single platform, without the need for per-board hardware abstraction layers.
+QEMU-emulated Arm MPS boards and the NUCLEO-N657X0-Q hardware board. It covers
+Cortex-M3/M4/M7/M33/M55 through a single platform, without the need for
+per-board hardware abstraction layers.
 
 ## Usage
 
@@ -23,16 +24,17 @@ nix develop .#zephyr --command ./scripts/tests func --opt=opt
 
 Currently supported targets:
 
-| `ZEPHYR_TARGET` | Zephyr board          | QEMU machine | Core       |
-| --------------- | --------------------- | ------------ | ---------- |
-| `mps2-an385`    | `mps2/an385`          | `mps2-an385` | Cortex-M3  |
-| `mps2-an386`    | `mps2/an386`          | `mps2-an386` | Cortex-M4  |
-| `mps2-an500`    | `mps2/an500`          | `mps2-an500` | Cortex-M7  |
-| `mps2-an521`    | `mps2/an521/cpu0`     | `mps2-an521` | Cortex-M33 |
-| `mps3-an547`    | `mps3/corstone300/an547` | `mps3-an547` | Cortex-M55 |
+| `ZEPHYR_TARGET`     | Zephyr board             | Runner         | Core       |
+| ------------------- | ------------------------ | -------------- | ---------- |
+| `mps2-an385`        | `mps2/an385`             | `mps2-an385`   | Cortex-M3  |
+| `mps2-an386`        | `mps2/an386`             | `mps2-an386`   | Cortex-M4  |
+| `mps2-an500`        | `mps2/an500`             | `mps2-an500`   | Cortex-M7  |
+| `mps2-an521`        | `mps2/an521/cpu0`        | `mps2-an521`   | Cortex-M33 |
+| `mps3-an547`        | `mps3/corstone300/an547` | `mps3-an547`   | Cortex-M55 |
+| `nucleo-n657x0-q`   | `nucleo_n657x0_q`        | OpenOCD + GDB  | Cortex-M55 |
 
 The Armv8.1-M MVE FIPS202 backend is an `OPT=1` feature and is built for
-`mps3-an547` only (the only listed core with MVE).
+`mps3-an547` and `nucleo-n657x0-q`.
 
 ## How it works
 

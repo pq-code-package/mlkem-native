@@ -762,8 +762,11 @@ class Tests:
                     test_type, self.do_opt(), suppress_output=False
                 )
 
-        if resultss is None:
+        # Nothing below should write benchmark output unless the run produced
+        # results and all compile/run steps succeeded.
+        if resultss is None or len(self.failed) > 0:
             self.check_fail()
+            return
 
         # NOTE: There will only be one items in resultss, as we haven't yet decided how to write both opt/no-opt benchmark results
         for k, results in resultss.items():
