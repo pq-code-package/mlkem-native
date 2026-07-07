@@ -893,6 +893,21 @@ let keccak_f1600_x4_v8a_v84a_scalar_mc = define_assert_from_elf
   0xa9466bf9;       (* arm_LDP X25 X26 SP (Immediate_Offset (iword (&96))) *)
   0xa94773fb;       (* arm_LDP X27 X28 SP (Immediate_Offset (iword (&112))) *)
   0xa9487bfd;       (* arm_LDP X29 X30 SP (Immediate_Offset (iword (&128))) *)
+  0x6e201c00;       (* arm_EOR_VEC Q0 Q0 Q0 128 *)
+  0x3d8003e0;       (* arm_STR Q0 SP (Immediate_Offset (word 0)) *)
+  0x3d8007e0;       (* arm_STR Q0 SP (Immediate_Offset (word 16)) *)
+  0x3d800be0;       (* arm_STR Q0 SP (Immediate_Offset (word 32)) *)
+  0x3d800fe0;       (* arm_STR Q0 SP (Immediate_Offset (word 48)) *)
+  0x3d8013e0;       (* arm_STR Q0 SP (Immediate_Offset (word 64)) *)
+  0x3d8017e0;       (* arm_STR Q0 SP (Immediate_Offset (word 80)) *)
+  0x3d801be0;       (* arm_STR Q0 SP (Immediate_Offset (word 96)) *)
+  0x3d801fe0;       (* arm_STR Q0 SP (Immediate_Offset (word 112)) *)
+  0x3d8023e0;       (* arm_STR Q0 SP (Immediate_Offset (word 128)) *)
+  0x3d8027e0;       (* arm_STR Q0 SP (Immediate_Offset (word 144)) *)
+  0x3d802be0;       (* arm_STR Q0 SP (Immediate_Offset (word 160)) *)
+  0x3d802fe0;       (* arm_STR Q0 SP (Immediate_Offset (word 176)) *)
+  0x3d8033e0;       (* arm_STR Q0 SP (Immediate_Offset (word 192)) *)
+  0x3d8037e0;       (* arm_STR Q0 SP (Immediate_Offset (word 208)) *)
   0x910383ff;       (* arm_ADD SP SP (rvalue (word 224)) *)
   0xd65f03c0        (* arm_RET X30 *)
 ];;
@@ -922,7 +937,7 @@ let KECCAK_F1600_X4_V8A_V84A_SCALAR_PREAMBLE_LENGTH = new_definition
   `KECCAK_F1600_X4_V8A_V84A_SCALAR_PREAMBLE_LENGTH = 44`;;
 
 let KECCAK_F1600_X4_V8A_V84A_SCALAR_POSTAMBLE_LENGTH = new_definition
-  `KECCAK_F1600_X4_V8A_V84A_SCALAR_POSTAMBLE_LENGTH = 48`;;
+  `KECCAK_F1600_X4_V8A_V84A_SCALAR_POSTAMBLE_LENGTH = 108`;;
 
 let KECCAK_F1600_X4_V8A_V84A_SCALAR_CORE_START = new_definition
   `KECCAK_F1600_X4_V8A_V84A_SCALAR_CORE_START = KECCAK_F1600_X4_V8A_V84A_SCALAR_PREAMBLE_LENGTH`;;
@@ -1388,7 +1403,7 @@ let KECCAK_F1600_X4_V8A_V84A_SCALAR_SUBROUTINE_CORRECT = prove
     (WORDLIST_FROM_MEMORY_CONV THENC
      ONCE_DEPTH_CONV NORMALIZE_RELATIVE_ADDRESS_CONV) in
   CONV_TAC TWEAK_CONV THEN
-  ARM_ADD_RETURN_STACK_TAC ~pre_post_nsteps:(11,11) KECCAK_F1600_X4_V8A_V84A_SCALAR_EXEC
+  ARM_ADD_RETURN_STACK_TAC ~pre_post_nsteps:(11,26) KECCAK_F1600_X4_V8A_V84A_SCALAR_EXEC
    (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV KECCAK_F1600_X4_V8A_V84A_SCALAR_CORRECT))
   `[D8; D9; D10; D11; D12; D13; D14; D15;
     X19; X20; X21; X22; X23; X24; X25; X26; X27; X28; X29; X30]` 224);;

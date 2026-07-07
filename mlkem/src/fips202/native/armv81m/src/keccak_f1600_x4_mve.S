@@ -681,6 +681,16 @@ Lkeccak_f1600_x4_mve_asm_roundend_pre:
         le lr, Lkeccak_f1600_x4_mve_asm_roundstart @ imm = #-0x8c0
 
 Lkeccak_f1600_x4_mve_asm_roundend:
+        movs r0, #0x0
+        vdup.32 q0, r0
+        vstrw.32 q0, [sp]
+        vstrw.32 q0, [sp, #16]
+        vstrw.32 q0, [sp, #32]
+        vstrw.32 q0, [sp, #48]
+        vstrw.32 q0, [sp, #64]
+        vstrw.32 q0, [sp, #80]
+        vstrw.32 q0, [sp, #96]
+        vstrw.32 q0, [sp, #112]
         add sp, #0x80
         .cfi_adjust_cfa_offset -0x80
         vpop {d8, d9, d10, d11, d12, d13, d14, d15}
@@ -705,7 +715,6 @@ Lkeccak_f1600_x4_mve_asm_roundend:
         .cfi_restore lr
         .cfi_adjust_cfa_offset -0x24
         .cfi_endproc
-        nop
 
 MLK_ASM_FN_SIZE(keccak_f1600_x4_mve_asm)
 
