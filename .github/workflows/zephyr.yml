@@ -53,5 +53,5 @@ jobs:
           ZEPHYR_TARGET: ${{ matrix.target.board }}
         run: |
           opt=${{ matrix.target.opt == 'all' && 'opt' || 'no_opt' }}
-          nix develop .#zephyr --command ./scripts/tests bench --no-auto -c PMU --opt=$opt
-          nix develop .#zephyr --command ./scripts/tests bench --no-auto --components -c PMU --opt=$opt
+          nix develop .#zephyr --command ./scripts/tests bench --no-auto -c NO --opt=$opt
+          nix develop .#zephyr --command ./scripts/tests bench --no-auto --components -c NO --opt=$opt
