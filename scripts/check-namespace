@@ -13,18 +13,21 @@
 # PQCP_MLKEM_NATIVE_MLKEM768_ for MLKEM768 code
 # PQCP_MLKEM_NATIVE_MLKEM1024_ for MLKEM1024 code
 
-import subprocess
 import os
+import subprocess
 
 
-def check_file(file_path, namespaces):
+def check_file(file_path, namespaces, nm="nm"):
     print("checking namespacing: {}".format(file_path))
-    command = ["nm", "-g", file_path]
+    command = [nm, "-g", file_path]
 
     result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    output = result.stdout.decode("utf-8")
+    if result.returncode != 0:
+        print(output)
+        raise RuntimeError("{} failed for {}".format(nm, file_path))
 
-    result = result.stdout.decode("utf-8")
-    lines = result.strip().split("\n")
+    lines = output.strip().split("\n")
     symbols = []
     for line in lines:
         if line.startswith("00"):
@@ -50,13 +53,34 @@ def check_file(file_path, namespaces):
     assert not non_namespaced, "Literals with missing namespaces"
 
 
-def check_folder(folder, namespace):
+def check_folder(folder, namespace, nm="nm"):
     checked = 0
     # recursively go through folder and check all object files
     for root, dirnames, filenames in os.walk(folder):
         for filename in filenames:
             if filename.endswith(".o"):
-                check_file(os.path.join(root, filename), namespace)
+                check_file(os.path.join(root, filename), namespace, nm)
+                checked += 1
+    print("Checked {} files".format(checked))
+    assert checked > 0
+
+
+def check_zephyr_folder(folder, lvl):
+    checked = 0
+    namespace = make_mlkem_namespace(lvl)
+    nm = os.environ.get("NM", "arm-none-eabi-nm")
+    for root, dirnames, filenames in os.walk(folder):
+        rel = os.path.relpath(root, folder)
+        if rel.split(os.sep, 1)[0].endswith(str(lvl)) is False:
+            continue
+
+        parts = root.split(os.sep)
+        if "app.dir" not in parts or "mlkem" not in parts:
+            continue
+
+        for filename in filenames:
+            if filename.endswith(".obj"):
+                check_file(os.path.join(root, filename), namespace, nm)
                 checked += 1
     print("Checked {} files".format(checked))
     assert checked > 0
@@ -67,9 +91,18 @@ def make_mlkem_namespace(lvl):
 
 
 def run():
-    check_folder("test/build/mlkem512/mlkem", make_mlkem_namespace(512))
-    check_folder("test/build/mlkem768/mlkem", make_mlkem_namespace(768))
-    check_folder("test/build/mlkem1024/mlkem", make_mlkem_namespace(1024))
+    build_dir = os.environ.get("BUILD_DIR", "test/build")
+    zephyr_target = os.environ.get("ZEPHYR_TARGET")
+    if zephyr_target:
+        zephyr_build = os.path.join(build_dir, "zephyr", zephyr_target)
+        check_zephyr_folder(zephyr_build, 512)
+        check_zephyr_folder(zephyr_build, 768)
+        check_zephyr_folder(zephyr_build, 1024)
+        return
+
+    check_folder(os.path.join(build_dir, "mlkem512", "mlkem"), make_mlkem_namespace(512))
+    check_folder(os.path.join(build_dir, "mlkem768", "mlkem"), make_mlkem_namespace(768))
+    check_folder(os.path.join(build_dir, "mlkem1024", "mlkem"), make_mlkem_namespace(1024))
 
 
 if __name__ == "__main__":
