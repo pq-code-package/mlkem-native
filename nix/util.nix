@@ -34,6 +34,7 @@ rec {
   _toolchains = { cross ? true }:
     let
       x86_64-gcc = wrap-gcc pkgs.pkgsCross.gnu64;
+      i686-gcc = wrap-gcc pkgs.pkgsCross.gnu32;
       aarch64-gcc = wrap-gcc pkgs.pkgsCross.aarch64-multiplatform;
       riscv64-gcc = wrap-gcc pkgs.pkgsCross.riscv64;
       riscv32-gcc = wrap-gcc pkgs.pkgsCross.riscv32;
@@ -47,7 +48,7 @@ rec {
       #   and won't just work for now
       # - equip all toolchains if cross is explicitly set to true
       # - On some machines, `native-gcc` needed to be evaluated lastly (placed as the last element of the toolchain list), or else would result in environment variables (CC, AR, ...) overriding issue.
-    pkgs.lib.optionals cross [ pkgs.qemu pkgs.gcc-arm-embedded x86_64-gcc aarch64-gcc riscv64-gcc riscv32-gcc ppc64le-gcc ]
+    pkgs.lib.optionals cross [ pkgs.qemu pkgs.gcc-arm-embedded x86_64-gcc i686-gcc aarch64-gcc riscv64-gcc riscv32-gcc ppc64le-gcc ]
     ++ pkgs.lib.optionals (cross && pkgs.stdenv.isLinux && pkgs.stdenv.isx86_64) [ aarch64_be-gcc ]
     ++ pkgs.lib.optionals cross [ native-gcc ]
     # git is not available in the nix shell on Darwin. As a workaround we add git as a dependency here.
@@ -141,6 +142,11 @@ rec {
   toolchain_x86_64 = _individual_toolchain {
     name = "x86_64";
     cross_compilers = [ (wrap-gcc pkgs.pkgsCross.gnu64) ];
+  };
+
+  toolchain_i686 = _individual_toolchain {
+    name = "i686";
+    cross_compilers = [ (wrap-gcc pkgs.pkgsCross.gnu32) ];
   };
 
   toolchain_aarch64 = _individual_toolchain {

@@ -72,3 +72,40 @@ jobs:
       cbmc: true
       cbmc_mlkem_k: 4
     secrets: inherit
+  cbmc_target_model:
+    name: CBMC target model (${{ matrix.cbmc_target }})
+    if: ${{ github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+      pull-requests: 'write'
+    strategy:
+      fail-fast: false
+      matrix:
+        cbmc_target:
+          - i386-linux
+          - x86_64-linux
+          - aarch64-linux
+          - riscv64-linux
+          - ppc64le-linux
+    uses: ./.github/workflows/ci_ec2_reusable.yml
+    with:
+      name: CBMC target model (${{ matrix.cbmc_target }})
+      ec2_instance_type: r8g.xlarge
+      ec2_ami: ubuntu-latest (aarch64)
+      ec2_volume_size: 20
+      compile_mode: native
+      opt: no_opt
+      lint: false
+      verbose: true
+      test: false
+      cbmc: true
+      cbmc_nix_shell: cbmc32
+      cbmc_mlkem_k: 2
+      cbmc_target: ${{ matrix.cbmc_target }}
+      cbmc_proofs: cbmc_target_model
+      cbmc_single_step: true
+      cbmc_report: false
+      cbmc_timeout: 300
+      cbmc_per_proof_timeout: 300
+    secrets: inherit
