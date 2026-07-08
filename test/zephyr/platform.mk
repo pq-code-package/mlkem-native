@@ -110,10 +110,13 @@ CFLAGS += -DNTESTS_FUNC=3 -DNTESTS_KAT=100 \
 # Requires AUTO=0 (see .github/workflows/zephyr.yml): the host-arch flags AUTO=1
 # adds must not reach the Zephyr toolchain, which selects the target arch itself.
 ZEPHYR_TEST_CFLAGS = $(subst \",\\\",$(patsubst -Imlkem,-I$(abspath mlkem),$(CFLAGS)))
+# Keep make-exported project flags out of Zephyr's own CMake build; the app
+# sources get those flags explicitly via ZEPHYR_TEST_CFLAGS.
+ZEPHYR_CMAKE_ENV := env -u CFLAGS -u CXXFLAGS -u CPPFLAGS -u LDFLAGS
 
 CUSTOM_BUILD = \
 	echo "  ZEPHYR  $(ZEPHYR_TARGET): $(notdir $@)" && \
-	cmake -GNinja -S $(ZEPHYR_APP) -B $(ZEPHYR_OUT) \
+	$(ZEPHYR_CMAKE_ENV) cmake -GNinja -S $(ZEPHYR_APP) -B $(ZEPHYR_OUT) \
 		-DBOARD=$(ZEPHYR_BOARD) \
 		-DZEPHYR_NATIVE_ROOT=$(CURDIR) \
 		-DZEPHYR_TEST_SRCS="$(strip $(TEST_SRCS))" \
@@ -123,7 +126,7 @@ CUSTOM_BUILD = \
 		$(ZEPHYR_TARGET_CMAKE_ARGS) \
 		-DUSER_CACHE_DIR=$(abspath $(ZEPHYR_OUT)/.cache) \
 		>/dev/null && \
-	cmake --build $(ZEPHYR_OUT) >/dev/null && \
+	$(ZEPHYR_CMAKE_ENV) cmake --build $(ZEPHYR_OUT) >/dev/null && \
 	cp $(ZEPHYR_OUT)/zephyr/zephyr.elf $@
 
 # A custom build links the test sources directly rather than from objects, so
