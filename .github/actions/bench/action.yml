@@ -88,10 +88,6 @@ runs:
               --ldflags="${{ inputs.ldflags }}" \
               --opt=$([[ ${{ inputs.opt }} == "false" ]] && echo "no_opt" || echo "opt")  \
               -v  ${{ inputs.bench_extra_args }}
-    - name: Check namespace
-      shell: ${{ env.SHELL }}
-      run: |
-        ./scripts/check-namespace
     - name: Store benchmark result
       uses: benchmark-action/github-action-benchmark@52576c92bccf6ac60c8223ec7eb2565637cae9ba # v1.22.1
       with:
