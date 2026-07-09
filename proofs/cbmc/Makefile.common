@@ -143,11 +143,28 @@ default: report
 #
 MAKEFILE_PATHS = $(foreach makefile,$(MAKEFILE_LIST),$(abspath $(makefile)))
 PROOF_ROOT = $(dir $(filter %/Makefile.common,$(MAKEFILE_PATHS)))
-
 CBMC_ROOT = $(shell dirname $(PROOF_ROOT))
 PROOF_SOURCE = $(CBMC_ROOT)/sources
-PROOF_INCLUDE = $(CBMC_ROOT)/cbmc/include/LP64
 PROOF_STUB = $(CBMC_ROOT)/stubs
+
+# Determine flags and include files for Memory Model
+# which must be exactly one of
+#     "ILP32" - 32-bit systems where "int, long, pointer are 32-bit"
+# or  "LP64"  - 64-bit systems where "long and pointer are 64-bit"
+#
+# if CBMC_MM is not set, default to LP64
+CBMC_MM ?= LP64
+ifeq ($(strip $(CBMC_MM)),LP64)
+  GOTO_CC_MM_FLAG = --64
+  CBMC_MM_FLAG = --LP64
+  PROOF_INCLUDE = $(CBMC_ROOT)/cbmc/include/LP64
+else ifeq ($(strip $(CBMC_MM)),ILP32)
+  GOTO_CC_MM_FLAG = --32
+  CBMC_MM_FLAG = --LP32
+  PROOF_INCLUDE = $(CBMC_ROOT)/cbmc/include/ILP32
+else
+  $(error CBMC_MM must be exactly one of ILP32 or LP64)
+endif
 
 # Flag to pass to goto-cc to make all static symbols globally visible. Leave it
 # unset or set it to --export-file-local-symbols to enable this behavior. Else,
@@ -330,7 +347,7 @@ NONDET_STATIC ?=
 # in order to get consistent header files on all platforms,
 # rather than using $(CC) (whight might be preferred for _compilation_
 # on some platforms such as macOS/Darwin)
-COMPILE_FLAGS ?= -Wall -Werror --native-compiler gcc -nostdinc -I$(PROOF_INCLUDE)
+COMPILE_FLAGS ?= -Wall -Werror --native-compiler gcc -nostdinc -I$(PROOF_INCLUDE) $(GOTO_CC_MM_FLAG)
 LINK_FLAGS ?= -Wall -Werror
 EXPORT_FILE_LOCAL_SYMBOLS ?= --export-file-local-symbols
 
@@ -561,6 +578,7 @@ endif
 CBMCFLAGS += $(CBMC_FLAG_FLUSH)
 CBMCFLAGS += --object-bits $(CBMC_OBJECT_BITS)
 CBMCFLAGS += --slice-formula
+CBMCFLAGS += $(CBMC_MM_FLAG)
 
 ################################################################
 # Set C compiler defines
