@@ -6,12 +6,12 @@
 #include "common.h"
 
 
-void mlk_ntt_butterfly_block(int16_t *r, int16_t root, unsigned start,
-                             unsigned len, unsigned bound);
+void mlk_ntt_butterfly_block(int16_t *r, int16_t root, int16_t root_twisted,
+                             unsigned start, unsigned len, unsigned bound);
 
 void harness(void)
 {
-  int16_t *r, root;
+  int16_t *r, root, root_twisted;
   unsigned start, stride, bound;
-  mlk_ntt_butterfly_block(r, root, start, stride, bound);
+  mlk_ntt_butterfly_block(r, root, root_twisted, start, stride, bound);
 }

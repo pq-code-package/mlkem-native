@@ -720,17 +720,25 @@ def signed_reduce(a):
 
 def gen_c_zetas():
     """Generate source and header file for zeta values used in
-    the reference NTT and invNTT"""
+    the reference NTT and invNTT.
+
+    Each yielded entry is a pair (zeta_mont, zeta_twisted) where:
+      - zeta_mont    = signed canonical representative of zeta * 2^16 mod q
+      - zeta_twisted = signed canonical 16-bit representative of
+                       zeta_mont * q^{-1} mod 2^16
+    The twisted form lets the C-reference fqmul skip the extra QINV
+    multiply that mlk_montgomery_reduce would otherwise perform."""
 
     # The zeta values are the powers of the chosen root of unity (17),
-    # converted to Montgomery form.
+    # converted to Montgomery form (and to its twisted-Montgomery counterpart).
 
-    zeta = []
+    zeta_pairs = []
     for i in range(128):
-        zeta.append(signed_reduce(pow(root_of_unity, i, modulus) * montgomery_factor))
+        raw = pow(root_of_unity, i, modulus)
+        zeta_pairs.append(prepare_root_for_montmul(raw))
 
     # The source code stores the zeta table in bit reversed form
-    yield from (zeta[bitreverse(i, 7)] for i in range(128))
+    yield from (zeta_pairs[bitreverse(i, 7)] for i in range(128))
 
 
 def gen_c_zeta_file():
@@ -739,10 +747,11 @@ def gen_c_zeta_file():
         yield ""
         yield "/*"
         yield " * Table of zeta values used in the reference NTT and inverse NTT."
-        yield " * See autogen for details."
+        yield " * Each row is (zeta_mont, zeta_twisted); see autogen for details."
         yield " */"
-        yield "static MLK_ALIGN const int16_t mlk_zetas[128] = {"
-        yield from map(lambda t: str(t) + ",", gen_c_zetas())
+        yield "static MLK_ALIGN const int16_t mlk_zetas[128][2] = {"
+        for z_mont, z_twisted in gen_c_zetas():
+            yield f"{{ {z_mont}, {z_twisted} }},"
         yield "};"
         yield ""
 
