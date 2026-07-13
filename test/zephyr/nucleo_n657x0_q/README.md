@@ -82,8 +82,9 @@ Zephyr's default NUCLEO-N657X0-Q RAM region is a 2 MiB SRAM window starting at
 `0x34000000`; its first 400 KiB is the STM32N657X0 FLEXRAM allocation. After
 reset, the Cortex-M55 TCM layout is 64 KiB ITCM and 128 KiB DTCM. The NUCLEO
 runner repurposes FLEXMEM to expand the TCMs to 256 KiB ITCM and 256 KiB DTCM
-before each RAM-loaded Zephyr test, so the test image is linked above that low
-AXISRAM/FLEXRAM window instead of using the board default:
+before each RAM-loaded Zephyr test. The test image is then linked as XIP from
+ITCM at `0x10000000`, with runtime data and stacks in DTCM at `0x30000000`;
+the fixed bootargs handoff block remains in AXISRAM at `0x340b0000`.
 
 1. OpenOCD attaches with `reset_config none`.
 2. The script enables the SYSCFG clock by setting bit 0 in `RCC_APB4ENSR2` at
@@ -95,16 +96,12 @@ AXISRAM/FLEXRAM window instead of using the board default:
 6. It runs `reset run` so the expanded layout is applied before the Zephyr ELF
    is loaded.
 
-The board is RAM-loaded, not flashed. Zephyr's default NUCLEO-N657X0-Q RAM
-region is a 2 MiB SRAM window starting at `0x34000000`; its first 400 KiB is
-the STM32N657X0 FLEXRAM allocation. The hardware benchmark setup is the reason
-this target uses a board-specific memory layout: before each run, the hardware
-wrapper repurposes FLEXMEM to expand the Cortex-M55 TCMs by setting the low
-byte of `SYSCFG_CM55TCMCR` to `0x99`, selecting 256 KiB ITCM and 256 KiB DTCM,
-then resets the target so that layout is active. Because this changes the low
-AXISRAM/FLEXRAM window that the default Zephyr layout would use, the test image
-is instead linked in a 192 KiB AXISRAM window at `0x34080000`; see
-`nucleo_n657x0_q/README.md` for the exact register sequence.
+The board is RAM-loaded, not flashed. The hardware benchmark setup is the
+reason this target uses a board-specific memory layout: before each run, the
+hardware wrapper repurposes FLEXMEM to expand the Cortex-M55 TCMs by setting
+the low byte of `SYSCFG_CM55TCMCR` to `0x99`, selecting 256 KiB ITCM and
+256 KiB DTCM, then resets the target so that layout is active. The Zephyr image
+is linked as XIP from ITCM, while runtime data and stacks are placed in DTCM.
 
 Test stdout is captured over ITM stimulus port 0 through SWO. This avoids using
 semihosting for normal output: semihosting is blocking and each host operation

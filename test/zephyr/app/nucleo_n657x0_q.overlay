@@ -4,6 +4,18 @@
  */
 
 / {
+    mlk_itcm: memory@10000000 {
+        compatible = "zephyr,memory-region", "arm,itcm";
+        reg = <0x10000000 0x00040000>;
+        zephyr,memory-region = "ITCM";
+    };
+
+    mlk_dtcm: memory@30000000 {
+        compatible = "zephyr,memory-region", "arm,dtcm";
+        reg = <0x30000000 0x00040000>;
+        zephyr,memory-region = "DTCM";
+    };
+
     mlk_axisram: memory@34080000 {
         compatible = "zephyr,memory-region", "mmio-sram";
         reg = <0x34080000 0x00030000>;
@@ -11,6 +23,7 @@
     };
 
     chosen {
-        zephyr,sram = &mlk_axisram;
+        zephyr,flash = &mlk_itcm;
+        zephyr,sram = &mlk_dtcm;
     };
 };

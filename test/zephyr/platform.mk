@@ -61,6 +61,7 @@ ZEPHYR_APP := $(PLATFORM_PATH)/app
 ZEPHYR_BUILD_DIR := $(BUILD_DIR)/zephyr/$(ZEPHYR_TARGET)
 ZEPHYR_ACTIVE_TARGET := $(BUILD_DIR)/zephyr/.active-target
 ZEPHYR_APP_INPUTS := \
+	$(PLATFORM_PATH)/platform.mk \
 	$(ZEPHYR_APP)/CMakeLists.txt \
 	$(ZEPHYR_APP)/Kconfig \
 	$(ZEPHYR_APP)/prj.conf \
@@ -111,12 +112,20 @@ CFLAGS += -DNTESTS_FUNC=3 -DNTESTS_KAT=100 \
 # adds must not reach the Zephyr toolchain, which selects the target arch itself.
 ZEPHYR_TEST_CFLAGS = $(subst \",\\\",$(patsubst -Imlkem,-I$(abspath mlkem),$(CFLAGS)))
 # Keep make-exported project flags out of Zephyr's own CMake build; the app
-# sources get those flags explicitly via ZEPHYR_TEST_CFLAGS.
+# sources get those flags explicitly via ZEPHYR_TEST_CFLAGS. Also overwrite
+# cached CMake global flags, so a prior polluted build directory cannot keep
+# applying project warning flags to Zephyr's generated/helper targets.
 ZEPHYR_CMAKE_ENV := env -u CFLAGS -u CXXFLAGS -u CPPFLAGS -u LDFLAGS
+ZEPHYR_CMAKE_CLEAR_FLAGS := \
+	-DCMAKE_ASM_FLAGS:STRING= \
+	-DCMAKE_C_FLAGS:STRING= \
+	-DCMAKE_CXX_FLAGS:STRING= \
+	-DCMAKE_EXE_LINKER_FLAGS:STRING=
 
 CUSTOM_BUILD = \
 	echo "  ZEPHYR  $(ZEPHYR_TARGET): $(notdir $@)" && \
 	$(ZEPHYR_CMAKE_ENV) cmake -GNinja -S $(ZEPHYR_APP) -B $(ZEPHYR_OUT) \
+		$(ZEPHYR_CMAKE_CLEAR_FLAGS) \
 		-DBOARD=$(ZEPHYR_BOARD) \
 		-DZEPHYR_NATIVE_ROOT=$(CURDIR) \
 		-DZEPHYR_TEST_SRCS="$(strip $(TEST_SRCS))" \
@@ -126,7 +135,8 @@ CUSTOM_BUILD = \
 		$(ZEPHYR_TARGET_CMAKE_ARGS) \
 		-DUSER_CACHE_DIR=$(abspath $(ZEPHYR_OUT)/.cache) \
 		>/dev/null && \
-	$(ZEPHYR_CMAKE_ENV) cmake --build $(ZEPHYR_OUT) >/dev/null && \
+	$(ZEPHYR_CMAKE_ENV) cmake --build $(ZEPHYR_OUT) >$(ZEPHYR_OUT)/build.log 2>&1 || \
+		{ cat $(ZEPHYR_OUT)/build.log; exit 1; }; \
 	cp $(ZEPHYR_OUT)/zephyr/zephyr.elf $@
 
 # A custom build links the test sources directly rather than from objects, so

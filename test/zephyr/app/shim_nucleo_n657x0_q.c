@@ -50,6 +50,28 @@ static char nucleo_stdout_buf[8192];
 static size_t nucleo_stdout_len;
 static bool nucleo_swo_enabled;
 
+/*
+ * Zephyr calls this before stack setup or normal RAM initialization. The
+ * NUCLEO runner has already expanded DTCM to 256 KiB, and the image now keeps
+ * runtime data/stacks there, so scrub the whole DTCM window before Zephyr's
+ * early stack, BSS, and MPU setup touch it.
+ */
+__attribute__((naked, used)) void soc_early_reset_hook(void)
+{
+  __asm__ volatile(
+      "movs r2, #0\n"
+      "movs r3, #0\n"
+      "ldr r0, =0x30000000\n"
+      "ldr r1, =0x30040000\n"
+      "1:\n"
+      "strd r2, r3, [r0], #8\n"
+      "cmp r0, r1\n"
+      "blo 1b\n"
+      "dsb\n"
+      "isb\n"
+      "bx lr\n");
+}
+
 static void nucleo_swo_pin_setup(void)
 {
   LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOB);
