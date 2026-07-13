@@ -32,6 +32,14 @@ target_include_directories(app PRIVATE
 # emulator with the test's exit code; the NUCLEO-N657X0-Q hardware target needs
 # its own shim plus libc wrappers that route stdio over ITM/SWO.
 if(ZEPHYR_NUCLEO_N657X0_Q)
+  # The STM32N6 SystemInit() fallback derives VTOR from &g_pfnVectors. With
+  # Zephyr data in DTCM that symbol lives in RAM, so force VTOR to the ITCM
+  # vector table instead.
+  zephyr_compile_definitions(
+    USER_VECT_TAB_ADDRESS
+    VECT_TAB_BASE_ADDRESS=0x10000000
+    VECT_TAB_OFFSET=0x0
+  )
   target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/shim_nucleo_n657x0_q.c)
   target_compile_definitions(app PRIVATE
     printf=__wrap_printf
