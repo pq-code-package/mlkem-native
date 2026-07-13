@@ -49,7 +49,7 @@
 
 void enable_cyclecounter(void) {}
 void disable_cyclecounter(void) {}
-uint64_t get_cyclecounter(void) { return k_cycle_get_32(); }
+uint64_t get_cyclecounter(void) { return k_cycle_get_64(); }
 
 #elif defined(PMU_CYCLES)
 

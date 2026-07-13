@@ -32,7 +32,12 @@
 
 static int cmp_uint64_t(const void *a, const void *b)
 {
-  return (int)((*((const uint64_t *)a)) - (*((const uint64_t *)b)));
+  const uint64_t va = *((const uint64_t *)a);
+  const uint64_t vb = *((const uint64_t *)b);
+
+  /* Avoid subtracting uint64_t values: qsort only needs the sign, and the
+   * difference may exceed int range after long benchmark runs. */
+  return (va > vb) - (va < vb);
 }
 
 #define CHECK(x)                                              \
