@@ -151,7 +151,6 @@
  */
 /* #define MLK_CONFIG_NO_DECAPS_API */
 
-
 /**
  * MLK_CONFIG_NO_RANDOMIZED_API
  *
