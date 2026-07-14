@@ -453,7 +453,7 @@ int MLK_API_NAMESPACE(check_sk)(
 #if !defined(MLK_CONFIG_NO_DECAPS_API)
 #define crypto_kem_dec MLK_API_NAMESPACE(dec)
 #define crypto_kem_check_sk MLK_API_NAMESPACE(check_sk)
-#endif /* !MLK_CONFIG_NO_DECAPS_API */
+#endif
 
 #else /* !MLK_CONFIG_API_NO_SUPERCOP */
 

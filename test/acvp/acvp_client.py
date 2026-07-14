@@ -105,34 +105,35 @@ def detect_supported_functions():
         return set(ALL_ACVP_FUNCTIONS)
 
 
+ENCAP_DECAP_FUNCTIONS = {
+    "encapsulation",
+    "encapsulationKeyCheck",
+    "decapsulation",
+    "decapsulationKeyCheck",
+}
+
+
 def loadDefaultAcvpData(version, supported_functions=None):
     if supported_functions is None:
         supported_functions = set(ALL_ACVP_FUNCTIONS)
 
-    # The ACVP encapDecap file bundles encapsulation, decapsulation, and both
-    # *KeyCheck helpers. To keep result comparison byte-identical against the
-    # published expectedResults.json, we only load the file if all four
-    # sub-functions are compiled in.
-    encapDecap_functions = {
-        "encapsulation",
-        "encapsulationKeyCheck",
-        "decapsulation",
-        "decapsulationKeyCheck",
-    }
-    encapDecap_supported = encapDecap_functions.issubset(supported_functions)
-    keyGen_supported = "keyGen" in supported_functions
+    # Load a prompt whenever any of its sub-functions is compiled in.
+    # Unsupported sub-functions are filtered out per test case (see
+    # filter_test_cases) so result comparison stays byte-identical.
+    keyGen_any = "keyGen" in supported_functions
+    encapDecap_any = bool(ENCAP_DECAP_FUNCTIONS & supported_functions)
 
     data_dir = f"test/acvp/.acvp-data/{version}/files"
     acvp_jsons_for_version = [
         (
             "keyGen",
-            keyGen_supported,
+            keyGen_any,
             f"{data_dir}/ML-KEM-keyGen-FIPS203/prompt.json",
             f"{data_dir}/ML-KEM-keyGen-FIPS203/expectedResults.json",
         ),
         (
             "encapDecap",
-            encapDecap_supported,
+            encapDecap_any,
             f"{data_dir}/ML-KEM-encapDecap-FIPS203/prompt.json",
             f"{data_dir}/ML-KEM-encapDecap-FIPS203/expectedResults.json",
         ),
@@ -140,10 +141,58 @@ def loadDefaultAcvpData(version, supported_functions=None):
     acvp_data = []
     for mode, is_supported, prompt, expectedResults in acvp_jsons_for_version:
         if not is_supported:
-            info(f"Skipping {mode} tests (mode not supported in this build)")
+            warn(
+                f"WARNING: Skipped {mode} ACVP prompt "
+                f"(no sub-function supported by this build)."
+            )
             continue
         acvp_data.append(loadAcvpData(prompt, expectedResults))
     return acvp_data
+
+
+def unwrap_acvts(data):
+    # ACVTS files wrap the payload as [{"acvVersion": ...}, {...}].
+    return data[1] if isinstance(data, list) else data
+
+
+def filter_test_cases(acvp_data, should_drop):
+    """Drop cases for which should_drop(tg, tc) returns a reason (None keeps).
+    Reasons are computed from the prompt but applied consistently to both
+    prompt and expected data, so downstream byte-identical result comparison
+    still works. Returns the list of drop reasons for reporting."""
+    reasons = []
+    for _, promptData, _, expectedData in acvp_data:
+        drop = {}
+        for tg in unwrap_acvts(promptData).get("testGroups", []):
+            for tc in tg["tests"]:
+                reason = should_drop(tg, tc)
+                if reason is not None:
+                    drop[tg["tgId"], tc["tcId"]] = reason
+        for data in (promptData, expectedData):
+            if data is None:
+                continue
+            for tg in unwrap_acvts(data).get("testGroups", []):
+                tg["tests"] = [
+                    tc for tc in tg["tests"] if (tg["tgId"], tc["tcId"]) not in drop
+                ]
+        reasons += drop.values()
+    return reasons
+
+
+def unsupported_function(supported_functions):
+    """Return a should_drop predicate that skips encapDecap test cases whose
+    tg['function'] is not in supported_functions. keyGen prompts have no
+    tg['function'] field, so they are never dropped by this predicate.
+    The predicate returns the bare function name so the caller can format
+    a compact 'Unsupported functions: A, B, C' summary."""
+
+    def should_drop(tg, tc):
+        fn = tg.get("function")
+        if fn is None or fn in supported_functions:
+            return None
+        return fn
+
+    return should_drop
 
 
 def err(msg, **kwargs):
@@ -152,6 +201,23 @@ def err(msg, **kwargs):
 
 def info(msg, **kwargs):
     print(msg, **kwargs)
+
+
+# Warnings deferred to the end of the run so they stand out after all the
+# per-test-case chatter. Collected by warn(), emitted once by flush_warnings().
+_warnings = []
+
+
+def warn(msg):
+    _warnings.append(msg)
+
+
+def flush_warnings():
+    if not _warnings:
+        return
+    err("")
+    for msg in _warnings:
+        err(msg)
 
 
 def get_acvp_binary(tg):
@@ -374,11 +440,23 @@ def test(prompt, expected, output, version, supported_functions=None):
         data = loadDefaultAcvpData(version, supported_functions)
 
     if not data:
-        info("No ACVP tests supported by this build")
+        warn("WARNING: No ACVP tests supported by this build; no cases were run.")
         info("ALL GOOD!")
+        flush_warnings()
         return
 
+    # Filter out test cases whose ACVP function isn't compiled in.
+    if supported_functions is not None:
+        reasons = filter_test_cases(data, unsupported_function(supported_functions))
+        if reasons:
+            fns = ", ".join(sorted(set(reasons)))
+            warn(
+                f"WARNING: Dropped {len(reasons)} ACVP test case(s). "
+                f"Unsupported functions: {fns}."
+            )
+
     runTest(data, output)
+    flush_warnings()
 
 
 parser = argparse.ArgumentParser()
