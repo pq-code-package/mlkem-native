@@ -27,9 +27,11 @@ typedef unsigned long uint64_t;
 typedef long int64_t;
 
 #define SIZE_MAX (18446744073709551615UL)
-#define UINT16_MAX (65535)
+
+#define UINT16_MAX (65535U)
 #define INT16_MAX (32767)
 #define INT16_MIN (-32767 - 1)
+
 #define INT32_MAX (2147483647)
 #define UINT32_MAX (4294967295U)
 
