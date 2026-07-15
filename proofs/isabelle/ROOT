@@ -1,0 +1,28 @@
+session MLKEM_Native_AutoCorrode = HOL +
+  options [document = pdf, document_output = "output"]
+  sessions
+    "HOL-Library"
+    Micro_C_Examples
+    Micro_Rust_Runtime
+    Byte_Level_Encoding
+  theories
+    MLKEM_Spec
+    MLKEM_Refinement
+    MLKEM_Zetas
+    MLKEM_NTT_Spec
+    MLKEM_InvNTT_Spec
+    MLKEM_NTT_Correctness
+  theories [document = false]
+    MLKEM_Machine_Model
+    MLKEM_Machine_Model_Instance
+    MLKEM_Poly_Definitions
+  theories
+    MLKEM_FC_Scalar
+    MLKEM_FC_Montgomery
+    MLKEM_FC_PolyLoop
+    MLKEM_FC_NTT
+    MLKEM_FC_InvNTT
+  theories [document = false]
+    MLKEM_Functional_Correctness
+  document_files
+    "root.tex"
