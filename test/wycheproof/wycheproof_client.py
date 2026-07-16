@@ -17,8 +17,11 @@ from pathlib import Path
 exec_prefix = os.environ.get("EXEC_WRAPPER", "")
 exec_prefix = exec_prefix.split(" ") if exec_prefix != "" else []
 
+# Pinned to a specific commit (2026-07-07).
+WYCHEPROOF_COMMIT = "fc24cd5b787d8e496bff31b0468af693a652b0f2"
 WYCHEPROOF_BASE_URL = (
-    "https://raw.githubusercontent.com/C2SP/wycheproof/main/testvectors_v1"
+    "https://raw.githubusercontent.com/C2SP/wycheproof"
+    f"/{WYCHEPROOF_COMMIT}/testvectors_v1"
 )
 
 WYCHEPROOF_FILES = [
@@ -49,6 +52,10 @@ def err(msg, **kwargs):
 
 def info(msg, **kwargs):
     print(msg, **kwargs)
+
+
+def get_wycheproof_data_dir(data_dir):
+    return Path(data_dir) / WYCHEPROOF_COMMIT
 
 
 def download_wycheproof_files(data_dir):
@@ -276,7 +283,8 @@ if args.file:
     info("ALL GOOD!")
 else:
     # Download and run all
-    if not download_wycheproof_files(args.data_dir):
+    data_dir = get_wycheproof_data_dir(args.data_dir)
+    if not download_wycheproof_files(data_dir):
         err("Failed to download Wycheproof test files")
         sys.exit(1)
-    run_all(args.data_dir)
+    run_all(data_dir)
