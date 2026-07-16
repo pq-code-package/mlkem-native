@@ -45,6 +45,25 @@ PARAMETER_SET_TO_LEVEL = {
     "ML-KEM-1024": 1024,
 }
 
+# Fields each test-case handler knows how to interpret. If Wycheproof adds a
+# new field to a schema, an unrecognized key here means it may carry
+# information we are silently failing to check; fail loudly instead.
+KNOWN_FIELDS = {
+    "keygen_seed": {"tcId", "comment", "result", "seed", "ek", "dk"},
+    "encaps": {"tcId", "comment", "flags", "result", "ek", "m", "c", "K"},
+    "semi_expanded_decaps": {
+        "tcId",
+        "comment",
+        "flags",
+        "result",
+        "dk",
+        "c",
+        "ek",
+        "K",
+    },
+    "combined": {"tcId", "comment", "flags", "result", "seed", "ek", "c", "K"},
+}
+
 
 def err(msg, **kwargs):
     print(msg, file=sys.stderr, **kwargs)
@@ -79,6 +98,14 @@ def download_wycheproof_files(data_dir):
     return True
 
 
+def check_known_fields(kind, tc):
+    unknown = set(tc.keys()) - KNOWN_FIELDS[kind]
+    assert not unknown, (
+        f"Unrecognized field(s) {sorted(unknown)} in {kind} tcId={tc['tcId']}; "
+        "Wycheproof schema may have grown a new field this client doesn't check"
+    )
+
+
 def get_binary(level):
     basedir = f"./test/build/mlkem{level}/bin"
     return f"{basedir}/wycheproof_mlkem{level}"
@@ -108,6 +135,7 @@ def run_keygen_seed_test(data_file):
         level = PARAMETER_SET_TO_LEVEL[tg["parameterSet"]]
         binary = get_binary(level)
         for tc in tg["tests"]:
+            check_known_fields("keygen_seed", tc)
             info(f"  tcId={tc['tcId']} ... ", end="")
             out = run_binary([binary, "keygen_seed", f"seed={tc['seed']}"])
             if tc["result"] == "valid":
@@ -137,6 +165,7 @@ def run_encaps_test(data_file):
         level = PARAMETER_SET_TO_LEVEL[tg["parameterSet"]]
         binary = get_binary(level)
         for tc in tg["tests"]:
+            check_known_fields("encaps", tc)
             info(f"  tcId={tc['tcId']} ... ", end="")
             out = run_binary([binary, "encaps", f"ek={tc['ek']}", f"m={tc['m']}"])
             if tc["result"] == "invalid":
@@ -171,6 +200,7 @@ def run_semi_expanded_decaps_test(data_file):
         level = PARAMETER_SET_TO_LEVEL[tg["parameterSet"]]
         binary = get_binary(level)
         for tc in tg["tests"]:
+            check_known_fields("semi_expanded_decaps", tc)
             info(f"  tcId={tc['tcId']} ... ", end="")
             out = run_binary([binary, "decaps", f"dk={tc['dk']}", f"c={tc['c']}"])
             if tc["result"] == "invalid":
@@ -179,7 +209,10 @@ def run_semi_expanded_decaps_test(data_file):
                     f"binary success on invalid tcId={tc['tcId']}"
                 )
             elif tc["result"] == "valid":
-                assert "K" in out, f"missing K in output tcId={tc['tcId']}"
+                assert "K" in tc, f"missing K in test vector tcId={tc['tcId']}"
+                assert out["K"].upper() == tc["K"].upper(), (
+                    f"K mismatch tcId={tc['tcId']}"
+                )
             else:
                 assert False, (
                     f"Unsupported test result '{tc['result']}' for tcId={tc['tcId']}"
@@ -200,6 +233,7 @@ def run_combined_test(data_file):
         level = PARAMETER_SET_TO_LEVEL[tg["parameterSet"]]
         binary = get_binary(level)
         for tc in tg["tests"]:
+            check_known_fields("combined", tc)
             info(f"  tcId={tc['tcId']} ... ", end="")
             # Generate keypair from seed
             keygen_out = run_binary([binary, "keygen_seed", f"seed={tc['seed']}"])
