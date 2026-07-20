@@ -44,9 +44,8 @@ int check_keccak_f1600_x1_scalar_aarch64_asm(void)
     input_state.gpr[1] = (uint64_t)buf_x1;
 
     /* Call function through ABI test stub */
-    asm_call_stub_aarch64(
-        &input_state, &output_state,
-        (void (*)(void))mlk_keccak_f1600_x1_scalar_aarch64_asm);
+    call_stub_aarch64(&input_state, &output_state,
+                      (void (*)(void))mlk_keccak_f1600_x1_scalar_aarch64_asm);
 
     /* Check ABI compliance */
     violations = check_aarch64_aapcs_compliance(&input_state, &output_state,

@@ -2917,6 +2917,7 @@ def check_macro_typos_in_file(filename, macro_check):
 def get_syscaps():
     return [
         "MLK_SYS_CAP_AVX2",
+        "MLK_SYS_CAP_NEON",
         "MLK_SYS_CAP_SHA3",
         "MLK_SYS_CAP_MVE",
         "MLK_SYS_CAP_DUMMY",
@@ -4617,6 +4618,14 @@ ABI_CAPS = {
         "cflags": ["-mavx2", "-mbmi2"],
         "aux_files": [],
     },
+    "NEON": {
+        "asm_subdir": "aarch64",
+        "guard": None,
+        "syscap": "MLK_SYS_CAP_NEON",
+        "description": "AArch64 NEON",
+        "cflags": [],
+        "aux_files": [],
+    },
     "SHA3": {
         "asm_subdir": "aarch64",
         "guard": "__ARM_FEATURE_SHA3",
@@ -4672,7 +4681,7 @@ ARCH_CALLINGS = {
         "gpr_int_type": "uint64_t",
         "fn_qualifier": "",
         "init_func": "init_aarch64_register_state",
-        "stub_func": "asm_call_stub_aarch64",
+        "stub_func": "call_stub_aarch64",
         "check_func": "check_aarch64_aapcs_compliance",
         # YAML register xN maps to gpr[N].
         "reg_to_field": lambda reg: f"gpr[{int(reg[1:])}]",
@@ -5192,7 +5201,8 @@ def gen_abicheck():
                 f"ABICHECK_REQ_{cap}_OBJS := "
                 f"$(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_REQ_{cap}_FILES))"
             )
-            yield f"$(ABICHECK_REQ_{cap}_OBJS): CFLAGS += {cflags}"
+            if cflags:
+                yield f"$(ABICHECK_REQ_{cap}_OBJS): CFLAGS += {cflags}"
         yield ""
 
     for asm_subdir, caps in caps_by_subdir.items():

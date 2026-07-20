@@ -19,6 +19,7 @@
   ABI:
     Architecture: aarch64
     CallingConvention: AAPCS64
+    Features: [NEON]
     x0:
       type: buffer
       size_bytes: 512

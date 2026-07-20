@@ -30,6 +30,14 @@ int check_poly_tobytes_aarch64_asm(void)
   MLK_ALIGN uint8_t buf_x0[384]; /* Output byte array */
   MLK_ALIGN uint8_t buf_x1[512]; /* Input polynomial */
 
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  {
+    fprintf(stderr,
+            "ABI check poly_tobytes_aarch64_asm: host lacks AArch64 NEON, "
+            "skipping\n");
+    return MLK_ABICHECK_SKIPPED;
+  }
+
   for (test_iter = 0; test_iter < MLK_ABICHECK_NUM_TESTS; test_iter++)
   {
     /* Initialize random register state */
@@ -43,8 +51,8 @@ int check_poly_tobytes_aarch64_asm(void)
     input_state.gpr[1] = (uint64_t)buf_x1;
 
     /* Call function through ABI test stub */
-    asm_call_stub_aarch64(&input_state, &output_state,
-                          (void (*)(void))mlk_poly_tobytes_aarch64_asm);
+    call_stub_aarch64(&input_state, &output_state,
+                      (void (*)(void))mlk_poly_tobytes_aarch64_asm);
 
     /* Check ABI compliance */
     violations = check_aarch64_aapcs_compliance(&input_state, &output_state,
