@@ -34,6 +34,14 @@ int check_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm(void)
   MLK_ALIGN uint8_t buf_x2[1536]; /* Input polynomial vector b */
   MLK_ALIGN uint8_t buf_x3[768];  /* Cached values for b */
 
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  {
+    fprintf(stderr,
+            "ABI check polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm: "
+            "host lacks AArch64 NEON, skipping\n");
+    return MLK_ABICHECK_SKIPPED;
+  }
+
   for (test_iter = 0; test_iter < MLK_ABICHECK_NUM_TESTS; test_iter++)
   {
     /* Initialize random register state */
@@ -51,7 +59,7 @@ int check_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm(void)
     input_state.gpr[3] = (uint64_t)buf_x3;
 
     /* Call function through ABI test stub */
-    asm_call_stub_aarch64(
+    call_stub_aarch64(
         &input_state, &output_state,
         (void (*)(
             void))mlk_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm);

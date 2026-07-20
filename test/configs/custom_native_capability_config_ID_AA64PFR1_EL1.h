@@ -418,6 +418,19 @@
 
 static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
 {
+  if (cap == MLK_SYS_CAP_NEON)
+  {
+    uint64_t id_aa64pfr0_el1;
+
+    /* Read ID_AA64PFR0_EL1 system register */
+    __asm__ volatile("mrs %0, id_aa64pfr0_el1" : "=r"(id_aa64pfr0_el1));
+
+    /* AdvSIMD field: 0b1111 = not implemented */
+    uint64_t advsimd_field = (id_aa64pfr0_el1 >> 20) & 0xF;
+
+    return (advsimd_field != 0xF) ? 1 : 0;
+  }
+
   if (cap == MLK_SYS_CAP_SHA3)
   {
     uint64_t id_aa64pfr1_el1;

@@ -109,7 +109,7 @@ extern void selftest_aarch64_corrupt_d13(void);
 extern void selftest_aarch64_corrupt_d14(void);
 extern void selftest_aarch64_corrupt_d15(void);
 
-static const selftest_entry_t aarch64_entries[] = {
+static const selftest_entry_t aarch64_gpr_entries[] = {
     {"noop", selftest_aarch64_noop, 0},
 #if !defined(__APPLE__)
     {"corrupt_x18", selftest_aarch64_corrupt_x18, 1},
@@ -125,6 +125,10 @@ static const selftest_entry_t aarch64_entries[] = {
     {"corrupt_x27", selftest_aarch64_corrupt_x27, 1},
     {"corrupt_x28", selftest_aarch64_corrupt_x28, 1},
     {"corrupt_x29", selftest_aarch64_corrupt_x29, 1},
+    {NULL, NULL, 0},
+};
+
+static const selftest_entry_t aarch64_neon_entries[] = {
     {"corrupt_d8", selftest_aarch64_corrupt_d8, 1},
     {"corrupt_d9", selftest_aarch64_corrupt_d9, 1},
     {"corrupt_d10", selftest_aarch64_corrupt_d10, 1},
@@ -325,9 +329,19 @@ int abicheck_selftest(void)
 
 #if defined(MLK_SYS_AARCH64)
   SELFTEST_RUN_ARCH("aarch64", struct aarch64_register_state,
-                    init_aarch64_register_state, asm_call_stub_aarch64,
-                    check_aarch64_aapcs_compliance, aarch64_entries,
+                    init_aarch64_register_state, call_stub_aarch64,
+                    check_aarch64_aapcs_compliance, aarch64_gpr_entries,
                     (void (*)(void)));
+
+  /* The NEON corrupters execute vector instructions, so running them on a
+   * host without NEON would fault instead of testing the ABI checker. */
+  if (mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  {
+    SELFTEST_RUN_ARCH("aarch64", struct aarch64_register_state,
+                      init_aarch64_register_state, call_stub_aarch64,
+                      check_aarch64_aapcs_compliance, aarch64_neon_entries,
+                      (void (*)(void)));
+  }
 #elif defined(MLK_SYS_X86_64) && defined(MLK_SYSV_ABI_SUPPORTED)
   SELFTEST_RUN_ARCH(
       "x86_64", struct x86_64_register_state, init_x86_64_register_state,
