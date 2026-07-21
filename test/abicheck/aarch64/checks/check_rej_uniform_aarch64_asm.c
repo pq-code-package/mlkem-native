@@ -14,7 +14,7 @@
 #include "../abicheck_aarch64.h"
 #include "../checks_aarch64_all.h"
 
-#if defined(MLK_SYS_AARCH64)
+#if defined(MLK_SYS_AARCH64) && defined(MLK_SYS_AARCH64_NEON)
 
 #include "../../../notrandombytes/notrandombytes.h"
 
@@ -76,4 +76,4 @@ int check_rej_uniform_aarch64_asm(void)
   return MLK_ABICHECK_PASSED;
 }
 
-#endif /* MLK_SYS_AARCH64 */
+#endif /* MLK_SYS_AARCH64 && MLK_SYS_AARCH64_NEON */

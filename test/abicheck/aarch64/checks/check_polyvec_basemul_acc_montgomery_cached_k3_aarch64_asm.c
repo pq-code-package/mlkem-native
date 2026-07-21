@@ -14,7 +14,7 @@
 #include "../abicheck_aarch64.h"
 #include "../checks_aarch64_all.h"
 
-#if defined(MLK_SYS_AARCH64)
+#if defined(MLK_SYS_AARCH64) && defined(MLK_SYS_AARCH64_NEON)
 
 #include "../../../notrandombytes/notrandombytes.h"
 
@@ -81,4 +81,4 @@ int check_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm(void)
   return MLK_ABICHECK_PASSED;
 }
 
-#endif /* MLK_SYS_AARCH64 */
+#endif /* MLK_SYS_AARCH64 && MLK_SYS_AARCH64_NEON */

@@ -34,6 +34,7 @@ ABICHECK_REQ_NEON_FILES := \
   mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S \
   mlkem/src/native/aarch64/src/rej_uniform_aarch64_asm.S
 ABICHECK_REQ_NEON_OBJS := $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_REQ_NEON_FILES))
+$(ABICHECK_REQ_NEON_OBJS): CFLAGS += -march=armv8-a+simd
 
 # SHA3: Armv8.4-A SHA3 (eor3, rax1, xar, bcax)
 ABICHECK_REQ_SHA3_FILES := \

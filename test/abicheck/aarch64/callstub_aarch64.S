@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
+#include "../../../mlkem/src/sys.h"
+
 #if defined(__ELF__)
 .section .note.GNU-stack,"",@progbits
 #endif
@@ -64,6 +66,7 @@
 .endm
 
 /* Callee-saved NEON registers d8-d15. */
+#if defined(MLK_SYS_AARCH64_NEON)
 .macro save_vregs
         save_pair  d8,  d9, STACK_BASE_VREGS, 0
         save_pair d10, d11, STACK_BASE_VREGS, 1
@@ -135,6 +138,13 @@
 
 1:
 .endm
+#else /* MLK_SYS_AARCH64_NEON */
+.macro save_and_load_vregs use_neon, scratch
+.endm
+
+.macro store_and_restore_vregs use_neon, scratch
+.endm
+#endif /* !MLK_SYS_AARCH64_NEON */
 
 /* Save the caller's callee-saved GPRs and seed x0-x29 from the input state
  * initially passed in x0. xzr pads the x18 slot for 16-byte alignment. */

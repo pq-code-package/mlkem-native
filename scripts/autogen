@@ -4620,10 +4620,10 @@ ABI_CAPS = {
     },
     "NEON": {
         "asm_subdir": "aarch64",
-        "guard": None,
+        "guard": "MLK_SYS_AARCH64_NEON",
         "syscap": "MLK_SYS_CAP_NEON",
         "description": "AArch64 NEON",
-        "cflags": [],
+        "cflags": ["-march=armv8-a+simd"],
         "aux_files": [],
     },
     "SHA3": {
