@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
+#include "../../../mlkem/src/sys.h"
+
 /*
  * AArch64 selftest stubs.
  *
@@ -62,6 +64,7 @@ define_corrupter selftest_aarch64_corrupt_x29, "mvn x29, x29"
 
 /* AAPCS64 preserves only the low 64 bits of v8-v15; fneg d touches just the
  * sign bit of that range. */
+#if defined(MLK_SYS_AARCH64_NEON)
 define_corrupter selftest_aarch64_corrupt_d8,  "fneg d8,  d8"
 define_corrupter selftest_aarch64_corrupt_d9,  "fneg d9,  d9"
 define_corrupter selftest_aarch64_corrupt_d10, "fneg d10, d10"
@@ -70,3 +73,4 @@ define_corrupter selftest_aarch64_corrupt_d12, "fneg d12, d12"
 define_corrupter selftest_aarch64_corrupt_d13, "fneg d13, d13"
 define_corrupter selftest_aarch64_corrupt_d14, "fneg d14, d14"
 define_corrupter selftest_aarch64_corrupt_d15, "fneg d15, d15"
+#endif /* MLK_SYS_AARCH64_NEON */

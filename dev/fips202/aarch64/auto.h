@@ -38,6 +38,9 @@
 #include "x1_scalar.h"
 #endif
 
+/* Batched, SIMD-based Keccak-f1600 implementations. */
+#if defined(MLK_SYS_AARCH64_NEON)
+
 /*
  * Keccak-f1600x2/x4
  *
@@ -69,5 +72,7 @@
 #include "x4_v8a_scalar.h"
 
 #endif /* !__ARM_FEATURE_SHA3 */
+
+#endif /* MLK_SYS_AARCH64_NEON */
 
 #endif /* !MLK_DEV_FIPS202_AARCH64_AUTO_H */
