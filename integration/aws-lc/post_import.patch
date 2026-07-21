@@ -11,12 +11,13 @@ diff --git a/crypto/fipsmodule/ml_kem/mlkem_native_config.h b/crypto/fipsmodule/
  static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
  {
  #if defined(MLK_SYS_X86_64)
-   if (cap == MLK_SYS_CAP_AVX2)
+-  if (cap == MLK_SYS_CAP_AVX2)
++  if (cap == MLK_SYS_CAP_X86_64_AVX2)
    {
      return CRYPTO_is_AVX2_capable();
    }
 +#elif defined(MLK_SYS_AARCH64)
-+  if (cap == MLK_SYS_CAP_NEON)
++  if (cap == MLK_SYS_CAP_AARCH64_NEON)
 +  {
 +    return CRYPTO_is_NEON_capable();
 +  }

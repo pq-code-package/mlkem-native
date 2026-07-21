@@ -32,7 +32,7 @@ int check_intt_aarch64_asm(void)
   MLK_ALIGN uint8_t buf_x1[160]; /* Twiddle factors for layers 1-5 */
   MLK_ALIGN uint8_t buf_x2[768]; /* Twiddle factors for layers 6-7 */
 
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     fprintf(stderr,
             "ABI check intt_aarch64_asm: host lacks AArch64 NEON, skipping\n");

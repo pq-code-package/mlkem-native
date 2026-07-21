@@ -34,7 +34,7 @@ int check_poly_decompress_d5_avx2_asm(void)
   MLK_ALIGN uint8_t buf_rdx[96];  /* Precomputed decompression constants */
   MLK_ALIGN uint8_t buf_rsi[160]; /* Input compressed polynomial */
 
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_AVX2))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_X86_64_AVX2))
   {
     fprintf(
         stderr,

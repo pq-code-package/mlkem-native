@@ -29,7 +29,7 @@ int check_poly_reduce_aarch64_asm(void)
   int violations;
   MLK_ALIGN uint8_t buf_x0[512]; /* Input/output polynomial */
 
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     fprintf(stderr,
             "ABI check poly_reduce_aarch64_asm: host lacks AArch64 NEON, "

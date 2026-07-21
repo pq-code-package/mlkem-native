@@ -31,7 +31,7 @@ int check_keccak_f1600_x1_v84a_aarch64_asm(void)
   MLK_ALIGN uint8_t buf_x0[200]; /* Keccak state (25 x uint64_t) */
   MLK_ALIGN uint8_t buf_x1[192]; /* Round constants (24 x uint64_t) */
 
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     fprintf(stderr,
             "ABI check keccak_f1600_x1_v84a_aarch64_asm: host lacks AArch64 "
@@ -39,7 +39,7 @@ int check_keccak_f1600_x1_v84a_aarch64_asm(void)
     return MLK_ABICHECK_SKIPPED;
   }
 
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_SHA3))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_SHA3))
   {
     fprintf(stderr,
             "ABI check keccak_f1600_x1_v84a_aarch64_asm: host lacks Armv8.4-A "

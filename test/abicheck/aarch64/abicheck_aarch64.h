@@ -32,7 +32,7 @@ static MLK_INLINE void call_stub_aarch64(struct aarch64_register_state *input,
                                          struct aarch64_register_state *output,
                                          void (*function_ptr)(void))
 {
-  int use_neon = mlk_sys_check_capability(MLK_SYS_CAP_NEON) != 0;
+  int use_neon = mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON) != 0;
   asm_call_stub_aarch64(input, output, function_ptr, use_neon);
 }
 

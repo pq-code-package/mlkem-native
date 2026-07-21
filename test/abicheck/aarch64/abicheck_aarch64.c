@@ -45,7 +45,7 @@ int check_aarch64_aapcs_compliance(struct aarch64_register_state *before,
   }
 
   /* The call stub leaves vector output untouched when NEON is unavailable. */
-  if (mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     /* Check callee-saved NEON registers (d8-d15, lower 64 bits only). */
     for (i = 8; i <= 15; i++)

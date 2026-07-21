@@ -33,7 +33,7 @@ int check_rej_uniform_aarch64_asm(void)
   MLK_ALIGN uint8_t buf_x1[504];  /* Input buffer */
   MLK_ALIGN uint8_t buf_x3[4096]; /* Lookup table */
 
-  if (!mlk_sys_check_capability(MLK_SYS_CAP_NEON))
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_AARCH64_NEON))
   {
     fprintf(stderr,
             "ABI check rej_uniform_aarch64_asm: host lacks AArch64 NEON, "
