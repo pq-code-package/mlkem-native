@@ -51,8 +51,9 @@
 // ---------------------------------------------------------------------------
 //   Prologue -- if offset is not 8-byte aligned, absorb
 //               min(length, 8-(offset%8)) bytes via predicated byte loads.
-//   Main     -- process full 8-byte groups via word-level gather loads,
-//               bit-interleave, then VEOR into even/odd state halves.
+//   Main     -- process full 8-byte groups via vldrw.u32 gather loads when
+//               32-bit aligned, otherwise byte loads; bit-interleave, then
+//               VEOR into even/odd state halves.
 //   Tail     -- absorb remaining <8 bytes via predicated byte loads.
 
 #include "../../../../common.h"
@@ -98,13 +99,13 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
         ldr.w r10, [sp, #0x6c]
         ldr r6, [sp, #0x70]
         cmp r6, #0x0
-        beq.w Lkeccak_f1600_x4_state_xor_bytes_asm_exit @ imm = #0x346
+        beq.w Lkeccak_f1600_x4_state_xor_bytes_asm_exit @ imm = #0x368
         and r5, r10, #0x7
         bic r9, r10, #0x7
         add.w r8, r0, r9, lsl #1
         add.w r7, r8, #0x190
         cmp r5, #0x0
-        beq.w Lkeccak_f1600_x4_state_xor_bytes_asm_pre_main @ imm = #0x12c
+        beq.w Lkeccak_f1600_x4_state_xor_bytes_asm_pre_main @ imm = #0x122
         subs r1, r1, r5
         subs r2, r2, r5
         subs r3, r3, r5
@@ -119,10 +120,10 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
         lsl.w r11, r11, r5
         vmsr p0, r11
         vpstttt
-        vldrbt.u8 q0, [r1], #4
-        vldrbt.u8 q1, [r2], #4
-        vldrbt.u8 q2, [r3], #4
-        vldrbt.u8 q3, [r4], #4
+        vldrbt.u8 q0, [r1], #8
+        vldrbt.u8 q1, [r2], #8
+        vldrbt.u8 q2, [r3], #8
+        vldrbt.u8 q3, [r4], #8
         vmov.f64 d1, d4
         vmov.f64 d3, d6
         vrev64.32 q2, q0
@@ -181,11 +182,13 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
         veor q5, q5, q1
         vstrw.32 q4, [r8], #16
         vstrw.32 q5, [r7], #16
-        vmov q7[2], q7[0], r1, r3
-        vmov q7[3], q7[1], r2, r4
-        b Lkeccak_f1600_x4_state_xor_bytes_asm_main_body @ imm = #0xe
 
 Lkeccak_f1600_x4_state_xor_bytes_asm_pre_main:
+        orr.w r0, r1, r2
+        orr.w r0, r0, r3
+        orr.w r0, r0, r4
+        tst.w r0, #0x3
+        bne.w Lkeccak_f1600_x4_state_xor_bytes_asm_main_body_byte @ imm = #0x104
         vmov q7[2], q7[0], r1, r3
         vmov q7[3], q7[1], r2, r4
         mov.w r0, #0x4
@@ -252,17 +255,27 @@ Lkeccak_f1600_x4_state_xor_bytes_asm_main_loop_start:
 
 Lkeccak_f1600_x4_state_xor_bytes_asm_main_loop_end:
         ands r6, r6, #0x7
-        beq.w Lkeccak_f1600_x4_state_xor_bytes_asm_exit @ imm = #0x110
+        beq.w Lkeccak_f1600_x4_state_xor_bytes_asm_exit @ imm = #0x128
         mov.w r0, #0x4
         vadd.i32 q7, q7, r0
         vmov r1, r3, q7[2], q7[0]
         vmov r2, r4, q7[3], q7[1]
-        vctp.8 r6
+
+Lkeccak_f1600_x4_state_xor_bytes_asm_main_body_byte:
+        cmp r6, #0x0
+        beq.w Lkeccak_f1600_x4_state_xor_bytes_asm_exit @ imm = #0x112
+
+Lkeccak_f1600_x4_state_xor_bytes_asm_main_loop_byte_start:
+        mov.w lr, #0x8
+        cmp r6, #0x8
+        it lo
+        movlo lr, r6
+        vctp.8 lr
         vpstttt
-        vldrbt.u8 q0, [r1]
-        vldrbt.u8 q1, [r2]
-        vldrbt.u8 q2, [r3]
-        vldrbt.u8 q3, [r4]
+        vldrbt.u8 q0, [r1], #8
+        vldrbt.u8 q1, [r2], #8
+        vldrbt.u8 q2, [r3], #8
+        vldrbt.u8 q3, [r4], #8
         vmov.f64 d1, d4
         vmov.f64 d3, d6
         vrev64.32 q2, q0
@@ -321,6 +334,8 @@ Lkeccak_f1600_x4_state_xor_bytes_asm_main_loop_end:
         veor q5, q5, q1
         vstrw.32 q4, [r8], #16
         vstrw.32 q5, [r7], #16
+        subs.w r6, r6, lr
+        bne.w Lkeccak_f1600_x4_state_xor_bytes_asm_main_loop_byte_start @ imm = #-0x112
 
 Lkeccak_f1600_x4_state_xor_bytes_asm_exit:
         vpop {d8, d9, d10, d11, d12, d13, d14, d15}
@@ -345,6 +360,7 @@ Lkeccak_f1600_x4_state_xor_bytes_asm_exit:
         .cfi_restore lr
         .cfi_adjust_cfa_offset -0x28
         .cfi_endproc
+        nop
 
 MLK_ASM_FN_SIZE(keccak_f1600_x4_state_xor_bytes_asm)
 
