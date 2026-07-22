@@ -14,7 +14,17 @@
 /* Register for sending commands (e.g. exit codes) to simavr */
 AVR_MCU_SIMAVR_COMMAND(&GPIOR0);
 
-#define RAM_BASE 0x2000
+/* The argc/argv block is placed at the top of RAM, just below 16 bytes of
+ * scratch stack used during startup. The exec wrapper chooses the base
+ * address RAM_TOP - blocksize and stores it in the first two bytes of
+ * EEPROM, followed by the block itself. The stack grows downwards from
+ * just below the block, so binaries with little argument data
+ * automatically get the largest possible stack. */
+#define RAM_TOP 0xFFF0
+
+/* Base address of the argc/argv block, read from EEPROM. Used by the
+ * argc/argv register setup in init7.S. */
+uint16_t mlk_argv_base;
 
 static int uart_putchar(char c, FILE *stream)
 {
@@ -27,11 +37,22 @@ static int uart_putchar(char c, FILE *stream)
 /* Set up stdout stream for avr-libc printf */
 static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
 
-/* Init6 function - copy EEPROM to RAM */
+/* Init6 function - copy argc/argv block from EEPROM to top of RAM and
+ * point the stack just below it. The scratch stack above RAM_TOP is used
+ * for the eeprom_read_* calls; the default stack location (RAMEND of the
+ * unpatched MCU) may lie inside .data/.bss and must not be used. */
 void setup_args(void) __attribute__((naked, section(".init6"), used));
 void setup_args(void)
 {
-  eeprom_read_block((void *)RAM_BASE, (void *)0x0000, 0x4000);
+  uint16_t base;
+  SPH = 0xFF;
+  SPL = 0xFF;
+  base = eeprom_read_word((const uint16_t *)0);
+  eeprom_read_block((void *)base, (const void *)2, (size_t)(RAM_TOP - base));
+  mlk_argv_base = base;
+  base--;
+  SPH = (uint8_t)(base >> 8);
+  SPL = (uint8_t)(base & 0xFF);
 }
 
 /* This is run as part of the init sequence, after setting up the stack

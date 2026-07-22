@@ -17,7 +17,7 @@ jobs:
       matrix:
         target:
          - runner: ubuntu-latest
-           name: 'AVR ATmega128RFR2 (modified for 32K RAM)'
+           name: 'AVR ATmega128RFR2 (modified for 63.5K RAM)'
            makefile: test/baremetal/platform/avr/platform.mk
            nix-shell: cross-avr
            func: true

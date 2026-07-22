@@ -32,7 +32,7 @@
     !defined(MLK_CONFIG_NO_ENCAPS_API) && !defined(MLK_CONFIG_NO_DECAPS_API)
 /* Force out-of-line so the ~6.4KB of stack buffers below stay in short-lived
  * frames and don't stack up in main() -- crucial on memory-constrained
- * targets such as AVR (32K RAM). */
+ * targets such as AVR. */
 static MLK_NOINLINE int test_keys_core(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
                                        uint8_t sk[CRYPTO_SECRETKEYBYTES],
                                        uint8_t ct[CRYPTO_CIPHERTEXTBYTES],
