@@ -7,11 +7,10 @@ CROSS_PREFIX=avr-
 CC=gcc
 
 # AVR target configuration
-# We would need ATMega256rfr2 with 32K RAM, but it's not supported by simavr.
-# We instead use ATMega128rfr1 with 16K RAM, but modify its specification in
-# simavr to bump the RAM to 32K.
-# Once simavr supports ATMega256rfr2, or once mlkem-native has [an option for]
-# lower stack usage, this should be changed.
+# ML-KEM-1024 (together with the RAM-resident test vectors) needs more than
+# the 16K RAM of any MCU supported by simavr, so we use ATMega128rfr2 with its
+# RAM specification in simavr bumped from 16K to the maximal 63.5K
+# (0x0200-0xFFFF).
 AVR_MCU ?= atmega128rfr2
 AVR_FREQ ?= 16000000UL
 
@@ -35,12 +34,16 @@ CFLAGS += \
 
 CFLAGS += $(CFLAGS_EXTRA)
 
-# Non-standard stack end: 0x81FF = 0x200 + 8K instead of default 0x41FF
+# Memory layout (data address space 0x0200-0xFFFF):
+# - .data/.bss grow upwards from 0x0200 (data region length raised from the
+#   default 16K to the full RAM size)
+# - the argc/argv block sits at the top of RAM, with the stack growing
+#   downwards from just below it (set up at runtime, see avr_wrapper.c)
 LDFLAGS += \
 	-mmcu=$(AVR_MCU) \
 	-Wl,--gc-sections \
 	-Wl,--relax \
-	-Wl,--defsym=__stack=0x81FF \
+	-Wl,--defsym=__DATA_REGION_LENGTH__=0xFC00 \
 	-Wl,--undefined=_simavr_command_register \
 	-Wl,--section-start=.mmcu=0x910000 \
 	-lprintf_min

@@ -7,6 +7,14 @@ import subprocess
 import os
 import tempfile
 
+# The argc/argv block is placed at the top of RAM, just below 16 bytes of
+# scratch stack used during startup (see avr_wrapper.c). The stack grows
+# downwards from just below the block.
+RAM_TOP = 0xFFF0
+
+# Patched EEPROM size (see nix/avr/simavr-32k-eeprom.patch)
+EEPROM_SIZE = 0x8000
+
 
 def intel_hex_line(addr, data):
     """Generate Intel HEX format line"""
@@ -25,6 +33,10 @@ def intel_hex_line(addr, data):
 def create_eeprom_hex(args, output_file):
     """
     Create EEPROM hex file from command line arguments.
+
+    EEPROM layout: 2 bytes block base address (little-endian), followed by
+    the argc/argv block to be copied to that address:
+    argc (2 bytes) + argv array (len(args) * 2 bytes) + packed strings.
     """
     # First arg should be binary name (strip path)
     args = [os.path.basename(args[0])] + args[1:]
@@ -38,15 +50,23 @@ def create_eeprom_hex(args, output_file):
         strings_data.extend(arg.encode("utf-8"))
         strings_data.append(0x00)  # Null terminator
 
-    # Step 2: Calculate where strings will be in RAM
-    # Layout: argc (2 bytes) + argv array (len(args) * 2 bytes) + strings
+    # Step 2: Calculate where the block will be in RAM
     argc_size = 2
     argv_size = len(args) * 2
-    strings_ram_base = 0x2000 + argc_size + argv_size
+    block_size = argc_size + argv_size + len(strings_data)
+    if block_size + 2 > EEPROM_SIZE:
+        print(
+            f"Error: argument block of {block_size} bytes does not fit in EEPROM",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    base = RAM_TOP - block_size
+    strings_ram_base = base + argc_size + argv_size
 
-    # Step 3: Build data starting with argc
+    # Step 3: Build EEPROM data: block base address, then argc
     data = bytearray()
-    data.extend([len(args) & 0xFF, (len(args) >> 8) & 0xFF])  # argc (little-endian)
+    data.extend([base & 0xFF, (base >> 8) & 0xFF])
+    data.extend([len(args) & 0xFF, (len(args) >> 8) & 0xFF])
 
     # Step 4: Build argv array with pointers to RAM addresses
     for offset in string_offsets:
@@ -96,7 +116,7 @@ def main():
 
         # Run with simavr - enable UART output
         # Note that we use a patched version of simavr where atmega128rfr2
-        # has 32K of RAM. This is purely for testing purposes.
+        # has 63.5K of RAM. This is purely for testing purposes.
         cmd = [
             "simavr",
             "-m",
@@ -126,12 +146,12 @@ def main():
                     filtered_lines.append(clean_line)
             output = "\n".join(filtered_lines)
 
-        # simavr does not propagate the guest exit code (returncode is always
-        # 0), so a guest-side failure would otherwise be reported as success.
-        # As a stopgap until simavr's exit-code mechanism is backported (#1728),
-        # scan the output for "ERROR" and fail instead. This catches both
-        # the UBSan-trap abort() in avr_wrapper.c and the CHECK(...) macros in
-        # the tests, which print "ERROR (file,line)" on failure.
+        # The guest exit code is propagated via simavr's exit-code commands
+        # (see avr_wrapper.c). As an additional safety net, scan the output
+        # for "ERROR" and fail: this catches failures where the firmware
+        # stops without reaching exit(), and both the UBSan-trap abort() in
+        # avr_wrapper.c and the CHECK(...) macros in the tests print
+        # "ERROR (file,line)" on failure.
         #
         # On failure, write to stderr, otherwise stdout.
         if "ERROR" in output:
