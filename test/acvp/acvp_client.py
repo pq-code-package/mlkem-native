@@ -20,6 +20,16 @@ exec_prefix = os.environ.get("EXEC_WRAPPER", "")
 exec_prefix = exec_prefix.split(" ") if exec_prefix != "" else []
 
 
+def acvp_version_has_tr1(version):
+    """Whether `version` ships the FIPS203-tr1 encapDecap vectors (v1.1.0.43+)."""
+    try:
+        parts = tuple(int(x) for x in version.lstrip("v").split("."))
+    except ValueError:
+        # Non-numeric ref (branch or commit); assume the vectors are present.
+        return True
+    return parts >= (1, 1, 0, 43)
+
+
 def download_acvp_files(version):
     """Download ACVP test files for the specified version if not present."""
     base_url = f"https://raw.githubusercontent.com/usnistgov/ACVP-Server/{version}/gen-val/json-files"
@@ -31,6 +41,13 @@ def download_acvp_files(version):
         "ML-KEM-encapDecap-FIPS203/prompt.json",
         "ML-KEM-encapDecap-FIPS203/expectedResults.json",
     ]
+
+    # The FIPS203-tr1 encapDecap vectors add seed/expanded key-format groups.
+    if acvp_version_has_tr1(version):
+        files_to_download += [
+            "ML-KEM-encapDecap-FIPS203-tr1/prompt.json",
+            "ML-KEM-encapDecap-FIPS203-tr1/expectedResults.json",
+        ]
 
     # Create directory structure
     data_dir = Path(f"test/acvp/.acvp-data/{version}/files")
@@ -63,6 +80,38 @@ def download_acvp_files(version):
     return True
 
 
+def unwrap_acvts(data):
+    # ACVTS files wrap the payload as [{"acvVersion": ...}, {...}].
+    return data[1] if isinstance(data, list) else data
+
+
+def drop_keyless_decap_key_checks(data):
+    """Drop decapsulationKeyCheck cases that provide no key.
+
+    Some ML-KEM sample vectors omit dk for these cases; the check cannot run
+    without a key. Removed from prompt and expected so the comparison stays
+    consistent, and runs normally once a key is present.
+    """
+    dropped = 0
+    for _, promptData, _, expectedData in data:
+        drop = set()
+        for tg in unwrap_acvts(promptData).get("testGroups", []):
+            if tg.get("function") != "decapsulationKeyCheck":
+                continue
+            for tc in tg["tests"]:
+                if "dk" not in tc:
+                    drop.add((tg["tgId"], tc["tcId"]))
+        for d in (promptData, expectedData):
+            if d is None:
+                continue
+            for tg in unwrap_acvts(d).get("testGroups", []):
+                tg["tests"] = [
+                    tc for tc in tg["tests"] if (tg["tgId"], tc["tcId"]) not in drop
+                ]
+        dropped += len(drop)
+    return dropped
+
+
 def loadAcvpData(prompt, expectedResults):
     with open(prompt, "r") as f:
         promptData = json.load(f)
@@ -86,6 +135,17 @@ def loadDefaultAcvpData(version):
             f"{data_dir}/ML-KEM-encapDecap-FIPS203/expectedResults.json",
         ),
     ]
+
+    # FIPS203-tr1 encapDecap vectors (seed/expanded key formats) exist from
+    # v1.1.0.43.
+    if acvp_version_has_tr1(version):
+        acvp_jsons_for_version.append(
+            (
+                f"{data_dir}/ML-KEM-encapDecap-FIPS203-tr1/prompt.json",
+                f"{data_dir}/ML-KEM-encapDecap-FIPS203-tr1/expectedResults.json",
+            )
+        )
+
     acvp_data = []
     for prompt, expectedResults in acvp_jsons_for_version:
         acvp_data.append(loadAcvpData(prompt, expectedResults))
@@ -139,12 +199,18 @@ def run_encapDecap_test(tg, tc):
             results[k] = v
     elif tg["function"] == "decapsulation":
         acvp_bin = get_acvp_binary(tg)
+        # keyFormat 'seed' provides d and z to expand into the key; 'expanded'
+        # (or absent) provides the expanded dk directly.
+        if tg.get("keyFormat") == "seed":
+            key_arg = f"seed={tc['d'] + tc['z']}"
+        else:
+            key_arg = f"dk={tc['dk']}"
         acvp_call = exec_prefix + [
             acvp_bin,
             "encapDecap",
             "VAL",
             "decapsulation",
-            f"dk={tc['dk']}",
+            key_arg,
             f"c={tc['c']}",
         ]
         result = subprocess.run(acvp_call, encoding="utf-8", capture_output=True)
@@ -319,6 +385,10 @@ def test(prompt, expected, output, version):
         # load data from downloaded files
         data = loadDefaultAcvpData(version)
 
+    dropped = drop_keyless_decap_key_checks(data)
+    if dropped:
+        info(f"Skipping {dropped} decapsulationKeyCheck case(s) with no key")
+
     runTest(data, output)
 
 
@@ -338,8 +408,8 @@ parser.add_argument(
 parser.add_argument(
     "--version",
     "-v",
-    default="v1.1.0.41",
-    help="ACVP test vector version (default: v1.1.0.41)",
+    default="v1.1.0.43",
+    help="ACVP test vector version (default: v1.1.0.43)",
 )
 args = parser.parse_args()
 

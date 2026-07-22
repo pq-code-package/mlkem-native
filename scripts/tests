@@ -1353,8 +1353,8 @@ def cli():
     )
     acvp_parser.add_argument(
         "--version",
-        default="v1.1.0.41",
-        help="ACVP test vector version (default: v1.1.0.41)",
+        default="v1.1.0.43",
+        help="ACVP test vector version (default: v1.1.0.43)",
     )
 
     # wycheproof arguments

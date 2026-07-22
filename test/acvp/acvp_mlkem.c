@@ -119,6 +119,29 @@ hex_usage:
   return 1;
 }
 
+/*
+ * Decode the decapsulation-key argument into dk. It is either the expanded
+ * key ("dk=HEX", keyFormat 'expanded') or a seed d||z to expand via keyGen
+ * ("seed=HEX", keyFormat 'seed'). Returns 0 on success, 1 on failure.
+ */
+static int decode_dk(const char *arg, unsigned char dk[CRYPTO_SECRETKEYBYTES])
+{
+  size_t seed_len = strlen("seed=");
+
+  /* Prefix check via memcmp; strncmp is unavailable on baremetal builds. */
+  if (strlen(arg) >= seed_len && memcmp(arg, "seed=", seed_len) == 0)
+  {
+    unsigned char ek[CRYPTO_PUBLICKEYBYTES];
+    unsigned char coins[2 * MLKEM_SYMBYTES];
+    if (decode_hex("seed", coins, sizeof(coins), arg) != 0)
+    {
+      return 1;
+    }
+    return crypto_kem_keypair_derand(ek, dk, coins) == 0 ? 0 : 1;
+  }
+  return decode_hex("dk", dk, CRYPTO_SECRETKEYBYTES, arg);
+}
+
 static void print_hex(const char *name, const unsigned char *raw, size_t len)
 {
   if (name != NULL)
@@ -321,8 +344,8 @@ int main(int argc, char *argv[])
             goto decaps_usage;
           }
 
-          /* Parse dk */
-          if (argc == 0 || decode_hex("dk", dk, sizeof(dk), *argv) != 0)
+          /* Parse dk (expanded key, or a seed to expand) */
+          if (argc == 0 || decode_dk(*argv, dk) != 0)
           {
             goto decaps_usage;
           }
