@@ -270,7 +270,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
     ldr     length,   [sp, #stack_offset+8]
 
     cmp     length,  #0
-    beq     keccak_f1600_x4_state_xor_bytes_asm_exit
+    beq     mlk_keccak_f1600_x4_state_xor_bytes_asm_exit
 
     and     off, off_full, #7
     bic     lane_offset_bytes, off_full, #7
@@ -282,7 +282,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
     // PROLOGUE: absorb min(len, 8-offset%8) bytes at the unaligned position
     // -----------------------------------------------------------------------
     cmp     off, #0
-    beq     keccak_f1600_x4_state_xor_bytes_asm_pre_main
+    beq     mlk_keccak_f1600_x4_state_xor_bytes_asm_pre_main
 
     // Subtract offset from data pointers so predicate window aligns
     subs dp0, dp0, off
@@ -323,21 +323,21 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
     // Build qP = {d0,d1,d2,d3} as u32 lanes for gather loads
     vmov    qP[2], qP[0],  dp0, dp2
     vmov    qP[3], qP[1],  dp1, dp3
-    b       keccak_f1600_x4_state_xor_bytes_asm_main_body
+    b       mlk_keccak_f1600_x4_state_xor_bytes_asm_main_body
 
-keccak_f1600_x4_state_xor_bytes_asm_pre_main:
+mlk_keccak_f1600_x4_state_xor_bytes_asm_pre_main:
     vmov    qP[2], qP[0],  dp0, dp2
     vmov    qP[3], qP[1],  dp1, dp3
     mov     tmp, #4
     vsub.u32    qP, qP, tmp        // pre-bias so first [qP,#4]! lands at original ptr
 
-keccak_f1600_x4_state_xor_bytes_asm_main_body:
+mlk_keccak_f1600_x4_state_xor_bytes_asm_main_body:
     // -----------------------------------------------------------------------
     // MAIN: process full 8-byte lanes
     // -----------------------------------------------------------------------
     lsr     lr, length, #3
-    wls     lr, lr, keccak_f1600_x4_state_xor_bytes_asm_main_loop_end
-keccak_f1600_x4_state_xor_bytes_asm_main_loop_start:
+    wls     lr, lr, mlk_keccak_f1600_x4_state_xor_bytes_asm_main_loop_end
+mlk_keccak_f1600_x4_state_xor_bytes_asm_main_loop_start:
     // Gather 8 bytes per instance (two u32 loads with post-increment)
     vldrw.u32 qd0, [qP, #4]!
     vldrw.u32 qd1, [qP, #4]!
@@ -348,14 +348,14 @@ keccak_f1600_x4_state_xor_bytes_asm_main_loop_start:
     // XOR into state (post-increments rSE/rSO by 16)
     xor_lane_and_store_postinc q0, q1, qS0, qS1, rSE, rSO
 
-    le      lr, keccak_f1600_x4_state_xor_bytes_asm_main_loop_start
-keccak_f1600_x4_state_xor_bytes_asm_main_loop_end:
+    le      lr, mlk_keccak_f1600_x4_state_xor_bytes_asm_main_loop_start
+mlk_keccak_f1600_x4_state_xor_bytes_asm_main_loop_end:
 
     // -----------------------------------------------------------------------
     // TAIL: absorb <8 remaining bytes at lane offset 0
     // -----------------------------------------------------------------------
     ands    length, length, #7
-    beq     keccak_f1600_x4_state_xor_bytes_asm_exit
+    beq     mlk_keccak_f1600_x4_state_xor_bytes_asm_exit
 
     // Recover scalar pointers from qP
     mov     tmp, #4
@@ -379,7 +379,7 @@ keccak_f1600_x4_state_xor_bytes_asm_main_loop_end:
     // XOR into state (post-increments rSE/rSO by 16)
     xor_lane_and_store_postinc qd0, qd1, qS0, qS1, rSE, rSO
 
-keccak_f1600_x4_state_xor_bytes_asm_exit:
+mlk_keccak_f1600_x4_state_xor_bytes_asm_exit:
     vpop    {d8-d15}
     pop     {r4-r12, pc}
     .unreq state

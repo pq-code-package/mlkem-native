@@ -483,7 +483,7 @@ MLK_ASM_FN_SYMBOL(intt_aarch64_asm)
         // sub v14.8H, v21.8H, v10.8H            // ..........................................................................................*.............
 
         sub count, count, #2
-intt_layer4567_start:
+mlk_intt_layer4567_start:
                                                 // Instructions:    92
                                                 // Expected cycles: 84
                                                 // Expected IPC:    1.10
@@ -687,7 +687,7 @@ intt_layer4567_start:
         // str q11, [x3, #(-64 + 16*3)]               // ................................................................~..................'................................................................~..................'................................................................l..................
 
         sub count, count, 1
-        cbnz count, intt_layer4567_start
+        cbnz count, mlk_intt_layer4567_start
                                                  // Instructions:    71
                                                  // Expected cycles: 77
                                                  // Expected IPC:    0.92
@@ -1017,7 +1017,7 @@ intt_layer4567_start:
         // mul v17.8H, v19.8H, v0.H[0]           // ............................................................*......
 
         sub count, count, #2
-intt_layer123_start:
+mlk_intt_layer123_start:
                                                 // Instructions:    76
                                                 // Expected cycles: 72
                                                 // Expected IPC:    1.06
@@ -1189,7 +1189,7 @@ intt_layer123_start:
         // str q11, [x0, #(-16 + 3*(512/8))]          // ........................................................'..~....................................................................'..l..................................................................
 
         sub count, count, 1
-        cbnz count, intt_layer123_start
+        cbnz count, mlk_intt_layer123_start
                                                 // Instructions:    81
                                                 // Expected cycles: 86
                                                 // Expected IPC:    0.94

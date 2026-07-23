@@ -179,7 +179,7 @@ mlk_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm:
         mul v29.8h, v28.8h, v2.8h
         sub x13, x13, #0x2
 
-Lpolyvec_basemul_acc_montgomery_cached_k4_loop_start:
+Lmlk_polyvec_basemul_acc_montgomery_cached_k4_loop_start:
         smlal2 v23.4s, v30.8h, v21.8h
         ldr q11, [x1], #0x20
         uzp2 v15.8h, v5.8h, v22.8h
@@ -263,7 +263,7 @@ Lpolyvec_basemul_acc_montgomery_cached_k4_loop_start:
         smlal2 v23.4s, v25.8h, v10.8h
         uzp1 v14.8h, v5.8h, v22.8h
         subs x13, x13, #0x1
-        cbnz x13, Lpolyvec_basemul_acc_montgomery_cached_k4_loop_start
+        cbnz x13, Lmlk_polyvec_basemul_acc_montgomery_cached_k4_loop_start
         smlal v18.4s, v29.4h, v0.4h
         ldr q11, [x1], #0x20
         uzp2 v28.8h, v5.8h, v22.8h

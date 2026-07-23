@@ -390,7 +390,7 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm)
         // uzp1 v14.8H, v5.8H, v22.8H         // ......................................*..
 
         sub count, count, #2
-polyvec_basemul_acc_montgomery_cached_k4_loop_start:
+mlk_polyvec_basemul_acc_montgomery_cached_k4_loop_start:
                                              // Instructions:    82
                                              // Expected cycles: 42
                                              // Expected IPC:    1.95
@@ -574,7 +574,7 @@ polyvec_basemul_acc_montgomery_cached_k4_loop_start:
         // str q13, [x0, #-16]               // ......~.........'...............................~.........'...............................l
 
         subs count, count, 1
-        cbnz count, polyvec_basemul_acc_montgomery_cached_k4_loop_start
+        cbnz count, mlk_polyvec_basemul_acc_montgomery_cached_k4_loop_start
                                              // Instructions:    83
                                              // Expected cycles: 59
                                              // Expected IPC:    1.41

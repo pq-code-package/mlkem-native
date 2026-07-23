@@ -105,7 +105,7 @@ MLK_ASM_FN_SYMBOL(rej_uniform_avx2_asm)
   // Return if input length is 0
   xorl ecnt, ecnt
   testq len, len
-  jz rej_uniform_asm_end
+  jz mlk_rej_uniform_asm_end
 
   // Broadcast MLKEM_Q (3329) to all 16-bit elements of bound reg.
   movq $0x0D010D010D010D01, %rax
@@ -128,7 +128,7 @@ MLK_ASM_FN_SYMBOL(rej_uniform_avx2_asm)
   movq $0, pos // pos is the current position in the input buffer.
   movq $0x5555, pext_mask // 0x5555 mask to extract every second bit.
 
-rej_uniform_asm_loop_start:
+mlk_rej_uniform_asm_loop_start:
   // 1. Split 96 bits into eight 12-bit integers where each integer.
   //    We explain the algorithm by considering the lowest 64 bits of vals.
   movq    (in, pos), vals        // Load low 8 bytes into bits [63:0] of vals
@@ -165,13 +165,13 @@ rej_uniform_asm_loop_start:
   addq good, cnt
 
   cmpq $256, cnt
-  jnb rej_uniform_asm_final_copy
+  jnb mlk_rej_uniform_asm_final_copy
 
   addq $12, pos
   cmpq pos, len
-  ja rej_uniform_asm_loop_start
+  ja mlk_rej_uniform_asm_loop_start
 
-rej_uniform_asm_final_copy:
+mlk_rej_uniform_asm_final_copy:
   // Copy up to 256 values to the output: min(cnt, 256).
   mov   $256, %rcx
   cmp   $256, cnt
@@ -182,7 +182,7 @@ rej_uniform_asm_final_copy:
   shlq $1, %rcx
   rep  movsb
 
-rej_uniform_asm_end:
+mlk_rej_uniform_asm_end:
 
   addq $STACK_SIZE, %rsp
   ret

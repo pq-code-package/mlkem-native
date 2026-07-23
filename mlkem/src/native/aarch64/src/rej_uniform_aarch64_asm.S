@@ -73,23 +73,23 @@ MLK_ASM_FN_SYMBOL(rej_uniform_aarch64_asm)
         mov x11, #0x0               // =0
         eor v16.16b, v16.16b, v16.16b
 
-Lrej_uniform_initial_zero:
+Lmlk_rej_uniform_initial_zero:
         str q16, [x7], #0x40
         stur q16, [x7, #-0x30]
         stur q16, [x7, #-0x20]
         stur q16, [x7, #-0x10]
         add x11, x11, #0x20
         cmp x11, #0x100
-        b.lt Lrej_uniform_initial_zero
+        b.lt Lmlk_rej_uniform_initial_zero
         mov x7, x8
         mov x9, #0x0                // =0
         mov x4, #0x100              // =256
         cmp x2, #0x30
-        b.lo Lrej_uniform_loop48_end
+        b.lo Lmlk_rej_uniform_loop48_end
 
-Lrej_uniform_loop48:
+Lmlk_rej_uniform_loop48:
         cmp x9, x4
-        b.hs Lrej_uniform_memory_copy
+        b.hs Lmlk_rej_uniform_memory_copy
         sub x2, x2, #0x30
         ld3 { v0.16b, v1.16b, v2.16b }, [x1], #48
         zip1 v4.16b, v0.16b, v1.16b
@@ -153,13 +153,13 @@ Lrej_uniform_loop48:
         add x9, x9, x12
         add x9, x9, x14
         cmp x2, #0x30
-        b.hs Lrej_uniform_loop48
+        b.hs Lmlk_rej_uniform_loop48
 
-Lrej_uniform_loop48_end:
+Lmlk_rej_uniform_loop48_end:
         cmp x9, x4
-        b.hs Lrej_uniform_memory_copy
+        b.hs Lmlk_rej_uniform_memory_copy
         cmp x2, #0x18
-        b.lo Lrej_uniform_memory_copy
+        b.lo Lmlk_rej_uniform_memory_copy
         ld3 { v0.8b, v1.8b, v2.8b }, [x1], #24
         zip1 v4.16b, v0.16b, v1.16b
         zip1 v5.16b, v1.16b, v2.16b
@@ -191,13 +191,13 @@ Lrej_uniform_loop48_end:
         add x9, x9, x12
         add x9, x9, x13
 
-Lrej_uniform_memory_copy:
+Lmlk_rej_uniform_memory_copy:
         cmp x9, x4
         csel x9, x9, x4, lo
         mov x11, #0x0               // =0
         mov x7, x8
 
-Lrej_uniform_final_copy:
+Lmlk_rej_uniform_final_copy:
         ldr q16, [x7], #0x40
         ldur q17, [x7, #-0x30]
         ldur q18, [x7, #-0x20]
@@ -208,10 +208,10 @@ Lrej_uniform_final_copy:
         stur q19, [x0, #-0x10]
         add x11, x11, #0x20
         cmp x11, #0x100
-        b.lt Lrej_uniform_final_copy
+        b.lt Lmlk_rej_uniform_final_copy
         mov x0, x9
 
-Lrej_uniform_return:
+Lmlk_rej_uniform_return:
         add sp, sp, #0x240
         .cfi_adjust_cfa_offset -0x240
         ret

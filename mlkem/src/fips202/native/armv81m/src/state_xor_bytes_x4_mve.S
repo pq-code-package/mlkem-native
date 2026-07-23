@@ -98,13 +98,13 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
         ldr.w r10, [sp, #0x6c]
         ldr r6, [sp, #0x70]
         cmp r6, #0x0
-        beq.w Lkeccak_f1600_x4_state_xor_bytes_asm_exit @ imm = #0x346
+        beq.w Lmlk_keccak_f1600_x4_state_xor_bytes_asm_exit @ imm = #0x346
         and r5, r10, #0x7
         bic r9, r10, #0x7
         add.w r8, r0, r9, lsl #1
         add.w r7, r8, #0x190
         cmp r5, #0x0
-        beq.w Lkeccak_f1600_x4_state_xor_bytes_asm_pre_main @ imm = #0x12c
+        beq.w Lmlk_keccak_f1600_x4_state_xor_bytes_asm_pre_main @ imm = #0x12c
         subs r1, r1, r5
         subs r2, r2, r5
         subs r3, r3, r5
@@ -183,19 +183,19 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
         vstrw.32 q5, [r7], #16
         vmov q7[2], q7[0], r1, r3
         vmov q7[3], q7[1], r2, r4
-        b Lkeccak_f1600_x4_state_xor_bytes_asm_main_body @ imm = #0xe
+        b Lmlk_keccak_f1600_x4_state_xor_bytes_asm_main_body @ imm = #0xe
 
-Lkeccak_f1600_x4_state_xor_bytes_asm_pre_main:
+Lmlk_keccak_f1600_x4_state_xor_bytes_asm_pre_main:
         vmov q7[2], q7[0], r1, r3
         vmov q7[3], q7[1], r2, r4
         mov.w r0, #0x4
         vsub.i32 q7, q7, r0
 
-Lkeccak_f1600_x4_state_xor_bytes_asm_main_body:
+Lmlk_keccak_f1600_x4_state_xor_bytes_asm_main_body:
         lsr.w lr, r6, #0x3
-        wls lr, lr, Lkeccak_f1600_x4_state_xor_bytes_asm_main_loop_end @ imm = #0xd4
+        wls lr, lr, Lmlk_keccak_f1600_x4_state_xor_bytes_asm_main_loop_end @ imm = #0xd4
 
-Lkeccak_f1600_x4_state_xor_bytes_asm_main_loop_start:
+Lmlk_keccak_f1600_x4_state_xor_bytes_asm_main_loop_start:
         vldrw.u32 q0, [q7, #4]!
         vldrw.u32 q1, [q7, #4]!
         vmov q2, q0
@@ -248,11 +248,11 @@ Lkeccak_f1600_x4_state_xor_bytes_asm_main_loop_start:
         veor q5, q5, q1
         vstrw.32 q4, [r8], #16
         vstrw.32 q5, [r7], #16
-        le lr, Lkeccak_f1600_x4_state_xor_bytes_asm_main_loop_start @ imm = #-0xd4
+        le lr, Lmlk_keccak_f1600_x4_state_xor_bytes_asm_main_loop_start @ imm = #-0xd4
 
-Lkeccak_f1600_x4_state_xor_bytes_asm_main_loop_end:
+Lmlk_keccak_f1600_x4_state_xor_bytes_asm_main_loop_end:
         ands r6, r6, #0x7
-        beq.w Lkeccak_f1600_x4_state_xor_bytes_asm_exit @ imm = #0x110
+        beq.w Lmlk_keccak_f1600_x4_state_xor_bytes_asm_exit @ imm = #0x110
         mov.w r0, #0x4
         vadd.i32 q7, q7, r0
         vmov r1, r3, q7[2], q7[0]
@@ -322,7 +322,7 @@ Lkeccak_f1600_x4_state_xor_bytes_asm_main_loop_end:
         vstrw.32 q4, [r8], #16
         vstrw.32 q5, [r7], #16
 
-Lkeccak_f1600_x4_state_xor_bytes_asm_exit:
+Lmlk_keccak_f1600_x4_state_xor_bytes_asm_exit:
         vpop {d8, d9, d10, d11, d12, d13, d14, d15}
         .cfi_restore d8
         .cfi_restore d9

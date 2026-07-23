@@ -85,7 +85,7 @@ mlk_poly_mulcache_compute_aarch64_asm:
         lsr x4, x4, #1
         sub x4, x4, #0x2
 
-Lpoly_mulcache_compute_loop_start:
+Lmlk_poly_mulcache_compute_loop_start:
         str q5, [x0], #0x10
         sqrdmulh v22.8h, v29.8h, v17.8h
         ldr q28, [x2], #0x10
@@ -105,7 +105,7 @@ Lpoly_mulcache_compute_loop_start:
         str q26, [x0], #0x10
         mul v26.8h, v23.8h, v18.8h
         subs x4, x4, #0x1
-        cbnz x4, Lpoly_mulcache_compute_loop_start
+        cbnz x4, Lmlk_poly_mulcache_compute_loop_start
         mls v26.8h, v4.8h, v6.h[0]
         str q5, [x0], #0x10
         ldr q5, [x2], #0x10
