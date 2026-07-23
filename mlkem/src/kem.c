@@ -276,6 +276,12 @@ int mlk_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   ret = mlk_kem_keypair_derand(pk, sk, coins, context);
 
 cleanup:
+  if (ret != 0)
+  {
+    mlk_zeroize(pk, MLKEM_INDCCA_PUBLICKEYBYTES);
+    mlk_zeroize(sk, MLKEM_INDCCA_SECRETKEYBYTES);
+  }
+
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   MLK_FREE(coins, uint8_t, 2 * MLKEM_SYMBYTES, context);
@@ -326,6 +332,12 @@ int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   mlk_memcpy(ss, kr, MLKEM_SYMBYTES);
 
 cleanup:
+  if (ret != 0)
+  {
+    mlk_zeroize(ct, MLKEM_INDCCA_CIPHERTEXTBYTES);
+    mlk_zeroize(ss, MLKEM_SSBYTES);
+  }
+
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   MLK_FREE(kr, uint8_t, 2 * MLKEM_SYMBYTES, context);
@@ -362,6 +374,12 @@ int mlk_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   ret = mlk_kem_enc_derand(ct, ss, pk, coins, context);
 
 cleanup:
+  if (ret != 0)
+  {
+    mlk_zeroize(ct, MLKEM_INDCCA_CIPHERTEXTBYTES);
+    mlk_zeroize(ss, MLKEM_SSBYTES);
+  }
+
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   MLK_FREE(coins, uint8_t, MLKEM_SYMBYTES, context);
@@ -431,6 +449,11 @@ int mlk_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   mlk_ct_cmov_zero(ss, kr, MLKEM_SYMBYTES, fail);
 
 cleanup:
+  if (ret != 0)
+  {
+    mlk_zeroize(ss, MLKEM_SSBYTES);
+  }
+
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   MLK_FREE(tmp, uint8_t, MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES,
