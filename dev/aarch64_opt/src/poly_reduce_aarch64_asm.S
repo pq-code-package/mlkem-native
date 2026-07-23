@@ -135,7 +135,7 @@ MLK_ASM_FN_SYMBOL(poly_reduce_aarch64_asm)
         // sqdmulh v2.8H, v26.8H, v4.H[0]       // .....................*.........
 
         sub count, count, #2
-poly_reduce_loop_start:
+mlk_poly_reduce_loop_start:
                                                // Instructions:    32
                                                // Expected cycles: 23
                                                // Expected IPC:    1.39
@@ -219,7 +219,7 @@ poly_reduce_loop_start:
         // str q0, [x0, #-16]                   // ......'........~.............'........l
 
         subs count, count, 1
-        cbnz count, poly_reduce_loop_start
+        cbnz count, mlk_poly_reduce_loop_start
                                                // Instructions:    39
                                                // Expected cycles: 29
                                                // Expected IPC:    1.34

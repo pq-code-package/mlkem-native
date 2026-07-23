@@ -105,7 +105,7 @@ MLK_ASM_FN_SYMBOL(intt_ppc_asm)
         mtctr 8
         xxlor 37, 0, 0
 
-intt_ppc_asm_Loopf:
+mlk_intt_ppc_asm_Loopf:
         lxvd2x 57, 0, 3
         lxvd2x 58, 10, 3
         lxvd2x 62, 11, 3
@@ -150,7 +150,7 @@ intt_ppc_asm_Loopf:
         stxvd2x 55, 17, 3
         stxvd2x 60, 18, 3
         addi 3, 3, 128
-        bdnz intt_ppc_asm_Loopf
+        bdnz mlk_intt_ppc_asm_Loopf
         addi 3, 3, -512
         nop
         nop

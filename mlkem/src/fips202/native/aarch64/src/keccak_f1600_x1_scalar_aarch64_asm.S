@@ -68,7 +68,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x1_scalar_aarch64_asm)
         .cfi_rel_offset x29, 0x70
         .cfi_rel_offset x30, 0x78
 
-Lkeccak_f1600_x1_scalar_initial:
+Lmlk_keccak_f1600_x1_scalar_initial:
         mov x26, x1
         str x1, [sp, #0x8]
         ldp x1, x6, [x0]
@@ -193,7 +193,7 @@ Lkeccak_f1600_x1_scalar_initial:
         eor x14, x26, x6, ror #46
         eor x6, x27, x29, ror #41
 
-Lkeccak_f1600_x1_scalar_loop:
+Lmlk_keccak_f1600_x1_scalar_loop:
         eor x0, x15, x11, ror #52
         eor x0, x0, x13, ror #48
         eor x26, x8, x9, ror #57
@@ -306,7 +306,7 @@ Lkeccak_f1600_x1_scalar_loop:
         bic x3, x0, x30, ror #5
         eor x23, x3, x26, ror #52
         eor x3, x29, x30, ror #24
-        b.le Lkeccak_f1600_x1_scalar_loop
+        b.le Lmlk_keccak_f1600_x1_scalar_loop
         ror x6, x6, #0x2b
         ror x11, x11, #0x32
         ror x21, x21, #0x14

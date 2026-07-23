@@ -122,7 +122,7 @@ MLK_ASM_FN_SYMBOL(poly_tobytes_aarch64_asm)
 
         lsr count, count, #1
         sub count, count, #2
-poly_tobytes_loop_start:
+mlk_poly_tobytes_loop_start:
                                                        // Instructions:    20
                                                        // Expected cycles: 10
                                                        // Expected IPC:    2.00
@@ -182,7 +182,7 @@ poly_tobytes_loop_start:
         // st3 {v2.8b, v3.8b, v4.8b}, [x0], #24      // ..~....'....~....'....l....'...
 
         subs count, count, 1
-        cbnz count, poly_tobytes_loop_start
+        cbnz count, mlk_poly_tobytes_loop_start
                                                        // Instructions:    18
                                                        // Expected cycles: 12
                                                        // Expected IPC:    1.50

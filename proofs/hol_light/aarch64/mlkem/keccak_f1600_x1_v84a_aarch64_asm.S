@@ -95,7 +95,7 @@ mlk_keccak_f1600_x1_v84a_aarch64_asm:
         ldr d24, [x0, #0xc0]
         mov x2, #0x18               // =24
 
-Lkeccak_f1600_x1_v84a_loop:
+Lmlk_keccak_f1600_x1_v84a_loop:
         eor3 v30.16b, v0.16b, v5.16b, v10.16b
         eor3 v29.16b, v1.16b, v6.16b, v11.16b
         eor3 v28.16b, v2.16b, v7.16b, v12.16b
@@ -164,7 +164,7 @@ Lkeccak_f1600_x1_v84a_loop:
         bcax v4.16b, v4.16b, v27.16b, v30.16b
         eor v0.16b, v0.16b, v31.16b
         sub x2, x2, #0x1
-        cbnz x2, Lkeccak_f1600_x1_v84a_loop
+        cbnz x2, Lmlk_keccak_f1600_x1_v84a_loop
         stp d0, d1, [x0]
         stp d2, d3, [x0, #0x10]
         stp d4, d5, [x0, #0x20]

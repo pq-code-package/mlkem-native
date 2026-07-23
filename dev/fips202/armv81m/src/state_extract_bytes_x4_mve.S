@@ -205,7 +205,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_extract_bytes_asm)
     ldr     length,   [sp, #stack_offset+8]
 
     cmp     length,  #0
-    beq     keccak_f1600_x4_state_extract_bytes_asm_exit
+    beq     mlk_keccak_f1600_x4_state_extract_bytes_asm_exit
 
     and     off, off_full, #7
     bic     lane_offset_bytes, off_full, #7
@@ -217,7 +217,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_extract_bytes_asm)
     // PROLOGUE: extract min(len, 8-offset%8) bytes from the unaligned lane
     // -----------------------------------------------------------------------
     cmp     off, #0
-    beq     keccak_f1600_x4_state_extract_bytes_asm_pre_main
+    beq     mlk_keccak_f1600_x4_state_extract_bytes_asm_pre_main
 
     // Load even/odd halves of one lane from state (post-increment rSE/rSO by 16)
     vldrw.u32 qd0, [rSE], #16
@@ -264,14 +264,14 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_extract_bytes_asm)
 
     subs    length, length, nB
     cmp     length, #0
-    beq     keccak_f1600_x4_state_extract_bytes_asm_exit
+    beq     mlk_keccak_f1600_x4_state_extract_bytes_asm_exit
 
     // Build qP from updated scalar pointers
     vmov    qP[2], qP[0],  dp0, dp2
     vmov    qP[3], qP[1],  dp1, dp3
-    b       keccak_f1600_x4_state_extract_bytes_asm_main_body
+    b       mlk_keccak_f1600_x4_state_extract_bytes_asm_main_body
 
-keccak_f1600_x4_state_extract_bytes_asm_pre_main:
+mlk_keccak_f1600_x4_state_extract_bytes_asm_pre_main:
     vmov    qP[2], qP[0],  dp0, dp2
     vmov    qP[3], qP[1],  dp1, dp3
     mov     tmp, #4
@@ -280,10 +280,10 @@ keccak_f1600_x4_state_extract_bytes_asm_pre_main:
     // -----------------------------------------------------------------------
     // MAIN: process full 8-byte lanes
     // -----------------------------------------------------------------------
-keccak_f1600_x4_state_extract_bytes_asm_main_body:
+mlk_keccak_f1600_x4_state_extract_bytes_asm_main_body:
     lsr     lr, length, #3
-    wls     lr, lr, keccak_f1600_x4_state_extract_bytes_asm_main_loop_end
-keccak_f1600_x4_state_extract_bytes_asm_main_loop_start:
+    wls     lr, lr, mlk_keccak_f1600_x4_state_extract_bytes_asm_main_loop_end
+mlk_keccak_f1600_x4_state_extract_bytes_asm_main_loop_start:
     vldrw.u32 qd0, [rSE], #16
     vldrw.u32 qd1, [rSO], #16
 
@@ -294,14 +294,14 @@ keccak_f1600_x4_state_extract_bytes_asm_main_loop_start:
     vstrw.u32   qd0, [qP, #4]!
     vstrw.u32   qd1, [qP, #4]!
 
-    le      lr, keccak_f1600_x4_state_extract_bytes_asm_main_loop_start
-keccak_f1600_x4_state_extract_bytes_asm_main_loop_end:
+    le      lr, mlk_keccak_f1600_x4_state_extract_bytes_asm_main_loop_start
+mlk_keccak_f1600_x4_state_extract_bytes_asm_main_loop_end:
 
     // -----------------------------------------------------------------------
     // TAIL: extract <8 remaining bytes at lane offset 0
     // -----------------------------------------------------------------------
     ands    length, length, #7
-    beq     keccak_f1600_x4_state_extract_bytes_asm_exit
+    beq     mlk_keccak_f1600_x4_state_extract_bytes_asm_exit
 
     // Recover scalar pointers from qP
     mov     tmp, #4
@@ -326,7 +326,7 @@ keccak_f1600_x4_state_extract_bytes_asm_main_loop_end:
     vstrbt.u8 qd2, [dp2], #4
     vstrbt.u8 qd3, [dp3], #4
 
-keccak_f1600_x4_state_extract_bytes_asm_exit:
+mlk_keccak_f1600_x4_state_extract_bytes_asm_exit:
     vpop    {d8-d15}
     pop     {r4-r12, pc}
     .unreq state

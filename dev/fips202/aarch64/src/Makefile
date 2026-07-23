@@ -16,8 +16,8 @@ keccak_f1600_x1_scalar_aarch64_asm.S: ../../aarch64_symbolic/keccak_f1600_x1_sca
 	   -c constraints.stalls_first_attempt=64 \
 	   -c constraints.allow_spills \
 	   -c constraints.minimize_spills \
-           -s keccak_f1600_x1_scalar_loop \
-           -e keccak_f1600_x1_scalar_end_loop \
+           -s mlk_keccak_f1600_x1_scalar_loop \
+           -e mlk_keccak_f1600_x1_scalar_end_loop \
 	   -c constraints.functional_only \
 	   -c objective_lower_bound=24
 
@@ -30,8 +30,8 @@ keccak_f1600_x1_scalar_aarch64_asm.S: ../../aarch64_symbolic/keccak_f1600_x1_sca
 	   -c constraints.stalls_first_attempt=64 \
 	   -c constraints.allow_spills \
 	   -c constraints.minimize_spills \
-           -s keccak_f1600_x1_scalar_initial_start \
-           -e keccak_f1600_x1_scalar_loop \
+           -s mlk_keccak_f1600_x1_scalar_initial_start \
+           -e mlk_keccak_f1600_x1_scalar_loop \
 	   -c constraints.functional_only \
 	   -c objective_lower_bound=24
 
@@ -49,8 +49,8 @@ keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S: ../../aarch64_symbolic/keccak_f
 	   -c split_heuristic_estimate_performance=False \
 	   -c absorb_spills=False \
            -c outputs="[hint_STACK_OFFSET_COUNT]" \
-           -s keccak_f1600_x4_v8a_scalar_hybrid_initial \
-           -e keccak_f1600_x4_v8a_scalar_hybrid_loop
+           -s mlk_keccak_f1600_x4_v8a_scalar_hybrid_initial \
+           -e mlk_keccak_f1600_x4_v8a_scalar_hybrid_loop
 
 	slothy-cli Arm_AArch64 Arm_Cortex_A55 \
 	   $@ -o $@                           \
@@ -65,8 +65,8 @@ keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S: ../../aarch64_symbolic/keccak_f
 	   -c split_heuristic_estimate_performance=False \
            -c outputs="[hint_STACK_OFFSET_COUNT]" \
 	   -c absorb_spills=False \
-           -s keccak_f1600_x4_v8a_scalar_hybrid_loop \
-           -e keccak_f1600_x4_v8a_scalar_hybrid_loop_end
+           -s mlk_keccak_f1600_x4_v8a_scalar_hybrid_loop \
+           -e mlk_keccak_f1600_x4_v8a_scalar_hybrid_loop_end
 
 keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S: ../../aarch64_symbolic/keccak_f1600_x4_v8a_v84a_scalar_hybrid_clean.S
 	slothy-cli Arm_AArch64 Arm_Cortex_A55 \
@@ -82,8 +82,8 @@ keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S: ../../aarch64_symbolic/kec
 	   -c split_heuristic_estimate_performance=False \
 	   -c absorb_spills=False \
            -c outputs="[hint_STACK_OFFSET_COUNT]" \
-           -s keccak_f1600_x4_v8a_v84a_scalar_hybrid_initial \
-           -e keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop
+           -s mlk_keccak_f1600_x4_v8a_v84a_scalar_hybrid_initial \
+           -e mlk_keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop
 
 	slothy-cli Arm_AArch64 Arm_Cortex_A55 \
 	   $@ -o $@                           \
@@ -98,8 +98,8 @@ keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S: ../../aarch64_symbolic/kec
 	   -c split_heuristic_estimate_performance=False \
            -c outputs="[hint_STACK_OFFSET_COUNT]" \
 	   -c absorb_spills=False \
-           -s keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop \
-           -e keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop_end
+           -s mlk_keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop \
+           -e mlk_keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop_end
 
 ALL=keccak_f1600_x1_scalar_aarch64_asm.S                \
   keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S       \

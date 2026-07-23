@@ -99,13 +99,13 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_extract_bytes_asm)
         ldr.w r10, [sp, #0x6c]
         ldr r6, [sp, #0x70]
         cmp r6, #0x0
-        beq.w Lkeccak_f1600_x4_state_extract_bytes_asm_exit @ imm = #0x2ea
+        beq.w Lmlk_keccak_f1600_x4_state_extract_bytes_asm_exit @ imm = #0x2ea
         and r5, r10, #0x7
         bic r9, r10, #0x7
         add.w r8, r0, r9, lsl #1
         add.w r7, r8, #0x190
         cmp r5, #0x0
-        beq.w Lkeccak_f1600_x4_state_extract_bytes_asm_pre_main @ imm = #0x112
+        beq.w Lmlk_keccak_f1600_x4_state_extract_bytes_asm_pre_main @ imm = #0x112
         vldrw.u32 q0, [r8], #16
         vldrw.u32 q1, [r7], #16
         vrev32.16 q2, q0
@@ -175,22 +175,22 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_extract_bytes_asm)
         vstrbt.8 q3, [r4], #4
         subs.w r6, r6, lr
         cmp r6, #0x0
-        beq.w Lkeccak_f1600_x4_state_extract_bytes_asm_exit @ imm = #0x1cc
+        beq.w Lmlk_keccak_f1600_x4_state_extract_bytes_asm_exit @ imm = #0x1cc
         vmov q7[2], q7[0], r1, r3
         vmov q7[3], q7[1], r2, r4
-        b Lkeccak_f1600_x4_state_extract_bytes_asm_main_body @ imm = #0xe
+        b Lmlk_keccak_f1600_x4_state_extract_bytes_asm_main_body @ imm = #0xe
 
-Lkeccak_f1600_x4_state_extract_bytes_asm_pre_main:
+Lmlk_keccak_f1600_x4_state_extract_bytes_asm_pre_main:
         vmov q7[2], q7[0], r1, r3
         vmov q7[3], q7[1], r2, r4
         mov.w r12, #0x4
         vsub.i32 q7, q7, r12
 
-Lkeccak_f1600_x4_state_extract_bytes_asm_main_body:
+Lmlk_keccak_f1600_x4_state_extract_bytes_asm_main_body:
         lsr.w lr, r6, #0x3
-        wls lr, lr, Lkeccak_f1600_x4_state_extract_bytes_asm_main_loop_end @ imm = #0xb4
+        wls lr, lr, Lmlk_keccak_f1600_x4_state_extract_bytes_asm_main_loop_end @ imm = #0xb4
 
-Lkeccak_f1600_x4_state_extract_bytes_asm_main_loop_start:
+Lmlk_keccak_f1600_x4_state_extract_bytes_asm_main_loop_start:
         vldrw.u32 q0, [r8], #16
         vldrw.u32 q1, [r7], #16
         vrev32.16 q2, q0
@@ -235,11 +235,11 @@ Lkeccak_f1600_x4_state_extract_bytes_asm_main_loop_start:
         vorr q1, q1, q3
         vstrw.32 q0, [q7, #4]!
         vstrw.32 q1, [q7, #4]!
-        le lr, Lkeccak_f1600_x4_state_extract_bytes_asm_main_loop_start @ imm = #-0xb4
+        le lr, Lmlk_keccak_f1600_x4_state_extract_bytes_asm_main_loop_start @ imm = #-0xb4
 
-Lkeccak_f1600_x4_state_extract_bytes_asm_main_loop_end:
+Lmlk_keccak_f1600_x4_state_extract_bytes_asm_main_loop_end:
         ands r6, r6, #0x7
-        beq Lkeccak_f1600_x4_state_extract_bytes_asm_exit @ imm = #0xee
+        beq Lmlk_keccak_f1600_x4_state_extract_bytes_asm_exit @ imm = #0xee
         mov.w r12, #0x4
         vadd.i32 q7, q7, r12
         vmov r1, r3, q7[2], q7[0]
@@ -301,7 +301,7 @@ Lkeccak_f1600_x4_state_extract_bytes_asm_main_loop_end:
         vstrbt.8 q2, [r3], #4
         vstrbt.8 q3, [r4], #4
 
-Lkeccak_f1600_x4_state_extract_bytes_asm_exit:
+Lmlk_keccak_f1600_x4_state_extract_bytes_asm_exit:
         vpop {d8, d9, d10, d11, d12, d13, d14, d15}
         .cfi_restore d8
         .cfi_restore d9
