@@ -74,7 +74,7 @@ mlk_rej_uniform_avx2_asm:
         .cfi_adjust_cfa_offset 0x210
         xorl %eax, %eax
         testq %rdx, %rdx
-        je Lrej_uniform_asm_end
+        je Lmlk_rej_uniform_asm_end
         movabsq $0xd010d010d010d01, %rax # imm = 0xD010D010D010D01
         movq %rax, %xmm0
         pinsrq $0x1, %rax, %xmm0
@@ -89,7 +89,7 @@ mlk_rej_uniform_avx2_asm:
         movq $0x0, %r8
         movq $0x5555, %r9            # imm = 0x5555
 
-Lrej_uniform_asm_loop_start:
+Lmlk_rej_uniform_asm_loop_start:
         movq (%rsi,%r8), %xmm2
         pinsrd $0x2, 0x8(%rsi,%r8), %xmm2
         pshufb %xmm4, %xmm2
@@ -109,12 +109,12 @@ Lrej_uniform_asm_loop_start:
         popcntq %r11, %r11
         addq %r11, %rax
         cmpq $0x100, %rax            # imm = 0x100
-        jae Lrej_uniform_asm_final_copy
+        jae Lmlk_rej_uniform_asm_final_copy
         addq $0xc, %r8
         cmpq %r8, %rdx
-        ja Lrej_uniform_asm_loop_start
+        ja Lmlk_rej_uniform_asm_loop_start
 
-Lrej_uniform_asm_final_copy:
+Lmlk_rej_uniform_asm_final_copy:
         movq $0x100, %rcx            # imm = 0x100
         cmpq $0x100, %rax            # imm = 0x100
         cmovaq %rcx, %rax
@@ -123,7 +123,7 @@ Lrej_uniform_asm_final_copy:
         shlq %rcx
         rep  movsb (%rsi), %es:(%rdi)
 
-Lrej_uniform_asm_end:
+Lmlk_rej_uniform_asm_end:
         addq $0x210, %rsp            # imm = 0x210
         .cfi_adjust_cfa_offset -0x210
         retq

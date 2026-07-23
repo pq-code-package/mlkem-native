@@ -159,7 +159,7 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm)
         uzp2 v19.8h, v11.8h, v4.8h
         sub x13, x13, #0x2
 
-Lpolyvec_basemul_acc_montgomery_cached_k2_loop_start:
+Lmlk_polyvec_basemul_acc_montgomery_cached_k2_loop_start:
         smlal v18.4s, v16.4h, v17.4h
         ldr q7, [x4], #0x20
         ldr q10, [x2, #0x10]
@@ -209,7 +209,7 @@ Lpolyvec_basemul_acc_montgomery_cached_k2_loop_start:
         smull2 v23.4s, v1.8h, v24.8h
         smull v26.4s, v1.4h, v24.4h
         subs x13, x13, #0x1
-        cbnz x13, Lpolyvec_basemul_acc_montgomery_cached_k2_loop_start
+        cbnz x13, Lmlk_polyvec_basemul_acc_montgomery_cached_k2_loop_start
         smlal v26.4s, v6.4h, v20.4h
         smlal2 v23.4s, v6.8h, v20.8h
         smlal v26.4s, v16.4h, v30.4h

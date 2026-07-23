@@ -357,7 +357,7 @@ MLK_ASM_FN_SYMBOL(ntt_aarch64_asm)
         // mul v23.8H, v20.8H, v0.H[2]           // ..................................................................*..
 
         sub count, count, #2
-ntt_layer123_start:
+mlk_ntt_layer123_start:
                                                 // Instructions:    76
                                                 // Expected cycles: 72
                                                 // Expected IPC:    1.06
@@ -529,7 +529,7 @@ ntt_layer123_start:
         // str q15, [x0, #(-16 + 7*(512/8))]          // .....................................~...........................'...........................................~...........................'...........................................l
 
         sub count, count, 1
-        cbnz count, ntt_layer123_start
+        cbnz count, mlk_ntt_layer123_start
                                                 // Instructions:    93
                                                 // Expected cycles: 84
                                                 // Expected IPC:    1.11
@@ -910,7 +910,7 @@ ntt_layer123_start:
         // trn1 v28.4S, v6.4S, v12.4S            // .............................................................*.......
 
         sub count, count, #2
-ntt_layer4567_start:
+mlk_ntt_layer4567_start:
                                                 // Instructions:    71
                                                 // Expected cycles: 48
                                                 // Expected IPC:    1.48
@@ -1072,7 +1072,7 @@ ntt_layer4567_start:
         // str q11, [x0, #(-16*1)]                    // ......................................~.......'.......................................~.......'.......................................l
 
         sub count, count, 1
-        cbnz count, ntt_layer4567_start
+        cbnz count, mlk_ntt_layer4567_start
                                               // Instructions:    66
                                               // Expected cycles: 49
                                               // Expected IPC:    1.35

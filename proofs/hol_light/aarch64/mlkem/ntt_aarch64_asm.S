@@ -150,7 +150,7 @@ mlk_ntt_aarch64_asm:
         mul v4.8h, v5.8h, v1.h[0]
         sub x4, x4, #0x2
 
-Lntt_layer123_start:
+Lmlk_ntt_layer123_start:
         mls v23.8h, v15.8h, v7.h[0]
         ldr q6, [x0, #0x190]
         ldr q15, [x0, #0x90]
@@ -228,7 +228,7 @@ Lntt_layer123_start:
         sub v13.8h, v13.8h, v23.8h
         mul v23.8h, v20.8h, v0.h[2]
         sub x4, x4, #0x1
-        cbnz x4, Lntt_layer123_start
+        cbnz x4, Lmlk_ntt_layer123_start
         sqrdmulh v3.8h, v5.8h, v1.h[1]
         mls v23.8h, v15.8h, v7.h[0]
         ldr q5, [x0, #0x190]
@@ -402,7 +402,7 @@ Lntt_layer123_start:
         mls v23.8h, v16.8h, v7.h[0]
         sub x4, x4, #0x2
 
-Lntt_layer4567_start:
+Lmlk_ntt_layer4567_start:
         ldr q19, [x2, #0x50]
         sub v31.8h, v30.8h, v23.8h
         mls v0.8h, v29.8h, v7.h[0]
@@ -475,7 +475,7 @@ Lntt_layer4567_start:
         mul v0.8h, v16.8h, v1.8h
         trn1 v28.4s, v6.4s, v12.4s
         sub x4, x4, #0x1
-        cbnz x4, Lntt_layer4567_start
+        cbnz x4, Lmlk_ntt_layer4567_start
         add v22.8h, v11.8h, v8.8h
         mul v27.8h, v27.8h, v4.h[2]
         trn2 v17.4s, v6.4s, v12.4s

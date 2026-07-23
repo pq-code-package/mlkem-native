@@ -60,7 +60,7 @@ MLK_ASM_FN_SYMBOL(poly_tomont_aarch64_asm)
         mls v18.8h, v26.8h, v4.h[0]
         sub x1, x1, #0x1
 
-Lpoly_tomont_loop:
+Lmlk_poly_tomont_loop:
         ldr q19, [x0, #0x10]
         mul v26.8h, v16.8h, v2.8h
         ldr q23, [x0, #0x20]
@@ -82,7 +82,7 @@ Lpoly_tomont_loop:
         mls v18.8h, v24.8h, v4.h[0]
         stur q26, [x0, #-0x40]
         sub x1, x1, #0x1
-        cbnz x1, Lpoly_tomont_loop
+        cbnz x1, Lmlk_poly_tomont_loop
         mul v16.8h, v16.8h, v2.8h
         stur q18, [x0, #-0x20]
         mls v16.8h, v29.8h, v4.h[0]
