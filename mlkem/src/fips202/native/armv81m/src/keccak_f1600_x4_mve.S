@@ -114,9 +114,9 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_mve_asm)
         vldrw.u32 q0, [r3]
         vldrw.u32 q1, [r2]
         vldrw.u32 q2, [r2, #32]
-        wls lr, lr, Lkeccak_f1600_x4_mve_asm_roundend @ imm = #0x8c0
+        wls lr, lr, Lmlk_keccak_f1600_x4_mve_asm_roundend @ imm = #0x8c0
 
-Lkeccak_f1600_x4_mve_asm_roundstart:
+Lmlk_keccak_f1600_x4_mve_asm_roundstart:
         vldrw.u32 q6, [r2, #112]
         veor q7, q6, q2
         vldrw.u32 q2, [r2, #80]
@@ -677,10 +677,10 @@ Lkeccak_f1600_x4_mve_asm_roundstart:
         veor q0, q4, q6
         vstrw.32 q0, [r5]
 
-Lkeccak_f1600_x4_mve_asm_roundend_pre:
-        le lr, Lkeccak_f1600_x4_mve_asm_roundstart @ imm = #-0x8c0
+Lmlk_keccak_f1600_x4_mve_asm_roundend_pre:
+        le lr, Lmlk_keccak_f1600_x4_mve_asm_roundstart @ imm = #-0x8c0
 
-Lkeccak_f1600_x4_mve_asm_roundend:
+Lmlk_keccak_f1600_x4_mve_asm_roundend:
         add sp, #0x80
         .cfi_adjust_cfa_offset -0x80
         vpop {d8, d9, d10, d11, d12, d13, d14, d15}

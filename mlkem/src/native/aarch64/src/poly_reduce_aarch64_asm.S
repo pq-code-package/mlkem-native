@@ -67,7 +67,7 @@ MLK_ASM_FN_SYMBOL(poly_reduce_aarch64_asm)
         and v31.16b, v3.16b, v31.16b
         sub x1, x1, #0x2
 
-Lpoly_reduce_loop_start:
+Lmlk_poly_reduce_loop_start:
         add v21.8h, v18.8h, v21.8h
         ldur q18, [x0, #-0x20]
         add v25.8h, v0.8h, v31.8h
@@ -101,7 +101,7 @@ Lpoly_reduce_loop_start:
         and v31.16b, v3.16b, v20.16b
         sqdmulh v2.8h, v26.8h, v4.h[0]
         subs x1, x1, #0x1
-        cbnz x1, Lpoly_reduce_loop_start
+        cbnz x1, Lmlk_poly_reduce_loop_start
         add v28.8h, v0.8h, v31.8h
         ldur q29, [x0, #-0x10]
         add v21.8h, v18.8h, v21.8h

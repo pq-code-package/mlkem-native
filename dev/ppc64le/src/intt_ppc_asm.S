@@ -789,13 +789,13 @@ MLK_ASM_FN_SYMBOL(intt_ppc_asm)
         mtctr   8
 
         xxlor   32+V_NMKQ, VS_NMKQ_STASH, VS_NMKQ_STASH      /* V_NMKQ = -Q */
-intt_ppc_asm_Loopf:
+mlk_intt_ppc_asm_Loopf:
         Reload_4coeffs
         barrett_fqmul_4x V_NINV, V_NINV, V_NINV, V_NINV, V_NINV_TW, V_NINV_TW, V_NINV_TW, V_NINV_TW, 6, 7, 8, 9
         Reload_4coeffs
         barrett_fqmul_4x V_NINV, V_NINV, V_NINV, V_NINV, V_NINV_TW, V_NINV_TW, V_NINV_TW, V_NINV_TW, 13, 18, 23, 28
         MWrite_8X 32+6, 32+7, 32+8, 32+9, 32+13, 32+18, 32+23, 32+28
-        bdnz    intt_ppc_asm_Loopf
+        bdnz    mlk_intt_ppc_asm_Loopf
 
         addi    rinp, rinp, -512
 
