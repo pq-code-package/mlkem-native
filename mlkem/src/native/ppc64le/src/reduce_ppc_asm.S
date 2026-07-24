@@ -40,21 +40,31 @@
 .global MLK_ASM_NAMESPACE(reduce_ppc_asm)
 MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
 
+        .cfi_startproc
         stdu 1, -224(1)
+        .cfi_def_cfa 1, 224
         mflr 0
         std 14, 96(1)
+        .cfi_offset 14, -128
         std 15, 104(1)
+        .cfi_offset 15, -120
         std 16, 112(1)
+        .cfi_offset 16, -112
         li 6, 128
         li 7, 144
         li 8, 160
         li 9, 176
         li 10, 192
         stxvd2x 52, 6, 1
+        .cfi_offset 1144, -96
         stxvd2x 53, 7, 1
+        .cfi_offset 1145, -80
         stxvd2x 54, 8, 1
+        .cfi_offset 1146, -64
         stxvd2x 55, 9, 1
+        .cfi_offset 1147, -48
         stxvd2x 56, 10, 1
+        .cfi_offset 1148, -32
         vxor 7, 7, 7
         li 6, 16
         li 7, 32
@@ -705,21 +715,31 @@ MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
         stxvd2x 33, 8, 3
         stxvd2x 32, 9, 3
         ld 14, 96(1)
+        .cfi_restore 14
         ld 15, 104(1)
+        .cfi_restore 15
         ld 16, 112(1)
+        .cfi_restore 16
         li 6, 128
         li 7, 144
         li 8, 160
         li 9, 176
         li 10, 192
         lxvd2x 52, 6, 1
+        .cfi_restore 1144
         lxvd2x 53, 7, 1
+        .cfi_restore 1145
         lxvd2x 54, 8, 1
+        .cfi_restore 1146
         lxvd2x 55, 9, 1
+        .cfi_restore 1147
         lxvd2x 56, 10, 1
+        .cfi_restore 1148
         mtlr 0
         addi 1, 1, 224
+        .cfi_def_cfa 1, 0
         blr
+        .cfi_endproc
 
 MLK_ASM_FN_SIZE(reduce_ppc_asm)
 
