@@ -338,31 +338,31 @@ static int bench(void)
 #endif
 #endif /* MLKEM_K == 4 */
 
-#if defined(MLK_USE_FIPS202_X1_NATIVE)
+#if defined(MLK_USE_NATIVE_FIPS202_X1)
   BENCH_NATIVE_OK("mlk_keccak_f1600_x1_native",
                   mlk_keccak_f1600_x1_native(data0));
 #endif
 
-#if defined(MLK_USE_FIPS202_X4_NATIVE)
+#if defined(MLK_USE_NATIVE_FIPS202_X4)
   BENCH_NATIVE_OK("mlk_keccak_f1600_x4_native",
                   mlk_keccak_f1600_x4_native(data0));
 #endif
 
-#if defined(MLK_USE_FIPS202_X4_XOR_BYTES_NATIVE)
+#if defined(MLK_USE_NATIVE_FIPS202_X4_XOR_BYTES)
   BENCH_NATIVE_OK(
       "mlk_keccakf1600_xor_bytes_x4_native",
       mlk_keccakf1600_xor_bytes_x4_native(
           data0, (uint8_t *)data1, (uint8_t *)data2, (uint8_t *)data3,
           (uint8_t *)data4, 0, 25 * sizeof(uint64_t)));
-#endif /* MLK_USE_FIPS202_X4_XOR_BYTES_NATIVE */
+#endif /* MLK_USE_NATIVE_FIPS202_X4_XOR_BYTES */
 
-#if defined(MLK_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE)
+#if defined(MLK_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES)
   BENCH_NATIVE_OK(
       "mlk_keccakf1600_extract_bytes_x4_native",
       mlk_keccakf1600_extract_bytes_x4_native(
           data0, (uint8_t *)data1, (uint8_t *)data2, (uint8_t *)data3,
           (uint8_t *)data4, 0, 25 * sizeof(uint64_t)));
-#endif /* MLK_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE */
+#endif /* MLK_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES */
 
   return 0;
 }
