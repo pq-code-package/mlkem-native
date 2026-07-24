@@ -66,6 +66,39 @@ will compile and run functionality tests. Similarly,
 
 will compile and run benchmarks, using PERF for cycle counting (`-c PERF`) and running as root (`-r`).
 
+#### Cross-compilation
+
+To cross-compile and run the tests for another architecture under QEMU, use the `--cross {ARCH}`
+flag. It sets sensible defaults for `--cross-prefix`, `--cflags`, `--ldflags` and `--exec-wrapper`
+that work out of the box in the corresponding `nix` shell (`nix develop .#cross-{ARCH}`), which
+provides the matching cross toolchain and QEMU and which you have to enter yourself:
+
+```bash
+# On any host, cross-compile and run AArch64 tests under QEMU:
+nix develop .#cross-aarch64 --command ./scripts/tests func --cross aarch64 -v
+```
+
+Each target pairs with the `nix develop .#cross-{ARCH}` shell of the same name and sets the
+following defaults:
+
+| `--cross`    | `--cross-prefix`                | `--cflags`                       | `--ldflags` | `--exec-wrapper`                       |
+|--------------|---------------------------------|----------------------------------|-------------|----------------------------------------|
+| `x86_64`     | `x86_64-unknown-linux-gnu-`     | `-DMLK_FORCE_X86_64`             |             | `qemu-x86_64`                          |
+| `aarch64`    | `aarch64-unknown-linux-gnu-`    | `-DMLK_FORCE_AARCH64`            |             | `qemu-aarch64`                         |
+| `aarch64_be` | `aarch64_be-none-linux-gnu-`    | `-static -DMLK_FORCE_AARCH64_EB` | `-static`   | `qemu-aarch64_be`                      |
+| `ppc64le`    | `powerpc64le-unknown-linux-gnu-`| `-DMLK_FORCE_PPC64LE -mcpu=power8`|            | `qemu-ppc64le -cpu power8`             |
+| `riscv64`    | `riscv64-unknown-linux-gnu-`    | `-DMLK_FORCE_RISCV64`            |             | `qemu-riscv64 -cpu rv64,v=true,vlen=128`|
+| `riscv32`    | `riscv32-unknown-linux-gnu-`    | `-DMLK_FORCE_RISCV32`            |             | `qemu-riscv32`                         |
+
+A few notes:
+
+* Explicit flags override the preset. For example, to use a different RISC-V vector length, pass
+  `-w "qemu-riscv64 -cpu rv64,v=true,vlen=256"`; to build PPC64LE for POWER7 instead of POWER8, pass
+  `--cflags="-mcpu=power7"`.
+* Architecture ISA feature flags (`-mavx2`, `-march=armv8.4-a+sha3`, `-march=rv64gcv`) are added
+  automatically by the Makefile in the default `--auto` mode, so keep `--auto` on for optimized
+  builds.
+
 For detailed information on how to use the script, please refer to
 `./scripts/tests --help`.
 
