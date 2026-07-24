@@ -111,6 +111,38 @@ def get_binary(level):
     return f"{basedir}/wycheproof_mlkem{level}"
 
 
+def detect_supported_modes():
+    """Run wycheproof_mlkem512 --info to detect which modes are supported."""
+    wycheproof_bin = "./test/build/mlkem512/bin/wycheproof_mlkem512"
+    wycheproof_call = exec_prefix + [wycheproof_bin, "--info"]
+    try:
+        result = subprocess.run(wycheproof_call, encoding="utf-8", capture_output=True)
+        if result.returncode != 0:
+            err(
+                f"Warning: {wycheproof_call} failed (rc={result.returncode}), assuming all modes supported"
+            )
+            return {"keygen_seed", "encaps", "decaps"}
+        modes = set()
+        for line in result.stdout.splitlines():
+            line = line.strip()
+            if line in ("keygen_seed", "encaps", "decaps"):
+                modes.add(line)
+        return modes
+    except FileNotFoundError:
+        err(f"Warning: {wycheproof_bin} not found, assuming all modes supported")
+        return {"keygen_seed", "encaps", "decaps"}
+
+
+# File-type → set of modes the binary must support to run those tests.
+FILE_REQUIRED_MODES = {
+    "keygen_seed_test": {"keygen_seed"},
+    "encaps_test": {"encaps"},
+    "semi_expanded_decaps_test": {"decaps"},
+    # Combined test drives keygen (to derive dk from seed) then decaps.
+    "_test": {"keygen_seed", "decaps"},
+}
+
+
 def run_binary(args_list):
     result = subprocess.run(
         exec_prefix + args_list, encoding="utf-8", capture_output=True
@@ -270,11 +302,28 @@ def run_combined_test(data_file):
     info(f"  {count} combined tests passed")
 
 
-def run_all(data_dir):
+def file_required_modes(filename):
+    """Which API modes must be available to run tests from this file."""
+    if "keygen_seed_test" in filename:
+        return FILE_REQUIRED_MODES["keygen_seed_test"]
+    if "encaps_test" in filename:
+        return FILE_REQUIRED_MODES["encaps_test"]
+    if "semi_expanded_decaps_test" in filename:
+        return FILE_REQUIRED_MODES["semi_expanded_decaps_test"]
+    if filename.endswith("_test.json"):
+        return FILE_REQUIRED_MODES["_test"]
+    return set()
+
+
+def run_all(data_dir, supported_modes):
     """Run all Wycheproof test vector files."""
     data_dir = Path(data_dir)
     for filename in WYCHEPROOF_FILES:
         filepath = data_dir / filename
+        required = file_required_modes(filename)
+        if not required.issubset(supported_modes):
+            info(f"Skipping {filename} (modes not supported in this build)")
+            continue
         if "keygen_seed_test" in filename:
             run_keygen_seed_test(filepath)
         elif "encaps_test" in filename:
@@ -300,9 +349,17 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
+supported_modes = detect_supported_modes()
+info(f"Auto-detected supported modes: {sorted(supported_modes)}")
+
 if args.file:
     # Run a single file
     filename = os.path.basename(args.file)
+    required = file_required_modes(filename)
+    if not required.issubset(supported_modes):
+        info(f"Skipping {filename} (modes not supported in this build)")
+        info("ALL GOOD!")
+        sys.exit(0)
     if "keygen_seed_test" in filename:
         run_keygen_seed_test(args.file)
     elif "encaps_test" in filename:
@@ -321,4 +378,4 @@ else:
     if not download_wycheproof_files(data_dir):
         err("Failed to download Wycheproof test files")
         sys.exit(1)
-    run_all(data_dir)
+    run_all(data_dir, supported_modes)

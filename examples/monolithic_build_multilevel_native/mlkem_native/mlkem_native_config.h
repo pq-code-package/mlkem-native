@@ -121,6 +121,42 @@
 #define MLK_CONFIG_EXTERNAL_API_QUALIFIER static
 
 /**
+ * MLK_CONFIG_NO_KEYPAIR_API
+ *
+ * By default, mlkem-native includes support for generating key pairs.
+ * If you don't need this, set MLK_CONFIG_NO_KEYPAIR_API to exclude
+ * crypto_kem_keypair and crypto_kem_keypair_derand, and all internal
+ * APIs only needed by those functions.
+ */
+/* #define MLK_CONFIG_NO_KEYPAIR_API */
+
+/**
+ * MLK_CONFIG_NO_ENCAPS_API
+ *
+ * By default, mlkem-native includes support for encapsulation. If you
+ * don't need this, set MLK_CONFIG_NO_ENCAPS_API to exclude
+ * crypto_kem_enc, crypto_kem_enc_derand, crypto_kem_check_pk, and
+ * all internal APIs only needed by those functions.
+ *
+ * @note Setting this option is incompatible with MLK_CONFIG_KEYGEN_PCT
+ *       as the current PCT implementation requires crypto_kem_enc().
+ */
+/* #define MLK_CONFIG_NO_ENCAPS_API */
+
+/**
+ * MLK_CONFIG_NO_DECAPS_API
+ *
+ * By default, mlkem-native includes support for decapsulation. If you
+ * don't need this, set MLK_CONFIG_NO_DECAPS_API to exclude
+ * crypto_kem_dec, crypto_kem_check_sk, and all internal APIs only
+ * needed by those functions.
+ *
+ * @note Setting this option is incompatible with MLK_CONFIG_KEYGEN_PCT
+ *       as the current PCT implementation requires crypto_kem_dec().
+ */
+/* #define MLK_CONFIG_NO_DECAPS_API */
+
+/**
  * MLK_CONFIG_NO_RANDOMIZED_API
  *
  * If this option is set, mlkem-native will be built without the randomized

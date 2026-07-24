@@ -28,7 +28,10 @@
 */
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64) &&  !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_AARCH64) && \
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
+    (!defined(MLK_CONFIG_NO_KEYPAIR_API) || \
+     !defined(MLK_CONFIG_NO_ENCAPS_API))
 /* simpasm: header-end */
 
 .macro ld2_wrap a, ptr
@@ -253,4 +256,5 @@ poly_tobytes_loop_start:
         .unreq count
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED && \
+          (!MLK_CONFIG_NO_KEYPAIR_API || !MLK_CONFIG_NO_ENCAPS_API) */

@@ -23,7 +23,8 @@
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_AARCH64) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
+    !defined(MLK_CONFIG_NO_KEYPAIR_API)
 /* simpasm: header-end */
 
 /* Montgomery multiplication, with precomputed Montgomery twist
@@ -103,4 +104,5 @@ poly_tomont_loop:
         .unreq tmp0
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED && \
+          !MLK_CONFIG_NO_KEYPAIR_API */

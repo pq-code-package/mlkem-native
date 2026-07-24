@@ -51,7 +51,10 @@
 */
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64) &&  !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+#if defined(MLK_ARITH_BACKEND_AARCH64) && \
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
+    (!defined(MLK_CONFIG_NO_ENCAPS_API) || \
+     !defined(MLK_CONFIG_NO_DECAPS_API))
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
@@ -624,7 +627,8 @@ Lintt_layer123_start:
 
 MLK_ASM_FN_SIZE(intt_aarch64_asm)
 
-#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED && \
+          (!MLK_CONFIG_NO_ENCAPS_API || !MLK_CONFIG_NO_DECAPS_API) */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits

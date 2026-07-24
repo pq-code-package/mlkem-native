@@ -40,11 +40,19 @@
 /* Declarations for _c functions exposed by MLK_STATIC_TESTABLE= */
 
 void mlk_poly_reduce_c(mlk_poly *r);
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 void mlk_poly_tomont_c(mlk_poly *r);
+#endif
 void mlk_poly_ntt_c(mlk_poly *r);
+#if !defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API)
 void mlk_poly_invntt_tomont_c(mlk_poly *r);
+#endif
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API) || !defined(MLK_CONFIG_NO_ENCAPS_API)
 void mlk_poly_tobytes_c(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a);
+#endif
+#if !defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API)
 void mlk_poly_frombytes_c(mlk_poly *r, const uint8_t a[MLKEM_POLYBYTES]);
+#endif
 void mlk_polyvec_basemul_acc_montgomery_cached_c(
     mlk_poly *r, const mlk_polyvec *a, const mlk_polyvec *b,
     const mlk_polyvec_mulcache *b_cache);
@@ -190,6 +198,8 @@ static void generate_i16_array_single(int16_t *data, size_t len, size_t pos,
   data[pos] = value;
 }
 
+#if defined(MLK_USE_NATIVE_INTT) && \
+    (!defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API))
 static void generate_i16_array_constant(int16_t *data, size_t len,
                                         int16_t value)
 {
@@ -199,6 +209,8 @@ static void generate_i16_array_constant(int16_t *data, size_t len,
     data[i] = value;
   }
 }
+#endif /* MLK_USE_NATIVE_INTT && (!MLK_CONFIG_NO_ENCAPS_API || \
+          !MLK_CONFIG_NO_DECAPS_API) */
 
 /* This does not generate a uniformly random distribution, but it's
  * good enough for our test.
@@ -229,7 +241,9 @@ static void generate_i16_array_ranged(int16_t *data, size_t len, int min_incl,
           MLK_USE_NATIVE_POLY_DECOMPRESS_D10 ||                              \
           MLK_USE_NATIVE_POLY_DECOMPRESS_D11 */
 
-#if defined(MLK_USE_NATIVE_POLY_TOBYTES) ||      \
+#if (defined(MLK_USE_NATIVE_POLY_TOBYTES) &&     \
+     (!defined(MLK_CONFIG_NO_KEYPAIR_API) ||     \
+      !defined(MLK_CONFIG_NO_ENCAPS_API))) ||    \
     defined(MLK_USE_NATIVE_POLY_COMPRESS_D4) ||  \
     defined(MLK_USE_NATIVE_POLY_COMPRESS_D5) ||  \
     defined(MLK_USE_NATIVE_POLY_COMPRESS_D10) || \
@@ -279,7 +293,8 @@ static int compare_u8_arrays(const uint8_t *a, const uint8_t *b, unsigned len,
   }
   return 1;
 }
-#endif /* MLK_USE_NATIVE_POLY_TOBYTES || MLK_USE_NATIVE_POLY_COMPRESS_D4 ||   \
+#endif /* (MLK_USE_NATIVE_POLY_TOBYTES && (!MLK_CONFIG_NO_KEYPAIR_API ||      \
+          !MLK_CONFIG_NO_ENCAPS_API)) || MLK_USE_NATIVE_POLY_COMPRESS_D4 ||   \
           MLK_USE_NATIVE_POLY_COMPRESS_D5 || MLK_USE_NATIVE_POLY_COMPRESS_D10 \
           || MLK_USE_NATIVE_POLY_COMPRESS_D11 */
 
@@ -368,7 +383,7 @@ static int test_native_poly_reduce(void)
 }
 #endif /* MLK_USE_NATIVE_POLY_REDUCE */
 
-#ifdef MLK_USE_NATIVE_POLY_TOMONT
+#if defined(MLK_USE_NATIVE_POLY_TOMONT) && !defined(MLK_CONFIG_NO_KEYPAIR_API)
 static int test_poly_tomont_core(const int16_t *input, const char *test_name)
 {
   int ret = 1;
@@ -422,7 +437,7 @@ static int test_native_poly_tomont(void)
 
   return 0;
 }
-#endif /* MLK_USE_NATIVE_POLY_TOMONT */
+#endif /* MLK_USE_NATIVE_POLY_TOMONT && !MLK_CONFIG_NO_KEYPAIR_API */
 
 #ifdef MLK_USE_NATIVE_NTT
 static int test_ntt_core(const int16_t *input, const char *test_name)
@@ -484,7 +499,8 @@ static int test_native_ntt(void)
 }
 #endif /* MLK_USE_NATIVE_NTT */
 
-#ifdef MLK_USE_NATIVE_INTT
+#if defined(MLK_USE_NATIVE_INTT) && \
+    (!defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API))
 static int test_intt_core(const int16_t *input, const char *test_name)
 {
   int ret = 1;
@@ -569,9 +585,12 @@ static int test_native_intt(void)
 
   return 0;
 }
-#endif /* MLK_USE_NATIVE_INTT */
+#endif /* MLK_USE_NATIVE_INTT && (!MLK_CONFIG_NO_ENCAPS_API || \
+          !MLK_CONFIG_NO_DECAPS_API) */
 
-#ifdef MLK_USE_NATIVE_POLY_TOBYTES
+#if defined(MLK_USE_NATIVE_POLY_TOBYTES) && \
+    (!defined(MLK_CONFIG_NO_KEYPAIR_API) || \
+     !defined(MLK_CONFIG_NO_ENCAPS_API))
 static int test_poly_tobytes_core(const int16_t *input, const char *test_name)
 {
   int ret = 1;
@@ -629,9 +648,11 @@ static int test_native_poly_tobytes(void)
 
   return 0;
 }
-#endif /* MLK_USE_NATIVE_POLY_TOBYTES */
+#endif /* MLK_USE_NATIVE_POLY_TOBYTES && (!MLK_CONFIG_NO_KEYPAIR_API || \
+          !MLK_CONFIG_NO_ENCAPS_API) */
 
-#ifdef MLK_USE_NATIVE_POLY_FROMBYTES
+#if defined(MLK_USE_NATIVE_POLY_FROMBYTES) && \
+    (!defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API))
 static int test_poly_frombytes_core(const uint8_t *input_bytes,
                                     const char *test_name)
 {
@@ -690,7 +711,8 @@ static int test_native_poly_frombytes(void)
 
   return 0;
 }
-#endif /* MLK_USE_NATIVE_POLY_FROMBYTES */
+#endif /* MLK_USE_NATIVE_POLY_FROMBYTES && (!MLK_CONFIG_NO_ENCAPS_API || \
+          !MLK_CONFIG_NO_DECAPS_API) */
 
 #ifdef MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED
 static int test_polyvec_basemul_core(const int16_t *a, const int16_t *b,
@@ -1090,7 +1112,7 @@ static int test_backend_units(void)
   CHECK(test_native_poly_reduce() == 0);
 #endif
 
-#ifdef MLK_USE_NATIVE_POLY_TOMONT
+#if defined(MLK_USE_NATIVE_POLY_TOMONT) && !defined(MLK_CONFIG_NO_KEYPAIR_API)
   CHECK(test_native_poly_tomont() == 0);
 #endif
 
@@ -1098,15 +1120,19 @@ static int test_backend_units(void)
   CHECK(test_native_ntt() == 0);
 #endif
 
-#ifdef MLK_USE_NATIVE_INTT
+#if defined(MLK_USE_NATIVE_INTT) && \
+    (!defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API))
   CHECK(test_native_intt() == 0);
 #endif
 
-#ifdef MLK_USE_NATIVE_POLY_TOBYTES
+#if defined(MLK_USE_NATIVE_POLY_TOBYTES) && \
+    (!defined(MLK_CONFIG_NO_KEYPAIR_API) || \
+     !defined(MLK_CONFIG_NO_ENCAPS_API))
   CHECK(test_native_poly_tobytes() == 0);
 #endif
 
-#ifdef MLK_USE_NATIVE_POLY_FROMBYTES
+#if defined(MLK_USE_NATIVE_POLY_FROMBYTES) && \
+    (!defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API))
   CHECK(test_native_poly_frombytes() == 0);
 #endif
 

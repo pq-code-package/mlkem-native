@@ -7,6 +7,7 @@
  * Wycheproof test driver for ML-KEM.
  *
  * Usage:
+ *   wycheproof_mlkem{lvl} --info
  *   wycheproof_mlkem{lvl} keygen_seed seed=HEX
  *   wycheproof_mlkem{lvl} encaps ek=HEX m=HEX
  *   wycheproof_mlkem{lvl} decaps dk=HEX c=HEX
@@ -20,7 +21,22 @@
 
 #include "../../mlkem/mlkem_native.h"
 
+/* Print supported API modes and exit (used by wycheproof_client.py) */
+static void print_info(void)
+{
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
+  printf("keygen_seed\n");
+#endif
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
+  printf("encaps\n");
+#endif
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
+  printf("decaps\n");
+#endif
+}
 
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API) || \
+    !defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API)
 #define CHECK(x)                                              \
   do                                                          \
   {                                                           \
@@ -99,6 +115,8 @@ static void print_hex(const char *name, const unsigned char *raw, size_t len)
   }
   printf("\n");
 }
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API || !MLK_CONFIG_NO_ENCAPS_API || \
+          !MLK_CONFIG_NO_DECAPS_API */
 
 /* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
 #if defined(main)
@@ -111,6 +129,13 @@ int main(int argc, char *argv[])
     goto usage;
   }
 
+  if (strcmp(argv[1], "--info") == 0)
+  {
+    print_info();
+    return 0;
+  }
+
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
   if (strcmp(argv[1], "keygen_seed") == 0)
   {
     /* keygen_seed seed=HEX (64 bytes = d || z) */
@@ -133,7 +158,10 @@ int main(int argc, char *argv[])
     print_hex("ek", ek, sizeof(ek));
     print_hex("dk", dk, sizeof(dk));
   }
-  else if (strcmp(argv[1], "encaps") == 0)
+  else
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
+      if (strcmp(argv[1], "encaps") == 0)
   {
     /* encaps ek=HEX m=HEX */
     unsigned char ek[CRYPTO_PUBLICKEYBYTES];
@@ -157,7 +185,10 @@ int main(int argc, char *argv[])
     print_hex("c", ct, sizeof(ct));
     print_hex("K", ss, sizeof(ss));
   }
-  else if (strcmp(argv[1], "decaps") == 0)
+  else
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
+#if !defined(MLK_CONFIG_NO_DECAPS_API)
+      if (strcmp(argv[1], "decaps") == 0)
   {
     /* decaps dk=HEX c=HEX */
     unsigned char dk[CRYPTO_SECRETKEYBYTES];
@@ -185,6 +216,7 @@ int main(int argc, char *argv[])
     print_hex("K", ss, sizeof(ss));
   }
   else
+#endif /* !MLK_CONFIG_NO_DECAPS_API */
   {
     goto usage;
   }
@@ -194,6 +226,7 @@ int main(int argc, char *argv[])
 usage:
   fprintf(stderr,
           "Usage:\n"
+          "  wycheproof_mlkem{lvl} --info\n"
           "  wycheproof_mlkem{lvl} keygen_seed seed=HEX\n"
           "  wycheproof_mlkem{lvl} encaps ek=HEX m=HEX\n"
           "  wycheproof_mlkem{lvl} decaps dk=HEX c=HEX\n");
