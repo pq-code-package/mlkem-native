@@ -20,6 +20,16 @@ exec_prefix = os.environ.get("EXEC_WRAPPER", "")
 exec_prefix = exec_prefix.split(" ") if exec_prefix != "" else []
 
 
+def acvp_version_has_tr1(version):
+    """Whether `version` ships the FIPS203-tr1 encapDecap vectors (v1.1.0.43+)."""
+    try:
+        parts = tuple(int(x) for x in version.lstrip("v").split("."))
+    except ValueError:
+        # Non-numeric ref (branch or commit); assume the vectors are present.
+        return True
+    return parts >= (1, 1, 0, 43)
+
+
 def download_acvp_files(version):
     """Download ACVP test files for the specified version if not present."""
     base_url = f"https://raw.githubusercontent.com/usnistgov/ACVP-Server/{version}/gen-val/json-files"
@@ -31,6 +41,13 @@ def download_acvp_files(version):
         "ML-KEM-encapDecap-FIPS203/prompt.json",
         "ML-KEM-encapDecap-FIPS203/expectedResults.json",
     ]
+
+    # The FIPS203-tr1 encapDecap vectors add seed/expanded key-format groups.
+    if acvp_version_has_tr1(version):
+        files_to_download += [
+            "ML-KEM-encapDecap-FIPS203-tr1/prompt.json",
+            "ML-KEM-encapDecap-FIPS203-tr1/expectedResults.json",
+        ]
 
     # Create directory structure
     data_dir = Path(f"test/acvp/.acvp-data/{version}/files")
@@ -140,6 +157,19 @@ def loadDefaultAcvpData(version, supported_functions=None):
             f"{data_dir}/ML-KEM-encapDecap-FIPS203/expectedResults.json",
         ),
     ]
+
+    # FIPS203-tr1 encapDecap vectors (seed/expanded key formats) exist from
+    # v1.1.0.43.
+    if acvp_version_has_tr1(version):
+        acvp_jsons_for_version.append(
+            (
+                "encapDecap",
+                encapDecap_any,
+                f"{data_dir}/ML-KEM-encapDecap-FIPS203-tr1/prompt.json",
+                f"{data_dir}/ML-KEM-encapDecap-FIPS203-tr1/expectedResults.json",
+            )
+        )
+
     acvp_data = []
     for mode, is_supported, prompt, expectedResults in acvp_jsons_for_version:
         if not is_supported:
@@ -195,6 +225,25 @@ def unsupported_function(supported_functions):
         return fn
 
     return should_drop
+
+
+def seed_key_format(tg, tc):
+    # keyFormat 'seed' cases need keyGen to expand the seed into the
+    # decapsulation key.
+    if tg.get("keyFormat") == "seed":
+        return "seed key format requires the keyGen API"
+    return None
+
+
+def keyless_decap_key_check(tg, tc):
+    """should_drop predicate for decapsulationKeyCheck cases carrying no key.
+
+    The v1.1.0.43 sample vectors omit dk for these cases; the check cannot run
+    without a key. They run normally again once a key is present.
+    """
+    if tg.get("function") == "decapsulationKeyCheck" and "dk" not in tc:
+        return "decapsulationKeyCheck without a key"
+    return None
 
 
 def err(msg, **kwargs):
@@ -261,12 +310,18 @@ def run_encapDecap_test(tg, tc):
             results[k] = v
     elif tg["function"] == "decapsulation":
         acvp_bin = get_acvp_binary(tg)
+        # keyFormat 'seed' provides d and z to expand into the key; 'expanded'
+        # (or absent) provides the expanded dk directly.
+        if tg.get("keyFormat") == "seed":
+            key_arg = f"seed={tc['d'] + tc['z']}"
+        else:
+            key_arg = f"dk={tc['dk']}"
         acvp_call = exec_prefix + [
             acvp_bin,
             "encapDecap",
             "VAL",
             "decapsulation",
-            f"dk={tc['dk']}",
+            key_arg,
             f"c={tc['c']}",
         ]
         result = subprocess.run(acvp_call, encoding="utf-8", capture_output=True)
@@ -457,6 +512,18 @@ def test(prompt, expected, output, version, supported_functions=None):
                 f"Unsupported functions: {fns}."
             )
 
+    # Seed key-format cases require keyGen to expand the key; drop them when the
+    # build does not provide it.
+    if supported_functions is not None and "keyGen" not in supported_functions:
+        seed_reasons = filter_test_cases(data, seed_key_format)
+        if seed_reasons:
+            summary = ", ".join(sorted(set(seed_reasons)))
+            info(f"Skipping {len(seed_reasons)} test case(s): {summary}")
+
+    reasons = filter_test_cases(data, keyless_decap_key_check)
+    if reasons:
+        info(f"Skipping {len(reasons)} decapsulationKeyCheck case(s) with no key")
+
     runTest(data, output)
     flush_warnings()
 
@@ -477,8 +544,8 @@ parser.add_argument(
 parser.add_argument(
     "--version",
     "-v",
-    default="v1.1.0.41",
-    help="ACVP test vector version (default: v1.1.0.41)",
+    default="v1.1.0.43",
+    help="ACVP test vector version (default: v1.1.0.43)",
 )
 args = parser.parse_args()
 
