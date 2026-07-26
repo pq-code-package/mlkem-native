@@ -11,7 +11,8 @@ inputs:
     description: 'List of tests to run (space-separated IDs) or "all" for all tests. Available IDs: pct-enabled,
     pct-enabled-broken, custom-alloc-heap, custom-zeroize, native-cap-ON, native-cap-OFF, native-cap-ID_AA64PFR1_EL1,
     native-cap-CPUID_AVX2, no-asm, serial-fips202, custom-randombytes, custom-memcpy, custom-memset, custom-stdlib,
-    nblocks-1, nblocks-2, nblocks-4, keygen-only, encaps-only, decaps-only, keygen-encaps, keygen-decaps, encaps-decaps'
+    nblocks-1, nblocks-2, nblocks-4, keygen-only, encaps-only, decaps-only, keygen-encaps, keygen-decaps, encaps-decaps,
+    no-randomized'
     required: false
     default: 'all'
   opt:
@@ -366,3 +367,23 @@ runs:
         rng_fail: true
         opt: ${{ inputs.opt }}
         examples: true
+    - name: "No randomized API (deterministic only)"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'no-randomized') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        cflags: "-DMLK_CONFIG_NO_RANDOMIZED_API= -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        wycheproof: true
+        stack: true
+        rng_fail: true
+        opt: ${{ inputs.opt }}
+        examples: true
+        # The alloc test's exact high-watermark check assumes the randomized
+        # wrappers (which allocate the coins buffer), so it doesn't match the
+        # deterministic-only allocation profile.
+        alloc: false

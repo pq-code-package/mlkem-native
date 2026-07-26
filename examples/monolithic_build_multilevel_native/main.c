@@ -28,15 +28,25 @@
 
 /* Keygen examples */
 
-#if !defined(MLK_CONFIG_NO_KEYPAIR_API) && \
-    !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 static int example_mlkem512_keygen(void)
 {
   uint8_t pk[MLKEM512_PUBLICKEYBYTES];
   uint8_t sk[MLKEM512_SECRETKEYBYTES];
+  uint8_t coins[2 * MLKEM_SYMBYTES];
 
-  printf("  Generating keypair... ");
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+  printf("  Generating keypair (randomized)... ");
   CHECK(mlkem512_keypair(pk, sk) == 0);
+  CHECK(memcmp(pk, test_vector_pk_512, MLKEM512_PUBLICKEYBYTES) == 0);
+  CHECK(memcmp(sk, test_vector_sk_512, MLKEM512_SECRETKEYBYTES) == 0);
+  printf("DONE\n");
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
+
+  printf("  Generating keypair (deterministic)... ");
+  memcpy(coins, test_vector_d, MLKEM_SYMBYTES);
+  memcpy(coins + MLKEM_SYMBYTES, test_vector_z, MLKEM_SYMBYTES);
+  CHECK(mlkem512_keypair_derand(pk, sk, coins) == 0);
   CHECK(memcmp(pk, test_vector_pk_512, MLKEM512_PUBLICKEYBYTES) == 0);
   CHECK(memcmp(sk, test_vector_sk_512, MLKEM512_SECRETKEYBYTES) == 0);
   printf("DONE\n");
@@ -47,9 +57,20 @@ static int example_mlkem768_keygen(void)
 {
   uint8_t pk[MLKEM768_PUBLICKEYBYTES];
   uint8_t sk[MLKEM768_SECRETKEYBYTES];
+  uint8_t coins[2 * MLKEM_SYMBYTES];
 
-  printf("  Generating keypair... ");
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+  printf("  Generating keypair (randomized)... ");
   CHECK(mlkem768_keypair(pk, sk) == 0);
+  CHECK(memcmp(pk, test_vector_pk_768, MLKEM768_PUBLICKEYBYTES) == 0);
+  CHECK(memcmp(sk, test_vector_sk_768, MLKEM768_SECRETKEYBYTES) == 0);
+  printf("DONE\n");
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
+
+  printf("  Generating keypair (deterministic)... ");
+  memcpy(coins, test_vector_d, MLKEM_SYMBYTES);
+  memcpy(coins + MLKEM_SYMBYTES, test_vector_z, MLKEM_SYMBYTES);
+  CHECK(mlkem768_keypair_derand(pk, sk, coins) == 0);
   CHECK(memcmp(pk, test_vector_pk_768, MLKEM768_PUBLICKEYBYTES) == 0);
   CHECK(memcmp(sk, test_vector_sk_768, MLKEM768_SECRETKEYBYTES) == 0);
   printf("DONE\n");
@@ -60,15 +81,26 @@ static int example_mlkem1024_keygen(void)
 {
   uint8_t pk[MLKEM1024_PUBLICKEYBYTES];
   uint8_t sk[MLKEM1024_SECRETKEYBYTES];
+  uint8_t coins[2 * MLKEM_SYMBYTES];
 
-  printf("  Generating keypair... ");
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+  printf("  Generating keypair (randomized)... ");
   CHECK(mlkem1024_keypair(pk, sk) == 0);
+  CHECK(memcmp(pk, test_vector_pk_1024, MLKEM1024_PUBLICKEYBYTES) == 0);
+  CHECK(memcmp(sk, test_vector_sk_1024, MLKEM1024_SECRETKEYBYTES) == 0);
+  printf("DONE\n");
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
+
+  printf("  Generating keypair (deterministic)... ");
+  memcpy(coins, test_vector_d, MLKEM_SYMBYTES);
+  memcpy(coins + MLKEM_SYMBYTES, test_vector_z, MLKEM_SYMBYTES);
+  CHECK(mlkem1024_keypair_derand(pk, sk, coins) == 0);
   CHECK(memcmp(pk, test_vector_pk_1024, MLKEM1024_PUBLICKEYBYTES) == 0);
   CHECK(memcmp(sk, test_vector_sk_1024, MLKEM1024_SECRETKEYBYTES) == 0);
   printf("DONE\n");
   return 0;
 }
-#else  /* !MLK_CONFIG_NO_KEYPAIR_API && !MLK_CONFIG_NO_RANDOMIZED_API */
+#else  /* !MLK_CONFIG_NO_KEYPAIR_API */
 static int example_mlkem512_keygen(void)
 {
   printf("  Generating keypair... SKIPPED (keygen API disabled)\n");
@@ -84,18 +116,26 @@ static int example_mlkem1024_keygen(void)
   printf("  Generating keypair... SKIPPED (keygen API disabled)\n");
   return 0;
 }
-#endif /* !(!MLK_CONFIG_NO_KEYPAIR_API && !MLK_CONFIG_NO_RANDOMIZED_API) */
+#endif /* MLK_CONFIG_NO_KEYPAIR_API */
 
 /* Encaps examples */
 
-#if !defined(MLK_CONFIG_NO_ENCAPS_API) && !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
 static int example_mlkem512_encaps(void)
 {
   uint8_t ct[MLKEM512_CIPHERTEXTBYTES];
   uint8_t ss[MLKEM512_BYTES];
 
-  printf("  Encaps... ");
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+  printf("  Encaps (randomized)... ");
   CHECK(mlkem512_enc(ct, ss, test_vector_pk_512) == 0);
+  CHECK(memcmp(ct, test_vector_ct_512, MLKEM512_CIPHERTEXTBYTES) == 0);
+  CHECK(memcmp(ss, test_vector_ss_512, MLKEM512_BYTES) == 0);
+  printf("DONE\n");
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
+
+  printf("  Encaps (deterministic)... ");
+  CHECK(mlkem512_enc_derand(ct, ss, test_vector_pk_512, test_vector_m) == 0);
   CHECK(memcmp(ct, test_vector_ct_512, MLKEM512_CIPHERTEXTBYTES) == 0);
   CHECK(memcmp(ss, test_vector_ss_512, MLKEM512_BYTES) == 0);
   printf("DONE\n");
@@ -107,8 +147,16 @@ static int example_mlkem768_encaps(void)
   uint8_t ct[MLKEM768_CIPHERTEXTBYTES];
   uint8_t ss[MLKEM768_BYTES];
 
-  printf("  Encaps... ");
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+  printf("  Encaps (randomized)... ");
   CHECK(mlkem768_enc(ct, ss, test_vector_pk_768) == 0);
+  CHECK(memcmp(ct, test_vector_ct_768, MLKEM768_CIPHERTEXTBYTES) == 0);
+  CHECK(memcmp(ss, test_vector_ss_768, MLKEM768_BYTES) == 0);
+  printf("DONE\n");
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
+
+  printf("  Encaps (deterministic)... ");
+  CHECK(mlkem768_enc_derand(ct, ss, test_vector_pk_768, test_vector_m) == 0);
   CHECK(memcmp(ct, test_vector_ct_768, MLKEM768_CIPHERTEXTBYTES) == 0);
   CHECK(memcmp(ss, test_vector_ss_768, MLKEM768_BYTES) == 0);
   printf("DONE\n");
@@ -120,14 +168,22 @@ static int example_mlkem1024_encaps(void)
   uint8_t ct[MLKEM1024_CIPHERTEXTBYTES];
   uint8_t ss[MLKEM1024_BYTES];
 
-  printf("  Encaps... ");
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+  printf("  Encaps (randomized)... ");
   CHECK(mlkem1024_enc(ct, ss, test_vector_pk_1024) == 0);
+  CHECK(memcmp(ct, test_vector_ct_1024, MLKEM1024_CIPHERTEXTBYTES) == 0);
+  CHECK(memcmp(ss, test_vector_ss_1024, MLKEM1024_BYTES) == 0);
+  printf("DONE\n");
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
+
+  printf("  Encaps (deterministic)... ");
+  CHECK(mlkem1024_enc_derand(ct, ss, test_vector_pk_1024, test_vector_m) == 0);
   CHECK(memcmp(ct, test_vector_ct_1024, MLKEM1024_CIPHERTEXTBYTES) == 0);
   CHECK(memcmp(ss, test_vector_ss_1024, MLKEM1024_BYTES) == 0);
   printf("DONE\n");
   return 0;
 }
-#else  /* !MLK_CONFIG_NO_ENCAPS_API && !MLK_CONFIG_NO_RANDOMIZED_API */
+#else  /* !MLK_CONFIG_NO_ENCAPS_API */
 static int example_mlkem512_encaps(void)
 {
   printf("  Encaps... SKIPPED (encaps API disabled)\n");
@@ -143,7 +199,7 @@ static int example_mlkem1024_encaps(void)
   printf("  Encaps... SKIPPED (encaps API disabled)\n");
   return 0;
 }
-#endif /* !(!MLK_CONFIG_NO_ENCAPS_API && !MLK_CONFIG_NO_RANDOMIZED_API) */
+#endif /* MLK_CONFIG_NO_ENCAPS_API */
 
 /* Decaps examples */
 
