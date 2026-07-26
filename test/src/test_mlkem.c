@@ -29,7 +29,9 @@
 
 
 #if !defined(MLK_CONFIG_NO_KEYPAIR_API) && \
-    !defined(MLK_CONFIG_NO_ENCAPS_API) && !defined(MLK_CONFIG_NO_DECAPS_API)
+    !defined(MLK_CONFIG_NO_ENCAPS_API) &&  \
+    !defined(MLK_CONFIG_NO_DECAPS_API) &&  \
+    !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 /* Forbid inlining so stack buffers below stay in short-lived
  * frames and don't stack up in main(). This helps testing on
  * memory-constrained targets such as AVR. */
@@ -166,7 +168,7 @@ static MLK_NOINLINE int test_invalid_ciphertext(void)
   return 0;
 }
 #endif /* !MLK_CONFIG_NO_KEYPAIR_API && !MLK_CONFIG_NO_ENCAPS_API && \
-          !MLK_CONFIG_NO_DECAPS_API */
+          !MLK_CONFIG_NO_DECAPS_API && !MLK_CONFIG_NO_RANDOMIZED_API */
 
 /*
  * Test each API operation independently against pre-computed test vectors.
@@ -288,7 +290,9 @@ int main(void)
   {
     r = 0;
 #if !defined(MLK_CONFIG_NO_KEYPAIR_API) && \
-    !defined(MLK_CONFIG_NO_ENCAPS_API) && !defined(MLK_CONFIG_NO_DECAPS_API)
+    !defined(MLK_CONFIG_NO_ENCAPS_API) &&  \
+    !defined(MLK_CONFIG_NO_DECAPS_API) &&  \
+    !defined(MLK_CONFIG_NO_RANDOMIZED_API)
     r |= test_keys();
     r |= test_keys_unaligned();
     r |= test_invalid_pk();
@@ -296,7 +300,7 @@ int main(void)
     r |= test_invalid_sk_b();
     r |= test_invalid_ciphertext();
 #endif /* !MLK_CONFIG_NO_KEYPAIR_API && !MLK_CONFIG_NO_ENCAPS_API && \
-          !MLK_CONFIG_NO_DECAPS_API */
+          !MLK_CONFIG_NO_DECAPS_API && !MLK_CONFIG_NO_RANDOMIZED_API */
     if (r)
     {
       return 1;

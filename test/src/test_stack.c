@@ -10,11 +10,10 @@
 
 static void print_info(void)
 {
-#if !defined(MLK_CONFIG_NO_KEYPAIR_API) && \
-    !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
   printf("keygen\n");
 #endif
-#if !defined(MLK_CONFIG_NO_ENCAPS_API) && !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
   printf("encaps\n");
 #endif
 #if !defined(MLK_CONFIG_NO_DECAPS_API)
@@ -22,33 +21,41 @@ static void print_info(void)
 #endif
 }
 
-#if !defined(MLK_CONFIG_NO_KEYPAIR_API) && \
-    !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+/*
+ * We measure the derandomized entry points rather than the randomized
+ * wrappers: they are available in every configuration (no configuration
+ * disables them), so the same measurements are taken under reduced-API
+ * builds such as MLK_CONFIG_NO_RANDOMIZED_API. The randomized wrappers
+ * merely add a coins buffer and a randombytes() call on top.
+ */
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 static void test_keygen_only(void)
 {
   unsigned char pk[CRYPTO_PUBLICKEYBYTES];
   unsigned char sk[CRYPTO_SECRETKEYBYTES];
+  unsigned char coins[2 * MLKEM_SYMBYTES] = {0};
 
-  /* Only call keypair - this is what we're measuring */
-  /* Uses the notrandombytes implementation for deterministic randomness */
-  int ret = crypto_kem_keypair(pk, sk);
+  /* Only call keypair_derand - this is what we're measuring */
+  /* coins is zero-initialized; the value is irrelevant for stack measurement */
+  int ret = crypto_kem_keypair_derand(pk, sk, coins);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 }
-#endif /* !MLK_CONFIG_NO_KEYPAIR_API && !MLK_CONFIG_NO_RANDOMIZED_API */
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
 
-#if !defined(MLK_CONFIG_NO_ENCAPS_API) && !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
 static void test_encaps_only(void)
 {
   unsigned char pk[CRYPTO_PUBLICKEYBYTES] = {0};
   unsigned char ct[CRYPTO_CIPHERTEXTBYTES];
   unsigned char ss[CRYPTO_BYTES];
+  unsigned char coins[MLKEM_SYMBYTES] = {0};
 
-  /* Only call encaps - this is what we're measuring */
-  /* pk is zero-initialized (invalid key, but OK for stack measurement) */
-  int ret = crypto_kem_enc(ct, ss, pk);
+  /* Only call enc_derand - this is what we're measuring */
+  /* pk and coins are zero-initialized (OK for stack measurement) */
+  int ret = crypto_kem_enc_derand(ct, ss, pk, coins);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 }
-#endif /* !MLK_CONFIG_NO_ENCAPS_API && !MLK_CONFIG_NO_RANDOMIZED_API */
+#endif /* !MLK_CONFIG_NO_ENCAPS_API */
 
 #if !defined(MLK_CONFIG_NO_DECAPS_API)
 static void test_decaps_only(void)
@@ -82,8 +89,7 @@ int main(int argc, char *argv[])
   }
   else if (strcmp(argv[1], "keygen") == 0)
   {
-#if !defined(MLK_CONFIG_NO_KEYPAIR_API) && \
-    !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
     test_keygen_only();
 #else
     printf("SKIPPED (keygen API disabled)\n");
@@ -91,7 +97,7 @@ int main(int argc, char *argv[])
   }
   else if (strcmp(argv[1], "encaps") == 0)
   {
-#if !defined(MLK_CONFIG_NO_ENCAPS_API) && !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
     test_encaps_only();
 #else
     printf("SKIPPED (encaps API disabled)\n");

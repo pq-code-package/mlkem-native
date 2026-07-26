@@ -24,48 +24,66 @@
     }                                                         \
   } while (0)
 
-#if !defined(MLK_CONFIG_NO_KEYPAIR_API) && \
-    !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 static int example_keygen(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t coins[2 * MLKEM_SYMBYTES];
 
-  printf("Generating keypair... ");
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+  printf("Generating keypair (randomized)... ");
   CHECK(crypto_kem_keypair(pk, sk) == 0);
+  CHECK(memcmp(pk, test_vector_pk, CRYPTO_PUBLICKEYBYTES) == 0);
+  CHECK(memcmp(sk, test_vector_sk, CRYPTO_SECRETKEYBYTES) == 0);
+  printf("DONE\n");
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
+
+  printf("Generating keypair (deterministic)... ");
+  memcpy(coins, test_vector_d, MLKEM_SYMBYTES);
+  memcpy(coins + MLKEM_SYMBYTES, test_vector_z, MLKEM_SYMBYTES);
+  CHECK(crypto_kem_keypair_derand(pk, sk, coins) == 0);
   CHECK(memcmp(pk, test_vector_pk, CRYPTO_PUBLICKEYBYTES) == 0);
   CHECK(memcmp(sk, test_vector_sk, CRYPTO_SECRETKEYBYTES) == 0);
   printf("DONE\n");
   return 0;
 }
-#else  /* !MLK_CONFIG_NO_KEYPAIR_API && !MLK_CONFIG_NO_RANDOMIZED_API */
+#else  /* !MLK_CONFIG_NO_KEYPAIR_API */
 static int example_keygen(void)
 {
   printf("Generating keypair... SKIPPED (keygen API disabled)\n");
   return 0;
 }
-#endif /* !(!MLK_CONFIG_NO_KEYPAIR_API && !MLK_CONFIG_NO_RANDOMIZED_API) */
+#endif /* MLK_CONFIG_NO_KEYPAIR_API */
 
-#if !defined(MLK_CONFIG_NO_ENCAPS_API) && !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+#if !defined(MLK_CONFIG_NO_ENCAPS_API)
 static int example_encaps(void)
 {
   uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
   uint8_t ss[CRYPTO_BYTES];
 
-  printf("Encaps... ");
+#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
+  printf("Encaps (randomized)... ");
   CHECK(crypto_kem_enc(ct, ss, test_vector_pk) == 0);
+  CHECK(memcmp(ct, test_vector_ct, CRYPTO_CIPHERTEXTBYTES) == 0);
+  CHECK(memcmp(ss, test_vector_ss, CRYPTO_BYTES) == 0);
+  printf("DONE\n");
+#endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
+
+  printf("Encaps (deterministic)... ");
+  CHECK(crypto_kem_enc_derand(ct, ss, test_vector_pk, test_vector_m) == 0);
   CHECK(memcmp(ct, test_vector_ct, CRYPTO_CIPHERTEXTBYTES) == 0);
   CHECK(memcmp(ss, test_vector_ss, CRYPTO_BYTES) == 0);
   printf("DONE\n");
   return 0;
 }
-#else  /* !MLK_CONFIG_NO_ENCAPS_API && !MLK_CONFIG_NO_RANDOMIZED_API */
+#else  /* !MLK_CONFIG_NO_ENCAPS_API */
 static int example_encaps(void)
 {
   printf("Encaps... SKIPPED (encaps API disabled)\n");
   return 0;
 }
-#endif /* !(!MLK_CONFIG_NO_ENCAPS_API && !MLK_CONFIG_NO_RANDOMIZED_API) */
+#endif /* MLK_CONFIG_NO_ENCAPS_API */
 
 #if !defined(MLK_CONFIG_NO_DECAPS_API)
 static int example_decaps(void)
