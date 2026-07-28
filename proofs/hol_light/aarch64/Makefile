@@ -52,16 +52,16 @@ endif
 
 SPLIT=tr ';' '\n'
 
-OBJ = mlkem/ntt_aarch64_asm.o \
-      mlkem/intt_aarch64_asm.o \
-      mlkem/poly_tomont_aarch64_asm.o \
-      mlkem/poly_mulcache_compute_aarch64_asm.o \
-      mlkem/poly_reduce_aarch64_asm.o \
-      mlkem/poly_tobytes_aarch64_asm.o \
-      mlkem/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.o \
-      mlkem/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.o \
-      mlkem/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.o \
-      mlkem/rej_uniform_aarch64_asm.o \
+OBJ = mlkem/mlkem_ntt_aarch64_asm.o \
+      mlkem/mlkem_intt_aarch64_asm.o \
+      mlkem/mlkem_poly_tomont_aarch64_asm.o \
+      mlkem/mlkem_poly_mulcache_compute_aarch64_asm.o \
+      mlkem/mlkem_poly_reduce_aarch64_asm.o \
+      mlkem/mlkem_poly_tobytes_aarch64_asm.o \
+      mlkem/mlkem_polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.o \
+      mlkem/mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.o \
+      mlkem/mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.o \
+      mlkem/mlkem_rej_uniform_aarch64_asm.o \
       mlkem/keccak_f1600_x1_scalar_aarch64_asm.o \
       mlkem/keccak_f1600_x1_v84a_aarch64_asm.o \
       mlkem/keccak_f1600_x2_v84a_aarch64_asm.o \

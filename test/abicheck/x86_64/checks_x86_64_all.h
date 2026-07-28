@@ -20,8 +20,8 @@
 
 #if defined(MLK_SYSV_ABI_SUPPORTED)
 #if defined(__AVX2__)
-int check_invntt_avx2_asm(void);
 int check_keccak_f1600_x4_avx2_asm(void);
+int check_invntt_avx2_asm(void);
 int check_ntt_avx2_asm(void);
 int check_nttfrombytes_avx2_asm(void);
 int check_ntttobytes_avx2_asm(void);
@@ -47,8 +47,8 @@ int check_tomont_avx2_asm(void);
 static const abicheck_entry_t all_checks[] = {
 #if defined(MLK_SYSV_ABI_SUPPORTED)
 #if defined(__AVX2__)
-    {"invntt_avx2_asm", check_invntt_avx2_asm},
     {"keccak_f1600_x4_avx2_asm", check_keccak_f1600_x4_avx2_asm},
+    {"invntt_avx2_asm", check_invntt_avx2_asm},
     {"ntt_avx2_asm", check_ntt_avx2_asm},
     {"nttfrombytes_avx2_asm", check_nttfrombytes_avx2_asm},
     {"ntttobytes_avx2_asm", check_ntttobytes_avx2_asm},

@@ -414,15 +414,14 @@ gh_group_end
 # Derive the theorem-name prefix from a proof routine's basename:
 #   - strip the platform suffix (_aarch64_asm or _avx2_asm)
 #   - uppercase
-#   - prepend MLKEM_ unless the routine is a keccak proof
+# The routine basename already carries the namespace (`mlkem_` for arithmetic,
+# none for the namespace-agnostic keccak proofs), so no fixup is needed.
 theorem-prefix()
 {
   local routine="$1"
   local platform_suffix="$2"
   local base="${routine%${platform_suffix}}"
-  base=$(echo "$base" | tr '[:lower:]' '[:upper:]')
-  [[ $base == KECCAK_* ]] || base="MLKEM_${base}"
-  echo "$base"
+  echo "$base" | tr '[:lower:]' '[:upper:]'
 }
 
 check-theorems()
@@ -444,7 +443,7 @@ check-theorems()
 
       # rej_uniform uses MEMSAFE in place of SAFE because no constant-time proof exists
       local safe="SAFE"
-      [[ ${routine} == rej_uniform_* ]] && safe="MEMSAFE"
+      [[ ${routine} == mlkem_rej_uniform_* ]] && safe="MEMSAFE"
 
       local expected=(
         "${prefix}_CORRECT"

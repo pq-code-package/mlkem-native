@@ -19,8 +19,8 @@ ABICHECK_REQ_MVE_FILES :=
 # MVE: Armv8.1-M MVE
 ABICHECK_REQ_MVE_FILES := \
   mlkem/src/fips202/native/armv81m/src/keccak_f1600_x4_mve.S \
-  mlkem/src/fips202/native/armv81m/src/state_extract_bytes_x4_mve.S \
-  mlkem/src/fips202/native/armv81m/src/state_xor_bytes_x4_mve.S \
+  mlkem/src/fips202/native/armv81m/src/keccak_f1600_x4_state_extract_bytes_mve.S \
+  mlkem/src/fips202/native/armv81m/src/keccak_f1600_x4_state_xor_bytes_mve.S \
   test/abicheck/armv81m/callstub_armv81m.S \
   test/abicheck/armv81m/selftest_armv81m.S
 ABICHECK_REQ_MVE_OBJS := $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_REQ_MVE_FILES))
