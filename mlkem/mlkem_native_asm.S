@@ -60,46 +60,46 @@
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
 #if defined(MLK_SYS_AARCH64)
-#include "src/native/aarch64/src/intt_aarch64_asm.S"
-#include "src/native/aarch64/src/ntt_aarch64_asm.S"
-#include "src/native/aarch64/src/poly_mulcache_compute_aarch64_asm.S"
-#include "src/native/aarch64/src/poly_reduce_aarch64_asm.S"
-#include "src/native/aarch64/src/poly_tobytes_aarch64_asm.S"
-#include "src/native/aarch64/src/poly_tomont_aarch64_asm.S"
-#include "src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S"
-#include "src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S"
-#include "src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S"
-#include "src/native/aarch64/src/rej_uniform_aarch64_asm.S"
+#include "src/native/aarch64/src/mlkem_intt_aarch64_asm.S"
+#include "src/native/aarch64/src/mlkem_ntt_aarch64_asm.S"
+#include "src/native/aarch64/src/mlkem_poly_mulcache_compute_aarch64_asm.S"
+#include "src/native/aarch64/src/mlkem_poly_reduce_aarch64_asm.S"
+#include "src/native/aarch64/src/mlkem_poly_tobytes_aarch64_asm.S"
+#include "src/native/aarch64/src/mlkem_poly_tomont_aarch64_asm.S"
+#include "src/native/aarch64/src/mlkem_polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S"
+#include "src/native/aarch64/src/mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S"
+#include "src/native/aarch64/src/mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S"
+#include "src/native/aarch64/src/mlkem_rej_uniform_aarch64_asm.S"
 #endif /* MLK_SYS_AARCH64 */
 #if defined(MLK_SYS_X86_64)
-#include "src/native/x86_64/src/intt_avx2_asm.S"
-#include "src/native/x86_64/src/ntt_avx2_asm.S"
-#include "src/native/x86_64/src/nttfrombytes_avx2_asm.S"
-#include "src/native/x86_64/src/ntttobytes_avx2_asm.S"
-#include "src/native/x86_64/src/nttunpack_avx2_asm.S"
-#include "src/native/x86_64/src/poly_compress_d10_avx2_asm.S"
-#include "src/native/x86_64/src/poly_compress_d11_avx2_asm.S"
-#include "src/native/x86_64/src/poly_compress_d4_avx2_asm.S"
-#include "src/native/x86_64/src/poly_compress_d5_avx2_asm.S"
-#include "src/native/x86_64/src/poly_decompress_d10_avx2_asm.S"
-#include "src/native/x86_64/src/poly_decompress_d11_avx2_asm.S"
-#include "src/native/x86_64/src/poly_decompress_d4_avx2_asm.S"
-#include "src/native/x86_64/src/poly_decompress_d5_avx2_asm.S"
-#include "src/native/x86_64/src/poly_mulcache_compute_avx2_asm.S"
-#include "src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.S"
-#include "src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_k3_avx2_asm.S"
-#include "src/native/x86_64/src/polyvec_basemul_acc_montgomery_cached_k4_avx2_asm.S"
-#include "src/native/x86_64/src/reduce_avx2_asm.S"
-#include "src/native/x86_64/src/rej_uniform_avx2_asm.S"
-#include "src/native/x86_64/src/tomont_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_intt_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_ntt_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_nttfrombytes_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_ntttobytes_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_nttunpack_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_poly_compress_d10_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_poly_compress_d11_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_poly_compress_d4_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_poly_compress_d5_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_poly_decompress_d10_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_poly_decompress_d11_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_poly_decompress_d4_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_poly_decompress_d5_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_poly_mulcache_compute_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_polyvec_basemul_acc_montgomery_cached_k3_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_polyvec_basemul_acc_montgomery_cached_k4_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_reduce_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_rej_uniform_avx2_asm.S"
+#include "src/native/x86_64/src/mlkem_tomont_avx2_asm.S"
 #endif /* MLK_SYS_X86_64 */
 #if defined(MLK_SYS_RISCV64)
 #endif
 #if defined(MLK_SYS_PPC64LE)
-#include "src/native/ppc64le/src/intt_ppc_asm.S"
-#include "src/native/ppc64le/src/ntt_ppc_asm.S"
-#include "src/native/ppc64le/src/poly_tomont_ppc_asm.S"
-#include "src/native/ppc64le/src/reduce_ppc_asm.S"
+#include "src/native/ppc64le/src/mlkem_intt_ppc_asm.S"
+#include "src/native/ppc64le/src/mlkem_ntt_ppc_asm.S"
+#include "src/native/ppc64le/src/mlkem_poly_tomont_ppc_asm.S"
+#include "src/native/ppc64le/src/mlkem_reduce_ppc_asm.S"
 #endif /* MLK_SYS_PPC64LE */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
@@ -116,8 +116,8 @@
 #endif
 #if defined(MLK_SYS_ARMV81M_MVE)
 #include "src/fips202/native/armv81m/src/keccak_f1600_x4_mve.S"
-#include "src/fips202/native/armv81m/src/state_extract_bytes_x4_mve.S"
-#include "src/fips202/native/armv81m/src/state_xor_bytes_x4_mve.S"
+#include "src/fips202/native/armv81m/src/keccak_f1600_x4_state_extract_bytes_mve.S"
+#include "src/fips202/native/armv81m/src/keccak_f1600_x4_state_xor_bytes_mve.S"
 #endif
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 

@@ -18,9 +18,6 @@
 
 #if defined(MLK_SYS_AARCH64)
 
-#if defined(MLK_SYS_AARCH64_NEON)
-int check_intt_aarch64_asm(void);
-#endif
 int check_keccak_f1600_x1_scalar_aarch64_asm(void);
 #if defined(MLK_SYS_AARCH64_NEON)
 #if defined(__ARM_FEATURE_SHA3)
@@ -37,6 +34,7 @@ int check_keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm(void);
 #endif
 #endif
 #if defined(MLK_SYS_AARCH64_NEON)
+int check_intt_aarch64_asm(void);
 int check_ntt_aarch64_asm(void);
 int check_poly_mulcache_compute_aarch64_asm(void);
 int check_poly_reduce_aarch64_asm(void);
@@ -49,9 +47,6 @@ int check_rej_uniform_aarch64_asm(void);
 #endif /* MLK_SYS_AARCH64_NEON */
 
 static const abicheck_entry_t all_checks[] = {
-#if defined(MLK_SYS_AARCH64_NEON)
-    {"intt_aarch64_asm", check_intt_aarch64_asm},
-#endif
     {"keccak_f1600_x1_scalar_aarch64_asm",
      check_keccak_f1600_x1_scalar_aarch64_asm},
 #if defined(MLK_SYS_AARCH64_NEON)
@@ -73,6 +68,7 @@ static const abicheck_entry_t all_checks[] = {
 #endif
 #endif
 #if defined(MLK_SYS_AARCH64_NEON)
+    {"intt_aarch64_asm", check_intt_aarch64_asm},
     {"ntt_aarch64_asm", check_ntt_aarch64_asm},
     {"poly_mulcache_compute_aarch64_asm",
      check_poly_mulcache_compute_aarch64_asm},

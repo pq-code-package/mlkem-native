@@ -78,8 +78,8 @@ static MLK_INLINE vint16m1_t fq_barrett(vint16m1_t a, size_t vl)
  * masked ops, and Zvkt's DIEL guarantee does not cover the v0 mask
  * register. Using an arithmetic-shift sign mask keeps all operands in the
  * Zvkt-covered set and matches the idiom used in the portable C
- * (mlk_ct_cmask_neg_i16, verify.h) and AArch64 (poly_reduce_aarch64_asm.S)
- * implementations. */
+ * (mlk_ct_cmask_neg_i16, verify.h) and AArch64
+ * (mlkem_poly_reduce_aarch64_asm.S) implementations. */
 
 static MLK_INLINE vint16m1_t fq_cadd(vint16m1_t rx, size_t vl)
 {

@@ -2988,8 +2988,10 @@ def check_macro_typos():
             if rest.startswith("\\") or m in ["MLK_XXX", "MLK_SOURCE_XXX"]:
                 return True
 
-        # AWS-LC importer patch
-        if is_autogen or filename == "integration/awslc/awslc.patch":
+        # AWS-LC integration patches. These carry AWS-LC's own identifiers
+        # (CMake variables like MLKEM_NATIVE_AARCH64_ASM_SOURCES) as well as
+        # mlkem-native config macros passed to unifdef.
+        if is_autogen or filename.startswith("integration/aws-lc/"):
             return True
 
         if (
@@ -3362,61 +3364,61 @@ def hol_light_asm_joblist():
     for ppc64le and armv81m)."""
     joblist_aarch64 = [
         (
-            "ntt_aarch64_asm.S",
+            "mlkem_ntt_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "intt_aarch64_asm.S",
+            "mlkem_intt_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "poly_tomont_aarch64_asm.S",
+            "mlkem_poly_tomont_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "poly_tobytes_aarch64_asm.S",
+            "mlkem_poly_tobytes_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "poly_reduce_aarch64_asm.S",
+            "mlkem_poly_reduce_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "poly_mulcache_compute_aarch64_asm.S",
+            "mlkem_poly_mulcache_compute_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S",
+            "mlkem_polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S",
+            "mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S",
+            "mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
         ),
         (
-            "rej_uniform_aarch64_asm.S",
+            "mlkem_rej_uniform_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
             "aarch64",
@@ -3456,121 +3458,121 @@ def hol_light_asm_joblist():
     x86_64_flags = "-mavx2 -mbmi2 -msse4 -fcf-protection=full"
     joblist_x86_64 = [
         (
-            "polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.S",
+            "mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "polyvec_basemul_acc_montgomery_cached_k3_avx2_asm.S",
+            "mlkem_polyvec_basemul_acc_montgomery_cached_k3_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "polyvec_basemul_acc_montgomery_cached_k4_avx2_asm.S",
+            "mlkem_polyvec_basemul_acc_montgomery_cached_k4_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "ntt_avx2_asm.S",
+            "mlkem_ntt_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "intt_avx2_asm.S",
+            "mlkem_intt_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "reduce_avx2_asm.S",
+            "mlkem_reduce_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "ntttobytes_avx2_asm.S",
+            "mlkem_ntttobytes_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "rej_uniform_avx2_asm.S",
+            "mlkem_rej_uniform_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "nttfrombytes_avx2_asm.S",
+            "mlkem_nttfrombytes_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "tomont_avx2_asm.S",
+            "mlkem_tomont_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "nttunpack_avx2_asm.S",
+            "mlkem_nttunpack_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_mulcache_compute_avx2_asm.S",
+            "mlkem_poly_mulcache_compute_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_compress_d4_avx2_asm.S",
+            "mlkem_poly_compress_d4_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_decompress_d4_avx2_asm.S",
+            "mlkem_poly_decompress_d4_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_compress_d5_avx2_asm.S",
+            "mlkem_poly_compress_d5_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_decompress_d5_avx2_asm.S",
+            "mlkem_poly_decompress_d5_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_compress_d10_avx2_asm.S",
+            "mlkem_poly_compress_d10_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_decompress_d10_avx2_asm.S",
+            "mlkem_poly_decompress_d10_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_compress_d11_avx2_asm.S",
+            "mlkem_poly_compress_d11_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_decompress_d11_avx2_asm.S",
+            "mlkem_poly_decompress_d11_avx2_asm.S",
             "dev/x86_64/src",
             f"-Idev/x86_64/src -Imlkem/src/native/x86_64/src -Imlkem/src/common.h {x86_64_flags}",
             "x86_64",
@@ -3977,17 +3979,20 @@ def gen_slothy(funcs):
     if not isinstance(funcs, list):
         return
 
-    targets = list(map(lambda s: s + ".S", funcs))
-
-    for t in targets:
-        if t.startswith("keccak"):
+    for func in funcs:
+        if func.startswith("keccak"):
+            # FIPS202 assembly is already self-identifying via its `keccak_`
+            # name and carries no `mlkem_` prefix.
             base = "dev/fips202/aarch64/src"
+            t = func + ".S"
         else:
+            # Arithmetic assembly carries the `mlkem_` filename prefix, while
+            # the YAML `Name:` (and hence the exported symbol) stays unprefixed.
             base = "dev/aarch64_opt/src"
+            t = "mlkem_" + func + ".S"
 
         # Remove file(s) to be re-generated
-        if t.endswith(".S"):
-            subprocess.run(["rm", "-f", f"{base}/{t}"])
+        subprocess.run(["rm", "-f", f"{base}/{t}"])
 
         p = subprocess.run(["make", t] + ["-C", base])
         if p.returncode != 0:
@@ -3996,7 +4001,7 @@ def gen_slothy(funcs):
 
         # Rename `name` field in YAML block
         out_path = f"{base}/{t}"
-        out_name = t.removesuffix(".S")
+        out_name = func
         with open(out_path, "r") as f:
             content = f.read()
         new_content = re.sub(
@@ -4884,8 +4889,8 @@ ABI_CAPS = {
             # Shipped MVE helpers pulled in by the abicheck wildcard but
             # not registered as ABI-tested kernels - they still need MVE
             # CFLAGS to assemble.
-            "mlkem/src/fips202/native/armv81m/src/state_extract_bytes_x4_mve.S",
-            "mlkem/src/fips202/native/armv81m/src/state_xor_bytes_x4_mve.S",
+            "mlkem/src/fips202/native/armv81m/src/keccak_f1600_x4_state_extract_bytes_mve.S",
+            "mlkem/src/fips202/native/armv81m/src/keccak_f1600_x4_state_xor_bytes_mve.S",
         ],
     },
     # VSX is build-time only: every ppc64le kernel requires it, the call
@@ -5069,7 +5074,7 @@ def gen_abicheck():
     # HOL-Light proofs (ppc64le, armv81m). Shape matches hol_light_asm_joblist
     # (basename, dev_dir, _cflags, arch); the cflags slot is unused here.
     joblist_abicheck_extra = [
-        (f"{name}.S", "dev/ppc64le/src", "", "powerpc64le")
+        (f"mlkem_{name}.S", "dev/ppc64le/src", "", "powerpc64le")
         for name in (
             "ntt_ppc_asm",
             "intt_ppc_asm",

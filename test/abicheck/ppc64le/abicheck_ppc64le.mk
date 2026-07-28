@@ -18,10 +18,10 @@ ABICHECK_REQ_VSX_FILES :=
 
 # VSX: PPC64 VSX/Altivec (POWER8)
 ABICHECK_REQ_VSX_FILES := \
-  mlkem/src/native/ppc64le/src/intt_ppc_asm.S \
-  mlkem/src/native/ppc64le/src/ntt_ppc_asm.S \
-  mlkem/src/native/ppc64le/src/poly_tomont_ppc_asm.S \
-  mlkem/src/native/ppc64le/src/reduce_ppc_asm.S \
+  mlkem/src/native/ppc64le/src/mlkem_intt_ppc_asm.S \
+  mlkem/src/native/ppc64le/src/mlkem_ntt_ppc_asm.S \
+  mlkem/src/native/ppc64le/src/mlkem_poly_tomont_ppc_asm.S \
+  mlkem/src/native/ppc64le/src/mlkem_reduce_ppc_asm.S \
   test/abicheck/ppc64le/callstub_ppc64le.S \
   test/abicheck/ppc64le/selftest_ppc64le.S
 ABICHECK_REQ_VSX_OBJS := $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_REQ_VSX_FILES))

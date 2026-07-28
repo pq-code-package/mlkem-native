@@ -70,8 +70,8 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: 'hol_light'
           script: |
-            make -C proofs/hol_light/aarch64 mlkem/poly_tobytes_aarch64_asm.o
-            echo 'needs "mlkem_native/aarch64/proofs/poly_tobytes_aarch64_asm.ml";;' | hol.sh
+            make -C proofs/hol_light/aarch64 mlkem/mlkem_poly_tobytes_aarch64_asm.o
+            echo 'needs "mlkem_native/aarch64/proofs/mlkem_poly_tobytes_aarch64_asm.ml";;' | hol.sh
   hol_light_proofs:
     needs: [ hol_light_bytecode ]
     strategy:
@@ -79,25 +79,25 @@ jobs:
       matrix:
         proof:
           # Dependencies on {name}.{S,ml} are implicit
-          - name: ntt_aarch64_asm
+          - name: mlkem_ntt_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml", "mlkem_zetas.ml"]
-          - name: intt_aarch64_asm
+          - name: mlkem_intt_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml", "mlkem_zetas.ml"]
-          - name: poly_tomont_aarch64_asm
+          - name: mlkem_poly_tomont_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
-          - name: poly_mulcache_compute_aarch64_asm
+          - name: mlkem_poly_mulcache_compute_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml", "mlkem_zetas.ml"]
-          - name: poly_reduce_aarch64_asm
+          - name: mlkem_poly_reduce_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
-          - name: polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm
+          - name: mlkem_polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
-          - name: polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm
+          - name: mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
-          - name: polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm
+          - name: mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
-          - name: poly_tobytes_aarch64_asm
+          - name: mlkem_poly_tobytes_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml" ]
-          - name: rej_uniform_aarch64_asm
+          - name: mlkem_rej_uniform_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml", "mlkem_rej_uniform_table.ml"]
           - name: keccak_f1600_x1_scalar_aarch64_asm
             needs: ["keccak_specs.ml"]
@@ -179,8 +179,8 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: 'hol_light'
           script: |
-            make -C proofs/hol_light/x86_64 mlkem/polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.o
-            echo 'needs "mlkem_native/x86_64/proofs/polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.ml";;' | hol.sh
+            make -C proofs/hol_light/x86_64 mlkem/mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.o
+            echo 'needs "mlkem_native/x86_64/proofs/mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.ml";;' | hol.sh
   hol_light_proofs_x86_64:
     needs: [ hol_light_bytecode_x86_64 ]
     strategy:
@@ -188,45 +188,45 @@ jobs:
       matrix:
         proof:
           # Dependencies on {name}.{S,ml} are implicit
-          - name: ntt_avx2_asm
+          - name: mlkem_ntt_avx2_asm
             needs: ["mlkem_specs.ml", "mlkem_zetas.ml"]
-          - name: intt_avx2_asm
+          - name: mlkem_intt_avx2_asm
             needs: ["mlkem_specs.ml", "mlkem_zetas.ml"]
-          - name: polyvec_basemul_acc_montgomery_cached_k2_avx2_asm
+          - name: mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm
             needs: ["mlkem_specs.ml"]
-          - name: polyvec_basemul_acc_montgomery_cached_k3_avx2_asm
+          - name: mlkem_polyvec_basemul_acc_montgomery_cached_k3_avx2_asm
             needs: ["mlkem_specs.ml"]
-          - name: polyvec_basemul_acc_montgomery_cached_k4_avx2_asm
+          - name: mlkem_polyvec_basemul_acc_montgomery_cached_k4_avx2_asm
             needs: ["mlkem_specs.ml"]
-          - name: reduce_avx2_asm
+          - name: mlkem_reduce_avx2_asm
             needs: ["mlkem_specs.ml"]
-          - name: ntttobytes_avx2_asm
+          - name: mlkem_ntttobytes_avx2_asm
             needs: ["mlkem_specs.ml"]
-          - name: rej_uniform_avx2_asm
+          - name: mlkem_rej_uniform_avx2_asm
             needs: ["mlkem_specs.ml", "mlkem_rej_uniform_table.ml"]
-          - name: nttfrombytes_avx2_asm
+          - name: mlkem_nttfrombytes_avx2_asm
             needs: ["mlkem_specs.ml"]
-          - name: tomont_avx2_asm
+          - name: mlkem_tomont_avx2_asm
             needs: ["mlkem_specs.ml"]
-          - name: nttunpack_avx2_asm
+          - name: mlkem_nttunpack_avx2_asm
             needs: ["mlkem_specs.ml"]
-          - name: poly_mulcache_compute_avx2_asm
+          - name: mlkem_poly_mulcache_compute_avx2_asm
             needs: ["mlkem_specs.ml", "mlkem_zetas.ml"]
-          - name: poly_compress_d4_avx2_asm
+          - name: mlkem_poly_compress_d4_avx2_asm
             needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
-          - name: poly_decompress_d4_avx2_asm
+          - name: mlkem_poly_decompress_d4_avx2_asm
             needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
-          - name: poly_compress_d5_avx2_asm
+          - name: mlkem_poly_compress_d5_avx2_asm
             needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
-          - name: poly_decompress_d5_avx2_asm
+          - name: mlkem_poly_decompress_d5_avx2_asm
             needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
-          - name: poly_compress_d10_avx2_asm
+          - name: mlkem_poly_compress_d10_avx2_asm
             needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
-          - name: poly_decompress_d10_avx2_asm
+          - name: mlkem_poly_decompress_d10_avx2_asm
             needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
-          - name: poly_compress_d11_avx2_asm
+          - name: mlkem_poly_compress_d11_avx2_asm
             needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
-          - name: poly_decompress_d11_avx2_asm
+          - name: mlkem_poly_decompress_d11_avx2_asm
             needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
           - name: keccak_f1600_x4_avx2_asm
             needs: ["keccak_utils.ml", "keccak_spec.ml", "keccak_f1600_x4_avx2_constants.ml", "keccak_constants.ml"]
