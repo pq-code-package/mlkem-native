@@ -1,5 +1,103 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
+mlkem-native v1.3.0
+===================
+
+Release notes
+-------------
+
+mlkem-native v1.3.0 adds configuration options to control which KEM operations
+are included in a build. It also improves AArch64 feature detection and runtime
+dispatch, and introduces ABI compliance checks for assembly backends. Embedded
+testing now uses Zephyr across a broader range of Arm targets, while assembly
+namespacing and source naming improve integration with projects such as AWS-LC.
+
+See the full change log here:
+https://github.com/pq-code-package/mlkem-native/compare/v1.2.0...v1.3.0
+
+What's next? mlkem-native v2
+----------------------------
+
+This is expected to be the last release prior to mlkem-native v2. Between
+v1.3.0 and v2, breaking changes to the `main` branch will be made.
+
+Long-Term Support
+-----------------
+
+`release/v1.3` will act as a support branch until 6 months after
+mlkem-native v2 is established. It will receive bugfixes, but no new features.
+We do currently not plan to offer long-term support for mlkem-native v1.x
+beyond that timeframe.
+
+If you are deploying mlkem-native v1.3 and expect to be unable to upgrade to
+mlkem-native v2 within 6 months of its release, please contact us to discuss
+a potential extension of the support schedule.
+
+What's New
+----------
+
+### Configuration / API
+
+- Add `MLK_CONFIG_NO_KEYPAIR_API`, `MLK_CONFIG_NO_ENCAPS_API`, and
+  `MLK_CONFIG_NO_DECAPS_API`, allowing unused KEM operations and their internal
+  dependencies to be excluded. All non-empty API combinations are covered in
+  CI. ([#1787](https://github.com/pq-code-package/mlkem-native/pull/1787))
+- Gate the AArch64 arithmetic and FIPS-202 backends on compile-time NEON
+  availability and the new `MLK_SYS_CAP_NEON` runtime capability. Integrators
+  can now fall back to portable C on AArch64 systems without usable NEON.
+  ([#1805](https://github.com/pq-code-package/mlkem-native/pull/1805),
+  [#1809](https://github.com/pq-code-package/mlkem-native/pull/1809))
+- Add `MLK_SYS_AARCH64_FAST_SHA3` to select the pure-Neon Armv8.4-A SHA3
+  implementation on CPUs with sufficient SHA3 execution capacity, including
+  Graviton5. ([#1784](https://github.com/pq-code-package/mlkem-native/pull/1784))
+
+### Assurance / Testing
+
+- Fix deterministic-only builds using `MLK_CONFIG_NO_RANDOMIZED_API`, including
+  test, example, and stack-measurement coverage.
+  ([#1816](https://github.com/pq-code-package/mlkem-native/pull/1816))
+- Upgrade CBMC to v6.10.0, the newest release of CBMC including the fix
+  [cbmc/#9011](https://github.com/diffblue/cbmc/pull/9011) to the Z3 soundness
+  issue [z3/#9550](https://github.com/Z3Prover/z3/issues/9550). mlkem-native v1.2
+  had pinned CBMC to an unstable version between v6.9 and v6.10 which already
+  included that fix.
+  ([#1762](https://github.com/pq-code-package/mlkem-native/pull/1762))
+- Add assembly ABI checkers for AArch64, x86_64 SysV, ppc64le ELFv2, and
+  Armv8.1-M MVE. The checkers verify preservation of callee-saved registers and
+  run as part of the standard test suite.
+  ([#1135](https://github.com/pq-code-package/mlkem-native/pull/1135))
+- Add Zephyr-based testing for QEMU Cortex-M3, M4, M7, M33, and M55 targets,
+  replacing the previous custom MPS baremetal platforms. Add test and benchmark
+  support for the NUCLEO-N657X0-Q board.
+  ([#1750](https://github.com/pq-code-package/mlkem-native/pull/1750),
+  [#1547](https://github.com/pq-code-package/mlkem-native/pull/1547))
+- Strengthen HOL Light tooling with cross-architecture proof execution and
+  checks that every expected theorem is present
+  ([#1634](https://github.com/pq-code-package/mlkem-native/pull/1634))
+- Strengthen Wycheproof validation by checking newly specified fields, rejecting
+  unknown schema fields, and tracking upstream vector changes.
+  ([#1801](https://github.com/pq-code-package/mlkem-native/pull/1801))
+- Extend Windows MSVC coverage to allocation-failure, RNG-failure, and
+  Wycheproof tests ([#1738](https://github.com/pq-code-package/mlkem-native/pull/1738))
+- Add emulated testing on x86_64 without AVX2.
+  ([#1753](https://github.com/pq-code-package/mlkem-native/pull/1753))
+- Correct decapsulation stack measurements, which previously returned before
+  the full operation and understated peak stack use by around 10%.
+  ([#1823](https://github.com/pq-code-package/mlkem-native/pull/1823))
+
+### Integration / Upgrade Notes
+
+- Namespace assembly-local labels with an `mlk_` prefix, preventing collisions
+  when mlkem-native and other projects are combined into one assembly unit.
+  ([#1813](https://github.com/pq-code-package/mlkem-native/pull/1813))
+- Rename backend assembly files to be self-identifying. Arithmetic assembly
+  filenames now use an `mlkem_` prefix. Downstream build systems with explicit
+  source lists must update those paths.
+  ([#1821](https://github.com/pq-code-package/mlkem-native/pull/1821))
+- Move context-parameter support into the new `mlkem/src/context.h`; downstream
+  source manifests must include this file.
+  ([#1768](https://github.com/pq-code-package/mlkem-native/pull/1768))
+
 mlkem-native v1.2.0
 ===================
 
