@@ -8,6 +8,8 @@
 
 #include "mlkem_native.h"
 
+#include "../test_vectors/expected_test_vectors.h"
+
 static void print_info(void)
 {
 #if !defined(MLK_CONFIG_NO_KEYPAIR_API)
@@ -60,13 +62,18 @@ static void test_encaps_only(void)
 #if !defined(MLK_CONFIG_NO_DECAPS_API)
 static void test_decaps_only(void)
 {
-  unsigned char sk[CRYPTO_SECRETKEYBYTES] = {0};
-  unsigned char ct[CRYPTO_CIPHERTEXTBYTES] = {0};
+  unsigned char sk[CRYPTO_SECRETKEYBYTES];
+  unsigned char ct[CRYPTO_CIPHERTEXTBYTES];
   unsigned char ss[CRYPTO_BYTES];
+  int ret;
+
+  /* A valid sk is needed: crypto_kem_dec() returns on the H(ek) check
+   * before decapsulating, leaving most of the work unmeasured. */
+  memcpy(sk, test_vector_sk, sizeof(sk));
+  memcpy(ct, test_vector_ct, sizeof(ct));
 
   /* Only call decaps - this is what we're measuring */
-  /* sk and ct are zero-initialized (invalid, but OK for stack measurement) */
-  int ret = crypto_kem_dec(ss, ct, sk);
+  ret = crypto_kem_dec(ss, ct, sk);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 }
 #endif /* !MLK_CONFIG_NO_DECAPS_API */
