@@ -220,6 +220,7 @@
 #define MLK_FREE(v, T, N, context)                     \
   do                                                   \
   {                                                    \
+    MLK_CONTEXT_UNUSED(context);                       \
     mlk_zeroize(mlk_alloc_##v, sizeof(mlk_alloc_##v)); \
     (v) = NULL;                                        \
   } while (0)

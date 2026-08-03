@@ -191,7 +191,7 @@ cleanup:
   MLK_FREE(ct, uint8_t, MLKEM_INDCCA_CIPHERTEXTBYTES, context);
   return ret;
 }
-#else /* MLK_CONFIG_KEYGEN_PCT */
+#else  /* MLK_CONFIG_KEYGEN_PCT */
 MLK_MUST_CHECK_RETURN_VALUE
 static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                          uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES],
@@ -200,9 +200,7 @@ static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   /* Skip PCT */
   ((void)pk);
   ((void)sk);
-#if defined(MLK_CONFIG_CONTEXT_PARAMETER)
-  ((void)context);
-#endif
+  MLK_CONTEXT_UNUSED(context);
   return 0;
 }
 #endif /* !MLK_CONFIG_KEYGEN_PCT */
