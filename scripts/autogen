@@ -2800,7 +2800,7 @@ def gen_monolithic_asm_file():
         yield " * If you want an SCU build of mlkem-native with support for multiple security"
         yield " * levels, you should include this file once with MLK_CONFIG_MULTILEVEL_WITH_SHARED set."
         yield " *"
-        yield " * (You could also follow the same pattern as for mlkem_native_monobuild.c"
+        yield " * (You could also follow the same pattern as for mlkem_native.c"
         yield " *  and include it for every level, setting MLK_CONFIG_MULTILEVEL_NO_SHARED"
         yield " *  for all but one. For builds with MLK_CONFIG_MULTILEVEL_NO_SHARED, this"
         yield " *  file will then be ignored.)"

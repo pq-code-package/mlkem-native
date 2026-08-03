@@ -100,15 +100,15 @@ jobs:
           - name: mlkem_rej_uniform_aarch64_asm
             needs: ["mlkem_specs.ml", "mlkem_utils.ml", "mlkem_rej_uniform_table.ml"]
           - name: keccak_f1600_x1_scalar_aarch64_asm
-            needs: ["keccak_specs.ml"]
+            needs: ["keccak_spec.ml"]
           - name: keccak_f1600_x1_v84a_aarch64_asm
-            needs: ["keccak_specs.ml"]
+            needs: ["keccak_spec.ml"]
           - name: keccak_f1600_x2_v84a_aarch64_asm
-            needs: ["keccak_specs.ml"]
+            needs: ["keccak_spec.ml"]
           - name: keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm
-            needs: ["keccak_specs.ml"]
+            needs: ["keccak_spec.ml"]
           - name: keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm
-            needs: ["keccak_specs.ml"]
+            needs: ["keccak_spec.ml"]
     name: AArch64 HOL Light proof for ${{ matrix.proof.name }}.S
     runs-on: ubuntu-24.04-arm
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
