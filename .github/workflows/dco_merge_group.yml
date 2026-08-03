@@ -1,0 +1,21 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+# The DCO app (https://github.com/apps/dco) does not report a status on
+# merge_group events (dcoapp/app#199), which would leave queued PRs stuck
+# waiting for the required "DCO" check. This workflow reports it for merge
+# groups instead. DCO enforcement is not weakened: a PR can only enter the
+# merge queue once the real DCO check has passed on the PR, and the queue
+# merges exactly those commits.
+
+name: DCO
+permissions:
+  contents: read
+on:
+  merge_group:
+
+jobs:
+  DCO:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "DCO is checked on the pull request before it enters the merge queue."
