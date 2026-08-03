@@ -33,6 +33,9 @@ on:
       - 'flake.lock'
       - 'nix/hol_light/*'
       - 'nix/s2n_bignum/*'
+  # No path filtering (unsupported for merge_group); the proof jobs skip
+  # themselves via their changed-files check.
+  merge_group:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

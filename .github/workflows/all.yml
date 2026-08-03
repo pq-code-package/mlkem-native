@@ -11,6 +11,7 @@ on:
   pull_request:
     branches: ["main", "release/**"]
     types: [ "opened", "synchronize" ]
+  merge_group:
 
 jobs:
   base:
@@ -114,3 +115,14 @@ jobs:
       contents: 'read'
     needs: [ base ]
     uses: ./.github/workflows/zephyr.yml
+  # Single required status check for branch protection and the merge queue; jobs added to this workflow must also be added to the needs list below to gate merges.
+  # riscv excluded as the RISE runners tend to be flaky.
+  ci-summary:
+    name: CI Summary
+    if: always()
+    needs: [ base, lint-markdown, nix, ci, cbmc, oqs_integration, awslc_integration, ct-test, slothy, baremetal, pavona_integration, zephyr ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any job failed or was cancelled
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
