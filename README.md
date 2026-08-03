@@ -3,7 +3,6 @@
 # mlkem-native
 
 ![CI](https://github.com/pq-code-package/mlkem-native/actions/workflows/all.yml/badge.svg)
-![Proof: HOL-Light](https://github.com/pq-code-package/mlkem-native/actions/workflows/hol_light.yml/badge.svg)
 ![Benchmarks](https://github.com/pq-code-package/mlkem-native/actions/workflows/bench.yml/badge.svg)
 ![C90](https://img.shields.io/badge/language-C90-blue.svg)
 
