@@ -1,0 +1,22 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+# The nix caches are only refreshed from main, and CI does not run on
+# pushes to main as merges are already tested in the merge queue.
+
+name: Nix cache
+permissions:
+  contents: read
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  nix:
+    name: Nix
+    permissions:
+      actions: 'write'
+      contents: 'read'
+      id-token: 'write'
+    uses: ./.github/workflows/nix.yml
+    secrets: inherit
