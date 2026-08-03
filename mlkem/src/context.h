@@ -34,6 +34,15 @@
   (arg0, arg1, arg2, arg3)
 #endif /* !MLK_CONFIG_CONTEXT_PARAMETER */
 
+/* Consume a context parameter carried only for the integration's benefit,
+ * avoiding -Wunused-parameter; expands to nothing when no context is
+ * configured. */
+#if defined(MLK_CONFIG_CONTEXT_PARAMETER)
+#define MLK_CONTEXT_UNUSED(context) ((void)(context))
+#else
+#define MLK_CONTEXT_UNUSED(context) ((void)0)
+#endif
+
 #if defined(MLK_CONFIG_CONTEXT_PARAMETER_TYPE) != \
     defined(MLK_CONFIG_CONTEXT_PARAMETER)
 #error MLK_CONFIG_CONTEXT_PARAMETER_TYPE must be defined if and only if MLK_CONFIG_CONTEXT_PARAMETER is defined

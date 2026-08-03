@@ -337,6 +337,7 @@
 #undef MLK_CONTEXT_PARAMETERS_2
 #undef MLK_CONTEXT_PARAMETERS_3
 #undef MLK_CONTEXT_PARAMETERS_4
+#undef MLK_CONTEXT_UNUSED
 /* mlkem/src/debug.h */
 #undef MLK_DEBUG_H
 #undef mlk_assert
