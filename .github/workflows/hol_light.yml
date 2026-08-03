@@ -6,7 +6,7 @@ permissions:
   contents: read
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "release/**"]
     paths:
      - '.github/workflows/hol_light.yml'
      - 'proofs/hol_light/aarch64/Makefile'
@@ -20,7 +20,7 @@ on:
      - 'nix/hol_light/*'
      - 'nix/s2n_bignum/*'
   pull_request:
-    branches: ["main"]
+    branches: ["main", "release/**"]
     paths:
       - '.github/workflows/hol_light.yml'
       - 'proofs/hol_light/aarch64/Makefile'
