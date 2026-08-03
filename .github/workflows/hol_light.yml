@@ -22,7 +22,7 @@ jobs:
     outputs:
       run_needed: ${{ steps.changed-files.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch' }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: github.event_name != 'workflow_dispatch'
         with:
           # Enough history for changed-files (rebase-merge pushes can be multi-commit)
@@ -47,7 +47,7 @@ jobs:
     needs: [ check_modified_files ]
     if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-shell
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -60,7 +60,7 @@ jobs:
     needs: [ check_modified_files, hol_light_bytecode ]
     if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-shell
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -109,7 +109,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Enough history for changed-files (rebase-merge pushes can be multi-commit)
           fetch-depth: 100
@@ -154,7 +154,7 @@ jobs:
     needs: [ check_modified_files ]
     if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-shell
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -167,7 +167,7 @@ jobs:
     needs: [ check_modified_files, hol_light_bytecode_x86_64 ]
     if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-shell
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -228,7 +228,7 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Enough history for changed-files (rebase-merge pushes can be multi-commit)
           fetch-depth: 100
