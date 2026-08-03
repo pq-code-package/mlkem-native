@@ -2909,6 +2909,7 @@ def get_config_options():
         "MLKEM_DEBUG",  # TODO: Rename?
         "MLK_BREAK_PCT",  # Use in PCT breakage test]
         "MLK_CHECK_APIS",
+        "MLK_ERR_XXX",
         "MLK_CONFIG_XXX",
         "MLK_CONFIG_API_XXX",
         "MLK_USE_NATIVE_XXX",
