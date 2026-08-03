@@ -22,7 +22,8 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         if: github.event_name != 'workflow_dispatch'
         with:
-          fetch-depth: 0
+          # Enough history for changed-files (rebase-merge pushes can be multi-commit)
+          fetch-depth: 100
       - name: Get changed files
         if: github.event_name != 'workflow_dispatch'
         id: changed-files

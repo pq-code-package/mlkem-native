@@ -48,8 +48,6 @@ jobs:
     if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          fetch-depth: 0
       - uses: ./.github/actions/setup-shell
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -63,8 +61,6 @@ jobs:
     if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          fetch-depth: 0
       - uses: ./.github/actions/setup-shell
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -115,7 +111,8 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          fetch-depth: 0
+          # Enough history for changed-files (rebase-merge pushes can be multi-commit)
+          fetch-depth: 100
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
@@ -158,8 +155,6 @@ jobs:
     if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          fetch-depth: 0
       - uses: ./.github/actions/setup-shell
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -173,8 +168,6 @@ jobs:
     if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          fetch-depth: 0
       - uses: ./.github/actions/setup-shell
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -237,7 +230,8 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          fetch-depth: 0
+          # Enough history for changed-files (rebase-merge pushes can be multi-commit)
+          fetch-depth: 100
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
