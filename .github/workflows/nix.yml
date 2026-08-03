@@ -19,7 +19,7 @@ jobs:
     outputs:
       run_needed: ${{ steps.check_run.outputs.run_needed }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: github.event_name != 'workflow_dispatch'
         with:
           # Enough history for changed-files (rebase-merge pushes can be multi-commit)
@@ -62,7 +62,7 @@ jobs:
     name: build nix cache (${{ matrix.runner }})
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-nix
         with:
           cache: true
