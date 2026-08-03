@@ -69,6 +69,16 @@ def err(msg, **kwargs):
     print(msg, file=sys.stderr, **kwargs)
 
 
+def fail(msg):
+    err(msg)
+    sys.exit(1)
+
+
+def require(condition, msg):
+    if not condition:
+        fail(msg)
+
+
 def info(msg, **kwargs):
     print(msg, **kwargs)
 
@@ -100,9 +110,10 @@ def download_wycheproof_files(data_dir):
 
 def check_known_fields(kind, tc):
     unknown = set(tc.keys()) - KNOWN_FIELDS[kind]
-    assert not unknown, (
+    require(
+        not unknown,
         f"Unrecognized field(s) {sorted(unknown)} in {kind} tcId={tc['tcId']}; "
-        "Wycheproof schema may have grown a new field this client doesn't check"
+        "Wycheproof schema may have grown a new field this client doesn't check",
     )
 
 
@@ -171,16 +182,18 @@ def run_keygen_seed_test(data_file):
             info(f"  tcId={tc['tcId']} ... ", end="")
             out = run_binary([binary, "keygen_seed", f"seed={tc['seed']}"])
             if tc["result"] == "valid":
-                assert out["ek"].upper() == tc["ek"].upper(), (
-                    f"ek mismatch tcId={tc['tcId']}"
+                require("ek" in out, f"missing ek for tcId={tc['tcId']}")
+                require(
+                    out["ek"].upper() == tc["ek"].upper(),
+                    f"ek mismatch tcId={tc['tcId']}",
                 )
-                assert out["dk"].upper() == tc["dk"].upper(), (
-                    f"dk mismatch tcId={tc['tcId']}"
+                require("dk" in out, f"missing dk for tcId={tc['tcId']}")
+                require(
+                    out["dk"].upper() == tc["dk"].upper(),
+                    f"dk mismatch tcId={tc['tcId']}",
                 )
             else:
-                assert False, (
-                    f"Unexpected result '{tc['result']}' for tcId={tc['tcId']}"
-                )
+                fail(f"Unexpected result '{tc['result']}' for tcId={tc['tcId']}")
             info("ok")
             count += 1
     info(f"  {count} keygen_seed tests passed")
@@ -202,20 +215,23 @@ def run_encaps_test(data_file):
             out = run_binary([binary, "encaps", f"ek={tc['ek']}", f"m={tc['m']}"])
             if tc["result"] == "invalid":
                 # _error: non-zero exit code; decode_error: explicit validation failure
-                assert "_error" in out or "decode_error" in out, (
-                    f"binary success on invalid tcId={tc['tcId']}"
+                require(
+                    "_error" in out or "decode_error" in out,
+                    f"binary success on invalid tcId={tc['tcId']}",
                 )
             elif tc["result"] == "valid":
-                assert out["c"].upper() == tc["c"].upper(), (
-                    f"c mismatch tcId={tc['tcId']}"
+                require("c" in out, f"missing c for tcId={tc['tcId']}")
+                require(
+                    out["c"].upper() == tc["c"].upper(),
+                    f"c mismatch tcId={tc['tcId']}",
                 )
-                assert out["K"].upper() == tc["K"].upper(), (
-                    f"K mismatch tcId={tc['tcId']}"
+                require("K" in out, f"missing K for tcId={tc['tcId']}")
+                require(
+                    out["K"].upper() == tc["K"].upper(),
+                    f"K mismatch tcId={tc['tcId']}",
                 )
             else:
-                assert False, (
-                    f"Unsupported test result '{tc['result']}' for tcId={tc['tcId']}"
-                )
+                fail(f"Unsupported test result '{tc['result']}' for tcId={tc['tcId']}")
             info("ok")
             count += 1
     info(f"  {count} encaps tests passed")
@@ -237,18 +253,19 @@ def run_semi_expanded_decaps_test(data_file):
             out = run_binary([binary, "decaps", f"dk={tc['dk']}", f"c={tc['c']}"])
             if tc["result"] == "invalid":
                 # _error: non-zero exit code; decode_error: explicit validation failure
-                assert "_error" in out or "decode_error" in out, (
-                    f"binary success on invalid tcId={tc['tcId']}"
+                require(
+                    "_error" in out or "decode_error" in out,
+                    f"binary success on invalid tcId={tc['tcId']}",
                 )
             elif tc["result"] == "valid":
-                assert "K" in tc, f"missing K in test vector tcId={tc['tcId']}"
-                assert out["K"].upper() == tc["K"].upper(), (
-                    f"K mismatch tcId={tc['tcId']}"
+                require("K" in tc, f"missing K in test vector tcId={tc['tcId']}")
+                require("K" in out, f"missing K for tcId={tc['tcId']}")
+                require(
+                    out["K"].upper() == tc["K"].upper(),
+                    f"K mismatch tcId={tc['tcId']}",
                 )
             else:
-                assert False, (
-                    f"Unsupported test result '{tc['result']}' for tcId={tc['tcId']}"
-                )
+                fail(f"Unsupported test result '{tc['result']}' for tcId={tc['tcId']}")
             info("ok")
             count += 1
     info(f"  {count} semi_expanded_decaps tests passed")
@@ -270,33 +287,37 @@ def run_combined_test(data_file):
             # Generate keypair from seed
             keygen_out = run_binary([binary, "keygen_seed", f"seed={tc['seed']}"])
             if "decode_error" in keygen_out:
-                assert tc["result"] == "invalid", (
-                    f"keygen decode error on valid tcId={tc['tcId']}"
+                require(
+                    tc["result"] == "invalid",
+                    f"keygen decode error on valid tcId={tc['tcId']}",
                 )
                 info("ok")
                 count += 1
                 continue
             # Keygen succeeded — check ek
-            assert "ek" in tc, f"missing ek in test vector tcId={tc['tcId']}"
-            assert keygen_out["ek"].upper() == tc["ek"].upper(), (
-                f"ek mismatch tcId={tc['tcId']}"
+            require("ek" in tc, f"missing ek in test vector tcId={tc['tcId']}")
+            require("ek" in keygen_out, f"missing ek for tcId={tc['tcId']}")
+            require(
+                keygen_out["ek"].upper() == tc["ek"].upper(),
+                f"ek mismatch tcId={tc['tcId']}",
             )
             # Decapsulate
             dk = keygen_out["dk"]
             decaps_out = run_binary([binary, "decaps", f"dk={dk}", f"c={tc['c']}"])
             if tc["result"] == "invalid":
                 # _error: non-zero exit code; decode_error: explicit validation failure
-                assert "_error" in decaps_out or "decode_error" in decaps_out, (
-                    f"binary success on invalid tcId={tc['tcId']}"
+                require(
+                    "_error" in decaps_out or "decode_error" in decaps_out,
+                    f"binary success on invalid tcId={tc['tcId']}",
                 )
             elif tc["result"] == "valid":
-                assert decaps_out["K"].upper() == tc["K"].upper(), (
-                    f"K mismatch tcId={tc['tcId']}"
+                require("K" in decaps_out, f"missing K for tcId={tc['tcId']}")
+                require(
+                    decaps_out["K"].upper() == tc["K"].upper(),
+                    f"K mismatch tcId={tc['tcId']}",
                 )
             else:
-                assert False, (
-                    f"Unsupported test result '{tc['result']}' for tcId={tc['tcId']}"
-                )
+                fail(f"Unsupported test result '{tc['result']}' for tcId={tc['tcId']}")
             info("ok")
             count += 1
     info(f"  {count} combined tests passed")
