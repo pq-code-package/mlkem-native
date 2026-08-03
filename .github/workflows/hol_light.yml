@@ -5,36 +5,47 @@ name: HOL-Light
 permissions:
   contents: read
 on:
-  pull_request:
-    branches: ["main", "release/**"]
-    paths:
-      - '.github/workflows/hol_light.yml'
-      - 'proofs/hol_light/aarch64/Makefile'
-      - 'proofs/hol_light/aarch64/**/*.S'
-      - 'proofs/hol_light/aarch64/**/*.ml'
-      - 'proofs/hol_light/x86_64/Makefile'
-      - 'proofs/hol_light/x86_64/**/*.S'
-      - 'proofs/hol_light/x86_64/**/*.ml'
-      - 'flake.nix'
-      - 'flake.lock'
-      - 'nix/hol_light/*'
-      - 'nix/s2n_bignum/*'
-  # No path filtering (unsupported for merge_group); the proof jobs skip
-  # themselves via their changed-files check.
-  merge_group:
+  workflow_call:
+  workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: hol-light-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # Coarse gate so the proof runners only start when relevant files changed.
+  # The owner/fork guard lives here, so on forks all downstream jobs skip too.
+  check_modified_files:
+    name: Determine changed files
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    outputs:
+      run_needed: ${{ steps.changed-files.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        if: github.event_name != 'workflow_dispatch'
+        with:
+          # Enough history for changed-files (rebase-merge pushes can be multi-commit)
+          fetch-depth: 100
+      - name: Get changed files
+        id: changed-files
+        if: github.event_name != 'workflow_dispatch'
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files: |
+            .github/workflows/hol_light.yml
+            proofs/hol_light/**
+            flake.nix
+            flake.lock
+            nix/**
   # The proofs also check that the byte code is up to date,
   # but we use this as a fast path to not even start the proofs
   # if the byte code needs updating.
   hol_light_bytecode:
     name: AArch64 HOL-Light bytecode check
     runs-on: ubuntu-24.04-arm
-    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    needs: [ check_modified_files ]
+    if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -48,8 +59,8 @@ jobs:
   hol_light_interactive:
     name: AArch64 HOL-Light interactive shell test
     runs-on: ubuntu-24.04-arm
-    needs: [ hol_light_bytecode ]
-    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    needs: [ check_modified_files, hol_light_bytecode ]
+    if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -62,7 +73,7 @@ jobs:
             make -C proofs/hol_light/aarch64 mlkem/mlkem_poly_tobytes_aarch64_asm.o
             echo 'needs "mlkem_native/aarch64/proofs/mlkem_poly_tobytes_aarch64_asm.ml";;' | hol.sh
   hol_light_proofs:
-    needs: [ hol_light_bytecode ]
+    needs: [ check_modified_files, hol_light_bytecode ]
     strategy:
       fail-fast: false
       matrix:
@@ -100,7 +111,7 @@ jobs:
             needs: ["keccak_spec.ml"]
     name: AArch64 HOL Light proof for ${{ matrix.proof.name }}.S
     runs-on: ubuntu-24.04-arm
-    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -143,7 +154,8 @@ jobs:
   hol_light_bytecode_x86_64:
     name: x86_64 HOL-Light bytecode check
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    needs: [ check_modified_files ]
+    if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -157,8 +169,8 @@ jobs:
   hol_light_interactive_x86_64:
     name: x86_64 HOL-Light interactive shell test
     runs-on: ubuntu-latest
-    needs: [ hol_light_bytecode_x86_64 ]
-    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    needs: [ check_modified_files, hol_light_bytecode_x86_64 ]
+    if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -171,7 +183,7 @@ jobs:
             make -C proofs/hol_light/x86_64 mlkem/mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.o
             echo 'needs "mlkem_native/x86_64/proofs/mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.ml";;' | hol.sh
   hol_light_proofs_x86_64:
-    needs: [ hol_light_bytecode_x86_64 ]
+    needs: [ check_modified_files, hol_light_bytecode_x86_64 ]
     strategy:
       fail-fast: false
       matrix:
@@ -221,7 +233,7 @@ jobs:
             needs: ["keccak_utils.ml", "keccak_spec.ml", "keccak_f1600_x4_avx2_constants.ml", "keccak_constants.ml"]
     name: x86_64 HOL Light proof for ${{ matrix.proof.name }}.S
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
