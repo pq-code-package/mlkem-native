@@ -1039,14 +1039,16 @@ class Tests:
         self.check_fail()
 
     def hol_light(self):
+        machine = platform.machine().lower()
         if self.args.arch:
             arch = self.args.arch
-        elif platform.machine().lower() in ["arm64", "aarch64"]:
+        elif machine in ["arm64", "aarch64"]:
             arch = "aarch64"
-        elif platform.machine().lower() in ["x86_64"]:
+        elif machine in ["x86_64"]:
             arch = "x86_64"
         else:
-            return
+            self.fail(f"HOL-Light unsupported architecture: {machine}")
+            self.check_fail()
 
         def list_proofs(arch):
             cmd_str = ["./proofs/hol_light/" + arch + "/list_proofs.sh"]
