@@ -22,7 +22,7 @@
  * levels, you should include this file once with
  * MLK_CONFIG_MULTILEVEL_WITH_SHARED set.
  *
- * (You could also follow the same pattern as for mlkem_native_monobuild.c
+ * (You could also follow the same pattern as for mlkem_native.c
  *  and include it for every level, setting MLK_CONFIG_MULTILEVEL_NO_SHARED
  *  for all but one. For builds with MLK_CONFIG_MULTILEVEL_NO_SHARED, this
  *  file will then be ignored.)
