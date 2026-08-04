@@ -52,9 +52,13 @@ The Zephyr application lives in `app/`:
 - `app/Kconfig` force-selects the FPU/MVE features for Corstone-300, whose
   Zephyr SoC does not otherwise advertise MVE.
 
-`platform.mk` forwards the test binary's full `CFLAGS` to the CMake build, so
-the firmware is compiled with the project's own warning/optimization/standard
-policy and feature defines rather than a divergent Zephyr default.
+`platform.mk` forwards the test binary's full `CFLAGS` to the CMake build. The
+application selects Zephyr's speed policy and supplements its `-O2` with the
+project's normal `-O3` through `CONFIG_COMPILER_OPT`. CMake reapplies that
+configured option to application sources because Zephyr's target options would
+otherwise follow them. This gives ML-KEM, the test harness, support sources,
+and Zephyr itself an effective final `-O3`. The resolved ordering can be
+inspected in the per-binary Zephyr build directory's `compile_commands.json`.
 
 `exec_wrapper.py` runs a built ELF under QEMU (`-nographic`, semihosting on),
 forwarding the guest's exit code; it is wired in as `EXEC_WRAPPER`.
