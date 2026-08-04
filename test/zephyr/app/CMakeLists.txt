@@ -40,7 +40,8 @@ if(ZEPHYR_NUCLEO_N657X0_Q)
     VECT_TAB_BASE_ADDRESS=0x10000000
     VECT_TAB_OFFSET=0x0
   )
-  target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/shim_nucleo_n657x0_q.c)
+  set(_zephyr_shim ${CMAKE_CURRENT_SOURCE_DIR}/shim_nucleo_n657x0_q.c)
+  target_sources(app PRIVATE ${_zephyr_shim})
   target_compile_definitions(app PRIVATE
     printf=__wrap_printf
     fprintf=__wrap_fprintf
@@ -58,7 +59,8 @@ if(ZEPHYR_NUCLEO_N657X0_Q)
     -Wl,--wrap=exit
   )
 else()
-  target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/shim.c)
+  set(_zephyr_shim ${CMAKE_CURRENT_SOURCE_DIR}/shim.c)
+  target_sources(app PRIVATE ${_zephyr_shim})
 endif()
 
 # The test binary's CFLAGS, forwarded from the build (test/zephyr/platform.mk
@@ -80,6 +82,12 @@ set_source_files_properties(${R}/test/hal/hal.c
 
 set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/shim_nucleo_n657x0_q.c
   PROPERTIES COMPILE_OPTIONS "-Wno-error")
+
+# CONFIG_COMPILER_OPT reaches Zephyr's own targets after its optimization
+# choice. The application target has the opposite ordering, so reapply the
+# same configured option as a source property to make it effective there too.
+set_property(SOURCE ${R}/mlkem/mlkem_native.c ${_test_srcs} ${_zephyr_shim}
+  APPEND PROPERTY COMPILE_OPTIONS ${CONFIG_COMPILER_OPT})
 
 # Optional native FIPS202 backend (e.g. Armv8.1-M MVE on Cortex-M55). The
 # monolithic mlkem_native.c already includes the backend C sources; its
