@@ -17,6 +17,7 @@
 #include "../../mlkem/src/indcpa.h"
 #include "../../mlkem/src/poly.h"
 #include "../../mlkem/src/poly_k.h"
+#include "../src/test_common.h"
 
 #ifndef MLK_BENCHMARK_NWARMUP
 #define MLK_BENCHMARK_NWARMUP 50
@@ -40,17 +41,6 @@ static int cmp_uint64_t(const void *a, const void *b)
   return (va > vb) - (va < vb);
 }
 
-#define CHECK(x)                                              \
-  do                                                          \
-  {                                                           \
-    int rc;                                                   \
-    rc = (x);                                                 \
-    if (!rc)                                                  \
-    {                                                         \
-      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
-      return 1;                                               \
-    }                                                         \
-  } while (0)
 
 
 #define BENCH(txt, code)                                              \

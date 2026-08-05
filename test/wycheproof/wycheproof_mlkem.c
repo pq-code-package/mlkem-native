@@ -22,6 +22,10 @@
 #include "../../mlkem/mlkem_native.h"
 #include "../src/test_namespace.h"
 
+/* The test-case handlers below return void, so a failed check must exit(). */
+#define MLK_TEST_CHECK_EXIT
+#include "../src/test_common.h"
+
 /* Print supported API modes and exit (used by wycheproof_client.py) */
 static void print_info(void)
 {
@@ -38,17 +42,6 @@ static void print_info(void)
 
 #if !defined(MLK_CONFIG_NO_KEYPAIR_API) || \
     !defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API)
-#define CHECK(x)                                              \
-  do                                                          \
-  {                                                           \
-    int rc;                                                   \
-    rc = (x);                                                 \
-    if (!rc)                                                  \
-    {                                                         \
-      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
-      exit(1);                                                \
-    }                                                         \
-  } while (0)
 
 static unsigned char decode_hex_char(char hex)
 {
@@ -155,7 +148,7 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    CHECK(mlk_kem_keypair_derand(ek, dk, seed) == 0);
+    CHECK_ERR(mlk_kem_keypair_derand(ek, dk, seed), 0);
     print_hex("ek", ek, sizeof(ek));
     print_hex("dk", dk, sizeof(dk));
   }
@@ -182,7 +175,7 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    CHECK(mlk_kem_enc_derand(ct, ss, ek, m) == 0);
+    CHECK_ERR(mlk_kem_enc_derand(ct, ss, ek, m), 0);
     print_hex("c", ct, sizeof(ct));
     print_hex("K", ss, sizeof(ss));
   }
@@ -213,7 +206,7 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    CHECK(mlk_kem_dec(ss, c, dk) == 0);
+    CHECK_ERR(mlk_kem_dec(ss, c, dk), 0);
     print_hex("K", ss, sizeof(ss));
   }
   else

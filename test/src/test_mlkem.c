@@ -10,23 +10,12 @@
 #include "../../mlkem/mlkem_native.h"
 #include "../notrandombytes/notrandombytes.h"
 #include "../test_vectors/expected_test_vectors.h"
+#include "test_common.h"
 #include "test_namespace.h"
 
 #ifndef NTESTS_FUNC
 #define NTESTS_FUNC 1000
 #endif
-
-#define CHECK(x)                                              \
-  do                                                          \
-  {                                                           \
-    int rc;                                                   \
-    rc = (x);                                                 \
-    if (!rc)                                                  \
-    {                                                         \
-      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
-      return 1;                                               \
-    }                                                         \
-  } while (0)
 
 
 #if !defined(MLK_CONFIG_NO_KEYPAIR_API) && \
@@ -43,11 +32,11 @@ static MLK_NOINLINE int test_keys_core(uint8_t pk[MLKEM_PK_BYTES],
                                        uint8_t key_b[MLKEM_BYTES])
 {
   /* Alice generates a public key */
-  CHECK(mlk_kem_keypair(pk, sk) == 0);
+  CHECK_ERR(mlk_kem_keypair(pk, sk), 0);
   /* Bob derives a secret key and creates a response */
-  CHECK(mlk_kem_enc(ct, key_b, pk) == 0);
+  CHECK_ERR(mlk_kem_enc(ct, key_b, pk), 0);
   /* Alice uses Bobs response to get her shared key */
-  CHECK(mlk_kem_dec(key_a, ct, sk) == 0);
+  CHECK_ERR(mlk_kem_dec(key_a, ct, sk), 0);
 
   /* mark as defined, so we can compare */
   MLK_CT_TESTING_DECLASSIFY(key_a, MLKEM_BYTES);
@@ -84,15 +73,15 @@ static MLK_NOINLINE int test_invalid_pk(void)
   uint8_t ct[MLKEM_CT_BYTES];
   uint8_t key_b[MLKEM_BYTES];
   /* Alice generates a public key */
-  CHECK(mlk_kem_keypair(pk, sk) == 0);
+  CHECK_ERR(mlk_kem_keypair(pk, sk), 0);
   /* Bob derives a secret key and creates a response */
-  CHECK(mlk_kem_enc(ct, key_b, pk) == 0);
+  CHECK_ERR(mlk_kem_enc(ct, key_b, pk), 0);
   /* set first public key coefficient to 4095 (0xFFF) */
   pk[0] = 0xFF;
   pk[1] |= 0x0F;
   /* Bob derives a secret key and creates a response.
    * This should fail the modulus check on the public key. */
-  CHECK(mlk_kem_enc(ct, key_b, pk) == MLK_ERR_INVALID_PK);
+  CHECK_ERR(mlk_kem_enc(ct, key_b, pk), MLK_ERR_INVALID_PK);
   return 0;
 }
 
@@ -104,14 +93,14 @@ static MLK_NOINLINE int test_invalid_sk_a(void)
   uint8_t key_a[MLKEM_BYTES];
   uint8_t key_b[MLKEM_BYTES];
   /* Alice generates a public key */
-  CHECK(mlk_kem_keypair(pk, sk) == 0);
+  CHECK_ERR(mlk_kem_keypair(pk, sk), 0);
   /* Bob derives a secret key and creates a response */
-  CHECK(mlk_kem_enc(ct, key_b, pk) == 0);
+  CHECK_ERR(mlk_kem_enc(ct, key_b, pk), 0);
   /* Replace first part of secret key with random values */
   CHECK(randombytes(sk, 10) == 0);
   /* Alice uses Bobs response to get her shared key
    * This should fail due to wrong sk */
-  CHECK(mlk_kem_dec(key_a, ct, sk) == 0);
+  CHECK_ERR(mlk_kem_dec(key_a, ct, sk), 0);
   /* mark as defined, so we can compare */
   MLK_CT_TESTING_DECLASSIFY(key_a, MLKEM_BYTES);
   MLK_CT_TESTING_DECLASSIFY(key_b, MLKEM_BYTES);
@@ -128,14 +117,14 @@ static MLK_NOINLINE int test_invalid_sk_b(void)
   uint8_t key_a[MLKEM_BYTES];
   uint8_t key_b[MLKEM_BYTES];
   /* Alice generates a public key */
-  CHECK(mlk_kem_keypair(pk, sk) == 0);
+  CHECK_ERR(mlk_kem_keypair(pk, sk), 0);
   /* Bob derives a secret key and creates a response */
-  CHECK(mlk_kem_enc(ct, key_b, pk) == 0);
+  CHECK_ERR(mlk_kem_enc(ct, key_b, pk), 0);
   /* Replace H(pk) with radom values; */
   CHECK(randombytes(sk + MLKEM_SK_BYTES - 64, 32) == 0);
   /* Alice uses Bobs response to get her shared key
    * This should fail the hash check on the secret key */
-    CHECK(mlk_kem_dec(key_a, ct, sk) == MLK_ERR_INVALID_SK);
+  CHECK_ERR(mlk_kem_dec(key_a, ct, sk), MLK_ERR_INVALID_SK);
   return 0;
 }
 
@@ -156,13 +145,13 @@ static MLK_NOINLINE int test_invalid_ciphertext(void)
   CHECK(randombytes((uint8_t *)&pos, sizeof(size_t)) == 0);
 
   /* Alice generates a public key */
-  CHECK(mlk_kem_keypair(pk, sk) == 0);
+  CHECK_ERR(mlk_kem_keypair(pk, sk), 0);
   /* Bob derives a secret key and creates a response */
-  CHECK(mlk_kem_enc(ct, key_b, pk) == 0);
+  CHECK_ERR(mlk_kem_enc(ct, key_b, pk), 0);
   /* Change some byte in the ciphertext (i.e., encapsulated key) */
   ct[pos % MLKEM_CT_BYTES] ^= b;
   /* Alice uses Bobs response to get her shared key */
-  CHECK(mlk_kem_dec(key_a, ct, sk) == 0);
+  CHECK_ERR(mlk_kem_dec(key_a, ct, sk), 0);
   /* mark as defined, so we can compare */
   MLK_CT_TESTING_DECLASSIFY(key_a, MLKEM_BYTES);
   MLK_CT_TESTING_DECLASSIFY(key_b, MLKEM_BYTES);
@@ -190,7 +179,7 @@ static MLK_NOINLINE int test_kem_expected_keygen(void)
   memcpy(coins, test_vector_d, MLKEM_SYMBYTES);
   memcpy(coins + MLKEM_SYMBYTES, test_vector_z, MLKEM_SYMBYTES);
 
-  CHECK(mlk_kem_keypair_derand(pk, sk, coins) == 0);
+  CHECK_ERR(mlk_kem_keypair_derand(pk, sk, coins), 0);
 
   /* Declassify the generated sk and a copy of test_vector_sk so we can
    * memcmp them; the underlying test_vector_sk stays SECRET so it can
@@ -211,7 +200,7 @@ static MLK_NOINLINE int test_kem_expected_encaps(void)
   uint8_t ct[MLKEM_CT_BYTES];
   uint8_t ss[MLKEM_BYTES];
 
-  CHECK(mlk_kem_enc_derand(ct, ss, test_vector_pk, test_vector_m) == 0);
+  CHECK_ERR(mlk_kem_enc_derand(ct, ss, test_vector_pk, test_vector_m), 0);
 
   MLK_CT_TESTING_DECLASSIFY(ct, MLKEM_CT_BYTES);
   MLK_CT_TESTING_DECLASSIFY(ss, MLKEM_BYTES);
@@ -227,7 +216,7 @@ static MLK_NOINLINE int test_kem_expected_decaps(void)
 {
   uint8_t ss[MLKEM_BYTES];
 
-  CHECK(mlk_kem_dec(ss, test_vector_ct, test_vector_sk) == 0);
+  CHECK_ERR(mlk_kem_dec(ss, test_vector_ct, test_vector_sk), 0);
 
   MLK_CT_TESTING_DECLASSIFY(ss, MLKEM_BYTES);
   CHECK(memcmp(ss, test_vector_ss, MLKEM_BYTES) == 0);

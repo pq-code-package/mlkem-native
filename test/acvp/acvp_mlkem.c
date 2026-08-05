@@ -11,6 +11,10 @@
 #include "../../mlkem/mlkem_native.h"
 #include "../src/test_namespace.h"
 
+/* The test-case handlers below return void, so a failed check must exit(). */
+#define MLK_TEST_CHECK_EXIT
+#include "../src/test_common.h"
+
 #define USAGE \
   "acvp_mlkem{lvl} [encapDecap|keyGen] [AFT|VAL] {test specific arguments}"
 #define ENCAPS_USAGE "acvp_mlkem{lvl} encapDecap AFT encaps ek=HEX m=HEX"
@@ -21,17 +25,6 @@
 #define DECAPS_KEY_CHECK_USAGE \
   "acvp_mlkem{lvl} encapDecap VAL decapsulationKeyCheck dk=HEX"
 
-#define CHECK(x)                                              \
-  do                                                          \
-  {                                                           \
-    int rc;                                                   \
-    rc = (x);                                                 \
-    if (!rc)                                                  \
-    {                                                         \
-      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
-      exit(1);                                                \
-    }                                                         \
-  } while (0)
 
 typedef enum
 {
@@ -144,7 +137,7 @@ static MLK_NOINLINE void acvp_mlkem_encapDecp_AFT_encapsulation(
   unsigned char ct[MLKEM_CT_BYTES];
   unsigned char ss[MLKEM_BYTES];
 
-  CHECK(mlk_kem_enc_derand(ct, ss, ek, m) == 0);
+  CHECK_ERR(mlk_kem_enc_derand(ct, ss, ek, m), 0);
 
   print_hex("c", ct, sizeof(ct));
   print_hex("k", ss, sizeof(ss));
@@ -166,7 +159,7 @@ static MLK_NOINLINE void acvp_mlkem_encapDecp_VAL_decapsulation(
 {
   unsigned char ss[MLKEM_BYTES];
 
-  CHECK(mlk_kem_dec(ss, c, dk) == 0);
+  CHECK_ERR(mlk_kem_dec(ss, c, dk), 0);
 
   print_hex("k", ss, sizeof(ss));
 }
@@ -192,7 +185,7 @@ static MLK_NOINLINE void acvp_mlkem_keyGen_AFT(
   memcpy(zd, d, MLKEM_SYMBYTES);
   memcpy(zd + MLKEM_SYMBYTES, z, MLKEM_SYMBYTES);
 
-  CHECK(mlk_kem_keypair_derand(ek, dk, zd) == 0);
+  CHECK_ERR(mlk_kem_keypair_derand(ek, dk, zd), 0);
 
   print_hex("ek", ek, sizeof(ek));
   print_hex("dk", dk, sizeof(dk));

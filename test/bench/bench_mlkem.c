@@ -12,6 +12,7 @@
 #include "hal.h"
 
 #include "../../mlkem/mlkem_native.h"
+#include "../src/test_common.h"
 #include "../src/test_namespace.h"
 
 #ifndef MLK_BENCHMARK_NWARMUP
@@ -24,17 +25,6 @@
 #define MLK_BENCHMARK_NTESTS 500
 #endif
 
-#define CHECK(x)                                              \
-  do                                                          \
-  {                                                           \
-    int rc;                                                   \
-    rc = (x);                                                 \
-    if (!rc)                                                  \
-    {                                                         \
-      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
-      return 1;                                               \
-    }                                                         \
-  } while (0)
 
 static int cmp_uint64_t(const void *a, const void *b)
 {

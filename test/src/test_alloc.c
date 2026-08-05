@@ -12,6 +12,7 @@
 #include "../../mlkem/src/common.h"
 #include "../notrandombytes/notrandombytes.h"
 #include "../test_vectors/expected_test_vectors.h"
+#include "test_common.h"
 #include "test_namespace.h"
 
 /*
@@ -250,8 +251,8 @@ void custom_free(test_ctx_t *ctx, void *p, size_t sz, const char *file,
     rc = call;                                                                 \
     if (rc != 0)                                                               \
     {                                                                          \
-      fprintf(stderr, "ERROR: %s failed with %d in counting pass\n",           \
-              test_name, rc);                                                  \
+      fprintf(stderr, "ERROR: %s failed with %d (%s) in counting pass\n",      \
+              test_name, rc, mlk_err_name(rc));                                \
       return 1;                                                                \
     }                                                                          \
     if (ctx->alloc_stack_top != 0)                                             \
@@ -285,10 +286,11 @@ void custom_free(test_ctx_t *ctx, void *p, size_t sz, const char *file,
         else                                                                   \
         {                                                                      \
           fprintf(stderr,                                                      \
-                  "ERROR: %s failed with wrong error code %d "                 \
-                  "(expected %d) when allocation %d/%d was instrumented "      \
+                  "ERROR: %s failed with wrong error code %d (%s) "            \
+                  "(expected %d (%s)) when allocation %d/%d was instrumented " \
                   "to fail\n",                                                 \
-                  test_name, rc, MLK_ERR_OUT_OF_MEMORY, i + 1, num_allocs);    \
+                  test_name, rc, mlk_err_name(rc), MLK_ERR_OUT_OF_MEMORY,      \
+                  mlk_err_name(MLK_ERR_OUT_OF_MEMORY), i + 1, num_allocs);     \
         }                                                                      \
         return 1;                                                              \
       }                                                                        \

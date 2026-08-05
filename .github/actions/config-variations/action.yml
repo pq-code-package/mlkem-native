@@ -45,12 +45,21 @@ runs:
         # PCT breakage is done at runtime via MLK_BREAK_PCT
         make run_func                 # Should be OK
         MLK_BREAK_PCT=0 make run_func # Should be OK
-        if (MLK_BREAK_PCT=1 make run_func 2>&1 >/dev/null); then
+        # With MLK_BREAK_PCT=1, key generation must fail, and it must fail
+        # with the dedicated PCT error code rather than some other error.
+        # CHECK_ERR reports the code by name, so we can assert on it here.
+        pct_log=$(mktemp)
+        if MLK_BREAK_PCT=1 make run_func >"$pct_log" 2>&1; then
            echo "PCT failure expected"
+           cat "$pct_log"
            exit 1
-        else
-           echo "PCT failed as expected"
         fi
+        if ! grep -q "MLK_ERR_PCT_FAIL" "$pct_log"; then
+           echo "PCT failed, but not with MLK_ERR_PCT_FAIL:"
+           cat "$pct_log"
+           exit 1
+        fi
+        echo "PCT failed as expected, reporting MLK_ERR_PCT_FAIL"
     - name: "Custom allocation (heap based)"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'custom-alloc-heap') }}
       uses: ./.github/actions/multi-functest
