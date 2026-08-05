@@ -2911,7 +2911,6 @@ def get_config_options():
         "MLK_CHECK_APIS",
         "MLK_ERR_XXX",
         "MLK_CONFIG_XXX",
-        "MLK_CONFIG_API_XXX",
         "MLK_USE_NATIVE_XXX",
     ]
 
