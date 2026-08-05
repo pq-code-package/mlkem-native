@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../../mlkem/src/common.h"
+#include "../src/decode_hex.h"
 
 #include "../../mlkem/mlkem_native.h"
 #include "../src/test_namespace.h"
@@ -46,84 +47,23 @@ typedef enum
   decapsulationKeyCheck
 } acvp_encapDecap_function;
 
-/* Decode hex character [0-9A-Fa-f] into 0-15 */
-static unsigned char decode_hex_char(char hex)
-{
-  if (hex >= '0' && hex <= '9')
-  {
-    return (unsigned char)(hex - '0');
-  }
-  else if (hex >= 'A' && hex <= 'F')
-  {
-    return (unsigned char)(10 + (unsigned char)(hex - 'A'));
-  }
-  else if (hex >= 'a' && hex <= 'f')
-  {
-    return (unsigned char)(10 + (unsigned char)(hex - 'a'));
-  }
-  else
-  {
-    return 0xFF;
-  }
-}
-
-static int decode_hex(const char *prefix, unsigned char *out, size_t out_len,
-                      const char *hex)
-{
-  size_t i;
-  size_t hex_len = strlen(hex);
-  size_t prefix_len = strlen(prefix);
-  /*
-   * Check that hex starts with `prefix=`
-   * Use memcmp, not strcmp
-   */
-  if (hex_len < prefix_len + 1 || memcmp(prefix, hex, prefix_len) != 0 ||
-      hex[prefix_len] != '=')
-  {
-    goto hex_usage;
-  }
-
-  hex += prefix_len + 1;
-  hex_len -= prefix_len + 1;
-
-  if (hex_len != 2 * out_len)
-  {
-    return 1;
-  }
-
-  for (i = 0; i < out_len; i++, hex += 2, out++)
-  {
-    unsigned hex0 = decode_hex_char(hex[0]);
-    unsigned hex1 = decode_hex_char(hex[1]);
-    if (hex0 == 0xFF || hex1 == 0xFF)
-    {
-      goto hex_usage;
-    }
-
-    *out = (unsigned char)((hex0 << 4) | hex1);
-  }
-
-  return 0;
-
-hex_usage:
-  fprintf(stderr,
-          "Argument %s invalid: Expected argument of the form '%s=HEX' with "
-          "HEX being a hex encoding of %u bytes\n",
-          hex, prefix, (unsigned)out_len);
-  return 1;
-}
-
 #if !defined(MLK_CONFIG_NO_DECAPS_API)
+#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
+/* Decapsulation key expanded from a seed. Kept in .bss (not on main's stack)
+ * so that main's per-case argument handling stays small on RAM-tight targets.
+ */
+static unsigned char acvp_expanded_dk[MLKEM_SK_BYTES];
+#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
+
 /*
- * Decode the decapsulation-key argument into dk. It is either the expanded
- * key ("dk=HEX", keyFormat 'expanded') or a seed d||z to expand via keyGen
- * ("seed=HEX", keyFormat 'seed'). Returns 0 on success, 1 on failure.
+ * Resolve the decapsulation-key argument. "dk=HEX" (keyFormat 'expanded') is
+ * decoded in place and a pointer into arg is returned; "seed=HEX" (keyFormat
+ * 'seed') is a seed d||z expanded via keyGen. Returns NULL on failure.
  * MLK_NOINLINE keeps the keyGen scratch (ek) out of the caller's (main's)
  * stack frame; under -fsanitize=undefined it would not share slots and would
  * overflow AVR RAM.
  */
-static MLK_NOINLINE int decode_dk(const char *arg,
-                                  unsigned char dk[MLKEM_SK_BYTES])
+static MLK_NOINLINE unsigned char *decode_dk(char *arg)
 {
   size_t seed_len = strlen("seed=");
 
@@ -131,24 +71,26 @@ static MLK_NOINLINE int decode_dk(const char *arg,
   if (strlen(arg) >= seed_len && memcmp(arg, "seed=", seed_len) == 0)
   {
 #if !defined(MLK_CONFIG_NO_KEYPAIR_API)
+    /* TODO(#1841): ek is scratch that is never used. Avoiding it needs a
+     * keyGen entry point deriving only dk from the seed. */
     unsigned char ek[MLKEM_PK_BYTES];
-    unsigned char coins[2 * MLKEM_SYMBYTES];
-    if (decode_hex("seed", coins, sizeof(coins), arg) != 0)
+    unsigned char *coins = decode_hex("seed", 2 * MLKEM_SYMBYTES, arg);
+    if (coins == NULL)
     {
-      return 1;
+      return NULL;
     }
-    if (mlk_kem_keypair_derand(ek, dk, coins) != 0)
+    if (mlk_kem_keypair_derand(ek, acvp_expanded_dk, coins) != 0)
     {
       fprintf(stderr, "Failed to expand seed into decapsulation key\n");
-      return 1;
+      return NULL;
     }
-    return 0;
+    return acvp_expanded_dk;
 #else  /* !MLK_CONFIG_NO_KEYPAIR_API */
     fprintf(stderr, "seed key format requires the keyGen API\n");
-    return 1;
+    return NULL;
 #endif /* MLK_CONFIG_NO_KEYPAIR_API */
   }
-  return decode_hex("dk", dk, MLKEM_SK_BYTES, arg);
+  return decode_hex("dk", MLKEM_SK_BYTES, arg);
 }
 #endif /* !MLK_CONFIG_NO_DECAPS_API */
 
@@ -351,8 +293,7 @@ int main(int argc, char *argv[])
 #if !defined(MLK_CONFIG_NO_ENCAPS_API)
         case encapsulation:
         {
-          unsigned char ek[MLKEM_PK_BYTES];
-          unsigned char m[MLKEM_SYMBYTES];
+          unsigned char *ek, *m;
           /* Encapsulation only for "AFT" */
           if (type != AFT)
           {
@@ -360,14 +301,15 @@ int main(int argc, char *argv[])
           }
 
           /* Parse ek */
-          if (argc == 0 || decode_hex("ek", ek, sizeof(ek), *argv) != 0)
+          if (argc == 0 ||
+              (ek = decode_hex("ek", MLKEM_PK_BYTES, *argv)) == NULL)
           {
             goto encaps_usage;
           }
           argc--, argv++;
 
           /* Parse m */
-          if (argc == 0 || decode_hex("m", m, sizeof(m), *argv) != 0)
+          if (argc == 0 || (m = decode_hex("m", MLKEM_SYMBYTES, *argv)) == NULL)
           {
             goto encaps_usage;
           }
@@ -381,8 +323,7 @@ int main(int argc, char *argv[])
 #if !defined(MLK_CONFIG_NO_DECAPS_API)
         case decapsulation:
         {
-          unsigned char dk[MLKEM_SK_BYTES];
-          unsigned char c[MLKEM_CT_BYTES];
+          unsigned char *dk, *c;
           /* Decapsulation only for "VAL" */
           if (type != VAL)
           {
@@ -390,14 +331,14 @@ int main(int argc, char *argv[])
           }
 
           /* Parse dk (expanded key, or a seed to expand) */
-          if (argc == 0 || decode_dk(*argv, dk) != 0)
+          if (argc == 0 || (dk = decode_dk(*argv)) == NULL)
           {
             goto decaps_usage;
           }
           argc--, argv++;
 
           /* Parse c */
-          if (argc == 0 || decode_hex("c", c, sizeof(c), *argv) != 0)
+          if (argc == 0 || (c = decode_hex("c", MLKEM_CT_BYTES, *argv)) == NULL)
           {
             goto decaps_usage;
           }
@@ -411,7 +352,7 @@ int main(int argc, char *argv[])
 #if !defined(MLK_CONFIG_NO_ENCAPS_API)
         case encapsulationKeyCheck:
         {
-          unsigned char ek[MLKEM_PK_BYTES];
+          unsigned char *ek;
           /* encapsulationKeyCheck only for "VAL" */
           if (type != VAL || argc == 0)
           {
@@ -419,7 +360,7 @@ int main(int argc, char *argv[])
           }
 
           /* Parse ek */
-          if (decode_hex("ek", ek, sizeof(ek), *argv) != 0)
+          if ((ek = decode_hex("ek", MLKEM_PK_BYTES, *argv)) == NULL)
           {
             /*
               ACVP 1.1.0.40+ {en, de}capsulationKeyCheck test cases test keys of
@@ -439,7 +380,7 @@ int main(int argc, char *argv[])
 #if !defined(MLK_CONFIG_NO_DECAPS_API)
         case decapsulationKeyCheck:
         {
-          unsigned char dk[MLKEM_SK_BYTES];
+          unsigned char *dk;
           /* Encapsulation only for "VAL" */
           if (type != VAL || argc == 0)
           {
@@ -447,7 +388,7 @@ int main(int argc, char *argv[])
           }
 
           /* Parse dk */
-          if (decode_hex("dk", dk, sizeof(dk), *argv) != 0)
+          if ((dk = decode_hex("dk", MLKEM_SK_BYTES, *argv)) == NULL)
           {
             /*
               ACVP 1.1.0.40+ {en, de}capsulationKeyCheck test cases test keys of
@@ -472,8 +413,7 @@ int main(int argc, char *argv[])
 #if !defined(MLK_CONFIG_NO_KEYPAIR_API)
     case keyGen:
     {
-      unsigned char z[MLKEM_SYMBYTES];
-      unsigned char d[MLKEM_SYMBYTES];
+      unsigned char *z, *d;
       /* keyGen only for "AFT" */
       if (type != AFT)
       {
@@ -481,14 +421,14 @@ int main(int argc, char *argv[])
       }
 
       /* Parse z */
-      if (argc == 0 || decode_hex("z", z, sizeof(z), *argv) != 0)
+      if (argc == 0 || (z = decode_hex("z", MLKEM_SYMBYTES, *argv)) == NULL)
       {
         goto keygen_usage;
       }
       argc--, argv++;
 
       /* Parse d */
-      if (argc == 0 || decode_hex("d", d, sizeof(d), *argv) != 0)
+      if (argc == 0 || (d = decode_hex("d", MLKEM_SYMBYTES, *argv)) == NULL)
       {
         goto keygen_usage;
       }

@@ -240,6 +240,9 @@ def keyless_decap_key_check(tg, tc):
 
     The v1.1.0.43 sample vectors omit dk for these cases; the check cannot run
     without a key. They run normally again once a key is present.
+
+    TODO(#1842): drop this once we bump past v1.1.0.43. The upstream bug
+    (usnistgov/ACVP-Server#459) is fixed on master, but not in any tag yet.
     """
     if tg.get("function") == "decapsulationKeyCheck" and "dk" not in tc:
         return "decapsulationKeyCheck without a key"
@@ -269,6 +272,23 @@ def flush_warnings():
     err("")
     for msg in _warnings:
         err(msg)
+
+
+def parse_kv_output(stdout):
+    """Parse the binary's `key=value` output lines, ignoring anything else.
+
+    Baremetal harnesses route stderr into stdout over semihosting, so usage
+    and diagnostic messages can be interleaved with the results. Those never
+    have a bare identifier before the first '=', so they are skipped. The
+    {en,de}capsulationKeyCheck cases provoke such messages by design, since
+    they pass keys of incorrect length.
+    """
+    kv = {}
+    for line in stdout.splitlines():
+        key, sep, value = line.partition("=")
+        if sep and key.isidentifier():
+            kv[key] = value
+    return kv
 
 
 def get_acvp_binary(tg):
@@ -305,9 +325,7 @@ def run_encapDecap_test(tg, tc):
             err(result.stderr)
             exit(1)
         # Extract results
-        for line in result.stdout.splitlines():
-            (k, v) = line.split("=")
-            results[k] = v
+        results.update(parse_kv_output(result.stdout))
     elif tg["function"] == "decapsulation":
         acvp_bin = get_acvp_binary(tg)
         # keyFormat 'seed' provides d and z to expand into the key; 'expanded'
@@ -331,9 +349,7 @@ def run_encapDecap_test(tg, tc):
             err(result.stderr)
             exit(1)
         # Extract results
-        for line in result.stdout.splitlines():
-            (k, v) = line.split("=")
-            results[k] = v
+        results.update(parse_kv_output(result.stdout))
     elif tg["function"] == "encapsulationKeyCheck":
         acvp_bin = get_acvp_binary(tg)
         acvp_call = exec_prefix + [
@@ -350,8 +366,7 @@ def run_encapDecap_test(tg, tc):
             err(result.stderr)
             exit(1)
         # Extract results
-        for line in result.stdout.splitlines():
-            (k, v) = line.split("=")
+        for k, v in parse_kv_output(result.stdout).items():
             results[k] = v == "1"
 
     elif tg["function"] == "decapsulationKeyCheck":
@@ -370,8 +385,7 @@ def run_encapDecap_test(tg, tc):
             err(result.stderr)
             exit(1)
         # Extract results
-        for line in result.stdout.splitlines():
-            (k, v) = line.split("=")
+        for k, v in parse_kv_output(result.stdout).items():
             results[k] = v == "1"
     info("done")
     return results
@@ -396,9 +410,7 @@ def run_keyGen_test(tg, tc):
         err(result.stderr)
         exit(1)
     # Extract results
-    for line in result.stdout.splitlines():
-        (k, v) = line.split("=")
-        results[k] = v
+    results.update(parse_kv_output(result.stdout))
     info("done")
     return results
 
