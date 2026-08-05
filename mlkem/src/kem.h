@@ -166,6 +166,11 @@ __contract__(
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
           return_value == MLK_ERR_OUT_OF_MEMORY ||
           return_value == MLK_ERR_RNG_FAIL)
+  /* Output buffers on error, per API-CONVENTIONS.md */
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(sk, MLKEM_INDCCA_SECRETKEYBYTES))
 );
 
 #if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
@@ -201,6 +206,11 @@ __contract__(
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
           return_value == MLK_ERR_OUT_OF_MEMORY ||
           return_value == MLK_ERR_RNG_FAIL)
+  /* Output buffers on error, per API-CONVENTIONS.md */
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(sk, MLKEM_INDCCA_SECRETKEYBYTES))
 );
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 #endif /* !MLK_CONFIG_NO_KEYPAIR_API */
@@ -245,6 +255,11 @@ __contract__(
   assigns(memory_slice(ss, MLKEM_SSBYTES))
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
           return_value == MLK_ERR_OUT_OF_MEMORY)
+  /* Output buffers on error, per API-CONVENTIONS.md */
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(ss, MLKEM_SSBYTES))
 );
 
 #if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
@@ -285,6 +300,11 @@ __contract__(
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
           return_value == MLK_ERR_OUT_OF_MEMORY ||
           return_value == MLK_ERR_RNG_FAIL)
+  /* Output buffers on error, per API-CONVENTIONS.md */
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(ss, MLKEM_SSBYTES))
 );
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 #endif /* !MLK_CONFIG_NO_ENCAPS_API */
@@ -324,6 +344,9 @@ __contract__(
   assigns(memory_slice(ss, MLKEM_SSBYTES))
   ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
           return_value == MLK_ERR_OUT_OF_MEMORY)
+  /* Output buffers on error, per API-CONVENTIONS.md */
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(ss, MLKEM_SSBYTES))
 );
 #endif /* !MLK_CONFIG_NO_DECAPS_API */
 
