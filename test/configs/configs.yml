@@ -456,6 +456,25 @@ configs:
           #define MLK_CUSTOM_ALLOC(v, T, N) T* v = (T *)malloc(sizeof(T) * (N))
           #define MLK_CUSTOM_FREE(v, T, N) free(v)
           #endif /* !__ASSEMBLER__ */
+      MLK_CONFIG_CUSTOM_ZEROIZE:
+        content: |
+          #define MLK_CONFIG_CUSTOM_ZEROIZE
+          #if !defined(__ASSEMBLER__)
+          #include <stddef.h>
+          #include <stdint.h>
+          #include "../../mlkem/src/cbmc.h"
+          #include "../../mlkem/src/sys.h"
+          static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+          __contract__(
+            requires(len <= UINT32_MAX)
+            requires(memory_no_alias(ptr, len))
+            assigns(memory_slice(ptr, len))
+            ensures(array_zeroized_u8((uint8_t *)ptr, len)))
+          {
+            /* Fail if we forget to invoke mlk_zeroize by contract. */
+            cassert(0);
+          }
+          #endif /* !__ASSEMBLER__ */
       MLK_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 

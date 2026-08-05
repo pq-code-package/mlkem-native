@@ -33,6 +33,7 @@
  *   - MLK_CONFIG_NAMESPACE_PREFIX
  *   - MLK_CONFIG_KEYGEN_PCT
  *   - MLK_CONFIG_CUSTOM_ALLOC_FREE
+ *   - MLK_CONFIG_CUSTOM_ZEROIZE
  */
 
 
@@ -386,16 +387,24 @@
  *          feature provides. In this case, you can set mlk_zeroize to a
  *          no-op.
  */
-/* #define MLK_CONFIG_CUSTOM_ZEROIZE
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "src/sys.h"
-   static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
-   {
-       ... your implementation ...
-   }
-   #endif
-*/
+#define MLK_CONFIG_CUSTOM_ZEROIZE
+#if !defined(__ASSEMBLER__)
+#include <stddef.h>
+#include <stdint.h>
+#include "../../mlkem/src/cbmc.h"
+#include "../../mlkem/src/sys.h"
+static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+__contract__(
+  requires(len <= UINT32_MAX)
+  requires(memory_no_alias(ptr, len))
+  assigns(memory_slice(ptr, len))
+  ensures(array_zeroized_u8((uint8_t *)ptr, len)))
+{
+  /* Fail if we forget to invoke mlk_zeroize by contract. */
+  cassert(0);
+}
+#endif /* !__ASSEMBLER__ */
+
 
 /**
  * MLK_CONFIG_CUSTOM_RANDOMBYTES
