@@ -605,8 +605,8 @@ static MLK_INLINE int mlk_randombytes(uint8_t *ptr, size_t len)
  * can be exported.
  *
  * Set this option if such a check should be implemented. In this case,
- * keypair_derand and keypair will return a non-zero
- * error code if the PCT failed.
+ * keypair_derand and keypair will return
+ * MLK_ERR_PCT_FAIL if the PCT failed.
  *
  * @note This feature will drastically lower the performance of key
  *       generation.

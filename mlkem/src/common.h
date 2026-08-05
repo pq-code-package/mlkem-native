@@ -2,6 +2,22 @@
  * Copyright (c) The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
+
+/* References
+ * ==========
+ *
+ * - [FIPS140_3_IG]
+ *   Implementation Guidance for FIPS 140-3 and the Cryptographic Module
+ *   Validation Program
+ *   National Institute of Standards and Technology
+ *   https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
+ *
+ * - [FIPS203]
+ *   FIPS 203 Module-Lattice-Based Key-Encapsulation Mechanism Standard
+ *   National Institute of Standards and Technology
+ *   https://csrc.nist.gov/pubs/fips/203/final
+ */
+
 #ifndef MLK_COMMON_H
 #define MLK_COMMON_H
 
@@ -252,8 +268,8 @@
 
 /****************************** Error codes ***********************************/
 
-/* Generic failure condition, reserved for failures not covered by a more
- * specific error code. */
+/* Generic failure condition. Currently not returned by any function;
+ * reserved for failures that no more specific code covers. */
 #define MLK_ERR_FAIL (-1)
 /* An allocation failed. This can only happen if MLK_CONFIG_CUSTOM_ALLOC_FREE
  * is defined and the provided MLK_CUSTOM_ALLOC can fail. */
@@ -261,6 +277,19 @@
 /* An RNG failure occurred. Might be due to insufficient entropy or
  * system misconfiguration. */
 #define MLK_ERR_RNG_FAIL (-3)
+/* Public key validation failed: the @[FIPS203, Section 7.2, 'modulus check']
+ * found a coefficient outside [0,q-1]. Returned by check_pk and by the
+ * encapsulation API. */
+#define MLK_ERR_INVALID_PK (-4)
+/* Secret key validation failed: the @[FIPS203, Section 7.3, 'hash check']
+ * found the embedded public key hash inconsistent. Returned by check_sk and
+ * by the decapsulation API. */
+#define MLK_ERR_INVALID_SK (-5)
+/* The 'Pairwise Consistency Test' @[FIPS140_3_IG, p.87] and
+ * @[FIPS203, Section 7.1, Pairwise Consistency] failed. Only possible when
+ * MLK_CONFIG_KEYGEN_PCT is enabled; signals that the freshly generated key
+ * pair failed its encaps/decaps self-test. */
+#define MLK_ERR_PCT_FAIL (-6)
 
 #endif /* !__ASSEMBLER__ */
 

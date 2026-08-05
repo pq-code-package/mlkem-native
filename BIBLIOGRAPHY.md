@@ -104,7 +104,9 @@ source code and documentation.
   - [integration/liboqs/config_c.h](integration/liboqs/config_c.h)
   - [integration/liboqs/config_ppc64le.h](integration/liboqs/config_ppc64le.h)
   - [integration/liboqs/config_x86_64.h](integration/liboqs/config_x86_64.h)
+  - [mlkem/mlkem_native.h](mlkem/mlkem_native.h)
   - [mlkem/mlkem_native_config.h](mlkem/mlkem_native_config.h)
+  - [mlkem/src/common.h](mlkem/src/common.h)
   - [mlkem/src/kem.c](mlkem/src/kem.c)
   - [proofs/cbmc/mlkem_native_config_cbmc.h](proofs/cbmc/mlkem_native_config_cbmc.h)
   - [test/configs/break_pct_config.h](test/configs/break_pct_config.h)
@@ -139,6 +141,7 @@ source code and documentation.
   - National Institute of Standards and Technology
 * URL: https://csrc.nist.gov/pubs/fips/203/final
 * Referenced from:
+  - [API-CONVENTIONS.md](API-CONVENTIONS.md)
   - [README.md](README.md)
   - [SOUNDNESS.md](SOUNDNESS.md)
   - [examples/basic_deterministic/mlkem_native/mlkem_native_config.h](examples/basic_deterministic/mlkem_native/mlkem_native_config.h)
@@ -153,6 +156,7 @@ source code and documentation.
   - [examples/multilevel_build_native/mlkem_native/mlkem_native_config.h](examples/multilevel_build_native/mlkem_native/mlkem_native_config.h)
   - [mlkem/mlkem_native.h](mlkem/mlkem_native.h)
   - [mlkem/mlkem_native_config.h](mlkem/mlkem_native_config.h)
+  - [mlkem/src/common.h](mlkem/src/common.h)
   - [mlkem/src/compress.c](mlkem/src/compress.c)
   - [mlkem/src/compress.h](mlkem/src/compress.h)
   - [mlkem/src/fips202/fips202.c](mlkem/src/fips202/fips202.c)

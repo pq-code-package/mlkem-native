@@ -90,8 +90,9 @@ static MLK_NOINLINE int test_invalid_pk(void)
   /* set first public key coefficient to 4095 (0xFFF) */
   pk[0] = 0xFF;
   pk[1] |= 0x0F;
-  /* Bob derives a secret key and creates a response */
-  CHECK(mlk_kem_enc(ct, key_b, pk) != 0);
+  /* Bob derives a secret key and creates a response.
+   * This should fail the modulus check on the public key. */
+  CHECK(mlk_kem_enc(ct, key_b, pk) == MLK_ERR_INVALID_PK);
   return 0;
 }
 
@@ -133,8 +134,8 @@ static MLK_NOINLINE int test_invalid_sk_b(void)
   /* Replace H(pk) with radom values; */
   CHECK(randombytes(sk + MLKEM_SK_BYTES - 64, 32) == 0);
   /* Alice uses Bobs response to get her shared key
-   * This should fail due to the input validation */
-  CHECK(mlk_kem_dec(key_a, ct, sk) != 0);
+   * This should fail the hash check on the secret key */
+    CHECK(mlk_kem_dec(key_a, ct, sk) == MLK_ERR_INVALID_SK);
   return 0;
 }
 
