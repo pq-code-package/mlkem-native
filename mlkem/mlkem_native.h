@@ -216,6 +216,8 @@ extern "C"
  * @retval MLK_ERR_FAIL          MLK_CONFIG_KEYGEN_PCT enabled and PCT failed.
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
  *                               MLK_CUSTOM_ALLOC returned NULL.
+ * @retval MLK_ERR_RNG_FAIL      MLK_CONFIG_KEYGEN_PCT enabled and random
+ *                               number generation failed within the PCT.
  */
 MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
