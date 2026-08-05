@@ -13,6 +13,7 @@
 #include "../../mlkem/src/poly.h"
 #include "../../mlkem/src/poly_k.h"
 #include "../../mlkem/src/sampling.h"
+#include "test_common.h"
 
 #ifndef NUM_RANDOM_TESTS
 #ifdef MLKEM_DEBUG
@@ -81,17 +82,6 @@ void mlk_poly_decompress_d11_c(mlk_poly *r,
                                const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11]);
 #endif /* !MLK_CONFIG_NO_DECAPS_API */
 
-#define CHECK(x)                                              \
-  do                                                          \
-  {                                                           \
-    int rc;                                                   \
-    rc = (x);                                                 \
-    if (!rc)                                                  \
-    {                                                         \
-      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
-      return 1;                                               \
-    }                                                         \
-  } while (0)
 
 #if defined(MLK_USE_NATIVE_FIPS202_X1)
 static void print_u64_array(const char *label, const uint64_t *array,

@@ -11,6 +11,7 @@
 #include "../../mlkem/mlkem_native.h"
 #include "../../mlkem/src/common.h"
 #include "../test_vectors/expected_test_vectors.h"
+#include "test_common.h"
 #include "test_namespace.h"
 
 /*
@@ -63,9 +64,9 @@ int randombytes(uint8_t *buf, size_t len)
     if (rc != 0)                                                       \
     {                                                                  \
       fprintf(stderr,                                                  \
-              "ERROR: %s failed with return code %d "                  \
+              "ERROR: %s failed with return code %d (%s) "             \
               "in dry-run\n",                                          \
-              test_name, rc);                                          \
+              test_name, rc, mlk_err_name(rc));                        \
       return 1;                                                        \
     }                                                                  \
     num_randombytes_calls = randombytes_counter;                       \
@@ -97,10 +98,11 @@ int randombytes(uint8_t *buf, size_t len)
         else                                                           \
         {                                                              \
           fprintf(stderr,                                              \
-                  "ERROR: %s failed with wrong error code %d "         \
-                  "(expected %d) when randombytes %d/%d was "          \
+                  "ERROR: %s failed with wrong error code %d (%s) "    \
+                  "(expected %d (%s)) when randombytes %d/%d was "     \
                   "instrumented to fail\n",                            \
-                  test_name, rc, MLK_ERR_RNG_FAIL, i + 1,              \
+                  test_name, rc, mlk_err_name(rc), MLK_ERR_RNG_FAIL,   \
+                  mlk_err_name(MLK_ERR_RNG_FAIL), i + 1,               \
                   num_randombytes_calls);                              \
         }                                                              \
         return 1;                                                      \

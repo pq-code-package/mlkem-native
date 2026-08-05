@@ -8,6 +8,7 @@
 #include "../../mlkem/src/fips202/fips202.h"
 
 #include "../../mlkem/mlkem_native.h"
+#include "test_common.h"
 #include "test_namespace.h"
 
 #if defined(MLK_CONFIG_NO_KEYPAIR_API) || defined(MLK_CONFIG_NO_ENCAPS_API) || \
@@ -30,17 +31,6 @@ int main(void)
  * the number of KAT tests, META.yml needs adjusting as well. */
 #define NTESTS_KAT 100
 
-#define CHECK(x)                                              \
-  do                                                          \
-  {                                                           \
-    int rc;                                                   \
-    rc = (x);                                                 \
-    if (!rc)                                                  \
-    {                                                         \
-      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
-      return 1;                                               \
-    }                                                         \
-  } while (0)
 
 static void print_hex(const char *label, const uint8_t *data, size_t size)
 {
@@ -86,14 +76,14 @@ int main(void)
   {
     mlk_shake256(coins, sizeof(coins), coins, sizeof(coins));
 
-    CHECK(mlk_kem_keypair_derand(pk, sk, coins) == 0);
+    CHECK_ERR(mlk_kem_keypair_derand(pk, sk, coins), 0);
     print_hex("pk", pk, sizeof(pk));
     print_hex("sk", sk, sizeof(sk));
 
-    CHECK(mlk_kem_enc_derand(ct, ss1, pk, coins + 2 * MLKEM_SYMBYTES) == 0);
+    CHECK_ERR(mlk_kem_enc_derand(ct, ss1, pk, coins + 2 * MLKEM_SYMBYTES), 0);
     print_hex("ct", ct, sizeof(ct));
 
-    CHECK(mlk_kem_dec(ss2, ct, sk) == 0);
+    CHECK_ERR(mlk_kem_dec(ss2, ct, sk), 0);
     CHECK(memcmp(ss1, ss2, sizeof(ss1)) == 0);
 
     print_hex("ss", ss1, sizeof(ss1));
