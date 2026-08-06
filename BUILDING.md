@@ -73,10 +73,13 @@ For detailed information on how to use the script, please refer to
 
 You can also build **mlkem-native** on Windows using `nmake` and an MSVC compiler.
 
-To build and run the tests (only support functional testing for non-opt implementation for now), use the following `nmake` targets:
+To build and run the tests, use the following `nmake` target:
 ```powershell
-nmke /f .\Makefile.Microsoft_nmake quickcheck
+nmake /f .\Makefile.Microsoft_nmake quickcheck
 ```
+
+This runs the functional, RNG-failure, allocation, ACVP, KAT and Wycheproof tests. The assembly backends are not yet
+supported on Windows, so the tests are built for the C backend only.
 
 # Checking the proofs
 

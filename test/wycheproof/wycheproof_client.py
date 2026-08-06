@@ -103,7 +103,8 @@ def download_wycheproof_files(data_dir):
                     json.load(f)
             except (json.JSONDecodeError, Exception) as e:
                 print(f"Error downloading {filename}: {e}", file=sys.stderr)
-                local_file.unlink(missing_ok=True)
+                if local_file.exists():
+                    local_file.unlink()
                 return False
     return True
 

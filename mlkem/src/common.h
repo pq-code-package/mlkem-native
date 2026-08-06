@@ -64,7 +64,7 @@
 #define MLK_NAMESPACE_K(s) MLK_CONCAT(MLK_NAMESPACE_PREFIX_K, s)
 
 /* On Apple platforms, we need to emit leading underscore
- * in front of assembly symbols. We thus introducee a separate
+ * in front of assembly symbols. We thus introduce a separate
  * namespace wrapper for ASM symbols. */
 #if !defined(__APPLE__)
 #define MLK_ASM_NAMESPACE(sym) MLK_NAMESPACE(sym)
@@ -252,12 +252,13 @@
 
 /****************************** Error codes ***********************************/
 
-/* Generic failure condition */
+/* Generic failure condition, reserved for failures not covered by a more
+ * specific error code. */
 #define MLK_ERR_FAIL (-1)
 /* An allocation failed. This can only happen if MLK_CONFIG_CUSTOM_ALLOC_FREE
  * is defined and the provided MLK_CUSTOM_ALLOC can fail. */
 #define MLK_ERR_OUT_OF_MEMORY (-2)
-/* An rng failure occured. Might be due to insufficient entropy or
+/* An RNG failure occurred. Might be due to insufficient entropy or
  * system misconfiguration. */
 #define MLK_ERR_RNG_FAIL (-3)
 

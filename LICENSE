@@ -6,13 +6,31 @@ of the Apache-2.0 license OR the ISC license OR the MIT license.
 These licenses are reproduced at the bottom of this file.
 The copyright holders are indicated at the top of each file.
 
-The code in test/notrandombytes/* is derived from
+Files outside the library itself may carry different terms. Every file
+states its own SPDX-License-Identifier, which determines the terms that
+apply to it. In particular:
+
+The code in test/notrandombytes/*, and its copies in
+examples/*/test_only_rng/* and scripts/notrandombytes, is derived from
 https://cr.yp.to/papers.html#surf and licensed under
 LicenseRef-PD-hp OR CC0-1.0 OR 0BSD OR MIT-0 OR MIT.
 It is only used for testing purposes.
 
-The benchmarking code in test/hal/hal.c carries the
+The benchmarking code in test/hal/* carries the
 MIT license. It is only used for testing purposes.
+
+The tiny_sha3 code in
+examples/bring_your_own_fips202/custom_fips202/tiny_sha3/* and
+examples/custom_backend/mlkem_native/src/fips202/native/custom/src/*
+carries the MIT license. It is only used to demonstrate custom
+FIPS-202 implementations.
+
+The proofs in proofs/* are in part derived from Amazon Web Services
+verification infrastructure. Individual files carry, among others,
+Apache-2.0 OR ISC OR MIT-0, MIT-0, and MIT-0 AND Apache-2.0. None of the
+proofs are part of the library.
+
+Documentation is licensed under CC-BY-4.0.
 
 ```
 Copyright (c) The mlkem-native project authors
@@ -39,7 +57,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-The tiny_sha3 implementation in examples/custom_backend/mlkem_native/mlkem/fips202/native/custom/src/
+The tiny_sha3 implementation in examples/custom_backend/mlkem_native/src/fips202/native/custom/src/
 carries the MIT license. It is only used for testing purposes.
 
 ```
