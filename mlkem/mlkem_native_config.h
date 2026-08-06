@@ -349,25 +349,35 @@
  * MLK_CONFIG_CUSTOM_ZEROIZE
  *
  * In compliance with @[FIPS203, Section 3.3], mlkem-native zeroizes
- * intermediate stack buffers before returning from function calls.
+ * intermediate buffers before returning from function calls. By default,
+ * those buffers are allocated from the stack; if MLK_CONFIG_CUSTOM_ALLOC_FREE
+ * is set, they are (mostly -- few exceptions remain at present) allocated from
+ * the configured custom allocator.
+ *
+ * mlkem-native also zeroizes caller-owned output buffers as needed to uphold
+ * the API convention that outputs be either unmodified or zeroized upon
+ * failure.
  *
  * Set this option and define `mlk_zeroize` if you want to use a custom
- * method to zeroize intermediate stack buffers. The default implementation
- * uses SecureZeroMemory on Windows and a memset + compiler barrier
- * otherwise. If neither of those is available on the target platform,
- * compilation will fail, and you will need to use MLK_CONFIG_CUSTOM_ZEROIZE
- * to provide a custom implementation of `mlk_zeroize()`.
+ * method to zeroize intermediate and output buffers.
  *
- * @warning The explicit stack zeroization conducted by mlkem-native reduces
- *          the likelihood of data leaking on the stack, but does not
- *          eliminate it. The C standard makes no guarantee about where a
- *          compiler allocates structures and whether/where it makes copies
- *          of them. Also, in addition to entire structures, there may also
- *          be potentially exploitable leakage of individual values on the
- *          stack. If you need bullet-proof zeroization of the stack, you
- *          need to consider additional measures instead of what this
- *          feature provides. In this case, you can set mlk_zeroize to a
- *          no-op.
+ * The default implementation uses SecureZeroMemory on Windows and a
+ * memset + compiler barrier otherwise. If neither of those is available on
+ * the target platform, compilation will fail, and you will need to use
+ * MLK_CONFIG_CUSTOM_ZEROIZE to provide a custom implementation of
+ * `mlk_zeroize()`.
+ *
+ * @warning
+ *   The zeroization conducted by mlkem-native reduces the likelihood of data
+ *   leaking on the stack or custom allocators, but it does not eliminate it.
+ *   For example, the C standard makes no guarantee about where a compiler
+ *   allocates local structures and whether/where it makes copies of them.
+ *   Also, in addition to entire structures, there may also be potentially
+ *   exploitable leakage of individual values on the stack. If you need
+ *   bullet-proof zeroization of the stack, you need to consider additional
+ *   measures instead of what this feature provides. In this case, you can
+ *   set mlk_zeroize to a no-op. Note that in this case you are also responsible
+ *   for zeroizing output buffers upon failure.
  */
 /* #define MLK_CONFIG_CUSTOM_ZEROIZE
    #if !defined(__ASSEMBLER__)
