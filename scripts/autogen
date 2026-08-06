@@ -4659,12 +4659,12 @@ def gen_test_vectors():
 
     # Each API is exercised independently: the example resets the PRNG
     # before invoking each API, so `d, z` are the first 64 bytes of a fresh
-    # notrandombytes stream (as consumed by crypto_kem_keypair) and `m` is
-    # the first 32 bytes of a fresh stream (as consumed by crypto_kem_enc).
+    # notrandombytes stream (as consumed by mlkem_keypair) and `m` is
+    # the first 32 bytes of a fresh stream (as consumed by mlkem_enc).
     #
-    # Order within the keypair pair matters: crypto_kem_keypair reads
+    # Order within the keypair pair matters: mlkem_keypair reads
     # randombytes into `coins[64]` which is then interpreted as `d || z` by
-    # crypto_kem_keypair_derand, so `d` must be the first 32 bytes.
+    # mlkem_keypair_derand, so `d` must be the first 32 bytes.
     keygen_rnd = notrandombytes(64)
     d = keygen_rnd[:64]
     z = keygen_rnd[64:128]
@@ -4724,9 +4724,9 @@ def gen_test_vectors():
         yield "/*"
         yield " * Generated with:"
         yield " *   d, z: consecutive 32-byte draws from a fresh notrandombytes"
-        yield " *         stream (as consumed by crypto_kem_keypair)."
+        yield " *         stream (as consumed by mlkem_keypair)."
         yield " *   m:    first 32-byte draw from a second, fresh"
-        yield " *         notrandombytes stream (as consumed by crypto_kem_enc"
+        yield " *         notrandombytes stream (as consumed by mlkem_enc"
         yield " *         after randombytes_reset())."
         yield " */"
 

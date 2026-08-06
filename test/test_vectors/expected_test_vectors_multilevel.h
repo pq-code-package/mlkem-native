@@ -17,9 +17,9 @@
 /*
  * Generated with:
  *   d, z: consecutive 32-byte draws from a fresh notrandombytes
- *         stream (as consumed by crypto_kem_keypair).
+ *         stream (as consumed by mlkem_keypair).
  *   m:    first 32-byte draw from a second, fresh
- *         notrandombytes stream (as consumed by crypto_kem_enc
+ *         notrandombytes stream (as consumed by mlkem_enc
  *         after randombytes_reset()).
  */
 

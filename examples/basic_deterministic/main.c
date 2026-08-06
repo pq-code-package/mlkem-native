@@ -12,6 +12,19 @@
 
 /* No randombytes needed for deterministic API */
 
+/* Convenience abbreviations for the key and ciphertext sizes.
+ *
+ * Ordinarily you know the parameter set you're working with, so you would
+ * just use the level-specific constants directly, e.g. MLKEM512_PUBLICKEYBYTES,
+ * MLKEM768_CIPHERTEXTBYTES, or MLKEM1024_SECRETKEYBYTES.
+ *
+ * These examples, however, are compiled for all three parameter sets (512, 768,
+ * 1024), so we keep things generic by deriving the sizes from the configured
+ * MLK_CONFIG_PARAMETER_SET. */
+#define MLKEM_PK_BYTES MLKEM_PUBLICKEYBYTES(MLK_CONFIG_PARAMETER_SET)
+#define MLKEM_SK_BYTES MLKEM_SECRETKEYBYTES(MLK_CONFIG_PARAMETER_SET)
+#define MLKEM_CT_BYTES MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_PARAMETER_SET)
+
 #define CHECK(x)                                              \
   do                                                          \
   {                                                           \
@@ -27,17 +40,17 @@
 #if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 static int example_keygen(void)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t pk[MLKEM_PK_BYTES];
+  uint8_t sk[MLKEM_SK_BYTES];
   uint8_t coins[2 * MLKEM_SYMBYTES];
 
   memcpy(coins, test_vector_d, MLKEM_SYMBYTES);
   memcpy(coins + MLKEM_SYMBYTES, test_vector_z, MLKEM_SYMBYTES);
 
   printf("Generating keypair (deterministic)... ");
-  CHECK(crypto_kem_keypair_derand(pk, sk, coins) == 0);
-  CHECK(memcmp(pk, test_vector_pk, CRYPTO_PUBLICKEYBYTES) == 0);
-  CHECK(memcmp(sk, test_vector_sk, CRYPTO_SECRETKEYBYTES) == 0);
+  CHECK(mlkem_keypair_derand(pk, sk, coins) == 0);
+  CHECK(memcmp(pk, test_vector_pk, MLKEM_PK_BYTES) == 0);
+  CHECK(memcmp(sk, test_vector_sk, MLKEM_SK_BYTES) == 0);
   printf("DONE\n");
   return 0;
 }
@@ -53,13 +66,13 @@ static int example_keygen(void)
 #if !defined(MLK_CONFIG_NO_ENCAPS_API)
 static int example_encaps(void)
 {
-  uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
-  uint8_t ss[CRYPTO_BYTES];
+  uint8_t ct[MLKEM_CT_BYTES];
+  uint8_t ss[MLKEM_BYTES];
 
   printf("Encaps (deterministic)... ");
-  CHECK(crypto_kem_enc_derand(ct, ss, test_vector_pk, test_vector_m) == 0);
-  CHECK(memcmp(ct, test_vector_ct, CRYPTO_CIPHERTEXTBYTES) == 0);
-  CHECK(memcmp(ss, test_vector_ss, CRYPTO_BYTES) == 0);
+  CHECK(mlkem_enc_derand(ct, ss, test_vector_pk, test_vector_m) == 0);
+  CHECK(memcmp(ct, test_vector_ct, MLKEM_CT_BYTES) == 0);
+  CHECK(memcmp(ss, test_vector_ss, MLKEM_BYTES) == 0);
   printf("DONE\n");
   return 0;
 }
@@ -74,11 +87,11 @@ static int example_encaps(void)
 #if !defined(MLK_CONFIG_NO_DECAPS_API)
 static int example_decaps(void)
 {
-  uint8_t ss[CRYPTO_BYTES];
+  uint8_t ss[MLKEM_BYTES];
 
   printf("Decaps... ");
-  CHECK(crypto_kem_dec(ss, test_vector_ct, test_vector_sk) == 0);
-  CHECK(memcmp(ss, test_vector_ss, CRYPTO_BYTES) == 0);
+  CHECK(mlkem_dec(ss, test_vector_ct, test_vector_sk) == 0);
+  CHECK(memcmp(ss, test_vector_ss, MLKEM_BYTES) == 0);
   printf("DONE\n");
   return 0;
 }

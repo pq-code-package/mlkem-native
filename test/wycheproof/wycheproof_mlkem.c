@@ -20,6 +20,7 @@
 #include "../../mlkem/src/common.h"
 
 #include "../../mlkem/mlkem_native.h"
+#include "../src/test_namespace.h"
 
 /* Print supported API modes and exit (used by wycheproof_client.py) */
 static void print_info(void)
@@ -140,8 +141,8 @@ int main(int argc, char *argv[])
   {
     /* keygen_seed seed=HEX (64 bytes = d || z) */
     unsigned char seed[2 * MLKEM_SYMBYTES];
-    unsigned char ek[CRYPTO_PUBLICKEYBYTES];
-    unsigned char dk[CRYPTO_SECRETKEYBYTES];
+    unsigned char ek[MLKEM_PK_BYTES];
+    unsigned char dk[MLKEM_SK_BYTES];
 
     if (argc != 3)
     {
@@ -154,7 +155,7 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    CHECK(crypto_kem_keypair_derand(ek, dk, seed) == 0);
+    CHECK(mlk_kem_keypair_derand(ek, dk, seed) == 0);
     print_hex("ek", ek, sizeof(ek));
     print_hex("dk", dk, sizeof(dk));
   }
@@ -164,10 +165,10 @@ int main(int argc, char *argv[])
       if (strcmp(argv[1], "encaps") == 0)
   {
     /* encaps ek=HEX m=HEX */
-    unsigned char ek[CRYPTO_PUBLICKEYBYTES];
+    unsigned char ek[MLKEM_PK_BYTES];
     unsigned char m[MLKEM_SYMBYTES];
-    unsigned char ct[CRYPTO_CIPHERTEXTBYTES];
-    unsigned char ss[CRYPTO_BYTES];
+    unsigned char ct[MLKEM_CT_BYTES];
+    unsigned char ss[MLKEM_BYTES];
 
     if (argc != 4)
     {
@@ -181,7 +182,7 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    CHECK(crypto_kem_enc_derand(ct, ss, ek, m) == 0);
+    CHECK(mlk_kem_enc_derand(ct, ss, ek, m) == 0);
     print_hex("c", ct, sizeof(ct));
     print_hex("K", ss, sizeof(ss));
   }
@@ -191,9 +192,9 @@ int main(int argc, char *argv[])
       if (strcmp(argv[1], "decaps") == 0)
   {
     /* decaps dk=HEX c=HEX */
-    unsigned char dk[CRYPTO_SECRETKEYBYTES];
-    unsigned char c[CRYPTO_CIPHERTEXTBYTES];
-    unsigned char ss[CRYPTO_BYTES];
+    unsigned char dk[MLKEM_SK_BYTES];
+    unsigned char c[MLKEM_CT_BYTES];
+    unsigned char ss[MLKEM_BYTES];
 
     if (argc != 4)
     {
@@ -212,7 +213,7 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    CHECK(crypto_kem_dec(ss, c, dk) == 0);
+    CHECK(mlk_kem_dec(ss, c, dk) == 0);
     print_hex("K", ss, sizeof(ss));
   }
   else

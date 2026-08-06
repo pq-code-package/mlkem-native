@@ -9,7 +9,7 @@ without requiring a `randombytes()` implementation.
 
 Use this approach when:
 - Your application manages its own entropy/randomness externally
-- You only need `crypto_kem_keypair_derand` and `crypto_kem_enc_derand` (deterministic variants)
+- You only need `mlkem_keypair_derand` and `mlkem_enc_derand` (deterministic variants)
 
 ## Components
 
@@ -21,7 +21,7 @@ No `randombytes()` implementation is required.
 ## Configuration
 
 The configuration file [mlkem_native_config.h](mlkem_native/mlkem_native_config.h) sets:
-- `MLK_CONFIG_NO_RANDOMIZED_API`: Disables `crypto_kem_keypair` and `crypto_kem_enc`
+- `MLK_CONFIG_NO_RANDOMIZED_API`: Disables `mlkem_keypair` and `mlkem_enc`
 - `MLK_CONFIG_PARAMETER_SET`: Security level (default 768)
 - `MLK_CONFIG_NAMESPACE_PREFIX`: Symbol prefix (set to `mlkem`)
 

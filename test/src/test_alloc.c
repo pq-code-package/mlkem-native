@@ -12,6 +12,7 @@
 #include "../../mlkem/src/common.h"
 #include "../notrandombytes/notrandombytes.h"
 #include "../test_vectors/expected_test_vectors.h"
+#include "test_namespace.h"
 
 /*
  * Level-dependent allocation limit macros.
@@ -331,15 +332,15 @@ void custom_free(test_ctx_t *ctx, void *p, size_t sz, const char *file,
 #if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 static int test_keypair_derand_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t pk[MLKEM_PK_BYTES];
+  uint8_t sk[MLKEM_SK_BYTES];
   uint8_t coins[2 * MLKEM_SYMBYTES];
 
   memcpy(coins, test_vector_d, MLKEM_SYMBYTES);
   memcpy(coins + MLKEM_SYMBYTES, test_vector_z, MLKEM_SYMBYTES);
 
-  TEST_ALLOC_FAILURE("crypto_kem_keypair_derand",
-                     crypto_kem_keypair_derand(pk, sk, coins, ctx),
+  TEST_ALLOC_FAILURE("keypair_derand",
+                     mlk_kem_keypair_derand(pk, sk, coins, ctx),
                      MLK_TOTAL_ALLOC_KEYPAIR, &ctx->global_high_mark_keypair);
   return 0;
 }
@@ -347,10 +348,10 @@ static int test_keypair_derand_alloc_failure(test_ctx_t *ctx)
 #if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 static int test_keypair_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t pk[MLKEM_PK_BYTES];
+  uint8_t sk[MLKEM_SK_BYTES];
 
-  TEST_ALLOC_FAILURE("crypto_kem_keypair", crypto_kem_keypair(pk, sk, ctx),
+  TEST_ALLOC_FAILURE("keypair", mlk_kem_keypair(pk, sk, ctx),
                      MLK_TOTAL_ALLOC_KEYPAIR, &ctx->global_high_mark_keypair);
   return 0;
 }
@@ -360,12 +361,12 @@ static int test_keypair_alloc_failure(test_ctx_t *ctx)
 #if !defined(MLK_CONFIG_NO_ENCAPS_API)
 static int test_enc_derand_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
-  uint8_t ss[CRYPTO_BYTES];
+  uint8_t ct[MLKEM_CT_BYTES];
+  uint8_t ss[MLKEM_BYTES];
 
   TEST_ALLOC_FAILURE(
-      "crypto_kem_enc_derand",
-      crypto_kem_enc_derand(ct, ss, test_vector_pk, test_vector_m, ctx),
+      "enc_derand",
+      mlk_kem_enc_derand(ct, ss, test_vector_pk, test_vector_m, ctx),
       MLK_TOTAL_ALLOC_ENCAPS, &ctx->global_high_mark_encaps);
   return 0;
 }
@@ -373,11 +374,10 @@ static int test_enc_derand_alloc_failure(test_ctx_t *ctx)
 #if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
 static int test_enc_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
-  uint8_t ss[CRYPTO_BYTES];
+  uint8_t ct[MLKEM_CT_BYTES];
+  uint8_t ss[MLKEM_BYTES];
 
-  TEST_ALLOC_FAILURE("crypto_kem_enc",
-                     crypto_kem_enc(ct, ss, test_vector_pk, ctx),
+  TEST_ALLOC_FAILURE("enc", mlk_kem_enc(ct, ss, test_vector_pk, ctx),
                      MLK_TOTAL_ALLOC_ENCAPS, &ctx->global_high_mark_encaps);
   return 0;
 }
@@ -385,8 +385,7 @@ static int test_enc_alloc_failure(test_ctx_t *ctx)
 
 static int test_check_pk_alloc_failure(test_ctx_t *ctx)
 {
-  TEST_ALLOC_FAILURE("crypto_kem_check_pk",
-                     crypto_kem_check_pk(test_vector_pk, ctx),
+  TEST_ALLOC_FAILURE("check_pk", mlk_kem_check_pk(test_vector_pk, ctx),
                      MLK_TOTAL_ALLOC_KEYPAIR, &ctx->global_high_mark_keypair);
   return 0;
 }
@@ -395,18 +394,17 @@ static int test_check_pk_alloc_failure(test_ctx_t *ctx)
 #if !defined(MLK_CONFIG_NO_DECAPS_API)
 static int test_dec_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t ss[CRYPTO_BYTES];
+  uint8_t ss[MLKEM_BYTES];
 
-  TEST_ALLOC_FAILURE("crypto_kem_dec",
-                     crypto_kem_dec(ss, test_vector_ct, test_vector_sk, ctx),
+  TEST_ALLOC_FAILURE("dec",
+                     mlk_kem_dec(ss, test_vector_ct, test_vector_sk, ctx),
                      MLK_TOTAL_ALLOC_DECAPS, &ctx->global_high_mark_decaps);
   return 0;
 }
 
 static int test_check_sk_alloc_failure(test_ctx_t *ctx)
 {
-  TEST_ALLOC_FAILURE("crypto_kem_check_sk",
-                     crypto_kem_check_sk(test_vector_sk, ctx),
+  TEST_ALLOC_FAILURE("check_sk", mlk_kem_check_sk(test_vector_sk, ctx),
                      MLK_TOTAL_ALLOC_KEYPAIR, &ctx->global_high_mark_keypair);
   return 0;
 }

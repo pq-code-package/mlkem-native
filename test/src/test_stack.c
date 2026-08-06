@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "mlkem_native.h"
+#include "test_namespace.h"
 
 #include "../test_vectors/expected_test_vectors.h"
 
@@ -33,13 +34,13 @@ static void print_info(void)
 #if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 static void test_keygen_only(void)
 {
-  unsigned char pk[CRYPTO_PUBLICKEYBYTES];
-  unsigned char sk[CRYPTO_SECRETKEYBYTES];
+  unsigned char pk[MLKEM_PK_BYTES];
+  unsigned char sk[MLKEM_SK_BYTES];
   unsigned char coins[2 * MLKEM_SYMBYTES] = {0};
 
   /* Only call keypair_derand - this is what we're measuring */
   /* coins is zero-initialized; the value is irrelevant for stack measurement */
-  int ret = crypto_kem_keypair_derand(pk, sk, coins);
+  int ret = mlk_kem_keypair_derand(pk, sk, coins);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 }
 #endif /* !MLK_CONFIG_NO_KEYPAIR_API */
@@ -47,14 +48,14 @@ static void test_keygen_only(void)
 #if !defined(MLK_CONFIG_NO_ENCAPS_API)
 static void test_encaps_only(void)
 {
-  unsigned char pk[CRYPTO_PUBLICKEYBYTES] = {0};
-  unsigned char ct[CRYPTO_CIPHERTEXTBYTES];
-  unsigned char ss[CRYPTO_BYTES];
+  unsigned char pk[MLKEM_PK_BYTES] = {0};
+  unsigned char ct[MLKEM_CT_BYTES];
+  unsigned char ss[MLKEM_BYTES];
   unsigned char coins[MLKEM_SYMBYTES] = {0};
 
   /* Only call enc_derand - this is what we're measuring */
   /* pk and coins are zero-initialized (OK for stack measurement) */
-  int ret = crypto_kem_enc_derand(ct, ss, pk, coins);
+  int ret = mlk_kem_enc_derand(ct, ss, pk, coins);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 }
 #endif /* !MLK_CONFIG_NO_ENCAPS_API */
@@ -62,18 +63,18 @@ static void test_encaps_only(void)
 #if !defined(MLK_CONFIG_NO_DECAPS_API)
 static void test_decaps_only(void)
 {
-  unsigned char sk[CRYPTO_SECRETKEYBYTES];
-  unsigned char ct[CRYPTO_CIPHERTEXTBYTES];
-  unsigned char ss[CRYPTO_BYTES];
+  unsigned char sk[MLKEM_SK_BYTES];
+  unsigned char ct[MLKEM_CT_BYTES];
+  unsigned char ss[MLKEM_BYTES];
   int ret;
 
-  /* A valid sk is needed: crypto_kem_dec() returns on the H(ek) check
+  /* A valid sk is needed: mlk_kem_dec() returns on the H(ek) check
    * before decapsulating, leaving most of the work unmeasured. */
   memcpy(sk, test_vector_sk, sizeof(sk));
   memcpy(ct, test_vector_ct, sizeof(ct));
 
   /* Only call decaps - this is what we're measuring */
-  ret = crypto_kem_dec(ss, ct, sk);
+  ret = mlk_kem_dec(ss, ct, sk);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 }
 #endif /* !MLK_CONFIG_NO_DECAPS_API */

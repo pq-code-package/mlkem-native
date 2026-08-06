@@ -59,8 +59,6 @@ The wrapper [mlkem_native_all.c](mlkem_native_all.c) includes `mlkem_native.c` t
 
 The header [mlkem_native_all.h](mlkem_native_all.h) exposes all APIs:
 ```c
-#define MLK_CONFIG_NO_SUPERCOP
-
 #define MLK_CONFIG_PARAMETER_SET 512
 #include <mlkem_native.h>
 #undef MLK_CONFIG_PARAMETER_SET
@@ -81,7 +79,6 @@ The header [mlkem_native_all.h](mlkem_native_all.h) exposes all APIs:
 
 - `MLK_CONFIG_MULTILEVEL_WITH_SHARED` must be set for exactly ONE level
 - `MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS` prevents cleanup of shared headers between inclusions
-- `MLK_CONFIG_NO_SUPERCOP` is required to avoid conflicting `CRYPTO_*` macro definitions
 
 ## Usage
 

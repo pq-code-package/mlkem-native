@@ -119,7 +119,7 @@
  *
  * By default, mlkem-native includes support for generating key pairs.
  * If you don't need this, set MLK_CONFIG_NO_KEYPAIR_API to exclude
- * crypto_kem_keypair and crypto_kem_keypair_derand, and all internal
+ * keypair and keypair_derand, and all internal
  * APIs only needed by those functions.
  */
 /* #define MLK_CONFIG_NO_KEYPAIR_API */
@@ -129,11 +129,11 @@
  *
  * By default, mlkem-native includes support for encapsulation. If you
  * don't need this, set MLK_CONFIG_NO_ENCAPS_API to exclude
- * crypto_kem_enc, crypto_kem_enc_derand, crypto_kem_check_pk, and
+ * enc, enc_derand, check_pk, and
  * all internal APIs only needed by those functions.
  *
  * @note Setting this option is incompatible with MLK_CONFIG_KEYGEN_PCT
- *       as the current PCT implementation requires crypto_kem_enc().
+ *       as the current PCT implementation requires enc().
  */
 /* #define MLK_CONFIG_NO_ENCAPS_API */
 
@@ -142,11 +142,11 @@
  *
  * By default, mlkem-native includes support for decapsulation. If you
  * don't need this, set MLK_CONFIG_NO_DECAPS_API to exclude
- * crypto_kem_dec, crypto_kem_check_sk, and all internal APIs only
+ * dec, check_sk, and all internal APIs only
  * needed by those functions.
  *
  * @note Setting this option is incompatible with MLK_CONFIG_KEYGEN_PCT
- *       as the current PCT implementation requires crypto_kem_dec().
+ *       as the current PCT implementation requires dec().
  */
 /* #define MLK_CONFIG_NO_DECAPS_API */
 
@@ -154,27 +154,15 @@
  * MLK_CONFIG_NO_RANDOMIZED_API
  *
  * If this option is set, mlkem-native will be built without the randomized
- * API functions (crypto_kem_keypair and crypto_kem_enc). This allows users
+ * API functions (keypair and enc). This allows users
  * to build mlkem-native without providing a randombytes() implementation
- * if they only need the deterministic API (crypto_kem_keypair_derand,
- * crypto_kem_enc_derand, crypto_kem_dec).
+ * if they only need the deterministic API (keypair_derand,
+ * enc_derand, dec).
  *
  * @note This option is incompatible with MLK_CONFIG_KEYGEN_PCT as the
- *       current PCT implementation requires crypto_kem_enc().
+ *       current PCT implementation requires enc().
  */
 /* #define MLK_CONFIG_NO_RANDOMIZED_API */
-
-/**
- * MLK_CONFIG_NO_SUPERCOP
- *
- * By default, mlkem_native.h exposes the mlkem-native API in the SUPERCOP
- * naming convention (crypto_kem_xxx). If you don't need this, set
- * MLK_CONFIG_NO_SUPERCOP.
- *
- * @note You must set this for a multi-level build as the SUPERCOP naming
- *       does not disambiguate between the parameter sets.
- */
-/* #define MLK_CONFIG_NO_SUPERCOP */
 
 /**
  * MLK_CONFIG_CONSTANTS_ONLY
@@ -618,7 +606,7 @@ static inline void *mlk_posix_memalign(size_t align, size_t sz)
  * can be exported.
  *
  * Set this option if such a check should be implemented. In this case,
- * crypto_kem_keypair_derand and crypto_kem_keypair will return a non-zero
+ * keypair_derand and keypair will return a non-zero
  * error code if the PCT failed.
  *
  * @note This feature will drastically lower the performance of key

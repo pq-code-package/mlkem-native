@@ -12,6 +12,7 @@
 #include "hal.h"
 
 #include "../../mlkem/mlkem_native.h"
+#include "../src/test_namespace.h"
 
 #ifndef MLK_BENCHMARK_NWARMUP
 #define MLK_BENCHMARK_NWARMUP 50
@@ -79,12 +80,12 @@ static void print_percentiles(const char *txt,
 
 static int bench(void)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
-  uint8_t key_a[CRYPTO_BYTES];
-  uint8_t key_b[CRYPTO_BYTES];
-  unsigned char kg_rand[2 * CRYPTO_BYTES], enc_rand[CRYPTO_BYTES];
+  uint8_t pk[MLKEM_PK_BYTES];
+  uint8_t sk[MLKEM_SK_BYTES];
+  uint8_t ct[MLKEM_CT_BYTES];
+  uint8_t key_a[MLKEM_BYTES];
+  uint8_t key_b[MLKEM_BYTES];
+  unsigned char kg_rand[2 * MLKEM_BYTES], enc_rand[MLKEM_BYTES];
   uint64_t cycles_kg[MLK_BENCHMARK_NTESTS], cycles_enc[MLK_BENCHMARK_NTESTS],
       cycles_dec[MLK_BENCHMARK_NTESTS];
 
@@ -95,19 +96,19 @@ static int bench(void)
   for (i = 0; i < MLK_BENCHMARK_NTESTS; i++)
   {
     int ret = 0;
-    CHECK(randombytes(kg_rand, 2 * CRYPTO_BYTES) == 0);
-    CHECK(randombytes(enc_rand, CRYPTO_BYTES) == 0);
+    CHECK(randombytes(kg_rand, 2 * MLKEM_BYTES) == 0);
+    CHECK(randombytes(enc_rand, MLKEM_BYTES) == 0);
 
     /* Key-pair generation */
     for (j = 0; j < MLK_BENCHMARK_NWARMUP; j++)
     {
-      ret |= crypto_kem_keypair_derand(pk, sk, kg_rand);
+      ret |= mlk_kem_keypair_derand(pk, sk, kg_rand);
     }
 
     t0 = get_cyclecounter();
     for (j = 0; j < MLK_BENCHMARK_NITERATIONS; j++)
     {
-      ret |= crypto_kem_keypair_derand(pk, sk, kg_rand);
+      ret |= mlk_kem_keypair_derand(pk, sk, kg_rand);
     }
     t1 = get_cyclecounter();
     cycles_kg[i] = t1 - t0;
@@ -116,12 +117,12 @@ static int bench(void)
     /* Encapsulation */
     for (j = 0; j < MLK_BENCHMARK_NWARMUP; j++)
     {
-      ret |= crypto_kem_enc_derand(ct, key_a, pk, enc_rand);
+      ret |= mlk_kem_enc_derand(ct, key_a, pk, enc_rand);
     }
     t0 = get_cyclecounter();
     for (j = 0; j < MLK_BENCHMARK_NITERATIONS; j++)
     {
-      ret |= crypto_kem_enc_derand(ct, key_a, pk, enc_rand);
+      ret |= mlk_kem_enc_derand(ct, key_a, pk, enc_rand);
     }
     t1 = get_cyclecounter();
     cycles_enc[i] = t1 - t0;
@@ -129,18 +130,18 @@ static int bench(void)
     /* Decapsulation */
     for (j = 0; j < MLK_BENCHMARK_NWARMUP; j++)
     {
-      ret |= crypto_kem_dec(key_b, ct, sk);
+      ret |= mlk_kem_dec(key_b, ct, sk);
     }
     t0 = get_cyclecounter();
     for (j = 0; j < MLK_BENCHMARK_NITERATIONS; j++)
     {
-      ret |= crypto_kem_dec(key_b, ct, sk);
+      ret |= mlk_kem_dec(key_b, ct, sk);
     }
     t1 = get_cyclecounter();
     cycles_dec[i] = t1 - t0;
 
     CHECK(ret == 0);
-    CHECK(memcmp(key_a, key_b, CRYPTO_BYTES) == 0);
+    CHECK(memcmp(key_a, key_b, MLKEM_BYTES) == 0);
   }
 
   qsort(cycles_kg, MLK_BENCHMARK_NTESTS, sizeof(uint64_t), cmp_uint64_t);

@@ -122,15 +122,15 @@
 #endif
 
 #if defined(MLK_CONFIG_NO_RANDOMIZED_API) && defined(MLK_CONFIG_KEYGEN_PCT)
-#error Bad configuration: MLK_CONFIG_NO_RANDOMIZED_API is incompatible with MLK_CONFIG_KEYGEN_PCT as the current PCT implementation requires crypto_kem_enc()
+#error Bad configuration: MLK_CONFIG_NO_RANDOMIZED_API is incompatible with MLK_CONFIG_KEYGEN_PCT as the current PCT implementation requires enc()
 #endif
 
 #if defined(MLK_CONFIG_NO_ENCAPS_API) && defined(MLK_CONFIG_KEYGEN_PCT)
-#error Bad configuration: MLK_CONFIG_NO_ENCAPS_API is incompatible with MLK_CONFIG_KEYGEN_PCT as the current PCT implementation requires crypto_kem_enc()
+#error Bad configuration: MLK_CONFIG_NO_ENCAPS_API is incompatible with MLK_CONFIG_KEYGEN_PCT as the current PCT implementation requires enc()
 #endif
 
 #if defined(MLK_CONFIG_NO_DECAPS_API) && defined(MLK_CONFIG_KEYGEN_PCT)
-#error Bad configuration: MLK_CONFIG_NO_DECAPS_API is incompatible with MLK_CONFIG_KEYGEN_PCT as the current PCT implementation requires crypto_kem_dec()
+#error Bad configuration: MLK_CONFIG_NO_DECAPS_API is incompatible with MLK_CONFIG_KEYGEN_PCT as the current PCT implementation requires dec()
 #endif
 
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
