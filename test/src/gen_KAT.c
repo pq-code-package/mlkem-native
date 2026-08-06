@@ -8,6 +8,7 @@
 #include "../../mlkem/src/fips202/fips202.h"
 
 #include "../../mlkem/mlkem_native.h"
+#include "test_namespace.h"
 
 #if defined(MLK_CONFIG_NO_KEYPAIR_API) || defined(MLK_CONFIG_NO_ENCAPS_API) || \
     defined(MLK_CONFIG_NO_DECAPS_API)
@@ -59,12 +60,12 @@ int main(void);
 int main(void)
 {
   unsigned i;
-  MLK_ALIGN uint8_t coins[3 * CRYPTO_SYMBYTES];
-  MLK_ALIGN uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  MLK_ALIGN uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  MLK_ALIGN uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
-  MLK_ALIGN uint8_t ss1[CRYPTO_BYTES];
-  MLK_ALIGN uint8_t ss2[CRYPTO_BYTES];
+  MLK_ALIGN uint8_t coins[3 * MLKEM_SYMBYTES];
+  MLK_ALIGN uint8_t pk[MLKEM_PK_BYTES];
+  MLK_ALIGN uint8_t sk[MLKEM_SK_BYTES];
+  MLK_ALIGN uint8_t ct[MLKEM_CT_BYTES];
+  MLK_ALIGN uint8_t ss1[MLKEM_BYTES];
+  MLK_ALIGN uint8_t ss2[MLKEM_BYTES];
 
   const uint8_t seed[64] = {
       32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
@@ -85,14 +86,14 @@ int main(void)
   {
     mlk_shake256(coins, sizeof(coins), coins, sizeof(coins));
 
-    CHECK(crypto_kem_keypair_derand(pk, sk, coins) == 0);
+    CHECK(mlk_kem_keypair_derand(pk, sk, coins) == 0);
     print_hex("pk", pk, sizeof(pk));
     print_hex("sk", sk, sizeof(sk));
 
-    CHECK(crypto_kem_enc_derand(ct, ss1, pk, coins + 2 * MLKEM_SYMBYTES) == 0);
+    CHECK(mlk_kem_enc_derand(ct, ss1, pk, coins + 2 * MLKEM_SYMBYTES) == 0);
     print_hex("ct", ct, sizeof(ct));
 
-    CHECK(crypto_kem_dec(ss2, ct, sk) == 0);
+    CHECK(mlk_kem_dec(ss2, ct, sk) == 0);
     CHECK(memcmp(ss1, ss2, sizeof(ss1)) == 0);
 
     print_hex("ss", ss1, sizeof(ss1));

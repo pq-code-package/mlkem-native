@@ -212,7 +212,7 @@ static MLK_INLINE int mlk_randombytes(uint8_t *ptr, size_t len)
  *              generated keypair before it can be exported.
  *
  *              Set this option if such a check should be implemented.
- *              In this case, crypto_kem_keypair_derand and crypto_kem_keypair
+ *              In this case, keypair_derand and keypair
  *              will return a non-zero error code if the PCT failed.
  *
  *              NOTE: This feature will drastically lower the performance of

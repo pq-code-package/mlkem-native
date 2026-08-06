@@ -145,11 +145,6 @@
  * Undefine macros from MLK_CONFIG_PARAMETER_SET-specific files
  */
 /* mlkem/mlkem_native.h */
-#undef CRYPTO_BYTES
-#undef CRYPTO_CIPHERTEXTBYTES
-#undef CRYPTO_PUBLICKEYBYTES
-#undef CRYPTO_SECRETKEYBYTES
-#undef CRYPTO_SYMBYTES
 #undef MLKEM1024_BYTES
 #undef MLKEM1024_CIPHERTEXTBYTES
 #undef MLKEM1024_PUBLICKEYBYTES
@@ -203,13 +198,6 @@
 #undef MLK_TOTAL_ALLOC_768_KEYPAIR
 #undef MLK_TOTAL_ALLOC_768_KEYPAIR_NO_PCT
 #undef MLK_TOTAL_ALLOC_768_KEYPAIR_PCT
-#undef crypto_kem_check_pk
-#undef crypto_kem_check_sk
-#undef crypto_kem_dec
-#undef crypto_kem_enc
-#undef crypto_kem_enc_derand
-#undef crypto_kem_keypair
-#undef crypto_kem_keypair_derand
 /* mlkem/src/common.h */
 #undef MLK_ADD_PARAM_SET
 #undef MLK_ALLOC

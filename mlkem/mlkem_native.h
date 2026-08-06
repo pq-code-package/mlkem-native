@@ -370,47 +370,8 @@ int MLK_API_NAMESPACE(check_sk)(
 }
 #endif
 
-/****************************** SUPERCOP API *********************************/
-
-#if !defined(MLK_CONFIG_NO_SUPERCOP)
-/* Export API in SUPERCOP naming scheme CRYPTO_xxx / crypto_kem_xxx */
-#define CRYPTO_SECRETKEYBYTES MLKEM_SECRETKEYBYTES(MLK_CONFIG_PARAMETER_SET)
-#define CRYPTO_PUBLICKEYBYTES MLKEM_PUBLICKEYBYTES(MLK_CONFIG_PARAMETER_SET)
-#define CRYPTO_CIPHERTEXTBYTES MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_PARAMETER_SET)
-#define CRYPTO_SYMBYTES MLKEM_SYMBYTES
-#define CRYPTO_BYTES MLKEM_BYTES
-
-#if !defined(MLK_CONFIG_NO_KEYPAIR_API)
-#define crypto_kem_keypair_derand MLK_API_NAMESPACE(keypair_derand)
-#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
-#define crypto_kem_keypair MLK_API_NAMESPACE(keypair)
-#endif
-#endif /* !MLK_CONFIG_NO_KEYPAIR_API */
-#if !defined(MLK_CONFIG_NO_ENCAPS_API)
-#define crypto_kem_enc_derand MLK_API_NAMESPACE(enc_derand)
-#if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
-#define crypto_kem_enc MLK_API_NAMESPACE(enc)
-#endif
-#define crypto_kem_check_pk MLK_API_NAMESPACE(check_pk)
-#endif /* !MLK_CONFIG_NO_ENCAPS_API */
-#if !defined(MLK_CONFIG_NO_DECAPS_API)
-#define crypto_kem_dec MLK_API_NAMESPACE(dec)
-#define crypto_kem_check_sk MLK_API_NAMESPACE(check_sk)
-#endif
-
-#else /* !MLK_CONFIG_NO_SUPERCOP */
-
-/* If the SUPERCOP API is not needed, we can undefine the various helper macros
- * above. Otherwise, they are needed for lazy evaluation of crypto_kem_xxx. */
-#undef MLK_API_CONCAT
-#undef MLK_API_CONCAT_
-#undef MLK_API_CONCAT_UNDERSCORE
-#undef MLK_API_NAMESPACE
 #undef MLK_API_NAMESPACE_PREFIX
-#undef MLK_API_MUST_CHECK_RETURN_VALUE
-#undef MLK_API_QUALIFIER
 
-#endif /* MLK_CONFIG_NO_SUPERCOP */
 #endif /* !MLK_CONFIG_CONSTANTS_ONLY */
 
 

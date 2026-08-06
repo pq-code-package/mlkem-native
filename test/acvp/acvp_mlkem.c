@@ -9,6 +9,7 @@
 #include "../../mlkem/src/common.h"
 
 #include "../../mlkem/mlkem_native.h"
+#include "../src/test_namespace.h"
 
 #define USAGE \
   "acvp_mlkem{lvl} [encapDecap|keyGen] [AFT|VAL] {test specific arguments}"
@@ -137,44 +138,44 @@ static void print_hex(const char *name, const unsigned char *raw, size_t len)
  * environments, e.g. AVR. */
 #if !defined(MLK_CONFIG_NO_ENCAPS_API)
 static MLK_NOINLINE void acvp_mlkem_encapDecp_AFT_encapsulation(
-    unsigned char const ek[CRYPTO_PUBLICKEYBYTES],
+    unsigned char const ek[MLKEM_PK_BYTES],
     unsigned char const m[MLKEM_SYMBYTES])
 {
-  unsigned char ct[CRYPTO_CIPHERTEXTBYTES];
-  unsigned char ss[CRYPTO_BYTES];
+  unsigned char ct[MLKEM_CT_BYTES];
+  unsigned char ss[MLKEM_BYTES];
 
-  CHECK(crypto_kem_enc_derand(ct, ss, ek, m) == 0);
+  CHECK(mlk_kem_enc_derand(ct, ss, ek, m) == 0);
 
   print_hex("c", ct, sizeof(ct));
   print_hex("k", ss, sizeof(ss));
 }
 
 static MLK_NOINLINE void acvp_mlkem_encapDecp_VAL_encapsulationKeyCheck(
-    unsigned char const ek[CRYPTO_PUBLICKEYBYTES])
+    unsigned char const ek[MLKEM_PK_BYTES])
 {
   int rc = 0;
-  rc = (crypto_kem_check_pk(ek) == 0) ? 1 : 0;
+  rc = (mlk_kem_check_pk(ek) == 0) ? 1 : 0;
   printf("testPassed=%d\n", rc);
 }
 #endif /* !MLK_CONFIG_NO_ENCAPS_API */
 
 #if !defined(MLK_CONFIG_NO_DECAPS_API)
 static MLK_NOINLINE void acvp_mlkem_encapDecp_VAL_decapsulation(
-    unsigned char const dk[CRYPTO_SECRETKEYBYTES],
-    unsigned char const c[CRYPTO_CIPHERTEXTBYTES])
+    unsigned char const dk[MLKEM_SK_BYTES],
+    unsigned char const c[MLKEM_CT_BYTES])
 {
-  unsigned char ss[CRYPTO_BYTES];
+  unsigned char ss[MLKEM_BYTES];
 
-  CHECK(crypto_kem_dec(ss, c, dk) == 0);
+  CHECK(mlk_kem_dec(ss, c, dk) == 0);
 
   print_hex("k", ss, sizeof(ss));
 }
 
 static MLK_NOINLINE void acvp_mlkem_encapDecp_VAL_decapsulationKeyCheck(
-    unsigned char const dk[CRYPTO_SECRETKEYBYTES])
+    unsigned char const dk[MLKEM_SK_BYTES])
 {
   int rc = 0;
-  rc = (crypto_kem_check_sk(dk) == 0) ? 1 : 0;
+  rc = (mlk_kem_check_sk(dk) == 0) ? 1 : 0;
   printf("testPassed=%d\n", rc);
 }
 #endif /* !MLK_CONFIG_NO_DECAPS_API */
@@ -184,14 +185,14 @@ static MLK_NOINLINE void acvp_mlkem_keyGen_AFT(
     unsigned char const z[MLKEM_SYMBYTES],
     unsigned char const d[MLKEM_SYMBYTES])
 {
-  unsigned char ek[CRYPTO_PUBLICKEYBYTES];
-  unsigned char dk[CRYPTO_SECRETKEYBYTES];
+  unsigned char ek[MLKEM_PK_BYTES];
+  unsigned char dk[MLKEM_SK_BYTES];
 
   unsigned char zd[2 * MLKEM_SYMBYTES];
   memcpy(zd, d, MLKEM_SYMBYTES);
   memcpy(zd + MLKEM_SYMBYTES, z, MLKEM_SYMBYTES);
 
-  CHECK(crypto_kem_keypair_derand(ek, dk, zd) == 0);
+  CHECK(mlk_kem_keypair_derand(ek, dk, zd) == 0);
 
   print_hex("ek", ek, sizeof(ek));
   print_hex("dk", dk, sizeof(dk));
@@ -318,7 +319,7 @@ int main(int argc, char *argv[])
 #if !defined(MLK_CONFIG_NO_ENCAPS_API)
         case encapsulation:
         {
-          unsigned char ek[CRYPTO_PUBLICKEYBYTES];
+          unsigned char ek[MLKEM_PK_BYTES];
           unsigned char m[MLKEM_SYMBYTES];
           /* Encapsulation only for "AFT" */
           if (type != AFT)
@@ -348,8 +349,8 @@ int main(int argc, char *argv[])
 #if !defined(MLK_CONFIG_NO_DECAPS_API)
         case decapsulation:
         {
-          unsigned char dk[CRYPTO_SECRETKEYBYTES];
-          unsigned char c[CRYPTO_CIPHERTEXTBYTES];
+          unsigned char dk[MLKEM_SK_BYTES];
+          unsigned char c[MLKEM_CT_BYTES];
           /* Decapsulation only for "VAL" */
           if (type != VAL)
           {
@@ -378,7 +379,7 @@ int main(int argc, char *argv[])
 #if !defined(MLK_CONFIG_NO_ENCAPS_API)
         case encapsulationKeyCheck:
         {
-          unsigned char ek[CRYPTO_PUBLICKEYBYTES];
+          unsigned char ek[MLKEM_PK_BYTES];
           /* encapsulationKeyCheck only for "VAL" */
           if (type != VAL || argc == 0)
           {
@@ -406,7 +407,7 @@ int main(int argc, char *argv[])
 #if !defined(MLK_CONFIG_NO_DECAPS_API)
         case decapsulationKeyCheck:
         {
-          unsigned char dk[CRYPTO_SECRETKEYBYTES];
+          unsigned char dk[MLKEM_SK_BYTES];
           /* Encapsulation only for "VAL" */
           if (type != VAL || argc == 0)
           {
