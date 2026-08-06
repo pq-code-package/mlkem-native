@@ -210,7 +210,7 @@
 #endif
 
 
-/* New X86_64 CPUs support Conflow-flow protection using the CET instructions.
+/* New X86_64 CPUs support control-flow protection using the CET instructions.
  * When enabled (through -fcf-protection=), all compilation units (including
  * empty ones) need to support CET for this to work.
  * For assembly, this means that source files need to signal support for

@@ -53,11 +53,13 @@ def download_acvp_files(version):
                     f"Error: Downloaded file {file_path} is not valid JSON: {e}",
                     file=sys.stderr,
                 )
-                local_file.unlink(missing_ok=True)
+                if local_file.exists():
+                    local_file.unlink()
                 return False
             except Exception as e:
                 print(f"Error downloading {file_path}: {e}", file=sys.stderr)
-                local_file.unlink(missing_ok=True)
+                if local_file.exists():
+                    local_file.unlink()
                 return False
 
     return True

@@ -139,7 +139,7 @@
  *              on the stack.
  *
  *              If you need bullet-proof zeroization of the stack, you need to
- *              consider additional measures instead of of what this feature
+ *              consider additional measures instead of what this feature
  *              provides. In this case, you can set mlk_zeroize to a no-op.
  *
  *****************************************************************************/
@@ -158,7 +158,7 @@
  * Name:        MLK_CONFIG_CUSTOM_RANDOMBYTES
  *
  * Description: mlkem-native does not provide a secure randombytes
- *              implementation. Such an implementation has to provided by the
+ *              implementation. Such an implementation has to be provided by the
  *              consumer.
  *
  *              If this option is not set, mlkem-native expects a function

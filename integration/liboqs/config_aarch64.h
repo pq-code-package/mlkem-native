@@ -84,16 +84,16 @@
 /******************************************************************************
  * Name:        MLK_CONFIG_USE_NATIVE_BACKEND_ARITH
  *
- * Description: Determines whether an native arithmetic backend should be used.
+ * Description: Determines whether a native arithmetic backend should be used.
  *
  *              The arithmetic backend covers performance critical functions
  *              such as the number-theoretic transform (NTT).
  *
  *              If this option is unset, the C backend will be used.
  *
- *              If this option is set, the arithmetic backend to be use is
+ *              If this option is set, the arithmetic backend to be used is
  *              determined by MLK_CONFIG_ARITH_BACKEND_FILE: If the latter is
- *              unset, the default backend for your the target architecture
+ *              unset, the default backend for your target architecture
  *              will be used. If set, it must be the name of a backend metadata
  *              file.
  *
@@ -177,7 +177,7 @@
  *              on the stack.
  *
  *              If you need bullet-proof zeroization of the stack, you need to
- *              consider additional measures instead of of what this feature
+ *              consider additional measures instead of what this feature
  *              provides. In this case, you can set mlk_zeroize to a no-op.
  *
  *****************************************************************************/
@@ -196,7 +196,7 @@
  * Name:        MLK_CONFIG_CUSTOM_RANDOMBYTES
  *
  * Description: mlkem-native does not provide a secure randombytes
- *              implementation. Such an implementation has to provided by the
+ *              implementation. Such an implementation has to be provided by the
  *              consumer.
  *
  *              If this option is not set, mlkem-native expects a function
