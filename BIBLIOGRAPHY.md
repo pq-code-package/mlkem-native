@@ -485,7 +485,7 @@ source code and documentation.
 
 ### `s2n-bignum`
 
-* s2n-bignum: Library of formally assembly kernels verified in HOL-Light
+* s2n-bignum: Library of formally verified assembly kernels in HOL-Light
 * Author(s):
   - Amazon Web Services
 * URL: https://github.com/awslabs/s2n-bignum/
