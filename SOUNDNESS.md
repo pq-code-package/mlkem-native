@@ -538,6 +538,6 @@ guarantee for the C proofs is therefore fundamentally weaker than for the assemb
 [^FIPS203]: National Institute of Standards and Technology: FIPS 203 Module-Lattice-Based Key-Encapsulation Mechanism Standard, [https://csrc.nist.gov/pubs/fips/203/final](https://csrc.nist.gov/pubs/fips/203/final)
 [^HOL-Light]: John Harrison: HOL-Light Theorem Prover, [https://hol-light.github.io/](https://hol-light.github.io/)
 [^HOLTrace]: Daniel J. Bernstein: HOLTrace: A collection of tools for processing traces of a HOL Light session, [https://holtrace.cr.yp.to/](https://holtrace.cr.yp.to/)
-[^s2n-bignum]: Amazon Web Services: s2n-bignum: Library of formally assembly kernels verified in HOL-Light, [https://github.com/awslabs/s2n-bignum/](https://github.com/awslabs/s2n-bignum/)
+[^s2n-bignum]: Amazon Web Services: s2n-bignum: Library of formally verified assembly kernels in HOL-Light, [https://github.com/awslabs/s2n-bignum/](https://github.com/awslabs/s2n-bignum/)
 [^s2n-bignum-soundness]: Amazon Web Services: s2n-bignum soundness documentation, [https://github.com/awslabs/s2n-bignum/blob/main/SOUNDNESS.md](https://github.com/awslabs/s2n-bignum/blob/main/SOUNDNESS.md)
 [^wycheproof]: Community Cryptography Specification Project: Project Wycheproof, [https://github.com/C2SP/wycheproof](https://github.com/C2SP/wycheproof)

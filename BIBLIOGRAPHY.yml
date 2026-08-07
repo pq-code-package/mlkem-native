@@ -26,7 +26,7 @@
   url: https://github.com/usnistgov/ACVP-Server
 
 - id: s2n-bignum
-  name: "s2n-bignum: Library of formally assembly kernels verified in HOL-Light"
+  name: "s2n-bignum: Library of formally verified assembly kernels in HOL-Light"
   author: Amazon Web Services
   url: https://github.com/awslabs/s2n-bignum/
 
