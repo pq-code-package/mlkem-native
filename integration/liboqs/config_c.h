@@ -91,7 +91,7 @@
  *              with mlkem-native.
  *
  *              If set, it must be the name of a file serving as the
- *              replacement for mlkem/fips202/fips202.h, and exposing
+ *              replacement for mlkem/src/fips202/fips202.h, and exposing
  *              the same API (see FIPS202.md).
  *
  *****************************************************************************/
@@ -108,7 +108,7 @@
  *              with mlkem-native.
  *
  *              If set, it must be the name of a file serving as the
- *              replacement for mlkem/fips202/fips202x4.h, and exposing
+ *              replacement for mlkem/src/fips202/fips202x4.h, and exposing
  *              the same API (see FIPS202.md).
  *
  *****************************************************************************/
