@@ -150,7 +150,7 @@ right answer as per FIPS 203), **memory-safe** (it only accesses memory within
 the bounds of what is provided or allocated) and **constant-time** (no
 secret-dependent timing variation).
 
-**Assembly (HOL Light).** All ASM specification capture functional correctness, memory safety,
+**Assembly (HOL Light).** All ASM specifications capture functional correctness, memory safety,
 and secret-independent execution. A special case is rejection sampling: Its assembly implementations
 are safely variable-time as they operate on public data only, so they only require correctness
 and safety specifications.
@@ -212,7 +212,7 @@ instructions such as divisions. The constant-time specifications then posit that
 emitted by a program can be expressed as a function of public variables such as input/output pointers or pointers
 to constant tables. Conversely, and somewhat implicitly, the absence of the (typically secret)
 _data_ behind those pointers as a parameter to the event-generating function implies that there
-is are no secret-dependent branches, load/stores, etc. It is the responsibility of the proof-writer
+are no secret-dependent branches, load/stores, etc. It is the responsibility of the proof-writer
 to identify what is meant to be public vs. secret, and parametrize the event-generating function
 accordingly.
 
@@ -309,7 +309,7 @@ arithmetic bounds, and constant tables.
 - HOL Light proves: If the input coefficients satisfy `abs(ival(x i)) <= &8191`, then the output
   satisfies `abs(ival zi) <= &23594` and `(ival zi == forward_ntt (ival o x) i) (mod &3329)`.
   In other words, we provide a description of the underlying modular arithmetic function (here, the NTT),
-  plus a bound on the concrete being computed.
+  plus a bound on the concrete values being computed.
 - The CBMC contract on `mlk_ntt_aarch64_asm` simplifies this to the mere bounds assertions
   `requires(array_abs_bound(p, 0, MLKEM_N, 8192))`
   and `ensures(array_abs_bound(p, 0, MLKEM_N, 23595))`, omitting the description of the
