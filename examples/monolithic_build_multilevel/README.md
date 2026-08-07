@@ -35,8 +35,6 @@ The configuration file [mlkem_native_config.h](mlkem_native/mlkem_native_config.
 
 The wrapper [mlkem_native_all.c](mlkem_native_all.c) includes `mlkem_native.c` three times:
 ```c
-#define MLK_CONFIG_FILE "multilevel_config.h"
-
 /* Include level-independent code with first level */
 #define MLK_CONFIG_MULTILEVEL_WITH_SHARED
 #define MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
