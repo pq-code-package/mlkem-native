@@ -4300,10 +4300,13 @@ def get_oqs_shared_sources(backend):
         for f in os.listdir(f"{mlkem_dir}/native")
         if os.path.isfile(f"{mlkem_dir}/native/{f}")
     ]
-    # Add FIPS202 glue code
+    # add the public header, which the glue consumes
+    sources.append("mlkem/mlkem_native.h")
+    # Add FIPS202 glue code and the KEM API glue
     sources += [
         "integration/liboqs/fips202_glue.h",
         "integration/liboqs/fips202x4_glue.h",
+        "integration/liboqs/kem_glue.c",
     ]
     # Add custom config
     if backend == "ref":
