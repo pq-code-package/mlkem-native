@@ -686,7 +686,11 @@ static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
  * e.g., PQCP_MLKEM_NATIVE_MLKEM512_
  */
 
-#if MLK_CONFIG_PARAMETER_SET == 512
+#if defined(MLK_CONFIG_MULTILEVEL_BUILD)
+/* In a multi-level build the parameter set is appended by the namespacing
+ * machinery, so the default prefix must not embed it. */
+#define MLK_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM
+#elif MLK_CONFIG_PARAMETER_SET == 512
 #define MLK_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM512
 #elif MLK_CONFIG_PARAMETER_SET == 768
 #define MLK_DEFAULT_NAMESPACE_PREFIX PQCP_MLKEM_NATIVE_MLKEM768
