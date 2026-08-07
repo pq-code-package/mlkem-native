@@ -1,5 +1,118 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
+mlkem-native v2.0.0
+===================
+
+Release notes
+-------------
+
+mlkem-native v2.0.0 is the second major release of mlkem-native. It follows
+mlkem-native v1.3 and makes minor API changes: It removes the SUPERCOP `crypto_kem_*`
+aliases and the legacy `MLK_CONFIG_API_*` path, splits the ambiguous `MLK_ERR_FAIL`
+return code into specific error codes, and renames the FIPS-202 backend and
+system-capability macros.
+
+See the full change log here:
+https://github.com/pq-code-package/mlkem-native/compare/v1.3.0...v2.0.0
+
+Long-Term Support
+-----------------
+
+[`release/v1.3`](https://github.com/pq-code-package/mlkem-native/tree/release/v1.3) will
+act as a support branch until February 2027 (inclusive). It will receive bugfixes, but no
+new features. We do currently not plan to offer long-term support for mlkem-native v1.x beyond that timeframe.
+
+If you are deploying mlkem-native v1.3 and expect to be unable to upgrade to
+mlkem-native v2 by February 2027, please contact us to discuss a potential extension
+of the support schedule.
+
+Breaking changes since v1.3.0
+-----------------------------
+
+- Split the ambiguous `MLK_ERR_FAIL` return code into `MLK_ERR_INVALID_PK`
+  (`-4`), `MLK_ERR_INVALID_SK` (`-5`), and `MLK_ERR_PCT_FAIL` (`-6`), returned
+  respectively for a public key rejected by the FIPS 203 modulus check, a secret
+  key rejected by the hash check, and a failed keygen pairwise consistency test.
+  The codes `-1`..`-3` are unchanged; `MLK_ERR_FAIL` remains defined but is no
+  longer returned by any function. Integrators mapping return codes into their
+  own error space must handle the new values.
+  ([#1852](https://github.com/pq-code-package/mlkem-native/pull/1852))
+- Remove the SUPERCOP `crypto_kem_*` API aliases, the `MLK_CONFIG_NO_SUPERCOP`
+  option, and the `CRYPTO_{PUBLICKEY,SECRETKEY,CIPHERTEXT}BYTES`,
+  `CRYPTO_SYMBYTES` and `CRYPTO_BYTES` size constants. Consumers must use the
+  namespaced API (e.g. `mlkem_keypair`) and derive sizes from
+  `MLK_CONFIG_PARAMETER_SET`.
+  ([#1857](https://github.com/pq-code-package/mlkem-native/pull/1857))
+- Remove the legacy `MLK_CONFIG_API_*` configuration path. Configure builds
+  through the configuration file instead, renaming `MLK_CONFIG_API_PARAMETER_SET`
+  to `MLK_CONFIG_PARAMETER_SET`, `MLK_CONFIG_API_NAMESPACE_PREFIX` to
+  `MLK_CONFIG_NAMESPACE_PREFIX`, `MLK_CONFIG_API_CONSTANTS_ONLY` to
+  `MLK_CONFIG_CONSTANTS_ONLY`, and `MLK_CONFIG_API_QUALIFIER` to
+  `MLK_CONFIG_EXTERNAL_API_QUALIFIER`. For a multi-level build, set
+  `MLK_CONFIG_MULTILEVEL_BUILD`; the parameter set is now appended to the
+  namespace prefix automatically.
+  ([#1853](https://github.com/pq-code-package/mlkem-native/pull/1853))
+- Prefix the `mlk_sys_cap` enum values with their architecture:
+  `MLK_SYS_CAP_{AVX2,NEON,SHA3,MVE}` become
+  `MLK_SYS_CAP_{X86_64_AVX2,AARCH64_NEON,AARCH64_SHA3,ARMV81M_MVE}`. Custom
+  capability functions must use the new names.
+  ([#1770](https://github.com/pq-code-package/mlkem-native/pull/1770))
+- Rename the FIPS-202 backend function-support flags to the
+  `MLK_USE_NATIVE_<function>` convention used by the arithmetic backend:
+  `MLK_USE_FIPS202_X1_NATIVE` to `MLK_USE_NATIVE_FIPS202_X1`,
+  `MLK_USE_FIPS202_X4_NATIVE` to `MLK_USE_NATIVE_FIPS202_X4`,
+  `MLK_USE_FIPS202_X4_XOR_BYTES_NATIVE` to `MLK_USE_NATIVE_FIPS202_X4_XOR_BYTES`,
+  and `MLK_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE` to
+  `MLK_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES`. Custom FIPS-202 backends must rename
+  these flags accordingly.
+  ([#1775](https://github.com/pq-code-package/mlkem-native/pull/1775))
+
+What's New
+----------
+
+### Assurance
+
+- Axiomatize the default `mlk_zeroize` in CBMC via a contract for its
+  zeroed-output postcondition, and configure the proofs with a failing custom
+  `mlk_zeroize` so they must rely on the contract rather than the concrete
+  implementation.
+  ([#1850](https://github.com/pq-code-package/mlkem-native/pull/1850))
+- Strengthen the top-level API contracts to check that output buffers are
+  zeroized or left unmodified on error.
+  ([#1850](https://github.com/pq-code-package/mlkem-native/pull/1850))
+
+### Configuration / API
+
+- Add the error codes `MLK_ERR_INVALID_PK`, `MLK_ERR_INVALID_SK`, and
+  `MLK_ERR_PCT_FAIL`, distinguishing a rejected public key, a rejected secret
+  key, and a failed keygen self-test. `mlk_check_pct` maps a key-check rejection
+  of the freshly generated key to `MLK_ERR_PCT_FAIL` and passes platform
+  failures through unmodified.
+  ([#1852](https://github.com/pq-code-package/mlkem-native/pull/1852))
+
+### Testing
+
+- Support the FIPS 203-tr1 encapDecap revision in the ACVP client, accepting a
+  decapsulation key supplied either as an expanded `dk` or as a `seed` (`d||z`)
+  to expand, with `keyFormat` inspected per group. mlkem-native now supports and
+  is tested against ACVP v1.1.0.43 in addition to the preceding two versions.
+  ([#1811](https://github.com/pq-code-package/mlkem-native/pull/1811))
+- Use runtime checks in the Wycheproof client instead of `assert`, which is
+  stripped under `python -O` and could report a mismatching vector as passing.
+  ([#1840](https://github.com/pq-code-package/mlkem-native/pull/1840))
+
+### Documentation
+
+- Add `API-CONVENTIONS.md` describing the conventions shared by all public
+  functions: return values and the meaning of the `MLK_ERR_XXX` codes, pointer
+  validity, and the state of output buffers on error. Link it from `README.md`
+  and the `mlkem_native.h` preamble.
+  ([#1843](https://github.com/pq-code-package/mlkem-native/pull/1843))
+- Document the `MLK_ERR_RNG_FAIL` error returned by keygen.
+  ([#1851](https://github.com/pq-code-package/mlkem-native/pull/1851))
+- Clarify the scope and customization of `mlk_zeroize`.
+  ([#1855](https://github.com/pq-code-package/mlkem-native/pull/1855))
+
 mlkem-native v1.3.0
 ===================
 
