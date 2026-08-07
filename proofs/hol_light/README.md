@@ -22,7 +22,7 @@ contains the byte code being verified, as well as the specification that is bein
 
 ## Primer
 
-Proofs are 'post-hoc' in the sense that HOL-Light/s2n-bignum operate on the final object code. In particular, the means by which the code was generated (including the [SLOTHY](https://github.com/slothy-optimizer/slothy/) superoptimizer) need not be trusted.
+Proofs are 'post-hoc' in the sense that HOL-Light/s2n-bignum operate on the final object code. In particular, the means by which the code was generated (including the SLOTHY[^SLOTHY] superoptimizer) need not be trusted.
 
 Specifications are essentially [Hoare triples](https://en.wikipedia.org/wiki/Hoare_logic), with the noteworthy difference that the program is implicit as the content of memory at the PC; which is asserted to
 be the code under verification as part of the precondition. For example, the following is the specification of the aarch64 `poly_reduce` function:
@@ -140,7 +140,7 @@ All AArch64 and x86_64 assembly routines used in mlkem-native are covered.
   * 'Hybrid' 4-fold Keccak-F1600 using scalar and v8-A Neon instructions: [keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S](aarch64/mlkem/keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S)
   * 'Triple hybrid' 4-fold Keccak-F1600 using scalar, v8-A Neon and v8.4-A+SHA3 Neon instructions:[keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S](aarch64/mlkem/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S)
 
-The NTT and invNTT functions are super-optimized using [SLOTHY](https://github.com/slothy-optimizer/slothy/).
+The NTT and invNTT functions are super-optimized using SLOTHY[^SLOTHY].
 
 ### x86_64
 - ML-KEM Arithmetic:
