@@ -332,7 +332,7 @@
  * implementation, different from the one shipped with mlkem-native.
  *
  * If set, it must be the name of a file serving as the replacement for
- * mlkem/fips202/fips202.h, and exposing the same API (see FIPS202.md).
+ * mlkem/src/fips202/fips202.h, and exposing the same API (see FIPS202.md).
  */
 /* #define MLK_CONFIG_FIPS202_CUSTOM_HEADER "SOME_FILE.h" */
 
@@ -345,7 +345,7 @@
  * implementation, different from the one shipped with mlkem-native.
  *
  * If set, it must be the name of a file serving as the replacement for
- * mlkem/fips202/fips202x4.h, and exposing the same API (see FIPS202.md).
+ * mlkem/src/fips202/fips202x4.h, and exposing the same API (see FIPS202.md).
  */
 /* #define MLK_CONFIG_FIPS202X4_CUSTOM_HEADER "SOME_FILE.h" */
 
@@ -411,7 +411,7 @@
  */
 /* Even though we use the default randombytes signature here, registering it
  * as a custom implementation avoids double-declaration of randombytes via
- * mlkem/randombytes.h and test_only_rng/notrandombytes.h: The former is by
+ * mlkem/src/randombytes.h and test_only_rng/notrandombytes.h: The former is by
  * default included by mlkem-native, and the latter is needed for this example
  * since we rely on the additional randombytes_reset() API. */
 

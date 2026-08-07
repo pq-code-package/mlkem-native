@@ -331,7 +331,7 @@
  * implementation, different from the one shipped with mlkem-native.
  *
  * If set, it must be the name of a file serving as the replacement for
- * mlkem/fips202/fips202.h, and exposing the same API (see FIPS202.md).
+ * mlkem/src/fips202/fips202.h, and exposing the same API (see FIPS202.md).
  */
 /* #define MLK_CONFIG_FIPS202_CUSTOM_HEADER "SOME_FILE.h" */
 
@@ -344,7 +344,7 @@
  * implementation, different from the one shipped with mlkem-native.
  *
  * If set, it must be the name of a file serving as the replacement for
- * mlkem/fips202/fips202x4.h, and exposing the same API (see FIPS202.md).
+ * mlkem/src/fips202/fips202x4.h, and exposing the same API (see FIPS202.md).
  */
 /* #define MLK_CONFIG_FIPS202X4_CUSTOM_HEADER "SOME_FILE.h" */
 
