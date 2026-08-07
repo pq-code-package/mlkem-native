@@ -216,7 +216,6 @@ source code and documentation.
   - Matthias J. Kannwischer
 * URL: https://eprint.iacr.org/2022/1243
 * Referenced from:
-  - [README.md](README.md)
   - [dev/fips202/aarch64/auto.h](dev/fips202/aarch64/auto.h)
   - [dev/fips202/aarch64/src/keccak_f1600_x1_v84a_aarch64_asm.S](dev/fips202/aarch64/src/keccak_f1600_x1_v84a_aarch64_asm.S)
   - [dev/fips202/aarch64/src/keccak_f1600_x2_v84a_aarch64_asm.S](dev/fips202/aarch64/src/keccak_f1600_x2_v84a_aarch64_asm.S)

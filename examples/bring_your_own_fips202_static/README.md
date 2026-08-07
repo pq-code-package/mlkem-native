@@ -4,7 +4,8 @@
 
 This directory contains a minimal example for using mlkem-native with a custom FIPS-202 implementation
 that uses a single global state. This is common for hardware accelerators that can only hold one
-Keccak state at a time.
+Keccak state at a time. We use tiny_sha3[^tiny_sha3], wrapped to operate on a single global state, as
+an example.
 
 ## Use Case
 
