@@ -482,7 +482,7 @@ __contract__(
  *
  * @warning This option is experimental. Its scope, configuration and
  *          function/macro signatures may change at any time. We expect a
- *          stable API for v2.
+ *          stable API in a future version.
  *
  * @note Even if this option is set, some allocations further down the call
  *       stack will still be made from the stack, consuming up to 3KB of
