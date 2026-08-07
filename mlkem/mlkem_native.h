@@ -46,7 +46,7 @@
 /******************************* Key sizes ************************************/
 
 /* Sizes of cryptographic material, per parameter set */
-/* See mlkem/common.h for the arithmetic expressions giving rise to these */
+/* See mlkem/src/params.h for the arithmetic expressions giving rise to these */
 /* check-magic: off */
 #define MLKEM512_SECRETKEYBYTES 1632
 #define MLKEM512_PUBLICKEYBYTES 800
