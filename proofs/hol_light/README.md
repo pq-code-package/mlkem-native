@@ -11,9 +11,9 @@ The proofs cover three properties:
 - **Memory safety:** The assembly only accesses memory within the bounds of what is provided or allocated.
 - **Secret-independent timing (constant-time):** The assembly is free of secret-dependent control flow, memory access patterns, and variable-latency instructions.
 
-The one exception is rejection sampling (`rej_uniform_aarch64_asm`), which only has a functional correctness specification.
-Rejection sampling is safely variable-time, so no constant-time proof is needed. Memory safety proofs for rejection
-sampling are not yet available ([#1596](https://github.com/pq-code-package/mlkem-native/issues/1596)).
+The one exception is rejection sampling (`rej_uniform_aarch64_asm` and `rej_uniform_avx2_asm`), which is proved
+functionally correct and memory-safe, but not constant-time. Rejection sampling operates on public data only and is
+safely variable-time, so no constant-time proof is needed.
 
 See [SOUNDNESS.md](../../SOUNDNESS.md) for a detailed analysis of the scope, assumptions and risks of the formal verification efforts.
 
