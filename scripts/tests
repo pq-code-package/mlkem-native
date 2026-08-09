@@ -702,6 +702,8 @@ class Tests:
         log = logger(test_type, scheme_str, None, self.compile_mode(), opt)
 
         args = ["make", test_type.make_run_target(scheme)]
+        if test_type.is_example() is False:
+            args += [f"OPT={int(opt)}", f"AUTO={int(self.args.auto)}"]
         if test_type.is_benchmark() is False and test_type.is_example() is False:
             args += self.make_j()
         if self.args.extra_makefile and self.args.cross_prefix:

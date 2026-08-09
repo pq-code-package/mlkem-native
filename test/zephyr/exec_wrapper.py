@@ -14,6 +14,7 @@ import subprocess
 binpath = sys.argv[1]
 args = sys.argv[2:]
 machine = os.environ.get("QEMU_MACHINE", "mps3-an547")
+timeout = float(os.environ.get("QEMU_TIMEOUT", "300"))
 
 semihosting_args = [binpath] + args
 semihosting_config = "enable=on," + ",".join(f"arg={a}" for a in semihosting_args)
@@ -31,7 +32,9 @@ qemu_cmd = [
     binpath,
 ]
 
-result = subprocess.run(qemu_cmd, encoding="utf-8", capture_output=True, timeout=300)
+result = subprocess.run(
+    qemu_cmd, encoding="utf-8", capture_output=True, timeout=timeout
+)
 sys.stdout.write(result.stdout)
 if result.returncode != 0:
     sys.stderr.write(result.stderr)
