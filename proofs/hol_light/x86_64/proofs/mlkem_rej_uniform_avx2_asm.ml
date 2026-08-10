@@ -108,6 +108,29 @@ let mlkem_rej_uniform_tmc =
 
 let MLKEM_REJ_UNIFORM_EXEC = X86_MK_CORE_EXEC_RULE mlkem_rej_uniform_tmc;;
 
+let LENGTH_MLKEM_REJ_UNIFORM_TMC =
+  REWRITE_CONV[mlkem_rej_uniform_tmc] `LENGTH mlkem_rej_uniform_tmc`
+  |> CONV_RULE(RAND_CONV LENGTH_CONV);;
+
+(* Preamble: SUB rsp, 528 (7 bytes) *)
+let MLKEM_REJ_UNIFORM_PREAMBLE_LENGTH = new_definition
+  `MLKEM_REJ_UNIFORM_PREAMBLE_LENGTH = 7`;;
+
+(* Postamble: ADD rsp, 528 (7 bytes) + RET (1 byte) = 8 bytes *)
+let MLKEM_REJ_UNIFORM_POSTAMBLE_LENGTH = new_definition
+  `MLKEM_REJ_UNIFORM_POSTAMBLE_LENGTH = 8`;;
+
+let MLKEM_REJ_UNIFORM_CORE_END = new_definition
+  `MLKEM_REJ_UNIFORM_CORE_END =
+   LENGTH mlkem_rej_uniform_tmc - MLKEM_REJ_UNIFORM_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLKEM_REJ_UNIFORM_TMC;
+              MLKEM_REJ_UNIFORM_CORE_END;
+              MLKEM_REJ_UNIFORM_PREAMBLE_LENGTH;
+              MLKEM_REJ_UNIFORM_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
+
 (* ------------------------------------------------------------------------- *)
 (* An abbreviation used within the proof, though expanded in the spec.       *)
 (* ------------------------------------------------------------------------- *)
@@ -191,18 +214,19 @@ let MLKEM_REJ_UNIFORM_CORRECT = prove
       12 divides val buflen /\
       8 * val buflen = 12 * LENGTH inlist /\
       ALL (nonoverlapping (stackpointer,528))
-          [(word pc,0x100); (buf,val buflen); (table,4096)] /\
+          [(word pc,LENGTH mlkem_rej_uniform_tmc);
+           (buf,val buflen); (table,4096)] /\
       ALL (nonoverlapping (res,512))
-          [(word pc,0x100); (stackpointer,528)]
+          [(word pc,LENGTH mlkem_rej_uniform_tmc); (stackpointer,528)]
       ==> ensures x86
            (\s. bytes_loaded s (word pc) (BUTLAST mlkem_rej_uniform_tmc) /\
-                read RIP s = word(pc + 0x7) /\
+                read RIP s = word(pc + MLKEM_REJ_UNIFORM_PREAMBLE_LENGTH) /\
                 read RSP s = stackpointer /\
                 C_ARGUMENTS [res;buf;buflen;table] s /\
                 (read DF s <=> false) /\
                 wordlist_from_memory(table,4096) s = mlkem_rej_uniform_table /\
                 wordlist_from_memory(buf,LENGTH inlist) s = inlist)
-           (\s. read RIP s = word(pc + 0xf8) /\
+           (\s. read RIP s = word(pc + MLKEM_REJ_UNIFORM_CORE_END) /\
                 let inlist' = MAP (word_zx:12 word->16 word) inlist in
                 let outlist =
                   SUB_LIST (0,256) (FILTER (\x. val x < 3329) inlist') in
@@ -214,6 +238,7 @@ let MLKEM_REJ_UNIFORM_CORRECT = prove
             MAYCHANGE SOME_FLAGS ,, MAYCHANGE [events] ,,
             MAYCHANGE [memory :> bytes(res,512);
                        memory :> bytes(stackpointer,528)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC [`res:int64`; `buf:int64`] THEN
   W64_GEN_TAC `buflen:num` THEN
   MAP_EVERY X_GEN_TAC
@@ -812,7 +837,8 @@ let MLKEM_REJ_UNIFORM_NOIBT_SUBROUTINE_CORRECT = prove
     REWRITE_CONV[wordlist_from_memory] in
   CONV_TAC TWEAK_CONV THEN
   X86_PROMOTE_RETURN_STACK_TAC mlkem_rej_uniform_tmc
-    (CONV_RULE TWEAK_CONV MLKEM_REJ_UNIFORM_CORRECT) `[]` 528);;
+    (CONV_RULE TWEAK_CONV
+      (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_REJ_UNIFORM_CORRECT)) `[]` 528);;
 
 (* NOTE: This must be kept in sync with the CBMC specification
  * in mlkem/src/native/x86_64/src/arith_native_x86_64.h *)
@@ -936,19 +962,20 @@ let MLKEM_REJ_UNIFORM_MEMSAFE = prove
       12 divides val buflen /\
       8 * val buflen = 12 * LENGTH inlist /\
       ALL (nonoverlapping (stackpointer,528))
-          [(word pc,0x100); (buf,val buflen); (table,4096)] /\
+          [(word pc,LENGTH mlkem_rej_uniform_tmc);
+           (buf,val buflen); (table,4096)] /\
       ALL (nonoverlapping (res,512))
-          [(word pc,0x100); (stackpointer,528)]
+          [(word pc,LENGTH mlkem_rej_uniform_tmc); (stackpointer,528)]
       ==> ensures x86
            (\s. bytes_loaded s (word pc) (BUTLAST mlkem_rej_uniform_tmc) /\
-                read RIP s = word(pc + 0x7) /\
+                read RIP s = word(pc + MLKEM_REJ_UNIFORM_PREAMBLE_LENGTH) /\
                 read RSP s = stackpointer /\
                 C_ARGUMENTS [res;buf;buflen;table] s /\
                 (read DF s <=> false) /\
                 wordlist_from_memory(table,4096) s = mlkem_rej_uniform_table /\
                 wordlist_from_memory(buf,LENGTH inlist) s = inlist /\
                 read events s = e)
-           (\s. read RIP s = word(pc + 0xf8) /\
+           (\s. read RIP s = word(pc + MLKEM_REJ_UNIFORM_CORE_END) /\
                 (exists e2.
                      read events s = APPEND e2 e /\
                      memaccess_inbounds e2
@@ -962,6 +989,7 @@ let MLKEM_REJ_UNIFORM_MEMSAFE = prove
 
   (* === Phase 0: Initial setup (same as CORRECT with extra e variable) === *)
 
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC [`res:int64`; `buf:int64`] THEN
   W64_GEN_TAC `buflen:num` THEN
   MAP_EVERY X_GEN_TAC
@@ -1556,7 +1584,8 @@ let MLKEM_REJ_UNIFORM_NOIBT_SUBROUTINE_MEMSAFE = time prove
     REWRITE_CONV[wordlist_from_memory] in
   CONV_TAC TWEAK_CONV THEN
   X86_PROMOTE_RETURN_STACK_TAC mlkem_rej_uniform_tmc
-    (CONV_RULE TWEAK_CONV MLKEM_REJ_UNIFORM_MEMSAFE) `[]` 528 THEN
+    (CONV_RULE TWEAK_CONV
+      (CONV_RULE LENGTH_SIMPLIFY_CONV MLKEM_REJ_UNIFORM_MEMSAFE)) `[]` 528 THEN
   DISCHARGE_MEMSAFE_TAC);;
 
 let MLKEM_REJ_UNIFORM_SUBROUTINE_MEMSAFE = time prove
