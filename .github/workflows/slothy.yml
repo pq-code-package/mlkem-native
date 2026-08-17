@@ -7,11 +7,49 @@ permissions:
 on:
   workflow_call:
   workflow_dispatch:
+  push:
+    branches: ["main"]
 
 jobs:
+  # Coarse gate so the EC2 instance only starts when the SLOTHY
+  # inputs or toolchain are changed.
+  check_modified_files:
+    name: Determine changed files
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    outputs:
+      # Pushes to main always run SLOTHY.
+      run_needed: >-
+        ${{ github.event_name == 'push' ||
+        steps.changed-files.outputs.any_changed == 'true' ||
+        github.event_name == 'workflow_dispatch' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: github.event_name != 'workflow_dispatch'
+        with:
+          # Enough history for changed-files (rebase-merge pushes can be multi-commit)
+          fetch-depth: 100
+      - name: Get changed files
+        id: changed-files
+        if: github.event_name != 'workflow_dispatch'
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files: |
+            .github/workflows/slothy.yml
+            .github/workflows/ci_ec2_reusable.yml
+            scripts/autogen
+            dev/aarch64_clean/**
+            dev/aarch64_opt/**
+            dev/fips202/aarch64/**
+            mlkem/src/native/aarch64/**
+            mlkem/src/fips202/native/aarch64/**
+            flake.nix
+            flake.lock
+            nix/**
   slothy:
     name: SLOTHY
-    if: ${{ github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }}
+    needs: [ check_modified_files ]
+    if: needs.check_modified_files.outputs.run_needed == 'true'
     permissions:
       contents: 'read'
       id-token: 'write'
