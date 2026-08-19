@@ -157,6 +157,11 @@
   name: "Faster AVX2 optimized NTT multiplication for Ring-LWE lattice cryptography."
   url: https://eprint.iacr.org/2018/039
 
+- id: ShortLimb
+  name: "Short-Limb Modular Multiplication Techniques: Barrett, Montgomery, Plantard, and the Explicit CRT"
+  author: Yang, Bo-Yin
+  url: https://eprint.iacr.org/2026/1743
+
 - id: mupq
   author:
   - Kannwischer, Matthias J.

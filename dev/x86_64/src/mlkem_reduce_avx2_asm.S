@@ -10,6 +10,12 @@
  *   CRYSTALS-Kyber optimized AVX2 implementation
  *   Bos, Ducas, Kiltz, Lepoint, Lyubashevsky, Schanck, Schwabe, Seiler, Stehlé
  *   https://github.com/pq-crystals/kyber/tree/main/avx2
+ *
+ * - [ShortLimb]
+ *   Short-Limb Modular Multiplication Techniques: Barrett, Montgomery,
+ *   Plantard, and the Explicit CRT
+ *   Bo-Yin Yang
+ *   https://eprint.iacr.org/2026/1743
  */
 
 /*
@@ -17,9 +23,13 @@
  * AVX2 Kyber implementation @[REF_AVX2].
  *
  * Changes:
- * - Add call to csub in reduce128_avx to produce outputs
- *   in [0,1,...,q-1] rather than [0,1,...,q], matching the
- *   semantics of mlk_poly_reduce(),
+ * - Replace Barrett reduction and conditional subtraction by the
+ *   plantard_red16 sequence from fq.inc (@[ShortLimb, Remark 5.9]),
+ *   which produces outputs in [0,1,...,q-1] directly, matching the
+ *   semantics of mlk_poly_reduce().
+ *   Its constants are those of the multiplier w = 1:
+ *   W = b * q^-1 mod 2^32 = 0x0013afb8 with b = (-2^32) mod q = 1976,
+ *   split into signed halves L = 0xafb8 and H = 0x0014, and bias s = 2.
  * - Use a macro instead of a local function call.
  */
 
@@ -50,41 +60,32 @@
 #include "fq.inc"
 
 .macro reduce_128_coefficients offset
-vmovdqa (\offset +   0)(%rdi), %ymm2
-vmovdqa (\offset +  32)(%rdi), %ymm3
-vmovdqa (\offset +  64)(%rdi), %ymm4
-vmovdqa (\offset +  96)(%rdi), %ymm5
-vmovdqa (\offset + 128)(%rdi), %ymm6
-vmovdqa (\offset + 160)(%rdi), %ymm7
-vmovdqa (\offset + 192)(%rdi), %ymm8
-vmovdqa (\offset + 224)(%rdi), %ymm9
+vmovdqa (\offset +   0)(%rdi), %ymm4
+vmovdqa (\offset +  32)(%rdi), %ymm5
+vmovdqa (\offset +  64)(%rdi), %ymm6
+vmovdqa (\offset +  96)(%rdi), %ymm7
+vmovdqa (\offset + 128)(%rdi), %ymm8
+vmovdqa (\offset + 160)(%rdi), %ymm9
+vmovdqa (\offset + 192)(%rdi), %ymm10
+vmovdqa (\offset + 224)(%rdi), %ymm11
 
-red16 2
-red16 3
-red16 4
-red16 5
-red16 6
-red16 7
-red16 8
-red16 9
+plantard_red16 4
+plantard_red16 5
+plantard_red16 6
+plantard_red16 7
+plantard_red16 8
+plantard_red16 9
+plantard_red16 10
+plantard_red16 11
 
-csubq 2
-csubq 3
-csubq 4
-csubq 5
-csubq 6
-csubq 7
-csubq 8
-csubq 9
-
-vmovdqa %ymm2, (\offset +   0)(%rdi)
-vmovdqa %ymm3, (\offset +  32)(%rdi)
-vmovdqa %ymm4, (\offset +  64)(%rdi)
-vmovdqa %ymm5, (\offset +  96)(%rdi)
-vmovdqa %ymm6, (\offset + 128)(%rdi)
-vmovdqa %ymm7, (\offset + 160)(%rdi)
-vmovdqa %ymm8, (\offset + 192)(%rdi)
-vmovdqa %ymm9, (\offset + 224)(%rdi)
+vmovdqa %ymm4,  (\offset +   0)(%rdi)
+vmovdqa %ymm5,  (\offset +  32)(%rdi)
+vmovdqa %ymm6,  (\offset +  64)(%rdi)
+vmovdqa %ymm7,  (\offset +  96)(%rdi)
+vmovdqa %ymm8,  (\offset + 128)(%rdi)
+vmovdqa %ymm9,  (\offset + 160)(%rdi)
+vmovdqa %ymm10, (\offset + 192)(%rdi)
+vmovdqa %ymm11, (\offset + 224)(%rdi)
 .endm
 
 .text
@@ -97,10 +98,21 @@ movl $0x0D010D01, %eax
 vmovd %eax, %xmm0
 vpbroadcastd %xmm0, %ymm0
 
-// Broadcast 20159 (0x4EBF) to all elements of ymm1
-movl $0x4ebf4ebf, %eax
+// Broadcast L = 0xAFB8, the low half of W, to all elements of ymm1
+movl $0xAFB8AFB8, %eax
 vmovd %eax, %xmm1
 vpbroadcastd %xmm1, %ymm1
+
+// Broadcast H = 0x0014 to all elements of ymm2. This is the high half
+// of W plus 1, as L is negative when read as a signed 16-bit value.
+movl $0x00140014, %eax
+vmovd %eax, %xmm2
+vpbroadcastd %xmm2, %ymm2
+
+// Broadcast the bias s = 2 to all elements of ymm3
+movl $0x00020002, %eax
+vmovd %eax, %xmm3
+vpbroadcastd %xmm3, %ymm3
 
 reduce_128_coefficients 0
 reduce_128_coefficients 128*2
