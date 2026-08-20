@@ -134,6 +134,15 @@ static MLK_INLINE vint16m1_t fq_mul_vx(vint16m1_t rx, int16_t ry, size_t vl)
   return fq_redc(rh, rl, vl);
 }
 
+static MLK_INLINE vint16m2_t fq_mul_vx_m2(vint16m2_t rx, int16_t ry, size_t vl)
+{
+  vint16m2_t rl, rh;
+
+  rh = __riscv_vmulh_vx_i16m2(rx, ry, vl); /*  h = (x * y) / R */
+  rl = __riscv_vmul_vx_i16m2(rx, ry, vl);  /*  l = (x * y) % R */
+  return fq_redc_m2(rh, rl, vl);
+}
+
 /* full normalization  */
 
 static MLK_INLINE vint16m1_t fq_mulq_vx(vint16m1_t rx, int16_t ry, size_t vl)
@@ -143,6 +152,18 @@ static MLK_INLINE vint16m1_t fq_mulq_vx(vint16m1_t rx, int16_t ry, size_t vl)
   result = fq_mul_vx(rx, ry, vl);
 
   mlk_assert_abs_bound_int16m1(result, vl, MLKEM_Q);
+  return result;
+}
+
+static MLK_INLINE vint16m2_t fq_mulq_vx_m2(vint16m2_t rx, int16_t ry, size_t vl)
+{
+  vint16m2_t result;
+
+  result = fq_mul_vx_m2(rx, ry, vl);
+
+  /* int16m2 data is treated as 2 chunks of int16m1,
+   * mlk_assert_abs_bound_int16m2 needs the vl for a single chunk. */
+  mlk_assert_abs_bound_int16m2(result, vl / 2, MLKEM_Q);
   return result;
 }
 
@@ -582,6 +603,98 @@ void mlk_rv64v_poly_ntt(int16_t *r)
     u1 = fq_mul_vv(ut, uc, vl);                \
   }
 
+#define MLK_RVV_GS_BFLY_RV_M2(u0, u1, ut, uc, vl) \
+  {                                               \
+    ut = __riscv_vsub_vv_i16m2(u0, u1, 2 * (vl)); \
+    u0 = __riscv_vadd_vv_i16m2(u0, u1, 2 * (vl)); \
+    u1 = fq_mul_vv_m2(ut, uc, 2 * (vl));          \
+  }
+
+/* Inlining this helper may keep all m4 permutation vectors live across the
+ * eight blocks, causing vector-register spills. */
+static MLK_NOINLINE vint16m4_t mlk_rv64v_intt4_vlen128(vint16m4_t vp,
+                                                       vint16m2_t cz)
+{
+  size_t vl = 8; /* We work with 128-bit vectors of 8x16-bit elements */
+  size_t vl2 = 2 * vl;
+  size_t vl4 = 4 * vl;
+
+  vuint16m4_t v4p;
+  vuint16m2_t vid, cs;
+  vint16m2_t t0, t1, c0, vt;
+
+  /* p0 = p2(p4(p8)) */
+  v4p = bitswap_perm_m4(3, 4, vl4);
+  v4p = __riscv_vrgather_vv_u16m4(v4p, bitswap_perm_m4(2, 4, vl4), vl4);
+  v4p = __riscv_vrgather_vv_u16m4(v4p, bitswap_perm_m4(1, 4, vl4), vl4);
+
+  /* initial permute */
+  vp = __riscv_vrgatherei16_vv_i16m4(vp, v4p, vl4);
+  t0 = __riscv_vget_v_i16m4_i16m2(vp, 0);
+  t1 = __riscv_vget_v_i16m4_i16m2(vp, 1);
+
+  /* pre-scale */
+  t0 = fq_mulq_vx_m2(t0, MLK_RVV_MONT_NR, vl2);
+  t1 = fq_mulq_vx_m2(t1, MLK_RVV_MONT_NR, vl2);
+
+  /* absolute bounds: < t0 < q, t1 < q */
+  mlk_assert_abs_bound_int16m2(t0, vl, MLKEM_Q);
+  mlk_assert_abs_bound_int16m2(t1, vl, MLKEM_Q);
+
+  vid = __riscv_vid_v_u16m2(vl2);
+  cs =
+      __riscv_vadd_vx_u16m2(__riscv_vsrl_vx_u16m2(vid, 1, vl2), 2 + 2 + 4, vl2);
+  c0 = __riscv_vrgather_vv_i16m2(cz, cs, vl2);
+  MLK_RVV_GS_BFLY_RV_M2(t0, t1, vt, c0, vl);
+
+  /* absolute bounds: < t0 < 2*q, t1 < q */
+  mlk_assert_abs_bound_int16m2(t0, vl, 2 * MLKEM_Q);
+  mlk_assert_abs_bound_int16m2(t1, vl, MLKEM_Q);
+
+  /* swap 2  */
+  vp = __riscv_vcreate_v_i16m2_i16m4(t0, t1);
+  v4p = bitswap_perm_m4(1, 4, vl4);
+  vp = __riscv_vrgatherei16_vv_i16m4(vp, v4p, vl4);
+  t0 = __riscv_vget_v_i16m4_i16m2(vp, 0);
+  t1 = __riscv_vget_v_i16m4_i16m2(vp, 1);
+
+  cs = __riscv_vadd_vx_u16m2(__riscv_vsrl_vx_u16m2(vid, 2, vl2), 2 + 2, vl2);
+  c0 = __riscv_vrgather_vv_i16m2(cz, cs, vl2);
+  MLK_RVV_GS_BFLY_RV_M2(t0, t1, vt, c0, vl);
+
+  /* absolute bounds: t0 < 4*q, t1 < q */
+  mlk_assert_abs_bound_int16m2(t0, vl, 4 * MLKEM_Q);
+  mlk_assert_abs_bound_int16m2(t1, vl, MLKEM_Q);
+
+  /* swap 4  */
+  vp = __riscv_vcreate_v_i16m2_i16m4(t0, t1);
+  v4p = bitswap_perm_m4(2, 4, vl4);
+  vp = __riscv_vrgatherei16_vv_i16m4(vp, v4p, vl4);
+  t0 = __riscv_vget_v_i16m4_i16m2(vp, 0);
+  t1 = __riscv_vget_v_i16m4_i16m2(vp, 1);
+
+  cs = __riscv_vadd_vx_u16m2(__riscv_vsrl_vx_u16m2(vid, 3, vl2), 2, vl2);
+  c0 = __riscv_vrgather_vv_i16m2(cz, cs, vl2);
+  MLK_RVV_GS_BFLY_RV_M2(t0, t1, vt, c0, vl);
+
+  /* absolute bounds: < 8*q */
+  mlk_assert_abs_bound_int16m2(t0, vl, 8 * MLKEM_Q);
+  mlk_assert_abs_bound_int16m2(t1, vl, MLKEM_Q);
+
+  t0 = fq_mulq_vx_m2(t0, MLK_RVV_MONT_R1, vl2);
+
+  /* absolute bounds: < q */
+  mlk_assert_abs_bound_int16m2(t0, vl, MLKEM_Q);
+  mlk_assert_abs_bound_int16m2(t1, vl, MLKEM_Q);
+
+  /* swap 8  */
+  vp = __riscv_vcreate_v_i16m2_i16m4(t0, t1);
+  v4p = bitswap_perm_m4(3, 4, vl4);
+  vp = __riscv_vrgatherei16_vv_i16m4(vp, v4p, vl4);
+
+  return vp;
+}
+
 static vint16m2_t mlk_rv64v_intt2(vint16m2_t vp, vint16m1_t cz)
 {
   size_t vl = 16; /* We work with 256-bit vectors of 16x16-bit elements */
@@ -685,6 +798,189 @@ static vint16m2_t mlk_rv64v_intt2(vint16m2_t vp, vint16m1_t cz)
     mlk_assert_abs_bound_int16m1(vf, vl, (bf) * MLKEM_Q);                      \
   } while (0)
 
+
+/**
+ * Compute the inverse negacyclic number-theoretic transform (NTT) of a
+ * polynomial in place; input assumed to be in bitreversed order, output in
+ * normal order.
+ *
+ * @param[in,out] r Input/output polynomial.
+ */
+void mlk_rv64v_poly_invntt_tomont_vlen128(int16_t *r)
+{
+/* zetas can be compiled into vector constants; don't pass as a pointer */
+#include "rv64v_izetas.inc"
+
+  size_t vl = 8; /* We work with 128-bit vectors of 8x16-bit elements */
+  size_t vl2 = 2 * vl;
+  size_t vl4 = 4 * vl;
+  size_t off;
+
+  vint16m1_t vt;
+  vint16m1_t v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, va, vb, vc, vd, ve, vf;
+
+  /* Process the first three layers in contiguous 32-coefficient blocks. */
+  __riscv_vse16_v_i16m4(
+      &r[0x00],
+      mlk_rv64v_intt4_vlen128(__riscv_vle16_v_i16m4(&r[0x00], vl4),
+                              __riscv_vle16_v_i16m2(&izeta[0x00], vl2)),
+      vl4);
+  __riscv_vse16_v_i16m4(
+      &r[0x20],
+      mlk_rv64v_intt4_vlen128(__riscv_vle16_v_i16m4(&r[0x20], vl4),
+                              __riscv_vle16_v_i16m2(&izeta[0x10], vl2)),
+      vl4);
+  __riscv_vse16_v_i16m4(
+      &r[0x40],
+      mlk_rv64v_intt4_vlen128(__riscv_vle16_v_i16m4(&r[0x40], vl4),
+                              __riscv_vle16_v_i16m2(&izeta[0x20], vl2)),
+      vl4);
+  __riscv_vse16_v_i16m4(
+      &r[0x60],
+      mlk_rv64v_intt4_vlen128(__riscv_vle16_v_i16m4(&r[0x60], vl4),
+                              __riscv_vle16_v_i16m2(&izeta[0x30], vl2)),
+      vl4);
+  __riscv_vse16_v_i16m4(
+      &r[0x80],
+      mlk_rv64v_intt4_vlen128(__riscv_vle16_v_i16m4(&r[0x80], vl4),
+                              __riscv_vle16_v_i16m2(&izeta[0x40], vl2)),
+      vl4);
+  __riscv_vse16_v_i16m4(
+      &r[0xa0],
+      mlk_rv64v_intt4_vlen128(__riscv_vle16_v_i16m4(&r[0xa0], vl4),
+                              __riscv_vle16_v_i16m2(&izeta[0x50], vl2)),
+      vl4);
+  __riscv_vse16_v_i16m4(
+      &r[0xc0],
+      mlk_rv64v_intt4_vlen128(__riscv_vle16_v_i16m4(&r[0xc0], vl4),
+                              __riscv_vle16_v_i16m2(&izeta[0x60], vl2)),
+      vl4);
+  __riscv_vse16_v_i16m4(
+      &r[0xe0],
+      mlk_rv64v_intt4_vlen128(__riscv_vle16_v_i16m4(&r[0xe0], vl4),
+                              __riscv_vle16_v_i16m2(&izeta[0x70], vl2)),
+      vl4);
+
+  /* Finish the last four layers in two 8-lane slices. */
+  for (off = 0; off < 2 * vl; off += vl)
+  {
+    v0 = __riscv_vle16_v_i16m1(&r[0x00 + off], vl);
+    v1 = __riscv_vle16_v_i16m1(&r[0x10 + off], vl);
+    v2 = __riscv_vle16_v_i16m1(&r[0x20 + off], vl);
+    v3 = __riscv_vle16_v_i16m1(&r[0x30 + off], vl);
+    v4 = __riscv_vle16_v_i16m1(&r[0x40 + off], vl);
+    v5 = __riscv_vle16_v_i16m1(&r[0x50 + off], vl);
+    v6 = __riscv_vle16_v_i16m1(&r[0x60 + off], vl);
+    v7 = __riscv_vle16_v_i16m1(&r[0x70 + off], vl);
+    v8 = __riscv_vle16_v_i16m1(&r[0x80 + off], vl);
+    v9 = __riscv_vle16_v_i16m1(&r[0x90 + off], vl);
+    va = __riscv_vle16_v_i16m1(&r[0xa0 + off], vl);
+    vb = __riscv_vle16_v_i16m1(&r[0xb0 + off], vl);
+    vc = __riscv_vle16_v_i16m1(&r[0xc0 + off], vl);
+    vd = __riscv_vle16_v_i16m1(&r[0xd0 + off], vl);
+    ve = __riscv_vle16_v_i16m1(&r[0xe0 + off], vl);
+    vf = __riscv_vle16_v_i16m1(&r[0xf0 + off], vl);
+
+    /* absolute bounds < q (see mlk_rv64v_intt4_vlen128) */
+    MLK_RV64V_ABS_BOUNDS16(vl,
+      v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, va, vb, vc, vd, ve, vf,
+      1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1);
+
+    MLK_RVV_GS_BFLY_RX(v0, v1, vt, izeta[0x40], vl);
+    MLK_RVV_GS_BFLY_RX(v2, v3, vt, izeta[0x41], vl);
+    MLK_RVV_GS_BFLY_RX(v4, v5, vt, izeta[0x50], vl);
+    MLK_RVV_GS_BFLY_RX(v6, v7, vt, izeta[0x51], vl);
+    MLK_RVV_GS_BFLY_RX(v8, v9, vt, izeta[0x60], vl);
+    MLK_RVV_GS_BFLY_RX(va, vb, vt, izeta[0x61], vl);
+    MLK_RVV_GS_BFLY_RX(vc, vd, vt, izeta[0x70], vl);
+    MLK_RVV_GS_BFLY_RX(ve, vf, vt, izeta[0x71], vl);
+
+    /* absolute bounds:
+     * - v{0,2,4,6,8,a,c,e}: < 2*q
+     * - v{1,3,5,7,9,b,d,f}: < 1*q
+     */
+    MLK_RV64V_ABS_BOUNDS16(vl,
+      v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, va, vb, vc, vd, ve, vf,
+      2,  1,  2,  1,  2,  1,  2,  1,  2,  1,  2,  1,  2,  1,  2,  1);
+
+    MLK_RVV_GS_BFLY_RX(v0, v2, vt, izeta[0x20], vl);
+    MLK_RVV_GS_BFLY_RX(v1, v3, vt, izeta[0x20], vl);
+    MLK_RVV_GS_BFLY_RX(v4, v6, vt, izeta[0x21], vl);
+    MLK_RVV_GS_BFLY_RX(v5, v7, vt, izeta[0x21], vl);
+    MLK_RVV_GS_BFLY_RX(v8, va, vt, izeta[0x30], vl);
+    MLK_RVV_GS_BFLY_RX(v9, vb, vt, izeta[0x30], vl);
+    MLK_RVV_GS_BFLY_RX(vc, ve, vt, izeta[0x31], vl);
+    MLK_RVV_GS_BFLY_RX(vd, vf, vt, izeta[0x31], vl);
+
+    /* absolute bounds:
+     * - v{0,4,8,c}: < 4*q
+     * - v{1,5,9,d}: < 2*q
+     * - v{2,3,6,7,a,b,e,f}: < 1*q
+     */
+    MLK_RV64V_ABS_BOUNDS16(vl,
+      v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, va, vb, vc, vd, ve, vf,
+      4,  2,  1,  1,  4,  2,  1,  1,  4,  2,  1,  1,  4,  2,  1,  1);
+
+    MLK_RVV_GS_BFLY_RX(v0, v4, vt, izeta[0x10], vl);
+    MLK_RVV_GS_BFLY_RX(v1, v5, vt, izeta[0x10], vl);
+    MLK_RVV_GS_BFLY_RX(v2, v6, vt, izeta[0x10], vl);
+    MLK_RVV_GS_BFLY_RX(v3, v7, vt, izeta[0x10], vl);
+    MLK_RVV_GS_BFLY_RX(v8, vc, vt, izeta[0x11], vl);
+    MLK_RVV_GS_BFLY_RX(v9, vd, vt, izeta[0x11], vl);
+    MLK_RVV_GS_BFLY_RX(va, ve, vt, izeta[0x11], vl);
+    MLK_RVV_GS_BFLY_RX(vb, vf, vt, izeta[0x11], vl);
+
+    /* absolute bounds:
+     * - v{0,8}: < 8*q
+     * - v{1,9}: < 4*q
+     * - v{2,3,a,b}: < 2*q
+     * - v{4,5,6,7,c,d,e,f}: < 1*q
+     */
+    MLK_RV64V_ABS_BOUNDS16(vl,
+      v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, va, vb, vc, vd, ve, vf,
+      8,  4,  2,  2,  1,  1,  1,  1,  8,  4,  2,  2,  1,  1,  1,  1);
+
+    /* Reduce v0, v8 to avoid overflow */
+    v0 = fq_mulq_vx(v0, MLK_RVV_MONT_R1, vl);
+    v8 = fq_mulq_vx(v8, MLK_RVV_MONT_R1, vl);
+
+    /* absolute bounds: < 4*q */
+    MLK_RV64V_ABS_BOUNDS16(vl,
+      v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, va, vb, vc, vd, ve, vf,
+      4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4);
+
+    MLK_RVV_GS_BFLY_RX(v0, v8, vt, izeta[0x01], vl);
+    MLK_RVV_GS_BFLY_RX(v1, v9, vt, izeta[0x01], vl);
+    MLK_RVV_GS_BFLY_RX(v2, va, vt, izeta[0x01], vl);
+    MLK_RVV_GS_BFLY_RX(v3, vb, vt, izeta[0x01], vl);
+    MLK_RVV_GS_BFLY_RX(v4, vc, vt, izeta[0x01], vl);
+    MLK_RVV_GS_BFLY_RX(v5, vd, vt, izeta[0x01], vl);
+    MLK_RVV_GS_BFLY_RX(v6, ve, vt, izeta[0x01], vl);
+    MLK_RVV_GS_BFLY_RX(v7, vf, vt, izeta[0x01], vl);
+
+    /* absolute bounds: < 8*q */
+    MLK_RV64V_ABS_BOUNDS16(vl,
+      v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, va, vb, vc, vd, ve, vf,
+      8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8);
+
+    __riscv_vse16_v_i16m1(&r[0x00 + off], v0, vl);
+    __riscv_vse16_v_i16m1(&r[0x10 + off], v1, vl);
+    __riscv_vse16_v_i16m1(&r[0x20 + off], v2, vl);
+    __riscv_vse16_v_i16m1(&r[0x30 + off], v3, vl);
+    __riscv_vse16_v_i16m1(&r[0x40 + off], v4, vl);
+    __riscv_vse16_v_i16m1(&r[0x50 + off], v5, vl);
+    __riscv_vse16_v_i16m1(&r[0x60 + off], v6, vl);
+    __riscv_vse16_v_i16m1(&r[0x70 + off], v7, vl);
+    __riscv_vse16_v_i16m1(&r[0x80 + off], v8, vl);
+    __riscv_vse16_v_i16m1(&r[0x90 + off], v9, vl);
+    __riscv_vse16_v_i16m1(&r[0xa0 + off], va, vl);
+    __riscv_vse16_v_i16m1(&r[0xb0 + off], vb, vl);
+    __riscv_vse16_v_i16m1(&r[0xc0 + off], vc, vl);
+    __riscv_vse16_v_i16m1(&r[0xd0 + off], vd, vl);
+    __riscv_vse16_v_i16m1(&r[0xe0 + off], ve, vl);
+    __riscv_vse16_v_i16m1(&r[0xf0 + off], vf, vl);
+  }
+}
 
 /**
  * Compute the inverse negacyclic number-theoretic transform (NTT) of a
@@ -1036,4 +1332,5 @@ MLK_EMPTY_CU(rv64v_poly)
 #undef MLK_RVV_CT_BFLY_FV_M2
 #undef MLK_RVV_GS_BFLY_RX
 #undef MLK_RVV_GS_BFLY_RV
+#undef MLK_RVV_GS_BFLY_RV_M2
 #undef MLK_RV64V_ABS_BOUNDS16

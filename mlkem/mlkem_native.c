@@ -641,6 +641,7 @@
 #undef mlk_rv64v_poly_basemul_mont_add_k3
 #undef mlk_rv64v_poly_basemul_mont_add_k4
 #undef mlk_rv64v_poly_invntt_tomont
+#undef mlk_rv64v_poly_invntt_tomont_vlen128
 #undef mlk_rv64v_poly_ntt
 #undef mlk_rv64v_poly_ntt_vlen128
 #undef mlk_rv64v_poly_reduce

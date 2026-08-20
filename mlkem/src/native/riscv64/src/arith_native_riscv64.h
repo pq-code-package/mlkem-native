@@ -14,9 +14,12 @@ void mlk_rv64v_poly_ntt_vlen128(int16_t *);
 void mlk_rv64v_poly_ntt(int16_t *);
 
 #if !defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API)
+#define mlk_rv64v_poly_invntt_tomont_vlen128 MLK_NAMESPACE(intt_riscv64_vlen128)
+void mlk_rv64v_poly_invntt_tomont_vlen128(int16_t *r);
+
 #define mlk_rv64v_poly_invntt_tomont MLK_NAMESPACE(intt_riscv64)
 void mlk_rv64v_poly_invntt_tomont(int16_t *r);
-#endif
+#endif /* !MLK_CONFIG_NO_ENCAPS_API || !MLK_CONFIG_NO_DECAPS_API */
 
 #define mlk_rv64v_poly_basemul_mont_add_k2 MLK_NAMESPACE(basemul_add_k2_riscv64)
 void mlk_rv64v_poly_basemul_mont_add_k2(int16_t *r, const int16_t *a,
