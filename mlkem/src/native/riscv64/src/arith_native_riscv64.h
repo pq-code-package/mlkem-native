@@ -7,6 +7,9 @@
 
 #include "../../../common.h"
 
+#define mlk_rv64v_poly_ntt_vlen128 MLK_NAMESPACE(ntt_riscv64_vlen128)
+void mlk_rv64v_poly_ntt_vlen128(int16_t *);
+
 #define mlk_rv64v_poly_ntt MLK_NAMESPACE(ntt_riscv64)
 void mlk_rv64v_poly_ntt(int16_t *);
 
