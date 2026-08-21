@@ -7,13 +7,6 @@
 
 void harness(void)
 {
-  {
-    /* Dummy use of malloc/free to work around
-     * https://github.com/diffblue/cbmc/issues/8814 */
-    uint8_t *ptr = malloc(1);
-    free(ptr);
-  }
-
   mlk_polymat *a;
   uint8_t *seed;
   int transposed;
