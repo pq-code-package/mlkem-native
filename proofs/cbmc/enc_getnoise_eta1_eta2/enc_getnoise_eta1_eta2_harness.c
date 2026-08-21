@@ -14,10 +14,5 @@ void harness(void)
   mlk_poly *epp;
   uint8_t *coins;
 
-  {
-    /* Dummy use of `free` to work around CBMC issue #8814. */
-    free(NULL);
-  }
-
   mlk_enc_getnoise_eta1_eta2(sp, ep, epp, coins);
 }
