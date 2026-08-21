@@ -15,12 +15,12 @@ buildEnv {
   paths =
     builtins.attrValues {
       cbmc = cbmc.overrideAttrs (_: {
-        version = "6.10.0";
+        version = "6.11.0";
         src = fetchFromGitHub {
           owner = "diffblue";
           repo = "cbmc";
-          hash = "sha256-GCagpb2TFhOEH+lzMth+PWiJxlEw0L+H1DYUEQoMF3g=";
-          tag = "cbmc-6.10.0";
+          hash = "sha256-GHpgcGBE/AAhTVxGVzTPMdZ8BkuXa7/OgMumZJ8ENRc";
+          tag = "cbmc-6.11.0";
         };
       });
       litani = callPackage ./litani.nix { }; # 1.29.0
