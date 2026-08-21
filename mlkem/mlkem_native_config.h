@@ -160,6 +160,43 @@
  */
 /* #define MLK_CONFIG_CONSTANTS_ONLY */
 
+/**
+ * MLK_CONFIG_KEYGEN_PCT
+ *
+ * Compliance with @[FIPS140_3_IG, p.87] requires a Pairwise Consistency
+ * Test (PCT) to be carried out on a freshly generated keypair before it
+ * can be exported.
+ *
+ * Set this option if such a check should be implemented. In this case,
+ * keypair_derand and keypair will return
+ * MLK_ERR_PCT_FAIL if the PCT failed.
+ *
+ * @note This feature will drastically lower the performance of key
+ *       generation.
+ */
+/* #define MLK_CONFIG_KEYGEN_PCT */
+
+/**
+ * MLK_CONFIG_CONTEXT_PARAMETER
+ *
+ * Set this to add a context parameter that is provided to public API
+ * functions and is then available in custom callbacks.
+ *
+ * The type of the context parameter is configured via
+ * MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
+ */
+/* #define MLK_CONFIG_CONTEXT_PARAMETER */
+
+/**
+ * MLK_CONFIG_CONTEXT_PARAMETER_TYPE
+ *
+ * Set this to define the type for the context parameter used by
+ * MLK_CONFIG_CONTEXT_PARAMETER.
+ *
+ * This is only relevant if MLK_CONFIG_CONTEXT_PARAMETER is set.
+ */
+/* #define MLK_CONFIG_CONTEXT_PARAMETER_TYPE void* */
+
 /******************************************************************************
  *
  * Build-only configuration options
@@ -576,22 +613,6 @@
 /* #define MLK_CONFIG_NO_ASM_VALUE_BARRIER */
 
 /**
- * MLK_CONFIG_KEYGEN_PCT
- *
- * Compliance with @[FIPS140_3_IG, p.87] requires a Pairwise Consistency
- * Test (PCT) to be carried out on a freshly generated keypair before it
- * can be exported.
- *
- * Set this option if such a check should be implemented. In this case,
- * keypair_derand and keypair will return
- * MLK_ERR_PCT_FAIL if the PCT failed.
- *
- * @note This feature will drastically lower the performance of key
- *       generation.
- */
-/* #define MLK_CONFIG_KEYGEN_PCT */
-
-/**
  * MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
  *
  * If this option is set, the user must provide a runtime function
@@ -630,27 +651,6 @@
  *       enable this when you have to.
  */
 /* #define MLK_CONFIG_SERIAL_FIPS202_ONLY */
-
-/**
- * MLK_CONFIG_CONTEXT_PARAMETER
- *
- * Set this to add a context parameter that is provided to public API
- * functions and is then available in custom callbacks.
- *
- * The type of the context parameter is configured via
- * MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
- */
-/* #define MLK_CONFIG_CONTEXT_PARAMETER */
-
-/**
- * MLK_CONFIG_CONTEXT_PARAMETER_TYPE
- *
- * Set this to define the type for the context parameter used by
- * MLK_CONFIG_CONTEXT_PARAMETER.
- *
- * This is only relevant if MLK_CONFIG_CONTEXT_PARAMETER is set.
- */
-/* #define MLK_CONFIG_CONTEXT_PARAMETER_TYPE void* */
 
 /*************************  Config internals  ********************************/
 
