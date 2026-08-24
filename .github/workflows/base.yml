@@ -226,6 +226,9 @@ jobs:
       - name: basic
         run: |
           CFLAGS="-O0" make run -C examples/basic
+      - name: context_parameter
+        run: |
+          CFLAGS="-O0" make run -C examples/context_parameter
       - name: basic_deterministic
         run: |
           CFLAGS="-O0" make run -C examples/basic_deterministic
