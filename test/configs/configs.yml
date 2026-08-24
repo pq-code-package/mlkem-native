@@ -431,6 +431,29 @@ configs:
           #endif /* _WIN32 */
           #endif /* !__ASSEMBLER__ */
 
+  - path: examples/context_parameter/mlkem_native/mlkem_native_config.h
+    description: "Configuration with a context parameter and custom allocation"
+    defines:
+      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
+      MLK_CONFIG_CONTEXT_PARAMETER:
+        content: |
+          #define MLK_CONFIG_CONTEXT_PARAMETER
+          #if !defined(__ASSEMBLER__)
+          #include "../example_context.h"
+          #endif /* !__ASSEMBLER__ */
+      MLK_CONFIG_CONTEXT_PARAMETER_TYPE: example_context *
+      MLK_CONFIG_CUSTOM_ALLOC_FREE:
+        content: |
+          #define MLK_CONFIG_CUSTOM_ALLOC_FREE
+          #if !defined(__ASSEMBLER__)
+          #define MLK_CUSTOM_ALLOC(v, T, N, context) \
+            T *v = example_context_malloc((context), sizeof(T) * (N))
+          #define MLK_CUSTOM_FREE(v, T, N, context) \
+            example_context_free((context), (v), sizeof(T) * (N))
+          #endif /* !__ASSEMBLER__ */
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
   - path: examples/basic_deterministic/mlkem_native/mlkem_native_config.h
     description: "Configuration for deterministic-only build of mlkem-native"
     defines:

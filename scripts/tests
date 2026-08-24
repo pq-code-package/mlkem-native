@@ -215,6 +215,7 @@ class TEST_TYPES(Enum):
     RNG_FAIL = 21
     WYCHEPROOF = 22
     ABICHECK = 23
+    CONTEXT_PARAMETER = 24
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -229,6 +230,7 @@ class TEST_TYPES(Enum):
             TEST_TYPES.BRING_YOUR_OWN_FIPS202_STATIC,
             TEST_TYPES.CUSTOM_BACKEND,
             TEST_TYPES.BASIC,
+            TEST_TYPES.CONTEXT_PARAMETER,
             TEST_TYPES.MONOLITHIC_BUILD,
             TEST_TYPES.MONOLITHIC_BUILD_NATIVE,
             TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL,
@@ -273,6 +275,8 @@ class TEST_TYPES(Enum):
             return "Example (Custom Backend)"
         if self == TEST_TYPES.BASIC:
             return "Example (mlkem-native as code package)"
+        if self == TEST_TYPES.CONTEXT_PARAMETER:
+            return "Example (context parameter)"
         if self == TEST_TYPES.BASIC_DETERMINISTIC:
             return "Example (mlkem-native as code package without randombytes() implementation)"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
@@ -307,6 +311,8 @@ class TEST_TYPES(Enum):
             return "examples/custom_backend"
         if self == TEST_TYPES.BASIC:
             return "examples/basic"
+        if self == TEST_TYPES.CONTEXT_PARAMETER:
+            return "examples/context_parameter"
         if self == TEST_TYPES.BASIC_DETERMINISTIC:
             return "examples/basic_deterministic"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
@@ -345,6 +351,8 @@ class TEST_TYPES(Enum):
         if self == TEST_TYPES.CUSTOM_BACKEND:
             return ""
         if self == TEST_TYPES.BASIC:
+            return ""
+        if self == TEST_TYPES.CONTEXT_PARAMETER:
             return ""
         if self == TEST_TYPES.BASIC_DETERMINISTIC:
             return ""
@@ -1277,6 +1285,7 @@ def cli():
             "bring_your_own_fips202_static",
             "custom_backend",
             "basic",
+            "context_parameter",
             "basic_deterministic",
             "monolithic_build",
             "monolithic_build_native",
@@ -1377,6 +1386,7 @@ def cli():
             "bring_your_own_fips202_static",
             "custom_backend",
             "basic",
+            "context_parameter",
             "basic_deterministic",
             "monolithic_build",
             "monolithic_build_native",
