@@ -109,11 +109,7 @@
  * pair failed its encaps/decaps self-test. */
 #define MLK_ERR_PCT_FAIL (-6)
 
-/********************* Namespacing and Qualifiers *****************************/
-
-#define MLK_API_CONCAT_(x, y) x##y
-#define MLK_API_CONCAT(x, y) MLK_API_CONCAT_(x, y)
-#define MLK_API_CONCAT_UNDERSCORE(x, y) MLK_API_CONCAT(MLK_API_CONCAT(x, _), y)
+/****************************** Configuration *********************************/
 
 /* You need to make sure the config file is in the include path. */
 #if defined(MLK_CONFIG_FILE)
@@ -121,6 +117,14 @@
 #else
 #include "mlkem_native_config.h"
 #endif
+
+/********************* Namespacing and Qualifiers *****************************/
+
+#if !defined(MLK_CONFIG_CONSTANTS_ONLY)
+
+#define MLK_API_CONCAT_(x, y) x##y
+#define MLK_API_CONCAT(x, y) MLK_API_CONCAT_(x, y)
+#define MLK_API_CONCAT_UNDERSCORE(x, y) MLK_API_CONCAT(MLK_API_CONCAT(x, _), y)
 
 /* Namespace prefix for the public API symbols. For multi-level builds, the
  * parameter set is appended to disambiguate the security levels. */
@@ -147,8 +151,6 @@
 #endif
 
 /****************************** Function API **********************************/
-
-#if !defined(MLK_CONFIG_CONSTANTS_ONLY)
 
 #include <stdint.h>
 
