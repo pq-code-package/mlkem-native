@@ -152,13 +152,15 @@ PROOF_STUB = $(CBMC_ROOT)/stubs
 #     "LP64"  - 64-bit systems where "long and pointer are 64-bit"
 #
 # if CBMC_DM is not set, default to LP64
-CBMC_DM ?= LP64
+ifndef CBMC_DM
+  CBMC_DM = LP64
+endif
 ifeq ($(strip $(CBMC_DM)),LP64)
   GOTO_CC_DM_FLAG = --64
   CBMC_DM_FLAG = --LP64
   PROOF_INCLUDE = $(CBMC_ROOT)/cbmc/include/LP64
 else
-  $(error CBMC_DM must be LP64)
+  $(error CBMC_DM=$(CBMC_DM) but must be LP64)
 endif
 
 # Flag to pass to goto-cc to make all static symbols globally visible. Leave it
@@ -1089,6 +1091,7 @@ result:
 	$(MAKE) -B _result
 	@ echo Running 'litani build'
 	$(LITANI) run-build
+	@ echo Proofs run with MLKEM_K=$(MLKEM_K) and CBMC_DM=$(CBMC_DM)
 	tail -4 $(LOGDIR)/result.txt
 	-grep FAILURE $(LOGDIR)/result.txt
 
@@ -1100,7 +1103,7 @@ smt:
 	$(MAKE) -B _smt
 	@ echo Running 'litani build'
 	$(LITANI) run-build
-	@ echo Generated SMT file for $(PROVER_NAME) in $(HARNESS_GOTO).smt2
+	@ echo Generated SMT file for $(PROVER_NAME) in $(HARNESS_GOTO).smt2 with MLKEM_K=$(MLKEM_K) and CBMC_DM=$(CBMC_DM)
 
 _smtz: $(HARNESS_GOTO).smtz
 smtz:
@@ -1171,6 +1174,7 @@ report:
 	$(MAKE) -B _report
 	@ echo Running 'litani build'
 	$(LITANI) run-build
+	@ echo Proofs run with MLKEM_K=$(MLKEM_K) and CBMC_DM=$(CBMC_DM)
 
 _report_no_coverage:
 	$(MAKE) COVERAGE="" VIEWER_COVERAGE_FLAG="" _report

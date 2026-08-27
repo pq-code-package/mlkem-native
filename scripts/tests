@@ -125,7 +125,7 @@ def config_logger(verbose):
         logger.setLevel(logging.INFO)
 
 
-def logger(test_type, scheme, cross_prefix, opt):
+def logger(test_type, scheme, dm, cross_prefix, opt):
     """Emit line indicating the processing of the given test"""
 
     test_desc = str(test_type)
@@ -144,10 +144,11 @@ def logger(test_type, scheme, cross_prefix, opt):
         sz = 18
 
     return logging.getLogger(
-        "{0:<{1}} {2:<11} {3:<17}".format(
+        "{0:<{1}} {2:<11} {4:<17} {3}".format(
             test_desc,
             sz,
             str(scheme),
+            dm or "",
             "({}{}):".format(compile_mode, opt_label),
         )
     )
@@ -452,7 +453,7 @@ class Tests:
             f"::group::compile {self.compile_mode()}{opt_label} {test_type.desc()}"
         )
 
-        log = logger(test_type, "Compile", self.args.cross_prefix, opt)
+        log = logger(test_type, "Compile", None, self.args.cross_prefix, opt)
 
         extra_make_args = []
         # Those options are not used in the examples
@@ -543,7 +544,7 @@ class Tests:
         else:
             scheme_str = str(scheme)
 
-        log = logger(test_type, scheme_str, self.args.cross_prefix, opt)
+        log = logger(test_type, scheme_str, None, self.args.cross_prefix, opt)
 
         args = ["make", test_type.make_run_target(scheme)]
         if test_type.is_benchmark() is False and test_type.is_example() is False:
@@ -941,13 +942,15 @@ class Tests:
                 print(p)
             exit(0)
 
-        def run_cbmc_single_step(mlkem_k, proofs):
-            envvars = {"MLKEM_K": mlkem_k}
+        def run_cbmc_single_step(mlkem_k, mlkem_dm, proofs):
+            envvars = {"MLKEM_K": mlkem_k, "CBMC_DM": mlkem_dm}
             scheme = SCHEME.from_k(mlkem_k)
             num_proofs = len(proofs)
             for i, func in enumerate(proofs):
-                log = logger(f"CBMC ({i + 1}/{num_proofs})", scheme, None, None)
-                log.info(f"Starting CBMC proof for {func}")
+                log = logger(
+                    f"CBMC ({i + 1}/{num_proofs})", scheme, mlkem_dm, None, None
+                )
+                log.info(f"Starting CBMC proof for {func}, {scheme}, {mlkem_dm}")
                 start = time.time()
                 try:
                     p = subprocess.run(
@@ -988,8 +991,8 @@ class Tests:
                 else:
                     log.info(f"   SUCCESS (after {dur}s)")
 
-        def run_cbmc(mlkem_k):
-            log = logger("CBMC", SCHEME.from_k(mlkem_k), None, None)
+        def run_cbmc(mlkem_k, mlkem_dm):
+            log = logger("CBMC", SCHEME.from_k(mlkem_k), mlkem_dm, None, None)
             all_proofs = list_proofs()
             proofs = all_proofs
             if self.args.start_with is not None:
@@ -1009,9 +1012,9 @@ class Tests:
                 proofs = sorted(set(proofs))
 
             if self.args.single_step:
-                run_cbmc_single_step(mlkem_k, proofs)
+                run_cbmc_single_step(mlkem_k, mlkem_dm, proofs)
                 return
-            envvars = {"MLKEM_K": mlkem_k}
+            envvars = {"MLKEM_K": mlkem_k, "CBMC_DM": mlkem_dm}
             cmd = (
                 [
                     "python3",
@@ -1034,15 +1037,16 @@ class Tests:
             )
 
             if p.returncode != 0:
-                self.fail(f"CBMC proofs for k={mlkem_k}")
+                self.fail(f"CBMC proofs for k={mlkem_k}, dm={mlkem_dm}")
 
         k = self.args.mlkem_parameter_set
+        dm = self.args.dm
         if k == "ALL":
-            run_cbmc("2")
-            run_cbmc("3")
-            run_cbmc("4")
+            run_cbmc("2", dm)
+            run_cbmc("3", dm)
+            run_cbmc("4", dm)
         else:
-            run_cbmc(k)
+            run_cbmc(k, dm)
 
         self.check_fail()
 
@@ -1072,7 +1076,9 @@ class Tests:
         def run_hol_light_single_step(proofs, arch):
             num_proofs = len(proofs)
             for i, func in enumerate(proofs):
-                log = logger(f"HOL_LIGHT ({i + 1}/{num_proofs})", None, None, None)
+                log = logger(
+                    f"HOL_LIGHT ({i + 1}/{num_proofs})", None, None, None, None
+                )
                 log.info(f"Starting HOL-Light proof for {func}")
                 start = time.time()
                 proof_bin = f"mlkem/{func}.native"
@@ -1457,6 +1463,14 @@ def cli():
         choices=["2", "3", "4", "ALL"],
         type=str.upper,
         default="ALL",
+    )
+
+    cbmc_parser.add_argument(
+        "--dm",
+        help="Value of CBMC_DM, determining the data model for CBMC proofs. Default LP64",
+        choices=["LP64"],
+        type=str.upper,
+        default="LP64",
     )
 
     cbmc_parser.add_argument(

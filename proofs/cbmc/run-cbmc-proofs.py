@@ -447,6 +447,15 @@ async def main():  # pylint: disable=too-many-locals
         else []
     )
 
+    # Normalise CBMC_DM in the environment inherited by the make jobs that
+    # litani spawns later, defaulting to LP64 when unset or empty.
+    dm = os.environ.get("CBMC_DM", "")
+    if dm == "":
+        os.environ["CBMC_DM"] = "LP64"
+    elif dm != "LP64":
+        logging.critical("CBMC_DM set to %s, but must be LP64", dm)
+        sys.exit(1)
+
     if not args.no_standalone:
         cmd = [
             str(litani),
@@ -503,6 +512,14 @@ async def main():  # pylint: disable=too-many-locals
 
     enable_memory_profiling = should_enable_memory_profiling(litani_caps, args)
     report_target = "_report_no_coverage" if args.no_coverage else "_report"
+
+    print(
+        "Running proofs with K =",
+        os.environ.get("MLKEM_K", ""),
+        "and DM =",
+        os.environ["CBMC_DM"],
+        "\n",
+    )
 
     for _ in range(task_pool_size()):
         task = asyncio.create_task(
