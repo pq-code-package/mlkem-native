@@ -18,11 +18,11 @@ on:
       ec2_ami:
         type: string
         description: Textual description of AMI
-        default: ubuntu-latest (aarch64)
+        default: ubuntu (aarch64)
       ec2_ami_id:
         type: string
         description: AMI ID
-        default: ami-096ea6a12ea24a797
+        default: ami-0b5db2dd959c9acb0 # Ubuntu 26.04 LTS (arm64), us-east-1, release 20260819
       cflags:
         type: string
         description: Custom CFLAGS for compilation
@@ -63,8 +63,8 @@ on:
 env:
   AWS_ROLE: arn:aws:iam::559050233797:role/mlkem-c-aarch64-gh-action
   AWS_REGION: us-east-1
-  AMI_UBUNTU_LATEST_X86_64: ami-0e86e20dae9224db8
-  AMI_UBUNTU_LATEST_AARCH64: ami-096ea6a12ea24a797
+  AMI_UBUNTU_X86_64: ami-03ceeebf93c41fdae # Ubuntu 26.04 LTS (amd64), us-east-1, release 20260819
+  AMI_UBUNTU_AARCH64: ami-0b5db2dd959c9acb0 # Ubuntu 26.04 LTS (arm64), us-east-1, release 20260819
 jobs:
   start-ec2-runner:
     name: Start instance (${{ inputs.ec2_instance_type }})
@@ -83,11 +83,11 @@ jobs:
       - name: Determine AMI ID
         id: det_ami_id
         run: |
-          if [[ "${{ inputs.ec2_ami }}" == "ubuntu-latest (x86_64)" ]]; then
-            AMI_ID=${{ env.AMI_UBUNTU_LATEST_X86_64 }}
-          elif [[ "${{ inputs.ec2_ami }}" == "ubuntu-latest (aarch64)" ]]; then
-            AMI_ID=${{ env.AMI_UBUNTU_LATEST_AARCH64 }}
-          elif [[ "${{ inputs.ec2_ami }}" == "ubuntu-latest (custom AMI)" ]]; then
+          if [[ "${{ inputs.ec2_ami }}" == "ubuntu (x86_64)" ]]; then
+            AMI_ID=${{ env.AMI_UBUNTU_X86_64 }}
+          elif [[ "${{ inputs.ec2_ami }}" == "ubuntu (aarch64)" ]]; then
+            AMI_ID=${{ env.AMI_UBUNTU_AARCH64 }}
+          elif [[ "${{ inputs.ec2_ami }}" == "custom AMI" ]]; then
             AMI_ID=${{ inputs.ec2_ami_id }}
           fi
           echo "Using AMI ID: $AMI_ID"

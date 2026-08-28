@@ -11,7 +11,7 @@ on:
 env:
   AWS_ROLE: arn:aws:iam::559050233797:role/mlkem-c-aarch64-gh-action
   AWS_REGION: us-east-1
-  AMI_UBUNTU_X86_64: ami-05cf1e9f73fbad2e2 # Ubuntu 24.04 LTS (2026-04-24)
+  AMI_UBUNTU_X86_64: ami-03ceeebf93c41fdae # Ubuntu 26.04 LTS (amd64), us-east-1, release 20260819
 
 jobs:
   start-ec2-runner:
