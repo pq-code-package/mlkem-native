@@ -17,14 +17,14 @@ on:
         description: AMI ID
         type: choice
         options:
-          - ubuntu-latest (x86_64)
-          - ubuntu-latest (aarch64)
-          - ubuntu-latest (custom AMI)
-        default: ubuntu-latest (aarch64)
+          - ubuntu (x86_64)
+          - ubuntu (aarch64)
+          - custom AMI
+        default: ubuntu (aarch64)
       ec2_ami_id:
         description: AMI ID
         required: false
-        default: ami-096ea6a12ea24a797
+        default: ami-0b5db2dd959c9acb0 # Ubuntu 26.04 LTS (arm64), us-east-1, release 20260819
       cflags:
         description: Custom CFLAGS for compilation
         default:

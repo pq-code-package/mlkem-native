@@ -569,28 +569,28 @@ jobs:
         target:
           - name: AMD EPYC 4th gen (t3a)
             ec2_instance_type: t3a.small
-            ec2_ami: ubuntu-latest (x86_64)
+            ec2_ami: ubuntu (x86_64)
             ec2_volume_size: 30
             compile_mode: native
             opt: all
             config_variations: 'native-cap-CPUID_AVX2'
           - name: Intel Xeon 4th gen (t3)
             ec2_instance_type: t3.small
-            ec2_ami: ubuntu-latest (x86_64)
+            ec2_ami: ubuntu (x86_64)
             ec2_volume_size: 30
             compile_mode: native
             opt: all
             config_variations: 'native-cap-CPUID_AVX2'
           - name: Graviton2 (c6g.medium)
             ec2_instance_type: c6g.medium
-            ec2_ami: ubuntu-latest (aarch64)
+            ec2_ami: ubuntu (aarch64)
             ec2_volume_size: 20
             compile_mode: native
             opt: all
             config_variations: 'native-cap-ON native-cap-OFF native-cap-ID_AA64PFR1_EL1'
           - name: Graviton3 (c7g.medium)
             ec2_instance_type: c7g.medium
-            ec2_ami: ubuntu-latest (aarch64)
+            ec2_ami: ubuntu (aarch64)
             ec2_volume_size: 20
             compile_mode: native
             opt: all
@@ -706,7 +706,7 @@ jobs:
       container: ${{ matrix.container.id }}
       name: ${{ matrix.container.id }}
       ec2_instance_type: t4g.small
-      ec2_ami: ubuntu-latest (custom AMI)
+      ec2_ami: custom AMI
       ec2_ami_id: ami-0c9bc1901ef0d1066 # Has docker images preinstalled
       compile_mode: native
       opt: all

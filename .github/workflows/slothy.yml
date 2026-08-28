@@ -19,7 +19,7 @@ jobs:
     with:
       name: SLOTHY
       ec2_instance_type: c8g.8xlarge
-      ec2_ami: ubuntu-latest (aarch64)
+      ec2_ami: ubuntu (aarch64)
       ec2_volume_size: 20
       lint: false
       test: false

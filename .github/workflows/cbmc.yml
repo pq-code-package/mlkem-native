@@ -20,7 +20,7 @@ jobs:
     with:
       name: CBMC (MLKEM-512)
       ec2_instance_type: r8g.xlarge
-      ec2_ami: ubuntu-latest (aarch64)
+      ec2_ami: ubuntu (aarch64)
       ec2_volume_size: 20
       compile_mode: native
       opt: no_opt
@@ -41,7 +41,7 @@ jobs:
     with:
       name: CBMC (MLKEM-768)
       ec2_instance_type: r8g.xlarge
-      ec2_ami: ubuntu-latest (aarch64)
+      ec2_ami: ubuntu (aarch64)
       ec2_volume_size: 20
       compile_mode: native
       opt: no_opt
@@ -62,7 +62,7 @@ jobs:
     with:
       name: CBMC (MLKEM-1024)
       ec2_instance_type: r8g.xlarge
-      ec2_ami: ubuntu-latest (aarch64)
+      ec2_ami: ubuntu (aarch64)
       ec2_volume_size: 20
       compile_mode: native
       opt: no_opt
