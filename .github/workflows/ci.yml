@@ -749,6 +749,21 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             python3 ./scripts/autogen --dry-run ${{ matrix.target.extra_args }}
+  check_test_vectors:
+    runs-on: ubuntu-latest
+    name: Check test vectors
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-shell
+        with:
+          nix-shell: ci
+          nix-cache: 'true'
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            make acvp OPT=0
+            python3 ./scripts/autogen --test-vectors --dry-run
   check_hol_light_object_code:
     strategy:
       fail-fast: false
