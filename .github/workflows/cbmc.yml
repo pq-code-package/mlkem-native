@@ -9,16 +9,26 @@ on:
   workflow_dispatch:
 
 jobs:
-  cbmc_k2:
-    name: CBMC (ML-KEM-512)
+  cbmc:
+    name: CBMC (ML-KEM-${{ matrix.level }})
     if: ${{ github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }}
     permissions:
       contents: 'read'
       id-token: 'write'
       pull-requests: 'write'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - k: 2
+            level: 512
+          - k: 3
+            level: 768
+          - k: 4
+            level: 1024
     uses: ./.github/workflows/ci_ec2_reusable.yml
     with:
-      name: CBMC (MLKEM-512)
+      name: CBMC (MLKEM-${{ matrix.level }})
       ec2_instance_type: r8g.xlarge
       ec2_ami: ubuntu (aarch64)
       ec2_volume_size: 20
@@ -28,47 +38,5 @@ jobs:
       verbose: true
       test: false
       cbmc: true
-      cbmc_mlkem_k: 2
-    secrets: inherit
-  cbmc_k3:
-    name: CBMC (ML-KEM-768)
-    if: ${{ github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }}
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-      pull-requests: 'write'
-    uses: ./.github/workflows/ci_ec2_reusable.yml
-    with:
-      name: CBMC (MLKEM-768)
-      ec2_instance_type: r8g.xlarge
-      ec2_ami: ubuntu (aarch64)
-      ec2_volume_size: 20
-      compile_mode: native
-      opt: no_opt
-      lint: false
-      verbose: true
-      test: false
-      cbmc: true
-      cbmc_mlkem_k: 3
-    secrets: inherit
-  cbmc_k4:
-    name: CBMC (ML-KEM-1024)
-    if: ${{ github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }}
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-      pull-requests: 'write'
-    uses: ./.github/workflows/ci_ec2_reusable.yml
-    with:
-      name: CBMC (MLKEM-1024)
-      ec2_instance_type: r8g.xlarge
-      ec2_ami: ubuntu (aarch64)
-      ec2_volume_size: 20
-      compile_mode: native
-      opt: no_opt
-      lint: false
-      verbose: true
-      test: false
-      cbmc: true
-      cbmc_mlkem_k: 4
+      cbmc_mlkem_k: ${{ matrix.k }}
     secrets: inherit
