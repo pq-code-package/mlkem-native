@@ -66,13 +66,6 @@ reduce it as much as possible in mlkem-native. For example, rather than having `
 may overlap with `src0` or `src1`, we only have a destructive `mlk_poly_add(dst, src)` implementing `dst += src`, thereby
 avoiding the need to specify an aliasing constraint.
 
-Care also has to be taken when _invoking_ a function that has a contract with multiple `memory_no_alias(...)` clauses;
-Here, CBMC will assert that the pointer arguments point to different C objects, rather than conducting a fine-grained
-check of disjointness. This simplifies the constraints, but can be impeding for the user: For example, given `foo x[2]`
-for some struct `foo`, you cannot pass `&foo[0]`, `&foo[1]` as arguments to a function specified using
-`memory_no_alias(...)` for both, because `&foo[0]`, `&foo[1]` point to the same object. In mlkem-native, we sometimes
-work around this by manually splitting statically-sized arrays into multiple separate objects.
-
 
 ### Maximum buffer sizes
 
