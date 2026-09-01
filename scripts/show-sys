@@ -1,0 +1,250 @@
+#!/usr/bin/env python3
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+import os
+import re
+import shlex
+import subprocess
+import sys
+import tempfile
+
+
+PROBE_SOURCE = r'''#include "mlkem/src/sys.h"
+
+#define MLK_SYS_SHOW_STRINGIFY_IMPL(x) #x
+#define MLK_SYS_SHOW_STRINGIFY(x) MLK_SYS_SHOW_STRINGIFY_IMPL(x)
+
+#ifdef MLK_HAVE_INLINE_ASM
+"MLK_SYS_SHOW MLK_HAVE_INLINE_ASM: 1"
+#else
+"MLK_SYS_SHOW MLK_HAVE_INLINE_ASM: 0"
+#endif
+
+#ifdef MLK_SYS_LITTLE_ENDIAN
+"MLK_SYS_SHOW MLK_SYS_LITTLE_ENDIAN: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_LITTLE_ENDIAN: 0"
+#endif
+
+#ifdef MLK_SYS_BIG_ENDIAN
+"MLK_SYS_SHOW MLK_SYS_BIG_ENDIAN: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_BIG_ENDIAN: 0"
+#endif
+
+#ifdef MLK_SYS_AARCH64
+"MLK_SYS_SHOW MLK_SYS_AARCH64: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_AARCH64: 0"
+#endif
+
+#ifdef MLK_SYS_AARCH64_NEON
+"MLK_SYS_SHOW MLK_SYS_AARCH64_NEON: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_AARCH64_NEON: 0"
+#endif
+
+#ifdef MLK_SYS_AARCH64_EB
+"MLK_SYS_SHOW MLK_SYS_AARCH64_EB: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_AARCH64_EB: 0"
+#endif
+
+#ifdef MLK_SYS_ARMV81M_MVE
+"MLK_SYS_SHOW MLK_SYS_ARMV81M_MVE: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_ARMV81M_MVE: 0"
+#endif
+
+#ifdef MLK_SYS_X86_64
+"MLK_SYS_SHOW MLK_SYS_X86_64: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_X86_64: 0"
+#endif
+
+#ifdef MLK_SYS_X86_64_AVX2
+"MLK_SYS_SHOW MLK_SYS_X86_64_AVX2: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_X86_64_AVX2: 0"
+#endif
+
+#ifdef MLK_SYS_PPC64LE
+"MLK_SYS_SHOW MLK_SYS_PPC64LE: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_PPC64LE: 0"
+#endif
+
+#ifdef MLK_SYS_RISCV64
+"MLK_SYS_SHOW MLK_SYS_RISCV64: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_RISCV64: 0"
+#endif
+
+#ifdef MLK_SYS_RISCV64_RVV
+"MLK_SYS_SHOW MLK_SYS_RISCV64_RVV: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_RISCV64_RVV: 0"
+#endif
+
+#ifdef MLK_SYS_RISCV32
+"MLK_SYS_SHOW MLK_SYS_RISCV32: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_RISCV32: 0"
+#endif
+
+#ifdef MLK_SYS_WINDOWS
+"MLK_SYS_SHOW MLK_SYS_WINDOWS: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_WINDOWS: 0"
+#endif
+
+#ifdef MLK_SYS_LINUX
+"MLK_SYS_SHOW MLK_SYS_LINUX: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_LINUX: 0"
+#endif
+
+#ifdef MLK_SYS_APPLE
+"MLK_SYS_SHOW MLK_SYS_APPLE: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_APPLE: 0"
+#endif
+
+#ifdef MLK_SYS_C99
+"MLK_SYS_SHOW MLK_SYS_C99: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_C99: 0"
+#endif
+
+#ifdef MLK_SYS_C11
+"MLK_SYS_SHOW MLK_SYS_C11: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_C11: 0"
+#endif
+
+#ifdef MLK_SYS_C17
+"MLK_SYS_SHOW MLK_SYS_C17: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_C17: 0"
+#endif
+
+#ifdef MLK_SYS_C23
+"MLK_SYS_SHOW MLK_SYS_C23: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_C23: 0"
+#endif
+
+#ifdef MLK_SYS_CXX
+"MLK_SYS_SHOW MLK_SYS_CXX: 1"
+#else
+"MLK_SYS_SHOW MLK_SYS_CXX: 0"
+#endif
+
+"MLK_SYS_SHOW MLK_SYS_SIZEOF_INT: " MLK_SYS_SHOW_STRINGIFY(MLK_SYS_SIZEOF_INT)
+"MLK_SYS_SHOW MLK_SYS_SIZEOF_SIZET: " MLK_SYS_SHOW_STRINGIFY(MLK_SYS_SIZEOF_SIZET)
+"MLK_SYS_SHOW MLK_SYS_SIZEOF_PTR: " MLK_SYS_SHOW_STRINGIFY(MLK_SYS_SIZEOF_PTR)
+
+"MLK_SYS_SHOW MLK_INLINE: \"" MLK_SYS_SHOW_STRINGIFY(MLK_INLINE) "\""
+"MLK_SYS_SHOW MLK_ALWAYS_INLINE: \"" MLK_SYS_SHOW_STRINGIFY(MLK_ALWAYS_INLINE) "\""
+"MLK_SYS_SHOW MLK_NOINLINE: \"" MLK_SYS_SHOW_STRINGIFY(MLK_NOINLINE) "\""
+"MLK_SYS_SHOW MLK_RESTRICT: \"" MLK_SYS_SHOW_STRINGIFY(MLK_RESTRICT) "\""
+"MLK_SYS_SHOW MLK_ALIGN: \"" MLK_SYS_SHOW_STRINGIFY(MLK_ALIGN) "\""
+
+#ifdef MLK_SYSV_ABI_SUPPORTED
+"MLK_SYS_SHOW MLK_SYSV_ABI_SUPPORTED: 1"
+#else
+"MLK_SYS_SHOW MLK_SYSV_ABI_SUPPORTED: 0"
+#endif
+
+"MLK_SYS_SHOW MLK_SYSV_ABI: \"" MLK_SYS_SHOW_STRINGIFY(MLK_SYSV_ABI) "\""
+'''
+
+STRING_LITERAL_RE = re.compile(r'"([^"\\]|\\.)*"')
+
+
+def split_flags(value):
+    if not value:
+        return []
+    return shlex.split(value)
+
+
+def filter_flags(args):
+    filtered = []
+    skip_next = False
+
+    for arg in args:
+        if skip_next:
+            skip_next = False
+            continue
+
+        if arg in ("-MD", "-MMD", "-MP"):
+            continue
+
+        if arg in ("-MF", "-MQ", "-MT"):
+            skip_next = True
+            continue
+
+        if arg.startswith("-MF") or arg.startswith("-MQ") or arg.startswith("-MT"):
+            continue
+
+        filtered.append(arg)
+
+    return filtered
+
+
+def parse_output(text):
+    lines = []
+
+    for raw_line in text.splitlines():
+        if "MLK_SYS_SHOW" not in raw_line:
+            continue
+
+        parts = []
+        for match in STRING_LITERAL_RE.finditer(raw_line):
+            parts.append(bytes(match.group(0)[1:-1], "utf-8").decode("unicode_escape"))
+
+        if not parts:
+            continue
+
+        line = "".join(parts)
+        if line.startswith("MLK_SYS_SHOW "):
+            line = line[len("MLK_SYS_SHOW ") :]
+
+        lines.append(line.rstrip())
+
+    return lines
+
+
+def main():
+    compiler = os.environ.get("CC", "cc")
+    flags = split_flags(os.environ.get("CPPFLAGS")) + split_flags(os.environ.get("CFLAGS"))
+    compiler_args = filter_flags(flags)
+
+    with tempfile.NamedTemporaryFile("w", suffix=".c", delete=False) as probe_file:
+        probe_file.write(PROBE_SOURCE)
+        probe_path = probe_file.name
+
+    try:
+        cmd = [compiler] + compiler_args + ["-I.", "-E", "-P", "-x", "c", probe_path]
+        result = subprocess.run(
+            cmd,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        sys.stderr.write(exc.stderr)
+        return exc.returncode
+    finally:
+        os.unlink(probe_path)
+
+    for line in parse_output(result.stdout):
+        print(line)
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

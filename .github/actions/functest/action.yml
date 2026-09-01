@@ -71,6 +71,9 @@ inputs:
   extra_env:
     description: Additional environment variables to set when calling the tests script
     default: ""
+  sys_expected:
+    description: Expected sys.h snapshot to diff against during the test run
+    required: true
 runs:
   using: composite
   steps:
@@ -122,7 +125,7 @@ runs:
         shell: ${{ env.SHELL }}
         run: |
           make clean
-          ${{ inputs.extra_env }} ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --ldflags="${{ inputs.ldflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.WYCHEPROOF }} --${{ env.EXAMPLES }} --${{ env.STACK }} --${{ env.UNIT }} --${{ env.ALLOC }} --${{ env.RNGFAIL }} -v ${{ inputs.extra_args }}
+          ${{ inputs.extra_env }} ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --sys="${{ inputs.sys_expected }}" --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --ldflags="${{ inputs.ldflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.WYCHEPROOF }} --${{ env.EXAMPLES }} --${{ env.STACK }} --${{ env.UNIT }} --${{ env.ALLOC }} --${{ env.RNGFAIL }} -v ${{ inputs.extra_args }}
       - name: Post ${{ env.MODE }} Tests
         shell: ${{ env.SHELL }}
         if: success() || failure()

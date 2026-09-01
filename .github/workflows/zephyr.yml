@@ -42,6 +42,7 @@ jobs:
           alloc: false
           rng_fail: false
           check_namespace: false
+          sys_expected: test/sys/expected/linux-x86_64-c99.txt
           # Zephyr's CMake selects the target arch; disable the host-arch
           # auto-detection that would otherwise leak into the forwarded CFLAGS.
           extra_args: --no-auto

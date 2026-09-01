@@ -5,6 +5,10 @@
 #ifndef MLK_SYS_H
 #define MLK_SYS_H
 
+#if !defined(__ASSEMBLER__)
+#include <limits.h>
+#endif
+
 #if !defined(MLK_CONFIG_NO_ASM) && (defined(__GNUC__) || defined(__clang__))
 #define MLK_HAVE_INLINE_ASM
 #endif
@@ -125,6 +129,121 @@
 #endif
 
 /*
+ * Detect the active C language standard, if any.
+ *
+ * These are cumulative: MLK_SYS_Cxx is defined whenever the compiler reports
+ * standard xx *or later*. For example, a C17 build defines MLK_SYS_C99,
+ * MLK_SYS_C11 and MLK_SYS_C17. This makes "C99 or later" a single
+ * defined(MLK_SYS_C99) check that stays correct for future standards; to
+ * detect exactly one standard, exclude the next, e.g.
+ * defined(MLK_SYS_C11) && !defined(MLK_SYS_C17).
+ */
+#if defined(__cplusplus)
+#define MLK_SYS_CXX
+#else
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#define MLK_SYS_C99
+#endif
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+#define MLK_SYS_C11
+#endif
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201710L
+#define MLK_SYS_C17
+#endif
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
+#define MLK_SYS_C23
+#endif
+#endif
+
+/*
+ * Detect the bit width of int.
+ *
+ * This is intentionally numeric rather than symbolic so it can be compared in
+ * preprocessor expressions.
+ */
+#if !defined(MLK_SYS_SIZEOF_INT)
+#if defined(__INT_WIDTH__)
+#define MLK_SYS_SIZEOF_INT __INT_WIDTH__
+#elif defined(__SIZEOF_INT__) && !defined(__ASSEMBLER__)
+#if (__SIZEOF_INT__ * CHAR_BIT) == 16
+#define MLK_SYS_SIZEOF_INT 16
+#elif (__SIZEOF_INT__ * CHAR_BIT) == 32
+#define MLK_SYS_SIZEOF_INT 32
+#elif (__SIZEOF_INT__ * CHAR_BIT) == 64
+#define MLK_SYS_SIZEOF_INT 64
+#endif
+#elif !defined(__ASSEMBLER__)
+#if UINT_MAX == 65535U
+#define MLK_SYS_SIZEOF_INT 16
+#elif UINT_MAX == 4294967295U
+#define MLK_SYS_SIZEOF_INT 32
+#elif UINT_MAX == 18446744073709551615ULL
+#define MLK_SYS_SIZEOF_INT 64
+#endif
+#endif
+#endif
+
+#if !defined(MLK_SYS_SIZEOF_INT)
+#error "Could not determine int bit width."
+#endif
+
+/*
+ * Detect the bit width of size_t.
+ *
+ * This is intentionally numeric rather than symbolic so it can be compared in
+ * preprocessor expressions.
+ */
+#if !defined(MLK_SYS_SIZEOF_SIZET)
+#if defined(__SIZE_WIDTH__)
+#define MLK_SYS_SIZEOF_SIZET __SIZE_WIDTH__
+#elif defined(__SIZEOF_SIZE_T__) && !defined(__ASSEMBLER__)
+#if (__SIZEOF_SIZE_T__ * CHAR_BIT) == 16
+#define MLK_SYS_SIZEOF_SIZET 16
+#elif (__SIZEOF_SIZE_T__ * CHAR_BIT) == 32
+#define MLK_SYS_SIZEOF_SIZET 32
+#elif (__SIZEOF_SIZE_T__ * CHAR_BIT) == 64
+#define MLK_SYS_SIZEOF_SIZET 64
+#endif
+#elif defined(__SIZEOF_POINTER__) && !defined(__ASSEMBLER__)
+#if (__SIZEOF_POINTER__ * CHAR_BIT) == 16
+#define MLK_SYS_SIZEOF_SIZET 16
+#elif (__SIZEOF_POINTER__ * CHAR_BIT) == 32
+#define MLK_SYS_SIZEOF_SIZET 32
+#elif (__SIZEOF_POINTER__ * CHAR_BIT) == 64
+#define MLK_SYS_SIZEOF_SIZET 64
+#endif
+#endif
+#endif
+
+#if !defined(MLK_SYS_SIZEOF_SIZET)
+#error "Could not determine size_t bit width."
+#endif
+
+/*
+ * Detect the bit width of pointers.
+ *
+ * This is intentionally numeric rather than symbolic so it can be compared in
+ * preprocessor expressions.
+ */
+#if !defined(MLK_SYS_SIZEOF_PTR)
+#if defined(__POINTER_WIDTH__)
+#define MLK_SYS_SIZEOF_PTR __POINTER_WIDTH__
+#elif defined(__SIZEOF_POINTER__) && !defined(__ASSEMBLER__)
+#if (__SIZEOF_POINTER__ * CHAR_BIT) == 16
+#define MLK_SYS_SIZEOF_PTR 16
+#elif (__SIZEOF_POINTER__ * CHAR_BIT) == 32
+#define MLK_SYS_SIZEOF_PTR 32
+#elif (__SIZEOF_POINTER__ * CHAR_BIT) == 64
+#define MLK_SYS_SIZEOF_PTR 64
+#endif
+#endif
+#endif
+
+#if !defined(MLK_SYS_SIZEOF_PTR)
+#error "Could not determine pointer bit width."
+#endif
+
+/*
  * MLK_INLINE: Hint for inlining.
  * - MSVC: __inline
  * - C99+: inline
@@ -134,8 +253,7 @@
 #if !defined(MLK_INLINE)
 #if defined(_MSC_VER)
 #define MLK_INLINE __inline
-#elif defined(inline) || \
-    (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)
+#elif defined(inline) || defined(MLK_SYS_C99)
 #define MLK_INLINE inline
 #elif defined(__GNUC__) || defined(__clang__)
 #define MLK_INLINE __attribute__((unused))
@@ -154,8 +272,7 @@
 #if defined(_MSC_VER)
 #define MLK_ALWAYS_INLINE __forceinline
 #elif (defined(__GNUC__) || defined(__clang__)) && \
-    (defined(inline) ||                            \
-     (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L))
+    (defined(inline) || defined(MLK_SYS_C99))
 #define MLK_ALWAYS_INLINE MLK_INLINE __attribute__((always_inline))
 #else
 #define MLK_ALWAYS_INLINE MLK_INLINE
@@ -187,7 +304,7 @@
  * We don't use it in C90 builds.
  */
 #if !defined(restrict)
-#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#if defined(MLK_SYS_C99)
 #define MLK_RESTRICT restrict
 #else
 #define MLK_RESTRICT
