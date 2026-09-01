@@ -46,6 +46,7 @@ jobs:
           stack: false
           alloc: ${{ matrix.target.alloc }}
           rng_fail: true
+          sys_expected: test/sys/expected/baremetal-avr-c99.txt
       - name: Baremetal bench
         if: ${{ matrix.target.bench }}
         uses: ./.github/actions/bench
@@ -88,4 +89,5 @@ jobs:
           stack: false
           alloc: false
           rng_fail: true
+          sys_expected: test/sys/expected/baremetal-aarch64-c99.txt
           extra_args: '--fips202-aarch64-backend=${{ matrix.fips202_backend }}'

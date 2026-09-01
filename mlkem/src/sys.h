@@ -125,6 +125,33 @@
 #endif
 
 /*
+ * Detect the active C language standard, if any.
+ *
+ * These are cumulative: MLK_SYS_Cxx is defined whenever the compiler reports
+ * standard xx *or later*. For example, a C17 build defines MLK_SYS_C99,
+ * MLK_SYS_C11 and MLK_SYS_C17. This makes "C99 or later" a single
+ * defined(MLK_SYS_C99) check that stays correct for future standards; to
+ * detect exactly one standard, exclude the next, e.g.
+ * defined(MLK_SYS_C11) && !defined(MLK_SYS_C17).
+ */
+#if defined(__cplusplus)
+#define MLK_SYS_CXX
+#else
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#define MLK_SYS_C99
+#endif
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+#define MLK_SYS_C11
+#endif
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201710L
+#define MLK_SYS_C17
+#endif
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
+#define MLK_SYS_C23
+#endif
+#endif
+
+/*
  * MLK_INLINE: Hint for inlining.
  * - MSVC: __inline
  * - C99+: inline
@@ -134,8 +161,7 @@
 #if !defined(MLK_INLINE)
 #if defined(_MSC_VER)
 #define MLK_INLINE __inline
-#elif defined(inline) || \
-    (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)
+#elif defined(inline) || defined(MLK_SYS_C99)
 #define MLK_INLINE inline
 #elif defined(__GNUC__) || defined(__clang__)
 #define MLK_INLINE __attribute__((unused))
@@ -154,8 +180,7 @@
 #if defined(_MSC_VER)
 #define MLK_ALWAYS_INLINE __forceinline
 #elif (defined(__GNUC__) || defined(__clang__)) && \
-    (defined(inline) ||                            \
-     (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L))
+    (defined(inline) || defined(MLK_SYS_C99))
 #define MLK_ALWAYS_INLINE MLK_INLINE __attribute__((always_inline))
 #else
 #define MLK_ALWAYS_INLINE MLK_INLINE
@@ -187,7 +212,7 @@
  * We don't use it in C90 builds.
  */
 #if !defined(restrict)
-#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#if defined(MLK_SYS_C99)
 #define MLK_RESTRICT restrict
 #else
 #define MLK_RESTRICT

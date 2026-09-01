@@ -22,7 +22,7 @@ endif
 
 LIB_SRCS := $(SOURCES) $(FIPS202_SRCS)
 
-BASIC_TESTS = test_mlkem gen_KAT test_stack
+BASIC_TESTS = test_mlkem gen_KAT test_stack show_sys
 ACVP_TESTS = acvp_mlkem
 WYCHEPROOF_TESTS = wycheproof_mlkem
 BENCH_TESTS = bench_mlkem bench_components_mlkem
