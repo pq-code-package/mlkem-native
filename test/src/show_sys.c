@@ -6,7 +6,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#include "../../mlkem/src/sys.h"
+#include "../../mlkem/src/common.h"
 
 #if defined(MLK_SYS_RISCV64_RVV)
 #include <riscv_vector.h>

@@ -15,11 +15,12 @@ jobs:
       fail-fast: false
       matrix:
         target:
-          - { board: mps2-an385, cpu: Cortex-M3, opt: no_opt }
-          - { board: mps2-an386, cpu: Cortex-M4, opt: no_opt }
-          - { board: mps2-an500, cpu: Cortex-M7, opt: no_opt }
-          - { board: mps2-an521, cpu: Cortex-M33, opt: no_opt }
-          - { board: mps3-an547, cpu: Cortex-M55, opt: all }
+          - { board: mps2-an385, cpu: Cortex-M3, opt: no_opt, sys_expected: test/sys/expected/zephyr-arm-c99.txt }
+          - { board: mps2-an386, cpu: Cortex-M4, opt: no_opt, sys_expected: test/sys/expected/zephyr-arm-c99.txt }
+          - { board: mps2-an500, cpu: Cortex-M7, opt: no_opt, sys_expected: test/sys/expected/zephyr-arm-c99.txt }
+          - { board: mps2-an521, cpu: Cortex-M33, opt: no_opt, sys_expected: test/sys/expected/zephyr-arm-c99.txt }
+          - { board: mps3-an547, cpu: Cortex-M55, opt: no_opt, sys_expected: test/sys/expected/zephyr-arm-c99.txt }
+          - { board: mps3-an547, cpu: Cortex-M55, opt: opt, sys_expected: test/sys/expected/zephyr-armv81m-mve-c99.txt }
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -42,7 +43,7 @@ jobs:
           alloc: false
           rng_fail: false
           check_namespace: false
-          sys_expected: test/sys/expected/linux-x86_64-c99.txt
+          sys_expected: ${{ matrix.target.sys_expected }}
           # Zephyr's CMake selects the target arch; disable the host-arch
           # auto-detection that would otherwise leak into the forwarded CFLAGS.
           extra_args: --no-auto
@@ -53,6 +54,6 @@ jobs:
           EXTRA_MAKEFILE: test/zephyr/platform.mk
           ZEPHYR_TARGET: ${{ matrix.target.board }}
         run: |
-          opt=${{ matrix.target.opt == 'all' && 'opt' || 'no_opt' }}
+          opt=${{ matrix.target.opt }}
           nix develop .#zephyr --command ./scripts/tests bench --no-auto -c NO --opt=$opt
           nix develop .#zephyr --command ./scripts/tests bench --no-auto --components -c NO --opt=$opt

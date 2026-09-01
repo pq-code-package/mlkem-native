@@ -105,7 +105,7 @@ runs:
         kat: true
         acvp: true
         opt: ${{ inputs.opt }}
-        sys_expected_native: ${{ runner.arch == 'X64' && 'test/sys/expected/linux-x86_64-c11.txt' || 'test/sys/expected/linux-aarch64-modern-c11.txt' }}
+        sys_expected_native: ${{ runner.arch == 'X64' && 'test/sys/expected/linux-x86_64-native-cap-on-c11.txt' || 'test/sys/expected/linux-aarch64-modern-native-cap-on-c11.txt' }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
         rng_fail: true
@@ -121,7 +121,7 @@ runs:
         kat: true
         acvp: true
         opt: ${{ inputs.opt }}
-        sys_expected_native: ${{ runner.arch == 'X64' && 'test/sys/expected/linux-x86_64-c11.txt' || 'test/sys/expected/linux-aarch64-modern-c11.txt' }}
+        sys_expected_native: ${{ runner.arch == 'X64' && 'test/sys/expected/linux-x86_64-native-cap-off-c11.txt' || 'test/sys/expected/linux-aarch64-modern-native-cap-off-c11.txt' }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
         rng_fail: true
@@ -137,7 +137,7 @@ runs:
         kat: true
         acvp: true
         opt: ${{ inputs.opt }}
-        sys_expected_native: ${{ runner.arch == 'X64' && 'test/sys/expected/linux-x86_64-c11.txt' || 'test/sys/expected/linux-aarch64-modern-c11.txt' }}
+        sys_expected_native: test/sys/expected/linux-aarch64-modern-native-cap-id-aa64pfr1-el1-c11.txt
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
         rng_fail: true
@@ -153,7 +153,7 @@ runs:
         kat: true
         acvp: true
         opt: ${{ inputs.opt }}
-        sys_expected_native: ${{ runner.arch == 'X64' && 'test/sys/expected/linux-x86_64-c11.txt' || 'test/sys/expected/linux-aarch64-modern-c11.txt' }}
+        sys_expected_native: test/sys/expected/linux-x86_64-native-cap-cpuid-avx2-c11.txt
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
         rng_fail: true
@@ -169,7 +169,7 @@ runs:
         kat: true
         acvp: true
         opt: ${{ inputs.opt }}
-        sys_expected_native: ${{ runner.arch == 'X64' && 'test/sys/expected/linux-x86_64-c11.txt' || 'test/sys/expected/linux-aarch64-modern-c11.txt' }}
+        sys_expected_native: ${{ runner.arch == 'X64' && 'test/sys/expected/linux-x86_64-no-asm-c11.txt' || 'test/sys/expected/linux-aarch64-modern-no-asm-c11.txt' }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
         rng_fail: true
@@ -185,6 +185,7 @@ runs:
         kat: true
         acvp: true
         opt: ${{ inputs.opt }}
+        sys_expected_native: ${{ runner.arch == 'X64' && 'test/sys/expected/linux-x86_64-c11.txt' || 'test/sys/expected/linux-aarch64-modern-c11.txt' }}
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
         rng_fail: true
