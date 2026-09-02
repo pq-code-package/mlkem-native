@@ -146,8 +146,8 @@ python3 ./test/wycheproof/wycheproof_client.py
 You can measure performance, memory usage, and binary size using the [`tests`](./scripts/tests) script:
 
 ```bash
-# Speed benchmarks (-c selects cycle counter: NO, PMU, PERF, or MAC)
-# Note: PERF/MAC may require the -r flag to run benchmarking binaries using sudo
+# Speed benchmarks (-c selects the measurement method: NO, PMU, PERF, MAC_KPC, or MAC_NS)
+# Note: PERF/MAC_KPC may require the -r flag to run benchmarking binaries using sudo
 ./scripts/tests bench -c PMU
 ./scripts/tests bench -c PERF -r
 

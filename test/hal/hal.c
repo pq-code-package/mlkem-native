@@ -50,6 +50,7 @@
 void enable_cyclecounter(void) {}
 void disable_cyclecounter(void) {}
 uint64_t get_cyclecounter(void) { return k_cycle_get_64(); }
+const char *get_cyclecounter_unit(void) { return "cycles"; }
 
 #elif defined(PMU_CYCLES)
 
@@ -173,6 +174,9 @@ uint64_t get_cyclecounter(void)
 #endif /* !__x86_64__ && !(__AARCH64EL__ || _M_ARM64) && \
           !(__ARM_ARCH_8M_MAIN__ || __ARM_ARCH_8_1M_MAIN__) && !__riscv */
 
+/* All PMU_CYCLES variants above read a cycle counter. */
+const char *get_cyclecounter_unit(void) { return "cycles"; }
+
 #elif defined(PERF_CYCLES)
 
 #include <asm/unistd.h>
@@ -227,8 +231,17 @@ uint64_t get_cyclecounter(void)
   ioctl(perf_fd, PERF_EVENT_IOC_ENABLE, 0);
   return (uint64_t)cpu_cycles;
 }
-#elif defined(MAC_CYCLES)
-/* Based on @[m1cycles] */
+
+const char *get_cyclecounter_unit(void) { return "cycles"; }
+
+#elif defined(MAC_KPC_CYCLES)
+/* Cycle counting on Apple platforms via the private kperf framework.
+ * Based on @[m1cycles]
+ *
+ * NOTE: This requires the benchmarking binary to run as root, and is known to
+ * fail on some recent combinations of Apple silicon and macOS, where
+ * kpc_set_config() is denied even to a process running as root. Use the
+ * MAC_NS_CYCLES implementation below on such systems. */
 
 #include <dlfcn.h>
 #include <pthread.h>
@@ -377,10 +390,53 @@ uint64_t get_cyclecounter(void)
   return g_counters[2];
 }
 
-#else /* !__ZEPHYR__ && !PMU_CYCLES && !PERF_CYCLES && MAC_CYCLES */
+const char *get_cyclecounter_unit(void) { return "cycles"; }
+
+#elif defined(MAC_NS_CYCLES)
+/* Elapsed-time measurement on Apple platforms via clock_gettime_nsec_np().
+ *
+ * Unlike MAC_KPC_CYCLES above, this needs no elevated privileges and no access
+ * to the private kperf framework, so it also works on systems on which macOS
+ * denies configuration of the performance counters. In exchange, it measures
+ * elapsed nanoseconds rather than CPU cycles: results are meaningful for
+ * relative comparisons on one machine, but are not cycle counts and are
+ * sensitive to CPU frequency scaling. */
+
+#include <pthread.h>
+#include <time.h>
+
+void enable_cyclecounter(void)
+{
+  int test_high_perf_cores = 1;
+
+  if (test_high_perf_cores)
+  {
+    pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
+  }
+  else
+  {
+    pthread_set_qos_class_self_np(QOS_CLASS_BACKGROUND, 0);
+  }
+}
+
+void disable_cyclecounter(void) { return; }
+
+uint64_t get_cyclecounter(void)
+{
+  /* CLOCK_UPTIME_RAW is monotonic and unaffected by NTP/frequency slewing,
+   * which makes it well suited to benchmarking. Requires no privileges. */
+  return clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
+}
+
+const char *get_cyclecounter_unit(void) { return "ns"; }
+
+#else /* !__ZEPHYR__ && !PMU_CYCLES && !PERF_CYCLES && !MAC_KPC_CYCLES && \
+         MAC_NS_CYCLES */
 
 void enable_cyclecounter(void) { return; }
 void disable_cyclecounter(void) { return; }
 uint64_t get_cyclecounter(void) { return (0); }
+const char *get_cyclecounter_unit(void) { return "cycles"; }
 
-#endif /* !__ZEPHYR__ && !PMU_CYCLES && !PERF_CYCLES && !MAC_CYCLES */
+#endif /* !__ZEPHYR__ && !PMU_CYCLES && !PERF_CYCLES && !MAC_KPC_CYCLES && \
+          !MAC_NS_CYCLES */

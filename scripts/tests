@@ -32,6 +32,29 @@ def dict2str(dict):
     return s
 
 
+# Benchmarking binaries report their headline results as lines of the form
+#
+#   keypair cycles = 123456
+#
+# where the unit is determined by the HAL implementation selected at build time
+# through the CYCLES option (see test/hal/hal.c): cycle counters report
+# "cycles", while the MAC_NS implementation reports elapsed nanoseconds ("ns").
+BENCH_RESULT_RE = re.compile(
+    r"^\s*(?P<primitive>[A-Za-z_][A-Za-z0-9_]*)"
+    r"\s+(?P<unit>[A-Za-z_]+)\s*=\s*(?P<value>[0-9]+)\s*$"
+)
+
+
+def parse_bench_results(output):
+    """Extract {primitive: (unit, value)} from the output of a bench binary."""
+    res = {}
+    for line in output.splitlines():
+        m = BENCH_RESULT_RE.match(line)
+        if m is not None:
+            res[m.group("primitive")] = (m.group("unit"), int(m.group("value")))
+    return res
+
+
 def github_log(msg):
     if os.environ.get("GITHUB_ENV") is None:
         return
@@ -788,21 +811,35 @@ class Tests:
                 r = results[scheme]
 
                 # The first 3 lines of the output are expected to be
-                # keypair cycles=X
-                # encaps cycles=X
-                # decaps cycles=X
+                # keypair <unit> = X
+                # encaps  <unit> = X
+                # decaps  <unit> = X
+                # where <unit> is reported by the HAL implementation selected
+                # via CYCLES, i.e. "cycles" or, for CYCLES=MAC_NS, "ns".
 
-                lines = [line for line in r.splitlines() if "=" in line]
+                d = parse_bench_results(r)
 
-                d = {k.strip(): int(v) for k, v in (ln.split("=") for ln in lines)}
                 for primitive in ["keypair", "encaps", "decaps"]:
+                    if primitive not in d:
+                        self.fail(
+                            f"Could not parse benchmark result for {schemeStr} {primitive}"
+                        )
+                        continue
+                    unit, value = d[primitive]
                     v.append(
                         {
                             "name": f"{schemeStr} {primitive}",
-                            "unit": "cycles",
-                            "value": d[f"{primitive} cycles"],
+                            "unit": unit,
+                            "value": value,
+                            # Record the HAL implementation that produced this
+                            # measurement; github-action-benchmark surfaces
+                            # `extra` in the GitHub Pages report.
+                            "extra": f"HAL: {self.args.cycles}",
                         }
                     )
+
+            if len(self.failed) > 0:
+                break
 
             with open(output, "w") as f:
                 f.write(json.dumps(v))
@@ -1414,8 +1451,8 @@ def cli():
     bench_parser.add_argument(
         "-c",
         "--cycles",
-        help="Method for counting clock cycles. PMU requires (user-space) access to the Arm Performance Monitor Unit (PMU). PERF requires a kernel with perf support. MAC works on some Apple platforms, at least Apple M1.",
-        choices=["NO", "PMU", "PERF", "MAC"],
+        help="Method for measuring the runtime of the benchmarked code. PMU requires (user-space) access to the Arm Performance Monitor Unit (PMU). PERF requires a kernel with perf support. MAC_KPC counts cycles through the private kperf framework on some Apple platforms, at least Apple M1; it needs to run as root and is denied by recent macOS versions on recent Apple silicon. MAC_NS works on all Apple platforms without special privileges, but reports elapsed nanoseconds rather than cycles.",
+        choices=["NO", "PMU", "PERF", "MAC_KPC", "MAC_NS"],
         type=str.upper,
         required=True,
     )

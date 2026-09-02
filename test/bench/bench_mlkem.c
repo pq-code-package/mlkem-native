@@ -38,7 +38,7 @@ static int cmp_uint64_t(const void *a, const void *b)
 
 static void print_median(const char *txt, uint64_t cyc[MLK_BENCHMARK_NTESTS])
 {
-  printf("%10s cycles = %" PRIu64 "\n", txt,
+  printf("%10s %s = %" PRIu64 "\n", txt, get_cyclecounter_unit(),
          cyc[MLK_BENCHMARK_NTESTS >> 1] / MLK_BENCHMARK_NITERATIONS);
 }
 
@@ -47,7 +47,7 @@ static int percentiles[] = {1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 99};
 static void print_percentile_legend(void)
 {
   unsigned i;
-  printf("%21s", "percentile");
+  printf("%10s %10s", get_cyclecounter_unit(), "percentile");
   for (i = 0; i < sizeof(percentiles) / sizeof(percentiles[0]); i++)
   {
     printf("%12d", percentiles[i]);

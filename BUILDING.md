@@ -37,16 +37,22 @@ make run_acvp
 
 The resulting binaries can be found in `test/build` (their full path is printed by `make`).
 
-For benchmarking, specify the cycle counting method. Currently, **mlkem-native** is supporting NO, PERF, PMU, and MAC:
+For benchmarking, specify the measurement method. Currently, **mlkem-native** is supporting NO, PERF, PMU, MAC_KPC, and MAC_NS:
 * `NO` means that no cycle counting will be used; this can be used to confirm that benchmarks compile fine.
 * `PERF` uses the `perf` kernel module for cycle counting. Does not work on Apple platforms.
 * `PMU` uses direct PMU access if available. On AArch64, this may require you to load a kernel module first, see [here](https://github.com/mupq/pqax?tab=readme-ov-file#enable-access-to-performance-counters). Does not work on Apple platforms.
-* `MAC` is `perf`-based and works on some Apple platforms, at least Apple M1.
+* `MAC_KPC` counts cycles through Apple's private `kperf` framework and works on some Apple platforms, at least Apple M1. It has to run as root, and recent macOS versions deny the required configuration even to root on recent Apple silicon.
+* `MAC_NS` uses `clock_gettime_nsec_np()` and works on all Apple platforms without special privileges. It reports **elapsed nanoseconds instead of cycles**, so results are meaningful for relative comparisons on one machine but are not cycle counts.
+
+Benchmarking binaries print the unit of their measurements alongside each result, i.e. `cycles` for the cycle-counting methods and `ns` for `MAC_NS`.
 
 ```
-# CYCLES has to be one of PERF, PMU, MAC, NO
+# CYCLES has to be one of PERF, PMU, MAC_KPC, MAC_NS, NO
 sudo make run_bench CYCLES=PERF
 sudo make run_bench_components CYCLES=PERF
+
+# MAC_NS needs no elevated privileges
+make run_bench CYCLES=MAC_NS
 ```
 
 ### Using `tests` script

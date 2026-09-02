@@ -31,4 +31,13 @@ void enable_cyclecounter(void);
 void disable_cyclecounter(void);
 uint64_t get_cyclecounter(void);
 
+/* Name of the unit of the values returned by get_cyclecounter().
+ *
+ * Most HAL implementations count CPU cycles and return "cycles". Some
+ * implementations are timer- rather than counter-based; for example the MAC_NS
+ * implementation returns elapsed nanoseconds and hence reports "ns".
+ *
+ * The returned string is statically allocated and must not be freed. */
+const char *get_cyclecounter_unit(void);
+
 #endif /* !HAL_H */

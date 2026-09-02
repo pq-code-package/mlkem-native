@@ -9,7 +9,7 @@ inputs:
     description: Name for the benchmarking run
     required: true
   perf:
-    description: Method of obtaining PMU metrics
+    description: "HAL implementation used to measure runtime, passed to `tests bench -c`: NO | PMU | PERF | MAC_KPC | MAC_NS"
     required: true
     default: "PERF"
   cflags:
@@ -66,6 +66,7 @@ runs:
           cat >> $GITHUB_STEP_SUMMARY <<-EOF
             ## Setup
             Architecture: $ARCH
+            HAL implementation (CYCLES): ${{ inputs.perf }}
             - $(uname -a)
             - $(nix --version)
             - $(${{ matrix.target.cross_prefix }}gcc --version | grep -m1 "")

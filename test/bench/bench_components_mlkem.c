@@ -65,7 +65,7 @@ static int cmp_uint64_t(const void *a, const void *b)
     (cyc)[i] = t1 - t0;                                               \
   }                                                                   \
   qsort((cyc), MLK_BENCHMARK_NTESTS, sizeof(uint64_t), cmp_uint64_t); \
-  printf(txt " cycles=%" PRIu64 "\n",                                 \
+  printf(txt " %s=%" PRIu64 "\n", get_cyclecounter_unit(),            \
          (cyc)[MLK_BENCHMARK_NTESTS >> 1] / MLK_BENCHMARK_NITERATIONS);
 
 #define BENCH_NATIVE_OK(txt, call) \

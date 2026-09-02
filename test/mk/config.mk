@@ -71,8 +71,12 @@ ifeq ($(CYCLES),PERF)
 	CFLAGS += -DPERF_CYCLES
 endif
 
-ifeq ($(CYCLES),MAC)
-	CFLAGS += -DMAC_CYCLES
+ifeq ($(CYCLES),MAC_KPC)
+	CFLAGS += -DMAC_KPC_CYCLES
+endif
+
+ifeq ($(CYCLES),MAC_NS)
+	CFLAGS += -DMAC_NS_CYCLES
 endif
 
 ##############################

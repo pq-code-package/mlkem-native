@@ -72,11 +72,12 @@ jobs:
           zephyr_target: ""
         - system: m1-mac-mini
           name: Mac Mini (M1, 2020) benchmarks
-          bench_pmu: MAC
+          bench_pmu: MAC_NS
           archflags: "-mcpu=apple-m1 -march=armv8.4-a+sha3"
           cflags: "-flto"
           ldflags: "-flto"
-          bench_extra_args: "-r"
+          # MAC_NS needs no elevated privileges, so no `-r` (run as root) here.
+          bench_extra_args: ""
           nix_shell: bench
           extra_makefile: ""
           zephyr_target: ""
