@@ -40,7 +40,7 @@ jobs:
           packages: 'cmake python3-jinja2 python3-tabulate python3-git python3-pytest valgrind'
       - uses: ./.github/actions/setup-oqs
         with:
-          commit: 'f986aea60a9f3cb4055474aa212538bb0b14f1fe' # main (2026-05-27)
+          commit: 'c27c88b76473f67a8072ce5b66874d172287ff96' # main (2026-09-03)
           gh_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Apply patch
         run: |
@@ -52,12 +52,8 @@ jobs:
           # TODO: Remove once patch is removed upstream
           # Remove patch
           sed -i "/name: mlkem-native/,/preserve_folder_structure/{/patches:/d}" scripts/copy_from_upstream/copy_from_upstream.yml
-          # TODO: Remove one it has been removed upstream
-          # Remove CT test suppressions
-          echo "" > tests/constant_time/kem/passes/ml_kem
           # Temporarily remove oldpqclean because of build failures in its SHA3 assembly
           yq e -i 'del(.kems[] | select(.name == "kyber"))' scripts/copy_from_upstream/copy_from_upstream.yml
-          yq e -i 'del(.sigs[] | select(.name == "dilithium"))' scripts/copy_from_upstream/copy_from_upstream.yml
           git diff >> "$GITHUB_STEP_SUMMARY";
       - name: Configure
         run: |
