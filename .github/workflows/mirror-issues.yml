@@ -17,6 +17,7 @@ jobs:
     permissions:
       contents: read
       issues: write
+      pull-requests: read
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
