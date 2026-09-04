@@ -2,16 +2,16 @@
 diff --git a/sw/device/tests/crypto/mlkem_functest.c b/sw/device/tests/crypto/mlkem_functest.c
 --- a/sw/device/tests/crypto/mlkem_functest.c
 +++ b/sw/device/tests/crypto/mlkem_functest.c
-@@ -312,6 +312,7 @@ static void test_mlkem1024_derand(void) {
-                   kOtcryptoMlkem1024SharedSecretBytes);
+@@ -355,6 +355,7 @@ static void test_mlkem1024_derand(void) {
+                             expected_key, kOtcryptoMlkem1024SharedSecretBytes);
  }
  
 +#if 0
  static void test_mlkem512_randomized(void) {
    uint64_t t0;
  
-@@ -492,6 +493,8 @@ static void test_mlkem1024_randomized(void) {
-   CHECK_ARRAYS_EQ(key_a_blob, key_b_blob, ARRAYSIZE(key_a_blob));
+@@ -538,6 +539,8 @@ static void test_mlkem1024_randomized(void) {
+                             kOtcryptoMlkem1024SharedSecretBytes);
  }
  
 +#endif
@@ -19,7 +19,7 @@ diff --git a/sw/device/tests/crypto/mlkem_functest.c b/sw/device/tests/crypto/ml
  bool test_main(void) {
    CHECK_STATUS_OK(entropy_testutils_auto_mode_init());
  
-@@ -500,10 +503,5 @@ bool test_main(void) {
+@@ -546,10 +549,5 @@ bool test_main(void) {
    test_mlkem768_derand();
    test_mlkem1024_derand();
  
