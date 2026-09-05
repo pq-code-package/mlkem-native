@@ -43,6 +43,8 @@ runs:
     - name: Set custom shell
       shell: bash
       if: ${{ inputs.nix-shell == '' }}
+      env:
+        GH_TOKEN: ${{ inputs.gh_token }}
       run: |
           echo SHELL="${{ inputs.custom_shell }}" >> $GITHUB_ENV
 

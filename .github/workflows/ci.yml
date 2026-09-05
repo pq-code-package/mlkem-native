@@ -551,6 +551,8 @@ jobs:
              }}
     name: Check API consistency
     runs-on: ${{ matrix.target.runner }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: make quickcheck
@@ -631,6 +633,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       ${{ matrix.container.id }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       # On 2026-09-05, Bullseye's live mirrors advertised packages whose
       # download URLs returned 404s, breaking CI dependency installation.

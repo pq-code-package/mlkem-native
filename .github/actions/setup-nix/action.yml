@@ -139,4 +139,6 @@ runs:
     - name: Dependency check
       shell: ${{ env.SHELL }}
       if: inputs.script != ''
+      env:
+        GH_TOKEN: ${{ inputs.gh_token }}
       run: eval ${{ inputs.script }}

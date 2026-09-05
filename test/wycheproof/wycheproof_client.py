@@ -11,6 +11,8 @@ import os
 import json
 import sys
 import subprocess
+import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -20,8 +22,7 @@ exec_prefix = exec_prefix.split(" ") if exec_prefix != "" else []
 # Pinned to a specific commit (2026-09-02).
 WYCHEPROOF_COMMIT = "3fa63dd0344abb611f1fb1d77e119938603ea230"
 WYCHEPROOF_BASE_URL = (
-    "https://raw.githubusercontent.com/C2SP/wycheproof"
-    f"/{WYCHEPROOF_COMMIT}/testvectors_v1"
+    "https://api.github.com/repos/C2SP/wycheproof/contents/testvectors_v1"
 )
 
 WYCHEPROOF_FILES = [
@@ -83,6 +84,31 @@ def info(msg, **kwargs):
     print(msg, **kwargs)
 
 
+def download_file(url, dest, token):
+    """Fetch url to dest via the authenticated contents API, retrying on failure.
+
+    Using api.github.com with a token raises the rate limit (per-user, not
+    per-IP), which avoids throttling when many CI jobs share an egress IP.
+    """
+    headers = {"Accept": "application/vnd.github.raw"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    for attempt in range(5):
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req) as resp:
+                dest.write_bytes(resp.read())
+            return
+        except Exception as e:
+            if attempt == 4:
+                raise
+            wait = 2**attempt
+            if isinstance(e, urllib.error.HTTPError):
+                wait = min(int(e.headers.get("Retry-After") or wait), 60)
+            print(f"Download failed ({e}); retrying in {wait}s", file=sys.stderr)
+            time.sleep(wait)
+
+
 def get_wycheproof_data_dir(data_dir):
     return Path(data_dir) / WYCHEPROOF_COMMIT
 
@@ -92,13 +118,15 @@ def download_wycheproof_files(data_dir):
     data_dir = Path(data_dir)
     data_dir.mkdir(parents=True, exist_ok=True)
 
+    token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    auth = "authenticated" if token else "anonymous"
     for filename in WYCHEPROOF_FILES:
         local_file = data_dir / filename
         if not local_file.exists():
-            url = f"{WYCHEPROOF_BASE_URL}/{filename}"
-            print(f"Downloading {filename}...", file=sys.stderr)
+            url = f"{WYCHEPROOF_BASE_URL}/{filename}?ref={WYCHEPROOF_COMMIT}"
+            print(f"Downloading {filename} ({auth})...", file=sys.stderr)
             try:
-                urllib.request.urlretrieve(url, local_file)
+                download_file(url, local_file, token)
                 with open(local_file, "r", encoding="utf-8") as f:
                     json.load(f)
             except (json.JSONDecodeError, Exception) as e:
