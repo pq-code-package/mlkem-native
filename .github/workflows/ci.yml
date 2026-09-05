@@ -171,6 +171,7 @@ jobs:
           exec_wrapper: ${{ matrix.target.exec_wrapper || '' }}
           cflags: "${{ matrix.target.cflags || '' }} -std=c90"
           opt: 'opt'
+          sys_expected_cross_riscv64: test/sys/expected/linux-riscv64-rvv-c90.txt
   ppc64le_tests:
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     name: Functional tests (ppc64le/POWER10, native)
@@ -183,12 +184,14 @@ jobs:
           nix-shell: ''
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           cflags: "-DMLK_FORCE_PPC64LE"
+          sys_expected_native: test/sys/expected/linux-ppc64le-c99.txt
       - name: build + test (+debug)
         uses: ./.github/actions/multi-functest
         with:
           nix-shell: ''
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           cflags: "-DMLKEM_DEBUG -DMLK_FORCE_PPC64LE"
+          sys_expected_native: test/sys/expected/linux-ppc64le-c99.txt
   backend_tests:
     name: AArch64 FIPS202 backends (${{ matrix.backend }})
     strategy:
@@ -215,6 +218,7 @@ jobs:
           cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           check_namespace: 'false'
+          sys_expected_native: test/sys/expected/macos-aarch64-c99.txt
           extra_args: "--fips202-aarch64-backend ${{ matrix.backend }}"
   compiler_tests:
     name: Compiler tests  (${{ matrix.compiler.family }}-${{ matrix.compiler.version }}, ${{ matrix.target.name }}, ${{ matrix.cflags }})
@@ -330,6 +334,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "${{ matrix.cflags }}"
+          sys_expected_native: ${{ matrix.target.name == 'x86_64' && 'test/sys/expected/linux-x86_64-c99.txt' || matrix.target.name == 'macos' && 'test/sys/expected/macos-aarch64-c99.txt' || (matrix.compiler.family == 'gcc' && matrix.compiler.version == '4.8') && 'test/sys/expected/linux-aarch64-gcc48-c99.txt' || 'test/sys/expected/linux-aarch64-modern-c99.txt' }}
       - name: native build+functest (C90)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
         uses: ./.github/actions/multi-functest
@@ -344,6 +349,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c90 ${{ matrix.cflags }}"
+          sys_expected_native: ${{ matrix.target.name == 'x86_64' && 'test/sys/expected/linux-x86_64-c90.txt' || matrix.target.name == 'macos' && 'test/sys/expected/macos-aarch64-c90.txt' || (matrix.compiler.family == 'gcc' && matrix.compiler.version == '4.8') && 'test/sys/expected/linux-aarch64-gcc48-c90.txt' || 'test/sys/expected/linux-aarch64-modern-c90.txt' }}
       - name: native build+functest (C99)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
         uses: ./.github/actions/multi-functest
@@ -358,6 +364,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c99 ${{ matrix.cflags }}"
+          sys_expected_native: ${{ matrix.target.name == 'x86_64' && 'test/sys/expected/linux-x86_64-c99.txt' || matrix.target.name == 'macos' && 'test/sys/expected/macos-aarch64-c99.txt' || (matrix.compiler.family == 'gcc' && matrix.compiler.version == '4.8') && 'test/sys/expected/linux-aarch64-gcc48-c99.txt' || 'test/sys/expected/linux-aarch64-modern-c99.txt' }}
       - name: native build+functest (C11)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
         uses: ./.github/actions/multi-functest
@@ -372,6 +379,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c11 ${{ matrix.cflags }}"
+          sys_expected_native: ${{ matrix.target.name == 'x86_64' && 'test/sys/expected/linux-x86_64-c11.txt' || matrix.target.name == 'macos' && 'test/sys/expected/macos-aarch64-c11.txt' || (matrix.compiler.family == 'gcc' && matrix.compiler.version == '4.8') && 'test/sys/expected/linux-aarch64-gcc48-c11.txt' || 'test/sys/expected/linux-aarch64-modern-c11.txt' }}
       - name: native build+functest (C17)
         if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
                 (matrix.compiler.family == 'zig' || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 8) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 7)) }}
@@ -387,6 +395,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c17 ${{ matrix.cflags }}"
+          sys_expected_native: ${{ matrix.target.name == 'x86_64' && 'test/sys/expected/linux-x86_64-c17.txt' || matrix.target.name == 'macos' && 'test/sys/expected/macos-aarch64-c17.txt' || 'test/sys/expected/linux-aarch64-modern-c17.txt' }}
       - name: native build+functest (C23)
         if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
                 ((matrix.compiler.family == 'zig' && matrix.compiler.version >= 0.14) || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 14) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 18)) }}
@@ -402,6 +411,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c23 ${{ matrix.cflags }}"
+          sys_expected_native: ${{ matrix.target.name == 'x86_64' && 'test/sys/expected/linux-x86_64-c23.txt' || matrix.target.name == 'macos' && 'test/sys/expected/macos-aarch64-c23.txt' || 'test/sys/expected/linux-aarch64-modern-c23.txt' }}
   stack_analysis:
     name: Stack analysis (${{ matrix.target.name }}, ${{ matrix.cflags }})
     strategy:
@@ -472,6 +482,7 @@ jobs:
           alloc: false
           rng_fail: false
           check_namespace: false
+          sys_expected: ${{ matrix.target.name == 'x86_64' && 'test/sys/expected/linux-x86_64-c11.txt' || 'test/sys/expected/linux-aarch64-modern-c11.txt' }}
           # Disable AArch64 SHA3 extension: valgrind cannot emulate it
           extra_env: "MK_COMPILER_SUPPORTS_SHA3=0"
           exec_wrapper: "valgrind --error-exitcode=1"

@@ -411,6 +411,23 @@ class Tests:
         print("All good!")
         exit(0)
 
+    def effective_cflags(self, test_type, opt):
+        cflags = self.args.cflags
+        if cflags is None:
+            cflags = ""
+
+        if test_type.is_example() and self.args.cross_prefix != "":
+            cflags += " -static"
+
+        if self.args.fips202_aarch64_backend != "auto" and opt is True:
+            if " -DMLK_FORCE_AARCH64" not in cflags:
+                cflags += " -DMLK_FORCE_AARCH64"
+
+            cflags += " -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202"
+            cflags += f' -DMLK_CONFIG_FIPS202_BACKEND_FILE=\\"fips202/native/aarch64/{self.args.fips202_aarch64_backend}.h\\"'
+
+        return cflags
+
     def cmd_prefix(self):
         res = []
         if self.args.run_as_root is True:
@@ -470,27 +487,10 @@ class Tests:
         args = ["make"] + target + extra_make_args
 
         # Force static compilation for cross builds
-        cflags = self.args.cflags
-        if cflags is None:
-            cflags = ""
+        cflags = self.effective_cflags(test_type, opt)
         ldflags = self.args.ldflags
         if ldflags is None:
             ldflags = ""
-
-        if test_type.is_example() and self.args.cross_prefix != "":
-            cflags += " -static"
-
-        # Add FIPS202 backend selection if specified and this is an OPT build
-        if self.args.fips202_aarch64_backend != "auto" and opt is True:
-            # Make sure we're forcing AArch64 architecture
-            if " -DMLK_FORCE_AARCH64" not in cflags:
-                cflags += " -DMLK_FORCE_AARCH64"
-
-            # Enable native backend for FIPS202
-            cflags += " -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202"
-
-            # Specify the backend file
-            cflags += f' -DMLK_CONFIG_FIPS202_BACKEND_FILE=\\"fips202/native/aarch64/{self.args.fips202_aarch64_backend}.h\\"'
 
         env_update = {}
         if cflags != "":
@@ -631,6 +631,29 @@ class Tests:
         else:
             return results
 
+    def check_sys(self):
+        if self.args.sys is None:
+            return
+
+        sys_opt = True if self.do_opt() else False
+        args = ["./scripts/check-sys", "--expected", self.args.sys]
+
+        cflags = self.effective_cflags(TEST_TYPES.FUNC, sys_opt)
+        if cflags != "":
+            args += ["--make-arg", f"CFLAGS={cflags}"]
+
+        if self.args.cross_prefix != "":
+            args += ["--make-arg", f"CROSS_PREFIX={self.args.cross_prefix}"]
+
+        args += ["--make-arg", f"AUTO={int(self.args.auto)}"]
+
+        p = subprocess.run(
+            args,
+            stdout=subprocess.DEVNULL if not self.args.verbose else None,
+        )
+        if p.returncode != 0:
+            self.fail(f"sys.h snapshot ({self.args.sys})")
+
     def func(self):
         def _func(opt):
             self._compile_schemes(TEST_TYPES.FUNC, opt)
@@ -650,6 +673,7 @@ class Tests:
         if self.do_opt():
             _func(True)
 
+        self.check_sys()
         self.check_fail()
 
     def kat(self):
@@ -663,6 +687,7 @@ class Tests:
         if self.do_opt():
             _kat(True)
 
+        self.check_sys()
         self.check_fail()
 
     def unit(self):
@@ -676,6 +701,7 @@ class Tests:
         if self.do_opt():
             _unit(True)
 
+        self.check_sys()
         self.check_fail()
 
     def alloc(self):
@@ -689,6 +715,7 @@ class Tests:
         if self.do_opt():
             _alloc(True)
 
+        self.check_sys()
         self.check_fail()
 
     def rng_fail(self):
@@ -702,6 +729,7 @@ class Tests:
         if self.do_opt():
             _rng_fail(True)
 
+        self.check_sys()
         self.check_fail()
 
     def acvp(self):
@@ -715,6 +743,7 @@ class Tests:
         if self.do_opt():
             _acvp(True)
 
+        self.check_sys()
         self.check_fail()
 
     def wycheproof(self):
@@ -728,6 +757,7 @@ class Tests:
         if self.do_opt():
             _wycheproof(True)
 
+        self.check_sys()
         self.check_fail()
 
     def examples(self):
@@ -744,6 +774,9 @@ class Tests:
         for e in items:
             self._compile_schemes(e, None)
             self._run_scheme(e, None, None)
+
+        self.check_sys()
+        self.check_fail()
 
     def bench(self):
         output = self.args.output
@@ -774,6 +807,7 @@ class Tests:
         # Nothing below should write benchmark output unless the run produced
         # results and all compile/run steps succeeded.
         if resultss is None or len(self.failed) > 0:
+            self.check_sys()
             self.check_fail()
             return
 
@@ -807,6 +841,7 @@ class Tests:
             with open(output, "w") as f:
                 f.write(json.dumps(v))
 
+        self.check_sys()
         self.check_fail()
 
     def stack(self):
@@ -822,6 +857,7 @@ class Tests:
         if self.do_opt():
             _stack(True)
 
+        self.check_sys()
         self.check_fail()
 
     def size(self):
@@ -844,17 +880,22 @@ class Tests:
                 )
 
         if resultss is None:
+            self.check_sys()
             self.check_fail()
+        self.check_sys()
+        self.check_fail()
 
     def abicheck(self):
         """Run ABI compliance tests for assembly functions."""
         if not self.do_opt():
-            return
+            self.check_sys()
+            self.check_fail()
 
         self._compile_schemes(TEST_TYPES.ABICHECK, True)
         if self.args.run:
             self._run_scheme(TEST_TYPES.ABICHECK, True, None)
 
+        self.check_sys()
         self.check_fail()
 
     def all(self):
@@ -928,6 +969,7 @@ class Tests:
         if examples is True:
             self.examples()
 
+        self.check_sys()
         self.check_fail()
 
     def cbmc(self):
@@ -1139,6 +1181,10 @@ def cli():
     )
     common_parser.add_argument(
         "--ldflags", help="Extra ldflags to passed in (e.g. '-static')"
+    )
+    common_parser.add_argument(
+        "--sys",
+        help="Path to expected sys.h snapshot; if set, diff it against make show-sys",
     )
     common_parser.add_argument(
         "-j",

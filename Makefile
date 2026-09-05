@@ -17,7 +17,7 @@
 	clean quickcheck check-defined-CYCLES \
 	size_512 size_768 size_1024 size \
 	run_size_512 run_size_768 run_size_1024 run_size \
-	host_info abicheck run_abicheck
+	host_info show-sys show_sys abicheck run_abicheck
 
 SHELL := /usr/bin/env bash
 .DEFAULT_GOAL := build
@@ -286,6 +286,11 @@ else
 	@echo "=== Architecture Not Supported ==="
 	@echo "No specific feature detection available for $(ARCH)"
 endif
+
+show-sys:
+	$(Q)CC="$(CC)" CPPFLAGS="$(CPPFLAGS)" CFLAGS="$(CFLAGS)" ./scripts/show-sys
+
+show_sys: show-sys
 
 EXAMPLE_DIRS := \
 	examples/bring_your_own_fips202 \

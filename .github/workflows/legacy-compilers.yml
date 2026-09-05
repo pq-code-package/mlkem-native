@@ -240,6 +240,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "${{ matrix.cflags }}"
+          sys_expected_native: ${{ matrix.target.name == 'x86_64' && 'test/sys/expected/linux-x86_64-c99.txt' || (matrix.compiler.family == 'gcc' && matrix.compiler.version == '4.8') && 'test/sys/expected/linux-aarch64-gcc48-c99.txt' || 'test/sys/expected/linux-aarch64-modern-c99.txt' }}
       - name: native build+functest (C90)
         uses: ./.github/actions/multi-functest
         with:
@@ -253,6 +254,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c90 ${{ matrix.cflags }}"
+          sys_expected_native: ${{ matrix.target.name == 'x86_64' && 'test/sys/expected/linux-x86_64-c90.txt' || (matrix.compiler.family == 'gcc' && matrix.compiler.version == '4.8') && 'test/sys/expected/linux-aarch64-gcc48-c90.txt' || 'test/sys/expected/linux-aarch64-modern-c90.txt' }}
       - name: native build+functest (C99)
         uses: ./.github/actions/multi-functest
         with:
@@ -266,6 +268,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c99 ${{ matrix.cflags }}"
+          sys_expected_native: ${{ matrix.target.name == 'x86_64' && 'test/sys/expected/linux-x86_64-c99.txt' || (matrix.compiler.family == 'gcc' && matrix.compiler.version == '4.8') && 'test/sys/expected/linux-aarch64-gcc48-c99.txt' || 'test/sys/expected/linux-aarch64-modern-c99.txt' }}
       - name: native build+functest (C11)
         uses: ./.github/actions/multi-functest
         with:
@@ -279,6 +282,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c11 ${{ matrix.cflags }}"
+          sys_expected_native: ${{ matrix.target.name == 'x86_64' && 'test/sys/expected/linux-x86_64-c11.txt' || (matrix.compiler.family == 'gcc' && matrix.compiler.version == '4.8') && 'test/sys/expected/linux-aarch64-gcc48-c11.txt' || 'test/sys/expected/linux-aarch64-modern-c11.txt' }}
       - name: native build+functest (C17)
         if: ${{ matrix.compiler.family == 'zig' || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 8) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 7) }}
         uses: ./.github/actions/multi-functest
@@ -293,6 +297,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c17 ${{ matrix.cflags }}"
+          sys_expected_native: ${{ matrix.target.name == 'x86_64' && 'test/sys/expected/linux-x86_64-c17.txt' || 'test/sys/expected/linux-aarch64-modern-c17.txt' }}
       - name: native build+functest (C23)
         if: ${{ (matrix.compiler.family == 'zig' && matrix.compiler.version >= 0.14) || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 14) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 18) }}
         uses: ./.github/actions/multi-functest
@@ -307,6 +312,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c23 ${{ matrix.cflags }}"
+          sys_expected_native: ${{ matrix.target.name == 'x86_64' && 'test/sys/expected/linux-x86_64-c23.txt' || 'test/sys/expected/linux-aarch64-modern-c23.txt' }}
 
   compiler_tests_macos:
     name: Compiler tests (${{ matrix.compiler.family }}-${{ matrix.compiler.version }}, macos, ${{ matrix.cflags }})
@@ -408,6 +414,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "${{ matrix.cflags }}"
+          sys_expected_native: test/sys/expected/macos-aarch64-c99.txt
       - name: native build+functest (C90)
         uses: ./.github/actions/multi-functest
         with:
@@ -421,6 +428,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c90 ${{ matrix.cflags }}"
+          sys_expected_native: test/sys/expected/macos-aarch64-c90.txt
       - name: native build+functest (C99)
         uses: ./.github/actions/multi-functest
         with:
@@ -434,6 +442,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c99 ${{ matrix.cflags }}"
+          sys_expected_native: test/sys/expected/macos-aarch64-c99.txt
       - name: native build+functest (C11)
         uses: ./.github/actions/multi-functest
         with:
@@ -447,6 +456,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c11 ${{ matrix.cflags }}"
+          sys_expected_native: test/sys/expected/macos-aarch64-c11.txt
       - name: native build+functest (C17)
         if: ${{ matrix.compiler.family == 'zig' || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 8) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 7) }}
         uses: ./.github/actions/multi-functest
@@ -461,6 +471,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c17 ${{ matrix.cflags }}"
+          sys_expected_native: test/sys/expected/macos-aarch64-c17.txt
       - name: native build+functest (C23)
         if: ${{ (matrix.compiler.family == 'zig' && matrix.compiler.version >= 0.14) || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 14) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 18) }}
         uses: ./.github/actions/multi-functest
@@ -475,6 +486,7 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c23 ${{ matrix.cflags }}"
+          sys_expected_native: test/sys/expected/macos-aarch64-c23.txt
 
   compiler_tests_windows_mingw:
     name: Compiler tests (Mingw-w64 ${{ matrix.mingw-version }}, x86_64)
@@ -510,11 +522,22 @@ jobs:
           CC=gcc OPT=0 make quickcheck
           CC=gcc make clean >/dev/null
           CC=gcc OPT=1 make quickcheck
+      - name: check sys.h (default)
+        shell: bash
+        run: |
+          ./scripts/check-sys --expected test/sys/expected/windows-x86_64-c99.txt \
+            --make-arg "CC=gcc"
       - name: make quickcheck (AVX2)
         shell: bash
         run: |
           CC=gcc make clean >/dev/null
           CC=gcc CFLAGS="-mavx2 -mbmi2" make quickcheck
+      - name: check sys.h (AVX2)
+        shell: bash
+        run: |
+          ./scripts/check-sys --expected test/sys/expected/windows-x86_64-avx2-c99.txt \
+            --make-arg "CC=gcc" \
+            --make-arg "CFLAGS=-mavx2 -mbmi2"
 
   check-ct-varlat-legacy:
     name: Constant-time test ${{ matrix.compiler.family }}-${{ matrix.compiler.version }} ${{ matrix.system }}
