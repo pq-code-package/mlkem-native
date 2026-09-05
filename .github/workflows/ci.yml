@@ -632,6 +632,21 @@ jobs:
     container:
       ${{ matrix.container.id }}
     steps:
+      # On 2026-09-05, Bullseye's live mirrors advertised packages whose
+      # download URLs returned 404s, breaking CI dependency installation.
+      # Use a fixed snapshot to keep Bullseye compatibility tests working.
+      # Configure APT before checkout, which needs to install Git.
+      - name: Configure Bullseye package snapshot
+        if: ${{ matrix.container.id == 'debian:bullseye' }}
+        shell: bash
+        run: |
+          snapshot=20260824T000000Z
+          printf '%s\n' \
+            "deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/$snapshot bullseye main" \
+            "deb [check-valid-until=no] http://snapshot.debian.org/archive/debian-security/$snapshot bullseye-security main" \
+            "deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/$snapshot bullseye-updates main" \
+            > /etc/apt/sources.list
+
       # We're not using the checkout action here because on it's not supported
       # on all containers we want to test. Resort to a manual checkout.
 
