@@ -174,7 +174,8 @@ static void mlk_show_compile_time(void)
   MLK_SHOW_UNDEFINE(MLK_SYSV_ABI_SUPPORTED);
 #endif
 
-  printf("MLK_SYSV_ABI: \"%s\"\n", MLK_SHOW_STRINGIFY(MLK_SYSV_ABI));
+  printf("MLK_SYSV_ABI: \"%s\"\n",
+         MLK_SHOW_STRINGIFY(MLK_SYSV_ABI));
 }
 
 static int mlk_show_runtime_capability(mlk_sys_cap cap)

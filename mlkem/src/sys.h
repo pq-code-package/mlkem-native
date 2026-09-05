@@ -127,9 +127,8 @@
 /*
  * Detect the active C language standard, if any.
  *
- * These are cumulative: MLK_SYS_Cxx is defined whenever the compiler reports
- * standard xx *or later*. For example, a C17 build defines MLK_SYS_C99,
- * MLK_SYS_C11 and MLK_SYS_C17. This makes "C99 or later" a single
+ * These standard markers are cumulative. For example, a C17 build defines
+ * MLK_SYS_C99, MLK_SYS_C11 and MLK_SYS_C17. This makes "C99 or later" a single
  * defined(MLK_SYS_C99) check that stays correct for future standards; to
  * detect exactly one standard, exclude the next, e.g.
  * defined(MLK_SYS_C11) && !defined(MLK_SYS_C17).
@@ -149,7 +148,7 @@
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
 #define MLK_SYS_C23
 #endif
-#endif
+#endif /* !__cplusplus */
 
 /*
  * MLK_INLINE: Hint for inlining.

@@ -674,7 +674,11 @@ class Tests:
             if re.match(r"^(MLK_|bits-|__|runtime-)", line)
         ]
         with open(self.args.sys, "r") as f:
-            expected_lines = f.read().splitlines()
+            expected_lines = [
+                line
+                for line in f.read().splitlines()
+                if re.match(r"^(MLK_|bits-|__|runtime-)", line)
+            ]
 
         if actual_lines != expected_lines:
             diff = difflib.unified_diff(

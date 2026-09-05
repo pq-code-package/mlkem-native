@@ -528,7 +528,9 @@ jobs:
           actual=$(mktemp)
           trap 'rm -f "$actual"' EXIT
           CC=gcc make run-show-sys | grep -E '^(MLK_|bits-|__|runtime-)' >"$actual"
-          diff -u test/sys/expected/windows-x86_64-c99.txt "$actual"
+          diff -u \
+            <(grep -E '^(MLK_|bits-|__|runtime-)' test/sys/expected/windows-x86_64-c99.txt) \
+            "$actual"
       - name: make quickcheck (AVX2)
         shell: bash
         run: |
@@ -540,7 +542,9 @@ jobs:
           actual=$(mktemp)
           trap 'rm -f "$actual"' EXIT
           CC=gcc CFLAGS="-mavx2 -mbmi2" make run-show-sys | grep -E '^(MLK_|bits-|__|runtime-)' >"$actual"
-          diff -u test/sys/expected/windows-x86_64-avx2-c99.txt "$actual"
+          diff -u \
+            <(grep -E '^(MLK_|bits-|__|runtime-)' test/sys/expected/windows-x86_64-avx2-c99.txt) \
+            "$actual"
 
   check-ct-varlat-legacy:
     name: Constant-time test ${{ matrix.compiler.family }}-${{ matrix.compiler.version }} ${{ matrix.system }}

@@ -90,7 +90,7 @@ inputs:
     description: Expected sys snapshot for aarch64_be cross runs
     default: "test/sys/expected/linux-aarch64_be-c99.txt"
   sys_expected_cross_riscv64:
-    description: Expected sys snapshot for riscv64 cross runs (default wrapper: VLEN=128)
+    description: "Expected sys snapshot for riscv64 cross runs (default wrapper: VLEN=128)"
     default: "test/sys/expected/linux-riscv64-rvv-vlen128-c99.txt"
   sys_expected_cross_riscv32:
     description: Expected sys snapshot for riscv32 cross runs
