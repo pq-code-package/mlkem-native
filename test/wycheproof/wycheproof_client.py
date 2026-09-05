@@ -85,7 +85,7 @@ def info(msg, **kwargs):
 
 
 def download_file(url, dest, token):
-    """Fetch url to dest via the authenticated contents API, retrying on 429/403.
+    """Fetch url to dest via the authenticated contents API, retrying on failure.
 
     Using api.github.com with a token raises the rate limit (per-user, not
     per-IP), which avoids throttling when many CI jobs share an egress IP.
@@ -99,11 +99,13 @@ def download_file(url, dest, token):
             with urllib.request.urlopen(req) as resp:
                 dest.write_bytes(resp.read())
             return
-        except urllib.error.HTTPError as e:
-            if e.code not in (429, 403) or attempt == 4:
+        except Exception as e:
+            if attempt == 4:
                 raise
-            wait = min(int(e.headers.get("Retry-After") or 2**attempt), 60)
-            print(f"Rate-limited ({e.code}); retrying in {wait}s", file=sys.stderr)
+            wait = 2**attempt
+            if isinstance(e, urllib.error.HTTPError):
+                wait = min(int(e.headers.get("Retry-After") or wait), 60)
+            print(f"Download failed ({e}); retrying in {wait}s", file=sys.stderr)
             time.sleep(wait)
 
 

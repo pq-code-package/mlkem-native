@@ -151,6 +151,8 @@ jobs:
              }}
     name: Quickcheck C90 (${{ matrix.target.name }})
     runs-on: ${{ matrix.target.runner }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: make quickcheck
@@ -175,6 +177,8 @@ jobs:
         system: [windows-2025, windows-2022]
     name: Quickcheck ${{ matrix.system }}
     runs-on: ${{ matrix.system }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
@@ -192,6 +196,8 @@ jobs:
         mingw-version: [5.4.0, 13.2.0, 14.2.0, 15.2.0]
     name: Quickcheck (Mingw-w64 ${{ matrix.mingw-version }})
     runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install MinGW-w64
@@ -317,6 +323,8 @@ jobs:
            name: 'x86_64'
     name: scan-build (${{ matrix.target.name }})
     runs-on: ${{ matrix.target.runner }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-apt

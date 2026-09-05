@@ -176,6 +176,8 @@ jobs:
         with:
           sudo: ""
       - name: make quickcheck
+        env:
+          GH_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}
         run: |
           OPT=0 make quickcheck
           make clean            >/dev/null
