@@ -45,6 +45,9 @@ inputs:
   custom_shell:
     description: The shell to use. Only relevant if no nix-shell specified
     default: "bash"
+  platform:
+    description: Test platform profile
+    default: ""
   cross_prefix:
     description: "Binary prefix for cross-compilation builds"
     default: ""
@@ -77,13 +80,18 @@ runs:
     - name: Run benchmark
       shell: ${{ env.SHELL }}
       run: |
-        ./scripts/tests bench -c ${{ inputs.perf }} --cross-prefix="${{ inputs.cross_prefix }}" \
+        platform_args=()
+        if [[ -n "${{ inputs.platform }}" ]]; then
+          platform_args+=(--platform="${{ inputs.platform }}")
+        fi
+
+        ./scripts/tests bench -c ${{ inputs.perf }} "${platform_args[@]}" --cross-prefix="${{ inputs.cross_prefix }}" \
               --cflags="${{ inputs.cflags }} ${{ inputs.archflags }}" \
               --ldflags="${{ inputs.ldflags }}" \
               --opt=$([[ ${{ inputs.opt }} == "false" ]] && echo "no_opt" || echo "opt")  \
               -v --output=output.json ${{ inputs.bench_extra_args }}
 
-        ./scripts/tests bench --components -c ${{ inputs.perf }} --cross-prefix="${{ inputs.cross_prefix }}" \
+        ./scripts/tests bench --components -c ${{ inputs.perf }} "${platform_args[@]}" --cross-prefix="${{ inputs.cross_prefix }}" \
               --cflags="${{ inputs.cflags }} ${{ inputs.archflags }}" \
               --ldflags="${{ inputs.ldflags }}" \
               --opt=$([[ ${{ inputs.opt }} == "false" ]] && echo "no_opt" || echo "opt")  \

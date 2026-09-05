@@ -26,9 +26,9 @@ jobs:
       - name: zephyr build + test
         uses: ./.github/actions/functest
         env:
-          EXTRA_MAKEFILE: test/zephyr/platform.mk
           ZEPHYR_TARGET: ${{ matrix.target.board }}
         with:
+          platform: zephyr
           nix-shell: zephyr
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           opt: ${{ matrix.target.opt }}
@@ -42,16 +42,12 @@ jobs:
           alloc: false
           rng_fail: false
           check_namespace: false
-          # Zephyr's CMake selects the target arch; disable the host-arch
-          # auto-detection that would otherwise leak into the forwarded CFLAGS.
-          extra_args: --no-auto
       # Smoke only: QEMU doesn't model cycle counts (real numbers come from the
       # FPGA); this just exercises the bench build + run.
       - name: bench (smoke)
         env:
-          EXTRA_MAKEFILE: test/zephyr/platform.mk
           ZEPHYR_TARGET: ${{ matrix.target.board }}
         run: |
           opt=${{ matrix.target.opt == 'all' && 'opt' || 'no_opt' }}
-          nix develop .#zephyr --command ./scripts/tests bench --no-auto -c NO --opt=$opt
-          nix develop .#zephyr --command ./scripts/tests bench --no-auto --components -c NO --opt=$opt
+          nix develop .#zephyr --command ./scripts/tests bench --platform zephyr -c NO --opt=$opt
+          nix develop .#zephyr --command ./scripts/tests bench --platform zephyr --components -c NO --opt=$opt
