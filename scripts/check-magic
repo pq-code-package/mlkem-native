@@ -147,11 +147,11 @@ def check_magic_numbers():
                 magic_val_check = evaluate_magic(magic_expr, magic_dict)
                 if magic_val != magic_val_check:
                     print(
-                        f"{FAIL}:{filename}:{i}: Mismatching magic annotation: {magic_val} != {magic_expr} (= {magic_val_check})"
+                        f"{FAIL}:{filename}:{i + 1}: Mismatching magic annotation: {magic_val} != {magic_expr} (= {magic_val_check})"
                     )
                     exit(1)
                 print(
-                    f"{REMEMBERED}:{filename}:{i}: Verified explanation {magic_val} == {magic_expr}"
+                    f"{REMEMBERED}:{filename}:{i + 1}: Verified explanation {magic_val} == {magic_expr}"
                 )
                 verified_magics[magic_val] = magic_expr
 
@@ -170,11 +170,13 @@ def check_magic_numbers():
 
             explanation = verified_magics.get(magic, None)
             if explanation is None:
-                print(f"{FAIL}:{filename}:{i}: No explanation for magic value {magic}")
+                print(
+                    f"{FAIL}:{filename}:{i + 1}: No explanation for magic value {magic}"
+                )
                 exit(1)
 
             print(
-                f"{CHECKED}:{filename}:{i}: {magic} previously explained as {explanation}"
+                f"{CHECKED}:{filename}:{i + 1}: {magic} previously explained as {explanation}"
             )
 
 
