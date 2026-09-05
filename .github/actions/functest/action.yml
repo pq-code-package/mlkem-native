@@ -120,6 +120,8 @@ runs:
           EOF
       - name: ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.EXAMPLES }}, ${{ env.STACK }}, ${{ env.UNIT }}, ${{ env.ALLOC }}, ${{ env.RNGFAIL }})
         shell: ${{ env.SHELL }}
+        env:
+          GH_TOKEN: ${{ inputs.gh_token }}
         run: |
           make clean
           ${{ inputs.extra_env }} ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --ldflags="${{ inputs.ldflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.WYCHEPROOF }} --${{ env.EXAMPLES }} --${{ env.STACK }} --${{ env.UNIT }} --${{ env.ALLOC }} --${{ env.RNGFAIL }} -v ${{ inputs.extra_args }}

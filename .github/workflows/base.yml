@@ -45,6 +45,8 @@ jobs:
              }}
     name: Quickcheck (${{ matrix.target.name }})
     runs-on: ${{ matrix.target.runner }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: make quickcheck
@@ -79,6 +81,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Run ACVP test
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./scripts/tests acvp --version ${{ matrix.acvp-version }}
   quickcheck_bench:
