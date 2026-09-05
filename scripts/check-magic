@@ -77,12 +77,6 @@ def check_magic_numbers():
             return line, (int(m.group(1)), m.group(2))
         return line, None
 
-    def get_define(line):
-        m = re.search(r"#define\s+(\w+)", line)
-        if m is not None:
-            return m.group(1)
-        return None
-
     def evaluate_magic(m, known_magics):
         def unsigned_mod(x, y):
             return x % y
@@ -161,6 +155,11 @@ def check_magic_numbers():
                 )
                 verified_magics[magic_val] = magic_expr
 
+            # Remember integer defines, in file order, for use in annotations
+            constant = re.match(r"\s*#define\s+(\w+)\s+\(?\s*([-]?\d+)\s*\)?$", line)
+            if constant is not None:
+                magic_dict[constant.group(1)] = int(constant.group(2))
+
             found = next(re.finditer(pattern, line), None)
             if found is None:
                 continue
@@ -177,11 +176,6 @@ def check_magic_numbers():
             print(
                 f"{CHECKED}:{filename}:{i}: {magic} previously explained as {explanation}"
             )
-
-            # If this is a #define's clause, remember it
-            define = get_define(line)
-            if define is not None:
-                magic_dict[define] = magic
 
 
 def _main():
