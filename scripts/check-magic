@@ -66,7 +66,9 @@ def check_magic_numbers():
         return magic in exceptions
 
     def get_magic(line):
-        regexp = r"/\* check-magic:\s+([-]?\d{4,})\s*==\s*(.*?) \*/"
+        # Annotations may explain a constant of any size; only constants with
+        # at least four digits _require_ one.
+        regexp = r"/\* check-magic:\s+([-]?\d+)\s*==\s*(.*?) \*/"
         m = re.search(regexp, line)
         if m is not None:
             # Remove magic annotation to avoid it being treated
