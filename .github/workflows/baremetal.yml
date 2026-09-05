@@ -18,7 +18,6 @@ jobs:
         target:
          - runner: ubuntu-latest
            name: 'AVR ATmega128RFR2 (modified for 63.5K RAM)'
-           makefile: test/baremetal/platform/avr/platform.mk
            nix-shell: cross-avr
            func: true
            kat: true
@@ -32,9 +31,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: baremetal build + test
         uses: ./.github/actions/functest
-        env:
-          EXTRA_MAKEFILE: ${{ matrix.target.makefile }}
         with:
+          platform: baremetal/avr
           nix-shell: ${{ matrix.target.nix-shell }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           opt: ${{ matrix.target.opt }}
@@ -49,10 +47,9 @@ jobs:
       - name: Baremetal bench
         if: ${{ matrix.target.bench }}
         uses: ./.github/actions/bench
-        env:
-          EXTRA_MAKEFILE: ${{ matrix.target.makefile }}
         with:
           name: ${{ matrix.target.name }}
+          platform: baremetal/avr
           nix-shell: ${{ matrix.target.nix-shell }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           perf: PMU
@@ -75,9 +72,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: baremetal build + test
         uses: ./.github/actions/functest
-        env:
-          EXTRA_MAKEFILE: test/baremetal/platform/aarch64-virt/platform.mk
         with:
+          platform: baremetal/aarch64-virt
           nix-shell: cross-aarch64-embedded
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           opt: opt

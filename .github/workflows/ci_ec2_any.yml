@@ -31,15 +31,22 @@ on:
         description: Determine for the log verbosity
         type: boolean
         default: false
-      compile_mode:
-        description: Indicates the desired compilation mode (native or cross compilation), or `all` to perform both types, or `none` to skip compilation and functional testing.
+      platform:
+        description: Test platform profile
         type: choice
         options:
-          - all
           - native
-          - cross
-          - none
-        default: all
+          - linux/x86_64
+          - linux/x86_64-no-avx2
+          - linux/aarch64
+          - linux/ppc64le-power8
+          - linux/ppc64le-power7
+          - linux/riscv64-rvv128
+          - linux/riscv64-rvv256
+          - linux/riscv64-rvv512
+          - linux/riscv64-rvv1024
+          - linux/riscv32
+        required: true
       opt:
         description: Determine whether to compile and run the opt/no_opt binary or both.
         type: choice
@@ -52,6 +59,10 @@ on:
         description: Whether to run CBMC proofs
         type: boolean
         default: false
+      test:
+        description: Whether to run the test suite
+        type: boolean
+        default: true
 jobs:
   ci-ec2-any:
     name: Ad-hoc CI on ${{ inputs.ec2_instance_type }}
@@ -62,12 +73,10 @@ jobs:
       ec2_ami: ${{ inputs.ec2_ami }}
       ec2_ami_id: ${{ inputs.ec2_ami_id }}
       cflags: ${{ inputs.cflags }}
-      compile_mode: ${{ inputs.compile_mode }}
+      platform: ${{ inputs.platform }}
       opt: ${{ inputs.opt }}
-      functest: ${{ inputs.compile_mode != 'none' }}
-      kattest: ${{ inputs.compile_mode != 'none' }}
-      acvptest: ${{ inputs.compile_mode != 'none' }}
       lint: true
+      test: ${{ inputs.test }}
       cbmc: ${{ inputs.cbmc }}
       verbose: ${{ inputs.verbose }}
     secrets: inherit
