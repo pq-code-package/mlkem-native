@@ -12,12 +12,37 @@ import os
 import json
 import sys
 import subprocess
+import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
 # Check if we need to use a wrapper for execution (e.g. QEMU)
 exec_prefix = os.environ.get("EXEC_WRAPPER", "")
 exec_prefix = exec_prefix.split(" ") if exec_prefix != "" else []
+
+
+def download_file(url, dest, token):
+    """Fetch url to dest via the authenticated contents API, retrying on 429/403.
+
+    Using api.github.com with a token raises the rate limit (per-user, not
+    per-IP), which avoids throttling when many CI jobs share an egress IP.
+    """
+    headers = {"Accept": "application/vnd.github.raw"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    for attempt in range(5):
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req) as resp:
+                dest.write_bytes(resp.read())
+            return
+        except urllib.error.HTTPError as e:
+            if e.code not in (429, 403) or attempt == 4:
+                raise
+            wait = min(int(e.headers.get("Retry-After") or 2**attempt), 60)
+            print(f"Rate-limited ({e.code}); retrying in {wait}s", file=sys.stderr)
+            time.sleep(wait)
 
 
 def acvp_version_has_tr1(version):
@@ -32,7 +57,9 @@ def acvp_version_has_tr1(version):
 
 def download_acvp_files(version):
     """Download ACVP test files for the specified version if not present."""
-    base_url = f"https://raw.githubusercontent.com/usnistgov/ACVP-Server/{version}/gen-val/json-files"
+    api_base = (
+        "https://api.github.com/repos/usnistgov/ACVP-Server/contents/gen-val/json-files"
+    )
 
     # Files we need to download for ML-KEM
     files_to_download = [
@@ -53,15 +80,17 @@ def download_acvp_files(version):
     data_dir = Path(f"test/acvp/.acvp-data/{version}/files")
     data_dir.mkdir(parents=True, exist_ok=True)
 
+    token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    auth = "authenticated" if token else "anonymous"
     for file_path in files_to_download:
         local_file = data_dir / file_path
         local_file.parent.mkdir(parents=True, exist_ok=True)
 
         if not local_file.exists():
-            url = f"{base_url}/{file_path}"
-            print(f"Downloading {file_path}...", file=sys.stderr)
+            url = f"{api_base}/{file_path}?ref={version}"
+            print(f"Downloading {file_path} ({auth})...", file=sys.stderr)
             try:
-                urllib.request.urlretrieve(url, local_file)
+                download_file(url, local_file, token)
                 # Verify the file is valid JSON
                 with open(local_file, "r") as f:
                     json.load(f)
