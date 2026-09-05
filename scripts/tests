@@ -566,9 +566,12 @@ class Tests:
             if stack_flags:
                 env_update["STACK_ANALYSIS_FLAGS"] = " ".join(stack_flags)
 
-        # Add ACVP version for ACVP tests
-        if test_type == TEST_TYPES.ACVP and hasattr(self.args, "version"):
-            env_update["ACVP_VERSION"] = self.args.version
+        # Add ACVP version and concurrency for ACVP tests
+        if test_type == TEST_TYPES.ACVP:
+            if hasattr(self.args, "version"):
+                env_update["ACVP_VERSION"] = self.args.version
+            if self.args.j is not None:
+                env_update["ACVP_JOBS"] = str(self.args.j)
 
         env = os.environ.copy()
         env.update(env_update)

@@ -15,11 +15,15 @@ import subprocess
 import time
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 # Check if we need to use a wrapper for execution (e.g. QEMU)
 exec_prefix = os.environ.get("EXEC_WRAPPER", "")
 exec_prefix = exec_prefix.split(" ") if exec_prefix != "" else []
+
+# Number of test cases to run concurrently; set from --jobs.
+jobs = 1
 
 
 def download_file(url, dest, token):
@@ -336,8 +340,6 @@ def get_acvp_binary(tg):
 
 
 def run_encapDecap_test(tg, tc):
-    info(f"Running encapDecap test case {tc['tcId']} ({tg['function']}) ... ", end="")
-
     results = {"tcId": tc["tcId"]}
     if tg["function"] == "encapsulation":
         acvp_bin = get_acvp_binary(tg)
@@ -418,12 +420,10 @@ def run_encapDecap_test(tg, tc):
         # Extract results
         for k, v in parse_kv_output(result.stdout).items():
             results[k] = v == "1"
-    info("done")
     return results
 
 
 def run_keyGen_test(tg, tc):
-    info(f"Running keyGen test case {tc['tcId']} ... ", end="")
     results = {"tcId": tc["tcId"]}
 
     acvp_bin = get_acvp_binary(tg)
@@ -442,8 +442,13 @@ def run_keyGen_test(tg, tc):
         exit(1)
     # Extract results
     results.update(parse_kv_output(result.stdout))
-    info("done")
     return results
+
+
+RUN_TEST = {
+    "encapDecap": run_encapDecap_test,
+    "keyGen": run_keyGen_test,
+}
 
 
 def runTestSingle(promptName, prompt, expectedResultName, expectedResult, output):
@@ -472,19 +477,29 @@ def runTestSingle(promptName, prompt, expectedResultName, expectedResult, output
     # copy top level fields into the results
     results = prompt.copy()
 
+    mode = prompt["mode"]
     results["testGroups"] = []
+    work = []
     for tg in prompt["testGroups"]:
         tgResult = {
             "tgId": tg["tgId"],
             "tests": [],
         }
         results["testGroups"].append(tgResult)
-        for tc in tg["tests"]:
-            if prompt["mode"] == "encapDecap":
-                result = run_encapDecap_test(tg, tc)
-            elif prompt["mode"] == "keyGen":
-                result = run_keyGen_test(tg, tc)
-            tgResult["tests"].append(result)
+        work += [(tgResult, tg, tc) for tc in tg["tests"]]
+
+    # Collect in prompt order, not completion order: the comparison is strict.
+    with ThreadPoolExecutor(max_workers=jobs) as pool:
+        futures = [pool.submit(RUN_TEST[mode], tg, tc) for _, tg, tc in work]
+        try:
+            for (tgResult, tg, tc), future in zip(work, futures):
+                tgResult["tests"].append(future.result())
+                fn = f" ({tg['function']})" if "function" in tg else ""
+                info(f"Running {mode} test case {tc['tcId']}{fn} ... done")
+        except BaseException:
+            for future in futures:
+                future.cancel()
+            raise
 
     # In case the testvectors are from the ACVTS server, it is expected
     # that the acvVersion is included in the output results.
@@ -518,9 +533,14 @@ def runTest(data, output):
     # if output is defined we expect only one input
     assert output is None or len(data) == 1
 
+    cases = sum(
+        len(tg["tests"]) for _, p, _, _ in data for tg in unwrap_acvts(p)["testGroups"]
+    )
+    info(f"Running {cases} test case(s) with {jobs} job(s)")
+    start = time.time()
     for promptName, prompt, expectedResultName, expectedResult in data:
         runTestSingle(promptName, prompt, expectedResultName, expectedResult, output)
-    info("ALL GOOD!")
+    info(f"ALL GOOD! ({cases} cases in {time.time() - start:.1f}s)")
 
 
 def test(prompt, expected, output, version, supported_functions=None):
@@ -590,7 +610,15 @@ parser.add_argument(
     default="v1.1.0.43",
     help="ACVP test vector version (default: v1.1.0.43)",
 )
+parser.add_argument(
+    "-j",
+    "--jobs",
+    type=int,
+    default=1,
+    help="Number of test cases to run concurrently (default: 1)",
+)
 args = parser.parse_args()
+jobs = args.jobs
 
 if args.prompt is None:
     print(f"Using ACVP test vectors version {args.version}", file=sys.stderr)
