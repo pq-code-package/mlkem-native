@@ -45,6 +45,125 @@ def merge_environment(env_update):
     return env
 
 
+#
+# Test platform profiles.
+#
+
+
+def linux_platform(cross_prefix, cflags, exec_wrapper, ldflags=""):
+    return {
+        "cross_prefix": cross_prefix,
+        "cflags": cflags,
+        "ldflags": ldflags,
+        "exec_wrapper": exec_wrapper,
+    }
+
+
+PLATFORMS = {
+    "native": {},
+    "linux/x86_64": linux_platform(
+        "x86_64-unknown-linux-gnu-",
+        "-DMLK_FORCE_X86_64",
+        "qemu-x86_64",
+    ),
+    "linux/x86_64-no-avx2": {
+        **linux_platform(
+            "x86_64-unknown-linux-gnu-",
+            "-DMLK_FORCE_X86_64",
+            "qemu-x86_64 -cpu Snowridge",
+        ),
+        "auto": False,
+    },
+    "linux/aarch64": linux_platform(
+        "aarch64-unknown-linux-gnu-",
+        "-DMLK_FORCE_AARCH64",
+        "qemu-aarch64",
+    ),
+    "linux/aarch64_be": linux_platform(
+        "aarch64_be-none-linux-gnu-",
+        "-static -DMLK_FORCE_AARCH64_EB",
+        "qemu-aarch64_be",
+        ldflags="-static",
+    ),
+    "linux/ppc64le-power8": linux_platform(
+        "powerpc64le-unknown-linux-gnu-",
+        "-DMLK_FORCE_PPC64LE -mcpu=power8",
+        "qemu-ppc64le -cpu power8",
+    ),
+    "linux/ppc64le-power7": linux_platform(
+        "powerpc64le-unknown-linux-gnu-",
+        "-DMLK_FORCE_PPC64LE -mcpu=power7",
+        "qemu-ppc64le -cpu power8",
+    ),
+    "linux/riscv64-rvv128": linux_platform(
+        "riscv64-unknown-linux-gnu-",
+        "-DMLK_FORCE_RISCV64",
+        "qemu-riscv64 -cpu rv64,v=true,vlen=128",
+    ),
+    "linux/riscv64-rvv256": linux_platform(
+        "riscv64-unknown-linux-gnu-",
+        "-DMLK_FORCE_RISCV64",
+        "qemu-riscv64 -cpu rv64,v=true,vlen=256",
+    ),
+    "linux/riscv64-rvv512": linux_platform(
+        "riscv64-unknown-linux-gnu-",
+        "-DMLK_FORCE_RISCV64",
+        "qemu-riscv64 -cpu rv64,v=true,vlen=512",
+    ),
+    "linux/riscv64-rvv1024": linux_platform(
+        "riscv64-unknown-linux-gnu-",
+        "-DMLK_FORCE_RISCV64",
+        "qemu-riscv64 -cpu rv64,v=true,vlen=1024",
+    ),
+    "linux/riscv32": linux_platform(
+        "riscv32-unknown-linux-gnu-",
+        "-DMLK_FORCE_RISCV32",
+        "qemu-riscv32",
+    ),
+    "baremetal/aarch64-virt": {
+        "extra_makefile": "test/baremetal/platform/aarch64-virt/platform.mk",
+    },
+    "baremetal/avr": {
+        "extra_makefile": "test/baremetal/platform/avr/platform.mk",
+    },
+    "zephyr": {
+        "extra_makefile": "test/zephyr/platform.mk",
+        "auto": False,
+    },
+}
+
+
+def merge_flags(default, user):
+    parts = [value for value in (default or "", user or "") if value != ""]
+    return " ".join(parts) if parts else None
+
+
+def apply_platform_profile(args):
+    for name in ("cross_prefix", "extra_makefile", "exec_wrapper"):
+        if getattr(args, name) == "":
+            setattr(args, name, None)
+
+    if args.platform is None:
+        if args.auto is None:
+            args.auto = True
+        return
+
+    profile = PLATFORMS[args.platform]
+
+    if args.cross_prefix is None and "cross_prefix" in profile:
+        args.cross_prefix = profile["cross_prefix"]
+    if args.extra_makefile is None and "extra_makefile" in profile:
+        args.extra_makefile = profile["extra_makefile"]
+    if args.exec_wrapper is None and "exec_wrapper" in profile:
+        args.exec_wrapper = profile["exec_wrapper"]
+
+    args.cflags = merge_flags(profile.get("cflags"), args.cflags)
+    args.ldflags = merge_flags(profile.get("ldflags"), args.ldflags)
+
+    if args.auto is None:
+        args.auto = profile.get("auto", True)
+
+
 def github_log(msg):
     if os.environ.get("GITHUB_ENV") is None:
         return
@@ -138,12 +257,12 @@ def config_logger(verbose):
         logger.setLevel(logging.INFO)
 
 
-def logger(test_type, scheme, dm, cross_prefix, opt):
+def logger(test_type, scheme, dm, compile_mode, opt):
     """Emit line indicating the processing of the given test"""
 
     test_desc = str(test_type)
 
-    compile_mode = "cross" if cross_prefix else "native"
+    compile_mode = (compile_mode or "Native").lower()
     if opt is None:
         opt_label = ""
     elif opt is True:
@@ -450,7 +569,12 @@ class Tests:
         return self.args.opt.lower() in ["all", "no_opt"]
 
     def compile_mode(self):
-        return "Cross" if self.args.cross_prefix != "" else "Native"
+        is_cross = (
+            self.args.platform not in (None, "native")
+            or self.args.cross_prefix
+            or os.environ.get("CROSS_PREFIX")
+        )
+        return "Cross" if is_cross else "Native"
 
     def _compile_schemes(self, test_type, opt):
         """compile or cross compile with some extra environment variables and makefile arguments"""
@@ -466,14 +590,18 @@ class Tests:
             f"::group::compile {self.compile_mode()}{opt_label} {test_type.desc()}"
         )
 
-        log = logger(test_type, "Compile", None, self.args.cross_prefix, opt)
+        log = logger(test_type, "Compile", None, self.compile_mode(), opt)
 
         extra_make_args = []
-        # Those options are not used in the examples
+        # Examples do not use OPT, but must honor explicit AUTO=0.
         if test_type.is_example() is False:
             extra_make_args += [f"OPT={int(opt)}", f"AUTO={int(self.args.auto)}"]
+        elif self.args.auto is False:
+            extra_make_args += ["AUTO=0"]
         if test_type.is_benchmark() is True:
             extra_make_args += [f"CYCLES={self.args.cycles}"]
+        if self.args.extra_makefile and self.args.cross_prefix:
+            extra_make_args += [f"CROSS_PREFIX={self.args.cross_prefix}"]
         if test_type.make_dir() != "":
             extra_make_args += ["-C", test_type.make_dir()]
         extra_make_args += self.make_j()
@@ -490,7 +618,7 @@ class Tests:
         if ldflags is None:
             ldflags = ""
 
-        if test_type.is_example() and self.args.cross_prefix != "":
+        if test_type.is_example() and self.args.cross_prefix:
             cflags += " -static"
 
         # Add FIPS202 backend selection if specified and this is an OPT build
@@ -512,7 +640,7 @@ class Tests:
             env_update["CFLAGS"] = cflags
         if ldflags != "":
             env_update["LDFLAGS"] = ldflags
-        if self.args.cross_prefix != "":
+        if self.args.cross_prefix:
             env_update["CROSS_PREFIX"] = self.args.cross_prefix
 
         env = merge_environment(env_update)
@@ -558,19 +686,26 @@ class Tests:
         else:
             scheme_str = str(scheme)
 
-        log = logger(test_type, scheme_str, None, self.args.cross_prefix, opt)
+        log = logger(test_type, scheme_str, None, self.compile_mode(), opt)
 
         args = ["make", test_type.make_run_target(scheme)]
         if test_type.is_benchmark() is False and test_type.is_example() is False:
             args += self.make_j()
+        if self.args.extra_makefile and self.args.cross_prefix:
+            args += [f"CROSS_PREFIX={self.args.cross_prefix}"]
+        if self.args.extra_makefile and self.args.exec_wrapper:
+            args += [f"EXEC_WRAPPER={' '.join(self.cmd_prefix())}"]
         if test_type.make_dir() != "":
             args += ["-C", test_type.make_dir()]
 
         env_update = {}
         if self.args.extra_makefile:
             env_update["EXTRA_MAKEFILE"] = self.args.extra_makefile
-        if len(self.cmd_prefix()) > 0:
-            env_update["EXEC_WRAPPER"] = " ".join(self.cmd_prefix())
+        if self.args.cross_prefix:
+            env_update["CROSS_PREFIX"] = self.args.cross_prefix
+        cmd_prefix = self.cmd_prefix()
+        if cmd_prefix:
+            env_update["EXEC_WRAPPER"] = " ".join(cmd_prefix)
 
         # Add stack analysis flags for stack tests
         if test_type == TEST_TYPES.STACK:
@@ -1150,11 +1285,18 @@ def cli():
         "-v", "--verbose", help="Show verbose output or not", action="store_true"
     )
     common_parser.add_argument(
-        "-cp", "--cross-prefix", help="Cross prefix for compilation", default=""
+        "-cp", "--cross-prefix", help="Cross prefix for compilation", default=None
     )
     common_parser.add_argument(
         "--extra-makefile",
         help="Use a custom platform Makefile, e.g. path/to/platform.mk",
+        default=None,
+    )
+    common_parser.add_argument(
+        "--platform",
+        help="Target test platform profile",
+        choices=sorted(PLATFORMS.keys()),
+        default=None,
     )
     common_parser.add_argument(
         "--cflags", help="Extra cflags to passed in (e.g. '-mcpu=cortex-a72')"
@@ -1175,7 +1317,7 @@ def cli():
         action="store_true",
         dest="auto",
         help="Allow makefile to auto configure system specific preprocessor",
-        default=True,
+        default=None,
     )
     auto_group.add_argument(
         "--no-auto",
@@ -1217,7 +1359,10 @@ def cli():
     )
 
     common_parser.add_argument(
-        "-w", "--exec-wrapper", help="Run the binary with the user-customized wrapper"
+        "-w",
+        "--exec-wrapper",
+        help="Run the binary with the user-customized wrapper",
+        default=None,
     )
     common_parser.add_argument(
         "-r",
@@ -1642,6 +1787,9 @@ def cli():
     )
 
     args = main_parser.parse_args()
+
+    if args.cmd is not None:
+        apply_platform_profile(args)
 
     if not hasattr(args, "mac_taskpolicy"):
         args.mac_taskpolicy = None
