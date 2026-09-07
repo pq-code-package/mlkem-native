@@ -30,28 +30,42 @@
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_ntt_native(int16_t data[MLKEM_N])
 {
-  /* VLEN = 256 only for now */
-  if (__riscv_vsetvlmax_e16m1() != 16)
+  size_t vlmax = __riscv_vsetvlmax_e16m1();
+
+  if (vlmax == 8)
   {
-    return MLK_NATIVE_FUNC_FALLBACK;
+    mlk_rv64v_poly_ntt_vlen128(data);
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 
-  mlk_rv64v_poly_ntt(data);
-  return MLK_NATIVE_FUNC_SUCCESS;
+  if (vlmax == 16)
+  {
+    mlk_rv64v_poly_ntt(data);
+    return MLK_NATIVE_FUNC_SUCCESS;
+  }
+
+  return MLK_NATIVE_FUNC_FALLBACK;
 }
 
 #if !defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API)
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
 {
-  /* VLEN = 256 only for now */
-  if (__riscv_vsetvlmax_e16m1() != 16)
+  size_t vlmax = __riscv_vsetvlmax_e16m1();
+
+  if (vlmax == 8)
   {
-    return MLK_NATIVE_FUNC_FALLBACK;
+    mlk_rv64v_poly_invntt_tomont_vlen128(data);
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
 
-  mlk_rv64v_poly_invntt_tomont(data);
-  return MLK_NATIVE_FUNC_SUCCESS;
+  if (vlmax == 16)
+  {
+    mlk_rv64v_poly_invntt_tomont(data);
+    return MLK_NATIVE_FUNC_SUCCESS;
+  }
+
+  return MLK_NATIVE_FUNC_FALLBACK;
 }
 #endif /* !MLK_CONFIG_NO_ENCAPS_API || !MLK_CONFIG_NO_DECAPS_API */
 
