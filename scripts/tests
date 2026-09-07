@@ -506,6 +506,8 @@ class Tests:
             cflags += f' -DMLK_CONFIG_FIPS202_BACKEND_FILE=\\"fips202/native/aarch64/{self.args.fips202_aarch64_backend}.h\\"'
 
         env_update = {}
+        if self.args.extra_makefile:
+            env_update["EXTRA_MAKEFILE"] = self.args.extra_makefile
         if cflags != "":
             env_update["CFLAGS"] = cflags
         if ldflags != "":
@@ -565,6 +567,8 @@ class Tests:
             args += ["-C", test_type.make_dir()]
 
         env_update = {}
+        if self.args.extra_makefile:
+            env_update["EXTRA_MAKEFILE"] = self.args.extra_makefile
         if len(self.cmd_prefix()) > 0:
             env_update["EXEC_WRAPPER"] = " ".join(self.cmd_prefix())
 
@@ -1147,6 +1151,10 @@ def cli():
     )
     common_parser.add_argument(
         "-cp", "--cross-prefix", help="Cross prefix for compilation", default=""
+    )
+    common_parser.add_argument(
+        "--extra-makefile",
+        help="Use a custom platform Makefile, e.g. path/to/platform.mk",
     )
     common_parser.add_argument(
         "--cflags", help="Extra cflags to passed in (e.g. '-mcpu=cortex-a72')"
