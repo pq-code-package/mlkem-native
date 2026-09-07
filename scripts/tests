@@ -32,6 +32,19 @@ def dict2str(dict):
     return s
 
 
+def merge_environment(env_update):
+    env_update = {
+        variable: value for variable, value in env_update.items() if value != ""
+    }
+    env = os.environ.copy()
+    for variable, value in env_update.items():
+        current = env.get(variable, "")
+        if current != "" and current != value:
+            sys.exit(f"Refusing to overwrite {variable}={current!r} with {value!r}")
+    env.update(env_update)
+    return env
+
+
 def github_log(msg):
     if os.environ.get("GITHUB_ENV") is None:
         return
@@ -500,8 +513,7 @@ class Tests:
         if self.args.cross_prefix != "":
             env_update["CROSS_PREFIX"] = self.args.cross_prefix
 
-        env = os.environ.copy()
-        env.update(env_update)
+        env = merge_environment(env_update)
 
         log.info(dict2str(env_update) + " ".join(args))
 
@@ -573,8 +585,7 @@ class Tests:
             if self.args.j is not None:
                 env_update["ACVP_JOBS"] = str(self.args.j)
 
-        env = os.environ.copy()
-        env.update(env_update)
+        env = merge_environment(env_update)
 
         cmd_str = dict2str(env_update) + " ".join(args)
         log.info(cmd_str)
