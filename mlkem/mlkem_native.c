@@ -373,6 +373,11 @@
 #undef MLK_SYS_APPLE
 #undef MLK_SYS_ARMV81M_MVE
 #undef MLK_SYS_BIG_ENDIAN
+#undef MLK_SYS_C11
+#undef MLK_SYS_C17
+#undef MLK_SYS_C23
+#undef MLK_SYS_C99
+#undef MLK_SYS_CXX
 #undef MLK_SYS_H
 #undef MLK_SYS_LINUX
 #undef MLK_SYS_LITTLE_ENDIAN

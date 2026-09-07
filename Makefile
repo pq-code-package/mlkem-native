@@ -2,11 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 .PHONY: func kat acvp wycheproof stack alloc rng_fail \
-	func_512 kat_512 acvp_512 wycheproof_512 stack_512 alloc_512 rng_fail_512 \
+	func_512 kat_512 acvp_512 wycheproof_512 stack_512 alloc_512 rng_fail_512 show_sys_512 \
 	func_768 kat_768 acvp_768 wycheproof_768 stack_768 alloc_768 rng_fail_768 \
 	func_1024 kat_1024 acvp_1024 wycheproof_1024 stack_1024 alloc_1024 rng_fail_1024 \
 	run_func run_kat run_acvp run_wycheproof run_stack run_alloc run_rng_fail \
-	run_func_512 run_kat_512 run_stack_512 run_alloc_512 run_rng_fail_512 \
+	run_func_512 run_kat_512 run_stack_512 run_alloc_512 run_rng_fail_512 run_show_sys_512 \
 	run_func_768 run_kat_768 run_stack_768 run_alloc_768 run_rng_fail_768 \
 	run_func_1024 run_kat_1024 run_stack_1024 run_alloc_1024 run_rng_fail_1024 \
 	bench_512 bench_768 bench_1024 bench \
@@ -17,7 +17,7 @@
 	clean quickcheck check-defined-CYCLES \
 	size_512 size_768 size_1024 size \
 	run_size_512 run_size_768 run_size_1024 run_size \
-	host_info abicheck run_abicheck
+	host_info show-sys show_sys run-show-sys run_show_sys abicheck run_abicheck
 
 SHELL := /usr/bin/env bash
 .DEFAULT_GOAL := build
@@ -73,6 +73,9 @@ run_unit_1024: unit_1024
 	$(W) $(MLKEM1024_DIR)/bin/test_unit1024
 run_unit: run_unit_512 run_unit_768 run_unit_1024
 
+run_show_sys_512: show_sys_512
+	$(W) $(MLKEM512_DIR)/bin/show_sys512
+
 run_acvp: acvp
 	EXEC_WRAPPER="$(EXEC_WRAPPER)" python3 ./test/acvp/acvp_client.py $(if $(ACVP_VERSION),--version $(ACVP_VERSION)) $(if $(ACVP_JOBS),--jobs $(ACVP_JOBS))
 
@@ -83,6 +86,9 @@ func_768:  $(MLKEM768_DIR)/bin/test_mlkem768
 func_1024: $(MLKEM1024_DIR)/bin/test_mlkem1024
 	$(Q)echo "  FUNC       ML-KEM-1024:  $^"
 func: func_512 func_768 func_1024
+
+show_sys_512: $(MLKEM512_DIR)/bin/show_sys512
+	$(Q)echo "  SYS        ML-KEM-512:   $^"
 
 unit_512:  $(MLKEM512_DIR)/bin/test_unit512
 	$(Q)echo "  UNIT       ML-KEM-512:   $^"
@@ -286,6 +292,16 @@ else
 	@echo "=== Architecture Not Supported ==="
 	@echo "No specific feature detection available for $(ARCH)"
 endif
+
+show-sys:
+	$(Q)$(MAKE) show_sys_512
+
+show_sys: show-sys
+
+run-show-sys:
+	$(Q)$(MAKE) run_show_sys_512
+
+run_show_sys: run-show-sys
 
 EXAMPLE_DIRS := \
 	examples/bring_your_own_fips202 \
