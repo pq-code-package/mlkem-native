@@ -179,6 +179,11 @@ def get_args():
             "help": "do property checking without coverage checking",
         },
         {
+            "flags": ["--cvc5"],
+            "action": "store_true",
+            "help": "Generate plain SMT for cvc5 only. Does not run the solver",
+        },
+        {
             "flags": ["--per-proof-timeout"],
             "type": int,
             "metavar": "SECONDS",
@@ -699,7 +704,10 @@ async def main():  # pylint: disable=too-many-locals
     tasks = []
 
     enable_memory_profiling = should_enable_memory_profiling(litani_caps, args)
-    report_target = "_report_no_coverage" if args.no_coverage else "_report"
+    if args.cvc5:
+        report_target = "_smtcp"
+    else:
+        report_target = "_report_no_coverage" if args.no_coverage else "_report"
 
     print(
         "Running proofs with K =",
