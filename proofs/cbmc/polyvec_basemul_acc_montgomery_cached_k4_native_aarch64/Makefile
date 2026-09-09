@@ -27,9 +27,9 @@ USE_FUNCTION_CONTRACTS += mlk_sys_check_capability
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
-# Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
-EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2
+# Supported CBMC configurations
+CBMC_SUPPORTED_CONFIGS = LP64:z3
+CBMC_DEFAULT_CONFIG = LP64:z3
 
 FUNCTION_NAME = polyvec_basemul_acc_montgomery_cached_k4_native_aarch64
 

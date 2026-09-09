@@ -945,8 +945,14 @@ class Tests:
                 print(p)
             exit(0)
 
+        def configuration_args():
+            args = ["--dm", self.args.dm, "--solver", self.args.solver]
+            if self.args.explore:
+                args.append("--explore")
+            return args
+
         def run_cbmc_single_step(mlkem_k, mlkem_dm, proofs):
-            envvars = {"MLKEM_K": mlkem_k, "CBMC_DM": mlkem_dm}
+            envvars = {"MLKEM_K": mlkem_k}
             scheme = SCHEME.from_k(mlkem_k)
             num_proofs = len(proofs)
             for i, func in enumerate(proofs):
@@ -967,6 +973,7 @@ class Tests:
                             "-p",
                             func,
                         ]
+                        + configuration_args()
                         + self.make_j(),
                         cwd="proofs/cbmc",
                         env=os.environ.copy() | envvars,
@@ -1017,7 +1024,7 @@ class Tests:
             if self.args.single_step:
                 run_cbmc_single_step(mlkem_k, mlkem_dm, proofs)
                 return
-            envvars = {"MLKEM_K": mlkem_k, "CBMC_DM": mlkem_dm}
+            envvars = {"MLKEM_K": mlkem_k}
             cmd = (
                 [
                     "python3",
@@ -1029,6 +1036,7 @@ class Tests:
                     "-p",
                 ]
                 + proofs
+                + configuration_args()
                 + self.make_j()
             )
             if self.args.output_result_json:
@@ -1470,10 +1478,11 @@ def cli():
 
     cbmc_parser.add_argument(
         "--dm",
-        help="Value of CBMC_DM, determining the data model for CBMC proofs. Default LP64",
-        choices=["LP64"],
-        type=str.upper,
-        default="LP64",
+        help=(
+            "Select CBMC data models: 'default', 'all', or a comma-separated "
+            "list. Forwarded to run-cbmc-proofs.py --dm. Default: default."
+        ),
+        default="default",
     )
 
     cbmc_parser.add_argument(
@@ -1531,6 +1540,27 @@ def cli():
         "--output-result-json",
         help="Path to export result JSON",
         default=None,
+    )
+
+    cbmc_parser.add_argument(
+        "--solver",
+        help=(
+            "Select CBMC solver profiles: 'default', 'all', or a "
+            "comma-separated list. Forwarded to run-cbmc-proofs.py --solver. "
+            "Default: default."
+        ),
+        default="default",
+    )
+
+    cbmc_parser.add_argument(
+        "--explore",
+        help=(
+            "Run selected CBMC configurations even when a proof does not "
+            "declare them supported. Forwarded to run-cbmc-proofs.py "
+            "--explore."
+        ),
+        action="store_true",
+        default=False,
     )
 
     # hol_light arguments
