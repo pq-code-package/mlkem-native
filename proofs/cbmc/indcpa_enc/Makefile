@@ -41,9 +41,9 @@ USE_FUNCTION_CONTRACTS += mlk_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
-# Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
-EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_smt_only --z3
+# Supported CBMC configurations
+CBMC_SUPPORTED_CONFIGS = LP64:z3_smt_only
+CBMC_DEFAULT_CONFIG = LP64:z3_smt_only
 
 FUNCTION_NAME = mlk_indcpa_enc
 

@@ -54,7 +54,7 @@ runs:
           GH_TOKEN: ${{ inputs.gh_token }}
         run: |
           echo "::group::cbmc_${{ inputs.mlkem_k }}"
-          tests cbmc --mlkem-parameter-set ${{ inputs.mlkem_k }} --per-proof-timeout 1800 --output-result-json ${{ github.workspace }}/cbmc_result_k${{ inputs.mlkem_k }}.json || cbmc_failed=true
+          tests cbmc --mlkem-parameter-set ${{ inputs.mlkem_k }} --dm all --solver all --per-proof-timeout 1800 --output-result-json ${{ github.workspace }}/cbmc_result_k${{ inputs.mlkem_k }}.json || cbmc_failed=true
           echo "::endgroup::"
           python3 ${{ github.action_path }}/report.py \
             --results-json "${{ github.workspace }}/cbmc_result_k${{ inputs.mlkem_k }}.json" \

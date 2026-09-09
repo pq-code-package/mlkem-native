@@ -147,22 +147,6 @@ CBMC_ROOT = $(shell dirname $(PROOF_ROOT))
 PROOF_SOURCE = $(CBMC_ROOT)/sources
 PROOF_STUB = $(CBMC_ROOT)/stubs
 
-# Determine flags and include files for Data Model
-# which must be
-#     "LP64"  - 64-bit systems where "long and pointer are 64-bit"
-#
-# if CBMC_DM is not set, default to LP64
-ifndef CBMC_DM
-  CBMC_DM = LP64
-endif
-ifeq ($(strip $(CBMC_DM)),LP64)
-  GOTO_CC_DM_FLAG = --64
-  CBMC_DM_FLAG = --LP64
-  PROOF_INCLUDE = $(CBMC_ROOT)/cbmc/include/LP64
-else
-  $(error CBMC_DM=$(CBMC_DM) but must be LP64)
-endif
-
 # Flag to pass to goto-cc to make all static symbols globally visible. Leave it
 # unset or set it to --export-file-local-symbols to enable this behavior. Else,
 # selectively enable access to such symbols via each proof's Makefile.
@@ -183,22 +167,119 @@ PROOFDIR ?= $(abspath .)
 ################################################################
 # Define how to run CBMC
 
-# Do property checking with the external SAT solver given by
-# EXTERNAL_SAT_SOLVER.  Do coverage checking with the default solver,
-# since coverage checking requires the use of an incremental solver.
-# The EXTERNAL_SAT_SOLVER variable is typically set (if it is at all)
-# as an environment variable or as a makefile variable in
-# Makefile-project-defines.
+# Proof configurations
+# --------------------
 #
-# For a particular proof, if the default solver is faster, do property
-# checking with the default solver by including this definition in the
-# proof Makefile:
-#         USE_EXTERNAL_SAT_SOLVER =
+# Each proof declares the configurations that are known to work and one
+# default configuration:
 #
-ifneq ($(strip $(EXTERNAL_SAT_SOLVER)),)
-   USE_EXTERNAL_SAT_SOLVER ?= --external-sat-solver $(EXTERNAL_SAT_SOLVER)
+#     CBMC_SUPPORTED_CONFIGS = LP64:z3 LP64:bitwuzla
+#     CBMC_DEFAULT_CONFIG = LP64:z3
+#
+# The driver selects data models and solver profiles independently, then
+# intersects their product with CBMC_SUPPORTED_CONFIGS. CBMC_EXPLORE=1 permits
+# a known but undeclared configuration to be run experimentally.
+
+CBMC_DMS_ALL := LP64 ILP32
+
+CBMC_DM_LP64_GOTO_CC_FLAG := --64
+CBMC_DM_LP64_CBMC_FLAG := --LP64
+CBMC_DM_LP64_INCLUDE := $(CBMC_ROOT)/cbmc/include/LP64
+
+CBMC_DM_ILP32_GOTO_CC_FLAG := --32
+CBMC_DM_ILP32_CBMC_FLAG := --ILP32
+CBMC_DM_ILP32_INCLUDE := $(CBMC_ROOT)/cbmc/include/ILP32
+
+# Solver profile IDs name the executable and all solver-specific options.
+CBMC_SOLVER_PROFILES_ALL := z3 z3_smt_only bitwuzla cvc5_arrays_exp
+
+CBMC_PROFILE_z3_BACKEND := --smt2
+CBMC_PROFILE_z3_PROVER_NAME := Z3
+CBMC_PROFILE_z3_SMT_FORMAT := --z3
+CBMC_PROFILE_z3_FLAGS :=
+
+CBMC_PROFILE_z3_smt_only_BACKEND := --smt2
+CBMC_PROFILE_z3_smt_only_PROVER_NAME := Z3
+CBMC_PROFILE_z3_smt_only_SMT_FORMAT := --z3
+CBMC_PROFILE_z3_smt_only_FLAGS := --external-smt2-solver $(PROOF_ROOT)/lib/z3_smt_only --z3
+
+CBMC_PROFILE_bitwuzla_BACKEND := --bitwuzla
+CBMC_PROFILE_bitwuzla_PROVER_NAME := Bitwuzla
+CBMC_PROFILE_bitwuzla_SMT_FORMAT := --bitwuzla
+CBMC_PROFILE_bitwuzla_FLAGS :=
+
+# cvc5 needs --arrays-exp to handle the STORE_ALL term kind that the CPROVER
+# library generates. The wrapper supplies that option.
+CBMC_PROFILE_cvc5_arrays_exp_BACKEND := --cvc5
+CBMC_PROFILE_cvc5_arrays_exp_PROVER_NAME := cvc5
+CBMC_PROFILE_cvc5_arrays_exp_SMT_FORMAT := --cvc5
+CBMC_PROFILE_cvc5_arrays_exp_FLAGS := --external-smt2-solver $(PROOF_ROOT)/lib/cvc5_arrays_exp --cvc5
+
+# Make evaluates the configuration checks below before running target recipes.
+# The runner queries these metadata targets before selecting CBMC_DM/CBMC_SOLVER.
+CBMC_INTROSPECTION_TARGETS := echo-supported-configs echo-default-config echo-solver-profiles echo-data-models echo-proof-uid echo-project-name litani-path
+# Skip resolution only for explicit metadata-only invocations. Plain `make` and
+# invocations containing a build target keep normal configuration validation.
+ifeq ($(filter-out $(CBMC_INTROSPECTION_TARGETS),$(MAKECMDGOALS)),)
+ifneq ($(strip $(MAKECMDGOALS)),)
+CBMC_SKIP_CONFIG_RESOLUTION := 1
 endif
-CHECKFLAGS += $(USE_EXTERNAL_SAT_SOLVER)
+endif
+
+ifndef CBMC_SKIP_CONFIG_RESOLUTION
+ifndef CBMC_SUPPORTED_CONFIGS
+$(error Per-harness Makefile must set CBMC_SUPPORTED_CONFIGS)
+endif
+ifndef CBMC_DEFAULT_CONFIG
+$(error Per-harness Makefile must set CBMC_DEFAULT_CONFIG)
+endif
+
+CBMC_DEFAULT_CONFIG_PARTS := $(subst :, ,$(CBMC_DEFAULT_CONFIG))
+ifneq ($(words $(CBMC_DEFAULT_CONFIG_PARTS)),2)
+$(error Invalid CBMC_DEFAULT_CONFIG='$(CBMC_DEFAULT_CONFIG)'; expected DM:solver-profile)
+endif
+CBMC_DEFAULT_DM := $(word 1,$(CBMC_DEFAULT_CONFIG_PARTS))
+CBMC_DEFAULT_SOLVER := $(word 2,$(CBMC_DEFAULT_CONFIG_PARTS))
+
+ifeq ($(filter $(CBMC_DEFAULT_CONFIG),$(CBMC_SUPPORTED_CONFIGS)),)
+$(error CBMC_DEFAULT_CONFIG='$(CBMC_DEFAULT_CONFIG)' is not in CBMC_SUPPORTED_CONFIGS)
+endif
+
+CBMC_SUPPORTED_DMS := $(foreach config,$(CBMC_SUPPORTED_CONFIGS),$(word 1,$(subst :, ,$(config))))
+CBMC_SUPPORTED_SOLVERS := $(foreach config,$(CBMC_SUPPORTED_CONFIGS),$(word 2,$(subst :, ,$(config))))
+ifneq ($(filter-out $(CBMC_DMS_ALL),$(CBMC_SUPPORTED_DMS)),)
+$(error Unknown data model in CBMC_SUPPORTED_CONFIGS='$(CBMC_SUPPORTED_CONFIGS)')
+endif
+ifneq ($(filter-out $(CBMC_SOLVER_PROFILES_ALL),$(CBMC_SUPPORTED_SOLVERS)),)
+$(error Unknown solver profile in CBMC_SUPPORTED_CONFIGS='$(CBMC_SUPPORTED_CONFIGS)')
+endif
+
+CBMC_DM ?= $(CBMC_DEFAULT_DM)
+CBMC_SOLVER ?= $(CBMC_DEFAULT_SOLVER)
+CBMC_ACTIVE_CONFIG := $(CBMC_DM):$(CBMC_SOLVER)
+
+ifeq ($(filter $(CBMC_DM),$(CBMC_DMS_ALL)),)
+$(error Unknown CBMC_DM='$(CBMC_DM)'; expected one of $(CBMC_DMS_ALL))
+endif
+ifeq ($(filter $(CBMC_SOLVER),$(CBMC_SOLVER_PROFILES_ALL)),)
+$(error Unknown CBMC_SOLVER='$(CBMC_SOLVER)'; expected one of $(CBMC_SOLVER_PROFILES_ALL))
+endif
+ifneq ($(CBMC_EXPLORE),1)
+ifeq ($(filter $(CBMC_ACTIVE_CONFIG),$(CBMC_SUPPORTED_CONFIGS)),)
+$(error Configuration $(CBMC_ACTIVE_CONFIG) is not supported by this proof; use CBMC_EXPLORE=1 to explore it)
+endif
+endif
+
+GOTO_CC_DM_FLAG := $(CBMC_DM_$(CBMC_DM)_GOTO_CC_FLAG)
+CBMC_DM_FLAG := $(CBMC_DM_$(CBMC_DM)_CBMC_FLAG)
+PROOF_INCLUDE := $(CBMC_DM_$(CBMC_DM)_INCLUDE)
+
+BACKEND_OPTION := $(CBMC_PROFILE_$(CBMC_SOLVER)_BACKEND)
+PROVER_NAME := $(CBMC_PROFILE_$(CBMC_SOLVER)_PROVER_NAME)
+SMT_FORMAT := $(CBMC_PROFILE_$(CBMC_SOLVER)_SMT_FORMAT)
+CBMCFLAGS += $(CBMC_PROFILE_$(CBMC_SOLVER)_FLAGS)
+CBMCFLAGS += $(CBMC_CONFIG_FLAGS)
+endif # CBMC_SKIP_CONFIG_RESOLUTION
 
 # Job pools
 # For version of Litani that are new enough (where `litani print-capabilities`
@@ -277,23 +358,8 @@ CBMC_FLAG_UNWINDING_ASSERTIONS ?= # set to --no-unwinding-assertions to disable
 CBMC_DEFAULT_UNWIND ?= --unwind 1
 CBMC_FLAG_FLUSH ?= --flush
 
-# Determine SMT back-end and prover combination chosen by the user
-ifeq ($(findstring --smt2,$(CBMCFLAGS)),--smt2) # User has chosen SMT2 (which defaults to Z3)
-CBMCFLAGS := $(subst --smt2,,$(CBMCFLAGS)) # Remove --smt2 from CBMCFLAGS
-BACKEND_OPTION := --smt2
-PROVER_NAME=Z3
-SMT_FORMAT := --z3
-else ifeq ($(findstring --bitwuzla,$(CBMCFLAGS)),--bitwuzla) # User has chosen Bitwuzla
-CBMCFLAGS := $(subst --bitwuzla,,$(CBMCFLAGS)) # Remove --bitwuzla from CBMCFLAGS
-BACKEND_OPTION := --bitwuzla
-PROVER_NAME=Bitwuzla
-SMT_FORMAT := --bitwuzla
-else ifeq ($(findstring --cvc5,$(CBMCFLAGS)),--cvc5) # User has chosen cvc5
-CBMCFLAGS := $(subst --cvc5,,$(CBMCFLAGS)) # Remove --cvc5 from CBMCFLAGS
-BACKEND_OPTION := --cvc5
-PROVER_NAME=cvc5
-SMT_FORMAT := --cvc5
-endif
+# BACKEND_OPTION, PROVER_NAME, and SMT_FORMAT are set above based on
+# CBMC_SOLVER selection.
 
 # CBMC 6.0.0 enables all standard checks by default, which can make coverage analysis
 # very slow. See https://github.com/diffblue/cbmc/issues/8389
@@ -542,8 +608,9 @@ VIEWER ?= cbmc-viewer
 VIEWER2 ?= cbmc-viewer
 CMAKE ?= cmake
 
-GOTODIR ?= $(PROOFDIR)/gotos
-LOGDIR ?= $(PROOFDIR)/logs
+GOTODIR ?= $(PROOFDIR)/gotos/$(CBMC_DM)/$(CBMC_SOLVER)
+LOGDIR ?= $(PROOFDIR)/logs/$(CBMC_DM)/$(CBMC_SOLVER)
+REPORTDIR ?= $(PROOFDIR)/report/$(CBMC_DM)/$(CBMC_SOLVER)
 
 PROJECT ?= project
 PROOF ?= proof
@@ -704,7 +771,7 @@ $(REWRITTEN_SOURCES):
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/crangler-$(subst /,_,$(subst .,_,$@))-log.txt \
 	  --interleave-stdout-stderr \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --ci-stage build \
 	  --description "$(PROOF_UID): removing static"
 
@@ -719,7 +786,7 @@ $(PROJECT_GOTO)0100.goto: $(PROJECT_SOURCES) $(REWRITTEN_SOURCES)
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/project_sources-log.txt \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --ci-stage build \
 	  --description "$(PROOF_UID): building project binary"
 
@@ -731,7 +798,7 @@ $(PROOF_GOTO)0100.goto: $(PROOF_SOURCES)
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/proof_sources-log.txt \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --ci-stage build \
 	  --description "$(PROOF_UID): building proof binary"
 
@@ -743,7 +810,7 @@ $(PROJECT_GOTO)0200.goto: $(PROJECT_GOTO)0100.goto
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/remove_function_body-log.txt \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --ci-stage build \
 	  --description "$(PROOF_UID): removing function bodies from project sources"
 
@@ -754,7 +821,7 @@ $(HARNESS_GOTO)0100.goto: $(PROOF_GOTO)0100.goto $(PROJECT_GOTO)0200.goto
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/link_proof_project-log.txt \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --ci-stage build \
 	  --description "$(PROOF_UID): linking project to proof"
 
@@ -766,7 +833,7 @@ $(HARNESS_GOTO)0200.goto: $(HARNESS_GOTO)0100.goto
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/restrict_function_pointer-log.txt \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --ci-stage build \
 	  --description "$(PROOF_UID): restricting function pointers in project sources"
 
@@ -778,7 +845,7 @@ ifneq ($(strip $(CODE_CONTRACTS)),)
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/nondet_static-log.txt \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --ci-stage build \
 	  --description "$(PROOF_UID): not setting static variables to nondet (will do during contract instrumentation)"
 else
@@ -788,7 +855,7 @@ else
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/nondet_static-log.txt \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --ci-stage build \
 	  --description "$(PROOF_UID): setting static variables to nondet"
 endif
@@ -802,7 +869,7 @@ ifneq ($(strip $(USE_DYNAMIC_FRAMES)),)
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/linking-library-models-log.txt \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --ci-stage build \
 	  --description "$(PROOF_UID): linking CPROVER library"
 else
@@ -811,7 +878,7 @@ else
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/linking-library-models-log.txt \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --ci-stage build \
 	  --description "$(PROOF_UID): not linking CPROVER library"
 endif
@@ -825,7 +892,7 @@ ifneq ($(strip $(USE_DYNAMIC_FRAMES)),)
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/unwind_loops-log.txt \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --ci-stage build \
 	  --description $(UNWIND_0500_DESC)
 else ifneq ($(strip $(CODE_CONTRACTS)),)
@@ -835,7 +902,7 @@ else ifneq ($(strip $(CODE_CONTRACTS)),)
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/unwind_loops-log.txt \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --ci-stage build \
 	  --description "$(PROOF_UID): unwinding loops in proof and project code"
 else
@@ -844,7 +911,7 @@ else
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/unwind_loops-log.txt \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --ci-stage build \
 	  --description "$(PROOF_UID): not unwinding loops"
 endif
@@ -857,7 +924,7 @@ $(HARNESS_GOTO)0600.goto: $(HARNESS_GOTO)0500.goto
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/check_function_contracts-log.txt \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --ci-stage build \
 	  --description "$(PROOF_UID): checking function contracts"
 
@@ -869,7 +936,7 @@ $(HARNESS_GOTO)0700.goto: $(HARNESS_GOTO)0600.goto
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/slice_global_inits-log.txt \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --ci-stage build \
 	  --description "$(PROOF_UID): slicing global initializations"
 
@@ -881,7 +948,7 @@ $(HARNESS_GOTO)0800.goto: $(HARNESS_GOTO)0700.goto
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/drop_unused_functions-log.txt \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --ci-stage build \
 	  --description "$(PROOF_UID): dropping unused functions"
 
@@ -891,7 +958,7 @@ $(HARNESS_GOTO).goto: $(HARNESS_GOTO)0800.goto
 	  --command 'cp $< $@' \
 	  --inputs $^ \
 	  --outputs $@ \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --ci-stage build \
 	  --description "$(PROOF_UID): copying final goto-binary"
 
@@ -918,7 +985,7 @@ $(LOGDIR)/result.xml: $(HARNESS_GOTO).goto
 	  $(MEMORY_PROFILING) \
 	  --ignore-returns 10 \
 	  --timeout $(CBMC_TIMEOUT) \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --tags "stats-group:safety checks" \
 	  --stderr-file $(LOGDIR)/result-err-log.txt \
 	  --description "$(PROOF_UID): checking safety properties"
@@ -935,7 +1002,7 @@ $(LOGDIR)/result.txt: $(HARNESS_GOTO).goto
 	  $(MEMORY_PROFILING) \
 	  --ignore-returns 10 \
 	  --timeout $(CBMC_TIMEOUT) \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --tags "stats-group:safety checks" \
 	  --stderr-file $(LOGDIR)/result-err-log.txt \
 	  --description "$(PROOF_UID): checking safety properties"
@@ -953,7 +1020,7 @@ $(HARNESS_GOTO).smt2: $(HARNESS_GOTO).goto
 	  $(MEMORY_PROFILING) \
 	  --ignore-returns 10 \
 	  --timeout $(CBMC_TIMEOUT) \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --tags "stats-group:safety checks" \
 	  --stderr-file $(LOGDIR)/smt2-err-log.txt \
 	  --description "$(PROOF_UID): checking safety properties (SMT to file only)"
@@ -971,7 +1038,7 @@ $(HARNESS_GOTO).smtz: $(HARNESS_GOTO).goto
 	  $(MEMORY_PROFILING) \
 	  --ignore-returns 10 \
 	  --timeout $(CBMC_TIMEOUT) \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --tags "stats-group:safety checks" \
 	  --stderr-file $(LOGDIR)/smtz-err-log.txt \
 	  --description "$(PROOF_UID): checking safety properties (SMT for Z3 only)"
@@ -989,7 +1056,7 @@ $(HARNESS_GOTO).smtb: $(HARNESS_GOTO).goto
 	  $(MEMORY_PROFILING) \
 	  --ignore-returns 10 \
 	  --timeout $(CBMC_TIMEOUT) \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --tags "stats-group:safety checks" \
 	  --stderr-file $(LOGDIR)/smtb-err-log.txt \
 	  --description "$(PROOF_UID): checking safety properties (SMT for Bitwuzla only)"
@@ -1007,7 +1074,7 @@ $(HARNESS_GOTO).smtc: $(HARNESS_GOTO).goto
 	  $(MEMORY_PROFILING) \
 	  --ignore-returns 10 \
 	  --timeout $(CBMC_TIMEOUT) \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --tags "stats-group:safety checks" \
 	  --stderr-file $(LOGDIR)/smtc-err-log.txt \
 	  --description "$(PROOF_UID): checking safety properties (SMT for cvc5 only)"
@@ -1021,7 +1088,7 @@ $(LOGDIR)/property.xml: $(HARNESS_GOTO).goto
 	  --ci-stage test \
 	  --stdout-file $@ \
 	  --ignore-returns 10 \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --stderr-file $(LOGDIR)/property-err-log.txt \
 	  --description "$(PROOF_UID): printing safety properties"
 
@@ -1037,7 +1104,7 @@ $(LOGDIR)/coverage.xml: $(HARNESS_GOTO).goto
 	  $(MEMORY_PROFILING) \
 	  --ignore-returns 10 \
 	  --timeout $(CBMC_TIMEOUT) \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --tags "stats-group:coverage computation" \
 	  --stderr-file $(LOGDIR)/coverage-err-log.txt \
 	  --description "$(PROOF_UID): calculating coverage"
@@ -1045,7 +1112,7 @@ $(LOGDIR)/coverage.xml: $(HARNESS_GOTO).goto
 COVERAGE ?= $(LOGDIR)/coverage.xml
 VIEWER_COVERAGE_FLAG ?= --coverage $(COVERAGE)
 
-$(PROOFDIR)/report: $(LOGDIR)/result.xml $(LOGDIR)/property.xml $(COVERAGE)
+$(REPORTDIR): $(LOGDIR)/result.xml $(LOGDIR)/property.xml $(COVERAGE)
 	$(LITANI) add-job \
 	  --command " $(VIEWER) \
 	    --result $(LOGDIR)/result.xml \
@@ -1053,14 +1120,14 @@ $(PROOFDIR)/report: $(LOGDIR)/result.xml $(LOGDIR)/property.xml $(COVERAGE)
 	    --property $(LOGDIR)/property.xml \
 	    --srcdir $(SRCDIR) \
 	    --goto $(HARNESS_GOTO).goto \
-	    --reportdir $(PROOFDIR)/report \
+	    --reportdir $(REPORTDIR) \
 	    --config $(PROOFDIR)/cbmc-viewer.json" \
 	  --inputs $^ \
-	  --outputs $(PROOFDIR)/report \
-	  --pipeline-name "$(PROOF_UID)" \
+	  --outputs $(REPORTDIR) \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
 	  --stdout-file $(LOGDIR)/viewer-log.txt \
 	  --ci-stage report \
-	  --description "$(PROOF_UID): generating report"
+	  --description "$(PROOF_UID)/$(CBMC_DM)/$(CBMC_SOLVER): generating report"
 
 litani-path:
 	@echo $(LITANI)
@@ -1166,7 +1233,7 @@ coverage:
 	@ echo Running 'litani build'
 	$(LITANI) run-build
 
-_report: $(PROOFDIR)/report
+_report: $(REPORTDIR)
 report:
 	@ echo Running 'litani init'
 	$(LITANI) init $(INIT_POOLS) --project $(PROJECT_NAME)
@@ -1190,8 +1257,8 @@ clean:
 	-$(RM) $(REWRITTEN_SOURCES) $(foreach rs,$(REWRITTEN_SOURCES),$(rs).json)
 
 veryclean: clean
-	-$(RM) -r report
-	-$(RM) -r $(LOGDIR) $(GOTODIR)
+	-$(RM) -r $(PROOFDIR)/report
+	-$(RM) -r $(PROOFDIR)/logs $(PROOFDIR)/gotos
 
 .PHONY: \
   _coverage \
@@ -1221,6 +1288,22 @@ veryclean: clean
 .PHONY: echo-proof-uid
 echo-proof-uid:
 	@echo $(PROOF_UID)
+
+.PHONY: echo-supported-configs
+echo-supported-configs:
+	@echo $(CBMC_SUPPORTED_CONFIGS)
+
+.PHONY: echo-default-config
+echo-default-config:
+	@echo $(CBMC_DEFAULT_CONFIG)
+
+.PHONY: echo-solver-profiles
+echo-solver-profiles:
+	@echo $(CBMC_SOLVER_PROFILES_ALL)
+
+.PHONY: echo-data-models
+echo-data-models:
+	@echo $(CBMC_DMS_ALL)
 
 .PHONY: echo-project-name
 echo-project-name:

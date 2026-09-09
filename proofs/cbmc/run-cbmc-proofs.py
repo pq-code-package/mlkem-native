@@ -190,6 +190,32 @@ def get_args():
             "metavar": "FILE",
             "help": "path to export result JSON",
         },
+        {
+            "flags": ["--dm"],
+            "metavar": "DM",
+            "default": "default",
+            "help": (
+                "select data models: 'default', 'all', or a comma-separated "
+                "list of data model IDs. Default: %(default)s"
+            ),
+        },
+        {
+            "flags": ["--solver"],
+            "metavar": "SOLVER",
+            "default": "default",
+            "help": (
+                "select solver profiles: 'default', 'all', or a "
+                "comma-separated list of profile IDs. Default: %(default)s"
+            ),
+        },
+        {
+            "flags": ["--explore"],
+            "action": "store_true",
+            "help": (
+                "run selected configurations even when a proof does not "
+                "declare them in CBMC_SUPPORTED_CONFIGS"
+            ),
+        },
     ]:
         flags = arg.pop("flags")
         pars.add_argument(*flags, **arg)
@@ -246,7 +272,16 @@ def get_proof_dirs(proof_root, proof_list, marker_file):
         sys.exit(1)
 
 
-def run_build(litani, jobs, fail_on_proof_failure, summarize, output_result_json=None):
+def run_build(
+    litani,
+    jobs,
+    fail_on_proof_failure,
+    summarize,
+    output_result_json=None,
+    omitted_configs=None,
+    default_configs=None,
+    exploratory_configs=None,
+):
     cmd = [str(litani), "run-build"]
     if jobs:
         cmd.extend(["-j", str(jobs)])
@@ -264,8 +299,19 @@ def run_build(litani, jobs, fail_on_proof_failure, summarize, output_result_json
         sys.exit(1)
 
     if summarize:
-        export_result_json(output_result_json, out_file)
-        print_proof_results(out_file)
+        export_result_json(
+            output_result_json,
+            out_file,
+            omitted_configs,
+            default_configs,
+            exploratory_configs,
+        )
+        print_proof_results(
+            out_file,
+            omitted_configs,
+            default_configs,
+            exploratory_configs,
+        )
         out_file.unlink()
 
     if proc.returncode:
@@ -304,6 +350,95 @@ def get_litani_capabilities(litani_path):
     except RuntimeError:
         logging.warning("Could not load litani capabilities: '%s'", proc.stdout)
         return []
+
+
+SELECT_ALL = "all"
+SELECT_DEFAULT = "default"
+
+
+def read_make_words(directory, target, makefile=None):
+    """Run a Make introspection target and return its whitespace-separated words."""
+    cmd = ["make", "--no-print-directory"]
+    if makefile:
+        cmd.extend(["-f", makefile])
+    cmd.append(target)
+    proc = subprocess.run(
+        cmd,
+        cwd=directory,
+        universal_newlines=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if proc.returncode:
+        logging.critical("Could not run %s in %s: %s", target, directory, proc.stderr)
+        sys.exit(1)
+    return proc.stdout.split()
+
+
+def read_supported_configs(proof_dir):
+    """Return the set of (data_model, solver_profile) tuples for a proof."""
+    configs = set()
+    for value in read_make_words(proof_dir, "echo-supported-configs"):
+        dm, separator, solver = value.partition(":")
+        if not separator or not dm or not solver:
+            logging.critical(
+                "Invalid supported configuration '%s' in %s", value, proof_dir
+            )
+            sys.exit(1)
+        configs.add((dm, solver))
+    return configs
+
+
+def read_default_config(proof_dir):
+    """Return the default (data_model, solver_profile) tuple for a proof."""
+    values = read_make_words(proof_dir, "echo-default-config")
+    if len(values) != 1:
+        logging.critical("Invalid default configuration in %s", proof_dir)
+        sys.exit(1)
+    dm, separator, solver = values[0].partition(":")
+    if not separator or not dm or not solver:
+        logging.critical(
+            "Invalid default configuration '%s' in %s", values[0], proof_dir
+        )
+        sys.exit(1)
+    return dm, solver
+
+
+def parse_selector(value, known_values, option):
+    """Resolve default/all/comma-list selector syntax against known IDs."""
+    normalized = value.strip().lower()
+    if normalized in (SELECT_DEFAULT, SELECT_ALL):
+        return normalized
+
+    lookup = {known.lower(): known for known in known_values}
+    selected = []
+    for item in value.split(","):
+        key = item.strip().lower()
+        if not key or key not in lookup:
+            logging.critical(
+                "Unknown %s value '%s'; expected one of %s, '%s', or '%s'",
+                option,
+                item.strip(),
+                ", ".join(known_values),
+                SELECT_DEFAULT,
+                SELECT_ALL,
+            )
+            sys.exit(1)
+        resolved = lookup[key]
+        if resolved not in selected:
+            selected.append(resolved)
+    return selected
+
+
+def read_proof_uid(proof_dir):
+    """Read PROOF_UID from a per-harness Makefile."""
+    with (pathlib.Path(proof_dir) / "Makefile").open() as handle:
+        for line in handle:
+            match = re.match(r"^PROOF_UID\s*=(?P<uid>[^#]+)", line)
+            if match:
+                return match["uid"].strip()
+    return None
 
 
 def check_uid_uniqueness(proof_dir, proof_uids):
@@ -348,7 +483,6 @@ def should_enable_pools(litani_caps, args):
 async def configure_proof_dirs(  # pylint: disable=too-many-arguments
     queue,
     counter,
-    proof_uids,
     enable_pools,
     enable_memory_profiling,
     report_target,
@@ -357,25 +491,16 @@ async def configure_proof_dirs(  # pylint: disable=too-many-arguments
 ):
     while True:
         print_counter(counter)
-        path = str(await queue.get())
-
-        check_uid_uniqueness(path, proof_uids)
+        path, dm, solver, exploratory = await queue.get()
+        path = str(path)
 
         pools = ["ENABLE_POOLS=true"] if enable_pools else []
         profiling = ["ENABLE_MEMORY_PROFILING=true"] if enable_memory_profiling else []
+        explore = ["CBMC_EXPLORE=1"] if exploratory else []
 
         # Set up environment with CBMC_TIMEOUT
         env = os.environ.copy()
         env["CBMC_TIMEOUT"] = str(timeout)
-
-        # delete old reports
-        proc = await asyncio.create_subprocess_exec(
-            "make",
-            "veryclean",
-            cwd=path,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
 
         # Allow interactive tasks to preempt proof configuration
         proc = await asyncio.create_subprocess_exec(
@@ -383,6 +508,9 @@ async def configure_proof_dirs(  # pylint: disable=too-many-arguments
             "-n",
             "15",
             "make",
+            f"CBMC_DM={dm}",
+            f"CBMC_SOLVER={solver}",
+            *explore,
             *pools,
             *profiling,
             "-B",
@@ -402,7 +530,8 @@ async def configure_proof_dirs(  # pylint: disable=too-many-arguments
         for line in stderr.decode().splitlines():
             logging.debug(line)
 
-        counter["fail" if proc.returncode else "pass"].append(path)
+        key = f"{path}::{dm}::{solver}"
+        counter["fail" if proc.returncode else "pass"].append(key)
         counter["complete"] += 1
 
         print_counter(counter)
@@ -447,15 +576,6 @@ async def main():  # pylint: disable=too-many-locals
         else []
     )
 
-    # Normalise CBMC_DM in the environment inherited by the make jobs that
-    # litani spawns later, defaulting to LP64 when unset or empty.
-    dm = os.environ.get("CBMC_DM", "")
-    if dm == "":
-        os.environ["CBMC_DM"] = "LP64"
-    elif dm != "LP64":
-        logging.critical("CBMC_DM set to %s, but must be LP64", dm)
-        sys.exit(1)
-
     if not args.no_standalone:
         cmd = [
             str(litani),
@@ -495,19 +615,87 @@ async def main():  # pylint: disable=too-many-locals
         logging.critical("No proof directories found")
         sys.exit(1)
 
-    proof_queue = asyncio.Queue()
-    for proof_dir in proof_dirs:
-        proof_queue.put_nowait(proof_dir)
+    all_dms = read_make_words(proof_root, "echo-data-models", "Makefile.common")
+    all_solvers = read_make_words(proof_root, "echo-solver-profiles", "Makefile.common")
+    dm_selector = parse_selector(args.dm, all_dms, "--dm")
+    solver_selector = parse_selector(args.solver, all_solvers, "--solver")
 
+    # Enforce PROOF_UID uniqueness up-front, then expand each proof directory
+    # into candidate (proof, DM, solver-profile) configurations. Normal mode
+    # intersects candidates with the proof's declared support; --explore runs
+    # the selected candidates regardless.
+    proof_uids = {}
+    configs_to_run = []  # (proof_dir, dm, solver, exploratory)
+    omitted_configs = set()  # (proof_uid, dm, solver)
+    default_configs = set()  # (proof_uid, dm, solver)
+    exploratory_configs = set()  # (proof_uid, dm, solver)
+    for proof_dir in proof_dirs:
+        check_uid_uniqueness(proof_dir, proof_uids)
+        proof_uid = read_proof_uid(proof_dir)
+        supported = read_supported_configs(proof_dir)
+        default = read_default_config(proof_dir)
+        if default not in supported:
+            logging.critical(
+                "Default configuration %s:%s is not supported by %s",
+                *default,
+                proof_dir,
+            )
+            sys.exit(1)
+
+        selected_dms = (
+            [default[0]]
+            if dm_selector == SELECT_DEFAULT
+            else (all_dms if dm_selector == SELECT_ALL else dm_selector)
+        )
+        selected_solvers = (
+            [default[1]]
+            if solver_selector == SELECT_DEFAULT
+            else (all_solvers if solver_selector == SELECT_ALL else solver_selector)
+        )
+
+        for dm in selected_dms:
+            for solver in selected_solvers:
+                config = (dm, solver)
+                key = (proof_uid, dm, solver)
+                if config == default:
+                    default_configs.add(key)
+                if config in supported:
+                    configs_to_run.append((proof_dir, dm, solver, False))
+                elif args.explore:
+                    configs_to_run.append((proof_dir, dm, solver, True))
+                    exploratory_configs.add(key)
+                else:
+                    omitted_configs.add(key)
+
+    if not configs_to_run:
+        logging.critical("No (proof, DM, solver-profile) configurations selected")
+        sys.exit(1)
+
+    # Wipe stale configuration outputs once per proof directory before
+    # configuring any tuple. `make veryclean` deletes
+    # logs/, gotos/, and report/ recursively.
+    for proof_dir in proof_dirs:
+        subprocess.run(
+            ["make", "veryclean"],
+            cwd=proof_dir,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+
+    proof_queue = asyncio.Queue()
+    for config in configs_to_run:
+        proof_queue.put_nowait(config)
+
+    total = len(configs_to_run)
     counter = {
         "pass": [],
         "fail": [],
         "complete": 0,
-        "total": len(proof_dirs),
-        "width": int(math.log10(len(proof_dirs))) + 1,
+        "total": total,
+        "width": int(math.log10(max(total, 1))) + 1,
     }
 
-    proof_uids = {}
     tasks = []
 
     enable_memory_profiling = should_enable_memory_profiling(litani_caps, args)
@@ -516,8 +704,10 @@ async def main():  # pylint: disable=too-many-locals
     print(
         "Running proofs with K =",
         os.environ.get("MLKEM_K", ""),
-        "and DM =",
-        os.environ["CBMC_DM"],
+        ", DM selector =",
+        args.dm,
+        ", solver selector =",
+        args.solver,
         "\n",
     )
 
@@ -526,7 +716,6 @@ async def main():  # pylint: disable=too-many-locals
             configure_proof_dirs(
                 proof_queue,
                 counter,
-                proof_uids,
                 enable_pools,
                 enable_memory_profiling,
                 report_target,
@@ -545,7 +734,8 @@ async def main():  # pylint: disable=too-many-locals
 
     if counter["fail"]:
         logging.critical(
-            "Failed to configure the following proofs:\n%s",
+            "Failed to configure the following "
+            "(proof, DM, solver-profile) configurations:\n%s",
             "\n".join([str(f) for f in counter["fail"]]),
         )
         sys.exit(1)
@@ -557,6 +747,9 @@ async def main():  # pylint: disable=too-many-locals
             args.fail_on_proof_failure,
             args.summarize,
             args.output_result_json,
+            omitted_configs=omitted_configs,
+            default_configs=default_configs,
+            exploratory_configs=exploratory_configs,
         )
 
 

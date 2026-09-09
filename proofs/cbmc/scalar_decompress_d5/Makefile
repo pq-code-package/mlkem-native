@@ -23,7 +23,9 @@ CHECK_FUNCTION_CONTRACTS=mlk_scalar_decompress_d5
 USE_FUNCTION_CONTRACTS=
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
-CBMCFLAGS=--smt2
+# Supported CBMC configurations
+CBMC_SUPPORTED_CONFIGS = LP64:z3
+CBMC_DEFAULT_CONFIG = LP64:z3
 
 # Uncomment this to see what commands litani is running...
 #VERBOSE=on
