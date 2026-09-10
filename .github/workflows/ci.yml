@@ -17,7 +17,7 @@ jobs:
          - runner: macos-latest
            name: 'macOS (aarch64)'
            arch: mac
-           mode: native
+           platform: native
            # macos-latest is now the macOS 26 (Tahoe) image, whose clang 21
            # ASan runtime deadlocks at process startup (see backend_tests).
            # Build this target with clang 22, which carries the compiler-rt
@@ -26,149 +26,140 @@ jobs:
          - runner: macos-15-intel
            name: 'macOS (x86_64)'
            arch: mac
-           mode: native
+           platform: native
            nix_shell: ci
          - runner: ubuntu-24.04-arm
            name: 'aarch64'
            arch: aarch64
-           mode: native
+           platform: native
            nix_shell: ci
          - runner: ubuntu-24.04-arm
            name: 'aarch64, no Neon'
            arch: aarch64
-           mode: native
+           platform: native
            nix_shell: ci
            cflags: '-march=armv8-a+nosimd'
            extra_args: '--no-auto'
          - runner: ubuntu-24.04-arm
            name: 'x86_64, cross'
            arch: x86_64
-           mode: cross-x86_64
+           platform: linux/x86_64
            nix_shell: cross-x86_64
          - runner: ubuntu-24.04-arm
            name: 'x86_64, cross, no AVX2'
            arch: x86_64
-           mode: cross-x86_64
+           platform: linux/x86_64-no-avx2
            nix_shell: cross-x86_64
-           exec_wrapper: 'qemu-x86_64 -cpu Snowridge'
-           extra_args: '--no-auto'
          - runner: ubuntu-24.04-arm
            name: 'riscv64, cross, VLEN=128'
            arch: riscv64
-           mode: cross-riscv64
+           platform: linux/riscv64-rvv128
            nix_shell: cross-riscv64
-           vlen: 128
-           exec_wrapper: 'qemu-riscv64 -cpu rv64,v=true,vlen=128'
          - runner: ubuntu-24.04-arm
            name: 'riscv64, cross, VLEN=256'
            arch: riscv64
-           mode: cross-riscv64
+           platform: linux/riscv64-rvv256
            nix_shell: cross-riscv64
-           vlen: 256
-           exec_wrapper: 'qemu-riscv64 -cpu rv64,v=true,vlen=256'
          - runner: ubuntu-24.04-arm
            name: 'riscv64, cross, VLEN=512'
            arch: riscv64
-           mode: cross-riscv64
+           platform: linux/riscv64-rvv512
            nix_shell: cross-riscv64
-           vlen: 512
-           exec_wrapper: 'qemu-riscv64 -cpu rv64,v=true,vlen=512'
          - runner: ubuntu-24.04-arm
            name: 'riscv64, cross, VLEN=1024'
            arch: riscv64
-           mode: cross-riscv64
+           platform: linux/riscv64-rvv1024
            nix_shell: cross-riscv64
-           vlen: 1024
-           exec_wrapper: 'qemu-riscv64 -cpu rv64,v=true,vlen=1024'
          - runner: ubuntu-24.04-arm
            name: 'riscv32, cross'
            arch: riscv32
-           mode: cross-riscv32
+           platform: linux/riscv32
            nix_shell: cross-riscv32
          - runner: ubuntu-24.04-arm
-           name: 'ppc64le, cross'
+           name: 'ppc64le, cross, POWER8'
            arch: ppc64le
-           mode: cross-ppc64le
+           platform: linux/ppc64le-power8
+           nix_shell: cross-ppc64le
+         - runner: ubuntu-24.04-arm
+           name: 'ppc64le, cross, POWER7 fallback'
+           arch: ppc64le
+           platform: linux/ppc64le-power7
            nix_shell: cross-ppc64le
          - runner: ubuntu-latest
            name: 'x86_64'
            arch: x86_64
-           mode: native
+           platform: native
            nix_shell: ci
          - runner: ubuntu-latest
            name: 'aarch64, cross'
            arch: aarch64
-           mode: cross-aarch64
+           platform: linux/aarch64
            nix_shell: cross-aarch64
          - runner: ubuntu-latest
            name: 'aarch64_be, cross'
            arch: aarch64_be
-           mode: cross-aarch64_be
+           platform: linux/aarch64_be
            nix_shell: cross-aarch64_be
     name: Functional tests (${{ matrix.target.name }})
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: build + test (no-opt)
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         # no-opt exercises only the C fallback, so RVV VLEN is irrelevant; run once for riscv64
-        if: ${{ matrix.target.arch != 'riscv64' || matrix.target.vlen == 128 }}
+        if: ${{ matrix.target.arch != 'riscv64' || matrix.target.platform == 'linux/riscv64-rvv128' }}
         with:
           nix-shell: ${{ matrix.target.nix_shell }}
-          nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
+          nix-cache: ${{ matrix.target.platform == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: ${{ matrix.target.mode }}
+          platform: ${{ matrix.target.platform }}
           cflags: ${{ matrix.target.cflags || '' }}
           extra_args: ${{ matrix.target.extra_args || '' }}
-          exec_wrapper: ${{ matrix.target.exec_wrapper || '' }}
           opt: 'no_opt'
       - name: build + test (+debug+memsan+ubsan, native)
-        uses: ./.github/actions/multi-functest
-        if: ${{ matrix.target.mode == 'native' }}
+        uses: ./.github/actions/functest
+        if: ${{ matrix.target.platform == 'native' }}
         with:
           nix-shell: ${{ matrix.target.nix_shell }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           cflags: "${{ matrix.target.cflags || '' }} -DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           extra_args: ${{ matrix.target.extra_args || '' }}
           check_namespace: 'false'
       - name: build + test (cross, opt)
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         # There is no native code yet on riscv32 or AArch64_be, so no point running opt tests
-        if: ${{ matrix.target.mode != 'native' && (matrix.target.arch != 'riscv32' && matrix.target.arch != 'aarch64_be') }}
+        if: ${{ matrix.target.platform != 'native' && (matrix.target.arch != 'riscv32' && matrix.target.arch != 'aarch64_be') }}
         with:
           nix-shell: ${{ matrix.target.nix_shell }}
-          nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
+          nix-cache: ${{ matrix.target.platform == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: ${{ matrix.target.mode }}
+          platform: ${{ matrix.target.platform }}
           cflags: ${{ matrix.target.cflags || '' }}
           extra_args: ${{ matrix.target.extra_args || '' }}
-          exec_wrapper: ${{ matrix.target.exec_wrapper || '' }}
           opt: 'opt'
       - name: build + test (cross, opt, +debug)
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         # There is no native code yet on riscv32 or AArch64_be, so no point running opt tests
-        if: ${{ matrix.target.mode != 'native' && (matrix.target.arch != 'riscv32' && matrix.target.arch != 'aarch64_be') }}
+        if: ${{ matrix.target.platform != 'native' && (matrix.target.arch != 'riscv32' && matrix.target.arch != 'aarch64_be') }}
         with:
           nix-shell: ${{ matrix.target.nix_shell }}
-          nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
+          nix-cache: ${{ matrix.target.platform == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: ${{ matrix.target.mode }}
+          platform: ${{ matrix.target.platform }}
           extra_args: ${{ matrix.target.extra_args || '' }}
-          exec_wrapper: ${{ matrix.target.exec_wrapper || '' }}
           cflags: "${{ matrix.target.cflags || '' }} -DMLKEM_DEBUG"
           opt: 'opt'
       - name: build + test (cross, opt, C90)
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         if: ${{ matrix.target.arch == 'riscv64' }}
         with:
           nix-shell: ${{ matrix.target.nix_shell }}
           nix-cache: 'true'
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: ${{ matrix.target.mode }}
+          platform: ${{ matrix.target.platform }}
           extra_args: ${{ matrix.target.extra_args || '' }}
-          exec_wrapper: ${{ matrix.target.exec_wrapper || '' }}
           cflags: "${{ matrix.target.cflags || '' }} -std=c90"
           opt: 'opt'
   ppc64le_tests:
@@ -178,16 +169,18 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: build + test
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           nix-shell: ''
           gh_token: ${{ secrets.GITHUB_TOKEN }}
+          platform: native
           cflags: "-DMLK_FORCE_PPC64LE"
       - name: build + test (+debug)
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           nix-shell: ''
           gh_token: ${{ secrets.GITHUB_TOKEN }}
+          platform: native
           cflags: "-DMLKEM_DEBUG -DMLK_FORCE_PPC64LE"
   backend_tests:
     name: AArch64 FIPS202 backends (${{ matrix.backend }})
@@ -199,7 +192,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: build + test
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           # clang 22 shell: the default `ci` shell's clang 21 ASan runtime
           # deadlocks at process startup on the macos-latest / macOS 26 (Tahoe)
@@ -209,7 +202,7 @@ jobs:
           nix-shell: 'clang22'
           nix-cache: 'false'
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: 'native'
+          platform: native
           opt: 'opt'
           examples: 'false'
           cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
@@ -318,10 +311,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: native build+functest (default)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
@@ -332,10 +325,10 @@ jobs:
           cflags: "${{ matrix.cflags }}"
       - name: native build+functest (C90)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
@@ -346,10 +339,10 @@ jobs:
           cflags: "-std=c90 ${{ matrix.cflags }}"
       - name: native build+functest (C99)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
@@ -360,10 +353,10 @@ jobs:
           cflags: "-std=c99 ${{ matrix.cflags }}"
       - name: native build+functest (C11)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
@@ -375,10 +368,10 @@ jobs:
       - name: native build+functest (C17)
         if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
                 (matrix.compiler.family == 'zig' || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 8) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 7)) }}
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
@@ -390,10 +383,10 @@ jobs:
       - name: native build+functest (C23)
         if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
                 ((matrix.compiler.family == 'zig' && matrix.compiler.version >= 0.14) || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 14) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 18)) }}
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
@@ -421,10 +414,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Stack analysis
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           nix-shell: valgrind-varlat_gcc15
           nix-cache: false
           opt: all
@@ -460,6 +453,7 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: valgrind-varlat_gcc15
           nix-cache: false
+          platform: native
           opt: opt
           cflags: "${{ matrix.cflags }} -std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../test/configs/custom_heap_alloc_config.h\\\\\\\""
           func: false
@@ -522,10 +516,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Test control-flow protections
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           cflags: "-Wl,-z,cet-report=error -fcf-protection=full"
           func: true
           kat: true
@@ -573,28 +567,28 @@ jobs:
             ec2_instance_type: t3a.small
             ec2_ami: ubuntu (x86_64)
             ec2_volume_size: 30
-            compile_mode: native
+            platform: native
             opt: all
             config_variations: 'native-cap-CPUID_AVX2'
           - name: Intel Xeon 4th gen (t3)
             ec2_instance_type: t3.small
             ec2_ami: ubuntu (x86_64)
             ec2_volume_size: 30
-            compile_mode: native
+            platform: native
             opt: all
             config_variations: 'native-cap-CPUID_AVX2'
           - name: Graviton2 (c6g.medium)
             ec2_instance_type: c6g.medium
             ec2_ami: ubuntu (aarch64)
             ec2_volume_size: 20
-            compile_mode: native
+            platform: native
             opt: all
             config_variations: 'native-cap-ON native-cap-OFF native-cap-ID_AA64PFR1_EL1'
           - name: Graviton3 (c7g.medium)
             ec2_instance_type: c7g.medium
             ec2_ami: ubuntu (aarch64)
             ec2_volume_size: 20
-            compile_mode: native
+            platform: native
             opt: all
             config_variations: 'native-cap-ID_AA64PFR1_EL1'
     name: Platform tests  (${{ matrix.target.name }})
@@ -608,7 +602,7 @@ jobs:
       ec2_instance_type: ${{ matrix.target.ec2_instance_type }}
       ec2_ami: ${{ matrix.target.ec2_ami }}
       ec2_volume_size: ${{ matrix.target.ec2_volume_size }}
-      compile_mode: ${{ matrix.target.compile_mode }}
+      platform: ${{ matrix.target.platform }}
       opt: ${{ matrix.target.opt }}
       config_variations: ${{ matrix.target.config_variations || '' }}
       functest: true
@@ -685,7 +679,7 @@ jobs:
             CC=gcc OPT=1 make quickcheck
           fi
       - name: Functional Tests
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           nix-shell: ""
           custom_shell: ${{ matrix.container.nix_shell && format('{0} --run \"bash -e {{0}}\"', matrix.container.nix_shell) || 'bash' }}
@@ -727,7 +721,7 @@ jobs:
       ec2_instance_type: t4g.small
       ec2_ami: custom AMI
       ec2_ami_id: ami-0c9bc1901ef0d1066 # Has docker images preinstalled
-      compile_mode: native
+      platform: native
       opt: all
       functest: true
       kattest: true

@@ -66,6 +66,65 @@ will compile and run functionality tests. Similarly,
 
 will compile and run benchmarks, using PERF for cycle counting (`-c PERF`) and running as root (`-r`).
 
+#### Test platforms
+
+The `--platform` option supplies non-empty cross-compilation and execution
+settings, or selects the platform Makefile. It does not change which tests run.
+Empty low-level options and profile values that are not specified preserve the
+existing environment. The `native` profile adds no compile or run overrides.
+
+```bash
+# Native host
+./scripts/tests func
+
+# GNU/Linux AArch64 under QEMU user mode
+nix develop .#cross-aarch64 --command \
+  ./scripts/tests func --platform linux/aarch64
+
+# No-MMU AArch64 QEMU virt machine
+nix develop .#cross-aarch64-embedded --command \
+  ./scripts/tests func --platform baremetal/aarch64-virt
+
+# AVR under simavr
+nix develop .#cross-avr --command \
+  ./scripts/tests func --platform baremetal/avr --opt=no_opt
+
+# Zephyr on the default QEMU board
+nix develop .#zephyr --command \
+  ./scripts/tests func --platform zephyr
+```
+
+Available profiles:
+
+| Platform | Nix shell | Execution environment |
+| -------- | --------- | --------------------- |
+| `native` | `default` | Inherited environment (normally the current host) |
+| `linux/x86_64` | `cross-x86_64` or `cross` | QEMU user mode |
+| `linux/x86_64-no-avx2` | `cross-x86_64` or `cross` | QEMU Snowridge, no AVX2 |
+| `linux/aarch64` | `cross-aarch64` or `cross` | QEMU user mode |
+| `linux/aarch64_be` | `cross-aarch64_be` or `cross` | QEMU user mode |
+| `linux/ppc64le-power8` | `cross-ppc64le` or `cross` | QEMU POWER8 |
+| `linux/ppc64le-power7` | `cross-ppc64le` or `cross` | POWER7 code on QEMU POWER8 |
+| `linux/riscv64-rvv128` | `cross-riscv64` or `cross` | QEMU RVV, VLEN=128 |
+| `linux/riscv64-rvv256` | `cross-riscv64` or `cross` | QEMU RVV, VLEN=256 |
+| `linux/riscv64-rvv512` | `cross-riscv64` or `cross` | QEMU RVV, VLEN=512 |
+| `linux/riscv64-rvv1024` | `cross-riscv64` or `cross` | QEMU RVV, VLEN=1024 |
+| `linux/riscv32` | `cross-riscv32` or `cross` | QEMU user mode |
+| `baremetal/aarch64-virt` | `cross-aarch64-embedded` | QEMU system emulation |
+| `baremetal/avr` | `cross-avr` | simavr |
+| `zephyr` | `zephyr` | Zephyr under QEMU or on supported hardware |
+
+Explicit non-empty `--cross-prefix` and `--exec-wrapper` values override
+profile values; empty values are treated like omitted options. `--cflags` and
+`--ldflags` extend profile values. Bare-metal and Zephyr profiles select
+their existing platform Makefile, which supplies toolchain, linker, and runtime
+defaults.
+
+The standalone example Makefiles do not consume platform Makefiles. The
+`examples` command, and `all` unless passed `--no-examples`, therefore reject
+bare-metal, Zephyr, and explicit `--extra-makefile` configurations. Prefix-based
+Linux profiles remain supported.
+
 For detailed information on how to use the script, please refer to
 `./scripts/tests --help`.
 

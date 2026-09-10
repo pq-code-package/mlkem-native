@@ -31,10 +31,10 @@ on:
         description: Determine for the log verbosity
         type: boolean
         default: false
-      compile_mode:
+      platform:
         type: string
-        description: either all, native, cross or none
-        default: all
+        description: Test platform profile
+        default: native
       opt:
         type: string
         description: either all, opt or no_opt
@@ -183,12 +183,12 @@ jobs:
           make clean            >/dev/null
           OPT=1 make quickcheck
       - name: Functional Tests
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           nix-shell: ""
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
           cflags: ${{ inputs.cflags }}
-          compile_mode: ${{ inputs.compile_mode }}
+          platform: ${{ inputs.platform }}
           opt: ${{ inputs.opt }}
           func: ${{ inputs.functest }}
           kat: ${{ inputs.kattest }}
