@@ -120,6 +120,11 @@ profile values; empty values are treated like omitted options. `--cflags` and
 their existing platform Makefile, which supplies toolchain, linker, and runtime
 defaults.
 
+The standalone example Makefiles do not consume platform Makefiles. The
+`examples` command, and `all` unless passed `--no-examples`, therefore reject
+bare-metal, Zephyr, and explicit `--extra-makefile` configurations. Prefix-based
+Linux profiles remain supported.
+
 For detailed information on how to use the script, please refer to
 `./scripts/tests --help`.
 
