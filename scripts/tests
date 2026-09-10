@@ -164,6 +164,19 @@ def apply_platform_profile(args):
         args.auto = profile.get("auto", True)
 
 
+def check_example_platform(args):
+    examples_requested = args.cmd == "examples" or (args.cmd == "all" and args.examples)
+    if not examples_requested or args.extra_makefile is None:
+        return
+
+    platform_name = args.platform or args.extra_makefile
+    sys.exit(
+        f"Examples do not support platform Makefile configuration "
+        f"{platform_name!r}. Use --no-examples with all or select a "
+        "prefix-based platform."
+    )
+
+
 def github_log(msg):
     if os.environ.get("GITHUB_ENV") is None:
         return
@@ -1797,6 +1810,9 @@ def cli():
         args.l = None
 
     os.chdir(os.path.join(os.path.dirname(__file__), ".."))
+
+    if args.cmd is not None:
+        check_example_platform(args)
 
     if args.cmd == "all":
         Tests(args).all()
