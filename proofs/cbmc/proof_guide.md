@@ -69,26 +69,26 @@ avoiding the need to specify an aliasing constraint.
 
 ### Maximum buffer sizes
 
-CBMC assumes that allocated objects are less than `__CPROVER_max_malloc_size`
-which is an an internal constant defined to be `SIZE_MAX >> (OBJECT_BITS + 1)`
-for that particular run of CBMC, where `SIZE_MAX` is an implementation-defined
-constant (declared in `stdint.h`) and `OBJECT_BITS` is a command-line parameter
-with value typically in the range 8 .. 12
+CBMC assumes that allocated objects are less than `__CPROVER_max_malloc_size`,
+which is an internal constant defined to be
+`SIZE_MAX >> (OBJECT_BITS + 1)` for that particular run of CBMC. `SIZE_MAX` is
+defined by the selected data model, and `OBJECT_BITS` is a command-line
+parameter with a value typically in the range 8 .. 12.
 
 See the [memory bounds checking](https://diffblue.github.io/cbmc/memory-bounds-checking.html)
 section of the CBMC manual for more details.
 
-Pragmatically, `SIZE_MAX` will either be `2**64-1` or `2**32-1` depending on the
-host platform, and we choose the largest value of `OBJECT_BITS` that is used
-for all proofs in this repository.
+For the supported data models, `SIZE_MAX` is `2**64-1` for `LP64` and
+`2**32-1` for `ILP32`, independently of the host platform. Each proof selects
+its `OBJECT_BITS` value through `CBMC_OBJECT_BITS`.
 
 This matters where a function takes a formal parameter `p` of some pointer type
 `t` and a `len` parameter of type `size_t` that denotes the number of elements
 pointed to by `p`, and those parameters are subject to a
 `memory_no_alias(p, len * sizeof(t))` contract.
 
-In such cases, len must be explicitly bounded to be less that or equal to
-MLK_MAX_BUFFER_SIZE which might be defined in `cbmc.h` as:
+In such cases, `len` must be explicitly bounded to be less than or equal to
+`MLK_MAX_BUFFER_SIZE`, which is defined in `cbmc.h` as:
 ```c
 #define MLK_MAX_BUFFER_SIZE (SIZE_MAX >> 12)
 ```
@@ -322,18 +322,37 @@ Edit the Makefile and update the definition of the following variables:
 * USE_FUNCTION_CONTRACTS - a list of functions that `XXX` calls where you want CBMC to use the contracts of the called
   function for proof, rather than 'inlining' the called function for proof. Include the `mlk_` prefix if
   required
-* EXTERNAL_SAT_SOLVER - should _always_ be "nothing" to prevent CBMC selecting a SAT backend over the selected SMT backend.
-* CBMCFLAGS - additional flags to pass to the final run of CBMC. This is normally set to `--smt2` which tells CBMC to
-  run Z3 as its underlying solver. Can also be set to `--bitwuzla` which is sometimes faster than Z3 for some functions.
+* CBMC_SUPPORTED_CONFIGS - the data-model and solver-profile pairs known to
+  work for this proof
+* CBMC_DEFAULT_CONFIG - the configuration to use when none is selected
+  explicitly; it must be a member of `CBMC_SUPPORTED_CONFIGS`
+* CBMC_CONFIG_FLAGS - optional flags that apply to every configuration of this
+  proof, independently of the selected solver profile, such as `--big-endian`
 * FUNCTION_NAME - set to `XXX` with the `mlk_` prefix if required
 * CBMC_OBJECT_BITS. Normally set to 8, but might need to be increased if CBMC runs out of memory for this proof.
 
 For documentation of these (and the other) options, see the [cbmc/Makefile.common](Makefile.common) file.
 
+Configurations use the form `DATA_MODEL:SOLVER_PROFILE`. The data model fixes
+implementation-specific choices for C types, in particular the widths of
+integer types and pointers. The solver profile selects the backend and its
+options. For example:
+
+```
+CBMC_SUPPORTED_CONFIGS = LP64:bitwuzla ILP32:bitwuzla
+CBMC_DEFAULT_CONFIG = LP64:bitwuzla
+```
+
+Examples include `LP64` and `ILP32` for data models, and `z3`,
+`z3_smt_only`, `bitwuzla`, and `cvc5_arrays_exp` for solver profiles. Data
+models and solver profiles, including any solver-specific command-line options,
+are defined centrally in `Makefile.common`. Do not put solver selection flags
+in `CBMC_CONFIG_FLAGS`.
+
 The `USE_FUNCTION_CONTRACTS` option should be used where possible, since contracts enable modular proof, which is far more efficient
  than inlining, which tends to explode in complexity for higher-level functions.
 
-#### Z3 or Bitwuzla?
+#### Choosing a solver profile
 
 We have found that it's better to use Bitwuzla in the initial stages of developing and debugging a new proof.
 
@@ -347,42 +366,38 @@ SMT2 solver returned non-constant value for variable Bxxx
 
 This is not helpful when trying to understand a failed proof. Bitwuzla works better and produces reliable counter-examples.
 
-Once a proof is working OK, you may revert to Z3 to check if it _also_ passes with Z3, and perhaps faster. If it does,
-then keep Z3 as the selected prover. If not, then stick with Bitwuzla.
+Once a proof is working, it can also be checked with Z3 or cvc5. Declare each
+configuration in `CBMC_SUPPORTED_CONFIGS` only after it is known to work, and
+select one of those configurations as `CBMC_DEFAULT_CONFIG`.
 
-#### Selecting custom options for Z3 or Bitwuzla
+#### Adding custom solver options
 
-By default, CBMC invokes provers with no special command-line options. If you want to pass additional flags to the prover,
-e.g. to improve proof performance, you can create a small wrapper script and pass it to CBMC via `--external-smt2-solver XXX` (introduced in 6.8.0).
+Solver-specific options belong in a named solver profile rather than in an
+individual proof Makefile. If options must be passed directly to a solver,
+create a small wrapper script and register a profile for it in
+`Makefile.common`.
 
-An example of such a script is [lib/z3_smt_only](lib/z3_smt_only) which looks like this:
+For example, [lib/z3_smt_only](lib/z3_smt_only) contains:
 
 ```
 #!/usr/bin/env bash
 z3 tactic.default_tactic=smt "$@"
 ```
 
-There is also a script [lib/z3_bv_sort](lib/z3_bv_sort) which looks like this:
+The corresponding profile is registered as:
 
 ```
-#!/usr/bin/env bash
-z3 rewriter.bv_sort_ac "$@"
+CBMC_PROFILE_z3_smt_only_BACKEND := --smt2
+CBMC_PROFILE_z3_smt_only_PROVER_NAME := Z3
+CBMC_PROFILE_z3_smt_only_SMT_FORMAT := --z3
+CBMC_PROFILE_z3_smt_only_FLAGS := \
+  --external-smt2-solver $(PROOF_ROOT)/lib/z3_smt_only --z3
 ```
 
-Both these extra options have been found to be effective in improving Z3's performance in some cases.
-
-To select the special prover, we update the proof `Makefile` for a particular function, replacing the
-`--smt2` or `--bitwuzla` option with `--external-smt2-solver`.  For example, the proof of
-`polyvec_add()` is much faster using the `z3_bv_sort` wrapper, so we change the `Makefile`, replacing
-
-```
-CBMCFLAGS=--smt2
-```
-with
-```
-CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_bv_sort --z3
-```
-Note that we still need the ``--z3`` option now to inform CBMC to generate SMTLib specifically for Z3.
+Also add the profile ID to `CBMC_SOLVER_PROFILES_ALL`, then add the desired
+`DATA_MODEL:SOLVER_PROFILE` tuple to the proof's
+`CBMC_SUPPORTED_CONFIGS`. The `cvc5_arrays_exp` profile follows the same pattern
+and uses a wrapper to enable cvc5's experimental array support.
 
 ### Update harness function
 
@@ -444,24 +459,42 @@ annotations to every loop in the function under proof.
 
 ### Prove it!
 
-Proof of a single function can be run from the proof directory for that function with `make result`.
+Proof of a single function can be run from its proof directory with
+`make result`. This uses the proof's `CBMC_DEFAULT_CONFIG`.
 
-This produces `logs/result.txt` in plaintext format.
+To select another declared configuration directly, pass both parts to Make:
+
+```
+make CBMC_DM=ILP32 CBMC_SOLVER=bitwuzla result
+```
+
+Running a known but undeclared configuration requires `CBMC_EXPLORE=1`:
+
+```
+make CBMC_DM=ILP32 CBMC_SOLVER=z3 CBMC_EXPLORE=1 result
+```
+
+The plaintext result is written to
+`logs/<DATA_MODEL>/<SOLVER_PROFILE>/result.txt`.
 
 Before pushing a new proof for a new function, make sure that _all_ proofs run OK from the [proofs/cbmc](./) directory with
 
 ```
-MLKEM_K=3 ./run-cbmc-proofs.py --summarize -j$(nproc)
+MLKEM_K=3 ./run-cbmc-proofs.py --summarize --dm all --solver all -j$(nproc)
 ```
 
-That will use `$(nproc)` processor cores to run the proofs.
+The runner forms the product of the selected data models and solver profiles,
+then runs the configurations declared by each proof and reports the remaining
+combinations as omitted. The selectors also accept comma-separated IDs. Pass
+`--explore` to run selected combinations even if the proof does not declare
+them supported. The command above uses `$(nproc)` processor cores.
 
 ### Debugging a proof
 
 If a proof fails, you can run
 
 ```
-make result VERBOSE=1 >log.txt
+make CBMC_DM=LP64 CBMC_SOLVER=bitwuzla result VERBOSE=1 >log.txt
 ```
 
 and then inspect `log.txt` to see the exact sequence of commands that has been run. With that, you should be able to reproduce a failure on the command-line directly.
@@ -471,22 +504,26 @@ and then inspect `log.txt` to see the exact sequence of commands that has been r
 The `Makefile.common` also contains make targets that can be used to generate the intermediate files
 for inspection, but without actually running the (time consuming) provers at all.
 
-`make goto` generates all the GOTO files (in `gotos/*.goto`) and then stops. For a function
-x(), the final GOTO file ends up in `gotos/x_harness.goto`.
+`make goto` generates all the GOTO files for the selected configuration and
+then stops. For a function x(), the final GOTO file ends up in
+`gotos/<DATA_MODEL>/<SOLVER_PROFILE>/x_harness.goto`.
 
 There are also targets that generate the SMT proof files, but without actually running the selected prover.
 
 For a function x(), (so you're in sub-directory `proofs/cbmc/x`), you can do:
 
-`make smt` generates `gotos/x_harness.smt2` for the prover selected in the `Makefile` (which must be one
-of Z3, Bitwuzla, or CVC5)
+`make smt` generates
+`gotos/<DATA_MODEL>/<SOLVER_PROFILE>/x_harness.smt2` for the selected solver
+profile.
 
-`make smtz` generates `gotos/x_harness.smtz` but forces generation for the Z3 prover, ignoring the prover
-selected in the `Makefile`. Similarly
+`make smtz` generates
+`gotos/<DATA_MODEL>/<SOLVER_PROFILE>/x_harness.smtz` for Z3. Similarly,
 
-`make smtb` generates `gotos/x_harness.smtb` but forces generation for Bitwuzla.
+`make smtb` generates
+`gotos/<DATA_MODEL>/<SOLVER_PROFILE>/x_harness.smtb` for Bitwuzla.
 
-`make smtc` generates `gotos/x_harness.smtb` but forces generation for cvc5.
+`make smtc` generates
+`gotos/<DATA_MODEL>/<SOLVER_PROFILE>/x_harness.smtc` for cvc5.
 
 Finally,
 
@@ -509,12 +546,16 @@ The significant changes are:
 ```
 HARNESS_FILE = poly_tobytes_harness
 PROOF_UID = mlk_poly_tobytes
-PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c
+PROJECT_SOURCES += $(SRCDIR)/mlkem/src/compress.c
 CHECK_FUNCTION_CONTRACTS=mlk_poly_tobytes
-USE_FUNCTION_CONTRACTS=
+USE_FUNCTION_CONTRACTS=mlk_poly_tobytes_c
+CBMC_SUPPORTED_CONFIGS = LP64:bitwuzla
+CBMC_DEFAULT_CONFIG = LP64:bitwuzla
 FUNCTION_NAME = mlk_poly_tobytes
 ```
-Note that `USE_FUNCTION_CONTRACTS` is left empty since `mlk_poly_tobytes()` is a leaf function that does not call any other functions at all.
+The proof uses the contract of `mlk_poly_tobytes_c()` rather than inlining its
+implementation. The C implementation has a separate proof in
+[proofs/cbmc/poly_tobytes_c](poly_tobytes_c).
 
 ### Update harness function
 
@@ -542,18 +583,19 @@ The comments on `mlk_poly_tobytes()` give us a clear hint:
  *              - r: pointer to output byte array
  *                   (of MLKEM_POLYBYTES bytes)
 ```
-So we need to write a requires contract to constrain the ranges of the coefficients denoted by the parameter `a`. There
-is no constraint on the output byte array, other than it must be the right length, which is given by the function
-prototype.
+The contract must constrain the ranges of the coefficients denoted by `a` and
+require valid, non-aliasing input and output buffers. There is no constraint on
+the initial contents of the output buffer.
 
 We can use the macros in [mlkem/src/cbmc.h](../../mlkem/src/cbmc.h) to help, thus:
 
 ```
 void mlk_poly_tobytes(uint8_t r[MLKEM_POLYBYTES], const mlk_poly *a)
 __contract__(
+  requires(memory_no_alias(r, MLKEM_POLYBYTES))
   requires(memory_no_alias(a, sizeof(mlk_poly)))
   requires(array_bound(a->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
-  assigns(object_whole(r)));
+  assigns(memory_slice(r, MLKEM_POLYBYTES)));
 ```
 
 `array_bound` is a macro that expands to a quantified expression that expresses that the elements of `a->coeffs` between
@@ -561,7 +603,7 @@ index values `0` (inclusive) and `MLKEM_N` (exclusive) are in the range `0` (inc
 
 ### Interior contracts and loop invariants
 
-`mlk_poly_tobytes` has a single loop statement:
+The C implementation `mlk_poly_tobytes_c` has a single loop statement:
 
 ```
   unsigned i;
@@ -570,9 +612,8 @@ index values `0` (inclusive) and `MLKEM_N` (exclusive) are in the range `0` (inc
 ```
 
 A candidate loop contract needs to state that:
-1. The loop body assigns to variable `i` and the whole object pointed to by `r`.
-2. Loop counter variable `i` is in range `0 .. MLKEM_N / 2` at the point of the loop invariant (remember the pattern above).
-3. The loop terminates because the expression `MLKEM_N / 2 - i` decreases on every iteration.
+1. Loop counter variable `i` is in range `0 .. MLKEM_N / 2` at the point of the loop invariant (remember the pattern above).
+2. The loop terminates because the expression `MLKEM_N / 2 - i` decreases on every iteration.
 
 Therefore, we add:
 
@@ -580,7 +621,6 @@ Therefore, we add:
   unsigned i;
   for (i = 0; i < MLKEM_N / 2; i++)
   __loop__(
-    assigns(i, object_whole(r))
     invariant(i <= MLKEM_N / 2)
     decreases(MLKEM_N / 2 - i))
   { ... }
@@ -603,18 +643,17 @@ and so on for the other two statements in the loop body.
 
 ### Prove it!
 
-With those changes, CBMC completes the proof in about 10 seconds:
+The loop annotations above are checked by the separate `poly_tobytes_c` proof.
+The top-level `poly_tobytes` proof uses the contract of that implementation.
+Run the top-level proof with:
 
 ```
 cd proofs/cbmc/poly_tobytes
 make result
-cat logs/result.txt
+cat logs/LP64/bitwuzla/result.txt
 ```
-concludes
-```
-** 0 of 228 failed (1 iterations)
-VERIFICATION SUCCESSFUL
-```
+
+The result concludes with `VERIFICATION SUCCESSFUL`.
 
 We can also use the higher-level Python script to prove just that one function:
 
@@ -624,8 +663,8 @@ MLKEM_K=3 ./run-cbmc-proofs.py --summarize -j$(nproc) -p poly_tobytes
 ```
 yields
 ```
-| Proof            | Status  |
-|------------------|---------|
-| mlk_poly_tobytes | Success |
+| Proof            | DM   | Solver     | Status  | Duration (in s) |
+|------------------|------|------------|---------|-----------------|
+| mlk_poly_tobytes | LP64 | bitwuzla*  | Success | ...             |
 
 ```

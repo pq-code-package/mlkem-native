@@ -44,7 +44,13 @@ See the [Proof Guide](proof_guide.md) for a walkthrough of how to use CBMC and d
 
 ## Installation
 
-To reproduce the CBMC proofs, you will require several tools ([CBMC](https://github.com/diffblue/cbmc), [z3](https://github.com/Z3Prover/z3), [bitwuzla](https://github.com/bitwuzla/bitwuzla), [litani](https://github.com/awslabs/aws-build-accumulator), [cbmc-viewer](https://github.com/model-checking/cbmc-viewer)) installed.
+To reproduce the CBMC proofs, you will require several tools:
+[CBMC](https://github.com/diffblue/cbmc),
+[z3](https://github.com/Z3Prover/z3),
+[bitwuzla](https://github.com/bitwuzla/bitwuzla),
+[cvc5](https://github.com/cvc5/cvc5),
+[litani](https://github.com/awslabs/aws-build-accumulator), and
+[cbmc-viewer](https://github.com/model-checking/cbmc-viewer).
 It is not uncommon for proofs to fail or have significantly worse performance when switching to different tool versions.
 Therefore, **we highly recommend using our Nix development environment** to install all the necessary tools. See [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
@@ -63,6 +69,25 @@ success/failure in the error code, use
 MLKEM_K={2,3,4} run-cbmc-proofs.py --summarize
 ```
 
+Each proof declares the data-model and solver-profile configurations known to
+work, together with one default configuration. A data model fixes
+implementation-specific choices for C types, in particular the widths of
+integer types and pointers. The command above runs the default declared by each
+proof. To run every declared configuration, use
+
+```
+MLKEM_K={2,3,4} run-cbmc-proofs.py --summarize --dm all --solver all
+```
+
+Examples include `LP64` and `ILP32` for data models, and `z3`,
+`z3_smt_only`, `bitwuzla`, and `cvc5_arrays_exp` for solver profiles. The
+`--dm` and `--solver` selectors also accept comma-separated lists. Candidate
+combinations not declared by a proof are omitted unless `--explore` is passed.
+
+The summary marks a proof's default solver profile with `*` and an undeclared
+configuration run with `--explore` as `(explore)`. A solver response of
+`unknown` is reported as `Inconclusive` and causes the proof run to fail.
+
 If `GITHUB_STEP_SUMMARY` is set, the proof summary will be appended to it.
 
 Alternatively, you can use the [tests](../../scripts/tests) script, see
@@ -70,6 +95,9 @@ Alternatively, you can use the [tests](../../scripts/tests) script, see
 ```
 tests cbmc --help
 ```
+
+The test wrapper accepts the same `--dm`, `--solver`, and `--explore`
+selectors.
 
 ## What is covered?
 
