@@ -64,7 +64,7 @@
             inherit system;
             overlays = [
               (_:_: {
-                inherit (pkgs-unstable) cbmc;
+                inherit (pkgs-unstable) cbmc hol_light ocaml ocamlPackages ledit;
               })
             ];
           };
