@@ -35,8 +35,13 @@ jobs:
            name: 'x86_64'
          - runner: macos-latest
            name: 'macos (aarch64)'
+           os: mac
+         - runner: xcode-27
+           name: 'macos (aarch64, Xcode 27)'
+           os: mac
          - runner: macos-15-intel
            name: 'macos (x86_64)'
+           os: mac
         exclude:
           - {external: true,
              target: {
@@ -98,8 +103,13 @@ jobs:
            name: 'x86_64'
          - runner: macos-latest
            name: 'macos (aarch64)'
+           os: mac
+         - runner: xcode-27
+           name: 'macos (aarch64, Xcode 27)'
+           os: mac
          - runner: macos-15-intel
            name: 'macos (x86_64)'
+           os: mac
         exclude:
           - {external: true,
              target: {
@@ -114,17 +124,17 @@ jobs:
         run: |
           ./scripts/tests bench -c NO
       - name: "tests bench (build only, cycles: PMU)"
-        if: ${{ matrix.target.name != 'macos (aarch64)' && matrix.target.name != 'macos (x86_64)' }}
+        if: ${{ matrix.target.os != 'mac' }}
         run: |
           make clean
           ./scripts/tests bench -c PMU --no-run
       - name: "tests bench (build only, cycles: PERF)"
-        if: ${{ matrix.target.name != 'macos (aarch64)' && matrix.target.name != 'macos (x86_64)' }}
+        if: ${{ matrix.target.os != 'mac' }}
         run: |
           make clean
           ./scripts/tests bench -c PERF --no-run
       - name: "tests bench (build only, cycles: MAC)"
-        if: ${{ matrix.target.name == 'macos (aarch64)' || matrix.target.name == 'macos (x86_64)' }}
+        if: ${{ matrix.target.os == 'mac' }}
         run: |
           make clean
           ./scripts/tests bench -c MAC --no-run
@@ -218,7 +228,7 @@ jobs:
     name: Quickcheck lib
     strategy:
       matrix:
-        system: [macos-latest, macos-15-intel, ubuntu-latest, ubuntu-24.04-arm]
+        system: [macos-latest, xcode-27, macos-15-intel, ubuntu-latest, ubuntu-24.04-arm]
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -229,7 +239,7 @@ jobs:
     name: Examples
     strategy:
       matrix:
-        system: [macos-latest, macos-15-intel, ubuntu-latest, ubuntu-24.04-arm]
+        system: [macos-latest, xcode-27, macos-15-intel, ubuntu-latest, ubuntu-24.04-arm]
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
