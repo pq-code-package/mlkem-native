@@ -106,6 +106,9 @@ jobs:
           - runner: macos-latest
             container:
             install: 'installer'
+          - runner: xcode-27
+            container:
+            install: 'installer'
           - runner: ubuntu-22.04
             container:
             install: 'installer'
