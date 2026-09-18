@@ -23,6 +23,11 @@ jobs:
            # Build this target with clang 22, which carries the compiler-rt
            # fix (llvm/llvm-project#191039, backport #192082).
            nix_shell: clang22
+         - runner: xcode-27
+           name: 'macOS (aarch64, Xcode 27)'
+           arch: mac
+           platform: native
+           nix_shell: clang22
          - runner: macos-15-intel
            name: 'macOS (x86_64)'
            arch: mac
