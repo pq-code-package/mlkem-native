@@ -6,6 +6,10 @@ permissions:
   contents: read
 on:
   workflow_call:
+    secrets:
+      AWS_GITHUB_TOKEN:
+        description: Token for registering EC2 runners and reading the nix cache
+        required: false
   workflow_dispatch:
   push:
     branches: ["main"]
@@ -78,4 +82,5 @@ jobs:
       test: false
       cbmc: false
       slothy: true
-    secrets: inherit
+    secrets:
+      AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}

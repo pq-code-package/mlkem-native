@@ -60,6 +60,10 @@ on:
       container:
         type: string
         default: ''
+    secrets:
+      AWS_GITHUB_TOKEN:
+        description: Token for registering EC2 runners and reading the nix cache
+        required: false
 env:
   AWS_ROLE: arn:aws:iam::559050233797:role/mlkem-c-aarch64-gh-action
   AWS_REGION: us-east-1

@@ -6,6 +6,10 @@ permissions:
   contents: read
 on:
   workflow_call:
+    secrets:
+      AWS_GITHUB_TOKEN:
+        description: Token for registering EC2 runners and reading the nix cache
+        required: false
   workflow_dispatch:
 
 env:

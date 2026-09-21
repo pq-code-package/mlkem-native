@@ -79,4 +79,5 @@ jobs:
       test: ${{ inputs.test }}
       cbmc: ${{ inputs.cbmc }}
       verbose: ${{ inputs.verbose }}
-    secrets: inherit
+    secrets:
+      AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}
