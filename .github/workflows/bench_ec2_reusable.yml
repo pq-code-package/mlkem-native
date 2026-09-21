@@ -96,6 +96,8 @@ jobs:
       ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Determine AMI ID
         id: det_ami_id
         run: |
@@ -137,6 +139,8 @@ jobs:
     if: ${{ inputs.compiler == '' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/bench
         if: ${{ inputs.opt == 'all' || inputs.opt == 'opt' }}
         with:
@@ -174,6 +178,8 @@ jobs:
     if: ${{ inputs.compiler != '' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-apt
         with:
           packages: ${{ inputs.additional_packages }}
