@@ -142,16 +142,32 @@ gh_group_end
 gh_group_start "Linting GitHub Actions workflows with actionlint"
 if ! command -v actionlint >/dev/null; then
   gh_error_simple "actionlint missing" "actionlint is not installed"
-  error "Lint GitHub Actions"
+  error "Lint GitHub Actions (actionlint)"
   SUCCESS=false
-  gh_summary_failure "Lint GitHub Actions"
+  gh_summary_failure "Lint GitHub Actions (actionlint)"
 elif ! actionlint; then
-  error "Lint GitHub Actions"
+  error "Lint GitHub Actions (actionlint)"
   SUCCESS=false
-  gh_summary_failure "Lint GitHub Actions"
+  gh_summary_failure "Lint GitHub Actions (actionlint)"
 else
-  info "Lint GitHub Actions"
-  gh_summary_success "Lint GitHub Actions"
+  info "Lint GitHub Actions (actionlint)"
+  gh_summary_success "Lint GitHub Actions (actionlint)"
+fi
+gh_group_end
+
+gh_group_start "Linting GitHub Actions workflows with zizmor"
+if ! command -v zizmor >/dev/null; then
+  gh_error_simple "zizmor missing" "zizmor is not installed"
+  error "Lint GitHub Actions (zizmor)"
+  SUCCESS=false
+  gh_summary_failure "Lint GitHub Actions (zizmor)"
+elif ! zizmor -qq --no-progress --offline "$ROOT/.github"; then
+  error "Lint GitHub Actions (zizmor)"
+  SUCCESS=false
+  gh_summary_failure "Lint GitHub Actions (zizmor)"
+else
+  info "Lint GitHub Actions (zizmor)"
+  gh_summary_success "Lint GitHub Actions (zizmor)"
 fi
 gh_group_end
 

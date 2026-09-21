@@ -27,7 +27,8 @@ runs:
         SRC_COMMIT: ${{ inputs.commit }}
         SRC_DIR: ${{ inputs.dir }}
         SRC_REPOSITORY: ${{ inputs.repository }}
-      run: |
+      # AWSLC_DIR is derived from a caller-supplied path.
+      run: | # zizmor: ignore[github-env]
         mkdir "$SRC_DIR" && cd "$SRC_DIR"
         git config --global --add safe.directory "$GITHUB_WORKSPACE/$SRC_DIR"
         git init

@@ -226,7 +226,8 @@ jobs:
           persist-credentials: false
       - name: Install MinGW-w64
         run: choco install mingw --version=${{ matrix.mingw-version }} -y
-        shell: cmd
+        # choco needs cmd here.
+        shell: cmd # zizmor: ignore[misfeature]
       - name: make quickcheck
         shell: bash
         run: |

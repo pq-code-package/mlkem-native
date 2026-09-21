@@ -165,7 +165,8 @@ jobs:
     needs: start-ec2-runner
     if: ${{ inputs.container != '' }}
     runs-on: ${{ needs.start-ec2-runner.outputs.label }}
-    container:
+    # Built and pushed to the local registry earlier in this workflow.
+    container: # zizmor: ignore[unpinned-images]
       localhost:5000/${{ inputs.container }}
     steps:
       # We're not using the checkout action here because on it's not supported

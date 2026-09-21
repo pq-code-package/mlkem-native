@@ -18,7 +18,8 @@ runs:
   steps:
     - name: Detect OS
       shell: bash
-      run: |
+      # PKG is one of three literals chosen below.
+      run: | # zizmor: ignore[github-env]
         if (which yum > /dev/null); then
            echo PKG="yum" >> $GITHUB_ENV
         elif (which brew > /dev/null); then

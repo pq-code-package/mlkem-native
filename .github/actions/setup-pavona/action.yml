@@ -22,7 +22,8 @@ runs:
       env:
         SRC_COMMIT: ${{ inputs.pavona-commit }}
         SRC_REPOSITORY: ${{ inputs.pavona-repository }}
-      run: |
+      # HOME and PAVONA_DIR are runner-provided or literal.
+      run: | # zizmor: ignore[github-env]
         # Ensure HOME is set for self-hosted runners
         echo "HOME=${HOME:-/home/runner}" >> $GITHUB_ENV
 

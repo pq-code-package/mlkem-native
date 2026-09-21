@@ -126,7 +126,8 @@ runs:
         CACHE_HIT: ${{ steps.cache.outputs.hit-primary-key }}
         DEV_SHELL: ${{ inputs.devShell }}
         INSTALL: ${{ inputs.install }}
-      run: |
+      # NIX_SHELL and SHELL are derived from a caller-supplied dev shell.
+      run: | # zizmor: ignore[github-env]
         echo "::group::set nix shell"
         if [[ "$CACHE_HIT" == "true" ]]; then
           echo NIX_CACHE_ENABLED=1 >> $GITHUB_ENV
