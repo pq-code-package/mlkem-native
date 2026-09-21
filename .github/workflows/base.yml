@@ -18,6 +18,8 @@ jobs:
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/lint
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -54,6 +56,8 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: make quickcheck
         run: |
           OPT=0 make quickcheck
@@ -85,6 +89,8 @@ jobs:
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Run ACVP test
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -120,6 +126,8 @@ jobs:
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: "tests bench (cycles: NO)"
         run: |
           ./scripts/tests bench -c NO
@@ -165,6 +173,8 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: make quickcheck
         run: |
           OPT=0 CFLAGS=-std=c90 make quickcheck
@@ -191,6 +201,8 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
       - name: Build test
         shell: powershell
@@ -210,6 +222,8 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Install MinGW-w64
         run: choco install mingw --version=${{ matrix.mingw-version }} -y
         shell: cmd
@@ -232,6 +246,8 @@ jobs:
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: make lib
         run: |
           make lib
@@ -243,6 +259,8 @@ jobs:
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: basic
         run: |
           CFLAGS="-O0" make run -C examples/basic
@@ -297,6 +315,8 @@ jobs:
     name: AArch64 dev backend (${{ matrix.backend.name }}, ${{ matrix.simplify.name }})
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Reinstate and test backend
         uses: ./.github/actions/setup-shell
         with:
@@ -311,6 +331,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Generate with Intel syntax and test
         uses: ./.github/actions/setup-shell
         with:
@@ -337,6 +359,8 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-apt
         with:
           packages: clang-tools clang
@@ -349,4 +373,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
     - uses: donatj/symlink-check-action@b3c737d0fd4e52752f0b8c71a03f3f775fa015cb
