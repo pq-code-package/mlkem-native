@@ -18,10 +18,17 @@ runs:
   steps:
     - name: Install base packages
       shell: bash
+      env:
+        SUDO: ${{ inputs.sudo }}
       run: |
-        ${{ inputs.sudo }} yum install make gcc python3 git -y
+        # SUDO is an optional command prefix and PACKAGES a list, so both
+        # are deliberately left unquoted.
+        $SUDO yum install make gcc python3 git -y
     - name: Install additional packages
       if: ${{ inputs.packages != ''}}
       shell: bash
+      env:
+        PACKAGES: ${{ inputs.packages }}
+        SUDO: ${{ inputs.sudo }}
       run: |
-        ${{ inputs.sudo }} yum install ${{ inputs.packages }} -y
+        $SUDO yum install $PACKAGES -y

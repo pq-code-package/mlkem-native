@@ -19,13 +19,16 @@ runs:
   steps:
     - name: Fetch pavona repository
       shell: bash
+      env:
+        SRC_COMMIT: ${{ inputs.pavona-commit }}
+        SRC_REPOSITORY: ${{ inputs.pavona-repository }}
       run: |
         # Ensure HOME is set for self-hosted runners
         echo "HOME=${HOME:-/home/runner}" >> $GITHUB_ENV
 
-        git clone ${{ inputs.pavona-repository }}
+        git clone "$SRC_REPOSITORY"
         cd pavona
-        git checkout ${{ inputs.pavona-commit }}
+        git checkout "$SRC_COMMIT"
 
         # Remember pavona directory
         echo PAVONA_DIR="$GITHUB_WORKSPACE/pavona" >> $GITHUB_ENV

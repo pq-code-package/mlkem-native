@@ -17,6 +17,8 @@ runs:
   steps:
       - name: System info
         shell: ${{ env.SHELL }}
+        env:
+          CROSS_PREFIX: ${{ inputs.cross_prefix }}
         run: |
           ARCH=$(uname -m)
           echo <<-EOF
@@ -26,7 +28,7 @@ runs:
             - $(nix --version || echo 'nix not present')
             - $(bash --version | grep -m1 "")
             - $(python3 --version)
-            - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
+            - $("${CROSS_PREFIX}${CC}" --version | grep -m1 "")
           EOF
           cat >> $GITHUB_STEP_SUMMARY <<-EOF
             ## Setup
@@ -35,10 +37,13 @@ runs:
             - $(nix --version || echo 'nix not present')
             - $(bash --version | grep -m1 "")
             - $(python3 --version)
-            - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
+            - $("${CROSS_PREFIX}${CC}" --version | grep -m1 "")
           EOF
       - shell: ${{ env.SHELL }}
+        env:
+          CFLAGS_EXTRA: ${{ inputs.cflags }}
+          VALGRIND_FLAGS: ${{ inputs.valgrind_flags }}
         run: |
           make clean
           # Disable the AArch64 SHA3 extension as it's not yet supported by valgrind
-          MK_COMPILER_SUPPORTS_SHA3=0 tests func --exec-wrapper="valgrind --error-exitcode=1 ${{ inputs.valgrind_flags }}" --cflags="-DMLK_CONFIG_CT_TESTING_ENABLED -DNTESTS_FUNC=50 ${{ inputs.cflags }}"
+          MK_COMPILER_SUPPORTS_SHA3=0 tests func --exec-wrapper="valgrind --error-exitcode=1 $VALGRIND_FLAGS" --cflags="-DMLK_CONFIG_CT_TESTING_ENABLED -DNTESTS_FUNC=50 $CFLAGS_EXTRA"

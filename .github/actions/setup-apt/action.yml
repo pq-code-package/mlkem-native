@@ -18,14 +18,23 @@ runs:
   steps:
     - name: Update package repository
       shell: bash
+      env:
+        SUDO: ${{ inputs.sudo }}
       run: |
-        ${{ inputs.sudo }} apt-get update
+        # SUDO is an optional command prefix and PACKAGES a list, so both
+        # are deliberately left unquoted.
+        $SUDO apt-get update
     - name: Install base packages
       shell: bash
+      env:
+        SUDO: ${{ inputs.sudo }}
       run: |
-        ${{ inputs.sudo }} apt-get install make gcc python3 -y
+        $SUDO apt-get install make gcc python3 -y
     - name: Install additional packages
       if: ${{ inputs.packages != ''}}
       shell: bash
+      env:
+        PACKAGES: ${{ inputs.packages }}
+        SUDO: ${{ inputs.sudo }}
       run: |
-        ${{ inputs.sudo }} apt-get install ${{ inputs.packages }} -y
+        $SUDO apt-get install $PACKAGES -y
