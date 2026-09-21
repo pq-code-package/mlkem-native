@@ -100,13 +100,16 @@ jobs:
           persist-credentials: false
       - name: Determine AMI ID
         id: det_ami_id
+        env:
+          EC2_AMI: ${{ inputs.ec2_ami }}
+          EC2_AMI_ID: ${{ inputs.ec2_ami_id }}
         run: |
-          if [[ "${{ inputs.ec2_ami }}" == "ubuntu (x86_64)" ]]; then
-            AMI_ID=${{ env.AMI_UBUNTU_X86_64 }}
-          elif [[ "${{ inputs.ec2_ami }}" == "ubuntu (aarch64)" ]]; then
-            AMI_ID=${{ env.AMI_UBUNTU_AARCH64 }}
-          elif [[ "${{ inputs.ec2_ami }}" == "custom AMI" ]]; then
-            AMI_ID=${{ inputs.ec2_ami_id }}
+          if [[ "$EC2_AMI" == "ubuntu (x86_64)" ]]; then
+            AMI_ID=$AMI_UBUNTU_X86_64
+          elif [[ "$EC2_AMI" == "ubuntu (aarch64)" ]]; then
+            AMI_ID=$AMI_UBUNTU_AARCH64
+          elif [[ "$EC2_AMI" == "custom AMI" ]]; then
+            AMI_ID=$EC2_AMI_ID
           fi
           echo "Using AMI ID: $AMI_ID"
           echo "AMI_ID=$AMI_ID" >> "$GITHUB_OUTPUT"
@@ -184,8 +187,10 @@ jobs:
         with:
           packages: ${{ inputs.additional_packages }}
       - name: Set compiler
+        env:
+          COMPILER: ${{ inputs.compiler }}
         run: |
-          echo "CC=${{ inputs.compiler }}" >> "$GITHUB_ENV"
+          echo "CC=$COMPILER" >> "$GITHUB_ENV"
       - uses: ./.github/actions/bench
         if: ${{ inputs.opt == 'all' || inputs.opt == 'opt' }}
         with:

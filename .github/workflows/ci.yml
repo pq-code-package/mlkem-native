@@ -476,7 +476,7 @@ jobs:
           nix-cache: false
           platform: native
           opt: opt
-          cflags: "${{ matrix.cflags }} -std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\\\\\"../test/configs/custom_heap_alloc_config.h\\\\\\\""
+          cflags: "${{ matrix.cflags }} -std=c11 -D_GNU_SOURCE -DMLK_CONFIG_FILE=\\\"../test/configs/custom_heap_alloc_config.h\\\""
           func: false
           kat: false
           acvp: false
@@ -710,7 +710,7 @@ jobs:
         uses: ./.github/actions/functest
         with:
           nix-shell: ""
-          custom_shell: ${{ matrix.container.nix_shell && format('{0} --run \"bash -e {{0}}\"', matrix.container.nix_shell) || 'bash' }}
+          custom_shell: ${{ matrix.container.nix_shell && format('{0} --run "bash -e {{0}}"', matrix.container.nix_shell) || 'bash' }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
   ec2_compatibilitytests:
     strategy:

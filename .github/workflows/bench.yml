@@ -51,7 +51,7 @@ jobs:
           name: Arm Cortex-A55 (Snapdragon 888) benchmarks
           bench_pmu: PERF
           archflags: "-mcpu=cortex-a55 -march=armv8.2-a"
-          cflags: "-flto -DMLK_FORCE_AARCH64 -DMLK_CONFIG_FIPS202_BACKEND_FILE=\\\\\\\"fips202/native/aarch64/x1_scalar.h\\\\\\\""
+          cflags: "-flto -DMLK_FORCE_AARCH64 -DMLK_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x1_scalar.h\\\""
           ldflags: "-flto -static"
           bench_extra_args: -w exec-on-a55
           nix_shell: bench

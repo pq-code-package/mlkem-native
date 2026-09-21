@@ -23,14 +23,18 @@ runs:
   steps:
     - name: Fetch AWS-LC
       shell: bash
+      env:
+        SRC_COMMIT: ${{ inputs.commit }}
+        SRC_DIR: ${{ inputs.dir }}
+        SRC_REPOSITORY: ${{ inputs.repository }}
       run: |
-        mkdir ${{ inputs.dir }} && cd ${{ inputs.dir }}
-        git config --global --add safe.directory $GITHUB_WORKSPACE/${{ inputs.dir }}
+        mkdir "$SRC_DIR" && cd "$SRC_DIR"
+        git config --global --add safe.directory "$GITHUB_WORKSPACE/$SRC_DIR"
         git init
-        git remote add origin $GITHUB_SERVER_URL/${{ inputs.repository }}
-        git fetch origin --depth 1 ${{ inputs.commit }}
+        git remote add origin "$GITHUB_SERVER_URL/$SRC_REPOSITORY"
+        git fetch origin --depth 1 "$SRC_COMMIT"
         git checkout FETCH_HEAD
 
         # Remember AWS-LC directory
-        echo AWSLC_DIR="$GITHUB_WORKSPACE/${{ inputs.dir }}" >> $GITHUB_ENV
-        AWSLC_DIR=$GITHUB_WORKSPACE/${{ inputs.dir }}
+        echo AWSLC_DIR="$GITHUB_WORKSPACE/$SRC_DIR" >> $GITHUB_ENV
+        AWSLC_DIR=$GITHUB_WORKSPACE/$SRC_DIR

@@ -98,13 +98,16 @@ jobs:
           persist-credentials: false
       - name: Determine AMI ID
         id: det_ami_id
+        env:
+          EC2_AMI: ${{ inputs.ec2_ami }}
+          EC2_AMI_ID: ${{ inputs.ec2_ami_id }}
         run: |
-          if [[ "${{ inputs.ec2_ami }}" == "ubuntu (x86_64)" ]]; then
-            AMI_ID=${{ env.AMI_UBUNTU_X86_64 }}
-          elif [[ "${{ inputs.ec2_ami }}" == "ubuntu (aarch64)" ]]; then
-            AMI_ID=${{ env.AMI_UBUNTU_AARCH64 }}
-          elif [[ "${{ inputs.ec2_ami }}" == "custom AMI" ]]; then
-            AMI_ID=${{ inputs.ec2_ami_id }}
+          if [[ "$EC2_AMI" == "ubuntu (x86_64)" ]]; then
+            AMI_ID=$AMI_UBUNTU_X86_64
+          elif [[ "$EC2_AMI" == "ubuntu (aarch64)" ]]; then
+            AMI_ID=$AMI_UBUNTU_AARCH64
+          elif [[ "$EC2_AMI" == "custom AMI" ]]; then
+            AMI_ID=$EC2_AMI_ID
           fi
           echo "Using AMI ID: $AMI_ID"
           echo "AMI_ID=$AMI_ID" >> "$GITHUB_OUTPUT"
@@ -154,13 +157,19 @@ jobs:
       - name: Remember runner
         id: remember-runner
         shell: bash
+        env:
+          FIRST_OUTCOME: ${{ steps.start-ec2-runner-first.outcome }}
+          RUNNER_FIRST_ID: ${{ steps.start-ec2-runner-first.outputs.ec2-instance-id }}
+          RUNNER_FIRST_LABEL: ${{ steps.start-ec2-runner-first.outputs.label }}
+          RUNNER_SECOND_ID: ${{ steps.start-ec2-runner-second.outputs.ec2-instance-id }}
+          RUNNER_SECOND_LABEL: ${{ steps.start-ec2-runner-second.outputs.label }}
         run: |
-          if [[ "${{ steps.start-ec2-runner-first.outcome }}" == "failure" ]]; then
-            echo "label=${{ steps.start-ec2-runner-second.outputs.label }}" >> "$GITHUB_OUTPUT"
-            echo "ec2-instance-id=${{ steps.start-ec2-runner-second.outputs.ec2-instance-id }}" >> "$GITHUB_OUTPUT"
+          if [[ "$FIRST_OUTCOME" == "failure" ]]; then
+            echo "label=$RUNNER_SECOND_LABEL" >> "$GITHUB_OUTPUT"
+            echo "ec2-instance-id=$RUNNER_SECOND_ID" >> "$GITHUB_OUTPUT"
           else
-            echo "label=${{ steps.start-ec2-runner-first.outputs.label }}" >> "$GITHUB_OUTPUT"
-            echo "ec2-instance-id=${{ steps.start-ec2-runner-first.outputs.ec2-instance-id }}" >> "$GITHUB_OUTPUT"
+            echo "label=$RUNNER_FIRST_LABEL" >> "$GITHUB_OUTPUT"
+            echo "ec2-instance-id=$RUNNER_FIRST_ID" >> "$GITHUB_OUTPUT"
           fi
 
   tests:
