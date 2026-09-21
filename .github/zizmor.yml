@@ -1,0 +1,8 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+rules:
+  # The `$/` form this audit recommends is rejected by actionlint, pending
+  # rhysd/actionlint#732.
+  self-repository:
+    disable: true

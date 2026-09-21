@@ -47,7 +47,8 @@ runs:
         CUSTOM_SHELL: ${{ inputs.custom_shell }}
         GH_TOKEN: ${{ inputs.gh_token }}
         SCRIPT: ${{ inputs.script }}
-      run: |
+      # SHELL is a caller-supplied shell command.
+      run: | # zizmor: ignore[github-env]
           echo SHELL="$CUSTOM_SHELL" >> $GITHUB_ENV
 
           if [[ -n "$SCRIPT" ]]; then

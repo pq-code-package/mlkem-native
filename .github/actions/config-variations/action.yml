@@ -8,11 +8,7 @@ inputs:
     description: 'GitHub token'
     required: true
   tests:
-    description: 'List of tests to run (space-separated IDs) or "all" for all tests. Available IDs: pct-enabled,
-    pct-enabled-broken, custom-alloc-heap, custom-zeroize, native-cap-ON, native-cap-OFF, native-cap-ID_AA64PFR1_EL1,
-    native-cap-CPUID_AVX2, no-asm, serial-fips202, custom-randombytes, custom-memcpy, custom-memset, custom-stdlib,
-    nblocks-1, nblocks-2, nblocks-4, keygen-only, encaps-only, decaps-only, keygen-encaps, keygen-decaps, encaps-decaps,
-    no-randomized'
+    description: 'List of tests to run (space-separated IDs) or "all" for all tests. Available IDs: pct-enabled, pct-enabled-broken, custom-alloc-heap, custom-zeroize, native-cap-ON, native-cap-OFF, native-cap-ID_AA64PFR1_EL1, native-cap-CPUID_AVX2, no-asm, serial-fips202, custom-randombytes, custom-memcpy, custom-memset, custom-stdlib, nblocks-1, nblocks-2, nblocks-4, keygen-only, encaps-only, decaps-only, keygen-encaps, keygen-decaps, encaps-decaps, no-randomized'
     required: false
     default: 'all'
   opt:

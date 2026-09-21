@@ -653,7 +653,8 @@ jobs:
             nix_shell: 'nix-shell -p python3 gcc gnumake perl'
     name: Compatibility tests (${{ matrix.container.id }})
     runs-on: ubuntu-latest
-    container:
+    # The matrix deliberately tracks the latest image.
+    container: # zizmor: ignore[unpinned-images]
       ${{ matrix.container.id }}
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

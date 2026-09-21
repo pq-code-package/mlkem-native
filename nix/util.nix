@@ -104,6 +104,7 @@ rec {
           shfmt
           shellcheck
           actionlint
+          zizmor
           doxygen
           ruff;
       } ++ [ pythonEnv ];
