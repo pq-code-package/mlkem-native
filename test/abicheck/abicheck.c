@@ -23,11 +23,18 @@ static const abicheck_entry_t all_checks[] = {{NULL, NULL}};
 /* Return-code convention: see abicheck_common.h. SKIPPED means the kernel
  * built but the host lacks the runtime capability; the generated check
  * decides this via mlk_sys_check_capability. */
-int main(void)
+/* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
+#if defined(main)
+int main(int argc, char *argv[]);
+#endif
+int main(int argc, char *argv[])
 {
   int failed_tests = 0;
   int selftest_failures;
   const abicheck_entry_t *entry;
+
+  (void)argc;
+  (void)argv;
 
   /* Meta-test the ABI checker before trusting kernel verdicts (see selftest.h).
    */
