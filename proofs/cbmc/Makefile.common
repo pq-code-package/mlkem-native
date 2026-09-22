@@ -1061,6 +1061,24 @@ $(HARNESS_GOTO).smtb: $(HARNESS_GOTO).goto
 	  --stderr-file $(LOGDIR)/smtb-err-log.txt \
 	  --description "$(PROOF_UID): checking safety properties (SMT for Bitwuzla only)"
 
+# Remove all "get-value" lines to sanitize the SMT file
+$(HARNESS_GOTO).smtbp: $(HARNESS_GOTO).smtb
+	$(LITANI) add-job \
+	  $(POOL) \
+	  --command \
+	    'grep -v get-value $< >$@' \
+	  --inputs $^ \
+	  --outputs $@ \
+	  --ci-stage test \
+	  --stdout-file $(LOGDIR)/smtbp-log.txt \
+	  $(MEMORY_PROFILING) \
+	  --ignore-returns 10 \
+	  --timeout $(CBMC_TIMEOUT) \
+	  --pipeline-name "$(PROOF_UID)" \
+	  --tags "stats-group:sanitize SMT" \
+	  --stderr-file $(LOGDIR)/smtbp-err-log.txt \
+	  --description "$(PROOF_UID): Sanitizing SMT file for Bitwuzla"
+
 # Force SMT generation to file, but for cvc5, ignoring whatever back-end the user specified
 $(HARNESS_GOTO).smtc: $(HARNESS_GOTO).goto
 	$(LITANI) add-job \
@@ -1229,6 +1247,16 @@ smtcp:
 	@ echo Running 'litani build'
 	$(LITANI) run-build
 	@ echo Generated sanitized SMT file for cvc5 in $(HARNESS_GOTO).smtcp
+
+_smtbp: $(HARNESS_GOTO).smtbp
+smtbp:
+	@ echo Running 'litani init'
+	$(LITANI) init $(INIT_POOLS) --project $(PROJECT_NAME)
+	@ echo Running 'litani add-job'
+	$(MAKE) -B _smtbp
+	@ echo Running 'litani build'
+	$(LITANI) run-build
+	@ echo Generated sanitized SMT file for Bitwuzla in $(HARNESS_GOTO).smtbp
 
 _smtall: $(HARNESS_GOTO).smtz $(HARNESS_GOTO).smtb $(HARNESS_GOTO).smtc
 smtall:

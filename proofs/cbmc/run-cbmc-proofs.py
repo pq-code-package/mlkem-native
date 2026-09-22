@@ -184,6 +184,11 @@ def get_args():
             "help": "Generate plain SMT for cvc5 only. Does not run the solver",
         },
         {
+            "flags": ["--bitwuzla"],
+            "action": "store_true",
+            "help": "Generate plain SMT for bitwuzla only. Does not run the solver",
+        },
+        {
             "flags": ["--per-proof-timeout"],
             "type": int,
             "metavar": "SECONDS",
@@ -707,7 +712,10 @@ async def main():  # pylint: disable=too-many-locals
     if args.cvc5:
         report_target = "_smtcp"
     else:
-        report_target = "_report_no_coverage" if args.no_coverage else "_report"
+        if args.bitwuzla:
+            report_target = "_smtbp"
+        else:
+            report_target = "_report_no_coverage" if args.no_coverage else "_report"
 
     print(
         "Running proofs with K =",
