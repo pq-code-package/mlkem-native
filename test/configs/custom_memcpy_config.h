@@ -544,7 +544,8 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "../mlkem/src/sys.h"
-static MLK_INLINE void *mlk_memcpy(void *dest, const void *src, size_t n)
+MLK_STATIC_PROVABLE MLK_INLINE void *mlk_memcpy(void *dest, const void *src,
+                                                size_t n)
 {
   /* Simple byte-by-byte copy implementation for testing */
   unsigned char *d = (unsigned char *)dest;
