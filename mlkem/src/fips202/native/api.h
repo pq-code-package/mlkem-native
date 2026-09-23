@@ -37,7 +37,7 @@
 
 #if defined(MLK_USE_NATIVE_FIPS202_X1)
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_keccak_f1600_x1_native(uint64_t *state)
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_keccak_f1600_x1_native(uint64_t *state)
 __contract__(
   requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 1))
   assigns(memory_slice(state, sizeof(uint64_t) * 25 * 1))
@@ -46,7 +46,7 @@ __contract__(
 #endif /* MLK_USE_NATIVE_FIPS202_X1 */
 #if defined(MLK_USE_NATIVE_FIPS202_X4)
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_keccak_f1600_x4_native(uint64_t *state)
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_keccak_f1600_x4_native(uint64_t *state)
 __contract__(
   requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 4))
   assigns(memory_slice(state, sizeof(uint64_t) * 25 * 4))
@@ -73,7 +73,7 @@ __contract__(
 
 #if defined(MLK_USE_NATIVE_FIPS202_X4_XOR_BYTES)
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_keccakf1600_xor_bytes_x4_native(
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_keccakf1600_xor_bytes_x4_native(
     uint64_t *state, const unsigned char *data0, const unsigned char *data1,
     const unsigned char *data2, const unsigned char *data3, unsigned offset,
     unsigned length)
@@ -95,7 +95,7 @@ __contract__(
 
 #if defined(MLK_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES)
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_keccakf1600_extract_bytes_x4_native(
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_keccakf1600_extract_bytes_x4_native(
     uint64_t *state, unsigned char *data0, unsigned char *data1,
     unsigned char *data2, unsigned char *data3, unsigned offset,
     unsigned length)
