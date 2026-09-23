@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+# Enable the experimental array theory in cvc5. CBMC encodes parts of
+# the CPROVER library using STORE_ALL, which cvc5 only accepts under
+# --arrays-exp.
+#
+# `exec` is load-bearing: without it bash sits between cbmc and cvc5,
+# holds the stdout FD open after cvc5 closes it, and cbmc's reader
+# stops mid-stream and treats every property verdict as ERROR even
+# though cvc5 returned `unsat`.
+exec cvc5 --arrays-exp "$@"

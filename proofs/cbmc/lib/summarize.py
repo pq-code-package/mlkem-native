@@ -74,49 +74,166 @@ def _get_rendered_table(data):
     return "".join(table)
 
 
+def _split_pipeline_name(pipeline_name):
+    """Split `<PROOF_UID>__<DM>__<SOLVER>` into its components."""
+    if "__" not in pipeline_name:
+        return None, None, None
+    parts = pipeline_name.rsplit("__", 2)
+    if len(parts) == 3:
+        return tuple(parts)
+    # Compatibility with run files from before DM became a proof dimension.
+    proof_uid, solver = parts
+    legacy_profiles = {
+        "Z3": "z3",
+        "BITWUZLA": "bitwuzla",
+        "CVC5": "cvc5_arrays_exp",
+    }
+    return proof_uid, "LP64", legacy_profiles.get(solver, solver)
+
+
+# Marker emitted by cbmc when the SMT backend returned `unknown` on the
+# verification query. cbmc still exits non-zero (cprover-status: ERROR)
+# in this case, so the pipeline shows up as `fail` in litani; but no
+# property was actually refuted -- the solver simply could not decide.
+# We surface this as a distinct "Inconclusive" outcome.
+_SOLVER_UNKNOWN_MARKER = 'SMT2 solver returned "unknown"'
+
+
+def _is_solver_inconclusive(stdout_file):
+    """Return True iff the cbmc safety-check job's stdout-file (result.xml)
+    contains the cbmc message indicating the SMT backend returned `unknown`.
+    """
+    if not stdout_file:
+        return False
+    try:
+        with open(stdout_file, encoding="utf-8", errors="replace") as f:
+            return _SOLVER_UNKNOWN_MARKER in f.read()
+    except OSError:
+        return False
+
+
 def _parse_proof_pipeline(proof_pipeline):
-    """Parse a single proof pipeline, returning (name, status, duration, has_timeout)."""
+    """Parse a single proof pipeline, returning
+    (name, dm, solver, status, duration, has_timeout)."""
     duration = 0
     has_timeout = False
+    inconclusive = False
+    has_other_failure = False
     for stage in proof_pipeline["ci_stages"]:
         for job in stage["jobs"]:
             if job.get("timeout_reached", False):
                 has_timeout = True
             if "duration" in job:
                 duration += int(job["duration"])
+            # Identify the safety-check job by its description suffix.
+            # Litani stores both description and stdout_file under
+            # wrapper_arguments (the args passed to `litani add-job`).
+            wa = job.get("wrapper_arguments") or {}
+            desc = wa.get("description") or ""
+            job_inconclusive = desc.endswith(
+                ": checking safety properties"
+            ) and _is_solver_inconclusive(wa.get("stdout_file"))
+            if job_inconclusive:
+                inconclusive = True
+            if job.get("outcome") in ("fail", "fail_ignored") and not job_inconclusive:
+                has_other_failure = True
 
-    status = "Timeout" if has_timeout else proof_pipeline["status"].title()
-    return proof_pipeline["name"], status, duration, has_timeout
+    if has_timeout:
+        status = "Timeout"
+    elif proof_pipeline["status"] == "fail" and inconclusive and not has_other_failure:
+        status = "Inconclusive"
+    else:
+        status = proof_pipeline["status"].title()
+    name, dm, solver = _split_pipeline_name(proof_pipeline["name"])
+    return name, dm, solver, status, duration, has_timeout
 
 
-def _get_status_and_proof_summaries(run_dict):
-    """Parse a dict representing a Litani run and create lists summarizing the
-    proof results.
-
-    Parameters
-    ----------
-    run_dict
-        A dictionary representing a Litani run.
-
-
-    Returns
-    -------
-    A list of 2 lists.
-    The first sub-list maps a status to the number of proofs with that status.
-    The second sub-list maps each proof to its status.
-    """
-    count_statuses = {}
-    proofs = [["Proof", "Status", "Duration (in s)"]]
+def _get_proof_records(
+    run_dict,
+    omitted_configs=None,
+    default_configs=None,
+    exploratory_configs=None,
+):
+    """Return normalized records for every selected proof configuration."""
+    default_configs = set(default_configs or ())
+    exploratory_configs = set(exploratory_configs or ())
+    records = []
     for proof_pipeline in run_dict["pipelines"]:
         if proof_pipeline["name"] == "print_tool_versions":
             continue
 
-        name, status, duration, has_timeout = _parse_proof_pipeline(proof_pipeline)
-        status_pretty = status.replace("_", " ")
-        duration_str = "TIMEOUT" if has_timeout else str(duration)
+        name, dm, solver, status, duration, has_timeout = _parse_proof_pipeline(
+            proof_pipeline
+        )
+        if name is None:
+            name, dm, solver = proof_pipeline["name"], "-", "-"
+        key = (name, dm, solver)
+        records.append(
+            {
+                "name": name,
+                "dm": dm,
+                "solver": solver,
+                "status": status.replace("_", " "),
+                "duration": "TIMEOUT" if has_timeout else str(duration),
+                "duration_seconds": duration,
+                "default": key in default_configs,
+                "exploratory": key in exploratory_configs,
+            }
+        )
 
-        count_statuses[status_pretty] = count_statuses.get(status_pretty, 0) + 1
-        proofs.append([name, status_pretty, duration_str])
+    for name, dm, solver in omitted_configs or ():
+        key = (name, dm, solver)
+        records.append(
+            {
+                "name": name,
+                "dm": dm,
+                "solver": solver,
+                "status": "-",
+                "duration": "",
+                "duration_seconds": None,
+                "default": key in default_configs,
+                "exploratory": False,
+            }
+        )
+
+    records.sort(key=lambda record: (record["name"], record["dm"], record["solver"]))
+    return records
+
+
+def _get_status_and_proof_summaries(
+    run_dict,
+    omitted_configs=None,
+    default_configs=None,
+    exploratory_configs=None,
+):
+    """Create status and per-configuration Markdown table data."""
+    records = _get_proof_records(
+        run_dict, omitted_configs, default_configs, exploratory_configs
+    )
+    count_statuses = {}
+
+    for record in records:
+        if record["status"] == "-":
+            count_statuses["Omitted"] = count_statuses.get("Omitted", 0) + 1
+            continue
+        count_statuses[record["status"]] = count_statuses.get(record["status"], 0) + 1
+
+    proofs = [["Proof", "DM", "Solver", "Status", "Duration (in s)"]]
+    for record in records:
+        solver = record["solver"]
+        if record["default"]:
+            solver += "*"
+        if record["exploratory"]:
+            solver += " (explore)"
+        proofs.append(
+            [
+                record["name"],
+                record["dm"],
+                solver,
+                record["status"],
+                record["duration"],
+            ]
+        )
 
     statuses = [["Status", "Count"]]
     for status, count in count_statuses.items():
@@ -124,7 +241,13 @@ def _get_status_and_proof_summaries(run_dict):
     return [statuses, proofs]
 
 
-def export_result_json(output_path, run_file):
+def export_result_json(
+    output_path,
+    run_file,
+    omitted_configs=None,
+    default_configs=None,
+    exploratory_configs=None,
+):
     """Export JSON with summary, failures, and runtimes."""
     if output_path is None:
         return
@@ -132,19 +255,38 @@ def export_result_json(output_path, run_file):
     with open(run_file, encoding="utf-8") as f:
         run_dict = json.load(f)
 
-    _, proof_table = _get_status_and_proof_summaries(run_dict)
-    # proof_table: [["Proof", "Status", "Duration (in s)"], [name, status, duration], ...]
-
+    records = _get_proof_records(
+        run_dict, omitted_configs, default_configs, exploratory_configs
+    )
     failures, runtimes = [], []
-    for name, status, duration_str in proof_table[1:]:  # skip header
-        is_success = status == "Success"
+    for record in records:
+        name = record["name"]
+        dm = record["dm"]
+        solver = record["solver"]
+        status = record["status"]
+        duration = record["duration"]
+        metadata = {
+            "name": name,
+            "dm": dm,
+            "solver": solver,
+            "default": record["default"],
+            "exploratory": record["exploratory"],
+        }
 
-        if not is_success:
-            failures.append({"name": name, "status": status, "duration": duration_str})
+        if status == "-":
+            runtimes.append(metadata | {"status": "omitted"})
+            continue
 
-        runtime = {"name": name, "unit": "seconds"}
-        if is_success:
-            runtime["value"] = int(duration_str)
+        if status == "Inconclusive":
+            runtimes.append(metadata | {"status": "inconclusive", "duration": duration})
+            continue
+
+        if status != "Success":
+            failures.append(metadata | {"status": status, "duration": duration})
+
+        runtime = metadata | {"unit": "seconds"}
+        if status == "Success":
+            runtime["value"] = record["duration_seconds"]
         else:
             runtime["status"] = "failed"
         runtimes.append(runtime)
@@ -152,14 +294,18 @@ def export_result_json(output_path, run_file):
     total = len(runtimes)
     failed = sum(1 for f in failures if f["status"] != "Timeout")
     timeout = sum(1 for f in failures if f["status"] == "Timeout")
+    omitted = sum(1 for r in runtimes if r.get("status") == "omitted")
+    inconclusive = sum(1 for r in runtimes if r.get("status") == "inconclusive")
 
     result = {
         "mlkem_k": os.getenv("MLKEM_K", "unknown"),
         "summary": {
             "total": total,
-            "success": total - failed - timeout,
+            "success": total - failed - timeout - omitted - inconclusive,
             "failed": failed,
             "timeout": timeout,
+            "omitted": omitted,
+            "inconclusive": inconclusive,
         },
         "failures": failures,
         "runtimes": runtimes,
@@ -169,15 +315,25 @@ def export_result_json(output_path, run_file):
         json.dump(result, f, indent=2)
 
 
-def print_proof_results(out_file):
+def print_proof_results(
+    out_file,
+    omitted_configs=None,
+    default_configs=None,
+    exploratory_configs=None,
+):
     """
     Print 2 strings that summarize the proof results.
     When printing, each string will render as a GitHub flavored Markdown table.
     """
-    output = "## Summary of CBMC proof results\n\n"
+    output = (
+        "## Summary of CBMC proof results\n\n"
+        "`*` default; `(explore)` undeclared configuration.\n\n"
+    )
     with open(out_file, encoding="utf-8") as run_json:
         run_dict = json.load(run_json)
-    status_table, proof_table = _get_status_and_proof_summaries(run_dict)
+    status_table, proof_table = _get_status_and_proof_summaries(
+        run_dict, omitted_configs, default_configs, exploratory_configs
+    )
     for summary in (status_table, proof_table):
         output += _get_rendered_table(summary)
 
@@ -197,14 +353,28 @@ def print_proof_results(out_file):
         "summarizing all proof results"
     )
 
-    # Check for timeouts by examining status table
-    has_timeout = any(row[0] == "Timeout" for row in status_table[1:])
-    has_failure = run_dict["status"] != "success"
+    # Inconclusive proofs did not refute a property, but they also did not
+    # prove it and therefore fail the run.
+    proof_statuses = [row[3] for row in proof_table[1:] if any(row)]
+    has_timeout = any(s == "Timeout" for s in proof_statuses)
+    has_real_failure = any(s == "Fail" for s in proof_statuses)
+    has_inconclusive = any(s == "Inconclusive" for s in proof_statuses)
+    has_tool_version_failure = any(
+        pipeline["name"] == "print_tool_versions" and pipeline["status"] == "fail"
+        for pipeline in run_dict["pipelines"]
+    )
 
-    if has_timeout or has_failure:
-        logging.error("Not all proofs passed.")
+    if has_timeout or has_real_failure or has_inconclusive or has_tool_version_failure:
+        logging.error("Not all CBMC jobs passed.")
         if has_timeout:
             logging.error("Some proofs timed out.")
+        if has_inconclusive:
+            logging.error(
+                "Some (proof, DM, solver-profile) configurations were inconclusive "
+                "(solver returned 'unknown')."
+            )
+        if has_tool_version_failure:
+            logging.error("Printing tool versions failed.")
         logging.error(msg)
         sys.exit(1)
     logging.info(msg)

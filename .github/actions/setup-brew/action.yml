@@ -22,7 +22,10 @@ runs:
         brew update
     - name: Install packages
       shell: bash
+      env:
+        PACKAGES: ${{ inputs.packages }}
       run: |
-        for pkg in make ${{ inputs.packages }}; do
+        # PACKAGES is a list, so it is deliberately left unquoted.
+        for pkg in make $PACKAGES; do
           brew list "$pkg" &>/dev/null || brew install "$pkg"
         done

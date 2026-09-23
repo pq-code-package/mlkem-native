@@ -18,11 +18,11 @@ on:
       ec2_ami:
         type: string
         description: Textual description of AMI
-        default: ubuntu-latest (aarch64)
+        default: ubuntu (aarch64)
       ec2_ami_id:
         type: string
         description: AMI ID
-        default: ami-096ea6a12ea24a797
+        default: ami-0b5db2dd959c9acb0 # Ubuntu 26.04 LTS (arm64), us-east-1, release 20260819
       ec2_volume_size:
         type: string
         default: ""
@@ -34,10 +34,10 @@ on:
         description: Determine for the log verbosity
         type: boolean
         default: false
-      compile_mode:
+      platform:
         type: string
-        description: either all, native, cross or none
-        default: all
+        description: Test platform profile
+        default: native
       opt:
         type: string
         description: either all, opt or no_opt
@@ -70,11 +70,15 @@ on:
       cbmc_mlkem_k:
         type: string
         default: 2
+    secrets:
+      AWS_GITHUB_TOKEN:
+        description: Token for registering EC2 runners and reading the nix cache
+        required: false
 env:
   AWS_ROLE: arn:aws:iam::559050233797:role/mlkem-c-aarch64-gh-action
   AWS_REGION: us-east-1
-  AMI_UBUNTU_LATEST_X86_64: ami-0e86e20dae9224db8
-  AMI_UBUNTU_LATEST_AARCH64: ami-096ea6a12ea24a797
+  AMI_UBUNTU_X86_64: ami-03ceeebf93c41fdae # Ubuntu 26.04 LTS (amd64), us-east-1, release 20260819
+  AMI_UBUNTU_AARCH64: ami-0b5db2dd959c9acb0 # Ubuntu 26.04 LTS (arm64), us-east-1, release 20260819
 jobs:
   start-ec2-runner:
     name: Start instance (${{ inputs.ec2_instance_type }})
@@ -90,15 +94,20 @@ jobs:
       ec2-instance-id: ${{ steps.remember-runner.outputs.ec2-instance-id }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Determine AMI ID
         id: det_ami_id
+        env:
+          EC2_AMI: ${{ inputs.ec2_ami }}
+          EC2_AMI_ID: ${{ inputs.ec2_ami_id }}
         run: |
-          if [[ "${{ inputs.ec2_ami }}" == "ubuntu-latest (x86_64)" ]]; then
-            AMI_ID=${{ env.AMI_UBUNTU_LATEST_X86_64 }}
-          elif [[ "${{ inputs.ec2_ami }}" == "ubuntu-latest (aarch64)" ]]; then
-            AMI_ID=${{ env.AMI_UBUNTU_LATEST_AARCH64 }}
-          elif [[ "${{ inputs.ec2_ami }}" == "ubuntu-latest (custom AMI)" ]]; then
-            AMI_ID=${{ inputs.ec2_ami_id }}
+          if [[ "$EC2_AMI" == "ubuntu (x86_64)" ]]; then
+            AMI_ID=$AMI_UBUNTU_X86_64
+          elif [[ "$EC2_AMI" == "ubuntu (aarch64)" ]]; then
+            AMI_ID=$AMI_UBUNTU_AARCH64
+          elif [[ "$EC2_AMI" == "custom AMI" ]]; then
+            AMI_ID=$EC2_AMI_ID
           fi
           echo "Using AMI ID: $AMI_ID"
           echo "AMI_ID=$AMI_ID" >> "$GITHUB_OUTPUT"
@@ -148,13 +157,19 @@ jobs:
       - name: Remember runner
         id: remember-runner
         shell: bash
+        env:
+          FIRST_OUTCOME: ${{ steps.start-ec2-runner-first.outcome }}
+          RUNNER_FIRST_ID: ${{ steps.start-ec2-runner-first.outputs.ec2-instance-id }}
+          RUNNER_FIRST_LABEL: ${{ steps.start-ec2-runner-first.outputs.label }}
+          RUNNER_SECOND_ID: ${{ steps.start-ec2-runner-second.outputs.ec2-instance-id }}
+          RUNNER_SECOND_LABEL: ${{ steps.start-ec2-runner-second.outputs.label }}
         run: |
-          if [[ "${{ steps.start-ec2-runner-first.outcome }}" == "failure" ]]; then
-            echo "label=${{ steps.start-ec2-runner-second.outputs.label }}" >> "$GITHUB_OUTPUT"
-            echo "ec2-instance-id=${{ steps.start-ec2-runner-second.outputs.ec2-instance-id }}" >> "$GITHUB_OUTPUT"
+          if [[ "$FIRST_OUTCOME" == "failure" ]]; then
+            echo "label=$RUNNER_SECOND_LABEL" >> "$GITHUB_OUTPUT"
+            echo "ec2-instance-id=$RUNNER_SECOND_ID" >> "$GITHUB_OUTPUT"
           else
-            echo "label=${{ steps.start-ec2-runner-first.outputs.label }}" >> "$GITHUB_OUTPUT"
-            echo "ec2-instance-id=${{ steps.start-ec2-runner-first.outputs.ec2-instance-id }}" >> "$GITHUB_OUTPUT"
+            echo "label=$RUNNER_FIRST_LABEL" >> "$GITHUB_OUTPUT"
+            echo "ec2-instance-id=$RUNNER_FIRST_ID" >> "$GITHUB_OUTPUT"
           fi
 
   tests:
@@ -163,6 +178,8 @@ jobs:
     runs-on: ${{ needs.start-ec2-runner.outputs.label }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Linting
         if: ${{ inputs.lint }}
         uses: ./.github/actions/lint
@@ -171,14 +188,14 @@ jobs:
           nix-verbose: ${{ inputs.verbose }}
       - name: Functional Tests
         if: ${{ inputs.test }}
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
-          nix-shell: ${{ (inputs.compile_mode == 'cross' || inputs.compile_mode == 'all') && 'cross' || 'ci' }}
-          nix-cache: ${{ inputs.cbmc || inputs.compile_mode == 'cross' || inputs.compile_mode == 'all' }}
+          nix-shell: ${{ inputs.platform == 'native' && 'ci' || 'cross' }}
+          nix-cache: ${{ inputs.cbmc || inputs.platform != 'native' }}
           nix-verbose: ${{ inputs.verbose }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
           cflags: ${{ inputs.cflags }}
-          compile_mode: ${{ inputs.compile_mode }}
+          platform: ${{ inputs.platform }}
           opt: ${{ inputs.opt }}
           func: ${{ inputs.functest }}
           kat: ${{ inputs.kattest }}

@@ -25,7 +25,7 @@ WARN = "⚠️"
 FAIL = "❌"
 
 ProofResult = namedtuple(
-    "ProofResult", ["name", "status", "current", "previous", "change"]
+    "ProofResult", ["name", "dm", "solver", "status", "current", "previous", "change"]
 )
 
 
@@ -70,66 +70,154 @@ def fetch_baseline(cfg):
 def render_table(rows):
     """Render a markdown table from ProofResult rows."""
     lines = [
-        "| Proof | Status | Current | Previous | Change |",
-        "|-------|--------|---------|----------|--------|",
+        "| Proof | DM | Solver | Status | Current | Previous | Change |",
+        "|-------|----|--------|--------|---------|----------|--------|",
     ]
-    lines.extend(
-        f"| `{r.name}` | {r.status} | {r.current} | {r.previous} | {r.change} |"
-        for r in rows
-    )
+    previous_name = None
+    for row in rows:
+        name = f"`{row.name}`" if row.name != previous_name else ""
+        previous_name = row.name
+        lines.append(
+            f"| {name} | {row.dm} | {row.solver} | {row.status} | "
+            f"{row.current} | {row.previous} | {row.change} |"
+        )
     return lines
 
 
-def classify_proof(r, baseline_runtimes, cfg):
+def config_key(r):
+    """Return the proof configuration identity used for baseline matching."""
+    return r["name"], r["dm"], r["solver"]
+
+
+def index_baseline(baseline):
+    """Index configured baselines exactly and old baselines by proof name."""
+    by_config = {}
+    by_name = {}
+    for result in (baseline or {}).get("runtimes", []):
+        has_dm = "dm" in result
+        has_solver = "solver" in result
+        if has_dm != has_solver:
+            raise ValueError(f"Incomplete baseline configuration for {result['name']}")
+        if has_dm:
+            by_config[config_key(result)] = result
+            continue
+        if result["name"] in by_name:
+            raise ValueError(
+                f"Multiple baselines without configurations for {result['name']}"
+            )
+        by_name[result["name"]] = result
+    return by_config, by_name
+
+
+def classify_proof(r, baseline_by_config, baseline_by_name, cfg):
     """Classify a single proof result, returning (ProofResult, is_alert)."""
-    name = r["name"]
-    base = baseline_runtimes.get(name, {})
+    name, dm, solver = config_key(r)
+    base = baseline_by_config.get((name, dm, solver), baseline_by_name.get(name, {}))
     base_val, base_failed = base.get("value"), base.get("status") == "failed"
+    base_omitted = base.get("status") == "omitted"
+    base_inconclusive = base.get("status") == "inconclusive"
+    solver_display = solver
+    if r.get("default", False):
+        solver_display += "*"
+    if r.get("exploratory", False):
+        solver_display += " (explore)"
+
+    # The solver did not refute a property, but it also did not prove it.
+    if r.get("status") == "inconclusive":
+        prev = (
+            f"{base_val}s"
+            if base_val
+            else "failed"
+            if base_failed
+            else "inconclusive"
+            if base_inconclusive
+            else "omitted"
+            if base_omitted
+            else "-"
+        )
+        return (
+            ProofResult(name, dm, solver_display, WARN, "?", prev, "inconclusive"),
+            True,
+        )
 
     if r.get("status") == "failed":
         prev = "failed" if base_failed else (f"{base_val}s" if base_val else "-")
-        return ProofResult(name, FAIL, "-", prev, "-"), True
+        if base_omitted:
+            prev = "omitted"
+        return ProofResult(name, dm, solver_display, FAIL, "-", prev, "-"), True
 
     cur_val = r["value"]
     if base_failed:
-        return ProofResult(name, OK, f"{cur_val}s", "failed", "fixed"), False
+        return (
+            ProofResult(name, dm, solver_display, OK, f"{cur_val}s", "failed", "fixed"),
+            False,
+        )
+    if base_omitted:
+        return (
+            ProofResult(name, dm, solver_display, OK, f"{cur_val}s", "omitted", "new"),
+            False,
+        )
     if base_val is None:
-        return ProofResult(name, OK, f"{cur_val}s", "-", "new"), False
+        return (
+            ProofResult(name, dm, solver_display, OK, f"{cur_val}s", "-", "new"),
+            False,
+        )
 
     ratio = cur_val / base_val if base_val > 0 else 1
     change = f"{(ratio - 1) * 100:+.0f}%" if base_val > 0 else "-"
     is_regression = cur_val >= cfg.min_runtime and ratio >= cfg.regression_threshold
     status = WARN if is_regression else OK
     return (
-        ProofResult(name, status, f"{cur_val}s", f"{base_val}s", change),
+        ProofResult(
+            name,
+            dm,
+            solver_display,
+            status,
+            f"{cur_val}s",
+            f"{base_val}s",
+            change,
+        ),
         is_regression,
     )
 
 
+def is_default_result(result):
+    """Recognize explicit defaults and unique legacy results."""
+    if "default" in result:
+        return result["default"]
+    return "dm" not in result and "solver" not in result
+
+
 def compute_total_runtime(data):
-    """Compute total runtime from proof results."""
+    """Compute total runtime from successful default configurations."""
     if not data:
         return None
     return sum(
-        r["value"] for r in data.get("runtimes", []) if r.get("status") != "failed"
+        r["value"]
+        for r in data.get("runtimes", [])
+        if r.get("status") not in ("failed", "omitted", "inconclusive")
+        and "value" in r
+        and is_default_result(r)
     )
 
 
 def build_comment(current, baseline, cfg):
     """Build the PR comment markdown."""
-    baseline_runtimes = {r["name"]: r for r in (baseline or {}).get("runtimes", [])}
+    baseline_by_config, baseline_by_name = index_baseline(baseline)
+    executed = [r for r in current.get("runtimes", []) if r.get("status") != "omitted"]
     alerts, all_rows = [], []
 
-    for r in current.get("runtimes", []):
-        result, is_alert = classify_proof(r, baseline_runtimes, cfg)
+    for r in executed:
+        result, is_alert = classify_proof(r, baseline_by_config, baseline_by_name, cfg)
         all_rows.append(result)
         if is_alert:
             alerts.append(result)
 
     def sort_key(r):
-        return -1 if r.current == "-" else -int(r.current.rstrip("s"))
+        return (r.name, r.dm, r.solver)
 
     all_rows.sort(key=sort_key)
+    alerts.sort(key=sort_key)
 
     # Compute total runtimes and add as first row
     cur_total = compute_total_runtime(current)
@@ -143,6 +231,8 @@ def build_comment(current, baseline, cfg):
         total_status = OK
     total_row = ProofResult(
         "**TOTAL**",
+        "-",
+        "-",
         total_status,
         f"{cur_total}s",
         f"{base_total}s" if base_total else "-",
@@ -156,16 +246,19 @@ def build_comment(current, baseline, cfg):
         f"<!-- {COMMENT_TAG}(start): mlkem-{cfg.param_set} -->",
         f"## CBMC Results (ML-KEM-{cfg.param_set})",
         "",
+        "`*` default.",
+        "",
     ]
 
     if alerts:
         lines += [f"{WARN} **Attention Required**", ""] + render_table(alerts) + [""]
 
-    total = current.get("summary", {}).get("total", len(all_rows))
+    total = len(executed)
+    configuration_label = "configuration" if total == 1 else "configurations"
     lines += (
         [
             "<details>",
-            f"<summary>Full Results ({total} proofs)</summary>",
+            f"<summary>Full Results ({total} {configuration_label})</summary>",
             "",
         ]
         + render_table(all_rows)

@@ -13,10 +13,5 @@ void harness(void)
   mlk_polyvec *a, *b;
   uint8_t *seed;
 
-  {
-    /* Dummy use of `free` to work around CBMC issue #8814. */
-    free(NULL);
-  }
-
   mlk_keypair_getnoise_eta1(a, b, seed);
 }

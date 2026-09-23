@@ -13,7 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
     - name: Check markdown links
-      run: |
+      # markdown-link-check is pinned to an exact version below.
+      run: | # zizmor: ignore[adhoc-packages]
         npm install -g markdown-link-check@3.14.2
         find . -name '*.md' -print0 | xargs -0 -P16 -n1 markdown-link-check -q -c .github/mlc_config.json

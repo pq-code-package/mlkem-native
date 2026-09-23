@@ -19,13 +19,17 @@ runs:
   steps:
     - name: Fetch pavona repository
       shell: bash
-      run: |
+      env:
+        SRC_COMMIT: ${{ inputs.pavona-commit }}
+        SRC_REPOSITORY: ${{ inputs.pavona-repository }}
+      # HOME and PAVONA_DIR are runner-provided or literal.
+      run: | # zizmor: ignore[github-env]
         # Ensure HOME is set for self-hosted runners
         echo "HOME=${HOME:-/home/runner}" >> $GITHUB_ENV
 
-        git clone ${{ inputs.pavona-repository }}
+        git clone "$SRC_REPOSITORY"
         cd pavona
-        git checkout ${{ inputs.pavona-commit }}
+        git checkout "$SRC_COMMIT"
 
         # Remember pavona directory
         echo PAVONA_DIR="$GITHUB_WORKSPACE/pavona" >> $GITHUB_ENV
@@ -33,6 +37,8 @@ runs:
     - name: Install Pavona dependencies
       shell: bash
       run: |
+        sudo sed -i 's|//[a-z0-9-]*\.ec2\.archive\.ubuntu\.com/|//archive.ubuntu.com/|g' \
+          /etc/apt/sources.list.d/ubuntu.sources
         sudo apt update
         cd pavona
         sed '/^#/d' apt-requirements.txt | xargs sudo apt install -y

@@ -24,9 +24,9 @@ USE_FUNCTION_CONTRACTS=mlk_fqmul
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
-# Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
-EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--bitwuzla
+# Supported CBMC configurations
+CBMC_SUPPORTED_CONFIGS = LP64:z3
+CBMC_DEFAULT_CONFIG = LP64:z3
 
 FUNCTION_NAME = mlk_ntt_butterfly_block
 
@@ -37,7 +37,7 @@ FUNCTION_NAME = mlk_ntt_butterfly_block
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 9
+CBMC_OBJECT_BITS = 13
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

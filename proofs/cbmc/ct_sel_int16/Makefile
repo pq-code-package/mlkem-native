@@ -24,9 +24,9 @@ USE_FUNCTION_CONTRACTS=mlk_ct_cmask_nonzero_u16
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
-# Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
-EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2
+# Supported CBMC configurations
+CBMC_SUPPORTED_CONFIGS = LP64:z3
+CBMC_DEFAULT_CONFIG = LP64:z3
 
 FUNCTION_NAME = mlk_ct_sel_int16
 

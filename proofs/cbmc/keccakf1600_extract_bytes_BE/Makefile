@@ -24,9 +24,10 @@ USE_FUNCTION_CONTRACTS=
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
-# Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
-EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--bitwuzla --big-endian
+# Supported CBMC configurations
+CBMC_SUPPORTED_CONFIGS = LP64:bitwuzla
+CBMC_DEFAULT_CONFIG = LP64:bitwuzla
+CBMC_CONFIG_FLAGS = --big-endian
 DEFINES += -DMLK_SYS_BIG_ENDIAN=1
 
 FUNCTION_NAME = mlk_keccakf1600_extract_bytes

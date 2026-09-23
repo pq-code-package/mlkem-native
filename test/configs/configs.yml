@@ -431,6 +431,29 @@ configs:
           #endif /* _WIN32 */
           #endif /* !__ASSEMBLER__ */
 
+  - path: examples/context_parameter/mlkem_native/mlkem_native_config.h
+    description: "Configuration with a context parameter and custom allocation"
+    defines:
+      MLK_CONFIG_NAMESPACE_PREFIX: mlkem
+      MLK_CONFIG_CONTEXT_PARAMETER:
+        content: |
+          #define MLK_CONFIG_CONTEXT_PARAMETER
+          #if !defined(__ASSEMBLER__)
+          #include "../example_context.h"
+          #endif /* !__ASSEMBLER__ */
+      MLK_CONFIG_CONTEXT_PARAMETER_TYPE: example_context *
+      MLK_CONFIG_CUSTOM_ALLOC_FREE:
+        content: |
+          #define MLK_CONFIG_CUSTOM_ALLOC_FREE
+          #if !defined(__ASSEMBLER__)
+          #define MLK_CUSTOM_ALLOC(v, T, N, context) \
+            T *v = example_context_malloc((context), sizeof(T) * (N))
+          #define MLK_CUSTOM_FREE(v, T, N, context) \
+            example_context_free((context), (v), sizeof(T) * (N))
+          #endif /* !__ASSEMBLER__ */
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
   - path: examples/basic_deterministic/mlkem_native/mlkem_native_config.h
     description: "Configuration for deterministic-only build of mlkem-native"
     defines:
@@ -478,14 +501,18 @@ configs:
     description: "Using custom allocation that can be made fail at specific invocation"
     defines:
       MLK_CONFIG_NAMESPACE_PREFIX: mlk
-      MLK_CONFIG_CONTEXT_PARAMETER: true
+      MLK_CONFIG_CONTEXT_PARAMETER:
+        content: |
+          #define MLK_CONFIG_CONTEXT_PARAMETER
+          #if !defined(__ASSEMBLER__)
+          struct test_ctx_t; /* Forward declaration */
+          #endif /* !__ASSEMBLER__ */
       MLK_CONFIG_CONTEXT_PARAMETER_TYPE: struct test_ctx_t *
       MLK_CONFIG_CUSTOM_ALLOC_FREE:
         content: |
           #define MLK_CONFIG_CUSTOM_ALLOC_FREE
           #if !defined(__ASSEMBLER__)
           #include <stdlib.h>
-          struct test_ctx_t; /* Forward declaration */
           void * custom_alloc(struct test_ctx_t *ctx, size_t sz, const char *file, int line, const char *var, const char *type);
           void custom_free(struct test_ctx_t *ctx, void *p, size_t sz, const char *file, int line, const char *var, const char *type);
           #define MLK_CUSTOM_ALLOC(v, T, N, ctx) T *v = custom_alloc(ctx, sizeof(T)*(N), __FILE__, __LINE__, #v, #T)

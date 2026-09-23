@@ -18,6 +18,8 @@ jobs:
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/lint
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -35,8 +37,13 @@ jobs:
            name: 'x86_64'
          - runner: macos-latest
            name: 'macos (aarch64)'
+           os: mac
+         - runner: xcode-27
+           name: 'macos (aarch64, Xcode 27)'
+           os: mac
          - runner: macos-15-intel
            name: 'macos (x86_64)'
+           os: mac
         exclude:
           - {external: true,
              target: {
@@ -45,8 +52,12 @@ jobs:
              }}
     name: Quickcheck (${{ matrix.target.name }})
     runs-on: ${{ matrix.target.runner }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: make quickcheck
         run: |
           OPT=0 make quickcheck
@@ -78,7 +89,11 @@ jobs:
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Run ACVP test
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./scripts/tests acvp --version ${{ matrix.acvp-version }}
   quickcheck_bench:
@@ -94,8 +109,13 @@ jobs:
            name: 'x86_64'
          - runner: macos-latest
            name: 'macos (aarch64)'
+           os: mac
+         - runner: xcode-27
+           name: 'macos (aarch64, Xcode 27)'
+           os: mac
          - runner: macos-15-intel
            name: 'macos (x86_64)'
+           os: mac
         exclude:
           - {external: true,
              target: {
@@ -106,21 +126,23 @@ jobs:
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: "tests bench (cycles: NO)"
         run: |
           ./scripts/tests bench -c NO
       - name: "tests bench (build only, cycles: PMU)"
-        if: ${{ matrix.target.name != 'macos (aarch64)' && matrix.target.name != 'macos (x86_64)' }}
+        if: ${{ matrix.target.os != 'mac' }}
         run: |
           make clean
           ./scripts/tests bench -c PMU --no-run
       - name: "tests bench (build only, cycles: PERF)"
-        if: ${{ matrix.target.name != 'macos (aarch64)' && matrix.target.name != 'macos (x86_64)' }}
+        if: ${{ matrix.target.os != 'mac' }}
         run: |
           make clean
           ./scripts/tests bench -c PERF --no-run
       - name: "tests bench (build only, cycles: MAC)"
-        if: ${{ matrix.target.name == 'macos (aarch64)' || matrix.target.name == 'macos (x86_64)' }}
+        if: ${{ matrix.target.os == 'mac' }}
         run: |
           make clean
           ./scripts/tests bench -c MAC --no-run
@@ -147,8 +169,12 @@ jobs:
              }}
     name: Quickcheck C90 (${{ matrix.target.name }})
     runs-on: ${{ matrix.target.runner }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: make quickcheck
         run: |
           OPT=0 CFLAGS=-std=c90 make quickcheck
@@ -171,8 +197,12 @@ jobs:
         system: [windows-2025, windows-2022]
     name: Quickcheck ${{ matrix.system }}
     runs-on: ${{ matrix.system }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
       - name: Build test
         shell: powershell
@@ -188,11 +218,16 @@ jobs:
         mingw-version: [5.4.0, 13.2.0, 14.2.0, 15.2.0]
     name: Quickcheck (Mingw-w64 ${{ matrix.mingw-version }})
     runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Install MinGW-w64
         run: choco install mingw --version=${{ matrix.mingw-version }} -y
-        shell: cmd
+        # choco needs cmd here.
+        shell: cmd # zizmor: ignore[misfeature]
       - name: make quickcheck
         shell: bash
         run: |
@@ -208,10 +243,12 @@ jobs:
     name: Quickcheck lib
     strategy:
       matrix:
-        system: [macos-latest, macos-15-intel, ubuntu-latest, ubuntu-24.04-arm]
+        system: [macos-latest, xcode-27, macos-15-intel, ubuntu-latest, ubuntu-24.04-arm]
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: make lib
         run: |
           make lib
@@ -219,13 +256,18 @@ jobs:
     name: Examples
     strategy:
       matrix:
-        system: [macos-latest, macos-15-intel, ubuntu-latest, ubuntu-24.04-arm]
+        system: [macos-latest, xcode-27, macos-15-intel, ubuntu-latest, ubuntu-24.04-arm]
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: basic
         run: |
           CFLAGS="-O0" make run -C examples/basic
+      - name: context_parameter
+        run: |
+          CFLAGS="-O0" make run -C examples/context_parameter
       - name: basic_deterministic
         run: |
           CFLAGS="-O0" make run -C examples/basic_deterministic
@@ -274,6 +316,8 @@ jobs:
     name: AArch64 dev backend (${{ matrix.backend.name }}, ${{ matrix.simplify.name }})
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Reinstate and test backend
         uses: ./.github/actions/setup-shell
         with:
@@ -288,6 +332,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Generate with Intel syntax and test
         uses: ./.github/actions/setup-shell
         with:
@@ -310,8 +356,12 @@ jobs:
            name: 'x86_64'
     name: scan-build (${{ matrix.target.name }})
     runs-on: ${{ matrix.target.runner }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-apt
         with:
           packages: clang-tools clang
@@ -324,4 +374,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
     - uses: donatj/symlink-check-action@b3c737d0fd4e52752f0b8c71a03f3f775fa015cb

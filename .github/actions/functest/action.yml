@@ -26,11 +26,14 @@ inputs:
   ldflags:
     description: LDFLAGS to pass to linking
     default: ""
+  platform:
+    description: Test platform profile
+    default: "native"
   cross_prefix:
-    description: Binary prefix for cross compilation
+    description: Binary prefix override; takes precedence over the platform profile
     default: ""
   exec_wrapper:
-    description: Binary wrapper for execution (e.g. QEMU)
+    description: Binary execution wrapper override; takes precedence over the platform profile
     default: ""
   opt:
     description: Whether to build opt/non-opt binaries or all (all | opt | no_opt)
@@ -77,8 +80,6 @@ runs:
       - name: Preprocess
         shell: bash
         run: |
-          arch=$(uname -m)
-          echo MODE="${{ inputs.cross_prefix == '' && 'native' || 'cross' }}" >> $GITHUB_ENV
           echo FUNC="${{ inputs.func == 'true' && 'func' || 'no-func' }}" >> $GITHUB_ENV
           echo KAT="${{ inputs.kat == 'true' && 'kat' || 'no-kat' }}" >> $GITHUB_ENV
           echo UNIT="${{ inputs.unit == 'true' && 'unit' || 'no-unit' }}" >> $GITHUB_ENV
@@ -98,6 +99,8 @@ runs:
           custom_shell: ${{ inputs.custom_shell }}
       - name: System info
         shell: ${{ env.SHELL }}
+        env:
+          PLATFORM: ${{ inputs.platform }}
         run: |
           ARCH=$(uname -m)
           echo <<-EOF
@@ -107,7 +110,7 @@ runs:
             - $(nix --version || echo 'nix not present')
             - $(bash --version | grep -m1 "")
             - $(python3 --version)
-            - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
+            - Platform: $PLATFORM
           EOF
           cat >> $GITHUB_STEP_SUMMARY <<-EOF
             ## Setup
@@ -116,14 +119,27 @@ runs:
             - $(nix --version || echo 'nix not present')
             - $(bash --version | grep -m1 "")
             - $(python3 --version)
-            - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
+            - Platform: $PLATFORM
           EOF
-      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.EXAMPLES }}, ${{ env.STACK }}, ${{ env.UNIT }}, ${{ env.ALLOC }}, ${{ env.RNGFAIL }})
+      - name: ${{ inputs.platform }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.EXAMPLES }}, ${{ env.STACK }}, ${{ env.UNIT }}, ${{ env.ALLOC }}, ${{ env.RNGFAIL }})
         shell: ${{ env.SHELL }}
+        env:
+          CFLAGS_EXTRA: ${{ inputs.cflags }}
+          CROSS_PREFIX: ${{ inputs.cross_prefix }}
+          EXEC_WRAPPER: ${{ inputs.exec_wrapper }}
+          EXTRA_ARGS: ${{ inputs.extra_args }}
+          EXTRA_ENV: ${{ inputs.extra_env }}
+          GH_TOKEN: ${{ inputs.gh_token }}
+          LDFLAGS_EXTRA: ${{ inputs.ldflags }}
+          OPT_MODE: ${{ inputs.opt }}
+          PLATFORM: ${{ inputs.platform }}
         run: |
           make clean
-          ${{ inputs.extra_env }} ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --ldflags="${{ inputs.ldflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.WYCHEPROOF }} --${{ env.EXAMPLES }} --${{ env.STACK }} --${{ env.UNIT }} --${{ env.ALLOC }} --${{ env.RNGFAIL }} -v ${{ inputs.extra_args }}
-      - name: Post ${{ env.MODE }} Tests
+          # EXTRA_ENV is a list of assignments and EXTRA_ARGS a list of
+          # arguments, so both are deliberately left unquoted. EXTRA_ENV goes
+          # through env(1) because an expansion is not an assignment prefix.
+          env $EXTRA_ENV ./scripts/tests all --platform="$PLATFORM" ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --cross-prefix="$CROSS_PREFIX" --exec-wrapper="$EXEC_WRAPPER" --cflags="$CFLAGS_EXTRA" --ldflags="$LDFLAGS_EXTRA" --opt="$OPT_MODE" --"$FUNC" --"$KAT" --"$ACVP" --"$WYCHEPROOF" --"$EXAMPLES" --"$STACK" --"$UNIT" --"$ALLOC" --"$RNGFAIL" -v $EXTRA_ARGS
+      - name: Post ${{ inputs.platform }} Tests
         shell: ${{ env.SHELL }}
         if: success() || failure()
         run: |

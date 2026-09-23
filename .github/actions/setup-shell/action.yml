@@ -43,9 +43,14 @@ runs:
     - name: Set custom shell
       shell: bash
       if: ${{ inputs.nix-shell == '' }}
-      run: |
-          echo SHELL="${{ inputs.custom_shell }}" >> $GITHUB_ENV
+      env:
+        CUSTOM_SHELL: ${{ inputs.custom_shell }}
+        GH_TOKEN: ${{ inputs.gh_token }}
+        SCRIPT: ${{ inputs.script }}
+      # SHELL is a caller-supplied shell command.
+      run: | # zizmor: ignore[github-env]
+          echo SHELL="$CUSTOM_SHELL" >> $GITHUB_ENV
 
-          if [[ "${{ inputs.script }}" != '' ]]; then
-            eval ${{ inputs.script }}
+          if [[ -n "$SCRIPT" ]]; then
+            eval "$SCRIPT"
           fi

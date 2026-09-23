@@ -34,6 +34,8 @@ jobs:
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-os
         with:
           packages: ${{ env.DEPENDENCIES }}
@@ -94,6 +96,8 @@ jobs:
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-os
         with:
           packages: ${{ env.DEPENDENCIES }}
@@ -129,7 +133,7 @@ jobs:
       max-parallel: 8
       fail-fast: false
       matrix:
-        system: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, macos-15-intel]
+        system: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, xcode-27, macos-15-intel]
         test:
           - name: Prefix+Debug
             flags:
@@ -139,6 +143,8 @@ jobs:
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-os
         with:
           packages: ${{ env.DEPENDENCIES }}

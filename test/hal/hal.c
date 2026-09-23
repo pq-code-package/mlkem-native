@@ -250,10 +250,23 @@ uint64_t get_cyclecounter(void)
   F(int, kperf_sample_get, int *)              \
   F(int, kpc_get_thread_counters, int, unsigned, void *)
 
+typedef struct kpep_db kpep_db;
+typedef struct kpep_config kpep_config;
+typedef struct kpep_event kpep_event;
+
+#define KPERFDATA_LIST                                                  \
+  F(int, kpep_db_create, const char *, kpep_db **)                      \
+  F(int, kpep_db_event, kpep_db *, const char *, kpep_event **)         \
+  F(int, kpep_config_create, kpep_db *, kpep_config **)                 \
+  F(int, kpep_config_add_event, kpep_config *, kpep_event **, uint32_t, \
+    uint32_t *)                                                         \
+  F(int, kpep_config_kpc, kpep_config *, uint64_t *, size_t)
+
 #define F(ret, name, ...)              \
   typedef ret name##proc(__VA_ARGS__); \
   static name##proc *name;
 KPERF_LIST
+KPERFDATA_LIST
 #undef F
 
 #define CFGWORD_EL0A32EN_MASK (0x10000)
@@ -298,6 +311,13 @@ static void configure_rdtsc(void)
     return;
   }
 
+  /* Recent kernels only apply the config when counting is started */
+  if (kpc_set_config(KPC_MASK, g_config))
+  {
+    printf("kpc_set_config failed\n");
+    return;
+  }
+
   if (kpc_set_counting(KPC_MASK))
   {
     printf("kpc_set_counting failed\n");
@@ -309,22 +329,23 @@ static void configure_rdtsc(void)
     printf("kpc_set_thread_counting failed\n");
     return;
   }
-
-  if (kpc_set_config(KPC_MASK, g_config))
-  {
-    printf("kpc_set_config failed\n");
-    return;
-  }
 }
 
 static void init_rdtsc(void)
 {
+  kpep_db *db = NULL;
+  kpep_config *cfg = NULL;
+  kpep_event *ev = NULL;
   void *kperf = dlopen(
       "/System/Library/PrivateFrameworks/kperf.framework/Versions/A/kperf",
       RTLD_LAZY);
-  if (!kperf)
+  void *kperfdata = dlopen(
+      "/System/Library/PrivateFrameworks/kperfdata.framework/Versions/A/"
+      "kperfdata",
+      RTLD_LAZY);
+  if (!kperf || !kperfdata)
   {
-    printf("kperf = %p\n", kperf);
+    printf("kperf = %p, kperfdata = %p\n", kperf, kperfdata);
     return;
   }
 
@@ -334,19 +355,30 @@ static void init_rdtsc(void)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 
-#define F(ret, name, ...)                     \
-  name = (name##proc *)(dlsym(kperf, #name)); \
-  if (!name)                                  \
-  {                                           \
-    printf("%s = %p\n", #name, (void *)name); \
-    return;                                   \
+#define F(ret, name, ...)                            \
+  name = (name##proc *)(dlsym(RTLD_DEFAULT, #name)); \
+  if (!name)                                         \
+  {                                                  \
+    printf("%s = %p\n", #name, (void *)name);        \
+    return;                                          \
   }
   KPERF_LIST
+  KPERFDATA_LIST
 #undef F
 
 #pragma GCC diagnostic pop
 
-  g_config[0] = CPMU_CORE_CYCLE | CFGWORD_EL0A64EN_MASK;
+  /* The event selector differs between Apple Silicon generations */
+  if (kpep_db_create(NULL, &db) ||
+      kpep_db_event(db, "CORE_ACTIVE_CYCLE", &ev) ||
+      kpep_config_create(db, &cfg) ||
+      kpep_config_add_event(cfg, &ev, 0, NULL) ||
+      kpep_config_kpc(cfg, g_config, sizeof(g_config)) || g_config[0] == 0)
+  {
+    printf("kperfdata lookup of CORE_ACTIVE_CYCLE failed\n");
+    return;
+  }
+  g_config[0] |= CFGWORD_EL0A64EN_MASK;
 }
 
 void enable_cyclecounter(void)

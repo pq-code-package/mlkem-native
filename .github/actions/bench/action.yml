@@ -45,6 +45,9 @@ inputs:
   custom_shell:
     description: The shell to use. Only relevant if no nix-shell specified
     default: "bash"
+  platform:
+    description: Test platform profile
+    default: ""
   cross_prefix:
     description: "Binary prefix for cross-compilation builds"
     default: ""
@@ -76,18 +79,46 @@ runs:
           EOF
     - name: Run benchmark
       shell: ${{ env.SHELL }}
+      env:
+        BENCH_ARCHFLAGS: ${{ inputs.archflags }}
+        BENCH_CFLAGS: ${{ inputs.cflags }}
+        BENCH_CROSS_PREFIX: ${{ inputs.cross_prefix }}
+        BENCH_EXTRA_ARGS: ${{ inputs.bench_extra_args }}
+        BENCH_LDFLAGS: ${{ inputs.ldflags }}
+        BENCH_OPT: ${{ inputs.opt }}
+        BENCH_PERF: ${{ inputs.perf }}
+        BENCH_PLATFORM: ${{ inputs.platform }}
       run: |
-        ./scripts/tests bench -c ${{ inputs.perf }} --cross-prefix="${{ inputs.cross_prefix }}" \
-              --cflags="${{ inputs.cflags }} ${{ inputs.archflags }}" \
-              --ldflags="${{ inputs.ldflags }}" \
-              --opt=$([[ ${{ inputs.opt }} == "false" ]] && echo "no_opt" || echo "opt")  \
-              -v --output=output.json ${{ inputs.bench_extra_args }}
+        platform_args=()
+        if [[ -n "$BENCH_PLATFORM" ]]; then
+          platform_args+=(--platform="$BENCH_PLATFORM")
+        fi
 
-        ./scripts/tests bench --components -c ${{ inputs.perf }} --cross-prefix="${{ inputs.cross_prefix }}" \
-              --cflags="${{ inputs.cflags }} ${{ inputs.archflags }}" \
-              --ldflags="${{ inputs.ldflags }}" \
-              --opt=$([[ ${{ inputs.opt }} == "false" ]] && echo "no_opt" || echo "opt")  \
-              -v  ${{ inputs.bench_extra_args }}
+        if [[ "$BENCH_OPT" == "false" ]]; then
+          bench_opt=no_opt
+        else
+          bench_opt=opt
+        fi
+
+        # Split on whitespace, as the previous unquoted expansion did.
+        extra_args=()
+        if [[ -n "$BENCH_EXTRA_ARGS" ]]; then
+          read -ra extra_args <<<"$BENCH_EXTRA_ARGS"
+        fi
+
+        bench=(
+          ./scripts/tests bench
+          -c "$BENCH_PERF"
+          "${platform_args[@]}"
+          "--cross-prefix=$BENCH_CROSS_PREFIX"
+          "--cflags=$BENCH_CFLAGS $BENCH_ARCHFLAGS"
+          "--ldflags=$BENCH_LDFLAGS"
+          "--opt=$bench_opt"
+          -v
+        )
+
+        "${bench[@]}" --output=output.json "${extra_args[@]}"
+        "${bench[@]}" --components "${extra_args[@]}"
     - name: Store benchmark result
       uses: benchmark-action/github-action-benchmark@52576c92bccf6ac60c8223ec7eb2565637cae9ba # v1.22.1
       with:

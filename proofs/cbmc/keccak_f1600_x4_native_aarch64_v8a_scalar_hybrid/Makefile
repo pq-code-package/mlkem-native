@@ -24,9 +24,9 @@ USE_FUNCTION_CONTRACTS=mlk_keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm mlk_sys
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
-# Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
-EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--bitwuzla
+# Supported CBMC configurations
+CBMC_SUPPORTED_CONFIGS = LP64:bitwuzla
+CBMC_DEFAULT_CONFIG = LP64:bitwuzla
 
 FUNCTION_NAME = keccak_f1600_x4_native_aarch64_v8a_scalar_hybrid
 

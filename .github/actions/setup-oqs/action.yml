@@ -23,13 +23,18 @@ runs:
   steps:
     - name: Fetch libOQS
       shell: bash
-      run: |
-        mkdir ${{ inputs.dir }} && cd ${{ inputs.dir }}
-        git config --global --add safe.directory $GITHUB_WORKSPACE/${{ inputs.dir }}
+      env:
+        SRC_COMMIT: ${{ inputs.commit }}
+        SRC_DIR: ${{ inputs.dir }}
+        SRC_REPOSITORY: ${{ inputs.repository }}
+      # LIBOQS_DIR is derived from a caller-supplied path.
+      run: | # zizmor: ignore[github-env]
+        mkdir "$SRC_DIR" && cd "$SRC_DIR"
+        git config --global --add safe.directory "$GITHUB_WORKSPACE/$SRC_DIR"
         git init
-        git remote add origin $GITHUB_SERVER_URL/${{ inputs.repository }}
-        git fetch origin --depth 1 ${{ inputs.commit }}
+        git remote add origin "$GITHUB_SERVER_URL/$SRC_REPOSITORY"
+        git fetch origin --depth 1 "$SRC_COMMIT"
         git checkout FETCH_HEAD
 
         # Remember libOQS directory
-        echo LIBOQS_DIR="$GITHUB_WORKSPACE/${{ inputs.dir }}" >> $GITHUB_ENV
+        echo LIBOQS_DIR="$GITHUB_WORKSPACE/$SRC_DIR" >> $GITHUB_ENV

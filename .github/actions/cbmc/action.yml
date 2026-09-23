@@ -27,6 +27,8 @@ runs:
   using: composite
   steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-shell
         with:
           nix-shell: ${{ inputs.nix-shell }}
@@ -51,14 +53,17 @@ runs:
       - name: Run CBMC proofs (MLKEM_K=${{ inputs.mlkem_k }})
         shell: ${{ env.SHELL }}
         env:
+          ACTION_PATH: ${{ github.action_path }}
           GH_TOKEN: ${{ inputs.gh_token }}
+          PARAMETER_SET: ${{ inputs.mlkem_k }}
+          WORKSPACE: ${{ github.workspace }}
         run: |
-          echo "::group::cbmc_${{ inputs.mlkem_k }}"
-          tests cbmc --mlkem-parameter-set ${{ inputs.mlkem_k }} --per-proof-timeout 1800 --output-result-json ${{ github.workspace }}/cbmc_result_k${{ inputs.mlkem_k }}.json || cbmc_failed=true
+          echo "::group::cbmc_$PARAMETER_SET"
+          tests cbmc --mlkem-parameter-set "$PARAMETER_SET" --dm all --solver all --per-proof-timeout 1800 --output-result-json "$WORKSPACE/cbmc_result_k$PARAMETER_SET.json" || cbmc_failed=true
           echo "::endgroup::"
-          python3 ${{ github.action_path }}/report.py \
-            --results-json "${{ github.workspace }}/cbmc_result_k${{ inputs.mlkem_k }}.json" \
-            --mlkem-k "${{ inputs.mlkem_k }}" \
+          python3 "$ACTION_PATH/report.py" \
+            --results-json "$WORKSPACE/cbmc_result_k$PARAMETER_SET.json" \
+            --mlkem-k "$PARAMETER_SET" \
             --min-runtime 20 \
             --regression-threshold 1.5 \
             --gh-pages-branch gh-pages \

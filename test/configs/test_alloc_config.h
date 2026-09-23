@@ -204,6 +204,10 @@
  * MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  */
 #define MLK_CONFIG_CONTEXT_PARAMETER
+#if !defined(__ASSEMBLER__)
+struct test_ctx_t; /* Forward declaration */
+#endif
+
 
 /**
  * MLK_CONFIG_CONTEXT_PARAMETER_TYPE
@@ -526,7 +530,6 @@
 #define MLK_CONFIG_CUSTOM_ALLOC_FREE
 #if !defined(__ASSEMBLER__)
 #include <stdlib.h>
-struct test_ctx_t; /* Forward declaration */
 void *custom_alloc(struct test_ctx_t *ctx, size_t sz, const char *file,
                    int line, const char *var, const char *type);
 void custom_free(struct test_ctx_t *ctx, void *p, size_t sz, const char *file,
