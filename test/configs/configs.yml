@@ -16,7 +16,7 @@ configs:
           #include <stdint.h>
           #include <string.h>
           #include "../mlkem/src/sys.h"
-          static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+          MLK_STATIC MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
           {
             explicit_bzero(ptr, len);
           }
@@ -37,7 +37,7 @@ configs:
           #include <stdint.h>
           #include "../mlkem/src/sys.h"
           #include "notrandombytes/notrandombytes.h"
-          static MLK_INLINE int mlk_randombytes(uint8_t *ptr, size_t len)
+          MLK_STATIC MLK_INLINE int mlk_randombytes(uint8_t *ptr, size_t len)
           {
             return randombytes(ptr, len);
           }
@@ -53,7 +53,7 @@ configs:
           #include <stdint.h>
           #include <string.h>
           #include "../mlkem/src/sys.h"
-          static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+          MLK_STATIC MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
           {
             explicit_bzero(ptr, len);
           }
@@ -69,7 +69,7 @@ configs:
           #include <stddef.h>
           #include <stdint.h>
           #include "../mlkem/src/sys.h"
-          static MLK_INLINE void *mlk_memcpy(void *dest, const void *src, size_t n)
+          MLK_STATIC MLK_INLINE void *mlk_memcpy(void *dest, const void *src, size_t n)
           {
             /* Simple byte-by-byte copy implementation for testing */
             unsigned char *d = (unsigned char *)dest;
@@ -92,7 +92,7 @@ configs:
           #include <stddef.h>
           #include <stdint.h>
           #include "../mlkem/src/sys.h"
-          static MLK_INLINE void *mlk_memset(void *s, int c, size_t n)
+          MLK_STATIC MLK_INLINE void *mlk_memset(void *s, int c, size_t n)
           {
             /* Simple byte-by-byte set implementation for testing */
             unsigned char *ptr = (unsigned char *)s;
@@ -114,7 +114,7 @@ configs:
           #include <stddef.h>
           #include <stdint.h>
           #include "../mlkem/src/sys.h"
-          static MLK_INLINE void *mlk_memcpy(void *dest, const void *src, size_t n)
+          MLK_STATIC MLK_INLINE void *mlk_memcpy(void *dest, const void *src, size_t n)
           {
             /* Simple byte-by-byte copy implementation for testing */
             unsigned char *d = (unsigned char *)dest;
@@ -133,7 +133,7 @@ configs:
           #include <stddef.h>
           #include <stdint.h>
           #include "../mlkem/src/sys.h"
-          static MLK_INLINE void *mlk_memset(void *s, int c, size_t n)
+          MLK_STATIC MLK_INLINE void *mlk_memset(void *s, int c, size_t n)
           {
             /* Simple byte-by-byte set implementation for testing */
             unsigned char *ptr = (unsigned char *)s;
@@ -156,7 +156,7 @@ configs:
           #include <stdlib.h>
           #include <string.h>
           #include "../mlkem/src/sys.h"
-          static MLK_INLINE int mlk_break_pct(void)
+          MLK_STATIC MLK_INLINE int mlk_break_pct(void)
           {
             /* Break PCT if and only if MLK_BREAK_PCT is set to 1 */
             const char *val = getenv("MLK_BREAK_PCT");
@@ -174,7 +174,7 @@ configs:
           #include "../mlkem/src/sys.h"
           /* System capability enumeration */
 
-          static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
+          MLK_STATIC MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
           {
             (void)cap; /* Ignore parameter */
             return 0;
@@ -190,7 +190,7 @@ configs:
           #if !defined(__ASSEMBLER__)
           #include "../mlkem/src/sys.h"
 
-          static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
+          MLK_STATIC MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
           {
             (void)cap; /* Ignore parameter */
             return 1;
@@ -212,7 +212,7 @@ configs:
           #error "This configuration is only supported on Linux/x86_64 systems"
           #endif
 
-          static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
+          MLK_STATIC MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
           {
             if (cap == MLK_SYS_CAP_X86_64_AVX2)
             {
@@ -259,7 +259,7 @@ configs:
           #error This configuration is only suitable for Linux/AArch64 systems
           #endif
 
-          static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
+          MLK_STATIC MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
           {
             if (cap == MLK_SYS_CAP_AARCH64_NEON)
             {
@@ -362,7 +362,7 @@ configs:
           #include <stdint.h>
           #include "src/sys.h"
           #include "test_only_rng/notrandombytes.h"
-          static MLK_INLINE int mlk_randombytes(uint8_t *ptr, size_t len)
+          MLK_STATIC MLK_INLINE int mlk_randombytes(uint8_t *ptr, size_t len)
           {
             return randombytes(ptr, len);
           }
@@ -418,7 +418,7 @@ configs:
           #define MLK_CUSTOM_FREE(v, T, N) _aligned_free(v)
           #else
           #include <stdlib.h>
-          static inline void *mlk_posix_memalign(size_t align, size_t sz)
+          MLK_STATIC inline void *mlk_posix_memalign(size_t align, size_t sz)
           {
             void *ptr = NULL;
             if (posix_memalign(&ptr, align, sz) != 0)
@@ -483,7 +483,7 @@ configs:
           #include <stdint.h>
           #include "../../mlkem/src/cbmc.h"
           #include "../../mlkem/src/sys.h"
-          static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+          MLK_STATIC MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
           __contract__(
             requires(len <= UINT32_MAX)
             requires(memory_no_alias(ptr, len))

@@ -72,7 +72,7 @@ __contract__(
  * @return Integer in [-(MLKEM_Q-1)/2, (MLKEM_Q-1)/2] congruent to @p a modulo
  *         MLKEM_Q.
  */
-static MLK_INLINE int16_t mlk_barrett_reduce(int16_t a)
+MLK_STATIC MLK_INLINE int16_t mlk_barrett_reduce(int16_t a)
 __contract__(
   ensures(return_value > -MLKEM_Q_HALF && return_value < MLKEM_Q_HALF)
 )
@@ -107,7 +107,7 @@ __contract__(
 
 #if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 /* Reference: `poly_tomont()` in the reference implementation @[REF]. */
-MLK_STATIC_TESTABLE void mlk_poly_tomont_c(mlk_poly *r)
+MLK_STATIC void mlk_poly_tomont_c(mlk_poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_poly)))
   assigns(memory_slice(r, sizeof(mlk_poly)))
@@ -184,7 +184,7 @@ __contract__(
  *              here to go from signed to unsigned representatives.
  *              This conditional addition is then dropped from all
  *              polynomial compression functions instead (see `compress.c`). */
-MLK_STATIC_TESTABLE void mlk_poly_reduce_c(mlk_poly *r)
+MLK_STATIC void mlk_poly_reduce_c(mlk_poly *r)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_poly)))
   assigns(memory_slice(r, sizeof(mlk_poly)))
@@ -270,8 +270,8 @@ void mlk_poly_sub(mlk_poly *r, const mlk_poly *b)
  *            - The reference implementation does not use a
  *              multiplication cache ('mulcache'). This idea originates
  *              from @[NeonNTT] and is used at the C level here. */
-MLK_STATIC_TESTABLE void mlk_poly_mulcache_compute_c(mlk_poly_mulcache *x,
-                                                     const mlk_poly *a)
+MLK_STATIC void mlk_poly_mulcache_compute_c(mlk_poly_mulcache *x,
+                                            const mlk_poly *a)
 __contract__(
   requires(memory_no_alias(x, sizeof(mlk_poly_mulcache)))
   requires(memory_no_alias(a, sizeof(mlk_poly)))
@@ -344,9 +344,9 @@ void mlk_poly_mulcache_compute(mlk_poly_mulcache *x, const mlk_poly *a)
  */
 
 /* Reference: Embedded in `ntt()` in the reference implementation @[REF]. */
-static void mlk_ntt_butterfly_block(int16_t r[MLKEM_N], int16_t zeta,
-                                    unsigned start, unsigned len,
-                                    unsigned bound)
+MLK_STATIC void mlk_ntt_butterfly_block(int16_t r[MLKEM_N], int16_t zeta,
+                                        unsigned start, unsigned len,
+                                        unsigned bound)
 __contract__(
   requires(start < MLKEM_N)
   requires(1 <= len && len <= MLKEM_N / 2 && start + 2 * len <= MLKEM_N)
@@ -391,7 +391,7 @@ __contract__(
  */
 
 /* Reference: Embedded in `ntt()` in the reference implementation @[REF]. */
-static void mlk_ntt_layer(int16_t r[MLKEM_N], unsigned layer)
+MLK_STATIC void mlk_ntt_layer(int16_t r[MLKEM_N], unsigned layer)
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
   requires(1 <= layer && layer <= 7)
@@ -428,7 +428,7 @@ __contract__(
 /* Reference: `ntt()` in the reference implementation @[REF].
  * - Iterate over `layer` instead of `len` in the outer loop
  *   to simplify computation of zeta index. */
-MLK_STATIC_TESTABLE void mlk_poly_ntt_c(mlk_poly *p)
+MLK_STATIC void mlk_poly_ntt_c(mlk_poly *p)
 __contract__(
   requires(memory_no_alias(p, sizeof(mlk_poly)))
   requires(array_abs_bound(p->coeffs, 0, MLKEM_N, MLKEM_Q))
@@ -478,7 +478,7 @@ void mlk_poly_ntt(mlk_poly *r)
 /* Compute one layer of inverse NTT */
 
 /* Reference: Embedded into `invntt()` in the reference implementation @[REF] */
-static void mlk_invntt_layer(int16_t *r, unsigned layer)
+MLK_STATIC void mlk_invntt_layer(int16_t *r, unsigned layer)
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
   requires(1 <= layer && layer <= 7)
@@ -520,7 +520,7 @@ __contract__(
  *              while the reference implementation normalizes at
  *              the end. This allows us to drop a call to `poly_reduce()`
  *              from the base multiplication. */
-MLK_STATIC_TESTABLE void mlk_poly_invntt_tomont_c(mlk_poly *p)
+MLK_STATIC void mlk_poly_invntt_tomont_c(mlk_poly *p)
 __contract__(
   requires(memory_no_alias(p, sizeof(mlk_poly)))
   assigns(memory_slice(p, sizeof(mlk_poly)))

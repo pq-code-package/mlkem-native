@@ -54,9 +54,9 @@
  * @param[in]  seed Input public seed.
  */
 #if !defined(MLK_CONFIG_NO_KEYPAIR_API)
-static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES],
-                        const mlk_polyvec *pk,
-                        const uint8_t seed[MLKEM_SYMBYTES])
+MLK_STATIC void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES],
+                            const mlk_polyvec *pk,
+                            const uint8_t seed[MLKEM_SYMBYTES])
 {
   mlk_assert_bound_2d(pk->vec, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
   mlk_polyvec_tobytes(r, pk);
@@ -76,8 +76,9 @@ static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES],
  * @param[in]  packedpk Input serialized public key.
  */
 #if !defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API)
-static void mlk_unpack_pk(mlk_polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
-                          const uint8_t packedpk[MLKEM_INDCPA_PUBLICKEYBYTES])
+MLK_STATIC void mlk_unpack_pk(
+    mlk_polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
+    const uint8_t packedpk[MLKEM_INDCPA_PUBLICKEYBYTES])
 {
   mlk_polyvec_frombytes(pk, packedpk);
   mlk_memcpy(seed, packedpk + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
@@ -98,8 +99,8 @@ static void mlk_unpack_pk(mlk_polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
  * @param[in]  sk Input vector of polynomials (secret key).
  */
 #if !defined(MLK_CONFIG_NO_KEYPAIR_API)
-static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES],
-                        const mlk_polyvec *sk)
+MLK_STATIC void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES],
+                            const mlk_polyvec *sk)
 {
   mlk_assert_bound_2d(sk->vec, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
   mlk_polyvec_tobytes(r, sk);
@@ -115,8 +116,8 @@ static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES],
  * @param[in]  packedsk Input serialized secret key.
  */
 #if !defined(MLK_CONFIG_NO_DECAPS_API)
-static void mlk_unpack_sk(mlk_polyvec *sk,
-                          const uint8_t packedsk[MLKEM_INDCPA_SECRETKEYBYTES])
+MLK_STATIC void mlk_unpack_sk(
+    mlk_polyvec *sk, const uint8_t packedsk[MLKEM_INDCPA_SECRETKEYBYTES])
 {
   mlk_polyvec_frombytes(sk, packedsk);
 }
@@ -134,8 +135,8 @@ static void mlk_unpack_sk(mlk_polyvec *sk,
  * @param[in]  v Input polynomial v.
  */
 #if !defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API)
-static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES],
-                                const mlk_polyvec *b, mlk_poly *v)
+MLK_STATIC void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES],
+                                    const mlk_polyvec *b, mlk_poly *v)
 {
   mlk_polyvec_compress_du(r, b);
   mlk_poly_compress_dv(r + MLKEM_POLYVECCOMPRESSEDBYTES_DU, v);
@@ -153,15 +154,15 @@ static void mlk_pack_ciphertext(uint8_t r[MLKEM_INDCPA_BYTES],
  * @param[in]  c Input serialized ciphertext.
  */
 #if !defined(MLK_CONFIG_NO_DECAPS_API)
-static void mlk_unpack_ciphertext(mlk_polyvec *b, mlk_poly *v,
-                                  const uint8_t c[MLKEM_INDCPA_BYTES])
+MLK_STATIC void mlk_unpack_ciphertext(mlk_polyvec *b, mlk_poly *v,
+                                      const uint8_t c[MLKEM_INDCPA_BYTES])
 {
   mlk_polyvec_decompress_du(b, c);
   mlk_poly_decompress_dv(v, c + MLKEM_POLYVECCOMPRESSEDBYTES_DU);
 }
 #endif /* !MLK_CONFIG_NO_DECAPS_API */
 
-static void mlk_polymat_permute_bitrev_to_custom(mlk_polymat *a)
+MLK_STATIC void mlk_polymat_permute_bitrev_to_custom(mlk_polymat *a)
 __contract__(
   /* We don't specify that this should be a permutation, but only
    * that it does not change the bound established at the end of mlk_gen_matrix. */
@@ -301,8 +302,9 @@ void mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
  * @param[in]  vc  Mulcache for @p v, computed via
  *                 mlk_polyvec_mulcache_compute().
  */
-static void mlk_matvec_mul(mlk_polyvec *out, const mlk_polymat *a,
-                           const mlk_polyvec *v, const mlk_polyvec_mulcache *vc)
+MLK_STATIC void mlk_matvec_mul(mlk_polyvec *out, const mlk_polymat *a,
+                               const mlk_polyvec *v,
+                               const mlk_polyvec_mulcache *vc)
 __contract__(
   requires(memory_no_alias(out, sizeof(mlk_polyvec)))
   requires(memory_no_alias(a, sizeof(mlk_polymat)))
@@ -336,8 +338,8 @@ __contract__(
  * @param[in]  seed Seed bytes for sampling.
  */
 #if !defined(MLK_CONFIG_NO_KEYPAIR_API)
-static void mlk_keypair_getnoise_eta1(mlk_polyvec *pv, mlk_polyvec *e,
-                                      const uint8_t seed[MLKEM_SYMBYTES])
+MLK_STATIC void mlk_keypair_getnoise_eta1(mlk_polyvec *pv, mlk_polyvec *e,
+                                          const uint8_t seed[MLKEM_SYMBYTES])
 __contract__(
   requires(memory_no_alias(pv, sizeof(mlk_polyvec)))
   requires(memory_no_alias(e, sizeof(mlk_polyvec)))
@@ -384,9 +386,9 @@ __contract__(
  * @param[in]  coins Seed bytes for sampling.
  */
 #if !defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API)
-static void mlk_enc_getnoise_eta1_eta2(mlk_polyvec *sp, mlk_polyvec *ep,
-                                       mlk_poly *epp,
-                                       const uint8_t coins[MLKEM_SYMBYTES])
+MLK_STATIC void mlk_enc_getnoise_eta1_eta2(mlk_polyvec *sp, mlk_polyvec *ep,
+                                           mlk_poly *epp,
+                                           const uint8_t coins[MLKEM_SYMBYTES])
 __contract__(
   requires(memory_no_alias(sp, sizeof(mlk_polyvec)))
   requires(memory_no_alias(ep, sizeof(mlk_polyvec)))

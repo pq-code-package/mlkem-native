@@ -482,7 +482,7 @@
 #if !defined(__ASSEMBLER__)
 #include "../mlkem/src/sys.h"
 
-static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
+MLK_STATIC MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
 {
   (void)cap; /* Ignore parameter */
   return 1;

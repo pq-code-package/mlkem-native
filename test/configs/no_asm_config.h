@@ -425,7 +425,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "../mlkem/src/sys.h"
-static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+MLK_STATIC MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
 {
   explicit_bzero(ptr, len);
 }

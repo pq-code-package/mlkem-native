@@ -43,7 +43,7 @@ int randombytes(uint8_t *out, size_t outlen);
  * @retval other Failure; top-level APIs propagate this as MLK_ERR_RNG_FAIL.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_randombytes(uint8_t *out, size_t outlen)
+MLK_STATIC MLK_INLINE int mlk_randombytes(uint8_t *out, size_t outlen)
 __contract__(
   requires(memory_no_alias(out, outlen))
   assigns(memory_slice(out, outlen))) { return randombytes(out, outlen); }

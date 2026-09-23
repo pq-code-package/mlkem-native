@@ -178,8 +178,28 @@
 #endif
 #endif /* !MLK_NOINLINE */
 
-#ifndef MLK_STATIC_TESTABLE
-#define MLK_STATIC_TESTABLE static
+#ifndef MLK_STATIC
+
+/* for CBMC proof and unit tests, functions are declared with global visibility
+ */
+#ifdef CBMC
+#define MLK_STATIC
+#else
+#define MLK_STATIC static
+#endif
+
+#endif /* !MLK_STATIC */
+
+/*
+ * C90 does not allow "const" and "static" as type qualifiers in formal array
+ * parameters. We don't use it in C90 builds.
+ */
+#if defined(_MSC_VER) || !defined(__STDC_VERSION__) || \
+    __STDC_VERSION__ < 199901L || defined(__STDC_NO_VLA__)
+#define MLK_CONST_STATIC
+#else
+#define MLK_CONST_STATIC const static
+
 #endif
 
 /*

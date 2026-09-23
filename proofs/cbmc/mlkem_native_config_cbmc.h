@@ -428,7 +428,7 @@
 #include <stdint.h>
 #include "../../mlkem/src/cbmc.h"
 #include "../../mlkem/src/sys.h"
-static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+MLK_STATIC MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
 __contract__(
   requires(len <= UINT32_MAX)
   requires(memory_no_alias(ptr, len))

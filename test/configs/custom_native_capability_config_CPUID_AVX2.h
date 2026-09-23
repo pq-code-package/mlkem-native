@@ -488,7 +488,7 @@
 #error "This configuration is only supported on Linux/x86_64 systems"
 #endif
 
-static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
+MLK_STATIC MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
 {
   if (cap == MLK_SYS_CAP_X86_64_AVX2)
   {

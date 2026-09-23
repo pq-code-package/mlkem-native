@@ -102,7 +102,7 @@ CFLAGS += -DNTESTS_FUNC=3 -DNTESTS_KAT=100 \
 # The binary's CFLAGS, forwarded to the CMake build (which applies them to the
 # mlkem amalgamation and test sources alike). '=' not ':=', so the recipe-time
 # $(CFLAGS) includes the binary's target-specific additions (e.g.
-# -DMLK_STATIC_TESTABLE= for test_unit, -DMLK_CONFIG_FILE="..." for test_alloc).
+# -DMLK_STATIC= for test_unit, -DMLK_CONFIG_FILE="..." for test_alloc).
 # Two rewrites:
 #   - -Imlkem -> absolute, as CMake builds from its own dir, not the repo root
 #     (and the alloc config path is relative to -Imlkem);

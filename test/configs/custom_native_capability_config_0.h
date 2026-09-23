@@ -483,7 +483,7 @@
 #include "../mlkem/src/sys.h"
 /* System capability enumeration */
 
-static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
+MLK_STATIC MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
 {
   (void)cap; /* Ignore parameter */
   return 0;
