@@ -92,7 +92,7 @@
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_ntt_native(int16_t p[MLKEM_N])
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_ntt_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   requires(array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
@@ -133,7 +133,8 @@ and to/from bytes conversions."
  *
  * @param[in,out] p Input/output polynomial.
  */
-static MLK_INLINE void mlk_poly_permute_bitrev_to_custom(int16_t p[MLKEM_N])
+MLK_STATIC_PROVABLE MLK_INLINE void mlk_poly_permute_bitrev_to_custom(
+    int16_t p[MLKEM_N])
 __contract__(
   /* We don't specify that this should be a permutation, but only
    * that it does not change the bound established at the end of mlk_gen_matrix. */
@@ -160,7 +161,7 @@ __contract__(
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_intt_native(int16_t p[MLKEM_N])
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_intt_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
@@ -182,7 +183,7 @@ __contract__(
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_poly_reduce_native(int16_t p[MLKEM_N])
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_poly_reduce_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
@@ -203,7 +204,7 @@ __contract__(
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_poly_tomont_native(int16_t p[MLKEM_N])
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_poly_tomont_native(int16_t p[MLKEM_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
@@ -232,7 +233,7 @@ __contract__(
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_poly_mulcache_compute_native(
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_poly_mulcache_compute_native(
     int16_t cache[MLKEM_N / 2], const int16_t mlk_poly[MLKEM_N])
 __contract__(
   requires(memory_no_alias(cache, sizeof(int16_t) * (MLKEM_N / 2)))
@@ -262,7 +263,8 @@ __contract__(
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
+MLK_STATIC_PROVABLE MLK_INLINE int
+mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
     int16_t r[MLKEM_N], const int16_t a[2 * MLKEM_N],
     const int16_t b[2 * MLKEM_N], const int16_t b_cache[2 * (MLKEM_N / 2)])
 __contract__(
@@ -294,7 +296,8 @@ __contract__(
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k3_native(
+MLK_STATIC_PROVABLE MLK_INLINE int
+mlk_polyvec_basemul_acc_montgomery_cached_k3_native(
     int16_t r[MLKEM_N], const int16_t a[3 * MLKEM_N],
     const int16_t b[3 * MLKEM_N], const int16_t b_cache[3 * (MLKEM_N / 2)])
 __contract__(
@@ -326,7 +329,8 @@ __contract__(
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
+MLK_STATIC_PROVABLE MLK_INLINE int
+mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
     int16_t r[MLKEM_N], const int16_t a[4 * MLKEM_N],
     const int16_t b[4 * MLKEM_N], const int16_t b_cache[4 * (MLKEM_N / 2)])
 __contract__(
@@ -356,8 +360,8 @@ __contract__(
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_poly_tobytes_native(uint8_t r[MLKEM_POLYBYTES],
-                                              const int16_t a[MLKEM_N])
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_poly_tobytes_native(
+    uint8_t r[MLKEM_POLYBYTES], const int16_t a[MLKEM_N])
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYBYTES))
   requires(memory_no_alias(a, sizeof(int16_t) * MLKEM_N))
@@ -382,7 +386,7 @@ __contract__(
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_poly_frombytes_native(
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_poly_frombytes_native(
     int16_t a[MLKEM_N], const uint8_t r[MLKEM_POLYBYTES])
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYBYTES))
@@ -410,9 +414,10 @@ __contract__(
  *                                  integers (at most @p len).
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_rej_uniform_native(int16_t *r, unsigned len,
-                                             const uint8_t *buf,
-                                             unsigned buflen)
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_rej_uniform_native(int16_t *r,
+                                                          unsigned len,
+                                                          const uint8_t *buf,
+                                                          unsigned buflen)
 __contract__(
   requires(len <= 4096 && buflen <= 4096 && buflen % 3 == 0)
   requires(memory_no_alias(r, sizeof(int16_t) * len))
@@ -442,7 +447,7 @@ __contract__(
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_poly_compress_d4_native(
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_poly_compress_d4_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D4], const int16_t a[MLKEM_N])
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D4))
@@ -467,7 +472,7 @@ __contract__(
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_poly_compress_d10_native(
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_poly_compress_d10_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const int16_t a[MLKEM_N])
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D10))
@@ -496,7 +501,7 @@ __contract__(
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_poly_decompress_d4_native(
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_poly_decompress_d4_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D4])
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
@@ -524,7 +529,7 @@ __contract__(
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_poly_decompress_d10_native(
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_poly_decompress_d10_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D10])
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
@@ -552,7 +557,7 @@ __contract__(
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_poly_compress_d5_native(
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_poly_compress_d5_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D5], const int16_t a[MLKEM_N])
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D5))
@@ -577,7 +582,7 @@ __contract__(
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_poly_compress_d11_native(
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_poly_compress_d11_native(
     uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D11], const int16_t a[MLKEM_N])
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D11))
@@ -606,7 +611,7 @@ __contract__(
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_poly_decompress_d5_native(
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_poly_decompress_d5_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D5])
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
@@ -634,7 +639,7 @@ __contract__(
  * @retval MLK_NATIVE_FUNC_FALLBACK Backend declined; caller should fall back.
  */
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_poly_decompress_d11_native(
+MLK_STATIC_PROVABLE MLK_INLINE int mlk_poly_decompress_d11_native(
     int16_t r[MLKEM_N], const uint8_t a[MLKEM_POLYCOMPRESSEDBYTES_D11])
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
