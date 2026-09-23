@@ -178,8 +178,35 @@
 #endif
 #endif /* !MLK_NOINLINE */
 
+
+/* Static functions which have a distinct unit-test driver need to be
+ * declated with global visibility. In normal builds, this
+ * macro expands to "static". When compiling for unit testing, this
+ * macro should be overridden in a Makefile to expand to ""
+ */
 #ifndef MLK_STATIC_TESTABLE
 #define MLK_STATIC_TESTABLE static
+#endif
+
+/* For CBMC proof, functions that would normally be declated "static"
+ * are declared with global visibility. In normal builds, this macro
+ * expands to "static". For CBMC, this macro should be overridden in a
+ * Makefile to expand to ""
+ */
+#ifndef MLK_STATIC_PROVABLE
+#define MLK_STATIC_PROVABLE static
+#endif
+
+/*
+ * C90 does not allow "const" and "static" as type qualifiers in formal array
+ * parameters. We don't use it in C90 builds.
+ */
+#if defined(_MSC_VER) || !defined(__STDC_VERSION__) || \
+    __STDC_VERSION__ < 199901L || defined(__STDC_NO_VLA__)
+#define MLK_CONST_STATIC
+#else
+#define MLK_CONST_STATIC const static
+
 #endif
 
 /*

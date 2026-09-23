@@ -101,7 +101,8 @@ __contract__(
  *              The reference implementation works with coefficients
  *              in the range [-(MLKEM_Q-1), MLKEM_Q-1]. */
 MLK_STATIC_TESTABLE void mlk_poly_compress_d10_c(
-    uint8_t r[MLKEM_POLYCOMPRESSEDBYTES_D10], const mlk_poly *a)
+    uint8_t r[MLK_CONST_STATIC MLKEM_POLYCOMPRESSEDBYTES_D10],
+    const mlk_poly *a)
 __contract__(
   requires(memory_no_alias(r, MLKEM_POLYCOMPRESSEDBYTES_D10))
   requires(memory_no_alias(a, sizeof(mlk_poly)))

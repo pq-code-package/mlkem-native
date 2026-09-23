@@ -121,9 +121,10 @@ cleanup:
 
 #if !defined(MLK_CONFIG_NO_KEYPAIR_API)
 MLK_MUST_CHECK_RETURN_VALUE
-static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                         uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES],
-                         MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+MLK_STATIC_PROVABLE int mlk_check_pct(
+    uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+    uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES],
+    MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
@@ -145,9 +146,10 @@ __contract__(
  * @retval MLK_ERR_RNG_FAIL      Random number generation failed.
  * @retval MLK_ERR_PCT_FAIL      The consistency check failed. */
 MLK_MUST_CHECK_RETURN_VALUE
-static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                         uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES],
-                         MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+MLK_STATIC_PROVABLE int mlk_check_pct(
+    uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+    uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES],
+    MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   int ret = 0;
   MLK_ALLOC(ct, uint8_t, MLKEM_INDCCA_CIPHERTEXTBYTES, context);
@@ -212,9 +214,10 @@ cleanup:
 }
 #else  /* MLK_CONFIG_KEYGEN_PCT */
 MLK_MUST_CHECK_RETURN_VALUE
-static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                         uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES],
-                         MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+MLK_STATIC_PROVABLE int mlk_check_pct(
+    uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+    uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES],
+    MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   /* Skip PCT */
   ((void)pk);

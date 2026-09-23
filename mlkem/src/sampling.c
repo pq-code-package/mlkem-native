@@ -112,8 +112,10 @@ __contract__(
  *         consumed; otherwise no information is provided on how many bytes
  *         of the input buffer have been consumed.
  */
-static unsigned mlk_rej_uniform(int16_t *r, unsigned target, unsigned offset,
-                                const uint8_t *buf, unsigned buflen)
+MLK_STATIC_PROVABLE unsigned mlk_rej_uniform(int16_t *r, unsigned target,
+                                             unsigned offset,
+                                             const uint8_t *buf,
+                                             unsigned buflen)
 __contract__(
   requires(offset <= target && target <= 4096 && buflen <= 4096 && buflen % 3 == 0)
   requires(memory_no_alias(r, sizeof(int16_t) * target))
@@ -262,7 +264,7 @@ void mlk_poly_rej_uniform(mlk_poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
  *
  * @return 32-bit unsigned integer loaded from @p x.
  */
-static uint32_t mlk_load32_littleendian(const uint8_t x[4])
+MLK_STATIC_PROVABLE uint32_t mlk_load32_littleendian(const uint8_t x[4])
 {
   uint32_t r;
   r = (uint32_t)x[0];
@@ -318,7 +320,7 @@ void mlk_poly_cbd2(mlk_poly *r, const uint8_t buf[2 * MLKEM_N / 4])
  * @return 32-bit unsigned integer loaded from @p x (most significant byte
  *         is zero).
  */
-static uint32_t mlk_load24_littleendian(const uint8_t x[3])
+MLK_STATIC_PROVABLE uint32_t mlk_load24_littleendian(const uint8_t x[3])
 {
   uint32_t r;
   r = (uint32_t)x[0];
