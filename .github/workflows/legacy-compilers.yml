@@ -184,6 +184,11 @@ jobs:
            shell: clang22
            opt: all
            examples: true
+         - family: clang
+           version: "23"
+           shell: clang23
+           opt: all
+           examples: true
          # CPU flags are not correctly passed to the zig assembler
          # https://github.com/ziglang/zig/issues/23576
          # We therefore only test the C backend, which is why opt is set to
@@ -367,6 +372,11 @@ jobs:
          - family: clang
            version: "22"
            shell: clang22
+           opt: all
+           examples: true
+         - family: clang
+           version: "23"
+           shell: clang23
            opt: all
            examples: true
          - family: zig
@@ -568,6 +578,7 @@ jobs:
           - { family: clang, version: "20",  shell: clang20 }
           - { family: clang, version: "21",  shell: clang21 }
           - { family: clang, version: "22",  shell: clang22 }
+          - { family: clang, version: "23",  shell: clang23 }
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

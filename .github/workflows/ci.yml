@@ -271,12 +271,6 @@ jobs:
            opt: all
            examples: true
          - family: clang
-           version: "20"
-           shell: clang20
-           darwin: True
-           opt: all
-           examples: true
-         - family: clang
            version: "21"
            shell: clang21
            darwin: True
@@ -285,6 +279,12 @@ jobs:
          - family: clang
            version: "22"
            shell: clang22
+           darwin: True
+           opt: all
+           examples: true
+         - family: clang
+           version: "23"
+           shell: clang23
            darwin: True
            opt: all
            examples: true
