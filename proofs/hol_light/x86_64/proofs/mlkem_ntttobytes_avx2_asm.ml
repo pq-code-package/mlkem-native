@@ -304,7 +304,6 @@ let BIT_BOUND = BITBLAST_RULE
 let MLKEM_NTTTOBYTES_CORRECT = prove(
   `!r a (l:int16 list) pc.
         aligned 32 a /\
-        aligned 32 r /\
         nonoverlapping (word pc, LENGTH mlkem_tobytes_tmc) (a, 512) /\
         nonoverlapping (word pc, LENGTH mlkem_tobytes_tmc) (r, 384) /\
         nonoverlapping (a, 512) (r, 384)
@@ -399,11 +398,10 @@ let MLKEM_NTTTOBYTES_CORRECT = prove(
 let MLKEM_NTTTOBYTES_NOIBT_SUBROUTINE_CORRECT = prove
 (`!r a (l:int16 list) pc.
         aligned 32 a /\
-        aligned 32 r /\
         nonoverlapping (word pc, LENGTH mlkem_tobytes_tmc) (a, 512) /\
         nonoverlapping (word pc, LENGTH mlkem_tobytes_tmc) (r, 384) /\
         nonoverlapping (a, 512) (r, 384) /\
-        nonoverlapping (stackpointer, 8) (r, 512)
+        nonoverlapping (stackpointer, 8) (r, 384)
         ==> ensures x86
              (\s. bytes_loaded s (word pc) mlkem_tobytes_tmc /\
                   read RIP s = word pc /\
@@ -429,11 +427,10 @@ let MLKEM_NTTTOBYTES_NOIBT_SUBROUTINE_CORRECT = prove
 let MLKEM_NTTTOBYTES_SUBROUTINE_CORRECT = prove
 (`!r a (l:int16 list) pc.
         aligned 32 a /\
-        aligned 32 r /\
         nonoverlapping (word pc, LENGTH mlkem_tobytes_mc) (a, 512) /\
         nonoverlapping (word pc, LENGTH mlkem_tobytes_mc) (r, 384) /\
         nonoverlapping (a, 512) (r, 384) /\
-        nonoverlapping (stackpointer, 8) (r, 512)
+        nonoverlapping (stackpointer, 8) (r, 384)
         ==> ensures x86
              (\s. bytes_loaded s (word pc) mlkem_tobytes_mc /\
                   read RIP s = word pc /\
@@ -468,7 +465,6 @@ let MLKEM_NTTTOBYTES_SAFE = time prove
  (`exists f_events.
        forall e r a pc.
            aligned 32 a /\
-           aligned 32 r /\
            nonoverlapping (word pc,LENGTH mlkem_tobytes_tmc) (a,512) /\
            nonoverlapping (word pc,LENGTH mlkem_tobytes_tmc) (r,384) /\
            nonoverlapping (a,512) (r,384)
@@ -499,7 +495,6 @@ let MLKEM_NTTTOBYTES_NOIBT_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e r a pc stackpointer returnaddress.
           aligned 32 a /\
-          aligned 32 r /\
           nonoverlapping (word pc, LENGTH mlkem_tobytes_tmc) (a, 512) /\
           nonoverlapping (word pc, LENGTH mlkem_tobytes_tmc) (r, 384) /\
           nonoverlapping (a, 512) (r, 384) /\
@@ -530,7 +525,6 @@ let MLKEM_NTTTOBYTES_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e r a pc stackpointer returnaddress.
           aligned 32 a /\
-          aligned 32 r /\
           nonoverlapping (word pc, LENGTH mlkem_tobytes_mc) (a, 512) /\
           nonoverlapping (word pc, LENGTH mlkem_tobytes_mc) (r, 384) /\
           nonoverlapping (a, 512) (r, 384) /\

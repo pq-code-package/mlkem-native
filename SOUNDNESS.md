@@ -339,6 +339,11 @@ from the actual register/stack layout used by the assembly. And a semantic gap b
 CBMC contract language and HOL Light's logic -- for example, differing signed vs. unsigned
 interpretation of bounds -- could cause the bridge to be unsound.
 
+Moreover, a HOL Light precondition without CBMC counterpart, such as an alignment assumption,
+is not checked against callers, so the assembly may rely on it while callers violate it. For example,
+the x86_64 `ntttobytes` and `nttfrombytes` specifications used to require alignment of the byte
+buffer, which callers do not guarantee, so the HOL Light theorems did not cover the actual calls.
+
 **Potential improvements.**
 - Establish a machine-checked link between the HOL Light specifications and the CBMC
   contracts. ([#1601](https://github.com/pq-code-package/mlkem-native/issues/1601))
