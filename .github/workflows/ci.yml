@@ -260,8 +260,7 @@ jobs:
          - family: gcc
            version: "16"
            shell: gcc16
-           # TODO: re-add once gcc16 is no longer broken in nixpkgs-unstable
-           darwin: False
+           darwin: True
            opt: all
            examples: true
          - family: clang
