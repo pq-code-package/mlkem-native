@@ -23,7 +23,7 @@ typedef struct x86_64_register_state reg_state;
 
 MLK_SYSV_ABI
 uint64_t mlk_rej_uniform_avx2_asm(int16_t *r, const uint8_t *buf,
-                                  unsigned buflen, const uint8_t *table);
+                                  uint64_t buflen, const uint8_t *table);
 
 int check_rej_uniform_avx2_asm(void)
 {
