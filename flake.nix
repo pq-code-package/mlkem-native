@@ -189,6 +189,8 @@
           devShells.clang20 = util.mkShellWithCC' pkgs.clang_20;
           devShells.clang21 = util.mkShellWithCC' pkgs.clang_21;
           devShells.clang22 = util.mkShellWithCC' pkgs.clang_22;
+          # TODO: switch to pkgs.clang_23 once nixpkgs provides the alias
+          devShells.clang23 = util.mkShellWithCC' pkgs.llvmPackages_23.clang;
 
           devShells.zig0_13 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_13);
           devShells.zig0_14 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_14);
@@ -205,6 +207,8 @@
           devShells.valgrind-varlat_clang20 = util.mkShellWithCC_valgrind' pkgs.clang_20;
           devShells.valgrind-varlat_clang21 = util.mkShellWithCC_valgrind' pkgs.clang_21;
           devShells.valgrind-varlat_clang22 = util.mkShellWithCC_valgrind' pkgs.clang_22;
+          # TODO: switch to pkgs.clang_23 once nixpkgs provides the alias
+          devShells.valgrind-varlat_clang23 = util.mkShellWithCC_valgrind' pkgs.llvmPackages_23.clang;
           devShells.valgrind-varlat_gcc13 = util.mkShellWithCC_valgrind' pkgs.gcc13;
           devShells.valgrind-varlat_gcc14 = util.mkShellWithCC_valgrind' pkgs.gcc14;
           devShells.valgrind-varlat_gcc15 = util.mkShellWithCC_valgrind' pkgs.gcc15;
