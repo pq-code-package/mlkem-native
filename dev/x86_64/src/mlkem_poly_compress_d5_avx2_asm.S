@@ -161,6 +161,9 @@ compress_d5_iter 320, 100
 compress_d5_iter 384, 120
 compress_d5_iter 448, 140
 
+/* Clear upper halves of YMM registers to avoid a performance
+ * penalty when switching to SSE. */
+vzeroupper
 ret
 
 /* simpasm: footer-start */

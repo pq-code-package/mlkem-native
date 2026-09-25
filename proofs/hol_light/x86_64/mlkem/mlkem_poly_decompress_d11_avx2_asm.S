@@ -294,6 +294,7 @@ mlk_poly_decompress_d11_avx2_asm:
         vpand %ymm1, %ymm6, %ymm6
         vpmulhrsw %ymm0, %ymm6, %ymm6
         vmovdqu %ymm6, 0x1e0(%rdi)
+        vzeroupper
         retq
         .cfi_endproc
 

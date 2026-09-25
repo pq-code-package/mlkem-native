@@ -124,6 +124,9 @@ vpbroadcastd %xmm0, %ymm0
 ntttobytes_128_coefficients 0, 0
 ntttobytes_128_coefficients 256, 192
 
+/* Clear upper halves of YMM registers to avoid a performance
+ * penalty when switching to SSE. */
+vzeroupper
 ret
 
 /* simpasm: footer-start */

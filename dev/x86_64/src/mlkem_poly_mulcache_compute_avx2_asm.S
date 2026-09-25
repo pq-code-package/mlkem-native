@@ -74,6 +74,9 @@ mulcache_compute_iter 1
 mulcache_compute_iter 2
 mulcache_compute_iter 3
 
+/* Clear upper halves of YMM registers to avoid a performance
+ * penalty when switching to SSE. */
+vzeroupper
 ret
 
 /* simpasm: footer-start */

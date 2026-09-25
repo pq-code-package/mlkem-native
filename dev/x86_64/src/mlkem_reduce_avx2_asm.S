@@ -104,6 +104,9 @@ vpbroadcastd %xmm1, %ymm1
 reduce_128_coefficients 0
 reduce_128_coefficients 128*2
 
+/* Clear upper halves of YMM registers to avoid a performance
+ * penalty when switching to SSE. */
+vzeroupper
 ret
 
 /* simpasm: footer-start */

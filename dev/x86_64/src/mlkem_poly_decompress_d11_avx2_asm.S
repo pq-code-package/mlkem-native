@@ -123,6 +123,9 @@ decompress_d11_iter 286, 416
 decompress_d11_iter 308, 448
 decompress_d11_iter 330, 480
 
+/* Clear upper halves of YMM registers to avoid a performance
+ * penalty when switching to SSE. */
+vzeroupper
 ret
 
 /* simpasm: footer-start */

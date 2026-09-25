@@ -142,6 +142,9 @@ compress_d4_iter 128, 32
 compress_d4_iter 256, 64
 compress_d4_iter 384, 96
 
+/* Clear upper halves of YMM registers to avoid a performance
+ * penalty when switching to SSE. */
+vzeroupper
 ret
 
 /* simpasm: footer-start */
