@@ -25,11 +25,13 @@
  */
 
 /*
- * Test configuration: Monolithic build config (native backends disabled)
+ * Test configuration: Monolithic build config with native backends
  *
  * This configuration differs from the default mlkem/mlkem_native_config.h in
  * the following places:
  *   - MLK_CONFIG_NAMESPACE_PREFIX
+ *   - MLK_CONFIG_USE_NATIVE_BACKEND_ARITH
+ *   - MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
  *   - MLK_CONFIG_INTERNAL_API_QUALIFIER
  */
 
@@ -300,9 +302,7 @@
  *
  * This can also be set using CFLAGS.
  */
-#if !defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
-/* #define MLK_CONFIG_USE_NATIVE_BACKEND_ARITH */
-#endif
+#define MLK_CONFIG_USE_NATIVE_BACKEND_ARITH
 
 /**
  * MLK_CONFIG_ARITH_BACKEND_FILE
@@ -339,9 +339,7 @@
  *
  * This can also be set using CFLAGS.
  */
-#if !defined(MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202)
-/* #define MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
-#endif
+#define MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
 
 /**
  * MLK_CONFIG_FIPS202_BACKEND_FILE
