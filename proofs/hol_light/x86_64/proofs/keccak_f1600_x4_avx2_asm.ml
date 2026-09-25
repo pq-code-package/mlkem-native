@@ -4,6 +4,7 @@
  *)
 
  needs "s2n_bignum/x86/proofs/base.ml";;
+ needs "mlkem_native/x86_64/proofs/mlkem_utils.ml";;
 
  needs "mlkem_native/x86_64/proofs/keccak_utils.ml";;
 
@@ -744,6 +745,7 @@ let keccak_f1600_x4_avx2_mc = define_assert_from_elf
                            (* VMOVQ (Memop Quadword (%% (rdi,592))) (%_% xmm15) *)
   0xc5; 0x79; 0x17; 0xbf; 0x18; 0x03; 0x00; 0x00;
                            (* VMOVHPD (Memop Quadword (%% (rdi,792))) (%_% xmm15) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0x4c; 0x89; 0xdc;        (* MOV (% rsp) (% r11) *)
   0xc3                     (* RET *)
 ];;
@@ -1015,7 +1017,7 @@ let KECCAK_F1600_X4_CORRECT = prove
     CONV_TAC NUM_REDUCE_CONV THEN
     REWRITE_TAC [keccak; keccak_round] THEN
     ENSURES_INIT_TAC "s0" THEN
-    X86_STEPS_TAC KECCAK_F1600_X4_EXEC (1--96) THEN
+    MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC KECCAK_F1600_X4_EXEC [n]) 1 THEN
     REPEAT(FIRST_X_ASSUM(STRIP_ASSUME_TAC o
       CONV_RULE(READ_MEMORY_SPLIT_CONV 2) o
       check (can (term_match [] `read qqq s:int256 = xxx`) o concl))) THEN

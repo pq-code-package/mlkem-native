@@ -309,6 +309,9 @@ intt_levels0t5 1
 
 intt_level6 0
 intt_level6 1
+/* Clear upper halves of YMM registers to avoid a performance
+ * penalty when switching to SSE. */
+vzeroupper
 ret
 
 /* simpasm: footer-start */

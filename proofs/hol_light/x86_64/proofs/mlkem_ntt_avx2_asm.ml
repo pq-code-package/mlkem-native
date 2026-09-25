@@ -5,6 +5,7 @@
 
 (* Load base theories for x86_64 from s2n-bignum *)
 needs "s2n_bignum/x86/proofs/base.ml";;
+needs "mlkem_native/x86_64/proofs/mlkem_utils.ml";;
 
 needs "mlkem_native/common/mlkem_specs.ml";;
 needs "mlkem_native/x86_64/proofs/mlkem_zetas.ml";;
@@ -1038,6 +1039,7 @@ let mlkem_ntt_mc = define_assert_from_elf "mlkem_ntt_mc" "x86_64/mlkem/mlkem_ntt
                            (* VMOVDQA (Memop Word256 (%% (rdi,448))) (%_% ymm9) *)
   0xc5; 0x7d; 0x7f; 0x9f; 0xe0; 0x01; 0x00; 0x00;
                            (* VMOVDQA (Memop Word256 (%% (rdi,480))) (%_% ymm11) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -1138,9 +1140,9 @@ let MLKEM_NTT_CORRECT = prove
   CONV_TAC(LAND_CONV(READ_MEMORY_SPLIT_CONV 2)) THEN
   CONV_TAC(LAND_CONV WORD_REDUCE_CONV) THEN STRIP_TAC THEN
 
-  MAP_EVERY (fun n -> X86_STEPS_TAC MLKEM_NTT_TMC_EXEC [n] THEN
+  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC MLKEM_NTT_TMC_EXEC [n] THEN
                       SIMD_SIMPLIFY_ABBREV_TAC[ntt_montmul] [ntt_montmul_add; ntt_montmul_sub])
-        (1--587) THEN
+        1 THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
   REPEAT(FIRST_X_ASSUM(STRIP_ASSUME_TAC o
@@ -1154,7 +1156,7 @@ let MLKEM_NTT_CORRECT = prove
   REWRITE_TAC[INT_ABS_BOUNDS; WORD_ADD_0] THEN
   ASM_REWRITE_TAC[WORD_ADD_0]  THEN
 
-  ASM_REWRITE_TAC[] THEN DISCARD_STATE_TAC "s587" THEN
+  ASM_REWRITE_TAC[] THEN DISCARD_MATCHING_ASSUMPTIONS [`read c s = x`] THEN
 
   W(fun (asl,w) ->
      let asms =
