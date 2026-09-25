@@ -9,6 +9,7 @@
 
 (* Load base theories for x86_64 from s2n-bignum *)
 needs "s2n_bignum/x86/proofs/base.ml";;
+needs "mlkem_native/x86_64/proofs/mlkem_utils.ml";;
 
 needs "mlkem_native/common/mlkem_specs.ml";;
 
@@ -266,6 +267,7 @@ let mlkem_tobytes_mc =
                            (* VMOVDQU (Memop Word256 (%% (rdi,320))) (%_% ymm3) *)
   0xc5; 0x7e; 0x7f; 0x8f; 0x60; 0x01; 0x00; 0x00;
                            (* VMOVDQU (Memop Word256 (%% (rdi,352))) (%_% ymm9) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -321,8 +323,8 @@ let MLKEM_NTTTOBYTES_CORRECT = prove(
              (MAYCHANGE [events] ,,
               MAYCHANGE [memory :> bytes(r, 384)] ,,
               MAYCHANGE [RIP] ,, MAYCHANGE [RAX] ,,
-              MAYCHANGE [ZMM0; ZMM1; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
-                         ZMM8; ZMM9; ZMM10; ZMM11; ZMM12])`,
+              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                         ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15])`,
 
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC [`r:int64`; `a:int64`; `l:int16 list`; `pc:num`] THEN
@@ -335,7 +337,7 @@ let MLKEM_NTTTOBYTES_CORRECT = prove(
 
   ASM_CASES_TAC `LENGTH(l:int16 list) = 256` THENL
    [ASM_REWRITE_TAC[] THEN ENSURES_INIT_TAC "s0";
-    X86_SIM_TAC mlkem_tobytes_TMC_EXEC (1--135)] THEN
+    X86_SIM_UNTIL_TARGET_PC_TAC mlkem_tobytes_TMC_EXEC] THEN
 
   UNDISCH_TAC
    `read(memory :> bytes(a,512)) s0 = num_of_wordlist(l:int16 list)` THEN
@@ -352,10 +354,10 @@ let MLKEM_NTTTOBYTES_CORRECT = prove(
   CONV_TAC(LAND_CONV BYTES_EQ_NUM_OF_WORDLIST_EXPAND_CONV) THEN
   REWRITE_TAC[GSYM BYTES256_WBYTES] THEN STRIP_TAC THEN
 
-  MAP_EVERY (fun n ->
+  MAP_UNTIL_TARGET_PC (fun n ->
     X86_STEPS_TAC mlkem_tobytes_TMC_EXEC [n] THEN
     SIMD_SIMPLIFY_TAC[])
-   (1--135) THEN
+   1 THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
   REPEAT(FIRST_X_ASSUM(STRIP_ASSUME_TAC o
@@ -489,8 +491,8 @@ let MLKEM_NTTTOBYTES_SAFE = time prove
               MAYCHANGE [RIP] ,,
               MAYCHANGE [RAX] ,,
               MAYCHANGE
-              [ZMM0; ZMM1; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
-               ZMM8; ZMM9; ZMM10; ZMM11; ZMM12])`,
+              [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+               ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15])`,
   ASSERT_CONCL_TAC full_spec THEN
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars mlkem_tobytes_TMC_EXEC);;

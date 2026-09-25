@@ -9,6 +9,7 @@
 
 (* Load base theories for x86_64 from s2n-bignum *)
 needs "s2n_bignum/x86/proofs/base.ml";;
+needs "mlkem_native/x86_64/proofs/mlkem_utils.ml";;
 
 needs "mlkem_native/common/mlkem_specs.ml";;
 
@@ -286,6 +287,7 @@ let mlkem_frombytes_mc =
                            (* VMOVDQA (Memop Word256 (%% (rdi,448))) (%_% ymm15) *)
   0xc5; 0xfd; 0x7f; 0x8f; 0xe0; 0x01; 0x00; 0x00;
                            (* VMOVDQA (Memop Word256 (%% (rdi,480))) (%_% ymm1) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -355,7 +357,7 @@ let MLKEM_NTTFROMBYTES_CORRECT = prove(
              (MAYCHANGE [events] ,,
               MAYCHANGE [memory :> bytes(r, 512)] ,,
               MAYCHANGE [RIP] ,, MAYCHANGE [RAX] ,,
-              MAYCHANGE [ZMM0; ZMM1; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
                          ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15])`,
 
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
@@ -370,7 +372,7 @@ let MLKEM_NTTFROMBYTES_CORRECT = prove(
 
   ASM_CASES_TAC `LENGTH(l:(12 word) list) = 256` THENL
    [ASM_REWRITE_TAC[] THEN ENSURES_INIT_TAC "s0";
-    X86_SIM_TAC mlkem_frombytes_TMC_EXEC (1--147)] THEN
+    X86_SIM_UNTIL_TARGET_PC_TAC mlkem_frombytes_TMC_EXEC] THEN
 
   (*** Restructure from 12-bit words to 256-bit chunks ***)
 
@@ -414,9 +416,9 @@ let MLKEM_NTTFROMBYTES_CORRECT = prove(
 
   (*** Simulate and simplify ***)
 
-  MAP_EVERY (fun n -> X86_STEPS_TAC mlkem_frombytes_TMC_EXEC [n] THEN
+  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC mlkem_frombytes_TMC_EXEC [n] THEN
                       SIMD_SIMPLIFY_TAC[])
-            (1--147) THEN
+            1 THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
   (*** Final reasoning ***)
@@ -530,7 +532,7 @@ let MLKEM_NTTFROMBYTES_SAFE = time prove
               MAYCHANGE [RIP] ,,
               MAYCHANGE [RAX] ,,
               MAYCHANGE
-              [ZMM0; ZMM1; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+              [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
                ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15])`,
   ASSERT_CONCL_TAC full_spec THEN
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN

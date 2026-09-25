@@ -221,6 +221,7 @@ MLK_ASM_FN_SYMBOL(reduce_avx2_asm)
         vmovdqa %ymm7, 0x1a0(%rdi)
         vmovdqa %ymm8, 0x1c0(%rdi)
         vmovdqa %ymm9, 0x1e0(%rdi)
+        vzeroupper
         retq
         .cfi_endproc
 

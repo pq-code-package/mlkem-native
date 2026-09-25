@@ -192,6 +192,7 @@ MLK_ASM_FN_SYMBOL(ntttobytes_avx2_asm)
         vmovdqu %ymm8, 0x120(%rdi)
         vmovdqu %ymm3, 0x140(%rdi)
         vmovdqu %ymm9, 0x160(%rdi)
+        vzeroupper
         retq
         .cfi_endproc
 

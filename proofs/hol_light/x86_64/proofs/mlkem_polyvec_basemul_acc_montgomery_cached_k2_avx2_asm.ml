@@ -9,6 +9,7 @@
 
 (* Load base theories for x86_64 from s2n-bignum *)
 needs "s2n_bignum/x86/proofs/base.ml";;
+needs "mlkem_native/x86_64/proofs/mlkem_utils.ml";;
 
 needs "mlkem_native/common/mlkem_specs.ml";;
 
@@ -797,6 +798,7 @@ let mlkem_basemul_k2_mc =
                            (* VMOVDQA (Memop Word256 (%% (rdi,448))) (%_% ymm7) *)
   0xc5; 0x7d; 0x7f; 0x8f; 0xe0; 0x01; 0x00; 0x00;
                            (* VMOVDQA (Memop Word256 (%% (rdi,480))) (%_% ymm9) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -951,7 +953,7 @@ let MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORRECT = prove(
               (MAYCHANGE [events] ,,
                MAYCHANGE [RIP] ,, MAYCHANGE [RAX] ,,
                MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
-                          ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14] ,,
+                          ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
                MAYCHANGE [memory :> bytes(dst, 512)])`,
 
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
@@ -976,9 +978,9 @@ let MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORRECT = prove(
   DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes16 any) s = x`] THEN
   REPEAT STRIP_TAC THEN
 
-  MAP_EVERY (fun n -> X86_STEPS_TAC mlkem_basemul_k2_tmc_EXEC [n] THEN
+  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC mlkem_basemul_k2_tmc_EXEC [n] THEN
                       SIMD_SIMPLIFY_TAC [montmul_x86; montmul_odd_x86])
-            (1--470) THEN
+            1 THEN
 
   ENSURES_FINAL_STATE_TAC THEN
   ASM_REWRITE_TAC[] THEN
@@ -997,7 +999,7 @@ let MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_CORRECT = prove(
            DEPTH_CONV let_CONV) THEN
   ASM_REWRITE_TAC[WORD_ADD_0] THEN
 
-  DISCARD_STATE_TAC "s470" THEN
+  DISCARD_MATCHING_ASSUMPTIONS [`read c s = x`] THEN
 
   REPEAT CONJ_TAC THEN
   REWRITE_TAC[pmulaccred0; pmulacc0; pmul0; pmulaccred0_odd;
@@ -1233,7 +1235,7 @@ let MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_SAFE = time prove
               MAYCHANGE [RAX] ,,
               MAYCHANGE
               [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
-               ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14] ,,
+               ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
               MAYCHANGE [memory :> bytes (dst,512)])`,
   ASSERT_CONCL_TAC full_spec THEN
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN

@@ -9,6 +9,7 @@
 
 (* Load base theories for x86_64 from s2n-bignum *)
 needs "s2n_bignum/x86/proofs/base.ml";;
+needs "mlkem_native/x86_64/proofs/mlkem_utils.ml";;
 
 needs "mlkem_native/common/mlkem_specs.ml";;
 
@@ -176,6 +177,7 @@ let mlkem_tomont_mc =
                            (* VMOVDQA (Memop Word256 (%% (rdi,448))) (%_% ymm9) *)
   0xc5; 0x7d; 0x7f; 0x97; 0xe0; 0x01; 0x00; 0x00;
                            (* VMOVDQA (Memop Word256 (%% (rdi,480))) (%_% ymm10) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -244,9 +246,9 @@ let MLKEM_TOMONT_CORRECT = prove(
   STRIP_TAC THEN
 
   (* Symbolic execution *)
-  MAP_EVERY (fun n -> X86_STEPS_TAC mlkem_tomont_TMC_EXEC [n] THEN
+  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC mlkem_tomont_TMC_EXEC [n] THEN
                       SIMD_SIMPLIFY_TAC[ntt_montmul])
-            (1--105) THEN
+            1 THEN
 
   ENSURES_FINAL_STATE_TAC THEN
   REPEAT CONJ_TAC THEN

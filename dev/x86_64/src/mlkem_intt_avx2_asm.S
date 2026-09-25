@@ -309,6 +309,7 @@ intt_levels0t5 1
 
 intt_level6 0
 intt_level6 1
+vzeroupper
 ret
 
 /* simpasm: footer-start */

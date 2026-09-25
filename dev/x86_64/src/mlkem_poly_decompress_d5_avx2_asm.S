@@ -110,6 +110,7 @@ decompress_d5_iter 130, 416
 decompress_d5_iter 140, 448
 decompress_d5_iter 150, 480
 
+vzeroupper
 ret
 
 /* simpasm: footer-start */

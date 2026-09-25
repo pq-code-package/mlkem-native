@@ -473,6 +473,7 @@ LLmlk_keccak_f1600_x4_avx2:
         vmovhpd %xmm3, 0x188(%rdi)
         vmovq %xmm15, 0x250(%rdi)
         vmovhpd %xmm15, 0x318(%rdi)
+        vzeroupper
         movq %r11, %rsp
         .cfi_def_cfa_register %rsp
         retq

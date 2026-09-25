@@ -204,6 +204,7 @@ MLK_ASM_FN_SYMBOL(nttfrombytes_avx2_asm)
         vmovdqa %ymm14, 0x1a0(%rdi)
         vmovdqa %ymm15, 0x1c0(%rdi)
         vmovdqa %ymm1, 0x1e0(%rdi)
+        vzeroupper
         retq
         .cfi_endproc
 

@@ -74,6 +74,7 @@ mulcache_compute_iter 1
 mulcache_compute_iter 2
 mulcache_compute_iter 3
 
+vzeroupper
 ret
 
 /* simpasm: footer-start */
