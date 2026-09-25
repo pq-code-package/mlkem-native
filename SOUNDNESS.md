@@ -302,7 +302,8 @@ for mlkem-native.
 For each assembly function, the CBMC specification is typically a subset of the HOL Light
 specification obtained by removing aspects of functional correctness -- which, as discussed
 above, are not yet covered in CBMC. What remains are statements about memory footprint,
-arithmetic bounds, and constant tables.
+arithmetic bounds, and constant tables. Further, memory alignment constraints cannot be
+faithfully expressed in CBMC's object model, and are currently omitted.
 
 **Example.** For the AArch64 NTT:
 
@@ -339,9 +340,15 @@ from the actual register/stack layout used by the assembly. And a semantic gap b
 CBMC contract language and HOL Light's logic -- for example, differing signed vs. unsigned
 interpretation of bounds -- could cause the bridge to be unsound.
 
+Finally, HOL Light alignment assumptions are not checked against callers. For example, the
+x86_64 `ntttobytes` and `nttfrombytes` specifications used to require an aligned byte buffer,
+which callers do not guarantee.
+
 **Potential improvements.**
 - Establish a machine-checked link between the HOL Light specifications and the CBMC
   contracts. ([#1601](https://github.com/pq-code-package/mlkem-native/issues/1601))
+- Check alignment in CBMC via the pointer offset within the enclosing object.
+  ([#1932](https://github.com/pq-code-package/mlkem-native/issues/1932))
 
 ---
 
