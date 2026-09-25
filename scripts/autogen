@@ -2594,6 +2594,10 @@ def k_generic(c):
     return not k_specific(c) and c != "mlkem/mlkem_native_config.h"
 
 
+def is_sys_h(c):
+    return c.endswith("src/sys.h")
+
+
 def gen_macro_undefs(extra_notes=None):
     if extra_notes is None:
         extra_notes = []
@@ -2618,7 +2622,11 @@ def gen_macro_undefs(extra_notes=None):
     yield "#if !defined(MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS)"
     yield from gen_monolithic_undef_all_core(
         filt=lambda c: (
-            not native(c) and k_generic(c) and not fips202(c) and "cbmc.h" not in c
+            not native(c)
+            and k_generic(c)
+            and not fips202(c)
+            and "cbmc.h" not in c
+            and not is_sys_h(c)
         ),
         desc="MLK_CONFIG_PARAMETER_SET-generic files",
     )
@@ -2678,6 +2686,8 @@ def gen_macro_undefs(extra_notes=None):
     )
     yield "#endif"
     yield "#endif"
+    # sys.h last: the native sections above are guarded by its MLK_SYS_* macros
+    yield from gen_monolithic_undef_all_core(filt=is_sys_h, desc="")
     yield "#endif"
     yield ""
 
