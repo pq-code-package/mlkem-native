@@ -217,12 +217,11 @@
  *
  * Build-only configuration options
  *
- * The remaining configurations are build-options only.
- * They do not affect the API described in mlkem_native.h.
+ * The remaining configurations only affect the build, not the API
+ * described in mlkem_native.h.
  *
  *****************************************************************************/
 
-#if defined(MLK_BUILD_INTERNAL)
 /**
  * MLK_CONFIG_MULTILEVEL_WITH_SHARED
  *
@@ -671,8 +670,6 @@ static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
 /* #define MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
 /*************************  Config internals  ********************************/
-
-#endif /* MLK_BUILD_INTERNAL */
 
 /* Default namespace
  *
