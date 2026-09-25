@@ -532,7 +532,7 @@
 #define MLK_CUSTOM_FREE(v, T, N) _aligned_free(v)
 #else /* _WIN32 */
 #include <stdlib.h>
-static inline void *mlk_posix_memalign(size_t align, size_t sz)
+MLK_STATIC inline void *mlk_posix_memalign(size_t align, size_t sz)
 {
   void *ptr = NULL;
   if (posix_memalign(&ptr, align, sz) != 0)

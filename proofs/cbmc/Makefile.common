@@ -668,8 +668,6 @@ endif
 
 DEFINES += -DMLK_CONFIG_FILE="\"mlkem_native_config_cbmc.h\""
 DEFINES += -DMLK_CONFIG_PARAMETER_SET=$(MLK_CONFIG_PARAMETER_SET)
-# Give visibility to all static functions
-DEFINES += -Dstatic=
 DEFINES += -DMLK_INLINE=
 DEFINES += -DMLK_ALWAYS_INLINE=
 

@@ -22,10 +22,9 @@
 
 typedef mlk_shake128x4ctx mlk_shake256x4_ctx;
 
-static void mlk_keccak_absorb_once_x4(uint64_t *s, unsigned r,
-                                      const uint8_t *in0, const uint8_t *in1,
-                                      const uint8_t *in2, const uint8_t *in3,
-                                      size_t inlen, uint8_t p)
+MLK_STATIC void mlk_keccak_absorb_once_x4(
+    uint64_t *s, unsigned r, const uint8_t *in0, const uint8_t *in1,
+    const uint8_t *in2, const uint8_t *in3, size_t inlen, uint8_t p)
 __contract__(
   requires(inlen <= MLK_MAX_BUFFER_SIZE)
   requires(memory_no_alias(s, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY))
@@ -77,9 +76,10 @@ __contract__(
   }
 }
 
-static void mlk_keccak_squeezeblocks_x4(uint8_t *out0, uint8_t *out1,
-                                        uint8_t *out2, uint8_t *out3,
-                                        size_t nblocks, uint64_t *s, unsigned r)
+MLK_STATIC void mlk_keccak_squeezeblocks_x4(uint8_t *out0, uint8_t *out1,
+                                            uint8_t *out2, uint8_t *out3,
+                                            size_t nblocks, uint64_t *s,
+                                            unsigned r)
 __contract__(
     requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)
     requires(r == SHAKE128_RATE || r == SHAKE256_RATE)
@@ -142,20 +142,21 @@ void mlk_shake128x4_release(mlk_shake128x4ctx *state)
   mlk_zeroize(state, sizeof(mlk_shake128x4ctx));
 }
 
-static void mlk_shake256x4_absorb_once(mlk_shake256x4_ctx *state,
-                                       const uint8_t *in0, const uint8_t *in1,
-                                       const uint8_t *in2, const uint8_t *in3,
-                                       size_t inlen)
+MLK_STATIC void mlk_shake256x4_absorb_once(mlk_shake256x4_ctx *state,
+                                           const uint8_t *in0,
+                                           const uint8_t *in1,
+                                           const uint8_t *in2,
+                                           const uint8_t *in3, size_t inlen)
 {
   mlk_memset(state, 0, sizeof(mlk_shake128x4ctx));
   mlk_keccak_absorb_once_x4(state->ctx, SHAKE256_RATE, in0, in1, in2, in3,
                             inlen, 0x1F);
 }
 
-static void mlk_shake256x4_squeezeblocks(uint8_t *out0, uint8_t *out1,
-                                         uint8_t *out2, uint8_t *out3,
-                                         size_t nblocks,
-                                         mlk_shake256x4_ctx *state)
+MLK_STATIC void mlk_shake256x4_squeezeblocks(uint8_t *out0, uint8_t *out1,
+                                             uint8_t *out2, uint8_t *out3,
+                                             size_t nblocks,
+                                             mlk_shake256x4_ctx *state)
 {
   mlk_keccak_squeezeblocks_x4(out0, out1, out2, out3, nblocks, state->ctx,
                               SHAKE256_RATE);

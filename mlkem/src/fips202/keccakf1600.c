@@ -80,12 +80,10 @@ void mlk_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
 #endif /* !MLK_SYS_LITTLE_ENDIAN */
 }
 
-static void mlk_keccakf1600x4_extract_bytes_c(uint64_t *state,
-                                              unsigned char *data0,
-                                              unsigned char *data1,
-                                              unsigned char *data2,
-                                              unsigned char *data3,
-                                              unsigned offset, unsigned length)
+MLK_STATIC void mlk_keccakf1600x4_extract_bytes_c(
+    uint64_t *state, unsigned char *data0, unsigned char *data1,
+    unsigned char *data2, unsigned char *data3, unsigned offset,
+    unsigned length)
 __contract__(
     requires(0 <= offset && offset <= MLK_KECCAK_LANES * sizeof(uint64_t) &&
          0 <= length && length <= MLK_KECCAK_LANES * sizeof(uint64_t) - offset)
@@ -127,12 +125,12 @@ void mlk_keccakf1600x4_extract_bytes(uint64_t *state, unsigned char *data0,
                                     length);
 }
 
-static void mlk_keccakf1600x4_xor_bytes_c(uint64_t *state,
-                                          const unsigned char *data0,
-                                          const unsigned char *data1,
-                                          const unsigned char *data2,
-                                          const unsigned char *data3,
-                                          unsigned offset, unsigned length)
+MLK_STATIC void mlk_keccakf1600x4_xor_bytes_c(uint64_t *state,
+                                              const unsigned char *data0,
+                                              const unsigned char *data1,
+                                              const unsigned char *data2,
+                                              const unsigned char *data3,
+                                              unsigned offset, unsigned length)
 __contract__(
     requires(0 <= offset && offset <= MLK_KECCAK_LANES * sizeof(uint64_t) &&
          0 <= length && length <= MLK_KECCAK_LANES * sizeof(uint64_t) - offset)
@@ -204,8 +202,7 @@ static const uint64_t mlk_KeccakF_RoundConstants[MLK_KECCAK_NROUNDS] = {
     (uint64_t)0x8000000080008081ULL, (uint64_t)0x8000000000008080ULL,
     (uint64_t)0x0000000080000001ULL, (uint64_t)0x8000000080008008ULL};
 
-MLK_STATIC_TESTABLE
-void mlk_keccakf1600_permute_c(uint64_t *state)
+MLK_STATIC void mlk_keccakf1600_permute_c(uint64_t *state)
 __contract__(
     requires(memory_no_alias(state, sizeof(uint64_t) * MLK_KECCAK_LANES))
     assigns(memory_slice(state, sizeof(uint64_t) * MLK_KECCAK_LANES))

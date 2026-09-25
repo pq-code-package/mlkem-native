@@ -642,7 +642,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../mlkem/src/sys.h"
-static MLK_INLINE int mlk_break_pct(void)
+MLK_STATIC MLK_INLINE int mlk_break_pct(void)
 {
   /* Break PCT if and only if MLK_BREAK_PCT is set to 1 */
   const char *val = getenv("MLK_BREAK_PCT");

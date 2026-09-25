@@ -487,7 +487,7 @@
 #error This configuration is only suitable for Linux/AArch64 systems
 #endif
 
-static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
+MLK_STATIC MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
 {
   if (cap == MLK_SYS_CAP_AARCH64_NEON)
   {

@@ -450,7 +450,7 @@
 #include <stdint.h>
 #include "../mlkem/src/sys.h"
 #include "notrandombytes/notrandombytes.h"
-static MLK_INLINE int mlk_randombytes(uint8_t *ptr, size_t len)
+MLK_STATIC MLK_INLINE int mlk_randombytes(uint8_t *ptr, size_t len)
 {
   return randombytes(ptr, len);
 }

@@ -51,8 +51,8 @@
  * @param      p    Domain-separation byte for different Keccak-derived
  *                  functions.
  */
-static void mlk_keccak_absorb_once(uint64_t *s, unsigned r, const uint8_t *m,
-                                   size_t mlen, uint8_t p)
+MLK_STATIC void mlk_keccak_absorb_once(uint64_t *s, unsigned r,
+                                       const uint8_t *m, size_t mlen, uint8_t p)
 __contract__(
     requires(mlen <= MLK_MAX_BUFFER_SIZE)
     requires(r > 0)
@@ -111,8 +111,8 @@ __contract__(
  * @param[in,out] s       Input/output state.
  * @param         r       Rate in bytes (e.g., 168 for SHAKE128).
  */
-static void mlk_keccak_squeezeblocks(uint8_t *h, size_t nblocks, uint64_t *s,
-                                     unsigned r)
+MLK_STATIC void mlk_keccak_squeezeblocks(uint8_t *h, size_t nblocks,
+                                         uint64_t *s, unsigned r)
 __contract__(
     requires(r <= sizeof(uint64_t) * MLK_KECCAK_LANES)
     requires(nblocks <= 8 /* somewhat arbitrary bound */)
@@ -147,8 +147,8 @@ __contract__(
  * @param[in,out] s      Keccak state.
  * @param         r      Rate in bytes (e.g., 168 for SHAKE128).
  */
-static void mlk_keccak_squeeze_once(uint8_t *h, size_t outlen, uint64_t *s,
-                                    unsigned r)
+MLK_STATIC void mlk_keccak_squeeze_once(uint8_t *h, size_t outlen, uint64_t *s,
+                                        unsigned r)
 __contract__(
     requires(outlen <= MLK_MAX_BUFFER_SIZE)
     requires(r > 0)

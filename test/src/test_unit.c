@@ -38,7 +38,7 @@
 #define MAX_INTT_CONSTANT_COEFF INT16_MAX
 #endif
 
-/* Declarations for _c functions exposed by MLK_STATIC_TESTABLE= */
+/* Declarations for _c functions exposed by MLK_STATIC= */
 
 void mlk_poly_reduce_c(mlk_poly *r);
 #if !defined(MLK_CONFIG_NO_KEYPAIR_API)

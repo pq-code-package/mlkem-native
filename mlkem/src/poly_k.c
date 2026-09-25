@@ -157,7 +157,7 @@ void mlk_polyvec_invntt_tomont(mlk_polyvec *r)
  *              at the end. The reference implementation uses 2 * MLKEM_K
  *              more modular reductions since it reduces after every modular
  *              multiplication. */
-MLK_STATIC_TESTABLE void mlk_polyvec_basemul_acc_montgomery_cached_c(
+MLK_STATIC void mlk_polyvec_basemul_acc_montgomery_cached_c(
     mlk_poly *r, const mlk_polyvec *a, const mlk_polyvec *b,
     const mlk_polyvec_mulcache *b_cache)
 __contract__(
@@ -319,7 +319,7 @@ void mlk_polyvec_tomont(mlk_polyvec *r)
  * @param[out] r   Output polynomial.
  * @param[in]  buf Input byte array.
  */
-static MLK_INLINE void mlk_poly_cbd_eta1(
+MLK_STATIC MLK_INLINE void mlk_poly_cbd_eta1(
     mlk_poly *r, const uint8_t buf[MLKEM_ETA1 * MLKEM_N / 4])
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_poly)))
@@ -412,7 +412,7 @@ void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
  * @param[out] r   Output polynomial.
  * @param[in]  buf Input byte array.
  */
-static MLK_INLINE void mlk_poly_cbd_eta2(
+MLK_STATIC MLK_INLINE void mlk_poly_cbd_eta2(
     mlk_poly *r, const uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4])
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_poly)))
