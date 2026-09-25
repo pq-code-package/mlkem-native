@@ -9,6 +9,7 @@
 
 (* Load base theories for x86_64 from s2n-bignum *)
 needs "s2n_bignum/x86/proofs/base.ml";;
+needs "mlkem_native/x86_64/proofs/mlkem_utils.ml";;
 
 needs "mlkem_native/x86_64/proofs/mlkem_compress_common.ml";;
 needs "mlkem_native/x86_64/proofs/mlkem_compress_consts.ml";;
@@ -298,6 +299,7 @@ let mlkem_poly_compress_d5_mc =
                            (* VMOVDQU (Memop Word128 (%% (rdi,140))) (%_% xmm7) *)
   0xc5; 0x79; 0x7e; 0x87; 0x9c; 0x00; 0x00; 0x00;
                            (* VMOVD (Memop Doubleword (%% (rdi,156))) (%_% xmm8) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -610,7 +612,8 @@ let MLKEM_POLY_COMPRESS_D5_CORRECT = prove(
            (MAYCHANGE [events] ,,
             MAYCHANGE [memory :> bytes(r, 160)] ,,
             MAYCHANGE [RIP] ,, MAYCHANGE [RAX] ,,
-            MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8])`,
+            MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                       ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15])`,
 
   MAP_EVERY X_GEN_TAC
     [`r:int64`; `a:int64`; `data:int64`; `inlist:(16 word) list`; `pc:num`] THEN
@@ -654,7 +657,7 @@ let MLKEM_POLY_COMPRESS_D5_CORRECT = prove(
 
   (*** Symbolic execution ***)
 
-  MAP_EVERY (fun n -> X86_STEPS_TAC MLKEM_POLY_COMPRESS_D5_TMC_EXEC [n] THEN SIMD_SIMPLIFY_TAC
+  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC MLKEM_POLY_COMPRESS_D5_TMC_EXEC [n] THEN SIMD_SIMPLIFY_TAC
     ([compress_d5_avx2_alt;
      GSYM DECOMPRESS_MULADD_D5;
      GSYM MULADD_32_1_JOIN; GSYM MULADD_1024_1_JOIN;
@@ -666,7 +669,7 @@ let MLKEM_POLY_COMPRESS_D5_CORRECT = prove(
      GSYM BIT_31_ZX_10_32; 
      GSYM BIT_15_ZX_10_32; 
      GSYM MIN_ZX_5_16; GSYM WORD_SUBWORD_ZX;
-     ADD_ASSOC; GSYM (CONV_RULE NUM_REDUCE_CONV BYTES256_JOIN)])) (1 -- 163) THEN
+     ADD_ASSOC; GSYM (CONV_RULE NUM_REDUCE_CONV BYTES256_JOIN)])) 1 THEN
 
   DISCARD_MATCHING_ASSUMPTIONS [`read ymm s = (t : 256 word)`] THEN   
   REWRITE_COMPRESS THEN
@@ -758,7 +761,6 @@ let MLKEM_POLY_COMPRESS_D5_SUBROUTINE_CORRECT = prove(
 (* Constant-time and memory safety proof.                                    *)
 (* ------------------------------------------------------------------------- *)
 
-needs "mlkem_native/x86_64/proofs/mlkem_utils.ml";;
 needs "mlkem_native/x86_64/proofs/subroutine_signatures.ml";;
 
 let full_spec,public_vars = mk_safety_spec
@@ -793,7 +795,8 @@ let MLKEM_POLY_COMPRESS_D5_SAFE = time prove
               MAYCHANGE [memory :> bytes (r,160)] ,,
               MAYCHANGE [RIP] ,,
               MAYCHANGE [RAX] ,,
-              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8])`,
+              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                         ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15])`,
   ASSERT_CONCL_TAC full_spec THEN
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars

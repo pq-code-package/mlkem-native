@@ -237,6 +237,7 @@ MLK_ASM_FN_SYMBOL(poly_compress_d5_avx2_asm)
         vpblendvb %xmm6, %xmm8, %xmm7, %xmm7
         vmovdqu %xmm7, 0x8c(%rdi)
         vmovd %xmm8, 0x9c(%rdi)
+        vzeroupper
         retq
         .cfi_endproc
 

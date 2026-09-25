@@ -730,6 +730,7 @@ MLK_ASM_FN_SYMBOL(invntt_avx2_asm)
         vmovdqa %ymm9, 0x1a0(%rdi)
         vmovdqa %ymm10, 0x1c0(%rdi)
         vmovdqa %ymm11, 0x1e0(%rdi)
+        vzeroupper
         retq
         .cfi_endproc
 

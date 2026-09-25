@@ -155,6 +155,7 @@ compress_d11_iter 416, 286
 compress_d11_iter 448, 308
 compress_d11_iter 480, 330
 
+vzeroupper
 ret
 
 /* simpasm: footer-start */

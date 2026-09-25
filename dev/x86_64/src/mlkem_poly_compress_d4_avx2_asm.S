@@ -142,6 +142,7 @@ compress_d4_iter 128, 32
 compress_d4_iter 256, 64
 compress_d4_iter 384, 96
 
+vzeroupper
 ret
 
 /* simpasm: footer-start */

@@ -9,6 +9,7 @@
 
 (* Load base theories for x86_64 from s2n-bignum *)
 needs "s2n_bignum/x86/proofs/base.ml";;
+needs "mlkem_native/x86_64/proofs/mlkem_utils.ml";;
 
 needs "mlkem_native/x86_64/proofs/mlkem_compress_common.ml";;
 needs "mlkem_native/x86_64/proofs/mlkem_compress_consts.ml";;
@@ -226,6 +227,7 @@ let mlkem_poly_decompress_d4_mc =
                            (* VPMULHRSW (%_% ymm4) (%_% ymm4) (%_% ymm0) *)
   0xc5; 0xfe; 0x7f; 0xa7; 0xe0; 0x01; 0x00; 0x00;
                            (* VMOVDQU (Memop Word256 (%% (rdi,480))) (%_% ymm4) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -332,7 +334,8 @@ let MLKEM_POLY_DECOMPRESS_D4_CORRECT = prove(
            (MAYCHANGE [events] ,,
             MAYCHANGE [memory :> bytes(r, 512)] ,,
             MAYCHANGE [RIP] ,, MAYCHANGE [RAX] ,,
-            MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4])`,
+            MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                       ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15])`,
   MAP_EVERY X_GEN_TAC
     [`r:int64`; `a:int64`; `data:int64`; `inlist:(4 word) list`; `pc:num`] THEN
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
@@ -361,8 +364,8 @@ let MLKEM_POLY_DECOMPRESS_D4_CORRECT = prove(
   REWRITE_TAC[GSYM BYTES256_WBYTES] THEN STRIP_TAC THEN
 
   (*** Symbolic execution ***)
-  MAP_EVERY (fun n -> X86_STEPS_TAC MLKEM_POLY_DECOMPRESS_D4_TMC_EXEC [n] THEN SIMD_SIMPLIFY_TAC (map GSYM (WORD_MUL_2EXP @ WORD_MUL_2EXP_3329))
-                      THEN SIMP_DECOMPRESS_D4_TAC) (1--122) THEN
+  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC MLKEM_POLY_DECOMPRESS_D4_TMC_EXEC [n] THEN SIMD_SIMPLIFY_TAC (map GSYM (WORD_MUL_2EXP @ WORD_MUL_2EXP_3329))
+                      THEN SIMP_DECOMPRESS_D4_TAC) 1 THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
   (* Gather some derived preconditions for the length of sublists *)
@@ -452,7 +455,6 @@ let MLKEM_POLY_DECOMPRESS_D4_SUBROUTINE_CORRECT = prove(
 (* Constant-time and memory safety proof.                                    *)
 (* ------------------------------------------------------------------------- *)
 
-needs "mlkem_native/x86_64/proofs/mlkem_utils.ml";;
 needs "mlkem_native/x86_64/proofs/subroutine_signatures.ml";;
 
 let full_spec,public_vars = mk_safety_spec
@@ -487,7 +489,8 @@ let MLKEM_POLY_DECOMPRESS_D4_SAFE = time prove
               MAYCHANGE [memory :> bytes (r,512)] ,,
               MAYCHANGE [RIP] ,,
               MAYCHANGE [RAX] ,,
-              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4])`,
+              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                         ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15])`,
   ASSERT_CONCL_TAC full_spec THEN
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars
