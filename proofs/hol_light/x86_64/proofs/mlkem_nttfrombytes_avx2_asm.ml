@@ -338,7 +338,6 @@ let DIMINDEX_12 = DIMINDEX_CONV `dimindex(:12)`;;
 
 let MLKEM_NTTFROMBYTES_CORRECT = prove(
     `!r a (l:(12 word) list) pc.
-        aligned 32 a /\
         aligned 32 r /\
         nonoverlapping (word pc, LENGTH mlkem_frombytes_tmc) (a, 384) /\
         nonoverlapping (word pc, LENGTH mlkem_frombytes_tmc) (r, 512) /\
@@ -441,7 +440,6 @@ let MLKEM_NTTFROMBYTES_CORRECT = prove(
 
 let MLKEM_NTTFROMBYTES_NOIBT_SUBROUTINE_CORRECT = prove(
     `!r a (l:(12 word) list) pc.
-        aligned 32 a /\
         aligned 32 r /\
         nonoverlapping (word pc, LENGTH mlkem_frombytes_tmc) (a, 384) /\
         nonoverlapping (word pc, LENGTH mlkem_frombytes_tmc) (r, 512) /\
@@ -470,7 +468,6 @@ let MLKEM_NTTFROMBYTES_NOIBT_SUBROUTINE_CORRECT = prove(
 
 let MLKEM_NTTFROMBYTES_SUBROUTINE_CORRECT = prove(
     `!r a (l:(12 word) list) pc.
-        aligned 32 a /\
         aligned 32 r /\
         nonoverlapping (word pc, LENGTH mlkem_frombytes_mc) (a, 384) /\
         nonoverlapping (word pc, LENGTH mlkem_frombytes_mc) (r, 512) /\
@@ -508,7 +505,6 @@ let full_spec,public_vars = mk_safety_spec
 let MLKEM_NTTFROMBYTES_SAFE = time prove
  (`exists f_events.
        forall e r a pc.
-           aligned 32 a /\
            aligned 32 r /\
            nonoverlapping (word pc,LENGTH mlkem_frombytes_tmc) (a,384) /\
            nonoverlapping (word pc,LENGTH mlkem_frombytes_tmc) (r,512) /\
@@ -539,7 +535,6 @@ let MLKEM_NTTFROMBYTES_SAFE = time prove
 let MLKEM_NTTFROMBYTES_NOIBT_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e r a pc stackpointer returnaddress.
-          aligned 32 a /\
           aligned 32 r /\
           nonoverlapping (word pc, LENGTH mlkem_frombytes_tmc) (a, 384) /\
           nonoverlapping (word pc, LENGTH mlkem_frombytes_tmc) (r, 512) /\
@@ -570,7 +565,6 @@ let MLKEM_NTTFROMBYTES_NOIBT_SUBROUTINE_SAFE = time prove
 let MLKEM_NTTFROMBYTES_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e r a pc stackpointer returnaddress.
-          aligned 32 a /\
           aligned 32 r /\
           nonoverlapping (word pc, LENGTH mlkem_frombytes_mc) (a, 384) /\
           nonoverlapping (word pc, LENGTH mlkem_frombytes_mc) (r, 512) /\
