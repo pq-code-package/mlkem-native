@@ -338,12 +338,11 @@ jobs:
            shell: gcc15
            opt: all
            examples: true
-         # TODO: re-add once gcc16 is no longer broken in nixpkgs-unstable
-         # - family: gcc
-         #   version: "16"
-         #   shell: gcc16
-         #   opt: all
-         #   examples: true
+         - family: gcc
+           version: "16"
+           shell: gcc16
+           opt: all
+           examples: true
          - family: clang
            version: "18"
            shell: clang18

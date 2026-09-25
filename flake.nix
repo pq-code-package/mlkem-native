@@ -198,7 +198,8 @@
           devShells.gcc13 = util.mkShellWithCC' pkgs.gcc13;
           devShells.gcc14 = util.mkShellWithCC' pkgs.gcc14;
           devShells.gcc15 = util.mkShellWithCC' pkgs.gcc15;
-          devShells.gcc16 = util.mkShellWithCC' pkgs.gcc16;
+          # TODO: switch back to pkgs.gcc16 once it builds on darwin in nixpkgs 26.05
+          devShells.gcc16 = util.mkShellWithCC' pkgs-unstable.gcc16;
 
           # valgrind with a patch for detecting variable-latency instructions
           devShells.valgrind-varlat_clang19 = util.mkShellWithCC_valgrind' pkgs.clang_19;
