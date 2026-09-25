@@ -121,6 +121,13 @@
 #endif
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 
+/* Mark the stack non-executable even if no assembly is included above */
+#if defined(__ELF__)
+/* clang-format off */
+.section .note.GNU-stack,"",%progbits
+/* clang-format on */
+#endif
+
 
 /* Macro #undef's
  *

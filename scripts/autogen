@@ -2870,6 +2870,13 @@ def gen_monolithic_asm_file():
         yield "#endif"
         yield "#endif"
         yield ""
+        yield "/* Mark the stack non-executable even if no assembly is included above */"
+        yield "#if defined(__ELF__)"
+        yield "/* clang-format off */"
+        yield '.section .note.GNU-stack,"",%progbits'
+        yield "/* clang-format on */"
+        yield "#endif"
+        yield ""
         # We generate #undef's for all headers, even though most are not
         # included by the assembly files. This does not harm, and avoids
         # having to trace which headers are being pulled in from common.h
