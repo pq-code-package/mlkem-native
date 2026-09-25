@@ -20,7 +20,7 @@ MLK_INTERNAL_DATA_DECLARATION const uint8_t mlk_rej_uniform_table[4096];
 #define mlk_rej_uniform_avx2_asm MLK_NAMESPACE(rej_uniform_avx2_asm)
 MLK_MUST_CHECK_RETURN_VALUE MLK_SYSV_ABI
 uint64_t mlk_rej_uniform_avx2_asm(int16_t *r, const uint8_t *buf,
-                                  unsigned buflen, const uint8_t *table)
+                                  uint64_t buflen, const uint8_t *table)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/mlkem_rej_uniform_avx2_asm.ml. */
 __contract__(
