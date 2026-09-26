@@ -6,7 +6,7 @@
 /*yaml
   Name: rej_uniform_aarch64_asm
   Description: Run rejection sampling on uniform random bytes to generate uniform random integers mod q
-  Signature: uint64_t mlk_rej_uniform_aarch64_asm(int16_t r[256], const uint8_t *buf, unsigned buflen, const uint8_t table[4096])
+  Signature: uint64_t mlk_rej_uniform_aarch64_asm(int16_t r[256], const uint8_t *buf, uint64_t buflen, const uint8_t table[4096])
   ABI:
     Architecture: aarch64
     CallingConvention: AAPCS64
@@ -25,7 +25,7 @@
       description: Input buffer
     x2:
       type: scalar
-      c_parameter: unsigned buflen
+      c_parameter: uint64_t buflen
       description: Length of input buffer (must be multiple of 24)
       test_with: 504  # MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE
     x3:

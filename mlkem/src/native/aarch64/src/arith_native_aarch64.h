@@ -168,7 +168,7 @@ __contract__(
 #define mlk_rej_uniform_aarch64_asm MLK_NAMESPACE(rej_uniform_aarch64_asm)
 MLK_MUST_CHECK_RETURN_VALUE
 uint64_t mlk_rej_uniform_aarch64_asm(int16_t r[256], const uint8_t *buf,
-                                     unsigned buflen, const uint8_t table[4096])
+                                     uint64_t buflen, const uint8_t table[4096])
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/mlkem_rej_uniform_aarch64_asm.ml. */
 __contract__(
