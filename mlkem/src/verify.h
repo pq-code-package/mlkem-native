@@ -345,7 +345,7 @@ __contract__(
   ensures((return_value == 0) == forall(i, 0, len, (a[i] == b[i]))))
 {
   uint8_t r = 0, s = 0;
-  unsigned i;
+  size_t i;
 
   for (i = 0; i < len; i++)
   __loop__(
