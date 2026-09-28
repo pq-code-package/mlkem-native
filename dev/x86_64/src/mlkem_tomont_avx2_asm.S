@@ -101,6 +101,7 @@ vpbroadcastd %xmm2, %ymm2
 tomont_128_coefficients 0
 tomont_128_coefficients 2*128
 
+vzeroupper
 ret
 
 /* simpasm: footer-start */

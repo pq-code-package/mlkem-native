@@ -5,6 +5,7 @@
 
 (* Load base theories for x86_64 from s2n-bignum *)
 needs "s2n_bignum/x86/proofs/base.ml";;
+needs "mlkem_native/x86_64/proofs/mlkem_utils.ml";;
 
 needs "mlkem_native/common/mlkem_specs.ml";;
 needs "mlkem_native/x86_64/proofs/mlkem_zetas.ml";;
@@ -107,6 +108,7 @@ let mlkem_mulcache_compute_mc = define_assert_from_elf "mlkem_mulcache_compute_m
                            (* VMOVDQA (Memop Word256 (%% (rdi,192))) (%_% ymm7) *)
   0xc5; 0x7d; 0x7f; 0x87; 0xe0; 0x00; 0x00; 0x00;
                            (* VMOVDQA (Memop Word256 (%% (rdi,224))) (%_% ymm8) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -164,7 +166,8 @@ let MLKEM_POLY_MULCACHE_COMPUTE_CORRECT = prove(
                       (ival zi == avx2_mulcache (ival o x) i) (mod &3329) /\
                       (abs(ival zi) <= &3328))
           (MAYCHANGE [events] ,,
-           MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8; ZMM9; ZMM10] ,,
+           MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                      ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
            MAYCHANGE [RIP] ,, MAYCHANGE [RAX] ,,
            MAYCHANGE [memory :> bytes(r, 256)])`,
 
@@ -203,9 +206,9 @@ let MLKEM_POLY_MULCACHE_COMPUTE_CORRECT = prove(
   DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes16 a) s = x`] THEN
   CONV_TAC(LAND_CONV WORD_REDUCE_CONV) THEN STRIP_TAC THEN
 
-  MAP_EVERY (fun n -> X86_STEPS_TAC MLKEM_POLY_MULCACHE_COMPUTE_TMC_EXEC [n] THEN
+  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC MLKEM_POLY_MULCACHE_COMPUTE_TMC_EXEC [n] THEN
                       SIMD_SIMPLIFY_TAC[ntt_montmul_alt])
-        (1--59) THEN
+        1 THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
   (* Reverse restructuring *)
@@ -369,7 +372,7 @@ let MLKEM_POLY_MULCACHE_COMPUTE_SAFE = time prove
                            [a,512; zetas,LENGTH qdata_full * 2; r,256] [r,256]))
                (MAYCHANGE [events] ,,
               MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
-                         ZMM8; ZMM9; ZMM10] ,,
+                         ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
               MAYCHANGE [RIP] ,,
               MAYCHANGE [RAX] ,,
               MAYCHANGE [memory :> bytes (r,256)])`,

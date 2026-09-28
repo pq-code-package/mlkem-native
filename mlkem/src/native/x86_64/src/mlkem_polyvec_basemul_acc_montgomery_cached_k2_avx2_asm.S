@@ -523,6 +523,7 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k2_avx2_asm)
         vpaddw %ymm9, %ymm10, %ymm9
         vmovdqa %ymm7, 0x1c0(%rdi)
         vmovdqa %ymm9, 0x1e0(%rdi)
+        vzeroupper
         retq
         .cfi_endproc
 

@@ -261,6 +261,7 @@ level0  1
 levels1t6 0
 levels1t6 1
 
+vzeroupper
 ret
 
 /* simpasm: footer-start */

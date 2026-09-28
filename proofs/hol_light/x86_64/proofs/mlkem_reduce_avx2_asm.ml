@@ -11,6 +11,7 @@
 needs "s2n_bignum/x86/proofs/base.ml";;
 
 needs "mlkem_native/common/mlkem_specs.ml";;
+needs "mlkem_native/x86_64/proofs/mlkem_utils.ml";;
 
 (* print_literal_from_elf "x86_64/mlkem/mlkem_reduce_avx2_asm.o";; *)
 
@@ -283,6 +284,7 @@ let mlkem_reduce_mc =
                            (* VMOVDQA (Memop Word256 (%% (rdi,448))) (%_% ymm8) *)
   0xc5; 0x7d; 0x7f; 0x8f; 0xe0; 0x01; 0x00; 0x00;
                            (* VMOVDQA (Memop Word256 (%% (rdi,480))) (%_% ymm9) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -366,8 +368,8 @@ let MLKEM_REDUCE_CORRECT = prove(
              (MAYCHANGE [events] ,,
               MAYCHANGE [memory :> bytes(a,512)] ,,
               MAYCHANGE [RIP] ,, MAYCHANGE [RAX] ,,
-              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5;
-                         ZMM6; ZMM7; ZMM8; ZMM9; ZMM12])`,
+              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                         ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15])`,
 
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   REWRITE_TAC[fst mlkem_reduce_TMC_EXEC] THEN
@@ -392,9 +394,8 @@ let MLKEM_REDUCE_CORRECT = prove(
   STRIP_TAC THEN
 
 
-  MAP_EVERY (fun n -> X86_STEPS_TAC mlkem_reduce_TMC_EXEC [n] THEN
-                      SIMD_SIMPLIFY_TAC_LOCAL[barred_x86])
-            (1--166) THEN
+  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC mlkem_reduce_TMC_EXEC [n] THEN
+                                SIMD_SIMPLIFY_TAC_LOCAL[barred_x86]) 1 THEN
 
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
@@ -409,7 +410,8 @@ let MLKEM_REDUCE_CORRECT = prove(
   check (can (term_match [] `read qqq s:int256 = xxx`) o concl))) THEN
 
   CONV_TAC(EXPAND_CASES_CONV THENC ONCE_DEPTH_CONV NUM_MULT_CONV) THEN
-  ASM_REWRITE_TAC[WORD_ADD_0] THEN DISCARD_STATE_TAC "s166" THEN
+  ASM_REWRITE_TAC[WORD_ADD_0] THEN
+  DISCARD_MATCHING_ASSUMPTIONS [`read c s = x`] THEN
   REWRITE_TAC[GSYM barred_x86; overall_lemma4] THEN
   REWRITE_TAC[helper_lemma]
 );;
@@ -503,7 +505,7 @@ let MLKEM_REDUCE_SAFE = time prove
               MAYCHANGE [RAX] ,,
               MAYCHANGE
               [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8; ZMM9;
-               ZMM12])`,
+               ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15])`,
   ASSERT_CONCL_TAC full_spec THEN
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars mlkem_reduce_TMC_EXEC);;

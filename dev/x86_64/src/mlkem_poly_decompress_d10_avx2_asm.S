@@ -118,6 +118,7 @@ decompress_d10_iter 260, 416
 decompress_d10_iter 280, 448
 decompress_d10_iter 300, 480
 
+vzeroupper
 ret
 
 /* simpasm: footer-start */

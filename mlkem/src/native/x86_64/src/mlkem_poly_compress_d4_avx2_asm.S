@@ -179,6 +179,7 @@ MLK_ASM_FN_SYMBOL(poly_compress_d4_avx2_asm)
         vpackuswb %ymm7, %ymm5, %ymm5
         vpermd %ymm5, %ymm4, %ymm5
         vmovdqu %ymm5, 0x60(%rdi)
+        vzeroupper
         retq
         .cfi_endproc
 

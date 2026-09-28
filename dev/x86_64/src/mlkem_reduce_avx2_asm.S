@@ -104,6 +104,7 @@ vpbroadcastd %xmm1, %ymm1
 reduce_128_coefficients 0
 reduce_128_coefficients 128*2
 
+vzeroupper
 ret
 
 /* simpasm: footer-start */

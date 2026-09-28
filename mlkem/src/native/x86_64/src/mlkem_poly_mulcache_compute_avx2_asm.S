@@ -105,6 +105,7 @@ MLK_ASM_FN_SYMBOL(poly_mulcache_compute_avx2_asm)
         vpsubw %ymm10, %ymm8, %ymm8
         vmovdqa %ymm7, 0xc0(%rdi)
         vmovdqa %ymm8, 0xe0(%rdi)
+        vzeroupper
         retq
         .cfi_endproc
 

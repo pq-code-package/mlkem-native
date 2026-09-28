@@ -93,6 +93,7 @@ MLK_ASM_FN_SYMBOL(nttunpack_avx2_asm)
 nttunpack_128_coefficients 0
 nttunpack_128_coefficients 2*128
 
+vzeroupper
 ret
 
 /* simpasm: footer-start */

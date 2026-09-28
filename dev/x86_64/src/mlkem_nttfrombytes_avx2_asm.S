@@ -129,6 +129,7 @@ vpbroadcastd %xmm0, %ymm0
 nttfrombytes_128_coefficients 0, 0
 nttfrombytes_128_coefficients 192, 256
 
+vzeroupper
 ret
 
 /* simpasm: footer-start */

@@ -52,6 +52,7 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k3_avx2_asm)
 
 polyvec_basemul 3
 
+vzeroupper
 ret
 
 /* simpasm: footer-start */
