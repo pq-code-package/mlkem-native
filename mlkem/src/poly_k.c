@@ -319,7 +319,7 @@ void mlk_polyvec_tomont(mlk_polyvec *r)
  * @param[out] r   Output polynomial.
  * @param[in]  buf Input byte array.
  */
-static MLK_INLINE void mlk_poly_cbd_eta1(
+MLK_STATIC_PROVABLE MLK_INLINE void mlk_poly_cbd_eta1(
     mlk_poly *r, const uint8_t buf[MLKEM_ETA1 * MLKEM_N / 4])
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_poly)))
@@ -412,7 +412,7 @@ void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
  * @param[out] r   Output polynomial.
  * @param[in]  buf Input byte array.
  */
-static MLK_INLINE void mlk_poly_cbd_eta2(
+MLK_STATIC_PROVABLE MLK_INLINE void mlk_poly_cbd_eta2(
     mlk_poly *r, const uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4])
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_poly)))
