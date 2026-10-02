@@ -83,7 +83,7 @@ jobs:
     needs: [ base ]
     uses: ./.github/workflows/integration-awslc.yml
     with:
-      commit: v5.8.0
+      commit: v5.11.0
   ct-test:
     name: Constant-time
     permissions:

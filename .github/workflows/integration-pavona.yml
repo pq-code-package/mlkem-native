@@ -67,7 +67,7 @@ jobs:
       - uses: ./.github/actions/setup-pavona
         with:
           pavona-repository: https://github.com/pavona/pavona
-          pavona-commit: 08fe42fd9dba4dc1cbd6e16f87d7c1d946885b48 # main (2026-09-05)
+          pavona-commit: 0677cf18963782bf53e9b49af5d27977f3abf5e4 # main (2026-10-02)
 
       - name: Patch mlkem-native dependency
         run: |
