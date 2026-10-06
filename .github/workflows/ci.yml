@@ -289,37 +289,36 @@ jobs:
            examples: true
          # CPU flags are not correctly passed to the zig assembler
          # https://github.com/ziglang/zig/issues/23576
-         # We therefore only test the C backend
-         #
-         # We omit all examples since there is currently no way to run
-         # only those examples not involving native code.
-         #
-         # zig 0.16 still appears affected on Linux (CPU-feature
-         # predefines look to be dropped in assembler-with-cpp mode).
+         # We therefore only test the C backend and exclude the native
+         # examples.
          - family: zig
            version: "0.10"
            shell: zig0_10
            darwin: False
            opt: no_opt
-           examples: False
+           examples: True
+           extra_args: "--exclude-example monolithic_build_native --exclude-example monolithic_build_multilevel_native --exclude-example multilevel_build_native"
          - family: zig
            version: "0.14"
            shell: zig0_14
            darwin: True
            opt: no_opt
-           examples: False
+           examples: True
+           extra_args: "--exclude-example monolithic_build_native --exclude-example monolithic_build_multilevel_native --exclude-example multilevel_build_native"
          - family: zig
            version: "0.15"
            shell: zig0_15
            darwin: True
            opt: no_opt
-           examples: False
+           examples: True
+           extra_args: "--exclude-example monolithic_build_native --exclude-example monolithic_build_multilevel_native --exclude-example multilevel_build_native"
          - family: zig
            version: "0.16"
            shell: zig0_16
            darwin: True
            opt: no_opt
-           examples: False
+           examples: True
+           extra_args: "--exclude-example monolithic_build_native --exclude-example monolithic_build_multilevel_native --exclude-example multilevel_build_native"
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -338,6 +337,7 @@ jobs:
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
+          extra_args: ${{ matrix.compiler.extra_args }}
           cflags: "${{ matrix.cflags }}"
       - name: native build+functest (C90)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
@@ -352,6 +352,7 @@ jobs:
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
+          extra_args: ${{ matrix.compiler.extra_args }}
           cflags: "-std=c90 ${{ matrix.cflags }}"
       - name: native build+functest (C99)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
@@ -366,6 +367,7 @@ jobs:
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
+          extra_args: ${{ matrix.compiler.extra_args }}
           cflags: "-std=c99 ${{ matrix.cflags }}"
       - name: native build+functest (C11)
         if: ${{ matrix.compiler.darwin || matrix.target.runner != 'macos-latest' }}
@@ -380,6 +382,7 @@ jobs:
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
+          extra_args: ${{ matrix.compiler.extra_args }}
           cflags: "-std=c11 ${{ matrix.cflags }}"
       - name: native build+functest (C17)
         if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
@@ -395,6 +398,7 @@ jobs:
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
+          extra_args: ${{ matrix.compiler.extra_args }}
           cflags: "-std=c17 ${{ matrix.cflags }}"
       - name: native build+functest (C23)
         if: ${{ (matrix.compiler.darwin || matrix.target.runner != 'macos-latest') &&
@@ -410,6 +414,7 @@ jobs:
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
+          extra_args: ${{ matrix.compiler.extra_args }}
           cflags: "-std=c23 ${{ matrix.cflags }}"
   stack_analysis:
     name: Stack analysis (${{ matrix.target.name }}, ${{ matrix.cflags }})
