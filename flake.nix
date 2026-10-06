@@ -196,6 +196,7 @@
           devShells.zig0_14 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_14);
           devShells.zig0_15 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_15);
           devShells.zig0_16 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_16);
+          devShells.zig0_17 = util.mkShellWithCC' (zigWrapCC pkgs-unstable.zig_0_17);
 
           devShells.gcc13 = util.mkShellWithCC' pkgs.gcc13;
           devShells.gcc14 = util.mkShellWithCC' pkgs.gcc14;
