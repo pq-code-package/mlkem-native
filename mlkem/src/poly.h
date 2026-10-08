@@ -55,7 +55,7 @@ typedef struct
  * @return Integer congruent to a * R^-1 modulo MLKEM_Q, with absolute value
  *         <= ceil(|a| / 2^16) + (MLKEM_Q + 1)/2.
  */
-static MLK_ALWAYS_INLINE int16_t mlk_montgomery_reduce(int32_t a)
+MLK_STATIC_PROVABLE MLK_ALWAYS_INLINE int16_t mlk_montgomery_reduce(int32_t a)
 __contract__(
     requires(a < +(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)) &&
              a > -(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)))

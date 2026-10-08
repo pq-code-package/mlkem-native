@@ -86,45 +86,45 @@ extern volatile uint64_t mlk_ct_opt_blocker_u64;
  * Its validity relies on the assumption that the global opt-blocker
  * constant mlk_ct_opt_blocker_u64 is not modified.
  */
-static MLK_INLINE uint64_t mlk_ct_get_optblocker_u64(void)
+MLK_STATIC_PROVABLE MLK_INLINE uint64_t mlk_ct_get_optblocker_u64(void)
 __contract__(ensures(return_value == 0)) { return mlk_ct_opt_blocker_u64; }
 
-static MLK_INLINE uint8_t mlk_ct_get_optblocker_u8(void)
+MLK_STATIC_PROVABLE MLK_INLINE uint8_t mlk_ct_get_optblocker_u8(void)
 __contract__(ensures(return_value == 0)) { return (uint8_t)mlk_ct_get_optblocker_u64(); }
 
-static MLK_INLINE uint32_t mlk_ct_get_optblocker_u32(void)
+MLK_STATIC_PROVABLE MLK_INLINE uint32_t mlk_ct_get_optblocker_u32(void)
 __contract__(ensures(return_value == 0)) { return (uint32_t)mlk_ct_get_optblocker_u64(); }
 
-static MLK_INLINE int32_t mlk_ct_get_optblocker_i32(void)
+MLK_STATIC_PROVABLE MLK_INLINE int32_t mlk_ct_get_optblocker_i32(void)
 __contract__(ensures(return_value == 0)) { return (int32_t)mlk_ct_get_optblocker_u64(); }
 
 /* Opt-blocker based implementation of value barriers */
-static MLK_INLINE uint32_t mlk_value_barrier_u32(uint32_t b)
+MLK_STATIC_PROVABLE MLK_INLINE uint32_t mlk_value_barrier_u32(uint32_t b)
 __contract__(ensures(return_value == b)) { return (b ^ mlk_ct_get_optblocker_u32()); }
 
-static MLK_INLINE int32_t mlk_value_barrier_i32(int32_t b)
+MLK_STATIC_PROVABLE MLK_INLINE int32_t mlk_value_barrier_i32(int32_t b)
 __contract__(ensures(return_value == b)) { return (b ^ mlk_ct_get_optblocker_i32()); }
 
-static MLK_INLINE uint8_t mlk_value_barrier_u8(uint8_t b)
+MLK_STATIC_PROVABLE MLK_INLINE uint8_t mlk_value_barrier_u8(uint8_t b)
 __contract__(ensures(return_value == b)) { return (b ^ mlk_ct_get_optblocker_u8()); }
 
 #else /* !MLK_USE_ASM_VALUE_BARRIER */
 
-static MLK_INLINE uint32_t mlk_value_barrier_u32(uint32_t b)
+MLK_STATIC_PROVABLE MLK_INLINE uint32_t mlk_value_barrier_u32(uint32_t b)
 __contract__(ensures(return_value == b))
 {
   __asm__ volatile("" : "+r"(b));
   return b;
 }
 
-static MLK_INLINE int32_t mlk_value_barrier_i32(int32_t b)
+MLK_STATIC_PROVABLE MLK_INLINE int32_t mlk_value_barrier_i32(int32_t b)
 __contract__(ensures(return_value == b))
 {
   __asm__ volatile("" : "+r"(b));
   return b;
 }
 
-static MLK_INLINE uint8_t mlk_value_barrier_u8(uint8_t b)
+MLK_STATIC_PROVABLE MLK_INLINE uint8_t mlk_value_barrier_u8(uint8_t b)
 __contract__(ensures(return_value == b))
 {
   __asm__ volatile("" : "+r"(b));
@@ -201,7 +201,7 @@ static MLK_ALWAYS_INLINE uint16_t mlk_cast_int16_to_uint16(int32_t x)
  *
  * @return Mask value (0 or 0xFFFF).
  */
-static MLK_INLINE uint16_t mlk_ct_cmask_neg_i16(int16_t x)
+MLK_STATIC_PROVABLE MLK_INLINE uint16_t mlk_ct_cmask_neg_i16(int16_t x)
 __contract__(ensures(return_value == ((x < 0) ? 0xFFFF : 0)))
 {
   int32_t tmp = mlk_value_barrier_i32((int32_t)x);
@@ -226,7 +226,7 @@ __contract__(ensures(return_value == ((x < 0) ? 0xFFFF : 0)))
  *
  * @return Mask value (0 or 0xFFFF).
  */
-static MLK_INLINE uint16_t mlk_ct_cmask_nonzero_u16(uint16_t x)
+MLK_STATIC_PROVABLE MLK_INLINE uint16_t mlk_ct_cmask_nonzero_u16(uint16_t x)
 __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFFFF)))
 {
   int32_t tmp = mlk_value_barrier_i32(-((int32_t)x));
@@ -252,7 +252,7 @@ __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFFFF)))
  *
  * @return Mask value (0 or 0xFF).
  */
-static MLK_INLINE uint8_t mlk_ct_cmask_nonzero_u8(uint8_t x)
+MLK_STATIC_PROVABLE MLK_INLINE uint8_t mlk_ct_cmask_nonzero_u8(uint8_t x)
 __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFF)))
 {
   uint16_t mask = mlk_ct_cmask_nonzero_u16((uint16_t)x);
@@ -286,7 +286,8 @@ __contract__(ensures(return_value == ((x == 0) ? 0 : 0xFF)))
  *
  * @return @p a if @p cond != 0, else @p b.
  */
-static MLK_INLINE int16_t mlk_ct_sel_int16(int16_t a, int16_t b, uint16_t cond)
+MLK_STATIC_PROVABLE MLK_INLINE int16_t mlk_ct_sel_int16(int16_t a, int16_t b,
+                                                        uint16_t cond)
 __contract__(ensures(return_value == (cond ? a : b)))
 {
   uint16_t au = mlk_cast_int16_to_uint16(a);
@@ -308,7 +309,8 @@ __contract__(ensures(return_value == (cond ? a : b)))
  *
  * @return @p a if @p cond != 0, else @p b.
  */
-static MLK_INLINE uint8_t mlk_ct_sel_uint8(uint8_t a, uint8_t b, uint8_t cond)
+MLK_STATIC_PROVABLE MLK_INLINE uint8_t mlk_ct_sel_uint8(uint8_t a, uint8_t b,
+                                                        uint8_t cond)
 __contract__(ensures(return_value == (cond ? a : b)))
 {
   return b ^ (mlk_ct_cmask_nonzero_u8(cond) & (a ^ b));
@@ -335,8 +337,9 @@ __contract__(ensures(return_value == (cond ? a : b)))
  * @retval 0    The byte arrays are equal.
  * @retval 0xFF The byte arrays are not equal.
  */
-static MLK_INLINE uint8_t mlk_ct_memcmp(const uint8_t *a, const uint8_t *b,
-                                        const size_t len)
+MLK_STATIC_PROVABLE MLK_INLINE uint8_t mlk_ct_memcmp(const uint8_t *a,
+                                                     const uint8_t *b,
+                                                     const size_t len)
 __contract__(
   requires(len <= UINT16_MAX)
   requires(memory_no_alias(a, len))
@@ -385,8 +388,9 @@ __contract__(
  * @param      len Number of bytes to be copied.
  * @param      b   Condition value.
  */
-static MLK_INLINE void mlk_ct_cmov_zero(uint8_t *r, const uint8_t *x,
-                                        size_t len, uint8_t b)
+MLK_STATIC_PROVABLE MLK_INLINE void mlk_ct_cmov_zero(uint8_t *r,
+                                                     const uint8_t *x,
+                                                     size_t len, uint8_t b)
 __contract__(
   requires(len <= UINT32_MAX)
   requires(memory_no_alias(r, len))
@@ -423,7 +427,7 @@ __contract__(
 #error No plausibly-secure implementation of mlk_zeroize available. Please provide your own using MLK_CONFIG_CUSTOM_ZEROIZE.
 #endif
 
-static MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
+MLK_STATIC_PROVABLE MLK_INLINE void mlk_zeroize(void *ptr, size_t len)
 __contract__(
   requires(len <= UINT32_MAX)
   requires(memory_no_alias(ptr, len))
