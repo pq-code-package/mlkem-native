@@ -13,7 +13,7 @@
 mlkem-native is a secure, fast, and portable C90[^C90] implementation of ML-KEM[^FIPS203].
 It is a fork of the ML-KEM reference implementation[^REF].
 
-All C code in [mlkem/src/*](mlkem) and [mlkem/src/fips202/*](mlkem/src/fips202) is proved memory-safe (no memory overflow) and type-safe (no integer overflow)
+All C code in [mlkem/src/*](mlkem) and [mlkem/src/fips202/*](mlkem/src/fips202), except for native backends and debug code, is proved memory-safe (no memory overflow) and type-safe (no integer overflow)
 using CBMC[^CBMC]. All AArch64 and x86_64 assembly is proved to be functionally correct,
 memory-safe, and of secret-independent timing (constant-time), using HOL-Light[^HOL-Light].
 
@@ -54,7 +54,7 @@ mlkem-native is used in
 
 ## Formal Verification
 
-All C code in [mlkem/src/*](mlkem) and [mlkem/src/fips202/*](mlkem/src/fips202) is proved memory-safe (no memory overflow) and type-safe (no integer overflow).
+All C code in [mlkem/src/*](mlkem) and [mlkem/src/fips202/*](mlkem/src/fips202), except for native backends and debug code, is proved memory-safe (no memory overflow) and type-safe (no integer overflow).
 This uses the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) and builds on function contracts and loop invariant annotations
 in the source code. See [proofs/cbmc](proofs/cbmc) for details.
 
@@ -72,7 +72,8 @@ All AArch64 and x86_64 assembly in mlkem-native is formally proved in [HOL Light
 memory access patterns, and variable-latency instructions, thwarting most timing side channels
 (see [proofs/hol_light](proofs/hol_light) for details). C code is hardened against
 compiler-introduced timing side channels (such as KyberSlash[^KyberSlash] or clangover[^clangover])
-through suitable barriers and constant-time patterns.
+through suitable barriers and constant-time patterns. The C code assumes constant-time 32x32->32 and 32x32->64 multiplication,
+which some targets do not provide, e.g., cores without a hardware multiplier or with early-terminating multiply instructions.
 
 Absence of secret-dependent branches, memory-access patterns and variable-latency instructions is also tested using `valgrind`
 with various combinations of compilers and compilation options.

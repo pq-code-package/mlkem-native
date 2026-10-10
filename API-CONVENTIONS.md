@@ -20,6 +20,8 @@ All pointers are assumed to be valid and non-NULL, and every buffer is assumed t
 
 Every buffer in the ML-KEM API has a fixed size determined by the parameter set. There are no pointer/length pairs, and therefore no empty buffers for which a NULL pointer would be admissible.
 
+Buffers passed to the same function must not overlap.
+
 ## Output buffers on error
 
 When a function returns an error, each caller-owned output buffer is left either unchanged or fully zeroized. An output buffer is never left holding partially computed or otherwise stale data that could be mistaken for a valid result.

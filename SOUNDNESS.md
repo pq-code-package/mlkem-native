@@ -180,6 +180,8 @@ intermediate computations would be flagged as undefined behavior. Constant-time 
 are tested empirically using valgrind across many compilers and optimization levels (see
 the corresponding [CI job](.github/workflows/ct-tests.yml) for
 the full list), and the C code uses value barriers to prevent harmful compiler optimizations.
+These tests run on x86_64 and AArch64 in the default configuration only; other platforms and
+non-default configurations are not covered.
 
 **Potential improvements.**
 - Add automatic extraction of compiler coverage documentation from CI. ([#1608](https://github.com/pq-code-package/mlkem-native/issues/1608))
