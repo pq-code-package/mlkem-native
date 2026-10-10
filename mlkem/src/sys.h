@@ -78,10 +78,15 @@
 #define MLK_SYS_RISCV64
 #endif
 
+/* check-magic: off */
+/* The RVV backend requires v0.12 or later of the RVV intrinsics
+ * (__riscv_v_intrinsic >= 12000); older compilers such as gcc 13 fall
+ * back to C. */
 #if defined(MLK_SYS_RISCV64) && defined(__riscv_vector) && \
-    defined(__riscv_v_intrinsic)
+    defined(__riscv_v_intrinsic) && __riscv_v_intrinsic >= 12000
 #define MLK_SYS_RISCV64_RVV
 #endif
+/* check-magic: on */
 
 #if defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 32
 #define MLK_SYS_RISCV32
