@@ -18,6 +18,7 @@
  */
 
 #define mlk_keccakf1600_extract_bytes MLK_NAMESPACE(keccakf1600_extract_bytes)
+MLK_INTERNAL_API
 void mlk_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
                                    unsigned offset, unsigned length)
 __contract__(
@@ -29,6 +30,7 @@ __contract__(
 );
 
 #define mlk_keccakf1600_xor_bytes MLK_NAMESPACE(keccakf1600_xor_bytes)
+MLK_INTERNAL_API
 void mlk_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
                                unsigned offset, unsigned length)
 __contract__(
@@ -39,8 +41,10 @@ __contract__(
     assigns(memory_slice(state, sizeof(uint64_t) * MLK_KECCAK_LANES))
 );
 
+#if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
 #define mlk_keccakf1600x4_extract_bytes \
   MLK_NAMESPACE(keccakf1600x4_extract_bytes)
+MLK_INTERNAL_API
 void mlk_keccakf1600x4_extract_bytes(uint64_t *state, unsigned char *data0,
                                      unsigned char *data1, unsigned char *data2,
                                      unsigned char *data3, unsigned offset,
@@ -60,6 +64,7 @@ __contract__(
 );
 
 #define mlk_keccakf1600x4_xor_bytes MLK_NAMESPACE(keccakf1600x4_xor_bytes)
+MLK_INTERNAL_API
 void mlk_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
                                  const unsigned char *data1,
                                  const unsigned char *data2,
@@ -82,13 +87,16 @@ __contract__(
 
 
 #define mlk_keccakf1600x4_permute MLK_NAMESPACE(keccakf1600x4_permute)
+MLK_INTERNAL_API
 void mlk_keccakf1600x4_permute(uint64_t *state)
 __contract__(
     requires(memory_no_alias(state, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY))
     assigns(memory_slice(state, sizeof(uint64_t) * MLK_KECCAK_LANES * MLK_KECCAK_WAY))
 );
+#endif /* !MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
 #define mlk_keccakf1600_permute MLK_NAMESPACE(keccakf1600_permute)
+MLK_INTERNAL_API
 void mlk_keccakf1600_permute(uint64_t *state)
 __contract__(
     requires(memory_no_alias(state, sizeof(uint64_t) * MLK_KECCAK_LANES))

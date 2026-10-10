@@ -33,6 +33,7 @@
 #define MLK_KECCAK_NROUNDS 24
 #define MLK_KECCAK_ROL(a, offset) (((a) << (offset)) ^ ((a) >> (64 - (offset))))
 
+MLK_INTERNAL_API
 void mlk_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
                                    unsigned offset, unsigned length)
 {
@@ -56,6 +57,7 @@ void mlk_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
 #endif /* !MLK_SYS_LITTLE_ENDIAN */
 }
 
+MLK_INTERNAL_API
 void mlk_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
                                unsigned offset, unsigned length)
 {
@@ -80,6 +82,7 @@ void mlk_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
 #endif /* !MLK_SYS_LITTLE_ENDIAN */
 }
 
+#if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
 static void mlk_keccakf1600x4_extract_bytes_c(uint64_t *state,
                                               unsigned char *data0,
                                               unsigned char *data1,
@@ -110,6 +113,7 @@ __contract__(
                                 length);
 }
 
+MLK_INTERNAL_API
 void mlk_keccakf1600x4_extract_bytes(uint64_t *state, unsigned char *data0,
                                      unsigned char *data1, unsigned char *data2,
                                      unsigned char *data3, unsigned offset,
@@ -158,6 +162,7 @@ __contract__(
                             length);
 }
 
+MLK_INTERNAL_API
 void mlk_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
                                  const unsigned char *data1,
                                  const unsigned char *data2,
@@ -176,6 +181,7 @@ void mlk_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
                                 length);
 }
 
+MLK_INTERNAL_API
 void mlk_keccakf1600x4_permute(uint64_t *state)
 {
 #if defined(MLK_USE_NATIVE_FIPS202_X4)
@@ -189,6 +195,7 @@ void mlk_keccakf1600x4_permute(uint64_t *state)
   mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 2);
   mlk_keccakf1600_permute(state + MLK_KECCAK_LANES * 3);
 }
+#endif /* !MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
 static const uint64_t mlk_KeccakF_RoundConstants[MLK_KECCAK_NROUNDS] = {
     (uint64_t)0x0000000000000001ULL, (uint64_t)0x0000000000008082ULL,
@@ -476,6 +483,7 @@ __contract__(
   state[24] = Asu;
 }
 
+MLK_INTERNAL_API
 void mlk_keccakf1600_permute(uint64_t *state)
 {
 #if defined(MLK_USE_NATIVE_FIPS202_X1)

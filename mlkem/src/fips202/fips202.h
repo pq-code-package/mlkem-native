@@ -38,6 +38,7 @@ typedef struct
  * @param[in]     input Input to be absorbed into the state.
  * @param         inlen Length of input in bytes.
  */
+MLK_INTERNAL_API
 void mlk_shake128_absorb_once(mlk_shake128ctx *state, const uint8_t *input,
                               size_t inlen)
 __contract__(
@@ -57,6 +58,7 @@ __contract__(
  * @param         nblocks Number of blocks to be squeezed (written to output).
  * @param[in,out] state   Keccak state.
  */
+MLK_INTERNAL_API
 void mlk_shake128_squeezeblocks(uint8_t *output, size_t nblocks,
                                 mlk_shake128ctx *state)
 __contract__(
@@ -67,11 +69,25 @@ __contract__(
 );
 
 #define mlk_shake128_init MLK_NAMESPACE(shake128_init)
+MLK_INTERNAL_API
 void mlk_shake128_init(mlk_shake128ctx *state);
 
 #define mlk_shake128_release MLK_NAMESPACE(shake128_release)
+MLK_INTERNAL_API
 void mlk_shake128_release(mlk_shake128ctx *state);
 
+/* mlk_shake256 is only used
+ * - in decapsulation, for the implicit rejection hash J,
+ * - in encapsulation for ML-KEM-512 and ML-KEM-1024, for sampling e2,
+ * - in key generation and encapsulation, if MLK_CONFIG_SERIAL_FIPS202_ONLY
+ *   is set. */
+#if !defined(MLK_CONFIG_NO_DECAPS_API) ||                           \
+    (!defined(MLK_CONFIG_NO_ENCAPS_API) &&                          \
+     (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 2 || \
+      MLKEM_K == 4)) ||                                             \
+    (defined(MLK_CONFIG_SERIAL_FIPS202_ONLY) &&                     \
+     (!defined(MLK_CONFIG_NO_KEYPAIR_API) ||                        \
+      !defined(MLK_CONFIG_NO_ENCAPS_API)))
 /* One-stop SHAKE256 call. Aliasing between input and
  * output is not permitted */
 #define mlk_shake256 MLK_NAMESPACE(shake256)
@@ -83,6 +99,7 @@ void mlk_shake128_release(mlk_shake128ctx *state);
  * @param[in]  input  Input buffer.
  * @param      inlen  Length of input in bytes.
  */
+MLK_INTERNAL_API
 void mlk_shake256(uint8_t *output, size_t outlen, const uint8_t *input,
                   size_t inlen)
 __contract__(
@@ -92,6 +109,10 @@ __contract__(
   requires(memory_no_alias(output, outlen))
   assigns(memory_slice(output, outlen))
 );
+#endif /* !MLK_CONFIG_NO_DECAPS_API || (!MLK_CONFIG_NO_ENCAPS_API &&           \
+          (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 4)) \
+          || (MLK_CONFIG_SERIAL_FIPS202_ONLY && (!MLK_CONFIG_NO_KEYPAIR_API || \
+          !MLK_CONFIG_NO_ENCAPS_API)) */
 
 /* One-stop SHA3_256 call. Aliasing between input and
  * output is not permitted */
@@ -104,6 +125,7 @@ __contract__(
  * @param[in]  input  Input buffer.
  * @param      inlen  Length of input in bytes.
  */
+MLK_INTERNAL_API
 void mlk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
 __contract__(
   requires(inlen <= MLK_MAX_BUFFER_SIZE)
@@ -123,6 +145,7 @@ __contract__(
  * @param[in]  input  Input buffer.
  * @param      inlen  Length of input in bytes.
  */
+MLK_INTERNAL_API
 void mlk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
 __contract__(
   requires(inlen <= MLK_MAX_BUFFER_SIZE)
@@ -130,6 +153,7 @@ __contract__(
   requires(memory_no_alias(output, SHA3_512_HASHBYTES))
   assigns(memory_slice(output, SHA3_512_HASHBYTES))
 );
+
 
 
 #endif /* !MLK_FIPS202_FIPS202_H */

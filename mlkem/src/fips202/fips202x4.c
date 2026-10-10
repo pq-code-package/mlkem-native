@@ -13,7 +13,8 @@
  */
 
 #include "../common.h"
-#if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
+#if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
+    !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
 
 #include "../verify.h"
 #include "fips202.h"
@@ -117,6 +118,7 @@ __contract__(
   }
 }
 
+MLK_INTERNAL_API
 void mlk_shake128x4_absorb_once(mlk_shake128x4ctx *state, const uint8_t *in0,
                                 const uint8_t *in1, const uint8_t *in2,
                                 const uint8_t *in3, size_t inlen)
@@ -126,6 +128,7 @@ void mlk_shake128x4_absorb_once(mlk_shake128x4ctx *state, const uint8_t *in0,
                             inlen, 0x1F);
 }
 
+MLK_INTERNAL_API
 void mlk_shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
                                   uint8_t *out3, size_t nblocks,
                                   mlk_shake128x4ctx *state)
@@ -134,7 +137,9 @@ void mlk_shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
                               SHAKE128_RATE);
 }
 
+MLK_INTERNAL_API
 void mlk_shake128x4_init(mlk_shake128x4ctx *state) { (void)state; }
+MLK_INTERNAL_API
 void mlk_shake128x4_release(mlk_shake128x4ctx *state)
 {
   /* Specification: Partially implements
@@ -161,6 +166,7 @@ static void mlk_shake256x4_squeezeblocks(uint8_t *out0, uint8_t *out1,
                               SHAKE256_RATE);
 }
 
+MLK_INTERNAL_API
 void mlk_shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
                     size_t outlen, const uint8_t *in0, const uint8_t *in1,
                     const uint8_t *in2, const uint8_t *in3, size_t inlen)
@@ -200,8 +206,10 @@ void mlk_shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
   mlk_zeroize(tmp3, sizeof(tmp3));
 }
 
-#else /* !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#else /* !MLK_CONFIG_MULTILEVEL_NO_SHARED && !MLK_CONFIG_SERIAL_FIPS202_ONLY \
+       */
 
 MLK_EMPTY_CU(fips202x4)
 
-#endif /* MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* !(!MLK_CONFIG_MULTILEVEL_NO_SHARED && \
+          !MLK_CONFIG_SERIAL_FIPS202_ONLY) */

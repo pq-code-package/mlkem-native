@@ -184,19 +184,23 @@ __contract__(
   }
 }
 
+MLK_INTERNAL_API
 void mlk_shake128_absorb_once(mlk_shake128ctx *state, const uint8_t *input,
                               size_t inlen)
 {
   mlk_keccak_absorb_once(state->ctx, SHAKE128_RATE, input, inlen, 0x1F);
 }
 
+MLK_INTERNAL_API
 void mlk_shake128_squeezeblocks(uint8_t *output, size_t nblocks,
                                 mlk_shake128ctx *state)
 {
   mlk_keccak_squeezeblocks(output, nblocks, state->ctx, SHAKE128_RATE);
 }
 
+MLK_INTERNAL_API
 void mlk_shake128_init(mlk_shake128ctx *state) { (void)state; }
+MLK_INTERNAL_API
 void mlk_shake128_release(mlk_shake128ctx *state)
 {
   /* Specification: Partially implements
@@ -204,7 +208,15 @@ void mlk_shake128_release(mlk_shake128ctx *state)
   mlk_zeroize(state, sizeof(mlk_shake128ctx));
 }
 
+#if !defined(MLK_CONFIG_NO_DECAPS_API) ||                           \
+    (!defined(MLK_CONFIG_NO_ENCAPS_API) &&                          \
+     (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 2 || \
+      MLKEM_K == 4)) ||                                             \
+    (defined(MLK_CONFIG_SERIAL_FIPS202_ONLY) &&                     \
+     (!defined(MLK_CONFIG_NO_KEYPAIR_API) ||                        \
+      !defined(MLK_CONFIG_NO_ENCAPS_API)))
 typedef mlk_shake128ctx mlk_shake256ctx;
+MLK_INTERNAL_API
 void mlk_shake256(uint8_t *output, size_t outlen, const uint8_t *input,
                   size_t inlen)
 {
@@ -217,7 +229,9 @@ void mlk_shake256(uint8_t *output, size_t outlen, const uint8_t *input,
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(&state, sizeof(state));
 }
+#endif /* !MLK_CONFIG_NO_DECAPS_API || (!MLK_CONFIG_NO_ENCAPS_API && (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 4)) || (MLK_CONFIG_SERIAL_FIPS202_ONLY && (!MLK_CONFIG_NO_KEYPAIR_API || !MLK_CONFIG_NO_ENCAPS_API)) */
 
+MLK_INTERNAL_API
 void mlk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
 {
   uint64_t ctx[25];
@@ -230,6 +244,7 @@ void mlk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
   mlk_zeroize(ctx, sizeof(ctx));
 }
 
+MLK_INTERNAL_API
 void mlk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
 {
   uint64_t ctx[25];
