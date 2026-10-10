@@ -52,7 +52,7 @@ def gen_contracts():
 
         content = strip_comments(content)
 
-        contract_pattern = r"(\w+)\s*\([^)]*\)\s*__contract__"
+        contract_pattern = r"(\w+)\s*\((?:[^()]|\([^()]*\))*\)\s*__contract__"
         matches = re.finditer(contract_pattern, content)
         for m in matches:
             line = content.count("\n", 0, m.start())
