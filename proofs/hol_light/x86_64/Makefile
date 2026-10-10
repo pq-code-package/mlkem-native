@@ -115,10 +115,15 @@ proofs/dump_bytecode.native: proofs/dump_bytecode.ml $(OBJ)
 %.native: proofs/$$(*F).ml %.o ; ./proofs/build-proof.sh $(BASE)/$< "$(HOLLIGHT)" "$@"
 
 # Run them and print the standard output+error at *.correct
+# The pipe hides the proof's exit status, so also require the completion
+# marker that build-proof.sh prints after check_axioms.
 %.correct: %.native
 	cd .. ; ./x86_64/$< 2>&1 | tee ./x86_64/$@
 	@if (grep -i "error:\|exception:" "$@" >/dev/null); then  \
 		echo "$< had errors!";			          \
+		exit 1;					          \
+	elif ! (grep -q "Running time:" "$@"); then		  \
+		echo "$< did not run to completion!";		  \
 		exit 1;					          \
 	else							  \
 		echo "$< OK";					  \
