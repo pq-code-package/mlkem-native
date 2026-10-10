@@ -32,9 +32,10 @@ void mlk_debug_check_bounds_int16m1(const char *file, int line, vint16m1_t vec,
                                     size_t vl, int lower_bound_exclusive,
                                     int upper_bound_exclusive)
 {
-  /* Allocate temporary array to store vector elements
-   * We use the maximum possible vector length to be safe */
-  int16_t temp_array[64];
+  /* Allocate temporary array to store vector elements.
+   * vl is at most MLKEM_N, as it is always obtained from
+   * vsetvl with an AVL of at most MLKEM_N. */
+  int16_t temp_array[MLKEM_N];
 
   /* Store vector elements to temporary array for inspection */
   __riscv_vse16_v_i16m1(temp_array, vec, vl);
@@ -60,7 +61,7 @@ void mlk_debug_check_bounds_int16m2(const char *file, int line, vint16m2_t vec,
 {
   /* Allocate temporary array to store vector elements
    * m2 vectors hold 2x the elements of m1 vectors */
-  int16_t temp_array[2 * 64];
+  int16_t temp_array[2 * MLKEM_N];
 
   /* Store vector elements to temporary array for inspection */
   __riscv_vse16_v_i16m2(temp_array, vec, 2 * vl);
