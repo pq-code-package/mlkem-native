@@ -4,13 +4,13 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = poly_getnoise_eta1122_4x_native_harness
+HARNESS_FILE = poly_getnoise_eta1122_4x_serial_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = poly_getnoise_eta1122_4x_native
+PROOF_UID = mlk_poly_getnoise_eta1122_4x_serial
 
-DEFINES += -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLK_CONFIG_FIPS202_BACKEND_FILE="\"dummy_backend_fips202_x4.h\""
+DEFINES += -DMLK_CONFIG_SERIAL_FIPS202_ONLY
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
@@ -24,7 +24,7 @@ ifeq ($(MLKEM_K),2)
 CHECK_FUNCTION_CONTRACTS=mlk_poly_getnoise_eta1122_4x
 USE_FUNCTION_CONTRACTS = mlk_poly_cbd_eta1
 USE_FUNCTION_CONTRACTS += mlk_poly_cbd_eta2
-USE_FUNCTION_CONTRACTS += mlk_shake256x4
+USE_FUNCTION_CONTRACTS += mlk_shake256
 USE_FUNCTION_CONTRACTS += mlk_zeroize
 else
 CHECK_FUNCTION_CONTRACTS=
