@@ -365,7 +365,6 @@
  * Undefine macros from FIPS-202 files
  */
 /* mlkem/src/fips202/fips202.h */
-#undef FIPS202_X4_DEFAULT_IMPLEMENTATION
 #undef MLK_FIPS202_FIPS202_H
 #undef SHA3_256_HASHBYTES
 #undef SHA3_256_RATE
