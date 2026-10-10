@@ -8,7 +8,7 @@ mlkem-native has minimal dependencies on the C standard library. This document l
 
 ### Memory Functions
 - **memcpy**: Used extensively for copying data structures, keys, and intermediate values
-- **memset**: Used for zeroing state structures and buffers. **Note**: This is NOT used for security-critical zeroing - that is handled by `mlk_zeroize` which has its own custom replacement mechanism
+- **memset**: Used for zeroing state structures and buffers, including by the default implementation of `mlk_zeroize` for security-critical zeroing (followed by a compiler barrier). `mlk_zeroize` can be replaced separately via `MLK_CONFIG_CUSTOM_ZEROIZE`
 
 ### Debug Functions (MLKEM_DEBUG builds only)
 - **fprintf**: Used in debug.c for error reporting to stderr
