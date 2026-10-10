@@ -32,7 +32,9 @@
  * # API conventions
  *
  * Conventions shared by all functions below (return values, pointer validity,
- * output buffers on error) are documented in API-CONVENTIONS.md.
+ * buffer overlap, output buffers on error) are documented in
+ * API-CONVENTIONS.md. In particular, buffers passed to the same function must
+ * not overlap.
  *
  * # Multi-level builds
  *
