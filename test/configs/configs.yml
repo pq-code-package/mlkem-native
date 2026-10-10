@@ -276,14 +276,14 @@ configs:
 
             if (cap == MLK_SYS_CAP_AARCH64_SHA3)
             {
-              uint64_t id_aa64pfr1_el1;
+              uint64_t id_aa64isar0_el1;
 
-              /* Read ID_AA64PFR1_EL1 system register */
-              __asm__ volatile("mrs %0, id_aa64pfr1_el1" : "=r"(id_aa64pfr1_el1));
+              /* Read ID_AA64ISAR0_EL1 system register */
+              __asm__ volatile("mrs %0, id_aa64isar0_el1" : "=r"(id_aa64isar0_el1));
 
               /* Extract SHA3 field (bits 35:32) and check if SHA3 is supported */
               /* SHA3 field: 0b0000 = not implemented, 0b0001 = SHA3 implemented */
-              uint64_t sha3_field = (id_aa64pfr1_el1 >> 32) & 0xF;
+              uint64_t sha3_field = (id_aa64isar0_el1 >> 32) & 0xF;
 
               return (sha3_field == 1) ? 1 : 0;
             }
