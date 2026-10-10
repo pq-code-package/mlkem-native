@@ -72,7 +72,8 @@ All AArch64 and x86_64 assembly in mlkem-native is formally proved in [HOL Light
 memory access patterns, and variable-latency instructions, thwarting most timing side channels
 (see [proofs/hol_light](proofs/hol_light) for details). C code is hardened against
 compiler-introduced timing side channels (such as KyberSlash[^KyberSlash] or clangover[^clangover])
-through suitable barriers and constant-time patterns.
+through suitable barriers and constant-time patterns. The C code assumes constant-time 32x32->32 and 32x32->64 multiplication,
+which some targets do not provide, e.g., cores without a hardware multiplier or with early-terminating multiply instructions.
 
 Absence of secret-dependent branches, memory-access patterns and variable-latency instructions is also tested using `valgrind`
 with various combinations of compilers and compilation options.
