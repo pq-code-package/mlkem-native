@@ -12,6 +12,7 @@
 #include "fips202.h"
 #include "keccakf1600.h"
 
+#if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
 /** Context for the non-incremental 4-way SHAKE128 API. */
 typedef struct
 {
@@ -20,6 +21,7 @@ typedef struct
 } MLK_ALIGN mlk_shake128x4ctx;
 
 #define mlk_shake128x4_absorb_once MLK_NAMESPACE(shake128x4_absorb_once)
+MLK_INTERNAL_API
 void mlk_shake128x4_absorb_once(mlk_shake128x4ctx *state, const uint8_t *in0,
                                 const uint8_t *in1, const uint8_t *in2,
                                 const uint8_t *in3, size_t inlen)
@@ -34,6 +36,7 @@ __contract__(
 );
 
 #define mlk_shake128x4_squeezeblocks MLK_NAMESPACE(shake128x4_squeezeblocks)
+MLK_INTERNAL_API
 void mlk_shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
                                   uint8_t *out3, size_t nblocks,
                                   mlk_shake128x4ctx *state)
@@ -52,12 +55,15 @@ __contract__(
 );
 
 #define mlk_shake128x4_init MLK_NAMESPACE(shake128x4_init)
+MLK_INTERNAL_API
 void mlk_shake128x4_init(mlk_shake128x4ctx *state);
 
 #define mlk_shake128x4_release MLK_NAMESPACE(shake128x4_release)
+MLK_INTERNAL_API
 void mlk_shake128x4_release(mlk_shake128x4ctx *state);
 
 #define mlk_shake256x4 MLK_NAMESPACE(shake256x4)
+MLK_INTERNAL_API
 void mlk_shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
                     size_t outlen, const uint8_t *in0, const uint8_t *in1,
                     const uint8_t *in2, const uint8_t *in3, size_t inlen)
@@ -77,5 +83,6 @@ __contract__(
   assigns(memory_slice(out2, outlen))
   assigns(memory_slice(out3, outlen))
 );
+#endif /* !MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
 #endif /* !MLK_FIPS202_FIPS202X4_H */
