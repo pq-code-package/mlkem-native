@@ -837,7 +837,8 @@ cleanup:
  * Test that x4 Keccak (xor_bytes, permute, extract_bytes) produces
  * the same results as the x1 C reference.
  */
-#ifdef MLK_USE_NATIVE_FIPS202_X4
+#if defined(MLK_USE_NATIVE_FIPS202_X4) && \
+    !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
 #define MAX_RATE 136
 
 static int test_keccakf1600x4_xor_permute_extract(void)
@@ -936,7 +937,7 @@ cleanup:
 }
 
 #undef MAX_RATE
-#endif /* MLK_USE_NATIVE_FIPS202_X4 */
+#endif /* MLK_USE_NATIVE_FIPS202_X4 && !MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
 #ifdef MLK_USE_NATIVE_REJ_UNIFORM
 #define REJ_UNIFORM_BUFLEN 504 /* 3 * 168, divisible by 3 */
@@ -1146,7 +1147,8 @@ static int test_backend_units(void)
   CHECK(test_keccakf1600_permute() == 0);
 #endif
 
-#ifdef MLK_USE_NATIVE_FIPS202_X4
+#if defined(MLK_USE_NATIVE_FIPS202_X4) && \
+    !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
   CHECK(test_keccakf1600x4_xor_permute_extract() == 0);
 #endif
 
