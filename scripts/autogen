@@ -3358,25 +3358,6 @@ def gen_hol_light_asm_file(job):
     )
 
 
-# Map dev/ source directory to the corresponding upstream under mlkem/.
-def upstream_src_dir_for_dev_dir(dev_dir):
-    if dev_dir.startswith("dev/fips202/"):
-        # dev/fips202/<arch>/src -> mlkem/src/fips202/native/<arch>/src
-        arch = dev_dir.split("/")[2]
-        return f"mlkem/src/fips202/native/{arch}/src"
-    if dev_dir.startswith("dev/aarch64_"):
-        # dev/aarch64_opt/src and dev/aarch64_clean/src map to the same tree
-        return "mlkem/src/native/aarch64/src"
-    if dev_dir.startswith("dev/x86_64/"):
-        return "mlkem/src/native/x86_64/src"
-    if dev_dir.startswith("dev/ppc64le/"):
-        return "mlkem/src/native/ppc64le/src"
-    raise ValueError(
-        f"Unrecognised dev/ source directory {dev_dir!r}; "
-        "extend upstream_src_dir_for_dev_dir() to map it to mlkem/src/..."
-    )
-
-
 def hol_light_asm_joblist():
     """Return the list of simpasm export jobs, each (basename, dev_dir, cflags,
     arch). Consumed by the HOL-Light assembly copies (gen_hol_light_asm) and, as
@@ -4867,71 +4848,37 @@ def extract_yaml_from_assembly(assembly_file):
 # ABI checker capability table.
 #
 # Maps each `ABI.Features:` tag from the kernel YAMLs to:
-#   - 'asm_subdir':  the arch this cap belongs to; selects the per-arch
-#                    test/abicheck/<asm_subdir>/abicheck_<asm_subdir>.mk it is
-#                    emitted into.
 #   - 'guard':       if non-None, wrap the generated check in #if defined(...).
 #   - 'syscap':      runtime capability; check skips if the host lacks it.
-#   - 'cflags':      for the autogeneration of the per-arch abicheck_<arch>.mk.
 #   - 'description': shown when a check is skipped.
-#   - 'aux_files':   extra .S files needing these CFLAGS though not generated
-#                    kernel exports (hand-written abicheck stubs/selftests, and
-#                    sources whose YAML doesn't list them as ABI-tested kernels
-#                    but still need the per-cap toolchain flags).
 ABI_CAPS = {
     "AVX2": {
-        "asm_subdir": "x86_64",
         "guard": "MLK_SYS_X86_64_AVX2",
         "syscap": "MLK_SYS_CAP_X86_64_AVX2",
         "description": "AVX2",
-        "cflags": ["-mavx2", "-mbmi2"],
-        "aux_files": [],
     },
     "NEON": {
-        "asm_subdir": "aarch64",
         "guard": "MLK_SYS_AARCH64_NEON",
         "syscap": "MLK_SYS_CAP_AARCH64_NEON",
         "description": "AArch64 NEON",
-        "cflags": ["-march=armv8-a+simd"],
-        "aux_files": [],
     },
     "SHA3": {
-        "asm_subdir": "aarch64",
         "guard": "__ARM_FEATURE_SHA3",
         "syscap": "MLK_SYS_CAP_AARCH64_SHA3",
         "description": "Armv8.4-A SHA3 (eor3, rax1, xar, bcax)",
-        "cflags": ["-march=armv8.4-a+sha3"],
-        "aux_files": [],
     },
     "MVE": {
-        "asm_subdir": "armv81m",
         "guard": "MLK_SYS_ARMV81M_MVE",
         "syscap": "MLK_SYS_CAP_ARMV81M_MVE",
         "description": "Armv8.1-M MVE",
-        "cflags": ["-march=armv8.1-m.main+mve", "-mthumb"],
-        "aux_files": [
-            "test/abicheck/armv81m/callstub_armv81m.S",
-            "test/abicheck/armv81m/selftest_armv81m.S",
-            # Shipped MVE helpers pulled in by the abicheck wildcard but
-            # not registered as ABI-tested kernels - they still need MVE
-            # CFLAGS to assemble.
-            "mlkem/src/fips202/native/armv81m/src/keccak_f1600_x4_state_extract_bytes_mve.S",
-            "mlkem/src/fips202/native/armv81m/src/keccak_f1600_x4_state_xor_bytes_mve.S",
-        ],
     },
     # NTT/INTT use the POWER8 vector merges vmrgew/vmrgow (ISA 2.07).
     # AltiVec predates POWER8, and VSX was introduced in POWER7.
     # All current PPC64 kernels and ABI stubs share the backend's guard.
     "POWER8_VECTOR": {
-        "asm_subdir": "ppc64le",
         "guard": "MLK_SYS_PPC64LE_POWER8_VECTOR",
         "syscap": "MLK_SYS_CAP_PPC64LE_POWER8_VECTOR",
         "description": "AltiVec/VSX and POWER8 vector extensions (Power ISA 2.07)",
-        "cflags": ["-mcpu=power8", "-maltivec", "-mvsx"],
-        "aux_files": [
-            "test/abicheck/ppc64le/callstub_ppc64le.S",
-            "test/abicheck/ppc64le/selftest_ppc64le.S",
-        ],
     },
 }
 
@@ -5115,10 +5062,6 @@ def gen_abicheck():
     # Bucket joblist entries by their YAML-declared (arch, calling) pair so a
     # single dev source file is fully self-describing.
     jobs_by_arch_calling = {key: [] for key in ARCH_CALLINGS}
-    # Map cap -> sorted list of .S files that require it. Drives the
-    # generated per-arch abicheck_<arch>.mk at the end of this function.
-    cap_to_files = {cap: [] for cap in ABI_CAPS}
-
     for entry in sorted(joblist, key=lambda j: j[0]):
         assembly_basename, dev_src_dir, _cflags, joblist_arch = entry
         dev_source = f"{dev_src_dir}/{assembly_basename}"
@@ -5130,9 +5073,6 @@ def gen_abicheck():
                 f"{dev_source}: YAML 'ABI.Architecture: {arch_calling[0]}' "
                 f"disagrees with joblist arch {joblist_arch!r}"
             )
-        upstream_src_dir = upstream_src_dir_for_dev_dir(dev_src_dir)
-        for cap in kernel_features(yaml_data, dev_source):
-            cap_to_files[cap].append(f"{upstream_src_dir}/{assembly_basename}")
         jobs_by_arch_calling[arch_calling].append((entry, yaml_data))
 
     # Per-(arch, calling) generated metadata used to assemble checks_all.h:
@@ -5428,72 +5368,6 @@ def gen_abicheck():
             "\n".join(gen_checks_arch_header(arch_guard, groups, asm_subdir)),
             force_format=True,
         )
-
-    # Emit per-capability CFLAGS injection for the build, split per arch:
-    # one test/abicheck/<arch>/abicheck_<arch>.mk per arch with caps, plus a
-    # top-level test/abicheck/abicheck.mk that includes them all. Single source
-    # of truth alongside the C-time guard (arch_flags) and runtime cap check.
-    caps_by_subdir = {}
-    for cap in sorted(ABI_CAPS):
-        caps_by_subdir.setdefault(ABI_CAPS[cap]["asm_subdir"], []).append(cap)
-
-    def gen_features_mk(asm_subdir, caps):
-        yield from gen_yaml_header()
-        yield from gen_yaml_autogen_warning()
-        yield "#"
-        yield "# Edit the YAML 'ABI.Features:' list in dev/<arch>/src/<kernel>.S"
-        yield "# and re-run scripts/autogen instead."
-        yield "#"
-        yield "# For each capability declared by a kernel's ABI.Features list, this"
-        yield "# file appends the capability's CFLAGS to that kernel's .S object"
-        yield "# under mlkem/src/."
-        yield ""
-        yield "# Default each cap's file list to empty so the unconditional appends"
-        yield "# below are safe even when a cap has no kernels on this arch."
-        for cap in caps:
-            yield f"ABICHECK_REQ_{cap}_FILES :="
-        for cap in caps:
-            # Files needing this cap's CFLAGS are: the kernel exports declared
-            # by YAML, plus any always-on auxiliary files (callstub/selftest)
-            # listed in ABI_CAPS[cap]['aux_files'].
-            files = sorted(
-                set(cap_to_files[cap]) | set(ABI_CAPS[cap].get("aux_files", []))
-            )
-            if not files:
-                continue
-            cflags = " ".join(ABI_CAPS[cap]["cflags"])
-            yield ""
-            yield f"# {cap}: {ABI_CAPS[cap]['description']}"
-            yield f"ABICHECK_REQ_{cap}_FILES := \\"
-            for i, f in enumerate(files):
-                sep = " \\" if i + 1 < len(files) else ""
-                yield f"  {f}{sep}"
-            yield (
-                f"ABICHECK_REQ_{cap}_OBJS := "
-                f"$(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_REQ_{cap}_FILES))"
-            )
-            if cflags:
-                yield f"$(ABICHECK_REQ_{cap}_OBJS): CFLAGS += {cflags}"
-        yield ""
-
-    for asm_subdir, caps in caps_by_subdir.items():
-        update_file(
-            f"test/abicheck/{asm_subdir}/abicheck_{asm_subdir}.mk",
-            "\n".join(gen_features_mk(asm_subdir, caps)),
-        )
-
-    def gen_abicheck_mk():
-        yield from gen_yaml_header()
-        yield from gen_yaml_autogen_warning()
-        yield "#"
-        yield "# Includes the per-arch abicheck_<arch>.mk, each of which appends"
-        yield "# its capabilities' CFLAGS to the matching .S objects."
-        yield ""
-        for asm_subdir in sorted(caps_by_subdir):
-            yield f"include test/abicheck/{asm_subdir}/abicheck_{asm_subdir}.mk"
-        yield ""
-
-    update_file("test/abicheck/abicheck.mk", "\n".join(gen_abicheck_mk()))
 
 
 def _main():
