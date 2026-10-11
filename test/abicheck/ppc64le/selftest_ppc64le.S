@@ -12,9 +12,13 @@
  * input.
  */
 
+#include "../../../mlkem/src/sys.h"
+
 #if defined(__ELF__)
 .section .note.GNU-stack,"",@progbits
 #endif
+
+#if defined(MLK_SYS_PPC64LE_POWER8_VECTOR)
 
 .text
 .machine power8
@@ -118,3 +122,5 @@ define_local \name
 corrupt_cr selftest_ppc64le_corrupt_cr2,  8
 corrupt_cr selftest_ppc64le_corrupt_cr3, 12
 corrupt_cr selftest_ppc64le_corrupt_cr4, 16
+
+#endif /* MLK_SYS_PPC64LE_POWER8_VECTOR */

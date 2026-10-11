@@ -8,7 +8,8 @@
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__) && \
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
+    defined(MLK_SYS_PPC64LE_POWER8_VECTOR) && \
     (!defined(MLK_CONFIG_NO_ENCAPS_API) || \
      !defined(MLK_CONFIG_NO_DECAPS_API))
 /*yaml
@@ -18,7 +19,7 @@
   ABI:
     Architecture: powerpc64le
     CallingConvention: ELFv2
-    Features: [VSX]
+    Features: [POWER8_VECTOR]
     r3:
       type: buffer
       size_bytes: 512
@@ -3238,7 +3239,7 @@ mlk_intt_ppc_asm_Loopf:
 MLK_ASM_FN_SIZE(intt_ppc_asm)
 
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
-          && __POWER8_VECTOR__ && (!MLK_CONFIG_NO_ENCAPS_API || \
+          && MLK_SYS_PPC64LE_POWER8_VECTOR && (!MLK_CONFIG_NO_ENCAPS_API || \
           !MLK_CONFIG_NO_DECAPS_API) */
 
 #if defined(__ELF__)

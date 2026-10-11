@@ -2276,7 +2276,8 @@ def gen_ppc64le_zeta_files():
         yield '#include "../../../common.h"'
         yield ""
         yield "#if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \\"
-        yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__)"
+        yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \\"
+        yield "    defined(MLK_SYS_PPC64LE_POWER8_VECTOR)"
         yield ""
         yield '#include "consts.h"'
         yield ""
@@ -2288,7 +2289,7 @@ def gen_ppc64le_zeta_files():
     def gen_c_epilogue():
         yield ""
         yield "#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \\"
-        yield "          !MLK_CONFIG_MULTILEVEL_NO_SHARED && __POWER8_VECTOR__ */"
+        yield "          !MLK_CONFIG_MULTILEVEL_NO_SHARED && MLK_SYS_PPC64LE_POWER8_VECTOR */"
         yield ""
 
     # dev copy: one array, annotated per region, LANES values per line.
@@ -2954,6 +2955,7 @@ def get_syscaps():
         "MLK_SYS_CAP_AARCH64_NEON",
         "MLK_SYS_CAP_AARCH64_SHA3",
         "MLK_SYS_CAP_ARMV81M_MVE",
+        "MLK_SYS_CAP_PPC64LE_POWER8_VECTOR",
     ]
 
 
@@ -4916,14 +4918,14 @@ ABI_CAPS = {
             "mlkem/src/fips202/native/armv81m/src/keccak_f1600_x4_state_xor_bytes_mve.S",
         ],
     },
-    # VSX is build-time only: every ppc64le kernel requires it, the call
-    # stub saves vr20-vr31 unconditionally, and we never run the binary on
-    # a non-VSX host. No #if guard, no syscap.
-    "VSX": {
+    # NTT/INTT use the POWER8 vector merges vmrgew/vmrgow (ISA 2.07).
+    # AltiVec predates POWER8, and VSX was introduced in POWER7.
+    # All current PPC64 kernels and ABI stubs share the backend's guard.
+    "POWER8_VECTOR": {
         "asm_subdir": "ppc64le",
-        "guard": None,
-        "syscap": None,
-        "description": "PPC64 VSX/Altivec (POWER8)",
+        "guard": "MLK_SYS_PPC64LE_POWER8_VECTOR",
+        "syscap": "MLK_SYS_CAP_PPC64LE_POWER8_VECTOR",
+        "description": "AltiVec/VSX and POWER8 vector extensions (Power ISA 2.07)",
         "cflags": ["-mcpu=power8", "-maltivec", "-mvsx"],
         "aux_files": [
             "test/abicheck/ppc64le/callstub_ppc64le.S",
@@ -5228,7 +5230,7 @@ def gen_abicheck():
 
                 # Emit a runtime mlk_sys_check_capability() skip (returning
                 # MLK_ABICHECK_SKIPPED) per Features cap that has a syscap; caps
-                # without a syscap (build-time-only, e.g. PPC64 VSX) are no-ops here.
+                # without a syscap are no-ops here.
                 # Emitted after the buffer decls to keep C90 mixed-decl-and-code happy.
                 for cap in features:
                     cap_enum = ABI_CAPS[cap]["syscap"]
