@@ -18,16 +18,20 @@
 
 #if defined(MLK_SYS_PPC64LE)
 
+#if defined(MLK_SYS_PPC64LE_POWER8_VECTOR)
 int check_intt_ppc_asm(void);
 int check_ntt_ppc_asm(void);
 int check_poly_tomont_ppc_asm(void);
 int check_reduce_ppc_asm(void);
+#endif /* MLK_SYS_PPC64LE_POWER8_VECTOR */
 
 static const abicheck_entry_t all_checks[] = {
+#if defined(MLK_SYS_PPC64LE_POWER8_VECTOR)
     {"intt_ppc_asm", check_intt_ppc_asm},
     {"ntt_ppc_asm", check_ntt_ppc_asm},
     {"poly_tomont_ppc_asm", check_poly_tomont_ppc_asm},
     {"reduce_ppc_asm", check_reduce_ppc_asm},
+#endif           /* MLK_SYS_PPC64LE_POWER8_VECTOR */
     {NULL, NULL} /* Sentinel */
 };
 

@@ -14,15 +14,15 @@
 
 # Default each cap's file list to empty so the unconditional appends
 # below are safe even when a cap has no kernels on this arch.
-ABICHECK_REQ_VSX_FILES :=
+ABICHECK_REQ_POWER8_VECTOR_FILES :=
 
-# VSX: PPC64 VSX/Altivec (POWER8)
-ABICHECK_REQ_VSX_FILES := \
+# POWER8_VECTOR: AltiVec/VSX and POWER8 vector extensions (Power ISA 2.07)
+ABICHECK_REQ_POWER8_VECTOR_FILES := \
   mlkem/src/native/ppc64le/src/mlkem_intt_ppc_asm.S \
   mlkem/src/native/ppc64le/src/mlkem_ntt_ppc_asm.S \
   mlkem/src/native/ppc64le/src/mlkem_poly_tomont_ppc_asm.S \
   mlkem/src/native/ppc64le/src/mlkem_reduce_ppc_asm.S \
   test/abicheck/ppc64le/callstub_ppc64le.S \
   test/abicheck/ppc64le/selftest_ppc64le.S
-ABICHECK_REQ_VSX_OBJS := $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_REQ_VSX_FILES))
-$(ABICHECK_REQ_VSX_OBJS): CFLAGS += -mcpu=power8 -maltivec -mvsx
+ABICHECK_REQ_POWER8_VECTOR_OBJS := $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_REQ_POWER8_VECTOR_FILES))
+$(ABICHECK_REQ_POWER8_VECTOR_OBJS): CFLAGS += -mcpu=power8 -maltivec -mvsx
