@@ -15,7 +15,7 @@
 
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__) && \
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
     !defined(MLK_CONFIG_NO_KEYPAIR_API)
 /*yaml
   Name: poly_tomont_ppc_asm
@@ -24,7 +24,7 @@
   ABI:
     Architecture: powerpc64le
     CallingConvention: ELFv2
-    Features: [VSX]
+    Features: [POWER8_VECTOR]
     r3:
       type: buffer
       size_bytes: 512
@@ -309,7 +309,7 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
 MLK_ASM_FN_SIZE(poly_tomont_ppc_asm)
 
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
-          && __POWER8_VECTOR__ && !MLK_CONFIG_NO_KEYPAIR_API */
+          && !MLK_CONFIG_NO_KEYPAIR_API */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits

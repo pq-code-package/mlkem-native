@@ -175,7 +175,7 @@ static const selftest_entry_t x86_64_entries[] = {
     {NULL, NULL, 0},
 };
 
-#elif defined(MLK_SYS_PPC64LE)
+#elif defined(MLK_SYS_PPC64LE_POWER8_VECTOR)
 
 extern void selftest_ppc64le_noop(void);
 /* GPRs r14..r31 (18) */
@@ -325,7 +325,7 @@ static const selftest_entry_t armv81m_entries[] = {
 };
 
 #endif /* !MLK_SYS_AARCH64 && !(MLK_SYS_X86_64 && MLK_SYSV_ABI_SUPPORTED) && \
-          !MLK_SYS_PPC64LE && MLK_SYS_ARMV81M_MVE */
+          !MLK_SYS_PPC64LE_POWER8_VECTOR && MLK_SYS_ARMV81M_MVE */
 
 int abicheck_selftest(void)
 {
@@ -354,21 +354,26 @@ int abicheck_selftest(void)
       asm_call_stub_x86_64_sysv, check_x86_64_sysv_compliance, x86_64_entries,
       (MLK_SYSV_ABI
        void (*)(void)));
-#elif defined(MLK_SYS_PPC64LE)
-  SELFTEST_RUN_ARCH("ppc64le", struct ppc64le_register_state,
-                    init_ppc64le_register_state, asm_call_stub_ppc64le,
-                    check_ppc64le_elfv2_compliance, ppc64le_entries,
-                    (void (*)(void)));
+#elif defined(MLK_SYS_PPC64LE_POWER8_VECTOR)
+  /* The call stub saves vector registers. Keep the self-test's capability
+   * check aligned with the current backend's POWER8 minimum. */
+  if (mlk_sys_check_capability(MLK_SYS_CAP_PPC64LE_POWER8_VECTOR))
+  {
+    SELFTEST_RUN_ARCH("ppc64le", struct ppc64le_register_state,
+                      init_ppc64le_register_state, asm_call_stub_ppc64le,
+                      check_ppc64le_elfv2_compliance, ppc64le_entries,
+                      (void (*)(void)));
+  }
 #elif defined(MLK_SYS_ARMV81M_MVE)
   SELFTEST_RUN_ARCH("armv81m", struct armv81m_register_state,
                     init_armv81m_register_state, asm_call_stub_armv81m,
                     check_armv81m_aapcs32_compliance, armv81m_entries,
                     (void (*)(void)));
 #else  /* !MLK_SYS_AARCH64 && !(MLK_SYS_X86_64 && MLK_SYSV_ABI_SUPPORTED) && \
-          !MLK_SYS_PPC64LE && MLK_SYS_ARMV81M_MVE */
+          !MLK_SYS_PPC64LE_POWER8_VECTOR && MLK_SYS_ARMV81M_MVE */
   /* No abicheck support on this architecture. */
 #endif /* !MLK_SYS_AARCH64 && !(MLK_SYS_X86_64 && MLK_SYSV_ABI_SUPPORTED) && \
-          !MLK_SYS_PPC64LE && !MLK_SYS_ARMV81M_MVE */
+          !MLK_SYS_PPC64LE_POWER8_VECTOR && !MLK_SYS_ARMV81M_MVE */
 
   return failures;
 }
