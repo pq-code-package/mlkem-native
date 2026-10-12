@@ -652,11 +652,8 @@
 /* mlkem/src/native/riscv64/src/rv64v_debug.h */
 #undef MLK_NATIVE_RISCV64_SRC_RV64V_DEBUG_H
 #undef mlk_assert_abs_bound_int16m1
-#undef mlk_assert_abs_bound_int16m2
 #undef mlk_assert_bound_int16m1
-#undef mlk_assert_bound_int16m2
 #undef mlk_debug_check_bounds_int16m1
-#undef mlk_debug_check_bounds_int16m2
 #endif /* MLK_SYS_RISCV64 */
 #if defined(MLK_SYS_PPC64LE)
 /*
