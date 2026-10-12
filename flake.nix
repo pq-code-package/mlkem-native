@@ -129,6 +129,9 @@
           };
           devShells.cbmc = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) cbmc toolchains_native; } ++ [ pkgs.gh ];
+            # Fortified glibc stdio wrappers use __builtin_va_arg_pack, which
+            # CBMC does not model. Keep the calls to the modeled libc functions.
+            hardeningDisable = [ "fortify" ];
           };
           devShells.slothy = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) slothy linters toolchains_native; };
