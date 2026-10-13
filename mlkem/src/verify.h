@@ -77,7 +77,7 @@
  * is loading from and masking with.
  */
 #define mlk_ct_opt_blocker_u64 MLK_NAMESPACE(ct_opt_blocker_u64)
-extern volatile uint64_t mlk_ct_opt_blocker_u64;
+MLK_INTERNAL_DATA_DECLARATION volatile uint64_t mlk_ct_opt_blocker_u64;
 
 /* Helper functions for obtaining global masks of various sizes */
 
