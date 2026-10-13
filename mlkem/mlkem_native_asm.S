@@ -219,6 +219,8 @@
 #undef MLK_COMMON_H
 #undef MLK_CONCAT
 #undef MLK_CONCAT_
+#undef MLK_CT_TESTING_DECLASSIFY
+#undef MLK_CT_TESTING_SECRET
 #undef MLK_EMPTY_CU
 #undef MLK_ERR_FAIL
 #undef MLK_ERR_INVALID_PK
@@ -230,6 +232,7 @@
 #undef MLK_FIPS202X4_HEADER_FILE
 #undef MLK_FIPS202_HEADER_FILE
 #undef MLK_FREE
+#undef MLK_HAVE_INLINE_ASM
 #undef MLK_INTERNAL_API
 #undef MLK_INTERNAL_DATA_DECLARATION
 #undef MLK_INTERNAL_DATA_DEFINITION
@@ -312,6 +315,8 @@
 /*
  * Undefine macros from MLK_CONFIG_PARAMETER_SET-generic files
  */
+/* mlkem/src/capability.h */
+#undef MLK_CAPABILITY_H
 /* mlkem/src/compress.h */
 #undef MLK_COMPRESS_H
 #undef mlk_poly_compress_d10
@@ -692,10 +697,7 @@
 #undef MLK_ALIGN_UP
 #undef MLK_ALWAYS_INLINE
 #undef MLK_CET_ENDBR
-#undef MLK_CT_TESTING_DECLASSIFY
-#undef MLK_CT_TESTING_SECRET
 #undef MLK_DEFAULT_ALIGN
-#undef MLK_HAVE_INLINE_ASM
 #undef MLK_INLINE
 #undef MLK_MUST_CHECK_RETURN_VALUE
 #undef MLK_NOINLINE

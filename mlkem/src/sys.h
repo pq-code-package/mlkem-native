@@ -5,9 +5,9 @@
 #ifndef MLK_SYS_H
 #define MLK_SYS_H
 
-#if !defined(MLK_CONFIG_NO_ASM) && (defined(__GNUC__) || defined(__clang__))
-#define MLK_HAVE_INLINE_ASM
-#endif
+/* This header must not depend on configuration options: configuration
+ * hooks may include it before all options are defined, and its include
+ * guard prevents re-evaluation. Evaluate options in common.h instead. */
 
 /* Try to find endianness, if not forced through CFLAGS already */
 #if !defined(MLK_SYS_LITTLE_ENDIAN) && !defined(MLK_SYS_BIG_ENDIAN)
@@ -235,23 +235,6 @@
 #endif
 #endif /* MLK_SYS_X86_64 */
 
-#if defined(MLK_CONFIG_CT_TESTING_ENABLED) && !defined(__ASSEMBLER__)
-#include <valgrind/memcheck.h>
-#define MLK_CT_TESTING_SECRET(ptr, len) \
-  VALGRIND_MAKE_MEM_UNDEFINED((ptr), (len))
-#define MLK_CT_TESTING_DECLASSIFY(ptr, len) \
-  VALGRIND_MAKE_MEM_DEFINED((ptr), (len))
-#else /* MLK_CONFIG_CT_TESTING_ENABLED && !__ASSEMBLER__ */
-#define MLK_CT_TESTING_SECRET(ptr, len) \
-  do                                    \
-  {                                     \
-  } while (0)
-#define MLK_CT_TESTING_DECLASSIFY(ptr, len) \
-  do                                        \
-  {                                         \
-  } while (0)
-#endif /* !(MLK_CONFIG_CT_TESTING_ENABLED && !__ASSEMBLER__) */
-
 #if defined(__GNUC__) || defined(__clang__)
 #define MLK_MUST_CHECK_RETURN_VALUE __attribute__((warn_unused_result))
 #else
@@ -295,26 +278,6 @@ typedef enum
   /* Armv8.1-M */
   MLK_SYS_CAP_ARMV81M_MVE
 } mlk_sys_cap;
-
-#if !defined(MLK_CONFIG_CUSTOM_CAPABILITY_FUNC)
-#include "cbmc.h"
-
-MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
-__contract__(
-  ensures(return_value == 0 || return_value == 1)
-)
-{
-  /* By default, we rely on compile-time feature detection/specification:
-   * If a feature is enabled at compile-time, we assume it is supported by
-   * the host that the resulting library/binary will be built on.
-   * If this assumption is not true, you MUST overwrite this function.
-   * See the documentation of MLK_CONFIG_CUSTOM_CAPABILITY_FUNC in
-   * mlkem_native_config.h for more information. */
-  (void)cap;
-  return 1;
-}
-#endif /* !MLK_CONFIG_CUSTOM_CAPABILITY_FUNC */
 #endif /* !__ASSEMBLER__ */
 
 #endif /* !MLK_SYS_H */
