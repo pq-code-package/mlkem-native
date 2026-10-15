@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1792060721874,
+  "lastUpdate": 1792060725833,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -2219,6 +2219,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 41784,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": true,
+          "id": "7da6bd118a948b0f029deaf712b5c16c63e37d62",
+          "message": "sys.h: Do not depend on configuration options\n\nsys.h evaluated MLK_CONFIG_NO_ASM, MLK_CONFIG_CT_TESTING_ENABLED and\nMLK_CONFIG_CUSTOM_CAPABILITY_FUNC when it was first included.\nConfiguration hooks such as MLK_CONFIG_CUSTOM_ZEROIZE include sys.h,\nand its include guard prevents re-evaluation, so an option defined\nafter such a hook was silently ignored or, for the capability function,\ncaused a redefinition error. This affects the order of the config\ntemplate and test/configs/no_asm_config.h: the \"No ASM\" configuration\nkept the inline-assembly value barrier and never built the volatile\nopt-blocker, and a late CT_TESTING_ENABLED made constant-time tests\nvacuous.\n\nMove the inline-assembly decision and the CT-testing macros to\ncommon.h, after the whole configuration has been read. Move the default\nmlk_sys_check_capability() to a new shared header capability.h,\nincluded from common.h, so that multilevel builds still define it only\nonce. Document in sys.h that it must not depend on configuration\noptions.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-15T09:03:02Z",
+          "tree_id": "0d57b47ac8d8245791ffbcb836dbca81e5c3dc79",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/7da6bd118a948b0f029deaf712b5c16c63e37d62"
+        },
+        "date": 1792060557947,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 12813,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 14224,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 18954,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 21601,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 22747,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 29688,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 30488,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 32681,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 41791,
             "unit": "cycles"
           }
         ]
