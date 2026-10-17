@@ -16,8 +16,23 @@
 
 #define MLK_DEBUG_ERROR_HEADER "[ERROR:%s:%04d] "
 
-void mlk_debug_check_assert(const char *file, int line, const int val)
+/*
+ * Spell out C-string validity using a length because CBMC 6.11 ignores
+ * __CPROVER_is_cstring and ignores __CPROVER_is_zero_string without string
+ * abstraction. String abstraction is incompatible with the dynamic-frame
+ * contract pass used by these proofs.
+ */
+void mlk_debug_check_assert(const char *file, size_t file_len, int line,
+                            const int val)
+__contract__(
+  requires(file_len > 0)
+  requires(file_len <= MLK_MAX_BUFFER_SIZE)
+  requires(memory_no_alias(file, file_len))
+  requires(file[file_len - 1] == '\0')
+  /* Safety proof only; no functional postcondition intended. */)
 {
+  (void)file_len;
+
   if (val == 0)
   {
     fprintf(stderr, MLK_DEBUG_ERROR_HEADER "Assertion failed (value %d)\n",
@@ -26,28 +41,72 @@ void mlk_debug_check_assert(const char *file, int line, const int val)
   }
 }
 
-void mlk_debug_check_bounds(const char *file, int line, const int16_t *ptr,
-                            unsigned len, int lower_bound_exclusive,
-                            int upper_bound_exclusive)
+/*
+ * The len bound controls proof complexity only. All repository call sites
+ * use lengths no greater than UINT16_MAX.
+ */
+static int mlk_debug_check_bounds_report(const char *file, size_t file_len,
+                                         int line, const int16_t *ptr,
+                                         unsigned len,
+                                         int lower_bound_exclusive,
+                                         int upper_bound_exclusive)
+__contract__(
+  requires(file_len > 0)
+  requires(file_len <= MLK_MAX_BUFFER_SIZE)
+  requires(memory_no_alias(file, file_len))
+  requires(file[file_len - 1] == '\0')
+  requires(len <= UINT16_MAX)
+  requires(lower_bound_exclusive < INT32_MAX)
+  requires(memory_no_alias(ptr, sizeof(int16_t) * len))
+  ensures(return_value ==
+          array_bound(ptr, 0, len, lower_bound_exclusive + 1,
+                      upper_bound_exclusive)))
 {
-  int err = 0;
+  int valid = 1;
   unsigned i;
+
+  (void)file_len;
+
   for (i = 0; i < len; i++)
+  __loop__(
+    invariant(i <= len)
+    invariant(valid ==
+              array_bound(ptr, 0, i, lower_bound_exclusive + 1,
+                          upper_bound_exclusive))
+    decreases(len - i))
   {
     int16_t val = ptr[i];
     if (!(val > lower_bound_exclusive && val < upper_bound_exclusive))
     {
-      fprintf(
-          stderr,
-          MLK_DEBUG_ERROR_HEADER
-          "Bounds assertion failed: Index %u, value %d out of bounds (%d,%d)\n",
-          file, line, i, (int)val, lower_bound_exclusive,
-          upper_bound_exclusive);
-      err = 1;
+      fprintf(stderr,
+              MLK_DEBUG_ERROR_HEADER
+              "Bounds assertion failed: Index %u, value %d out of bounds "
+              "(%d,%d)\n",
+              file, line, i, (int)val, lower_bound_exclusive,
+              upper_bound_exclusive);
+      valid = 0;
     }
   }
 
-  if (err == 1)
+  return valid;
+}
+
+void mlk_debug_check_bounds(const char *file, size_t file_len, int line,
+                            const int16_t *ptr, unsigned len,
+                            int lower_bound_exclusive,
+                            int upper_bound_exclusive)
+__contract__(
+  requires(file_len > 0)
+  requires(file_len <= MLK_MAX_BUFFER_SIZE)
+  requires(memory_no_alias(file, file_len))
+  requires(file[file_len - 1] == '\0')
+  requires(len <= UINT16_MAX)
+  requires(lower_bound_exclusive < INT32_MAX)
+  requires(memory_no_alias(ptr, sizeof(int16_t) * len)))
+{
+  if (!mlk_debug_check_bounds_report(file, file_len, line, ptr, len,
+                                     lower_bound_exclusive,
+                                     upper_bound_exclusive))
   {
     exit(1);
   }

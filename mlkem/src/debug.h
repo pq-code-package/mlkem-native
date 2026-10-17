@@ -14,11 +14,13 @@
  * Prints an error message to stderr and calls exit(1) on failure.
  *
  * @param[in] file Filename.
+ * @param     file_len Length of @p file, including its terminating null byte.
  * @param     line Line number.
  * @param     val  Value asserted to be non-zero.
  */
 #define mlk_debug_check_assert MLK_NAMESPACE(mlkem_debug_assert)
-void mlk_debug_check_assert(const char *file, int line, const int val);
+void mlk_debug_check_assert(const char *file, size_t file_len, int line,
+                            const int val);
 
 /**
  * Check whether values in an array of int16_t are within specified bounds.
@@ -26,6 +28,8 @@ void mlk_debug_check_assert(const char *file, int line, const int val);
  * Prints an error message to stderr and calls exit(1) on failure.
  *
  * @param[in] file                  Filename.
+ * @param     file_len              Length of @p file, including its
+ *                                  terminating null byte.
  * @param     line                  Line number.
  * @param[in] ptr                   Base of array to be checked.
  * @param     len                   Number of int16_t in @p ptr.
@@ -33,15 +37,17 @@ void mlk_debug_check_assert(const char *file, int line, const int val);
  * @param     upper_bound_exclusive Exclusive upper bound.
  */
 #define mlk_debug_check_bounds MLK_NAMESPACE(mlkem_debug_check_bounds)
-void mlk_debug_check_bounds(const char *file, int line, const int16_t *ptr,
-                            unsigned len, int lower_bound_exclusive,
+void mlk_debug_check_bounds(const char *file, size_t file_len, int line,
+                            const int16_t *ptr, unsigned len,
+                            int lower_bound_exclusive,
                             int upper_bound_exclusive);
 
 /* Check assertion, calling exit() upon failure
  *
  * val: Value that's asserted to be non-zero
  */
-#define mlk_assert(val) mlk_debug_check_assert(__FILE__, __LINE__, (val))
+#define mlk_assert(val) \
+  mlk_debug_check_assert(__FILE__, sizeof(__FILE__), __LINE__, (val))
 
 /* Check bounds in array of int16_t's
  * ptr: Base of int16_t array; will be explicitly cast to int16_t*,
@@ -49,9 +55,10 @@ void mlk_debug_check_bounds(const char *file, int line, const int16_t *ptr,
  * len: Number of int16_t in array
  * value_lb: Inclusive lower value bound
  * value_ub: Exclusive upper value bound */
-#define mlk_assert_bound(ptr, len, value_lb, value_ub)                      \
-  mlk_debug_check_bounds(__FILE__, __LINE__, (const int16_t *)(ptr), (len), \
-                         (value_lb) - 1, (value_ub))
+#define mlk_assert_bound(ptr, len, value_lb, value_ub)                  \
+  mlk_debug_check_bounds(__FILE__, sizeof(__FILE__), __LINE__,          \
+                         (const int16_t *)(ptr), (len), (value_lb) - 1, \
+                         (value_ub))
 
 /* Check absolute bounds in array of int16_t's
  * ptr: Base of array, expression of type int16_t*
