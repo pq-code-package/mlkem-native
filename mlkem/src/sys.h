@@ -74,6 +74,14 @@
 #define MLK_SYS_PPC64LE
 #endif
 
+/* Check if the PPC64LE compilation target supports the vector instructions
+ * used by the POWER8 backend: AltiVec/VMX, VSX, and POWER8 vector extensions
+ * (Power ISA 2.07). AltiVec predates POWER8; VSX was introduced in POWER7. */
+#if defined(MLK_SYS_PPC64LE) && defined(__ALTIVEC__) && defined(__VSX__) && \
+    defined(__POWER8_VECTOR__)
+#define MLK_SYS_PPC64LE_POWER8_VECTOR
+#endif
+
 #if defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 64
 #define MLK_SYS_RISCV64
 #endif
@@ -281,7 +289,10 @@ typedef enum
   MLK_SYS_CAP_AARCH64_NEON,
   MLK_SYS_CAP_AARCH64_SHA3,
   /* Armv8.1-M */
-  MLK_SYS_CAP_ARMV81M_MVE
+  MLK_SYS_CAP_ARMV81M_MVE,
+  /* PowerPC64 */
+  /* AltiVec/VMX, VSX, and POWER8 vector extensions (Power ISA 2.07). */
+  MLK_SYS_CAP_PPC64LE_POWER8_VECTOR
 } mlk_sys_cap;
 #endif /* !__ASSEMBLER__ */
 

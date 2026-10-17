@@ -2,6 +2,5 @@
 
 # ppc64le backend (little endian)
 
-This directory contains a native backend for little endian POWER 9 (ppc64le) and above systems.
-Or, Power systems supporting ISA 2.07 and above.
-
+This directory contains a native backend for little endian PPC64.
+It requires POWER8 or above as well as the AltiVec and VSX extensions.

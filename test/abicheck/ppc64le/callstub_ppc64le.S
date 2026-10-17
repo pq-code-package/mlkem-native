@@ -29,6 +29,10 @@
  * CR2-CR4, and LR.
  */
 
+#include "../../../mlkem/src/sys.h"
+
+#if defined(MLK_SYS_PPC64LE_POWER8_VECTOR)
+
 #define ST_GPR_ARG 0   /* r3-r10            */
 #define ST_GPR_NV 64   /* r14-r31           */
 #define ST_FPR 208     /* f14-f31           */
@@ -455,6 +459,8 @@ asm_call_stub_ppc64le:
         .cfi_restore lr
         blr
         .cfi_endproc
+
+#endif /* MLK_SYS_PPC64LE_POWER8_VECTOR */
 
 #if defined(__ELF__)
 .section .note.GNU-stack, "", @progbits

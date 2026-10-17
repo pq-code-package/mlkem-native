@@ -12,7 +12,8 @@
 #include "../../../common.h"
 
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) &&  \
+    defined(MLK_SYS_PPC64LE_POWER8_VECTOR)
 
 #include "consts.h"
 
@@ -296,4 +297,4 @@ MLK_ALIGN MLK_INTERNAL_DATA_DEFINITION const int16_t mlk_ppc_qdata[2072] = {
 /* clang-format on */
 
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
-          !MLK_CONFIG_MULTILEVEL_NO_SHARED && __POWER8_VECTOR__ */
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED && MLK_SYS_PPC64LE_POWER8_VECTOR */

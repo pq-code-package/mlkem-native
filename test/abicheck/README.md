@@ -31,8 +31,10 @@ Before trusting any verdict, `abicheck.c` runs a self-test: hand-written
 corrupters (`<arch>/selftest_<arch>.S`) that each clobber one callee-saved
 register, confirming the checker fires.
 
-The `mlkem/src/.../*.S` sources are assembled directly. On unsupported
-architectures the registry is empty and the driver exits cleanly.
+The `mlkem/src/.../*.S` sources are assembled directly. Compile-time feature
+guards select which checks are registered; a check is skipped if
+`mlk_sys_check_capability()` reports a required feature as unavailable.
+On unsupported architectures the registry is empty and the driver exits cleanly.
 
 ## Code generation
 

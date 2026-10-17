@@ -14,7 +14,7 @@
 #include "../abicheck_ppc64le.h"
 #include "../checks_ppc64le_all.h"
 
-#if defined(MLK_SYS_PPC64LE)
+#if defined(MLK_SYS_PPC64LE) && defined(MLK_SYS_PPC64LE_POWER8_VECTOR)
 
 #include "../../../notrandombytes/notrandombytes.h"
 
@@ -29,6 +29,14 @@ int check_reduce_ppc_asm(void)
   int violations;
   MLK_ALIGN uint8_t buf_r3[512];  /* Input/output polynomial (256 x int16_t) */
   MLK_ALIGN uint8_t buf_r4[4144]; /* Precomputed constants (2072 x int16_t) */
+
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_PPC64LE_POWER8_VECTOR))
+  {
+    fprintf(stderr,
+            "ABI check reduce_ppc_asm: host lacks AltiVec/VSX and POWER8 "
+            "vector extensions (Power ISA 2.07), skipping\n");
+    return MLK_ABICHECK_SKIPPED;
+  }
 
   for (test_iter = 0; test_iter < MLK_ABICHECK_NUM_TESTS; test_iter++)
   {
@@ -62,4 +70,4 @@ int check_reduce_ppc_asm(void)
   return MLK_ABICHECK_PASSED;
 }
 
-#endif /* MLK_SYS_PPC64LE */
+#endif /* MLK_SYS_PPC64LE && MLK_SYS_PPC64LE_POWER8_VECTOR */

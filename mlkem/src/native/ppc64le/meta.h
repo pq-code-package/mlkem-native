@@ -28,7 +28,7 @@
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_ntt_native(int16_t data[MLKEM_N])
 {
-#if defined(__POWER8_VECTOR__)
+#if defined(MLK_SYS_PPC64LE_POWER8_VECTOR)
   mlk_ntt_ppc_asm(data, mlk_ppc_qdata);
   return MLK_NATIVE_FUNC_SUCCESS;
 #else
@@ -41,7 +41,7 @@ static MLK_INLINE int mlk_ntt_native(int16_t data[MLKEM_N])
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
 {
-#if defined(__POWER8_VECTOR__)
+#if defined(MLK_SYS_PPC64LE_POWER8_VECTOR)
   mlk_intt_ppc_asm(data, mlk_ppc_qdata);
   return MLK_NATIVE_FUNC_SUCCESS;
 #else
@@ -54,7 +54,7 @@ static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])
 {
-#if defined(__POWER8_VECTOR__)
+#if defined(MLK_SYS_PPC64LE_POWER8_VECTOR)
   mlk_reduce_ppc_asm(data, mlk_ppc_qdata);
   return MLK_NATIVE_FUNC_SUCCESS;
 #else
@@ -67,7 +67,7 @@ static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_tomont_native(int16_t data[MLKEM_N])
 {
-#if defined(__POWER8_VECTOR__)
+#if defined(MLK_SYS_PPC64LE_POWER8_VECTOR)
   mlk_poly_tomont_ppc_asm(data, mlk_ppc_qdata);
   return MLK_NATIVE_FUNC_SUCCESS;
 #else

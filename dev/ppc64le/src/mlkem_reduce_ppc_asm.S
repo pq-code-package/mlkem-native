@@ -7,7 +7,8 @@
  */
 #include "../../../common.h"
 #if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
-    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(__POWER8_VECTOR__)
+    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
+    defined(MLK_SYS_PPC64LE_POWER8_VECTOR)
 /*yaml
   Name: reduce_ppc_asm
   Description: PowerPC64 VSX modular reduction
@@ -15,7 +16,7 @@
   ABI:
     Architecture: powerpc64le
     CallingConvention: ELFv2
-    Features: [VSX]
+    Features: [POWER8_VECTOR]
     r3:
       type: buffer
       size_bytes: 512
@@ -463,4 +464,4 @@ MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
 
 /* simpasm: footer-start */
 #endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
-          && __POWER8_VECTOR__ */
+          && MLK_SYS_PPC64LE_POWER8_VECTOR */
