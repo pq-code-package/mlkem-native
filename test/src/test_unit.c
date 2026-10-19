@@ -843,6 +843,12 @@ cleanup:
 
 static int test_keccakf1600x4_xor_permute_extract(void)
 {
+  static const uint8_t input_offset_cases[][MLK_KECCAK_WAY] = {
+      {0, 1, 2, 3},
+      {1, 2, 3, 0},
+      {2, 3, 0, 1},
+      {3, 0, 1, 2},
+  };
   int ret = 1;
   int i, j;
   uint8_t xor_offset, xor_length, ext_offset, ext_length;
@@ -859,15 +865,17 @@ static int test_keccakf1600x4_xor_permute_extract(void)
   MLK_ALLOC(input_3, unsigned char, MAX_RATE + 3, NULL);
 
   unsigned char *output_x4[MLK_KECCAK_WAY];
+  unsigned char *input_base[MLK_KECCAK_WAY];
   unsigned char *input[MLK_KECCAK_WAY];
+  const uint8_t *input_offsets;
   output_x4[0] = output_x4_0;
   output_x4[1] = output_x4_1;
   output_x4[2] = output_x4_2;
   output_x4[3] = output_x4_3;
-  input[0] = input_0;
-  input[1] = input_1;
-  input[2] = input_2;
-  input[3] = input_3;
+  input_base[0] = input_0;
+  input_base[1] = input_1;
+  input_base[2] = input_2;
+  input_base[3] = input_3;
 
   if (state_x4 == NULL || state_x1 == NULL || output_x1 == NULL ||
       output_x4_0 == NULL || output_x4_1 == NULL || output_x4_2 == NULL ||
@@ -891,13 +899,15 @@ static int test_keccakf1600x4_xor_permute_extract(void)
     ext_offset = ext_offset % MAX_RATE;
     ext_length = (uint8_t)(1 + (ext_length % (MAX_RATE - ext_offset)));
 
-    /* Generate different random input for each lane */
-    input[0] = input_0 + (((unsigned)i + 0u) & 3u);
-    input[1] = input_1 + (((unsigned)i + 1u) & 3u);
-    input[2] = input_2 + (((unsigned)i + 2u) & 3u);
-    input[3] = input_3 + (((unsigned)i + 3u) & 3u);
+    /* Select the input offsets for this iteration. */
+    input_offsets =
+        input_offset_cases[(size_t)i % (sizeof(input_offset_cases) /
+                                        sizeof(input_offset_cases[0]))];
+
+    /* Generate different random input for each lane. */
     for (j = 0; j < MLK_KECCAK_WAY; j++)
     {
+      input[j] = input_base[j] + input_offsets[j];
       randombytes(input[j], xor_length);
     }
 
