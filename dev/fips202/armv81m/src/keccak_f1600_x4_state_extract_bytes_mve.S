@@ -53,7 +53,8 @@
 //   Prologue -- if offset is not 8-byte aligned, extract
 //               min(length, 8-(offset%8)) bytes via predicated byte stores.
 //   Main     -- process full 8-byte groups: load even/odd lane pair,
-//               de-interleave, scatter-store to output buffers.
+//               de-interleave, scatter-store to aligned output buffers
+//               or use predicated byte stores for unaligned buffers.
 //   Tail     -- extract remaining <8 bytes via predicated byte stores.
 
 #include "../../../../common.h"
@@ -255,23 +256,25 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_extract_bytes_asm)
     subs dp2, dp2, off
     subs dp3, dp3, off
 
-    // Predicated byte stores (post-increment by 4)
+    // Advance each pointer to the next lane start after the partial lane.
     vpstttt
-    vstrbt.u8 qd0, [dp0], #4
-    vstrbt.u8 qd1, [dp1], #4
-    vstrbt.u8 qd2, [dp2], #4
-    vstrbt.u8 qd3, [dp3], #4
+    vstrbt.u8 qd0, [dp0], #8
+    vstrbt.u8 qd1, [dp1], #8
+    vstrbt.u8 qd2, [dp2], #8
+    vstrbt.u8 qd3, [dp3], #8
 
     subs    length, length, nB
     cmp     length, #0
     beq     mlk_keccak_f1600_x4_state_extract_bytes_asm_exit
 
-    // Build qP from updated scalar pointers
-    vmov    qP[2], qP[0],  dp0, dp2
-    vmov    qP[3], qP[1],  dp1, dp3
-    b       mlk_keccak_f1600_x4_state_extract_bytes_asm_main_body
-
 mlk_keccak_f1600_x4_state_extract_bytes_asm_pre_main:
+    // Scatter-word stores require all four next-lane pointers to be aligned.
+    orr     tmp, dp0, dp1
+    orr     tmp, tmp, dp2
+    orr     tmp, tmp, dp3
+    tst     tmp, #3
+    bne     mlk_keccak_f1600_x4_state_extract_bytes_asm_main_body_byte
+
     vmov    qP[2], qP[0],  dp0, dp2
     vmov    qP[3], qP[1],  dp1, dp3
     mov     tmp, #4
@@ -309,6 +312,11 @@ mlk_keccak_f1600_x4_state_extract_bytes_asm_main_loop_end:
     vmov    dp0, dp2, qP[2], qP[0]
     vmov    dp1, dp3, qP[3], qP[1]
 
+mlk_keccak_f1600_x4_state_extract_bytes_asm_main_body_byte:
+    // Unaligned output and the aligned tail share this bounded byte loop.
+    cmp     length, #0
+    beq     mlk_keccak_f1600_x4_state_extract_bytes_asm_exit
+mlk_keccak_f1600_x4_state_extract_bytes_asm_main_loop_byte_start:
     vldrw.u32 qd0, [rSE], #16
     vldrw.u32 qd1, [rSO], #16
 
@@ -318,13 +326,20 @@ mlk_keccak_f1600_x4_state_extract_bytes_asm_main_loop_end:
     // Transpose from per-lane to per-instance layout
     transpose_lanes_to_streams
 
-    // Predicated byte stores for remaining bytes
-    vctp.8 length
+    // Limit stores to one lane, including the final partial lane.
+    mov     nB, #8
+    cmp     length, #8
+    it      lo
+    movlo   nB, length
+    vctp.8 nB
     vpstttt
-    vstrbt.u8 qd0, [dp0], #4
-    vstrbt.u8 qd1, [dp1], #4
-    vstrbt.u8 qd2, [dp2], #4
-    vstrbt.u8 qd3, [dp3], #4
+    vstrbt.u8 qd0, [dp0], #8
+    vstrbt.u8 qd1, [dp1], #8
+    vstrbt.u8 qd2, [dp2], #8
+    vstrbt.u8 qd3, [dp3], #8
+
+    subs    length, length, nB
+    bne     mlk_keccak_f1600_x4_state_extract_bytes_asm_main_loop_byte_start
 
 mlk_keccak_f1600_x4_state_extract_bytes_asm_exit:
     vpop    {d8-d15}
