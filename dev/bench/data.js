@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1792447586506,
+  "lastUpdate": 1792447592912,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -5541,6 +5541,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 120323,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": true,
+          "id": "d8cc522a8ed905466a5109bae97e4661ef80cf22",
+          "message": "Test: Run ABI checks as Zephyr applications\n\nThe ABI-check target bypassed the custom platform build path and linked\nan executable directly with $(LD). Under Zephyr that produced a host\nexecutable, which was then handed to Arm QEMU and faulted at startup.\n\nRoute the ABI-check target through the existing $(LINK)/CUSTOM_BUILD\nmechanism, so the ABI driver, self-tests, generated checks, and\nArmv8.1-M assembly sources build as a standalone Zephyr application.\nSelect armv81m explicitly for mps3-an547 rather than inferring it from\nthe generic arm-none-eabi compiler prefix, and reject ABI-check requests\nfor other Zephyr targets explicitly. Preserve OPT and AUTO when\nscripts/tests invokes a run target, so the run step no longer re-enters\nthe makefiles under a platform's own OPT default.\n\nTrack OPT, the selected FIPS202 backend, and the now-configurable test\ncounts in the active build marker so changes to those inputs rebuild\nstale Zephyr binaries, name the native assembly amalgamation as an\nexplicit dependency, and allow QEMU execution timeouts to be overridden.\n\nPorts pq-code-package/mldsa-native#1318.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-19T19:29:29Z",
+          "tree_id": "5945ee18a8890ce81d74d6ad1506e0b9a43d0bfa",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/d8cc522a8ed905466a5109bae97e4661ef80cf22"
+        },
+        "date": 1792447591547,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 36978,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 44322,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 57081,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 59677,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 67609,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 84682,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 88326,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 98768,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 120028,
             "unit": "cycles"
           }
         ]
