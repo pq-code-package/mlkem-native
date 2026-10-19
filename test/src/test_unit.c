@@ -844,10 +844,8 @@ cleanup:
 static int test_keccakf1600x4_xor_permute_extract(void)
 {
   static const uint8_t input_offset_cases[][MLK_KECCAK_WAY] = {
-      {0, 1, 2, 3},
-      {1, 2, 3, 0},
-      {2, 3, 0, 1},
-      {3, 0, 1, 2},
+      {0, 0, 0, 0}, {0, 1, 2, 3}, {1, 1, 1, 1}, {1, 2, 3, 0},
+      {2, 2, 2, 2}, {2, 3, 0, 1}, {3, 3, 3, 3}, {3, 0, 1, 2},
   };
   int ret = 1;
   int i, j;
