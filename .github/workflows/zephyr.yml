@@ -39,7 +39,7 @@ jobs:
           acvp: true
           wycheproof: false
           examples: false
-          unit: false
+          unit: true
           stack: false
           alloc: false
           rng_fail: false
