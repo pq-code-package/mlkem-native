@@ -840,36 +840,65 @@ cleanup:
 #if defined(MLK_USE_NATIVE_FIPS202_X4) && \
     !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
 #define MAX_RATE 136
+/* Reserve eight leading guard bytes, keeping alignment modulo four,
+ * up to three bytes for the alignment shift, MAX_RATE data bytes, and
+ * sixteen trailing guard bytes. Check the guards for out-of-range writes. */
+#define OUTPUT_BYTES (8 + 3 + MAX_RATE + 16)
 
 static int test_keccakf1600x4_xor_permute_extract(void)
 {
-  static const uint8_t input_offset_cases[][MLK_KECCAK_WAY] = {
+  static const uint8_t buffer_offset_cases[][MLK_KECCAK_WAY] = {
       {0, 0, 0, 0}, {0, 1, 2, 3}, {1, 1, 1, 1}, {1, 2, 3, 0},
       {2, 2, 2, 2}, {2, 3, 0, 1}, {3, 3, 3, 3}, {3, 0, 1, 2},
   };
+  /* Append fixed extraction regressions after the randomized trials.
+   * Offset 1, length 15 consumes a seven-byte prologue and one full lane. */
+  static const struct
+  {
+    uint8_t offset, length;
+    uint8_t output_offsets[MLK_KECCAK_WAY];
+  } extract_cases[] = {
+      {1, 15, {0, 0, 0, 0}},  /* Unaligned after the prologue. */
+      {1, 15, {1, 1, 1, 1}},  /* Aligned after the prologue. */
+      {0, 17, {0, 0, 0, 0}},  /* Word stores and a partial tail. */
+      {0, 17, {1, 1, 1, 1}},  /* Byte stores and a partial tail. */
+      {0, 17, {1, 0, 0, 0}},  /* Only output 0 is unaligned. */
+      {0, 17, {0, 1, 0, 0}},  /* Only output 1 is unaligned. */
+      {0, 17, {0, 0, 1, 0}},  /* Only output 2 is unaligned. */
+      {0, 17, {0, 0, 0, 1}},  /* Only output 3 is unaligned. */
+      {1, 7, {0, 0, 0, 0}},   /* Prologue only. */
+      {0, 7, {0, 0, 0, 0}},   /* Tail only. */
+      {0, 0, {0, 0, 0, 0}},   /* Empty range. */
+      {199, 1, {0, 0, 0, 0}}, /* Final state byte. */
+      {200, 0, {0, 0, 0, 0}}, /* Empty range at the state endpoint. */
+  };
+  const int num_extract_cases =
+      (int)(sizeof(extract_cases) / sizeof(extract_cases[0]));
   int ret = 1;
-  int i, j;
+  int i, j, k;
   uint8_t xor_offset, xor_length, ext_offset, ext_length;
   MLK_ALLOC(state_x4, uint64_t, MLK_KECCAK_LANES *MLK_KECCAK_WAY, NULL);
   MLK_ALLOC(state_x1, uint64_t, MLK_KECCAK_LANES, NULL);
   MLK_ALLOC(output_x1, unsigned char, MAX_RATE, NULL);
-  MLK_ALLOC(output_x4_0, unsigned char, MAX_RATE, NULL);
-  MLK_ALLOC(output_x4_1, unsigned char, MAX_RATE, NULL);
-  MLK_ALLOC(output_x4_2, unsigned char, MAX_RATE, NULL);
-  MLK_ALLOC(output_x4_3, unsigned char, MAX_RATE, NULL);
+  MLK_ALLOC(output_x4_0, unsigned char, OUTPUT_BYTES, NULL);
+  MLK_ALLOC(output_x4_1, unsigned char, OUTPUT_BYTES, NULL);
+  MLK_ALLOC(output_x4_2, unsigned char, OUTPUT_BYTES, NULL);
+  MLK_ALLOC(output_x4_3, unsigned char, OUTPUT_BYTES, NULL);
   MLK_ALLOC(input_0, unsigned char, MAX_RATE + 3, NULL);
   MLK_ALLOC(input_1, unsigned char, MAX_RATE + 3, NULL);
   MLK_ALLOC(input_2, unsigned char, MAX_RATE + 3, NULL);
   MLK_ALLOC(input_3, unsigned char, MAX_RATE + 3, NULL);
 
   unsigned char *output_x4[MLK_KECCAK_WAY];
+  unsigned char *output_base[MLK_KECCAK_WAY];
   unsigned char *input_base[MLK_KECCAK_WAY];
   unsigned char *input[MLK_KECCAK_WAY];
   const uint8_t *input_offsets;
-  output_x4[0] = output_x4_0;
-  output_x4[1] = output_x4_1;
-  output_x4[2] = output_x4_2;
-  output_x4[3] = output_x4_3;
+  const uint8_t *output_offsets;
+  output_base[0] = output_x4_0;
+  output_base[1] = output_x4_1;
+  output_base[2] = output_x4_2;
+  output_base[3] = output_x4_3;
   input_base[0] = input_0;
   input_base[1] = input_1;
   input_base[2] = input_2;
@@ -883,7 +912,7 @@ static int test_keccakf1600x4_xor_permute_extract(void)
     goto cleanup;
   }
 
-  for (i = 0; i < NUM_RANDOM_TESTS; i++)
+  for (i = 0; i < NUM_RANDOM_TESTS + num_extract_cases; i++)
   {
     /* Generate random offset and length for xor_bytes */
     randombytes(&xor_offset, 1);
@@ -897,16 +926,27 @@ static int test_keccakf1600x4_xor_permute_extract(void)
     ext_offset = ext_offset % MAX_RATE;
     ext_length = (uint8_t)(1 + (ext_length % (MAX_RATE - ext_offset)));
 
-    /* Select the input offsets for this iteration. */
+    /* Select the buffer offsets for this iteration. */
     input_offsets =
-        input_offset_cases[(size_t)i % (sizeof(input_offset_cases) /
-                                        sizeof(input_offset_cases[0]))];
+        buffer_offset_cases[(size_t)i % (sizeof(buffer_offset_cases) /
+                                         sizeof(buffer_offset_cases[0]))];
+    output_offsets = input_offsets;
+    if (i >= NUM_RANDOM_TESTS)
+    {
+      int c = i - NUM_RANDOM_TESTS;
+      ext_offset = extract_cases[c].offset;
+      ext_length = extract_cases[c].length;
+      output_offsets = extract_cases[c].output_offsets;
+    }
 
     /* Generate different random input for each lane. */
     for (j = 0; j < MLK_KECCAK_WAY; j++)
     {
       input[j] = input_base[j] + input_offsets[j];
       randombytes(input[j], xor_length);
+      /* Leave eight leading bytes and room for an over-store sentinel. */
+      output_x4[j] = output_base[j] + 8 + output_offsets[j];
+      memset(output_base[j], 0xA5, OUTPUT_BYTES);
     }
 
     /* Run x4 implementation */
@@ -928,6 +968,14 @@ static int test_keccakf1600x4_xor_permute_extract(void)
                                     ext_length);
 
       CHECK(memcmp(output_x4[j], output_x1, ext_length) == 0);
+      for (k = 0; k < 8 + output_offsets[j]; k++)
+      {
+        CHECK(output_base[j][k] == 0xA5);
+      }
+      for (k = 8 + output_offsets[j] + ext_length; k < OUTPUT_BYTES; k++)
+      {
+        CHECK(output_base[j][k] == 0xA5);
+      }
     }
   }
 
@@ -938,16 +986,17 @@ cleanup:
   MLK_FREE(input_2, unsigned char, MAX_RATE + 3, NULL);
   MLK_FREE(input_1, unsigned char, MAX_RATE + 3, NULL);
   MLK_FREE(input_0, unsigned char, MAX_RATE + 3, NULL);
-  MLK_FREE(output_x4_3, unsigned char, MAX_RATE, NULL);
-  MLK_FREE(output_x4_2, unsigned char, MAX_RATE, NULL);
-  MLK_FREE(output_x4_1, unsigned char, MAX_RATE, NULL);
-  MLK_FREE(output_x4_0, unsigned char, MAX_RATE, NULL);
+  MLK_FREE(output_x4_3, unsigned char, OUTPUT_BYTES, NULL);
+  MLK_FREE(output_x4_2, unsigned char, OUTPUT_BYTES, NULL);
+  MLK_FREE(output_x4_1, unsigned char, OUTPUT_BYTES, NULL);
+  MLK_FREE(output_x4_0, unsigned char, OUTPUT_BYTES, NULL);
   MLK_FREE(output_x1, unsigned char, MAX_RATE, NULL);
   MLK_FREE(state_x1, uint64_t, MLK_KECCAK_LANES, NULL);
   MLK_FREE(state_x4, uint64_t, MLK_KECCAK_LANES *MLK_KECCAK_WAY, NULL);
   return ret;
 }
 
+#undef OUTPUT_BYTES
 #undef MAX_RATE
 #endif /* MLK_USE_NATIVE_FIPS202_X4 && !MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
