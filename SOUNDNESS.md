@@ -163,6 +163,10 @@ coefficient bounds after arithmetic operations, or the functional specification 
 `mlk_ct_memcmp`. See [`proofs/cbmc/Makefile.common`](proofs/cbmc/Makefile.common) for the
 full list of checked classes of undefined behavior.
 
+The scalar debug helpers are proved using CBMC's libc models, which do
+not parse `fprintf` formats or inspect variadic arguments. These proofs
+do not establish safety or output behavior of real formatted diagnostics.
+
 The CBMC proofs do **not** currently cover:
 
 - **Functional correctness.** There is no machine-checked proof that the C code computes
