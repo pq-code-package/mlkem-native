@@ -53,7 +53,8 @@
 //   Prologue -- if offset is not 8-byte aligned, extract
 //               min(length, 8-(offset%8)) bytes via predicated byte stores.
 //   Main     -- process full 8-byte groups: load even/odd lane pair,
-//               de-interleave, scatter-store to output buffers.
+//               de-interleave, scatter-store to aligned output buffers
+//               or use predicated byte stores for unaligned buffers.
 //   Tail     -- extract remaining <8 bytes via predicated byte stores.
 
 #include "../../../../common.h"
@@ -99,13 +100,13 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_extract_bytes_asm)
         ldr.w r10, [sp, #0x6c]
         ldr r6, [sp, #0x70]
         cmp r6, #0x0
-        beq.w Lmlk_keccak_f1600_x4_state_extract_bytes_asm_exit @ imm = #0x2ea
+        beq.w Lmlk_keccak_f1600_x4_state_extract_bytes_asm_exit @ imm = #0x308
         and r5, r10, #0x7
         bic r9, r10, #0x7
         add.w r8, r0, r9, lsl #1
         add.w r7, r8, #0x190
         cmp r5, #0x0
-        beq.w Lmlk_keccak_f1600_x4_state_extract_bytes_asm_pre_main @ imm = #0x112
+        beq.w Lmlk_keccak_f1600_x4_state_extract_bytes_asm_pre_main @ imm = #0x108
         vldrw.u32 q0, [r8], #16
         vldrw.u32 q1, [r7], #16
         vrev32.16 q2, q0
@@ -169,18 +170,20 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_state_extract_bytes_asm)
         subs r3, r3, r5
         subs r4, r4, r5
         vpstttt
-        vstrbt.8 q0, [r1], #4
-        vstrbt.8 q1, [r2], #4
-        vstrbt.8 q2, [r3], #4
-        vstrbt.8 q3, [r4], #4
+        vstrbt.8 q0, [r1], #8
+        vstrbt.8 q1, [r2], #8
+        vstrbt.8 q2, [r3], #8
+        vstrbt.8 q3, [r4], #8
         subs.w r6, r6, lr
         cmp r6, #0x0
-        beq.w Lmlk_keccak_f1600_x4_state_extract_bytes_asm_exit @ imm = #0x1cc
-        vmov q7[2], q7[0], r1, r3
-        vmov q7[3], q7[1], r2, r4
-        b Lmlk_keccak_f1600_x4_state_extract_bytes_asm_main_body @ imm = #0xe
+        beq.w Lmlk_keccak_f1600_x4_state_extract_bytes_asm_exit @ imm = #0x1ea
 
 Lmlk_keccak_f1600_x4_state_extract_bytes_asm_pre_main:
+        orr.w r12, r1, r2
+        orr.w r12, r12, r3
+        orr.w r12, r12, r4
+        tst.w r12, #0x3
+        bne Lmlk_keccak_f1600_x4_state_extract_bytes_asm_main_body_byte @ imm = #0xe2
         vmov q7[2], q7[0], r1, r3
         vmov q7[3], q7[1], r2, r4
         mov.w r12, #0x4
@@ -239,11 +242,17 @@ Lmlk_keccak_f1600_x4_state_extract_bytes_asm_main_loop_start:
 
 Lmlk_keccak_f1600_x4_state_extract_bytes_asm_main_loop_end:
         ands r6, r6, #0x7
-        beq Lmlk_keccak_f1600_x4_state_extract_bytes_asm_exit @ imm = #0xee
+        beq.w Lmlk_keccak_f1600_x4_state_extract_bytes_asm_exit @ imm = #0x104
         mov.w r12, #0x4
         vadd.i32 q7, q7, r12
         vmov r1, r3, q7[2], q7[0]
         vmov r2, r4, q7[3], q7[1]
+
+Lmlk_keccak_f1600_x4_state_extract_bytes_asm_main_body_byte:
+        cmp r6, #0x0
+        beq Lmlk_keccak_f1600_x4_state_extract_bytes_asm_exit @ imm = #0xee
+
+Lmlk_keccak_f1600_x4_state_extract_bytes_asm_main_loop_byte_start:
         vldrw.u32 q0, [r8], #16
         vldrw.u32 q1, [r7], #16
         vrev32.16 q2, q0
@@ -294,12 +303,18 @@ Lmlk_keccak_f1600_x4_state_extract_bytes_asm_main_loop_end:
         vpsel q1, q2, q1
         vmov.f64 d4, d1
         vmov.f64 d6, d3
-        vctp.8 r6
+        mov.w lr, #0x8
+        cmp r6, #0x8
+        it lo
+        movlo lr, r6
+        vctp.8 lr
         vpstttt
-        vstrbt.8 q0, [r1], #4
-        vstrbt.8 q1, [r2], #4
-        vstrbt.8 q2, [r3], #4
-        vstrbt.8 q3, [r4], #4
+        vstrbt.8 q0, [r1], #8
+        vstrbt.8 q1, [r2], #8
+        vstrbt.8 q2, [r3], #8
+        vstrbt.8 q3, [r4], #8
+        subs.w r6, r6, lr
+        bne Lmlk_keccak_f1600_x4_state_extract_bytes_asm_main_loop_byte_start @ imm = #-0xf2
 
 Lmlk_keccak_f1600_x4_state_extract_bytes_asm_exit:
         vpop {d8, d9, d10, d11, d12, d13, d14, d15}
@@ -324,6 +339,7 @@ Lmlk_keccak_f1600_x4_state_extract_bytes_asm_exit:
         .cfi_restore lr
         .cfi_adjust_cfa_offset -0x28
         .cfi_endproc
+        nop
 
 MLK_ASM_FN_SIZE(keccak_f1600_x4_state_extract_bytes_asm)
 
