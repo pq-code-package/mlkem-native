@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1792518671872,
+  "lastUpdate": 1792520370252,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -1036,6 +1036,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 1398918,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": true,
+          "id": "b9550181de754f798941b8a4f495f8a9b8b5e3ec",
+          "message": "PPC64: Align backend selection and ABI feature guards\n\nThe PPC64 ABI checker registered kernels whenever the target was\nPPC64LE, while the kernels require POWER8 vector support. Removing the\nchecker's forced assembly flags would leave checks referring to kernels\nomitted by the build's CPU flags.\n\nAdd `MLK_SYS_PPC64LE_POWER8_VECTOR`, requiring `__ALTIVEC__`, `__VSX__`,\nand `__POWER8_VECTOR__` on PPC64LE. Use it to select the default PPC64\nbackend in `native/meta.h`, as for the NEON and AVX2 backends.\nUnsupported targets then use portable C without selecting the native\nwrappers.\n\nRemove the per-kernel and constant-table `__POWER8_VECTOR__` guards and\nthe wrappers' compile-time fallback branches. Explicitly selecting the\nPPC64 backend now requires a target with its documented features,\nmatching the other backends.\n\nThe PPC64 wrappers previously checked only `__POWER8_VECTOR__` at\ncompile time, so a custom capability function could not disable them at\nruntime. Append `MLK_SYS_CAP_PPC64LE_POWER8_VECTOR` and have all four\nwrappers consult the capability hook before calling assembly. Return\n`MLK_NATIVE_FUNC_FALLBACK` without modifying the input if it rejects\nPOWER8 vector support.\n\nUse the same feature macro for the generated ABI checks, registry, call\nstub and self-test. Name the ABI feature `POWER8_VECTOR` and consult the\ncapability hook before calling assembly from ABI checks or the\nself-test.\n\nCorrect the backend READMEs from POWER9 to POWER8 and state the AltiVec\nand VSX requirement. The default capability hook assumes compile-time\nfeatures are supported; runtime detection requires a custom function.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-10-20T16:11:56Z",
+          "tree_id": "338e3d87e2fcd142f599f4a3dbd8d1f6b4e6a9b8",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/b9550181de754f798941b8a4f495f8a9b8b5e3ec"
+        },
+        "date": 1792519594648,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 398857,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 513294,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 714034,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 669876,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 782851,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 1054085,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 899202,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 1051577,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 1399144,
             "unit": "cycles"
           }
         ]
