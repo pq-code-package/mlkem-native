@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
+#include "../../../mlkem/src/sys.h"
+
+#if defined(MLK_SYS_ARMV81M_MVE)
+
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits
 #endif
@@ -181,3 +185,5 @@ asm_call_stub_armv81m:
         .cfi_adjust_cfa_offset -64
         pop     {r4-r12, pc}
         .cfi_endproc
+
+#endif /* MLK_SYS_ARMV81M_MVE */

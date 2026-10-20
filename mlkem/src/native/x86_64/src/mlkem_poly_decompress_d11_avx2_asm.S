@@ -31,7 +31,8 @@
  **************************************************/
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+#if defined(MLK_SYS_X86_64_AVX2) && \
+    defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
     !defined(MLK_CONFIG_NO_DECAPS_API) && \
     (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4)
@@ -299,9 +300,9 @@ MLK_ASM_FN_SYMBOL(poly_decompress_d11_avx2_asm)
 
 MLK_ASM_FN_SIZE(poly_decompress_d11_avx2_asm)
 
-#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
-          && !MLK_CONFIG_NO_DECAPS_API && (MLK_CONFIG_MULTILEVEL_WITH_SHARED || \
-          MLKEM_K == 4) */
+#endif /* MLK_SYS_X86_64_AVX2 && MLK_ARITH_BACKEND_X86_64_DEFAULT && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED && !MLK_CONFIG_NO_DECAPS_API && \
+          (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4) */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits

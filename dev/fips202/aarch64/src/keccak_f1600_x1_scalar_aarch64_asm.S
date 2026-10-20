@@ -33,7 +33,8 @@
 */
 
 #include "../../../../common.h"
-#if defined(MLK_FIPS202_AARCH64_NEED_X1_SCALAR) && \
+#if defined(MLK_SYS_AARCH64) && \
+    defined(MLK_FIPS202_AARCH64_NEED_X1_SCALAR) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
@@ -470,5 +471,5 @@ mlk_keccak_f1600_x1_scalar_initial:
 #undef KECCAK_F1600_ROUNDS
 
 /* simpasm: footer-start */
-#endif /* MLK_FIPS202_AARCH64_NEED_X1_SCALAR && \
+#endif /* MLK_SYS_AARCH64 && MLK_FIPS202_AARCH64_NEED_X1_SCALAR && \
           !MLK_CONFIG_MULTILEVEL_NO_SHARED */

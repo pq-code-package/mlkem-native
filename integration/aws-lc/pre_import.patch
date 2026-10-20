@@ -1,0 +1,13 @@
+diff --git a/crypto/fipsmodule/ml_kem/importer.sh b/crypto/fipsmodule/ml_kem/importer.sh
+index 6263a90..d582b4c 100644
+--- a/crypto/fipsmodule/ml_kem/importer.sh
++++ b/crypto/fipsmodule/ml_kem/importer.sh
+@@ -146,6 +146,8 @@ for file in $SRC/native/aarch64/src/*.S $SRC/native/x86_64/src/*.S; do
+   # guard collapses and the body is included unconditionally.
+   sed -e ':a' -e 'N' -e '$!ba' -e 's/\\\n/ /g' "$file" | \
+     unifdef -D$backend_define \
++            -DMLK_SYS_AARCH64_NEON \
++            -DMLK_SYS_X86_64_AVX2 \
+             -UMLK_CONFIG_MULTILEVEL_NO_SHARED \
+             -DMLK_CONFIG_MULTILEVEL_WITH_SHARED \
+             -UMLK_CONFIG_NO_KEYPAIR_API \

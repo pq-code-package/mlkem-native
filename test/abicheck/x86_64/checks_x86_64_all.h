@@ -19,7 +19,7 @@
 #if defined(MLK_SYS_X86_64)
 
 #if defined(MLK_SYSV_ABI_SUPPORTED)
-#if defined(__AVX2__)
+#if defined(MLK_SYS_X86_64_AVX2)
 int check_keccak_f1600_x4_avx2_asm(void);
 int check_invntt_avx2_asm(void);
 int check_ntt_avx2_asm(void);
@@ -41,12 +41,12 @@ int check_polyvec_basemul_acc_montgomery_cached_k4_avx2_asm(void);
 int check_reduce_avx2_asm(void);
 int check_rej_uniform_avx2_asm(void);
 int check_tomont_avx2_asm(void);
-#endif /* __AVX2__ */
+#endif /* MLK_SYS_X86_64_AVX2 */
 #endif /* MLK_SYSV_ABI_SUPPORTED */
 
 static const abicheck_entry_t all_checks[] = {
 #if defined(MLK_SYSV_ABI_SUPPORTED)
-#if defined(__AVX2__)
+#if defined(MLK_SYS_X86_64_AVX2)
     {"keccak_f1600_x4_avx2_asm", check_keccak_f1600_x4_avx2_asm},
     {"invntt_avx2_asm", check_invntt_avx2_asm},
     {"ntt_avx2_asm", check_ntt_avx2_asm},
@@ -71,7 +71,7 @@ static const abicheck_entry_t all_checks[] = {
     {"reduce_avx2_asm", check_reduce_avx2_asm},
     {"rej_uniform_avx2_asm", check_rej_uniform_avx2_asm},
     {"tomont_avx2_asm", check_tomont_avx2_asm},
-#endif           /* __AVX2__ */
+#endif           /* MLK_SYS_X86_64_AVX2 */
 #endif           /* MLK_SYSV_ABI_SUPPORTED */
     {NULL, NULL} /* Sentinel */
 };

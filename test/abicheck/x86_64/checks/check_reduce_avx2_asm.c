@@ -15,7 +15,7 @@
 #include "../checks_x86_64_all.h"
 
 #if defined(MLK_SYS_X86_64) && defined(MLK_SYSV_ABI_SUPPORTED) && \
-    defined(__AVX2__)
+    defined(MLK_SYS_X86_64_AVX2)
 
 #include "../../../notrandombytes/notrandombytes.h"
 
@@ -69,4 +69,4 @@ int check_reduce_avx2_asm(void)
   return MLK_ABICHECK_PASSED;
 }
 
-#endif /* MLK_SYS_X86_64 && MLK_SYSV_ABI_SUPPORTED && __AVX2__ */
+#endif /* MLK_SYS_X86_64 && MLK_SYSV_ABI_SUPPORTED && MLK_SYS_X86_64_AVX2 */

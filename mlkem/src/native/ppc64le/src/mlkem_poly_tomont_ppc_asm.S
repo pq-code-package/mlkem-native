@@ -14,7 +14,8 @@
  */
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
+#if defined(MLK_SYS_PPC64LE_POWER8_VECTOR) && \
+    defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
     !defined(MLK_CONFIG_NO_KEYPAIR_API)
 /*yaml
@@ -308,8 +309,8 @@ MLK_ASM_FN_SYMBOL(poly_tomont_ppc_asm)
 
 MLK_ASM_FN_SIZE(poly_tomont_ppc_asm)
 
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
-          && !MLK_CONFIG_NO_KEYPAIR_API */
+#endif /* MLK_SYS_PPC64LE_POWER8_VECTOR && MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED && !MLK_CONFIG_NO_KEYPAIR_API */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits

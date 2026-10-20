@@ -3788,13 +3788,15 @@ def synchronize_backends(
         # comparing the object code before and after simplification.
         cflags="-Idev/x86_64/src/ -Imlkem/src/native/x86_64/src/ -mavx2 -mbmi2 -msse4 -fcf-protection=none",
     )
+    # GCC exposes __ARM_FEATURE_MVE only with a softfp or hard float ABI.
+    # The assembly feature guards must see MVE while regenerating kernels.
     synchronize_backend(
         "dev/fips202/armv81m/src",
         "mlkem/src/fips202/native/armv81m/src",
         delete=delete,
         force_cross=force_cross,
         no_simplify=no_simplify,
-        cflags="-Idev/fips202/armv81m/src -Imlkem/src/fips202/native/armv81m/src -march=armv8.1-m.main+mve -mthumb",
+        cflags="-Idev/fips202/armv81m/src -Imlkem/src/fips202/native/armv81m/src -march=armv8.1-m.main+mve -mthumb -mfloat-abi=hard",
     )
     synchronize_backend(
         "dev/fips202/armv81m",
@@ -3802,7 +3804,7 @@ def synchronize_backends(
         delete=delete,
         force_cross=force_cross,
         no_simplify=no_simplify,
-        cflags="-Idev/fips202/armv81m -Imlkem/src/fips202/native/armv81m -march=armv8.1-m.main+mve -mthumb",
+        cflags="-Idev/fips202/armv81m -Imlkem/src/fips202/native/armv81m -march=armv8.1-m.main+mve -mthumb -mfloat-abi=hard",
     )
     synchronize_backend(
         "dev/fips202/x86_64/src",
@@ -4879,7 +4881,7 @@ def extract_yaml_from_assembly(assembly_file):
 ABI_CAPS = {
     "AVX2": {
         "asm_subdir": "x86_64",
-        "guard": "__AVX2__",
+        "guard": "MLK_SYS_X86_64_AVX2",
         "syscap": "MLK_SYS_CAP_X86_64_AVX2",
         "description": "AVX2",
         "cflags": ["-mavx2", "-mbmi2"],
@@ -4903,7 +4905,7 @@ ABI_CAPS = {
     },
     "MVE": {
         "asm_subdir": "armv81m",
-        "guard": "__ARM_FEATURE_MVE",
+        "guard": "MLK_SYS_ARMV81M_MVE",
         "syscap": "MLK_SYS_CAP_ARMV81M_MVE",
         "description": "Armv8.1-M MVE",
         "cflags": ["-march=armv8.1-m.main+mve", "-mthumb"],
@@ -5155,12 +5157,14 @@ def gen_abicheck():
             features = kernel_features(yaml_data, dev_source)
             registers = kernel_registers(yaml_data, dev_source)
             # Compile-time guards derived from Features. Each capability with a
-            # 'guard' (e.g. __AVX2__ for AVX2, __ARM_FEATURE_SHA3 for SHA3)
+            # 'guard' (e.g. MLK_SYS_X86_64_AVX2 for AVX2)
             # contributes an #if term mirroring the backend's own compile-time
             # gate; runtime gating via mlk_sys_check_capability is
             # additional, not a replacement.
             feature_guards = [
-                ABI_CAPS[f]["guard"] for f in features if ABI_CAPS[f]["guard"]
+                ABI_CAPS[f]["guard"]
+                for f in features
+                if ABI_CAPS[f]["guard"] and ABI_CAPS[f]["guard"] != arch_guard
             ]
 
             function_name = yaml_data.get("Name")
@@ -5360,7 +5364,7 @@ def gen_abicheck():
         # Emit one row per function, consolidating consecutive functions that
         # share the same feature_guards into a single #if/#endif block (rather
         # than one block per function). This collapses a uniform-feature group
-        # (e.g. x86_64, where every kernel is gated on __AVX2__) into a single
+        # (e.g. x86_64, where every kernel requires AVX2) into a single
         # block, while still splitting where guards differ (e.g. aarch64, where
         # SHA3 and non-SHA3 kernels are interleaved).
         def emit_feature_grouped(functions, render):

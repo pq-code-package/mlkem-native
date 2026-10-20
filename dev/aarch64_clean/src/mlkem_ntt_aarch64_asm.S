@@ -51,7 +51,8 @@
 */
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64) && \
+#if defined(MLK_SYS_AARCH64_NEON) && \
+    defined(MLK_ARITH_BACKEND_AARCH64) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
@@ -341,4 +342,5 @@ mlk_ntt_layer4567_start:
     .unreq t3
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_SYS_AARCH64_NEON && MLK_ARITH_BACKEND_AARCH64 && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED */

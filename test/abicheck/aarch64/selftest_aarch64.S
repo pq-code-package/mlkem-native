@@ -5,6 +5,8 @@
 
 #include "../../../mlkem/src/sys.h"
 
+#if defined(MLK_SYS_AARCH64)
+
 /*
  * AArch64 selftest stubs.
  *
@@ -74,3 +76,5 @@ define_corrupter selftest_aarch64_corrupt_d13, "fneg d13, d13"
 define_corrupter selftest_aarch64_corrupt_d14, "fneg d14, d14"
 define_corrupter selftest_aarch64_corrupt_d15, "fneg d15, d15"
 #endif /* MLK_SYS_AARCH64_NEON */
+
+#endif /* MLK_SYS_AARCH64 */

@@ -51,7 +51,8 @@
 */
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64) && \
+#if defined(MLK_SYS_AARCH64_NEON) && \
+    defined(MLK_ARITH_BACKEND_AARCH64) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
     (!defined(MLK_CONFIG_NO_ENCAPS_API) || \
      !defined(MLK_CONFIG_NO_DECAPS_API))
@@ -1423,5 +1424,6 @@ mlk_intt_layer123_start:
     .unreq ninv_tw
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED && \
-          (!MLK_CONFIG_NO_ENCAPS_API || !MLK_CONFIG_NO_DECAPS_API) */
+#endif /* MLK_SYS_AARCH64_NEON && MLK_ARITH_BACKEND_AARCH64 && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED && (!MLK_CONFIG_NO_ENCAPS_API || \
+          !MLK_CONFIG_NO_DECAPS_API) */

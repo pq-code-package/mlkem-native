@@ -58,7 +58,8 @@
 //   Tail     -- extract remaining <8 bytes via predicated byte stores.
 
 #include "../../../../common.h"
-#if defined(MLK_FIPS202_ARMV81M_NEED_X4) && \
+#if defined(MLK_SYS_ARMV81M_MVE) && \
+    defined(MLK_FIPS202_ARMV81M_NEED_X4) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
@@ -365,4 +366,5 @@ mlk_keccak_f1600_x4_state_extract_bytes_asm_exit:
     .unreq qd3
 
 /* simpasm: footer-start */
-#endif /* MLK_FIPS202_ARMV81M_NEED_X4 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_SYS_ARMV81M_MVE && MLK_FIPS202_ARMV81M_NEED_X4 && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED */

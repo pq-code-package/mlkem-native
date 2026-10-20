@@ -57,7 +57,8 @@
 //   Tail     -- absorb remaining <8 bytes via predicated byte loads.
 
 #include "../../../../common.h"
-#if defined(MLK_FIPS202_ARMV81M_NEED_X4) && \
+#if defined(MLK_SYS_ARMV81M_MVE) && \
+    defined(MLK_FIPS202_ARMV81M_NEED_X4) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 /*
@@ -364,7 +365,8 @@ Lmlk_keccak_f1600_x4_state_xor_bytes_asm_exit:
 
 MLK_ASM_FN_SIZE(keccak_f1600_x4_state_xor_bytes_asm)
 
-#endif /* MLK_FIPS202_ARMV81M_NEED_X4 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_SYS_ARMV81M_MVE && MLK_FIPS202_ARMV81M_NEED_X4 && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits

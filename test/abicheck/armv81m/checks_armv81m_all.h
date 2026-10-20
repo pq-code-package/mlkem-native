@@ -18,14 +18,10 @@
 
 #if defined(MLK_SYS_ARMV81M_MVE)
 
-#if defined(__ARM_FEATURE_MVE)
 int check_keccak_f1600_x4_mve_asm(void);
-#endif
 
 static const abicheck_entry_t all_checks[] = {
-#if defined(__ARM_FEATURE_MVE)
     {"keccak_f1600_x4_mve_asm", check_keccak_f1600_x4_mve_asm},
-#endif
     {NULL, NULL} /* Sentinel */
 };
 

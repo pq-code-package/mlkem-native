@@ -6,7 +6,8 @@
  * Written by Danny Tsen <dtsen@us.ibm.com>
  */
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
+#if defined(MLK_SYS_PPC64LE_POWER8_VECTOR) && \
+    defined(MLK_ARITH_BACKEND_PPC64LE_DEFAULT) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /*yaml
   Name: reduce_ppc_asm
@@ -723,8 +724,8 @@ MLK_ASM_FN_SYMBOL(reduce_ppc_asm)
 
 MLK_ASM_FN_SIZE(reduce_ppc_asm)
 
-#endif /* MLK_ARITH_BACKEND_PPC64LE_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
-        */
+#endif /* MLK_SYS_PPC64LE_POWER8_VECTOR && MLK_ARITH_BACKEND_PPC64LE_DEFAULT && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits

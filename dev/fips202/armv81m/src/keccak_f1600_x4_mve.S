@@ -66,7 +66,8 @@
 //   784     S[0][24]_odd,  S[1][24]_odd,  S[2][24]_odd,  S[3][24]_odd
 
 #include "../../../../common.h"
-#if defined(MLK_FIPS202_ARMV81M_NEED_X4) && \
+#if defined(MLK_SYS_ARMV81M_MVE) && \
+    defined(MLK_FIPS202_ARMV81M_NEED_X4) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
@@ -1637,4 +1638,5 @@ mlk_keccak_f1600_x4_mve_asm_roundend:
     .unreq qA20_l
 
 /* simpasm: footer-start */
-#endif /* MLK_FIPS202_ARMV81M_NEED_X4 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_SYS_ARMV81M_MVE && MLK_FIPS202_ARMV81M_NEED_X4 && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED */

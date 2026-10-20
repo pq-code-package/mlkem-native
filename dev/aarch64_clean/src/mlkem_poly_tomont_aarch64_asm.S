@@ -22,7 +22,8 @@
 */
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64) && \
+#if defined(MLK_SYS_AARCH64_NEON) && \
+    defined(MLK_ARITH_BACKEND_AARCH64) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
     !defined(MLK_CONFIG_NO_KEYPAIR_API)
 /* simpasm: header-end */
@@ -104,5 +105,5 @@ mlk_poly_tomont_loop:
         .unreq tmp0
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED && \
-          !MLK_CONFIG_NO_KEYPAIR_API */
+#endif /* MLK_SYS_AARCH64_NEON && MLK_ARITH_BACKEND_AARCH64 && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED && !MLK_CONFIG_NO_KEYPAIR_API */
