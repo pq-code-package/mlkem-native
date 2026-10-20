@@ -40,7 +40,8 @@
 */
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64) && \
+#if defined(MLK_SYS_AARCH64_NEON) && \
+    defined(MLK_ARITH_BACKEND_AARCH64) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
@@ -461,4 +462,5 @@ mlk_rej_uniform_return:
 #undef STACK_SIZE
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_SYS_AARCH64_NEON && MLK_ARITH_BACKEND_AARCH64 && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED */

@@ -4,7 +4,8 @@
  */
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+#if defined(MLK_SYS_X86_64_AVX2) && \
+    defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /*yaml
   Name: poly_mulcache_compute_avx2_asm
@@ -80,5 +81,5 @@ vzeroupper
 ret
 
 /* simpasm: footer-start */
-#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
-        */
+#endif /* MLK_SYS_X86_64_AVX2 && MLK_ARITH_BACKEND_X86_64_DEFAULT && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED */

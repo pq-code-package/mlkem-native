@@ -4,7 +4,8 @@
  */
 #include "../../../../common.h"
 
-#if defined(MLK_FIPS202_X86_64_NEED_X4_AVX2) && \
+#if defined(MLK_SYS_X86_64_AVX2) && \
+    defined(MLK_FIPS202_X86_64_NEED_X4_AVX2) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /*yaml
   Name: keccak_f1600_x4_avx2_asm
@@ -658,4 +659,5 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2_asm)
    ret
 
 /* simpasm: footer-start */
-#endif /* MLK_FIPS202_X86_64_NEED_X4_AVX2 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_SYS_X86_64_AVX2 && MLK_FIPS202_X86_64_NEED_X4_AVX2 && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED */

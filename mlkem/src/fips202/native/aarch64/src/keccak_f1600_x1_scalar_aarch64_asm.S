@@ -33,7 +33,8 @@
 */
 
 #include "../../../../common.h"
-#if defined(MLK_FIPS202_AARCH64_NEED_X1_SCALAR) && \
+#if defined(MLK_SYS_AARCH64) && \
+    defined(MLK_FIPS202_AARCH64_NEED_X1_SCALAR) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 /*
@@ -369,7 +370,7 @@ Lmlk_keccak_f1600_x1_scalar_loop:
 
 MLK_ASM_FN_SIZE(keccak_f1600_x1_scalar_aarch64_asm)
 
-#endif /* MLK_FIPS202_AARCH64_NEED_X1_SCALAR && \
+#endif /* MLK_SYS_AARCH64 && MLK_FIPS202_AARCH64_NEED_X1_SCALAR && \
           !MLK_CONFIG_MULTILEVEL_NO_SHARED */
 
 #if defined(__ELF__)

@@ -52,7 +52,8 @@
 /* Re-implementation of asymmetric base multiplication following @[NeonNTT] */
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_AARCH64) &&  !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) &&  (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 2)
+#if defined(MLK_SYS_AARCH64_NEON) && \
+    defined(MLK_ARITH_BACKEND_AARCH64) &&  !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) &&  (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 2)
 /* simpasm: header-end */
 
 // Input:
@@ -586,5 +587,6 @@ mlk_polyvec_basemul_acc_montgomery_cached_k2_loop_start:
 
 /* simpasm: footer-start */
 
-#endif /* MLK_ARITH_BACKEND_AARCH64 && !MLK_CONFIG_MULTILEVEL_NO_SHARED && \
+#endif /* MLK_SYS_AARCH64_NEON && MLK_ARITH_BACKEND_AARCH64 && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED && \
           (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2) */

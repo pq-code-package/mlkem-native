@@ -4,7 +4,8 @@
  */
 
 #include "../../../common.h"
-#if defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
+#if defined(MLK_SYS_X86_64_AVX2) && \
+    defined(MLK_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \
     (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 2)
 /*yaml
@@ -529,8 +530,9 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k2_avx2_asm)
 
 MLK_ASM_FN_SIZE(polyvec_basemul_acc_montgomery_cached_k2_avx2_asm)
 
-#endif /* MLK_ARITH_BACKEND_X86_64_DEFAULT && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
-          && (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2) */
+#endif /* MLK_SYS_X86_64_AVX2 && MLK_ARITH_BACKEND_X86_64_DEFAULT && \
+          !MLK_CONFIG_MULTILEVEL_NO_SHARED && \
+          (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2) */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits

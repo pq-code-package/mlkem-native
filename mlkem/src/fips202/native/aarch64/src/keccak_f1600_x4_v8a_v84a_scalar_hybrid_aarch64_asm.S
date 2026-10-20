@@ -34,10 +34,10 @@
 */
 
 #include "../../../../common.h"
-#if defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID) && \
+#if defined(MLK_SYS_AARCH64_NEON) && defined(__ARM_FEATURE_SHA3) && \
+    defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
-#if defined(__ARM_FEATURE_SHA3)
 
 /*
  * WARNING: This file is auto-derived from the mlkem-native source file
@@ -979,9 +979,9 @@ Lmlk_keccak_f1600_x4_v8a_v84a_scalar_hybrid_done:
 
 MLK_ASM_FN_SIZE(keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm)
 
-#endif /* __ARM_FEATURE_SHA3 */
 
-#endif /* MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID && \
+#endif /* MLK_SYS_AARCH64_NEON && __ARM_FEATURE_SHA3 && \
+          MLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID && \
           !MLK_CONFIG_MULTILEVEL_NO_SHARED */
 
 #if defined(__ELF__)

@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
+#include "../../../mlkem/src/sys.h"
+
+#if defined(MLK_SYS_X86_64) && defined(MLK_SYSV_ABI_SUPPORTED)
+
 /*
  * x86_64 (System V) selftest stubs.
  *
@@ -39,3 +43,5 @@ define_corrupter selftest_x86_64_corrupt_r12, "notq %r12"
 define_corrupter selftest_x86_64_corrupt_r13, "notq %r13"
 define_corrupter selftest_x86_64_corrupt_r14, "notq %r14"
 define_corrupter selftest_x86_64_corrupt_r15, "notq %r15"
+
+#endif /* MLK_SYS_X86_64 && MLK_SYSV_ABI_SUPPORTED */

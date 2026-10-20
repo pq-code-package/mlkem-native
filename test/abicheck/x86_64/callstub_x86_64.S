@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
+#include "../../../mlkem/src/sys.h"
+
+#if defined(MLK_SYS_X86_64) && defined(MLK_SYSV_ABI_SUPPORTED)
+
 /*
  * Function: asm_call_stub_x86_64_sysv
  * Description: x86_64 System V ABI compliance testing stub
@@ -147,3 +151,5 @@ asm_call_stub_x86_64_sysv:
         .cfi_restore %r15
         ret
         .cfi_endproc
+
+#endif /* MLK_SYS_X86_64 && MLK_SYSV_ABI_SUPPORTED */

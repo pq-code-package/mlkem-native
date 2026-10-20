@@ -34,7 +34,8 @@
 */
 
 #include "../../../../common.h"
-#if defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID) && \
+#if defined(MLK_SYS_AARCH64_NEON) && \
+    defined(MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
@@ -2580,5 +2581,5 @@ mlk_keccak_f1600_x4_v8a_scalar_hybrid_done:
 #undef STACK_LOC_1
 
 /* simpasm: footer-start */
-#endif /* MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID && \
-          !MLK_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLK_SYS_AARCH64_NEON && MLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID \
+          && !MLK_CONFIG_MULTILEVEL_NO_SHARED */
