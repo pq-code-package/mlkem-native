@@ -194,9 +194,6 @@ jobs:
          #   (https://github.com/ziglang/zig/issues/23576). We therefore
          #   only test the C backend and exclude the native examples.
          # - 0.17 fixes this, so we test the native backends as well.
-         # - The ABI check is not supported with zig: on AArch64 it passes
-         #   -march=armv8-a+simd and -march=armv8.4-a+sha3, which zig rejects
-         #   since it parses -march as a CPU name.
          - family: zig
            version: "0.10"
            shell: zig0_10
@@ -244,7 +241,6 @@ jobs:
            shell: zig0_17
            opt: all
            examples: True
-           extra_args: "--no-abicheck"
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -435,7 +431,6 @@ jobs:
            shell: zig0_17
            opt: all
            examples: True
-           extra_args: "--no-abicheck"
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
