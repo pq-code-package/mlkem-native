@@ -565,7 +565,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "../mlkem/src/sys.h"
-static MLK_INLINE void *mlk_memset(void *s, int c, size_t n)
+MLK_STATIC_PROVABLE MLK_INLINE void *mlk_memset(void *s, int c, size_t n)
 {
   /* Simple byte-by-byte set implementation for testing */
   unsigned char *ptr = (unsigned char *)s;
