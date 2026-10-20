@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1792501425946,
+  "lastUpdate": 1792501442852,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -620,6 +620,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 98326,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": true,
+          "id": "a7914d44f2321b9422ba853c952cb4f3391ea964",
+          "message": "CI: Enable unit tests on all Zephyr targets\n\nZephyr CI runs ML-KEM tests on five emulated Arm boards, but skips\nthe unit suite. Those checks therefore do not run in these jobs.\n\nEnable unit tests for every board in the existing matrix. Keep the\ncurrent OPT modes: Cortex-M55 runs portable and MVE builds, and the\nother boards run portable builds. Leave other test selections and\nstack sizes unchanged.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-10-20T11:37:55Z",
+          "tree_id": "f4feaac10b3344830f0737da72e15bd5a522a8d5",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/a7914d44f2321b9422ba853c952cb4f3391ea964"
+        },
+        "date": 1792501125288,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 28251,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 34079,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 44529,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 47618,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 53837,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 68470,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 70154,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 78563,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 98325,
             "unit": "cycles"
           }
         ]
