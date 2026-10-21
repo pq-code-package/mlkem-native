@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1792596421273,
+  "lastUpdate": 1792596423634,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -8648,6 +8648,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 132909,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "e2d4b50896c76ada9950de2855dcd6069789e74e",
+          "message": "CI: Enable ABI checks in the Zig 0.17 jobs\n\nThe Zig 0.17 jobs skip ABI checks because the checker previously added\nAArch64 `-march` flags which Zig parses as CPU names. The checker now\nuses the platform's CPU flags, so that restriction no longer applies.\n\nRemove `--no-abicheck` from the Extended compiler matrix and the Linux\nand macOS legacy matrices. Drop the comments about the old `-march`\nflags.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-10-21T14:01:28Z",
+          "tree_id": "9aa3a4ff1dd1ee167dc89b6ebd7e54c7d65f28e5",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/e2d4b50896c76ada9950de2855dcd6069789e74e"
+        },
+        "date": 1792596423209,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 39625,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 49483,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 62813,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 63864,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 75591,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 92927,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 94982,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 109657,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 132399,
             "unit": "cycles"
           }
         ]
