@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1792876110310,
+  "lastUpdate": 1792876118100,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -8782,6 +8782,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 61337,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": true,
+          "id": "8898866e9f134db2f7d73e6aa7761c77a697cfe2",
+          "message": "CBMC: Use a second solver for 157/190 proofs\n\nA soundness bug in a single SMT solver would silently invalidate every\nproof discharged by it. To mitigate this risk, we aim to have each\nproof discharged by at least two solvers.\n\n157 of 190 proofs gain a second solver: 82 bitwuzla, 3\ncvc5_arrays_exp, and 72 Z3 profiles alongside a z3 or bitwuzla\ndefault. Of the others, one already runs with several solvers and\n32 do not get a second one, mostly because bitwuzla timed out or\ncvc5 returned unknown under a local 300s per-proof cap for\nMLKEM_K=2, 3, or 4.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-24T19:51:41Z",
+          "tree_id": "7d205ced9a05110355f8f495b9409978ed717041",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/8898866e9f134db2f7d73e6aa7761c77a697cfe2"
+        },
+        "date": 1792875922532,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 17695,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 20533,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 27029,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 29823,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 32708,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 41845,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 43668,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 48632,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 61336,
             "unit": "cycles"
           }
         ]
