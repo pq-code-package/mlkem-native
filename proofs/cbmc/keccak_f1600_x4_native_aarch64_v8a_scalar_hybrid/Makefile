@@ -25,7 +25,9 @@ APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
-CBMC_SUPPORTED_CONFIGS = LP64:bitwuzla
+CBMC_SUPPORTED_CONFIGS = \
+  LP64:bitwuzla \
+  LP64:z3
 CBMC_DEFAULT_CONFIG = LP64:bitwuzla
 
 FUNCTION_NAME = keccak_f1600_x4_native_aarch64_v8a_scalar_hybrid

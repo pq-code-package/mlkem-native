@@ -24,7 +24,9 @@ USE_FUNCTION_CONTRACTS=
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 # Supported CBMC configurations
-CBMC_SUPPORTED_CONFIGS = LP64:z3
+CBMC_SUPPORTED_CONFIGS = \
+  LP64:z3 \
+  LP64:bitwuzla
 CBMC_DEFAULT_CONFIG = LP64:z3
 
 # Uncomment this to see what commands litani is running...
