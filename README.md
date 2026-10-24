@@ -50,6 +50,7 @@ mlkem-native is used in
  - [libOQS](https://github.com/open-quantum-safe/liboqs/) of the Open Quantum Safe project since [0.13.0](https://github.com/open-quantum-safe/liboqs/releases/tag/0.13.0) (as the default ML-KEM implementation)
  - AWS' Cryptography library [AWS-LC](https://github.com/aws/aws-lc/) since [v1.50.0](https://github.com/aws/aws-lc/releases/tag/v1.50.0)
  - The [rustls](https://github.com/rustls/rustls) TLS library written in Rust since [0.23.28](https://github.com/rustls/rustls/releases/tag/v%2F0.23.28) (through AWS-LC as the default cryptography provider)
+ - [PyCryptodome](https://github.com/Legrandin/pycryptodome) - a self-contained Python package of low-level cryptographic primitives, since [v4.2.0](https://github.com/Legrandin/pycryptodome/releases/tag/v4.2.0)
  - [Pavona](https://github.com/pavona/pavona) - a library of modular, tapeout-proven, and secure-by-default open silicon blocks
 
 ## Formal Verification
