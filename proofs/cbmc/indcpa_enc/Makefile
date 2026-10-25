@@ -42,7 +42,9 @@ APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
-CBMC_SUPPORTED_CONFIGS = LP64:z3_smt_only
+CBMC_SUPPORTED_CONFIGS = \
+  LP64:z3_smt_only \
+  LP64:cadical
 CBMC_DEFAULT_CONFIG = LP64:z3_smt_only
 
 FUNCTION_NAME = mlk_indcpa_enc
