@@ -25,7 +25,9 @@ APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
-CBMC_SUPPORTED_CONFIGS = LP64:bitwuzla
+CBMC_SUPPORTED_CONFIGS = \
+  LP64:bitwuzla \
+  LP64:cvc5_mbqi_enum
 CBMC_DEFAULT_CONFIG = LP64:bitwuzla
 
 FUNCTION_NAME = mlk_ct_cmov_zero

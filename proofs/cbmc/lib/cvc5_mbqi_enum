@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+# As cvc5_arrays_exp, but use model-based quantifier instantiation,
+# augmented with fast enumeration.
+#
+# `exec` is load-bearing; see cvc5_arrays_exp.
+exec cvc5 --arrays-exp --mbqi --mbqi-enum "$@"
