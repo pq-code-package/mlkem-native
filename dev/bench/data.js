@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1792933357821,
+  "lastUpdate": 1792934908138,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -1681,6 +1681,75 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/pq-code-package/mlkem-native/commit/6b29fa8fe3c66ab6657cf138192b52aafae72c20"
         },
         "date": 1792922638029,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 398857,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 513294,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 714034,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 669876,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 782851,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 1054085,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 899202,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 1051577,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 1399144,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "e8fd86214f9da57e12393aaef6a23c69579613a6",
+          "message": "CBMC: Add CaDiCaL SAT profile\n\nAdd a cadical solver profile that uses CBMC's propositional backend\nwith CaDiCaL instead of an SMT solver.\n\nUse it as a second solver for 12 proofs that discharge in about 150s\nor less locally for MLKEM_K=4, for which the SMT alternatives\ntimed out, returned unknown or were too slow.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-25T11:21:32Z",
+          "tree_id": "b3f088ccaa7d477e73db201b7921656b9292af9b",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/e8fd86214f9da57e12393aaef6a23c69579613a6"
+        },
+        "date": 1792934906347,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
