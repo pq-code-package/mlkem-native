@@ -1,0 +1,51 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+# When a commit lands on main, copy the CBMC results from its merge queue
+# run to gh-pages. PR reports use them as the baseline.
+
+name: CBMC publish
+permissions:
+  contents: read
+on:
+  push:
+    branches: ["main"]
+
+concurrency: cbmc-publish
+
+jobs:
+  publish:
+    name: Publish CBMC baselines
+    if: ${{ github.repository_owner == 'pq-code-package' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: gh-pages
+          persist-credentials: false
+      - name: Publish CBMC results to gh-pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The merge queue fast-forwards main to the commit it tested.
+          run_id=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/all.yml/runs?event=merge_group&head_sha=$GITHUB_SHA" \
+            --jq '.workflow_runs | max_by(.created_at) | .id // empty')
+          if [ -z "$run_id" ]; then
+            echo "::warning::$GITHUB_SHA has no merge queue run; skipping"
+            exit 0
+          fi
+
+          # Each artifact holds one result file under its gh-pages path.
+          gh run download "$run_id" -R "$GITHUB_REPOSITORY" --pattern 'cbmc-results-*' --dir "$RUNNER_TEMP/cbmc-results"
+          cp -r "$RUNNER_TEMP"/cbmc-results/*/dev .
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dev
+          git diff --cached --quiet || git commit -m "Update CBMC results (${GITHUB_SHA::7})"
+          # Rebase and retry once if bench.yml pushed first.
+          remote="https://x-access-token:$GH_TOKEN@github.com/$GITHUB_REPOSITORY"
+          git push "$remote" HEAD:gh-pages || { git pull --rebase origin gh-pages && git push "$remote" HEAD:gh-pages; }
