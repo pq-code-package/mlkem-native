@@ -191,7 +191,7 @@ CBMC_DM_ILP32_CBMC_FLAG := --ILP32
 CBMC_DM_ILP32_INCLUDE := $(CBMC_ROOT)/cbmc/include/ILP32
 
 # Solver profile IDs name the executable and all solver-specific options.
-CBMC_SOLVER_PROFILES_ALL := z3 z3_smt_only bitwuzla cvc5_arrays_exp
+CBMC_SOLVER_PROFILES_ALL := z3 z3_smt_only bitwuzla cvc5_arrays_exp cadical
 
 CBMC_PROFILE_z3_BACKEND := --smt2
 CBMC_PROFILE_z3_PROVER_NAME := Z3
@@ -214,6 +214,11 @@ CBMC_PROFILE_cvc5_arrays_exp_BACKEND := --cvc5
 CBMC_PROFILE_cvc5_arrays_exp_PROVER_NAME := cvc5
 CBMC_PROFILE_cvc5_arrays_exp_SMT_FORMAT := --cvc5
 CBMC_PROFILE_cvc5_arrays_exp_FLAGS := --external-smt2-solver $(PROOF_ROOT)/lib/cvc5_arrays_exp --cvc5
+
+CBMC_PROFILE_cadical_BACKEND :=
+CBMC_PROFILE_cadical_PROVER_NAME := CaDiCaL
+CBMC_PROFILE_cadical_SMT_FORMAT :=
+CBMC_PROFILE_cadical_FLAGS := --sat-solver cadical
 
 # Make evaluates the configuration checks below before running target recipes.
 # The runner queries these metadata targets before selecting CBMC_DM/CBMC_SOLVER.
