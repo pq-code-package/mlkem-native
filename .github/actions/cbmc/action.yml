@@ -56,16 +56,33 @@ runs:
           ACTION_PATH: ${{ github.action_path }}
           GH_TOKEN: ${{ inputs.gh_token }}
           PARAMETER_SET: ${{ inputs.mlkem_k }}
-          WORKSPACE: ${{ github.workspace }}
+          RESULTS_DIR: ${{ runner.temp }}/cbmc-results
         run: |
           echo "::group::cbmc_$PARAMETER_SET"
-          tests cbmc --mlkem-parameter-set "$PARAMETER_SET" --dm all --solver all --per-proof-timeout 1800 --output-result-json "$WORKSPACE/cbmc_result_k$PARAMETER_SET.json" || cbmc_failed=true
+          case "$PARAMETER_SET" in
+            2) parameter_set_name=512 ;;
+            3) parameter_set_name=768 ;;
+            4) parameter_set_name=1024 ;;
+            *) echo "::error::Unsupported MLKEM_K: $PARAMETER_SET"; exit 1 ;;
+          esac
+          # Write the results at their gh-pages path; see cbmc_publish.yml.
+          result="$RESULTS_DIR/dev/cbmc/mlkem-$parameter_set_name.json"
+          mkdir -p "$(dirname "$result")"
+          tests cbmc --mlkem-parameter-set "$PARAMETER_SET" --dm all --solver all --per-proof-timeout 1800 --output-result-json "$result" || cbmc_failed=true
           echo "::endgroup::"
           python3 "$ACTION_PATH/report.py" \
-            --results-json "$WORKSPACE/cbmc_result_k$PARAMETER_SET.json" \
+            --results-json "$result" \
             --mlkem-k "$PARAMETER_SET" \
             --min-runtime 20 \
             --regression-threshold 1.5 \
             --gh-pages-branch gh-pages \
             --data-dir dev/cbmc
           if [ "$cbmc_failed" = "true" ]; then exit 1; fi
+      - name: Upload CBMC results for publishing
+        if: ${{ github.event_name == 'merge_group' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: cbmc-results-mlkem-k${{ inputs.mlkem_k }}
+          path: ${{ runner.temp }}/cbmc-results/
+          if-no-files-found: error
+          retention-days: 7

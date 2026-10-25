@@ -5,7 +5,6 @@
 """CBMC proof results reporter for GitHub Actions."""
 
 import argparse
-import base64
 import json
 import os
 import subprocess
@@ -14,8 +13,6 @@ from collections import namedtuple
 
 # GitHub context
 GITHUB_REPOSITORY = os.environ.get("GITHUB_REPOSITORY", "")
-GITHUB_REF = os.environ.get("GITHUB_REF", "")
-GITHUB_SHA = os.environ.get("GITHUB_SHA", "")[:7]
 
 COMMENT_TAG = "cbmc-report"
 
@@ -333,44 +330,6 @@ def post_or_update_comment(pr_number, body, cfg):
         os.unlink(tmp_path)
 
 
-def push_to_gh_pages(current, cfg):
-    """Push results to gh-pages branch using GitHub Contents API."""
-    file_path = f"{cfg.data_dir}/mlkem-{cfg.param_set}.json"
-    content_b64 = base64.b64encode(json.dumps(current, indent=2).encode()).decode()
-
-    result = subprocess.run(
-        [
-            "gh",
-            "api",
-            f"repos/{GITHUB_REPOSITORY}/contents/{file_path}?ref={cfg.gh_pages_branch}",
-            "--jq",
-            ".sha",
-        ],
-        capture_output=True,
-        text=True,
-    )
-    sha = result.stdout.strip() if result.returncode == 0 else ""
-
-    cmd = [
-        "gh",
-        "api",
-        f"repos/{GITHUB_REPOSITORY}/contents/{file_path}",
-        "-X",
-        "PUT",
-        "-F",
-        f"message=Update CBMC results for ML-KEM-{cfg.param_set} ({GITHUB_SHA})",
-        "-F",
-        f"content={content_b64}",
-        "-F",
-        f"branch={cfg.gh_pages_branch}",
-    ]
-    if sha:
-        cmd.extend(["-F", f"sha={sha}"])
-
-    subprocess.run(cmd, check=True)
-    print(f"Pushed results to {cfg.gh_pages_branch}")
-
-
 def main():
     args = get_args()
     args.param_set = {"2": "512", "3": "768", "4": "1024"}[args.mlkem_k]
@@ -382,10 +341,8 @@ def main():
     pr_number = get_pr_number()
     if pr_number:
         post_or_update_comment(pr_number, build_comment(current, baseline, args), args)
-    elif GITHUB_REF in ("refs/heads/main", "refs/heads/master"):
-        push_to_gh_pages(current, args)
     else:
-        print(f"Not a PR and not main branch ({GITHUB_REF}), skipping")
+        print("Not a PR, skipping")
 
 
 if __name__ == "__main__":
