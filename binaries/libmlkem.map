@@ -1,0 +1,26 @@
+{
+  global:
+    mlkem512_check_pk;
+    mlkem512_check_sk;
+    mlkem512_dec;
+    mlkem512_enc;
+    mlkem512_enc_derand;
+    mlkem512_keypair;
+    mlkem512_keypair_derand;
+    mlkem768_check_pk;
+    mlkem768_check_sk;
+    mlkem768_dec;
+    mlkem768_enc;
+    mlkem768_enc_derand;
+    mlkem768_keypair;
+    mlkem768_keypair_derand;
+    mlkem1024_check_pk;
+    mlkem1024_check_sk;
+    mlkem1024_dec;
+    mlkem1024_enc;
+    mlkem1024_enc_derand;
+    mlkem1024_keypair;
+    mlkem1024_keypair_derand;
+  local:
+    *;
+};

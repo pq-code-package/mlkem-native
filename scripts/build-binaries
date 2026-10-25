@@ -1,0 +1,834 @@
+#!/usr/bin/env python3
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+"""Rebuild the pre-built multilevel library matrix.
+
+The coordinator stages the complete binaries directory, runs one worker in
+each selected Nix compiler shell, validates every shared object and split
+DWARF package, generates the manifest, and replaces binaries/ only after the
+whole staged tree passes.
+"""
+
+import argparse
+import datetime
+import hashlib
+import json
+import os
+import platform
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+
+TOOLCHAINS = {
+    "gcc49": {"family": "GCC", "cc": "gcc"},
+    "gcc8": {"family": "GCC", "cc": "gcc"},
+    "gcc12": {"family": "GCC", "cc": "gcc"},
+    "gcc16": {"family": "GCC", "cc": "gcc"},
+    "clang6": {"family": "Clang", "cc": "clang"},
+    "clang12": {"family": "Clang", "cc": "clang"},
+    "clang17": {"family": "Clang", "cc": "clang"},
+    "clang23": {"family": "Clang", "cc": "clang"},
+}
+
+LAYOUTS = ("multilevel", "multilevel-mono")
+OPTIMIZATIONS = (0, 2, 3)
+PUBLIC_FUNCTIONS = (
+    "check_pk",
+    "check_sk",
+    "dec",
+    "enc",
+    "enc_derand",
+    "keypair",
+    "keypair_derand",
+)
+PUBLIC_SYMBOLS = tuple(
+    sorted(
+        f"mlkem{level}_{function}"
+        for level in (512, 768, 1024)
+        for function in PUBLIC_FUNCTIONS
+    )
+)
+
+COMMON_FLAGS = (
+    "-Wall",
+    "-Wextra",
+    "-Werror=unused-result",
+    "-Wpedantic",
+    "-Werror",
+    "-Wmissing-prototypes",
+    "-Wshadow",
+    "-Wpointer-arith",
+    "-Wredundant-decls",
+    "-Wconversion",
+    "-Wsign-conversion",
+    "-Wno-long-long",
+    "-Wno-unknown-pragmas",
+    "-Wno-unused-command-line-argument",
+    "-fomit-frame-pointer",
+    "-std=c99",
+    "-pedantic",
+    "-Wno-redundant-decls",
+)
+
+
+class BuildError(RuntimeError):
+    """A build or validation step failed."""
+
+
+def run(
+    command,
+    *,
+    cwd,
+    env=None,
+    capture=True,
+    log_file=None,
+):
+    if log_file is not None:
+        with log_file.open("w", encoding="utf-8") as output:
+            result = subprocess.run(
+                command,
+                cwd=cwd,
+                env=env,
+                stdout=output,
+                stderr=subprocess.STDOUT,
+                text=True,
+                check=False,
+            )
+        if result.returncode != 0:
+            raise BuildError(
+                f"{command[0]} failed with status {result.returncode}; "
+                f"see {log_file}"
+            )
+        return ""
+
+    result = subprocess.run(
+        command,
+        cwd=cwd,
+        env=env,
+        stdout=subprocess.PIPE if capture else None,
+        stderr=subprocess.STDOUT if capture else None,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        detail = result.stdout.strip() if result.stdout else "no output"
+        raise BuildError(
+            f"{' '.join(map(str, command))} failed with status "
+            f"{result.returncode}:\n{detail}"
+        )
+    return result.stdout if capture else ""
+
+
+def sha256(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as input_file:
+        for block in iter(lambda: input_file.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def first_line(command, *, cwd):
+    output = run(command, cwd=cwd)
+    return output.splitlines()[0]
+
+
+def global_dynamic_symbols(shared_object, *, cwd, defined):
+    mode = "--defined-only" if defined else "--undefined-only"
+    output = run(
+        ["nm", "-D", "-P", mode, str(shared_object)],
+        cwd=cwd,
+    )
+    return sorted(
+        {
+            line.split()[0].split("@", 1)[0]
+            for line in output.splitlines()
+            if line.split()
+        }
+    )
+
+
+def dynamic_relocations(shared_object, undefined_symbols, *, cwd):
+    output = run(["readelf", "-Wr", str(shared_object)], cwd=cwd)
+    relocations = []
+    bad_relocations = []
+    undefined = set(undefined_symbols)
+
+    for line in output.splitlines():
+        fields = line.split()
+        if not fields or not re.fullmatch(r"[0-9a-fA-F]+", fields[0]):
+            continue
+        relocation_type = fields[2]
+        target = fields[4] if len(fields) >= 5 else ""
+        target = target.split("@", 1)[0]
+        relocations.append({"type": relocation_type, "target": target})
+        if target not in undefined:
+            bad_relocations.append(line)
+
+    if bad_relocations:
+        raise BuildError(
+            f"{shared_object} retains non-external dynamic relocations:\n"
+            + "\n".join(bad_relocations)
+        )
+    return relocations
+
+
+def validate_elf(shared_object, debug_package, *, cwd):
+    header = run(["readelf", "-h", str(shared_object)], cwd=cwd)
+    if not re.search(r"Type:\s+DYN", header):
+        raise BuildError(f"{shared_object} is not an ET_DYN shared object")
+    if "AArch64" not in header:
+        raise BuildError(f"{shared_object} is not an AArch64 object")
+
+    dynamic = run(["readelf", "-d", str(shared_object)], cwd=cwd)
+    if "SYMBOLIC" not in dynamic:
+        raise BuildError(f"{shared_object} lacks symbolic binding")
+    if "libmlkem.so" not in dynamic or "SONAME" not in dynamic:
+        raise BuildError(f"{shared_object} lacks the libmlkem.so SONAME")
+    if "TEXTREL" in dynamic:
+        raise BuildError(f"{shared_object} has dynamic text relocations")
+
+    program_headers = run(["readelf", "-Wl", str(shared_object)], cwd=cwd)
+    for line in program_headers.splitlines():
+        fields = line.split()
+        if not fields or fields[0] != "LOAD":
+            continue
+        flags = "".join(fields[6:-1])
+        if "W" in flags and "E" in flags:
+            raise BuildError(
+                f"{shared_object} has a writable-executable LOAD segment"
+            )
+
+    sections = run(["readelf", "-SW", str(shared_object)], cwd=cwd)
+    if ".debug_info" not in sections:
+        raise BuildError(f"{shared_object} lacks split-DWARF skeleton data")
+
+    debug_sections = run(["readelf", "-SW", str(debug_package)], cwd=cwd)
+    for required in (".debug_info.dwo", ".debug_cu_index"):
+        if required not in debug_sections:
+            raise BuildError(f"{debug_package} lacks {required}")
+
+
+def dwo_id(dwo_file, *, cwd):
+    output = run(
+        ["readelf", "--debug-dump=info", str(dwo_file)],
+        cwd=cwd,
+    )
+    match = re.search(r"DW_AT_GNU_dwo_id\s*:\s*(0x[0-9a-fA-F]+)", output)
+    if match is None:
+        if b".debug_info.dwo" not in dwo_file.read_bytes():
+            return None
+        raise BuildError(f"could not read a DWO ID from {dwo_file}")
+    return match.group(1)
+
+
+def unique_dwo_files(dwo_files, *, cwd):
+    by_id = {}
+    unique = []
+
+    for dwo_file in dwo_files:
+        identifier = dwo_id(dwo_file, cwd=cwd)
+        if identifier is None:
+            continue
+        digest = sha256(dwo_file)
+        if identifier in by_id:
+            previous_digest, previous_path = by_id[identifier]
+            if digest != previous_digest:
+                raise BuildError(
+                    f"DWO ID {identifier} has differing contents in "
+                    f"{previous_path} and {dwo_file}"
+                )
+            continue
+        by_id[identifier] = (digest, dwo_file)
+        unique.append(dwo_file)
+
+    return unique
+
+
+def compile_test_program(
+    *,
+    root,
+    cc_name,
+    layout,
+    optimization,
+    artifact_dir,
+    work_dir,
+):
+    if layout == "multilevel":
+        example = root / "examples" / "multilevel_build"
+    else:
+        example = root / "examples" / "monolithic_build_multilevel"
+
+    test_binary = work_dir / "test_binary"
+    run(
+        [
+            cc_name,
+            f"-O{optimization}",
+            "-g",
+            "-gdwarf-4",
+            f"-I{example / 'mlkem_native'}",
+            str(example / "main.c"),
+            str(example / "test_only_rng" / "notrandombytes.c"),
+            f"-L{artifact_dir}",
+            "-Wl,-rpath,$ORIGIN/..",
+            "-lmlkem",
+            "-o",
+            str(test_binary),
+        ],
+        cwd=root,
+        log_file=work_dir / "test-link.log",
+    )
+
+    environment = os.environ.copy()
+    environment["LD_LIBRARY_PATH"] = str(artifact_dir)
+    output = run([str(test_binary)], cwd=root, env=environment)
+    if not output.rstrip().endswith("All tests passed!"):
+        raise BuildError(f"runtime test did not pass for {artifact_dir}")
+    (work_dir / "run.log").write_text(output, encoding="utf-8")
+
+
+def build_layout(
+    *,
+    root,
+    stage,
+    compiler_id,
+    cc_name,
+    layout,
+    optimization,
+):
+    artifact_dir = stage / layout / compiler_id / f"O{optimization}"
+    work_dir = artifact_dir / ".work"
+    objects_dir = work_dir / "objects"
+    intermediate_archive = work_dir / "libmlkem.a"
+    shared_object = artifact_dir / "libmlkem.so"
+    debug_package = artifact_dir / "libmlkem.so.dwp"
+    export_map = stage / "libmlkem.map"
+
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    work_dir.mkdir(parents=True, exist_ok=True)
+
+    debug_prefix_flags = (
+        f"-fdebug-prefix-map={root}=.",
+        f"-fdebug-prefix-map={root.resolve()}=.",
+    )
+    split_debug_flags = (
+        "-g",
+        "-gdwarf-4",
+        "-gsplit-dwarf",
+        "-fPIC",
+        *debug_prefix_flags,
+    )
+
+    if layout == "multilevel":
+        objects_dir.mkdir(parents=True, exist_ok=True)
+        example = root / "examples" / "multilevel_build"
+        build_dir = os.path.relpath(objects_dir, example)
+        environment = os.environ.copy()
+        environment["CC"] = cc_name
+        environment["CFLAGS"] = " ".join(
+            (f"-O{optimization}", *split_debug_flags)
+        )
+        run(
+            [
+                "make",
+                "-C",
+                str(example),
+                f"BUILD_DIR={build_dir}",
+                "AUTO=0",
+                "mlkem_objs",
+                "-j2",
+            ],
+            cwd=root,
+            env=environment,
+            log_file=work_dir / "build.log",
+        )
+        object_files = sorted(objects_dir.rglob("*.o"))
+        dwo_files = sorted(objects_dir.rglob("*.dwo"))
+    else:
+        example = root / "examples" / "monolithic_build_multilevel"
+        object_file = work_dir / "mlkem_native.o"
+        run(
+            [
+                cc_name,
+                *COMMON_FLAGS,
+                f"-O{optimization}",
+                *split_debug_flags,
+                f"-I{example / 'mlkem_native'}",
+                "-c",
+                str(example / "mlkem_native_all.c"),
+                "-o",
+                str(object_file),
+            ],
+            cwd=root,
+            log_file=work_dir / "build.log",
+        )
+        object_files = [object_file]
+        dwo_files = [work_dir / "mlkem_native.dwo"]
+
+    if not object_files or len(dwo_files) != len(object_files):
+        raise BuildError(
+            f"{layout}/{compiler_id}/O{optimization} produced "
+            f"{len(object_files)} objects and {len(dwo_files)} DWO files"
+        )
+    if not all(path.is_file() for path in dwo_files):
+        raise BuildError(f"missing DWO output under {work_dir}")
+
+    run(
+        ["ar", "rcsD", str(intermediate_archive), *map(str, object_files)],
+        cwd=root,
+    )
+    run(
+        [
+            "ld",
+            "-shared",
+            "-Bsymbolic",
+            "-soname",
+            "libmlkem.so",
+            f"--version-script={export_map}",
+            "--whole-archive",
+            str(intermediate_archive),
+            "--no-whole-archive",
+            "-o",
+            str(shared_object),
+        ],
+        cwd=root,
+    )
+
+    packaged_dwo_files = unique_dwo_files(dwo_files, cwd=root)
+    if not packaged_dwo_files:
+        raise BuildError(f"no compilation units to package under {work_dir}")
+    run(
+        [
+            "dwp",
+            "-o",
+            str(debug_package),
+            *map(str, packaged_dwo_files),
+        ],
+        cwd=root,
+    )
+
+    validate_elf(shared_object, debug_package, cwd=root)
+    exports = global_dynamic_symbols(shared_object, cwd=root, defined=True)
+    if exports != list(PUBLIC_SYMBOLS):
+        raise BuildError(
+            f"{shared_object} exports {exports}, expected "
+            f"{list(PUBLIC_SYMBOLS)}"
+        )
+    undefined_symbols = global_dynamic_symbols(
+        shared_object, cwd=root, defined=False
+    )
+    relocations = dynamic_relocations(
+        shared_object, undefined_symbols, cwd=root
+    )
+
+    compile_test_program(
+        root=root,
+        cc_name=cc_name,
+        layout=layout,
+        optimization=optimization,
+        artifact_dir=artifact_dir,
+        work_dir=work_dir,
+    )
+
+    output_prefix = Path("binaries") / layout / compiler_id / f"O{optimization}"
+    return {
+        "path": str(output_prefix / "libmlkem.so"),
+        "size_bytes": shared_object.stat().st_size,
+        "sha256": sha256(shared_object),
+        "debug": {
+            "path": str(output_prefix / "libmlkem.so.dwp"),
+            "size_bytes": debug_package.stat().st_size,
+            "sha256": sha256(debug_package),
+            "source_dwo_count": len(dwo_files),
+            "packaged_unit_count": len(packaged_dwo_files),
+        },
+        "dynamic_exports": len(exports),
+        "dynamic_relocations": {
+            "count": len(relocations),
+            "undefined_symbols": undefined_symbols,
+        },
+    }
+
+
+def worker(root, stage, compiler_id, cc_name):
+    metadata_dir = stage / ".metadata"
+    metadata_dir.mkdir(parents=True, exist_ok=True)
+    artifacts = {}
+
+    print(f"{compiler_id}: {first_line([cc_name, '--version'], cwd=root)}")
+    for optimization in OPTIMIZATIONS:
+        print(f"{compiler_id}: building O{optimization}", flush=True)
+        for layout in LAYOUTS:
+            artifacts.setdefault(layout, {})[f"O{optimization}"] = build_layout(
+                root=root,
+                stage=stage,
+                compiler_id=compiler_id,
+                cc_name=cc_name,
+                layout=layout,
+                optimization=optimization,
+            )
+
+    metadata = {
+        "toolchain": {
+            "family": TOOLCHAINS[compiler_id]["family"],
+            "version_line": first_line([cc_name, "--version"], cwd=root),
+            "nix_shell": f".#{compiler_id}",
+            "cc": cc_name,
+            "ar": first_line(["ar", "--version"], cwd=root),
+            "ld": first_line(["ld", "--version"], cwd=root),
+            "dwp": first_line(["dwp", "--version"], cwd=root),
+        },
+        "artifacts": artifacts,
+    }
+    (metadata_dir / f"{compiler_id}.json").write_text(
+        json.dumps(metadata, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    print(f"{compiler_id}: all six artifacts passed", flush=True)
+
+
+def source_commit(root):
+    return run(["git", "rev-parse", "HEAD"], cwd=root).strip()
+
+
+def build_manifest(root, stage):
+    toolchains = {}
+    artifacts = {layout: {} for layout in LAYOUTS}
+
+    for compiler_id in TOOLCHAINS:
+        metadata_path = stage / ".metadata" / f"{compiler_id}.json"
+        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        toolchains[compiler_id] = metadata["toolchain"]
+        for layout in LAYOUTS:
+            artifacts[layout][compiler_id] = metadata["artifacts"][layout]
+
+    generated_at = (
+        datetime.datetime.now(datetime.timezone.utc)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z")
+    )
+    manifest = {
+        "schema_version": 3,
+        "generated_at": generated_at,
+        "source": {
+            "commit": source_commit(root),
+            "root": str(root),
+            "host": " ".join(platform.uname()),
+        },
+        "rebuild": {
+            "script": "scripts/build-binaries",
+            "command": "scripts/build-binaries",
+            "replacement": (
+                "The script stages and validates the full matrix before "
+                "replacing binaries/, and restores the prior directory if "
+                "replacement validation fails."
+            ),
+        },
+        "selection": {
+            "gcc": {
+                "shells": ["gcc49", "gcc8", "gcc12", "gcc16"],
+                "rationale": (
+                    "Four generations with major-version labels 4, 8, 12, "
+                    "and 16; GCC 4.9 is the oldest selected compiler with "
+                    "working split-DWARF output on AArch64."
+                ),
+            },
+            "clang": {
+                "shells": ["clang6", "clang12", "clang17", "clang23"],
+                "rationale": (
+                    "Oldest and newest shells plus the nearest integer third "
+                    "points; major-version gaps are 6, 5, and 6."
+                ),
+            },
+        },
+        "matrix": {
+            "layouts": list(LAYOUTS),
+            "optimizations": [f"O{value}" for value in OPTIMIZATIONS],
+            "compile_flags": [
+                "-g",
+                "-gdwarf-4",
+                "-gsplit-dwarf",
+                "-fPIC",
+            ],
+            "primary_artifact": "libmlkem.so",
+            "debug_artifact": "libmlkem.so.dwp",
+            "artifact_count": 48,
+            "debug_artifact_count": 48,
+        },
+        "link": {
+            "intermediate_archive_command": (
+                "ar rcsD <intermediate-libmlkem.a> <object-files>"
+            ),
+            "command": (
+                "ld -shared -Bsymbolic -soname libmlkem.so "
+                "--version-script=binaries/libmlkem.map --whole-archive "
+                "<intermediate-libmlkem.a> --no-whole-archive "
+                "-o <artifact>/libmlkem.so"
+            ),
+            "internal_relocations": "resolved",
+            "dynamic_relocations": (
+                "Every target is validated as undefined in the shared object."
+            ),
+            "exports": {
+                "count": len(PUBLIC_SYMBOLS),
+                "symbols": list(PUBLIC_SYMBOLS),
+            },
+        },
+        "debug": {
+            "format": "DWARF 4 split DWARF package",
+            "compile_flags": "-g -gdwarf-4 -gsplit-dwarf",
+            "package_command": (
+                "dwp -o <artifact>/libmlkem.so.dwp <unique-dwo-inputs>"
+            ),
+            "empty_units": (
+                "Compiler-generated DWO files without .debug_info.dwo are "
+                "omitted because they contain no compilation unit."
+            ),
+            "duplicate_dwo_ids": (
+                "Byte-identical duplicate DWO IDs from repeated multilevel "
+                "translation units are deduplicated before packaging."
+            ),
+        },
+        "toolchains": toolchains,
+        "recipes": {
+            "multilevel": {
+                "source": "examples/multilevel_build",
+                "description": (
+                    "Compile separate source files for all three parameter "
+                    "sets, archive every object, and final-link the complete "
+                    "archive into a shared object."
+                ),
+                "compile_command": (
+                    "env CC=<cc> CFLAGS='-O<level> -g -gdwarf-4 "
+                    "-gsplit-dwarf -fPIC -fdebug-prefix-map=<root>=.' "
+                    "make -C examples/multilevel_build "
+                    "BUILD_DIR=<work>/objects AUTO=0 mlkem_objs -j2"
+                ),
+                "automatic_host_isa_flags": False,
+            },
+            "multilevel-mono": {
+                "source": (
+                    "examples/monolithic_build_multilevel/mlkem_native_all.c"
+                ),
+                "description": (
+                    "Compile the single multilevel translation unit, archive "
+                    "it, and final-link the complete archive into a shared "
+                    "object."
+                ),
+                "compile_command": (
+                    "<cc> <warning-flags> -O<level> -g -gdwarf-4 "
+                    "-gsplit-dwarf -fPIC -fdebug-prefix-map=<root>=. "
+                    "-Iexamples/monolithic_build_multilevel/mlkem_native "
+                    "-c examples/monolithic_build_multilevel/"
+                    "mlkem_native_all.c -o <work>/mlkem_native.o"
+                ),
+                "automatic_host_isa_flags": False,
+            },
+        },
+        "artifacts": artifacts,
+        "validation": {
+            "status": "passed",
+            "checks_per_artifact": [
+                "Shared object is AArch64 ET_DYN with SONAME libmlkem.so.",
+                "DF_SYMBOLIC is set and no dynamic TEXTREL is present.",
+                "No LOAD segment is both writable and executable.",
+                "Exactly the 21 public ML-KEM symbols are exported.",
+                "Every dynamic relocation targets an undefined symbol.",
+                "The DWP package has .debug_info.dwo and .debug_cu_index.",
+                "The matching example links and reports All tests passed!.",
+            ],
+        },
+    }
+    (stage / "builds.json").write_text(
+        json.dumps(manifest, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return manifest
+
+
+def iter_manifest_artifacts(manifest):
+    for layout in LAYOUTS:
+        for compiler_id in TOOLCHAINS:
+            for optimization in (f"O{value}" for value in OPTIMIZATIONS):
+                yield manifest["artifacts"][layout][compiler_id][optimization]
+
+
+def validate_tree(tree, manifest):
+    primary_files = sorted(tree.rglob("libmlkem.so"))
+    debug_files = sorted(tree.rglob("libmlkem.so.dwp"))
+    forbidden = [
+        *tree.rglob("*.a"),
+        *tree.rglob("*.o"),
+        *tree.rglob("*.dwo"),
+    ]
+    if len(primary_files) != 48 or len(debug_files) != 48:
+        raise BuildError(
+            f"expected 48 shared objects and 48 DWP files, found "
+            f"{len(primary_files)} and {len(debug_files)}"
+        )
+    if forbidden:
+        raise BuildError(
+            "final tree contains intermediate files: "
+            + ", ".join(map(str, forbidden[:10]))
+        )
+
+    for artifact in iter_manifest_artifacts(manifest):
+        shared_object = tree / Path(artifact["path"]).relative_to("binaries")
+        debug = artifact["debug"]
+        debug_package = tree / Path(debug["path"]).relative_to("binaries")
+        for path, metadata in (
+            (shared_object, artifact),
+            (debug_package, debug),
+        ):
+            if not path.is_file():
+                raise BuildError(f"manifest path does not exist: {path}")
+            if path.stat().st_size != metadata["size_bytes"]:
+                raise BuildError(f"size mismatch for {path}")
+            if sha256(path) != metadata["sha256"]:
+                raise BuildError(f"SHA-256 mismatch for {path}")
+
+
+def write_checksums(stage):
+    files = sorted(
+        [
+            *stage.rglob("libmlkem.so"),
+            *stage.rglob("libmlkem.so.dwp"),
+            stage / "builds.json",
+            stage / "libmlkem.map",
+        ]
+    )
+    lines = [
+        f"{sha256(path)}  {path.relative_to(stage)}"
+        for path in files
+    ]
+    (stage / "SHA256SUMS").write_text(
+        "\n".join(lines) + "\n",
+        encoding="utf-8",
+    )
+
+
+def safe_remove(path, root):
+    if path.parent != root or path.name not in {
+        ".binaries-build",
+        ".binaries-backup",
+    }:
+        raise BuildError(f"refusing to remove unexpected path {path}")
+    if path.exists():
+        shutil.rmtree(path)
+
+
+def coordinator(root):
+    stage = root / ".binaries-build"
+    backup = root / ".binaries-backup"
+    output = root / "binaries"
+    script = Path(__file__).resolve()
+
+    if backup.exists():
+        if output.exists():
+            safe_remove(backup, root)
+        else:
+            print(
+                f"Restoring interrupted replacement from {backup}",
+                flush=True,
+            )
+            backup.rename(output)
+    safe_remove(stage, root)
+    stage.mkdir()
+    shutil.copy2(root / "scripts" / "libmlkem.map", stage / "libmlkem.map")
+
+    print(f"Staging a complete rebuild under {stage}", flush=True)
+    try:
+        for compiler_id, toolchain in TOOLCHAINS.items():
+            run(
+                [
+                    "nix",
+                    "develop",
+                    f".#{compiler_id}",
+                    "-c",
+                    "python3",
+                    str(script),
+                    "--worker",
+                    compiler_id,
+                    "--stage",
+                    str(stage),
+                ],
+                cwd=root,
+                capture=False,
+            )
+
+        manifest = build_manifest(root, stage)
+        for work_dir in stage.rglob(".work"):
+            shutil.rmtree(work_dir)
+        shutil.rmtree(stage / ".metadata")
+        write_checksums(stage)
+
+        validate_tree(stage, manifest)
+
+        print("All staged artifacts passed; replacing binaries/", flush=True)
+        if output.exists():
+            output.rename(backup)
+        try:
+            stage.rename(output)
+            validate_tree(output, manifest)
+        except Exception:
+            if output.exists():
+                shutil.rmtree(output)
+            if backup.exists():
+                backup.rename(output)
+            raise
+        safe_remove(backup, root)
+    except Exception:
+        print(
+            f"Build failed; existing {output} was not replaced. "
+            f"Staging data remains at {stage}.",
+            file=sys.stderr,
+        )
+        raise
+
+    print("Rebuilt binaries/ from scratch: 48 shared objects and 48 DWP files.")
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--worker",
+        choices=TOOLCHAINS,
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        "--stage",
+        type=Path,
+        help=argparse.SUPPRESS,
+    )
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    root = Path(__file__).resolve().parent.parent
+
+    if args.worker is not None:
+        if args.stage is None:
+            raise BuildError("--worker requires --stage")
+        compiler_id = args.worker
+        worker(
+            root,
+            args.stage.resolve(),
+            compiler_id,
+            TOOLCHAINS[compiler_id]["cc"],
+        )
+        return
+
+    coordinator(root)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except BuildError as error:
+        print(f"error: {error}", file=sys.stderr)
+        sys.exit(1)

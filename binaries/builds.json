@@ -1,0 +1,1334 @@
+{
+  "schema_version": 3,
+  "generated_at": "2026-10-25T18:11:16Z",
+  "source": {
+    "commit": "03392e4189517edd4486dc602b16724b57bee33b",
+    "root": "/local/home/beckphan/repos/mlkem-native-task-binary",
+    "host": "Linux dev-dsk-beckphan-1a-d90e7be3.eu-west-1.amazon.com 6.12.111-136.204.amzn2023.aarch64 #1 SMP Tue Oct  6 18:01:38 UTC 2026 aarch64 aarch64"
+  },
+  "rebuild": {
+    "script": "scripts/build-binaries",
+    "command": "scripts/build-binaries",
+    "replacement": "The script stages and validates the full matrix before replacing binaries/, and restores the prior directory if replacement validation fails."
+  },
+  "selection": {
+    "gcc": {
+      "shells": [
+        "gcc49",
+        "gcc8",
+        "gcc12",
+        "gcc16"
+      ],
+      "rationale": "Four generations with major-version labels 4, 8, 12, and 16; GCC 4.9 is the oldest selected compiler with working split-DWARF output on AArch64."
+    },
+    "clang": {
+      "shells": [
+        "clang6",
+        "clang12",
+        "clang17",
+        "clang23"
+      ],
+      "rationale": "Oldest and newest shells plus the nearest integer third points; major-version gaps are 6, 5, and 6."
+    }
+  },
+  "matrix": {
+    "layouts": [
+      "multilevel",
+      "multilevel-mono"
+    ],
+    "optimizations": [
+      "O0",
+      "O2",
+      "O3"
+    ],
+    "compile_flags": [
+      "-g",
+      "-gdwarf-4",
+      "-gsplit-dwarf",
+      "-fPIC"
+    ],
+    "primary_artifact": "libmlkem.so",
+    "debug_artifact": "libmlkem.so.dwp",
+    "artifact_count": 48,
+    "debug_artifact_count": 48
+  },
+  "link": {
+    "intermediate_archive_command": "ar rcsD <intermediate-libmlkem.a> <object-files>",
+    "command": "ld -shared -Bsymbolic -soname libmlkem.so --version-script=binaries/libmlkem.map --whole-archive <intermediate-libmlkem.a> --no-whole-archive -o <artifact>/libmlkem.so",
+    "internal_relocations": "resolved",
+    "dynamic_relocations": "Every target is validated as undefined in the shared object.",
+    "exports": {
+      "count": 21,
+      "symbols": [
+        "mlkem1024_check_pk",
+        "mlkem1024_check_sk",
+        "mlkem1024_dec",
+        "mlkem1024_enc",
+        "mlkem1024_enc_derand",
+        "mlkem1024_keypair",
+        "mlkem1024_keypair_derand",
+        "mlkem512_check_pk",
+        "mlkem512_check_sk",
+        "mlkem512_dec",
+        "mlkem512_enc",
+        "mlkem512_enc_derand",
+        "mlkem512_keypair",
+        "mlkem512_keypair_derand",
+        "mlkem768_check_pk",
+        "mlkem768_check_sk",
+        "mlkem768_dec",
+        "mlkem768_enc",
+        "mlkem768_enc_derand",
+        "mlkem768_keypair",
+        "mlkem768_keypair_derand"
+      ]
+    }
+  },
+  "debug": {
+    "format": "DWARF 4 split DWARF package",
+    "compile_flags": "-g -gdwarf-4 -gsplit-dwarf",
+    "package_command": "dwp -o <artifact>/libmlkem.so.dwp <unique-dwo-inputs>",
+    "empty_units": "Compiler-generated DWO files without .debug_info.dwo are omitted because they contain no compilation unit.",
+    "duplicate_dwo_ids": "Byte-identical duplicate DWO IDs from repeated multilevel translation units are deduplicated before packaging."
+  },
+  "toolchains": {
+    "gcc49": {
+      "family": "GCC",
+      "version_line": "gcc (GCC) 4.9.4",
+      "nix_shell": ".#gcc49",
+      "cc": "gcc",
+      "ar": "GNU ar (GNU Binutils) 2.41",
+      "ld": "GNU ld (GNU Binutils) 2.41",
+      "dwp": "GNU dwp (GNU Binutils) 2.41"
+    },
+    "gcc8": {
+      "family": "GCC",
+      "version_line": "gcc (GCC) 8.5.0",
+      "nix_shell": ".#gcc8",
+      "cc": "gcc",
+      "ar": "GNU ar (GNU Binutils) 2.41",
+      "ld": "GNU ld (GNU Binutils) 2.41",
+      "dwp": "GNU dwp (GNU Binutils) 2.41"
+    },
+    "gcc12": {
+      "family": "GCC",
+      "version_line": "gcc (GCC) 12.3.0",
+      "nix_shell": ".#gcc12",
+      "cc": "gcc",
+      "ar": "GNU ar (GNU Binutils) 2.41",
+      "ld": "GNU ld (GNU Binutils) 2.41",
+      "dwp": "GNU dwp (GNU Binutils) 2.41"
+    },
+    "gcc16": {
+      "family": "GCC",
+      "version_line": "gcc (GCC) 16.2.0",
+      "nix_shell": ".#gcc16",
+      "cc": "gcc",
+      "ar": "GNU ar (GNU Binutils) 2.46",
+      "ld": "GNU ld (GNU Binutils) 2.46",
+      "dwp": "GNU dwp (GNU Binutils) 2.46"
+    },
+    "clang6": {
+      "family": "Clang",
+      "version_line": "clang version 6.0.1 (tags/RELEASE_601/final)",
+      "nix_shell": ".#clang6",
+      "cc": "clang",
+      "ar": "GNU ar (GNU Binutils) 2.40",
+      "ld": "GNU ld (GNU Binutils) 2.40",
+      "dwp": "GNU dwp (GNU Binutils) 2.40"
+    },
+    "clang12": {
+      "family": "Clang",
+      "version_line": "clang version 12.0.1",
+      "nix_shell": ".#clang12",
+      "cc": "clang",
+      "ar": "GNU ar (GNU Binutils) 2.41",
+      "ld": "GNU ld (GNU Binutils) 2.41",
+      "dwp": "GNU dwp (GNU Binutils) 2.41"
+    },
+    "clang17": {
+      "family": "Clang",
+      "version_line": "clang version 17.0.6",
+      "nix_shell": ".#clang17",
+      "cc": "clang",
+      "ar": "GNU ar (GNU Binutils) 2.41",
+      "ld": "GNU ld (GNU Binutils) 2.41",
+      "dwp": "GNU dwp (GNU Binutils) 2.41"
+    },
+    "clang23": {
+      "family": "Clang",
+      "version_line": "clang version 23.1.0",
+      "nix_shell": ".#clang23",
+      "cc": "clang",
+      "ar": "GNU ar (GNU Binutils) 2.46",
+      "ld": "GNU ld (GNU Binutils) 2.46",
+      "dwp": "GNU dwp (GNU Binutils) 2.46"
+    }
+  },
+  "recipes": {
+    "multilevel": {
+      "source": "examples/multilevel_build",
+      "description": "Compile separate source files for all three parameter sets, archive every object, and final-link the complete archive into a shared object.",
+      "compile_command": "env CC=<cc> CFLAGS='-O<level> -g -gdwarf-4 -gsplit-dwarf -fPIC -fdebug-prefix-map=<root>=.' make -C examples/multilevel_build BUILD_DIR=<work>/objects AUTO=0 mlkem_objs -j2",
+      "automatic_host_isa_flags": false
+    },
+    "multilevel-mono": {
+      "source": "examples/monolithic_build_multilevel/mlkem_native_all.c",
+      "description": "Compile the single multilevel translation unit, archive it, and final-link the complete archive into a shared object.",
+      "compile_command": "<cc> <warning-flags> -O<level> -g -gdwarf-4 -gsplit-dwarf -fPIC -fdebug-prefix-map=<root>=. -Iexamples/monolithic_build_multilevel/mlkem_native -c examples/monolithic_build_multilevel/mlkem_native_all.c -o <work>/mlkem_native.o",
+      "automatic_host_isa_flags": false
+    }
+  },
+  "artifacts": {
+    "multilevel": {
+      "gcc49": {
+        "O0": {
+          "path": "binaries/multilevel/gcc49/O0/libmlkem.so",
+          "size_bytes": 129464,
+          "sha256": "17d30fe4bcb66acda11f3c9d722c3d89234993b8c0b9ff177de7ca8dfea642de",
+          "debug": {
+            "path": "binaries/multilevel/gcc49/O0/libmlkem.so.dwp",
+            "size_bytes": 55008,
+            "sha256": "76fc574ccab819ec84b76064aab623af51a3f1631c83636c61d670866c74d6f9",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 23
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel/gcc49/O2/libmlkem.so",
+          "size_bytes": 149904,
+          "sha256": "b02dd77b3fe6b9db29cbc668a84cc7e73798e4bb32a08325ae1b6624c9d3d4fe",
+          "debug": {
+            "path": "binaries/multilevel/gcc49/O2/libmlkem.so.dwp",
+            "size_bytes": 134248,
+            "sha256": "6a0963abd687e17dc1d1606531faefbee2d4ce5583ec96a3844e7e443b24210c",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 23
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel/gcc49/O3/libmlkem.so",
+          "size_bytes": 162984,
+          "sha256": "5435414f7aa2ec1062f5c5cc4ff261ddd28161aa04f3f01f33e6b4378ee7e25d",
+          "debug": {
+            "path": "binaries/multilevel/gcc49/O3/libmlkem.so.dwp",
+            "size_bytes": 145656,
+            "sha256": "bf7b0fae4b15923067f805b2f15911b4ded699436ebddd6a469e0227adf4aaba",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 23
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "gcc8": {
+        "O0": {
+          "path": "binaries/multilevel/gcc8/O0/libmlkem.so",
+          "size_bytes": 129536,
+          "sha256": "6b92dfea4db9803089f7e7025ff6619a0f097757e979d2f18124ae07cd553993",
+          "debug": {
+            "path": "binaries/multilevel/gcc8/O0/libmlkem.so.dwp",
+            "size_bytes": 62232,
+            "sha256": "0f66554f37fb30df2aaddb680ff7ce9b125e6c0066eb0d642e05f3285df049e3",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 33
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel/gcc8/O2/libmlkem.so",
+          "size_bytes": 161656,
+          "sha256": "cfbd72e34a15c7bea9a6bdd5a866c35b73adf26da4d591e2c028560f8ee1e157",
+          "debug": {
+            "path": "binaries/multilevel/gcc8/O2/libmlkem.so.dwp",
+            "size_bytes": 144176,
+            "sha256": "3e28d33886b5366663f4fb3304f671f6650847793a98d037548966e5fe36cd68",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 33
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel/gcc8/O3/libmlkem.so",
+          "size_bytes": 198496,
+          "sha256": "ddc5e63f28847d162201f6fb1382dcab3f8dc5d5ba616de4914b0b1c0a927915",
+          "debug": {
+            "path": "binaries/multilevel/gcc8/O3/libmlkem.so.dwp",
+            "size_bytes": 162576,
+            "sha256": "c91ca77a8f35f0d365a6af4a5890b7de877f9ee5ce8f48ad3f39f67f8cadf108",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 33
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "gcc12": {
+        "O0": {
+          "path": "binaries/multilevel/gcc12/O0/libmlkem.so",
+          "size_bytes": 131136,
+          "sha256": "a079b1731f983c6a0b29257a4e9ba2e5c47a2d60c708a0de6ca542b67cb82fa8",
+          "debug": {
+            "path": "binaries/multilevel/gcc12/O0/libmlkem.so.dwp",
+            "size_bytes": 66296,
+            "sha256": "076e50d259841d5527a8ca61efb051d676314b749d07f4a2ce458f84440664c5",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 23
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel/gcc12/O2/libmlkem.so",
+          "size_bytes": 158704,
+          "sha256": "ed9a4710c0ec93ef1eab794f3e854dfadf92b45e08c76101cffdf1a36b035692",
+          "debug": {
+            "path": "binaries/multilevel/gcc12/O2/libmlkem.so.dwp",
+            "size_bytes": 143024,
+            "sha256": "d1df2547a1ed5ae8ac6453e1c46638d420a36bdef159715d1e912662377a585d",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 23
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel/gcc12/O3/libmlkem.so",
+          "size_bytes": 190032,
+          "sha256": "5139544fd8a5aa5d0ac9d3895dadbe23d9168b2853dce9f5a9a758b0f0dfdd77",
+          "debug": {
+            "path": "binaries/multilevel/gcc12/O3/libmlkem.so.dwp",
+            "size_bytes": 158808,
+            "sha256": "856a0390aa2bb10daaaacd2abf9dfc2509df8721d973244d4943a58a6054d34a",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 23
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "gcc16": {
+        "O0": {
+          "path": "binaries/multilevel/gcc16/O0/libmlkem.so",
+          "size_bytes": 127864,
+          "sha256": "f9d66549d7b5cb6689fa3c4d6616b28c37d31465d6f48bc47ec73c35c884eb3b",
+          "debug": {
+            "path": "binaries/multilevel/gcc16/O0/libmlkem.so.dwp",
+            "size_bytes": 66424,
+            "sha256": "5b10895f07e3f811475c126bef29711cb21e1430fae542251e7f0153e23369e5",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 23
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel/gcc16/O2/libmlkem.so",
+          "size_bytes": 161216,
+          "sha256": "ac0d23c7031118cc8e9dfe3fafa87a272a879585a4beae8aad64fdce4e14699c",
+          "debug": {
+            "path": "binaries/multilevel/gcc16/O2/libmlkem.so.dwp",
+            "size_bytes": 144864,
+            "sha256": "31fa9f4b36643e9537eebfb775904304bfbd9890f3873810782e3a2d9766976f",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 23
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel/gcc16/O3/libmlkem.so",
+          "size_bytes": 203640,
+          "sha256": "0740db209e2c6fbff18a2a11569b06457adb1bc35046181391babe1887ffb1ec",
+          "debug": {
+            "path": "binaries/multilevel/gcc16/O3/libmlkem.so.dwp",
+            "size_bytes": 160376,
+            "sha256": "0cd43aa7615ce543c017d5295d24e228f65cb3f5b57f26ce3496e8d4fc2e4335",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 23
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "clang6": {
+        "O0": {
+          "path": "binaries/multilevel/clang6/O0/libmlkem.so",
+          "size_bytes": 143088,
+          "sha256": "bf346000cbcf424f206507321be70b9b064a6048afdcdcfb3d50c605ae1c5c9f",
+          "debug": {
+            "path": "binaries/multilevel/clang6/O0/libmlkem.so.dwp",
+            "size_bytes": 44632,
+            "sha256": "e09d9341f1824660eec57cb25d2218db1780234b05e48f3656d05e059d24deed",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 15
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 4,
+            "undefined_symbols": [
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel/clang6/O2/libmlkem.so",
+          "size_bytes": 169112,
+          "sha256": "e31e0c78b97615a12113be0458fdbd4727ecaefc1003ce6a621b94a261084a5f",
+          "debug": {
+            "path": "binaries/multilevel/clang6/O2/libmlkem.so.dwp",
+            "size_bytes": 81208,
+            "sha256": "ccc973ffb89dbf5ab20cb50b3b5d29bec29f28bb4f3fd011202f8d5a6967a5e0",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 15
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel/clang6/O3/libmlkem.so",
+          "size_bytes": 184056,
+          "sha256": "4e1fd54734b9d8f539d9e92dfa7459e42c2bfebf07048f5009e8920c1329082f",
+          "debug": {
+            "path": "binaries/multilevel/clang6/O3/libmlkem.so.dwp",
+            "size_bytes": 82072,
+            "sha256": "ed3bd763720ab7ef82361ede61216c2529db7cdb0f14ae393598718b4ca3fd50",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 15
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "clang12": {
+        "O0": {
+          "path": "binaries/multilevel/clang12/O0/libmlkem.so",
+          "size_bytes": 131064,
+          "sha256": "43aeef79b077e580537f8aafc39ab1ab6138d5062d102c8d4602de12d2849d19",
+          "debug": {
+            "path": "binaries/multilevel/clang12/O0/libmlkem.so.dwp",
+            "size_bytes": 44528,
+            "sha256": "eff3e807fd7b483b21ee5b082737f279fa72ebc2bca62eba77cf3c41217dae56",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 15
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel/clang12/O2/libmlkem.so",
+          "size_bytes": 147512,
+          "sha256": "6be9371f9b43f38e9338b751d183287cf78e34844c9adefd75974ca6593873dd",
+          "debug": {
+            "path": "binaries/multilevel/clang12/O2/libmlkem.so.dwp",
+            "size_bytes": 94160,
+            "sha256": "b74033e36a634ebe002e3fb0c1cdc4884decab749efffd7806bab370f803edd7",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 15
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel/clang12/O3/libmlkem.so",
+          "size_bytes": 184400,
+          "sha256": "d63a11aa658e23acf93f03299cee160a857077b5ea1608be7c5de28972525f5a",
+          "debug": {
+            "path": "binaries/multilevel/clang12/O3/libmlkem.so.dwp",
+            "size_bytes": 95808,
+            "sha256": "23d5f5a4fe7947f2c452b0876894152145b70214eb679c50c2773c3aad947b16",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 15
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "clang17": {
+        "O0": {
+          "path": "binaries/multilevel/clang17/O0/libmlkem.so",
+          "size_bytes": 132208,
+          "sha256": "5d812532700c75d90bb1a97824cab5a0d11ed72e905f37df107983c88c2657e8",
+          "debug": {
+            "path": "binaries/multilevel/clang17/O0/libmlkem.so.dwp",
+            "size_bytes": 44528,
+            "sha256": "f9ab1a776c4ab291d700bffc4c9d67569a64f2d48dee5016cb06597cdb9f7d6d",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 15
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel/clang17/O2/libmlkem.so",
+          "size_bytes": 156048,
+          "sha256": "b7589e6e7ae228dd0dfa30424b0375e99a281979f70a5a40e6d163058fb50955",
+          "debug": {
+            "path": "binaries/multilevel/clang17/O2/libmlkem.so.dwp",
+            "size_bytes": 98648,
+            "sha256": "34be6d67a3e8e50816c4fd3b08989ae3e2829b537b74f4c9010002b04e87ba5c",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 15
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel/clang17/O3/libmlkem.so",
+          "size_bytes": 259824,
+          "sha256": "c0b9cda5f78ff1baddc6f47c38aec02bb416c31fd559f390e845ee55f35375db",
+          "debug": {
+            "path": "binaries/multilevel/clang17/O3/libmlkem.so.dwp",
+            "size_bytes": 99264,
+            "sha256": "84be11b7f671b02637c91344513238e516335d9c9222c3b2d55b197e673803bf",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 15
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "clang23": {
+        "O0": {
+          "path": "binaries/multilevel/clang23/O0/libmlkem.so",
+          "size_bytes": 132184,
+          "sha256": "d2b8fcefc87e9b076c7cd4561122344dc88d1a57bdd5723b475955cb62a3f35d",
+          "debug": {
+            "path": "binaries/multilevel/clang23/O0/libmlkem.so.dwp",
+            "size_bytes": 44576,
+            "sha256": "f0c21766413346e1c95453ac77fec014cc4f59e587415e38b1702532cac2fb12",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 15
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel/clang23/O2/libmlkem.so",
+          "size_bytes": 162760,
+          "sha256": "85520e543c13efbd4578d8c48a64e423d91b2b1adc777091474ea50164eca0f3",
+          "debug": {
+            "path": "binaries/multilevel/clang23/O2/libmlkem.so.dwp",
+            "size_bytes": 101336,
+            "sha256": "967cc3b5769c9078be5a7e5bfd4c359d5a99aa9ca5e42a70671f084902a7ace9",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 15
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel/clang23/O3/libmlkem.so",
+          "size_bytes": 270448,
+          "sha256": "99d2c6d3a0d90b0831d01248388653dbfaf7ea415d3c3a3dbc877f2bc0e15714",
+          "debug": {
+            "path": "binaries/multilevel/clang23/O3/libmlkem.so.dwp",
+            "size_bytes": 101472,
+            "sha256": "5fc7ab1a3ca2910c2405d68d743c2cc824ff83dc868dccf656c260260f9e02b4",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 15
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      }
+    },
+    "multilevel-mono": {
+      "gcc49": {
+        "O0": {
+          "path": "binaries/multilevel-mono/gcc49/O0/libmlkem.so",
+          "size_bytes": 104912,
+          "sha256": "05ce3bca4f9ff36d815160c49f1346abcc0b4774fafd4e79d033e7ea39d712d0",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc49/O0/libmlkem.so.dwp",
+            "size_bytes": 33720,
+            "sha256": "8c22cf418462e7a9695061cbd28c4d7010800ee0487c1a7dd51aaf8e3bb54eb5",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel-mono/gcc49/O2/libmlkem.so",
+          "size_bytes": 122448,
+          "sha256": "99414a1519234b3748c9285600ca856807cb652899237481038ccf39c0fd45fa",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc49/O2/libmlkem.so.dwp",
+            "size_bytes": 119304,
+            "sha256": "79656dc9dc24b5b2b2a8350310624b01d1bec3bbed7831d7d4a0065355e2d1f7",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel-mono/gcc49/O3/libmlkem.so",
+          "size_bytes": 270512,
+          "sha256": "69365e3f836abf80c0eff9fed00c47b3b86710926d50e1b738fb4e186a6de7ce",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc49/O3/libmlkem.so.dwp",
+            "size_bytes": 149224,
+            "sha256": "598a9ebad3d2f87973f0d885c8d0dc5f99eaffe32a235546038e1563131ad8b4",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "gcc8": {
+        "O0": {
+          "path": "binaries/multilevel-mono/gcc8/O0/libmlkem.so",
+          "size_bytes": 105112,
+          "sha256": "b472c81146c6cb94097e7b6e5f1985cf4cede066db0f8ac22c057f3ca80a62c6",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc8/O0/libmlkem.so.dwp",
+            "size_bytes": 36552,
+            "sha256": "ea314c0e8c9c572e2e9b4d6c97801902cd06b850941d498d26271f886652993f",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel-mono/gcc8/O2/libmlkem.so",
+          "size_bytes": 154712,
+          "sha256": "f621a11cae53e48cbe0507183abe212b44505c8eb2d4122e98465d6bf0b87c81",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc8/O2/libmlkem.so.dwp",
+            "size_bytes": 123528,
+            "sha256": "2c800e64991779834c2b0c91c70796d4e319bef255beb9e29df369276ac8776d",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel-mono/gcc8/O3/libmlkem.so",
+          "size_bytes": 443232,
+          "sha256": "dfe5c9937ae67fcecd5c594acbf75cbdde1ca3ca8f2b1a05576bb299814d1e25",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc8/O3/libmlkem.so.dwp",
+            "size_bytes": 223536,
+            "sha256": "7dac4c13df925772e35b98f9cca4c3d5c80acd2104750cad0f33a6e98d1f2612",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "gcc12": {
+        "O0": {
+          "path": "binaries/multilevel-mono/gcc12/O0/libmlkem.so",
+          "size_bytes": 105248,
+          "sha256": "5068158193cdb2844f5552b1c55f8b4437d3decf9e8d395a71b180e58fa1c9ea",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc12/O0/libmlkem.so.dwp",
+            "size_bytes": 35824,
+            "sha256": "91a4c6e17521bd4ca2d83d375d83013f9993dc4c3da6c17fcd6111705737a2a4",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel-mono/gcc12/O2/libmlkem.so",
+          "size_bytes": 147504,
+          "sha256": "218c21e6488dd7d9005ed0dd728d1511e6acce8be2ff981c4870c309b3c31e58",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc12/O2/libmlkem.so.dwp",
+            "size_bytes": 115000,
+            "sha256": "0956b4684f2bb703406cfc2cf2a704d5622f9f4103e41c544b7ce13c7353737a",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel-mono/gcc12/O3/libmlkem.so",
+          "size_bytes": 370520,
+          "sha256": "8f360b61243a6a3f192f5caf017a61af93c06790a8d326227dcf9d3ff17d3be0",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc12/O3/libmlkem.so.dwp",
+            "size_bytes": 195264,
+            "sha256": "ad18557a51c9bda63a669218d1a3500ba3b499708392db88f5ca20fa51dff7db",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "gcc16": {
+        "O0": {
+          "path": "binaries/multilevel-mono/gcc16/O0/libmlkem.so",
+          "size_bytes": 102064,
+          "sha256": "6b0fe2b7ff9433eef79e6abd41c41002f4cbcb447ca494d4ebe282b0646bdadf",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc16/O0/libmlkem.so.dwp",
+            "size_bytes": 35944,
+            "sha256": "735c1b5952d7425370edea1279be80384afc1e453bc0963fab3d5c363fbc27ee",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel-mono/gcc16/O2/libmlkem.so",
+          "size_bytes": 146104,
+          "sha256": "c575c9250db9a1dcaf70a61cc75aa6896bf7c10cdea589eba6c0f967f9550487",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc16/O2/libmlkem.so.dwp",
+            "size_bytes": 120360,
+            "sha256": "597a27fdac27d97136514e492d506eda8af36a9dc2c3ae76f11b4b55541f34ba",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel-mono/gcc16/O3/libmlkem.so",
+          "size_bytes": 414360,
+          "sha256": "6b978e1602b1a1f666ecf65eec168df80343cc055d5769911fdd12f0c9daeba7",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc16/O3/libmlkem.so.dwp",
+            "size_bytes": 220640,
+            "sha256": "6de1b814a5183b6d0a6496f5681016237b47259cf8a3c9b61728ac967f82b55f",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "clang6": {
+        "O0": {
+          "path": "binaries/multilevel-mono/clang6/O0/libmlkem.so",
+          "size_bytes": 122872,
+          "sha256": "2ea2ecb6f45b0a9b18765b9ececddde6d121d9fe37a8d2363447198816cd3ad0",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang6/O0/libmlkem.so.dwp",
+            "size_bytes": 30552,
+            "sha256": "a4772fb79672b80d4b5a79a20a795bb2a9e003c359dc704d612d2551906ded46",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 4,
+            "undefined_symbols": [
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel-mono/clang6/O2/libmlkem.so",
+          "size_bytes": 195088,
+          "sha256": "3ba6ef2ca1cee9d214951effc228ebd6c6210a7b945807d8c371abf9b46aec5e",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang6/O2/libmlkem.so.dwp",
+            "size_bytes": 58280,
+            "sha256": "760443d14b4adccc63801609a5a9a9a5d155768bedcacf3d5c693e18617f5d21",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel-mono/clang6/O3/libmlkem.so",
+          "size_bytes": 372664,
+          "sha256": "0afd720cd8c10f8ad8027a0a207fed8ed28d2c7fcf14a28dd872773f8b1abd98",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang6/O3/libmlkem.so.dwp",
+            "size_bytes": 68464,
+            "sha256": "0977caca5ebe94e0bd0938ef9923f8fac5d0e2c54618e36d97c8833faad79a73",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "clang12": {
+        "O0": {
+          "path": "binaries/multilevel-mono/clang12/O0/libmlkem.so",
+          "size_bytes": 112848,
+          "sha256": "f76e1ae1dd81bd7e2bf7f88e0fcd9a4d816d0eb8b8d18208bd34cebed67e6abb",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang12/O0/libmlkem.so.dwp",
+            "size_bytes": 30504,
+            "sha256": "3a45989e5015cc926aeed2064fb389a8fd0a35c382a0e05131c4023b4ccea29f",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel-mono/clang12/O2/libmlkem.so",
+          "size_bytes": 259064,
+          "sha256": "3c2a4a68cd4022e0ac87bdd38988dd3489fc608a59291011b1cead5c84c986db",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang12/O2/libmlkem.so.dwp",
+            "size_bytes": 100920,
+            "sha256": "4c2ce09525c9da010f67a82c43423c48d2cf0c4c1467242adda19f1875234c63",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel-mono/clang12/O3/libmlkem.so",
+          "size_bytes": 417664,
+          "sha256": "a118e3f62afc0b813b616b2f18e08fbacd28379016c160d7f35092e310cc078d",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang12/O3/libmlkem.so.dwp",
+            "size_bytes": 106520,
+            "sha256": "dc6abee201e436f457263132aebfef94edb8d8eb6dc34f94fd5f6e65da478cec",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "clang17": {
+        "O0": {
+          "path": "binaries/multilevel-mono/clang17/O0/libmlkem.so",
+          "size_bytes": 113952,
+          "sha256": "eda4f1270becb9b58c09e4036ff30f8a92864ff324460343edabd054f1dd6043",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang17/O0/libmlkem.so.dwp",
+            "size_bytes": 30504,
+            "sha256": "03833ae77b25db38ac184f8e3d8618e02033ae7630675b599b9f7ff567357772",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel-mono/clang17/O2/libmlkem.so",
+          "size_bytes": 433528,
+          "sha256": "94c610a141735a80b6d139c117e89c5c5c2b93287a1ed27fa14168537364630d",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang17/O2/libmlkem.so.dwp",
+            "size_bytes": 158464,
+            "sha256": "ee58e7cc6e894f784b6a793a3e119c6c47f084d029696a310ade20d18e24b4f3",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel-mono/clang17/O3/libmlkem.so",
+          "size_bytes": 471016,
+          "sha256": "61ced7c24b43e4d4282e2936616a29be23a8f388493b979d9ea33108bdb32da1",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang17/O3/libmlkem.so.dwp",
+            "size_bytes": 158104,
+            "sha256": "5686df0c61a1246f73f18f218276d5888422ca71c1f59b2e40e3303bb9ff7df3",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "clang23": {
+        "O0": {
+          "path": "binaries/multilevel-mono/clang23/O0/libmlkem.so",
+          "size_bytes": 113856,
+          "sha256": "f6cb4916a492f84b9c0ac274d35ff5a395091bbdd8076942f9639b1418ae7fb9",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang23/O0/libmlkem.so.dwp",
+            "size_bytes": 30536,
+            "sha256": "a2335ad87bfc6e78b4aa49fb98b06079d25f2736b74de09015088c94e5dd3918",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel-mono/clang23/O2/libmlkem.so",
+          "size_bytes": 460448,
+          "sha256": "e9b4d7334cdfd477a2e0521f57674ac25b4240a87ec9dafba942d9112118bb38",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang23/O2/libmlkem.so.dwp",
+            "size_bytes": 142720,
+            "sha256": "7c5dad8161ed31776c2164f1c65296ad930c68cbe7aef7a77ea95d42b414c2cb",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel-mono/clang23/O3/libmlkem.so",
+          "size_bytes": 527936,
+          "sha256": "b6383785f5f3731e381c5633727e4cad52fe69ea9192e43bfb67df197773b5ad",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang23/O3/libmlkem.so.dwp",
+            "size_bytes": 138592,
+            "sha256": "b56bbdd3b93e645b25fe35415e4c28a3c024b2da279b423acb07488b2379fc92",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 21,
+          "dynamic_relocations": {
+            "count": 5,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "validation": {
+    "status": "passed",
+    "checks_per_artifact": [
+      "Shared object is AArch64 ET_DYN with SONAME libmlkem.so.",
+      "DF_SYMBOLIC is set and no dynamic TEXTREL is present.",
+      "No LOAD segment is both writable and executable.",
+      "Exactly the 21 public ML-KEM symbols are exported.",
+      "Every dynamic relocation targets an undefined symbol.",
+      "The DWP package has .debug_info.dwo and .debug_cu_index.",
+      "The matching example links and reports All tests passed!."
+    ]
+  }
+}
