@@ -112,7 +112,11 @@ def index_baseline(baseline):
 def classify_proof(r, baseline_by_config, baseline_by_name, cfg):
     """Classify a single proof result, returning (ProofResult, is_alert)."""
     name, dm, solver = config_key(r)
-    base = baseline_by_config.get((name, dm, solver), baseline_by_name.get(name, {}))
+    base = baseline_by_config.get((name, dm, solver))
+    if base is None:
+        # Legacy baselines have one entry per proof, timed with the default
+        # configuration. Comparing other configurations with it is misleading.
+        base = baseline_by_name.get(name, {}) if r.get("default", False) else {}
     base_val, base_failed = base.get("value"), base.get("status") == "failed"
     base_omitted = base.get("status") == "omitted"
     base_inconclusive = base.get("status") == "inconclusive"
