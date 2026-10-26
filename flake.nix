@@ -6,7 +6,8 @@
   description = "mlkem-native";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    # TODO: switch to nixos-26.11 once the release branch exists
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     flake-parts = {
@@ -64,7 +65,7 @@
             inherit system;
             overlays = [
               (_:_: {
-                inherit (pkgs-unstable) cbmc;
+                # Add pkgs-unstable overlays here when needed
               })
             ];
           };
@@ -189,20 +190,19 @@
           devShells.clang20 = util.mkShellWithCC' pkgs.clang_20;
           devShells.clang21 = util.mkShellWithCC' pkgs.clang_21;
           devShells.clang22 = util.mkShellWithCC' pkgs.clang_22;
-          # TODO: switch to pkgs.clang_23 once nixpkgs provides the alias and it builds on darwin in 26.05
-          devShells.clang23 = util.mkShellWithCC' pkgs-unstable.llvmPackages_23.clang;
+          # TODO: switch to pkgs.clang_23 once nixpkgs provides the alias
+          devShells.clang23 = util.mkShellWithCC' pkgs.llvmPackages_23.clang;
 
           devShells.zig0_13 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_13);
           devShells.zig0_14 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_14);
           devShells.zig0_15 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_15);
           devShells.zig0_16 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_16);
-          devShells.zig0_17 = util.mkShellWithCC' (zigWrapCC pkgs-unstable.zig_0_17);
+          devShells.zig0_17 = util.mkShellWithCC' (zigWrapCC pkgs.zig_0_17);
 
           devShells.gcc13 = util.mkShellWithCC' pkgs.gcc13;
           devShells.gcc14 = util.mkShellWithCC' pkgs.gcc14;
           devShells.gcc15 = util.mkShellWithCC' pkgs.gcc15;
-          # TODO: switch back to pkgs.gcc16 once it builds on darwin in nixpkgs 26.05
-          devShells.gcc16 = util.mkShellWithCC' pkgs-unstable.gcc16;
+          devShells.gcc16 = util.mkShellWithCC' pkgs.gcc16;
 
           # valgrind with a patch for detecting variable-latency instructions
           devShells.valgrind-varlat_clang19 = util.mkShellWithCC_valgrind' pkgs.clang_19;
