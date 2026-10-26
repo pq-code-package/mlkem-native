@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793004537556,
+  "lastUpdate": 1793005807808,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -22259,6 +22259,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 208557,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "5093600fc52d4743433d2f195113522e53baa4b3",
+          "message": "HOL-Light: Avoid repeated work in proof loops\n\nInstruction loops apply the same step and SIMD tactics after each\ninstruction. Constructing them inside callbacks rebuilds rewrite\nconversions and helper predicates for every step, making long arithmetic\nproofs spend time preparing unchanged work.\n\nPrepare ARM/x86 step tactics and SIMD simplifiers once outside all\nmatching ML-KEM loops. In SIMD_SIMPLIFY_ABBREV_TAC, also prepare the\nconversion and local-definition predicate once while still reading\narithmetic equations from the current proof context.\n\nAfter NTT congruences are reduced to real polynomials,\nREAL_INTEGER_TAC needs no execution assumptions. Drop those assumptions\nbefore the four AArch64/x86_64 NTT and inverse NTT closure calls.\n\nThe prepared conversions capture their rewrite rules when the tactic is\nbuilt. Rebuild the tactic if those rules change.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-10-26T06:43:24Z",
+          "tree_id": "8e88c30287a3f0286e69ed83363343400587ee41",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/5093600fc52d4743433d2f195113522e53baa4b3"
+        },
+        "date": 1793005040090,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 59749,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 70474,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 89479,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 100839,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 112736,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 140457,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 154784,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 171415,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 209671,
             "unit": "cycles"
           }
         ]
