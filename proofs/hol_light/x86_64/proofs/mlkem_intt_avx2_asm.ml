@@ -1128,10 +1128,11 @@ let MLKEM_INTT_CORRECT = prove
   CONV_TAC(LAND_CONV(READ_MEMORY_SPLIT_CONV 2)) THEN
   CONV_TAC(LAND_CONV WORD_REDUCE_CONV) THEN STRIP_TAC THEN
 
-  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC MLKEM_INTT_TMC_EXEC [n] THEN
-                      SIMD_SIMPLIFY_ABBREV_TAC[ntt_montmul; barred_x86]
-                              [ntt_montmul_add; ntt_montmul_sub])
-        1 THEN
+  (let step = X86_STEPS_TAC MLKEM_INTT_TMC_EXEC
+   and simplify =
+     SIMD_SIMPLIFY_ABBREV_TAC[ntt_montmul; barred_x86]
+       [ntt_montmul_add; ntt_montmul_sub] in
+   MAP_UNTIL_TARGET_PC (fun n -> step [n] THEN simplify) 1) THEN
 
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
@@ -1201,7 +1202,9 @@ let MLKEM_INTT_CORRECT = prove
     REWRITE_TAC[INT_REM_EQ] THEN
     REWRITE_TAC[REAL_INT_CONGRUENCE; INT_OF_NUM_EQ; ARITH_EQ] THEN
     REWRITE_TAC[GSYM REAL_OF_INT_CLAUSES] THEN
-    CONV_TAC(RAND_CONV REAL_POLY_CONV) THEN REAL_INTEGER_TAC;
+    CONV_TAC(RAND_CONV REAL_POLY_CONV) THEN
+    (* Integer closure needs no execution assumptions. *)
+    POP_ASSUM_LIST(K REAL_INTEGER_TAC);
     MATCH_MP_TAC(INT_ARITH
      `l':int <= l /\ u <= u'
       ==> l <= x /\ x <= u ==> l' <= x /\ x <= u'`) THEN

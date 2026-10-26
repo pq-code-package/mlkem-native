@@ -246,9 +246,9 @@ let MLKEM_TOMONT_CORRECT = prove(
   STRIP_TAC THEN
 
   (* Symbolic execution *)
-  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC mlkem_tomont_TMC_EXEC [n] THEN
-                      SIMD_SIMPLIFY_TAC[ntt_montmul])
-            1 THEN
+  (let step = X86_STEPS_TAC mlkem_tomont_TMC_EXEC
+   and simplify = SIMD_SIMPLIFY_TAC[ntt_montmul] in
+   MAP_UNTIL_TARGET_PC (fun n -> step [n] THEN simplify) 1) THEN
 
   ENSURES_FINAL_STATE_TAC THEN
   REPEAT CONJ_TAC THEN

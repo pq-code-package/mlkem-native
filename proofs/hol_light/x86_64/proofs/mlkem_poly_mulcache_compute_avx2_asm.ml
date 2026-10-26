@@ -206,9 +206,9 @@ let MLKEM_POLY_MULCACHE_COMPUTE_CORRECT = prove(
   DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes16 a) s = x`] THEN
   CONV_TAC(LAND_CONV WORD_REDUCE_CONV) THEN STRIP_TAC THEN
 
-  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC MLKEM_POLY_MULCACHE_COMPUTE_TMC_EXEC [n] THEN
-                      SIMD_SIMPLIFY_TAC[ntt_montmul_alt])
-        1 THEN
+  (let step = X86_STEPS_TAC MLKEM_POLY_MULCACHE_COMPUTE_TMC_EXEC
+   and simplify = SIMD_SIMPLIFY_TAC[ntt_montmul_alt] in
+   MAP_UNTIL_TARGET_PC (fun n -> step [n] THEN simplify) 1) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
   (* Reverse restructuring *)
