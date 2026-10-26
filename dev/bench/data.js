@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1792996706062,
+  "lastUpdate": 1792996718694,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -1103,6 +1103,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 98325,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": true,
+          "id": "8ef496aba697503e9458430afb76a8e2608c60ab",
+          "message": "CI: Publish CBMC baselines from merge queue runs\n\nPull-request reports compare CBMC runtimes with baselines on gh-pages\n(dev/cbmc/mlkem-{512,768,1024}.json). report.py previously wrote them\nfrom CI runs on main. Since 116a5929 (\"CI: Do not run on pushes to\nmain\"), CBMC runs only for pull requests and merge groups, so the\nbaselines have not been updated since 2026-08-03 and still contain one\nresult per proof.\n\nThe merge queue tests the exact commit that main then receives, so its\nresults are the right baseline. Each CBMC job now maps k=2, 3, or 4 to\nthe corresponding ML-KEM name, writes the result at its gh-pages path,\nand uploads that tree from merge-group runs.\n\nRun cbmc_publish.yml on each push to main. It finds the all.yml merge\nqueue run for that commit, downloads all CBMC artifacts into a gh-pages\ncheckout, and pushes them as one commit. Rebase and retry once if the\nbenchmark workflow changed gh-pages first; warn and skip commits that\ndid not pass through the merge queue.\n\nRemove the Contents API upload from report.py. Configured result files\nno longer need to be base64-encoded into a single gh command argument.\n\nPorts pq-code-package/mldsa-native#1494.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-10-26T05:00:20Z",
+          "tree_id": "116a227227955afbb4ef0976ebb7e17193732ff8",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/8ef496aba697503e9458430afb76a8e2608c60ab"
+        },
+        "date": 1792996384943,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 28250,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 34082,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 44528,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 47618,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 53840,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 68470,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 70149,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 78567,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 98324,
             "unit": "cycles"
           }
         ]
