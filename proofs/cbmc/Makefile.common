@@ -271,6 +271,12 @@ ifneq ($(filter-out $(CBMC_SOLVER_PROFILES_ALL),$(CBMC_SUPPORTED_SOLVERS)),)
 $(error Unknown solver profile in CBMC_SUPPORTED_CONFIGS='$(CBMC_SUPPORTED_CONFIGS)')
 endif
 
+# Every proof must be discharged by at least two different 64-bit provers.
+CBMC_LP64_PROVERS := $(sort $(foreach config,$(filter LP64:%,$(CBMC_SUPPORTED_CONFIGS)),$(CBMC_PROFILE_$(word 2,$(subst :, ,$(config)))_PROVER_NAME)))
+ifeq ($(word 2,$(CBMC_LP64_PROVERS)),)
+$(error CBMC_SUPPORTED_CONFIGS='$(CBMC_SUPPORTED_CONFIGS)' must contain LP64 configurations for at least two different provers)
+endif
+
 CBMC_DM ?= $(CBMC_DEFAULT_DM)
 CBMC_SOLVER ?= $(CBMC_DEFAULT_SOLVER)
 CBMC_ACTIVE_CONFIG := $(CBMC_DM):$(CBMC_SOLVER)
