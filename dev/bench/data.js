@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793015234577,
+  "lastUpdate": 1793015289115,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -8222,6 +8222,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 42035,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "64784aca8a3ac5aa2b774b2aad684dd89699eaea",
+          "message": "CBMC: Permute polymat via a polyvec helper again\n\nReintroduce mlk_polyvec_permute_bitrev_to_custom and permute the matrix\nrow by row through it. This restores the code and proof structure that\nhttps://github.com/pq-code-package/mlkem-native/pull/1336 removed once\nCBMC no longer required the helper. The contract of\nmlk_polymat_permute_bitrev_to_custom is unchanged.\n\nWith the helper, cadical can discharge the polymat_permute proof\n(locally about 200s for MLKEM_K=4), which gives it a second solver.\nThe polyvec helper proofs also get cadical as a second solver.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-26T10:11:47Z",
+          "tree_id": "00f96aa591ec60747c3f039c4b87b726e9207a7d",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/64784aca8a3ac5aa2b774b2aad684dd89699eaea"
+        },
+        "date": 1793015122509,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 12850,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 14268,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 19021,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 21650,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 22788,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 29727,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 30458,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 32606,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 41902,
             "unit": "cycles"
           }
         ]
