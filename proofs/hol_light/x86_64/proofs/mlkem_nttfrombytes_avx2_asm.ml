@@ -415,9 +415,9 @@ let MLKEM_NTTFROMBYTES_CORRECT = prove(
 
   (*** Simulate and simplify ***)
 
-  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC mlkem_frombytes_TMC_EXEC [n] THEN
-                      SIMD_SIMPLIFY_TAC[])
-            1 THEN
+  (let step = X86_STEPS_TAC mlkem_frombytes_TMC_EXEC
+   and simplify = SIMD_SIMPLIFY_TAC[] in
+   MAP_UNTIL_TARGET_PC (fun n -> step [n] THEN simplify) 1) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
   (*** Final reasoning ***)
