@@ -92,7 +92,7 @@ stack.
                                    Gap C │        Gap C│
                                          │             │
                                    CBMC +│      HOL Light kernel
-                             SMT solvers │             │
+                         SMT/SAT solvers │             │
                                          │             │
   ┌─────────────────────┐          ┌─────┴─────────────┴─────┐
   │                     │          │                         │
@@ -465,8 +465,8 @@ at the hardware or protocol level would be needed.
 
 ### B5. C semantics model fidelity
 
-CBMC gives meaning to C by translating C source into an internal representation and then into SMT formulas. Bugs in
-CBMC's C-to-SMT translation could cause it to miss undefined behavior and to accept incorrect code; this has happened in
+CBMC gives meaning to C by translating C source into an internal representation and then into SMT or SAT formulas. Bugs in
+CBMC's C-to-SMT/SAT translation could cause it to miss undefined behavior and to accept incorrect code; this has happened in
 the past. However, CBMC is a mature, widely-used tool with an active community and extensive test suite, and
 mlkem-native uses the latest CBMC version.
 
@@ -512,15 +512,15 @@ widespread use.
 
 Independent reassurance can be provided by Candle[^Candle] and HOLTrace [^HOLTrace]. See the s2n-bignum soundness doc[^s2n-bignum-soundness] for full details.
 
-### C2. CBMC & SMT solver trusted computing base
+### C2. CBMC & SMT/SAT solver trusted computing base
 
 The CBMC trusted computing base is substantially larger than HOL Light's:
 
-- **CBMC itself**: The C frontend, GOTO program transformation, and SMT encoding are all
+- **CBMC itself**: The C frontend, GOTO program transformation, and SMT/SAT encoding are all
   part of the TCB. Unlike HOL Light's LCF architecture, there is no small kernel through
   which all results must pass. A bug anywhere in the CBMC pipeline could produce a false
   "verified" result.
-- **SMT solvers** (Z3, Bitwuzla): These are complex software systems. A solver bug
+- **SMT and SAT solvers** (Z3, Bitwuzla, cvc5, CaDiCaL): These are complex software systems. A solver bug
   directly compromises soundness. Unlike HOL Light's LCF architecture, where bugs in
   proof automation cannot compromise soundness, a solver bug in CBMC's backend directly
   invalidates the proof.
@@ -531,16 +531,13 @@ The CBMC trusted computing base is substantially larger than HOL Light's:
 
 - CBMC has been in development for more than 20 years and is widely used in industry (including
   at Amazon for AWS-LC and other projects).
-- The SMT solvers are independently developed and extensively tested.
+- The SMT and SAT solvers are independently developed and extensively tested.
+- Every CBMC proof is discharged by at least two independently developed solvers.
 - mlkem-native's proofs are run continuously in CI, providing regression testing.
 
 **Residual risks.** The CBMC TCB is orders of magnitude larger than HOL Light's. There is
 no independent proof-checking mechanism analogous to Candle or HOLTrace. The soundness
 guarantee for the C proofs is therefore fundamentally weaker than for the assembly proofs.
-
-**Potential improvements**:
-- Systematically introduce redundancy by employing more than one SMT solver backend
-  for CBMC functions, or use solvers with independently checkable results ([#1603](https://github.com/pq-code-package/mlkem-native/issues/1603)).
 
 <!--- bibliography --->
 [^CBMC]: Diffblue, Amazon Web Services: C Bounded Model Checker, [https://github.com/diffblue/cbmc](https://github.com/diffblue/cbmc)

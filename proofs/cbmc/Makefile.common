@@ -229,6 +229,8 @@ CBMC_PROFILE_cadical_BACKEND :=
 CBMC_PROFILE_cadical_PROVER_NAME := CaDiCaL
 CBMC_PROFILE_cadical_SMT_FORMAT :=
 CBMC_PROFILE_cadical_FLAGS := --sat-solver cadical
+# SAT array expansion can consume many GiB before solving starts.
+CBMC_PROFILE_cadical_EXPENSIVE := true
 
 # Make evaluates the configuration checks below before running target recipes.
 # The runner queries these metadata targets before selecting CBMC_DM/CBMC_SOLVER.
@@ -298,7 +300,7 @@ endif # CBMC_SKIP_CONFIG_RESOLUTION
 
 # Job pools
 # For version of Litani that are new enough (where `litani print-capabilities`
-# prints "pools"), proofs for which `EXPENSIVE = true` is set can be added to a
+# prints "pools"), proofs or solver profiles marked EXPENSIVE can be added to a
 # "job pool" that restricts how many expensive proofs are run at a time. All
 # other proofs will be built in parallel as usual.
 #
@@ -325,7 +327,7 @@ endif # CBMC_SKIP_CONFIG_RESOLUTION
 ifeq ($(strip $(ENABLE_POOLS)),)
   POOL =
   INIT_POOLS =
-else ifeq ($(strip $(EXPENSIVE)),)
+else ifeq ($(strip $(EXPENSIVE) $(CBMC_PROFILE_$(CBMC_SOLVER)_EXPENSIVE)),)
   POOL =
   INIT_POOLS =
 else
