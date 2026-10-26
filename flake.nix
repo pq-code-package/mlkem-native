@@ -96,17 +96,8 @@
               } ++ holLightToolchain;
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
 
-          # arm-none-eabi-gcc + platform files from pqmx
-          packages.m55-an547 = util.m55-an547;
           packages.avr-toolchain = util.avr-toolchain;
           packages.openocd = util.openocd;
-          devShells.arm-embedded = util.mkShell {
-            packages = builtins.attrValues
-              {
-                inherit (config.packages) m55-an547;
-                inherit (pkgs) gcc-arm-embedded qemu coreutils python3 git;
-              };
-          };
 
           devShells.avr = util.mkShell (import ./nix/avr { inherit pkgs; });
           packages.hol_server = util.hol_server.hol_server_start;
