@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793010454820,
+  "lastUpdate": 1793010481498,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -16102,6 +16102,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 158821,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "fcd2280494aaee547f5a507edda3823bb82931cf",
+          "message": "CBMC: Add a second solver for 3 slow proofs\n\nAdd a second solver for kem_check_pk (bitwuzla), indcpa_enc (cadical)\nand poly_rej_uniform_x4 (cvc5_enum_inst).\n\nThese are quite slow: locally for MLKEM_K=4, kem_check_pk takes about\n60s, but indcpa_enc takes about 470s and poly_rej_uniform_x4 about\n540s. No faster non-Z3 option was found for them across the CBMC SAT\nbackend, bitwuzla and cvc5 configurations tried.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-26T09:02:15Z",
+          "tree_id": "7d3bd081c18c16016dc727aa0e5fe2653b8956d4",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/fcd2280494aaee547f5a507edda3823bb82931cf"
+        },
+        "date": 1793010481078,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 49306,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 59781,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 75561,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 80476,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 90866,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 111836,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 116375,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 131171,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 158196,
             "unit": "cycles"
           }
         ]
