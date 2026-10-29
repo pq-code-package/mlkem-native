@@ -37,8 +37,8 @@ buildEnv {
       });
 
       inherit
-        bitwuzla# 0.9.0
-        cvc5# 1.3.4 (from nixpkgs-26.05)
+        bitwuzla# 0.9.1
+        cvc5# 1.4.0
         ninja; # 1.13.2
     };
 }
