@@ -1,6 +1,46 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# Full X86-64 or ARM64/Aarch64 assembly support added
+# to Windows 11/64bit builds, respectively.
+#
 
-CFLAGS = /nologo /O2 /Imlkem /Imlkem/src /Imlkem/src/fips202 /Imlkem/src/fips202/native /Imlkem/src/sys /Imlkem/src/native
+!IFDEF DEBUG
+!IFDEF OPT_MOST
+!ERROR You MUST NOT define DEBUG= and OPT_MOST= together.
+!ENDIF
+CFLAGS_OPT = /Od
+!ELSE
+!IFDEF OPT_MOST
+CFLAGS_OPT = /Ox /Ob2 /Oi /Ot /Oy
+!ELSE
+CFLAGS_OPT = /O2
+!ENDIF
+!ENDIF
+
+CFLAGS = /nologo $(CFLAGS_OPT) /Imlkem /Imlkem/src /Imlkem/src/fips202 /Imlkem/src/fips202/native /Imlkem/src/sys /Imlkem/src/native
+
+!IFDEF DEBUG
+CFLAGS = $(CFLAGS) /Zi
+!ENDIF
+
+!IFDEF ASSEMBLY
+CFLAGS = $(CFLAGS) /D MLK_CONFIG_USE_NATIVE_BACKEND_ARITH /D MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202
+!IFDEF ARM64
+AS = armasm64.exe
+ASFLAGS = -machine ARM64 -nologo
+!IFDEF DEBUG
+ASFLAGS = $(ASFLAGS) -g
+!ENDIF
+!ELSE
+AS = ml64.exe
+ASFLAGS = /nologo /c
+!IFDEF DEBUG
+ASFLAGS = $(ASFLAGS) /Zi
+!ENDIF
+!ENDIF
+!ELSE
+CFLAGS = $(CFLAGS) /D MLD_CONFIG_NO_ASM
+!ENDIF
 
 ALLOC_CFLAGS = \
     $(CFLAGS) \
@@ -28,9 +68,8 @@ OBJ_FILES_768_ALLOC = $(MLKEM768_BUILD_DIR)\alloc\mlkem\*.obj \
 OBJ_FILES_1024_ALLOC = $(MLKEM1024_BUILD_DIR)\alloc\mlkem\*.obj \
                        $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\*.obj
 
-# NOTE: We currently only build code for non-opt code, as we haven't yet made the assembly compatible on Windows
-!IFNDEF OPT
-OPT = 0
+!IFDEF ASSEMBLY
+!include NMake.Win64.assembly
 !ENDIF
 
 {test/notrandombytes}.c{$(BUILD_DIR)\randombytes}.obj::
@@ -268,9 +307,14 @@ run_alloc: test_alloc512 test_alloc768 test_alloc1024
     $(MLKEM1024_BUILD_DIR)\bin\test_alloc1024.exe
 
 test: run_func run_rng_fail run_alloc run_acvp run_kat run_wycheproof
-    @echo   Everything checks fine!
+!IFDEF ASSEMBLY
+    @echo   Everything checks fine (with assembly)!
+!ELSE
+    @echo   Everything checks fine (without assembly, pure C)!
+!ENDIF
 
 quickcheck: test
 
 clean:
-    -DEL $(BUILD_DIR)
+    @echo Removing folder $(BUILD_DIR) recursively.
+    @IF EXIST $(BUILD_DIR) rmdir /q/s $(BUILD_DIR) >NUL
