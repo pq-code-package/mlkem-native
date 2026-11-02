@@ -1080,14 +1080,14 @@ let MLKEM_NTT_CORRECT = prove
               read RIP s = word pc /\
               C_ARGUMENTS [a; zetas] s /\
               wordlist_from_memory(zetas, 624) s = MAP (iword: int -> 16 word) qdata_full /\
-              (!i. i < 256 ==> abs(ival(x i)) <= &8191) /\
+              (!i. i < 256 ==> abs(ival(x i)) <= &3328) /\
               (!i. i < 256 ==> read(memory :> bytes16(word_add a (word(2 * i)))) s = x i))
           (\s. read RIP s = word(pc + MLKEM_NTT_CORE_END) /\
               (!i. i < 256
                         ==> let zi =
                       read(memory :> bytes16(word_add a (word(2 * i)))) s in
                       (ival zi == avx2_forward_ntt (ival o x) i) (mod &3329) /\
-                      abs(ival zi) <= &23594))
+                      abs(ival zi) <= &16187))
           (MAYCHANGE [events] ,,
            MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
                       ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14;
@@ -1236,7 +1236,7 @@ let MLKEM_NTT_NOIBT_SUBROUTINE_CORRECT  = prove
               read (memory :> bytes64 stackpointer) s = returnaddress /\
               C_ARGUMENTS [a; zetas] s /\
               wordlist_from_memory(zetas, 624) s = MAP (iword: int -> 16 word) qdata_full /\
-              (!i. i < 256 ==> abs(ival(x i)) <= &8191) /\
+              (!i. i < 256 ==> abs(ival(x i)) <= &3328) /\
               (!i. i < 256 ==> read(memory :> bytes16(word_add a (word(2 * i)))) s = x i))
           (\s. read RIP s = returnaddress /\
                read RSP s = word_add stackpointer (word 8) /\
@@ -1244,7 +1244,7 @@ let MLKEM_NTT_NOIBT_SUBROUTINE_CORRECT  = prove
                         ==> let zi =
                       read(memory :> bytes16(word_add a (word(2 * i)))) s in
                       (ival zi == avx2_forward_ntt (ival o x) i) (mod &3329) /\
-                      abs(ival zi) <= &23594))
+                      abs(ival zi) <= &16187))
           (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
            MAYCHANGE [memory :> bytes(a, 512)])`,
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
@@ -1272,7 +1272,7 @@ let MLKEM_NTT_SUBROUTINE_CORRECT  = prove
               read (memory :> bytes64 stackpointer) s = returnaddress /\
               C_ARGUMENTS [a; zetas] s /\
               wordlist_from_memory(zetas, 624) s = MAP (iword: int -> 16 word) qdata_full /\
-              (!i. i < 256 ==> abs(ival(x i)) <= &8191) /\
+              (!i. i < 256 ==> abs(ival(x i)) <= &3328) /\
               (!i. i < 256 ==> read(memory :> bytes16(word_add a (word(2 * i)))) s = x i))
           (\s. read RIP s = returnaddress /\
                read RSP s = word_add stackpointer (word 8) /\
@@ -1280,7 +1280,7 @@ let MLKEM_NTT_SUBROUTINE_CORRECT  = prove
                         ==> let zi =
                       read(memory :> bytes16(word_add a (word(2 * i)))) s in
                       (ival zi == avx2_forward_ntt (ival o x) i) (mod &3329) /\
-                      abs(ival zi) <= &23594))
+                      abs(ival zi) <= &16187))
           (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
            MAYCHANGE [memory :> bytes(a, 512)])`,
   let TWEAK_CONV = ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV in
