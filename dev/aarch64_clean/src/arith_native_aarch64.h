@@ -41,12 +41,12 @@ void mlk_ntt_aarch64_asm(int16_t p[256], const int16_t twiddles12345[80],
  * in proofs/hol_light/aarch64/proofs/mlkem_ntt_aarch64_asm.ml */
 __contract__(
   requires(memory_no_alias(p, sizeof(int16_t) * MLKEM_N))
-  requires(array_abs_bound(p, 0, MLKEM_N, 8192))
+  requires(array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))
   requires(twiddles12345 == mlk_aarch64_ntt_zetas_layer12345)
   requires(twiddles56 == mlk_aarch64_ntt_zetas_layer67)
   assigns(memory_slice(p, sizeof(int16_t) * MLKEM_N))
   /* check-magic: off */
-  ensures(array_abs_bound(p, 0, MLKEM_N, 23595))
+  ensures(array_abs_bound(p, 0, MLKEM_N, 17390))
   /* check-magic: on */
 );
 

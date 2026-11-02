@@ -547,12 +547,12 @@ let MLKEM_NTT_CORRECT = prove
                     ==> read(memory :> bytes16(word_add a (word(2 * i)))) s =
                         x i)
            (\s. read PC s = word(pc + MLKEM_NTT_CORE_END) /\
-                ((!i. i < 256 ==> abs(ival(x i)) <= &8191)
+                ((!i. i < 256 ==> abs(ival(x i)) <= &3328)
                  ==> !i. i < 256
                          ==> let zi =
                         read(memory :> bytes16(word_add a (word(2 * i)))) s in
                         (ival zi == forward_ntt (ival o x) i) (mod &3329) /\
-                        abs(ival zi) <= &23594))
+                        abs(ival zi) <= &17389))
            (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
             MAYCHANGE [Q8; Q9; Q10; Q11; Q12; Q13; Q14; Q15] ,,
             MAYCHANGE [memory :> bytes(a,512)])`,
@@ -662,12 +662,12 @@ let MLKEM_NTT_SUBROUTINE_CORRECT = prove
                     ==> read(memory :> bytes16(word_add a (word(2 * i)))) s =
                         x i)
            (\s. read PC s = returnaddress /\
-                ((!i. i < 256 ==> abs(ival(x i)) <= &8191)
+                ((!i. i < 256 ==> abs(ival(x i)) <= &3328)
                  ==> !i. i < 256
                          ==> let zi =
                         read(memory :> bytes16(word_add a (word(2 * i)))) s in
                         (ival zi == forward_ntt (ival o x) i) (mod &3329) /\
-                        abs(ival zi) <= &23594))
+                        abs(ival zi) <= &17389))
            (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
             MAYCHANGE [memory :> bytes(a,512);
                        memory :> bytes(word_sub stackpointer (word 64),64)])`,

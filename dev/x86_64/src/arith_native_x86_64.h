@@ -40,11 +40,11 @@ void mlk_ntt_avx2_asm(int16_t *r, const int16_t *qdata)
  * in proofs/hol_light/x86_64/proofs/mlkem_ntt_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(r, sizeof(int16_t) * MLKEM_N))
-  requires(array_abs_bound(r, 0, MLKEM_N, 8192))
+  requires(array_abs_bound(r, 0, MLKEM_N, MLKEM_Q))
   requires(qdata == mlk_qdata)
   assigns(memory_slice(r, sizeof(int16_t) * MLKEM_N))
   /* check-magic: off */
-  ensures(array_abs_bound(r, 0, MLKEM_N, 23595))
+  ensures(array_abs_bound(r, 0, MLKEM_N, 16188))
   /* check-magic: on */
 );
 
