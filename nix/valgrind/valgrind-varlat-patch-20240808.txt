@@ -724,7 +724,7 @@ diff --git a/memcheck/tests/Makefile.am b/memcheck/tests/Makefile.am
 index 19ac76730..2012be681 100644
 --- a/memcheck/tests/Makefile.am
 +++ b/memcheck/tests/Makefile.am
-@@ -437,6 +437,14 @@ EXTRA_DIST = \
+@@ -457,6 +457,14 @@ EXTRA_DIST = \
  	varinfo6.vgtest varinfo6.stdout.exp varinfo6.stderr.exp \
  		varinfo6.stderr.exp-ppc64 \
  	varinforestrict.vgtest varinforestrict.stderr.exp \
@@ -736,18 +736,18 @@ index 19ac76730..2012be681 100644
 +	varlat2-env.vgtest varlat2-env.stderr.exp \
 +	varlat2-no.vgtest varlat2-no.stderr.exp \
 +	varlat2-yes.vgtest varlat2-yes.stderr.exp \
- 	vcpu_bz2.stdout.exp vcpu_bz2.stderr.exp vcpu_bz2.vgtest \
- 	vcpu_fbench.stdout.exp vcpu_fbench.stderr.exp vcpu_fbench.vgtest \
+ 	vcpu_bz2.stdout.exp vcpu_bz2.vgtest \
+ 	vcpu_fbench.stdout.exp vcpu_fbench.vgtest \
  	vcpu_fnfns.stdout.exp vcpu_fnfns.stdout.exp-glibc28-amd64 \
-@@ -547,6 +555,7 @@ check_PROGRAMS = \
+@@ -575,6 +583,7 @@ check_PROGRAMS = \
  	varinfo1 varinfo2 varinfo3 varinfo4 \
  	varinfo5 varinfo5so.so varinfo6 \
  	varinforestrict \
 +	varlat varlat2 \
  	vcpu_fbench vcpu_fnfns \
  	wcs \
- 	xml1 \
-@@ -855,6 +864,9 @@ else
+ 	wcscat \
+@@ -936,6 +945,9 @@ else
  endif
  varinforestrict_CFLAGS	= $(AM_CFLAGS) -O0 -g @FLAG_W_NO_MAYBE_UNINITIALIZED@
  
