@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793694525646,
+  "lastUpdate": 1793694543411,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -14645,6 +14645,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 63387,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": true,
+          "id": "589a3a90b614d6d454e55a8aac227a7f622414cb",
+          "message": "AArch64, x86_64: Use MLKEM_Q as NTT input bound\n\nThe AArch64 and x86_64 NTT contracts accepted |x| < 8192. Both callers,\nmlk_poly_ntt and mlk_ntt_native, require |x| < MLKEM_Q. The HOL Light\nspecs used the same looser bound (&8191).\n\nUse MLKEM_Q as the input bound in the CBMC contracts and &3328 in the\nHOL Light specs. Recompute the output bounds with the HOL Light\nsymbolic simulation: 17389 on AArch64 and 16187 on x86_64, down from\n23594. The CBMC ensures become 17390 and 16188.\n\nThe generated headers in mlkem/ come from the dev/ sources, which are\nupdated as well.\n\nValidation: both HOL Light NTT proofs pass. CBMC proofs\nntt_native_{aarch64,x86_64} pass for MLKEM_K=2,3,4.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-03T06:54:56Z",
+          "tree_id": "d2acf0091829607063cf00ae467e216c78f4fdf2",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/589a3a90b614d6d454e55a8aac227a7f622414cb"
+        },
+        "date": 1793694342278,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 18343,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 20628,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 27733,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 31621,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 32133,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 43023,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 43824,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 45879,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 62621,
             "unit": "cycles"
           }
         ]
