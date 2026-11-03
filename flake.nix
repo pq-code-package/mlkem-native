@@ -6,7 +6,7 @@
   description = "mlkem-native";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     flake-parts = {
@@ -64,7 +64,7 @@
             inherit system;
             overlays = [
               (_:_: {
-                inherit (pkgs-unstable) cbmc;
+                # Add pkgs-unstable overlays here when needed
               })
             ];
           };

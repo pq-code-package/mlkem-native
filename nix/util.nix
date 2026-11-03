@@ -18,7 +18,7 @@ rec {
   };
 
   native-gcc =
-    if pkgs.stdenv.isDarwin
+    if pkgs.stdenv.hostPlatform.isDarwin
     then pkgs.clang
     else wrap-gcc pkgs;
 
@@ -57,11 +57,11 @@ rec {
     # `gccNN` here, or the two platforms could drift apart on a nixpkgs bump).
     # Note that on Darwin, $CC remains set to "clang" for compilation and testing purposes,
     # while gcc is used for pre-processing sources for CBMC only.
-    ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [ pkgs.gcc ]
+    ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ pkgs.gcc ]
     ++ pkgs.lib.optionals cross [ native-gcc ]
     # git is not available in the nix shell on Darwin. As a workaround we add git as a dependency here.
     # Initially, we expected this to be fixed by https://github.com/NixOS/nixpkgs/pull/353893, but that does not seem to be the case.
-    ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [ pkgs.git ]
+    ++ pkgs.lib.optionals (pkgs.stdenv.hostPlatform.isDarwin) [ pkgs.git ]
     ++ [ pythonEnv ]
     ++ builtins.attrValues {
       inherit (pkgs)
@@ -86,7 +86,7 @@ rec {
     };
   mkShellWithCC_valgrind' = cc:
     mkShellWithCC cc {
-      packages = [ pkgs.python3 ] ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ valgrind_varlat ];
+      packages = [ pkgs.python3 ] ++ pkgs.lib.optionals (!pkgs.stdenv.hostPlatform.isDarwin) [ valgrind_varlat ];
       hardeningDisable = [ "fortify" ];
     };
 
@@ -140,7 +140,7 @@ rec {
             gnumake
             qemu;
         } ++ [ pythonEnv ]
-      ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [ pkgs.git ];
+      ++ pkgs.lib.optionals (pkgs.stdenv.hostPlatform.isDarwin) [ pkgs.git ];
     in
     pkgs.symlinkJoin {
       name = "toolchain-${name}";
