@@ -22,7 +22,8 @@
       perSystem = { config, pkgs, system, ... }:
         let
           pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
-          util = pkgs.callPackage ./nix/util.nix { };
+          # z3 for the CBMC tool bundle comes from nixos-unstable.
+          util = pkgs.callPackage ./nix/util.nix { inherit (pkgs-unstable) z3; };
           holLightToolchain = builtins.attrValues {
             inherit (pkgs) ocaml ledit;
             inherit (pkgs.ocamlPackages) findlib camlp5 zarith;
