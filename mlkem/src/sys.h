@@ -48,7 +48,7 @@
  * Neon is enabled. If you use gcc 4.8, you should set __ARM_NEON manually.
  * gcc 4.9 onwards do set __ARM_NEON.
  */
-#if defined(MLK_SYS_AARCH64) && defined(__ARM_NEON)
+#if defined(MLK_SYS_AARCH64) && (defined(__ARM_NEON) || defined(_WIN64))
 #define MLK_SYS_AARCH64_NEON
 #endif
 
@@ -66,7 +66,7 @@
 /* Check if we're running on an x86_64 system. */
 #if defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64)
 #define MLK_SYS_X86_64
-#if defined(__AVX2__)
+#if defined(__AVX2__) || (defined(_WIN64) && defined(_M_X64))
 #define MLK_SYS_X86_64_AVX2
 #endif
 #endif /* __x86_64__ || _M_X64 || _M_AMD64 */
@@ -270,6 +270,15 @@
 #if !defined(MLK_SYS_WINDOWS) || defined(__GNUC__) || defined(__clang__)
 #define MLK_SYSV_ABI_SUPPORTED
 #endif
+#endif
+
+/* X86-64 on Windows uses the Microsoft AMD64 ABI calling convention
+ * for Microsoft Assembler ml64.exe assembly;
+ * for AArch64/ARM64, this is called 'ARM64 Windows ABI' matching the
+ * standard ABI of the ARM64 toolchain (Linux and Windows)
+ */
+#if defined(MLK_SYS_WINDOWS) && defined(MLK_SYS_X86_64)
+# define MLK_MS_AMD64_ABI_SUPPORTED
 #endif
 
 #if !defined(MLK_SYSV_ABI)

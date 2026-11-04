@@ -1,0 +1,588 @@
+# Copyright (c) The mldsa-native project authors
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+#
+# MS AMD 64bit ABI assembly files, AAPCS64 assembly files
+# for MS Windows 11/64bit (using ml64.exe or armasm64.exe,
+# respectively) and this Makefile include file contributed
+# by:
+#
+# Ingo A. Kubbilun
+# <ingo.kubbilun@gmail.com>, Oct. 2026
+# (GERMANY)
+#
+
+!IFDEF ARM64
+
+OBJ_ASSEMBLY_FILES_512 = \
+                $(MLKEM512_BUILD_DIR)\mlkem\aarch64\mlkem_intt_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\aarch64\mlkem_ntt_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\aarch64\mlkem_polyvec_basemul_acc_montgomery_cached_k2_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\aarch64\mlkem_poly_tobytes_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\aarch64\mlkem_poly_reduce_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\aarch64\mlkem_poly_tomont_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\aarch64\mlkem_poly_mulcache_compute_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\aarch64\mlkem_rej_uniform_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\aarch64\aarch64_zetas.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\aarch64\rej_uniform_table.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\fips202\aarch64\keccak_f1600_x1_scalar_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\fips202\aarch64\keccak_f1600_x4_v8a_scalar_hybrid_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\fips202\aarch64\keccakf1600_round_constants.obj
+
+OBJ_ASSEMBLY_FILES_768 = \
+                $(MLKEM768_BUILD_DIR)\mlkem\aarch64\mlkem_intt_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\aarch64\mlkem_ntt_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\aarch64\mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\aarch64\mlkem_poly_tobytes_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\aarch64\mlkem_poly_reduce_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\aarch64\mlkem_poly_tomont_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\aarch64\mlkem_poly_mulcache_compute_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\aarch64\mlkem_rej_uniform_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\aarch64\aarch64_zetas.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\aarch64\rej_uniform_table.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\fips202\aarch64\keccak_f1600_x1_scalar_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\fips202\aarch64\keccak_f1600_x4_v8a_scalar_hybrid_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\fips202\aarch64\keccakf1600_round_constants.obj
+
+OBJ_ASSEMBLY_FILES_1024 = \
+                $(MLKEM1024_BUILD_DIR)\mlkem\aarch64\mlkem_intt_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\aarch64\mlkem_ntt_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\aarch64\mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\aarch64\mlkem_poly_tobytes_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\aarch64\mlkem_poly_reduce_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\aarch64\mlkem_poly_tomont_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\aarch64\mlkem_poly_mulcache_compute_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\aarch64\mlkem_rej_uniform_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\aarch64\aarch64_zetas.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\aarch64\rej_uniform_table.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\fips202\aarch64\keccak_f1600_x1_scalar_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\fips202\aarch64\keccak_f1600_x4_v8a_scalar_hybrid_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\fips202\aarch64\keccakf1600_round_constants.obj
+
+OBJ_ASSEMBLY_ALLOC_FILES_512 = \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_intt_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_ntt_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_polyvec_basemul_acc_montgomery_cached_k2_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_poly_tobytes_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_poly_reduce_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_poly_tomont_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_poly_mulcache_compute_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_rej_uniform_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64\aarch64_zetas.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64\rej_uniform_table.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\aarch64\keccak_f1600_x1_scalar_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\aarch64\keccak_f1600_x4_v8a_scalar_hybrid_aarch64.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\aarch64\keccakf1600_round_constants.obj
+
+OBJ_ASSEMBLY_ALLOC_FILES_768 = \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_intt_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_ntt_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_poly_tobytes_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_poly_reduce_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_poly_tomont_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_poly_mulcache_compute_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_rej_uniform_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64\aarch64_zetas.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64\rej_uniform_table.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\aarch64\keccak_f1600_x1_scalar_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\aarch64\keccak_f1600_x4_v8a_scalar_hybrid_aarch64.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\aarch64\keccakf1600_round_constants.obj
+
+OBJ_ASSEMBLY_ALLOC_FILES_1024 = \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_intt_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_ntt_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_poly_tobytes_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_poly_reduce_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_poly_tomont_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_poly_mulcache_compute_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64\mlkem_rej_uniform_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64\aarch64_zetas.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64\rej_uniform_table.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\aarch64\keccak_f1600_x1_scalar_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\aarch64\keccak_f1600_x4_v8a_scalar_hybrid_aarch64.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\aarch64\keccakf1600_round_constants.obj
+
+!ELSE
+
+OBJ_ASSEMBLY_FILES_512 = \
+                $(MLKEM512_BUILD_DIR)\mlkem\x86_64\mlkem_invntt_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\x86_64\mlkem_ntt_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\x86_64\mlkem_ntttobytes_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\x86_64\mlkem_nttfrombytes_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\x86_64\mlkem_poly_compress_d4_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\x86_64\mlkem_poly_decompress_d4_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\x86_64\mlkem_poly_compress_d10_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\x86_64\mlkem_poly_decompress_d10_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\x86_64\mlkem_nttunpack_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\x86_64\mlkem_reduce_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\x86_64\mlkem_poly_mulcache_compute_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\x86_64\mlkem_tomont_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\x86_64\mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\x86_64\mlkem_rej_uniform_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\x86_64\consts.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\x86_64\compress_consts.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\x86_64\rej_uniform_table.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\fips202\x86_64\keccak_f1600_x4_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\mlkem\fips202\x86_64\keccakf1600_constants.obj
+
+OBJ_ASSEMBLY_FILES_768 = \
+                $(MLKEM768_BUILD_DIR)\mlkem\x86_64\mlkem_invntt_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\x86_64\mlkem_ntt_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\x86_64\mlkem_ntttobytes_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\x86_64\mlkem_nttfrombytes_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\x86_64\mlkem_poly_compress_d4_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\x86_64\mlkem_poly_decompress_d4_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\x86_64\mlkem_poly_compress_d10_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\x86_64\mlkem_poly_decompress_d10_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\x86_64\mlkem_nttunpack_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\x86_64\mlkem_reduce_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\x86_64\mlkem_poly_mulcache_compute_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\x86_64\mlkem_tomont_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\x86_64\mlkem_polyvec_basemul_acc_montgomery_cached_k3_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\x86_64\mlkem_rej_uniform_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\x86_64\consts.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\x86_64\compress_consts.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\x86_64\rej_uniform_table.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\fips202\x86_64\keccak_f1600_x4_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\mlkem\fips202\x86_64\keccakf1600_constants.obj
+
+OBJ_ASSEMBLY_FILES_1024 = \
+                $(MLKEM1024_BUILD_DIR)\mlkem\x86_64\mlkem_invntt_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\x86_64\mlkem_ntt_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\x86_64\mlkem_ntttobytes_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\x86_64\mlkem_nttfrombytes_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\x86_64\mlkem_poly_compress_d5_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\x86_64\mlkem_poly_decompress_d5_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\x86_64\mlkem_poly_compress_d11_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\x86_64\mlkem_poly_decompress_d11_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\x86_64\mlkem_nttunpack_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\x86_64\mlkem_reduce_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\x86_64\mlkem_poly_mulcache_compute_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\x86_64\mlkem_tomont_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\x86_64\mlkem_polyvec_basemul_acc_montgomery_cached_k4_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\x86_64\mlkem_rej_uniform_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\x86_64\consts.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\x86_64\compress_consts.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\x86_64\rej_uniform_table.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\fips202\x86_64\keccak_f1600_x4_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\mlkem\fips202\x86_64\keccakf1600_constants.obj
+
+OBJ_ASSEMBLY_ALLOC_FILES_512 = \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_invntt_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_ntt_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_ntttobytes_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_nttfrombytes_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_poly_compress_d4_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_poly_decompress_d4_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_poly_compress_d10_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_poly_decompress_d10_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_nttunpack_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_reduce_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_poly_mulcache_compute_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_tomont_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_rej_uniform_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\consts.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\compress_consts.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\rej_uniform_table.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\x86_64\keccak_f1600_x4_avx2.obj \
+                $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\x86_64\keccakf1600_constants.obj
+
+OBJ_ASSEMBLY_ALLOC_FILES_768 = \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_invntt_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_ntt_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_ntttobytes_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_nttfrombytes_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_poly_compress_d4_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_poly_decompress_d4_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_poly_compress_d10_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_poly_decompress_d10_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_nttunpack_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_reduce_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_poly_mulcache_compute_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_tomont_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_polyvec_basemul_acc_montgomery_cached_k3_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_rej_uniform_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\consts.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\compress_consts.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\rej_uniform_table.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\x86_64\keccak_f1600_x4_avx2.obj \
+                $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\x86_64\keccakf1600_constants.obj
+
+OBJ_ASSEMBLY_ALLOC_FILES_1024 = \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_invntt_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_ntt_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_ntttobytes_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_nttfrombytes_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_poly_compress_d5_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_poly_decompress_d5_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_poly_compress_d11_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_poly_decompress_d11_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_nttunpack_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_reduce_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_poly_mulcache_compute_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_tomont_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_polyvec_basemul_acc_montgomery_cached_k4_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\mlkem_rej_uniform_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\consts.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\compress_consts.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\rej_uniform_table.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\x86_64\keccak_f1600_x4_avx2.obj \
+                $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\x86_64\keccakf1600_constants.obj
+
+!ENDIF
+
+OBJ_FILES_512 = $(OBJ_FILES_512) \
+                $(OBJ_ASSEMBLY_FILES_512)
+
+OBJ_FILES_512_ALLOC = $(OBJ_FILES_512_ALLOC) \
+                $(OBJ_ASSEMBLY_ALLOC_FILES_512)
+
+OBJ_FILES_768 = $(OBJ_FILES_768) \
+                $(OBJ_ASSEMBLY_FILES_768)
+
+OBJ_FILES_768_ALLOC = $(OBJ_FILES_768_ALLOC) \
+                $(OBJ_ASSEMBLY_ALLOC_FILES_768)
+
+OBJ_FILES_1024 = $(OBJ_FILES_1024) \
+                $(OBJ_ASSEMBLY_FILES_1024)
+
+OBJ_FILES_1024_ALLOC = $(OBJ_FILES_1024_ALLOC) \
+                $(OBJ_ASSEMBLY_ALLOC_FILES_1024)
+
+#
+# ML-KEM 512
+#
+
+!IFDEF ARM64
+
+#
+# Comment from author: armasm64.exe has bugs:
+# a) ALIGN 16 in code sections does NOT emit
+#    correct 'HINT #0x0' (NOPs) but zeros
+# b) 'RELOC 2' for PDATA sections meaning
+#    IMAGE_REL_ARM64_ADDR32NB still emit ADDR64
+#    instead
+#
+# The bottom line is: you may also use clang-cl
+# to compile Aarch64 assembly stuff on MS Windows.
+# You have to add:
+# --target=aarch64-pc-windows-msvc
+# in this case.
+# Claude Code provided the fix_pdata.py script,
+# which performs well here, though.
+#
+# clang-cl works for ARM64 but obviously not for
+# AMD64 assembly (ml64.exe is used in this case)
+# because we had to convert the SysV AMD64 ABI
+# to MS AMD64 ABI by hand...
+#
+
+# compilation of C files for MLKEM512 (assembly part)
+{mlkem\src\native\aarch64\src}.c{$(MLKEM512_BUILD_DIR)\mlkem\aarch64}.obj:
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\mlkem\aarch64 mkdir $(MLKEM512_BUILD_DIR)\mlkem\aarch64
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\mlkem\aarch64\ $<
+
+# compilation of ASM files for MLKEM512 (assembly part)
+{mlkem\src\native\aarch64\win64}.asm{$(MLKEM512_BUILD_DIR)\mlkem\aarch64}.obj:
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\mlkem\aarch64 mkdir $(MLKEM512_BUILD_DIR)\mlkem\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"PQCP_MLKEM_NATIVE_MLKEM512_$(<B:mlkem_=)_asm\"" -o $(MLKEM512_BUILD_DIR)\mlkem\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLKEM512_BUILD_DIR)\mlkem\aarch64\$(<B).obj
+
+# compilation of C files for MLKEM512 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\aarch64\src}.c{$(MLKEM512_BUILD_DIR)\mlkem\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\mlkem\fips202\aarch64 mkdir $(MLKEM512_BUILD_DIR)\mlkem\fips202\aarch64
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\mlkem\fips202\aarch64\ $<
+
+# compilation of ASM files for MLKEM512 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\aarch64\win64}.asm{$(MLKEM512_BUILD_DIR)\mlkem\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\mlkem\fips202\aarch64 mkdir $(MLKEM512_BUILD_DIR)\mlkem\fips202\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"PQCP_MLKEM_NATIVE_MLKEM512_$(<B)_asm\"" -o $(MLKEM512_BUILD_DIR)\mlkem\fips202\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLKEM512_BUILD_DIR)\mlkem\fips202\aarch64\$(<B).obj
+
+!ELSE
+
+# compilation of C files for MLKEM512 (assembly part)
+{mlkem\src\native\x86_64\src}.c{$(MLKEM512_BUILD_DIR)\mlkem\x86_64}.obj:
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\mlkem\x86_64 mkdir $(MLKEM512_BUILD_DIR)\mlkem\x86_64
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\mlkem\x86_64\ $<
+
+# compilation of ASM files for MLKEM512 (assembly part)
+{mlkem\src\native\x86_64\win64}.asm{$(MLKEM512_BUILD_DIR)\mlkem\x86_64}.obj:
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\mlkem\x86_64 mkdir $(MLKEM512_BUILD_DIR)\mlkem\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=PQCP_MLKEM_NATIVE_MLKEM512_$(<B:mlkem_=)_asm /Fo$(MLKEM512_BUILD_DIR)\mlkem\x86_64\$(<B).obj $<
+
+# compilation of C files for MLKEM512 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\x86_64\src}.c{$(MLKEM512_BUILD_DIR)\mlkem\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\mlkem\fips202\x86_64 mkdir $(MLKEM512_BUILD_DIR)\mlkem\fips202\x86_64
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\mlkem\fips202\x86_64\ $<
+
+# compilation of ASM files for MLKEM512 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\x86_64\win64}.asm{$(MLKEM512_BUILD_DIR)\mlkem\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\mlkem\fips202\x86_64 mkdir $(MLKEM512_BUILD_DIR)\mlkem\fips202\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=PQCP_MLKEM_NATIVE_MLKEM512_$(<B)_asm /Fo$(MLKEM512_BUILD_DIR)\mlkem\fips202\x86_64\$(<B).obj $<
+
+!ENDIF
+
+#
+# ML-KEM 768
+#
+
+!IFDEF ARM64
+
+# compilation of C files for MLKEM768 (assembly part)
+{mlkem\src\native\aarch64\src}.c{$(MLKEM768_BUILD_DIR)\mlkem\aarch64}.obj:
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\mlkem\aarch64 mkdir $(MLKEM768_BUILD_DIR)\mlkem\aarch64
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\mlkem\aarch64\ $<
+
+# compilation of ASM files for MLKEM768 (assembly part)
+{mlkem\src\native\aarch64\win64}.asm{$(MLKEM768_BUILD_DIR)\mlkem\aarch64}.obj:
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\mlkem\aarch64 mkdir $(MLKEM768_BUILD_DIR)\mlkem\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"PQCP_MLKEM_NATIVE_MLKEM768_$(<B:mlkem_=)_asm\"" -o $(MLKEM768_BUILD_DIR)\mlkem\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLKEM768_BUILD_DIR)\mlkem\aarch64\$(<B).obj
+
+# compilation of C files for MLKEM768 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\aarch64\src}.c{$(MLKEM768_BUILD_DIR)\mlkem\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\mlkem\fips202\aarch64 mkdir $(MLKEM768_BUILD_DIR)\mlkem\fips202\aarch64
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\mlkem\fips202\aarch64\ $<
+
+# compilation of ASM files for MLKEM768 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\aarch64\win64}.asm{$(MLKEM768_BUILD_DIR)\mlkem\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\mlkem\fips202\aarch64 mkdir $(MLKEM768_BUILD_DIR)\mlkem\fips202\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"PQCP_MLKEM_NATIVE_MLKEM768_$(<B)_asm\"" -o $(MLKEM768_BUILD_DIR)\mlkem\fips202\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLKEM768_BUILD_DIR)\mlkem\fips202\aarch64\$(<B).obj
+
+!ELSE
+
+# compilation of C files for MLKEM768 (assembly part)
+{mlkem\src\native\x86_64\src}.c{$(MLKEM768_BUILD_DIR)\mlkem\x86_64}.obj:
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\mlkem\x86_64 mkdir $(MLKEM768_BUILD_DIR)\mlkem\x86_64
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\mlkem\x86_64\ $<
+
+# compilation of ASM files for MLKEM768 (assembly part)
+{mlkem\src\native\x86_64\win64}.asm{$(MLKEM768_BUILD_DIR)\mlkem\x86_64}.obj:
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\mlkem\x86_64 mkdir $(MLKEM768_BUILD_DIR)\mlkem\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=PQCP_MLKEM_NATIVE_MLKEM768_$(<B:mlkem_=)_asm /Fo$(MLKEM768_BUILD_DIR)\mlkem\x86_64\$(<B).obj $<
+
+# compilation of C files for MLKEM768 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\x86_64\src}.c{$(MLKEM768_BUILD_DIR)\mlkem\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\mlkem\fips202\x86_64 mkdir $(MLKEM768_BUILD_DIR)\mlkem\fips202\x86_64
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\mlkem\fips202\x86_64\ $<
+
+# compilation of ASM files for MLKEM768 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\x86_64\win64}.asm{$(MLKEM768_BUILD_DIR)\mlkem\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\mlkem\fips202\x86_64 mkdir $(MLKEM768_BUILD_DIR)\mlkem\fips202\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=PQCP_MLKEM_NATIVE_MLKEM768_$(<B)_asm /Fo$(MLKEM768_BUILD_DIR)\mlkem\fips202\x86_64\$(<B).obj $<
+
+!ENDIF
+
+#
+# ML-KEM 1024
+#
+
+!IFDEF ARM64
+
+# compilation of C files for MLKEM1024 (assembly part)
+{mlkem\src\native\aarch64\src}.c{$(MLKEM1024_BUILD_DIR)\mlkem\aarch64}.obj:
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\mlkem\aarch64 mkdir $(MLKEM1024_BUILD_DIR)\mlkem\aarch64
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\mlkem\aarch64\ $<
+
+# compilation of ASM files for MLKEM1024 (assembly part)
+{mlkem\src\native\aarch64\win64}.asm{$(MLKEM1024_BUILD_DIR)\mlkem\aarch64}.obj:
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\mlkem\aarch64 mkdir $(MLKEM1024_BUILD_DIR)\mlkem\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"PQCP_MLKEM_NATIVE_MLKEM1024_$(<B:mlkem_=)_asm\"" -o $(MLKEM1024_BUILD_DIR)\mlkem\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLKEM1024_BUILD_DIR)\mlkem\aarch64\$(<B).obj
+
+# compilation of C files for MLKEM1024 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\aarch64\src}.c{$(MLKEM1024_BUILD_DIR)\mlkem\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\mlkem\fips202\aarch64 mkdir $(MLKEM1024_BUILD_DIR)\mlkem\fips202\aarch64
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\mlkem\fips202\aarch64\ $<
+
+# compilation of ASM files for MLKEM1024 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\aarch64\win64}.asm{$(MLKEM1024_BUILD_DIR)\mlkem\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\mlkem\fips202\aarch64 mkdir $(MLKEM1024_BUILD_DIR)\mlkem\fips202\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"PQCP_MLKEM_NATIVE_MLKEM1024_$(<B)_asm\"" -o $(MLKEM1024_BUILD_DIR)\mlkem\fips202\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLKEM1024_BUILD_DIR)\mlkem\fips202\aarch64\$(<B).obj
+
+!ELSE
+
+# compilation of C files for MLKEM1024 (assembly part)
+{mlkem\src\native\x86_64\src}.c{$(MLKEM1024_BUILD_DIR)\mlkem\x86_64}.obj:
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\mlkem\x86_64 mkdir $(MLKEM1024_BUILD_DIR)\mlkem\x86_64
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\mlkem\x86_64\ $<
+
+# compilation of ASM files for MLKEM1024 (assembly part)
+{mlkem\src\native\x86_64\win64}.asm{$(MLKEM1024_BUILD_DIR)\mlkem\x86_64}.obj:
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\mlkem\x86_64 mkdir $(MLKEM1024_BUILD_DIR)\mlkem\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=PQCP_MLKEM_NATIVE_MLKEM1024_$(<B:mlkem_=)_asm /Fo$(MLKEM1024_BUILD_DIR)\mlkem\x86_64\$(<B).obj $<
+
+# compilation of C files for MLKEM1024 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\x86_64\src}.c{$(MLKEM1024_BUILD_DIR)\mlkem\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\mlkem\fips202\x86_64 mkdir $(MLKEM1024_BUILD_DIR)\mlkem\fips202\x86_64
+    $(CC) $(CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\mlkem\fips202\x86_64\ $<
+
+# compilation of ASM files for MLKEM1024 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\x86_64\win64}.asm{$(MLKEM1024_BUILD_DIR)\mlkem\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\mlkem\fips202\x86_64 mkdir $(MLKEM1024_BUILD_DIR)\mlkem\fips202\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=PQCP_MLKEM_NATIVE_MLKEM1024_$(<B)_asm /Fo$(MLKEM1024_BUILD_DIR)\mlkem\fips202\x86_64\$(<B).obj $<
+
+!ENDIF
+
+#
+# ML-KEM 512 (ALLOC)
+#
+
+!IFDEF ARM64
+
+# compilation of C files for MLKEM512 (assembly part)
+{mlkem\src\native\aarch64\src}.c{$(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64}.obj:
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64 mkdir $(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64\ $<
+
+# compilation of ASM files for MLKEM512 (assembly part)
+{mlkem\src\native\aarch64\win64}.asm{$(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64}.obj:
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64 mkdir $(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"$(<B:mlkem_=mlk_)_asm\"" -o $(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLKEM512_BUILD_DIR)\alloc\mlkem\aarch64\$(<B).obj
+
+# compilation of C files for MLKEM512 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\aarch64\src}.c{$(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\aarch64 mkdir $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\aarch64
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\aarch64\ $<
+
+# compilation of ASM files for MLKEM512 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\aarch64\win64}.asm{$(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\aarch64 mkdir $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"mlk_$(<B)_asm\"" -o $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\aarch64\$(<B).obj
+
+!ELSE
+
+# compilation of C files for MLKEM512 (assembly part)
+{mlkem\src\native\x86_64\src}.c{$(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64}.obj:
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64 mkdir $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\ $<
+
+# compilation of ASM files for MLKEM512 (assembly part)
+{mlkem\src\native\x86_64\win64}.asm{$(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64}.obj:
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64 mkdir $(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=$(<B:mlkem_=mlk_)_asm /Fo$(MLKEM512_BUILD_DIR)\alloc\mlkem\x86_64\$(<B).obj $<
+
+# compilation of C files for MLKEM512 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\x86_64\src}.c{$(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\x86_64 mkdir $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\x86_64
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=512 /c /Fo$(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\x86_64\ $<
+
+# compilation of ASM files for MLKEM512 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\x86_64\win64}.asm{$(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\x86_64 mkdir $(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=mlk_$(<B)_asm /Fo$(MLKEM512_BUILD_DIR)\alloc\mlkem\fips202\x86_64\$(<B).obj $<
+
+!ENDIF
+
+#
+# ML-KEM 768 (ALLOC)
+#
+
+!IFDEF ARM64
+
+# compilation of C files for MLKEM768 (assembly part)
+{mlkem\src\native\aarch64\src}.c{$(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64}.obj:
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64 mkdir $(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64\ $<
+
+# compilation of ASM files for MLKEM768 (assembly part)
+{mlkem\src\native\aarch64\win64}.asm{$(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64}.obj:
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64 mkdir $(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"$(<B:mlkem_=mlk_)_asm\"" -o $(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLKEM768_BUILD_DIR)\alloc\mlkem\aarch64\$(<B).obj
+
+# compilation of C files for MLKEM768 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\aarch64\src}.c{$(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\aarch64 mkdir $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\aarch64
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\aarch64\ $<
+
+# compilation of ASM files for MLKEM768 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\aarch64\win64}.asm{$(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\aarch64 mkdir $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"mlk_$(<B)_asm\"" -o $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\aarch64\$(<B).obj
+
+!ELSE
+
+# compilation of C files for MLKEM768 (assembly part)
+{mlkem\src\native\x86_64\src}.c{$(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64}.obj:
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64 mkdir $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\ $<
+
+# compilation of ASM files for MLKEM768 (assembly part)
+{mlkem\src\native\x86_64\win64}.asm{$(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64}.obj:
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64 mkdir $(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=$(<B:mlkem_=mlk_)_asm /Fo$(MLKEM768_BUILD_DIR)\alloc\mlkem\x86_64\$(<B).obj $<
+
+# compilation of C files for MLKEM768 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\x86_64\src}.c{$(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\x86_64 mkdir $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\x86_64
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=768 /c /Fo$(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\x86_64\ $<
+
+# compilation of ASM files for MLKEM768 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\x86_64\win64}.asm{$(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\x86_64 mkdir $(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=mlk_$(<B)_asm /Fo$(MLKEM768_BUILD_DIR)\alloc\mlkem\fips202\x86_64\$(<B).obj $<
+
+!ENDIF
+
+#
+# ML-KEM 1024 (ALLOC)
+#
+
+!IFDEF ARM64
+
+# compilation of C files for MLKEM1024 (assembly part)
+{mlkem\src\native\aarch64\src}.c{$(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64}.obj:
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64 mkdir $(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64\ $<
+
+# compilation of ASM files for MLKEM1024 (assembly part)
+{mlkem\src\native\aarch64\win64}.asm{$(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64}.obj:
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64 mkdir $(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"$(<B:mlkem_=mlk_)_asm\"" -o $(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLKEM1024_BUILD_DIR)\alloc\mlkem\aarch64\$(<B).obj
+
+# compilation of C files for MLKEM1024 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\aarch64\src}.c{$(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\aarch64 mkdir $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\aarch64
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\aarch64\ $<
+
+# compilation of ASM files for MLKEM1024 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\aarch64\win64}.asm{$(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\aarch64 mkdir $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"mlk_$(<B)_asm\"" -o $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\aarch64\$(<B).obj
+
+!ELSE
+
+# compilation of C files for MLKEM1024 (assembly part)
+{mlkem\src\native\x86_64\src}.c{$(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64}.obj:
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64 mkdir $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\ $<
+
+# compilation of ASM files for MLKEM1024 (assembly part)
+{mlkem\src\native\x86_64\win64}.asm{$(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64}.obj:
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64 mkdir $(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=$(<B:mlkem_=mlk_)_asm /Fo$(MLKEM1024_BUILD_DIR)\alloc\mlkem\x86_64\$(<B).obj $<
+
+# compilation of C files for MLKEM1024 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\x86_64\src}.c{$(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\x86_64 mkdir $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\x86_64
+    $(CC) $(ALLOC_CFLAGS) /D MLK_CONFIG_PARAMETER_SET=1024 /c /Fo$(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\x86_64\ $<
+
+# compilation of ASM files for MLKEM1024 (assembly part, FIPS 202)
+{mlkem\src\fips202\native\x86_64\win64}.asm{$(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\x86_64 mkdir $(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=mlk_$(<B)_asm /Fo$(MLKEM1024_BUILD_DIR)\alloc\mlkem\fips202\x86_64\$(<B).obj $<
+
+!ENDIF

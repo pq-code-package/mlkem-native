@@ -16,7 +16,8 @@
 #endif
 
 /* The x86_64 backend requires toolchain support for the SysV ABI */
-#if defined(MLK_SYS_X86_64_AVX2) && defined(MLK_SYSV_ABI_SUPPORTED)
+#if defined(MLK_SYS_X86_64_AVX2) && (defined(MLK_SYSV_ABI_SUPPORTED) || \
+    defined(MLK_MS_AMD64_ABI_SUPPORTED))
 #include "x86_64/keccak_f1600_x4_avx2.h"
 #endif
 

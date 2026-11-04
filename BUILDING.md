@@ -137,8 +137,63 @@ To build and run the tests, use the following `nmake` target:
 nmake /f .\Makefile.Microsoft_nmake quickcheck
 ```
 
-This runs the functional, RNG-failure, allocation, ACVP, KAT and Wycheproof tests. The assembly backends are not yet
-supported on Windows, so the tests are built for the C backend only.
+This runs the functional, RNG-failure, allocation, ACVP, KAT and Wycheproof tests.
+
+Full assembly support is provided for both x86-64 and ARM64 (AArch64). The following NMake options are available:
+
+| Option    | Description                                                  |
+| --------- | ------------------------------------------------------------ |
+| ASSEMBLY= | Build with assembly enabled (x86-64); requires ml64.exe (Microsoft Macro Assembler) |
+| ARM64=    | (requires ASSEMBLY=) Build with assembly enabled (ARM64/AArch64); requires armasm64.exe (Microsoft ARM64 assembler) |
+| OPT_MOST= | (*independent of assembly*) Use the maximum optimization switches /Ox /Ob2 /Oi /Ot /Oy instead of only /O2 |
+| DEBUG=    | (*independent of assembly*) Compile with /Od and generate debug information with /Zi |
+
+#### Examples (Windows x86-64)
+
+Build with x86-64 assembly (Microsoft x64 ABI):
+
+```powershell
+nmake /f Makefile.Microsoft_nmake ASSEMBLY= clean quickcheck
+```
+
+Build with assembly and maximum optimization:
+
+```powershell
+nmake /f Makefile.Microsoft_nmake ASSEMBLY= OPT_MOST= clean quickcheck
+```
+
+Build with x86-64 assembly, unoptimized C code, and debugging information enabled:
+
+```powershell
+nmake /f Makefile.Microsoft_nmake ASSEMBLY= DEBUG= clean quickcheck
+```
+
+#### Examples (Windows ARM64)
+
+Build with ARM64 assembly:
+
+```powershell
+nmake /f Makefile.Microsoft_nmake ASSEMBLY= ARM64= clean quickcheck
+```
+
+Build with ARM64 assembly and maximum optimization:
+
+```powershell
+nmake /f Makefile.Microsoft_nmake ASSEMBLY= ARM64= OPT_MOST= clean quickcheck
+```
+
+All tests have been executed on Windows 11/64bit (ALL PASSED); on an AMD Ryzen 9 8945HS and on a Snapdragon(R) X (X126100, Qualcomm(R) Oryon(TM) CPU).
+
+#### Notes on MS Windows assembly ports
+
+- For x86-64, the code was ported manually from the System V AMD64 ABI to the Microsoft x64 ABI.
+- GitHub Copilot and Anthropic's Claude subsequently optimized register usage in some of the .asm sources.
+- For ARM64, the Linux and Windows ABIs are compatible. The sources were reformatted for armasm64.exe, and assembler pseudo-instructions were added.
+- Alternatively, the ARM64 assembly files can be compiled with clang-cl (it must be selected explicitly in the Visual Studio Installer).
+- For ARM64, SEH unwind codes (PDATA and XDATA sections) were added by hand.
+- armasm64.exe has two severe bugs, which are worked around as follows:
+  - ALIGN directives pad with zeros instead of proper NOPs (HINT #0x0), and the zeros cause CPU exceptions when executed. Workaround: the ALIGN directives are replaced with explicit NOP instructions.
+  - armasm64.exe does not honor the `RELOC 2` suffix, which is required in the PDATA section. Workaround: a small Python script (written by Anthropic's Claude) patches the .obj files right after they are assembled.
 
 # Checking the proofs
 

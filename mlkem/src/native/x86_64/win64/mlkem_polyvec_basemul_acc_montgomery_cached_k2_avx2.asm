@@ -1,0 +1,586 @@
+;
+; Copyright(c) The mlkem - native project authors
+; Copyright(c) The mldsa - native project authors
+; SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+;
+;  References
+;  ==========
+;
+;  - [REF_AVX2]
+;    CRYSTALS-Dilithium optimized AVX2 implementation
+;    Bai, Ducas, Kiltz, Lepoint, Lyubashevsky, Schwabe, Seiler, Stehlé
+;    https://github.com/pq-crystals/dilithium/tree/master/avx2
+;
+; This file is derived from the public domain
+; AVX2 Dilithium implementation @[REF_AVX2].
+;
+; MASM (Microsoft Assembler) version for MS Windows
+; provided by Ingo A. Kubbilun <ingo.kubbilun@gmail.com>
+; Oct. 2026
+;
+; This honors the Microsoft AMD64 ABI instead of
+; Sys V AMD64 ABI (e.g. Linux/GNU Compiler Collection)
+;
+; pseudo assembly instructions (prologue, FRAME/UNWIND)
+; added with help from Github Copilot, assembly checking
+; performed by Github Copilot, too.
+;
+
+                                                       .CODE
+
+                                                        ALIGN 16
+
+; yaml
+; Name: polyvec_basemul_acc_montgomery_cached_k2_avx2_asm
+; Description: x86_64 AVX2 base multiplication with accumulation (k=2)
+; Signature: void mlk_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm(int16_t *r, const int16_t *a, const int16_t *b, const int16_t *b_cache)
+; ABI:
+;   Architecture: x86_64
+;   CallingConvention: Microsoft AMD64 ABI
+;   Features: [AVX2]
+;   rcx:
+;     type: buffer
+;     size_bytes: 512
+;     permissions: read/write
+;     c_parameter: int16_t *r
+;     description: Output polynomial (256 x int16_t)
+;   rdx:
+;     type: buffer
+;     size_bytes: 1024
+;     permissions: read-only
+;     c_parameter: const int16_t *a
+;     description: Input polyvec a (2 x 256 x int16_t)
+;   r8:
+;     type: buffer
+;     size_bytes: 1024
+;     permissions: read-only
+;     c_parameter: const int16_t *b
+;     description: Input polyvec b (2 x 256 x int16_t)
+;   r9:
+;     type: buffer
+;     size_bytes: 512
+;     permissions: read-only
+;     c_parameter: const int16_t *b_cache
+;     description: Mulcache for b (2 x 128 x int16_t)
+;
+
+IFNDEF FUNC_NAME
+FUNC_NAME EQU mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm
+ENDIF
+
+FUNC_NAME PROC FRAME
+
+
+  sub           rsp,098h                       ; 098h and not 090h for alignment purposes
+  .allocstack   098h
+
+  vmovdqa       xmmword ptr [rsp+000h],xmm6    ; save xmm6 on stack
+  .savexmm128   xmm6,000h
+  vmovdqa       xmmword ptr [rsp+010h],xmm7    ; save xmm7 on stack
+  .savexmm128   xmm7,010h
+  vmovdqa       xmmword ptr [rsp+020h],xmm8    ; save xmm8 on stack
+  .savexmm128   xmm8,020h
+  vmovdqa       xmmword ptr [rsp+030h],xmm9    ; save xmm9 on stack
+  .savexmm128   xmm9,030h
+  vmovdqa       xmmword ptr [rsp+040h],xmm10   ; save xmm10 on stack
+  .savexmm128   xmm10,040h
+  vmovdqa       xmmword ptr [rsp+050h],xmm11   ; save xmm11 on stack
+  .savexmm128   xmm11,050h
+  vmovdqa       xmmword ptr [rsp+060h],xmm12   ; save xmm12 on stack
+  .savexmm128   xmm12,060h
+  vmovdqa       xmmword ptr [rsp+070h],xmm13   ; save xmm13 on stack
+  .savexmm128   xmm13,070h
+  vmovdqa       xmmword ptr [rsp+080h],xmm14   ; save xmm14 on stack
+  .savexmm128   xmm14,080h
+  .endprolog
+
+  mov           eax,0d010d01h                  ;
+  vmovd         xmm0,eax                       ;
+  vpbroadcastd  ymm0,xmm0                      ;
+  mov           eax,0f301f301h                 ;
+  vmovd         xmm1,eax                       ;
+  vpbroadcastd  ymm1,xmm1                      ;
+  vmovdqa       ymm2,ymmword ptr [rdx]         ;
+  vmovdqa       ymm3,ymmword ptr [rdx+020h]    ;
+  vmovdqa       ymm4,ymmword ptr [r8]          ;
+  vmovdqa       ymm5,ymmword ptr [r8+020h]     ;
+  vmovdqa       ymm6,ymmword ptr [r9]          ;
+  vpmullw       ymm13,ymm1,ymm2                ;
+  vpmullw       ymm14,ymm1,ymm3                ;
+  vpmullw       ymm7,ymm4,ymm13                ;
+  vpmullw       ymm9,ymm5,ymm13                ;
+  vpmullw       ymm8,ymm6,ymm14                ;
+  vpmullw       ymm10,ymm4,ymm14               ;
+  vpmulhw       ymm7,ymm0,ymm7                 ;
+  vpmulhw       ymm9,ymm0,ymm9                 ;
+  vpmulhw       ymm8,ymm0,ymm8                 ;
+  vpmulhw       ymm10,ymm0,ymm10               ;
+  vpmulhw       ymm11,ymm4,ymm2                ;
+  vpmulhw       ymm12,ymm5,ymm2                ;
+  vpmulhw       ymm13,ymm6,ymm3                ;
+  vpmulhw       ymm14,ymm4,ymm3                ;
+  vpsubw        ymm7,ymm11,ymm7                ;
+  vpsubw        ymm9,ymm12,ymm9                ;
+  vpsubw        ymm8,ymm13,ymm8                ;
+  vpsubw        ymm10,ymm14,ymm10              ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymmword ptr [rcx],ymm7         ;
+  vmovdqa       ymmword ptr [rcx+020h],ymm9    ;
+  vmovdqa       ymm2,ymmword ptr [rdx+040h]    ;
+  vmovdqa       ymm3,ymmword ptr [rdx+060h]    ;
+  vmovdqa       ymm4,ymmword ptr [r8+040h]     ;
+  vmovdqa       ymm5,ymmword ptr [r8+060h]     ;
+  vmovdqa       ymm6,ymmword ptr [r9+020h]     ;
+  vpmullw       ymm13,ymm1,ymm2                ;
+  vpmullw       ymm14,ymm1,ymm3                ;
+  vpmullw       ymm7,ymm4,ymm13                ;
+  vpmullw       ymm9,ymm5,ymm13                ;
+  vpmullw       ymm8,ymm6,ymm14                ;
+  vpmullw       ymm10,ymm4,ymm14               ;
+  vpmulhw       ymm7,ymm0,ymm7                 ;
+  vpmulhw       ymm9,ymm0,ymm9                 ;
+  vpmulhw       ymm8,ymm0,ymm8                 ;
+  vpmulhw       ymm10,ymm0,ymm10               ;
+  vpmulhw       ymm11,ymm4,ymm2                ;
+  vpmulhw       ymm12,ymm5,ymm2                ;
+  vpmulhw       ymm13,ymm6,ymm3                ;
+  vpmulhw       ymm14,ymm4,ymm3                ;
+  vpsubw        ymm7,ymm11,ymm7                ;
+  vpsubw        ymm9,ymm12,ymm9                ;
+  vpsubw        ymm8,ymm8,ymm13                ;
+  vpsubw        ymm10,ymm14,ymm10              ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymmword ptr [rcx+040h],ymm7    ;
+  vmovdqa       ymmword ptr [rcx+060h],ymm9    ;
+  vmovdqa       ymm2,ymmword ptr [rdx+080h]    ;
+  vmovdqa       ymm3,ymmword ptr [rdx+0a0h]    ;
+  vmovdqa       ymm4,ymmword ptr [r8+080h]     ;
+  vmovdqa       ymm5,ymmword ptr [r8+0a0h]     ;
+  vmovdqa       ymm6,ymmword ptr [r9+040h]     ;
+  vpmullw       ymm13,ymm1,ymm2                ;
+  vpmullw       ymm14,ymm1,ymm3                ;
+  vpmullw       ymm7,ymm4,ymm13                ;
+  vpmullw       ymm9,ymm5,ymm13                ;
+  vpmullw       ymm8,ymm6,ymm14                ;
+  vpmullw       ymm10,ymm4,ymm14               ;
+  vpmulhw       ymm7,ymm0,ymm7                 ;
+  vpmulhw       ymm9,ymm0,ymm9                 ;
+  vpmulhw       ymm8,ymm0,ymm8                 ;
+  vpmulhw       ymm10,ymm0,ymm10               ;
+  vpmulhw       ymm11,ymm4,ymm2                ;
+  vpmulhw       ymm12,ymm5,ymm2                ;
+  vpmulhw       ymm13,ymm6,ymm3                ;
+  vpmulhw       ymm14,ymm4,ymm3                ;
+  vpsubw        ymm7,ymm11,ymm7                ;
+  vpsubw        ymm9,ymm12,ymm9                ;
+  vpsubw        ymm8,ymm13,ymm8                ;
+  vpsubw        ymm10,ymm14,ymm10              ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymmword ptr [rcx+080h],ymm7    ;
+  vmovdqa       ymmword ptr [rcx+0a0h],ymm9    ;
+  vmovdqa       ymm2,ymmword ptr [rdx+0c0h]    ;
+  vmovdqa       ymm3,ymmword ptr [rdx+0e0h]    ;
+  vmovdqa       ymm4,ymmword ptr [r8+0c0h]     ;
+  vmovdqa       ymm5,ymmword ptr [r8+0e0h]     ;
+  vmovdqa       ymm6,ymmword ptr [r9+060h]     ;
+  vpmullw       ymm13,ymm1,ymm2                ;
+  vpmullw       ymm14,ymm1,ymm3                ;
+  vpmullw       ymm7,ymm4,ymm13                ;
+  vpmullw       ymm9,ymm5,ymm13                ;
+  vpmullw       ymm8,ymm6,ymm14                ;
+  vpmullw       ymm10,ymm4,ymm14               ;
+  vpmulhw       ymm7,ymm0,ymm7                 ;
+  vpmulhw       ymm9,ymm0,ymm9                 ;
+  vpmulhw       ymm8,ymm0,ymm8                 ;
+  vpmulhw       ymm10,ymm0,ymm10               ;
+  vpmulhw       ymm11,ymm4,ymm2                ;
+  vpmulhw       ymm12,ymm5,ymm2                ;
+  vpmulhw       ymm13,ymm6,ymm3                ;
+  vpmulhw       ymm14,ymm4,ymm3                ;
+  vpsubw        ymm7,ymm11,ymm7                ;
+  vpsubw        ymm9,ymm12,ymm9                ;
+  vpsubw        ymm8,ymm8,ymm13                ;
+  vpsubw        ymm10,ymm14,ymm10              ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymmword ptr [rcx+0c0h],ymm7    ;
+  vmovdqa       ymmword ptr [rcx+0e0h],ymm9    ;
+  vmovdqa       ymm2,ymmword ptr [rdx+0100h]   ;
+  vmovdqa       ymm3,ymmword ptr [rdx+0120h]   ;
+  vmovdqa       ymm4,ymmword ptr [r8+0100h]    ;
+  vmovdqa       ymm5,ymmword ptr [r8+0120h]    ;
+  vmovdqa       ymm6,ymmword ptr [r9+080h]     ;
+  vpmullw       ymm13,ymm1,ymm2                ;
+  vpmullw       ymm14,ymm1,ymm3                ;
+  vpmullw       ymm7,ymm4,ymm13                ;
+  vpmullw       ymm9,ymm5,ymm13                ;
+  vpmullw       ymm8,ymm6,ymm14                ;
+  vpmullw       ymm10,ymm4,ymm14               ;
+  vpmulhw       ymm7,ymm0,ymm7                 ;
+  vpmulhw       ymm9,ymm0,ymm9                 ;
+  vpmulhw       ymm8,ymm0,ymm8                 ;
+  vpmulhw       ymm10,ymm0,ymm10               ;
+  vpmulhw       ymm11,ymm4,ymm2                ;
+  vpmulhw       ymm12,ymm5,ymm2                ;
+  vpmulhw       ymm13,ymm6,ymm3                ;
+  vpmulhw       ymm14,ymm4,ymm3                ;
+  vpsubw        ymm7,ymm11,ymm7                ;
+  vpsubw        ymm9,ymm12,ymm9                ;
+  vpsubw        ymm8,ymm13,ymm8                ;
+  vpsubw        ymm10,ymm14,ymm10              ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymmword ptr [rcx+0100h],ymm7   ;
+  vmovdqa       ymmword ptr [rcx+0120h],ymm9   ;
+  vmovdqa       ymm2,ymmword ptr [rdx+0140h]   ;
+  vmovdqa       ymm3,ymmword ptr [rdx+0160h]   ;
+  vmovdqa       ymm4,ymmword ptr [r8+0140h]    ;
+  vmovdqa       ymm5,ymmword ptr [r8+0160h]    ;
+  vmovdqa       ymm6,ymmword ptr [r9+0a0h]     ;
+  vpmullw       ymm13,ymm1,ymm2                ;
+  vpmullw       ymm14,ymm1,ymm3                ;
+  vpmullw       ymm7,ymm4,ymm13                ;
+  vpmullw       ymm9,ymm5,ymm13                ;
+  vpmullw       ymm8,ymm6,ymm14                ;
+  vpmullw       ymm10,ymm4,ymm14               ;
+  vpmulhw       ymm7,ymm0,ymm7                 ;
+  vpmulhw       ymm9,ymm0,ymm9                 ;
+  vpmulhw       ymm8,ymm0,ymm8                 ;
+  vpmulhw       ymm10,ymm0,ymm10               ;
+  vpmulhw       ymm11,ymm4,ymm2                ;
+  vpmulhw       ymm12,ymm5,ymm2                ;
+  vpmulhw       ymm13,ymm6,ymm3                ;
+  vpmulhw       ymm14,ymm4,ymm3                ;
+  vpsubw        ymm7,ymm11,ymm7                ;
+  vpsubw        ymm9,ymm12,ymm9                ;
+  vpsubw        ymm8,ymm8,ymm13                ;
+  vpsubw        ymm10,ymm14,ymm10              ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymmword ptr [rcx+0140h],ymm7   ;
+  vmovdqa       ymmword ptr [rcx+0160h],ymm9   ;
+  vmovdqa       ymm2,ymmword ptr [rdx+0180h]   ;
+  vmovdqa       ymm3,ymmword ptr [rdx+01a0h]   ;
+  vmovdqa       ymm4,ymmword ptr [r8+0180h]    ;
+  vmovdqa       ymm5,ymmword ptr [r8+01a0h]    ;
+  vmovdqa       ymm6,ymmword ptr [r9+0c0h]     ;
+  vpmullw       ymm13,ymm1,ymm2                ;
+  vpmullw       ymm14,ymm1,ymm3                ;
+  vpmullw       ymm7,ymm4,ymm13                ;
+  vpmullw       ymm9,ymm5,ymm13                ;
+  vpmullw       ymm8,ymm6,ymm14                ;
+  vpmullw       ymm10,ymm4,ymm14               ;
+  vpmulhw       ymm7,ymm0,ymm7                 ;
+  vpmulhw       ymm9,ymm0,ymm9                 ;
+  vpmulhw       ymm8,ymm0,ymm8                 ;
+  vpmulhw       ymm10,ymm0,ymm10               ;
+  vpmulhw       ymm11,ymm4,ymm2                ;
+  vpmulhw       ymm12,ymm5,ymm2                ;
+  vpmulhw       ymm13,ymm6,ymm3                ;
+  vpmulhw       ymm14,ymm4,ymm3                ;
+  vpsubw        ymm7,ymm11,ymm7                ;
+  vpsubw        ymm9,ymm12,ymm9                ;
+  vpsubw        ymm8,ymm13,ymm8                ;
+  vpsubw        ymm10,ymm14,ymm10              ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymmword ptr [rcx+0180h],ymm7   ;
+  vmovdqa       ymmword ptr [rcx+01a0h],ymm9   ;
+  vmovdqa       ymm2,ymmword ptr [rdx+01c0h]   ;
+  vmovdqa       ymm3,ymmword ptr [rdx+01e0h]   ;
+  vmovdqa       ymm4,ymmword ptr [r8+01c0h]    ;
+  vmovdqa       ymm5,ymmword ptr [r8+01e0h]    ;
+  vmovdqa       ymm6,ymmword ptr [r9+0e0h]     ;
+  vpmullw       ymm13,ymm1,ymm2                ;
+  vpmullw       ymm14,ymm1,ymm3                ;
+  vpmullw       ymm7,ymm4,ymm13                ;
+  vpmullw       ymm9,ymm5,ymm13                ;
+  vpmullw       ymm8,ymm6,ymm14                ;
+  vpmullw       ymm10,ymm4,ymm14               ;
+  vpmulhw       ymm7,ymm0,ymm7                 ;
+  vpmulhw       ymm9,ymm0,ymm9                 ;
+  vpmulhw       ymm8,ymm0,ymm8                 ;
+  vpmulhw       ymm10,ymm0,ymm10               ;
+  vpmulhw       ymm11,ymm4,ymm2                ;
+  vpmulhw       ymm12,ymm5,ymm2                ;
+  vpmulhw       ymm13,ymm6,ymm3                ;
+  vpmulhw       ymm14,ymm4,ymm3                ;
+  vpsubw        ymm7,ymm11,ymm7                ;
+  vpsubw        ymm9,ymm12,ymm9                ;
+  vpsubw        ymm8,ymm8,ymm13                ;
+  vpsubw        ymm10,ymm14,ymm10              ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymmword ptr [rcx+01c0h],ymm7   ;
+  vmovdqa       ymmword ptr [rcx+01e0h],ymm9   ;
+  vmovdqa       ymm2,ymmword ptr [rdx+0200h]   ;
+  vmovdqa       ymm3,ymmword ptr [rdx+0220h]   ;
+  vmovdqa       ymm4,ymmword ptr [r8+0200h]    ;
+  vmovdqa       ymm5,ymmword ptr [r8+0220h]    ;
+  vmovdqa       ymm6,ymmword ptr [r9+0100h]    ;
+  vpmullw       ymm13,ymm1,ymm2                ;
+  vpmullw       ymm14,ymm1,ymm3                ;
+  vpmullw       ymm7,ymm4,ymm13                ;
+  vpmullw       ymm9,ymm5,ymm13                ;
+  vpmullw       ymm8,ymm6,ymm14                ;
+  vpmullw       ymm10,ymm4,ymm14               ;
+  vpmulhw       ymm7,ymm0,ymm7                 ;
+  vpmulhw       ymm9,ymm0,ymm9                 ;
+  vpmulhw       ymm8,ymm0,ymm8                 ;
+  vpmulhw       ymm10,ymm0,ymm10               ;
+  vpmulhw       ymm11,ymm4,ymm2                ;
+  vpmulhw       ymm12,ymm5,ymm2                ;
+  vpmulhw       ymm13,ymm6,ymm3                ;
+  vpmulhw       ymm14,ymm4,ymm3                ;
+  vpsubw        ymm7,ymm11,ymm7                ;
+  vpsubw        ymm9,ymm12,ymm9                ;
+  vpsubw        ymm8,ymm13,ymm8                ;
+  vpsubw        ymm10,ymm14,ymm10              ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymm8,ymmword ptr [rcx]         ;
+  vmovdqa       ymm10,ymmword ptr [rcx+020h]   ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymmword ptr [rcx],ymm7         ;
+  vmovdqa       ymmword ptr [rcx+020h],ymm9    ;
+  vmovdqa       ymm2,ymmword ptr [rdx+0240h]   ;
+  vmovdqa       ymm3,ymmword ptr [rdx+0260h]   ;
+  vmovdqa       ymm4,ymmword ptr [r8+0240h]    ;
+  vmovdqa       ymm5,ymmword ptr [r8+0260h]    ;
+  vmovdqa       ymm6,ymmword ptr [r9+0120h]    ;
+  vpmullw       ymm13,ymm1,ymm2                ;
+  vpmullw       ymm14,ymm1,ymm3                ;
+  vpmullw       ymm7,ymm4,ymm13                ;
+  vpmullw       ymm9,ymm5,ymm13                ;
+  vpmullw       ymm8,ymm6,ymm14                ;
+  vpmullw       ymm10,ymm4,ymm14               ;
+  vpmulhw       ymm7,ymm0,ymm7                 ;
+  vpmulhw       ymm9,ymm0,ymm9                 ;
+  vpmulhw       ymm8,ymm0,ymm8                 ;
+  vpmulhw       ymm10,ymm0,ymm10               ;
+  vpmulhw       ymm11,ymm4,ymm2                ;
+  vpmulhw       ymm12,ymm5,ymm2                ;
+  vpmulhw       ymm13,ymm6,ymm3                ;
+  vpmulhw       ymm14,ymm4,ymm3                ;
+  vpsubw        ymm7,ymm11,ymm7                ;
+  vpsubw        ymm9,ymm12,ymm9                ;
+  vpsubw        ymm8,ymm8,ymm13                ;
+  vpsubw        ymm10,ymm14,ymm10              ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymm8,ymmword ptr [rcx+040h]    ;
+  vmovdqa       ymm10,ymmword ptr [rcx+060h]   ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymmword ptr [rcx+040h],ymm7    ;
+  vmovdqa       ymmword ptr [rcx+060h],ymm9    ;
+  vmovdqa       ymm2,ymmword ptr [rdx+0280h]   ;
+  vmovdqa       ymm3,ymmword ptr [rdx+02a0h]   ;
+  vmovdqa       ymm4,ymmword ptr [r8+0280h]    ;
+  vmovdqa       ymm5,ymmword ptr [r8+02a0h]    ;
+  vmovdqa       ymm6,ymmword ptr [r9+0140h]    ;
+  vpmullw       ymm13,ymm1,ymm2                ;
+  vpmullw       ymm14,ymm1,ymm3                ;
+  vpmullw       ymm7,ymm4,ymm13                ;
+  vpmullw       ymm9,ymm5,ymm13                ;
+  vpmullw       ymm8,ymm6,ymm14                ;
+  vpmullw       ymm10,ymm4,ymm14               ;
+  vpmulhw       ymm7,ymm0,ymm7                 ;
+  vpmulhw       ymm9,ymm0,ymm9                 ;
+  vpmulhw       ymm8,ymm0,ymm8                 ;
+  vpmulhw       ymm10,ymm0,ymm10               ;
+  vpmulhw       ymm11,ymm4,ymm2                ;
+  vpmulhw       ymm12,ymm5,ymm2                ;
+  vpmulhw       ymm13,ymm6,ymm3                ;
+  vpmulhw       ymm14,ymm4,ymm3                ;
+  vpsubw        ymm7,ymm11,ymm7                ;
+  vpsubw        ymm9,ymm12,ymm9                ;
+  vpsubw        ymm8,ymm13,ymm8                ;
+  vpsubw        ymm10,ymm14,ymm10              ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymm8,ymmword ptr [rcx+080h]    ;
+  vmovdqa       ymm10,ymmword ptr [rcx+0a0h]   ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymmword ptr [rcx+080h],ymm7    ;
+  vmovdqa       ymmword ptr [rcx+0a0h],ymm9    ;
+  vmovdqa       ymm2,ymmword ptr [rdx+02c0h]   ;
+  vmovdqa       ymm3,ymmword ptr [rdx+02e0h]   ;
+  vmovdqa       ymm4,ymmword ptr [r8+02c0h]    ;
+  vmovdqa       ymm5,ymmword ptr [r8+02e0h]    ;
+  vmovdqa       ymm6,ymmword ptr [r9+0160h]    ;
+  vpmullw       ymm13,ymm1,ymm2                ;
+  vpmullw       ymm14,ymm1,ymm3                ;
+  vpmullw       ymm7,ymm4,ymm13                ;
+  vpmullw       ymm9,ymm5,ymm13                ;
+  vpmullw       ymm8,ymm6,ymm14                ;
+  vpmullw       ymm10,ymm4,ymm14               ;
+  vpmulhw       ymm7,ymm0,ymm7                 ;
+  vpmulhw       ymm9,ymm0,ymm9                 ;
+  vpmulhw       ymm8,ymm0,ymm8                 ;
+  vpmulhw       ymm10,ymm0,ymm10               ;
+  vpmulhw       ymm11,ymm4,ymm2                ;
+  vpmulhw       ymm12,ymm5,ymm2                ;
+  vpmulhw       ymm13,ymm6,ymm3                ;
+  vpmulhw       ymm14,ymm4,ymm3                ;
+  vpsubw        ymm7,ymm11,ymm7                ;
+  vpsubw        ymm9,ymm12,ymm9                ;
+  vpsubw        ymm8,ymm8,ymm13                ;
+  vpsubw        ymm10,ymm14,ymm10              ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymm8,ymmword ptr [rcx+0c0h]    ;
+  vmovdqa       ymm10,ymmword ptr [rcx+0e0h]   ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymmword ptr [rcx+0c0h],ymm7    ;
+  vmovdqa       ymmword ptr [rcx+0e0h],ymm9    ;
+  vmovdqa       ymm2,ymmword ptr [rdx+0300h]   ;
+  vmovdqa       ymm3,ymmword ptr [rdx+0320h]   ;
+  vmovdqa       ymm4,ymmword ptr [r8+0300h]    ;
+  vmovdqa       ymm5,ymmword ptr [r8+0320h]    ;
+  vmovdqa       ymm6,ymmword ptr [r9+0180h]    ;
+  vpmullw       ymm13,ymm1,ymm2                ;
+  vpmullw       ymm14,ymm1,ymm3                ;
+  vpmullw       ymm7,ymm4,ymm13                ;
+  vpmullw       ymm9,ymm5,ymm13                ;
+  vpmullw       ymm8,ymm6,ymm14                ;
+  vpmullw       ymm10,ymm4,ymm14               ;
+  vpmulhw       ymm7,ymm0,ymm7                 ;
+  vpmulhw       ymm9,ymm0,ymm9                 ;
+  vpmulhw       ymm8,ymm0,ymm8                 ;
+  vpmulhw       ymm10,ymm0,ymm10               ;
+  vpmulhw       ymm11,ymm4,ymm2                ;
+  vpmulhw       ymm12,ymm5,ymm2                ;
+  vpmulhw       ymm13,ymm6,ymm3                ;
+  vpmulhw       ymm14,ymm4,ymm3                ;
+  vpsubw        ymm7,ymm11,ymm7                ;
+  vpsubw        ymm9,ymm12,ymm9                ;
+  vpsubw        ymm8,ymm13,ymm8                ;
+  vpsubw        ymm10,ymm14,ymm10              ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymm8,ymmword ptr [rcx+0100h]   ;
+  vmovdqa       ymm10,ymmword ptr [rcx+0120h]  ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymmword ptr [rcx+0100h],ymm7   ;
+  vmovdqa       ymmword ptr [rcx+0120h],ymm9   ;
+  vmovdqa       ymm2,ymmword ptr [rdx+0340h]   ;
+  vmovdqa       ymm3,ymmword ptr [rdx+0360h]   ;
+  vmovdqa       ymm4,ymmword ptr [r8+0340h]    ;
+  vmovdqa       ymm5,ymmword ptr [r8+0360h]    ;
+  vmovdqa       ymm6,ymmword ptr [r9+01a0h]    ;
+  vpmullw       ymm13,ymm1,ymm2                ;
+  vpmullw       ymm14,ymm1,ymm3                ;
+  vpmullw       ymm7,ymm4,ymm13                ;
+  vpmullw       ymm9,ymm5,ymm13                ;
+  vpmullw       ymm8,ymm6,ymm14                ;
+  vpmullw       ymm10,ymm4,ymm14               ;
+  vpmulhw       ymm7,ymm0,ymm7                 ;
+  vpmulhw       ymm9,ymm0,ymm9                 ;
+  vpmulhw       ymm8,ymm0,ymm8                 ;
+  vpmulhw       ymm10,ymm0,ymm10               ;
+  vpmulhw       ymm11,ymm4,ymm2                ;
+  vpmulhw       ymm12,ymm5,ymm2                ;
+  vpmulhw       ymm13,ymm6,ymm3                ;
+  vpmulhw       ymm14,ymm4,ymm3                ;
+  vpsubw        ymm7,ymm11,ymm7                ;
+  vpsubw        ymm9,ymm12,ymm9                ;
+  vpsubw        ymm8,ymm8,ymm13                ;
+  vpsubw        ymm10,ymm14,ymm10              ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymm8,ymmword ptr [rcx+0140h]   ;
+  vmovdqa       ymm10,ymmword ptr [rcx+0160h]  ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymmword ptr [rcx+0140h],ymm7   ;
+  vmovdqa       ymmword ptr [rcx+0160h],ymm9   ;
+  vmovdqa       ymm2,ymmword ptr [rdx+0380h]   ;
+  vmovdqa       ymm3,ymmword ptr [rdx+03a0h]   ;
+  vmovdqa       ymm4,ymmword ptr [r8+0380h]    ;
+  vmovdqa       ymm5,ymmword ptr [r8+03a0h]    ;
+  vmovdqa       ymm6,ymmword ptr [r9+01c0h]    ;
+  vpmullw       ymm13,ymm1,ymm2                ;
+  vpmullw       ymm14,ymm1,ymm3                ;
+  vpmullw       ymm7,ymm4,ymm13                ;
+  vpmullw       ymm9,ymm5,ymm13                ;
+  vpmullw       ymm8,ymm6,ymm14                ;
+  vpmullw       ymm10,ymm4,ymm14               ;
+  vpmulhw       ymm7,ymm0,ymm7                 ;
+  vpmulhw       ymm9,ymm0,ymm9                 ;
+  vpmulhw       ymm8,ymm0,ymm8                 ;
+  vpmulhw       ymm10,ymm0,ymm10               ;
+  vpmulhw       ymm11,ymm4,ymm2                ;
+  vpmulhw       ymm12,ymm5,ymm2                ;
+  vpmulhw       ymm13,ymm6,ymm3                ;
+  vpmulhw       ymm14,ymm4,ymm3                ;
+  vpsubw        ymm7,ymm11,ymm7                ;
+  vpsubw        ymm9,ymm12,ymm9                ;
+  vpsubw        ymm8,ymm13,ymm8                ;
+  vpsubw        ymm10,ymm14,ymm10              ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymm8,ymmword ptr [rcx+0180h]   ;
+  vmovdqa       ymm10,ymmword ptr [rcx+01a0h]  ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymmword ptr [rcx+0180h],ymm7   ;
+  vmovdqa       ymmword ptr [rcx+01a0h],ymm9   ;
+  vmovdqa       ymm2,ymmword ptr [rdx+03c0h]   ;
+  vmovdqa       ymm3,ymmword ptr [rdx+03e0h]   ;
+  vmovdqa       ymm4,ymmword ptr [r8+03c0h]    ;
+  vmovdqa       ymm5,ymmword ptr [r8+03e0h]    ;
+  vmovdqa       ymm6,ymmword ptr [r9+01e0h]    ;
+  vpmullw       ymm13,ymm1,ymm2                ;
+  vpmullw       ymm14,ymm1,ymm3                ;
+  vpmullw       ymm7,ymm4,ymm13                ;
+  vpmullw       ymm9,ymm5,ymm13                ;
+  vpmullw       ymm8,ymm6,ymm14                ;
+  vpmullw       ymm10,ymm4,ymm14               ;
+  vpmulhw       ymm7,ymm0,ymm7                 ;
+  vpmulhw       ymm9,ymm0,ymm9                 ;
+  vpmulhw       ymm8,ymm0,ymm8                 ;
+  vpmulhw       ymm10,ymm0,ymm10               ;
+  vpmulhw       ymm11,ymm4,ymm2                ;
+  vpmulhw       ymm12,ymm5,ymm2                ;
+  vpmulhw       ymm13,ymm6,ymm3                ;
+  vpmulhw       ymm14,ymm4,ymm3                ;
+  vpsubw        ymm7,ymm11,ymm7                ;
+  vpsubw        ymm9,ymm12,ymm9                ;
+  vpsubw        ymm8,ymm8,ymm13                ;
+  vpsubw        ymm10,ymm14,ymm10              ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymm8,ymmword ptr [rcx+01c0h]   ;
+  vmovdqa       ymm10,ymmword ptr [rcx+01e0h]  ;
+  vpaddw        ymm7,ymm8,ymm7                 ;
+  vpaddw        ymm9,ymm10,ymm9                ;
+  vmovdqa       ymmword ptr [rcx+01c0h],ymm7   ;
+  vmovdqa       ymmword ptr [rcx+01e0h],ymm9   ;
+
+  vzeroupper                                   ;
+
+  vmovdqa       xmm6,xmmword ptr [rsp+000h]    ; restore xmm6 from stack
+  vmovdqa       xmm7,xmmword ptr [rsp+010h]    ; restore xmm7 from stack
+  vmovdqa       xmm8,xmmword ptr [rsp+020h]    ; restore xmm8 from stack
+  vmovdqa       xmm9,xmmword ptr [rsp+030h]    ; restore xmm9 from stack
+  vmovdqa       xmm10,xmmword ptr [rsp+040h]   ; restore xmm10 from stack
+  vmovdqa       xmm11,xmmword ptr [rsp+050h]   ; restore xmm11 from stack
+  vmovdqa       xmm12,xmmword ptr [rsp+060h]   ; restore xmm12 from stack
+  vmovdqa       xmm13,xmmword ptr [rsp+070h]   ; restore xmm13 from stack
+  vmovdqa       xmm14,xmmword ptr [rsp+080h]   ; restore xmm14 from stack
+
+  add           rsp,098h                       ; 098h and not 090h for alignment purposes
+
+  ret                                          ;
+
+FUNC_NAME ENDP
+
+  END
