@@ -24,6 +24,23 @@ To confirm that everything worked, try `lint` or `tests cbmc`.
 We use auto-formatting using `clang-format` as specified in [.clang-format](.clang-format). Use the `./scripts/format`
 script (in your `PATH` when using`nix`) to re-format the files accordingly.
 
+### Commit messages
+
+We follow common git conventions:
+
+- **Subject line**: `<Component>: <Summary>`, e.g. `CBMC: Add CaDiCaL SAT profile` or `AArch64, x86_64: Use MLKEM_Q as NTT
+  input bound`. The component is the area the commit touches, e.g. `CI`, `CBMC`, `HOL-Light`, `nix`, `AArch64`,
+  `x86_64`, `Armv8.1-M`, `FIPS202`, `README`, or a file name such as `sys.h`. Use the imperative mood, capitalize the
+  summary, omit the trailing period, and keep the subject at no more than 72 characters.
+- **Body**: Separate it from the subject by a blank line and wrap it at 72 characters. Explain what changed and why;
+  the diff already shows how. The body may be omitted for trivial changes.
+- **Issue references**: Reference an issue the commit resolves in the body, e.g. `Resolves #1603`.
+- **Sign-off**: Every commit must carry a `Signed-off-by:` line certifying the [Developer Certificate of
+  Origin](https://developercertificate.org/), e.g. via `git commit -s`. This is enforced by the DCO check on pull
+  requests.
+
+Each commit should be a self-contained logical change that builds and passes the tests on its own.
+
 ### Namespacing
 
 We namespace all entities of global scope, including statics and structures. This is to facilitate monolithic builds of
