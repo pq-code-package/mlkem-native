@@ -43,9 +43,9 @@ USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
 CBMC_SUPPORTED_CONFIGS = \
-  LP64:z3_smt_only \
+  LP64:z3 \
   LP64:cadical
-CBMC_DEFAULT_CONFIG = LP64:z3_smt_only
+CBMC_DEFAULT_CONFIG = LP64:z3
 
 FUNCTION_NAME = mlk_indcpa_enc
 
