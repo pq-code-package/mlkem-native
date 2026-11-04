@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793811865987,
+  "lastUpdate": 1793812412739,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -34058,6 +34058,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 209807,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "rodchap@amazon.com",
+            "name": "Rod Chapman",
+            "username": "rod-chapman"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": true,
+          "id": "f3c173addad8807a21cbb52eb8ce7d33c25ede07",
+          "message": "CBMC: Switch proof of rej_uniform_c() to bitwuzla by default.\n\nSigned-off-by: Rod Chapman <rodchap@amazon.com>",
+          "timestamp": "2026-11-04T15:30:11Z",
+          "tree_id": "872575f57536ced62622fc5d1885ed7ecd3ea3bb",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/f3c173addad8807a21cbb52eb8ce7d33c25ede07"
+        },
+        "date": 1793811594596,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 59784,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 70585,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 89548,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 100861,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 112715,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 139924,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 155049,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 171929,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 207940,
             "unit": "cycles"
           }
         ]
