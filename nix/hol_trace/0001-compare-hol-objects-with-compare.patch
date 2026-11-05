@@ -1,0 +1,81 @@
+HOLTrace record/replay: Avoid tree walks in HOL comparisons
+
+Scope: recording and replay.
+
+The hashtt recording build uses hash tables to deduplicate HOL types,
+terms and theorems. Their generated `equal` functions used OCaml's
+structural `=` after comparing hashes. `=` must report `nan <> nan`, so
+it does not stop at physically equal subvalues and walks shared terms as
+trees. Symbolic simulation shares terms heavily; recording an
+mlkem-native proof therefore stalled for over 20 minutes in caml_equal.
+
+The replay-side `holtrace_restore` code also used `=` to find existing
+axioms, check decoded theorem statements and compare named theorems.
+Use `compare ... = 0` in both places. It stops at shared subvalues and
+agrees with structural equality for these HOL values, which contain no
+floats or closures.
+
+Trusted-base impact: the generated hashtt equality functions run only
+while recording and are outside the trusted base. The
+`holtrace_restore` comparisons run during replay and are part of the
+trusted acceptance path. This patch changes that trusted replay code,
+but does not modify the HOL Light kernel in `fusion.ml`.
+
+--- a/holtrace.ml
++++ b/holtrace.ml
+@@ -627,7 +627,7 @@
+
+   let holtrace_axiom allownewaxioms term =
+     let target = [],term in
+-    let istarget f = (dest_thm f = target) in
++    let istarget f = (compare (dest_thm f) target = 0) in
+     try
+       let th = List.find istarget (axioms()) in
+       Printf.printf "matching axiom\n%!";
+@@ -840,7 +840,7 @@
+     let c = hd chhh in
+     let hhh = rev(tl chhh) in
+     let thm = Dynarray.get infs (!inf_id-1) in
+-    if checkthmstatements then assert((hhh,c) = dest_thm(thm));
++    if checkthmstatements then assert(compare (hhh,c) (dest_thm thm) = 0);
+     holtrace_thms_add thm
+
+   let thmname_acceptable_firstchar c =
+@@ -871,7 +871,7 @@
+         Printf.printf "matching thm %s\n%!" name;
+         stats_thm_matching := 1 + !stats_thm_matching;
+         let known = assoc name previousthms in
+-        assert(dest_thm known = dest_thm th)
++        assert(compare (dest_thm known) (dest_thm th) = 0)
+       end else begin
+         Printf.printf "creating thm %s\n%!" name;
+         stats_thm_creating := 1 + !stats_thm_creating;
+--- a/install-worker
++++ b/install-worker
+@@ -228,7 +228,7 @@
+         if not defined_hashtbl_type:
+           result += r'''  module Hashtbl_type = Hashtbl.Make(struct
+     type t = hol_type
+-    let equal ty0 ty1 = (ty0 == ty1) || ((hash_type ty0 = hash_type ty1) && (ty0 = ty1))
++    let equal ty0 ty1 = (ty0 == ty1) || ((hash_type ty0 = hash_type ty1) && (compare ty0 ty1 = 0))
+     let hash = hash_type
+   end)
+ '''
+@@ -238,7 +238,7 @@
+         if not defined_hashtbl_term:
+           result += r'''  module Hashtbl_term = Hashtbl.Make(struct
+     type t = term
+-    let equal tm0 tm1 = (tm0 == tm1) || ((hash_term tm0 = hash_term tm1) && (tm0 = tm1))
++    let equal tm0 tm1 = (tm0 == tm1) || ((hash_term tm0 = hash_term tm1) && (compare tm0 tm1 = 0))
+     let hash = hash_term
+   end)
+ '''
+@@ -248,7 +248,7 @@
+         if not defined_hashtbl_thm:
+           result += r'''  module Hashtbl_thm = Hashtbl.Make(struct
+     type t = thm
+-    let equal th0 th1 = (th0 == th1) || ((hash_thm th0 = hash_thm th1) && equals_thm th0 th1)
++    let equal th0 th1 = (th0 == th1) || ((hash_thm th0 = hash_thm th1) && (compare (dest_thm th0) (dest_thm th1) = 0))
+     let hash = hash_thm
+   end)
+ '''
