@@ -100,6 +100,12 @@ clean:; rm -f */*.o */*/*.o */*.correct */*.native
 HOLDIR?=$(HOLLIGHTDIR)
 HOLLIGHT:=$(HOLDIR)/hol.sh
 
+# The proofs run on stock HOL Light. A build with HOLTrace installed (see
+# ../hol_trace) changes the library and is for `hol-trace` only.
+ifneq ($(wildcard $(HOLDIR)/INSTALLED-HOLTrace),)
+$(error HOLDIR=$(HOLDIR) has HOLTrace installed; use stock HOL Light)
+endif
+
 BASE?=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 PROOF_BINS = $(OBJ:.o=.native)

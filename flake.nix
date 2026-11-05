@@ -57,7 +57,17 @@
             ln -sfn "$PROOF_DIR"      "$IMPORTS_DIR/mlkem_native"
             export HOLLIGHT_LOAD_PATH="$IMPORTS_DIR:$S2N_BIGNUM_DIR''${HOLLIGHT_LOAD_PATH:+:$HOLLIGHT_LOAD_PATH}"
             export HOLDIR="$HOLLIGHT_DIR"
+            # HOL Light with HOLTrace's library hook, for `hol-trace`
+            # only. It is not a package of any shell, so it never becomes
+            # HOLLIGHT_DIR or the `hol.sh` on PATH.
+            export HOLTRACE_REPLAY_HOL=${config.packages.hol_trace.hol_light_replay}/lib/hol_light
+            # hol-trace, appended to PATH.
+            export PATH="$PATH:$PROOF_DIR/hol_trace"
           '';
+          mkHolLightShell = packages: (util.mkShell {
+            inherit packages;
+          }).overrideAttrs (old: { shellHook = holLightShellHook; });
+          holLightCrossPackages = builtins.attrValues { inherit (config.packages) linters toolchains toolchain_ppc64le hol_light s2n_bignum gcc-arm-embedded hol_server; } ++ holLightToolchain;
 
         in
         {
@@ -76,6 +86,7 @@
           packages.cbmc = util.cbmc_pkgs;
           packages.hol_light = util.hol_light';
           packages.s2n_bignum = util.s2n_bignum;
+          packages.hol_trace = util.hol_trace;
           packages.valgrind_varlat = util.valgrind_varlat;
           packages.slothy = util.slothy;
           packages.toolchains = util.toolchains;
@@ -101,18 +112,20 @@
 
           devShells.avr = util.mkShell (import ./nix/avr { inherit pkgs; });
           packages.hol_server = util.hol_server.hol_server_start;
-          devShells.hol_light = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum hol_server; } ++ holLightToolchain;
-          }).overrideAttrs (old: { shellHook = holLightShellHook; });
-          devShells.hol_light-cross = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchains toolchain_ppc64le hol_light s2n_bignum gcc-arm-embedded hol_server; } ++ holLightToolchain;
-          }).overrideAttrs (old: { shellHook = holLightShellHook; });
-          devShells.hol_light-cross-aarch64 = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 hol_light s2n_bignum hol_server; } ++ holLightToolchain;
-          }).overrideAttrs (old: { shellHook = holLightShellHook; });
-          devShells.hol_light-cross-x86_64 = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum hol_server; } ++ holLightToolchain;
-          }).overrideAttrs (old: { shellHook = holLightShellHook; });
+          devShells.hol_light = mkHolLightShell (
+            builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum hol_server; } ++ holLightToolchain
+          );
+          devShells.hol_light-cross = mkHolLightShell holLightCrossPackages;
+          devShells.hol_light-cross-aarch64 = mkHolLightShell (
+            builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 hol_light s2n_bignum hol_server; } ++ holLightToolchain
+          );
+          devShells.hol_light-cross-x86_64 = mkHolLightShell (
+            builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum hol_server; } ++ holLightToolchain
+          );
+          # hol_light-cross with HOLTrace's recording tools.
+          devShells.hol_trace-cross = mkHolLightShell (holLightCrossPackages ++ [
+            config.packages.hol_trace
+          ]);
           devShells.ci = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains_native; };
           };

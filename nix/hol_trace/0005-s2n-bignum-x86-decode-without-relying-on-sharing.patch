@@ -1,0 +1,57 @@
+s2n-bignum x86 decoder: Do not rely on physical sharing of terms
+
+Scope: the s2n-bignum copy used for recording only.
+
+DECODE_LEN_THM walks an x86 byte list until it reaches, by physical
+equality (`==`), the tail that DECODE_CONV returned; two similar
+walkers in the same file do likewise. While HOLTrace records, its
+kernel wrappers replace objects with structurally equal copies from
+the trace tables, so the tail is equal but not shared, the walk runs
+past it, and the proof fails with Failure "DECODE_LEN_THM". Without
+HOLTrace the same build succeeds.
+
+Also accept a structurally equal tail (`compare ... = 0`). The tails
+of a list have different lengths, so this matches the same tail as
+before.
+
+Trusted-base impact: the patched decoder is outside the trusted base.
+The replay build loads neither s2n-bignum nor this patch. It
+reconstructs every accepted theorem through its own kernel.
+
+--- a/x86/proofs/decode.ml
++++ b/x86/proofs/decode.ml
+@@ -2962,13 +2962,13 @@
+               (INST [rand (lhs (concl th3)),el'; n',en] pth2) in
+           fun a ls -> INST ((a,ea)::ls) th) in
+         function
+-        | l,ls,l' when l' == l -> INST ls th
++        | l,ls,l' when l' == l || compare l' l = 0 -> INST ls th
+         | l,ls,Comb(Comb(Const("CONS",_),a'),tm') -> gcons (l, (a',a)::ls, tm')
+         | l,ls,Comb(Comb(Const("APPEND",_),
+-            Comb(Comb(Const("bytelist_of_num",_),_),a)),l') when l' == l ->
++            Comb(Comb(Const("bytelist_of_num",_),_),a)),l') when l' == l || compare l' l = 0 ->
+           gnum a ls
+         | l,ls,Comb(Comb(Const("APPEND",_),
+-            Comb(Comb(Const("bytelist_of_int",_),_),a)),l') when l' == l ->
++            Comb(Comb(Const("bytelist_of_int",_),_),a)),l') when l' == l || compare l' l = 0 ->
+           gint a ls
+         | _ -> failwith "DECODE_LEN_THM" in
+     mk_pths 0 (ARITH_RULE `LENGTH (l:byte list) = LENGTH l + 0`)
+@@ -2990,7 +2990,7 @@
+     let lhs,rhs = dest_eq (concl th) in
+     let tm',next = dest_comb (rand rhs) in
+     let rec len n = function
+-    | t when t == next -> n
++    | t when t == next || compare t next = 0 -> n
+     | Comb(Comb(Const("CONS",_),_),l) -> len (n+1) l
+     | Comb(Comb(Const("APPEND",_),
+         Comb(Comb(Const("bytelist_of_num",_),i),_)),l) ->
+@@ -3260,7 +3260,7 @@
+           let lhs,rhs = dest_eq (concl th) in
+           let tm',next = dest_comb (rand rhs) in
+           let rec len n = function
+-          | t when t == next -> n
++          | t when t == next || compare t next = 0 -> n
+           | Comb(Comb(Const("CONS",_),_),l) -> len (n+1) l
+           | Comb(Comb(Const("APPEND",_),
+               Comb(Comb(Const("bytelist_of_num",_),i),_)),l) ->

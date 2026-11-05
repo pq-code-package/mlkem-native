@@ -1,0 +1,88 @@
+holtrace-prune: Mark dependencies without recursion
+
+Scope: trace pruning after recording and before replay.
+
+The five mark_* functions recursed as deep as the longest dependency
+chain. On an 11 GB trace this overflowed a 10 MB C stack and pypy3
+crashed with SIGSEGV. Marking now uses an explicit stack and pushes
+only lines not yet marked. The set of marked lines, and hence the
+output, is unchanged.
+
+Trusted-base impact: `holtrace-prune` is outside the trusted base. It is
+not loaded by the replay process and cannot construct a theorem. A
+pruning error can make replay fail or change the trace presented to
+replay; acceptance still requires the replayed theorems and the
+definitions they use to match the accepted ones.
+
+--- a/holtrace-prune
++++ b/holtrace-prune
+@@ -251,7 +251,21 @@
+   wantinf = [False]*len(infs)
+   wanttypedef = [False]*len(typedefs)
+
++  # Marking uses an explicit stack instead of recursion: dependency
++  # chains in large traces are deeper than the C stack allows.
++  stack = []
+   def mark_type(id):
++    if not wanttype[id]: stack.append((0,id))
++  def mark_term(id):
++    if not wantterm[id]: stack.append((1,id))
++  def mark_thm(id):
++    if not wantthm[id]: stack.append((2,id))
++  def mark_inf(id):
++    if not wantinf[id]: stack.append((3,id))
++  def mark_typedef(id):
++    if not wanttypedef[id]: stack.append((4,id))
++
++  def visit_type(id):
+     if wanttype[id]: return
+     wanttype[id] = True
+     x = types[id]
+@@ -260,7 +274,7 @@
+         mark_inf(app2inf[x[-1]])
+       for t in x[1:-1]: mark_type(t)
+
+-  def mark_term(id):
++  def visit_term(id):
+     if wantterm[id]: return
+     wantterm[id] = True
+     x = terms[id]
+@@ -275,7 +289,7 @@
+       mark_term(x[2])
+       mark_term(x[3])
+
+-  def mark_thm(id):
++  def visit_thm(id):
+     if wantthm[id]: return
+     wantthm[id] = True
+     x = thms[id]
+@@ -284,7 +298,7 @@
+     for t in x[1:]: mark_term(t)
+     mark_inf(thm2inf[id])
+
+-  def mark_inf(id):
++  def visit_inf(id):
+     if wantinf[id]: return
+     wantinf[id] = True
+     x = infs[id]
+@@ -311,7 +325,7 @@
+       assert tag == b'D'
+       mark_typedef(x[1])
+
+-  def mark_typedef(id):
++  def visit_typedef(id):
+     if wanttypedef[id]: return
+     wanttypedef[id] = True
+     mark_inf(typedefs[id])
+@@ -322,6 +336,11 @@
+         continue
+     mark_thm(t0)
+
++  visit = (visit_type,visit_term,visit_thm,visit_inf,visit_typedef)
++  while stack:
++    k,id = stack.pop()
++    visit[k](id)
++
+   # ===== print the marked lines (in the same order as before)
+
+   sys.stdout.buffer.write(b'HOLTrace 1\n')
