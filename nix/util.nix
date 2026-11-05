@@ -116,6 +116,7 @@ rec {
   hol_light' = pkgs.callPackage ./hol_light { };
   hol_server = pkgs.callPackage ./hol_light/hol_server.nix { inherit hol_light'; };
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
+  hol_trace = pkgs.callPackage ./hol_trace { inherit hol_light' s2n_bignum; };
   slothy = pkgs.callPackage ./slothy { };
   zephyr = pkgs.callPackage ./zephyr { };
   zephyrPythonEnv = pkgs.python3.withPackages (ps: with ps; [

@@ -1,0 +1,67 @@
+holtrace-save: Drop the per-line flush and timing system calls
+
+Scope: recording only.
+
+Recording flushed the trace after every line (one write(2) each), and
+dedup_trace_{type,term,thm} called Sys.time() (getrusage(2)) twice per
+call only to print statistics. On an mlkem-native proof this was 581 s
+of 1074 s wall time. Drop both. holtrace_stop closes the channel, which
+flushes it. The trace is byte-identical; the "Holtrace_save so far"
+statistics report 0.00 s.
+
+Trusted-base impact: none. This code only produces the trace and is
+not present in the replay build.
+
+--- a/holtrace.ml
++++ b/holtrace.ml
+@@ -80,7 +80,9 @@
+ 
+   let tracing = ref enabled
+ 
+-  let trace_flush() = if !tracing then Out_channel.flush fd
++  (* No flush per line (one write(2) each). holtrace_stop closes, and
++     thereby flushes, the channel. *)
++  let trace_flush() = ()
+ 
+   let trace_char c = if !tracing then output_char fd c
+ 
+@@ -203,9 +205,7 @@
+   let dedup_trace_type_time = ref 0.0
+ 
+   let dedup_trace_type tm =
+-    dedup_trace_type_time := !dedup_trace_type_time -. Sys.time();
+     let result = dedup_trace_type_core tm in
+-    dedup_trace_type_time := !dedup_trace_type_time +. Sys.time();
+     dedup_trace_type_calls := !dedup_trace_type_calls + 1;
+     result
+ 
+@@ -257,9 +257,7 @@
+   let dedup_trace_term_time = ref 0.0
+ 
+   let dedup_trace_term tm =
+-    dedup_trace_term_time := !dedup_trace_term_time -. Sys.time();
+     let result = dedup_trace_term_core tm in
+-    dedup_trace_term_time := !dedup_trace_term_time +. Sys.time();
+     dedup_trace_term_calls := !dedup_trace_term_calls + 1;
+     result
+ 
+@@ -287,9 +285,7 @@
+     with Not_found -> begin
+       let h,c = dest_thm th in
+       let hc = h@[c] in
+-      dedup_trace_thm_time := !dedup_trace_thm_time +. Sys.time();
+       let hc = map (snd o dedup_trace_term) hc in
+-      dedup_trace_thm_time := !dedup_trace_thm_time -. Sys.time();
+       trace 't' (map termid2compress hc) "";
+       let id = Dynarray.length id2thm in
+       Dynarray.add_last id2thm th;
+@@ -298,9 +294,7 @@
+     end
+ 
+   let dedup_trace_thm th =
+-    dedup_trace_thm_time := !dedup_trace_thm_time -. Sys.time();
+     let result = dedup_trace_thm_core th in
+-    dedup_trace_thm_time := !dedup_trace_thm_time +. Sys.time();
+     dedup_trace_thm_calls := !dedup_trace_thm_calls + 1;
+     if !dedup_trace_thm_calls mod 100000 = 0 then begin
+       Printf.printf "Holtrace_save so far: %d -> %d thms %.2f s, %d -> %d terms %.2f s, %d -> %d types %.2f s\n%!"
