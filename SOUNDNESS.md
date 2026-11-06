@@ -524,8 +524,9 @@ they depend on to equal accepted copies in the repository, and the
 machine-code definitions to equal the `.text` sections of the assembled
 object files. See
 [`proofs/hol_light/hol_trace/README.md`](proofs/hol_light/hol_trace/README.md).
-The replay still trusts the same HOL Light kernel and does not replace an
-independent kernel implementation.
+Replay can also use HolLean, an independent implementation of the HOL
+Light kernel in Lean, so that a bug in the OCaml kernel alone cannot make
+the check pass.
 
 HOL Light runs on OCaml, so the OCaml compiler and runtime are also part of the trusted computing base. A compiler or
 runtime bug could in principle allow construction of a spurious theorem. This is mitigated by OCaml's maturity and
