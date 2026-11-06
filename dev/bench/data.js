@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793990102936,
+  "lastUpdate": 1793991654619,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -3199,6 +3199,75 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/pq-code-package/mlkem-native/commit/2760190397d9626ee2fc9e3c92d7015dc68712f4"
         },
         "date": 1793859886569,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 398857,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 513294,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 714034,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 669876,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 782851,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 1054085,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 899202,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 1051577,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 1399144,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": true,
+          "id": "9b96caa137514c82a097a4251783769657826f6c",
+          "message": "scripts/tests: Align GitHub summary rows by benchmark name\n\nThe GitHub job summary combined the outputs of the three parameter sets\nline by line using zip(). This truncated the table to the shortest\noutput and misaligned rows whenever the parameter sets print different\nbenchmarks. For example, in the component benchmarks of\nhttps://github.com/pq-code-package/mlkem-native/actions/runs/41974093178\nmlk_rej_uniform_native is only shown for ML-KEM-768.\n\nMatch lines of the form `name = value` by name instead, and keep all\nlines.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-06T16:47:11Z",
+          "tree_id": "2a0eaf47a68f599e53655aad4c52d736cf8f5905",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/9b96caa137514c82a097a4251783769657826f6c"
+        },
+        "date": 1793991652708,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
