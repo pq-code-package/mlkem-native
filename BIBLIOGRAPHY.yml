@@ -235,6 +235,12 @@
   author: OpenPOWER Foundation
   url: https://openpowerfoundation.org/specifications/64bitelfabi/
 
+- id: RVPSABI
+  short: RISC-V psABI
+  name: "RISC-V ABIs Specification"
+  author: RISC-V International
+  url: https://github.com/riscv-non-isa/riscv-elf-psabi-doc
+
 - id: ArmARMv8M
   short: Armv8-M ARM
   name: "Armv8-M Architecture Reference Manual (DDI 0553)"

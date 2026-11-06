@@ -13,6 +13,8 @@
 #include "ppc64le/checks_ppc64le_all.h"
 #elif defined(MLK_SYS_ARMV81M_MVE)
 #include "armv81m/checks_armv81m_all.h"
+#elif defined(MLK_SYS_RISCV64)
+#include "riscv64/checks_riscv64_all.h"
 #else
 /* No abicheck support on this architecture - empty registry, driver runs zero
  * kernel checks (selftest still runs). */
