@@ -1,0 +1,21 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# WARNING: This file is auto-generated from scripts/autogen
+#          in the mlkem-native repository.
+#          Do not modify it directly.
+#
+# Hashes of the assembled kernels that HOL Light proofs reason about.
+# Use scripts/check-binary to check if a given binary contains matching
+# function symbols and machine code.
+#
+# Each entry is keyed by a kernel's symbol without the `mlk_` prefix,
+# and names the architecture and function of its proof,
+# proofs/hol_light/ARCH/proofs/FUNC.ml. `sha256` maps each byte list in
+# the proof's accepted FUNC.defs to its hash:
+# - FUNC_mc is the kernel's code as the proof assembles it. On x86_64,
+#   it starts with ENDBR64, which builds emit only with CET enabled.
+# - FUNC_tmc, on x86_64 only, is that code without ENDBR64. The proofs'
+#   NOIBT theorems are about it, and builds without CET contain it.
+# A kernel matches if its code has either hash.
+{}

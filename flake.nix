@@ -61,6 +61,10 @@
             # only. It is not a package of any shell, so it never becomes
             # HOLLIGHT_DIR or the `hol.sh` on PATH.
             export HOLTRACE_REPLAY_HOL=${config.packages.hol_trace.hol_light_replay}/lib/hol_light
+            # The upstream sources of HOL Light and s2n-bignum; `hol-trace
+            # layers` records their commits in the accepted files.
+            export HOL_LIGHT_SRC=${config.packages.hol_light.src.url}
+            export S2N_BIGNUM_SRC=${config.packages.s2n_bignum.src.url}
             # hol-trace, appended to PATH.
             export PATH="$PATH:$PROOF_DIR/hol_trace"
           '';

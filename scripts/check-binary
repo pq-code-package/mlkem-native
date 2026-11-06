@@ -1,0 +1,384 @@
+#!/usr/bin/env python3
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+"""Check that the assembly functions in binaries are the machine code
+that the HOL Light proofs verify.
+
+For every assembly function with a HOL Light proof, look for a function
+symbol of the same name in the given files, with or without a namespace
+prefix. If there is one, compare the SHA-256 of its code with the hash
+of the proof's byte list in its accepted FUNC.defs. These hashes are
+collected in proofs/hol_light/bind.yml, which `check-binary gen` writes
+and scripts/autogen keeps up to date. The exit status is 1 if any
+check fails.
+
+The files are read with ${CROSS_PREFIX}readelf, GNU's or LLVM's, or
+with readelf if there is no such tool, so any ELF file that readelf
+reads can be checked, including archives. A file that readelf cannot
+read fails.
+
+Options:
+  --show-all   also list, in gray, the functions without a proof
+  --force-all  require a proof for every function, and at least one
+               function in every FILE
+  --quiet      print only failures
+  --require-match
+               fail if no function in the FILEs has a proof
+
+Usage:
+  check-binary [--show-all] [--force-all] [--quiet] [--require-match] FILE ...
+  check-binary gen          print bind.yml
+"""
+
+import glob
+import hashlib
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+
+import yaml
+
+ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+HOL_LIGHT = os.path.join(ROOT, "proofs", "hol_light")
+HOL_TRACE = os.path.join(HOL_LIGHT, "hol_trace")
+BIND_YML = os.path.join(HOL_LIGHT, "bind.yml")
+ACCEPTED_PROOFS = os.path.join(HOL_TRACE, "accepted", "proofs")
+sys.path.insert(0, HOL_TRACE)
+# Proof code run by `hol-trace gen` can write untracked files in the
+# checkout, such as a __pycache__ entry for conform.py, that Python
+# would load instead of conform.py. Read and write bytecode elsewhere.
+_pycache = tempfile.TemporaryDirectory(prefix="check-binary-pycache-")
+sys.pycache_prefix = _pycache.name
+import conform  # noqa: E402
+
+
+class Failed(Exception):
+    pass
+
+
+# ----- bind.yml: the expected hashes, derived from the accepted .defs;
+# the checked-in file must match them.
+
+
+def symbol_of(arch, func):
+    """The proved function's symbol without namespace prefix: the
+    assembly declares it as `mlk_NAME`."""
+    path = os.path.join(HOL_LIGHT, arch, "mlkem", func + ".S")
+    with open(path, encoding="utf-8") as f:
+        names = re.findall(r"^\.global mlk_(\S+)$", f.read(), flags=re.M)
+    if len(names) != 1:
+        raise Failed(f"{path}: expected one `.global mlk_NAME`")
+    return names[0]
+
+
+def check_note(defs_path, name, data):
+    """The comment before a byte list states its length and SHA-256."""
+    with open(defs_path, encoding="utf-8") as f:
+        lines = f.read().split("\n")
+    at = lines.index(f"definition {conform.qname(name)}")
+    note = conform.byte_note(name, data)
+    if "\n".join(lines[at - note.count("\n") - 1 : at]) != note:
+        raise Failed(f"the comment before {name} is not `{note}`")
+
+
+def defs_hashes(defs_path):
+    """{constant: SHA-256} of the byte list in a proof's .defs and, if
+    the file defines it, of its copy without the first four bytes."""
+    entries = conform.read_entries(defs_path)
+    lists = [b for b in map(conform.rendered_bytes, entries.values()) if b]
+    if len(lists) != 1:
+        raise Failed(f"{conform.short(defs_path)}: expected one byte list")
+    name, data = lists[0]
+    check_note(defs_path, name, data)
+    hashes = {name: hashlib.sha256(data).hexdigest()}
+    if name.endswith("_mc"):
+        trimmed = name[: -len("_mc")] + "_tmc"
+        text = entries.get(f"definition {conform.qname(trimmed)}")
+        if text == f"|- (= {trimmed} (TRIM_LIST (, #4 #0) {name}))":
+            hashes[trimmed] = hashlib.sha256(data[4:]).hexdigest()
+    return hashes
+
+
+def gen_bind():
+    bind = {}
+    for path in sorted(glob.glob(os.path.join(ACCEPTED_PROOFS, "*", "*.defs"))):
+        arch = os.path.basename(os.path.dirname(path))
+        func = os.path.basename(path)[: -len(".defs")]
+        symbol = symbol_of(arch, func)
+        if symbol in bind:
+            raise Failed(f"two proofs are about the symbol {symbol}")
+        bind[symbol] = {"arch": arch, "function": func, "sha256": defs_hashes(path)}
+    return dict(sorted(bind.items()))
+
+
+def read_bind():
+    with open(BIND_YML, encoding="utf-8") as f:
+        bind = yaml.safe_load(f)
+    if bind != gen_bind():
+        raise Failed(
+            "proofs/hol_light/bind.yml does not match the accepted .defs; "
+            "run scripts/autogen"
+        )
+    return bind
+
+
+# ----- readelf: the function symbols of an ELF file, or of each member
+# of an archive, and the bytes of each function.
+
+SECTION = re.compile(
+    r"^\s*\[\s*(\d+)\]\s+(\S+)\s+\S+\s+([0-9a-f]+)\s+[0-9a-f]+\s+([0-9a-f]+)"
+    r"\s+[0-9a-f]+\s+(\S*)\s+\d+\s+(\d+)\s+\d+\s*$"
+)  # [Nr] Name Type Address Off Size ES Flg Lk Inf Al
+SYMBOL = re.compile(
+    r"^\s*\d+:\s+([0-9a-f]+)\s+(\S+)\s+(\w+)\s+(\w+)\s+\w+(?:\s+\[[^\]]*\])?"
+    r"\s+(\S+)\s+(\S+)\s*$"
+)  # Num: Value Size Type Bind Vis Ndx Name
+RELOCATIONS = re.compile(r"^Relocation section '(\S+)' at offset")
+DUMP = re.compile(r"^Hex dump of section '(\S+)':")
+DUMP_LINE = re.compile(r"^\s*0x([0-9a-f]+)\s+(.*)$")
+
+
+def readelf(path, *args):
+    """The output of `${CROSS_PREFIX}readelf -W ARGS path`, as
+    [(label, text)]: one for path or, for an archive, one per member,
+    which readelf introduces with a line `File: NAME`."""
+    tool = os.environ.get("CROSS_PREFIX", "") + "readelf"
+    if shutil.which(tool) is None:
+        tool = "readelf"  # it reads ELF files of any architecture
+    try:
+        p = subprocess.run([tool, "-W", *args, path], capture_output=True, text=True)
+    except FileNotFoundError:
+        raise Failed(f"{tool} not found")
+    if p.returncode != 0:
+        raise Failed((p.stderr.strip().splitlines() or [f"{tool} failed on {path}"])[0])
+    parts = re.split(r"^File: (.*)\n", p.stdout, flags=re.M)
+    if len(parts) == 1:
+        return [(path, p.stdout)]
+    return [(parts[i], parts[i + 1]) for i in range(1, len(parts), 2)]
+
+
+def parse_headers(text):
+    """(relocatable, sections, symbols, relocations) of one file, from
+    `readelf -h -S -s -r`: sections maps an index to (name, address,
+    size, executable); symbols are (name, section, value, size,
+    is_function) of the defined symbols in .symtab, where a function is
+    global, or local of type FUNC, in an executable section; and
+    relocations are (target section, offset) pairs."""
+    relocatable = re.search(r"^\s*Type:\s+REL\b", text, flags=re.M) is not None
+    sections, targets = {}, {}
+    for m in map(SECTION.match, text.split("\n")):
+        if m:
+            idx, name, addr, size, flags, info = m.groups()
+            sections[int(idx)] = (name, int(addr, 16), int(size, 16), "X" in flags)
+            targets[name] = int(info)
+    symbols, relocations, table, target = [], [], None, None
+    for line in text.split("\n"):
+        if line.startswith("Symbol table "):
+            table = line.split("'")[1]
+            continue
+        m = RELOCATIONS.match(line)
+        if m:
+            target = targets[m.group(1)]
+            continue
+        if not line.strip():
+            table = target = None
+            continue
+        m = SYMBOL.match(line)
+        if m and table == ".symtab":
+            value, size, kind, binding, ndx, name = m.groups()
+            if ndx.isdigit() and int(ndx) in sections:
+                is_function = (
+                    sections[int(ndx)][3]
+                    and kind in ("NOTYPE", "FUNC")
+                    and (binding != "LOCAL" or kind == "FUNC")
+                )
+                symbols.append(
+                    (name, int(ndx), int(value, 16), int(size, 0), is_function)
+                )
+            continue
+        m = re.match(r"^([0-9a-f]+)\s+[0-9a-f]+\s+\S", line)
+        if m and target is not None:
+            relocations.append((target, int(m.group(1), 16)))
+    return relocatable, sections, symbols, relocations
+
+
+def parse_dumps(text, sections):
+    """{section name: bytes} from `readelf -x NAME ...`. A line shows
+    an address and up to 16 bytes in hex, then the same bytes as text;
+    the section's size says how many of them there are."""
+    sizes = {name: (addr, size) for name, addr, size, _ in sections.values()}
+    dumps, name = {}, None
+    for line in text.split("\n"):
+        m = DUMP.match(line)
+        if m:
+            name = m.group(1)
+            dumps[name] = bytearray()
+            continue
+        m = DUMP_LINE.match(line)
+        if m and name in sizes:
+            addr, size = sizes[name]
+            count = min(16, addr + size - int(m.group(1), 16)) * 2
+            digits = ""
+            for word in m.group(2).split():
+                if len(digits) >= count:
+                    break
+                digits += word
+            dumps[name] += bytes.fromhex(digits[:count])
+    return {n: bytes(b) for n, b in dumps.items()}
+
+
+def functions(path):
+    """[(label, [(symbol, bytes, problem, is_function)])] for path or
+    each member of it. A function's bytes run from its symbol for its
+    size or, without a size, to the next function symbol or the end of
+    its section. problem says why its bytes cannot be checked: a
+    relocation applies to them, its section's name is not unique, or it
+    is not a function."""
+    headers = readelf(path, "-h", "-S", "-s", "-r")
+    parsed = [(label, parse_headers(text)) for label, text in headers]
+    code = sorted(
+        {sec[n][0] for _, (_, sec, syms, _) in parsed for _, n, _, _, f in syms if f}
+    )
+    if code:
+        dumps = readelf(path, *[a for n in code for a in ("-x", n)])
+    else:
+        dumps = [(label, "") for label, _ in headers]
+    if len(dumps) != len(parsed):
+        raise Failed(f"{path}: readelf listed the members differently")
+    out = []
+    for (label, (relocatable, sections, symbols, relocations)), (_, text) in zip(
+        parsed, dumps
+    ):
+        contents = parse_dumps(text, sections)
+        names = [sec[0] for sec in sections.values()]
+        funcs = []
+        for symbol, ndx, value, size, is_function in symbols:
+            name, addr, sec_size, _ = sections[ndx]
+            if not is_function:
+                funcs.append((symbol, b"", "not a function", False))
+                continue
+            if not size:
+                later = [v for _, n, v, _, f in symbols if f and n == ndx and v > value]
+                end = sec_size if relocatable else addr + sec_size
+                size = min(later, default=end) - value
+            # In an object file, a symbol's value is an offset into its
+            # section; in a linked file, an address, as are the offsets of
+            # its relocations, which the loader applies.
+            start = value if relocatable else value - addr
+            data = contents.get(name, b"")[start : start + size]
+            problem = None
+            if any(
+                start <= off < start + size
+                if relocatable
+                else value <= off < value + size
+                for t, off in relocations
+                if not relocatable or t == ndx
+            ):
+                problem = "relocations apply"
+            elif names.count(name) != 1:
+                problem = f"its section {name} is not the only one of that name"
+            elif start < 0 or len(data) != size:
+                problem = "it extends beyond its section"
+            funcs.append((symbol, data, problem, True))
+        out.append((label, funcs))
+    return out
+
+
+# ----- check: compare each function found with bind.yml and report.
+
+
+def entry_for(symbol, bind):
+    """The bind.yml entry that a symbol matches; the longest name wins."""
+    names = [n for n in bind if symbol == n or symbol.endswith("_" + n)]
+    return max(names, key=len) if names else None
+
+
+def paint(text, color):
+    if sys.stdout.isatty() or os.environ.get("GITHUB_ACTIONS"):
+        return f"\033[{color}m{text}\033[0m"
+    return text
+
+
+GREEN, RED, GRAY = "32", "31", "90"
+
+
+def check(paths, show_all, force_all, quiet, require_match):
+    bind, failures, matched = read_bind(), 0, 0
+
+    def report(line, color):
+        if color == RED and os.environ.get("GITHUB_ACTIONS"):
+            print(f"::error title=check-binary::{line}")  # an annotation
+        elif color == RED or not quiet:
+            print(paint(line, color))
+
+    for path in paths:
+        for label, funcs in functions(path):
+            if force_all and not any(f for _, _, _, f in funcs):
+                report(f"✗ {label}: no function symbols", RED)
+                failures += 1
+            for symbol, code, problem, is_function in funcs:
+                name = entry_for(symbol, bind)
+                where = f"{label}: {symbol}"
+                if name is None:
+                    if is_function and force_all:
+                        report(f"✗ {where}: no proof", RED)
+                        failures += 1
+                    elif is_function and show_all:
+                        report(f"  {where}: no proof", GRAY)
+                    continue
+                matched += 1
+                proof = f"{bind[name]['arch']}/{bind[name]['function']}"
+                if problem:
+                    report(f"✗ {where}: {problem} ({proof})", RED)
+                    failures += 1
+                    continue
+                digest = hashlib.sha256(code).hexdigest()
+                consts = [c for c, h in bind[name]["sha256"].items() if h == digest]
+                if consts:
+                    report(
+                        f"✓ {where}: {len(code)} bytes = {consts[0]} ({proof})", GREEN
+                    )
+                else:
+                    expected = " or ".join(bind[name]["sha256"])
+                    report(
+                        f"✗ {where}: {len(code)} bytes, sha256 {digest}, not {expected} ({proof})",
+                        RED,
+                    )
+                    failures += 1
+    if not matched:
+        if require_match:
+            report("✗ no function in these files has a proof", RED)
+            failures += 1
+        elif not quiet:
+            print("check-binary: no function in these files has a proof")
+    if failures:
+        print(
+            f"check-binary: {failures} check(s) failed: these files do not contain the "
+            "code that the HOL Light proofs are about (see the reassembly risk in "
+            "SOUNDNESS.md)"
+        )
+    return 1 if failures else 0
+
+
+def main(args):
+    try:
+        if args == ["gen"]:
+            print(yaml.safe_dump(gen_bind(), sort_keys=False), end="")
+            return 0
+        flags = {"--show-all", "--force-all", "--quiet", "--require-match"}
+        paths = [a for a in args if a not in flags]
+        if not paths or any(a.startswith("-") for a in paths):
+            sys.exit(__doc__.strip())
+        options = ("--show-all", "--force-all", "--quiet", "--require-match")
+        return check(paths, *(f in args for f in options))
+    except (Failed, conform.Failed, OSError) as e:
+        print(f"check-binary: {e}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

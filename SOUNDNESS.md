@@ -398,6 +398,10 @@ C reference implementations, catching gross mismatches.
 
 See the s2n-bignum soundness doc[^s2n-bignum-soundness] for further details on the ELF loader.
 
+With HOLTrace replay (see [C1](#c1-hol-light-kernel-and-ocaml-runtime)), the loader is no
+longer trusted: the accepted definitions fix each proof's machine code as a byte list, and
+`scripts/check-binary` checks that the proofs' object files contain exactly those bytes.
+
 **Reassembly risk.** When mlkem-native's `.S` files are assembled on a different system --
 whether by mlkem-native's own build, by a downstream consumer such as AWS-LC, or by a
 cross-compilation toolchain -- there is currently no systematic check that the resulting
@@ -501,14 +505,26 @@ yet not true, because of an unsoundness in the underlying proof infrastructure.
 
 ### C1. HOL Light kernel and OCaml runtime
 
-HOL Light has a small trusted kernel (~400 lines of OCaml) implementing 10 primitive inference rules and 3 axioms. All
-proofs are ultimately constructed through this kernel. Higher level infrastructure such as proof automation cannot
-compromise soundness as it is built atop the kernel. This is a fundamental design property of the LCF architecture.
-No soundness bugs in the kernel have been found since 2003.
+HOL Light has a small trusted kernel (~400 lines of OCaml) implementing 10
+primitive inference rules and three ways to extend the logic: new axioms,
+and conservative constant and type definitions. HOL Light itself uses three
+axioms. All proofs are ultimately constructed through this kernel.
+Higher-level infrastructure such as proof automation cannot compromise
+soundness when it uses only the kernel interface. Code in the same OCaml
+process can bypass that interface, however, for example through unsafe
+runtime operations.
 
-HOL Light runs on OCaml, so the OCaml compiler and runtime are also part of the trusted computing base. A compiler or
-runtime bug could in principle allow construction of a spurious theorem. This is mitigated by OCaml's maturity and
-widespread use.
+To remove the proof scripts and the OCaml runtime from the TCB, we use the
+HOLTrace[^HOLTrace] approach: we capture the kernel inferences that the
+proof scripts emit and store them in a trace file. This trace file is then
+replayed independently against the HOL Light kernel, in a process that loads
+neither s2n-bignum nor the proof scripts. During the replay, we record all
+definitions and theorems made. Finally, we check that no new axioms are
+introduced, and compare the definitions against trusted definitions
+generated from the pinned HOL Light and s2n-bignum, as well as against
+reviewed definitions and theorem statements expected from the proof at hand.
+See
+[`proofs/hol_light/hol_trace/README.md`](proofs/hol_light/hol_trace/README.md).
 
 Independent reassurance can be provided by Candle[^Candle] and HOLTrace [^HOLTrace]. See the s2n-bignum soundness doc[^s2n-bignum-soundness] for full details.
 

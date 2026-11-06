@@ -3983,6 +3983,24 @@ def gen_undefs():
     run_parallel(files, gen_source_undefs)
 
 
+def run_quietly(cmd):
+    """Run cmd, a long step, without printing its output unless it
+    fails."""
+    if _progress:
+        _progress.update(
+            _main_task,
+            description=f"[cyan]{_current_task}[/] [dim](this may take a few minutes)[/]",
+        )
+    p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    if p.returncode != 0:
+        console.print(p.stdout, end="", markup=False, highlight=False)
+        raise subprocess.CalledProcessError(p.returncode, cmd)
+
+
+def gen_hol_trace_defs():
+    run_quietly(["proofs/hol_light/hol_trace/hol-trace", "layers"])
+
+
 def gen_slothy(funcs):
     if not isinstance(funcs, list):
         return
@@ -4491,6 +4509,40 @@ def update_hol_light_bytecode_for_arch(arch, force_cross=()):
                 f"{proof_dir}/dump_bytecode.ml does not dump {asm_file.stem}.o"
             )
         update_bytecode_in_proof_script(ml_file, bytecode_dict[asm_file.stem])
+
+
+def gen_hol_light_bind():
+    """Write proofs/hol_light/bind.yml: the SHA-256 of the code of each
+    proved function, from the accepted .defs."""
+    check_binary = "scripts/check-binary"
+    if not os.path.exists(check_binary):
+        return
+    out = subprocess.run(
+        [check_binary, "gen"], check=True, capture_output=True, text=True
+    ).stdout
+    header = [
+        "# Copyright (c) The mlkem-native project authors",
+        "# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT",
+        "#",
+        "# WARNING: This file is auto-generated from scripts/autogen",
+        "#          in the mlkem-native repository.",
+        "#          Do not modify it directly.",
+        "#",
+        "# Hashes of the assembled kernels that HOL Light proofs reason about.",
+        "# Use scripts/check-binary to check if a given binary contains matching",
+        "# function symbols and machine code.",
+        "#",
+        "# Each entry is keyed by a kernel's symbol without the `mlk_` prefix,",
+        "# and names the architecture and function of its proof,",
+        "# proofs/hol_light/ARCH/proofs/FUNC.ml. `sha256` maps each byte list in",
+        "# the proof's accepted FUNC.defs to its hash:",
+        "# - FUNC_mc is the kernel's code as the proof assembles it. On x86_64,",
+        "#   it starts with ENDBR64, which builds emit only with CET enabled.",
+        "# - FUNC_tmc, on x86_64 only, is that code without ENDBR64. The proofs'",
+        "#   NOIBT theorems are about it, and builds without CET contain it.",
+        "# A kernel matches if its code has either hash.",
+    ]
+    update_file("proofs/hol_light/bind.yml", "\n".join(header) + "\n" + out)
 
 
 def gen_hol_light_deps():
@@ -5465,6 +5517,14 @@ def _main():
         help="Extra CFLAGS prepended to ppc64le simpasm invocations",
     )
     parser.add_argument(
+        "--hol-trace-defs",
+        default=False,
+        action="store_true",
+        help="Regenerate proofs/hol_light/hol_trace/accepted/{base,spec} "
+        "from the pinned HOL Light and s2n-bignum and the specification "
+        "files. Run in `nix develop .#hol_light`.",
+    )
+    parser.add_argument(
         "--test-vectors",
         default=False,
         action="store_true",
@@ -5511,6 +5571,11 @@ def _main():
             "Generate SLOTHY optimized assembly",
             lambda: gen_slothy(args.slothy),
             args.slothy is not None and not args.dry_run,
+        ),
+        (
+            "Generate HOLTrace definition layers",
+            gen_hol_trace_defs,
+            args.hol_trace_defs and not args.dry_run,
         ),
     ]
 
@@ -5562,6 +5627,7 @@ def _main():
             args.update_hol_light_bytecode,
         ),
         ("Generate HOL Light proof dependencies", gen_hol_light_deps),
+        ("Generate HOL Light machine-code bindings", gen_hol_light_bind),
         ("Generate monolithic source files", gen_monolithic),
         ("Generate undefs", gen_undefs),
         ("Generate test configs", gen_test_configs),

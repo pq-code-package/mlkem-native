@@ -80,8 +80,9 @@ $(OBJ): %.o : %.S
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	cat $< | $(PREPROCESS) | $(SPLIT) | $(ASSEMBLE) -o $@ -
 	# MacOS may generate relocations in non-text sections that break
-	# the object file parser in HOL-Light
-	strip $@
+	# the object file parser in HOL-Light. Keep the function's symbol,
+	# which check-binary looks for; strips without --keep-symbol drop it.
+	strip $(patsubst %,--keep-symbol=%,$(shell sed -n 's/^\.global //p' $<)) $@ 2>/dev/null || strip $@
 
 clean:; rm -f */*.o */*/*.o */*.correct */*.native
 
