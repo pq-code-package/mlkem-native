@@ -3979,6 +3979,10 @@ def gen_undefs():
     run_parallel(files, gen_source_undefs)
 
 
+def gen_hol_trace_defs():
+    subprocess.run(["proofs/hol_light/hol_trace/hol-trace", "layers"], check=True)
+
+
 def gen_slothy(funcs):
     if not isinstance(funcs, list):
         return
@@ -5424,6 +5428,14 @@ def _main():
         help="Extra CFLAGS prepended to ppc64le simpasm invocations",
     )
     parser.add_argument(
+        "--hol-trace-defs",
+        default=False,
+        action="store_true",
+        help="Regenerate proofs/hol_light/hol_trace/accepted/{base,spec} "
+        "from the pinned HOL Light and s2n-bignum and the specification "
+        "files. Run in `nix develop .#hol_trace`.",
+    )
+    parser.add_argument(
         "--test-vectors",
         default=False,
         action="store_true",
@@ -5470,6 +5482,11 @@ def _main():
             "Generate SLOTHY optimized assembly",
             lambda: gen_slothy(args.slothy),
             args.slothy is not None and not args.dry_run,
+        ),
+        (
+            "Generate HOLTrace definition layers",
+            gen_hol_trace_defs,
+            args.hol_trace_defs and not args.dry_run,
         ),
     ]
 
