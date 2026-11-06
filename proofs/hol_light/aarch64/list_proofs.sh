@@ -5,6 +5,6 @@
 # This tiny script just lists the names of source files for which
 # we have a spec and proof in HOL-Light.
 
-ROOT=$(git rev-parse --show-toplevel)
-cd "$ROOT" || exit
-ls -1 proofs/hol_light/aarch64/mlkem/*.S | cut -d '/' -f 5 | sed 's/\.S//'
+set -euo pipefail
+cd "$(dirname "$(realpath "$0")")/mlkem"
+ls -1 -- *.S | sed 's/\.S$//'
