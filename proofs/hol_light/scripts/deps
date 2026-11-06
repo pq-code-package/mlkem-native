@@ -155,15 +155,35 @@ EVERY_PROOF = (
     ".github/actions/setup-nix/",
     ".github/actions/setup-shell/",
     HL + "aarch64/proofs/build-proof.sh",  # used for both architectures
+    "scripts/check-binary",  # checks the proofs' object files
 )
+HT = HL + "hol_trace/"
+ACC = HT + "accepted/"
+S2N_LAYER = {"s2n_bignum_arm.defs": "aarch64", "s2n_bignum_x86.defs": "x86_64"}
 
 
 def affected(path, deps, proofs):
-    """The proofs that a change to path can affect."""
+    """The proofs that a change to path can affect, both for HOL-Light CI
+    and for HOLTrace CI."""
     if path.endswith(".md") or path == HL + "s2n_bignum_allowlist.txt":
         return set()  # documentation; the allowlist is read by `check` only
+    if path == HL + "bind.yml":
+        return set()  # derived from the accepted .defs, which select proofs
     if path.startswith(EVERY_PROOF):
         return set(proofs)
+    # An accepted HOLTrace file selects what the file it comes from selects.
+    if path.startswith(ACC + "base/"):  # HOL Light, or s2n-bignum for ARCH
+        arch = S2N_LAYER.get(os.path.basename(path))
+        return {p for p in proofs if p.startswith(f"{arch}/")} if arch else set(proofs)
+    if path.startswith(ACC + "spec/"):  # spec/[ARCH/]NAME.defs
+        arch, _, name = os.path.splitext(path[len(ACC + "spec/") :])[0].rpartition("/")
+        src = f"{arch}/proofs/{name}.ml" if arch else f"common/{name}.ml"
+        return affected(HL + src, deps, proofs)
+    if path.startswith(ACC + "proofs/"):  # proofs/ARCH/FUNC.{defs,thms}
+        arch, name = path[len(ACC + "proofs/") :].split("/", 1)
+        return affected(
+            f"{HL}{arch}/proofs/{os.path.splitext(name)[0]}.ml", deps, proofs
+        )
     users = {p for p, d in deps.items() if path in d["files"]}
     if users:
         return users
@@ -171,8 +191,9 @@ def affected(path, deps, proofs):
     for arch in ARCHS:
         if path.startswith(f"{HL}{arch}/"):
             return {p for p in proofs if p.startswith(arch + "/")}
-    # Anything else under proofs/hol_light, including deps.yml and these
-    # scripts, can affect every proof; files elsewhere none.
+    # Anything else under proofs/hol_light, including deps.yml, these
+    # scripts and HOLTrace's tools, can affect every proof; files elsewhere
+    # none.
     return set(proofs) if path.startswith(HL) else set()
 
 

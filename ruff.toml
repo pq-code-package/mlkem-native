@@ -4,6 +4,8 @@
 # In addition to ruff's default (*.py, *.pyi), format and lint the
 # extension-less python scripts under scripts/ and proofs/.
 extend-include = [
+    "scripts/check-binary",
+    "proofs/hol_light/hol_trace/hol-trace",
     "proofs/hol_light/scripts/deps",
     "scripts/autogen",
     "scripts/cfify",

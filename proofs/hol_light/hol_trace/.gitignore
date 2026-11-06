@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+/traces/**
+!/traces/**/
+!/traces/**/README.md
+/__pycache__/
