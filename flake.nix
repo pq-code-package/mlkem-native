@@ -23,7 +23,10 @@
         let
           pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
           # z3 for the CBMC tool bundle comes from nixos-unstable.
-          util = pkgs.callPackage ./nix/util.nix { inherit (pkgs-unstable) z3; };
+          util = pkgs.callPackage ./nix/util.nix {
+            inherit pkgs-unstable;
+            inherit (pkgs-unstable) z3;
+          };
           holLightToolchain = builtins.attrValues {
             inherit (pkgs) ocaml ledit;
             inherit (pkgs.ocamlPackages) findlib camlp5 zarith;
@@ -65,7 +68,12 @@
             inherit packages;
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
           mkHolTraceShell = packages: (util.mkShell {
-            packages = packages ++ [ config.packages.hol_trace ];
+            packages = packages ++ [
+              config.packages.hol_trace
+              config.packages.hol_lean
+            ] ++ pkgs.lib.optionals (pkgs.stdenv.isLinux && pkgs.stdenv.isx86_64) [
+              config.packages.hol_candle
+            ];
           }).overrideAttrs (old: { shellHook = holTraceShellHook; });
 
         in
@@ -86,6 +94,8 @@
           packages.hol_light = util.hol_light';
           packages.s2n_bignum = util.s2n_bignum;
           packages.hol_trace = util.hol_trace;
+          packages.hol_lean = util.hol_lean;
+          packages.hol_candle = util.hol_candle;
           packages.valgrind_varlat = util.valgrind_varlat;
           packages.slothy = util.slothy;
           packages.toolchains = util.toolchains;
