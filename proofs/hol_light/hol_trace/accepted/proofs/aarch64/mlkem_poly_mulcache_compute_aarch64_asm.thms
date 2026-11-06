@@ -1,0 +1,62 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# aarch64/mlkem_poly_mulcache_compute_aarch64_asm
+#
+# The main theorems. Written by `hol-trace conform --accept`; review
+# changes like source code: this is what the proof claims.
+
+theorem aarch64/mlkem_poly_mulcache_compute_aarch64_asm MLKEM_POLY_MULCACHE_COMPUTE_SUBROUTINE_CORRECT
+  |- (!dst:(word #64) src:(word #64) zetas:(word #64) zetas_twisted:(word #64) x:(num -> (word #16)) pc:num returnaddress:(word #64).
+       (==>
+         (ALL (nonoverlapping (, dst #256))
+           [(, (word:(num -> (word #64)) pc) (LENGTH poly_mulcache_compute_mc)); (, src #512);
+            (, zetas #256); (, zetas_twisted #256)])
+         (ensures arm
+           (\s:armstate.
+             (/\ (aligned_bytes_loaded s (word:(num -> (word #64)) pc) poly_mulcache_compute_mc)
+               (= (read PC s) (word:(num -> (word #64)) pc)) (= (read X30 s) returnaddress)
+               (C_ARGUMENTS [dst; src; zetas; zetas_twisted] s)
+               (!i:num.
+                 (==> (< i #256)
+                   (=
+                     (read (":>" memory (bytes16 (word_add src (word:(num -> (word #64)) (* #2 i)))))
+                       s)
+                     (x i))))
+               (have_mulcache_zetas zetas zetas_twisted s)))
+           (\s:armstate.
+             (/\ (= (read PC s) returnaddress)
+               (!i:num.
+                 (==> (< i #128)
+                   (LET
+                     (\z_i:(word #16).
+                       (LET_END
+                         (/\
+                           (== (ival z_i) (mulcache (o ival:((word #16) -> int) x) i) (int_mod &3329))
+                           (int_le (int_abs (ival z_i)) &3328))))
+                     (read (":>" memory (bytes16 (word_add dst (word:(num -> (word #64)) (* #2 i)))))
+                       s))))))
+           (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             (MAYCHANGE [(":>" memory (bytes (, dst #256)))])))))
+
+theorem aarch64/mlkem_poly_mulcache_compute_aarch64_asm MLKEM_POLY_MULCACHE_COMPUTE_SUBROUTINE_SAFE
+  |- (?f_events:((word #64) -> (word #64) -> (word #64) -> (word #64) -> num -> (word #64) -> (list (address_uarch_event #64))).
+       (!e:(list (address_uarch_event #64)) dst:(word #64) src:(word #64) zetas:(word #64) zetas_twisted:(word #64) pc:num returnaddress:(word #64).
+         (==>
+           (ALL (nonoverlapping (, dst #256))
+             [(, (word:(num -> (word #64)) pc) (LENGTH poly_mulcache_compute_mc)); (, src #512);
+              (, zetas #256); (, zetas_twisted #256)])
+           (ensures arm
+             (\s:armstate.
+               (/\ (aligned_bytes_loaded s (word:(num -> (word #64)) pc) poly_mulcache_compute_mc)
+                 (= (read PC s) (word:(num -> (word #64)) pc)) (= (read X30 s) returnaddress)
+                 (C_ARGUMENTS [dst; src; zetas; zetas_twisted] s) (= (read events s) e)))
+             (\s:armstate.
+               (/\ (= (read PC s) returnaddress)
+                 (?e2:(list (address_uarch_event #64)).
+                   (/\ (= (read events s) (APPEND e2 e))
+                     (= e2 (f_events src zetas zetas_twisted dst pc returnaddress))
+                     (memaccess_inbounds e2
+                       [(, src #512); (, zetas #256); (, zetas_twisted #256); (, dst #256)]
+                       [(, dst #256)])))))
+             (\s:armstate s':armstate. T)))))

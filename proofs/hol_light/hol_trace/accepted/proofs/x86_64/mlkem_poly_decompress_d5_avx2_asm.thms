@@ -1,0 +1,115 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# x86_64/mlkem_poly_decompress_d5_avx2_asm
+#
+# The main theorems. Written by `hol-trace conform --accept`; review
+# changes like source code: this is what the proof claims.
+
+theorem x86_64/mlkem_poly_decompress_d5_avx2_asm MLKEM_POLY_DECOMPRESS_D5_NOIBT_SUBROUTINE_CORRECT
+  |- (!r:(word #64) a:(word #64) data:(word #64) inlist:(list (word #5)) pc:num stackpointer:(word #64) returnaddress:(word #64).
+       (==>
+         (/\ (= (LENGTH inlist) #256) (aligned #32 r) (aligned #32 data)
+           (ALL (nonoverlapping (, r #512))
+             [(, (word:(num -> (word #64)) pc) (LENGTH mlkem_poly_decompress_d5_tmc)); (, a #160);
+              (, data #96); (, stackpointer #8)]))
+         (ensures x86
+           (\s:x86state.
+             (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_poly_decompress_d5_tmc)
+               (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+               (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress)
+               (C_ARGUMENTS [r; a; data] s)
+               (= (read (":>" memory (bytes (, data #96))) s)
+                 (num_of_wordlist (MAP iword:(int -> (word #8)) decompress_d5_data)))
+               (= (read (":>" memory (bytes (, a #160))) s) (num_of_wordlist inlist))))
+           (\s:x86state.
+             (/\ (= (read RIP s) returnaddress)
+               (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+               (= (read (":>" memory (bytes (, r #512))) s)
+                 (num_of_wordlist (MAP decompress_d5 inlist)))
+               (!i:num.
+                 (==> (< i #256)
+                   (/\ (int_le &0 (ival (EL i (MAP decompress_d5 inlist))))
+                     (int_lt (ival (EL i (MAP decompress_d5 inlist))) &3329))))))
+           (,, (MAYCHANGE [RSP])
+             (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+               (MAYCHANGE [(":>" memory (bytes (, r #512)))]))))))
+
+theorem x86_64/mlkem_poly_decompress_d5_avx2_asm MLKEM_POLY_DECOMPRESS_D5_NOIBT_SUBROUTINE_SAFE
+  |- (?f_events:((word #64) -> (word #64) -> (word #64) -> num -> (word #64) -> (word #64) -> (list (address_uarch_event #64))).
+       (!e:(list (address_uarch_event #64)) r:(word #64) a:(word #64) data:(word #64) inlist:(list (word #5)) pc:num stackpointer:(word #64) returnaddress:(word #64).
+         (==>
+           (/\ (= (LENGTH inlist) #256) (aligned #32 r) (aligned #32 data)
+             (ALL (nonoverlapping (, r #512))
+               [(, (word:(num -> (word #64)) pc) (LENGTH mlkem_poly_decompress_d5_tmc)); (, a #160);
+                (, data #96); (, stackpointer #8)]))
+           (ensures x86
+             (\s:x86state.
+               (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_poly_decompress_d5_tmc)
+                 (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+                 (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress)
+                 (C_ARGUMENTS [r; a; data] s) (= (read events s) e)))
+             (\s:x86state.
+               (/\ (= (read RIP s) returnaddress)
+                 (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+                 (?e2:(list (address_uarch_event #64)).
+                   (/\ (= (read events s) (APPEND e2 e))
+                     (= e2 (f_events a data r pc stackpointer returnaddress))
+                     (memaccess_inbounds e2
+                       [(, a #160); (, data #96); (, r #512); (, stackpointer #8)]
+                       [(, r #512); (, stackpointer #8)])))))
+             (\s:x86state s':x86state. T)))))
+
+theorem x86_64/mlkem_poly_decompress_d5_avx2_asm MLKEM_POLY_DECOMPRESS_D5_SUBROUTINE_CORRECT
+  |- (!r:(word #64) a:(word #64) data:(word #64) inlist:(list (word #5)) pc:num stackpointer:(word #64) returnaddress:(word #64).
+       (==>
+         (/\ (= (LENGTH inlist) #256) (aligned #32 r) (aligned #32 data)
+           (ALL (nonoverlapping (, r #512))
+             [(, (word:(num -> (word #64)) pc) (LENGTH mlkem_poly_decompress_d5_mc)); (, a #160);
+              (, data #96); (, stackpointer #8)]))
+         (ensures x86
+           (\s:x86state.
+             (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_poly_decompress_d5_mc)
+               (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+               (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress)
+               (C_ARGUMENTS [r; a; data] s)
+               (= (read (":>" memory (bytes (, data #96))) s)
+                 (num_of_wordlist (MAP iword:(int -> (word #8)) decompress_d5_data)))
+               (= (read (":>" memory (bytes (, a #160))) s) (num_of_wordlist inlist))))
+           (\s:x86state.
+             (/\ (= (read RIP s) returnaddress)
+               (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+               (= (read (":>" memory (bytes (, r #512))) s)
+                 (num_of_wordlist (MAP decompress_d5 inlist)))
+               (!i:num.
+                 (==> (< i #256)
+                   (/\ (int_le &0 (ival (EL i (MAP decompress_d5 inlist))))
+                     (int_lt (ival (EL i (MAP decompress_d5 inlist))) &3329))))))
+           (,, (MAYCHANGE [RSP])
+             (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+               (MAYCHANGE [(":>" memory (bytes (, r #512)))]))))))
+
+theorem x86_64/mlkem_poly_decompress_d5_avx2_asm MLKEM_POLY_DECOMPRESS_D5_SUBROUTINE_SAFE
+  |- (?f_events:((word #64) -> (word #64) -> (word #64) -> num -> (word #64) -> (word #64) -> (list (address_uarch_event #64))).
+       (!e:(list (address_uarch_event #64)) r:(word #64) a:(word #64) data:(word #64) inlist:(list (word #5)) pc:num stackpointer:(word #64) returnaddress:(word #64).
+         (==>
+           (/\ (= (LENGTH inlist) #256) (aligned #32 r) (aligned #32 data)
+             (ALL (nonoverlapping (, r #512))
+               [(, (word:(num -> (word #64)) pc) (LENGTH mlkem_poly_decompress_d5_mc)); (, a #160);
+                (, data #96); (, stackpointer #8)]))
+           (ensures x86
+             (\s:x86state.
+               (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_poly_decompress_d5_mc)
+                 (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+                 (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress)
+                 (C_ARGUMENTS [r; a; data] s) (= (read events s) e)))
+             (\s:x86state.
+               (/\ (= (read RIP s) returnaddress)
+                 (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+                 (?e2:(list (address_uarch_event #64)).
+                   (/\ (= (read events s) (APPEND e2 e))
+                     (= e2 (f_events a data r pc stackpointer returnaddress))
+                     (memaccess_inbounds e2
+                       [(, a #160); (, data #96); (, r #512); (, stackpointer #8)]
+                       [(, r #512); (, stackpointer #8)])))))
+             (\s:x86state s':x86state. T)))))

@@ -1,0 +1,97 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# aarch64/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm
+#
+# The main theorems. Written by `hol-trace conform --accept`; review
+# changes like source code: this is what the proof claims.
+
+theorem aarch64/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm KECCAK_F1600_X4_V8A_V84A_SCALAR_HYBRID_SUBROUTINE_CORRECT
+  |- (!a:(word #64) rc:(word #64) A1:(list (word #64)) A2:(list (word #64)) A3:(list (word #64)) A4:(list (word #64)) pc:num stackpointer:(word #64) returnaddress:(word #64).
+       (==>
+         (/\ (aligned #16 stackpointer)
+           (nonoverlapping (, a #800) (, (word_sub stackpointer (word:(num -> (word #64)) #224)) #224))
+           (ALLPAIRS nonoverlapping:(((word #64) # num) -> ((word #64) # num) -> bool)
+             [(, a #800); (, (word_sub stackpointer (word:(num -> (word #64)) #224)) #224)]
+             [(, (word:(num -> (word #64)) pc) (LENGTH keccak_f1600_x4_v8a_v84a_scalar_mc));
+              (, rc #192)]))
+         (ensures arm
+           (\s:armstate.
+             (/\
+               (aligned_bytes_loaded s (word:(num -> (word #64)) pc)
+                 keccak_f1600_x4_v8a_v84a_scalar_mc)
+               (= (read PC s) (word:(num -> (word #64)) pc)) (= (read SP s) stackpointer)
+               (= (read X30 s) returnaddress) (C_ARGUMENTS [a; rc] s)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> armstate -> (list (word #64))) (, a #25)
+                   s)
+                 A1)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> armstate -> (list (word #64)))
+                   (, (word_add a (word:(num -> (word #64)) #200)) #25) s)
+                 A2)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> armstate -> (list (word #64)))
+                   (, (word_add a (word:(num -> (word #64)) #400)) #25) s)
+                 A3)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> armstate -> (list (word #64)))
+                   (, (word_add a (word:(num -> (word #64)) #600)) #25) s)
+                 A4)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> armstate -> (list (word #64)))
+                   (, rc #24) s)
+                 round_constants)))
+           (\s:armstate.
+             (/\ (= (read PC s) returnaddress)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> armstate -> (list (word #64))) (, a #25)
+                   s)
+                 (keccak #24 A1))
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> armstate -> (list (word #64)))
+                   (, (word_add a (word:(num -> (word #64)) #200)) #25) s)
+                 (keccak #24 A2))
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> armstate -> (list (word #64)))
+                   (, (word_add a (word:(num -> (word #64)) #400)) #25) s)
+                 (keccak #24 A3))
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> armstate -> (list (word #64)))
+                   (, (word_add a (word:(num -> (word #64)) #600)) #25) s)
+                 (keccak #24 A4))))
+           (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             (MAYCHANGE
+               [(":>" memory (bytes (, a #800)));
+                (":>" memory (bytes (, (word_sub stackpointer (word:(num -> (word #64)) #224)) #224)))])))))
+
+theorem aarch64/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm KECCAK_F1600_X4_V8A_V84A_SCALAR_HYBRID_SUBROUTINE_SAFE
+  |- (?f_events:((word #64) -> (word #64) -> num -> (word #64) -> (word #64) -> (list (address_uarch_event #64))).
+       (!e:(list (address_uarch_event #64)) a:(word #64) rc:(word #64) pc:num stackpointer:(word #64) returnaddress:(word #64).
+         (==>
+           (/\ (aligned #16 stackpointer)
+             (nonoverlapping (, a #800)
+               (, (word_sub stackpointer (word:(num -> (word #64)) #224)) #224))
+             (ALLPAIRS nonoverlapping:(((word #64) # num) -> ((word #64) # num) -> bool)
+               [(, a #800); (, (word_sub stackpointer (word:(num -> (word #64)) #224)) #224)]
+               [(, (word:(num -> (word #64)) pc) (LENGTH keccak_f1600_x4_v8a_v84a_scalar_mc));
+                (, rc #192)]))
+           (ensures arm
+             (\s:armstate.
+               (/\
+                 (aligned_bytes_loaded s (word:(num -> (word #64)) pc)
+                   keccak_f1600_x4_v8a_v84a_scalar_mc)
+                 (= (read PC s) (word:(num -> (word #64)) pc)) (= (read SP s) stackpointer)
+                 (= (read X30 s) returnaddress) (C_ARGUMENTS [a; rc] s) (= (read events s) e)))
+             (\s:armstate.
+               (/\ (= (read PC s) returnaddress)
+                 (?e2:(list (address_uarch_event #64)).
+                   (/\ (= (read events s) (APPEND e2 e))
+                     (= e2
+                       (f_events rc a pc (word_sub stackpointer (word:(num -> (word #64)) #224))
+                         returnaddress))
+                     (memaccess_inbounds e2
+                       [(, a #800); (, rc #192);
+                        (, (word_sub stackpointer (word:(num -> (word #64)) #224)) #224)]
+                       [(, a #800); (, (word_sub stackpointer (word:(num -> (word #64)) #224)) #224)])))))
+             (\s:armstate s':armstate. T)))))

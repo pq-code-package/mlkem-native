@@ -1,0 +1,54 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# x86_64/mlkem_poly_mulcache_compute_avx2_asm
+#
+# The definitions that the main theorems use beyond the generated
+# layers. Written by `hol-trace conform --accept`; review changes like
+# source code. check-bind compares the byte lists named in
+# mlkem_poly_mulcache_compute_avx2_asm.bind with sections of object files.
+
+definition avx2_mulcache
+  |- (= avx2_mulcache
+       (@
+         (\avx2_mulcache:((num # num # num # num # num # num # num # num # num # num # num # num # num) -> (num -> int) -> num -> int).
+           (!_1:(num # num # num # num # num # num # num # num # num # num # num # num # num) f:(num -> int) k:num.
+             (= (avx2_mulcache _1 f k)
+               (LET
+                 (\r:num.
+                   (LET_END
+                     (LET
+                       (\q:num.
+                         (LET_END
+                           (LET
+                             (\s:num.
+                               (LET_END
+                                 (LET
+                                   (\t:num.
+                                     (LET_END
+                                       (rem
+                                         (int_mul (f s) (int_pow &17 (+ (* #2 (bitreverse7 t)) #1)))
+                                         &3329)))
+                                   (+ (* #64 r) (+ (* #2 (DIV q #32)) (* #4 (MOD q #16)))))))
+                             (+ (* r #128) (+ (* #32 (DIV q #16)) (+ (MOD q #16) #16))))))
+                       (MOD k #64))))
+                 (DIV k #64)))))
+         (, #97 #118 #120 #50 #95 #109 #117 #108 #99 #97 #99 #104 #101)))
+
+# mlkem_mulcache_compute_mc: 331 bytes, sha256 acbc0b0754b8003a6edb95bb3753ee1d9e68f16499ef419c2b1b7a9f7ec4957c
+definition mlkem_mulcache_compute_mc
+  |- (= mlkem_mulcache_compute_mc
+       #x[f3 0f 1e fa b8 01 0d 01 0d c5 f9 6e c0 c4 e2 7d 58 c0 c5 fd 6f 56 20 c5 fd 6f 5e 60 c5 fd 6f
+          a2 e0 03 00 00 c5 fd 6f 8a 60 04 00 00 c5 f5 d5 ea c5 f5 d5 f3 c5 dd e5 fa c5 5d e5 c3 c5 7d
+          e5 cd c5 7d e5 d6 c4 c1 45 f9 f9 c4 41 3d f9 c2 c5 fd 7f 3f c5 7d 7f 47 20 c5 fd 6f 96 a0 00
+          00 00 c5 fd 6f 9e e0 00 00 00 c5 fd 6f a2 00 04 00 00 c5 fd 6f 8a 80 04 00 00 c5 f5 d5 ea c5
+          f5 d5 f3 c5 dd e5 fa c5 5d e5 c3 c5 7d e5 cd c5 7d e5 d6 c4 c1 45 f9 f9 c4 41 3d f9 c2 c5 fd
+          7f 7f 40 c5 7d 7f 47 60 c5 fd 6f 96 20 01 00 00 c5 fd 6f 9e 60 01 00 00 c5 fd 6f a2 20 04 00
+          00 c5 fd 6f 8a a0 04 00 00 c5 f5 d5 ea c5 f5 d5 f3 c5 dd e5 fa c5 5d e5 c3 c5 7d e5 cd c5 7d
+          e5 d6 c4 c1 45 f9 f9 c4 41 3d f9 c2 c5 fd 7f bf 80 00 00 00 c5 7d 7f 87 a0 00 00 00 c5 fd 6f
+          96 a0 01 00 00 c5 fd 6f 9e e0 01 00 00 c5 fd 6f a2 40 04 00 00 c5 fd 6f 8a c0 04 00 00 c5 f5
+          d5 ea c5 f5 d5 f3 c5 dd e5 fa c5 5d e5 c3 c5 7d e5 cd c5 7d e5 d6 c4 c1 45 f9 f9 c4 41 3d f9
+          c2 c5 fd 7f bf c0 00 00 00 c5 7d 7f 87 e0 00 00 00 c5 f8 77 c3])
+
+definition mlkem_mulcache_compute_tmc
+  |- (= mlkem_mulcache_compute_tmc (TRIM_LIST (, #4 #0) mlkem_mulcache_compute_mc))

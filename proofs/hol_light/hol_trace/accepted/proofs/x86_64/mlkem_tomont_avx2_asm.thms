@@ -1,0 +1,119 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# x86_64/mlkem_tomont_avx2_asm
+#
+# The main theorems. Written by `hol-trace conform --accept`; review
+# changes like source code: this is what the proof claims.
+
+theorem x86_64/mlkem_tomont_avx2_asm MLKEM_TOMONT_NOIBT_SUBROUTINE_CORRECT
+  |- (!a:(word #64) x:(num -> (word #16)) pc:num stackpointer:(word #64) returnaddress:(word #64).
+       (==>
+         (/\ (aligned #32 a)
+           (nonoverlapping (, (word:(num -> (word #64)) pc) (LENGTH mlkem_tomont_tmc)) (, a #512))
+           (nonoverlapping (, stackpointer #8) (, a #512)))
+         (ensures x86
+           (\s:x86state.
+             (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_tomont_tmc)
+               (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+               (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress) (C_ARGUMENTS [a] s)
+               (!i:num.
+                 (==> (< i #256)
+                   (=
+                     (read (":>" memory (bytes16 (word_add a (word:(num -> (word #64)) (* #2 i))))) s)
+                     (x i))))))
+           (\s:x86state.
+             (/\ (= (read RIP s) returnaddress)
+               (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+               (!i:num.
+                 (==> (< i #256)
+                   (LET
+                     (\z_i:(word #16).
+                       (LET_END
+                         (/\
+                           (== (ival z_i) (tomont_3329 (o ival:((word #16) -> int) x) i)
+                             (int_mod &3329))
+                           (int_le (int_abs (ival z_i)) &3328))))
+                     (read (":>" memory (bytes16 (word_add a (word:(num -> (word #64)) (* #2 i))))) s))))))
+           (,, (MAYCHANGE [RSP])
+             (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+               (MAYCHANGE [(":>" memory (bytes (, a #512)))]))))))
+
+theorem x86_64/mlkem_tomont_avx2_asm MLKEM_TOMONT_NOIBT_SUBROUTINE_SAFE
+  |- (?f_events:((word #64) -> num -> (word #64) -> (word #64) -> (list (address_uarch_event #64))).
+       (!e:(list (address_uarch_event #64)) a:(word #64) pc:num stackpointer:(word #64) returnaddress:(word #64).
+         (==>
+           (/\ (aligned #32 a)
+             (nonoverlapping (, (word:(num -> (word #64)) pc) (LENGTH mlkem_tomont_tmc)) (, a #512))
+             (nonoverlapping (, stackpointer #8) (, a #512)))
+           (ensures x86
+             (\s:x86state.
+               (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_tomont_tmc)
+                 (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+                 (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress) (C_ARGUMENTS [a] s)
+                 (= (read events s) e)))
+             (\s:x86state.
+               (/\ (= (read RIP s) returnaddress)
+                 (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+                 (?e2:(list (address_uarch_event #64)).
+                   (/\ (= (read events s) (APPEND e2 e))
+                     (= e2 (f_events a pc stackpointer returnaddress))
+                     (memaccess_inbounds e2 [(, a #512); (, stackpointer #8)]
+                       [(, a #512); (, stackpointer #8)])))))
+             (\s:x86state s':x86state. T)))))
+
+theorem x86_64/mlkem_tomont_avx2_asm MLKEM_TOMONT_SUBROUTINE_CORRECT
+  |- (!a:(word #64) x:(num -> (word #16)) pc:num stackpointer:(word #64) returnaddress:(word #64).
+       (==>
+         (/\ (aligned #32 a)
+           (nonoverlapping (, (word:(num -> (word #64)) pc) (LENGTH mlkem_tomont_mc)) (, a #512))
+           (nonoverlapping (, stackpointer #8) (, a #512)))
+         (ensures x86
+           (\s:x86state.
+             (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_tomont_mc)
+               (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+               (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress) (C_ARGUMENTS [a] s)
+               (!i:num.
+                 (==> (< i #256)
+                   (=
+                     (read (":>" memory (bytes16 (word_add a (word:(num -> (word #64)) (* #2 i))))) s)
+                     (x i))))))
+           (\s:x86state.
+             (/\ (= (read RIP s) returnaddress)
+               (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+               (!i:num.
+                 (==> (< i #256)
+                   (LET
+                     (\z_i:(word #16).
+                       (LET_END
+                         (/\
+                           (== (ival z_i) (tomont_3329 (o ival:((word #16) -> int) x) i)
+                             (int_mod &3329))
+                           (int_le (int_abs (ival z_i)) &3328))))
+                     (read (":>" memory (bytes16 (word_add a (word:(num -> (word #64)) (* #2 i))))) s))))))
+           (,, (MAYCHANGE [RSP])
+             (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+               (MAYCHANGE [(":>" memory (bytes (, a #512)))]))))))
+
+theorem x86_64/mlkem_tomont_avx2_asm MLKEM_TOMONT_SUBROUTINE_SAFE
+  |- (?f_events:((word #64) -> num -> (word #64) -> (word #64) -> (list (address_uarch_event #64))).
+       (!e:(list (address_uarch_event #64)) a:(word #64) pc:num stackpointer:(word #64) returnaddress:(word #64).
+         (==>
+           (/\ (aligned #32 a)
+             (nonoverlapping (, (word:(num -> (word #64)) pc) (LENGTH mlkem_tomont_mc)) (, a #512))
+             (nonoverlapping (, stackpointer #8) (, a #512)))
+           (ensures x86
+             (\s:x86state.
+               (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_tomont_mc)
+                 (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+                 (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress) (C_ARGUMENTS [a] s)
+                 (= (read events s) e)))
+             (\s:x86state.
+               (/\ (= (read RIP s) returnaddress)
+                 (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+                 (?e2:(list (address_uarch_event #64)).
+                   (/\ (= (read events s) (APPEND e2 e))
+                     (= e2 (f_events a pc stackpointer returnaddress))
+                     (memaccess_inbounds e2 [(, a #512); (, stackpointer #8)]
+                       [(, a #512); (, stackpointer #8)])))))
+             (\s:x86state s':x86state. T)))))

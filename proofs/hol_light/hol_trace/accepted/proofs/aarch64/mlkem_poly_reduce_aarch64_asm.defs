@@ -1,0 +1,27 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# aarch64/mlkem_poly_reduce_aarch64_asm
+#
+# The definitions that the main theorems use beyond the generated
+# layers. Written by `hol-trace conform --accept`; review changes like
+# source code. check-bind compares the byte lists named in
+# mlkem_poly_reduce_aarch64_asm.bind with sections of object files.
+
+# mlkem_poly_reduce_mc: 420 bytes, sha256 5e7c08b8d4c19ecc8425ef8c30a9263b6f11ecd94109bebc07873fb3a2cf24f7
+definition mlkem_poly_reduce_mc
+  |- (= mlkem_poly_reduce_mc
+       #x[22 a0 81 52 43 0c 02 4e e2 d7 89 52 44 0c 02 4e 01 01 80 d2 15 04 c4 3c 12 00 de 3c 00 00 dd
+          3c 05 00 df 3c 1a 04 c4 3c b1 c2 44 4f 5b c2 44 4f 16 c0 44 4f 31 26 15 4f b7 c0 44 4f 7d 27
+          15 4f 35 42 43 6f d1 26 15 4f b2 43 43 6f f6 26 15 4f 20 42 43 6f a2 06 11 4f c5 42 43 6f 5d
+          06 11 4f 73 1c 22 4e 42 c3 44 4f 1f 04 11 4f b1 86 73 4e 75 1c 3d 4e 7f 1c 3f 4e 21 08 00 d1
+          55 86 75 4e 12 00 de 3c 19 84 7f 4e 00 00 dd 3c 15 00 9a 3c bc 04 11 4f 11 00 98 3c 57 24 15
+          4f 5e c2 44 4f 19 00 99 3c 76 1c 3c 4e 07 c0 44 4f b0 84 76 4e 05 00 df 3c fa 42 43 6f 10 00
+          9b 3c c6 27 15 4f e1 24 15 4f b3 c0 44 4f d2 40 43 6f 58 07 11 4f 20 40 43 6f 7b 1c 38 4e 7d
+          26 15 4f 51 87 7b 4e 1a 04 c4 3c 41 06 11 4f a5 43 43 6f 14 04 11 4f 75 1c 21 4e 7f 1c 34 4e
+          42 c3 44 4f 21 04 00 f1 e1 fb ff b5 1c 84 7f 4e 1d 00 df 3c 55 86 75 4e 52 24 15 4f a2 04 11
+          4f 10 00 de 3c 11 00 98 3c 00 00 dd 3c 62 1c 22 4e b8 c3 44 4f 1c 00 99 3c 15 00 9a 3c bf 84
+          62 4e 06 c2 44 4f 1f 00 9b 3c 11 c0 44 4f 16 27 15 4f 5a 42 43 6f df 24 15 4f dd 42 43 6f 33
+          26 15 4f f0 43 43 6f 47 07 11 4f 60 42 43 6f 65 1c 27 4e b6 07 11 4f 5b 87 65 4e 7a 1c 36 4e
+          14 06 11 4f 1b 00 9c 3c 62 1c 34 4e 17 04 11 4f b2 87 7a 4e 1f 86 62 4e 7d 1c 37 4e 12 00 9f
+          3c 19 84 7d 4e 1f 00 9e 3c 19 00 9d 3c c0 03 5f d6])

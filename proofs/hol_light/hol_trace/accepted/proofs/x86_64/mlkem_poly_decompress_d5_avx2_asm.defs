@@ -1,0 +1,40 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# x86_64/mlkem_poly_decompress_d5_avx2_asm
+#
+# The definitions that the main theorems use beyond the generated
+# layers. Written by `hol-trace conform --accept`; review changes like
+# source code. check-bind compares the byte lists named in
+# mlkem_poly_decompress_d5_avx2_asm.bind with sections of object files.
+
+# mlkem_poly_decompress_d5_mc: 731 bytes, sha256 bb56abb86cd693483c91fd5435b54df30f18c0553f12212417a56df12c435e98
+definition mlkem_poly_decompress_d5_mc
+  |- (= mlkem_poly_decompress_d5_mc
+       #x[f3 0f 1e fa b8 01 0d 01 0d c5 f9 6e c0 c4 e2 7d 58 c0 c5 fd 6f 0a c5 fd 6f 52 20 c5 fd 6f 5a
+          40 c5 fa 7e 26 c5 d9 c4 66 08 04 c4 e3 5d 38 e4 01 c4 e2 5d 00 e1 c5 dd db e2 c5 dd d5 e3 c4
+          e2 5d 0b e0 c5 fe 7f 27 c5 fa 7e 66 0a c5 d9 c4 66 12 04 c4 e3 5d 38 e4 01 c4 e2 5d 00 e1 c5
+          dd db e2 c5 dd d5 e3 c4 e2 5d 0b e0 c5 fe 7f 67 20 c5 fa 7e 66 14 c5 d9 c4 66 1c 04 c4 e3 5d
+          38 e4 01 c4 e2 5d 00 e1 c5 dd db e2 c5 dd d5 e3 c4 e2 5d 0b e0 c5 fe 7f 67 40 c5 fa 7e 66 1e
+          c5 d9 c4 66 26 04 c4 e3 5d 38 e4 01 c4 e2 5d 00 e1 c5 dd db e2 c5 dd d5 e3 c4 e2 5d 0b e0 c5
+          fe 7f 67 60 c5 fa 7e 66 28 c5 d9 c4 66 30 04 c4 e3 5d 38 e4 01 c4 e2 5d 00 e1 c5 dd db e2 c5
+          dd d5 e3 c4 e2 5d 0b e0 c5 fe 7f a7 80 00 00 00 c5 fa 7e 66 32 c5 d9 c4 66 3a 04 c4 e3 5d 38
+          e4 01 c4 e2 5d 00 e1 c5 dd db e2 c5 dd d5 e3 c4 e2 5d 0b e0 c5 fe 7f a7 a0 00 00 00 c5 fa 7e
+          66 3c c5 d9 c4 66 44 04 c4 e3 5d 38 e4 01 c4 e2 5d 00 e1 c5 dd db e2 c5 dd d5 e3 c4 e2 5d 0b
+          e0 c5 fe 7f a7 c0 00 00 00 c5 fa 7e 66 46 c5 d9 c4 66 4e 04 c4 e3 5d 38 e4 01 c4 e2 5d 00 e1
+          c5 dd db e2 c5 dd d5 e3 c4 e2 5d 0b e0 c5 fe 7f a7 e0 00 00 00 c5 fa 7e 66 50 c5 d9 c4 66 58
+          04 c4 e3 5d 38 e4 01 c4 e2 5d 00 e1 c5 dd db e2 c5 dd d5 e3 c4 e2 5d 0b e0 c5 fe 7f a7 00 01
+          00 00 c5 fa 7e 66 5a c5 d9 c4 66 62 04 c4 e3 5d 38 e4 01 c4 e2 5d 00 e1 c5 dd db e2 c5 dd d5
+          e3 c4 e2 5d 0b e0 c5 fe 7f a7 20 01 00 00 c5 fa 7e 66 64 c5 d9 c4 66 6c 04 c4 e3 5d 38 e4 01
+          c4 e2 5d 00 e1 c5 dd db e2 c5 dd d5 e3 c4 e2 5d 0b e0 c5 fe 7f a7 40 01 00 00 c5 fa 7e 66 6e
+          c5 d9 c4 66 76 04 c4 e3 5d 38 e4 01 c4 e2 5d 00 e1 c5 dd db e2 c5 dd d5 e3 c4 e2 5d 0b e0 c5
+          fe 7f a7 60 01 00 00 c5 fa 7e 66 78 c5 d9 c4 a6 80 00 00 00 04 c4 e3 5d 38 e4 01 c4 e2 5d 00
+          e1 c5 dd db e2 c5 dd d5 e3 c4 e2 5d 0b e0 c5 fe 7f a7 80 01 00 00 c5 fa 7e a6 82 00 00 00 c5
+          d9 c4 a6 8a 00 00 00 04 c4 e3 5d 38 e4 01 c4 e2 5d 00 e1 c5 dd db e2 c5 dd d5 e3 c4 e2 5d 0b
+          e0 c5 fe 7f a7 a0 01 00 00 c5 fa 7e a6 8c 00 00 00 c5 d9 c4 a6 94 00 00 00 04 c4 e3 5d 38 e4
+          01 c4 e2 5d 00 e1 c5 dd db e2 c5 dd d5 e3 c4 e2 5d 0b e0 c5 fe 7f a7 c0 01 00 00 c5 fa 7e a6
+          96 00 00 00 c5 d9 c4 a6 9e 00 00 00 04 c4 e3 5d 38 e4 01 c4 e2 5d 00 e1 c5 dd db e2 c5 dd d5
+          e3 c4 e2 5d 0b e0 c5 fe 7f a7 e0 01 00 00 c5 f8 77 c3])
+
+definition mlkem_poly_decompress_d5_tmc
+  |- (= mlkem_poly_decompress_d5_tmc (TRIM_LIST (, #4 #0) mlkem_poly_decompress_d5_mc))

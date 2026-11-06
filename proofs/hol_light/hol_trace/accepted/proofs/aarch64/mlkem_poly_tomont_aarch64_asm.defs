@@ -1,0 +1,20 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# aarch64/mlkem_poly_tomont_aarch64_asm
+#
+# The definitions that the main theorems use beyond the generated
+# layers. Written by `hol-trace conform --accept`; review changes like
+# source code. check-bind compares the byte lists named in
+# mlkem_poly_tomont_aarch64_asm.bind with sections of object files.
+
+# poly_tomont_asm_mc: 204 bytes, sha256 064c8bdd8b021e44dfdf41b9fef250afc1443a4091cfad31c3ab6fa8c4b1ce50
+definition poly_tomont_asm_mc
+  |- (= poly_tomont_asm_mc
+       #x[22 a0 81 52 44 0c 02 4e 62 82 80 12 42 0c 02 4e 62 04 85 12 43 0c 02 4e 01 01 80 d2 12 08 c0
+          3d 00 04 c0 3d 10 04 c4 3c 17 b4 63 6e 1a 9c 62 4e 13 b6 63 6e fa 42 44 6f 1d 9e 62 4e 10 00
+          df 3c 7d 42 44 6f 1a 00 9d 3c 5a b6 63 6e 52 9e 62 4e 1d 00 9c 3c 1d b6 63 6e 52 43 44 6f 21
+          04 00 d1 13 04 c0 3d 1a 9e 62 4e 17 08 c0 3d 11 04 c4 3c ba 43 44 6f 10 00 df 3c 7c b6 63 6e
+          12 00 9a 3c 60 9e 62 4e 1a 00 9b 3c f8 b6 63 6e f2 9e 62 4e 36 b6 63 6e 3a 9e 62 4e 80 43 44
+          6f da 42 44 6f 1d b6 63 6e 00 00 9d 3c 12 43 44 6f 1a 00 9c 3c 21 04 00 d1 61 fd ff b5 10 9e
+          62 4e 12 00 9e 3c b0 43 44 6f 10 00 9f 3c c0 03 5f d6])

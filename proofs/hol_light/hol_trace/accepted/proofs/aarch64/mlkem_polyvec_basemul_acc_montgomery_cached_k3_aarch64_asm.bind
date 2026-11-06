@@ -1,0 +1,10 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# aarch64/mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm
+#
+# Byte lists in the .defs file next to this one, and the object-file
+# sections that `check-bind` compares them with. Written by hand.
+#
+# CONSTANT OBJECT SECTION
+poly_basemul_acc_montgomery_cached_k3_mc proofs/hol_light/aarch64/mlkem/mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.o .text

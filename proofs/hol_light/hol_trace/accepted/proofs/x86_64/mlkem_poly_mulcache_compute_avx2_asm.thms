@@ -1,0 +1,145 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# x86_64/mlkem_poly_mulcache_compute_avx2_asm
+#
+# The main theorems. Written by `hol-trace conform --accept`; review
+# changes like source code: this is what the proof claims.
+
+theorem x86_64/mlkem_poly_mulcache_compute_avx2_asm MLKEM_POLY_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_CORRECT
+  |- (!r:(word #64) a:(word #64) zetas:(word #64) zetas_list:(list (word #16)) x:(num -> (word #16)) pc:num stackpointer:(word #64) returnaddress:(word #64).
+       (==>
+         (/\ (aligned #32 r) (aligned #32 a) (aligned #32 zetas)
+           (nonoverlapping (, r #256)
+             (, (word:(num -> (word #64)) pc) (LENGTH mlkem_mulcache_compute_tmc)))
+           (nonoverlapping (, r #256) (, a #512))
+           (nonoverlapping (, r #256) (, zetas (* (LENGTH qdata_full) #2)))
+           (nonoverlapping (, r #256) (, stackpointer #8)))
+         (ensures x86
+           (\s:x86state.
+             (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_mulcache_compute_tmc)
+               (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+               (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress)
+               (C_ARGUMENTS [r; a; zetas] s)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> x86state -> (list (word #16)))
+                   (, zetas #624) s)
+                 (MAP iword:(int -> (word #16)) qdata_full))
+               (!i:num.
+                 (==> (< i #256)
+                   (=
+                     (read (":>" memory (bytes16 (word_add a (word:(num -> (word #64)) (* #2 i))))) s)
+                     (x i))))))
+           (\s:x86state.
+             (/\ (= (read RIP s) returnaddress)
+               (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+               (!i:num.
+                 (==> (< i #128)
+                   (LET
+                     (\zi:(word #16).
+                       (LET_END
+                         (/\
+                           (== (ival zi) (avx2_mulcache (o ival:((word #16) -> int) x) i)
+                             (int_mod &3329))
+                           (int_le (int_abs (ival zi)) &3328))))
+                     (read (":>" memory (bytes16 (word_add r (word:(num -> (word #64)) (* #2 i))))) s))))))
+           (,, (MAYCHANGE [RSP])
+             (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+               (MAYCHANGE [(":>" memory (bytes (, r #256)))]))))))
+
+theorem x86_64/mlkem_poly_mulcache_compute_avx2_asm MLKEM_POLY_MULCACHE_COMPUTE_NOIBT_SUBROUTINE_SAFE
+  |- (?f_events:((word #64) -> (word #64) -> (word #64) -> num -> (word #64) -> (word #64) -> (list (address_uarch_event #64))).
+       (!e:(list (address_uarch_event #64)) r:(word #64) a:(word #64) zetas:(word #64) pc:num stackpointer:(word #64) returnaddress:(word #64).
+         (==>
+           (/\ (aligned #32 r) (aligned #32 a) (aligned #32 zetas)
+             (nonoverlapping (, r #256)
+               (, (word:(num -> (word #64)) pc) (LENGTH mlkem_mulcache_compute_tmc)))
+             (nonoverlapping (, r #256) (, a #512))
+             (nonoverlapping (, r #256) (, zetas (* (LENGTH qdata_full) #2)))
+             (nonoverlapping (, stackpointer #8) (, r #256)))
+           (ensures x86
+             (\s:x86state.
+               (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_mulcache_compute_tmc)
+                 (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+                 (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress)
+                 (C_ARGUMENTS [r; a; zetas] s) (= (read events s) e)))
+             (\s:x86state.
+               (/\ (= (read RIP s) returnaddress)
+                 (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+                 (?e2:(list (address_uarch_event #64)).
+                   (/\ (= (read events s) (APPEND e2 e))
+                     (= e2 (f_events a zetas r pc stackpointer returnaddress))
+                     (memaccess_inbounds e2
+                       [(, a #512); (, zetas (* (LENGTH qdata_full) #2)); (, r #256);
+                        (, stackpointer #8)]
+                       [(, r #256); (, stackpointer #8)])))))
+             (\s:x86state s':x86state. T)))))
+
+theorem x86_64/mlkem_poly_mulcache_compute_avx2_asm MLKEM_POLY_MULCACHE_COMPUTE_SUBROUTINE_CORRECT
+  |- (!r:(word #64) a:(word #64) zetas:(word #64) zetas_list:(list (word #16)) x:(num -> (word #16)) pc:num stackpointer:(word #64) returnaddress:(word #64).
+       (==>
+         (/\ (aligned #32 r) (aligned #32 a) (aligned #32 zetas)
+           (nonoverlapping (, r #256)
+             (, (word:(num -> (word #64)) pc) (LENGTH mlkem_mulcache_compute_mc)))
+           (nonoverlapping (, r #256) (, a #512))
+           (nonoverlapping (, r #256) (, zetas (* (LENGTH qdata_full) #2)))
+           (nonoverlapping (, r #256) (, stackpointer #8)))
+         (ensures x86
+           (\s:x86state.
+             (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_mulcache_compute_mc)
+               (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+               (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress)
+               (C_ARGUMENTS [r; a; zetas] s)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> x86state -> (list (word #16)))
+                   (, zetas #624) s)
+                 (MAP iword:(int -> (word #16)) qdata_full))
+               (!i:num.
+                 (==> (< i #256)
+                   (=
+                     (read (":>" memory (bytes16 (word_add a (word:(num -> (word #64)) (* #2 i))))) s)
+                     (x i))))))
+           (\s:x86state.
+             (/\ (= (read RIP s) returnaddress)
+               (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+               (!i:num.
+                 (==> (< i #128)
+                   (LET
+                     (\zi:(word #16).
+                       (LET_END
+                         (/\
+                           (== (ival zi) (avx2_mulcache (o ival:((word #16) -> int) x) i)
+                             (int_mod &3329))
+                           (int_le (int_abs (ival zi)) &3328))))
+                     (read (":>" memory (bytes16 (word_add r (word:(num -> (word #64)) (* #2 i))))) s))))))
+           (,, (MAYCHANGE [RSP])
+             (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+               (MAYCHANGE [(":>" memory (bytes (, r #256)))]))))))
+
+theorem x86_64/mlkem_poly_mulcache_compute_avx2_asm MLKEM_POLY_MULCACHE_COMPUTE_SUBROUTINE_SAFE
+  |- (?f_events:((word #64) -> (word #64) -> (word #64) -> num -> (word #64) -> (word #64) -> (list (address_uarch_event #64))).
+       (!e:(list (address_uarch_event #64)) r:(word #64) a:(word #64) zetas:(word #64) pc:num stackpointer:(word #64) returnaddress:(word #64).
+         (==>
+           (/\ (aligned #32 r) (aligned #32 a) (aligned #32 zetas)
+             (nonoverlapping (, r #256)
+               (, (word:(num -> (word #64)) pc) (LENGTH mlkem_mulcache_compute_mc)))
+             (nonoverlapping (, r #256) (, a #512))
+             (nonoverlapping (, r #256) (, zetas (* (LENGTH qdata_full) #2)))
+             (nonoverlapping (, stackpointer #8) (, r #256)))
+           (ensures x86
+             (\s:x86state.
+               (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_mulcache_compute_mc)
+                 (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+                 (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress)
+                 (C_ARGUMENTS [r; a; zetas] s) (= (read events s) e)))
+             (\s:x86state.
+               (/\ (= (read RIP s) returnaddress)
+                 (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+                 (?e2:(list (address_uarch_event #64)).
+                   (/\ (= (read events s) (APPEND e2 e))
+                     (= e2 (f_events a zetas r pc stackpointer returnaddress))
+                     (memaccess_inbounds e2
+                       [(, a #512); (, zetas (* (LENGTH qdata_full) #2)); (, r #256);
+                        (, stackpointer #8)]
+                       [(, r #256); (, stackpointer #8)])))))
+             (\s:x86state s':x86state. T)))))

@@ -1,0 +1,43 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# aarch64/mlkem_poly_tobytes_aarch64_asm
+#
+# The main theorems. Written by `hol-trace conform --accept`; review
+# changes like source code: this is what the proof claims.
+
+theorem aarch64/mlkem_poly_tobytes_aarch64_asm MLKEM_POLY_TOBYTES_SUBROUTINE_CORRECT
+  |- (!r:(word #64) a:(word #64) l:(list (word #16)) pc:num returnaddress:(word #64).
+       (==>
+         (ALL (nonoverlapping (, r #384))
+           [(, (word:(num -> (word #64)) pc) (LENGTH mlkem_poly_tobytes_mc)); (, a #512)])
+         (ensures arm
+           (\s:armstate.
+             (/\ (aligned_bytes_loaded s (word:(num -> (word #64)) pc) mlkem_poly_tobytes_mc)
+               (= (read PC s) (word:(num -> (word #64)) pc)) (= (read X30 s) returnaddress)
+               (C_ARGUMENTS [r; a] s) (= (LENGTH l) #256)
+               (= (read (":>" memory (bytes (, a #512))) s) (num_of_wordlist l))))
+           (\s:armstate.
+             (/\ (= (read PC s) returnaddress)
+               (= (read (":>" memory (bytes (, r #384))) s)
+                 (num_of_wordlist (MAP word_zx:((word #16) -> (word #12)) l)))))
+           (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             (MAYCHANGE [(":>" memory (bytes (, r #384)))])))))
+
+theorem aarch64/mlkem_poly_tobytes_aarch64_asm MLKEM_POLY_TOBYTES_SUBROUTINE_SAFE
+  |- (?f_events:((word #64) -> (word #64) -> num -> (word #64) -> (list (address_uarch_event #64))).
+       (!e:(list (address_uarch_event #64)) r:(word #64) a:(word #64) pc:num returnaddress:(word #64).
+         (==>
+           (ALL (nonoverlapping (, r #384))
+             [(, (word:(num -> (word #64)) pc) (LENGTH mlkem_poly_tobytes_mc)); (, a #512)])
+           (ensures arm
+             (\s:armstate.
+               (/\ (aligned_bytes_loaded s (word:(num -> (word #64)) pc) mlkem_poly_tobytes_mc)
+                 (= (read PC s) (word:(num -> (word #64)) pc)) (= (read X30 s) returnaddress)
+                 (C_ARGUMENTS [r; a] s) (= (read events s) e)))
+             (\s:armstate.
+               (/\ (= (read PC s) returnaddress)
+                 (?e2:(list (address_uarch_event #64)).
+                   (/\ (= (read events s) (APPEND e2 e)) (= e2 (f_events a r pc returnaddress))
+                     (memaccess_inbounds e2 [(, a #512); (, r #384)] [(, r #384)])))))
+             (\s:armstate s':armstate. T)))))
