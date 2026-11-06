@@ -52,6 +52,12 @@ runs:
       run: |
         source .github/actions/hol-trace/lib.sh
         hol-trace replay -j "$HOLTRACE_JOBS" --backend hol-light -p "${proofs[@]}"
+    - name: Replay with HolLean
+      if: ${{ !cancelled() }}
+      shell: ${{ env.SHELL }}
+      run: |
+        source .github/actions/hol-trace/lib.sh
+        hol-trace replay -j "$HOLTRACE_JOBS" --backend hol-lean -p "${proofs[@]}"
     - name: Compare with the accepted files
       if: ${{ !cancelled() }}
       shell: ${{ env.SHELL }}
@@ -59,6 +65,7 @@ runs:
         source .github/actions/hol-trace/lib.sh
         status=0
         hol-trace compare -j "$HOLTRACE_JOBS" --backend hol-light -p "${proofs[@]}" || status=1
+        hol-trace compare -j "$HOLTRACE_JOBS" --backend hol-lean -p "${proofs[@]}" || status=1
         # CI never accepts: the accepted files must be unchanged.
         git diff --exit-code HEAD -- proofs/hol_light/hol_trace/accepted || status=1
         exit "$status"
