@@ -1,0 +1,41 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mlkem_rej_uniform_aarch64_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+definition REJ_SAMPLE
+  |- REJ_SAMPLE
+     = (specification "REJ_SAMPLE" REJ_SAMPLE:((12 word) list -> int16 list).
+         !l:((12 word) list).
+           REJ_SAMPLE l = FILTER (\x:int16. val x < 3329) (MAP (word_zx : 12 word -> int16) l))
+
+# mlkem_rej_uniform_mc: 588 bytes
+# sha256 eac14fee9ff461b03d8d2ffb9714706f206fcf4974c0fa9d9efead6077cb1001
+definition mlkem_rej_uniform_mc
+  |- mlkem_rej_uniform_mc
+     = #x[ff 03 09 d1 27 00 80 d2 47 00 a0 f2 87 00 c0 f2 07 01 e0 f2 ff 1c 08 4e 07 02 80 d2 07 04
+          a0 f2 07 08 c0 f2 07 10 e0 f2 ff 1c 18 4e 2b a0 81 52 7e 0d 02 4e e8 03 00 91 e7 03 08 aa
+          0b 00 80 d2 10 1e 30 6e f0 04 84 3c f0 00 9d 3c f0 00 9e 3c f0 00 9f 3c 6b 81 00 91 7f 01
+          04 f1 4b ff ff 54 e7 03 08 aa 09 00 80 d2 04 20 80 d2 5f c0 00 f1 63 08 00 54 3f 01 04 eb
+          62 0c 00 54 42 c0 00 d1 20 40 df 4c 04 38 01 4e 05 78 01 4e 26 38 02 4e 27 78 02 4e 04 b6
+          07 6f 05 b6 07 6f c6 04 1c 6f e7 04 1c 6f 90 38 46 4e 91 78 46 4e b2 38 47 4e b3 78 47 4e
+          c4 37 70 6e c5 37 71 6e c6 37 72 6e c7 37 73 6e 84 1c 3f 4e a5 1c 3f 4e c6 1c 3f 4e e7 1c
+          3f 4e 94 38 70 6e b5 38 70 6e d6 38 70 6e f7 38 70 6e 8c 02 26 1e ad 02 26 1e ce 02 26 1e
+          ef 02 26 1e 78 78 ec 3c 79 78 ed 3c 7a 78 ee 3c 7b 78 ef 3c 84 58 20 4e a5 58 20 4e c6 58
+          20 4e e7 58 20 4e 94 38 70 6e b5 38 70 6e d6 38 70 6e f7 38 70 6e 8c 02 26 1e ad 02 26 1e
+          ce 02 26 1e ef 02 26 1e 10 02 18 4e 31 02 19 4e 52 02 1a 4e 73 02 1b 4e f0 74 00 4c e7 04
+          0c 8b f1 74 00 4c e7 04 0d 8b f2 74 00 4c e7 04 0e 8b f3 74 00 4c e7 04 0f 8b 8c 01 0d 8b
+          ce 01 0f 8b 29 01 0c 8b 29 01 0e 8b 5f c0 00 f1 e2 f7 ff 54 3f 01 04 eb 22 04 00 54 5f 60
+          00 f1 e3 03 00 54 20 40 df 0c 04 38 01 4e 25 38 02 4e 04 b6 07 6f a5 04 1c 6f 90 38 45 4e
+          91 78 45 4e c4 37 70 6e c5 37 71 6e 84 1c 3f 4e a5 1c 3f 4e 94 38 70 6e b5 38 70 6e 8c 02
+          26 1e ad 02 26 1e 78 78 ec 3c 79 78 ed 3c 84 58 20 4e a5 58 20 4e 94 38 70 6e b5 38 70 6e
+          8c 02 26 1e ad 02 26 1e 10 02 18 4e 31 02 19 4e f0 74 00 4c e7 04 0c 8b f1 74 00 4c 29 01
+          0c 8b 29 01 0d 8b 3f 01 04 eb 29 31 84 9a 0b 00 80 d2 e7 03 08 aa f0 04 c4 3c f1 00 dd 3c
+          f2 00 de 3c f3 00 df 3c 10 04 84 3c 11 00 9d 3c 12 00 9e 3c 13 00 9f 3c 6b 81 00 91 7f 01
+          04 f1 cb fe ff 54 e0 03 09 aa ff 03 09 91 c0 03 5f d6]

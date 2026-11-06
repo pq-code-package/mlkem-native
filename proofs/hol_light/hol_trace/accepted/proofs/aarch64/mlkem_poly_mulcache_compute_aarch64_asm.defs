@@ -1,0 +1,39 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mlkem_poly_mulcache_compute_aarch64_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+definition have_mulcache_zetas
+  |- have_mulcache_zetas
+     = (specification "have_mulcache_zetas" have_mulcache_zetas:(int64 -> int64 -> armstate ->
+           bool).
+         !zetas:int64 zetas_twisted:int64 s:armstate.
+           have_mulcache_zetas zetas zetas_twisted s
+           = ((!i:num.
+               i < 128
+               ==> read (memory :> bytes16 (word_add zetas (word (2 * i) : int64))) s
+                   = (iword (EL i mulcache_zetas) : int16))
+             /\ (!i:num.
+                  i < 128
+                  ==> read (memory :> bytes16 (word_add zetas_twisted (word (2 * i) : int64))) s
+                      = (iword (EL i mulcache_zetas_twisted) : int16))))
+
+# poly_mulcache_compute_mc: 256 bytes
+# sha256 82005b257188f1ae158eb7ce4db78667bcefc8bf10e3e35f8fa2f936c046dffb
+definition poly_mulcache_compute_mc
+  |- poly_mulcache_compute_mc
+     = #x[25 a0 81 52 a6 0c 02 4e e5 d7 89 52 a7 0c 02 4e 04 02 80 d2 20 04 c2 3c 22 00 df 3c 33 04
+          c2 3c 7d 04 c1 3c 30 00 df 3c 52 04 c1 3c 3a 04 c2 3c 59 04 c1 3c 05 58 42 4e 7c 04 c1 3c
+          27 00 df 3c 22 04 c2 3c 7b 5a 50 4e b0 b4 7d 6e 71 04 c1 3c 73 04 c1 3c a5 9c 72 4e 5d 5b
+          47 4e 7a 9f 79 4e 64 b7 7c 6e 05 42 46 6f 84 fc 41 d3 84 08 00 d1 05 04 81 3c b6 b7 71 6e
+          5c 04 c1 3c 38 00 df 3c 20 04 c2 3c 9a 40 46 6f 30 00 df 3c 71 04 c1 3c a5 9f 7c 4e 57 58
+          58 4e 52 04 c1 3c c5 42 46 6f 1d 58 50 4e e4 b6 73 6e 22 04 c2 3c 73 04 c1 3c 1a 04 81 3c
+          fa 9e 72 4e 84 04 00 f1 a4 fd ff b5 9a 40 46 6f 05 04 81 3c 45 04 c1 3c 24 00 df 3c b0 b7
+          71 6e 40 04 c1 3c bd 9f 65 4e 52 58 44 4e 1a 04 81 3c 51 b6 73 6e 1d 42 46 6f 5a 9e 60 4e
+          3a 42 46 6f 1d 04 81 3c 1a 04 81 3c c0 03 5f d6]

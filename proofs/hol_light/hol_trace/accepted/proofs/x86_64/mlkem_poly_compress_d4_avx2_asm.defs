@@ -1,0 +1,36 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mlkem_poly_compress_d4_avx2_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# mlkem_poly_compress_d4_mc: 522 bytes
+# sha256 3772c93bb75889ae0c82782fe8e8c123d6f1f5309c61cc3846879994699ea88c
+definition mlkem_poly_compress_d4_mc
+  |- mlkem_poly_compress_d4_mc
+     = #x[f3 0f 1e fa b8 bf 4e bf 4e c5 f9 6e c0 c4 e2 7d 58 c0 b8 00 02 00 02 c5 f9 6e c8 c4 e2 7d
+          58 c9 b8 0f 00 0f 00 c5 f9 6e d0 c4 e2 7d 58 d2 b8 01 10 01 10 c5 f9 6e d8 c4 e2 7d 58 db
+          c5 fd 6f 22 c5 fd 6f 2e c5 fd 6f 76 20 c5 fd 6f 7e 40 c5 7d 6f 46 60 c5 d5 e5 e8 c5 cd e5
+          f0 c5 c5 e5 f8 c5 3d e5 c0 c4 e2 55 0b e9 c4 e2 4d 0b f1 c4 e2 45 0b f9 c4 62 3d 0b c1 c5
+          d5 db ea c5 cd db f2 c5 c5 db fa c5 3d db c2 c5 d5 67 ee c4 c1 45 67 f8 c4 e2 55 04 eb c4
+          e2 45 04 fb c5 d5 67 ef c4 e2 5d 36 ed c5 fe 7f 2f c5 fd 6f ae 80 00 00 00 c5 fd 6f b6 a0
+          00 00 00 c5 fd 6f be c0 00 00 00 c5 7d 6f 86 e0 00 00 00 c5 d5 e5 e8 c5 cd e5 f0 c5 c5 e5
+          f8 c5 3d e5 c0 c4 e2 55 0b e9 c4 e2 4d 0b f1 c4 e2 45 0b f9 c4 62 3d 0b c1 c5 d5 db ea c5
+          cd db f2 c5 c5 db fa c5 3d db c2 c5 d5 67 ee c4 c1 45 67 f8 c4 e2 55 04 eb c4 e2 45 04 fb
+          c5 d5 67 ef c4 e2 5d 36 ed c5 fe 7f 6f 20 c5 fd 6f ae 00 01 00 00 c5 fd 6f b6 20 01 00 00
+          c5 fd 6f be 40 01 00 00 c5 7d 6f 86 60 01 00 00 c5 d5 e5 e8 c5 cd e5 f0 c5 c5 e5 f8 c5 3d
+          e5 c0 c4 e2 55 0b e9 c4 e2 4d 0b f1 c4 e2 45 0b f9 c4 62 3d 0b c1 c5 d5 db ea c5 cd db f2
+          c5 c5 db fa c5 3d db c2 c5 d5 67 ee c4 c1 45 67 f8 c4 e2 55 04 eb c4 e2 45 04 fb c5 d5 67
+          ef c4 e2 5d 36 ed c5 fe 7f 6f 40 c5 fd 6f ae 80 01 00 00 c5 fd 6f b6 a0 01 00 00 c5 fd 6f
+          be c0 01 00 00 c5 7d 6f 86 e0 01 00 00 c5 d5 e5 e8 c5 cd e5 f0 c5 c5 e5 f8 c5 3d e5 c0 c4
+          e2 55 0b e9 c4 e2 4d 0b f1 c4 e2 45 0b f9 c4 62 3d 0b c1 c5 d5 db ea c5 cd db f2 c5 c5 db
+          fa c5 3d db c2 c5 d5 67 ee c4 c1 45 67 f8 c4 e2 55 04 eb c4 e2 45 04 fb c5 d5 67 ef c4 e2
+          5d 36 ed c5 fe 7f 6f 60 c5 f8 77 c3]
+
+definition mlkem_poly_compress_d4_tmc
+  |- mlkem_poly_compress_d4_tmc = TRIM_LIST (4, 0) mlkem_poly_compress_d4_mc

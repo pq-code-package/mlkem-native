@@ -3004,6 +3004,10 @@ def check_macro_typos():
             if filename.endswith(".ml"):
                 return True
 
+        # Exclude the HOL Light terms accepted by hol-trace
+        if filename.startswith("proofs/hol_light/hol_trace/accepted/"):
+            return True
+
         # Exclude regexp patterns in `autogen`
         if is_autogen:
             if rest.startswith("\\") or m in ["MLK_XXX", "MLK_SOURCE_XXX"]:

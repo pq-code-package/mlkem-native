@@ -1,0 +1,97 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mlkem_nttunpack_avx2_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mlkem_nttunpack_avx2_asm MLKEM_NTTUNPACK_NOIBT_SUBROUTINE_CORRECT
+  |- !a:int64 l:(int16 list) pc:num.
+       aligned 32 a
+       /\ nonoverlapping ((word pc : int64), LENGTH mlkem_unpack_tmc) (a, 512)
+       /\ nonoverlapping ({stackpointer:int64}, 8) (a, 512)
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) mlkem_unpack_tmc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = {stackpointer:int64}
+               /\ read (memory :> bytes64 {stackpointer:int64}) s = {returnaddress:int64}
+               /\ C_ARGUMENTS [a] s
+               /\ read (memory :> bytes (a, 512)) s = num_of_wordlist l)
+             (\s:x86state.
+               read RIP s = {returnaddress:int64}
+               /\ read RSP s = word_add {stackpointer:int64} (word 8 : int64)
+               /\ (LENGTH l = 256
+                  ==> read (memory :> bytes (a, 512)) s = num_of_wordlist (unpermute_list l)))
+             (MAYCHANGE [RSP]
+             ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (a, 512)])
+
+theorem mlkem_nttunpack_avx2_asm MLKEM_NTTUNPACK_NOIBT_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> num -> int64 -> int64 -> (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) a:int64 pc:num stackpointer:int64 returnaddress:int64.
+         aligned 32 a
+         /\ nonoverlapping ((word pc : int64), LENGTH mlkem_unpack_tmc) (a, 512)
+         /\ nonoverlapping (stackpointer, 8) (a, 512)
+         ==> ensures x86
+               (\s:x86state.
+                 bytes_loaded s (word pc : int64) mlkem_unpack_tmc
+                 /\ read RIP s = (word pc : int64)
+                 /\ read RSP s = stackpointer
+                 /\ read (memory :> bytes64 stackpointer) s = returnaddress
+                 /\ C_ARGUMENTS [a] s
+                 /\ read events s = e)
+               (\s:x86state.
+                 read RIP s = returnaddress
+                 /\ read RSP s = word_add stackpointer (word 8 : int64)
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events a pc stackpointer returnaddress
+                      /\ memaccess_inbounds e2 [a, 512; stackpointer, 8] [a, 512; stackpointer, 8]))
+               (\s:x86state s':x86state. T)
+
+theorem mlkem_nttunpack_avx2_asm MLKEM_NTTUNPACK_SUBROUTINE_CORRECT
+  |- !a:int64 l:(int16 list) pc:num.
+       aligned 32 a
+       /\ nonoverlapping ((word pc : int64), LENGTH mlkem_unpack_mc) (a, 512)
+       /\ nonoverlapping ({stackpointer:int64}, 8) (a, 512)
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) mlkem_unpack_mc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = {stackpointer:int64}
+               /\ read (memory :> bytes64 {stackpointer:int64}) s = {returnaddress:int64}
+               /\ C_ARGUMENTS [a] s
+               /\ read (memory :> bytes (a, 512)) s = num_of_wordlist l)
+             (\s:x86state.
+               read RIP s = {returnaddress:int64}
+               /\ read RSP s = word_add {stackpointer:int64} (word 8 : int64)
+               /\ (LENGTH l = 256
+                  ==> read (memory :> bytes (a, 512)) s = num_of_wordlist (unpermute_list l)))
+             (MAYCHANGE [RSP]
+             ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (a, 512)])
+
+theorem mlkem_nttunpack_avx2_asm MLKEM_NTTUNPACK_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> num -> int64 -> int64 -> (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) a:int64 pc:num stackpointer:int64 returnaddress:int64.
+         aligned 32 a
+         /\ nonoverlapping ((word pc : int64), LENGTH mlkem_unpack_mc) (a, 512)
+         /\ nonoverlapping (stackpointer, 8) (a, 512)
+         ==> ensures x86
+               (\s:x86state.
+                 bytes_loaded s (word pc : int64) mlkem_unpack_mc
+                 /\ read RIP s = (word pc : int64)
+                 /\ read RSP s = stackpointer
+                 /\ read (memory :> bytes64 stackpointer) s = returnaddress
+                 /\ C_ARGUMENTS [a] s
+                 /\ read events s = e)
+               (\s:x86state.
+                 read RIP s = returnaddress
+                 /\ read RSP s = word_add stackpointer (word 8 : int64)
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events a pc stackpointer returnaddress
+                      /\ memaccess_inbounds e2 [a, 512; stackpointer, 8] [a, 512; stackpointer, 8]))
+               (\s:x86state s':x86state. T)
