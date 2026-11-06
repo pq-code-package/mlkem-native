@@ -183,6 +183,21 @@ def github_log(msg):
     print(msg)
 
 
+def merge_output_lines(outputs):
+    """Merge the output lines of several runs into table rows. Lines
+    `name = value` are matched by name, all other lines by position."""
+    rows = {}
+    for run, lines in enumerate(outputs):
+        n = 0
+        for line in lines:
+            if "=" in line:
+                key = line.split("=")[0].strip()
+            else:
+                key, n = n, n + 1
+            rows.setdefault(key, [""] * len(outputs))[run] = line
+    return list(rows.values())
+
+
 def github_summary(title, test_label, results):
     """Generate summary for GitHub CI"""
     summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
@@ -190,17 +205,8 @@ def github_summary(title, test_label, results):
     res = list(results.values())
 
     if isinstance(results[SCHEME.MLKEM512], str):
-        summaries = list(
-            map(
-                lambda s: f" {s} |",
-                reduce(
-                    lambda acc, s: [
-                        line1 + " | " + line2 for line1, line2 in zip(acc, s)
-                    ],
-                    [s.splitlines() for s in res],
-                ),
-            )
-        )
+        rows = merge_output_lines([s.splitlines() for s in res])
+        summaries = [" " + " | ".join(row) + " |" for row in rows]
         summaries = [f"| {test_label} |" + summaries[0]] + [
             "| |" + x for x in summaries[1:]
         ]
