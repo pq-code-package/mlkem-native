@@ -53,14 +53,22 @@ stdenv.mkDerivation (finalAttrs: {
     runHook postBuild
   '';
 
+  # hol-trace runs only bin/candle-holtrace; bin/candle starts Candle's
+  # interactive session, for inspecting a replay by hand.
   installPhase = ''
     runHook preInstall
     mkdir -p "$out/share" "$out/bin"
+    cp ${./holtrace_restore.ml} candle/holtrace_restore.ml
+    cp ${./run-holtrace.ml} candle/run-holtrace.ml
     cp -r . "$out/share/candle"
     substitute ${./run-candle.sh} "$out/bin/candle" \
       --replace-fail @bash@ ${stdenv.shell} \
       --replace-fail @candle@ "$out/share/candle"
+    substitute ${./run-holtrace.sh} "$out/bin/candle-holtrace" \
+      --replace-fail @bash@ ${stdenv.shell} \
+      --replace-fail @candle@ "$out/share/candle"
     chmod +x "$out/bin/candle"
+    chmod +x "$out/bin/candle-holtrace"
     runHook postInstall
   '';
 

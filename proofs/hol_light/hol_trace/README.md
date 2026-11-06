@@ -67,14 +67,19 @@ object files.
    to what the main theorems (`ARCH/list_thms.sh`) need. Note that this is
    a very memory-intensive process that takes hours and consumes
    >100G of RAM and disk space.
-2. **Replay** (`hol-trace replay --backend hol-light|hol-lean`):
+2. **Replay** (`hol-trace replay --backend hol-light|hol-lean|candle`):
    replay the trace against a separate kernel that loads no proof code, and
    write the resulting theory to a result file. The backends are
-   [restore.ml](restore.ml) for HOL Light and
+   [restore.ml](restore.ml) for HOL Light,
    [HolTraceAdapter.lean](../../../nix/hol_lean/HolTraceAdapter.lean) for
-   HolLean; the result format is described in
+   HolLean and
+   [holtrace_restore.ml](../../../nix/candle/holtrace_restore.ml) for
+   Candle; the result format is described in
    [term_encoding.ml](term_encoding.ml). With HOL Light, replay is
-   expected to take under 30 minutes per function.
+   expected to take under 30 minutes per function. Candle is much
+   slower: so far it has replayed only
+   `aarch64/mlkem_poly_tomont_aarch64_asm`, and did not finish
+   `x86_64/mlkem_tomont_avx2_asm` within 9 hours.
 3. **Conform** (`hol-trace conform`): check the result against
    [accepted/](accepted) as described above; [conform.py](conform.py)
    lists the exact rules, and [accepted/README.md](accepted/README.md)

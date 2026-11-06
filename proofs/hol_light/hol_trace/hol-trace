@@ -439,6 +439,7 @@ def executable(name):
 BACKENDS = {
     "hol-light": hol_light_replay,
     "hol-lean": executable("hollean-holtrace"),
+    "candle": executable("candle-holtrace"),
 }
 
 

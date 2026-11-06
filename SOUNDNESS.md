@@ -525,8 +525,10 @@ machine-code definitions to equal the `.text` sections of the assembled
 object files. See
 [`proofs/hol_light/hol_trace/README.md`](proofs/hol_light/hol_trace/README.md).
 Replay can also use HolLean, an independent implementation of the HOL
-Light kernel in Lean, so that a bug in the OCaml kernel alone cannot make
-the check pass.
+Light kernel in Lean, or Candle, whose kernel is verified in CakeML (the
+HOLTrace driver written for it is not); a check that passes with one of
+them does not depend on the OCaml kernel. These checks run locally, not
+in CI, and so far 6 of the 36 assembly proofs have accepted files.
 
 HOL Light runs on OCaml, so the OCaml compiler and runtime are also part of the trusted computing base. A compiler or
 runtime bug could in principle allow construction of a spurious theorem. This is mitigated by OCaml's maturity and
