@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793989021214,
+  "lastUpdate": 1793989037351,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -8494,6 +8494,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 47119,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": true,
+          "id": "9b96caa137514c82a097a4251783769657826f6c",
+          "message": "scripts/tests: Align GitHub summary rows by benchmark name\n\nThe GitHub job summary combined the outputs of the three parameter sets\nline by line using zip(). This truncated the table to the shortest\noutput and misaligned rows whenever the parameter sets print different\nbenchmarks. For example, in the component benchmarks of\nhttps://github.com/pq-code-package/mlkem-native/actions/runs/41974093178\nmlk_rej_uniform_native is only shown for ML-KEM-768.\n\nMatch lines of the form `name = value` by name instead, and keep all\nlines.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-06T16:47:11Z",
+          "tree_id": "2a0eaf47a68f599e53655aad4c52d736cf8f5905",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/9b96caa137514c82a097a4251783769657826f6c"
+        },
+        "date": 1793988892292,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 13432,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 15818,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 21340,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 22867,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 25291,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 33168,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 33303,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 36982,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 47125,
             "unit": "cycles"
           }
         ]
